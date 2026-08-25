@@ -163,7 +163,7 @@ func _on_end_turn() -> void:
 
 
 func get_camera() -> Camera2D:
-	return _camera
+    return _camera
 
 func center_camera_on(cell: Vector2i) -> void:
     if _map_gen and _map_gen._tile_map and _map_gen._tile_map.tile_set != null:
