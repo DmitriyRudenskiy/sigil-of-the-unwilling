@@ -43,6 +43,11 @@ func _ready() -> void:
     
     _spawn_villages()
     print("[World] Scene ready.")
+    
+    # Для headless режима: выход после генерации
+    if OS.has_feature("headless") or "--autoquit" in OS.get_cmdline_args():
+        await get_tree().create_timer(1.0).timeout
+        get_tree().quit()
 
 func _process(delta: float) -> void:
     if _camera == null or _hero == null:
