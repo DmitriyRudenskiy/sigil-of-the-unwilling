@@ -6,7 +6,8 @@
 - **Rendering**: TileMapLayer for terrains and decor.
 
 ## Deviations
-- None so far.
+- Explicit typing used instead of type inference (:=) for pop_front(), Dictionary access, and .get() due to strict-warnings mode in Godot.
+
 
 ## Terrain Mask Table
 | Terrain | ID | Neighbor Rule |
