@@ -104,14 +104,43 @@
 Синтезированные временные тайлы:
 - нет
 
-## Приложение B: Battle Mode Layout (Stage 4)
+## Приложение C: Asset Mapping (Stage 4.5)
 
-Нижняя панель управления (слева направо):
-- ⚙️ (Настройки/Пауза)
-- 🏕️ (Отступление)
-- 🏃 (Ждать)
-- ⚔️ (Режим атаки)
-- ▲ (Свернуть панель)
-- 📖 (Книга заклинаний)
-- ⏳ (Пропуск хода)
-- 🛡️ (Защита)
+### Unit Portraits (res://assets/units/)
+| Unit | Key | File |
+|---|---|---|
+| Swordsmen | swordsmen | `swordsmen.png` |
+| Archers | archers | `archersers.png` |
+| Cavalry | cavalry | `cavalry.png` |
+| Mages | mages | `mages.png` |
+| Guardians | guardians | `guardians.png` |
+| Archmages | archmages | `archmages.png` |
+| Champions | champions | `champions.png` |
+| Knights | knights | `knights.png` |
+| Goblins | goblins | `goblins.png` |
+| Wolves | wolves | `wolves.png` |
+| Trolls | trolls | `trolls.png` |
+
+### UI Icons (res://assets/ui/icons/)
+| Button | Icon File | Fallback |
+|---|---|---|
+| Замок | `treasure.png` | 🏰 |
+| Флаг | `flag.png` | 🚩 |
+| Лагерь | `battle_flag.png` | ⛺ |
+| Конюшня | `horse.png` | 🐎 |
+| Корабль | `ship.png` | 🚢 |
+| Кузница | `swords.png` | ⚒️ |
+| Разведка | `scout.png` | 🔍 |
+| Армия | `army.png` | 🪖 |
+| Журнал | `scroll.png` | 📜 |
+| Конец хода | `hourglass.png` | ⏳ |
+| Королевство | `gold.png` | 🏰 |
+| Опции | `expand.png` | ⚙️ |
+| Бой: Настройки | `expand.png` | ⚙️ |
+| Бой: Отступление | `flag.png` | 🏕️ |
+| Бой: Ждать | `horse4.png` | 🏃 |
+| Бой: Атака | `atk_sword.png` | ⚔️ |
+| Бой: Свернуть | `point.png` | ▲ |
+| Бой: Книга | `spell.png` | 📖 |
+| Бой: Пропуск | `hourglass2.png` | ⏳ |
+| Бой: Защита | `helm.png` | 🛡️ |

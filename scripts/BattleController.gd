@@ -32,6 +32,9 @@ var _uid := 0
 
 
 func _ready() -> void:
+    print("[Battle] Initializing combat scene...")
+    _setup_background()
+    
     _tile_map = TileMapLayer.new()
     _tile_map.name = "BattleTerrain"
     _tile_map.tile_set = load("res://tilesets/hex_tileset.tres")
@@ -54,6 +57,7 @@ func _ready() -> void:
         _camera.position = _tile_map.map_to_local(Vector2i(BW / 2, BH / 2))
 
     _build_ui()
+    _fade_in()
 
 
 func _paint_field() -> void:
@@ -113,24 +117,23 @@ func _build_ui() -> void:
     _bottom_bar.add_theme_constant_override("separation", 10)
     _canvas.add_child(_bottom_bar)
 
-    # Раскладка кнопок строго по prototype_var.html (зафиксировать в REPORT.md)
+    # Золотые иконки по ДОПОЛНЕНИЮ №3
     var btns := [
-        ["⚙️", "Настройки/пауза", "_on_settings"],
-        ["🏕️", "Отступление", "_on_retreat"],
-        ["🏃", "Ждать", "_on_wait"],
-        ["⚔️", "Атака", "_on_attack_mode"],
-        ["▲", "Свернуть панель", "_on_collapse"],
-        ["📖", "Книга заклинаний", "_on_spellbook"],
-        ["⏳", "Пропуск хода", "_on_skip"],
-        ["🛡️", "Защита", "_on_defend"],
+        ["res://assets/ui/icons/expand.png", "Настройки/пауза", "_on_settings", "⚙️"],
+        ["res://assets/ui/icons/flag.png", "Отступление", "_on_retreat", "🏕️"],
+        ["res://assets/ui/icons/horse4.png", "Ждать", "_on_wait", "🏃"],
+        ["res://assets/ui/icons/atk_sword.png", "Атака", "_on_attack_mode", "⚔️"],
+        ["res://assets/ui/icons/point.png", "Свернуть панель", "_on_collapse", "▲"],
+        ["res://assets/ui/icons/spell.png", "Книга заклинаний", "_on_spellbook", "📖"],
+        ["res://assets/ui/icons/hourglass2.png", "Пропуск хода", "_on_skip", "⏳"],
+        ["res://assets/ui/icons/helm.png", "Защита", "_on_defend", "🛡️"],
     ]
     for b in btns:
         var btn := Button.new()
-        btn.text = b[0]
         btn.tooltip_text = b[1]
         btn.custom_minimum_size = Vector2(56, 48)
-        btn.add_theme_font_size_override("font_size", 22)
         btn.pressed.connect(Callable(self, b[2]))
+        _apply_icon(btn, b[0], b[3])
         _bottom_bar.add_child(btn)
 
 
@@ -163,18 +166,28 @@ func _place_army(army: Array[Dictionary], is_atk: bool) -> Array[Dictionary]:
 
 func _make_unit_sprite(u: Dictionary) -> void:
     var n := Node2D.new()
-    var col := Color(0.2, 0.5, 0.9) if u["side"] == "attacker" else Color(0.9, 0.3, 0.2)
-    var img := Image.create(52, 52, false, Image.FORMAT_RGBA8)
-    var c := Vector2(26, 26)
-    for y in 52:
-        for x in 52:
-            var d := Vector2(x, y).distance_to(c)
-            if d <= 22:
-                img.set_pixel(x, y, col)
-            elif d <= 24:
-                img.set_pixel(x, y, Color(0.1, 0.1, 0.1))
     var sp := Sprite2D.new()
-    sp.texture = ImageTexture.create_from_image(img)
+    
+    # Приоритет: Портрет -> Эмодзи-круг
+    var portrait_path := UnitSprites.find_portrait(u.get("name", "").to_lower().replace(" ", "_"))
+    if portrait_path == "":
+        # Фолбэк: рисование цветного круга с эмодзи
+        var col := Color(0.2, 0.5, 0.9) if u["side"] == "attacker" else Color(0.9, 0.3, 0.2)
+        var img := Image.create(52, 52, false, Image.FORMAT_RGBA8)
+        var c := Vector2(26, 26)
+        for y in 52:
+            for x in 52:
+                var d := Vector2(x, y).distance_to(c)
+                if d <= 22:
+                    img.set_pixel(x, y, col)
+                elif d <= 24:
+                    img.set_pixel(x, y, Color(0.1, 0.1, 0.1))
+        sp.texture = ImageTexture.create_from_image(img)
+    else:
+        sp.texture = load(portrait_path)
+        if u["side"] == "defender":
+            sp.flip_h = true
+    
     n.add_child(sp)
     var il := Label.new()
     il.text = u.get("icon", "?")
@@ -451,7 +464,35 @@ func _on_defend() -> void:
         _end_turn()
 
 
-# ===================== UTILS =====================
+func _apply_icon(btn: Button, icon_path: String, fallback: String) -> void:
+    if FileAccess.file_exists(icon_path):
+        btn.icon = load(icon_path)
+        btn.text = ""
+        btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+        btn.expand_icon = true
+    else:
+        btn.text = fallback
+func _setup_background() -> void:
+    var bg_layer := CanvasLayer.new()
+    bg_layer.layer = -1
+    add_child(bg_layer)
+    var bg := ColorRect.new()
+    bg.color = Color(0.05, 0.05, 0.07, 1.0)
+    bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+    bg_layer.add_child(bg)
+
+func _fade_in() -> void:
+    var fade_layer := CanvasLayer.new()
+    fade_layer.layer = 100
+    add_child(fade_layer)
+    var fade := ColorRect.new()
+    fade.color = Color.BLACK
+    fade.set_anchors_preset(Control.PRESET_FULL_RECT)
+    fade_layer.add_child(fade)
+    var tw := create_tween()
+    tw.tween_property(fade, "color:a", 0.0, 0.5)
+    tw.tween_callback(fade_layer.queue_free)
+
 func _unit_at(cell: Vector2i, side: String) -> Dictionary:
     var units := attacker_units if side == "attacker" else defender_units
     for u in units:
