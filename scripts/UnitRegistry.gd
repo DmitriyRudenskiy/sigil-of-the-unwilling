@@ -1,6 +1,9 @@
 extends RefCounted
 class_name UnitRegistry
 
+const _UnitStack = preload("res://scripts/unit_stack.gd")
+const _UnitStats = preload("res://scripts/unit_stats.gd")
+
 const UNITS := {
     # базовые (герой + старые враги)
     "swordsmen": ["Swordsman", 4, 10, 5, 2], "archers": ["Archer", 3, 8, 4, 1],
@@ -69,13 +72,37 @@ const FACTION_SETS := [
     ["earth_elemental","storm_elemental","ice_elemental","magma_elemental","phoenix","firebird","troglodyte","beholder","medusa","manticore","red_dragon","rust_dragon"],
 ]
 
-static func make_stack(key: String, rng: RandomNumberGenerator) -> Dictionary:
-    if not UNITS.has(key):
-        return {}
-    var u: Array = UNITS[key]
-    var dmg: int = u[1]
-    var count := clampi(int(float(rng.randi_range(30, 80)) * 6.0 / float(dmg)), 3, 120)
-    return {
-        "key": key, "icon": "", "name": u[0], "count": count,
-        "base_damage": dmg, "hp": u[2], "speed": u[3], "defense": u[4],
-    }
+static var _definitions: Dictionary = {}
+
+
+static func _ensure_definitions() -> void:
+    if not _definitions.is_empty():
+        return
+    for key in UNITS:
+        var raw: Array = UNITS[key]
+        var stats := _UnitStats.new(key, str(raw[0]), int(raw[1]), int(raw[2]), int(raw[3]), int(raw[4]))
+        _definitions[key] = stats
+
+
+static func get_definition(key: String) -> UnitStats:
+    _ensure_definitions()
+    return _definitions.get(key, null)
+
+
+static func make_stack(key: String, rng: RandomNumberGenerator) -> UnitStack:
+    var stats: UnitStats = get_definition(key)
+    if stats == null:
+        return null
+    var count := clampi(
+        int(float(rng.randi_range(30, 80)) * 6.0 / float(stats.base_damage)),
+        3,
+        120
+    )
+    return UnitStack.new(stats, count)
+
+
+static func make_fixed_stack(key: String, count: int) -> UnitStack:
+    var stats: UnitStats = get_definition(key)
+    if stats == null:
+        return null
+    return UnitStack.new(stats, count)

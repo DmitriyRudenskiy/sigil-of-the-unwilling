@@ -6,6 +6,7 @@ func _init() -> void:
 	failed += _test_battle_setup()
 	failed += _test_attack()
 	failed += _test_battle_end()
+	failed += _test_wait_order()
 
 	if failed == 0:
 		print("BattleState tests passed")
@@ -113,4 +114,48 @@ func _test_battle_end() -> int:
 	if def_survivors.size() != 0:
 		printerr("defender survivors should be empty")
 		errors += 1
+	return errors
+
+
+func _test_wait_order() -> int:
+	var errors := 0
+	var state = load("res://scripts/BattleState.gd").new()
+	var atk: Array[UnitStack] = [
+		UnitRegistry.make_fixed_stack("swordsmen", 10),
+		UnitRegistry.make_fixed_stack("archers", 10),
+	]
+	var def: Array[UnitStack] = [
+		UnitRegistry.make_fixed_stack("goblins", 10),
+	]
+	state.place_army(atk, def)
+	state.build_queue()
+
+	var a = state.attacker_units[0]
+	var b = state.attacker_units[1]
+	var c = state.defender_units[0]
+
+	state.turn_queue.clear()
+	state.turn_queue.append(a)
+	state.turn_queue.append(b)
+	state.turn_queue.append(c)
+
+	state.turn_idx = 0
+	state.active_unit = a
+
+	# Wait with first unit → next should be b
+	state.do_wait(a)
+	state.advance_turn()
+
+	if state.active_unit != b:
+		printerr("After waiting with first unit, second unit should act")
+		errors += 1
+
+	# Wait with second unit → next should be c
+	state.do_wait(b)
+	state.advance_turn()
+
+	if state.active_unit != c:
+		printerr("After waiting with second unit, third unit should act")
+		errors += 1
+
 	return errors

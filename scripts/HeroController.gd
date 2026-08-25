@@ -1,6 +1,9 @@
 extends Node2D
 class_name HeroController
 
+const _UnitStack = preload("res://scripts/unit_stack.gd")
+const _UnitRegistry = preload("res://scripts/UnitRegistry.gd")
+
 signal hero_moved(cell: Vector2i)
 signal hero_entered_village(cell: Vector2i)
 signal movement_points_changed(current: int, max_val: int)
@@ -22,16 +25,7 @@ var hero_name: String = "Darkstorn"
 
 var stats := {"attack": 0, "defense": 0, "spell_power": 4, "knowledge": 2}
 
-var army: Array[Dictionary] = [
-    {"icon": "🗡️", "name": "Swordsmen", "count": 103, "base_damage": 4, "speed": 5, "hp": 10, "defense": 2},
-    {"icon": "🏹", "name": "Archers", "count": 36, "base_damage": 3, "speed": 4, "hp": 8, "defense": 1},
-    {"icon": "🐴", "name": "Cavalry", "count": 34, "base_damage": 5, "speed": 7, "hp": 15, "defense": 2},
-    {"icon": "📜", "name": "Mages", "count": 10, "base_damage": 7, "speed": 5, "hp": 12, "defense": 2},
-    {"icon": "🛡️", "name": "Guardians", "count": 20, "base_damage": 6, "speed": 3, "hp": 25, "defense": 3},
-    {"icon": "🧙", "name": "Archmages", "count": 12, "base_damage": 9, "speed": 6, "hp": 14, "defense": 2},
-    {"icon": "⚔️", "name": "Champions", "count": 6, "base_damage": 12, "speed": 8, "hp": 30, "defense": 3},
-    {"icon": "🐎", "name": "Knights", "count": 12, "base_damage": 8, "speed": 9, "hp": 20, "defense": 3},
-]
+var army: Array = []  # Array[UnitStack] via preload
 
 var resources := {
     "wood": 10, "mercury": 2, "ore": 10, "sulfur": 2,
@@ -45,6 +39,10 @@ var _avatar_tex: Texture2D
 var _tween: Tween
 var _path_line: Line2D
 var _marker: DestMarker
+
+## Public accessor for the map generator
+func get_map_gen() -> MapGenerator:
+    return _map_gen
 
 
 # ======== Маркер кликнутой клетки (отладка пути) ========
@@ -78,7 +76,21 @@ class DestMarker extends Node2D:
 
 
 func _ready() -> void:
+    _init_default_army()
     _build_visual()
+
+
+func _init_default_army() -> void:
+    army = [
+        _UnitRegistry.make_fixed_stack("swordsmen", 103),
+        _UnitRegistry.make_fixed_stack("archers", 36),
+        _UnitRegistry.make_fixed_stack("cavalry", 34),
+        _UnitRegistry.make_fixed_stack("mages", 10),
+        _UnitRegistry.make_fixed_stack("guardians", 20),
+        _UnitRegistry.make_fixed_stack("archmages", 12),
+        _UnitRegistry.make_fixed_stack("champions", 6),
+        _UnitRegistry.make_fixed_stack("knights", 12),
+    ]
 
 
 func _build_visual() -> void:
@@ -199,15 +211,15 @@ func setup(map: MapGenerator) -> void:
 
 
 func _update_position() -> void:
-    if _map_gen and _map_gen._tile_map and _map_gen._tile_map.tile_set != null:
-        position = _map_gen._tile_map.map_to_local(current_cell)
+    if _map_gen and _map_gen.has_valid_tilemap():
+        position = _map_gen.map_to_local(current_cell)
     else:
         position = Vector2(current_cell.x * 64 + 32, current_cell.y * 56 + 28)
 
 
 # ===================== TWO-CLICK MOVEMENT =====================
 func on_map_clicked(cell: Vector2i) -> void:
-    if is_moving or _map_gen == null or _map_gen._tile_map == null:
+    if is_moving or _map_gen == null or not _map_gen.has_valid_tilemap():
         return
     if cell == current_cell:
         cancel_pending()
@@ -226,7 +238,7 @@ func on_map_clicked(cell: Vector2i) -> void:
         path_previewed.emit("Нет очков движения — нажмите ⏳")
         return
 
-    var blocked := _map_gen.get_blocked_cells()
+    var blocked: Dictionary = _map_gen.get_blocked_cells()
     var found := HexUtils.bfs_path(current_cell, cell, blocked, _map_gen.map_width, _map_gen.map_height)
     if found.size() < 2:
         cancel_pending()
@@ -240,8 +252,8 @@ func on_map_clicked(cell: Vector2i) -> void:
     _set_line_points(affordable)
 
     # Маркер кликнутой клетки
-    if _map_gen._tile_map.tile_set != null:
-        _marker.show_at(_map_gen._tile_map.map_to_local(cell))
+    if _map_gen.has_valid_tilemap():
+        _marker.show_at(_map_gen.map_to_local(cell))
 
     var cost := (affordable.size() - 1) * move_cost_per_cell
     var suffix := ""
@@ -268,8 +280,8 @@ func _set_line_points(pts: Array[Vector2i]) -> void:
     _path_line.clear_points()
     for p in pts:
         var local_pos: Vector2
-        if _map_gen and _map_gen._tile_map and _map_gen._tile_map.tile_set != null:
-            local_pos = _map_gen._tile_map.map_to_local(p)
+        if _map_gen and _map_gen.has_valid_tilemap():
+            local_pos = _map_gen.map_to_local(p)
         else:
             local_pos = Vector2(p.x * 64 + 32, p.y * 56 + 28)
         _path_line.add_point(local_pos)
@@ -304,8 +316,8 @@ func _move_next_step() -> void:
     movement_points_changed.emit(move_points, max_move_points)
 
     var target_pos: Vector2
-    if _map_gen and _map_gen._tile_map and _map_gen._tile_map.tile_set != null:
-        target_pos = _map_gen._tile_map.map_to_local(next_cell)
+    if _map_gen and _map_gen.has_valid_tilemap():
+        target_pos = _map_gen.map_to_local(next_cell)
     else:
         target_pos = Vector2(next_cell.x * 64 + 32, next_cell.y * 56 + 28)
 
@@ -376,16 +388,20 @@ func end_turn() -> void:
     cancel_pending()
 
 
-func get_army_for_battle() -> Array[Dictionary]:
-    var alive: Array[Dictionary] = []
+func get_army_for_battle() -> Array[UnitStack]:
+    var alive: Array[UnitStack] = []
     for stack in army:
-        if stack["count"] > 0:
-            alive.append(stack.duplicate())
+        if stack != null and stack.is_alive():
+            alive.append(stack.duplicate_stack())
     return alive
 
 
-func apply_battle_results(surviving_army: Array[Dictionary]) -> void:
-    army = surviving_army
+func apply_battle_results(surviving_army: Array[UnitStack]) -> void:
+    var new_army: Array[UnitStack] = []
+    for stack in surviving_army:
+        if stack != null and stack.is_alive():
+            new_army.append(stack)
+    army = new_army
 
 func force_stop() -> void:
     is_moving = false

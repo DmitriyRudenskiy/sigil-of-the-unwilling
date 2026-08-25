@@ -1,4 +1,4 @@
-tool
+@tool
 extends EditorScript
 ## Нарезка листов 5x5 из res://assets/raw/binom/ в processed/
 ## Автоопределение биома по среднему цвету; самый "пустой" гекс -> {biome}_base.png

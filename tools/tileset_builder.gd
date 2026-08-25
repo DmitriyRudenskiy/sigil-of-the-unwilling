@@ -188,6 +188,9 @@ func _synthesize_missing(files: Array[String]) -> void:
     if not files.has("water_base"):
         _save_hex_solid("water_base", TERRAIN_COLORS[0])
         synth_list.append("water_base (solid)")
+    if not files.has("swamp_base"):
+        _save_hex_solid("swamp_base", TERRAIN_COLORS[1])
+        synth_list.append("swamp_base (solid)")
     if not files.has("snow_base"):
         _save_hex_solid("snow_base", TERRAIN_COLORS[6])
         synth_list.append("snow_base (solid)")

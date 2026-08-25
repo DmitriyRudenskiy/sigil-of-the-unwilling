@@ -1,183 +1,145 @@
 extends Node2D
 class_name MapGenerator
+## Координатор карты: модель, рендерер, спавнер, тайлмапы.
 
 const TerrainAtlasMapScript = preload("res://scripts/TerrainAtlasMap.gd")
-const _UnitRegistry = preload("res://scripts/UnitRegistry.gd")
+const _MapModel = preload("res://scripts/map/MapModel.gd")
+const _MapRenderer = preload("res://scripts/map/MapRenderer.gd")
+const _MapSpawner = preload("res://scripts/map/MapSpawner.gd")
 
-@export var map_width: int = 60
-@export var map_height: int = 60
-@export var seed_value: int = 12345
-@export var village_count: int = 8
-@export var water_threshold: float = 0.35
-@export var sand_threshold: float = 0.40
-@export var grass_threshold: float = 0.65
-@export var forest_threshold: float = 0.75
-@export var mountain_threshold: float = 0.85
-@export var swamp_threshold: float = 0.42
+var model
+var renderer
+var spawner
 
-var terrain_grid: Dictionary = {}
-var height_grid: Dictionary = {}
-var village_cells: Array[Vector2i] = []
-var resource_cells: Dictionary = {}
-var decor_cells: Dictionary = {}
-var enemy_stacks: Dictionary = {}   # Vector2i -> Array[Dictionary]
 var _tile_map: TileMapLayer
 var _decor_layer: TileMapLayer
 var _resource_layer: Node2D
 
+# Публичные свойства — делегирование в модель
+var terrain_grid: Dictionary:
+	get: return model.terrain_grid if model != null else {}
+
+var height_grid: Dictionary:
+	get: return model.height_grid if model != null else {}
+
+var village_cells: Array[Vector2i]:
+	get: return model.village_cells if model != null else []
+
+var resource_cells: Dictionary:
+	get: return model.resource_cells if model != null else {}
+
+var decor_cells: Dictionary:
+	get: return model.decor_cells if model != null else {}
+
+var enemy_stacks: Dictionary:
+	get: return model.enemy_stacks if model != null else {}
+
+var _seed_value: int = 0
+var _map_width: int = 0
+var _map_height: int = 0
+
+var seed_value: int:
+	get:
+		return _seed_value
+	set(v):
+		_seed_value = v
+		if model != null:
+			model.seed_value = v
+
+var map_width: int:
+	get: return model.map_width if model != null else _map_width
+	set(v):
+		_map_width = v
+		if model != null:
+			model.map_width = v
+
+var map_height: int:
+	get: return model.map_height if model != null else _map_height
+	set(v):
+		_map_height = v
+		if model != null:
+			model.map_height = v
+
+
 func _ready() -> void:
 	generate()
 
+
 func generate() -> void:
 	_ensure_layers()
+
+	model = _MapModel.new()
+	model.map_width = _map_width if _map_width > 0 else 60
+	model.map_height = _map_height if _map_height > 0 else 60
+	model.seed_value = _seed_value
+	model.village_count = 8
+
+	renderer = _MapRenderer.new(model)
+	spawner = _MapSpawner.new(model)
+
 	HexUtils.calibrate(_tile_map)
-	_generate_noise()
-	_paint_tilemap()
-	_diversify()
-	_place_villages()
-	_place_resources()
-	_place_decor()
-	_place_enemies()
+
+	model.generate_noise()
+	renderer.paint(_tile_map)
+	renderer.diversify(_tile_map)
+
+	spawner.place_villages()
+	spawner.place_resources()
+	spawner.place_decor()
+	spawner.place_enemies()
+
 
 func _ensure_layers() -> void:
 	_tile_map = get_node_or_null("TileMapTerrain")
 	if _tile_map == null:
 		_tile_map = TileMapLayer.new()
 		_tile_map.name = "TileMapTerrain"
-		_tile_map.tile_set = load("res://tilesets/hex_tileset.tres")
+		var tileset_path := "res://tilesets/hex_tileset.tres"
+		if ResourceLoader.exists(tileset_path):
+			_tile_map.tile_set = load(tileset_path)
+		else:
+			push_error("Tileset not found: %s" % tileset_path)
 		add_child(_tile_map)
+
 	_decor_layer = get_node_or_null("TileMapDecor")
 	if _decor_layer == null:
 		_decor_layer = TileMapLayer.new()
 		_decor_layer.name = "TileMapDecor"
-		_decor_layer.tile_set = load("res://tilesets/hex_tileset.tres")
+		var tileset_path2 := "res://tilesets/hex_tileset.tres"
+		if ResourceLoader.exists(tileset_path2):
+			_decor_layer.tile_set = load(tileset_path2)
+		else:
+			push_error("Tileset not found: %s" % tileset_path2)
 		add_child(_decor_layer)
+
 	_resource_layer = get_node_or_null("ResourceLayer")
 	if _resource_layer == null:
 		_resource_layer = Node2D.new()
 		_resource_layer.name = "ResourceLayer"
 		add_child(_resource_layer)
 
-func _generate_noise() -> void:
-	var hn := FastNoiseLite.new(); hn.seed = seed_value; hn.frequency = 0.03; hn.fractal_octaves = 5
-	var tn := FastNoiseLite.new(); tn.seed = seed_value+100; tn.frequency = 0.02; tn.fractal_octaves = 3
-	var mn := FastNoiseLite.new(); mn.seed = seed_value+200; mn.frequency = 0.025; mn.fractal_octaves = 3
-	terrain_grid.clear(); height_grid.clear()
-	for y in map_height:
-		for x in map_width:
-			var cell := Vector2i(x, y)
-			var h := (hn.get_noise_2d(x,y)+1.0)/2.0
-			var t := (tn.get_noise_2d(x,y)+1.0)/2.0
-			var m := (mn.get_noise_2d(x,y)+1.0)/2.0
-			height_grid[cell] = h
-			terrain_grid[cell] = get_biome_terrain_id(h, t, m)
 
-func get_biome_terrain_id(height: float, temp: float, moist: float) -> int:
-	if height < water_threshold: return HexUtils.Terrain.WATER
-	elif height < swamp_threshold and moist > 0.55: return HexUtils.Terrain.SWAMP
-	elif height < sand_threshold: return HexUtils.Terrain.SAND
-	elif height > mountain_threshold:
-		return HexUtils.Terrain.SNOW if temp < 0.3 else HexUtils.Terrain.MOUNTAIN
-	elif height > forest_threshold:
-		if moist > 0.4: return HexUtils.Terrain.FOREST
-		return HexUtils.Terrain.SNOW if temp < 0.3 else HexUtils.Terrain.MOUNTAIN
-	else:
-		if moist < 0.25: return HexUtils.Terrain.SAND
-		return HexUtils.Terrain.SNOW if temp < 0.2 else HexUtils.Terrain.GRASS
-
-func _paint_tilemap() -> void:
-	_tile_map.clear()
-	for cell in terrain_grid:
-		var terrain_id: int = terrain_grid[cell]
-		if not TerrainAtlasMapScript.CENTER_COORDS.has(terrain_id):
-			continue
-		var atlas_coords: Vector2i = TerrainAtlasMapScript.CENTER_COORDS[terrain_id]
-		_tile_map.set_cell(cell, TerrainAtlasMapScript.SOURCE_ID, atlas_coords)
-	# In Godot 4.7, terrain transitions are handled by the TileSet's proxy system automatically.
-
-func _diversify() -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = seed_value + 1234
-	for cell in terrain_grid:
-		var t: int = terrain_grid[cell]
-		if not TerrainAtlasMapScript.VARIANTS.has(t):
-			continue
-		var vars: Array = TerrainAtlasMapScript.VARIANTS[t]
-		if vars.is_empty():
-			continue
-		if _tile_map.get_cell_atlas_coords(cell) == TerrainAtlasMapScript.CENTER_COORDS[t]:
-			var pick: Vector2i = vars[rng.randi_range(0, vars.size() - 1)]
-			_tile_map.set_cell(cell, TerrainAtlasMapScript.SOURCE_ID, pick)
-
-func _place_villages() -> void:
-	village_cells.clear()
-	var rng := RandomNumberGenerator.new(); rng.seed = seed_value + 500
-	var attempts := 0
-	while village_cells.size() < village_count and attempts < 1000:
-		attempts += 1
-		var cell := Vector2i(rng.randi_range(2, map_width-3), rng.randi_range(2, map_height-3))
-		if is_valid_village_location(cell): village_cells.append(cell)
-
-func is_valid_village_location(cell: Vector2i) -> bool:
-	if not terrain_grid.has(cell): return false
-	if terrain_grid[cell] in [HexUtils.Terrain.WATER, HexUtils.Terrain.MOUNTAIN]: return false
-	for v in village_cells:
-		if HexUtils.hex_distance(cell, v) <= 2: return false
-	return true
-
-func _place_resources() -> void:
-	resource_cells.clear()
-	var rng := RandomNumberGenerator.new(); rng.seed = seed_value + 700
-	var target := int(float(map_width * map_height) / 70.0)
-	var attempts := 0
-	while resource_cells.size() < target and attempts < 5000:
-		attempts += 1
-		var cell := Vector2i(rng.randi_range(0, map_width-1), rng.randi_range(0, map_height-1))
-		if not terrain_grid.has(cell): continue
-		if terrain_grid[cell] in [HexUtils.Terrain.WATER, HexUtils.Terrain.MOUNTAIN]: continue
-		if resource_cells.has(cell) or cell in village_cells: continue
-		resource_cells[cell] = rng.randi_range(0, 6)
-
-func _place_decor() -> void:
-	decor_cells.clear()
-	var rng := RandomNumberGenerator.new(); rng.seed = seed_value + 900
-	for cell in terrain_grid:
-		if terrain_grid[cell] == HexUtils.Terrain.SAND and rng.randf() < 0.04:
-			decor_cells[cell] = "palm" if rng.randf() > 0.5 else "cactus"
-
-func _place_enemies() -> void:
-	enemy_stacks.clear()
-	var rng := RandomNumberGenerator.new()
-	rng.seed = seed_value + 777
-	var placed := 0
-	var attempts := 0
-	while placed < 15 and attempts < 5000:
-		attempts += 1
-		var cell := Vector2i(rng.randi_range(3, map_width - 4), rng.randi_range(3, map_height - 4))
-		if not is_walkable(cell) or enemy_stacks.has(cell) or cell in village_cells or resource_cells.has(cell):
-			continue
-		
-		# Выбираем случайную фракцию из реестра
-		var faction_idx: int = rng.randi_range(0, _UnitRegistry.FACTION_SETS.size() - 1)
-		var faction_pool: Array = _UnitRegistry.FACTION_SETS[faction_idx]
-		
-		var army: Array[Dictionary] = []
-		for i in rng.randi_range(1, 3):
-			var unit_key: String = faction_pool[rng.randi_range(0, faction_pool.size() - 1)]
-			var stack: Dictionary = _UnitRegistry.make_stack(unit_key, rng)
-			if stack.size() > 0:
-				army.append(stack)
-		
-		if army.size() > 0:
-			enemy_stacks[cell] = army
-			placed += 1
-
+# Публичный API — делегирование в модель
 func is_walkable(cell: Vector2i) -> bool:
-	if not terrain_grid.has(cell): return false
-	return terrain_grid[cell] not in [HexUtils.Terrain.WATER, HexUtils.Terrain.MOUNTAIN]
+	return model.is_walkable(cell) if model != null else false
+
 
 func get_blocked_cells() -> Dictionary:
-	var b: Dictionary = {}
-	for cell in terrain_grid:
-		if not is_walkable(cell): b[cell] = true
-	return b
+	return model.get_blocked_cells() if model != null else {}
+
+
+# Публичный API — тайлмап
+func has_valid_tilemap() -> bool:
+	return _tile_map != null and _tile_map.tile_set != null
+
+
+func local_to_map(world_pos: Vector2) -> Vector2i:
+	if not has_valid_tilemap():
+		return Vector2i(-1, -1)
+	return _tile_map.local_to_map(world_pos)
+
+
+func map_to_local(cell: Vector2i) -> Vector2:
+	if not has_valid_tilemap():
+		return Vector2.ZERO
+	return _tile_map.map_to_local(cell)

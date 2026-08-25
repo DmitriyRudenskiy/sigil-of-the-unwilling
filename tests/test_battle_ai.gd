@@ -108,4 +108,14 @@ func _test_move_towards_target() -> int:
 	if max_steps > speed:
 		printerr("AI should not move farther than unit speed")
 		errors += 1
+
+	# AI must not move onto an occupied enemy cell
+	if decision.target_cell == attacker.cell:
+		printerr("AI must not move onto occupied enemy cell")
+		errors += 1
+
+	if blocked.has(decision.target_cell):
+		printerr("AI target cell must not be blocked")
+		errors += 1
+
 	return errors
