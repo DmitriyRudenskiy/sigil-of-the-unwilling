@@ -132,6 +132,11 @@ func _find_sheet() -> String:
     return best
 
 
+func _idle() -> void:
+    if _anim != null:
+        _anim.stop()
+        _anim.frame = 0
+
 func _build_anim_from_sheet(sheet: Image) -> void:
     if sheet.get_format() != Image.FORMAT_RGBA8:
         sheet.convert(Image.FORMAT_RGBA8)
@@ -164,7 +169,8 @@ func _build_anim_from_sheet(sheet: Image) -> void:
     _anim.scale = Vector2(0.62, 0.62)
     _anim.z_index = 10
     add_child(_anim)
-    _anim.play("side")
+    _anim.stop()
+    _anim.frame = 0
     print("[Hero] Knight animation built from ", HERO_SHEET_PATH)
 
 
@@ -285,6 +291,7 @@ func _move_next_step() -> void:
             _path_line.clear_points()
         if _marker:
             _marker.hide_marker()
+        _idle()
         return
 
     var next_cell := path[1]
@@ -347,6 +354,7 @@ func _on_step_complete(cell: Vector2i) -> void:
             _path_line.clear_points()
         if _marker:
             _marker.hide_marker()
+        _idle()
         return
 
     _move_next_step()

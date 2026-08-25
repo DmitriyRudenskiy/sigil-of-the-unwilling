@@ -69,7 +69,7 @@ func _ready() -> void:
 
 func setup(hero: HeroController) -> void:
     _hero_controller = hero
-    hero.movement_points_changed.connect(func(c, m): _on_mp_changed(c, m))
+    hero.movement_points_changed.connect(func(c, m): _set_status("👣 %d/%d" % [c, m]))
     hero.resources_changed.connect(func(_r): _update_resources())
     hero.path_previewed.connect(func(t): _set_status(t))
     _minimap_overlay.map_ref = hero._map_gen
@@ -94,6 +94,7 @@ func _panel_style() -> StyleBoxFlat:
 func _empty_slot(h: float) -> Panel:
     var p := Panel.new()
     p.custom_minimum_size = Vector2(0, h)
+    p.size_flags_horizontal = Control.SIZE_EXPAND_FILL  # FIX: слоты растягиваются поровну
     var s := StyleBoxFlat.new()
     s.bg_color = C_SLOT_BG
     s.set_corner_radius_all(3)
@@ -112,7 +113,7 @@ func _arrow(up: bool) -> Button:
     return b
 
 
-# ===================== ПРАВАЯ КОЛОНКА КАК В ОРИГИНАЛЕ =====================
+# ===================== ПРАВАЯ КОЛОНКА (порядок оригинала) =====================
 func _build_right_column() -> void:
     var p := PanelContainer.new()
     p.add_theme_stylebox_override("panel", _panel_style())
@@ -127,7 +128,7 @@ func _build_right_column() -> void:
     vb.add_theme_constant_override("separation", 6)
     p.add_child(vb)
 
-    # 1) Миникарта (самая верхняя, как в оригинале)
+    # 1) Миникарта
     var box := Control.new()
     box.custom_minimum_size = Vector2(RIGHT_W - 24, RIGHT_W - 24)
     vb.add_child(box)
@@ -139,7 +140,7 @@ func _build_right_column() -> void:
     _minimap_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
     box.add_child(_minimap_overlay)
 
-    # NSWE (из прототипа) тонкой строкой под миникартой
+    # NSWE
     var nswe := HBoxContainer.new()
     nswe.alignment = BoxContainer.ALIGNMENT_CENTER
     nswe.add_theme_constant_override("separation", 8)
@@ -152,7 +153,7 @@ func _build_right_column() -> void:
         b.pressed.connect(_on_camera_jump.bind(d))
         nswe.add_child(b)
 
-    # Дата (тонкая строка)
+    # Дата
     _date_label = Label.new()
     _date_label.text = _fmt_date()
     _date_label.add_theme_font_size_override("font_size", 14)
@@ -160,40 +161,46 @@ func _build_right_column() -> void:
     _date_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     vb.add_child(_date_label)
 
-    # 2) Панель «герои | города» двумя колонками со стрелками
+    # 2) Панель «герои | города»
     var lists := HBoxContainer.new()
     lists.add_theme_constant_override("separation", 6)
     vb.add_child(lists)
 
     var hv := VBoxContainer.new()
+    hv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     hv.add_theme_constant_override("separation", 3)
     lists.add_child(hv)
-    hv.add_child(_arrow(true))
+    var ha := HBoxContainer.new()
+    ha.alignment = BoxContainer.ALIGNMENT_CENTER
+    ha.add_child(_arrow(true))
+    hv.add_child(ha)
     for i in 4:
         var s := _empty_slot(44)
         hv.add_child(s)
         _hero_slots.append(s)
-    hv.add_child(_arrow(false))
+    var ha2 := HBoxContainer.new()
+    ha2.alignment = BoxContainer.ALIGNMENT_CENTER
+    ha2.add_child(_arrow(false))
+    hv.add_child(ha2)
 
     var tv := VBoxContainer.new()
+    tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     tv.add_theme_constant_override("separation", 3)
     lists.add_child(tv)
-    tv.add_child(_arrow(true))
+    var ta := HBoxContainer.new()
+    ta.alignment = BoxContainer.ALIGNMENT_CENTER
+    ta.add_child(_arrow(true))
+    tv.add_child(ta)
     for i in 4:
         var s := _empty_slot(44)
         tv.add_child(s)
         _town_slots.append(s)
-    tv.add_child(_arrow(false))
+    var ta2 := HBoxContainer.new()
+    ta2.alignment = BoxContainer.ALIGNMENT_CENTER
+    ta2.add_child(_arrow(false))
+    tv.add_child(ta2)
 
-    # Статус-строка
-    _status_label = Label.new()
-    _status_label.text = ""
-    _status_label.add_theme_font_size_override("font_size", 12)
-    _status_label.add_theme_color_override("font_color", C_TEXT)
-    _status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-    vb.add_child(_status_label)
-
-    # 3) Сетка кнопок 4x3 (как оригинальная 4x2 + кнопки прототипа)
+    # 3) Сетка кнопок 4x3 — СРАЗУ после панели героев/городов (как в оригинале)
     var bg := GridContainer.new()
     bg.columns = 4
     bg.add_theme_constant_override("h_separation", 4)
@@ -232,7 +239,8 @@ func _build_right_column() -> void:
     for i in 8:
         var slot := Panel.new()
         slot.name = "Slot%d" % i
-        slot.custom_minimum_size = Vector2(108, 40)
+        slot.custom_minimum_size = Vector2(0, 40)
+        slot.size_flags_horizontal = Control.SIZE_EXPAND_FILL
         var ss := StyleBoxFlat.new()
         ss.bg_color = C_SLOT_BG
         ss.set_corner_radius_all(3)
@@ -256,7 +264,7 @@ func _build_right_column() -> void:
         ag.add_child(slot)
         _army_slots.append(slot)
 
-    # 5) Ресурсы тонкой строкой в самом низу
+    # 5) Ресурсы
     var rh := HBoxContainer.new()
     rh.alignment = BoxContainer.ALIGNMENT_CENTER
     rh.add_theme_constant_override("separation", 8)
@@ -269,6 +277,16 @@ func _build_right_column() -> void:
         l.add_theme_color_override("font_color", C_TEXT)
         rh.add_child(l)
         _resource_labels[ri[0]] = l
+
+    vb.add_child(_vspacer())
+
+    # 6) Статус — в самом низу
+    _status_label = Label.new()
+    _status_label.text = ""
+    _status_label.add_theme_font_size_override("font_size", 12)
+    _status_label.add_theme_color_override("font_color", C_TEXT)
+    _status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    vb.add_child(_status_label)
 
 
 func _fill_hero_slot(idx: int, hero: HeroController) -> void:
@@ -284,8 +302,9 @@ func _fill_hero_slot(idx: int, hero: HeroController) -> void:
     if av != null:
         var tr := TextureRect.new()
         tr.texture = av
-        tr.custom_minimum_size = Vector2(40, 40)
+        tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE   # FIX: держим 40x40
         tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+        tr.custom_minimum_size = Vector2(40, 40)
         hb.add_child(tr)
     else:
         var em := Label.new()
@@ -296,6 +315,7 @@ func _fill_hero_slot(idx: int, hero: HeroController) -> void:
     nm.text = hero.hero_name
     nm.add_theme_font_size_override("font_size", 13)
     nm.add_theme_color_override("font_color", C_GOLD)
+    nm.clip_text = true
     hb.add_child(nm)
 
 
@@ -364,10 +384,6 @@ func _update_resources() -> void:
         _resource_labels[k].text = "%s%d" % [icons[k], _hero_controller.resources.get(k, 0)]
 
 
-func _on_mp_changed(cur: int, mx: int) -> void:
-    _set_status("👣 %d/%d" % [cur, mx])
-
-
 func _set_status(text: String) -> void:
     if _status_label:
         _status_label.text = text
@@ -398,3 +414,9 @@ func _on_camera_jump(direction: String) -> void:
     var world := get_parent()
     if world and world.has_method("jump_camera"):
         world.jump_camera(direction)
+
+
+func _vspacer() -> Control:
+    var sp := Control.new()
+    sp.size_flags_vertical = Control.SIZE_EXPAND_FILL
+    return sp
