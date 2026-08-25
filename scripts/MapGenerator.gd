@@ -77,7 +77,7 @@ func get_biome_terrain_id(height: float, temp: float, moist: float) -> int:
 func _paint_tilemap() -> void:
     _tile_map.clear()
     for cell in terrain_grid:
-        _tile_map.set_cell(cell, 0, Vector2i(0, terrain_grid[cell]))
+        _tile_map.set_cell(cell, TerrainAtlasMap.SOURCE_ID, TerrainAtlasMap.CENTER_COORDS[terrain_grid[cell]])
     _tile_map.update_terrain()
 
 func _place_villages() -> void:

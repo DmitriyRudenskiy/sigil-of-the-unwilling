@@ -48,3 +48,29 @@
 
 ## Commits
 - Initial setup and implementation of provided package.
+
+## Приложение A: Stage 1 (автоназначение, tileset_builder v2)
+
+Ориентация: pointy-top. Peering bits (CellNeighbor): E=0, SE=2, SW=6, W=8, NW=10, NE=14.
+Маска 0b###### в порядке doc-битов [E,NE,NW,W,SW,SE]; 1 = на ребре чужой биом (peering=-1).
+
+| Тайл | Atlas | Террейн | Маска |
+|---|---|---|---|
+| water_corner | (0,0) | water | 0b111000 |
+| water_base | (1,0) | water | 0b000000 |
+| sand_base | (2,0) | sand | 0b000000 |
+| sand_grass | (3,0) | sand | 0b000011 |
+| grass_base | (4,0) | grass | 0b000000 |
+| grass_dry | (5,0) | grass | 0b000000 |
+| forest_shrub | (6,0) | grass | 0b000000 |
+| forest_1tree | (7,0) | forest | 0b000000 |
+| mountain_1 | (8,0) | mountain | 0b100001 |
+| mountain_3a | (9,0) | mountain | 0b000001 |
+| mountain_3b | (10,0) | mountain | 0b100000 |
+| snow_base | (11,0) | snow | 0b000000 |
+
+Синтезированные временные тайлы:
+- water_base (заливка из палитры river_straight)
+- snow_base (модуляция grass_base в бело-синий)
+
+Вариативность: тайлы с одинаковой маской (sand_base/dunes/pebbles, forest_1tree/2trees, mountain_*) движок выбирает случайно по probability.
