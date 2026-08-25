@@ -44,10 +44,10 @@ func _ready() -> void:
     HexUtils.calibrate(_tile_map)
 
     _hl_move = TileMapLayer.new()
-    _hl_move.modulate = Color(0.3, 0.8, 1.0, 0.35)
+    _hl_move.modulate = Color(0.3, 0.8, 1.0, 0.5)
     add_child(_hl_move)
     _hl_atk = TileMapLayer.new()
-    _hl_atk.modulate = Color(1.0, 0.2, 0.2, 0.45)
+    _hl_atk.modulate = Color(1.0, 0.2, 0.2, 0.6)
     add_child(_hl_atk)
 
     _paint_field()
@@ -56,8 +56,7 @@ func _ready() -> void:
     _camera = Camera2D.new()
     add_child(_camera)
     _camera.make_current()
-    if _tile_map.tile_set != null:
-        _camera.position = _tile_map.map_to_local(Vector2i(BW / 2, BH / 2))
+    await get_tree().process_frame   # дождаться реального размера viewport
     _fit_camera()
 
     _build_ui()
@@ -147,6 +146,7 @@ func start_battle(atk: Array[Dictionary], def: Array[Dictionary]) -> void:
     defender_units = _place_army(def, false)
     _build_queue()
     _next_turn()
+    _fit_camera()  # страховка после расстановки армий
 
 
 func _place_army(army: Array[Dictionary], is_atk: bool) -> Array[Dictionary]:
@@ -267,26 +267,42 @@ func _end_turn() -> void:
 
 
 # ===================== INPUT =====================
-func _unhandled_input(ev: InputEvent) -> void:
+func _input(ev: InputEvent) -> void:
     if battle_over or not is_player_turn:
         return
-    if ev is InputEventMouseButton and ev.pressed:
-        if ev.button_index == MOUSE_BUTTON_LEFT:
-            var cell := _tile_map.local_to_map(get_global_mouse_position())
-            if cell.x < 0 or cell.x >= BW or cell.y < 0 or cell.y >= BH:
-                return
-            if highlight_attack.has(cell):
-                _do_attack(active_unit, _unit_at(cell, "defender"))
-                return
-            if highlight_move.has(cell):
-                _do_move(active_unit, cell)
-                return
-            var own := _unit_at(cell, "attacker")
-            if own.size() > 0 and not own.get("has_moved", false):
-                _select(own)
-        elif ev.button_index == MOUSE_BUTTON_RIGHT:
-            _clear_highlights()
-            _status.text = "Выберите существо…"
+    if not (ev is InputEventMouseButton) or not ev.pressed:
+        return
+    # клики по кнопкам/панелям не перехватываем
+    if get_viewport().gui_get_hovered_control() != null:
+        return
+
+    if ev.button_index == MOUSE_BUTTON_RIGHT:
+        _clear_highlights()
+        _status.text = "Выберите существо…"
+        return
+    if ev.button_index != MOUSE_BUTTON_LEFT:
+        return
+
+    var world_pos := get_global_mouse_position()
+    var cell := _tile_map.local_to_map(world_pos)
+    if cell.x < 0 or cell.x >= BW or cell.y < 0 or cell.y >= BH:
+        return
+
+    if highlight_attack.has(cell):
+        _do_attack(active_unit, _unit_at(cell, "defender"))
+        return
+    if highlight_move.has(cell):
+        _do_move(active_unit, cell)
+        return
+
+    # выбор своего юнита: по клетке, а если не совпало — по пикселям
+    var own := _unit_at(cell, "attacker")
+    if own.size() == 0:
+        own = _unit_at_pixel(world_pos, "attacker")
+    if own.size() > 0 and not own.get("has_moved", false):
+        _select(own)
+        return
+    print("[Battle] click -> ", cell, " (пусто)")
 
 
 func _select(u: Dictionary) -> void:
@@ -488,17 +504,19 @@ func _apply_icon(btn: Button, icon_path: String, fallback: String) -> void:
     else:
         btn.text = fallback
 func _fit_camera() -> void:
-    if _tile_map.tile_set == null:
+    if _tile_map == null or _tile_map.tile_set == null:
         return
-    var vp_size := get_viewport_rect().size
-    var ts := _tile_map.tile_set.get_tile_size()
-    # Подбираем зум так, чтобы поле 17×11 занимало ~90% экрана
-    var field_w := float(BW * 1.5) * ts.x * 0.5
-    var field_h := float(BH * 1.85) * ts.y * 0.5
-    var zoom_x: float = vp_size.x / field_w * 0.9
-    var zoom_y: float = vp_size.y / field_h * 0.9
-    var zoom: float = minf(zoom_x, zoom_y)
-    _camera.zoom = Vector2(zoom, zoom)
+    var used: Rect2i = _tile_map.get_used_rect()
+    if used.size.x <= 0 or used.size.y <= 0:
+        return
+    var p0 := _tile_map.map_to_local(used.position)
+    var p1 := _tile_map.map_to_local(used.position + used.size - Vector2i(1, 1))
+    var field_sz := Vector2(absf(p1.x - p0.x) + 90.0, absf(p1.y - p0.y) + 90.0)
+    var center := (p0 + p1) / 2.0
+    var vp_sz := get_viewport().get_visible_rect().size
+    var z: float = maxf(vp_sz.x / field_sz.x, vp_sz.y / field_sz.y)
+    _camera.zoom = Vector2(z, z)
+    _camera.position = center
 
 func _setup_background() -> void:
     var bg_layer := CanvasLayer.new()
@@ -526,6 +544,15 @@ func _unit_at(cell: Vector2i, side: String) -> Dictionary:
     for u in units:
         if u.get("alive", false) and u.get("cell", Vector2i(-1, -1)) == cell:
             return u
+    return {}
+
+func _unit_at_pixel(pos: Vector2, side: String) -> Dictionary:
+    var units := attacker_units if side == "attacker" else defender_units
+    for u in units:
+        if u.get("alive", false):
+            var up := _tile_map.map_to_local(u["cell"])
+            if pos.distance_to(up) < 45.0:
+                return u
     return {}
 
 
