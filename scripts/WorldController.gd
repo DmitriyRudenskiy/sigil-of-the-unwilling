@@ -149,23 +149,27 @@ func _spawn_enemies() -> void:
 		var e := Node2D.new()
 		e.set_meta("enemy_cell", cell)
 		var sp := Sprite2D.new()
-		var img := Image.create(48, 48, false, Image.FORMAT_RGBA8)
-		var c := Vector2(24, 24)
-		for y in 48:
-			for x in 48:
-				var d := Vector2(x, y).distance_to(c)
-				if d <= 20:
-					img.set_pixel(x, y, Color(0.7, 0.15, 0.1))
-				elif d <= 22:
-					img.set_pixel(x, y, Color(0.2, 0.05, 0.05))
-		sp.texture = ImageTexture.create_from_image(img)
+		
+		# Портрет первого юнита стека
+		var first_unit: Dictionary = army[0]
+		var key: String = first_unit.get("key", "")
+		var portrait_path := UnitSprites.find_portrait_small(key)
+		if portrait_path != "":
+			sp.texture = load(portrait_path)
+		else:
+			# Фолбэк: красный круг
+			var img := Image.create(48, 48, false, Image.FORMAT_RGBA8)
+			var c := Vector2(24, 24)
+			for y in 48:
+				for x in 48:
+					var d := Vector2(x, y).distance_to(c)
+					if d <= 20:
+						img.set_pixel(x, y, Color(0.7, 0.15, 0.1))
+					elif d <= 22:
+						img.set_pixel(x, y, Color(0.2, 0.05, 0.05))
+			sp.texture = ImageTexture.create_from_image(img)
 		sp.z_index = 6
 		e.add_child(sp)
-		var il := Label.new()
-		il.text = army[0]["icon"]
-		il.add_theme_font_size_override("font_size", 18)
-		il.position = Vector2(-10, -12)
-		e.add_child(il)
 		e.position = _map_gen._tile_map.map_to_local(cell)
 		add_child(e)
 

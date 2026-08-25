@@ -144,3 +144,28 @@
 | Бой: Книга | `spell.png` | 📖 |
 | Бой: Пропуск | `hourglass2.png` | ⏳ |
 | Бой: Защита | `helm.png` | 🛡️ |
+
+---
+
+## Приложение D: UnitRegistry (84 существ)
+
+### Файлы → Ключи
+| Файл | Ключи по порядку |
+|---|---|
+| `img_00017.jpeg` | pikeman, halberdier, lancer, alchemist, berserker, griffin, royal_griffin, pegasus, gargoyle, titan, dwarf, battle_dwarf |
+| `img_00015.jpeg` | centaur, elf, grand_elf, druid, great_druid, unicorn, war_unicorn, treant, dryad, green_dragon, gold_dragon, black_dragon |
+| `img_00016.jpeg` | skeleton, zombie, ghost, wraith, vampire, lich, orc, ogre, behemoth, harpy, minotaur, hydra |
+| `img_00014.jpeg` | gremlin, master_gremlin, stone_golem, iron_golem, gold_golem, diamond_golem, magus, genie, master_genie, naga, naga_queen, giant |
+| `img_00013.jpeg` | gnoll, gnoll_marauder, lizardman, lizard_warrior, serpent_fly, dragon_fly, basilisk, greater_basilisk, wyvern, wyvern_monarch, gorgon, mighty_gorgon |
+| `img_00012.jpeg` | hobgoblin, wolf_rider, wolf_raider, orc_chieftain, ogre_mage, roc, thunderbird, cyclops, cyclops_king, air_elemental, fire_elemental, water_elemental |
+| `img_00011.jpeg` | earth_elemental, storm_elemental, ice_elemental, magma_elemental, phoenix, firebird, troglodyte, beholder, medusa, manticore, red_dragon, rust_dragon |
+
+### Статистика (UnitRegistry.UNITS)
+Каждый ключ: `[Name, base_damage, hp, speed, defense]`.
+Генерация отрядов: `UnitRegistry.make_stack(key, rng)` вычисляет количество по формуле `clampi(rand(30,80) * 6 / base_damage, 3, 120)`.
+
+### Интеграция
+- `MapGenerator._place_enemies()`: 15 стеков, 1-3 отряда из случайной фракции.
+- `BattleController._place_army()`: дозаполнение статов из реестра по ключу.
+- `AdventureUI.refresh_all()`: портреты `_s.png` для слотов армии.
+- `WorldController._spawn_enemies()`: портрет `_s.png` первого юнита вместо эмодзи.

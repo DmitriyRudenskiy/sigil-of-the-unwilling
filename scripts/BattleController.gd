@@ -6,6 +6,8 @@ class_name BattleController
 
 signal battle_finished(winner: String, surviving_atk: Array, surviving_def: Array)
 
+const _UnitRegistry = preload("res://scripts/UnitRegistry.gd")
+
 const BW := 17
 const BH := 11
 
@@ -152,6 +154,17 @@ func _place_army(army: Array[Dictionary], is_atk: bool) -> Array[Dictionary]:
         var s: Dictionary = army[i].duplicate()
         if s.get("count", 0) <= 0:
             continue
+            
+        # Дозаполнение статов из реестра по ключу
+        var key: String = s.get("key", "")
+        if key != "" and _UnitRegistry.UNITS.has(key):
+            var reg_data: Array = _UnitRegistry.UNITS[key]
+            s["name"] = reg_data[0]
+            s["base_damage"] = reg_data[1]
+            s["hp"] = reg_data[2]
+            s["speed"] = reg_data[3]
+            s["defense"] = reg_data[4]
+            
         var row := clampi(1 + i * 2, 0, BH - 1)
         s["cell"] = Vector2i(sx, row)
         s["side"] = "attacker" if is_atk else "defender"

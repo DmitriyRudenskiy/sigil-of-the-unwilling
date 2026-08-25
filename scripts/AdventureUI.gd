@@ -384,14 +384,14 @@ func refresh_all() -> void:
         var ic: TextureRect = hbox.get_node("Icon")
         var ct: Label = hbox.get_node("Count")
         if i < _hero_controller.army.size():
-            var key: String = _hero_controller.army[i].get("name", "").to_lower().replace(" ", "_")
+            var key: String = _hero_controller.army[i].get("key", "")
+            if key == "":
+                key = _hero_controller.army[i].get("name", "").to_lower().replace(" ", "_")
             var portrait := UnitSprites.find_portrait_small(key)
             if portrait != "":
                 ic.texture = load(portrait)
             else:
                 ic.texture = null
-                # fallback to emoji if we had a label, but now it's TextureRect.
-                # We can't put emoji in TextureRect. We'll just leave it blank or use a default.
             ct.text = str(_hero_controller.army[i]["count"])
         else:
             ic.texture = null

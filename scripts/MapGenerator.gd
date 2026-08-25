@@ -2,6 +2,7 @@ extends Node2D
 class_name MapGenerator
 
 const TerrainAtlasMapScript = preload("res://scripts/TerrainAtlasMap.gd")
+const _UnitRegistry = preload("res://scripts/UnitRegistry.gd")
 
 @export var map_width: int = 60
 @export var map_height: int = 60
@@ -148,23 +149,28 @@ func _place_enemies() -> void:
 	enemy_stacks.clear()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_value + 777
-	var pool := [
-		{"icon": "👹", "name": "Goblins", "count": 40, "base_damage": 3, "speed": 4, "hp": 6, "defense": 1},
-		{"icon": "🐺", "name": "Wolves", "count": 25, "base_damage": 4, "speed": 6, "hp": 8, "defense": 1},
-		{"icon": "🧌", "name": "Trolls", "count": 12, "base_damage": 8, "speed": 3, "hp": 20, "defense": 2},
-	]
 	var placed := 0
 	var attempts := 0
-	while placed < 4 and attempts < 2000:
+	while placed < 15 and attempts < 5000:
 		attempts += 1
 		var cell := Vector2i(rng.randi_range(3, map_width - 4), rng.randi_range(3, map_height - 4))
 		if not is_walkable(cell) or enemy_stacks.has(cell) or cell in village_cells or resource_cells.has(cell):
 			continue
+		
+		# Выбираем случайную фракцию из реестра
+		var faction_idx: int = rng.randi_range(0, _UnitRegistry.FACTION_SETS.size() - 1)
+		var faction_pool: Array = _UnitRegistry.FACTION_SETS[faction_idx]
+		
 		var army: Array[Dictionary] = []
-		for i in rng.randi_range(1, 2):
-			army.append(pool[rng.randi_range(0, pool.size() - 1)].duplicate())
-		enemy_stacks[cell] = army
-		placed += 1
+		for i in rng.randi_range(1, 3):
+			var unit_key: String = faction_pool[rng.randi_range(0, faction_pool.size() - 1)]
+			var stack: Dictionary = _UnitRegistry.make_stack(unit_key, rng)
+			if stack.size() > 0:
+				army.append(stack)
+		
+		if army.size() > 0:
+			enemy_stacks[cell] = army
+			placed += 1
 
 func is_walkable(cell: Vector2i) -> bool:
 	if not terrain_grid.has(cell): return false
