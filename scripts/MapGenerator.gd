@@ -19,6 +19,7 @@ var height_grid: Dictionary = {}
 var village_cells: Array[Vector2i] = []
 var resource_cells: Dictionary = {}
 var decor_cells: Dictionary = {}
+var enemy_stacks: Dictionary = {}   # Vector2i -> Array[Dictionary]
 var _tile_map: TileMapLayer
 var _decor_layer: TileMapLayer
 var _resource_layer: Node2D
@@ -35,6 +36,7 @@ func generate() -> void:
 	_place_villages()
 	_place_resources()
 	_place_decor()
+	_place_enemies()
 
 func _ensure_layers() -> void:
 	_tile_map = get_node_or_null("TileMapTerrain")
@@ -141,6 +143,28 @@ func _place_decor() -> void:
 	for cell in terrain_grid:
 		if terrain_grid[cell] == HexUtils.Terrain.SAND and rng.randf() < 0.04:
 			decor_cells[cell] = "palm" if rng.randf() > 0.5 else "cactus"
+
+func _place_enemies() -> void:
+	enemy_stacks.clear()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value + 777
+	var pool := [
+		{"icon": "👹", "name": "Goblins", "count": 40, "base_damage": 3, "speed": 4, "hp": 6, "defense": 1},
+		{"icon": "🐺", "name": "Wolves", "count": 25, "base_damage": 4, "speed": 6, "hp": 8, "defense": 1},
+		{"icon": "🧌", "name": "Trolls", "count": 12, "base_damage": 8, "speed": 3, "hp": 20, "defense": 2},
+	]
+	var placed := 0
+	var attempts := 0
+	while placed < 4 and attempts < 2000:
+		attempts += 1
+		var cell := Vector2i(rng.randi_range(3, map_width - 4), rng.randi_range(3, map_height - 4))
+		if not is_walkable(cell) or enemy_stacks.has(cell) or cell in village_cells or resource_cells.has(cell):
+			continue
+		var army: Array[Dictionary] = []
+		for i in rng.randi_range(1, 2):
+			army.append(pool[rng.randi_range(0, pool.size() - 1)].duplicate())
+		enemy_stacks[cell] = army
+		placed += 1
 
 func is_walkable(cell: Vector2i) -> bool:
 	if not terrain_grid.has(cell): return false

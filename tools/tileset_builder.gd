@@ -1,8 +1,7 @@
-@tool
-extends EditorScript
+extends SceneTree
 ## Stage 1 (v2.1): TileSet builder with AUTOMATIC terrain + peering bit assignment.
 ## Now supports 7 terrains (including Swamp) and dynamic variants.
-## Run: File > Run Script (Ctrl+Shift+X).
+## Run via CLI: godot --headless -s tools/tileset_builder.gd
 
 const PROCESSED_DIR := "res://tilesets/processed/"
 const ATLAS_PATH := "res://tilesets/hex_atlas.png"
@@ -44,7 +43,7 @@ const EDGE_DIRS := [
 var ref_colors: Array[Color] = []
 var synth_list: Array[String] = []
 
-func _run() -> void:
+func _init() -> void:
     print("=== Stage 1 v2.1: auto TileSet builder ===")
     var files := _list_processed()
     if files.is_empty():
@@ -118,6 +117,7 @@ func _run() -> void:
     _write_map_script(coords)
     _write_report(report_rows)
     print("=== DONE ===")
+    quit()
 
 func _analyze(img: Image, home: int) -> Array[int]:
     var res: Array[int] = []
@@ -135,7 +135,7 @@ func _analyze(img: Image, home: int) -> Array[int]:
         var n := 0
         for tf in [0.74, 0.82, 0.90]:
             for of in [-0.18, -0.09, 0.0, 0.09, 0.18]:
-                var p := Vector2(cx, cy) + d * (a * tf) + perp * (a * of)
+                var p: Vector2 = Vector2(cx, cy) + d * (a * tf) + perp * (a * of)
                 var xi := int(p.x); var yi := int(p.y)
                 if xi < 0 or yi < 0 or xi >= img.get_width() or yi >= img.get_height(): continue
                 var px := img.get_pixel(xi, yi)

@@ -6,6 +6,7 @@ var _hero: HeroController
 var _ui: AdventureUI
 var _camera: Camera2D
 var _zoom: float = 1.0
+var _pending_enemy_cell: Vector2i = Vector2i(-1, -1)
 
 const CAM_SPEED := 600.0
 const ZOOM_MIN := 0.3
@@ -41,6 +42,7 @@ func _ready() -> void:
 
 	_spawn_villages()
 	_spawn_resources()
+	_spawn_enemies()
 	print("[World] Scene ready.")
 	
 	# Для headless режима: выход после генерации
@@ -139,12 +141,87 @@ func _spawn_resources() -> void:
 		add_child(r)
 
 
+func _spawn_enemies() -> void:
+	if _map_gen._tile_map == null or _map_gen._tile_map.tile_set == null:
+		return
+	for cell in _map_gen.enemy_stacks:
+		var army: Array = _map_gen.enemy_stacks[cell]
+		var e := Node2D.new()
+		e.set_meta("enemy_cell", cell)
+		var sp := Sprite2D.new()
+		var img := Image.create(48, 48, false, Image.FORMAT_RGBA8)
+		var c := Vector2(24, 24)
+		for y in 48:
+			for x in 48:
+				var d := Vector2(x, y).distance_to(c)
+				if d <= 20:
+					img.set_pixel(x, y, Color(0.7, 0.15, 0.1))
+				elif d <= 22:
+					img.set_pixel(x, y, Color(0.2, 0.05, 0.05))
+		sp.texture = ImageTexture.create_from_image(img)
+		sp.z_index = 6
+		e.add_child(sp)
+		var il := Label.new()
+		il.text = army[0]["icon"]
+		il.add_theme_font_size_override("font_size", 18)
+		il.position = Vector2(-10, -12)
+		e.add_child(il)
+		e.position = _map_gen._tile_map.map_to_local(cell)
+		add_child(e)
+
+
 func _on_hero_moved(cell: Vector2i) -> void:
 	_camera.position = _hero.position
 	for child in get_children():
 		if child.has_meta("cell") and child.get_meta("cell") == cell and child.has_meta("res_type"):
 			child.queue_free()
 			break
+	_check_enemy_contact(cell)
+
+
+func _check_enemy_contact(cell: Vector2i) -> void:
+	if _map_gen.enemy_stacks.has(cell):
+		start_battle(_map_gen.enemy_stacks[cell], cell)
+		return
+	for nb in HexUtils.get_all_neighbors(cell):
+		if _map_gen.enemy_stacks.has(nb):
+			start_battle(_map_gen.enemy_stacks[nb], nb)
+			return
+
+
+func start_battle(enemy: Array[Dictionary], enemy_cell: Vector2i) -> void:
+	_hero.force_stop()
+	_pending_enemy_cell = enemy_cell
+	var battle := BattleController.new()
+	battle.name = "Battle"
+	get_tree().root.add_child(battle)
+	visible = false
+	set_process(false)
+	set_process_unhandled_input(false)
+	battle.start_battle(_hero.get_army_for_battle(), enemy)
+	battle.battle_finished.connect(_on_battle_end.bind(battle))
+
+
+func _on_battle_end(winner: String, surv_atk: Array, surv_def: Array, node: Node) -> void:
+	node.queue_free()
+	visible = true
+	set_process(true)
+	set_process_unhandled_input(true)
+	var new_army: Array[Dictionary] = []
+	for s in surv_atk:
+		new_army.append(s)
+	_hero.apply_battle_results(new_army)
+	if winner == "attacker":
+		_map_gen.enemy_stacks.erase(_pending_enemy_cell)
+		for child in get_children():
+			if child.has_meta("enemy_cell") and child.get_meta("enemy_cell") == _pending_enemy_cell:
+				child.queue_free()
+				break
+		print("[World] Enemy defeated at ", _pending_enemy_cell)
+	else:
+		print("[World] Battle lost/retreated.")
+	_pending_enemy_cell = Vector2i(-1, -1)
+	_ui.refresh_all()
 
 
 func _on_village(cell: Vector2i) -> void:

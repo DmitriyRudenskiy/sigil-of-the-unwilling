@@ -23,14 +23,14 @@ var hero_name: String = "Darkstorn"
 var stats := {"attack": 0, "defense": 0, "spell_power": 4, "knowledge": 2}
 
 var army: Array[Dictionary] = [
-    {"icon": "🗡️", "name": "Swordsmen", "count": 103, "base_damage": 4, "speed": 5, "hp": 10},
-    {"icon": "🏹", "name": "Archers", "count": 36, "base_damage": 3, "speed": 4, "hp": 8},
-    {"icon": "🐴", "name": "Cavalry", "count": 34, "base_damage": 5, "speed": 7, "hp": 15},
-    {"icon": "📜", "name": "Mages", "count": 10, "base_damage": 7, "speed": 5, "hp": 12},
-    {"icon": "🛡️", "name": "Guardians", "count": 20, "base_damage": 6, "speed": 3, "hp": 25},
-    {"icon": "🧙", "name": "Archmages", "count": 12, "base_damage": 9, "speed": 6, "hp": 14},
-    {"icon": "⚔️", "name": "Champions", "count": 6, "base_damage": 12, "speed": 8, "hp": 30},
-    {"icon": "🐎", "name": "Knights", "count": 12, "base_damage": 8, "speed": 9, "hp": 20},
+    {"icon": "🗡️", "name": "Swordsmen", "count": 103, "base_damage": 4, "speed": 5, "hp": 10, "defense": 2},
+    {"icon": "🏹", "name": "Archers", "count": 36, "base_damage": 3, "speed": 4, "hp": 8, "defense": 1},
+    {"icon": "🐴", "name": "Cavalry", "count": 34, "base_damage": 5, "speed": 7, "hp": 15, "defense": 2},
+    {"icon": "📜", "name": "Mages", "count": 10, "base_damage": 7, "speed": 5, "hp": 12, "defense": 2},
+    {"icon": "🛡️", "name": "Guardians", "count": 20, "base_damage": 6, "speed": 3, "hp": 25, "defense": 3},
+    {"icon": "🧙", "name": "Archmages", "count": 12, "base_damage": 9, "speed": 6, "hp": 14, "defense": 2},
+    {"icon": "⚔️", "name": "Champions", "count": 6, "base_damage": 12, "speed": 8, "hp": 30, "defense": 3},
+    {"icon": "🐎", "name": "Knights", "count": 12, "base_damage": 8, "speed": 9, "hp": 20, "defense": 3},
 ]
 
 var resources := {
@@ -386,3 +386,14 @@ func get_army_for_battle() -> Array[Dictionary]:
 
 func apply_battle_results(surviving_army: Array[Dictionary]) -> void:
     army = surviving_army
+
+func force_stop() -> void:
+    is_moving = false
+    path.clear()
+    if _tween and _tween.is_valid():
+        _tween.kill()
+    if _path_line:
+        _path_line.clear_points()
+    if _marker:
+        _marker.hide_marker()
+    _idle()

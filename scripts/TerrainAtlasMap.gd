@@ -3,11 +3,11 @@ class_name TerrainAtlasMap
 const SOURCE_ID := 0
 const CENTER_COORDS := {
 	0: Vector2i(1, 0),
-	1: Vector2i(2, 0),
-	2: Vector2i(4, 0),
-	3: Vector2i(7, 0),
-	4: Vector2i(8, 0),
-	5: Vector2i(11, 0),
+	2: Vector2i(2, 0),
+	3: Vector2i(4, 0),
+	4: Vector2i(7, 0),
+	5: Vector2i(8, 0),
+	6: Vector2i(11, 0),
 }
 const DECOR_COORDS := {
 }
@@ -18,3 +18,19 @@ const RIVER_COORDS := [
 	Vector2i(15, 0),
 	Vector2i(16, 0),
 ]
+const VARIANTS := {
+	0: [
+	],
+	1: [
+	],
+	2: [
+	],
+	3: [
+	],
+	4: [
+	],
+	5: [
+	],
+	6: [
+	],
+}
