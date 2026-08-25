@@ -2,6 +2,8 @@ class_name MapModel
 extends RefCounted
 ## Данные карты: шум, биомы, проходимость.
 
+const _UnitStack = preload("res://scripts/unit_stack.gd")
+
 var map_width: int = 60
 var map_height: int = 60
 var seed_value: int = 12345
@@ -20,7 +22,7 @@ var height_grid: Dictionary = {}
 var village_cells: Array[Vector2i] = []
 var resource_cells: Dictionary = {}
 var decor_cells: Dictionary = {}
-var enemy_stacks: Dictionary[Vector2i, Array[UnitStack]] = {}
+var enemy_stacks: Dictionary = {}
 
 
 func generate_noise() -> void:

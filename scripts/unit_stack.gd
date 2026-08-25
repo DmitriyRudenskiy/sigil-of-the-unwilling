@@ -2,6 +2,8 @@ class_name UnitStack
 extends RefCounted
 ## Runtime stack: reference to definition + mutable count.
 
+const _UnitStats = preload("res://scripts/unit_stats.gd")
+
 var stats: UnitStats
 var count: int = 0
 

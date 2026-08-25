@@ -120,10 +120,10 @@ func _check_enemy_contact(cell: Vector2i) -> void:
 			return
 
 
-func start_battle(enemy_army: Array[UnitStack], enemy_cell: Vector2i) -> void:
+func start_battle(enemy_army: Array, enemy_cell: Vector2i) -> void:
 	_pending_enemy_cell = enemy_cell
 	_hero.force_stop()
-	_battle_flow.start_battle(_hero.get_army_for_battle(), enemy_army)
+	_battle_flow.start_battle(_hero.get_army_for_battle(), enemy_army as Array[UnitStack])
 
 
 # ==================== BATTLE LIFECYCLE ====================
