@@ -1,6 +1,8 @@
 extends Node2D
 class_name MapGenerator
 
+const TerrainAtlasMapScript = preload("res://scripts/TerrainAtlasMap.gd")
+
 @export var map_width: int = 60
 @export var map_height: int = 60
 @export var seed_value: int = 12345
@@ -36,11 +38,13 @@ func _ensure_layers() -> void:
     if _tile_map == null:
         _tile_map = TileMapLayer.new()
         _tile_map.name = "TileMapTerrain"
+        _tile_map.tile_set = load("res://tilesets/hex_tileset.tres")
         add_child(_tile_map)
     _decor_layer = get_node_or_null("TileMapDecor")
     if _decor_layer == null:
         _decor_layer = TileMapLayer.new()
         _decor_layer.name = "TileMapDecor"
+        _decor_layer.tile_set = load("res://tilesets/hex_tileset.tres")
         add_child(_decor_layer)
     _resource_layer = get_node_or_null("ResourceLayer")
     if _resource_layer == null:
@@ -77,8 +81,12 @@ func get_biome_terrain_id(height: float, temp: float, moist: float) -> int:
 func _paint_tilemap() -> void:
     _tile_map.clear()
     for cell in terrain_grid:
-        _tile_map.set_cell(cell, TerrainAtlasMap.SOURCE_ID, TerrainAtlasMap.CENTER_COORDS[terrain_grid[cell]])
-    _tile_map.update_terrain()
+        var terrain_id: int = terrain_grid[cell]
+        if not TerrainAtlasMapScript.CENTER_COORDS.has(terrain_id):
+            continue
+        var atlas_coords: Vector2i = TerrainAtlasMapScript.CENTER_COORDS[terrain_id]
+        _tile_map.set_cell(cell, TerrainAtlasMapScript.SOURCE_ID, atlas_coords)
+    # In Godot 4.7, terrain transitions are handled by the TileSet's proxy system automatically.
 
 func _place_villages() -> void:
     village_cells.clear()

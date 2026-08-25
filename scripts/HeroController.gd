@@ -57,18 +57,21 @@ func setup(map: MapGenerator) -> void:
                 return
 
 func _update_position() -> void:
-    if _map_gen and _map_gen._tile_map:
+    if _map_gen and _map_gen._tile_map and _map_gen._tile_map.tile_set != null:
         position = _map_gen._tile_map.map_to_local(current_cell)
+    else:
+        position = Vector2(current_cell.x * 64 + 32, current_cell.y * 56 + 28)
 
 func on_map_clicked(cell: Vector2i) -> void:
     if is_moving or cell == current_cell: return
-    if _map_gen:
-        var blocked := _map_gen.get_blocked_cells()
-        var p := HexUtils.bfs_path(current_cell, cell, blocked, _map_gen.map_width, _map_gen.map_height)
-        if p.size() > 1:
-            var max_cells := move_points / move_cost_per_cell
-            path = p.slice(0, mini(p.size(), max_cells + 1))
-            _start_moving()
+    if _map_gen == null or _map_gen._tile_map == null:
+        return
+    var blocked := _map_gen.get_blocked_cells()
+    var p := HexUtils.bfs_path(current_cell, cell, blocked, _map_gen.map_width, _map_gen.map_height)
+    if p.size() > 1:
+        var max_cells := move_points / move_cost_per_cell
+        path = p.slice(0, mini(p.size(), max_cells + 1))
+        _start_moving()
 
 func _start_moving() -> void:
     if path.size() < 2: return

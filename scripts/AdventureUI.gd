@@ -76,10 +76,10 @@ func _build_army_panel() -> void:
     var hb := HBoxContainer.new(); hb.alignment = BoxContainer.ALIGNMENT_CENTER
     hb.add_theme_constant_override("separation", 8); bp.add_child(hb)
     for i in 8:
-        var slot := Panel.new(); slot.custom_minimum_size = Vector2(90, 70)
+        var slot := Panel.new(); slot.name = "Slot%d" % i; slot.custom_minimum_size = Vector2(90, 70)
         var ss := StyleBoxFlat.new(); ss.bg_color = Color(0.2,0.18,0.28); ss.set_corner_radius_all(4)
         slot.add_theme_stylebox_override("panel", ss)
-        var svb := VBoxContainer.new(); svb.alignment = BoxContainer.ALIGNMENT_CENTER; slot.add_child(svb)
+        var svb := VBoxContainer.new(); svb.name = "VBox"; svb.alignment = BoxContainer.ALIGNMENT_CENTER; slot.add_child(svb)
         var ic := Label.new(); ic.name = "Icon"; ic.text = "-"; ic.add_theme_font_size_override("font_size", 24)
         ic.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER; svb.add_child(ic)
         var ct := Label.new(); ct.name = "Count"; ct.text = "0"; ct.add_theme_font_size_override("font_size", 16)
@@ -99,8 +99,10 @@ func refresh_all() -> void:
     for k in _stat_labels:
         _stat_labels[k].text = "%s: %d" % [k, _hero_controller.stats.get(k, 0)]
     for i in range(8):
-        var ic: Label = _army_slots[i].get_node("VBoxContainer/Icon")
-        var ct: Label = _army_slots[i].get_node("VBoxContainer/Count")
+        var slot: Panel = _army_slots[i]
+        var vbox := slot.get_node("VBox")
+        var ic: Label = vbox.get_node("Icon")
+        var ct: Label = vbox.get_node("Count")
         if i < _hero_controller.army.size():
             ic.text = _hero_controller.army[i]["icon"]; ct.text = str(_hero_controller.army[i]["count"])
         else: ic.text = "-"; ct.text = "0"
