@@ -4,13 +4,12 @@ class_name AdventureUI
 signal end_turn_pressed
 signal date_changed(month: int, week: int, day: int)
 
-const RIGHT_W := 244
-const BOTTOM_H := 252
+const RIGHT_W := 252
 const C_BG := Color(0.16, 0.11, 0.06, 0.95)
 const C_BORDER := Color(0.62, 0.47, 0.22)
 const C_TEXT := Color(0.95, 0.89, 0.72)
 const C_GOLD := Color(1.0, 0.85, 0.4)
-const C_SLOT_BG := Color(0.22, 0.16, 0.10)
+const C_SLOT_BG := Color(0.35, 0.24, 0.15)
 const MINIMAP_COLORS := [
     Color(0.15, 0.35, 0.75), Color(0.85, 0.75, 0.45), Color(0.35, 0.6, 0.3),
     Color(0.15, 0.35, 0.15), Color(0.45, 0.4, 0.35), Color(0.9, 0.93, 0.98),
@@ -22,13 +21,10 @@ var month := 1
 
 var _date_label: Label
 var _status_label: Label
-var _stats_label: Label
-var _mp_label: Label
 var _army_slots: Array[Panel] = []
 var _resource_labels: Dictionary = {}
-var _city_list: VBoxContainer
-var _city_placeholder: Label
-var _hero_list: VBoxContainer
+var _hero_slots: Array[Panel] = []
+var _town_slots: Array[Panel] = []
 var _hero_controller: HeroController
 var _minimap_tex_rect: TextureRect
 var _minimap_overlay: MinimapOverlay
@@ -63,21 +59,19 @@ class MinimapOverlay extends Control:
             if map_ref == null:
                 return
             var s := size / Vector2(map_ref.map_width, map_ref.map_height)
-            var cell := Vector2i(int(ev.position.x / s.x), int(ev.position.y / s.y))
-            minimap_clicked.emit(cell)
+            minimap_clicked.emit(Vector2i(int(ev.position.x / s.x), int(ev.position.y / s.y)))
 
 
 func _ready() -> void:
     layer = 10
     _build_right_column()
-    _build_bottom_panel()
 
 
 func setup(hero: HeroController) -> void:
     _hero_controller = hero
-    hero.movement_points_changed.connect(_on_mp_changed)
-    hero.resources_changed.connect(_on_resources_changed)
-    hero.path_previewed.connect(_on_path_preview)
+    hero.movement_points_changed.connect(func(c, m): _on_mp_changed(c, m))
+    hero.resources_changed.connect(func(_r): _update_resources())
+    hero.path_previewed.connect(func(t): _set_status(t))
     _minimap_overlay.map_ref = hero._map_gen
     _minimap_overlay.hero_ref = hero
     var world := get_parent()
@@ -85,7 +79,7 @@ func setup(hero: HeroController) -> void:
         _minimap_overlay.cam_ref = world.get_camera()
     _minimap_overlay.minimap_clicked.connect(_on_minimap_clicked)
     _build_minimap_image(hero._map_gen)
-    _fill_hero_list(hero)
+    _fill_hero_slot(0, hero)
     refresh_all()
 
 
@@ -97,19 +91,28 @@ func _panel_style() -> StyleBoxFlat:
     return s
 
 
-func _btn(icon: String, tip: String, h: float) -> Button:
-    var btn := Button.new()
-    btn.text = icon
-    btn.tooltip_text = tip
-    btn.custom_minimum_size = Vector2(0, h)
-    btn.add_theme_font_size_override("font_size", 16)
-    if tip == "Конец хода":
-        btn.pressed.connect(_on_end_turn)
-        btn.modulate = C_GOLD
-    return btn
+func _empty_slot(h: float) -> Panel:
+    var p := Panel.new()
+    p.custom_minimum_size = Vector2(0, h)
+    var s := StyleBoxFlat.new()
+    s.bg_color = C_SLOT_BG
+    s.set_corner_radius_all(3)
+    s.set_border_width_all(1)
+    s.border_color = Color(0.2, 0.13, 0.08)
+    p.add_theme_stylebox_override("panel", s)
+    return p
 
 
-# ===================== ПРАВАЯ КОЛОНКА =====================
+func _arrow(up: bool) -> Button:
+    var b := Button.new()
+    b.text = "▲" if up else "▼"
+    b.custom_minimum_size = Vector2(24, 18)
+    b.add_theme_font_size_override("font_size", 10)
+    b.tooltip_text = "Прокрутка (в прототипе не реализовано)"
+    return b
+
+
+# ===================== ПРАВАЯ КОЛОНКА КАК В ОРИГИНАЛЕ =====================
 func _build_right_column() -> void:
     var p := PanelContainer.new()
     p.add_theme_stylebox_override("panel", _panel_style())
@@ -118,35 +121,16 @@ func _build_right_column() -> void:
     p.anchor_top = 0.0
     p.anchor_bottom = 1.0
     p.offset_left = -RIGHT_W
-    p.offset_right = 0
     add_child(p)
 
     var vb := VBoxContainer.new()
     vb.add_theme_constant_override("separation", 6)
     p.add_child(vb)
 
-    _date_label = Label.new()
-    _date_label.text = _fmt_date()
-    _date_label.add_theme_font_size_override("font_size", 16)
-    _date_label.add_theme_color_override("font_color", C_TEXT)
-    _date_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    vb.add_child(_date_label)
-
-    # Миникарта с NSWE крестом
-    var grid := GridContainer.new()
-    grid.columns = 3
-    grid.add_theme_constant_override("h_separation", 4)
-    vb.add_child(grid)
-
-    var mm_size := RIGHT_W - 100
-    grid.add_child(_cell_spacer())
-    grid.add_child(_nswe("N"))
-    grid.add_child(_cell_spacer())
-    grid.add_child(_nswe("W"))
-
+    # 1) Миникарта (самая верхняя, как в оригинале)
     var box := Control.new()
-    box.custom_minimum_size = Vector2(mm_size, mm_size)
-    grid.add_child(box)
+    box.custom_minimum_size = Vector2(RIGHT_W - 24, RIGHT_W - 24)
+    vb.add_child(box)
     _minimap_tex_rect = TextureRect.new()
     _minimap_tex_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
     _minimap_tex_rect.stretch_mode = TextureRect.STRETCH_SCALE
@@ -155,55 +139,103 @@ func _build_right_column() -> void:
     _minimap_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
     box.add_child(_minimap_overlay)
 
-    grid.add_child(_nswe("E"))
-    grid.add_child(_cell_spacer())
-    grid.add_child(_nswe("S"))
-    grid.add_child(_cell_spacer())
+    # NSWE (из прототипа) тонкой строкой под миникартой
+    var nswe := HBoxContainer.new()
+    nswe.alignment = BoxContainer.ALIGNMENT_CENTER
+    nswe.add_theme_constant_override("separation", 8)
+    vb.add_child(nswe)
+    for d in ["N", "S", "W", "E"]:
+        var b := Button.new()
+        b.text = d
+        b.custom_minimum_size = Vector2(36, 24)
+        b.add_theme_font_size_override("font_size", 12)
+        b.pressed.connect(_on_camera_jump.bind(d))
+        nswe.add_child(b)
 
+    # Дата (тонкая строка)
+    _date_label = Label.new()
+    _date_label.text = _fmt_date()
+    _date_label.add_theme_font_size_override("font_size", 14)
+    _date_label.add_theme_color_override("font_color", C_TEXT)
+    _date_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    vb.add_child(_date_label)
+
+    # 2) Панель «герои | города» двумя колонками со стрелками
+    var lists := HBoxContainer.new()
+    lists.add_theme_constant_override("separation", 6)
+    vb.add_child(lists)
+
+    var hv := VBoxContainer.new()
+    hv.add_theme_constant_override("separation", 3)
+    lists.add_child(hv)
+    hv.add_child(_arrow(true))
+    for i in 4:
+        var s := _empty_slot(44)
+        hv.add_child(s)
+        _hero_slots.append(s)
+    hv.add_child(_arrow(false))
+
+    var tv := VBoxContainer.new()
+    tv.add_theme_constant_override("separation", 3)
+    lists.add_child(tv)
+    tv.add_child(_arrow(true))
+    for i in 4:
+        var s := _empty_slot(44)
+        tv.add_child(s)
+        _town_slots.append(s)
+    tv.add_child(_arrow(false))
+
+    # Статус-строка
     _status_label = Label.new()
     _status_label.text = ""
-    _status_label.add_theme_font_size_override("font_size", 13)
+    _status_label.add_theme_font_size_override("font_size", 12)
     _status_label.add_theme_color_override("font_color", C_TEXT)
     _status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     vb.add_child(_status_label)
 
-    vb.add_child(_vspacer())
+    # 3) Сетка кнопок 4x3 (как оригинальная 4x2 + кнопки прототипа)
+    var bg := GridContainer.new()
+    bg.columns = 4
+    bg.add_theme_constant_override("h_separation", 4)
+    bg.add_theme_constant_override("v_separation", 4)
+    vb.add_child(bg)
+    var btns := [
+        ["🏰", "Замок"], ["🚩", "Флаг"], ["⛺", "Лагерь"], ["🐎", "Конюшня"],
+        ["🚢", "Корабль"], ["⚒️", "Кузница"], ["🔍", "Разведка"], ["🪖", "Армия"],
+        ["📜", "Журнал"], ["⏳", "Конец хода"], ["🏰", "Королевство"], ["⚙️", "Опции"],
+    ]
+    for b in btns:
+        var btn := Button.new()
+        btn.text = b[0]
+        btn.tooltip_text = b[1]
+        btn.custom_minimum_size = Vector2(52, 42)
+        btn.add_theme_font_size_override("font_size", 20)
+        if b[1] == "Конец хода":
+            btn.pressed.connect(_on_end_turn)
+            btn.modulate = C_GOLD
+        bg.add_child(btn)
 
-    # Герой
-    var hv := VBoxContainer.new()
-    hv.add_theme_constant_override("separation", 2)
-    vb.add_child(hv)
-    var nl := Label.new()
-    nl.text = "Darkstorn"
-    nl.add_theme_font_size_override("font_size", 19)
-    nl.add_theme_color_override("font_color", C_GOLD)
-    hv.add_child(nl)
-    _stats_label = Label.new()
-    _stats_label.text = "⚔️ 0 🛡️ 0 🔮 4  2"
-    _stats_label.add_theme_font_size_override("font_size", 15)
-    _stats_label.add_theme_color_override("font_color", C_TEXT)
-    hv.add_child(_stats_label)
-    _mp_label = Label.new()
-    _mp_label.text = "👣 20/20"
-    _mp_label.add_theme_font_size_override("font_size", 13)
-    _mp_label.add_theme_color_override("font_color", Color(0.6, 0.9, 0.6))
-    hv.add_child(_mp_label)
-
-    # Армия 2x4
+    # 4) Панель армии (внизу, как в оригинале)
+    var ap := PanelContainer.new()
+    var aps := StyleBoxFlat.new()
+    aps.bg_color = Color(0.3, 0.2, 0.12)
+    aps.set_corner_radius_all(4)
+    aps.set_border_width_all(2)
+    aps.border_color = C_BORDER
+    ap.add_theme_stylebox_override("panel", aps)
+    vb.add_child(ap)
     var ag := GridContainer.new()
     ag.columns = 2
     ag.add_theme_constant_override("h_separation", 6)
     ag.add_theme_constant_override("v_separation", 6)
-    vb.add_child(ag)
+    ap.add_child(ag)
     for i in 8:
         var slot := Panel.new()
         slot.name = "Slot%d" % i
-        slot.custom_minimum_size = Vector2(104, 40)
+        slot.custom_minimum_size = Vector2(108, 40)
         var ss := StyleBoxFlat.new()
         ss.bg_color = C_SLOT_BG
-        ss.set_corner_radius_all(4)
-        ss.set_border_width_all(1)
-        ss.border_color = C_BORDER
+        ss.set_corner_radius_all(3)
         slot.add_theme_stylebox_override("panel", ss)
         var sh := HBoxContainer.new()
         sh.name = "HBox"
@@ -224,133 +256,67 @@ func _build_right_column() -> void:
         ag.add_child(slot)
         _army_slots.append(slot)
 
-
-func _nswe(d: String) -> Button:
-    var b := Button.new()
-    b.text = d
-    b.custom_minimum_size = Vector2(40, 26)
-    b.add_theme_font_size_override("font_size", 13)
-    b.pressed.connect(_on_camera_jump.bind(d))
-    return b
-
-
-func _cell_spacer() -> Control:
-    var c := Control.new()
-    c.custom_minimum_size = Vector2(40, 26)
-    return c
-
-
-# ===================== НИЗ: 4 КОЛОНКИ =====================
-func _build_bottom_panel() -> void:
-    var p := PanelContainer.new()
-    p.add_theme_stylebox_override("panel", _panel_style())
-    p.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-    p.offset_top = -BOTTOM_H
-    p.offset_right = -RIGHT_W
-    add_child(p)
-
-    var outer := VBoxContainer.new()
-    outer.add_theme_constant_override("separation", 4)
-    p.add_child(outer)
-
-    # Ресурсы (перенесены сюда из правой колонки)
+    # 5) Ресурсы тонкой строкой в самом низу
     var rh := HBoxContainer.new()
-    rh.add_theme_constant_override("separation", 14)
-    outer.add_child(rh)
-    var res_icons := [
-        ["wood", "🪵"], ["mercury", "🧪"], ["ore", "🪨"], ["sulfur", "🟡"],
-        ["crystal", "🔷"], ["gems", "💎"], ["gold", "🪙"],
-    ]
-    for ri in res_icons:
+    rh.alignment = BoxContainer.ALIGNMENT_CENTER
+    rh.add_theme_constant_override("separation", 8)
+    vb.add_child(rh)
+    for ri in [["wood", "🪵"], ["mercury", "🧪"], ["ore", "🪨"], ["sulfur", "🟡"],
+            ["crystal", "🔷"], ["gems", "💎"], ["gold", "🪙"]]:
         var l := Label.new()
-        l.text = "%s 0" % ri[1]
-        l.add_theme_font_size_override("font_size", 14)
+        l.text = "%s0" % ri[1]
+        l.add_theme_font_size_override("font_size", 12)
         l.add_theme_color_override("font_color", C_TEXT)
         rh.add_child(l)
         _resource_labels[ri[0]] = l
 
-    outer.add_child(HSeparator.new())
 
-    var cols := HBoxContainer.new()
-    cols.add_theme_constant_override("separation", 10)
-    outer.add_child(cols)
-
-    # Колонка 1: аватарки героев
-    var c1 := VBoxContainer.new()
-    cols.add_child(c1)
-    var t1 := Label.new()
-    t1.text = "Герои"
-    t1.add_theme_font_size_override("font_size", 14)
-    t1.add_theme_color_override("font_color", C_GOLD)
-    c1.add_child(t1)
-    _hero_list = VBoxContainer.new()
-    _hero_list.add_theme_constant_override("separation", 4)
-    c1.add_child(_hero_list)
-
-    # Колонка 2: кнопки управления (часть 1)
-    var c2 := VBoxContainer.new()
-    c2.add_theme_constant_override("separation", 4)
-    cols.add_child(c2)
-    for b in [["🏰", "Замок"], ["🚩", "Флаг"], ["⛺", "Лагерь"], ["🐎", "Конюшня"], ["🚢", "Корабль"], ["⚒️", "Кузница"]]:
-        c2.add_child(_btn(b[0], b[1], 30))
-
-    # Колонка 3: кнопки управления (часть 2)
-    var c3 := VBoxContainer.new()
-    c3.add_theme_constant_override("separation", 4)
-    cols.add_child(c3)
-    for b in [["🔍", "Разведка"], ["🪖", "Армия"], ["📜", "Журнал"], ["⏳", "Конец хода"], ["🏰", "Королевство"]]:
-        c3.add_child(_btn(b[0], b[1], 30))
-
-    # Колонка 4: города
-    var c4 := VBoxContainer.new()
-    cols.add_child(c4)
-    var t4 := Label.new()
-    t4.text = "Города"
-    t4.add_theme_font_size_override("font_size", 14)
-    t4.add_theme_color_override("font_color", C_GOLD)
-    c4.add_child(t4)
-    _city_list = VBoxContainer.new()
-    _city_list.add_theme_constant_override("separation", 4)
-    c4.add_child(_city_list)
-    _city_placeholder = Label.new()
-    _city_placeholder.text = "— нет городов —"
-    _city_placeholder.add_theme_font_size_override("font_size", 13)
-    _city_placeholder.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
-    _city_list.add_child(_city_placeholder)
-
-
-func _fill_hero_list(hero: HeroController) -> void:
-    var entry := HBoxContainer.new()
-    entry.add_theme_constant_override("separation", 6)
-    _hero_list.add_child(entry)
+func _fill_hero_slot(idx: int, hero: HeroController) -> void:
+    if idx >= _hero_slots.size():
+        return
+    var slot := _hero_slots[idx]
+    for c in slot.get_children():
+        c.queue_free()
+    var hb := HBoxContainer.new()
+    hb.add_theme_constant_override("separation", 4)
+    slot.add_child(hb)
     var av := hero.get_avatar_texture()
     if av != null:
         var tr := TextureRect.new()
         tr.texture = av
-        tr.custom_minimum_size = Vector2(48, 48)
+        tr.custom_minimum_size = Vector2(40, 40)
         tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-        entry.add_child(tr)
+        hb.add_child(tr)
     else:
         var em := Label.new()
         em.text = "🧙"
-        em.add_theme_font_size_override("font_size", 28)
-        entry.add_child(em)
+        em.add_theme_font_size_override("font_size", 22)
+        hb.add_child(em)
     var nm := Label.new()
     nm.text = hero.hero_name
-    nm.add_theme_font_size_override("font_size", 14)
-    nm.add_theme_color_override("font_color", C_TEXT)
-    entry.add_child(nm)
+    nm.add_theme_font_size_override("font_size", 13)
+    nm.add_theme_color_override("font_color", C_GOLD)
+    hb.add_child(nm)
 
 
 func add_city(city_name: String) -> void:
-    if _city_placeholder != null and is_instance_valid(_city_placeholder):
-        _city_placeholder.queue_free()
-        _city_placeholder = null
-    var l := Label.new()
-    l.text = "🏰 %s" % city_name
-    l.add_theme_font_size_override("font_size", 14)
-    l.add_theme_color_override("font_color", C_TEXT)
-    _city_list.add_child(l)
+    for i in _town_slots.size():
+        var slot := _town_slots[i]
+        if slot.get_child_count() == 0:
+            var hb := HBoxContainer.new()
+            hb.add_theme_constant_override("separation", 4)
+            slot.add_child(hb)
+            var ic := Label.new()
+            ic.text = "🏰"
+            ic.add_theme_font_size_override("font_size", 18)
+            hb.add_child(ic)
+            var nm := Label.new()
+            nm.text = city_name
+            nm.add_theme_font_size_override("font_size", 12)
+            nm.add_theme_color_override("font_color", C_TEXT)
+            nm.clip_text = true
+            hb.add_child(nm)
+            return
 
 
 # ===================== MINIMAP / REFRESH =====================
@@ -374,10 +340,6 @@ func _on_minimap_clicked(cell: Vector2i) -> void:
 func refresh_all() -> void:
     if not _hero_controller:
         return
-    var st: Dictionary = _hero_controller.stats
-    _stats_label.text = "⚔️ %d 🛡️ %d 🔮 %d 📖 %d" % [
-        st.get("attack", 0), st.get("defense", 0),
-        st.get("spell_power", 0), st.get("knowledge", 0)]
     for i in range(8):
         var hbox: HBoxContainer = _army_slots[i].get_node("HBox")
         var ic: Label = hbox.get_node("Icon")
@@ -399,19 +361,14 @@ func _update_resources() -> void:
         "crystal": "🔷", "gems": "💎", "gold": "🪙",
     }
     for k in _resource_labels:
-        _resource_labels[k].text = "%s %d" % [icons[k], _hero_controller.resources.get(k, 0)]
+        _resource_labels[k].text = "%s%d" % [icons[k], _hero_controller.resources.get(k, 0)]
 
 
 func _on_mp_changed(cur: int, mx: int) -> void:
-    if _mp_label:
-        _mp_label.text = "👣 %d/%d" % [cur, mx]
+    _set_status("👣 %d/%d" % [cur, mx])
 
 
-func _on_resources_changed(_r: Dictionary) -> void:
-    _update_resources()
-
-
-func _on_path_preview(text: String) -> void:
+func _set_status(text: String) -> void:
     if _status_label:
         _status_label.text = text
 
@@ -441,9 +398,3 @@ func _on_camera_jump(direction: String) -> void:
     var world := get_parent()
     if world and world.has_method("jump_camera"):
         world.jump_camera(direction)
-
-
-func _vspacer() -> Control:
-    var sp := Control.new()
-    sp.size_flags_vertical = Control.SIZE_EXPAND_FILL
-    return sp

@@ -82,13 +82,13 @@ func _ready() -> void:
 
 
 func _build_visual() -> void:
-    # Пытаемся собрать анимацию из спрайт-листа рыцаря
-    if FileAccess.file_exists(HERO_SHEET_PATH):
-        var sheet := Image.load_from_file(HERO_SHEET_PATH)
+    var sheet_path := _find_sheet()
+    if sheet_path != "":
+        var sheet := Image.load_from_file(sheet_path)
         if sheet != null:
             _build_anim_from_sheet(sheet)
     if _anim == null:
-        # Фолбэк: золотой круг
+        # фолбэк-круг (остается как раньше)
         _fallback = Sprite2D.new()
         var img := Image.create(48, 48, false, Image.FORMAT_RGBA8)
         var center := Vector2(24, 24)
@@ -102,6 +102,34 @@ func _build_visual() -> void:
         _fallback.texture = ImageTexture.create_from_image(img)
         _fallback.z_index = 10
         add_child(_fallback)
+
+
+func _find_sheet() -> String:
+    # 1) явные имена
+    for c in ["hero_knight.png", "knight.png", "hero.png", "knight.jpeg", "hero.jpeg", "hero_knight.jpg"]:
+        if FileAccess.file_exists("res://assets/raw/" + c):
+            return "res://assets/raw/" + c
+    # 2) автопоиск: большой квадратный файл в assets/raw
+    var dir := DirAccess.open("res://assets/raw")
+    if dir == null:
+        return ""
+    var best := ""
+    var best_w := 0
+    dir.list_dir_begin()
+    var f := dir.get_next()
+    while f != "":
+        var low := f.to_lower()
+        if low.ends_with(".png") or low.ends_with(".jpeg") or low.ends_with(".jpg"):
+            var img := Image.load_from_file("res://assets/raw/" + f)
+            if img != null and img.get_width() >= 800 and absi(img.get_width() - img.get_height()) < 8:
+                if img.get_width() > best_w:
+                    best_w = img.get_width()
+                    best = "res://assets/raw/" + f
+        f = dir.get_next()
+    dir.list_dir_end()
+    if best != "":
+        print("[Hero] sheet auto-detected: ", best)
+    return best
 
 
 func _build_anim_from_sheet(sheet: Image) -> void:
