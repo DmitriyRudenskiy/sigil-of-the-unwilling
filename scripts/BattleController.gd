@@ -55,8 +55,10 @@ func _ready() -> void:
 
     _camera = Camera2D.new()
     add_child(_camera)
+    _camera.make_current()
     if _tile_map.tile_set != null:
         _camera.position = _tile_map.map_to_local(Vector2i(BW / 2, BH / 2))
+    _fit_camera()
 
     _build_ui()
     _fade_in()
@@ -485,6 +487,19 @@ func _apply_icon(btn: Button, icon_path: String, fallback: String) -> void:
         btn.expand_icon = true
     else:
         btn.text = fallback
+func _fit_camera() -> void:
+    if _tile_map.tile_set == null:
+        return
+    var vp_size := get_viewport_rect().size
+    var ts := _tile_map.tile_set.get_tile_size()
+    # Подбираем зум так, чтобы поле 17×11 занимало ~90% экрана
+    var field_w := float(BW * 1.5) * ts.x * 0.5
+    var field_h := float(BH * 1.85) * ts.y * 0.5
+    var zoom_x: float = vp_size.x / field_w * 0.9
+    var zoom_y: float = vp_size.y / field_h * 0.9
+    var zoom: float = minf(zoom_x, zoom_y)
+    _camera.zoom = Vector2(zoom, zoom)
+
 func _setup_background() -> void:
     var bg_layer := CanvasLayer.new()
     bg_layer.layer = -1

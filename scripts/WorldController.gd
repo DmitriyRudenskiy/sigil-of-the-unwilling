@@ -196,12 +196,16 @@ func _check_enemy_contact(cell: Vector2i) -> void:
 func start_battle(enemy: Array[Dictionary], enemy_cell: Vector2i) -> void:
 	_hero.force_stop()
 	_pending_enemy_cell = enemy_cell
-	var battle := BattleController.new()
-	battle.name = "Battle"
-	get_tree().root.add_child(battle)
+	# Скрыть ВЕСЬ адвенчур: CanvasLayer не прячется через visible у World
+	if _ui:
+		_ui.visible = false
 	visible = false
 	set_process(false)
 	set_process_unhandled_input(false)
+	
+	var battle := BattleController.new()
+	battle.name = "Battle"
+	get_tree().root.add_child(battle)
 	battle.start_battle(_hero.get_army_for_battle(), enemy)
 	battle.battle_finished.connect(_on_battle_end.bind(battle))
 
@@ -209,8 +213,12 @@ func start_battle(enemy: Array[Dictionary], enemy_cell: Vector2i) -> void:
 func _on_battle_end(winner: String, surv_atk: Array, surv_def: Array, node: Node) -> void:
 	node.queue_free()
 	visible = true
+	if _ui:
+		_ui.visible = true
 	set_process(true)
 	set_process_unhandled_input(true)
+	_camera.make_current()
+	
 	var new_army: Array[Dictionary] = []
 	for s in surv_atk:
 		new_army.append(s)
