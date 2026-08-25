@@ -162,15 +162,17 @@ func _on_end_turn() -> void:
     _ui.refresh_all()
 
 
+func center_camera_on(cell: Vector2i) -> void:
+    if _map_gen and _map_gen._tile_map and _map_gen._tile_map.tile_set != null:
+        _camera.position = _map_gen._tile_map.map_to_local(cell)
+
+
 func jump_camera(direction: String) -> void:
-    if not _map_gen or not _map_gen._tile_map or _map_gen._tile_map.tile_set == null:
+    if not _map_gen:
         return
     var center := Vector2i(_map_gen.map_width / 2, _map_gen.map_height / 2)
-    var target: Vector2i
     match direction:
-        "N": target = Vector2i(center.x, 2)
-        "S": target = Vector2i(center.x, _map_gen.map_height - 3)
-        "W": target = Vector2i(2, center.y)
-        "E": target = Vector2i(_map_gen.map_width - 3, center.y)
-        _: return
-    _camera.position = _map_gen._tile_map.map_to_local(target)
+        "N": center_camera_on(Vector2i(center.x, 2))
+        "S": center_camera_on(Vector2i(center.x, _map_gen.map_height - 3))
+        "W": center_camera_on(Vector2i(2, center.y))
+        "E": center_camera_on(Vector2i(_map_gen.map_width - 3, center.y))
