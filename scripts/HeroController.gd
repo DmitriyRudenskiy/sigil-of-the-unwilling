@@ -7,6 +7,8 @@ signal movement_points_changed(current: int, max_val: int)
 signal resources_changed(resources: Dictionary)
 signal path_previewed(text: String)
 
+const HERO_SHEET_PATH := "res://assets/raw/hero_knight.png"
+
 @export var max_move_points: int = 20
 @export var move_cost_per_cell: int = 1
 
@@ -37,41 +39,122 @@ var resources := {
 }
 
 var _map_gen: MapGenerator
-var _sprite: Sprite2D
+var _anim: AnimatedSprite2D
+var _fallback: Sprite2D
+var _avatar_tex: Texture2D
 var _tween: Tween
 var _path_line: Line2D
+var _marker: DestMarker
+
+
+# ======== Маркер кликнутой клетки (отладка пути) ========
+class DestMarker extends Node2D:
+    var active := false
+    var _t := 0.0
+
+    func _process(d: float) -> void:
+        if active:
+            _t += d
+            queue_redraw()
+
+    func show_at(pos: Vector2) -> void:
+        position = pos
+        active = true
+        queue_redraw()
+
+    func hide_marker() -> void:
+        active = false
+        queue_redraw()
+
+    func _draw() -> void:
+        if not active:
+            return
+        var r := 36.0 + sin(_t * 6.0) * 4.0
+        var pts := PackedVector2Array()
+        for i in 7:
+            var ang := deg_to_rad(60.0 * i - 90.0)
+            pts.append(Vector2(cos(ang), sin(ang)) * r)
+        draw_polyline(pts, Color(1.0, 0.25, 0.2, 0.95), 3.0)
 
 
 func _ready() -> void:
-    _create_visual()
-    movement_points_changed.emit(move_points, max_move_points)
-    resources_changed.emit(resources)
+    _build_visual()
 
 
-func _create_visual() -> void:
-    _sprite = Sprite2D.new()
-    var img := Image.create(48, 48, false, Image.FORMAT_RGBA8)
-    var center := Vector2(24, 24)
-    for y in 48:
-        for x in 48:
-            var dist := Vector2(x, y).distance_to(center)
-            if dist <= 20:
-                img.set_pixel(x, y, Color(0.9, 0.7, 0.1))
-            elif dist <= 22:
-                img.set_pixel(x, y, Color(0.3, 0.2, 0.0))
-    _sprite.texture = ImageTexture.create_from_image(img)
-    _sprite.z_index = 10
-    add_child(_sprite)
+func _build_visual() -> void:
+    # Пытаемся собрать анимацию из спрайт-листа рыцаря
+    if FileAccess.file_exists(HERO_SHEET_PATH):
+        var sheet := Image.load_from_file(HERO_SHEET_PATH)
+        if sheet != null:
+            _build_anim_from_sheet(sheet)
+    if _anim == null:
+        # Фолбэк: золотой круг
+        _fallback = Sprite2D.new()
+        var img := Image.create(48, 48, false, Image.FORMAT_RGBA8)
+        var center := Vector2(24, 24)
+        for y in 48:
+            for x in 48:
+                var dist := Vector2(x, y).distance_to(center)
+                if dist <= 20:
+                    img.set_pixel(x, y, Color(0.9, 0.7, 0.1))
+                elif dist <= 22:
+                    img.set_pixel(x, y, Color(0.3, 0.2, 0.0))
+        _fallback.texture = ImageTexture.create_from_image(img)
+        _fallback.z_index = 10
+        add_child(_fallback)
 
-    _path_line = Line2D.new()
-    _path_line.width = 3.0
-    _path_line.default_color = Color(1, 1, 0, 0.6)
-    _path_line.z_index = 5
-    add_child(_path_line)
+
+func _build_anim_from_sheet(sheet: Image) -> void:
+    if sheet.get_format() != Image.FORMAT_RGBA8:
+        sheet.convert(Image.FORMAT_RGBA8)
+    sheet.resize(512, 512, Image.INTERPOLATE_LANCZOS)
+    # Убрать чёрный фон
+    for y in 512:
+        for x in 512:
+            var px := sheet.get_pixel(x, y)
+            if px.r < 0.12 and px.g < 0.12 and px.b < 0.12:
+                sheet.set_pixel(x, y, Color(0, 0, 0, 0))
+    var fs := 128
+    var sf := SpriteFrames.new()
+    if sf.has_animation("default"):
+        sf.remove_animation("default")
+    sf.add_animation("side")
+    sf.add_animation("away")
+    for an in ["side", "away"]:
+        sf.set_animation_loop(an, true)
+        sf.set_animation_speed(an, 8.0)
+    for c in 4:
+        var f_side := Image.create(fs, fs, false, Image.FORMAT_RGBA8)
+        f_side.blit_rect(sheet, Rect2i(c * fs, 0, fs, fs), Vector2i(0, 0))
+        sf.add_frame("side", ImageTexture.create_from_image(f_side))
+        var f_away := Image.create(fs, fs, false, Image.FORMAT_RGBA8)
+        f_away.blit_rect(sheet, Rect2i(c * fs, 3 * fs, fs, fs), Vector2i(0, 0))
+        sf.add_frame("away", ImageTexture.create_from_image(f_away))
+    _avatar_tex = sf.get_frame_texture("side", 0)
+    _anim = AnimatedSprite2D.new()
+    _anim.sprite_frames = sf
+    _anim.scale = Vector2(0.62, 0.62)
+    _anim.z_index = 10
+    add_child(_anim)
+    _anim.play("side")
+    print("[Hero] Knight animation built from ", HERO_SHEET_PATH)
+
+
+func get_avatar_texture() -> Texture2D:
+    return _avatar_tex
 
 
 func setup(map: MapGenerator) -> void:
     _map_gen = map
+    if _path_line == null:
+        _path_line = Line2D.new()
+        _path_line.width = 3.0
+        _path_line.default_color = Color(1, 1, 0, 0.6)
+        _path_line.z_index = 5
+        get_parent().add_child(_path_line)
+    if _marker == null:
+        _marker = DestMarker.new()
+        get_parent().add_child(_marker)
     for y in map.map_height:
         for x in map.map_width:
             var cell := Vector2i(x, y)
@@ -96,16 +179,19 @@ func on_map_clicked(cell: Vector2i) -> void:
         cancel_pending()
         return
 
-    # Второй клик по той же клетке -> подтверждение и движение
     if cell == pending_cell and pending_path.size() > 1:
         path = pending_path
         pending_cell = Vector2i(-1, -1)
         pending_path = []
         path_previewed.emit("")
+        _marker.hide_marker()
         _start_moving()
         return
 
-    # Первый клик -> оценка пути
+    if move_points <= 0:
+        path_previewed.emit("Нет очков движения — нажмите ⏳")
+        return
+
     var blocked := _map_gen.get_blocked_cells()
     var found := HexUtils.bfs_path(current_cell, cell, blocked, _map_gen.map_width, _map_gen.map_height)
     if found.size() < 2:
@@ -119,10 +205,14 @@ func on_map_clicked(cell: Vector2i) -> void:
     pending_path = affordable
     _set_line_points(affordable)
 
+    # Маркер кликнутой клетки
+    if _map_gen._tile_map.tile_set != null:
+        _marker.show_at(_map_gen._tile_map.map_to_local(cell))
+
     var cost := (affordable.size() - 1) * move_cost_per_cell
     var suffix := ""
     if affordable.size() < found.size():
-        suffix = " (хватит очков только на %d кл.)" % (affordable.size() - 1)
+        suffix = " (очков хватит на %d кл.)" % (affordable.size() - 1)
     path_previewed.emit("Путь: %d кл., очков: %d%s. Клик ещё раз — идти. ПКМ — отмена." % [
         affordable.size() - 1, cost, suffix])
 
@@ -130,12 +220,17 @@ func on_map_clicked(cell: Vector2i) -> void:
 func cancel_pending(clear_text := true) -> void:
     pending_cell = Vector2i(-1, -1)
     pending_path = []
-    _path_line.clear_points()
+    if _path_line:
+        _path_line.clear_points()
+    if _marker:
+        _marker.hide_marker()
     if clear_text:
         path_previewed.emit("")
 
 
 func _set_line_points(pts: Array[Vector2i]) -> void:
+    if _path_line == null:
+        return
     _path_line.clear_points()
     for p in pts:
         var local_pos: Vector2
@@ -158,12 +253,17 @@ func _move_next_step() -> void:
     if path.size() < 2:
         is_moving = false
         path.clear()
-        _path_line.clear_points()
+        if _path_line:
+            _path_line.clear_points()
+        if _marker:
+            _marker.hide_marker()
         return
 
     var next_cell := path[1]
     path.remove_at(0)
     _set_line_points(path)
+
+    _set_facing(next_cell - current_cell)
 
     move_points -= move_cost_per_cell
     movement_points_changed.emit(move_points, max_move_points)
@@ -177,13 +277,30 @@ func _move_next_step() -> void:
     if _tween and _tween.is_valid():
         _tween.kill()
     _tween = create_tween()
-    _tween.tween_property(_sprite, "position", target_pos, 0.25)
+    _tween.tween_property(self, "position", target_pos, 0.35)
     _tween.tween_callback(_on_step_complete.bind(next_cell))
+
+
+func _set_facing(delta: Vector2i) -> void:
+    if _anim == null:
+        return
+    if delta.x > 0:
+        _anim.animation = "side"
+        _anim.flip_h = true
+    elif delta.x < 0:
+        _anim.animation = "side"
+        _anim.flip_h = false
+    elif delta.y < 0:
+        _anim.animation = "away"
+        _anim.flip_h = false
+    else:
+        _anim.animation = "away"
+        _anim.flip_h = true
+    _anim.play()
 
 
 func _on_step_complete(cell: Vector2i) -> void:
     current_cell = cell
-    position = _sprite.position if _sprite else position
     hero_moved.emit(cell)
 
     if _map_gen and _map_gen.resource_cells.has(cell):
@@ -198,7 +315,10 @@ func _on_step_complete(cell: Vector2i) -> void:
     if move_points <= 0:
         is_moving = false
         path.clear()
-        _path_line.clear_points()
+        if _path_line:
+            _path_line.clear_points()
+        if _marker:
+            _marker.hide_marker()
         return
 
     _move_next_step()

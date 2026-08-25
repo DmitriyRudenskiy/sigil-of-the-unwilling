@@ -1,4 +1,4 @@
-tool
+@tool
 extends EditorScript
 ## Stage 0: Hex Asset Normalizer
 ## Run: File > Run Script (Ctrl+Shift+X)

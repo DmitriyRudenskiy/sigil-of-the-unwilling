@@ -1,4 +1,4 @@
-tool
+@tool
 extends EditorScript
 ## Stage 1 (v2): TileSet builder with AUTOMATIC terrain + peering bit assignment.
 ## Алгоритм: для каждого тайла семплируем цвет у 6 рёбер гекса, сравниваем с
