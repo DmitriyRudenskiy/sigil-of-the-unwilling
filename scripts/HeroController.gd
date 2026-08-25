@@ -7,7 +7,7 @@ signal movement_points_changed(current: int, max_val: int)
 signal resources_changed(resources: Dictionary)
 signal path_previewed(text: String)
 
-const HERO_SHEET_PATH := "res://assets/raw/hero_knight.png"
+const HERO_SHEET_PATH := "res://assets/raw/hero_knight.jpg"
 
 @export var max_move_points: int = 20
 @export var move_cost_per_cell: int = 1
