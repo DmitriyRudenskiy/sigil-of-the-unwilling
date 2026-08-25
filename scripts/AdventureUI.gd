@@ -5,9 +5,7 @@ signal end_turn_pressed
 signal date_changed(month: int, week: int, day: int)
 
 # ==== КАЛИБРОВКА ПО prototype_map.html ====
-const TOP_H := 48
-const BOTTOM_H := 96
-const RIGHT_W := 232
+const RIGHT_W := 244
 const C_BG := Color(0.16, 0.11, 0.06, 0.95)
 const C_BORDER := Color(0.62, 0.47, 0.22)
 const C_TEXT := Color(0.95, 0.89, 0.72)
@@ -32,10 +30,8 @@ var _resource_labels: Dictionary = {}
 var _hero_controller: HeroController
 var _minimap_tex_rect: TextureRect
 var _minimap_overlay: MinimapOverlay
-var _minimap_img: Image
 
 
-# ============ ОВЕРЛЕЙ МИНИКАРТЫ ============
 class MinimapOverlay extends Control:
     signal minimap_clicked(cell: Vector2i)
     var map_ref: MapGenerator
@@ -58,7 +54,7 @@ class MinimapOverlay extends Control:
                 Color(1, 1, 1, 0.8), false, 1.0)
         if hero_ref != null:
             var cell := hero_ref.current_cell
-            draw_rect(Rect2(cell.x * s.x - 2, cell.y * s.y - 2, 4, 4), C_GOLD)
+            draw_rect(Rect2(cell.x * s.x - 2, cell.y * s.y - 2, 4, 4), Color(1.0, 0.85, 0.4))
 
     func _gui_input(ev: InputEvent) -> void:
         if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
@@ -71,9 +67,7 @@ class MinimapOverlay extends Control:
 
 func _ready() -> void:
     layer = 10
-    _build_top()
-    _build_right()
-    _build_bottom()
+    _build_right_column()
 
 
 func setup(hero: HeroController) -> void:
@@ -81,14 +75,11 @@ func setup(hero: HeroController) -> void:
     hero.movement_points_changed.connect(_on_mp_changed)
     hero.resources_changed.connect(_on_resources_changed)
     hero.path_previewed.connect(_on_path_preview)
-    # миникарта
     _minimap_overlay.map_ref = hero._map_gen
     _minimap_overlay.hero_ref = hero
-    # We need to find the camera in the world
-    var world = get_parent()
-    if world and world.get(" _camera"):
-        _minimap_overlay.cam_ref = world._camera
-    
+    var world := get_parent()
+    if world and world.has_method("get_camera"):
+        _minimap_overlay.cam_ref = world.get_camera()
     _minimap_overlay.minimap_clicked.connect(_on_minimap_clicked)
     _build_minimap_image(hero._map_gen)
     refresh_all()
@@ -102,42 +93,8 @@ func _panel_style() -> StyleBoxFlat:
     return s
 
 
-# ===================== TOP: дата + ресурсы =====================
-func _build_top() -> void:
-    var top := PanelContainer.new()
-    top.add_theme_stylebox_override("panel", _panel_style())
-    top.set_anchors_preset(Control.PRESET_TOP_WIDE)
-    top.offset_bottom = TOP_H
-    top.offset_right = -RIGHT_W
-    add_child(top)
-
-    var hb := HBoxContainer.new()
-    hb.add_theme_constant_override("separation", 12)
-    top.add_child(hb)
-
-    _date_label = Label.new()
-    _date_label.text = _fmt_date()
-    _date_label.add_theme_font_size_override("font_size", 19)
-    _date_label.add_theme_color_override("font_color", C_TEXT)
-    hb.add_child(_date_label)
-
-    hb.add_child(_spacer())
-
-    var res_icons := [
-        ["wood", "🪵"], ["mercury", "🧪"], ["ore", "🪨"], ["sulfur", "🟡"],
-        ["crystal", "🔷"], ["gems", "💎"], ["gold", "🪙"],
-    ]
-    for ri in res_icons:
-        var l := Label.new()
-        l.text = "%s 0" % ri[1]
-        l.add_theme_font_size_override("font_size", 15)
-        l.add_theme_color_override("font_color", C_TEXT)
-        hb.add_child(l)
-        _resource_labels[ri[0]] = l
-
-
-# ===================== RIGHT: миникарта + NSWE + кнопки =====================
-func _build_right() -> void:
+# ===================== ЕДИНАЯ ПРАВАЯ КОЛОНКА =====================
+func _build_right_column() -> void:
     var p := PanelContainer.new()
     p.add_theme_stylebox_override("panel", _panel_style())
     p.anchor_left = 1.0
@@ -151,24 +108,47 @@ func _build_right() -> void:
     add_child(p)
 
     var vb := VBoxContainer.new()
-    vb.add_theme_constant_override("separation", 8)
+    vb.add_theme_constant_override("separation", 6)
     p.add_child(vb)
 
-    # Миникарта
-    var box := Control.new()
-    box.custom_minimum_size = Vector2(RIGHT_W - 20, RIGHT_W - 20)
-    vb.add_child(box)
+    # 1) Дата (верх колонки)
+    _date_label = Label.new()
+    _date_label.text = _fmt_date()
+    _date_label.add_theme_font_size_override("font_size", 17)
+    _date_label.add_theme_color_override("font_color", C_TEXT)
+    _date_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    vb.add_child(_date_label)
 
+    # 2) Ресурсы (сетка 2 колонки)
+    var rg := GridContainer.new()
+    rg.columns = 2
+    rg.add_theme_constant_override("h_separation", 10)
+    vb.add_child(rg)
+    var res_icons := [
+        ["wood", "🪵"], ["mercury", "🧪"], ["ore", "🪨"], ["sulfur", "🟡"],
+        ["crystal", "🔷"], ["gems", "💎"], ["gold", "🪙"],
+    ]
+    for ri in res_icons:
+        var l := Label.new()
+        l.text = "%s 0" % ri[1]
+        l.add_theme_font_size_override("font_size", 14)
+        l.add_theme_color_override("font_color", C_TEXT)
+        rg.add_child(l)
+        _resource_labels[ri[0]] = l
+
+    # 3) Миникарта
+    var box := Control.new()
+    box.custom_minimum_size = Vector2(RIGHT_W - 24, RIGHT_W - 24)
+    vb.add_child(box)
     _minimap_tex_rect = TextureRect.new()
     _minimap_tex_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
     _minimap_tex_rect.stretch_mode = TextureRect.STRETCH_SCALE
     box.add_child(_minimap_tex_rect)
-
     _minimap_overlay = MinimapOverlay.new()
     _minimap_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
     box.add_child(_minimap_overlay)
 
-    # NSWE
+    # 4) NSWE
     var nswe := HBoxContainer.new()
     nswe.alignment = BoxContainer.ALIGNMENT_CENTER
     nswe.add_theme_constant_override("separation", 6)
@@ -176,14 +156,14 @@ func _build_right() -> void:
     for d in ["N", "S", "W", "E"]:
         var b := Button.new()
         b.text = d
-        b.custom_minimum_size = Vector2(40, 34)
-        b.add_theme_font_size_override("font_size", 15)
+        b.custom_minimum_size = Vector2(44, 30)
+        b.add_theme_font_size_override("font_size", 14)
         b.pressed.connect(_on_camera_jump.bind(d))
         nswe.add_child(b)
 
     vb.add_child(HSeparator.new())
 
-    # Вертикальная колонка кнопок управления (порядок прототипа)
+    # 5) Кнопки управления (вертикально, порядок прототипа)
     var btns := [
         ["🏰", "Замок"], ["🚩", "Флаг"], ["⛺", "Лагерь"], ["🐎", "Конюшня"],
         ["🚢", "Корабль"], ["⚒️", "Кузница"], ["🔍", "Разведка"], ["🪖", "Армия"],
@@ -193,64 +173,61 @@ func _build_right() -> void:
         var btn := Button.new()
         btn.text = b[0]
         btn.tooltip_text = b[1]
-        btn.custom_minimum_size = Vector2(RIGHT_W - 20, 38)
-        btn.add_theme_font_size_override("font_size", 18)
+        btn.custom_minimum_size = Vector2(RIGHT_W - 24, 32)
+        btn.add_theme_font_size_override("font_size", 16)
         if b[1] == "Конец хода":
             btn.pressed.connect(_on_end_turn)
             btn.modulate = C_GOLD
         vb.add_child(btn)
 
-    vb.add_child(_spacer())
+    # 6) Статус-строка (предпросмотр пути)
+    _status_label = Label.new()
+    _status_label.text = ""
+    _status_label.add_theme_font_size_override("font_size", 13)
+    _status_label.add_theme_color_override("font_color", C_TEXT)
+    _status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+    vb.add_child(_status_label)
 
+    vb.add_child(_vspacer())
 
-# ===================== BOTTOM: герой + армия =====================
-func _build_bottom() -> void:
-    var p := PanelContainer.new()
-    p.add_theme_stylebox_override("panel", _panel_style())
-    p.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-    p.offset_top = -BOTTOM_H
-    p.offset_right = -RIGHT_W
-    add_child(p)
-
-    var hb := HBoxContainer.new()
-    hb.add_theme_constant_override("separation", 10)
-    p.add_child(hb)
-
+    # 7) Герой
     var hv := VBoxContainer.new()
     hv.add_theme_constant_override("separation", 2)
-    hb.add_child(hv)
-
+    vb.add_child(hv)
     var nl := Label.new()
     nl.text = "Darkstorn"
-    nl.add_theme_font_size_override("font_size", 20)
+    nl.add_theme_font_size_override("font_size", 19)
     nl.add_theme_color_override("font_color", C_GOLD)
     hv.add_child(nl)
-
     _stats_label = Label.new()
     _stats_label.text = "⚔️ 0 🛡️ 0 🔮 4 📖 2"
-    _stats_label.add_theme_font_size_override("font_size", 16)
+    _stats_label.add_theme_font_size_override("font_size", 15)
     _stats_label.add_theme_color_override("font_color", C_TEXT)
     hv.add_child(_stats_label)
-
     _mp_label = Label.new()
     _mp_label.text = "👣 20/20"
-    _mp_label.add_theme_font_size_override("font_size", 14)
+    _mp_label.add_theme_font_size_override("font_size", 13)
     _mp_label.add_theme_color_override("font_color", Color(0.6, 0.9, 0.6))
     hv.add_child(_mp_label)
-
+    var tg := HBoxContainer.new()
+    hv.add_child(tg)
     for t in ["🛡️", "⚔️"]:
         var b := Button.new()
         b.text = t
-        b.custom_minimum_size = Vector2(36, 36)
+        b.custom_minimum_size = Vector2(34, 30)
         b.tooltip_text = "Панель героя"
-        hb.add_child(b)
+        tg.add_child(b)
 
-    hb.add_child(VSeparator.new())
-
+    # 8) Армия: сетка 2x4 в самом низу колонки
+    var ag := GridContainer.new()
+    ag.columns = 2
+    ag.add_theme_constant_override("h_separation", 6)
+    ag.add_theme_constant_override("v_separation", 6)
+    vb.add_child(ag)
     for i in 8:
         var slot := Panel.new()
         slot.name = "Slot%d" % i
-        slot.custom_minimum_size = Vector2(84, 78)
+        slot.custom_minimum_size = Vector2(104, 44)
         var ss := StyleBoxFlat.new()
         ss.bg_color = C_SLOT_BG
         ss.set_corner_radius_all(4)
@@ -258,54 +235,43 @@ func _build_bottom() -> void:
         ss.border_color = C_BORDER
         slot.add_theme_stylebox_override("panel", ss)
 
-        var svb := VBoxContainer.new()
-        svb.name = "VBox"
-        svb.alignment = BoxContainer.ALIGNMENT_CENTER
-        slot.add_child(svb)
+        var sh := HBoxContainer.new()
+        sh.name = "HBox"
+        sh.alignment = BoxContainer.ALIGNMENT_CENTER
+        sh.add_theme_constant_override("separation", 6)
+        slot.add_child(sh)
 
         var ic := Label.new()
         ic.name = "Icon"
         ic.text = "-"
-        ic.add_theme_font_size_override("font_size", 24)
-        ic.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-        svb.add_child(ic)
+        ic.add_theme_font_size_override("font_size", 18)
+        sh.add_child(ic)
 
         var ct := Label.new()
         ct.name = "Count"
         ct.text = "0"
-        ct.add_theme_font_size_override("font_size", 16)
-        ct.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+        ct.add_theme_font_size_override("font_size", 15)
         ct.add_theme_color_override("font_color", C_TEXT)
-        svb.add_child(ct)
+        sh.add_child(ct)
 
-        hb.add_child(slot)
+        ag.add_child(slot)
         _army_slots.append(slot)
-
-    hb.add_child(_spacer())
-
-    _status_label = Label.new()
-    _status_label.text = ""
-    _status_label.add_theme_font_size_override("font_size", 14)
-    _status_label.add_theme_color_override("font_color", C_TEXT)
-    hb.add_child(_status_label)
 
 
 # ===================== MINIMAP =====================
 func _build_minimap_image(map: MapGenerator) -> void:
     if map == null:
         return
-    var w := map.map_width
-    var h := map.map_height
-    _minimap_img = Image.create(w, h, false, Image.FORMAT_RGBA8)
-    for y in h:
-        for x in w:
+    var img := Image.create(map.map_width, map.map_height, false, Image.FORMAT_RGBA8)
+    for y in map.map_height:
+        for x in map.map_width:
             var cell := Vector2i(x, y)
             var t: int = map.terrain_grid.get(cell, 0)
             if t < MINIMAP_COLORS.size():
-                _minimap_img.set_pixel(x, y, MINIMAP_COLORS[t])
+                img.set_pixel(x, y, MINIMAP_COLORS[t])
             else:
-                _minimap_img.set_pixel(x, y, Color.BLACK)
-    _minimap_tex_rect.texture = ImageTexture.create_from_image(_minimap_img)
+                img.set_pixel(x, y, Color.BLACK)
+    _minimap_tex_rect.texture = ImageTexture.create_from_image(img)
 
 
 func _on_minimap_clicked(cell: Vector2i) -> void:
@@ -319,13 +285,13 @@ func refresh_all() -> void:
     if not _hero_controller:
         return
     var st: Dictionary = _hero_controller.stats
-    _stats_label.text = "⚔️ %d 🛡️ %d 🔮 %d  %d" % [
+    _stats_label.text = "⚔️ %d 🛡️ %d 🔮 %d 📖 %d" % [
         st.get("attack", 0), st.get("defense", 0),
         st.get("spell_power", 0), st.get("knowledge", 0)]
     for i in range(8):
-        var vbox: VBoxContainer = _army_slots[i].get_node("VBox")
-        var ic: Label = vbox.get_node("Icon")
-        var ct: Label = vbox.get_node("Count")
+        var hbox: HBoxContainer = _army_slots[i].get_node("HBox")
+        var ic: Label = hbox.get_node("Icon")
+        var ct: Label = hbox.get_node("Count")
         if i < _hero_controller.army.size():
             ic.text = _hero_controller.army[i]["icon"]
             ct.text = str(_hero_controller.army[i]["count"])
@@ -387,8 +353,7 @@ func _on_camera_jump(direction: String) -> void:
         world.jump_camera(direction)
 
 
-func _spacer() -> Control:
+func _vspacer() -> Control:
     var sp := Control.new()
-    sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
     sp.size_flags_vertical = Control.SIZE_EXPAND_FILL
     return sp

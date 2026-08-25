@@ -27,6 +27,7 @@ func _ready() -> void:
 
 func generate() -> void:
 	_ensure_layers()
+	HexUtils.calibrate(_tile_map)
 	_generate_noise()
 	_paint_tilemap()
 	_place_villages()
