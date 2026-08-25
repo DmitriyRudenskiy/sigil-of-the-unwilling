@@ -40,7 +40,7 @@ func _unhandled_input(ev: InputEvent) -> void:
 	if ev.button_index != MOUSE_BUTTON_LEFT:
 		return
 
-	var world_pos := get_global_mouse_position()
+	var world_pos: Vector2 = get_viewport().get_mouse_position()
 	var cell := _view.local_to_map(world_pos)
 
 	if highlight_attack.has(cell):
@@ -77,8 +77,9 @@ func _select(u: BattleState.BattleUnit) -> void:
 	_clear_highlights()
 
 	var speed := u.get_speed()
-	var blocked := _state.build_all_blocked(u, _obstacles)
-	highlight_move = _state.get_reachable(u.cell, speed, blocked)
+	var blocked_dict := _state.build_all_blocked(u, _obstacles)
+	var blocked_callable := func() -> Dictionary: return blocked_dict
+	highlight_move = _state.get_reachable(u.cell, speed, blocked_callable)
 
 	for nb in HexUtils.get_all_neighbors(u.cell):
 		var en := _state.get_unit_at(nb, "defender")
