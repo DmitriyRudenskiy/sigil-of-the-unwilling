@@ -7,7 +7,7 @@ signal battle_finished(winner: String, surviving_atk: Array, surviving_def: Arra
 
 const BW := 17
 const BH := 11
-const RING := 3  # декоративное кольцо клеток вокруг поля
+const RING := 5  # декоративное кольцо клеток вокруг поля
 
 var attacker_units: Array[Dictionary] = []
 var defender_units: Array[Dictionary] = []
@@ -63,6 +63,7 @@ func _ready() -> void:
 	_tile_map.name = "BattleTerrain"
 	_tile_map.tile_set = load("res://tilesets/hex_tileset.tres")
 	add_child(_tile_map)
+	RenderingServer.set_default_clear_color(Color(0.33, 0.30, 0.18))  # оливковый «грунт» за полем
 	HexUtils.calibrate(_tile_map)
 
 	_overlay = HighlightOverlay.new()
@@ -107,7 +108,7 @@ func _place_obstacles() -> void:
 		obstacles[cell] = true
 		var lbl := Label.new()
 		lbl.text = "🪨" if rng.randf() > 0.5 else "🌳"
-		lbl.add_theme_font_size_override("font_size", 28)
+		lbl.add_theme_font_size_override("font_size", 36)
 		lbl.position = _tile_map.map_to_local(cell) + Vector2(-14, -16)
 		lbl.z_index = 4
 		add_child(lbl)
@@ -138,7 +139,7 @@ func _spawn_hero_figure() -> void:
 		return
 	var hero := Sprite2D.new()
 	hero.texture = load(path)
-	hero.scale = Vector2(0.7, 0.7)
+	hero.scale = Vector2(1.0, 1.0)
 	hero.flip_h = true
 	hero.position = _tile_map.map_to_local(Vector2i(1, 1))
 	hero.z_index = 7
@@ -239,7 +240,7 @@ func _make_unit_sprite(u: Dictionary) -> void:
 	if ppath != "":
 		var sp := Sprite2D.new()
 		sp.texture = load(ppath)
-		sp.scale = Vector2(0.5, 0.5)
+		sp.scale = Vector2(1.0, 1.0)
 		sp.flip_h = (u["side"] == "attacker")
 		n.add_child(sp)
 	else:
@@ -264,9 +265,9 @@ func _make_unit_sprite(u: Dictionary) -> void:
 	var cl := Label.new()
 	cl.name = "CountLabel"
 	cl.text = str(u["count"])
-	cl.add_theme_font_size_override("font_size", 13)
+	cl.add_theme_font_size_override("font_size", 16)
 	cl.add_theme_color_override("font_color", Color.WHITE)
-	cl.position = Vector2(-10, 24)
+	cl.position = Vector2(-12, 34)
 	n.add_child(cl)
 	n.position = _tile_map.map_to_local(u["cell"])
 	n.z_index = 6
@@ -363,7 +364,7 @@ func _unit_at_pixel(pos: Vector2, side: String) -> Dictionary:
 	for u in units:
 		if u.get("alive", false):
 			var up := _tile_map.map_to_local(u["cell"])
-			if pos.distance_to(up) < 45.0:
+			if pos.distance_to(up) < 60.0:
 				return u
 	return {}
 

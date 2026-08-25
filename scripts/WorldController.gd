@@ -212,6 +212,7 @@ func start_battle(enemy: Array[Dictionary], enemy_cell: Vector2i) -> void:
 
 func _on_battle_end(winner: String, surv_atk: Array, surv_def: Array, node: Node) -> void:
 	node.queue_free()
+	RenderingServer.set_default_clear_color(Color(0.10, 0.10, 0.12))
 	visible = true
 	if _ui:
 		_ui.visible = true
