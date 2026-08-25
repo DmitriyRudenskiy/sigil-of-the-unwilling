@@ -4,6 +4,7 @@ extends Node2D
 ## Не меняет BattleState и не принимает решений.
 
 const RING := 5
+const _HexDraw = preload("res://scripts/util/HexDraw.gd")
 
 var _tile_map: TileMapLayer
 var _overlay: HighlightOverlay

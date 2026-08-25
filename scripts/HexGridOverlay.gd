@@ -2,6 +2,8 @@ extends Node2D
 class_name HexGridOverlay
 ## Опциональная рамка гексов (по умолчанию выключена)
 
+const HexDraw = preload("res://scripts/util/HexDraw.gd")
+
 var map_ref: MapGenerator
 var cam_ref: Camera2D
 var enabled := false
@@ -29,8 +31,5 @@ func _draw() -> void:
   for y in range(c0.y - 1, c1.y + 2):
     for x in range(c0.x - 1, c1.x + 2):
       var center: Vector2 = map_ref.map_to_local(Vector2i(x, y))
-      var pts := PackedVector2Array()
-      for i in 7:
-        var ang := deg_to_rad(60.0 * i - 90.0)
-        pts.append(center + Vector2(cos(ang), sin(ang)) * R)
+      var pts := HexDraw.points_at(center, R)
       draw_polyline(pts, Color(0, 0, 0, 0.4), 2.0)

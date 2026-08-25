@@ -80,9 +80,11 @@ static func bfs_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: in
 	if start == goal:
 		return [start]
 	var queue: Array[Vector2i] = [start]
+	var head := 0
 	var from: Dictionary = {start: start}
-	while queue.size() > 0:
-		var cur: Vector2i = queue.pop_front()
+	while head < queue.size():
+		var cur: Vector2i = queue[head]
+		head += 1
 		if cur == goal:
 			break
 		for bit in 6:
@@ -108,8 +110,10 @@ static func bfs_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: in
 static func bfs_reachable(start: Vector2i, steps: int, blocked: Dictionary, w: int, h: int) -> Dictionary:
 	var result := {start: 0}
 	var queue: Array[Vector2i] = [start]
-	while queue.size() > 0:
-		var cur: Vector2i = queue.pop_front()
+	var head := 0
+	while head < queue.size():
+		var cur: Vector2i = queue[head]
+		head += 1
 		var dist: int = result[cur]
 		if dist >= steps:
 			continue

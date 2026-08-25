@@ -3,6 +3,7 @@ class_name HeroController
 
 const _UnitStack = preload("res://scripts/unit_stack.gd")
 const _UnitRegistry = preload("res://scripts/UnitRegistry.gd")
+const _HexDraw = preload("res://scripts/util/HexDraw.gd")
 
 signal hero_moved(cell: Vector2i)
 signal hero_entered_village(cell: Vector2i)
@@ -68,10 +69,7 @@ class DestMarker extends Node2D:
         if not active:
             return
         var r := 36.0 + sin(_t * 6.0) * 4.0
-        var pts := PackedVector2Array()
-        for i in 7:
-            var ang := deg_to_rad(60.0 * i - 90.0)
-            pts.append(Vector2(cos(ang), sin(ang)) * r)
+        var pts := _HexDraw.points(r)
         draw_polyline(pts, Color(1.0, 0.25, 0.2, 0.95), 3.0)
 
 
