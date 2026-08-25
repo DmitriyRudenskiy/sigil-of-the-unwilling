@@ -12,6 +12,7 @@ const ZOOM_MIN := 0.3
 const ZOOM_MAX := 2.0
 const EDGE := 30
 
+
 func _ready() -> void:
     _map_gen = MapGenerator.new()
     _map_gen.name = "MapGenerator"
@@ -22,7 +23,6 @@ func _ready() -> void:
     _hero.name = "Hero"
     add_child(_hero)
     
-    # Дождитесь, пока MapGenerator создаст _tile_map
     await get_tree().process_frame
     _hero.setup(_map_gen)
     
@@ -33,6 +33,7 @@ func _ready() -> void:
     add_child(_ui)
     _ui.setup(_hero)
     _ui.end_turn_pressed.connect(_on_end_turn)
+    _ui.date_changed.connect(_on_date_changed)
     
     _camera = Camera2D.new()
     _camera.position_smoothing_enabled = true
@@ -42,12 +43,14 @@ func _ready() -> void:
         _camera.position = _hero.position
     
     _spawn_villages()
+    _spawn_resources()
     print("[World] Scene ready.")
     
     # Для headless режима: выход после генерации
     if OS.has_feature("headless") or "--autoquit" in OS.get_cmdline_args():
         await get_tree().create_timer(1.0).timeout
         get_tree().quit()
+
 
 func _process(delta: float) -> void:
     if _camera == null or _hero == null:
@@ -69,20 +72,24 @@ func _process(delta: float) -> void:
     if mv != Vector2.ZERO:
         _camera.position += mv.normalized() * CAM_SPEED * delta / _zoom
 
+
 func _unhandled_input(event: InputEvent) -> void:
     if event is InputEventMouseButton and event.pressed:
         if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-            _zoom = minf(_zoom + 0.1, ZOOM_MAX); _camera.zoom = Vector2(_zoom, _zoom)
+            _zoom = minf(_zoom + 0.1, ZOOM_MAX)
+            _camera.zoom = Vector2(_zoom, _zoom)
         elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-            _zoom = maxf(_zoom - 0.1, ZOOM_MIN); _camera.zoom = Vector2(_zoom, _zoom)
+            _zoom = maxf(_zoom - 0.1, ZOOM_MIN)
+            _camera.zoom = Vector2(_zoom, _zoom)
         elif event.button_index == MOUSE_BUTTON_LEFT:
-            var cell := _map_gen._tile_map.local_to_map(get_global_mouse_position())
-            if cell.x >= 0 and cell.x < _map_gen.map_width and cell.y >= 0 and cell.y < _map_gen.map_height:
-                _hero.on_map_clicked(cell)
+            if _map_gen and _map_gen._tile_map and _map_gen._tile_map.tile_set != null:
+                var cell := _map_gen._tile_map.local_to_map(get_global_mouse_position())
+                if cell.x >= 0 and cell.x < _map_gen.map_width and cell.y >= 0 and cell.y < _map_gen.map_height:
+                    _hero.on_map_clicked(cell)
+
 
 func _spawn_villages() -> void:
     if _map_gen._tile_map == null or _map_gen._tile_map.tile_set == null:
-        print("WARN: TileMap not ready for villages")
         return
     
     for cell in _map_gen.village_cells:
@@ -101,30 +108,81 @@ func _spawn_villages() -> void:
         sp.z_index = 5
         v.add_child(sp)
         
+        var flag := Label.new()
+        flag.name = "Flag"
+        flag.text = "🚩"
+        flag.add_theme_font_size_override("font_size", 16)
+        flag.position = Vector2(18, -20)
+        v.add_child(flag)
+        
         v.position = _map_gen._tile_map.map_to_local(cell)
         add_child(v)
 
-func _on_hero_moved(cell: Vector2i) -> void: _camera.position = _hero.position
-func _on_village(cell: Vector2i) -> void: print("Village captured: ", cell)
-func _on_end_turn() -> void: _hero.end_turn(); _ui.refresh_all()
 
-func start_battle(enemy: Array[Dictionary]) -> void:
-    var battle := BattleController.new(); battle.name = "Battle"
-    get_tree().root.add_child(battle); visible = false
-    set_process(false); set_process_unhandled_input(false)
-    battle.start_battle(_hero.get_army_for_battle(), enemy)
-    battle.battle_finished.connect(_on_battle_end.bind(battle))
+func _spawn_resources() -> void:
+    if _map_gen._tile_map == null or _map_gen._tile_map.tile_set == null:
+        return
+    
+    var icons := ["🪵", "🧪", "🪨", "🟡", "🔷", "💎", "🪙"]
+    for cell in _map_gen.resource_cells:
+        var res_type: int = _map_gen.resource_cells[cell]
+        var r := Node2D.new()
+        r.set_meta("cell", cell)
+        r.set_meta("res_type", res_type)
+        
+        var lbl := Label.new()
+        lbl.text = icons[res_type] if res_type < icons.size() else "?"
+        lbl.add_theme_font_size_override("font_size", 24)
+        lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+        lbl.position = Vector2(-12, -12)
+        r.add_child(lbl)
+        
+        r.position = _map_gen._tile_map.map_to_local(cell)
+        r.z_index = 6
+        add_child(r)
 
-func _on_battle_end(winner: String, surv_atk: Array, surv_def: Array, node: Node) -> void:
-    node.queue_free(); visible = true; set_process(true); set_process_unhandled_input(true)
-    if winner == "attacker":
-        var a: Array[Dictionary] = []
-        for s in surv_atk: a.append(s)
-        _hero.apply_battle_results(a); _ui.refresh_all()
 
-func spawn_demo_enemy() -> void:
-    start_battle([
-        {"icon":"👹","name":"Goblins","count":50,"base_damage":3,"speed":4,"hp":6},
-        {"icon":"🐺","name":"Wolves","count":30,"base_damage":4,"speed":6,"hp":8},
-        {"icon":"🧌","name":"Trolls","count":15,"base_damage":8,"speed":3,"hp":20},
-    ])
+func _on_hero_moved(cell: Vector2i) -> void:
+    _camera.position = _hero.position
+    _remove_resource_at(cell)
+
+
+func _remove_resource_at(cell: Vector2i) -> void:
+    for child in get_children():
+        if child.has_meta("cell") and child.get_meta("cell") == cell:
+            if child.has_meta("res_type"):
+                child.queue_free()
+                break
+
+
+func _on_village(cell: Vector2i) -> void:
+    print("[World] Village captured at ", cell)
+    for child in get_children():
+        if child.has_meta("cell") and child.get_meta("cell") == cell:
+            var flag := child.get_node_or_null("Flag")
+            if flag:
+                flag.text = "🏳️"
+            break
+
+
+func _on_end_turn() -> void:
+    _hero.end_turn()
+    _ui.refresh_all()
+
+
+func _on_date_changed(month: int, week: int, day: int) -> void:
+    print("[World] Date: Month %d, Week %d, Day %d" % [month, week, day])
+
+
+func jump_camera(direction: String) -> void:
+    if not _map_gen or not _map_gen._tile_map:
+        return
+    var center := Vector2(_map_gen.map_width / 2, _map_gen.map_height / 2)
+    var target: Vector2i
+    match direction:
+        "N": target = Vector2i(center.x, 2)
+        "S": target = Vector2i(center.x, _map_gen.map_height - 2)
+        "W": target = Vector2i(2, center.y)
+        "E": target = Vector2i(_map_gen.map_width - 2, center.y)
+        _: return
+    _camera.position = _map_gen._tile_map.map_to_local(target)
