@@ -13,11 +13,12 @@
 | Terrain | ID | Neighbor Rule |
 |---------|----|---------------|
 | Water   | 0  | -             |
-| Sand    | 1  | Water         |
-| Grass   | 2  | Sand          |
-| Forest  | 3  | Grass         |
-| Mountain| 4  | Forest        |
-| Snow    | 5  | Mountain      |
+| Swamp   | 1  | Water         |
+| Sand    | 2  | Water/Swamp   |
+| Grass   | 3  | Sand           |
+| Forest  | 4  | Grass         |
+| Mountain| 5  | Forest        |
+| Snow    | 6  | Mountain      |
 
 ## Synthesis
 - Integrated noise-based generation with biome logic.
@@ -39,6 +40,11 @@
 
 ## Bugs
 - None reported.
+
+## Missing Assets/Features (Stage 3.5)
+- High-quality water, mountain, and forest tiles in the new "binom" style.
+- Transition tiles (peering masks) for the new "binom" textures.
+- Specific decor for swamp biome.
 
 ## Launch Instructions
 1. Open project in Godot 4.7.

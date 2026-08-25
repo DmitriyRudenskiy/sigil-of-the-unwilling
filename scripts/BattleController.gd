@@ -5,6 +5,7 @@ signal battle_finished(winner: String, surviving_atk: Array, surviving_def: Arra
 
 const BW := 17
 const BH := 11
+const TerrainAtlasMapScript = preload("res://scripts/TerrainAtlasMap.gd")
 
 var attacker_units: Array[Dictionary] = []
 var defender_units: Array[Dictionary] = []
@@ -25,7 +26,7 @@ func _ready() -> void:
     _tile_map = TileMapLayer.new(); _tile_map.name = "BattleTerrain"; add_child(_tile_map)
     _hl_layer = TileMapLayer.new(); _hl_layer.name = "HL"; _hl_layer.modulate = Color(0.3,0.8,1,0.4); add_child(_hl_layer)
     for y in BH:
-        for x in BW: _tile_map.set_cell(Vector2i(x,y), 0, Vector2i(0, 2))
+        for x in BW: _tile_map.set_cell(Vector2i(x,y), 0, TerrainAtlasMapScript.CENTER_COORDS[HexUtils.Terrain.GRASS])
     _build_ui()
 
 func _build_ui() -> void:

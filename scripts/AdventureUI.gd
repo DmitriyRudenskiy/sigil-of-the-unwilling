@@ -11,8 +11,9 @@ const C_TEXT := Color(0.95, 0.89, 0.72)
 const C_GOLD := Color(1.0, 0.85, 0.4)
 const C_SLOT_BG := Color(0.35, 0.24, 0.15)
 const MINIMAP_COLORS := [
-    Color(0.15, 0.35, 0.75), Color(0.85, 0.75, 0.45), Color(0.35, 0.6, 0.3),
-    Color(0.15, 0.35, 0.15), Color(0.45, 0.4, 0.35), Color(0.9, 0.93, 0.98),
+    Color(0.15, 0.35, 0.75), Color(0.2, 0.45, 0.4), Color(0.85, 0.75, 0.45),
+    Color(0.35, 0.6, 0.3), Color(0.15, 0.35, 0.15), Color(0.45, 0.4, 0.35),
+    Color(0.9, 0.93, 0.98),
 ]
 
 var day := 1
@@ -220,6 +221,8 @@ func _build_right_column() -> void:
         if b[1] == "Конец хода":
             btn.pressed.connect(_on_end_turn)
             btn.modulate = C_GOLD
+        elif b[1] == "Опции":
+            btn.pressed.connect(_on_options)
         bg.add_child(btn)
 
     # 4) Панель армии (внизу, как в оригинале)
@@ -420,3 +423,23 @@ func _vspacer() -> Control:
     var sp := Control.new()
     sp.size_flags_vertical = Control.SIZE_EXPAND_FILL
     return sp
+
+var _options_popup: PopupPanel
+var _border_check: CheckBox
+
+func _on_options() -> void:
+    if _options_popup == null:
+        _options_popup = PopupPanel.new()
+        var vb := VBoxContainer.new()
+        _options_popup.add_child(vb)
+        _border_check = CheckBox.new()
+        _border_check.text = "Рамка гексов"
+        _border_check.toggled.connect(_on_border_toggled)
+        vb.add_child(_border_check)
+        add_child(_options_popup)
+    _options_popup.popup_centered(Vector2i(260, 80))
+
+func _on_border_toggled(on: bool) -> void:
+    var world := get_parent()
+    if world and world.has_method("set_hex_borders"):
+        world.set_hex_borders(on)

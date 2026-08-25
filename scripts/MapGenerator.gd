@@ -12,6 +12,7 @@ const TerrainAtlasMapScript = preload("res://scripts/TerrainAtlasMap.gd")
 @export var grass_threshold: float = 0.65
 @export var forest_threshold: float = 0.75
 @export var mountain_threshold: float = 0.85
+@export var swamp_threshold: float = 0.42
 
 var terrain_grid: Dictionary = {}
 var height_grid: Dictionary = {}
@@ -30,6 +31,7 @@ func generate() -> void:
 	HexUtils.calibrate(_tile_map)
 	_generate_noise()
 	_paint_tilemap()
+	_diversify()
 	_place_villages()
 	_place_resources()
 	_place_decor()
@@ -69,6 +71,7 @@ func _generate_noise() -> void:
 
 func get_biome_terrain_id(height: float, temp: float, moist: float) -> int:
 	if height < water_threshold: return HexUtils.Terrain.WATER
+	elif height < swamp_threshold and moist > 0.55: return HexUtils.Terrain.SWAMP
 	elif height < sand_threshold: return HexUtils.Terrain.SAND
 	elif height > mountain_threshold:
 		return HexUtils.Terrain.SNOW if temp < 0.3 else HexUtils.Terrain.MOUNTAIN
@@ -88,6 +91,20 @@ func _paint_tilemap() -> void:
 		var atlas_coords: Vector2i = TerrainAtlasMapScript.CENTER_COORDS[terrain_id]
 		_tile_map.set_cell(cell, TerrainAtlasMapScript.SOURCE_ID, atlas_coords)
 	# In Godot 4.7, terrain transitions are handled by the TileSet's proxy system automatically.
+
+func _diversify() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value + 1234
+	for cell in terrain_grid:
+		var t: int = terrain_grid[cell]
+		if not TerrainAtlasMapScript.VARIANTS.has(t):
+			continue
+		var vars: Array = TerrainAtlasMapScript.VARIANTS[t]
+		if vars.is_empty():
+			continue
+		if _tile_map.get_cell_atlas_coords(cell) == TerrainAtlasMapScript.CENTER_COORDS[t]:
+			var pick: Vector2i = vars[rng.randi_range(0, vars.size() - 1)]
+			_tile_map.set_cell(cell, TerrainAtlasMapScript.SOURCE_ID, pick)
 
 func _place_villages() -> void:
 	village_cells.clear()

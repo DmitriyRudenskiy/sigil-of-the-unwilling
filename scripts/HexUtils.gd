@@ -16,8 +16,8 @@ const T_EVEN_RIGHT := [  # чётная строка (при odd-r)
 # Калибруется по реальному TileMapLayer (см. calibrate)
 static var odd_row_shift_right := true
 
-enum Terrain { WATER=0, SAND=1, GRASS=2, FOREST=3, MOUNTAIN=4, SNOW=5 }
-const TERRAIN_NAMES := ["water", "sand", "grass", "forest", "mountain", "snow"]
+enum Terrain { WATER=0, SWAMP=1, SAND=2, GRASS=3, FOREST=4, MOUNTAIN=5, SNOW=6 }
+const TERRAIN_NAMES := ["water", "swamp", "sand", "grass", "forest", "mountain", "snow"]
 
 
 static func calibrate(tm: TileMapLayer) -> void:

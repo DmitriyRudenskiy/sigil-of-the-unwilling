@@ -181,3 +181,14 @@ func jump_camera(direction: String) -> void:
 		"S": center_camera_on(Vector2i(center.x, _map_gen.map_height - 3))
 		"W": center_camera_on(Vector2i(2, center.y))
 		"E": center_camera_on(Vector2i(_map_gen.map_width - 3, center.y))
+
+var _grid_overlay: HexGridOverlay
+
+func set_hex_borders(on: bool) -> void:
+	if on and _grid_overlay == null:
+		_grid_overlay = HexGridOverlay.new()
+		_grid_overlay.map_ref = _map_gen
+		_grid_overlay.cam_ref = _camera
+		add_child(_grid_overlay)
+	if _grid_overlay != null:
+		_grid_overlay.enabled = on

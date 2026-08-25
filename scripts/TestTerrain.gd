@@ -9,12 +9,12 @@ func _ready() -> void:
     var H := 22
     for y in H:
         for x in W:
-            tm.set_cell(Vector2i(x, y), TerrainAtlasMap.SOURCE_ID, TerrainAtlasMap.CENTER_COORDS[2])
+            tm.set_cell(Vector2i(x, y), TerrainAtlasMap.SOURCE_ID, TerrainAtlasMap.CENTER_COORDS[3])
     _blob(tm, Vector2i(4, 5), 3, 0)    # вода
-    _blob(tm, Vector2i(11, 6), 3, 1)  # песок
-    _blob(tm, Vector2i(18, 6), 2, 3)  # лес
-    _blob(tm, Vector2i(11, 15), 2, 4) # горы
-    _blob(tm, Vector2i(18, 15), 2, 5) # снег
+    _blob(tm, Vector2i(11, 6), 3, 2)  # песок
+    _blob(tm, Vector2i(18, 6), 2, 4)  # лес
+    _blob(tm, Vector2i(11, 15), 2, 5) # горы
+    _blob(tm, Vector2i(18, 15), 2, 6) # снег
     tm.update_terrain()
     print("[TestTerrain] ready, check borders")
 
