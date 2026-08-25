@@ -31,7 +31,7 @@ fi
 
 echo ""
 echo "=== [4/5] Headless-рантайм (ошибки выполнения) ==="
-RUNTIME_LOG=$($GODOT --headless --autoquit 2>&1)
+RUNTIME_LOG=$(timeout 15 $GODOT --headless --autoquit 2>&1 || true)
 echo "$RUNTIME_LOG" | grep -E "ERROR|SCRIPT ERROR" | head -20
 if echo "$RUNTIME_LOG" | grep -qE "^ERROR:"; then
   echo "❌ Runtime errors detected"; FAIL=1

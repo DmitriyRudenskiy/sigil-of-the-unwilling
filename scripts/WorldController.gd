@@ -224,6 +224,11 @@ func _on_battle_end(winner: String, surv_atk: Array, surv_def: Array, node: Node
 	for s in surv_atk:
 		new_army.append(s)
 	_hero.apply_battle_results(new_army)
+	if _hero.army.is_empty():
+		var rng := RandomNumberGenerator.new()
+		rng.seed = randi()
+		_hero.army = [UnitRegistry.make_stack("swordsmen", rng)]
+		print("[World] Герой разбит: выдан минимальный отряд")
 	if winner == "attacker":
 		_map_gen.enemy_stacks.erase(_pending_enemy_cell)
 		for child in get_children():
