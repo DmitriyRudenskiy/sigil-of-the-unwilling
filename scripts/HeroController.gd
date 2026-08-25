@@ -5,6 +5,7 @@ signal hero_moved(cell: Vector2i)
 signal hero_entered_village(cell: Vector2i)
 signal movement_points_changed(current: int, max_val: int)
 signal resources_changed(resources: Dictionary)
+signal path_previewed(text: String)
 
 @export var max_move_points: int = 20
 @export var move_cost_per_cell: int = 1
@@ -12,15 +13,12 @@ signal resources_changed(resources: Dictionary)
 var current_cell: Vector2i = Vector2i(5, 5)
 var move_points: int = 20
 var path: Array[Vector2i] = []
+var pending_cell: Vector2i = Vector2i(-1, -1)
+var pending_path: Array[Vector2i] = []
 var is_moving: bool = false
 var hero_name: String = "Darkstorn"
 
-var stats := {
-    "attack": 0,
-    "defense": 0,
-    "spell_power": 4,
-    "knowledge": 2,
-}
+var stats := {"attack": 0, "defense": 0, "spell_power": 4, "knowledge": 2}
 
 var army: Array[Dictionary] = [
     {"icon": "🗡️", "name": "Swordsmen", "count": 103, "base_damage": 4, "speed": 5, "hp": 10},
@@ -34,13 +32,8 @@ var army: Array[Dictionary] = [
 ]
 
 var resources := {
-    "wood": 10,
-    "mercury": 2,
-    "ore": 10,
-    "sulfur": 2,
-    "crystal": 2,
-    "gems": 2,
-    "gold": 500,
+    "wood": 10, "mercury": 2, "ore": 10, "sulfur": 2,
+    "crystal": 2, "gems": 2, "gold": 500,
 }
 
 var _map_gen: MapGenerator
@@ -69,7 +62,7 @@ func _create_visual() -> void:
     _sprite.texture = ImageTexture.create_from_image(img)
     _sprite.z_index = 10
     add_child(_sprite)
-    
+
     _path_line = Line2D.new()
     _path_line.width = 3.0
     _path_line.default_color = Color(1, 1, 0, 0.6)
@@ -79,7 +72,6 @@ func _create_visual() -> void:
 
 func setup(map: MapGenerator) -> void:
     _map_gen = map
-    # Найти стартовую позицию на суше
     for y in map.map_height:
         for x in map.map_width:
             var cell := Vector2i(x, y)
@@ -96,46 +88,70 @@ func _update_position() -> void:
         position = Vector2(current_cell.x * 64 + 32, current_cell.y * 56 + 28)
 
 
+# ===================== TWO-CLICK MOVEMENT =====================
 func on_map_clicked(cell: Vector2i) -> void:
-    if is_moving or cell == current_cell:
+    if is_moving or _map_gen == null or _map_gen._tile_map == null:
         return
-    if _map_gen == null or _map_gen._tile_map == null:
+    if cell == current_cell:
+        cancel_pending()
         return
-    
-    # Проверить, можно ли дойти
+
+    # Второй клик по той же клетке -> подтверждение и движение
+    if cell == pending_cell and pending_path.size() > 1:
+        path = pending_path
+        pending_cell = Vector2i(-1, -1)
+        pending_path = []
+        path_previewed.emit("")
+        _start_moving()
+        return
+
+    # Первый клик -> оценка пути
     var blocked := _map_gen.get_blocked_cells()
-    var found_path := HexUtils.bfs_path(current_cell, cell, blocked, _map_gen.map_width, _map_gen.map_height)
-    
-    if found_path.size() > 1:
-        var cost := (found_path.size() - 1) * move_cost_per_cell
-        if cost <= move_points:
-            path = found_path
-            _start_moving()
-        else:
-            # Двигаться насколько хватит очков
-            var max_cells := move_points / move_cost_per_cell
-            if max_cells > 0:
-                path = found_path.slice(0, max_cells + 1)
-                _start_moving()
-
-
-func _start_moving() -> void:
-    if path.size() < 2:
+    var found := HexUtils.bfs_path(current_cell, cell, blocked, _map_gen.map_width, _map_gen.map_height)
+    if found.size() < 2:
+        cancel_pending()
+        path_previewed.emit("Путь недоступен")
         return
-    is_moving = true
-    _draw_path()
-    _move_next_step()
+
+    var max_cells := move_points / move_cost_per_cell
+    var affordable: Array[Vector2i] = found.slice(0, mini(found.size(), max_cells + 1))
+    pending_cell = cell
+    pending_path = affordable
+    _set_line_points(affordable)
+
+    var cost := (affordable.size() - 1) * move_cost_per_cell
+    var suffix := ""
+    if affordable.size() < found.size():
+        suffix = " (хватит очков только на %d кл.)" % (affordable.size() - 1)
+    path_previewed.emit("Путь: %d кл., очков: %d%s. Клик ещё раз — идти. ПКМ — отмена." % [
+        affordable.size() - 1, cost, suffix])
 
 
-func _draw_path() -> void:
+func cancel_pending(clear_text := true) -> void:
+    pending_cell = Vector2i(-1, -1)
+    pending_path = []
     _path_line.clear_points()
-    for p in path:
+    if clear_text:
+        path_previewed.emit("")
+
+
+func _set_line_points(pts: Array[Vector2i]) -> void:
+    _path_line.clear_points()
+    for p in pts:
         var local_pos: Vector2
-        if _map_gen and _map_gen._tile_map:
+        if _map_gen and _map_gen._tile_map and _map_gen._tile_map.tile_set != null:
             local_pos = _map_gen._tile_map.map_to_local(p)
         else:
             local_pos = Vector2(p.x * 64 + 32, p.y * 56 + 28)
         _path_line.add_point(local_pos)
+
+
+# ===================== MOVEMENT =====================
+func _start_moving() -> void:
+    if path.size() < 2:
+        return
+    is_moving = true
+    _move_next_step()
 
 
 func _move_next_step() -> void:
@@ -144,21 +160,20 @@ func _move_next_step() -> void:
         path.clear()
         _path_line.clear_points()
         return
-    
+
     var next_cell := path[1]
     path.remove_at(0)
-    
-    # Списать очки движения
+    _set_line_points(path)
+
     move_points -= move_cost_per_cell
     movement_points_changed.emit(move_points, max_move_points)
-    
-    # Tween к следующей клетке
+
     var target_pos: Vector2
-    if _map_gen and _map_gen._tile_map:
+    if _map_gen and _map_gen._tile_map and _map_gen._tile_map.tile_set != null:
         target_pos = _map_gen._tile_map.map_to_local(next_cell)
     else:
         target_pos = Vector2(next_cell.x * 64 + 32, next_cell.y * 56 + 28)
-    
+
     if _tween and _tween.is_valid():
         _tween.kill()
     _tween = create_tween()
@@ -170,25 +185,22 @@ func _on_step_complete(cell: Vector2i) -> void:
     current_cell = cell
     position = _sprite.position if _sprite else position
     hero_moved.emit(cell)
-    
-    # Проверить подбор ресурса
+
     if _map_gen and _map_gen.resource_cells.has(cell):
         var res_type: int = _map_gen.resource_cells[cell]
         _pickup_resource(res_type)
         _map_gen.resource_cells.erase(cell)
         resources_changed.emit(resources)
-    
-    # Проверить вход в деревню
+
     if _map_gen and cell in _map_gen.village_cells:
         hero_entered_village.emit(cell)
-    
-    # Если очков не осталось — остановить
+
     if move_points <= 0:
         is_moving = false
         path.clear()
         _path_line.clear_points()
         return
-    
+
     _move_next_step()
 
 
@@ -205,8 +217,7 @@ func end_turn() -> void:
     movement_points_changed.emit(move_points, max_move_points)
     is_moving = false
     path.clear()
-    _path_line.clear_points()
-    print("[Hero] End turn: move points restored to %d" % move_points)
+    cancel_pending()
 
 
 func get_army_for_battle() -> Array[Dictionary]:

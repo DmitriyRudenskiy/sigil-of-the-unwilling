@@ -1,179 +1,176 @@
 extends CanvasLayer
 class_name AdventureUI
+## Adventure UI по prototype_map.html:
+## верх: дата (рус) + NSWE + ресурсы + кнопки действий
+## низ: герой (имя + статы inline + 👣) + тумблеры 🛡️⚔️ + 8 слотов армии + статус-строка
 
 signal end_turn_pressed
 signal date_changed(month: int, week: int, day: int)
 
-var day: int = 1
-var week: int = 1
-var month: int = 1
+var day := 1
+var week := 1
+var month := 1
 
 var _date_label: Label
-var _hero_panel: PanelContainer
+var _status_label: Label
+var _stats_label: Label
+var _mp_label: Label
 var _army_slots: Array[Panel] = []
 var _resource_labels: Dictionary = {}
-var _stat_labels: Dictionary = {}
-var _mp_label: Label
 var _hero_controller: HeroController
 
 
 func _ready() -> void:
     layer = 10
     _build_top_panel()
-    _build_hero_panel()
-    _build_army_panel()
-    _build_resource_panel()
+    _build_bottom_panel()
 
 
 func setup(hero: HeroController) -> void:
     _hero_controller = hero
     hero.movement_points_changed.connect(_on_mp_changed)
     hero.resources_changed.connect(_on_resources_changed)
+    hero.path_previewed.connect(_on_path_preview)
     refresh_all()
 
 
-# ===================== TOP PANEL =====================
+# ===================== TOP =====================
 func _build_top_panel() -> void:
     var p := PanelContainer.new()
     var s := StyleBoxFlat.new()
-    s.bg_color = Color(0.15, 0.12, 0.25, 0.9)
-    s.set_corner_radius_all(4)
+    s.bg_color = Color(0.09, 0.08, 0.16, 0.95)
     p.add_theme_stylebox_override("panel", s)
     p.set_anchors_preset(Control.PRESET_TOP_WIDE)
-    p.offset_bottom = 60
+    p.offset_bottom = 56
     add_child(p)
-    
+
     var hb := HBoxContainer.new()
-    hb.add_theme_constant_override("separation", 10)
+    hb.add_theme_constant_override("separation", 8)
     p.add_child(hb)
-    
-    # Дата
+
+    # Дата (как в прототипе, по-русски)
     _date_label = Label.new()
     _date_label.text = _fmt_date()
     _date_label.add_theme_font_size_override("font_size", 20)
-    _date_label.add_theme_color_override("font_color", Color(0.9, 0.85, 0.6))
+    _date_label.add_theme_color_override("font_color", Color(0.95, 0.9, 0.7))
     hb.add_child(_date_label)
-    
-    var sp := Control.new()
-    sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-    hb.add_child(sp)
-    
-    # Кнопки действий
+
+    hb.add_child(_spacer())
+
+    # NSWE
+    for d in ["N", "S", "W", "E"]:
+        var b := Button.new()
+        b.text = d
+        b.custom_minimum_size = Vector2(32, 32)
+        b.add_theme_font_size_override("font_size", 14)
+        b.pressed.connect(_on_camera_jump.bind(d))
+        hb.add_child(b)
+
+    hb.add_child(_spacer())
+
+    # Ресурсы (7 иконок со счётчиками)
+    var res_icons := [
+        ["wood", "🪵"], ["mercury", "🧪"], ["ore", "🪨"], ["sulfur", "🟡"],
+        ["crystal", "🔷"], ["gems", "💎"], ["gold", "🪙"],
+    ]
+    for ri in res_icons:
+        var l := Label.new()
+        l.text = "%s 0" % ri[1]
+        l.add_theme_font_size_override("font_size", 16)
+        l.add_theme_color_override("font_color", Color(0.85, 0.85, 0.7))
+        hb.add_child(l)
+        _resource_labels[ri[0]] = l
+
+    hb.add_child(_spacer())
+
+    # Кнопки действий (порядок как в прототипе)
     var btns := [
-        ["🏰", "Castle"], ["🚩", "Flag"], ["⛺", "Camp"],
-        ["🐎", "Stable"], ["🚢", "Ship"], ["⚒️", "Forge"],
-        ["🔍", "Scout"], ["🪖", "Army"], ["📜", "Journal"],
-        ["⏳", "End Turn"],
+        ["🏰", "Замок"], ["🚩", "Флаг"], ["⛺", "Лагерь"], ["🐎", "Конюшня"],
+        ["🚢", "Корабль"], ["⚒️", "Кузница"], ["🔍", "Разведка"], ["🪖", "Армия"],
+        ["📜", "Журнал"], ["⏳", "Конец хода"], ["🏰", "Королевство"],
     ]
     for b in btns:
         var btn := Button.new()
         btn.text = b[0]
         btn.tooltip_text = b[1]
-        btn.custom_minimum_size = Vector2(50, 44)
-        btn.add_theme_font_size_override("font_size", 22)
-        if b[1] == "End Turn":
+        btn.custom_minimum_size = Vector2(44, 40)
+        btn.add_theme_font_size_override("font_size", 20)
+        if b[1] == "Конец хода":
             btn.pressed.connect(_on_end_turn)
             btn.modulate = Color(1.0, 0.85, 0.4)
         hb.add_child(btn)
-    
-    # Камера: N S W E
-    for dir_name in ["N", "S", "W", "E"]:
-        var btn := Button.new()
-        btn.text = dir_name
-        btn.custom_minimum_size = Vector2(36, 36)
-        btn.add_theme_font_size_override("font_size", 16)
-        btn.pressed.connect(_on_camera_jump.bind(dir_name))
-        hb.add_child(btn)
 
 
-# ===================== HERO PANEL =====================
-func _build_hero_panel() -> void:
-    _hero_panel = PanelContainer.new()
+# ===================== BOTTOM =====================
+func _build_bottom_panel() -> void:
+    var p := PanelContainer.new()
     var s := StyleBoxFlat.new()
-    s.bg_color = Color(0.1, 0.1, 0.2, 0.85)
-    s.set_corner_radius_all(6)
-    s.set_border_width_all(2)
-    s.border_color = Color(0.4, 0.35, 0.6)
-    _hero_panel.add_theme_stylebox_override("panel", s)
-    _hero_panel.offset_left = 10
-    _hero_panel.offset_top = 70
-    _hero_panel.offset_right = 250
-    _hero_panel.offset_bottom = 350
-    add_child(_hero_panel)
-    
-    var vb := VBoxContainer.new()
-    vb.name = "VBox"
-    vb.add_theme_constant_override("separation", 8)
-    _hero_panel.add_child(vb)
-    
+    s.bg_color = Color(0.09, 0.08, 0.16, 0.95)
+    p.add_theme_stylebox_override("panel", s)
+    p.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+    p.offset_top = -96
+    add_child(p)
+
+    var hb := HBoxContainer.new()
+    hb.add_theme_constant_override("separation", 10)
+    p.add_child(hb)
+
+    # Герой: имя + статы inline + очки движения
+    var hv := VBoxContainer.new()
+    hv.add_theme_constant_override("separation", 2)
+    hb.add_child(hv)
+
     var nl := Label.new()
     nl.text = "Darkstorn"
-    nl.add_theme_font_size_override("font_size", 22)
+    nl.add_theme_font_size_override("font_size", 20)
     nl.add_theme_color_override("font_color", Color(1, 0.9, 0.5))
-    vb.add_child(nl)
-    
-    vb.add_child(HSeparator.new())
-    
-    var stats_data := [
-        ["⚔️", "attack", "Attack"],
-        ["🛡️", "defense", "Defense"],
-        ["🔮", "spell_power", "Spell"],
-        ["📖", "knowledge", "Know"],
-    ]
-    for sd in stats_data:
-        var l := Label.new()
-        l.name = sd[1]
-        l.text = "%s %s: 0" % [sd[0], sd[2]]
-        l.add_theme_font_size_override("font_size", 18)
-        vb.add_child(l)
-        _stat_labels[sd[1]] = l
-    
+    hv.add_child(nl)
+
+    _stats_label = Label.new()
+    _stats_label.text = "⚔️ 0 🛡️ 0 🔮 4 📖 2"
+    _stats_label.add_theme_font_size_override("font_size", 16)
+    hv.add_child(_stats_label)
+
     _mp_label = Label.new()
-    _mp_label.name = "MP"
-    _mp_label.text = "Move: 20/20"
-    _mp_label.add_theme_font_size_override("font_size", 16)
+    _mp_label.text = "👣 20/20"
+    _mp_label.add_theme_font_size_override("font_size", 14)
     _mp_label.add_theme_color_override("font_color", Color(0.6, 0.9, 0.6))
-    vb.add_child(_mp_label)
+    hv.add_child(_mp_label)
 
+    # Тумблеры как в прототипе
+    for t in ["🛡️", "⚔️"]:
+        var b := Button.new()
+        b.text = t
+        b.custom_minimum_size = Vector2(36, 36)
+        b.tooltip_text = "Панель героя"
+        hb.add_child(b)
 
-# ===================== ARMY PANEL =====================
-func _build_army_panel() -> void:
-    var bp := PanelContainer.new()
-    var s := StyleBoxFlat.new()
-    s.bg_color = Color(0.12, 0.1, 0.18, 0.9)
-    s.set_corner_radius_all(4)
-    bp.add_theme_stylebox_override("panel", s)
-    bp.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-    bp.offset_top = -90
-    add_child(bp)
-    
-    var hb := HBoxContainer.new()
-    hb.name = "HBox"
-    hb.alignment = BoxContainer.ALIGNMENT_CENTER
-    hb.add_theme_constant_override("separation", 8)
-    bp.add_child(hb)
-    
+    hb.add_child(VSeparator.new())
+
+    # 8 слотов армии
     for i in 8:
         var slot := Panel.new()
         slot.name = "Slot%d" % i
-        slot.custom_minimum_size = Vector2(90, 70)
+        slot.custom_minimum_size = Vector2(84, 76)
         var ss := StyleBoxFlat.new()
-        ss.bg_color = Color(0.2, 0.18, 0.28)
+        ss.bg_color = Color(0.16, 0.14, 0.24)
         ss.set_corner_radius_all(4)
+        ss.set_border_width_all(1)
+        ss.border_color = Color(0.35, 0.3, 0.5)
         slot.add_theme_stylebox_override("panel", ss)
-        
+
         var svb := VBoxContainer.new()
         svb.name = "VBox"
         svb.alignment = BoxContainer.ALIGNMENT_CENTER
         slot.add_child(svb)
-        
+
         var ic := Label.new()
         ic.name = "Icon"
         ic.text = "-"
         ic.add_theme_font_size_override("font_size", 24)
         ic.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
         svb.add_child(ic)
-        
+
         var ct := Label.new()
         ct.name = "Count"
         ct.text = "0"
@@ -181,48 +178,30 @@ func _build_army_panel() -> void:
         ct.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
         ct.add_theme_color_override("font_color", Color(0.9, 0.9, 0.7))
         svb.add_child(ct)
-        
+
         hb.add_child(slot)
         _army_slots.append(slot)
 
+    hb.add_child(_spacer())
 
-# ===================== RESOURCE PANEL =====================
-func _build_resource_panel() -> void:
-    var rp := HBoxContainer.new()
-    rp.name = "ResourcePanel"
-    rp.set_anchors_preset(Control.PRESET_TOP_WIDE)
-    rp.offset_top = 62
-    rp.offset_bottom = 92
-    rp.alignment = BoxContainer.ALIGNMENT_CENTER
-    rp.add_theme_constant_override("separation", 20)
-    add_child(rp)
-    
-    var res_icons := [
-        ["wood", "🪵"], ["mercury", "🧪"], ["ore", "🪨"],
-        ["sulfur", "🟡"], ["crystal", "🔷"], ["gems", "💎"], ["gold", "🪙"],
-    ]
-    for ri in res_icons:
-        var l := Label.new()
-        l.text = "%s 0" % ri[1]
-        l.add_theme_font_size_override("font_size", 16)
-        l.add_theme_color_override("font_color", Color(0.85, 0.85, 0.7))
-        rp.add_child(l)
-        _resource_labels[ri[0]] = l
+    # Статус-строка (предпросмотр пути и т.п.)
+    _status_label = Label.new()
+    _status_label.text = ""
+    _status_label.add_theme_font_size_override("font_size", 14)
+    _status_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.6))
+    hb.add_child(_status_label)
 
 
 # ===================== REFRESH =====================
 func refresh_all() -> void:
     if not _hero_controller:
         return
-    
-    # Статы
-    for k in _stat_labels:
-        _stat_labels[k].text = "%s: %d" % [k, _hero_controller.stats.get(k, 0)]
-    
-    # Армия
+    var st: Dictionary = _hero_controller.stats
+    _stats_label.text = "⚔️ %d 🛡️ %d 🔮 %d  %d" % [
+        st.get("attack", 0), st.get("defense", 0),
+        st.get("spell_power", 0), st.get("knowledge", 0)]
     for i in range(8):
-        var slot: Panel = _army_slots[i]
-        var vbox := slot.get_node("VBox")
+        var vbox: VBoxContainer = _army_slots[i].get_node("VBox")
         var ic: Label = vbox.get_node("Icon")
         var ct: Label = vbox.get_node("Count")
         if i < _hero_controller.army.size():
@@ -231,8 +210,6 @@ func refresh_all() -> void:
         else:
             ic.text = "-"
             ct.text = "0"
-    
-    # Ресурсы
     _update_resources()
 
 
@@ -240,8 +217,8 @@ func _update_resources() -> void:
     if not _hero_controller:
         return
     var icons := {
-        "wood": "🪵", "mercury": "🧪", "ore": "🪨",
-        "sulfur": "🟡", "crystal": "🔷", "gems": "💎", "gold": "🪙",
+        "wood": "🪵", "mercury": "🧪", "ore": "🪨", "sulfur": "🟡",
+        "crystal": "🔷", "gems": "💎", "gold": "🪙",
     }
     for k in _resource_labels:
         _resource_labels[k].text = "%s %d" % [icons[k], _hero_controller.resources.get(k, 0)]
@@ -250,14 +227,19 @@ func _update_resources() -> void:
 # ===================== SIGNALS =====================
 func _on_mp_changed(cur: int, mx: int) -> void:
     if _mp_label:
-        _mp_label.text = "Move: %d/%d" % [cur, mx]
+        _mp_label.text = "👣 %d/%d" % [cur, mx]
 
 
-func _on_resources_changed(res: Dictionary) -> void:
+func _on_resources_changed(_r: Dictionary) -> void:
     _update_resources()
 
 
-# ===================== DATE =====================
+func _on_path_preview(text: String) -> void:
+    if _status_label:
+        _status_label.text = text
+
+
+# ===================== DATE / BUTTONS =====================
 func advance_day() -> void:
     day += 1
     if day > 7:
@@ -271,10 +253,9 @@ func advance_day() -> void:
 
 
 func _fmt_date() -> String:
-    return "Month: %d, Week: %d, Day: %d" % [month, week, day]
+    return "Месяц: %d, Неделя: %d, День: %d" % [month, week, day]
 
 
-# ===================== BUTTON HANDLERS =====================
 func _on_end_turn() -> void:
     advance_day()
     end_turn_pressed.emit()
@@ -284,3 +265,9 @@ func _on_camera_jump(direction: String) -> void:
     var world := get_parent()
     if world and world.has_method("jump_camera"):
         world.jump_camera(direction)
+
+
+func _spacer() -> Control:
+    var sp := Control.new()
+    sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+    return sp

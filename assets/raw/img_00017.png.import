@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://hiiirdlabfte"
-path="res://.godot/imported/a_измени_бином_на_пуст-2.jpeg-478b459244d6c948d7d5b4ca09296a5e.ctex"
+uid="uid://yqx8q06kgs28"
+path="res://.godot/imported/img_00017.png-11becc4db238735a852ba4e1f3df1330.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/raw/a_измени_бином_на_пуст-2.jpeg"
-dest_files=["res://.godot/imported/a_измени_бином_на_пуст-2.jpeg-478b459244d6c948d7d5b4ca09296a5e.ctex"]
+source_file="res://assets/raw/img_00017.png"
+dest_files=["res://.godot/imported/img_00017.png-11becc4db238735a852ba4e1f3df1330.ctex"]
 
 [params]
 
