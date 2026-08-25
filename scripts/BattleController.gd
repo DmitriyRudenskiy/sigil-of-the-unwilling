@@ -1,15 +1,13 @@
 extends Node2D
 class_name BattleController
-## Боевой режим по prototype_var.html:
-## клик по своему существу -> подсветка гексов хода -> клик -> перемещение (tween по пути)
-## атака по соседу без реталиации; очередь ходов по скорости
+## Бой v2: cover-зум без чёрных краёв (кольцо травы), армии с отступом,
+## яркая подсветка контурами, надёжный выбор юнитов (_input + pixel fallback)
 
 signal battle_finished(winner: String, surviving_atk: Array, surviving_def: Array)
 
-const _UnitRegistry = preload("res://scripts/UnitRegistry.gd")
-
 const BW := 17
 const BH := 11
+const RING := 3  # декоративное кольцо клеток вокруг поля
 
 var attacker_units: Array[Dictionary] = []
 var defender_units: Array[Dictionary] = []
@@ -23,8 +21,7 @@ var turn_queue: Array[Dictionary] = []
 var turn_idx := 0
 
 var _tile_map: TileMapLayer
-var _hl_move: TileMapLayer
-var _hl_atk: TileMapLayer
+var _overlay: HighlightOverlay
 var _sprites: Array[Node2D] = []
 var _status: Label
 var _canvas: CanvasLayer
@@ -33,45 +30,67 @@ var _camera: Camera2D
 var _uid := 0
 
 
+# ==================== ОВЕРЛЕЙ ПОДСВЕТКИ ====================
+class HighlightOverlay extends Node2D:
+	var move_cells: Dictionary = {}
+	var atk_cells: Dictionary = {}
+	var tm: TileMapLayer
+
+	func refresh() -> void:
+		queue_redraw()
+
+	func _draw() -> void:
+		if tm == null:
+			return
+		for k in move_cells:
+			var c: Vector2i = k
+			_hex(tm.map_to_local(c), Color(0.2, 0.9, 1.0, 0.95))
+		for k in atk_cells:
+			var c: Vector2i = k
+			_hex(tm.map_to_local(c), Color(1.0, 0.25, 0.2, 0.95))
+
+	func _hex(center: Vector2, col: Color) -> void:
+		var pts := PackedVector2Array()
+		for i in 7:
+			var ang := deg_to_rad(60.0 * i - 90.0)
+			pts.append(center + Vector2(cos(ang), sin(ang)) * 38.0)
+		draw_polyline(pts, col, 3.0)
+
+
+# ==================== READY ====================
 func _ready() -> void:
-	print("[Battle] Initializing combat scene...")
-	_setup_background()
-	
 	_tile_map = TileMapLayer.new()
 	_tile_map.name = "BattleTerrain"
 	_tile_map.tile_set = load("res://tilesets/hex_tileset.tres")
 	add_child(_tile_map)
 	HexUtils.calibrate(_tile_map)
 
-	_hl_move = TileMapLayer.new()
-	_hl_move.modulate = Color(0.3, 0.8, 1.0, 0.5)
-	add_child(_hl_move)
-	_hl_atk = TileMapLayer.new()
-	_hl_atk.modulate = Color(1.0, 0.2, 0.2, 0.6)
-	add_child(_hl_atk)
+	_overlay = HighlightOverlay.new()
+	_overlay.tm = _tile_map
+	_overlay.z_index = 5
+	add_child(_overlay)
 
 	_paint_field()
 	_place_obstacles()
 
-	_build_ui()  # до await — чтобы _status существовал при start_battle()
-
 	_camera = Camera2D.new()
 	add_child(_camera)
 	_camera.make_current()
-	await get_tree().process_frame   # дождаться реального размера viewport
-	_fit_camera()
 
-	_fade_in()
+	_build_ui()
+
+	await get_tree().process_frame
+	_fit_camera()
 
 
 func _paint_field() -> void:
 	var grass: Vector2i = TerrainAtlasMap.CENTER_COORDS[HexUtils.Terrain.GRASS]
+	var vars: Array = TerrainAtlasMap.VARIANTS.get(HexUtils.Terrain.GRASS, [])
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 42
-	for y in BH:
-		for x in BW:
+	for y in range(-RING, BH + RING):
+		for x in range(-RING, BW + RING):
 			var coords := grass
-			var vars: Array = TerrainAtlasMap.VARIANTS.get(HexUtils.Terrain.GRASS, [])
 			if vars.size() > 0 and rng.randf() < 0.5:
 				coords = vars[rng.randi_range(0, vars.size() - 1)]
 			_tile_map.set_cell(Vector2i(x, y), TerrainAtlasMap.SOURCE_ID, coords)
@@ -82,7 +101,7 @@ func _place_obstacles() -> void:
 	rng.seed = 777
 	var n := 0
 	while n < 8:
-		var cell := Vector2i(rng.randi_range(3, BW - 4), rng.randi_range(1, BH - 2))
+		var cell := Vector2i(rng.randi_range(4, BW - 5), rng.randi_range(1, BH - 2))
 		if obstacles.has(cell):
 			continue
 		obstacles[cell] = true
@@ -95,6 +114,38 @@ func _place_obstacles() -> void:
 		n += 1
 
 
+func _fit_camera() -> void:
+	if _tile_map.tile_set == null:
+		return
+	var used: Rect2i = _tile_map.get_used_rect()
+	if used.size.x <= 0 or used.size.y <= 0:
+		return
+	var p0 := _tile_map.map_to_local(used.position)
+	var p1 := _tile_map.map_to_local(used.position + used.size - Vector2i(1, 1))
+	var field_sz := Vector2(absf(p1.x - p0.x) + 60.0, absf(p1.y - p0.y) + 60.0)
+	var center := (p0 + p1) / 2.0
+	var vp_sz := get_viewport().get_visible_rect().size
+	var z: float = maxf(vp_sz.x / field_sz.x, vp_sz.y / field_sz.y)
+	_camera.zoom = Vector2(z, z)
+	_camera.position = center
+
+
+func _spawn_hero_figure() -> void:
+	var path := UnitSprites.find_portrait("hero_knight")
+	if path == "":
+		path = UnitSprites.find_portrait("knight")
+	if path == "":
+		return
+	var hero := Sprite2D.new()
+	hero.texture = load(path)
+	hero.scale = Vector2(0.7, 0.7)
+	hero.flip_h = true
+	hero.position = _tile_map.map_to_local(Vector2i(1, 1))
+	hero.z_index = 7
+	add_child(hero)
+
+
+# ==================== UI ====================
 func _build_ui() -> void:
 	_canvas = CanvasLayer.new()
 	_canvas.layer = 10
@@ -121,55 +172,56 @@ func _build_ui() -> void:
 	_bottom_bar.add_theme_constant_override("separation", 10)
 	_canvas.add_child(_bottom_bar)
 
-	# Золотые иконки по ДОПОЛНЕНИЮ №3
 	var btns := [
-		["res://assets/ui/icons/expand.png", "Настройки/пауза", "_on_settings", "⚙️"],
-		["res://assets/ui/icons/flag.png", "Отступление", "_on_retreat", "🏕️"],
-		["res://assets/ui/icons/horse4.png", "Ждать", "_on_wait", "🏃"],
-		["res://assets/ui/icons/atk_sword.png", "Атака", "_on_attack_mode", "⚔️"],
-		["res://assets/ui/icons/point.png", "Свернуть панель", "_on_collapse", "▲"],
-		["res://assets/ui/icons/spell.png", "Книга заклинаний", "_on_spellbook", "📖"],
-		["res://assets/ui/icons/hourglass2.png", "Пропуск хода", "_on_skip", "⏳"],
-		["res://assets/ui/icons/helm.png", "Защита", "_on_defend", "🛡️"],
+		["⚙️", "Настройки/пауза", "_on_settings"],
+		["🏕️", "Отступление", "_on_retreat"],
+		["🏃", "Ждать", "_on_wait"],
+		["⚔️", "Атака", "_on_attack_mode"],
+		["▲", "Свернуть панель", "_on_collapse"],
+		["📖", "Книга заклинаний", "_on_spellbook"],
+		["⏳", "Пропуск хода", "_on_skip"],
+		["🛡️", "Защита", "_on_defend"],
 	]
 	for b in btns:
 		var btn := Button.new()
+		btn.text = b[0]
 		btn.tooltip_text = b[1]
 		btn.custom_minimum_size = Vector2(56, 48)
+		btn.add_theme_font_size_override("font_size", 22)
 		btn.pressed.connect(Callable(self, b[2]))
-		_apply_icon(btn, b[0], b[3])
 		_bottom_bar.add_child(btn)
 
 
-# ===================== START =====================
+# ==================== START ====================
 func start_battle(atk: Array[Dictionary], def: Array[Dictionary]) -> void:
 	attacker_units = _place_army(atk, true)
 	defender_units = _place_army(def, false)
+	_spawn_hero_figure()
 	_build_queue()
+	_fit_camera()
 	_next_turn()
-	_fit_camera()  # страховка после расстановки армий
 
 
 func _place_army(army: Array[Dictionary], is_atk: bool) -> Array[Dictionary]:
 	var units: Array[Dictionary] = []
-	var sx := 1 if is_atk else BW - 2
+	var sx := 2 if is_atk else BW - 3   # отступ от краёв, чтобы не срезало зумом
 	for i in army.size():
 		var s: Dictionary = army[i].duplicate()
 		if s.get("count", 0) <= 0:
 			continue
-			
-		# Дозаполнение статов из реестра по ключу
-		var key: String = s.get("key", "")
-		if key != "" and _UnitRegistry.UNITS.has(key):
-			var reg_data: Array = _UnitRegistry.UNITS[key]
-			s["name"] = reg_data[0]
-			s["base_damage"] = reg_data[1]
-			s["hp"] = reg_data[2]
-			s["speed"] = reg_data[3]
-			s["defense"] = reg_data[4]
-			
-		var row := clampi(1 + i * 2, 0, BH - 1)
-		s["cell"] = Vector2i(sx, row)
+		if UnitRegistry.UNITS.has(s.get("key", "")):
+			var ru: Array = UnitRegistry.UNITS[s["key"]]
+			if not s.has("base_damage"):
+				s["base_damage"] = ru[1]
+			if not s.has("hp"):
+				s["hp"] = ru[2]
+			if not s.has("speed"):
+				s["speed"] = ru[3]
+			if not s.has("defense"):
+				s["defense"] = ru[4]
+			s["name"] = ru[0]
+		var cell := Vector2i(sx + (i % 2), (i / 2) * 2 + 1)
+		s["cell"] = cell
 		s["side"] = "attacker" if is_atk else "defender"
 		s["alive"] = true
 		s["has_moved"] = false
@@ -182,12 +234,15 @@ func _place_army(army: Array[Dictionary], is_atk: bool) -> Array[Dictionary]:
 
 func _make_unit_sprite(u: Dictionary) -> void:
 	var n := Node2D.new()
-	var sp := Sprite2D.new()
-	
-	# Приоритет: Портрет -> Эмодзи-круг
-	var portrait_path := UnitSprites.find_portrait(u.get("name", "").to_lower().replace(" ", "_"))
-	if portrait_path == "":
-		# Фолбэк: рисование цветного круга с эмодзи
+	var key: String = u.get("key", "")
+	var ppath := UnitSprites.find_portrait(key)
+	if ppath != "":
+		var sp := Sprite2D.new()
+		sp.texture = load(ppath)
+		sp.scale = Vector2(0.5, 0.5)
+		sp.flip_h = (u["side"] == "attacker")
+		n.add_child(sp)
+	else:
 		var col := Color(0.2, 0.5, 0.9) if u["side"] == "attacker" else Color(0.9, 0.3, 0.2)
 		var img := Image.create(52, 52, false, Image.FORMAT_RGBA8)
 		var c := Vector2(26, 26)
@@ -198,24 +253,20 @@ func _make_unit_sprite(u: Dictionary) -> void:
 					img.set_pixel(x, y, col)
 				elif d <= 24:
 					img.set_pixel(x, y, Color(0.1, 0.1, 0.1))
+		var sp := Sprite2D.new()
 		sp.texture = ImageTexture.create_from_image(img)
-	else:
-		sp.texture = load(portrait_path)
-		if u["side"] == "defender":
-			sp.flip_h = true
-	
-	n.add_child(sp)
-	var il := Label.new()
-	il.text = u.get("icon", "?")
-	il.add_theme_font_size_override("font_size", 20)
-	il.position = Vector2(-10, -14)
-	n.add_child(il)
+		n.add_child(sp)
+		var il := Label.new()
+		il.text = u.get("icon", "?")
+		il.add_theme_font_size_override("font_size", 20)
+		il.position = Vector2(-10, -14)
+		n.add_child(il)
 	var cl := Label.new()
 	cl.name = "CountLabel"
 	cl.text = str(u["count"])
 	cl.add_theme_font_size_override("font_size", 13)
 	cl.add_theme_color_override("font_color", Color.WHITE)
-	cl.position = Vector2(-10, 10)
+	cl.position = Vector2(-10, 24)
 	n.add_child(cl)
 	n.position = _tile_map.map_to_local(u["cell"])
 	n.z_index = 6
@@ -224,7 +275,7 @@ func _make_unit_sprite(u: Dictionary) -> void:
 	_sprites.append(n)
 
 
-# ===================== TURNS =====================
+# ==================== TURNS ====================
 func _build_queue() -> void:
 	turn_queue.clear()
 	turn_queue.append_array(attacker_units)
@@ -267,16 +318,12 @@ func _end_turn() -> void:
 	_next_turn()
 
 
-# ===================== INPUT =====================
+# ==================== INPUT ====================
 func _input(ev: InputEvent) -> void:
 	if battle_over or not is_player_turn:
 		return
 	if not (ev is InputEventMouseButton) or not ev.pressed:
 		return
-	# клики по кнопкам/панелям не перехватываем
-	if get_viewport().gui_get_hovered_control() != null:
-		return
-
 	if ev.button_index == MOUSE_BUTTON_RIGHT:
 		_clear_highlights()
 		_status.text = "Выберите существо…"
@@ -286,8 +333,6 @@ func _input(ev: InputEvent) -> void:
 
 	var world_pos := get_global_mouse_position()
 	var cell := _tile_map.local_to_map(world_pos)
-	if cell.x < 0 or cell.x >= BW or cell.y < 0 or cell.y >= BH:
-		return
 
 	if highlight_attack.has(cell):
 		_do_attack(active_unit, _unit_at(cell, "defender"))
@@ -296,14 +341,31 @@ func _input(ev: InputEvent) -> void:
 		_do_move(active_unit, cell)
 		return
 
-	# выбор своего юнита: по клетке, а если не совпало — по пикселям
 	var own := _unit_at(cell, "attacker")
 	if own.size() == 0:
 		own = _unit_at_pixel(world_pos, "attacker")
 	if own.size() > 0 and not own.get("has_moved", false):
 		_select(own)
 		return
-	print("[Battle] click -> ", cell, " (пусто)")
+	print("[Battle] click -> ", cell)
+
+
+func _unit_at(cell: Vector2i, side: String) -> Dictionary:
+	var units := attacker_units if side == "attacker" else defender_units
+	for u in units:
+		if u.get("alive", false) and u.get("cell", Vector2i(-1, -1)) == cell:
+			return u
+	return {}
+
+
+func _unit_at_pixel(pos: Vector2, side: String) -> Dictionary:
+	var units := attacker_units if side == "attacker" else defender_units
+	for u in units:
+		if u.get("alive", false):
+			var up := _tile_map.map_to_local(u["cell"])
+			if pos.distance_to(up) < 45.0:
+				return u
+	return {}
 
 
 func _select(u: Dictionary) -> void:
@@ -311,21 +373,23 @@ func _select(u: Dictionary) -> void:
 	_clear_highlights()
 	var blocked := _all_blocked(u)
 	highlight_move = HexUtils.bfs_reachable(u["cell"], u.get("speed", 5), blocked, BW, BH)
-	for c in highlight_move:
-		_hl_move.set_cell(c, TerrainAtlasMap.SOURCE_ID, _grass_coords())
 	for nb in HexUtils.get_all_neighbors(u["cell"]):
 		var en := _unit_at(nb, "defender")
 		if en.size() > 0:
 			highlight_attack[nb] = 1
-			_hl_atk.set_cell(nb, TerrainAtlasMap.SOURCE_ID, _grass_coords())
-	_status.text = "%s: клик по гексу — ход, по врагу — атака." % u.get("name", "")
+	_overlay.move_cells = highlight_move
+	_overlay.atk_cells = highlight_attack
+	_overlay.refresh()
+	_status.text = "%s: синий контур — ход, красный — атака." % u.get("name", "")
+	print("[Battle] selected ", u.get("name"), " moves=", highlight_move.size())
 
 
 func _clear_highlights() -> void:
 	highlight_move.clear()
 	highlight_attack.clear()
-	_hl_move.clear()
-	_hl_atk.clear()
+	_overlay.move_cells.clear()
+	_overlay.atk_cells.clear()
+	_overlay.refresh()
 
 
 func _all_blocked(except: Dictionary) -> Dictionary:
@@ -341,11 +405,7 @@ func _all_blocked(except: Dictionary) -> Dictionary:
 	return b
 
 
-func _grass_coords() -> Vector2i:
-	return TerrainAtlasMap.CENTER_COORDS[HexUtils.Terrain.GRASS]
-
-
-# ===================== ACTIONS =====================
+# ==================== ACTIONS ====================
 func _do_move(u: Dictionary, target: Vector2i) -> void:
 	var blocked := _all_blocked(u)
 	var path := HexUtils.bfs_path(u["cell"], target, blocked, BW, BH)
@@ -361,9 +421,14 @@ func _animate(u: Dictionary, path: Array[Vector2i]) -> void:
 	var node := _find_node(u)
 	if node == null or path.size() < 2:
 		return
+	var an := node.get_node_or_null("Anim")
+	if an != null:
+		an.play()
 	var tw := create_tween()
 	for i in range(1, path.size()):
 		tw.tween_property(node, "position", _tile_map.map_to_local(path[i]), 0.12)
+	if an != null:
+		tw.tween_callback(an.stop)
 
 
 func _do_attack(atk: Dictionary, def: Dictionary) -> void:
@@ -402,7 +467,7 @@ func _do_attack(atk: Dictionary, def: Dictionary) -> void:
 		_end_turn()
 
 
-# ===================== AI =====================
+# ==================== AI ====================
 func _ai_turn() -> void:
 	if battle_over:
 		return
@@ -426,10 +491,8 @@ func _ai_turn() -> void:
 	if path.size() > 1:
 		var steps := mini(u.get("speed", 5), path.size() - 1)
 		var target: Vector2i = path[steps]
-		# если встали вплотную — атакуем
-		var adj := HexUtils.get_all_neighbors(target)
 		var victim: Dictionary = {}
-		for a in adj:
+		for a in HexUtils.get_all_neighbors(target):
 			var au := _unit_at(a, "attacker")
 			if au.size() > 0:
 				victim = au
@@ -444,23 +507,20 @@ func _ai_turn() -> void:
 	_end_turn()
 
 
-# ===================== BUTTONS =====================
+# ==================== BUTTONS ====================
 func _on_settings() -> void:
 	_status.text = "⚙️ Пауза (в прототипе не реализовано)"
-
 
 func _on_retreat() -> void:
 	battle_over = true
 	_status.text = "Отступление!"
 	battle_finished.emit("defender", _surv(attacker_units), _surv(defender_units))
 
-
 func _on_wait() -> void:
 	if active_unit.size() > 0 and is_player_turn:
 		turn_queue.erase(active_unit)
 		turn_queue.append(active_unit)
 		_end_turn()
-
 
 func _on_attack_mode() -> void:
 	if active_unit.size() == 0 or not is_player_turn:
@@ -470,23 +530,20 @@ func _on_attack_mode() -> void:
 		var en := _unit_at(nb, "defender")
 		if en.size() > 0:
 			highlight_attack[nb] = 1
-			_hl_atk.set_cell(nb, TerrainAtlasMap.SOURCE_ID, _grass_coords())
-	_status.text = "⚔️ Кликните подсвеченного врага."
-
+	_overlay.atk_cells = highlight_attack
+	_overlay.refresh()
+	_status.text = "⚔️ Кликните врага с красным контуром."
 
 func _on_collapse() -> void:
 	_bottom_bar.visible = not _bottom_bar.visible
 
-
 func _on_spellbook() -> void:
 	_status.text = "📖 Книга заклинаний: в прототипе не реализовано"
-
 
 func _on_skip() -> void:
 	if is_player_turn and active_unit.size() > 0:
 		active_unit["has_moved"] = true
 		_end_turn()
-
 
 func _on_defend() -> void:
 	if is_player_turn and active_unit.size() > 0:
@@ -496,67 +553,7 @@ func _on_defend() -> void:
 		_end_turn()
 
 
-func _apply_icon(btn: Button, icon_path: String, fallback: String) -> void:
-	if FileAccess.file_exists(icon_path):
-		btn.icon = load(icon_path)
-		btn.text = ""
-		btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		btn.expand_icon = true
-	else:
-		btn.text = fallback
-func _fit_camera() -> void:
-	if _tile_map == null or _tile_map.tile_set == null:
-		return
-	var used: Rect2i = _tile_map.get_used_rect()
-	if used.size.x <= 0 or used.size.y <= 0:
-		return
-	var p0 := _tile_map.map_to_local(used.position)
-	var p1 := _tile_map.map_to_local(used.position + used.size - Vector2i(1, 1))
-	var field_sz := Vector2(absf(p1.x - p0.x) + 90.0, absf(p1.y - p0.y) + 90.0)
-	var center := (p0 + p1) / 2.0
-	var vp_sz := get_viewport().get_visible_rect().size
-	var z: float = maxf(vp_sz.x / field_sz.x, vp_sz.y / field_sz.y)
-	_camera.zoom = Vector2(z, z)
-	_camera.position = center
-
-func _setup_background() -> void:
-	var bg_layer := CanvasLayer.new()
-	bg_layer.layer = -1
-	add_child(bg_layer)
-	var bg := ColorRect.new()
-	bg.color = Color(0.05, 0.05, 0.07, 1.0)
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	bg_layer.add_child(bg)
-
-func _fade_in() -> void:
-	var fade_layer := CanvasLayer.new()
-	fade_layer.layer = 100
-	add_child(fade_layer)
-	var fade := ColorRect.new()
-	fade.color = Color.BLACK
-	fade.set_anchors_preset(Control.PRESET_FULL_RECT)
-	fade_layer.add_child(fade)
-	var tw := create_tween()
-	tw.tween_property(fade, "color:a", 0.0, 0.5)
-	tw.tween_callback(fade_layer.queue_free)
-
-func _unit_at(cell: Vector2i, side: String) -> Dictionary:
-	var units := attacker_units if side == "attacker" else defender_units
-	for u in units:
-		if u.get("alive", false) and u.get("cell", Vector2i(-1, -1)) == cell:
-			return u
-	return {}
-
-func _unit_at_pixel(pos: Vector2, side: String) -> Dictionary:
-	var units := attacker_units if side == "attacker" else defender_units
-	for u in units:
-		if u.get("alive", false):
-			var up := _tile_map.map_to_local(u["cell"])
-			if pos.distance_to(up) < 45.0:
-				return u
-	return {}
-
-
+# ==================== UTILS ====================
 func _find_node(u: Dictionary) -> Node2D:
 	for n in _sprites:
 		if n.get_meta("uid", -1) == u.get("uid", -2):
