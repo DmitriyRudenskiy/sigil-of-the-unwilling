@@ -98,7 +98,7 @@ func duplicate() -> BattleState:
 func place_army(attacker_stacks: Array, defender_stacks: Array) -> void:
 	attacker_units = _build_units(attacker_stacks, true)
 	defender_units = _build_units(defender_stacks, false)
-	_invalidate_board_cache()
+	invalidate_board_cache()
 
 
 func _build_units(stacks: Array, is_atk: bool) -> Array[BattleUnit]:
