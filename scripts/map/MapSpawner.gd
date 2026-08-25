@@ -62,9 +62,9 @@ func place_enemies() -> void:
 		if not model.is_walkable(cell) or model.enemy_stacks.has(cell) or cell in model.village_cells or model.resource_cells.has(cell):
 			continue
 
-		var faction_idx: int = rng.randi_range(0, UnitRegistry.FACTION_SETS.size() - 1)
+				var faction_idx: int = rng.randi_range(0, UnitRegistry.FACTION_SETS.size() - 1)
 		var faction_pool: Array = UnitRegistry.FACTION_SETS[faction_idx]
-		var army: Array = []
+		var army: Array[UnitStack] = []
 		for i in rng.randi_range(1, 3):
 			var unit_key: String = faction_pool[rng.randi_range(0, faction_pool.size() - 1)]
 			var stack = UnitRegistry.make_stack(unit_key, rng)

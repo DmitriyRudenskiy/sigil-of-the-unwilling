@@ -20,7 +20,7 @@ var height_grid: Dictionary = {}
 var village_cells: Array[Vector2i] = []
 var resource_cells: Dictionary = {}
 var decor_cells: Dictionary = {}
-var enemy_stacks: Dictionary = {}
+var enemy_stacks: Dictionary[Vector2i, Array[UnitStack]] = {}
 
 
 func generate_noise() -> void:
