@@ -9,6 +9,7 @@ const ZOOM_TWEEN_DURATION := 0.175
 # Map bounds in world coords — set after map generation
 var _map_rect: Rect2 = Rect2(0, 0, 10000, 10000)  # generous default
 var _tween: Tween = null
+var _settings = null
 
 func _get_settings():
 	# Works in editor/runtime; null in headless
@@ -19,17 +20,16 @@ func _get_settings():
 
 func _ready() -> void:
 	position_smoothing_enabled = true
-	# Apply saved zoom on start
-	var s = _get_settings()
-	if s:
-		_set_zoom(s.get_zoom())
+	_settings = _get_settings()
+	if _settings:
+		_set_zoom(_settings.get_zoom())
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	# +/- zoom steps (no scroll zoom)
-	var s = _get_settings()
-	if not s:
+	if _settings == null:
 		return
+	var s = _settings
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_EQUAL or event.keycode == KEY_KP_ADD:
 			var delta: int = s.step_zoom(1)

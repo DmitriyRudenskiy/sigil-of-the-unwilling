@@ -186,7 +186,7 @@ func _execute_command(cmd: String, args: Dictionary) -> Variant:
 			return _cmd_wait_hours(wc, h)
 		
 		"challenge":
-			var mid := args.get("monster_id", -1)
+			var mid: int = args.get("monster_id", -1)
 			return _cmd_challenge(wc, mid)
 		
 		"get_battle_state":
@@ -209,11 +209,12 @@ func _execute_command(cmd: String, args: Dictionary) -> Variant:
 func _get_game_state(wc: WorldController) -> Dictionary:
 	var hero: HeroController = wc._hero
 	var session: GameSession = wc._session
+	var ts = hero.get("time")
 	return {
 		"hero": {
 			"pos": hero.current_cell,
 			"mp": hero.movement.current_mp,
-			"hour": hero.get("time").current_hour if hero.get("time") else 0,
+			"hour": ts.current_hour if ts else 0.0,
 		},
 		"collected": {
 			"total": hero.inventory.total_items,
@@ -278,14 +279,17 @@ func _cmd_collect_here(wc: WorldController) -> Dictionary:
 
 func _cmd_wait_hours(wc: WorldController, h: int) -> Dictionary:
 	# Simplified wait: subtract MP or just advance time
-	wc._hero.time.advance_hours(h)
+	var time_sys = wc._hero.get("time")
+	if time_sys:
+		time_sys.advance_hours(h)
 	return {"status": "waited", "hours": h}
 
 func _cmd_challenge(wc: WorldController, mid: int) -> Dictionary:
 	# In a real game, we'd find the monster at the hero's cell
 	var cell: Vector2i = wc._hero.current_cell
 	if wc._map_gen.enemy_stacks.has(cell):
-		wc.battle_coordinator.start_battle(cell)
+		var enemy_army: Array[UnitStack] = wc._map_gen.enemy_stacks[cell]
+		wc.battle_coordinator.start_battle(enemy_army, cell)
 		return {"status": "battle_started"}
 	return {"error": "No monster here"}
 
@@ -304,12 +308,18 @@ func _cmd_battle_retreat(wc: WorldController) -> Dictionary:
 	wc._battle_flow.retreat()
 	return {"status": "retreated"}
 
-func _cmd_debug_unlock(wc) -> Dictionary:
-	var hero = wc._hero
-	for skill in ["nature_sense", "keen_eye", "navigation", "geology", "alchemy"]:
-		hero.skills.set_skill(skill, 3)
-	for tool in ["pickaxe", "shovel", "compass"]:
-		hero.tools.add_tool(tool)
+func _cmd_debug_unlock(wc: WorldController) -> Dictionary:
+	var hero: HeroController = wc._hero
+	var skills = hero.get("skills")
+	if skills:
+		for skill in ["nature_sense", "keen_eye", "navigation", "geology", "alchemy"]:
+			skills.set(skill, 3)
+	
+	var tools = hero.get("tools")
+	if tools:
+		for tool in ["pickaxe", "shovel", "compass"]:
+			tools.add_tool(tool)
+	
 	# Add workers
 	hero.army.add_unit("worker", 1)
 	hero.army.add_unit("miner", 1)

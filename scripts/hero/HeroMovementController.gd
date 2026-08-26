@@ -6,6 +6,7 @@ signal hero_moved(cell: Vector2i)
 signal movement_points_changed(current: float, max_val: float)
 signal path_previewed(text: String)
 signal hero_entered_village(cell: Vector2i)
+signal step_taken(cost: float)
 signal reach_preview_changed(pts: Array[Vector2i], dist: Dictionary, mp: float)
 signal reach_preview_cleared
 
@@ -150,6 +151,7 @@ func _move_next_step() -> void:
 	# Update time system
 	if _parent and _parent.has_method("_on_time_update"):
 		_parent._on_time_update(step_cost)
+	step_taken.emit(step_cost)
 
 	var delta := next_cell - current_cell
 	_parent._set_facing(delta)

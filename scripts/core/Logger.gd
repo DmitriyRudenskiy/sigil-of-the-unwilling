@@ -22,11 +22,8 @@ static func error(msg: String, tag: String = "") -> void:
 	push_error("%s %s" % [_tag(tag), msg])
 
 static func trace(msg: String, tag: String = "") -> void:
-	#if OS.has_feature("debug"):
+	if OS.is_debug():
 		print_rich("%s %s" % [_tag(tag), msg])
-	#else:
-		pass
-	#endif
 
 static func battle(msg: String) -> void:
 	print_rich("%s [color=cyan]%s[/color]" % [_tag("Battle"), msg])

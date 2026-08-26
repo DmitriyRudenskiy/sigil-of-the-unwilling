@@ -25,9 +25,9 @@ var inventory: HeroInventory = HeroInventory.new()
 var magic: HeroMagic = HeroMagic.new()
 
 # Resource chains (Addendum 10)
-var skills: HeroSkills = HeroSkills.new()
-var tools: HeroTools = HeroTools.new()
-var time: TimeSystem = TimeSystem.new()
+var skills: HeroSkills
+var tools: HeroTools
+var time: TimeSystem
 var strategic_resources: Dictionary = {}  # resource_id -> amount
 
 # Backward-compat pass-throughs (kept for existing callers)

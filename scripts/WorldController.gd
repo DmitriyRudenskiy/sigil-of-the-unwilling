@@ -11,6 +11,7 @@ var _input_controller: WorldInput
 var _spawner: WorldSpawner
 var _battle_flow: BattleFlow
 var _session: GameSession = null
+static var next_seed: int = 1234
 var _rng := RandomNumberGenerator.new()
 var _world_delta: WorldStateDelta = null
 var _save_manager: SaveManager = null
@@ -56,7 +57,6 @@ func _ready() -> void:
 	_create_resource_nodes()
 	_create_inventory_screen()
 	_create_chest_dialog()
-	_create_save_manager()
 	_create_marker_layer()
 
 	_world_delta = WorldStateDelta.new()
@@ -98,7 +98,7 @@ func _create_resource_nodes() -> void:
 	resource_node_manager.setup(node_container, _rng)
 	# Generate nodes from map data
 	var map_data := {
-		"terrain": _map_gen.terrain_map.duplicate(),
+		"terrain": _map_gen.terrain_grid.duplicate(),
 		"width": _map_gen.map_width,
 		"height": _map_gen.map_height,
 	}
@@ -337,16 +337,6 @@ func save_game() -> bool:
 	_save_manager = _save_manager if _save_manager != null else SaveManager.new()
 	return _save_manager.save_game(save_data)
 
-# ==================== SAVE / LOAD ====================
-
-func save_game() -> bool:
-	var save_data := SaveData.new()
-	save_data.run_seed = _session.run_seed
-	save_data.hero = _hero.serialize()
-	save_data.world = _world_delta.serialize()
-	_save_manager = _save_manager if _save_manager != null else SaveManager.new()
-	return _save_manager.save_game(save_data)
-
 func load_game() -> SaveData:
 	return _save_manager.load_game()
 
@@ -367,6 +357,7 @@ func hide_reach_markers() -> void:
 
 func _on_marker_hovered(cell: Vector2i, cost: float, remaining: float, is_reachable: bool) -> void:
 	# Could show tooltip; for now pass through
+	pass
 
 
 func _on_marker_clicked(cell: Vector2i, is_reachable: bool) -> void:
@@ -403,7 +394,7 @@ func _build_discovery_keys() -> Dictionary:
 	# Check for undead/lizard army tags
 	var army_stacks := _hero.army.get_army_for_battle()
 	for stack in army_stacks:
-		var unit_def := UnitRegistry.get(stack.unit_id)
+		var unit_def: UnitStats = UnitRegistry.get_definition(stack.unit_id)
 		if unit_def:
 			for tag in unit_def.get_tags():
 				if tag in [&"undead", &"lizard"]:
@@ -411,12 +402,17 @@ func _build_discovery_keys() -> Dictionary:
 	return keys
 
 
+var _cached_extraction_keys: Dictionary = {}
+var _extraction_cache_valid := false
+
 func _build_extraction_keys() -> Dictionary:
+	if _extraction_cache_valid:
+		return _cached_extraction_keys
 	var keys: Dictionary = {}
 	# Tags from army units
 	var army_stacks := _hero.army.get_army_for_battle()
 	for stack in army_stacks:
-		var unit_def := UnitRegistry.get(stack.unit_id)
+		var unit_def: UnitStats = UnitRegistry.get_definition(stack.unit_id)
 		if unit_def:
 			for tag in unit_def.get_tags():
 				keys[tag] = true
@@ -431,7 +427,12 @@ func _build_extraction_keys() -> Dictionary:
 		keys[tool_type] = _hero.tools.has_tool(tool_type)
 	# Fire capability
 	keys["fire"] = false  # Would need spell check; simplified for now
+	_cached_extraction_keys = keys
+	_extraction_cache_valid = true
 	return keys
+
+func _invalidate_extraction_cache() -> void:
+	_extraction_cache_valid = false
 
 
 func try_extract_resource(cell: Vector2i) -> int:
@@ -448,7 +449,7 @@ func _on_resource_discovered(cell: Vector2i, resource_id: StringName) -> void:
 
 func _on_resource_extracted(cell: Vector2i, resource_id: StringName, amount: int) -> void:
 	var skill_mult: float = 1.0
-	var def := ResourceRegistry.get(resource_id)
+	var def: ResourceRegistry.ResourceDef = ResourceRegistry.get(resource_id)
 	if def:
 		if not def.discovery_skill.is_empty():
 			skill_mult = _hero.skills.get_yield_multiplier(def.discovery_skill)

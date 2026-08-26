@@ -36,17 +36,13 @@ func place_villages() -> void:
 			break
 		if blocked.has(cell):
 			continue
-		var ok: bool = true
-		for v in model.village_cells:
-			if HexUtils.hex_distance(cell, v) <= spacing:
-				ok = false
-				break
-		if not ok:
-			continue
+		# O(n) вместо O(n²): помечаем всё кольцо spacing=4 сразу
 		model.village_cells.append(cell)
-		blocked[cell] = true
-		for nb in HexUtils.get_all_neighbors(cell):
-			blocked[nb] = true
+		for y in range(cell.y - spacing, cell.y + spacing + 1):
+			for x in range(cell.x - spacing, cell.x + spacing + 1):
+				var nb := Vector2i(x, y)
+				if HexUtils.hex_distance(cell, nb) <= spacing:
+					blocked[nb] = true
 
 
 func place_resources() -> void:
@@ -108,36 +104,16 @@ func place_enemies() -> void:
 
 
 func _get_reachable_cells() -> Dictionary:
-	var reachable := {}
 	var start_cell := Vector2i(-1, -1)
-	
-	# Find start cell (same logic as HeroMovementController)
 	for y in model.map_height:
 		for x in model.map_width:
 			var cell := Vector2i(x, y)
 			if model.is_walkable(cell):
 				start_cell = cell
 				break
-		if start_cell != Vector2i(-1, -1): break
-	
-	if start_cell == Vector2i(-1, -1):
-		return reachable
-	
-	var queue := [start_cell]
-	reachable[start_cell] = true
-	var head := 0
-	
-	while head < queue.size():
-		var curr := queue[head]
-		head += 1
-		
-		for neighbor in HexUtils.get_neighbors(curr):
-			if neighbor.x < 0 or neighbor.x >= model.map_width or neighbor.y < 0 or neighbor.y >= model.map_height:
-				continue
-			if not model.is_walkable(neighbor):
-				continue
-			if not reachable.has(neighbor):
-				reachable[neighbor] = true
-				queue.append(neighbor)
-	
-	return reachable
+		if start_cell.x >= 0: break
+	if start_cell.x < 0:
+		return {}
+	# Переиспользуем кэшированную BFS из HexUtils
+	return HexUtils.bfs_reachable(start_cell, model.map_width + model.map_height,
+		model.get_blocked_cells(), model.map_width, model.map_height)

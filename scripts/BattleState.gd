@@ -3,6 +3,8 @@ extends RefCounted
 ## Чистое состояние боя: юниты, очередь ходов, конец боя, кэш bfs.
 ## Не зависит от Godot-узлов — работает только с данными.
 
+const _StatusEffects = preload("res://scripts/data/StatusEffects.gd")
+
 var attacker_units: Array[BattleUnit] = []
 var defender_units: Array[BattleUnit] = []
 var active_unit: BattleUnit = null
@@ -30,6 +32,10 @@ var defender_hero_bonus: Dictionary = {
 var _reachable_cache: Dictionary = {}
 var _board_version: int = 0
 var _uid := 0
+
+# Счётчики живых для O(1) check_end
+var _attacker_alive_count := 0
+var _defender_alive_count := 0
 
 const BW := 17
 const BH := 11
@@ -135,7 +141,6 @@ class BattleUnit extends RefCounted:
 		statuses[effect] = maxi(statuses.get(effect, 0), duration)
 
 	func clear_debuffs() -> void:
-		var _StatusEffects = preload("res://scripts/data/StatusEffects.gd")
 		var to_remove: Array = []
 		for eff in statuses.keys():
 			if _StatusEffects.is_debuff(eff):
@@ -144,7 +149,6 @@ class BattleUnit extends RefCounted:
 			statuses.erase(eff)
 
 	func is_stunned() -> bool:
-		var _StatusEffects = preload("res://scripts/data/StatusEffects.gd")
 		for eff in statuses.keys():
 			if _StatusEffects.is_stun(eff):
 				return true
@@ -158,13 +162,24 @@ func place_army(
 	attacker_artifact_mods: Dictionary = {},
 	defender_artifact_mods: Dictionary = {}
 ) -> void:
+	_uid = 0  # Сброс UID для нового боя
 	attacker_units = _build_units(attacker_stacks, true)
 	defender_units = _build_units(defender_stacks, false)
+	_attacker_alive_count = attacker_units.size()
+	_defender_alive_count = defender_units.size()
 	_apply_artifact_effects(attacker_units, attacker_artifact_mods)
 	_apply_artifact_effects(defender_units, defender_artifact_mods)
 	invalidate_board_cache()
 	check_end()
 
+
+# Вспомогательный: убить юнита + обновить счётчики
+func _kill_unit(unit: BattleUnit) -> void:
+	if not unit.alive: return
+	unit.alive = false
+	if unit.side == "attacker": _attacker_alive_count -= 1
+	else: _defender_alive_count -= 1
+	check_end()
 
 func _apply_artifact_effects(units: Array[BattleUnit], mods: Dictionary) -> void:
 	if mods.is_empty():
@@ -379,107 +394,91 @@ func apply_attack(
 	rng: RandomNumberGenerator,
 	consume_action: bool = true
 ) -> Dictionary:
-	if atk == null or def == null:
+	if atk == null or def == null or not atk.is_alive() or not def.is_alive():
 		return {}
 
-	if not atk.is_alive() or not def.is_alive():
-		return {}
-
-	var attacker_bonus: int = 0
-	var defender_bonus: int = 0
-
-	if atk.side == "attacker":
-		attacker_bonus = int(attacker_hero_bonus.get("attack", 0))
-	else:
-		attacker_bonus = int(defender_hero_bonus.get("attack", 0))
-
-	if def.side == "defender":
-		defender_bonus = int(defender_hero_bonus.get("defense", 0))
-	else:
-		defender_bonus = int(attacker_hero_bonus.get("defense", 0))
-
-	# --- First Strike (Royal Griffin) ---
-	var first_strike_triggered := false
-	if is_melee_attack and def.has_tag("first_strike") and not def.has_retaliated:
-		def.has_retaliated = true
-		var fs_result = BattleRules.calculate_attack(def, atk, true, rng, defender_bonus, attacker_bonus)
-		if not fs_result.is_empty():
-			atk.set_count(atk.get_count() - int(fs_result.get("kills", 0)))
-			if atk.get_count() <= 0:
-				atk.alive = false
-		first_strike_triggered = true
-
-	# --- Charge (Champion) ---
-	var charge_mult := 1.0
-	if atk.has_tag("charge") and atk.distance_moved_this_turn >= 3:
-		charge_mult = 1.5
-
-	var result := BattleRules.calculate_attack(
-		atk,
-		def,
-		is_melee_attack,
-		rng,
-		attacker_bonus,
-		defender_bonus
-	)
-
-	if result.is_empty():
-		return result
+	var bonuses := _get_hero_bonuses(atk, def)
+	var attacker_bonus := bonuses[0]
+	var defender_bonus := bonuses[1]
+	var first_strike_triggered := _apply_first_strike(atk, def, is_melee_attack, rng, attacker_bonus, defender_bonus)
+	var charge_mult := _get_charge_multiplier(atk)
+	var result := BattleRules.calculate_attack(atk, def, is_melee_attack, rng, attacker_bonus, defender_bonus)
+	if result.is_empty(): return result
 
 	if first_strike_triggered:
 		result["first_strike"] = true
-
-	# Apply charge multiplier
-	if charge_mult > 1.0:
-		result["damage"] = int(result["damage"] * charge_mult)
-		var hp: int = maxi(1, def.get_hp())
-		result["kills"] = maxi(1, result["damage"] / hp)
-		result["kills"] = mini(result["kills"], def.get_count())
-		result["charge"] = true
-
+	result = _apply_charge(atk, def, result, charge_mult)
 	def.set_count(def.get_count() - int(result.get("kills", 0)))
-	if consume_action:
-		atk.has_moved = true
+	if consume_action: atk.has_moved = true
 
-	# --- Petrify / Blind procs ---
-	var _SE = preload("res://scripts/data/StatusEffects.gd")
+	_apply_status_procs(atk, def, rng, result)
+	if def.get_count() <= 0: _kill_unit(def)
+	_apply_vampiric(atk, result)
+	_apply_breath(atk, def, result, rng)
+	_apply_saltpeter(atk, def, rng, result)
+	_apply_rebirth(def, rng, result)
+
+	invalidate_board_cache()
+	check_end()
+	return result
+
+# ---------- Вспомогательные методы атаки ----------
+func _get_hero_bonuses(atk: BattleUnit, def: BattleUnit) -> Array:
+	var atk_bonus := int(attacker_hero_bonus.get("attack", 0)) if atk.side == "attacker" else int(defender_hero_bonus.get("attack", 0))
+	var def_bonus := int(defender_hero_bonus.get("defense", 0)) if def.side == "defender" else int(attacker_hero_bonus.get("defense", 0))
+	return [atk_bonus, def_bonus]
+
+func _apply_first_strike(atk: BattleUnit, def: BattleUnit, is_melee: bool, rng: RandomNumberGenerator, atk_bonus: int, def_bonus: int) -> bool:
+	if not (is_melee and def.has_tag("first_strike") and not def.has_retaliated): return false
+	def.has_retaliated = true
+	var fs_result = BattleRules.calculate_attack(def, atk, true, rng, def_bonus, atk_bonus)
+	if not fs_result.is_empty():
+		atk.set_count(atk.get_count() - int(fs_result.get("kills", 0)))
+		if atk.get_count() <= 0: _kill_unit(atk)
+	return true
+
+func _get_charge_multiplier(atk: BattleUnit) -> float:
+	return 1.5 if (atk.has_tag("charge") and atk.distance_moved_this_turn >= 3) else 1.0
+
+func _apply_charge(atk: BattleUnit, def: BattleUnit, result: Dictionary, charge_mult: float) -> Dictionary:
+	if charge_mult <= 1.0: return result
+	result["damage"] = int(result["damage"] * charge_mult)
+	var hp: int = maxi(1, def.get_hp())
+	result["kills"] = maxi(1, result["damage"] / hp)
+	result["kills"] = mini(result["kills"], def.get_count())
+	result["charge"] = true
+	return result
+
+func _apply_status_procs(atk: BattleUnit, def: BattleUnit, rng: RandomNumberGenerator, result: Dictionary) -> void:
 	if atk.has_tag("petrify") and rng.randf() < 0.20:
-		def.add_status(_SE.Effect.PETRIFIED, 1)
+		def.add_status(_StatusEffects.Effect.PETRIFIED, 1)
 		result["petrify"] = true
 	if atk.has_tag("blind") and rng.randf() < 0.20:
-		def.add_status(_SE.Effect.BLIND, 1)
+		def.add_status(_StatusEffects.Effect.BLIND, 1)
 		result["blind"] = true
 
-	if def.get_count() <= 0:
-		def.alive = false
+func _apply_vampiric(atk: BattleUnit, result: Dictionary) -> void:
+	if not atk.has_tag("vampiric") or int(result.get("kills", 0)) <= 0: return
+	var healed := mini(int(result.get("kills", 0)), atk.max_count - atk.get_count())
+	if healed > 0:
+		atk.set_count(atk.get_count() + healed)
+		result["vampiric"] = healed
 
-	# --- Vampiric ---
-	if atk.has_tag("vampiric") and int(result.get("kills", 0)) > 0:
-		var healed := mini(int(result.get("kills", 0)), atk.max_count - atk.get_count())
-		if healed > 0:
-			atk.set_count(atk.get_count() + healed)
-			result["vampiric"] = healed
-
-	# --- Breath (Dragons) ---
+func _apply_breath(atk: BattleUnit, def: BattleUnit, result: Dictionary, rng: RandomNumberGenerator) -> void:
 	if atk.has_tag("breath"):
 		result["breath_kills"] = _apply_breath_damage(atk, def, int(result["damage"]) * 0.5, rng)
 
-	# --- Saltpeter explosion ---
+func _apply_saltpeter(atk: BattleUnit, def: BattleUnit, rng: RandomNumberGenerator, result: Dictionary) -> void:
 	if atk.has_tag("saltpeter"):
 		result["saltpeter_kills"] = _apply_saltpeter_explosion(atk, def, rng)
 
-	# --- Rebirth (Phoenix) ---
+func _apply_rebirth(def: BattleUnit, rng: RandomNumberGenerator, result: Dictionary) -> void:
 	if def.get_count() <= 0 and def.has_tag("rebirth") and not def.already_reborn:
 		if rng.randf() < 0.20:
 			def.already_reborn = true
 			def.set_count(int(def.max_count * 0.5))
 			def.alive = true
 			result["rebirth"] = true
-
-	invalidate_board_cache()
-	check_end()
-
-	return result
 
 
 func _apply_breath_damage(atk: BattleUnit, original_def: BattleUnit, breath_dmg: int, rng: RandomNumberGenerator) -> int:
@@ -499,7 +498,7 @@ func _apply_breath_damage(atk: BattleUnit, original_def: BattleUnit, breath_dmg:
 			victim.set_count(victim.get_count() - kills)
 			total_kills += kills
 			if victim.get_count() <= 0:
-				victim.alive = false
+				_kill_unit(victim)
 	return total_kills
 
 
@@ -522,7 +521,7 @@ func _apply_saltpeter_explosion(atk: BattleUnit, original_def: BattleUnit, rng: 
 			victim.set_count(victim.get_count() - kills)
 			total_kills += kills
 			if victim.get_count() <= 0:
-				victim.alive = false
+				_kill_unit(victim)
 	return total_kills
 
 
@@ -572,20 +571,9 @@ func check_end() -> String:
 	if battle_over:
 		return battle_winner
 
-	var aa := false
-	var da := false
-	for u in attacker_units:
-		if u.is_alive():
-			aa = true
-			break
-	for u in defender_units:
-		if u.is_alive():
-			da = true
-			break
-
-	if not aa:
+	if _attacker_alive_count == 0:
 		force_end("defender")
-	elif not da:
+	elif _defender_alive_count == 0:
 		force_end("attacker")
 
 	return battle_winner

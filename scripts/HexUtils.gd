@@ -107,39 +107,52 @@ static func bfs_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: in
 	return path
 
 
-## Dijkstra with float terrain costs.
+## Dijkstra with float terrain costs (binary heap O(log n)).
 ## `cost_fn` — Callable(cell: Vector2i) -> float; returns cost to ENTER that cell (INF = blocked).
 ## Returns Dictionary[cell: float] of cheapest cost from start to each reachable cell.
 static func dijkstra(start: Vector2i, max_cost: float, cost_fn: Callable) -> Dictionary:
 	var dist: Dictionary = {start: 0.0}
-	var pq: Array[Dictionary] = [{"cell": start, "d": 0.0}]  # simple priority list
-	var head := 0
-	while head < pq.size():
-		# Find minimum in remaining queue
-		var best_idx: int = head
-		for i in range(head + 1, pq.size()):
-			if pq[i].d < pq[best_idx].d:
-				best_idx = i
-		var entry: Dictionary = pq[best_idx]
-		var tmp = pq[head]
-		pq[head] = pq[best_idx]
-		pq[best_idx] = tmp
-		var cur: Vector2i = entry.cell
-		var cur_d: float = entry.d
-		head += 1
-		if cur_d > dist[cur]:
-			continue
-		if cur_d > max_cost:
-			continue
+	# Min-heap: index 1 = root, [d, cell] pairs
+	var heap: Array = [0.0, [0.0, start]]
+
+	while heap.size() > 1:
+		# heap pop
+		var entry: Array = heap[1]
+		if heap.size() > 2:
+			heap[1] = heap.pop_back()
+		else:
+			heap.pop_back()
+			# sift down (skip if heap is now empty)
+		if heap.size() > 1:
+			var hi := 1
+			while hi * 2 < heap.size():
+				var smallest := hi
+				var left := hi * 2
+				var right := left + 1
+				if left < heap.size() and heap[left][0] < heap[smallest][0]: smallest = left
+				if right < heap.size() and heap[right][0] < heap[smallest][0]: smallest = right
+				if smallest == hi: break
+				var tmp = heap[smallest]; heap[smallest] = heap[hi]; heap[hi] = tmp
+				hi = smallest
+		var cur: Vector2i = entry[1]
+		var cur_d: float = entry[0]
+		if cur_d > dist[cur]: continue
+		if cur_d > max_cost: continue
 		for bit in 6:
 			var nxt := get_neighbor(cur, bit)
 			var enter_cost: float = cost_fn.call(nxt)
-			if enter_cost >= INF:
-				continue
+			if enter_cost >= INF: continue
 			var new_d: float = cur_d + enter_cost
 			if not dist.has(nxt) or new_d < dist[nxt]:
 				dist[nxt] = new_d
-				pq.append({"cell": nxt, "d": new_d})
+				# heap push
+			heap.append([new_d, nxt])
+			var i := heap.size() - 1
+			while i > 1:
+				var parent := i / 2
+				if heap[parent][0] <= heap[i][0]: break
+				var tmp2 = heap[parent]; heap[parent] = heap[i]; heap[i] = tmp2
+				i = parent
 	dist.erase(start)
 	# Filter: only keep cells within max_cost
 	var result: Dictionary = {}

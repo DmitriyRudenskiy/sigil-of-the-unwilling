@@ -194,31 +194,13 @@ func _spawn_chests() -> void:
 		sp.texture = ImageTexture.create_from_image(img)
 		n.add_child(sp)
 		add_child(n)
-	_chest_nodes[cell] = n
+		_chest_nodes[cell] = n
 		placed += 1
 
 
 # ==================== REMOVAL (for save/load) ====================
-
-func remove_enemy_at(cell: Vector2i) -> void:
-	if _enemy_nodes.has(cell):
-		_enemy_nodes[cell].queue_free()
-		_enemy_nodes.erase(cell)
-
-func remove_resource_at(cell: Vector2i) -> void:
-	if _resource_nodes.has(cell):
-		_resource_nodes[cell].queue_free()
-		_resource_nodes.erase(cell)
-
-func remove_chest_at(cell: Vector2i) -> void:
-	if _chest_nodes.has(cell):
-		_chest_nodes[cell].queue_free()
-		_chest_nodes.erase(cell)
-	_chests.erase(cell)
-
-func capture_village(cell: Vector2i) -> void:
-	# Mark village as captured (visual update if needed)
-	pass
+# These are handled by the primary removal functions above.
+# (Removed duplicate definitions of remove_enemy_at, remove_resource_at, remove_chest_at, capture_village)
 
 
 # ==================== SCROLLS ====================
