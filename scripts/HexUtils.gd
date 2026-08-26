@@ -107,6 +107,79 @@ static func bfs_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: in
 	return path
 
 
+## Dijkstra with float terrain costs.
+## `cost_fn` — Callable(cell: Vector2i) -> float; returns cost to ENTER that cell (INF = blocked).
+## Returns Dictionary[cell: float] of cheapest cost from start to each reachable cell.
+static func dijkstra(start: Vector2i, max_cost: float, cost_fn: Callable) -> Dictionary:
+	var dist: Dictionary = {start: 0.0}
+	var pq: Array[Dictionary] = [{"cell": start, "d": 0.0}]  # simple priority list
+	var head := 0
+	while head < pq.size():
+		# Find minimum in remaining queue
+		var best_idx: int = head
+		for i in range(head + 1, pq.size()):
+			if pq[i].d < pq[best_idx].d:
+				best_idx = i
+		var entry: Dictionary = pq[best_idx]
+		var tmp = pq[head]
+		pq[head] = pq[best_idx]
+		pq[best_idx] = tmp
+		var cur: Vector2i = entry.cell
+		var cur_d: float = entry.d
+		head += 1
+		if cur_d > dist[cur]:
+			continue
+		if cur_d > max_cost:
+			continue
+		for bit in 6:
+			var nxt := get_neighbor(cur, bit)
+			var enter_cost: float = cost_fn.call(nxt)
+			if enter_cost >= INF:
+				continue
+			var new_d: float = cur_d + enter_cost
+			if not dist.has(nxt) or new_d < dist[nxt]:
+				dist[nxt] = new_d
+				pq.append({"cell": nxt, "d": new_d})
+	dist.erase(start)
+	# Filter: only keep cells within max_cost
+	var result: Dictionary = {}
+	for cell in dist:
+		if dist[cell] <= max_cost + 0.001:
+			result[cell] = dist[cell]
+	return result
+
+
+## Dijkstra path reconstruction: trace back from goal to start using dist map.
+static func dijkstra_path(start: Vector2i, goal: Vector2i, dist: Dictionary, cost_fn: Callable) -> Array[Vector2i]:
+	if not dist.has(goal):
+		return []
+	if start == goal:
+		return [start]
+	var path: Array[Vector2i] = []
+	var c := goal
+	while c != start:
+		path.append(c)
+		var best: Vector2i = c
+		var best_d: float = dist[c]
+		for bit in 6:
+			var nb := get_neighbor(c, bit)
+			if dist.has(nb):
+				var nb_cost: float = cost_fn.call(nb)
+				if nb_cost < INF:
+					var prev_d: float = dist[nb]
+					if prev_d + nb_cost <= best_d - 0.0001:
+						best_d = prev_d + nb_cost
+						best = nb
+			if best == c:
+				break  # can't find predecessor, stuck
+		if best == c:
+			break
+		c = best
+	path.append(c)
+	path.reverse()
+	return path
+
+
 static func bfs_reachable(start: Vector2i, steps: int, blocked: Dictionary, w: int, h: int) -> Dictionary:
 	var result := {start: 0}
 	var queue: Array[Vector2i] = [start]

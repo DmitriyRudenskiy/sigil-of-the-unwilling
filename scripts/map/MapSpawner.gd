@@ -15,24 +15,52 @@ func place_villages() -> void:
 	model.village_cells.clear()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = model.seed_value + 500
-	var attempts := 0
-	while model.village_cells.size() < model.village_count and attempts < 1000:
-		attempts += 1
-		var cell := Vector2i(rng.randi_range(2, model.map_width - 3), rng.randi_range(2, model.map_height - 3))
-		if _is_valid_village_location(cell):
-			model.village_cells.append(cell)
+
+	# Port: ForlornU/HexagonalMapGodot object_placer.gd (MIT)
+	# Poisson-disc placement: shuffle candidates, single pass, ring-distance guard.
+	var candidates: Array[Vector2i] = []
+	for cell in model.terrain_grid:
+		if model.is_walkable(cell):
+			candidates.append(cell)
+	for i in candidates.size():
+		var j := rng.randi_range(0, i)
+		var tmp := candidates[i]
+		candidates[i] = candidates[j]
+		candidates[j] = tmp
+
+	var spacing: int = 4
+	var blocked: Dictionary = {}
+
+	for cell in candidates:
+		if model.village_cells.size() >= model.village_count:
+			break
+		if blocked.has(cell):
+			continue
+		var ok: bool = true
+		for v in model.village_cells:
+			if HexUtils.hex_distance(cell, v) <= spacing:
+				ok = false
+				break
+		if not ok:
+			continue
+		model.village_cells.append(cell)
+		blocked[cell] = true
+		for nb in HexUtils.get_all_neighbors(cell):
+			blocked[nb] = true
 
 
 func place_resources() -> void:
 	model.resource_cells.clear()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = model.seed_value + 700
+	
+	var reachable := _get_reachable_cells()
 	var target := int(float(model.map_width * model.map_height) / 70.0)
 	var attempts := 0
 	while model.resource_cells.size() < target and attempts < 5000:
 		attempts += 1
 		var cell := Vector2i(rng.randi_range(0, model.map_width - 1), rng.randi_range(0, model.map_height - 1))
-		if not model.terrain_grid.has(cell):
+		if not reachable.has(cell):
 			continue
 		if model.terrain_grid[cell] in [HexUtils.Terrain.WATER, HexUtils.Terrain.MOUNTAIN]:
 			continue
@@ -54,12 +82,14 @@ func place_enemies() -> void:
 	model.enemy_stacks.clear()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = model.seed_value + 777
+	
+	var reachable := _get_reachable_cells()
 	var placed := 0
 	var attempts := 0
 	while placed < 15 and attempts < 5000:
 		attempts += 1
 		var cell := Vector2i(rng.randi_range(3, model.map_width - 4), rng.randi_range(3, model.map_height - 4))
-		if not model.is_walkable(cell) or model.enemy_stacks.has(cell) or cell in model.village_cells or model.resource_cells.has(cell):
+		if not reachable.has(cell) or model.enemy_stacks.has(cell) or cell in model.village_cells or model.resource_cells.has(cell):
 			continue
 
 		var faction_idx: int = rng.randi_range(0, UnitRegistry.FACTION_SETS.size() - 1)
@@ -76,12 +106,38 @@ func place_enemies() -> void:
 			placed += 1
 
 
-func _is_valid_village_location(cell: Vector2i) -> bool:
-	if not model.terrain_grid.has(cell):
-		return false
-	if model.terrain_grid[cell] in [HexUtils.Terrain.WATER, HexUtils.Terrain.MOUNTAIN]:
-		return false
-	for v in model.village_cells:
-		if HexUtils.hex_distance(cell, v) <= 2:
-			return false
-	return true
+
+func _get_reachable_cells() -> Dictionary:
+	var reachable := {}
+	var start_cell := Vector2i(-1, -1)
+	
+	# Find start cell (same logic as HeroMovementController)
+	for y in model.map_height:
+		for x in model.map_width:
+			var cell := Vector2i(x, y)
+			if model.is_walkable(cell):
+				start_cell = cell
+				break
+		if start_cell != Vector2i(-1, -1): break
+	
+	if start_cell == Vector2i(-1, -1):
+		return reachable
+	
+	var queue := [start_cell]
+	reachable[start_cell] = true
+	var head := 0
+	
+	while head < queue.size():
+		var curr := queue[head]
+		head += 1
+		
+		for neighbor in HexUtils.get_neighbors(curr):
+			if neighbor.x < 0 or neighbor.x >= model.map_width or neighbor.y < 0 or neighbor.y >= model.map_height:
+				continue
+			if not model.is_walkable(neighbor):
+				continue
+			if not reachable.has(neighbor):
+				reachable[neighbor] = true
+				queue.append(neighbor)
+	
+	return reachable

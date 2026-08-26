@@ -10,6 +10,7 @@ func _init() -> void:
 	failed += _test_no_target()
 	failed += _test_adjacent_attack()
 	failed += _test_move_towards_target()
+	failed += _test_attacker_ai_targets_defender()
 
 	if failed == 0:
 		print("BattleAI tests passed")
@@ -116,6 +117,46 @@ func _test_move_towards_target() -> int:
 
 	if blocked.has(decision.target_cell):
 		printerr("AI target cell must not be blocked")
+		errors += 1
+
+	return errors
+
+
+func _test_attacker_ai_targets_defender() -> int:
+	var errors := 0
+	var state = _create_state(true, true)
+	var ai = load("res://scripts/BattleAI.gd").new()
+
+	var attacker = state.get_units_by_side("attacker")[0]
+	var defender = state.get_units_by_side("defender")[0]
+	attacker.cell = Vector2i(4, 5)
+	defender.cell = Vector2i(12, 5)
+
+	# AI playing as attacker side should target defender
+	var blocked: Dictionary = state.build_all_blocked(attacker, {})
+	var decision = ai.decide_turn(attacker, state, blocked)
+
+	if decision.action != ACTION_MOVE:
+		printerr("Attacker AI should move towards distant defender, got %d" % decision.action)
+		errors += 1
+		return errors
+
+	var distance_before = HexUtils.hex_distance(attacker.cell, defender.cell)
+	var distance_after = HexUtils.hex_distance(decision.target_cell, defender.cell)
+	if distance_after >= distance_before:
+		printerr("Attacker AI target cell should reduce distance to defender")
+		errors += 1
+
+	# Place attacker adjacent to defender and verify attack
+	attacker.cell = HexUtils.get_neighbor(defender.cell, 3)
+	blocked = state.build_all_blocked(attacker, {})
+	decision = ai.decide_turn(attacker, state, blocked)
+
+	if decision.action != ACTION_ATTACK:
+		printerr("Attacker AI should attack adjacent defender, got %d" % decision.action)
+		errors += 1
+	if decision.attack_target != defender:
+		printerr("Attacker AI should target the adjacent defender")
 		errors += 1
 
 	return errors

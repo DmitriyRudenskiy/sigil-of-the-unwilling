@@ -72,7 +72,7 @@ func generate() -> void:
 	model.map_width = _map_width if _map_width > 0 else 60
 	model.map_height = _map_height if _map_height > 0 else 60
 	model.seed_value = _seed_value
-	model.village_count = 8
+	model.village_count = GameSettings.MAP_VILLAGE_COUNT
 
 	renderer = _MapRenderer.new(model)
 	spawner = _MapSpawner.new(model)
@@ -80,8 +80,10 @@ func generate() -> void:
 	HexUtils.calibrate(_tile_map)
 
 	model.generate_noise()
+	model.smooth_invalid_adjacencies()
 	renderer.paint(_tile_map)
 	renderer.diversify(_tile_map)
+	renderer.paint_decor(_decor_layer)
 
 	spawner.place_villages()
 	spawner.place_resources()
@@ -124,6 +126,14 @@ func is_walkable(cell: Vector2i) -> bool:
 	return model.is_walkable(cell) if model != null else false
 
 
+func is_in_bounds(cell: Vector2i) -> bool:
+	return cell.x >= 0 and cell.x < map_width and cell.y >= 0 and cell.y < map_height
+
+
+func get_terrain_name(cell: Vector2i) -> String:
+	return model.get_terrain_name(cell) if model != null else "grass"
+
+
 func get_blocked_cells() -> Dictionary:
 	return model.get_blocked_cells() if model != null else {}
 
@@ -143,3 +153,12 @@ func map_to_local(cell: Vector2i) -> Vector2:
 	if not has_valid_tilemap():
 		return Vector2.ZERO
 	return _tile_map.map_to_local(cell)
+
+
+func get_map_world_rect() -> Rect2:
+	if not has_valid_tilemap():
+		return Rect2(0, 0, 10000, 10000)
+	var used := _tile_map.get_used_rect()
+	var pos := _tile_map.map_to_local(used.position)
+	var end := _tile_map.map_to_local(used.end)
+	return Rect2(pos, end - pos)

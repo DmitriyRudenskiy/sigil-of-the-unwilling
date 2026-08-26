@@ -1,0 +1,4 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://tools/texture_preview_tool.gd" id="1"]
+[node name="TexturePreviewTool" type="Node"]
+script = ExtResource("1")

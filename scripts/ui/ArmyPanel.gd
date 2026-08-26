@@ -53,7 +53,7 @@ func _ready() -> void:
 		_slots.append(slot)
 
 
-func update_army(army: Array) -> void:
+func update_army(army: Array[UnitStack]) -> void:
 	for i in range(8):
 		var hbox: HBoxContainer = _slots[i].get_node("HBox")
 		var ic: TextureRect = hbox.get_node("Icon")

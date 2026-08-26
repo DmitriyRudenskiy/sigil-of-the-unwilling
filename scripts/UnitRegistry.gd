@@ -4,7 +4,7 @@ class_name UnitRegistry
 const _UnitStack = preload("res://scripts/unit_stack.gd")
 const _UnitStats = preload("res://scripts/unit_stats.gd")
 
-const UNITS := {
+const UNITS_BASE := {
     # базовые (герой + старые враги)
     "swordsmen": ["Swordsman", 4, 10, 5, 2], "archers": ["Archer", 3, 8, 4, 1],
     "cavalry": ["Cavalry", 5, 15, 7, 2], "mages": ["Mage", 7, 12, 5, 2],
@@ -72,20 +72,166 @@ const FACTION_SETS := [
     ["earth_elemental","storm_elemental","ice_elemental","magma_elemental","phoenix","firebird","troglodyte","beholder","medusa","manticore","red_dragon","rust_dragon"],
 ]
 
+const UNIT_ATTACK := {
+    # Пример переопределения:
+    # "swordsmen": 8,
+}
+
+const UNIT_TAGS := {
+    "swordsmen": ["melee"],
+    "archers": ["ranged"],
+    "cavalry": ["melee"],
+    "mages": ["ranged"],
+    "guardians": ["melee"],
+    "archmages": ["ranged"],
+    "champions": ["melee", "double_strike", "morale", "charge", "strong_strike"],
+    "knights": ["melee"],
+    "goblins": ["melee"],
+    "wolves": ["melee"],
+    "trolls": ["melee", "strong_strike"],
+
+    "pikeman": ["melee"],
+    "halberdier": ["melee"],
+    "lancer": ["melee"],
+    "alchemist": ["ranged", "alchemy"],
+    "berserker": ["melee", "strong_strike"],
+    "griffin": ["flying"],
+    "royal_griffin": ["flying", "no_retaliation", "double_strike", "first_strike"],
+    "pegasus": ["flying"],
+    "gargoyle": ["flying"],
+    "titan": ["ranged"],
+    "dwarf": ["melee", "magic_resistant", "worker", "miner"],
+    "battle_dwarf": ["melee", "magic_resistant", "worker", "miner"],
+
+    "centaur": ["melee"],
+    "elf": ["ranged", "precise_strike"],
+    "grand_elf": ["ranged", "double_strike", "precise_strike"],
+    "druid": ["ranged"],
+    "great_druid": ["ranged"],
+    "unicorn": ["melee"],
+    "war_unicorn": ["melee"],
+    "treant": ["melee", "mind_immune"],
+    "dryad": ["melee"],
+    "green_dragon": ["flying", "dragon"],
+    "gold_dragon": ["flying", "dragon"],
+    "black_dragon": ["flying", "dragon"],
+
+    "skeleton": ["undead"],
+    "zombie": ["undead"],
+    "ghost": ["undead"],
+    "wraith": ["undead"],
+    "vampire": ["flying", "undead", "no_retaliation", "vampiric", "poison_immune"],
+    "lich": ["ranged", "undead", "poison_immune"],
+    "orc": ["melee"],
+    "ogre": ["melee"],
+    "behemoth": ["melee"],
+    "harpy": ["flying"],
+    "minotaur": ["melee"],
+    "hydra": ["melee"],
+
+    "gremlin": ["melee"],
+    "master_gremlin": ["ranged"],
+    "stone_golem": ["melee", "mind_immune"],
+    "iron_golem": ["melee", "mind_immune"],
+    "gold_golem": ["melee", "mind_immune"],
+    "diamond_golem": ["melee", "mind_immune"],
+    "magus": ["ranged"],
+    "genie": ["flying"],
+    "master_genie": ["flying"],
+    "naga": ["melee"],
+    "naga_queen": ["melee"],
+    "giant": ["melee"],
+
+    "gnoll": ["melee"],
+    "gnoll_marauder": ["melee"],
+    "lizardman": ["melee", "lizard"],
+    "lizard_warrior": ["melee", "lizard"],
+    "serpent_fly": ["flying"],
+    "dragon_fly": ["flying"],
+    "basilisk": ["melee"],
+    "greater_basilisk": ["melee"],
+    "wyvern": ["flying"],
+    "wyvern_monarch": ["flying"],
+    "gorgon": ["ranged"],
+    "mighty_gorgon": ["ranged"],
+
+    "hobgoblin": ["melee"],
+    "wolf_rider": ["melee"],
+    "wolf_raider": ["melee", "double_strike"],
+    "orc_chieftain": ["melee"],
+    "ogre_mage": ["melee"],
+    "roc": ["flying"],
+    "thunderbird": ["flying"],
+    "cyclops": ["ranged"],
+    "cyclops_king": ["ranged"],
+    "air_elemental": ["flying", "elemental"],
+    "fire_elemental": ["elemental"],
+    "water_elemental": ["elemental"],
+
+    "earth_elemental": ["elemental"],
+    "storm_elemental": ["flying", "elemental"],
+    "ice_elemental": ["flying", "elemental"],
+    "magma_elemental": ["elemental"],
+    "phoenix": ["flying", "rebirth"],
+    "firebird": ["flying"],
+    "troglodyte": ["melee"],
+    "beholder": ["ranged", "no_retaliation"],
+    "medusa": ["ranged", "no_retaliation"],
+    "manticore": ["flying"],
+    "red_dragon": ["flying", "dragon", "breath", "petrify", "blind"],
+    "rust_dragon": ["flying", "dragon", "breath"],
+}
+
 static var _definitions: Dictionary = {}
 
 
-static func _ensure_definitions() -> void:
+static func ensure_definitions() -> void:
     if not _definitions.is_empty():
         return
-    for key in UNITS:
-        var raw: Array = UNITS[key]
-        var stats := _UnitStats.new(key, str(raw[0]), int(raw[1]), int(raw[2]), int(raw[3]), int(raw[4]))
-        _definitions[key] = stats
+
+    for key in UNITS_BASE:
+        var raw: Array = UNITS_BASE[key]
+
+        var display_name: String = str(raw[0])
+        var base_damage: int = int(raw[1])
+        var hp: int = int(raw[2])
+        var speed: int = int(raw[3])
+        var defense: int = int(raw[4])
+
+        var attack: int = int(UNIT_ATTACK.get(
+            key,
+            int(round(float(base_damage + defense) / 2.0))
+        ))
+
+        var raw_tags: Array = UNIT_TAGS.get(key, ["melee"])
+        var tags: Array[String] = []
+        tags.assign(raw_tags)
+
+        _definitions[key] = UnitStats.new(
+            key,
+            display_name,
+            attack,
+            base_damage,
+            hp,
+            speed,
+            defense,
+            tags
+        )
+
+
+static func get_all_keys() -> Array[String]:
+    ensure_definitions()
+
+    var keys: Array[String] = []
+    for k in _definitions.keys():
+        keys.append(str(k))
+
+    keys.sort()
+    return keys
 
 
 static func get_definition(key: String) -> UnitStats:
-    _ensure_definitions()
+    ensure_definitions()
     return _definitions.get(key, null)
 
 

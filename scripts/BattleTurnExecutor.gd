@@ -3,12 +3,21 @@ class_name BattleTurnExecutor
 ## State Machine для очередности ходов боя.
 ## Управляет: начало хода → ожидание ввода / AI → анимация → конец хода.
 ## Все эффекты через сигналы — контроллер подписывается и реагирует.
+## Мутация BattleState происходит ТОЛЬКО здесь.
 
 signal status_updated(text: String)
 signal clear_highlights
 signal pulse_unit(unit: BattleState.BattleUnit)
-signal execute_move(unit: BattleState.BattleUnit, target: Vector2i)
-signal execute_attack(atk: BattleState.BattleUnit, def: BattleState.BattleUnit)
+signal phase_changed(new_phase: State)
+signal initiative_changed
+signal active_unit_changed(unit: BattleState.BattleUnit)
+signal floating_text(cell: Vector2i, text: String, color: Color)
+signal execute_move(unit: BattleState.BattleUnit, path: Array[Vector2i])
+signal execute_attack(
+	atk: BattleState.BattleUnit,
+	def: BattleState.BattleUnit,
+	result: Dictionary
+)
 signal end_battle(winner: String, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack])
 
 enum State {
@@ -22,11 +31,22 @@ enum State {
 }
 
 var _state := State.IDLE
+var _state_token: int = 0
 var _battle_state: BattleState
 var _ai: BattleAI
 var _obstacles: Dictionary = {}
-var _animation_duration := 0.4
-var _ai_think_time := 0.7
+var _ai_think_time := GameSettings.BATTLE_AI_THINK_TIME
+var _rng := RandomNumberGenerator.new()
+var _end_emitted := false
+var _retreat_requested := false
+var _morale_allowed := false
+
+var _attack_attacker: BattleState.BattleUnit = null
+var _attack_defender: BattleState.BattleUnit = null
+var _attack_strikes_left := 0
+var _attack_is_melee := false
+var _retaliation_phase := false
+var _pending_attack: BattleState.BattleUnit = null
 
 
 func setup(bs: BattleState, ai: BattleAI, obstacles: Dictionary) -> void:
@@ -34,6 +54,12 @@ func setup(bs: BattleState, ai: BattleAI, obstacles: Dictionary) -> void:
 	_ai = ai
 	_obstacles = obstacles
 	_state = State.IDLE
+
+	_rng.randomize()
+
+	_end_emitted = false
+	_retreat_requested = false
+	_morale_allowed = false
 
 
 func get_current_state() -> State:
@@ -44,93 +70,275 @@ func is_input_active() -> bool:
 	return _state == State.WAITING_INPUT
 
 
+var _paused := false
+
+
+func pause_battle() -> void:
+	_paused = true
+
+
+func resume_battle() -> void:
+	_paused = false
+
+
+func is_paused() -> bool:
+	return _paused
+
+
 ## Основной вход: начать бой
 func start_battle() -> void:
+	_paused = false
+	_end_emitted = false
+	_retreat_requested = false
+	_morale_allowed = false
+
+	if _battle_state.check_end() != "":
+		_transition_to(State.BATTLE_OVER)
+		_emit_end()
+		return
+
+	_battle_state.build_queue()
 	_state = State.TURN_START
 	_advance_to_next_turn()
 
 
 ## Вызывается игроком через BattleInput
+## Валидирует, мутирует BattleState, затем испускает сигнал для анимации.
 func request_move(unit: BattleState.BattleUnit, target: Vector2i) -> void:
 	if _state != State.WAITING_INPUT:
 		return
-	_state = State.PLAYER_ANIMATING
-	execute_move.emit(unit, target)
+
+	if unit == null:
+		return
+
+	if unit != _battle_state.active_unit:
+		return
+
+	if not unit.is_alive() or unit.has_moved:
+		return
+
+	var blocked := _battle_state.build_all_blocked(unit, _obstacles)
+	var reachable := _battle_state.get_reachable_for_unit(
+		unit,
+		func() -> Dictionary: return blocked
+	)
+
+	if not reachable.has(target):
+		return
+
+	var path: Array[Vector2i] = []
+
+	if unit.is_flying():
+		path = [unit.cell, target]
+	else:
+		path = HexUtils.bfs_path(
+			unit.cell,
+			target,
+			blocked,
+			BattleState.BW,
+			BattleState.BH
+		)
+
+	if path.size() < 2:
+		return
+
+	_battle_state.do_move(unit, target)
+
+	var anim_state := State.PLAYER_ANIMATING if unit.side == "attacker" else State.AI_ANIMATING
+	_transition_to(anim_state)
+	execute_move.emit(unit, path)
 
 
 ## Вызывается игроком через BattleInput
 func request_attack(atk: BattleState.BattleUnit, def: BattleState.BattleUnit) -> void:
 	if _state != State.WAITING_INPUT:
 		return
-	_state = State.PLAYER_ANIMATING
-	execute_attack.emit(atk, def)
+
+	if atk == null or def == null:
+		return
+
+	if atk != _battle_state.active_unit:
+		return
+
+	if not atk.is_alive() or not def.is_alive():
+		return
+
+	var adjacent_enemy := _has_adjacent_enemy(atk)
+
+	if atk.is_ranged() and not adjacent_enemy:
+		# Ranged can shoot any visible enemy.
+		pass
+	else:
+		if HexUtils.hex_distance(atk.cell, def.cell) != 1:
+			return
+
+	_morale_allowed = true
+	_start_attack(atk, def)
 
 
-## Вызывается после завершения анимации хода (controller → executor)
+## Вызывается после завершения анимации перемещения (controller → executor)
 func on_move_completed() -> void:
+	if _paused:
+		return
+	if _state == State.BATTLE_OVER:
+		return
+
+	if _battle_state.battle_over:
+		_transition_to(State.BATTLE_OVER)
+		_emit_end()
+		return
+
+	if _pending_attack != null and _pending_attack.is_alive():
+		var target := _pending_attack
+		_pending_attack = null
+		_morale_allowed = true
+		_start_attack(_battle_state.active_unit, target)
+		return
+
+	_morale_allowed = true
 	_on_action_completed()
 
 
 ## Вызывается после завершения анимации атаки (controller → executor)
 func on_attack_completed() -> void:
+	if _paused:
+		return
+	if _state == State.BATTLE_OVER:
+		return
+
 	if _battle_state.battle_over:
 		_transition_to(State.BATTLE_OVER)
 		_emit_end()
 		return
+
+	if _attack_attacker != null:
+		if _retaliation_phase:
+			_attack_attacker = null
+			_attack_defender = null
+			_retaliation_phase = false
+			_finish_attack_sequence()
+			return
+
+		if (
+			_attack_strikes_left > 0
+			and _attack_attacker.is_alive()
+			and _attack_defender != null
+			and _attack_defender.is_alive()
+		):
+			_do_next_attack_strike()
+			return
+
+		if _can_retaliate():
+			_start_retaliation()
+			return
+
+		_finish_attack_sequence()
+		return
+
 	_on_action_completed()
 
 
 ## Кнопка «Ждать» — переносит активного юнита в конец очереди
 func request_wait() -> void:
+	if _paused:
+		return
 	if _state != State.WAITING_INPUT or _battle_state.active_unit == null:
 		return
+
 	_battle_state.do_wait(_battle_state.active_unit)
+	_morale_allowed = false
 	_on_action_completed()
 
 
 ## Кнопка «Пропустить»
 func request_skip() -> void:
+	if _paused:
+		return
 	if _state != State.WAITING_INPUT or _battle_state.active_unit == null:
 		return
+
 	_battle_state.do_skip(_battle_state.active_unit)
+	_morale_allowed = false
 	_on_action_completed()
 
 
 ## Кнопка «Защита»
 func request_defend() -> void:
+	if _paused:
+		return
 	if _state != State.WAITING_INPUT or _battle_state.active_unit == null:
 		return
+
 	_battle_state.do_defend(_battle_state.active_unit)
-	status_updated.emit("🛡️ Защита: входящий урон вдвое меньше до следующего хода.")
+	status_updated.emit("🛡️ Защита: +20% DEF до конца раунда.")
+	_morale_allowed = false
 	_on_action_completed()
 
 
 ## Кнопка «Отступление»
 func request_retreat() -> void:
-	_battle_state.battle_over = true
+	if _paused:
+		return
+	if _state != State.WAITING_INPUT:
+		return
+
+	_retreat_requested = true
+	_battle_state.force_end("defender")
 	_transition_to(State.BATTLE_OVER)
-	status_updated.emit("Отступление!")
-	end_battle.emit("defender", _battle_state.get_survivors("attacker"), _battle_state.get_survivors("defender"))
+	status_updated.emit("Отступление! Потеря 50% стеков.")
+	_emit_end()
 
 
 ## === Внутренняя логика ===
 
 func _advance_to_next_turn() -> void:
 	clear_highlights.emit()
+
 	_battle_state.advance_turn()
 
 	if _check_battle_over():
 		return
 
+	var u := _battle_state.active_unit
+
+	# Tick statuses (decrement durations)
+	var to_remove: Array = []
+	for eff in u.statuses.keys():
+		u.statuses[eff] -= 1
+		if u.statuses[eff] <= 0:
+			to_remove.append(eff)
+	for eff in to_remove:
+		u.statuses.erase(eff)
+
+	# Reset charge tracker
+	u.distance_moved_this_turn = 0
+
+	# Check for stun (petrified/blind)
+	if u.is_stunned():
+		var stun_effect := -1
+		for eff in u.statuses.keys():
+			if StatusEffects.is_stun(eff):
+				stun_effect = eff
+				break
+		status_updated.emit("%s is %s! Skips turn." % [u.get_display_name(), StatusEffects.get_name(stun_effect)])
+		u.has_moved = true
+		_on_action_completed()
+		return
+
 	_transition_to(State.TURN_START)
 	status_updated.emit(_battle_state.get_turn_info())
+
+	initiative_changed.emit()
+	active_unit_changed.emit(_battle_state.active_unit)
 	pulse_unit.emit(_battle_state.active_unit)
 
 	if _battle_state.is_player_turn:
-		# Небольшая задержка перед переходом в ожидание ввода
-		await get_tree().create_timer(0.15).timeout
-		if _state == State.BATTLE_OVER:
+		var token := _state_token
+		await get_tree().create_timer(GameSettings.BATTLE_TURN_DELAY).timeout
+
+		if _is_stale(token):
 			return
+
 		_transition_to(State.WAITING_INPUT)
 	else:
 		_run_ai_turn()
@@ -138,8 +346,11 @@ func _advance_to_next_turn() -> void:
 
 func _run_ai_turn() -> void:
 	_transition_to(State.AI_THINKING)
+	var token := _state_token
+
 	await get_tree().create_timer(_ai_think_time).timeout
-	if _state == State.BATTLE_OVER:
+
+	if _is_stale(token):
 		return
 
 	var blocked := _battle_state.build_all_blocked(_battle_state.active_unit, _obstacles)
@@ -147,8 +358,7 @@ func _run_ai_turn() -> void:
 
 	match decision.action:
 		BattleAI.Action.ATTACK:
-			_state = State.AI_ANIMATING
-			execute_attack.emit(_battle_state.active_unit, decision.attack_target)
+			_start_attack(_battle_state.active_unit, decision.attack_target)
 		BattleAI.Action.MOVE:
 			_execute_ai_move(decision)
 		_:
@@ -157,32 +367,184 @@ func _run_ai_turn() -> void:
 
 func _execute_ai_move(decision: BattleAI.AIResult) -> void:
 	var u := _battle_state.active_unit
-	_state = State.AI_ANIMATING
-	_battle_state.do_move(u, decision.target_cell)
-	clear_highlights.emit()
 
+	if u == null:
+		_on_action_completed()
+		return
+
+	_pending_attack = decision.move_victim
+
+	_battle_state.do_move(u, decision.target_cell)
+
+	_transition_to(State.AI_ANIMATING)
+	clear_highlights.emit()
 	execute_move.emit(u, decision.move_path)
 
-	await get_tree().create_timer(_animation_duration).timeout
-	if _state == State.BATTLE_OVER:
+
+## === Боевая последовательность ===
+
+func _start_attack(atk: BattleState.BattleUnit, def: BattleState.BattleUnit) -> void:
+	if atk == null or def == null or not def.is_alive():
+		_on_action_completed()
 		return
 
-	# После хода AI проверяем, есть ли цель для атаки
-	if decision.move_victim != null and decision.move_victim.is_alive():
-		execute_attack.emit(u, decision.move_victim)
-		await get_tree().create_timer(_animation_duration).timeout
-		if _state == State.BATTLE_OVER:
-			return
-	if _battle_state.battle_over:
-		_transition_to(State.BATTLE_OVER)
-		_emit_end()
+	if not atk.is_alive():
+		_on_action_completed()
 		return
+
+	var distance := HexUtils.hex_distance(atk.cell, def.cell)
+	var adjacent_enemy := _has_adjacent_enemy(atk)
+
+	var is_ranged_shot := atk.is_ranged() and distance > 1 and not adjacent_enemy
+	var is_melee_attack := not is_ranged_shot
+
+	_attack_attacker = atk
+	_attack_defender = def
+	_attack_is_melee = is_melee_attack
+	_attack_strikes_left = 2 if atk.is_double_strike() else 1
+	_retaliation_phase = false
+
+	var anim_state := State.PLAYER_ANIMATING if atk.side == "attacker" else State.AI_ANIMATING
+	_transition_to(anim_state)
+
+	_do_next_attack_strike()
+
+
+func _do_next_attack_strike() -> void:
+	if _attack_attacker == null or _attack_defender == null:
+		_finish_attack_sequence()
+		return
+
+	if not _attack_attacker.is_alive() or not _attack_defender.is_alive():
+		_finish_attack_sequence()
+		return
+
+	if _attack_strikes_left <= 0:
+		_finish_attack_sequence()
+		return
+
+	_attack_strikes_left -= 1
+
+	var result := _battle_state.apply_attack(
+		_attack_attacker,
+		_attack_defender,
+		_attack_is_melee,
+		_rng,
+		not _retaliation_phase
+	)
+
+	if result.is_empty():
+		_finish_attack_sequence()
+		return
+
+	result["is_retaliation"] = _retaliation_phase
+
+	if result.get("luck", false):
+		floating_text.emit(_attack_defender.cell, "LUCK!", Color.RED)
+
+	execute_attack.emit(_attack_attacker, _attack_defender, result)
+
+
+func _finish_attack_sequence() -> void:
+	_attack_attacker = null
+	_attack_defender = null
+	_attack_strikes_left = 0
+	_retaliation_phase = false
+
+	_morale_allowed = true
 	_on_action_completed()
+
+
+func _can_retaliate() -> bool:
+	if _attack_attacker == null or _attack_defender == null:
+		return false
+
+	if not _attack_is_melee:
+		return false
+
+	if not _attack_defender.is_alive():
+		return false
+
+	if not _attack_attacker.is_alive():
+		return false
+
+	if _attack_defender.has_retaliated:
+		return false
+
+	if _attack_attacker.is_no_retaliation():
+		return false
+
+	return true
+
+
+func _start_retaliation() -> void:
+	var original_attacker := _attack_attacker
+	var original_defender := _attack_defender
+
+	_retaliation_phase = true
+	_attack_attacker = original_defender
+	_attack_defender = original_attacker
+	_attack_strikes_left = 1
+	_attack_is_melee = true
+
+	original_defender.has_retaliated = true
+
+	var anim_state := State.PLAYER_ANIMATING if _attack_attacker.side == "attacker" else State.AI_ANIMATING
+	_transition_to(anim_state)
+
+	floating_text.emit(_attack_attacker.cell, "RETALIATION", Color.ORANGE)
+
+	_do_next_attack_strike()
+
+
+## === Мораль и вспомогательные ===
+
+func _try_morale_extra_turn() -> bool:
+	var unit := _battle_state.active_unit
+
+	if unit == null or not unit.is_alive():
+		return false
+
+	if not BattleRules.can_morale(unit):
+		return false
+
+	if _rng.randf() >= BattleRules.MORALE_CHANCE:
+		return false
+
+	floating_text.emit(unit.cell, "HIGH MORALE!", Color.YELLOW)
+
+	unit.has_moved = false
+
+	if _battle_state.is_player_turn:
+		_transition_to(State.WAITING_INPUT)
+	else:
+		_run_ai_turn()
+
+	return true
+
+
+func _has_adjacent_enemy(unit: BattleState.BattleUnit) -> bool:
+	if unit == null:
+		return false
+
+	var target_side := "defender" if unit.side == "attacker" else "attacker"
+
+	for nb in HexUtils.get_all_neighbors(unit.cell):
+		var u := _battle_state.get_unit_at(nb, target_side)
+		if u != null and u.is_alive():
+			return true
+
+	return false
 
 
 func _on_action_completed() -> void:
 	if _check_battle_over():
 		return
+
+	if _morale_allowed and _try_morale_extra_turn():
+		return
+
+	_morale_allowed = false
 	_advance_to_next_turn()
 
 
@@ -195,14 +557,35 @@ func _check_battle_over() -> bool:
 
 
 func _emit_end() -> void:
+	if _end_emitted:
+		return
+
 	var winner := _battle_state.check_end()
-	if winner != "":
-		end_battle.emit(
-			winner,
-			_battle_state.get_survivors("attacker"),
-			_battle_state.get_survivors("defender")
-		)
+	if winner == "":
+		return
+
+	var surviving_atk: Array[UnitStack] = []
+	var surviving_def: Array[UnitStack] = _battle_state.get_survivors("defender")
+
+	if _retreat_requested and winner == "defender":
+		surviving_atk = _battle_state.get_retreat_survivors("attacker")
+	else:
+		surviving_atk = _battle_state.get_survivors("attacker")
+
+	_end_emitted = true
+
+	end_battle.emit(
+		winner,
+		surviving_atk,
+		surviving_def
+	)
 
 
 func _transition_to(new_state: State) -> void:
 	_state = new_state
+	_state_token += 1
+	phase_changed.emit(new_state)
+
+
+func _is_stale(token: int) -> bool:
+	return _state == State.BATTLE_OVER or token != _state_token

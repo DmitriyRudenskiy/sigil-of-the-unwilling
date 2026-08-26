@@ -2,6 +2,8 @@ extends CanvasLayer
 class_name AdventureUI
 ## Координатор UI: миникарта, армия, ресурсы, инфо-панель.
 
+const _SettingsScreen = preload("res://scripts/ui/SettingsScreen.gd")
+
 signal end_turn_pressed
 signal date_changed(month: int, week: int, day: int)
 
@@ -13,6 +15,11 @@ var _minimap: MinimapPanel
 var _army: ArmyPanel
 var _resources: ResourceBar
 var _info: InfoPanel
+
+# Addendum 10: Resource chain panels
+var _strat_resources: ResourcesPanel
+var _skills_panel: SkillsPanel
+var _tools_panel: ToolsPanel
 
 var _hero_controller: HeroController
 var _options_popup: PopupPanel
@@ -54,6 +61,16 @@ func _build_right_column() -> void:
 	_resources = ResourceBar.new()
 	vb.add_child(_resources)
 
+	# Addendum 10: Resource chain panels
+	_strat_resources = ResourcesPanel.new()
+	vb.add_child(_strat_resources)
+
+	_skills_panel = SkillsPanel.new()
+	vb.add_child(_skills_panel)
+
+	_tools_panel = ToolsPanel.new()
+	vb.add_child(_tools_panel)
+
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vb.add_child(spacer)
@@ -61,9 +78,14 @@ func _build_right_column() -> void:
 
 func setup(hero: HeroController) -> void:
 	_hero_controller = hero
-	hero.movement_points_changed.connect(func(c, m): _info.set_status("👣 %d/%d" % [c, m]))
+	hero.movement_points_changed.connect(func(c, m): _update_mp_display(c, m))
 	hero.resources_changed.connect(func(_r): _resources.update_resources(hero.resources))
 	hero.path_previewed.connect(func(t): _info.set_status(t))
+	# Addendum 10: Resource chain signals
+	hero.strategic_resources_changed.connect(_strat_resources.update_resources)
+	hero.skills_changed.connect(func(): _skills_panel.update_skills(hero.skills.get_all()))
+	hero.tools_changed.connect(func(): _tools_panel.update_tools(hero.tools.get_all()))
+	hero.time_changed.connect(_info.set_time)
 
 	var world := get_parent()
 	var camera: Camera2D = null
@@ -115,6 +137,7 @@ func _on_end_turn() -> void:
 
 
 func _on_options() -> void:
+	# Show merged options: hex borders + settings button
 	if _options_popup == null:
 		_options_popup = PopupPanel.new()
 		var vb := VBoxContainer.new()
@@ -123,11 +146,47 @@ func _on_options() -> void:
 		_border_check.text = "Рамка гексов"
 		_border_check.toggled.connect(_on_border_toggled)
 		vb.add_child(_border_check)
+
+		var settings_btn := Button.new()
+		settings_btn.text = "⚙️ Настройки"
+		settings_btn.pressed.connect(_on_open_settings)
+		vb.add_child(settings_btn)
+
 		add_child(_options_popup)
-	_options_popup.popup_centered(Vector2i(260, 80))
+	_options_popup.popup_centered(Vector2i(260, 110))
+
+
+func _on_open_settings() -> void:
+	if _options_popup != null:
+		_options_popup.hide()
+	var screen: Control = _SettingsScreen.new()
+	screen.applied.connect(_on_settings_applied)
+	add_child(screen)
+
+
+func _on_settings_applied() -> void:
+	# Apply zoom
+	var world := get_parent()
+	if world and world.has_method("get_camera"):
+		var cam: Camera2D = world.get_camera()
+		if cam and cam.has_method("set_zoom_level"):
+			cam.set_zoom_level(Settings.get_zoom())
 
 
 func _on_border_toggled(on: bool) -> void:
 	var world := get_parent()
 	if world and world.has_method("set_hex_borders"):
 		world.set_hex_borders(on)
+
+
+func _update_mp_display(current: float, max_val: float) -> void:
+	var text := "🚶 %.1f / %.0f" % [current, max_val]
+	var ratio: float = current / max_val if max_val > 0 else 0.0
+	var color: Color
+	if ratio >= 0.4:
+		color = Color.GREEN
+	elif ratio >= 0.1:
+		color = Color.YELLOW
+	else:
+		color = Color.RED
+	_info.set_status_colored(text, color)

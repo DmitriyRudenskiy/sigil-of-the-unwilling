@@ -10,6 +10,7 @@ const C_GOLD := Color(1.0, 0.85, 0.4)
 const C_SLOT_BG := Color(0.35, 0.24, 0.15)
 
 var _date_label: Label
+var _time_label: Label
 var _status_label: Label
 var _hero_slots: Array[Panel] = []
 var _town_slots: Array[Panel] = []
@@ -22,6 +23,7 @@ var month := 1
 func _ready() -> void:
 	add_theme_constant_override("separation", 6)
 	_build_date()
+	_build_time()
 	_build_hero_town_lists()
 	_build_action_buttons()
 	_build_status()
@@ -34,6 +36,30 @@ func _build_date() -> void:
 	_date_label.add_theme_color_override("font_color", C_TEXT)
 	_date_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(_date_label)
+
+
+func _build_time() -> void:
+	_time_label = Label.new()
+	_time_label.text = "🕐 06:00"
+	_time_label.add_theme_font_size_override("font_size", 12)
+	_time_label.add_theme_color_override("font_color", C_TEXT)
+	_time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	add_child(_time_label)
+
+
+func set_time(hour: float) -> void:
+	var h := int(floor(hour))
+	var m := int(round((hour - floor(hour)) * 60))
+	_time_label.text = "🕐 %02d:%02d" % [h, m]
+	# Color coding: green for morning, yellow for noon, orange for evening, dark blue for night
+	if hour >= 21.0:
+		_time_label.add_theme_color_override("font_color", Color(0.3, 0.3, 0.8))
+	elif hour >= 17.0:
+		_time_label.add_theme_color_override("font_color", Color(0.9, 0.6, 0.2))
+	elif hour >= 11.0:
+		_time_label.add_theme_color_override("font_color", Color(0.9, 0.9, 0.3))
+	else:
+		_time_label.add_theme_color_override("font_color", Color(0.4, 0.9, 0.4))
 
 
 func _build_hero_town_lists() -> void:
@@ -129,6 +155,11 @@ func _apply_icon(btn: Button, icon_path: String, fallback: String) -> void:
 
 func set_status(text: String) -> void:
 	_status_label.text = text
+
+
+func set_status_colored(text: String, color: Color) -> void:
+	_status_label.text = text
+	_status_label.add_theme_color_override("font_color", color)
 
 
 func advance_day() -> void:

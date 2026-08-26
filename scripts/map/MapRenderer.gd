@@ -35,3 +35,39 @@ func diversify(tile_map: TileMapLayer) -> void:
 		if tile_map.get_cell_atlas_coords(cell) == TerrainAtlasMapScript.CENTER_COORDS[t]:
 			var pick: Vector2i = vars[rng.randi_range(0, vars.size() - 1)]
 			tile_map.set_cell(cell, TerrainAtlasMapScript.SOURCE_ID, pick)
+
+
+## Рисует объекты на декор-слой с вероятностью
+func paint_decor(decor_layer: TileMapLayer) -> void:
+	if decor_layer == null:
+		return
+	decor_layer.clear()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = model.seed_value + 9999
+
+	for cell in model.terrain_grid:
+		var t: int = model.terrain_grid[cell]
+		if not TerrainAtlasMapScript.DECOR_COORDS.has(t):
+			continue
+		var decor_list: Array = TerrainAtlasMapScript.DECOR_COORDS[t]
+		if decor_list.is_empty():
+			continue
+
+		# Собираем суммарную вероятность
+		var total_prob := 0.0
+		for entry in decor_list:
+			total_prob += float(entry.get("probability", 0.1))
+
+		# Бросаем кубик: ставим ли объект вообще
+		if rng.randf() > total_prob:
+			continue
+
+		# Выбираем какой именно объект
+		var roll := rng.randf() * total_prob
+		var accum := 0.0
+		for entry in decor_list:
+			accum += float(entry.get("probability", 0.1))
+			if roll <= accum:
+				var coords: Vector2i = entry["coords"]
+				decor_layer.set_cell(cell, TerrainAtlasMapScript.OBJECT_SOURCE_ID, coords)
+				break

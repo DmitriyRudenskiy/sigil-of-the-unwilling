@@ -1,413 +1,321 @@
 extends Node2D
 class_name HeroController
-
-const _UnitStack = preload("res://scripts/unit_stack.gd")
-const _UnitRegistry = preload("res://scripts/UnitRegistry.gd")
-const _HexDraw = preload("res://scripts/util/HexDraw.gd")
+## Thin facade: composes Movement, Army, Resources, Visual.
 
 signal hero_moved(cell: Vector2i)
 signal hero_entered_village(cell: Vector2i)
-signal movement_points_changed(current: int, max_val: int)
+signal movement_points_changed(current: float, max_val: float)
 signal resources_changed(resources: Dictionary)
 signal path_previewed(text: String)
+signal strategic_resources_changed(resources: Dictionary)
+signal skills_changed
+signal tools_changed
+signal time_changed(hour: float)
 
-const HERO_SHEET_PATH := "res://assets/raw/hero_knight.jpg"
+var movement: HeroMovementController
+var army: HeroArmyController
+var resources: HeroResources
+var visual: HeroVisualController
 
-@export var max_move_points: int = 20
-@export var move_cost_per_cell: int = 1
-
-var current_cell: Vector2i = Vector2i(5, 5)
-var move_points: int = 20
-var path: Array[Vector2i] = []
-var pending_cell: Vector2i = Vector2i(-1, -1)
-var pending_path: Array[Vector2i] = []
-var is_moving: bool = false
 var hero_name: String = "Darkstorn"
-
 var stats := {"attack": 0, "defense": 0, "spell_power": 4, "knowledge": 2}
+var inventory: HeroInventory = HeroInventory.new()
 
-var army: Array = []  # Array[UnitStack] via preload
+# Magic — HeroMagic handles mana/schools/spellbook internally.
+var magic: HeroMagic = HeroMagic.new()
 
-var resources := {
-    "wood": 10, "mercury": 2, "ore": 10, "sulfur": 2,
-    "crystal": 2, "gems": 2, "gold": 500,
-}
+# Resource chains (Addendum 10)
+var skills: HeroSkills = HeroSkills.new()
+var tools: HeroTools = HeroTools.new()
+var time: TimeSystem = TimeSystem.new()
+var strategic_resources: Dictionary = {}  # resource_id -> amount
 
-var _map_gen: MapGenerator
-var _anim: AnimatedSprite2D
-var _fallback: Sprite2D
-var _avatar_tex: Texture2D
+# Backward-compat pass-throughs (kept for existing callers)
+var mana_current: int:
+	get: return magic.mana_current
+var mana_max: int:
+	get: return magic.mana_max
+var magic_schools: Dictionary:
+	get: return magic.schools
+var spellbook: Array[StringName]:
+	get: return magic.spellbook
+
 var _tween: Tween
-var _path_line: Line2D
-var _marker: DestMarker
 
-## Public accessor for the map generator
-func get_map_gen() -> MapGenerator:
-    return _map_gen
-
-
-# ======== Маркер кликнутой клетки (отладка пути) ========
-class DestMarker extends Node2D:
-    var active := false
-    var _t := 0.0
-
-    func _process(d: float) -> void:
-        if active:
-            _t += d
-            queue_redraw()
-
-    func show_at(pos: Vector2) -> void:
-        position = pos
-        active = true
-        queue_redraw()
-
-    func hide_marker() -> void:
-        active = false
-        queue_redraw()
-
-    func _draw() -> void:
-        if not active:
-            return
-        var r := 36.0 + sin(_t * 6.0) * 4.0
-        var pts := _HexDraw.points(r)
-        draw_polyline(pts, Color(1.0, 0.25, 0.2, 0.95), 3.0)
+var current_cell: Vector2i:
+	get: return movement.current_cell
+var move_points: float:
+	get: return movement.move_points
 
 
 func _ready() -> void:
-    _init_default_army()
-    _build_visual()
+	movement = HeroMovementController.new()
+	movement.name = "Movement"
+	movement.max_move_points = 10.0
+	add_child(movement)
+
+	army = HeroArmyController.new()
+	army.name = "Army"
+	add_child(army)
+
+	resources = HeroResources.new()
+	resources.name = "Resources"
+	resources.inventory = inventory
+	add_child(resources)
+
+	visual = HeroVisualController.new()
+	visual.name = "Visual"
+	add_child(visual)
+
+	magic.init_defaults()
+
+	# Resource chains (Addendum 10)
+	time = TimeSystem.new()
+	time.name = "Time"
+	add_child(time)
+	skills = HeroSkills.new()
+	skills.name = "Skills"
+	add_child(skills)
+	tools = HeroTools.new()
+	tools.name = "Tools"
+	add_child(tools)
+
+	_init_strategic_resources()
+
+	_wire_signals()
 
 
-func _init_default_army() -> void:
-    army = [
-        _UnitRegistry.make_fixed_stack("swordsmen", 103),
-        _UnitRegistry.make_fixed_stack("archers", 36),
-        _UnitRegistry.make_fixed_stack("cavalry", 34),
-        _UnitRegistry.make_fixed_stack("mages", 10),
-        _UnitRegistry.make_fixed_stack("guardians", 20),
-        _UnitRegistry.make_fixed_stack("archmages", 12),
-        _UnitRegistry.make_fixed_stack("champions", 6),
-        _UnitRegistry.make_fixed_stack("knights", 12),
-    ]
+func _init_strategic_resources() -> void:
+	var all := ResourceRegistry.get_all()
+	for def in all:
+		strategic_resources[def.id] = 0
 
 
-func _build_visual() -> void:
-    var sheet_path := _find_sheet()
-    if sheet_path != "":
-        var sheet := Image.load_from_file(sheet_path)
-        if sheet != null:
-            _build_anim_from_sheet(sheet)
-    if _anim == null:
-        # фолбэк-круг (остается как раньше)
-        _fallback = Sprite2D.new()
-        var img := Image.create(48, 48, false, Image.FORMAT_RGBA8)
-        var center := Vector2(24, 24)
-        for y in 48:
-            for x in 48:
-                var dist := Vector2(x, y).distance_to(center)
-                if dist <= 20:
-                    img.set_pixel(x, y, Color(0.9, 0.7, 0.1))
-                elif dist <= 22:
-                    img.set_pixel(x, y, Color(0.3, 0.2, 0.0))
-        _fallback.texture = ImageTexture.create_from_image(img)
-        _fallback.z_index = 10
-        add_child(_fallback)
+func _wire_signals() -> void:
+	movement.hero_moved.connect(hero_moved.emit)
+	movement.movement_points_changed.connect(movement_points_changed.emit)
+	movement.path_previewed.connect(path_previewed.emit)
+	movement.hero_entered_village.connect(hero_entered_village.emit)
+	movement.reach_preview_changed.connect(_on_reach_preview)
+	movement.reach_preview_cleared.connect(_on_reach_cleared)
+	resources.resources_changed.connect(resources_changed.emit)
+	time.time_changed.connect(time_changed.emit)
+	skills.skills_changed.connect(skills_changed.emit)
+	tools.tools_changed.connect(tools_changed.emit)
 
 
-func _find_sheet() -> String:
-    # 1) явные имена
-    for c in ["hero_knight.png", "knight.png", "hero.png", "knight.jpeg", "hero.jpeg", "hero_knight.jpg"]:
-        if FileAccess.file_exists("res://assets/raw/" + c):
-            return "res://assets/raw/" + c
-    # 2) автопоиск: большой квадратный файл в assets/raw
-    var dir := DirAccess.open("res://assets/raw")
-    if dir == null:
-        return ""
-    var best := ""
-    var best_w := 0
-    dir.list_dir_begin()
-    var f := dir.get_next()
-    while f != "":
-        var low := f.to_lower()
-        if low.ends_with(".png") or low.ends_with(".jpeg") or low.ends_with(".jpg"):
-            var img := Image.load_from_file("res://assets/raw/" + f)
-            if img != null and img.get_width() >= 800 and absi(img.get_width() - img.get_height()) < 8:
-                if img.get_width() > best_w:
-                    best_w = img.get_width()
-                    best = "res://assets/raw/" + f
-        f = dir.get_next()
-    dir.list_dir_end()
-    if best != "":
-        print("[Hero] sheet auto-detected: ", best)
-    return best
-
-
-func _idle() -> void:
-    if _anim != null:
-        _anim.stop()
-        _anim.frame = 0
-
-func _build_anim_from_sheet(sheet: Image) -> void:
-    if sheet.get_format() != Image.FORMAT_RGBA8:
-        sheet.convert(Image.FORMAT_RGBA8)
-    sheet.resize(512, 512, Image.INTERPOLATE_LANCZOS)
-    # Убрать чёрный фон
-    for y in 512:
-        for x in 512:
-            var px := sheet.get_pixel(x, y)
-            if px.r < 0.12 and px.g < 0.12 and px.b < 0.12:
-                sheet.set_pixel(x, y, Color(0, 0, 0, 0))
-    var fs := 128
-    var sf := SpriteFrames.new()
-    if sf.has_animation("default"):
-        sf.remove_animation("default")
-    sf.add_animation("side")
-    sf.add_animation("away")
-    for an in ["side", "away"]:
-        sf.set_animation_loop(an, true)
-        sf.set_animation_speed(an, 8.0)
-    for c in 4:
-        var f_side := Image.create(fs, fs, false, Image.FORMAT_RGBA8)
-        f_side.blit_rect(sheet, Rect2i(c * fs, 0, fs, fs), Vector2i(0, 0))
-        sf.add_frame("side", ImageTexture.create_from_image(f_side))
-        var f_away := Image.create(fs, fs, false, Image.FORMAT_RGBA8)
-        f_away.blit_rect(sheet, Rect2i(c * fs, 3 * fs, fs, fs), Vector2i(0, 0))
-        sf.add_frame("away", ImageTexture.create_from_image(f_away))
-    _avatar_tex = sf.get_frame_texture("side", 0)
-    _anim = AnimatedSprite2D.new()
-    _anim.sprite_frames = sf
-    _anim.scale = Vector2(0.62, 0.62)
-    _anim.z_index = 10
-    add_child(_anim)
-    _anim.stop()
-    _anim.frame = 0
-    print("[Hero] Knight animation built from ", HERO_SHEET_PATH)
-
-
-func get_avatar_texture() -> Texture2D:
-    return _avatar_tex
+func get_map_gen() -> MapGenerator:
+	return movement.get_map_gen()
 
 
 func setup(map: MapGenerator) -> void:
-    _map_gen = map
-    if _path_line == null:
-        _path_line = Line2D.new()
-        _path_line.width = 3.0
-        _path_line.default_color = Color(1, 1, 0, 0.6)
-        _path_line.z_index = 5
-        get_parent().add_child(_path_line)
-    if _marker == null:
-        _marker = DestMarker.new()
-        get_parent().add_child(_marker)
-    for y in map.map_height:
-        for x in map.map_width:
-            var cell := Vector2i(x, y)
-            if map.is_walkable(cell):
-                current_cell = cell
-                _update_position()
-                return
+	movement.setup(map, self)
+	visual.setup(map, self)
+	visual.build_visual()
+	visual.setup_path_visual()
 
 
-func _update_position() -> void:
-    if _map_gen and _map_gen.has_valid_tilemap():
-        position = _map_gen.map_to_local(current_cell)
-    else:
-        position = Vector2(current_cell.x * 64 + 32, current_cell.y * 56 + 28)
+# ==================== PASSTHROUGH — movement ====================
 
-
-# ===================== TWO-CLICK MOVEMENT =====================
 func on_map_clicked(cell: Vector2i) -> void:
-    if is_moving or _map_gen == null or not _map_gen.has_valid_tilemap():
-        return
-    if cell == current_cell:
-        cancel_pending()
-        return
-
-    if cell == pending_cell and pending_path.size() > 1:
-        path = pending_path
-        pending_cell = Vector2i(-1, -1)
-        pending_path = []
-        path_previewed.emit("")
-        _marker.hide_marker()
-        _start_moving()
-        return
-
-    if move_points <= 0:
-        path_previewed.emit("Нет очков движения — нажмите ⏳")
-        return
-
-    var blocked: Dictionary = _map_gen.get_blocked_cells()
-    var found := HexUtils.bfs_path(current_cell, cell, blocked, _map_gen.map_width, _map_gen.map_height)
-    if found.size() < 2:
-        cancel_pending()
-        path_previewed.emit("Путь недоступен")
-        return
-
-    var max_cells := move_points / move_cost_per_cell
-    var affordable: Array[Vector2i] = found.slice(0, mini(found.size(), max_cells + 1))
-    pending_cell = cell
-    pending_path = affordable
-    _set_line_points(affordable)
-
-    # Маркер кликнутой клетки
-    if _map_gen.has_valid_tilemap():
-        _marker.show_at(_map_gen.map_to_local(cell))
-
-    var cost := (affordable.size() - 1) * move_cost_per_cell
-    var suffix := ""
-    if affordable.size() < found.size():
-        suffix = " (очков хватит на %d кл.)" % (affordable.size() - 1)
-    path_previewed.emit("Путь: %d кл., очков: %d%s. Клик ещё раз — идти. ПКМ — отмена." % [
-        affordable.size() - 1, cost, suffix])
+	movement.on_map_clicked(cell)
 
 
-func cancel_pending(clear_text := true) -> void:
-    pending_cell = Vector2i(-1, -1)
-    pending_path = []
-    if _path_line:
-        _path_line.clear_points()
-    if _marker:
-        _marker.hide_marker()
-    if clear_text:
-        path_previewed.emit("")
+func cancel_pending(clear_text: bool = true) -> void:
+	movement.cancel_pending(clear_text)
 
 
-func _set_line_points(pts: Array[Vector2i]) -> void:
-    if _path_line == null:
-        return
-    _path_line.clear_points()
-    for p in pts:
-        var local_pos: Vector2
-        if _map_gen and _map_gen.has_valid_tilemap():
-            local_pos = _map_gen.map_to_local(p)
-        else:
-            local_pos = Vector2(p.x * 64 + 32, p.y * 56 + 28)
-        _path_line.add_point(local_pos)
-
-
-# ===================== MOVEMENT =====================
-func _start_moving() -> void:
-    if path.size() < 2:
-        return
-    is_moving = true
-    _move_next_step()
-
-
-func _move_next_step() -> void:
-    if path.size() < 2:
-        is_moving = false
-        path.clear()
-        if _path_line:
-            _path_line.clear_points()
-        if _marker:
-            _marker.hide_marker()
-        _idle()
-        return
-
-    var next_cell := path[1]
-    path.remove_at(0)
-    _set_line_points(path)
-
-    _set_facing(next_cell - current_cell)
-
-    move_points -= move_cost_per_cell
-    movement_points_changed.emit(move_points, max_move_points)
-
-    var target_pos: Vector2
-    if _map_gen and _map_gen.has_valid_tilemap():
-        target_pos = _map_gen.map_to_local(next_cell)
-    else:
-        target_pos = Vector2(next_cell.x * 64 + 32, next_cell.y * 56 + 28)
-
-    if _tween and _tween.is_valid():
-        _tween.kill()
-    _tween = create_tween()
-    _tween.tween_property(self, "position", target_pos, 0.35)
-    _tween.tween_callback(_on_step_complete.bind(next_cell))
-
-
-func _set_facing(delta: Vector2i) -> void:
-    if _anim == null:
-        return
-    if delta.x > 0:
-        _anim.animation = "side"
-        _anim.flip_h = true
-    elif delta.x < 0:
-        _anim.animation = "side"
-        _anim.flip_h = false
-    elif delta.y < 0:
-        _anim.animation = "away"
-        _anim.flip_h = false
-    else:
-        _anim.animation = "away"
-        _anim.flip_h = true
-    _anim.play()
-
-
-func _on_step_complete(cell: Vector2i) -> void:
-    current_cell = cell
-    hero_moved.emit(cell)
-
-    if _map_gen and _map_gen.resource_cells.has(cell):
-        var res_type: int = _map_gen.resource_cells[cell]
-        _pickup_resource(res_type)
-        _map_gen.resource_cells.erase(cell)
-        resources_changed.emit(resources)
-
-    if _map_gen and cell in _map_gen.village_cells:
-        hero_entered_village.emit(cell)
-
-    if move_points <= 0:
-        is_moving = false
-        path.clear()
-        if _path_line:
-            _path_line.clear_points()
-        if _marker:
-            _marker.hide_marker()
-        _idle()
-        return
-
-    _move_next_step()
-
-
-func _pickup_resource(res_type: int) -> void:
-    var names := ["wood", "mercury", "ore", "sulfur", "crystal", "gems", "gold"]
-    if res_type < names.size():
-        var amount := 5 if res_type < 6 else 50
-        resources[names[res_type]] += amount
-        print("[Hero] Picked up +%d %s" % [amount, names[res_type]])
-
-
-func end_turn() -> void:
-    move_points = max_move_points
-    movement_points_changed.emit(move_points, max_move_points)
-    is_moving = false
-    path.clear()
-    cancel_pending()
-
+# ==================== PASSTHROUGH — army ====================
 
 func get_army_for_battle() -> Array[UnitStack]:
-    var alive: Array[UnitStack] = []
-    for stack in army:
-        if stack != null and stack.is_alive():
-            alive.append(stack.duplicate_stack())
-    return alive
+	return army.get_army_for_battle()
 
 
 func apply_battle_results(surviving_army: Array[UnitStack]) -> void:
-    var new_army: Array[UnitStack] = []
-    for stack in surviving_army:
-        if stack != null and stack.is_alive():
-            new_army.append(stack)
-    army = new_army
+	army.apply_battle_results(surviving_army)
+
+
+# ==================== PASSTHROUGH — resources ====================
+
+func _on_resource_pickup(res_type: int) -> void:
+	resources.pickup_resource(res_type)
+
+
+# ==================== PASSTHROUGH — visual ====================
+
+func _idle_animation() -> void:
+	visual.idle_animation()
+
+
+func _set_facing(delta: Vector2i) -> void:
+	visual.set_facing(delta)
+
+
+func _draw_path(pts: Array[Vector2i]) -> void:
+	visual.draw_path(pts)
+
+
+func _clear_path_visual() -> void:
+	visual.clear_path_visual()
+
+
+# Marker layer passthroughs (for new marker system)
+func _on_reach_preview(_pts: Array[Vector2i], _dist: Dictionary, _mp: float) -> void:
+	pass  # WorldController handles MarkerLayer rendering
+
+func _on_reach_cleared() -> void:
+	pass
+
+
+func _hide_path_visual() -> void:
+	visual.clear_path_visual()
+
+
+func _show_marker(pos: Vector2) -> void:
+	visual.show_marker(pos)
+
+
+func _tween_to(target: Vector2, duration: float, callback: Callable) -> void:
+	if _tween and _tween.is_valid():
+		_tween.kill()
+	_tween = create_tween()
+	_tween.tween_property(self, "position", target, duration)
+	_tween.tween_callback(callback)
+
+
+func _kill_tween() -> void:
+	if _tween and _tween.is_valid():
+		_tween.kill()
+
+
+# ==================== TURN LOGIC ====================
+
+func end_turn() -> void:
+	resources.apply_daily_effects()
+	magic.tick_restore(stats.get("knowledge", 0))
+
+	# Auto-generate basic resources
+	_add_strategic_resource(&"wood", GameSettings.RESOURCE_AUTO_WOOD_PER_DAY)
+	_add_strategic_resource(&"stone", GameSettings.RESOURCE_AUTO_STONE_PER_DAY)
+
+	# Reset time for new day
+	time.reset_for_new_day()
+
+	movement.move_points = get_daily_movement_points()
+	movement_points_changed.emit(movement.move_points, get_daily_movement_points())
+	movement.end_turn_movement()
+
+
+func _add_strategic_resource(id: StringName, amount: int) -> void:
+	if not strategic_resources.has(id):
+		strategic_resources[id] = 0
+	var current := strategic_resources[id]
+	var new_val := min(current + amount, GameSettings.RESOURCE_CAPACITY)
+	if new_val != current:
+		strategic_resources[id] = new_val
+		strategic_resources_changed.emit(strategic_resources)
+
+
+func add_strategic_resource(id: StringName, amount: int) -> int:
+	"""Add strategic resource. Returns amount actually added (may be capped)."""
+	if amount <= 0:
+		return 0
+	if not strategic_resources.has(id):
+		strategic_resources[id] = 0
+	var current := strategic_resources[id]
+	var space := GameSettings.RESOURCE_CAPACITY - current
+	var actual := min(amount, max(0, space))
+	strategic_resources[id] = current + actual
+	strategic_resources_changed.emit(strategic_resources)
+	return actual
+
+
+func remove_strategic_resource(id: StringName, amount: int) -> int:
+	"""Remove strategic resource (for tools/consumables). Returns amount actually removed."""
+	if amount <= 0 or not strategic_resources.has(id):
+		return 0
+	var current := strategic_resources[id]
+	var actual := min(amount, current)
+	strategic_resources[id] = current - actual
+	strategic_resources_changed.emit(strategic_resources)
+	return actual
+
 
 func force_stop() -> void:
-    is_moving = false
-    path.clear()
-    if _tween and _tween.is_valid():
-        _tween.kill()
-    if _path_line:
-        _path_line.clear_points()
-    if _marker:
-        _marker.hide_marker()
-    _idle()
+	movement.force_stop()
+
+
+func get_daily_movement_points() -> float:
+	return movement.get_daily_movement_points()
+
+
+func _on_time_update(step_cost: float) -> void:
+	time.spend_move_points(step_cost)
+
+
+# ==================== BATTLE ====================
+
+func get_battle_bonus() -> Dictionary:
+	var mods := inventory.get_total_modifiers()
+	return {
+		"attack": int(stats.get("attack", 0)) + int(mods.get("attack", 0)),
+		"defense": int(stats.get("defense", 0)) + int(mods.get("defense", 0)),
+		"spell_power": int(stats.get("spell_power", 0)) + int(mods.get("spell_power", 0)),
+		"knowledge": int(stats.get("knowledge", 0)) + int(mods.get("knowledge", 0)),
+		"luck": int(mods.get("luck", 0)),
+		"morale": int(mods.get("morale", 0)),
+	}
+
+
+func has_artifact_effect(effect: StringName) -> bool:
+	return inventory.has_special_effect(effect)
+
+
+func get_hero_bonus() -> Dictionary:
+	return {
+		"attack": stats.get("attack", 0),
+		"defense": stats.get("defense", 0),
+		"spell_power": stats.get("spell_power", 0),
+	}
+
+
+# ==================== SERIALIZATION ====================
+
+func serialize() -> Dictionary:
+	return {
+		"cell": {"x": movement.current_cell.x, "y": movement.current_cell.y},
+		"move_points": movement.move_points,
+		"hero_name": hero_name,
+		"stats": stats.duplicate(),
+		"resources": resources.serialize(),
+		"army": army.serialize(),
+		"inventory": inventory.serialize(),
+		"mana_current": magic.mana_current,
+		"mana_max": magic.mana_max,
+		"magic_schools": magic.schools.duplicate(),
+		"spellbook": magic.spellbook.duplicate(),
+		"skills": skills.get_all(),
+		"tools": tools.serialize(),
+		"strategic_resources": strategic_resources.duplicate(),
+		"time_mp_spent": time.mp_spent_today,
+	}
+
+
+func deserialize(data: Dictionary) -> void:
+	movement.current_cell = Vector2i(int(data["cell"]["x"]), int(data["cell"]["y"]))
+	movement.move_points = int(data.get("move_points", movement.move_points))
+	hero_name = str(data.get("hero_name", hero_name))
+	stats = data.get("stats", stats).duplicate()
+	resources.deserialize(data.get("resources", {}))
+	army.deserialize(data.get("army", []))
+	inventory.deserialize(data.get("inventory", {}))
+	magic.mana_current = int(data.get("mana_current", magic.mana_current))
+	magic.mana_max = int(data.get("mana_max", magic.mana_max))
+	magic.schools = data.get("magic_schools", magic.schools).duplicate()
+	magic.spellbook = data.get("spellbook", magic.spellbook).duplicate()
+	skills = HeroSkills.new()
+	for sk in data.get("skills", {}):
+		skills.set(StringName(sk), int(data["skills"][sk]))
+	tools.deserialize(data.get("tools", []))
+	strategic_resources = data.get("strategic_resources", strategic_resources).duplicate()
+	time.mp_spent_today = float(data.get("time_mp_spent", 0.0))

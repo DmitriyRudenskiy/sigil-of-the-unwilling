@@ -4,14 +4,8 @@ class_name HexDraw
 ## Генерирует PackedVector2Array вершин; вызывающий рисует через draw_polyline().
 
 
-static var _cached: Array[PackedVector2Array] = []
-
-
 ## Вершины правильного гекса (pointy-top), радиус r, центр в origin.
 static func points(radius: float) -> PackedVector2Array:
-	if _cached.size() >= 4 and _cached[3] != null:
-		# Кэш для фиксированных радиусов (36, 38, 40) — не нужен, просто генерируем
-		pass
 	var pts := PackedVector2Array()
 	for i in 7:
 		var ang := deg_to_rad(60.0 * i - 90.0)

@@ -1,5 +1,5 @@
 extends SceneTree
-## Тесты BattleState: размещение, очередь, атака, конец боя.
+## Тесты BattleState: размещение, очередь, атака, конец боя, теги, отступление.
 
 func _init() -> void:
 	var failed := 0
@@ -7,6 +7,15 @@ func _init() -> void:
 	failed += _test_attack()
 	failed += _test_battle_end()
 	failed += _test_wait_order()
+	failed += _test_check_end_repeat_call()
+	failed += _test_attack_with_rng()
+	failed += _test_get_reachable_for_unit()
+	failed += _test_flying_unit_placement()
+	failed += _test_ranged_unit_tag()
+	failed += _test_morale_tag()
+	failed += _test_retreat_survivors()
+	failed += _test_defend_bonus()
+	failed += _test_hero_bonuses()
 
 	if failed == 0:
 		print("BattleState tests passed")
@@ -67,13 +76,41 @@ func _test_attack() -> int:
 	defender.cell = HexUtils.get_neighbor(attacker.cell, 0)
 
 	var defender_count_before = defender.get_count()
-	state.apply_attack(attacker, defender)
+	var rng1 := RandomNumberGenerator.new()
+	state.apply_attack(attacker, defender, true, rng1)
 
 	if defender.get_count() >= defender_count_before:
 		printerr("attack should reduce defender count")
 		errors += 1
 	if not attacker.has_moved:
 		printerr("attacker should have has_moved after attack")
+		errors += 1
+	return errors
+
+
+func _test_attack_with_rng() -> int:
+	var errors := 0
+	var state = load("res://scripts/BattleState.gd").new()
+	var atk: Array[UnitStack] = []
+	atk.append(UnitRegistry.make_fixed_stack("swordsmen", 50))
+	var def: Array[UnitStack] = []
+	def.append(UnitRegistry.make_fixed_stack("goblins", 50))
+	state.place_army(atk, def)
+
+	var attacker = state.get_units_by_side("attacker")[0]
+	var defender = state.get_units_by_side("defender")[0]
+	attacker.cell = Vector2i(5, 5)
+	defender.cell = HexUtils.get_neighbor(attacker.cell, 0)
+
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 12345
+
+	var result: Dictionary = state.apply_attack(attacker, defender, true, rng)
+	if not result.has("damage"):
+		printerr("apply_attack with rng should return result with damage")
+		errors += 1
+	if result.get("damage", 0) <= 0:
+		printerr("damage should be > 0 for swordsmen vs goblins")
 		errors += 1
 	return errors
 
@@ -94,8 +131,9 @@ func _test_battle_end() -> int:
 	defender.cell = HexUtils.get_neighbor(attacker.cell, 0)
 
 	var guard := 0
+	var rng2 := RandomNumberGenerator.new()
 	while defender.is_alive() and guard < 100:
-		state.apply_attack(attacker, defender)
+		state.apply_attack(attacker, defender, true, rng2)
 		guard += 1
 
 	if defender.is_alive():
@@ -158,4 +196,178 @@ func _test_wait_order() -> int:
 		printerr("After waiting with second unit, third unit should act")
 		errors += 1
 
+	return errors
+
+
+func _test_check_end_repeat_call() -> int:
+	var errors := 0
+	var state = load("res://scripts/BattleState.gd").new()
+	var atk: Array[UnitStack] = []
+	atk.append(UnitRegistry.make_fixed_stack("swordsmen", 100))
+	var def: Array[UnitStack] = []
+	def.append(UnitRegistry.make_fixed_stack("goblins", 1))
+	state.place_army(atk, def)
+
+	var attacker = state.get_units_by_side("attacker")[0]
+	var defender = state.get_units_by_side("defender")[0]
+	attacker.cell = Vector2i(5, 5)
+	defender.cell = HexUtils.get_neighbor(attacker.cell, 0)
+
+	var rng3 := RandomNumberGenerator.new()
+	state.apply_attack(attacker, defender, true, rng3)
+
+	var winner1: String = state.check_end()
+	if winner1 != "attacker":
+		printerr("first check_end() should return 'attacker', got: ", winner1)
+		errors += 1
+
+	var winner2: String = state.check_end()
+	if winner2 != "attacker":
+		printerr("second check_end() should return 'attacker', got: ", winner2)
+		errors += 1
+
+	var state2 = load("res://scripts/BattleState.gd").new()
+	state2.force_end("defender")
+	if not state2.battle_over:
+		printerr("force_end should set battle_over")
+		errors += 1
+	if state2.check_end() != "defender":
+		printerr("check_end after force_end should return 'defender'")
+		errors += 1
+
+	return errors
+
+
+func _test_get_reachable_for_unit() -> int:
+	var errors := 0
+	var state = load("res://scripts/BattleState.gd").new()
+	var atk: Array[UnitStack] = []
+	atk.append(UnitRegistry.make_fixed_stack("swordsmen", 20))
+	var def: Array[UnitStack] = []
+	state.place_army(atk, def)
+
+	var unit = state.get_units_by_side("attacker")[0]
+
+	var blocked := func() -> Dictionary: return {}
+	var reachable: Dictionary = state.get_reachable_for_unit(unit, blocked)
+
+	if reachable.size() <= 1:
+		printerr("reachable should include unit's own cell + neighbors")
+		errors += 1
+	return errors
+
+
+func _test_flying_unit_placement() -> int:
+	var errors := 0
+	var state = load("res://scripts/BattleState.gd").new()
+	var atk: Array[UnitStack] = []
+	atk.append(UnitRegistry.make_fixed_stack("pegasus", 10))
+	var def: Array[UnitStack] = []
+	state.place_army(atk, def)
+
+	var unit = state.get_units_by_side("attacker")[0]
+	if not unit.is_flying():
+		printerr("pegasus should be flying")
+		errors += 1
+	return errors
+
+
+func _test_ranged_unit_tag() -> int:
+	var errors := 0
+	var state = load("res://scripts/BattleState.gd").new()
+	var atk: Array[UnitStack] = []
+	atk.append(UnitRegistry.make_fixed_stack("archers", 10))
+	var def: Array[UnitStack] = []
+	state.place_army(atk, def)
+
+	var unit = state.get_units_by_side("attacker")[0]
+	if not unit.is_ranged():
+		printerr("archers should be ranged")
+		errors += 1
+	return errors
+
+
+func _test_morale_tag() -> int:
+	var errors := 0
+	var state = load("res://scripts/BattleState.gd").new()
+	var atk: Array[UnitStack] = []
+	atk.append(UnitRegistry.make_fixed_stack("champions", 10))
+	var def: Array[UnitStack] = []
+	state.place_army(atk, def)
+
+	var unit = state.get_units_by_side("attacker")[0]
+	if not unit.has_morale():
+		printerr("champions should have morale")
+		errors += 1
+	return errors
+
+
+func _test_retreat_survivors() -> int:
+	var errors := 0
+	var state = load("res://scripts/BattleState.gd").new()
+	var atk: Array[UnitStack] = [
+		UnitRegistry.make_fixed_stack("swordsmen", 50),
+		UnitRegistry.make_fixed_stack("archers", 20),
+		UnitRegistry.make_fixed_stack("mages", 10),
+	]
+	var def: Array[UnitStack] = []
+	state.place_army(atk, def)
+
+	var survivors: Array = state.get_retreat_survivors("attacker")
+
+	if survivors.size() != 2:
+		printerr("retreat survivors should be 2, got %d" % survivors.size())
+		errors += 1
+
+	if survivors.size() > 0:
+		var first_count: int = survivors[0].count
+		if first_count != 25:
+			printerr("first retreat stack should have 25 (50/2), got %d" % first_count)
+			errors += 1
+	return errors
+
+
+func _test_defend_bonus() -> int:
+	var errors := 0
+	var state = load("res://scripts/BattleState.gd").new()
+	var atk: Array[UnitStack] = []
+	atk.append(UnitRegistry.make_fixed_stack("swordsmen", 50))
+	var def: Array[UnitStack] = []
+	def.append(UnitRegistry.make_fixed_stack("goblins", 50))
+	state.place_army(atk, def)
+
+	var defender = state.get_units_by_side("defender")[0]
+	state.do_defend(defender)
+
+	if not defender.is_defending():
+		printerr("defender should be defending after do_defend")
+		errors += 1
+
+	# DEFEND_DEFENSE_BONUS = 1.2 means +20% defense when defending
+	var rules := load("res://scripts/util/BattleRules.gd")
+	if rules.DEFEND_DEFENSE_BONUS != 1.2:
+		printerr("DEFEND_DEFENSE_BONUS should be 1.2")
+		errors += 1
+	return errors
+
+
+func _test_hero_bonuses() -> int:
+	var errors := 0
+	var state = load("res://scripts/BattleState.gd").new()
+	var atk: Array[UnitStack] = []
+	atk.append(UnitRegistry.make_fixed_stack("swordsmen", 50))
+	var def: Array[UnitStack] = []
+	def.append(UnitRegistry.make_fixed_stack("goblins", 50))
+	state.place_army(atk, def)
+
+	state.set_hero_bonuses({"attack": 5, "defense": 3}, {"defense": 2})
+
+	var attacker = state.get_units_by_side("attacker")[0]
+	if state.attacker_hero_bonus.get("attack", 0) != 5:
+		printerr("attacker bonus attack should be 5")
+		errors += 1
+
+	if state.defender_hero_bonus.get("defense", 0) != 2:
+		printerr("defender bonus defense should be 2")
+		errors += 1
 	return errors

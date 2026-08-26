@@ -5,11 +5,12 @@ extends Node2D
 
 const RING := 5
 const _HexDraw = preload("res://scripts/util/HexDraw.gd")
+const ParticlePresets = preload("res://scripts/util/ParticlePresets.gd")
 
 var _tile_map: TileMapLayer
 var _overlay: HighlightOverlay
 var _camera: Camera2D
-var _sprites: Array[Node2D] = []
+var _sprites_by_uid: Dictionary = {}
 
 
 # ==================== ПОДСВЕТКА ====================
@@ -124,17 +125,8 @@ func create_unit_sprite(unit: BattleState.BattleUnit) -> void:
 		n.add_child(sp)
 	else:
 		var col := Color(0.2, 0.5, 0.9) if unit.side == "attacker" else Color(0.9, 0.3, 0.2)
-		var img := Image.create(52, 52, false, Image.FORMAT_RGBA8)
-		var c := Vector2(26, 26)
-		for y in 52:
-			for x in 52:
-				var d := Vector2(x, y).distance_to(c)
-				if d <= 22:
-					img.set_pixel(x, y, col)
-				elif d <= 24:
-					img.set_pixel(x, y, Color(0.1, 0.1, 0.1))
 		var sp := Sprite2D.new()
-		sp.texture = ImageTexture.create_from_image(img)
+		sp.texture = PlaceholderTexture.circle(22, col, Color(0.1, 0.1, 0.1))
 		n.add_child(sp)
 
 	var il := Label.new()
@@ -155,8 +147,8 @@ func create_unit_sprite(unit: BattleState.BattleUnit) -> void:
 	n.position = _tile_map.map_to_local(unit.cell)
 	n.z_index = 6
 	n.set_meta("uid", unit.uid)
+	_sprites_by_uid[unit.uid] = n
 	add_child(n)
-	_sprites.append(n)
 
 
 func update_unit_count(unit: BattleState.BattleUnit) -> void:
@@ -181,22 +173,101 @@ func remove_unit(unit: BattleState.BattleUnit) -> void:
 	var node := _find_node(unit)
 	if node == null:
 		return
-	node.queue_free()
-	_sprites.erase(node)
+
+	_sprites_by_uid.erase(unit.uid)
+	ParticlePresets.spawn_burst(self, node.position, Color.RED)
+
+	var tw := create_tween()
+	tw.tween_property(node, "modulate", Color(1, 1, 1, 0), 0.25)
+	tw.tween_callback(node.queue_free)
 
 
-func animate_move(unit: BattleState.BattleUnit, path: Array[Vector2i]) -> void:
+func animate_move(unit: BattleState.BattleUnit, path: Array[Vector2i]) -> Tween:
 	var node := _find_node(unit)
 	if node == null or path.size() < 2:
-		return
+		return null
 	var an := node.get_node_or_null("Anim")
 	if an != null:
 		an.play()
 	var tw := create_tween()
 	for i in range(1, path.size()):
-		tw.tween_property(node, "position", _tile_map.map_to_local(path[i]), 0.12)
+		tw.tween_property(node, "position", _tile_map.map_to_local(path[i]), 0.15)
 	if an != null:
 		tw.tween_callback(an.stop)
+	return tw
+
+
+func animate_attack(attacker: BattleState.BattleUnit, defender: BattleState.BattleUnit) -> void:
+	var attacker_node := _find_node(attacker)
+	var defender_node := _find_node(defender)
+
+	if attacker_node == null or defender_node == null:
+		return
+
+	var start_pos: Vector2 = attacker_node.position
+	var dir: Vector2 = (defender_node.position - start_pos).normalized() * 26.0
+
+	var tw := create_tween()
+	tw.tween_property(attacker_node, "position", start_pos + dir, 0.08)
+	tw.tween_property(attacker_node, "position", start_pos, 0.12)
+
+
+func show_floating_text(cell: Vector2i, text: String, color: Color) -> void:
+	var label := Label.new()
+	label.text = text
+	label.add_theme_font_size_override("font_size", 18)
+	label.add_theme_color_override("font_color", color)
+	label.position = _tile_map.map_to_local(cell) + Vector2(-30, -60)
+	label.z_index = 20
+
+	add_child(label)
+
+	var tw := create_tween()
+	tw.tween_property(label, "position:y", label.position.y - 30.0, 0.6)
+	tw.parallel().tween_property(label, "modulate:a", 0.0, 0.6)
+	tw.tween_callback(label.queue_free)
+
+
+func show_damage_number(unit: BattleState.BattleUnit, damage: int) -> void:
+	var node := _find_node(unit)
+	if node == null:
+		return
+
+	var label := Label.new()
+	label.text = "-%d" % damage
+	label.add_theme_font_size_override("font_size", 20)
+	label.add_theme_color_override("font_color", Color(1.0, 0.25, 0.2))
+	label.position = node.position + Vector2(-16, -50)
+	label.z_index = 21
+
+	add_child(label)
+
+	var tw := create_tween()
+	tw.tween_property(label, "position:y", label.position.y - 24.0, 0.5)
+	tw.parallel().tween_property(label, "modulate:a", 0.0, 0.5)
+	tw.tween_callback(label.queue_free)
+
+
+func show_retaliation_arrow(from_unit: BattleState.BattleUnit, to_unit: BattleState.BattleUnit) -> void:
+	var from_node := _find_node(from_unit)
+	var to_node := _find_node(to_unit)
+
+	if from_node == null or to_node == null:
+		return
+
+	var line := Line2D.new()
+	line.width = 3.0
+	line.default_color = Color(1.0, 0.8, 0.2, 0.95)
+	line.z_index = 19
+
+	line.add_point(from_node.position)
+	line.add_point(to_node.position)
+
+	add_child(line)
+
+	var tw := create_tween()
+	tw.tween_property(line, "modulate:a", 0.0, 0.35)
+	tw.tween_callback(line.queue_free)
 
 
 func pulse_unit(unit: BattleState.BattleUnit) -> void:
@@ -226,6 +297,10 @@ func local_to_map(world_pos: Vector2) -> Vector2i:
 	return _tile_map.local_to_map(world_pos)
 
 
+func global_to_map(global_pos: Vector2) -> Vector2i:
+	return _tile_map.local_to_map(_tile_map.to_local(global_pos))
+
+
 func map_to_local(cell: Vector2i) -> Vector2:
 	return _tile_map.map_to_local(cell)
 
@@ -233,7 +308,4 @@ func map_to_local(cell: Vector2i) -> Vector2:
 func _find_node(unit: BattleState.BattleUnit) -> Node2D:
 	if unit == null:
 		return null
-	for n in _sprites:
-		if n.get_meta("uid", -1) == unit.uid:
-			return n
-	return null
+	return _sprites_by_uid.get(unit.uid, null)

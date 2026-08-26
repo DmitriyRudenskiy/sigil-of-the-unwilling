@@ -3,9 +3,13 @@ class_name MainMenu
 ## Главное меню по референсу тронного зала:
 ## фон — тронный зал; справа колонка: серая панель с 🔒 + три синие глянцевые кнопки
 
+const _UIAnimator = preload("res://scripts/ui/UIAnimator.gd")
+const _SettingsScreen = preload("res://scripts/ui/SettingsScreen.gd")
+
 func _ready() -> void:
 	_build_background()
 	_build_right_column()
+	_UIAnimator.animate_in(self)
 
 
 func _build_background() -> void:
@@ -34,8 +38,14 @@ func _find_bg() -> Texture2D:
 		while f != "":
 			var low := f.to_lower()
 			if low.find("throne") != -1 or low.find("menu") != -1 or low.find("tron") != -1:
-				if FileAccess.file_exists("res://assets/raw/" + f):
-					return load("res://assets/raw/" + f)
+				var path := "res://assets/raw/" + f
+				if ResourceLoader.exists(path):
+					return load(path)
+				# Raw file not imported as resource — try direct image load
+				if FileAccess.file_exists(path):
+					var img := Image.load_from_file(path)
+					if img != null:
+						return ImageTexture.create_from_image(img)
 			f = dir.get_next()
 	return null
 
@@ -51,6 +61,7 @@ func _placeholder() -> ImageTexture:
 
 func _build_right_column() -> void:
 	var col := VBoxContainer.new()
+	col.name = "RightColumn"
 	col.anchor_left = 1.0
 	col.anchor_right = 1.0
 	col.offset_left = -380
@@ -62,6 +73,7 @@ func _build_right_column() -> void:
 
 	# Серая панель с 🔒 (как на референсе)
 	var lock := PanelContainer.new()
+	lock.name = "LockPanel"
 	var ls := StyleBoxFlat.new()
 	ls.bg_color = Color(0.35, 0.35, 0.38, 0.85)
 	ls.set_corner_radius_all(8)
@@ -88,9 +100,15 @@ func _build_right_column() -> void:
 	lv.add_child(lt)
 
 	# Три синие глянцевые кнопки
-	for bd in [["Новая игра", "_on_new_game"], ["Загрузить", "_on_load_game"], ["Выход", "_on_exit"]]:
+	var btns: Array[Dictionary] = [
+		{"text": "Новая игра", "callback": _on_new_game},
+		{"text": "Загрузить", "callback": _on_load_game},
+		{"text": "Настройки", "callback": _on_settings},
+		{"text": "Выход", "callback": _on_exit},
+	]
+	for bd in btns:
 		var btn := Button.new()
-		btn.text = bd[0]
+		btn.text = bd["text"]
 		btn.custom_minimum_size = Vector2(300, 70)
 		btn.add_theme_font_size_override("font_size", 24)
 		var sn := StyleBoxFlat.new()
@@ -108,7 +126,9 @@ func _build_right_column() -> void:
 		sp.bg_color = Color(0.1, 0.25, 0.6)
 		btn.add_theme_stylebox_override("pressed", sp)
 		btn.add_theme_color_override("font_color", Color(0.9, 0.95, 1.0))
-		btn.pressed.connect(Callable(self, bd[1]))
+		var callback: Callable = bd["callback"]
+		btn.pressed.connect(callback)
+		_UIAnimator.setup_button(btn)
 		col.add_child(btn)
 
 	var spacer := Control.new()
@@ -128,7 +148,7 @@ func _on_new_game() -> void:
 
 
 func _on_load_game() -> void:
-	var lock := get_node_or_null("VBoxContainer/PanelContainer")
+	var lock := get_node_or_null("RightColumn/LockPanel")
 	if lock != null:
 		var tw := create_tween()
 		tw.tween_property(lock, "modulate", Color(1, 0.5, 0.5), 0.15)
@@ -138,3 +158,14 @@ func _on_load_game() -> void:
 
 func _on_exit() -> void:
 	get_tree().quit()
+
+
+func _on_settings() -> void:
+	var screen: Control = _SettingsScreen.new()
+	screen.applied.connect(_on_settings_applied)
+	add_child(screen)
+
+
+func _on_settings_applied() -> void:
+	# Apply zoom immediately
+	$"../WorldCamera".set_zoom_level(Settings.get_zoom()) if has_node("../WorldCamera") else null

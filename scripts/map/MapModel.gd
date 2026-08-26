@@ -23,6 +23,10 @@ var village_cells: Array[Vector2i] = []
 var resource_cells: Dictionary = {}
 var decor_cells: Dictionary = {}
 var enemy_stacks: Dictionary = {}
+var chest_cells: Array[Vector2i] = []
+
+var _blocked_cache: Dictionary = {}
+var _blocked_cache_dirty: bool = true
 
 
 func generate_noise() -> void:
@@ -43,6 +47,7 @@ func generate_noise() -> void:
 
 	terrain_grid.clear()
 	height_grid.clear()
+	invalidate_blocked_cache()
 
 	for y in map_height:
 		for x in map_width:
@@ -79,9 +84,50 @@ func is_walkable(cell: Vector2i) -> bool:
 	return terrain_grid[cell] not in [HexUtils.Terrain.WATER, HexUtils.Terrain.MOUNTAIN]
 
 
+func get_terrain_name(cell: Vector2i) -> String:
+	var tid: int = terrain_grid.get(cell, HexUtils.Terrain.GRASS)
+	return HexUtils.TERRAIN_NAMES[tid] if tid < HexUtils.TERRAIN_NAMES.size() else "grass"
+
+
+func get_terrain_id(cell: Vector2i) -> int:
+	return terrain_grid.get(cell, HexUtils.Terrain.GRASS)
+
+
 func get_blocked_cells() -> Dictionary:
-	var b: Dictionary = {}
+	if _blocked_cache_dirty:
+		_rebuild_blocked_cache()
+
+	return _blocked_cache
+
+func _rebuild_blocked_cache() -> void:
+	_blocked_cache.clear()
+
 	for cell in terrain_grid:
 		if not is_walkable(cell):
-			b[cell] = true
-	return b
+			_blocked_cache[cell] = true
+
+	_blocked_cache_dirty = false
+
+func invalidate_blocked_cache() -> void:
+	_blocked_cache_dirty = true
+
+func set_terrain(cell: Vector2i, terrain_id: int) -> void:
+	terrain_grid[cell] = terrain_id
+	invalidate_blocked_cache()
+
+
+# Port: ForlornU/HexagonalMapGodot tile_factory.gd invalidate_ocean_hill_neighbors (MIT)
+# Голые горы не могут стоять вплотную к воде — вставляем песчаную кромку.
+func smooth_invalid_adjacencies() -> void:
+	var to_change: Array[Vector2i] = []
+	for cell in terrain_grid:
+		if terrain_grid[cell] != HexUtils.Terrain.MOUNTAIN:
+			continue
+		for nb in HexUtils.get_all_neighbors(cell):
+			if terrain_grid.get(nb, -1) == HexUtils.Terrain.WATER:
+				to_change.append(cell)
+				break
+	for cell in to_change:
+		terrain_grid[cell] = HexUtils.Terrain.SAND
+	if to_change.size() > 0:
+		invalidate_blocked_cache()
