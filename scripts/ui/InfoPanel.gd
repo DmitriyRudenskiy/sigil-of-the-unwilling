@@ -173,6 +173,13 @@ func advance_day() -> void:
 	_date_label.text = _fmt_date()
 
 
+func set_date(m: int, w: int, d: int) -> void:
+	month = max(1, m)
+	week = max(1, min(4, w))
+	day = max(1, min(7, d))
+	_date_label.text = _fmt_date()
+
+
 func add_city(city_name: String) -> void:
 	for i in _town_slots.size():
 		var slot := _town_slots[i]
@@ -202,7 +209,7 @@ func fill_hero_slot(idx: int, hero: HeroController) -> void:
 	var hb := HBoxContainer.new()
 	hb.add_theme_constant_override("separation", 4)
 	slot.add_child(hb)
-	var av := hero.get_avatar_texture()
+	var av: Texture2D = hero.get_avatar_texture()
 	if av != null:
 		var tr := TextureRect.new()
 		tr.texture = av

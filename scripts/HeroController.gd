@@ -71,14 +71,8 @@ func _ready() -> void:
 
 	# Resource chains (Addendum 10)
 	time = TimeSystem.new()
-	time.name = "Time"
-	add_child(time)
 	skills = HeroSkills.new()
-	skills.name = "Skills"
-	add_child(skills)
 	tools = HeroTools.new()
-	tools.name = "Tools"
-	add_child(tools)
 
 	_init_strategic_resources()
 
@@ -86,7 +80,7 @@ func _ready() -> void:
 
 
 func _init_strategic_resources() -> void:
-	var all := ResourceRegistry.get_all()
+	var all: Array = ResourceRegistry.get_all()
 	for def in all:
 		strategic_resources[def.id] = 0
 
@@ -209,8 +203,8 @@ func end_turn() -> void:
 func _add_strategic_resource(id: StringName, amount: int) -> void:
 	if not strategic_resources.has(id):
 		strategic_resources[id] = 0
-	var current := strategic_resources[id]
-	var new_val := min(current + amount, GameSettings.RESOURCE_CAPACITY)
+	var current: int = strategic_resources[id]
+	var new_val: int = min(current + amount, GameSettings.RESOURCE_CAPACITY)
 	if new_val != current:
 		strategic_resources[id] = new_val
 		strategic_resources_changed.emit(strategic_resources)
@@ -222,9 +216,9 @@ func add_strategic_resource(id: StringName, amount: int) -> int:
 		return 0
 	if not strategic_resources.has(id):
 		strategic_resources[id] = 0
-	var current := strategic_resources[id]
-	var space := GameSettings.RESOURCE_CAPACITY - current
-	var actual := min(amount, max(0, space))
+	var current: int = strategic_resources[id]
+	var space: int = GameSettings.RESOURCE_CAPACITY - current
+	var actual: int = min(amount, max(0, space))
 	strategic_resources[id] = current + actual
 	strategic_resources_changed.emit(strategic_resources)
 	return actual
@@ -234,8 +228,8 @@ func remove_strategic_resource(id: StringName, amount: int) -> int:
 	"""Remove strategic resource (for tools/consumables). Returns amount actually removed."""
 	if amount <= 0 or not strategic_resources.has(id):
 		return 0
-	var current := strategic_resources[id]
-	var actual := min(amount, current)
+	var current: int = strategic_resources[id]
+	var actual: int = min(amount, current)
 	strategic_resources[id] = current - actual
 	strategic_resources_changed.emit(strategic_resources)
 	return actual
@@ -247,6 +241,11 @@ func force_stop() -> void:
 
 func get_daily_movement_points() -> float:
 	return movement.get_daily_movement_points()
+
+
+## Для UI-панелей. По умолчанию — null (аватар не задан, используется эмодзи 🧙)
+func get_avatar_texture() -> Texture2D:
+	return null
 
 
 func _on_time_update(step_cost: float) -> void:
@@ -303,7 +302,7 @@ func serialize() -> Dictionary:
 
 func deserialize(data: Dictionary) -> void:
 	movement.current_cell = Vector2i(int(data["cell"]["x"]), int(data["cell"]["y"]))
-	movement.move_points = int(data.get("move_points", movement.move_points))
+	movement.move_points = float(data.get("move_points", movement.move_points))
 	hero_name = str(data.get("hero_name", hero_name))
 	stats = data.get("stats", stats).duplicate()
 	resources.deserialize(data.get("resources", {}))
@@ -313,9 +312,15 @@ func deserialize(data: Dictionary) -> void:
 	magic.mana_max = int(data.get("mana_max", magic.mana_max))
 	magic.schools = data.get("magic_schools", magic.schools).duplicate()
 	magic.spellbook = data.get("spellbook", magic.spellbook).duplicate()
-	skills = HeroSkills.new()
-	for sk in data.get("skills", {}):
-		skills.set(StringName(sk), int(data["skills"][sk]))
+	if skills == null:
+		skills = HeroSkills.new()
+
+	for skill in skills.get_all():
+		skills.set_skill(StringName(skill), 0)
+
+	var saved_skills: Dictionary = data.get("skills", {})
+	for sk in saved_skills:
+		skills.set_skill(StringName(sk), int(saved_skills[sk]))
 	tools.deserialize(data.get("tools", []))
 	strategic_resources = data.get("strategic_resources", strategic_resources).duplicate()
 	time.mp_spent_today = float(data.get("time_mp_spent", 0.0))
