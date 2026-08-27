@@ -19,6 +19,7 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 SoundManager="res://scripts/audio/SoundManager.gd"
 Settings="*res://scripts/core/Settings.gd"
 GameEventBus="*res://scripts/core/GameEventBus.gd"
+CardSpells="*res://scripts/card/CardSpellRegistry.gd"
 SocketController="*res://scripts/SocketController.gd"
 Units="*res://scripts/UnitRegistry.gd"
 Artifacts="*res://scripts/data/ArtifactRegistry.gd"
