@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CardSpells",
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "type": "object",
+    "required": ["id", "name", "template", "speed", "cost", "color"],
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "description": "Уникальный идентификатор в формате snake_case"
+      },
+      "name": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 40
+      },
+      "template": {
+        "type": "string",
+        "enum": [
+          "DIRECT_DAMAGE", "HARD_REMOVAL", "BOUNCE", "COUNTERMAGIC",
+          "COMBAT_TRICK", "DEBUFF_CONTROL", "CARD_DRAW", "MANA_RAMP",
+          "TOKEN_GENERATION", "RELIC_INTERACTION", "KEYWORD_BUFF",
+          "CHOICE_CYCLE", "TOUCH_CYCLE", "DISPLAY_CYCLE",
+          "DISCARD_DRAW", "MARKET_NICHE"
+        ]
+      },
+      "speed": {
+        "type": "string",
+        "enum": ["fast", "slow", "burst"]
+      },
+      "cost": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 10
+      },
+      "color": {
+        "type": "string",
+        "enum": ["fire", "time", "justice", "primal", "shadow", "multifaction", "colorless"]
+      },
+      "params": {
+        "type": "object"
+      },
+      "condition": {
+        "type": "object",
+        "properties": {
+          "target_hp_max": {"type": "integer", "minimum": 0},
+          "target_cost_max": {"type": "integer", "minimum": 0},
+          "target_is_damaged": {"type": "boolean"},
+          "target_is_flying": {"type": "boolean"},
+          "hand_size_max": {"type": "integer", "minimum": 0},
+          "spell_cost_max": {"type": "integer", "minimum": 0},
+          "attacker_unblocked": {"type": "boolean"},
+          "discard_cost": {"type": "integer", "minimum": 0},
+          "min_ally_count": {"type": "integer", "minimum": 0}
+        },
+        "additionalProperties": false
+      },
+      "secondary_effects": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["effect"],
+          "properties": {
+            "effect": {
+              "type": "string",
+              "enum": ["DRAW", "DEAL_DAMAGE", "HEAL_NEXUS", "APPLY_STATUS"]
+            },
+            "count": {"type": "integer", "minimum": 1},
+            "amount": {"type": "integer", "minimum": 1}
+          }
+        }
+      },
+      "description": {
+        "type": "string",
+        "maxLength": 200
+      },
+      "flavor": {
+        "type": "string"
+      }
+    }
+  }
+}
