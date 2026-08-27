@@ -1,12 +1,24 @@
 extends Node
 
 const MAX_BUFFER_SIZE := 1_048_576  # 1 MB per client
+const MAX_LINE_SIZE := 65_536  # 64 KB per command
 const IDLE_TIMEOUT_SEC := 30.0
 
 var server: TCPServer
+# Cached controllers — avoid O(n) full tree walk on every request
+var _world_ctrl_cache: Node = null
+var _battle_ctrl_cache: Node = null
+var _world_ctrl_script: Script = null
+var _battle_ctrl_script: Script = null
 var peers: Array[StreamPeerTCP] = []
 var buffers: Dictionary = {}
 var _last_activity: Dictionary = {}  # peer -> unix timestamp
+
+# --- Метрики производительности ---
+const SLOW_THRESHOLD_MS := 50.0  # порог "медленного" запроса
+var _request_count: int = 0
+var _total_time_ms: float = 0.0
+var _slow_count: int = 0
 
 func _ready():
 	server = TCPServer.new()
@@ -15,6 +27,14 @@ func _ready():
 		print("[SocketServer] ✅ Listening on 127.0.0.1:9090")
 	else:
 		print("[SocketServer] ❌ Failed to listen: ", err)
+
+	# Invalidate controller cache on scene tree changes (RF-07)
+	get_tree().node_added.connect(_on_tree_changed)
+	get_tree().node_removed.connect(_on_tree_changed)
+
+func _on_tree_changed(_node: Node) -> void:
+	_world_ctrl_cache = null
+	_battle_ctrl_cache = null
 
 func _process(_delta):
 	# Accept new connections
@@ -47,7 +67,16 @@ func _process(_delta):
 						var line = buffers[peer].substr(0, idx)
 						buffers[peer] = buffers[peer].substr(idx + 1)
 						if line.length() > 0:
+							var t0 := Time.get_ticks_usec()
 							var resp = _route_command(line)
+							var elapsed_ms: float = (Time.get_ticks_usec() - t0) / 1000.0
+							_request_count += 1
+							_total_time_ms += elapsed_ms
+							if elapsed_ms > SLOW_THRESHOLD_MS:
+								_slow_count += 1
+								push_warning("[SocketServer] Slow request: %.1f ms | %s" % [elapsed_ms, _extract_action(line)])
+							else:
+								print("[SocketServer] %.2f ms | %s" % [elapsed_ms, _extract_action(line)])
 							peer.put_data((JSON.stringify(resp) + "\n").to_utf8_buffer())
 							
 		elif status != StreamPeerTCP.STATUS_CONNECTING:
@@ -69,6 +98,8 @@ func _process(_delta):
 # ==================== COMMAND ROUTING ====================
 
 func _route_command(line: String) -> Dictionary:
+	if line.length() > MAX_LINE_SIZE:
+		return {"error": "Command too large"}
 	var req = JSON.parse_string(line)
 	if req == null or not (req is Dictionary):
 		return {"error": "Invalid JSON"}
@@ -76,9 +107,10 @@ func _route_command(line: String) -> Dictionary:
 	if not (action is String) or action.is_empty():
 		return {"error": "Field 'action' is required and must be a string"}
 	
-	# Find active controllers in the scene tree
-	var world_ctrl = _find_controller(WorldController)
-	var battle_ctrl = _find_controller(BattleController)
+	# Find active controllers in the scene tree (cached, lazy-load scripts to avoid autoload deps)
+	_ensure_scripts_loaded()
+	var world_ctrl = _get_cached_controller(_world_ctrl_script, true)
+	var battle_ctrl = _get_cached_controller(_battle_ctrl_script, false)
 	
 	if world_ctrl == null:
 		print("[SocketServer] DEBUG: WorldController not found in scene tree")
@@ -108,19 +140,39 @@ func _route_command(line: String) -> Dictionary:
 			if battle_ctrl == null:
 				return {"error": "Not in Battle mode"}
 			return _retreat(battle_ctrl)
+		"GET_METRICS":
+			return get_metrics()
 		_:
 			return {"error": "Unknown action: %s" % action}
 
-func _find_controller(type: Variant) -> Variant:
-	# Recursive search through full scene tree
+func _find_controller(script: Script) -> Node:
+	# Recursive search through full scene tree (script-avoid autoload compile deps)
 	var stack: Array[Node] = [get_tree().root]
 	while not stack.is_empty():
 		var node: Node = stack.pop_back()
-		if is_instance_of(node, type):
+		if node.get_script() == script:
 			return node
 		for child in node.get_children():
 			stack.append(child)
 	return null
+
+func _get_cached_controller(script: Script, is_world: bool) -> Variant:
+	var cached := _world_ctrl_cache if is_world else _battle_ctrl_cache
+	if cached != null and is_instance_valid(cached) and cached.is_inside_tree():
+		return cached
+	# Re-search
+	var found = _find_controller(script)
+	if is_world:
+		_world_ctrl_cache = found
+	else:
+		_battle_ctrl_cache = found
+	return found
+
+func _ensure_scripts_loaded() -> void:
+	if _world_ctrl_script != null and _battle_ctrl_script != null:
+		return
+	_world_ctrl_script = load("res://scripts/WorldController.gd")
+	_battle_ctrl_script = load("res://scripts/BattleController.gd")
 
 func _start_game() -> Dictionary:
 	if get_node_or_null("/root/World"):
@@ -212,3 +264,26 @@ func _retreat(battle_ctrl) -> Dictionary:
 		return {"error": "Battle already over"}
 	battle_ctrl.do_retreat()
 	return {"status": "retreating"}
+
+# ==================== METRICS ====================
+
+## Парсинг action из JSON-строки для лога.
+func _extract_action(line: String) -> String:
+	var req = JSON.parse_string(line)
+	if req is Dictionary and req.has("action"):
+		return str(req["action"])
+	return "UNKNOWN"
+
+## Возвращает сводную статистику по обработанным запросам.
+func get_metrics() -> Dictionary:
+	var avg: float = 0.0
+	if _request_count > 0:
+		avg = _total_time_ms / float(_request_count)
+	return {
+		"total_requests": _request_count,
+		"total_time_ms": roundf(_total_time_ms * 100.0) / 100.0,
+		"avg_ms": roundf(avg * 100.0) / 100.0,
+		"slow_requests": _slow_count,
+		"slow_threshold_ms": SLOW_THRESHOLD_MS,
+		"connected_peers": peers.size(),
+	}
