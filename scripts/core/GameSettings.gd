@@ -57,3 +57,12 @@ const RESOURCE_AUTO_STONE_PER_DAY := 2
 const SALTPETER_EXPLOSION_DMG_MULT := 2.0  # double damage to adjacent
 const RESOURCE_NODE_REMOVAL_DAYS := 3  # days after exhaustion before removal
 const TOOL_INVENTORY_SLOTS := 8
+
+# --- Battle magic numbers ---
+const STATUS_PROC_CHANCE := 0.20  # petrify / blind
+const REBIRTH_CHANCE := 0.20
+const CHARGE_MULT := 1.5
+const BREATH_DMG_RATIO := 0.5
+const RETREAT_STACK_LIMIT := 2
+const CLICK_RADIUS_PX := 60.0
+const INF := 999999

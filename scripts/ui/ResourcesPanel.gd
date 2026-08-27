@@ -2,6 +2,8 @@ extends PanelContainer
 class_name ResourcesPanel
 ## Displays strategic resources with icons and amounts.
 
+const ResourceDef = preload("res://scripts/data/ResourceDef.gd")
+
 var _labels: Dictionary = {}  # resource_id -> Label
 
 
@@ -36,8 +38,8 @@ func _build_ui() -> void:
 func update_resources(resources: Dictionary) -> void:
 	for id in _labels:
 		var label: Label = _labels[id]
-		var amount := resources.get(id, 0)
-		var def := ResourceRegistry.get(id)
+		var amount: int = int(resources.get(id, 0))
+		var def: ResourceDef = ResourceRegistry.get_resource(id)
 		if def:
 			label.text = "%s %d/%d" % [def.icon, amount, GameSettings.RESOURCE_CAPACITY]
 		else:

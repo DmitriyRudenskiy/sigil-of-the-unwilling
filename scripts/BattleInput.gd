@@ -3,9 +3,11 @@ class_name BattleInput
 ## Ввод боя: обработка кликов, подсветка ходов/атак, выбор юнитов.
 ## Не содержит логики ходов или AI — только ввод и сигналы.
 
+signal unit_pick_requested(unit: BattleState.BattleUnit)
 signal unit_selected(unit: BattleState.BattleUnit)
 signal unit_move_requested(unit: BattleState.BattleUnit, target: Vector2i)
 signal unit_attack_requested(unit: BattleState.BattleUnit, target: BattleState.BattleUnit)
+signal spell_cast_requested(spell_id: StringName, target: BattleState.BattleUnit)
 signal cancel_requested
 signal attack_preview_updated(text: String)
 
@@ -13,8 +15,8 @@ var _view: BattleView
 var _state: BattleState
 var _obstacles: Dictionary = {}
 var _action_lock: bool = false
-var _attacker_bonus: Dictionary = {}
-var _defender_bonus: Dictionary = {}
+
+var _pending_spell_id: StringName = ""
 
 var highlight_move: Dictionary = {}
 var highlight_attack: Dictionary = {}
@@ -26,17 +28,45 @@ func setup(view: BattleView, state: BattleState, obstacles: Dictionary) -> void:
 	_obstacles = obstacles
 
 
-func setup_bonuses(attacker_bonus: Dictionary, defender_bonus: Dictionary) -> void:
-	_attacker_bonus = attacker_bonus
-	_defender_bonus = defender_bonus
-
-
 func set_action_lock(locked: bool) -> void:
 	_action_lock = locked
 
 
+func start_spell_targeting(spell_id: StringName) -> void:
+	_pending_spell_id = spell_id
+	_clear_highlights()
+	var target_side := "defender" if _state.is_player_turn else "attacker"
+	for u in _state.get_units_by_side(target_side):
+		if u.is_alive():
+			highlight_attack[u.cell] = 1
+	_view.set_highlights({}, highlight_attack)
+	GameLogger.battle("Spell targeting started: %s" % spell_id)
+
+
 func _unhandled_input(ev: InputEvent) -> void:
 	if _action_lock or _state == null or _state.battle_over or not _state.is_player_turn:
+		return
+
+	if _pending_spell_id != "":
+		if ev is InputEventMouseButton and ev.pressed:
+			if ev.button_index == MOUSE_BUTTON_RIGHT:
+				_pending_spell_id = ""
+				_clear_highlights()
+				cancel_requested.emit()
+				get_viewport().set_input_as_handled()
+				return
+			
+			if ev.button_index == MOUSE_BUTTON_LEFT:
+				var global_pos := _view.get_global_mouse_position()
+				var cell := _view.global_to_map(global_pos)
+				if highlight_attack.has(cell):
+					var target_side := "defender" if _state.is_player_turn else "attacker"
+					var target := _state.get_unit_at(cell, target_side)
+					if target != null:
+						spell_cast_requested.emit(_pending_spell_id, target)
+						_pending_spell_id = ""
+						_clear_highlights()
+						get_viewport().set_input_as_handled()
 		return
 
 	if ev is InputEventMouseMotion:
@@ -85,13 +115,13 @@ func _unit_at_pixel(global_pos: Vector2, side: String) -> BattleState.BattleUnit
 	for u in units:
 		if u.is_alive():
 			var unit_pos := _view.map_to_local(u.cell)
-			if local_pos.distance_to(unit_pos) < 60.0:
+			if local_pos.distance_to(unit_pos) < GameSettings.CLICK_RADIUS_PX:
 				return u
 	return null
 
 
 func _select(u: BattleState.BattleUnit) -> void:
-	_state.active_unit = u
+	unit_pick_requested.emit(u)
 	_clear_highlights()
 
 	var blocked_dict := _state.build_all_blocked(u, _obstacles)
@@ -104,7 +134,7 @@ func _select(u: BattleState.BattleUnit) -> void:
 	unit_selected.emit(u)
 	_update_attack_preview()
 
-	Logger.battle("selected %s moves=%d" % [u.get_display_name(), highlight_move.size()])
+	GameLogger.battle("selected %s moves=%d" % [u.get_display_name(), highlight_move.size()])
 
 
 func _update_attack_preview() -> void:
@@ -119,11 +149,13 @@ func _update_attack_preview() -> void:
 		var target := _state.get_unit_at(cell, "defender")
 
 		if target != null:
+			var atk_bon: int = int(_state.attacker_hero_bonus.get("attack", 0))
+			var def_bon: int = int(_state.defender_hero_bonus.get("defense", 0))
 			var preview := BattleRules.preview_text(
 				_state.active_unit,
 				target,
-				int(_attacker_bonus.get("attack", 0)),
-				int(_defender_bonus.get("defense", 0))
+				atk_bon,
+				def_bon
 			)
 			attack_preview_updated.emit(preview)
 			return

@@ -41,11 +41,11 @@ func update_tools(tools: Array[Dictionary]) -> void:
 	for i in GameSettings.TOOL_INVENTORY_SLOTS:
 		if i >= _slot_labels.size():
 			break
-		var slot: Dictionary = tools.get(i, {})
+		var slot: Dictionary = tools[i] if i < tools.size() else {}
 		if slot.is_empty():
 			_slot_labels[i].text = "[%d] Пусто" % (i + 1)
 		else:
 			var id: StringName = slot.get("id", "")
 			var qty: int = slot.get("quantity", 1)
-			var name := _tool_names.get(id, str(id))
+			var name: String = _tool_names.get(id, str(id))
 			_slot_labels[i].text = "[%d] %s x%d" % [i + 1, name, qty]

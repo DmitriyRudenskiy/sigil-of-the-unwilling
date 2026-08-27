@@ -2,6 +2,11 @@ extends Node
 class_name ResourceNodeManager
 ## Manages resource node lifecycle: generation, discovery, extraction, removal.
 
+const ResourceNode = preload("res://scripts/nodes/ResourceNode.gd")
+const ResourceRegistry = preload("res://scripts/data/ResourceRegistry.gd")
+const ResourceDef = preload("res://scripts/data/ResourceDef.gd")
+
+
 var _nodes: Dictionary = {}  # cell -> ResourceNode
 var _container: Node2D = null
 var _rng: RandomNumberGenerator = null
@@ -10,6 +15,23 @@ signal resource_discovered(cell: Vector2i, resource_id: StringName)
 signal resource_extracted(cell: Vector2i, resource_id: StringName, amount: int)
 signal resource_exhausted(cell: Vector2i, resource_id: StringName)
 
+## Bridge functions to resolve Variant inference from preload() calls.
+func _get_def(id: StringName) -> ResourceDef:
+	return ResourceRegistry.get_resource(id)
+
+func _get_hidden_by_biome(biome: String) -> Array:
+	var all: Array = ResourceRegistry.get_by_biome(biome)
+	var hidden: Array = []
+	for item in all:
+		if ResourceRegistry.is_hidden_resource((item as ResourceDef).id):
+			hidden.append(item)
+	return hidden
+
+func _get_biome_name(terrain_id: StringName) -> String:
+	for i in HexUtils.TERRAIN_NAMES.size():
+		if HexUtils.TERRAIN_NAMES[i] == terrain_id:
+			return terrain_id as String
+	return ""
 
 func setup(container: Node2D, rng: RandomNumberGenerator) -> void:
 	_container = container
@@ -25,9 +47,9 @@ func generate_nodes_for_map(map_data: Dictionary) -> void:
 	if _rng == null or _container == null:
 		return
 
-	var terrain_map := map_data.get("terrain", {})
-	var width := map_data.get("width", 0)
-	var height := map_data.get("height", 0)
+	var terrain_map: Dictionary = map_data.get("terrain", {})
+	var width: int = map_data.get("width", 0)
+	var height: int = map_data.get("height", 0)
 	if width == 0 or height == 0:
 		return
 
@@ -37,39 +59,30 @@ func generate_nodes_for_map(map_data: Dictionary) -> void:
 			var cell := Vector2i(x, y)
 			if not terrain_map.has(cell):
 				continue
-			var terrain_id := terrain_map[cell]
-			var biome := _terrain_to_biome(terrain_id)
+			var terrain_id: int = int(terrain_map[cell])
+			var biome: String = _terrain_to_biome(terrain_id)
 			if biome == "":
 				continue
 
 			# Hidden resource chance
 			if _rng.randf() < 0.08:  # 8% chance per cell
-				var candidates := ResourceRegistry.get_by_biome(biome)
-				# Filter out non-hidden
-				var hidden: Array = []
-				for def in candidates:
-					if ResourceRegistry.is_hidden_resource(def.id):
-						hidden.append(def)
+				var hidden: Array = _get_hidden_by_biome(biome)
 				if hidden.is_empty():
 					continue
 
-				var def := hidden[_rng.randi() % hidden.size()]
+				var def: ResourceDef = hidden[_rng.randi() % hidden.size()] as ResourceDef
 				var yield_amt := _rng.randi_range(def.yield_min, def.yield_max)
 				_spawn_node(cell, def.id, yield_amt)
 
 
-func _terrain_to_biome(terrain_id: StringName) -> String:
-	match terrain_id:
-		&"grass", &"forest": return "grass"
-		&"sand", &"desert": return "sand"
-		&"snow", &"ice": return "snow"
-		&"swamp", &"marsh": return "swamp"
-		&"mountain", &"volcano": return "mountain"
-		_ : return ""
+func _terrain_to_biome(terrain_id: int) -> String:
+	if terrain_id < 0 or terrain_id >= HexUtils.TERRAIN_NAMES.size():
+		return ""
+	return HexUtils.TERRAIN_NAMES[terrain_id]
 
 
 func _spawn_node(cell: Vector2i, resource_id: StringName, yield_amount: int) -> ResourceNode:
-	var node := ResourceNode.new()
+	var node: ResourceNode = ResourceNode.new()
 	node.init_node(resource_id, cell, yield_amount)
 	if _container:
 		_container.add_child(node)
@@ -81,13 +94,14 @@ func try_discover(cell: Vector2i, discovery_keys: Dictionary) -> bool:
 	"""Try to discover a hidden resource at cell.
 	discovery_keys: {skill_name: level, time: "noon"/"night", auto_tags: [...] }
 	"""
-	var node := _nodes.get(cell, null)
+	var node: ResourceNode = _nodes.get(cell, null)
 	if node == null or not node.is_hidden():
 		return false
 
-	var def := ResourceRegistry.get(node.resource_id)
+	var def: ResourceDef = _get_def(node.resource_id)
 	if def == null:
 		return false
+
 
 	# Check auto-discovery (undead/lizard units)
 	if def.discovery_auto:
@@ -99,11 +113,11 @@ func try_discover(cell: Vector2i, discovery_keys: Dictionary) -> bool:
 
 	# Check skill-based discovery
 	if not def.discovery_skill.is_empty():
-		var skill_level := discovery_keys.get(def.discovery_skill, 0)
+		var skill_level: int = int(discovery_keys.get(def.discovery_skill, 0))
 		if skill_level >= 1:
 			# Check time requirement
 			if not def.discovery_time.is_empty():
-				var time_match := discovery_keys.get("time", "") == def.discovery_time
+				var time_match: bool = discovery_keys.get("time", "") == def.discovery_time
 				if not time_match:
 					return false
 			node.discover()
@@ -117,18 +131,18 @@ func try_extract(cell: Vector2i, extraction_keys: Dictionary) -> int:
 	"""Try to extract resources. Returns amount extracted, 0 on failure.
 	extraction_keys: {tag: bool, skill: int, unit: bool, tool: bool, consumable: bool, fire: bool}
 	"""
-	var node := _nodes.get(cell, null)
+	var node: ResourceNode = _nodes.get(cell, null)
 	if node == null or not node.is_discovered():
 		return 0
 
-	var def := ResourceRegistry.get(node.resource_id)
+	var def: ResourceDef = _get_def(node.resource_id)
 	if def == null:
 		return 0
 
 	if not _check_extraction(def, extraction_keys):
 		return 0
 
-	var amount := node.get_yield()
+	var amount: int = node.get_yield()
 	node.reduce_yield(amount)
 	if node.is_exhausted():
 		resource_exhausted.emit(cell, node.resource_id)
@@ -136,37 +150,41 @@ func try_extract(cell: Vector2i, extraction_keys: Dictionary) -> int:
 	return amount
 
 
-func _check_extraction(def: ResourceRegistry.ResourceDef, keys: Dictionary) -> bool:
-	# Tag-based extraction (e.g. strong_strike)
+func _check_extraction(def: ResourceDef, keys: Dictionary) -> bool:
+	# 1. Прямой тег
 	if not def.extraction_tag.is_empty():
 		if keys.get(def.extraction_tag, false):
 			return true
 
-	# Skill-based extraction
+	# 2. Навык
 	if not def.extraction_skill.is_empty():
-		if keys.get(def.extraction_skill, 0) >= 1:
+		if int(keys.get(def.extraction_skill, 0)) >= 1:
 			return true
 
-	# Unit-based (requires matching unit type)
+	# 3. Юнит + инструмент + расходник
 	if not def.extraction_unit.is_empty():
-		if keys.get(def.extraction_unit, false):
-			# May also need tool
-			if not def.extraction_tool.is_empty():
-				if keys.get(def.extraction_tool, false):
-					# May also need consumable
-					if not def.extraction_consumable.is_empty():
-						if keys.get(def.extraction_consumable, false):
-							return true
-						return false
-					return true
-			return true
+		if not keys.get(def.extraction_unit, false):
+			return false
 
-	# Fire-based extraction
+		if not def.extraction_tool.is_empty():
+			if not keys.get(def.extraction_tool, false):
+				return false
+
+		if not def.extraction_consumable.is_empty():
+			if not keys.get(def.extraction_consumable, false):
+				return false
+
+		return true
+
+	# 4. Огонь
 	if def.extraction_fire:
-		if keys.get("fire", false):
-			return true
+		return bool(keys.get("fire", false))
 
-	return false
+	# 5. Если требований нет — разрешить базовую добычу
+	return def.extraction_tag.is_empty() \
+		and def.extraction_skill.is_empty() \
+		and def.extraction_unit.is_empty() \
+		and not def.extraction_fire
 
 
 func tick_daily() -> Array[Vector2i]:
@@ -179,7 +197,7 @@ func tick_daily() -> Array[Vector2i]:
 				remove_cells.append(cell)
 
 	for cell in remove_cells:
-		var node := _nodes[cell]
+		var node: ResourceNode = _nodes[cell]
 		if node:
 			node.queue_free()
 		_nodes.erase(cell)
@@ -189,6 +207,27 @@ func tick_daily() -> Array[Vector2i]:
 
 func remove_node(cell: Vector2i) -> void:
 	if _nodes.has(cell):
-		var node := _nodes[cell]
+		var node: ResourceNode = _nodes[cell]
 		node.queue_free()
 		_nodes.erase(cell)
+
+
+func mark_discovered(cell: Vector2i) -> void:
+	var node: ResourceNode = _nodes.get(cell, null)
+	if node == null:
+		return
+
+	if node.is_hidden():
+		node.discover()
+
+
+func mark_exhausted(cell: Vector2i) -> void:
+	var node: ResourceNode = _nodes.get(cell, null)
+	if node == null:
+		return
+
+	if node.is_hidden():
+		node.discover()
+
+	if node.is_discovered():
+		node.exhaust()

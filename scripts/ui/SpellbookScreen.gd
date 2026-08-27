@@ -28,14 +28,16 @@ func _update_list() -> void:
 		if spell == null:
 			continue
 
-		var school := hero_controller.magic_schools.get(spell.school, 0)
-		if school < spell.level:
+		var school_level := int(hero_controller.magic_schools.get(spell.school.to_lower(), 0))
+		if school_level < spell.level:
 			continue
 
+		var mana_cost := hero_controller.magic.get_mana_cost_def(spell)
+
 		var btn := Button.new()
-		btn.text = "%s (%d MP)" % [spell.display_name, spell.base_mana]
-		btn.tooltip_text = "%s | Lv.%d | %s" % [SR.get_school_name(spell.school), spell.level, spell.display_name]
-		btn.disabled = hero_controller.mana_current < spell.base_mana
+		btn.text = "%s (%d MP)" % [spell.display_name, mana_cost]
+		btn.tooltip_text = "%s | Lv.%d | %s" % [SR.get_school_name(spell.school_int), spell.level, spell.display_name]
+		btn.disabled = hero_controller.mana_current < mana_cost
 		btn.pressed.connect(_on_spell_pressed.bind(spell_id))
 		grid.add_child(btn)
 

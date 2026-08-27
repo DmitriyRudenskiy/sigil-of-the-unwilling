@@ -88,26 +88,35 @@ static func cast(
 			result.status = _SE.Effect.SLOW
 		&"resurrection":
 			if target_unit.get_count() <= 0:
-				target_unit.set_count(mini(1, target_unit.stack.max_count))
-				target_unit.set_hp(target_unit.get_hp() * 2)
-				result.revived = true
+				var sp_res: int = int(caster_hero_bonus.get("spell_power", 0))
+				var hp: int = max(1, target_unit.get_hp())
+
+				var revived_count := int(sp_res * 20 / hp)
+				revived_count = max(1, revived_count)
+				revived_count = min(revived_count, target_unit.max_count)
+
+				target_unit.set_count(revived_count)
+				target_unit.alive = true
+				result["revived"] = true
 
 	return result
 
 
 static func _apply_damage(unit: BattleState.BattleUnit, dmg: int, rng: RandomNumberGenerator, result: Dictionary) -> Dictionary:
-	var hp := maxi(1, unit.get_hp())
-	var kills := maxi(1, dmg / hp)
-	kills = mini(kills, unit.get_count())
-	unit.set_count(unit.get_count() - kills)
+	var hp: int = max(1, unit.get_hp())
+	var kills: int = max(1, dmg / hp)
+	kills = min(kills, unit.get_count())
 	result.damage = dmg
 	result.kills = kills
 	return result
 
 
 static func _check_immunity(unit: BattleState.BattleUnit, spell: Variant) -> bool:
-	var spell_id: StringName = spell.id
-	var spell_level: int = spell.level
+	if spell == null: return false
+	var s := spell as _SR.SpellDef
+	if s == null: return false
+	var spell_id: StringName = s.id
+	var spell_level: int = s.level
 	# Undead immune to water healing/curses
 	if unit.has_tag("undead") and spell_id in [&"bless", &"cure", &"curse", &"weakness", &"slow"]:
 		return true

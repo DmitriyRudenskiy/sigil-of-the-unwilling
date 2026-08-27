@@ -3,7 +3,10 @@ class_name SettingsScreen
 ## Settings screen: Graphics, Audio, Gameplay sections.
 ## Built procedurally; opened from menu, adventure, or battle.
 
+const _SettingsScript = preload("res://scripts/core/Settings.gd")
+
 signal applied
+signal closed
 
 const C_BG := Color(0.08, 0.06, 0.04, 0.95)
 const C_BORDER := Color(0.5, 0.38, 0.18)
@@ -22,12 +25,16 @@ var _master_slider: HSlider
 var _music_slider: HSlider
 var _sfx_slider: HSlider
 var _tween: Tween = null
+var _settings: Node = null
 
 
 func _ready() -> void:
 	z_index = 50
+	_settings = get_node_or_null("/root/Settings")
+	if not _settings:
+		return
 	_build()
-	if Settings.ui_animations:
+	if _settings.ui_animations:
 		modulate = Color.WHITE
 		modulate.a = 0.0
 		_tween = create_tween()
@@ -106,39 +113,39 @@ func _build_graphics_section(parent: Control) -> void:
 	row.add_child(lbl)
 
 	_zoom_selector = OptionButton.new()
-	for i in Settings.ZOOM_LEVELS.size():
-		_zoom_selector.add_item("%0.2f" % Settings.ZOOM_LEVELS[i], i)
-	_zoom_selector.selected = Settings.zoom_index
+	for i in _settings.ZOOM_LEVELS.size():
+		_zoom_selector.add_item("%0.2f" % _settings.ZOOM_LEVELS[i], i)
+	_zoom_selector.selected = _settings.zoom_index
 	_zoom_selector.item_selected.connect(_on_zoom_selected)
 	row.add_child(_zoom_selector)
 
-	_fullscreen_toggle = _make_check("Полноэкранный режим", Settings.fullscreen)
+	_fullscreen_toggle = _make_check("Полноэкранный режим", _settings.fullscreen)
 	parent.add_child(_fullscreen_toggle)
 
-	_ui_anim_toggle = _make_check("Анимации UI", Settings.ui_animations)
+	_ui_anim_toggle = _make_check("Анимации UI", _settings.ui_animations)
 	parent.add_child(_ui_anim_toggle)
 
-	_particles_toggle = _make_check("Частицы", Settings.particles)
+	_particles_toggle = _make_check("Частицы", _settings.particles)
 	parent.add_child(_particles_toggle)
 
 
 func _build_audio_section(parent: Control) -> void:
 	_add_section_header(parent, "🔊 Звук")
 
-	_master_slider = _create_volume_row(parent, "Master", Settings.master_volume)
+	_master_slider = _create_volume_row(parent, "Master", _settings.master_volume)
 	_master_slider.value_changed.connect(_on_master_changed)
 
-	_music_slider = _create_volume_row(parent, "Музыка", Settings.music_volume)
+	_music_slider = _create_volume_row(parent, "Музыка", _settings.music_volume)
 	_music_slider.value_changed.connect(_on_music_changed)
 
-	_sfx_slider = _create_volume_row(parent, "Эффекты", Settings.sfx_volume)
+	_sfx_slider = _create_volume_row(parent, "Эффекты", _settings.sfx_volume)
 	_sfx_slider.value_changed.connect(_on_sfx_changed)
 
 
 func _build_gameplay_section(parent: Control) -> void:
 	_add_section_header(parent, "🎮 Игра")
 
-	_auto_save_toggle = _make_check("Автосохранение при выходе", Settings.auto_save)
+	_auto_save_toggle = _make_check("Автосохранение при выходе", _settings.auto_save)
 	parent.add_child(_auto_save_toggle)
 
 
@@ -217,56 +224,58 @@ func _create_volume_row(parent: Control, label_text: String, value: int) -> HSli
 
 
 func _restore_state() -> void:
-	_zoom_selector.selected = Settings.zoom_index
-	_fullscreen_toggle.button_pressed = Settings.fullscreen
-	_ui_anim_toggle.button_pressed = Settings.ui_animations
-	_particles_toggle.button_pressed = Settings.particles
-	_auto_save_toggle.button_pressed = Settings.auto_save
-	_master_slider.value = float(Settings.master_volume)
-	_music_slider.value = float(Settings.music_volume)
-	_sfx_slider.value = float(Settings.sfx_volume)
+	_zoom_selector.selected = _settings.zoom_index
+	_fullscreen_toggle.button_pressed = _settings.fullscreen
+	_ui_anim_toggle.button_pressed = _settings.ui_animations
+	_particles_toggle.button_pressed = _settings.particles
+	_auto_save_toggle.button_pressed = _settings.auto_save
+	_master_slider.value = float(_settings.master_volume)
+	_music_slider.value = float(_settings.music_volume)
+	_sfx_slider.value = float(_settings.sfx_volume)
 
 
 # --- Callbacks ---
 
 func _on_zoom_selected(index: int) -> void:
-	Settings.zoom_index = index
-	Settings.save()
+	_settings.zoom_index = index
+	_settings.save()
 
 
 func _on_master_changed(value: float) -> void:
 	_master_slider.get_meta("value_label").text = "%d%%" % int(value)
-	Settings.master_volume = int(value)
-	Settings._apply_audio()
+	_settings.master_volume = int(value)
+	_settings._apply_audio()
 
 
 func _on_music_changed(value: float) -> void:
 	_music_slider.get_meta("value_label").text = "%d%%" % int(value)
-	Settings.music_volume = int(value)
-	Settings._apply_audio()
+	_settings.music_volume = int(value)
+	_settings._apply_audio()
 
 
 func _on_sfx_changed(value: float) -> void:
 	_sfx_slider.get_meta("value_label").text = "%d%%" % int(value)
-	Settings.sfx_volume = int(value)
-	Settings._apply_audio()
+	_settings.sfx_volume = int(value)
+	_settings._apply_audio()
 
 
 func _on_apply() -> void:
 	# Commit all toggles
-	Settings.fullscreen = _fullscreen_toggle.button_pressed
-	Settings.ui_animations = _ui_anim_toggle.button_pressed
-	Settings.particles = _particles_toggle.button_pressed
-	Settings.auto_save = _auto_save_toggle.button_pressed
-	Settings.save()
+	_settings.fullscreen = _fullscreen_toggle.button_pressed
+	_settings.ui_animations = _ui_anim_toggle.button_pressed
+	_settings.particles = _particles_toggle.button_pressed
+	_settings.auto_save = _auto_save_toggle.button_pressed
+	_settings.save()
 	applied.emit()
+	closed.emit()
 	queue_free()
 
 
 func _on_reset() -> void:
-	Settings.reset_to_defaults()
+	_settings.reset_to_defaults()
 	_restore_state()
 
 
 func _on_cancel() -> void:
+	closed.emit()
 	queue_free()

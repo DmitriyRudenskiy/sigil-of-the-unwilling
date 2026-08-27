@@ -15,7 +15,10 @@ func _ready() -> void:
     _blob(tm, Vector2i(18, 6), 2, 4)  # лес
     _blob(tm, Vector2i(11, 15), 2, 5) # горы
     _blob(tm, Vector2i(18, 15), 2, 6) # снег
-    tm.update_terrain()
+    if tm.has_method("update_terrain"):
+        tm.call("update_terrain")
+    elif tm.has_method("notify_runtime"):
+        tm.call("notify_runtime")
     print("[TestTerrain] ready, check borders")
 
 func _blob(tm: TileMapLayer, center: Vector2i, radius: int, terrain: int) -> void:

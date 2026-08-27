@@ -62,13 +62,13 @@ func decide_turn(unit: BattleState.BattleUnit, state: BattleState, blocked: Dict
 	var path_blocked := blocked.duplicate()
 	path_blocked.erase(nearest.cell)
 
-	var path := HexUtils.bfs_path(
+	var path: Array[Vector2i] = HexUtils.bfs_path(
 		unit.cell, nearest.cell, path_blocked, BattleState.BW, BattleState.BH
 	)
 	if path.size() <= 1:
 		return result
 
-	var steps := mini(unit.get_speed(), path.size() - 2)
+	var steps: int = min(unit.get_speed(), path.size() - 2)
 	if steps <= 0:
 		return result
 
@@ -76,7 +76,9 @@ func decide_turn(unit: BattleState.BattleUnit, state: BattleState, blocked: Dict
 	var victim := _find_victim_near(target_cell, state, target_side)
 
 	result.action = Action.MOVE
-	result.move_path = path.slice(0, steps + 1)
+	var sliced_path: Array = path.slice(0, steps + 1)
+	for p in sliced_path:
+		result.move_path.append(p)
 	result.target_cell = target_cell
 	result.attack_target = victim
 	result.move_victim = victim
@@ -86,7 +88,7 @@ func decide_turn(unit: BattleState.BattleUnit, state: BattleState, blocked: Dict
 
 func _find_nearest(unit: BattleState.BattleUnit, state: BattleState, target_side: String) -> BattleState.BattleUnit:
 	var nearest: BattleState.BattleUnit = null
-	var nearest_distance := 999
+	var nearest_distance := GameSettings.INF
 
 	for u in state.get_units_by_side(target_side):
 		if u.is_alive():
@@ -127,7 +129,7 @@ func _find_flying_landing_cell(
 	blocked: Dictionary
 ) -> Vector2i:
 	var best := Vector2i(-1, -1)
-	var best_score := 999999
+	var best_score := GameSettings.INF
 
 	for y in BattleState.BH:
 		for x in BattleState.BW:

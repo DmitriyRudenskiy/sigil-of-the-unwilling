@@ -11,11 +11,8 @@ var _map_rect: Rect2 = Rect2(0, 0, 10000, 10000)  # generous default
 var _tween: Tween = null
 var _settings = null
 
-func _get_settings():
-	# Works in editor/runtime; null in headless
-	if "Settings" in Engine.get_singleton_list():
-		return Engine.get_singleton("Settings")
-	return null
+func _get_settings() -> Node:
+	return get_node_or_null("/root/Settings")
 
 
 func _ready() -> void:
@@ -23,6 +20,14 @@ func _ready() -> void:
 	_settings = _get_settings()
 	if _settings:
 		_set_zoom(_settings.get_zoom())
+
+
+func step_zoom(direction: int) -> void:
+	var s := _get_settings()
+	if s == null:
+		return
+	if s.step_zoom(direction) != 0:
+		_animate_zoom(s.get_zoom())
 
 
 func _unhandled_input(event: InputEvent) -> void:

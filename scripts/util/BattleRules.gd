@@ -102,7 +102,7 @@ static func calculate_attack(
 
     var min_base: int = stats.base_damage
     var max_base: int = int(ceil(float(stats.base_damage) * 1.25))
-    max_base = maxi(max_base, min_base)
+    max_base = max(max_base, min_base)
 
     var base_total: int = rng.randi_range(min_base, max_base) * count
 
@@ -119,16 +119,16 @@ static func calculate_attack(
     if is_melee_attack and attacker.is_ranged():
         damage = int(float(damage) * RANGED_MELEE_PENALTY)
 
-    damage = maxi(1, damage)
+    damage = max(1, damage)
 
     var luck: bool = false
     if can_luck(attacker) and rng.randf() < LUCK_CHANCE:
         damage *= 2
         luck = true
 
-    var hp: int = maxi(1, defender.get_hp())
-    var kills: int = maxi(1, damage / hp)
-    kills = mini(kills, defender.get_count())
+    var hp: int = max(1, defender.get_hp())
+    var kills: int = max(1, damage / hp)
+    kills = min(kills, defender.get_count())
 
     return {
         "damage": damage,
@@ -170,15 +170,15 @@ static func preview_text(
         min_damage = int(float(min_damage) * RANGED_MELEE_PENALTY)
         max_damage = int(float(max_damage) * RANGED_MELEE_PENALTY)
 
-    min_damage = maxi(1, min_damage)
-    max_damage = maxi(1, max_damage)
+    min_damage = max(1, min_damage)
+    max_damage = max(1, max_damage)
 
-    var hp: int = maxi(1, defender.get_hp())
-    var min_kills: int = maxi(1, min_damage / hp)
-    var max_kills: int = maxi(1, max_damage / hp)
+    var hp: int = max(1, defender.get_hp())
+    var min_kills: int = max(1, min_damage / hp)
+    var max_kills: int = max(1, max_damage / hp)
 
-    min_kills = mini(min_kills, defender.get_count())
-    max_kills = mini(max_kills, defender.get_count())
+    min_kills = min(min_kills, defender.get_count())
+    max_kills = min(max_kills, defender.get_count())
 
     return "Damage: ~%d-%d (kills ~%d-%d)" % [
         min_damage,

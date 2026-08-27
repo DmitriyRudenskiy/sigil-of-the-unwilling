@@ -63,7 +63,7 @@ func _find_sheet() -> String:
 		f = dir.get_next()
 	dir.list_dir_end()
 	if best != "":
-		Logger.hero("sheet auto-detected: %s" % best)
+		GameLogger.hero("sheet auto-detected: %s" % best)
 	return best
 
 
@@ -101,7 +101,7 @@ func _build_anim_from_sheet(sheet: Image) -> void:
 	_parent.add_child(_anim)
 	_anim.stop()
 	_anim.frame = 0
-	Logger.hero("Knight animation built from %s" % HERO_SHEET_PATH)
+	GameLogger.hero("Knight animation built from %s" % HERO_SHEET_PATH)
 
 
 func idle_animation() -> void:
@@ -141,6 +141,7 @@ func setup_path_visual() -> void:
 ## Path line removed — markers now handled by MarkerLayer.
 func draw_path(_pts: Array[Vector2i]) -> void:
 	# no-op: markers replace path line
+	pass
 
 
 func clear_path_visual() -> void:

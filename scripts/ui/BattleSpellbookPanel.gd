@@ -31,11 +31,11 @@ func _refresh() -> void:
 		if spell == null:
 			continue
 
-		if not _magic.can_cast(spell):
+		if not _magic.can_cast_def(spell):
 			continue
 
 		var btn := Button.new()
-		btn.text = "%s (%d)" % [spell.display_name, _magic.get_mana_cost(spell)]
+		btn.text = "%s (%d)" % [spell.display_name, _magic.get_mana_cost_def(spell)]
 		btn.tooltip_text = "%s | Lv.%d" % [spell.school, spell.level]
 		btn.custom_minimum_size = Vector2(90, 36)
 		btn.pressed.connect(_on_spell_pressed.bind(spell_id))

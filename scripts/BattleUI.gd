@@ -8,10 +8,12 @@ signal attack_mode_requested
 signal skip_requested
 signal defend_requested
 signal spellbook_requested
+signal spell_chosen(spell_id: StringName)
 signal settings_requested
 signal settings_closed
 
 const _SettingsScreen = preload("res://scripts/ui/SettingsScreen.gd")
+const _SpellbookPanel = preload("res://scripts/ui/BattleSpellbookPanel.gd")
 
 var _status: Label
 var _active_info: Label
@@ -21,6 +23,7 @@ var _initiative_list: VBoxContainer
 var _action_buttons: Array[Button] = []
 var _attack_button: Button = null
 var _settings_screen: Control = null
+var _spellbook_panel: _SpellbookPanel = null
 
 
 func _ready() -> void:
@@ -96,6 +99,14 @@ func _build_ui() -> void:
 	_build_top_panel()
 	_build_bottom_bar()
 	_build_initiative_panel()
+	_build_spellbook()
+
+
+func _build_spellbook() -> void:
+	_spellbook_panel = _SpellbookPanel.new()
+	_spellbook_panel.visible = false
+	_spellbook_panel.spell_chosen.connect(func(id): spell_chosen.emit(id))
+	add_child(_spellbook_panel)
 
 
 func _build_top_panel() -> void:
@@ -152,7 +163,7 @@ func _build_bottom_bar() -> void:
 		{"text": "⏳", "tooltip": "Пропуск хода", "callback": _on_skip, "action": true},
 		{"text": "▲", "tooltip": "Свернуть панель", "callback": _on_collapse, "action": false},
 		{"text": "📖", "tooltip": "Книга заклинаний", "callback": _on_spellbook, "action": false},
-		{"text": "⚙️", "tooltip": "Настройки", "callback": _on_settings, "action": false},
+		{"text": "⚙️", "tooltip": "Настройки", "callback": _on_settings, "action": true},
 	]
 
 	for data in buttons:
@@ -224,6 +235,12 @@ func _on_spellbook() -> void:
 	spellbook_requested.emit()
 
 
+func open_spellbook(_state: BattleState) -> void:
+	if _spellbook_panel == null: return
+	# TODO: pass hero and magic when available
+	_spellbook_panel.visible = true
+
+
 func _on_settings() -> void:
 	settings_requested.emit()
 
@@ -232,9 +249,16 @@ func open_settings() -> void:
 	# Opened by BattleController when pause is set
 	_settings_screen = _SettingsScreen.new()
 	_settings_screen.applied.connect(_on_settings_applied)
+	_settings_screen.closed.connect(_on_settings_closed)
 	add_child(_settings_screen)
 
 
 func _on_settings_applied() -> void:
+	# Applied only applies settings.
+	# Resume is handled by the closed signal.
+	pass
+
+
+func _on_settings_closed() -> void:
 	_settings_screen = null
 	settings_closed.emit()

@@ -61,7 +61,7 @@ func remove_tool(tool_id: StringName, quantity: int = 1) -> bool:
 		if remaining <= 0:
 			break
 		if slots[i].has("id") and slots[i].id == tool_id:
-			var avail := slots[i].get("quantity", 1)
+			var avail: int = int(slots[i].get("quantity", 1))
 			if avail <= remaining:
 				remaining -= avail
 				slots[i] = {}

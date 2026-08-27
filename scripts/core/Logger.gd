@@ -1,5 +1,5 @@
 extends RefCounted
-class_name Logger
+class_name GameLogger
 ## Structured logging with colored output via print_rich.
 
 const TAG_WIDTH := 14
@@ -10,7 +10,7 @@ const _COLOR_RED := "[color=red]"
 const _RESET := "[/color]"
 
 static func _tag(tag: String) -> String:
-	return _COLOR_GRAY + "[%s]" % tag.pad_r(TAG_WIDTH) + _RESET
+	return _COLOR_GRAY + "[%s]" % tag.rpad(TAG_WIDTH) + _RESET
 
 static func info(msg: String, tag: String = "") -> void:
 	print_rich("%s %s" % [_tag(tag), msg])
@@ -22,7 +22,7 @@ static func error(msg: String, tag: String = "") -> void:
 	push_error("%s %s" % [_tag(tag), msg])
 
 static func trace(msg: String, tag: String = "") -> void:
-	if OS.is_debug():
+	if OS.is_debug_build():
 		print_rich("%s %s" % [_tag(tag), msg])
 
 static func battle(msg: String) -> void:

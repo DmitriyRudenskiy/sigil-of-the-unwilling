@@ -76,10 +76,10 @@ func equip(artifact: Artifact, target_slot: Artifact.Slot = Artifact.Slot.RING_L
         modifiers_changed.emit()
         return true
 
-    if not can_equip_to_slot(artifact, artifact.slot):
+    var slot: Artifact.Slot = artifact.slot
+    if not can_equip_to_slot(artifact, slot):
         return false
 
-    var slot: Artifact.Slot = target_slot if target_slot >= 0 else artifact.slot
     if idx >= 0:
         backpack.remove_at(idx)
     var old: Artifact = equipped[slot]
@@ -87,7 +87,7 @@ func equip(artifact: Artifact, target_slot: Artifact.Slot = Artifact.Slot.RING_L
     if old != null:
         backpack.append(old)
     if artifact.is_two_handed and slot == Artifact.Slot.WEAPON:
-        var shield: Artifact = equipped[Artifact.Slot.SHIELD]
+        var shield: Artifact = equipped.get(Artifact.Slot.SHIELD, null)
         if shield != null:
             equipped[Artifact.Slot.SHIELD] = null
             backpack.append(shield)

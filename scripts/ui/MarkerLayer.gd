@@ -1,4 +1,4 @@
-extends CanvasLayer
+extends Node2D
 class_name MarkerLayer
 ## Overlays green/yellow/red dots on reachable hexes.
 
@@ -22,11 +22,9 @@ var _hex_size: float = 32.0  # default, recalculated on setup
 
 func setup(map: MapGenerator) -> void:
 	_map_gen = map
-	layer = 5  # between terrain and units
+	z_index = 5
 	if _map_gen and _map_gen.has_valid_tilemap():
-		var ts = _map_gen.tile_map.tile_set
-		if ts:
-			_hex_size = ts.tile_size.x * 0.5
+		_hex_size = _map_gen.get_tile_size().x * 0.5
 
 
 func show_markers(hero_cell: Vector2i, mp: float, dist_map: Dictionary) -> void:
@@ -49,8 +47,7 @@ func show_markers(hero_cell: Vector2i, mp: float, dist_map: Dictionary) -> void:
 	# Red frontier: unreachable neighbors of reachable cells
 	var red_candidates: Dictionary = {}
 	for cell in _reachable:
-		for bit in 6:
-			var nb = _HexUtils_get_neighbor(cell, bit)
+		for nb in HexUtils.get_all_neighbors(cell):
 			if not _dist.has(nb) or _dist[nb] > mp + 0.001:
 				# Check if actually blocked or just too expensive
 				if _map_gen.is_in_bounds(nb) and _map_gen.is_walkable(nb):
@@ -102,9 +99,8 @@ func _draw() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed:
-		var pos: Vector2 = event.position
-		var cell := _screen_to_cell(pos)
-		if cell == null:
+		var cell := _screen_to_cell(get_global_mouse_position())
+		if cell == Vector2i(-1, -1):
 			return
 
 		if event.button_index == MOUSE_BUTTON_LEFT:
@@ -118,8 +114,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			pass  # handled elsewhere
 
 	elif event is InputEventMouseMotion and _visible:
-		var cell := _screen_to_cell(event.position)
-		if cell != null:
+		var cell := _screen_to_cell(get_global_mouse_position())
+		if cell != Vector2i(-1, -1):
 			var is_reachable: bool = _reachable.has(cell) and _reachable[cell] != MarkType.RED
 			var cost: float = _dist.get(cell, INF)
 			var remaining: float = _mp_current - cost
@@ -128,22 +124,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			marker_hovered.emit(cell, cost, remaining, is_reachable)
 
 
-func _screen_to_cell(pos: Vector2) -> Vector2i:
+func _screen_to_cell(world_pos: Vector2) -> Vector2i:
 	if not _map_gen or not _map_gen.has_valid_tilemap():
-		return null
-	return _map_gen.local_to_map(pos)
-
-
-# Inline neighbor to avoid circular preload
-static func _HexUtils_get_neighbor(cell: Vector2i, bit: int) -> Vector2i:
-	# Simplified: use even-r offsets (good enough for frontier detection)
-	var neighbors := [
-		Vector2i(1, 0), Vector2i(0, -1), Vector2i(-1, -1),
-		Vector2i(-1, 0), Vector2i(-1, 1), Vector2i(0, 1),
-	]
-	if (cell.y & 1) == 1:
-		neighbors = [
-			Vector2i(1, 0), Vector2i(1, -1), Vector2i(0, -1),
-			Vector2i(-1, 0), Vector2i(0, 1), Vector2i(1, 1),
-		]
-	return cell + neighbors[bit]
+		return Vector2i(-1, -1)
+	return _map_gen.world_to_map(world_pos)

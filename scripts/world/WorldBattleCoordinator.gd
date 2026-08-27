@@ -2,6 +2,8 @@ extends Node
 class_name WorldBattleCoordinator
 ## Handles enemy contact, battle lifecycle, and post-battle results.
 
+const UnitStack = preload("res://scripts/unit_stack.gd")
+
 var hero: HeroController
 var map_gen: MapGenerator
 var spawner: WorldSpawner
@@ -63,17 +65,22 @@ func on_battle_completed(winner: String, surv_atk: Array[UnitStack], surv_def: A
 
 	hero.apply_battle_results(surv_atk)
 
-	if hero.army.is_empty():
-		hero.army = [UnitRegistry.make_stack("swordsmen", rng)]
-		Logger.hero("Hero routed: awarded minimal stack")
+	if hero.army.army.is_empty():
+		var fallback: Array[UnitStack] = []
+		var stack := UnitRegistry.make_fixed_stack("swordsmen", 10)
+		if stack != null:
+			fallback.append(stack)
+
+		hero.army.apply_battle_results(fallback)
+		GameLogger.hero("Hero routed: awarded minimal stack")
 
 	if winner == "attacker":
 		map_gen.enemy_stacks.erase(_pending_enemy_cell)
 		if spawner:
 			spawner.remove_enemy_at(_pending_enemy_cell)
-		Logger.battle("Enemy defeated at %s" % _pending_enemy_cell)
+		GameLogger.battle("Enemy defeated at %s" % _pending_enemy_cell)
 	else:
-		Logger.battle("Battle lost / retreated")
+		GameLogger.battle("Battle lost / retreated")
 
 	_pending_enemy_cell = Vector2i(-1, -1)
 
@@ -83,9 +90,9 @@ func on_battle_completed(winner: String, surv_atk: Array[UnitStack], surv_def: A
 			if arts.size() > 0:
 				var drop := arts[rng.randi() % arts.size()]
 				if hero.inventory.add_to_backpack(drop):
-					Logger.world("Monster drop: %s" % drop.display_name)
+					GameLogger.world("Monster drop: %s" % drop.display_name)
 				else:
-					Logger.world("Backpack full, drop lost!")
+					GameLogger.world("Backpack full, drop lost!")
 
 
 func get_pending_enemy_cell() -> Vector2i:

@@ -2,32 +2,9 @@ extends RefCounted
 class_name ResourceRegistry
 ## Strategic resource definitions: 11 hidden veins + 2 basic (wood/stone).
 
+const ResourceDef = preload("res://scripts/data/ResourceDef.gd")
+
 enum Rarity { COMMON, RARE }
-
-class ResourceDef extends RefCounted:
-	var id: StringName
-	var display_name: String
-	var biomes: Array[String] = []
-	var rarity: int  # 0=common, 1=rare
-	# Discovery keys
-	var discovery_skill: StringName = &""
-	var discovery_time: String = ""  # "noon" / "night" / ""
-	var discovery_auto: bool = false  # auto-marked on entry
-	var discovery_auto_tags: Array[StringName] = []
-	# Extraction keys
-	var extraction_tag: StringName = &""      # e.g. "strong_strike"
-	var extraction_skill: StringName = &""    # alternative skill key
-	var extraction_unit: StringName = &""     # e.g. "worker"
-	var extraction_tool: StringName = &""     # e.g. "cart"
-	var extraction_consumable: StringName = &""  # e.g. "skin_protection"
-	var extraction_fire: bool = false  # fire spell/aura alternative
-	# Yield and weight
-	var yield_min: int = 1
-	var yield_max: int = 3
-	var weight_per_unit: float = 1.0
-	# Icon emoji
-	var icon: String = "⛏️"
-
 
 static var _resources: Dictionary = {}
 
@@ -140,9 +117,9 @@ static func _add(id: StringName, name: String, biomes: Array[String], rarity: in
 	_resources[id] = def
 
 
-static func get(id: StringName) -> ResourceDef:
+static func get_resource(id: StringName) -> ResourceDef:
 	ensure_definitions()
-	return _resources.get(id, null)
+	return _resources.get(id, null) as ResourceDef
 
 
 static func get_all() -> Array[ResourceDef]:

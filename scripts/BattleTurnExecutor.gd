@@ -18,6 +18,7 @@ signal execute_attack(
 	def: BattleState.BattleUnit,
 	result: Dictionary
 )
+signal spell_cast_executed(caster: BattleState.BattleUnit, target: BattleState.BattleUnit, result: Dictionary)
 signal end_battle(winner: String, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack])
 
 enum State {
@@ -71,14 +72,21 @@ func is_input_active() -> bool:
 
 
 var _paused := false
-
+var _pending_completion: String = ""
 
 func pause_battle() -> void:
 	_paused = true
 
-
 func resume_battle() -> void:
 	_paused = false
+
+	var pending := _pending_completion
+	_pending_completion = ""
+
+	if pending == "move":
+		on_move_completed()
+	elif pending == "attack":
+		on_attack_completed()
 
 
 func is_paused() -> bool:
@@ -88,6 +96,7 @@ func is_paused() -> bool:
 ## Основной вход: начать бой
 func start_battle() -> void:
 	_paused = false
+	_pending_completion = ""
 	_end_emitted = false
 	_retreat_requested = false
 	_morale_allowed = false
@@ -101,6 +110,13 @@ func start_battle() -> void:
 	_state = State.TURN_START
 	_advance_to_next_turn()
 
+
+## Выбор юнита игроком: валидация + мутация state
+func request_select(unit: BattleState.BattleUnit) -> void:
+	if not is_input_active() or unit == null or not unit.is_alive():
+		return
+	_battle_state.active_unit = unit
+	active_unit_changed.emit(unit)
 
 ## Вызывается игроком через BattleInput
 ## Валидирует, мутирует BattleState, затем испускает сигнал для анимации.
@@ -179,6 +195,7 @@ func request_attack(atk: BattleState.BattleUnit, def: BattleState.BattleUnit) ->
 ## Вызывается после завершения анимации перемещения (controller → executor)
 func on_move_completed() -> void:
 	if _paused:
+		_pending_completion = "move"
 		return
 	if _state == State.BATTLE_OVER:
 		return
@@ -199,9 +216,22 @@ func on_move_completed() -> void:
 	_on_action_completed()
 
 
+## Вызывается после завершения анимации каста (controller → executor)
+func on_spell_anim_completed() -> void:
+	if _paused:
+		return
+	if _state == State.BATTLE_OVER:
+		return
+	if _battle_state.battle_over:
+		_transition_to(State.BATTLE_OVER)
+		_emit_end()
+		return
+	_on_action_completed()
+
 ## Вызывается после завершения анимации атаки (controller → executor)
 func on_attack_completed() -> void:
 	if _paused:
+		_pending_completion = "attack"
 		return
 	if _state == State.BATTLE_OVER:
 		return
@@ -262,6 +292,31 @@ func request_skip() -> void:
 	_on_action_completed()
 
 
+func request_spell_cast(spell_id: StringName) -> void:
+	if _state != State.WAITING_INPUT or _battle_state.active_unit == null:
+		return
+	_transition_to(State.PLAYER_ANIMATING)
+	status_updated.emit("Выберите цель для заклинания...")
+
+
+func on_spell_target_selected(spell_id: StringName, target: BattleState.BattleUnit) -> void:
+	var caster := _battle_state.active_unit
+	if caster == null or target == null:
+		_on_action_completed()
+		return
+	
+	var caster_bonus := _battle_state.attacker_hero_bonus if caster.side == "attacker" else _battle_state.defender_hero_bonus
+	var target_bonus := _battle_state.defender_hero_bonus if target.side == "defender" else _battle_state.attacker_hero_bonus
+	
+	var result := _battle_state.apply_spell(spell_id, caster, target, caster_bonus, target_bonus, _rng)
+	
+	if result.get("result") == "success":
+		spell_cast_executed.emit(caster, target, result)
+	else:
+		status_updated.emit("Заклинание не сработало: %s" % result.get("result", "unknown"))
+		_on_action_completed()
+
+
 ## Кнопка «Защита»
 func request_defend() -> void:
 	if _paused:
@@ -300,30 +355,30 @@ func _advance_to_next_turn() -> void:
 		return
 
 	var u := _battle_state.active_unit
-
-	# Tick statuses (decrement durations)
-	var to_remove: Array = []
-	for eff in u.statuses.keys():
-		u.statuses[eff] -= 1
-		if u.statuses[eff] <= 0:
-			to_remove.append(eff)
-	for eff in to_remove:
-		u.statuses.erase(eff)
+	if u == null:
+		_on_action_completed()
+		return
 
 	# Reset charge tracker
 	u.distance_moved_this_turn = 0
 
-	# Check for stun (petrified/blind)
+	# Статусы с длительностью 1 должны сработать до начала хода.
+	# Иначе длительность исчезнет до проверки stun, и ход не будет пропущен.
 	if u.is_stunned():
 		var stun_effect := -1
 		for eff in u.statuses.keys():
 			if StatusEffects.is_stun(eff):
 				stun_effect = eff
 				break
+
+		_tick_statuses(u)
+
 		status_updated.emit("%s is %s! Skips turn." % [u.get_display_name(), StatusEffects.get_name(stun_effect)])
 		u.has_moved = true
 		_on_action_completed()
 		return
+
+	_tick_statuses(u)
 
 	_transition_to(State.TURN_START)
 	status_updated.emit(_battle_state.get_turn_info())
@@ -342,6 +397,18 @@ func _advance_to_next_turn() -> void:
 		_transition_to(State.WAITING_INPUT)
 	else:
 		_run_ai_turn()
+
+
+func _tick_statuses(u: BattleState.BattleUnit) -> void:
+	var to_remove: Array[int] = []
+
+	for eff in u.statuses.keys():
+		u.statuses[eff] -= 1
+		if u.statuses[eff] <= 0:
+			to_remove.append(eff)
+
+	for eff in to_remove:
+		u.statuses.erase(eff)
 
 
 func _run_ai_turn() -> void:

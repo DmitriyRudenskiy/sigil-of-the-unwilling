@@ -6,6 +6,9 @@ var captured_villages: Array[Vector2i] = []
 var defeated_enemies: Array[Vector2i] = []
 var removed_resources: Array[Vector2i] = []
 var opened_chests: Array[Vector2i] = []
+var removed_scrolls: Array[Vector2i] = []
+var discovered_nodes: Array[Vector2i] = []
+var exhausted_nodes: Array[Vector2i] = []
 
 
 func serialize() -> Dictionary:
@@ -14,6 +17,9 @@ func serialize() -> Dictionary:
 		"defeated_enemies": _cells_to_array(defeated_enemies),
 		"removed_resources": _cells_to_array(removed_resources),
 		"opened_chests": _cells_to_array(opened_chests),
+		"removed_scrolls": _cells_to_array(removed_scrolls),
+		"discovered_nodes": _cells_to_array(discovered_nodes),
+		"exhausted_nodes": _cells_to_array(exhausted_nodes),
 	}
 
 
@@ -22,6 +28,9 @@ func deserialize(data: Dictionary) -> void:
 	defeated_enemies = _array_to_cells(data.get("defeated_enemies", []))
 	removed_resources = _array_to_cells(data.get("removed_resources", []))
 	opened_chests = _array_to_cells(data.get("opened_chests", []))
+	removed_scrolls = _array_to_cells(data.get("removed_scrolls", []))
+	discovered_nodes = _array_to_cells(data.get("discovered_nodes", []))
+	exhausted_nodes = _array_to_cells(data.get("exhausted_nodes", []))
 
 
 func add_village(cell: Vector2i) -> void:
@@ -42,6 +51,21 @@ func add_removed_resource(cell: Vector2i) -> void:
 func add_opened_chest(cell: Vector2i) -> void:
 	if not opened_chests.has(cell):
 		opened_chests.append(cell)
+
+
+func add_removed_scroll(cell: Vector2i) -> void:
+	if not removed_scrolls.has(cell):
+		removed_scrolls.append(cell)
+
+
+func add_discovered_node(cell: Vector2i) -> void:
+	if not discovered_nodes.has(cell):
+		discovered_nodes.append(cell)
+
+
+func add_exhausted_node(cell: Vector2i) -> void:
+	if not exhausted_nodes.has(cell):
+		exhausted_nodes.append(cell)
 
 
 func _cells_to_array(cells: Array[Vector2i]) -> Array:

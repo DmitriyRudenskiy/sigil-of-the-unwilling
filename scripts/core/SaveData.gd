@@ -28,7 +28,15 @@ func from_dict(data: Dictionary) -> void:
 	version = int(data.get("version", 1))
 	generator_version = int(data.get("generator_version", 1))
 	run_seed = int(data.get("run_seed", 0))
-	date = data.get("date", {"month": 1, "week": 1, "day": 1})
+	var raw_date = data.get("date", {})
+	if not (raw_date is Dictionary):
+		raw_date = {}
+
+	date = {
+		"month": int(raw_date.get("month", 1)),
+		"week": int(raw_date.get("week", 1)),
+		"day": int(raw_date.get("day", 1)),
+	}
 	hero = data.get("hero", {})
 	world = data.get("world", {})
 

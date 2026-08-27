@@ -14,26 +14,26 @@ var levels: Dictionary = {
 }
 
 
-func get(skill: StringName) -> int:
+func get_skill(skill: StringName) -> int:
 	return levels.get(skill, 0)
 
 
-func set(skill: StringName, value: int) -> void:
+func set_skill(skill: StringName, value: int) -> void:
 	levels[skill] = clampi(value, 0, 3)
 	skills_changed.emit()
 
 
 func add_point(skill: StringName) -> void:
-	set(skill, get(skill) + 1)
+	set_skill(skill, get_skill(skill) + 1)
 
 
 func has_detection_key(skill: StringName) -> bool:
-	return get(skill) >= 1
+	return get_skill(skill) >= 1
 
 
 func get_yield_multiplier(skill: StringName) -> float:
 	"""Level 0 = 0, Level 1 = 1.0, Level 2 = 1.5, Level 3 = 2.0"""
-	var lvl := get(skill)
+	var lvl: int = get_skill(skill)
 	if lvl == 0:
 		return 0.0
 	return 1.0 + (lvl - 1) * 0.5

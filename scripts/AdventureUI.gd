@@ -3,9 +3,14 @@ class_name AdventureUI
 ## Координатор UI: миникарта, армия, ресурсы, инфо-панель.
 
 const _SettingsScreen = preload("res://scripts/ui/SettingsScreen.gd")
+const _SettingsScript = preload("res://scripts/core/Settings.gd")
 
 signal end_turn_pressed
 signal date_changed(month: int, week: int, day: int)
+signal minimap_cell_activated(cell: Vector2i)
+signal camera_jump_requested_dir(dir: String)
+signal settings_applied
+signal hex_borders_toggled(on: bool)
 
 const RIGHT_W := 252
 const C_BG := Color(0.16, 0.11, 0.06, 0.95)
@@ -76,21 +81,16 @@ func _build_right_column() -> void:
 	vb.add_child(spacer)
 
 
-func setup(hero: HeroController) -> void:
+func setup(hero: HeroController, camera: Camera2D = null) -> void:
 	_hero_controller = hero
 	hero.movement_points_changed.connect(func(c, m): _update_mp_display(c, m))
-	hero.resources_changed.connect(func(_r): _resources.update_resources(hero.resources))
+	hero.resources_changed.connect(func(res): _resources.update_resources(res))
 	hero.path_previewed.connect(func(t): _info.set_status(t))
 	# Addendum 10: Resource chain signals
 	hero.strategic_resources_changed.connect(_strat_resources.update_resources)
 	hero.skills_changed.connect(func(): _skills_panel.update_skills(hero.skills.get_all()))
 	hero.tools_changed.connect(func(): _tools_panel.update_tools(hero.tools.get_all()))
 	hero.time_changed.connect(_info.set_time)
-
-	var world := get_parent()
-	var camera: Camera2D = null
-	if world and world.has_method("get_camera"):
-		camera = world.get_camera()
 
 	_minimap.setup(hero.get_map_gen(), hero, camera)
 	_minimap.minimap_clicked.connect(_on_minimap_clicked)
@@ -106,8 +106,8 @@ func setup(hero: HeroController) -> void:
 func refresh_all() -> void:
 	if _hero_controller == null:
 		return
-	_army.update_army(_hero_controller.army)
-	_resources.update_resources(_hero_controller.resources)
+	_army.update_army(_hero_controller.army.army)
+	_resources.update_resources(_hero_controller.resources.resources)
 
 
 func add_city(city_name: String) -> void:
@@ -119,16 +119,16 @@ func advance_day() -> void:
 	date_changed.emit(_info.month, _info.week, _info.day)
 
 
+func set_date(month: int, week: int, day: int) -> void:
+	_info.set_date(month, week, day)
+
+
 func _on_minimap_clicked(cell: Vector2i) -> void:
-	var world := get_parent()
-	if world and world.has_method("center_camera_on"):
-		world.center_camera_on(cell)
+	minimap_cell_activated.emit(cell)
 
 
 func _on_camera_jump(direction: String) -> void:
-	var world := get_parent()
-	if world and world.has_method("jump_camera"):
-		world.jump_camera(direction)
+	camera_jump_requested_dir.emit(direction)
 
 
 func _on_end_turn() -> void:
@@ -165,18 +165,11 @@ func _on_open_settings() -> void:
 
 
 func _on_settings_applied() -> void:
-	# Apply zoom
-	var world := get_parent()
-	if world and world.has_method("get_camera"):
-		var cam: Camera2D = world.get_camera()
-		if cam and cam.has_method("set_zoom_level"):
-			cam.set_zoom_level(Settings.get_zoom())
+	settings_applied.emit()
 
 
 func _on_border_toggled(on: bool) -> void:
-	var world := get_parent()
-	if world and world.has_method("set_hex_borders"):
-		world.set_hex_borders(on)
+	hex_borders_toggled.emit(on)
 
 
 func _update_mp_display(current: float, max_val: float) -> void:

@@ -14,9 +14,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-		camera.apply_zoom(0.1)
+		camera.step_zoom(1)
 	elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-		camera.apply_zoom(-0.1)
+		camera.step_zoom(-1)
 	elif event.button_index == MOUSE_BUTTON_RIGHT:
 		hero.cancel_pending()
 	elif event.button_index == MOUSE_BUTTON_LEFT:

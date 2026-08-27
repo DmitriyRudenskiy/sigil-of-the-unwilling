@@ -47,6 +47,6 @@ func _build_ui() -> void:
 
 func update_skills(skills: Dictionary) -> void:
 	for skill in _skill_order:
-		var level := skills.get(skill, 0)
+		var level: int = int(skills.get(skill, 0))
 		if _labels.has(skill):
 			_labels[skill].text = "%d/3" % level

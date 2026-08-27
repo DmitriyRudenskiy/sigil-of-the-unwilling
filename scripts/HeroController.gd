@@ -115,6 +115,10 @@ func on_map_clicked(cell: Vector2i) -> void:
 	movement.on_map_clicked(cell)
 
 
+func move_to_cell(cell: Vector2i) -> bool:
+	return movement.move_to_cell(cell)
+
+
 func cancel_pending(clear_text: bool = true) -> void:
 	movement.cancel_pending(clear_text)
 

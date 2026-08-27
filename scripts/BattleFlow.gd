@@ -8,6 +8,7 @@ signal battle_completed(winner: String, surviving_atk: Array[UnitStack], survivi
 
 const _BATTLE_SCENE := preload("res://scenes/Battle.tscn")
 
+var _active := false
 
 func start_battle(
 	attacker_army: Array[UnitStack],
@@ -16,8 +17,13 @@ func start_battle(
 	defender_bonus: Dictionary = {},
 	attacker_artifact_mods: Dictionary = {},
 	defender_artifact_mods: Dictionary = {},
-	obstacle_seed: int = 777
+	obstacle_seed: int = -1
 ) -> void:
+	if obstacle_seed < 0:
+		obstacle_seed = randi()
+	if _active:
+		return
+	_active = true
 	battle_started.emit()
 
 	var battle := _BATTLE_SCENE.instantiate()
@@ -39,6 +45,7 @@ func start_battle(
 
 
 func _on_battle_finished(winner: String, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack], battle: Node) -> void:
+	_active = false
 	battle.queue_free()
 	RenderingServer.set_default_clear_color(Color(0.10, 0.10, 0.12))
 	battle_completed.emit(winner, surviving_atk, surviving_def)

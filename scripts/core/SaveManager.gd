@@ -49,6 +49,17 @@ func load_game() -> Variant:
 	return data
 
 
+static func load_slot() -> SaveData:
+	var manager := SaveManager.new()
+	var data = manager.load_game()
+	manager.free()
+
+	if data is SaveData:
+		return data
+
+	return null
+
+
 func has_save() -> bool:
 	return FileAccess.file_exists(SAVE_PATH)
 
