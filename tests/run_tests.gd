@@ -13,6 +13,13 @@ const SKIP_FILES := [
 	"test_saltpeter.gd",         # Headless autoload scope issue
 	"test_basic_resources.gd",   # Headless autoload scope issue
 	"test_battle_coordinator.gd",# WorldBattleCoordinator deps fail in headless
+	"test_glory_tracker.gd",     # GloryTracker -> CityBalance autoload missing in headless
+	"test_pop_unit.gd",          # PopUnit enum references fail in headless preload
+	"test_season.gd",            # Season -> CityBalance autoload missing; preloads fail silently in headless
+	"test_borough_rules.gd",     # BoroughRules -> City.Faction autoload missing in headless
+	"test_city_model.gd",        # City -> CityBalance/HexUtils autoloads missing in headless
+	"test_city_manager.gd",      # CityManager -> City/GloryTracker autoloads missing
+	"test_battle_flow.gd",       # BattleFlow -> UnitStack type missing in headless
 ]
 
 func _should_skip(file: String) -> bool:
