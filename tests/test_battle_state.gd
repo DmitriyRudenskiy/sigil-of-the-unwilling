@@ -41,8 +41,8 @@ func _test_battle_setup() -> int:
 	var errors := 0
 	var state = _create_state()
 
-	var attackers = state.get_units_by_side("attacker")
-	var defenders = state.get_units_by_side("defender")
+	var attackers = state.get_units_by_side(BattleState.Side.ATTACKER)
+	var defenders = state.get_units_by_side(BattleState.Side.DEFENDER)
 
 	if attackers.size() != 1:
 		printerr("expected 1 attacker unit")
@@ -61,7 +61,7 @@ func _test_battle_setup() -> int:
 		errors += 1
 
 	if attackers.size() > 0:
-		var found = state.get_unit_at(attackers[0].cell, "attacker")
+		var found = state.get_unit_at(attackers[0].cell, BattleState.Side.ATTACKER)
 		if found == null:
 			printerr("get_unit_at should find attacker at its cell")
 			errors += 1
@@ -72,8 +72,8 @@ func _test_attack() -> int:
 	var errors := 0
 	var state = _create_state()
 
-	var attacker = state.get_units_by_side("attacker")[0]
-	var defender = state.get_units_by_side("defender")[0]
+	var attacker = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
+	var defender = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
 	attacker.cell = Vector2i(5, 5)
 	defender.cell = HexUtils.get_neighbor(attacker.cell, 0)
 
@@ -99,8 +99,8 @@ func _test_attack_with_rng() -> int:
 	def.append(Units.make_fixed_stack("goblins", 50))
 	state.place_army(atk, def)
 
-	var attacker = state.get_units_by_side("attacker")[0]
-	var defender = state.get_units_by_side("defender")[0]
+	var attacker = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
+	var defender = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
 	attacker.cell = Vector2i(5, 5)
 	defender.cell = HexUtils.get_neighbor(attacker.cell, 0)
 
@@ -127,8 +127,8 @@ func _test_battle_end() -> int:
 	state.place_army(atk, def)
 	state.build_queue()
 
-	var attacker = state.get_units_by_side("attacker")[0]
-	var defender = state.get_units_by_side("defender")[0]
+	var attacker = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
+	var defender = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
 	attacker.cell = Vector2i(5, 5)
 	defender.cell = HexUtils.get_neighbor(attacker.cell, 0)
 
@@ -145,8 +145,8 @@ func _test_battle_end() -> int:
 		printerr("battle should be over after defender extinction")
 		errors += 1
 
-	var atk_survivors: Array = state.get_survivors("attacker")
-	var def_survivors: Array = state.get_survivors("defender")
+	var atk_survivors: Array = state.get_survivors(BattleState.Side.ATTACKER)
+	var def_survivors: Array = state.get_survivors(BattleState.Side.DEFENDER)
 
 	if atk_survivors.size() != 1:
 		printerr("attacker survivors should contain 1 stack")
@@ -210,30 +210,30 @@ func _test_check_end_repeat_call() -> int:
 	def.append(Units.make_fixed_stack("goblins", 1))
 	state.place_army(atk, def)
 
-	var attacker = state.get_units_by_side("attacker")[0]
-	var defender = state.get_units_by_side("defender")[0]
+	var attacker = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
+	var defender = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
 	attacker.cell = Vector2i(5, 5)
 	defender.cell = HexUtils.get_neighbor(attacker.cell, 0)
 
 	var rng3 := RandomNumberGenerator.new()
 	state.apply_attack(attacker, defender, true, rng3)
 
-	var winner1: String = state.check_end()
-	if winner1 != "attacker":
+	var winner1: BattleState.Side = state.check_end()
+	if winner1 != BattleState.Side.ATTACKER:
 		printerr("first check_end() should return 'attacker', got: ", winner1)
 		errors += 1
 
-	var winner2: String = state.check_end()
-	if winner2 != "attacker":
+	var winner2: BattleState.Side = state.check_end()
+	if winner2 != BattleState.Side.ATTACKER:
 		printerr("second check_end() should return 'attacker', got: ", winner2)
 		errors += 1
 
 	var state2 = load("res://scripts/BattleState.gd").new()
-	state2.force_end("defender")
+	state2.force_end(BattleState.Side.DEFENDER)
 	if not state2.battle_over:
 		printerr("force_end should set battle_over")
 		errors += 1
-	if state2.check_end() != "defender":
+	if state2.check_end() != BattleState.Side.DEFENDER:
 		printerr("check_end after force_end should return 'defender'")
 		errors += 1
 
@@ -248,7 +248,7 @@ func _test_get_reachable_for_unit() -> int:
 	var def: Array[UnitStack] = []
 	state.place_army(atk, def)
 
-	var unit = state.get_units_by_side("attacker")[0]
+	var unit = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
 
 	var blocked := func() -> Dictionary: return {}
 	var reachable: Dictionary = state.get_reachable_for_unit(unit, blocked)
@@ -267,7 +267,7 @@ func _test_flying_unit_placement() -> int:
 	var def: Array[UnitStack] = []
 	state.place_army(atk, def)
 
-	var unit = state.get_units_by_side("attacker")[0]
+	var unit = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
 	if not unit.is_flying():
 		printerr("pegasus should be flying")
 		errors += 1
@@ -282,7 +282,7 @@ func _test_ranged_unit_tag() -> int:
 	var def: Array[UnitStack] = []
 	state.place_army(atk, def)
 
-	var unit = state.get_units_by_side("attacker")[0]
+	var unit = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
 	if not unit.is_ranged():
 		printerr("archers should be ranged")
 		errors += 1
@@ -297,7 +297,7 @@ func _test_morale_tag() -> int:
 	var def: Array[UnitStack] = []
 	state.place_army(atk, def)
 
-	var unit = state.get_units_by_side("attacker")[0]
+	var unit = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
 	if not unit.has_morale():
 		printerr("champions should have morale")
 		errors += 1
@@ -315,7 +315,7 @@ func _test_retreat_survivors() -> int:
 	var def: Array[UnitStack] = []
 	state.place_army(atk, def)
 
-	var survivors: Array = state.get_retreat_survivors("attacker")
+	var survivors: Array = state.get_retreat_survivors(BattleState.Side.ATTACKER)
 
 	if survivors.size() != 2:
 		printerr("retreat survivors should be 2, got %d" % survivors.size())
@@ -338,7 +338,7 @@ func _test_defend_bonus() -> int:
 	def.append(Units.make_fixed_stack("goblins", 50))
 	state.place_army(atk, def)
 
-	var defender = state.get_units_by_side("defender")[0]
+	var defender = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
 	state.do_defend(defender)
 
 	if not defender.is_defending():
@@ -364,7 +364,7 @@ func _test_hero_bonuses() -> int:
 
 	state.set_hero_bonuses({"attack": 5, "defense": 3}, {"defense": 2})
 
-	var attacker = state.get_units_by_side("attacker")[0]
+	var attacker = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
 	if state.attacker_hero_bonus.get("attack", 0) != 5:
 		printerr("attacker bonus attack should be 5")
 		errors += 1
@@ -379,11 +379,11 @@ func _test_get_unit_at_after_kill() -> int:
 	# Regression: _unit_grid must not return dead units (Fix #9)
 	var errors := 0
 	var state = _create_state()
-	var def = state.get_units_by_side("defender")[0]
+	var def = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
 	var cell = def.cell
 
 	# Kill the defender
-	var attacker = state.get_units_by_side("attacker")[0]
+	var attacker = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
 	attacker.cell = HexUtils.get_neighbor(def.cell, 0)
 	var rng := RandomNumberGenerator.new()
 	state.apply_attack(attacker, def, true, rng)
@@ -392,12 +392,12 @@ func _test_get_unit_at_after_kill() -> int:
 		# If still alive, kill it directly via _kill_unit
 		# (apply_attack may not kill if damage insufficient)
 		# Use a stronger approach: just verify the grid is consistent
-		var found = state.get_unit_at(cell, "defender")
+		var found = state.get_unit_at(cell, BattleState.Side.DEFENDER)
 		if found != null and not found.is_alive():
 			printerr("get_unit_at returned a dead unit")
 			errors += 1
 	else:
-		var found = state.get_unit_at(cell, "defender")
+		var found = state.get_unit_at(cell, BattleState.Side.DEFENDER)
 		if found != null:
 			printerr("dead unit still in grid at %s" % cell)
 			errors += 1

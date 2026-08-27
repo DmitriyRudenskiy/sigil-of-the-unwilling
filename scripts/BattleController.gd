@@ -4,6 +4,8 @@ class_name BattleController
 ## Логика ходов → BattleTurnExecutor, ввод → BattleInput, AI → BattleAI.
 ## Контроллер только проигрывает анимации и ждёт их завершения.
 
+const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
+
 signal battle_finished(winner: String, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack])
 
 var _state: BattleState
@@ -34,6 +36,10 @@ func _ready() -> void:
 func _init_state() -> void:
 	_state = BattleState.new()
 	_ai = BattleAI.new()
+	# ServiceContainer для боя (если не создан в мире)
+	if ServiceContainer.current == null:
+		var services := ServiceContainer.from_autoloads()
+		ServiceContainer.setup_global(services)
 
 
 func _init_view() -> void:
@@ -169,6 +175,9 @@ func _on_execute_spell(caster: BattleState.BattleUnit, target: BattleState.Battl
 	_show_damage_feedback(target, result)
 	await _get_damage_wait()
 
+	if not is_inside_tree() or _state.battle_over:
+		return
+
 	# 3. Визуал статусов
 	if result.has("status") and int(result.get("status", -1)) != -1:
 		_fx.show_status(target.cell, int(result.get("status")))
@@ -194,8 +203,11 @@ func _on_execute_move(unit: BattleState.BattleUnit, path: Array[Vector2i]) -> vo
 
 	if tween != null:
 		await tween.finished
+		if not is_inside_tree() or _state.battle_over:
+			return
 
-	_executor.on_move_completed()
+	if is_instance_valid(_executor):
+		_executor.on_move_completed()
 
 
 func _on_execute_attack(
@@ -204,13 +216,14 @@ func _on_execute_attack(
 	result: Dictionary
 ) -> void:
 	if def == null:
-		_executor.on_attack_completed()
+		if is_instance_valid(_executor):
+			_executor.on_attack_completed()
 		return
 
 	_show_damage_feedback(def, result)
 	await _fx.play_attack_sequence(atk, def, result)
 
-	if not is_inside_tree():
+	if not is_inside_tree() or _state.battle_over:
 		return
 
 	if is_instance_valid(_executor):
@@ -269,10 +282,10 @@ func start_battle(
 	_state.set_hero_bonuses(attacker_bonus, defender_bonus)
 	_state.place_army(atk, def, attacker_artifact_mods, defender_artifact_mods)
 
-	for u in _state.get_units_by_side("attacker"):
+	for u in _state.get_units_by_side(BattleState.Side.ATTACKER):
 		_view.create_unit_sprite(u)
 
-	for u in _state.get_units_by_side("defender"):
+	for u in _state.get_units_by_side(BattleState.Side.DEFENDER):
 		_view.create_unit_sprite(u)
 
 	_view.spawn_hero_figure()

@@ -47,7 +47,7 @@ static func _apply_breath(state: BattleState, atk: BattleState.BattleUnit, def: 
 			result, &"breath_kills"
 		)
 
-const _SIDES := ["attacker", "defender"]
+const _SIDES := [BattleState.Side.ATTACKER, BattleState.Side.DEFENDER]
 
 static func _apply_area_damage(
 	state: BattleState, atk: BattleState.BattleUnit,

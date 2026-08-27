@@ -19,7 +19,7 @@ signal execute_attack(
 	result: Dictionary
 )
 signal spell_cast_executed(caster: BattleState.BattleUnit, target: BattleState.BattleUnit, result: Dictionary)
-signal end_battle(winner: String, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack])
+signal end_battle(winner: BattleState.Side, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack])
 
 enum State {
 	IDLE,
@@ -77,8 +77,13 @@ var _pending_completion: PendingAction = PendingAction.NONE
 
 func pause_battle() -> void:
 	_paused = true
+	# Freeze tree to stop all tweens and animations mid-frame
+	if get_tree() != null:
+		get_tree().paused = true
 
 func resume_battle() -> void:
+	if get_tree() != null:
+		get_tree().paused = false
 	_paused = false
 
 	var pending := _pending_completion
@@ -101,7 +106,7 @@ func start_battle() -> void:
 	_retreat_requested = false
 	_morale_allowed = false
 
-	if _battle_state.check_end() != "":
+	if _battle_state.check_end() != BattleState.Side.NONE:
 		_transition_to(State.BATTLE_OVER)
 		_emit_end()
 		return
@@ -160,7 +165,7 @@ func request_move(unit: BattleState.BattleUnit, target: Vector2i) -> void:
 
 	_battle_state.do_move(unit, target)
 
-	var anim_state := State.PLAYER_ANIMATING if unit.side == "attacker" else State.AI_ANIMATING
+	var anim_state := State.PLAYER_ANIMATING if unit.side == BattleState.Side.ATTACKER else State.AI_ANIMATING
 	_transition_to(anim_state)
 	execute_move.emit(unit, path)
 
@@ -305,8 +310,8 @@ func on_spell_target_selected(spell_id: StringName, target: BattleState.BattleUn
 		_on_action_completed()
 		return
 	
-	var caster_bonus := _battle_state.attacker_hero_bonus if caster.side == "attacker" else _battle_state.defender_hero_bonus
-	var target_bonus := _battle_state.defender_hero_bonus if target.side == "defender" else _battle_state.attacker_hero_bonus
+	var caster_bonus := _battle_state.attacker_hero_bonus if caster.side == BattleState.Side.ATTACKER else _battle_state.defender_hero_bonus
+	var target_bonus := _battle_state.defender_hero_bonus if target.side == BattleState.Side.DEFENDER else _battle_state.attacker_hero_bonus
 	
 	var result := _battle_state.apply_spell(spell_id, caster, target, caster_bonus, target_bonus, _rng)
 	
@@ -338,7 +343,7 @@ func request_retreat() -> void:
 		return
 
 	_retreat_requested = true
-	_battle_state.force_end("defender")
+	_battle_state.force_end(BattleState.Side.DEFENDER)
 	_transition_to(State.BATTLE_OVER)
 	status_updated.emit("Отступление! Потеря 50% стеков.")
 	_emit_end()
@@ -471,7 +476,7 @@ func _start_attack(atk: BattleState.BattleUnit, def: BattleState.BattleUnit) -> 
 	_attack_strikes_left = 2 if atk.is_double_strike() else 1
 	_retaliation_phase = false
 
-	var anim_state := State.PLAYER_ANIMATING if atk.side == "attacker" else State.AI_ANIMATING
+	var anim_state := State.PLAYER_ANIMATING if atk.side == BattleState.Side.ATTACKER else State.AI_ANIMATING
 	_transition_to(anim_state)
 
 	_do_next_attack_strike()
@@ -556,7 +561,7 @@ func _start_retaliation() -> void:
 
 	original_defender.has_retaliated = true
 
-	var anim_state := State.PLAYER_ANIMATING if _attack_attacker.side == "attacker" else State.AI_ANIMATING
+	var anim_state := State.PLAYER_ANIMATING if _attack_attacker.side == BattleState.Side.ATTACKER else State.AI_ANIMATING
 	_transition_to(anim_state)
 
 	floating_text.emit(_attack_attacker.cell, "RETALIATION", Color.ORANGE)
@@ -594,7 +599,7 @@ func _has_adjacent_enemy(unit: BattleState.BattleUnit) -> bool:
 	if unit == null:
 		return false
 
-	var target_side := "defender" if unit.side == "attacker" else "attacker"
+	var target_side := BattleState.Side.DEFENDER if unit.side == BattleState.Side.ATTACKER else BattleState.Side.ATTACKER
 
 	for nb in HexUtils.get_all_neighbors(unit.cell):
 		var u := _battle_state.get_unit_at(nb, target_side)
@@ -632,12 +637,12 @@ func _emit_end() -> void:
 		return
 
 	var surviving_atk: Array[UnitStack] = []
-	var surviving_def: Array[UnitStack] = _battle_state.get_survivors("defender")
+	var surviving_def: Array[UnitStack] = _battle_state.get_survivors(BattleState.Side.DEFENDER)
 
-	if _retreat_requested and winner == "defender":
-		surviving_atk = _battle_state.get_retreat_survivors("attacker")
+	if _retreat_requested and winner == BattleState.Side.DEFENDER:
+		surviving_atk = _battle_state.get_retreat_survivors(BattleState.Side.ATTACKER)
 	else:
-		surviving_atk = _battle_state.get_survivors("attacker")
+		surviving_atk = _battle_state.get_survivors(BattleState.Side.ATTACKER)
 
 	_end_emitted = true
 

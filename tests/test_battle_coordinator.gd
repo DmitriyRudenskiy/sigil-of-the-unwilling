@@ -1,21 +1,18 @@
 extends "res://tests/test_base.gd"
 ## Тесты WorldBattleCoordinator: создание, API, граничные случаи.
 ##
-## В headless режиме WorldBattleCoordinator не компилируется из-за
-## зависимостей (MapGenerator, WorldSpawner, WorldUIManager и т.д.).
-## Используем load() вместо preload() для обхода проблемы.
+## После рефакторинга WorldBattleCoordinator использует мягкие
+## зависимости (Node + has_method) вместо жёстких типов,
+## поэтому preload() работает в headless-режиме.
 
-const _COORDINATOR_PATH := "res://scripts/world/WorldBattleCoordinator.gd"
-const _BattleFlow = preload("res://scripts/BattleFlow.gd")
+const _Coordinator = preload("res://scripts/world/WorldBattleCoordinator.gd")
 
 var coordinator: Node
 
 func before_each() -> void:
 	coordinator = null
-	var script: Variant = load(_COORDINATOR_PATH)
-	if script != null and script.has_method("new"):
-		coordinator = script.new()
-		coordinator.name = "TestCoordinator"
+	coordinator = _Coordinator.new()
+	coordinator.name = "TestCoordinator"
 
 
 # ==================== СОЗДАНИЕ ====================
@@ -77,7 +74,7 @@ func test_on_battle_completed_null_hero_no_crash() -> void:
 	var surv_atk: Array = []
 	var surv_def: Array = []
 
-	coordinator.on_battle_completed("attacker", surv_atk, surv_def)
+	coordinator._on_battle_completed(BattleState.Side.ATTACKER, surv_atk, surv_def)
 	assert_true(true, "no crash with null hero")
 
 func test_on_battle_completed_resets_pending_cell() -> void:
@@ -87,7 +84,7 @@ func test_on_battle_completed_resets_pending_cell() -> void:
 	var surv_atk: Array = []
 	var surv_def: Array = []
 
-	coordinator.on_battle_completed("attacker", surv_atk, surv_def)
+	coordinator._on_battle_completed(BattleState.Side.ATTACKER, surv_atk, surv_def)
 	assert_eq(coordinator._pending_enemy_cell, Vector2i(-1, -1), "pending cell reset")
 
 func test_on_battle_completed_resets_pending_cell_defender() -> void:
@@ -97,7 +94,7 @@ func test_on_battle_completed_resets_pending_cell_defender() -> void:
 	var surv_atk: Array = []
 	var surv_def: Array = []
 
-	coordinator.on_battle_completed("defender", surv_atk, surv_def)
+	coordinator._on_battle_completed(BattleState.Side.DEFENDER, surv_atk, surv_def)
 	assert_eq(coordinator._pending_enemy_cell, Vector2i(-1, -1), "pending cell reset on loss")
 
 
@@ -116,12 +113,12 @@ func test_battle_completed_emitted() -> void:
 	coordinator.setup(null, null, null, null, null, null, null, null, null)
 
 	var data: Dictionary = {}
-	coordinator.battle_flow.battle_completed.connect(func(w: String, _a, _d):
+	coordinator.battle_flow.battle_completed.connect(func(w: BattleState.Side, _a, _d):
 		data["winner"] = w
 	)
 
-	coordinator.battle_flow.battle_completed.emit("attacker", [], [])
-	assert_eq(data.get("winner", ""), "attacker", "winner captured")
+	coordinator.battle_flow.battle_completed.emit(BattleState.Side.ATTACKER, [], [])
+	assert_eq(data.get("winner", -1), BattleState.Side.ATTACKER, "winner captured")
 
 
 # ==================== ДРОП АРТЕФАКТА ====================

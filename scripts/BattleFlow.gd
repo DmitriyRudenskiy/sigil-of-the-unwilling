@@ -4,7 +4,7 @@ extends Node
 ## Не прячет мир и не меняет героя — это остаётся в WorldController.
 
 signal battle_started
-signal battle_completed(winner: String, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack])
+signal battle_completed(winner: BattleState.Side, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack])
 
 const _BATTLE_SCENE := preload("res://scenes/Battle.tscn")
 

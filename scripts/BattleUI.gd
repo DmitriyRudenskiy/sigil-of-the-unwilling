@@ -59,7 +59,8 @@ func update_active_unit(unit: BattleState.BattleUnit) -> void:
 
 func update_initiative(units: Array[BattleState.BattleUnit], active_unit: BattleState.BattleUnit) -> void:
 	for child in _initiative_list.get_children():
-		child.queue_free()
+		child.remove_from_parent()
+		child.free()
 
 	for unit in units:
 		if unit == null:
@@ -74,7 +75,7 @@ func update_initiative(units: Array[BattleState.BattleUnit], active_unit: Battle
 
 		if unit == active_unit:
 			label.add_theme_color_override("font_color", Color.GOLD)
-		elif unit.side == "attacker":
+		elif unit.side == BattleState.Side.ATTACKER:
 			label.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
 		else:
 			label.add_theme_color_override("font_color", Color(1.0, 0.75, 0.7))

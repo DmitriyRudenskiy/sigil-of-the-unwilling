@@ -40,7 +40,7 @@ func _test_no_target() -> int:
 	var state = _create_state(false, true)
 	var ai = load("res://scripts/BattleAI.gd").new()
 
-	var defender = state.get_units_by_side("defender")[0]
+	var defender = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
 	var blocked: Dictionary = state.build_all_blocked(defender, {})
 	var decision = ai.decide_turn(defender, state, blocked)
 
@@ -55,8 +55,8 @@ func _test_adjacent_attack() -> int:
 	var state = _create_state(true, true)
 	var ai = load("res://scripts/BattleAI.gd").new()
 
-	var attacker = state.get_units_by_side("attacker")[0]
-	var defender = state.get_units_by_side("defender")[0]
+	var attacker = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
+	var defender = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
 	defender.cell = Vector2i(8, 5)
 	attacker.cell = HexUtils.get_neighbor(defender.cell, 0)
 
@@ -82,8 +82,8 @@ func _test_move_towards_target() -> int:
 	var state = _create_state(true, true)
 	var ai = load("res://scripts/BattleAI.gd").new()
 
-	var attacker = state.get_units_by_side("attacker")[0]
-	var defender = state.get_units_by_side("defender")[0]
+	var attacker = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
+	var defender = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
 	defender.cell = Vector2i(2, 5)
 	attacker.cell = Vector2i(12, 5)
 
@@ -128,8 +128,8 @@ func _test_attacker_ai_targets_defender() -> int:
 	var state = _create_state(true, true)
 	var ai = load("res://scripts/BattleAI.gd").new()
 
-	var attacker = state.get_units_by_side("attacker")[0]
-	var defender = state.get_units_by_side("defender")[0]
+	var attacker = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
+	var defender = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
 	attacker.cell = Vector2i(4, 5)
 	defender.cell = Vector2i(12, 5)
 

@@ -4,7 +4,7 @@ extends RefCounted
 ## Не зависит от Godot-уззлов — работает только с данными.
 
 const _StatusEffects = preload("res://scripts/data/StatusEffects.gd")
-const BattleDamageResolver = preload("res://scripts/battle/BattleDamageResolver.gd")
+const BattleActionResolver = preload("res://scripts/battle/BattleActionResolver.gd")
 
 var attacker_units: Array[BattleUnit] = []
 var defender_units: Array[BattleUnit] = []
@@ -13,20 +13,23 @@ var turn_queue: Array[BattleUnit] = []
 var turn_idx := 0
 var is_player_turn := true
 var battle_over := false
-var battle_winner := ""
 
-var attacker_hero_bonus: Dictionary = {
-    "attack": 0,
-    "defense": 0,
-    "spell_power": 0,
-    "knowledge": 0,
+# Стороны в бою
+enum Side { NONE, ATTACKER, DEFENDER }
+
+var battle_winner: Side = Side.NONE
+var attacker_hero_bonus: Dictionary[StringName, int] = {
+    &"attack": 0,
+    &"defense": 0,
+    &"spell_power": 0,
+    &"knowledge": 0,
 }
 
-var defender_hero_bonus: Dictionary = {
-    "attack": 0,
-    "defense": 0,
-    "spell_power": 0,
-    "knowledge": 0,
+var defender_hero_bonus: Dictionary[StringName, int] = {
+    &"attack": 0,
+    &"defense": 0,
+    &"spell_power": 0,
+    &"knowledge": 0,
 }
 
 # BFS reachable cache
@@ -34,7 +37,7 @@ var _reachable_cache: Dictionary = {}
 var _board_version: int = 0
 var _uid := 0
 
-# Unit grid for O(1) lookup: {side: {cell: BattleUnit}}
+# Unit grid for O(1) lookup: {Side: {cell: BattleUnit}}
 var _unit_grid: Dictionary = {}
 
 # Счётчики живых для O(1) check_end
@@ -49,7 +52,7 @@ const BH := 11
 class BattleUnit extends RefCounted:
 	var stack: UnitStack
 	var cell := Vector2i(-1, -1)
-	var side := "attacker"
+	var side: Side = Side.ATTACKER
 	var alive := true
 	var has_moved := false
 	var defending := false
@@ -88,30 +91,24 @@ class BattleUnit extends RefCounted:
 			return
 		stack.count = max(0, value)
 
+	## Direct stats accessor — replaces individual get_speed/get_attack/get_defense/get_hp/get_base_damage
+	var stats: UnitStats:
+		get: return stack.stats if stack != null and stack.stats != null else null
+
 	func get_speed() -> int:
-		if stack == null or stack.stats == null:
-			return 0
-		return stack.stats.speed
+		return stats.speed if stats != null else 0
 
 	func get_base_damage() -> int:
-		if stack == null or stack.stats == null:
-			return 0
-		return stack.stats.base_damage
+		return stats.base_damage if stats != null else 0
 
 	func get_hp() -> int:
-		if stack == null or stack.stats == null:
-			return 1
-		return stack.stats.hp
+		return stats.hp if stats != null else 1
 
 	func get_defense() -> int:
-		if stack == null or stack.stats == null:
-			return 0
-		return stack.stats.defense
+		return stats.defense if stats != null else 0
 
 	func get_attack() -> int:
-		if stack == null or stack.stats == null:
-			return 0
-		return stack.stats.attack
+		return stats.attack if stats != null else 0
 
 	func has_tag(tag: String) -> bool:
 		if stack == null or stack.stats == null:
@@ -180,7 +177,7 @@ func place_army(
 func _kill_unit(unit: BattleUnit) -> void:
 	if not unit.alive: return
 	unit.alive = false
-	if unit.side == "attacker": _attacker_alive_count -= 1
+	if unit.side == Side.ATTACKER: _attacker_alive_count -= 1
 	else: _defender_alive_count -= 1
 	_unit_grid.get(unit.side, {}).erase(unit.cell)
 	check_end()
@@ -229,7 +226,7 @@ func _build_units(stacks: Array, is_atk: bool) -> Array[BattleUnit]:
 				+ "Max stacks per side: %d" % ((BH - 1) / 2 * 2))
 			continue
 		unit.cell = Vector2i(sx + (i % 2), row)
-		unit.side = "attacker" if is_atk else "defender"
+		unit.side = Side.ATTACKER if is_atk else Side.DEFENDER
 		unit.alive = true
 		unit.has_moved = false
 		unit.max_count = stack.count
@@ -259,7 +256,7 @@ func build_queue() -> void:
 			return a.get_hp() > b.get_hp()
 
 		if a.side != b.side:
-			return a.side == "attacker"
+			return a.side == Side.ATTACKER
 
 		return a.uid < b.uid
 	)
@@ -284,7 +281,7 @@ func _normalize_active_unit() -> void:
 		return
 
 	active_unit = turn_queue[turn_idx]
-	is_player_turn = (active_unit.side == "attacker")
+	is_player_turn = (active_unit.side == Side.ATTACKER)
 
 
 func start_new_round() -> void:
@@ -307,12 +304,12 @@ func start_new_round() -> void:
 	if turn_queue.is_empty():
 		check_end()
 		if not battle_over:
-			force_end("defender")
+			force_end(Side.DEFENDER)
 		return
 
 	turn_idx = 0
 	active_unit = turn_queue[0]
-	is_player_turn = (active_unit.side == "attacker")
+	is_player_turn = (active_unit.side == Side.ATTACKER)
 
 
 func get_turn_info() -> String:
@@ -323,24 +320,24 @@ func get_turn_info() -> String:
 
 
 # ==================== ПОИСК ЮНИТОВ ====================
-func get_unit_at(cell: Vector2i, side: String) -> BattleUnit:
+func get_unit_at(cell: Vector2i, side: Side) -> BattleUnit:
 	if not _unit_grid.has(side):
 		return null
 	var u = _unit_grid[side].get(cell, null)
 	return u if (u != null and u.is_alive()) else null
 
 func _rebuild_unit_grid() -> void:
-	_unit_grid = {"attacker": {}, "defender": {}}
+	_unit_grid = {Side.ATTACKER: {}, Side.DEFENDER: {}}
 	for u in attacker_units:
 		if u.is_alive():
-			_unit_grid["attacker"][u.cell] = u
+			_unit_grid[Side.ATTACKER][u.cell] = u
 	for u in defender_units:
 		if u.is_alive():
-			_unit_grid["defender"][u.cell] = u
+			_unit_grid[Side.DEFENDER][u.cell] = u
 
 
-func get_units_by_side(side: String) -> Array[BattleUnit]:
-	return attacker_units if side == "attacker" else defender_units
+func get_units_by_side(side: Side) -> Array[BattleUnit]:
+	return attacker_units if side == Side.ATTACKER else defender_units
 
 
 # ==================== КЭШИРОВАННЫЙ BFS ====================
@@ -376,10 +373,9 @@ func get_reachable_for_unit(unit: BattleUnit, blocked_fn: Callable) -> Dictionar
 	)
 
 
-func get_reachable(cell: Vector2i, speed: int, blocked_fn: Callable, unit: BattleUnit = null) -> Dictionary:
-	var uid := -1 if unit == null else unit.uid
-	# Integer hash key avoids string allocation per BFS call
-	var key: int = cell.x | (cell.y << 8) | (speed << 16) | (_board_version << 24)
+func get_reachable(cell: Vector2i, speed: int, blocked_fn: Callable, _unit: BattleUnit = null) -> Dictionary:
+	# Vector3i key avoids bit-overflow; _board_version handled via invalidate_board_cache()
+	var key := Vector3i(cell.x, cell.y, speed)
 	if _reachable_cache.has(key):
 		return _reachable_cache[key].duplicate()
 
@@ -409,6 +405,7 @@ func build_all_blocked(except_unit: BattleUnit, obstacles: Dictionary) -> Dictio
 
 
 # ==================== АТАКА (расчёт урона) ====================
+## Delegates to BattleActionResolver for pure attack logic.
 func apply_attack(
 	atk: BattleUnit,
 	def: BattleUnit,
@@ -416,38 +413,9 @@ func apply_attack(
 	rng: RandomNumberGenerator,
 	consume_action: bool = true
 ) -> Dictionary:
-	if atk == null or def == null or not atk.is_alive() or not def.is_alive():
-		return {}
+	return BattleActionResolver.apply_attack(self, atk, def, is_melee_attack, rng, consume_action)
 
-	var bonuses := _get_hero_bonuses(atk, def)
-	var attacker_bonus: int = bonuses[0]
-	var defender_bonus: int = bonuses[1]
-	var first_strike_triggered := _apply_first_strike(atk, def, is_melee_attack, rng, attacker_bonus, defender_bonus)
-	var charge_mult := _get_charge_multiplier(atk)
-	
-	var ctx := {
-		"is_melee": is_melee_attack,
-		"rng": rng,
-		"atk_bonus": attacker_bonus,
-		"def_bonus": defender_bonus
-	}
-	var result: Dictionary = BattleDamageResolver.resolve(self, atk, def, ctx)
-	if result.is_empty(): return result
-
-	if first_strike_triggered:
-		result["first_strike"] = true
-	result = _apply_charge(atk, def, result, charge_mult)
-	def.set_count(def.get_count() - int(result.get("kills", 0)))
-	if consume_action: atk.has_moved = true
-
-	if def.get_count() <= 0:
-		if not _try_rebirth(def, rng, result):
-			_kill_unit(def)
-
-	invalidate_board_cache()
-	check_end()
-	return result
-
+## Delegates to BattleActionResolver for spell resolution.
 func apply_spell(
 	spell_id: StringName,
 	caster: BattleUnit,
@@ -456,71 +424,10 @@ func apply_spell(
 	target_hero_bonus: Dictionary,
 	rng: RandomNumberGenerator
 ) -> Dictionary:
-	if caster == null or target == null or not caster.is_alive() or not target.is_alive():
-		return {"result": "invalid_target"}
-	
-	# Делегируем чистую логику SpellCaster'у
-	var result := SpellCaster.cast(spell_id, target, caster_hero_bonus, target_hero_bonus, rng)
-	
-	if result.get("result") == "success":
-		# Обработка урона
-		if result.has("damage") and int(result.get("damage", 0)) > 0:
-			var kills := int(result.get("kills", 0))
-			target.set_count(target.get_count() - kills)
-			if target.get_count() <= 0:
-				_kill_unit(target)
-		
-		# Обработка исцеления (заглушка)
-		if result.has("heal") and int(result.get("heal", 0)) > 0:
-			pass 
-		
-		invalidate_board_cache()
-		check_end()
-	
-	return result
+	return BattleActionResolver.apply_spell(
+		self, spell_id, caster, target, caster_hero_bonus, target_hero_bonus, rng
+	)
 
-# ---------- Вспомогательные методы атаки ----------
-func _get_hero_bonuses(atk: BattleUnit, def: BattleUnit) -> Array:
-	var atk_bonus: int = int(attacker_hero_bonus.get("attack", 0)) if atk.side == "attacker" else int(defender_hero_bonus.get("attack", 0))
-	var def_bonus: int = int(defender_hero_bonus.get("defense", 0)) if def.side == "defender" else int(attacker_hero_bonus.get("defense", 0))
-	return [atk_bonus, def_bonus]
-
-func _apply_first_strike(atk: BattleUnit, def: BattleUnit, is_melee: bool, rng: RandomNumberGenerator, atk_bonus: int, def_bonus: int) -> bool:
-	if not (is_melee and def.has_tag("first_strike") and not def.has_retaliated): return false
-	def.has_retaliated = true
-	var fs_result = BattleRules.calculate_attack(def, atk, true, rng, def_bonus, atk_bonus)
-	if not fs_result.is_empty():
-		atk.set_count(atk.get_count() - int(fs_result.get("kills", 0)))
-		if atk.get_count() <= 0: _kill_unit(atk)
-	return true
-
-func _get_charge_multiplier(atk: BattleUnit) -> float:
-	return GameSettings.CHARGE_MULT if (atk.has_tag("charge") and atk.distance_moved_this_turn >= 3) else 1.0
-
-func _apply_charge(atk: BattleUnit, def: BattleUnit, result: Dictionary, charge_mult: float) -> Dictionary:
-	if charge_mult <= 1.0: return result
-	result["damage"] = int(result["damage"] * charge_mult)
-	var hp: int = max(1, def.get_hp())
-	result["kills"] = max(1, result["damage"] / hp)
-	result["kills"] = min(result["kills"], def.get_count())
-	result["charge"] = true
-	return result
-
-
-func _try_rebirth(def: BattleUnit, rng: RandomNumberGenerator, result: Dictionary) -> bool:
-	if def == null or not def.has_tag("rebirth") or def.already_reborn:
-		return false
-
-	if rng.randf() >= GameSettings.REBIRTH_CHANCE:
-		return false
-
-	def.already_reborn = true
-	def.set_count(max(1, int(def.max_count * 0.5)))
-	def.alive = true
-	_unit_grid.get(def.side, {})[def.cell] = def  # re-insert into grid after rebirth
-	result["rebirth"] = true
-
-	return true
 
 
 
@@ -566,33 +473,33 @@ func do_skip(unit: BattleUnit) -> void:
 		unit.has_moved = true
 
 
-func force_end(winner: String) -> void:
+func force_end(winner: Side) -> void:
 	battle_over = true
 	battle_winner = winner
 
 # ==================== ПРОВЕРКА КОНЦА БОЯ ====================
-func check_end() -> String:
+func check_end() -> Side:
 	if battle_over:
 		return battle_winner
 
 	if _attacker_alive_count == 0:
-		force_end("defender")
+		force_end(Side.DEFENDER)
 	elif _defender_alive_count == 0:
-		force_end("attacker")
+		force_end(Side.ATTACKER)
 
 	return battle_winner
 
 
-func get_survivors(side: String) -> Array[UnitStack]:
+func get_survivors(side: Side) -> Array[UnitStack]:
 	var r: Array[UnitStack] = []
-	var units := attacker_units if side == "attacker" else defender_units
+	var units := attacker_units if side == Side.ATTACKER else defender_units
 	for u in units:
 		if u.is_alive():
 			r.append(u.stack)
 	return r
 
 
-func get_retreat_survivors(side: String) -> Array[UnitStack]:
+func get_retreat_survivors(side: Side) -> Array[UnitStack]:
 	var all_survivors: Array[UnitStack] = []
 	var units := get_units_by_side(side)
 
@@ -619,10 +526,10 @@ func set_hero_bonuses(attacker_bonus: Dictionary, defender_bonus: Dictionary) ->
 	defender_hero_bonus = _normalize_hero_bonus(defender_bonus)
 
 
-func _normalize_hero_bonus(bonus: Dictionary) -> Dictionary:
+func _normalize_hero_bonus(bonus: Dictionary) -> Dictionary[StringName, int]:
 	return {
-		"attack": int(bonus.get("attack", 0)),
-		"defense": int(bonus.get("defense", 0)),
-		"spell_power": int(bonus.get("spell_power", 0)),
-		"knowledge": int(bonus.get("knowledge", 0)),
+		&"attack": int(bonus.get(&"attack", bonus.get("attack", 0))),
+		&"defense": int(bonus.get(&"defense", bonus.get("defense", 0))),
+		&"spell_power": int(bonus.get(&"spell_power", bonus.get("spell_power", 0))),
+		&"knowledge": int(bonus.get(&"knowledge", bonus.get("knowledge", 0))),
 	}

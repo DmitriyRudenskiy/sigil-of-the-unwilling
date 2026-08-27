@@ -34,15 +34,15 @@ func test_battle_completed_signal() -> void:
 	var winner := ""
 	var atk_count := -1
 	var def_count := -1
-	flow.battle_completed.connect(func(w: String, a: Array, d: Array):
+	flow.battle_completed.connect(func(w: BattleState.Side, a: Array, d: Array):
 		winner = w
 		atk_count = a.size()
 		def_count = d.size()
 	)
 	var atk: Array = []
 	var def: Array = []
-	flow.battle_completed.emit("attacker", atk, def)
-	assert_eq(winner, "attacker", "winner is attacker")
+	flow.battle_completed.emit(BattleState.Side.ATTACKER, atk, def)
+	assert_eq(winner, BattleState.Side.ATTACKER, "winner is attacker")
 	assert_eq(atk_count, 0, "empty attacker survivors")
 	assert_eq(def_count, 0, "empty defender survivors")
 

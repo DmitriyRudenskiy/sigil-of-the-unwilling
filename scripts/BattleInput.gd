@@ -35,7 +35,7 @@ func set_action_lock(locked: bool) -> void:
 func start_spell_targeting(spell_id: StringName) -> void:
 	_pending_spell_id = spell_id
 	_clear_highlights()
-	var target_side := "defender" if _state.is_player_turn else "attacker"
+	var target_side := BattleState.Side.DEFENDER if _state.is_player_turn else BattleState.Side.ATTACKER
 	for u in _state.get_units_by_side(target_side):
 		if u.is_alive():
 			highlight_attack[u.cell] = 1
@@ -60,7 +60,7 @@ func _unhandled_input(ev: InputEvent) -> void:
 				var global_pos := _view.get_global_mouse_position()
 				var cell := _view.global_to_map(global_pos)
 				if highlight_attack.has(cell):
-					var target_side := "defender" if _state.is_player_turn else "attacker"
+					var target_side := BattleState.Side.DEFENDER if _state.is_player_turn else BattleState.Side.ATTACKER
 					var target := _state.get_unit_at(cell, target_side)
 					if target != null:
 						spell_cast_requested.emit(_pending_spell_id, target)
@@ -89,7 +89,7 @@ func _unhandled_input(ev: InputEvent) -> void:
 	var cell := _view.global_to_map(global_pos)
 
 	if highlight_attack.has(cell):
-		var target := _state.get_unit_at(cell, "defender")
+		var target := _state.get_unit_at(cell, BattleState.Side.DEFENDER)
 		unit_attack_requested.emit(_state.active_unit, target)
 		get_viewport().set_input_as_handled()
 		return
@@ -99,9 +99,9 @@ func _unhandled_input(ev: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 
-	var own := _state.get_unit_at(cell, "attacker")
+	var own := _state.get_unit_at(cell, BattleState.Side.ATTACKER)
 	if own == null:
-		own = _unit_at_pixel(global_pos, "attacker")
+		own = _unit_at_pixel(global_pos, BattleState.Side.ATTACKER)
 
 	if own != null and not own.has_moved:
 		_select(own)
@@ -109,14 +109,20 @@ func _unhandled_input(ev: InputEvent) -> void:
 		return
 
 
-func _unit_at_pixel(global_pos: Vector2, side: String) -> BattleState.BattleUnit:
+func _unit_at_pixel(global_pos: Vector2, side: BattleState.Side) -> BattleState.BattleUnit:
+	var cell := _view.global_to_map(global_pos)
+	# O(1) lookup via unit_grid instead of O(n) iteration
+	var unit := _state.get_unit_at(cell, side)
+	if unit != null:
+		return unit
+	# Check neighbors for clicks near hex edges
 	var local_pos := _view.to_local(global_pos)
-	var units := _state.get_units_by_side(side)
-	for u in units:
-		if u.is_alive():
-			var unit_pos := _view.map_to_local(u.cell)
+	for nb in HexUtils.get_all_neighbors(cell):
+		unit = _state.get_unit_at(nb, side)
+		if unit != null:
+			var unit_pos := _view.map_to_local(nb)
 			if local_pos.distance_to(unit_pos) < GameSettings.CLICK_RADIUS_PX:
-				return u
+				return unit
 	return null
 
 
@@ -146,11 +152,11 @@ func _update_attack_preview() -> void:
 	var cell := _view.global_to_map(global_pos)
 
 	if highlight_attack.has(cell):
-		var target := _state.get_unit_at(cell, "defender")
+		var target := _state.get_unit_at(cell, BattleState.Side.DEFENDER)
 
 		if target != null:
-			var atk_bon: int = int(_state.attacker_hero_bonus.get("attack", 0))
-			var def_bon: int = int(_state.defender_hero_bonus.get("defense", 0))
+			var atk_bon: int = int(_state.attacker_hero_bonus.get(&"attack", 0))
+			var def_bon: int = int(_state.defender_hero_bonus.get(&"defense", 0))
 			var preview := BattleRules.preview_text(
 				_state.active_unit,
 				target,
@@ -189,12 +195,12 @@ func _compute_attack_highlight(u: BattleState.BattleUnit) -> Dictionary:
 	var adjacent_enemies: Array[Vector2i] = []
 
 	for nb in HexUtils.get_all_neighbors(u.cell):
-		var enemy := _state.get_unit_at(nb, "defender")
+		var enemy := _state.get_unit_at(nb, BattleState.Side.DEFENDER)
 		if enemy != null and enemy.is_alive():
 			adjacent_enemies.append(nb)
 
 	if u.is_ranged() and adjacent_enemies.is_empty():
-		for enemy in _state.get_units_by_side("defender"):
+		for enemy in _state.get_units_by_side(BattleState.Side.DEFENDER):
 			if enemy.is_alive():
 				result[enemy.cell] = 1
 	else:

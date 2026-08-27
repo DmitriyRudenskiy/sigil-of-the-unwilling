@@ -27,8 +27,8 @@ func _test_attacker_wins() -> int:
 	state.place_army(atk, def)
 	state.build_queue()
 
-	var attacker = state.get_units_by_side("attacker")[0]
-	var defender = state.get_units_by_side("defender")[0]
+	var attacker = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
+	var defender = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
 	attacker.cell = Vector2i(5, 5)
 	defender.cell = HexUtils.get_neighbor(attacker.cell, 0)
 
@@ -42,10 +42,10 @@ func _test_attacker_wins() -> int:
 	if not state.battle_over:
 		printerr("battle should end when defender is destroyed")
 		errors += 1
-	if state.get_survivors("attacker").size() != 1:
+	if state.get_survivors(BattleState.Side.ATTACKER).size() != 1:
 		printerr("attacker should have survivors")
 		errors += 1
-	if state.get_survivors("defender").size() != 0:
+	if state.get_survivors(BattleState.Side.DEFENDER).size() != 0:
 		printerr("defender should have no survivors")
 		errors += 1
 	return errors
@@ -61,8 +61,8 @@ func _test_defender_wins() -> int:
 	state.place_army(atk, def)
 	state.build_queue()
 
-	var attacker = state.get_units_by_side("attacker")[0]
-	var defender = state.get_units_by_side("defender")[0]
+	var attacker = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
+	var defender = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
 	attacker.cell = Vector2i(5, 5)
 	defender.cell = HexUtils.get_neighbor(attacker.cell, 0)
 
@@ -76,10 +76,10 @@ func _test_defender_wins() -> int:
 	if not state.battle_over:
 		printerr("battle should end when attacker is destroyed")
 		errors += 1
-	if state.get_survivors("attacker").size() != 0:
+	if state.get_survivors(BattleState.Side.ATTACKER).size() != 0:
 		printerr("attacker should have no survivors")
 		errors += 1
-	if state.get_survivors("defender").size() != 1:
+	if state.get_survivors(BattleState.Side.DEFENDER).size() != 1:
 		printerr("defender should have survivors")
 		errors += 1
 	return errors
@@ -96,8 +96,8 @@ func _test_battle_rules_damage() -> int:
 	def.append(Units.make_fixed_stack("goblins", 50))
 	state.place_army(atk, def)
 
-	var atk_unit: BattleState.BattleUnit = state.get_units_by_side("attacker")[0]
-	var def_unit: BattleState.BattleUnit = state.get_units_by_side("defender")[0]
+	var atk_unit: BattleState.BattleUnit = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
+	var def_unit: BattleState.BattleUnit = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
 
 	var rules: BattleRules = load("res://scripts/util/BattleRules.gd").new()
 
@@ -148,7 +148,7 @@ func _test_ranged_vs_flying() -> int:
 	def.append(Units.make_fixed_stack("goblins", 5))  # needed for placement
 	state.place_army(atk, def)
 
-	var all_units: Array[BattleState.BattleUnit] = state.get_units_by_side("attacker")
+	var all_units: Array[BattleState.BattleUnit] = state.get_units_by_side(BattleState.Side.ATTACKER)
 
 	# Find archers and pegasus by key instead of position
 	var archer: BattleState.BattleUnit = null
@@ -181,7 +181,7 @@ func _test_morale_check() -> int:
 	def.append(Units.make_fixed_stack("goblins", 5))  # needed for placement
 	state.place_army(atk, def)
 
-	var all_units: Array[BattleState.BattleUnit] = state.get_units_by_side("attacker")
+	var all_units: Array[BattleState.BattleUnit] = state.get_units_by_side(BattleState.Side.ATTACKER)
 	var champion: BattleState.BattleUnit = null
 	var skeleton: BattleState.BattleUnit = null
 	for u in all_units:

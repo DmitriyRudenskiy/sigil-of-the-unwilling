@@ -26,13 +26,13 @@ func _test_retreat_smoke() -> int:
 
 	state.place_army(atk, def)
 
-	state.force_end("defender")
+	state.force_end(BattleState.Side.DEFENDER)
 
 	if not state.battle_over:
 		printerr("force_end should set battle_over")
 		errors += 1
 
-	var survivors: Array = state.get_retreat_survivors("attacker")
+	var survivors: Array = state.get_retreat_survivors(BattleState.Side.ATTACKER)
 
 	if survivors.size() != 2:
 		printerr("retreat survivors should be 2, got %d" % survivors.size())

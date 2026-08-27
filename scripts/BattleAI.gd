@@ -23,7 +23,7 @@ func decide_turn(unit: BattleState.BattleUnit, state: BattleState, blocked: Dict
 	if unit == null or state.battle_over:
 		return result
 
-	var target_side := "defender" if unit.side == "attacker" else "attacker"
+	var target_side := BattleState.Side.DEFENDER if unit.side == BattleState.Side.ATTACKER else BattleState.Side.ATTACKER
 	var nearest := _find_nearest(unit, state, target_side)
 
 	if nearest == null:
@@ -86,7 +86,7 @@ func decide_turn(unit: BattleState.BattleUnit, state: BattleState, blocked: Dict
 	return result
 
 
-func _find_nearest(unit: BattleState.BattleUnit, state: BattleState, target_side: String) -> BattleState.BattleUnit:
+func _find_nearest(unit: BattleState.BattleUnit, state: BattleState, target_side: BattleState.Side) -> BattleState.BattleUnit:
 	var nearest: BattleState.BattleUnit = null
 	var nearest_distance := GameSettings.INF
 
@@ -100,7 +100,7 @@ func _find_nearest(unit: BattleState.BattleUnit, state: BattleState, target_side
 	return nearest
 
 
-func _find_victim_near(cell: Vector2i, state: BattleState, target_side: String) -> BattleState.BattleUnit:
+func _find_victim_near(cell: Vector2i, state: BattleState, target_side: BattleState.Side) -> BattleState.BattleUnit:
 	for neighbor in HexUtils.get_all_neighbors(cell):
 		var u := state.get_unit_at(neighbor, target_side)
 		if u != null and u.is_alive():
@@ -112,7 +112,7 @@ func _find_victim_near(cell: Vector2i, state: BattleState, target_side: String) 
 func _has_adjacent_enemy(
 	unit: BattleState.BattleUnit,
 	state: BattleState,
-	target_side: String
+	target_side: BattleState.Side
 ) -> bool:
 	for nb in HexUtils.get_all_neighbors(unit.cell):
 		var u := state.get_unit_at(nb, target_side)
@@ -130,9 +130,15 @@ func _find_flying_landing_cell(
 ) -> Vector2i:
 	var best := Vector2i(-1, -1)
 	var best_score := GameSettings.INF
+	var speed := unit.get_speed()
+	# Limit search to bounding box of radius speed around the unit
+	var min_x := maxi(0, unit.cell.x - speed)
+	var max_x := mini(BattleState.BW - 1, unit.cell.x + speed)
+	var min_y := maxi(0, unit.cell.y - speed)
+	var max_y := mini(BattleState.BH - 1, unit.cell.y + speed)
 
-	for y in BattleState.BH:
-		for x in BattleState.BW:
+	for y in range(min_y, max_y + 1):
+		for x in range(min_x, max_x + 1):
 			var cell := Vector2i(x, y)
 
 			if cell == unit.cell:
@@ -142,7 +148,7 @@ func _find_flying_landing_cell(
 				continue
 
 			var dist_to_unit := HexUtils.hex_distance(unit.cell, cell)
-			if dist_to_unit > unit.get_speed():
+			if dist_to_unit > speed:
 				continue
 
 			var dist_to_target := HexUtils.hex_distance(cell, target.cell)

@@ -3,10 +3,10 @@ extends Node2D
 ## Визуальное представление боя: поле, спрайты, подсветка, камера.
 ## Не меняет BattleState и не принимает решений.
 
-const RING := 5
-const HEX_OUTLINE_RADIUS := 38.0
-const ATTACK_LUNGE_PX := 26.0
-const MOVE_TWEEN_SEC := 0.15
+const RING := GameSettings.BATTLE_FIELD_RING
+const HEX_OUTLINE_RADIUS := GameSettings.BATTLE_HEX_OUTLINE_RADIUS
+const ATTACK_LUNGE_PX := GameSettings.BATTLE_ATTACK_LUNGE_PX
+const MOVE_TWEEN_SEC := GameSettings.BATTLE_MOVE_TWEEN_SEC
 const _HexDraw = preload("res://scripts/util/HexDraw.gd")
 const ParticlePresets = preload("res://scripts/util/ParticlePresets.gd")
 
@@ -124,10 +124,10 @@ func create_unit_sprite(unit: BattleState.BattleUnit) -> void:
 		var sp := Sprite2D.new()
 		sp.texture = load(ppath)
 		sp.scale = Vector2(1.0, 1.0)
-		sp.flip_h = (unit.side == "attacker")
+		sp.flip_h = (unit.side == BattleState.Side.ATTACKER)
 		n.add_child(sp)
 	else:
-		var col := Color(0.2, 0.5, 0.9) if unit.side == "attacker" else Color(0.9, 0.3, 0.2)
+		var col := Color(0.2, 0.5, 0.9) if unit.side == BattleState.Side.ATTACKER else Color(0.9, 0.3, 0.2)
 		var sp := Sprite2D.new()
 		sp.texture = PlaceholderTexture.circle(22, col, Color(0.1, 0.1, 0.1))
 		n.add_child(sp)

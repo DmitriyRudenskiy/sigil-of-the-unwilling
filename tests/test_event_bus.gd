@@ -26,12 +26,12 @@ func test_battle_started_signal() -> void:
 
 func test_battle_completed_signal() -> void:
 	var data: Dictionary = {}
-	bus.battle_completed.connect(func(w: String, c: Vector2i):
+	bus.battle_completed.connect(func(w: BattleState.Side, c: Vector2i):
 		data["winner"] = w
 		data["cell"] = c
 	)
-	bus.battle_completed.emit("attacker", Vector2i(5, 5))
-	assert_eq(data.get("winner", ""), "attacker", "winner is attacker")
+	bus.battle_completed.emit(BattleState.Side.ATTACKER, Vector2i(5, 5))
+	assert_eq(data.get("winner", -1), BattleState.Side.ATTACKER, "winner is attacker")
 	assert_eq(data.get("cell", Vector2i(-1, -1)), Vector2i(5, 5), "cell is (5,5)")
 
 func test_battle_won_signal() -> void:

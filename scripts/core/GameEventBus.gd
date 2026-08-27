@@ -4,7 +4,7 @@ extends Node
 
 # ==================== БОЙ ====================
 signal battle_started
-signal battle_completed(winner: String, enemy_cell: Vector2i)
+signal battle_completed(winner: BattleState.Side, enemy_cell: Vector2i)
 signal battle_won(enemy_cell: Vector2i)
 signal battle_lost(enemy_cell: Vector2i)
 
