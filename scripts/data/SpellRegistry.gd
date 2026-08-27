@@ -1,6 +1,6 @@
-extends RefCounted
+extends Node
 class_name SpellRegistry
-## Spell definitions: 20 spells across 4 schools.
+## Autoload: Spells. 20 spells across 4 schools.
 
 enum School { AIR, FIRE, WATER, EARTH }
 enum TargetType { SINGLE_ENEMY, SINGLE_ALLY, ALL_ENEMIES, ALL_ALLIES, HEX_AOE, SELF }
@@ -18,10 +18,15 @@ class SpellDef extends RefCounted:
 	var expert_desc: String
 
 
-static var _spells: Dictionary = {}
+var _spells: Dictionary = {}
 
+func _ready() -> void:
+	ensure_definitions()
 
-static func ensure_definitions() -> void:
+func reset() -> void:
+	_spells.clear()
+
+func ensure_definitions() -> void:
 	if not _spells.is_empty():
 		return
 
@@ -54,7 +59,7 @@ static func ensure_definitions() -> void:
 	_reg(&"resurrection", "Resurrection", School.EARTH, 4, 20, TargetType.SINGLE_ALLY, "Revive 20x SP HP", "Permanent", [])
 
 
-static func _reg(id: StringName, name: String, school: int, lvl: int, mana: int, target: int, desc: String, exp_desc: String, tags: Array[String]) -> void:
+func _reg(id: StringName, name: String, school: int, lvl: int, mana: int, target: int, desc: String, exp_desc: String, tags: Array[String]) -> void:
 	var s := SpellDef.new()
 	s.id = id
 	s.display_name = name
@@ -69,12 +74,12 @@ static func _reg(id: StringName, name: String, school: int, lvl: int, mana: int,
 	_spells[id] = s
 
 
-static func get_spell(id: StringName) -> SpellDef:
+func get_spell(id: StringName) -> SpellDef:
 	ensure_definitions()
 	return _spells.get(id, null)
 
 
-static func get_all_spells() -> Array:
+func get_all_spells() -> Array:
 	ensure_definitions()
 	var result: Array = []
 	for id in _spells:
@@ -83,7 +88,7 @@ static func get_all_spells() -> Array:
 	return result
 
 
-static func get_spells_by_school(school: int) -> Array:
+func get_spells_by_school(school: int) -> Array:
 	ensure_definitions()
 	var result: Array = []
 	for id in _spells:
@@ -93,7 +98,7 @@ static func get_spells_by_school(school: int) -> Array:
 	return result
 
 
-static func get_school_name(school: int) -> String:
+func get_school_name(school: int) -> String:
 	match school:
 		School.AIR: return "Air"
 		School.FIRE: return "Fire"

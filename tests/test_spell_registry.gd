@@ -1,8 +1,6 @@
 extends SceneTree
 ## Spell registry: all 20 spells load and validate.
 
-const _SpellRegistry = preload("res://scripts/data/SpellRegistry.gd")
-
 func _init() -> void:
 	var failed := 0
 	failed += _test_spell_count()
@@ -20,7 +18,7 @@ func _init() -> void:
 
 
 func _test_spell_count() -> int:
-	var all := _SpellRegistry.get_all_spells()
+	var all := Spells.get_all_spells()
 	if all.size() != 20:
 		printerr("Expected 20 spells, got %d" % all.size())
 		return 1
@@ -35,7 +33,7 @@ func _test_all_spells_exist() -> int:
 
 	var errors := 0
 	for id in expected:
-		if _SpellRegistry.get_spell(id) == null:
+		if Spells.get_spell(id) == null:
 			printerr("Missing spell: %s" % id)
 			errors += 1
 	return errors
@@ -43,18 +41,18 @@ func _test_all_spells_exist() -> int:
 
 func _test_school_distribution() -> int:
 	var errors := 0
-	for school in [_SpellRegistry.School.AIR, _SpellRegistry.School.FIRE,
-		_SpellRegistry.School.WATER, _SpellRegistry.School.EARTH]:
-		var spells := _SpellRegistry.get_spells_by_school(school)
+	for school in [SpellRegistry.School.AIR, SpellRegistry.School.FIRE,
+		SpellRegistry.School.WATER, SpellRegistry.School.EARTH]:
+		var spells := Spells.get_spells_by_school(school)
 		if spells.size() != 5:
-			printerr("School %s has %d spells, expected 5" % [_SpellRegistry.get_school_name(school), spells.size()])
+			printerr("School %s has %d spells, expected 5" % [Spells.get_school_name(school), spells.size()])
 			errors += 1
 	return errors
 
 
 func _test_level_range() -> int:
 	var errors := 0
-	for spell in _SpellRegistry.get_all_spells():
+	for spell in Spells.get_all_spells():
 		if spell.level < 1 or spell.level > 4:
 			printerr("Spell %s has invalid level %d" % [spell.id, spell.level])
 			errors += 1
@@ -63,7 +61,7 @@ func _test_level_range() -> int:
 
 func _test_mana_positive() -> int:
 	var errors := 0
-	for spell in _SpellRegistry.get_all_spells():
+	for spell in Spells.get_all_spells():
 		if spell.base_mana <= 0:
 			printerr("Spell %s has non-positive mana %d" % [spell.id, spell.base_mana])
 			errors += 1
@@ -72,7 +70,7 @@ func _test_mana_positive() -> int:
 
 func _test_target_type_valid() -> int:
 	var errors := 0
-	for spell in _SpellRegistry.get_all_spells():
+	for spell in Spells.get_all_spells():
 		if spell.target_type < 0 or spell.target_type > 5:
 			printerr("Spell %s has invalid target_type %d" % [spell.id, spell.target_type])
 			errors += 1

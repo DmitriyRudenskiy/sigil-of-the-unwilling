@@ -10,14 +10,13 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-    ArtifactRegistry.ensure_definitions()
     var dir_path := "res://assets/artifacts"
     if not DirAccess.dir_exists_absolute(dir_path):
         DirAccess.make_dir_recursive_absolute(dir_path)
-    for art in ArtifactRegistry.get_all():
+    for art in Artifacts.get_all():
         var img := _build_icon(art)
         img.save_png("%s/%s.png" % [dir_path, art.id])
-    print("[ArtifactIconGenerator] Generated %d icons in %s" % [ArtifactRegistry.get_all().size(), dir_path])
+    print("[ArtifactIconGenerator] Generated %d icons in %s" % [Artifacts.get_all().size(), dir_path])
     quit(0)
 
 

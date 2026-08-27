@@ -235,7 +235,6 @@ func serialize() -> Dictionary:
 
 
 func deserialize(data: Dictionary) -> void:
-    ArtifactRegistry.ensure_definitions()
     for slot in equipped:
         equipped[slot] = null
     backpack.clear()
@@ -243,13 +242,13 @@ func deserialize(data: Dictionary) -> void:
         for slot in data["equipped"]:
             var id = data["equipped"][slot]
             if id != "" and id != null:
-                var art := ArtifactRegistry.get_by_id(StringName(id))
+                var art := Artifacts.get_by_id(StringName(id))
                 if art != null:
                     equipped[slot] = art
     if data.has("backpack"):
         for id in data["backpack"]:
             if id != "" and id != null:
-                var art := ArtifactRegistry.get_by_id(StringName(id))
+                var art := Artifacts.get_by_id(StringName(id))
                 if art != null:
                     backpack.append(art)
     equipped_changed.emit()

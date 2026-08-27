@@ -1,15 +1,20 @@
-extends RefCounted
+extends Node
 class_name ResourceRegistry
-## Strategic resource definitions: 11 hidden veins + 2 basic (wood/stone).
+## Autoload: Resources. 11 hidden veins + 2 basic (wood/stone).
 
 const ResourceDef = preload("res://scripts/data/ResourceDef.gd")
 
 enum Rarity { COMMON, RARE }
 
-static var _resources: Dictionary = {}
+var _resources: Dictionary = {}
 
+func _ready() -> void:
+	ensure_definitions()
 
-static func ensure_definitions() -> void:
+func reset() -> void:
+	_resources.clear()
+
+func ensure_definitions() -> void:
 	if not _resources.is_empty():
 		return
 
@@ -91,7 +96,7 @@ static func ensure_definitions() -> void:
 		2, 2, 0.0, "🪨")
 
 
-static func _add(id: StringName, name: String, biomes: Array[String], rarity: int,
+func _add(id: StringName, name: String, biomes: Array[String], rarity: int,
 		discovery_skill: StringName, discovery_time: String, discovery_auto: bool, discovery_auto_tags: Array[StringName],
 		extraction_tag: StringName, extraction_skill: StringName, extraction_unit: StringName, extraction_tool: StringName, extraction_consumable: StringName, extraction_fire: bool,
 		ymin: int, ymax: int, weight: float, icon: String) -> void:
@@ -117,12 +122,12 @@ static func _add(id: StringName, name: String, biomes: Array[String], rarity: in
 	_resources[id] = def
 
 
-static func get_resource(id: StringName) -> ResourceDef:
+func get_resource(id: StringName) -> ResourceDef:
 	ensure_definitions()
 	return _resources.get(id, null) as ResourceDef
 
 
-static func get_all() -> Array[ResourceDef]:
+func get_all() -> Array[ResourceDef]:
 	ensure_definitions()
 	var result: Array[ResourceDef] = []
 	for id in _resources:
@@ -130,7 +135,7 @@ static func get_all() -> Array[ResourceDef]:
 	return result
 
 
-static func get_by_biome(biome: String) -> Array[ResourceDef]:
+func get_by_biome(biome: String) -> Array[ResourceDef]:
 	ensure_definitions()
 	var result: Array[ResourceDef] = []
 	for id in _resources:
@@ -140,11 +145,11 @@ static func get_by_biome(biome: String) -> Array[ResourceDef]:
 	return result
 
 
-static func is_hidden_resource(id: StringName) -> bool:
+func is_hidden_resource(id: StringName) -> bool:
 	return id != &"wood" and id != &"stone"
 
 
-static func get_hidden_resource_ids() -> Array[StringName]:
+func get_hidden_resource_ids() -> Array[StringName]:
 	ensure_definitions()
 	var ids: Array[StringName] = []
 	for id in _resources:

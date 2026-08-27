@@ -8,7 +8,7 @@ signal strategic_resources_changed(resources: Dictionary)
 var _resources: Dictionary = {}
 
 func init_from_registry() -> void:
-	var all: Array = ResourceRegistry.get_all()
+	var all: Array = Resources.get_all()
 	for def in all:
 		_resources[def.id] = 0
 

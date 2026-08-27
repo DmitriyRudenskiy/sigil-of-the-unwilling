@@ -21,7 +21,7 @@ func _build_ui() -> void:
 	title.add_theme_font_size_override("font_size", 14)
 	vbox.add_child(title)
 
-	var all := ResourceRegistry.get_all()
+	var all := Resources.get_all()
 	for def in all:
 		var hbox := HBoxContainer.new()
 		vbox.add_child(hbox)
@@ -39,7 +39,7 @@ func update_resources(resources: Dictionary) -> void:
 	for id in _labels:
 		var label: Label = _labels[id]
 		var amount: int = int(resources.get(id, 0))
-		var def: ResourceDef = ResourceRegistry.get_resource(id)
+		var def: ResourceDef = Resources.get_resource(id)
 		if def:
 			label.text = "%s %d/%d" % [def.icon, amount, GameSettings.RESOURCE_CAPACITY]
 		else:

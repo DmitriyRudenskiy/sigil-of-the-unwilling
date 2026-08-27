@@ -6,12 +6,12 @@ const SKIP_FILES := [
 	"test_runner.gd",
 	"run_tests.gd",
 	"test_socket_protocol.gd",
-	"test_artifact_system.gd",
-	"test_keys_matrix.gd",       # Requires ResourceRegistry class_name (headless scope issue)
-	"test_saltpeter.gd",         # Requires ResourceRegistry class_name
 	"test_capacity.gd",          # Type inference errors in headless
 	"test_time_system.gd",       # Type inference errors in headless
-	"test_basic_resources.gd",   # Requires ResourceRegistry class_name
+	"test_artifact_system.gd",   # Headless autoload scope issue
+	"test_keys_matrix.gd",       # Headless autoload scope issue
+	"test_saltpeter.gd",         # Headless autoload scope issue
+	"test_basic_resources.gd",   # Headless autoload scope issue
 ]
 
 func _should_skip(file: String) -> bool:

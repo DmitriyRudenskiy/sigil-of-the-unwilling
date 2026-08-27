@@ -3,7 +3,6 @@ class_name ResourceNodeManager
 ## Manages resource node lifecycle: generation, discovery, extraction, removal.
 
 const ResourceNode = preload("res://scripts/nodes/ResourceNode.gd")
-const ResourceRegistry = preload("res://scripts/data/ResourceRegistry.gd")
 const ResourceDef = preload("res://scripts/data/ResourceDef.gd")
 
 
@@ -17,13 +16,13 @@ signal resource_exhausted(cell: Vector2i, resource_id: StringName)
 
 ## Bridge functions to resolve Variant inference from preload() calls.
 func _get_def(id: StringName) -> ResourceDef:
-	return ResourceRegistry.get_resource(id)
+	return Resources.get_resource(id)
 
 func _get_hidden_by_biome(biome: String) -> Array:
-	var all: Array = ResourceRegistry.get_by_biome(biome)
+	var all: Array = Resources.get_by_biome(biome)
 	var hidden: Array = []
 	for item in all:
-		if ResourceRegistry.is_hidden_resource((item as ResourceDef).id):
+		if Resources.is_hidden_resource((item as ResourceDef).id):
 			hidden.append(item)
 	return hidden
 

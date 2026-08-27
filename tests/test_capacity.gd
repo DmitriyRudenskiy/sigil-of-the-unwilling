@@ -2,7 +2,7 @@ extends "res://tests/test_base.gd"
 ## Resource capacity and basic resource tests.
 
 const _HeroController = preload("res://scripts/HeroController.gd")
-const _ResourceRegistry = preload("res://scripts/data/ResourceRegistry.gd")
+
 
 var hero
 

@@ -86,7 +86,7 @@ func on_battle_completed(winner: String, surv_atk: Array[UnitStack], surv_def: A
 
 	if winner == "attacker" and hero.inventory != null:
 		if rng.randf() < GameSettings.MONSTER_DROP_CHANCE:
-			var arts := ArtifactRegistry.get_by_rarity(Artifact.Rarity.MINOR)
+			var arts := Artifacts.get_by_rarity(Artifact.Rarity.MINOR)
 			if arts.size() > 0:
 				var drop := arts[rng.randi() % arts.size()]
 				if hero.inventory.add_to_backpack(drop):

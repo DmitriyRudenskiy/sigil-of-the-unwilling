@@ -24,8 +24,7 @@ func show_spell_cast(cell: Vector2i, spell_id: StringName) -> void:
 	}
 
 	var color := Color.WHITE
-	var SR = preload("res://scripts/data/SpellRegistry.gd")
-	var spell := SR.get_spell(spell_id)
+	var spell := Spells.get_spell(spell_id)
 	if spell:
 		color = school_colors.get(spell.school, Color.WHITE)
 

@@ -1,7 +1,7 @@
 extends SceneTree
 ## Magic resistance: undead immunity, dragon level check, pendant negation, dwarf resistance.
 
-const _SpellRegistry = preload("res://scripts/data/SpellRegistry.gd")
+
 const _SpellCaster = preload("res://scripts/spells/SpellCaster.gd")
 const _BattleState = preload("res://scripts/BattleState.gd")
 const _SE = preload("res://scripts/data/StatusEffects.gd")

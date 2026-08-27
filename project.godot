@@ -20,6 +20,9 @@ SoundManager="res://scripts/audio/SoundManager.gd"
 Settings="*res://scripts/core/Settings.gd"
 SocketController="*res://scripts/SocketController.gd"
 Units="*res://scripts/UnitRegistry.gd"
+Artifacts="*res://scripts/data/ArtifactRegistry.gd"
+Spells="*res://scripts/data/SpellRegistry.gd"
+Resources="*res://scripts/data/ResourceRegistry.gd"
 
 [display]
 

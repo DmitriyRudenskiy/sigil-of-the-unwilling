@@ -25,9 +25,8 @@ func _refresh() -> void:
 	if _magic == null:
 		return
 
-	var SR = preload("res://scripts/data/SpellRegistry.gd")
 	for spell_id in _magic.spellbook:
-		var spell = SR.get_spell(spell_id)
+		var spell = Spells.get_spell(spell_id)
 		if spell == null:
 			continue
 

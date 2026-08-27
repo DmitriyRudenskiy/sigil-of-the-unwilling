@@ -33,11 +33,7 @@ const WorldLoadContextScript = preload("res://scripts/world/WorldLoadContext.gd"
 # ==================== INIT ====================
 
 func _ready() -> void:
-	# Force initialize registries to prevent runtime freezes
-	Units.ensure_definitions()
-	ArtifactRegistry.ensure_definitions()
-	ResourceRegistry.ensure_definitions()
-	SpellRegistry.ensure_definitions()
+	# Autoloads (Units, Artifacts, Spells, Resources) already initialized in _ready()
 
 	# Create extracted services early to avoid Nil errors
 	_save_manager = SaveManager.new()
@@ -444,7 +440,7 @@ const ResourceDef = preload("res://scripts/data/ResourceDef.gd")
 
 func _on_resource_extracted(cell: Vector2i, resource_id: StringName, amount: int) -> void:
 	var skill_mult: float = 1.0
-	var def: ResourceDef = ResourceRegistry.get_resource(resource_id)
+	var def: ResourceDef = Resources.get_resource(resource_id)
 	if def:
 		if not def.discovery_skill.is_empty():
 			skill_mult = _hero.skills.get_yield_multiplier(def.discovery_skill)

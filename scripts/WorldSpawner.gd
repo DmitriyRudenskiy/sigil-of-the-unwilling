@@ -150,7 +150,6 @@ func get_enemy_defender_bonus() -> Dictionary:
 
 
 func _spawn_chests() -> void:
-	ArtifactRegistry.ensure_definitions()
 
 	var chest_rng := rng if rng != null else RandomNumberGenerator.new()
 	if rng == null:
@@ -173,7 +172,7 @@ func _spawn_chests() -> void:
 				break
 		if nearby_enemy:
 			continue
-		var artifact := ArtifactRegistry.random_of_rarity(Artifact.Rarity.MINOR, chest_rng)
+		var artifact := Artifacts.random_of_rarity(Artifact.Rarity.MINOR, chest_rng)
 		if artifact == null:
 			continue
 		var chest := ArtifactChest.new()
@@ -208,7 +207,6 @@ func _spawn_chests() -> void:
 # ==================== SCROLLS ====================
 
 func _spawn_scrolls() -> void:
-	var SR = preload("res://scripts/data/SpellRegistry.gd")
 	var scroll_count: int = max(2, map.map_width / 3)
 	var placed: int = 0
 	var attempts: int = 0
@@ -224,7 +222,7 @@ func _spawn_scrolls() -> void:
 			continue
 		if _scrolls.has(cell):
 			continue
-		var all_spells: Array = SR.get_all_spells()
+		var all_spells: Array = Spells.get_all_spells()
 		if all_spells.is_empty():
 			continue
 		var spell = all_spells[chest_rng.randi() % all_spells.size()]

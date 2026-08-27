@@ -3,7 +3,6 @@ class_name SpellCaster
 ## Core spell-casting logic: damage, status application, resistance checks.
 
 const _SE = preload("res://scripts/data/StatusEffects.gd")
-const _SR = preload("res://scripts/data/SpellRegistry.gd")
 
 const _DAMAGE_SPELLS := {
 	&"magic_arrow": 10, &"lightning_bolt": 25,
@@ -26,7 +25,7 @@ static func cast(
 	target_hero_bonus: Dictionary,
 	rng: RandomNumberGenerator
 ) -> Dictionary:
-	var spell := _SR.get_spell(spell_id)
+	var spell := Spells.get_spell(spell_id)
 	if spell == null:
 		return {"result": "not_found"}
 
@@ -40,7 +39,7 @@ static func cast(
 	var result := {"result": "success", "damage": 0, "status": -1, "resisted": resisted, "spell_id": spell_id}
 
 	if _DAMAGE_SPELLS.has(spell_id):
-		var base_dmg := sp * _DAMAGE_SPELLS[spell_id]
+		var base_dmg: int = sp * _DAMAGE_SPELLS[spell_id]
 		if resisted: base_dmg = int(base_dmg * 0.5)
 		result = _apply_damage(target_unit, base_dmg, rng, result)
 	elif _BUFF_SPELLS.has(spell_id):
@@ -79,7 +78,7 @@ static func _apply_damage(unit: BattleState.BattleUnit, dmg: int, rng: RandomNum
 
 static func _check_immunity(unit: BattleState.BattleUnit, spell: Variant) -> bool:
 	if spell == null: return false
-	var s := spell as _SR.SpellDef
+	var s := spell as SpellRegistry.SpellDef
 	if s == null: return false
 	var spell_id: StringName = s.id
 	var spell_level: int = s.level

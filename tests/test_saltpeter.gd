@@ -6,8 +6,6 @@ const _BattleRules = preload("res://scripts/util/BattleRules.gd")
 const _UnitStack = preload("res://scripts/unit_stack.gd")
 const _UnitStats = preload("res://scripts/unit_stats.gd")
 const _HexUtils = preload("res://scripts/HexUtils.gd")
-const _ResourceRegistry = preload("res://scripts/data/ResourceRegistry.gd")
-
 var state: BattleState
 var rng: RandomNumberGenerator
 
@@ -19,7 +17,7 @@ func before_each() -> void:
 
 
 func test_saltpeter_tag_exists() -> void:
-	var def := _ResourceRegistry.get(&"saltpeter")
+	var def := Resources.get_resource(&"saltpeter")
 	assert_not_null(def, "saltpeter exists")
 
 

@@ -22,9 +22,8 @@ func _update_list() -> void:
 
 	mana_label.text = "Mana: %d / %d" % [hero_controller.mana_current, hero_controller.mana_max]
 
-	var SR = preload("res://scripts/data/SpellRegistry.gd")
 	for spell_id in hero_controller.spellbook:
-		var spell = SR.get_spell(spell_id)
+		var spell = Spells.get_spell(spell_id)
 		if spell == null:
 			continue
 
@@ -36,7 +35,7 @@ func _update_list() -> void:
 
 		var btn := Button.new()
 		btn.text = "%s (%d MP)" % [spell.display_name, mana_cost]
-		btn.tooltip_text = "%s | Lv.%d | %s" % [SR.get_school_name(spell.school_int), spell.level, spell.display_name]
+		btn.tooltip_text = "%s | Lv.%d | %s" % [Spells.get_school_name(spell.school_int), spell.level, spell.display_name]
 		btn.disabled = hero_controller.mana_current < mana_cost
 		btn.pressed.connect(_on_spell_pressed.bind(spell_id))
 		grid.add_child(btn)

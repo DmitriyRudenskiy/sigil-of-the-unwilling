@@ -4,8 +4,6 @@ extends "res://tests/test_base.gd"
 const _BS = preload("res://scripts/BattleState.gd")
 const _BTX = preload("res://scripts/BattleTurnExecutor.gd")
 const _BAI = preload("res://scripts/BattleAI.gd")
-const _SR = preload("res://scripts/data/SpellRegistry.gd")
-
 # ==================== R1: obstacle seed determinism ====================
 
 func test_obstacle_different_seeds_differ() -> void:
@@ -67,7 +65,7 @@ func test_scroll_spawn_varies_with_seed() -> void:
 func _get_scroll_spell_ids(seed: int) -> Array[StringName]:
 	var chest_rng := RandomNumberGenerator.new()
 	chest_rng.seed = seed
-	var all_spells: Array = _SR.get_all_spells()
+	var all_spells: Array = Spells.get_all_spells()
 	var count := 3
 	var result: Array[StringName] = []
 	for i in count:

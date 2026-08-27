@@ -1,5 +1,8 @@
 extends GUnitTest
 
+func before_each() -> void:
+	Artifacts.reset()
+
 # ======== Artifact resource tests ========
 func test_artifact_rarity_values() -> void:
     assert_eq(Artifact.Rarity.MINOR, 0)
@@ -50,39 +53,34 @@ func test_artifact_is_two_handed() -> void:
 
 # ======== ArtifactRegistry tests ========
 func test_registry_has_30() -> void:
-    ArtifactRegistry.ensure_definitions()
-    assert_eq(ArtifactRegistry.get_all().size(), 30)
+    assert_eq(Artifacts.get_all().size(), 30)
 
 func test_registry_rarity_distribution() -> void:
-    ArtifactRegistry.ensure_definitions()
-    assert_eq(ArtifactRegistry.get_by_rarity(Artifact.Rarity.MINOR).size(), 10)
-    assert_eq(ArtifactRegistry.get_by_rarity(Artifact.Rarity.MAJOR).size(), 10)
-    assert_eq(ArtifactRegistry.get_by_rarity(Artifact.Rarity.RELIC).size(), 10)
+    assert_eq(Artifacts.get_by_rarity(Artifact.Rarity.MINOR).size(), 10)
+    assert_eq(Artifacts.get_by_rarity(Artifact.Rarity.MAJOR).size(), 10)
+    assert_eq(Artifacts.get_by_rarity(Artifact.Rarity.RELIC).size(), 10)
 
 func test_registry_unique_ids() -> void:
-    ArtifactRegistry.ensure_definitions()
     var ids: Array = []
     var seen: Dictionary = {}
-    for art in ArtifactRegistry.get_all():
+    for art in Artifacts.get_all():
         ids.append(art.id)
         if art.id in seen:
             push_error("[test] Duplicate artifact id: %s" % art.id)
         seen[art.id] = true
 
 func test_registry_random_returns_valid() -> void:
-    ArtifactRegistry.ensure_definitions()
     var rng := RandomNumberGenerator.new()
     rng.seed = 42
     for i in 100:
-        var art = ArtifactRegistry.random_of_rarity(Artifact.Rarity.MINOR, rng)
+        var art = Artifacts.random_of_rarity(Artifact.Rarity.MINOR, rng)
         assert_true(art != null)
         assert_eq(art.rarity, Artifact.Rarity.MINOR)
 
 func test_registry_get_by_id() -> void:
-    ArtifactRegistry.ensure_definitions()
-    var arts := ArtifactRegistry.get_all()
+    var arts := Artifacts.get_all()
     if arts.size() > 0:
-        var found := ArtifactRegistry.get_by_id(arts[0].id)
+        var found := Artifacts.get_by_id(arts[0].id)
         assert_true(found != null)
         assert_eq(found.id, arts[0].id)
 
@@ -93,7 +91,6 @@ func test_inventory_init_empty() -> void:
     assert_eq(inv.backpack.size(), 0)
 
 func test_inventory_equip_unequip() -> void:
-    ArtifactRegistry.ensure_definitions()
     var inv := HeroInventory.new()
     var art := Artifact.new()
     art.id = &"inv_test"
@@ -125,9 +122,8 @@ func test_inventory_add_remove_backpack() -> void:
     assert_eq(inv.backpack.size(), 0)
 
 func test_inventory_serialization() -> void:
-    ArtifactRegistry.ensure_definitions()
     var inv := HeroInventory.new()
-    var art := ArtifactRegistry.get_all()[0]
+    var art := Artifacts.get_all()[0]
     inv.equip(art)
     var data := inv.serialize()
     assert_true(data.has("equipped"))
