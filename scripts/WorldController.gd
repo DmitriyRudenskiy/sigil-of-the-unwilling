@@ -30,72 +30,29 @@ const WorldShortcutsScript = preload("res://scripts/world/WorldShortcuts.gd")
 const WorldLoadContextScript = preload("res://scripts/world/WorldLoadContext.gd")
 
 
-# ==================== INIT ====================
-
 func _ready() -> void:
-	# Autoloads (Units, Artifacts, Spells, Resources) already initialized in _ready()
-
-	# Create extracted services early to avoid Nil errors
-	_save_manager = SaveManager.new()
-	_save_manager.name = "SaveManager"
-	add_child(_save_manager)
-	_persistence = WorldPersistenceScript.new(_save_manager)
-	_resource_chain = ResourceChainServiceScript.new()
-
-	var loaded_save: SaveData = WorldPersistenceScript.pending_save
-	WorldPersistenceScript.pending_save = null
-
-	if loaded_save != null:
-		_persistence.session = _persistence.get_session_for_seed(loaded_save.run_seed)
-	else:
-		_persistence.session = _persistence.get_session_for_seed(_persistence.get_run_seed())
-
-	_rng.seed = _persistence.session.run_seed
+	_init_services()
+	var loaded_save := _resolve_session()
 
 	_create_map()
 	_create_hero()
-
 	await get_tree().process_frame
 
-	if loaded_save != null:
-		_hero.setup(_map_gen)
-		_hero.deserialize(loaded_save.hero)
-		if _map_gen.has_valid_tilemap():
-			_hero.position = _map_gen.map_to_local(_hero.current_cell)
-	else:
-		_hero.setup(_map_gen)
-	_hero.hero_moved.connect(_on_hero_moved)
-	_hero.hero_entered_village.connect(_on_village)
-	_hero.movement.reach_preview_changed.connect(_on_reach_preview_changed)
-	_hero.movement.reach_preview_cleared.connect(_on_reach_preview_cleared)
-
-	# Set camera map bounds
-	if _camera:
-		_camera.set_map_rect(_compute_map_rect())
-
-	if not OS.has_feature("headless"):
-		_ui_manager = WorldUIManager.new()
-		_ui_manager.name = "WorldUIManager"
-		add_child(_ui_manager)
-		_ui_manager.setup(_hero, _map_gen, _camera)
-		_ui_manager.ui.end_turn_pressed.connect(_on_end_turn)
-		_ui_manager.ui.date_changed.connect(_on_date_changed)
-		_ui_manager.ui.minimap_cell_activated.connect(center_camera_on)
-		_ui_manager.ui.camera_jump_requested_dir.connect(jump_camera)
-		_ui_manager.ui.hex_borders_toggled.connect(set_hex_borders)
-		_ui_manager.ui.settings_applied.connect(_on_settings_applied)
-		_ui_manager.marker_layer.marker_hovered.connect(_on_marker_hovered)
-		_ui_manager.marker_layer.marker_clicked.connect(_on_marker_clicked)
-	else:
-		GameLogger.world("Headless mode: skipping UI initialization")
+	_init_hero(loaded_save)
+	_wire_hero_signals()
 
 	_create_camera()
+	_camera.set_map_rect(_compute_map_rect())
+
+	_init_ui()
 	_create_input()
 	_create_spawner()
 	_create_battle_flow()
 	_create_cities()
+
 	_world_delta = WorldStateDelta.new()
 	_persistence.world_delta = _world_delta
+
 	_create_subsystems()
 	_create_resource_nodes()
 
@@ -103,14 +60,69 @@ func _ready() -> void:
 		_persistence.apply_loaded_save(loaded_save, _build_load_context())
 
 	GameLogger.world("Scene ready, seed=%d" % _persistence.session.run_seed)
+	_handle_headless_exit()
 
-	# Only auto-quit if we are headless AND NOT running the test server
+
+# ==================== INIT HELPERS ====================
+
+func _init_services() -> void:
+	_save_manager = SaveManager.new()
+	_save_manager.name = "SaveManager"
+	add_child(_save_manager)
+	_persistence = WorldPersistenceScript.new(_save_manager)
+	_resource_chain = ResourceChainServiceScript.new()
+
+
+func _resolve_session() -> SaveData:
+	var loaded_save: SaveData = WorldPersistenceScript.pending_save
+	WorldPersistenceScript.pending_save = null
+	if loaded_save != null:
+		_persistence.session = _persistence.get_session_for_seed(loaded_save.run_seed)
+	else:
+		_persistence.session = _persistence.get_session_for_seed(_persistence.get_run_seed())
+	_rng.seed = _persistence.session.run_seed
+	return loaded_save
+
+
+func _init_hero(loaded_save: SaveData) -> void:
+	_hero.setup(_map_gen)
+	if loaded_save != null:
+		_hero.deserialize(loaded_save.hero)
+		if _map_gen.has_valid_tilemap():
+			_hero.position = _map_gen.map_to_local(_hero.current_cell)
+
+
+func _wire_hero_signals() -> void:
+	_hero.hero_moved.connect(_on_hero_moved)
+	_hero.hero_entered_village.connect(_on_village)
+	_hero.movement.reach_preview_changed.connect(_on_reach_preview_changed)
+	_hero.movement.reach_preview_cleared.connect(_on_reach_preview_cleared)
+
+
+func _init_ui() -> void:
+	if OS.has_feature("headless"):
+		GameLogger.world("Headless mode: skipping UI initialization")
+		return
+	_ui_manager = WorldUIManager.new()
+	_ui_manager.name = "WorldUIManager"
+	add_child(_ui_manager)
+	_ui_manager.setup(_hero, _map_gen, _camera)
+	_ui_manager.ui.end_turn_pressed.connect(_on_end_turn)
+	_ui_manager.ui.date_changed.connect(_on_date_changed)
+	_ui_manager.ui.minimap_cell_activated.connect(center_camera_on)
+	_ui_manager.ui.camera_jump_requested_dir.connect(jump_camera)
+	_ui_manager.ui.hex_borders_toggled.connect(set_hex_borders)
+	_ui_manager.ui.settings_applied.connect(_on_settings_applied)
+	_ui_manager.marker_layer.marker_hovered.connect(_on_marker_hovered)
+	_ui_manager.marker_layer.marker_clicked.connect(_on_marker_clicked)
+
+
+func _handle_headless_exit() -> void:
 	var is_server := false
 	for arg in OS.get_cmdline_args():
 		if arg.begins_with("--test-server"):
 			is_server = true
 			break
-
 	if (OS.has_feature("headless") or "--autoquit" in OS.get_cmdline_args()) and not is_server:
 		await get_tree().create_timer(1.0).timeout
 		get_tree().quit()
