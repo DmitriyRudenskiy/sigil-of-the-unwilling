@@ -5,6 +5,7 @@ class_name WorldInteractionController
 var hero: HeroController
 var spawner: WorldSpawner
 var chest_dialog: ArtifactChestDialog
+var world_delta: WorldStateDelta = null
 
 
 func setup(h: HeroController, s: WorldSpawner, d: ArtifactChestDialog) -> void:
@@ -42,35 +43,48 @@ func _on_chest_choice(choice: String, chest: ArtifactChest) -> void:
 		"take":
 			if chest.artifact != null:
 				if hero.inventory.add_to_backpack(chest.artifact):
-					Logger.inventory("Picked up artifact: %s" % chest.artifact.display_name)
+					GameLogger.inventory("Picked up artifact: %s" % chest.artifact.display_name)
 				else:
-					Logger.inventory("Backpack full!")
+					GameLogger.inventory("Backpack full!")
 		"gold":
-			hero.resources["gold"] = hero.resources.get("gold", 0) + chest.gold_reward
-			hero.resources_changed.emit(hero.resources)
-			Logger.world("Took %d gold from chest" % chest.gold_reward)
+			var res_dict: Dictionary = hero.resources.resources
+			res_dict["gold"] = int(res_dict.get("gold", 0)) + chest.gold_reward
+			hero.resources.resources_changed.emit(res_dict)
+			GameLogger.world("Took %d gold from chest" % chest.gold_reward)
 
 	chest.open()
 	if spawner:
 		spawner.remove_chest_at(chest.cell)
 
+	if world_delta:
+		world_delta.add_opened_chest(chest.cell)
+
 
 func collect_resource_at(cell: Vector2i) -> bool:
 	if spawner:
-		return spawner.remove_resource_at(cell)
+		var removed := spawner.remove_resource_at(cell)
+		if removed and world_delta:
+			world_delta.add_removed_resource(cell)
+		return removed
 	return false
 
 
 func capture_village_at(cell: Vector2i) -> void:
-	if spawner:
-		spawner.capture_village(cell)
+	if spawner and spawner.capture_village(cell):
+		if world_delta:
+			world_delta.add_village(cell)
 
 
 func pickup_scroll_at(cell: Vector2i) -> void:
 	if spawner == null or hero == null:
 		return
-	if spawner._scrolls.has(cell):
-		var spell_id: StringName = spawner._scrolls[cell]
-		ScrollRules.apply_pickup(hero.magic, spell_id)
-		spawner.remove_scroll_at(cell)
-		Logger.world("Picked up scroll: %s" % spell_id)
+	var spell_id: StringName = spawner.get_scroll_at(cell)
+	if spell_id == &"":
+		return
+	ScrollRules.apply_pickup(hero.magic, spell_id)
+	spawner.remove_scroll_at(cell)
+
+	if world_delta:
+		world_delta.add_removed_scroll(cell)
+
+	GameLogger.world("Picked up scroll: %s" % spell_id)

@@ -151,13 +151,15 @@ func get_enemy_defender_bonus() -> Dictionary:
 
 func _spawn_chests() -> void:
 	ArtifactRegistry.ensure_definitions()
-	var rng := RandomNumberGenerator.new()
-	rng.seed = GameSettings.EDITOR_SEED
+
+	var chest_rng := rng if rng != null else RandomNumberGenerator.new()
+	if rng == null:
+		chest_rng.seed = GameSettings.EDITOR_SEED
 	var placed := 0
 	var attempts := 0
 	while placed < GameSettings.CHEST_COUNT and attempts < GameSettings.CHEST_PLACE_ATTEMPTS:
 		attempts += 1
-		var cell := Vector2i(rng.randi_range(3, map.map_width - 4), rng.randi_range(3, map.map_height - 4))
+		var cell := Vector2i(chest_rng.randi_range(3, map.map_width - 4), chest_rng.randi_range(3, map.map_height - 4))
 		if not map.is_walkable(cell):
 			continue
 		if map.enemy_stacks.has(cell) or map.resource_cells.has(cell) or cell in map.village_cells:
@@ -171,14 +173,14 @@ func _spawn_chests() -> void:
 				break
 		if nearby_enemy:
 			continue
-		var artifact := ArtifactRegistry.random_of_rarity(Artifact.Rarity.MINOR, rng)
+		var artifact := ArtifactRegistry.random_of_rarity(Artifact.Rarity.MINOR, chest_rng)
 		if artifact == null:
 			continue
 		var chest := ArtifactChest.new()
 		chest.id = "chest_%s" % cell
 		chest.artifact = artifact
 		chest.cell = cell
-		chest.gold_reward = rng.randi_range(GameSettings.CHEST_GOLD_MIN, GameSettings.CHEST_GOLD_MAX)
+		chest.gold_reward = chest_rng.randi_range(GameSettings.CHEST_GOLD_MIN, GameSettings.CHEST_GOLD_MAX)
 		_chests[cell] = chest
 		var n := Node2D.new()
 		n.position = map.map_to_local(cell)
@@ -207,12 +209,13 @@ func _spawn_chests() -> void:
 
 func _spawn_scrolls() -> void:
 	var SR = preload("res://scripts/data/SpellRegistry.gd")
-	var scroll_count := maxi(2, map.map_width / 3)
-	var placed := 0
-	var attempts := 0
+	var scroll_count: int = max(2, map.map_width / 3)
+	var placed: int = 0
+	var attempts: int = 0
+	var chest_rng := rng if rng != null else RandomNumberGenerator.new()
 	while placed < scroll_count and attempts < 200:
 		attempts += 1
-		var cell := Vector2i(rng.randi_range(3, map.map_width - 4), rng.randi_range(3, map.map_height - 4))
+		var cell := Vector2i(chest_rng.randi_range(3, map.map_width - 4), chest_rng.randi_range(3, map.map_height - 4))
 		if not map.is_walkable(cell):
 			continue
 		if map.enemy_stacks.has(cell) or map.resource_cells.has(cell) or cell in map.village_cells:
@@ -221,10 +224,10 @@ func _spawn_scrolls() -> void:
 			continue
 		if _scrolls.has(cell):
 			continue
-		var all_spells := SR.get_all_spells()
+		var all_spells: Array = SR.get_all_spells()
 		if all_spells.is_empty():
 			continue
-		var spell := all_spells[rng.randi() % all_spells.size()]
+		var spell = all_spells[rng.randi() % all_spells.size()]
 		_scrolls[cell] = spell.id
 		var n := Node2D.new()
 		n.position = map.map_to_local(cell)
@@ -248,3 +251,7 @@ func remove_scroll_at(cell: Vector2i) -> void:
 		_scroll_nodes[cell].queue_free()
 		_scroll_nodes.erase(cell)
 	_scrolls.erase(cell)
+
+
+func get_scroll_at(cell: Vector2i) -> StringName:
+	return _scrolls.get(cell, &"")

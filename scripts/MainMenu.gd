@@ -7,6 +7,10 @@ const _UIAnimator = preload("res://scripts/ui/UIAnimator.gd")
 const _SettingsScreen = preload("res://scripts/ui/SettingsScreen.gd")
 
 func _ready() -> void:
+	# Don't auto-quit in test-server mode
+	for arg in OS.get_cmdline_args():
+		if arg.begins_with("--test-server"):
+			return
 	_build_background()
 	_build_right_column()
 	_UIAnimator.animate_in(self)
@@ -148,12 +152,24 @@ func _on_new_game() -> void:
 
 
 func _on_load_game() -> void:
+	var data := SaveManager.load_slot()
+	if data == null or not data.is_valid():
+		_flash_lock()
+		print("[MainMenu] Load: no valid save")
+		return
+
+	WorldPersistence.pending_save = data
+	get_tree().change_scene_to_file("res://scenes/World.tscn")
+
+
+func _flash_lock() -> void:
 	var lock := get_node_or_null("RightColumn/LockPanel")
-	if lock != null:
-		var tw := create_tween()
-		tw.tween_property(lock, "modulate", Color(1, 0.5, 0.5), 0.15)
-		tw.tween_property(lock, "modulate", Color.WHITE, 0.15)
-	print("[MainMenu] Load: не реализовано в прототипе")
+	if lock == null:
+		return
+
+	var tw := create_tween()
+	tw.tween_property(lock, "modulate", Color(1, 0.5, 0.5), 0.15)
+	tw.tween_property(lock, "modulate", Color.WHITE, 0.15)
 
 
 func _on_exit() -> void:
@@ -167,5 +183,6 @@ func _on_settings() -> void:
 
 
 func _on_settings_applied() -> void:
-	# Apply zoom immediately
-	$"../WorldCamera".set_zoom_level(Settings.get_zoom()) if has_node("../WorldCamera") else null
+	# MainMenu не обязан иметь WorldCamera.
+	# Зум будет применён там, где камера реально существует.
+	pass

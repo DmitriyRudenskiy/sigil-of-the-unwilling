@@ -5,13 +5,11 @@ class_name WorldController
 # Core references
 var _map_gen: MapGenerator
 var _hero: HeroController
-var _ui: AdventureUI
 var _camera: WorldCamera
 var _input_controller: WorldInput
 var _spawner: WorldSpawner
 var _battle_flow: BattleFlow
-var _session: GameSession = null
-static var next_seed: int = 1234
+var _cities: CityManager
 var _rng := RandomNumberGenerator.new()
 var _world_delta: WorldStateDelta = null
 var _save_manager: SaveManager = null
@@ -20,48 +18,87 @@ var _save_manager: SaveManager = null
 var battle_coordinator: WorldBattleCoordinator = null
 var interaction_controller: WorldInteractionController = null
 var resource_node_manager: ResourceNodeManager = null
+var _ui_manager: WorldUIManager = null
 
-# UI
-var _ui_layer: CanvasLayer = null
-var _inventory_screen: ArtifactInventoryScreen = null
-var _chest_dialog: ArtifactChestDialog = null
-var _grid_overlay: HexGridOverlay = null
-var _marker_layer: MarkerLayer = null
+# Extracted services
+var _resource_chain = null
+var _persistence = null
+
+const WorldPersistenceScript = preload("res://scripts/world/WorldPersistence.gd")
+const ResourceChainServiceScript = preload("res://scripts/world/ResourceChainService.gd")
+const WorldShortcutsScript = preload("res://scripts/world/WorldShortcuts.gd")
 
 
 # ==================== INIT ====================
 
 func _ready() -> void:
-	_session = GameSession.new(_get_run_seed())
-	_rng.seed = _session.run_seed
+	# Force initialize registries to prevent runtime freezes
+	UnitRegistry.ensure_definitions()
+	ArtifactRegistry.ensure_definitions()
+	ResourceRegistry.ensure_definitions()
+	SpellRegistry.ensure_definitions()
+
+	var loaded_save: SaveData = WorldPersistenceScript.pending_save
+	WorldPersistenceScript.pending_save = null
+
+	if loaded_save != null:
+		_persistence.session = _persistence.get_session_for_seed(loaded_save.run_seed)
+	else:
+		_persistence.session = _persistence.get_session_for_seed(_persistence.get_run_seed())
+
+	_rng.seed = _persistence.session.run_seed
 
 	_create_map()
 	_create_hero()
 
 	await get_tree().process_frame
-	_hero.setup(_map_gen)
+
+	if loaded_save != null:
+		_hero.setup(_map_gen)
+		_hero.deserialize(loaded_save.hero)
+		if _map_gen.has_valid_tilemap():
+			_hero.position = _map_gen.map_to_local(_hero.current_cell)
+	else:
+		_hero.setup(_map_gen)
 	_hero.hero_moved.connect(_on_hero_moved)
 	_hero.hero_entered_village.connect(_on_village)
 	_hero.movement.reach_preview_changed.connect(_on_reach_preview_changed)
 	_hero.movement.reach_preview_cleared.connect(_on_reach_preview_cleared)
 
 	# Set camera map bounds
-	_camera.set_map_rect(_compute_map_rect())
+	if _camera:
+		_camera.set_map_rect(_compute_map_rect())
 
-	_create_ui()
+	if not OS.has_feature("headless"):
+		_ui_manager = WorldUIManager.new()
+		_ui_manager.name = "WorldUIManager"
+		add_child(_ui_manager)
+		_ui_manager.setup(_hero, _map_gen, _camera)
+		_ui_manager.ui.end_turn_pressed.connect(_on_end_turn)
+		_ui_manager.ui.date_changed.connect(_on_date_changed)
+		_ui_manager.ui.minimap_cell_activated.connect(center_camera_on)
+		_ui_manager.ui.camera_jump_requested_dir.connect(jump_camera)
+		_ui_manager.ui.hex_borders_toggled.connect(set_hex_borders)
+		_ui_manager.ui.settings_applied.connect(_on_settings_applied)
+		_ui_manager.marker_layer.marker_hovered.connect(_on_marker_hovered)
+		_ui_manager.marker_layer.marker_clicked.connect(_on_marker_clicked)
+	else:
+		GameLogger.world("Headless mode: skipping UI initialization")
+
 	_create_camera()
 	_create_input()
 	_create_spawner()
 	_create_battle_flow()
+	_create_cities()
+	_world_delta = WorldStateDelta.new()
+	_persistence.world_delta = _world_delta
 	_create_subsystems()
 	_create_resource_nodes()
-	_create_inventory_screen()
-	_create_chest_dialog()
-	_create_marker_layer()
 
-	_world_delta = WorldStateDelta.new()
+	if loaded_save != null:
+		_persistence.apply_loaded_save(loaded_save, _build_load_context())
 
-	Logger.world("Scene ready, seed=%d" % _session.run_seed)
+	GameLogger.world("Scene ready, seed=%d" % _persistence.session.run_seed)
 
 	# Only auto-quit if we are headless AND NOT running the test server
 	var is_server := false
@@ -83,8 +120,9 @@ func _create_subsystems() -> void:
 
 	interaction_controller = WorldInteractionController.new()
 	interaction_controller.name = "InteractionController"
-	interaction_controller.setup(_hero, _spawner, _chest_dialog)
+	interaction_controller.setup(_hero, _spawner, _ui_manager.chest_dialog)
 	interaction_controller.connect_chest_signals()
+	interaction_controller.world_delta = _world_delta
 	add_child(interaction_controller)
 
 
@@ -105,6 +143,7 @@ func _create_resource_nodes() -> void:
 	resource_node_manager.generate_nodes_for_map(map_data)
 	resource_node_manager.resource_discovered.connect(_on_resource_discovered)
 	resource_node_manager.resource_extracted.connect(_on_resource_extracted)
+	resource_node_manager.resource_exhausted.connect(_on_resource_exhausted)
 
 
 # ==================== CREATION ====================
@@ -120,13 +159,6 @@ func _create_hero() -> void:
 	_hero = HeroController.new()
 	_hero.name = "Hero"
 	add_child(_hero)
-
-
-func _create_ui() -> void:
-	_ui = AdventureUI.new()
-	add_child(_ui)
-	_ui.setup(_hero)
-	_ui.end_turn_pressed.connect(_on_end_turn)
 
 
 func _create_camera() -> void:
@@ -162,37 +194,39 @@ func _create_battle_flow() -> void:
 	_battle_flow.battle_completed.connect(_on_battle_completed)
 	add_child(_battle_flow)
 
+# ==================== CITY SYSTEM ====================
+func _create_cities() -> void:
+	_cities = CityManager.new()
+	_cities.name = "CityManager"
+	add_child(_cities)
+	_cities.status_message.connect(func(text: String):
+		if _ui_manager: _ui_manager.set_status(text))
+
+	# Регистрация столицы
+	var capital := City.new()
+	capital.display_name = "Перворечье"
+	capital.center = Vector2i(10, 10)
+	capital.special_sites = {Vector2i(12, 9): BuildingDefs.SITE_SHRINE}
+	_cities.register_city(capital, true)
+
+	# Провайдер FIDSI тайлов (заглушка — заменить на реальный MapGen)
+	_cities.set_tile_yield_provider(func(_cell: Vector2i) -> Dictionary:
+		return {&"food": 5.0, &"industry": 5.0, &"dust": 0.0, &"science": 0.0, &"influence": 0.0}
+	)
+
 	_save_manager = SaveManager.new()
 	_save_manager.name = "SaveManager"
 	add_child(_save_manager)
 
+	# Create extracted services
+	_persistence = WorldPersistenceScript.new(_save_manager)
+	_resource_chain = ResourceChainServiceScript.new()
 
-func _create_inventory_screen() -> void:
-	if _ui_layer == null:
-		_ui_layer = CanvasLayer.new()
-		_ui_layer.name = "WorldUILayer"
-		_ui_layer.layer = 30
-		add_child(_ui_layer)
-
-	_inventory_screen = ArtifactInventoryScreen.new()
-	_inventory_screen.name = "ArtifactInventoryScreen"
-	_inventory_screen.visible = false
-	_inventory_screen.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_ui_layer.add_child(_inventory_screen)
-
-
-func _create_chest_dialog() -> void:
-	if _ui_layer == null:
-		_ui_layer = CanvasLayer.new()
-		_ui_layer.name = "WorldUILayer"
-		_ui_layer.layer = 30
-		add_child(_ui_layer)
-
-	_chest_dialog = ArtifactChestDialog.new()
-	_chest_dialog.name = "ArtifactChestDialog"
-	_chest_dialog.visible = false
-	_chest_dialog.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_ui_layer.add_child(_chest_dialog)
+	# Create shortcuts node
+	var shortcuts := WorldShortcutsScript.new()
+	shortcuts.name = "WorldShortcuts"
+	shortcuts.setup(_persistence, _ui_manager)
+	add_child(shortcuts)
 
 
 # ==================== HERO EVENTS ====================
@@ -206,15 +240,18 @@ func _on_hero_moved(cell: Vector2i) -> void:
 
 	# Addendum 10: Try to discover hidden resource nodes
 	if resource_node_manager:
-		var disc_keys := _build_discovery_keys()
+		var disc_keys := _resource_chain.build_discovery_keys(_hero)
 		resource_node_manager.try_discover(cell, disc_keys)
 
 
 func _on_village(cell: Vector2i) -> void:
-	Logger.world("Village captured at %s" % cell)
+	GameLogger.world("Village captured at %s" % cell)
 	interaction_controller.capture_village_at(cell)
-	if _ui:
-		_ui.add_city("Деревня (%d, %d)" % [cell.x, cell.y])
+
+	if _world_delta:
+		_world_delta.add_village(cell)
+	if _ui_manager:
+		_ui_manager.ui.add_city("Деревня (%d, %d)" % [cell.x, cell.y])
 
 
 func _on_end_turn() -> void:
@@ -222,15 +259,28 @@ func _on_end_turn() -> void:
 	# Tick resource nodes
 	if resource_node_manager:
 		resource_node_manager.tick_daily()
-	if _ui:
-		_ui.refresh_all()
+	if _cities:
+		_cities.on_turn_ended(int(_persistence.get_date().get("month", 1)))
+	if _ui_manager:
+		_ui_manager.refresh_ui()
+
+
+func _on_date_changed(month: int, week: int, day: int) -> void:
+	_persistence.set_date(month, week, day)
+
+
+func _on_settings_applied() -> void:
+	if _camera and _camera.has_method("set_zoom_level"):
+		var settings_node = get_node_or_null("/root/Settings")
+		if settings_node:
+			_camera.set_zoom_level(settings_node.get_zoom())
 
 
 # ==================== BATTLE LIFECYCLE (callbacks for BattleFlow signals) ====================
 
 func _on_battle_started() -> void:
-	if _ui:
-		_ui.visible = false
+	if _ui_manager:
+		_ui_manager.set_ui_visible(false)
 	visible = false
 	_camera.set_process(false)
 	_input_controller.set_process_unhandled_input(false)
@@ -238,16 +288,24 @@ func _on_battle_started() -> void:
 
 func _on_battle_completed(winner: String, surv_atk: Array[UnitStack], surv_def: Array[UnitStack]) -> void:
 	visible = true
-	if _ui:
-		_ui.visible = true
+	if _ui_manager:
+		_ui_manager.set_ui_visible(true)
 	_camera.set_process(true)
 	_camera.make_current()
 	_input_controller.set_process_unhandled_input(true)
 
+	var enemy_cell := battle_coordinator.get_pending_enemy_cell()
 	battle_coordinator.on_battle_completed(winner, surv_atk, surv_def)
 
-	if _ui:
-		_ui.refresh_all()
+	# Слава за победу
+	if winner == "attacker" and _cities:
+		_cities.add_glory(15.0, &"battle_won")
+
+	if winner == "attacker" and enemy_cell != Vector2i(-1, -1) and _world_delta:
+		_world_delta.add_defeated_enemy(enemy_cell)
+
+	if _ui_manager:
+		_ui_manager.refresh_ui()
 
 
 # ==================== CAMERA ====================
@@ -272,87 +330,67 @@ func jump_camera(direction: String) -> void:
 		"E": center_camera_on(Vector2i(_map_gen.map_width - 3, center.y))
 
 
-func _create_marker_layer() -> void:
-	_marker_layer = MarkerLayer.new()
-	_marker_layer.name = "MarkerLayer"
-	_marker_layer.setup(_map_gen)
-	add_child(_marker_layer)
-	_marker_layer.marker_hovered.connect(_on_marker_hovered)
-	_marker_layer.marker_clicked.connect(_on_marker_clicked)
-
-
 func set_hex_borders(on: bool) -> void:
-	if on and _grid_overlay == null:
-		_grid_overlay = HexGridOverlay.new()
-		_grid_overlay.map_ref = _map_gen
-		_grid_overlay.cam_ref = _camera
-		add_child(_grid_overlay)
-	if _grid_overlay != null:
-		_grid_overlay.enabled = on
+	if _ui_manager:
+		_ui_manager.set_hex_borders(on)
 
 
-# ==================== INPUT ====================
-
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_I:
-			_toggle_inventory()
-			get_viewport().set_input_as_handled()
-			return
-
-		if event.keycode == KEY_ESCAPE:
-			if _inventory_screen != null and _inventory_screen.visible:
-				_inventory_screen.hide()
-				get_viewport().set_input_as_handled()
-				return
-
+# ==================== INPUT (delegated to WorldShortcuts) ====================
 
 func _toggle_inventory() -> void:
-	if _inventory_screen == null:
-		return
-
-	if _inventory_screen.visible:
-		_inventory_screen.hide()
-	else:
-		_inventory_screen.setup(_hero.inventory)
-		_inventory_screen.show()
+	if _ui_manager:
+		_ui_manager.toggle_inventory()
 
 
-func _get_run_seed() -> int:
-	if OS.has_feature("editor"):
-		return GameSettings.EDITOR_SEED
-	return int(Time.get_unix_time_from_system()) & 0x7FFFFFFF
+# ==================== ACCESSORS ====================
 
 func get_session() -> GameSession:
-	return _session
+	return _persistence.session
+
+# Public accessors for SocketController / external callers
+func get_hero() -> HeroController:
+	return _hero
+
+func get_map_gen() -> MapGenerator:
+	return _map_gen
+
+func is_world_visible() -> bool:
+	return visible
+
+func do_end_turn() -> void:
+	_on_end_turn()
 
 
-# ==================== SAVE / LOAD ====================
+# ==================== SAVE / LOAD (delegated) ====================
 
 func save_game() -> bool:
-	var save_data := SaveData.new()
-	save_data.run_seed = _session.run_seed
-	save_data.hero = _hero.serialize()
-	save_data.world = _world_delta.serialize()
-	_save_manager = _save_manager if _save_manager != null else SaveManager.new()
-	return _save_manager.save_game(save_data)
+	_persistence.world_delta = _world_delta
+	return _persistence.save_game(_hero)
+
 
 func load_game() -> SaveData:
-	return _save_manager.load_game()
+	return _persistence.load_game()
 
-func restart_game(seed: int) -> void:
-	WorldController.next_seed = seed
+
+func request_load_game() -> void:
+	var data = _persistence.request_load_game()
+	if data != null:
+		get_tree().reload_current_scene()
+
+
+func restart_game(seed_value: int) -> void:
+	_persistence.restart_game(seed_value)
 	get_tree().reload_current_scene()
 
-func show_reach_markers(hero_cell: Vector2i, mp: float, dist: Dictionary) -> void:
-	if _marker_layer:
-		_marker_layer.show_markers(hero_cell, mp, dist)
 
+func show_reach_markers(hero_cell: Vector2i, mp: float, dist: Dictionary) -> void:
+	if _ui_manager:
+		_ui_manager.show_reach_markers(hero_cell, mp, dist)
 
 
 func hide_reach_markers() -> void:
-	if _marker_layer:
-		_marker_layer.hide_markers()
+	if _ui_manager:
+		_ui_manager.hide_reach_markers()
 
 
 func _on_marker_hovered(cell: Vector2i, cost: float, remaining: float, is_reachable: bool) -> void:
@@ -366,13 +404,13 @@ func _on_marker_clicked(cell: Vector2i, is_reachable: bool) -> void:
 
 
 func _on_reach_preview_changed(pts: Array[Vector2i], dist: Dictionary, mp: float) -> void:
-	if _marker_layer:
-		_marker_layer.show_markers(_hero.current_cell, mp, dist)
+	if _ui_manager:
+		_ui_manager.show_reach_markers(_hero.current_cell, mp, dist)
 
 
 func _on_reach_preview_cleared() -> void:
-	if _marker_layer:
-		_marker_layer.hide_markers()
+	if _ui_manager:
+		_ui_manager.hide_reach_markers()
 
 
 func _compute_map_rect() -> Rect2:
@@ -381,108 +419,58 @@ func _compute_map_rect() -> Rect2:
 	return Rect2(0, 0, 10000, 10000)
 
 
-# ==================== RESOURCE CHAIN HELPERS ====================
-
-func _build_discovery_keys() -> Dictionary:
-	var keys: Dictionary = {}
-	keys[&"nature_sense"] = _hero.skills.get(&"nature_sense")
-	keys[&"keen_eye"] = _hero.skills.get(&"keen_eye")
-	keys[&"navigation"] = _hero.skills.get(&"navigation")
-	keys[&"geology"] = _hero.skills.get(&"geology")
-	keys[&"alchemy"] = _hero.skills.get(&"alchemy")
-	keys["time"] = _hero.time.get_period_name()
-	# Check for undead/lizard army tags
-	var army_stacks := _hero.army.get_army_for_battle()
-	for stack in army_stacks:
-		var unit_def: UnitStats = UnitRegistry.get_definition(stack.unit_id)
-		if unit_def:
-			for tag in unit_def.get_tags():
-				if tag in [&"undead", &"lizard"]:
-					keys[tag] = true
-	return keys
-
-
-var _cached_extraction_keys: Dictionary = {}
-var _extraction_cache_valid := false
+# ==================== RESOURCE CHAIN (delegated) ====================
 
 func _build_extraction_keys() -> Dictionary:
-	if _extraction_cache_valid:
-		return _cached_extraction_keys
-	var keys: Dictionary = {}
-	# Tags from army units
-	var army_stacks := _hero.army.get_army_for_battle()
-	for stack in army_stacks:
-		var unit_def: UnitStats = UnitRegistry.get_definition(stack.unit_id)
-		if unit_def:
-			for tag in unit_def.get_tags():
-				keys[tag] = true
-	# Skills
-	for skill in _hero.skills.get_all():
-		keys[skill] = _hero.skills.get(skill)
-	# Units
-	for stack in army_stacks:
-		keys[stack.unit_id] = true
-	# Tools
-	for tool_type in HeroTools.TOOL_TYPES:
-		keys[tool_type] = _hero.tools.has_tool(tool_type)
-	# Fire capability
-	keys["fire"] = false  # Would need spell check; simplified for now
-	_cached_extraction_keys = keys
-	_extraction_cache_valid = true
-	return keys
+	return _resource_chain.build_extraction_keys(_hero)
+
 
 func _invalidate_extraction_cache() -> void:
-	_extraction_cache_valid = false
+	_resource_chain.invalidate_extraction_cache()
 
 
 func try_extract_resource(cell: Vector2i) -> int:
-	if resource_node_manager == null:
-		return 0
-	var keys := _build_extraction_keys()
-	var amount := resource_node_manager.try_extract(cell, keys)
-	return amount
+	return _resource_chain.try_extract(resource_node_manager, _hero, cell)
 
 
 func _on_resource_discovered(cell: Vector2i, resource_id: StringName) -> void:
-	Logger.world("Resource discovered at %s: %s" % [cell, resource_id])
+	GameLogger.world("Resource discovered at %s: %s" % [cell, resource_id])
 
+	if _world_delta:
+		_world_delta.add_discovered_node(cell)
+
+
+const ResourceDef = preload("res://scripts/data/ResourceDef.gd")
 
 func _on_resource_extracted(cell: Vector2i, resource_id: StringName, amount: int) -> void:
 	var skill_mult: float = 1.0
-	var def: ResourceRegistry.ResourceDef = ResourceRegistry.get(resource_id)
+	var def: ResourceDef = ResourceRegistry.get_resource(resource_id)
 	if def:
 		if not def.discovery_skill.is_empty():
 			skill_mult = _hero.skills.get_yield_multiplier(def.discovery_skill)
-	var final_amount := max(1, int(amount * skill_mult))
-	var actual := _hero.add_strategic_resource(resource_id, final_amount)
-	Logger.world("Extracted %d of %s at %s (actual: %d)" % [final_amount, resource_id, cell, actual])
+	var final_amount: int = max(1, int(amount * skill_mult))
+	var actual: int = _hero.add_strategic_resource(resource_id, final_amount)
+	GameLogger.world("Extracted %d of %s at %s (actual: %d)" % [final_amount, resource_id, cell, actual])
+
+
+func _on_resource_exhausted(cell: Vector2i, resource_id: StringName) -> void:
+	GameLogger.world("Resource exhausted at %s: %s" % [cell, resource_id])
+
+	if _world_delta:
+		_world_delta.add_exhausted_node(cell)
 
 
 func apply_save(data: SaveData) -> void:
-	if data == null or not data.is_valid():
-		return
+	_persistence.apply_loaded_save(data, _build_load_context())
 
-	# Rebuild map from seed
-	_session.run_seed = data.run_seed
-	_rng.seed = data.run_seed
 
-	# Apply world deltas after generation
-	_world_delta.deserialize(data.world)
-
-	# Restore hero state
-	_hero.deserialize(data.hero)
-	_hero.setup(_map_gen)
-
-	# Remove defeated enemies and collected resources
-	for cell in _world_delta.defeated_enemies:
-		_map_gen.enemy_stacks.erase(cell)
-		_spawner.remove_enemy_at(cell)
-
-	for cell in _world_delta.removed_resources:
-		_map_gen.resource_cells.erase(cell)
-		_spawner.remove_resource_at(cell)
-
-	for cell in _world_delta.opened_chests:
-		_spawner.remove_chest_at(cell)
-
-	Logger.world("Loaded save: seed=%d, cell=%s" % [data.run_seed, str(_hero.current_cell)])
+func _build_load_context() -> WorldLoadContext:
+	var ctx := WorldLoadContext.new()
+	ctx.map_gen = _map_gen
+	ctx.spawner = _spawner
+	ctx.resource_node_manager = resource_node_manager
+	ctx.ui_manager = _ui_manager
+	ctx.camera = _camera
+	ctx.hero = _hero
+	ctx.world_delta = _world_delta
+	return ctx
