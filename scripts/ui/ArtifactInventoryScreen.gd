@@ -14,7 +14,9 @@ func setup(inv: HeroInventory) -> void:
 	_build_layout()
 	_update_all()
 	_connect_signals()
-	UIAnimator.animate_in(self)
+	var animator = get_node_or_null("/root/UIAnimator")
+	if animator:
+		animator.animate_in(self)
 
 
 func _build_layout() -> void:
@@ -187,7 +189,7 @@ func _update_backpack() -> void:
 func _update_modifiers() -> void:
 	if _modifiers_label == null:
 		return
-	var mods := _inventory.get_total_modifiers()
+	var mods: Dictionary = _inventory.get_total_modifiers()
 	var fmt := func(k: String, default: int = 0) -> String:
 		var val: int = int(mods.get(k, default))
 		return ("+%d" % val) if val > 0 else (("%d" % val) if val != 0 else "0")
@@ -196,15 +198,15 @@ func _update_modifiers() -> void:
 		return ("%+.1f%%" % val) if val != 0 else "0%"
 
 	_modifiers_label.text = (
-		"ATK %s  DEF %s  SP %s\n"
-		"KNW %s  LCK %s  MOR %s\n"
-		"HP %s (%s)  SPD %s\n"
+		"ATK %s  DEF %s  SP %s\n" +
+		"KNW %s  LCK %s  MOR %s\n" +
+		"HP %s (%s)  SPD %s\n" +
 		"Gems %s  Growth %s"
 	) % [
-		fmt("attack"), fmt("defense"), fmt("spell_power"),
-		fmt("knowledge"), fmt("luck"), fmt("morale"),
-		fmt("stack_hp"), fmt_pct("stack_hp_percent"), fmt("stack_speed"),
-		fmt("daily_gems"), fmt_pct("castle_growth_percent"),
+		fmt.call("attack"), fmt.call("defense"), fmt.call("spell_power"),
+		fmt.call("knowledge"), fmt.call("luck"), fmt.call("morale"),
+		fmt.call("stack_hp"), fmt_pct.call("stack_hp_percent"), fmt.call("stack_speed"),
+		fmt.call("daily_gems"), fmt_pct.call("castle_growth_percent"),
 	]
 
 
@@ -229,8 +231,8 @@ func _on_equipped_slot_clicked(artifact: Artifact, slot: Artifact.Slot) -> void:
 func _on_item_hover(artifact: Artifact) -> void:
 	if artifact == null:
 		return
-	var mods := artifact.get_modifiers()
-	var lines := [artifact.display_name, "(%s)" % _rarity_name(artifact.rarity)]
+	var mods: Dictionary = artifact.modifiers
+	var lines := [artifact.display_name, "(%s)" % artifact.get_rarity_name()]
 	if artifact.is_two_handed:
 		lines.append("TWO-HANDED")
 	for k in mods:
@@ -254,9 +256,4 @@ func _on_item_hover_exit() -> void:
 		_tooltip = null
 
 
-func _rarity_name(rarity: Artifact.Rarity) -> String:
-	match rarity:
-		Artifact.Rarity.MINOR: return "Minor"
-		Artifact.Rarity.MAJOR: return "Major"
-		Artifact.Rarity.RELIC: return "Relic"
-	return "?"
+

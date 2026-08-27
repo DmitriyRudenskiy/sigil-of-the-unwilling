@@ -103,6 +103,14 @@ func get_rarity_name() -> String:
     return ""
 
 
+func get_rarity_color() -> Color:
+    match rarity:
+        Rarity.MINOR: return Color(0.8, 0.8, 0.6)
+        Rarity.MAJOR: return Color(0.4, 0.6, 1.0)
+        Rarity.RELIC: return Color(1.0, 0.75, 0.15)
+    return Color.WHITE
+
+
 func get_slot_name() -> String:
     match slot:
         Slot.HEAD: return "Head"

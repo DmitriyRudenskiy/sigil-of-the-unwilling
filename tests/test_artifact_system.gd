@@ -15,9 +15,7 @@ func test_artifact_stats() -> void:
     a.id = &"test_item"
     a.slot = Artifact.Slot.WEAPON
     a.rarity = Artifact.Rarity.MINOR
-    a.attack_bonus = 10
-    a.defense_bonus = 5
-    a.spell_power_bonus = 3
+    a.modifiers = {"attack": 10, "defense": 5, "spell_power": 3}
     assert_eq(a.get_attack(), 10)
     assert_eq(a.get_defense(), 5)
     assert_eq(a.get_spell_power(), 3)
@@ -29,9 +27,7 @@ func test_artifact_stack_modifiers() -> void:
     a.id = &"test_item"
     a.slot = Artifact.Slot.TORSO
     a.rarity = Artifact.Rarity.MAJOR
-    a.stack_hp_bonus = 15
-    a.stack_hp_percent = 0.2
-    a.stack_speed_bonus = 2
+    a.modifiers = {"stack_hp": 15, "stack_hp_percent": 0.2, "stack_speed": 2}
     assert_eq(a.get_stack_hp_bonus(), 15)
     assert_eq(a.get_stack_hp_percent(), 0.2)
     assert_eq(a.get_stack_speed_bonus(), 2)
@@ -78,7 +74,7 @@ func test_registry_random_returns_valid() -> void:
     var rng := RandomNumberGenerator.new()
     rng.seed = 42
     for i in 100:
-        var art = ArtifactRegistry.random_by_rarity(Artifact.Rarity.MINOR, rng)
+        var art = ArtifactRegistry.random_of_rarity(Artifact.Rarity.MINOR, rng)
         assert_true(art != null)
         assert_eq(art.rarity, Artifact.Rarity.MINOR)
 

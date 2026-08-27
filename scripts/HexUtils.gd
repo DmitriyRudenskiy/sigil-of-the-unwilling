@@ -73,7 +73,7 @@ static func cube_to_offset(c: Vector3i) -> Vector2i:
 static func hex_distance(a: Vector2i, b: Vector2i) -> int:
 	var ac := offset_to_cube(a)
 	var bc := offset_to_cube(b)
-	return maxi(maxi(absi(ac.x - bc.x), absi(ac.y - bc.y)), absi(ac.z - bc.z))
+	return max(max(absi(ac.x - bc.x), absi(ac.y - bc.y)), absi(ac.z - bc.z))
 
 
 static func bfs_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: int, h: int) -> Array[Vector2i]:
@@ -107,11 +107,24 @@ static func bfs_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: in
 	return path
 
 
+static func pos_to_idx(cell: Vector2i, w: int) -> int:
+	return cell.y * w + cell.x
+
+
+static func idx_to_pos(idx: int, w: int) -> Vector2i:
+	return Vector2i(idx % w, idx / w)
+
+
 ## Dijkstra with float terrain costs (binary heap O(log n)).
 ## `cost_fn` — Callable(cell: Vector2i) -> float; returns cost to ENTER that cell (INF = blocked).
-## Returns Dictionary[cell: float] of cheapest cost from start to each reachable cell.
-static func dijkstra(start: Vector2i, max_cost: float, cost_fn: Callable) -> Dictionary:
-	var dist: Dictionary = {start: 0.0}
+## Returns PackedFloat32Array of cheapest cost from start to each cell. Indices: y * w + x.
+static func dijkstra(start: Vector2i, max_cost: float, cost_fn: Callable, w: int, h: int) -> PackedFloat32Array:
+	var dist := PackedFloat32Array()
+	dist.resize(w * h)
+	dist.fill(INF)
+	
+	var start_idx := pos_to_idx(start, w)
+	dist[start_idx] = 0.0
 	# Min-heap: index 1 = root, [d, cell] pairs
 	var heap: Array = [0.0, [0.0, start]]
 
@@ -122,7 +135,6 @@ static func dijkstra(start: Vector2i, max_cost: float, cost_fn: Callable) -> Dic
 			heap[1] = heap.pop_back()
 		else:
 			heap.pop_back()
-			# sift down (skip if heap is now empty)
 		if heap.size() > 1:
 			var hi := 1
 			while hi * 2 < heap.size():
@@ -136,67 +148,84 @@ static func dijkstra(start: Vector2i, max_cost: float, cost_fn: Callable) -> Dic
 				hi = smallest
 		var cur: Vector2i = entry[1]
 		var cur_d: float = entry[0]
-		if cur_d > dist[cur]: continue
+		
+		var cur_idx := pos_to_idx(cur, w)
+		if cur_d > dist[cur_idx]: continue
 		if cur_d > max_cost: continue
 		for bit in 6:
 			var nxt := get_neighbor(cur, bit)
+			if nxt.x < 0 or nxt.x >= w or nxt.y < 0 or nxt.y >= h:
+				continue
 			var enter_cost: float = cost_fn.call(nxt)
-			if enter_cost >= INF: continue
+			if enter_cost == INF: continue
 			var new_d: float = cur_d + enter_cost
-			if not dist.has(nxt) or new_d < dist[nxt]:
-				dist[nxt] = new_d
-				# heap push
-			heap.append([new_d, nxt])
-			var i := heap.size() - 1
-			while i > 1:
-				var parent := i / 2
-				if heap[parent][0] <= heap[i][0]: break
-				var tmp2 = heap[parent]; heap[parent] = heap[i]; heap[i] = tmp2
-				i = parent
-	dist.erase(start)
-	# Filter: only keep cells within max_cost
-	var result: Dictionary = {}
-	for cell in dist:
-		if dist[cell] <= max_cost + 0.001:
-			result[cell] = dist[cell]
-	return result
+			var nxt_idx := pos_to_idx(nxt, w)
+			if new_d < dist[nxt_idx]:
+				dist[nxt_idx] = new_d
+				heap.append([new_d, nxt])
+				var i := heap.size() - 1
+				while i > 1:
+					var parent := i / 2
+					if heap[parent][0] <= heap[i][0]: break
+					var tmp2 = heap[parent]; heap[parent] = heap[i]; heap[i] = tmp2
+					i = parent
+	for i in range(dist.size()):
+		if dist[i] > max_cost + 0.001:
+			dist[i] = INF
+	return dist
 
 
 ## Dijkstra path reconstruction: trace back from goal to start using dist map.
-static func dijkstra_path(start: Vector2i, goal: Vector2i, dist: Dictionary, cost_fn: Callable) -> Array[Vector2i]:
-	if not dist.has(goal):
+static func dijkstra_path(start: Vector2i, goal: Vector2i, dist: PackedFloat32Array, cost_fn: Callable, w: int, h: int) -> Array[Vector2i]:
+	var goal_idx := pos_to_idx(goal, w)
+	if dist[goal_idx] == INF:
 		return []
 	if start == goal:
 		return [start]
 	var path: Array[Vector2i] = []
-	var c := goal
+	var c: Vector2i = goal
+
 	while c != start:
 		path.append(c)
+
 		var best: Vector2i = c
-		var best_d: float = dist[c]
+		var c_idx := pos_to_idx(c, w)
+		var best_d: float = dist[c_idx]
+		var enter_current: float = cost_fn.call(c)
+
+		if enter_current == INF:
+			break
+
 		for bit in 6:
-			var nb := get_neighbor(c, bit)
-			if dist.has(nb):
-				var nb_cost: float = cost_fn.call(nb)
-				if nb_cost < INF:
-					var prev_d: float = dist[nb]
-					if prev_d + nb_cost <= best_d - 0.0001:
-						best_d = prev_d + nb_cost
-						best = nb
-			if best == c:
-				break  # can't find predecessor, stuck
+			var nb: Vector2i = get_neighbor(c, bit)
+			if nb.x < 0 or nb.x >= w or nb.y < 0 or nb.y >= h:
+				continue
+			var nb_idx := pos_to_idx(nb, w)
+			var candidate: float = INF
+
+			if nb == start:
+				candidate = enter_current
+			elif dist[nb_idx] != INF:
+				candidate = dist[nb_idx] + enter_current
+
+			if candidate != INF and candidate <= best_d + 0.0001:
+				best_d = candidate
+				best = nb
+
 		if best == c:
 			break
+
 		c = best
+
 	path.append(c)
 	path.reverse()
 	return path
 
 
 static func bfs_reachable(start: Vector2i, steps: int, blocked: Dictionary, w: int, h: int) -> Dictionary:
-	var result := {start: 0}
+	var result: Dictionary = {start: 0}
 	var queue: Array[Vector2i] = [start]
-	var head := 0
+	var head: int = 0
 	while head < queue.size():
 		var cur: Vector2i = queue[head]
 		head += 1
@@ -204,7 +233,7 @@ static func bfs_reachable(start: Vector2i, steps: int, blocked: Dictionary, w: i
 		if dist >= steps:
 			continue
 		for bit in 6:
-			var nxt := get_neighbor(cur, bit)
+			var nxt: Vector2i = get_neighbor(cur, bit)
 			if nxt.x < 0 or nxt.x >= w or nxt.y < 0 or nxt.y >= h:
 				continue
 			if blocked.has(nxt) or result.has(nxt):

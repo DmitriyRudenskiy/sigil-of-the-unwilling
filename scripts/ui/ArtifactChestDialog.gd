@@ -14,7 +14,7 @@ func open(chest: ArtifactChest) -> void:
 	_build_layout()
 	_update_display()
 	visible = true
-	Logger.ui("Chest dialog opened at %s" % chest.cell)
+	GameLogger.ui("Chest dialog opened at %s" % chest.cell)
 
 
 func _build_layout() -> void:
@@ -93,9 +93,9 @@ func _update_display() -> void:
 	if _current_chest.artifact != null:
 		var art := _current_chest.artifact
 		_artifact_label.text = "%s\n(%s) ATK+%d DEF+%d" % [
-			art.display_name, _rarity_name(art.rarity), art.get_attack(), art.get_defense()
+			art.display_name, art.get_rarity_name(), art.get_attack(), art.get_defense()
 		]
-		_artifact_label.add_theme_color_override("font_color", _rarity_color(art.rarity))
+		_artifact_label.add_theme_color_override("font_color", art.get_rarity_color())
 	else:
 		_artifact_label.text = "Empty"
 		_artifact_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
@@ -124,16 +124,4 @@ func _close() -> void:
 	visible = false
 
 
-func _rarity_color(rarity: Artifact.Rarity) -> Color:
-	match rarity:
-		Artifact.Rarity.MAJOR: return Color(0.4, 0.6, 1.0)
-		Artifact.Rarity.RELIC: return Color(1.0, 0.75, 0.15)
-		_: return Color(0.9, 0.9, 0.7)
 
-
-func _rarity_name(rarity: Artifact.Rarity) -> String:
-	match rarity:
-		Artifact.Rarity.MINOR: return "Minor"
-		Artifact.Rarity.MAJOR: return "Major"
-		Artifact.Rarity.RELIC: return "Relic"
-	return "?"

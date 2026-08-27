@@ -14,14 +14,29 @@ var _input: BattleInput
 var _executor: BattleTurnExecutor
 var _fx: BattleFX
 var obstacles: Dictionary = {}
-var _obstacle_seed: int = 777
+var _obstacle_seed: int = -1
 
 
 # ==================== READY ====================
 func _ready() -> void:
+	_init_state()
+	_init_view()
+	_init_executor()
+	_init_ui()
+	_init_input()
+	_init_fx()
+	_wire_signals()
+
+	await get_tree().process_frame
+	_view.fit_camera()
+
+
+func _init_state() -> void:
 	_state = BattleState.new()
 	_ai = BattleAI.new()
 
+
+func _init_view() -> void:
 	_view = BattleView.new()
 	_view.name = "BattleView"
 	add_child(_view)
@@ -29,6 +44,15 @@ func _ready() -> void:
 	_view.paint_field()
 	_place_obstacles()
 
+
+func _init_executor() -> void:
+	_executor = BattleTurnExecutor.new()
+	_executor.name = "BattleTurnExecutor"
+	add_child(_executor)
+	_executor.setup(_state, _ai, obstacles)
+
+
+func _init_ui() -> void:
 	_ui = BattleUI.new()
 	_ui.name = "BattleUI"
 	add_child(_ui)
@@ -38,41 +62,44 @@ func _ready() -> void:
 	_ui.skip_requested.connect(_on_skip)
 	_ui.defend_requested.connect(_on_defend)
 	_ui.spellbook_requested.connect(_on_spellbook)
+	_ui.spell_chosen.connect(_executor.request_spell_cast)
 	_ui.settings_requested.connect(_on_settings)
 	_ui.settings_closed.connect(resume_from_settings)
 
+
+func _init_input() -> void:
 	_input = BattleInput.new()
 	_input.name = "BattleInput"
 	add_child(_input)
 	_input.setup(_view, _state, obstacles)
+	_input.unit_pick_requested.connect(_executor.request_select)
 	_input.unit_selected.connect(_on_unit_selected)
 	_input.unit_move_requested.connect(_on_move_requested)
 	_input.unit_attack_requested.connect(_on_attack_requested)
+	_input.spell_cast_requested.connect(_executor.on_spell_target_selected)
 	_input.cancel_requested.connect(_on_cancel)
 
-	_executor = BattleTurnExecutor.new()
-	_executor.name = "BattleTurnExecutor"
-	add_child(_executor)
-	_executor.setup(_state, _ai, obstacles)
 
+func _init_fx() -> void:
 	_fx = BattleFX.new()
 	_fx.name = "BattleFX"
 	add_child(_fx)
 	_fx.setup(_view)
+
+
+func _wire_signals() -> void:
 	_executor.status_updated.connect(_on_status_updated)
 	_executor.clear_highlights.connect(_on_clear_highlights)
 	_executor.pulse_unit.connect(_view.pulse_unit)
 	_executor.execute_move.connect(_on_execute_move)
 	_executor.execute_attack.connect(_on_execute_attack)
+	_executor.spell_cast_executed.connect(_on_execute_spell)
 	_executor.end_battle.connect(battle_finished.emit)
 	_executor.phase_changed.connect(_on_executor_phase_changed)
 	_executor.initiative_changed.connect(_on_initiative_changed)
 	_executor.active_unit_changed.connect(_ui.update_active_unit)
 	_executor.floating_text.connect(_view.show_floating_text)
 	_input.attack_preview_updated.connect(_ui.set_attack_preview)
-
-	await get_tree().process_frame
-	_view.fit_camera()
 
 
 func _place_obstacles() -> void:
@@ -132,7 +159,24 @@ func _on_defend() -> void:
 
 
 func _on_spellbook() -> void:
-	_on_status_updated("📖 Книга заклинаний открыта.")
+	_ui.open_spellbook(_state)
+
+
+func _on_execute_spell(caster: BattleState.BattleUnit, target: BattleState.BattleUnit, result: Dictionary) -> void:
+	# 1. Визуал каста
+	_fx.show_spell_cast(target.cell, result.get("spell_id", &""))
+
+	# 2. Визуал урона/эффектов
+	_show_damage_feedback(target, result)
+	await _get_damage_wait()
+
+	# 3. Визуал статусов
+	if result.has("status") and int(result.get("status", -1)) != -1:
+		_fx.show_status(target.cell, int(result.get("status")))
+
+	# 4. Уведомляем Executor
+	if is_instance_valid(_executor):
+		_executor.on_spell_anim_completed()
 
 
 func _on_settings() -> void:
@@ -165,38 +209,40 @@ func _on_execute_attack(
 		return
 
 	_view.animate_attack(atk, def)
-	_view.update_unit_count(def)
-	_view.show_damage_number(def, int(result.get("damage", 0)))
 
 	if result.get("is_retaliation", false):
 		_view.show_retaliation_arrow(atk, def)
 
-	if int(result.get("kills", 0)) > 0:
-		_view.show_floating_text(
-			def.cell,
-			"KILLED: %d" % int(result.get("kills", 0)),
-			Color.WHITE
-		)
+	_show_damage_feedback(def, result)
 
-	Logger.battle("%s -> %s: damage=%d killed=%d" % [
+	GameLogger.battle("%s -> %s: damage=%d killed=%d" % [
 		atk.get_display_name(),
 		def.get_display_name(),
 		result.get("damage", 0),
 		result.get("kills", 0),
 	])
 
-	if def.get_count() <= 0:
-		_view.remove_unit(def)
-
-	await get_tree().create_timer(0.35).timeout
+	await _get_damage_wait()
 
 	if not is_inside_tree():
 		return
 
-	_executor.on_attack_completed()
+	if is_instance_valid(_executor):
+		_executor.on_attack_completed()
 
 
 # ==================== STATUS / HIGHLIGHTS ====================
+func _show_damage_feedback(target: BattleState.BattleUnit, result: Dictionary) -> void:
+	_view.update_unit_count(target)
+	_view.show_damage_number(target, int(result.get("damage", 0)))
+	if int(result.get("kills", 0)) > 0:
+		_view.show_floating_text(target.cell, "KILLED: %d" % int(result.get("kills", 0)), Color.WHITE)
+	if target.get_count() <= 0:
+		_view.remove_unit(target)
+
+func _get_damage_wait() -> SceneTreeTimer:
+	return get_tree().create_timer(0.3)
+
 func _on_status_updated(text: String) -> void:
 	_ui.set_status(text)
 
@@ -228,11 +274,12 @@ func start_battle(
 	defender_bonus: Dictionary = {},
 	attacker_artifact_mods: Dictionary = {},
 	defender_artifact_mods: Dictionary = {},
-	obstacle_seed: int = 777
+	obstacle_seed: int = -1
 ) -> void:
+	if obstacle_seed < 0:
+		obstacle_seed = randi()
 	_obstacle_seed = obstacle_seed
 	_state.set_hero_bonuses(attacker_bonus, defender_bonus)
-	_input.setup_bonuses(attacker_bonus, defender_bonus)
 	_state.place_army(atk, def, attacker_artifact_mods, defender_artifact_mods)
 
 	for u in _state.get_units_by_side("attacker"):
@@ -250,3 +297,10 @@ func start_battle(
 
 func _on_initiative_changed() -> void:
 	_ui.update_initiative(_state.turn_queue, _state.active_unit)
+
+# Public accessors for SocketController / external callers
+func get_battle_state() -> BattleState:
+	return _state
+
+func do_retreat() -> void:
+	_on_retreat()

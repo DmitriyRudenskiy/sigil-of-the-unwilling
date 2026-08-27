@@ -3,9 +3,6 @@ class_name MapGenerator
 ## Координатор карты: модель, рендерер, спавнер, тайлмапы.
 
 const TerrainAtlasMapScript = preload("res://scripts/TerrainAtlasMap.gd")
-const _MapModel = preload("res://scripts/map/MapModel.gd")
-const _MapRenderer = preload("res://scripts/map/MapRenderer.gd")
-const _MapSpawner = preload("res://scripts/map/MapSpawner.gd")
 
 var model
 var renderer
@@ -68,14 +65,14 @@ func _ready() -> void:
 func generate() -> void:
 	_ensure_layers()
 
-	model = _MapModel.new()
+	model = MapModel.new()
 	model.map_width = _map_width if _map_width > 0 else 60
 	model.map_height = _map_height if _map_height > 0 else 60
 	model.seed_value = _seed_value
 	model.village_count = GameSettings.MAP_VILLAGE_COUNT
 
-	renderer = _MapRenderer.new(model)
-	spawner = _MapSpawner.new(model)
+	renderer = MapRenderer.new(model)
+	spawner = MapSpawner.new(model)
 
 	HexUtils.calibrate(_tile_map)
 
@@ -86,9 +83,33 @@ func generate() -> void:
 	renderer.paint_decor(_decor_layer)
 
 	spawner.place_villages()
-	spawner.place_resources()
+	# Compute reachable cells once, reuse for resources + enemies
+	var reachable := _compute_reachable_cells()
+	spawner.place_resources(reachable)
 	spawner.place_decor()
-	spawner.place_enemies()
+	spawner.place_enemies(reachable)
+
+
+func _compute_reachable_cells() -> Dictionary:
+	# Find first walkable cell as BFS start point
+	var start_cell := Vector2i(-1, -1)
+	for y in model.map_height:
+		for x in model.map_width:
+			var cell := Vector2i(x, y)
+			if model.is_walkable(cell):
+				start_cell = cell
+				break
+		if start_cell.x >= 0:
+			break
+	if start_cell.x < 0:
+		return {}
+	return HexUtils.bfs_reachable(
+		start_cell,
+		model.map_width + model.map_height,
+		model.get_blocked_cells(),
+		model.map_width,
+		model.map_height
+	)
 
 
 func _ensure_layers() -> void:
@@ -126,6 +147,10 @@ func is_walkable(cell: Vector2i) -> bool:
 	return model.is_walkable(cell) if model != null else false
 
 
+func is_walkable_with_effects(cell: Vector2i, has_levitation: bool = false) -> bool:
+	return model.is_walkable_with_effects(cell, has_levitation) if model != null else false
+
+
 func is_in_bounds(cell: Vector2i) -> bool:
 	return cell.x >= 0 and cell.x < map_width and cell.y >= 0 and cell.y < map_height
 
@@ -141,6 +166,18 @@ func get_blocked_cells() -> Dictionary:
 # Публичный API — тайлмап
 func has_valid_tilemap() -> bool:
 	return _tile_map != null and _tile_map.tile_set != null
+
+
+func get_tile_size() -> Vector2i:
+	if has_valid_tilemap():
+		return _tile_map.tile_set.tile_size
+	return Vector2i(82, 82)
+
+
+func world_to_map(world_pos: Vector2) -> Vector2i:
+	if not has_valid_tilemap():
+		return Vector2i(-1, -1)
+	return _tile_map.local_to_map(_tile_map.to_local(world_pos))
 
 
 func local_to_map(world_pos: Vector2) -> Vector2i:

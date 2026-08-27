@@ -45,12 +45,13 @@ func place_villages() -> void:
 					blocked[nb] = true
 
 
-func place_resources() -> void:
+func place_resources(reachable = null) -> void:
 	model.resource_cells.clear()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = model.seed_value + 700
 	
-	var reachable := _get_reachable_cells()
+	if reachable == null:
+		reachable = _get_reachable_cells()
 	var target := int(float(model.map_width * model.map_height) / 70.0)
 	var attempts := 0
 	while model.resource_cells.size() < target and attempts < 5000:
@@ -74,12 +75,13 @@ func place_decor() -> void:
 			model.decor_cells[cell] = "palm" if rng.randf() > 0.5 else "cactus"
 
 
-func place_enemies() -> void:
+func place_enemies(reachable = null) -> void:
 	model.enemy_stacks.clear()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = model.seed_value + 777
 	
-	var reachable := _get_reachable_cells()
+	if reachable == null:
+		reachable = _get_reachable_cells()
 	var placed := 0
 	var attempts := 0
 	while placed < 15 and attempts < 5000:
