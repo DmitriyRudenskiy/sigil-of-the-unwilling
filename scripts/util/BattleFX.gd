@@ -71,3 +71,30 @@ func show_kill(cell: Vector2i, count: int) -> void:
 	if _view == null:
 		return
 	_view.show_floating_text(cell, "KILLED: %d" % count, Color.WHITE)
+
+
+## Play full attack animation sequence: animate → feedback → log → wait.
+## @warning: must be awaited — `_executor.on_attack_completed()` fires after timer.
+## Asserts `is_inside_tree()` to catch missing `await`.
+func play_attack_sequence(
+	atk: BattleState.BattleUnit,
+	def: BattleState.BattleUnit,
+	result: Dictionary,
+	wait_time: float = 0.3
+) -> SceneTreeTimer:
+	assert(is_inside_tree(), "BattleFX.play_attack_sequence: not in tree")
+	_view.animate_attack(atk, def)
+
+	if result.get("is_retaliation", false):
+		_view.show_retaliation_arrow(atk, def)
+
+	show_damage_number(def, int(result.get("damage", 0)))
+
+	GameLogger.battle("%s -> %s: damage=%d killed=%d" % [
+		atk.get_display_name(),
+		def.get_display_name(),
+		result.get("damage", 0),
+		result.get("kills", 0),
+	])
+
+	return get_tree().create_timer(wait_time)

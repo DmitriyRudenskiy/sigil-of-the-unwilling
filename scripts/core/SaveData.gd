@@ -42,4 +42,16 @@ func from_dict(data: Dictionary) -> void:
 
 
 func is_valid() -> bool:
-	return version == CURRENT_VERSION and run_seed > 0
+	if version != CURRENT_VERSION:
+		return false
+	if run_seed <= 0:
+		return false
+	if not (hero is Dictionary) or hero.is_empty():
+		return false
+	if not hero.has("cell"):
+		return false
+	if not (hero["cell"] is Dictionary):
+		return false
+	if not (world is Dictionary):
+		return false
+	return true

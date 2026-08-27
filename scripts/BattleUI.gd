@@ -248,6 +248,7 @@ func _on_settings() -> void:
 func open_settings() -> void:
 	# Opened by BattleController when pause is set
 	_settings_screen = _SettingsScreen.new()
+	_settings_screen.setup(get_node_or_null("/root/Settings"))
 	_settings_screen.applied.connect(_on_settings_applied)
 	_settings_screen.closed.connect(_on_settings_closed)
 	add_child(_settings_screen)

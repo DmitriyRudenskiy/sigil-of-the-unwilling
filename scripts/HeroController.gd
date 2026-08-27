@@ -2,6 +2,8 @@ extends Node2D
 class_name HeroController
 ## Thin facade: composes Movement, Army, Resources, Visual.
 
+const _Platform = preload("res://scripts/core/Platform.gd")
+
 signal hero_moved(cell: Vector2i)
 signal hero_entered_village(cell: Vector2i)
 signal movement_points_changed(current: float, max_val: float)
@@ -89,6 +91,18 @@ func _wire_signals() -> void:
 	movement.hero_entered_village.connect(hero_entered_village.emit)
 	movement.reach_preview_changed.connect(_on_reach_preview)
 	movement.reach_preview_cleared.connect(_on_reach_cleared)
+
+	# R2: New signals replacing _parent back-references
+	movement.facing_changed.connect(visual.set_facing)
+	movement.move_requested.connect(_tween_to)
+	movement.request_hide_path_visual.connect(visual.clear_path_visual)
+	movement.request_show_marker.connect(visual.show_marker)
+	movement.request_idle_animation.connect(visual.idle_animation)
+	movement.request_kill_tween.connect(_kill_tween)
+	movement.request_time_update.connect(_on_time_update)
+	movement.request_resource_pickup.connect(_on_resource_pickup)
+	movement.request_set_position.connect(func(pos: Vector2): position = pos)
+
 	resources.resources_changed.connect(resources_changed.emit)
 	strategic_resources.strategic_resources_changed.connect(strategic_resources_changed.emit)
 	time.time_changed.connect(time_changed.emit)
@@ -101,6 +115,7 @@ func get_map_gen() -> MapGenerator:
 
 
 func setup(map: MapGenerator) -> void:
+	movement.set_artifact_effect_fn(has_artifact_effect)  # must be before movement.setup()
 	movement.setup(map, self)
 	visual.setup(map, self)
 	visual.build_visual()
@@ -172,6 +187,10 @@ func _show_marker(pos: Vector2) -> void:
 
 
 func _tween_to(target: Vector2, duration: float, callback: Callable) -> void:
+	if _Platform.is_headless():
+		callback.call()
+		return
+
 	if _tween and _tween.is_valid():
 		_tween.kill()
 	_tween = create_tween()
@@ -187,17 +206,24 @@ func _kill_tween() -> void:
 # ==================== TURN LOGIC ====================
 
 func end_turn() -> void:
-	resources.apply_daily_effects()
-	magic.tick_restore(stats.get("knowledge", 0))
+	_apply_daily_resource_effects()
+	_restore_mana()
+	_reset_time_and_movement()
 
-	# Auto-generate basic resources
+
+func _apply_daily_resource_effects() -> void:
+	resources.apply_daily_effects()
 	strategic_resources._add_internal(&"wood", GameSettings.RESOURCE_AUTO_WOOD_PER_DAY)
 	strategic_resources._add_internal(&"stone", GameSettings.RESOURCE_AUTO_STONE_PER_DAY)
 	strategic_resources.emit_changed()
 
-	# Reset time for new day
-	time.reset_for_new_day()
 
+func _restore_mana() -> void:
+	magic.tick_restore(stats.get("knowledge", 0))
+
+
+func _reset_time_and_movement() -> void:
+	time.reset_for_new_day()
 	movement.move_points = get_daily_movement_points()
 	movement_points_changed.emit(movement.move_points, get_daily_movement_points())
 	movement.end_turn_movement()
@@ -216,7 +242,8 @@ func force_stop() -> void:
 
 
 func get_daily_movement_points() -> float:
-	return movement.get_daily_movement_points()
+	var mods := inventory.get_total_modifiers()
+	return movement.get_daily_movement_points(mods.get("movement", 0))
 
 
 ## Для UI-панелей. По умолчанию — null (аватар не задан, используется эмодзи 🧙)

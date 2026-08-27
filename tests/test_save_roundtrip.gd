@@ -85,6 +85,8 @@ func _test_save_manager_write() -> int:
 
 	var data := _SaveData.new()
 	data.run_seed = 12345
+	data.hero = {"cell": {"x": 5, "y": 5}, "move_points": 10}
+	data.world = {"captured_villages": []}
 
 	var ok := sm.call("save_game", data) as bool
 	if not ok:

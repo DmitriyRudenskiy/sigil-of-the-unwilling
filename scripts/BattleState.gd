@@ -225,7 +225,8 @@ func _build_units(stacks: Array, is_atk: bool) -> Array[BattleUnit]:
 		var unit := BattleUnit.new(stack)
 		var row := (i / 2) * 2 + 1
 		if row > BH - 1:
-			push_warning("[BattleState] row %d exceeds board height %d for stack %d" % [row, BH, i])
+			push_error("[BattleState] Cannot place stack %d: row %d exceeds BH=%d. " % [i, row, BH]
+				+ "Max stacks per side: %d" % ((BH - 1) / 2 * 2))
 			continue
 		unit.cell = Vector2i(sx + (i % 2), row)
 		unit.side = "attacker" if is_atk else "defender"
@@ -377,7 +378,8 @@ func get_reachable_for_unit(unit: BattleUnit, blocked_fn: Callable) -> Dictionar
 
 func get_reachable(cell: Vector2i, speed: int, blocked_fn: Callable, unit: BattleUnit = null) -> Dictionary:
 	var uid := -1 if unit == null else unit.uid
-	var key := "%d:%d:%d:%d:%d" % [cell.x, cell.y, speed, _board_version, uid]
+	# Integer hash key avoids string allocation per BFS call
+	var key: int = cell.x | (cell.y << 8) | (speed << 16) | (_board_version << 24)
 	if _reachable_cache.has(key):
 		return _reachable_cache[key].duplicate()
 

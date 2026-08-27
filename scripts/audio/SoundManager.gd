@@ -1,6 +1,8 @@
 extends Node
 class_name SoundManager
 
+const _Platform = preload("res://scripts/core/Platform.gd")
+
 const SFX_POOL := 8
 
 var sfx_players: Array[AudioStreamPlayer] = []
@@ -9,7 +11,7 @@ var _stream_cache: Dictionary = {}
 var _rr := 0
 
 func _ready() -> void:
-	if OS.has_feature("headless"):
+	if _Platform.is_headless():
 		return  # No audio server in headless mode
 
 	# Verify bus existence

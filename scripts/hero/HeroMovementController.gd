@@ -10,6 +10,17 @@ signal step_taken(cost: float)
 signal reach_preview_changed(pts: Array[Vector2i], dist: Dictionary, mp: float)
 signal reach_preview_cleared
 
+## Signals to HeroController facade — replaces _parent back-references.
+signal facing_changed(delta: Vector2i)
+signal move_requested(target: Vector2, duration: float, callback: Callable)
+signal request_hide_path_visual
+signal request_show_marker(pos: Vector2)
+signal request_idle_animation
+signal request_kill_tween
+signal request_time_update(step_cost: float)
+signal request_resource_pickup(res_type: int)
+signal request_set_position(pos: Vector2)
+
 const _HexUtils = preload("res://scripts/HexUtils.gd")
 const _TerrainCostTable = preload("res://scripts/data/TerrainCostTable.gd")
 
@@ -23,16 +34,15 @@ var pending_path: Array[Vector2i] = []
 var is_moving: bool = false
 
 var _map_gen: MapGenerator
-var _parent: HeroController
+# _parent removed — use signals instead (R2)
 
 
 func get_map_gen() -> MapGenerator:
 	return _map_gen
 
 
-func setup(map: MapGenerator, hero: HeroController) -> void:
+func setup(map: MapGenerator, _hero: HeroController) -> void:
 	_map_gen = map
-	_parent = hero
 	_place_hero_on_map()
 	move_points = get_daily_movement_points()
 
@@ -51,7 +61,7 @@ func _terrain_cost(cell: Vector2i) -> float:
 	if cell.x < 0 or cell.x >= _map_gen.map_width or cell.y < 0 or cell.y >= _map_gen.map_height:
 		return INF
 
-	var levitation := _parent.has_artifact_effect(&"boots_levitation")
+	var levitation := _has_artifact_effect(&"boots_levitation")
 	if not _map_gen.is_walkable_with_effects(cell, levitation):
 		return INF
 
@@ -71,7 +81,7 @@ func on_map_clicked(cell: Vector2i) -> void:
 		pending_cell = Vector2i(-1, -1)
 		pending_path = []
 		path_previewed.emit("")
-		_parent._hide_path_visual()
+		request_hide_path_visual.emit()
 		_start_moving()
 		return
 
@@ -93,9 +103,9 @@ func on_map_clicked(cell: Vector2i) -> void:
 	var dist := _HexUtils.dijkstra(current_cell, move_points, cost_fn, _map_gen.map_width, _map_gen.map_height)
 	reach_preview_changed.emit(affordable, dist, move_points)
 
-	# Marker at clicked cell
+	# Marker at clicked cell (emitted via signal, facade handles it)
 	if _map_gen.has_valid_tilemap():
-		_parent._show_marker(_map_gen.map_to_local(cell))
+		request_show_marker.emit(_map_gen.map_to_local(cell))
 
 	var cost := 0.0
 	for i in range(1, affordable.size()):
@@ -161,32 +171,33 @@ func cancel_pending(clear_text: bool = true) -> void:
 func _start_moving() -> void:
 	if path.size() < 2:
 		return
+	print("[Movement] 🚀 Starting movement. Path size: %d" % path.size())
 	is_moving = true
 	_move_next_step()
 
 
 func _move_next_step() -> void:
 	if path.size() < 2:
+		print("[Movement] 🏁 Path exhausted. Stopping.")
 		is_moving = false
 		path.clear()
 		reach_preview_cleared.emit()
-		_parent._idle_animation()
+		request_idle_animation.emit()
 		return
 
 	var next_cell := path[1]
+	print("[Movement] ➡️ Moving to %s. Remaining path: %d" % [str(next_cell), path.size()])
 	path.remove_at(0)
 
 	var step_cost: float = _terrain_cost(next_cell)
 	move_points -= step_cost
 	movement_points_changed.emit(move_points, get_daily_movement_points())
 
-	# Update time system
-	if _parent and _parent.has_method("_on_time_update"):
-		_parent._on_time_update(step_cost)
 	step_taken.emit(step_cost)
 
 	var delta := next_cell - current_cell
-	_parent._set_facing(delta)
+	facing_changed.emit(delta)
+	request_time_update.emit(step_cost)
 
 	var target_pos: Vector2
 	if _map_gen and _map_gen.has_valid_tilemap():
@@ -194,18 +205,19 @@ func _move_next_step() -> void:
 	else:
 		target_pos = Vector2(next_cell.x * 64 + 32, next_cell.y * 56 + 28)
 
-	_parent._tween_to(target_pos, 0.35, _on_step_complete.bind(next_cell))
+	move_requested.emit(target_pos, 0.35, _on_step_complete.bind(next_cell))
 
 
 func _on_step_complete(cell: Vector2i) -> void:
+	print("[Movement] ✅ Step complete: %s" % str(cell))
 	current_cell = cell
 	_emit_position_update()
 	hero_moved.emit(cell)
 
-	# Pickup resource if present
+	# Pickup resource if present (emitted via signal)
 	if _map_gen and _map_gen.resource_cells.has(cell):
 		var res_type: int = _map_gen.resource_cells[cell]
-		_parent._on_resource_pickup(res_type)
+		request_resource_pickup.emit(res_type)
 		_map_gen.resource_cells.erase(cell)
 
 	# Check village entry
@@ -216,7 +228,7 @@ func _on_step_complete(cell: Vector2i) -> void:
 		is_moving = false
 		path.clear()
 		reach_preview_cleared.emit()
-		_parent._idle_animation()
+		request_idle_animation.emit()
 		return
 
 	_move_next_step()
@@ -231,18 +243,27 @@ func end_turn_movement() -> void:
 func force_stop() -> void:
 	is_moving = false
 	path.clear()
-	_parent._kill_tween()
+	request_kill_tween.emit()
 	reach_preview_cleared.emit()
-	_parent._idle_animation()
+	request_idle_animation.emit()
 
 
 func _emit_position_update() -> void:
 	if _map_gen and _map_gen.has_valid_tilemap():
-		_parent.position = _map_gen.map_to_local(current_cell)
+		request_set_position.emit(_map_gen.map_to_local(current_cell))
 	else:
-		_parent.position = Vector2(current_cell.x * 64 + 32, current_cell.y * 56 + 28)
+		request_set_position.emit(Vector2(current_cell.x * 64 + 32, current_cell.y * 56 + 28))
 
 
-func get_daily_movement_points() -> float:
-	var mods := _parent.inventory.get_total_modifiers()
-	return max_move_points + float(mods.get("movement", 0))
+func _has_artifact_effect(effect: StringName) -> bool:
+	# Called by _terrain_cost — the facade (HeroController) should wire this.
+	# For now, emit a signal or use a callback. We pass it via a stored callback.
+	return _artifact_effect_fn.call(effect) if _artifact_effect_fn.is_valid() else false
+
+var _artifact_effect_fn: Callable
+
+func set_artifact_effect_fn(fn: Callable) -> void:
+	_artifact_effect_fn = fn
+
+func get_daily_movement_points(movement_mod: int = 0) -> float:
+	return max_move_points + float(movement_mod)

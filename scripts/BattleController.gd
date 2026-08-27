@@ -207,21 +207,8 @@ func _on_execute_attack(
 		_executor.on_attack_completed()
 		return
 
-	_view.animate_attack(atk, def)
-
-	if result.get("is_retaliation", false):
-		_view.show_retaliation_arrow(atk, def)
-
 	_show_damage_feedback(def, result)
-
-	GameLogger.battle("%s -> %s: damage=%d killed=%d" % [
-		atk.get_display_name(),
-		def.get_display_name(),
-		result.get("damage", 0),
-		result.get("kills", 0),
-	])
-
-	await _get_damage_wait()
+	await _fx.play_attack_sequence(atk, def, result)
 
 	if not is_inside_tree():
 		return

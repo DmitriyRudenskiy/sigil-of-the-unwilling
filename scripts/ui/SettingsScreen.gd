@@ -27,10 +27,11 @@ var _sfx_slider: HSlider
 var _tween: Tween = null
 var _settings: Node = null
 
+func setup(settings: Node) -> void:
+	_settings = settings
 
 func _ready() -> void:
 	z_index = 50
-	_settings = get_node_or_null("/root/Settings")
 	if not _settings:
 		return
 	_build()

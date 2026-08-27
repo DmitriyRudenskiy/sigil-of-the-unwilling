@@ -4,6 +4,7 @@ extends RefCounted
 ## Точка входа: валидация → оплата → диспетчеризация в шаблон.
 
 const _Engine = preload("res://scripts/card/CardTemplateEngine.gd")
+const _Utils = preload("res://scripts/card/CardUtils.gd")
 
 static func resolve(
 	spell,
@@ -63,9 +64,9 @@ static func _has_power(obj: Variant) -> bool:
 static func _get_influence(caster: Variant, color: String) -> int:
 	if caster == null:
 		return 0
-	if _has_method(caster, "get_influence"):
+	if _Utils.has_method(caster, "get_influence"):
 		return caster.get_influence(color)
-	if _has_attr(caster, "influence"):
+	if _Utils.has_attr(caster, "influence"):
 		var inf: Dictionary = caster.influence
 		return int(inf.get(color, 0))
 	return 0
@@ -73,20 +74,6 @@ static func _get_influence(caster: Variant, color: String) -> int:
 static func _get_player_id(caster: Variant) -> Variant:
 	if caster == null:
 		return null
-	if _has_attr(caster, "player_id"):
+	if _Utils.has_attr(caster, "player_id"):
 		return caster.player_id
 	return caster
-
-static func _has_method(obj: Variant, method: String) -> bool:
-	if obj == null:
-		return false
-	if obj is Object:
-		return obj.has_method(method)
-	return false
-
-static func _has_attr(obj: Variant, attr: String) -> bool:
-	if obj == null:
-		return false
-	if obj is Dictionary:
-		return obj.has(attr)
-	return false

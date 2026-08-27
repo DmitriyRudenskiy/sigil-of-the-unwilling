@@ -9,15 +9,17 @@ const ZOOM_TWEEN_DURATION := 0.175
 # Map bounds in world coords — set after map generation
 var _map_rect: Rect2 = Rect2(0, 0, 10000, 10000)  # generous default
 var _tween: Tween = null
-var _settings = null
+var _settings: Node = null
+
+func setup(settings: Node) -> void:
+	_settings = settings
 
 func _get_settings() -> Node:
-	return get_node_or_null("/root/Settings")
+	return _settings
 
 
 func _ready() -> void:
 	position_smoothing_enabled = true
-	_settings = _get_settings()
 	if _settings:
 		_set_zoom(_settings.get_zoom())
 

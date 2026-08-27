@@ -193,7 +193,8 @@ static func dijkstra_path(start: Vector2i, goal: Vector2i, dist: PackedFloat32Ar
 		var best_d: float = dist[c_idx]
 		var enter_current: float = cost_fn.call(c)
 
-		if enter_current == INF:
+		if enter_current >= INF:
+			push_warning("dijkstra_path: cell %s has INF enter cost" % c)
 			break
 
 		for bit in 6:

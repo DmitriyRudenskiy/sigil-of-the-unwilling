@@ -1,14 +1,16 @@
 extends Node
 
 const MAX_BUFFER_SIZE := 1_048_576  # 1 MB per client
+const IDLE_TIMEOUT_SEC := 30.0
 
 var server: TCPServer
 var peers: Array[StreamPeerTCP] = []
 var buffers: Dictionary = {}
+var _last_activity: Dictionary = {}  # peer -> unix timestamp
 
 func _ready():
 	server = TCPServer.new()
-	var err = server.listen(9090)
+	var err = server.listen(9095)
 	if err == OK:
 		print("[SocketServer] ✅ Listening on 127.0.0.1:9090")
 	else:
@@ -20,6 +22,7 @@ func _process(_delta):
 		var peer = server.take_connection()
 		peers.append(peer)
 		buffers[peer] = ""
+		_last_activity[peer] = Time.get_unix_time_from_system()
 		
 	var to_remove = []
 	for peer in peers:
@@ -32,6 +35,7 @@ func _process(_delta):
 				var res = peer.get_data(available)
 				if res[0] == OK:
 					buffers[peer] += res[1].get_string_from_utf8()
+					_last_activity[peer] = Time.get_unix_time_from_system()
 					# R7b: защита от memory exhaustion
 					if buffers[peer].length() > MAX_BUFFER_SIZE:
 						push_warning("[SocketServer] Buffer overflow from peer, disconnecting")
@@ -48,6 +52,13 @@ func _process(_delta):
 							
 		elif status != StreamPeerTCP.STATUS_CONNECTING:
 			to_remove.append(peer)
+
+		# R7a: idle timeout — disconnect peers with no recent activity
+		if status == StreamPeerTCP.STATUS_CONNECTED:
+			var last_active = _last_activity.get(peer, 0)
+			if Time.get_unix_time_from_system() - last_active > IDLE_TIMEOUT_SEC:
+				to_remove.append(peer)
+				continue
 			
 	# Remove disconnected clients
 	for peer in to_remove:
@@ -69,6 +80,11 @@ func _route_command(line: String) -> Dictionary:
 	var world_ctrl = _find_controller(WorldController)
 	var battle_ctrl = _find_controller(BattleController)
 	
+	if world_ctrl == null:
+		print("[SocketServer] DEBUG: WorldController not found in scene tree")
+	else:
+		print("[SocketServer] DEBUG: WorldController found: ", world_ctrl.name)
+	
 	match action:
 		"START_GAME":
 			return _start_game()
@@ -79,9 +95,11 @@ func _route_command(line: String) -> Dictionary:
 				return {"error": "Not in World mode"}
 			var x = req.get("x")
 			var y = req.get("y")
-			if not (x is int) or not (y is int):
-				return {"error": "Fields 'x' and 'y' must be integers"}
-			return _move_to(world_ctrl, x, y)
+			if not (x is int or x is float) or not (y is int or y is float):
+				return {"error": "Fields 'x' and 'y' must be numbers"}
+			var tx := int(x)
+			var ty := int(y)
+			return _move_to(world_ctrl, tx, ty)
 		"END_TURN":
 			if world_ctrl == null or not world_ctrl.is_world_visible():
 				return {"error": "Not in World mode"}

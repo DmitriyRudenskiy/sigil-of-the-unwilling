@@ -178,6 +178,7 @@ func _on_exit() -> void:
 
 func _on_settings() -> void:
 	var screen: Control = _SettingsScreen.new()
+	screen.setup(get_node_or_null("/root/Settings"))
 	screen.applied.connect(_on_settings_applied)
 	add_child(screen)
 

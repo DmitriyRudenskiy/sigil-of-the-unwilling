@@ -6,7 +6,7 @@ import sys
 import math
 
 class GodotClient:
-    def __init__(self, host='127.0.0.1', port=9090):
+    def __init__(self, host='127.0.0.1', port=9095):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             self.sock.connect((host, port))
@@ -120,7 +120,13 @@ def task1_collect_resources(client):
             break
             
         target = resources[0]
-        client.send_command({"action": "MOVE_TO", "x": target["x"], "y": target["y"]})
+        resp = client.send_command({"action": "MOVE_TO", "x": target["x"], "y": target["y"]})
+        if "error" in resp:
+            print(f"\n⚠️ MOVE_TO error: {resp['error']}")
+            # If unreachable, we might want to remove it from the list or just end turn
+            if "unreachable" in resp["error"]:
+                # For now, just end turn and hope for better luck or skip it
+                pass
         
         result = wait_for_movement(client, target["x"], target["y"], collected_count, total_res, f"Turns:{turn_count}/10")
         if result == "no_mp":
