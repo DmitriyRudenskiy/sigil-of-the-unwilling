@@ -8,7 +8,6 @@ var _hero
 var _camera
 var _input_controller
 var _spawner
-var _battle_flow
 var _cities
 var _rng := RandomNumberGenerator.new()
 var _world_delta = null
@@ -47,7 +46,6 @@ func _ready() -> void:
 	_init_ui()
 	_create_input()
 	_create_spawner()
-	_create_battle_flow()
 	_create_cities()
 
 	_world_delta = WorldStateDelta.new()
@@ -55,6 +53,10 @@ func _ready() -> void:
 
 	_create_subsystems()
 	_create_resource_nodes()
+
+	# Подписка на шину
+	GameEventBus.battle_won.connect(_on_battle_won)
+	GameEventBus.turn_ended.connect(_on_turn_ended_bus)
 
 	if loaded_save != null:
 		_persistence.apply_loaded_save(loaded_save, _build_load_context())
@@ -131,7 +133,10 @@ func _handle_headless_exit() -> void:
 func _create_subsystems() -> void:
 	battle_coordinator = WorldBattleCoordinator.new()
 	battle_coordinator.name = "BattleCoordinator"
-	battle_coordinator.setup(_hero, _map_gen, _spawner, _battle_flow, _rng)
+	battle_coordinator.setup(
+		_hero, _map_gen, _spawner, _rng,
+		self, _ui_manager, _camera, _input_controller, _world_delta
+	)
 	add_child(battle_coordinator)
 
 	interaction_controller = WorldInteractionController.new()
@@ -157,9 +162,10 @@ func _create_resource_nodes() -> void:
 		"height": _map_gen.map_height,
 	}
 	resource_node_manager.generate_nodes_for_map(map_data)
-	resource_node_manager.resource_discovered.connect(_on_resource_discovered)
-	resource_node_manager.resource_extracted.connect(_on_resource_extracted)
-	resource_node_manager.resource_exhausted.connect(_on_resource_exhausted)
+	# Подписка на шину вместо прямых сигналов
+	GameEventBus.resource_discovered.connect(_on_resource_discovered)
+	GameEventBus.resource_extracted.connect(_on_resource_extracted)
+	GameEventBus.resource_exhausted.connect(_on_resource_exhausted)
 
 
 # ==================== CREATION ====================
@@ -202,13 +208,6 @@ func _create_spawner() -> void:
 	add_child(_spawner)
 	_spawner.spawn_all()
 
-
-func _create_battle_flow() -> void:
-	_battle_flow = BattleFlow.new()
-	_battle_flow.name = "BattleFlow"
-	_battle_flow.battle_started.connect(_on_battle_started)
-	_battle_flow.battle_completed.connect(_on_battle_completed)
-	add_child(_battle_flow)
 
 # ==================== CITY SYSTEM ====================
 func _create_cities() -> void:
@@ -267,8 +266,10 @@ func _on_end_turn() -> void:
 	# Tick resource nodes
 	if resource_node_manager:
 		resource_node_manager.tick_daily()
-	if _cities:
-		_cities.on_turn_ended(int(_persistence.get_date().get("month", 1)))
+
+	var month: int = int(_persistence.get_date().get("month", 1))
+	GameEventBus.turn_ended.emit(_cities.current_turn + 1, month)
+
 	if _ui_manager:
 		_ui_manager.refresh_ui()
 
@@ -284,36 +285,16 @@ func _on_settings_applied() -> void:
 			_camera.set_zoom_level(settings_node.get_zoom())
 
 
-# ==================== BATTLE LIFECYCLE (callbacks for BattleFlow signals) ====================
+# ==================== EVENT BUS HANDLERS ====================
 
-func _on_battle_started() -> void:
-	if _ui_manager:
-		_ui_manager.set_ui_visible(false)
-	visible = false
-	_camera.set_process(false)
-	_input_controller.set_process_unhandled_input(false)
-
-
-func _on_battle_completed(winner: String, surv_atk: Array[UnitStack], surv_def: Array[UnitStack]) -> void:
-	visible = true
-	if _ui_manager:
-		_ui_manager.set_ui_visible(true)
-	_camera.set_process(true)
-	_camera.make_current()
-	_input_controller.set_process_unhandled_input(true)
-
-	var enemy_cell = battle_coordinator.get_pending_enemy_cell()
-	battle_coordinator.on_battle_completed(winner, surv_atk, surv_def)
-
-	# Слава за победу
-	if winner == "attacker" and _cities:
+func _on_battle_won(enemy_cell: Vector2i) -> void:
+	if _cities:
 		_cities.add_glory(15.0, &"battle_won")
 
-	if winner == "attacker" and enemy_cell != Vector2i(-1, -1) and _world_delta:
-		_world_delta.add_defeated_enemy(enemy_cell)
 
-	if _ui_manager:
-		_ui_manager.refresh_ui()
+func _on_turn_ended_bus(turn: int, month: int) -> void:
+	if _cities:
+		_cities.on_turn_ended(month)
 
 
 # ==================== CAMERA ====================

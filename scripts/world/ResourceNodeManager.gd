@@ -108,6 +108,7 @@ func try_discover(cell: Vector2i, discovery_keys: Dictionary) -> bool:
 			if discovery_keys.get(tag, false):
 				node.discover()
 				resource_discovered.emit(cell, node.resource_id)
+				GameEventBus.resource_discovered.emit(cell, node.resource_id)
 				return true
 
 	# Check skill-based discovery
@@ -121,6 +122,7 @@ func try_discover(cell: Vector2i, discovery_keys: Dictionary) -> bool:
 					return false
 			node.discover()
 			resource_discovered.emit(cell, node.resource_id)
+			GameEventBus.resource_discovered.emit(cell, node.resource_id)
 			return true
 
 	return false
@@ -145,7 +147,9 @@ func try_extract(cell: Vector2i, extraction_keys: Dictionary) -> int:
 	node.reduce_yield(amount)
 	if node.is_exhausted():
 		resource_exhausted.emit(cell, node.resource_id)
+		GameEventBus.resource_exhausted.emit(cell, node.resource_id)
 	resource_extracted.emit(cell, node.resource_id, amount)
+	GameEventBus.resource_extracted.emit(cell, node.resource_id, amount)
 	return amount
 
 

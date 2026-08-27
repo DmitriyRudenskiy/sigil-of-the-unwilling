@@ -1,6 +1,7 @@
 extends Node
 class_name WorldBattleCoordinator
-## Handles enemy contact, battle lifecycle, and post-battle results.
+## Полный боевой цикл: контакт → бой → результаты → слава → дельта.
+## Мир прячется/показывается через GameEventBus.
 
 const UnitStack = preload("res://scripts/unit_stack.gd")
 
@@ -9,37 +10,62 @@ var map_gen: MapGenerator
 var spawner: WorldSpawner
 var battle_flow: BattleFlow
 var rng: RandomNumberGenerator
+var world_ctrl: Node
+var ui_manager: WorldUIManager
+var camera: Camera2D
+var input_controller: Node
+var world_delta: WorldStateDelta
 
 var _pending_enemy_cell: Vector2i = Vector2i(-1, -1)
 
 
-func setup(h: HeroController, m: MapGenerator, s: WorldSpawner, bf: BattleFlow, r: RandomNumberGenerator) -> void:
+func setup(
+	h: HeroController,
+	m: MapGenerator,
+	s: WorldSpawner,
+	r: RandomNumberGenerator,
+	wc: Node,
+	ui: WorldUIManager,
+	cam: Camera2D,
+	inp: Node,
+	delta: WorldStateDelta
+) -> void:
 	hero = h
 	map_gen = m
 	spawner = s
-	battle_flow = bf
 	rng = r
+	world_ctrl = wc
+	ui_manager = ui
+	camera = cam
+	input_controller = inp
+	world_delta = delta
+
+	_create_battle_flow()
 
 
-func connect_battle_signals(owner: Node) -> void:
-	battle_flow.battle_started.connect(owner._on_battle_started)
-	battle_flow.battle_completed.connect(owner._on_battle_completed)
+func _create_battle_flow() -> void:
+	battle_flow = BattleFlow.new()
+	battle_flow.name = "BattleFlow"
+	battle_flow.battle_started.connect(_on_battle_started)
+	battle_flow.battle_completed.connect(_on_battle_completed)
+	add_child(battle_flow)
 
+
+# ==================== КОНТАКТ С ВРАГОМ ====================
 
 func check_enemy_contact(cell: Vector2i) -> void:
 	if map_gen.enemy_stacks.has(cell):
-		start_battle(map_gen.enemy_stacks[cell], cell)
+		_start_battle(map_gen.enemy_stacks[cell], cell)
 		return
 	for nb in HexUtils.get_all_neighbors(cell):
 		if map_gen.enemy_stacks.has(nb):
-			start_battle(map_gen.enemy_stacks[nb], nb)
+			_start_battle(map_gen.enemy_stacks[nb], nb)
 			return
 
 
-func start_battle(enemy_army: Array[UnitStack], enemy_cell: Vector2i) -> void:
+func _start_battle(enemy_army: Array[UnitStack], enemy_cell: Vector2i) -> void:
 	if battle_flow == null or hero == null:
 		return
-
 	_pending_enemy_cell = enemy_cell
 	hero.force_stop()
 
@@ -55,11 +81,57 @@ func start_battle(enemy_army: Array[UnitStack], enemy_cell: Vector2i) -> void:
 		defender_bonus,
 		hero.inventory.get_total_modifiers(),
 		{},
-		rng.randi()  # obstacle_seed derived from run_seed
+		rng.randi()
 	)
 
 
-func on_battle_completed(winner: String, surv_atk: Array[UnitStack], surv_def: Array[UnitStack]) -> void:
+# ==================== ЖИЗНЕННЫЙ ЦИКЛ БОЯ ====================
+
+func _on_battle_started() -> void:
+	GameEventBus.battle_started.emit()
+
+	if world_ctrl != null:
+		world_ctrl.visible = false
+	if ui_manager != null:
+		ui_manager.set_ui_visible(false)
+	if camera != null:
+		camera.set_process(false)
+	if input_controller != null:
+		input_controller.set_process_unhandled_input(false)
+
+
+func _on_battle_completed(
+	winner: String,
+	surv_atk: Array[UnitStack],
+	surv_def: Array[UnitStack]
+) -> void:
+	if world_ctrl != null:
+		world_ctrl.visible = true
+	if ui_manager != null:
+		ui_manager.set_ui_visible(true)
+	if camera != null:
+		camera.set_process(true)
+		camera.make_current()
+	if input_controller != null:
+		input_controller.set_process_unhandled_input(true)
+
+	var enemy_cell := _pending_enemy_cell
+	_apply_results(winner, surv_atk, surv_def)
+
+	GameEventBus.battle_completed.emit(winner, enemy_cell)
+	if winner == "attacker":
+		GameEventBus.battle_won.emit(enemy_cell)
+	else:
+		GameEventBus.battle_lost.emit(enemy_cell)
+
+	_pending_enemy_cell = Vector2i(-1, -1)
+
+
+func _apply_results(
+	winner: String,
+	surv_atk: Array[UnitStack],
+	surv_def: Array[UnitStack]
+) -> void:
 	if hero == null:
 		return
 
@@ -70,7 +142,6 @@ func on_battle_completed(winner: String, surv_atk: Array[UnitStack], surv_def: A
 		var stack := Units.make_fixed_stack("swordsmen", 10)
 		if stack != null:
 			fallback.append(stack)
-
 		hero.army.apply_battle_results(fallback)
 		GameLogger.hero("Hero routed: awarded minimal stack")
 
@@ -79,21 +150,36 @@ func on_battle_completed(winner: String, surv_atk: Array[UnitStack], surv_def: A
 		if spawner:
 			spawner.remove_enemy_at(_pending_enemy_cell)
 		GameLogger.battle("Enemy defeated at %s" % _pending_enemy_cell)
+
+		if world_delta != null:
+			world_delta.add_defeated_enemy(_pending_enemy_cell)
+
+		_try_artifact_drop()
+
+		if ui_manager != null:
+			ui_manager.refresh_ui()
 	else:
 		GameLogger.battle("Battle lost / retreated")
 
-	_pending_enemy_cell = Vector2i(-1, -1)
 
-	if winner == "attacker" and hero.inventory != null:
-		if rng.randf() < GameSettings.MONSTER_DROP_CHANCE:
-			var arts := Artifacts.get_by_rarity(Artifact.Rarity.MINOR)
-			if arts.size() > 0:
-				var drop := arts[rng.randi() % arts.size()]
-				if hero.inventory.add_to_backpack(drop):
-					GameLogger.world("Monster drop: %s" % drop.display_name)
-				else:
-					GameLogger.world("Backpack full, drop lost!")
+func _try_artifact_drop() -> void:
+	if hero.inventory == null:
+		return
+	if rng.randf() < GameSettings.MONSTER_DROP_CHANCE:
+		var arts := Artifacts.get_by_rarity(Artifact.Rarity.MINOR)
+		if arts.size() > 0:
+			var drop := arts[rng.randi() % arts.size()]
+			if hero.inventory.add_to_backpack(drop):
+				GameLogger.world("Monster drop: %s" % drop.display_name)
+			else:
+				GameLogger.world("Backpack full, drop lost!")
 
+
+# ==================== ПУБЛИЧНЫЙ API ====================
 
 func get_pending_enemy_cell() -> Vector2i:
 	return _pending_enemy_cell
+
+
+func get_battle_flow() -> BattleFlow:
+	return battle_flow
