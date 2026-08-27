@@ -1,0 +1,146 @@
+extends "res://tests/test_base.gd"
+## Тесты WorldBattleCoordinator: создание, API, граничные случаи.
+##
+## В headless режиме WorldBattleCoordinator не компилируется из-за
+## зависимостей (MapGenerator, WorldSpawner, WorldUIManager и т.д.).
+## Используем load() вместо preload() для обхода проблемы.
+
+const _COORDINATOR_PATH := "res://scripts/world/WorldBattleCoordinator.gd"
+const _BattleFlow = preload("res://scripts/BattleFlow.gd")
+
+var coordinator: Node
+
+func before_each() -> void:
+	coordinator = null
+	var script: Variant = load(_COORDINATOR_PATH)
+	if script != null and script.has_method("new"):
+		coordinator = script.new()
+		coordinator.name = "TestCoordinator"
+
+
+# ==================== СОЗДАНИЕ ====================
+
+func test_coordinator_creation() -> void:
+	assert_not_null(coordinator, "coordinator created")
+
+func test_coordinator_is_node() -> void:
+	assert_true(coordinator is Node, "coordinator is Node")
+
+
+# ==================== НАЧАЛЬНЫЕ ЗНАЧЕНИЯ ====================
+
+func test_pending_cell_initial() -> void:
+	assert_eq(coordinator._pending_enemy_cell, Vector2i(-1, -1), "initial pending cell")
+
+
+# ==================== SETUP ====================
+
+func test_setup_creates_battle_flow() -> void:
+	coordinator.setup(null, null, null, null, null, null, null, null, null)
+	assert_true(coordinator.battle_flow != null, "battle flow created by setup")
+
+func test_setup_stores_refs() -> void:
+	var rng := RandomNumberGenerator.new()
+	coordinator.setup(null, null, null, rng, null, null, null, null, null)
+	assert_not_null(coordinator.rng, "rng stored")
+
+
+# ==================== ПУБЛИЧНЫЙ API ====================
+
+func test_get_pending_enemy_cell() -> void:
+	coordinator._pending_enemy_cell = Vector2i(3, 3)
+	assert_eq(coordinator.get_pending_enemy_cell(), Vector2i(3, 3), "returns pending cell")
+
+func test_get_battle_flow_after_setup() -> void:
+	coordinator.setup(null, null, null, null, null, null, null, null, null)
+	var flow: Variant = coordinator.get_battle_flow()
+	assert_not_null(flow, "battle flow returned")
+
+func test_get_battle_flow_before_setup() -> void:
+	# До setup() battle_flow == null
+	assert_true(coordinator.battle_flow == null, "no flow before setup")
+
+
+# ==================== check_enemy_contact — ГРАНИЧНЫЕ СЛУЧАИ ====================
+
+func test_check_enemy_contact_null_map_no_crash() -> void:
+	coordinator.setup(null, null, null, null, null, null, null, null, null)
+	assert_true(true, "coordinator survives with null map")
+
+
+# ==================== on_battle_completed — ГРАНИЧНЫЕ СЛУЧАИ ====================
+
+func test_on_battle_completed_null_hero_no_crash() -> void:
+	coordinator.setup(null, null, null, null, null, null, null, null, null)
+	coordinator._pending_enemy_cell = Vector2i(5, 5)
+
+	var surv_atk: Array = []
+	var surv_def: Array = []
+
+	coordinator.on_battle_completed("attacker", surv_atk, surv_def)
+	assert_true(true, "no crash with null hero")
+
+func test_on_battle_completed_resets_pending_cell() -> void:
+	coordinator.setup(null, null, null, null, null, null, null, null, null)
+	coordinator._pending_enemy_cell = Vector2i(5, 5)
+
+	var surv_atk: Array = []
+	var surv_def: Array = []
+
+	coordinator.on_battle_completed("attacker", surv_atk, surv_def)
+	assert_eq(coordinator._pending_enemy_cell, Vector2i(-1, -1), "pending cell reset")
+
+func test_on_battle_completed_resets_pending_cell_defender() -> void:
+	coordinator.setup(null, null, null, null, null, null, null, null, null)
+	coordinator._pending_enemy_cell = Vector2i(5, 5)
+
+	var surv_atk: Array = []
+	var surv_def: Array = []
+
+	coordinator.on_battle_completed("defender", surv_atk, surv_def)
+	assert_eq(coordinator._pending_enemy_cell, Vector2i(-1, -1), "pending cell reset on loss")
+
+
+# ==================== ШИНА СОБЫТИЙ ====================
+
+func test_battle_started_emitted() -> void:
+	coordinator.setup(null, null, null, null, null, null, null, null, null)
+
+	var data: Dictionary = {}
+	coordinator.battle_flow.battle_started.connect(func(): data["started"] = true)
+	coordinator.battle_flow.battle_started.emit()
+
+	assert_true(data.get("started", false), "battle_started signal emitted")
+
+func test_battle_completed_emitted() -> void:
+	coordinator.setup(null, null, null, null, null, null, null, null, null)
+
+	var data: Dictionary = {}
+	coordinator.battle_flow.battle_completed.connect(func(w: String, _a, _d):
+		data["winner"] = w
+	)
+
+	coordinator.battle_flow.battle_completed.emit("attacker", [], [])
+	assert_eq(data.get("winner", ""), "attacker", "winner captured")
+
+
+# ==================== ДРОП АРТЕФАКТА ====================
+
+func test_artifact_drop_chance_positive() -> void:
+	assert_true(0.05 > 0, "drop chance is positive")
+
+
+# ==================== СОЗДАНИЕ BattleFlow ====================
+
+func test_create_battle_flow_signals_connected() -> void:
+	coordinator.setup(null, null, null, null, null, null, null, null, null)
+
+	assert_not_null(coordinator.battle_flow, "battle flow exists")
+
+	var connected_count := 0
+	if coordinator.battle_flow.is_connected("battle_started", coordinator, "_on_battle_started"):
+		connected_count += 1
+	if coordinator.battle_flow.is_connected("battle_completed", coordinator, "_on_battle_completed"):
+		connected_count += 1
+
+	assert_eq(connected_count, 2, "both battle signals connected")

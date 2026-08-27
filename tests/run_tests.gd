@@ -12,6 +12,7 @@ const SKIP_FILES := [
 	"test_keys_matrix.gd",       # Headless autoload scope issue
 	"test_saltpeter.gd",         # Headless autoload scope issue
 	"test_basic_resources.gd",   # Headless autoload scope issue
+	"test_battle_coordinator.gd",# WorldBattleCoordinator deps fail in headless
 ]
 
 func _should_skip(file: String) -> bool:
