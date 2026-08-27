@@ -72,7 +72,7 @@ func get_date() -> Dictionary:
 	return _date.duplicate()
 
 
-func apply_loaded_save(data: SaveData, ctx: WorldLoadContext) -> void:
+func apply_loaded_save(data: SaveData, ctx) -> void:
 	if data == null or not data.is_valid():
 		return
 

@@ -242,11 +242,9 @@ func first_free_worker_tile() -> Vector2i:
 
 
 # ==================== ЭКОНОМИКА ====================
-func _exploited_cells() -> Dictionary:
-	## Эксплуатируемые клетки: соседи каждого района (автоматически, ТЗ 4.1)
-	## ∪ клетки, занятые рабочими. Застройка (районы/центр/здания) дохода не даёт.
+func _ensure_exploited_cache() -> void:
 	if not _exploited_dirty:
-		return _exploited_cache
+		return
 	_exploited_cache.clear()
 	for b in boroughs:
 		for nb in HexUtils.get_all_neighbors(b.cell):
@@ -256,6 +254,11 @@ func _exploited_cells() -> Dictionary:
 		if u.state == PopUnit.State.WORKER and u.tile.x >= 0 and not cell_is_built(u.tile):
 			_exploited_cache[u.tile] = true
 	_exploited_dirty = false
+
+func _exploited_cells() -> Dictionary:
+	## Эксплуатируемые клетки: соседи каждого района (автоматически, ТЗ 4.1)
+	## ∪ клетки, занятые рабочими. Застройка (районы/центр/здания) дохода не даёт.
+	_ensure_exploited_cache()
 	return _exploited_cache
 
 

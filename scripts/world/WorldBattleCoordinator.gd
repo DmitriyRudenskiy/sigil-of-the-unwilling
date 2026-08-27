@@ -67,7 +67,7 @@ func on_battle_completed(winner: String, surv_atk: Array[UnitStack], surv_def: A
 
 	if hero.army.army.is_empty():
 		var fallback: Array[UnitStack] = []
-		var stack := UnitRegistry.make_fixed_stack("swordsmen", 10)
+		var stack := Units.make_fixed_stack("swordsmen", 10)
 		if stack != null:
 			fallback.append(stack)
 

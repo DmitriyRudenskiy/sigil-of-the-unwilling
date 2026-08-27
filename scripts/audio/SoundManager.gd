@@ -9,6 +9,9 @@ var _stream_cache: Dictionary = {}
 var _rr := 0
 
 func _ready() -> void:
+	if OS.has_feature("headless"):
+		return  # No audio server in headless mode
+
 	# Verify bus existence
 	if AudioServer.get_bus_index("SFX") == -1:
 		push_warning("SoundManager: bus 'SFX' not found")

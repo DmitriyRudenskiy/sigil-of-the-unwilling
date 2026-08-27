@@ -3,7 +3,6 @@ extends "res://tests/test_base.gd"
 
 const _BattleState = preload("res://scripts/BattleState.gd")
 const _BattleRules = preload("res://scripts/util/BattleRules.gd")
-const _UnitRegistry = preload("res://scripts/UnitRegistry.gd")
 const _UnitStack = preload("res://scripts/unit_stack.gd")
 const _UnitStats = preload("res://scripts/unit_stats.gd")
 const _HexUtils = preload("res://scripts/HexUtils.gd")

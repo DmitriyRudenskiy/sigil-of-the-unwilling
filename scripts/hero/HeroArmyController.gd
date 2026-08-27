@@ -2,8 +2,6 @@ extends Node
 class_name HeroArmyController
 ## Hero army: init, battle serialization, results application.
 
-const _UnitRegistry = preload("res://scripts/UnitRegistry.gd")
-
 var army: Array[UnitStack] = []
 
 
@@ -13,14 +11,14 @@ func _init() -> void:
 
 func _init_default_army() -> void:
 	army = [
-		_UnitRegistry.make_fixed_stack("swordsmen", 103),
-		_UnitRegistry.make_fixed_stack("archers", 36),
-		_UnitRegistry.make_fixed_stack("cavalry", 34),
-		_UnitRegistry.make_fixed_stack("mages", 10),
-		_UnitRegistry.make_fixed_stack("guardians", 20),
-		_UnitRegistry.make_fixed_stack("archmages", 12),
-		_UnitRegistry.make_fixed_stack("champions", 6),
-		_UnitRegistry.make_fixed_stack("knights", 12),
+		Units.make_fixed_stack("swordsmen", 103),
+		Units.make_fixed_stack("archers", 36),
+		Units.make_fixed_stack("cavalry", 34),
+		Units.make_fixed_stack("mages", 10),
+		Units.make_fixed_stack("guardians", 20),
+		Units.make_fixed_stack("archmages", 12),
+		Units.make_fixed_stack("champions", 6),
+		Units.make_fixed_stack("knights", 12),
 	]
 
 
@@ -53,6 +51,6 @@ func deserialize(data: Array) -> void:
 	for item in data:
 		var key: String = str(item.get("key", ""))
 		var count: int = int(item.get("count", 0))
-		var stack := _UnitRegistry.make_fixed_stack(key, count)
+		var stack := Units.make_fixed_stack(key, count)
 		if stack != null and stack.is_alive():
 			army.append(stack)

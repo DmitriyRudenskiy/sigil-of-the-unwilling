@@ -3,7 +3,6 @@ extends SceneTree
 
 const _SpellRegistry = preload("res://scripts/data/SpellRegistry.gd")
 const _SpellCaster = preload("res://scripts/spells/SpellCaster.gd")
-const _UnitRegistry = preload("res://scripts/UnitRegistry.gd")
 const _BattleState = preload("res://scripts/BattleState.gd")
 const _SE = preload("res://scripts/data/StatusEffects.gd")
 
@@ -152,9 +151,9 @@ func _test_status_application() -> int:
 
 
 func _make_unit(key: String) -> BattleState.BattleUnit:
-	var stack := _UnitRegistry.make_fixed_stack(key, 10)
+	var stack := Units.make_fixed_stack(key, 10)
 	if stack == null:
-		stack = _UnitRegistry.make_fixed_stack("skeleton", 10)
+		stack = Units.make_fixed_stack("skeleton", 10)
 	if stack == null:
 		return null
 	var unit := _BattleState.BattleUnit.new(stack)

@@ -2,7 +2,7 @@ extends SceneTree
 ## Выдаёт сводку по всем юнитам: имя, ATK, DEF, HP, SPD, теги.
 
 func _init() -> void:
-	UnitRegistry.ensure_definitions()
+	Units.ensure_definitions()
 
 	var lines: Array[String] = []
 	lines.append("UNIT REFERENCE")
@@ -12,8 +12,8 @@ func _init() -> void:
 
 	var all_tags: Dictionary = {}
 
-	for key in UnitRegistry.get_all_keys():
-		var stack := UnitRegistry.make_fixed_stack(key, 10)
+	for key in Units.get_all_keys():
+		var stack := Units.make_fixed_stack(key, 10)
 		var s: UnitStats = stack.stats
 		var tags_str: String = ", ".join(s.tags) if s.tags.size() > 0 else "-"
 		lines.append("%-22s %4d %4d %4d %4d  %s" % [
@@ -25,7 +25,7 @@ func _init() -> void:
 	lines.append("")
 	lines.append("ALL TAGS: %s" % ", ".join(all_tags.keys()))
 	lines.append("")
-	lines.append("TOTAL: %d units" % UnitRegistry.get_all_keys().size())
+	lines.append("TOTAL: %d units" % Units.get_all_keys().size())
 
 	var text: String = "\n".join(lines)
 	print(text)

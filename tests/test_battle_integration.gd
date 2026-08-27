@@ -20,9 +20,9 @@ func _test_attacker_wins() -> int:
 	var errors := 0
 	var state = load("res://scripts/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
-	atk.append(UnitRegistry.make_fixed_stack("swordsmen", 100))
+	atk.append(Units.make_fixed_stack("swordsmen", 100))
 	var def: Array[UnitStack] = []
-	def.append(UnitRegistry.make_fixed_stack("goblins", 1))
+	def.append(Units.make_fixed_stack("goblins", 1))
 	state.place_army(atk, def)
 	state.build_queue()
 
@@ -54,9 +54,9 @@ func _test_defender_wins() -> int:
 	var errors := 0
 	var state = load("res://scripts/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
-	atk.append(UnitRegistry.make_fixed_stack("goblins", 1))
+	atk.append(Units.make_fixed_stack("goblins", 1))
 	var def: Array[UnitStack] = []
-	def.append(UnitRegistry.make_fixed_stack("swordsmen", 100))
+	def.append(Units.make_fixed_stack("swordsmen", 100))
 	state.place_army(atk, def)
 	state.build_queue()
 
@@ -90,9 +90,9 @@ func _test_battle_rules_damage() -> int:
 	# Use BattleState to create proper BattleUnit wrappers
 	var state: BattleState = load("res://scripts/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
-	atk.append(UnitRegistry.make_fixed_stack("swordsmen", 50))
+	atk.append(Units.make_fixed_stack("swordsmen", 50))
 	var def: Array[UnitStack] = []
-	def.append(UnitRegistry.make_fixed_stack("goblins", 50))
+	def.append(Units.make_fixed_stack("goblins", 50))
 	state.place_army(atk, def)
 
 	var atk_unit: BattleState.BattleUnit = state.get_units_by_side("attacker")[0]
@@ -141,10 +141,10 @@ func _test_ranged_vs_flying() -> int:
 
 	var state: BattleState = load("res://scripts/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
-	atk.append(UnitRegistry.make_fixed_stack("archers", 20))
-	atk.append(UnitRegistry.make_fixed_stack("pegasus", 10))
+	atk.append(Units.make_fixed_stack("archers", 20))
+	atk.append(Units.make_fixed_stack("pegasus", 10))
 	var def: Array[UnitStack] = []
-	def.append(UnitRegistry.make_fixed_stack("goblins", 5))  # needed for placement
+	def.append(Units.make_fixed_stack("goblins", 5))  # needed for placement
 	state.place_army(atk, def)
 
 	var all_units: Array[BattleState.BattleUnit] = state.get_units_by_side("attacker")
@@ -174,10 +174,10 @@ func _test_morale_check() -> int:
 
 	var state: BattleState = load("res://scripts/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
-	atk.append(UnitRegistry.make_fixed_stack("champions", 10))
-	atk.append(UnitRegistry.make_fixed_stack("skeleton", 10))  # undead = no morale
+	atk.append(Units.make_fixed_stack("champions", 10))
+	atk.append(Units.make_fixed_stack("skeleton", 10))  # undead = no morale
 	var def: Array[UnitStack] = []
-	def.append(UnitRegistry.make_fixed_stack("goblins", 5))  # needed for placement
+	def.append(Units.make_fixed_stack("goblins", 5))  # needed for placement
 	state.place_army(atk, def)
 
 	var all_units: Array[BattleState.BattleUnit] = state.get_units_by_side("attacker")

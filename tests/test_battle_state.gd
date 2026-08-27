@@ -28,9 +28,9 @@ func _init() -> void:
 func _create_state():
 	var state = load("res://scripts/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
-	atk.append(UnitRegistry.make_fixed_stack("swordsmen", 20))
+	atk.append(Units.make_fixed_stack("swordsmen", 20))
 	var def: Array[UnitStack] = []
-	def.append(UnitRegistry.make_fixed_stack("goblins", 20))
+	def.append(Units.make_fixed_stack("goblins", 20))
 	state.place_army(atk, def)
 	state.build_queue()
 	return state
@@ -93,9 +93,9 @@ func _test_attack_with_rng() -> int:
 	var errors := 0
 	var state = load("res://scripts/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
-	atk.append(UnitRegistry.make_fixed_stack("swordsmen", 50))
+	atk.append(Units.make_fixed_stack("swordsmen", 50))
 	var def: Array[UnitStack] = []
-	def.append(UnitRegistry.make_fixed_stack("goblins", 50))
+	def.append(Units.make_fixed_stack("goblins", 50))
 	state.place_army(atk, def)
 
 	var attacker = state.get_units_by_side("attacker")[0]
@@ -120,9 +120,9 @@ func _test_battle_end() -> int:
 	var errors := 0
 	var state = load("res://scripts/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
-	atk.append(UnitRegistry.make_fixed_stack("swordsmen", 100))
+	atk.append(Units.make_fixed_stack("swordsmen", 100))
 	var def: Array[UnitStack] = []
-	def.append(UnitRegistry.make_fixed_stack("goblins", 1))
+	def.append(Units.make_fixed_stack("goblins", 1))
 	state.place_army(atk, def)
 	state.build_queue()
 
@@ -160,11 +160,11 @@ func _test_wait_order() -> int:
 	var errors := 0
 	var state = load("res://scripts/BattleState.gd").new()
 	var atk: Array[UnitStack] = [
-		UnitRegistry.make_fixed_stack("swordsmen", 10),
-		UnitRegistry.make_fixed_stack("archers", 10),
+		Units.make_fixed_stack("swordsmen", 10),
+		Units.make_fixed_stack("archers", 10),
 	]
 	var def: Array[UnitStack] = [
-		UnitRegistry.make_fixed_stack("goblins", 10),
+		Units.make_fixed_stack("goblins", 10),
 	]
 	state.place_army(atk, def)
 	state.build_queue()
@@ -204,9 +204,9 @@ func _test_check_end_repeat_call() -> int:
 	var errors := 0
 	var state = load("res://scripts/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
-	atk.append(UnitRegistry.make_fixed_stack("swordsmen", 100))
+	atk.append(Units.make_fixed_stack("swordsmen", 100))
 	var def: Array[UnitStack] = []
-	def.append(UnitRegistry.make_fixed_stack("goblins", 1))
+	def.append(Units.make_fixed_stack("goblins", 1))
 	state.place_army(atk, def)
 
 	var attacker = state.get_units_by_side("attacker")[0]
@@ -243,7 +243,7 @@ func _test_get_reachable_for_unit() -> int:
 	var errors := 0
 	var state = load("res://scripts/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
-	atk.append(UnitRegistry.make_fixed_stack("swordsmen", 20))
+	atk.append(Units.make_fixed_stack("swordsmen", 20))
 	var def: Array[UnitStack] = []
 	state.place_army(atk, def)
 
@@ -262,7 +262,7 @@ func _test_flying_unit_placement() -> int:
 	var errors := 0
 	var state = load("res://scripts/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
-	atk.append(UnitRegistry.make_fixed_stack("pegasus", 10))
+	atk.append(Units.make_fixed_stack("pegasus", 10))
 	var def: Array[UnitStack] = []
 	state.place_army(atk, def)
 
@@ -277,7 +277,7 @@ func _test_ranged_unit_tag() -> int:
 	var errors := 0
 	var state = load("res://scripts/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
-	atk.append(UnitRegistry.make_fixed_stack("archers", 10))
+	atk.append(Units.make_fixed_stack("archers", 10))
 	var def: Array[UnitStack] = []
 	state.place_army(atk, def)
 
@@ -292,7 +292,7 @@ func _test_morale_tag() -> int:
 	var errors := 0
 	var state = load("res://scripts/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
-	atk.append(UnitRegistry.make_fixed_stack("champions", 10))
+	atk.append(Units.make_fixed_stack("champions", 10))
 	var def: Array[UnitStack] = []
 	state.place_army(atk, def)
 
@@ -307,9 +307,9 @@ func _test_retreat_survivors() -> int:
 	var errors := 0
 	var state = load("res://scripts/BattleState.gd").new()
 	var atk: Array[UnitStack] = [
-		UnitRegistry.make_fixed_stack("swordsmen", 50),
-		UnitRegistry.make_fixed_stack("archers", 20),
-		UnitRegistry.make_fixed_stack("mages", 10),
+		Units.make_fixed_stack("swordsmen", 50),
+		Units.make_fixed_stack("archers", 20),
+		Units.make_fixed_stack("mages", 10),
 	]
 	var def: Array[UnitStack] = []
 	state.place_army(atk, def)
@@ -332,9 +332,9 @@ func _test_defend_bonus() -> int:
 	var errors := 0
 	var state = load("res://scripts/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
-	atk.append(UnitRegistry.make_fixed_stack("swordsmen", 50))
+	atk.append(Units.make_fixed_stack("swordsmen", 50))
 	var def: Array[UnitStack] = []
-	def.append(UnitRegistry.make_fixed_stack("goblins", 50))
+	def.append(Units.make_fixed_stack("goblins", 50))
 	state.place_army(atk, def)
 
 	var defender = state.get_units_by_side("defender")[0]
@@ -356,9 +356,9 @@ func _test_hero_bonuses() -> int:
 	var errors := 0
 	var state = load("res://scripts/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
-	atk.append(UnitRegistry.make_fixed_stack("swordsmen", 50))
+	atk.append(Units.make_fixed_stack("swordsmen", 50))
 	var def: Array[UnitStack] = []
-	def.append(UnitRegistry.make_fixed_stack("goblins", 50))
+	def.append(Units.make_fixed_stack("goblins", 50))
 	state.place_army(atk, def)
 
 	state.set_hero_bonuses({"attack": 5, "defense": 3}, {"defense": 2})

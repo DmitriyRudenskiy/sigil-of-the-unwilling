@@ -72,7 +72,8 @@ func is_input_active() -> bool:
 
 
 var _paused := false
-var _pending_completion: String = ""
+enum PendingAction { NONE, MOVE, ATTACK }
+var _pending_completion: PendingAction = PendingAction.NONE
 
 func pause_battle() -> void:
 	_paused = true
@@ -81,12 +82,11 @@ func resume_battle() -> void:
 	_paused = false
 
 	var pending := _pending_completion
-	_pending_completion = ""
+	_pending_completion = PendingAction.NONE
 
-	if pending == "move":
-		on_move_completed()
-	elif pending == "attack":
-		on_attack_completed()
+	match pending:
+		PendingAction.MOVE: on_move_completed()
+		PendingAction.ATTACK: on_attack_completed()
 
 
 func is_paused() -> bool:
@@ -96,7 +96,7 @@ func is_paused() -> bool:
 ## Основной вход: начать бой
 func start_battle() -> void:
 	_paused = false
-	_pending_completion = ""
+	_pending_completion = PendingAction.NONE
 	_end_emitted = false
 	_retreat_requested = false
 	_morale_allowed = false
@@ -195,7 +195,7 @@ func request_attack(atk: BattleState.BattleUnit, def: BattleState.BattleUnit) ->
 ## Вызывается после завершения анимации перемещения (controller → executor)
 func on_move_completed() -> void:
 	if _paused:
-		_pending_completion = "move"
+		_pending_completion = PendingAction.MOVE
 		return
 	if _state == State.BATTLE_OVER:
 		return
@@ -231,7 +231,7 @@ func on_spell_anim_completed() -> void:
 ## Вызывается после завершения анимации атаки (controller → executor)
 func on_attack_completed() -> void:
 	if _paused:
-		_pending_completion = "attack"
+		_pending_completion = PendingAction.ATTACK
 		return
 	if _state == State.BATTLE_OVER:
 		return

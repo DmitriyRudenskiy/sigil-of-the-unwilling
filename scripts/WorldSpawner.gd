@@ -227,7 +227,7 @@ func _spawn_scrolls() -> void:
 		var all_spells: Array = SR.get_all_spells()
 		if all_spells.is_empty():
 			continue
-		var spell = all_spells[rng.randi() % all_spells.size()]
+		var spell = all_spells[chest_rng.randi() % all_spells.size()]
 		_scrolls[cell] = spell.id
 		var n := Node2D.new()
 		n.position = map.map_to_local(cell)

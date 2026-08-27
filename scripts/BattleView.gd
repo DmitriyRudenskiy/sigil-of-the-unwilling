@@ -4,6 +4,9 @@ extends Node2D
 ## Не меняет BattleState и не принимает решений.
 
 const RING := 5
+const HEX_OUTLINE_RADIUS := 38.0
+const ATTACK_LUNGE_PX := 26.0
+const MOVE_TWEEN_SEC := 0.15
 const _HexDraw = preload("res://scripts/util/HexDraw.gd")
 const ParticlePresets = preload("res://scripts/util/ParticlePresets.gd")
 
@@ -36,7 +39,7 @@ class HighlightOverlay extends Node2D:
 		var pts := PackedVector2Array()
 		for i in 7:
 			var ang := deg_to_rad(60.0 * i - 90.0)
-			pts.append(center + Vector2(cos(ang), sin(ang)) * 38.0)
+			pts.append(center + Vector2(cos(ang), sin(ang)) * HEX_OUTLINE_RADIUS)
 		draw_polyline(pts, col, 3.0)
 
 
@@ -191,7 +194,7 @@ func animate_move(unit: BattleState.BattleUnit, path: Array[Vector2i]) -> Tween:
 		an.play()
 	var tw := create_tween()
 	for i in range(1, path.size()):
-		tw.tween_property(node, "position", _tile_map.map_to_local(path[i]), 0.15)
+		tw.tween_property(node, "position", _tile_map.map_to_local(path[i]), MOVE_TWEEN_SEC)
 	if an != null:
 		tw.tween_callback(an.stop)
 	return tw
@@ -205,7 +208,7 @@ func animate_attack(attacker: BattleState.BattleUnit, defender: BattleState.Batt
 		return
 
 	var start_pos: Vector2 = attacker_node.position
-	var dir: Vector2 = (defender_node.position - start_pos).normalized() * 26.0
+	var dir: Vector2 = (defender_node.position - start_pos).normalized() * ATTACK_LUNGE_PX
 
 	var tw := create_tween()
 	tw.tween_property(attacker_node, "position", start_pos + dir, 0.08)

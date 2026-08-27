@@ -5,6 +5,19 @@ class_name SpellCaster
 const _SE = preload("res://scripts/data/StatusEffects.gd")
 const _SR = preload("res://scripts/data/SpellRegistry.gd")
 
+const _DAMAGE_SPELLS := {
+	&"magic_arrow": 10, &"lightning_bolt": 25,
+	&"fireball": 20, &"meteor_shower": 30, &"armageddon": 40,
+}
+const _BUFF_SPELLS := {
+	&"haste": _SE.Effect.HASTE, &"slow": _SE.Effect.SLOW,
+	&"bless": _SE.Effect.BLESS, &"curse": _SE.Effect.CURSE,
+	&"shield": _SE.Effect.SHIELD, &"stoneskin": _SE.Effect.STONESKIN,
+	&"bloodlust": _SE.Effect.BLOODLUST, &"weakness": _SE.Effect.WEAKNESS,
+	&"precision": _SE.Effect.PRECISION, &"wind_wall": _SE.Effect.WIND_WALL,
+	&"misfortune": _SE.Effect.MISFORTUNE,
+}
+
 
 static func cast(
 	spell_id: StringName,
@@ -26,78 +39,31 @@ static func cast(
 	var sp: int = caster_hero_bonus.get("spell_power", 0)
 	var result := {"result": "success", "damage": 0, "status": -1, "resisted": resisted, "spell_id": spell_id}
 
-	match spell_id:
-		&"magic_arrow":
-			var base_dmg := sp * 10
-			if resisted: base_dmg = int(base_dmg * 0.5)
-			result = _apply_damage(target_unit, base_dmg, rng, result)
-		&"lightning_bolt":
-			var base_dmg := sp * 25
-			if resisted: base_dmg = int(base_dmg * 0.5)
-			result = _apply_damage(target_unit, base_dmg, rng, result)
-		&"fireball":
-			var base_dmg := sp * 20
-			if resisted: base_dmg = int(base_dmg * 0.5)
-			result = _apply_damage(target_unit, base_dmg, rng, result)
-		&"meteor_shower":
-			var base_dmg := sp * 30
-			if resisted: base_dmg = int(base_dmg * 0.5)
-			result = _apply_damage(target_unit, base_dmg, rng, result)
-		&"armageddon":
-			var base_dmg := sp * 40
-			if resisted: base_dmg = int(base_dmg * 0.5)
-			result = _apply_damage(target_unit, base_dmg, rng, result)
-		&"haste":
-			target_unit.add_status(_SE.Effect.HASTE, 3)
-			result.status = _SE.Effect.HASTE
-		&"cure":
-			target_unit.clear_debuffs()
-			result.heal = sp * 10
-		&"slow":
-			target_unit.add_status(_SE.Effect.SLOW, 3)
-			result.status = _SE.Effect.SLOW
-		&"bless":
-			target_unit.add_status(_SE.Effect.BLESS, 3)
-			result.status = _SE.Effect.BLESS
-		&"curse":
-			target_unit.add_status(_SE.Effect.CURSE, 3)
-			result.status = _SE.Effect.CURSE
-		&"shield":
-			target_unit.add_status(_SE.Effect.SHIELD, 3)
-			result.status = _SE.Effect.SHIELD
-		&"stoneskin":
-			target_unit.add_status(_SE.Effect.STONESKIN, 3)
-			result.status = _SE.Effect.STONESKIN
-		&"bloodlust":
-			target_unit.add_status(_SE.Effect.BLOODLUST, 3)
-			result.status = _SE.Effect.BLOODLUST
-		&"weakness":
-			target_unit.add_status(_SE.Effect.WEAKNESS, 3)
-			result.status = _SE.Effect.WEAKNESS
-		&"precision":
-			target_unit.add_status(_SE.Effect.PRECISION, 3)
-			result.status = _SE.Effect.PRECISION
-		&"wind_wall":
-			target_unit.add_status(_SE.Effect.WIND_WALL, 3)
-			result.status = _SE.Effect.WIND_WALL
-		&"misfortune":
-			target_unit.add_status(_SE.Effect.MISFORTUNE, 3)
-			result.status = _SE.Effect.MISFORTUNE
-		&"slow_mass":
-			target_unit.add_status(_SE.Effect.SLOW, 4)
-			result.status = _SE.Effect.SLOW
-		&"resurrection":
-			if target_unit.get_count() <= 0:
-				var sp_res: int = int(caster_hero_bonus.get("spell_power", 0))
-				var hp: int = max(1, target_unit.get_hp())
+	if _DAMAGE_SPELLS.has(spell_id):
+		var base_dmg := sp * _DAMAGE_SPELLS[spell_id]
+		if resisted: base_dmg = int(base_dmg * 0.5)
+		result = _apply_damage(target_unit, base_dmg, rng, result)
+	elif _BUFF_SPELLS.has(spell_id):
+		target_unit.add_status(_BUFF_SPELLS[spell_id], 3)
+		result.status = _BUFF_SPELLS[spell_id]
+	elif spell_id == &"cure":
+		target_unit.clear_debuffs()
+		result.heal = sp * 10
+	elif spell_id == &"slow_mass":
+		target_unit.add_status(_SE.Effect.SLOW, 4)
+		result.status = _SE.Effect.SLOW
+	elif spell_id == &"resurrection":
+		if target_unit.get_count() <= 0:
+			var sp_res: int = int(caster_hero_bonus.get("spell_power", 0))
+			var hp: int = max(1, target_unit.get_hp())
 
-				var revived_count := int(sp_res * 20 / hp)
-				revived_count = max(1, revived_count)
-				revived_count = min(revived_count, target_unit.max_count)
+			var revived_count := int(sp_res * 20 / hp)
+			revived_count = max(1, revived_count)
+			revived_count = min(revived_count, target_unit.max_count)
 
-				target_unit.set_count(revived_count)
-				target_unit.alive = true
-				result["revived"] = true
+			target_unit.set_count(revived_count)
+			target_unit.alive = true
+			result["revived"] = true
 
 	return result
 

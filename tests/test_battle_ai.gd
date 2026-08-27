@@ -25,9 +25,9 @@ func _create_state(attacker_alive: bool, def_alive: bool):
 	var def: Array[UnitStack] = []
 
 	if attacker_alive:
-		atk.append(UnitRegistry.make_fixed_stack("swordsmen", 10))
+		atk.append(Units.make_fixed_stack("swordsmen", 10))
 	if def_alive:
-		def.append(UnitRegistry.make_fixed_stack("goblins", 10))
+		def.append(Units.make_fixed_stack("goblins", 10))
 
 	state.place_army(atk, def)
 	state.build_queue()

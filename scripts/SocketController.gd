@@ -1,5 +1,7 @@
 extends Node
 
+const MAX_BUFFER_SIZE := 1_048_576  # 1 MB per client
+
 var server: TCPServer
 var peers: Array[StreamPeerTCP] = []
 var buffers: Dictionary = {}
@@ -30,7 +32,11 @@ func _process(_delta):
 				var res = peer.get_data(available)
 				if res[0] == OK:
 					buffers[peer] += res[1].get_string_from_utf8()
-					
+					# R7b: защита от memory exhaustion
+					if buffers[peer].length() > MAX_BUFFER_SIZE:
+						push_warning("[SocketServer] Buffer overflow from peer, disconnecting")
+						to_remove.append(peer)
+						continue
 					# Process messages separated by newline
 					while "\n" in buffers[peer]:
 						var idx = buffers[peer].find("\n")
@@ -53,10 +59,11 @@ func _process(_delta):
 
 func _route_command(line: String) -> Dictionary:
 	var req = JSON.parse_string(line)
-	if req == null:
+	if req == null or not (req is Dictionary):
 		return {"error": "Invalid JSON"}
-		
-	var action = req.get("action", "")
+	var action = req.get("action")
+	if not (action is String) or action.is_empty():
+		return {"error": "Field 'action' is required and must be a string"}
 	
 	# Find active controllers in the scene tree
 	var world_ctrl = _find_controller(WorldController)
@@ -68,19 +75,23 @@ func _route_command(line: String) -> Dictionary:
 		"GET_STATE":
 			return _get_state(world_ctrl, battle_ctrl)
 		"MOVE_TO":
-			if world_ctrl and world_ctrl.is_world_visible(): 
-				return _move_to(world_ctrl, req.get("x", -1), req.get("y", -1))
-			return {"error": "Not in World mode"}
+			if world_ctrl == null or not world_ctrl.is_world_visible():
+				return {"error": "Not in World mode"}
+			var x = req.get("x")
+			var y = req.get("y")
+			if not (x is int) or not (y is int):
+				return {"error": "Fields 'x' and 'y' must be integers"}
+			return _move_to(world_ctrl, x, y)
 		"END_TURN":
-			if world_ctrl and world_ctrl.is_world_visible(): 
-				return _end_turn(world_ctrl)
-			return {"error": "Not in World mode"}
+			if world_ctrl == null or not world_ctrl.is_world_visible():
+				return {"error": "Not in World mode"}
+			return _end_turn(world_ctrl)
 		"RETREAT":
-			if battle_ctrl: 
-				return _retreat(battle_ctrl)
-			return {"error": "Not in Battle mode"}
+			if battle_ctrl == null:
+				return {"error": "Not in Battle mode"}
+			return _retreat(battle_ctrl)
 		_:
-			return {"error": "Unknown action"}
+			return {"error": "Unknown action: %s" % action}
 
 func _find_controller(type: Variant) -> Variant:
 	# Recursive search through full scene tree
@@ -116,7 +127,7 @@ func _get_state(world_ctrl, battle_ctrl) -> Dictionary:
 			state.move_points = hero.move_points
 			state.max_move_points = hero.get_daily_movement_points()
 			state.basic_resources = hero.resources.resources.duplicate()
-			state.strategic_resources = hero.strategic_resources.duplicate()
+			state.strategic_resources = hero.strategic_resources.get_all()
 		
 		if map_gen:
 			# Map resources
@@ -157,27 +168,29 @@ func _get_state(world_ctrl, battle_ctrl) -> Dictionary:
 	return state
 
 func _move_to(world_ctrl, x: int, y: int) -> Dictionary:
-	print("[SocketServer] Attempting move to: ", x, ",", y)
 	var hero = world_ctrl.get_hero()
-	var target = Vector2i(x, y)
-	if world_ctrl.get_map_gen().is_in_bounds(target):
-		print("[SocketServer] Target in bounds, calling move_to_cell...")
-		var success = hero.move_to_cell(target)
-		if success:
-			print("[SocketServer] move_to_cell started successfully")
-			return {"status": "moving", "target": {"x": x, "y": y}}
-		else:
-			print("[SocketServer] move_to_cell failed (unreachable or no MP)")
-			return {"error": "Cannot move to target (unreachable or no MP)"}
-	print("[SocketServer] Target out of bounds")
-	return {"error": "Out of bounds"}
+	if hero == null:
+		return {"error": "Hero not initialized"}
+	var map = world_ctrl.get_map_gen()
+	if map == null:
+		return {"error": "Map not initialized"}
+	var target := Vector2i(x, y)
+	if not map.is_in_bounds(target):
+		return {"error": "Out of bounds: (%d, %d)" % [x, y]}
+	var success: bool = hero.move_to_cell(target)
+	if success:
+		return {"status": "moving", "target": {"x": x, "y": y}}
+	return {"error": "Cannot move to (%d, %d): unreachable or no MP" % [x, y]}
 
 func _end_turn(world_ctrl) -> Dictionary:
 	world_ctrl.do_end_turn()
 	return {"status": "turn_ended"}
 
 func _retreat(battle_ctrl) -> Dictionary:
-	if battle_ctrl.get_battle_state().battle_over:
+	var bstate = battle_ctrl.get_battle_state()
+	if bstate == null:
+		return {"error": "Battle state not initialized"}
+	if bstate.battle_over:
 		return {"error": "Battle already over"}
 	battle_ctrl.do_retreat()
 	return {"status": "retreating"}

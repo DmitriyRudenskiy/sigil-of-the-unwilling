@@ -19,7 +19,7 @@ func build_discovery_keys(hero: HeroController) -> Dictionary:
 	# Check for undead/lizard army tags
 	var army_stacks: Array[UnitStack] = hero.army.get_army_for_battle()
 	for stack in army_stacks:
-		var unit_def = UnitRegistry.get_definition(stack.get_key())
+		var unit_def = Units.get_definition(stack.get_key())
 		if unit_def:
 			for tag in unit_def.tags:
 				if tag in [&"undead", &"lizard"]:
@@ -37,7 +37,7 @@ func build_extraction_keys(hero: HeroController) -> Dictionary:
 
 	# Tags and unit keys from army
 	for stack in army_stacks:
-		var unit_def = UnitRegistry.get_definition(stack.get_key())
+		var unit_def = Units.get_definition(stack.get_key())
 		if unit_def:
 			for tag in unit_def.tags:
 				keys[StringName(tag)] = true

@@ -1,11 +1,11 @@
 extends SceneTree
 ## Headless tests for UnitRegistry, UnitStats, UnitStack
 
-const _REGISTRY_PATH := "res://scripts/UnitRegistry.gd"
+const _REGISTRY_PATH := "res://scripts/Units.gd"
 const _STACK_PATH := "res://scripts/unit_stack.gd"
 
 func _init() -> void:
-    print("=== UnitRegistry headless tests ===")
+    print("=== Units headless tests ===")
     var failed := 0
     var rng := RandomNumberGenerator.new()
     rng.seed = 123
@@ -99,7 +99,7 @@ func _init() -> void:
 
 
 func _reg():
-    return load(_REGISTRY_PATH)
+    return Units
 
 func _stack():
     return load(_STACK_PATH)

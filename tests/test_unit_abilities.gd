@@ -1,7 +1,6 @@
 extends SceneTree
 ## Unit abilities: vampiric, breath, charge, first_strike, rebirth.
 
-const _UnitRegistry = preload("res://scripts/UnitRegistry.gd")
 const _BattleState = preload("res://scripts/BattleState.gd")
 const _BattleRules = preload("res://scripts/util/BattleRules.gd")
 
@@ -27,7 +26,7 @@ func _init() -> void:
 
 
 func _test_vampiric_heal() -> int:
-	var stack := _UnitRegistry.make_fixed_stack("vampire", 5)
+	var stack := Units.make_fixed_stack("vampire", 5)
 	if not stack:
 		return 0
 	var unit := _BattleState.BattleUnit.new(stack)
@@ -42,7 +41,7 @@ func _test_vampiric_cap() -> int:
 
 
 func _test_charge_multiplier() -> int:
-	var stack := _UnitRegistry.make_fixed_stack("champions", 10)
+	var stack := Units.make_fixed_stack("champions", 10)
 	if not stack:
 		return 0
 	var unit := _BattleState.BattleUnit.new(stack)
@@ -54,8 +53,8 @@ func _test_charge_multiplier() -> int:
 
 func _test_first_strike() -> int:
 	var bs := _BattleState.new()
-	var atk_stack := _UnitRegistry.make_fixed_stack("swordsmen", 10)
-	var def_stack := _UnitRegistry.make_fixed_stack("royal_griffin", 5)
+	var atk_stack := Units.make_fixed_stack("swordsmen", 10)
+	var def_stack := Units.make_fixed_stack("royal_griffin", 5)
 
 	if not atk_stack or not def_stack:
 		return 0  # Skip if unit not found
@@ -75,7 +74,7 @@ func _test_first_strike() -> int:
 
 
 func _test_rebirth() -> int:
-	var stack := _UnitRegistry.make_fixed_stack("phoenix", 3)
+	var stack := Units.make_fixed_stack("phoenix", 3)
 	if not stack:
 		return 0
 	var unit := _BattleState.BattleUnit.new(stack)
@@ -86,7 +85,7 @@ func _test_rebirth() -> int:
 
 
 func _test_breath_splash() -> int:
-	var stack := _UnitRegistry.make_fixed_stack("red_dragon", 5)
+	var stack := Units.make_fixed_stack("red_dragon", 5)
 	if not stack:
 		return 0
 	var unit := _BattleState.BattleUnit.new(stack)
@@ -98,7 +97,7 @@ func _test_breath_splash() -> int:
 
 func _test_max_count_set() -> int:
 	var bs := _BattleState.new()
-	var stack := _UnitRegistry.make_fixed_stack("swordsmen", 42)
+	var stack := Units.make_fixed_stack("swordsmen", 42)
 
 	bs.place_army([stack], [])
 	if bs.attacker_units.is_empty():
@@ -112,7 +111,7 @@ func _test_max_count_set() -> int:
 
 func _test_distance_moved() -> int:
 	var bs := _BattleState.new()
-	var stack := _UnitRegistry.make_fixed_stack("swordsmen", 10)
+	var stack := Units.make_fixed_stack("swordsmen", 10)
 
 	bs.place_army([stack], [])
 	if bs.attacker_units.is_empty():

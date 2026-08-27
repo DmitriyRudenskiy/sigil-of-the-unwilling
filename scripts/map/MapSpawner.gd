@@ -90,12 +90,12 @@ func place_enemies(reachable = null) -> void:
 		if not reachable.has(cell) or model.enemy_stacks.has(cell) or cell in model.village_cells or model.resource_cells.has(cell):
 			continue
 
-		var faction_idx: int = rng.randi_range(0, UnitRegistry.FACTION_SETS.size() - 1)
-		var faction_pool: Array = UnitRegistry.FACTION_SETS[faction_idx]
+		var faction_idx: int = rng.randi_range(0, Units.FACTION_SETS.size() - 1)
+		var faction_pool: Array = Units.FACTION_SETS[faction_idx]
 		var army: Array[UnitStack] = []
 		for i in rng.randi_range(1, 3):
 			var unit_key: String = faction_pool[rng.randi_range(0, faction_pool.size() - 1)]
-			var stack = UnitRegistry.make_stack(unit_key, rng)
+			var stack = Units.make_stack(unit_key, rng)
 			if stack != null and stack.is_alive():
 				army.append(stack)
 

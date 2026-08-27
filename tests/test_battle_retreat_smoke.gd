@@ -17,11 +17,11 @@ func _test_retreat_smoke() -> int:
 
 	var state: BattleState = load("res://scripts/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
-	atk.append(UnitRegistry.make_fixed_stack("swordsmen", 40))
-	atk.append(UnitRegistry.make_fixed_stack("archers", 20))
-	atk.append(UnitRegistry.make_fixed_stack("mages", 10))
+	atk.append(Units.make_fixed_stack("swordsmen", 40))
+	atk.append(Units.make_fixed_stack("archers", 20))
+	atk.append(Units.make_fixed_stack("mages", 10))
 	var def: Array[UnitStack] = []
-	def.append(UnitRegistry.make_fixed_stack("goblins", 50))
+	def.append(Units.make_fixed_stack("goblins", 50))
 
 	state.place_army(atk, def)
 

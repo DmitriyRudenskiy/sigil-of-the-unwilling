@@ -3,22 +3,22 @@ class_name WorldController
 ## Composition Root — creates subsystems and wires signals.
 
 # Core references
-var _map_gen: MapGenerator
-var _hero: HeroController
-var _camera: WorldCamera
-var _input_controller: WorldInput
-var _spawner: WorldSpawner
-var _battle_flow: BattleFlow
-var _cities: CityManager
+var _map_gen
+var _hero
+var _camera
+var _input_controller
+var _spawner
+var _battle_flow
+var _cities
 var _rng := RandomNumberGenerator.new()
-var _world_delta: WorldStateDelta = null
-var _save_manager: SaveManager = null
+var _world_delta = null
+var _save_manager = null
 
 # Subsystems
-var battle_coordinator: WorldBattleCoordinator = null
-var interaction_controller: WorldInteractionController = null
-var resource_node_manager: ResourceNodeManager = null
-var _ui_manager: WorldUIManager = null
+var battle_coordinator = null
+var interaction_controller = null
+var resource_node_manager = null
+var _ui_manager = null
 
 # Extracted services
 var _resource_chain = null
@@ -27,16 +27,24 @@ var _persistence = null
 const WorldPersistenceScript = preload("res://scripts/world/WorldPersistence.gd")
 const ResourceChainServiceScript = preload("res://scripts/world/ResourceChainService.gd")
 const WorldShortcutsScript = preload("res://scripts/world/WorldShortcuts.gd")
+const WorldLoadContextScript = preload("res://scripts/world/WorldLoadContext.gd")
 
 
 # ==================== INIT ====================
 
 func _ready() -> void:
 	# Force initialize registries to prevent runtime freezes
-	UnitRegistry.ensure_definitions()
+	Units.ensure_definitions()
 	ArtifactRegistry.ensure_definitions()
 	ResourceRegistry.ensure_definitions()
 	SpellRegistry.ensure_definitions()
+
+	# Create extracted services early to avoid Nil errors
+	_save_manager = SaveManager.new()
+	_save_manager.name = "SaveManager"
+	add_child(_save_manager)
+	_persistence = WorldPersistenceScript.new(_save_manager)
+	_resource_chain = ResourceChainServiceScript.new()
 
 	var loaded_save: SaveData = WorldPersistenceScript.pending_save
 	WorldPersistenceScript.pending_save = null
@@ -214,18 +222,10 @@ func _create_cities() -> void:
 		return {&"food": 5.0, &"industry": 5.0, &"dust": 0.0, &"science": 0.0, &"influence": 0.0}
 	)
 
-	_save_manager = SaveManager.new()
-	_save_manager.name = "SaveManager"
-	add_child(_save_manager)
-
-	# Create extracted services
-	_persistence = WorldPersistenceScript.new(_save_manager)
-	_resource_chain = ResourceChainServiceScript.new()
-
 	# Create shortcuts node
 	var shortcuts := WorldShortcutsScript.new()
 	shortcuts.name = "WorldShortcuts"
-	shortcuts.setup(_persistence, _ui_manager)
+	shortcuts.call("setup", _persistence, _ui_manager)
 	add_child(shortcuts)
 
 
@@ -240,7 +240,7 @@ func _on_hero_moved(cell: Vector2i) -> void:
 
 	# Addendum 10: Try to discover hidden resource nodes
 	if resource_node_manager:
-		var disc_keys := _resource_chain.build_discovery_keys(_hero)
+		var disc_keys = _resource_chain.build_discovery_keys(_hero)
 		resource_node_manager.try_discover(cell, disc_keys)
 
 
@@ -294,7 +294,7 @@ func _on_battle_completed(winner: String, surv_atk: Array[UnitStack], surv_def: 
 	_camera.make_current()
 	_input_controller.set_process_unhandled_input(true)
 
-	var enemy_cell := battle_coordinator.get_pending_enemy_cell()
+	var enemy_cell = battle_coordinator.get_pending_enemy_cell()
 	battle_coordinator.on_battle_completed(winner, surv_atk, surv_def)
 
 	# Слава за победу
@@ -464,8 +464,8 @@ func apply_save(data: SaveData) -> void:
 	_persistence.apply_loaded_save(data, _build_load_context())
 
 
-func _build_load_context() -> WorldLoadContext:
-	var ctx := WorldLoadContext.new()
+func _build_load_context():
+	var ctx := WorldLoadContextScript.new()
 	ctx.map_gen = _map_gen
 	ctx.spawner = _spawner
 	ctx.resource_node_manager = resource_node_manager

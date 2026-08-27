@@ -1,5 +1,7 @@
-extends RefCounted
-class_name UnitRegistry
+extends Node
+## Autoload: UnitRegistry. Registry of unit definitions — instance node, not static.
+## Call reset() in tests to isolate data between runs.
+## Call reset() in tests to isolate data between runs.
 
 const _UnitStack = preload("res://scripts/unit_stack.gd")
 const _UnitStats = preload("res://scripts/unit_stats.gd")
@@ -182,10 +184,10 @@ const UNIT_TAGS := {
     "rust_dragon": ["flying", "dragon", "breath"],
 }
 
-static var _definitions: Dictionary = {}
+var _definitions: Dictionary = {}
 
 
-static func ensure_definitions() -> void:
+func ensure_definitions() -> void:
     if not _definitions.is_empty():
         return
 
@@ -219,7 +221,12 @@ static func ensure_definitions() -> void:
         )
 
 
-static func get_all_keys() -> Array[String]:
+func reset() -> void:
+    ## Для тестов: сброс определений.
+    _definitions.clear()
+
+
+func get_all_keys() -> Array[String]:
     ensure_definitions()
 
     var keys: Array[String] = []
@@ -230,12 +237,12 @@ static func get_all_keys() -> Array[String]:
     return keys
 
 
-static func get_definition(key: String) -> UnitStats:
+func get_definition(key: String) -> UnitStats:
     ensure_definitions()
     return _definitions.get(key, null)
 
 
-static func make_stack(key: String, rng: RandomNumberGenerator) -> UnitStack:
+func make_stack(key: String, rng: RandomNumberGenerator) -> UnitStack:
     var stats: UnitStats = get_definition(key)
     if stats == null:
         return null
@@ -247,7 +254,7 @@ static func make_stack(key: String, rng: RandomNumberGenerator) -> UnitStack:
     return UnitStack.new(stats, count)
 
 
-static func make_fixed_stack(key: String, count: int) -> UnitStack:
+func make_fixed_stack(key: String, count: int) -> UnitStack:
     var stats: UnitStats = get_definition(key)
     if stats == null:
         return null

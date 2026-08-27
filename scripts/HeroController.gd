@@ -28,7 +28,7 @@ var magic: HeroMagic = HeroMagic.new()
 var skills: HeroSkills
 var tools: HeroTools
 var time: TimeSystem
-var strategic_resources: Dictionary = {}  # resource_id -> amount
+var strategic_resources: HeroStrategicResources = HeroStrategicResources.new()
 
 # Backward-compat pass-throughs (kept for existing callers)
 var mana_current: int:
@@ -74,15 +74,12 @@ func _ready() -> void:
 	skills = HeroSkills.new()
 	tools = HeroTools.new()
 
-	_init_strategic_resources()
+	strategic_resources.init_from_registry()
 
 	_wire_signals()
 
 
-func _init_strategic_resources() -> void:
-	var all: Array = ResourceRegistry.get_all()
-	for def in all:
-		strategic_resources[def.id] = 0
+
 
 
 func _wire_signals() -> void:
@@ -93,6 +90,7 @@ func _wire_signals() -> void:
 	movement.reach_preview_changed.connect(_on_reach_preview)
 	movement.reach_preview_cleared.connect(_on_reach_cleared)
 	resources.resources_changed.connect(resources_changed.emit)
+	strategic_resources.strategic_resources_changed.connect(strategic_resources_changed.emit)
 	time.time_changed.connect(time_changed.emit)
 	skills.skills_changed.connect(skills_changed.emit)
 	tools.tools_changed.connect(tools_changed.emit)
@@ -193,8 +191,9 @@ func end_turn() -> void:
 	magic.tick_restore(stats.get("knowledge", 0))
 
 	# Auto-generate basic resources
-	_add_strategic_resource(&"wood", GameSettings.RESOURCE_AUTO_WOOD_PER_DAY)
-	_add_strategic_resource(&"stone", GameSettings.RESOURCE_AUTO_STONE_PER_DAY)
+	strategic_resources._add_internal(&"wood", GameSettings.RESOURCE_AUTO_WOOD_PER_DAY)
+	strategic_resources._add_internal(&"stone", GameSettings.RESOURCE_AUTO_STONE_PER_DAY)
+	strategic_resources.emit_changed()
 
 	# Reset time for new day
 	time.reset_for_new_day()
@@ -204,39 +203,12 @@ func end_turn() -> void:
 	movement.end_turn_movement()
 
 
-func _add_strategic_resource(id: StringName, amount: int) -> void:
-	if not strategic_resources.has(id):
-		strategic_resources[id] = 0
-	var current: int = strategic_resources[id]
-	var new_val: int = min(current + amount, GameSettings.RESOURCE_CAPACITY)
-	if new_val != current:
-		strategic_resources[id] = new_val
-		strategic_resources_changed.emit(strategic_resources)
-
-
 func add_strategic_resource(id: StringName, amount: int) -> int:
-	"""Add strategic resource. Returns amount actually added (may be capped)."""
-	if amount <= 0:
-		return 0
-	if not strategic_resources.has(id):
-		strategic_resources[id] = 0
-	var current: int = strategic_resources[id]
-	var space: int = GameSettings.RESOURCE_CAPACITY - current
-	var actual: int = min(amount, max(0, space))
-	strategic_resources[id] = current + actual
-	strategic_resources_changed.emit(strategic_resources)
-	return actual
+	return strategic_resources.add(id, amount)
 
 
 func remove_strategic_resource(id: StringName, amount: int) -> int:
-	"""Remove strategic resource (for tools/consumables). Returns amount actually removed."""
-	if amount <= 0 or not strategic_resources.has(id):
-		return 0
-	var current: int = strategic_resources[id]
-	var actual: int = min(amount, current)
-	strategic_resources[id] = current - actual
-	strategic_resources_changed.emit(strategic_resources)
-	return actual
+	return strategic_resources.remove(id, amount)
 
 
 func force_stop() -> void:
@@ -299,7 +271,7 @@ func serialize() -> Dictionary:
 		"spellbook": magic.spellbook.duplicate(),
 		"skills": skills.get_all(),
 		"tools": tools.serialize(),
-		"strategic_resources": strategic_resources.duplicate(),
+		"strategic_resources": strategic_resources.get_all(),
 		"time_mp_spent": time.mp_spent_today,
 	}
 
@@ -326,5 +298,5 @@ func deserialize(data: Dictionary) -> void:
 	for sk in saved_skills:
 		skills.set_skill(StringName(sk), int(saved_skills[sk]))
 	tools.deserialize(data.get("tools", []))
-	strategic_resources = data.get("strategic_resources", strategic_resources).duplicate()
+	strategic_resources.set_all(data.get("strategic_resources", strategic_resources.get_all()))
 	time.mp_spent_today = float(data.get("time_mp_spent", 0.0))

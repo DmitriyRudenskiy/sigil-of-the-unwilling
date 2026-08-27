@@ -3,7 +3,6 @@ extends SceneTree
 
 const _StatusEffects = preload("res://scripts/data/StatusEffects.gd")
 const _BattleState = preload("res://scripts/BattleState.gd")
-const _UnitRegistry = preload("res://scripts/UnitRegistry.gd")
 
 func _init() -> void:
 	var failed := 0
@@ -126,6 +125,6 @@ func _test_name_lookup() -> int:
 
 
 func _make_unit() -> BattleState.BattleUnit:
-	var stack := _UnitRegistry.make_fixed_stack("swordsmen", 10)
+	var stack := Units.make_fixed_stack("swordsmen", 10)
 	var unit := BattleState.BattleUnit.new(stack)
 	return unit

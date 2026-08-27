@@ -42,7 +42,6 @@ func _init_view() -> void:
 	add_child(_view)
 	_view.setup()
 	_view.paint_field()
-	_place_obstacles()
 
 
 func _init_executor() -> void:
@@ -279,6 +278,7 @@ func start_battle(
 	if obstacle_seed < 0:
 		obstacle_seed = randi()
 	_obstacle_seed = obstacle_seed
+	_place_obstacles()
 	_state.set_hero_bonuses(attacker_bonus, defender_bonus)
 	_state.place_army(atk, def, attacker_artifact_mods, defender_artifact_mods)
 
