@@ -38,9 +38,12 @@ func _init() -> void:
 	var read_body: String = packet.slice(4, 4 + read_len).get_string_from_utf8()
 	var read_json: Variant = JSON.parse_string(read_body)
 	
-	if read_json == req:
+	# JSON.parse_string converts int to float, so compare loosely
+	var ok: bool = read_json.get("cmd") == req.get("cmd") and read_json.get("args") == req.get("args")
+	var id_match: bool = int(read_json.get("id")) == int(req.get("id"))
+	if ok and id_match:
 		print("✅ JSON roundtrip passed")
 	else:
-		print("❌ JSON roundtrip failed")
+		print("❌ JSON roundtrip failed: %s" % read_json)
 
 	quit()
