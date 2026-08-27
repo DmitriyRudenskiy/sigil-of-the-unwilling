@@ -22,6 +22,7 @@ func _init() -> void:
 		print("BattleState tests passed")
 	else:
 		printerr("BattleState tests failed: ", failed)
+	await process_frame
 	quit(1 if failed > 0 else 0)
 
 

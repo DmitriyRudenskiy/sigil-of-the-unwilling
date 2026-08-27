@@ -124,4 +124,5 @@ func _init() -> void:
 	test_even_row_mode()
 	test_cube_roundtrip()
 	print("\n=== %d passed, %d failed ===" % [passed, failed])
+	await process_frame
 	quit(1 if failed > 0 else 0)

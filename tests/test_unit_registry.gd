@@ -94,7 +94,7 @@ func _init() -> void:
     else:
         print("PASS  get_definition guardians")
 
-    print("\n=== %d failed ===" % failed)
+    await process_frame
     quit(1 if failed > 0 else 0)
 
 

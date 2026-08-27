@@ -9,6 +9,7 @@ func _init() -> void:
 		print("Battle retreat smoke test passed")
 	else:
 		printerr("Battle retreat smoke test failed: ", failed)
+	await process_frame
 	quit(1 if failed > 0 else 0)
 
 

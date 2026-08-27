@@ -16,6 +16,7 @@ func _init() -> void:
 		print("BattleAI tests passed")
 	else:
 		printerr("BattleAI tests failed: ", failed)
+	await process_frame
 	quit(1 if failed > 0 else 0)
 
 

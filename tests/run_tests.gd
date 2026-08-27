@@ -82,9 +82,24 @@ func _init() -> void:
 						var results: String = instance.get_results()
 						print(results)
 
+					# Очистка после теста
+					_cleanup_instance(instance)
 					print("---")
 		file = dir.get_next()
 	dir.list_dir_end()
 
+	# Финальная очистка: 2 кадра для завершения всех queue_free()
+	await process_frame
+	await process_frame
+
 	print("=== Total: %d passed, %d failed ===" % [total_passed, total_failed])
 	call_deferred("quit")
+
+func _cleanup_instance(instance: Object) -> void:
+	if instance == null:
+		return
+	if instance is Node:
+		if instance.is_inside_tree():
+			instance.queue_free()
+		else:
+			instance.free()

@@ -14,6 +14,7 @@ func _init() -> void:
 		print("test_spell_registry: 20/20 passed")
 	else:
 		printerr("test_spell_registry: %d failed" % failed)
+	await process_frame
 	quit(1 if failed > 0 else 0)
 
 

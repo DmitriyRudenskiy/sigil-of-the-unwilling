@@ -18,6 +18,7 @@ func _init() -> void:
 		print("test_status_effects: 15/15 passed")
 	else:
 		printerr("test_status_effects: %d failed" % failed)
+	await process_frame
 	quit(1 if failed > 0 else 0)
 
 

@@ -15,6 +15,7 @@ func _init() -> void:
 		print("Save roundtrip tests passed")
 	else:
 		printerr("Save roundtrip tests failed: ", failed)
+	await process_frame
 	quit(1 if failed > 0 else 0)
 
 
@@ -98,8 +99,9 @@ func _test_save_manager_write() -> int:
 		printerr("loaded run_seed mismatch")
 		errors += 1
 
-	# Cleanup
+	# Cleanup — синхронное освобождение
 	sm.call("delete_save")
-	parent.queue_free()
+	sm.free()
+	parent.free()
 
 	return errors

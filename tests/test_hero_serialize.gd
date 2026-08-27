@@ -14,6 +14,7 @@ func _init() -> void:
 		print("Hero serialize tests passed")
 	else:
 		printerr("Hero serialize tests failed: ", failed)
+	await process_frame
 	quit(1 if failed > 0 else 0)
 
 

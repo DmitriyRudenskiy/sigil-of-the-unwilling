@@ -22,6 +22,7 @@ func _init() -> void:
 		print("test_unit_abilities: 22/22 passed")
 	else:
 		printerr("test_unit_abilities: %d failed" % failed)
+	await process_frame
 	quit(1 if failed > 0 else 0)
 
 

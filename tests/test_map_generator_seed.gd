@@ -36,4 +36,5 @@ func _init() -> void:
 	else:
 		print("MapGenerator map_height persistence passed")
 
+	await process_frame
 	quit(1 if failed > 0 else 0)

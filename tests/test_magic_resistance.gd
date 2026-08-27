@@ -28,6 +28,7 @@ func _init() -> void:
 		print("test_magic_resistance: 12/12 passed")
 	else:
 		printerr("test_magic_resistance: %d failed" % failed)
+	await process_frame
 	quit(1 if failed > 0 else 0)
 
 

@@ -94,5 +94,11 @@ func _on_test_timeout() -> void:
 		print("\n❌ Runtime integration FAILED:")
 		for err in _errors:
 			print("   - %s" % err)
-	
+
+	# Очистка перед выходом: освобождаем мир и даём движку 2 кадра на RID
+	if world_node != null:
+		world_node.queue_free()
+	await process_frame
+	await process_frame
+
 	quit()
