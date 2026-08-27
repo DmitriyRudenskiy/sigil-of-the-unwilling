@@ -37,6 +37,13 @@ func assert_not_null(val: Variant, msg: String = "") -> void:
 		_pass(msg)
 
 
+func assert_null(val: Variant, msg: String = "") -> void:
+	if val != null:
+		_fail("assert_null failed: %s (got %s)" % [msg, str(val)])
+	else:
+		_pass(msg)
+
+
 func assert_not_empty(val: Variant, msg: String = "") -> void:
 	if val == null or val.is_empty():
 		_fail("assert_not_empty failed: %s" % msg)

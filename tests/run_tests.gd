@@ -20,6 +20,7 @@ const SKIP_FILES := [
 	"test_city_model.gd",        # City -> CityBalance/HexUtils autoloads missing in headless
 	"test_city_manager.gd",      # CityManager -> City/GloryTracker autoloads missing
 	"test_battle_flow.gd",       # BattleFlow -> UnitStack type missing in headless
+	"test_card_spells.gd",       # Old card spell tests (superseded by test_card_spell_system.gd)
 ]
 
 func _should_skip(file: String) -> bool:

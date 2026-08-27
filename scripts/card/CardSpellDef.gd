@@ -1,82 +1,69 @@
 ## scripts/card/CardSpellDef.gd
 class_name CardSpellDef
 extends RefCounted
-## Определение карточного заклинания (LoR/MTG-стиль).
-## Независимо от существующей системы BattleState/SpellRegistry (HoMM3-стиль).
+## Определение одного карточного заклинания.
 
-enum TargetType {
-	NONE,
-	ALLY_UNIT,
-	ENEMY_UNIT,
-	ANY_UNIT,
-	ALLY_NEXUS,
-	ENEMY_NEXUS,
-	ANY_NEXUS,
-	ENEMY_SPELL,
-	ENEMY_RELIC,
-	ALL_ENEMY_UNITS,
-	ALL_ALLY_UNITS,
-	TWO_ALLY_UNITS,
-	ALLY_UNIT_IN_HAND,
-	ALLY_UNIT_IN_GRAVE,
-	SELF,
-	SAME_AS_PREVIOUS,
-}
+const _CE = preload("res://scripts/card/CardEnums.gd")
 
-enum EffectType {
-	DESTROY,
-	EXILE,
-	RETURN_TO_HAND,
-	RETURN_TO_DECK,
-	DEAL_DAMAGE,
-	MODIFY_STAT_TEMP,
-	MODIFY_STAT_PERM,
-	APPLY_STATUS,
-	DRAW,
-	DISCARD,
-	CANCEL,
-	CREATE_TOKEN,
-	SWAP_POSITION,
-	MODIFY_POWER,
-	MARKET_ACTION,
-	ACTION_REPEAT,
-	CHANGE_CONTROL,
-	TRIGGER_ON_DISCARD,
-	HEAL,
-}
-
-enum StatusEffect {
-	SILENCE,
-	FROZEN,
-	STUN,
-	QUICKDRAW,
-	UNBLOCKABLE,
-	OVERWHELM,
-	ARMORED,
-	WARD,
-	CHALLENGE,
-	CANNOT_BLOCK,
-	CANNOT_ATTACK,
-}
-
-var id: StringName
-var display_name: String
-var spell_type: String = "fast"      # fast | slow | burst
+var id: StringName = &""
+var display_name: String = ""
+var template: StringName = &""
+var speed: int = _CE.SpellSpeed.FAST
 var cost: int = 0
-var school: StringName = &""         # привязка к школе
-var rarity: int = 0                  # 0=common 1=rare 2=epic
+var color: int = _CE.CardColor.COLORLESS
+var influence_req: Dictionary = {}
 var description: String = ""
-var effects: Array[Dictionary] = []  # [{action, target, params}]
-var condition: Dictionary = {}       # глобальное условие каста
+var flavor: String = ""
+var params: Dictionary = {}
+var condition: Dictionary = {}
+var secondary_effects: Array = []
+
+static func from_dict(d: Dictionary):
+	var s = new()
+	s.id = StringName(d.get("id", ""))
+	s.display_name = d.get("name", "")
+	s.template = StringName(d.get("template", ""))
+	s.speed = _CE.parse_speed(d.get("speed", "fast"))
+	s.cost = int(d.get("cost", 0))
+	s.color = _CE.parse_color(d.get("color", "colorless"))
+	s.influence_req = d.get("influence_req", {})
+	s.description = d.get("description", "")
+	s.flavor = d.get("flavor", "")
+	s.params = d.get("params", {})
+	s.condition = d.get("condition", {})
+	var se = d.get("secondary_effects", [])
+	if se is Array:
+		s.secondary_effects = Array(se)
+	return s
 
 func to_dict() -> Dictionary:
 	return {
 		"id": id,
 		"name": display_name,
-		"type": spell_type,
+		"template": template,
+		"speed": _speed_to_str(speed),
 		"cost": cost,
-		"school": school,
-		"rarity": rarity,
-		"effects": effects,
+		"color": _color_to_str(color),
+		"influence_req": influence_req,
+		"description": description,
+		"params": params,
 		"condition": condition,
+		"secondary_effects": secondary_effects,
 	}
+
+func _speed_to_str(s: int) -> String:
+	match s:
+		_CE.SpellSpeed.FAST: return "fast"
+		_CE.SpellSpeed.SLOW: return "slow"
+		_CE.SpellSpeed.BURST: return "burst"
+	return "fast"
+
+func _color_to_str(c: int) -> String:
+	match c:
+		_CE.CardColor.FIRE: return "fire"
+		_CE.CardColor.TIME: return "time"
+		_CE.CardColor.JUSTICE: return "justice"
+		_CE.CardColor.PRIMAL: return "primal"
+		_CE.CardColor.SHADOW: return "shadow"
+		_CE.CardColor.MULTIFACTION: return "multifact"
+		_: return "colorless"

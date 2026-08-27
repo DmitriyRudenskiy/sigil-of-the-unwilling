@@ -1,12 +1,16 @@
 ## scripts/card/CardSpellRegistry.gd
-## Autoload: CardSpells
-## Реестр 71 карточного заклинания (LoR/MTG-стиль).
-
 extends Node
+class_name CardSpellRegistry
+## Autoload: CardSpells. Загружает ~420 карт из JSON.
 
-const CardSpellDef = preload("res://scripts/card/CardSpellDef.gd")
+const JSON_PATH := "res://data/card_spells.json"
+
+const _Def = preload("res://scripts/card/CardSpellDef.gd")
+const _Enums = preload("res://scripts/card/CardEnums.gd")
 
 var _spells: Dictionary = {}
+var _by_template: Dictionary = {}
+var _by_color: Dictionary = {}
 
 func _ready() -> void:
 	ensure_definitions()
@@ -14,302 +18,115 @@ func _ready() -> void:
 func ensure_definitions() -> void:
 	if not _spells.is_empty():
 		return
-	# === Группа А: Уничтожение и урон (14) ===
-	_reg(&"annihilate", "Annihilate", "fast", 5, [
-		_eff(CardSpellDef.EffectType.DESTROY, CardSpellDef.TargetType.ENEMY_UNIT, {"ignore_ward": true, "cost_check": true}),
-	])
-	_reg(&"banish", "Banish", "fast", 4, [
-		_eff(CardSpellDef.EffectType.EXILE, CardSpellDef.TargetType.ENEMY_UNIT, {"ignore_ward": true}),
-	])
-	_reg(&"deathstrike", "Deathstrike", "fast", 3, [
-		_eff(CardSpellDef.EffectType.DESTROY, CardSpellDef.TargetType.ENEMY_UNIT, {}),
-	], {"target_hp_max": 4})
-	_reg(&"incineration", "Incineration", "fast", 3, [
-		_eff(CardSpellDef.EffectType.DEAL_DAMAGE, CardSpellDef.TargetType.ENEMY_UNIT, {"amount": 4}),
-	])
-	_reg(&"ruin", "Ruin", "fast", 4, [
-		_eff(CardSpellDef.EffectType.DESTROY, CardSpellDef.TargetType.ENEMY_RELIC, {}),
-	])
-	_reg(&"slay", "Slay", "fast", 3, [
-		_eff(CardSpellDef.EffectType.DESTROY, CardSpellDef.TargetType.ENEMY_UNIT, {}),
-	], {"target_is_damaged": true})
-	_reg(&"unmake", "Unmake", "fast", 2, [
-		_eff(CardSpellDef.EffectType.DESTROY, CardSpellDef.TargetType.ENEMY_UNIT, {}),
-	], {"target_cost_max": 3})
-	_reg(&"ice_bolt", "Ice Bolt", "fast", 1, [
-		_eff(CardSpellDef.EffectType.DEAL_DAMAGE, CardSpellDef.TargetType.ANY_NEXUS, {"amount": 2}),
-		_eff(CardSpellDef.EffectType.APPLY_STATUS, CardSpellDef.TargetType.SAME_AS_PREVIOUS, {"status": CardSpellDef.StatusEffect.FROZEN, "duration": 1}),
-	])
-	_reg(&"lightning_strike", "Lightning Strike", "fast", 2, [
-		_eff(CardSpellDef.EffectType.DEAL_DAMAGE, CardSpellDef.TargetType.ANY_UNIT, {"amount": 2}),
-	])
-	_reg(&"skybolt", "Skybolt", "fast", 3, [
-		_eff(CardSpellDef.EffectType.DEAL_DAMAGE, CardSpellDef.TargetType.ENEMY_UNIT, {"amount": 3}),
-	], {"target_is_flying": true})
-	_reg(&"burn_them_all", "Burn Them All", "slow", 5, [
-		_eff(CardSpellDef.EffectType.DEAL_DAMAGE, CardSpellDef.TargetType.ALL_ENEMY_UNITS, {"amount": 2}),
-	])
-	_reg(&"crack_the_earth", "Crack the Earth", "slow", 5, [
-		_eff(CardSpellDef.EffectType.DEAL_DAMAGE, CardSpellDef.TargetType.ALL_ENEMY_UNITS, {"amount": 2}),
-	])
-	_reg(&"shatter", "Shatter", "fast", 3, [
-		_eff(CardSpellDef.EffectType.DESTROY, CardSpellDef.TargetType.ENEMY_RELIC, {}),
-	])
-	_reg(&"dismantle", "Dismantle", "fast", 3, [
-		_eff(CardSpellDef.EffectType.DESTROY, CardSpellDef.TargetType.ENEMY_RELIC, {}),
-		_eff(CardSpellDef.EffectType.DRAW, CardSpellDef.TargetType.SELF, {"count": 1}),
-	])
-
-	# === Группа Б: Защита и уклонение (12) ===
-	_reg(&"blink", "Blink", "fast", 2, [
-		_eff(CardSpellDef.EffectType.RETURN_TO_HAND, CardSpellDef.TargetType.ALLY_UNIT, {}),
-	])
-	_reg(&"disappear", "Disappear", "fast", 2, [
-		_eff(CardSpellDef.EffectType.RETURN_TO_HAND, CardSpellDef.TargetType.ALLY_UNIT, {}),
-	])
-	_reg(&"levitate", "Levitate", "fast", 2, [
-		_eff(CardSpellDef.EffectType.RETURN_TO_HAND, CardSpellDef.TargetType.ANY_UNIT, {}),
-	])
-	_reg(&"teleport", "Teleport", "fast", 3, [
-		_eff(CardSpellDef.EffectType.RETURN_TO_HAND, CardSpellDef.TargetType.ALLY_UNIT, {}),
-	])
-	_reg(&"transpose", "Transpose", "fast", 2, [
-		_eff(CardSpellDef.EffectType.SWAP_POSITION, CardSpellDef.TargetType.TWO_ALLY_UNITS, {}),
-	])
-	_reg(&"nullify", "Nullify", "fast", 3, [
-		_eff(CardSpellDef.EffectType.CANCEL, CardSpellDef.TargetType.ENEMY_SPELL, {}),
-	])
-	_reg(&"hesitate", "Hesitate", "fast", 2, [
-		_eff(CardSpellDef.EffectType.CANCEL, CardSpellDef.TargetType.ENEMY_SPELL, {}),
-	], {"spell_cost_max": 3})
-	_reg(&"swift_refusal", "Swift Refusal", "fast", 2, [
-		_eff(CardSpellDef.EffectType.CANCEL, CardSpellDef.TargetType.ENEMY_SPELL, {}),
-	], {"spell_targets_ally": true})
-	_reg(&"bubble_shield", "Bubble Shield", "fast", 2, [
-		_eff(CardSpellDef.EffectType.APPLY_STATUS, CardSpellDef.TargetType.ALLY_UNIT, {"status": CardSpellDef.StatusEffect.WARD, "duration": 1}),
-	])
-	_reg(&"forcefield", "Forcefield", "fast", 3, [
-		_eff(CardSpellDef.EffectType.MODIFY_STAT_TEMP, CardSpellDef.TargetType.ALLY_NEXUS, {"hp_temp": 4}),
-	])
-	_reg(&"stoneskin", "Stoneskin", "fast", 2, [
-		_eff(CardSpellDef.EffectType.MODIFY_STAT_TEMP, CardSpellDef.TargetType.ALLY_UNIT, {"hp_temp": 2}),
-	])
-	_reg(&"withstand", "Withstand", "fast", 2, [
-		_eff(CardSpellDef.EffectType.MODIFY_STAT_TEMP, CardSpellDef.TargetType.ALLY_UNIT, {"hp_temp": 2}),
-	])
-
-	# === Группа В: Боевые хитрости (12) ===
-	_reg(&"agile_strike", "Agile Strike", "fast", 3, [
-		_eff(CardSpellDef.EffectType.MODIFY_STAT_TEMP, CardSpellDef.TargetType.ALLY_UNIT, {"atk": 2, "hp": 2}),
-	])
-	_reg(&"inner_might", "Inner Might", "fast", 3, [
-		_eff(CardSpellDef.EffectType.MODIFY_STAT_TEMP, CardSpellDef.TargetType.ALLY_UNIT, {"atk": 3, "hp": 3}),
-	])
-	_reg(&"mighty_strikes", "Mighty Strikes", "slow", 4, [
-		_eff(CardSpellDef.EffectType.MODIFY_STAT_TEMP, CardSpellDef.TargetType.ALL_ALLY_UNITS, {"atk": 1, "hp": 1}),
-	])
-	_reg(&"overthrow", "Overthrow", "fast", 4, [
-		_eff(CardSpellDef.EffectType.MODIFY_STAT_TEMP, CardSpellDef.TargetType.ALLY_UNIT, {"atk_dynamic": "ally_count", "hp_dynamic": "ally_count"}),
-	])
-	_reg(&"reinvigorate", "Reinvigorate", "fast", 3, [
-		_eff(CardSpellDef.EffectType.MODIFY_STAT_TEMP, CardSpellDef.TargetType.ALLY_UNIT, {"atk": 2, "hp": 2}),
-		_eff(CardSpellDef.EffectType.HEAL, CardSpellDef.TargetType.SAME_AS_PREVIOUS, {"amount": 2}),
-	])
-	_reg(&"sharpened_reflex", "Sharpened Reflex", "fast", 2, [
-		_eff(CardSpellDef.EffectType.APPLY_STATUS, CardSpellDef.TargetType.ALLY_UNIT, {"status": CardSpellDef.StatusEffect.QUICKDRAW}),
-	])
-	_reg(&"steely_resolve", "Steely Resolve", "fast", 2, [
-		_eff(CardSpellDef.EffectType.APPLY_STATUS, CardSpellDef.TargetType.ALLY_UNIT, {"status": CardSpellDef.StatusEffect.UNBLOCKABLE}),
-	])
-	_reg(&"augmented_form", "Augmented Form", "fast", 2, [
-		_eff(CardSpellDef.EffectType.APPLY_STATUS, CardSpellDef.TargetType.ALLY_UNIT, {"status": CardSpellDef.StatusEffect.OVERWHELM}),
-	])
-	_reg(&"scalehide", "Scalehide", "fast", 2, [
-		_eff(CardSpellDef.EffectType.APPLY_STATUS, CardSpellDef.TargetType.ALLY_UNIT, {"status": CardSpellDef.StatusEffect.ARMORED}),
-	])
-	_reg(&"barrel_through", "Barrel Through", "fast", 2, [
-		_eff(CardSpellDef.EffectType.DEAL_DAMAGE, CardSpellDef.TargetType.ENEMY_NEXUS, {"amount": 2}),
-	], {"attacker_unblocked": true})
-	_reg(&"daring_maneuver", "Daring Maneuver", "fast", 2, [
-		_eff(CardSpellDef.EffectType.APPLY_STATUS, CardSpellDef.TargetType.ALLY_UNIT, {"status": CardSpellDef.StatusEffect.CHALLENGE}),
-		_eff(CardSpellDef.EffectType.MODIFY_STAT_TEMP, CardSpellDef.TargetType.SAME_AS_PREVIOUS, {"atk": 2}),
-	])
-	_reg(&"turn_the_tides", "Turn the Tides", "slow", 5, [
-		_eff(CardSpellDef.EffectType.MODIFY_STAT_TEMP, CardSpellDef.TargetType.ALL_ALLY_UNITS, {"atk": 2, "hp": 2}),
-	])
-
-	# === Группа Г: Ослабление и контроль (12) ===
-	_reg(&"disarm", "Disarm", "fast", 3, [
-		_eff(CardSpellDef.EffectType.APPLY_STATUS, CardSpellDef.TargetType.ENEMY_UNIT, {"status": CardSpellDef.StatusEffect.SILENCE}),
-	])
-	_reg(&"mute", "Mute", "fast", 2, [
-		_eff(CardSpellDef.EffectType.APPLY_STATUS, CardSpellDef.TargetType.ENEMY_UNIT, {"status": CardSpellDef.StatusEffect.SILENCE}),
-	])
-	_reg(&"sickness", "Sickness", "fast", 2, [
-		_eff(CardSpellDef.EffectType.APPLY_STATUS, CardSpellDef.TargetType.ENEMY_UNIT, {"status": CardSpellDef.StatusEffect.SILENCE}),
-		_eff(CardSpellDef.EffectType.MODIFY_STAT_TEMP, CardSpellDef.TargetType.SAME_AS_PREVIOUS, {"atk": -1, "hp": -1}),
-	])
-	_reg(&"chill", "Chill", "fast", 2, [
-		_eff(CardSpellDef.EffectType.MODIFY_STAT_TEMP, CardSpellDef.TargetType.ENEMY_UNIT, {"atk": -2, "hp": -2}),
-	])
-	_reg(&"icy_hold", "Icy Hold", "fast", 3, [
-		_eff(CardSpellDef.EffectType.APPLY_STATUS, CardSpellDef.TargetType.ENEMY_UNIT, {"status": CardSpellDef.StatusEffect.FROZEN}),
-	])
-	_reg(&"shrivel", "Shrivel", "slow", 3, [
-		_eff(CardSpellDef.EffectType.MODIFY_STAT_PERM, CardSpellDef.TargetType.ENEMY_UNIT, {"atk": -2, "hp": -2}),
-	])
-	_reg(&"subdue", "Subdue", "fast", 3, [
-		_eff(CardSpellDef.EffectType.MODIFY_STAT_TEMP, CardSpellDef.TargetType.ENEMY_UNIT, {"atk": -3, "hp": -3}),
-	])
-	_reg(&"withering_touch", "Withering Touch", "slow", 2, [
-		_eff(CardSpellDef.EffectType.MODIFY_STAT_PERM, CardSpellDef.TargetType.ENEMY_UNIT, {"atk": -1, "hp": -1}),
-	])
-	_reg(&"arrest", "Arrest", "fast", 3, [
-		_eff(CardSpellDef.EffectType.APPLY_STATUS, CardSpellDef.TargetType.ENEMY_UNIT, {"status": CardSpellDef.StatusEffect.STUN}),
-	])
-	_reg(&"ensnare", "Ensnare", "fast", 3, [
-		_eff(CardSpellDef.EffectType.APPLY_STATUS, CardSpellDef.TargetType.ENEMY_UNIT, {"status": CardSpellDef.StatusEffect.STUN}),
-	])
-	_reg(&"hold_at_bay", "Hold At Bay", "fast", 2, [
-		_eff(CardSpellDef.EffectType.APPLY_STATUS, CardSpellDef.TargetType.ENEMY_UNIT, {"status": CardSpellDef.StatusEffect.CANNOT_BLOCK}),
-	])
-	_reg(&"telekinetic_shackles", "Telekinetic Shackles", "fast", 3, [
-		_eff(CardSpellDef.EffectType.APPLY_STATUS, CardSpellDef.TargetType.ENEMY_UNIT, {"status": CardSpellDef.StatusEffect.CANNOT_ATTACK}),
-	])
-
-	# === Группа Д: Манипуляция картами (12) ===
-	_reg(&"boundless_knowledge", "Boundless Knowledge", "slow", 3, [
-		_eff(CardSpellDef.EffectType.DRAW, CardSpellDef.TargetType.SELF, {"count": 2}),
-	], {"hand_size_max": 4})
-	_reg(&"bottled_insight", "Bottled Insight", "fast", 2, [
-		_eff(CardSpellDef.EffectType.DRAW, CardSpellDef.TargetType.SELF, {"count": 1}),
-	])
-	_reg(&"find_the_moment", "Find The Moment", "fast", 1, [
-		_eff(CardSpellDef.EffectType.DRAW, CardSpellDef.TargetType.SELF, {"count": 1}),
-	])
-	_reg(&"wisdom_of_the_elders", "Wisdom of the Elders", "slow", 3, [
-		_eff(CardSpellDef.EffectType.DRAW, CardSpellDef.TargetType.SELF, {"count": 1}),
-	])
-	_reg(&"recycle", "Recycle", "fast", 2, [
-		_eff(CardSpellDef.EffectType.RETURN_TO_DECK, CardSpellDef.TargetType.ALLY_UNIT_IN_HAND, {"shuffle": true}),
-		_eff(CardSpellDef.EffectType.DRAW, CardSpellDef.TargetType.SELF, {"count": 1}),
-	])
-	_reg(&"recovery", "Recovery", "fast", 2, [
-		_eff(CardSpellDef.EffectType.RETURN_TO_HAND, CardSpellDef.TargetType.ALLY_UNIT_IN_GRAVE, {}),
-	], {"target_cost_max": 2})
-	_reg(&"express_route", "Express Route", "fast", 1, [
-		_eff(CardSpellDef.EffectType.MODIFY_POWER, CardSpellDef.TargetType.SELF, {"power": 1}),
-	])
-	_reg(&"furnish", "Furnish", "fast", 1, [
-		_eff(CardSpellDef.EffectType.MODIFY_POWER, CardSpellDef.TargetType.SELF, {"power": 1}),
-	])
-	_reg(&"earth_conjuring", "Earth Conjuring", "fast", 1, [
-		_eff(CardSpellDef.EffectType.MODIFY_POWER, CardSpellDef.TargetType.SELF, {"power": 1, "influence": &"earth"}),
-	])
-	_reg(&"fire_conjuring", "Fire Conjuring", "fast", 1, [
-		_eff(CardSpellDef.EffectType.MODIFY_POWER, CardSpellDef.TargetType.SELF, {"power": 1, "influence": &"fire"}),
-	])
-	_reg(&"water_conjuring", "Water Conjuring", "fast", 1, [
-		_eff(CardSpellDef.EffectType.MODIFY_POWER, CardSpellDef.TargetType.SELF, {"power": 1, "influence": &"water"}),
-	])
-	_reg(&"wind_conjuring", "Wind Conjuring", "fast", 1, [
-		_eff(CardSpellDef.EffectType.MODIFY_POWER, CardSpellDef.TargetType.SELF, {"power": 1, "influence": &"wind"}),
-	])
-
-	# === Группа Е: Специфические механики (9) ===
-	_reg(&"send_an_agent", "Send an Agent", "fast", 1, [
-		_eff(CardSpellDef.EffectType.MARKET_ACTION, CardSpellDef.TargetType.SELF, {"action": "draw_from_market", "cost": 1}),
-	])
-	_reg(&"skullmarket_delivery", "Skullmarket Delivery", "fast", 2, [
-		_eff(CardSpellDef.EffectType.CREATE_TOKEN, CardSpellDef.TargetType.SELF, {"token": "random_cheap"}),
-	], {"discard_cost": 1})
-	_reg(&"warren_delivery", "Warren Delivery", "fast", 2, [
-		_eff(CardSpellDef.EffectType.CREATE_TOKEN, CardSpellDef.TargetType.SELF, {"token": "rat", "atk": 1, "hp": 1}),
-	])
-	_reg(&"trick_shot", "Trick Shot", "fast", 2, [
-		_eff(CardSpellDef.EffectType.DESTROY, CardSpellDef.TargetType.ENEMY_UNIT, {}),
-	], {"target_hp_max": 2})
-	_reg(&"trigger_happy", "Trigger-Happy", "fast", 3, [
-		_eff(CardSpellDef.EffectType.ACTION_REPEAT, CardSpellDef.TargetType.ALLY_UNIT, {"action": "ranged_attack", "count": 1}),
-	])
-	_reg(&"stutterstep", "Stutterstep", "fast", 4, [
-		_eff(CardSpellDef.EffectType.RETURN_TO_HAND, CardSpellDef.TargetType.ALLY_UNIT, {}),
-		_eff(CardSpellDef.EffectType.CREATE_TOKEN, CardSpellDef.TargetType.SELF, {"replay_target": true, "free": true}),
-	])
-	_reg(&"reality_snap", "Reality Snap", "fast", 2, [
-		_eff(CardSpellDef.EffectType.RETURN_TO_HAND, CardSpellDef.TargetType.ANY_UNIT, {}),
-	], {"target_cost_max": 2})
-	_reg(&"turnabout", "Turnabout", "fast", 5, [
-		_eff(CardSpellDef.EffectType.CHANGE_CONTROL, CardSpellDef.TargetType.ENEMY_UNIT, {"duration": 1}),
-	])
-	_reg(&"well_laid_trap", "Well-Laid Trap", "fast", 2, [
-		_eff(CardSpellDef.EffectType.TRIGGER_ON_DISCARD, CardSpellDef.TargetType.SELF, {"effect": "deal_damage", "amount": 2, "target": "enemy_nexus"}),
-	])
-
-
-# ==================== PRIVATE HELPERS ====================
-
-func _reg(id: StringName, name: String, type: String, cost: int, effects: Array[Dictionary], condition: Dictionary = {}) -> void:
-	var s := CardSpellDef.new()
-	s.id = id
-	s.display_name = name
-	s.spell_type = type
-	s.cost = cost
-	s.effects = effects
-	s.condition = condition
-	_spells[id] = s
-
-func _eff(action: int, target: int, params: Dictionary) -> Dictionary:
-	return {"action": action, "target": target, "params": params}
-
-
-# ==================== PUBLIC API ====================
+	_load_from_json()
 
 func reset() -> void:
 	_spells.clear()
+	_by_template.clear()
+	_by_color.clear()
 
-func get_spell(id: StringName) -> CardSpellDef:
+func _load_from_json() -> void:
+	if not FileAccess.file_exists(JSON_PATH):
+		push_warning("CardSpellRegistry: %s not found, using fallback" % JSON_PATH)
+		_load_fallback()
+		return
+
+	var file := FileAccess.open(JSON_PATH, FileAccess.READ)
+	var text := file.get_as_text()
+	file.close()
+
+	var data = JSON.parse_string(text)
+	if data == null or not (data is Array):
+		push_error("CardSpellRegistry: invalid JSON format")
+		return
+
+	for entry in data:
+		if not (entry is Dictionary):
+			continue
+		var spell: Variant = _Def.from_dict(entry)
+		if spell.id.is_empty():
+			continue
+		_register(spell)
+
+	print("[CardSpellRegistry] Loaded %d spells from JSON" % _spells.size())
+
+func _load_fallback() -> void:
+	# Минимальный набор для тестов
+	var fallback: Array[Dictionary] = [
+		{"id": "ice_bolt", "name": "Ice Bolt", "template": "DIRECT_DAMAGE", "speed": "fast", "cost": 1, "color": "primal",
+		 "params": {"amount": 2, "target": "ANY_NEXUS", "apply_status": "FROZEN", "status_duration": 1}},
+		{"id": "annihilate", "name": "Annihilate", "template": "HARD_REMOVAL", "speed": "fast", "cost": 7, "color": "shadow",
+		 "params": {"target": "ENEMY_UNIT", "ignore_ward": true}},
+		{"id": "nullify", "name": "Nullify", "template": "COUNTERMAGIC", "speed": "fast", "cost": 3, "color": "primal",
+		 "params": {}},
+		{"id": "agile_strike", "name": "Agile Strike", "template": "COMBAT_TRICK", "speed": "fast", "cost": 3, "color": "justice",
+		 "params": {"atk": 2, "hp": 2}},
+		{"id": "mute", "name": "Mute", "template": "DEBUFF_CONTROL", "speed": "fast", "cost": 2, "color": "shadow",
+		 "params": {"status": "SILENCE"}},
+		{"id": "bottled_insight", "name": "Bottled Insight", "template": "CARD_DRAW", "speed": "fast", "cost": 2, "color": "primal",
+		 "params": {"count": 1}},
+		{"id": "earth_conjuring", "name": "Earth Conjuring", "template": "MANA_RAMP", "speed": "fast", "cost": 1, "color": "time",
+		 "params": {"power": 1, "influence": "time"}},
+		{"id": "blink", "name": "Blink", "template": "BOUNCE", "speed": "fast", "cost": 2, "color": "primal",
+		 "params": {"target": "ALLY_UNIT"}},
+		{"id": "deathstrike", "name": "Deathstrike", "template": "HARD_REMOVAL", "speed": "fast", "cost": 3, "color": "shadow",
+		 "condition": {"target_hp_max": 4}, "params": {}},
+		{"id": "reality_snap", "name": "Reality Snap", "template": "BOUNCE", "speed": "fast", "cost": 2, "color": "primal",
+		 "condition": {"target_cost_max": 2}, "params": {"target": "ANY_UNIT"}},
+		{"id": "turnabout", "name": "Turnabout", "template": "DEBUFF_CONTROL", "speed": "fast", "cost": 5, "color": "primal",
+		 "params": {"change_control": true, "control_duration": 1}},
+		{"id": "scalehide", "name": "Scalehide", "template": "KEYWORD_BUFF", "speed": "fast", "cost": 2, "color": "time",
+		 "params": {"keyword": "ARMORED"}},
+		{"id": "warren_delivery", "name": "Warren Delivery", "template": "TOKEN_GENERATION", "speed": "fast", "cost": 2, "color": "shadow",
+		 "params": {"token_id": "rat", "count": 1, "atk": 1, "hp": 1}},
+	]
+	for entry in fallback:
+		var spell: Variant = _Def.from_dict(entry)
+		_register(spell)
+
+func _register(spell) -> void:
+	_spells[spell.id] = spell
+
+	if not _by_template.has(spell.template):
+		_by_template[spell.template] = []
+	_by_template[spell.template].append(spell)
+
+	var color_name: String = "UNKNOWN"
+	var keys: Array = _Enums.CardColor.keys()
+	if spell.color < keys.size():
+		color_name = str(keys[spell.color])
+	if not _by_color.has(color_name):
+		_by_color[color_name] = []
+	_by_color[color_name].append(spell)
+
+# ==================== PUBLIC API ====================
+
+func get_spell(id: StringName) -> Variant:
 	ensure_definitions()
 	return _spells.get(id, null)
 
-func get_all() -> Array[CardSpellDef]:
+func get_all() -> Array:
 	ensure_definitions()
-	var result: Array[CardSpellDef] = []
+	var result: Array = []
 	for id in _spells:
 		result.append(_spells[id])
 	return result
 
-func get_by_type(type: String) -> Array[CardSpellDef]:
+func get_by_template(template: StringName) -> Array:
 	ensure_definitions()
-	var result: Array[CardSpellDef] = []
-	for id in _spells:
-		if _spells[id].spell_type == type:
-			result.append(_spells[id])
-	return result
+	if _by_template.has(template):
+		return _by_template[template]
+	return []
 
-func get_by_cost(cost: int) -> Array[CardSpellDef]:
+func get_by_color(color: String) -> Array:
 	ensure_definitions()
-	var result: Array[CardSpellDef] = []
-	for id in _spells:
-		if _spells[id].cost == cost:
-			result.append(_spells[id])
-	return result
+	if _by_color.has(color):
+		return _by_color[color]
+	return []
 
-func get_multi_effect() -> Array[CardSpellDef]:
-	ensure_definitions()
-	var result: Array[CardSpellDef] = []
-	for id in _spells:
-		if _spells[id].effects.size() > 1:
-			result.append(_spells[id])
-	return result
-
-func get_conditional() -> Array[CardSpellDef]:
-	ensure_definitions()
-	var result: Array[CardSpellDef] = []
-	for id in _spells:
-		if not _spells[id].condition.is_empty():
-			result.append(_spells[id])
-	return result
-
-func spell_count() -> int:
+func get_count() -> int:
 	return _spells.size()
+
+func get_template_count() -> int:
+	ensure_definitions()
+	return _by_template.size()
