@@ -119,7 +119,7 @@ def task1_collect_resources(client):
     coords = [(r['x'], r['y']) for r in all_resources]
     avg_dist = calculate_avg_distance(coords)
     print(f"📏 Average distance between resources: {avg_dist:.2f} hexes")
-    print("📦 Starting collection process (Limited to 10 turns)...\n")
+    print(f"📦 Starting collection process (Limited to 10 turns)...\n")
     
     collected_count = 0
     turn_count = 1
@@ -214,57 +214,136 @@ def task2_challenge_and_flee(client):
     print(f"📏 Average distance between enemies: {avg_dist:.2f} hexes")
     print("🛡️ Starting challenge process...\n")
     
+    challenged = set()      # координаты врагов, с которыми уже сражались
+    # (RETREAT не удаляет врага с карты — без этого агент зацикливается на ближайшем)
     challenged_count = 0
-    while True:
+    max_iterations = 500    # защита от бесконечного цикла
+    iterations = 0
+    stuck_target = None     # цель, к которой путь не строится
+    stuck_count = 0         # сколько ходов подряд MOVE_TO по ней ошибался
+    noskip_target = None    # цель «вплотную»: герой не двигается и бой не стартует
+    noskip_count = 0
+    while iterations < max_iterations:
+        iterations += 1
         state = client.send_command({"action": "GET_STATE"})
-        if state["mode"] == "world":
-            enemies = state["map_enemies"]
-            if not enemies:
-                break
-            
-            hero_pos = state.get("hero_pos", {"x": 0, "y": 0})
-            enemies.sort(key=lambda e: hex_dist((hero_pos["x"], hero_pos["y"]), (e["x"], e["y"])))
-            target = enemies[0]
-            move_resp = client.send_command({"action": "MOVE_TO", "x": target["x"], "y": target["y"]})
-            if move_resp.get("status") == "already_at":
-                time.sleep(0.5)
-                continue
-            if "error" in move_resp:
-                print(f"\n⚠️ MOVE_TO error: {move_resp['error']}")
-                # No path at all — refresh MP and retry next turn
-                client.send_command({"action": "END_TURN"})
-                time.sleep(0.5)
-                continue
-
-            will_reach = move_resp.get("will_reach", True)
-            result = wait_for_movement(client, target["x"], target["y"], challenged_count, total_enemies, "Combat", will_reach=will_reach)
-            if result in ("no_mp", "stopped"):
-                # Hero closed in but stopped short of the enemy (MP spent).
-                # End turn, resume approach next turn → eventually adjacent → battle.
-                client.send_command({"action": "END_TURN"})
-                time.sleep(0.5)
-            elif result == "battle_started":
-                time.sleep(0.5)
-                client.send_command({"action": "RETREAT"})
-                challenged_count += 1
-                while True:
-                    state = client.send_command({"action": "GET_STATE"})
-                    if state["mode"] == "world": 
-                        break
-                    time.sleep(0.5)
-            elif result == "arrived":
-                # If we arrived but no battle started, wait a bit for the engine to transition
-                time.sleep(1.0)
-                # We don't increment challenged_count here because the battle hasn't started/finished
-            elif result == "timeout":
-                print("\n⚠️ Movement timeout! Trying to end turn...")
-                client.send_command({"action": "END_TURN"})
-                time.sleep(0.5)
-        elif state["mode"] == "battle":
+        if state["mode"] == "battle":
+            # Бой мог начаться самопроизвольно (контакт при движении) — отступаем.
             client.send_command({"action": "RETREAT"})
             time.sleep(1)
-        else:
+            continue
+        if state["mode"] != "world":
             break
+
+        enemies = state["map_enemies"]
+        remaining = [e for e in enemies if (e["x"], e["y"]) not in challenged]
+        if not remaining:
+            break
+
+        hero_pos = state.get("hero_pos", {"x": 0, "y": 0})
+        remaining.sort(key=lambda e: hex_dist((hero_pos["x"], hero_pos["y"]), (e["x"], e["y"])))
+        target = remaining[0]
+        move_resp = client.send_command({"action": "MOVE_TO", "x": target["x"], "y": target["y"]})
+        if move_resp.get("status") == "already_at":
+            # Герой стоит на клетке врага (остаточное состояние) — считаем контакт.
+            challenged.add((target["x"], target["y"]))
+            time.sleep(0.5)
+            continue
+        if "error" in move_resp:
+            print(f"\n⚠️ MOVE_TO error: {move_resp['error']}")
+            key = (target["x"], target["y"])
+            stuck_count = stuck_count + 1 if stuck_target == key else 1
+            stuck_target = key
+            if stuck_count >= 3:
+                # Три хода подряд нет пути — цель недостижима (например, враг на
+                # недосягаемой высоте/острове). Пропускаем, чтобы не сжигать все
+                # 500 итераций.
+                print(f"⏭️  Enemy {key} unreachable for {stuck_count} turns — skipping")
+                challenged.add(key)
+                stuck_target, stuck_count = None, 0
+            client.send_command({"action": "END_TURN"})
+            time.sleep(0.5)
+            continue
+
+        # Путь построен — счётчики «застрявших» целей сбрасываются.
+        stuck_target, stuck_count = None, 0
+        noskip_target, noskip_count = None, 0
+        will_reach = move_resp.get("will_reach", True)
+        result = wait_for_movement(client, target["x"], target["y"], challenged_count, total_enemies, "Combat", will_reach=will_reach)
+        if result in ("no_mp", "stopped"):
+            if result == "stopped":
+                # Герой не сдвинулся с места (стоял вплотную к врагу, но бой не
+                # стартовал — вырожденное состояние, напр. пустая армия: бой
+                # заканчивается мгновенно до появления battle-режима). Три раза
+                # подряд — пропускаем цель, иначе упрёмся в 500 итераций.
+                now = client.send_command({"action": "GET_STATE"})
+                np = (now["hero_pos"]["x"], now["hero_pos"]["y"])
+                key = (target["x"], target["y"])
+                noskip_count = noskip_count + 1 if (np == (hero_pos["x"], hero_pos["y"]) and noskip_target == key) else 1
+                noskip_target = key
+                if noskip_count >= 3:
+                    print(f"⏭️  Enemy {key}: hero stuck adjacent, no battle — skipping")
+                    challenged.add(key)
+                    noskip_target, noskip_count = None, 0
+            # Hero closed in but stopped short of the enemy (MP spent).
+            # End turn, resume approach next turn → eventually adjacent → battle.
+            client.send_command({"action": "END_TURN"})
+            time.sleep(0.5)
+        elif result == "battle_started":
+            # Контакт с врагом: бой начался.
+            # При отступлении армия сохраняется, но вражеский стек остаётся на карте.
+            # Поэтому помечаем цель, чтобы не атаковать её повторно (иначе агент
+            # зациклится на ближайшем враге).
+            challenged.add((target["x"], target["y"]))
+            challenged_count += 1
+            print(f"\n⚔️ Battle {challenged_count}/{total_enemies} with enemy at ({target['x']},{target['y']}) — retreating...")
+            time.sleep(0.5)
+            # Отступление из боя: шлём RETREAT; на сервере executor принимает его
+            # только в WAITING_INPUT (на старте боя думает ИИ) — поэтому ретраем
+            # в цикле. Если бой завис (напр. SCRIPT ERROR во view-слое) — после
+            # 30с эскалируем в FORCE_RETREAT.
+            got_world = False
+            for _ in range(60):  # до 30с
+                client.send_command({"action": "RETREAT"})
+                if client.send_command({"action": "GET_STATE"})["mode"] == "world":
+                    got_world = True
+                    break
+                time.sleep(0.5)
+            if not got_world:
+                print("\n⚠️ RETREAT not processed for 30s — escalating to FORCE_RETREAT")
+                client.send_command({"action": "FORCE_RETREAT"})
+                for _ in range(10):  # до 5с на аварийный выход
+                    if client.send_command({"action": "GET_STATE"})["mode"] == "world":
+                        break
+                    time.sleep(0.5)
+                else:
+                    print("⚠️ FORCE_RETREAT did not help — battle stuck, aborting scenario")
+            # Контактный бой мог начаться не с запланированной цели, а со СМЕЖНЫМ
+            # врагом (путь героя проходит через контактную клетку). После
+            # отступления герой стоит на pre-battle клетке — в 1 клетке от
+            # РЕАЛЬНОГО противника. Помечаем всех врагов в радиусе 2, чтобы не
+            # зациклиться на неучтённом.
+            post_state = client.send_command({"action": "GET_STATE"})
+            if post_state.get("mode") == "world":
+                hp = post_state.get("hero_pos", {"x": 0, "y": 0})
+                for e in post_state.get("map_enemies", []):
+                    ek = (e["x"], e["y"])
+                    if ek not in challenged and hex_dist((hp["x"], hp["y"]), ek) <= 2:
+                        challenged.add(ek)
+                        print(f"🏁 Enemy {ek} marked processed (contact battle)")
+        elif result == "arrived":
+            # Герой стоит вплотную к врагу, но бой не стартовал (крайний случай) —
+            # помечаем, чтобы не зациклиться.
+            challenged.add((target["x"], target["y"]))
+            challenged_count += 1
+            print(f"\n⚠️ Arrived at enemy ({target['x']},{target['y']}) but no battle started — marking processed.")
+            time.sleep(0.5)
+        elif result == "timeout":
+            print("\n⚠️ Movement timeout! Trying to end turn...")
+            client.send_command({"action": "END_TURN"})
+            time.sleep(0.5)
+
+    if iterations >= max_iterations:
+        print(f"\n⚠️ Reached max iterations ({max_iterations}) — stopping challenge process")
 
     print("\n✅ All monsters on the map have been challenged and cleared!")
 

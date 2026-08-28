@@ -6,6 +6,10 @@ extends "res://tests/test_base.gd"
 ## поэтому preload() работает в headless-режиме.
 
 const _Coordinator = preload("res://world/WorldBattleCoordinator.gd")
+const _UnitRegistry = preload("res://entities/UnitRegistry.gd")
+const _HeroArmy = preload("res://entities/HeroArmyController.gd")
+const _FakeHero = preload("res://tests/fakes/fake_hero.gd")
+const _FakeMap = preload("res://tests/fakes/fake_battle_map.gd")
 
 var coordinator: Node
 
@@ -143,3 +147,38 @@ func test_create_battle_flow_signals_connected() -> void:
 		connected_count += 1
 
 	assert_eq(connected_count, 2, "both battle signals connected")
+
+
+# ==================== РЕГРЕССИЯ: FALLBACK-СТЕК ПРИ ПОЛНОМ УНИЧТОЖЕНИИ ====================
+
+## e2e8 (сценарий 2, бой №11): армия героя полностью уничтожена → fallback-стек
+## не выдавался (typed-array баг в _apply_results: untyped [stack] в параметр
+## Array[UnitStack] → SCRIPT ERROR). Армия оставалась пустой, каждый следующий
+## контакт вызывал мгновенный бой, и агент уходил в 500-итерационный цикл.
+func test_fallback_stack_on_total_annihilation() -> void:
+	var prev_container: Variant = ServiceContainer.current
+	var container := ServiceContainer.new()
+	container.units = _UnitRegistry.new()
+	ServiceContainer.current = container
+
+	var army = _HeroArmy.new()
+	army.setup(container.units)
+	army.army.clear()  # полное уничтожение
+
+	var hero = _FakeHero.new()
+	hero.army = army
+
+	var map = _FakeMap.new()
+
+	coordinator.setup(hero, map, null, null, null, null, null, null, null, container)
+
+	var surv_atk: Array[UnitStack] = []
+	var surv_def: Array[UnitStack] = []
+	coordinator._on_battle_completed(BattleState.Side.DEFENDER, surv_atk, surv_def)
+
+	assert_false(army.army.is_empty(), "fallback-стек выдан после полного уничтожения")
+	assert_eq(army.army[0].get_key(), "swordsmen", "fallback-стек — swordsmen")
+	assert_eq(army.army[0].count, 10, "fallback-стек, численность = 10")
+	assert_eq(hero.apply_calls, 1, "hero.apply_battle_results вызван один раз")
+
+	ServiceContainer.current = prev_container
