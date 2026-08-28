@@ -239,3 +239,102 @@ func test_validator_catches_bad_keyword() -> void:
 		if issue.code == "E321":
 			found = true
 	assert_true(found, "detects invalid keyword")
+
+# ==================== BASELINE (DRIFT-ДЕТЕКЦИЯ) ====================
+
+func test_baseline_matches_current_data() -> void:
+	validator.validate_file(JSON_PATH)
+	var built: Dictionary = validator.build_baseline()
+	var committed: Dictionary = _Validator.load_baseline(_Validator.BASELINE_PATH)
+	assert_true(not committed.is_empty(), "baseline file exists and parses")
+	assert_eq(built.get("total", -1), committed.get("total", -2), "baseline total matches data")
+	assert_eq(built.get("templates", {}), committed.get("templates", {}),
+		"baseline template distribution matches data")
+
+func test_baseline_drift_total_warns() -> void:
+	var v = _Validator.new()
+	_write("user://test_baseline_drift.json",
+		JSON.stringify({"total": 42, "templates": {}}))
+	v._baseline = _Validator.load_baseline("user://test_baseline_drift.json")
+	v.validate_file(JSON_PATH)
+	var found := false
+	for issue in v.report.issues:
+		if issue.code == "W920":
+			found = true
+	assert_true(found, "W920 raised when total differs from baseline")
+
+func test_baseline_drift_template_warns() -> void:
+	var v = _Validator.new()
+	v.validate_file(JSON_PATH)
+	var built: Dictionary = v.build_baseline()
+	var templates: Dictionary = built["templates"].duplicate()
+	templates["BOUNCE"] = 999
+	_write("user://test_baseline_tpl.json",
+		JSON.stringify({"total": built["total"], "templates": templates}))
+	v._baseline = _Validator.load_baseline("user://test_baseline_tpl.json")
+	v.validate_file(JSON_PATH)
+	var found := false
+	for issue in v.report.issues:
+		if issue.code == "W921" and "BOUNCE" in issue.message:
+			found = true
+	assert_true(found, "W921 raised on per-template drift")
+
+func test_baseline_save_load_roundtrip() -> void:
+	var v = _Validator.new()
+	v.validate_file(JSON_PATH)
+	var before: Dictionary = v.build_baseline()
+	assert_true(v.save_baseline("user://test_baseline_rt.json"),
+		"save_baseline returns true")
+	var after: Dictionary = _Validator.load_baseline("user://test_baseline_rt.json")
+	assert_eq(after, before, "baseline roundtrip preserves data")
+
+# ==================== W910 / W901 РЕГРЕССИИ ====================
+
+func test_unconditional_suppresses_w910() -> void:
+	var v = _Validator.new()
+	_write("user://test_hr_uncond.json", JSON.stringify([
+		{"id": "hr1", "name": "HR1", "template": "HARD_REMOVAL", "speed": "fast",
+		 "cost": 4, "color": "shadow", "params": {"unconditional": true},
+		 "description": "x"}
+	]))
+	v.validate_file("user://test_hr_uncond.json")
+	var w910 := 0
+	for issue in v.report.issues:
+		if issue.code == "W910":
+			w910 += 1
+	assert_eq(w910, 0, "unconditional flag suppresses W910")
+
+	_write("user://test_hr_plain.json", JSON.stringify([
+		{"id": "hr2", "name": "HR2", "template": "HARD_REMOVAL", "speed": "fast",
+		 "cost": 4, "color": "shadow", "params": {},
+		 "description": "x"}
+	]))
+	v.validate_file("user://test_hr_plain.json")
+	var w910b := 0
+	for issue in v.report.issues:
+		if issue.code == "W910":
+			w910b += 1
+	assert_eq(w910b, 1, "HARD_REMOVAL without condition/unconditional warns W910")
+
+func test_duplicate_display_name_warns() -> void:
+	var v = _Validator.new()
+	_write("user://test_dup_name.json", JSON.stringify([
+		{"id": "a1", "name": "Dismantle", "template": "DIRECT_DAMAGE", "speed": "fast",
+		 "cost": 2, "color": "fire", "params": {"amount": 1, "target": "ENEMY_UNIT"}, "description": "x"},
+		{"id": "b1", "name": "Dismantle", "template": "DIRECT_DAMAGE", "speed": "fast",
+		 "cost": 3, "color": "fire", "params": {"amount": 2, "target": "ENEMY_UNIT"}, "description": "x"}
+	]))
+	v.validate_file("user://test_dup_name.json")
+	var found := false
+	for issue in v.report.issues:
+		if issue.code == "W901":
+			found = true
+	assert_true(found, "duplicate display name warns W901")
+
+func test_no_w901_or_w910_in_project_data() -> void:
+	validator.validate_file(JSON_PATH)
+	var bad := 0
+	for issue in validator.report.issues:
+		if issue.code == "W901" or issue.code == "W910":
+			bad += 1
+	assert_eq(bad, 0, "project data has no duplicate names or unmarked HARD_REMOVALs")

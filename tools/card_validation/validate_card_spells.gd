@@ -6,10 +6,11 @@ extends SceneTree
 ##
 ## Флаги:
 ##   --path <file>   Путь к файлу (по умолчанию: res://data/card_spells.json)
-##   --strict        Warnings считаются ошибками (ненулевой exit code)
-##   --json          Вывод в формате JSON (для CI)
-##   --quiet         Показывать только ошибки (без INFO)
-##   --out <file>    Сохранить отчёт в файл
+##   --strict            Warnings считаются ошибками (ненулевой exit code)
+##   --json              Вывод в формате JSON (для CI)
+##   --quiet             Показывать только ошибки (без INFO)
+##   --out <file>        Сохранить отчёт в файл
+##   --update-baseline   Переписать baseline.json из текущей выборки (после валидации)
 
 const _Validator = preload("res://tools/card_validation/CardSpellValidator.gd")
 const _Report = preload("res://tools/card_validation/ValidationReport.gd")
@@ -22,6 +23,7 @@ func _init() -> void:
 	var json_output := false
 	var quiet := false
 	var out_file := ""
+	var update_baseline := false
 
 	for i in args.size():
 		if args[i] == "--path" and i + 1 < args.size():
@@ -34,6 +36,8 @@ func _init() -> void:
 			quiet = true
 		elif args[i] == "--out" and i + 1 < args.size():
 			out_file = args[i + 1]
+		elif args[i] == "--update-baseline":
+			update_baseline = true
 
 	var validator = _Validator.new()
 	var start_time := Time.get_ticks_usec()
@@ -60,6 +64,19 @@ func _init() -> void:
 				report.error_count(), report.warning_count()])
 		else:
 			print(report.to_text())
+
+	# Обновление baseline (только если данные прошли без ошибок,
+	# чтобы не заморозить сломанную выборку как эталон)
+	if update_baseline:
+		if ok:
+			if validator.save_baseline(_Validator.BASELINE_PATH):
+				print("Baseline updated: %s" % _Validator.BASELINE_PATH)
+			else:
+				print("❌ Failed to write baseline")
+				quit(1)
+				return
+		else:
+			print("⚠️  --update-baseline skipped: validation has errors")
 
 	# Сохранение отчёта
 	if out_file != "":
