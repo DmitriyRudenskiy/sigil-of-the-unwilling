@@ -2,6 +2,8 @@ extends Node
 class_name ResourceNodeManager
 ## Manages resource node lifecycle: generation, discovery, extraction, removal.
 
+const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
+const ServiceLocator = preload("res://scripts/core/ServiceLocator.gd")
 const ResourceNode = preload("res://scripts/nodes/ResourceNode.gd")
 const ResourceDef = preload("res://scripts/data/ResourceDef.gd")
 
@@ -9,6 +11,17 @@ const ResourceDef = preload("res://scripts/data/ResourceDef.gd")
 var _nodes: Dictionary = {}  # cell -> ResourceNode
 var _container: Node2D = null
 var _rng: RandomNumberGenerator = null
+var _resource_registry: Node = null  # ResourceRegistry (инъекция)
+var _map_to_local_fn: Callable = Callable()
+
+enum NodeError {
+	OK,
+	NODE_NOT_FOUND,
+	INVALID_RESOURCE_DEF,
+	ALREADY_DISCOVERED,
+	NOT_DISCOVERED,
+	EXTRACTION_KEY_MISSING,
+}
 
 signal resource_discovered(cell: Vector2i, resource_id: StringName)
 signal resource_extracted(cell: Vector2i, resource_id: StringName, amount: int)
@@ -16,15 +29,19 @@ signal resource_exhausted(cell: Vector2i, resource_id: StringName)
 
 ## Bridge functions to resolve Variant inference from preload() calls.
 func _get_def(id: StringName) -> ResourceDef:
-	return Resources.get_resource(id)
+	return _resolve_registry().get_resource(id) as ResourceDef
 
 func _get_hidden_by_biome(biome: String) -> Array:
-	var all: Array = Resources.get_by_biome(biome)
+	var reg := _resolve_registry()
+	var all: Array = reg.get_by_biome(biome)
 	var hidden: Array = []
 	for item in all:
-		if Resources.is_hidden_resource((item as ResourceDef).id):
+		if reg.is_hidden_resource((item as ResourceDef).id):
 			hidden.append(item)
 	return hidden
+
+func _resolve_registry() -> Node:
+	return ServiceLocator.resolve(_resource_registry, &"resources")
 
 func _get_biome_name(terrain_id: StringName) -> String:
 	for i in HexUtils.TERRAIN_NAMES.size():
@@ -32,9 +49,11 @@ func _get_biome_name(terrain_id: StringName) -> String:
 			return terrain_id as String
 	return ""
 
-func setup(container: Node2D, rng: RandomNumberGenerator) -> void:
+func setup(container: Node2D, rng: RandomNumberGenerator, resource_registry: Node = null, map_to_local_fn: Callable = Callable()) -> void:
 	_container = container
 	_rng = rng
+	_resource_registry = ServiceLocator.resolve(resource_registry, &"resources")
+	_map_to_local_fn = map_to_local_fn
 
 
 func get_node_at(cell: Vector2i) -> ResourceNode:
@@ -85,22 +104,27 @@ func _spawn_node(cell: Vector2i, resource_id: StringName, yield_amount: int) -> 
 	node.init_node(resource_id, cell, yield_amount)
 	if _container:
 		_container.add_child(node)
+		if _map_to_local_fn.is_valid():
+			node.position = _map_to_local_fn.call(cell)
 	_nodes[cell] = node
 	return node
 
 
-func try_discover(cell: Vector2i, discovery_keys: Dictionary) -> bool:
+func try_discover(cell: Vector2i, discovery_keys: Dictionary) -> Dictionary:
 	"""Try to discover a hidden resource at cell.
+	Returns {"error": NodeError, "discovered": bool}.
 	discovery_keys: {skill_name: level, time: "noon"/"night", auto_tags: [...] }
 	"""
 	var node: ResourceNode = _nodes.get(cell, null)
-	if node == null or not node.is_hidden():
-		return false
+	if node == null:
+		return {"error": NodeError.NODE_NOT_FOUND, "discovered": false}
+	if not node.is_hidden():
+		return {"error": NodeError.ALREADY_DISCOVERED, "discovered": false}
 
 	var def: ResourceDef = _get_def(node.resource_id)
 	if def == null:
-		return false
-
+		GameLogger.error("ResourceNodeManager: unknown resource '%s' at %s" % [node.resource_id, cell], "World")
+		return {"error": NodeError.INVALID_RESOURCE_DEF, "discovered": false}
 
 	# Check auto-discovery (undead/lizard units)
 	if def.discovery_auto:
@@ -109,7 +133,7 @@ func try_discover(cell: Vector2i, discovery_keys: Dictionary) -> bool:
 				node.discover()
 				resource_discovered.emit(cell, node.resource_id)
 				GameEventBus.resource_discovered.emit(cell, node.resource_id)
-				return true
+				return {"error": NodeError.OK, "discovered": true}
 
 	# Check skill-based discovery
 	if not def.discovery_skill.is_empty():
@@ -119,29 +143,32 @@ func try_discover(cell: Vector2i, discovery_keys: Dictionary) -> bool:
 			if not def.discovery_time.is_empty():
 				var time_match: bool = discovery_keys.get("time", "") == def.discovery_time
 				if not time_match:
-					return false
+					return {"error": NodeError.OK, "discovered": false}
 			node.discover()
 			resource_discovered.emit(cell, node.resource_id)
 			GameEventBus.resource_discovered.emit(cell, node.resource_id)
-			return true
+			return {"error": NodeError.OK, "discovered": true}
 
-	return false
+	return {"error": NodeError.OK, "discovered": false}
 
 
-func try_extract(cell: Vector2i, extraction_keys: Dictionary) -> int:
-	"""Try to extract resources. Returns amount extracted, 0 on failure.
+func try_extract(cell: Vector2i, extraction_keys: Dictionary) -> Dictionary:
+	"""Try to extract resources. Returns {"error": NodeError, "amount": int}.
 	extraction_keys: {tag: bool, skill: int, unit: bool, tool: bool, consumable: bool, fire: bool}
 	"""
 	var node: ResourceNode = _nodes.get(cell, null)
-	if node == null or not node.is_discovered():
-		return 0
+	if node == null:
+		return {"error": NodeError.NODE_NOT_FOUND, "amount": 0}
+	if not node.is_discovered():
+		return {"error": NodeError.NOT_DISCOVERED, "amount": 0}
 
 	var def: ResourceDef = _get_def(node.resource_id)
 	if def == null:
-		return 0
+		GameLogger.error("ResourceNodeManager: unknown resource '%s' at %s" % [node.resource_id, cell], "World")
+		return {"error": NodeError.INVALID_RESOURCE_DEF, "amount": 0}
 
 	if not _check_extraction(def, extraction_keys):
-		return 0
+		return {"error": NodeError.EXTRACTION_KEY_MISSING, "amount": 0}
 
 	var amount: int = node.get_yield()
 	node.reduce_yield(amount)
@@ -150,7 +177,7 @@ func try_extract(cell: Vector2i, extraction_keys: Dictionary) -> int:
 		GameEventBus.resource_exhausted.emit(cell, node.resource_id)
 	resource_extracted.emit(cell, node.resource_id, amount)
 	GameEventBus.resource_extracted.emit(cell, node.resource_id, amount)
-	return amount
+	return {"error": NodeError.OK, "amount": amount}
 
 
 func _check_extraction(def: ResourceDef, keys: Dictionary) -> bool:

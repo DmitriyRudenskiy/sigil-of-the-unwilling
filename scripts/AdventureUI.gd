@@ -3,7 +3,6 @@ class_name AdventureUI
 ## Координатор UI: миникарта, армия, ресурсы, инфо-панель.
 
 const _SettingsScreen = preload("res://scripts/ui/SettingsScreen.gd")
-const _SettingsScript = preload("res://scripts/core/Settings.gd")
 
 signal end_turn_pressed
 signal date_changed(month: int, week: int, day: int)
@@ -108,6 +107,9 @@ func refresh_all() -> void:
 		return
 	_army.update_army(_hero_controller.army.army)
 	_resources.update_resources(_hero_controller.resources.resources)
+	_strat_resources.update_resources(_hero_controller.strategic_resources.get_all())
+	_skills_panel.update_skills(_hero_controller.skills.get_all())
+	_tools_panel.update_tools(_hero_controller.tools.get_all())
 
 
 func add_city(city_name: String) -> void:

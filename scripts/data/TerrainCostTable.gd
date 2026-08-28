@@ -48,7 +48,7 @@ static func get_cost_with_effects(terrain: String, has_levitation: bool) -> floa
 
 
 ## Все известные террейны (для итерации)
-static func get_all_terains() -> Array[String]:
+static func get_all_terrains() -> Array[String]:
 	ensure()
 	var r: Array[String] = []
 	for k in _costs:

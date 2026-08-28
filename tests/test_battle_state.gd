@@ -1,4 +1,7 @@
 extends SceneTree
+
+var _passed: int = 0
+var _failed: int = 0
 ## Тесты BattleState: размещение, очередь, атака, конец боя, теги, отступление.
 
 func _init() -> void:
@@ -22,6 +25,9 @@ func _init() -> void:
 		print("BattleState tests passed")
 	else:
 		printerr("BattleState tests failed: ", failed)
+	_failed = failed
+	_passed = 1 if failed == 0 else 0
+
 	await process_frame
 	quit(1 if failed > 0 else 0)
 

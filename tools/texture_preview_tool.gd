@@ -81,15 +81,15 @@ func _init() -> void:
     # Создаем сцену, рендерим, делаем скриншот
     var preview_scene_res = load("res://tools/texture_preview_tool.tscn")
     if preview_scene_res:
-        var preview_scene := preview_scene_res.instantiate()
+        var preview_scene: Node = preview_scene_res.instantiate()
         root.add_child(preview_scene)
         
         # Ждем рендера и сохраняем
-        await get_tree().process_frame
+        await process_frame
         await RenderingServer.frame_post_draw
         await RenderingServer.frame_post_draw
         
-        var viewport_img := get_viewport().get_texture().get_image()
+        var viewport_img: Image = root.get_viewport().get_texture().get_image()
         var out_path := out_dir.path_join("preview_%d.png" % seed_val)
         viewport_img.save_png(out_path)
         print("Preview saved: %s" % out_path)

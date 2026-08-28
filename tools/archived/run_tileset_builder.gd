@@ -96,15 +96,17 @@ func run_builder() -> void:
     
     tileset.add_source(atlas, 0)
     
-    var terrain_set := TileSetTerrainSet.new()
-    terrain_set.mode = TileSetTerrainSet.TERRAIN_MODE_MATCH_SIDES
-    for tdef in TERRAIN_DEFS:
-        var terrain := TileSetTerrain.new()
-        terrain.name = tdef["name"]
-        terrain.color = tdef["color"]
-        terrain_set.add_terrain(terrain)
+    # Godot 4.7: плоский terrain-API на TileSet (TileSetTerrainSet/TileSetTerrain удалены)
+    tileset.add_terrain_set(0)
+    var terrain_set_idx: int = tileset.get_terrain_sets_count() - 1
+    tileset.set_terrain_set_mode(terrain_set_idx, TileSet.TerrainMode.TERRAIN_MODE_MATCH_SIDES)
+    for i in TERRAIN_DEFS.size():
+        var tdef: Dictionary = TERRAIN_DEFS[i]
+        tileset.add_terrain(terrain_set_idx, -1)
+        var terrain_idx: int = tileset.get_terrains_count(terrain_set_idx) - 1
+        tileset.set_terrain_name(terrain_set_idx, terrain_idx, str(tdef["name"]))
+        tileset.set_terrain_color(terrain_set_idx, terrain_idx, tdef["color"])
     
-    tileset.add_terrain_set(terrain_set, 0)
     ResourceSaver.save(tileset, OUTPUT_PATH)
     _generate_report(available_tiles, tile_coords)
     print("TileSet saved to: ", OUTPUT_PATH)
@@ -117,7 +119,7 @@ func _generate_report(available_tiles: Array[String], tile_coords: Array[Vector2
         var tile_name := available_tiles[i]
         var coord := tile_coords[i]
         var terrain_id: int = FILE_TO_TERRAIN.get(tile_name, -1)
-        var terrain_name := TERRAIN_DEFS[terrain_id]["name"] if terrain_id >= 0 else "N/A"
+        var terrain_name: String = str(TERRAIN_DEFS[terrain_id]["name"]) if terrain_id >= 0 else "N/A"
         var tile_type := "декор" if tile_name in DECOR_FILES else ("террейн" if terrain_id >= 0 else "река")
         report += "| %s | (%d, 0) | %s | %s |\n" % [tile_name, coord.x, terrain_name, tile_type]
     

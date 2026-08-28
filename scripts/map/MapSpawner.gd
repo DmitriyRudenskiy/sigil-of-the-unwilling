@@ -5,6 +5,10 @@ extends RefCounted
 const _MapModel = preload("res://scripts/map/MapModel.gd")
 
 var model
+var _units_registry: Node = null
+
+func setup_registry(units_registry: Node) -> void:
+	_units_registry = units_registry
 
 
 func _init(p_model) -> void:
@@ -52,7 +56,7 @@ func place_resources(reachable = null) -> void:
 	
 	if reachable == null:
 		reachable = _get_reachable_cells()
-	var target := int(float(model.map_width * model.map_height) / 70.0)
+	var target := GameSettings.MAP_RESOURCE_COUNT  # РФ7-3
 	var attempts := 0
 	while model.resource_cells.size() < target and attempts < 5000:
 		attempts += 1
@@ -84,18 +88,19 @@ func place_enemies(reachable = null) -> void:
 		reachable = _get_reachable_cells()
 	var placed := 0
 	var attempts := 0
-	while placed < 15 and attempts < 5000:
+	while placed < GameSettings.MAP_ENEMY_COUNT and attempts < 5000:  # РФ7-3
 		attempts += 1
 		var cell := Vector2i(rng.randi_range(3, model.map_width - 4), rng.randi_range(3, model.map_height - 4))
 		if not reachable.has(cell) or model.enemy_stacks.has(cell) or cell in model.village_cells or model.resource_cells.has(cell):
 			continue
 
-		var faction_idx: int = rng.randi_range(0, Units.FACTION_SETS.size() - 1)
-		var faction_pool: Array = Units.FACTION_SETS[faction_idx]
+		var reg: Node = _units_registry if _units_registry != null else Units
+		var faction_idx: int = rng.randi_range(0, reg.FACTION_SETS.size() - 1)
+		var faction_pool: Array = reg.FACTION_SETS[faction_idx]
 		var army: Array[UnitStack] = []
 		for i in rng.randi_range(1, 3):
 			var unit_key: String = faction_pool[rng.randi_range(0, faction_pool.size() - 1)]
-			var stack = Units.make_stack(unit_key, rng)
+			var stack = reg.make_stack(unit_key, rng)
 			if stack != null and stack.is_alive():
 				army.append(stack)
 

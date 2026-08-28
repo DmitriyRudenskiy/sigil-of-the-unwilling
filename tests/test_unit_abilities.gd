@@ -1,4 +1,7 @@
 extends SceneTree
+
+var _passed: int = 0
+var _failed: int = 0
 ## Unit abilities: vampiric, breath, charge, first_strike, rebirth.
 
 const _BattleState = preload("res://scripts/BattleState.gd")
@@ -22,6 +25,9 @@ func _init() -> void:
 		print("test_unit_abilities: 22/22 passed")
 	else:
 		printerr("test_unit_abilities: %d failed" % failed)
+	_failed = failed
+	_passed = 1 if failed == 0 else 0
+
 	await process_frame
 	quit(1 if failed > 0 else 0)
 

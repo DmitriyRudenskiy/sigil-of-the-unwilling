@@ -71,8 +71,8 @@ func test_on_battle_completed_null_hero_no_crash() -> void:
 	coordinator.setup(null, null, null, null, null, null, null, null, null)
 	coordinator._pending_enemy_cell = Vector2i(5, 5)
 
-	var surv_atk: Array = []
-	var surv_def: Array = []
+	var surv_atk: Array[UnitStack] = []
+	var surv_def: Array[UnitStack] = []
 
 	coordinator._on_battle_completed(BattleState.Side.ATTACKER, surv_atk, surv_def)
 	assert_true(true, "no crash with null hero")
@@ -81,8 +81,8 @@ func test_on_battle_completed_resets_pending_cell() -> void:
 	coordinator.setup(null, null, null, null, null, null, null, null, null)
 	coordinator._pending_enemy_cell = Vector2i(5, 5)
 
-	var surv_atk: Array = []
-	var surv_def: Array = []
+	var surv_atk: Array[UnitStack] = []
+	var surv_def: Array[UnitStack] = []
 
 	coordinator._on_battle_completed(BattleState.Side.ATTACKER, surv_atk, surv_def)
 	assert_eq(coordinator._pending_enemy_cell, Vector2i(-1, -1), "pending cell reset")
@@ -91,8 +91,8 @@ func test_on_battle_completed_resets_pending_cell_defender() -> void:
 	coordinator.setup(null, null, null, null, null, null, null, null, null)
 	coordinator._pending_enemy_cell = Vector2i(5, 5)
 
-	var surv_atk: Array = []
-	var surv_def: Array = []
+	var surv_atk: Array[UnitStack] = []
+	var surv_def: Array[UnitStack] = []
 
 	coordinator._on_battle_completed(BattleState.Side.DEFENDER, surv_atk, surv_def)
 	assert_eq(coordinator._pending_enemy_cell, Vector2i(-1, -1), "pending cell reset on loss")
@@ -117,7 +117,9 @@ func test_battle_completed_emitted() -> void:
 		data["winner"] = w
 	)
 
-	coordinator.battle_flow.battle_completed.emit(BattleState.Side.ATTACKER, [], [])
+	var empty_atk: Array[UnitStack] = []
+	var empty_def: Array[UnitStack] = []
+	coordinator.battle_flow.battle_completed.emit(BattleState.Side.ATTACKER, empty_atk, empty_def)
 	assert_eq(data.get("winner", -1), BattleState.Side.ATTACKER, "winner captured")
 
 
@@ -135,9 +137,9 @@ func test_create_battle_flow_signals_connected() -> void:
 	assert_not_null(coordinator.battle_flow, "battle flow exists")
 
 	var connected_count := 0
-	if coordinator.battle_flow.is_connected("battle_started", coordinator, "_on_battle_started"):
+	if coordinator.battle_flow.battle_started.is_connected(Callable(coordinator, "_on_battle_started")):
 		connected_count += 1
-	if coordinator.battle_flow.is_connected("battle_completed", coordinator, "_on_battle_completed"):
+	if coordinator.battle_flow.battle_completed.is_connected(Callable(coordinator, "_on_battle_completed")):
 		connected_count += 1
 
 	assert_eq(connected_count, 2, "both battle signals connected")

@@ -5,6 +5,7 @@ extends RefCounted
 ## Extracted from WorldController._ready() to keep the controller as a thin facade.
 
 const _Platform = preload("res://scripts/core/Platform.gd")
+const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
 const WorldPersistenceScript = preload("res://scripts/world/WorldPersistence.gd")
 const ResourceChainServiceScript = preload("res://scripts/world/ResourceChainService.gd")
 const WorldShortcutsScript = preload("res://scripts/world/WorldShortcuts.gd")
@@ -30,6 +31,7 @@ class BootstrapResult:
 	var loaded_save: SaveData = null
 	var map_rect: Rect2 = Rect2(0, 0, 10000, 10000)
 	var event_bus_subscribers: Array[Callable] = []
+	var services: ServiceContainer = null
 
 
 static func run(
@@ -42,6 +44,13 @@ static func run(
 
 	# 1. Services
 	_init_services(parent, R)
+
+	# 1b. Create ServiceContainer from autoloads
+	R.services = ServiceContainer.from_autoloads()
+	ServiceContainer.setup_global(R.services)
+	var missing := R.services.validate()
+	if not missing.is_empty():
+		push_error("[WorldBootstrap] Missing services: %s" % ", ".join(missing))
 
 	# 2. Resolve session / seed
 	R.loaded_save = _resolve_session(R)
@@ -58,27 +67,22 @@ static func run(
 	# 5. Init hero (requires map)
 	_init_hero(R)
 
-	# 6. Wire hero signals — returns callables for parent to connect
-	var hero_signals = _wire_hero_signals(R)
-	R.event_bus_subscribers.append_array(hero_signals)
-
-	# 7. Camera
+	# 6. Camera
 	_create_camera(parent, R)
 	R.map_rect = _compute_map_rect(R)
 
-	# 8. UI
+	# 7. UI
 	_init_ui(parent, platform, R)
 
-	# 9. Input, spawner, cities, subsystems, resource nodes
+	# 8. Input, spawner, cities, subsystems, resource nodes
 	_create_input(parent, R)
 	_create_spawner(parent, R)
 	_create_cities(parent, R)
 	_create_subsystems(parent, R)
 	_create_resource_nodes(parent, R)
 
-	# 10. Event bus subscriptions
-	var bus_subs = _subscribe_event_bus(R)
-	R.event_bus_subscribers.append_array(bus_subs)
+	# Setup resource chain with services
+	R.resource_chain.setup(R.services)
 
 	return R
 
@@ -125,12 +129,6 @@ static func _init_hero(R: BootstrapResult) -> void:
 			R.hero.position = R.map_gen.map_to_local(R.hero.current_cell)
 
 
-static func _wire_hero_signals(R: BootstrapResult) -> Array[Callable]:
-	# These callables are meant to be connected by the parent (WorldController).
-	# We return a list of (signal, callable) pairs as a single array of Callable
-	# that the parent connects. The parent owns the actual event handlers.
-	return []
-
 
 static func _init_ui(parent: Node2D, platform: Variant, R: BootstrapResult) -> void:
 	if platform.is_headless():
@@ -168,6 +166,7 @@ static func _create_spawner(parent: Node2D, R: BootstrapResult) -> void:
 	R.spawner.map = R.map_gen
 	R.spawner.rng = R.rng
 	parent.add_child(R.spawner)
+	R.spawner.setup_services(R.services)
 	R.spawner.spawn_all()
 
 
@@ -178,10 +177,13 @@ static func _create_cities(parent: Node2D, R: BootstrapResult) -> void:
 	R.cities.status_message.connect(func(text: String):
 		if R.ui_manager: R.ui_manager.set_status(text))
 
-	# Capital
+	# Capital (РФ6-6: проверка проходимости)
 	var capital := City.new()
 	capital.display_name = "Перворечье"
-	capital.center = Vector2i(10, 10)
+	var center := Vector2i(10, 10)
+	if not R.map_gen.is_walkable(center):
+		center = _nearest_walkable(R.map_gen, center)
+	capital.center = center
 	capital.special_sites = {Vector2i(12, 9): BuildingDefs.SITE_SHRINE}
 	R.cities.register_city(capital, true)
 
@@ -193,7 +195,7 @@ static func _create_cities(parent: Node2D, R: BootstrapResult) -> void:
 	# Shortcuts
 	var shortcuts := WorldShortcutsScript.new()
 	shortcuts.name = "WorldShortcuts"
-	shortcuts.call("setup", R.persistence, R.ui_manager)
+	shortcuts.setup(R.persistence, R.ui_manager, R.hero, parent)
 	parent.add_child(shortcuts)
 
 
@@ -216,7 +218,7 @@ static func _create_resource_nodes(parent: Node2D, R: BootstrapResult) -> void:
 	var node_container := Node2D.new()
 	node_container.name = "ResourceNodes"
 	parent.add_child(node_container)
-	R.resource_node_manager.setup(node_container, R.rng)
+	R.resource_node_manager.setup(node_container, R.rng, R.services.resources, R.map_gen.map_to_local)
 
 	var map_data := {
 		"terrain": R.map_gen.terrain_grid.duplicate(),
@@ -226,8 +228,19 @@ static func _create_resource_nodes(parent: Node2D, R: BootstrapResult) -> void:
 	R.resource_node_manager.generate_nodes_for_map(map_data)
 
 
-static func _subscribe_event_bus(R: BootstrapResult) -> Array[Callable]:
-	return []
+static func _nearest_walkable(map_gen: MapGenerator, start: Vector2i) -> Vector2i:
+	var visited: Dictionary = {}
+	var queue: Array[Vector2i] = [start]
+	visited[start] = true
+	while queue.size() > 0:
+		var cell = queue.pop_front()
+		if map_gen.is_walkable(cell):
+			return cell
+		for nb in HexUtils.get_all_neighbors(cell):
+			if map_gen.is_in_bounds(nb) and not visited.has(nb):
+				visited[nb] = true
+				queue.append(nb)
+	return start
 
 
 static func _compute_map_rect(R: BootstrapResult) -> Rect2:

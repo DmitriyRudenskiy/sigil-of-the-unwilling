@@ -36,7 +36,7 @@ func _create_ui_layer() -> void:
 func _create_ui() -> void:
 	ui = AdventureUI.new()
 	add_child(ui)
-	ui.setup(_hero)
+	ui.setup(_hero, _camera)
 
 func _create_inventory_screen() -> void:
 	inventory_screen = ArtifactInventoryScreen.new()

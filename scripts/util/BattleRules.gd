@@ -8,7 +8,7 @@ const MAX_DAMAGE_MULTIPLIER := 5.0
 const MIN_DAMAGE_MULTIPLIER := 0.3
 
 const LUCK_CHANCE := 0.10
-const MORALE_CHANCE := 0.08
+const MORALE_CHANCE := 0.08  # (РФ5-6: рабочее значение; см. REPORT.md — дрейф с GameSettings 0.5)
 const RETREAT_SURVIVAL_RATIO := 0.5
 const DEFEND_DEFENSE_BONUS := 1.2
 const RANGED_MELEE_PENALTY := 0.5

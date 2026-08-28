@@ -8,7 +8,7 @@ const _CityBalance = preload("res://scripts/city/CityBalance.gd")
 const _UniqueBuilding = preload("res://scripts/city/UniqueBuilding.gd")
 const _BuildingDefs = preload("res://scripts/data/BuildingDefs.gd")
 
-var city: RefCounted
+var city: City
 
 func before_each() -> void:
 	city = _City.new()
@@ -140,13 +140,21 @@ func test_get_yield_empty_city() -> void:
 	assert_eq(y[&"food"], 0.0, "no yield without workers/boroughs")
 
 func test_food_consumption() -> void:
-	city.add_followers(3)
+	# По ТЗ/допущению №2 потребляют только рабочие и ополченцы (FOOD_PER_FOLLOWER = 0)
+	city.add_followers(1)
+	var u: PopUnit = city.pop[0]
+	city.request_switch(u.uid, PopUnit.State.WORKER, city.first_free_worker_tile())
+	city.process_turn(1)
 	var consumption := city.food_consumption()
 	assert_true(consumption > 0.0, "consumption > 0")
 
 func test_net_food_negative_without_workers() -> void:
+	# Ополченцы едят, но дохода не дают (нет рабочих/районов → доход 0 по ТЗ 4.1)
 	city.tile_yield_fn = _food_yield
-	city.add_followers(3)
+	city.add_followers(2)
+	for u in city.pop:
+		u.request_switch(PopUnit.State.MILITIA)
+	city.process_turn(1)
 	var nf := city.net_food()
 	assert_true(nf < 0.0, "net food negative without workers")
 

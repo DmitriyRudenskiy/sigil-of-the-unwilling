@@ -4,7 +4,7 @@ extends "res://tests/test_base.gd"
 const _HeroController = preload("res://scripts/HeroController.gd")
 
 
-var hero
+var hero: HeroController
 
 
 func before_each() -> void:
@@ -75,6 +75,14 @@ func test_auto_capped() -> void:
 
 
 func _make_hero() -> HeroController:
+	# Предыдущий герой из теста освобождается (добавлен в дерево для _ready())
+	if hero != null and is_instance_valid(hero):
+		hero.queue_free()
 	var h := _HeroController.new()
 	h.name = "TestHero"
+	# _ready() создаёт resources/movement/army — нужен живой узел в дереве
+	var root_node: Node = Engine.get_main_loop().root
+	root_node.add_child(h)
+	# Инициализация стратегических ресурсов из реестра (все id = 0)
+	h.strategic_resources.init_from_registry()
 	return h

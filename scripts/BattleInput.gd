@@ -17,6 +17,8 @@ var _obstacles: Dictionary = {}
 var _action_lock: bool = false
 
 var _pending_spell_id: StringName = ""
+var _pending_target_side: BattleState.Side = BattleState.Side.DEFENDER
+var _include_dead: bool = false
 
 var highlight_move: Dictionary = {}
 var highlight_attack: Dictionary = {}
@@ -32,12 +34,13 @@ func set_action_lock(locked: bool) -> void:
 	_action_lock = locked
 
 
-func start_spell_targeting(spell_id: StringName) -> void:
+func start_spell_targeting(spell_id: StringName, target_side: BattleState.Side, include_dead: bool = false) -> void:
 	_pending_spell_id = spell_id
+	_pending_target_side = target_side
+	_include_dead = include_dead
 	_clear_highlights()
-	var target_side := BattleState.Side.DEFENDER if _state.is_player_turn else BattleState.Side.ATTACKER
 	for u in _state.get_units_by_side(target_side):
-		if u.is_alive():
+		if u.is_alive() or (include_dead and u.stack != null):
 			highlight_attack[u.cell] = 1
 	_view.set_highlights({}, highlight_attack)
 	GameLogger.battle("Spell targeting started: %s" % spell_id)
@@ -60,8 +63,12 @@ func _unhandled_input(ev: InputEvent) -> void:
 				var global_pos := _view.get_global_mouse_position()
 				var cell := _view.global_to_map(global_pos)
 				if highlight_attack.has(cell):
-					var target_side := BattleState.Side.DEFENDER if _state.is_player_turn else BattleState.Side.ATTACKER
-					var target := _state.get_unit_at(cell, target_side)
+					var target := _state.get_unit_at(cell, _pending_target_side)
+					if _include_dead and target == null:
+						for u in _state.get_units_by_side(_pending_target_side):
+							if u.cell == cell and not u.is_alive():
+								target = u
+								break
 					if target != null:
 						spell_cast_requested.emit(_pending_spell_id, target)
 						_pending_spell_id = ""
@@ -174,9 +181,11 @@ func clear_highlights() -> void:
 
 
 func _clear_highlights() -> void:
+	_pending_spell_id = ""
 	highlight_move.clear()
 	highlight_attack.clear()
-	_view.clear_highlights()
+	if _view != null:
+		_view.clear_highlights()
 
 
 func show_attack_only() -> void:

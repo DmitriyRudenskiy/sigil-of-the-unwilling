@@ -1,14 +1,21 @@
 class_name HeroStrategicResources
 extends RefCounted
 ## Strategic resource management (wood, stone, etc.) for the hero.
-## Extracted from HeroController to reduce its size and improve testability.
+## ResourceRegistry инжектируется через init_from_registry().
+
+const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
+const ServiceLocator = preload("res://scripts/core/ServiceLocator.gd")
 
 signal strategic_resources_changed(resources: Dictionary)
 
 var _resources: Dictionary = {}
+var _resource_registry: Node = null  # ResourceRegistry
 
-func init_from_registry() -> void:
-	var all: Array = Resources.get_all()
+
+func init_from_registry(resource_registry: Node = null) -> void:
+	_resource_registry = ServiceLocator.resolve(resource_registry, &"resources")
+
+	var all: Array = _resource_registry.get_all()
 	for def in all:
 		_resources[def.id] = 0
 

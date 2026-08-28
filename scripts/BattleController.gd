@@ -6,7 +6,7 @@ class_name BattleController
 
 const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
 
-signal battle_finished(winner: String, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack])
+signal battle_finished(winner: BattleState.Side, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack])
 
 var _state: BattleState
 var _ai: BattleAI
@@ -17,6 +17,8 @@ var _executor: BattleTurnExecutor
 var _fx: BattleFX
 var obstacles: Dictionary = {}
 var _obstacle_seed: int = -1
+var _hero_magic: HeroMagic = null
+var _last_spell_cost := 0
 
 
 # ==================== READY ====================
@@ -67,7 +69,7 @@ func _init_ui() -> void:
 	_ui.skip_requested.connect(_on_skip)
 	_ui.defend_requested.connect(_on_defend)
 	_ui.spellbook_requested.connect(_on_spellbook)
-	_ui.spell_chosen.connect(_executor.request_spell_cast)
+	_ui.spell_chosen.connect(_on_spell_chosen)
 	_ui.settings_requested.connect(_on_settings)
 	_ui.settings_closed.connect(resume_from_settings)
 
@@ -81,7 +83,7 @@ func _init_input() -> void:
 	_input.unit_selected.connect(_on_unit_selected)
 	_input.unit_move_requested.connect(_on_move_requested)
 	_input.unit_attack_requested.connect(_on_attack_requested)
-	_input.spell_cast_requested.connect(_executor.on_spell_target_selected)
+	_input.spell_cast_requested.connect(_on_spell_cast_requested)
 	_input.cancel_requested.connect(_on_cancel)
 
 
@@ -95,6 +97,7 @@ func _init_fx() -> void:
 func _wire_signals() -> void:
 	_executor.status_updated.connect(_on_status_updated)
 	_executor.clear_highlights.connect(_on_clear_highlights)
+	_executor.spell_cast_failed.connect(_on_spell_cast_failed)
 	_executor.pulse_unit.connect(_view.pulse_unit)
 	_executor.execute_move.connect(_on_execute_move)
 	_executor.execute_attack.connect(_on_execute_attack)
@@ -137,8 +140,7 @@ func _on_attack_requested(atk: BattleState.BattleUnit, def: BattleState.BattleUn
 		_executor.request_attack(atk, def)
 
 
-func _on_cancel() -> void:
-	_on_status_updated("Выберите существо…")
+
 
 
 # ==================== BUTTON CALLBACKS → EXECUTOR ====================
@@ -164,12 +166,57 @@ func _on_defend() -> void:
 
 
 func _on_spellbook() -> void:
-	_ui.open_spellbook(_state)
+	_ui.open_spellbook(_state, _hero_magic)
+
+
+# ==================== SPELL TARGETING ====================
+func _on_spell_chosen(spell_id: StringName) -> void:
+	# РФ6-2: игнорировать, если не фаза WAITING_INPUT
+	if not _executor.is_input_active():
+		return
+	var reg: Node = ServiceContainer.current.spells if ServiceContainer.current != null else Spells
+	var spell = reg.get_spell(spell_id)
+	if spell == null: return
+	var ally_side := BattleState.Side.ATTACKER
+	var enemy_side := BattleState.Side.DEFENDER
+	var side := ally_side if spell.target_type == SpellRegistry.TargetType.SINGLE_ALLY else enemy_side
+	var include_dead := spell_id == &"resurrection"
+	_executor.request_spell_cast(spell_id)
+	_input.start_spell_targeting(spell_id, side, include_dead)
+
+
+func _on_spell_cast_requested(spell_id: StringName, target: BattleState.BattleUnit) -> void:
+	# РФ3-2: Расход маны
+	if _hero_magic != null:
+		var reg: Node = ServiceContainer.current.spells if ServiceContainer.current != null else null
+		var spell = reg.get_spell(spell_id) if reg != null else null
+		if spell == null or not _hero_magic.can_cast_def(spell):
+			_ui.set_status("Недостаточно маны или школа не изучена.")
+			return
+		var cost = _hero_magic.get_mana_cost_def(spell)
+		_hero_magic.spend_mana(cost)
+		_last_spell_cost = cost
+	_executor.on_spell_target_selected(spell_id, target)
+
+
+func _on_spell_cast_failed(_reason: String) -> void:
+	if _hero_magic != null and _last_spell_cost > 0:
+		_hero_magic.refund_mana(_last_spell_cost)
+		_last_spell_cost = 0
+
+func _on_cancel() -> void:
+	_ui.close_spellbook()
+	_input.clear_highlights()
+	_on_status_updated("Выберите существо…")
 
 
 func _on_execute_spell(caster: BattleState.BattleUnit, target: BattleState.BattleUnit, result: Dictionary) -> void:
 	# 1. Визуал каста
 	_fx.show_spell_cast(target.cell, result.get("spell_id", &""))
+
+	# 1b. Визуал исцеления
+	if result.has("healed"):
+		_fx.show_heal(target.cell, int(result["healed"]))
 
 	# 2. Визуал урона/эффектов
 	_show_damage_feedback(target, result)
@@ -240,7 +287,7 @@ func _show_damage_feedback(target: BattleState.BattleUnit, result: Dictionary) -
 		_view.remove_unit(target)
 
 func _get_damage_wait() -> SceneTreeTimer:
-	return get_tree().create_timer(0.3)
+	return get_tree().create_timer(GameSettings.BATTLE_SPELL_ANIM_TIME, false)
 
 func _on_status_updated(text: String) -> void:
 	_ui.set_status(text)
@@ -273,8 +320,10 @@ func start_battle(
 	defender_bonus: Dictionary = {},
 	attacker_artifact_mods: Dictionary = {},
 	defender_artifact_mods: Dictionary = {},
-	obstacle_seed: int = -1
+	obstacle_seed: int = -1,
+	hero_magic: HeroMagic = null
 ) -> void:
+	_hero_magic = hero_magic
 	if obstacle_seed < 0:
 		obstacle_seed = randi()
 	_obstacle_seed = obstacle_seed
@@ -291,7 +340,6 @@ func start_battle(
 	_view.spawn_hero_figure()
 	_view.fit_camera()
 
-	_state.build_queue()
 	_executor.start_battle()
 
 

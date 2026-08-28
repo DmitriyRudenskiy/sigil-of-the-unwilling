@@ -8,6 +8,7 @@ const _HexDraw = preload("res://scripts/util/HexDraw.gd")
 const HERO_SHEET_PATH := "res://assets/raw/hero_knight.jpg"
 
 var _anim: AnimatedSprite2D
+var _sheet_path_cache: String = ""
 var _fallback: Sprite2D
 var _avatar_tex: Texture2D
 var _marker: DestMarker
@@ -27,6 +28,8 @@ func setup(map: MapGenerator, hero: HeroController) -> void:
 
 
 func build_visual() -> void:
+	if _anim != null or _fallback != null:
+		return
 	var sheet_path := _find_sheet()
 	if sheet_path != "":
 		var sheet := Image.load_from_file(sheet_path)
@@ -40,11 +43,15 @@ func build_visual() -> void:
 
 
 func _find_sheet() -> String:
-	# 1) explicit names
+	if _sheet_path_cache != "":
+		return _sheet_path_cache
+	# 1) explicit names — no scanning needed
 	for c in ["hero_knight.png", "knight.png", "hero.png", "knight.jpeg", "hero.jpeg", "hero_knight.jpg"]:
-		if FileAccess.file_exists("res://assets/raw/" + c):
-			return "res://assets/raw/" + c
-	# 2) auto-detect: large square image in assets/raw
+		var path: String = "res://assets/raw/" + str(c)
+		if FileAccess.file_exists(path):
+			_sheet_path_cache = path
+			return path
+	# 2) auto-detect: large square image in assets/raw (only if explicit names missed)
 	var dir := DirAccess.open("res://assets/raw")
 	if dir == null:
 		return ""
@@ -62,6 +69,7 @@ func _find_sheet() -> String:
 					best = "res://assets/raw/" + f
 		f = dir.get_next()
 	dir.list_dir_end()
+	_sheet_path_cache = best
 	if best != "":
 		GameLogger.hero("sheet auto-detected: %s" % best)
 	return best

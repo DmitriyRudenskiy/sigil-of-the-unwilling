@@ -1,4 +1,7 @@
 extends SceneTree
+
+var _passed: int = 0
+var _failed: int = 0
 ## Тесты MapModel: генерация, детерминизм, биомы, проходимость.
 
 const MapModelScript = preload("res://scripts/map/MapModel.gd")
@@ -14,6 +17,9 @@ func _init() -> void:
 		print("MapModel tests passed")
 	else:
 		printerr("MapModel tests failed: ", failed)
+	_failed = failed
+	_passed = 1 if failed == 0 else 0
+
 	await process_frame
 	quit(1 if failed > 0 else 0)
 

@@ -1,4 +1,7 @@
 extends SceneTree
+
+var _passed: int = 0
+var _failed: int = 0
 ## Spell registry: all 20 spells load and validate.
 
 func _init() -> void:
@@ -14,6 +17,9 @@ func _init() -> void:
 		print("test_spell_registry: 20/20 passed")
 	else:
 		printerr("test_spell_registry: %d failed" % failed)
+	_failed = failed
+	_passed = 1 if failed == 0 else 0
+
 	await process_frame
 	quit(1 if failed > 0 else 0)
 

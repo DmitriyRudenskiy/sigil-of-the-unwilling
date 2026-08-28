@@ -98,9 +98,13 @@ func on_map_clicked(cell: Vector2i) -> void:
 	pending_cell = cell
 	pending_path = affordable
 	
-	# Need the full dist map for the reach preview signal
+	# Need the full dist map for the reach preview signal (array → dict)
 	var cost_fn := func(c: Vector2i) -> float: return _terrain_cost(c)
-	var dist := _HexUtils.dijkstra(current_cell, move_points, cost_fn, _map_gen.map_width, _map_gen.map_height)
+	var dist_arr := _HexUtils.dijkstra(current_cell, move_points, cost_fn, _map_gen.map_width, _map_gen.map_height)
+	var dist: Dictionary = {}
+	for i in dist_arr.size():
+		if dist_arr[i] < INF:
+			dist[_HexUtils.idx_to_pos(i, _map_gen.map_width)] = dist_arr[i]
 	reach_preview_changed.emit(affordable, dist, move_points)
 
 	# Marker at clicked cell (emitted via signal, facade handles it)
@@ -137,15 +141,17 @@ func move_to_cell(cell: Vector2i) -> bool:
 
 
 func _get_affordable_path(cell: Vector2i) -> Array[Vector2i]:
-	var cost_fn := func(c: Vector2i) -> float: return _terrain_cost(c)
-	# Use INF to find the path regardless of current MP, then trim it.
-	var dist := _HexUtils.dijkstra(current_cell, INF, cost_fn, _map_gen.map_width, _map_gen.map_height)
-
-	var goal_idx := _HexUtils.pos_to_idx(cell, _map_gen.map_width)
-	if dist[goal_idx] >= INF:
-		return []
-
-	var found := _HexUtils.dijkstra_path(current_cell, cell, dist, cost_fn, _map_gen.map_width, _map_gen.map_height)
+	# Reuse cached blocked cells from MapGenerator model
+	var blocked: Dictionary = _map_gen.get_blocked_cells().duplicate()
+	var levitation := _has_artifact_effect(&"boots_levitation")
+	if levitation:
+		# Remove water cells from blocked if hero has levitation
+		for c in blocked.keys():
+			var terrain_id: int = _map_gen.get_terrain_id(c)
+			if terrain_id == _HexUtils.Terrain.WATER:
+				blocked.erase(c)
+	# A* prunes search via heuristic — much faster than full-map Dijkstra
+	var found := _HexUtils.astar_path(current_cell, cell, blocked, _map_gen.map_width, _map_gen.map_height)
 	if found.size() < 2:
 		return []
 

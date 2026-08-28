@@ -4,14 +4,22 @@ extends Node
 
 var _persistence
 var _ui_manager: WorldUIManager
+var _hero: HeroController
+var _world_ctrl: Node
 
 
-func setup(persistence: WorldPersistence, ui_manager: WorldUIManager) -> void:
+func setup(persistence: WorldPersistence, ui_manager: WorldUIManager, hero: HeroController, world_ctrl: Node = null) -> void:
 	_persistence = persistence
 	_ui_manager = ui_manager
+	_hero = hero
+	_world_ctrl = world_ctrl
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	# РФ6-4: в бою шорткаты мира не действуют
+	if _world_ctrl != null and _world_ctrl.has_method("is_world_visible") and not _world_ctrl.is_world_visible():
+		return
+
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_I:
 			_toggle_inventory()
@@ -19,9 +27,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 
 		if event.keycode == KEY_F5:
-			if _persistence:
-				# WorldController delegates save_game to persistence
-				get_viewport().set_input_as_handled()
+			if _persistence and _persistence.save_game(_hero):
+				GameLogger.world("Quick save OK")
+			get_viewport().set_input_as_handled()
 			return
 
 		if event.keycode == KEY_F9:

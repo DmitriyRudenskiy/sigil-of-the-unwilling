@@ -24,7 +24,7 @@ func test_cost_levitation_water() -> void:
 	assert_eq(_TerrainCostTable.get_cost_with_effects("water", true), 1.0, "water+levitation")
 
 func test_cost_all_terains() -> void:
-	assert_true(_TerrainCostTable.get_all_terains().size() >= 6, "6+ terrains")
+	assert_true(_TerrainCostTable.get_all_terrains().size() >= 6, "6+ terrains")
 
 # --- Dijkstra ---
 

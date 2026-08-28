@@ -19,6 +19,7 @@ signal execute_attack(
 	result: Dictionary
 )
 signal spell_cast_executed(caster: BattleState.BattleUnit, target: BattleState.BattleUnit, result: Dictionary)
+signal spell_cast_failed(reason: String)
 signal end_battle(winner: BattleState.Side, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack])
 
 enum State {
@@ -72,26 +73,31 @@ func is_input_active() -> bool:
 
 
 var _paused := false
-enum PendingAction { NONE, MOVE, ATTACK }
+enum PendingAction { NONE, MOVE, ATTACK, SPELL }
 var _pending_completion: PendingAction = PendingAction.NONE
 
 func pause_battle() -> void:
 	_paused = true
 	# Freeze tree to stop all tweens and animations mid-frame
-	if get_tree() != null:
+	if is_inside_tree():
 		get_tree().paused = true
 
 func resume_battle() -> void:
-	if get_tree() != null:
+	if is_inside_tree():
 		get_tree().paused = false
 	_paused = false
 
 	var pending := _pending_completion
 	_pending_completion = PendingAction.NONE
 
+	# Без активного боя возвращать pending-действие нечему (напр., resume до setup)
+	if _battle_state == null:
+		return
+
 	match pending:
 		PendingAction.MOVE: on_move_completed()
 		PendingAction.ATTACK: on_attack_completed()
+		PendingAction.SPELL: on_spell_anim_completed()
 
 
 func is_paused() -> bool:
@@ -204,6 +210,8 @@ func on_move_completed() -> void:
 		return
 	if _state == State.BATTLE_OVER:
 		return
+	if _battle_state == null:
+		return
 
 	if _battle_state.battle_over:
 		_transition_to(State.BATTLE_OVER)
@@ -224,6 +232,7 @@ func on_move_completed() -> void:
 ## Вызывается после завершения анимации каста (controller → executor)
 func on_spell_anim_completed() -> void:
 	if _paused:
+		_pending_completion = PendingAction.SPELL
 		return
 	if _state == State.BATTLE_OVER:
 		return
@@ -300,8 +309,7 @@ func request_skip() -> void:
 func request_spell_cast(spell_id: StringName) -> void:
 	if _state != State.WAITING_INPUT or _battle_state.active_unit == null:
 		return
-	_transition_to(State.PLAYER_ANIMATING)
-	status_updated.emit("Выберите цель для заклинания...")
+	status_updated.emit("Выберите цель для заклинания… (ПКМ — отмена)")
 
 
 func on_spell_target_selected(spell_id: StringName, target: BattleState.BattleUnit) -> void:
@@ -309,17 +317,18 @@ func on_spell_target_selected(spell_id: StringName, target: BattleState.BattleUn
 	if caster == null or target == null:
 		_on_action_completed()
 		return
-	
+
 	var caster_bonus := _battle_state.attacker_hero_bonus if caster.side == BattleState.Side.ATTACKER else _battle_state.defender_hero_bonus
 	var target_bonus := _battle_state.defender_hero_bonus if target.side == BattleState.Side.DEFENDER else _battle_state.attacker_hero_bonus
-	
+
 	var result := _battle_state.apply_spell(spell_id, caster, target, caster_bonus, target_bonus, _rng)
-	
+
 	if result.get("result") == "success":
+		_transition_to(State.PLAYER_ANIMATING)
 		spell_cast_executed.emit(caster, target, result)
 	else:
+		spell_cast_failed.emit(result.get("result", "unknown"))
 		status_updated.emit("Заклинание не сработало: %s" % result.get("result", "unknown"))
-		_on_action_completed()
 
 
 ## Кнопка «Защита»
@@ -394,9 +403,9 @@ func _advance_to_next_turn() -> void:
 
 	if _battle_state.is_player_turn:
 		var token := _state_token
-		await get_tree().create_timer(GameSettings.BATTLE_TURN_DELAY).timeout
+		await get_tree().create_timer(GameSettings.BATTLE_TURN_DELAY, false).timeout
 
-		if _is_stale(token):
+		if _is_stale(token) or _paused:
 			return
 
 		_transition_to(State.WAITING_INPUT)
@@ -420,9 +429,9 @@ func _run_ai_turn() -> void:
 	_transition_to(State.AI_THINKING)
 	var token := _state_token
 
-	await get_tree().create_timer(_ai_think_time).timeout
+	await get_tree().create_timer(_ai_think_time, false).timeout
 
-	if _is_stale(token):
+	if _is_stale(token) or _paused:
 		return
 
 	var blocked := _battle_state.build_all_blocked(_battle_state.active_unit, _obstacles)
@@ -633,7 +642,7 @@ func _emit_end() -> void:
 		return
 
 	var winner := _battle_state.check_end()
-	if winner == "":
+	if winner == BattleState.Side.NONE:
 		return
 
 	var surviving_atk: Array[UnitStack] = []

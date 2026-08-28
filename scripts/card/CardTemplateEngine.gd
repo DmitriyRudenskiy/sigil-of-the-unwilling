@@ -17,6 +17,10 @@ static var _handlers: Dictionary = {}
 static func register_handler(template: StringName, handler: Callable) -> void:
 	_handlers[template] = handler
 
+## Clear all handlers. Use in tests to avoid state leaking between runs.
+static func reset() -> void:
+	_handlers.clear()
+
 
 ## Main dispatcher: template_id → handler.
 static func execute(
@@ -62,7 +66,7 @@ class CardTemplateHandlers:
 
 		var targets := _resolve_targets(target_type, state, caster, target)
 		for t in targets:
-			if t != null and _Utils.has_method(t, "take_damage"):
+			if t != null and _Utils.has_obj_method(t, "take_damage"):
 				var actual: Variant = t.take_damage(amount)
 				effects.append({"type": "damage", "target_id": _Utils.get_id(t), "amount": actual})
 
@@ -70,13 +74,13 @@ class CardTemplateHandlers:
 			var status: int = _Enums.parse_status(str(params["apply_status"]))
 			var duration: int = int(params.get("status_duration", 1))
 			for t in targets:
-				if t != null and _Utils.has_method(t, "add_status"):
+				if t != null and _Utils.has_obj_method(t, "add_status"):
 					t.add_status(status, duration)
 					effects.append({"type": "status", "target_id": _Utils.get_id(t), "status": status})
 
 		if params.has("self_damage"):
 			var self_dmg: int = int(params["self_damage"])
-			if caster != null and _Utils.has_method(caster, "take_damage"):
+			if caster != null and _Utils.has_obj_method(caster, "take_damage"):
 				caster.take_damage(self_dmg)
 				effects.append({"type": "self_damage", "amount": self_dmg})
 
@@ -94,28 +98,28 @@ class CardTemplateHandlers:
 		var ignore_ward: bool = bool(params.get("ignore_ward", false))
 		var exile: bool = bool(params.get("exile", false))
 
-		if not ignore_ward and _Utils.has_method(target, "has_ward") and target.has_ward():
-			if _Utils.has_method(target, "remove_ward"):
+		if not ignore_ward and _Utils.has_obj_method(target, "has_ward") and target.has_ward():
+			if _Utils.has_obj_method(target, "remove_ward"):
 				target.remove_ward()
 			effects.append({"type": "blocked_by_ward", "target_id": _Utils.get_id(target)})
 			return {"result": "ward_blocked", "effects": effects}
 
 		if exile:
-			if _Utils.has_method(target, "exile"):
+			if _Utils.has_obj_method(target, "exile"):
 				target.exile()
 				effects.append({"type": "exile", "target_id": _Utils.get_id(target)})
 		else:
-			if _Utils.has_method(target, "destroy"):
+			if _Utils.has_obj_method(target, "destroy"):
 				target.destroy()
 				effects.append({"type": "destroy", "target_id": _Utils.get_id(target)})
 
 		if params.has("draw_on_kill"):
-			if _Utils.has_method(caster, "draw_cards"):
+			if _Utils.has_obj_method(caster, "draw_cards"):
 				caster.draw_cards(int(params["draw_on_kill"]))
 			effects.append({"type": "draw", "count": int(params["draw_on_kill"])})
 
 		if params.has("create_token_on_kill"):
-			if _Utils.has_method(caster, "create_token"):
+			if _Utils.has_obj_method(caster, "create_token"):
 				var token_id: String = str(params["create_token_on_kill"])
 				caster.create_token(token_id, 1, 1)
 			effects.append({"type": "token", "token_id": str(params["create_token_on_kill"])})
@@ -133,10 +137,10 @@ class CardTemplateHandlers:
 
 		var target_type: String = str(params.get("target", "ALLY_UNIT"))
 		if target_type == "ALLY_UNIT":
-			if caster != null and _Utils.has_method(caster, "owns_unit") and not caster.owns_unit(target):
+			if caster != null and _Utils.has_obj_method(caster, "owns_unit") and not caster.owns_unit(target):
 				return {"result": "invalid_target", "effects": effects}
 
-		if _Utils.has_method(target, "return_to_hand"):
+		if _Utils.has_obj_method(target, "return_to_hand"):
 			target.return_to_hand()
 			effects.append({"type": "bounce", "target_id": _Utils.get_id(target)})
 
@@ -144,7 +148,7 @@ class CardTemplateHandlers:
 			effects.append({"type": "replay_free", "target_id": _Utils.get_id(target)})
 
 		if params.has("draw_after"):
-			if _Utils.has_method(caster, "draw_cards"):
+			if _Utils.has_obj_method(caster, "draw_cards"):
 				caster.draw_cards(int(params["draw_after"]))
 			effects.append({"type": "draw", "count": int(params["draw_after"])})
 
@@ -156,22 +160,22 @@ class CardTemplateHandlers:
 		caster: Variant, target: Variant
 	) -> Dictionary:
 		var effects: Array[Dictionary] = []
-		if target == null or not _Utils.has_method(target, "cancel"):
+		if target == null or not _Utils.has_obj_method(target, "cancel"):
 			return {"result": "no_target", "effects": effects}
 
 		if params.has("cost_max"):
-			if _Utils.has_method(target, "get_cost") and target.get_cost() > int(params["cost_max"]):
+			if _Utils.has_obj_method(target, "get_cost") and target.get_cost() > int(params["cost_max"]):
 				return {"result": "cost_too_high", "effects": effects}
 
 		if params.has("targets_ally_only") and bool(params["targets_ally_only"]):
-			if not _Utils.has_method(target, "targets_ally") or not target.targets_ally():
+			if not _Utils.has_obj_method(target, "targets_ally") or not target.targets_ally():
 				return {"result": "not_targeting_ally", "effects": effects}
 
 		target.cancel()
 		effects.append({"type": "counter", "target_id": _Utils.get_id(target)})
 
 		if params.has("draw_on_counter"):
-			if _Utils.has_method(caster, "draw_cards"):
+			if _Utils.has_obj_method(caster, "draw_cards"):
 				caster.draw_cards(int(params["draw_on_counter"]))
 			effects.append({"type": "draw", "count": int(params["draw_on_counter"])})
 
@@ -199,13 +203,13 @@ class CardTemplateHandlers:
 				"enemy_count": hp = _board_count(_get_opponent(state, caster))
 
 		for t in targets:
-			if t != null and _Utils.has_method(t, "modify_temp_stats"):
+			if t != null and _Utils.has_obj_method(t, "modify_temp_stats"):
 				t.modify_temp_stats(atk, hp)
 				effects.append({"type": "buff", "target_id": _Utils.get_id(t), "atk": atk, "hp": hp})
 
 		if params.has("heal"):
 			for t in targets:
-				if t != null and _Utils.has_method(t, "heal"):
+				if t != null and _Utils.has_obj_method(t, "heal"):
 					t.heal(int(params["heal"]))
 					effects.append({"type": "heal", "target_id": _Utils.get_id(t), "amount": int(params["heal"])})
 
@@ -213,14 +217,14 @@ class CardTemplateHandlers:
 			var sec_type: String = str(sec.get("effect", ""))
 			match sec_type:
 				"DRAW":
-					if _Utils.has_method(caster, "draw_cards"):
+					if _Utils.has_obj_method(caster, "draw_cards"):
 						caster.draw_cards(int(sec.get("count", 1)))
 					effects.append({"type": "draw", "count": int(sec.get("count", 1))})
 				"DEAL_DAMAGE":
 					var dmg: int = int(sec.get("amount", 0))
 					var sec_target := _resolve_targets(str(sec.get("target", "ENEMY_NEXUS")), state, caster, null)
 					for st in sec_target:
-						if st != null and _Utils.has_method(st, "take_damage"):
+						if st != null and _Utils.has_obj_method(st, "take_damage"):
 							st.take_damage(dmg)
 							effects.append({"type": "damage", "target_id": _Utils.get_id(st), "amount": dmg})
 
@@ -238,7 +242,7 @@ class CardTemplateHandlers:
 		if params.has("status"):
 			var status: int = _Enums.parse_status(str(params["status"]))
 			var duration: int = int(params.get("duration", -1))
-			if _Utils.has_method(target, "add_status"):
+			if _Utils.has_obj_method(target, "add_status"):
 				target.add_status(status, duration)
 				effects.append({"type": "status", "target_id": _Utils.get_id(target), "status": status})
 
@@ -246,16 +250,16 @@ class CardTemplateHandlers:
 		var hp: int = int(params.get("hp", 0))
 		if atk != 0 or hp != 0:
 			var permanent: bool = bool(params.get("permanent", false))
-			if permanent and _Utils.has_method(target, "modify_perm_stats"):
+			if permanent and _Utils.has_obj_method(target, "modify_perm_stats"):
 				target.modify_perm_stats(atk, hp)
 				effects.append({"type": "perm_debuff", "target_id": _Utils.get_id(target), "atk": atk, "hp": hp})
-			elif _Utils.has_method(target, "modify_temp_stats"):
+			elif _Utils.has_obj_method(target, "modify_temp_stats"):
 				target.modify_temp_stats(atk, hp)
 				effects.append({"type": "temp_debuff", "target_id": _Utils.get_id(target), "atk": atk, "hp": hp})
 
 		if params.has("change_control") and bool(params["change_control"]):
 			var duration: int = int(params.get("control_duration", 1))
-			if _Utils.has_method(target, "change_control"):
+			if _Utils.has_obj_method(target, "change_control"):
 				target.change_control(caster, duration)
 				effects.append({"type": "steal", "target_id": _Utils.get_id(target), "duration": duration})
 
@@ -277,13 +281,13 @@ class CardTemplateHandlers:
 			var filter: String = str(params["search_filter"])
 			effects.append({"type": "search", "filter": filter, "count": count})
 		else:
-			if _Utils.has_method(caster, "draw_cards"):
+			if _Utils.has_obj_method(caster, "draw_cards"):
 				caster.draw_cards(count)
 			effects.append({"type": "draw", "count": count})
 
 		if params.has("opponent_draw"):
 			var opp: Variant = _get_opponent(state, caster)
-			if _Utils.has_method(opp, "draw_cards"):
+			if _Utils.has_obj_method(opp, "draw_cards"):
 				opp.draw_cards(int(params["opponent_draw"]))
 			effects.append({"type": "opponent_draw", "count": int(params["opponent_draw"])})
 
@@ -300,13 +304,13 @@ class CardTemplateHandlers:
 		var effects: Array[Dictionary] = []
 		var power: int = int(params.get("power", 1))
 
-		if _Utils.has_method(caster, "add_max_power"):
+		if _Utils.has_obj_method(caster, "add_max_power"):
 			caster.add_max_power(power)
 		effects.append({"type": "ramp", "amount": power})
 
 		if params.has("influence"):
 			var inf: String = str(params["influence"])
-			if _Utils.has_method(caster, "add_influence"):
+			if _Utils.has_obj_method(caster, "add_influence"):
 				caster.add_influence(inf)
 			effects.append({"type": "influence", "color": inf})
 
@@ -327,11 +331,11 @@ class CardTemplateHandlers:
 		for i in range(count):
 			var uid: String = str(token_id) + "_" + str(i)
 			effects.append({"type": "token", "token_id": token_id, "uid": uid, "atk": atk, "hp": hp})
-			if _Utils.has_method(caster, "create_token"):
+			if _Utils.has_obj_method(caster, "create_token"):
 				var unit = caster.create_token(token_id, atk, hp)
 				if unit != null:
 					for kw in keywords:
-						if _Utils.has_method(unit, "add_status"):
+						if _Utils.has_obj_method(unit, "add_status"):
 							unit.add_status(_Enums.parse_status(str(kw)), -1)
 
 		return {"result": "success", "effects": effects}
@@ -348,16 +352,16 @@ class CardTemplateHandlers:
 		var action: String = str(params.get("action", "destroy"))
 		match action:
 			"destroy":
-				if _Utils.has_method(target, "destroy"):
+				if _Utils.has_obj_method(target, "destroy"):
 					target.destroy()
 					effects.append({"type": "destroy_relic", "target_id": _Utils.get_id(target)})
 			"steal":
-				if _Utils.has_method(target, "steal"):
+				if _Utils.has_obj_method(target, "steal"):
 					target.steal(caster)
 					effects.append({"type": "steal_relic", "target_id": _Utils.get_id(target)})
 
 		if params.has("draw_on_destroy"):
-			if _Utils.has_method(caster, "draw_cards"):
+			if _Utils.has_obj_method(caster, "draw_cards"):
 				caster.draw_cards(int(params["draw_on_destroy"]))
 			effects.append({"type": "draw", "count": int(params["draw_on_destroy"])})
 
@@ -376,14 +380,14 @@ class CardTemplateHandlers:
 		var duration: int = int(params.get("duration", -1))
 		var status: int = _Enums.parse_status(keyword)
 
-		if _Utils.has_method(target, "add_status"):
+		if _Utils.has_obj_method(target, "add_status"):
 			target.add_status(status, duration)
 			effects.append({"type": "keyword", "target_id": _Utils.get_id(target), "keyword": keyword})
 
 		if params.has("atk") or params.has("hp"):
 			var atk: int = int(params.get("atk", 0))
 			var hp: int = int(params.get("hp", 0))
-			if _Utils.has_method(target, "modify_temp_stats"):
+			if _Utils.has_obj_method(target, "modify_temp_stats"):
 				target.modify_temp_stats(atk, hp)
 				effects.append({"type": "buff", "target_id": _Utils.get_id(target), "atk": atk, "hp": hp})
 
@@ -396,7 +400,7 @@ class CardTemplateHandlers:
 	) -> Dictionary:
 		var effects: Array[Dictionary] = []
 		var draw_count: int = int(params.get("draw", 1))
-		if _Utils.has_method(caster, "draw_cards"):
+		if _Utils.has_obj_method(caster, "draw_cards"):
 			caster.draw_cards(draw_count)
 		effects.append({"type": "draw", "count": draw_count})
 
@@ -404,19 +408,19 @@ class CardTemplateHandlers:
 			var sec: String = str(params["secondary"])
 			match sec:
 				"DEAL_1_DAMAGE":
-					if target != null and _Utils.has_method(target, "take_damage"):
+					if target != null and _Utils.has_obj_method(target, "take_damage"):
 						target.take_damage(1)
 						effects.append({"type": "damage", "target_id": _Utils.get_id(target), "amount": 1})
 				"BUFF_1_1":
-					if target != null and _Utils.has_method(target, "modify_temp_stats"):
+					if target != null and _Utils.has_obj_method(target, "modify_temp_stats"):
 						target.modify_temp_stats(1, 1)
 						effects.append({"type": "buff", "target_id": _Utils.get_id(target), "atk": 1, "hp": 1})
 				"HEAL_2":
-					if target != null and _Utils.has_method(target, "heal"):
+					if target != null and _Utils.has_obj_method(target, "heal"):
 						target.heal(2)
 						effects.append({"type": "heal", "target_id": _Utils.get_id(target), "amount": 2})
 				"GAIN_1_ARMOR":
-					if target != null and _Utils.has_method(target, "add_status"):
+					if target != null and _Utils.has_obj_method(target, "add_status"):
 						target.add_status(_S.ARMORED, 1)
 						effects.append({"type": "keyword", "target_id": _Utils.get_id(target), "keyword": "ARMORED"})
 
@@ -433,7 +437,7 @@ class CardTemplateHandlers:
 
 		var atk: int = int(params.get("atk", 1))
 		var hp: int = int(params.get("hp", 1))
-		if _Utils.has_method(target, "modify_perm_stats"):
+		if _Utils.has_obj_method(target, "modify_perm_stats"):
 			target.modify_perm_stats(atk, hp)
 			effects.append({"type": "perm_buff", "target_id": _Utils.get_id(target), "atk": atk, "hp": hp})
 
@@ -449,13 +453,13 @@ class CardTemplateHandlers:
 		if params.has("cost_reduction"):
 			var amount: int = int(params["cost_reduction"])
 			effects.append({"type": "cost_reduce", "amount": amount})
-			if _Utils.has_method(caster, "set_next_spell_discount"):
+			if _Utils.has_obj_method(caster, "set_next_spell_discount"):
 				caster.set_next_spell_discount(amount)
 
 		if params.has("influence"):
 			var inf: String = str(params["influence"])
 			effects.append({"type": "influence", "color": inf})
-			if _Utils.has_method(caster, "add_influence"):
+			if _Utils.has_obj_method(caster, "add_influence"):
 				caster.add_influence(inf)
 
 		if params.has("trigger"):
@@ -477,16 +481,16 @@ class CardTemplateHandlers:
 			return {"result": "not_enough_cards", "effects": effects}
 
 		if params.has("discard_target") and target != null:
-			if _Utils.has_method(caster, "discard_card"):
+			if _Utils.has_obj_method(caster, "discard_card"):
 				caster.discard_card(target)
 			effects.append({"type": "discard", "card_id": _Utils.get_id(target)})
 		else:
 			for i in range(discard_count):
 				effects.append({"type": "discard", "auto": true})
-				if _Utils.has_method(caster, "discard_random"):
+				if _Utils.has_obj_method(caster, "discard_random"):
 					caster.discard_random()
 
-		if _Utils.has_method(caster, "draw_cards"):
+		if _Utils.has_obj_method(caster, "draw_cards"):
 			caster.draw_cards(draw_count)
 		effects.append({"type": "draw", "count": draw_count})
 
@@ -524,25 +528,25 @@ class CardTemplateHandlers:
 		if cond.is_empty():
 			return true
 		if cond.has("target_hp_max") and target != null:
-			if _Utils.has_method(target, "get_hp") and target.get_hp() > int(cond["target_hp_max"]):
+			if _Utils.has_obj_method(target, "get_hp") and target.get_hp() > int(cond["target_hp_max"]):
 				return false
 		if cond.has("target_cost_max") and target != null:
-			if _Utils.has_method(target, "get_cost") and target.get_cost() > int(cond["target_cost_max"]):
+			if _Utils.has_obj_method(target, "get_cost") and target.get_cost() > int(cond["target_cost_max"]):
 				return false
 		if cond.has("target_is_damaged") and target != null:
-			if _Utils.has_method(target, "is_damaged") and not target.is_damaged():
+			if _Utils.has_obj_method(target, "is_damaged") and not target.is_damaged():
 				return false
 		if cond.has("target_is_flying") and target != null:
-			if _Utils.has_method(target, "is_flying") and not target.is_flying():
+			if _Utils.has_obj_method(target, "is_flying") and not target.is_flying():
 				return false
 		if cond.has("hand_size_max"):
 			if _hand_size(caster) > int(cond["hand_size_max"]):
 				return false
 		if cond.has("spell_cost_max") and target != null:
-			if _Utils.has_method(target, "get_cost") and target.get_cost() > int(cond["spell_cost_max"]):
+			if _Utils.has_obj_method(target, "get_cost") and target.get_cost() > int(cond["spell_cost_max"]):
 				return false
 		if cond.has("attacker_unblocked"):
-			if not _Utils.has_method(state, "is_attacker_unblocked") or not state.is_attacker_unblocked():
+			if not _Utils.has_obj_method(state, "is_attacker_unblocked") or not state.is_attacker_unblocked():
 				return false
 		if cond.has("discard_cost"):
 			if _hand_size(caster) < int(cond["discard_cost"]):
@@ -559,11 +563,11 @@ class CardTemplateHandlers:
 		match target_type:
 			"ALL_ENEMY_UNITS":
 				var opp: Variant = _get_opponent(state, caster)
-				if _Utils.has_method(opp, "get_all_units"):
+				if _Utils.has_obj_method(opp, "get_all_units"):
 					return opp.get_all_units()
 				return []
 			"ALL_ALLY_UNITS":
-				if _Utils.has_method(caster, "get_all_units"):
+				if _Utils.has_obj_method(caster, "get_all_units"):
 					return caster.get_all_units()
 				return []
 			"ENEMY_NEXUS":
@@ -587,7 +591,7 @@ class CardTemplateHandlers:
 	static func _board_count(caster: Variant) -> int:
 		if caster == null:
 			return 0
-		if _Utils.has_method(caster, "board_count"):
+		if _Utils.has_obj_method(caster, "board_count"):
 			return caster.board_count()
 		if _Utils.has_attr(caster, "board"):
 			return caster.board.size()
@@ -603,6 +607,6 @@ class CardTemplateHandlers:
 		return 0
 
 	static func _get_opponent(state: Variant, caster: Variant) -> Variant:
-		if state != null and _Utils.has_method(state, "get_opponent"):
+		if state != null and _Utils.has_obj_method(state, "get_opponent"):
 			return state.get_opponent(caster)
 		return null

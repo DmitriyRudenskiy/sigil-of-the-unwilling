@@ -8,7 +8,7 @@ func _init() -> void:
 	lines.append("UNIT REFERENCE")
 	lines.append("")
 	lines.append("%-22s %4s %4s %4s %4s  %s" % ["NAME", "ATK", "DMG", "HP", "SPD", "TAGS"])
-	lines.append("-" * 74)
+	lines.append("-".repeat(74))
 
 	var all_tags: Dictionary = {}
 

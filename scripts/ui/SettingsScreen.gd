@@ -33,6 +33,10 @@ func setup(settings: Node) -> void:
 func _ready() -> void:
 	z_index = 50
 	if not _settings:
+		# РФ7-5: не зависать без /root/Settings — закрыть экран и снять паузу
+		push_warning("SettingsScreen: /root/Settings not found — closing")
+		closed.emit()
+		queue_free()
 		return
 	_build()
 	if _settings.ui_animations:
@@ -267,6 +271,7 @@ func _on_apply() -> void:
 	_settings.particles = _particles_toggle.button_pressed
 	_settings.auto_save = _auto_save_toggle.button_pressed
 	_settings.save()
+	_settings.apply_display_mode()
 	applied.emit()
 	closed.emit()
 	queue_free()

@@ -1,4 +1,7 @@
 extends SceneTree
+
+var _passed: int = 0
+var _failed: int = 0
 ## Интеграционный тест: полный цикл боя через BattleState.
 
 func _init() -> void:
@@ -13,6 +16,9 @@ func _init() -> void:
 		print("Battle integration tests passed")
 	else:
 		printerr("Battle integration tests failed: ", failed)
+	_failed = failed
+	_passed = 1 if failed == 0 else 0
+
 	await process_frame
 	quit(1 if failed > 0 else 0)
 

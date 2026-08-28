@@ -23,11 +23,20 @@ static func cast(
 	target_unit: BattleState.BattleUnit,
 	caster_hero_bonus: Dictionary,
 	target_hero_bonus: Dictionary,
-	rng: RandomNumberGenerator
+	rng: RandomNumberGenerator,
+	registry: Node = null  # SpellRegistry; null → autoload Spells
 ) -> Dictionary:
-	var spell := Spells.get_spell(spell_id)
+	var is_res := spell_id == &"resurrection"
+
+	var reg: Node = registry if registry != null else Spells  # fallback намеренно: SpellCaster — статический RefCounted без доступа к дереву
+	var spell: SpellRegistry.SpellDef = reg.get_spell(spell_id)
 	if spell == null:
 		return {"result": "not_found"}
+
+	if target_unit == null:
+		return {"result": "invalid_target"}
+	if not is_res and not target_unit.is_alive():
+		return {"result": "invalid_target"}
 
 	if _check_immunity(target_unit, spell):
 		return {"result": "immune", "spell_id": spell_id}
@@ -60,9 +69,7 @@ static func cast(
 			revived_count = max(1, revived_count)
 			revived_count = min(revived_count, target_unit.max_count)
 
-			target_unit.set_count(revived_count)
-			target_unit.alive = true
-			result["revived"] = true
+			result["revive_count"] = revived_count
 
 	return result
 

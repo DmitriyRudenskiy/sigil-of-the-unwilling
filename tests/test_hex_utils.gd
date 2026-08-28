@@ -4,21 +4,21 @@ extends SceneTree
 
 const HexUtilsScript = preload("res://scripts/HexUtils.gd")
 
-var failed := 0
-var passed := 0
+var _failed: int = 0
+var _passed: int = 0
 
 func check(name: String, condition: bool, detail: String = "") -> void:
 	if condition:
-		passed += 1
+		_passed += 1
 		print("  PASS  ", name)
 	else:
-		failed += 1
+		_failed += 1
 		printerr("  FAIL  ", name, " — ", detail)
 
 
 func test_neighbors() -> void:
 	print("[test] neighbors")
-	HexUtils.odd_row_shift_right = true
+	HexUtils.get_config().odd_row_shift_right = true
 	
 	# Even row
 	var even := Vector2i(0, 0)
@@ -36,7 +36,7 @@ func test_neighbors() -> void:
 
 func test_hex_distance() -> void:
 	print("[test] hex_distance")
-	HexUtils.odd_row_shift_right = true
+	HexUtils.get_config().odd_row_shift_right = true
 	
 	check("same cell", HexUtils.hex_distance(Vector2i(0, 0), Vector2i(0, 0)) == 0)
 	check("adjacent x", HexUtils.hex_distance(Vector2i(0, 0), Vector2i(1, 0)) == 1)
@@ -47,7 +47,7 @@ func test_hex_distance() -> void:
 
 func test_bfs_path() -> void:
 	print("[test] bfs_path")
-	HexUtils.odd_row_shift_right = true
+	HexUtils.get_config().odd_row_shift_right = true
 	
 	# start == goal
 	var path := HexUtils.bfs_path(Vector2i(0, 0), Vector2i(0, 0), {}, 10, 10)
@@ -74,7 +74,7 @@ func test_bfs_path() -> void:
 
 func test_bfs_reachable() -> void:
 	print("[test] bfs_reachable")
-	HexUtils.odd_row_shift_right = true
+	HexUtils.get_config().odd_row_shift_right = true
 	
 	# 1 step from center in open field
 	var reach := HexUtils.bfs_reachable(Vector2i(5, 5), 1, {}, 10, 10)
@@ -94,7 +94,7 @@ func test_bfs_reachable() -> void:
 
 func test_even_row_mode() -> void:
 	print("[test] even row mode")
-	HexUtils.odd_row_shift_right = false
+	HexUtils.get_config().odd_row_shift_right = false
 	
 	var n := HexUtils.get_all_neighbors(Vector2i(0, 0))
 	check("even mode: 6 neighbors", n.size() == 6)
@@ -105,7 +105,7 @@ func test_even_row_mode() -> void:
 
 func test_cube_roundtrip() -> void:
 	print("[test] cube roundtrip")
-	HexUtils.odd_row_shift_right = true
+	HexUtils.get_config().odd_row_shift_right = true
 	
 	for y in 4:
 		for x in 4:
@@ -123,6 +123,6 @@ func _init() -> void:
 	test_bfs_reachable()
 	test_even_row_mode()
 	test_cube_roundtrip()
-	print("\n=== %d passed, %d failed ===" % [passed, failed])
+	print("\n=== %d passed, %d failed ===" % [_passed, _failed])
 	await process_frame
-	quit(1 if failed > 0 else 0)
+	quit(1 if _failed > 0 else 0)

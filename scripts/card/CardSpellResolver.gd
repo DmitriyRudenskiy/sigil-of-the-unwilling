@@ -46,7 +46,7 @@ static func resolve(
 
 	# 5. Логирование
 	if result.get("result") == "success" and state != null:
-		if state is Object and state.has_method("add_to_history"):
+		if _Utils.has_obj_method(state, "add_to_history"):
 			state.add_to_history(spell.id, _get_player_id(caster), result.get("effects", []))
 
 	return result
@@ -64,7 +64,7 @@ static func _has_power(obj: Variant) -> bool:
 static func _get_influence(caster: Variant, color: String) -> int:
 	if caster == null:
 		return 0
-	if _Utils.has_method(caster, "get_influence"):
+	if _Utils.has_obj_method(caster, "get_influence"):
 		return caster.get_influence(color)
 	if _Utils.has_attr(caster, "influence"):
 		var inf: Dictionary = caster.influence

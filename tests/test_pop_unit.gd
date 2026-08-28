@@ -33,41 +33,41 @@ func test_initial_not_assigned() -> void:
 # ==================== ПЕРЕКЛЮЧЕНИЕ ====================
 
 func test_request_switch_to_worker() -> void:
-	var result := unit.request_switch(_PopUnit.State.WORKER, Vector2i(3, 3))
+	var result: bool = unit.request_switch(_PopUnit.State.WORKER, Vector2i(3, 3))
 	assert_true(result, "switch requested")
 	assert_eq(unit.pending_state, _PopUnit.State.WORKER, "pending is worker")
 	assert_eq(unit.pending_tile, Vector2i(3, 3), "pending tile set")
 
 func test_request_switch_to_militia() -> void:
-	var result := unit.request_switch(_PopUnit.State.MILITIA)
+	var result: bool = unit.request_switch(_PopUnit.State.MILITIA)
 	assert_true(result, "switch to militia")
 	assert_eq(unit.pending_state, _PopUnit.State.MILITIA, "pending is militia")
 
 func test_request_switch_to_follower() -> void:
 	unit.state = _PopUnit.State.WORKER
-	var result := unit.request_switch(_PopUnit.State.FOLLOWER)
+	var result: bool = unit.request_switch(_PopUnit.State.FOLLOWER)
 	assert_true(result, "switch to follower")
 	assert_eq(unit.pending_state, _PopUnit.State.FOLLOWER, "pending is follower")
 
 func test_request_switch_worker_requires_tile() -> void:
-	var result := unit.request_switch(_PopUnit.State.WORKER)
+	var result: bool = unit.request_switch(_PopUnit.State.WORKER)
 	assert_false(result, "worker requires tile")
 
 func test_request_switch_while_pending() -> void:
 	unit.request_switch(_PopUnit.State.WORKER, Vector2i(3, 3))
-	var result := unit.request_switch(_PopUnit.State.MILITIA)
+	var result: bool = unit.request_switch(_PopUnit.State.MILITIA)
 	assert_false(result, "cannot switch while pending")
 
 func test_request_switch_while_assigned() -> void:
 	unit.assigned_to = 5
-	var result := unit.request_switch(_PopUnit.State.MILITIA)
+	var result: bool = unit.request_switch(_PopUnit.State.MILITIA)
 	assert_false(result, "cannot switch while assigned")
 
 # ==================== ПРИМЕНЕНИЕ ====================
 
 func test_apply_pending_to_worker() -> void:
 	unit.request_switch(_PopUnit.State.WORKER, Vector2i(3, 3))
-	var changed := unit.apply_pending()
+	var changed: bool = unit.apply_pending()
 	assert_true(changed, "state changed")
 	assert_eq(unit.state, _PopUnit.State.WORKER, "now worker")
 	assert_eq(unit.tile, Vector2i(3, 3), "tile set")
@@ -87,7 +87,7 @@ func test_apply_pending_to_militia() -> void:
 	assert_eq(unit.state, _PopUnit.State.MILITIA, "now militia")
 
 func test_apply_pending_no_pending() -> void:
-	var changed := unit.apply_pending()
+	var changed: bool = unit.apply_pending()
 	assert_false(changed, "no change without pending")
 
 func test_apply_pending_preserves_patrol_for_militia() -> void:

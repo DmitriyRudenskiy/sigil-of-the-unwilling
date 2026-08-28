@@ -5,6 +5,10 @@ class_name ResourcesPanel
 const ResourceDef = preload("res://scripts/data/ResourceDef.gd")
 
 var _labels: Dictionary = {}  # resource_id -> Label
+var _resource_registry: Node = null
+
+func setup_registry(registry: Node) -> void:
+	_resource_registry = registry
 
 
 func _ready() -> void:
@@ -21,7 +25,8 @@ func _build_ui() -> void:
 	title.add_theme_font_size_override("font_size", 14)
 	vbox.add_child(title)
 
-	var all := Resources.get_all()
+	var reg: Node = _resource_registry if _resource_registry != null else Resources
+	var all: Array[ResourceDef] = reg.get_all()
 	for def in all:
 		var hbox := HBoxContainer.new()
 		vbox.add_child(hbox)
@@ -39,7 +44,8 @@ func update_resources(resources: Dictionary) -> void:
 	for id in _labels:
 		var label: Label = _labels[id]
 		var amount: int = int(resources.get(id, 0))
-		var def: ResourceDef = Resources.get_resource(id)
+		var reg: Node = _resource_registry if _resource_registry != null else Resources
+		var def: ResourceDef = reg.get_resource(id) as ResourceDef
 		if def:
 			label.text = "%s %d/%d" % [def.icon, amount, GameSettings.RESOURCE_CAPACITY]
 		else:

@@ -2,6 +2,9 @@ class_name WorldSpawner
 extends Node2D
 ## Спавн и удаление объектов мира: деревни, ресурсы, враги, сундуки.
 
+const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
+const ServiceLocator = preload("res://scripts/core/ServiceLocator.gd")
+
 var map: MapGenerator = null
 var rng: RandomNumberGenerator = null
 
@@ -12,6 +15,10 @@ var _chest_nodes: Dictionary = {}
 var _chests: Dictionary = {}
 var _scroll_nodes: Dictionary = {}
 var _scrolls: Dictionary = {}
+var _services: ServiceContainer = null
+
+func setup_services(services: ServiceContainer) -> void:
+	_services = services
 
 
 func spawn_all() -> void:
@@ -65,12 +72,13 @@ func _spawn_villages() -> void:
 		var sp := Sprite2D.new()
 		# Triangle + rectangle village placeholder
 		var img := Image.create(48, 48, false, Image.FORMAT_RGBA8)
-		for y in 48:
-			for x in 48:
-				if y < 20 and abs(x - 24) < (24 - y) * 0.8:
-					img.set_pixel(x, y, Color(0.7, 0.2, 0.1))
-				elif y >= 20 and y < 42 and x >= 10 and x <= 38:
-					img.set_pixel(x, y, Color(0.6, 0.5, 0.3))
+		# Triangle roof (y 0-19): fill_rect per row
+		for y in 20:
+			var half_w := int((24 - y) * 0.8)
+			if half_w > 0:
+				img.fill_rect(Rect2i(24 - half_w, y, half_w * 2, 1), Color(0.7, 0.2, 0.1))
+		# Rect body (y 20-41)
+		img.fill_rect(Rect2i(10, 20, 29, 22), Color(0.6, 0.5, 0.3))
 		sp.texture = ImageTexture.create_from_image(img)
 		sp.z_index = 5
 		v.add_child(sp)
@@ -104,6 +112,7 @@ func _spawn_resources() -> void:
 
 
 func _spawn_enemies() -> void:
+	var units_reg: Node = ServiceLocator.resolve(null, &"units")
 	for cell in map.enemy_stacks:
 		var army: Array = map.enemy_stacks[cell]
 		var e := Node2D.new()
@@ -158,7 +167,7 @@ func _spawn_chests() -> void:
 	var attempts := 0
 	while placed < GameSettings.CHEST_COUNT and attempts < GameSettings.CHEST_PLACE_ATTEMPTS:
 		attempts += 1
-		var cell := Vector2i(chest_rng.randi_range(3, map.map_width - 4), chest_rng.randi_range(3, map.map_height - 4))
+		var cell := Vector2i(chest_rng.randi_range(GameSettings.SPAWN_CHEST_MIN_BORDER, map.map_width - 4), chest_rng.randi_range(GameSettings.SPAWN_CHEST_MIN_BORDER, map.map_height - 4))
 		if not map.is_walkable(cell):
 			continue
 		if map.enemy_stacks.has(cell) or map.resource_cells.has(cell) or cell in map.village_cells:
@@ -172,7 +181,8 @@ func _spawn_chests() -> void:
 				break
 		if nearby_enemy:
 			continue
-		var artifact := Artifacts.random_of_rarity(Artifact.Rarity.MINOR, chest_rng)
+		var art_reg: Node = ServiceLocator.resolve(null, &"artifacts")
+		var artifact: Artifact = art_reg.random_of_rarity(Artifact.Rarity.MINOR, chest_rng)
 		if artifact == null:
 			continue
 		var chest := ArtifactChest.new()
@@ -186,12 +196,9 @@ func _spawn_chests() -> void:
 		n.z_index = 7
 		var sp := Sprite2D.new()
 		var img := Image.create(32, 24, false, Image.FORMAT_RGBA8)
-		for y in 24:
-			for x in 32:
-				var c := Color(0.6, 0.4, 0.1)
-				if y < 4: c = Color(0.8, 0.6, 0.2)
-				elif y > 18: c = Color(0.4, 0.25, 0.08)
-				img.set_pixel(x, y, c)
+		img.fill_rect(Rect2i(0, 0, 32, 4), Color(0.8, 0.6, 0.2))
+		img.fill_rect(Rect2i(0, 4, 32, 15), Color(0.6, 0.4, 0.1))
+		img.fill_rect(Rect2i(0, 19, 32, 5), Color(0.4, 0.25, 0.08))
 		sp.texture = ImageTexture.create_from_image(img)
 		n.add_child(sp)
 		add_child(n)
@@ -211,9 +218,9 @@ func _spawn_scrolls() -> void:
 	var placed: int = 0
 	var attempts: int = 0
 	var chest_rng := rng if rng != null else RandomNumberGenerator.new()
-	while placed < scroll_count and attempts < 200:
+	while placed < scroll_count and attempts < GameSettings.SPAWN_SCROLL_MAX_ATTEMPTS:
 		attempts += 1
-		var cell := Vector2i(chest_rng.randi_range(3, map.map_width - 4), chest_rng.randi_range(3, map.map_height - 4))
+		var cell := Vector2i(chest_rng.randi_range(GameSettings.SPAWN_CHEST_MIN_BORDER, map.map_width - 4), chest_rng.randi_range(GameSettings.SPAWN_CHEST_MIN_BORDER, map.map_height - 4))
 		if not map.is_walkable(cell):
 			continue
 		if map.enemy_stacks.has(cell) or map.resource_cells.has(cell) or cell in map.village_cells:
@@ -222,7 +229,8 @@ func _spawn_scrolls() -> void:
 			continue
 		if _scrolls.has(cell):
 			continue
-		var all_spells: Array = Spells.get_all_spells()
+		var spell_reg: Node = ServiceLocator.resolve(null, &"spells")
+		var all_spells: Array = spell_reg.get_all_spells()
 		if all_spells.is_empty():
 			continue
 		var spell = all_spells[chest_rng.randi() % all_spells.size()]
@@ -232,11 +240,9 @@ func _spawn_scrolls() -> void:
 		n.z_index = 6
 		var sp := Sprite2D.new()
 		var img := Image.create(24, 32, false, Image.FORMAT_RGBA8)
-		for y in 32:
-			for x in 24:
-				var c := Color(0.3, 0.15, 0.5)
-				if x < 4 or x > 18: c = Color(0.5, 0.3, 0.7)
-				img.set_pixel(x, y, c)
+		img.fill_rect(Rect2i(0, 0, 24, 32), Color(0.3, 0.15, 0.5))
+		img.fill_rect(Rect2i(0, 0, 4, 32), Color(0.5, 0.3, 0.7))
+		img.fill_rect(Rect2i(20, 0, 4, 32), Color(0.5, 0.3, 0.7))
 		sp.texture = ImageTexture.create_from_image(img)
 		n.add_child(sp)
 		add_child(n)
@@ -253,3 +259,4 @@ func remove_scroll_at(cell: Vector2i) -> void:
 
 func get_scroll_at(cell: Vector2i) -> StringName:
 	return _scrolls.get(cell, &"")
+

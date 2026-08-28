@@ -366,9 +366,11 @@ func _write_map_script(base_coords: Dictionary, obj_ordered: Array[String]) -> v
     txt += "const RIVER_COORDS := []\n"
 
     var fa := FileAccess.open(MAP_SCRIPT_PATH, FileAccess.WRITE)
-    if fa:
-        fa.store_string(txt)
-        fa.close()
+    if fa == null:
+        push_error("Failed to write TerrainAtlasMap: %s" % error_string(FileAccess.get_open_error()))
+        quit(1)
+    fa.store_string(txt)
+    fa.close()
     print("📝 TerrainAtlasMap updated")
 
 # ===================== 8. ОТЧЁТ =====================
@@ -401,10 +403,17 @@ func _write_report(base_ordered: Array[String], obj_ordered: Array[String]) -> v
             txt += "- %s\n" % s
 
     var fa := FileAccess.open("res://REPORT.md", FileAccess.READ_WRITE)
-    if fa:
+    if fa == null:
+        push_error("Failed to open res://REPORT.md: %s" % error_string(FileAccess.get_open_error()))
+        return
+    fa.seek_end()
+    # Гарантируем перевод строки между блоками отчёта
+    var content := fa.get_as_text()
+    if content.length() > 0 and not content.ends_with("\n"):
         fa.seek_end()
-        fa.store_string(txt)
-        fa.close()
+        fa.store_string("\n")
+    fa.store_string(txt + "\n")
+    fa.close()
 
 # ===================== УТИЛИТЫ =====================
 func _complexity_score(img: Image) -> float:

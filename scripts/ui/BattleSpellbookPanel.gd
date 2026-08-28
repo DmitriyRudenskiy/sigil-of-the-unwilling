@@ -3,17 +3,21 @@ extends Control
 ## Panel of castable spells during battle. Shown as a bottom bar in battle UI.
 ## Reads HeroMagic + SpellRegistry to list available spells.
 
+const ServiceLocator = preload("res://scripts/core/ServiceLocator.gd")
+
 signal spell_chosen(spell_id: StringName)
 
 var _hero: HeroController
 var _magic: HeroMagic
+var _spell_registry: Node = null
 
-func setup(hero: HeroController, magic: HeroMagic) -> void:
+func setup(hero: HeroController = null, magic: HeroMagic = null, registry: Node = null) -> void:
 	_hero = hero
 	_magic = magic
+	_spell_registry = ServiceLocator.resolve(registry, &"spells")
 	_refresh()
 
-	if _magic != null:
+	if _magic != null and not _magic.changed.is_connected(_refresh):
 		_magic.changed.connect(_refresh)
 
 func _refresh() -> void:
@@ -26,8 +30,12 @@ func _refresh() -> void:
 		return
 
 	for spell_id in _magic.spellbook:
-		var spell = Spells.get_spell(spell_id)
+		var spell = _spell_registry.get_spell(spell_id)
 		if spell == null:
+			continue
+
+		# РФ4-4: показывать только одиночные таргеты
+		if not (spell.target_type in [SpellRegistry.TargetType.SINGLE_ENEMY, SpellRegistry.TargetType.SINGLE_ALLY]):
 			continue
 
 		if not _magic.can_cast_def(spell):

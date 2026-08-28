@@ -1,26 +1,34 @@
-extends SceneTree
+extends "res://tests/test_base.gd"
 ## Save/Load roundtrip: SaveData → SaveManager → roundtrip.
+##
+## SaveManager API (by design): save_game -> SaveError code,
+## load_game -> {"error": SaveError, "data": SaveData|null, "message": String}.
 
 const _SaveData = preload("res://scripts/core/SaveData.gd")
 const _WorldStateDelta = preload("res://scripts/world/WorldStateDelta.gd")
 const _SaveManager = preload("res://scripts/core/SaveManager.gd")
 
-func _init() -> void:
-	var failed := 0
-	failed += _test_save_data_roundtrip()
-	failed += _test_world_delta_roundtrip()
-	failed += _test_save_manager_write()
-
-	if failed == 0:
-		print("Save roundtrip tests passed")
-	else:
-		printerr("Save roundtrip tests failed: ", failed)
-	await process_frame
-	quit(1 if failed > 0 else 0)
+var _sm: SaveManager
+var _parent: Node
 
 
-func _test_save_data_roundtrip() -> int:
-	var errors := 0
+func before_each() -> void:
+	_parent = Node.new()
+	_parent.name = "TestParent"
+	root.add_child(_parent)
+	_sm = _SaveManager.new()
+	_sm.name = "SaveManager"
+	_parent.add_child(_sm)
+	_sm.call("delete_save")
+
+
+func after_each() -> void:
+	_sm.call("delete_save")
+	_sm.queue_free()
+	_parent.queue_free()
+
+
+func test_save_data_roundtrip() -> void:
 	var data := _SaveData.new()
 	data.run_seed = 42
 	data.date = {"month": 5, "week": 2, "day": 10}
@@ -32,21 +40,12 @@ func _test_save_data_roundtrip() -> int:
 	var data2 := _SaveData.new()
 	data2.from_dict(dict)
 
-	if data2.run_seed != 42:
-		printerr("run_seed mismatch")
-		errors += 1
-	if data2.hero["cell"]["x"] != 10:
-		printerr("hero cell mismatch")
-		errors += 1
-	if not data2.is_valid():
-		printerr("is_valid should be true")
-		errors += 1
-
-	return errors
+	assert_eq(data2.run_seed, 42, "run_seed roundtrip")
+	assert_eq(data2.hero["cell"]["x"], 10, "hero cell roundtrip")
+	assert_true(data2.is_valid(), "is_valid after roundtrip")
 
 
-func _test_world_delta_roundtrip() -> int:
-	var errors := 0
+func test_world_delta_roundtrip() -> void:
 	var delta := _WorldStateDelta.new()
 	delta.add_village(Vector2i(1, 2))
 	delta.add_defeated_enemy(Vector2i(5, 5))
@@ -58,52 +57,30 @@ func _test_world_delta_roundtrip() -> int:
 	var delta2 := _WorldStateDelta.new()
 	delta2.deserialize(dict)
 
-	if delta2.captured_villages.size() != 1:
-		printerr("village count mismatch")
-		errors += 1
-	if delta2.defeated_enemies[0] != Vector2i(5, 5):
-		printerr("enemy cell mismatch")
-		errors += 1
-	if delta2.opened_chests.size() != 1:
-		printerr("chest count mismatch")
-		errors += 1
-
-	return errors
+	assert_eq(delta2.captured_villages.size(), 1, "village count")
+	assert_eq(delta2.defeated_enemies[0], Vector2i(5, 5), "enemy cell")
+	assert_eq(delta2.opened_chests.size(), 1, "chest count")
+	assert_eq(delta2.removed_resources[0], Vector2i(3, 3), "resource cell")
 
 
-func _test_save_manager_write() -> int:
-	var errors := 0
-
-	# Create a parent node for SaveManager (needs to be a Node)
-	var parent := Node.new()
-	parent.name = "TestParent"
-	root.add_child(parent)
-
-	var sm := _SaveManager.new()
-	sm.name = "SaveManager"
-	parent.add_child(sm)
-
+func test_save_manager_roundtrip() -> void:
 	var data := _SaveData.new()
 	data.run_seed = 12345
 	data.hero = {"cell": {"x": 5, "y": 5}, "move_points": 10}
 	data.world = {"captured_villages": []}
 
-	var ok := sm.call("save_game", data) as bool
-	if not ok:
-		printerr("save_game failed")
-		errors += 1
+	var err: int = _sm.call("save_game", data)
+	assert_eq(err, SaveManager.SaveError.OK, "save_game returns OK")
 
-	var loaded: Variant = sm.call("load_game")
-	if loaded == null:
-		printerr("load_game returned null")
-		errors += 1
-	elif loaded.run_seed != 12345:
-		printerr("loaded run_seed mismatch")
-		errors += 1
+	var loaded: Dictionary = _sm.call("load_game")
+	assert_eq(loaded.get("error"), SaveManager.SaveError.OK, "load_game error OK")
+	var data2: SaveData = loaded.get("data")
+	assert_not_null(data2, "load_game data present")
+	assert_eq(data2.run_seed, 12345, "loaded run_seed")
+	assert_eq(data2.hero["cell"]["x"], 5, "loaded hero cell")
 
-	# Cleanup — синхронное освобождение
-	sm.call("delete_save")
-	sm.free()
-	parent.free()
 
-	return errors
+func test_load_missing_returns_file_not_found() -> void:
+	var loaded: Dictionary = _sm.call("load_game")
+	assert_eq(loaded.get("error"), SaveManager.SaveError.FILE_NOT_FOUND, "missing save -> FILE_NOT_FOUND")
+	assert_null(loaded.get("data"), "missing save -> null data")

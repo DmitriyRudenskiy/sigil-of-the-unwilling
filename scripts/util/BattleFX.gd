@@ -4,6 +4,9 @@ extends Node2D
 ## Attached to the BattleController so it has access to the BattleView.
 ## Not a singleton; instantiated per battle scene.
 
+const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
+const ServiceLocator = preload("res://scripts/core/ServiceLocator.gd")
+
 var _view: BattleView
 var _rng := RandomNumberGenerator.new()
 
@@ -24,9 +27,9 @@ func show_spell_cast(cell: Vector2i, spell_id: StringName) -> void:
 	}
 
 	var color := Color.WHITE
-	var spell := Spells.get_spell(spell_id)
+	var spell: Dictionary = _resolve_spell(spell_id)
 	if spell:
-		color = school_colors.get(spell.school, Color.WHITE)
+		color = school_colors.get(spell.get("school", ""), Color.WHITE)
 
 	_view.show_floating_text(cell, "SPELL: %s" % spell_id, color)
 
@@ -80,7 +83,7 @@ func play_attack_sequence(
 	atk: BattleState.BattleUnit,
 	def: BattleState.BattleUnit,
 	result: Dictionary,
-	wait_time: float = 0.3
+	wait_time: float = GameSettings.BATTLE_ATTACK_ANIM_SEC
 ) -> SceneTreeTimer:
 	assert(is_inside_tree(), "BattleFX.play_attack_sequence: not in tree")
 	_view.animate_attack(atk, def)
@@ -98,3 +101,12 @@ func play_attack_sequence(
 	])
 
 	return get_tree().create_timer(wait_time)
+
+
+func _resolve_spell(spell_id: StringName) -> Dictionary:
+	var reg: Node = ServiceLocator.resolve(null, &"spells")
+	if reg != null and reg.has_method("get_spell"):
+		var result = reg.get_spell(spell_id)
+		if result != null:
+			return result
+	return Spells.get_spell(spell_id) if Spells.has_method("get_spell") else {}

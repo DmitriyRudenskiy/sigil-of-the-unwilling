@@ -71,9 +71,18 @@ func test_level_up_2_requires_cultists() -> void:
 	assert_false(_BoroughRules.can_level_up(city, b), "level 3 requires cultists")
 
 func test_level_up_2_cultists_ok() -> void:
+	# can_level_up проверяет и факцию, и число соседей того же уровня (>= 4)
 	city.faction = _City.Faction.CULTISTS
 	var b := _Borough.new()
 	b.level = 2
+	b.cell = Vector2i(5, 5)
+	city.boroughs.append(b)
+	var nbs: Array = HexUtils.get_all_neighbors(b.cell)
+	for i in _CityBalance.BOROUGH_LEVELUP_NEIGHBORS:
+		var nb := _Borough.new()
+		nb.level = 2
+		nb.cell = nbs[i]
+		city.boroughs.append(nb)
 	assert_true(_BoroughRules.can_level_up(city, b), "level 3 ok for cultists")
 
 func test_same_level_neighbors() -> void:

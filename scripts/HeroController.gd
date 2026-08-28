@@ -3,6 +3,7 @@ class_name HeroController
 ## Thin facade: composes Movement, Army, Resources, Visual.
 
 const _Platform = preload("res://scripts/core/Platform.gd")
+const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
 
 signal hero_moved(cell: Vector2i)
 signal hero_entered_village(cell: Vector2i)
@@ -43,6 +44,7 @@ var spellbook: Array[StringName]:
 	get: return magic.spellbook
 
 var _tween: Tween
+var _setup_done := false
 
 var current_cell: Vector2i:
 	get: return movement.current_cell
@@ -76,7 +78,7 @@ func _ready() -> void:
 	skills = HeroSkills.new()
 	tools = HeroTools.new()
 
-	strategic_resources.init_from_registry()
+	# strategic_resources.init_from_registry() вызывается в setup() после ServiceContainer
 
 	_wire_signals()
 
@@ -115,6 +117,16 @@ func get_map_gen() -> MapGenerator:
 
 
 func setup(map: MapGenerator) -> void:
+	if _setup_done:
+		return
+	_setup_done = true
+	# Инъекция реестра в армию
+	army.setup(ServiceContainer.current.units if ServiceContainer.current != null else null)
+	# Инъекция реестра в стратегические ресурсы
+	strategic_resources.init_from_registry(
+		ServiceContainer.current.resources if ServiceContainer.current != null else null
+	)
+
 	movement.set_artifact_effect_fn(has_artifact_effect)  # must be before movement.setup()
 	movement.setup(map, self)
 	visual.setup(map, self)
@@ -144,6 +156,10 @@ func get_army_for_battle() -> Array[UnitStack]:
 
 func apply_battle_results(surviving_army: Array[UnitStack]) -> void:
 	army.apply_battle_results(surviving_army)
+
+
+func get_army() -> HeroArmyController:
+	return army
 
 
 # ==================== PASSTHROUGH — resources ====================
@@ -248,7 +264,7 @@ func get_daily_movement_points() -> float:
 
 ## Для UI-панелей. По умолчанию — null (аватар не задан, используется эмодзи 🧙)
 func get_avatar_texture() -> Texture2D:
-	return null
+	return visual.get_avatar_texture() if visual != null else null
 
 
 func _on_time_update(step_cost: float) -> void:

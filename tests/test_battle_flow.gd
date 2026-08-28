@@ -22,29 +22,28 @@ func test_flow_initial_inactive() -> void:
 func test_battle_started_signal() -> void:
 	var flow := _BattleFlow.new()
 	flow.name = "TestFlow"
-	var received := false
-	flow.battle_started.connect(func(): received = true)
+	# Lambda захватывает локальные переменные по значению — для мутации нужен ссылочный holder
+	var state: Array = [false]
+	flow.battle_started.connect(func(): state[0] = true)
 	# Не можем запустить полноценный бой без сцены, но проверяем сигнал
 	flow.battle_started.emit()
-	assert_true(received, "battle_started emitted")
+	assert_true(state[0], "battle_started emitted")
 
 func test_battle_completed_signal() -> void:
 	var flow := _BattleFlow.new()
 	flow.name = "TestFlow2"
-	var winner := ""
-	var atk_count := -1
-	var def_count := -1
+	var result: Dictionary = {"winner": BattleState.Side.DEFENDER, "atk": -1, "def": -1}
 	flow.battle_completed.connect(func(w: BattleState.Side, a: Array, d: Array):
-		winner = w
-		atk_count = a.size()
-		def_count = d.size()
+		result["winner"] = w
+		result["atk"] = a.size()
+		result["def"] = d.size()
 	)
 	var atk: Array = []
 	var def: Array = []
 	flow.battle_completed.emit(BattleState.Side.ATTACKER, atk, def)
-	assert_eq(winner, BattleState.Side.ATTACKER, "winner is attacker")
-	assert_eq(atk_count, 0, "empty attacker survivors")
-	assert_eq(def_count, 0, "empty defender survivors")
+	assert_eq(result["winner"], BattleState.Side.ATTACKER, "winner is attacker")
+	assert_eq(result["atk"], 0, "empty attacker survivors")
+	assert_eq(result["def"], 0, "empty defender survivors")
 
 # ==================== ЗАЩИТА ОТ ДВОЙНОГО ЗАПУСКА ====================
 

@@ -1,26 +1,18 @@
 extends SceneTree
 ## Simple headless test runner.
 
+const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
+
 const SKIP_FILES := [
 	"test_base.gd",
-	"test_runner.gd",
 	"run_tests.gd",
-	"test_socket_protocol.gd",
-	"test_capacity.gd",          # Type inference errors in headless
-	"test_time_system.gd",       # Type inference errors in headless
-	"test_artifact_system.gd",   # Headless autoload scope issue
-	"test_keys_matrix.gd",       # Headless autoload scope issue
-	"test_saltpeter.gd",         # Headless autoload scope issue
-	"test_basic_resources.gd",   # Headless autoload scope issue
-	"test_battle_coordinator.gd",# WorldBattleCoordinator deps fail in headless
-	"test_glory_tracker.gd",     # GloryTracker -> CityBalance autoload missing in headless
-	"test_pop_unit.gd",          # PopUnit enum references fail in headless preload
-	"test_season.gd",            # Season -> CityBalance autoload missing; preloads fail silently in headless
-	"test_borough_rules.gd",     # BoroughRules -> City.Faction autoload missing in headless
-	"test_city_model.gd",        # City -> CityBalance/HexUtils autoloads missing in headless
-	"test_city_manager.gd",      # CityManager -> City/GloryTracker autoloads missing
-	"test_battle_flow.gd",       # BattleFlow -> UnitStack type missing in headless
-	"test_card_spells.gd",       # Old card spell tests (superseded by test_card_spell_system.gd)
+	# Автономные SceneTree-раннеры: запускаются сами через `godot -s`,
+	# а не как тестовые файлы в главном раннере.
+	# (test_runtime_integration асинхронен: ждёт 4с инициализации мира —
+	#  главный раннер не умеет await-ить тесты, а Timer в его контексте не стартует)
+	"test_runtime_integration.gd",
+	"test_validation_runner.gd",
+	"debug_load.gd",
 ]
 
 func _should_skip(file: String) -> bool:
@@ -31,33 +23,64 @@ func _should_skip(file: String) -> bool:
 
 
 func _init() -> void:
-	print("=== Test Runner ===")
-	var dir := DirAccess.open("res://tests")
-	if dir == null:
-		printerr("Cannot open tests/ directory")
-		call_deferred("quit")
-		return
+	call_deferred("_run_tests")
 
+func _run_tests() -> void:
+	print("=== Test Runner ===")
+
+	# Инициализация ServiceContainer для headless-тестов
+	var services := ServiceContainer.new()
+	var root := get_root()
+	services.units = root.get_node_or_null("Units")
+	services.resources = root.get_node_or_null("Resources")
+	services.spells = root.get_node_or_null("Spells")
+	services.artifacts = root.get_node_or_null("Artifacts")
+	services.card_spells = root.get_node_or_null("CardSpells")
+	ServiceContainer.setup_global(services)
+
+	var dir := DirAccess.open("res://tests")
+	# Рекурсивный скан: tests/ + подпапки (tests/unit/ и т.д.)
+	var total: Array[int] = [0, 0]
+	_run_dir("res://tests", total)
+
+	# Финальная очистка: 2 кадра для завершения всех queue_free()
+	await process_frame
+	await process_frame
+
+	print("=== Total: %d passed, %d failed ===" % [total[0], total[1]])
+	if total[1] > 0:
+		printerr("SOME TESTS FAILED")
+		call_deferred("quit", 1)
+	else:
+		print("ALL TESTS PASSED")
+		call_deferred("quit", 0)
+
+func _run_dir(dir_path: String, total: Array[int]) -> void:
+	var dir := DirAccess.open(dir_path)
+	if dir == null:
+		return
 	dir.list_dir_begin()
-	var file: String = dir.get_next()
-	var total_passed := 0
-	var total_failed := 0
-	while file != "":
-		if file.begins_with("test_") and file.ends_with(".gd") and not _should_skip(file):
-			var path: String = "res://tests/%s" % file
-			var script: Script = load(path)
+	var entry: String = dir.get_next()
+	while entry != "":
+		var full_path: String = dir_path.path_join(entry)
+		if dir.current_is_dir():
+			if entry != ".git" and entry != ".godot":
+				_run_dir(full_path, total)
+		elif entry.begins_with("test_") and entry.ends_with(".gd") and not _should_skip(entry):
+			var script: Script = load(full_path)
 			if script == null or not script.can_instantiate():
-				print("[SKIP] %s (uninstantiable)" % file)
+				print("[SKIP] %s (uninstantiable)" % full_path)
 				print("---")
 			else:
 				var instance: Object = script.new()
 				if instance == null:
-					print("[SKIP] %s (instantiation failed)" % file)
+					print("[SKIP] %s (instantiation failed)" % full_path)
 					print("---")
 				else:
-					print("[RUN] %s" % file)
+					print("[RUN] %s" % full_path)
 					if instance.has_method("before_each"):
 						instance.call("before_each")
+					var had_internal_counters: bool = instance.get("_failed") != null
 
 					# Collect unique test method names
 					var test_methods: Array[String] = []
@@ -68,13 +91,12 @@ func _init() -> void:
 							seen[method_info.name] = true
 							test_methods.append(method_info.name)
 
+					var method_exceptions: int = 0
 					for method_name in test_methods:
 						var err = instance.call(method_name)
 						if err is int and err != OK:
-							printerr("[ERROR] Exception in %s.%s" % [file, method_name])
-							total_failed += 1
-						else:
-							total_passed += 1
+							printerr("[ERROR] Exception in %s.%s" % [full_path, method_name])
+							method_exceptions += 1
 						if instance.has_method("before_each"):
 							instance.call("before_each")
 
@@ -82,18 +104,20 @@ func _init() -> void:
 						var results: String = instance.get_results()
 						print(results)
 
+					# Источники истины: внутренние счётчики test_base (_passed/_failed);
+					# fallback — количество исключений методов (для файлов без test_base).
+					if had_internal_counters:
+						total[0] += int(instance.get("_passed"))
+						total[1] += int(instance.get("_failed")) + method_exceptions
+					else:
+						total[0] += test_methods.size() - method_exceptions
+						total[1] += method_exceptions
+
 					# Очистка после теста
 					_cleanup_instance(instance)
 					print("---")
-		file = dir.get_next()
+		entry = dir.get_next()
 	dir.list_dir_end()
-
-	# Финальная очистка: 2 кадра для завершения всех queue_free()
-	await process_frame
-	await process_frame
-
-	print("=== Total: %d passed, %d failed ===" % [total_passed, total_failed])
-	call_deferred("quit")
 
 func _cleanup_instance(instance: Object) -> void:
 	if instance == null:

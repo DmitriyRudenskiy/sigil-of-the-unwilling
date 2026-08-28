@@ -79,17 +79,17 @@ func test_hidden_vs_basic() -> void:
 	assert_false(Resources.is_hidden_resource(&"stone"), "stone not hidden")
 
 func test_get_hidden_ids() -> void:
-	var ids = Resources.get_resource_hidden_resource_ids()
+	var ids = Resources.get_hidden_resource_ids()
 	assert_eq(ids.size(), 11, "11 hidden resources")
 
 func test_get_all() -> void:
-	var all = Resources.get_resource_all()
+	var all = Resources.get_all()
 	assert_eq(all.size(), 13, "13 total")
 
 func test_biome_grass() -> void:
-	var defs = Resources.get_resource_by_biome("grass")
+	var defs = Resources.get_by_biome("grass")
 	assert_true(defs.size() >= 3, "grass has oak, silver, wood")
 
 func test_biome_snow() -> void:
-	var defs = Resources.get_resource_by_biome("snow")
+	var defs = Resources.get_by_biome("snow")
 	assert_true(defs.size() >= 3, "snow has limonite, coal, gold_ore")

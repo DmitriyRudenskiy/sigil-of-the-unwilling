@@ -37,6 +37,16 @@ var _config := ConfigFile.new()
 func _ready() -> void:
 	_load()
 	_apply_audio()
+	apply_display_mode()
+
+
+func apply_display_mode() -> void:
+	# РФ7-1: сохранённый полноэкранный режим реально применяется
+	if OS.has_feature("headless"):
+		return
+	DisplayServer.window_set_mode(
+		DisplayServer.WINDOW_MODE_FULLSCREEN if fullscreen
+		else DisplayServer.WINDOW_MODE_WINDOWED)
 
 
 func get_zoom() -> float:

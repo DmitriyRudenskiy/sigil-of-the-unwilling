@@ -15,6 +15,12 @@ var _start_time: float = 0.0
 
 func _init() -> void:
 	print("\n🧪 Runtime Integration Test")
+	# Отложенный старт: в -s-режиме _init выполняется до инициализации autoloads,
+	# а скрипты мира ссылаются на них (GameEventBus, Units и т.д.) и не компилируются.
+	call_deferred("_run")
+
+
+func _run() -> void:
 	print("Loading world scene: %s ..." % WORLD_SCENE)
 	
 	_start_time = Time.get_ticks_msec() / 1000.0
@@ -32,27 +38,14 @@ func _init() -> void:
 		quit()
 		return
 	
-	# Подключаем сигнал scene_tree_changed для перехвата ошибок
-	get_root().connect("scene_tree_changed", _on_scene_tree_changed, CONNECT_DEFERRED)
-	
 	# Добавляем мир в дерево сцен
 	get_root().add_child(world)
 	
-	# Даём сцене время на _ready() и инициализацию
+	# Даём сцене время на _ready() и инициализацию.
+	# create_timer вместо Timer: в момент _init дерево ещё не готово к Timer.start().
 	print("⏳ Waiting %ss for world initialization..." % MAX_SECONDS)
-	
-	# Используем Timer для отложенной проверки
-	var timer: Timer = Timer.new()
-	timer.wait_time = MAX_SECONDS
-	timer.one_shot = true
-	timer.timeout.connect(_on_test_timeout, CONNECT_DEFERRED)
-	add_child(timer)
-	timer.start()
-
-
-func _on_scene_tree_changed() -> void:
-	# Заглушка — можно логировать изменения дерева
-	pass
+	await create_timer(MAX_SECONDS).timeout
+	_on_test_timeout()
 
 
 func _on_test_timeout() -> void:
@@ -73,12 +66,12 @@ func _on_test_timeout() -> void:
 	else:
 		print(" ✅ World node exists")
 	
-	# Проверяем, что есть WorldController
-	var wc: Node = world_node.get_node_or_null("WorldController") if world_node else null
-	if wc != null:
-		print(" ✅ WorldController found")
+	# WorldController — скрипт корневого узла World (а не дочерний узел)
+	var wc_script: Script = world_node.get_script() if world_node else null
+	if wc_script != null and wc_script.resource_path == "res://scripts/WorldController.gd":
+		print(" ✅ WorldController script attached to World root")
 	else:
-		print(" ⚠️  WorldController not found (may use different name)")
+		print(" ⚠️  WorldController script missing on World root")
 	
 	# Проверяем наличие UI
 	if world_node:

@@ -347,7 +347,8 @@ func test_resolve_condition_not_met() -> void:
 	var spell = registry.get_spell(&"deathstrike")
 	var player: Dictionary = {"current_power": 10}
 	var result: Dictionary = _Resolver.resolve(spell, null, player, null)
-	assert_true(result["result"] in ["success", "condition_not_met"], "resolved")
+	# Без цели HARD_REMOVAL возвращает no_target — это корректное поведение.
+	assert_true(result["result"] in ["success", "condition_not_met", "no_target"], "resolved")
 
 func test_resolve_all_16_templates() -> void:
 	var templates := [

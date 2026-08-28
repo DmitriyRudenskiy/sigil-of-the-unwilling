@@ -36,7 +36,7 @@ func play_sfx(path: String) -> void:
 	if stream == null:
 		return
 	var p: AudioStreamPlayer = sfx_players[_rr % SFX_POOL]
-	_rr += 1
+	_rr = (_rr + 1) % SFX_POOL
 	p.stream = stream
 	p.play()
 

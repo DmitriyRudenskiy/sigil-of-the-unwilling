@@ -34,15 +34,26 @@ static func extract_hexes_from_screenshot(img: Image, hex_size: int, orientation
 static func apply_hex_mask(img: Image, size: int) -> void:
     var cx := float(img.get_width()) / 2.0
     var cy := float(img.get_height()) / 2.0
-    var r := minf(cx, cy) * 0.98
+    # Tile geometry: pointy-top, width = 2*apothem, height = 2*circumradius.
+    # min(cx, cy) is the apothem (half width); 0.98 leaves a 2% anti-bleed margin.
+    var apothem := minf(cx, cy) * 0.98
+    var r := apothem * 2.0 / SQRT3  # circumradius
     for y in img.get_height():
         for x in img.get_width():
             var px := float(x) - cx + 0.5
             var py := float(y) - cy + 0.5
-            # Pointy top hex math
-            var q := (SQRT3 / 3.0 * px - 1.0 / 3.0 * py) / r
-            var s := (2.0 / 3.0 * py) / r
-            if maxf(absf(q), maxf(absf(s), absf(-q - s))) > 1.0:
+            var apy := absf(py)
+            var inside := apy <= r
+            if inside:
+                # Pointy-top: flat sides |px| <= apothem near the equator,
+                # tapering to the top/bottom vertices: |px| <= sqrt(3)*(r - |py|).
+                var max_px: float
+                if apy <= r / 2.0:
+                    max_px = apothem
+                else:
+                    max_px = SQRT3 * (r - apy)
+                inside = absf(px) <= max_px
+            if not inside:
                 img.set_pixel(x, y, Color(0, 0, 0, 0))
 
 static func compute_dhash(img: Image) -> int:
@@ -61,9 +72,11 @@ static func compute_dhash(img: Image) -> int:
     return hash_val
 
 static func hamming_distance(h1: int, h2: int) -> int:
+    # Bounded loop: h1/h2 are signed 64-bit, so x >>= 1 on a negative value
+    # (arithmetic shift) never reaches 0 — a while-loop would hang.
     var x := h1 ^ h2
     var count := 0
-    while x != 0:
+    for i in 64:
         count += x & 1
-        x >>= 1
+        x = x >> 1
     return count

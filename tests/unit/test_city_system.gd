@@ -56,11 +56,16 @@ func test_switch_takes_full_turn() -> void:
 func test_growth_births_follow_threshold() -> void:
 	var c := _city()
 	c.tile_yield_fn = _food_yield
+	# ТЗ 4.1: доход дают только клетки рабочих (и соседи районов) —
+	# 1 рабочий (100 еды с его клетки) + 1 последователь (N=2, без дохода)
 	c.add_followers(2)
+	var u: PopUnit = c.pop[0]
+	c.request_switch(u.uid, PopUnit.State.WORKER, c.first_free_worker_tile())
 	var r := c.process_turn(1)
-	# Порог N=2: 5×2^2.75 ≈ 33.64 → 1 рождение; N=3: ≈ 102.5 > остатка 66.4
+	# Порог N=2: 5×2^2.75 ≈ 33.64 → 1 рождение; N=3: ≈ 102.5 > остатка 65.4
+	# Склад = 100 (клетка рабочего) − 1 (еда рабочего) − 33.64 (рождение)
 	assert_eq(r.births, 1, "one birth")
-	assert_almost_eq(c.food_stockpile, FOOD_PER_TILE - 5.0 * pow(2.0, 2.75), 0.01, "food stockpile after birth")
+	assert_almost_eq(c.food_stockpile, FOOD_PER_TILE - 1.0 - 5.0 * pow(2.0, 2.75), 0.01, "food stockpile after birth")
 
 
 func test_cycle_inflow_summer_with_glory_and_temple() -> void:
@@ -169,8 +174,8 @@ func test_worker_switch_invalidates_yield() -> void:
 	var c := _city()
 	c.tile_yield_fn = _food_yield
 	c.add_followers(1)
-	var y0 := c.get_yield()[&"food"]
+	var y0: float = c.get_yield()[&"food"]
 	c.request_switch(c.pop[0].uid, PopUnit.State.WORKER, c.first_free_worker_tile())
 	c.process_turn(1)  # applies pending switch
-	var y1 := c.get_yield()[&"food"]
+	var y1: float = c.get_yield()[&"food"]
 	assert_true(y1 > y0, "yield must rise after worker placed (cache invalidated)")

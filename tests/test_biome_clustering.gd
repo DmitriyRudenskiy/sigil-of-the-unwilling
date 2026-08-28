@@ -1,5 +1,8 @@
 extends SceneTree
 
+var _passed: int = 0
+var _failed: int = 0
+
 const Clusterer = preload("res://tools/texture_slicer/BiomeClusterer.gd")
 
 func _init() -> void:
@@ -32,4 +35,6 @@ func _init() -> void:
     else:
         print("  FAILURE: Clustering failed")
         
+    _failed = 0 if success else 1
+    _passed = 1 if success else 0
     quit(0)

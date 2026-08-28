@@ -9,6 +9,7 @@ extends RefCounted
 ##   var spell_result := BattleActionResolver.apply_spell(state, id, caster, target, ...)
 
 const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
+const ServiceLocator = preload("res://scripts/core/ServiceLocator.gd")
 const BattleDamageResolver = preload("res://scripts/battle/BattleDamageResolver.gd")
 
 
@@ -81,15 +82,16 @@ static func apply_spell(
 	rng: RandomNumberGenerator,
 	registry: Node = null  # SpellRegistry; null → ServiceContainer.current.spells
 ) -> Dictionary:
-	if caster == null or target == null or not caster.is_alive() or not target.is_alive():
+	var is_res := spell_id == &"resurrection"
+	if caster == null or target == null or not caster.is_alive():
+		return {"result": "invalid_target"}
+	if is_res and target.is_alive():
+		return {"result": "invalid_target"}
+	if not is_res and not target.is_alive():
 		return {"result": "invalid_target"}
 
-	# Инъекция реестра: параметр → глобальный контейнер → autoload
-	var spell_registry: Node = registry
-	if spell_registry == null and ServiceContainer.current != null:
-		spell_registry = ServiceContainer.current.spells
-	if spell_registry == null:
-		spell_registry = Spells  # fallback: autoload
+	# Инъекция реестра: параметр → ServiceLocator → autoload
+	var spell_registry: Node = ServiceLocator.resolve(registry, &"spells")
 
 	var result := SpellCaster.cast(
 		spell_id, target, caster_hero_bonus, target_hero_bonus, rng, spell_registry
@@ -102,9 +104,18 @@ static func apply_spell(
 			target.set_count(target.get_count() - kills)
 			if target.get_count() <= 0:
 				state.kill_unit(target)
-		# Обработка исцеления (заглушка)
+		# Обработка исцеления
 		if result.has("heal") and int(result.get("heal", 0)) > 0:
-			pass
+			var hp: int = maxi(1, int(target.get_hp()))
+			var healed := mini(int(result.get("heal", 0)) / hp, target.max_count - target.get_count())
+			if healed > 0:
+				target.set_count(target.get_count() + healed)
+				result["healed"] = healed
+		# Обработка воскрешения (РФ4-2)
+		if result.has("revive_count"):
+			target.set_count(int(result["revive_count"]))
+			state.revive_unit(target)
+			result["revived"] = true
 
 	state.invalidate_board_cache()
 	state.check_end()
@@ -180,7 +191,6 @@ static func _try_rebirth(
 		return false
 	def.already_reborn = true
 	def.set_count(max(1, int(def.max_count * 0.5)))
-	def.alive = true
-	state._unit_grid.get(def.side, {})[def.cell] = def
+	state.revive_unit(def)
 	result["rebirth"] = true
 	return true

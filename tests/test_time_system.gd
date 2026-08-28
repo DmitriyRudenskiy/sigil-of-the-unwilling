@@ -3,7 +3,7 @@ extends "res://tests/test_base.gd"
 
 const _TimeSystem = preload("res://scripts/data/TimeSystem.gd")
 
-var ts
+var ts: TimeSystem
 
 
 func before_each() -> void:
@@ -69,9 +69,10 @@ func test_spend_incremental() -> void:
 
 
 func test_wait_hours() -> void:
+	# 3.6 ч / 1.8 ч за MP = 2.0 MP; 6.0 + 2.0 * 1.8 = 9.6 (та же формула, что в остальных тестах)
 	var cost := ts.wait_hours(3.6)
 	assert_eq(cost, 2.0, "wait cost")
-	assert_eq(ts.current_hour, 12.6, "wait hour")
+	assert_eq(ts.current_hour, 9.6, "wait hour")
 
 
 func test_wait_until_noon_already_past() -> void:

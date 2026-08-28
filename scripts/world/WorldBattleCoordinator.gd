@@ -8,6 +8,7 @@ class_name WorldBattleCoordinator
 ## headless-тестирование через preload().
 
 const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
+const ServiceLocator = preload("res://scripts/core/ServiceLocator.gd")
 const UnitStack = preload("res://scripts/unit_stack.gd")
 
 ## Сигналы для декомпозиции (мокируются в тестах вместо реального UI).
@@ -77,16 +78,28 @@ func _create_battle_flow() -> void:
 # ==================== КОНТАКТ С ВРАГОМ ====================
 
 func check_enemy_contact(cell: Vector2i) -> void:
-	if map_gen == null or not map_gen.has_method("enemy_stacks"):
+	if map_gen == null:
 		return
-	var stacks: Dictionary = map_gen.get("enemy_stacks")
+	var stacks: Variant = map_gen.get("enemy_stacks")
+	if not (stacks is Dictionary):
+		return
 	if stacks.has(cell):
-		_start_battle(stacks[cell], cell)
+		_start_battle(_as_unit_stack_array(stacks[cell]), cell)
 		return
 	for nb in HexUtils.get_all_neighbors(cell):
 		if stacks.has(nb):
-			_start_battle(stacks[nb], nb)
+			_start_battle(_as_unit_stack_array(stacks[nb]), nb)
 			return
+
+
+## enemy_stacks хранится в Dictionary как обычный Array — приводим к типизированному.
+static func _as_unit_stack_array(v: Variant) -> Array[UnitStack]:
+	var out: Array[UnitStack] = []
+	if v is Array:
+		for s in v:
+			if s is UnitStack:
+				out.append(s)
+	return out
 
 
 func _start_battle(enemy_army: Array[UnitStack], enemy_cell: Vector2i) -> void:
@@ -101,13 +114,14 @@ func _start_battle(enemy_army: Array[UnitStack], enemy_cell: Vector2i) -> void:
 	if spawner != null and spawner.has_method("get_enemy_defender_bonus"):
 		defender_bonus = spawner.call("get_enemy_defender_bonus")
 
-	var attacker_army: Array[UnitStack] = hero.call("get_army_for_battle") if hero.has_method("get_army_for_battle") else []
+	var attacker_army_raw: Variant = hero.call("get_army_for_battle") if hero.has_method("get_army_for_battle") else []
+	var attacker_army: Array[UnitStack] = _as_unit_stack_array(attacker_army_raw)
 	var artifact_mods: Dictionary = {}
-	if hero.has_method("inventory"):
-		var inv = hero.call("inventory")
-		if inv != null and inv.has_method("get_total_modifiers"):
-			artifact_mods = inv.call("get_total_modifiers")
+	var inv: Variant = hero.get("inventory")
+	if inv != null and inv.has_method("get_total_modifiers"):
+		artifact_mods = inv.call("get_total_modifiers")
 
+	var hero_magic = hero.get("magic") if hero != null else null
 	battle_flow.start_battle(
 		attacker_army,
 		enemy_army,
@@ -115,7 +129,8 @@ func _start_battle(enemy_army: Array[UnitStack], enemy_cell: Vector2i) -> void:
 		defender_bonus,
 		artifact_mods,
 		{},
-		rng.randi()
+		rng.randi(),
+		hero_magic
 	)
 
 
@@ -179,24 +194,21 @@ func _apply_results(
 	if hero.has_method("apply_battle_results"):
 		hero.call("apply_battle_results", surv_atk)
 
-	## Fallback при полном уничтожении армии.
-	if hero.has_method("get_army"):
-		var army_ref = hero.call("get_army")
-		if army_ref != null and army_ref.has_method("get_army"):
-			var army_list = army_ref.call("get_army")
-			if army_list.is_empty():
-				var fallback: Array[UnitStack] = []
+	## Fallback при полном уничтожении армии (РФ5-2: типизированный доступ)
+	var army_ref: Variant = hero.get("army")
+	if army_ref != null:
+		if army_ref is HeroArmyController:
+			if army_ref.army.is_empty():
 				var stack = _make_fallback_stack()
 				if stack != null:
-					fallback.append(stack)
-				if army_ref.has_method("apply_battle_results"):
-					army_ref.call("apply_battle_results", fallback)
-				GameLogger.hero("Hero routed: awarded minimal stack")
+					army_ref.apply_battle_results([stack])
+					GameLogger.hero("Hero routed: awarded minimal stack")
 
 	if winner == BattleState.Side.ATTACKER:
-		if map_gen != null and map_gen.has_method("enemy_stacks"):
-			var stacks: Dictionary = map_gen.get("enemy_stacks")
-			stacks.erase(_pending_enemy_cell)
+		if map_gen != null:
+			var stacks: Variant = map_gen.get("enemy_stacks")
+			if stacks is Dictionary:
+				stacks.erase(_pending_enemy_cell)
 		if spawner != null and spawner.has_method("remove_enemy_at"):
 			spawner.call("remove_enemy_at", _pending_enemy_cell)
 		GameLogger.battle("Enemy defeated at %s" % _pending_enemy_cell)
@@ -217,38 +229,24 @@ func _apply_results(
 
 func _make_fallback_stack() -> UnitStack:
 	## Безопасный вызов без жёсткой зависимости от autoload Units.
-	var units_reg: Node = _get_units_registry()
+	var units_reg: Node = ServiceLocator.resolve(null, &"units")
 	if units_reg != null and units_reg.has_method("make_fixed_stack"):
 		return units_reg.make_fixed_stack("swordsmen", 10)
 	# Fallback: создать стек вручную
 	return UnitStack.new(null, 10)
 
-func _get_units_registry() -> Node:
-	if _services != null and _services.units != null:
-		return _services.units
-	if ServiceContainer.current != null and ServiceContainer.current.units != null:
-		return ServiceContainer.current.units
-	return Units  # fallback: autoload
-
-func _get_artifacts_registry() -> Node:
-	if _services != null and _services.artifacts != null:
-		return _services.artifacts
-	if ServiceContainer.current != null and ServiceContainer.current.artifacts != null:
-		return ServiceContainer.current.artifacts
-	return Artifacts  # fallback: autoload
-
 
 func _try_artifact_drop() -> void:
-	if hero == null or not hero.has_method("inventory"):
+	if hero == null:
 		return
-	var inv = hero.call("inventory")
+	var inv: Variant = hero.get("inventory")
 	if inv == null or not inv.has_method("add_to_backpack"):
 		return
 	if rng.randf() < GameSettings.MONSTER_DROP_CHANCE:
-		var art_reg: Node = _get_artifacts_registry()
-		var arts := art_reg.get_by_rarity(Artifact.Rarity.MINOR)
+		var art_reg: Node = ServiceLocator.resolve(null, &"artifacts")
+		var arts: Array[Artifact] = art_reg.get_by_rarity(Artifact.Rarity.MINOR)
 		if arts.size() > 0:
-			var drop := arts[rng.randi() % arts.size()]
+			var drop: Artifact = arts[rng.randi() % arts.size()]
 			if inv.call("add_to_backpack", drop):
 				GameLogger.world("Monster drop: %s" % drop.display_name)
 			else:

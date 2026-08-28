@@ -32,7 +32,8 @@ func spend_move_points(amount: float) -> void:
 func get_period_name() -> String:
 	if current_hour >= 11.0 and current_hour < 13.0:
 		return "noon"
-	if current_hour >= 21.0 and current_hour < 24.0:
+	# 24.0 (конец дня после clamp) тоже ночь.
+	if current_hour >= 21.0 and current_hour <= 24.0:
 		return "night"
 	return "day"
 
@@ -42,7 +43,8 @@ func is_noon() -> bool:
 
 
 func is_night() -> bool:
-	return current_hour >= 21.0 and current_hour < 24.0
+	# 24.0 (конец дня после clamp) тоже ночь.
+	return current_hour >= 21.0 and current_hour <= 24.0
 
 
 func get_hours_until(target_hour: float) -> float:

@@ -6,7 +6,7 @@ const _City = preload("res://scripts/city/City.gd")
 const _CityBalance = preload("res://scripts/city/CityBalance.gd")
 const _BuildingDefs = preload("res://scripts/data/BuildingDefs.gd")
 
-var manager: Node
+var manager: CityManager
 var capital: RefCounted
 
 func before_each() -> void:

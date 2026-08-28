@@ -1,4 +1,7 @@
 extends SceneTree
+
+var _passed: int = 0
+var _failed: int = 0
 ## Тест: MapGenerator сохраняет seed_value до generate().
 
 # Предзагрузка зависимостей, чтобы class_name резолвились в headless-режиме
@@ -35,6 +38,9 @@ func _init() -> void:
 		failed += 1
 	else:
 		print("MapGenerator map_height persistence passed")
+
+	_failed = failed
+	_passed = 3 - failed
 
 	await process_frame
 	quit(1 if failed > 0 else 0)

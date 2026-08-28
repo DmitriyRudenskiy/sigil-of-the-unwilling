@@ -17,7 +17,7 @@ var battle_over := false
 # Стороны в бою
 enum Side { NONE, ATTACKER, DEFENDER }
 
-var battle_winner: Side = Side.NONE
+var battle_winner: BattleState.Side = Side.NONE
 var attacker_hero_bonus: Dictionary[StringName, int] = {
     &"attack": 0,
     &"defense": 0,
@@ -52,7 +52,7 @@ const BH := 11
 class BattleUnit extends RefCounted:
 	var stack: UnitStack
 	var cell := Vector2i(-1, -1)
-	var side: Side = Side.ATTACKER
+	var side: BattleState.Side = Side.ATTACKER
 	var alive := true
 	var has_moved := false
 	var defending := false
@@ -177,6 +177,9 @@ func place_army(
 func _kill_unit(unit: BattleUnit) -> void:
 	if not unit.alive: return
 	unit.alive = false
+	# Инвариант: мёртвый юнит всегда имеет count = 0 (воскрешение, сериализация
+	# и подсветка опираются на это; исходный состав хранится в max_count).
+	unit.set_count(0)
 	if unit.side == Side.ATTACKER: _attacker_alive_count -= 1
 	else: _defender_alive_count -= 1
 	_unit_grid.get(unit.side, {}).erase(unit.cell)
@@ -185,6 +188,21 @@ func _kill_unit(unit: BattleUnit) -> void:
 ## Публичная обёртка для вызова из DamageResolver
 func kill_unit(unit: BattleUnit) -> void:
 	_kill_unit(unit)
+
+## Восстановить убитого юнита (для rebirth/воскрешения)
+func revive_unit(unit: BattleUnit) -> void:
+	if unit == null: return
+	if not unit.alive:
+		unit.alive = true
+		# Если численность не установлена явно (вызовер сам сделал set_count
+		# до revive_unit — rebirth 50%, resurrection revive_count),
+		# восстанавливаем полный состав (max_count).
+		if unit.get_count() <= 0:
+			unit.set_count(unit.max_count)
+		if unit.side == Side.ATTACKER: _attacker_alive_count += 1
+		else: _defender_alive_count += 1
+	_unit_grid.get(unit.side, {})[unit.cell] = unit
+	invalidate_board_cache()
 
 func _apply_artifact_effects(units: Array[BattleUnit], mods: Dictionary) -> void:
 	if mods.is_empty():
@@ -320,7 +338,7 @@ func get_turn_info() -> String:
 
 
 # ==================== ПОИСК ЮНИТОВ ====================
-func get_unit_at(cell: Vector2i, side: Side) -> BattleUnit:
+func get_unit_at(cell: Vector2i, side: BattleState.Side) -> BattleUnit:
 	if not _unit_grid.has(side):
 		return null
 	var u = _unit_grid[side].get(cell, null)
@@ -336,7 +354,7 @@ func _rebuild_unit_grid() -> void:
 			_unit_grid[Side.DEFENDER][u.cell] = u
 
 
-func get_units_by_side(side: Side) -> Array[BattleUnit]:
+func get_units_by_side(side: BattleState.Side) -> Array[BattleUnit]:
 	return attacker_units if side == Side.ATTACKER else defender_units
 
 
@@ -473,12 +491,12 @@ func do_skip(unit: BattleUnit) -> void:
 		unit.has_moved = true
 
 
-func force_end(winner: Side) -> void:
+func force_end(winner: BattleState.Side) -> void:
 	battle_over = true
 	battle_winner = winner
 
 # ==================== ПРОВЕРКА КОНЦА БОЯ ====================
-func check_end() -> Side:
+func check_end() -> BattleState.Side:
 	if battle_over:
 		return battle_winner
 
@@ -490,7 +508,7 @@ func check_end() -> Side:
 	return battle_winner
 
 
-func get_survivors(side: Side) -> Array[UnitStack]:
+func get_survivors(side: BattleState.Side) -> Array[UnitStack]:
 	var r: Array[UnitStack] = []
 	var units := attacker_units if side == Side.ATTACKER else defender_units
 	for u in units:
@@ -499,7 +517,7 @@ func get_survivors(side: Side) -> Array[UnitStack]:
 	return r
 
 
-func get_retreat_survivors(side: Side) -> Array[UnitStack]:
+func get_retreat_survivors(side: BattleState.Side) -> Array[UnitStack]:
 	var all_survivors: Array[UnitStack] = []
 	var units := get_units_by_side(side)
 
@@ -512,10 +530,10 @@ func get_retreat_survivors(side: Side) -> Array[UnitStack]:
 			)
 			all_survivors.append(stack)
 
-	# Sort by count descending and keep top 2
+	# Sort by count descending and keep top N
 	all_survivors.sort_custom(func(a: UnitStack, b: UnitStack): return a.count > b.count)
 	var result: Array[UnitStack] = []
-	for i in min(2, all_survivors.size()):
+	for i in min(GameSettings.RETREAT_STACK_LIMIT, all_survivors.size()):
 		result.append(all_survivors[i])
 
 	return result

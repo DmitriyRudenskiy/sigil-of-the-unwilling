@@ -1,4 +1,7 @@
 extends SceneTree
+
+var _passed: int = 0
+var _failed: int = 0
 ## Status effects: duration, stun skip, cure clear, debuff check.
 
 const _StatusEffects = preload("res://scripts/data/StatusEffects.gd")
@@ -18,6 +21,9 @@ func _init() -> void:
 		print("test_status_effects: 15/15 passed")
 	else:
 		printerr("test_status_effects: %d failed" % failed)
+	_failed = failed
+	_passed = 1 if failed == 0 else 0
+
 	await process_frame
 	quit(1 if failed > 0 else 0)
 

@@ -27,6 +27,7 @@ var _spellbook_panel: _SpellbookPanel = null
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS  # SettingsScreen inherits this
 	layer = 10
 	_build_ui()
 
@@ -106,8 +107,14 @@ func _build_ui() -> void:
 func _build_spellbook() -> void:
 	_spellbook_panel = _SpellbookPanel.new()
 	_spellbook_panel.visible = false
-	_spellbook_panel.spell_chosen.connect(func(id): spell_chosen.emit(id))
+	_spellbook_panel.spell_chosen.connect(func(id):
+		_spellbook_panel.visible = false
+		spell_chosen.emit(id))
 	add_child(_spellbook_panel)
+
+func close_spellbook() -> void:
+	if _spellbook_panel != null:
+		_spellbook_panel.visible = false
 
 
 func _build_top_panel() -> void:
@@ -163,7 +170,7 @@ func _build_bottom_bar() -> void:
 		{"text": "🛡️", "tooltip": "Защита", "callback": _on_defend, "action": true},
 		{"text": "⏳", "tooltip": "Пропуск хода", "callback": _on_skip, "action": true},
 		{"text": "▲", "tooltip": "Свернуть панель", "callback": _on_collapse, "action": false},
-		{"text": "📖", "tooltip": "Книга заклинаний", "callback": _on_spellbook, "action": false},
+		{"text": "📖", "tooltip": "Книга заклинаний", "callback": _on_spellbook, "action": true},
 		{"text": "⚙️", "tooltip": "Настройки", "callback": _on_settings, "action": true},
 	]
 
@@ -236,9 +243,10 @@ func _on_spellbook() -> void:
 	spellbook_requested.emit()
 
 
-func open_spellbook(_state: BattleState) -> void:
+func open_spellbook(_state: BattleState, magic: HeroMagic = null) -> void:
 	if _spellbook_panel == null: return
-	# TODO: pass hero and magic when available
+	if magic != null:
+		_spellbook_panel.setup(null, magic, null)
 	_spellbook_panel.visible = true
 
 

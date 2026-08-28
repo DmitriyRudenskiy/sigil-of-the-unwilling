@@ -17,7 +17,8 @@ func start_battle(
 	defender_bonus: Dictionary = {},
 	attacker_artifact_mods: Dictionary = {},
 	defender_artifact_mods: Dictionary = {},
-	obstacle_seed: int = -1
+	obstacle_seed: int = -1,
+	hero_magic: Node = null
 ) -> void:
 	if obstacle_seed < 0:
 		obstacle_seed = randi()
@@ -40,11 +41,12 @@ func start_battle(
 		defender_bonus,
 		attacker_artifact_mods,
 		defender_artifact_mods,
-		obstacle_seed
+		obstacle_seed,
+		hero_magic
 	)
 
 
-func _on_battle_finished(winner: String, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack], battle: Node) -> void:
+func _on_battle_finished(winner: BattleState.Side, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack], battle: Node) -> void:
 	_active = false
 	battle.queue_free()
 	RenderingServer.set_default_clear_color(Color(0.10, 0.10, 0.12))

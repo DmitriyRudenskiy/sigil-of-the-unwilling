@@ -56,10 +56,14 @@ func _find_bg() -> Texture2D:
 
 func _placeholder() -> ImageTexture:
 	var img := Image.create(1920, 1080, false, Image.FORMAT_RGBA8)
-	for y in 1080:
-		var t := float(y) / 1080.0
-		for x in 1920:
-			img.set_pixel(x, y, Color(lerpf(0.08, 0.02, t), lerpf(0.06, 0.01, t), lerpf(0.15, 0.05, t)))
+	img.fill(Color(0.05, 0.04, 0.10))
+	# Gradient via fill_rect strips (10 iterations instead of 2M pixels)
+	for i in 10:
+		var t := float(i) / 10.0
+		var y0 := int(t * 1080)
+		var h := 108
+		img.fill_rect(Rect2i(0, y0, 1920, h),
+			Color(lerpf(0.08, 0.02, t), lerpf(0.06, 0.01, t), lerpf(0.15, 0.05, t)))
 	return ImageTexture.create_from_image(img)
 
 
@@ -152,12 +156,13 @@ func _on_new_game() -> void:
 
 
 func _on_load_game() -> void:
-	var data := SaveManager.load_slot()
-	if data == null or not data.is_valid():
+	var result: Dictionary = SaveManager.load_slot()
+	var err: int = result.get("error", SaveManager.SaveError.FILE_NOT_FOUND)
+	if err != SaveManager.SaveError.OK:
 		_flash_lock()
-		print("[MainMenu] Load: no valid save")
+		GameLogger.warn("Load failed: %s" % SaveManager.error_to_string(err), "MainMenu")
 		return
-
+	var data: SaveData = result.get("data")
 	WorldPersistence.pending_save = data
 	get_tree().change_scene_to_file("res://scenes/World.tscn")
 

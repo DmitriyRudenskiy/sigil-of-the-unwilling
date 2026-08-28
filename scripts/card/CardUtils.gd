@@ -6,7 +6,8 @@ extends RefCounted
 ## CardTemplateEngine, and CardTemplateHandlers.
 
 
-static func has_method(obj: Variant, method: String) -> bool:
+## Имя has_method занято нативным Object.has_method — используем has_obj_method.
+static func has_obj_method(obj: Variant, method: String) -> bool:
 	if obj == null:
 		return false
 	if obj is Object:
@@ -25,6 +26,6 @@ static func has_attr(obj: Variant, attr: String) -> bool:
 static func get_id(obj: Variant) -> String:
 	if obj == null:
 		return ""
-	if has_method(obj, "get_id"):
+	if has_obj_method(obj, "get_id"):
 		return obj.get_id()
 	return str(obj)

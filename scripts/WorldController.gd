@@ -23,7 +23,7 @@ var _world_delta = null
 var _persistence = null
 var _resource_chain = null
 var _event_router: WorldEventRouter = null
-var _bootstrap_result = null
+var _bootstrap_result: WorldBootstrap.BootstrapResult = null
 
 
 func _ready() -> void:
@@ -68,7 +68,8 @@ func _ready() -> void:
 		_hero, _map_gen, _camera, _cities,
 		battle_coordinator, interaction_controller,
 		resource_node_manager, _ui_manager,
-		_world_delta, _persistence, _resource_chain
+		_world_delta, _persistence, _resource_chain,
+		_bootstrap_result.services.resources if _bootstrap_result.services != null else null
 	)
 
 	# Connect router outward signals
@@ -95,7 +96,8 @@ func _finit_hero(loaded_save: SaveData) -> void:
 func _finit_subsystems() -> void:
 	battle_coordinator.setup(
 		_hero, _map_gen, _bootstrap_result.spawner, _rng,
-		self, _ui_manager, _camera, _bootstrap_result.input_controller, _world_delta
+		self, _ui_manager, _camera, _bootstrap_result.input_controller, _world_delta,
+		_bootstrap_result.services
 	)
 	interaction_controller.setup(_hero, _bootstrap_result.spawner, _ui_manager.chest_dialog)
 	interaction_controller.connect_chest_signals()
@@ -140,10 +142,8 @@ func is_world_visible() -> bool:
 
 func do_end_turn() -> void:
 	# Triggered by SocketController remote command.
-	# The router handles the actual turn logic.
 	if _event_router:
-		# Direct call to router's handler to bypass signal
-		_event_router.call("_on_end_turn")
+		_event_router.request_end_turn()
 
 
 # ==================== SAVE / LOAD ====================
@@ -173,7 +173,7 @@ func apply_save(data: SaveData) -> void:
 
 
 func _build_load_context():
-	var ctx := WorldLoadContextScript.new()
+	var ctx := WorldLoadContext.new()
 	ctx.map_gen = _map_gen
 	ctx.spawner = _bootstrap_result.spawner
 	ctx.resource_node_manager = resource_node_manager

@@ -9,7 +9,9 @@ var count: int = 0
 
 
 func _init(p_stats: UnitStats = null, p_count: int = 0) -> void:
-    stats = p_stats
+    # Защитная копия: мутации рантайм-статов (артефакты в бою и т.п.)
+    # не должны просачиваться в общее определение реестра (РФ6-1).
+    stats = p_stats.copy() if p_stats != null else null
     count = p_count
 
 

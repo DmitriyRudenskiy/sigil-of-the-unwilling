@@ -16,7 +16,7 @@ var description: String = ""
 var flavor: String = ""
 var params: Dictionary = {}
 var condition: Dictionary = {}
-var secondary_effects: Array = []
+var secondary_effects: Array[Dictionary] = []
 
 static func from_dict(d: Dictionary):
 	var s = new()
@@ -33,7 +33,11 @@ static func from_dict(d: Dictionary):
 	s.condition = d.get("condition", {})
 	var se = d.get("secondary_effects", [])
 	if se is Array:
-		s.secondary_effects = Array(se)
+		var typed: Array[Dictionary] = []
+		for entry in se:
+			if entry is Dictionary:
+				typed.append(entry)
+		s.secondary_effects = typed
 	return s
 
 func to_dict() -> Dictionary:

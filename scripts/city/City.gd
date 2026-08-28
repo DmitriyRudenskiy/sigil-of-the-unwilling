@@ -103,6 +103,7 @@ func request_switch(p_uid: int, new_state: PopUnit.State, new_tile := Vector2i(-
 	if not u.request_switch(new_state, new_tile):
 		status_message.emit("Фигурка занята (уже переключается или закреплена за зданием)")
 		return false
+	_invalidate_exploited()
 	population_changed.emit()
 	return true
 

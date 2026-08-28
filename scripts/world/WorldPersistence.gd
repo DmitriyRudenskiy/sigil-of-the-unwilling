@@ -41,13 +41,17 @@ func save_game(hero: HeroController) -> bool:
 	save_data.hero = hero.serialize()
 	save_data.world = world_delta.serialize()
 
-	var ok := _save_manager.save_game(save_data)
-	if ok:
+	var err := _save_manager.save_game(save_data)
+	if err == SaveManager.SaveError.OK:
 		GameLogger.world("Game saved to %s" % SaveManager.SAVE_PATH)
-	return ok
+	return err == SaveManager.SaveError.OK
 
 
 func load_game() -> SaveData:
+	var result: Dictionary = _save_manager.load_game()
+	return result.get("data", null) as SaveData
+
+func load_game_with_error() -> Dictionary:
 	return _save_manager.load_game()
 
 

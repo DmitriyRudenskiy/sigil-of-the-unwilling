@@ -2,8 +2,22 @@ class_name ResourceChainService
 extends RefCounted
 ## Discovery / extraction key building + cache for resource nodes.
 
-var _cached_extraction_keys: Dictionary = {}
-var _extraction_cache_valid: bool = false
+const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
+const ServiceLocator = preload("res://scripts/core/ServiceLocator.gd")
+
+var _services: ServiceContainer = null
+# Кэш extraction-ключей: hero instance id → {"fp": fingerprint, "keys": Dictionary}.
+# Fingerprint покрывает все входы (живые юниты + навыки + инструменты),
+# поэтому кэш не может отдать устаревшие ключи; invalidate_extraction_cache()
+# — публичный сброс (world persistence / смена мира).
+var _extraction_cache: Dictionary = {}
+
+func setup(services: ServiceContainer) -> void:
+	_services = services
+
+
+func invalidate_extraction_cache() -> void:
+	_extraction_cache.clear()
 
 
 func build_discovery_keys(hero: HeroController) -> Dictionary:
@@ -17,9 +31,10 @@ func build_discovery_keys(hero: HeroController) -> Dictionary:
 	keys["time"] = hero.time.get_period_name()
 
 	# Check for undead/lizard army tags
-	var army_stacks: Array[UnitStack] = hero.army.get_army_for_battle()
-	for stack in army_stacks:
-		var unit_def = Units.get_definition(stack.get_key())
+	var units_reg: Node = ServiceLocator.resolve(null, &"units")
+	for stack in hero.army.army:
+		if stack == null or not stack.is_alive(): continue
+		var unit_def = units_reg.get_definition(stack.get_key())
 		if unit_def:
 			for tag in unit_def.tags:
 				if tag in [&"undead", &"lizard"]:
@@ -29,15 +44,18 @@ func build_discovery_keys(hero: HeroController) -> Dictionary:
 
 
 func build_extraction_keys(hero: HeroController) -> Dictionary:
-	if _extraction_cache_valid:
-		return _cached_extraction_keys
-
+	var iid: int = hero.get_instance_id()
+	var fp := _extraction_fingerprint(hero)
+	var cached: Dictionary = _extraction_cache.get(iid, {})
+	if cached.has("fp") and cached["fp"] == fp and cached.has("keys"):
+		return cached["keys"]
 	var keys: Dictionary = {}
-	var army_stacks: Array[UnitStack] = hero.army.get_army_for_battle()
 
 	# Tags and unit keys from army
-	for stack in army_stacks:
-		var unit_def = Units.get_definition(stack.get_key())
+	var units_reg: Node = ServiceLocator.resolve(null, &"units")
+	for stack in hero.army.army:
+		if stack == null or not stack.is_alive(): continue
+		var unit_def = units_reg.get_definition(stack.get_key())
 		if unit_def:
 			for tag in unit_def.tags:
 				keys[StringName(tag)] = true
@@ -54,17 +72,30 @@ func build_extraction_keys(hero: HeroController) -> Dictionary:
 	# Fire capability
 	keys["fire"] = false
 
-	_cached_extraction_keys = keys
-	_extraction_cache_valid = true
+	_extraction_cache[iid] = {"fp": fp, "keys": keys}
 	return keys
 
 
-func invalidate_extraction_cache() -> void:
-	_extraction_cache_valid = false
+func _extraction_fingerprint(hero: HeroController) -> String:
+	## Дешёвый отпечаток всех входов build_extraction_keys: если совпал —
+	## полные ключи из кэша остаются корректными.
+	var fp := ""
+	if hero.army != null:
+		for stack in hero.army.army:
+			if stack == null or not stack.is_alive(): continue
+			fp += StringName(stack.get_key()) + ";"
+	if hero.skills != null:
+		for skill in hero.skills.get_all():
+			fp += StringName(skill) + ":" + str(int(hero.skills.get_skill(skill))) + ";"
+	if hero.tools != null:
+		for tool_type in HeroTools.TOOL_TYPES:
+			if hero.tools.has_tool(StringName(tool_type)):
+				fp += "T" + StringName(tool_type)
+	return fp
 
 
-func try_extract(mgr: ResourceNodeManager, hero: HeroController, cell: Vector2i) -> int:
+func try_extract(mgr: ResourceNodeManager, hero: HeroController, cell: Vector2i) -> Dictionary:
 	if mgr == null:
-		return 0
+		return {"error": ResourceNodeManager.NodeError.NODE_NOT_FOUND, "amount": 0}
 	var keys: Dictionary = build_extraction_keys(hero)
 	return mgr.try_extract(cell, keys)

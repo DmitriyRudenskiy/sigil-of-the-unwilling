@@ -1,4 +1,7 @@
 extends SceneTree
+
+var _passed: int = 0
+var _failed: int = 0
 ## Тест отступления: BattleTurnExecutor + BattleState: ретрит → 50% стеков.
 
 func _init() -> void:
@@ -9,6 +12,9 @@ func _init() -> void:
 		print("Battle retreat smoke test passed")
 	else:
 		printerr("Battle retreat smoke test failed: ", failed)
+	_failed = failed
+	_passed = 1 if failed == 0 else 0
+
 	await process_frame
 	quit(1 if failed > 0 else 0)
 

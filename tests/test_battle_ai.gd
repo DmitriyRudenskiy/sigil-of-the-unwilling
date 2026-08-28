@@ -1,4 +1,7 @@
 extends SceneTree
+
+var _passed: int = 0
+var _failed: int = 0
 ## Тесты BattleAI: решения при отсутствии целей, атака, движение.
 
 const ACTION_SKIP := 0
@@ -16,6 +19,9 @@ func _init() -> void:
 		print("BattleAI tests passed")
 	else:
 		printerr("BattleAI tests failed: ", failed)
+	_failed = failed
+	_passed = 1 if failed == 0 else 0
+
 	await process_frame
 	quit(1 if failed > 0 else 0)
 

@@ -73,6 +73,8 @@ func generate() -> void:
 
 	renderer = MapRenderer.new(model)
 	spawner = MapSpawner.new(model)
+	if ServiceContainer.current != null:
+		spawner.setup_registry(ServiceContainer.current.units)
 
 	HexUtils.calibrate(_tile_map)
 
@@ -157,6 +159,10 @@ func is_in_bounds(cell: Vector2i) -> bool:
 
 func get_terrain_name(cell: Vector2i) -> String:
 	return model.get_terrain_name(cell) if model != null else "grass"
+
+
+func get_terrain_id(cell: Vector2i) -> int:
+	return model.get_terrain_id(cell) if model != null else HexUtils.Terrain.GRASS
 
 
 func get_blocked_cells() -> Dictionary:

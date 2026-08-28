@@ -24,7 +24,7 @@ func _ready():
 	server = TCPServer.new()
 	var err = server.listen(9095)
 	if err == OK:
-		print("[SocketServer] ✅ Listening on 127.0.0.1:9090")
+		print("[SocketServer] ✅ Listening on 127.0.0.1:9095")
 	else:
 		print("[SocketServer] ❌ Failed to listen: ", err)
 

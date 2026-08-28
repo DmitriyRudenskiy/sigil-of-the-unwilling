@@ -53,8 +53,18 @@ def make_grid(image_paths: list[Path], output_path: Path, background: str) -> No
             with Image.open(path) as img:
                 # учитываем EXIF-ориентацию (актуально для фото с телефона)
                 img = ImageOps.exif_transpose(img).convert("RGB")
-                # fit: масштабирует с сохранением пропорций и обрезает по центру до 256x256
-                cell = ImageOps.fit(img, (CELL_SIZE, CELL_SIZE), Image.LANCZOS)
+                
+                # Рассчитываем масштаб, чтобы картинка вписалась в ячейку с сохранением пропорций
+                img_w, img_h = img.size
+                ratio = min(CELL_SIZE / img_w, CELL_SIZE / img_h)
+                new_w = int(img_w * ratio)
+                new_h = int(img_h * ratio)
+                img_resized = img.resize((new_w, new_h), Image.LANCZOS)
+
+                # Создаём зелёный фон для ячейки и центрируем в ней изображение
+                cell = Image.new("RGB", (CELL_SIZE, CELL_SIZE), CHROMA_KEY)
+                offset = ((CELL_SIZE - new_w) // 2, (CELL_SIZE - new_h) // 2)
+                cell.paste(img_resized, offset)
 
         canvas.paste(cell, (col * CELL_SIZE, row * CELL_SIZE))
 

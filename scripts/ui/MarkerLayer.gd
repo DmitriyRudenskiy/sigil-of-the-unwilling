@@ -49,11 +49,7 @@ func show_markers(hero_cell: Vector2i, mp: float, dist_map: Dictionary) -> void:
 	for cell in _reachable:
 		for nb in HexUtils.get_all_neighbors(cell):
 			if not _dist.has(nb) or _dist[nb] > mp + 0.001:
-				# Check if actually blocked or just too expensive
-				if _map_gen.is_in_bounds(nb) and _map_gen.is_walkable(nb):
-					# Too expensive — not red, just unreachable
-					pass
-				elif _map_gen.is_in_bounds(nb):
+				if _map_gen.is_in_bounds(nb) and not _map_gen.is_walkable(nb):
 					red_candidates[nb] = true
 
 	_red_frontier = red_candidates
@@ -65,6 +61,10 @@ func hide_markers() -> void:
 	_reachable.clear()
 	_red_frontier.clear()
 	queue_redraw()
+
+func _process(_d: float) -> void:
+	if _visible:
+		queue_redraw()
 
 
 func _draw() -> void:
@@ -107,8 +107,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			var is_green_or_yellow: bool = _reachable.has(cell) and _reachable[cell] != MarkType.RED
 			if is_green_or_yellow:
 				marker_clicked.emit(cell, true)
+				get_viewport().set_input_as_handled()
 			elif _red_frontier.has(cell):
 				marker_clicked.emit(cell, false)
+				get_viewport().set_input_as_handled()
 
 		elif event.button_index == MOUSE_BUTTON_RIGHT:
 			pass  # handled elsewhere

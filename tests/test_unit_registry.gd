@@ -1,4 +1,7 @@
 extends SceneTree
+
+var _passed: int = 0
+var _failed: int = 0
 ## Headless tests for UnitRegistry, UnitStats, UnitStack
 
 const _REGISTRY_PATH := "res://scripts/Units.gd"
@@ -94,6 +97,8 @@ func _init() -> void:
     else:
         print("PASS  get_definition guardians")
 
+    _failed = failed
+    _passed = 12 - failed
     await process_frame
     quit(1 if failed > 0 else 0)
 

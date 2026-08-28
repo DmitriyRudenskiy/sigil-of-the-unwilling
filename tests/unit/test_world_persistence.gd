@@ -17,7 +17,7 @@ func test_chain_service_has_methods() -> void:
 func test_extraction_cache_invalidation() -> void:
 	var chain := ResourceChainService.new()
 	chain.invalidate_extraction_cache()
-	assert_true(chain.is_instance_of(ResourceChainService), "service intact after invalidation")
+	assert_true(chain.get_script() == ResourceChainService, "service intact after invalidation")
 
 
 # ----- WorldLoadContext tests -----

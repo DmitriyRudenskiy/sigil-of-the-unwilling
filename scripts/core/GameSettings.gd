@@ -25,9 +25,10 @@ const MONSTER_DROP_CHANCE := 0.05
 const BATTLE_AI_THINK_TIME := 0.7
 const BATTLE_TURN_DELAY := 0.15
 const BATTLE_RETREAT_LOSS_FRACTION := 0.5
-const BATTLE_MORALE_EXTRA_TURN_CHANCE := 0.5
 const BATTLE_DEFEND_BONUS_DEFENSE := 0.20
 const BATTLE_SPELL_ANIM_TIME := 0.35
+const BATTLE_ATTACK_ANIM_SEC := 0.3
+const ASTAR_HEURISTIC_WEIGHT := 1.0  # 1.0 = optimal path, >1.0 = faster but not optimal
 
 # --- Map ---
 const MAP_SIZE_MIN := 40
@@ -43,7 +44,6 @@ const EDITOR_SEED := 12345
 
 # --- Save/Load ---
 const SAVE_MAGIC := "SIG_SAVE"
-const SAVE_VERSION := 1
 
 # --- Camera / Zoom ---
 const ZOOM_LEVELS := [0.5, 0.7, 1.0, 1.1, 1.25, 1.5, 1.75, 2.0, 2.25]
@@ -65,4 +65,45 @@ const CHARGE_MULT := 1.5
 const BREATH_DMG_RATIO := 0.5
 const RETREAT_STACK_LIMIT := 2
 const CLICK_RADIUS_PX := 60.0
-const INF := 999999
+const INF := 1e9  # float, compatible with PackedFloat32Array
+
+# --- Battle View ---
+const BATTLE_FIELD_RING := 5
+const BATTLE_HEX_OUTLINE_RADIUS := 38.0
+const BATTLE_ATTACK_LUNGE_PX := 26.0
+const BATTLE_MOVE_TWEEN_SEC := 0.15
+const BATTLE_FLOATING_TEXT_OFFSET := Vector2(-30, -60)
+const BATTLE_DAMAGE_NUMBER_OFFSET := Vector2(-16, -50)
+
+# --- World Spawner ---
+const SPAWN_RESOURCE_NODE_CHANCE := 0.08
+const SPAWN_DECOR_SAND_CHANCE := 0.04
+const SPAWN_SCROLL_MAX_ATTEMPTS := 200
+const SPAWN_CHEST_MIN_BORDER := 3
+const SPAWN_ENEMY_MIN_BORDER := 3
+
+# --- World Camera ---
+const CAMERA_SPEED := 600.0
+const CAMERA_EDGE_ZONE := 20
+const CAMERA_ZOOM_TWEEN_SEC := 0.175
+
+# --- Main Menu UI ---
+const MENU_COL_OFFSET_LEFT := -380
+const MENU_COL_OFFSET_RIGHT := -60
+const MENU_COL_OFFSET_TOP := 120
+const MENU_COL_OFFSET_BOTTOM := -120
+const MENU_COL_SEPARATION := 20
+const MENU_BTN_MIN_SIZE := Vector2(300, 70)
+const MENU_LOCK_MIN_SIZE := Vector2(300, 180)
+
+# --- Adventure UI ---
+const ADVENTURE_RIGHT_PANEL_W := 252
+const ADVENTURE_INITIATIVE_PANEL_W := 190
+const ADVENTURE_BATTLE_STATUS_H := 92
+const ADVENTURE_BOTTOM_BAR_OFFSET := -58
+
+# --- City Panel ---
+const CITY_PANEL_W := 340.0
+const CITY_PANEL_OFFSET := 12.0
+const CITY_PANEL_TOP := 40.0
+const CITY_PANEL_BOTTOM := -40.0

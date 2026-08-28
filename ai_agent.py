@@ -208,6 +208,10 @@ def task2_challenge_and_flee(client):
                     if state["mode"] == "world": 
                         break
                     time.sleep(0.5)
+            elif result == "arrived":
+                # If we arrived but no battle started, wait a bit for the engine to transition
+                time.sleep(1.0)
+                # We don't increment challenged_count here because the battle hasn't started/finished
             elif result == "timeout":
                 print("\n⚠️ Movement timeout! Trying to end turn...")
                 client.send_command({"action": "END_TURN"})

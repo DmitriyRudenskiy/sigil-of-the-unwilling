@@ -4,6 +4,8 @@ extends Node
 ## Centralized event routing for the world scene.
 ## All _on_* handlers extracted from WorldController live here.
 
+const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
+const ServiceLocator = preload("res://scripts/core/ServiceLocator.gd")
 const ResourceDef = preload("res://scripts/data/ResourceDef.gd")
 
 
@@ -19,6 +21,7 @@ var ui_manager: Node = null
 var world_delta: Variant = null
 var persistence: Variant = null
 var resource_chain: Variant = null
+var _resource_registry: Node = null
 
 
 # Outward signals so WorldController can react to specific events
@@ -37,7 +40,8 @@ func setup(
 	p_battle_coordinator: Node, p_interaction_controller: Node,
 	p_resource_node_manager: Node, p_ui_manager: Node,
 	p_world_delta: Variant, p_persistence: Variant,
-	p_resource_chain: Variant
+	p_resource_chain: Variant,
+	p_resource_registry: Node = null
 ) -> void:
 	hero = p_hero
 	map_gen = p_map_gen
@@ -50,6 +54,7 @@ func setup(
 	world_delta = p_world_delta
 	persistence = p_persistence
 	resource_chain = p_resource_chain
+	_resource_registry = ServiceLocator.resolve(p_resource_registry, &"resources")
 
 
 func _ready() -> void:
@@ -110,7 +115,9 @@ func _on_hero_moved(cell: Vector2i) -> void:
 	# Try to discover hidden resource nodes
 	if resource_node_manager and resource_chain and hero:
 		var disc_keys = resource_chain.build_discovery_keys(hero)
-		resource_node_manager.try_discover(cell, disc_keys)
+		var discover_result: Dictionary = resource_node_manager.try_discover(cell, disc_keys)
+		if discover_result.get("discovered", false):
+			GameLogger.world("Resource discovered at %s" % cell)
 
 	hero_moved_to.emit(cell)
 
@@ -127,6 +134,9 @@ func _on_village(cell: Vector2i) -> void:
 
 	village_captured.emit(cell)
 
+
+func request_end_turn() -> void:
+	_on_end_turn()
 
 func _on_end_turn() -> void:
 	if hero:
@@ -187,9 +197,7 @@ func _on_marker_hovered(cell: Vector2i, cost: float, remaining: float, is_reacha
 
 
 func _on_marker_clicked(cell: Vector2i, is_reachable: bool) -> void:
-	if is_reachable and hero:
-		hero.movement.on_map_clicked(cell)
-	marker_clicked.emit(cell)
+	marker_clicked.emit(cell)  # telemetry only; movement handled by WorldInput
 
 
 func _on_reach_preview_changed(pts: Array[Vector2i], dist: Dictionary, mp: float) -> void:
@@ -214,7 +222,7 @@ func _on_resource_discovered(cell: Vector2i, resource_id: StringName) -> void:
 
 func _on_resource_extracted(cell: Vector2i, resource_id: StringName, amount: int) -> void:
 	var skill_mult: float = 1.0
-	var def: ResourceDef = Resources.get_resource(resource_id)
+	var def: ResourceDef = _resource_registry.get_resource(resource_id) as ResourceDef
 	if def:
 		if not def.discovery_skill.is_empty() and hero:
 			skill_mult = hero.skills.get_yield_multiplier(def.discovery_skill)
