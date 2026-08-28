@@ -61,25 +61,41 @@ def calculate_avg_distance(points):
             count += 1
     return total_dist / count
 
-def wait_for_movement(client, target_x, target_y, current_idx, total_count, mode, timeout=30):
+def wait_for_movement(client, target_x, target_y, current_idx, total_count, mode, will_reach=True, timeout=60):
+    """Ждём завершения движения.
+    will_reach=True  → ждём прибытия на целевую клетку.
+    will_reach=False → HoMM3-частичное движение: герой идёт в сторону цели
+                       и остановится сам (moving == false) — ждём остановки,
+                       а не прибытия (баг "Movement timeout": 30с ожидания).
+    Возвращает: arrived | stopped | no_mp | battle_started | unknown_mode | timeout
+    """
     start_time = time.time()
     while True:
         elapsed = time.time() - start_time
         if elapsed > timeout:
             return "timeout"
-            
+
         state = client.send_command({"action": "GET_STATE"})
         hero_pos = state.get("hero_pos", {"x": 0, "y": 0})
-        
+
         print_status(current_idx, total_count, f"({target_x},{target_y})", f"({hero_pos['x']},{hero_pos['y']})", mode)
-        
+
         if state["mode"] == "battle":
             return "battle_started"
         if state["mode"] != "world":
             return "unknown_mode"
         if hero_pos["x"] == target_x and hero_pos["y"] == target_y:
             return "arrived"
-        if state.get("move_points", 1) <= 0:
+        if not state.get("moving", False):
+            # Герой стоит: либо вышагал ОД (частичное движение), либо уже был на месте
+            if not will_reach:
+                return "stopped"
+            if state.get("move_points", 1) <= 0:
+                return "no_mp"
+            # will_reach=True, но герой стоит и ОД есть — движок не запустил шаг;
+            # дальше ждать бессмысленно
+            return "stopped"
+        if state.get("move_points", 1) <= 0 and not state.get("moving", False):
             return "no_mp"
         time.sleep(0.2)
 
@@ -118,18 +134,32 @@ def task1_collect_resources(client):
         resources = state["map_resources"]
         if not resources:
             break
-            
+
+        hero_pos = state.get("hero_pos", {"x": 0, "y": 0})
+        resources.sort(key=lambda r: hex_dist((hero_pos["x"], hero_pos["y"]), (r["x"], r["y"])))
         target = resources[0]
         resp = client.send_command({"action": "MOVE_TO", "x": target["x"], "y": target["y"]})
+        if resp.get("status") == "already_at":
+            collected_count += 1
+            time.sleep(0.2)
+            continue
         if "error" in resp:
             print(f"\n⚠️ MOVE_TO error: {resp['error']}")
-            # If unreachable, we might want to remove it from the list or just end turn
-            if "unreachable" in resp["error"]:
-                # For now, just end turn and hope for better luck or skip it
-                pass
-        
-        result = wait_for_movement(client, target["x"], target["y"], collected_count, total_res, f"Turns:{turn_count}/10")
-        if result == "no_mp":
+            # error = пути нет вообще (не только не хватает ОД). Сменим цель.
+            if turn_count >= 10:
+                print(f"\n🛑 Reached turn limit (10). Stopping collection.")
+                break
+            client.send_command({"action": "END_TURN"})
+            turn_count += 1
+            time.sleep(0.5)
+            continue
+
+        will_reach = resp.get("will_reach", True)
+        result = wait_for_movement(client, target["x"], target["y"], collected_count, total_res, f"Turns:{turn_count}/10", will_reach=will_reach)
+        if result in ("no_mp", "stopped"):
+            # Герой сближался с целью и остановился (ОД кончились).
+            if not will_reach:
+                print(f"\n...partial walk on turn {turn_count}: hero stopped short, ending turn.")
             if turn_count >= 10:
                 print(f"\n🛑 Reached turn limit (10). Stopping collection.")
                 break
@@ -192,11 +222,25 @@ def task2_challenge_and_flee(client):
             if not enemies:
                 break
             
+            hero_pos = state.get("hero_pos", {"x": 0, "y": 0})
+            enemies.sort(key=lambda e: hex_dist((hero_pos["x"], hero_pos["y"]), (e["x"], e["y"])))
             target = enemies[0]
-            client.send_command({"action": "MOVE_TO", "x": target["x"], "y": target["y"]})
-            
-            result = wait_for_movement(client, target["x"], target["y"], challenged_count, total_enemies, "Combat")
-            if result == "no_mp":
+            move_resp = client.send_command({"action": "MOVE_TO", "x": target["x"], "y": target["y"]})
+            if move_resp.get("status") == "already_at":
+                time.sleep(0.5)
+                continue
+            if "error" in move_resp:
+                print(f"\n⚠️ MOVE_TO error: {move_resp['error']}")
+                # No path at all — refresh MP and retry next turn
+                client.send_command({"action": "END_TURN"})
+                time.sleep(0.5)
+                continue
+
+            will_reach = move_resp.get("will_reach", True)
+            result = wait_for_movement(client, target["x"], target["y"], challenged_count, total_enemies, "Combat", will_reach=will_reach)
+            if result in ("no_mp", "stopped"):
+                # Hero closed in but stopped short of the enemy (MP spent).
+                # End turn, resume approach next turn → eventually adjacent → battle.
                 client.send_command({"action": "END_TURN"})
                 time.sleep(0.5)
             elif result == "battle_started":

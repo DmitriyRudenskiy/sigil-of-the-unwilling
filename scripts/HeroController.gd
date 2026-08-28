@@ -128,7 +128,7 @@ func setup(map: MapGenerator) -> void:
 	)
 
 	movement.set_artifact_effect_fn(has_artifact_effect)  # must be before movement.setup()
-	movement.setup(map, self)
+	movement.setup(map)
 	visual.setup(map, self)
 	visual.build_visual()
 	visual.setup_path_visual()
@@ -142,6 +142,14 @@ func on_map_clicked(cell: Vector2i) -> void:
 
 func move_to_cell(cell: Vector2i) -> bool:
 	return movement.move_to_cell(cell)
+
+
+func can_reach(cell: Vector2i) -> bool:
+	return movement.can_reach(cell)
+
+
+func reach_problem(cell: Vector2i) -> String:
+	return movement.reach_problem(cell)
 
 
 func cancel_pending(clear_text: bool = true) -> void:

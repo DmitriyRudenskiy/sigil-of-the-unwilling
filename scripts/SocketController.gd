@@ -198,6 +198,8 @@ func _get_state(world_ctrl, battle_ctrl) -> Dictionary:
 			state.max_move_points = hero.get_daily_movement_points()
 			state.basic_resources = hero.resources.resources.duplicate()
 			state.strategic_resources = hero.strategic_resources.get_all()
+			# Идёт ли герой прямо сейчас (для честного ожидания частичного движения)
+			state.moving = hero.movement != null and hero.movement.is_moving
 		
 		if map_gen:
 			# Map resources
@@ -247,10 +249,18 @@ func _move_to(world_ctrl, x: int, y: int) -> Dictionary:
 	var target := Vector2i(x, y)
 	if not map.is_in_bounds(target):
 		return {"error": "Out of bounds: (%d, %d)" % [x, y]}
+	if hero.current_cell == target:
+		return {"status": "already_at", "target": {"x": x, "y": y}}
+	# HoMM3-семантика: цель дальше ОД — герой идёт в её сторону.
+	# Честный протокол: will_reach говорит клиенту, стоит ли ждать прибытия
+	# (false — герой остановится по исчерпании ОД, клиент ждёт moving==false).
+	var will_reach: bool = hero.can_reach(target)
 	var success: bool = hero.move_to_cell(target)
 	if success:
-		return {"status": "moving", "target": {"x": x, "y": y}}
-	return {"error": "Cannot move to (%d, %d): unreachable or no MP" % [x, y]}
+		return {"status": "moving", "will_reach": will_reach, "target": {"x": x, "y": y}}
+	var problem: String = hero.reach_problem(target)
+	var reason := "unreachable" if problem == "unreachable" else "not enough movement points"
+	return {"error": "Cannot move to (%d, %d): %s" % [x, y, reason]}
 
 func _end_turn(world_ctrl) -> Dictionary:
 	world_ctrl.do_end_turn()

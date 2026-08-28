@@ -41,7 +41,7 @@ func get_map_gen() -> MapGenerator:
 	return _map_gen
 
 
-func setup(map: MapGenerator, _hero: HeroController) -> void:
+func setup(map: MapGenerator) -> void:
 	_map_gen = map
 	_place_hero_on_map()
 	move_points = get_daily_movement_points()
@@ -125,23 +125,47 @@ func on_map_clicked(cell: Vector2i) -> void:
 		affordable.size() - 1, cost, remaining])
 
 
+## Запускает движение к `cell` (HoMM3-семантика: если цель дальше ОД —
+## герой идёт в её сторону, пока хватает очков).
+## true — движение начато; false — пути нет / герой уже на месте / уже идёт.
+## Клиент, которому важно знать, дойдёт ли герой, должен спросить can_reach() ДО вызова.
 func move_to_cell(cell: Vector2i) -> bool:
 	if is_moving or _map_gen == null:
 		return false
 	if cell == current_cell:
 		return true
-	
-	var affordable = _get_affordable_path(cell)
+
+	var affordable := _get_affordable_path(cell)
 	if affordable.size() < 2:
 		return false
-		
+
 	path = affordable
 	_start_moving()
 	return true
 
 
-func _get_affordable_path(cell: Vector2i) -> Array[Vector2i]:
-	# Reuse cached blocked cells from MapGenerator model
+## True, если `cell` полностью достижим с текущими точками движения.
+func can_reach(cell: Vector2i) -> bool:
+	if cell == current_cell:
+		return true
+	var affordable := _get_affordable_path(cell)
+	return affordable.size() >= 2 and affordable.back() == cell
+
+
+## Диагностика недостижимости: "" — достижимо, "unreachable" — пути нет,
+## "insufficient_mp" — путь есть, но не хватает очков движения.
+func reach_problem(cell: Vector2i) -> String:
+	if cell == current_cell:
+		return ""
+	if _full_path(cell).size() < 2:
+		return "unreachable"
+	return "" if can_reach(cell) else "insufficient_mp"
+
+
+## Полный A* путь без обрезки по ОД (пусто, если пути нет).
+func _full_path(cell: Vector2i) -> Array[Vector2i]:
+	if _map_gen == null:
+		return []
 	var blocked: Dictionary = _map_gen.get_blocked_cells().duplicate()
 	var levitation := _has_artifact_effect(&"boots_levitation")
 	if levitation:
@@ -151,7 +175,11 @@ func _get_affordable_path(cell: Vector2i) -> Array[Vector2i]:
 			if terrain_id == _HexUtils.Terrain.WATER:
 				blocked.erase(c)
 	# A* prunes search via heuristic — much faster than full-map Dijkstra
-	var found := _HexUtils.astar_path(current_cell, cell, blocked, _map_gen.map_width, _map_gen.map_height)
+	return _HexUtils.astar_path(current_cell, cell, blocked, _map_gen.map_width, _map_gen.map_height)
+
+
+func _get_affordable_path(cell: Vector2i) -> Array[Vector2i]:
+	var found := _full_path(cell)
 	if found.size() < 2:
 		return []
 
@@ -196,6 +224,15 @@ func _move_next_step() -> void:
 	path.remove_at(0)
 
 	var step_cost: float = _terrain_cost(next_cell)
+	if step_cost >= INF:
+		# Клетка стала непроходимой во время движения (динамическая блокировка).
+		# Останавливаемся штатно, не портя move_points (-INF застревал героя до конца хода).
+		print("[Movement] ⛔ Path blocked at %s — stopping" % str(next_cell))
+		is_moving = false
+		path.clear()
+		reach_preview_cleared.emit()
+		request_idle_animation.emit()
+		return
 	move_points -= step_cost
 	movement_points_changed.emit(move_points, get_daily_movement_points())
 
