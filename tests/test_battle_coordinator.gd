@@ -5,7 +5,7 @@ extends "res://tests/test_base.gd"
 ## зависимости (Node + has_method) вместо жёстких типов,
 ## поэтому preload() работает в headless-режиме.
 
-const _Coordinator = preload("res://scripts/world/WorldBattleCoordinator.gd")
+const _Coordinator = preload("res://world/WorldBattleCoordinator.gd")
 
 var coordinator: Node
 

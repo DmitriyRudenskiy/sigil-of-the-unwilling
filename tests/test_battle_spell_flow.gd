@@ -1,9 +1,9 @@
 extends "res://tests/test_base.gd"
 ## Regression tests for round 3 fixes.
 
-const _Executor = preload("res://scripts/BattleTurnExecutor.gd")
-const _ActionResolver = preload("res://scripts/battle/BattleActionResolver.gd")
-const _Controller = preload("res://scripts/BattleController.gd")
+const _Executor = preload("res://systems/BattleTurnExecutor.gd")
+const _ActionResolver = preload("res://systems/BattleActionResolver.gd")
+const _Controller = preload("res://systems/BattleController.gd")
 
 var _units: Node
 

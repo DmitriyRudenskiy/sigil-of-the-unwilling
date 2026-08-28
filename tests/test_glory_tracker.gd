@@ -1,8 +1,8 @@
 extends "res://tests/test_base.gd"
 ## Тесты GloryTracker: скользящее окно славы.
 
-const _GloryTracker = preload("res://scripts/city/GloryTracker.gd")
-const _CityBalance = preload("res://scripts/city/CityBalance.gd")
+const _GloryTracker = preload("res://world/GloryTracker.gd")
+const _CityBalance = preload("res://world/CityBalance.gd")
 
 var tracker: RefCounted
 

@@ -1,9 +1,9 @@
 extends "res://tests/test_base.gd"
 ## Регрессионные тесты для правок R1, R2, R3.
 
-const _BS = preload("res://scripts/BattleState.gd")
-const _BTX = preload("res://scripts/BattleTurnExecutor.gd")
-const _BAI = preload("res://scripts/BattleAI.gd")
+const _BS = preload("res://systems/BattleState.gd")
+const _BTX = preload("res://systems/BattleTurnExecutor.gd")
+const _BAI = preload("res://systems/BattleAI.gd")
 # ==================== R1: obstacle seed determinism ====================
 
 func test_obstacle_different_seeds_differ() -> void:

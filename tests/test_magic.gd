@@ -1,6 +1,6 @@
 extends "res://tests/test_base.gd"
 
-const _HeroMagic = preload("res://scripts/hero/HeroMagic.gd")
+const _HeroMagic = preload("res://entities/HeroMagic.gd")
 
 func test_init_defaults() -> void:
 	

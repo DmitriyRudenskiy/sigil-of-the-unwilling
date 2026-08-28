@@ -1,7 +1,7 @@
 extends "res://tests/test_base.gd"
 
-const _Camera = preload("res://scripts/WorldCamera.gd")
-const _Settings = preload("res://scripts/core/Settings.gd")
+const _Camera = preload("res://world/WorldCamera.gd")
+const _Settings = preload("res://core/Settings.gd")
 
 # --- Clamp math ---
 

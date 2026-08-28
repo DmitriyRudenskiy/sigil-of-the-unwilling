@@ -1,7 +1,7 @@
 extends "res://tests/test_base.gd"
 
-const _TerrainCostTable = preload("res://scripts/data/TerrainCostTable.gd")
-const _HexUtils = preload("res://scripts/HexUtils.gd")
+const _TerrainCostTable = preload("res://data/TerrainCostTable.gd")
+const _HexUtils = preload("res://core/HexUtils.gd")
 
 # --- Terrain cost table ---
 

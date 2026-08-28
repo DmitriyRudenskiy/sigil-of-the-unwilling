@@ -1,7 +1,7 @@
 extends SceneTree
 ## Simple headless test runner.
 
-const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
+const ServiceContainer = preload("res://core/ServiceContainer.gd")
 
 const SKIP_FILES := [
 	"test_base.gd",

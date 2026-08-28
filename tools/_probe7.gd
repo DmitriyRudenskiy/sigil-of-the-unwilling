@@ -5,7 +5,7 @@ func _initialize() -> void:
 	await process_frame
 	var units: Node = Engine.get_main_loop().root.get_node("Units")
 	print("units: ", units != null)
-	var bs = (preload("res://scripts/BattleState.gd")).new()
+	var bs = (preload("res://systems/BattleState.gd")).new()
 	var atk_stack = units.make_fixed_stack("swordsmen", 20)
 	var def_stack = units.make_fixed_stack("goblins", 20)
 	print("atk_stack: ", atk_stack, " count=", atk_stack.count if atk_stack else -1, " alive=", atk_stack.is_alive() if atk_stack else -1)
@@ -15,7 +15,7 @@ func _initialize() -> void:
 	print("cell: ", dead_unit.cell, " stack null? ", dead_unit.stack == null)
 	bs.kill_unit(dead_unit)
 	print("alive after kill: ", dead_unit.is_alive(), " count=", dead_unit.get_count())
-	var _Input = preload("res://scripts/BattleInput.gd")
+	var _Input = preload("res://systems/BattleInput.gd")
 	var inp = _Input.new()
 	inp.name = "ProbeInput"
 	var view = Node.new()
@@ -25,13 +25,13 @@ func _initialize() -> void:
 	print("highlight_attack: ", inp.highlight_attack)
 	print("has cell: ", inp.highlight_attack.has(dead_unit.cell))
 	# SpellCaster probe
-	var _SpellCaster = preload("res://scripts/spells/SpellCaster.gd")
+	var _SpellCaster = preload("res://systems/SpellCaster.gd")
 	var rng := RandomNumberGenerator.new()
 	var res = _SpellCaster.cast(&"resurrection", dead_unit, {"spell_power": 10}, {}, rng)
 	print("caster result: ", res)
 	# apply_spell probe
-	var _Resolver = preload("res://scripts/battle/BattleActionResolver.gd")
-	var bs2 = (preload("res://scripts/BattleState.gd")).new()
+	var _Resolver = preload("res://systems/BattleActionResolver.gd")
+	var bs2 = (preload("res://systems/BattleState.gd")).new()
 	var atk2 = units.make_fixed_stack("swordsmen", 20)
 	var def2 = units.make_fixed_stack("goblins", 5)
 	bs2.place_army([atk2], [def2])

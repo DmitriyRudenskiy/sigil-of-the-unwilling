@@ -1,7 +1,7 @@
 extends "res://tests/test_base.gd"
 
-const _HeroMagic = preload("res://scripts/hero/HeroMagic.gd")
-const _ScrollRules = preload("res://scripts/data/ScrollRules.gd")
+const _HeroMagic = preload("res://entities/HeroMagic.gd")
+const _ScrollRules = preload("res://data/ScrollRules.gd")
 
 func test_pickup_learn() -> void:
 	var m := _HeroMagic.new()

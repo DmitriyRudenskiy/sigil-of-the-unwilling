@@ -16,16 +16,16 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [autoload]
 
-SoundManager="res://scripts/audio/SoundManager.gd"
-Settings="*res://scripts/core/Settings.gd"
-GameEventBus="*res://scripts/core/GameEventBus.gd"
-CardSpells="*res://scripts/card/CardSpellRegistry.gd"
-CardTemplateBootstrap="*res://scripts/card/CardTemplateBootstrap.gd"
-SocketController="*res://scripts/SocketController.gd"
-Units="*res://scripts/UnitRegistry.gd"
-Artifacts="*res://scripts/data/ArtifactRegistry.gd"
-Spells="*res://scripts/data/SpellRegistry.gd"
-Resources="*res://scripts/data/ResourceRegistry.gd"
+SoundManager="res://core/SoundManager.gd"
+Settings="*res://core/Settings.gd"
+GameEventBus="*res://core/GameEventBus.gd"
+CardSpells="*res://data/CardSpellRegistry.gd"
+CardTemplateBootstrap="*res://data/CardTemplateBootstrap.gd"
+SocketController="res://core/SocketController.gd"
+Units="*res://entities/UnitRegistry.gd"
+Artifacts="*res://data/ArtifactRegistry.gd"
+Spells="*res://data/SpellRegistry.gd"
+Resources="*res://data/ResourceRegistry.gd"
 
 [display]
 

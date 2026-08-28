@@ -1,7 +1,7 @@
 extends "res://tests/test_base.gd"
 ## Regression tests for РФ6-2/РФ6-3: spellbook button and panel guards.
 
-const _Executor = preload("res://scripts/BattleTurnExecutor.gd")
+const _Executor = preload("res://systems/BattleTurnExecutor.gd")
 
 # РФ6-2: spellbook button is in _action_buttons (action: true)
 func test_spellbook_button_is_action_button() -> void:

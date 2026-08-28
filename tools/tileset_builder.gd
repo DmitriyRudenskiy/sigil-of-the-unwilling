@@ -16,7 +16,7 @@ const PROCESSED_DIR := "res://tilesets/processed/"
 const ATLAS_PATH := "res://tilesets/hex_atlas_base.png"
 const ATLAS_OBJ_PATH := "res://tilesets/hex_atlas_objects.png"
 const OUTPUT_PATH := "res://tilesets/hex_tileset.tres"
-const MAP_SCRIPT_PATH := "res://scripts/TerrainAtlasMap.gd"
+const MAP_SCRIPT_PATH := "res://world/TerrainAtlasMap.gd"
 const TILE := 82
 
 const TERRAINS := ["water", "swamp", "sand", "grass", "forest", "mountain", "snow"]

@@ -183,8 +183,8 @@ func _get_cached_controller(script: Script, is_world: bool) -> Variant:
 func _ensure_scripts_loaded() -> void:
 	if _world_ctrl_script != null and _battle_ctrl_script != null:
 		return
-	_world_ctrl_script = load("res://game/world/WorldController.gd")
-	_battle_ctrl_script = load("res://game/systems/BattleController.gd")
+	_world_ctrl_script = load("res://world/WorldController.gd")
+	_battle_ctrl_script = load("res://systems/BattleController.gd")
 
 func _start_game() -> Dictionary:
 	if get_node_or_null("/root/World"):

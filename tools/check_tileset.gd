@@ -2,7 +2,7 @@ extends SceneTree
 ## Check tileset integrity: existence, resources, and TerrainAtlasMap.
 ## Run: godot --headless -s tools/check_tileset.gd
 
-const TerrainAtlasMapScript = preload("res://scripts/TerrainAtlasMap.gd")
+const TerrainAtlasMapScript = preload("res://world/TerrainAtlasMap.gd")
 
 var failed := 0
 var passed := 0

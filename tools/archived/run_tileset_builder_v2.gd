@@ -5,7 +5,7 @@ extends Node
 const PROCESSED_DIR := "res://tilesets/processed/"
 const ATLAS_PATH := "res://tilesets/hex_atlas.png"
 const OUTPUT_PATH := "res://tilesets/hex_tileset.tres"
-const MAP_SCRIPT_PATH := "res://scripts/TerrainAtlasMap.gd"
+const MAP_SCRIPT_PATH := "res://world/TerrainAtlasMap.gd"
 const TILE := 82
 const FLAT_TOP := false
 

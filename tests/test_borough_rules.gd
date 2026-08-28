@@ -1,10 +1,10 @@
 extends "res://tests/test_base.gd"
 ## Тесты BoroughRules: стоимость, лимиты, уровни.
 
-const _BoroughRules = preload("res://scripts/city/BoroughRules.gd")
-const _City = preload("res://scripts/city/City.gd")
-const _Borough = preload("res://scripts/city/Borough.gd")
-const _CityBalance = preload("res://scripts/city/CityBalance.gd")
+const _BoroughRules = preload("res://world/BoroughRules.gd")
+const _City = preload("res://world/City.gd")
+const _Borough = preload("res://world/Borough.gd")
+const _CityBalance = preload("res://world/CityBalance.gd")
 
 var city: RefCounted
 

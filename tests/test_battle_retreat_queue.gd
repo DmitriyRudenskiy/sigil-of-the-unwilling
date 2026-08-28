@@ -12,7 +12,7 @@ extends "res://tests/test_base.gd"
 ## поэтому для захвата событий end_battle используется массив (его объект
 ## виден из замыкания), а не int-счётчик.
 
-const _Executor = preload("res://game/systems/BattleTurnExecutor.gd")
+const _Executor = preload("res://systems/BattleTurnExecutor.gd")
 
 
 func _make_executor() -> Dictionary:

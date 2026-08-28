@@ -1,8 +1,8 @@
 extends "res://tests/test_base.gd"
 ## Tests for typed error handling: SaveManager, ResourceNodeManager, GameSettings.
 
-const _SaveManager = preload("res://scripts/core/SaveManager.gd")
-const _SaveData = preload("res://scripts/core/SaveData.gd")
+const _SaveManager = preload("res://core/SaveManager.gd")
+const _SaveData = preload("res://core/SaveData.gd")
 
 
 # ==================== SaveManager ====================

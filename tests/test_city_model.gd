@@ -1,12 +1,12 @@
 extends "res://tests/test_base.gd"
 ## Тесты модели города: население, районы, здания, экономика.
 
-const _City = preload("res://scripts/city/City.gd")
-const _Borough = preload("res://scripts/city/Borough.gd")
-const _PopUnit = preload("res://scripts/city/PopUnit.gd")
-const _CityBalance = preload("res://scripts/city/CityBalance.gd")
-const _UniqueBuilding = preload("res://scripts/city/UniqueBuilding.gd")
-const _BuildingDefs = preload("res://scripts/data/BuildingDefs.gd")
+const _City = preload("res://world/City.gd")
+const _Borough = preload("res://world/Borough.gd")
+const _PopUnit = preload("res://world/PopUnit.gd")
+const _CityBalance = preload("res://world/CityBalance.gd")
+const _UniqueBuilding = preload("res://world/UniqueBuilding.gd")
+const _BuildingDefs = preload("res://data/BuildingDefs.gd")
 
 var city: City
 

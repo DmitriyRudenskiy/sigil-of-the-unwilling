@@ -27,7 +27,7 @@ func _init() -> void:
 
 
 func _create_state(attacker_alive: bool, def_alive: bool):
-	var state = load("res://scripts/BattleState.gd").new()
+	var state = load("res://systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	var def: Array[UnitStack] = []
 
@@ -44,7 +44,7 @@ func _create_state(attacker_alive: bool, def_alive: bool):
 func _test_no_target() -> int:
 	var errors := 0
 	var state = _create_state(false, true)
-	var ai = load("res://scripts/BattleAI.gd").new()
+	var ai = load("res://systems/BattleAI.gd").new()
 
 	var defender = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
 	var blocked: Dictionary = state.build_all_blocked(defender, {})
@@ -59,7 +59,7 @@ func _test_no_target() -> int:
 func _test_adjacent_attack() -> int:
 	var errors := 0
 	var state = _create_state(true, true)
-	var ai = load("res://scripts/BattleAI.gd").new()
+	var ai = load("res://systems/BattleAI.gd").new()
 
 	var attacker = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
 	var defender = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
@@ -86,7 +86,7 @@ func _test_adjacent_attack() -> int:
 func _test_move_towards_target() -> int:
 	var errors := 0
 	var state = _create_state(true, true)
-	var ai = load("res://scripts/BattleAI.gd").new()
+	var ai = load("res://systems/BattleAI.gd").new()
 
 	var attacker = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
 	var defender = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
@@ -132,7 +132,7 @@ func _test_move_towards_target() -> int:
 func _test_attacker_ai_targets_defender() -> int:
 	var errors := 0
 	var state = _create_state(true, true)
-	var ai = load("res://scripts/BattleAI.gd").new()
+	var ai = load("res://systems/BattleAI.gd").new()
 
 	var attacker = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
 	var defender = state.get_units_by_side(BattleState.Side.DEFENDER)[0]

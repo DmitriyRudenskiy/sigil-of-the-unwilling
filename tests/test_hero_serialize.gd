@@ -4,8 +4,8 @@ var _passed: int = 0
 var _failed: int = 0
 ## Сериализация армии и ресурсов: serialize → deserialize → roundtrip.
 
-const _HeroArmyController = preload("res://scripts/hero/HeroArmyController.gd")
-const _HeroResources = preload("res://scripts/hero/HeroResources.gd")
+const _HeroArmyController = preload("res://entities/HeroArmyController.gd")
+const _HeroResources = preload("res://entities/HeroResources.gd")
 
 func _init() -> void:
 	var failed := 0

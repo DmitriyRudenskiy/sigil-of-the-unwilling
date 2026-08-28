@@ -1,11 +1,11 @@
 extends "res://tests/test_base.gd"
 ## Тесты карточной системы заклинаний: реестр, шаблоны, резолвер.
 
-const _Registry = preload("res://scripts/card/CardSpellRegistry.gd")
-const _Def = preload("res://scripts/card/CardSpellDef.gd")
-const _Enums = preload("res://scripts/card/CardEnums.gd")
-const _Engine = preload("res://scripts/card/CardTemplateEngine.gd")
-const _Resolver = preload("res://scripts/card/CardSpellResolver.gd")
+const _Registry = preload("res://data/CardSpellRegistry.gd")
+const _Def = preload("res://data/CardSpellDef.gd")
+const _Enums = preload("res://data/CardEnums.gd")
+const _Engine = preload("res://data/CardTemplateEngine.gd")
+const _Resolver = preload("res://data/CardSpellResolver.gd")
 
 var registry: Variant = null
 

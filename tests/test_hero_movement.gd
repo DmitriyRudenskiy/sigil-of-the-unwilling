@@ -11,9 +11,9 @@ extends RefCounted
 ## Запуск:
 ##   godot --headless -s tests/run_tests.gd
 
-const _MapGenerator = preload("res://scripts/MapGenerator.gd")
-const _Movement = preload("res://scripts/hero/HeroMovementController.gd")
-const _HexUtils = preload("res://scripts/HexUtils.gd")
+const _MapGenerator = preload("res://world/MapGenerator.gd")
+const _Movement = preload("res://entities/HeroMovementController.gd")
+const _HexUtils = preload("res://core/HexUtils.gd")
 
 var _passed := 0
 var _failed := 0

@@ -11,8 +11,8 @@ extends Node2D
 ## Режимы: solo | duo | trio | matrix | all
 ## --all генерирует сразу 1 solo на каждый биом + все пары duo + 2 trio + matrix.
 
-const TerrainAtlasMap = preload("res://scripts/TerrainAtlasMap.gd")
-const HexUtilsClass = preload("res://scripts/HexUtils.gd")
+const TerrainAtlasMap = preload("res://world/TerrainAtlasMap.gd")
+const HexUtilsClass = preload("res://core/HexUtils.gd")
 
 const GRID_W := 28
 const GRID_H := 20
