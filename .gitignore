@@ -13,3 +13,4 @@ godot*.log
 **/*.import
 **/*.uid
 
+__pycache__/
