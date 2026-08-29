@@ -31,7 +31,9 @@ func get_session_for_seed(seed: int) -> GameSession:
 	return GameSession.new(seed)
 
 
-func save_game(hero: HeroController) -> bool:
+## cities — Array[City] (сериализуются сами); characters — результат
+## CharacterRegistry.serialize() (save v3: Каскад Сложности).
+func save_game(hero: HeroController, cities: Array = [], characters: Array = []) -> bool:
 	if session == null or hero == null or world_delta == null:
 		return false
 
@@ -40,6 +42,11 @@ func save_game(hero: HeroController) -> bool:
 	save_data.date = _date.duplicate()
 	save_data.hero = hero.serialize()
 	save_data.world = world_delta.serialize()
+	var cities_arr: Array = []
+	for c in cities:
+		cities_arr.append(c.serialize())
+	save_data.cities = cities_arr
+	save_data.characters = characters
 
 	var err := _save_manager.save_game(save_data)
 	if err == SaveManager.SaveError.OK:
@@ -134,6 +141,10 @@ func apply_loaded_save(data: SaveData, ctx) -> void:
 		for cell in ctx.world_delta.exhausted_nodes:
 			ctx.resource_node_manager.mark_exhausted(cell)
 
+	# --- Сохранение v3: города и персонажи (Каскад Сложности) ---
+	_restore_cities(data, ctx)
+	_restore_characters(data, ctx)
+
 	if ctx.camera and ctx.hero:
 		ctx.camera.center_on(ctx.hero.position)
 
@@ -146,3 +157,43 @@ func apply_loaded_save(data: SaveData, ctx) -> void:
 			str(ctx.hero.current_cell if ctx.hero else Vector2i(-1, -1))
 		]
 	)
+
+
+func _restore_cities(data: SaveData, ctx) -> void:
+	## Города пересозданы при бутстрапе — по uid возвращаем прогресс.
+	## v2-сейв (cities пусто) — не трогает.
+	if not (ctx.cities is Node):
+		return
+	if not (data.cities is Array) or (data.cities as Array).is_empty():
+		return
+	var all: Array = ctx.cities.cities
+	var saved_count: int = (data.cities as Array).size()
+	var restored := 0
+	for d in data.cities:
+		var city := _find_city(all, int(d.get("uid", 0)), saved_count)
+		if city == null:
+			GameLogger.warn("Load: город uid=%s не найден — пропущен" % d.get("uid", "?"))
+			continue
+		city.deserialize(d)
+		restored += 1
+	if restored > 0:
+		GameLogger.world("Loaded cities: %d" % restored)
+
+
+func _find_city(all: Array, city_uid: int, saved_count: int) -> City:
+	for c in all:
+		if c.uid == city_uid:
+			return c
+	# Fallback: единственный город (столица) — единственный и в сейве.
+	if all.size() == 1 and saved_count == 1:
+		return all[0]
+	return null
+
+
+func _restore_characters(data: SaveData, ctx) -> void:
+	if ctx.character_registry == null:
+		return
+	if not (data.characters is Array) or (data.characters as Array).is_empty():
+		return
+	ctx.character_registry.deserialize(data.characters)
+	GameLogger.world("Loaded characters: %d" % (data.characters as Array).size())

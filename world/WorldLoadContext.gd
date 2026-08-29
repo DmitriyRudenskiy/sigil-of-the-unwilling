@@ -9,3 +9,6 @@ var ui_manager: WorldUIManager
 var camera: WorldCamera
 var hero: HeroController
 var world_delta: WorldStateDelta
+# Сохранение v3 (Каскад Сложности): города + персонажи.
+var cities: Node = null  # CityManager
+var character_registry: CharacterRegistry = null

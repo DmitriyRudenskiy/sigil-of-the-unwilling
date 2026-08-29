@@ -151,7 +151,11 @@ func do_end_turn() -> void:
 
 func save_game() -> bool:
 	_persistence.world_delta = _world_delta
-	return _persistence.save_game(_hero)
+	# save v3: города и персонажи (Каскад Сложности).
+	var chars: Array = []
+	if _bootstrap_result != null and _bootstrap_result.character_registry != null:
+		chars = _bootstrap_result.character_registry.serialize()
+	return _persistence.save_game(_hero, _cities.cities, chars)
 
 
 func load_game() -> SaveData:
@@ -182,6 +186,10 @@ func _build_load_context():
 	ctx.camera = _camera
 	ctx.hero = _hero
 	ctx.world_delta = _world_delta
+	# save v3: города и персонажи (Каскад Сложности).
+	ctx.cities = _cities
+	if _bootstrap_result != null:
+		ctx.character_registry = _bootstrap_result.character_registry
 	return ctx
 
 

@@ -516,6 +516,121 @@ func get_great_temple_level() -> int:
 	return 0
 
 
+## ==================== СЕРИАЛИЗАЦИЯ (save v3) ====================
+## Снимок состояния города в JSON-совместимый словарь. Не сериализуется:
+## tile_yield_fn (Callable — провайдер ставится CityManager.set_tile_yield_provider
+## после загрузки) и служебный кэш _exploited (пересобирается).
+func serialize() -> Dictionary:
+	var d := {
+		"uid": uid,
+		"display_name": display_name,
+		"center": {"x": center.x, "y": center.y},
+		"faction": faction,
+		"stronghold_level": stronghold_level,
+		"is_capital": is_capital,
+		"food_stockpile": food_stockpile,
+		"starving": starving,
+		"scale_tier": scale_tier,
+		"auto_resource_mult": auto_resource_mult,
+		"upkeep_mult": upkeep_mult,
+		"uid_seq": _uid_seq,
+	}
+	var storage_str: Dictionary = {}
+	for k in storage:
+		storage_str[String(k)] = float(storage[k])
+	d["storage"] = storage_str
+	var sites: Array = []
+	for cell in special_sites:
+		sites.append({"cell": {"x": cell.x, "y": cell.y}, "site": String(special_sites[cell])})
+	d["special_sites"] = sites
+	var roads_arr: Array = []
+	for cell in roads:
+		roads_arr.append({"x": cell.x, "y": cell.y})
+	d["roads"] = roads_arr
+	if resource_ctx != null:
+		d["resource_ctx"] = resource_ctx.serialize()
+	var pops_arr: Array = []
+	for u in pop:
+		pops_arr.append(u.serialize())
+	d["pop"] = pops_arr
+	var bhs_arr: Array = []
+	for b in boroughs:
+		bhs_arr.append({"cell": {"x": b.cell.x, "y": b.cell.y}, "level": b.level, "uid": b.uid})
+	d["boroughs"] = bhs_arr
+	var blds_arr: Array = []
+	for b in buildings:
+		blds_arr.append(b.serialize())
+	d["buildings"] = blds_arr
+	return d
+
+
+## Восстановление состояния из снимка (save v3). Вызывается после
+## пересоздания города при загрузке сцены: структура (центр, фракция)
+## уже существует — сюда возвращается прогресс.
+func deserialize(data: Dictionary) -> void:
+	var c: Dictionary = data.get("center", {})
+	center = Vector2i(int(c.get("x", -1)), int(c.get("y", -1)))
+	faction = int(data.get("faction", Faction.DEFAULT))
+	stronghold_level = int(data.get("stronghold_level", 1))
+	is_capital = bool(data.get("is_capital", false))
+	food_stockpile = float(data.get("food_stockpile", 0.0))
+	starving = bool(data.get("starving", false))
+	scale_tier = int(data.get("scale_tier", 0))
+	auto_resource_mult = float(data.get("auto_resource_mult", 1.0))
+	upkeep_mult = float(data.get("upkeep_mult", 1.0))
+
+	storage.clear()
+	var raw_storage: Dictionary = data.get("storage", {})
+	for k in raw_storage:
+		storage[StringName(k)] = float(raw_storage[k])
+
+	special_sites.clear()
+	for s in data.get("special_sites", []):
+		var sc: Dictionary = s.cell
+		special_sites[Vector2i(int(sc.get("x", 0)), int(sc.get("y", 0)))] \
+			= StringName(s.site)
+
+	roads.clear()
+	for rc in data.get("roads", []):
+		roads[Vector2i(int(rc.get("x", 0)), int(rc.get("y", 0)))] = true
+
+	if data.has("resource_ctx"):
+		ensure_resource_ctx()
+		resource_ctx.deserialize(data["resource_ctx"])
+
+	pop.clear()
+	for pd in data.get("pop", []):
+		pop.append(PopUnit.deserialize(pd))
+
+	boroughs.clear()
+	for bd in data.get("boroughs", []):
+		var bcell: Dictionary = bd.cell
+		var bh := Borough.new()
+		bh.cell = Vector2i(int(bcell.get("x", 0)), int(bcell.get("y", 0)))
+		bh.level = int(bd.get("level", 1))
+		bh.uid = int(bd.get("uid", 0))
+		boroughs.append(bh)
+
+	buildings.clear()
+	for bl in data.get("buildings", []):
+		var def := BuildingDefs.def_by_id(StringName(bl.get("def_id", "")))
+		if def == null:
+			GameLogger.warn("City.deserialize: неизвестное здание '%s' — пропущено" % bl.get("def_id", ""))
+			continue
+		buildings.append(UniqueBuilding.deserialize(bl, def))
+
+	# uid_seq — после максимального встреченного uid (и сохранённого значения).
+	var max_uid := int(data.get("uid_seq", 0))
+	for u in pop:
+		max_uid = maxi(max_uid, u.uid + 1)
+	for b in boroughs:
+		max_uid = maxi(max_uid, b.uid + 1)
+	for b in buildings:
+		max_uid = maxi(max_uid, b.uid + 1)
+	_uid_seq = max_uid
+	_invalidate_exploited()
+
+
 func _within_build_distance(cell: Vector2i) -> bool:
 	if HexUtils.hex_distance(cell, center) <= CityBalance.BUILDING_MAX_BUILD_DISTANCE:
 		return true

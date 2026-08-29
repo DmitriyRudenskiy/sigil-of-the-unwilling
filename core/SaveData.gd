@@ -2,7 +2,7 @@ extends RefCounted
 class_name SaveData
 ## Save file data container.
 
-const CURRENT_VERSION := 2
+const CURRENT_VERSION := 3
 const CURRENT_GENERATOR_VERSION := 1
 
 var version: int = CURRENT_VERSION
@@ -11,6 +11,11 @@ var run_seed: int = 0
 var date: Dictionary = {"month": 1, "week": 1, "day": 1}
 var hero: Dictionary = {}
 var world: Dictionary = {}
+# --- Сохранение v3 (Каскад Сложности): состояние городов и персонажей ---
+## Сериализованные города (City.serialize()). v2-сейвы: пустой список.
+var cities: Array = []
+## Сериализованные персонажи (CharacterRegistry.serialize()). v2: пусто.
+var characters: Array = []
 
 
 func to_dict() -> Dictionary:
@@ -21,6 +26,8 @@ func to_dict() -> Dictionary:
 		"date": date,
 		"hero": hero,
 		"world": world,
+		"cities": cities,
+		"characters": characters,
 	}
 
 
@@ -31,6 +38,8 @@ func from_dict(data: Dictionary) -> void:
 	# Migrate save data across versions
 	if version < 2:
 		_migrate_v1_to_v2(data)
+	if version < 3:
+		_migrate_v2_to_v3(data)
 	version = CURRENT_VERSION
 
 	run_seed = int(data.get("run_seed", 0))
@@ -45,6 +54,10 @@ func from_dict(data: Dictionary) -> void:
 	}
 	hero = data.get("hero", {})
 	world = data.get("world", {})
+	var raw_cities = data.get("cities", [])
+	cities = raw_cities if raw_cities is Array else []
+	var raw_chars = data.get("characters", [])
+	characters = raw_chars if raw_chars is Array else []
 
 func _migrate_v1_to_v2(data: Dictionary) -> void:
 	## v2: ensure hero.time_mp_spent exists for mana persistence
@@ -52,6 +65,15 @@ func _migrate_v1_to_v2(data: Dictionary) -> void:
 		data["hero"] = {}
 	if not data["hero"].has("time_mp_spent"):
 		data["hero"]["time_mp_spent"] = 0.0
+
+
+func _migrate_v2_to_v3(data: Dictionary) -> void:
+	## v3: города и персонажи (Каскад Сложности). В v2-сейвах их нет —
+	## город пересоздаётся при загрузке, персонажи появятся в первый ход.
+	if not data.has("cities") or not (data["cities"] is Array):
+		data["cities"] = []
+	if not data.has("characters") or not (data["characters"] is Array):
+		data["characters"] = []
 
 
 func is_valid() -> bool:

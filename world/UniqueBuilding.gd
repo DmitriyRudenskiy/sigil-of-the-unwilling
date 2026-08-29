@@ -55,3 +55,44 @@ func next_level_req() -> LevelReq:
 	if level >= def.levels.size():
 		return null
 	return def.levels[level]
+
+
+## ==================== СЕРИАЛИЗАЦИЯ (save v3) ====================
+func serialize() -> Dictionary:
+	var d := {
+		"def_id": String(def.id) if def != null else "",
+		"cell": {"x": cell.x, "y": cell.y},
+		"level": level,
+		"uid": uid,
+		"assigned_followers": assigned_followers,
+		"zone_type": zone_type,
+		"upkeep": {},
+		"zone_multiplier": zone_multiplier,
+	}
+	var upkeep_str: Dictionary = {}
+	for k in upkeep:
+		upkeep_str[String(k)] = float(upkeep[k])
+	d["upkeep"] = upkeep_str
+	if production_chain != null:
+		d["chain"] = production_chain.to_dict()
+	return d
+
+
+static func deserialize(data: Dictionary, def: UniqueBuilding.Def) -> UniqueBuilding:
+	## def — перевязка по BuildingDefs.def_by_id() (делает вызывающий).
+	var b := UniqueBuilding.new()
+	b.def = def
+	var c: Dictionary = data.get("cell", {})
+	b.cell = Vector2i(int(c.get("x", -1)), int(c.get("y", -1)))
+	b.level = int(data.get("level", 0))
+	b.uid = int(data.get("uid", 0))
+	b.assigned_followers = int(data.get("assigned_followers", 0))
+	b.zone_type = int(data.get("zone_type", 0))
+	b.zone_multiplier = float(data.get("zone_multiplier", 1.0))
+	var raw_upkeep: Dictionary = data.get("upkeep", {})
+	for k in raw_upkeep:
+		b.upkeep[StringName(k)] = float(raw_upkeep[k])
+	var raw_chain: Dictionary = data.get("chain", {})
+	if not raw_chain.is_empty():
+		b.production_chain = ProductionChain.from_dict(raw_chain)
+	return b

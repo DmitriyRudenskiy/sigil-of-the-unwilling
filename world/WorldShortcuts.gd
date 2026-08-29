@@ -27,7 +27,14 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 
 		if event.keycode == KEY_F5:
-			if _persistence and _persistence.save_game(_hero):
+			# save v3: через WorldController (берёт города и персонажей);
+			# fallback — только герой (старый путь).
+			var saved := false
+			if _world_ctrl != null and _world_ctrl.has_method("save_game"):
+				saved = bool(_world_ctrl.save_game())
+			elif _persistence:
+				saved = _persistence.save_game(_hero)
+			if saved:
 				GameLogger.world("Quick save OK")
 			get_viewport().set_input_as_handled()
 			return

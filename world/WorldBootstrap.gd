@@ -107,6 +107,11 @@ static func _resolve_session(R: BootstrapResult) -> SaveData:
 	else:
 		R.persistence.session = R.persistence.get_session_for_seed(R.persistence.get_run_seed())
 	R.session = R.persistence.session
+	# Пустой дельта-снимок мира: нужен для save (в новой игре world_delta
+	# раньше оставался null -> F5 всегда возвращал false). При загрузке
+	# apply_loaded_save пересоздаёт/перезаполняет его из сейва.
+	if R.world_delta == null:
+		R.world_delta = WorldStateDelta.new()
 	return loaded_save
 
 

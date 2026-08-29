@@ -36,6 +36,21 @@ static func ancient_vault() -> UniqueBuilding.Def:
 	])
 
 
+## Перевязка определения по id (save v3: восстановление зданий).
+## Неизвестный id -> null (здание не восстанавливается).
+static func def_by_id(id: StringName) -> UniqueBuilding.Def:
+	match id:
+		&"great_temple":
+			return great_temple()
+		&"market":
+			return market()
+		&"barracks":
+			return barracks()
+		&"ancient_vault":
+			return ancient_vault()
+	return null
+
+
 static func _mk(
 	id: StringName, display_name: String, requires_site: bool, levels: Array
 ) -> UniqueBuilding.Def:
