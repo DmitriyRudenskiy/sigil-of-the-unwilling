@@ -39,6 +39,16 @@ static func ancient_vault() -> UniqueBuilding.Def:
 	])
 
 
+static func walls() -> UniqueBuilding.Def:
+	## Стены (Спринт 10): защита города от рейдов.
+	## +RaidSystem.DEFENSE_PER_WALL к обороне за каждый уровень.
+	return _mk(&"walls", "Стены", false, [
+		_req(20.0),
+		_req(50.0, 2, &"gold", 30.0),
+		_req(100.0, 3, &"gold", 60.0),
+	])
+
+
 ## --- Цепочки производства (Спринт 8) ---
 ## Порядок цепочек: зерно->мука->хлеб, руда->инструменты,
 ## училище->баллы учёных, таверна/торговый пост->золото.
@@ -131,6 +141,8 @@ static func def_by_id(id: StringName) -> UniqueBuilding.Def:
 			return barracks()
 		&"ancient_vault":
 			return ancient_vault()
+		&"walls":
+			return walls()
 		&"shack":
 			return shack()
 		&"manor":

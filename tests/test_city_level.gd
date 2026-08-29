@@ -189,7 +189,7 @@ func test_processor_prosperity_and_level_up() -> void:
 	var got: Array = []
 	proc.city_level_up.connect(func(uid: int, lvl: int): got.append([uid, lvl]))
 	var gold_before: float = c.storage[&"industry"]
-	proc._process_city(c)
+	proc._process_city(c, 7)
 
 	# Репутация (шаг 6): +1 за избыток еды. Процветание (шаг 9):
 	# 50 + 10 (еда) + 10 (золото) + 4 (2 здания) + 0.1 (репутация 1) = 74.1.

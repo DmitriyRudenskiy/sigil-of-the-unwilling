@@ -31,6 +31,8 @@ signal migration_occurred(city_uid: int, immigrants: int, emigrants: int)
 signal worker_assignment_changed(city_uid: int, assigned: int)
 ## Спринт 9: город повысил уровень (1..5).
 signal city_level_up(city_uid: int, new_level: int)
+## Спринт 10: рейд (repelled = отбит).
+signal raid_occurred(city_uid: int, repelled: bool)
 
 
 ## Базовые (до масштабного бонуса) ёмкости: city.uid -> {id: float}.
@@ -47,23 +49,24 @@ func get_priority() -> int:
 
 func process(ctx: TurnContext) -> Dictionary:
 	var report := {"cities": [], "scale_changes": 0, "zone_violations": 0,
-		"rep_deltas": 0, "immigrants": 0, "emigrants": 0}
+		"rep_deltas": 0, "immigrants": 0, "emigrants": 0, "raids": 0}
 	if ctx == null:
 		return report
 	for city in ctx.cities:
-		var city_report: Dictionary = _process_city(city)
+		var city_report: Dictionary = _process_city(city, int(ctx.turn_number))
 		(report["cities"] as Array).append(city_report)
 		report["scale_changes"] += int(city_report.get("scale_changed", 0))
 		report["zone_violations"] += int(city_report.get("violations", 0))
 		report["rep_deltas"] += int(city_report.get("rep_delta", 0))
 		report["immigrants"] += int(city_report.get("immigrants", 0))
 		report["emigrants"] += int(city_report.get("emigrants", 0))
+		report["raids"] += int(city_report.get("raid_occurred", 0))
 	return report
 
 
-func _process_city(city: City) -> Dictionary:
+func _process_city(city: City, turn: int) -> Dictionary:
 	var report := {"uid": city.uid, "scale_changed": 0, "violations": 0, "tier": 0,
-		"rep_delta": 0, "immigrants": 0, "emigrants": 0}
+		"rep_delta": 0, "immigrants": 0, "emigrants": 0, "raid_occurred": 0}
 
 	# 1. Масштаб.
 	var new_tier: int = ScaleShiftManager.tier_for(city.pop_capped())
@@ -152,6 +155,14 @@ func _process_city(city: City) -> Dictionary:
 	if ProsperitySystem.try_level_up(city):
 		report["level_up"] = city.level
 		city_level_up.emit(city.uid, city.level)
+
+	# 11. Рейды (Спринт 10): детерминированный бросок от (uid, turn).
+	var raid: Dictionary = RaidSystem.resolve(city, turn)
+	if bool(raid.occurred):
+		report["raid_occurred"] = 1
+		report["raid_repelled"] = bool(raid.repelled)
+		report["raid_strength"] = int(raid.strength)
+		raid_occurred.emit(city.uid, bool(raid.repelled))
 	return report
 
 

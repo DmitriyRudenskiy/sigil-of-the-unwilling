@@ -715,6 +715,15 @@ func ring_of(cell: Vector2i) -> int:
 	return HexUtils.hex_distance(cell, center)
 
 
+## Спринт 10: сила обороны: ополчение + стены (за каждый уровень).
+func defense_strength() -> int:
+	var d := count_state(PopUnit.State.MILITIA) * RaidSystem.DEFENSE_PER_MILITIA
+	for b in buildings:
+		if b != null and b.def != null and b.def.id == &"walls":
+			d += b.level * RaidSystem.DEFENSE_PER_WALL
+	return d
+
+
 func _check_req(req: UniqueBuilding.LevelReq) -> Dictionary:
 	if float(storage.get(&"industry", 0.0)) < req.industry:
 		return _fail("Промышленность: %.0f/%.0f" % [float(storage.get(&"industry", 0.0)), req.industry])

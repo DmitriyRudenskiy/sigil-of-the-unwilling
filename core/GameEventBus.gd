@@ -41,6 +41,8 @@ signal reputation_changed(city_uid: int, value: int, band: int)
 signal migration_occurred(city_uid: int, immigrants: int, emigrants: int)
 signal city_level_up(city_uid: int, new_level: int)
 signal raid_occurred(city_uid: int, repelled: bool)
+## Спринт 10: сделка на рынке (city.traded через MarketSystem).
+signal trade_completed(city_uid: int, resource_id: StringName, amount: float, gold: float)
 signal city_event_occurred(city_uid: int, event_id: StringName)
 signal relocation_completed(city_uid: int, new_center: Vector2i)
 
