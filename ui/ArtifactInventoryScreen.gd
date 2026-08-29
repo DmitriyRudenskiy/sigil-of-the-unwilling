@@ -147,6 +147,8 @@ func _build() -> void:
 	_build_right(window, Vector2i(424, 6))
 	_build_side(window, Vector2i(862, 6))
 	_build_bottom(window, Vector2i(6, 600))
+	# Инициализировать отображение под текущего героя (иконки рюкзака, накладки).
+	_refresh()
 
 # ---------------------------------------------------------------------------
 # Левая панель
@@ -309,38 +311,37 @@ func _build_right(parent: Control, origin: Vector2i) -> void:
 	inv.add_theme_stylebox_override("panel", _stylebox(PANEL_BORDER, 2, 4, true, PANEL_BG, 6))
 	right.add_child(inv)
 
-	# Стрелки
-	var prev := TextureRect.new()
+	# Стрелки prev/next (22×56, как в макете): кнопка с фоном строки + иконка-стрелка.
+	var prev := Button.new()
 	prev.name = "Prev"
-	prev.texture = _tex("res://assets/ui/icons/arrow_s.png", 22, 56)
-	_set_offsets(prev, 8, 6, 22, 56)
-	prev.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	prev.add_theme_stylebox_override("panel", _stylebox(Color("#201006"), 2, 6, true, SLOT_BG))
+	prev.focus_mode = Button.FOCUS_NONE
+	var prev_ic := TextureRect.new()
+	prev_ic.texture = _tex("res://assets/ui/icons/arrow_s.png", 22, 56)
+	prev_ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	prev.add_child(prev_ic)
+	prev.offset_left = 8
+	prev.offset_top = 6
+	prev.offset_right = 30
+	prev.offset_bottom = 62
+	prev.pressed.connect(func(): _backpack_scroll_by(-1))
 	inv.add_child(prev)
 
-	var next := TextureRect.new()
+	var next := Button.new()
 	next.name = "Next"
-	next.texture = _tex("res://assets/ui/icons/arrow_s.png", 22, 56)
-	next.flip_h = true
-	_set_offsets(next, 402, 6, 22, 56)
-	next.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	next.add_theme_stylebox_override("panel", _stylebox(Color("#201006"), 2, 6, true, SLOT_BG))
+	next.focus_mode = Button.FOCUS_NONE
+	var next_ic := TextureRect.new()
+	next_ic.texture = _tex("res://assets/ui/icons/arrow_s.png", 22, 56)
+	next_ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	next.add_child(next_ic)
+	next.offset_left = 402
+	next.offset_top = 6
+	next.offset_right = 424
+	next.offset_bottom = 62
+	next_ic.flip_h = true
+	next.pressed.connect(func(): _backpack_scroll_by(1))
 	inv.add_child(next)
-
-	# Невидимые кнопки-стрелки ( во весь размер строки) для обработки нажатий.
-	var prev_btn := Button.new()
-	prev_btn.name = "PrevBtn"
-	_set_offsets(prev_btn, 0, 0, 432, 68)
-	prev_btn.focus_mode = Button.FOCUS_NONE
-	prev_btn.add_theme_stylebox_override("panel", _stylebox(Color("#201006"), 0, 0, true, Color(0, 0, 0, 0)))
-	prev_btn.pressed.connect(func(): _backpack_scroll_by(-1))
-	inv.add_child(prev_btn)
-
-	var next_btn := Button.new()
-	next_btn.name = "NextBtn"
-	_set_offsets(next_btn, 0, 0, 432, 68)
-	next_btn.focus_mode = Button.FOCUS_NONE
-	next_btn.add_theme_stylebox_override("panel", _stylebox(Color("#201006"), 0, 0, true, Color(0, 0, 0, 0)))
-	next_btn.pressed.connect(func(): _backpack_scroll_by(1))
-	inv.add_child(next_btn)
 
 	# Сетка из 6 слотов рюкзака (56x56), позиции по макету (шаг 62, центровка).
 	for i in 6:
