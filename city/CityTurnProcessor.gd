@@ -29,6 +29,8 @@ signal zone_violation(city_uid: int, cell: Vector2i)
 signal reputation_changed(city_uid: int, value: int, band: int)
 signal migration_occurred(city_uid: int, immigrants: int, emigrants: int)
 signal worker_assignment_changed(city_uid: int, assigned: int)
+## Спринт 9: город повысил уровень (1..5).
+signal city_level_up(city_uid: int, new_level: int)
 
 
 ## Базовые (до масштабного бонуса) ёмкости: city.uid -> {id: float}.
@@ -134,6 +136,22 @@ func _process_city(city: City) -> Dictionary:
 	if assigned > 0:
 		report["workers_assigned"] = assigned
 		worker_assignment_changed.emit(city.uid, assigned)
+
+	# 9. Процветание (Спринт 9): пересчёт + бонус к золоту + реп. модификатор.
+	var prosperity: float = ProsperitySystem.recalculate(city)
+	var gold_bonus: float = ProsperitySystem.gold_bonus(city)
+	if gold_bonus > 0.0:
+		city.storage[&"industry"] = float(city.storage.get(&"industry", 0.0)) + gold_bonus
+	var rep_mod: int = ProsperitySystem.reputation_mod(city)
+	if rep_mod != 0:
+		ReputationSystem.apply(city, float(rep_mod))
+	report["prosperity"] = prosperity
+	report["gold_bonus"] = gold_bonus
+
+	# 10. Уровень города (Спринт 9): кольцо застройки расширяется.
+	if ProsperitySystem.try_level_up(city):
+		report["level_up"] = city.level
+		city_level_up.emit(city.uid, city.level)
 	return report
 
 

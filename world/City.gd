@@ -19,6 +19,9 @@ var display_name := ""
 var center := Vector2i(-1, -1)
 ## Спринт 6: репутация (-100..+100), диапазон — ReputationSystem.band().
 var reputation := 0
+## Спринт 9: процветание (0..100, ProsperitySystem) и уровень города (1..5).
+var prosperity := 50.0
+var level := 1
 var faction: int = Faction.DEFAULT
 var stronghold_level := 1
 var is_capital := false
@@ -497,7 +500,7 @@ func can_build_building(def: UniqueBuilding.Def, cell: Vector2i) -> Dictionary:
 			return _fail("Здание требует специальной площадки")
 	else:
 		if not _within_build_distance(cell):
-			return _fail("Не дальше %d клеток от города или района" % CityBalance.BUILDING_MAX_BUILD_DISTANCE)
+			return _fail("Не дальше %d клеток от города или района" % building_max_distance())
 	var req: UniqueBuilding.LevelReq = def.levels[0]
 	return _check_req(req)
 
@@ -582,6 +585,8 @@ func serialize() -> Dictionary:
 		"display_name": display_name,
 		"center": {"x": center.x, "y": center.y},
 		"reputation": reputation,
+		"prosperity": prosperity,
+		"level": level,
 		"faction": faction,
 		"stronghold_level": stronghold_level,
 		"is_capital": is_capital,
@@ -628,6 +633,8 @@ func deserialize(data: Dictionary) -> void:
 	var c: Dictionary = data.get("center", {})
 	center = Vector2i(int(c.get("x", -1)), int(c.get("y", -1)))
 	reputation = int(data.get("reputation", 0))
+	prosperity = clampf(float(data.get("prosperity", 50.0)), 0.0, 100.0)
+	level = clampi(int(data.get("level", 1)), 1, ProsperitySystem.CITY_LEVEL_MAX)
 	faction = int(data.get("faction", Faction.DEFAULT))
 	stronghold_level = int(data.get("stronghold_level", 1))
 	is_capital = bool(data.get("is_capital", false))
@@ -690,12 +697,22 @@ func deserialize(data: Dictionary) -> void:
 
 
 func _within_build_distance(cell: Vector2i) -> bool:
-	if HexUtils.hex_distance(cell, center) <= CityBalance.BUILDING_MAX_BUILD_DISTANCE:
+	if HexUtils.hex_distance(cell, center) <= building_max_distance():
 		return true
 	for b in boroughs:
-		if HexUtils.hex_distance(cell, b.cell) <= CityBalance.BUILDING_MAX_BUILD_DISTANCE:
+		if HexUtils.hex_distance(cell, b.cell) <= building_max_distance():
 			return true
 	return false
+
+
+## Спринт 9: радиус застройки (кольцо) растёт с уровнем: 3, 4, 5, 5, 5.
+func building_max_distance() -> int:
+	return ProsperitySystem.build_radius_for_level(level)
+
+
+## Спринт 9: кольцо клетки — расстояние по гексам от центра города.
+func ring_of(cell: Vector2i) -> int:
+	return HexUtils.hex_distance(cell, center)
 
 
 func _check_req(req: UniqueBuilding.LevelReq) -> Dictionary:

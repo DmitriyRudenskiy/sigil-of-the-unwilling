@@ -251,6 +251,9 @@ static func _register_city(R: BootstrapResult) -> void:
 	city_proc.migration_occurred.connect(
 		func(city_uid: int, immigrants: int, emigrants: int):
 			GameEventBus.migration_occurred.emit(city_uid, immigrants, emigrants))
+	city_proc.city_level_up.connect(
+		func(city_uid: int, new_level: int):
+			GameEventBus.city_level_up.emit(city_uid, new_level))
 
 
 static func _register_economy(R: BootstrapResult) -> void:
