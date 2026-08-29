@@ -26,6 +26,7 @@ class BootstrapResult:
 	var world_delta: Variant = null
 	var persistence: Variant = null
 	var resource_chain: Variant = null
+	var turn_scheduler: TurnScheduler = null
 	var rng: RandomNumberGenerator = null
 	var session: Variant = null
 	var loaded_save: SaveData = null
@@ -200,6 +201,11 @@ static func _create_cities(parent: Node2D, R: BootstrapResult) -> void:
 
 
 static func _create_subsystems(parent: Node2D, R: BootstrapResult) -> void:
+	# M0: Ядро — оркестратор фаз хода. Процессоры (M1 экономика, M2 демография,
+	# M3 город) регистрируются сюда по мере готовности (см. следующие шаги
+	# внедрения «Каскада сложности»); роутер событий вызывает execute_turn().
+	R.turn_scheduler = TurnScheduler.new()
+
 	R.battle_coordinator = WorldBattleCoordinator.new()
 	R.battle_coordinator.name = "BattleCoordinator"
 	# setup is called by parent after bootstrap (parent reference needed)

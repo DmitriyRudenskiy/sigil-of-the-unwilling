@@ -21,6 +21,7 @@ var ui_manager: Node = null
 var world_delta: Variant = null
 var persistence: Variant = null
 var resource_chain: Variant = null
+var turn_scheduler: TurnScheduler = null  # M0: Ядро — оркестратор фаз хода
 var _resource_registry: Node = null
 
 
@@ -41,7 +42,8 @@ func setup(
 	p_resource_node_manager: Node, p_ui_manager: Node,
 	p_world_delta: Variant, p_persistence: Variant,
 	p_resource_chain: Variant,
-	p_resource_registry: Node = null
+	p_resource_registry: Node = null,
+	p_turn_scheduler: TurnScheduler = null
 ) -> void:
 	hero = p_hero
 	map_gen = p_map_gen
@@ -55,6 +57,7 @@ func setup(
 	persistence = p_persistence
 	resource_chain = p_resource_chain
 	_resource_registry = ServiceLocator.resolve(p_resource_registry, &"resources")
+	turn_scheduler = p_turn_scheduler
 
 	# ВАЖНО: _ready() может выполниться ДО setup() (add_child родителя, который
 	# уже в дереве), поэтому подключение сигналов hero/ui повторяем здесь —
@@ -179,10 +182,31 @@ func _on_end_turn() -> void:
 	if cities:
 		GameEventBus.turn_ended.emit(cities.current_turn + 1, month)
 
+	# M0: Ядро — фазы хода (M1-M3) исполняются ПОСЛЕ монолита городов
+	# (City.process_turn уже отработал через turn_ended → CityManager).
+	_run_turn_scheduler(month)
+
 	if ui_manager:
 		ui_manager.refresh_ui()
 
 	end_turn_requested.emit()
+
+
+func _run_turn_scheduler(month: int) -> void:
+	## Собирает TurnContext из текущего состояния мира и запускает фазы.
+	if turn_scheduler == null or cities == null:
+		return
+	var ctx := TurnContext.new()
+	ctx.turn_number = int(cities.current_turn)
+	var date: Dictionary = persistence.get_date() if persistence != null else {}
+	ctx.month = int(date.get("month", 1))
+	ctx.week = int(date.get("week", 1))
+	ctx.day = int(date.get("day", 1))
+	for c in cities.cities:
+		ctx.cities.append(c)
+	if hero != null:
+		ctx.heroes.append(hero)
+	turn_scheduler.execute_turn(ctx)
 
 
 func _on_date_changed(month: int, week: int, day: int) -> void:

@@ -45,6 +45,12 @@ const MAP_ENEMY_DEFENSE_BONUS_MAX := 6
 # --- World ---
 const EDITOR_SEED := 12345
 
+# --- Weather (M5, TurnContext.weather) ---
+const WEATHER_CLEAR := 0
+const WEATHER_RAIN := 1
+const WEATHER_SNOW := 2
+const WEATHER_STORM := 3
+
 # --- Save/Load ---
 const SAVE_MAGIC := "SIG_SAVE"
 

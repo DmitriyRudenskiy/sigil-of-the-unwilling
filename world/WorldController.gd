@@ -69,7 +69,8 @@ func _ready() -> void:
 		battle_coordinator, interaction_controller,
 		resource_node_manager, _ui_manager,
 		_world_delta, _persistence, _resource_chain,
-		_bootstrap_result.services.resources if _bootstrap_result.services != null else null
+		_bootstrap_result.services.resources if _bootstrap_result.services != null else null,
+		_bootstrap_result.turn_scheduler
 	)
 
 	# Connect router outward signals
