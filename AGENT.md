@@ -30,12 +30,16 @@
 ├── world/       # Карта и мир: MapGenerator/Model/Renderer, Borough, City, HexGridOverlay
 ├── ui/          # UI: AdventureUI, BattleUI, панели, components
 ├── economy/     # Экономические процессы хода
+├── lair/        # Логово — контент фракции «Логово» (монстры/нейтральные здания).
+│                #   Сам каталог — контейнер: данные → data/, логика → world/,
+│                #   ассеты → assets/units/. Подробности: lair/README.md
 ├── data/        # Ресурсы/константы: SpellRegistry, ArtifactRegistry, BuildingDefs…
 ├── scenes/      # .tscn: MainMenu, World, Battle, TestTerrain, BiomePreview
 ├── tilesets/    # hex_atlas_*.png, hex_tileset.tres
 ├── assets/      # Ассеты: artifacts, audio, cursors, raw, ui, units
 ├── tests/       # Тесты: test_*.gd, unit/, fakes/
-└── tools/       # Инструменты и проверки (compile_all, check_scene_refs, …)
+├── tools/       # Инструменты и проверки (compile_all, check_scene_refs, …)
+└── tmp/         # Временные/черновые файлы (gitignored, не коммитится)
 ```
 
 ### Неигровые папки (мусор/инфраструктура — не часть игры)
@@ -45,9 +49,13 @@
 `__pycache__/`, `.godot/`, `*.log`.
 
 Эти папки **не игнорируются Git** (в `.gitignore` только `.godot/`, `.DS_Store`, `*.log`,
-`*.import`, `*.uid`, `__pycache__/`), поэтому в игровые коммиты их **намеренно не добавляем**:
+`*.import`, `*.uid`, `__pycache__/`, `tmp/`), поэтому в игровые коммиты их **намеренно не добавляем**:
 стейджим только затронутые игровые пути (`core/`, `systems/`, `entities/`, `world/`, `ui/`,
 `data/`, `scenes/`, `tilesets/`, `assets/`, `tests/`, `project.godot`).
+
+`tmp/` — рабочее пространство для черновых/временных файлов: в нём **не должно** оказываться
+того, что предназначено для игры (код, сцены, данные). Если в `tmp/` появилась готовая
+игровая фича — выносим в соответствующий слой и коммитим её там, а из `tmp/` убирали.
 
 ---
 
