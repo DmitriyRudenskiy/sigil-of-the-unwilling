@@ -52,13 +52,14 @@ func test_artifact_is_two_handed() -> void:
 	assert_false(a.is_two_handed)
 
 # ======== ArtifactRegistry tests ========
-func test_registry_has_30() -> void:
-	assert_eq(Artifacts.get_all().size(), 30)
+func test_registry_has_54() -> void:
+	# bfcf05f: +24 артефакта (6 типов x 3 класса + 6 аксессуаров).
+	assert_eq(Artifacts.get_all().size(), 54)
 
 func test_registry_rarity_distribution() -> void:
 	assert_eq(Artifacts.get_by_rarity(Artifact.Rarity.MINOR).size(), 10)
 	assert_eq(Artifacts.get_by_rarity(Artifact.Rarity.MAJOR).size(), 10)
-	assert_eq(Artifacts.get_by_rarity(Artifact.Rarity.RELIC).size(), 10)
+	assert_eq(Artifacts.get_by_rarity(Artifact.Rarity.RELIC).size(), 34)
 
 func test_registry_unique_ids() -> void:
 	var ids: Array = []

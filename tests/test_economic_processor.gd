@@ -26,6 +26,8 @@ func _make_lumber_building(city: City) -> UniqueBuilding:
 	b.uid = city.buildings.size() + 1
 	b.cell = Vector2i(6, 5)
 	b.level = 1
+	# Спринт 7: WorkerAssignment пропускает здания без def.
+	b.def = BuildingDefs.farm()
 	var chain := ProductionChain.new()
 	chain.id = &"lumber"
 	chain.inputs = {"wood": 2.0}
@@ -33,6 +35,8 @@ func _make_lumber_building(city: City) -> UniqueBuilding:
 	chain.required_workers = 2
 	b.production_chain = chain
 	city.buildings.append(b)
+	# Спринт 7/8: экономика считает только назначенных рабочих.
+	WorkerAssignment.assign_all(city)
 	return b
 
 

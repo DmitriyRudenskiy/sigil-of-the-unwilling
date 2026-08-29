@@ -70,6 +70,8 @@ func _make_building(city: City, cell: Vector2i, zone: int) -> UniqueBuilding:
 	b.cell = cell
 	b.level = 1
 	b.zone_type = zone
+	# Спринт 7: WorkerAssignment пропускает здания без def.
+	b.def = BuildingDefs.farm()
 	city.buildings.append(b)
 	return b
 

@@ -90,7 +90,7 @@ func test_lazy_character_creation() -> void:
 	assert_eq(reg.all().size(), 3, "3 characters")
 	for pop in city.pop:
 		assert_true(pop.character_uid >= 0, "pop linked")
-		var ch: Character = reg.get(pop.character_uid)
+		var ch: Character = reg.get_by_uid(pop.character_uid)  # get() = Object.get
 		assert_not_null(ch, "character exists")
 		assert_eq(ch.pop_uid, pop.uid, "pop uid matches")
 

@@ -21,7 +21,8 @@ func test_stone_definition() -> void:
 
 func test_all_resources_count() -> void:
 	var all := Resources.get_all()
-	assert_eq(all.size(), 13, "13 total resources")
+	# 13 жил + 7 городских ресурсов цепочек (Спринт 8).
+	assert_eq(all.size(), 20, "20 total resources")
 
 
 func test_hidden_resources_count() -> void:

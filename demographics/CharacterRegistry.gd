@@ -43,6 +43,8 @@ func create(city_uid: int, pop: PopUnit, rng: RandomNumberGenerator = null) -> C
 	var existing := get_by_pop(pop.uid)
 	if existing != null and existing.alive:
 		return existing
+	if rng == null:
+		rng = RandomNumberGenerator.new()
 	var ch := Character.new()
 	ch.uid = _next_uid()
 	ch.name = make_name(rng)
@@ -51,8 +53,6 @@ func create(city_uid: int, pop: PopUnit, rng: RandomNumberGenerator = null) -> C
 	ch.city_uid = city_uid
 	ch.pop_uid = pop.uid
 	ch.alive = true
-	if rng == null:
-		rng = RandomNumberGenerator.new()
 	ch.traits = _trait_registry.roll_traits(rng)
 	_characters[ch.uid] = ch
 	_by_pop[pop.uid] = ch.uid

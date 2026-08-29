@@ -14,6 +14,20 @@ func _ready() -> void:
 func reset() -> void:
 	_resources.clear()
 
+## Городские ресурсы цепочек производства (Спринт 8).
+## Не спавнятся на карте (пустые биомы) — только городские цепочки.
+## Ёмкость = вместимость амбара ResourceContext.
+const CITY_RESOURCE_CAPACITIES: Dictionary = {
+	&"grain": 20.0,      # зерно
+	&"flour": 20.0,      # мука
+	&"bread": 20.0,      # хлеб
+	&"ore": 20.0,        # руда
+	&"tools": 10.0,      # инструменты
+	&"gold": 50.0,       # золото (доход)
+	&"scholar_points": 10.0,  # баллы училища
+}
+
+
 func ensure_definitions() -> void:
 	if not _resources.is_empty():
 		return
@@ -95,6 +109,25 @@ func ensure_definitions() -> void:
 		"", &"", &"worker", "", "", false,
 		2, 2, 0.0, "🪨")
 
+	# Городские ресурсы цепочек (Спринт 8): не на карте, амбар-ёмкость.
+	_add_city(&"grain", "Зерно", float(CITY_RESOURCE_CAPACITIES[&"grain"]))
+	_add_city(&"flour", "Мука", float(CITY_RESOURCE_CAPACITIES[&"flour"]))
+	_add_city(&"bread", "Хлеб", float(CITY_RESOURCE_CAPACITIES[&"bread"]))
+	_add_city(&"ore", "Руда", float(CITY_RESOURCE_CAPACITIES[&"ore"]))
+	_add_city(&"tools", "Инструменты", float(CITY_RESOURCE_CAPACITIES[&"tools"]))
+	_add_city(&"gold", "Золото", float(CITY_RESOURCE_CAPACITIES[&"gold"]))
+	_add_city(&"scholar_points", "Баллы училища",
+		float(CITY_RESOURCE_CAPACITIES[&"scholar_points"]))
+
+
+## Городской ресурс: без биомов/добычи, только цепочки города.
+func _add_city(id: StringName, name: String, capacity: float) -> void:
+	var def := ResourceDef.new()
+	def.id = id
+	def.display_name = name
+	def.capacity = capacity
+	_resources[id] = def
+
 
 func _add(id: StringName, name: String, biomes: Array[String], rarity: int,
 		discovery_skill: StringName, discovery_time: String, discovery_auto: bool, discovery_auto_tags: Array[StringName],
@@ -146,7 +179,9 @@ func get_by_biome(biome: String) -> Array[ResourceDef]:
 
 
 func is_hidden_resource(id: StringName) -> bool:
-	return id != &"wood" and id != &"stone"
+	# Городские ресурсы цепочек (Спринт 8) — не жилы.
+	return id != &"wood" and id != &"stone" \
+		and not CITY_RESOURCE_CAPACITIES.has(id)
 
 
 func get_hidden_resource_ids() -> Array[StringName]:

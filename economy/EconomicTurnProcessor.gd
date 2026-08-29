@@ -8,7 +8,8 @@ extends TurnPhaseProcessor
 ##  1. Авто-ресурсы — дрова/камень по GameSettings (базовый уклад мира;
 ##     они — вход для цепочек, поэтому идут ПЕРВЫМИ);
 ##  2. Цепочки производства зданий (production_chain) — входы списываются
-##     из resource_ctx, выходы добавляются туда же;
+##     из resource_ctx, выходы добавляются туда же; рабочих считает
+##     здание (assigned_workers, Спринт 7: WorkerAssignment);
 ##  3. Поддержка (upkeep) — списывается ресурс на содержание зданий.
 ##
 ## Внешние эффекты (GameEventBus/UI) не вызываются здесь: сигналы
@@ -69,10 +70,14 @@ func _process_city(city: City, _ctx: TurnContext) -> Dictionary:
 		var chain: ProductionChain = building.get_production_chain()
 		if chain == null:
 			continue
-		var workers: int = city.count_state(PopUnit.State.WORKER)
+		# Спринт 7/8: рабочие, НАЗНАЧЕННЫЕ на это здание (WorkerAssignment),
+		# а не всё рабочее население города.
+		var workers: int = building.assigned_workers
 		# M3: логистика (дистанция/дороги) × зона здания (агломерация и т.п.).
+		# Спринт 8: × adjacency-бонус соседей (мельница у полей, кузница у рудника).
 		var logistics: float = city.get_logistics_multiplier(building.cell) \
-			* building.zone_multiplier
+			* building.zone_multiplier \
+			* AdjacencySystem.building_output_mult(city, building)
 		var outputs: Dictionary = chain.execute(res, workers, logistics)
 		if outputs.is_empty():
 			# Цепочка не отработала (нет рабочих или нехватка входов);

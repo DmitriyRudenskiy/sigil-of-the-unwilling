@@ -84,7 +84,8 @@ func test_get_hidden_ids() -> void:
 
 func test_get_all() -> void:
 	var all = Resources.get_all()
-	assert_eq(all.size(), 13, "13 total")
+	# 13 жил + 7 городских ресурсов цепочек (Спринт 8: зерно/мука/хлеб/руда/инструменты/золото/учёные).
+	assert_eq(all.size(), 20, "20 total")
 
 func test_biome_grass() -> void:
 	var defs = Resources.get_by_biome("grass")
