@@ -20,7 +20,15 @@ extends TurnPhaseProcessor
 ##     migration_occurred;
 ##  8. Рабочие (Спринт 7) — WorkerAssignment.rebalance(): сломанные
 ##     ссылки освобождаем, здания добирают рабочих до required_workers,
-##     сигнал worker_assignment_changed.
+##     сигнал worker_assignment_changed;
+##  9. Процветание (Спринт 9) — пересчёт prosperity, бонус золота и
+##     репутационный модификатор;
+## 10. Уровень города (Спринт 9) — при выполнении всех врат повышение,
+##     сигнал city_level_up;
+## 11. Рейды (Спринт 10) — детерминированный бросок от (uid, turn),
+##     сигнал raid_occurred;
+## 12. События (Спринт 11) — детерминированный бросок, пул эффектов,
+##     сигнал city_event_occurred; наука специализации scholar.
 ##
 ## Не вызывает city.process_turn() — монолит идёт своим контуром (turn_ended).
 
@@ -33,6 +41,8 @@ signal worker_assignment_changed(city_uid: int, assigned: int)
 signal city_level_up(city_uid: int, new_level: int)
 ## Спринт 10: рейд (repelled = отбит).
 signal raid_occurred(city_uid: int, repelled: bool)
+## Спринт 11: городское событие (event_id из CityEvents.POOL).
+signal city_event_occurred(city_uid: int, event_id: StringName)
 
 
 ## Базовые (до масштабного бонуса) ёмкости: city.uid -> {id: float}.
@@ -49,7 +59,7 @@ func get_priority() -> int:
 
 func process(ctx: TurnContext) -> Dictionary:
 	var report := {"cities": [], "scale_changes": 0, "zone_violations": 0,
-		"rep_deltas": 0, "immigrants": 0, "emigrants": 0, "raids": 0}
+		"rep_deltas": 0, "immigrants": 0, "emigrants": 0, "raids": 0, "events": 0}
 	if ctx == null:
 		return report
 	for city in ctx.cities:
@@ -61,12 +71,14 @@ func process(ctx: TurnContext) -> Dictionary:
 		report["immigrants"] += int(city_report.get("immigrants", 0))
 		report["emigrants"] += int(city_report.get("emigrants", 0))
 		report["raids"] += int(city_report.get("raid_occurred", 0))
+		report["events"] += int(city_report.get("event_occurred", 0))
 	return report
 
 
 func _process_city(city: City, turn: int) -> Dictionary:
 	var report := {"uid": city.uid, "scale_changed": 0, "violations": 0, "tier": 0,
-		"rep_delta": 0, "immigrants": 0, "emigrants": 0, "raid_occurred": 0}
+		"rep_delta": 0, "immigrants": 0, "emigrants": 0, "raid_occurred": 0,
+		"event_occurred": 0, "event": ""}
 
 	# 1. Масштаб.
 	var new_tier: int = ScaleShiftManager.tier_for(city.pop_capped())
@@ -163,6 +175,16 @@ func _process_city(city: City, turn: int) -> Dictionary:
 		report["raid_repelled"] = bool(raid.repelled)
 		report["raid_strength"] = int(raid.strength)
 		raid_occurred.emit(city.uid, bool(raid.repelled))
+
+	# 12. События (Спринт 11) + бонус науки специализации scholar.
+	var sci: float = SpecializationSystem.science_per_turn(city)
+	if sci > 0.0:
+		res.add(&"science", sci)
+	var ev: Dictionary = CityEvents.resolve(city, turn)
+	if bool(ev.occurred):
+		report["event_occurred"] = 1
+		report["event"] = String(ev.event_id)
+		city_event_occurred.emit(city.uid, ev.event_id)
 	return report
 
 

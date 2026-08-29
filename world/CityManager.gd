@@ -8,6 +8,8 @@ signal cycle_completed(turn: int, arrivals: int)
 signal glory_changed(window_total: float)
 signal status_message(text: String)
 signal reputation_changed(city_uid: int, value: int, band: int)
+## Спринт 11: перенос города (City.relocation_completed агрегатором).
+signal relocation_completed(city_uid: int, new_center: Vector2i)
 
 var cities: Array[City] = []
 var capital: City = null
@@ -21,6 +23,8 @@ func register_city(city: City, make_capital := false) -> void:
 		return
 	city.uid = cities.size()
 	cities.append(city)
+	city.relocation_completed.connect(
+		func(new_center: Vector2i): relocation_completed.emit(city.uid, new_center))
 	if make_capital or capital == null:
 		set_capital(city)
 

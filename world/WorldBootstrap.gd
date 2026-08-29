@@ -183,6 +183,10 @@ static func _create_cities(parent: Node2D, R: BootstrapResult) -> void:
 	parent.add_child(R.cities)
 	R.cities.status_message.connect(func(text: String):
 		if R.ui_manager: R.ui_manager.set_status(text))
+	# Спринт 11: перенос города -> шина событий.
+	R.cities.relocation_completed.connect(
+		func(city_uid: int, new_center: Vector2i):
+			GameEventBus.relocation_completed.emit(city_uid, new_center))
 
 	# Capital (РФ6-6: проверка проходимости)
 	var capital := City.new()
@@ -257,6 +261,9 @@ static func _register_city(R: BootstrapResult) -> void:
 	city_proc.raid_occurred.connect(
 		func(city_uid: int, repelled: bool):
 			GameEventBus.raid_occurred.emit(city_uid, repelled))
+	city_proc.city_event_occurred.connect(
+		func(city_uid: int, event_id: StringName):
+			GameEventBus.city_event_occurred.emit(city_uid, event_id))
 
 
 static func _register_economy(R: BootstrapResult) -> void:

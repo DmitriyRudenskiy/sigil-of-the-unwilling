@@ -9,6 +9,8 @@ signal boroughs_changed
 signal buildings_changed
 signal storage_changed
 signal status_message(text: String)
+## Спринт 11: перенос столицы (new_center).
+signal relocation_completed(new_center: Vector2i)
 
 enum Faction { DEFAULT, NECROPHAGE, ALLAYI, CULTISTS }
 
@@ -22,6 +24,8 @@ var reputation := 0
 ## Спринт 9: процветание (0..100, ProsperitySystem) и уровень города (1..5).
 var prosperity := 50.0
 var level := 1
+## Спринт 11: специализация (SpecializationSystem; пусто = нет). С 2-го уровня.
+var specialization: StringName = &""
 var faction: int = Faction.DEFAULT
 var stronghold_level := 1
 var is_capital := false
@@ -385,6 +389,8 @@ func get_yield() -> Dictionary:
 		var y: Dictionary = tile_yield_fn.call(cell)
 		for k in _YIELD_KEYS:
 			total[k] = float(total[k]) + float(y.get(k, 0.0))
+	# Спринт 11: специализация agrarian — бонус к еде.
+	total[&"food"] = float(total[&"food"]) * SpecializationSystem.food_yield_multiplier(self)
 	return total
 
 
@@ -587,6 +593,7 @@ func serialize() -> Dictionary:
 		"reputation": reputation,
 		"prosperity": prosperity,
 		"level": level,
+		"specialization": String(specialization),
 		"faction": faction,
 		"stronghold_level": stronghold_level,
 		"is_capital": is_capital,
@@ -635,6 +642,7 @@ func deserialize(data: Dictionary) -> void:
 	reputation = int(data.get("reputation", 0))
 	prosperity = clampf(float(data.get("prosperity", 50.0)), 0.0, 100.0)
 	level = clampi(int(data.get("level", 1)), 1, ProsperitySystem.CITY_LEVEL_MAX)
+	specialization = StringName(data.get("specialization", ""))
 	faction = int(data.get("faction", Faction.DEFAULT))
 	stronghold_level = int(data.get("stronghold_level", 1))
 	is_capital = bool(data.get("is_capital", false))
@@ -721,6 +729,7 @@ func defense_strength() -> int:
 	for b in buildings:
 		if b != null and b.def != null and b.def.id == &"walls":
 			d += b.level * RaidSystem.DEFENSE_PER_WALL
+	d += SpecializationSystem.defense_bonus(self)
 	return d
 
 
@@ -753,6 +762,36 @@ func _assign_followers(bld: UniqueBuilding, n: int) -> void:
 			u.assigned_to = bld.uid
 			left -= 1
 	bld.assigned_followers += n - left
+
+
+## Спринт 11: перенос города (столицы). Тела (районы/здания/дороги/рабочие)
+## сдвигаются на вектор (new_center - center). Макс. дистанция — 3 клетки.
+const RELOCATE_MAX_DISTANCE := 3
+
+
+func relocate(new_center: Vector2i) -> Dictionary:
+	if new_center == center:
+		return _fail("Новый центр совпадает со старым")
+	if HexUtils.hex_distance(center, new_center) > RELOCATE_MAX_DISTANCE:
+		return _fail("Слишком далеко: максимум %d клеток" % RELOCATE_MAX_DISTANCE)
+	if cell_is_built(new_center):
+		return _fail("На новом центре уже застройка")
+	var delta := new_center - center
+	for b in boroughs:
+		b.cell += delta
+	for b in buildings:
+		b.cell += delta
+	var new_roads: Dictionary = {}
+	for cell in roads:
+		new_roads[(cell as Vector2i) + delta] = true
+	roads = new_roads
+	for u in pop:
+		if u.tile.x >= 0:
+			u.tile += delta
+	center = new_center
+	_invalidate_exploited()
+	relocation_completed.emit(new_center)
+	return {"ok": true, "new_center": new_center}
 
 
 static func _fail(reason: String) -> Dictionary:

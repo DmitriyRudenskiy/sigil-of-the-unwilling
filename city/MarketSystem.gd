@@ -37,7 +37,9 @@ static func has_market(city: City) -> bool:
 ## Курс ресурса при текущем процветании.
 static func rate_for(city: City, resource_id: StringName) -> float:
 	var base: float = float(RATES.get(resource_id, DEFAULT_RATE))
-	return base * (1.0 + city.prosperity / 200.0)
+	# Спринт 11: специализация merchant — повышенный курс.
+	return base * (1.0 + city.prosperity / 200.0) \
+		* SpecializationSystem.trade_rate_multiplier(city)
 
 
 ## Запас ресурса: еда — из food_stockpile, остальное — из storage.
