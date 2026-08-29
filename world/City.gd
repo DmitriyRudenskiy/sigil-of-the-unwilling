@@ -38,6 +38,15 @@ var resource_ctx: ResourceContext = null
 ## Провайдер FIDSI тайлов: Callable(cell) -> {food, industry, dust, science, influence}.
 var tile_yield_fn: Callable = func(_cell: Vector2i) -> Dictionary: return {}
 
+# --- Город (M3) ---
+## Дороги: Vector2i -> true. Строит игрок (UI, M3+); логистика читает их.
+var roads: Dictionary = {}
+## Текущий масштаб города (ScaleShiftManager, 0..3).
+var scale_tier := 0
+## Мультипликаторы фазы города (CityTurnProcessor, M3): для экономики.
+var auto_resource_mult := 1.0
+var upkeep_mult := 1.0
+
 var _uid_seq := 0
 
 # Exploited cells cache (invalidated on borough/building changes)
@@ -125,9 +134,25 @@ func get_building_at(cell: Vector2i) -> UniqueBuilding:
 
 
 func get_logistics_multiplier(cell: Vector2i) -> float:
-	## Множитель логистики для здания (M3: LogisticsCalculator — дистанция
-	## до центра/склада, дороги). В M1 — заглушка 1.0 (декад включат в M3).
-	return 1.0
+	## M3: LogisticsCalculator — затухание по дистанции до тела города
+	## (центр/районы) + бонус за дорогу (на клетке или в соседней).
+	return LogisticsCalculator.compute(self, cell)
+
+
+## ==================== ДОРОГИ (M3) ====================
+func has_road(cell: Vector2i) -> bool:
+	return roads.has(cell)
+
+
+func add_road(cell: Vector2i) -> void:
+	if not roads.has(cell):
+		roads[cell] = true
+		buildings_changed.emit()
+
+
+func remove_road(cell: Vector2i) -> void:
+	if roads.erase(cell):
+		buildings_changed.emit()
 
 # ==================== НАСЕЛЕНИЕ: УПРАВЛЕНИЕ ====================
 func request_switch(p_uid: int, new_state: PopUnit.State, new_tile := Vector2i(-1, -1)) -> bool:

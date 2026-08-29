@@ -31,6 +31,9 @@ var zone_type: int = 0
 var production_chain: ProductionChain = null
 ## Поддержка: StringName -> float (ресурсов в день).
 var upkeep: Dictionary = {}  # {} = поддержки нет
+## Множитель зоны (ZoningSystem, M3). Обновляется CityTurnProcessor каждый
+## ход; 1.0 = без бонусов. Экономическая фаза умножает на логистику.
+var zone_multiplier: float = 1.0
 
 
 func get_zone_type() -> int:

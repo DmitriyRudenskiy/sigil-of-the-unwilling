@@ -54,10 +54,12 @@ func _process_city(city: City, _ctx: TurnContext) -> Dictionary:
 	var res := city.ensure_resource_ctx()
 	var report := {"uid": city.uid, "chains": 0, "upkeep_ok": 0, "upkeep_failed": 0, "auto": {}}
 
-	# 1. Авто-ресурсы (базовый уклад) — вход для цепочек.
+	# 1. Авто-ресурсы (базовый уклад) × масштабный бонус (M3: город).
 	var auto: Dictionary = {}
-	auto[&"wood"] = res.add(&"wood", float(GameSettings.RESOURCE_AUTO_WOOD_PER_DAY))
-	auto[&"stone"] = res.add(&"stone", float(GameSettings.RESOURCE_AUTO_STONE_PER_DAY))
+	auto[&"wood"] = res.add(
+		&"wood", float(GameSettings.RESOURCE_AUTO_WOOD_PER_DAY) * city.auto_resource_mult)
+	auto[&"stone"] = res.add(
+		&"stone", float(GameSettings.RESOURCE_AUTO_STONE_PER_DAY) * city.auto_resource_mult)
 	report["auto"] = auto
 
 	# 2. Цепочки производства.
@@ -68,7 +70,9 @@ func _process_city(city: City, _ctx: TurnContext) -> Dictionary:
 		if chain == null:
 			continue
 		var workers: int = city.count_state(PopUnit.State.WORKER)
-		var logistics: float = city.get_logistics_multiplier(building.cell)
+		# M3: логистика (дистанция/дороги) × зона здания (агломерация и т.п.).
+		var logistics: float = city.get_logistics_multiplier(building.cell) \
+			* building.zone_multiplier
 		var outputs: Dictionary = chain.execute(res, workers, logistics)
 		if outputs.is_empty():
 			# Цепочка не отработала (нет рабочих или нехватка входов);
@@ -88,12 +92,16 @@ func _process_city(city: City, _ctx: TurnContext) -> Dictionary:
 		var upkeep: Dictionary = building.get_upkeep()
 		if upkeep.is_empty():
 			continue
-		if res.spend(upkeep):
+		# M3: масштабная скидка на поддержку.
+		var effective: Dictionary = {}
+		for rid in upkeep:
+			effective[rid] = float(upkeep[rid]) * city.upkeep_mult
+		if res.spend(effective):
 			report["upkeep_ok"] += 1
 		else:
 			report["upkeep_failed"] += 1
-		for rid in upkeep:
-			if res.amount(rid) < float(upkeep[rid]):
+		for rid in effective:
+			if res.amount(rid) < float(effective[rid]):
 				upkeep_failed.emit(building.uid, rid)
 
 	return report

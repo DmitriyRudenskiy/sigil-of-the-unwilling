@@ -207,6 +207,10 @@ static func _create_subsystems(parent: Node2D, R: BootstrapResult) -> void:
 	# внедрения «Каскада сложности»); роутер событий вызывает execute_turn().
 	R.turn_scheduler = TurnScheduler.new()
 
+	# M3: Город — масштаб, ёмкости, зонирование (приоритет 5 — раньше
+	# экономики, чтобы мультипликаторы были готовы).
+	_register_city(R)
+
 	# M1: Экономика — инициализация хранилищ городов и процессор цепочек.
 	_register_economy(R)
 	_register_demographics(R)
@@ -219,6 +223,23 @@ static func _create_subsystems(parent: Node2D, R: BootstrapResult) -> void:
 	R.interaction_controller = WorldInteractionController.new()
 	R.interaction_controller.name = "InteractionController"
 	parent.add_child(R.interaction_controller)
+
+
+static func _register_city(R: BootstrapResult) -> void:
+	## M3: Город — процессор фазы города (масштаб/ёмкости/зоны). Сигналы
+	## пробрасываются в GameEventBus (интеграционный слой).
+	if R.turn_scheduler == null or R.cities == null:
+		return
+
+	var city_proc := CityTurnProcessor.new()
+	R.turn_scheduler.register_processor(city_proc)
+
+	city_proc.city_scale_changed.connect(
+		func(city_uid: int, new_scale: int):
+			GameEventBus.scale_shift.emit(city_uid, new_scale))
+	city_proc.zone_violation.connect(
+		func(city_uid: int, cell: Vector2i):
+			GameEventBus.zone_violation.emit(city_uid, cell))
 
 
 static func _register_economy(R: BootstrapResult) -> void:
