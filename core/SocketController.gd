@@ -136,6 +136,18 @@ func _route_command(line: String) -> Dictionary:
 			if world_ctrl == null or not world_ctrl.is_world_visible():
 				return {"error": "Not in World mode"}
 			return _end_turn(world_ctrl)
+		"COLLECT_HERE":
+			# Собрать ресурс/сундук/скролл в клетке героя (сценарий «Collect All»).
+			if world_ctrl == null or not world_ctrl.is_world_visible():
+				return {"error": "Not in World mode"}
+			var hero = world_ctrl.get_hero()
+			if hero == null:
+				return {"error": "Hero not initialized"}
+			var ic = world_ctrl.interaction_controller
+			if ic == null:
+				return {"error": "No interaction controller"}
+			var removed = ic.collect_resource_at(hero.current_cell)
+			return {"status": "collected" if removed else "nothing_here"}
 		"RETREAT":
 			if battle_ctrl == null:
 				return {"error": "Not in Battle mode"}

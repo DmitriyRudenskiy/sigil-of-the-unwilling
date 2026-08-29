@@ -38,6 +38,9 @@ func remove_resource_at(cell: Vector2i) -> bool:
 	var node: Node2D = _resource_nodes[cell]
 	node.queue_free()
 	_resource_nodes.erase(cell)
+	# Синхронизируем модель, чтобы GET_STATE (map_resources) отражал сбор.
+	if map != null and map.resource_cells.has(cell):
+		map.resource_cells.erase(cell)
 
 	return true
 
