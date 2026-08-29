@@ -20,6 +20,9 @@ var pending_tile := Vector2i(-1, -1)
 var assigned_to := -1
 ## Ход (номер дня), в который фигурка родилась/прибыла.
 var born_turn := -1
+## Персонаж (M2: Демография), привязанный к фигурке (-1 = нет).
+## Устанавливается CharacterRegistry.create(); сбрасывается при смерти.
+var character_uid: int = -1
 
 
 func is_available() -> bool:

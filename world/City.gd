@@ -95,6 +95,18 @@ func find_pop(p_uid: int) -> PopUnit:
 	return null
 
 
+## Удаляет фигурку (смерть/эмиграция, M2: Демография).
+## Возвращает удалённую PopUnit или null, если uid не найден.
+func remove_pop(p_uid: int) -> PopUnit:
+	var u := find_pop(p_uid)
+	if u == null:
+		return null
+	pop.erase(u)
+	_invalidate_exploited()
+	population_changed.emit()
+	return u
+
+
 # ==================== ЭКОНОМИКА (M1) ====================
 func ensure_resource_ctx(defs: Array = []) -> ResourceContext:
 	## Ленивая инициализация контекста ресурсов. defs — из ResourceRegistry

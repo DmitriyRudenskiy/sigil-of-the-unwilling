@@ -25,6 +25,9 @@ var global_resources: Variant = null
 ## Очередь событий хода: процессоры могут добавлять сюда события
 ## для обработки последующими фазами / интеграционным слоем.
 var event_queue: Array[Dictionary] = []
+## RNG для недетерминированных фаз (демография и т.п.). null =
+## процессор сам сидирует (воспроизводимо по (ход, сущность)).
+var rng: RandomNumberGenerator = null
 
 
 func get_date_label() -> String:

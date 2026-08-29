@@ -27,6 +27,7 @@ class BootstrapResult:
 	var persistence: Variant = null
 	var resource_chain: Variant = null
 	var turn_scheduler: TurnScheduler = null
+	var character_registry: CharacterRegistry = null
 	var rng: RandomNumberGenerator = null
 	var session: Variant = null
 	var loaded_save: SaveData = null
@@ -208,6 +209,7 @@ static func _create_subsystems(parent: Node2D, R: BootstrapResult) -> void:
 
 	# M1: Экономика — инициализация хранилищ городов и процессор цепочек.
 	_register_economy(R)
+	_register_demographics(R)
 
 	R.battle_coordinator = WorldBattleCoordinator.new()
 	R.battle_coordinator.name = "BattleCoordinator"
@@ -245,6 +247,31 @@ static func _register_economy(R: BootstrapResult) -> void:
 	econ.resource_depleted.connect(
 		func(city_uid: int, resource_id: StringName):
 			GameEventBus.resource_depleted.emit(city_uid, resource_id))
+
+
+static func _register_demographics(R: BootstrapResult) -> void:
+	## M2: Демография — реестр персонажей + процессор фазы. Сигналы
+	## пробрасываются в GameEventBus (интеграционный слой).
+	if R.turn_scheduler == null or R.cities == null:
+		return
+
+	R.character_registry = CharacterRegistry.new()
+	var demo := DemographicTurnProcessor.new()
+	demo.setup(R.character_registry)
+	R.turn_scheduler.register_processor(demo)
+
+	demo.character_born.connect(
+		func(character_uid: int, city_uid: int, _name: String):
+			GameEventBus.character_born.emit(city_uid, character_uid))
+	demo.character_died.connect(
+		func(character_uid: int, city_uid: int, _cause: StringName):
+			GameEventBus.character_died.emit(city_uid, character_uid))
+	demo.character_need_critical.connect(
+		func(character_uid: int, need_id: StringName):
+			GameEventBus.character_need_critical.emit(character_uid, need_id))
+	demo.disease_outbreak.connect(
+		func(city_uid: int, character_uid: int):
+			GameEventBus.disease_outbreak.emit(city_uid, character_uid))
 
 
 static func _create_resource_nodes(parent: Node2D, R: BootstrapResult) -> void:
