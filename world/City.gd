@@ -75,7 +75,34 @@ func pop_capped() -> int:
 
 func pop_cap() -> int:
 	var idx := clampi(stronghold_level, 1, CityBalance.POP_CAP_BY_STRONGHOLD.size()) - 1
-	return CityBalance.POP_CAP_BY_STRONGHOLD[idx]
+	return CityBalance.POP_CAP_BY_STRONGHOLD[idx] + housing_total()
+
+
+# ==================== ЖИЛЬЁ (Спринт 7) ====================
+func housing_capacity(state: int) -> int:
+	## Слотов жилья для состояния (из def.housing зданий).
+	var n := 0
+	for b in buildings:
+		if b == null or b.def == null:
+			continue
+		n += int(b.def.housing.get(state, 0))
+	return n
+
+
+func housing_total() -> int:
+	var n := 0
+	for state in PopUnit.State.values():
+		n += housing_capacity(state)
+	return n
+
+
+func free_housing(state: int) -> int:
+	## Свободные слоты для состояния. У рабочих есть базовое жильё
+	## поселения (CityBalance.BASE_SETTLEMENT_HOUSING — без зданий).
+	var slots := housing_capacity(state)
+	if state == PopUnit.State.WORKER:
+		slots += CityBalance.BASE_SETTLEMENT_HOUSING
+	return slots - count_state(state)
 
 
 func over_limit() -> int:
@@ -97,10 +124,16 @@ func reputation_band() -> int:
 func add_migrant(state: int = PopUnit.State.WORKER, turn: int = -1) -> PopUnit:
 	return _add_pop(state, turn)
 
-## Спринт 6: состояние для нового мигранта.
-## Пока — рабочий; Спринт 7 переведёт на жильё (рабочий -> ополченец -> учёный).
+## Спринт 7: состояние для нового мигранта по свободному жилью:
+## рабочий -> ополченец -> учёный. -1 = жилья нет (иммиграция закрыта).
 func immigrant_state() -> int:
-	return PopUnit.State.WORKER
+	if free_housing(PopUnit.State.WORKER) > 0:
+		return PopUnit.State.WORKER
+	if free_housing(PopUnit.State.MILITIA) > 0:
+		return PopUnit.State.MILITIA
+	if free_housing(PopUnit.State.SCHOLAR) > 0:
+		return PopUnit.State.SCHOLAR
+	return -1
 
 
 func free_followers() -> int:
@@ -483,6 +516,13 @@ func build_building(def: UniqueBuilding.Def, cell: Vector2i) -> UniqueBuilding:
 	bld.uid = _uid_seq
 	_uid_seq += 1
 	_assign_followers(bld, req.followers)
+	# Спринт 7/8: цепочка/upkeep/зона по умолчанию из определения
+	# (копия цепочки — per-building building_eff).
+	if def.production_chain != null:
+		bld.production_chain = ProductionChain.from_dict(def.production_chain.to_dict())
+	for k in def.default_upkeep:
+		bld.upkeep[StringName(k)] = float(def.default_upkeep[k])
+	bld.zone_type = def.default_zone
 	buildings.append(bld)
 	_invalidate_exploited()
 	buildings_changed.emit()

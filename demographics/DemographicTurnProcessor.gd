@@ -75,7 +75,7 @@ func process(ctx: TurnContext) -> Dictionary:
 
 
 func _process_city(city: City, ctx: TurnContext) -> Dictionary:
-	var report := {"uid": city.uid, "ensured": 0, "critical": 0, "deaths": 0, "outbreaks": 0}
+	var report := {"uid": city.uid, "ensured": 0, "critical": 0, "deaths": 0, "outbreaks": 0, "promoted": 0}
 	var rng := _rng_for(ctx, city)
 
 	# 1. Персонаж для каждой живой фигурки.
@@ -140,7 +140,38 @@ func _process_city(city: City, ctx: TurnContext) -> Dictionary:
 				ch.modify_need(&"belief", -0.1)
 				report["outbreaks"] += 1
 				disease_outbreak.emit(city.uid, ch.uid)
+
+	# 6. Повышение учёных (Спринт 7): балл училища (scholar_points)
+	#    -> самый старый свободный последователь становится учёным
+	#    (персонаж не мешает — состояние живёт на PopUnit).
+	#    Особняк (slot SCHOLAR) обязателен.
+	var promoted := 0
+	var rc: ResourceContext = city.resource_ctx
+	if rc != null:
+		var candidate: PopUnit = _promotable_follower(city)
+		while rc.amount(&"scholar_points") >= 1.0 \
+				and candidate != null \
+				and city.free_housing(PopUnit.State.SCHOLAR) > 0:
+			rc.remove(&"scholar_points", 1.0)
+			candidate.state = PopUnit.State.SCHOLAR
+			city.population_changed.emit()
+			promoted += 1
+			candidate = _promotable_follower(city)
+	if promoted > 0:
+		report["promoted"] = promoted
 	return report
+
+
+func _promotable_follower(city: City) -> PopUnit:
+	## Самый старый свободный последователь (исключая переключающихся
+	## и закреплённых — is_free_follower()).
+	var best: PopUnit = null
+	for u in city.pop:
+		if not u.is_free_follower():
+			continue
+		if best == null or u.born_turn < best.born_turn:
+			best = u
+	return best
 
 
 ## Восстановление потребности от состояния города.

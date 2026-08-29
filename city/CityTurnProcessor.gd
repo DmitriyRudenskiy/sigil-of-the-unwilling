@@ -17,7 +17,10 @@ extends TurnPhaseProcessor
 ##     adjacency), сжатие -100..+100, сигнал reputation_changed;
 ##  7. Миграция (Спринт 6) — иммиграция при репутации >= +30, эмиграция
 ##     при <= -30 (порядок: учёный -> ополченец -> рабочий), сигнал
-##     migration_occurred.
+##     migration_occurred;
+##  8. Рабочие (Спринт 7) — WorkerAssignment.rebalance(): сломанные
+##     ссылки освобождаем, здания добирают рабочих до required_workers,
+##     сигнал worker_assignment_changed.
 ##
 ## Не вызывает city.process_turn() — монолит идёт своим контуром (turn_ended).
 
@@ -25,6 +28,7 @@ signal city_scale_changed(city_uid: int, new_scale: int)
 signal zone_violation(city_uid: int, cell: Vector2i)
 signal reputation_changed(city_uid: int, value: int, band: int)
 signal migration_occurred(city_uid: int, immigrants: int, emigrants: int)
+signal worker_assignment_changed(city_uid: int, assigned: int)
 
 
 ## Базовые (до масштабного бонуса) ёмкости: city.uid -> {id: float}.
@@ -123,6 +127,13 @@ func _process_city(city: City) -> Dictionary:
 	report["emigrants"] = int(mig.emigrants)
 	if int(mig.immigrants) > 0 or int(mig.emigrants) > 0:
 		migration_occurred.emit(city.uid, int(mig.immigrants), int(mig.emigrants))
+
+	# 8. Назначение рабочих (Спринт 7) — после миграции: новые рабочие
+	#    сразу занимают свободные места в цепочках зданий.
+	var assigned: int = WorkerAssignment.rebalance(city)
+	if assigned > 0:
+		report["workers_assigned"] = assigned
+		worker_assignment_changed.emit(city.uid, assigned)
 	return report
 
 

@@ -22,11 +22,14 @@ static func market() -> UniqueBuilding.Def:
 	])
 
 static func barracks() -> UniqueBuilding.Def:
-	return _mk(&"barracks", "Казармы", false, [
+	## Казармы: +5 слотов ополчения (Спринт 7).
+	var d := _mk(&"barracks", "Казармы", false, [
 		_req(20.0),
 		_req(40.0, 2),
 		_req(80.0, 3, &"gold", 30.0),
 	])
+	d.housing[PopUnit.State.MILITIA] = 5
+	return d
 
 static func ancient_vault() -> UniqueBuilding.Def:
 	return _mk(&"ancient_vault", "Древнее хранилище", true, [
@@ -34,6 +37,21 @@ static func ancient_vault() -> UniqueBuilding.Def:
 		_req(70.0, 2),
 		_req(140.0, 3, &"gold", 60.0),
 	])
+
+
+## --- Жильё (Спринт 7) ---
+static func shack() -> UniqueBuilding.Def:
+	## Хижина: +10 слотов рабочих.
+	var d := _mk(&"shack", "Хижина", false, [_req(15.0)])
+	d.housing[PopUnit.State.WORKER] = 10
+	return d
+
+
+static func manor() -> UniqueBuilding.Def:
+	## Особняк: +2 слота учёных (жильё для повышения).
+	var d := _mk(&"manor", "Особняк", false, [_req(40.0)])
+	d.housing[PopUnit.State.SCHOLAR] = 2
+	return d
 
 
 ## Перевязка определения по id (save v3: восстановление зданий).
@@ -48,6 +66,10 @@ static func def_by_id(id: StringName) -> UniqueBuilding.Def:
 			return barracks()
 		&"ancient_vault":
 			return ancient_vault()
+		&"shack":
+			return shack()
+		&"manor":
+			return manor()
 	return null
 
 

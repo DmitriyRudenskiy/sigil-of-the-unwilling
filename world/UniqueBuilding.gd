@@ -33,6 +33,8 @@ var cell := Vector2i(-1, -1)
 var level := 0  # 0 = не построено (объект-запись), рабочие здания — 1..3
 var uid := 0
 var assigned_followers := 0
+## Спринт 7: назначенные рабочие (WorkerAssignment). -1/0 = свободные.
+var assigned_workers := 0
 # --- Зонирование и экономика (M1/M3) ---
 ## Тип зоны (ZoningSystem.ZoneType). 0 = не участвует в зонировании.
 var zone_type: int = 0
@@ -74,6 +76,7 @@ func serialize() -> Dictionary:
 		"level": level,
 		"uid": uid,
 		"assigned_followers": assigned_followers,
+		"assigned_workers": assigned_workers,
 		"zone_type": zone_type,
 		"upkeep": {},
 		"zone_multiplier": zone_multiplier,
@@ -96,6 +99,7 @@ static func deserialize(data: Dictionary, def: UniqueBuilding.Def) -> UniqueBuil
 	b.level = int(data.get("level", 0))
 	b.uid = int(data.get("uid", 0))
 	b.assigned_followers = int(data.get("assigned_followers", 0))
+	b.assigned_workers = int(data.get("assigned_workers", 0))
 	b.zone_type = int(data.get("zone_type", 0))
 	b.zone_multiplier = float(data.get("zone_multiplier", 1.0))
 	var raw_upkeep: Dictionary = data.get("upkeep", {})
