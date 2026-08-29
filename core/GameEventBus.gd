@@ -36,6 +36,14 @@ signal building_constructed(city_uid: int, building_uid: int)
 signal scale_shift(city_uid: int, new_scale: int)
 signal zone_violation(city_uid: int, cell: Vector2i)
 
+# ==================== ГОРОД: РЕПУТАЦИЯ (M6) ====================
+signal reputation_changed(city_uid: int, value: int, band: int)
+signal migration_occurred(city_uid: int, immigrants: int, emigrants: int)
+signal city_level_up(city_uid: int, new_level: int)
+signal raid_occurred(city_uid: int, repelled: bool)
+signal city_event_occurred(city_uid: int, event_id: StringName)
+signal relocation_completed(city_uid: int, new_center: Vector2i)
+
 # ==================== НАРРАТИВ (M5) ====================
 signal chronicle_entry_added(entry_id: StringName, text: String)
 signal weather_changed(new_weather: int)

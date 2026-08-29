@@ -245,6 +245,12 @@ static func _register_city(R: BootstrapResult) -> void:
 	city_proc.zone_violation.connect(
 		func(city_uid: int, cell: Vector2i):
 			GameEventBus.zone_violation.emit(city_uid, cell))
+	city_proc.reputation_changed.connect(
+		func(city_uid: int, value: int, band: int):
+			GameEventBus.reputation_changed.emit(city_uid, value, band))
+	city_proc.migration_occurred.connect(
+		func(city_uid: int, immigrants: int, emigrants: int):
+			GameEventBus.migration_occurred.emit(city_uid, immigrants, emigrants))
 
 
 static func _register_economy(R: BootstrapResult) -> void:

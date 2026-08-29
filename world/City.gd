@@ -17,6 +17,8 @@ const _YIELD_KEYS := [&"food", &"industry", &"dust", &"science", &"influence"]
 var uid := 0
 var display_name := ""
 var center := Vector2i(-1, -1)
+## Спринт 6: репутация (-100..+100), диапазон — ReputationSystem.band().
+var reputation := 0
 var faction: int = Faction.DEFAULT
 var stronghold_level := 1
 var is_capital := false
@@ -86,6 +88,19 @@ func count_state(s: PopUnit.State) -> int:
 		if u.state == s:
 			n += 1
 	return n
+
+## Диапазон репутации (ReputationSystem.Band).
+func reputation_band() -> int:
+	return ReputationSystem.band(reputation)
+
+## Спринт 6: мигрант (состояние — immigrant_state()).
+func add_migrant(state: int = PopUnit.State.WORKER, turn: int = -1) -> PopUnit:
+	return _add_pop(state, turn)
+
+## Спринт 6: состояние для нового мигранта.
+## Пока — рабочий; Спринт 7 переведёт на жильё (рабочий -> ополченец -> учёный).
+func immigrant_state() -> int:
+	return PopUnit.State.WORKER
 
 
 func free_followers() -> int:
@@ -340,7 +355,8 @@ func get_yield() -> Dictionary:
 func food_consumption() -> float:
 	return count_state(PopUnit.State.WORKER) * CityBalance.FOOD_PER_WORKER \
 		+ count_state(PopUnit.State.MILITIA) * CityBalance.FOOD_PER_MILITIA \
-		+ count_state(PopUnit.State.FOLLOWER) * CityBalance.FOOD_PER_FOLLOWER
+		+ count_state(PopUnit.State.FOLLOWER) * CityBalance.FOOD_PER_FOLLOWER \
+		+ count_state(PopUnit.State.SCHOLAR) * CityBalance.FOOD_PER_SCHOLAR
 
 
 func net_food() -> float:
@@ -525,6 +541,7 @@ func serialize() -> Dictionary:
 		"uid": uid,
 		"display_name": display_name,
 		"center": {"x": center.x, "y": center.y},
+		"reputation": reputation,
 		"faction": faction,
 		"stronghold_level": stronghold_level,
 		"is_capital": is_capital,
@@ -570,6 +587,7 @@ func serialize() -> Dictionary:
 func deserialize(data: Dictionary) -> void:
 	var c: Dictionary = data.get("center", {})
 	center = Vector2i(int(c.get("x", -1)), int(c.get("y", -1)))
+	reputation = int(data.get("reputation", 0))
 	faction = int(data.get("faction", Faction.DEFAULT))
 	stronghold_level = int(data.get("stronghold_level", 1))
 	is_capital = bool(data.get("is_capital", false))

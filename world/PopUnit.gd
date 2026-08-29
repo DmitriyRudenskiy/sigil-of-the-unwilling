@@ -5,7 +5,7 @@ extends RefCounted
 ## request_switch() переводит фигурку в pending (недоступна),
 ## apply_pending() применяется в конце текущего хода City.process_turn().
 
-enum State { WORKER, FOLLOWER, MILITIA }
+enum State { WORKER, FOLLOWER, MILITIA, SCHOLAR }  # Спринт 6: +учёные
 
 var uid := 0
 var state: State = State.FOLLOWER

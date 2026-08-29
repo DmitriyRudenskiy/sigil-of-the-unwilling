@@ -12,12 +12,19 @@ extends TurnPhaseProcessor
 ##     EconomicTurnProcessor;
 ##  4. Зонирование — zone_multiplier у каждого здания (для экономики);
 ##  5. Контроль зон — здания, нарушающие правила (например, завод у
-##     центра), дают сигнал zone_violation (защита от обходов UI).
+##     центра), дают сигнал zone_violation (защита от обходов UI);
+##  6. Репутация (Спринт 6) — факторы хода (еда/голод/перенаселение/
+##     adjacency), сжатие -100..+100, сигнал reputation_changed;
+##  7. Миграция (Спринт 6) — иммиграция при репутации >= +30, эмиграция
+##     при <= -30 (порядок: учёный -> ополченец -> рабочий), сигнал
+##     migration_occurred.
 ##
 ## Не вызывает city.process_turn() — монолит идёт своим контуром (turn_ended).
 
 signal city_scale_changed(city_uid: int, new_scale: int)
 signal zone_violation(city_uid: int, cell: Vector2i)
+signal reputation_changed(city_uid: int, value: int, band: int)
+signal migration_occurred(city_uid: int, immigrants: int, emigrants: int)
 
 
 ## Базовые (до масштабного бонуса) ёмкости: city.uid -> {id: float}.
@@ -33,7 +40,8 @@ func get_priority() -> int:
 
 
 func process(ctx: TurnContext) -> Dictionary:
-	var report := {"cities": [], "scale_changes": 0, "zone_violations": 0}
+	var report := {"cities": [], "scale_changes": 0, "zone_violations": 0,
+		"rep_deltas": 0, "immigrants": 0, "emigrants": 0}
 	if ctx == null:
 		return report
 	for city in ctx.cities:
@@ -41,11 +49,15 @@ func process(ctx: TurnContext) -> Dictionary:
 		(report["cities"] as Array).append(city_report)
 		report["scale_changes"] += int(city_report.get("scale_changed", 0))
 		report["zone_violations"] += int(city_report.get("violations", 0))
+		report["rep_deltas"] += int(city_report.get("rep_delta", 0))
+		report["immigrants"] += int(city_report.get("immigrants", 0))
+		report["emigrants"] += int(city_report.get("emigrants", 0))
 	return report
 
 
 func _process_city(city: City) -> Dictionary:
-	var report := {"uid": city.uid, "scale_changed": 0, "violations": 0, "tier": 0}
+	var report := {"uid": city.uid, "scale_changed": 0, "violations": 0, "tier": 0,
+		"rep_delta": 0, "immigrants": 0, "emigrants": 0}
 
 	# 1. Масштаб.
 	var new_tier: int = ScaleShiftManager.tier_for(city.pop_capped())
@@ -97,6 +109,20 @@ func _process_city(city: City) -> Dictionary:
 		if not check.ok:
 			report["violations"] += 1
 			zone_violation.emit(city.uid, building.cell)
+
+	# 6. Репутация (Спринт 6): факторы хода + сжатие.
+	var rep_before: int = city.reputation
+	ReputationSystem.process_turn(city)
+	if city.reputation != rep_before:
+		report["rep_delta"] = city.reputation - rep_before
+		reputation_changed.emit(city.uid, city.reputation, city.reputation_band())
+
+	# 7. Миграция (Спринт 6).
+	var mig: Dictionary = ReputationSystem.process_migration(city)
+	report["immigrants"] = int(mig.immigrants)
+	report["emigrants"] = int(mig.emigrants)
+	if int(mig.immigrants) > 0 or int(mig.emigrants) > 0:
+		migration_occurred.emit(city.uid, int(mig.immigrants), int(mig.emigrants))
 	return report
 
 

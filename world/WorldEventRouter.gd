@@ -239,6 +239,8 @@ func _on_camera_jump(direction: String) -> void:
 func _on_battle_won(enemy_cell: Vector2i) -> void:
 	if cities:
 		cities.add_glory(15.0, &"battle_won")
+		# Спринт 6: победа — +репутация столице (CityManager.apply_reputation).
+		cities.apply_reputation(cities.capital, CityBalance.REP_VICTORY)
 
 
 func _on_turn_ended_bus(turn: int, month: int) -> void:

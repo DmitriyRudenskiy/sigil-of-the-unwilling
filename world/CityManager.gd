@@ -7,6 +7,7 @@ signal city_updated(city: City)
 signal cycle_completed(turn: int, arrivals: int)
 signal glory_changed(window_total: float)
 signal status_message(text: String)
+signal reputation_changed(city_uid: int, value: int, band: int)
 
 var cities: Array[City] = []
 var capital: City = null
@@ -38,6 +39,16 @@ func add_glory(amount: float, reason: StringName = &"") -> void:
 	## +1: событие принадлежит текущему незавершённому ходу.
 	glory.add_glory(amount, current_turn + 1, reason)
 	glory_changed.emit(glory.glory_last_window(current_turn + 1))
+
+
+func apply_reputation(city: City, delta: float) -> int:
+	## Дискретные события репутации (Спринт 6): победа +10, ЧП -10.
+	## Возвращает новое значение. Сигнал — для UI (хедер города).
+	if city == null:
+		return 0
+	var v: int = ReputationSystem.apply(city, delta)
+	reputation_changed.emit(city.uid, v, city.reputation_band())
+	return v
 
 
 func set_tile_yield_provider(fn: Callable) -> void:

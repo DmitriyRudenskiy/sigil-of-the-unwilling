@@ -12,6 +12,15 @@ class Def extends RefCounted:
 	## Если true — строится только на спец. площадке (руины/святилище/луга),
 	## без ограничения дистанции.
 	var requires_site := false
+	## Спринт 7: жильё — PopUnit.State (int) -> слотов. Пусто = не жильё.
+	## Рабочие: хижина; ополченцы: казарма; учёные: особняк.
+	var housing: Dictionary = {}
+	## Спринт 8: цепочка производства по умолчанию (ставится при постройке;
+	## UI/тесты могут переопределить bld.production_chain).
+	var production_chain: ProductionChain = null
+	## Спринт 8: upkeep/зона по умолчанию (legacy-поля здания).
+	var default_upkeep: Dictionary = {}
+	var default_zone := 0
 
 class LevelReq extends RefCounted:
 	var industry := 0.0
