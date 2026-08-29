@@ -206,6 +206,9 @@ static func _create_subsystems(parent: Node2D, R: BootstrapResult) -> void:
 	# внедрения «Каскада сложности»); роутер событий вызывает execute_turn().
 	R.turn_scheduler = TurnScheduler.new()
 
+	# M1: Экономика — инициализация хранилищ городов и процессор цепочек.
+	_register_economy(R)
+
 	R.battle_coordinator = WorldBattleCoordinator.new()
 	R.battle_coordinator.name = "BattleCoordinator"
 	# setup is called by parent after bootstrap (parent reference needed)
@@ -214,6 +217,34 @@ static func _create_subsystems(parent: Node2D, R: BootstrapResult) -> void:
 	R.interaction_controller = WorldInteractionController.new()
 	R.interaction_controller.name = "InteractionController"
 	parent.add_child(R.interaction_controller)
+
+
+static func _register_economy(R: BootstrapResult) -> void:
+	## M1: Экономика — инициализирует city.resource_ctx (лимиты из
+	## ResourceRegistry), регистрирует EconomicTurnProcessor в планировщике
+	## и пробрасывает его сигналы в GameEventBus (интеграционный слой).
+	if R.turn_scheduler == null or R.cities == null:
+		return
+
+	# Лимиты ресурсов из реестра (если доступен).
+	var defs: Array[ResourceDef] = []
+	if R.services != null and R.services.resources != null:
+		defs = R.services.resources.get_all()
+	for c in R.cities.cities:
+		c.ensure_resource_ctx(defs)
+
+	var econ := EconomicTurnProcessor.new()
+	R.turn_scheduler.register_processor(econ)
+
+	econ.production_completed.connect(
+		func(city_uid: int, chain_id: StringName, outputs: Dictionary):
+			GameEventBus.production_completed.emit(city_uid, chain_id, outputs))
+	econ.upkeep_failed.connect(
+		func(building_uid: int, resource_id: StringName):
+			GameEventBus.upkeep_failed.emit(building_uid, resource_id))
+	econ.resource_depleted.connect(
+		func(city_uid: int, resource_id: StringName):
+			GameEventBus.resource_depleted.emit(city_uid, resource_id))
 
 
 static func _create_resource_nodes(parent: Node2D, R: BootstrapResult) -> void:

@@ -24,6 +24,25 @@ var cell := Vector2i(-1, -1)
 var level := 0  # 0 = не построено (объект-запись), рабочие здания — 1..3
 var uid := 0
 var assigned_followers := 0
+# --- Зонирование и экономика (M1/M3) ---
+## Тип зоны (ZoningSystem.ZoneType). 0 = не участвует в зонировании.
+var zone_type: int = 0
+## Цепочка производства (M1). null = здание не производит.
+var production_chain: ProductionChain = null
+## Поддержка: StringName -> float (ресурсов в день).
+var upkeep: Dictionary = {}  # {} = поддержки нет
+
+
+func get_zone_type() -> int:
+	return zone_type
+
+
+func get_production_chain() -> ProductionChain:
+	return production_chain
+
+
+func get_upkeep() -> Dictionary:
+	return upkeep
 
 
 func next_level_req() -> LevelReq:

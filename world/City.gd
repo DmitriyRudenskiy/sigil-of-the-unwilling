@@ -30,6 +30,10 @@ var special_sites: Dictionary = {}
 var food_stockpile := 0.0
 var storage: Dictionary = {}  # StringName -> float (industry, gold, ...)
 var starving := false
+# --- Экономика (M1) ---
+## Хранилище ресурсов цепочек производства. Отдельно от легасийного storage:
+## legacy-контур (City.process_turn, build costs) не тронут.
+var resource_ctx: ResourceContext = null
 
 ## Провайдер FIDSI тайлов: Callable(cell) -> {food, industry, dust, science, influence}.
 var tile_yield_fn: Callable = func(_cell: Vector2i) -> Dictionary: return {}
@@ -90,6 +94,28 @@ func find_pop(p_uid: int) -> PopUnit:
 			return u
 	return null
 
+
+# ==================== ЭКОНОМИКА (M1) ====================
+func ensure_resource_ctx(defs: Array = []) -> ResourceContext:
+	## Ленивая инициализация контекста ресурсов. defs — из ResourceRegistry
+	## (даёт лимиты); при пустом массиве все id безлимитные (INF).
+	if resource_ctx == null:
+		resource_ctx = ResourceContext.new()
+		resource_ctx.setup(defs)
+	return resource_ctx
+
+
+func get_building_at(cell: Vector2i) -> UniqueBuilding:
+	for b in buildings:
+		if b.cell == cell:
+			return b
+	return null
+
+
+func get_logistics_multiplier(cell: Vector2i) -> float:
+	## Множитель логистики для здания (M3: LogisticsCalculator — дистанция
+	## до центра/склада, дороги). В M1 — заглушка 1.0 (декад включат в M3).
+	return 1.0
 
 # ==================== НАСЕЛЕНИЕ: УПРАВЛЕНИЕ ====================
 func request_switch(p_uid: int, new_state: PopUnit.State, new_tile := Vector2i(-1, -1)) -> bool:

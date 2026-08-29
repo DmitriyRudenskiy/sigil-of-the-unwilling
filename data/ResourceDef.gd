@@ -23,3 +23,8 @@ var yield_max: int = 3
 var weight_per_unit: float = 1.0
 # Icon emoji
 var icon: String = "⛏️"
+# --- Экономика (M1) ---
+var category: int = 0  # 0=raw, 1=craft, 2=spirit
+var capacity: float = INF  # ёмкость хранилища (ResourceContext); INF = без лимита
+var binom_pair: StringName = &""  # бином: второй ресурс пары (для редких)
+var tier: int = 1  # технологический уровень ресурса
