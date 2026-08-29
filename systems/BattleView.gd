@@ -1,6 +1,6 @@
 class_name BattleView
 extends Node2D
-## Визуальное представление боя: поле, спрайты, подсветка, камера.
+## Визуальное представление боя: поле, спрайты, подсветка, камера, курсор.
 ## Не меняет BattleState и не принимает решений.
 
 const RING := GameSettings.BATTLE_FIELD_RING
@@ -10,10 +10,97 @@ const MOVE_TWEEN_SEC := GameSettings.BATTLE_MOVE_TWEEN_SEC
 const _HexDraw = preload("res://core/HexDraw.gd")
 const ParticlePresets = preload("res://core/ParticlePresets.gd")
 
+enum CursorMode { DEFAULT, ATTACK, SPELL, RANGED }
+
 var _tile_map: TileMapLayer
 var _overlay: HighlightOverlay
+var _cursor: CursorOverlay
 var _camera: Camera2D
 var _sprites_by_uid: Dictionary = {}
+
+## Курсой боя: иконка следует за мышью и меняется от режима взаимодействия.
+## ⚔️ — атака (меч), 🪄 — заклинание (палочка), ➹ — стрельба (стрела),
+## 🎯 — дефолтный прицел. Отрисовывается векторно, без шрифтов.
+class CursorOverlay extends Node2D:
+	var mode := BattleView.CursorMode.DEFAULT
+	var visible_flag := false
+	var mouse_pos := Vector2.ZERO
+
+	func set_mode(m: int) -> void:
+		mode = m
+		if is_inside_tree():
+			queue_redraw()
+
+	func _draw() -> void:
+		if not visible_flag:
+			return
+		match mode:
+			BattleView.CursorMode.DEFAULT:
+				_reticle()
+			BattleView.CursorMode.ATTACK:
+				_sword(Color(1.0, 0.3, 0.22, 0.95))
+			BattleView.CursorMode.RANGED:
+				_arrow(Color(1.0, 0.68, 0.2, 0.95))
+			BattleView.CursorMode.SPELL:
+				_wand(Color(0.78, 0.42, 1.0, 0.95))
+
+	func _reticle() -> void:
+		var col := Color(0.3, 0.7, 1.0, 0.9)
+		var pts := PackedVector2Array()
+		for i in 20:
+			var ang := deg_to_rad(18.0 * i)
+			pts.append(mouse_pos + Vector2(cos(ang), sin(ang)) * 13.0)
+		draw_polyline(pts, col, 2.0)
+		draw_circle(mouse_pos, 2.5, col)
+
+	func _sword(col: Color) -> void:
+		# Лезвие (стрелка вверх)
+		var blade := PackedVector2Array([
+			mouse_pos + Vector2(0, -17),
+			mouse_pos + Vector2(7, 0),
+			mouse_pos + Vector2(0, -5),
+			mouse_pos + Vector2(-7, 0),
+		])
+		draw_colored_polygon(blade, col)
+		# Охрана меча
+		draw_line(mouse_pos + Vector2(-10, 2), mouse_pos + Vector2(10, 2), col, 3.0)
+		# Рукоять
+		draw_line(mouse_pos + Vector2(0, -2), mouse_pos + Vector2(0, 12), col, 4.0)
+
+	func _arrow(col: Color) -> void:
+		# Древко
+		draw_line(mouse_pos + Vector2(0, 12), mouse_pos + Vector2(0, -4), col, 3.5)
+		# Острие (V вверх)
+		var head := PackedVector2Array([
+			mouse_pos + Vector2(0, -16),
+			mouse_pos + Vector2(7, -4),
+			mouse_pos + Vector2(-7, -4),
+		])
+		draw_colored_polygon(head, col)
+		draw_line(mouse_pos + Vector2(0, -16), mouse_pos + Vector2(0, -4), col, 3.5)
+
+	func _wand(col: Color) -> void:
+		# Палочка
+		draw_line(mouse_pos + Vector2(-8, 12), mouse_pos + Vector2(6, -6), col, 4.0)
+		# Искорка (4-конечная звезда)
+		var spark := PackedVector2Array([
+			mouse_pos + Vector2(0, -20),
+			mouse_pos + Vector2(3, -13),
+			mouse_pos + Vector2(10, -13),
+			mouse_pos + Vector2(4, -9),
+			mouse_pos + Vector2(6, -2),
+			mouse_pos + Vector2(0, -6),
+			mouse_pos + Vector2(-6, -2),
+			mouse_pos + Vector2(-4, -9),
+			mouse_pos + Vector2(-10, -13),
+			mouse_pos + Vector2(-3, -13),
+		])
+		draw_colored_polygon(spark, col)
+
+	func _process(_delta: float) -> void:
+		if not visible_flag or not is_inside_tree():
+			return
+		mouse_pos = to_local(get_global_mouse_position())
 
 
 # ==================== ПОДСВЕТКА ====================
@@ -60,6 +147,12 @@ func setup() -> void:
 	_camera = Camera2D.new()
 	add_child(_camera)
 	_camera.make_current()
+
+	_cursor = CursorOverlay.new()
+	_cursor.name = "BattleCursor"
+	_cursor.z_index = 30
+	_cursor.visible = false
+	add_child(_cursor)
 
 
 func paint_field() -> void:
@@ -281,6 +374,23 @@ func pulse_unit(unit: BattleState.BattleUnit) -> void:
 	tw.tween_property(node, "scale", Vector2(1.25, 1.25), 0.15)
 	tw.tween_property(node, "scale", Vector2(1, 1), 0.15)
 
+
+# ==================== КУРСОР ====================
+func set_cursor_mode(mode: int) -> void:
+	if _cursor == null:
+		return
+	_cursor.set_mode(mode)
+
+func set_cursor_visible(visible: bool) -> void:
+	if _cursor == null:
+		return
+	_cursor.visible_flag = visible
+	_cursor.visible = visible
+	_cursor.queue_redraw()
+
+func clear_cursor() -> void:
+	set_cursor_mode(CursorMode.DEFAULT)
+	set_cursor_visible(false)
 
 # ==================== ПОДСВЕТКА ====================
 func set_highlights(move_cells: Dictionary, attack_cells: Dictionary) -> void:

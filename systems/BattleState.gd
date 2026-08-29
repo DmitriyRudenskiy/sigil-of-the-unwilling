@@ -227,7 +227,14 @@ func _apply_artifact_effects(units: Array[BattleUnit], mods: Dictionary) -> void
 func _build_units(stacks: Array, is_atk: bool) -> Array[BattleUnit]:
 	var units: Array[BattleUnit] = []
 	var sx := 2 if is_atk else BW - 3
+	var max_stacks := GameSettings.BATTLE_MAX_UNITS_PER_SIDE
 	for i in stacks.size():
+		# РФ-бой: не более BATTLE_MAX_UNITS_PER_SIDE юнитов с одной стороны.
+		if i >= max_stacks:
+			GameLogger.battle(
+				"%s: лимит юнитов в бою (%d) достигнут, остальные отброшены."
+				% ["Атакующие" if is_atk else "Защитники", max_stacks])
+			break
 		var input_stack = stacks[i]
 		if input_stack == null or not input_stack.is_alive():
 			continue

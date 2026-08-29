@@ -381,6 +381,97 @@ func _test_hero_bonuses() -> int:
 	return errors
 
 
+## РФ-бой: в бою не может быть более 7 юнитов с каждой стороны.
+func _test_max_units_per_side_cap() -> int:
+	var errors := 0
+	var state = load("res://systems/BattleState.gd").new()
+	var atk: Array[UnitStack] = []
+	var def: Array[UnitStack] = []
+	for i in 10:
+		atk.append(Units.make_fixed_stack("swordsmen", 10))
+		def.append(Units.make_fixed_stack("goblins", 10))
+	state.place_army(atk, def)
+
+	var atk_units = state.get_units_by_side(BattleState.Side.ATTACKER)
+	var def_units = state.get_units_by_side(BattleState.Side.DEFENDER)
+	if atk_units.size() != 7:
+		printerr("attacker units should be capped at 7, got %d" % atk_units.size())
+		errors += 1
+	if def_units.size() != 7:
+		printerr("defender units should be capped at 7, got %d" % def_units.size())
+		errors += 1
+	return errors
+
+## РФ-бой: очередь ходов (инициатива) строится по скорости — быстрее ходит первым.
+func _test_initiative_sorted_by_speed() -> int:
+	var errors := 0
+	var state = load("res://systems/BattleState.gd").new()
+	var atk: Array[UnitStack] = []
+	var def: Array[UnitStack] = []
+
+	var slow := Units.make_fixed_stack("swordsmen", 10)
+	slow.stats.speed = 3
+	var fast := Units.make_fixed_stack("archers", 10)
+	fast.stats.speed = 9
+	var mid := Units.make_fixed_stack("cavalry", 10)
+	mid.stats.speed = 6
+
+	atk.append(slow)
+	atk.append(fast)
+	atk.append(mid)
+	def.append(Units.make_fixed_stack("goblins", 10))
+	state.place_army(atk, def)
+	state.build_queue()
+
+	# Очередь должна быть отсортирована по скорости (убывание).
+	var prev: int = 100
+	for u in state.turn_queue:
+		if u.get_speed() > prev:
+			printerr("turn queue not sorted by speed descending: %d after %d"
+				% [u.get_speed(), prev])
+			errors += 1
+		prev = u.get_speed()
+	if state.turn_queue.size() > 0 and state.turn_queue[0].get_speed() != 9:
+		printerr("fastest unit should act first, got speed %d"
+			% state.turn_queue[0].get_speed())
+		errors += 1
+	return errors
+
+## РФ-бой: инициатива пересчитывается каждый раунд (мертвые исключаются).
+func _test_initiative_rebuilt_each_round() -> int:
+	var errors := 0
+	var state = load("res://systems/BattleState.gd").new()
+	var atk: Array[UnitStack] = []
+	var def: Array[UnitStack] = []
+	var fast := Units.make_fixed_stack("cavalry", 10)
+	fast.stats.speed = 9
+	var slow := Units.make_fixed_stack("swordsmen", 10)
+	slow.stats.speed = 3
+	atk.append(fast)
+	atk.append(slow)
+	def.append(Units.make_fixed_stack("goblins", 10))
+	state.place_army(atk, def)
+	state.build_queue()
+
+	var goblin = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
+	var cavalry = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
+	var sword = state.get_units_by_side(BattleState.Side.ATTACKER)[1]
+
+	state.turn_queue.clear()
+	state.turn_queue.append(sword)
+	state.turn_queue.append(cavalry)
+	# Сдвигаем индекс за пределы очереди, чтобы advance_turn() вызвал
+	# start_new_round() → build_queue() (пересборка инициативы).
+	state.turn_idx = state.turn_queue.size()
+	state.active_unit = sword
+
+	state.advance_turn()
+
+	if state.turn_queue.is_empty():
+		printerr("turn queue should not be empty after round rebuild")
+		errors += 1
+	return errors
+
 func _test_get_unit_at_after_kill() -> int:
 	# Regression: _unit_grid must not return dead units (Fix #9)
 	var errors := 0

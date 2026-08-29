@@ -154,6 +154,11 @@ func _on_wait() -> void:
 
 func _on_attack_mode() -> void:
 	_input.show_attack_only()
+	if _state.active_unit != null and _state.active_unit.is_ranged():
+		_input.set_cursor_mode(BattleView.CursorMode.RANGED)
+	else:
+		_input.set_cursor_mode(BattleView.CursorMode.ATTACK)
+	_view.set_cursor_visible(true)
 	_on_status_updated("⚔️ Кликните врага с красным контуром.")
 
 
@@ -206,7 +211,9 @@ func _on_spell_cast_failed(_reason: String) -> void:
 
 func _on_cancel() -> void:
 	_ui.close_spellbook()
+	_input.set_cursor_mode(BattleView.CursorMode.DEFAULT)
 	_input.clear_highlights()
+	_view.set_cursor_visible(_executor.is_input_active())
 	_on_status_updated("Выберите существо…")
 
 
@@ -315,6 +322,14 @@ func _on_executor_phase_changed(phase: BattleTurnExecutor.State) -> void:
 
 	if locked:
 		_ui.set_attack_enabled(false)
+		# Во время хода ИИ / анимаций курсор прячем, режим сбрасываем.
+		_input.set_cursor_mode(BattleView.CursorMode.DEFAULT)
+		_view.set_cursor_visible(false)
+	else:
+		# Ход игрока: курсор видим, дефолтный прицел (моды сбрасываются
+		# кнопками атаки/магии, поэтому здесь — DEFAULT).
+		_input.set_cursor_mode(BattleView.CursorMode.DEFAULT)
+		_view.set_cursor_visible(true)
 
 	_on_initiative_changed()
 

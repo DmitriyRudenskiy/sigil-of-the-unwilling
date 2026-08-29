@@ -23,6 +23,15 @@ var _include_dead: bool = false
 var highlight_move: Dictionary = {}
 var highlight_attack: Dictionary = {}
 
+var _cursor_mode := BattleView.CursorMode.DEFAULT
+
+## Курсор боя: меч (⚔️) — атака, палочка (🪄) — заклинание,
+## стрела (➹) — стрельба, прицел (🎯) — дефолт.
+func set_cursor_mode(mode: int) -> void:
+	_cursor_mode = mode
+	if _view != null:
+		_view.set_cursor_mode(mode)
+
 
 func setup(view: BattleView, state: BattleState, obstacles: Dictionary) -> void:
 	_view = view
@@ -38,6 +47,9 @@ func start_spell_targeting(spell_id: StringName, target_side: BattleState.Side, 
 	_pending_spell_id = spell_id
 	_pending_target_side = target_side
 	_include_dead = include_dead
+	_cursor_mode = BattleView.CursorMode.SPELL
+	if _view != null:
+		_view.set_cursor_mode(_cursor_mode)
 	_clear_highlights()
 	for u in _state.get_units_by_side(target_side):
 		if u.is_alive() or (include_dead and u.stack != null):
@@ -195,6 +207,14 @@ func show_attack_only() -> void:
 
 	var u := _state.active_unit
 	highlight_attack = _compute_attack_highlight(u)
+
+	# Стреляющий юнит бьёт стрелой — стрелочный курсор, мечом — курсор атаки.
+	if u.is_ranged():
+		_cursor_mode = BattleView.CursorMode.RANGED
+	else:
+		_cursor_mode = BattleView.CursorMode.ATTACK
+	if _view != null:
+		_view.set_cursor_mode(_cursor_mode)
 
 	_view.set_highlights({}, highlight_attack)
 

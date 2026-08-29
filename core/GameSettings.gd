@@ -4,7 +4,10 @@ class_name GameSettings
 
 # --- Hero / Inventory ---
 const MAX_BACKPACK_SIZE := 16
-const MAX_HERO_ARMY_SLOTS := 8
+## Максимум юнитов, которыми герой может командовать на карте/в бою.
+const MAX_HERO_ARMY_SIZE := 7
+## Максимум юнитов (инициатив) в бою с каждой из сторон.
+const BATTLE_MAX_UNITS_PER_SIDE := 7
 const HERO_BASE_SPEED := 120.0  # pixels/sec on world map
 const HERO_DAILY_MOVEMENT := 10.0  # float, ОД в день
 const HERO_RETREAT_LOSS_FRACTION := 0.5
