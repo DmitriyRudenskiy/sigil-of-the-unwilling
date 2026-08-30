@@ -24,9 +24,9 @@ func _ready():
 	server = TCPServer.new()
 	var err = server.listen(9095)
 	if err == OK:
-		print("[SocketServer] ✅ Listening on 127.0.0.1:9095")
+		GameLogger.info("✅ Listening on 127.0.0.1:9095", "SocketServer")
 	else:
-		print("[SocketServer] ❌ Failed to listen: ", err)
+		GameLogger.error("❌ Failed to listen: %s" % err, "SocketServer")
 
 	# Invalidate controller cache on scene tree changes (RF-07)
 	get_tree().node_added.connect(_on_tree_changed)
@@ -76,7 +76,7 @@ func _process(_delta):
 								_slow_count += 1
 								push_warning("[SocketServer] Slow request: %.1f ms | %s" % [elapsed_ms, _extract_action(line)])
 							else:
-								print("[SocketServer] %.2f ms | %s" % [elapsed_ms, _extract_action(line)])
+								GameLogger.trace("%.2f ms | %s" % [elapsed_ms, _extract_action(line)], "SocketServer")
 							peer.put_data((JSON.stringify(resp) + "\n").to_utf8_buffer())
 							
 		elif status != StreamPeerTCP.STATUS_CONNECTING:
@@ -113,9 +113,9 @@ func _route_command(line: String) -> Dictionary:
 	var battle_ctrl = _get_cached_controller(_battle_ctrl_script, false)
 	
 	if world_ctrl == null:
-		print("[SocketServer] DEBUG: WorldController not found in scene tree")
+		GameLogger.warn("DEBUG: WorldController not found in scene tree", "SocketServer")
 	else:
-		print("[SocketServer] DEBUG: WorldController found: ", world_ctrl.name)
+		GameLogger.trace("DEBUG: WorldController found: %s" % world_ctrl.name, "SocketServer")
 	
 	match action:
 		"START_GAME":

@@ -342,14 +342,14 @@ func cancel_pending(clear_text: bool = true) -> void:
 func _start_moving() -> void:
 	if path.size() < 2:
 		return
-	print("[Movement] 🚀 Starting movement. Path size: %d" % path.size())
+	GameLogger.trace("🚀 Starting movement. Path size: %d" % path.size(), "Movement")
 	is_moving = true
 	_move_next_step()
 
 
 func _move_next_step() -> void:
 	if path.size() < 2:
-		print("[Movement] 🏁 Path exhausted. Stopping.")
+		GameLogger.trace("🏁 Path exhausted. Stopping.", "Movement")
 		is_moving = false
 		path.clear()
 		reach_preview_cleared.emit()
@@ -357,14 +357,14 @@ func _move_next_step() -> void:
 		return
 
 	var next_cell := path[1]
-	print("[Movement] ➡️ Moving to %s. Remaining path: %d" % [str(next_cell), path.size()])
+	GameLogger.trace("➡️ Moving to %s. Remaining path: %d" % [str(next_cell), path.size()], "Movement")
 	path.remove_at(0)
 
 	var step_cost: float = _terrain_cost(next_cell)
 	if step_cost >= INF:
 		# Клетка стала непроходимой во время движения (динамическая блокировка).
 		# Останавливаемся штатно, не портя move_points (-INF застревал героя до конца хода).
-		print("[Movement] ⛔ Path blocked at %s — stopping" % str(next_cell))
+		GameLogger.trace("⛔ Path blocked at %s — stopping" % str(next_cell), "Movement")
 		is_moving = false
 		path.clear()
 		reach_preview_cleared.emit()
@@ -389,7 +389,7 @@ func _move_next_step() -> void:
 
 
 func _on_step_complete(cell: Vector2i) -> void:
-	print("[Movement] ✅ Step complete: %s" % str(cell))
+	GameLogger.trace("✅ Step complete: %s" % str(cell), "Movement")
 	previous_cell = current_cell
 	current_cell = cell
 	_emit_position_update()

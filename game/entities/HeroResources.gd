@@ -22,7 +22,7 @@ func pickup_resource(res_type: int) -> void:
 	if res_type < names.size():
 		var amount := 5 if res_type < 6 else 50
 		resources[names[res_type]] += amount
-		print("[Hero] Picked up +%d %s" % [amount, names[res_type]])
+		GameLogger.hero("Picked up +%d %s" % [amount, names[res_type]])
 		resources_changed.emit(resources)
 
 

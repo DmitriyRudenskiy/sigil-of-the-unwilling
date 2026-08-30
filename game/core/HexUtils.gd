@@ -32,7 +32,7 @@ static func calibrate(tm: TileMapLayer) -> void:
 	var a := tm.map_to_local(Vector2i(0, 0))
 	var b := tm.map_to_local(Vector2i(0, 1))
 	get_config().odd_row_shift_right = b.x > a.x
-	print("[HexUtils] calibrated: odd_row_shift_right = ", get_config().odd_row_shift_right)
+	GameLogger.trace("calibrated: odd_row_shift_right = %s" % str(get_config().odd_row_shift_right), "HexUtils")
 
 
 static func get_neighbor(cell: Vector2i, bit: int) -> Vector2i:

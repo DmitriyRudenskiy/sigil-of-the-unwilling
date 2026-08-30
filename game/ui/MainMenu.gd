@@ -26,7 +26,7 @@ func _build_background() -> void:
 		bg.texture = tex
 	else:
 		bg.texture = _placeholder()
-		print("[MainMenu] TODO: положить арт тронного зала в res://assets/ui/main_menu_bg.png")
+		GameLogger.trace("TODO: положить арт тронного зала в res://assets/ui/main_menu_bg.png", "MainMenu")
 	add_child(bg)
 
 

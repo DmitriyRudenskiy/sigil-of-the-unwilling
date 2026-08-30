@@ -48,7 +48,7 @@ func _load_from_json() -> void:
 			continue
 		_register(spell)
 
-	print("[CardSpellRegistry] Loaded %d spells from JSON" % _spells.size())
+	GameLogger.info("Loaded %d spells from JSON" % _spells.size(), "CardSpells")
 
 func _load_fallback() -> void:
 	# Минимальный набор для тестов
