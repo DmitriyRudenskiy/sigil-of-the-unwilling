@@ -14,6 +14,8 @@ func _init() -> void:
 	failed += _test_cursor_overlay_visibility()
 	failed += _test_view_cursor_methods()
 	failed += _test_input_setter_propagates()
+	failed += _test_walk_cursor_mode()
+	failed += _test_walk_cursor_distinct_from_ranged()
 
 	if failed == 0:
 		print("Battle cursor tests passed")
@@ -139,4 +141,36 @@ func _test_input_setter_propagates() -> int:
 		errors += 1
 
 	input.queue_free()
+	return errors
+
+
+## Режим ходьбы (MOVE) — отдельный курсор, не путается с атакой/стрелой.
+func _test_walk_cursor_mode() -> int:
+	var errors := 0
+	if _BattleView.CursorMode.MOVE != 4:
+		printerr("CursorMode.MOVE should be 4 (added after RANGED=3)")
+		errors += 1
+	# Значения старых режимов не должны сдвинуться.
+	if _BattleView.CursorMode.DEFAULT != 0 or _BattleView.CursorMode.ATTACK != 1:
+		printerr("existing cursor mode values must not change")
+		errors += 1
+
+	var c := _BattleView.CursorOverlay.new()
+	c.set_mode(_BattleView.CursorMode.MOVE)
+	if c.mode != _BattleView.CursorMode.MOVE:
+		printerr("cursor overlay should be MOVE after set_mode(MOVE)")
+		errors += 1
+	c.queue_free()
+	return errors
+
+
+## Курсор ходьбы должен отличаться от стрелого (RANGED) и дефолтного (DEFAULT).
+func _test_walk_cursor_distinct_from_ranged() -> int:
+	var errors := 0
+	if _BattleView.CursorMode.MOVE == _BattleView.CursorMode.RANGED:
+		printerr("MOVE cursor mode must be distinct from RANGED")
+		errors += 1
+	if _BattleView.CursorMode.MOVE == _BattleView.CursorMode.DEFAULT:
+		printerr("MOVE cursor mode must be distinct from DEFAULT")
+		errors += 1
 	return errors

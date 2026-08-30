@@ -126,7 +126,10 @@ func _place_obstacles() -> void:
 
 # ==================== INPUT CALLBACKS → EXECUTOR ====================
 func _on_unit_selected(u: BattleState.BattleUnit) -> void:
-	_on_status_updated("%s: синий контур — ход, красный — атака." % u.get_display_name())
+	_on_status_updated(
+		"%s: синяя траектория — куда ходит, красная окрестность — ходов не хватает, красный контур — атака."
+		% u.get_display_name()
+	)
 	_ui.update_active_unit(u)
 	_ui.set_attack_enabled(_input.highlight_attack.size() > 0)
 

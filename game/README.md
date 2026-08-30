@@ -16,6 +16,16 @@
 - `core/ city/ data/ demographics/ economy/ entities/ systems/ ui/ world/` — код
 - `assets/` — спрайты, аудио, иконки
 - `tilesets/` — гекс-тайлсеты
+- `tests/` — тесты (`run_tests.gd`, `test_base.gd`, `fakes/`)
+- `tools/` — утилиты и dev-скрипты (`shell/`, `spell_validation/`, `scenarios/`)
+- `docs/` — документация
+- `previews/` — превью биомов
+- `backup_assets/` — запасные ассеты
+- `prototype/` — HTML-прототипы
+- `scenes/` — MainMenu, World, Battle, CityArena + BiomePreview, TestTerrain
+- `lair/` — материалы лаи
+- `tmp/` — черновые логи и скрипты
 - `.godot/` — кэш импорта (можно удалить, Godot пересоздаст)
 
-Тесты (`tests/`), утилиты (`tools/`), доки (`docs/`) и плагины — вне этой папки.
+Это самодостаточная папка: всё (код, тесты `tests/`, утилиты `tools/`, доки `docs/`,
+`previews/`, `backup_assets/`, `prototype/`, `scenes/`, `lair/`, `tmp/`) — внутри неё.

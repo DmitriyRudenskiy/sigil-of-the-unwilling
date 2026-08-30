@@ -84,11 +84,11 @@
 
 **Фикс:** хелпер `static func _as_unit_stack_array(v: Variant) -> Array[UnitStack]` на границе — оба вызова `_start_battle` в `check_enemy_contact`; тернарник в `_start_battle` разведён через Variant-промежуточный.
 
-### РФ10-3: `CardSpellDef.secondary_effects` ломал все карточные спеллы
+### РФ10-3: `SpellDef.secondary_effects` ломал все заклинания
 
-**Файл:** `scripts/card/CardSpellDef.gd`
+**Файл:** `scripts/data/SpellbookDef.gd`
 
-**Проблема:** `secondary_effects` объявлен как `Array`, а `CardTemplateEngine._Engine.execute()` ожидает `Array[Dictionary]` — тип-несовпадение роняло выполнение **каждого** карточного спелла со вторичными эффектами.
+**Проблема:** `secondary_effects` объявлен как `Array`, а `TemplateEngine._Engine.execute()` ожидает `Array[Dictionary]` — тип-несовпадение роняло выполнение **каждого** заклинания со вторичными эффектами.
 
 **Фикс:** поле типа `Array[Dictionary]`, `from_dict()` собирает типизированный массив.
 
@@ -103,7 +103,7 @@
 1. **~40 SCRIPT ERROR в логах тестов** — каждый триажирован: баг продукта (фиксы РФ10-1…РФ10-4 и в `BattleState`/`UnitStack`/`TimeSystem` — см. предыдущие фазы), баг теста (поправка ожиданий) или устаревший API (напр. `Window.scene_tree_changed` удалён в Godot 4.7).
 2. **Автономные SceneTree self-runners** — опасные преобразованы в паттерн `test_base`; асинхронный `test_runtime_integration` (ждёт 4 с инициализации мира) перенесён в `SKIP_FILES` главного раннера и исправлен для standalone: deferred-старт после autoloads (в `-s`-режиме `_init` выполняется раньше autoloads, и скрипты мира с их идентификаторами autoloads не компилировались) + `create_timer()` вместо `Timer.start()`. Запуск: `godot --headless -s tests/test_runtime_integration.gd`.
 3. **16 синхронных self-runner-файлов** (`test_battle_ai`, `test_battle_integration`, `test_battle_state`, `test_hex_utils`, `test_unit_registry` и др.) — работы выполнялись в `_init`, но раннер считал их за 0 тестов: падение любого чек-поинта не меняло итог и exit code. Подключены к счётчикам раннера (`_passed`/`_failed`): их результаты теперь входят в `=== Total ===` и exit code.
-4. **Ожидание `test_card_spell_system`**: `HARD_REMOVAL` без цели корректно возвращает `{"result": "no_target"}` — ожидание расширено до `["success", "condition_not_met", "no_target"]` (фикс теста, не продукта).
+4. **Ожидание `test_spell_system`**: `HARD_REMOVAL` без цели корректно возвращает `{"result": "no_target"}` — ожидание расширено до `["success", "condition_not_met", "no_target"]` (фикс теста, не продукта).
 
 ### Итоговые цифры (Godot 4.7.2.stable, headless)
 
@@ -161,3 +161,26 @@ processed/{biome}/objects/ → объекты (декор, 15% шанс)
     - **Duo**: 21 (all pairs)
     - **Trio**: 3 (water-grass-mountain, swamp-sand-forest, grass-forest-snow)
     - **Matrix**: 1 (full mix of all 7 biomes)
+
+## TileSet Builder v4 Report (base + objects)
+| Биом | Фон | Варианты | Объекты |
+|---|---|---|---|
+| water | 1 | 5 | 14 |
+| swamp | 1 | 39 | 0 |
+| sand | 1 | 0 | 0 |
+| grass | 1 | 0 | 0 |
+| forest | 1 | 0 | 0 |
+| mountain | 1 | 5 | 0 |
+| snow | 1 | 0 | 18 |
+
+### Структура папок:
+```
+processed/{biome}/base/    → фоновые (заполнение)
+processed/{biome}/objects/ → объекты (декор, 15% шанс)
+```
+
+### Synthesized:
+- sand_base (solid color fill)
+- grass_base (solid color fill)
+- forest_base (solid color fill)
+

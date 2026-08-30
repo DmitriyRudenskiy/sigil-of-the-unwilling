@@ -92,6 +92,7 @@ func test_pause_sets_pending_move() -> void:
 	)
 	executor.resume_battle()
 	assert_false(executor.is_paused(), "resumed after resume_battle")
+	executor.free()
 
 func test_pause_sets_pending_attack() -> void:
 	var executor := _BTX.new()
@@ -103,6 +104,7 @@ func test_pause_sets_pending_attack() -> void:
 		_BTX.PendingAction.ATTACK,
 		"pending is ATTACK enum"
 	)
+	executor.free()
 
 func test_resume_clears_pending() -> void:
 	var executor := _BTX.new()
@@ -115,6 +117,7 @@ func test_resume_clears_pending() -> void:
 		_BTX.PendingAction.NONE,
 		"pending cleared after resume"
 	)
+	executor.free()
 
 func test_start_battle_resets_pending() -> void:
 	var executor := _BTX.new()
@@ -131,3 +134,4 @@ func test_start_battle_resets_pending() -> void:
 		_BTX.PendingAction.NONE,
 		"start_battle clears pending"
 	)
+	executor.free()

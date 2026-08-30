@@ -1,11 +1,11 @@
-## scripts/card/CardTemplateEngine.gd
-class_name CardTemplateEngine
+## scripts/data/TemplateEngine.gd
+class_name TemplateEngine
 extends RefCounted
 ## Strategy pattern: template_id → Callable handler.
 ## Handlers are registered at boot; new templates add to _handlers without touching this file.
 
-const _Enums = preload("res://data/CardEnums.gd")
-const _Utils = preload("res://data/CardUtils.gd")
+const _Enums = preload("res://data/SpellEnums.gd")
+const _Utils = preload("res://data/SpellUtils.gd")
 const _E := _Enums.EffectType
 const _T := _Enums.TargetType
 const _S := _Enums.StatusType
@@ -33,7 +33,7 @@ static func execute(
 	target: Variant
 ) -> Dictionary:
 	# Проверка глобального условия
-	if not CardTemplateHandlers._check_condition(condition, state, caster, target):
+	if not TemplateHandlers._check_condition(condition, state, caster, target):
 		return {"result": "condition_not_met", "effects": []}
 
 	if not _handlers.has(template):
@@ -48,7 +48,7 @@ static func execute(
 
 # ==================== HANDLER IMPLEMENTATIONS ====================
 ## Each handler is a standalone Callable so the registry can swap them.
-class CardTemplateHandlers:
+class TemplateHandlers:
 	## ——— T01: DIRECT DAMAGE ———
 	static func t01_direct_damage(
 		params: Dictionary, state: Variant,
@@ -265,8 +265,8 @@ class CardTemplateHandlers:
 
 		return {"result": "success", "effects": effects}
 
-	## ——— T07: CARD DRAW ———
-	static func t07_card_draw(
+	## ——— T07: SPELL DRAW ———
+	static func t07_spell_draw(
 		params: Dictionary, state: Variant,
 		caster: Variant, target: Variant
 	) -> Dictionary:
@@ -468,8 +468,8 @@ class CardTemplateHandlers:
 
 		return {"result": "success", "effects": effects}
 
-	## ——— T15: DISCARD & DRAW ———
-	static func t15_discard_draw(
+	## ——— T15: DISPEL & DRAW ———
+	static func t15_dispel_draw(
 		params: Dictionary, state: Variant,
 		caster: Variant, target: Variant
 	) -> Dictionary:

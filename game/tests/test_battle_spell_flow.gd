@@ -21,6 +21,7 @@ func test_cast_keeps_waiting_input() -> void:
 	bs.active_unit = null
 	executor.request_spell_cast(&"fireball")
 	assert_eq(executor.get_current_state(), BattleTurnExecutor.State.WAITING_INPUT, "phase stays WAITING_INPUT")
+	executor.free()
 
 # РФ3-3: Исцеление — wounded stack увеличивается
 func test_cure_heals_wounded() -> void:
@@ -66,6 +67,7 @@ func test_avatar_texture_passthrough() -> void:
 	hero.name = "TestHero"
 	var tex = hero.get_avatar_texture()
 	assert_true(tex == null or tex is Texture2D, "avatar texture valid or null")
+	hero.free()
 
 # РФ3-1: Контроллер — новые хендлеры
 func test_controller_spell_handlers_exist() -> void:
@@ -73,3 +75,4 @@ func test_controller_spell_handlers_exist() -> void:
 	bc.name = "TestBC"
 	assert_true(bc.has_method("_on_spell_chosen"), "spell_chosen handler exists")
 	assert_true(bc.has_method("_on_spell_cast_requested"), "spell_cast_requested handler exists")
+	bc.free()

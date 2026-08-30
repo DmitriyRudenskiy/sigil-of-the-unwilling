@@ -1,6 +1,6 @@
-class_name CardSpellValidator
+class_name SpellValidator
 extends RefCounted
-## Полный валидатор data/card_spells.json.
+## Полный валидатор data/spells.json.
 ## 7 уровней проверки: структура → поля → типы → enum → семантика → целостность → баланс.
 ##
 ## Коды ошибок:
@@ -31,7 +31,7 @@ func _dir() -> String:
 static func _load_src(path: String) -> Script:
 	var fa := FileAccess.open(path, FileAccess.READ)
 	if fa == null:
-		push_error("[CardSpellValidator] cannot open %s" % path)
+		push_error("[SpellValidator] cannot open %s" % path)
 		return null
 	var text := fa.get_as_text()
 	fa.close()
@@ -62,7 +62,7 @@ const TEMPLATES := {
 	"COUNTERMAGIC":     [],
 	"COMBAT_TRICK":     [],
 	"DEBUFF_CONTROL":   [],
-	"CARD_DRAW":        ["count"],
+	"SPELL_DRAW":        ["count"],
 	"MANA_RAMP":        ["power"],
 	"TOKEN_GENERATION": ["token_id", "count"],
 	"RELIC_INTERACTION":["action"],
@@ -70,7 +70,7 @@ const TEMPLATES := {
 	"CHOICE_CYCLE":     ["draw"],
 	"TOUCH_CYCLE":      ["atk", "hp"],
 	"DISPLAY_CYCLE":    [],
-	"DISCARD_DRAW":     ["discard", "draw"],
+	"DISPEL_DRAW":     ["discard", "draw"],
 	"MARKET_NICHE":     ["action"],
 }
 
@@ -121,7 +121,7 @@ const VALID_CHOICE_SECONDARY := ["DEAL_1_DAMAGE", "BUFF_1_1", "HEAL_2", "GAIN_1_
 
 ## Базовая линия распределения (snapshot данных). Живёт в отдельном файле,
 ## чтобы при легитимном росте карты правил CI не ломался хардкодом.
-## Обновление: godot --headless -s tools/card_validation/validate_card_spells.gd --update-baseline
+## Обновление: godot --headless -s tools/spell_validation/validate_spells.gd --update-baseline
 ## Путь к baseline — относительно этого скрипта, а не через res:// (см. _dir()).
 func baseline_path() -> String:
 	return _dir().path_join("baseline.json")
@@ -416,7 +416,7 @@ func _validate_template_semantics(
 		"COUNTERMAGIC":       _v_countermagic(params, spell_id)
 		"COMBAT_TRICK":       _v_combat_trick(params, spell_id)
 		"DEBUFF_CONTROL":     _v_debuff_control(params, spell_id)
-		"CARD_DRAW":          _v_card_draw(params, condition, spell_id)
+		"SPELL_DRAW":          _v_spell_draw(params, condition, spell_id)
 		"MANA_RAMP":          _v_mana_ramp(params, spell_id)
 		"TOKEN_GENERATION":   _v_token_generation(params, spell_id)
 		"RELIC_INTERACTION":  _v_relic_interaction(params, spell_id)
@@ -424,7 +424,7 @@ func _validate_template_semantics(
 		"CHOICE_CYCLE":       _v_choice_cycle(params, spell_id)
 		"TOUCH_CYCLE":        _v_touch_cycle(params, spell_id)
 		"DISPLAY_CYCLE":      _v_display_cycle(params, spell_id)
-		"DISCARD_DRAW":       _v_discard_draw(params, spell_id)
+		"DISPEL_DRAW":       _v_dispel_draw(params, spell_id)
 		"MARKET_NICHE":       _v_market_niche(params, spell_id)
 
 func _v_direct_damage(params: Dictionary, sid: String) -> void:
@@ -511,7 +511,7 @@ func _v_debuff_control(params: Dictionary, sid: String) -> void:
 	if params.has("duration"):
 		_check_int_range(params["duration"], 1, 5, "E422", "duration", sid)
 
-func _v_card_draw(params: Dictionary, condition: Dictionary, sid: String) -> void:
+func _v_spell_draw(params: Dictionary, condition: Dictionary, sid: String) -> void:
 	_check_int_range(params.get("count"), DRAW_COUNT_MIN, DRAW_COUNT_MAX, "E423", "count", sid)
 	if params.has("scout"):
 		_check_int_range(params["scout"], 1, 5, "E424", "scout", sid)
@@ -590,7 +590,7 @@ func _v_display_cycle(params: Dictionary, sid: String) -> void:
 		if not VALID_COLORS.has(inf):
 			report.error("E318", "Invalid influence '%s'" % inf, sid)
 
-func _v_discard_draw(params: Dictionary, sid: String) -> void:
+func _v_dispel_draw(params: Dictionary, sid: String) -> void:
 	_check_int_range(params.get("discard"), 0, 3, "E443", "discard", sid)
 	_check_int_range(params.get("draw"), 1, DRAW_COUNT_MAX, "E444", "draw", sid)
 	if params.has("shuffle_back") and not (params["shuffle_back"] is bool):
@@ -656,7 +656,7 @@ func save_baseline(path: String) -> bool:
 	var data = build_baseline()
 	var fa := FileAccess.open(path, FileAccess.WRITE)
 	if fa == null:
-		push_error("[CardSpellValidator] Cannot open baseline for write: %s" % path)
+		push_error("[SpellValidator] Cannot open baseline for write: %s" % path)
 		return false
 	fa.store_string(JSON.stringify(data, "\t"))
 	fa.close()

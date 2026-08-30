@@ -30,8 +30,8 @@ func _init() -> void:
 		return state
 	)
 
-	_measure("CardSpellRegistry 420 cards", func():
-		var reg = load("res://data/CardSpellRegistry.gd").new()
+	_measure("SpellbookRegistry 420 spells", func():
+		var reg = load("res://data/SpellbookRegistry.gd").new()
 		reg.ensure_definitions()
 		return reg
 	)

@@ -8,6 +8,11 @@ var bus: Node
 func before_each() -> void:
 	bus = _GameEventBus.new()
 
+func after_each() -> void:
+	if bus != null:
+		bus.free()
+		bus = null
+
 # ==================== СОЗДАНИЕ ====================
 
 func test_bus_creation() -> void:

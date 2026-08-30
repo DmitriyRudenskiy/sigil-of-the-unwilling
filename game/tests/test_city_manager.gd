@@ -17,6 +17,12 @@ func before_each() -> void:
 	capital.center = Vector2i(10, 10)
 	manager.register_city(capital, true)
 
+func after_each() -> void:
+	# CityManager — Node: без free() каждый тест утекает в ObjectDB.
+	if manager != null:
+		manager.free()
+		manager = null
+
 # ==================== РЕГИСТРАЦИЯ ====================
 
 func test_register_city() -> void:
@@ -91,6 +97,7 @@ func test_capital_inflow_no_capital() -> void:
 	mgr.name = "TestMgr2"
 	var inflow := mgr.capital_inflow(1)
 	assert_eq(inflow, 0, "no inflow without capital")
+	mgr.free()
 
 func test_capital_inflow_base() -> void:
 	# Без храма и славы: base = 2, glory_mod = 1, season_mod = 1 (лето)

@@ -4202,7 +4202,7 @@
  {
   "id": "abyssal_scrying",
   "name": "Abyssal Scrying",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "slow",
   "cost": 3,
   "color": "shadow",
@@ -4215,7 +4215,7 @@
  {
   "id": "all_nighter",
   "name": "All-Nighter",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "time",
@@ -4228,7 +4228,7 @@
  {
   "id": "audacious_ruse",
   "name": "Audacious Ruse",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "shadow",
@@ -4241,7 +4241,7 @@
  {
   "id": "biding_time",
   "name": "Biding Time",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "time",
@@ -4254,7 +4254,7 @@
  {
   "id": "bone_music",
   "name": "Bone Music",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "shadow",
@@ -4267,7 +4267,7 @@
  {
   "id": "bottled_insight",
   "name": "Bottled Insight",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "primal",
@@ -4280,7 +4280,7 @@
  {
   "id": "boundless_knowledge",
   "name": "Boundless Knowledge",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "slow",
   "cost": 3,
   "color": "primal",
@@ -4296,7 +4296,7 @@
  {
   "id": "brenns_insight",
   "name": "Brenn's Insight",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "fire",
@@ -4309,7 +4309,7 @@
  {
   "id": "call_for_aid",
   "name": "Call for Aid",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "justice",
@@ -4322,7 +4322,7 @@
  {
   "id": "caravan_delivery",
   "name": "Caravan Delivery",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "slow",
   "cost": 3,
   "color": "time",
@@ -4335,7 +4335,7 @@
  {
   "id": "collection_rounds",
   "name": "Collection Rounds",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "time",
@@ -4348,7 +4348,7 @@
  {
   "id": "curtain_call",
   "name": "Curtain Call",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "shadow",
@@ -4361,7 +4361,7 @@
  {
   "id": "dangerous_gambit",
   "name": "Dangerous Gambit",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 1,
   "color": "fire",
@@ -4377,7 +4377,7 @@
  {
   "id": "desperate_gambit",
   "name": "Desperate Gambit",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 1,
   "color": "fire",
@@ -4393,7 +4393,7 @@
  {
   "id": "dazzling_revelation",
   "name": "Dazzling Revelation",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 3,
   "color": "justice",
@@ -4406,7 +4406,7 @@
  {
   "id": "deja_vu",
   "name": "Deja Vu",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "time",
@@ -4431,7 +4431,7 @@
  {
   "id": "fair_exchange",
   "name": "Fair Exchange",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "time",
@@ -4444,7 +4444,7 @@
  {
   "id": "find_the_moment",
   "name": "Find The Moment",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 1,
   "color": "primal",
@@ -4456,7 +4456,7 @@
  {
   "id": "finest_hour",
   "name": "Finest Hour",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 3,
   "color": "justice",
@@ -4469,7 +4469,7 @@
  {
   "id": "friends_in_low_places",
   "name": "Friends in Low Places",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "shadow",
@@ -4482,7 +4482,7 @@
  {
   "id": "gavels_insight",
   "name": "Gavel's Insight",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "justice",
@@ -4495,7 +4495,7 @@
  {
   "id": "generosity",
   "name": "Generosity",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "primal",
@@ -4508,7 +4508,7 @@
  {
   "id": "glimpse_another_age",
   "name": "Glimpse Another Age",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "slow",
   "cost": 4,
   "color": "time",
@@ -4521,7 +4521,7 @@
  {
   "id": "greeds_reward",
   "name": "Greed's Reward",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "slow",
   "cost": 3,
   "color": "shadow",
@@ -4534,7 +4534,7 @@
  {
   "id": "grievance_day",
   "name": "Grievance Day",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "fire",
@@ -4547,7 +4547,7 @@
  {
   "id": "grisly_contest",
   "name": "Grisly Contest",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "shadow",
@@ -4560,7 +4560,7 @@
  {
   "id": "hard_lesson",
   "name": "Hard Lesson",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "time",
@@ -4573,7 +4573,7 @@
  {
   "id": "hive_delivery",
   "name": "Hive Delivery",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "primal",
@@ -4586,7 +4586,7 @@
  {
   "id": "honeypot",
   "name": "Honeypot",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "primal",
@@ -4599,7 +4599,7 @@
  {
   "id": "icy_scrying",
   "name": "Icy Scrying",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "primal",
@@ -4612,7 +4612,7 @@
  {
   "id": "ironclad_oath",
   "name": "Ironclad Oath",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "justice",
@@ -4625,7 +4625,7 @@
  {
   "id": "keep_your_distance",
   "name": "Keep Your Distance",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "primal",
@@ -4638,7 +4638,7 @@
  {
   "id": "maddening_whisper",
   "name": "Maddening Whisper",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "shadow",
@@ -4652,7 +4652,7 @@
  {
   "id": "meditation",
   "name": "Meditation",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "slow",
   "cost": 3,
   "color": "time",
@@ -4665,7 +4665,7 @@
  {
   "id": "midnight_hunt",
   "name": "Midnight Hunt",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "shadow",
@@ -4679,7 +4679,7 @@
  {
   "id": "mob_rule",
   "name": "Mob Rule",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "fire",
@@ -4692,7 +4692,7 @@
  {
   "id": "new_prey",
   "name": "New Prey",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "shadow",
@@ -4706,7 +4706,7 @@
  {
   "id": "no_one_left_behind",
   "name": "No One Left Behind",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 3,
   "color": "justice",
@@ -4719,7 +4719,7 @@
  {
   "id": "pick_clean",
   "name": "Pick Clean",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "shadow",
@@ -4733,7 +4733,7 @@
  {
   "id": "poison_the_well",
   "name": "Poison the Well",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "shadow",
@@ -4747,7 +4747,7 @@
  {
   "id": "prodigious_sorcery",
   "name": "Prodigious Sorcery",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "slow",
   "cost": 4,
   "color": "primal",
@@ -4759,7 +4759,7 @@
  {
   "id": "pull_from_duty",
   "name": "Pull From Duty",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "justice",
@@ -4772,7 +4772,7 @@
  {
   "id": "rage",
   "name": "Rage",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "fire",
@@ -4785,7 +4785,7 @@
  {
   "id": "rainfall_accord",
   "name": "Rainfall Accord",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "primal",
@@ -4798,7 +4798,7 @@
  {
   "id": "rains_of_linrei",
   "name": "Rains of Linrei",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "slow",
   "cost": 3,
   "color": "primal",
@@ -4811,7 +4811,7 @@
  {
   "id": "read_the_runes",
   "name": "Read the Runes",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "time",
@@ -4824,7 +4824,7 @@
  {
   "id": "realign_the_stars",
   "name": "Realign the Stars",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "slow",
   "cost": 4,
   "color": "time",
@@ -4837,7 +4837,7 @@
  {
   "id": "realize_your_potential",
   "name": "Realize Your Potential",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "time",
@@ -4851,7 +4851,7 @@
  {
   "id": "recombobulate",
   "name": "Recombobulate",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "time",
@@ -4865,7 +4865,7 @@
  {
   "id": "recovery",
   "name": "Recovery",
-  "template": "DISCARD_DRAW",
+  "template": "DISPEL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "primal",
@@ -4882,7 +4882,7 @@
  {
   "id": "refresh",
   "name": "Refresh",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "primal",
@@ -4896,7 +4896,7 @@
  {
   "id": "refreshing_waters",
   "name": "Refreshing Waters",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "primal",
@@ -4910,7 +4910,7 @@
  {
   "id": "relentless_pursuit",
   "name": "Relentless Pursuit",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "fire",
@@ -4923,7 +4923,7 @@
  {
   "id": "secret_pages",
   "name": "Secret Pages",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "time",
@@ -4937,7 +4937,7 @@
  {
   "id": "seek_refuge",
   "name": "Seek Refuge",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "justice",
@@ -4950,7 +4950,7 @@
  {
   "id": "second_sight",
   "name": "Second Sight",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "time",
@@ -4963,7 +4963,7 @@
  {
   "id": "sinister_research",
   "name": "Sinister Research",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "slow",
   "cost": 3,
   "color": "shadow",
@@ -4976,7 +4976,7 @@
  {
   "id": "sleight_of_hand",
   "name": "Sleight of Hand",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 1,
   "color": "shadow",
@@ -4988,7 +4988,7 @@
  {
   "id": "smooth_hustle",
   "name": "Smooth Hustle",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "shadow",
@@ -5002,7 +5002,7 @@
  {
   "id": "soul_feast",
   "name": "Soul Feast",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "shadow",
@@ -5016,7 +5016,7 @@
  {
   "id": "spindown",
   "name": "Spindown",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "time",
@@ -5030,7 +5030,7 @@
  {
   "id": "summary_judgement",
   "name": "Summary Judgement",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "justice",
@@ -5044,7 +5044,7 @@
  {
   "id": "sweet_dreams",
   "name": "Sweet Dreams",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "primal",
@@ -5058,7 +5058,7 @@
  {
   "id": "tactical_expertise",
   "name": "Tactical Expertise",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "justice",
@@ -5072,7 +5072,7 @@
  {
   "id": "through_the_unknown",
   "name": "Through The Unknown",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "slow",
   "cost": 4,
   "color": "time",
@@ -5085,7 +5085,7 @@
  {
   "id": "trailblaze",
   "name": "Trailblaze",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "fire",
@@ -5099,7 +5099,7 @@
  {
   "id": "unexpected_arrival",
   "name": "Unexpected Arrival",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "time",
@@ -5113,7 +5113,7 @@
  {
   "id": "urgent_missive",
   "name": "Urgent Missive",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 1,
   "color": "justice",
@@ -5125,7 +5125,7 @@
  {
   "id": "vermins_feast",
   "name": "Vermin's Feast",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "shadow",
@@ -5139,7 +5139,7 @@
  {
   "id": "warlocks_brew",
   "name": "Warlock's Brew",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "shadow",
@@ -5153,7 +5153,7 @@
  {
   "id": "wisdom_of_the_elders",
   "name": "Wisdom of the Elders",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "slow",
   "cost": 3,
   "color": "primal",
@@ -5166,7 +5166,7 @@
  {
   "id": "worthy_cause",
   "name": "Worthy Cause",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "justice",
@@ -5180,7 +5180,7 @@
  {
   "id": "xumuc_whisper",
   "name": "Xumuc Whisper",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "shadow",
@@ -5194,7 +5194,7 @@
  {
   "id": "deep_study",
   "name": "Deep Study",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "slow",
   "cost": 3,
   "color": "primal",
@@ -5207,7 +5207,7 @@
  {
   "id": "ancient_knowledge",
   "name": "Ancient Knowledge",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "slow",
   "cost": 4,
   "color": "time",
@@ -5220,7 +5220,7 @@
  {
   "id": "quick_thinking",
   "name": "Quick Thinking",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 1,
   "color": "time",
@@ -5232,7 +5232,7 @@
  {
   "id": "hidden_stash",
   "name": "Hidden Stash",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "shadow",
@@ -5246,7 +5246,7 @@
  {
   "id": "scout_ahead",
   "name": "Scout Ahead",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 1,
   "color": "primal",
@@ -5259,7 +5259,7 @@
  {
   "id": "battle_plans",
   "name": "Battle Plans",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "justice",
@@ -5273,7 +5273,7 @@
  {
   "id": "forbidden_tome",
   "name": "Forbidden Tome",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "slow",
   "cost": 3,
   "color": "shadow",
@@ -5286,7 +5286,7 @@
  {
   "id": "star_chart",
   "name": "Star Chart",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "time",
@@ -5299,7 +5299,7 @@
  {
   "id": "commune_with_nature",
   "name": "Commune with Nature",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "primal",
@@ -5313,7 +5313,7 @@
  {
   "id": "war_council",
   "name": "War Council",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "slow",
   "cost": 3,
   "color": "fire",
@@ -5325,7 +5325,7 @@
  {
   "id": "divine_guidance",
   "name": "Divine Guidance",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "justice",
@@ -5339,7 +5339,7 @@
  {
   "id": "shadow_network",
   "name": "Shadow Network",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "shadow",
@@ -5353,7 +5353,7 @@
  {
   "id": "temporal_insight",
   "name": "Temporal Insight",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "time",
@@ -5366,7 +5366,7 @@
  {
   "id": "elemental_wisdom",
   "name": "Elemental Wisdom",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "slow",
   "cost": 3,
   "color": "primal",
@@ -5379,7 +5379,7 @@
  {
   "id": "warpath",
   "name": "Warpath",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "fire",
@@ -5393,7 +5393,7 @@
  {
   "id": "tactical_retreat",
   "name": "Tactical Retreat",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "justice",
@@ -5407,7 +5407,7 @@
  {
   "id": "dark_omens",
   "name": "Dark Omens",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "shadow",
@@ -5421,7 +5421,7 @@
  {
   "id": "prophetic_vision",
   "name": "Prophetic Vision",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "slow",
   "cost": 4,
   "color": "time",
@@ -5434,7 +5434,7 @@
  {
   "id": "supply_lines",
   "name": "Supply Lines",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "justice",
@@ -5448,7 +5448,7 @@
  {
   "id": "espionage",
   "name": "Espionage",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "shadow",
@@ -5461,7 +5461,7 @@
  {
   "id": "arcane_study",
   "name": "Arcane Study",
-  "template": "CARD_DRAW",
+  "template": "SPELL_DRAW",
   "speed": "slow",
   "cost": 3,
   "color": "primal",
@@ -6710,7 +6710,7 @@
  {
   "id": "recycle",
   "name": "Recycle",
-  "template": "DISCARD_DRAW",
+  "template": "DISPEL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "primal",
@@ -6724,7 +6724,7 @@
  {
   "id": "send_to_market",
   "name": "Send to Market",
-  "template": "DISCARD_DRAW",
+  "template": "DISPEL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "time",
@@ -6738,7 +6738,7 @@
  {
   "id": "trade_secrets",
   "name": "Trade Secrets",
-  "template": "DISCARD_DRAW",
+  "template": "DISPEL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "shadow",
@@ -6751,7 +6751,7 @@
  {
   "id": "reclaim",
   "name": "Reclaim",
-  "template": "DISCARD_DRAW",
+  "template": "DISPEL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "primal",
@@ -6765,7 +6765,7 @@
  {
   "id": "salvage_operation",
   "name": "Salvage Operation",
-  "template": "DISCARD_DRAW",
+  "template": "DISPEL_DRAW",
   "speed": "fast",
   "cost": 2,
   "color": "time",

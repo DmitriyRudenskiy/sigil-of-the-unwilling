@@ -49,6 +49,8 @@ func _test_army_serialize() -> int:
 			printerr("count mismatch at %d: %d vs %d" % [i, army2.army[i].count, army.army[i].count])
 			errors += 1
 
+	army.free()  # Node: освобождение
+	army2.free()  # Node: освобождение
 	return errors
 
 
@@ -69,6 +71,8 @@ func _test_resources_roundtrip() -> int:
 		printerr("deserialize: values wrong")
 		errors += 1
 
+	res.free()  # Node: освобождение
+	res2.free()  # Node: освобождение
 	return errors
 
 
@@ -88,6 +92,8 @@ func _test_army_empty() -> int:
 		printerr("empty deserialize should result in empty army")
 		errors += 1
 
+	army.free()  # Node: освобождение
+	army2.free()  # Node: освобождение
 	return errors
 
 ## РФ-герой: герой не может командовать более чем 7 юнитами в бою.
@@ -103,6 +109,7 @@ func _test_army_cap() -> int:
 		printerr("get_army_for_battle should cap at 7, got %d" % for_battle.size())
 		errors += 1
 
+	army.free()  # Node: освобождение
 	return errors
 
 ## Стартовая армия по умолчанию не превышает лимит 7 юнитов.
@@ -114,4 +121,5 @@ func _test_default_army_cap() -> int:
 		printerr("default army should not exceed 7 units, got %d" % for_battle.size())
 		errors += 1
 
+	army.free()  # Node: освобождение
 	return errors

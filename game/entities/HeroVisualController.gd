@@ -32,9 +32,12 @@ func build_visual() -> void:
 		return
 	var sheet_path := _find_sheet()
 	if sheet_path != "":
-		var sheet := Image.load_from_file(sheet_path)
-		if sheet != null:
-			_build_anim_from_sheet(sheet)
+		# Через импорт-пайплайн, а не Image.load_from_file: файл имеет .import
+		# (CompressedTexture2D) — прямая загрузка как Image-файла даёт варнинг
+		# "Loaded resource as image file, this will not work on export".
+		var sheet_res := load(sheet_path)
+		if sheet_res is ImageTexture:
+			_build_anim_from_sheet((sheet_res as ImageTexture).get_image())
 	if _anim == null:
 		_fallback = Sprite2D.new()
 		_fallback.texture = PlaceholderTexture.circle(20, Color(0.9, 0.7, 0.1), Color(0.3, 0.2, 0.0))
@@ -62,7 +65,8 @@ func _find_sheet() -> String:
 	while f != "":
 		var low := f.to_lower()
 		if low.ends_with(".png") or low.ends_with(".jpeg") or low.ends_with(".jpg"):
-			var img := Image.load_from_file("res://assets/raw/" + f)
+			var res := load("res://assets/raw/" + f)
+			var img: Image = (res as ImageTexture).get_image() if res is ImageTexture else null
 			if img != null and img.get_width() >= 800 and absi(img.get_width() - img.get_height()) < 8:
 				if img.get_width() > best_w:
 					best_w = img.get_width()

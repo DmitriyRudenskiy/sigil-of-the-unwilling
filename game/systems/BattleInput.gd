@@ -22,6 +22,7 @@ var _include_dead: bool = false
 
 var highlight_move: Dictionary = {}
 var highlight_attack: Dictionary = {}
+var highlight_unreachable: Dictionary = {}
 
 var _cursor_mode := BattleView.CursorMode.DEFAULT
 
@@ -154,8 +155,13 @@ func _select(u: BattleState.BattleUnit) -> void:
 
 	highlight_move = _state.get_reachable_for_unit(u, blocked_callable)
 	highlight_attack = _compute_attack_highlight(u)
+	highlight_unreachable = _state.get_unreachable_ring(u, blocked_callable)
 
 	_view.set_highlights(highlight_move, highlight_attack)
+	_view.set_unreachable_highlights(highlight_unreachable)
+	# Режим ходьбы — курсор «идти» (MOVE), а не дефолтный прицел.
+	_cursor_mode = BattleView.CursorMode.MOVE
+	_view.set_cursor_mode(_cursor_mode)
 	unit_selected.emit(u)
 	_update_attack_preview()
 
@@ -191,11 +197,18 @@ func _update_attack_preview() -> void:
 func clear_highlights() -> void:
 	_clear_highlights()
 
+## Передать окрестность «не хватает ходов» на вид.
+func set_unreachable_highlights(cells: Dictionary) -> void:
+	highlight_unreachable = cells
+	if _view != null:
+		_view.set_unreachable_highlights(cells)
+
 
 func _clear_highlights() -> void:
 	_pending_spell_id = ""
 	highlight_move.clear()
 	highlight_attack.clear()
+	highlight_unreachable.clear()
 	if _view != null:
 		_view.clear_highlights()
 

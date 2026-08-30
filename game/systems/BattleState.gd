@@ -409,6 +409,35 @@ func get_reachable(cell: Vector2i, speed: int, blocked_fn: Callable, _unit: Batt
 	_reachable_cache[key] = reachable.duplicate()
 	return reachable
 
+## Кольцо «не хватает ходов»: клетки, до которых доходят за speed+1 шагов,
+## но нельзя дойти за speed (наиболее близкие недостигаемые — «в шаге от цели»).
+## Используется для подсветки траектории: куда юнит уже доходит (cyan —
+## highlight_move) и куда ходов не хватает (красный — highlight_unreachable).
+func get_unreachable_ring(unit: BattleUnit, blocked_fn: Callable) -> Dictionary:
+	if unit == null:
+		return {}
+
+	if unit.is_flying():
+		var blocked: Dictionary = blocked_fn.call()
+		var speed := unit.get_speed()
+		var ring: Dictionary = {}
+		for y in BH:
+			for x in BW:
+				var c := Vector2i(x, y)
+				if c == unit.cell or blocked.has(c):
+					continue
+				if HexUtils.hex_distance(unit.cell, c) == speed + 1:
+					ring[c] = HexUtils.hex_distance(unit.cell, c)
+		return ring
+
+	var near: Dictionary = get_reachable(unit.cell, unit.get_speed() + 1, blocked_fn, unit)
+	var reach: Dictionary = get_reachable(unit.cell, unit.get_speed(), blocked_fn, unit)
+	var ring: Dictionary = {}
+	for c in near:
+		if not reach.has(c):
+			ring[c] = near[c]
+	return ring
+
 
 func invalidate_board_cache() -> void:
 	_board_version += 1

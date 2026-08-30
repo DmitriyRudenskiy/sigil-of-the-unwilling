@@ -26,25 +26,32 @@ func test_buff_targets_ally_side() -> void:
 	var inp = _Input.new()
 	inp.name = "TestInput"
 	var bs = BattleState.new()
-	inp.setup(_MockView.new(), bs, {})
+	var view = _MockView.new()
+	inp.setup(view, bs, {})
 	inp.start_spell_targeting(&"haste", BattleState.Side.ATTACKER)
 	assert_eq(inp._pending_target_side, BattleState.Side.ATTACKER, "buff targets ATTACKER side")
+	inp.free()
+	view.free()
 
 # РФ4-1: Урон на врага
 func test_damage_targets_enemy_side() -> void:
 	var inp = _Input.new()
 	inp.name = "TestInput2"
 	var bs = BattleState.new()
-	inp.setup(_MockView.new(), bs, {})
+	var view = _MockView.new()
+	inp.setup(view, bs, {})
 	inp.start_spell_targeting(&"magic_arrow", BattleState.Side.DEFENDER)
 	assert_eq(inp._pending_target_side, BattleState.Side.DEFENDER, "damage targets DEFENDER side")
+	inp.free()
+	view.free()
 
 # РФ4-2: Мёртвый союзник подсвечен
 func test_resurrection_targets_dead_ally() -> void:
 	var inp = _Input.new()
 	inp.name = "TestInput3"
 	var bs = BattleState.new()
-	inp.setup(_MockView.new(), bs, {})
+	var view = _MockView.new()
+	inp.setup(view, bs, {})
 	var atk_stack = _units.make_fixed_stack("swordsmen", 20)
 	var def_stack = _units.make_fixed_stack("goblins", 20)
 	bs.place_army([atk_stack], [def_stack])
@@ -54,6 +61,8 @@ func test_resurrection_targets_dead_ally() -> void:
 	inp.start_spell_targeting(&"resurrection", BattleState.Side.ATTACKER, true)
 	# Dead unit cell should be in highlights
 	assert_true(inp.highlight_attack.has(dead_unit.cell), "dead ally highlighted")
+	inp.free()
+	view.free()
 
 # РФ4-2: Воскрешение восстанавливает состояние
 func test_resurrection_restores_state() -> void:

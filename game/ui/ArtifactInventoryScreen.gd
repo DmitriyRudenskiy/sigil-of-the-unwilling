@@ -597,12 +597,16 @@ func _panel_stylebox() -> StyleBoxFlat:
 	return _stylebox(PANEL_BORDER, 2, 4, true, PANEL_BG, 10)
 
 func _tex(path: String, w: int, h: int) -> Texture2D:
-	var img := Image.load_from_file(path)
+	# Сначала импорт-пайплайн (load), Image.load_from_file — только fallback
+	# для файлов без .import: на импортированных файлах он даёт варнинг
+	# "Loaded resource as image file, this will not work on export".
+	var res := load(path)
+	var img: Image = (res as ImageTexture).get_image() if res is ImageTexture \
+		else Image.load_from_file(path)
 	if img == null:
-		return load(path)
+		return res as Texture2D
 	img.resize(w, h)
-	var tex := ImageTexture.create_from_image(img)
-	return tex
+	return ImageTexture.create_from_image(img)
 
 func _txt(parent: Control, text: String, pos: Vector2i, size: Vector2i, font_size: int,
 		color: Color, h_align: HorizontalAlignment) -> Label:

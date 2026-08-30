@@ -34,7 +34,7 @@ func forget(spell_id: StringName) -> bool:
 	return true
 
 func can_cast(spell) -> bool:
-	# Accepts SpellDef (object) or Dictionary
+	# Accepts SpellbookDef (object) or Dictionary
 	var school: String
 	var level: int
 	if spell is Dictionary:
@@ -52,7 +52,7 @@ func can_cast(spell) -> bool:
 	return true
 
 func get_mana_cost(spell) -> int:
-	# Accepts SpellDef (object) or Dictionary
+	# Accepts SpellbookDef (object) or Dictionary
 	var base: int
 	var tags: Array
 	if spell is Dictionary:

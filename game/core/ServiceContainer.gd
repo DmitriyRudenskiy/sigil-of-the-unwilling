@@ -21,7 +21,7 @@ var units: Node = null          # UnitRegistry   (autoload Units)
 var resources: Node = null      # ResourceRegistry (autoload Resources)
 var spells: Node = null         # SpellRegistry  (autoload Spells)
 var artifacts: Node = null      # ArtifactRegistry (autoload Artifacts)
-var card_spells: Node = null    # CardSpellRegistry (autoload CardSpells)
+var spellbook: Node = null    # SpellbookRegistry (autoload Spellbook)
 
 # ==================== СИСТЕМНЫЕ СЕРВИСЫ (Node) ====================
 var settings: Node = null       # Settings (autoload)
@@ -42,7 +42,7 @@ static func from_autoloads() -> ServiceContainer:
 	c.resources = Engine.get_main_loop().root.get_node_or_null("Resources")
 	c.spells = Engine.get_main_loop().root.get_node_or_null("Spells")
 	c.artifacts = Engine.get_main_loop().root.get_node_or_null("Artifacts")
-	c.card_spells = Engine.get_main_loop().root.get_node_or_null("CardSpells")
+	c.spellbook = Engine.get_main_loop().root.get_node_or_null("Spellbook")
 	c.settings = Engine.get_main_loop().root.get_node_or_null("Settings")
 	c.event_bus = Engine.get_main_loop().root.get_node_or_null("GameEventBus")
 	return c

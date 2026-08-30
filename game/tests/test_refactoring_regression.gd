@@ -19,6 +19,7 @@ func test_battle_completed_signal_type() -> void:
 	)
 	flow.battle_completed.emit(BattleState.Side.DEFENDER, [], [])
 	assert_eq(holder["winner"], BattleState.Side.DEFENDER)
+	flow.free()
 
 # ==================== Т2: dist Dictionary conversion ====================
 
@@ -48,6 +49,7 @@ func test_executor_has_paused_property() -> void:
 	executor._paused = true
 	assert_true(executor._paused)
 	executor._paused = false
+	executor.free()
 
 # ==================== Т4: Inventory deserialization ====================
 
@@ -91,12 +93,14 @@ func test_map_generator_has_get_terrain_id() -> void:
 	var mg := MapGenerator.new()
 	mg.name = "TestMG"
 	assert_true(mg.has_method("get_terrain_id"))
+	mg.free()
 
 func test_map_generator_get_terrain_id_null_model() -> void:
 	var mg := MapGenerator.new()
 	mg.name = "TestMG2"
 	var tid = mg.get_terrain_id(Vector2i(0, 0))
 	assert_eq(tid, HexUtils.Terrain.GRASS)
+	mg.free()
 
 # ==================== Т9: Marker signal chain (dict type) ====================
 
@@ -109,6 +113,7 @@ func test_movement_signal_emits_dict() -> void:
 	)
 	hc.reach_preview_changed.emit([], {}, 0.0)
 	assert_true(holder[0])
+	hc.free()
 
 # ==================== Т10: BattleUI process_mode ====================
 
@@ -116,3 +121,4 @@ func test_battle_ui_has_build_ui() -> void:
 	var battle_ui := BattleUI.new()
 	battle_ui.name = "TestBattleUI"
 	assert_true(battle_ui.has_method("_build_ui"))
+	battle_ui.free()

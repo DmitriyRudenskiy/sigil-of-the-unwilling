@@ -17,6 +17,7 @@ func test_pending_action_spell_exists() -> void:
 	var exec = _Executor.new()
 	var val = exec.PendingAction.SPELL
 	assert_eq(val, 3, "SPELL action should be enum value 3")
+	exec.free()
 
 # РФ5-1: on_spell_target_selected emits spell_cast_executed on success
 func test_cast_emits_spell_cast_executed() -> void:
@@ -36,6 +37,7 @@ func test_cast_emits_spell_cast_executed() -> void:
 	exec.on_spell_target_selected(&"magic_arrow", target)
 	assert_true(state_holder[0], "spell_cast_executed should fire on successful cast")
 	assert_eq(state_holder[1].get("result"), "success", "result is success")
+	exec.free()
 
 # РФ5-1: on_spell_target_selected emits spell_cast_failed on failure
 func test_cast_emits_spell_cast_failed() -> void:
@@ -52,6 +54,7 @@ func test_cast_emits_spell_cast_failed() -> void:
 	)
 	exec.on_spell_target_selected(&"nonexistent_spell", caster)
 	assert_true(failed_holder[0], "spell_cast_failed should fire on invalid spell")
+	exec.free()
 
 func _make_battle_state() -> BattleState:
 	var state := BattleState.new()
@@ -81,6 +84,7 @@ func test_clear_highlights_resets_pending_spell() -> void:
 	assert_eq(input._pending_spell_id, "", "pending_spell_id should be cleared")
 	assert_eq(input.highlight_move.size(), 0, "move highlights should be cleared")
 	assert_eq(input.highlight_attack.size(), 0, "attack highlights should be cleared")
+	input.free()
 
 # РФ5-6: HeroMagic.spend_mana returns false on insufficient mana
 func test_spend_mana_insufficient() -> void:
@@ -98,6 +102,7 @@ func test_resume_battle_pending_spell() -> void:
 	exec.resume_battle()
 	assert_eq(exec._pending_completion, _Executor.PendingAction.NONE, "pending should reset after resume")
 	assert_false(exec.is_paused(), "executor unpaused after resume")
+	exec.free()
 
 # РФ5-1: _paused guard in on_spell_anim_completed
 func test_spell_anim_paused_guard() -> void:
@@ -107,3 +112,4 @@ func test_spell_anim_paused_guard() -> void:
 	exec.on_spell_anim_completed()
 	assert_eq(exec._pending_completion, _Executor.PendingAction.SPELL, "SPELL should be pending after paused guard")
 	assert_eq(exec._state, _Executor.State.IDLE, "state unchanged while paused")
+	exec.free()

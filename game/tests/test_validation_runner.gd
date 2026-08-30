@@ -1,11 +1,11 @@
 extends SceneTree
 ## Standalone runner for validation tests.
 
-const _TestCardSpells = preload("res://tests/test_card_spells_json.gd")
+const _TestSpellbook = preload("res://tests/test_spells_json.gd")
 
 func _init() -> void:
-	print("=== Card Spells Validation Tests ===")
-	var test = _TestCardSpells.new()
+	print("=== Spellbook Validation Tests ===")
+	var test = _TestSpellbook.new()
 
 	var methods = test.get_method_list()
 	for info in methods:

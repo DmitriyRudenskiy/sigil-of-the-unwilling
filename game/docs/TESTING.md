@@ -1,8 +1,7 @@
 # Тестирование
 
 Корень Godot-проекта — `game/`. Все команды запускаются с `--path game`.
-Тесты лежат в `tests/` (корень репозитория) и видны из проекта через симлинк
-`game/tests -> ../tests` (gitignored; при клоне: `ln -s ../tests game/tests`).
+Тесты лежат в `game/tests/` (внутри Godot-проекта, отслеживаются в Git).
 
 ## Компиляция
 
@@ -32,7 +31,7 @@ godot --headless --path game -s tests/test_battle_integration.gd
 
 ```bash
 godot --headless --path game -s tools/check_scene_refs.gd
-godot --headless --path game -s tools/card_validation/validate_card_spells.gd --strict --json
+godot --headless --path game -s tools/spell_validation/validate_spells.gd --strict --json
 godot --headless --path game -s tools/check_tileset.gd
 ```
 
@@ -57,7 +56,7 @@ godot --headless --path game -s tests/test_city_arena_view.gd
 ```bash
 bash tools/shell/run_all_ci_checks.sh      # полный CI (--fast / --tests)
 bash tools/shell/play_scenario.sh          # сценарные прогоны (default N=1)
-./tools/shell/run_all_ci_checks.sh         # full CI (compile + refs + card-validation + tileset + tests)
+./tools/shell/run_all_ci_checks.sh         # full CI (compile + refs + spell-validation + tileset + tests)
 ```
 
 ## Ожидаемый результат

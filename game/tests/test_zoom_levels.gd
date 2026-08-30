@@ -7,6 +7,11 @@ var settings: Object
 func before_each() -> void:
 	settings = _Settings.new()
 
+func after_each() -> void:
+	if settings != null:
+		settings.free()
+		settings = null
+
 
 # --- Zoom levels spec ---
 

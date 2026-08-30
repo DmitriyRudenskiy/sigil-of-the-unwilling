@@ -71,7 +71,7 @@ func filtered(min_severity: int) -> Array:
 func to_text() -> String:
 	var lines = []
 	lines.append("=".repeat(70))
-	lines.append("CARD SPELLS VALIDATION REPORT")
+	lines.append("SPELLBOOK VALIDATION REPORT")
 	lines.append("=".repeat(70))
 
 	# Сводка по кодам

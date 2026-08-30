@@ -1,15 +1,15 @@
 extends RefCounted
-## Тесты валидации data/card_spells.json.
+## Тесты валидации data/spells.json.
 ## Используют ядро валидатора как библиотеку.
 ##
 ## Запуск:
 ##   godot --headless -s tests/test_runner.gd
 ##   или standalone:
-##   godot --headless -s tests/test_card_spells_json.gd
+##   godot --headless -s tests/test_spells_json.gd
 
-const _Validator = preload("res://tools/card_validation/CardSpellValidator.gd")
+const _Validator = preload("res://tools/spell_validation/SpellValidator.gd")
 
-const JSON_PATH := "res://data/card_spells.json"
+const JSON_PATH := "res://data/spells.json"
 
 var _passed := 0
 var _failed := 0
@@ -66,7 +66,7 @@ func _write(path: String, content: String) -> void:
 # ==================== СТРУКТУРА ====================
 
 func test_file_exists() -> void:
-	assert_true(FileAccess.file_exists(JSON_PATH), "card_spells.json exists")
+	assert_true(FileAccess.file_exists(JSON_PATH), "spells.json exists")
 
 func test_file_is_valid_json() -> void:
 	validator.validate_file(JSON_PATH)

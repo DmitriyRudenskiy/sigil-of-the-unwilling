@@ -24,10 +24,14 @@ var _mov  # HeroMovementController (Node)
 var _block_next_step: bool = false  # флаг для теста INF-гарда
 
 func before_each() -> void:
-	_map = null
-	_mov = null
 	_block_next_step = false
 	_setup_map()
+
+## Узлы (MapGenerator/Node2D и HeroMovementController/Node) — это Object,
+## а не RefCounted: без явного free() каждый тест утекает в ObjectDB
+## (CanvasItem RID, texture RID'ы, «resources still in use» при выходе).
+func after_each() -> void:
+	_teardown()
 
 # ==================== УТИЛИТЫ ====================
 
@@ -56,6 +60,9 @@ func assert_eq(a: Variant, b: Variant, msg: String) -> void:
 		_fail("%s (got %s, expected %s)" % [msg, str(a), str(b)])
 
 func get_results() -> String:
+	# Раннер вызывает before_each один лишний раз после последнего теста —
+	# освобождаем сиротский сетап, иначе он уйдёт в ObjectDB/ResourceCache.
+	_teardown()
 	var lines := _errors.duplicate()
 	lines.append("")
 	lines.append("Results: %d passed, %d failed" % [_passed, _failed])
@@ -67,7 +74,17 @@ func get_results() -> String:
 
 # ==================== SETUP ====================
 
+func _teardown() -> void:
+	if _mov != null:
+		_mov.free()
+		_mov = null
+	if _map != null:
+		_map.free()
+		_map = null
+
+
 func _setup_map() -> void:
+	_teardown()
 	_map = _MapGenerator.new()
 	_map.map_width = 12
 	_map.map_height = 12

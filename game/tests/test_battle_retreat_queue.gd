@@ -35,7 +35,6 @@ func _survivor_total(a: Array) -> int:
 		total += s.count
 	return total
 
-
 # 1) Немедленное отступление в WAITING_INPUT.
 func test_immediate_retreat_at_waiting_input() -> void:
 	var ctx: Dictionary = _make_executor()
@@ -55,7 +54,7 @@ func test_immediate_retreat_at_waiting_input() -> void:
 		assert_eq(end_events[0][0], BattleState.Side.DEFENDER, "winner = DEFENDER (retreat)")
 		# 40 + 20 = 60 → 50% = 30
 		assert_eq(_survivor_total(end_events[0][1]), 30, "attacker survives with 50% stacks")
-
+		ex.free()
 
 # 2) Ранний RETREAT: очередь + исполнение при входе в WAITING_INPUT.
 func test_early_retreat_queued_until_waiting_input() -> void:
@@ -83,7 +82,7 @@ func test_early_retreat_queued_until_waiting_input() -> void:
 	assert_eq(end_events.size(), 1, "end_battle emitted once")
 	if end_events.size() == 1:
 		assert_eq(_survivor_total(end_events[0][1]), 30, "50% stacks survive")
-
+		ex.free()
 
 # 3) Очередное отступление не срабатывает на других переходах,
 #    но исполняется при следующем входе в WAITING_INPUT.
@@ -102,7 +101,7 @@ func test_queued_retreat_ignores_other_transitions() -> void:
 
 	ex._transition_to(BattleTurnExecutor.State.WAITING_INPUT)
 	assert_true(bs.battle_over, "retreat fires on next WAITING_INPUT")
-
+	ex.free()
 
 # 4) force_retreat — аварийный выход из зависшего боя (AI_THINKING).
 func test_force_retreat_from_stuck_ai_turn() -> void:
@@ -124,7 +123,7 @@ func test_force_retreat_from_stuck_ai_turn() -> void:
 	if end_events.size() == 1:
 		assert_eq(end_events[0][0], BattleState.Side.DEFENDER, "forced retreat = player retreat")
 		assert_eq(_survivor_total(end_events[0][1]), 30, "50% stacks survive forced retreat")
-
+		ex.free()
 
 # 5) force_retreat после уже завершённого боя — no-op (один end_battle).
 func test_force_retreat_noop_after_battle_over() -> void:
@@ -140,7 +139,7 @@ func test_force_retreat_noop_after_battle_over() -> void:
 
 	ex.force_retreat()
 	assert_eq(end_events.size(), 1, "force_retreat is no-op after battle over")
-
+	ex.free()
 
 ## 6) Регрессия E2E-зависания: бой уже окончен по боевому стейту
 ##    (последний удар убил последнего юнита, battle_over=true), но
@@ -168,3 +167,4 @@ func test_force_retreat_on_over_state_without_end_emitted() -> void:
 	# Повторный force_retreat после развязки — no-op.
 	ex.force_retreat()
 	assert_eq(end_events.size(), 1, "second force_retreat is no-op")
+	ex.free()

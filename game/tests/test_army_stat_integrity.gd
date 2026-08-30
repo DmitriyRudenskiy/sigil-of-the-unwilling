@@ -29,6 +29,7 @@ func test_artifact_mods_do_not_compound() -> void:
 	# After apply: stats should be canonical (rebuilt from registry)
 	assert_eq(ctrl.army[0].stats.hp, base_hp, "HP should be canonical after apply_battle_results")
 	assert_eq(ctrl.army[0].count, 50, "Count should be preserved")
+	ctrl.free()
 
 # РФ6-1: Two consecutive battles don't compound
 func test_two_battles_no_compound() -> void:
@@ -54,6 +55,7 @@ func test_two_battles_no_compound() -> void:
 	ctrl.apply_battle_results(dirty2)
 	assert_eq(ctrl.army[0].stats.hp, base_hp, "HP canonical after battle 2 (no compound)")
 	assert_eq(ctrl.army[0].count, 60, "Count preserved after battle 2")
+	ctrl.free()
 
 func test_retreat_survivors_clean_stats() -> void:
 	var ctrl = _ArmyCtrl.new()
@@ -69,3 +71,4 @@ func test_retreat_survivors_clean_stats() -> void:
 
 	ctrl.apply_battle_results(survivors)
 	assert_eq(ctrl.army[0].stats.hp, base_hp, "Retreat survivor HP is canonical")
+	ctrl.free()

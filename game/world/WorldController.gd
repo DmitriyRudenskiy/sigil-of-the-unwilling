@@ -100,7 +100,9 @@ func _finit_subsystems() -> void:
 		self, _ui_manager, _camera, _bootstrap_result.input_controller, _world_delta,
 		_bootstrap_result.services
 	)
-	interaction_controller.setup(_hero, _bootstrap_result.spawner, _ui_manager.chest_dialog)
+	# Headless: UI не создаётся (WorldBootstrap._init_ui) → _ui_manager == null.
+	var chest_dialog: ArtifactChestDialog = _ui_manager.chest_dialog if _ui_manager != null else null
+	interaction_controller.setup(_hero, _bootstrap_result.spawner, chest_dialog)
 	interaction_controller.connect_chest_signals()
 	interaction_controller.world_delta = _world_delta
 

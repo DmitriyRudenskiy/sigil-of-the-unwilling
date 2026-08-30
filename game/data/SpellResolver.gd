@@ -1,10 +1,10 @@
-## scripts/card/CardSpellResolver.gd
-class_name CardSpellResolver
+## scripts/data/SpellResolver.gd
+class_name SpellResolver
 extends RefCounted
 ## Точка входа: валидация → оплата → диспетчеризация в шаблон.
 
-const _Engine = preload("res://data/CardTemplateEngine.gd")
-const _Utils = preload("res://data/CardUtils.gd")
+const _Engine = preload("res://data/TemplateEngine.gd")
+const _Utils = preload("res://data/SpellUtils.gd")
 
 static func resolve(
 	spell,

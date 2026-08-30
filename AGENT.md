@@ -17,8 +17,7 @@
   `docs/`, `previews/`, `backup_assets/`, `tmp/`, `lair/`, dev-сцены `scenes/`.
 - Все пути в коде — `res://…` относительно **корня проекта** `game/`:
   `res://systems/BattleState.gd`, `res://core/GameLogger.gd`, `res://scenes/World.tscn`.
-- Тесты исполняются через симлинк `game/tests -> ../tests` (gitignored, локальная
-  dev-связка; при клоне создать заново: `ln -s ../tests game/tests`).
+- Тесты лежат прямо в `game/tests/` (внутри проекта, отслеживаются в Git).
 
 ```text
 .                                   # Корень репозитория = dev-материалы
@@ -40,28 +39,27 @@
 │   ├── scenes/     # .tscn: MainMenu, World, Battle, CityArena
 │   ├── tilesets/   # hex_atlas_*.png, hex_tileset.tres
 │   ├── assets/     # Ассеты: artifacts, audio, cursors, raw, ui, units
-│   └── tests -> ../tests           # Симлинк (локально, не коммитится)
-├── tests/        # Тесты: test_*.gd, unit/, fakes/ (exec: --path game)
-├── tools/        # Инструменты: compile_all, check_scene_refs, card_validation, shell/
-├── docs/         # Документация: ARCHITECTURE, TESTING, TOOLS, CONCEPT_*, …
-├── lair/         # Логово — контент фракции; см. lair/README.md
-├── previews/     # Превью-картинки (не игровые)
-├── scenes/       # Dev-сцены: BiomePreview, TestTerrain (не в игре)
-├── backup_assets/ # Архив/резерв ассетов (не в игре)
-└── tmp/          # Временные/черновые файлы (gitignored)
+│   ├── tests/      # Тесты: test_*.gd, unit/, fakes/ (exec: --path game)
+│   ├── tools/      # Инструменты: compile_all, check_scene_refs, card_validation, shell/
+│   ├── docs/       # Документация: ARCHITECTURE, TESTING, TOOLS, CONCEPT_*, …
+│   ├── lair/       # Логово — контент фракции; см. lair/README.md
+│   ├── previews/    # Превью-картинки (не игровые)
+│   ├── scenes/     # Dev-сцены: BiomePreview, TestTerrain (+ игровые .tscn)
+│   ├── backup_assets/ # Архив/резерв ассетов
+│   ├── prototype/  # HTML-прототипы (было prototype_interfes)
+│   └── tmp/        # Временные/черновые файлы (gitignored)
 ```
 
-### Dev-папки в корне (не часть игры)
+### Состав `game/`
 
-`previews/`, `backup_assets/`, `docs/`, `tools/`, `tests/`, `tmp/`, `lair/`, `scenes/`
-(dev-сцены), `prototype_interfes/` — **не входят в portable-проект `game/`** и не должны
-туда попадать. Инструментальные скрипты (`process_assets*.py`, `ai_agent.py`,
+Всего внутри `game/`: игровой Godot-проект + dev-материалы — `tests/`, `tools/`,
+`docs/`, `previews/`, `backup_assets/`, `prototype/`, `scenes/`, `lair/`, `tmp/`.
+Инструментальные скрипты (`process_assets*.py`, `ai_agent.py`,
 `generate_map_preview.py`, `organize_assets.py`, `biome_showcase.py`) — в `tools/`.
 
-Эти папки **не игнорируются Git** (в `.gitignore`: `.godot/`, `.DS_Store`, `*.log`,
-`*.import`, `*.uid`, `__pycache__/`, `tmp/`, `game/tests`), поэтому в игровые коммиты их
-добавляем только при осознанном изменении dev-инструментария; игровые пути стейджим
-внутри `game/`.
+Внутри `game/` игнорируется только `tmp/` (в `.gitignore`: `.godot/`, `.DS_Store`, `*.log`,
+`*.import`, `*.uid`, `__pycache__/`, `tmp/`); остальное — `tests/`, `tools/`, `docs/`,
+`previews/`, `backup_assets/`, `prototype/`, `scenes/`, `lair/` — отслеживается в Git.
 
 `tmp/` — рабочее пространство для черновых/временных файлов: в нём **не должно** оказываться
 того, что предназначается для игры (код, сцены, данные). Если в `tmp/` появилась готовая
@@ -217,7 +215,7 @@ bash tools/shell/run_all_ci_checks.sh
 # Облегённый вариант (README): compile + scene-refs + подборка тестов + world smoke
 ./tools/shell/run_all_ci_checks.sh
 
-# Юнит-тесты (главный раннер сканирует res://tests/**; нужен симлинк game/tests)
+# Юнит-тесты (главный раннер сканирует res://tests/**).
 $GODOT --headless --path game -s tests/run_tests.gd
 # → "Total: N passed, 0 failed" / "ALL TESTS PASSED"
 
@@ -274,8 +272,8 @@ cat /tmp/godot_run.log | grep -vE 'loading_editor_layout|ready'
 
 ## 9. Тесты
 
-- Файлы: `tests/test_*.gd` в корне репозитория (рекурсивно с `tests/unit/`), исполняются
-  из проекта `game/` через симлинк `game/tests`. Автономные SceneTree-раннеры
+- Файлы: `game/tests/test_*.gd` (рекурсивно с `game/tests/unit/`), исполняются
+  из проекта `game/` (тот же каталог). Автономные SceneTree-раннеры
   (`test_runtime_integration.gd`, `debug_load.gd`, `run_tests.gd`, `test_validation_runner.gd`)
   **пропускаются** главным раннером — они запускаются сами через `godot -s`.
 - **Шаблон тестового файла**:
@@ -351,3 +349,19 @@ SocketController, Units, Artifacts, Spells, Resources
 5. Стейджены только затронутые игровые пути; мусор (`graphify/`, `grepai/`,
    python-скрипты, `backup_assets/`, `.godot/`, `*.log`, `.DS_Store`) — в коммите нет.
 6. Если двигал/переименовал файлы — почистил `.godot/` и проверил, что кэш пересобрался.
+
+
+#!/bin/bash
+# runwt.sh <timeout_seconds> <cmd...>
+TO="${1:?need timeout}"; shift
+OUT="$(mktemp)"; PIDFILE="$(mktemp)"
+"$@" >"$OUT" 2>&1 &
+PID=$!
+echo "$PID" >"$PIDFILE"
+( sleep "$TO"; kill -9 "$PID" 2>/dev/null ) &
+KILLER=$!
+wait "$PID"; RC=$?
+kill "$KILLER" 2>/dev/null
+cat "$OUT"
+rm -f "$OUT" "$PIDFILE"
+exit $RC

@@ -1,11 +1,11 @@
 extends "res://tests/test_base.gd"
 ## Тесты карточной системы заклинаний: реестр, шаблоны, резолвер.
 
-const _Registry = preload("res://data/CardSpellRegistry.gd")
-const _Def = preload("res://data/CardSpellDef.gd")
-const _Enums = preload("res://data/CardEnums.gd")
-const _Engine = preload("res://data/CardTemplateEngine.gd")
-const _Resolver = preload("res://data/CardSpellResolver.gd")
+const _Registry = preload("res://data/SpellbookRegistry.gd")
+const _Def = preload("res://data/SpellbookDef.gd")
+const _Enums = preload("res://data/SpellEnums.gd")
+const _Engine = preload("res://data/TemplateEngine.gd")
+const _Resolver = preload("res://data/SpellResolver.gd")
 
 var registry: Variant = null
 
@@ -13,6 +13,13 @@ func before_each() -> void:
 	registry = _Registry.new()
 	registry.name = "TestReg"
 	registry.ensure_definitions()
+
+## SpellbookRegistry — это Node (Object): без free() каждый из ~1700 тестов
+## утаскивает в ObjectDB весь реестр с картами.
+func after_each() -> void:
+	if registry != null:
+		registry.free()
+		registry = null
 
 
 # ==================== ENUM PARSING ====================
@@ -45,7 +52,7 @@ func test_parse_speed_unknown_defaults_fast() -> void:
 	assert_eq(_Enums.parse_speed("invalid"), _Enums.SpellSpeed.FAST, "unknown → FAST")
 
 func test_parse_color_fire() -> void:
-	assert_eq(_Enums.parse_color("FIRE"), _Enums.CardColor.FIRE, "parse FIRE")
+	assert_eq(_Enums.parse_color("FIRE"), _Enums.SpellColor.FIRE, "parse FIRE")
 
 
 # ==================== SPELL DEF FROM DICT ====================
@@ -100,7 +107,7 @@ func test_def_from_dict_influence_req() -> void:
 
 func test_def_to_dict_round_trip() -> void:
 	var d := {
-		"id": "round", "name": "Round", "template": "CARD_DRAW",
+		"id": "round", "name": "Round", "template": "SPELL_DRAW",
 		"speed": "slow", "cost": 3, "color": "fire",
 		"params": {"count": 2}, "description": "Draw 2",
 	}
@@ -164,10 +171,10 @@ func test_template_unknown_returns_error() -> void:
 func test_all_templates_exist() -> void:
 	var templates := [
 		&"DIRECT_DAMAGE", &"HARD_REMOVAL", &"BOUNCE", &"COUNTERMAGIC",
-		&"COMBAT_TRICK", &"DEBUFF_CONTROL", &"CARD_DRAW", &"MANA_RAMP",
+		&"COMBAT_TRICK", &"DEBUFF_CONTROL", &"SPELL_DRAW", &"MANA_RAMP",
 		&"TOKEN_GENERATION", &"RELIC_INTERACTION", &"KEYWORD_BUFF",
 		&"CHOICE_CYCLE", &"TOUCH_CYCLE", &"DISPLAY_CYCLE",
-		&"DISCARD_DRAW", &"MARKET_NICHE",
+		&"DISPEL_DRAW", &"MARKET_NICHE",
 	]
 	for t in templates:
 		var result: Dictionary = _Engine.execute(t, {}, {}, [], null, null, null)
@@ -177,10 +184,10 @@ func test_all_templates_exist() -> void:
 func test_template_count_is_16() -> void:
 	var templates := [
 		&"DIRECT_DAMAGE", &"HARD_REMOVAL", &"BOUNCE", &"COUNTERMAGIC",
-		&"COMBAT_TRICK", &"DEBUFF_CONTROL", &"CARD_DRAW", &"MANA_RAMP",
+		&"COMBAT_TRICK", &"DEBUFF_CONTROL", &"SPELL_DRAW", &"MANA_RAMP",
 		&"TOKEN_GENERATION", &"RELIC_INTERACTION", &"KEYWORD_BUFF",
 		&"CHOICE_CYCLE", &"TOUCH_CYCLE", &"DISPLAY_CYCLE",
-		&"DISCARD_DRAW", &"MARKET_NICHE",
+		&"DISPEL_DRAW", &"MARKET_NICHE",
 	]
 	assert_eq(templates.size(), 16, "exactly 16 templates")
 
@@ -223,10 +230,10 @@ func test_debuff_no_target() -> void:
 	)
 	assert_eq(result["result"], "no_target", "no target")
 
-func test_card_draw_basic() -> void:
+func test_spell_draw_basic() -> void:
 	var caster: Dictionary = {"hand": []}
 	var result: Dictionary = _Engine.execute(
-		&"CARD_DRAW", {"count": 2}, {}, [], null, caster, null
+		&"SPELL_DRAW", {"count": 2}, {}, [], null, caster, null
 	)
 	assert_eq(result["result"], "success", "success")
 	assert_true(result["effects"].size() > 0, "has effects")
@@ -274,17 +281,17 @@ func test_display_cycle_basic() -> void:
 	)
 	assert_eq(result["result"], "success", "success")
 
-func test_discard_draw_not_enough() -> void:
+func test_dispel_draw_not_enough() -> void:
 	var caster: Dictionary = {"hand": [1]}
 	var result: Dictionary = _Engine.execute(
-		&"DISCARD_DRAW", {"discard": 3, "draw": 1}, {}, [], null, caster, null
+		&"DISPEL_DRAW", {"discard": 3, "draw": 1}, {}, [], null, caster, null
 	)
 	assert_eq(result["result"], "not_enough_cards", "not enough")
 
-func test_discard_draw_basic() -> void:
+func test_dispel_draw_basic() -> void:
 	var caster: Dictionary = {"hand": [1, 2, 3]}
 	var result: Dictionary = _Engine.execute(
-		&"DISCARD_DRAW", {"discard": 1, "draw": 1}, {}, [], null, caster, null
+		&"DISPEL_DRAW", {"discard": 1, "draw": 1}, {}, [], null, caster, null
 	)
 	assert_eq(result["result"], "success", "success")
 
@@ -353,10 +360,10 @@ func test_resolve_condition_not_met() -> void:
 func test_resolve_all_16_templates() -> void:
 	var templates := [
 		&"DIRECT_DAMAGE", &"HARD_REMOVAL", &"BOUNCE", &"COUNTERMAGIC",
-		&"COMBAT_TRICK", &"DEBUFF_CONTROL", &"CARD_DRAW", &"MANA_RAMP",
+		&"COMBAT_TRICK", &"DEBUFF_CONTROL", &"SPELL_DRAW", &"MANA_RAMP",
 		&"TOKEN_GENERATION", &"RELIC_INTERACTION", &"KEYWORD_BUFF",
 		&"CHOICE_CYCLE", &"TOUCH_CYCLE", &"DISPLAY_CYCLE",
-		&"DISCARD_DRAW", &"MARKET_NICHE",
+		&"DISPEL_DRAW", &"MARKET_NICHE",
 	]
 	for t in templates:
 		var spell: Variant = _Def.from_dict({

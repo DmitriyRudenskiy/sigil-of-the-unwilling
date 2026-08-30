@@ -5,6 +5,8 @@ class_name MainMenu
 
 const _UIAnimator = preload("res://ui/UIAnimator.gd")
 const _SettingsScreen = preload("res://ui/SettingsScreen.gd")
+const _HeroModelFactory = preload("res://ui/HeroModelFactory.gd")
+const _ModelScreen = preload("res://ui/ArtifactInventoryScreen.gd")
 
 func _ready() -> void:
 	# Don't auto-quit in test-server mode
@@ -112,6 +114,8 @@ func _build_right_column() -> void:
 		{"text": "Новая игра", "callback": _on_new_game},
 		{"text": "Загрузить", "callback": _on_load_game},
 		{"text": "🏙 Арена города", "callback": _on_arena},
+		{"text": "🗡 Модель: Рыцарь", "callback": _on_model_warrior},
+		{"text": "✨ Модель: Маг", "callback": _on_model_mage},
 		{"text": "Настройки", "callback": _on_settings},
 		{"text": "Выход", "callback": _on_exit},
 	]
@@ -197,3 +201,23 @@ func _on_settings_applied() -> void:
 	# MainMenu не обязан иметь WorldCamera.
 	# Зум будет применён там, где камера реально существует.
 	pass
+
+
+func _on_model_warrior() -> void:
+	_open_model_window("warrior")
+
+
+func _on_model_mage() -> void:
+	_open_model_window("mage")
+
+
+# Открыть «модельное окно» (экран героя с куклой) для выбранного героя.
+# ArtifactInventoryScreen сам создаёт CenterContainer и рисует окно 942×706 по
+# макету Qwen_html_20260829_1ub90rx55.html; мир за ним виден сквозь прозрачность.
+func _open_model_window(variant: String) -> void:
+	# Имя героя отображается в «модельном окне» (экран героя с куклой).
+	var name := "Аджит — Рыцарь" if variant == "warrior" else "Аджит — Маг"
+	var screen := _ModelScreen.new()
+	screen.name = "HeroModelWindow"
+	screen.set_hero(_HeroModelFactory.build_hero(name, variant))
+	add_child(screen)

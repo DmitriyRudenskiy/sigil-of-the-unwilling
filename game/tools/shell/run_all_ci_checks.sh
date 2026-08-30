@@ -51,7 +51,7 @@ _fail() {
 
 # ---------- 1. Компиляция всех скриптов ----------
 _step "Compile check (compile_all.gd)"
-if "$GODOT" --headless --path "$PROJECT_DIR" -s "$REPO_DIR/tools/compile_all.gd" 2>&1; then
+if "$GODOT" --headless --path "$PROJECT_DIR" -s "$REPO_DIR/game/tools/compile_all.gd" 2>&1; then
     _pass "compile_all"
 else
     _fail "compile_all"
@@ -59,24 +59,24 @@ fi
 
 # ---------- 2. Проверка ссылок в сценах ----------
 _step "Scene refs check (check_scene_refs.gd)"
-if "$GODOT" --headless --path "$PROJECT_DIR" -s "$REPO_DIR/tools/check_scene_refs.gd" 2>&1; then
+if "$GODOT" --headless --path "$PROJECT_DIR" -s "$REPO_DIR/game/tools/check_scene_refs.gd" 2>&1; then
     _pass "check_scene_refs"
 else
     _fail "check_scene_refs"
 fi
 
 # ---------- 3. Валидация данных ----------
-_step "Card spells validation"
+_step "Spell validation"
 if "$GODOT" --headless --path "$PROJECT_DIR" \
-    -s "$REPO_DIR/tools/card_validation/validate_card_spells.gd" --strict --json 2>&1; then
-    _pass "card_validation"
+    -s "$REPO_DIR/game/tools/spell_validation/validate_spells.gd" --strict --json 2>&1; then
+    _pass "spell_validation"
 else
-    _fail "card_validation"
+    _fail "spell_validation"
 fi
 
 # ---------- 4. Проверка тайлсетов ----------
 _step "Tileset integrity (check_tileset.gd)"
-if "$GODOT" --headless --path "$PROJECT_DIR" -s "$REPO_DIR/tools/check_tileset.gd" 2>&1; then
+if "$GODOT" --headless --path "$PROJECT_DIR" -s "$REPO_DIR/game/tools/check_tileset.gd" 2>&1; then
     _pass "check_tileset"
 else
     _fail "check_tileset"
@@ -85,7 +85,7 @@ fi
 # ---------- 5. Юнит-тесты (если не --fast) ----------
 if [ "${1:-}" != "--fast" ]; then
     _step "Unit tests (run_tests.gd)"
-    if "$GODOT" --headless --path "$PROJECT_DIR" -s "$REPO_DIR/tests/run_tests.gd" 2>&1; then
+    if "$GODOT" --headless --path "$PROJECT_DIR" -s "$REPO_DIR/game/tests/run_tests.gd" 2>&1; then
         _pass "unit_tests"
     else
         _fail "unit_tests"

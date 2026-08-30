@@ -26,7 +26,7 @@ func _init() -> void:
 	print("")
 
 	_bench_map_generation()
-	_bench_card_registry()
+	_bench_spell_registry()
 	_bench_serialization()
 	_bench_placeholder_texture()
 	_bench_json_parse()
@@ -49,15 +49,15 @@ func _bench_map_generation() -> void:
 	_record("MapModel.generate_noise", times)
 
 # ==================== 2. КАРТОЧНАЯ СИСТЕМА ====================
-func _bench_card_registry() -> void:
+func _bench_spell_registry() -> void:
 	var times: Array = []
 	for i in _iterations:
-		var reg = load("res://data/CardSpellRegistry.gd").new()
+		var reg = load("res://data/SpellbookRegistry.gd").new()
 		var t0 := Time.get_ticks_usec()
 		reg.ensure_definitions()
 		var t1 := Time.get_ticks_usec()
 		times.append((t1 - t0) / 1000.0)
-	_record("CardSpellRegistry.ensure_definitions", times)
+	_record("SpellbookRegistry.ensure_definitions", times)
 
 # ==================== 3. СЕРИАЛИЗАЦИЯ ====================
 func _bench_serialization() -> void:
@@ -174,8 +174,8 @@ func _print_summary() -> void:
 		var avg: float = r["avg_ms"]
 		if name.contains("generate_noise") and avg > 50.0:
 			warnings.append("Map generation > 50ms: %.1fms" % avg)
-		if name.contains("CardSpellRegistry") and avg > 20.0:
-			warnings.append("Card registry > 20ms: %.1fms" % avg)
+		if name.contains("SpellbookRegistry") and avg > 20.0:
+			warnings.append("Spell registry > 20ms: %.1fms" % avg)
 		if name.contains("stringify") and avg > 5.0:
 			warnings.append("Serialization > 5ms: %.1fms" % avg)
 

@@ -5,6 +5,9 @@ var _passed := 0
 var _failed := 0
 var _errors: Array[String] = []
 
+## Теги файла (см. `tag(...)`). Используются ранжером для `--tag <name>`.
+var _tags: Array[String] = []
+
 func _init() -> void:
 	pass  # Runner handles test execution
 
@@ -64,6 +67,22 @@ func assert_lt(a: Variant, b: Variant, msg: String = "") -> void:
 	else:
 		_pass(msg)
 
+## Сравнение float с допуском (избегает флейки на float-арифметике).
+func assert_approx(a: Variant, b: Variant, eps: float = 0.0001, msg: String = "") -> void:
+	if abs(float(a) - float(b)) > eps:
+		_fail("assert_approx failed: %s (got %s, expected ~%s ±%s)" % [
+			msg, str(a), str(b), str(eps)])
+	else:
+		_pass(msg)
+
+## Пометить текущий файл/тест тегами для `--tag <name>`.
+## Принимает строку или массив строк: `tag("battle")` или `tag(["battle", "slow"])`.
+func tag(names: Variant) -> void:
+	var list: Array = names if names is Array else [names]
+	for n in list:
+		if not _tags.has(n):
+			_tags.append(n)
+
 
 func _pass(msg: String) -> void:
 	_passed += 1
@@ -74,6 +93,11 @@ func _fail(msg: String) -> void:
 	_errors.append(msg)
 	printerr("[FAIL] %s" % msg)
 
+
+## Хук очистки после каждого метода (если определён — вызывает ранжер).
+## По умолчанию пустой. Нужен, когда тесты оставляют глобальное состояние.
+func after_each() -> void:
+	pass
 
 func get_results() -> String:
 	var lines := _errors.duplicate()

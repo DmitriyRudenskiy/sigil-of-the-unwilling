@@ -18,6 +18,13 @@ func before_each() -> void:
 	coordinator = _Coordinator.new()
 	coordinator.name = "TestCoordinator"
 
+func after_each() -> void:
+	# Coordinator — Node (и battle_flow как его child): без free()
+	# каждый тест утаскивает их в ObjectDB.
+	if coordinator != null:
+		coordinator.free()
+		coordinator = null
+
 
 # ==================== СОЗДАНИЕ ====================
 
@@ -181,4 +188,11 @@ func test_fallback_stack_on_total_annihilation() -> void:
 	assert_eq(army.army[0].count, 10, "fallback-стек, численность = 10")
 	assert_eq(hero.apply_calls, 1, "hero.apply_battle_results вызван один раз")
 
+	# Node-объекты — освобождаем явно (не ref-counted). UnitRegistry держит
+	# ~90 UnitStats в себе: утечка registry = сотня RefCounted в ObjectDB.
+	map.free()
+	hero.free()
+	army.free()
+	container.units.free()
+	container.units = null
 	ServiceContainer.current = prev_container

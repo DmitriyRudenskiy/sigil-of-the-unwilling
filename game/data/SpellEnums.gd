@@ -1,7 +1,7 @@
-## scripts/card/CardEnums.gd
-class_name CardEnums
+## scripts/data/SpellEnums.gd
+class_name SpellEnums
 extends RefCounted
-## Все перечисления карточной системы.
+## Все перечисления системы заклинаний.
 
 enum TargetType {
 	NONE,
@@ -74,7 +74,7 @@ enum SpellSpeed {
 	BURST,   # не может быть отвечено
 }
 
-enum CardColor {
+enum SpellColor {
 	FIRE,
 	TIME,
 	JUSTICE,
@@ -102,4 +102,4 @@ static func parse_speed(s: String) -> int:
 	return SpellSpeed.FAST
 
 static func parse_color(s: String) -> int:
-	return CardColor.get(s.to_upper(), CardColor.COLORLESS)
+	return SpellColor.get(s.to_upper(), SpellColor.COLORLESS)

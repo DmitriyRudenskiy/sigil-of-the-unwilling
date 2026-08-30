@@ -19,7 +19,6 @@ func _add_workers(city: City, n: int) -> void:
 	for i in n:
 		var u: RefCounted = city.add_migrant(PopUnit.State.WORKER)
 
-
 ## Клетка, соседняя хотя бы с одной из `targets`, свободная и достроенная.
 func _cell_adjacent_to(city: City, targets: Array, avoid: Array) -> Vector2i:
 	for t in targets:
@@ -34,13 +33,11 @@ func _cell_adjacent_to(city: City, targets: Array, avoid: Array) -> Vector2i:
 				return c
 	return Vector2i(-10, -10)
 
-
 func _run_economy(city: City) -> Dictionary:
 	var ctx := TurnContext.new()
 	ctx.cities.append(city)
 	var p := EconomicTurnProcessor.new()
 	return p.process(ctx)
-
 
 # ==================== РЕЕСТР ====================
 
@@ -56,7 +53,7 @@ func test_registry_city_resources() -> void:
 	var oak: ResourceDef = reg.get_resource(&"oak")
 	assert_not_null(oak, "oak остался")
 	assert_true(oak.biomes.size() > 0, "у дуба есть биомы")
-
+	reg.free()
 
 # ==================== ОПРЕДЕЛЕНИЯ ЦЕПОЧЕК ====================
 
@@ -72,7 +69,6 @@ func test_chain_defs_resolve() -> void:
 		assert_eq(d.production_chain.required_workers, c[1], "%s: workers" % c[0])
 		assert_true(d.production_chain.outputs.size() > 0, "%s: outputs" % c[0])
 
-
 func test_chain_def_isolated_copy() -> void:
 	var city := _make_city()
 	var b1: Variant = city.build_building(BuildingDefs.farm(), HexUtils.get_neighbor(city.center, 0))
@@ -82,7 +78,6 @@ func test_chain_def_isolated_copy() -> void:
 	assert_true(b1.production_chain != b2.production_chain, "per-building копии цепочек")
 	b1.production_chain.building_eff = 2.0
 	assert_eq(b2.production_chain.building_eff, 1.0, "эффективность изолирована")
-
 
 # ==================== ПРОИЗВОДСТВО ====================
 
@@ -94,7 +89,6 @@ func test_farm_produces_grain() -> void:
 	_run_economy(city)
 	assert_eq(city.resource_ctx.amount(&"grain"), 3.0, "зерно +3")
 
-
 func test_mill_shortage_no_grain() -> void:
 	var city := _make_city()
 	city.build_building(BuildingDefs.mill(), HexUtils.get_neighbor(city.center, 0))
@@ -102,7 +96,6 @@ func test_mill_shortage_no_grain() -> void:
 	WorkerAssignment.assign_all(city)
 	_run_economy(city)
 	assert_eq(city.resource_ctx.amount(&"flour"), 0.0, "муки нет (нет зерна)")
-
 
 func test_full_bread_chain() -> void:
 	var city := _make_city()
@@ -124,7 +117,6 @@ func test_full_bread_chain() -> void:
 	assert_true(absf(city.resource_ctx.amount(&"bread") - expected_bread) < 1e-9,
 		"хлеб %f = 2 x логистика %f" % [city.resource_ctx.amount(&"bread"), expected_bread])
 
-
 func test_unassigned_workers_produce_nothing() -> void:
 	var city := _make_city()
 	city.build_building(BuildingDefs.farm(), HexUtils.get_neighbor(city.center, 0))
@@ -141,7 +133,6 @@ func test_unassigned_workers_produce_nothing() -> void:
 	_run_economy(city)
 	assert_true(city.resource_ctx.amount(&"grain") > 0.0, "после назначения — зерно")
 
-
 func test_upkeep_blocks_chain_resources() -> void:
 	var city := _make_city()
 	city.build_building(BuildingDefs.mill(), HexUtils.get_neighbor(city.center, 0))
@@ -154,7 +145,6 @@ func test_upkeep_blocks_chain_resources() -> void:
 	var report: Dictionary = _run_economy(city)
 	assert_eq(int(report.get("upkeep_ok", -1)), 1, "upkeep оплачен (авто-дрова)")
 	assert_eq(city.resource_ctx.amount(&"flour"), 2.0, "мука +2")
-
 
 # ==================== ADJACENCY ====================
 
@@ -172,7 +162,6 @@ func test_adjacency_mill_bonus() -> void:
 	_run_economy(city)
 	# Мельница у 2 ферм: мука 2 * 1.5 = 3.
 	assert_eq(city.resource_ctx.amount(&"flour"), 3.0, "мука x1.5 у двух ферм")
-
 
 func test_adjacency_smithy_bonus() -> void:
 	var city := _make_city()
@@ -192,7 +181,6 @@ func test_adjacency_smithy_bonus() -> void:
 		% [city.resource_ctx.amount(&"tools"), expected_tools])
 	assert_eq(city.resource_ctx.amount(&"ore"), 1.0, "руда 2-1=1")
 
-
 func test_adjacency_reputation_bonus() -> void:
 	var city := _make_city()
 	var shack_cell: Vector2i = HexUtils.get_neighbor(city.center, 0)
@@ -211,7 +199,6 @@ func test_adjacency_reputation_bonus() -> void:
 	city2.build_building(BuildingDefs.mine(), mine_cell2)
 	city2.build_building(BuildingDefs.manor(), manor_cell2)
 	assert_eq(AdjacencySystem.reputation_bonus(city2), -2, "особняк у рудника -2")
-
 
 func test_adjacency_no_neighbors_no_bonus() -> void:
 	var city := _make_city()

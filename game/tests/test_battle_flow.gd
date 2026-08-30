@@ -8,14 +8,17 @@ const _BattleFlow = preload("res://systems/BattleFlow.gd")
 func test_flow_creation() -> void:
 	var flow := _BattleFlow.new()
 	assert_not_null(flow, "flow created")
+	flow.free()
 
 func test_flow_is_node() -> void:
 	var flow := _BattleFlow.new()
 	assert_true(flow is Node, "flow is Node")
+	flow.free()
 
 func test_flow_initial_inactive() -> void:
 	var flow := _BattleFlow.new()
 	assert_false(flow._active, "initially inactive")
+	flow.free()
 
 # ==================== СИГНАЛЫ ====================
 
@@ -28,6 +31,7 @@ func test_battle_started_signal() -> void:
 	# Не можем запустить полноценный бой без сцены, но проверяем сигнал
 	flow.battle_started.emit()
 	assert_true(state[0], "battle_started emitted")
+	flow.free()
 
 func test_battle_completed_signal() -> void:
 	var flow := _BattleFlow.new()
@@ -44,6 +48,7 @@ func test_battle_completed_signal() -> void:
 	assert_eq(result["winner"], BattleState.Side.ATTACKER, "winner is attacker")
 	assert_eq(result["atk"], 0, "empty attacker survivors")
 	assert_eq(result["def"], 0, "empty defender survivors")
+	flow.free()
 
 # ==================== ЗАЩИТА ОТ ДВОЙНОГО ЗАПУСКА ====================
 
@@ -55,6 +60,7 @@ func test_active_flag_prevents_double_start() -> void:
 	# Не можем вызвать без сцены, но проверяем флаг
 	assert_true(flow._active, "active flag set")
 	assert_true(flow._active, "active flag persists")
+	flow.free()
 
 # ==================== ГРАНИЧНЫЕ СЛУЧАИ ====================
 
@@ -66,6 +72,7 @@ func test_obstacle_seed_negative_gets_random() -> void:
 	if seed < 0:
 		seed = randi()
 	assert_true(seed >= 0, "negative seed replaced")
+	flow.free()
 
 func test_battle_completed_resets_active() -> void:
 	var flow := _BattleFlow.new()
@@ -74,3 +81,4 @@ func test_battle_completed_resets_active() -> void:
 	# Имитируем _on_battle_finished
 	flow._active = false
 	assert_false(flow._active, "active reset after finish")
+	flow.free()

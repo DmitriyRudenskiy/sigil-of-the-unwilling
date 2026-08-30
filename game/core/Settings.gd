@@ -2,6 +2,8 @@ extends Node
 ## Autoload — persistent settings (zoom, audio, flags).
 ## Saved to user://settings.cfg via ConfigFile.
 
+const _Platform = preload("res://core/Platform.gd")
+
 const SECTION := "settings"
 const FILE := "user://settings.cfg"
 
@@ -42,7 +44,7 @@ func _ready() -> void:
 
 func apply_display_mode() -> void:
 	# РФ7-1: сохранённый полноэкранный режим реально применяется
-	if OS.has_feature("headless"):
+	if _Platform.is_headless():
 		return
 	DisplayServer.window_set_mode(
 		DisplayServer.WINDOW_MODE_FULLSCREEN if fullscreen

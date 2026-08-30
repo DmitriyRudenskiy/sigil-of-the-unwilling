@@ -13,14 +13,19 @@ config_version=5
 config/name="HoMM3 Clone"
 run/main_scene="res://scenes/MainMenu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
+config/icon="res://icon.svg"
+
+[audio]
+
+buses="res://default_bus_layout.tres"
 
 [autoload]
 
 SoundManager="res://core/SoundManager.gd"
 Settings="*res://core/Settings.gd"
 GameEventBus="*res://core/GameEventBus.gd"
-CardSpells="*res://data/CardSpellRegistry.gd"
-CardTemplateBootstrap="*res://data/CardTemplateBootstrap.gd"
+Spellbook="*res://data/SpellbookRegistry.gd"
+TemplateBootstrap="*res://data/TemplateBootstrap.gd"
 SocketController="res://core/SocketController.gd"
 Units="*res://entities/UnitRegistry.gd"
 Artifacts="*res://data/ArtifactRegistry.gd"

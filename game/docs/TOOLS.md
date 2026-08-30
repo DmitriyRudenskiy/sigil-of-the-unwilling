@@ -10,7 +10,7 @@ All tools live under `tools/` — the single home for the project's tooling.
 ```
 tools/
 ├── shell/                 # shell orchestrators (CI + scenario runners)
-├── card_validation/       # card-spell JSON validator + report model
+├── spell_validation/       # spell JSON validator + report model
 ├── texture_slicer/        # texture-slicer core (clustering + preview)
 ├── scenarios/             # Python scenario generators (collect / flee)
 ├── archived/              # retired builders + superseded asset/analysis drafts
@@ -21,7 +21,7 @@ tools/
 
 | Script | Purpose |
 |---|---|
-| `tools/shell/run_all_ci_checks.sh` | Full CI: compile-all → scene-refs → card-spell validation → tileset integrity → unit tests. `--fast` skips the unit-test step; `--tests` runs only the suite. |
+| `tools/shell/run_all_ci_checks.sh` | Full CI: compile-all → scene-refs → spell validation → tileset integrity → unit tests. `--fast` skips the unit-test step; `--tests` runs only the suite. |
 | `tools/shell/play_scenario.sh` | Runs a scenario end-to-end over the live socket (default N=1). `--log <file>` sets the log path. |
 | `tools/lint.sh` | Static linter: compile-all → scene-refs → grep regressions. `--runtime` adds a World.tscn smoke run. |
 
@@ -49,10 +49,10 @@ tools/
 | `compile_all.gd` | Headless compile of every `.gd` — catches parse errors and broken `preload`s. |
 | `check_scene_refs.gd` | Verifies all `ext_resource`/`sub_resource` paths in scenes resolve. |
 | `check_tileset.gd` | Checks tileset integrity (`.tres`/`.atlas` consistency). |
-| `card_validation/validate_card_spells.gd` | Validates card-spell definitions against `data/` JSON (with `--strict --json`). |
-| `card_validation/CardSpellValidator.gd` | Validator logic used by `validate_card_spells.gd`. |
-| `card_validation/ValidationReport.gd` | Structured report model for the validator. |
-| `benchmark_all.gd` | Profiler: map generation, card registry, JSON stringify (run at 60×60). |
+| `spell_validation/validate_spells.gd` | Validates spell definitions against `data/` JSON (with `--strict --json`). |
+| `spell_validation/SpellValidator.gd` | Validator logic used by `validate_spells.gd`. |
+| `spell_validation/ValidationReport.gd` | Structured report model for the validator. |
+| `benchmark_all.gd` | Profiler: map generation, spell registry, JSON stringify (run at 60×60). |
 | `memory_profile.gd` | Captures resource/RID allocation stats at exit. |
 | `dump_unit_report.gd` | Dumps a report of unit definitions. |
 | `tune_city_arena.gd` | Tuning harness for the city arena. |

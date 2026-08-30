@@ -74,8 +74,14 @@ elif [ -f "$SC_DIR/scenario_${SCENARIO}_explore.py" ]; then
     SC_PY="scenario_${SCENARIO}_explore.py"
 elif [ -f "$SC_DIR/scenario_${SCENARIO}_endure.py" ]; then
     SC_PY="scenario_${SCENARIO}_endure.py"
+elif [ -f "$SC_DIR/scenario_${SCENARIO}_spells.py" ]; then
+    SC_PY="scenario_${SCENARIO}_spells.py"
+elif [ -f "$SC_DIR/scenario_${SCENARIO}_battle.py" ]; then
+    SC_PY="scenario_${SCENARIO}_battle.py"
+elif [ -f "$SC_DIR/scenario_${SCENARIO}_battle_spells.py" ]; then
+    SC_PY="scenario_${SCENARIO}_battle_spells.py"
 else
-    echo "❌ Нет файла сценария scenario_${SCENARIO}_{collect,flee,explore,endure}.py"
+    echo "❌ Нет файла сценария scenario_${SCENARIO}_{collect,flee,explore,endure,spells,battle,battle_spells}.py"
     exit 2
 fi
 echo "🏃 Сценарий: game/tools/scenarios/$SC_PY"

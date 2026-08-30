@@ -16,11 +16,13 @@ func test_spell_chosen_ignored_when_locked() -> void:
 	var exec = _Executor.new()
 	# Default state is not WAITING_INPUT
 	assert_false(exec.is_input_active(), "executor should not be in WAITING_INPUT initially")
+	exec.free()
 
 # РФ6-3: is_input_active returns true only in WAITING_INPUT
 func test_is_input_active_states() -> void:
 	var exec = _Executor.new()
 	assert_false(exec.is_input_active(), "not active before start_battle")
+	exec.free()
 
 # РФ6-3: spell_chosen signal closes panel (verify signal fires)
 func test_spell_chosen_panel_closes() -> void:
@@ -40,6 +42,7 @@ func test_spell_chosen_panel_closes() -> void:
 	)
 	exec.on_spell_target_selected(&"magic_arrow", state.defender_units[0])
 	assert_true(emitted_holder[0], "spell_cast_executed should fire on success")
+	exec.free()
 
 # РФ6-4: WorldShortcuts visibility gate
 func test_shortcuts_gated_by_world_visibility() -> void:
@@ -48,5 +51,3 @@ func test_shortcuts_gated_by_world_visibility() -> void:
 	var world_visible = false
 	var should_gate = not world_visible
 	assert_true(should_gate, "shortcuts should be gated when world is not visible")
-
-

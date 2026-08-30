@@ -1,9 +1,9 @@
-## scripts/card/CardUtils.gd
-class_name CardUtils
+## scripts/data/SpellUtils.gd
+class_name SpellUtils
 extends RefCounted
-## Shared reflection utilities for card handlers.
-## Deduplicates _has_method / _has_attr / _get_id across CardSpellResolver,
-## CardTemplateEngine, and CardTemplateHandlers.
+## Shared reflection utilities for spell handlers.
+## Deduplicates _has_method / _has_attr / _get_id across SpellResolver,
+## TemplateEngine, and TemplateHandlers.
 
 
 ## Имя has_method занято нативным Object.has_method — используем has_obj_method.

@@ -1,16 +1,16 @@
-## scripts/card/CardSpellDef.gd
-class_name CardSpellDef
+## scripts/data/SpellbookDef.gd
+class_name SpellbookDef
 extends RefCounted
 ## Определение одного карточного заклинания.
 
-const _CE = preload("res://data/CardEnums.gd")
+const _CE = preload("res://data/SpellEnums.gd")
 
 var id: StringName = &""
 var display_name: String = ""
 var template: StringName = &""
 var speed: int = _CE.SpellSpeed.FAST
 var cost: int = 0
-var color: int = _CE.CardColor.COLORLESS
+var color: int = _CE.SpellColor.COLORLESS
 var influence_req: Dictionary = {}
 var description: String = ""
 var flavor: String = ""
@@ -64,10 +64,10 @@ func _speed_to_str(s: int) -> String:
 
 func _color_to_str(c: int) -> String:
 	match c:
-		_CE.CardColor.FIRE: return "fire"
-		_CE.CardColor.TIME: return "time"
-		_CE.CardColor.JUSTICE: return "justice"
-		_CE.CardColor.PRIMAL: return "primal"
-		_CE.CardColor.SHADOW: return "shadow"
-		_CE.CardColor.MULTIFACTION: return "multifact"
+		_CE.SpellColor.FIRE: return "fire"
+		_CE.SpellColor.TIME: return "time"
+		_CE.SpellColor.JUSTICE: return "justice"
+		_CE.SpellColor.PRIMAL: return "primal"
+		_CE.SpellColor.SHADOW: return "shadow"
+		_CE.SpellColor.MULTIFACTION: return "multifact"
 		_: return "colorless"

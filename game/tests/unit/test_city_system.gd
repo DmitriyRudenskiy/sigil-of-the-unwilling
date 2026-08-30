@@ -40,7 +40,6 @@ func test_militia_excluded_from_pop_cap() -> void:
 	assert_eq(c.pop_capped(), 7, "pop_capped excludes militia")
 	assert_eq(c.over_limit(), 0, "no overflow")
 
-
 func test_switch_takes_full_turn() -> void:
 	var c := _city()
 	c.add_followers(1)
@@ -51,7 +50,6 @@ func test_switch_takes_full_turn() -> void:
 	c.process_turn(1)
 	assert_eq(u.state, PopUnit.State.WORKER, "worker after turn")
 	assert_true(u.is_available(), "available after apply")
-
 
 func test_growth_births_follow_threshold() -> void:
 	var c := _city()
@@ -67,7 +65,6 @@ func test_growth_births_follow_threshold() -> void:
 	assert_eq(r.births, 1, "one birth")
 	assert_almost_eq(c.food_stockpile, FOOD_PER_TILE - 1.0 - 5.0 * pow(2.0, 2.75), 0.01, "food stockpile after birth")
 
-
 func test_cycle_inflow_summer_with_glory_and_temple() -> void:
 	var mgr := CityManager.new()
 	var cap := _city()
@@ -81,7 +78,7 @@ func test_cycle_inflow_summer_with_glory_and_temple() -> void:
 		mgr.on_turn_ended(7)      # июль = лето = 1.0
 	# База = 2 + 1×2 = 4; итог floor(4 × 2 × 1) = 8
 	assert_eq(cap.pop_total(), 8, "8 followers from cycle")
-
+	mgr.free()
 
 func test_cycle_inflow_winter_halved() -> void:
 	var mgr := CityManager.new()
@@ -90,7 +87,7 @@ func test_cycle_inflow_winter_halved() -> void:
 	for i in CityBalance.CITY_CYCLE_TURNS:
 		mgr.on_turn_ended(1)      # январь = зима = 0.5
 	assert_eq(cap.pop_total(), 1, "winter halved to 1")  # floor(2 × 1 × 0.5)
-
+	mgr.free()
 
 func test_borough_limit_by_faction() -> void:
 	var c := _city()
@@ -98,7 +95,6 @@ func test_borough_limit_by_faction() -> void:
 	assert_eq(BoroughRules.max_boroughs(c), 2, "default faction limit")
 	c.faction = City.Faction.NECROPHAGE
 	assert_eq(BoroughRules.max_boroughs(c), 5, "necrophage limit")
-
 
 func test_borough_levelup_needs_4_same_level() -> void:
 	var c := _city()
@@ -113,7 +109,6 @@ func test_borough_levelup_needs_4_same_level() -> void:
 	assert_eq(c.boroughs[0].level, 2, "central borough level 2")
 	# Уровень 3 недоступен не-Культистам:
 	assert_false(BoroughRules.can_level_up(c, c.boroughs[0]), "no level 3 for non-cultists")
-
 
 func test_building_upgrade_requires_hero_and_followers() -> void:
 	var c := _city()
@@ -132,7 +127,6 @@ func test_building_upgrade_requires_hero_and_followers() -> void:
 	assert_eq(bld.level, 3, "building level 3")
 	assert_eq(c.free_followers(), 0, "0 free followers after 3 assigned")
 
-
 func test_free_building_placement_distance() -> void:
 	var c := _city()
 	c.storage[&"industry"] = 1000.0
@@ -142,7 +136,6 @@ func test_free_building_placement_distance() -> void:
 	assert_false(c.can_build_building(BuildingDefs.market(), far).ok, "too far rejected")
 	var near: Vector2i = HexUtils.get_all_neighbors(c.center)[0]
 	assert_true(c.can_build_building(BuildingDefs.market(), near).ok, "nearby OK")
-
 
 func test_overflow_transfer_between_cities() -> void:
 	var mgr := CityManager.new()
@@ -157,7 +150,7 @@ func test_overflow_transfer_between_cities() -> void:
 	assert_eq(cap.send_followers_to(other, 1), 1, "transferred 1")
 	assert_eq(cap.over_limit(), 0, "no overflow after transfer")
 	assert_eq(other.pop_total(), 1, "other city has 1")
-
+	mgr.free()
 
 func test_patrol_gives_safety() -> void:
 	var c := _city()
@@ -167,7 +160,6 @@ func test_patrol_gives_safety() -> void:
 	c.process_turn(1)
 	c.set_patrol(c.pop[0].uid, true)
 	assert_eq(c.safety(), CityBalance.SAFETY_PER_PATROL_MILITIA, "patrol safety")
-
 
 func test_worker_switch_invalidates_yield() -> void:
 	# Regression: cache invalidation on follower→worker switch (Fix #5)

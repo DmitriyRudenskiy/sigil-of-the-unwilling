@@ -10,7 +10,7 @@ const _AUTOLOAD: Dictionary = {
 	&"resources": "Resources",
 	&"spells": "Spells",
 	&"artifacts": "Artifacts",
-	&"card_spells": "CardSpells",
+	&"spellbook": "Spellbook",
 }
 
 static func resolve(injected: Node, key: StringName) -> Node:

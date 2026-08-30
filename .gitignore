@@ -17,6 +17,3 @@ godot*.log
 **/*.uid
 
 __pycache__/
-
-# локальная dev-связка для прогона тестов из game/ (не часть portable-папки)
-game/tests

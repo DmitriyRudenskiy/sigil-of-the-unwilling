@@ -42,5 +42,6 @@ func _init() -> void:
 	_failed = failed
 	_passed = 3 - failed
 
+	mg.free()  # Node2D: освобождаем, чтобы не утекал в ObjectDB
 	await process_frame
 	quit(1 if failed > 0 else 0)

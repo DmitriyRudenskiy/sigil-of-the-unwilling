@@ -1,12 +1,12 @@
-## scripts/card/CardSpellRegistry.gd
+## scripts/data/SpellbookRegistry.gd
 extends Node
-class_name CardSpellRegistry
-## Autoload: CardSpells. Загружает ~420 карт из JSON.
+class_name SpellbookRegistry
+## Autoload: Spellbook. Загружает ~420 карт из JSON.
 
-const JSON_PATH := "res://data/card_spells.json"
+const JSON_PATH := "res://data/spells.json"
 
-const _Def = preload("res://data/CardSpellDef.gd")
-const _Enums = preload("res://data/CardEnums.gd")
+const _Def = preload("res://data/SpellbookDef.gd")
+const _Enums = preload("res://data/SpellEnums.gd")
 
 var _spells: Dictionary = {}
 var _by_template: Dictionary = {}
@@ -27,7 +27,7 @@ func reset() -> void:
 
 func _load_from_json() -> void:
 	if not FileAccess.file_exists(JSON_PATH):
-		push_warning("CardSpellRegistry: %s not found, using fallback" % JSON_PATH)
+		push_warning("SpellbookRegistry: %s not found, using fallback" % JSON_PATH)
 		_load_fallback()
 		return
 
@@ -37,7 +37,7 @@ func _load_from_json() -> void:
 
 	var data = JSON.parse_string(text)
 	if data == null or not (data is Array):
-		push_error("CardSpellRegistry: invalid JSON format")
+		push_error("SpellbookRegistry: invalid JSON format")
 		return
 
 	for entry in data:
@@ -48,7 +48,7 @@ func _load_from_json() -> void:
 			continue
 		_register(spell)
 
-	GameLogger.info("Loaded %d spells from JSON" % _spells.size(), "CardSpells")
+	GameLogger.info("Loaded %d spells from JSON" % _spells.size(), "Spellbook")
 
 func _load_fallback() -> void:
 	# Минимальный набор для тестов
@@ -63,7 +63,7 @@ func _load_fallback() -> void:
 		 "params": {"atk": 2, "hp": 2}},
 		{"id": "mute", "name": "Mute", "template": "DEBUFF_CONTROL", "speed": "fast", "cost": 2, "color": "shadow",
 		 "params": {"status": "SILENCE"}},
-		{"id": "bottled_insight", "name": "Bottled Insight", "template": "CARD_DRAW", "speed": "fast", "cost": 2, "color": "primal",
+		{"id": "bottled_insight", "name": "Bottled Insight", "template": "SPELL_DRAW", "speed": "fast", "cost": 2, "color": "primal",
 		 "params": {"count": 1}},
 		{"id": "earth_conjuring", "name": "Earth Conjuring", "template": "MANA_RAMP", "speed": "fast", "cost": 1, "color": "time",
 		 "params": {"power": 1, "influence": "time"}},
@@ -92,7 +92,7 @@ func _register(spell) -> void:
 	_by_template[spell.template].append(spell)
 
 	var color_name: String = "UNKNOWN"
-	var keys: Array = _Enums.CardColor.keys()
+	var keys: Array = _Enums.SpellColor.keys()
 	if spell.color < keys.size():
 		color_name = str(keys[spell.color])
 	if not _by_color.has(color_name):
@@ -100,6 +100,11 @@ func _register(spell) -> void:
 	_by_color[color_name].append(spell)
 
 # ==================== PUBLIC API ====================
+
+## Зарегистрировать карточное заклинание в системе (публично для мостов,
+## напр. BattleSpellBridge — конвертация боевых заклинаний в карточные).
+func register(spell) -> void:
+	_register(spell)
 
 func get_spell(id: StringName) -> Variant:
 	ensure_definitions()

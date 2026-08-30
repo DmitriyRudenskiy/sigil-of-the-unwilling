@@ -1,13 +1,13 @@
 extends SceneTree
-## CLI-валидатор card_spells.json.
+## CLI-валидатор spells.json.
 ##
 ## Запуск:
-##   godot --headless --path game -s tools/card_validation/validate_card_spells.gd
-## (project root = game/, данные: game/data/card_spells.json.
+##   godot --headless --path game -s tools/spell_validation/validate_spells.gd
+## (project root = game/, данные: game/data/spells.json.
 ##  зависимости скрипта грузятся из исходника — res://tools/... не нужны.)
 ##
 ## Флаги:
-##   --path <file>   Путь к файлу (по умолчанию: res://data/card_spells.json)
+##   --path <file>   Путь к файлу (по умолчанию: res://data/spells.json)
 ##   --strict            Warnings считаются ошибками (ненулевой exit code)
 ##   --json              Вывод в формате JSON (для CI)
 ##   --quiet             Показывать только ошибки (без INFO)
@@ -17,7 +17,7 @@ extends SceneTree
 ## Путь к зависимостям вычисляется в рантайме, а не статическим preload'ом.
 ## Причина: статический `preload("res://tools/...")` ломался бы при --path game
 ## (тогда res://tools/ = game/tools/, которого нет). Скрипт лежит в
-## tools/card_validation/ в корне репозитория — резолвим относительно себя.
+## tools/spell_validation/ в корне репозитория — резолвим относительно себя.
 var _self_path: String = ""
 func _dir() -> String:
 	if _self_path.is_empty():
@@ -25,14 +25,14 @@ func _dir() -> String:
 	return _self_path.get_base_dir()
 
 ## Грузим зависимости из исходника, а не через load()/preload() по res://.
-## Причина: скрипт лежит в tools/card_validation/ в КОРНЕ репозитория, а
+## Причина: скрипт лежит в tools/spell_validation/ в КОРНЕ репозитория, а
 ## project root = game/. При --path game нет res://-маппинга на root/tools, а
 ## load() не принимает абсолютные OS-пути (повисал бы). GDScript из текста
 ## работает с любым абсолютным путём и при любом --path.
 static func _load_src(path: String) -> Script:
 	var fa := FileAccess.open(path, FileAccess.READ)
 	if fa == null:
-		push_error("[validate_card_spells] cannot open %s" % path)
+		push_error("[validate_spellbook] cannot open %s" % path)
 		return null
 	var text := fa.get_as_text()
 	fa.close()
@@ -55,12 +55,12 @@ var _Report: Script
 
 func _init() -> void:
 	var dir := _dir()
-	_Validator = _load_src(dir.path_join("CardSpellValidator.gd"))
+	_Validator = _load_src(dir.path_join("SpellValidator.gd"))
 	_Report = _load_src(dir.path_join("ValidationReport.gd"))
 
 	var args := OS.get_cmdline_args()
 
-	var path := "res://data/card_spells.json"
+	var path := "res://data/spells.json"
 	var strict := false
 	var json_output := false
 	var quiet := false

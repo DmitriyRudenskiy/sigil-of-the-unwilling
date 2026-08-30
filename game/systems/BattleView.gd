@@ -10,7 +10,7 @@ const MOVE_TWEEN_SEC := GameSettings.BATTLE_MOVE_TWEEN_SEC
 const _HexDraw = preload("res://core/HexDraw.gd")
 const ParticlePresets = preload("res://core/ParticlePresets.gd")
 
-enum CursorMode { DEFAULT, ATTACK, SPELL, RANGED }
+enum CursorMode { DEFAULT, ATTACK, SPELL, RANGED, MOVE }
 
 var _tile_map: TileMapLayer
 var _overlay: HighlightOverlay
@@ -43,6 +43,8 @@ class CursorOverlay extends Node2D:
 				_arrow(Color(1.0, 0.68, 0.2, 0.95))
 			BattleView.CursorMode.SPELL:
 				_wand(Color(0.78, 0.42, 1.0, 0.95))
+			BattleView.CursorMode.MOVE:
+				_boot(Color(0.35, 1.0, 0.55, 0.98))
 
 	func _reticle() -> void:
 		var col := Color(0.3, 0.7, 1.0, 0.9)
@@ -97,6 +99,21 @@ class CursorOverlay extends Node2D:
 		])
 		draw_colored_polygon(spark, col)
 
+	## Курсор ходьбы (MOVE): стрелка вниз — «идти на клетку». Отличается от
+	## RANGED (стрелка ВВЕРХ) и DEFAULT (прицел-кольцо).
+	func _boot(col: Color) -> void:
+		var head := PackedVector2Array([
+			mouse_pos + Vector2(0, 18),
+			mouse_pos + Vector2(-7, 5),
+			mouse_pos + Vector2(-3, 5),
+			mouse_pos + Vector2(-3, -12),
+			mouse_pos + Vector2(3, -12),
+			mouse_pos + Vector2(3, 5),
+			mouse_pos + Vector2(7, 5),
+		])
+		draw_colored_polygon(head, col)
+		draw_line(mouse_pos + Vector2(0, -18), mouse_pos + Vector2(0, -12), col, 3.0)
+
 	func _process(_delta: float) -> void:
 		if not visible_flag or not is_inside_tree():
 			return
@@ -107,6 +124,7 @@ class CursorOverlay extends Node2D:
 class HighlightOverlay extends Node2D:
 	var move_cells: Dictionary = {}
 	var atk_cells: Dictionary = {}
+	var unreachable_cells: Dictionary = {}
 	var tm: TileMapLayer
 
 	func refresh() -> void:
@@ -115,12 +133,17 @@ class HighlightOverlay extends Node2D:
 	func _draw() -> void:
 		if tm == null:
 			return
+		# Ходов не хватает — полупрозрачный красный (недостижимая окрестность).
+		for k in unreachable_cells:
+			_hex_fill(tm.map_to_local(k), Color(0.9, 0.15, 0.15, 0.35))
+		# Траектория хода: полупрозрачный cyan + яркий контур.
 		for k in move_cells:
-			var c: Vector2i = k
-			_hex(tm.map_to_local(c), Color(0.2, 0.9, 1.0, 0.95))
+			_hex_fill(tm.map_to_local(k), Color(0.2, 0.7, 1.0, 0.28))
+		for k in move_cells:
+			_hex(tm.map_to_local(k), Color(0.3, 0.9, 1.0, 0.95))
+		# Атака — красный контур.
 		for k in atk_cells:
-			var c: Vector2i = k
-			_hex(tm.map_to_local(c), Color(1.0, 0.25, 0.2, 0.95))
+			_hex(tm.map_to_local(k), Color(1.0, 0.25, 0.2, 0.95))
 
 	func _hex(center: Vector2, col: Color) -> void:
 		var pts := PackedVector2Array()
@@ -129,12 +152,19 @@ class HighlightOverlay extends Node2D:
 			pts.append(center + Vector2(cos(ang), sin(ang)) * HEX_OUTLINE_RADIUS)
 		draw_polyline(pts, col, 3.0)
 
+	func _hex_fill(center: Vector2, col: Color) -> void:
+		var pts := PackedVector2Array()
+		for i in 7:
+			var ang := deg_to_rad(60.0 * i - 90.0)
+			pts.append(center + Vector2(cos(ang), sin(ang)) * HEX_OUTLINE_RADIUS)
+		draw_colored_polygon(pts, col)
+
 
 # ==================== ИНИЦИАЛИЗАЦИЯ ====================
 func setup() -> void:
 	_tile_map = TileMapLayer.new()
 	_tile_map.name = "BattleTerrain"
-	_tile_map.tile_set = load("res://data/hex_tileset.tres")
+	_tile_map.tile_set = HommAtlas.build_hex_tileset()
 	add_child(_tile_map)
 	RenderingServer.set_default_clear_color(Color(0.33, 0.30, 0.18))
 	HexUtils.calibrate(_tile_map)
@@ -156,16 +186,11 @@ func setup() -> void:
 
 
 func paint_field() -> void:
-	var grass: Vector2i = TerrainAtlasMap.CENTER_COORDS[HexUtils.Terrain.GRASS]
-	var vars: Array = TerrainAtlasMap.VARIANTS.get(HexUtils.Terrain.GRASS, [])
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 42
+	# Арена — плоская трава HoMM3 (у биома один базовый тайл, вариантов нет).
+	var grass: Vector2i = HommAtlas.BASE_COORDS[HommAtlas.Biome.GRASS][0]
 	for y in range(-RING, BattleState.BH + RING):
 		for x in range(-RING, BattleState.BW + RING):
-			var coords := grass
-			if vars.size() > 0 and rng.randf() < 0.5:
-				coords = vars[rng.randi_range(0, vars.size() - 1)]
-			_tile_map.set_cell(Vector2i(x, y), TerrainAtlasMap.SOURCE_ID, coords)
+			_tile_map.set_cell(Vector2i(x, y), HommAtlas.SOURCE_ID, grass)
 
 
 func add_obstacle(cell: Vector2i, emoji: String) -> void:
@@ -396,6 +421,10 @@ func clear_cursor() -> void:
 func set_highlights(move_cells: Dictionary, attack_cells: Dictionary) -> void:
 	_overlay.move_cells = move_cells
 	_overlay.atk_cells = attack_cells
+	_overlay.refresh()
+
+func set_unreachable_highlights(cells: Dictionary) -> void:
+	_overlay.unreachable_cells = cells.duplicate()
 	_overlay.refresh()
 
 

@@ -13,6 +13,7 @@ func _init() -> void:
 	failed += _test_check_end_repeat_call()
 	failed += _test_attack_with_rng()
 	failed += _test_get_reachable_for_unit()
+	failed += _test_get_unreachable_ring()
 	failed += _test_flying_unit_placement()
 	failed += _test_ranged_unit_tag()
 	failed += _test_morale_tag()
@@ -262,6 +263,45 @@ func _test_get_reachable_for_unit() -> int:
 	if reachable.size() <= 1:
 		printerr("reachable should include unit's own cell + neighbors")
 		errors += 1
+
+	# Клетка самого юнита не должна быть в области ходьбы.
+	if reachable.has(unit.cell):
+		printerr("reachable must not include the unit's own cell")
+		errors += 1
+	return errors
+
+
+func _test_get_unreachable_ring() -> int:
+	var errors := 0
+	var state = load("res://systems/BattleState.gd").new()
+	var atk: Array[UnitStack] = []
+	atk.append(Units.make_fixed_stack("swordsmen", 20))
+	var def: Array[UnitStack] = []
+	state.place_army(atk, def)
+
+	var unit = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
+	var blocked := func() -> Dictionary: return {}
+
+	var reachable: Dictionary = state.get_reachable_for_unit(unit, blocked)
+	var ring: Dictionary = state.get_unreachable_ring(unit, blocked)
+
+	# Клетка юнита не в кольце «не хватает ходов».
+	if ring.has(unit.cell):
+		printerr("unreachable ring must not include the unit's own cell")
+		errors += 1
+
+	# Клетки из области ходьбы не могут быть и «не хватает ходов».
+	for c in ring:
+		if reachable.has(c):
+			printerr("unreachable ring must not overlap the walkable set: %s" % c)
+			errors += 1
+
+	# Клетки в кольце реально достижимы за speed+1 (иначе это не «в шаге от цели»).
+	var near: Dictionary = state.get_reachable(unit.cell, unit.get_speed() + 1, blocked, unit)
+	for c in ring:
+		if not near.has(c):
+			printerr("unreachable ring cell must be reachable in speed+1 steps: %s" % c)
+			errors += 1
 	return errors
 
 

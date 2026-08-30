@@ -1,14 +1,14 @@
-# Система заклинаний (Card Spells)
+# Система заклинаний
 
 ## Обзор
 
-`data/card_spells.json` — единый источник данных для всех заклинаний в игре. Файл содержит 505 карт, распределённых по 16 шаблонам и 6 цветам/фракциям.
+`data/spells.json` — единый источник данных для всех заклинаний в игре. Файл содержит 505 заклинаний, распределённых по 16 шаблонам и 6 цветам/фракциям.
 
 ```
-data/card_spells.json         ← JSON-массив всех заклинаний (505 записей)
-data/card_spells.schema.json  ← JSON Schema валидации
-tools/card_validation/        ← Ядро валидатора (GDScript)
-tests/test_card_spells_json.gd ← 33 интеграционных теста
+data/spells.json         ← JSON-массив всех заклинаний (505 записей)
+data/spells.schema.json  ← JSON Schema валидации
+tools/spell_validation/        ← Ядро валидатора (GDScript)
+tests/test_spells_json.gd ← 33 интеграционных теста
 tests/test_validation_runner.gd ← Standalone-раннер для тестов
 ```
 
@@ -16,7 +16,7 @@ tests/test_validation_runner.gd ← Standalone-раннер для тестов
 
 ## Формат записи
 
-Каждая карта — JSON-объект с фиксированной структурой:
+Каждое заклинание — JSON-объект с фиксированной структурой:
 
 ```json
 {
@@ -74,7 +74,7 @@ tests/test_validation_runner.gd ← Standalone-раннер для тестов
 | `HARD_REMOVAL` | 32 | — | Уничтожение юнитов |
 | `COMBAT_TRICK` | 96 | — | Тактические приёмы боя |
 | `DEBUFF_CONTROL` | 76 | — | Даббафы и контроль |
-| `CARD_DRAW` | 93 | `count` | Поиск карт |
+| `SPELL_DRAW` | 93 | `count` | Поиск заклинаний |
 | `TOKEN_GENERATION` | 27 | `token_id`, `count` | Призыв токенов |
 | `CHOICE_CYCLE` | 19 | `draw` | Выбор эффекта |
 | `BOUNCE` | 18 | `target` | Возврат на руку |
@@ -83,7 +83,7 @@ tests/test_validation_runner.gd ← Standalone-раннер для тестов
 | `RELIC_INTERACTION` | 9 | `action` (`destroy`, `steal`) | Взаимодействие с реликвиями |
 | `KEYWORD_BUFF` | 14 | `keyword` | Придание ключевого слова |
 | `MANA_RAMP` | 6 | `power` | Увеличение маны |
-| `DISCARD_DRAW` | 6 | `discard`, `draw` | Сброс → поиск |
+| `DISPEL_DRAW` | 6 | `discard`, `draw` | Сброс → поиск |
 | `MARKET_NICHE` | 6 | `action` | Рыночные механики |
 | `TOUCH_CYCLE` | 4 | `atk`, `hp` | Призыв 1/1 |
 
@@ -91,7 +91,7 @@ tests/test_validation_runner.gd ← Standalone-раннер для тестов
 
 ## Распределение по цветам
 
-| Цвет | Карт | Процент |
+| Цвет | Заклинаний | Процент |
 |------|------|---------|
 | `shadow` | 124 | 24.6% |
 | `primal` | 118 | 23.4% |
@@ -102,7 +102,7 @@ tests/test_validation_runner.gd ← Standalone-раннер для тестов
 
 ## Распределение по стоимости
 
-| Стоимость | Карт | Процент |
+| Стоимость | Заклинаний | Процент |
 |-----------|------|---------|
 | 1 | 36 | 7.1% |
 | 2 | 218 | 43.2% |
@@ -117,7 +117,7 @@ tests/test_validation_runner.gd ← Standalone-раннер для тестов
 
 ## Распределение по скорости
 
-| Скорость | Карт | Процент |
+| Скорость | Заклинаний | Процент |
 |----------|------|---------|
 | `fast` | 441 | 87.3% |
 | `slow` | 64 | 12.7% |
@@ -126,7 +126,7 @@ tests/test_validation_runner.gd ← Standalone-раннер для тестов
 
 ## Валидатор
 
-Ядро валидатора — `CardSpellValidator.gd` — проверяет данные на 7 уровнях:
+Ядро валидатора — `SpellValidator.gd` — проверяет данные на 7 уровнях:
 
 ### Уровень 0: Файл и парсинг (`E0xx`)
 
@@ -216,28 +216,28 @@ tests/test_validation_runner.gd ← Standalone-раннер для тестов
 
 ```bash
 # Базовая валидация
-godot --headless -s tools/card_validation/validate_card_spells.gd data/card_spells.json 2>/dev/null
+godot --headless -s tools/spell_validation/validate_spells.gd data/spells.json 2>/dev/null
 
 # Строгий режим (warnings = errors)
-godot --headless -s tools/card_validation/validate_card_spells.gd --strict data/card_spells.json 2>/dev/null
+godot --headless -s tools/spell_validation/validate_spells.gd --strict data/spells.json 2>/dev/null
 
 # JSON-выход
-godot --headless -s tools/card_validation/validate_card_spells.gd --json data/card_spells.json 2>/dev/null
+godot --headless -s tools/spell_validation/validate_spells.gd --json data/spells.json 2>/dev/null
 
 # Сохранение отчёта
-godot --headless -s tools/card_validation/validate_card_spells.gd --out report.json data/card_spells.json 2>/dev/null
+godot --headless -s tools/spell_validation/validate_spells.gd --out report.json data/spells.json 2>/dev/null
 
 # Тихий режим (только ошибки)
-godot --headless -s tools/card_validation/validate_card_spells.gd --quiet data/card_spells.json 2>/dev/null
+godot --headless -s tools/spell_validation/validate_spells.gd --quiet data/spells.json 2>/dev/null
 ```
 
 ### API (GDScript)
 
 ```gdscript
-const Validator = preload("res://tools/card_validation/CardSpellValidator.gd")
+const Validator = preload("res://tools/spell_validation/SpellValidator.gd")
 
 var validator = Validator.new()
-var passed = validator.validate_file("res://data/card_spells.json")
+var passed = validator.validate_file("res://data/spells.json")
 
 # Получить отчёт
 print(validator.report.to_text())
@@ -263,15 +263,15 @@ godot --headless -s tests/test_validation_runner.gd 2>/dev/null
 ## Архитектура валидатора
 
 ```
-validate_card_spells.gd   (72  строк)  ← CLI-обёртка
-CardSpellValidator.gd     (651 строк)  ← Ядро валидатора
+validate_spells.gd   (72  строк)  ← CLI-обёртка
+SpellValidator.gd     (651 строк)  ← Ядро валидатора
 ValidationReport.gd       (132 строки) ← Сборщик ошибок / отчётов
-card_spells.schema.json   (445 строк)  ← JSON Schema
+spells.schema.json   (445 строк)  ← JSON Schema
 ```
 
 - **ValidationReport** — собирает `Issue` (код, сообщение, severity, spell_id), генерирует текстовый и JSON-отчёт с фильтрацией по severity.
-- **CardSpellValidator** — 7 уровней проверки, справочники (источник истины для enum-значений), диапазоны, распределение по шаблонам.
-- **validate_card_spells.gd** — CLI с парсингом аргументов и поддержкой `--strict`, `--json`, `--quiet`, `--out`.
+- **SpellValidator** — 7 уровней проверки, справочники (источник истины для enum-значений), диапазоны, распределение по шаблонам.
+- **validate_spells.gd** — CLI с парсингом аргументов и поддержкой `--strict`, `--json`, `--quiet`, `--out`.
 
 ---
 
@@ -281,9 +281,9 @@ card_spells.schema.json   (445 строк)  ← JSON Schema
 |-----|--------|----------|
 | `W910` | 19 | `HARD_REMOVAL` без условия — по дизайну |
 | `W901` | 1 | Дубликат имени: «Fireball» |
-| `W920` | 1 | 505 вместо 420 (+85 карт) |
+| `W920` | 1 | 505 вместо 420 (+85 заклинаний) |
 | `W921` | 8 | Расхождения по шаблонам |
-| `W922` | 1 | `multifaction` = 0 карт |
+| `W922` | 1 | `multifaction` = 0 заклинаний |
 | `W924` | 1 | 87% fast-спеллов |
 
 Все предупреждения informational — они отражают текущее состояние колоды и не являются ошибками.
@@ -292,10 +292,10 @@ card_spells.schema.json   (445 строк)  ← JSON Schema
 
 ## Изменение данных
 
-1. Отредактируйте `data/card_spells.json`
+1. Отредактируйте `data/spells.json`
 2. Запустите валидатор:
    ```bash
-   godot --headless -s tools/card_validation/validate_card_spells.gd --strict data/card_spells.json 2>/dev/null
+   godot --headless -s tools/spell_validation/validate_spells.gd --strict data/spells.json 2>/dev/null
    ```
 3. Убедитесь, что ошибок `E0xx–E7xx` нет
 4. Предупреждения `W9xx` — информационные, игнорируются в не-строгом режиме

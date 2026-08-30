@@ -2,8 +2,6 @@ extends Node2D
 class_name MapGenerator
 ## Координатор карты: модель, рендерер, спавнер, тайлмапы.
 
-const TerrainAtlasMapScript = preload("res://world/TerrainAtlasMap.gd")
-
 var model
 var renderer
 var spawner
@@ -115,27 +113,25 @@ func _compute_reachable_cells() -> Dictionary:
 
 
 func _ensure_layers() -> void:
+	var tileset := HommAtlas.build_hex_tileset()
+
 	_tile_map = get_node_or_null("TileMapTerrain")
 	if _tile_map == null:
 		_tile_map = TileMapLayer.new()
 		_tile_map.name = "TileMapTerrain"
-		var tileset_path := "res://data/hex_tileset.tres"
-		if ResourceLoader.exists(tileset_path):
-			_tile_map.tile_set = load(tileset_path)
-		else:
-			push_error("Tileset not found: %s" % tileset_path)
 		add_child(_tile_map)
+	if tileset == null:
+		push_error("HommAtlas: не удалось построить hex-тайлсет (нет %s)" % HommAtlas.SHEET_PATH)
+	else:
+		_tile_map.tile_set = tileset
 
 	_decor_layer = get_node_or_null("TileMapDecor")
 	if _decor_layer == null:
 		_decor_layer = TileMapLayer.new()
 		_decor_layer.name = "TileMapDecor"
-		var tileset_path2 := "res://data/hex_tileset.tres"
-		if ResourceLoader.exists(tileset_path2):
-			_decor_layer.tile_set = load(tileset_path2)
-		else:
-			push_error("Tileset not found: %s" % tileset_path2)
 		add_child(_decor_layer)
+	if tileset != null:
+		_decor_layer.tile_set = tileset
 
 	_resource_layer = get_node_or_null("ResourceLayer")
 	if _resource_layer == null:

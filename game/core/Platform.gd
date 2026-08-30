@@ -3,8 +3,10 @@ extends RefCounted
 ## Central abstraction for platform checks (headless, test-server, etc.).
 ## Replaces scattered OS.has_feature("headless") calls for testability.
 
+## В Godot 4.7 OS.has_feature("headless") НЕ вернёт true для --headless —
+## надёжный способ: DisplayServer.get_name() == "headless".
 static func is_headless() -> bool:
-	return OS.has_feature("headless")
+	return DisplayServer.get_name() == "headless"
 
 
 static func is_test_server() -> bool:

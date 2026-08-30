@@ -1,9 +1,20 @@
 class_name MapRenderer
 extends RefCounted
-## Покраска TileMapLayer из данных MapModel.
+## Рисует TileMapLayer из данных MapModel (тайлы HoMM3).
 
-const TerrainAtlasMapScript = preload("res://world/TerrainAtlasMap.gd")
 const _MapModel = preload("res://world/MapModel.gd")
+
+## Соответствие HexUtils.Terrain -> HoMM3-биом.
+## FOREST -> GRASS (в HoMM3 нет отдельного леса), MOUNTAIN -> ROCK.
+const TERRAIN_TO_BIOME := {
+	HexUtils.Terrain.WATER:    HommAtlas.Biome.WATER,
+	HexUtils.Terrain.SWAMP:    HommAtlas.Biome.SWAMP,
+	HexUtils.Terrain.SAND:     HommAtlas.Biome.SAND,
+	HexUtils.Terrain.GRASS:    HommAtlas.Biome.GRASS,
+	HexUtils.Terrain.FOREST:   HommAtlas.Biome.GRASS,
+	HexUtils.Terrain.MOUNTAIN: HommAtlas.Biome.ROCK,
+	HexUtils.Terrain.SNOW:     HommAtlas.Biome.SNOW,
+}
 
 var model
 
@@ -16,58 +27,18 @@ func paint(tile_map: TileMapLayer) -> void:
 	tile_map.clear()
 	for cell in model.terrain_grid:
 		var terrain_id: int = model.terrain_grid[cell]
-		if not TerrainAtlasMapScript.CENTER_COORDS.has(terrain_id):
+		if not TERRAIN_TO_BIOME.has(terrain_id):
 			continue
-		var atlas_coords: Vector2i = TerrainAtlasMapScript.CENTER_COORDS[terrain_id]
-		tile_map.set_cell(cell, TerrainAtlasMapScript.SOURCE_ID, atlas_coords)
+		var biome: int = TERRAIN_TO_BIOME[terrain_id]
+		var coords: Array = HommAtlas.BASE_COORDS[biome]
+		tile_map.set_cell(cell, HommAtlas.SOURCE_ID, coords[0])
 
 
-func diversify(tile_map: TileMapLayer) -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = model.seed_value + 1234
-	for cell in model.terrain_grid:
-		var t: int = model.terrain_grid[cell]
-		if not TerrainAtlasMapScript.VARIANTS.has(t):
-			continue
-		var vars: Array = TerrainAtlasMapScript.VARIANTS[t]
-		if vars.is_empty():
-			continue
-		if tile_map.get_cell_atlas_coords(cell) == TerrainAtlasMapScript.CENTER_COORDS[t]:
-			var pick: Vector2i = vars[rng.randi_range(0, vars.size() - 1)]
-			tile_map.set_cell(cell, TerrainAtlasMapScript.SOURCE_ID, pick)
+## В HoMM3 у биома один базовый вариант — диверсификация не нужна.
+func diversify(_tile_map: TileMapLayer) -> void:
+	pass
 
 
-## Рисует объекты на декор-слой с вероятностью
-func paint_decor(decor_layer: TileMapLayer) -> void:
-	if decor_layer == null:
-		return
-	decor_layer.clear()
-	var rng := RandomNumberGenerator.new()
-	rng.seed = model.seed_value + 9999
-
-	for cell in model.terrain_grid:
-		var t: int = model.terrain_grid[cell]
-		if not TerrainAtlasMapScript.DECOR_COORDS.has(t):
-			continue
-		var decor_list: Array = TerrainAtlasMapScript.DECOR_COORDS[t]
-		if decor_list.is_empty():
-			continue
-
-		# Собираем суммарную вероятность
-		var total_prob := 0.0
-		for entry in decor_list:
-			total_prob += float(entry.get("probability", 0.1))
-
-		# Бросаем кубик: ставим ли объект вообще
-		if rng.randf() > total_prob:
-			continue
-
-		# Выбираем какой именно объект
-		var roll := rng.randf() * total_prob
-		var accum := 0.0
-		for entry in decor_list:
-			accum += float(entry.get("probability", 0.1))
-			if roll <= accum:
-				var coords: Vector2i = entry["coords"]
-				decor_layer.set_cell(cell, TerrainAtlasMapScript.OBJECT_SOURCE_ID, coords)
-				break
+## В листе HoMM3 нет декор-объектов — декор-слой остаётся пустым.
+func paint_decor(_decor_layer: TileMapLayer) -> void:
+	pass
