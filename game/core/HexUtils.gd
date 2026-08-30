@@ -124,18 +124,13 @@ static func astar_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: 
 
 	var g_score: Dictionary = {start: 0}
 	var came_from: Dictionary = {}
-	var open_count: Dictionary = {start: 1}  # track duplicates in heap
 
 	while not open.is_empty():
 		var cur: Array = open.pop()
 		var cur_g: float = cur[1]
 		var cur_cell: Vector2i = cur[2]
 
-		open_count[cur_cell] = open_count.get(cur_cell, 1) - 1
-		if open_count[cur_cell] <= 0:
-			open_count.erase(cur_cell)
-
-		# Stale entry — skip
+		# Stale entry (улучшенная копия уже в open) — skip
 		var best_g: float = g_score.get(cur_cell, INF)
 		if cur_g > best_g + 0.001:
 			continue
@@ -165,7 +160,6 @@ static func astar_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: 
 			came_from[nxt] = cur_cell
 			var f_score = tentative_g + GameSettings.ASTAR_HEURISTIC_WEIGHT * h_fn.call(nxt)
 			open.push([f_score, tentative_g, nxt])
-			open_count[nxt] = open_count.get(nxt, 0) + 1
 
 	return []
 
