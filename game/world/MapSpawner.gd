@@ -67,7 +67,8 @@ func place_resources(reachable = null, spacing := -1) -> void:
 	for cell in model.terrain_grid:
 		if not reachable.has(cell):
 			continue
-		if model.terrain_grid[cell] in [HexUtils.Terrain.WATER, HexUtils.Terrain.MOUNTAIN]:
+		var t: int = model.terrain_grid[cell]
+		if t == HexUtils.Terrain.WATER or t == HexUtils.Terrain.MOUNTAIN:
 			continue
 		if model.village_cells.has(cell):
 			continue

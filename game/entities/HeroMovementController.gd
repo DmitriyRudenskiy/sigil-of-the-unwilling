@@ -67,8 +67,9 @@ func _terrain_cost(cell: Vector2i) -> float:
 	if not _map_gen.is_walkable_with_effects(cell, levitation):
 		return INF
 
-	var terrain := _map_gen.get_terrain_name(cell)
-	return _TerrainCostTable.get_cost_with_effects(terrain, levitation)
+	# int-API: без String-аллокаций в hot path Dijkstra
+	var terrain_id := _map_gen.get_terrain_id(cell)
+	return _TerrainCostTable.get_cost_with_effects_by_id(terrain_id, levitation)
 
 
 func on_map_clicked(cell: Vector2i) -> void:

@@ -16,6 +16,10 @@ const WATER := INF
 # Пустоши (Wasteland), Высокогорье (Highlands) → 1.25
 
 static var _costs: Dictionary = {}
+# int-таблицы (индекс = HexUtils.Terrain id) — для hot path (Dijkstra):
+# без String-аллокаций и dict-lookup'ов.
+static var _costs_by_id: PackedFloat32Array = PackedFloat32Array()
+static var _levitation_costs_by_id: PackedFloat32Array = PackedFloat32Array()
 
 
 static func ensure() -> void:
@@ -30,6 +34,12 @@ static func ensure() -> void:
 		"swamp": SWAMP,
 		"water": WATER,
 	}
+	_costs_by_id = PackedFloat32Array()
+	_levitation_costs_by_id = PackedFloat32Array()
+	for i in HexUtils.TERRAIN_NAMES.size():
+		var name: String = HexUtils.TERRAIN_NAMES[i]
+		_costs_by_id.append(get_cost(name))
+		_levitation_costs_by_id.append(get_cost_with_effects(name, true))
 
 
 static func get_cost(terrain: String) -> float:
@@ -45,6 +55,15 @@ static func get_cost_with_effects(terrain: String, has_levitation: bool) -> floa
 	if terrain == "water":
 		return GRASS if has_levitation else WATER
 	return _costs.get(terrain, GRASS)
+
+
+## Стоимость по ID террейна (int) — быстрый путь для Dijkstra.
+## Эквивалент get_cost_with_effects(), но без String-аллокаций.
+static func get_cost_with_effects_by_id(terrain_id: int, has_levitation: bool) -> float:
+	ensure()
+	if terrain_id < 0 or terrain_id >= _costs_by_id.size():
+		return GRASS
+	return _levitation_costs_by_id[terrain_id] if has_levitation else _costs_by_id[terrain_id]
 
 
 ## Все известные террейны (для итерации)

@@ -85,7 +85,9 @@ func get_biome_terrain_id(height: float, temp: float, moist: float) -> int:
 func is_walkable(cell: Vector2i) -> bool:
 	if not terrain_grid.has(cell):
 		return false
-	return terrain_grid[cell] not in [HexUtils.Terrain.WATER, HexUtils.Terrain.MOUNTAIN]
+	# Без `in [a, b]`: не аллоцирует Array на каждом вызове (hot path)
+	var t: int = terrain_grid[cell]
+	return t != HexUtils.Terrain.WATER and t != HexUtils.Terrain.MOUNTAIN
 
 
 func is_walkable_with_effects(cell: Vector2i, has_levitation: bool = false) -> bool:
@@ -136,7 +138,8 @@ func set_terrain(cell: Vector2i, terrain_id: int) -> void:
 func smooth_invalid_adjacencies() -> void:
 	var to_change: Array[Vector2i] = []
 	for cell in terrain_grid:
-		if terrain_grid[cell] not in [HexUtils.Terrain.MOUNTAIN, HexUtils.Terrain.SNOW]:
+		var t2: int = terrain_grid[cell]
+		if t2 != HexUtils.Terrain.MOUNTAIN and t2 != HexUtils.Terrain.SNOW:
 			continue
 		for nb in HexUtils.get_all_neighbors(cell):
 			if terrain_grid.get(nb, -1) == HexUtils.Terrain.WATER:

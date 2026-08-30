@@ -24,6 +24,15 @@ func _should_skip(file: String) -> bool:
 	return false
 
 
+## True, если тест preload'ит dev-тулзы (res://tools/...), а tools/ в проекте нет
+## (portable-проект game/ их не включает). Проверяем по тексту файла до load().
+func _skips_for_missing_dev_tools(full_path: String) -> bool:
+	if not DirAccess.dir_exists_absolute(ProjectSettings.globalize_path("res://tools")):
+		var source := FileAccess.get_file_as_string(full_path)
+		return source.contains("res://tools/")
+	return false
+
+
 func _init() -> void:
 	call_deferred("_run_tests")
 
@@ -69,6 +78,13 @@ func _run_dir(dir_path: String, total: Array[int]) -> void:
 			if entry != ".git" and entry != ".godot":
 				_run_dir(full_path, total)
 		elif entry.begins_with("test_") and entry.ends_with(".gd") and not _should_skip(entry):
+			# Тесты dev-тулзов: tools/ не входит в portable-проект game/ —
+			# пропускаем до load(), чтобы не ловить Parse Error на preload'ах.
+			if _skips_for_missing_dev_tools(full_path):
+				print("[SKIP] %s (dev-tools недоступны в проекте)" % full_path)
+				print("---")
+				entry = dir.get_next()
+				continue
 			var script: Script = load(full_path)
 			if script == null or not script.can_instantiate():
 				print("[SKIP] %s (uninstantiable)" % full_path)
