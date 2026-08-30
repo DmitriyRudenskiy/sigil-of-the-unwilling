@@ -245,7 +245,7 @@ func test_validator_catches_bad_keyword() -> void:
 func test_baseline_matches_current_data() -> void:
 	validator.validate_file(JSON_PATH)
 	var built: Dictionary = validator.build_baseline()
-	var committed: Dictionary = _Validator.load_baseline(_Validator.BASELINE_PATH)
+	var committed: Dictionary = _Validator.load_baseline(validator.baseline_path())
 	assert_true(not committed.is_empty(), "baseline file exists and parses")
 	assert_eq(built.get("total", -1), committed.get("total", -2), "baseline total matches data")
 	assert_eq(built.get("templates", {}), committed.get("templates", {}),
