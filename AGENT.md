@@ -215,7 +215,7 @@ bash tools/shell/run_all_ci_checks.sh
 # --tests : только тесты
 
 # Облегённый вариант (README): compile + scene-refs + подборка тестов + world smoke
-./tools/run_checks.sh
+./tools/shell/run_all_ci_checks.sh
 
 # Юнит-тесты (главный раннер сканирует res://tests/**; нужен симлинк game/tests)
 $GODOT --headless --path game -s tests/run_tests.gd

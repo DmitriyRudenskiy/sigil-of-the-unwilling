@@ -14,7 +14,32 @@ extends RefCounted
 ##   E7xx — кросс-валидация с кодом
 ##   W9xx — предупреждения (стиль, рекомендации)
 
-const _ValidationReport = preload("res://tools/card_validation/ValidationReport.gd")
+## Зависимости грузим из исходника (путь-независимо): при --path game нет
+## res://-маппинга на root/tools/, а load()/preload() по res://tools/... падают.
+## Каталог скрипта задаёт вызывающий (set_base_dir), так как загруженный из
+## исходника GDScript не знает свой реальный путь. Резерв — own resource_path.
+var _base_dir: String = ""
+
+func set_base_dir(path: String) -> void:
+	_base_dir = path
+
+func _dir() -> String:
+	if _base_dir.is_empty():
+		_base_dir = get_script().resource_path.get_base_dir()
+	return _base_dir
+
+static func _load_src(path: String) -> Script:
+	var fa := FileAccess.open(path, FileAccess.READ)
+	if fa == null:
+		push_error("[CardSpellValidator] cannot open %s" % path)
+		return null
+	var gs := GDScript.new()
+	gs.source_code = fa.get_as_text()
+	fa.close()
+	gs.reload()
+	return gs
+
+var _report_script: Script
 
 # ==================== СПРАВОЧНИКИ (источник истины) ====================
 
@@ -86,7 +111,9 @@ const VALID_CHOICE_SECONDARY := ["DEAL_1_DAMAGE", "BUFF_1_1", "HEAL_2", "GAIN_1_
 ## Базовая линия распределения (snapshot данных). Живёт в отдельном файле,
 ## чтобы при легитимном росте карты правил CI не ломался хардкодом.
 ## Обновление: godot --headless -s tools/card_validation/validate_card_spells.gd --update-baseline
-const BASELINE_PATH := "res://tools/card_validation/baseline.json"
+## Путь к baseline — относительно этого скрипта, а не через res:// (см. _dir()).
+func baseline_path() -> String:
+	return _dir().path_join("baseline.json")
 
 # Границы допустимых значений
 const COST_MIN := 0
@@ -111,9 +138,12 @@ var _ids_seen = {}
 var _names_seen = {}
 var _baseline: Dictionary = {}
 
-func _init() -> void:
-	report = _ValidationReport.new()
-	_baseline = load_baseline(BASELINE_PATH)
+func _init(report_script: Script = null) -> void:
+	if report_script == null:
+		report_script = _load_src(_dir().path_join("ValidationReport.gd"))
+	_report_script = report_script
+	report = _report_script.new()
+	_baseline = load_baseline(baseline_path())
 
 ## Загрузить baseline. Пустой словарь, если файла нет или он битый.
 static func load_baseline(path: String) -> Dictionary:
@@ -147,7 +177,7 @@ static func _normalize_numbers(data: Dictionary) -> Dictionary:
 ## Валидирует файл целиком. Возвращает true, если нет ошибок.
 func validate_file(path: String) -> bool:
 	# Сброс состояния для нового вызова
-	report = _ValidationReport.new()
+	report = _report_script.new()
 	_spells = []
 	_ids_seen = {}
 	_names_seen = {}
@@ -572,7 +602,7 @@ func _validate_uniqueness() -> void:
 func _validate_totals() -> void:
 	var actual: int = _spells.size()
 	if _baseline.is_empty():
-		report.info("I920", "No baseline at %s — drift checks skipped (run --update-baseline)" % BASELINE_PATH)
+		report.info("I920", "No baseline at %s — drift checks skipped (run --update-baseline)" % baseline_path())
 		return
 	var expected_total: int = int(_baseline.get("total", 0))
 	if expected_total > 0 and actual != expected_total:

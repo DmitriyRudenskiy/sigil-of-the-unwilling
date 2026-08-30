@@ -56,8 +56,8 @@ godot --headless --path game -s tests/test_city_arena_view.gd
 
 ```bash
 bash tools/shell/run_all_ci_checks.sh      # полный CI (--fast / --tests)
-bash tools/shell/run_scenarios.sh          # сценарные прогоны
-./tools/run_checks.sh                      # облегчённая проверка (compile + refs + smoke)
+bash tools/shell/play_scenario.sh          # сценарные прогоны (default N=1)
+./tools/shell/run_all_ci_checks.sh         # full CI (compile + refs + card-validation + tileset + tests)
 ```
 
 ## Ожидаемый результат

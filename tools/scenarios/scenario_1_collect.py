@@ -13,7 +13,7 @@ newline-delimited JSON) и собирает все ресурсные узлы �
 Запуск:
     python3 tools/scenarios/scenario_1_collect.py
     # или через оркестратора:
-    ./run_scenarios.sh
+    ./tools/shell/play_scenario.sh 1
 """
 
 import socket
