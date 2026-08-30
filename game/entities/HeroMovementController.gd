@@ -204,7 +204,10 @@ func _full_path(cell: Vector2i) -> Array[Vector2i]:
 		return []
 	if goal == current_cell:
 		return [goal]
-	return _full_path_to(goal)
+	# base передаём, если цель была вражеской (base уже посчитан в resolve);
+	# для обычной цели — один _base_blocked() внутри.
+	var base := _base_blocked() if _map_gen.enemy_stacks.has(cell) else {}
+	return _full_path_to(goal, base)
 
 
 ## Клетки, закрытые для прокладки пути из-за врагов: сами вражеские клетки
@@ -233,8 +236,9 @@ func _contacts_only_with(cell: Vector2i, enemy_cell: Vector2i) -> bool:
 	return true
 
 
-## A* до `goal` (goal не должен быть вражеской клеткой).
-func _full_path_to(goal: Vector2i) -> Array[Vector2i]:
+## Базовый blocked-набор (terrain + levitation) — считается один раз на
+## операцию; `_full_path_to` дублирует его и добавляет ауру врагов.
+func _base_blocked() -> Dictionary:
 	var blocked: Dictionary = _map_gen.get_blocked_cells().duplicate()
 	var levitation := _has_artifact_effect(&"boots_levitation")
 	if levitation:
@@ -243,6 +247,15 @@ func _full_path_to(goal: Vector2i) -> Array[Vector2i]:
 			var terrain_id: int = _map_gen.get_terrain_id(c)
 			if terrain_id == _HexUtils.Terrain.WATER:
 				blocked.erase(c)
+	return blocked
+
+
+## A* до `goal` (goal не должен быть вражеской клеткой).
+## `base` — готовый base-blocked (экономит levitation-скан; пустой — посчитать).
+## ВАЖНО: `base` не мутируем (дубликуем) — merge ауры добавляет ключи,
+## и мутация отравила бы переиспользуемый набор при нескольких вызовах.
+func _full_path_to(goal: Vector2i, base: Dictionary = {}) -> Array[Vector2i]:
+	var blocked: Dictionary = base.duplicate() if not base.is_empty() else _base_blocked()
 	# Вражеские клетки и их аура — после levitation: ботинки левитации не
 	# дают встать на клетку врага (даже на воде) и не отменяют контактный бой.
 	blocked.merge(_enemy_aura_blocked(goal))
@@ -258,6 +271,8 @@ func _resolve_enemy_goal(goal: Vector2i) -> Vector2i:
 	if not stacks.has(goal):
 		return goal
 	var levitation := _has_artifact_effect(&"boots_levitation")
+	# Один base-blocked на все до 6 кандидатов (ранее — пересчёт на каждого)
+	var base := _base_blocked()
 	var best := Vector2i(-1, -1)
 	var best_cost := INF
 	for nb in _HexUtils.get_all_neighbors(goal):
@@ -271,7 +286,7 @@ func _resolve_enemy_goal(goal: Vector2i) -> Vector2i:
 		if nb == current_cell:
 			c = 0.0  # уже на контактной позиции
 		else:
-			var p := _full_path_to(nb)
+			var p := _full_path_to(nb, base)
 			if p.size() < 2:
 				continue
 			c = _path_cost(p)
