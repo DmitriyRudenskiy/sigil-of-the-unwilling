@@ -34,9 +34,19 @@ static func _load_src(path: String) -> Script:
 	if fa == null:
 		push_error("[validate_card_spells] cannot open %s" % path)
 		return null
-	var gs := GDScript.new()
-	gs.source_code = fa.get_as_text()
+	var text := fa.get_as_text()
 	fa.close()
+	# Убираем «class_name X» из динамически загружаемого исходника:
+	# иначе Godот ругается «hides a global script class», когда имя класса
+	# уже зарегистрировано глобально (такой класс уже есть в проекте).
+	var lines := text.split("\n", true)
+	var kept: Array = []
+	for line in lines:
+		if line.strip_edges().begins_with("class_name "):
+			continue
+		kept.append(line)
+	var gs := GDScript.new()
+	gs.source_code = "\n".join(kept)
 	gs.reload()
 	return gs
 
@@ -103,7 +113,7 @@ func _init() -> void:
 	if update_baseline:
 		if ok:
 			if validator.save_baseline(validator.baseline_path()):
-				print("Baseline updated: %s" % _Validator.BASELINE_PATH)
+				print("Baseline updated: %s" % validator.baseline_path())
 			else:
 				print("❌ Failed to write baseline")
 				quit(1)

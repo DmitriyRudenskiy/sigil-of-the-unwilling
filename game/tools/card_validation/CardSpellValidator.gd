@@ -33,9 +33,20 @@ static func _load_src(path: String) -> Script:
 	if fa == null:
 		push_error("[CardSpellValidator] cannot open %s" % path)
 		return null
-	var gs := GDScript.new()
-	gs.source_code = fa.get_as_text()
+	var text := fa.get_as_text()
 	fa.close()
+	# Убираем «class_name X» из динамически загружаемого исходника:
+	# иначе Godot ругается «hides a global script class», когда имя
+	# класса уже зарегистрировано глобально (такой класс уже есть в
+	# проекте). Само тело скрипта от этого не страдает.
+	var lines := text.split("\n", true)
+	var kept: Array = []
+	for line in lines:
+		if line.strip_edges().begins_with("class_name "):
+			continue
+		kept.append(line)
+	var gs := GDScript.new()
+	gs.source_code = "\n".join(kept)
 	gs.reload()
 	return gs
 
@@ -143,7 +154,6 @@ func _init(report_script: Script = null) -> void:
 		report_script = _load_src(_dir().path_join("ValidationReport.gd"))
 	_report_script = report_script
 	report = _report_script.new()
-	_baseline = load_baseline(baseline_path())
 
 ## Загрузить baseline. Пустой словарь, если файла нет или он битый.
 static func load_baseline(path: String) -> Dictionary:
@@ -157,6 +167,10 @@ static func load_baseline(path: String) -> Dictionary:
 	if parsed is Dictionary:
 		return _normalize_numbers(parsed)
 	return {}
+
+## Загрузить baseline в _baseline относительно текущего base_dir.
+func _load_baseline() -> void:
+	_baseline = load_baseline(baseline_path())
 
 ## JSON.parse_string отдаёт целые как float — приводим числа к int,
 ## чтобы baseline был сравним по равенству со срезом из build_baseline().
@@ -176,8 +190,14 @@ static func _normalize_numbers(data: Dictionary) -> Dictionary:
 
 ## Валидирует файл целиком. Возвращает true, если нет ошибок.
 func validate_file(path: String) -> bool:
-	# Сброс состояния для нового вызова
+	# Сброс состояния для нового вызода
 	report = _report_script.new()
+	# Baseline грузим здесь (лениво), если он ещё не задан вызывающим.
+	# Это нужно, потому что base_dir (set_base_dir) устанавливается уже после
+	# конструктора, а в source-loaded валидаторе _dir() резолвится относительно
+	# пустого resource_path — поэтому грузить baseline в _init нельзя.
+	if _baseline.is_empty():
+		_load_baseline()
 	_spells = []
 	_ids_seen = {}
 	_names_seen = {}
