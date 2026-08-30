@@ -19,7 +19,7 @@ if [ "${2:-}" = "--log" ]; then
     LOG="${3:-$LOG}"
     SCENARIO="${1:-1}"
 fi
-HERE="$(cd "$(dirname "$0")/../.." && pwd)"   # корень репозитория (скрипт в tools/shell/)
+HERE="$(cd "$(dirname "$0")/../../.." && pwd)"   # корень репозитория (скрипт в game/tools/shell/)
 
 # --- 1. Находим Godot (env -> стандартный путь -> поиск) ---
 GODOT_BIN="${GODOT_BIN:-}"
@@ -42,7 +42,7 @@ fi
 echo "🚀 Godot: $GODOT_BIN"
 
 # --- 2. Стартуем сервер ---
-"$GODOT_BIN" --path "$HERE/game" --headless --scene scenes/MainMenu.tscn >"$LOG" 2>&1 &
+"$GODOT_BIN" --path "$HERE/game" --headless --test-server --scene scenes/MainMenu.tscn >"$LOG" 2>&1 &
 GODOT_PID=$!
 
 cleanup() {
@@ -64,18 +64,22 @@ done
 [ "$ready" -eq 1 ] || { echo "❌ Сервер не поднялся за 30с. Лог:"; cat "$LOG"; exit 1; }
 echo "✅ Сервер готов."
 
-# --- 4. Гоняем сценарий (collect, с фолбэком на flee) ---
-SC_DIR="$HERE/tools/scenarios"
+# --- 4. Гоняем сценарий (collect/flee/explore/endure) ---
+SC_DIR="$HERE/game/tools/scenarios"
 if [ -f "$SC_DIR/scenario_${SCENARIO}_collect.py" ]; then
     SC_PY="scenario_${SCENARIO}_collect.py"
 elif [ -f "$SC_DIR/scenario_${SCENARIO}_flee.py" ]; then
     SC_PY="scenario_${SCENARIO}_flee.py"
+elif [ -f "$SC_DIR/scenario_${SCENARIO}_explore.py" ]; then
+    SC_PY="scenario_${SCENARIO}_explore.py"
+elif [ -f "$SC_DIR/scenario_${SCENARIO}_endure.py" ]; then
+    SC_PY="scenario_${SCENARIO}_endure.py"
 else
-    echo "❌ Нет файла сценария scenario_${SCENARIO}_{collect,flee}.py"
+    echo "❌ Нет файла сценария scenario_${SCENARIO}_{collect,flee,explore,endure}.py"
     exit 2
 fi
-echo "🏃 Сценарий: tools/scenarios/$SC_PY"
-( cd "$HERE" && python3 "tools/scenarios/$SC_PY" )
+echo "🏃 Сценарий: game/tools/scenarios/$SC_PY"
+( cd "$HERE" && python3 "game/tools/scenarios/$SC_PY" )
 RES=$?
 
 cleanup

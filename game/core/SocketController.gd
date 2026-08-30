@@ -258,6 +258,12 @@ func _get_state(world_ctrl, battle_ctrl) -> Dictionary:
 					})
 			state.map_enemies = enemies
 		
+		# Деревни на карте (для сценария «Explore»).
+		var _villages: Array = []
+		for _c in map_gen.village_cells:
+			_villages.append({"x": _c.x, "y": _c.y})
+		state.map_villages = _villages
+		
 	if battle_ctrl:
 		var bstate = battle_ctrl.get_battle_state()
 		if bstate:
