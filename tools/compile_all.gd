@@ -25,7 +25,9 @@ func _scan(path: String) -> void:
     while f != "":
         var full: String = path.path_join(f)
         if dir.current_is_dir():
-            if f != ".git" and f != ".godot" and f != "addons" and f != "tools":
+            # tests/ не компилируем тут: у dev-тулзов нет tools/ в portable-проекте
+            # (их parse-валидация — в run_tests.gd с осознанным skip'ом)
+            if f != ".git" and f != ".godot" and f != "addons" and f != "tools" and f != "tests":
                 _scan(full)
         elif f.ends_with(".gd"):
             var res = ResourceLoader.load(full, "GDScript")

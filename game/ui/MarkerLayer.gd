@@ -9,6 +9,10 @@ signal marker_clicked(cell: Vector2i, is_reachable: bool)
 
 enum MarkType { GREEN, YELLOW, RED }
 
+const _COLOR_GREEN := Color(0.2, 0.85, 0.2, 0.75)
+const _COLOR_YELLOW := Color(1.0, 0.85, 0.1, 0.8)
+const _COLOR_RED := Color(0.9, 0.2, 0.2, 0.6)
+
 var _map_gen: MapGenerator
 var _hero_cell: Vector2i
 var _mp_current: float = 0.0
@@ -16,6 +20,11 @@ var _dist: Dictionary = {}  # cell -> cumulative cost from hero
 var _reachable: Dictionary = {}  # cell -> MarkType
 var _red_frontier: Dictionary = {}  # cell -> true
 var _visible: bool = false
+# Позиции точек, пересчитываются в show_markers() — _draw() не ходит
+# по словарям и не вызывает map_to_local каждый кадр.
+var _green_pos: PackedVector2Array = PackedVector2Array()
+var _yellow_pos: PackedVector2Array = PackedVector2Array()
+var _red_pos: PackedVector2Array = PackedVector2Array()
 
 var _hex_size: float = 32.0  # default, recalculated on setup
 
@@ -53,6 +62,20 @@ func show_markers(hero_cell: Vector2i, mp: float, dist_map: Dictionary) -> void:
 					red_candidates[nb] = true
 
 	_red_frontier = red_candidates
+
+	# Кэшируем экранные позиции (map_to_local — дорого, не делаем в _draw)
+	_green_pos.clear()
+	_yellow_pos.clear()
+	_red_pos.clear()
+	if _map_gen and _map_gen.has_valid_tilemap():
+		for cell in _reachable:
+			if _reachable[cell] == MarkType.GREEN:
+				_green_pos.append(_map_gen.map_to_local(cell))
+			else:
+				_yellow_pos.append(_map_gen.map_to_local(cell))
+		for cell in _red_frontier:
+			_red_pos.append(_map_gen.map_to_local(cell))
+
 	queue_redraw()
 
 
@@ -60,10 +83,15 @@ func hide_markers() -> void:
 	_visible = false
 	_reachable.clear()
 	_red_frontier.clear()
+	_green_pos.clear()
+	_yellow_pos.clear()
+	_red_pos.clear()
 	queue_redraw()
 
+
 func _process(_d: float) -> void:
-	if _visible:
+	# Анимация (пульс) нужна только зелёным точкам; без них — без редraw'ов.
+	if _visible and not _green_pos.is_empty():
 		queue_redraw()
 
 
@@ -71,30 +99,21 @@ func _draw() -> void:
 	if not _visible or not _map_gen or not _map_gen.has_valid_tilemap():
 		return
 
-	var time: float = Time.get_ticks_msec() / 1000.0
-
 	# Green dots (pulse)
-	for cell in _reachable:
-		if _reachable[cell] != MarkType.GREEN:
-			continue
-		var pos: Vector2 = _map_gen.map_to_local(cell)
-		var pulse: float = 1.0 + sin(time * 3.0) * 0.15
-		var r: float = _hex_size * 0.18 * pulse
-		draw_circle(pos, r, Color(0.2, 0.85, 0.2, 0.75))
+	var pulse: float = 1.0 + sin(Time.get_ticks_msec() / 1000.0 * 3.0) * 0.15
+	var r_green: float = _hex_size * 0.18 * pulse
+	for pos in _green_pos:
+		draw_circle(pos, r_green, _COLOR_GREEN)
 
 	# Yellow dots (smaller, static)
-	for cell in _reachable:
-		if _reachable[cell] != MarkType.YELLOW:
-			continue
-		var pos: Vector2 = _map_gen.map_to_local(cell)
-		var r: float = _hex_size * 0.10
-		draw_circle(pos, r, Color(1.0, 0.85, 0.1, 0.8))
+	var r_yellow: float = _hex_size * 0.10
+	for pos in _yellow_pos:
+		draw_circle(pos, r_yellow, _COLOR_YELLOW)
 
 	# Red frontier dots (tiny, sparse)
-	for cell in _red_frontier:
-		var pos: Vector2 = _map_gen.map_to_local(cell)
-		var r: float = _hex_size * 0.08
-		draw_circle(pos, r, Color(0.9, 0.2, 0.2, 0.6))
+	var r_red: float = _hex_size * 0.08
+	for pos in _red_pos:
+		draw_circle(pos, r_red, _COLOR_RED)
 
 
 func _unhandled_input(event: InputEvent) -> void:
