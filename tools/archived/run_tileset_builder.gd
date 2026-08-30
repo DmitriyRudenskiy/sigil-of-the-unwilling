@@ -129,7 +129,7 @@ func _generate_report(available_tiles: Array[String], tile_coords: Array[Vector2
     for doc_bit in BIT_MAPPING:
         report += "| %s | %s | %s |\n" % [doc_bit, BIT_MAPPING[doc_bit], doc_bit.substr(8)]
     
-    var report_file := FileAccess.open("res://REPORT.md", FileAccess.READ)
+    var report_file := FileAccess.open("res://docs/REPORT.md", FileAccess.READ)
     var report_content := ""
     if report_file:
         report_content = report_file.get_as_text()
@@ -139,7 +139,7 @@ func _generate_report(available_tiles: Array[String], tile_coords: Array[Vector2
     if insert_pos == -1: insert_pos = report_content.length()
     report_content = report_content.insert(insert_pos, report)
     
-    var report_write := FileAccess.open("res://REPORT.md", FileAccess.WRITE)
+    var report_write := FileAccess.open("res://docs/REPORT.md", FileAccess.WRITE)
     if report_write:
         report_write.store_string(report_content)
         report_write.close()

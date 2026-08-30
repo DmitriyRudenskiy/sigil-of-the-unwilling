@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Боевое поле — гексы</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#1b1b1b;font-family:system-ui,"Segoe UI",Arial,sans-serif}
+  #wrap{max-width:1500px;margin:0 auto;border:6px solid #6b4a2b;border-radius:6px;overflow:hidden;box-shadow:0 10px 40px #000}
+
+  /* НЕБО И ЛЕС */
+  #sky{position:relative;height:96px;background:linear-gradient(#aebfb2,#e6efe6);overflow:hidden}
+  #hills{position:absolute;left:0;right:0;bottom:0;height:80px;background:
+    radial-gradient(55% 100% at 18% 100%,#7fa98f 0 55%,transparent 56%),
+    radial-gradient(45% 90% at 65% 100%,#8ab39a 0 55%,transparent 56%),
+    radial-gradient(40% 80% at 92% 100%,#7fa98f 0 55%,transparent 56%)}
+  #trees{position:absolute;left:0;right:0;bottom:-4px;white-space:nowrap;line-height:1;overflow:hidden}
+  #trees span{display:inline-block}
+
+  /* ПОЛЕ */
+  #fieldWrap{position:relative;background:
+    radial-gradient(3px 3px at 20% 30%,#5d9a44 40%,transparent 41%) 0 0/140px 90px,
+    radial-gradient(4px 3px at 70% 60%,#3f7a2c 40%,transparent 41%) 0 0/170px 110px,
+    linear-gradient(#4d8c36,#417d2e 60%,#3c752b)}
+  svg#field{display:block;width:100%;height:auto}
+  polygon.hex{fill:transparent;stroke:#8fc85e;stroke-opacity:.5;stroke-width:1.3;pointer-events:all}
+  polygon.hex.reach{fill:rgba(150,255,120,.16);stroke:#d6ff8a;stroke-opacity:.95;cursor:pointer}
+  polygon.hex.reach:hover{fill:rgba(200,255,150,.34)}
+  polygon.hex.sel{stroke:#ffe94a;stroke-opacity:1;stroke-width:2.4}
+  text{user-select:none}
+  .obst{pointer-events:none}
+  .unit{cursor:pointer}
+  .unit .badge rect{fill:#5e1f8f;stroke:#d3b0f2;stroke-width:1}
+  .unit .badge text{fill:#fff;font-size:12px;font-weight:600;text-anchor:middle}
+  .walking{animation:bob .32s infinite alternate ease-in-out}
+  @keyframes bob{from{transform:translateY(1px) rotate(-2deg)}to{transform:translateY(-4px) rotate(2deg)}}
+  .dark{filter:grayscale(.7) brightness(.75)}
+  #hint{position:absolute;left:10px;top:8px;background:#0009;color:#fff;font-size:12px;padding:6px 10px;border-radius:6px;pointer-events:none}
+
+  /* НИЖНЯЯ ПАНЕЛЬ */
+  #bar{display:flex;gap:6px;background:linear-gradient(#7a5533,#5d3f24);padding:6px;border-top:3px solid #3e2a17}
+  .btn{width:52px;height:44px;display:flex;align-items:center;justify-content:center;font-size:20px;
+    background:linear-gradient(#8a6a45,#6b4a2b);border:2px solid #3e2a17;border-radius:4px;
+    box-shadow:inset 0 0 0 2px #9a7a55;cursor:pointer}
+  .btn:active{transform:translateY(1px)}
+  #info{flex:1;margin:0 8px;background:#4a3320;border:2px solid #3e2a17;border-radius:4px;color:#f0e6d2;
+    display:flex;align-items:center;padding:0 12px;font-size:14px;box-shadow:inset 0 2px 8px #0008}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="sky"><div id="hills"></div><div id="trees"></div></div>
+  <div id="fieldWrap">
+    <svg id="field"></svg>
+    <div id="hint">Кликните по фигурке — подсветятся гексы хода. Клик по подсвеченному гексу — фигурка идёт туда.</div>
+  </div>
+  <div id="bar">
+    <div class="btn">⚙️</div><div class="btn">🏕️</div><div class="btn">🏃</div><div class="btn">⚔️</div>
+    <div id="info">Выберите существо…</div>
+    <div class="btn">▲</div><div class="btn">📖</div><div class="btn">⏳</div><div class="btn">🛡️</div>
+  </div>
+</div>
+
+<script>
+/* ---------- СЕТКА ---------- */
+const COLS=15, ROWS=11, R=40, W=Math.sqrt(3)*R, PAD=6;
+const VBW=W*(COLS+0.5)+PAD*2, VBH=1.5*R*(ROWS-1)+2*R+PAD*2;
+const NS='http://www.w3.org/2000/svg';
+const svg=document.getElementById('field');
+svg.setAttribute('viewBox',`0 0 ${VBW} ${VBH}`);
+const el=(n,a,p)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);(p||svg).appendChild(e);return e;};
+const center=(c,r)=>({x:PAD+W/2+W*(c+0.5*(r&1)), y:PAD+R+1.5*R*r});
+const key=(c,r)=>c+','+r;
+function corners(cx,cy){const s=[];for(let i=0;i<6;i++){const a=Math.PI/180*(60*i-30);
+  s.push((cx+R*Math.cos(a)).toFixed(1)+','+(cy+R*Math.sin(a)).toFixed(1));}return s.join(' ');}
+
+const polys={}, gridG=el('g',{});
+for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+  const p=center(c,r);
+  polys[key(c,r)]=el('polygon',{class:'hex',points:corners(p.x,p.y),'data-key':key(c,r)},gridG);
+}
+
+/* ---------- ПРЕПЯТСТВИЯ ---------- */
+const obstG=el('g',{class:'obst'}), blocked=new Set();
+function addObst(c,r,ch,size,rot){blocked.add(key(c,r));const p=center(c,r);
+  el('text',{x:p.x,y:p.y+size*0.35,'font-size':size,'text-anchor':'middle',
+    transform:`rotate(${rot||0} ${p.x} ${p.y})`},obstG).textContent=ch;}
+addObst(7,1,'🪵',40,0);    // пень
+addObst(4,5,'🪵',54,90);   // бревно
+addObst(14,8,'',52,0);   // шатёр
+/* пруд */
+[key(4,7),key(5,7),key(5,8)].forEach(k=>blocked.add(k));
+const pa=center(4,7), pb=center(5,8), px=(pa.x+pb.x)/2, py=(pa.y+pb.y)/2;
+el('ellipse',{cx:px,cy:py,rx:W*1.05,ry:R*0.85,fill:'#2e6fa0',stroke:'#7fb060','stroke-width':3,opacity:.9},obstG);
+el('ellipse',{cx:px-8,cy:py-6,rx:W*0.5,ry:R*0.4,fill:'#3d84b6',opacity:.8},obstG);
+
+/* ---------- ВОЙСКА ---------- */
+const UNITS=[
+ {id:'cav', name:'Кавалерия',       ch:'🏇', n:15,  c:0, r:0, sp:6, size:52, side:0, flag:'#8e24aa'},
+ {id:'arch',name:'Лучник',          ch:'🏹', n:54,  c:1, r:1, sp:4, size:40, side:0},
+ {id:'halb',name:'Алебардщик',      ch:'💂', n:158, c:1, r:2, sp:5, size:42, side:0},
+ {id:'mage',name:'Маг',             ch:'🧙', n:38,  c:1, r:4, sp:5, size:44, side:0},
+ {id:'champ',name:'Чемпион',        ch:'🤺', n:18,  c:1, r:6, sp:6, size:44, side:0},
+ {id:'grif',name:'Грифон',          ch:'🦅', n:91,  c:1, r:7, sp:8, size:50, side:0},
+ {id:'swd', name:'Мечник',          ch:'🥷', n:52,  c:1, r:9, sp:5, size:42, side:0},
+ {id:'bk',  name:'Чёрный рыцарь',   ch:'🏇', n:12,  c:14,r:0, sp:6, size:52, side:1, dark:true, flag:'#2e7d32'},
+ {id:'liz', name:'Ящер',            ch:'🦎', n:180, c:13,r:1, sp:5, size:44, side:1},
+ {id:'gorg',name:'Горгона',         ch:'🐂', n:7,   c:13,r:2, sp:4, size:50, side:1},
+ {id:'bal', name:'Баллиста',        ch:'🛞', n:1,   c:13,r:3, sp:0, size:46, side:1},
+ {id:'wolf',name:'Волчий наездник', ch:'🐺', n:34,  c:13,r:4, sp:6, size:46, side:1},
+ {id:'mant',name:'Мантикора',       ch:'🦇', n:9,   c:13,r:6, sp:6, size:46, side:1},
+ {id:'drag',name:'Зелёный дракон',  ch:'🐉', n:3,   c:13,r:7, sp:6, size:56, side:1},
+ {id:'fd',  name:'Фея-дракон',      ch:'🐍', n:13,  c:13,r:9, sp:6, size:40, side:1},
+];
+const unitG=el('g',{}), occupied={};
+for(const u of UNITS){
+  const p=center(u.c,u.r);
+  u.face=u.side?1:-1;                      // эмодзи «смотрят влево» — левое войско зеркалим
+  u.g   =el('g',{class:'unit','data-id':u.id},unitG);
+  u.posG=el('g',{transform:`translate(${p.x},${p.y})`},u.g);
+  u.faceG=el('g',{transform:`scale(${u.face},1)`},u.posG);
+  u.bobG=el('g',{class:'bob'},u.faceG);
+  el('text',{class:'sprite'+(u.dark?' dark':''),y:u.size*0.35,'font-size':u.size,'text-anchor':'middle'},u.bobG).textContent=u.ch;
+  if(u.flag) el('text',{x:-u.size*0.55,y:-u.size*0.45,'font-size':20,fill:u.flag},u.bobG).textContent='⚑';
+  const bg=el('g',{class:'badge',transform:'translate(14,26)'},u.posG);
+  const w=14+String(u.n).length*8;
+  el('rect',{x:0,y:0,width:w,height:16,rx:2},bg);
+  el('text',{x:w/2,y:12.5},bg).textContent=u.n;
+  occupied[key(u.c,u.r)]=u;
+}
+
+/* ---------- ВЫБОР И ДОСЯГАЕМОСТЬ (BFS) ---------- */
+let selected=null, reach={};
+function neighbors(c,r){
+  const d=(r&1)?[[1,0],[-1,0],[1,-1],[0,-1],[1,1],[0,1]]
+              :[[1,0],[-1,0],[0,-1],[-1,-1],[0,1],[-1,1]];
+  return d.map(([dc,dr])=>[c+dc,r+dr]).filter(([c,r])=>c>=0&&c<COLS&&r>=0&&r<ROWS);
+}
+function computeReach(u){
+  reach={};
+  const dist={[key(u.c,u.r)]:0}, q=[[u.c,u.r,0]];
+  while(q.length){
+    const [c,r,d]=q.shift();
+    if(d>=u.sp)continue;
+    for(const [nc,nr] of neighbors(c,r)){
+      const k=key(nc,nr);
+      if(dist[k]!==undefined||blocked.has(k)||occupied[k])continue;
+      dist[k]=d+1; reach[k]={prev:key(c,r)};
+      q.push([nc,nr,d+1]);
+    }
+  }
+}
+const clearHl=()=>{for(const k in polys)polys[k].classList.remove('reach','sel');};
+const info=document.getElementById('info');
+function updateInfo(u){
+  info.textContent=u?`${u.ch} ${u.name} ×${u.n} · скорость ${u.sp}`:'Выберите существо…';
+}
+function select(u){
+  clearHl(); selected=u;
+  if(!u){updateInfo();return;}
+  computeReach(u);
+  for(const k in reach)polys[k].classList.add('reach');
+  polys[key(u.c,u.r)].classList.add('sel');
+  updateInfo(u);
+}
+
+/* ---------- КЛИКИ ---------- */
+svg.addEventListener('click',e=>{
+  const ug=e.target.closest&&e.target.closest('g.unit');
+  if(ug){
+    const u=UNITS.find(x=>x.id===ug.getAttribute('data-id'));
+    if(u&&!u.moving)select(selected===u?null:u);
+    return;
+  }
+  const poly=e.target.closest&&e.target.closest('polygon.hex');
+  if(poly&&selected){
+    const k=poly.getAttribute('data-key');
+    if(reach[k]){moveTo(selected,k);select(null);return;}
+  }
+  select(null);
+});
+
+/* ---------- ПЕРЕДВИЖЕНИЕ С АНИМАЦИЕЙ ---------- */
+const SPEED=230;
+function moveTo(u,targetKey){
+  const path=[targetKey]; let cur=targetKey;
+  while(cur!==key(u.c,u.r)){cur=reach[cur].prev;path.push(cur);}
+  path.reverse();
+  const pts=path.map(k=>{const [c,r]=k.split(',').map(Number);return center(c,r);});
+  delete occupied[key(u.c,u.r)]; occupied[targetKey]=u;   // резервируем клетку
+  const [tc,tr]=targetKey.split(',').map(Number); u.tc=tc; u.tr=tr;
+  const dx=pts[pts.length-1].x-pts[0].x;                  // поворот по направлению
+  if(Math.abs(dx)>2){u.face=dx>0?-1:1;u.faceG.setAttribute('transform',`scale(${u.face},1)`);}
+  u.moving=true; u.bobG.classList.add('walking');
+  const segs=[]; let total=0;
+  for(let i=0;i<pts.length-1;i++){
+    const L=Math.hypot(pts[i+1].x-pts[i].x,pts[i+1].y-pts[i].y);
+    segs.push({a:pts[i],b:pts[i+1],L,start:total}); total+=L;
+  }
+  let t0=null;
+  (function frame(ts){
+    if(t0===null)t0=ts;
+    const d=(ts-t0)/1000*SPEED;
+    if(d>=total){
+      const p=pts[pts.length-1];
+      u.posG.setAttribute('transform',`translate(${p.x},${p.y})`);
+      u.c=u.tc; u.r=u.tr; u.moving=false;
+      u.bobG.classList.remove('walking');
+      return;
+    }
+    const s=segs.find(s=>d>=s.start&&d<=s.start+s.L), k=(d-s.start)/s.L;
+    u.posG.setAttribute('transform',
+      `translate(${s.a.x+(s.b.x-s.a.x)*k},${s.a.y+(s.b.y-s.a.y)*k})`);
+    requestAnimationFrame(frame);
+  })(performance.now());
+}
+updateInfo();
+
+/* ---------- ЛЕС СВЕРХУ ---------- */
+let html='';
+for(let i=0;i<80;i++){
+  html+=`<span style="font-size:${14+Math.random()*20}px;margin-left:${(-4+Math.random()*6).toFixed(1)}px">${Math.random()<0.8?'🌲':''}</span>`;
+}
+document.getElementById('trees').innerHTML=html;
+</script>
+</body>
+</html>

@@ -402,9 +402,9 @@ func _write_report(base_ordered: Array[String], obj_ordered: Array[String]) -> v
         for s in synth_log:
             txt += "- %s\n" % s
 
-    var fa := FileAccess.open("res://REPORT.md", FileAccess.READ_WRITE)
+    var fa := FileAccess.open("res://docs/REPORT.md", FileAccess.READ_WRITE)
     if fa == null:
-        push_error("Failed to open res://REPORT.md: %s" % error_string(FileAccess.get_open_error()))
+        push_error("Failed to open res://docs/REPORT.md: %s" % error_string(FileAccess.get_open_error()))
         return
     fa.seek_end()
     # Гарантируем перевод строки между блоками отчёта

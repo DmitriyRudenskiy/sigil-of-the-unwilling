@@ -2,6 +2,9 @@
 
 Godot 4.7 hex strategy prototype.
 
+> Игра (портативный проект) — в папке `game/` (см. `game/README.md`).
+> В корне остались только dev-материалы: `tests/`, `tools/`, `docs/`, `previews/`, `tmp/`.
+
 ## Checks
 
 ```bash
@@ -10,7 +13,7 @@ Godot 4.7 hex strategy prototype.
 
 ## Manual run
 
-Open project in Godot 4.7 and run `scenes/MainMenu.tscn` or `scenes/World.tscn`.
+Open `game/` in Godot 4.7 and run `F5` (main scene: `game/scenes/MainMenu.tscn`).
 
 ## Tools
 

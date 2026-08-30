@@ -305,7 +305,7 @@ func _write_report(rows: Array[String]) -> void:
         for s in synth_list:
             txt += "- %s\n" % s
     txt += "\nВариативность: тайлы с одинаковой маской (sand_base/dunes/pebbles, forest_1tree/2trees, mountain_*) движок выбирает случайно по probability.\n"
-    var fa := FileAccess.open("res://REPORT.md", FileAccess.READ_WRITE)
+    var fa := FileAccess.open("res://docs/REPORT.md", FileAccess.READ_WRITE)
     if fa:
         fa.seek_end()
         fa.store_string(txt)

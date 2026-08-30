@@ -11,6 +11,8 @@ const SKIP_FILES := [
 	# (test_runtime_integration асинхронен: ждёт 4с инициализации мира —
 	#  главный раннер не умеет await-ить тесты, а Timer в его контексте не стартует)
 	"test_runtime_integration.gd",
+	# Корутинный smoke-тест UI арены (ждёт кадры/таймеры) — только через `godot -s`.
+	"test_city_arena_view.gd",
 	"test_validation_runner.gd",
 	"debug_load.gd",
 ]

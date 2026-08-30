@@ -44,9 +44,9 @@
 
 ### Неигровые папки (мусор/инфраструктура — не часть игры)
 
-`graphify/`, `grepai/`, `backup_assets/`, `biome_showcase.*`, `process_assets*.py`,
-`generate_map_preview.py`, `organize_assets.py`, `ai_agent.py`, `map_preview.png`,
-`__pycache__/`, `.godot/`, `*.log`.
+`graphify/`, `grepai/`, `backup_assets/`, `__pycache__/`, `.godot/`, `*.log`.
+Инструментальные скрипты (`process_assets*.py`, `ai_agent.py`, `generate_map_preview.py`,
+`organize_assets.py`, `biome_showcase.py`) лежат в `tools/`, превью-картинки — в `previews/`.
 
 Эти папки **не игнорируются Git** (в `.gitignore` только `.godot/`, `.DS_Store`, `*.log`,
 `*.import`, `*.uid`, `__pycache__/`, `tmp/`), поэтому в игровые коммиты их **намеренно не добавляем**:
@@ -198,7 +198,7 @@ $GODOT --headless --path . -s tools/compile_all.gd
 # → "compile check: N ok, 0 errors"
 
 # Полный CI: компиляция + проверки сцен/данных/тайлкетов + юнит-тесты
-./run_all_ci_checks.sh
+bash tools/shell/run_all_ci_checks.sh
 # --fast  : только компиляция + проверки (без тестов)
 # --tests : только тесты
 
@@ -221,6 +221,42 @@ $GODOT --path . --scene scenes/MainMenu.tscn          # с окном, для р
 
 > Если после переключения ветки поехали ошибки кэша/импорта:
 > `rm -rf .godot` и перезагрузить проект (см. правило 6).
+
+## 8.1. ⚠️ КРИТИЧЕСКОЕ ПРАВИЛО: запуск Godот-сцен/скриптов — только с жёстким таймаутом
+
+Запуск Godot (`--scene`, `-s script.gd`) **всегда** оборачиваем в жёсткий таймаут через
+фоновый процесс + `kill`, потому что зависшая сцена/скрипт гоняет main-loop бесконечно и
+может «повесить» всю команду (хэндлер отрубает через ~5000 с — теряется весь прогресс).
+
+```bash
+GODOT=/Applications/Godot.app/Contents/MacOS/Godot
+
+# Универсальный обёртка: запускает Godot, ждёт до N секунд, убивает, возвращает код.
+run_godot() {  # run_godot <секунд> <остальные_аргументы...>
+  local secs="$1"; shift
+  "$GODOT" "$@" >/tmp/godot_run.log 2>&1 &
+  local pid=$!
+  ( sleep "$secs"; kill "$pid" 2>/dev/null ) &
+  local killer=$!
+  wait "$pid"
+  local rc=$?
+  kill "$killer" 2>/dev/null
+  return "$rc"
+}
+
+# Примеры:
+run_godot 40 $GODOT --headless --path . --scene tmp/inv_check.tscn
+cat /tmp/godot_run.log | grep -vE 'loading_editor_layout|ready'
+```
+
+- Для smoke-запуска сцены добавляем `--autoquit` (см. правило 8) — но всё равно оборачиваем.
+- Если сцена должна завершиться сама (`quit()` после `await process_frame`) — всё равно
+  держим `kill`-таймаут на всякий случай.
+- `timeout` на macOS **отсутствует**, поэтому используем именно `sleep + kill`.
+- Проверку UI лучше делать через `SceneTree`-скрипт с `_init()` + `quit()` (каноничный
+  раннер из правила 9), а не через `--scene` — он гарантиленно завершается.
+- Если после `run_godot` в `/tmp/godot_run.log` есть `SCRIPT ERROR` / `Parse Error` —
+  чиним; чистый прогон = только предупреждения импорта без ошибок скриптов.
 
 ---
 
@@ -295,7 +331,7 @@ SocketController, Units, Artifacts, Spells, Resources
 
 ## 12. Чек-лист перед коммитом
 
-1. `./run_all_ci_checks.sh --fast` (или полный) — зелёный.
+1. `bash tools/shell/run_all_ci_checks.sh --fast` (или полный) — зелёный.
 2. `tests/run_tests.gd` — `ALL TESTS PASSED`, `0 failed`.
 3. Нет лишних `print()`; граничные условия логированы через `GameLogger`.
 4. Соблюдён порядок членов скрипта и `class_name` = имени файла.

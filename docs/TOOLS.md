@@ -7,11 +7,11 @@ This document lists the scripts and tools available in the project for asset pro
 | Script | Location | Description |
 |---|---|---|
 | `scripts/tools/make_grid.py` | `scripts/tools/` | Creates sprite sheets by arranging images into a grid. |
-| `process_assets.py` | (Root) | Primary pipeline script for resizing, masking, and moving assets to `data/processed`. |
-| `organize_assets.py` | (Root) | Performs color-based clustering to sort raw textures into biome folders. |
+| `process_assets.py` | (tools/) | Primary pipeline script for resizing, masking, and moving assets to `data/processed`. |
+| `organize_assets.py` | (tools/) | Performs color-based clustering to sort raw textures into biome folders. |
 | `analyze_texture_pairs.py` | `tools/` | Compares two textures to determine visual weight, color harmony, and transition quality. |
-| `generate_map_preview.py` | (Root) | Generates a procedural map visualization to validate biome distribution and distribution logic. |
-| `biome_showcase.py` | (Root) | Generates a visual "daidgest" (showcase) of all processed biomes and their combinations. |
+| `generate_map_preview.py` | (tools/) | Generates a procedural map visualization to validate biome distribution and distribution logic. |
+| `biome_showcase.py` | (tools/) | Generates a visual "daidgest" (showcase) of all processed biomes and their combinations. |
 
 ## Godot Tools (GDScript)
 

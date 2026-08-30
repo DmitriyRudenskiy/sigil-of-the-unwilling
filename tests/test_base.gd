@@ -51,6 +51,20 @@ func assert_not_empty(val: Variant, msg: String = "") -> void:
 		_pass(msg)
 
 
+func assert_gt(a: Variant, b: Variant, msg: String = "") -> void:
+	if not (float(a) > float(b)):
+		_fail("assert_gt failed: %s (got %s, expected > %s)" % [msg, str(a), str(b)])
+	else:
+		_pass(msg)
+
+
+func assert_lt(a: Variant, b: Variant, msg: String = "") -> void:
+	if not (float(a) < float(b)):
+		_fail("assert_lt failed: %s (got %s, expected < %s)" % [msg, str(a), str(b)])
+	else:
+		_pass(msg)
+
+
 func _pass(msg: String) -> void:
 	_passed += 1
 
