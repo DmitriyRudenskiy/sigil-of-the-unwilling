@@ -11,7 +11,18 @@
 
 set -euo pipefail
 
-GODOT="${GODOT_BIN:-godot}"
+# Разрешение Godot: GODOT_BIN → godot в PATH → macOS-приложение.
+if [ -n "${GODOT_BIN:-}" ]; then
+    GODOT="$GODOT_BIN"
+elif command -v godot >/dev/null 2>&1; then
+    GODOT="godot"
+elif [ -x "/Applications/Godot.app/Contents/MacOS/Godot" ]; then
+    GODOT="/Applications/Godot.app/Contents/MacOS/Godot"
+else
+    echo "ERROR: Godot не найден. Поставьте GODOT_BIN=/path/to/godot" >&2
+    exit 1
+fi
+
 REPO_DIR="$(cd "$(dirname "$0")/../.." && pwd)"   # корень репозитория
 PROJECT_DIR="$REPO_DIR/game"                       # корень Godot-проекта
 EXIT_CODE=0
