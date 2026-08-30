@@ -10,52 +10,62 @@
 
 ## 1. Структура проекта
 
-- **Корень репозитория = корень Godot-проекта.** `project.godot` лежит в корне.
-- Префикса `game/` **не существует** для рабочей разработки. Папка `game/` в корне —
-  пустой остаток от миграции; **новый код туда не кладём** (там только `.DS_Store`).
-- Все пути в коде — относительные от корня: `res://systems/BattleState.gd`,
-  `res://core/Logger.gd`, `res://scenes/World.tscn`.
+- **Корень Godot-проекта — `game/`.** `project.godot` лежит в `game/project.godot`.
+  Игра полностью само-contained в `game/`: её можно скопировать на другую машину
+  и запустить без остального репозитория (см. `game/README.md`).
+- **Корень репозитория — dev-рабочее пространство.** Тут живут `tests/`, `tools/`,
+  `docs/`, `previews/`, `backup_assets/`, `tmp/`, `lair/`, dev-сцены `scenes/`.
+- Все пути в коде — `res://…` относительно **корня проекта** `game/`:
+  `res://systems/BattleState.gd`, `res://core/GameLogger.gd`, `res://scenes/World.tscn`.
+- Тесты исполняются через симлинк `game/tests -> ../tests` (gitignored, локальная
+  dev-связка; при клоне создать заново: `ln -s ../tests game/tests`).
 
 ```text
-.                                   # Корень = Godot-проект
+.                                   # Корень репозитория = dev-материалы
 ├── AGENT.md                        # Этот файл
-├── README.md / TESTING.md          # Краткая справка
-├── project.godot                   # project.godot в КОРНЕ
-├── .godot/                         # Кэш Godot (gitignored)
-├── core/        # Ядро: HexUtils, UnitRegistry, BattleRules, GameLogger,
-│                #   GameSession, GameSettings, ServiceContainer/Locator, autoloads
-├── systems/     # Бой: BattleController/State/AI/View/UI/Input, BattleFlow,
-│                #   TurnExecutor, SpellCaster, BattleFX
-├── entities/    # Герой и юниты: Hero*, UnitRegistry, HeroInventory, HeroMagic…
-├── world/       # Карта и мир: MapGenerator/Model/Renderer, Borough, City, HexGridOverlay
-├── ui/          # UI: AdventureUI, BattleUI, панели, components
-├── economy/     # Экономические процессы хода
-├── lair/        # Логово — контент фракции «Логово» (монстры/нейтральные здания).
-│                #   Сам каталог — контейнер: данные → data/, логика → world/,
-│                #   ассеты → assets/units/. Подробности: lair/README.md
-├── data/        # Ресурсы/константы: SpellRegistry, ArtifactRegistry, BuildingDefs…
-├── scenes/      # .tscn: MainMenu, World, Battle, TestTerrain, BiomePreview
-├── tilesets/    # hex_atlas_*.png, hex_tileset.tres
-├── assets/      # Ассеты: artifacts, audio, cursors, raw, ui, units
-├── tests/       # Тесты: test_*.gd, unit/, fakes/
-├── tools/       # Инструменты и проверки (compile_all, check_scene_refs, …)
-└── tmp/         # Временные/черновые файлы (gitignored, не коммитится)
+├── README.md                       # Краткая справка
+├── game/                           # ← Godot-проект (портативный)
+│   ├── project.godot
+│   ├── README.md                   # Как запустить на другой машине
+│   ├── .godot/                     # Кэш Godot (gitignored)
+│   ├── core/       # Ядро: HexUtils, GameLogger, GameSession, GameSettings,
+│   │               #   ServiceContainer/Locator, autoloads
+│   ├── systems/    # Бой: BattleController/State/AI/View/UI/Input, BattleFlow, …
+│   ├── entities/   # Герой и юниты: Hero*, UnitRegistry, HeroInventory, …
+│   ├── world/      # Карта и мир: MapGenerator/Model/Renderer, Borough, City…
+│   ├── city/       # Модель города: CityTurnProcessor, системы (Спринт 6–11), Arena
+│   ├── ui/         # UI: AdventureUI, BattleUI, панели, components
+│   ├── economy/    # Экономические процессы хода
+│   ├── data/       # Ресурсы/константы: SpellRegistry, ArtifactRegistry, …
+│   ├── scenes/     # .tscn: MainMenu, World, Battle, CityArena
+│   ├── tilesets/   # hex_atlas_*.png, hex_tileset.tres
+│   ├── assets/     # Ассеты: artifacts, audio, cursors, raw, ui, units
+│   └── tests -> ../tests           # Симлинк (локально, не коммитится)
+├── tests/        # Тесты: test_*.gd, unit/, fakes/ (exec: --path game)
+├── tools/        # Инструменты: compile_all, check_scene_refs, card_validation, shell/
+├── docs/         # Документация: ARCHITECTURE, TESTING, TOOLS, CONCEPT_*, …
+├── lair/         # Логово — контент фракции; см. lair/README.md
+├── previews/     # Превью-картинки (не игровые)
+├── scenes/       # Dev-сцены: BiomePreview, TestTerrain (не в игре)
+├── backup_assets/ # Архив/резерв ассетов (не в игре)
+└── tmp/          # Временные/черновые файлы (gitignored)
 ```
 
-### Неигровые папки (мусор/инфраструктура — не часть игры)
+### Dev-папки в корне (не часть игры)
 
-`graphify/`, `grepai/`, `backup_assets/`, `__pycache__/`, `.godot/`, `*.log`.
-Инструментальные скрипты (`process_assets*.py`, `ai_agent.py`, `generate_map_preview.py`,
-`organize_assets.py`, `biome_showcase.py`) лежат в `tools/`, превью-картинки — в `previews/`.
+`previews/`, `backup_assets/`, `docs/`, `tools/`, `tests/`, `tmp/`, `lair/`, `scenes/`
+(dev-сцены), `prototype_interfes/` — **не входят в portable-проект `game/`** и не должны
+туда попадать. Инструментальные скрипты (`process_assets*.py`, `ai_agent.py`,
+`generate_map_preview.py`, `organize_assets.py`, `biome_showcase.py`) — в `tools/`.
 
-Эти папки **не игнорируются Git** (в `.gitignore` только `.godot/`, `.DS_Store`, `*.log`,
-`*.import`, `*.uid`, `__pycache__/`, `tmp/`), поэтому в игровые коммиты их **намеренно не добавляем**:
-стейджим только затронутые игровые пути (`core/`, `systems/`, `entities/`, `world/`, `ui/`,
-`data/`, `scenes/`, `tilesets/`, `assets/`, `tests/`, `project.godot`).
+Эти папки **не игнорируются Git** (в `.gitignore`: `.godot/`, `.DS_Store`, `*.log`,
+`*.import`, `*.uid`, `__pycache__/`, `tmp/`, `game/tests`), поэтому в игровые коммиты их
+добавляем только при осознанном изменении dev-инструментария; игровые пути стейджим
+внутри `game/`.
 
 `tmp/` — рабочее пространство для черновых/временных файлов: в нём **не должно** оказываться
-того, что предназначено для игры (код, сцены, данные). Если в `tmp/` появилась готовая
-игровая фича — выносим в соответствующий слой и коммитим её там, а из `tmp/` убирали.
+того, что предназначается для игры (код, сцены, данные). Если в `tmp/` появилась готовая
+игровая фича — выносим в `game/` (соответствующий слой) и коммитим её там, а из `tmp/` убираем.
 
 ---
 
@@ -159,8 +169,8 @@
 
 ## 7. Правила поведения агента
 
-1. **Корень = Godot-проект.** Никогда не создавать `game/project.godot` и не добавлять
-   префикс `game/` к путям. Работать напрямую в `res://…`.
+1. **`game/` = Godot-проект.** `res://…` — это пути внутри `game/`. Игровой код пишем
+   только в `game/`; dev-материалы (тесты/тулзы/доки) — в корне репозитория.
 2. **Никогда не хардкодить `get_node("../../../")`.** Использовать `%NodeName`
    (Scene Unique Nodes), `@export` или Dependency Injection.
 3. **Классы с `class_name` резолвятся по имени.** Не добавлять лишний `preload` для
@@ -190,11 +200,13 @@
 Godot в headless-режиме гоняет сцены в бесконечном цикле. Для smoke-тестов сцена должна
 сама завершаться (через `--autoquit` или `quit()` в `_init`/после инициализации).
 
+Все команды Godot идут с `--path game` (корень проекта — `game/`).
+
 ```bash
 GODOT=/Applications/Godot.app/Contents/MacOS/Godot
 
 # Компиляция ВСЕХ скриптов (быстро, без запуска игры)
-$GODOT --headless --path . -s tools/compile_all.gd
+$GODOT --headless --path game -s tools/compile_all.gd
 # → "compile check: N ok, 0 errors"
 
 # Полный CI: компиляция + проверки сцен/данных/тайлкетов + юнит-тесты
@@ -205,22 +217,22 @@ bash tools/shell/run_all_ci_checks.sh
 # Облегённый вариант (README): compile + scene-refs + подборка тестов + world smoke
 ./tools/run_checks.sh
 
-# Юнит-тесты (главный раннер сканирует res://tests/**)
-$GODOT --headless --path . -s tests/run_tests.gd
-# → "Total: 2864 passed, 0 failed" / "ALL TESTS PASSED"
+# Юнит-тесты (главный раннер сканирует res://tests/**; нужен симлинк game/tests)
+$GODOT --headless --path game -s tests/run_tests.gd
+# → "Total: N passed, 0 failed" / "ALL TESTS PASSED"
 
 # Проверка ссылок в сценах / валидация карт / целостность тайлкетов
-$GODOT --headless --path . -s tools/check_scene_refs.gd
-$GODOT --headless --path . -s tools/card_validation/validate_card_spells.gd --strict --json
-$GODOT --headless --path . -s tools/check_tileset.gd
+$GODOT --headless --path game -s tools/check_scene_refs.gd
+$GODOT --headless --path game -s tools/card_validation/validate_card_spells.gd --strict --json
+$GODOT --headless --path game -s tools/check_tileset.gd
 
 # Запуск сцены (нужен --autoquit, иначе зависнет)
-$GODOT --headless --path . --scene scenes/World.tscn --autoquit
-$GODOT --path . --scene scenes/MainMenu.tscn          # с окном, для ручной проверки
+$GODOT --headless --path game --scene scenes/World.tscn --autoquit
+$GODOT --path game --scene scenes/MainMenu.tscn          # с окном, для ручной проверки
 ```
 
 > Если после переключения ветки поехали ошибки кэша/импорта:
-> `rm -rf .godot` и перезагрузить проект (см. правило 6).
+> `rm -rf game/.godot` и перезагрузить проект (см. правило 6).
 
 ## 8.1. ⚠️ КРИТИЧЕСКОЕ ПРАВИЛО: запуск Godот-сцен/скриптов — только с жёстким таймаутом
 
@@ -245,7 +257,7 @@ run_godot() {  # run_godot <секунд> <остальные_аргументы
 }
 
 # Примеры:
-run_godot 40 $GODOT --headless --path . --scene tmp/inv_check.tscn
+run_godot 40 $GODOT --headless --path game --scene scenes/World.tscn --autoquit
 cat /tmp/godot_run.log | grep -vE 'loading_editor_layout|ready'
 ```
 
@@ -262,7 +274,8 @@ cat /tmp/godot_run.log | grep -vE 'loading_editor_layout|ready'
 
 ## 9. Тесты
 
-- Файлы: `tests/test_*.gd` (рекурсивно с `tests/unit/`). Автономные SceneTree-раннеры
+- Файлы: `tests/test_*.gd` в корне репозитория (рекурсивно с `tests/unit/`), исполняются
+  из проекта `game/` через симлинк `game/tests`. Автономные SceneTree-раннеры
   (`test_runtime_integration.gd`, `debug_load.gd`, `run_tests.gd`, `test_validation_runner.gd`)
   **пропускаются** главным раннером — они запускаются сами через `godot -s`.
 - **Шаблон тестового файла**:

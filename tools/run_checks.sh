@@ -1,31 +1,38 @@
 #!/usr/bin/env bash
+# Облегчённая проверка: compile + scene-refs + подборка тестов + world smoke.
+# Запускать из корня репозитория: ./tools/run_checks.sh
 set -e
 
+REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+GODOT="${GODOT_BIN:-godot}"
+
+cd "$REPO_DIR"
+
 echo "=== Compile ==="
-godot --headless -s tools/compile_all.gd
+"$GODOT" --headless --path game -s tools/compile_all.gd
 
 echo "=== Scene refs ==="
-godot --headless -s tools/check_scene_refs.gd
+"$GODOT" --headless --path game -s tools/check_scene_refs.gd
 
 echo "=== HexUtils tests ==="
-godot --headless -s tests/test_hex_utils.gd
+"$GODOT" --headless --path game -s tests/test_hex_utils.gd
 
 echo "=== UnitRegistry tests ==="
-godot --headless -s tests/test_unit_registry.gd
+"$GODOT" --headless --path game -s tests/test_unit_registry.gd
 
 echo "=== MapModel tests ==="
-godot --headless -s tests/test_map_model.gd
+"$GODOT" --headless --path game -s tests/test_map_model.gd
 
 echo "=== BattleState tests ==="
-godot --headless -s tests/test_battle_state.gd
+"$GODOT" --headless --path game -s tests/test_battle_state.gd
 
 echo "=== BattleAI tests ==="
-godot --headless -s tests/test_battle_ai.gd
+"$GODOT" --headless --path game -s tests/test_battle_ai.gd
 
 echo "=== Battle integration tests ==="
-godot --headless -s tests/test_battle_integration.gd
+"$GODOT" --headless --path game -s tests/test_battle_integration.gd
 
 echo "=== World smoke test ==="
-godot --headless res://scenes/World.tscn --autoquit
+"$GODOT" --headless --path game --scene scenes/World.tscn --autoquit
 
 echo "=== ALL CHECKS PASSED ==="

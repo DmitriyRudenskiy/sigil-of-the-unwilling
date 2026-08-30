@@ -1,32 +1,63 @@
 # Тестирование
 
+Корень Godot-проекта — `game/`. Все команды запускаются с `--path game`.
+Тесты лежат в `tests/` (корень репозитория) и видны из проекта через симлинк
+`game/tests -> ../tests` (gitignored; при клоне: `ln -s ../tests game/tests`).
+
 ## Компиляция
 
 ```bash
-godot --headless -s tools/compile_all.gd
+godot --headless --path game -s tools/compile_all.gd
 ```
 
-## Проверка сцен
+## Полный набор тестов
 
 ```bash
-godot --headless -s tools/check_scene_refs.gd
+godot --headless --path game -s tests/run_tests.gd
+# → "=== Total: N passed, 0 failed ===" / "ALL TESTS PASSED"
 ```
 
-## Тесты
+## Отдельные тесты
 
 ```bash
-godot --headless -s tests/test_hex_utils.gd
-godot --headless -s tests/test_unit_registry.gd
-godot --headless -s tests/test_map_model.gd
-godot --headless -s tests/test_battle_state.gd
-godot --headless -s tests/test_battle_ai.gd
-godot --headless -s tests/test_battle_integration.gd
+godot --headless --path game -s tests/test_hex_utils.gd
+godot --headless --path game -s tests/test_unit_registry.gd
+godot --headless --path game -s tests/test_map_model.gd
+godot --headless --path game -s tests/test_battle_state.gd
+godot --headless --path game -s tests/test_battle_ai.gd
+godot --headless --path game -s tests/test_battle_integration.gd
 ```
 
-## Smoke-тест мира
+## Проверка сцен / данных / тайлкетов
 
 ```bash
-godot --headless res://scenes/World.tscn --autoquit
+godot --headless --path game -s tools/check_scene_refs.gd
+godot --headless --path game -s tools/card_validation/validate_card_spells.gd --strict --json
+godot --headless --path game -s tools/check_tileset.gd
+```
+
+## Smoke-тесты миров
+
+```bash
+godot --headless --path game --scene scenes/World.tscn --autoquit
+godot --headless --path game --scene scenes/MainMenu.tscn --autoquit
+```
+
+## Автономные SceneTree-раннеры
+
+Запускаются сами через `godot -s` (главный раннер их пропускает):
+
+```bash
+godot --headless --path game -s tests/test_runtime_integration.gd
+godot --headless --path game -s tests/test_city_arena_view.gd
+```
+
+## CI-скрипты
+
+```bash
+bash tools/shell/run_all_ci_checks.sh      # полный CI (--fast / --tests)
+bash tools/shell/run_scenarios.sh          # сценарные прогоны
+./tools/run_checks.sh                      # облегчённая проверка (compile + refs + smoke)
 ```
 
 ## Ожидаемый результат

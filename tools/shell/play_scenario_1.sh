@@ -12,7 +12,7 @@ set -u
 PORT=9095
 SCENARIO="${1:-1}"
 LOG="/tmp/godot_scenario.log"
-HERE="$(cd "$(dirname "$0")/.." && pwd)"  # project root (was at root, now in tools/shell/)
+HERE="$(cd "$(dirname "$0")/../.." && pwd)"  # корень репозитория (скрипт в tools/shell/)
 
 # --- 1. Находим Godot (env -> стандартный путь -> поиск) ---
 GODOT_BIN="${GODOT_BIN:-}"
@@ -35,7 +35,7 @@ fi
 echo "🚀 Godot: $GODOT_BIN"
 
 # --- 2. Стартуем сервер (та же команда, что в run_scenarios.sh) ---
-"$GODOT_BIN" --path "$HERE" --headless --scene scenes/MainMenu.tscn >"$LOG" 2>&1 &
+"$GODOT_BIN" --path "$HERE/game" --headless --scene scenes/MainMenu.tscn >"$LOG" 2>&1 &
 GODOT_PID=$!
 
 cleanup() {

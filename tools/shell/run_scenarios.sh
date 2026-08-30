@@ -7,10 +7,10 @@
 
 GODOT_BIN="${GODOT_BIN:-/Applications/Godot.app/Contents/MacOS/Godot}"
 PORT=9095
-HERE="$(cd "$(dirname "$0")/.." && pwd)"  # project root (was at root, now in tools/shell/)
+HERE="$(cd "$(dirname "$0")/../.." && pwd)"  # корень репозитория (скрипт в tools/shell/)
 
 echo "🚀 Starting Godot Test Server..."
-"$GODOT_BIN" --path "$HERE" --headless --scene scenes/MainMenu.tscn > /tmp/godot_scenario.log 2>&1 &
+"$GODOT_BIN" --path "$HERE/game" --headless --scene scenes/MainMenu.tscn > /tmp/godot_scenario.log 2>&1 &
 GODOT_PID=$!
 
 cleanup() {
