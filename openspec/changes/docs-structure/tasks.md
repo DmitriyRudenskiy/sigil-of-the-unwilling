@@ -1,0 +1,39 @@
+## 1. Audit (baseline)
+- [x] List all 26 docs; note area, one-line purpose, and any stale `scripts/…` refs.
+- [x] Confirm `docs/` is untracked (`git ls-files docs/` empty).
+
+## 2. Create `docs/README.md` index
+- [x] Group docs into areas (architecture, overview, systems, economy, concepts, howto, reports) with one-line descriptions + links.
+- [x] Note the "docs are being filled in" status.
+
+## 3. Reorganize into area folders
+- [ ] Move docs into `docs/architecture/`, `docs/systems/`, `docs/economy/`, `docs/concepts/`, `docs/howto/`, `docs/reports/`, `docs/overview/`.
+- [ ] Update cross-references in AGENT.md (lines 4, 90, 335–338) and within docs.
+- [ ] Verify no dangling `docs/…` link (`grep -rn "docs/" . | grep -vE "\.md:"` sanity check).
+- ⏭️ **Deferred** (decision point): flat `docs/*.md` structure kept on purpose. Reorg
+  would break production-referenced flat paths in AGENT.md (rules §8/§11) and README;
+  low value. User may reorg later, leaving flat structure for gap-fill.
+
+## 4. Fix stale docs
+- [x] `REPORT.md`: fix `scripts/…` → `game/…`, or mark as archived open-questions.
+- [x] `ADDING_UNITS.md`: fix `scripts/…` → `game/…`.
+- [x] Scan all docs for other stale paths; fix or flag.
+
+## 5. Fill initial system-documentation gaps
+- [x] Add/expand core-system docs (priority order, all done this cycle):
+  - `docs/hero_system.md` — фасад героя, подсистемы, движение, армия, магия.
+  - `docs/city_system.md` — модель города, население, ход города, подсистемы.
+  - `docs/world_adventure.md` — bootstrap мира, карта, оркестрация хода, роутер.
+  - `docs/battle_system.md` — слои боя, BattleState, резолверы, AI, поток.
+  - `docs/save_load.md` — 3 уровня персистентности (SaveManager/SaveData/WorldPersistence).
+- [x] Keep each doc concise and accurate to current code (facts verified against source).
+- ➕ **Possible follow-ups** (not done, lower priority): inventory, magic (beyond hero),
+  economy, spells/battle-spells (see existing `spells_system.md` / `battle_spells.md`).
+
+## 6. Version control
+- [x] `git add docs/` and commit; confirm `git ls-files docs/` now lists files.
+- ✅ `94bc212` (docs-versioning) + `42dbb07` (gap-fill). 31 files tracked in `docs/`.
+
+## 7. Validation
+- [x] Re-run the agent-run-and-debug gate (CI `--fast`) to confirm docs changes don't break anything — 4/4 PASS.
+- [x] Commit scoped to `docs/` + index (README.md).
