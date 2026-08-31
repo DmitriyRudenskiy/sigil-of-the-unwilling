@@ -86,9 +86,5 @@
 
 ## 5. Фиксация
 
-- [ ] 5.1 Один коммит: структура + ссылки + доки (message: «Restructure
-      game/ to Godot Docs layout: scripts/ (+autoload/), assets/data,
-      assets/settings»). Чужие dirty-файлы (410 D docs, 44 ??) в коммит не
-      включать.
-- [ ] 5.2 После коммита: быстрый `run_all_ci_checks.sh --fast` для
-      подтверждения зелёного состояния закоммиченного дерева.
+- [x] 5.1 Один коммит: `5655c94` (247 файлов: 140 renames + 100 модификаций ссылок/доков + 7 новых). Чужие dirty-файлы (418 D, untracked WIP) в коммит не включены — 44 RD-переноса пользовательских удалённых файлов разстейджены, исходные ` D` восстановлены.
+- [x] 5.2 `run_all_ci_checks.sh --fast`: 4/4 PASS, exit 0 (лог tmp/ci_fast_after_commit.log).
