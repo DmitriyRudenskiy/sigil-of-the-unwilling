@@ -79,6 +79,7 @@
 ### Misc / Research
 - [`binomials.md`](misc/binomials.md) — механика биномиев.
 - [`GRAPH_KNOWLEDGE.md`](misc/GRAPH_KNOWLEDGE.md) — knowledge graph и связи данных.
+- [`audit-docs-tests-2026-08-31.md`](misc/audit-docs-tests-2026-08-31.md) — однократный аудит документации и тестов (2026-08-31): findings + рекомендации (исправление — отдельный change).
 
 ---
 
