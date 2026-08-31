@@ -1,4 +1,10 @@
-## ADDED Requirements
+# console-hygiene Specification
+
+## Purpose
+
+Keeps live gameplay console output clean across the socket scenarios (menu -> world -> movement -> capture -> spells): no error-class lines ever, and every warning either fixed at the source or explicitly allowlisted, enforced by a one-command reproducible gate.
+
+## Requirements
 
 ### Requirement: Scenario play produces no console errors
 A run of any standard socket scenario (menu → world → gameplay) **MUST NOT** emit error-class console lines (`SCRIPT ERROR`, parse errors, invalid calls, nonexistent members/functions/classes, `E 0:`) to the server log.
