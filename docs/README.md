@@ -70,6 +70,7 @@
 - [`CONCEPT_SOCIAL_RACES.md`](CONCEPT_SOCIAL_RACES.md) — социальная составляющая и расы.
 - [`CONCEPT_POPULATION_RUNTIME.md`](CONCEPT_POPULATION_RUNTIME.md) — соц. составляющая TerraScape-прототипа в ходу: потребности (cap/demand/ok), мораль/Resolve, штормы, караваны, репутация.
 - [`CONCEPT_MERGE_AUTO_4.md`](CONCEPT_MERGE_AUTO_4.md) — авто-слияние ×4 (BFS связного компонента, «здание II» _BIG, переселение работников, триггер в цикле размещения). Отдельно от рецептурного слияния.
+- [`CONCEPT_CHARACTER_SYSTEM.md`](CONCEPT_CHARACTER_SYSTEM.md) — единые 8 характеристик, 31 навык, 134 способности (48 черт/70 перков/16 особых). Единый фэнтезный стиль, объединяет D&D 3.x/5e + Fallout-подобную систему.
 - [`TASK_SOCIAL_AND_BUILDINGS.md`](TASK_SOCIAL_AND_BUILDINGS.md) — задачи по социалке и постройки.
 - [`TASK_BUILDING_SCORING_GODOT47.md`](TASK_BUILDING_SCORING_GODOT47.md) — самодостаточное ТЗ: размещение зданий, радиальный скорнинг, слияние (GridManager/ScoringManager/MergeSystem, сборка в Godot Editor).
 
