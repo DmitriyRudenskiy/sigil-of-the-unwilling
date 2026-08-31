@@ -42,6 +42,9 @@
   - [`BIOME_SYSTEM.md`](BIOME_SYSTEM.md) — биомы, текстуры и тайлкеты.
 - **Герой**
   - [`hero_system.md`](hero_system.md) — фасад героя: движение, армия, ресурсы, магия, навыки.
+- **Инвентарь**
+  - [`inventory_system.md`](inventory_system.md) — экипировка по слотам + рюкзак, оценка оборудования (AC/урон/криты, NWN2/D&D 3.5).
+  - [`inventory_items.md`](inventory_items.md) — каталог артефактов (воин / лучник / маг) и их эффекты.
 - **Город**
   - [`city_system.md`](city_system.md) — модель города, население, ход города, подсистемы.
 - **Мир / Приключения**
@@ -50,8 +53,6 @@
   - [`battle_system.md`](battle_system.md) — слои боя, BattleState, резолверы, порядок ходов, AI, интеграция с миром.
 - **Сохранение**
   - [`save_load.md`](save_load.md) — 3 уровня: JSON-менеджер, SaveData, WorldPersistence.
-- **Инвентарь**
-  - [`inventory_items.md`](inventory_items.md) — предметы инвентаря (воин / лучник / маг).
 
 ### How-to / Tooling
 - [`ADDING_UNITS.md`](ADDING_UNITS.md) — как добавить нового юнита.
@@ -73,13 +74,15 @@
 
 ## 🕳 Пробелы в документации (нужно написать)
 
-Центральные системы без отдельного документа:
+Большинство центральных систем уже документированы (world, city, hero, inventory,
+battle, save/load, spells, economy). Остаются более узкие/перспективные разделы:
 
-- **World / Adventure** — карта, world bootstrap, города на карте, перемещение.
-- **City** — модель города, арена, городские процессы хода.
-- **Hero** — HeroController, армия героя, инвентарь героя.
+- **Магия за пределами героя** — SpellResolver, SpellCaster, BattleSpellBridge,
+  правила применения заклинаний в бою (HeroMagic уже есть в `hero_system.md`).
+- **Экономика хода** — `economy/EconomicTurnProcessor.gd`, `ProductionChain`.
+- **Город: подсистемы хода** — Arena, Zoning, Specialization, Logistics,
+  Market, Reputation, Prosperity, Raid (`city/`), подробнее, чем в `city_system.md`.
 - **Battle (общее)** — общий архитектурный обзор боя (не только заклинания).
-- **Save / Load** — сериализация состояния (`SaveManager`).
 
 Как написать документ: кратко, точно под текущий код, без выдумок. Если системный
 документ создаётся впервые — положите его в `docs/` и обновите этот индекс.

@@ -27,8 +27,13 @@
   - `docs/battle_system.md` — слои боя, BattleState, резолверы, AI, поток.
   - `docs/save_load.md` — 3 уровня персистентности (SaveManager/SaveData/WorldPersistence).
 - [x] Keep each doc concise and accurate to current code (facts verified against source).
-- ➕ **Possible follow-ups** (not done, lower priority): inventory, magic (beyond hero),
-  economy, spells/battle-spells (see existing `spells_system.md` / `battle_spells.md`).
+- [x] **Follow-up: inventory** — `docs/inventory_system.md` — экипировка по слотам +
+  рюкзак (`HeroInventory`), оценка оборудования AC/урон/криты (`EquipmentManager`,
+  NWN2/D&D 3.5), артефакты (`Artifact`), UI, тесты. Индекс `docs/README.md` обновлён.
+- ➕ **Possible follow-ups** (not done, lower priority): magic (beyond hero —
+  SpellResolver/SpellCaster/BattleSpellBridge), economy (`EconomicTurnProcessor`),
+  city subsystems (Arena/Zoning/Specialization/Logistics/Market/Reputation),
+  battle (general overview). See `spells_system.md` / `battle_spells.md`.
 
 ## 6. Version control
 - [x] `git add docs/` and commit; confirm `git ls-files docs/` now lists files.
