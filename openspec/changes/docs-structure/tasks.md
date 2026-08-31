@@ -30,8 +30,8 @@
 - [x] **Follow-up: inventory** — `docs/inventory_system.md` — экипировка по слотам +
   рюкзак (`HeroInventory`), оценка оборудования AC/урон/криты (`EquipmentManager`,
   NWN2/D&D 3.5), артефакты (`Artifact`), UI, тесты. Индекс `docs/README.md` обновлён.
-- ➕ **Possible follow-ups** (not done, lower priority): magic (beyond hero —
-  SpellResolver/SpellCaster/BattleSpellBridge), economy (`EconomicTurnProcessor`),
+- [x] **Follow-up: magic (runtime)** — `docs/magic_runtime.md` — исполнение
+  заклинаний в момент каста:
   city subsystems (Arena/Zoning/Specialization/Logistics/Market/Reputation),
   battle (general overview). See `spells_system.md` / `battle_spells.md`.
 

@@ -34,7 +34,8 @@
 
 - **Бой / Магия**
   - [`battle_spells.md`](battle_spells.md) — боевые заклинания, быстрая архитектура боя.
-  - [`spells_system.md`](spells_system.md) — система заклинаний в целом.
+  - [`spells_system.md`](spells_system.md) — система заклинаний в целом (данные, шаблоны, валидатор).
+  - [`magic_runtime.md`](magic_runtime.md) — исполнение заклинаний в момент каста: SpellResolver, TemplateEngine, SpellCaster, BattleSpellBridge, свитки.
 - **Экономика**
   - [`ECONOMY_DATA.md`](ECONOMY_DATA.md) — экономические данные игры.
   - [`ECONOMY_BALANCE.md`](ECONOMY_BALANCE.md) — экономика и баланс.
@@ -77,8 +78,6 @@
 Большинство центральных систем уже документированы (world, city, hero, inventory,
 battle, save/load, spells, economy). Остаются более узкие/перспективные разделы:
 
-- **Магия за пределами героя** — SpellResolver, SpellCaster, BattleSpellBridge,
-  правила применения заклинаний в бою (HeroMagic уже есть в `hero_system.md`).
 - **Экономика хода** — `economy/EconomicTurnProcessor.gd`, `ProductionChain`.
 - **Город: подсистемы хода** — Arena, Zoning, Specialization, Logistics,
   Market, Reputation, Prosperity, Raid (`city/`), подробнее, чем в `city_system.md`.
