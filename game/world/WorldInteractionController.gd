@@ -63,8 +63,10 @@ func _on_chest_choice(choice: String, chest: ArtifactChest) -> void:
 func collect_resource_at(cell: Vector2i) -> bool:
 	if spawner:
 		var removed := spawner.remove_resource_at(cell)
-		if removed and world_delta:
-			world_delta.add_removed_resource(cell)
+		if removed:
+			if world_delta:
+				world_delta.add_removed_resource(cell)
+			SoundManager.play_sfx_cue(&"resource_collected")
 		return removed
 	return false
 
@@ -73,6 +75,7 @@ func capture_village_at(cell: Vector2i) -> void:
 	if spawner and spawner.capture_village(cell):
 		if world_delta:
 			world_delta.add_village(cell)
+		SoundManager.play_sfx_cue(&"village_captured")
 
 
 func pickup_scroll_at(cell: Vector2i) -> void:
@@ -83,6 +86,7 @@ func pickup_scroll_at(cell: Vector2i) -> void:
 		return
 	ScrollRules.apply_pickup(hero.magic, spell_id)
 	spawner.remove_scroll_at(cell)
+	SoundManager.play_sfx_cue(&"resource_collected")
 
 	if world_delta:
 		world_delta.add_removed_scroll(cell)

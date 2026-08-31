@@ -389,6 +389,7 @@ func _move_next_step() -> void:
 	movement_points_changed.emit(move_points, get_daily_movement_points())
 
 	step_taken.emit(step_cost)
+	SoundManager.play_sfx_cue(&"hero_step")
 
 	var delta := next_cell - current_cell
 	facing_changed.emit(delta)

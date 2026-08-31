@@ -27,6 +27,7 @@ var _bootstrap_result: WorldBootstrap.BootstrapResult = null
 
 
 func _ready() -> void:
+	SoundManager.play_music_cue(&"music_world")
 	_rng = RandomNumberGenerator.new()
 	_bootstrap_result = WorldBootstrap.run(self, _Platform, _rng)
 

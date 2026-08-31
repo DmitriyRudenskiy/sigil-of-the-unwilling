@@ -21,6 +21,7 @@ var _fullscreen_toggle: CheckBox
 var _ui_anim_toggle: CheckBox
 var _particles_toggle: CheckBox
 var _auto_save_toggle: CheckBox
+var _mute_toggle: CheckBox
 var _master_slider: HSlider
 var _music_slider: HSlider
 var _sfx_slider: HSlider
@@ -146,6 +147,9 @@ func _build_audio_section(parent: Control) -> void:
 	_sfx_slider = _create_volume_row(parent, "Эффекты", _settings.sfx_volume)
 	_sfx_slider.value_changed.connect(_on_sfx_changed)
 
+	_mute_toggle = _make_check("🔇 Мьют (M)", _settings.is_muted)
+	_mute_toggle.toggled.connect(_on_mute_toggled)
+
 
 func _build_gameplay_section(parent: Control) -> void:
 	_add_section_header(parent, "🎮 Игра")
@@ -237,6 +241,7 @@ func _restore_state() -> void:
 	_master_slider.value = float(_settings.master_volume)
 	_music_slider.value = float(_settings.music_volume)
 	_sfx_slider.value = float(_settings.sfx_volume)
+	_mute_toggle.button_pressed = _settings.is_muted
 
 
 # --- Callbacks ---
@@ -261,6 +266,11 @@ func _on_music_changed(value: float) -> void:
 func _on_sfx_changed(value: float) -> void:
 	_sfx_slider.get_meta("value_label").text = "%d%%" % int(value)
 	_settings.sfx_volume = int(value)
+	_settings._apply_audio()
+
+
+func _on_mute_toggled(pressed: bool) -> void:
+	_settings.is_muted = pressed
 	_settings._apply_audio()
 
 

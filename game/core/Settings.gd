@@ -113,16 +113,17 @@ func reset_to_defaults() -> void:
 # --- Audio ---
 
 func _apply_audio() -> void:
-	var master_db := _db_from_percent(master_volume if not is_muted else 0)
-	var music_db := _db_from_percent(music_volume if not is_muted else 0)
-	var sfx_db := _db_from_percent(sfx_volume if not is_muted else 0)
+	# По имени шины, а не индексу: порядок в default_bus_layout.tres —
+	# [Master, SFX, Music], индексная запись путала Music/SFX громкости.
+	_set_bus("Master", _db_from_percent(master_volume if not is_muted else 0))
+	_set_bus("Music", _db_from_percent(music_volume if not is_muted else 0))
+	_set_bus("SFX", _db_from_percent(sfx_volume if not is_muted else 0))
 
-	if AudioServer.bus_count > 0:
-		AudioServer.set_bus_volume_db(0, master_db)
-	if AudioServer.bus_count > 1:
-		AudioServer.set_bus_volume_db(1, music_db)
-	if AudioServer.bus_count > 2:
-		AudioServer.set_bus_volume_db(2, sfx_db)
+
+func _set_bus(bus_name: String, db: float) -> void:
+	var idx := AudioServer.get_bus_index(bus_name)
+	if idx != -1:
+		AudioServer.set_bus_volume_db(idx, db)
 
 
 func toggle_mute() -> void:

@@ -21,7 +21,7 @@ buses="res://default_bus_layout.tres"
 
 [autoload]
 
-SoundManager="res://core/SoundManager.gd"
+SoundManager="*res://core/SoundManager.gd"
 Settings="*res://core/Settings.gd"
 GameEventBus="*res://core/GameEventBus.gd"
 Spellbook="*res://data/SpellbookRegistry.gd"

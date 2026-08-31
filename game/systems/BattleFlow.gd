@@ -25,6 +25,7 @@ func start_battle(
 	if _active:
 		return
 	_active = true
+	SoundManager.play_music_cue(&"music_battle")
 	battle_started.emit()
 
 	var battle := _BATTLE_SCENE.instantiate()
@@ -50,4 +51,10 @@ func _on_battle_finished(winner: BattleState.Side, surviving_atk: Array[UnitStac
 	_active = false
 	battle.queue_free()
 	RenderingServer.set_default_clear_color(Color(0.10, 0.10, 0.12))
+	# Победа/поражение + возврат к музыке мира (мир не пересоздаётся под боем).
+	if winner == BattleState.Side.ATTACKER:
+		SoundManager.play_sfx_cue(&"battle_victory")
+	else:
+		SoundManager.play_sfx_cue(&"battle_defeat")
+	SoundManager.play_music_cue(&"music_world")
 	battle_completed.emit(winner, surviving_atk, surviving_def)

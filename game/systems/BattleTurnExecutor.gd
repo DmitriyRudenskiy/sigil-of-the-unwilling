@@ -324,6 +324,7 @@ func on_spell_target_selected(spell_id: StringName, target: BattleState.BattleUn
 	var result := _battle_state.apply_spell(spell_id, caster, target, caster_bonus, target_bonus, _rng)
 
 	if result.get("result") == "success":
+		SoundManager.play_sfx_cue(&"spell_cast")
 		_transition_to(State.PLAYER_ANIMATING)
 		spell_cast_executed.emit(caster, target, result)
 	else:
@@ -546,6 +547,7 @@ func _do_next_attack_strike() -> void:
 		_finish_attack_sequence()
 		return
 
+	SoundManager.play_sfx_cue(&"battle_hit")
 	result["is_retaliation"] = _retaliation_phase
 
 	if result.get("luck", false):

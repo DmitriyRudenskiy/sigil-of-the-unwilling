@@ -139,6 +139,7 @@ func _on_camera_jump(direction: String) -> void:
 
 
 func _on_end_turn() -> void:
+	SoundManager.play_sfx_cue(&"ui_click")
 	advance_day()
 	end_turn_pressed.emit()
 
@@ -157,6 +158,7 @@ func _on_options() -> void:
 		var settings_btn := Button.new()
 		settings_btn.text = "⚙️ Настройки"
 		settings_btn.pressed.connect(_on_open_settings)
+		settings_btn.pressed.connect(func() -> void: SoundManager.play_sfx_cue(&"ui_click"))
 		vb.add_child(settings_btn)
 
 		add_child(_options_popup)
