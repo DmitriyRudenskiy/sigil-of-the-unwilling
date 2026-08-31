@@ -1,8 +1,9 @@
-# HoMM3-like Prototype
+# Sigil of the Unwilling
 
 Godot 4.7 hex strategy prototype.
 
-> Весь проект — в папке `game/` (см. `game/README.md`): игровой Godot-проект + `tests/`, `tools/`, `docs/`, `previews/`, `backup_assets/`, `prototype/`, `scenes/`, `lair/`, `tmp/`.
+> Игровой Godot-проект — в папке `game/` (см. `game/README.md`): код `scripts/`, сцены `scenes/`, ассеты `assets/`, плюс `tests/` и `tools/` (исполняются на Godot с `--path game`).
+> Dev-материалы — в корне репозитория: `docs/`, `backup_assets/`, `lair/`, `prototype/`; временные файлы — в `tmp/`.
 
 ## Checks
 

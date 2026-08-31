@@ -13,15 +13,15 @@
 
 | Файл | Роль |
 | --- | --- |
-| `economy/ResourceContext.gd` | Хранилище ресурсов (`id → количество`) с лимитами. |
-| `economy/ProductionChain.gd` | Формула и исполнение производства здания. |
-| `economy/EconomicTurnProcessor.gd` | Фаза 1 (`priority 10`): авто-ресурсы → цепочки → поддержка. |
-| `demographics/DemographicTurnProcessor.gd` | Фаза 2 (`priority 20`): персонажи, потребности, смерть, эпидемии, учёные. |
-| `world/WorkerAssignment.gd` | Назначение рабочих на здания (Спринт 7). |
-| `world/CityBalance.gd` | Константы баланса (приток, лимиты, еда, репутация). |
-| `world/GloryTracker.gd` | Слава за скользящее окно (множитель притока). |
-| `data/ResourceRegistry.gd` | Определения ресурсов и ёмкости складов. |
-| `data/BuildingDefs.gd` | Каталог зданий с цепочками/upkeep/жильём. |
+| `scripts/economy/ResourceContext.gd` | Хранилище ресурсов (`id → количество`) с лимитами. |
+| `scripts/economy/ProductionChain.gd` | Формула и исполнение производства здания. |
+| `scripts/economy/EconomicTurnProcessor.gd` | Фаза 1 (`priority 10`): авто-ресурсы → цепочки → поддержка. |
+| `scripts/demographics/DemographicTurnProcessor.gd` | Фаза 2 (`priority 20`): персонажи, потребности, смерть, эпидемии, учёные. |
+| `scripts/world/WorkerAssignment.gd` | Назначение рабочих на здания (Спринт 7). |
+| `scripts/world/CityBalance.gd` | Константы баланса (приток, лимиты, еда, репутация). |
+| `scripts/world/GloryTracker.gd` | Слава за скользящее окно (множитель притока). |
+| `scripts/autoload/ResourceRegistry.gd` | Определения ресурсов и ёмкости складов. |
+| `scripts/data/BuildingDefs.gd` | Каталог зданий с цепочками/upkeep/жильём. |
 
 См. [`city_system.md`](../systems/city_system.md) — модель `City`, население, ход города,
 строительство зданий; здесь только экономика- и демография-подсистемы.

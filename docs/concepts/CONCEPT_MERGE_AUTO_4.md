@@ -186,11 +186,11 @@ func on_cell_clicked(cell):
 
 | В прототипе | Где в проекте | Замечание |
 | :--- | :--- | :--- |
-| `GridManager.get_cell(q,r)` | `core/HexUtils.gd`, `world/` | Гексы — только `odd-r` через `HexUtils`, не чебышевская модель прототипа. |
-| BFS-компонент | `world/City`, `game/city/AdjacencySystem.gd` | Отдельно от городского adjacency-слоя. |
-| `_BIG`-здания | `data/BuildingDefs.gd` | Усиливая копия — новый `BuildingDef` (или флаг `is_merged`), баланс через `@export`. |
-| Переселение работников | `world/`, `DemographicTurnProcessor` | Повторное заселение после слияния — см. демографику. |
-| Пересчёт очков/потребностей | `game/city/AdjacencySystem.gd`, `DemographicTurnProcessor` | Обратное влияние на соседей и население. |
+| `GridManager.get_cell(q,r)` | `scripts/core/HexUtils.gd`, `scripts/world/` | Гексы — только `odd-r` через `HexUtils`, не чебышевская модель прототипа. |
+| BFS-компонент | `scripts/world/City`, `game/scripts/city/AdjacencySystem.gd` | Отдельно от городского adjacency-слоя. |
+| `_BIG`-здания | `scripts/data/BuildingDefs.gd` | Усиливая копия — новый `BuildingDef` (или флаг `is_merged`), баланс через `@export`. |
+| Переселение работников | `scripts/world/`, `DemographicTurnProcessor` | Повторное заселение после слияния — см. демографику. |
+| Пересчёт очков/потребностей | `game/scripts/city/AdjacencySystem.gd`, `DemographicTurnProcessor` | Обратное влияние на соседей и население. |
 
 > ⚠️ **В прототипе данные — в глобальном `Globals` (харкод), результат — строка
 > `type + "_BIG"` без отдельного определения.** В проекте мёрдж-здания должны

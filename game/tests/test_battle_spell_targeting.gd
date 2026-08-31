@@ -1,11 +1,11 @@
 extends "res://tests/test_base.gd"
 ## Regression tests for round 4 fixes (РФ4-1 through РФ4-4).
 
-const _Input = preload("res://systems/BattleInput.gd")
-const _ActionResolver = preload("res://systems/BattleActionResolver.gd")
-const _Spellbook = preload("res://ui/BattleSpellbookPanel.gd")
-const _SpellCaster = preload("res://systems/SpellCaster.gd")
-const _Registry = preload("res://data/SpellRegistry.gd")
+const _Input = preload("res://scripts/systems/BattleInput.gd")
+const _ActionResolver = preload("res://scripts/systems/BattleActionResolver.gd")
+const _Spellbook = preload("res://scripts/ui/BattleSpellbookPanel.gd")
+const _SpellCaster = preload("res://scripts/systems/SpellCaster.gd")
+const _Registry = preload("res://scripts/autoload/SpellRegistry.gd")
 
 var _units: Node
 

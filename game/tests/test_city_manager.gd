@@ -1,10 +1,10 @@
 extends "res://tests/test_base.gd"
 ## Тесты CityManager: регистрация, ход, циклический приток, слава.
 
-const _CityManager = preload("res://world/CityManager.gd")
-const _City = preload("res://world/City.gd")
-const _CityBalance = preload("res://world/CityBalance.gd")
-const _BuildingDefs = preload("res://data/BuildingDefs.gd")
+const _CityManager = preload("res://scripts/world/CityManager.gd")
+const _City = preload("res://scripts/world/City.gd")
+const _CityBalance = preload("res://scripts/world/CityBalance.gd")
+const _BuildingDefs = preload("res://scripts/data/BuildingDefs.gd")
 
 var manager: CityManager
 var capital: RefCounted

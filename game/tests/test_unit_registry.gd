@@ -4,8 +4,8 @@ var _passed: int = 0
 var _failed: int = 0
 ## Headless tests for UnitRegistry, UnitStats, UnitStack
 
-const _REGISTRY_PATH := "res://entities/UnitRegistry.gd"
-const _STACK_PATH := "res://entities/UnitStack.gd"
+const _REGISTRY_PATH := "res://scripts/autoload/UnitRegistry.gd"
+const _STACK_PATH := "res://scripts/entities/UnitStack.gd"
 
 func _init() -> void:
     print("=== Units headless tests ===")

@@ -2,8 +2,8 @@ extends "res://tests/test_base.gd"
 ## M2: Черты — TraitDef и TraitRegistry (реестр, выкатка по редкости,
 ## сериализация, пользовательские черты).
 
-const _TraitDef = preload("res://demographics/TraitDef.gd")
-const _TraitRegistry = preload("res://demographics/TraitRegistry.gd")
+const _TraitDef = preload("res://scripts/demographics/TraitDef.gd")
+const _TraitRegistry = preload("res://scripts/demographics/TraitRegistry.gd")
 
 var reg: Variant
 

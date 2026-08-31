@@ -4,8 +4,8 @@ var _passed: int = 0
 var _failed: int = 0
 ## Unit abilities: vampiric, breath, charge, first_strike, rebirth.
 
-const _BattleState = preload("res://systems/BattleState.gd")
-const _BattleRules = preload("res://core/BattleRules.gd")
+const _BattleState = preload("res://scripts/systems/BattleState.gd")
+const _BattleRules = preload("res://scripts/core/BattleRules.gd")
 
 var _rng := RandomNumberGenerator.new()
 

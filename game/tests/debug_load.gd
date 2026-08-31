@@ -7,20 +7,20 @@ extends SceneTree
 func _init() -> void:
 	print("\n🧪 Script Load Test")
 	var scripts = [
-		"res://core/Logger.gd",
-		"res://core/Settings.gd",
-		"res://data/ResourceDef.gd",
-		"res://data/ResourceRegistry.gd",
-		"res://data/Artifact.gd",
-		"res://ui/components/ItemSlotUI.gd",
-		"res://ui/ArtifactInventoryScreen.gd",
-		"res://world/WorldSpawner.gd",
-		"res://world/ResourceNodeManager.gd",
-		"res://ui/MarkerLayer.gd",
-		"res://world/WorldController.gd",
-		"res://core/SocketController.gd",
-		"res://entities/HeroController.gd",
-		"res://ui/InfoPanel.gd",
+		"res://scripts/core/Logger.gd",
+		"res://scripts/autoload/Settings.gd",
+		"res://scripts/data/ResourceDef.gd",
+		"res://scripts/autoload/ResourceRegistry.gd",
+		"res://scripts/data/Artifact.gd",
+		"res://scripts/ui/components/ItemSlotUI.gd",
+		"res://scripts/ui/ArtifactInventoryScreen.gd",
+		"res://scripts/world/WorldSpawner.gd",
+		"res://scripts/world/ResourceNodeManager.gd",
+		"res://scripts/ui/MarkerLayer.gd",
+		"res://scripts/world/WorldController.gd",
+		"res://scripts/autoload/SocketController.gd",
+		"res://scripts/entities/HeroController.gd",
+		"res://scripts/ui/InfoPanel.gd",
 	]
 	
 	var errors: int = 0
@@ -37,7 +37,7 @@ func _init() -> void:
 	print("\n🔍 Runtime method checks...")
 	
 	# HeroController.get_avatar_texture() — проверка через Callable
-	var hc_script: Script = load("res://entities/HeroController.gd")
+	var hc_script: Script = load("res://scripts/entities/HeroController.gd")
 	if hc_script != null:
 		# Проверяем через скрипт-класс (get_script_method_list)
 		var method_found: bool = false

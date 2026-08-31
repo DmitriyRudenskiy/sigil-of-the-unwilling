@@ -49,7 +49,7 @@ tools/
 | `compile_all.gd` | Headless compile of every `.gd` — catches parse errors and broken `preload`s. |
 | `check_scene_refs.gd` | Verifies all `ext_resource`/`sub_resource` paths in scenes resolve. |
 | `check_tileset.gd` | Checks tileset integrity (`.tres`/`.atlas` consistency). |
-| `spell_validation/validate_spells.gd` | Validates spell definitions against `data/` JSON (with `--strict --json`). |
+| `spell_validation/validate_spells.gd` | Validates spell definitions against `scripts/data/` JSON (with `--strict --json`). |
 | `spell_validation/SpellValidator.gd` | Validator logic used by `validate_spells.gd`. |
 | `spell_validation/ValidationReport.gd` | Structured report model for the validator. |
 | `benchmark_all.gd` | Profiler: map generation, spell registry, JSON stringify (run at 60×60). |

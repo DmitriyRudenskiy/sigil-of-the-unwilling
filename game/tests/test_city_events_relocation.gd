@@ -1,14 +1,14 @@
 extends "res://tests/test_base.gd"
 ## Спринт 11: события, перенос города, специализации.
 
-const _City := preload("res://world/City.gd")
-const _UniqueBuilding := preload("res://world/UniqueBuilding.gd")
-const _PopUnit := preload("res://world/PopUnit.gd")
-const _BuildingDefs := preload("res://data/BuildingDefs.gd")
-const _Market := preload("res://city/MarketSystem.gd")
-const _Events := preload("res://city/CityEvents.gd")
-const _Spec := preload("res://city/SpecializationSystem.gd")
-const _CityProc := preload("res://city/CityTurnProcessor.gd")
+const _City := preload("res://scripts/world/City.gd")
+const _UniqueBuilding := preload("res://scripts/world/UniqueBuilding.gd")
+const _PopUnit := preload("res://scripts/world/PopUnit.gd")
+const _BuildingDefs := preload("res://scripts/data/BuildingDefs.gd")
+const _Market := preload("res://scripts/city/MarketSystem.gd")
+const _Events := preload("res://scripts/city/CityEvents.gd")
+const _Spec := preload("res://scripts/city/SpecializationSystem.gd")
+const _CityProc := preload("res://scripts/city/CityTurnProcessor.gd")
 
 
 func _city(uid := 1) -> Variant:

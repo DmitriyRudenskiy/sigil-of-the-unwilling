@@ -2,7 +2,7 @@ extends SceneTree
 ## Headless tests for HexUtils.
 ## Run: godot --headless -s tests/test_hex_utils.gd
 
-const HexUtilsScript = preload("res://core/HexUtils.gd")
+const HexUtilsScript = preload("res://scripts/core/HexUtils.gd")
 
 var _failed: int = 0
 var _passed: int = 0

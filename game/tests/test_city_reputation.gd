@@ -1,8 +1,8 @@
 extends "res://tests/test_base.gd"
 ## Спринт 6: репутация и миграция.
 
-const CityC = preload("res://world/City.gd")
-const Reputation = preload("res://city/ReputationSystem.gd")
+const CityC = preload("res://scripts/world/City.gd")
+const Reputation = preload("res://scripts/city/ReputationSystem.gd")
 
 
 func _make_city(stronghold: int = 1) -> RefCounted:
@@ -164,7 +164,7 @@ func test_processor_reputation_flow() -> void:
 	# 10 последователей + 3 рабочих = 13 > лимит 10: -2*3 = -6, голод -5
 	# (флаг starving — монолит выставляет; здесь задаём вручную).
 	city.starving = true
-	var proc := preload("res://city/CityTurnProcessor.gd").new()
+	var proc := preload("res://scripts/city/CityTurnProcessor.gd").new()
 	var ctx := TurnContext.new()
 	ctx.cities.append(city)
 	var report: Dictionary = proc.process(ctx)
@@ -178,7 +178,7 @@ func test_processor_emigration_signal() -> void:
 	for i in 4:
 		city.add_migrant()
 	city.reputation = -40
-	var proc := preload("res://city/CityTurnProcessor.gd").new()
+	var proc := preload("res://scripts/city/CityTurnProcessor.gd").new()
 	var got: Array = []
 	proc.migration_occurred.connect(func(uid: int, im: int, em: int):
 		got.append([uid, im, em]))

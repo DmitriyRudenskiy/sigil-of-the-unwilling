@@ -1,7 +1,7 @@
 extends "res://tests/test_base.gd"
 ## Tests for BattleActionResolver: attack, spell, rebirth, first_strike.
 
-const _Resolver = preload("res://systems/BattleActionResolver.gd")
+const _Resolver = preload("res://scripts/systems/BattleActionResolver.gd")
 
 var _units: Node
 

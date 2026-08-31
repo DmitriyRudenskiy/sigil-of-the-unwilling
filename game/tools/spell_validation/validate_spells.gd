@@ -7,7 +7,7 @@ extends SceneTree
 ##  зависимости скрипта грузятся из исходника — res://tools/... не нужны.)
 ##
 ## Флаги:
-##   --path <file>   Путь к файлу (по умолчанию: res://data/spells.json)
+##   --path <file>   Путь к файлу (по умолчанию: res://assets/data/spells.json)
 ##   --strict            Warnings считаются ошибками (ненулевой exit code)
 ##   --json              Вывод в формате JSON (для CI)
 ##   --quiet             Показывать только ошибки (без INFO)
@@ -60,7 +60,7 @@ func _init() -> void:
 
 	var args := OS.get_cmdline_args()
 
-	var path := "res://data/spells.json"
+	var path := "res://assets/data/spells.json"
 	var strict := false
 	var json_output := false
 	var quiet := false

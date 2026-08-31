@@ -18,12 +18,12 @@ This document tracks the progress, current status, and future tasks for the proj
 - [x] Analyze and identify "Type-based" project structure.
 - [x] Create "Feature-based" migration plan.
 - [x] Execute Phase 1 Migration:
-    - Move global systems to `core/`.
-    - Move entity logic to `game/entities/`.
-    - Move complex logic to `game/systems/`.
-    - Move UI components to `game/ui/`.
-    - Move world management to `game/world/`.
-    - Move config/data to `data/`.
+    - Move global systems to `scripts/core/`.
+    - Move entity logic to `game/scripts/entities/`.
+    - Move complex logic to `game/scripts/systems/`.
+    - Move UI components to `game/scripts/ui/`.
+    - Move world management to `game/scripts/world/`.
+    - Move config/data to `scripts/data/`.
 - [x] Establish comprehensive Documentation Suite in `/DOCS`.
 
 ### Tools & Knowledge Graph
@@ -34,7 +34,7 @@ This document tracks the progress, current status, and future tasks for the proj
 ### Biome & World System
 - [x] Analyze texture combinations for biomes (Swamp, Water, etc.).
 - [x] Establish visual weight and color palette guidelines.
-- [x] Verify `data/ResourceRegistry.gd` for biome compatibility.
+- [x] Verify `scripts/autoload/ResourceRegistry.gd` for biome compatibility.
 
 ### Documentation & Concepts
 - [x] Created `DOCS/CONCEPT_ENDLESS_LEGEND.md` (FIDSI, Boroughs, Approval, Seasons).

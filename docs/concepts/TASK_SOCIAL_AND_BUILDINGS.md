@@ -3,7 +3,7 @@
 > Нарезка анализа из `docs/CONCEPT_SOCIAL_RACES.md` (расы, Against the Storm)
 > и `docs/CONCEPT_BUILDING_SYNERGY.md` (взаимосвязи построек, TerraScape)
 > в исполняемые задачи для Godot 4.7. Связка с существующими слоями:
-> `demographics/`, `economy/`, `data/BuildingDefs.gd`, `world/Borough`, `world/City`.
+> `scripts/demographics/`, `scripts/economy/`, `scripts/data/BuildingDefs.gd`, `scripts/world/Borough`, `scripts/world/City`.
 
 ---
 
@@ -54,12 +54,12 @@
 
 - [ ] **2.1 `BuildingData` → ресурс с `input_radius`, `biome_bonus`,
   `adjacency_rules`, `merge_recipes`.**
-  Перевести `data/BuildingDefs.gd` на модель с правилами соседства (вместо
+  Перевести `scripts/data/BuildingDefs.gd` на модель с правилами соседства (вместо
   только `production_chain`/`default_upkeep`).
 - [ ] **2.2 `GridManager` (автозагрузка).**
   Хранит `placed: Dictionary[Vector2i -> BuildingData]`. Метод
   `get_neighbors_in_radius(pos, radius)` — гексовое соседство через
-  `core/HexUtils.gd` (сетка проекта — гексы; квадратная/чебышевская модель
+  `scripts/core/HexUtils.gd` (сетка проекта — гексы; квадратная/чебышевская модель
   TerraScape не переносится как есть).
 - [ ] **2.3 `ScoringManager.calculate_score(building) -> int`.**
   base_score + biome_bonus(тайл) + sum(adjacency_rules по соседям в радиусе).
@@ -106,4 +106,4 @@
 - [ ] Код типизирован, баланс — через `@export`/ресурсы, без хардкода в логике.
 
 > Зависимости: `docs/CONCEPT_SOCIAL_RACES.md`, `docs/CONCEPT_BUILDING_SYNERGY.md`,
-> `data/BuildingDefs.gd`, `demographics/`, `economy/`, `world/Borough.gd`.
+> `scripts/data/BuildingDefs.gd`, `scripts/demographics/`, `scripts/economy/`, `scripts/world/Borough.gd`.

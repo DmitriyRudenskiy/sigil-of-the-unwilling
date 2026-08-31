@@ -15,16 +15,16 @@
 
 | Модель | Класс данных | Применение |
 | --- | --- | --- |
-| Карточная («быстрая») | `data/SpellbookDef.gd` (`template` + `params`) | `data/SpellResolver.gd` → `data/TemplateEngine.gd` |
-| Боевая (20 заклинаний) | `data/SpellRegistry.gd` (`SpellDef`, `damage_multiplier` / `buff_effect`) | `systems/SpellCaster.gd` ( бой) + `data/BattleSpellBridge.gd` (мост в карточную) |
+| Карточная («быстрая») | `scripts/data/SpellbookDef.gd` (`template` + `params`) | `scripts/data/SpellResolver.gd` → `scripts/data/TemplateEngine.gd` |
+| Боевая (20 заклинаний) | `scripts/autoload/SpellRegistry.gd` (`SpellDef`, `damage_multiplier` / `buff_effect`) | `scripts/systems/SpellCaster.gd` ( бой) + `scripts/data/BattleSpellBridge.gd` (мост в карточную) |
 
-Источник карт — `data/spells.json` (~505 записей), загружается
+Источник карт — `assets/data/spells.json` (~505 записей), загружается
 `SpellbookRegistry` (autoload `Spellbook`). Источник боевых —
 `SpellRegistry` (autoload `Spells`), 20 заклинаний по 4 школам.
 
 ## 1. Точка входа: `SpellResolver.resolve`
 
-`data/SpellResolver.gd` (`class_name SpellResolver`, `RefCounted`) — фасад
+`scripts/data/SpellResolver.gd` (`class_name SpellResolver`, `RefCounted`) — фасад
 выполнения карточного заклинания. Статический `resolve(spell, state, caster, target)`:
 
 1. **Валидация** — `spell != null` и `spell.template` не пуст. Иначе `invalid_spell` / `no_template`.
@@ -41,7 +41,7 @@
 
 ## 2. Исполнение шаблонов: `TemplateEngine`
 
-`data/TemplateEngine.gd` (`RefCounted`) — **Strategy pattern**:
+`scripts/data/TemplateEngine.gd` (`RefCounted`) — **Strategy pattern**:
 `template_id → Callable`. Обработчики регистрируются в `_handlers` на старте
 (`register_handler`), новые шаблоны добавляются без правки движка.
 
@@ -64,7 +64,7 @@
 
 ## 3. Боевой путь: `SpellCaster.cast`
 
-`systems/SpellCaster.gd` (`RefCounted`) — применение боевого заклинания
+`scripts/systems/SpellCaster.gd` (`RefCounted`) — применение боевого заклинания
 (`SpellRegistry.SpellDef`) к `BattleState.BattleUnit`. Статический `cast(
 spell_id, target_unit, caster_hero_bonus, target_hero_bonus, rng, registry)`:
 
@@ -95,7 +95,7 @@ spell_id, target_unit, caster_hero_bonus, target_hero_bonus, rng, registry)`:
 
 ## 5. Свитки: `ScrollRules`
 
-`data/ScrollRules.gd` — правила подбора и каста свитков:
+`scripts/data/ScrollRules.gd` — правила подбора и каста свитков:
 - `can_pickup` — всегда `true`.
 - `apply_pickup` — **обучение при подборе** (`hero.learn`), если заклинание ещё не известно.
 - `can_cast_in_battle` — только если свиток ещё не израсходован (`scroll_remaining > 0`) и `hero.can_cast`.
@@ -103,7 +103,7 @@ spell_id, target_unit, caster_hero_bonus, target_hero_bonus, rng, registry)`:
 
 ## 6. Связь с героем: `HeroMagic`
 
-`entities/HeroMagic.gd` хранит ману, школы и `spellbook` (`Array[StringName]`),
+`scripts/entities/HeroMagic.gd` хранит ману, школы и `spellbook` (`Array[StringName]`),
 даёт `knows/learn/forget/can_cast/get_mana_cost/spend_mana`. Он не вызывает
 `SpellResolver`/`SpellCaster` напрямую — фасад `HeroController` и боевой код
 берут определение из `SpellRegistry` / `SpellbookRegistry` и прогоняют их через

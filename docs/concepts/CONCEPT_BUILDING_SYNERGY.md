@@ -4,7 +4,7 @@
 > анализ колод (Decks) игры TerraScape.
 > Цель: описать систему радиального скорнинга зданий и слияний (Merging)
 > как образец для системы размещения построек на гексах проекта
-> (связь с `data/BuildingDefs.gd`, `world/Borough`, `world/City`).
+> (связь с `scripts/data/BuildingDefs.gd`, `scripts/world/Borough`, `scripts/world/City`).
 
 ---
 

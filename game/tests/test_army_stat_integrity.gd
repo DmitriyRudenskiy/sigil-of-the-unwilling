@@ -1,8 +1,8 @@
 extends "res://tests/test_base.gd"
 ## Regression tests for РФ6-1: army stat integrity after battle.
 
-const _ArmyCtrl = preload("res://entities/HeroArmyController.gd")
-const _ServiceLocator = preload("res://core/ServiceLocator.gd")
+const _ArmyCtrl = preload("res://scripts/entities/HeroArmyController.gd")
+const _ServiceLocator = preload("res://scripts/core/ServiceLocator.gd")
 
 var _units: Node
 

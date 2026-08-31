@@ -212,17 +212,17 @@ func building_score(bldg):
 
 | Механика прототипа | Где в проекте | Что переносить / не дублировать |
 | --- | --- | --- |
-| Resolve 0–50, `demographics/` | `DemographicTurnProcessor`, `Character.NEED_KEYS` (0–1) | Resolve — **новая** скалярная величина, не замена шкале потребностей (см. фаза 0.4 `TASK_SOCIAL_AND_BUILDINGS.md`). |
-| Потребности (cap/demand/ok) | `economy/ProductionChain`, `DemographicTurnProcessor` | Модель «ёмкость от зданий × ratio занятости» — заимствовать, но через `@export`-данные, а не `Globals`. |
-| `resilience`/`decadence`/`comfort` | `demographics/TraitRegistry`, `TraitDef` | Уже есть в системе черт; маппинг расовых полей на теги `body/mind/soul`. |
-| Шторы (`fire`) | `world/` цикл сезона | Модификатор урона по сезонам; `human_perk` = «Хранитель Огня». |
-| Авто-слияние ×4 | `world/City`, `building_*` | Отдельно от городского adjacency (`game/city/AdjacencySystem.gd`) и рецептурного слияния. |
-| Scoring (base/biome/feat/adj) | `game/city/AdjacencySystem.gd`, `BuildingDefs.gd` | Картографический слой поверх города (см. `TASK_BUILDING_SCORING_GODOT47.md`). |
+| Resolve 0–50, `scripts/demographics/` | `DemographicTurnProcessor`, `Character.NEED_KEYS` (0–1) | Resolve — **новая** скалярная величина, не замена шкале потребностей (см. фаза 0.4 `TASK_SOCIAL_AND_BUILDINGS.md`). |
+| Потребности (cap/demand/ok) | `scripts/economy/ProductionChain`, `DemographicTurnProcessor` | Модель «ёмкость от зданий × ratio занятости» — заимствовать, но через `@export`-данные, а не `Globals`. |
+| `resilience`/`decadence`/`comfort` | `scripts/demographics/TraitRegistry`, `TraitDef` | Уже есть в системе черт; маппинг расовых полей на теги `body/mind/soul`. |
+| Шторы (`fire`) | `scripts/world/` цикл сезона | Модификатор урона по сезонам; `human_perk` = «Хранитель Огня». |
+| Авто-слияние ×4 | `scripts/world/City`, `building_*` | Отдельно от городского adjacency (`game/scripts/city/AdjacencySystem.gd`) и рецептурного слияния. |
+| Scoring (base/biome/feat/adj) | `game/scripts/city/AdjacencySystem.gd`, `BuildingDefs.gd` | Картографический слой поверх города (см. `TASK_BUILDING_SCORING_GODOT47.md`). |
 
 > ⚠️ **В прототипе данные — в глобальном словаре `Globals` (харкод).**
 > В проекте баланс должен быть в `@export`-ресурсах / реестрах, а не в
 > едином `Globals`. Геометрия гекса и расстояние — только через
-> `core/HexUtils.gd` (odd-r), а не чебышевская квадратная модель прототипа.
+> `scripts/core/HexUtils.gd` (odd-r), а не чебышевская квадратная модель прототипа.
 
 ---
 

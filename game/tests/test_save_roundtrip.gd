@@ -4,9 +4,9 @@ extends "res://tests/test_base.gd"
 ## SaveManager API (by design): save_game -> SaveError code,
 ## load_game -> {"error": SaveError, "data": SaveData|null, "message": String}.
 
-const _SaveData = preload("res://core/SaveData.gd")
-const _WorldStateDelta = preload("res://world/WorldStateDelta.gd")
-const _SaveManager = preload("res://core/SaveManager.gd")
+const _SaveData = preload("res://scripts/core/SaveData.gd")
+const _WorldStateDelta = preload("res://scripts/world/WorldStateDelta.gd")
+const _SaveManager = preload("res://scripts/core/SaveManager.gd")
 
 var _sm: SaveManager
 var _parent: Node

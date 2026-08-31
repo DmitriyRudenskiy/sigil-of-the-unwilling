@@ -1,8 +1,8 @@
 extends "../test_base.gd"
 ## Tests for WorldLoadContext and ResourceChainService (static fields tested via main runner).
 
-const WorldLoadContext = preload("res://world/WorldLoadContext.gd")
-const ResourceChainService = preload("res://world/ResourceChainService.gd")
+const WorldLoadContext = preload("res://scripts/world/WorldLoadContext.gd")
+const ResourceChainService = preload("res://scripts/world/ResourceChainService.gd")
 
 # ----- ResourceChainService tests -----
 

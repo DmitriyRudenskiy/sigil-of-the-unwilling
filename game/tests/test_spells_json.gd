@@ -9,7 +9,7 @@ extends RefCounted
 
 const _Validator = preload("res://tools/spell_validation/SpellValidator.gd")
 
-const JSON_PATH := "res://data/spells.json"
+const JSON_PATH := "res://assets/data/spells.json"
 
 var _passed := 0
 var _failed := 0

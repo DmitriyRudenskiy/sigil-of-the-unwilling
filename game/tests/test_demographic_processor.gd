@@ -3,11 +3,11 @@ extends "res://tests/test_base.gd"
 ## критика, смерти от истощения, эпидемии. Город создаётся вручную;
 ## city.process_turn() здесь НЕ вызывается (монолит — отдельный контур).
 
-const _City = preload("res://world/City.gd")
-const _Processor = preload("res://demographics/DemographicTurnProcessor.gd")
-const _Registry = preload("res://demographics/CharacterRegistry.gd")
-const _Character = preload("res://demographics/Character.gd")
-const _TraitDef = preload("res://demographics/TraitDef.gd")
+const _City = preload("res://scripts/world/City.gd")
+const _Processor = preload("res://scripts/demographics/DemographicTurnProcessor.gd")
+const _Registry = preload("res://scripts/demographics/CharacterRegistry.gd")
+const _Character = preload("res://scripts/demographics/Character.gd")
+const _TraitDef = preload("res://scripts/demographics/TraitDef.gd")
 
 var city: Variant
 var reg: Variant

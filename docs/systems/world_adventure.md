@@ -3,7 +3,7 @@
 Мир на карте мира — координатор, на котором живут герой, города, спавнер врагов,
 ресурсы, камера и UI.
 
-**Корневой узел:** `world/WorldController.gd` (`class_name WorldController`).
+**Корневой узел:** `scripts/world/WorldController.gd` (`class_name WorldController`).
 Он не держит состояние сам — запускает **bootstrap** (`WorldBootstrap`) и
 подписывает подсистемы через **WorldEventRouter**. Цикл хода (`execute_turn` →
 `TurnScheduler`) запускается из `WorldEventRouter._on_end_turn()` **после**
@@ -57,7 +57,7 @@
 
 ## Оркестрация хода (`TurnScheduler`)
 
-`core/TurnScheduler.gd` (`class_name TurnScheduler`) — оркестратор фаз хода
+`scripts/core/TurnScheduler.gd` (`class_name TurnScheduler`) — оркестратор фаз хода
 (M0: Ядро):
 
 - Процессоры (`TurnPhaseProcessor`) регистрируются по **приоритету**;
@@ -71,7 +71,7 @@
 
 ## Центр событий (`WorldEventRouter`)
 
-`world/WorldEventRouter.gd` (`class_name WorldEventRouter`) — хаб событий мира.
+`scripts/world/WorldEventRouter.gd` (`class_name WorldEventRouter`) — хаб событий мира.
 Принимает все подсистемы в `setup(...)` и эмитит сигналы для UI/персистенса:
 `end_turn_requested`, `hero_moved_to`, `village_captured`, `battle_won_at`,
 `resource_extracted_at`, `reach_preview_changed`, `marker_clicked`.

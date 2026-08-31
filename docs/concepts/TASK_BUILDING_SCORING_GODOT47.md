@@ -7,8 +7,8 @@
 > ([TerraScape Fandom — Library](https://terrascape.fandom.com/wiki/Library)).
 > Детальный дизайн-разбор: [`CONCEPT_BUILDING_SYNERGY.md`](CONCEPT_BUILDING_SYNERGY.md).
 >
-> **Не изобретать велосипед.** Соседство и гексы уже есть в `core/HexUtils.gd`,
-> городской adjacency-скоринг — в `game/city/AdjacencySystem.gd`. Новая система —
+> **Не изобретать велосипед.** Соседство и гексы уже есть в `scripts/core/HexUtils.gd`,
+> городской adjacency-скоринг — в `game/scripts/city/AdjacencySystem.gd`. Новая система —
 > это **картографический** слой (размещение на открытой карте + village-сквоттинг),
  который работает поверх / независимо от городского `AdjacencySystem`.
 
@@ -34,9 +34,9 @@
 
 | Что | Где | Как использовать |
 | --- | --- | --- |
-| Гекс-геометрия, соседство, расстояние | `core/HexUtils.gd` | `get_all_neighbors()`, `hex_distance()`, `get_config()` (odd-r offset). **Не писать свою математику сетки.** |
-| Городской adjacency (production mult + reputation) | `game/city/AdjacencySystem.gd` | Уже покрывает «мельница у полей ×1.5», «кузница у рудника ×3». Картографический скорнинг — отдельный слой; не трогать эту матрицу, если не требуется миграция правил. |
-| Определение зданий | `game/data/BuildingDefs.gd`, `game/data/UniqueBuilding.gd` | Источник `def`-ов для городов/уникальных зданий. Новая система вводит **отдельный** `BuildingData`-слой для стандартных зданий открытой карты (не путать с `UniqueBuilding.Def`). |
+| Гекс-геометрия, соседство, расстояние | `scripts/core/HexUtils.gd` | `get_all_neighbors()`, `hex_distance()`, `get_config()` (odd-r offset). **Не писать свою математику сетки.** |
+| Городской adjacency (production mult + reputation) | `game/scripts/city/AdjacencySystem.gd` | Уже покрывает «мельница у полей ×1.5», «кузница у рудника ×3». Картографический скорнинг — отдельный слой; не трогать эту матрицу, если не требуется миграция правил. |
+| Определение зданий | `game/scripts/data/BuildingDefs.gd`, `game/scripts/data/UniqueBuilding.gd` | Источник `def`-ов для городов/уникальных зданий. Новая система вводит **отдельный** `BuildingData`-слой для стандартных зданий открытой карты (не путать с `UniqueBuilding.Def`). |
 | Сериализация мира | `SaveData`, `WorldBootstrap` | Состояние `GridManager.placed` должно сериализоваться. |
 
 > **Вывод:** ядро скорнинга (счёт + биом + adjacency + иерархия) — **новое**,
@@ -78,7 +78,7 @@ enum Tier { RESOURCE = 0, PROCESSING = 1, CITY = 2 }
 
 ### 1.4 Файлы `.tres`
 
-Создать в `game/data/buildings/` по одному `.tres` на здание:
+Создать в `game/scripts/data/buildings/` по одному `.tres` на здание:
 `library.tres`, `school.tres`, `university.tres`, `smithy.tres`, `farm.tres` …
 Значения (`base_score`, `input_radius`, `biome_bonus`, `adjacency_rules`, `merge_recipes`)
 берутся из [`CONCEPT_BUILDING_SYNERGY.md`](CONCEPT_BUILDING_SYNERGY.md) — **не харкодить
@@ -203,7 +203,7 @@ func try_merge(target_pos: Vector2i, new_id: StringName) -> bool
    с `Node`-корнем, `tilemap` резолвится по пути).
 
 ### Шаг 2. Ресурсы зданий
-1. В инспекторе создать `game/data/buildings/*.tres` для `BuildingData`.
+1. В инспекторе создать `game/scripts/data/buildings/*.tres` для `BuildingData`.
 2. Заполнить поля по [`CONCEPT_BUILDING_SYNERGY.md`](CONCEPT_BUILDING_SYNERGY.md):
    - **Library:** `input_radius=4`, `biome_bonus={urban:25}`, `adjacency_rules={citadel:40, school:35, hospital:30, city_district:25, longhouse:20, university:15, chapel:15, houses:10}`, `adjacency_rules.library=-120` (самоштраф), `merge_recipes=[university, citadel]`.
    - **School / University / Citadel / …** — аналогично из таблицы.
@@ -263,7 +263,7 @@ func try_merge(target_pos: Vector2i, new_id: StringName) -> bool
   кубические координаты: `HexUtils.offset_to_cube()` → `max(dx, dy, dz)`.
   Чебышевская (`max(|dx|,|dy|)`) и манхэттенская (`|dx|+|dy|`) модели **неверны** для
   гексов — использовать `HexUtils.hex_distance`.
-- **Не дублировать городской скорнинг.** `game/city/AdjacencySystem.gd` уже даёт
+- **Не дублировать городской скорнинг.** `game/scripts/city/AdjacencySystem.gd` уже даёт
   `building_output_mult` + `reputation_bonus` для зданий **внутри города**. Новая система —
   это картографический слой для открытой карты/деревень; правила не копировать, а держать
   в `BuildingData.adjacency_rules`.
@@ -280,5 +280,5 @@ func try_merge(target_pos: Vector2i, new_id: StringName) -> bool
   взаимосвязей всех зданий TerraScape.
 - [`TASK_SOCIAL_AND_BUILDINGS.md`](TASK_SOCIAL_AND_BUILDINGS.md) — фаза 2/3 (та же тема,
   но в составе задачи «социалка + постройки»).
-- `core/HexUtils.gd`, `game/city/AdjacencySystem.gd`, `game/data/BuildingDefs.gd`,
-  `game/data/UniqueBuilding.gd`.
+- `scripts/core/HexUtils.gd`, `game/scripts/city/AdjacencySystem.gd`, `game/scripts/data/BuildingDefs.gd`,
+  `game/scripts/data/UniqueBuilding.gd`.

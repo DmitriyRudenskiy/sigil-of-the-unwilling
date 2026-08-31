@@ -68,7 +68,7 @@ func _on_test_timeout() -> void:
 	
 	# WorldController — скрипт корневого узла World (а не дочерний узел)
 	var wc_script: Script = world_node.get_script() if world_node else null
-	if wc_script != null and wc_script.resource_path == "res://world/WorldController.gd":
+	if wc_script != null and wc_script.resource_path == "res://scripts/world/WorldController.gd":
 		print(" ✅ WorldController script attached to World root")
 	else:
 		print(" ⚠️  WorldController script missing on World root")

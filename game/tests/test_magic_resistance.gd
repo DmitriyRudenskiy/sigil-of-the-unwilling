@@ -1,9 +1,9 @@
 extends "res://tests/test_base.gd"
 ## Magic resistance: undead immunity, dragon level check, pendant negation, dwarf resistance.
 
-const _SpellCaster = preload("res://systems/SpellCaster.gd")
-const _BattleState = preload("res://systems/BattleState.gd")
-const _SE = preload("res://data/StatusEffects.gd")
+const _SpellCaster = preload("res://scripts/systems/SpellCaster.gd")
+const _BattleState = preload("res://scripts/systems/BattleState.gd")
+const _SE = preload("res://scripts/data/StatusEffects.gd")
 
 var _rng := RandomNumberGenerator.new()
 var _units: Node

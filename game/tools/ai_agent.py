@@ -64,7 +64,7 @@ def calculate_avg_distance(points):
 def wait_for_movement(client, target_x, target_y, current_idx, total_count, mode, will_reach=True, timeout=60):
     """Ждём завершения движения.
     will_reach=True  → ждём прибытия на целевую клетку.
-    will_reach=False → HoMM3-частичное движение: герой идёт в сторону цели
+    will_reach=False → частичное движение: герой идёт в сторону цели
                        и остановится сам (moving == false) — ждём остановки,
                        а не прибытия (баг "Movement timeout": 30с ожидания).
     Возвращает: arrived | stopped | no_mp | battle_started | unknown_mode | timeout

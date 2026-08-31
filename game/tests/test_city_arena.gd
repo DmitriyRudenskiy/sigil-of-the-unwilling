@@ -1,10 +1,10 @@
 extends "res://tests/test_base.gd"
 ## Тесты строительной арены: CityArenaModel + ArenaBalance (синхронно).
 
-const _Model = preload("res://city/CityArenaModel.gd")
-const _Balance = preload("res://city/ArenaBalance.gd")
-const _BuildingDefs = preload("res://data/BuildingDefs.gd")
-const _PopUnit = preload("res://world/PopUnit.gd")
+const _Model = preload("res://scripts/city/CityArenaModel.gd")
+const _Balance = preload("res://scripts/city/ArenaBalance.gd")
+const _BuildingDefs = preload("res://scripts/data/BuildingDefs.gd")
+const _PopUnit = preload("res://scripts/world/PopUnit.gd")
 
 
 var city: City

@@ -8,7 +8,7 @@
 [`CONCEPT_ABILITIES.md`](../concepts/CONCEPT_ABILITIES.md). В цикле хода герой участвует
 через фазы (`TurnScheduler`), см. [`CORE_TURN_PIPELINE.md`](../architecture/CORE_TURN_PIPELINE.md).
 
-**Корневой класс:** `entities/HeroController.gd` (`class_name HeroController`,
+**Корневой класс:** `scripts/entities/HeroController.gd` (`class_name HeroController`,
 `extends Node2D`). Это **тонкий фасад** — он не хранит состояние сам, а
 композирует подсистемы и пробрасывает вызовы/сигналы наружу.
 
@@ -28,7 +28,7 @@
 
 | Подсистема | Класс | Ответственность |
 | --- | --- | --- |
-| Время | `data/TimeSystem.gd` | Очки времени суток, трата на движение |
+| Время | `scripts/data/TimeSystem.gd` | Очки времени суток, трата на движение |
 | Навыки | `HeroSkills` (49) | Уровни 0–3: nature_sense, keen_eye, navigation, geology, alchemy |
 | Инструменты | `HeroTools` (107) | Отдельный 8-слотный инвентарь: лопата, кирка, телега, защита от кожи, сеть |
 | Стратегические | `HeroStrategicResources` (69) | Дерево/камень и т.д., привязка к `ResourceRegistry` |
@@ -92,14 +92,14 @@ knowledge) и модификаторы экипировки (`inventory.get_tota
 
 ## Инициализация в мире
 
-Полный конвейер в `world/WorldBootstrap.gd`:
+Полный конвейер в `scripts/world/WorldBootstrap.gd`:
 
 1. `_create_hero()` — `HeroController.new()`, добавляется в дерево.
 2. `_init_hero()` — `hero.setup(map_gen)` (инъекция `UnitRegistry` в армию и
    `ResourceRegistry` в стратегические ресурсы), затем `deserialize(save)` — если
    загружено сохранение.
 
-Фабрика `ui/HeroModelFactory.gd` собирает «модель» героя (имя/статы/экипировка)
+Фабрика `scripts/ui/HeroModelFactory.gd` собирает «модель» героя (имя/статы/экипировка)
 для модельных экранов (стартовое меню, `ArtifactInventoryScreen`).
 
 ## Сериализация

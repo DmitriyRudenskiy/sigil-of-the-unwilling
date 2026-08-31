@@ -2,10 +2,10 @@ extends "res://tests/test_base.gd"
 ## M2: Персонажи — Character (потребности, черты, сериализация) и
 ## CharacterRegistry (связь с PopUnit, uid, сериализация).
 
-const _Character = preload("res://demographics/Character.gd")
-const _CharacterRegistry = preload("res://demographics/CharacterRegistry.gd")
-const _PopUnit = preload("res://world/PopUnit.gd")
-const _TraitDef = preload("res://demographics/TraitDef.gd")
+const _Character = preload("res://scripts/demographics/Character.gd")
+const _CharacterRegistry = preload("res://scripts/demographics/CharacterRegistry.gd")
+const _PopUnit = preload("res://scripts/world/PopUnit.gd")
+const _TraitDef = preload("res://scripts/demographics/TraitDef.gd")
 
 
 func _mk_pop(uid: int) -> PopUnit:

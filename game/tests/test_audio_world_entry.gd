@@ -12,7 +12,7 @@ extends SceneTree
 ##   godot --headless --path game -s tests/test_audio_world_entry.gd
 
 const WORLD_SCENE := "res://scenes/World.tscn"
-const AudioCues = preload("res://data/AudioCues.gd")
+const AudioCues = preload("res://scripts/data/AudioCues.gd")
 
 const MAX_SECONDS := 6.0
 const POLL := 0.5

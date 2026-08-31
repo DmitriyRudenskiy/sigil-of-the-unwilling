@@ -32,7 +32,7 @@ The following automated steps are used to prepare assets:
 4. **Atlas Building**: `tileset_builder.gd` generates the final `.tres` resources used by Godot.
 
 ## Biome Registry
-The `data/ResourceRegistry.gd` serves as the "Source of Truth" for biome properties, including:
+The `scripts/autoload/ResourceRegistry.gd` serves as the "Source of Truth" for biome properties, including:
 - Color palettes.
 - Object density.
 - Transition weights (how easily one biome blends into another).

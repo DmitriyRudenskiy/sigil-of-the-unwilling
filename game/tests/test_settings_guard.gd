@@ -1,7 +1,7 @@
 extends "res://tests/test_base.gd"
 ## Regression tests for РФ7-1 / РФ7-2 / РФ7-5: settings guard, headless safety, backpack source.
 
-const _Settings = preload("res://core/Settings.gd")
+const _Settings = preload("res://scripts/autoload/Settings.gd")
 
 # РФ7-5: SettingsScreen без setup() закрывается, closed эмитится, _build пропускается
 func test_settings_screen_closed_without_settings() -> void:

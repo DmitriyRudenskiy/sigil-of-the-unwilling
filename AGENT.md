@@ -13,57 +13,68 @@
 - **Корень Godot-проекта — `game/`.** `project.godot` лежит в `game/project.godot`.
   Игра полностью само-contained в `game/`: её можно скопировать на другую машину
   и запустить без остального репозитория (см. `game/README.md`).
-- **Корень репозитория — dev-рабочее пространство.** Тут живут `tests/`, `tools/`,
-  `docs/`, `previews/`, `backup_assets/`, `tmp/`, `lair/`, dev-сцены `scenes/`.
+- **Корень репозитория — dev-рабочее пространство.** Тут живут `docs/`, `tmp/`,
+  `backup_assets/`, `lair/`, `prototype/` и OpenSpec (`openspec/`).
+- **Внутри `game/` — только то, что нужно игре для запуска**, плюс явное исключение
+  `tests/` и `tools/`: `project.godot`, `assets/`, `scenes/`, `scripts/`,
+  `tests/`, `tools/`, `README.md`, `icon.svg`.
 - Все пути в коде — `res://…` относительно **корня проекта** `game/`:
-  `res://systems/BattleState.gd`, `res://core/GameLogger.gd`, `res://scenes/World.tscn`.
-- Тесты лежат прямо в `game/tests/` (внутри проекта, отслеживаются в Git).
+  `res://scripts/systems/BattleState.gd`, `res://scripts/core/GameLogger.gd`, `res://scenes/World.tscn`.
+- Тесты лежат прямо в `game/tests/` (внутри проекта, отслеживаются в Git);
+  раннер сканирует `res://tests/**` — поэтому `tests/` не выносится из `game/`.
+  То же для `tools/`: CI и утилиты выполняются через Godot с `--path game`.
 
 ```text
 .                                   # Корень репозитория = dev-материалы
 ├── AGENT.md                        # Этот файл
 ├── README.md                       # Краткая справка
-├── game/                           # ← Godot-проект (портативный)
-│   ├── project.godot
-│   ├── README.md                   # Как запустить на другой машине
-│   ├── .godot/                     # Кэш Godot (gitignored)
-│   ├── core/       # Ядро: HexUtils, GameLogger, GameSession, GameSettings,
-│   │               #   ServiceContainer/Locator, autoloads
-│   ├── systems/    # Бой: BattleController/State/AI/View/UI/Input, BattleFlow, …
-│   ├── entities/   # Герой и юниты: Hero*, UnitRegistry, HeroInventory, …
-│   ├── world/      # Карта и мир: MapGenerator/Model/Renderer, Borough, City…
-│   ├── city/       # Модель города: CityTurnProcessor, системы (Спринт 6–11), Arena
-│   ├── ui/         # UI: AdventureUI, BattleUI, панели, components
-│   ├── economy/    # Экономические процессы хода
-│   ├── data/       # Ресурсы/константы: SpellRegistry, ArtifactRegistry, …
-│   ├── scenes/     # .tscn: MainMenu, World, Battle, CityArena
-│   ├── tilesets/   # hex_atlas_*.png, hex_tileset.tres
-│   ├── assets/     # Ассеты: artifacts, audio, cursors, raw, ui, units
-│   ├── tests/      # Тесты: test_*.gd, unit/, fakes/ (exec: --path game)
-│   ├── tools/      # Инструменты: compile_all, check_scene_refs, card_validation, shell/
-│   ├── docs/       # Документация: ARCHITECTURE, TESTING, TOOLS, CONCEPT_*, …
-│   ├── lair/       # Логово — контент фракции; см. lair/README.md
-│   ├── previews/    # Превью-картинки (не игровые)
-│   ├── scenes/     # Dev-сцены: BiomePreview, TestTerrain (+ игровые .tscn)
-│   ├── backup_assets/ # Архив/резерв ассетов
-│   ├── prototype/  # HTML-прототипы (было prototype_interfes)
-│   └── tmp/        # Временные/черновые файлы (gitignored)
+├── docs/                           # Документация проекта (architecture, howto, concepts, …)
+├── tmp/                            # Временные/черновые файлы (каталог закоммичен, содержимое gitignored)
+├── backup_assets/                  # Архив/резерв ассетов (вне игры)
+├── lair/                           # Логово — контент фракции; см. lair/README.md
+├── prototype/                      # HTML-прототипы
+├── openspec/                       # Изменения OpenSpec
+└── game/                           # ← Godot-проект (портативный, self-contained)
+    ├── project.godot
+    ├── README.md                   # Как запустить на другой машине
+    ├── icon.svg
+    ├── .godot/                     # Кэш Godot (gitignored)
+    ├── scripts/                    # Весь GDScript-код
+    │   ├── autoload/               # 10 синглтонов: SoundManager, Settings, GameEventBus, …
+    │   ├── core/                   # Ядро: HexUtils, GameLogger, GameSession, …
+    │   ├── systems/                # Бой: BattleController/State/AI/View/UI/Input, BattleFlow, …
+    │   ├── entities/               # Герой и юниты: Hero*, HeroInventory, …
+    │   ├── world/                  # Карта и мир: MapGenerator/Model/Renderer, Borough, City…
+    │   ├── city/                   # Модель города: CityTurnProcessor, системы, Arena
+    │   ├── ui/                     # UI: AdventureUI, BattleUI, панели, components
+    │   ├── economy/                # Экономические процессы хода
+    │   ├── demographics/           # Население, потребности, черты
+    │   └── data/                   # Определения: BuildingDefs, Artifact, ScrollRules, …
+    ├── assets/                     # Только ассеты (без кода)
+    │   ├── data/                   # spells.json, spells.schema.json
+    │   ├── settings/               # Конфиг движка: default_bus_layout.tres
+    │   ├── tilesets/               # hex_atlas_*.png, hex_tileset.tres
+    │   └── audio/ cursors/ raw/ ui/ units/   # Медиа и текстуры
+    ├── scenes/                     # .tscn: MainMenu, World, Battle, CityArena
+    ├── tests/                      # Тесты: test_*.gd, unit/, fakes/ (exec: --path game)
+    └── tools/                      # Инструменты: compile_all, check_scene_refs, shell/
 ```
 
-### Состав `game/`
+### Состав `game/` и правила для `tmp/`
 
-Всего внутри `game/`: игровой Godot-проект + dev-материалы — `tests/`, `tools/`,
-`docs/`, `previews/`, `backup_assets/`, `prototype/`, `scenes/`, `lair/`, `tmp/`.
-Инструментальные скрипты (`process_assets*.py`, `ai_agent.py`,
-`generate_map_preview.py`, `organize_assets.py`, `biome_showcase.py`) — в `tools/`.
+Внутри `game/` — игровой Godot-проект и только явное исключение `tests/`, `tools/`
+(они исполняются на Godot с `--path game`). Инструментальные скрипты
+(`process_assets*.py`, `ai_agent.py`, `generate_map_preview.py`,
+`organize_assets.py`, `biome_showcase.py`) — в `game/tools/`.
 
-Внутри `game/` игнорируется только `tmp/` (в `.gitignore`: `.godot/`, `.DS_Store`, `*.log`,
-`*.import`, `*.uid`, `__pycache__/`, `tmp/`); остальное — `tests/`, `tools/`, `docs/`,
-`previews/`, `backup_assets/`, `prototype/`, `scenes/`, `lair/` — отслеживается в Git.
+Внутри `game/` gitignore-ится только кэш/служебное: `.godot/`, `.DS_Store`, `*.log`,
+`*.import`, `*.uid`, `__pycache__/` (см. `.gitignore`); остальное отслеживается в Git.
 
-`tmp/` — рабочее пространство для черновых/временных файлов: в нём **не должно** оказываться
-того, что предназначается для игры (код, сцены, данные). Если в `tmp/` появилась готовая
-игровая фича — выносим в `game/` (соответствующий слой) и коммитим её там, а из `tmp/` убираем.
+Корневой `tmp/` — рабочее пространство для черновых/временных файлов. Каталог сам
+отслеживается в Git (через `tmp/.gitignore`), всё содержимое в нём игнорируется.
+В `tmp/` **не должно** оказываться того, что предназначается для игры (код, сцены, данные).
+Если в `tmp/` появилась готовая игровая фича — выносим в `game/` (соответствующий слой)
+и коммитим её там, а из `tmp/` убираем.
 
 ---
 
@@ -172,7 +183,7 @@
 2. **Никогда не хардкодить `get_node("../../../")`.** Использовать `%NodeName`
    (Scene Unique Nodes), `@export` или Dependency Injection.
 3. **Классы с `class_name` резолвятся по имени.** Не добавлять лишний `preload` для
-   файлов из `core/`, `systems/`, `entities/`, `world/`, `ui/`, `data/`.
+   файлов из `scripts/core/`, `scripts/systems/`, `scripts/entities/`, `scripts/world/`, `scripts/ui/`, `scripts/data/`.
 4. **Ранние ассерты** в `_ready()` или через DI — ловить неправильно настроенные сцены
    сразу, а не в бою.
 5. **Никогда не создавать `Node` только чтобы держать данные.** Использовать

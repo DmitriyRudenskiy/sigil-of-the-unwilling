@@ -1,11 +1,11 @@
 extends "res://tests/test_base.gd"
 ## Regression tests for round 5 executor + spell flow (РФ5-1, РФ5-3, РФ5-4).
 
-const _Executor = preload("res://systems/BattleTurnExecutor.gd")
-const _Input = preload("res://systems/BattleInput.gd")
-const _ActionResolver = preload("res://systems/BattleActionResolver.gd")
-const _HeroMagic = preload("res://entities/HeroMagic.gd")
-const _BAI = preload("res://systems/BattleAI.gd")
+const _Executor = preload("res://scripts/systems/BattleTurnExecutor.gd")
+const _Input = preload("res://scripts/systems/BattleInput.gd")
+const _ActionResolver = preload("res://scripts/systems/BattleActionResolver.gd")
+const _HeroMagic = preload("res://scripts/entities/HeroMagic.gd")
+const _BAI = preload("res://scripts/systems/BattleAI.gd")
 
 var _units: Node
 

@@ -34,7 +34,7 @@ func _init() -> void:
 
 
 func _create_state():
-	var state = load("res://systems/BattleState.gd").new()
+	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 20))
 	var def: Array[UnitStack] = []
@@ -99,7 +99,7 @@ func _test_attack() -> int:
 
 func _test_attack_with_rng() -> int:
 	var errors := 0
-	var state = load("res://systems/BattleState.gd").new()
+	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 50))
 	var def: Array[UnitStack] = []
@@ -126,7 +126,7 @@ func _test_attack_with_rng() -> int:
 
 func _test_battle_end() -> int:
 	var errors := 0
-	var state = load("res://systems/BattleState.gd").new()
+	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 100))
 	var def: Array[UnitStack] = []
@@ -166,7 +166,7 @@ func _test_battle_end() -> int:
 
 func _test_wait_order() -> int:
 	var errors := 0
-	var state = load("res://systems/BattleState.gd").new()
+	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = [
 		Units.make_fixed_stack("swordsmen", 10),
 		Units.make_fixed_stack("archers", 10),
@@ -210,7 +210,7 @@ func _test_wait_order() -> int:
 
 func _test_check_end_repeat_call() -> int:
 	var errors := 0
-	var state = load("res://systems/BattleState.gd").new()
+	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 100))
 	var def: Array[UnitStack] = []
@@ -235,7 +235,7 @@ func _test_check_end_repeat_call() -> int:
 		printerr("second check_end() should return 'attacker', got: ", winner2)
 		errors += 1
 
-	var state2 = load("res://systems/BattleState.gd").new()
+	var state2 = load("res://scripts/systems/BattleState.gd").new()
 	state2.force_end(BattleState.Side.DEFENDER)
 	if not state2.battle_over:
 		printerr("force_end should set battle_over")
@@ -249,7 +249,7 @@ func _test_check_end_repeat_call() -> int:
 
 func _test_get_reachable_for_unit() -> int:
 	var errors := 0
-	var state = load("res://systems/BattleState.gd").new()
+	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 20))
 	var def: Array[UnitStack] = []
@@ -273,7 +273,7 @@ func _test_get_reachable_for_unit() -> int:
 
 func _test_get_unreachable_ring() -> int:
 	var errors := 0
-	var state = load("res://systems/BattleState.gd").new()
+	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 20))
 	var def: Array[UnitStack] = []
@@ -307,7 +307,7 @@ func _test_get_unreachable_ring() -> int:
 
 func _test_flying_unit_placement() -> int:
 	var errors := 0
-	var state = load("res://systems/BattleState.gd").new()
+	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("pegasus", 10))
 	var def: Array[UnitStack] = []
@@ -322,7 +322,7 @@ func _test_flying_unit_placement() -> int:
 
 func _test_ranged_unit_tag() -> int:
 	var errors := 0
-	var state = load("res://systems/BattleState.gd").new()
+	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("archers", 10))
 	var def: Array[UnitStack] = []
@@ -337,7 +337,7 @@ func _test_ranged_unit_tag() -> int:
 
 func _test_morale_tag() -> int:
 	var errors := 0
-	var state = load("res://systems/BattleState.gd").new()
+	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("champions", 10))
 	var def: Array[UnitStack] = []
@@ -352,7 +352,7 @@ func _test_morale_tag() -> int:
 
 func _test_retreat_survivors() -> int:
 	var errors := 0
-	var state = load("res://systems/BattleState.gd").new()
+	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = [
 		Units.make_fixed_stack("swordsmen", 50),
 		Units.make_fixed_stack("archers", 20),
@@ -377,7 +377,7 @@ func _test_retreat_survivors() -> int:
 
 func _test_defend_bonus() -> int:
 	var errors := 0
-	var state = load("res://systems/BattleState.gd").new()
+	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 50))
 	var def: Array[UnitStack] = []
@@ -392,7 +392,7 @@ func _test_defend_bonus() -> int:
 		errors += 1
 
 	# DEFEND_DEFENSE_BONUS = 1.2 means +20% defense when defending
-	var rules := load("res://core/BattleRules.gd")
+	var rules := load("res://scripts/core/BattleRules.gd")
 	if rules.DEFEND_DEFENSE_BONUS != 1.2:
 		printerr("DEFEND_DEFENSE_BONUS should be 1.2")
 		errors += 1
@@ -401,7 +401,7 @@ func _test_defend_bonus() -> int:
 
 func _test_hero_bonuses() -> int:
 	var errors := 0
-	var state = load("res://systems/BattleState.gd").new()
+	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 50))
 	var def: Array[UnitStack] = []
@@ -424,7 +424,7 @@ func _test_hero_bonuses() -> int:
 ## РФ-бой: в бою не может быть более 7 юнитов с каждой стороны.
 func _test_max_units_per_side_cap() -> int:
 	var errors := 0
-	var state = load("res://systems/BattleState.gd").new()
+	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	var def: Array[UnitStack] = []
 	for i in 10:
@@ -445,7 +445,7 @@ func _test_max_units_per_side_cap() -> int:
 ## РФ-бой: очередь ходов (инициатива) строится по скорости — быстрее ходит первым.
 func _test_initiative_sorted_by_speed() -> int:
 	var errors := 0
-	var state = load("res://systems/BattleState.gd").new()
+	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	var def: Array[UnitStack] = []
 
@@ -480,7 +480,7 @@ func _test_initiative_sorted_by_speed() -> int:
 ## РФ-бой: инициатива пересчитывается каждый раунд (мертвые исключаются).
 func _test_initiative_rebuilt_each_round() -> int:
 	var errors := 0
-	var state = load("res://systems/BattleState.gd").new()
+	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	var def: Array[UnitStack] = []
 	var fast := Units.make_fixed_stack("cavalry", 10)

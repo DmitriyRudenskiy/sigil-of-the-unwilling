@@ -25,7 +25,7 @@ func _init() -> void:
 
 func _test_attacker_wins() -> int:
 	var errors := 0
-	var state = load("res://systems/BattleState.gd").new()
+	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 100))
 	var def: Array[UnitStack] = []
@@ -59,7 +59,7 @@ func _test_attacker_wins() -> int:
 
 func _test_defender_wins() -> int:
 	var errors := 0
-	var state = load("res://systems/BattleState.gd").new()
+	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("goblins", 1))
 	var def: Array[UnitStack] = []
@@ -95,7 +95,7 @@ func _test_battle_rules_damage() -> int:
 	var errors := 0
 
 	# Use BattleState to create proper BattleUnit wrappers
-	var state: BattleState = load("res://systems/BattleState.gd").new()
+	var state: BattleState = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 50))
 	var def: Array[UnitStack] = []
@@ -105,7 +105,7 @@ func _test_battle_rules_damage() -> int:
 	var atk_unit: BattleState.BattleUnit = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
 	var def_unit: BattleState.BattleUnit = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
 
-	var rules: BattleRules = load("res://core/BattleRules.gd").new()
+	var rules: BattleRules = load("res://scripts/core/BattleRules.gd").new()
 
 	var test_rng := RandomNumberGenerator.new()
 	test_rng.seed = 42
@@ -146,7 +146,7 @@ func _test_battle_rules_damage() -> int:
 func _test_ranged_vs_flying() -> int:
 	var errors := 0
 
-	var state: BattleState = load("res://systems/BattleState.gd").new()
+	var state: BattleState = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("archers", 20))
 	atk.append(Units.make_fixed_stack("pegasus", 10))
@@ -179,7 +179,7 @@ func _test_ranged_vs_flying() -> int:
 func _test_morale_check() -> int:
 	var errors := 0
 
-	var state: BattleState = load("res://systems/BattleState.gd").new()
+	var state: BattleState = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("champions", 10))
 	atk.append(Units.make_fixed_stack("skeleton", 10))  # undead = no morale
@@ -196,7 +196,7 @@ func _test_morale_check() -> int:
 		elif u.get_key() == "skeleton":
 			skeleton = u
 
-	var rules2: BattleRules = load("res://core/BattleRules.gd").new()
+	var rules2: BattleRules = load("res://scripts/core/BattleRules.gd").new()
 
 	if champion == null or not rules2.can_morale(champion):
 		printerr("champions should be eligible for morale")

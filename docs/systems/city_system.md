@@ -2,9 +2,9 @@
 
 Город — узел производства, роста и обороны на карте мира.
 
-**Модель:** `world/City.gd` (`class_name City`). Это **чистая модель без узлов
+**Модель:** `scripts/world/City.gd` (`class_name City`). Это **чистая модель без узлов
 Godot** — UI подписывается на сигналы (тот же паттерн, что и `BattleState`).
-Управление — через `world/CityManager.gd`.
+Управление — через `scripts/world/CityManager.gd`.
 
 Фаза города — одна из фаз цикла хода (`CityTurnProcessor`, приоритет 5); см.
 [`CORE_TURN_PIPELINE.md`](../architecture/CORE_TURN_PIPELINE.md). Социальная составляющая и
@@ -79,7 +79,7 @@ Godot** — UI подписывается на сигналы (тот же па�
 - `apply_reputation`, `set_capital`, `register_city`, сигналы (`city_updated`,
   `cycle_completed`, `reputation_changed`, `relocation_completed`).
 
-## Подсистемы (`city/`)
+## Подсистемы (`scripts/city/`)
 
 | Подсистема | Назначение |
 | --- | --- |

@@ -2,11 +2,11 @@
 
 ## Обзор
 
-`data/spells.json` — единый источник данных для всех заклинаний в игре. Файл содержит 505 заклинаний, распределённых по 16 шаблонам и 6 цветам/фракциям.
+`assets/data/spells.json` — единый источник данных для всех заклинаний в игре. Файл содержит 505 заклинаний, распределённых по 16 шаблонам и 6 цветам/фракциям.
 
 ```
-data/spells.json         ← JSON-массив всех заклинаний (505 записей)
-data/spells.schema.json  ← JSON Schema валидации
+assets/data/spells.json         ← JSON-массив всех заклинаний (505 записей)
+assets/data/spells.schema.json  ← JSON Schema валидации
 tools/spell_validation/        ← Ядро валидатора (GDScript)
 tests/test_spells_json.gd ← 33 интеграционных теста
 tests/test_validation_runner.gd ← Standalone-раннер для тестов
@@ -216,19 +216,19 @@ tests/test_validation_runner.gd ← Standalone-раннер для тестов
 
 ```bash
 # Базовая валидация
-godot --headless -s tools/spell_validation/validate_spells.gd data/spells.json 2>/dev/null
+godot --headless -s tools/spell_validation/validate_spells.gd assets/data/spells.json 2>/dev/null
 
 # Строгий режим (warnings = errors)
-godot --headless -s tools/spell_validation/validate_spells.gd --strict data/spells.json 2>/dev/null
+godot --headless -s tools/spell_validation/validate_spells.gd --strict assets/data/spells.json 2>/dev/null
 
 # JSON-выход
-godot --headless -s tools/spell_validation/validate_spells.gd --json data/spells.json 2>/dev/null
+godot --headless -s tools/spell_validation/validate_spells.gd --json assets/data/spells.json 2>/dev/null
 
 # Сохранение отчёта
-godot --headless -s tools/spell_validation/validate_spells.gd --out report.json data/spells.json 2>/dev/null
+godot --headless -s tools/spell_validation/validate_spells.gd --out report.json assets/data/spells.json 2>/dev/null
 
 # Тихий режим (только ошибки)
-godot --headless -s tools/spell_validation/validate_spells.gd --quiet data/spells.json 2>/dev/null
+godot --headless -s tools/spell_validation/validate_spells.gd --quiet assets/data/spells.json 2>/dev/null
 ```
 
 ### API (GDScript)
@@ -237,7 +237,7 @@ godot --headless -s tools/spell_validation/validate_spells.gd --quiet data/spell
 const Validator = preload("res://tools/spell_validation/SpellValidator.gd")
 
 var validator = Validator.new()
-var passed = validator.validate_file("res://data/spells.json")
+var passed = validator.validate_file("res://scripts/data/spells.json")
 
 # Получить отчёт
 print(validator.report.to_text())
@@ -292,10 +292,10 @@ spells.schema.json   (445 строк)  ← JSON Schema
 
 ## Изменение данных
 
-1. Отредактируйте `data/spells.json`
+1. Отредактируйте `assets/data/spells.json`
 2. Запустите валидатор:
    ```bash
-   godot --headless -s tools/spell_validation/validate_spells.gd --strict data/spells.json 2>/dev/null
+   godot --headless -s tools/spell_validation/validate_spells.gd --strict assets/data/spells.json 2>/dev/null
    ```
 3. Убедитесь, что ошибок `E0xx–E7xx` нет
 4. Предупреждения `W9xx` — информационные, игнорируются в не-строгом режиме

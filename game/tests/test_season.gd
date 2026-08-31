@@ -1,8 +1,8 @@
 extends "res://tests/test_base.gd"
 ## Тесты Season: определение сезона по месяцу, модификаторы.
 
-const _Season = preload("res://world/Season.gd")
-const _CityBalance = preload("res://world/CityBalance.gd")
+const _Season = preload("res://scripts/world/Season.gd")
+const _CityBalance = preload("res://scripts/world/CityBalance.gd")
 
 # ==================== ОПРЕДЕЛЕНИЕ СЕЗОНА ====================
 

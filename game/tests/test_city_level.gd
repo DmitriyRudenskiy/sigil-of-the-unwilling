@@ -1,9 +1,9 @@
 extends "res://tests/test_base.gd"
 ## Спринт 9: процветание, уровень города, кольца застройки.
 
-const _City = preload("res://world/City.gd")
-const _Prosperity = preload("res://city/ProsperitySystem.gd")
-const _CityProc = preload("res://city/CityTurnProcessor.gd")
+const _City = preload("res://scripts/world/City.gd")
+const _Prosperity = preload("res://scripts/city/ProsperitySystem.gd")
+const _CityProc = preload("res://scripts/city/CityTurnProcessor.gd")
 
 var center := Vector2i(5, 5)
 

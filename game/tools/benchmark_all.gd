@@ -38,7 +38,7 @@ func _init() -> void:
 func _bench_map_generation() -> void:
 	var times: Array = []
 	for i in _iterations:
-		var model = load("res://world/MapModel.gd").new()
+		var model = load("res://scripts/world/MapModel.gd").new()
 		model.map_width = _map_w
 		model.map_height = _map_h
 		model.seed_value = 42 + i
@@ -52,7 +52,7 @@ func _bench_map_generation() -> void:
 func _bench_spell_registry() -> void:
 	var times: Array = []
 	for i in _iterations:
-		var reg = load("res://data/SpellbookRegistry.gd").new()
+		var reg = load("res://scripts/autoload/SpellbookRegistry.gd").new()
 		var t0 := Time.get_ticks_usec()
 		reg.ensure_definitions()
 		var t1 := Time.get_ticks_usec()
@@ -62,7 +62,7 @@ func _bench_spell_registry() -> void:
 # ==================== 3. СЕРИАЛИЗАЦИЯ ====================
 func _bench_serialization() -> void:
 	var times: Array = []
-	var save_data = load("res://core/SaveData.gd").new()
+	var save_data = load("res://scripts/core/SaveData.gd").new()
 	save_data.run_seed = 12345
 	save_data.hero = {
 		"cell": {"x": 10, "y": 20},
@@ -122,7 +122,7 @@ func _bench_placeholder_texture() -> void:
 
 # ==================== 5. JSON PARSE (big payload) ====================
 func _bench_json_parse() -> void:
-	var save_data = load("res://core/SaveData.gd").new()
+	var save_data = load("res://scripts/core/SaveData.gd").new()
 	save_data.run_seed = 12345
 	save_data.hero = {"cell": {"x": 10, "y": 20}, "army": [], "inventory": {}}
 	save_data.world = {}

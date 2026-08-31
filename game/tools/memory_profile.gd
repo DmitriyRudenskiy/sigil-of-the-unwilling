@@ -2,14 +2,14 @@ extends SceneTree
 ## Профилирование памяти: измеряет выделение до/после ключевых операций.
 ## Запуск: godot --headless -s tools/memory_profile.gd
 
-const _UnitRegistry = preload("res://entities/UnitRegistry.gd")
+const _UnitRegistry = preload("res://scripts/autoload/UnitRegistry.gd")
 
 func _init() -> void:
 	print("=== Memory Profile ===")
 	print("")
 
 	_measure("MapModel 60x60 generate", func():
-		var model = load("res://world/MapModel.gd").new()
+		var model = load("res://scripts/world/MapModel.gd").new()
 		model.map_width = 60
 		model.map_height = 60
 		model.seed_value = 42
@@ -18,7 +18,7 @@ func _init() -> void:
 	)
 
 	_measure("BattleState full battle", func():
-		var state = load("res://systems/BattleState.gd").new()
+		var state = load("res://scripts/systems/BattleState.gd").new()
 		var ureg = _UnitRegistry.new()
 		var atk: Array = []
 		var def: Array = []
@@ -31,19 +31,19 @@ func _init() -> void:
 	)
 
 	_measure("SpellbookRegistry 420 spells", func():
-		var reg = load("res://data/SpellbookRegistry.gd").new()
+		var reg = load("res://scripts/autoload/SpellbookRegistry.gd").new()
 		reg.ensure_definitions()
 		return reg
 	)
 
 	_measure("SaveData roundtrip", func():
-		var data = load("res://core/SaveData.gd").new()
+		var data = load("res://scripts/core/SaveData.gd").new()
 		data.run_seed = 12345
 		data.hero = {"cell": {"x": 10, "y": 20}, "army": [], "inventory": {}}
 		data.world = {}
 		var json := JSON.stringify(data.to_dict())
 		var parsed = JSON.parse_string(json)
-		var data2 = load("res://core/SaveData.gd").new()
+		var data2 = load("res://scripts/core/SaveData.gd").new()
 		data2.from_dict(parsed)
 		return data2
 	)

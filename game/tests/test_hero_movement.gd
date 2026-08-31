@@ -11,9 +11,9 @@ extends RefCounted
 ## Запуск:
 ##   godot --headless -s tests/run_tests.gd
 
-const _MapGenerator = preload("res://world/MapGenerator.gd")
-const _Movement = preload("res://entities/HeroMovementController.gd")
-const _HexUtils = preload("res://core/HexUtils.gd")
+const _MapGenerator = preload("res://scripts/world/MapGenerator.gd")
+const _Movement = preload("res://scripts/entities/HeroMovementController.gd")
+const _HexUtils = preload("res://scripts/core/HexUtils.gd")
 
 var _passed := 0
 var _failed := 0
@@ -125,7 +125,7 @@ func test_can_reach_within_mp() -> void:
 	assert_true(_mov.can_reach(_mov.current_cell), "current cell always reachable")
 
 func test_move_to_cell_partial_when_insufficient_mp() -> void:
-	# HoMM3-семантика: цель дальше ОД — герой идёт в её сторону, пока хватает ОД
+	# Семантика: цель дальше ОД — герой идёт в её сторону, пока хватает ОД
 	_mov.move_points = 3.0
 	assert_false(_mov.can_reach(Vector2i(5, 0)), "can_reach is false (5 steps > 3 MP)")
 	assert_eq(_mov.reach_problem(Vector2i(5, 0)), "insufficient_mp", "diagnosis: insufficient_mp")

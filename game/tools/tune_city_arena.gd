@@ -16,7 +16,7 @@ extends SceneTree
 ## Опции: --evals N (итераций), --seed S, --turns T (длина сценария),
 ## --dry-run (не перезаписывать ArenaBalance.gd), --report PATH.
 
-const TUNE_FILE := "res://city/ArenaBalance.gd"
+const TUNE_FILE := "res://scripts/city/ArenaBalance.gd"
 const RESOURCES: Array[StringName] = [&"food", &"industry", &"dust", &"science", &"influence"]
 
 ## Здания с кольцевыми бонусами (порядок — как в ArenaBalance.RING_BONUS).

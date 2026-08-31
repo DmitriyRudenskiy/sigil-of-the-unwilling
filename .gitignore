@@ -2,8 +2,10 @@
 .godot/
 /android/
 
-# Временные/черновые файлы (scratch)
-tmp/
+# Временные/черновые файлы (scratch): сама директория закоммичена (маркер
+# tmp/.gitignore), содержимое игнорируется.
+tmp/*
+!tmp/.gitignore
 
 # macOS
 .DS_Store

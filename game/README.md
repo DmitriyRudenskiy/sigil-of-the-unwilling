@@ -12,20 +12,18 @@
 ## Состав
 
 - `project.godot`, `icon.svg` — конфиг проекта
+- `scripts/` — весь GDScript-код: `autoload/` (10 синглтонов), `core/`, `systems/`,
+  `entities/`, `world/`, `city/`, `ui/`, `economy/`, `demographics/`, `data/`
 - `scenes/` — MainMenu, World, Battle, CityArena
-- `core/ city/ data/ demographics/ economy/ entities/ systems/ ui/ world/` — код
-- `assets/` — спрайты, аудио, иконки
-- `tilesets/` — гекс-тайлсеты
-- `tests/` — тесты (`run_tests.gd`, `test_base.gd`, `fakes/`)
+- `assets/` — спрайты, аудио, иконки, `data/` (spells.json), `settings/` (аудиобусы),
+  `tilesets/` (гекс-тайлсеты)
+- `tests/` — тесты (`run_tests.gd`, `test_base.gd`, `fakes/`; раннер сканирует `res://tests/**`)
 - `tools/` — утилиты и dev-скрипты (`shell/`, `spell_validation/`, `scenarios/`)
-- `docs/` — документация
-- `previews/` — превью биомов
-- `backup_assets/` — запасные ассеты
-- `prototype/` — HTML-прототипы
-- `scenes/` — MainMenu, World, Battle, CityArena + BiomePreview, TestTerrain
-- `lair/` — материалы лаи
-- `tmp/` — черновые логи и скрипты
 - `.godot/` — кэш импорта (можно удалить, Godot пересоздаст)
 
-Это самодостаточная папка: всё (код, тесты `tests/`, утилиты `tools/`, доки `docs/`,
-`previews/`, `backup_assets/`, `prototype/`, `scenes/`, `lair/`, `tmp/`) — внутри неё.
+Это самодостаточная папка: всё, что нужно игре для запуска (код `scripts/`, сцены
+`scenes/`, ассеты `assets/`), плюс тесты `tests/` и утилиты `tools/` (они исполняются
+на Godot с `--path game`) — внутри неё.
+
+Несвязанные с игрой dev-материалы живут в корне репозитория: `docs/`, `backup_assets/`,
+`lair/`, `prototype/`; временные файлы — в корневом `tmp/`.

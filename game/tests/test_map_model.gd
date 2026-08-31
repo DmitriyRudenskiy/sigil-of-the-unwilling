@@ -4,7 +4,7 @@ var _passed: int = 0
 var _failed: int = 0
 ## Тесты MapModel: генерация, детерминизм, биомы, проходимость.
 
-const MapModelScript = preload("res://world/MapModel.gd")
+const MapModelScript = preload("res://scripts/world/MapModel.gd")
 
 func _init() -> void:
 	var failed := 0

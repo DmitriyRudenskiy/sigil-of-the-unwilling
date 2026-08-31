@@ -7,20 +7,20 @@
 
 | Слой | Класс | Ответственность |
 | --- | --- | --- |
-| Состояние | `systems/BattleState.gd` | Чистое состояние боя (юниты, очередь, bfs) |
-| Логика | `systems/BattleActionResolver.gd` | Атака, заклинания, чардж, ребёрт, первый удар |
-| Урон | `systems/BattleDamageResolver.gd` | Вычисление урона |
-| Правила | `core/BattleRules.gd` | ATK/DEF-множитель, удача, мораль, ретрит, контратака |
-| Порядок ходов | `systems/BattleTurnExecutor.gd` | State machine очередности (единственный мутант состояния) |
-| AI | `systems/BattleAI.gd` | Чистая логика решений на основе BattleState |
-| Поток | `systems/BattleFlow.gd` | Создание боя, ожидание, возврат результата |
-| Координатор | `systems/BattleController.gd` | Инициализация, визуал, связка сигналов |
-| Представление | `systems/BattleView.gd` | Поле, спрайты, подсветка, камера, курсор |
-| Ввод | `systems/BattleInput.gd` | Клики, подсветка ходов/атак, выбор юнитов |
-| Эффекты | `core/BattleFX.gd` | Визуальные эффекты |
-| Мост в мир | `world/WorldBattleCoordinator.gd` | За бой из мира, применение результатов |
+| Состояние | `scripts/systems/BattleState.gd` | Чистое состояние боя (юниты, очередь, bfs) |
+| Логика | `scripts/systems/BattleActionResolver.gd` | Атака, заклинания, чардж, ребёрт, первый удар |
+| Урон | `scripts/systems/BattleDamageResolver.gd` | Вычисление урона |
+| Правила | `scripts/core/BattleRules.gd` | ATK/DEF-множитель, удача, мораль, ретрит, контратака |
+| Порядок ходов | `scripts/systems/BattleTurnExecutor.gd` | State machine очередности (единственный мутант состояния) |
+| AI | `scripts/systems/BattleAI.gd` | Чистая логика решений на основе BattleState |
+| Поток | `scripts/systems/BattleFlow.gd` | Создание боя, ожидание, возврат результата |
+| Координатор | `scripts/systems/BattleController.gd` | Инициализация, визуал, связка сигналов |
+| Представление | `scripts/systems/BattleView.gd` | Поле, спрайты, подсветка, камера, курсор |
+| Ввод | `scripts/systems/BattleInput.gd` | Клики, подсветка ходов/атак, выбор юнитов |
+| Эффекты | `scripts/core/BattleFX.gd` | Визуальные эффекты |
+| Мост в мир | `scripts/world/WorldBattleCoordinator.gd` | За бой из мира, применение результатов |
 
-## BattleState (`systems/BattleState.gd`)
+## BattleState (`scripts/systems/BattleState.gd`)
 
 Чистое состояние, **не зависит от узлов Godot** (паттерн как у `City`):
 - `attacker_units` / `defender_units: Array[BattleUnit]`
@@ -71,8 +71,8 @@ attacker_artifact_mods, defender_artifact_mods, obstacle_seed, hero_magic)`:
 
 ## Связь со spell-системой
 
-Заклинания в бою — через `data/BattleSpellBridge.gd` (мост между spell-системой и
-боевой логикой); панель — `ui/BattleSpellbookPanel.gd`. Подробности —
+Заклинания в бою — через `scripts/data/BattleSpellBridge.gd` (мост между spell-системой и
+боевой логикой); панель — `scripts/ui/BattleSpellbookPanel.gd`. Подробности —
 [`spells_system.md`](spells_system.md).
 
 ## Тесты

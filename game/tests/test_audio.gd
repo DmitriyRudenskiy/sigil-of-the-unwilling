@@ -5,9 +5,9 @@ extends "res://tests/test_base.gd"
 ## - Settings._apply_audio() мапит по именам шин (баг индексов);
 ## - mute → -80 dB.
 
-const _Settings = preload("res://core/Settings.gd")
-const _SoundManager = preload("res://core/SoundManager.gd")
-const AudioCues = preload("res://data/AudioCues.gd")
+const _Settings = preload("res://scripts/autoload/Settings.gd")
+const _SoundManager = preload("res://scripts/autoload/SoundManager.gd")
+const AudioCues = preload("res://scripts/data/AudioCues.gd")
 
 var settings: Object
 var sm: Object

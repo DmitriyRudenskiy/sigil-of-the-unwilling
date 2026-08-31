@@ -4,9 +4,9 @@
 экипировки (AC, урон, криты) по модели NWN2 / D&D 3.5.
 
 **Корневые классы:**
-- `entities/HeroInventory.gd` (`class_name HeroInventory`, `extends RefCounted`) — состояние инвентаря.
-- `systems/EquipmentManager.gd` (`class_name EquipmentManager`, `extends RefCounted`) — расчёт боевых характеристик экипировки.
-- `data/Artifact.gd` + `data/ArtifactRegistry.gd` — профили предметов и реестр.
+- `scripts/entities/HeroInventory.gd` (`class_name HeroInventory`, `extends RefCounted`) — состояние инвентаря.
+- `scripts/systems/EquipmentManager.gd` (`class_name EquipmentManager`, `extends RefCounted`) — расчёт боевых характеристик экипировки.
+- `scripts/data/Artifact.gd` + `scripts/autoload/ArtifactRegistry.gd` — профили предметов и реестр.
 
 Инвентарь не наследуется от `Node` — это `RefCounted`, поэтому он полностью
 тестируем без сцены. Фасад `HeroController` держит `HeroInventory` и пробрасывает
@@ -134,7 +134,7 @@ RING_L, RING_R, MISC_A, MISC_B, SPELLBOOK`.
 
 ## 3. Предметы: `Artifact`
 
-Профиль предмета (`data/Artifact.gd`) содержит: `id`, `display_name`, `slot`,
+Профиль предмета (`scripts/data/Artifact.gd`) содержит: `id`, `display_name`, `slot`,
 `rarity` (`MINOR/MAJOR/RELIC`), модификаторы, `is_two_handed`, `is_ranged`,
 `proficiency`, профили `combat` / `armor` / `ac_bonus_type`, `damage_types`,
 `crit_threat/multiplier`, `value_gold`, `special_effect`.
@@ -144,10 +144,10 @@ RING_L, RING_R, MISC_A, MISC_B, SPELLBOOK`.
 
 ## 4. UI
 
-- `ui/ArtifactInventoryScreen.gd` — экран инвентаря/артефактов (экипировка,
+- `scripts/ui/ArtifactInventoryScreen.gd` — экран инвентаря/артефактов (экипировка,
   сортировка, продажа).
-- `ui/ArtifactChestDialog.gd` — диалот сундука с артефактами.
-- `ui/HeroModelFactory.gd` — собирает «модель» героя (статы/экипировка) для
+- `scripts/ui/ArtifactChestDialog.gd` — диалот сундука с артефактами.
+- `scripts/ui/HeroModelFactory.gd` — собирает «модель» героя (статы/экипировка) для
   модельных экранов (стартовое меню и др.), используя `get_total_modifiers()`.
 
 ## 5. Тесты

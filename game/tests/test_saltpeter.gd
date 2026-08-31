@@ -1,11 +1,11 @@
 extends "res://tests/test_base.gd"
 ## Saltpeter explosion tests: double damage to adjacent units.
 
-const _BattleState = preload("res://systems/BattleState.gd")
-const _BattleRules = preload("res://core/BattleRules.gd")
-const _UnitStack = preload("res://entities/UnitStack.gd")
-const _UnitStats = preload("res://entities/UnitStats.gd")
-const _HexUtils = preload("res://core/HexUtils.gd")
+const _BattleState = preload("res://scripts/systems/BattleState.gd")
+const _BattleRules = preload("res://scripts/core/BattleRules.gd")
+const _UnitStack = preload("res://scripts/entities/UnitStack.gd")
+const _UnitStats = preload("res://scripts/entities/UnitStats.gd")
+const _HexUtils = preload("res://scripts/core/HexUtils.gd")
 var state: BattleState
 var rng: RandomNumberGenerator
 

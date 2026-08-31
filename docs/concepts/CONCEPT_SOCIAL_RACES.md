@@ -2,7 +2,7 @@
 
 > Источник: [Official Against the Storm Wiki](https://wiki.hoodedhorse.com/Against_the_Storm/Against_the_Storm_Official_Wiki).
 > Цель: описать систему управления населением как образец для социальной механики
-> проекта «Sigil of the Unwilling» («Знак Нежелавших») (слои `demographics/`, `economy/`).
+> проекта «Sigil of the Unwilling» («Знак Нежелавших») (слои `scripts/demographics/`, `scripts/economy/`).
 
 ---
 
@@ -153,7 +153,7 @@
 2. **Синергия Хранителей Огня:** Ящер → пережиток Шторма (+1 Resolve); Бобр → экономия топлива.
 3. **Оптимизация Комфорта:** Ящеры → кузницы/печи рядом с домами; Лисы → группы по 3–4.
 
-> См. связку с `demographics/TraitDef.gd` (модификаторы потребностей),
-> `economy/ProductionChain.gd` (расовые производственные цепочки),
-> `data/BuildingDefs.gd` (базовый каталог зданий проекта).
+> См. связку с `scripts/demographics/TraitDef.gd` (модификаторы потребностей),
+> `scripts/economy/ProductionChain.gd` (расовые производственные цепочки),
+> `scripts/data/BuildingDefs.gd` (базовый каталог зданий проекта).
 > Детальный разбор взаимосвязей построек — `docs/CONCEPT_BUILDING_SYNERGY.md`.

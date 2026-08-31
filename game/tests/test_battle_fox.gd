@@ -1,6 +1,6 @@
 extends "res://tests/test_base.gd"
 
-const _BattleFX = preload("res://core/BattleFX.gd")
+const _BattleFX = preload("res://scripts/core/BattleFX.gd")
 
 func test_fx_instantiation() -> void:
 	var fx := _BattleFX.new()

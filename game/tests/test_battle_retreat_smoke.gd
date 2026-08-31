@@ -22,7 +22,7 @@ func _init() -> void:
 func _test_retreat_smoke() -> int:
 	var errors := 0
 
-	var state: BattleState = load("res://systems/BattleState.gd").new()
+	var state: BattleState = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 40))
 	atk.append(Units.make_fixed_stack("archers", 20))

@@ -8,15 +8,15 @@
 
 В проекте две системы описания эффектов:
 
-- **Боевая** (`game/data/SpellRegistry.gd`, автозагрузка `Spells`) — 20
+- **Боевая** (`game/scripts/autoload/SpellRegistry.gd`, автозагрузка `Spells`) — 20
   обычных боевых заклинаний. Каждое — `SpellRegistry.SpellDef` с
   `damage_multiplier` (множитель урона) и `buff_effect` (эффект статуса,
   `-1` если нет). Применяется через `SpellCaster.cast`.
-- **Система заклинаний** (`game/data/`, автозагрузка `Spellbook`) — 505 заклинаний из
+- **Система заклинаний** (`game/scripts/data/`, автозагрузка `Spellbook`) — 505 заклинаний из
   `spells.json`. Каждая — `SpellDef` с шаблоном (16 вариантов) и
   параметрами (`params`). Применяется через `SpellResolver.resolve`.
 
-Мост — `game/data/BattleSpellBridge.gd` (`class_name BattleSpellBridge`):
+Мост — `game/scripts/data/BattleSpellBridge.gd` (`class_name BattleSpellBridge`):
 
 1. **`to_spell()`** — боевое заклинание как быстрое:
    `speed = FAST`, шаблон/параметры из категории, `cost = base_mana`.
@@ -73,7 +73,7 @@
 
 ## 4. Интеграция с сокет-сервером
 
-`game/core/SocketController.gd`:
+`game/scripts/autoload/SocketController.gd`:
 
 - **`BATTLE_SPELL`** — `{"spell_id", "tags", "hp", "count", "resistant"}`.
   Строит `BattleUnit`, вызывает `BattleSpellBridge.to_spell` + `apply_spell`,

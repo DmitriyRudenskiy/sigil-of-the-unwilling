@@ -55,9 +55,9 @@ LEGS=5  BOOTS=6 RING_L=7  RING_R=8  MISC_A=9  MISC_B=10  SPELLBOOK=11
 
 ## Система снаряжения и боя (NWN2 / D&D 3.5)
 
-Реализована в `systems/EquipmentManager.gd` (RefCounted) с поддержкой в
-`data/Artifact.gd` (профили `combat` / `armor` / `ac_bonus_type`) и
-`data/ArtifactRegistry.gd` (заполнены оружие, броня, аксессуары).
+Реализована в `scripts/systems/EquipmentManager.gd` (RefCounted) с поддержкой в
+`scripts/data/Artifact.gd` (профили `combat` / `armor` / `ac_bonus_type`) и
+`scripts/autoload/ArtifactRegistry.gd` (заполнены оружие, броня, аксессуары).
 
 ### 1. Класс брони (AC) — стаки бонусов по модели NWN2
 

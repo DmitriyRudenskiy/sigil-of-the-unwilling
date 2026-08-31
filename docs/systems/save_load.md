@@ -7,11 +7,11 @@
 
 | Уровень | Класс | Ответственность |
 | --- | --- | --- |
-| JSON | `core/SaveManager.gd` | Запись/чтение `user://save_slot_1.json`, коды ошибок |
-| Данные | `core/SaveData.gd` | Контейнер файла сохранения (версии, миграции) |
-| Мир | `world/WorldPersistence.gd` | save/load/restart/seed/session-состояние |
+| JSON | `scripts/core/SaveManager.gd` | Запись/чтение `user://save_slot_1.json`, коды ошибок |
+| Данные | `scripts/core/SaveData.gd` | Контейнер файла сохранения (версии, миграции) |
+| Мир | `scripts/world/WorldPersistence.gd` | save/load/restart/seed/session-состояние |
 
-## SaveManager (`core/SaveManager.gd`)
+## SaveManager (`scripts/core/SaveManager.gd`)
 
 Низкоурневый уровень. Путь — `SAVE_PATH := "user://save_slot_1.json"`.
 **Все ошибки возвращаются как коды** (`SaveError`), а не молчаливый null:
@@ -26,7 +26,7 @@
 > ⚠️ Лог «SaveManager: parse error» — **информационный** (например, при
 > проверке отсутствия сейва/некорректного файла), не критическая ошибка.
 
-## SaveData (`core/SaveData.gd`)
+## SaveData (`scripts/core/SaveData.gd`)
 
 Контейнер файла сохранения:
 
@@ -45,7 +45,7 @@
 `hero.time_mp_spent` для персистентности маны), `_migrate_v2_to_v3` (города и
 персонажи). `is_valid()` — проверка версии/седа.
 
-## WorldPersistence (`world/WorldPersistence.gd`)
+## WorldPersistence (`scripts/world/WorldPersistence.gd`)
 
 Обёртка над `SaveManager` + состояние мира:
 

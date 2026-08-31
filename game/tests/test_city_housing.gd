@@ -2,12 +2,12 @@ extends "res://tests/test_base.gd"
 ## Спринт 7: жильё (хижина/особняк/казармы), назначение рабочих,
 ## повышение учёных.
 
-const _City = preload("res://world/City.gd")
-const _Defs = preload("res://data/BuildingDefs.gd")
-const _Chain = preload("res://economy/ProductionChain.gd")
-const _Assignment = preload("res://world/WorkerAssignment.gd")
-const _DemoProc = preload("res://demographics/DemographicTurnProcessor.gd")
-const _Registry = preload("res://demographics/CharacterRegistry.gd")
+const _City = preload("res://scripts/world/City.gd")
+const _Defs = preload("res://scripts/data/BuildingDefs.gd")
+const _Chain = preload("res://scripts/economy/ProductionChain.gd")
+const _Assignment = preload("res://scripts/world/WorkerAssignment.gd")
+const _DemoProc = preload("res://scripts/demographics/DemographicTurnProcessor.gd")
+const _Registry = preload("res://scripts/demographics/CharacterRegistry.gd")
 
 var city: Variant
 var center := Vector2i(5, 5)

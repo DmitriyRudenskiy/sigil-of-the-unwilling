@@ -1,7 +1,7 @@
 extends SceneTree
 ## Simple headless test runner.
 
-const ServiceContainer = preload("res://core/ServiceContainer.gd")
+const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
 
 ## Параметры из командной строки (заполняются в _run_tests).
 var FILTER := ""          # подстрока по имени файла и/или метода
@@ -88,6 +88,16 @@ func _run_tests() -> void:
 		_list_dir("res://tests")
 		call_deferred("quit", 0)
 		return
+
+	# Godot 4.7 `-s`-режим сбрасывает layout AudioServer до дефолта (только Master)
+	# после инициализации дерева — если шин проекта нет, пере-применяем layout
+	# из audio/buses (иначе test_audio видит только Master).
+	if AudioServer.get_bus_index("SFX") == -1:
+		var layout_path := String(ProjectSettings.get_setting("audio/buses", ""))
+		if layout_path != "":
+			var layout = load(layout_path) as AudioBusLayout
+			if layout != null:
+				AudioServer.set_bus_layout(layout)
 
 	# Инициализация ServiceContainer для headless-тестов
 	var services := ServiceContainer.new()

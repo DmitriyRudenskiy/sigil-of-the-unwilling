@@ -1,7 +1,7 @@
 extends "res://tests/test_base.gd"
 ## Tests for algorithmic optimizations: A*, cache keys, bounding box search.
 
-const _HexUtils = preload("res://core/HexUtils.gd")
+const _HexUtils = preload("res://scripts/core/HexUtils.gd")
 
 func test_astar_finds_path() -> void:
 	var blocked: Dictionary = {}

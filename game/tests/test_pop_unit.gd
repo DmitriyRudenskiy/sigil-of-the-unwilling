@@ -1,7 +1,7 @@
 extends "res://tests/test_base.gd"
 ## Тесты PopUnit: состояния, переключение, доступность.
 
-const _PopUnit = preload("res://world/PopUnit.gd")
+const _PopUnit = preload("res://scripts/world/PopUnit.gd")
 
 var unit: RefCounted
 

@@ -10,27 +10,27 @@ config_version=5
 
 [application]
 
-config/name="HoMM3 Clone"
+config/name="Sigil of the Unwilling"
 run/main_scene="res://scenes/MainMenu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [audio]
 
-buses="res://default_bus_layout.tres"
+buses="res://assets/settings/default_bus_layout.tres"
 
 [autoload]
 
-SoundManager="*res://core/SoundManager.gd"
-Settings="*res://core/Settings.gd"
-GameEventBus="*res://core/GameEventBus.gd"
-Spellbook="*res://data/SpellbookRegistry.gd"
-TemplateBootstrap="*res://data/TemplateBootstrap.gd"
-SocketController="res://core/SocketController.gd"
-Units="*res://entities/UnitRegistry.gd"
-Artifacts="*res://data/ArtifactRegistry.gd"
-Spells="*res://data/SpellRegistry.gd"
-Resources="*res://data/ResourceRegistry.gd"
+SoundManager="*res://scripts/autoload/SoundManager.gd"
+Settings="*res://scripts/autoload/Settings.gd"
+GameEventBus="*res://scripts/autoload/GameEventBus.gd"
+Spellbook="*res://scripts/autoload/SpellbookRegistry.gd"
+TemplateBootstrap="*res://scripts/autoload/TemplateBootstrap.gd"
+SocketController="res://scripts/autoload/SocketController.gd"
+Units="*res://scripts/autoload/UnitRegistry.gd"
+Artifacts="*res://scripts/autoload/ArtifactRegistry.gd"
+Spells="*res://scripts/autoload/SpellRegistry.gd"
+Resources="*res://scripts/autoload/ResourceRegistry.gd"
 
 [debug]
 

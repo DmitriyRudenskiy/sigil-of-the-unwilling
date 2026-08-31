@@ -1,6 +1,6 @@
 extends "res://tests/test_base.gd"
 
-const _Settings = preload("res://core/Settings.gd")
+const _Settings = preload("res://scripts/autoload/Settings.gd")
 
 var settings: Object
 

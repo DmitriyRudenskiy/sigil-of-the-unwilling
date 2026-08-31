@@ -1,8 +1,8 @@
 extends SceneTree
 ## Курсор боя: режимы (меч/палочка/стрела/прицел) и видимость.
 
-const _BattleView = preload("res://systems/BattleView.gd")
-const _BattleInput = preload("res://systems/BattleInput.gd")
+const _BattleView = preload("res://scripts/systems/BattleView.gd")
+const _BattleInput = preload("res://scripts/systems/BattleInput.gd")
 
 var _passed: int = 0
 var _failed: int = 0

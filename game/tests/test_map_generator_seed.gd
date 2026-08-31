@@ -5,10 +5,10 @@ var _failed: int = 0
 ## Тест: MapGenerator сохраняет seed_value до generate().
 
 # Предзагрузка зависимостей, чтобы class_name резолвились в headless-режиме
-const _MapModel = preload("res://world/MapModel.gd")
-const _MapRenderer = preload("res://world/MapRenderer.gd")
-const _MapSpawner = preload("res://world/MapSpawner.gd")
-const _MapGenerator = preload("res://world/MapGenerator.gd")
+const _MapModel = preload("res://scripts/world/MapModel.gd")
+const _MapRenderer = preload("res://scripts/world/MapRenderer.gd")
+const _MapSpawner = preload("res://scripts/world/MapSpawner.gd")
+const _MapGenerator = preload("res://scripts/world/MapGenerator.gd")
 
 func _init() -> void:
 	var failed := 0

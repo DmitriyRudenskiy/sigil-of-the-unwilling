@@ -1,7 +1,7 @@
 extends "res://tests/test_base.gd"
 ## Resource capacity and basic resource tests.
 
-const _HeroController = preload("res://entities/HeroController.gd")
+const _HeroController = preload("res://scripts/entities/HeroController.gd")
 
 
 var hero: HeroController

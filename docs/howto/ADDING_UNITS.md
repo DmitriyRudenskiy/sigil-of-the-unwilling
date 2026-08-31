@@ -2,7 +2,7 @@
 
 ## 1. Добавить характеристики
 
-Открыть `game/entities/UnitRegistry.gd`.
+Открыть `game/scripts/autoload/UnitRegistry.gd`.
 
 Добавить запись в `UNITS`:
 

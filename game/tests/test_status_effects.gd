@@ -4,8 +4,8 @@ var _passed: int = 0
 var _failed: int = 0
 ## Status effects: duration, stun skip, cure clear, debuff check.
 
-const _StatusEffects = preload("res://data/StatusEffects.gd")
-const _BattleState = preload("res://systems/BattleState.gd")
+const _StatusEffects = preload("res://scripts/data/StatusEffects.gd")
+const _BattleState = preload("res://scripts/systems/BattleState.gd")
 
 func _init() -> void:
 	var failed := 0

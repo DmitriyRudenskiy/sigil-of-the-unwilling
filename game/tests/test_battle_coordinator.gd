@@ -5,9 +5,9 @@ extends "res://tests/test_base.gd"
 ## зависимости (Node + has_method) вместо жёстких типов,
 ## поэтому preload() работает в headless-режиме.
 
-const _Coordinator = preload("res://world/WorldBattleCoordinator.gd")
-const _UnitRegistry = preload("res://entities/UnitRegistry.gd")
-const _HeroArmy = preload("res://entities/HeroArmyController.gd")
+const _Coordinator = preload("res://scripts/world/WorldBattleCoordinator.gd")
+const _UnitRegistry = preload("res://scripts/autoload/UnitRegistry.gd")
+const _HeroArmy = preload("res://scripts/entities/HeroArmyController.gd")
 const _FakeHero = preload("res://tests/fakes/fake_hero.gd")
 const _FakeMap = preload("res://tests/fakes/fake_battle_map.gd")
 
