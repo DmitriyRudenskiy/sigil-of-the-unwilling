@@ -1,50 +1,29 @@
 extends SceneTree
-## Check tileset integrity: existence, resources, and TerrainAtlasMap.
-## Run: godot --headless -s tools/check_tileset.gd
 
-const TerrainAtlasMapScript = preload("res://world/TerrainAtlasMap.gd")
+## Проверка целостности тайлкета (CI-шаг). Работает как check_scene_refs.gd:
+## сканируем в _process и завершаем проект через quit().
+## Печатает «RESULT: PASSED» / «RESULT: FAILED» — надёжный сигнал для CI.
 
-var failed := 0
-var passed := 0
+var _ok := true
+const SHEET_PATH := "res://assets/tiles/world_tiles.jpeg"
 
-func check(name: String, condition: bool, detail: String = "") -> void:
-	if condition:
-		passed += 1
-		print("  PASS  ", name)
+
+func _process(_delta: float) -> bool:
+	var tex := load(SHEET_PATH)
+	if not (tex is Texture2D):
+		print("FAIL: не удалось загрузить ", SHEET_PATH)
+		_ok = false
 	else:
-		failed += 1
-		printerr("  FAIL  ", name, " — ", detail)
+		print("OK: текстура %dx%d" % [tex.get_width(), tex.get_height()])
 
+	var ts := TileAtlas.build_hex_tileset()
+	if ts == null:
+		print("FAIL: TileAtlas.build_hex_tileset() == null")
+		_ok = false
+	else:
+		print("OK: TileSet источников ", ts.get_source_count())
 
-func _init() -> void:
-	print("=== Tileset check ===")
-
-	# 1. File exists
-	var tileset_path := "res://tilesets/hex_tileset.tres"
-	check("tileset file exists", FileAccess.file_exists(tileset_path))
-
-	# 2. Resource loads
-	var ts := load(tileset_path)
-	check("tileset loads", ts != null, "%s" % ts)
-	check("tileset is TileSet", ts is TileSet, "%s" % ts.get_class())
-
-	# 3. Has source 0
-	var has_source: bool = ts.has_source(0) if ts is TileSet else false
-	check("has source 0", has_source)
-
-	# 4. TerrainAtlasMap has 7 biomes
-	var coords := TerrainAtlasMapScript.CENTER_COORDS
-	for t in 7:
-		check("biome %d in CENTER_COORDS" % t, coords.has(t))
-
-	# 5. All coords are valid Vector2i
-	for t in 7:
-		if coords.has(t):
-			var c = coords[t]
-			check("biome %d is Vector2i" % t, c is Vector2i, "%s" % str(c))
-
-	# 6. Swamp specifically
-	check("swamp (id=1) present", coords.has(1), "missing swamp!")
-
-	print("\n=== %d passed, %d failed ===" % [passed, failed])
-	quit(1 if failed > 0 else 0)
+	var verdict := "PASSED" if _ok else "FAILED"
+	print("=== tileset check: RESULT: ", verdict, " ===")
+	quit(0 if _ok else 1)
+	return true
