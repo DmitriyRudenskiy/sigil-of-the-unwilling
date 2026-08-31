@@ -69,6 +69,7 @@
 - [`CONCEPT_ECONOMIC_SYNERGY.md`](CONCEPT_ECONOMIC_SYNERGY.md) — экономическая синергия (анализ Endless Legend).
 - [`CONCEPT_SOCIAL_RACES.md`](CONCEPT_SOCIAL_RACES.md) — социальная составляющая и расы.
 - [`TASK_SOCIAL_AND_BUILDINGS.md`](TASK_SOCIAL_AND_BUILDINGS.md) — задачи по социалке и постройки.
+- [`TASK_BUILDING_SCORING_GODOT47.md`](TASK_BUILDING_SCORING_GODOT47.md) — самодостаточное ТЗ: размещение зданий, радиальный скорнинг, слияние (GridManager/ScoringManager/MergeSystem, сборка в Godot Editor).
 
 ### Misc / Research
 - [`binomials.md`](binomials.md) — механика биномиев.

@@ -40,6 +40,15 @@
   `WorkerAssignment`, приток последователей (столица, слава, храм, сезон),
   экономические поля зданий, `DemographicTurnProcessor` (фаза 2). Индекс
   `docs/README.md` обновлён, «Экономика хода» убран из «Пробелов».
+- [x] **Follow-up: building scoring (Godot 4.7 ТЗ)** — `docs/TASK_BUILDING_SCORING_GODOT47.md`
+  — самодостаточное ТЗ на стратегическое размещение зданий на гексах: радиальный
+  скорнинг (base + biome + adjacency в `input_radius` + иерархия тиров), слияние
+  (`MergeSystem`), архитектура `GridManager` (autoload) / `ScoringManager` / `MergeSystem`
+  с сигнатурами методов, пошаговая сборка в Godot Editor (TileMapLayer, .tres, визуализация
+  радиуса), критерии приемки + тесты. Привязка к `core/HexUtils.gd`,
+  `game/city/AdjacencySystem.gd`, `data/BuildingDefs.gd`. Не дублирует
+  `CONCEPT_BUILDING_SYNERGY.md` (дизайн) и `TASK_SOCIAL_AND_BUILDINGS.md` (фаза 2/3).
+  Индекс `docs/README.md` обновлён.
 
 ## 6. Version control
 - [x] `git add docs/` and commit; confirm `git ls-files docs/` now lists files.
