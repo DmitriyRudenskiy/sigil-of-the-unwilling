@@ -34,6 +34,12 @@
   заклинаний в момент каста:
   city subsystems (Arena/Zoning/Specialization/Logistics/Market/Reputation),
   battle (general overview). See `spells_system.md` / `battle_spells.md`.
+- [x] **Follow-up: economy (runtime)** — `docs/economy_runtime.md` — исполнение
+  экономики и демографии в ходу: `ResourceContext`, `ProductionChain`,
+  `EconomicTurnProcessor` (фаза 1: авто-ресурсы → цепочки → поддержка),
+  `WorkerAssignment`, приток последователей (столица, слава, храм, сезон),
+  экономические поля зданий, `DemographicTurnProcessor` (фаза 2). Индекс
+  `docs/README.md` обновлён, «Экономика хода» убран из «Пробелов».
 
 ## 6. Version control
 - [x] `git add docs/` and commit; confirm `git ls-files docs/` now lists files.

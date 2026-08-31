@@ -39,6 +39,9 @@
 - **Экономика**
   - [`ECONOMY_DATA.md`](ECONOMY_DATA.md) — экономические данные игры.
   - [`ECONOMY_BALANCE.md`](ECONOMY_BALANCE.md) — экономика и баланс.
+  - [`economy_runtime.md`](economy_runtime.md) — исполнение экономики в ходу:
+    ResourceContext, ProductionChain, EconomicTurnProcessor, WorkerAssignment,
+    приток последователей, здания, DemographicTurnProcessor.
 - **Тайлы / Биомы**
   - [`BIOME_SYSTEM.md`](BIOME_SYSTEM.md) — биомы, текстуры и тайлкеты.
 - **Герой**
@@ -78,7 +81,6 @@
 Большинство центральных систем уже документированы (world, city, hero, inventory,
 battle, save/load, spells, economy). Остаются более узкие/перспективные разделы:
 
-- **Экономика хода** — `economy/EconomicTurnProcessor.gd`, `ProductionChain`.
 - **Город: подсистемы хода** — Arena, Zoning, Specialization, Logistics,
   Market, Reputation, Prosperity, Raid (`city/`), подробнее, чем в `city_system.md`.
 - **Battle (общее)** — общий архитектурный обзор боя (не только заклинания).
