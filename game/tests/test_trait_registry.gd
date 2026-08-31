@@ -95,7 +95,7 @@ func test_custom_trait_add() -> void:
 	t.id = &"custom"
 	t.display_name = "Кастом"
 	t.rarity = _TraitDef.Rarity.RARE
-	t.effect_type = &"belief"
+	t.effect_type = &"inspiration"
 	t.effect_value = -0.5
 	reg.add(t)
 	assert_true(reg.has(&"custom"), "added")

@@ -38,7 +38,7 @@ func test_is_need_critical() -> void:
 	var ch := _Character.new()
 	ch.modify_need(&"hunger", -0.7)
 	assert_true(ch.is_need_critical(&"hunger"), "0.1 < 0.2")
-	assert_false(ch.is_need_critical(&"belief"), "0.8 not critical")
+	assert_false(ch.is_need_critical(&"inspiration"), "0.8 not critical")
 	ch.modify_need(&"hunger", 0.05)
 	assert_true(ch.is_need_critical(&"hunger"), "0.15 still critical")
 
@@ -53,7 +53,7 @@ func test_trait_modifier_sums() -> void:
 	t2.effect_value = -0.05
 	ch.traits = [t1, t2]
 	assert_eq(ch.trait_modifier(&"hunger"), 0.05, "sum of modifiers")
-	assert_eq(ch.trait_modifier(&"belief"), 0.0, "unaffected need")
+	assert_eq(ch.trait_modifier(&"inspiration"), 0.0, "unaffected need")
 
 
 func test_age_in_days() -> void:
@@ -91,6 +91,34 @@ func test_serialize_roundtrip() -> void:
 	assert_false(ch2.alive, "alive state")
 	assert_eq(ch2.traits.size(), 1, "trait count")
 	assert_eq(ch2.traits[0].id, &"hardy", "trait id")
+
+
+func test_deserialize_migrates_belief_to_inspiration() -> void:
+	# Старое сохранение: потребность belief (до переименования в inspiration).
+	var old_save := {
+		"uid": 42,
+		"name": "Старый",
+		"icon": "🙂",
+		"birth_turn": 0,
+		"city_uid": -1,
+		"pop_uid": -1,
+		"alive": true,
+		"needs": {"hunger": "0.8", "rest": "0.8", "social": "0.8", "belief": "0.4"},
+		"traits": [],
+	}
+	var ch := _Character.deserialize(old_save)
+	assert_true(ch.needs.has(&"inspiration"), "inspiration present after migration")
+	assert_eq(ch.needs[&"inspiration"], 0.4, "belief value carried over")
+	assert_false(ch.needs.has(&"belief"), "old key removed")
+	# Смешанный набор (вручную повреждённое сохранение): inspiration побеждает.
+	var mixed_save := {
+		"uid": 43, "name": "Микс", "icon": "🙂", "birth_turn": 0,
+		"city_uid": -1, "pop_uid": -1, "alive": true,
+		"needs": {"belief": "0.4", "inspiration": "0.6"}, "traits": [],
+	}
+	var ch2 := _Character.deserialize(mixed_save)
+	assert_eq(ch2.needs[&"inspiration"], 0.6, "inspiration wins over stale belief")
+	assert_false(ch2.needs.has(&"belief"), "mixed: old key removed")
 
 
 # ==================== REGISTRY ====================

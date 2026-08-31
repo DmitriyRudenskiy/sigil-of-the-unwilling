@@ -246,7 +246,7 @@ func test_outbreak_triggered_and_cooldown() -> void:
 	assert_eq(outbreak[0]["city"], city.uid, "city uid in signal")
 	# Поражённые получили штраф.
 	var c0: Character = chars[0]
-	assert_true(c0.needs[&"belief"] < 0.75, "belief penalty applied")
+	assert_true(c0.needs[&"inspiration"] < 0.75, "inspiration penalty applied")
 	# Каллдаун: повторное состояние, но меньше 5 ходов с эпидемии.
 	chars[1].needs[&"hunger"] = 0.05
 	chars[1].needs[&"rest"] = 0.05

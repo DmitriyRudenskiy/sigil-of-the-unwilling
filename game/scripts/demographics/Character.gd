@@ -7,7 +7,7 @@ extends RefCounted
 ## удовлетворена); дельты считает DemographicTurnProcessor.
 ## Чистый RefCounted: сериализуется в Dictionary, не зависит от узлов.
 
-const NEED_KEYS: Array[StringName] = [&"hunger", &"rest", &"social", &"belief"]
+const NEED_KEYS: Array[StringName] = [&"hunger", &"rest", &"social", &"inspiration"]
 
 var uid := 0
 var name := ""
@@ -93,6 +93,12 @@ static func deserialize(data: Dictionary) -> Character:
 	ch.pop_uid = int(data.get("pop_uid", -1))
 	ch.alive = bool(data.get("alive", true))
 	var raw_needs: Dictionary = data.get("needs", {})
+	# Миграция старых сохранений: потребность belief переименована в inspiration.
+	# Без переноса у героя пропадала бы одна из четырёх потребностей.
+	if raw_needs.has("belief"):
+		if not raw_needs.has("inspiration"):
+			raw_needs["inspiration"] = raw_needs["belief"]
+		raw_needs.erase("belief")
 	for k in raw_needs:
 		ch.needs[StringName(k)] = float(raw_needs[k])
 	var raw_traits: Array = data.get("traits", [])

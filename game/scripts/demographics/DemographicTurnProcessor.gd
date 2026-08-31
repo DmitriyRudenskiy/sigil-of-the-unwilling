@@ -35,7 +35,7 @@ const DECAY: Dictionary = {
 	&"hunger": 0.15,
 	&"rest": 0.10,
 	&"social": 0.08,
-	&"belief": 0.05,
+	&"inspiration": 0.05,
 }
 
 var registry: CharacterRegistry = null
@@ -137,7 +137,7 @@ func _process_city(city: City, ctx: TurnContext) -> Dictionary:
 		for ch in registry.alive_in_city(city.uid):
 			if critical_chars.has(ch):
 				ch.modify_need(&"rest", -0.2)
-				ch.modify_need(&"belief", -0.1)
+				ch.modify_need(&"inspiration", -0.1)
 				report["outbreaks"] += 1
 				disease_outbreak.emit(city.uid, ch.uid)
 
@@ -192,7 +192,7 @@ func _recovery(need_id: StringName, city: City, pop: PopUnit) -> float:
 			if city.pop.size() >= 3:
 				return 0.10
 			return -0.05
-		&"belief":
+		&"inspiration":
 			return 0.05
 	return 0.0
 
@@ -207,8 +207,8 @@ func _death_cause(ch: Character) -> StringName:
 					return &"exhaustion"
 				&"social":
 					return &"isolation"
-				&"belief":
-					return &"despair"
+				&"inspiration":
+					return &"burnout"
 	return &""
 
 

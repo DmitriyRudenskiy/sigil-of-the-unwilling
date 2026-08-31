@@ -3,7 +3,7 @@ extends RefCounted
 ## Черта персонажа (M2: Демография).
 ##
 ## effect_type — ключ потребности, на которую черта влияет:
-## &"hunger", &"rest", &"social", &"belief" (влияние = effect_value,
+## &"hunger", &"rest", &"social", &"inspiration" (влияние = effect_value,
 ## добавляется к ежедневному дельте; может быть отрицательным).
 ## Сериализуется в Dictionary (JSON-совместимо).
 
