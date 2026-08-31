@@ -68,7 +68,8 @@
 - [`CONCEPT_BUILDING_SYNERGY.md`](CONCEPT_BUILDING_SYNERGY.md) — взаимосвязи построек (TerraScape-скоринг).
 - [`CONCEPT_ECONOMIC_SYNERGY.md`](CONCEPT_ECONOMIC_SYNERGY.md) — экономическая синергия (анализ Endless Legend).
 - [`CONCEPT_SOCIAL_RACES.md`](CONCEPT_SOCIAL_RACES.md) — социальная составляющая и расы.
-- [`CONCEPT_POPULATION_RUNTIME.md`](CONCEPT_POPULATION_RUNTIME.md) — соц. составляющая TerraScape-прототипа в ходу: потребности (cap/demand/ok), мораль/Resolve, штормы, караваны, репутация, авто-слияние ×4.
+- [`CONCEPT_POPULATION_RUNTIME.md`](CONCEPT_POPULATION_RUNTIME.md) — соц. составляющая TerraScape-прототипа в ходу: потребности (cap/demand/ok), мораль/Resolve, штормы, караваны, репутация.
+- [`CONCEPT_MERGE_AUTO_4.md`](CONCEPT_MERGE_AUTO_4.md) — авто-слияние ×4 (BFS связного компонента, «здание II» _BIG, переселение работников, триггер в цикле размещения). Отдельно от рецептурного слияния.
 - [`TASK_SOCIAL_AND_BUILDINGS.md`](TASK_SOCIAL_AND_BUILDINGS.md) — задачи по социалке и постройки.
 - [`TASK_BUILDING_SCORING_GODOT47.md`](TASK_BUILDING_SCORING_GODOT47.md) — самодостаточное ТЗ: размещение зданий, радиальный скорнинг, слияние (GridManager/ScoringManager/MergeSystem, сборка в Godot Editor).
 
