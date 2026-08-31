@@ -40,6 +40,16 @@
   - [`ECONOMY_BALANCE.md`](ECONOMY_BALANCE.md) — экономика и баланс.
 - **Тайлы / Биомы**
   - [`BIOME_SYSTEM.md`](BIOME_SYSTEM.md) — биомы, текстуры и тайлкеты.
+- **Герой**
+  - [`hero_system.md`](hero_system.md) — фасад героя: движение, армия, ресурсы, магия, навыки.
+- **Город**
+  - [`city_system.md`](city_system.md) — модель города, население, ход города, подсистемы.
+- **Мир / Приключения**
+  - [`world_adventure.md`](world_adventure.md) — bootstrap мира, карта, оркестрация хода, роутер событий.
+- **Бой**
+  - [`battle_system.md`](battle_system.md) — слои боя, BattleState, резолверы, порядок ходов, AI, интеграция с миром.
+- **Сохранение**
+  - [`save_load.md`](save_load.md) — 3 уровня: JSON-менеджер, SaveData, WorldPersistence.
 - **Инвентарь**
   - [`inventory_items.md`](inventory_items.md) — предметы инвентаря (воин / лучник / маг).
 
