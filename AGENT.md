@@ -210,7 +210,7 @@
 ## 8. Команды (headless, без GPU/окна)
 
 Godot в headless-режиме гоняет сцены в бесконечном цикле. Для smoke-тестов сцена должна
-сама завершаться (через `--autoquit` или `quit()` в `_init`/после инициализации).
+сама завершаться (через `--quit-after N` или `quit()` в `_init`/после инициализации).
 
 Все команды Godot идут с `--path game` (корень проекта — `game/`).
 
@@ -239,11 +239,11 @@ $GODOT --headless --path game -s tests/run_tests.gd
 
 # Проверка ссылок в сценах / валидация карт / целостность тайлкетов
 $GODOT --headless --path game -s tools/check_scene_refs.gd
-$GODOT --headless --path game -s tools/card_validation/validate_card_spells.gd --strict --json
+$GODOT --headless --path game -s tools/spell_validation/validate_spells.gd --strict --json
 $GODOT --headless --path game -s tools/check_tileset.gd
 
-# Запуск сцены (нужен --autoquit, иначе зависнет)
-$GODOT --headless --path game --scene scenes/World.tscn --autoquit
+# Запуск сцены (--quit-after N, иначе зависнет; см. правило 8.1)
+$GODOT --headless --path game --scene scenes/World.tscn --quit-after 120
 $GODOT --path game --scene scenes/MainMenu.tscn          # с окном, для ручной проверки
 ```
 
@@ -273,11 +273,11 @@ run_godot() {  # run_godot <секунд> <остальные_аргументы
 }
 
 # Примеры:
-run_godot 40 $GODOT --headless --path game --scene scenes/World.tscn --autoquit
+run_godot 40 $GODOT --headless --path game --scene scenes/World.tscn --quit-after 120
 cat /tmp/godot_run.log | grep -vE 'loading_editor_layout|ready'
 ```
 
-- Для smoke-запуска сцены добавляем `--autoquit` (см. правило 8) — но всё равно оборачиваем.
+- Для smoke-запуска сцены добавляем `--quit-after 120` (см. правило 8) — но всё равно оборачиваем.
 - Если сцена должна завершиться сама (`quit()` после `await process_frame`) — всё равно
   держим `kill`-таймаут на всякий случай.
 - `timeout` на macOS **отсутствует**, поэтому используем именно `sleep + kill`.
@@ -311,7 +311,7 @@ cat /tmp/godot_run.log | grep -vE 'loading_editor_layout|ready'
 
 1. Быстрый прогон (`--fast`, ~1 мин) — проверить, что CI стартует и компиляция чистая.
 2. Полный прогон (`run_all_ci_checks.sh`, до ~5 мин с первого раза из-за автозагрузки
-   реестра) — все проверки + юнит-тесты (`4759 passed, 0 failed` из 75 файлов).
+   реестра) — все проверки + юнит-тесты (`4703 passed, 0 failed` из 75 файлов).
 3. Оба прогон **всегда** оборачивать в жёсткий таймаут (см. правило 8.1).
 
 ---
@@ -319,40 +319,28 @@ cat /tmp/godot_run.log | grep -vE 'loading_editor_layout|ready'
 ## 9. Тесты
 
 - Файлы: `game/tests/test_*.gd` (рекурсивно с `game/tests/unit/`), исполняются
-  из проекта `game/` (тот же каталог). Автономные SceneTree-раннеры
-  (`test_runtime_integration.gd`, `debug_load.gd`, `run_tests.gd`, `test_validation_runner.gd`)
-  **пропускаются** главным раннером — они запускаются сами через `godot -s`.
+  из проекта `game/` (тот же каталог). Автономные SceneTree-раннеры и служебные
+  файлы из `SKIP_FILES` в `run_tests.gd` (`test_base.gd`, `run_tests.gd`,
+  `test_runtime_integration.gd`, `test_audio_world_entry.gd`,
+  `test_city_arena_view.gd`, `test_validation_runner.gd`, `debug_load.gd`)
+  **пропускаются** главным раннером — автономные запускаются сами через `godot -s`.
 - **Шаблон тестового файла**:
   ```gdscript
-  extends SceneTree
-  var _passed: int = 0
-  var _failed: int = 0
+  extends "res://tests/test_base.gd"
 
-  func _init() -> void:
-      var failed := 0
-      failed += _test_что_то()
-      failed += _test_ещё_что()
-      if failed == 0:
-          print("... tests passed")
-      else:
-          printerr("... tests failed: ", failed)
-      _failed = failed
-      _passed = 1 if failed == 0 else 0
-      await process_frame
-      quit(1 if failed > 0 else 0)
-
-  func _test_что_то() -> int:
-      var errors := 0
-      # ... проверки через printerr + инкремент errors ...
-      return errors
+  func test_имя_кеbab() -> void:
+      tag("unit")
+      assert_eq(1 + 1, 2, "пример")
+      assert_true(true, "пример")
   ```
   Тест **не обязан** добавлять узлы в дерево. Если код требует дерева — добавлять
   осторожно (`get_root().add_child(node)`); `queue_redraw()`/`_process` должны быть
   защищены `is_inside_tree()`.
 - **Фейки/моки** — в `tests/fakes/` (`fake_battle_flow.gd`, `fake_hero.gd`, …):
   лёгкие замены координаторов для изоляции логики.
-- **Asserts** — через `printerr` + возврат счётчика ошибок (в проекте нет `assert`-хелпера);
-  раннер считает каждый файл теста за 1 единицу, поэтому возвращай `errors`.
+- **Asserts** — через `tests/test_base.gd` (`assert_eq/true/false/not_null/null/
+  not_empty/gt/lt/approx`): раннер считает ассерты, итог
+  `Total: N passed, M failed (of K files)` + `ALL TESTS PASSED`.
 - **Память**: для `RefCounted`-объектов (например `BattleState`) освобождать `free()`,
   не `queue_free()`.
 
@@ -363,12 +351,15 @@ cat /tmp/godot_run.log | grep -vE 'loading_editor_layout|ready'
 Только для систем с глобальным доступом и изолированным состоянием. В `project.godot`:
 
 ```
-SoundManager, Settings, GameEventBus, CardSpells, CardTemplateBootstrap,
+SoundManager, Settings, GameEventBus, Spellbook, TemplateBootstrap,
 SocketController, Units, Artifacts, Spells, Resources
 ```
+(все скрипты — в `game/scripts/autoload/`)
 
-- Без `*` в `project.godot` — грузятся со стартом (`SoundManager`, `SocketController`).
-- С `*` — отложенная загрузка (`Settings`, `Units`, `Spells`, `Artifacts`, `CardSpells`, …).
+- Без `*` в `project.godot` — грузится со стартом (сейчас только `SocketController`).
+- С `*` — отложенная загрузка (остальные 9: `SoundManager`, `Settings`,
+  `GameEventBus`, `Spellbook`, `TemplateBootstrap`, `Units`, `Artifacts`,
+  `Spells`, `Resources`).
 - `GameEventBus` — центральная шина событий для связи слоёв (не заменять прямыми сигналами
   там, где связь глобальная/множественная).
 

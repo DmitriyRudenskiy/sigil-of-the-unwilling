@@ -156,4 +156,4 @@
 > См. связку с `scripts/demographics/TraitDef.gd` (модификаторы потребностей),
 > `scripts/economy/ProductionChain.gd` (расовые производственные цепочки),
 > `scripts/data/BuildingDefs.gd` (базовый каталог зданий проекта).
-> Детальный разбор взаимосвязей построек — `docs/CONCEPT_BUILDING_SYNERGY.md`.
+> Детальный разбор взаимосвязей построек — `docs/concepts/CONCEPT_BUILDING_SYNERGY.md`.

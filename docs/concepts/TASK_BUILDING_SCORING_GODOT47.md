@@ -36,7 +36,7 @@
 | --- | --- | --- |
 | Гекс-геометрия, соседство, расстояние | `scripts/core/HexUtils.gd` | `get_all_neighbors()`, `hex_distance()`, `get_config()` (odd-r offset). **Не писать свою математику сетки.** |
 | Городской adjacency (production mult + reputation) | `game/scripts/city/AdjacencySystem.gd` | Уже покрывает «мельница у полей ×1.5», «кузница у рудника ×3». Картографический скорнинг — отдельный слой; не трогать эту матрицу, если не требуется миграция правил. |
-| Определение зданий | `game/scripts/data/BuildingDefs.gd`, `game/scripts/data/UniqueBuilding.gd` | Источник `def`-ов для городов/уникальных зданий. Новая система вводит **отдельный** `BuildingData`-слой для стандартных зданий открытой карты (не путать с `UniqueBuilding.Def`). |
+| Определение зданий | `game/scripts/data/BuildingDefs.gd`, `game/scripts/world/UniqueBuilding.gd` | Источник `def`-ов для городов/уникальных зданий. Новая система вводит **отдельный** `BuildingData`-слой для стандартных зданий открытой карты (не путать с `UniqueBuilding.Def`). |
 | Сериализация мира | `SaveData`, `WorldBootstrap` | Состояние `GridManager.placed` должно сериализоваться. |
 
 > **Вывод:** ядро скорнинга (счёт + биом + adjacency + иерархия) — **новое**,
@@ -281,4 +281,4 @@ func try_merge(target_pos: Vector2i, new_id: StringName) -> bool
 - [`TASK_SOCIAL_AND_BUILDINGS.md`](TASK_SOCIAL_AND_BUILDINGS.md) — фаза 2/3 (та же тема,
   но в составе задачи «социалка + постройки»).
 - `scripts/core/HexUtils.gd`, `game/scripts/city/AdjacencySystem.gd`, `game/scripts/data/BuildingDefs.gd`,
-  `game/scripts/data/UniqueBuilding.gd`.
+  `game/scripts/world/UniqueBuilding.gd`.

@@ -1,7 +1,7 @@
 # Задачи: Социальная составляющая + Система размещения построек
 
-> Нарезка анализа из `docs/CONCEPT_SOCIAL_RACES.md` (расы, Against the Storm)
-> и `docs/CONCEPT_BUILDING_SYNERGY.md` (взаимосвязи построек, TerraScape)
+> Нарезка анализа из `docs/concepts/CONCEPT_SOCIAL_RACES.md` (расы, Against the Storm)
+> и `docs/concepts/CONCEPT_BUILDING_SYNERGY.md` (взаимосвязи построек, TerraScape)
 > в исполняемые задачи для Godot 4.7. Связка с существующими слоями:
 > `scripts/demographics/`, `scripts/economy/`, `scripts/data/BuildingDefs.gd`, `scripts/world/Borough`, `scripts/world/City`.
 
@@ -105,5 +105,5 @@
 - [ ] Bats нельзя фаворить; преданность сгорает при смерти летучей мыши.
 - [ ] Код типизирован, баланс — через `@export`/ресурсы, без хардкода в логике.
 
-> Зависимости: `docs/CONCEPT_SOCIAL_RACES.md`, `docs/CONCEPT_BUILDING_SYNERGY.md`,
+> Зависимости: `docs/concepts/CONCEPT_SOCIAL_RACES.md`, `docs/concepts/CONCEPT_BUILDING_SYNERGY.md`,
 > `scripts/data/BuildingDefs.gd`, `scripts/demographics/`, `scripts/economy/`, `scripts/world/Borough.gd`.

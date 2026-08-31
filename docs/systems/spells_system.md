@@ -237,7 +237,7 @@ godot --headless -s tools/spell_validation/validate_spells.gd --quiet assets/dat
 const Validator = preload("res://tools/spell_validation/SpellValidator.gd")
 
 var validator = Validator.new()
-var passed = validator.validate_file("res://scripts/data/spells.json")
+var passed = validator.validate_file("res://assets/data/spells.json")
 
 # Получить отчёт
 print(validator.report.to_text())

@@ -132,5 +132,5 @@
 4. **Радиус как инструмент баланса:** большие радиусы (Библиотека 4, Ремесло 3)
    требуют места, но их сложнее разместить без штрафующих соседей.
 
-> Смотри `docs/CONCEPT_SOCIAL_RACES.md` (расы) и `docs/TASK_SOCIAL_AND_BUILDINGS.md`
+> Смотри `docs/concepts/CONCEPT_SOCIAL_RACES.md` (расы) и `docs/concepts/TASK_SOCIAL_AND_BUILDINGS.md`
 > (разборка на задачи реализации в Godot 4.7).
