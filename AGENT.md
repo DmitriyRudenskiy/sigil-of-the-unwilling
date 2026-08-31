@@ -1,6 +1,6 @@
 # AGENT.md — руководство для агентов и разработчиков
 
-Строкий свод правил для работы с проектом **HoMM3-like hex strategy** (Godot 4.7).
+Строкий свод правил для работы с проектом **Sigil of the Unwilling** (hex strategy, Godot 4.7).
 Перед правкой прочитай `docs/ARCHITECTURE.md` — там описаны слои и запреты между ними.
 
 > Этот файл — адаптация общего шаблона под **конкретную структуру проекта**.
@@ -181,6 +181,9 @@
 6. **Перемещение/переименование файлов.** Кэш Godot десинхронизируется. Делать через
    Godot Editor **или** убедиться, что есть чистый коммит beforehand, и после —
    очистить `.godot/` (`rm -rf .godot`) и перезагрузить проект при странных ошибках.
+   **Обязательно чистить `.godot/`** после любых перемещений файлов, смены версий
+   `class_name` или если проверки начали падать с «Could not find type X» — иначе
+   устаревший реестр `global_script_class_cache.cfg` даёт ложные ошибки (см. 8.2).
 7. **Логи — через `GameLogger`.** Не слать `print()` в продакшн-код. Тег выбирается по
    домену: `GameLogger.battle(...)`, `world(...)`, `inventory(...)`, `ui(...)`,
    `warn(...)`, `error(...)`. Ошибки-граничные условия (лимиты, фолбэки) — через
@@ -211,6 +214,10 @@ $GODOT --headless --path game -s tools/compile_all.gd
 bash tools/shell/run_all_ci_checks.sh
 # --fast  : только компиляция + проверки (без тестов)
 # --tests : только тесты
+
+# ⚠️ run_all_ci_checks.sh АВТОМАТИЧЕСКИ соберёт реестр class_name, если его нет —
+#    чистый checkout работает из коробки, .godot вручную собирать/чистить не надо
+#    (см. правило 8.2).
 
 # Облегённый вариант (README): compile + scene-refs + подборка тестов + world smoke
 ./tools/shell/run_all_ci_checks.sh
@@ -267,6 +274,34 @@ cat /tmp/godot_run.log | grep -vE 'loading_editor_layout|ready'
   раннер из правила 9), а не через `--scene` — он гарантиленно завершается.
 - Если после `run_godot` в `/tmp/godot_run.log` есть `SCRIPT ERROR` / `Parse Error` —
   чиним; чистый прогон = только предупреждения импорта без ошибок скриптов.
+
+### 8.2. Реестр `class_name` и автозагрузка в CI
+
+Проект массово использует `class_name` (~91 класс). При загрузке GDScript Godot резолвит
+эти имена по **глобальному реестру** `.godot/global_script_class_cache.cfg`.
+
+- **Важно:** headless-запуски (`-s script.gd`, обычный импорт) реестр **не пишут** — он
+  строится только **ректором** (`godot --editor`). Без пресбортого реестра все проверки
+  падают с `SCRIPT ERROR: Parse Error: Could not find type "BattleState" in the current
+  scope` и `Failed to instantiate an autoload … does not inherit from 'Node'`.
+- **Поэтому `run_all_ci_checks.sh` автостартует реестр:** если `.godot/global_script_class_cache.cfg`
+  отсутствует, скрипт один раз прогоняет `godot --headless --path game --editor` (с таймаутом
+  240 с — импорт прёвается загрузкой UI-макета, но кэш успевает записаться) и только потом
+  запускает проверки. Чистый checkout **работает из коробки** — ничего собирать не надо.
+- **Обязательная чистка кэша:** если после правок поехали странные ошибки кэша/импорта —
+  `rm -rf game/.godot` и заново прогоните CI (он соберёт реестр заново).
+- **Определение провала** — по логу (маркеры `SCRIPT ERROR:`, `Failed to load script`,
+  `Could not find type`, `does not inherit from`, `RESULT: FAILED`, `SOME TESTS FAILED`),
+  а не по коду выхода: Godot возвращает `0` даже когда скрипт не загрузился.
+- **Ложные срабатывания:** приложение само логирует `SaveManager: parse error …` — поэтому
+  в маркеры провала **не** включают `Parse error`/`File not found`.
+
+### Рабочий цикл запуска/сборки
+
+1. Быстрый прогон (`--fast`, ~1 мин) — проверить, что CI стартует и компиляция чистая.
+2. Полный прогон (`run_all_ci_checks.sh`, до ~5 мин с первого раза из-за автозагрузки
+   реестра) — все проверки + юнит-тесты (`4759 passed, 0 failed` из 75 файлов).
+3. Оба прогон **всегда** оборачивать в жёсткий таймаут (см. правило 8.1).
 
 ---
 
@@ -333,7 +368,7 @@ SocketController, Units, Artifacts, Spells, Resources
 ## 11. Документация
 
 - `docs/ARCHITECTURE.md` — слои, координаторы, запреты между модулями (читать первым).
-- `docs/OVERVIEW.md`, `docs/TOOLS.md`, `docs/BIOME_SYSTEM.md`.
+- `docs/ASSET_PIPELINE.md`, `docs/TOOLS.md`, `docs/BIOME_SYSTEM.md`.
 - `docs/ADDING_TERRAINS.md`, `docs/ADDING_UNITS.md` — как добавлять контент.
 - `docs/PLAN_MASTER.md`, `docs/TASK.md` — дорожная карта.
 - `TESTING.md` — справка по headless-запуску сцен.
