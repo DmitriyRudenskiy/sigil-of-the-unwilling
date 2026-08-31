@@ -3,8 +3,8 @@
 # Любая ошибка валит пайплайн (set -e).
 #
 # Использование:
-#   tools/shell/run_all_ci_checks.sh           # все проверки
-#   tools/shell/run_all_ci_checks.sh --fast    # только компиляция + валидация (без тестов)
+#   tools/shell/run_all_ci_checks.sh           # все проверки (включая console clean)
+#   tools/shell/run_all_ci_checks.sh --fast    # только компиляция + валидация (без тестов и console clean)
 #   tools/shell/run_all_ci_checks.sh --tests   # только тесты
 #
 # Зависимости: godot 4.x в PATH
@@ -136,6 +136,20 @@ _godot_script "check_tileset" -s "$PROJECT_DIR/tools/check_tileset.gd"
 if [ "${1:-}" != "--fast" ]; then
     _step "Unit tests (run_tests.gd)"
     _godot_script "unit_tests" -s "$PROJECT_DIR/tests/run_tests.gd"
+
+    # ---------- 6. Console clean (живые сценарии 1–5) ----------
+    # Прогон 5 сценариев через play_scenario.sh + скан логов: любой error-маркер
+    # валит шаг; warning валит, только если не в docs/CONSOLE_ALLOWLIST.md.
+    # Длительный шаг (~3–5 мин) — --fast его пропускает.
+    _step "Console clean (scenarios 1-5)"
+    if (
+        cd "$PROJECT_DIR"
+        GODOT_BIN="$GODOT" bash tools/shell/check_console_clean.sh
+    ); then
+        _pass "console_clean"
+    else
+        _fail "console_clean"
+    fi
 fi
 
 # ---------- Итог ----------

@@ -68,7 +68,7 @@ godot --headless --path game -s tests/test_validation_runner.gd   # валида
 ## CI-скрипты
 
 ```bash
-bash tools/shell/run_all_ci_checks.sh          # полный CI (compile + refs + spell-validation + tileset + tests + smoke)
+bash tools/shell/run_all_ci_checks.sh          # полный CI (compile + refs + spell-validation + tileset + tests + console clean)
 bash tools/shell/run_all_ci_checks.sh --fast   # быстрый CI (без тестов)
 bash tools/shell/run_all_ci_checks.sh --tests  # только тесты
 bash tools/shell/play_scenario.sh              # сценарные прогоны (default N=1)
