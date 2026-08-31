@@ -1,7 +1,7 @@
 # AGENT.md — руководство для агентов и разработчиков
 
 Строкий свод правил для работы с проектом **Sigil of the Unwilling** (hex strategy, Godot 4.7).
-Перед правкой прочитай `docs/ARCHITECTURE.md` — там описаны слои и запреты между ними.
+Перед правкой прочитай `docs/architecture/ARCHITECTURE.md` — там описаны слои и запреты между ними.
 
 > Этот файл — адаптация общего шаблона под **конкретную структуру проекта**.
 > Не слепо копировать шаблоны: структура ниже — плоская, а не вложенная.
@@ -87,7 +87,7 @@
 
 ## 3. Архитектура сцен и узлов
 
-Основа — принципы из `docs/ARCHITECTURE.md`:
+Основа — принципы из `docs/architecture/ARCHITECTURE.md`:
 
 1. **Данные отделены от визуала.** Координатор (например `BattleController`) связывает
    модули, но не содержит тяжёлой логики.
@@ -367,10 +367,10 @@ SocketController, Units, Artifacts, Spells, Resources
 
 ## 11. Документация
 
-- `docs/ARCHITECTURE.md` — слои, координаторы, запреты между модулями (читать первым).
-- `docs/ASSET_PIPELINE.md`, `docs/TOOLS.md`, `docs/BIOME_SYSTEM.md`.
-- `docs/ADDING_TERRAINS.md`, `docs/ADDING_UNITS.md` — как добавлять контент.
-- `docs/PLAN_MASTER.md`, `docs/TASK.md` — дорожная карта.
+- `docs/architecture/ARCHITECTURE.md` — слои, координаторы, запреты между модулями (читать первым).
+- `docs/overview/ASSET_PIPELINE.md`, `docs/howto/TOOLS.md`, `docs/systems/BIOME_SYSTEM.md`.
+- `docs/howto/ADDING_TERRAINS.md`, `docs/howto/ADDING_UNITS.md` — как добавлять контент.
+- `docs/overview/PLAN_MASTER.md`, `docs/overview/TASK.md` — дорожная карта.
 - `TESTING.md` — справка по headless-запуску сцен.
 
 ---

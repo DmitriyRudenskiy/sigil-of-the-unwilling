@@ -206,4 +206,4 @@ func on_cell_clicked(cell):
   (Школа+Библиотека→Университет) и adjacency-штрафы/баффы.
 - [`TASK_BUILDING_SCORING_GODOT47.md`](TASK_BUILDING_SCORING_GODOT47.md) — ТЗ на
   размещение/скорнинг/слияние в Godot 4.7.
-- [`city_system.md`](city_system.md) — городская модель проекта.
+- [`city_system.md`](../systems/city_system.md) — городская модель проекта.

@@ -6,6 +6,10 @@
 Godot** — UI подписывается на сигналы (тот же паттерн, что и `BattleState`).
 Управление — через `world/CityManager.gd`.
 
+Фаза города — одна из фаз цикла хода (`CityTurnProcessor`, приоритет 5); см.
+[`CORE_TURN_PIPELINE.md`](../architecture/CORE_TURN_PIPELINE.md). Социальная составляющая и
+население города в ходу — в [`CONCEPT_POPULATION_RUNTIME.md`](../concepts/CONCEPT_POPULATION_RUNTIME.md).
+
 ## Модель города (`City`)
 
 Основные поля состояния:

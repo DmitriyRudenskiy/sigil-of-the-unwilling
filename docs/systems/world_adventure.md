@@ -5,7 +5,10 @@
 
 **Корневой узел:** `world/WorldController.gd` (`class_name WorldController`).
 Он не держит состояние сам — запускает **bootstrap** (`WorldBootstrap`) и
-подписывает подсистемы через **WorldEventRouter**.
+подписывает подсистемы через **WorldEventRouter**. Цикл хода (`execute_turn` →
+`TurnScheduler`) запускается из `WorldEventRouter._on_end_turn()` **после**
+монолита `City.process_turn`; детали фаз/приоритетов/контекста — в
+[`CORE_TURN_PIPELINE.md`](../architecture/CORE_TURN_PIPELINE.md).
 
 ## Bootstrap (`WorldBootstrap.run`)
 

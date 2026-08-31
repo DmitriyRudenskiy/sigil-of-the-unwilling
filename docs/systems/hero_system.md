@@ -3,6 +3,11 @@
 Герой — центральный игровой объект на карте мира: перемещается по клеткам,
 носит армию, управляет ресурсами/инвентарём/магией, тратит очки времени.
 
+Характеристики, навыки и способности героя (статы/скиллы/134 способности) —
+в [`CONCEPT_CHARACTER_SYSTEM.md`](../concepts/CONCEPT_CHARACTER_SYSTEM.md) и
+[`CONCEPT_ABILITIES.md`](../concepts/CONCEPT_ABILITIES.md). В цикле хода герой участвует
+через фазы (`TurnScheduler`), см. [`CORE_TURN_PIPELINE.md`](../architecture/CORE_TURN_PIPELINE.md).
+
 **Корневой класс:** `entities/HeroController.gd` (`class_name HeroController`,
 `extends Node2D`). Это **тонкий фасад** — он не хранит состояние сам, а
 композирует подсистемы и пробрасывает вызовы/сигналы наружу.

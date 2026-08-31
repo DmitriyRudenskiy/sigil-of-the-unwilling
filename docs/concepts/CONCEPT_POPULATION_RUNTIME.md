@@ -10,7 +10,7 @@
 > для демографики/города проекта. Данные рас/построек переиспользуются из
 > [`CONCEPT_SOCIAL_RACES.md`](CONCEPT_SOCIAL_RACES.md) и
 > [`CONCEPT_BUILDING_SYNERGY.md`](CONCEPT_BUILDING_SYNERGY.md);
-> городская модель — [`city_system.md`](city_system.md).
+> городская модель — [`city_system.md`](../systems/city_system.md).
 
 ---
 
@@ -236,4 +236,4 @@ func building_score(bldg):
   размещение/скорнинг/слияние в Godot 4.7.
 - [`TASK_SOCIAL_AND_BUILDINGS.md`](TASK_SOCIAL_AND_BUILDINGS.md) — фазы реализации
   соц. составляющей.
-- [`city_system.md`](city_system.md) — городская модель проекта (PopUnit, boroughs).
+- [`city_system.md`](../systems/city_system.md) — городская модель проекта (PopUnit, boroughs).
