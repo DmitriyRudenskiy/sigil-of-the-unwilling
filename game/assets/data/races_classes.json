@@ -1,0 +1,1588 @@
+{
+  "meta": {
+    "title": "Pathfinder: Kingmaker — расы и классы (адаптация для игры)",
+    "source": "chat-Godot Pathfinder Constructor.txt",
+    "races_count": 6,
+    "classes_count": 16,
+    "note": "6 рас (без Half-Elf/Half-Orc), 16 классов x 4 архетипа. Модификаторы; подсистемы (bloodlines/domains/prestige/feats) — данные для будущих циклов."
+  },
+  "races": [
+    {
+      "id": "aasimar",
+      "name": "Aasimar",
+      "size": "medium",
+      "speed": 30,
+      "ability_adjustments": {
+        "WIS": 2,
+        "CHA": 2
+      },
+      "traits": [
+        "Darkvision",
+        "Celestial Resistance",
+        "Spell-Like Ability"
+      ],
+      "subraces": [
+        {
+          "id": "aasimar_standard",
+          "name": "Standard"
+        }
+      ]
+    },
+    {
+      "id": "dwarf",
+      "name": "Dwarf",
+      "size": "medium",
+      "speed": 20,
+      "ability_adjustments": {
+        "CON": 2,
+        "WIS": 2,
+        "CHA": -2
+      },
+      "traits": [
+        "Darkvision",
+        "Defensive Training",
+        "Hatred"
+      ],
+      "subraces": []
+    },
+    {
+      "id": "elf",
+      "name": "Elf",
+      "size": "medium",
+      "speed": 30,
+      "ability_adjustments": {
+        "DEX": 2,
+        "INT": 2,
+        "CON": -2
+      },
+      "traits": [
+        "Low-Light Vision",
+        "Elven Immunities",
+        "Keen Senses"
+      ],
+      "subraces": []
+    },
+    {
+      "id": "gnome",
+      "name": "Gnome",
+      "size": "small",
+      "speed": 20,
+      "ability_adjustments": {
+        "CON": 2,
+        "CHA": 2,
+        "STR": -2
+      },
+      "traits": [
+        "Low-Light Vision",
+        "Defensive Training",
+        "Hatred"
+      ],
+      "subraces": []
+    },
+    {
+      "id": "halfling",
+      "name": "Halfling",
+      "size": "small",
+      "speed": 20,
+      "ability_adjustments": {
+        "DEX": 2,
+        "CHA": 2,
+        "STR": -2
+      },
+      "traits": [
+        "Fearless",
+        "Halfling Luck",
+        "Keen Senses"
+      ],
+      "subraces": []
+    },
+    {
+      "id": "human",
+      "name": "Human",
+      "size": "medium",
+      "speed": 30,
+      "ability_adjustments": {},
+      "traits": [
+        "Bonus Feat",
+        "Skilled",
+        "Ability Choice"
+      ],
+      "subraces": []
+    }
+  ],
+  "classes": [
+    {
+      "id": "alchemist",
+      "name": "Alchemist",
+      "hit_die": 8,
+      "bab": "medium",
+      "saves": {
+        "fort": "good",
+        "ref": "good",
+        "will": "bad"
+      },
+      "skill_points": 4,
+      "class_skills": [
+        "Alchemy",
+        "Craft",
+        "Heal",
+        "Knowledge (arcana)",
+        "Knowledge (nature)",
+        "Perception",
+        "Profession",
+        "Use Magic Device"
+      ],
+      "spellcasting": {
+        "type": "spontaneous",
+        "tradition": "alchemy",
+        "ability": "INT",
+        "max_level": 6
+      },
+      "class_resources": [
+        {
+          "id": "alchemy",
+          "note": "Alchemy crafting and mutagens"
+        }
+      ],
+      "features": [
+        "Alchemy",
+        "Mutagen",
+        "Throw Anything"
+      ],
+      "archetypes": [
+        {
+          "id": "preservationist",
+          "name": "Preservationist"
+        },
+        {
+          "id": "grenadier",
+          "name": "Grenadier"
+        },
+        {
+          "id": "vivisectionist",
+          "name": "Vivisectionist"
+        },
+        {
+          "id": "trap_breaker",
+          "name": "Trap Breaker"
+        }
+      ]
+    },
+    {
+      "id": "barbarian",
+      "name": "Barbarian",
+      "hit_die": 12,
+      "bab": "full",
+      "saves": {
+        "fort": "good",
+        "ref": "bad",
+        "will": "bad"
+      },
+      "skill_points": 4,
+      "class_skills": [
+        "Acrobatics",
+        "Climb",
+        "Craft",
+        "Handle Animal",
+        "Intimidate",
+        "Knowledge (nature)",
+        "Perception",
+        "Ride",
+        "Survival",
+        "Swim"
+      ],
+      "allowed_alignments": [
+        "NG",
+        "CG",
+        "N",
+        "CN",
+        "NE",
+        "CE"
+      ],
+      "class_resources": [
+        {
+          "id": "rage",
+          "note": "Rage rounds"
+        }
+      ],
+      "features": [
+        "Rage",
+        "Fast Movement",
+        "Rage Powers"
+      ],
+      "archetypes": [
+        {
+          "id": "invulnerable_rager",
+          "name": "Invulnerable Rager"
+        },
+        {
+          "id": "titan_mauler",
+          "name": "Titan Mauler"
+        },
+        {
+          "id": "urban_barbarian",
+          "name": "Urban Barbarian"
+        },
+        {
+          "id": "mounted_fury",
+          "name": "Mounted Fury"
+        }
+      ]
+    },
+    {
+      "id": "bard",
+      "name": "Bard",
+      "hit_die": 8,
+      "bab": "medium",
+      "saves": {
+        "fort": "bad",
+        "ref": "good",
+        "will": "good"
+      },
+      "skill_points": 6,
+      "class_skills": [
+        "Acrobatics",
+        "Appraise",
+        "Bluff",
+        "Climb",
+        "Craft",
+        "Diplomacy",
+        "Disguise",
+        "Escape Artist",
+        "Intimidate",
+        "Knowledge",
+        "Linguistics",
+        "Perception",
+        "Perform",
+        "Profession",
+        "Sense Motive",
+        "Sleight of Hand",
+        "Spellcraft",
+        "Stealth",
+        "Use Magic Device"
+      ],
+      "spellcasting": {
+        "type": "spontaneous",
+        "tradition": "arcane",
+        "ability": "CHA",
+        "max_level": 6
+      },
+      "class_resources": [
+        {
+          "id": "bardic_performance",
+          "note": "Performance rounds"
+        }
+      ],
+      "features": [
+        "Bardic Knowledge",
+        "Bardic Performance",
+        "Versatile Performance"
+      ],
+      "archetypes": [
+        {
+          "id": "arcane_duelist",
+          "name": "Arcane Duelist"
+        },
+        {
+          "id": "dirge_bard",
+          "name": "Dirge Bard"
+        },
+        {
+          "id": "sandman",
+          "name": "Sandman"
+        },
+        {
+          "id": "thundercaller",
+          "name": "Thundercaller"
+        }
+      ]
+    },
+    {
+      "id": "cleric",
+      "name": "Cleric",
+      "hit_die": 8,
+      "bab": "medium",
+      "saves": {
+        "fort": "good",
+        "ref": "bad",
+        "will": "good"
+      },
+      "skill_points": 2,
+      "class_skills": [
+        "Appraise",
+        "Craft",
+        "Diplomacy",
+        "Heal",
+        "Knowledge (arcana)",
+        "Knowledge (history)",
+        "Knowledge (nobility)",
+        "Knowledge (planes)",
+        "Knowledge (religion)",
+        "Linguistics",
+        "Profession",
+        "Sense Motive",
+        "Spellcraft"
+      ],
+      "spellcasting": {
+        "type": "prepared",
+        "tradition": "divine",
+        "ability": "WIS",
+        "max_level": 9
+      },
+      "domain_count": 2,
+      "class_resources": [
+        {
+          "id": "channel_energy",
+          "note": "Channel positive/negative energy"
+        }
+      ],
+      "features": [
+        "Aura",
+        "Channel Energy",
+        "Domains"
+      ],
+      "archetypes": [
+        {
+          "id": "crusade_priest",
+          "name": "Crusade Priest"
+        },
+        {
+          "id": "ecclesitheurge",
+          "name": "Ecclesitheurge"
+        },
+        {
+          "id": "separatist",
+          "name": "Separatist"
+        },
+        {
+          "id": "undead_slayer",
+          "name": "Undead Slayer"
+        }
+      ]
+    },
+    {
+      "id": "druid",
+      "name": "Druid",
+      "hit_die": 8,
+      "bab": "medium",
+      "saves": {
+        "fort": "good",
+        "ref": "bad",
+        "will": "good"
+      },
+      "skill_points": 4,
+      "class_skills": [
+        "Climb",
+        "Craft",
+        "Fly",
+        "Handle Animal",
+        "Heal",
+        "Knowledge (geography)",
+        "Knowledge (nature)",
+        "Perception",
+        "Profession",
+        "Ride",
+        "Spellcraft",
+        "Survival",
+        "Swim"
+      ],
+      "allowed_alignments": [
+        "LG",
+        "NG",
+        "CG",
+        "LN",
+        "N",
+        "CN"
+      ],
+      "spellcasting": {
+        "type": "prepared",
+        "tradition": "divine",
+        "ability": "WIS",
+        "max_level": 9
+      },
+      "class_resources": [
+        {
+          "id": "wild_shape",
+          "note": "Wild shape uses"
+        }
+      ],
+      "features": [
+        "Nature Sense",
+        "Wild Empathy",
+        "Wild Shape"
+      ],
+      "archetypes": [
+        {
+          "id": "blighted_druid",
+          "name": "Blighted Druid"
+        },
+        {
+          "id": "forest_warden",
+          "name": "Forest Warden"
+        },
+        {
+          "id": "shapeshifter",
+          "name": "Shapeshifter"
+        },
+        {
+          "id": "storm_druid",
+          "name": "Storm Druid"
+        }
+      ]
+    },
+    {
+      "id": "fighter",
+      "name": "Fighter",
+      "hit_die": 10,
+      "bab": "full",
+      "saves": {
+        "fort": "good",
+        "ref": "bad",
+        "will": "bad"
+      },
+      "skill_points": 2,
+      "class_skills": [
+        "Climb",
+        "Craft",
+        "Handle Animal",
+        "Intimidate",
+        "Knowledge (dungeoneering)",
+        "Knowledge (engineering)",
+        "Profession",
+        "Ride",
+        "Survival",
+        "Swim"
+      ],
+      "class_resources": [
+        {
+          "id": "bonus_feats",
+          "note": "Bonus feats"
+        }
+      ],
+      "features": [
+        "Bonus Feats",
+        "Bravery",
+        "Armor Training",
+        "Weapon Training"
+      ],
+      "archetypes": [
+        {
+          "id": "aldori_defender",
+          "name": "Aldori Defender"
+        },
+        {
+          "id": "two_handed_fighter",
+          "name": "Two-Handed Fighter"
+        },
+        {
+          "id": "tower_shield_specialist",
+          "name": "Tower Shield Specialist"
+        },
+        {
+          "id": "weapon_master",
+          "name": "Weapon Master"
+        }
+      ]
+    },
+    {
+      "id": "inquisitor",
+      "name": "Inquisitor",
+      "hit_die": 8,
+      "bab": "medium",
+      "saves": {
+        "fort": "good",
+        "ref": "bad",
+        "will": "good"
+      },
+      "skill_points": 6,
+      "class_skills": [
+        "Bluff",
+        "Climb",
+        "Craft",
+        "Disguise",
+        "Heal",
+        "Intimidate",
+        "Knowledge",
+        "Perception",
+        "Profession",
+        "Ride",
+        "Sense Motive",
+        "Spellcraft",
+        "Stealth",
+        "Survival"
+      ],
+      "spellcasting": {
+        "type": "spontaneous",
+        "tradition": "divine",
+        "ability": "WIS",
+        "max_level": 6
+      },
+      "class_resources": [
+        {
+          "id": "judgment",
+          "note": "Judgment uses"
+        }
+      ],
+      "features": [
+        "Judgment",
+        "Monster Lore",
+        "Stern Gaze"
+      ],
+      "archetypes": [
+        {
+          "id": "heretic",
+          "name": "Heretic"
+        },
+        {
+          "id": "monster_slayer",
+          "name": "Monster Slayer"
+        },
+        {
+          "id": "preacher",
+          "name": "Preacher"
+        },
+        {
+          "id": "sanctified_slayer",
+          "name": "Sanctified Slayer"
+        }
+      ]
+    },
+    {
+      "id": "kineticist",
+      "name": "Kineticist",
+      "hit_die": 8,
+      "bab": "medium",
+      "saves": {
+        "fort": "good",
+        "ref": "good",
+        "will": "bad"
+      },
+      "skill_points": 4,
+      "class_skills": [
+        "Acrobatics",
+        "Athletics",
+        "Craft",
+        "Intimidate",
+        "Knowledge (planes)",
+        "Perception",
+        "Profession",
+        "Sense Motive",
+        "Stealth",
+        "Survival"
+      ],
+      "spellcasting": null,
+      "class_resources": [
+        {
+          "id": "burn",
+          "note": "Burn resource, uses CON"
+        }
+      ],
+      "features": [
+        "Elemental Focus",
+        "Infusions",
+        "Burn"
+      ],
+      "archetypes": [
+        {
+          "id": "dark_elementalist",
+          "name": "Dark Elementalist"
+        },
+        {
+          "id": "kinetic_knight",
+          "name": "Kinetic Knight"
+        },
+        {
+          "id": "psionic_kineticist",
+          "name": "Psionic Kineticist"
+        },
+        {
+          "id": "blood_kineticist",
+          "name": "Blood Kineticist"
+        }
+      ]
+    },
+    {
+      "id": "magus",
+      "name": "Magus",
+      "hit_die": 8,
+      "bab": "medium",
+      "saves": {
+        "fort": "good",
+        "ref": "good",
+        "will": "bad"
+      },
+      "skill_points": 4,
+      "class_skills": [
+        "Climb",
+        "Craft",
+        "Fly",
+        "Intimidate",
+        "Knowledge (arcana)",
+        "Knowledge (dungeoneering)",
+        "Knowledge (planes)",
+        "Profession",
+        "Ride",
+        "Spellcraft",
+        "Swim",
+        "Use Magic Device"
+      ],
+      "spellcasting": {
+        "type": "prepared",
+        "tradition": "arcane",
+        "ability": "INT",
+        "max_level": 6
+      },
+      "class_resources": [
+        {
+          "id": "arcane_pool",
+          "note": "Arcane Pool points"
+        }
+      ],
+      "features": [
+        "Spell Combat",
+        "Spellstrike",
+        "Arcane Pool"
+      ],
+      "archetypes": [
+        {
+          "id": "blade_bound",
+          "name": "Blade Bound"
+        },
+        {
+          "id": "eldritch_scion",
+          "name": "Eldritch Scion"
+        },
+        {
+          "id": "hexcrafter",
+          "name": "Hexcrafter"
+        },
+        {
+          "id": "skirnir",
+          "name": "Skirnir"
+        }
+      ]
+    },
+    {
+      "id": "monk",
+      "name": "Monk",
+      "hit_die": 8,
+      "bab": "full",
+      "saves": {
+        "fort": "good",
+        "ref": "good",
+        "will": "good"
+      },
+      "skill_points": 4,
+      "class_skills": [
+        "Acrobatics",
+        "Climb",
+        "Craft",
+        "Escape Artist",
+        "Intimidate",
+        "Knowledge (history)",
+        "Knowledge (religion)",
+        "Perception",
+        "Perform",
+        "Profession",
+        "Ride",
+        "Sense Motive",
+        "Stealth",
+        "Swim"
+      ],
+      "class_resources": [
+        {
+          "id": "ki_pool",
+          "note": "Ki Pool points"
+        }
+      ],
+      "features": [
+        "Flurry of Blows",
+        "Stunning Fist",
+        "Evasion",
+        "Ki Pool"
+      ],
+      "archetypes": [
+        {
+          "id": "monk_of_the_four_winds",
+          "name": "Monk of the Four Winds"
+        },
+        {
+          "id": "scaled_fist",
+          "name": "Scaled Fist"
+        },
+        {
+          "id": "sohei",
+          "name": "Sohei"
+        },
+        {
+          "id": "zen_archer",
+          "name": "Zen Archer"
+        }
+      ]
+    },
+    {
+      "id": "paladin",
+      "name": "Paladin",
+      "hit_die": 10,
+      "bab": "full",
+      "saves": {
+        "fort": "good",
+        "ref": "bad",
+        "will": "good"
+      },
+      "skill_points": 2,
+      "class_skills": [
+        "Craft",
+        "Diplomacy",
+        "Handle Animal",
+        "Heal",
+        "Knowledge (nobility)",
+        "Knowledge (religion)",
+        "Profession",
+        "Ride",
+        "Sense Motive",
+        "Spellcraft"
+      ],
+      "allowed_alignments": [
+        "LG"
+      ],
+      "spellcasting": {
+        "type": "prepared",
+        "tradition": "divine",
+        "ability": "CHA",
+        "max_level": 4
+      },
+      "class_resources": [
+        {
+          "id": "smite_evil",
+          "note": "Smite Evil uses"
+        },
+        {
+          "id": "lay_on_hands",
+          "note": "Lay on Hands uses"
+        }
+      ],
+      "features": [
+        "Aura of Good",
+        "Detect Evil",
+        "Smite Evil",
+        "Lay on Hands"
+      ],
+      "archetypes": [
+        {
+          "id": "divine_shield",
+          "name": "Divine Shield"
+        },
+        {
+          "id": "oathbreaker",
+          "name": "Oathbreaker"
+        },
+        {
+          "id": "sacred_shield",
+          "name": "Sacred Shield"
+        },
+        {
+          "id": "warrior_of_the_holy_light",
+          "name": "Warrior of the Holy Light"
+        }
+      ]
+    },
+    {
+      "id": "ranger",
+      "name": "Ranger",
+      "hit_die": 10,
+      "bab": "full",
+      "saves": {
+        "fort": "good",
+        "ref": "good",
+        "will": "bad"
+      },
+      "skill_points": 6,
+      "class_skills": [
+        "Climb",
+        "Craft",
+        "Handle Animal",
+        "Heal",
+        "Intimidate",
+        "Knowledge (dungeoneering)",
+        "Knowledge (geography)",
+        "Knowledge (nature)",
+        "Perception",
+        "Profession",
+        "Ride",
+        "Spellcraft",
+        "Stealth",
+        "Survival",
+        "Swim"
+      ],
+      "spellcasting": {
+        "type": "prepared",
+        "tradition": "divine",
+        "ability": "WIS",
+        "max_level": 4
+      },
+      "class_resources": [
+        {
+          "id": "favored_enemy",
+          "note": "Favored Enemy bonuses"
+        }
+      ],
+      "features": [
+        "Favored Enemy",
+        "Track",
+        "Wild Empathy"
+      ],
+      "archetypes": [
+        {
+          "id": "beast_master",
+          "name": "Beast Master"
+        },
+        {
+          "id": "freebooter",
+          "name": "Freebooter"
+        },
+        {
+          "id": "skirmisher",
+          "name": "Skirmisher"
+        },
+        {
+          "id": "trap_finder",
+          "name": "Trap Finder"
+        }
+      ]
+    },
+    {
+      "id": "rogue",
+      "name": "Rogue",
+      "hit_die": 8,
+      "bab": "medium",
+      "saves": {
+        "fort": "bad",
+        "ref": "good",
+        "will": "bad"
+      },
+      "skill_points": 8,
+      "class_skills": [
+        "Acrobatics",
+        "Appraise",
+        "Bluff",
+        "Climb",
+        "Craft",
+        "Diplomacy",
+        "Disable Device",
+        "Disguise",
+        "Escape Artist",
+        "Intimidate",
+        "Knowledge",
+        "Linguistics",
+        "Perception",
+        "Perform",
+        "Profession",
+        "Sense Motive",
+        "Sleight of Hand",
+        "Stealth",
+        "Swim",
+        "Use Magic Device"
+      ],
+      "class_resources": [
+        {
+          "id": "sneak_attack",
+          "note": "Sneak Attack dice"
+        }
+      ],
+      "features": [
+        "Sneak Attack",
+        "Trapfinding",
+        "Rogue Talents"
+      ],
+      "archetypes": [
+        {
+          "id": "acrobat",
+          "name": "Acrobat"
+        },
+        {
+          "id": "knife_master",
+          "name": "Knife Master"
+        },
+        {
+          "id": "scout",
+          "name": "Scout"
+        },
+        {
+          "id": "thief",
+          "name": "Thief"
+        }
+      ]
+    },
+    {
+      "id": "sorcerer",
+      "name": "Sorcerer",
+      "hit_die": 6,
+      "bab": "half",
+      "saves": {
+        "fort": "bad",
+        "ref": "bad",
+        "will": "good"
+      },
+      "skill_points": 2,
+      "class_skills": [
+        "Bluff",
+        "Craft",
+        "Fly",
+        "Intimidate",
+        "Knowledge (arcana)",
+        "Profession",
+        "Spellcraft",
+        "Use Magic Device"
+      ],
+      "spellcasting": {
+        "type": "spontaneous",
+        "tradition": "arcane",
+        "ability": "CHA",
+        "max_level": 9
+      },
+      "choice_groups": [
+        "bloodline"
+      ],
+      "class_resources": [
+        {
+          "id": "bloodline_powers",
+          "note": "Bloodline powers"
+        }
+      ],
+      "features": [
+        "Bloodline",
+        "Eschew Materials"
+      ],
+      "archetypes": [
+        {
+          "id": "crossblooded",
+          "name": "Crossblooded"
+        },
+        {
+          "id": "empyreal",
+          "name": "Empyreal"
+        },
+        {
+          "id": "sage",
+          "name": "Sage"
+        },
+        {
+          "id": "wild_magic",
+          "name": "Wild Magic"
+        }
+      ]
+    },
+    {
+      "id": "wizard",
+      "name": "Wizard",
+      "hit_die": 6,
+      "bab": "half",
+      "saves": {
+        "fort": "bad",
+        "ref": "bad",
+        "will": "good"
+      },
+      "skill_points": 2,
+      "class_skills": [
+        "Appraise",
+        "Craft",
+        "Fly",
+        "Knowledge",
+        "Linguistics",
+        "Profession",
+        "Spellcraft"
+      ],
+      "spellcasting": {
+        "type": "prepared",
+        "tradition": "arcane",
+        "ability": "INT",
+        "max_level": 9
+      },
+      "choice_groups": [
+        "arcane_school"
+      ],
+      "class_resources": [
+        {
+          "id": "arcane_school",
+          "note": "Arcane School powers"
+        }
+      ],
+      "features": [
+        "Arcane Bond",
+        "Arcane School"
+      ],
+      "archetypes": [
+        {
+          "id": "abjurer",
+          "name": "Abjurer"
+        },
+        {
+          "id": "conjurer",
+          "name": "Conjurer"
+        },
+        {
+          "id": "diviner",
+          "name": "Diviner"
+        },
+        {
+          "id": "enchanter",
+          "name": "Enchanter"
+        }
+      ]
+    },
+    {
+      "id": "witch",
+      "name": "Witch",
+      "hit_die": 6,
+      "bab": "half",
+      "saves": {
+        "fort": "bad",
+        "ref": "bad",
+        "will": "good"
+      },
+      "skill_points": 2,
+      "class_skills": [
+        "Craft",
+        "Fly",
+        "Heal",
+        "Intimidate",
+        "Knowledge",
+        "Profession",
+        "Spellcraft",
+        "Use Magic Device"
+      ],
+      "spellcasting": {
+        "type": "prepared",
+        "tradition": "arcane",
+        "ability": "INT",
+        "max_level": 9
+      },
+      "choice_groups": [
+        "patron"
+      ],
+      "class_resources": [
+        {
+          "id": "hexes",
+          "note": "Hexes"
+        },
+        {
+          "id": "familiar",
+          "note": "Witch familiar stores spells"
+        }
+      ],
+      "features": [
+        "Hexes",
+        "Patron",
+        "Familiar"
+      ],
+      "archetypes": [
+        {
+          "id": "beast_witch",
+          "name": "Beast Witch"
+        },
+        {
+          "id": "hagbound",
+          "name": "Hagbound"
+        },
+        {
+          "id": "winter_witch",
+          "name": "Winter Witch"
+        },
+        {
+          "id": "scar_witch",
+          "name": "Scar Witch"
+        }
+      ]
+    }
+  ],
+  "bloodlines": [
+    {
+      "id": "abyssal",
+      "name": "Abyssal",
+      "ability": "CHA",
+      "features": [
+        "Acidic Ray",
+        "Demonic Might",
+        "Strength of the Abyss"
+      ]
+    },
+    {
+      "id": "arcane",
+      "name": "Arcane",
+      "ability": "CHA",
+      "features": [
+        "Arcane Bond",
+        "Metamagic Affinity"
+      ]
+    },
+    {
+      "id": "celestial",
+      "name": "Celestial",
+      "ability": "CHA",
+      "features": [
+        "Heavenly Fire",
+        "Wings of Heaven"
+      ]
+    },
+    {
+      "id": "draconic",
+      "name": "Draconic",
+      "ability": "CHA",
+      "features": [
+        "Dragon Bite",
+        "Elemental Resistance",
+        "Dragon Wings"
+      ]
+    },
+    {
+      "id": "fey",
+      "name": "Fey",
+      "ability": "CHA",
+      "features": [
+        "Laughing Touch",
+        "Woodland Stride"
+      ]
+    },
+    {
+      "id": "infernal",
+      "name": "Infernal",
+      "ability": "CHA",
+      "features": [
+        "Corrupting Touch",
+        "Hellfire"
+      ]
+    },
+    {
+      "id": "serpentine",
+      "name": "Serpentine",
+      "ability": "CHA",
+      "features": [
+        "Serpent Bite",
+        "Serpent Shape"
+      ]
+    },
+    {
+      "id": "undead",
+      "name": "Undead",
+      "ability": "CHA",
+      "features": [
+        "Grave Touch",
+        "Undead Resistance"
+      ]
+    }
+  ],
+  "domains": [
+    {
+      "id": "animal",
+      "name": "Animal"
+    },
+    {
+      "id": "artifice",
+      "name": "Artifice"
+    },
+    {
+      "id": "chaos",
+      "name": "Chaos"
+    },
+    {
+      "id": "charm",
+      "name": "Charm"
+    },
+    {
+      "id": "community",
+      "name": "Community"
+    },
+    {
+      "id": "death",
+      "name": "Death"
+    },
+    {
+      "id": "destruction",
+      "name": "Destruction"
+    },
+    {
+      "id": "earth",
+      "name": "Earth"
+    },
+    {
+      "id": "evil",
+      "name": "Evil"
+    },
+    {
+      "id": "fire",
+      "name": "Fire"
+    },
+    {
+      "id": "glory",
+      "name": "Glory"
+    },
+    {
+      "id": "good",
+      "name": "Good"
+    },
+    {
+      "id": "healing",
+      "name": "Healing"
+    },
+    {
+      "id": "knowledge",
+      "name": "Knowledge"
+    },
+    {
+      "id": "law",
+      "name": "Law"
+    },
+    {
+      "id": "liberation",
+      "name": "Liberation"
+    },
+    {
+      "id": "luck",
+      "name": "Luck"
+    },
+    {
+      "id": "madness",
+      "name": "Madness"
+    },
+    {
+      "id": "magic",
+      "name": "Magic"
+    },
+    {
+      "id": "nobility",
+      "name": "Nobility"
+    },
+    {
+      "id": "plant",
+      "name": "Plant"
+    },
+    {
+      "id": "protection",
+      "name": "Protection"
+    },
+    {
+      "id": "repose",
+      "name": "Repose"
+    },
+    {
+      "id": "rune",
+      "name": "Rune"
+    },
+    {
+      "id": "strength",
+      "name": "Strength"
+    },
+    {
+      "id": "sun",
+      "name": "Sun"
+    },
+    {
+      "id": "travel",
+      "name": "Travel"
+    },
+    {
+      "id": "trickery",
+      "name": "Trickery"
+    },
+    {
+      "id": "war",
+      "name": "War"
+    },
+    {
+      "id": "water",
+      "name": "Water"
+    },
+    {
+      "id": "weather",
+      "name": "Weather"
+    }
+  ],
+  "prestige_classes": [
+    {
+      "id": "aldori_swordlord",
+      "name": "Aldori Swordlord",
+      "requirements": {
+        "bab": 1,
+        "feats": [
+          "exotic_weapon_proficiency_dueling_sword",
+          "weapon_focus_dueling_sword"
+        ],
+        "skills": {
+          "mobility": 5
+        }
+      },
+      "features": [
+        "Duelist Training",
+        "Defensive Parry"
+      ]
+    },
+    {
+      "id": "arcane_trickster",
+      "name": "Arcane Trickster",
+      "requirements": {
+        "alignment": [
+          "any"
+        ],
+        "skills": {
+          "stealth": 5,
+          "knowledge_arcana": 5,
+          "disable_device": 5
+        }
+      },
+      "features": [
+        "Sneak Attack",
+        "Impromptu Sneak Attack"
+      ]
+    },
+    {
+      "id": "dragon_disciple",
+      "name": "Dragon Disciple",
+      "requirements": {
+        "skills": {
+          "knowledge_arcana": 5
+        },
+        "spellcasting": "arcane"
+      },
+      "features": [
+        "Natural Armor",
+        "Dragon Bite"
+      ]
+    },
+    {
+      "id": "duelist",
+      "name": "Duelist",
+      "requirements": {
+        "bab": 6,
+        "feats": [
+          "dodge",
+          "mobility",
+          "weapon_finesse"
+        ],
+        "skills": {
+          "acrobatics": 5
+        }
+      },
+      "features": [
+        "Canny Defense",
+        "Precise Strike"
+      ]
+    },
+    {
+      "id": "eldritch_knight",
+      "name": "Eldritch Knight",
+      "requirements": {
+        "bab": 1,
+        "spellcasting": "arcane",
+        "feats": [
+          "martial_weapon_proficiency"
+        ]
+      },
+      "features": [
+        "Bonus Feat",
+        "Spell Critical"
+      ]
+    },
+    {
+      "id": "mystic_theurge",
+      "name": "Mystic Theurge",
+      "requirements": {
+        "skills": {
+          "knowledge_arcana": 5,
+          "knowledge_religion": 5
+        },
+        "spellcasting": "arcane_and_divine"
+      },
+      "features": [
+        "Increased Spellcasting"
+      ]
+    },
+    {
+      "id": "stalwart_defender",
+      "name": "Stalwart Defender",
+      "requirements": {
+        "bab": 5,
+        "feats": [
+          "toughness",
+          "diehard"
+        ],
+        "alignment": [
+          "LG",
+          "NG",
+          "LN",
+          "N",
+          "LE"
+        ]
+      },
+      "features": [
+        "Defensive Stance"
+      ]
+    }
+  ],
+  "feats": [
+    {
+      "id": "power_attack",
+      "name": "Power Attack",
+      "type": "combat",
+      "prerequisites": {
+        "ability": {
+          "STR": 13
+        },
+        "bab": 1
+      },
+      "effects": [
+        "combat_action"
+      ]
+    },
+    {
+      "id": "dodge",
+      "name": "Dodge",
+      "type": "combat",
+      "prerequisites": {
+        "ability": {
+          "DEX": 13
+        }
+      },
+      "effects": [
+        "+1 dodge AC"
+      ]
+    },
+    {
+      "id": "mobility",
+      "name": "Mobility",
+      "type": "combat",
+      "prerequisites": {
+        "ability": {
+          "DEX": 13
+        },
+        "feats": [
+          "dodge"
+        ]
+      },
+      "effects": [
+        "+4 AC vs AoO"
+      ]
+    },
+    {
+      "id": "weapon_finesse",
+      "name": "Weapon Finesse",
+      "type": "combat",
+      "prerequisites": {
+        "bab": 1
+      },
+      "effects": [
+        "DEX to melee attack"
+      ]
+    },
+    {
+      "id": "exotic_weapon_proficiency_dueling_sword",
+      "name": "Exotic Weapon Proficiency (Dueling Sword)",
+      "type": "combat",
+      "prerequisites": {
+        "bab": 1
+      },
+      "effects": [
+        "dueling sword proficiency"
+      ]
+    },
+    {
+      "id": "weapon_focus_dueling_sword",
+      "name": "Weapon Focus (Dueling Sword)",
+      "type": "combat",
+      "prerequisites": {
+        "bab": 1,
+        "feats": [
+          "exotic_weapon_proficiency_dueling_sword"
+        ]
+      },
+      "effects": [
+        "+1 attack"
+      ]
+    },
+    {
+      "id": "martial_weapon_proficiency",
+      "name": "Martial Weapon Proficiency",
+      "type": "combat",
+      "prerequisites": {},
+      "effects": [
+        "martial weapon proficiency"
+      ]
+    },
+    {
+      "id": "toughness",
+      "name": "Toughness",
+      "type": "general",
+      "prerequisites": {},
+      "effects": [
+        "+3 HP"
+      ]
+    },
+    {
+      "id": "diehard",
+      "name": "Diehard",
+      "type": "general",
+      "prerequisites": {
+        "feats": [
+          "toughness"
+        ]
+      },
+      "effects": [
+        "stable when dying"
+      ]
+    },
+    {
+      "id": "combat_casting",
+      "name": "Combat Casting",
+      "type": "magic",
+      "prerequisites": {},
+      "effects": [
+        "+4 concentration defensive"
+      ]
+    },
+    {
+      "id": "selective_channeling",
+      "name": "Selective Channeling",
+      "type": "magic",
+      "prerequisites": {
+        "ability": {
+          "CHA": 13
+        },
+        "class": [
+          "cleric"
+        ]
+      },
+      "effects": [
+        "exclude targets"
+      ]
+    },
+    {
+      "id": "spell_focus",
+      "name": "Spell Focus",
+      "type": "magic",
+      "prerequisites": {},
+      "effects": [
+        "+1 DC school"
+      ]
+    },
+    {
+      "id": "skill_focus",
+      "name": "Skill Focus",
+      "type": "general",
+      "prerequisites": {},
+      "effects": [
+        "+3 skill"
+      ]
+    },
+    {
+      "id": "improved_critical",
+      "name": "Improved Critical",
+      "type": "combat",
+      "prerequisites": {
+        "bab": 8
+      },
+      "effects": [
+        "threat x2"
+      ]
+    }
+  ]
+}
