@@ -43,6 +43,24 @@ passed — это ожидаемый вывод, а не предупрежде�
   AudioServer еще не содержит кастомных шин `SFX`/`Music`. Не регрессия,
   не связано с изменяемым кодом (проявляется и без правок) |
 
+### Предупреждения импорта изображений (легитимные, pre-existing)
+
+`WARNING: Loaded resource as image file …` для `res://assets/ui/hero/*.png`
+и `res://assets/ui/icons/*.png`. Причина: все PNG проекта импортированы как
+`CompressedTexture2D`, поэтому `load()` возвращает не `ImageTexture`, и в
+`MainMenu.gd` (~53) и `ArtifactInventoryScreen.gd` (`_tex()`, ~473) срабатывает
+`Image.load_from_file()`-фолбэкс для получения сырого `Image` под ресайм.
+
+Это **pre-existing** поведение UI-кода (не связано со spell-depth / другими
+изменяемыми областями), проявляется на чистом checkout, на экспорт-пайплайн не
+влияет (рабочий путь — `CompressedTexture2D`). Ресайм в коде требует сырого
+`Image`, поэтому без глобальной смены типа импорта (увеличит размер экспорта)
+фолбэкс необходим. Не регрессия, не связано с изменяемым кодом.
+
+| Pattern | Description |
+|---|---|
+| `Loaded resource as image file` | фолбэкс `Image.load_from_file` в UI (MainMenu/ArtifactInventoryScreen), pre-existing |
+
 ## Как добавить
 
 1. Запусти `bash game/tools/shell/run_operability.sh`.
