@@ -38,6 +38,10 @@ passed — это ожидаемый вывод, а не предупрежде�
 | `DemographicTurnProcessor: registry не задан` | тест без setup() |
 | `SoundManager: no file` | SoundManager: отсутствует аудиофайл |
 | `SoundManager: unknown .* cue` | SoundManager: неизвестный cue |
+| `SoundManager: bus '.*' not found` | SoundManager: авто-загрузка, сценарии operability
+  гоняются на графическом (OpenGL) сервере отображения, а не headless —
+  AudioServer еще не содержит кастомных шин `SFX`/`Music`. Не регрессия,
+  не связано с изменяемым кодом (проявляется и без правок) |
 
 ## Как добавить
 

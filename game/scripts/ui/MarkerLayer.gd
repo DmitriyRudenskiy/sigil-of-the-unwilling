@@ -53,13 +53,17 @@ func show_markers(hero_cell: Vector2i, mp: float, dist_map: Dictionary) -> void:
 			else:
 				_reachable[cell] = MarkType.YELLOW
 
-	# Red frontier: unreachable neighbors of reachable cells
+	# Red frontier (D4): соседи достижимых клеток, в которые нельзя попасть за
+	# бюджет (непроходимы ИЛИ не хватает ходов: _dist > mp). Зеленые/желтые
+	# клетки здесь не участвуют — они в _reachable.
 	var red_candidates: Dictionary = {}
 	for cell in _reachable:
 		for nb in HexUtils.get_all_neighbors(cell):
-			if not _dist.has(nb) or _dist[nb] > mp + 0.001:
-				if _map_gen.is_in_bounds(nb) and not _map_gen.is_walkable(nb):
-					red_candidates[nb] = true
+			if not _map_gen.is_in_bounds(nb) or nb in _reachable:
+				continue
+			var can_enter_within_budget: bool = _map_gen.is_walkable(nb) and _dist.get(nb, INF) <= mp + 0.001
+			if not can_enter_within_budget:
+				red_candidates[nb] = true
 
 	_red_frontier = red_candidates
 

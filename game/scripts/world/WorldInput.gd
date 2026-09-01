@@ -18,6 +18,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 		camera.step_zoom(-1)
 	elif event.button_index == MOUSE_BUTTON_RIGHT:
+		# ПКМ отменяет зафиксированный маршрут автохода (если есть) и превью пути.
+		hero.cancel_planned_path()
 		hero.cancel_pending()
 	elif event.button_index == MOUSE_BUTTON_LEFT:
 		if not map.has_valid_tilemap():

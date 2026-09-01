@@ -10,6 +10,7 @@ signal hero_entered_village(cell: Vector2i)
 signal movement_points_changed(current: float, max_val: float)
 signal resources_changed(resources: Dictionary)
 signal path_previewed(text: String)
+signal planned_route_changed(committed: bool)
 signal strategic_resources_changed(resources: Dictionary)
 signal skills_changed
 signal tools_changed
@@ -32,6 +33,10 @@ var skills: HeroSkills
 var tools: HeroTools
 var time: TimeSystem
 var strategic_resources: HeroStrategicResources = HeroStrategicResources.new()
+
+# city-in-world: именованные последователи (Follower). Найм — из населения
+# городов (FollowerSystem.recruit). Персистентность — serialize/deserialize.
+var followers: Array = []
 
 # Backward-compat pass-throughs (kept for existing callers)
 var mana_current: int:
@@ -93,6 +98,7 @@ func _wire_signals() -> void:
 	movement.hero_entered_village.connect(hero_entered_village.emit)
 	movement.reach_preview_changed.connect(_on_reach_preview)
 	movement.reach_preview_cleared.connect(_on_reach_cleared)
+	movement.planned_route_changed.connect(planned_route_changed.emit)
 
 	# R2: New signals replacing _parent back-references
 	movement.facing_changed.connect(visual.set_facing)
@@ -154,6 +160,9 @@ func reach_problem(cell: Vector2i) -> String:
 
 func cancel_pending(clear_text: bool = true) -> void:
 	movement.cancel_pending(clear_text)
+
+func cancel_planned_path() -> void:
+	movement.cancel_planned_path()
 
 
 # ==================== PASSTHROUGH — army ====================
@@ -251,6 +260,8 @@ func _reset_time_and_movement() -> void:
 	movement.move_points = get_daily_movement_points()
 	movement_points_changed.emit(movement.move_points, get_daily_movement_points())
 	movement.end_turn_movement()
+	# Автоход по зафиксированному маршруту в начале нового хода (D2).
+	movement.auto_follow_at_turn_start()
 
 
 func add_strategic_resource(id: StringName, amount: int) -> int:
@@ -324,7 +335,22 @@ func serialize() -> Dictionary:
 		"tools": tools.serialize(),
 		"strategic_resources": strategic_resources.get_all(),
 		"time_mp_spent": time.mp_spent_today,
+		"followers": _followers_data(),
+		"planned_path": _planned_path_data(),
 	}
+
+func _planned_path_data() -> Array:
+	var out: Array = []
+	for c in movement.planned_path:
+		out.append({"x": c.x, "y": c.y})
+	return out
+
+func _planned_path_from(data: Array) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	for p in data:
+		if p is Dictionary:
+			out.append(Vector2i(int(p.get("x", -1)), int(p.get("y", -1))))
+	return out
 
 
 func deserialize(data: Dictionary) -> void:
@@ -351,3 +377,17 @@ func deserialize(data: Dictionary) -> void:
 	tools.deserialize(data.get("tools", []))
 	strategic_resources.set_all(data.get("strategic_resources", strategic_resources.get_all()))
 	time.mp_spent_today = float(data.get("time_mp_spent", 0.0))
+	movement.planned_path = _planned_path_from(data.get("planned_path", []))
+	followers.clear()
+	for f_data in data.get("followers", []):
+		var f := Follower.new()
+		f.deserialize(f_data)
+		followers.append(f)
+
+
+func _followers_data() -> Array:
+	var out: Array = []
+	for f in followers:
+		if f != null:
+			out.append(f.serialize())
+	return out

@@ -49,6 +49,47 @@
 управляется `WorldInput` + `WorldInteractionController` (лeft-click /右键,
 сундуки, деревни).
 
+### Планирование траектории и автоход (`HeroMovementController`)
+
+Движение по клеткам живёт в `HeroMovementController` (`move_to`, `_move_next_step`,
+`on_map_clicked`). Введено понятие **зафиксированного маршрута** — `planned_path:
+Array[Vector2i]` (ячейки в мировых координатах, голова = текущая клетка) и сигнал
+`planned_route_changed(committed: bool)`.
+
+- **Двуклик с состоянием (D1).** Второй клик по `cell` в `on_map_clicked`: если
+  `planned_path` пуст — маршрут не фиксирован, поэтому ставим
+  `planned_path = _full_path(cell)` (необрезанный путь, `size >= 2`), эмитируем
+  `planned_route_changed(true)` и **не двигаемся** (ждём проверки доступности
+  цели/пути). Если `planned_path` не пуст — маршрут уже зафиксирован, поэтому
+  сразу `_start_moving()` с `path = planned_path.duplicate()`.
+- **Отмена (`cancel_planned_path`, ПКМ).** Очищает `planned_path` и эмитирует
+  `planned_route_changed(false)`. Привязан к правому клику в `WorldInput` +
+  `HeroController.cancel_planned_path()` (цепочка: `hero.cancel_planned_path()` →
+  `movement.cancel_planned_path()`).
+- **Автоход в начале хода (D2).** `auto_follow_at_turn_start()`: если
+  `planned_path.size() >= 2` и `current_cell` ≠ цель — кладём `path =
+  planned_path.duplicate()` и `_start_moving()`. В цели — очищаем `planned_path`.
+  Если цель недостижима (`_full_path(goal).size() < 2`) — маршрут не трогаем
+  (D5, защита от бесконечного цикла). Вызывается в `HeroController._reset_time_and_movement()`
+  после `end_turn_movement()` и сброса `move_points`.
+- **Синхронизация остатка (D2/D3).** `end_turn_movement()` сбрасывает `path`/`pending`,
+  но **не** `planned_path` — маршрут переживает сброс хода. В `_on_step_complete`
+  при остановке по `move_points <= 0` пишем `planned_path = path.duplicate()`
+  (остаток без головы); при достижении цели в `_move_next_step` (`path.size() < 2`)
+  очищаем `planned_path`.
+- **Подсветка ходов (D3 / MarkerLayer 3.1).** Красный фронталь расширен: сосед
+  красный, если достижим за бюджет (`_dist <= mp`), но войти в него за текущий
+  `move_points` нельзя ( непроходим ИЛИ `_dist > mp`):
+  `can_enter_within_budget = is_walkable(nb) and dist.get(nb, INF) <= mp + 0.001`.
+  Зелёный/жёлтый (по остатку ≥ 1.0) и логика `_unhandled_input` не затронуты.
+- **Save / Load (D4).** `planned_path` сериализуется в `HeroController._planned_path_data()`
+  ({`x`,`y`} словари) и восстанавливается в `_planned_path_from()`, поэтому маршрут
+  переживает сохранение/загрузку игры.
+
+> В headless-режиме (см. «Headless-safe» ниже) `_tween_to` вызывает callback
+> мгновенно, поэтому движение в тестах проходит синхронно внутри
+> `auto_follow_at_turn_start()` / `on_map_clicked`.
+
 ## Города на карте
 
 `CityManager` (см. [`city_system.md`](city_system.md)): `cities`, `capital`,

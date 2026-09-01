@@ -9,6 +9,9 @@ signal hero_entered_village(cell: Vector2i)
 signal step_taken(cost: float)
 signal reach_preview_changed(pts: Array[Vector2i], dist: Dictionary, mp: float)
 signal reach_preview_cleared
+## Эмитируется при фиксации/отмене маршрута автохода.
+## committed=true — маршрут зафиксирован (готов к автоходу), committed=false — отменён.
+signal planned_route_changed(committed: bool)
 
 ## Signals to HeroController facade — replaces _parent back-references.
 signal facing_changed(delta: Vector2i)
@@ -33,6 +36,11 @@ var path: Array[Vector2i] = []
 var pending_cell: Vector2i = Vector2i(-1, -1)
 var pending_path: Array[Vector2i] = []
 var is_moving: bool = false
+
+## Зафиксированный многоклеточный маршрут автохода (необрезанный, до цели).
+## Голова — клетка, куда герой только что пришёл (равна current_cell после шага).
+## Сохраняется между ходами; см. auto_follow_at_turn_start().
+var planned_path: Array[Vector2i] = []
 
 var _map_gen: MapGenerator
 # _parent removed — use signals instead (R2)
@@ -80,13 +88,24 @@ func on_map_clicked(cell: Vector2i) -> void:
 		return
 
 	if cell == pending_cell and pending_path.size() > 1:
-		path = pending_path
-		pending_cell = Vector2i(-1, -1)
-		pending_path = []
-		path_previewed.emit("")
-		request_hide_path_visual.emit()
-		_start_moving()
-		return
+		# Второй клик — состоятельное поведение по состоянию маршрута (D1).
+		if planned_path.is_empty():
+			# Маршрут ещё не зафиксирован — фиксируем полный (необрезанный) путь
+			# до цели как маршрут автохода; герой не двигается сразу.
+			var full: Array[Vector2i] = _full_path(cell)
+			if full.size() >= 2:
+				planned_path = full
+				planned_route_changed.emit(true)
+			return
+		else:
+			# Маршрут уже зафиксирован — немедленное движение вперёд.
+			path = planned_path.duplicate()
+			pending_cell = Vector2i(-1, -1)
+			pending_path = []
+			path_previewed.emit("")
+			request_hide_path_visual.emit()
+			_start_moving()
+			return
 
 	if move_points <= 0:
 		# Контакт с врагом бесплатен: атака не тратит ОД.
@@ -353,6 +372,14 @@ func cancel_pending(clear_text: bool = true) -> void:
 	if clear_text:
 		path_previewed.emit("")
 
+## Отменить зафиксированный маршрут автохода (ПКМ / кнопка отмены).
+## Очищает planned_path и эмитирует planned_route_changed(false).
+func cancel_planned_path() -> void:
+	if planned_path.is_empty():
+		return
+	planned_path.clear()
+	planned_route_changed.emit(false)
+
 
 func _start_moving() -> void:
 	if path.size() < 2:
@@ -366,6 +393,10 @@ func _move_next_step() -> void:
 	if path.size() < 2:
 		GameLogger.trace("🏁 Path exhausted. Stopping.", "Movement")
 		is_moving = false
+		# Достигли последней клетки маршрута (цели) — очистить зафиксированный маршрут.
+		if not planned_path.is_empty():
+			planned_path.clear()
+			planned_route_changed.emit(false)
 		path.clear()
 		reach_preview_cleared.emit()
 		request_idle_animation.emit()
@@ -423,6 +454,10 @@ func _on_step_complete(cell: Vector2i) -> void:
 
 	if move_points <= 0:
 		is_moving = false
+		# Остаток маршрута сохраняется на следующий ход (D3): path[0] == current_cell,
+		# поэтому planned_path = path.duplicate() держит голову = текущая клетка.
+		if not planned_path.is_empty():
+			planned_path = path.duplicate()
 		path.clear()
 		reach_preview_cleared.emit()
 		request_idle_animation.emit()
@@ -433,8 +468,31 @@ func _on_step_complete(cell: Vector2i) -> void:
 
 func end_turn_movement() -> void:
 	is_moving = false
+	# Не очищаем planned_path: зафиксированный маршрут должен пережить сброс хода
+	# и автоходиться в начале следующего хода (D2).
+	if not planned_path.is_empty():
+		return
 	path.clear()
 	cancel_pending()
+
+## Автоход в начале хода (D2/D3/D5). Если маршрут зафиксирован (size >= 2) и
+## герой ещё не в цели — стартует движение по нему; в цели — очищает маршрут.
+## Если цель стал недостижимой (путь исчез/заблокирован) — не запускает движение,
+## сохраняя planned_path, пока маршрут перефиксирован (D5 — без падений/циклов).
+func auto_follow_at_turn_start() -> void:
+	if planned_path.size() < 2:
+		return
+	var goal: Vector2i = planned_path.back()
+	if current_cell == goal:
+		# Цель достигнута — очистить маршрут.
+		planned_path.clear()
+		planned_route_changed.emit(false)
+		return
+	# Деградация при исчезновении цели: не гонить бесконечный старт/останов.
+	if _full_path(goal).size() < 2:
+		return
+	path = planned_path.duplicate()
+	_start_moving()
 
 
 func force_stop() -> void:
