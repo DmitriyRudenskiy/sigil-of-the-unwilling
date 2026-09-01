@@ -14,8 +14,9 @@ func _make_city(uid: int = 0) -> City:
 
 # ==================== SaveData v3 ====================
 
-func test_version_is_three() -> void:
-	assert_eq(SaveData.CURRENT_VERSION, 3, "CURRENT_VERSION == 3")
+func test_version_is_current() -> void:
+	# v4: Succession-Sigil добавил successor/legend/path_id (см. SaveData).
+	assert_eq(SaveData.CURRENT_VERSION, 4, "CURRENT_VERSION == 4")
 
 
 func test_v2_migration_adds_empty_cities() -> void:
@@ -29,7 +30,7 @@ func test_v2_migration_adds_empty_cities() -> void:
 	}
 	var sd := SaveData.new()
 	sd.from_dict(v2)
-	assert_eq(sd.version, 3, "migrated to v3")
+	assert_eq(sd.version, SaveData.CURRENT_VERSION, "migrated to current version")
 	assert_true(sd.cities is Array, "cities is Array")
 	assert_eq((sd.cities as Array).size(), 0, "cities empty")
 	assert_eq((sd.characters as Array).size(), 0, "characters empty")
@@ -60,7 +61,7 @@ func test_v3_roundtrip_json() -> void:
 
 	var sd2 := SaveData.new()
 	sd2.from_dict(parsed)
-	assert_eq(sd2.version, 3, "version")
+	assert_eq(sd2.version, SaveData.CURRENT_VERSION, "version")
 	assert_eq(sd2.run_seed, 7, "seed")
 	assert_eq(sd2.cities.size(), 1, "one city")
 	assert_eq(sd2.characters.size(), 1, "one character")

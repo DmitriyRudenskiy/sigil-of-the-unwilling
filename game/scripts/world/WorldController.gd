@@ -6,6 +6,7 @@ extends Node2D
 const _Platform = preload("res://scripts/core/Platform.gd")
 const WorldEventRouterScript = preload("res://scripts/world/WorldEventRouter.gd")
 const WorldBootstrapScript = preload("res://scripts/world/WorldBootstrap.gd")
+const SuccessionControllerScript = preload("res://scripts/world/SuccessionController.gd")
 
 # Bootstrap result fields (public for external callers)
 var battle_coordinator: Node = null
@@ -24,6 +25,10 @@ var _persistence = null
 var _resource_chain = null
 var _event_router: WorldEventRouter = null
 var _bootstrap_result: WorldBootstrap.BootstrapResult = null
+# succession-sigil: смерть героя → преемник. Чистый RefCounted, headless-safe.
+# Типизация через локальный preload (const), а не через global class_name:
+# в detached-тестах class_name не регистрируется в classdb → компиляция падает.
+var _succession = null
 
 
 func _ready() -> void:
@@ -77,6 +82,12 @@ func _ready() -> void:
 	# Connect router outward signals
 	_event_router.end_turn_requested.connect(_on_end_turn_from_router)
 
+	# succession-sigil: смерть героя → выбор преемника и наследование легенды.
+	# hero_died из WorldBattleCoordinator (бой) и need-loop (голод/усталость...).
+	_succession = SuccessionControllerScript.new()
+	if not GameEventBus.hero_died.is_connected(_on_hero_died):
+		GameEventBus.hero_died.connect(_on_hero_died)
+
 	# Load saved game if applicable
 	if loaded_save != null:
 		_persistence.apply_loaded_save(loaded_save, _build_load_context())
@@ -101,7 +112,7 @@ func _finit_subsystems() -> void:
 		self, _ui_manager, _camera, _bootstrap_result.input_controller, _world_delta,
 		_bootstrap_result.services
 	)
-	# Headless: UI не создаётся (WorldBootstrap._init_ui) → _ui_manager == null.
+	# city-in-world: UI создаётся ВСЕГДА (включая headless) → chest_dialog есть.
 	var chest_dialog: ArtifactChestDialog = _ui_manager.chest_dialog if _ui_manager != null else null
 	interaction_controller.setup(_hero, _bootstrap_result.spawner, chest_dialog)
 	interaction_controller.connect_chest_signals()
@@ -112,6 +123,44 @@ func _on_end_turn_from_router() -> void:
 	# Router already executed the turn logic; this hook is for
 	# any controller-level side effects (currently none needed).
 	pass
+
+# ==================== SUCCESSION-SIGIL: death -> successor ====================
+
+## GameEventBus.hero_died(cause): выбрать преемника, перенести легенду,
+## заменить активного героя. Возврат преемника = легенда продолжается;
+## null = преемника нет → run заканчивается (никого не меняем).
+func _on_hero_died(_deceased: HeroController) -> void:
+	var successor := _plan_succession(_deceased)
+	if successor == null:
+		GameLogger.world("Succession: no eligible follower — run ends")
+		return
+	_reincarnate(successor)
+	GameEventBus.hero_successor.emit(successor)
+
+## Выбрать преемника через SuccessionController. Возвращает HeroController либо
+## null (преемника нет). Отдельно от _reincarnate — чтобы проверять выбор
+## без полного перепричинения (тесты, headless).
+func _plan_succession(deceased: HeroController) -> HeroController:
+	if _succession == null or _cities == null or deceased == null:
+		return null
+	return _succession.on_hero_died(
+		deceased, _rng, _cities.cities, _cities)
+
+## Заменить активного героя на преемника: новый в дереве, инициализирован,
+## battle/interaction переподключены на него. Города уже «свои» (owner =
+## общий path_id), так что перерегистрация в transfer_legend не нужна.
+func _reincarnate(successor: HeroController) -> void:
+	if _hero != null and is_instance_valid(_hero) and _hero.get_parent() != null:
+		_hero.get_parent().remove_child(_hero)
+		_hero.free()
+	add_child(successor)
+	successor.setup(_map_gen)
+	if _map_gen != null and _map_gen.has_valid_tilemap():
+		successor.position = _map_gen.map_to_local(successor.current_cell)
+	if is_instance_valid(battle_coordinator):
+		battle_coordinator.hero = successor
+	if is_instance_valid(interaction_controller):
+		interaction_controller.hero = successor
 
 
 # ==================== CAMERA ====================
@@ -137,6 +186,15 @@ func get_hero() -> HeroController:
 
 func get_map_gen() -> MapGenerator:
 	return _map_gen
+
+
+## city-in-world: доступ для SocketController (CITY_* команды, GET_STATE).
+func get_cities() -> CityManager:
+	return _cities
+
+
+func get_ui_manager() -> WorldUIManager:
+	return _ui_manager
 
 
 func is_world_visible() -> bool:
@@ -218,3 +276,4 @@ func _handle_headless_exit() -> void:
 	if (_Platform.is_headless() or _Platform.should_auto_quit()) and not _Platform.is_test_server():
 		await get_tree().create_timer(1.0).timeout
 		get_tree().quit()
+

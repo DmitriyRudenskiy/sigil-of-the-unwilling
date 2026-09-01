@@ -47,10 +47,15 @@ func apply_battle_results(surviving_army: Array[UnitStack]) -> void:
 	var new_army: Array[UnitStack] = []
 	for stack in surviving_army:
 		if stack != null and stack.is_alive():
-			# РФ6-1: пересборка из реестра — статы каноничные, только численность сохраняется
-			var clean = _units_registry.make_fixed_stack(stack.get_key(), stack.count)
-			if clean != null:
-				new_army.append(clean)
+			if _units_registry != null:
+				# РФ6-1: пересборка из реестра — статы каноничные, только численность сохраняется
+				var clean = _units_registry.make_fixed_stack(stack.get_key(), stack.count)
+				if clean != null:
+					new_army.append(clean)
+				continue
+			# ponytail: реестра нет (детаченные тесты) — дублируем стек как есть;
+			# в игре registry всегда на месте (HeroController._ready → setup).
+			new_army.append(stack.duplicate_stack())
 	army = new_army
 
 

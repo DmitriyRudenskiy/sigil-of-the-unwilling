@@ -26,6 +26,10 @@ var camera: Node = null        # Camera2D
 var input_controller: Node = null
 var world_delta: WorldStateDelta = null
 
+## succession-sigil: боевая смерть (поражение + аннигиляция → combat_hp = 0 →
+## hero_died). За флагом, чтобы можно было тонко настраивать/отключить.
+var battle_death_enabled := true
+
 ## Опциональные Callable-хуки (инъекция зависимостей вместо жёстких типов).
 var _on_ui_refresh: Callable = Callable()
 var _services: ServiceContainer = null
@@ -235,6 +239,18 @@ func _apply_results(
 					army_ref.apply_battle_results(minimal)
 					GameLogger.hero("Hero routed: awarded minimal stack")
 
+	## succession-sigil: боевая смерть. При поражении полное уничтожение армии
+	## обнуляет combat_hp; combat_hp <= 0 = герой пал. Тогда — hero_died(&"battle")
+	## и отступление ОТКЛАЫВАЕТСЯ. Гат за battle_death_enabled.
+	if battle_death_enabled and winner != BattleState.Side.ATTACKER and hero != null:
+		if surv_atk.is_empty() and hero.has_method("set_combat_hp"):
+			hero.call("set_combat_hp", 0)
+		if hero.has_method("is_combat_dead") and hero.call("is_combat_dead"):
+			hero.call("mark_combat_dead")
+			GameEventBus.hero_died.emit(&"battle")
+			GameLogger.hero("Hero died in battle at %s" % _pending_enemy_cell)
+			return
+
 	if winner == BattleState.Side.ATTACKER:
 		if map_gen != null:
 			var stacks: Variant = map_gen.get("enemy_stacks")
@@ -353,3 +369,4 @@ func get_pending_enemy_cell() -> Vector2i:
 
 func get_battle_flow() -> BattleFlow:
 	return battle_flow
+

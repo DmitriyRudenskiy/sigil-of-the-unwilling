@@ -23,6 +23,9 @@ var born_turn := -1
 ## Персонаж (M2: Демография), привязанный к фигурке (-1 = нет).
 ## Устанавливается CharacterRegistry.create(); сбрасывается при смерти.
 var character_uid: int = -1
+## Путь (фракция/кандидат) этой фигурки. Источник истины для наследования:
+## наследником может стать только последователь того же path_id, что и павший герой.
+var path_id: StringName = &""
 
 
 func is_available() -> bool:
@@ -70,6 +73,7 @@ func serialize() -> Dictionary:
 		"assigned_to": assigned_to,
 		"born_turn": born_turn,
 		"character_uid": character_uid,
+		"path_id": String(path_id),
 	}
 
 
@@ -86,4 +90,5 @@ static func deserialize(data: Dictionary) -> PopUnit:
 	u.assigned_to = int(data.get("assigned_to", -1))
 	u.born_turn = int(data.get("born_turn", -1))
 	u.character_uid = int(data.get("character_uid", -1))
+	u.path_id = StringName(str(data.get("path_id", &"")))
 	return u

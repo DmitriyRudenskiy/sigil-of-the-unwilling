@@ -162,11 +162,24 @@ func apply_loaded_save(data: SaveData, ctx) -> void:
 func _restore_cities(data: SaveData, ctx) -> void:
 	## Города пересозданы при бутстрапе — по uid возвращаем прогресс.
 	## v2-сейв (cities пусто) — не трогает.
+	## city-in-world: после бутстрапа существует только столица (uid 0), а
+	## захваченные деревни — нет. Пересоздаём их из world_delta
+	## (порядок регистрации: сначала столица, потом деревни в порядке захвата
+	## из delta — уиды совпадают с оригинальным прогоном), ПОСЛЕМатчируем по uid.
 	if not (ctx.cities is Node):
 		return
 	if not (data.cities is Array) or (data.cities as Array).is_empty():
 		return
-	var all: Array = ctx.cities.cities
+	var cities_mgr: CityManager = ctx.cities
+	if ctx.world_delta != null:
+		for cell in ctx.world_delta.captured_villages:
+			# Пересоздаём безусловно: у города из сейва центр может отличаться
+			# от capture-cell (перенос), а временное совпадение с бутстоп-столицей
+			# безопасно — deserialize сразу вернёт оба города на их места.
+			var village := CityFactory.create_village(
+				cell, CityFactory.village_name(data.run_seed, cell), data.run_seed)
+			cities_mgr.register_city(village)
+	var all: Array = cities_mgr.cities
 	var saved_count: int = (data.cities as Array).size()
 	var restored := 0
 	for d in data.cities:

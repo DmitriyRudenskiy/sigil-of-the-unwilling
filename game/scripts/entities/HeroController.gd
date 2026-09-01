@@ -25,6 +25,16 @@ var hero_name: String = "Darkstorn"
 var stats := {"attack": 0, "defense": 0, "spell_power": 4, "knowledge": 2}
 var inventory: HeroInventory = HeroInventory.new()
 
+## succession-sigil: путь-легенда (build identity). Источник истины для
+## выбора преемника (преемник должен быть последователем того же пути).
+var path_id: StringName = &""
+## succession-sigil: бой. HP героя в бою; 0 = герой пал в бою.
+## combat_hp обнуляется в _apply_results при полном уничтожении армии.
+var combat_hp := 0
+var max_combat_hp := 0
+## succession-sigil: жив ли герой (смерть в бою / от потребностей).
+var is_alive := true
+
 # Magic — HeroMagic handles mana/schools/spellbook internally.
 var magic: HeroMagic = HeroMagic.new()
 
@@ -47,6 +57,22 @@ var magic_schools: Dictionary:
 	get: return magic.schools
 var spellbook: Array[StringName]:
 	get: return magic.spellbook
+
+# ==================== SUCCESSION-SIGIL: COMBAT DEATH ====================
+
+## True, если герой получил смертельный урон в бою (combat_hp <= 0).
+func is_combat_dead() -> bool:
+	return combat_hp <= 0
+
+## Обнулить боевое HP и пометить героя умершим.
+func mark_combat_dead() -> void:
+	combat_hp = 0
+	is_alive = false
+
+## Установить боевое HP (0..max). 0 → герой пал в бою.
+func set_combat_hp(amount: int) -> void:
+	combat_hp = clampi(amount, 0, max(max_combat_hp, 0))
+	is_alive = combat_hp > 0
 
 var _tween: Tween
 var _setup_done := false
@@ -324,6 +350,7 @@ func serialize() -> Dictionary:
 		"move_points": movement.move_points,
 		"hero_name": hero_name,
 		"stats": stats.duplicate(),
+		"path_id": String(path_id),
 		"resources": resources.serialize(),
 		"army": army.serialize(),
 		"inventory": inventory.serialize(),
@@ -358,6 +385,7 @@ func deserialize(data: Dictionary) -> void:
 	movement.move_points = float(data.get("move_points", movement.move_points))
 	hero_name = str(data.get("hero_name", hero_name))
 	stats = data.get("stats", stats).duplicate()
+	path_id = StringName(str(data.get("path_id", path_id)))
 	resources.deserialize(data.get("resources", {}))
 	army.deserialize(data.get("army", []))
 	inventory.deserialize(data.get("inventory", {}))
@@ -391,3 +419,4 @@ func _followers_data() -> Array:
 		if f != null:
 			out.append(f.serialize())
 	return out
+

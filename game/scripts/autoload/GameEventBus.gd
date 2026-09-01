@@ -31,6 +31,13 @@ signal character_died(city_uid: int, char_uid: int)
 signal character_need_critical(char_uid: int, need_id: StringName)
 signal disease_outbreak(city_uid: int, char_uid: int)
 
+# ==================== SUCCESSION-SIGIL ====================
+## Герой умер (cause = StringName: "battle", "starvation", "exhaustion",
+## "isolation", "burnout"). Преемник выбирается на это событие.
+signal hero_died(cause: StringName)
+## Преемник принял легенду (передаётся новый HeroController).
+signal hero_successor(hero: Node)
+
 # ==================== ГОРОД (M3) ====================
 signal building_constructed(city_uid: int, building_uid: int)
 signal scale_shift(city_uid: int, new_scale: int)

@@ -2,7 +2,7 @@ extends RefCounted
 class_name SaveData
 ## Save file data container.
 
-const CURRENT_VERSION := 3
+const CURRENT_VERSION := 4
 const CURRENT_GENERATOR_VERSION := 1
 
 var version: int = CURRENT_VERSION
@@ -16,6 +16,12 @@ var world: Dictionary = {}
 var cities: Array = []
 ## Сериализованные персонажи (CharacterRegistry.serialize()). v2: пусто.
 var characters: Array = []
+# --- Сохранение v4 (Succession-Sigil): преемник и легенда ---
+## Преемник (SuccessionController.build_successor serialize). Пусто, пока
+## герой жив или преемник не выбран.
+var successor: Dictionary = {}
+## Состояние легенды: путь, уровень, слава. Пусто по умолчанию.
+var legend: Dictionary = {}
 
 
 func to_dict() -> Dictionary:
@@ -28,6 +34,8 @@ func to_dict() -> Dictionary:
 		"world": world,
 		"cities": cities,
 		"characters": characters,
+		"successor": successor,
+		"legend": legend,
 	}
 
 
@@ -40,6 +48,8 @@ func from_dict(data: Dictionary) -> void:
 		_migrate_v1_to_v2(data)
 	if version < 3:
 		_migrate_v2_to_v3(data)
+	if version < 4:
+		_migrate_v3_to_v4(data)
 	version = CURRENT_VERSION
 
 	run_seed = int(data.get("run_seed", 0))
@@ -58,6 +68,12 @@ func from_dict(data: Dictionary) -> void:
 	cities = raw_cities if raw_cities is Array else []
 	var raw_chars = data.get("characters", [])
 	characters = raw_chars if raw_chars is Array else []
+	successor = data.get("successor", {})
+	if not (successor is Dictionary):
+		successor = {}
+	legend = data.get("legend", {})
+	if not (legend is Dictionary):
+		legend = {}
 
 func _migrate_v1_to_v2(data: Dictionary) -> void:
 	## v2: ensure hero.time_mp_spent exists for mana persistence
@@ -74,6 +90,19 @@ func _migrate_v2_to_v3(data: Dictionary) -> void:
 		data["cities"] = []
 	if not data.has("characters") or not (data["characters"] is Array):
 		data["characters"] = []
+
+func _migrate_v3_to_v4(data: Dictionary) -> void:
+	## v4: преемник и легенда. В v3-сейвах их нет — заполняем пустыми
+	## словарями (преемник не выбран, легенда не накоплена).
+	if not data.has("successor") or not (data["successor"] is Dictionary):
+		data["successor"] = {}
+	if not data.has("legend") or not (data["legend"] is Dictionary):
+		data["legend"] = {}
+
+	# path_id героя уже сериализуется с v4 (HeroController.path_id); для
+	# v3-сейвов без него — путь героя остаётся пустым (pristine run).
+	if not data["hero"].has("path_id"):
+		data["hero"]["path_id"] = ""
 
 
 func is_valid() -> bool:
