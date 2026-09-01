@@ -21,3 +21,6 @@ func _ready() -> void:
 	TemplateEngine.register_handler(&"DISPLAY_CYCLE", TemplateEngine.TemplateHandlers.t14_display_cycle)
 	TemplateEngine.register_handler(&"DISPEL_DRAW", TemplateEngine.TemplateHandlers.t15_dispel_draw)
 	TemplateEngine.register_handler(&"MARKET_NICHE", TemplateEngine.TemplateHandlers.t16_market_niche)
+	TemplateEngine.register_handler(&"HEAL_CLEAR", TemplateEngine.TemplateHandlers.t17_heal_clear)
+	TemplateEngine.register_handler(&"REVIVE", TemplateEngine.TemplateHandlers.t18_revive)
+	TemplateEngine.register_handler(&"PORTAL", TemplateEngine.TemplateHandlers.t19_portal)

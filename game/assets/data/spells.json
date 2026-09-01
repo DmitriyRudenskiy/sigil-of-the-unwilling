@@ -3,7 +3,7 @@
     "id": "alchemical_blast",
     "name": "Alchemical Blast",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "fire",
     "params": {
@@ -12,13 +12,19 @@
       "apply_status": "FROZEN",
       "status_duration": 1
     },
-    "description": "Deal 2 damage to an enemy unit (freezes the target)."
+    "description": "Deal 2 damage to an enemy unit (freezes the target).",
+    "secondary_effects": [
+      {
+        "effect": "DEAL_DAMAGE",
+        "count": 1
+      }
+    ]
   },
   {
     "id": "beaker_blast",
     "name": "Beaker Blast",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "fire",
     "params": {
@@ -32,7 +38,7 @@
     "id": "blazing_salvo",
     "name": "Blazing Salvo",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "fire",
     "params": {
@@ -77,7 +83,7 @@
     "id": "burn_out",
     "name": "Burn Out",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "fire",
     "params": {
@@ -104,7 +110,7 @@
     "id": "chakram_throw",
     "name": "Chakram Throw",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "fire",
     "params": {
@@ -119,7 +125,7 @@
     "id": "char",
     "name": "Char",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 1,
     "color": "fire",
     "params": {
@@ -146,7 +152,7 @@
     "id": "chloric_mix",
     "name": "Chloric Mix",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "fire",
     "params": {
@@ -188,7 +194,7 @@
     "id": "cremate",
     "name": "Cremate",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "shadow",
     "params": {
@@ -258,7 +264,7 @@
     "id": "firebomb",
     "name": "Firebomb",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 4,
     "color": "fire",
     "params": {
@@ -273,7 +279,7 @@
     "id": "flash_fry",
     "name": "Flash Fry",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "fire",
     "params": {
@@ -286,7 +292,7 @@
     "id": "flash_grenade",
     "name": "Flash Grenade",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "fire",
     "params": {
@@ -300,7 +306,7 @@
     "id": "forked_lightning",
     "name": "Forked Lightning",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "primal",
     "params": {
@@ -315,7 +321,7 @@
     "id": "free_fire",
     "name": "Free Fire",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "fire",
     "params": {
@@ -328,7 +334,7 @@
     "id": "frost",
     "name": "Frost",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "primal",
     "params": {
@@ -358,7 +364,7 @@
     "id": "funeral_pyre",
     "name": "Funeral Pyre",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 4,
     "color": "shadow",
     "params": {
@@ -387,7 +393,7 @@
     "id": "guns_blazing",
     "name": "Guns Blazing",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 4,
     "color": "fire",
     "params": {
@@ -401,7 +407,7 @@
     "id": "harbingers_bite",
     "name": "Harbinger's Bite",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "shadow",
     "params": {
@@ -415,7 +421,7 @@
     "id": "ice_bolt",
     "name": "Ice Bolt",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 1,
     "color": "primal",
     "params": {
@@ -430,7 +436,7 @@
     "id": "ignite",
     "name": "Ignite",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 1,
     "color": "fire",
     "params": {
@@ -443,7 +449,7 @@
     "id": "incineration",
     "name": "Incineration",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "fire",
     "params": {
@@ -456,7 +462,7 @@
     "id": "just_desserts",
     "name": "Just Desserts",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "justice",
     "params": {
@@ -471,7 +477,7 @@
     "id": "light_em_up",
     "name": "Light 'em Up",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "fire",
     "params": {
@@ -486,7 +492,7 @@
     "id": "lightning_strike",
     "name": "Lightning Strike",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "primal",
     "params": {
@@ -529,7 +535,7 @@
     "id": "rapid_shot",
     "name": "Rapid Shot",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "fire",
     "params": {
@@ -557,7 +563,7 @@
     "id": "ruinous_burst",
     "name": "Ruinous Burst",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 5,
     "color": "shadow",
     "params": {
@@ -584,7 +590,7 @@
     "id": "sear",
     "name": "Sear",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "fire",
     "params": {
@@ -597,7 +603,7 @@
     "id": "siphon_vitality",
     "name": "Siphon Vitality",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "shadow",
     "params": {
@@ -616,7 +622,7 @@
     "id": "sky_race",
     "name": "Sky Race",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "primal",
     "params": {
@@ -633,7 +639,7 @@
     "id": "skybolt",
     "name": "Skybolt",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "primal",
     "params": {
@@ -675,7 +681,7 @@
     "id": "sonic_blast",
     "name": "Sonic Blast",
     "template": "DIRECT_DAMAGE",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "primal",
     "params": {
@@ -787,7 +793,7 @@
     "id": "trick_shot",
     "name": "Trick Shot",
     "template": "HARD_REMOVAL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "fire",
     "params": {},
@@ -1053,7 +1059,10 @@
       "unconditional": true,
       "draw_on_kill": 1
     },
-    "description": "Destroy an enemy unit. Ignores Ward (draws a card)."
+    "description": "Destroy an enemy unit. Ignores Ward (draws a card).",
+    "condition": {
+      "target_hp_max": 22
+    }
   },
   {
     "id": "annihilate",
@@ -1066,7 +1075,10 @@
       "ignore_ward": true,
       "unconditional": true
     },
-    "description": "Destroy an enemy unit. Ignores Ward. (exiles the target) (Shadow, chilling)."
+    "description": "Destroy an enemy unit. Ignores Ward. (exiles the target) (Shadow, chilling).",
+    "condition": {
+      "target_hp_max": 22
+    }
   },
   {
     "id": "banish",
@@ -1080,13 +1092,16 @@
       "ignore_ward": true,
       "unconditional": true
     },
-    "description": "Exile an enemy unit. Ignores Ward. (exiles the target) (Shadow, chilling)."
+    "description": "Exile an enemy unit. Ignores Ward. (exiles the target) (Shadow, chilling).",
+    "condition": {
+      "target_hp_max": 22
+    }
   },
   {
     "id": "bring_down",
     "name": "Bring Down",
     "template": "HARD_REMOVAL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 4,
     "color": "justice",
     "params": {
@@ -1109,13 +1124,16 @@
       "unconditional": true,
       "draw_on_kill": 1
     },
-    "description": "Exile an enemy unit (draws a card). (exiles the target) (Shadow, chilling)."
+    "description": "Exile an enemy unit (draws a card). (exiles the target) (Shadow, chilling).",
+    "condition": {
+      "target_hp_max": 22
+    }
   },
   {
     "id": "collapse",
     "name": "Collapse",
     "template": "HARD_REMOVAL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 5,
     "color": "time",
     "params": {},
@@ -1128,7 +1146,7 @@
     "id": "controlled_demolition",
     "name": "Controlled Demolition",
     "template": "HARD_REMOVAL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 4,
     "color": "time",
     "params": {
@@ -1150,13 +1168,16 @@
       "draw_on_kill": 1,
       "unconditional": true
     },
-    "description": "Destroy an enemy unit. Draw a card. (a reward spell) (Justice, exact)."
+    "description": "Destroy an enemy unit. Draw a card. (a reward spell) (Justice, exact).",
+    "condition": {
+      "target_hp_max": 22
+    }
   },
   {
     "id": "deathstrike",
     "name": "Deathstrike",
     "template": "HARD_REMOVAL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "shadow",
     "params": {
@@ -1177,13 +1198,16 @@
     "params": {
       "unconditional": true
     },
-    "description": "Destroy an enemy unit. (exiles the target) (Shadow, chilling)."
+    "description": "Destroy an enemy unit. (exiles the target) (Shadow, chilling).",
+    "condition": {
+      "target_hp_max": 22
+    }
   },
   {
     "id": "desecrate",
     "name": "Desecrate",
     "template": "HARD_REMOVAL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 5,
     "color": "shadow",
     "params": {
@@ -1197,7 +1221,7 @@
     "id": "excavate",
     "name": "Excavate",
     "template": "HARD_REMOVAL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "time",
     "params": {},
@@ -1210,7 +1234,7 @@
     "id": "fatal_misstep",
     "name": "Fatal Misstep",
     "template": "HARD_REMOVAL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 4,
     "color": "shadow",
     "params": {},
@@ -1223,7 +1247,7 @@
     "id": "ghodans_takedown",
     "name": "Ghodan's Takedown",
     "template": "HARD_REMOVAL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 6,
     "color": "shadow",
     "params": {
@@ -1237,7 +1261,7 @@
     "id": "grave_robbery",
     "name": "Grave Robbery",
     "template": "HARD_REMOVAL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 4,
     "color": "shadow",
     "params": {
@@ -1256,7 +1280,7 @@
     "id": "lash_out",
     "name": "Lash Out",
     "template": "HARD_REMOVAL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "fire",
     "params": {
@@ -1271,7 +1295,7 @@
     "id": "nevermore",
     "name": "Nevermore",
     "template": "HARD_REMOVAL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 7,
     "color": "shadow",
     "params": {
@@ -1285,7 +1309,7 @@
     "id": "pillage",
     "name": "Pillage",
     "template": "HARD_REMOVAL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 4,
     "color": "fire",
     "params": {
@@ -1322,7 +1346,7 @@
     "id": "scythe_slash",
     "name": "Scythe Slash",
     "template": "HARD_REMOVAL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 5,
     "color": "shadow",
     "params": {
@@ -1334,7 +1358,7 @@
     "id": "slag",
     "name": "Slag",
     "template": "HARD_REMOVAL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "fire",
     "params": {
@@ -1349,7 +1373,7 @@
     "id": "slay",
     "name": "Slay",
     "template": "HARD_REMOVAL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "shadow",
     "params": {
@@ -1364,7 +1388,7 @@
     "id": "smite",
     "name": "Smite",
     "template": "HARD_REMOVAL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 5,
     "color": "justice",
     "params": {
@@ -1390,7 +1414,7 @@
     "id": "unmake",
     "name": "Unmake",
     "template": "HARD_REMOVAL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "shadow",
     "params": {},
@@ -1403,7 +1427,7 @@
     "id": "execute",
     "name": "Execute",
     "template": "HARD_REMOVAL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 4,
     "color": "justice",
     "params": {
@@ -1418,7 +1442,7 @@
     "id": "obliterate",
     "name": "Obliterate",
     "template": "HARD_REMOVAL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 8,
     "color": "shadow",
     "params": {
@@ -1493,7 +1517,10 @@
       "target": "ALLY_UNIT",
       "draw_after": 1
     },
-    "description": "Return an ally unit to your hand (draws a card). (any unit) (Primal, rooted)."
+    "description": "Return an ally unit to your hand (draws a card). (any unit) (Primal, rooted).",
+    "condition": {
+      "target_is_damaged": true
+    }
   },
   {
     "id": "disappear",
@@ -1506,7 +1533,10 @@
       "target": "ALLY_UNIT",
       "replay_free": true
     },
-    "description": "Return an ally unit to your hand (plays for free). (any unit) (Primal, rooted)."
+    "description": "Return an ally unit to your hand (plays for free). (any unit) (Primal, rooted).",
+    "condition": {
+      "target_is_damaged": true
+    }
   },
   {
     "id": "evacuation_plan",
@@ -1519,7 +1549,10 @@
       "target": "ALLY_UNIT",
       "draw_after": 1
     },
-    "description": "Return an ally to hand. Draw a card. (draws a spell) (Justice, exact)."
+    "description": "Return an ally to hand. Draw a card. (draws a spell) (Justice, exact).",
+    "condition": {
+      "target_is_damaged": true
+    }
   },
   {
     "id": "levitate",
@@ -1532,7 +1565,10 @@
       "target": "ANY_UNIT",
       "draw_after": 1
     },
-    "description": "Return any unit to its owner's hand (draws a card). (any unit) (Primal, rooted)."
+    "description": "Return any unit to its owner's hand (draws a card). (any unit) (Primal, rooted).",
+    "condition": {
+      "target_is_damaged": true
+    }
   },
   {
     "id": "obstructive_flicker",
@@ -1545,7 +1581,10 @@
       "target": "ANY_UNIT",
       "draw_after": 1
     },
-    "description": "Return any unit to its owner's hand (draws a card). (draws x3) (Primal, rooted)."
+    "description": "Return any unit to its owner's hand (draws a card). (draws x3) (Primal, rooted).",
+    "condition": {
+      "target_is_damaged": true
+    }
   },
   {
     "id": "reality_snap",
@@ -1574,7 +1613,10 @@
       "target": "ALLY_UNIT",
       "draw_after": 1
     },
-    "description": "Return an ally unit to your hand (draws a card). (draws a spell) (Justice, exact)."
+    "description": "Return an ally unit to your hand (draws a card). (draws a spell) (Justice, exact).",
+    "condition": {
+      "target_is_damaged": true
+    }
   },
   {
     "id": "slip_away",
@@ -1840,7 +1882,7 @@
     "id": "agile_strike",
     "name": "Agile Strike",
     "template": "COMBAT_TRICK",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "justice",
     "params": {
@@ -1848,13 +1890,19 @@
       "hp": 3,
       "heal": 1
     },
-    "description": "+2/+2 until end of turn (heals). (grants +1/+1) (Justice, exact)."
+    "description": "+2/+2 until end of turn (heals). (grants +1/+1) (Justice, exact).",
+    "secondary_effects": [
+      {
+        "effect": "APPLY_STATUS",
+        "status": "BURN"
+      }
+    ]
   },
   {
     "id": "against_the_odds",
     "name": "Against the Odds",
     "template": "COMBAT_TRICK",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "justice",
     "params": {
@@ -1868,7 +1916,7 @@
     "id": "aggressive_meeting",
     "name": "Aggressive Meeting",
     "template": "COMBAT_TRICK",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "fire",
     "params": {
@@ -1882,7 +1930,7 @@
     "id": "argos_technique",
     "name": "Argo's Technique",
     "template": "COMBAT_TRICK",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "justice",
     "params": {
@@ -1896,7 +1944,7 @@
     "id": "at_any_cost",
     "name": "At Any Cost",
     "template": "COMBAT_TRICK",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "fire",
     "params": {
@@ -1910,7 +1958,7 @@
     "id": "backlash",
     "name": "Backlash",
     "template": "COMBAT_TRICK",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "fire",
     "params": {
@@ -1940,7 +1988,7 @@
     "id": "bladesmash",
     "name": "Bladesmash",
     "template": "COMBAT_TRICK",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "fire",
     "params": {
@@ -1954,7 +2002,7 @@
     "id": "bolster",
     "name": "Bolster",
     "template": "COMBAT_TRICK",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "justice",
     "params": {
@@ -1968,7 +2016,7 @@
     "id": "bottoms_up",
     "name": "Bottoms Up",
     "template": "COMBAT_TRICK",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "fire",
     "params": {
@@ -1981,7 +2029,7 @@
     "id": "bring_into_focus",
     "name": "Bring into Focus",
     "template": "COMBAT_TRICK",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "time",
     "params": {
@@ -1994,7 +2042,7 @@
     "id": "bullseye",
     "name": "Bullseye",
     "template": "COMBAT_TRICK",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "fire",
     "params": {
@@ -2008,7 +2056,7 @@
     "id": "call_the_hit",
     "name": "Call The Hit",
     "template": "COMBAT_TRICK",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "fire",
     "params": {
@@ -2022,7 +2070,7 @@
     "id": "called_shot",
     "name": "Called Shot",
     "template": "COMBAT_TRICK",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "fire",
     "params": {
@@ -2036,7 +2084,7 @@
     "id": "check_raise",
     "name": "Check-Raise",
     "template": "COMBAT_TRICK",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "fire",
     "params": {
@@ -2049,7 +2097,7 @@
     "id": "daring_maneuver",
     "name": "Daring Maneuver",
     "template": "COMBAT_TRICK",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "fire",
     "params": {
@@ -2207,14 +2255,20 @@
     "id": "futility",
     "name": "Futility",
     "template": "DEBUFF_CONTROL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "shadow",
     "params": {
       "atk": -2,
       "hp": -2
     },
-    "description": "Give -2/-2 until end of turn. (permanently) (Shadow, chilling)."
+    "description": "Give -2/-2 until end of turn. (permanently) (Shadow, chilling).",
+    "secondary_effects": [
+      {
+        "effect": "APPLY_STATUS",
+        "status": "FROZEN"
+      }
+    ]
   },
   {
     "id": "gruanform",
@@ -2813,7 +2867,10 @@
     "params": {
       "keyword": "QUICKDRAW"
     },
-    "description": "Give an ally Quickdraw."
+    "description": "Give an ally Quickdraw.",
+    "condition": {
+      "target_hp_max": 12
+    }
   },
   {
     "id": "showdown",
@@ -3219,7 +3276,7 @@
     "id": "arrest",
     "name": "Arrest",
     "template": "DEBUFF_CONTROL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "justice",
     "params": {
@@ -3232,7 +3289,7 @@
     "id": "beneath_notice",
     "name": "Beneath Notice",
     "template": "DEBUFF_CONTROL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "shadow",
     "params": {
@@ -3246,7 +3303,7 @@
     "id": "biting_winds",
     "name": "Biting Winds",
     "template": "DEBUFF_CONTROL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "primal",
     "params": {
@@ -3272,7 +3329,7 @@
     "id": "calming_melody",
     "name": "Calming Melody",
     "template": "DEBUFF_CONTROL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "primal",
     "params": {
@@ -3284,7 +3341,7 @@
     "id": "chill",
     "name": "Chill",
     "template": "DEBUFF_CONTROL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "primal",
     "params": {
@@ -3297,7 +3354,7 @@
     "id": "cirsos_meddling",
     "name": "Cirso's Meddling",
     "template": "DEBUFF_CONTROL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 2,
     "color": "shadow",
     "params": {
@@ -3311,7 +3368,7 @@
     "id": "cocoon",
     "name": "Cocoon",
     "template": "DEBUFF_CONTROL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "primal",
     "params": {
@@ -3324,7 +3381,7 @@
     "id": "contaminating_ritual",
     "name": "Contaminating Ritual",
     "template": "DEBUFF_CONTROL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "shadow",
     "params": {
@@ -3339,7 +3396,7 @@
     "id": "corrupt",
     "name": "Corrupt",
     "template": "DEBUFF_CONTROL",
-    "speed": "fast",
+    "speed": "burst",
     "cost": 3,
     "color": "shadow",
     "params": {
@@ -4210,7 +4267,10 @@
       "count": 2,
       "scout": 1
     },
-    "description": "Draw 2 cards (scouts). (draws 1, scouts 5) (Shadow, chilling)."
+    "description": "Draw 2 cards (scouts). (draws 1, scouts 5) (Shadow, chilling).",
+    "condition": {
+      "hand_size_max": 4
+    }
   },
   {
     "id": "all_nighter",
@@ -4223,7 +4283,10 @@
       "count": 1,
       "scout": 1
     },
-    "description": "Draw a card (scouts). (draws 3, scouts 3) (Time, accelerated)."
+    "description": "Draw a card (scouts). (draws 3, scouts 3) (Time, accelerated).",
+    "condition": {
+      "hand_size_max": 4
+    }
   },
   {
     "id": "audacious_ruse",
@@ -4236,7 +4299,10 @@
       "count": 1,
       "scout": 1
     },
-    "description": "Draw a card (scouts). (draws 1, scouts 5) (Shadow, chilling)."
+    "description": "Draw a card (scouts). (draws 1, scouts 5) (Shadow, chilling).",
+    "condition": {
+      "hand_size_max": 4
+    }
   },
   {
     "id": "biding_time",
@@ -4249,7 +4315,10 @@
       "count": 4,
       "scout": 1
     },
-    "description": "Draw a card (scouts). (draws, opponent draws) (Time, accelerated)."
+    "description": "Draw a card (scouts). (draws, opponent draws) (Time, accelerated).",
+    "condition": {
+      "hand_size_max": 4
+    }
   },
   {
     "id": "bone_music",
@@ -4262,7 +4331,10 @@
       "count": 1,
       "scout": 2
     },
-    "description": "Draw a card (scouts). (draws 3, scouts 1) (Shadow, chilling)."
+    "description": "Draw a card (scouts). (draws 3, scouts 1) (Shadow, chilling).",
+    "condition": {
+      "hand_size_max": 4
+    }
   },
   {
     "id": "bottled_insight",
@@ -4275,7 +4347,10 @@
       "count": 1,
       "scout": 1
     },
-    "description": "Draw a card (scouts). (draws 2, scouts 4) (Primal, rooted)."
+    "description": "Draw a card (scouts). (draws 2, scouts 4) (Primal, rooted).",
+    "condition": {
+      "hand_size_max": 4
+    }
   },
   {
     "id": "boundless_knowledge",
@@ -4297,7 +4372,7 @@
     "id": "brenns_insight",
     "name": "Brenn's Insight",
     "template": "SPELL_DRAW",
-    "speed": "fast",
+    "speed": "slow",
     "cost": 2,
     "color": "fire",
     "params": {
@@ -4310,7 +4385,7 @@
     "id": "call_for_aid",
     "name": "Call for Aid",
     "template": "SPELL_DRAW",
-    "speed": "fast",
+    "speed": "slow",
     "cost": 2,
     "color": "justice",
     "params": {
@@ -4336,7 +4411,7 @@
     "id": "collection_rounds",
     "name": "Collection Rounds",
     "template": "SPELL_DRAW",
-    "speed": "fast",
+    "speed": "slow",
     "cost": 2,
     "color": "time",
     "params": {
@@ -4349,7 +4424,7 @@
     "id": "curtain_call",
     "name": "Curtain Call",
     "template": "SPELL_DRAW",
-    "speed": "fast",
+    "speed": "slow",
     "cost": 2,
     "color": "shadow",
     "params": {
@@ -4362,7 +4437,7 @@
     "id": "dangerous_gambit",
     "name": "Dangerous Gambit",
     "template": "SPELL_DRAW",
-    "speed": "fast",
+    "speed": "slow",
     "cost": 1,
     "color": "fire",
     "params": {
@@ -4378,7 +4453,7 @@
     "id": "desperate_gambit",
     "name": "Desperate Gambit",
     "template": "SPELL_DRAW",
-    "speed": "fast",
+    "speed": "slow",
     "cost": 1,
     "color": "fire",
     "params": {
@@ -4394,7 +4469,7 @@
     "id": "dazzling_revelation",
     "name": "Dazzling Revelation",
     "template": "SPELL_DRAW",
-    "speed": "fast",
+    "speed": "slow",
     "cost": 3,
     "color": "justice",
     "params": {
@@ -4407,7 +4482,7 @@
     "id": "deja_vu",
     "name": "Deja Vu",
     "template": "SPELL_DRAW",
-    "speed": "fast",
+    "speed": "slow",
     "cost": 2,
     "color": "time",
     "params": {
@@ -4426,13 +4501,16 @@
     "params": {
       "power": 1
     },
-    "description": "+1 max power. (time influence) (Time, accelerated)."
+    "description": "+1 max power. (time influence) (Time, accelerated).",
+    "condition": {
+      "hand_size_max": 3
+    }
   },
   {
     "id": "fair_exchange",
     "name": "Fair Exchange",
     "template": "SPELL_DRAW",
-    "speed": "fast",
+    "speed": "slow",
     "cost": 2,
     "color": "time",
     "params": {
@@ -4445,7 +4523,7 @@
     "id": "find_the_moment",
     "name": "Find The Moment",
     "template": "SPELL_DRAW",
-    "speed": "fast",
+    "speed": "slow",
     "cost": 1,
     "color": "primal",
     "params": {
@@ -4457,7 +4535,7 @@
     "id": "finest_hour",
     "name": "Finest Hour",
     "template": "SPELL_DRAW",
-    "speed": "fast",
+    "speed": "slow",
     "cost": 3,
     "color": "justice",
     "params": {
@@ -4470,7 +4548,7 @@
     "id": "friends_in_low_places",
     "name": "Friends in Low Places",
     "template": "SPELL_DRAW",
-    "speed": "fast",
+    "speed": "slow",
     "cost": 2,
     "color": "shadow",
     "params": {
@@ -4483,7 +4561,7 @@
     "id": "gavels_insight",
     "name": "Gavel's Insight",
     "template": "SPELL_DRAW",
-    "speed": "fast",
+    "speed": "slow",
     "cost": 2,
     "color": "justice",
     "params": {
@@ -4496,7 +4574,7 @@
     "id": "generosity",
     "name": "Generosity",
     "template": "SPELL_DRAW",
-    "speed": "fast",
+    "speed": "slow",
     "cost": 2,
     "color": "primal",
     "params": {
@@ -4535,7 +4613,7 @@
     "id": "grievance_day",
     "name": "Grievance Day",
     "template": "SPELL_DRAW",
-    "speed": "fast",
+    "speed": "slow",
     "cost": 2,
     "color": "fire",
     "params": {
@@ -5483,7 +5561,10 @@
       "power": 1,
       "influence": "time"
     },
-    "description": "+1 max power, +1 Time influence."
+    "description": "+1 max power, +1 Time influence.",
+    "condition": {
+      "hand_size_max": 3
+    }
   },
   {
     "id": "fire_conjuring",
@@ -5496,7 +5577,10 @@
       "power": 1,
       "influence": "fire"
     },
-    "description": "+1 max power, +1 Fire influence."
+    "description": "+1 max power, +1 Fire influence.",
+    "condition": {
+      "hand_size_max": 3
+    }
   },
   {
     "id": "water_conjuring",
@@ -5509,7 +5593,10 @@
       "power": 1,
       "influence": "primal"
     },
-    "description": "+1 max power, +1 Primal influence."
+    "description": "+1 max power, +1 Primal influence.",
+    "condition": {
+      "hand_size_max": 3
+    }
   },
   {
     "id": "wind_conjuring",
@@ -5522,7 +5609,10 @@
       "power": 1,
       "influence": "justice"
     },
-    "description": "+1 max power, +1 Justice influence."
+    "description": "+1 max power, +1 Justice influence.",
+    "condition": {
+      "hand_size_max": 3
+    }
   },
   {
     "id": "furnish",
@@ -5534,7 +5624,10 @@
     "params": {
       "power": 1
     },
-    "description": "+1 max power. (variant 7)."
+    "description": "+1 max power. (variant 7).",
+    "condition": {
+      "hand_size_max": 3
+    }
   },
   {
     "id": "aerial_deployment",
@@ -5564,7 +5657,10 @@
     "params": {
       "keyword": "OVERWHELM"
     },
-    "description": "Give an ally Overwhelm."
+    "description": "Give an ally Overwhelm.",
+    "condition": {
+      "target_hp_max": 12
+    }
   },
   {
     "id": "back_to_back",
@@ -6077,7 +6173,10 @@
       "keyword": "ARMORED",
       "atk": 1
     },
-    "description": "Give an ally Armored (grants attack)."
+    "description": "Give an ally Armored (grants attack).",
+    "condition": {
+      "target_hp_max": 12
+    }
   },
   {
     "id": "steely_resolve",
@@ -6089,7 +6188,10 @@
     "params": {
       "keyword": "UNBLOCKABLE"
     },
-    "description": "Give an ally Unblockable. (grants +1 attack) (Fire, scorching)."
+    "description": "Give an ally Unblockable. (grants +1 attack) (Fire, scorching).",
+    "condition": {
+      "target_hp_max": 12
+    }
   },
   {
     "id": "spectral_armor",
@@ -6102,7 +6204,10 @@
       "keyword": "WARD",
       "atk": 1
     },
-    "description": "Give an ally Ward (grants attack)."
+    "description": "Give an ally Ward (grants attack).",
+    "condition": {
+      "target_hp_max": 12
+    }
   },
   {
     "id": "weather_the_storm",
@@ -6114,7 +6219,10 @@
     "params": {
       "keyword": "ARMORED"
     },
-    "description": "Give an ally Armored. (lasts 3 turns) (Justice, exact)."
+    "description": "Give an ally Armored. (lasts 3 turns) (Justice, exact).",
+    "condition": {
+      "target_hp_max": 12
+    }
   },
   {
     "id": "thick_hide",
@@ -6227,7 +6335,10 @@
       "draw": 1,
       "secondary": "DEAL_1_DAMAGE"
     },
-    "description": "Draw 1 or deal 1 damage (deal damage). (disables the target) (Shadow, chilling)."
+    "description": "Draw 1 or deal 1 damage (deal damage). (disables the target) (Shadow, chilling).",
+    "condition": {
+      "hand_size_max": 3
+    }
   },
   {
     "id": "cirsos_choice",
@@ -6240,7 +6351,10 @@
       "draw": 3,
       "secondary": "HEAL_2"
     },
-    "description": "Draw 1 or give +1/+1. (disables the target) (Shadow, chilling)."
+    "description": "Draw 1 or give +1/+1. (disables the target) (Shadow, chilling).",
+    "condition": {
+      "hand_size_max": 3
+    }
   },
   {
     "id": "eilyns_choice",
@@ -6253,7 +6367,10 @@
       "draw": 1,
       "secondary": "DEAL_1_DAMAGE"
     },
-    "description": "Draw 1 or give +1/+1 (deal damage). (grants armor) (Primal, rooted)."
+    "description": "Draw 1 or give +1/+1 (deal damage). (grants armor) (Primal, rooted).",
+    "condition": {
+      "hand_size_max": 3
+    }
   },
   {
     "id": "felrauks_choice",
@@ -6266,7 +6383,10 @@
       "draw": 1,
       "secondary": "DEAL_1_DAMAGE"
     },
-    "description": "Draw 1 or deal 1 damage (deal damage). (deal damage) (Fire, scorching)."
+    "description": "Draw 1 or deal 1 damage (deal damage). (deal damage) (Fire, scorching).",
+    "condition": {
+      "hand_size_max": 3
+    }
   },
   {
     "id": "fieras_choice",
@@ -6279,7 +6399,10 @@
       "draw": 2,
       "secondary": "DEAL_1_DAMAGE"
     },
-    "description": "Draw 1 or deal 1 damage (deal damage). (buff x2) (Fire, scorching)."
+    "description": "Draw 1 or deal 1 damage (deal damage). (buff x2) (Fire, scorching).",
+    "condition": {
+      "hand_size_max": 3
+    }
   },
   {
     "id": "finneass_choice",
@@ -6292,7 +6415,10 @@
       "draw": 1,
       "secondary": "DEAL_1_DAMAGE"
     },
-    "description": "Draw 1 or heal 2 (deal damage). (buff x2) (Time, accelerated)."
+    "description": "Draw 1 or heal 2 (deal damage). (buff x2) (Time, accelerated).",
+    "condition": {
+      "hand_size_max": 3
+    }
   },
   {
     "id": "ijins_choice",
@@ -6719,7 +6845,10 @@
       "draw": 1,
       "shuffle_back": true
     },
-    "description": "Shuffle a card into deck. Draw 1 (shuffles back)."
+    "description": "Shuffle a card into deck. Draw 1 (shuffles back).",
+    "condition": {
+      "discard_cost": 1
+    }
   },
   {
     "id": "send_to_market",
@@ -6733,7 +6862,10 @@
       "draw": 1,
       "shuffle_back": true
     },
-    "description": "Discard 1. Draw 1 (shuffles back)."
+    "description": "Discard 1. Draw 1 (shuffles back).",
+    "condition": {
+      "discard_cost": 1
+    }
   },
   {
     "id": "trade_secrets",
@@ -6746,7 +6878,10 @@
       "discard": 1,
       "draw": 1
     },
-    "description": "Discard 1. Draw 1."
+    "description": "Discard 1. Draw 1.",
+    "condition": {
+      "discard_cost": 1
+    }
   },
   {
     "id": "reclaim",
@@ -6760,7 +6895,10 @@
       "draw": 2,
       "shuffle_back": true
     },
-    "description": "Shuffle a card into deck. Draw 1 x2 добыча."
+    "description": "Shuffle a card into deck. Draw 1 x2 добыча.",
+    "condition": {
+      "discard_cost": 1
+    }
   },
   {
     "id": "salvage_operation",
@@ -6773,7 +6911,10 @@
       "discard": 1,
       "draw": 2
     },
-    "description": "Discard 1. Draw 1 x2 добыча."
+    "description": "Discard 1. Draw 1 x2 добыча.",
+    "condition": {
+      "discard_cost": 1
+    }
   },
   {
     "id": "send_an_agent",
@@ -6826,5 +6967,44 @@
       "market_cost": 0
     },
     "description": "Draw from Market for free. (market cost 3) (Justice, exact)."
+  },
+  {
+    "id": "purifying_dawn",
+    "name": "Purifying Dawn",
+    "template": "HEAL_CLEAR",
+    "speed": "slow",
+    "cost": 3,
+    "color": "primal",
+    "params": {
+      "target": "ALLY_UNIT",
+      "amount": 2
+    },
+    "description": "Heal an ally unit and clear debuffs from it."
+  },
+  {
+    "id": "rebirth_of_the_ancients",
+    "name": "Rebirth of the Ancients",
+    "template": "REVIVE",
+    "speed": "burst",
+    "cost": 5,
+    "color": "primal",
+    "params": {
+      "target": "ANY_UNIT",
+      "amount": 1
+    },
+    "description": "Revive a fallen unit from the graveyard."
+  },
+  {
+    "id": "folded_ground",
+    "name": "Folded Ground",
+    "template": "PORTAL",
+    "speed": "slow",
+    "cost": 2,
+    "color": "shadow",
+    "params": {
+      "target": "ALLY_UNIT",
+      "to": "town"
+    },
+    "description": "Teleport an ally unit back to town."
   }
 ]

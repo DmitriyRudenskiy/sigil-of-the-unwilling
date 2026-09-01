@@ -72,6 +72,9 @@ const TEMPLATES := {
 	"DISPLAY_CYCLE":    [],
 	"DISPEL_DRAW":     ["discard", "draw"],
 	"MARKET_NICHE":     ["action"],
+	"HEAL_CLEAR":       ["target", "amount"],
+	"REVIVE":           ["target", "amount"],
+	"PORTAL":           ["target"],
 }
 
 ## Допустимые цели

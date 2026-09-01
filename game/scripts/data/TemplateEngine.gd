@@ -520,6 +520,51 @@ class TemplateHandlers:
 
 		return {"result": "success", "effects": effects}
 
+	## ——— T17: HEAL CLEAR ——— heal target + remove debuffs
+	static func t17_heal_clear(
+		params: Dictionary, state: Variant,
+		caster: Variant, target: Variant
+	) -> Dictionary:
+		var effects: Array[Dictionary] = []
+		if target == null:
+			return {"result": "no_target", "effects": effects}
+		var amount: int = int(params.get("amount", 0))
+		if _Utils.has_obj_method(target, "heal"):
+			target.heal(amount)
+			effects.append({"type": "heal", "target_id": _Utils.get_id(target), "amount": amount})
+		if _Utils.has_obj_method(target, "clear_debuffs"):
+			target.clear_debuffs()
+			effects.append({"type": "debuff_clear", "target_id": _Utils.get_id(target)})
+		return {"result": "success", "effects": effects}
+
+	## ——— T18: REVIVE ——— resurrect a fallen stack
+	static func t18_revive(
+		params: Dictionary, state: Variant,
+		caster: Variant, target: Variant
+	) -> Dictionary:
+		var effects: Array[Dictionary] = []
+		if target == null:
+			return {"result": "no_target", "effects": effects}
+		if _Utils.has_obj_method(target, "revive"):
+			var amount: int = int(params.get("amount", 1))
+			target.revive(amount)
+			effects.append({"type": "revive", "target_id": _Utils.get_id(target), "amount": amount})
+		return {"result": "success", "effects": effects}
+
+	## ——— T19: PORTAL ——— safe displacement (no-op if target can't move)
+	static func t19_portal(
+		params: Dictionary, state: Variant,
+		caster: Variant, target: Variant
+	) -> Dictionary:
+		var effects: Array[Dictionary] = []
+		if target == null:
+			return {"result": "no_target", "effects": effects}
+		if _Utils.has_obj_method(target, "displace"):
+			var to: String = str(params.get("to", "town"))
+			target.displace(to)
+			effects.append({"type": "displace", "target_id": _Utils.get_id(target), "to": to})
+		return {"result": "success", "effects": effects}
+
 	## ——— UTILITIES (shared across all handlers) ———
 	static func _check_condition(
 		cond: Dictionary, state: Variant,

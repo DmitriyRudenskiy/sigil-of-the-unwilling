@@ -1,7 +1,6 @@
 {
 	"templates": {
 		"BOUNCE": 18,
-		"SPELL_DRAW": 93,
 		"CHOICE_CYCLE": 19,
 		"COMBAT_TRICK": 96,
 		"COUNTERMAGIC": 11,
@@ -10,12 +9,16 @@
 		"DISPEL_DRAW": 6,
 		"DISPLAY_CYCLE": 15,
 		"HARD_REMOVAL": 32,
+		"HEAL_CLEAR": 1,
 		"KEYWORD_BUFF": 14,
 		"MANA_RAMP": 6,
 		"MARKET_NICHE": 6,
+		"PORTAL": 1,
 		"RELIC_INTERACTION": 9,
+		"REVIVE": 1,
+		"SPELL_DRAW": 93,
 		"TOKEN_GENERATION": 27,
 		"TOUCH_CYCLE": 4
 	},
-	"total": 505
+	"total": 508
 }

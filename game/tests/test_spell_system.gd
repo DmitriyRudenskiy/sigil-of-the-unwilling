@@ -188,8 +188,62 @@ func test_template_count_is_16() -> void:
 		&"TOKEN_GENERATION", &"RELIC_INTERACTION", &"KEYWORD_BUFF",
 		&"CHOICE_CYCLE", &"TOUCH_CYCLE", &"DISPLAY_CYCLE",
 		&"DISPEL_DRAW", &"MARKET_NICHE",
+		&"HEAL_CLEAR", &"REVIVE", &"PORTAL",
 	]
-	assert_eq(templates.size(), 16, "exactly 16 templates")
+	assert_eq(templates.size(), 19, "exactly 19 templates (16 + HEAL_CLEAR/REVIVE/PORTAL)")
+
+# Лёгкий макет юнита: методы, которые вызывают новые обработчики.
+class _MockUnit extends RefCounted:
+	var _hp: int
+	var _debuffs: Array = []
+	var _revived: int = 0
+	var _displaced: String = ""
+	func _init(p_hp: int = 5) -> void:
+		_hp = p_hp
+	func get_id() -> String:
+		return "mock-unit"
+	func heal(amount: int) -> void:
+		_hp += amount
+	func get_hp() -> int:
+		return _hp
+	func clear_debuffs() -> void:
+		_debuffs.clear()
+	func revive(amount: int) -> void:
+		_revived += amount
+	func displace(to: String) -> void:
+		_displaced = to
+
+func test_heal_clear_heals_and_clears_debuffs() -> void:
+	var unit := _MockUnit.new()
+	unit.clear_debuffs()
+	unit.clear_debuffs()
+	unit._debuffs.append(3)
+	var result: Dictionary = _Engine.execute(
+		&"HEAL_CLEAR", {"target": "ALLY_UNIT", "amount": 3}, {}, [], null, null, unit)
+	assert_eq(result["result"], "success", "HEAL_CLEAR resolves")
+	assert_eq(unit.get_hp(), 8, "heal adds amount")
+	assert_true(unit._debuffs.is_empty(), "debuffs cleared")
+	var types: Array = result["effects"]
+	assert_true(types.size() >= 2, "heal + debuff_clear effects present")
+
+func test_heal_clear_no_target() -> void:
+	var result: Dictionary = _Engine.execute(
+		&"HEAL_CLEAR", {"target": "ALLY_UNIT", "amount": 3}, {}, [], null, null, null)
+	assert_eq(result["result"], "no_target", "null target -> no_target")
+
+func test_revive_resurrects_fallen_stack() -> void:
+	var unit := _MockUnit.new()
+	var result: Dictionary = _Engine.execute(
+		&"REVIVE", {"target": "ANY_UNIT", "amount": 2}, {}, [], null, null, unit)
+	assert_eq(result["result"], "success", "REVIVE resolves")
+	assert_eq(unit._revived, 2, "revive restores count")
+
+func test_portal_displaces_target() -> void:
+	var unit := _MockUnit.new()
+	var result: Dictionary = _Engine.execute(
+		&"PORTAL", {"target": "ALLY_UNIT", "to": "town"}, {}, [], null, null, unit)
+	assert_eq(result["result"], "success", "PORTAL resolves")
+	assert_eq(unit._displaced, "town", "target displaced to town")
 
 func test_direct_damage_no_target() -> void:
 	var result: Dictionary = _Engine.execute(
