@@ -21,6 +21,9 @@ func _init() -> void:
 	failed += _test_defend_bonus()
 	failed += _test_hero_bonuses()
 	failed += _test_get_unit_at_after_kill()
+	failed += _test_deployment_line_at_edge()
+	failed += _test_deployment_max_capacity()
+	failed += _test_cell_taken_avoids_occupied()
 
 	if failed == 0:
 		print("BattleState tests passed")
@@ -538,5 +541,121 @@ func _test_get_unit_at_after_kill() -> int:
 		if found != null:
 			printerr("dead unit still in grid at %s" % cell)
 			errors += 1
+
+	return errors
+
+
+func _test_deployment_line_at_edge() -> int:
+	# D1–D3: атакующие — одна вертикальная колонка у левого края, защитники — у правого;
+	# ряды 0..N-1 в порядке входных стэков, без наложений клеток.
+	var errors := 0
+	var state = load("res://scripts/systems/BattleState.gd").new()
+
+	var atk: Array[UnitStack] = []
+	var def: Array[UnitStack] = []
+	for k in 5:
+		atk.append(Units.make_fixed_stack("swordsmen", 10))
+		def.append(Units.make_fixed_stack("goblins", 10))
+	state.place_army(atk, def)
+
+	var attackers = state.get_units_by_side(BattleState.Side.ATTACKER)
+	var defenders = state.get_units_by_side(BattleState.Side.DEFENDER)
+
+	if attackers.size() != 5:
+		printerr("expected 5 attacker units, got ", attackers.size())
+		errors += 1
+	if defenders.size() != 5:
+		printerr("expected 5 defender units, got ", defenders.size())
+		errors += 1
+
+	var seen: Dictionary = {}
+	for k in attackers.size():
+		var u = attackers[k]
+		if u.cell.x != 0:
+			printerr("attacker ", k, " should be in column 0, got x=", u.cell.x)
+			errors += 1
+		if u.cell.y != k:
+			printerr("attacker ", k, " should be at row ", k, " got row=", u.cell.y)
+			errors += 1
+		if seen.has(u.cell):
+			printerr("duplicate attacker cell ", u.cell)
+			errors += 1
+		seen[u.cell] = true
+
+	for k in defenders.size():
+		var u = defenders[k]
+		if u.cell.x != BattleState.BW - 1:
+			printerr("defender ", k, " should be in column ", BattleState.BW - 1, " got x=", u.cell.x)
+			errors += 1
+		if u.cell.y != k:
+			printerr("defender ", k, " should be at row ", k, " got row=", u.cell.y)
+			errors += 1
+		if seen.has(u.cell):
+			printerr("duplicate defender cell ", u.cell)
+			errors += 1
+		seen[u.cell] = true
+
+	return errors
+
+
+func _test_deployment_max_capacity() -> int:
+	# При лимите в 7 юнитов с каждой стороны все размещаются одной линией
+	# в рядах 0..6 без наложений (D2, D4 в предельном случае).
+	var errors := 0
+	var state = load("res://scripts/systems/BattleState.gd").new()
+
+	var atk: Array[UnitStack] = []
+	var def: Array[UnitStack] = []
+	for k in 7:
+		atk.append(Units.make_fixed_stack("swordsmen", 5))
+		def.append(Units.make_fixed_stack("goblins", 5))
+	state.place_army(atk, def)
+
+	var attackers = state.get_units_by_side(BattleState.Side.ATTACKER)
+	var defenders = state.get_units_by_side(BattleState.Side.DEFENDER)
+
+	if attackers.size() != 7:
+		printerr("expected 7 attacker units, got ", attackers.size())
+		errors += 1
+	if defenders.size() != 7:
+		printerr("expected 7 defender units, got ", defenders.size())
+		errors += 1
+
+	for k in attackers.size():
+		if attackers[k].cell.x != 0 or attackers[k].cell.y != k:
+			printerr("max-cap attacker ", k, " bad cell ", attackers[k].cell)
+			errors += 1
+	for k in defenders.size():
+		if defenders[k].cell.x != BattleState.BW - 1 or defenders[k].cell.y != k:
+			printerr("max-cap defender ", k, " bad cell ", defenders[k].cell)
+			errors += 1
+
+	return errors
+
+
+func _test_cell_taken_avoids_occupied() -> int:
+	# D4: _cell_taken определяет занятую клетку, чтобы занять следующую свободную
+	# в той же колонке.
+	var errors := 0
+	var state = load("res://scripts/systems/BattleState.gd").new()
+
+	var atk: Array[UnitStack] = [Units.make_fixed_stack("swordsmen", 5)]
+	var def: Array[UnitStack] = []
+	state.place_army(atk, def)
+
+	# Возьмём реальный юнит как « занятую » клетку.
+	var taken = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
+	taken.cell = Vector2i(0, 0)
+	var units: Array = [taken]
+
+	if not state._cell_taken(0, 0, units):
+		printerr("_cell_taken should report (0,0) as occupied")
+		errors += 1
+	if state._cell_taken(0, 1, units):
+		printerr("_cell_taken should report (0,1) as free")
+		errors += 1
+	if state._cell_taken(1, 0, units):
+		printerr("_cell_taken should report (1,0) as free")
+		errors += 1
 
 	return errors

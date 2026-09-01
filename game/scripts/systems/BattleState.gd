@@ -226,7 +226,7 @@ func _apply_artifact_effects(units: Array[BattleUnit], mods: Dictionary) -> void
 
 func _build_units(stacks: Array, is_atk: bool) -> Array[BattleUnit]:
 	var units: Array[BattleUnit] = []
-	var sx := 2 if is_atk else BW - 3
+	var col := 0 if is_atk else BW - 1  # D1: одна вертикальная колонка у края (атк — лево, защ — право)
 	var max_stacks := GameSettings.BATTLE_MAX_UNITS_PER_SIDE
 	for i in stacks.size():
 		# РФ-бой: не более BATTLE_MAX_UNITS_PER_SIDE юнитов с одной стороны.
@@ -245,12 +245,18 @@ func _build_units(stacks: Array, is_atk: bool) -> Array[BattleUnit]:
 			continue
 
 		var unit := BattleUnit.new(stack)
-		var row := (i / 2) * 2 + 1
-		if row > BH - 1:
+
+		# D2: i-й стэк → i-ряд (одна линия сверху вниз, в порядке входных стэков).
+		# D4: если клетка колонки занята — занять следующую свободную в той же колонке.
+		var row := i
+		if _cell_taken(col, row, units):
+			while row < BH and _cell_taken(col, row, units):
+				row += 1
+		if row >= BH:
 			push_error("[BattleState] Cannot place stack %d: row %d exceeds BH=%d. " % [i, row, BH]
-				+ "Max stacks per side: %d" % ((BH - 1) / 2 * 2))
+				+ "Max rows in column: %d" % (BH - 1))
 			continue
-		unit.cell = Vector2i(sx + (i % 2), row)
+		unit.cell = Vector2i(col, row)
 		unit.side = Side.ATTACKER if is_atk else Side.DEFENDER
 		unit.alive = true
 		unit.has_moved = false
@@ -260,6 +266,12 @@ func _build_units(stacks: Array, is_atk: bool) -> Array[BattleUnit]:
 		units.append(unit)
 	return units
 
+# D4: занята ли клетка (col,row) уже размещённым юнитом той же стороны.
+func _cell_taken(col: int, row: int, units: Array) -> bool:
+	for u in units:
+		if u.cell.x == col and u.cell.y == row:
+			return true
+	return false
 
 # ==================== ОЧЕРЕДЬ ХОДОВ ====================
 func build_queue() -> void:
