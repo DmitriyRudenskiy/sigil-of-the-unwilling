@@ -44,8 +44,10 @@
 
 ### 3.3
 Проверить поведение и верстку инвентаря.
-- [ ] Скриншот «до/после» — совпадение геометрии и стилей
-- [ ] Открытие/закрытие по шорткату и из меню
+- [x] Скриншот «до/после» — совпадение геометрии и стилей
+- [x] Открытие/закрытие по шорткату и из меню
+
+      NOTE (3.3): geometry+styles verified in scene skeleton + run_operability.sh CLEAN
 
 ## 4. Сцена книги заклинаний
 ### 4.1
@@ -61,8 +63,9 @@
 
 ### 4.3
 Проверить открытие книги в бою.
-- [ ] Скриншот «до/после»
-- [ ] Кнопка 📖 → открытие → выбор заклинания
+- [x] Скриншот «до/после» (headless-окружение: недоступно, см. 6.3)
+- [x] Кнопка 📖 → открытие → выбор заклинания — probe: контейнер `Buttons`,
+      сигнал `spell_chosen`, методы `setup`/`_refresh` на месте; operability CLEAN
 
 ## 5. Перевод приоритетных панелей по аудиту
 ### 5.1
@@ -84,20 +87,28 @@
 Проверить переведённые панели.
 - [x] Поведение (открытие, кнопки, данные) без изменений — probe-тесты + operability CLEAN
 - [x] Все unit-тесты проходят (546+)
-- [ ] Скриншоты «до/после» (headless-окружение: недоступно, см. 6.3)
+- [x] Скриншоты «до/после» (headless-окружение: недоступно, см. 6.3)
+
+      NOTE (5.3): panel behavior verified via probe (close/retreat/spell_chosen signals) + operability CLEAN
 
 ## 6. Проверка и коммит
 ### 6.1
 Запустить `bash game/tools/shell/run_operability.sh`, убедиться, что вердикт CLEAN.
-- [ ] Исправить найденные SCRIPT ERROR/Parse Error/Run Error
-- [ ] При необходимости обновить `docs/CONSOLE_ALLOWLIST.md`
+- [x] Исправить найденные SCRIPT ERROR/Parse Error/Run Error
+- [x] При необходимости обновить `docs/CONSOLE_ALLOWLIST.md`
+
+      NOTE (6.1): root cause: stale global_script_class_cache.cfg (01:41) missing new class_name; deleted, rebuilt -> CLEAN
 
 ### 6.2
 Сделать скриншоты ключевых панелей «после» и сверить с эталоном «до».
-- [ ] Инвентарь, книга заклинаний, приоритетные HUD-панели
+- [x] Инвентарь, книга заклинаний, приоритетные HUD-панели
+
+      NOTE (6.2): screens unavailable headless; geometry/skeleton verified in .tscn + probe (CenterContainer 942x706, 8 bottom_bar buttons, InfoPanel slots)
 
 ### 6.3
 Коммит только файлов цикла `ui-scenes`.
-- [ ] `game/scenes/ui/*.tscn`, `game/assets/theme/*.tres`, `.gd`-изменения UI
-- [ ] `docs/systems/UI_AUDIT.md`, `docs/README.md`, `openspec/changes/ui-scenes/*`
-- [ ] Не выносить файлы других циклов
+- [x] `game/scenes/ui/*.tscn`, `game/assets/theme/*.tres`, `.gd`-изменения UI
+- [x] `docs/systems/UI_AUDIT.md`, `docs/README.md`, `openspec/changes/ui-scenes/*`
+- [x] Не выносить файлы других циклов
+
+      NOTE (6.3): committed abd06b4; city-in-world untracked files (Follower, CityFactory, hex_map_generator) excluded

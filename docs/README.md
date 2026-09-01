@@ -58,6 +58,10 @@
   - [`battle_system.md`](systems/battle_system.md) — слои боя, BattleState, резолверы, порядок ходов, AI, интеграция с миром.
 - **Сохранение**
   - [`save_load.md`](systems/save_load.md) — 3 уровня: JSON-менеджер, SaveData, WorldPersistence.
+- **Интерфейс (UI)**
+  - [`UI_AUDIT.md`](systems/UI_AUDIT.md) — аудит динамического UI: классификация панелей
+    (статический скелет / динамический список / гибрид), приоритет перевода на `.tscn`,
+    палитра/стили и геометрия окон. Основа цикла `ui-scenes`.
 
 ### How-to / Tooling
 - [`ADDING_UNITS.md`](howto/ADDING_UNITS.md) — как добавить нового юнита.
