@@ -115,10 +115,16 @@ func test_movement_signal_emits_dict() -> void:
 	assert_true(holder[0])
 	hc.free()
 
-# ==================== Т10: BattleUI process_mode ====================
+# ==================== Т10: BattleUI scene skeleton ====================
 
-func test_battle_ui_has_build_ui() -> void:
-	var battle_ui := BattleUI.new()
+func test_battle_ui_scene_has_skeleton() -> void:
+	var scene := load("res://scenes/ui/BattleUI.tscn")
+	assert_true(scene != null)
+	var battle_ui := scene.instantiate() as BattleUI
 	battle_ui.name = "TestBattleUI"
-	assert_true(battle_ui.has_method("_build_ui"))
+	# Скелет: нижняя полоса с 8 кнопками, коннектор скелета есть.
+	assert_true(battle_ui.has_method("_connect_skeleton"))
+	assert_eq(battle_ui.get_node_or_null("bottom_bar").get_child_count(), 8)
+	assert_true(battle_ui.has_method("set_status"))
+	assert_true(battle_ui.has_method("update_initiative"))
 	battle_ui.free()

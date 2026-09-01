@@ -1,0 +1,104 @@
+[gd_scene load_steps=2 format=3 uid="uid://battleui01"]
+
+[ext_resource type="Script" path="res://scripts/ui/BattleUI.gd" id="1"]
+
+[node name="BattleUI" type="CanvasLayer"]
+script = ExtResource("1")
+
+[node name="top_panel" type="PanelContainer" parent="."]
+anchors_preset = 10
+anchors_preset_inner_x = 0
+anchors_preset_inner_y = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 92.0
+
+[node name="top_vbox" type="VBoxContainer" parent="top_panel"]
+theme_override_constants/separation = 2
+
+[node name="status" type="Label" parent="top_panel/top_vbox"]
+mouse_filter = 2
+text = "Выберите существо…"
+horizontal_alignment = 1
+theme_override_font_size/font_size = 18
+
+[node name="active_info" type="Label" parent="top_panel/top_vbox"]
+mouse_filter = 2
+horizontal_alignment = 1
+theme_override_font_size/font_size = 14
+
+[node name="preview" type="Label" parent="top_panel/top_vbox"]
+mouse_filter = 2
+horizontal_alignment = 1
+theme_override_font_size/font_size = 14
+
+[node name="bottom_bar" type="HBoxContainer" parent="."]
+anchors_preset = 12
+anchors_preset_inner_x = 0
+anchors_preset_inner_y = 0
+offset_left = 0.0
+offset_top = -58.0
+offset_right = 0.0
+offset_bottom = 0.0
+theme_override_constants/separation = 10
+
+[node name="retreat_btn" type="Button" parent="bottom_bar"]
+mouse_filter = 2
+text = "🏕️"
+custom_minimum_size = Vector2(56, 48)
+theme_override_font_size/font_size = 22
+
+[node name="wait_btn" type="Button" parent="bottom_bar"]
+mouse_filter = 2
+text = "🏃"
+custom_minimum_size = Vector2(56, 48)
+theme_override_font_size/font_size = 22
+
+[node name="attack_btn" type="Button" parent="bottom_bar"]
+mouse_filter = 2
+text = "⚔️"
+custom_minimum_size = Vector2(56, 48)
+theme_override_font_size/font_size = 22
+
+[node name="defend_btn" type="Button" parent="bottom_bar"]
+mouse_filter = 2
+text = "🛡️"
+custom_minimum_size = Vector2(56, 48)
+theme_override_font_size/font_size = 22
+
+[node name="skip_btn" type="Button" parent="bottom_bar"]
+mouse_filter = 2
+text = "⏳"
+custom_minimum_size = Vector2(56, 48)
+theme_override_font_size/font_size = 22
+
+[node name="collapse_btn" type="Button" parent="bottom_bar"]
+mouse_filter = 2
+text = "▲"
+custom_minimum_size = Vector2(56, 48)
+theme_override_font_size/font_size = 22
+
+[node name="spellbook_btn" type="Button" parent="bottom_bar"]
+mouse_filter = 2
+text = "📖"
+custom_minimum_size = Vector2(56, 48)
+theme_override_font_size/font_size = 22
+
+[node name="settings_btn" type="Button" parent="bottom_bar"]
+mouse_filter = 2
+text = "⚙️"
+custom_minimum_size = Vector2(56, 48)
+theme_override_font_size/font_size = 22
+
+[node name="initiative_panel" type="PanelContainer" parent="."]
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_top = 0.0
+anchor_bottom = 1.0
+offset_left = -190.0
+offset_top = 100.0
+offset_bottom = -80.0
+
+[node name="initiative_list" type="VBoxContainer" parent="initiative_panel"]
+theme_override_constants/separation = 4

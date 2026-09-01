@@ -56,7 +56,7 @@ func _build_right_column() -> void:
 	_minimap = MinimapPanel.new()
 	vb.add_child(_minimap)
 
-	_info = InfoPanel.new()
+	_info = load("res://scenes/ui/InfoPanel.tscn").instantiate() as InfoPanel
 	vb.add_child(_info)
 
 	_army = ArmyPanel.new()

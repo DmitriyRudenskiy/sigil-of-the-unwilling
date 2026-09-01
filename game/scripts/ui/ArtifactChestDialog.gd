@@ -1,89 +1,51 @@
 extends Control
 class_name ArtifactChestDialog
 ## Chest open dialog: artifact preview + Take/Gold buttons.
+## Скетч (MarginContainer → VBoxContainer → title/labels/buttons) верстается в
+## сцене `ArtifactChestDialog.tscn`; данные подтягиваются в `_update_display()`.
+## Стиль — из общей темы (D3).
+
+const THEME_PATH := "res://assets/theme/game_theme.tres"
 
 signal choice_made(choice: String, chest: ArtifactChest)
 
 var _current_chest: ArtifactChest = null
 var _artifact_label: Label = null
 var _gold_label: Label = null
+var _theme: Theme = null
+
+
+func _ready() -> void:
+	_theme = load(THEME_PATH)
+	_apply_theme()
+	_connect_skeleton()
 
 
 func open(chest: ArtifactChest) -> void:
 	_current_chest = chest
-	_build_layout()
 	_update_display()
 	visible = true
 	GameLogger.ui("Chest dialog opened at %s" % chest.cell)
 
 
-func _build_layout() -> void:
-	for child in get_children():
-		child.queue_free()
+func _apply_theme() -> void:
+	if _theme == null:
+		return
+	var sb := _theme.get_stylebox("panel", "Panel")
+	if sb:
+		add_theme_stylebox_override("panel", sb)
 
-	var margin := MarginContainer.new()
-	margin.set_anchors_preset(PRESET_FULL_RECT)
-	margin.add_theme_constant_override("margin_top", 100)
-	margin.add_theme_constant_override("margin_bottom", 100)
-	margin.add_theme_constant_override("margin_left", 200)
-	margin.add_theme_constant_override("margin_right", 200)
-	add_child(margin)
 
-	var vbox := VBoxContainer.new()
-	vbox.size_flags_horizontal = SIZE_FILL
-	vbox.add_theme_constant_override("separation", 12)
-	margin.add_child(vbox)
-
-	# Title
-	var title := Label.new()
-	title.text = "📦 Treasure Chest"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 22)
-	title.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3))
-	vbox.add_child(title)
-
-	# Separator
-	vbox.add_child(HSeparator.new())
-
-	# Artifact preview
-	_artifact_label = Label.new()
-	_artifact_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_artifact_label.autowrap_mode = TextServer.AUTOWRAP_WORD
-	_artifact_label.add_theme_font_size_override("font_size", 16)
-	vbox.add_child(_artifact_label)
-
-	# Gold preview
-	_gold_label = Label.new()
-	_gold_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_gold_label.add_theme_font_size_override("font_size", 16)
-	_gold_label.add_theme_color_override("font_color", Color(0.9, 0.75, 0.3))
-	vbox.add_child(_gold_label)
-
-	vbox.add_child(HSeparator.new())
-
-	# Buttons
-	var btn_hbox := HBoxContainer.new()
-	btn_hbox.add_theme_constant_override("separation", 16)
-	btn_hbox.size_flags_horizontal = SIZE_FILL
-	vbox.add_child(btn_hbox)
-
-	var btn_take := Button.new()
-	btn_take.text = "✋ Artifact"
-	btn_take.size_flags_horizontal = SIZE_FILL
-	btn_take.pressed.connect(_on_take)
-	btn_hbox.add_child(btn_take)
-
-	var btn_gold := Button.new()
-	btn_gold.text = "💰 Gold"
-	btn_gold.size_flags_horizontal = SIZE_FILL
-	btn_gold.pressed.connect(_on_gold)
-	btn_hbox.add_child(btn_gold)
-
-	# Cancel
-	var btn_cancel := Button.new()
-	btn_cancel.text = "Close"
-	btn_cancel.pressed.connect(_on_close)
-	vbox.add_child(btn_cancel)
+func _connect_skeleton() -> void:
+	# Ссылки на узлы-скелет (из сцены). Сигналы подключаем один раз.
+	_artifact_label = get_node_or_null("Margin/VBox/artifact_label") as Label
+	_gold_label = get_node_or_null("Margin/VBox/gold_label") as Label
+	var take := get_node_or_null("Margin/VBox/buttons/take")
+	var gold := get_node_or_null("Margin/VBox/buttons/gold")
+	if take != null and not take.pressed.is_connected(_on_take):
+		take.pressed.connect(_on_take)
+	if gold != null and not gold.pressed.is_connected(_on_gold):
+		gold.pressed.connect(_on_gold)
 
 
 func _update_display() -> void:
@@ -122,6 +84,3 @@ func _on_close() -> void:
 func _close() -> void:
 	_current_chest = null
 	visible = false
-
-
-

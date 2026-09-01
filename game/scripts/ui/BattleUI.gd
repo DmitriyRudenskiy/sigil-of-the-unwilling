@@ -1,6 +1,14 @@
 class_name BattleUI
 extends CanvasLayer
 ## Панель боя: статус, кнопки, инициатива, активный стек, preview.
+## Скелет (top-панель, нижняя полоса кнопок, инициатива) вертается в сцене
+## `BattleUI.tscn`; динамические элементы (лейблы инициативы, книга заклинаний,
+## настройки) строятся/управляются в рантайме. Стили — из общей темы (D3).
+
+const THEME_PATH := "res://assets/theme/game_theme.tres"
+const _SettingsScreen = preload("res://scripts/ui/SettingsScreen.gd")
+const _SpellbookPath = "res://scenes/ui/BattleSpellbookPanel.tscn"
+const _SpellbookPanel = preload("res://scripts/ui/BattleSpellbookPanel.gd")
 
 signal retreat_requested
 signal wait_requested
@@ -12,9 +20,6 @@ signal spell_chosen(spell_id: StringName)
 signal settings_requested
 signal settings_closed
 
-const _SettingsScreen = preload("res://scripts/ui/SettingsScreen.gd")
-const _SpellbookPanel = preload("res://scripts/ui/BattleSpellbookPanel.gd")
-
 var _status: Label
 var _active_info: Label
 var _preview: Label
@@ -25,11 +30,67 @@ var _attack_button: Button = null
 var _settings_screen: Control = null
 var _spellbook_panel: _SpellbookPanel = null
 
+var _theme: Theme = null
+
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS  # SettingsScreen inherits this
 	layer = 10
-	_build_ui()
+	_theme = load(THEME_PATH)
+	_apply_theme()
+	_connect_skeleton()
+	_build_spellbook()
+
+
+func _apply_theme() -> void:
+	if _theme == null:
+		return
+	var sb := _theme.get_stylebox("panel", "Panel")
+	if sb == null:
+		return
+	var tp := get_node_or_null("top_panel") as PanelContainer
+	if tp != null:
+		tp.add_theme_stylebox_override("panel", sb)
+	var ip := get_node_or_null("initiative_panel") as PanelContainer
+	if ip != null:
+		ip.add_theme_stylebox_override("panel", sb)
+
+
+func _connect_skeleton() -> void:
+	_status = get_node_or_null("top_panel/top_vbox/status") as Label
+	_active_info = get_node_or_null("top_panel/top_vbox/active_info") as Label
+	_preview = get_node_or_null("top_panel/top_vbox/preview") as Label
+	_bottom_bar = get_node_or_null("bottom_bar") as HBoxContainer
+	_initiative_list = get_node_or_null("initiative_panel/initiative_list") as VBoxContainer
+
+	if _status != null:
+		_status.add_theme_color_override("font_color", Color(0.95, 0.89, 0.72))
+	if _active_info != null:
+		_active_info.add_theme_color_override("font_color", Color(0.85, 0.9, 1.0))
+	if _preview != null:
+		_preview.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
+
+	_action_buttons = []
+	_connect_btn("retreat_btn", _on_retreat, true)
+	_connect_btn("wait_btn", _on_wait, true)
+	_connect_btn("attack_btn", _on_attack_mode, true)
+	_connect_btn("defend_btn", _on_defend, true)
+	_connect_btn("skip_btn", _on_skip, true)
+	_connect_btn("collapse_btn", _on_collapse, false)
+	_connect_btn("spellbook_btn", _on_spellbook, true)
+	_connect_btn("settings_btn", _on_settings, true)
+	_attack_button = get_node_or_null("bottom_bar/attack_btn") as Button
+	if _attack_button != null:
+		_attack_button.disabled = true
+
+
+func _connect_btn(name: String, cb: Callable, is_action: bool) -> void:
+	var btn := get_node_or_null("bottom_bar/%s" % name) as Button
+	if btn == null:
+		return
+	btn.pressed.connect(cb)
+	if is_action:
+		_action_buttons.append(btn)
 
 
 func set_status(text: String) -> void:
@@ -98,122 +159,18 @@ func set_attack_enabled(enabled: bool) -> void:
 		_attack_button.disabled = not enabled
 
 
-func _build_ui() -> void:
-	_build_top_panel()
-	_build_bottom_bar()
-	_build_initiative_panel()
-	_build_spellbook()
-
-
 func _build_spellbook() -> void:
-	_spellbook_panel = _SpellbookPanel.new()
+	_spellbook_panel = load(_SpellbookPath).instantiate() as _SpellbookPanel
 	_spellbook_panel.visible = false
 	_spellbook_panel.spell_chosen.connect(func(id):
 		_spellbook_panel.visible = false
 		spell_chosen.emit(id))
 	add_child(_spellbook_panel)
 
+
 func close_spellbook() -> void:
 	if _spellbook_panel != null:
 		_spellbook_panel.visible = false
-
-
-func _build_top_panel() -> void:
-	var panel := PanelContainer.new()
-	panel.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	panel.offset_bottom = 92
-
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.1, 0.08, 0.05, 0.92)
-	panel.add_theme_stylebox_override("panel", style)
-
-	add_child(panel)
-
-	var vb := VBoxContainer.new()
-	vb.add_theme_constant_override("separation", 2)
-	panel.add_child(vb)
-
-	_status = Label.new()
-	_status.text = "Выберите существо…"
-	_status.add_theme_font_size_override("font_size", 18)
-	_status.add_theme_color_override("font_color", Color(0.95, 0.89, 0.72))
-	_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	vb.add_child(_status)
-
-	_active_info = Label.new()
-	_active_info.text = ""
-	_active_info.add_theme_font_size_override("font_size", 14)
-	_active_info.add_theme_color_override("font_color", Color(0.85, 0.9, 1.0))
-	_active_info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	vb.add_child(_active_info)
-
-	_preview = Label.new()
-	_preview.text = ""
-	_preview.add_theme_font_size_override("font_size", 14)
-	_preview.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
-	_preview.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	vb.add_child(_preview)
-
-
-func _build_bottom_bar() -> void:
-	_bottom_bar = HBoxContainer.new()
-	_bottom_bar.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	_bottom_bar.offset_top = -58
-	_bottom_bar.alignment = BoxContainer.ALIGNMENT_CENTER
-	_bottom_bar.add_theme_constant_override("separation", 10)
-
-	add_child(_bottom_bar)
-
-	var buttons: Array[Dictionary] = [
-		{"text": "🏕️", "tooltip": "Отступление", "callback": _on_retreat, "action": true},
-		{"text": "🏃", "tooltip": "Ждать", "callback": _on_wait, "action": true},
-		{"text": "⚔️", "tooltip": "Атака", "callback": _on_attack_mode, "action": true, "attack": true},
-		{"text": "🛡️", "tooltip": "Защита", "callback": _on_defend, "action": true},
-		{"text": "⏳", "tooltip": "Пропуск хода", "callback": _on_skip, "action": true},
-		{"text": "▲", "tooltip": "Свернуть панель", "callback": _on_collapse, "action": false},
-		{"text": "📖", "tooltip": "Книга заклинаний", "callback": _on_spellbook, "action": true},
-		{"text": "⚙️", "tooltip": "Настройки", "callback": _on_settings, "action": true},
-	]
-
-	for data in buttons:
-		var btn := Button.new()
-		btn.text = data["text"]
-		btn.tooltip_text = data["tooltip"]
-		btn.custom_minimum_size = Vector2(56, 48)
-		btn.add_theme_font_size_override("font_size", 22)
-
-		var callback: Callable = data["callback"]
-		btn.pressed.connect(callback)
-
-		_bottom_bar.add_child(btn)
-
-		if data.get("action", false):
-			_action_buttons.append(btn)
-
-		if data.get("attack", false):
-			_attack_button = btn
-			btn.disabled = true
-
-
-func _build_initiative_panel() -> void:
-	var panel := PanelContainer.new()
-	panel.anchor_left = 1.0
-	panel.anchor_right = 1.0
-	panel.anchor_top = 0.0
-	panel.anchor_bottom = 1.0
-	panel.offset_left = -190
-	panel.offset_top = 100
-	panel.offset_bottom = -80
-
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.08, 0.07, 0.05, 0.85)
-	panel.add_theme_stylebox_override("panel", style)
-
-	add_child(panel)
-
-	_initiative_list = VBoxContainer.new()
-	_initiative_list.add_theme_constant_override("separation", 4)
-	panel.add_child(_initiative_list)
 
 
 func _on_retreat() -> void:

@@ -60,7 +60,7 @@ func _init_executor() -> void:
 
 
 func _init_ui() -> void:
-	_ui = BattleUI.new()
+	_ui = load("res://scenes/ui/BattleUI.tscn").instantiate() as BattleUI
 	_ui.name = "BattleUI"
 	add_child(_ui)
 	_ui.retreat_requested.connect(_on_retreat)

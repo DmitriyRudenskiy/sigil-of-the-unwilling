@@ -39,7 +39,10 @@ func _create_ui() -> void:
 	ui.setup(_hero, _camera)
 
 func _create_inventory_screen() -> void:
-	inventory_screen = ArtifactInventoryScreen.new()
+	# Скелет окна — в res://scenes/ui/ArtifactInventoryScreen.tscn (static structural
+	# children); скрипт применяет тему и наполняет динамическим содержимом.
+	var scene := load("res://scenes/ui/ArtifactInventoryScreen.tscn") as PackedScene
+	inventory_screen = scene.instantiate() as Control
 	inventory_screen.name = "ArtifactInventoryScreen"
 	inventory_screen.visible = false
 	inventory_screen.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -47,7 +50,7 @@ func _create_inventory_screen() -> void:
 	ui_layer.add_child(inventory_screen)
 
 func _create_chest_dialog() -> void:
-	chest_dialog = ArtifactChestDialog.new()
+	chest_dialog = load("res://scenes/ui/ArtifactChestDialog.tscn").instantiate() as ArtifactChestDialog
 	chest_dialog.name = "ArtifactChestDialog"
 	chest_dialog.visible = false
 	chest_dialog.set_anchors_preset(Control.PRESET_FULL_RECT)

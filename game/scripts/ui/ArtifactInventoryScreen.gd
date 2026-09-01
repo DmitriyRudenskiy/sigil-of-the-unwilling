@@ -1,42 +1,29 @@
 extends Control
 class_name ArtifactInventoryScreen
-## Экран героя: попиксельная сборка по макету HTML-мокапа.
-## Модульное окно 942×700 (левая/правая/боковая/нижняя панели), центрируется в
-## CenterContainer, мир показывается сквозь прозрачный корень.
+## Экран героя: скелет-панели собран в res://scenes/ui/ArtifactInventoryScreen.tscn
+## (static structural children), этот скрипт только применяет тему и наполняет
+## динамическим содержимом (портрет/артефакты/юниты/скиллы) из HeroController.
 ##
-## Динамическое содержимое (портрет/артефакты/юниты/скиллы) подтягивается из
-## HeroController; пустые слоты рисуются стилизованными панелями.
+## Единый источник стиля — res://assets/theme/game_theme.tres (stylebox'ы по имени).
 
 var _hero: HeroController = null
+var _theme: Theme = null
 
-# Состояние прокрутки рюкзака (члены класса, а не локальные — используются в _backpack_scroll_by/_refresh_backpack).
+# Состояние прокрутки рюкзака (члены класса — используются в _backpack_scroll_by/_refresh_backpack).
 var bp_page := 0
 var bp_slots: Array = []
 
-# Состояние инвентаря пересобирается в _refresh (см. _rebuild_equipped/_refresh_backpack).
-# Экипированный слот, который «Снять» снимет по умолчанию (по макету нет UI выбора — WEAPON).
+# Эккипированный слот, который «Снять» снимет по умолчанию (по макету нет UI выбора — WEAPON).
 var _selected_slot: Artifact.Slot = Artifact.Slot.WEAPON
 # Ссылки на динамические накладки, чтобы пересобирать их в _refresh без затрагивания фигуры/слотов.
 var _eq_overlays: Array = []
 var _bp_icons: Array = []
-# Origin правой панели в координатах экрана — нужен _rebuild_equipped в _refresh.
+# Origin правой панели в координатах окна — нужен _rebuild_equipped в _refresh.
 var _right_origin: Vector2i = Vector2i.ZERO
 # Ссылка на правую панель — нужна _rebuild_equipped в _refresh.
 var _right: Control = null
 
 # --- Палитра (из макета) ---
-const WIN_BG := Color("#4a3423")
-const WIN_BORDER := Color("#16100a")
-const OUTLINE := Color("#8a6a3a")
-const PANEL_BG := Color("#41301f")
-const PANEL_BORDER := Color("#241608")
-const GOLD_INSET := Color("#6b4e2e")
-const RED_BG := Color("#7a100c")
-const RED_BORDER := Color("#3a0806")
-const SLOT_BG := Color("#3a2415")
-const SLOT_BORDER := Color("#201006")
-const SLOT_INSET := Color("#1a0e04")
-const STATVAL_BG := Color("#3a281a")
 const TEXT_GOLD := Color("#e6cf9a")
 const TEXT_LIGHT := Color("#f0dcae")
 
@@ -52,26 +39,13 @@ const _STAT_ICON := {
 
 # --- 16 слотов куклы (сетка 4×4, относительно правой панели) ---
 const _DOLL_SLOTS := [
-	Vector2i(258, 6),
-	Vector2i(318, 6),
-	Vector2i(180, 66),
-	Vector2i(6, 58),
-	Vector2i(68, 58),
-	Vector2i(318, 68),
-	Vector2i(180, 146),
-	Vector2i(318, 130),
-	Vector2i(6, 160),
-	Vector2i(22, 230),
-	Vector2i(318, 218),
-	Vector2i(46, 300),
-	Vector2i(258, 298),
-	Vector2i(6, 370),
-	Vector2i(68, 370),
-	Vector2i(318, 392)
+	Vector2i(258, 6), Vector2i(318, 6), Vector2i(180, 66), Vector2i(6, 58),
+	Vector2i(68, 58), Vector2i(318, 68), Vector2i(180, 146), Vector2i(318, 130),
+	Vector2i(6, 160), Vector2i(22, 230), Vector2i(318, 218), Vector2i(46, 300),
+	Vector2i(258, 298), Vector2i(6, 370), Vector2i(68, 370), Vector2i(318, 392)
 ]
 
 # --- Соответствие экипированных слотов индексу слота куклы ---
-# Индексы 1, 4, 9, 15 — лишние слоты без привязки к типу артефакта (по макету).
 const _DOLL_MAP := {
 	Artifact.Slot.HEAD: 0, Artifact.Slot.NECK: 2, Artifact.Slot.SHIELD: 3,
 	Artifact.Slot.WEAPON: 5, Artifact.Slot.TORSO: 6, Artifact.Slot.MISC_A: 7,
@@ -88,8 +62,6 @@ const _SKILL_ICON := [
 	"res://assets/ui/icons/alchemy.png",
 ]
 
-signal closed
-
 # --- Иконки действий/построений (существующие ассеты) ---
 const _ICON := {
 	"formation": [
@@ -100,81 +72,115 @@ const _ICON := {
 	],
 }
 
+signal closed
 
+# ---------------------------------------------------------------------------
+# Жизненный цикл
+# ---------------------------------------------------------------------------
 func set_hero(hero: HeroController) -> void:
 	_hero = hero
 	_build()
-
 
 func close() -> void:
 	closed.emit()
 	if is_inside_tree():
 		queue_free()
 
-
 func _ready() -> void:
 	add_theme_color_override("font_color", TEXT_GOLD)
-
+	_theme = load("res://assets/theme/game_theme.tres") as Theme
+	_apply_theme()
+	_connect_signals()
+	_build()
 
 # ---------------------------------------------------------------------------
-# Сборка окна
+# Тема: применяем единые stylebox'ы к скелету по имени.
+# ---------------------------------------------------------------------------
+func _apply_theme() -> void:
+	if _theme == null:
+		return
+	_style("Center/Window", "panel")
+	_style("Center/Window/Outline", "outline")
+	_style("Center/Window/Left", "panel")
+	_style("Center/Window/Right", "panel")
+	_style("Center/Window/Side", "panel")
+	_style("Center/Window/Bottom", "panel")
+	_style("Center/Window/Left/Portrait", "portrait")
+	for i in 4:
+		_style("Center/Window/Left/StatIcon_%d" % i, "slot")
+	for i in 16:
+		_style("Center/Window/Right/DollSlot_%d" % i, "doll_slot")
+	for i in 6:
+		_style("Center/Window/Right/Inventory/BackpackSlot_%d" % i, "backpack_slot")
+	_style("Center/Window/Right/Equip", "action_button")
+	_style("Center/Window/Right/Remove", "action_button")
+	_style("Center/Window/Right/Dispose", "action_button")
+	_style("Center/Window/Right/Inventory/Prev", "action_button")
+	_style("Center/Window/Right/Inventory/Next", "action_button")
+	for i in 6:
+		_style("Center/Window/Side/SideSlot_%d" % i, "side_slot")
+	_style("Center/Window/Side/Ok", "action_button")
+	for i in 7:
+		_style("Center/Window/Bottom/ArmySlot_%d" % i, "army_slot")
+	for i in 4:
+		_style("Center/Window/Bottom/Formations/Form_%d" % i, "action_button")
+
+func _style(path: String, theme_name: String) -> void:
+	var n := get_node_or_null(path)
+	if n is Control and _theme:
+		var sb := _theme.get_stylebox(theme_name, "Panel")
+		if sb:
+			n.add_theme_stylebox_override("panel", sb)
+
+func _theme_font_size(path: String, name: String) -> void:
+	# default_font_sizes из game_theme.tres (small=14, default=16, large=22, stat=16)
+	# недоступны через get_font_size — берём значения из макета темы.
+	var sizes := {"small": 14, "default": 16, "large": 22, "stat": 16}
+	var sz: int = int(sizes.get(name, 16))
+	var n := get_node_or_null(path)
+	if n is Label and sz > 0:
+		n.add_theme_font_size_override("font", sz)
+
+func _connect_signals() -> void:
+	var prev := get_node_or_null("Center/Window/Right/Inventory/Prev")
+	var next := get_node_or_null("Center/Window/Right/Inventory/Next")
+	if prev is Button: prev.pressed.connect(func(): _backpack_scroll_by(-1))
+	if next is Button: next.pressed.connect(func(): _backpack_scroll_by(1))
+	_connect_btn("Center/Window/Right/Equip", _on_equip)
+	_connect_btn("Center/Window/Right/Remove", _on_remove)
+	_connect_btn("Center/Window/Right/Dispose", _on_dispose)
+	_connect_btn("Center/Window/Side/Ok", close)
+	for i in 4:
+		_connect_btn("Center/Window/Bottom/Formations/Form_%d" % i, func(): _on_form(i))
+
+func _connect_btn(path: String, handler: Callable) -> void:
+	var b := get_node_or_null(path)
+	if b is Button:
+		b.pressed.connect(handler)
+
+# ---------------------------------------------------------------------------
+# Наполнение скелета динамическим содержимом
 # ---------------------------------------------------------------------------
 func _build() -> void:
-	for child in get_children():
-		child.queue_free()
-
-	# CenterContainer — центрирует окно 942×700, мир виден сквозь прозрачность.
-	var center := CenterContainer.new()
-	center.name = "Center"
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(center)
-
-	var window := Control.new()
-	window.name = "Window"
-	_set_offsets(window, 0, 0, 942, 706)
-	# window 942×706 — по макету (Qwen_html_20260829_1ub90rx55.html).
-	window.add_theme_stylebox_override("panel", _panel_stylebox())
-	center.add_child(window)
-
-	# Обводка + тень (на 4px больше окна)
-	var outline := Control.new()
-	outline.name = "Outline"
-	outline.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_set_offsets(outline, -4, -4, 946, 710)
-	outline.add_theme_stylebox_override("panel", _stylebox(OUTLINE, 2, 6, true, Color.TRANSPARENT, 12))
-	center.add_child(outline)
-
-	_build_left(window, Vector2i(8, 8))
-	_build_right(window, Vector2i(420, 8))
-	_build_side(window, Vector2i(855, 8))
-	_build_bottom(window, Vector2i(8, 602))
-	# Инициализировать отображение под текущего героя (иконки рюкзака, накладки).
+	_apply_theme()
+	_build_left()
+	_build_right()
+	_build_side()
+	_build_bottom()
 	_refresh()
 
-# ---------------------------------------------------------------------------
-# Левая панель
-# ---------------------------------------------------------------------------
-func _build_left(parent: Control, origin: Vector2i) -> void:
-	var left := Control.new()
-	left.name = "Left"
-	# left 406×588 — по макету (window 8,8).
-	_set_offsets(left, origin.x, origin.y, 406, 588)
-	left.add_theme_stylebox_override("panel", _stylebox(PANEL_BORDER, 2, 4, true, PANEL_BG, 8))
-	parent.add_child(left)
-
-	# Портрет 80×80 (window 19,19 → left-rel 11,11)
-	var portrait := TextureRect.new()
-	portrait.name = "Portrait"
-	portrait.texture = _tex("res://assets/ui/hero/portrait.png", 80, 80)
-	_set_offsets(portrait, origin.x + 11, origin.y + 11, 80, 80)
-	portrait.add_theme_stylebox_override("panel", _stylebox(Color("#201006"), 2, 6, true, Color("#2a1a0c")))
-	left.add_child(portrait)
-
-	# Имя героя (window 105,39 → left-rel 97,31)
-	_txt(left, _hero.hero_name if _hero != null else "Герой", Vector2i(97, 31), Vector2i(300, 39),
-		20, TEXT_GOLD, HORIZONTAL_ALIGNMENT_LEFT)
-
-	# Статы: 4 иконки в ряд (window 9,103 → left-rel 1,95), значения под ними (window 17,176).
+# --- Левая панель ---
+func _build_left() -> void:
+	var left := get_node_or_null("Center/Window/Left")
+	if left == null:
+		return
+	var portrait := get_node_or_null("Center/Window/Left/Portrait")
+	if portrait is TextureRect:
+		portrait.texture = _tex("res://assets/ui/hero/portrait.png", 80, 80)
+	var name := get_node_or_null("Center/Window/Left/Name")
+	if name is Label:
+		name.text = _hero.hero_name if _hero else "Герой"
+	_theme_font_size("Center/Window/Left/Name", "large")
 	var primary := [
 		["attack", "Атака", _hero.stats.get("attack", 0) if _hero else 0],
 		["defense", "Защита", _hero.stats.get("defense", 0) if _hero else 0],
@@ -184,216 +190,166 @@ func _build_left(parent: Control, origin: Vector2i) -> void:
 	for i in 4:
 		var key: String = primary[i][0]
 		var label: String = primary[i][1]
-		var val: Variant = primary[i][2]
+		var val: int = int(primary[i][2])
 		var icon_path := "res://assets/ui/icons/%s.png" % _STAT_ICON.get(key, "dot")
-		var ic := TextureRect.new()
-		ic.texture = _tex(icon_path, 46, 46)
-		_set_offsets(ic, origin.x + 20 + i * 101, origin.y + 95, 46, 46)
-		ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		left.add_child(ic)
-		# Название стата под иконкой (y≈143).
-		_txt(left, label, Vector2i(20 + i * 101, origin.y + 143), Vector2i(101, 18),
-			12, TEXT_GOLD, HORIZONTAL_ALIGNMENT_CENTER)
-		# Значение стата в строке значений (window 17,176 → left-rel 9,168).
-		_txt(left, str(val), Vector2i(12 + i * 101, origin.y + 168), Vector2i(97, 21),
-			14, TEXT_LIGHT, HORIZONTAL_ALIGNMENT_CENTER)
-
-	# Информационные строки (мана, опыт, школа) — window 199/248/297 → left-rel 191/240/289.
-	var iy := 191
-	_info_row(left, "Мана", "%d/%d" % [_mana_cur(), _mana_max()], iy)
-	iy += 49
-	_info_row(left, "Опыт", "0", iy)
-	iy += 49
-	_info_row(left, "Школа", _magic_school(), iy)
-
-	# Сетка скиллов 2×3 (window 9,346 → left-rel 1,338; ячейки 120×70, шаг 190/82).
-	var sy := 338
-	_txt(left, "Навыки", Vector2i(12, sy - 18), Vector2i(120, 20), 16, TEXT_GOLD, HORIZONTAL_ALIGNMENT_LEFT)
-	sy += 14
+		var ic := get_node_or_null("Center/Window/Left/StatIcon_%d" % i)
+		if ic is TextureRect:
+			ic.texture = _tex(icon_path, 46, 46)
+		var sn := get_node_or_null("Center/Window/Left/StatName_%d" % i)
+		if sn is Label:
+			sn.text = label
+			_theme_font_size("Center/Window/Left/StatName_%d" % i, "small")
+		var sv := get_node_or_null("Center/Window/Left/StatValue_%d" % i)
+		if sv is Label:
+			sv.text = str(val)
+			_theme_font_size("Center/Window/Left/StatValue_%d" % i, "stat")
+	var ml := get_node_or_null("Center/Window/Left/Mana_lbl")
+	if ml is Label:
+		ml.text = "Мана"
+		_theme_font_size("Center/Window/Left/Mana_lbl", "default")
+	var mv := get_node_or_null("Center/Window/Left/Mana_val")
+	if mv is Label:
+		mv.text = "%d/%d" % [_mana_cur(), _mana_max()]
+		_theme_font_size("Center/Window/Left/Mana_val", "default")
+	var el := get_node_or_null("Center/Window/Left/Exp_lbl")
+	if el is Label:
+		el.text = "Опыт"
+		_theme_font_size("Center/Window/Left/Exp_lbl", "default")
+	var ev := get_node_or_null("Center/Window/Left/Exp_val")
+	if ev is Label:
+		ev.text = "0"
+		_theme_font_size("Center/Window/Left/Exp_val", "default")
+	var sl := get_node_or_null("Center/Window/Left/School_lbl")
+	if sl is Label:
+		sl.text = "Школа"
+		_theme_font_size("Center/Window/Left/School_lbl", "default")
+	var sv2 := get_node_or_null("Center/Window/Left/School_val")
+	if sv2 is Label:
+		sv2.text = _magic_school()
+		_theme_font_size("Center/Window/Left/School_val", "default")
+	var st := get_node_or_null("Center/Window/Left/Skills_lbl")
+	if st is Label:
+		st.text = "Навыки"
+		_theme_font_size("Center/Window/Left/Skills_lbl", "large")
 	for i in 6:
-		var slot := Control.new()
-		slot.name = "Skill_%d" % i
-		_set_offsets(slot, origin.x + 22 + (i % 2) * 190, origin.y + sy + (i / 2) * 82, 120, 70)
+		var slot := get_node_or_null("Center/Window/Left/Skill_%d" % i)
+		if slot is not Button:
+			continue
 		var lvl := _skill_level(i)
 		var has := lvl > 0
-		slot.add_theme_stylebox_override("panel", _stylebox(Color("#201006"), 2, 6, true,
-			(Color("#5a3a1a") if has else SLOT_BG), 6))
-		left.add_child(slot)
+		_set_style_slot(slot, has)
+		_clear_children(slot)
 		if i < _SKILL_ICON.size():
 			var sic := TextureRect.new()
 			sic.texture = _tex(_SKILL_ICON[i], 40, 40)
-			_set_offsets(sic, 8, 15, 40, 40)
+			sic.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			sic.offset_left = 8
+			sic.offset_top = 15
+			sic.offset_right = 48
+			sic.offset_bottom = 55
 			slot.add_child(sic)
 		if has:
-			_txt(slot, str(lvl), Vector2i(52, 24), Vector2i(60, 22), 20, TEXT_GOLD, HORIZONTAL_ALIGNMENT_CENTER)
+			var ll := Label.new()
+			ll.text = str(lvl)
+			ll.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			ll.offset_left = 52
+			ll.offset_top = 24
+			ll.offset_right = 112
+			ll.offset_bottom = 46
+			ll.add_theme_color_override("font_color", TEXT_GOLD)
+			ll.add_theme_font_size_override("font", 20)
+			slot.add_child(ll)
 
-# --- Вспомогательные источники данных ---
-func _mana_cur() -> int:
-	return _hero.mana_current if _hero != null else 0
-
-func _mana_max() -> int:
-	return _hero.mana_max if _hero != null else 0
-
-func _magic_school() -> String:
-	var schools: Dictionary = _hero.magic_schools if _hero != null else {}
-	var active: Array = []
-	for k in schools:
-		if int(schools[k]) > 0:
-			active.append(str(k))
-	return " / ".join(active) if not active.is_empty() else "—"
-
-func _skill_level(i: int) -> int:
-	if _hero == null or _hero.skills == null:
-		return 0
-	var keys := _hero.skills.levels.keys()
-	if i < keys.size():
-		return _hero.skills.get_skill(keys[i])
-	return 0
-
-func _info_row(parent: Control, label: String, value: String, y: int) -> void:
-	_txt(parent, label, Vector2i(12, y), Vector2i(150, 20), 14, TEXT_GOLD, HORIZONTAL_ALIGNMENT_LEFT)
-	_txt(parent, value, Vector2i(204, y), Vector2i(196, 20), 14, TEXT_LIGHT, HORIZONTAL_ALIGNMENT_RIGHT)
-
-func _stats_rows() -> Array:
-	var hero_stats: Dictionary = _hero.stats if _hero != null else {}
-	var rows := [
-		["attack", "Атака", hero_stats.get("attack", 0)],
-		["defense", "Защита", hero_stats.get("defense", 0)],
-		["spell_power", "Магия", hero_stats.get("spell_power", 0)],
-		["knowledge", "Знания", hero_stats.get("knowledge", 0)],
-	]
-	# Вторичные навыки как строки
-	if _hero != null and _hero.skills != null:
-		for k in _hero.skills.levels.keys():
-			var lvl: int = _hero.skills.get_skill(k)
-			if lvl > 0:
-				rows.append([str(k), _secondary_label(k), lvl])
-	return rows
-
-func _secondary_label(k: String) -> String:
-	var m := {
-		"nature_sense": "Природа", "keen_eye": "Глаз орла", "navigation": "Навигация",
-		"geology": "Геология", "alchemy": "Алхимия",
-	}
-	return m.get(k, k)
-
-# ---------------------------------------------------------------------------
-# Правая панель (кукла + инвентарь + действия)
-# ---------------------------------------------------------------------------
-func _build_right(parent: Control, origin: Vector2i) -> void:
-	var right := Control.new()
-	right.name = "Right"
-	# right 427×588 — по макету (window 420,8).
-	_set_offsets(right, origin.x, origin.y, 427, 588)
-	_right_origin = origin
-	_right = right
-	right.add_theme_stylebox_override("panel", _stylebox(PANEL_BORDER, 2, 4, true, PANEL_BG, 8))
-	parent.add_child(right)
-
-	# Кукла-фигура — под слотами (в HTML: <svg class="fig"> идёт до слотов).
-	var figure := TextureRect.new()
-	figure.name = "Figure"
-	figure.texture = _tex("res://assets/ui/hero/figure.png", 240, 360)
-	# figure (window 517,11 → right-rel 97,3)
-	_set_offsets(figure, origin.x + 97, origin.y + 3, 240, 360)
-	figure.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	right.add_child(figure)
-
-	# 16 слотов экипировки поверх фигуры
-	for i in _DOLL_SLOTS.size():
-		var slot := Control.new()
-		slot.name = "DollSlot_%d" % i
-		_set_offsets(slot, origin.x + _DOLL_SLOTS[i].x, origin.y + _DOLL_SLOTS[i].y, 56, 56)
-		slot.add_theme_stylebox_override("panel", _stylebox(Color("#201006"), 2, 6, true, SLOT_BG, 8))
-		right.add_child(slot)
-
-	# Накладка экипированных артефактов на слоты куклы (вынесена в _rebuild_equipped, чтобы
-	# кнопки «Взять»/«Снять»/«Сбросить» могли пересобрать её по месту без затргивания фигуры).
-	_rebuild_equipped(origin)
-
-	# Строка инвентаря (рюкзак): 6 видимых слотов + стрелки ◀ ▶ (по макету). Прокрутка по 6.
-	var inv := Control.new()
-	inv.name = "Inventory"
-	# inv (window 421,461 → right-rel 1,453) 427×68
-	_set_offsets(inv, 1, 453, 427, 68)
-	inv.add_theme_stylebox_override("panel", _stylebox(PANEL_BORDER, 2, 4, true, PANEL_BG, 6))
-	right.add_child(inv)
-
-	# Стрелки prev/next (22×56, как в макете): кнопка с фоном строки + иконка-стрелка.
-	var prev := Button.new()
-	prev.name = "Prev"
-	prev.add_theme_stylebox_override("panel", _stylebox(Color("#201006"), 2, 6, true, SLOT_BG))
-	prev.focus_mode = Button.FOCUS_NONE
-	var prev_ic := TextureRect.new()
-	prev_ic.texture = _tex("res://assets/ui/icons/arrow_s.png", 22, 56)
-	prev_ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	prev.add_child(prev_ic)
-	prev.offset_left = 6
-	prev.offset_top = 9
-	prev.offset_right = 28
-	prev.offset_bottom = 65
-	prev.pressed.connect(func(): _backpack_scroll_by(-1))
-	inv.add_child(prev)
-
-	var next := Button.new()
-	next.name = "Next"
-	next.add_theme_stylebox_override("panel", _stylebox(Color("#201006"), 2, 6, true, SLOT_BG))
-	next.focus_mode = Button.FOCUS_NONE
-	var next_ic := TextureRect.new()
-	next_ic.texture = _tex("res://assets/ui/icons/arrow_s.png", 22, 56)
-	next_ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	next.add_child(next_ic)
-	next.offset_left = 375
-	next.offset_top = 9
-	next.offset_right = 397
-	next.offset_bottom = 65
-	next_ic.flip_h = true
-	next.pressed.connect(func(): _backpack_scroll_by(1))
-	inv.add_child(next)
-
-	# Сетка из 6 слотов рюкзака (56x56), позиции по макету (шаг 62, центровка).
-	for i in 6:
-		var slot := Control.new()
-		slot.name = "BackpackSlot_%d" % i
-		_set_offsets(slot, 49 + i * 61, 9, 56, 56)
-		slot.add_theme_stylebox_override("panel", _stylebox(SLOT_BORDER, 1, 4, true, SLOT_BG, 6))
-		inv.add_child(slot)
-		bp_slots.append(slot)
-
-	# Кнопки действий (58x46, space-between) в строке действий (window 421,529 → right-rel 1,521).
-	_action_icon_button(right, "res://assets/ui/icons/scroll_s.png", 6, 531, _on_equip)
-	_action_icon_button(right, "res://assets/ui/icons/treasure_s.png", 184, 531, _on_remove)
-	_action_icon_button(right, "res://assets/ui/hero/x.png", 362, 531, _on_dispose)
-
-func _backpack_scroll_by(dir: int) -> void:
-	if _hero == null:
+func _set_style_slot(slot: Button, has: bool) -> void:
+	if _theme == null:
 		return
-	var max_page := int(floorf(float(GameSettings.MAX_BACKPACK_SIZE - 6) / 6.0))
-	bp_page = clampi(bp_page + dir, 0, max_page)
+	var sb := _theme.get_stylebox("action_button" if has else "slot", "Panel")
+	if sb:
+		slot.add_theme_stylebox_override("panel", sb)
+
+func _clear_children(node: Node) -> void:
+	for c in node.get_children():
+		node.remove_child(c)
+		c.free()
+
+# --- Правая панель ---
+func _build_right() -> void:
+	var right := get_node_or_null("Center/Window/Right")
+	if right == null:
+		return
+	_right = right
+	_right_origin = Vector2i(510, 10)
+	var figure := get_node_or_null("Center/Window/Right/Figure")
+	if figure is TextureRect:
+		figure.texture = _tex("res://assets/ui/hero/figure.png", 240, 360)
+	_rebuild_equipped(_right_origin)
 	_refresh_backpack()
 
-func _refresh_backpack() -> void:
-	if _hero == null:
+# --- Боковая панель ---
+func _build_side() -> void:
+	var side := get_node_or_null("Center/Window/Side")
+	if side == null:
 		return
-	var bp: Array[Artifact] = _hero.inventory.backpack
-	for i in 6:
-		var slot: Control = bp_slots[i]
-		for c in slot.get_children():
-			slot.remove_child(c)
-			c.free()
-		var idx := bp_page * 6 + i
-		if idx < bp.size() and bp[idx] != null:
-			var icon_path := _artifact_icon(bp[idx])
-			if not icon_path.is_empty():
-				var ic := TextureRect.new()
-				ic.name = "BpIcon_%d" % idx
-				ic.texture = _tex(icon_path, 56, 56)
-				ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
-				# Выделение выбранного индекса рюкзака (для «Сбросить»): золотой контур.
-				slot.add_child(ic)
-				_bp_icons.append(ic)
+	var banner := get_node_or_null("Center/Window/Side/Banner")
+	if banner is TextureRect:
+		banner.texture = _tex("res://assets/ui/hero/banner.png", 62, 62)
+	var mini := get_node_or_null("Center/Window/Side/Mini")
+	if mini is TextureRect:
+		mini.texture = _tex("res://assets/ui/hero/mini.png", 62, 46)
+	_refresh_side_slots()
 
-# Пересобрать накладки экипированных артефактов поверх слотов куклы (очируя старые).
+# --- Нижняя панель ---
+func _build_bottom() -> void:
+	var bottom := get_node_or_null("Center/Window/Bottom")
+	if bottom == null:
+		return
+	var army: HeroArmyController = _hero.army if _hero != null else null
+	for i in 7:
+		var slot := get_node_or_null("Center/Window/Bottom/ArmySlot_%d" % i)
+		if slot is not TextureRect:
+			continue
+		_clear_children(slot)
+		var filled := army != null and i < army.army.size() and army.army[i] != null
+		if filled:
+			var key: String = str(army.army[i].get_key())
+			var count: int = army.army[i].count
+			var icon := _unit_icon(key)
+			if icon != null:
+				var ic := TextureRect.new()
+				ic.texture = icon
+				ic.offset_left = 6
+				ic.offset_top = 6
+				ic.offset_right = 70
+				ic.offset_bottom = 70
+				ic.stretch_mode = TextureRect.STRETCH_SCALE
+				ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				slot.add_child(ic)
+			var ct := Label.new()
+			ct.text = str(count)
+			ct.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			ct.offset_left = 50
+			ct.offset_top = 56
+			ct.offset_right = 74
+			ct.offset_bottom = 76
+			ct.add_theme_color_override("font_color", Color.WHITE)
+			ct.add_theme_font_size_override("font", 14)
+			bottom.add_child(ct)
+	for i in 4:
+		var fb := get_node_or_null("Center/Window/Bottom/Formations/Form_%d" % i)
+		if fb is Button:
+			fb.icon = load(_ICON["formation"][i])
+			fb.add_theme_color_override("font_color", TEXT_GOLD)
+			fb.add_theme_color_override("font_pressed_color", TEXT_LIGHT)
+
+# ---------------------------------------------------------------------------
+# Пересборка динамических слоёв
+# ---------------------------------------------------------------------------
+func _refresh() -> void:
+	if _hero == null or _right == null:
+		return
+	_rebuild_equipped(_right_origin)
+	_refresh_backpack()
+
 func _rebuild_equipped(origin: Vector2i) -> void:
 	for ov in _eq_overlays:
 		if ov.get_parent() != null:
@@ -416,20 +372,61 @@ func _rebuild_equipped(origin: Vector2i) -> void:
 		var ov := TextureRect.new()
 		ov.name = "Equip_%s" % str(slot)
 		ov.texture = _tex(icon_path, 56, 56)
-		_set_offsets(ov, origin.x + _DOLL_SLOTS[idx].x, origin.y + _DOLL_SLOTS[idx].y, 56, 56)
+		ov.offset_left = float(origin.x + _DOLL_SLOTS[idx].x)
+		ov.offset_top = float(origin.y + _DOLL_SLOTS[idx].y)
+		ov.offset_right = ov.offset_left + 56
+		ov.offset_bottom = ov.offset_top + 56
 		ov.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_right.add_child(ov)
 		_eq_overlays.append(ov)
 
-# Пересобрать всё, что зависит от состояния инвентаря: накладки экипировки и иконки рюкзака.
-func _refresh() -> void:
-	if _hero == null or _right == null:
+func _refresh_backpack() -> void:
+	if _hero == null:
 		return
-	_rebuild_equipped(_right_origin)
+	var bp: Array[Artifact] = _hero.inventory.backpack
+	for i in 6:
+		var slot: TextureRect = get_node_or_null(
+			"Center/Window/Right/Inventory/BackpackSlot_%d" % i)
+		if slot == null:
+			continue
+		for c in slot.get_children():
+			slot.remove_child(c)
+			c.free()
+		var idx := bp_page * 6 + i
+		if idx < bp.size() and bp[idx] != null:
+			var icon_path := _artifact_icon(bp[idx])
+			if not icon_path.is_empty():
+				var ic := TextureRect.new()
+				ic.name = "BpIcon_%d" % idx
+				ic.texture = _tex(icon_path, 56, 56)
+				ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				ic.offset_left = 6
+				ic.offset_top = 6
+				ic.offset_right = 62
+				ic.offset_bottom = 62
+				slot.add_child(ic)
+				_bp_icons.append(ic)
+
+func _refresh_side_slots() -> void:
+	var side := get_node_or_null("Center/Window/Side")
+	if side == null:
+		return
+	for i in 6:
+		var slot := get_node_or_null("Center/Window/Side/SideSlot_%d" % i)
+		if slot == null:
+			continue
+		for c in slot.get_children():
+			slot.remove_child(c)
+			c.free()
+
+func _backpack_scroll_by(dir: int) -> void:
+	if _hero == null:
+		return
+	var max_page := int(floorf(float(GameSettings.MAX_BACKPACK_SIZE - 6) / 6.0))
+	bp_page = clampi(bp_page + dir, 0, max_page)
 	_refresh_backpack()
 
 func _on_equip() -> void:
-	# «Взять» (📜): экипировать первый подходящий элемент рюкзака.
 	if _hero == null:
 		return
 	var inv: HeroInventory = _hero.inventory
@@ -440,7 +437,6 @@ func _on_equip() -> void:
 	_refresh()
 
 func _on_remove() -> void:
-	# «Снять» (🧰): снять выбранный экипированный элемент в рюкзак.
 	if _hero == null:
 		return
 	var inv: HeroInventory = _hero.inventory
@@ -449,7 +445,6 @@ func _on_remove() -> void:
 	_refresh()
 
 func _on_dispose() -> void:
-	# «Сбросить» (⊘): удалить первый элемент рюкзака.
 	if _hero == null:
 		return
 	var inv: HeroInventory = _hero.inventory
@@ -457,116 +452,9 @@ func _on_dispose() -> void:
 		inv.remove_from_backpack(0)
 	_refresh()
 
-func _action_icon_button(parent: Control, icon_path: String, left: int, top: int,
-		_handler: Callable) -> Button:
-	var b := Button.new()
-	b.name = "Action_%s" % icon_path
-	b.add_theme_stylebox_override("panel", _stylebox(Color("#201006"), 2, 6, true, SLOT_BG))
-	b.focus_mode = Button.FOCUS_NONE
-	var ic := TextureRect.new()
-	ic.texture = _tex(icon_path, 58, 46)
-	ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	b.add_child(ic)
-	b.offset_left = float(left)
-	b.offset_top = float(top)
-	b.offset_right = float(left + 58)
-	b.offset_bottom = float(top + 46)
-	b.pressed.connect(_handler)
-	parent.add_child(b)
-	return b
-
-# ---------------------------------------------------------------------------
-# Боковая панель (красная) и нижняя панель (армия + построения)
-# ---------------------------------------------------------------------------
-func _build_side(parent: Control, origin: Vector2i) -> void:
-	var side := Control.new()
-	side.name = "Side"
-	# side 79×588 — по макету (window 855,8).
-	_set_offsets(side, origin.x, origin.y, 79, 588)
-	side.add_theme_stylebox_override("panel", _stylebox(Color("#3a0806"), 1, 0, true, RED_BG))
-	parent.add_child(side)
-
-	var banner := TextureRect.new()
-	banner.name = "Banner"
-	banner.texture = _tex("res://assets/ui/hero/banner.png", 62, 62)
-	# banner (window 863.5,17 → side-rel 9,9)
-	_set_offsets(banner, 9, 9, 62, 62)
-	banner.stretch_mode = TextureRect.STRETCH_SCALE
-	side.add_child(banner)
-
-	var mini := TextureRect.new()
-	mini.name = "Mini"
-	mini.texture = _tex("res://assets/ui/hero/mini.png", 62, 46)
-	# mini (window 863.5,87 → side-rel 9,79)
-	_set_offsets(mini, 9, 79, 62, 46)
-	mini.stretch_mode = TextureRect.STRETCH_SCALE
-	side.add_child(mini)
-
-	# 6 слотов (window 863.5,140+50*i → side-rel 9,132+i*50)
-	for i in 6:
-		var ss := Control.new()
-		ss.name = "SideSlot_%d" % i
-		_set_offsets(ss, 9, 132 + i * 50, 62, 42)
-		ss.add_theme_stylebox_override("panel", _stylebox(Color("#241608"), 2, 4, true, Color("#4a3423"), 6))
-		side.add_child(ss)
-
-	var ok := Button.new()
-	ok.name = "Ok"
-	# ok прижат к низу (margin-top auto): side 588 − 46 = 542
-	_set_offsets(ok, 9, 542, 62, 46)
-	ok.add_theme_stylebox_override("panel", _stylebox(Color("#201006"), 2, 6, true, SLOT_BG))
-	ok.icon = load("res://assets/ui/hero/check.png")
-	ok.focus_mode = Button.FOCUS_NONE
-	ok.add_theme_color_override("font_color", TEXT_GOLD)
-	ok.pressed.connect(func(): close())
-	side.add_child(ok)
-
-func _build_bottom(parent: Control, origin: Vector2i) -> void:
-	var bottom := Control.new()
-	bottom.name = "Bottom"
-	# bottom 926×96 — по макету (window 8,602).
-	_set_offsets(bottom, origin.x, origin.y, 926, 96)
-	bottom.add_theme_stylebox_override("panel", _stylebox(Color("#3a0806"), 1, 0, true, RED_BG))
-	parent.add_child(bottom)
-
-	var army: HeroArmyController = _hero.army if _hero != null else null
-	for i in 7:
-		var slot := Control.new()
-		slot.name = "ArmySlot_%d" % i
-		# army (window 18+i*82,612 → bottom-rel 10+i*82,10)
-		_set_offsets(slot, 10 + i * 82, 10, 76, 76)
-		var filled := army != null and i < army.army.size() and army.army[i] != null
-		var bg := Color("#241a12") if filled else Color("#8a1210")
-		slot.add_theme_stylebox_override("panel", _stylebox(Color("#40080a"), 2, 8, true, bg, 8))
-		bottom.add_child(slot)
-		if filled:
-			var key: String = str(army.army[i].get_key())
-			var count: int = army.army[i].count
-			var icon := _unit_icon(key)
-			if icon != null:
-				var ic := TextureRect.new()
-				ic.texture = icon
-				_set_offsets(ic, 6, 6, 64, 64)
-				ic.stretch_mode = TextureRect.STRETCH_SCALE
-				slot.add_child(ic)
-			_txt(bottom, str(count), Vector2i(50, 56), Vector2i(24, 20), 14, Color.WHITE, HORIZONTAL_ALIGNMENT_CENTER)
-
-	var forms := Control.new()
-	forms.name = "Formations"
-	# forms (window 791,613.5 → bottom-rel 783,11) 133×73
-	_set_offsets(forms, 783, 11, 133, 73)
-	bottom.add_child(forms)
-	for i in 4:
-		var fb := Button.new()
-		fb.name = "Form_%d" % i
-		fb.add_theme_stylebox_override("panel", _stylebox(Color("#201006"), 2, 6, true, SLOT_BG))
-		fb.focus_mode = Button.FOCUS_NONE
-		fb.icon = load(_ICON["formation"][i])
-		fb.add_theme_color_override("font_color", TEXT_GOLD)
-		fb.add_theme_color_override("font_pressed_color", TEXT_LIGHT)
-		# кнопки построений 2×2 внутри forms: (6,6),(72,6),(6,42),(72,42)
-		_set_offsets(fb, 6 + (i % 2) * 66, 6 + (i / 2) * 36, 60, 32)
-		forms.add_child(fb)
+func _on_form(_i: int) -> void:
+	# Выбор активного построения (по макету — переключение иконки).
+	pass
 
 # ---------------------------------------------------------------------------
 # Хелперы
@@ -579,27 +467,7 @@ func _set_offsets(c: Control, left: int, top: int, w: int, h: int) -> void:
 	c.offset_right = float(left + w)
 	c.offset_bottom = float(top + h)
 
-func _stylebox(border_color: Color, border_size: int, radius: int, draw_center: bool,
-		bg: Color = Color.TRANSPARENT, inset_size: int = 0) -> StyleBoxFlat:
-	var sb := StyleBoxFlat.new()
-	sb.draw_center = draw_center
-	if draw_center and bg != Color.TRANSPARENT:
-		sb.bg_color = bg
-	sb.set_border_width_all(border_size)
-	sb.set_corner_radius_all(radius)
-	sb.border_color = border_color
-	if inset_size > 0:
-		sb.shadow_size = inset_size
-		sb.shadow_color = SLOT_INSET
-	return sb
-
-func _panel_stylebox() -> StyleBoxFlat:
-	return _stylebox(PANEL_BORDER, 2, 4, true, PANEL_BG, 10)
-
 func _tex(path: String, w: int, h: int) -> Texture2D:
-	# Сначала импорт-пайплайн (load), Image.load_from_file — только fallback
-	# для файлов без .import: на импортированных файлах он даёт варнинг
-	# "Loaded resource as image file, this will not work on export".
 	var res := load(path)
 	var img: Image = (res as ImageTexture).get_image() if res is ImageTexture \
 		else Image.load_from_file(path)
@@ -607,18 +475,6 @@ func _tex(path: String, w: int, h: int) -> Texture2D:
 		return res as Texture2D
 	img.resize(w, h)
 	return ImageTexture.create_from_image(img)
-
-func _txt(parent: Control, text: String, pos: Vector2i, size: Vector2i, font_size: int,
-		color: Color, h_align: HorizontalAlignment) -> Label:
-	var tr := Label.new()
-	tr.text = text
-	tr.add_theme_font_size_override("font_size", font_size)
-	tr.horizontal_alignment = h_align
-	tr.vertical_alignment = VerticalAlignment.VERTICAL_ALIGNMENT_CENTER
-	tr.add_theme_color_override("font_color", color)
-	_set_offsets(tr, pos.x, pos.y, size.x, size.y)
-	parent.add_child(tr)
-	return tr
 
 func _artifact_icon(art: Artifact) -> String:
 	if art == null:
@@ -633,3 +489,25 @@ func _unit_icon(key: String) -> Texture2D:
 	if ResourceLoader.exists(path):
 		return load(path)
 	return null
+
+func _mana_cur() -> int:
+	return _hero.mana_current if _hero != null else 0
+
+func _mana_max() -> int:
+	return _hero.mana_max if _hero != null else 0
+
+func _magic_school() -> String:
+	var schools: Dictionary = _hero.magic_schools if _hero != null else {}
+	var active: Array = []
+	for k in schools:
+		if int(schools[k]) > 0:
+			active.append(str(k))
+	return " / ".join(active) if not active.is_empty() else "—"
+
+func _skill_level(i: int) -> int:
+	if _hero == null or _hero.skills == null:
+		return 0
+	var keys := _hero.skills.levels.keys()
+	if i < keys.size():
+		return _hero.skills.get_skill(keys[i])
+	return 0
