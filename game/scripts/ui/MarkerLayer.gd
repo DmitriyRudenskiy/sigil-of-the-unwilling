@@ -6,6 +6,8 @@ const _TerrainCostTable = preload("res://scripts/data/TerrainCostTable.gd")
 
 signal marker_hovered(cell: Vector2i, cost: float, remaining: float, is_reachable: bool)
 signal marker_clicked(cell: Vector2i, is_reachable: bool)
+# city-navigation: клик по значку города — роутер строит маршрут герою.
+signal city_marker_clicked(city: City)
 
 enum MarkType { GREEN, YELLOW, RED }
 
@@ -27,6 +29,8 @@ var _yellow_pos: PackedVector2Array = PackedVector2Array()
 var _red_pos: PackedVector2Array = PackedVector2Array()
 
 var _hex_size: float = 32.0  # default, recalculated on setup
+# city-navigation: значки городов — всегда видны, без порога дистанции.
+var _city_marks: Array = []  # {cell: Vector2i, pos: Vector2, city: City}
 
 
 func setup(map: MapGenerator) -> void:
@@ -93,6 +97,25 @@ func hide_markers() -> void:
 	queue_redraw()
 
 
+## city-navigation: выдать/обновить значки городов (без порога дистанции).
+func set_city_markers(cities: Array) -> void:
+	_city_marks.clear()
+	if _map_gen == null or not _map_gen.has_valid_tilemap():
+		return
+	for c in cities:
+		if c == null:
+			continue
+		_city_marks.append({"cell": c.center, "pos": _map_gen.map_to_local(c.center), "city": c})
+	queue_redraw()
+
+
+func city_at_cell(cell: Vector2i) -> City:
+	for m in _city_marks:
+		if m.cell == cell:
+			return m.city
+	return null
+
+
 func _process(_d: float) -> void:
 	# Анимация (пульс) нужна только зелёным точкам; без них — без редraw'ов.
 	if _visible and not _green_pos.is_empty():
@@ -100,7 +123,20 @@ func _process(_d: float) -> void:
 
 
 func _draw() -> void:
-	if not _visible or not _map_gen or not _map_gen.has_valid_tilemap():
+	if not _map_gen or not _map_gen.has_valid_tilemap():
+		return
+
+	# city-navigation: значки городов — всегда видны, под reach-метками.
+	for m in _city_marks:
+		var pos: Vector2 = m.pos
+		draw_circle(pos, _hex_size * 0.22, Color(0.62, 0.47, 0.9, 0.25))
+		draw_arc(pos, _hex_size * 0.22, 0.0, TAU, 32, Color(0.8, 0.65, 1.0, 0.95), 2.0)
+		draw_string(
+			ThemeDB.fallback_font, pos + Vector2(0.0, -_hex_size * 0.30),
+			m.city.display_name, HORIZONTAL_ALIGNMENT_CENTER,
+			int(_hex_size * 2.0), 14, Color(1.0, 0.96, 0.85, 0.95))
+
+	if not _visible:
 		return
 
 	# Green dots (pulse)
@@ -127,13 +163,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 
 		if event.button_index == MOUSE_BUTTON_LEFT:
-			var is_green_or_yellow: bool = _reachable.has(cell) and _reachable[cell] != MarkType.RED
-			if is_green_or_yellow:
-				marker_clicked.emit(cell, true)
-				get_viewport().set_input_as_handled()
-			elif _red_frontier.has(cell):
-				marker_clicked.emit(cell, false)
-				get_viewport().set_input_as_handled()
+			_handle_left_click(cell)
 
 		elif event.button_index == MOUSE_BUTTON_RIGHT:
 			pass  # handled elsewhere
@@ -147,6 +177,23 @@ func _unhandled_input(event: InputEvent) -> void:
 			if not is_reachable and _red_frontier.has(cell):
 				remaining = -remaining  # show deficit
 			marker_hovered.emit(cell, cost, remaining, is_reachable)
+
+
+func _handle_left_click(cell: Vector2i) -> void:
+	# city-navigation: клик по значку города приоритетнее reach-меток —
+	# эмитим city_marker_clicked и съедаем событие (маршрут делает роутер).
+	var c: City = city_at_cell(cell)
+	if c != null:
+		city_marker_clicked.emit(c)
+		get_viewport().set_input_as_handled()
+		return
+	var is_green_or_yellow: bool = _reachable.has(cell) and _reachable[cell] != MarkType.RED
+	if is_green_or_yellow:
+		marker_clicked.emit(cell, true)
+		get_viewport().set_input_as_handled()
+	elif _red_frontier.has(cell):
+		marker_clicked.emit(cell, false)
+		get_viewport().set_input_as_handled()
 
 
 func _screen_to_cell(world_pos: Vector2) -> Vector2i:
