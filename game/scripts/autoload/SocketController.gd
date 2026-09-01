@@ -149,6 +149,24 @@ func _route_command(line: String) -> Dictionary:
 				return {"error": "No interaction controller"}
 			var removed = ic.collect_resource_at(hero.current_cell)
 			return {"status": "collected" if removed else "nothing_here"}
+		"CITY_BUILD":
+			# city-in-world: постройка в городе мира (через реальный CityScreen).
+			return _city_action(world_ctrl, req, "build")
+		"CITY_LEVEL":
+			# city-in-world: улучшение города (уровень — при выполнении условий).
+			return _city_action(world_ctrl, req, "level")
+		"CITY_HIRE":
+			# city-in-world: найм последователя (FollowerSystem.recruit).
+			return _city_action(world_ctrl, req, "hire")
+		"CITY_CLOSE":
+			# city-in-world: закрыть экран управления городом.
+			if world_ctrl == null or not world_ctrl.is_world_visible():
+				return {"error": "Not in World mode"}
+			var ui_mgr = world_ctrl.get_ui_manager()
+			if ui_mgr == null:
+				return {"error": "No UI manager (city screen unavailable)"}
+			ui_mgr.close_city_screen()
+			return {"status": "closed", "city_screen_open": ui_mgr.city_overlay_open()}
 		"RETREAT":
 			if battle_ctrl == null:
 				return {"error": "Not in Battle mode"}
@@ -628,6 +646,14 @@ func _get_state(world_ctrl, battle_ctrl) -> Dictionary:
 			state.strategic_resources = hero.strategic_resources.get_all()
 			# Идёт ли герой прямо сейчас (для честного ожидания частичного движения)
 			state.moving = hero.movement != null and hero.movement.is_moving
+			# city-in-world: именованные последователи героя (CITY_HIRE).
+			var followers_out: Array = []
+			for f in hero.followers:
+				if f != null and f.has_method("to_dict"):
+					followers_out.append(f.to_dict())
+				else:
+					followers_out.append({"name": str(f)})
+			state.followers = followers_out
 		
 		if map_gen:
 			# Map resources
@@ -658,6 +684,17 @@ func _get_state(world_ctrl, battle_ctrl) -> Dictionary:
 					})
 			state.map_enemies = enemies
 		
+		# city-in-world: города мира + экран управления (CITY_* сценарии).
+		var cities_mgr = world_ctrl.get_cities()
+		if cities_mgr != null:
+			var city_list: Array = []
+			for c in cities_mgr.cities:
+				city_list.append(_city_state_dict(c))
+			state.cities = city_list
+			state.capital = _city_state_dict(cities_mgr.capital)
+		var ui_mgr = world_ctrl.get_ui_manager()
+		state.city_screen_open = ui_mgr.city_overlay_open() if ui_mgr != null else false
+
 		# Деревни на карте (для сценария «Explore»).
 		var _villages: Array = []
 		for _c in map_gen.village_cells:
@@ -698,6 +735,68 @@ func _move_to(world_ctrl, x: int, y: int) -> Dictionary:
 func _end_turn(world_ctrl) -> Dictionary:
 	world_ctrl.do_end_turn()
 	return {"status": "turn_ended"}
+
+# ==================== CITY ACTIONS (city-in-world) ====================
+
+## city-in-world: действие в городе через РЕАЛЬНЫЙ CityScreen: открыть
+## экран для города → выполнить то же действие, что делает кнопка → результат.
+func _city_action(world_ctrl, req: Dictionary, action: String) -> Dictionary:
+	if world_ctrl == null or not world_ctrl.is_world_visible():
+		return {"error": "Not in World mode"}
+	var city: City = _resolve_city(world_ctrl, req)
+	if city == null:
+		return {"error": "City not found"}
+	var ui_mgr = world_ctrl.get_ui_manager()
+	if ui_mgr == null:
+		return {"error": "No UI manager (city screen unavailable)"}
+	var hero = world_ctrl.get_hero()
+	var hero_cell: Vector2i = hero.current_cell if hero != null else Vector2i(-1, -1)
+	var args: Variant = req.get("args", {})
+	if not (args is Dictionary):
+		args = {}
+	var building := str(args.get("building", "farm"))
+	var res: Dictionary = ui_mgr.city_screen_action(action, city, hero_cell, building)
+	res["city"] = _city_state_dict(city)
+	return res
+
+## city-in-world: город из args: {"uid": N} или {"cell": {"x","y"}}; если
+## ничего не передано — столица.
+func _resolve_city(world_ctrl, req: Dictionary) -> City:
+	var cities = world_ctrl.get_cities()
+	if cities == null:
+		return null
+	var args: Variant = req.get("args", {})
+	if args is Dictionary:
+		if args.has("uid"):
+			var c = cities.get_city_by_uid(int(args.get("uid")))
+			if c != null:
+				return c
+			return null  # uid передан, но город не найден — не гадать по столице
+		if args.has("cell") and args.get("cell") is Dictionary:
+			var cell: Dictionary = args.get("cell")
+			var c = cities.city_at(Vector2i(int(cell.get("x", -1)), int(cell.get("y", -1))))
+			if c != null:
+				return c
+	return cities.capital
+
+## city-in-world: JSON-совместимый снимок города (GET_STATE / ответы CITY_*).
+func _city_state_dict(city: City) -> Dictionary:
+	if city == null:
+		return {}
+	return {
+		"uid": city.uid,
+		"name": city.display_name,
+		"center": {"x": city.center.x, "y": city.center.y},
+		"level": city.level,
+		"owner": String(city.owner),
+		"population": city.pop_capped(),
+		"free_followers": city.free_followers(),
+		"food": city.food_stockpile,
+		"prosperity": city.prosperity,
+		"gold": city.resource_ctx.amount(&"gold") if city.resource_ctx != null else 0.0,
+		"industry": float(city.storage.get(&"industry", 0.0)),
+		"buildings": city.buildings.size(),
+	}
 
 func _retreat(battle_ctrl) -> Dictionary:
 	var bstate = battle_ctrl.get_battle_state()

@@ -68,3 +68,16 @@ const MIGRATE_CRISIS_PER_TURN := 2
 
 ## Базовое жильё поселения: принимает рабочих без зданий (Спринт 7).
 const BASE_SETTLEMENT_HOUSING := 10
+
+# --- Города мира (city-in-world) ---
+## Дань города: доля золотой казны (resource_ctx gold), уходящая герою в ход.
+const ROYALTY_FRACTION := 0.25
+## Стартовое состояние захваченной деревни (CityFactory.apply_starting_kit;
+## используется и для столицы — один конструктор, одна детермина).
+const VILLAGE_START_WORKERS := 4
+## Свободные последователи в стартовом наборе — CITY_HIRE работает с первого
+## хода (FollowerSystem.recruit ищет FREE FOLLOWER-юнит в pop).
+const VILLAGE_START_FOLLOWERS := 2
+const VILLAGE_START_INDUSTRY := 30.0  # legacy storage — на первый район/здание
+const VILLAGE_START_GOLD := 5.0       # resource_ctx — дань видна с первого хода
+const VILLAGE_START_FOOD := 10.0

@@ -129,6 +129,15 @@ static func manor() -> UniqueBuilding.Def:
 	return d
 
 
+## city-in-world: полный каталог определений (CityScreen: список строящихся).
+static func all() -> Array[UniqueBuilding.Def]:
+	return [
+		great_temple(), market(), barracks(), ancient_vault(), walls(),
+		farm(), mill(), bakery(), mine(), smithy(), school(), tavern(),
+		trade_post(), shack(), manor(),
+	]
+
+
 ## Перевязка определения по id (save v3: восстановление зданий).
 ## Неизвестный id -> null (здание не восстанавливается).
 static func def_by_id(id: StringName) -> UniqueBuilding.Def:

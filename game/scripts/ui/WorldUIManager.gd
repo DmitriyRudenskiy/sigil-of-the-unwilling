@@ -8,6 +8,8 @@ signal inventory_closed_requested
 var _hero: HeroController
 var _map_gen: MapGenerator
 var _camera: Camera2D
+# city-in-world: сид мира (детерминированный найм последователей в CityScreen).
+var _rng: RandomNumberGenerator
 
 var ui: AdventureUI
 var ui_layer: CanvasLayer
@@ -15,16 +17,22 @@ var inventory_screen: ArtifactInventoryScreen
 var chest_dialog: ArtifactChestDialog
 var grid_overlay: HexGridOverlay
 var marker_layer: MarkerLayer
+# city-in-world: экран управления городом (свой слой, выше UI мира).
+var city_screen: CityScreen
+var city_layer: CanvasLayer
 
-func setup(hero: HeroController, map_gen: MapGenerator, camera: Camera2D) -> void:
+func setup(hero: HeroController, map_gen: MapGenerator, camera: Camera2D,
+		rng: RandomNumberGenerator = null) -> void:
 	_hero = hero
 	_map_gen = map_gen
 	_camera = camera
+	_rng = rng
 	
 	_create_ui_layer()
 	_create_ui()
 	_create_inventory_screen()
 	_create_chest_dialog()
+	_create_city_screen()
 	_create_marker_layer()
 
 func _create_ui_layer() -> void:
@@ -55,6 +63,19 @@ func _create_chest_dialog() -> void:
 	chest_dialog.visible = false
 	chest_dialog.set_anchors_preset(Control.PRESET_FULL_RECT)
 	ui_layer.add_child(chest_dialog)
+
+func _create_city_screen() -> void:
+	# city-in-world: слой 40 — выше WorldUI (30), ниже battle-слоёв.
+	city_layer = CanvasLayer.new()
+	city_layer.name = "CityScreenLayer"
+	city_layer.layer = 40
+	add_child(city_layer)
+	city_screen = CityScreen.new()
+	city_screen.name = "CityScreen"
+	city_screen.visible = false
+	city_screen.set_anchors_preset(Control.PRESET_FULL_RECT)
+	city_screen.close_requested.connect(_on_city_screen_close_requested)
+	city_layer.add_child(city_screen)
 
 func _create_marker_layer() -> void:
 	marker_layer = MarkerLayer.new()
@@ -99,6 +120,55 @@ func refresh_ui() -> void:
 	if ui:
 		ui.refresh_all()
 
+
+# ==================== city-in-world: city screen ====================
+
+## Открыть экран управления городом. Идемпотентно: при смене города —
+## пере-привязка (setup), при том же городе — только повторное открытие.
+func open_city_screen(city: City, hero_cell: Vector2i) -> void:
+	if city == null or city_screen == null:
+		return
+	var bounds := Vector2i(0, 0)
+	if _map_gen != null:
+		bounds = Vector2i(_map_gen.map_width, _map_gen.map_height)
+	if city_screen.city != city:
+		city_screen.setup(city, _hero, hero_cell, _rng, bounds)
+	else:
+		city_screen.hero_cell = hero_cell
+	city_screen.open()
+
+func close_city_screen() -> void:
+	if city_screen != null and city_screen.is_open():
+		city_screen.close()
+
+## Guard для WorldShortcuts/WorldInput: оверлей открыт.
+func city_overlay_open() -> bool:
+	return city_screen != null and city_screen.is_open()
+
+## Перерисовать открытый экран из состояния города (после внешних мутаций).
+func refresh_city_screen() -> void:
+	if city_screen != null and city_screen.is_open():
+		city_screen.refresh()
+
+func _on_city_screen_close_requested() -> void:
+	close_city_screen()
+
+## city-in-world: сокет-действия через РЕАЛЬНЫЙ экран (CITY_BUILD/CITY_LEVEL/
+## CITY_HIRE): открыть экран для города → выполнить то же действие, что
+## выполняет кнопка → вернуть результат.
+func city_screen_action(action: String, city: City, hero_cell: Vector2i,
+		building_id: String = "farm") -> Dictionary:
+	if city == null:
+		return {"ok": false, "reason": "no city"}
+	open_city_screen(city, hero_cell)
+	match action:
+		"build":
+			return city_screen.build_pressed(StringName(building_id))
+		"level":
+			return city_screen.level_up_pressed()
+		"hire":
+			return city_screen.hire_pressed()
+	return {"ok": false, "reason": "unknown action: " + action}
 
 ## Статусная строка в InfoPanel (WorldBootstrap показывает тут сообщения).
 func set_status(text: String) -> void:

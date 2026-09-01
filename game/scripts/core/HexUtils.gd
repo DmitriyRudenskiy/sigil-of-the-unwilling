@@ -81,6 +81,21 @@ static func hex_distance(a: Vector2i, b: Vector2i) -> int:
 	return max(max(absi(ac.x - bc.x), absi(ac.y - bc.y)), absi(ac.z - bc.z))
 
 
+## city-in-world: детерминированное кольцо клеток на расстоянии r от центра
+## (r <= 0 → [center]). Порядок обхода: строки сверху вниз, внутри строки
+## слева направо. Для автоматической расстановки зданий (CityScreen).
+static func ring(center: Vector2i, r: int) -> Array[Vector2i]:
+	if r <= 0:
+		return [center]
+	var out: Array[Vector2i] = []
+	for y in range(center.y - r, center.y + r + 1):
+		for x in range(center.x - r, center.x + r + 1):
+			var c := Vector2i(x, y)
+			if hex_distance(center, c) == r:
+				out.append(c)
+	return out
+
+
 static func bfs_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: int, h: int) -> Array[Vector2i]:
 	if start == goal:
 		return [start]

@@ -16,6 +16,8 @@ var capital: City = null
 var glory := GloryTracker.new()
 ## Абсолютный счётчик завершённых ходов (дней).
 var current_turn := 0
+## city-in-world: провайдер FIDSI выходов клеток (CityYieldTable через terrain).
+var _tile_yield_provider: Callable = Callable()
 
 
 func register_city(city: City, make_capital := false) -> void:
@@ -23,6 +25,10 @@ func register_city(city: City, make_capital := false) -> void:
 		return
 	city.uid = cities.size()
 	cities.append(city)
+	# city-in-world: провайдер ставится здесь (а не только в set_tile_yield_provider),
+	# иначе города, захваченные после бутстрапа, останутся без tile_yield_fn.
+	if _tile_yield_provider.is_valid():
+		city.tile_yield_fn = _tile_yield_provider
 	city.relocation_completed.connect(
 		func(new_center: Vector2i): relocation_completed.emit(city.uid, new_center))
 	if make_capital or capital == null:
@@ -56,8 +62,25 @@ func apply_reputation(city: City, delta: float) -> int:
 
 
 func set_tile_yield_provider(fn: Callable) -> void:
+	_tile_yield_provider = fn
 	for c in cities:
 		c.tile_yield_fn = fn
+
+
+## city-in-world: город на клетке (центр совпадает) или null.
+func city_at(cell: Vector2i) -> City:
+	for c in cities:
+		if c != null and c.center == cell:
+			return c
+	return null
+
+
+## city-in-world: поиск города по uid (сокет-команды CITY_*).
+func get_city_by_uid(u: int) -> City:
+	for c in cities:
+		if c != null and c.uid == u:
+			return c
+	return null
 
 
 func on_turn_ended(month: int) -> Dictionary:
@@ -104,3 +127,4 @@ func capital_inflow(month: int) -> int:
 
 func get_season(month: int) -> Season.ID:
 	return Season.from_month(month)
+

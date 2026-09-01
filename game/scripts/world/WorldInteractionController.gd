@@ -71,11 +71,14 @@ func collect_resource_at(cell: Vector2i) -> bool:
 	return false
 
 
-func capture_village_at(cell: Vector2i) -> void:
+## city-in-world: true — деревня реально захвачена (флаг переключился).
+func capture_village_at(cell: Vector2i) -> bool:
 	if spawner and spawner.capture_village(cell):
 		if world_delta:
 			world_delta.add_village(cell)
 		SoundManager.play_sfx_cue(&"village_captured")
+		return true
+	return false
 
 
 func pickup_scroll_at(cell: Vector2i) -> void:

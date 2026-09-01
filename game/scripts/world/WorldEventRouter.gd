@@ -111,6 +111,9 @@ func _connect_ui_signals() -> void:
 			m.marker_hovered.connect(_on_marker_hovered)
 		if not m.marker_clicked.is_connected(_on_marker_clicked):
 			m.marker_clicked.connect(_on_marker_clicked)
+		# city-navigation: клик по значку города → маршрут героя к городу.
+		if not m.city_marker_clicked.is_connected(_on_city_marker_clicked):
+			m.city_marker_clicked.connect(_on_city_marker_clicked)
 
 
 func _on_minimap_cell_activated(cell: Vector2i) -> void:
@@ -121,6 +124,25 @@ func _on_minimap_cell_activated(cell: Vector2i) -> void:
 func _on_hex_borders_toggled(on: bool) -> void:
 	if ui_manager:
 		ui_manager.set_hex_borders(on)
+
+
+# city-navigation: клик по значку города — маршрут героя к городу (D2/D3).
+# Центр города может оказаться непроходимой клеткой (relocate не валидирует
+# terrain) — тогда ищем ближайшую проходимую.
+func _on_city_marker_clicked(city: City) -> void:
+	if hero == null or city == null or map_gen == null:
+		return
+	var target: Vector2i = city.center
+	if not map_gen.is_walkable(target):
+		target = WorldBootstrap._nearest_walkable(map_gen, target)
+	if target != hero.current_cell:
+		hero.on_map_clicked(target)
+
+
+# city-navigation: значки городов обновляем при появлении новых.
+func _refresh_city_markers() -> void:
+	if ui_manager and cities and ui_manager.get("marker_layer"):
+		ui_manager.marker_layer.set_city_markers(cities.cities)
 
 
 # ==================== EVENT BUS ====================
@@ -154,18 +176,40 @@ func _on_hero_moved(cell: Vector2i) -> void:
 
 	hero_moved_to.emit(cell)
 
+	# city-in-world: герой стоит на клетке города (столица / захваченная деревня)
+	# → открыть экран управления (идемпотентно: уже открыт — ничего не делать).
+	if cities and hero and ui_manager and ui_manager.has_method("city_overlay_open"):
+		if not ui_manager.city_overlay_open():
+			var entered: City = cities.city_at(hero.current_cell)
+			if entered != null:
+				ui_manager.open_city_screen(entered, hero.current_cell)
+
 
 func _on_village(cell: Vector2i) -> void:
-	GameLogger.world("Village captured at %s" % cell)
-	if interaction_controller:
-		interaction_controller.capture_village_at(cell)
-
-	if world_delta:
-		world_delta.add_village(cell)
-	if ui_manager:
-		ui_manager.ui.add_city("Деревня (%d, %d)" % [cell.x, cell.y])
-
-	village_captured.emit(cell)
+	## city-in-world: захват создаёт реальный City (CityFactory), повторный заход
+	# просто открывает экран. hero_moved эмитится ДО hero_entered_village, поэтому
+	# для свежезахваченной деревни открытии экрана — здесь.
+	var city: City = null
+	if cities:
+		city = cities.city_at(cell)
+	if city == null:
+		var captured := false
+		if interaction_controller:
+			captured = interaction_controller.capture_village_at(cell)
+		if captured:
+			# world_delta.add_village — уже сделан внутри capture_village_at.
+			var seed: int = persistence.session.run_seed if persistence != null else 0
+			city = CityFactory.create_village(
+				cell, CityFactory.village_name(seed, cell), seed)
+			cities.register_city(city)
+			_refresh_city_markers()
+			if ui_manager:
+				ui_manager.ui.add_city(city.display_name)
+				village_captured.emit(cell)
+			GameLogger.world("Village captured at %s: %s" % [cell, city.display_name])
+	if city != null and ui_manager:
+		var hero_cell: Vector2i = hero.current_cell if hero else cell
+		ui_manager.open_city_screen(city, hero_cell)
 
 
 func request_end_turn() -> void:
@@ -206,7 +250,23 @@ func _run_turn_scheduler(month: int) -> void:
 		ctx.cities.append(c)
 	if hero != null:
 		ctx.heroes.append(hero)
-	turn_scheduler.execute_turn(ctx)
+	var report: Dictionary = turn_scheduler.execute_turn(ctx)
+	_grant_city_income(report)
+
+
+func _grant_city_income(report: Dictionary) -> void:
+	## city-in-world: дань городов (фаза &"city_income") → стратегические ресурсы
+	# героя. Внешний эффект — в интеграционном слое, не в процессоре.
+	var phases: Dictionary = report.get("phases", {})
+	var income: Dictionary = phases.get(&"city_income", {})
+	if income.is_empty():
+		return
+	var totals: Dictionary = income.get("total", {})
+	for rid in totals:
+		var amount: int = int(totals[rid])
+		if amount > 0 and hero != null:
+			hero.add_strategic_resource(rid, float(amount))
+			GameLogger.world("Городская дань: +%d %s" % [amount, String(rid)])
 
 
 func _on_date_changed(month: int, week: int, day: int) -> void:

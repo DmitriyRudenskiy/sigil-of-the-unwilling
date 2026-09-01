@@ -73,13 +73,18 @@ static func run(
 	_create_camera(parent, R)
 	R.map_rect = _compute_map_rect(R)
 
-	# 7. UI
-	_init_ui(parent, platform, R)
-
-	# 8. Input, spawner, cities, subsystems, resource nodes
+	# 7. Input + spawner + cities (city-in-world: города — ПЕРЕД UI:
+	#    WorldShortcuts создаётся в _init_ui, потому что ему нужен ui_manager;
+	#    провайдер тайлового yield ставится до регистрации столицы).
 	_create_input(parent, R)
 	_create_spawner(parent, R)
 	_create_cities(parent, R)
+
+	# 8. UI (city-in-world: создаётся ВСЕГДА, включая headless — сокет-
+	#    сценарии открывают/закрывают city-экран без дисплея)
+	_init_ui(parent, platform, R)
+
+	# 9. Subsystems + resource nodes
 	_create_subsystems(parent, R)
 	_create_resource_nodes(parent, R)
 
@@ -137,14 +142,23 @@ static func _init_hero(R: BootstrapResult) -> void:
 
 
 
-static func _init_ui(parent: Node2D, platform: Variant, R: BootstrapResult) -> void:
-	if platform.is_headless():
-		GameLogger.world("Headless mode: skipping UI initialization")
-		return
+static func _init_ui(parent: Node2D, _platform: Variant, R: BootstrapResult) -> void:
+	# city-in-world: UI создаётся ВСЕГДА (включая headless) — сокет-сценарии
+	# открывают/закрывают city-экран без дисплея.
 	R.ui_manager = WorldUIManager.new()
 	R.ui_manager.name = "WorldUIManager"
 	parent.add_child(R.ui_manager)
-	R.ui_manager.setup(R.hero, R.map_gen, R.camera)
+	R.ui_manager.setup(R.hero, R.map_gen, R.camera, R.rng)
+
+	# city-navigation: навигационные значки городов (всегда видны, без порога).
+	if R.cities != null and R.ui_manager.get("marker_layer") != null:
+		R.ui_manager.marker_layer.set_city_markers(R.cities.cities)
+
+	# Shortcuts — после ui_manager: guard по city-оверлею (city-in-world).
+	var shortcuts := WorldShortcutsScript.new()
+	shortcuts.name = "WorldShortcuts"
+	shortcuts.setup(R.persistence, R.ui_manager, R.hero, parent)
+	parent.add_child(shortcuts)
 
 
 static func _create_camera(parent: Node2D, R: BootstrapResult) -> void:
@@ -188,6 +202,13 @@ static func _create_cities(parent: Node2D, R: BootstrapResult) -> void:
 		func(city_uid: int, new_center: Vector2i):
 			GameEventBus.relocation_completed.emit(city_uid, new_center))
 
+	# FIDSI tile provider (city-in-world): выходы клеток из реального terrain.
+	# ВАЖНО: ставится ДО register_city — register_city применяет провайдер
+	# только если он уже есть (set_tile_yield_provider ниже его не заменяет).
+	R.cities.set_tile_yield_provider(func(cell: Vector2i) -> Dictionary:
+		return CityYieldTable.yield_for_terrain(R.map_gen.get_terrain_id(cell))
+	)
+
 	# Capital (РФ6-6: проверка проходимости)
 	var capital := City.new()
 	capital.display_name = "Перворечье"
@@ -196,18 +217,17 @@ static func _create_cities(parent: Node2D, R: BootstrapResult) -> void:
 		center = _nearest_walkable(R.map_gen, center)
 	capital.center = center
 	capital.special_sites = {Vector2i(12, 9): BuildingDefs.SITE_SHRINE}
+	# city-in-world: столица принадлежит игроку + стартовый набор (как у
+	# захваченной деревни) — с первого хода доступны CITY_BUILD/CITY_HIRE.
+	capital.owner = &"player"
+	CityFactory.apply_starting_kit(capital)
 	R.cities.register_city(capital, true)
 
-	# FIDSI tile provider (stub)
-	R.cities.set_tile_yield_provider(func(_cell: Vector2i) -> Dictionary:
-		return {&"food": 5.0, &"industry": 5.0, &"dust": 0.0, &"science": 0.0, &"influence": 0.0}
-	)
-
-	# Shortcuts
-	var shortcuts := WorldShortcutsScript.new()
-	shortcuts.name = "WorldShortcuts"
-	shortcuts.setup(R.persistence, R.ui_manager, R.hero, parent)
-	parent.add_child(shortcuts)
+	# city-navigation: второй стартовый город ~15 гексов от столицы (не столица;
+	# имя на навигационном значке = display_name «Город 2»).
+	var second := CityFactory.create_village(
+		_nearest_walkable(R.map_gen, Vector2i(center.x + 15, center.y)), "Город 2", 0)
+	R.cities.register_city(second, false)
 
 
 static func _create_subsystems(parent: Node2D, R: BootstrapResult) -> void:
@@ -222,6 +242,10 @@ static func _create_subsystems(parent: Node2D, R: BootstrapResult) -> void:
 
 	# M1: Экономика — инициализация хранилищ городов и процессор цепочек.
 	_register_economy(R)
+
+	# city-in-world: дань городов (приоритет 15 — после экономики, до демографии).
+	_register_city_income(R)
+
 	_register_demographics(R)
 
 	R.battle_coordinator = WorldBattleCoordinator.new()
@@ -292,6 +316,13 @@ static func _register_economy(R: BootstrapResult) -> void:
 	econ.resource_depleted.connect(
 		func(city_uid: int, resource_id: StringName):
 			GameEventBus.resource_depleted.emit(city_uid, resource_id))
+
+
+static func _register_city_income(R: BootstrapResult) -> void:
+	## city-in-world: дань городов → ресурсы героя (отчёт читает WorldEventRouter).
+	if R.turn_scheduler == null:
+		return
+	R.turn_scheduler.register_processor(CityIncomeProcessor.new())
 
 
 static func _register_demographics(R: BootstrapResult) -> void:

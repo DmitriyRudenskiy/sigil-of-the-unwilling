@@ -29,6 +29,9 @@ var specialization: StringName = &""
 var faction: int = Faction.DEFAULT
 var stronghold_level := 1
 var is_capital := false
+## Владелец города (city-in-world): &"player" / &"enemy" / &"none" (песочница).
+## Персистентно (save v3, аддитивно): старые сейвы → &"none".
+var owner: StringName = &"none"
 
 var pop: Array[PopUnit] = []
 var boroughs: Array[Borough] = []
@@ -122,6 +125,12 @@ func count_state(s: PopUnit.State) -> int:
 		if u.state == s:
 			n += 1
 	return n
+
+
+## city-in-world: гарнизон (ополчение) — производный от pop, хранится в сейве
+## вместе с pop-массивом; defense_strength() масштабирует от него оборону.
+func garrison_count() -> int:
+	return count_state(PopUnit.State.MILITIA)
 
 ## Диапазон репутации (ReputationSystem.Band).
 func reputation_band() -> int:
@@ -360,6 +369,44 @@ func first_free_worker_tile() -> Vector2i:
 	return Vector2i(-1, -1)
 
 
+## city-in-world: свободная клетка под новое здание (авто-расстановка для
+## CityScreen). requires_site → первая неиспользованная special site
+## (детерминированный порядок по клеткам); иначе — от ближайшего кольца
+## наружу: первая свободная клетка С ВЫХОДОМ (вода не даёт выхода —
+## пропускается). bounds=(0,0) → без проверки границ карты.
+## Вернёт Vector2i(-1, -1), если клетки не нашлось.
+func first_free_build_cell(
+	def: UniqueBuilding.Def, bounds := Vector2i.ZERO
+) -> Vector2i:
+	if def == null or def.levels.is_empty():
+		return Vector2i(-1, -1)
+	if def.requires_site:
+		var sites: Array = special_sites.keys().duplicate()
+		sites.sort()
+		for s in sites:
+			var cell := Vector2i(s)
+			if not cell_is_built(cell):
+				return cell
+		return Vector2i(-1, -1)
+	var max_d := building_max_distance()
+	for r in range(1, max_d + 1):
+		for cell in HexUtils.ring(center, r):
+			if bounds.x > 0 and bounds.y > 0:
+				if cell.x < 0 or cell.y < 0 \
+						or cell.x >= bounds.x or cell.y >= bounds.y:
+					continue
+			if cell_is_built(cell):
+				continue
+			var y: Dictionary = tile_yield_fn.call(cell)
+			var total := 0.0
+			for k in y:
+				total += float(y.get(k, 0.0))
+			if total <= 0.0:
+				continue
+			return cell
+	return Vector2i(-1, -1)
+
+
 # ==================== ЭКОНОМИКА ====================
 func _ensure_exploited_cache() -> void:
 	if not _exploited_dirty:
@@ -580,6 +627,19 @@ func get_great_temple_level() -> int:
 			return b.level
 	return 0
 
+## succession-sigil: может ли город воскресить героя.
+## Требуется великий храм уровня ≥ 1 и запас storage не ниже требуемого
+## (industry + специальный ресурс). required: StringName -> amount.
+func can_resurrect(required: Dictionary) -> bool:
+	if get_great_temple_level() < 1:
+		return false
+	for key in required:
+		if not storage.has(key):
+			return false
+		if float(storage.get(key, 0.0)) < float(required[key]):
+			return false
+	return true
+
 
 ## ==================== СЕРИАЛИЗАЦИЯ (save v3) ====================
 ## Снимок состояния города в JSON-совместимый словарь. Не сериализуется:
@@ -597,6 +657,7 @@ func serialize() -> Dictionary:
 		"faction": faction,
 		"stronghold_level": stronghold_level,
 		"is_capital": is_capital,
+		"owner": String(owner),
 		"food_stockpile": food_stockpile,
 		"starving": starving,
 		"scale_tier": scale_tier,
@@ -646,6 +707,9 @@ func deserialize(data: Dictionary) -> void:
 	faction = int(data.get("faction", Faction.DEFAULT))
 	stronghold_level = int(data.get("stronghold_level", 1))
 	is_capital = bool(data.get("is_capital", false))
+	# display_name: был в serialize, но не восстанавливался (city-in-world fix).
+	display_name = String(data.get("display_name", display_name))
+	owner = StringName(data.get("owner", "none"))
 	food_stockpile = float(data.get("food_stockpile", 0.0))
 	starving = bool(data.get("starving", false))
 	scale_tier = int(data.get("scale_tier", 0))

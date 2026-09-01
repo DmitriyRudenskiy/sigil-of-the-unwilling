@@ -80,9 +80,17 @@ elif [ -f "$SC_DIR/scenario_${SCENARIO}_battle.py" ]; then
     SC_PY="scenario_${SCENARIO}_battle.py"
 elif [ -f "$SC_DIR/scenario_${SCENARIO}_battle_spells.py" ]; then
     SC_PY="scenario_${SCENARIO}_battle_spells.py"
+elif [ -f "$SC_DIR/scenario_${SCENARIO}.py" ]; then
+    SC_PY="scenario_${SCENARIO}.py"
 else
-    echo "❌ Нет файла сценария scenario_${SCENARIO}_{collect,flee,explore,endure,spells,battle,battle_spells}.py"
-    exit 2
+    # Общий фолбэк: scenario_N_<имя>.py (напр. scenario_8_city.py).
+    match="$(ls "$SC_DIR"/scenario_${SCENARIO}_*.py 2>/dev/null | head -1)"
+    if [ -n "$match" ]; then
+        SC_PY="$(basename "$match")"
+    else
+        echo "❌ Нет файла сценария scenario_${SCENARIO}_{collect,flee,explore,endure,spells,battle,battle_spells,*.py}"
+        exit 2
+    fi
 fi
 echo "🏃 Сценарий: game/tools/scenarios/$SC_PY"
 ( cd "$HERE" && python3 "game/tools/scenarios/$SC_PY" )

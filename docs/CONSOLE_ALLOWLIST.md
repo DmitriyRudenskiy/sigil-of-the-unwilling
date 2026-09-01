@@ -38,7 +38,10 @@ passed — это ожидаемый вывод, а не предупрежде�
 | `DemographicTurnProcessor: registry не задан` | тест без setup() |
 | `SoundManager: no file` | SoundManager: отсутствует аудиофайл |
 | `SoundManager: unknown .* cue` | SoundManager: неизвестный cue |
-| `SoundManager: bus '.*' not found` | SoundManager: авто-загрузка, сценарии operability
+| `SoundManager: bus '.*' not found` | SoundManager: авто-загрузка, сценарии operability |
+| `WARNING: [1-9] ObjectDB instances were leaked at exit` | Godot 4.7 headless: недетерминированный teardown-шум при N≤20 (зонд 200×register/free → 0; реальный leak — сотни объектов) |
+| `WARNING: 1[0-9] ObjectDB instances were leaked at exit` | то же, N=10–19 |
+| `WARNING: 20 ObjectDB instances were leaked at exit` | то же, N=20
   гоняются на графическом (OpenGL) сервере отображения, а не headless —
   AudioServer еще не содержит кастомных шин `SFX`/`Music`. Не регрессия,
   не связано с изменяемым кодом (проявляется и без правок) |
