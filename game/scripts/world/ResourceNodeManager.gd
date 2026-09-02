@@ -64,6 +64,15 @@ func setup(container: Node2D, rng: RandomNumberGenerator, resource_registry: Nod
 	_map_to_local_fn = map_to_local_fn
 
 
+## fog-of-war: (пере)применить видимость ресурсных нод на невидимых клетках.
+## Вызывается на каждом перерисе тумана (см. WorldSpawner.apply_fog_visibility).
+func apply_fog_visibility(vis) -> void:
+	if vis == null:
+		return
+	for cell in _nodes:
+		_nodes[cell].visible = vis.is_visible(cell)
+
+
 func get_node_at(cell: Vector2i) -> ResourceNode:
 	return _nodes.get(cell, null)
 

@@ -2,9 +2,14 @@ extends Node2D
 class_name MapGenerator
 ## Координатор карты: модель, рендерер, спавнер, тайлмапы.
 
+const _VisibilityMap = preload("res://scripts/core/VisibilityMap.gd")
+
 var model
 var renderer
 var spawner
+## fog-of-war: карта видимости (заполняет WorldController). Тип нужен для
+## вывода `:=` в гейтах HeroMovementController (is_explored/is_visible).
+var visibility: _VisibilityMap = null
 
 var _tile_map: TileMapLayer
 var _decor_layer: TileMapLayer
@@ -141,6 +146,12 @@ func _ensure_layers() -> void:
 
 
 # Публичный API — делегирование в модель
+## Fog-of-war: применить карту видимости к тайлмапу (перерисовать сетку).
+func apply_fog(visibility) -> void:
+	if visibility == null or renderer == null:
+		return
+	renderer.apply_fog(_tile_map, visibility)
+
 func is_walkable(cell: Vector2i) -> bool:
 	return model.is_walkable(cell) if model != null else false
 

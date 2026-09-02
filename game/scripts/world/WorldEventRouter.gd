@@ -20,6 +20,8 @@ var resource_node_manager: Node = null
 var ui_manager: Node = null
 var world_delta: Variant = null
 var persistence: Variant = null
+## fog-of-war: карта видимости (наследует WorldBootstrap). null — без fog.
+var visibility = null
 var resource_chain: Variant = null
 var turn_scheduler: TurnScheduler = null  # M0: Ядро — оркестратор фаз хода
 var _resource_registry: Node = null
@@ -41,7 +43,7 @@ func setup(
 	p_battle_coordinator: Node, p_interaction_controller: Node,
 	p_resource_node_manager: Node, p_ui_manager: Node,
 	p_world_delta: Variant, p_persistence: Variant,
-	p_resource_chain: Variant,
+	p_resource_chain: Variant, p_visibility = null,
 	p_resource_registry: Node = null,
 	p_turn_scheduler: TurnScheduler = null
 ) -> void:
@@ -56,6 +58,7 @@ func setup(
 	world_delta = p_world_delta
 	persistence = p_persistence
 	resource_chain = p_resource_chain
+	visibility = p_visibility
 	_resource_registry = ServiceLocator.resolve(p_resource_registry, &"resources")
 	turn_scheduler = p_turn_scheduler
 
@@ -121,6 +124,24 @@ func _on_minimap_cell_activated(cell: Vector2i) -> void:
 		camera.center_on(map_gen.map_to_local(cell))
 
 
+## Fog-of-war: пересчёт видимости по диску обзора героя + городов.
+func _refresh_visibility() -> void:
+	if visibility == null or map_gen == null:
+		return
+	var sources: Array = []
+	if hero != null and hero.current_cell is Vector2i:
+		sources.append(hero.current_cell)
+	# cities — CityManager (Node), не Array.
+	if cities != null:
+		for c in cities.cities:
+			if c != null and c.owner == &"player" and c.center is Vector2i:
+				sources.append(c.center)
+	visibility.set_map_size(map_gen.map_width, map_gen.map_height)
+	if visibility.recompute(hero.current_cell, sources,
+		GameSettings.FOG_HERO_SIGHT, GameSettings.FOG_CITY_SIGHT):
+		map_gen.apply_fog(visibility)
+
+
 func _on_hex_borders_toggled(on: bool) -> void:
 	if ui_manager:
 		ui_manager.set_hex_borders(on)
@@ -166,6 +187,10 @@ func _on_hero_moved(cell: Vector2i) -> void:
 		interaction_controller.check_chest_contact(cell)
 	if battle_coordinator:
 		battle_coordinator.check_enemy_contact(cell)
+
+	# fog-of-war: герой двинулся — пересчитываем видимость (иначе reach
+	# предпросмотр и клики открывали бы неразведённые клетки).
+	_refresh_visibility()
 
 	# Try to discover hidden resource nodes
 	if resource_node_manager and resource_chain and hero:
@@ -218,6 +243,9 @@ func request_end_turn() -> void:
 func _on_end_turn() -> void:
 	if hero:
 		hero.end_turn()
+
+	# fog-of-war: конец хода — пересчёт видимости (города/герой могли смениться).
+	_refresh_visibility()
 
 	if resource_node_manager:
 		resource_node_manager.tick_daily()

@@ -16,9 +16,31 @@ var _chests: Dictionary = {}
 var _scroll_nodes: Dictionary = {}
 var _scrolls: Dictionary = {}
 var _services: ServiceContainer = null
+## fog-of-war: карта видимости. null — без тумана (все ноды видны).
+var fog_vis = null
+
 
 func setup_services(services: ServiceContainer) -> void:
 	_services = services
+
+
+## fog-of-war: (пере)применить видимость всех нод мира. Вызывается на
+## каждом перерисе тумана (MapRenderer.fog_refreshed) — ноды на невидимых
+## клетках прячутся, чтобы не висели над «стертыми» тайлами.
+func apply_fog_visibility(vis) -> void:
+	fog_vis = vis
+	if vis == null:
+		return
+	for cell in _enemy_nodes:
+		_enemy_nodes[cell].visible = vis.is_visible(cell)
+	for cell in _resource_nodes:
+		_resource_nodes[cell].visible = vis.is_visible(cell)
+	for cell in _chest_nodes:
+		_chest_nodes[cell].visible = vis.is_visible(cell)
+	for cell in _scroll_nodes:
+		_scroll_nodes[cell].visible = vis.is_visible(cell)
+	for cell in _village_nodes:
+		_village_nodes[cell].visible = vis.is_visible(cell)
 
 
 func spawn_all() -> void:
@@ -65,6 +87,8 @@ func move_enemy_visual(from_cell: Vector2i, to_cell: Vector2i) -> void:
 	_enemy_nodes[to_cell] = node
 	node.set_meta("enemy_cell", to_cell)
 	node.position = map.map_to_local(to_cell)
+	if fog_vis != null:
+		node.visible = fog_vis.is_visible(to_cell)
 
 
 ## enemy-world-ai: создание визуала нового стека (респаун/рост).
@@ -76,6 +100,8 @@ func spawn_enemy_visual(cell: Vector2i, army: Array) -> void:
 		return
 	add_child(e)
 	_enemy_nodes[cell] = e
+	if fog_vis != null:
+		e.visible = fog_vis.is_visible(cell)
 
 
 func capture_village(cell: Vector2i) -> bool:

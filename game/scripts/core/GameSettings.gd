@@ -52,6 +52,9 @@ const MAP_ENEMY_DEFENSE_BONUS_MAX := 6
 
 # enemy-world-ai: параметры ИИ вражеских стеков.
 const ENEMY_AGGRO_RADIUS := 8
+# fog-of-war: радиус обзора (в гексах) у героя и у городов (odd-r диск).
+const FOG_HERO_SIGHT := 3
+const FOG_CITY_SIGHT := 4
 const ENEMY_MP := 5.0
 const ENEMY_RESPAWN_TURNS := 6
 

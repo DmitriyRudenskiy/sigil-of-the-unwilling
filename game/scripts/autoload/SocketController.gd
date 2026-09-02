@@ -683,7 +683,17 @@ func _get_state(world_ctrl, battle_ctrl) -> Dictionary:
 						"composition": composition
 					})
 			state.map_enemies = enemies
-		
+
+			# fog-of-war: туман для сценариев — счётчики + видимые стеки.
+			var fog = world_ctrl.get_fog() if world_ctrl.has_method("get_fog") else null
+			if fog != null:
+				state.fog = {"explored": fog.explored.size(), "visible": fog.visible.size()}
+				var visible_enemies: Array = []
+				for cell in map_gen.enemy_stacks:
+					if fog.is_visible(cell):
+						visible_enemies.append({"x": cell.x, "y": cell.y})
+				state.visible_enemies = visible_enemies
+
 		# city-in-world: города мира + экран управления (CITY_* сценарии).
 		var cities_mgr = world_ctrl.get_cities()
 		if cities_mgr != null:

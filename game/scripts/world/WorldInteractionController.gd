@@ -6,12 +6,31 @@ var hero: HeroController
 var spawner: WorldSpawner
 var chest_dialog: ArtifactChestDialog
 var world_delta: WorldStateDelta = null
+## fog-of-war: карта видимости (наследует WorldController). null — без fog.
+var visibility = null
+## callback для статуса «клетка не разведена» (WorldUIManager.set_status).
+var status_cb: Callable = Callable()
 
 
 func setup(h: HeroController, s: WorldSpawner, d: ArtifactChestDialog) -> void:
 	hero = h
 	spawner = s
 	chest_dialog = d
+
+
+## fog-of-war: клетка невидима? (visibility != null и не в visible диске).
+func _is_hidden(cell: Vector2i) -> bool:
+	if visibility == null:
+		return false
+	return not visibility.is_visible(cell)
+
+## fog-of-war: действие запрещено — клетка не разведена; сигнал в UI.
+func _reject(cell: Vector2i) -> bool:
+	if _is_hidden(cell):
+		if status_cb.is_valid():
+			status_cb.call("Клетка не разведена")
+		return true
+	return false
 
 
 func connect_chest_signals() -> void:
@@ -21,6 +40,8 @@ func connect_chest_signals() -> void:
 
 func check_chest_contact(cell: Vector2i) -> void:
 	if spawner == null or chest_dialog == null:
+		return
+	if _reject(cell):
 		return
 
 	var chest := spawner.get_chest_at(cell)
@@ -61,6 +82,8 @@ func _on_chest_choice(choice: String, chest: ArtifactChest) -> void:
 
 
 func collect_resource_at(cell: Vector2i) -> bool:
+	if _reject(cell):
+		return false
 	if spawner:
 		var removed := spawner.remove_resource_at(cell)
 		if removed:
@@ -73,6 +96,8 @@ func collect_resource_at(cell: Vector2i) -> bool:
 
 ## city-in-world: true — деревня реально захвачена (флаг переключился).
 func capture_village_at(cell: Vector2i) -> bool:
+	if _reject(cell):
+		return false
 	if spawner and spawner.capture_village(cell):
 		if world_delta:
 			world_delta.add_village(cell)
@@ -83,6 +108,8 @@ func capture_village_at(cell: Vector2i) -> bool:
 
 func pickup_scroll_at(cell: Vector2i) -> void:
 	if spawner == null or hero == null:
+		return
+	if _reject(cell):
 		return
 	var spell_id: StringName = spawner.get_scroll_at(cell)
 	if spell_id == &"":

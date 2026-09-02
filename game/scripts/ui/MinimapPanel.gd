@@ -117,12 +117,29 @@ func setup(map: MapGenerator, hero: HeroController, camera: Camera2D) -> void:
 	_build_minimap_image(map)
 
 
-func _build_minimap_image(map: MapGenerator) -> void:
+func _build_minimap_image(map: MapGenerator, visibility = null) -> void:
 	if map == null:
 		return
 	var img := Image.create(map.map_width, map.map_height, false, Image.FORMAT_RGBA8)
 	for y in map.map_height:
 		for x in map.map_width:
-			var t: int = map.terrain_grid.get(Vector2i(x, y), 0)
-			img.set_pixel(x, y, MINIMAP_COLORS[t])
+			var cell := Vector2i(x, y)
+			var t: int = map.terrain_grid.get(cell, 0)
+			var color: Color = MINIMAP_COLORS[t]
+			# fog-of-war: неразведённое — чёрное, разведённое но невидимое —
+			# приглушённое, видимое — полный цвет.
+			if visibility != null:
+				if not visibility.is_explored(cell):
+					color = Color(0, 0, 0, 1)
+				elif not visibility.is_visible(cell):
+					color = color.lerp(Color(0.5, 0.5, 0.5, 1), 0.55)
+			img.set_pixel(x, y, color)
 	_tex_rect.texture = ImageTexture.create_from_image(img)
+
+## fog-of-war: перерисовать мини-карту по текущей видимости (лениво, по
+## сигналу перериса тайлмапа). ponytail: rebuild всей картинки вместо
+## инкрементного драва — достаточно для 60×60, если станет узким местом,
+## рисовать только изменённые клетки.
+func refresh() -> void:
+	if map_ref != null:
+		_build_minimap_image(map_ref, map_ref.visibility)

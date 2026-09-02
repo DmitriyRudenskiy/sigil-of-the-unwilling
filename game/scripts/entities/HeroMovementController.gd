@@ -71,6 +71,12 @@ func _terrain_cost(cell: Vector2i) -> float:
 	if cell.x < 0 or cell.x >= _map_gen.map_width or cell.y < 0 or cell.y >= _map_gen.map_height:
 		return INF
 
+	# fog-of-war: неразведённые клетки непроходимы — единый гейт для
+	# Dijkstra-reach (предпросмотр) и всех стоимостей; A* тот же гейт в _base_blocked.
+	var vis_fog := _map_gen.visibility
+	if vis_fog != null and not vis_fog.is_explored(cell):
+		return INF
+
 	var levitation := _has_artifact_effect(&"boots_levitation")
 	if not _map_gen.is_walkable_with_effects(cell, levitation):
 		return INF
@@ -266,6 +272,13 @@ func _base_blocked() -> Dictionary:
 			var terrain_id: int = _map_gen.get_terrain_id(c)
 			if terrain_id == _HexUtils.Terrain.WATER:
 				blocked.erase(c)
+	# fog-of-war: неразведённые клетки непроходимы — не попадают в reach и
+	# не открываются (единая точка для всех путей/предпросмотров).
+	var vis := _map_gen.visibility
+	if vis != null:
+		for cell in _map_gen.terrain_grid:
+			if not vis.is_explored(cell):
+				blocked[cell] = true
 	return blocked
 
 

@@ -91,8 +91,12 @@ func setup(hero: HeroController, camera: Camera2D = null) -> void:
 	hero.tools_changed.connect(func(): _tools_panel.update_tools(hero.tools.get_all()))
 	hero.time_changed.connect(_info.set_time)
 
-	_minimap.setup(hero.get_map_gen(), hero, camera)
+	var map_gen := hero.get_map_gen()
+	_minimap.setup(map_gen, hero, camera)
 	_minimap.minimap_clicked.connect(_on_minimap_clicked)
+	# fog-of-war: обновлять мини-карту при перерисе видимости.
+	if map_gen != null and map_gen.renderer != null:
+		map_gen.renderer.fog_refreshed.connect(_minimap.refresh)
 	_minimap.camera_jump_requested.connect(_on_camera_jump)
 
 	_info.end_turn_pressed.connect(_on_end_turn)

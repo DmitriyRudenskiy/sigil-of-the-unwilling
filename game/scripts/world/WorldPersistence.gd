@@ -6,6 +6,8 @@ var _save_manager: SaveManager
 var session: GameSession = null
 var _date: Dictionary = {"month": 1, "week": 1, "day": 1}
 var world_delta: WorldStateDelta = null
+## fog-of-war: карта видимости (наследует WorldController). null — без fog.
+var visibility = null
 
 static var next_seed: int = 0
 static var pending_save: SaveData = null
@@ -41,6 +43,9 @@ func save_game(hero: HeroController, cities: Array = [], characters: Array = [])
 	save_data.run_seed = session.run_seed
 	save_data.date = _date.duplicate()
 	save_data.hero = hero.serialize()
+	# fog-of-war: разведённая сетка сохраняется вместе с миром.
+	if visibility != null:
+		world_delta.set_fog_explored(visibility.serialize_explored())
 	save_data.world = world_delta.serialize()
 	var cities_arr: Array = []
 	for c in cities:
@@ -92,6 +97,11 @@ func apply_loaded_save(data: SaveData, ctx) -> void:
 
 	ctx.world_delta.deserialize(data.world)
 
+	# fog-of-war: восстановить разведённую сетку и пересчитывать видимое.
+	if visibility != null:
+		visibility.load_explored(data.world.get("fog_explored", []))
+		_recompute_visible(visibility, ctx)
+
 	if data.date != null:
 		set_date(
 			int(data.date.get("month", 1)),
@@ -118,6 +128,7 @@ func apply_loaded_save(data: SaveData, ctx) -> void:
 			ctx.map_gen.resource_cells.erase(cell)
 		if ctx.spawner:
 			ctx.spawner.remove_resource_at(cell)
+
 
 	# Remove opened chests
 	for cell in ctx.world_delta.opened_chests:
@@ -157,6 +168,28 @@ func apply_loaded_save(data: SaveData, ctx) -> void:
 			str(ctx.hero.current_cell if ctx.hero else Vector2i(-1, -1))
 		]
 	)
+
+
+## Fog-of-war: пересчёт видимости из текущей позиции героя и городов
+## (разведённая сетка уже восстановлена в load_explored).
+func _recompute_visible(visibility, ctx) -> void:
+	if ctx.map_gen == null:
+		return
+	var sources: Array = []
+	if ctx.hero != null and ctx.hero.current_cell is Vector2i:
+		sources.append(ctx.hero.current_cell)
+	# ctx.cities — CityManager (Node), не Array.
+	var cm = ctx.cities
+	if cm != null:
+		for c in cm.cities:
+			if c != null and c.owner == &"player" and c.center is Vector2i:
+				sources.append(c.center)
+	visibility.set_map_size(ctx.map_gen.map_width, ctx.map_gen.map_height)
+	if visibility.recompute(ctx.hero.current_cell, sources,
+		GameSettings.FOG_HERO_SIGHT, GameSettings.FOG_CITY_SIGHT):
+		if ctx.map_gen.visibility == null:
+			ctx.map_gen.visibility = visibility
+		ctx.map_gen.apply_fog(visibility)
 
 
 func _restore_cities(data: SaveData, ctx) -> void:

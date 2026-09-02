@@ -11,6 +11,8 @@ var discovered_nodes: Array[Vector2i] = []
 var exhausted_nodes: Array[Vector2i] = []
 # enemy-world-ai: состояние роста врагов (очередь респауна, гарнизоны).
 var enemy_growth_state: Dictionary = {}
+# fog-of-war: разведённая сетка (массив {x,y}) — сохраняется вместе с миром.
+var fog_explored: Array = []
 
 
 func serialize() -> Dictionary:
@@ -23,7 +25,14 @@ func serialize() -> Dictionary:
 		"discovered_nodes": _cells_to_array(discovered_nodes),
 		"exhausted_nodes": _cells_to_array(exhausted_nodes),
 		"enemy_growth_state": enemy_growth_state.duplicate(true),
+		"fog_explored": fog_explored.duplicate(true),
 	}
+
+
+## Fog-of-war: подставить текущую разведённую сетку из VisibilityMap перед
+## сериализацией (сетка хранится в VisibilityMap, а не в дельте).
+func set_fog_explored(arr: Array) -> void:
+	fog_explored = arr.duplicate(true)
 
 
 func deserialize(data: Dictionary) -> void:
@@ -36,6 +45,7 @@ func deserialize(data: Dictionary) -> void:
 	exhausted_nodes = _array_to_cells(data.get("exhausted_nodes", []))
 	var growth_raw: Variant = data.get("enemy_growth_state", {})
 	enemy_growth_state = growth_raw.duplicate(true) if growth_raw is Dictionary else {}
+	fog_explored = data.get("fog_explored", [])
 
 
 func add_village(cell: Vector2i) -> void:

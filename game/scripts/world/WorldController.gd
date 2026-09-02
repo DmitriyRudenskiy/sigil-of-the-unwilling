@@ -7,6 +7,7 @@ const _Platform = preload("res://scripts/core/Platform.gd")
 const WorldEventRouterScript = preload("res://scripts/world/WorldEventRouter.gd")
 const WorldBootstrapScript = preload("res://scripts/world/WorldBootstrap.gd")
 const SuccessionControllerScript = preload("res://scripts/world/SuccessionController.gd")
+const _VisibilityMapScript = preload("res://scripts/core/VisibilityMap.gd")
 
 # Bootstrap result fields (public for external callers)
 var battle_coordinator: Node = null
@@ -22,6 +23,8 @@ var _ui_manager: Node = null
 var _rng: RandomNumberGenerator = null
 var _world_delta = null
 var _persistence = null
+## fog-of-war: карта видимости мира.
+var _visibility = null
 var _resource_chain = null
 var _event_router: WorldEventRouter = null
 var _bootstrap_result: WorldBootstrap.BootstrapResult = null
@@ -48,6 +51,14 @@ func _ready() -> void:
 	_world_delta = _bootstrap_result.world_delta
 	_persistence = _bootstrap_result.persistence
 	_resource_chain = _bootstrap_result.resource_chain
+	# fog-of-war: карта видимости мира (создаётся здесь — нужен map_size).
+	_visibility = _VisibilityMapScript.new()
+	_visibility.set_map_size(_map_gen.map_width, _map_gen.map_height)
+	_map_gen.visibility = _visibility
+	# fog-of-war: ноды сущностей (враги/ресурсы/сундуки/скроллы/деревни)
+	# прячутся на каждом перерисе тумана (MapRenderer.fog_refreshed).
+	if _map_gen.renderer != null:
+		_map_gen.renderer.fog_refreshed.connect(_on_fog_refreshed)
 
 	var loaded_save := _bootstrap_result.loaded_save
 
@@ -75,6 +86,7 @@ func _ready() -> void:
 		battle_coordinator, interaction_controller,
 		resource_node_manager, _ui_manager,
 		_world_delta, _persistence, _resource_chain,
+		_visibility,
 		_bootstrap_result.services.resources if _bootstrap_result.services != null else null,
 		_bootstrap_result.turn_scheduler
 	)
@@ -88,9 +100,13 @@ func _ready() -> void:
 	if not GameEventBus.hero_died.is_connected(_on_hero_died):
 		GameEventBus.hero_died.connect(_on_hero_died)
 
-	# Load saved game if applicable
+	# Load saved game if applicable (восстанавливает fog_explored + пересчитывает).
 	if loaded_save != null:
 		_persistence.apply_loaded_save(loaded_save, _build_load_context())
+	else:
+		# fog-of-war: применить видимость к тайлмапу после загрузки/старта.
+		if _map_gen.has_valid_tilemap():
+			_map_gen.apply_fog(_visibility)
 
 	GameLogger.world("Scene ready, seed=%d" % _persistence.session.run_seed)
 	_handle_headless_exit()
@@ -117,6 +133,35 @@ func _finit_subsystems() -> void:
 	interaction_controller.setup(_hero, _bootstrap_result.spawner, chest_dialog)
 	interaction_controller.connect_chest_signals()
 	interaction_controller.world_delta = _world_delta
+	# fog-of-war: gating действий по видимости + статус «клетка не разведена».
+	interaction_controller.visibility = _visibility
+	interaction_controller.status_cb = (
+		_ui_manager.set_status if _ui_manager != null and _ui_manager.has_method("set_status") else Callable())
+	_persistence.visibility = _visibility
+	# fog-of-war: первый пересчёт видимости: герой + города игрока (как в
+	# WorldEventRouter._refresh_visibility — единая логика источников).
+	var sight_sources: Array = []
+	if _cities != null:
+		for c in _cities.cities:
+			if c != null and c.owner == &"player" and c.center is Vector2i:
+				sight_sources.append(c.center)
+	_visibility.recompute(_hero.current_cell, sight_sources,
+		GameSettings.FOG_HERO_SIGHT, GameSettings.FOG_CITY_SIGHT)
+	if _map_gen.has_valid_tilemap():
+		_map_gen.apply_fog(_visibility)
+
+
+## fog-of-war: перерис тумана → спрятать/показать ноды сущностей.
+func _on_fog_refreshed() -> void:
+	if _bootstrap_result != null and _bootstrap_result.spawner != null:
+		_bootstrap_result.spawner.apply_fog_visibility(_visibility)
+	if resource_node_manager != null and resource_node_manager.has_method("apply_fog_visibility"):
+		resource_node_manager.apply_fog_visibility(_visibility)
+
+
+## fog-of-war: карта видимости (SocketController GET_STATE, сценарии).
+func get_fog():
+	return _visibility
 
 
 func _on_end_turn_from_router() -> void:
