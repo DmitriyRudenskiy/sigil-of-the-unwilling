@@ -50,6 +50,11 @@ const MAP_ENEMY_COUNT := 20
 const MAP_ENEMY_DEFENSE_BONUS_MIN := 2
 const MAP_ENEMY_DEFENSE_BONUS_MAX := 6
 
+# enemy-world-ai: параметры ИИ вражеских стеков.
+const ENEMY_AGGRO_RADIUS := 8
+const ENEMY_MP := 5.0
+const ENEMY_RESPAWN_TURNS := 6
+
 # --- World ---
 const EDITOR_SEED := 12345
 

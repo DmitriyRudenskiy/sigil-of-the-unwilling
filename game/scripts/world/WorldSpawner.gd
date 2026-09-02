@@ -56,6 +56,28 @@ func remove_enemy_at(cell: Vector2i) -> bool:
 	return true
 
 
+## enemy-world-ai: перенос визуала вражеского стека при его ходе.
+func move_enemy_visual(from_cell: Vector2i, to_cell: Vector2i) -> void:
+	if map == null or not _enemy_nodes.has(from_cell):
+		return
+	var node: Node2D = _enemy_nodes[from_cell]
+	_enemy_nodes.erase(from_cell)
+	_enemy_nodes[to_cell] = node
+	node.set_meta("enemy_cell", to_cell)
+	node.position = map.map_to_local(to_cell)
+
+
+## enemy-world-ai: создание визуала нового стека (респаун/рост).
+func spawn_enemy_visual(cell: Vector2i, army: Array) -> void:
+	if map == null or _enemy_nodes.has(cell) or army.is_empty():
+		return
+	var e: Node2D = _make_enemy_node(cell, army)
+	if e == null:
+		return
+	add_child(e)
+	_enemy_nodes[cell] = e
+
+
 func capture_village(cell: Vector2i) -> bool:
 	if not _village_nodes.has(cell):
 		return false
@@ -115,29 +137,36 @@ func _spawn_resources() -> void:
 
 
 func _spawn_enemies() -> void:
-	var units_reg: Node = ServiceLocator.resolve(null, &"units")
 	for cell in map.enemy_stacks:
-		var army: Array = map.enemy_stacks[cell]
-		var e := Node2D.new()
-		e.set_meta("enemy_cell", cell)
-		var sp := Sprite2D.new()
-
-		var first_unit = army[0]
-		var key: String = first_unit.get_key()
-		var portrait_path := UnitSprites.find_portrait_small(key)
-		if portrait_path != "":
-			sp.texture = load(portrait_path)
-		else:
-			sp.texture = PlaceholderTexture.circle(
-				20,
-				Color(0.7, 0.15, 0.1),
-				Color(0.2, 0.05, 0.05)
-			)
-		sp.z_index = 6
-		e.add_child(sp)
-		e.position = map.map_to_local(cell)
+		var e := _make_enemy_node(cell, map.enemy_stacks[cell])
+		if e == null:
+			continue
 		add_child(e)
 		_enemy_nodes[cell] = e
+
+
+func _make_enemy_node(cell: Vector2i, army: Array) -> Node2D:
+	if army.is_empty():
+		return null
+	var e := Node2D.new()
+	e.set_meta("enemy_cell", cell)
+	var sp := Sprite2D.new()
+
+	var first_unit = army[0]
+	var key: String = first_unit.get_key()
+	var portrait_path := UnitSprites.find_portrait_small(key)
+	if portrait_path != "":
+		sp.texture = load(portrait_path)
+	else:
+		sp.texture = PlaceholderTexture.circle(
+			20,
+			Color(0.7, 0.15, 0.1),
+			Color(0.2, 0.05, 0.05)
+		)
+	sp.z_index = 6
+	e.add_child(sp)
+	e.position = map.map_to_local(cell)
+	return e
 
 
 func remove_chest_at(cell: Vector2i) -> bool:

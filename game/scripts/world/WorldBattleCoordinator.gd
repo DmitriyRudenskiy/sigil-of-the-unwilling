@@ -15,6 +15,10 @@ const UnitStack = preload("res://scripts/entities/UnitStack.gd")
 signal battle_world_hide_requested
 signal battle_world_show_requested
 
+## enemy-world-ai: вражеский стек уничтожен (до удаления из map_gen) —
+## рост планирует его ослабленное возрождение.
+signal enemy_stack_defeated(enemy_cell: Vector2i, army: Array)
+
 var hero: Node = null          # HeroController (Node)
 var map_gen: Node = null       # MapGenerator (Node, enemy_stacks dict)
 var spawner: Node = null       # WorldSpawner (Node)
@@ -35,6 +39,9 @@ var _on_ui_refresh: Callable = Callable()
 var _services: ServiceContainer = null
 
 var _pending_enemy_cell: Vector2i = Vector2i(-1, -1)
+
+## enemy-world-ai: роли в бою поменяны (враг — атакующий, герой — защищающийся).
+var _roles_swapped := false
 
 ## Позиция героя до шага, вызвавшего контакт (для восстановления при отступлении).
 var _pre_battle_cell: Vector2i = Vector2i(-1, -1)
@@ -83,6 +90,44 @@ func _create_battle_flow() -> void:
 
 
 # ==================== КОНТАКТ С ВРАГОМ ====================
+
+## enemy-world-ai: атака с вражеского хода — враг атакующий, герой защищающийся.
+func start_enemy_attack(army: Array, enemy_cell: Vector2i) -> void:
+	if battle_flow == null or hero == null:
+		return
+	var enemy_army := _as_unit_stack_array(army)
+	if enemy_army.is_empty():
+		return
+	var stacks: Variant = map_gen.get("enemy_stacks") if map_gen != null else null
+	if not (stacks is Dictionary) or not stacks.has(enemy_cell):
+		return
+	_roles_swapped = true
+	_pending_enemy_cell = enemy_cell
+	if hero.has_method("force_stop"):
+		hero.call("force_stop")
+
+	var enemy_bonus: Dictionary = {}
+	if spawner != null and spawner.has_method("get_enemy_defender_bonus"):
+		enemy_bonus = spawner.call("get_enemy_defender_bonus")
+	var hero_bonus: Dictionary = hero.call("get_battle_bonus") if hero.has_method("get_battle_bonus") else {}
+	var hero_army_raw: Variant = hero.call("get_army_for_battle") if hero.has_method("get_army_for_battle") else []
+	var hero_army: Array[UnitStack] = _as_unit_stack_array(hero_army_raw)
+	var artifact_mods: Dictionary = {}
+	var inv: Variant = hero.get("inventory")
+	if inv != null and inv.has_method("get_total_modifiers"):
+		artifact_mods = inv.call("get_total_modifiers")
+	var hero_magic = hero.get("magic") if hero != null else null
+	battle_flow.start_battle(
+		enemy_army,
+		hero_army,
+		enemy_bonus,
+		hero_bonus,
+		{},
+		artifact_mods,
+		rng.randi(),
+		hero_magic
+	)
+
 
 func check_enemy_contact(cell: Vector2i) -> void:
 	if map_gen == null:
@@ -203,15 +248,24 @@ func _on_battle_completed(
 	battle_world_show_requested.emit()
 
 	var enemy_cell := _pending_enemy_cell
+	var hero_won: bool = _hero_won(winner)
 	_apply_results(winner, surv_atk, surv_def)
 
 	GameEventBus.battle_completed.emit(winner, enemy_cell)
-	if winner == BattleState.Side.ATTACKER:
+	if hero_won:
 		GameEventBus.battle_won.emit(enemy_cell)
 	else:
 		GameEventBus.battle_lost.emit(enemy_cell)
 
 	_pending_enemy_cell = Vector2i(-1, -1)
+	_roles_swapped = false
+
+
+## enemy-world-ai: победил ли ГЕРОЙ (при свопе ролей герой — защищающийся).
+func _hero_won(winner: BattleState.Side) -> bool:
+	if _roles_swapped:
+		return winner == BattleState.Side.DEFENDER
+	return winner == BattleState.Side.ATTACKER
 
 
 func _apply_results(
@@ -222,8 +276,12 @@ func _apply_results(
 	if hero == null:
 		return
 
+	var hero_won: bool = _hero_won(winner)
+	## Выжившие юниты героя: при свопе герой — защищающаяся сторона.
+	var hero_survivors: Array[UnitStack] = surv_def if _roles_swapped else surv_atk
+
 	if hero.has_method("apply_battle_results"):
-		hero.call("apply_battle_results", surv_atk)
+		hero.call("apply_battle_results", hero_survivors)
 
 	## Fallback при полном уничтожении армии (РФ5-2: типизированный доступ)
 	var army_ref: Variant = hero.get("army")
@@ -242,8 +300,8 @@ func _apply_results(
 	## succession-sigil: боевая смерть. При поражении полное уничтожение армии
 	## обнуляет combat_hp; combat_hp <= 0 = герой пал. Тогда — hero_died(&"battle")
 	## и отступление ОТКЛАЫВАЕТСЯ. Гат за battle_death_enabled.
-	if battle_death_enabled and winner != BattleState.Side.ATTACKER and hero != null:
-		if surv_atk.is_empty() and hero.has_method("set_combat_hp"):
+	if battle_death_enabled and not hero_won and hero != null:
+		if hero_survivors.is_empty() and hero.has_method("set_combat_hp"):
 			hero.call("set_combat_hp", 0)
 		if hero.has_method("is_combat_dead") and hero.call("is_combat_dead"):
 			hero.call("mark_combat_dead")
@@ -251,11 +309,14 @@ func _apply_results(
 			GameLogger.hero("Hero died in battle at %s" % _pending_enemy_cell)
 			return
 
-	if winner == BattleState.Side.ATTACKER:
+	if hero_won:
 		if map_gen != null:
 			var stacks: Variant = map_gen.get("enemy_stacks")
 			if stacks is Dictionary:
+				## Снимок армии ДО удаления — для планирования роста (enemy-world-ai).
+				var defeated_army: Array = stacks.get(_pending_enemy_cell, [])
 				stacks.erase(_pending_enemy_cell)
+				enemy_stack_defeated.emit(_pending_enemy_cell, defeated_army)
 		if spawner != null and spawner.has_method("remove_enemy_at"):
 			spawner.call("remove_enemy_at", _pending_enemy_cell)
 		GameLogger.battle("Enemy defeated at %s" % _pending_enemy_cell)

@@ -253,6 +253,9 @@ static func _create_subsystems(parent: Node2D, R: BootstrapResult) -> void:
 	# setup is called by parent after bootstrap (parent reference needed)
 	parent.add_child(R.battle_coordinator)
 
+	# enemy-world-ai: ход и рост врагов (нужен battle_coordinator).
+	_register_enemy_ai(R)
+
 	R.interaction_controller = WorldInteractionController.new()
 	R.interaction_controller.name = "InteractionController"
 	parent.add_child(R.interaction_controller)
@@ -289,6 +292,47 @@ static func _register_city(R: BootstrapResult) -> void:
 		func(city_uid: int, event_id: StringName):
 			GameEventBus.city_event_occurred.emit(city_uid, event_id))
 
+
+static func _register_enemy_ai(R: BootstrapResult) -> void:
+	## enemy-world-ai: ход врагов (25) + рост (30). Детерминированы seed'ом мира.
+	if R.turn_scheduler == null or R.map_gen == null or R.cities == null:
+		return
+	var seed: int = R.session.run_seed if R.session != null else 0
+
+	var proc := EnemyTurnProcessor.new()
+	proc.setup_world(R.map_gen, R.hero, R.spawner, R.cities, R.world_delta, seed)
+	R.turn_scheduler.register_processor(proc)
+
+	var growth := EnemyGrowthSystem.new()
+	growth.setup_growth(R.map_gen, R.spawner, R.cities, R.world_delta, seed)
+	R.turn_scheduler.register_processor(growth)
+
+	# Проводка: атака врага → бой со сменой ролей (враг — атакующий).
+	proc.enemy_attack_requested.connect(R.battle_coordinator.start_enemy_attack)
+	# Проводка: уничтоженный стек → ослабленное возрождение.
+	R.battle_coordinator.enemy_stack_defeated.connect(growth.on_stack_defeated)
+
+	# UI: угрожающие маркеры (стеки в радиусе агрессии от героя).
+	if R.ui_manager != null and R.ui_manager.marker_layer != null:
+		# ponytail: узкие captures (Node, не R) — цикл R->scheduler->proc->lambda->R
+		# удерживал бы весь граф после выхода (RefCounted-циклы Godot не собирает).
+		var hero := R.hero
+		var map_gen := R.map_gen
+		var ui := R.ui_manager
+		var markers = R.ui_manager.marker_layer
+		proc.enemy_turn_reported.connect(
+			func(report: Dictionary) -> void:
+				var cells: Array = []
+				var hp: Variant = hero.get("current_cell") if hero != null else null
+				if hp is Vector2i:
+					for c in map_gen.enemy_stacks:
+						if HexUtils.hex_distance(hp, c) <= GameSettings.ENEMY_AGGRO_RADIUS:
+							cells.append(c)
+				markers.set_threat_markers(cells)
+				# Статус-строка: враги действовали в этом ходу.
+				if int(report.get("moved", 0)) > 0:
+					ui.set_status("Враги движутся")
+		)
 
 static func _register_economy(R: BootstrapResult) -> void:
 	## M1: Экономика — инициализирует city.resource_ctx (лимиты из

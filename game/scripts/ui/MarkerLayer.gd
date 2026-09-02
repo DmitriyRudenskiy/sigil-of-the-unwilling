@@ -31,6 +31,8 @@ var _red_pos: PackedVector2Array = PackedVector2Array()
 var _hex_size: float = 32.0  # default, recalculated on setup
 # city-navigation: значки городов — всегда видны, без порога дистанции.
 var _city_marks: Array = []  # {cell: Vector2i, pos: Vector2, city: City}
+# enemy-world-ai: кольца угрозы (враги в радиусе агрессии) — всегда видны.
+var _threat_pos: PackedVector2Array = PackedVector2Array()
 
 
 func setup(map: MapGenerator) -> void:
@@ -116,15 +118,33 @@ func city_at_cell(cell: Vector2i) -> City:
 	return null
 
 
+## enemy-world-ai: обновить кольца угрозы (клетки врагов в радиусе агрессии).
+func set_threat_markers(cells: Array) -> void:
+	_threat_pos.clear()
+	if _map_gen == null or not _map_gen.has_valid_tilemap():
+		queue_redraw()
+		return
+	for c in cells:
+		if c is Vector2i:
+			_threat_pos.append(_map_gen.map_to_local(c))
+	queue_redraw()
+
+
 func _process(_d: float) -> void:
-	# Анимация (пульс) нужна только зелёным точкам; без них — без редraw'ов.
-	if _visible and not _green_pos.is_empty():
+	# Анимация (пульс) нужна зелёным точкам и кольцам угрозы.
+	if (_visible and not _green_pos.is_empty()) or not _threat_pos.is_empty():
 		queue_redraw()
 
 
 func _draw() -> void:
 	if not _map_gen or not _map_gen.has_valid_tilemap():
 		return
+
+	# enemy-world-ai: кольца угрозы — всегда видны, пульсируют.
+	var pulse_t: float = Time.get_ticks_msec() / 1000.0
+	for pos in _threat_pos:
+		var ring_r: float = _hex_size * (0.30 + 0.08 * sin(pulse_t * 4.0))
+		draw_arc(pos, ring_r, 0.0, TAU, 32, Color(0.95, 0.25, 0.2, 0.85), 2.5)
 
 	# city-navigation: значки городов — всегда видны, под reach-метками.
 	for m in _city_marks:

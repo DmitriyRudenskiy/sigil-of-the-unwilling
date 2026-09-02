@@ -9,6 +9,8 @@ var opened_chests: Array[Vector2i] = []
 var removed_scrolls: Array[Vector2i] = []
 var discovered_nodes: Array[Vector2i] = []
 var exhausted_nodes: Array[Vector2i] = []
+# enemy-world-ai: состояние роста врагов (очередь респауна, гарнизоны).
+var enemy_growth_state: Dictionary = {}
 
 
 func serialize() -> Dictionary:
@@ -20,6 +22,7 @@ func serialize() -> Dictionary:
 		"removed_scrolls": _cells_to_array(removed_scrolls),
 		"discovered_nodes": _cells_to_array(discovered_nodes),
 		"exhausted_nodes": _cells_to_array(exhausted_nodes),
+		"enemy_growth_state": enemy_growth_state.duplicate(true),
 	}
 
 
@@ -31,6 +34,8 @@ func deserialize(data: Dictionary) -> void:
 	removed_scrolls = _array_to_cells(data.get("removed_scrolls", []))
 	discovered_nodes = _array_to_cells(data.get("discovered_nodes", []))
 	exhausted_nodes = _array_to_cells(data.get("exhausted_nodes", []))
+	var growth_raw: Variant = data.get("enemy_growth_state", {})
+	enemy_growth_state = growth_raw.duplicate(true) if growth_raw is Dictionary else {}
 
 
 func add_village(cell: Vector2i) -> void:
