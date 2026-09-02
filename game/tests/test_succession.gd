@@ -230,11 +230,11 @@ func test_save_roundtrip_v4() -> void:
 	d.legend = {"path_id": "archivist", "level": 3, "glory": 120.0}
 
 	var data := d.to_dict()
-	assert_eq(data["version"], 4, "save version is 4")
+	assert_eq(data["version"], 5, "save version is 5")
 
 	var d2 := _SaveData.new()
 	d2.from_dict(data)
-	assert_eq(d2.version, 4, "loaded version 4")
+	assert_eq(d2.version, 5, "loaded version 5")
 	assert_eq(d2.hero.get("path_id"), "archivist", "hero path_id preserved")
 	assert_eq(d2.successor.get("path"), "archivist", "successor preserved")
 	assert_eq(d2.legend.get("level"), 3, "legend level preserved")
@@ -247,7 +247,7 @@ func test_migrate_v3_to_v4_defaults() -> void:
 		"world": {}, "cities": [], "characters": []}
 	var d := _SaveData.new()
 	d.from_dict(v3)
-	assert_eq(d.version, 4, "v3 migrated to v4")
+	assert_eq(d.version, 5, "v3 migrated to current (v5)")
 	assert_true(d.successor is Dictionary, "successor defaulted to dict")
 	assert_true(d.legend is Dictionary, "legend defaulted to dict")
 	assert_eq(d.run_seed, 99, "run_seed preserved through migration")

@@ -103,6 +103,9 @@ func _ready() -> void:
 	# Load saved game if applicable (восстанавливает fog_explored + пересчитывает).
 	if loaded_save != null:
 		_persistence.apply_loaded_save(loaded_save, _build_load_context())
+		# endgame: сейв мог содержать терминальный забег — показать экран.
+		if _bootstrap_result.endgame != null:
+			_bootstrap_result.endgame.restore()
 	else:
 		# fog-of-war: применить видимость к тайлмапу после загрузки/старта.
 		if _map_gen.has_valid_tilemap():
@@ -171,13 +174,24 @@ func _on_end_turn_from_router() -> void:
 
 # ==================== SUCCESSION-SIGIL: death -> successor ====================
 
-## GameEventBus.hero_died(cause): выбрать преемника, перенести легенду,
-## заменить активного героя. Возврат преемника = легенда продолжается;
-## null = преемника нет → run заканчивается (никого не меняем).
-func _on_hero_died(_deceased: HeroController) -> void:
-	var successor := _plan_succession(_deceased)
+## GameEventBus.hero_died(cause: StringName): выбрать преемника, перенести
+## легенду, заменить активного героя. Возврат преемника = легенда
+## продолжается; преемника нет → run заканчивается (EndgameController уже
+## поставил DEFEAT — он подключён первым; тут только убираем труп).
+func _on_hero_died(_cause: StringName) -> void:
+	var deceased := get_hero()
+	if deceased == null:
+		return
+	# endgame: sticky-терминальное состояние уже зафиксировано Endgame
+	# (смерть без преемника) — преемника не выбираем, только убираем героя.
+	var session := get_session()
+	if session != null and session.is_terminal():
+		_remove_hero(deceased)
+		return
+	var successor := _plan_succession(deceased)
 	if successor == null:
 		GameLogger.world("Succession: no eligible follower — run ends")
+		_remove_hero(deceased)
 		return
 	_reincarnate(successor)
 	GameEventBus.hero_successor.emit(successor)
@@ -191,13 +205,22 @@ func _plan_succession(deceased: HeroController) -> HeroController:
 	return _succession.on_hero_died(
 		deceased, _rng, _cities.cities, _cities)
 
+## Убрать героя из дерева (смерть без преемника / замена на преемника).
+func _remove_hero(deceased: Node) -> void:
+	if deceased != null and is_instance_valid(deceased) and deceased.get_parent() != null:
+		deceased.get_parent().remove_child(deceased)
+		deceased.free()
+	if _hero == deceased:
+		_hero = null
+
+
 ## Заменить активного героя на преемника: новый в дереве, инициализирован,
-## battle/interaction переподключены на него. Города уже «свои» (owner =
-## общий path_id), так что перерегистрация в transfer_legend не нужна.
+## ВСЕ потребители героя переподключены на него (battle/interaction/враги/
+## ввод/router/UI — иначе freed-референсы = краш на следующем кадре).
 func _reincarnate(successor: HeroController) -> void:
-	if _hero != null and is_instance_valid(_hero) and _hero.get_parent() != null:
-		_hero.get_parent().remove_child(_hero)
-		_hero.free()
+	var old := _hero
+	_hero = successor
+	_remove_hero(old)
 	add_child(successor)
 	successor.setup(_map_gen)
 	if _map_gen != null and _map_gen.has_valid_tilemap():
@@ -206,6 +229,26 @@ func _reincarnate(successor: HeroController) -> void:
 		battle_coordinator.hero = successor
 	if is_instance_valid(interaction_controller):
 		interaction_controller.hero = successor
+	if _bootstrap_result != null:
+		# enemy-world-ai: без этого вражеский ИИ смотрит на freed-героя.
+		if _bootstrap_result.enemy_proc != null:
+			_bootstrap_result.enemy_proc._hero = successor
+		# endgame: ввод кликов по карте тоже держит реф на героя.
+		if _bootstrap_result.input_controller != null:
+			_bootstrap_result.input_controller.hero = successor
+		if _bootstrap_result.shortcuts != null:
+			_bootstrap_result.shortcuts._hero = successor
+	if _event_router != null:
+		_event_router.hero = successor
+		_event_router._connect_hero_signals()
+	if _ui_manager != null:
+		_ui_manager._hero = successor
+		_ui_manager.ui.reattach_hero(successor, _camera)
+		if is_instance_valid(_ui_manager.inventory_screen):
+			_ui_manager.inventory_screen.set_hero(successor)
+		if is_instance_valid(_ui_manager.city_screen):
+			_ui_manager.city_screen.hero = successor
+	GameLogger.world("Succession: successor took the legend")
 
 
 # ==================== CAMERA ====================
@@ -249,8 +292,28 @@ func is_world_visible() -> bool:
 
 func do_end_turn() -> void:
 	# Triggered by SocketController remote command.
+	# endgame: в терминальном состоянии ходы не проходят (sticky).
+	if get_session() != null and get_session().is_terminal():
+		return
 	if _event_router:
 		_event_router.request_end_turn()
+
+
+## endgame: забег в терминальном состоянии (VICTORY/DEFEAT)?
+func is_terminal() -> bool:
+	var s := get_session()
+	return s != null and s.is_terminal()
+
+
+## endgame: состояние забега для SocketController GET_STATE / сценариев.
+func get_endgame_state() -> Dictionary:
+	var s := get_session()
+	if s == null:
+		return {"state": "RUNNING", "end_reason": ""}
+	var names := {GameSession.GameState.RUNNING: "RUNNING",
+		GameSession.GameState.VICTORY: "VICTORY",
+		GameSession.GameState.DEFEAT: "DEFEAT"}
+	return {"state": names.get(s.state, "RUNNING"), "end_reason": s.end_reason}
 
 
 # ==================== SAVE / LOAD ====================

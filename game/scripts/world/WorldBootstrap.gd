@@ -9,6 +9,7 @@ const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
 const WorldPersistenceScript = preload("res://scripts/world/WorldPersistence.gd")
 const ResourceChainServiceScript = preload("res://scripts/world/ResourceChainService.gd")
 const WorldShortcutsScript = preload("res://scripts/world/WorldShortcuts.gd")
+const EndgameControllerScript = preload("res://scripts/systems/EndgameController.gd")
 
 
 ## Result bundle returned after bootstrap completes.
@@ -32,6 +33,11 @@ class BootstrapResult:
 	var session: Variant = null
 	var loaded_save: SaveData = null
 	var map_rect: Rect2 = Rect2(0, 0, 10000, 10000)
+	# ponytail: Variant — EnemyTurnProcessor наследует TurnPhaseProcessor
+	# (не Node); в detached-компиляции class_name может не резолвиться.
+	var enemy_proc: Variant = null
+	var shortcuts: Node = null
+	var endgame: Node = null
 	var event_bus_subscribers: Array[Callable] = []
 	var services: ServiceContainer = null
 
@@ -90,6 +96,15 @@ static func run(
 
 	# Setup resource chain with services
 	R.resource_chain.setup(R.services)
+
+	# 10. endgame-conditions: терминальные состояния (создаётся ПОСЛЕ всех
+	# подсистем; коннекты ставятся ДО WorldController._ready — «первое
+	# условие wins»).
+	R.endgame = EndgameControllerScript.new()
+	R.endgame.name = "EndgameController"
+	parent.add_child(R.endgame)
+	# parent = WorldController (у него get_hero для проверки преемника).
+	R.endgame.setup(parent, R.battle_coordinator, R.map_gen, R.cities, R.persistence, R.enemy_proc)
 
 	return R
 
@@ -159,6 +174,7 @@ static func _init_ui(parent: Node2D, _platform: Variant, R: BootstrapResult) -> 
 	shortcuts.name = "WorldShortcuts"
 	shortcuts.setup(R.persistence, R.ui_manager, R.hero, parent)
 	parent.add_child(shortcuts)
+	R.shortcuts = shortcuts
 
 
 static func _create_camera(parent: Node2D, R: BootstrapResult) -> void:
@@ -178,6 +194,8 @@ static func _create_input(parent: Node2D, R: BootstrapResult) -> void:
 	R.input_controller.map = R.map_gen
 	R.input_controller.hero = R.hero
 	R.input_controller.camera = R.camera
+	# endgame: блокировка ввода в терминальном состоянии.
+	R.input_controller.world = parent
 	parent.add_child(R.input_controller)
 
 
@@ -302,6 +320,7 @@ static func _register_enemy_ai(R: BootstrapResult) -> void:
 	var proc := EnemyTurnProcessor.new()
 	proc.setup_world(R.map_gen, R.hero, R.spawner, R.cities, R.world_delta, seed)
 	R.turn_scheduler.register_processor(proc)
+	R.enemy_proc = proc
 
 	var growth := EnemyGrowthSystem.new()
 	growth.setup_growth(R.map_gen, R.spawner, R.cities, R.world_delta, seed)

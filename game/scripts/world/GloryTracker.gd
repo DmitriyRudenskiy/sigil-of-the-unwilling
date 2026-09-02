@@ -5,6 +5,8 @@ extends RefCounted
 
 var _events: Array = []  # [{turn: int, amount: float, reason: StringName}]
 var _window: int
+## endgame: суммарная слава забега (не окно) — порог победы «Путь».
+var total := 0.0
 
 
 func _init(window: int = CityBalance.CITY_CYCLE_TURNS) -> void:
@@ -15,6 +17,7 @@ func add_glory(amount: float, turn: int, reason: StringName = &"") -> void:
 	if amount <= 0.0:
 		return
 	_events.append({"turn": turn, "amount": amount, "reason": reason})
+	total += amount
 
 
 func glory_last_window(current_turn: int) -> float:

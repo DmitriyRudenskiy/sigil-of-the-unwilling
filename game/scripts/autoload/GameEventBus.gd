@@ -38,6 +38,13 @@ signal hero_died(cause: StringName)
 ## Преемник принял легенду (передаётся новый HeroController).
 signal hero_successor(hero: Node)
 
+# ==================== ENDGAME ====================
+## Забег закончен (победа/поражение). result: "VICTORY"/"DEFEAT",
+## reason: StringName-ключ причины (unsuccessored_death, total_collapse,
+## path_completed, domination), summary: итоговый отчёт забега (Dictionary).
+## Терминальное состояние липкое — сигнал эмитится ровно один раз.
+signal game_ended(result: String, reason: StringName, summary: Dictionary)
+
 # ==================== ГОРОД (M3) ====================
 signal building_constructed(city_uid: int, building_uid: int)
 signal scale_shift(city_uid: int, new_scale: int)

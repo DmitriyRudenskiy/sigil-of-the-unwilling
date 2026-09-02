@@ -2,7 +2,7 @@ extends RefCounted
 class_name SaveData
 ## Save file data container.
 
-const CURRENT_VERSION := 4
+const CURRENT_VERSION := 5
 const CURRENT_GENERATOR_VERSION := 1
 
 var version: int = CURRENT_VERSION
@@ -22,6 +22,10 @@ var characters: Array = []
 var successor: Dictionary = {}
 ## Состояние легенды: путь, уровень, слава. Пусто по умолчанию.
 var legend: Dictionary = {}
+# --- Сохранение v5 (endgame-conditions): состояние забега ---
+## Состояние забега (GameSession.serialize): state/end_reason/счётчики.
+## v4-сейвы: пусто → RUNNING (миграция ниже).
+var session: Dictionary = {}
 
 
 func to_dict() -> Dictionary:
@@ -36,6 +40,7 @@ func to_dict() -> Dictionary:
 		"characters": characters,
 		"successor": successor,
 		"legend": legend,
+		"session": session,
 	}
 
 
@@ -50,6 +55,8 @@ func from_dict(data: Dictionary) -> void:
 		_migrate_v2_to_v3(data)
 	if version < 4:
 		_migrate_v3_to_v4(data)
+	if version < 5:
+		_migrate_v4_to_v5(data)
 	version = CURRENT_VERSION
 
 	run_seed = int(data.get("run_seed", 0))
@@ -74,6 +81,9 @@ func from_dict(data: Dictionary) -> void:
 	legend = data.get("legend", {})
 	if not (legend is Dictionary):
 		legend = {}
+	session = data.get("session", {})
+	if not (session is Dictionary):
+		session = {}
 
 func _migrate_v1_to_v2(data: Dictionary) -> void:
 	## v2: ensure hero.time_mp_spent exists for mana persistence
@@ -103,6 +113,13 @@ func _migrate_v3_to_v4(data: Dictionary) -> void:
 	# v3-сейвов без него — путь героя остаётся пустым (pristine run).
 	if not data["hero"].has("path_id"):
 		data["hero"]["path_id"] = ""
+
+
+func _migrate_v4_to_v5(data: Dictionary) -> void:
+	## v5: состояние забега (endgame). В v4-сейвах его нет — забег считается
+	## живым (RUNNING без причины).
+	if not data.has("session") or not (data["session"] is Dictionary):
+		data["session"] = {}
 
 
 func is_valid() -> bool:

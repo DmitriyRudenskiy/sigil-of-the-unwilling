@@ -3,7 +3,7 @@
 #
 # Run → capture → scan → verify, по ВСЕМ точках входа:
 #   • сцены:      MainMenu, CityArena, World, Battle   (tools/run_scene.gd)
-#   • сценарии:   scenario_{1..10}                      (play_scenario.sh)
+#   • сценарии:   scenario_{1..11}                      (play_scenario.sh)
 #   • тесты:      юнит-тесты                            (run_tests.gd)
 #   • console-clean: сценарии 1–5                       (check_console_clean.sh)
 #
@@ -114,7 +114,7 @@ normalize_line() {
 
 # ============================================ 6. Точки входа
 SCENES=(MainMenu CityArena World Battle)
-SCENARIOS=(1 2 3 4 5 6 7 8 9 10)
+SCENARIOS=(1 2 3 4 5 6 7 8 9 10 11)
 FRAME_LIMIT=25
 REPORT="/tmp/operability_report.md"
 

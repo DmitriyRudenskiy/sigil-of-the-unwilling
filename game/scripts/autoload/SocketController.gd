@@ -126,6 +126,9 @@ func _route_command(line: String) -> Dictionary:
 		"MOVE_TO":
 			if world_ctrl == null or not world_ctrl.is_world_visible():
 				return {"error": "Not in World mode"}
+			# endgame: терминальный забег — движение запрещено (sticky).
+			if world_ctrl.has_method("is_terminal") and world_ctrl.is_terminal():
+				return {"error": "Game over"}
 			var x = req.get("x")
 			var y = req.get("y")
 			if not (x is int or x is float) or not (y is int or y is float):
@@ -136,7 +139,23 @@ func _route_command(line: String) -> Dictionary:
 		"END_TURN":
 			if world_ctrl == null or not world_ctrl.is_world_visible():
 				return {"error": "Not in World mode"}
+			# endgame: терминальный забег — ходы не проходят (sticky).
+			if world_ctrl.has_method("is_terminal") and world_ctrl.is_terminal():
+				return {"error": "Game over"}
 			return _end_turn(world_ctrl)
+		"HERO_DIE":
+			# endgame (тест-only): честная цепочка смерти героя — та же,
+			# что в WorldBattleCoordinator при потере боя (mark_combat_dead
+			# + hero_died). ДETERMINISTIC-путь к сценарию 11 без случайного боя.
+			if world_ctrl == null or not world_ctrl.is_world_visible():
+				return {"error": "Not in World mode"}
+			var die_hero = world_ctrl.get_hero()
+			if die_hero == null:
+				return {"error": "Hero not initialized"}
+			die_hero.set_combat_hp(0)
+			die_hero.mark_combat_dead()
+			GameEventBus.hero_died.emit(&"battle")
+			return {"status": "hero_dead"}
 		"COLLECT_HERE":
 			# Собрать ресурс/сундук/скролл в клетке героя (сценарий «Collect All»).
 			if world_ctrl == null or not world_ctrl.is_world_visible():
@@ -704,6 +723,10 @@ func _get_state(world_ctrl, battle_ctrl) -> Dictionary:
 			state.capital = _city_state_dict(cities_mgr.capital)
 		var ui_mgr = world_ctrl.get_ui_manager()
 		state.city_screen_open = ui_mgr.city_overlay_open() if ui_mgr != null else false
+
+		# endgame: состояние забега (RUNNING/VICTORY/DEFEAT + reason).
+		if world_ctrl.has_method("get_endgame_state"):
+			state.endgame = world_ctrl.get_endgame_state()
 
 		# Деревни на карте (для сценария «Explore»).
 		var _villages: Array = []

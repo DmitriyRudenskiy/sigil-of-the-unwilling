@@ -5,10 +5,15 @@ extends Node2D
 var map: MapGenerator = null
 var hero: HeroController = null
 var camera: WorldCamera = null
+## endgame: WorldController — для проверки терминального состояния.
+var world: Node = null
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if map == null or hero == null or camera == null:
+		return
+	# endgame: терминальное состояние — ввод мира не проходит.
+	if world != null and world.has_method("is_terminal") and world.is_terminal():
 		return
 	if not (event is InputEventMouseButton) or not event.pressed:
 		return

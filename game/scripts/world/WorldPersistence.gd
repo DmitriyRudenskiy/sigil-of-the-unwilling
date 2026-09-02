@@ -52,6 +52,9 @@ func save_game(hero: HeroController, cities: Array = [], characters: Array = [])
 		cities_arr.append(c.serialize())
 	save_data.cities = cities_arr
 	save_data.characters = characters
+	# endgame: состояние забега (state/end_reason/счётчики) — липкое
+	# терминальное состояние переживает save/load.
+	save_data.session = session.serialize()
 
 	var err := _save_manager.save_game(save_data)
 	if err == SaveManager.SaveError.OK:
@@ -96,6 +99,11 @@ func apply_loaded_save(data: SaveData, ctx) -> void:
 		ctx.world_delta = WorldStateDelta.new()
 
 	ctx.world_delta.deserialize(data.world)
+
+	# endgame: восстановить состояние забега ДО любого использования
+	# (терминальный сейв → WorldController сразу покажет экран).
+	if session != null:
+		session.deserialize(data.session)
 
 	# fog-of-war: восстановить разведённую сетку и пересчитывать видимое.
 	if visibility != null:

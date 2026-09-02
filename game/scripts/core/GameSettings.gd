@@ -132,3 +132,12 @@ const CITY_PANEL_W := 340.0
 const CITY_PANEL_OFFSET := 12.0
 const CITY_PANEL_TOP := 40.0
 const CITY_PANEL_BOTTOM := -40.0
+
+# --- Endgame (endgame-conditions) ---
+## Победа «Путь завершён»: суммарная слава забега (GloryTracker.total).
+const ENDGAME_GlORY_VICTORY := 500
+## Победа «Доминация»: все вражеские стеки уничтожены. Если false —
+## условие победы по доминации не проверяется.
+const ENDGAME_DOMINATION_ENABLED := true
+## Поражение «Тотальный коллапс»: у игрока не осталось городов.
+const ENDGAME_COLLAPSE_ENABLED := true

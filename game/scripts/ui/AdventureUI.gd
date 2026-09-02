@@ -106,6 +106,24 @@ func setup(hero: HeroController, camera: Camera2D = null) -> void:
 	refresh_all()
 
 
+## endgame/succession: сменить героя НЕ через setup() — setup ре-коннектит
+## сигналы долговечных нод (info.end_turn_pressed и т.п.) и задвоит их.
+## Тут только hero-специфичная часть: новые сигналы героя + реф миникарты.
+func reattach_hero(hero: HeroController, camera: Camera2D = null) -> void:
+	_hero_controller = hero
+	hero.movement_points_changed.connect(func(c, m): _update_mp_display(c, m))
+	hero.resources_changed.connect(func(res): _resources.update_resources(res))
+	hero.path_previewed.connect(func(t): _info.set_status(t))
+	hero.strategic_resources_changed.connect(_strat_resources.update_resources)
+	hero.skills_changed.connect(func(): _skills_panel.update_skills(hero.skills.get_all()))
+	hero.tools_changed.connect(func(): _tools_panel.update_tools(hero.tools.get_all()))
+	hero.time_changed.connect(_info.set_time)
+	var map_gen := hero.get_map_gen()
+	_minimap.setup(map_gen, hero, camera)
+	_info.fill_hero_slot(0, hero)
+	refresh_all()
+
+
 func refresh_all() -> void:
 	if _hero_controller == null:
 		return

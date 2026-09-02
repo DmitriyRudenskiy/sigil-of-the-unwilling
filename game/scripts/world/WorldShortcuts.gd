@@ -22,6 +22,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	# РФ6-4: в бою шорткаты мира не действуют
 	if _world_ctrl != null and _world_ctrl.has_method("is_world_visible") and not _world_ctrl.is_world_visible():
 		return
+	# endgame: терминальное состояние — шорткаты мира не действуют
+	# (F5-сейв после конца забега бессмыслен, экран уже открыт).
+	if _world_ctrl != null and _world_ctrl.has_method("is_terminal") and _world_ctrl.is_terminal():
+		return
 
 	# city-in-world: city-оверлей открыт — только Esc закрывает его;
 	# I/F5/F9 игнорируются (мир под оверлеем заморожен для ввода).
