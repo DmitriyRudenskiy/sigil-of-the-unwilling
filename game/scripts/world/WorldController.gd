@@ -8,6 +8,8 @@ const WorldEventRouterScript = preload("res://scripts/world/WorldEventRouter.gd"
 const WorldBootstrapScript = preload("res://scripts/world/WorldBootstrap.gd")
 const SuccessionControllerScript = preload("res://scripts/world/SuccessionController.gd")
 const _VisibilityMapScript = preload("res://scripts/core/VisibilityMap.gd")
+const DeathSequenceScript = preload("res://scripts/ui/DeathSequence.gd")
+const ChronicleScreenScript = preload("res://scripts/ui/ChronicleScreen.gd")
 
 # Bootstrap result fields (public for external callers)
 var battle_coordinator: Node = null
@@ -32,6 +34,14 @@ var _bootstrap_result: WorldBootstrap.BootstrapResult = null
 # Типизация через локальный preload (const), а не через global class_name:
 # в detached-тестах class_name не регистрируется в classdb → компиляция падает.
 var _succession = null
+## legend-chronicle: момент смерти — полноэкранная последовательность;
+## перерождение отложено до «Знак переходит» (последовательность ≠ молчаливая
+## замена). _deceased_snapshot — только строки (hero уже freed на момент
+# кнопки, живой реф держать нельзя).
+var _death_seq = null
+var _chronicle_screen = null
+var _pending_successor: HeroController = null
+var _deceased_snapshot: Dictionary = {}
 
 
 func _ready() -> void:
@@ -178,23 +188,128 @@ func _on_end_turn_from_router() -> void:
 ## легенду, заменить активного героя. Возврат преемника = легенда
 ## продолжается; преемника нет → run заканчивается (EndgameController уже
 ## поставил DEFEAT — он подключён первым; тут только убираем труп).
-func _on_hero_died(_cause: StringName) -> void:
+func _on_hero_died(cause: StringName) -> void:
 	var deceased := get_hero()
 	if deceased == null:
 		return
+	# legend-chronicle: снимаем имя/пути ДО освобождения героя — запись
+	# летописи строится по этому снапшоту (живой реф не держим).
+	_deceased_snapshot = {
+		"hero_name": str(deceased.hero_name),
+		"path": String(deceased.path_id),
+	}
 	# endgame: sticky-терминальное состояние уже зафиксировано Endgame
-	# (смерть без преемника) — преемника не выбираем, только убираем героя.
+	# (смерть без преемника) — преемника не выбираем, только убираем героя
+	# и показываем момент смерти («цикл оборвался» + «В меню»).
 	var session := get_session()
 	if session != null and session.is_terminal():
 		_remove_hero(deceased)
+		_show_death_sequence(str(deceased.hero_name), cause, null)
 		return
 	var successor := _plan_succession(deceased)
 	if successor == null:
 		GameLogger.world("Succession: no eligible follower — run ends")
 		_remove_hero(deceased)
+		_show_death_sequence(str(deceased.hero_name), cause, null)
 		return
+	# legend-chronicle: перерождение отложено — «Знак переходит» в
+	# последовательности вызывает succession-поток (_execute_succession).
+	# Труп убираем сразу (UI/ввод не должны ходить по мёртвому герою);
+	# _reincarnate с _hero == null работает (old == null → просто добавляет).
+	_remove_hero(deceased)
+	_pending_successor = successor
+	_show_death_sequence(str(deceased.hero_name), cause, successor)
+
+
+func is_death_sequence_open() -> bool:
+	return _death_seq != null and _death_seq.visible
+
+
+func _show_death_sequence(deceased_name: String, cause: StringName, successor: Node) -> void:
+	if _death_seq == null:
+		_death_seq = DeathSequenceScript.new()
+		_death_seq.name = "DeathSequence"
+		add_child(_death_seq)
+		_death_seq.successor_chosen.connect(_execute_succession)
+		_death_seq.return_to_menu.connect(_on_death_return_to_menu)
+		_death_seq.chronicle_requested.connect(_on_death_chronicle_requested)
+	_death_seq.show_death(deceased_name, cause, _run_summary(), successor)
+
+
+## Кнопка «Знак переходит»: перерождение + hero_successor + запись в летопись.
+func _execute_succession() -> void:
+	var successor := _pending_successor
+	_pending_successor = null
+	if successor == null:
+		return
+	if is_death_sequence_open():
+		_death_seq.visible = false
 	_reincarnate(successor)
 	GameEventBus.hero_successor.emit(successor)
+	_append_succession_entry()
+
+
+## legend-chronicle: запись завершённого цикла (умерший герой).
+func _append_succession_entry() -> void:
+	if _persistence == null or _persistence.chronicle == null:
+		return
+	var sum := _run_summary()
+	_persistence.chronicle.append({
+		"hero_name": _deceased_snapshot.get("hero_name", "?"),
+		"path": _deceased_snapshot.get("path", ""),
+		"end_turn": sum["turns"],
+		"cities": sum["cities_owned"],
+		"glory": sum["glory"],
+		"battles_won": sum["battles_won"],
+		"battles_lost": sum["battles_lost"],
+		"outcome": "succession",
+	})
+	_deceased_snapshot = {}
+
+
+## legend-chronicle: «Летопись» из последовательности смерти.
+func _on_death_chronicle_requested() -> void:
+	var entries: Array = []
+	if _persistence != null and _persistence.chronicle != null:
+		entries = _persistence.chronicle.to_array()
+	if _chronicle_screen == null:
+		_chronicle_screen = ChronicleScreenScript.new()
+		_chronicle_screen.name = "ChronicleScreen"
+		add_child(_chronicle_screen)
+	_chronicle_screen.show_entries(entries)
+
+
+func _on_death_return_to_menu() -> void:
+	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
+
+
+## Сводка забега для DeathSequence (тот же формат, что у endgame).
+func _run_summary() -> Dictionary:
+	var turns := 0
+	var glory := 0
+	var cities_left := 0
+	if _cities != null:
+		turns = int(_cities.current_turn)
+		if _cities.glory != null:
+			glory = int(round(_cities.glory.total))
+		for c in _cities.cities:
+			if c != null and c.owner == &"player":
+				cities_left += 1
+	var s: GameSession = get_session()
+	var date: Dictionary = _persistence.get_date() if _persistence != null else {}
+	return {
+		"turns": turns,
+		"date": {
+			"month": int(date.get("month", 1)),
+			"week": int(date.get("week", 1)),
+			"day": int(date.get("day", 1)),
+		},
+		"cities_owned": cities_left,
+		"glory": glory,
+		"battles_won": int(s.battles_won) if s != null else 0,
+		"battles_lost": int(s.battles_lost) if s != null else 0,
+		"generations": (int(s.successions) if s != null else 0) + 1,
+	}
 
 ## Выбрать преемника через SuccessionController. Возвращает HeroController либо
 ## null (преемника нет). Отдельно от _reincarnate — чтобы проверять выбор
@@ -222,7 +337,9 @@ func _reincarnate(successor: HeroController) -> void:
 	_hero = successor
 	_remove_hero(old)
 	add_child(successor)
-	successor.setup(_map_gen)
+	# Гвард — для headless-тестов (карты нет); в игре _map_gen всегда есть.
+	if _map_gen != null:
+		successor.setup(_map_gen)
 	if _map_gen != null and _map_gen.has_valid_tilemap():
 		successor.position = _map_gen.map_to_local(successor.current_cell)
 	if is_instance_valid(battle_coordinator):

@@ -163,7 +163,7 @@ static func _init_ui(parent: Node2D, _platform: Variant, R: BootstrapResult) -> 
 	R.ui_manager = WorldUIManager.new()
 	R.ui_manager.name = "WorldUIManager"
 	parent.add_child(R.ui_manager)
-	R.ui_manager.setup(R.hero, R.map_gen, R.camera, R.rng)
+	R.ui_manager.setup(R.hero, R.map_gen, R.camera, R.rng, R.cities)
 
 	# city-navigation: навигационные значки городов (всегда видны, без порога).
 	if R.cities != null and R.ui_manager.get("marker_layer") != null:

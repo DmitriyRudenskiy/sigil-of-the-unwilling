@@ -22,7 +22,7 @@ var city_screen: CityScreen
 var city_layer: CanvasLayer
 
 func setup(hero: HeroController, map_gen: MapGenerator, camera: Camera2D,
-		rng: RandomNumberGenerator = null) -> void:
+		rng: RandomNumberGenerator = null, cities_mgr: Node = null) -> void:
 	_hero = hero
 	_map_gen = map_gen
 	_camera = camera
@@ -30,6 +30,9 @@ func setup(hero: HeroController, map_gen: MapGenerator, camera: Camera2D,
 	
 	_create_ui_layer()
 	_create_ui()
+	# legend-chronicle: видимый прогресс славы в правой колонке.
+	if ui != null:
+		ui.set_cities(cities_mgr)
 	_create_inventory_screen()
 	_create_chest_dialog()
 	_create_city_screen()

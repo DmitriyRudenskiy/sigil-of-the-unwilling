@@ -2,7 +2,7 @@ extends RefCounted
 class_name SaveData
 ## Save file data container.
 
-const CURRENT_VERSION := 5
+const CURRENT_VERSION := 6
 const CURRENT_GENERATOR_VERSION := 1
 
 var version: int = CURRENT_VERSION
@@ -26,6 +26,10 @@ var legend: Dictionary = {}
 ## Состояние забега (GameSession.serialize): state/end_reason/счётчики.
 ## v4-сейвы: пусто → RUNNING (миграция ниже).
 var session: Dictionary = {}
+# --- Сохранение v6 (legend-chronicle): летопись поколений ---
+## Записи Chronicle.to_array(): одна строка на героя (исход, слава, бои).
+## v5-сейвы: пусто (легенда начинается с чистого листа).
+var chronicle: Array = []
 
 
 func to_dict() -> Dictionary:
@@ -41,6 +45,7 @@ func to_dict() -> Dictionary:
 		"successor": successor,
 		"legend": legend,
 		"session": session,
+		"chronicle": chronicle,
 	}
 
 
@@ -57,6 +62,8 @@ func from_dict(data: Dictionary) -> void:
 		_migrate_v3_to_v4(data)
 	if version < 5:
 		_migrate_v4_to_v5(data)
+	if version < 6:
+		_migrate_v5_to_v6(data)
 	version = CURRENT_VERSION
 
 	run_seed = int(data.get("run_seed", 0))
@@ -84,6 +91,9 @@ func from_dict(data: Dictionary) -> void:
 	session = data.get("session", {})
 	if not (session is Dictionary):
 		session = {}
+	chronicle = data.get("chronicle", [])
+	if not (chronicle is Array):
+		chronicle = []
 
 func _migrate_v1_to_v2(data: Dictionary) -> void:
 	## v2: ensure hero.time_mp_spent exists for mana persistence
@@ -120,6 +130,13 @@ func _migrate_v4_to_v5(data: Dictionary) -> void:
 	## живым (RUNNING без причины).
 	if not data.has("session") or not (data["session"] is Dictionary):
 		data["session"] = {}
+
+
+func _migrate_v5_to_v6(data: Dictionary) -> void:
+	## v6: летопись поколений (legend-chronicle). В v5-сейвах её нет —
+	## легенда начинается с чистого листа.
+	if not data.has("chronicle") or not (data["chronicle"] is Array):
+		data["chronicle"] = []
 
 
 func is_valid() -> bool:

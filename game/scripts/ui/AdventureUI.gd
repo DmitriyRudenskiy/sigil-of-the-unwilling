@@ -24,6 +24,12 @@ var _info: InfoPanel
 var _strat_resources: ResourcesPanel
 var _skills_panel: SkillsPanel
 var _tools_panel: ToolsPanel
+var _hero_status: HeroStatusPanel
+
+## legend-chronicle: видимый прогресс славы (цель — ENDGAME_GlORY_VICTORY).
+var _cities_mgr: Node = null
+var _glory_label: Label
+var _glory_bar: ProgressBar
 
 var _hero_controller: HeroController
 var _options_popup: PopupPanel
@@ -75,6 +81,24 @@ func _build_right_column() -> void:
 	_tools_panel = ToolsPanel.new()
 	vb.add_child(_tools_panel)
 
+	# legend-chronicle: состояние героя (кондиция/статы/последователи).
+	_hero_status = HeroStatusPanel.new()
+	vb.add_child(_hero_status)
+
+	# legend-chronicle: прогресс славы (когда до победы).
+	var glory_box := VBoxContainer.new()
+	glory_box.name = "GloryBox"
+	glory_box.add_theme_constant_override("separation", 2)
+	vb.add_child(glory_box)
+	_glory_label = Label.new()
+	_glory_label.add_theme_font_size_override("font_size", 12)
+	glory_box.add_child(_glory_label)
+	_glory_bar = ProgressBar.new()
+	_glory_bar.show_percentage = false
+	_glory_bar.custom_minimum_size = Vector2(0, 12)
+	glory_box.add_child(_glory_bar)
+	refresh_glory()
+
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vb.add_child(spacer)
@@ -90,6 +114,7 @@ func setup(hero: HeroController, camera: Camera2D = null) -> void:
 	hero.skills_changed.connect(func(): _skills_panel.update_skills(hero.skills.get_all()))
 	hero.tools_changed.connect(func(): _tools_panel.update_tools(hero.tools.get_all()))
 	hero.time_changed.connect(_info.set_time)
+	_hero_status.set_hero(hero)
 
 	var map_gen := hero.get_map_gen()
 	_minimap.setup(map_gen, hero, camera)
@@ -98,6 +123,7 @@ func setup(hero: HeroController, camera: Camera2D = null) -> void:
 	if map_gen != null and map_gen.renderer != null:
 		map_gen.renderer.fog_refreshed.connect(_minimap.refresh)
 	_minimap.camera_jump_requested.connect(_on_camera_jump)
+	set_cities(_cities_mgr)
 
 	_info.end_turn_pressed.connect(_on_end_turn)
 	_info.options_requested.connect(_on_options)
@@ -118,9 +144,11 @@ func reattach_hero(hero: HeroController, camera: Camera2D = null) -> void:
 	hero.skills_changed.connect(func(): _skills_panel.update_skills(hero.skills.get_all()))
 	hero.tools_changed.connect(func(): _tools_panel.update_tools(hero.tools.get_all()))
 	hero.time_changed.connect(_info.set_time)
+	_hero_status.set_hero(hero)
 	var map_gen := hero.get_map_gen()
 	_minimap.setup(map_gen, hero, camera)
 	_info.fill_hero_slot(0, hero)
+	set_cities(_cities_mgr)
 	refresh_all()
 
 
@@ -132,6 +160,35 @@ func refresh_all() -> void:
 	_strat_resources.update_resources(_hero_controller.strategic_resources.get_all())
 	_skills_panel.update_skills(_hero_controller.skills.get_all())
 	_tools_panel.update_tools(_hero_controller.tools.get_all())
+	_hero_status.refresh()
+	refresh_glory()
+
+
+## legend-chronicle: слава (CityManager) — метка + прогресс-бар к цели.
+func set_cities(cities_mgr: Node) -> void:
+	if _cities_mgr == cities_mgr:
+		return
+	_cities_mgr = cities_mgr
+	if _cities_mgr != null and _cities_mgr.has_signal("glory_changed") \
+			and not _cities_mgr.glory_changed.is_connected(_on_glory_changed):
+		_cities_mgr.glory_changed.connect(_on_glory_changed)
+	refresh_glory()
+
+
+func _on_glory_changed(_window_total: float) -> void:
+	refresh_glory()
+
+
+func refresh_glory() -> void:
+	var total := 0.0
+	if _cities_mgr != null and _cities_mgr.glory != null:
+		total = _cities_mgr.glory.total
+	var target := float(GameSettings.ENDGAME_GlORY_VICTORY)
+	if _glory_label != null:
+		_glory_label.text = "👑 Слава: %d / %d" % [int(total), int(target)]
+	if _glory_bar != null:
+		_glory_bar.max_value = target
+		_glory_bar.value = clampf(total, 0.0, target)
 
 
 ## Статусная строка (путь, сообщения системы).

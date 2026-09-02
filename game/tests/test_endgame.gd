@@ -27,6 +27,9 @@ class _MockEnemyProc:
 class _MockPersistence:
 	extends Node
 	var session: GameSession
+	# legend-chronicle: EndgameController._append_chronicle_entry читает
+	# persistence.chronicle; null — запись пропускается (как в раннем return).
+	var chronicle = null
 
 	func get_date() -> Dictionary:
 		return {"month": 3, "week": 2, "day": 1}
@@ -324,11 +327,11 @@ func test_save_v5_roundtrip_with_session() -> void:
 		"battles_won": 4, "battles_lost": 2, "successions": 1}
 
 	var data := d.to_dict()
-	assert_eq(data["version"], 5, "save version is 5")
+	assert_eq(data["version"], _SaveData.CURRENT_VERSION, "save version is current")
 
 	var d2 := _SaveData.new()
 	d2.from_dict(data)
-	assert_eq(d2.version, 5, "loaded version 5")
+	assert_eq(d2.version, _SaveData.CURRENT_VERSION, "loaded version is current")
 	assert_eq(d2.session.get("state"), 2, "session state preserved")
 	assert_eq(d2.session.get("end_reason"), "total_collapse", "session reason preserved")
 
@@ -341,7 +344,7 @@ func test_migrate_v4_to_v5_defaults() -> void:
 		"successor": {}, "legend": {}}
 	var d := _SaveData.new()
 	d.from_dict(v4)
-	assert_eq(d.version, 5, "v4 migrated to v5")
+	assert_eq(d.version, _SaveData.CURRENT_VERSION, "v4 migrated to current")
 	assert_true(d.session is Dictionary, "session defaulted to dict")
 	assert_eq(d.run_seed, 99, "run_seed preserved through migration")
 	# Сессия, восстановленная из пустого session, — RUNNING.

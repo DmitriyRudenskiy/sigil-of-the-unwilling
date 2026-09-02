@@ -7,6 +7,7 @@ const _UIAnimator = preload("res://scripts/ui/UIAnimator.gd")
 const _SettingsScreen = preload("res://scripts/ui/SettingsScreen.gd")
 const _HeroModelFactory = preload("res://scripts/ui/HeroModelFactory.gd")
 const _ModelScreen = preload("res://scripts/ui/ArtifactInventoryScreen.gd")
+const _ChronicleScreen = preload("res://scripts/ui/ChronicleScreen.gd")
 
 func _ready() -> void:
 	# Don't auto-quit in test-server mode
@@ -118,6 +119,7 @@ func _build_right_column() -> void:
 		{"text": "🗡 Модель: Рыцарь", "callback": _on_model_warrior},
 		{"text": "✨ Модель: Маг", "callback": _on_model_mage},
 		{"text": "Настройки", "callback": _on_settings},
+		{"text": "📜 Летопись", "callback": _on_chronicle},
 		{"text": "Выход", "callback": _on_exit},
 	]
 	for bd in btns:
@@ -187,6 +189,20 @@ func _flash_lock() -> void:
 
 func _on_arena() -> void:
 	get_tree().change_scene_to_file("res://scenes/CityArena.tscn")
+
+
+## legend-chronicle: летопись поколений — читается из последнего сейва
+## (save v6; для v5-сейвов список пуст — «легенда только начинается»).
+func _on_chronicle() -> void:
+	var entries: Array = []
+	var result: Dictionary = SaveManager.load_slot()
+	if result.get("error", -1) == SaveManager.SaveError.OK:
+		var data: SaveData = result.get("data")
+		if data != null:
+			entries = data.chronicle
+	var screen: CanvasLayer = _ChronicleScreen.new()
+	add_child(screen)
+	screen.show_entries(entries)
 
 
 func _on_exit() -> void:

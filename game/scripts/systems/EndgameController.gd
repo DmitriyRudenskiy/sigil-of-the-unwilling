@@ -141,7 +141,31 @@ func _end(result: String, reason: StringName) -> void:
 	var summary := _build_summary(result, reason)
 	_show_screen(result, reason, summary)
 	GameEventBus.game_ended.emit(result, reason, summary)
+	_append_chronicle_entry(result, summary)
 	GameLogger.world("Endgame: %s — %s" % [result, String(reason)])
+
+
+## legend-chronicle: финальная запись забега (победа/поражение). Смерть с
+## преемником сюда не ходит (запись цикла делает WorldController на кнопке
+## «Знак переходит») — каждая смерть даёт ровно одну запись.
+func _append_chronicle_entry(result: String, summary: Dictionary) -> void:
+	if _persistence == null:
+		return
+	var chronicle = _persistence.chronicle
+	if chronicle == null:
+		return
+	var h = _world_ctrl.get_hero() if _world_ctrl != null else null
+	var valid := h != null and is_instance_valid(h)
+	chronicle.append({
+		"hero_name": str(h.hero_name) if valid else "—",
+		"path": String(h.path_id) if valid else "",
+		"end_turn": int(summary.get("turns", 0)),
+		"cities": int(summary.get("cities_owned", 0)),
+		"glory": int(summary.get("glory", 0)),
+		"battles_won": int(summary.get("battles_won", 0)),
+		"battles_lost": int(summary.get("battles_lost", 0)),
+		"outcome": result,
+	})
 
 
 func _build_summary(result: String, reason: StringName) -> Dictionary:

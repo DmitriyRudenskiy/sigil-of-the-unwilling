@@ -15,6 +15,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	# endgame: терминальное состояние — ввод мира не проходит.
 	if world != null and world.has_method("is_terminal") and world.is_terminal():
 		return
+	# legend-chronicle: открыта последовательность смерти — ввод мира не проходит.
+	if world != null and world.has_method("is_death_sequence_open") \
+			and world.is_death_sequence_open():
+		return
 	if not (event is InputEventMouseButton) or not event.pressed:
 		return
 

@@ -26,6 +26,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	# (F5-сейв после конца забега бессмыслен, экран уже открыт).
 	if _world_ctrl != null and _world_ctrl.has_method("is_terminal") and _world_ctrl.is_terminal():
 		return
+	# legend-chronicle: последовательность смерти открыта — шорткаты мира
+	# не действуют (момент, а не фон).
+	if _world_ctrl != null and _world_ctrl.has_method("is_death_sequence_open") \
+			and _world_ctrl.is_death_sequence_open():
+		return
 
 	# city-in-world: city-оверлей открыт — только Esc закрывает его;
 	# I/F5/F9 игнорируются (мир под оверлеем заморожен для ввода).

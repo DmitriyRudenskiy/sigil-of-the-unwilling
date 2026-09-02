@@ -4,6 +4,8 @@ extends RefCounted
 
 var _save_manager: SaveManager
 var session: GameSession = null
+## legend-chronicle: летопись поколений (персистентная, save v6).
+var chronicle: Chronicle = Chronicle.new()
 var _date: Dictionary = {"month": 1, "week": 1, "day": 1}
 var world_delta: WorldStateDelta = null
 ## fog-of-war: карта видимости (наследует WorldController). null — без fog.
@@ -55,6 +57,8 @@ func save_game(hero: HeroController, cities: Array = [], characters: Array = [])
 	# endgame: состояние забега (state/end_reason/счётчики) — липкое
 	# терминальное состояние переживает save/load.
 	save_data.session = session.serialize()
+	# legend-chronicle: летопись поколений (save v6).
+	save_data.chronicle = chronicle.to_array()
 
 	var err := _save_manager.save_game(save_data)
 	if err == SaveManager.SaveError.OK:
@@ -104,6 +108,8 @@ func apply_loaded_save(data: SaveData, ctx) -> void:
 	# (терминальный сейв → WorldController сразу покажет экран).
 	if session != null:
 		session.deserialize(data.session)
+	# legend-chronicle: восстановить летопись (save v6; v5-сейвы — пусто).
+	chronicle.from_array(data.chronicle)
 
 	# fog-of-war: восстановить разведённую сетку и пересчитывать видимое.
 	if visibility != null:
