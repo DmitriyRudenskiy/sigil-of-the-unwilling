@@ -375,6 +375,7 @@ SocketController, Units, Artifacts, Spells, Resources
 - `docs/howto/ADDING_TERRAINS.md`, `docs/howto/ADDING_UNITS.md` — как добавлять контент.
 - `docs/overview/PLAN_MASTER.md`, `docs/overview/TASK.md` — дорожная карта.
 - `TESTING.md` — справка по headless-запуску сцен.
+- `howto/OPERABILITY.md` — полная проверка работоспособности (`run_operability.sh`).
 
 ---
 
