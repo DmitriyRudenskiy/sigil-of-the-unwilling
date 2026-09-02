@@ -52,8 +52,8 @@
 - [x] Выход закрывает панель (`test_exit_button_renamed_and_closes`)
 ### 5.3
 Комит только файлов цикла `city-navigation`.
-- [ ] `WorldBootstrap`, `MarkerLayer`, `WorldEventRouter` (+ пересечённые с city-in-world)
-- [ ] Не выносить файлы других циклов
+- [x] `WorldBootstrap`, `MarkerLayer`, `WorldEventRouter` (+ пересечённые с city-in-world)
+- [x] Не выносить файлы других циклов
 
 > Отложено: `WorldEventRouter.gd`/`HeroController.gd`/`WorldBattleCoordinator.gd` содержат
 > незакоммиченный WIP параллельной сессии (Succession-Sigil) — коммит по частям невозможен.
