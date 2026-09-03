@@ -87,7 +87,7 @@
 - [x ] `Godot --headless --path game -s tests/run_tests.gd` → тесты зелёные
       (5672 passed, 0 failed; учтено расширение набора тестов после реорганизации).
 - [x ] `Godot --headless --path game -s game/tools/compile_all.gd` → без ошибок компиляции.
-- [ ] `bash game/tools/shell/run_operability.sh` → CLEAN (фоновый запуск + опрос).
+- [x ] `bash game/tools/shell/run_operability.sh` → CLEAN (0 ошибок, 0 предупреждений).
 - [ ] `bash game/tools/shell/check_console_clean.sh` → новых `SCRIPT ERROR` нет
       (игнорируется пре-existing `SocketServer Failed to listen`).
 ### 6.4
