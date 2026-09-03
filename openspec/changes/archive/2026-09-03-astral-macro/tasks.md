@@ -1,9 +1,9 @@
 ## Stage 1 — Shard abstraction
-- [ ] `ShardState` (id, name, seed, biome_mix, entry cell, completed) + `core/ShardManager.gd` (list + active).
-- [ ] Parameterize `WorldBootstrap` to bootstrap the active shard (shard #1 = today's world, no behavior change).
-- [ ] Save migration v3→v4: wrap the legacy `world` dict under `shards[active]`.
-- [ ] Create + load shard #2 (different seed/biome mix).
-- [ ] Tests: shard #1 unchanged; shard #2 loads with its seed; save round-trips both.
+- [x] `ShardState` (id, name, seed, biome_mix, entry cell, completed) + `core/ShardManager.gd` (list + active).
+- [x] Parameterize `WorldBootstrap` to bootstrap the active shard (shard #1 = today's world, no behavior change).
+- [x] Save migration v6→v7: wrap the legacy world under `shards[active]` (SaveData; v6→v7 migration).
+- [x] Create + load shard #2 (different seed/biome mix): _ShardManager seeds it, `WorldBootstrap.run(shard_seed)`.
+- [x] Tests: shard #1 unchanged; shard #2 loads with its seed (0x2A1F3C7); save round-trips both (test_shard.gd + scenario_13_shard.py, 3/3 green).
 
 ## Stage 2 — The astral sea
 - [ ] `AstralSeaModel` (shards, routes, unlocked, travel cost/cooldown).
