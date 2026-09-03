@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "godot-mcp": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "/Users/user/sigil-of-the-unwilling/game/tools/godot-mcp/build/index.js"
+      ],
+      "env": {}
+    }
+  }
+}
