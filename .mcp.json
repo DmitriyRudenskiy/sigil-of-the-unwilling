@@ -6,7 +6,10 @@
       "args": [
         "/Users/user/sigil-of-the-unwilling/game/tools/godot-mcp/build/index.js"
       ],
-      "env": {}
+      "env": {
+        "GODOT_PATH": "/Applications/Godot.app/Contents/MacOS/Godot",
+        "GODOT_MCP_ALLOWED_DIRS": "/Users/user/sigil-of-the-unwilling"
+      }
     }
   }
 }

@@ -16,13 +16,10 @@ var _key_map: Dictionary
 var _held_keys: Dictionary = {}
 
 func _ready() -> void:
-	# ponytail: flag-gated — только по --mcp-server, как SocketController
-	# гейтит свой сервер по --socket-server. Иначе в обычном/шипед-билде не
-	# поднимается вечный TCP-сервер на 9090.
-	if "--mcp-server" not in OS.get_cmdline_args():
-		print("McpInteractionServer: disabled (pass --mcp-server to enable on 127.0.0.1:%d)" % PORT)
-		return
-	# Ensure MCP server keeps processing even when game is paused
+	# Слушаем всегда (дизайн godot-mcp): автозагрузка опциональна — сервер
+	# появляется только после установки godot-mcp, бинд на loopback:9090.
+	# Управляющий Node-сервер сам поднимает игру через run_project (godot -d
+	# --path <proj>), без флагов — поэтому флаг-гейт здесь не ставим.
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_init_key_map()
 	_server = TCPServer.new()
