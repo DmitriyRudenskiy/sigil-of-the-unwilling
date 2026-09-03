@@ -204,6 +204,11 @@ func apply_loaded_save(data: SaveData, ctx) -> void:
 		for cell in ctx.world_delta.exhausted_nodes:
 			ctx.resource_node_manager.mark_exhausted(cell)
 
+	# terrain-resources: восстановить истощённые точки добычи (лес/гора).
+	if ctx.terrain_resource_manager != null:
+		ctx.terrain_resource_manager.mark_exhausted(
+			ctx.world_delta.terrain_exhausted_cells)
+
 	# --- Сохранение v3: города и персонажи (Каскад Сложности) ---
 	_restore_cities(data, ctx)
 	_restore_characters(data, ctx)

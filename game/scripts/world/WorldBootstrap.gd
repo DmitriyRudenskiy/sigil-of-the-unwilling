@@ -10,6 +10,9 @@ const WorldPersistenceScript = preload("res://scripts/world/WorldPersistence.gd"
 const ResourceChainServiceScript = preload("res://scripts/world/ResourceChainService.gd")
 const WorldShortcutsScript = preload("res://scripts/world/WorldShortcuts.gd")
 const EndgameControllerScript = preload("res://scripts/systems/EndgameController.gd")
+# port-troles-heritage/terrain-resources: preload — class_name регистрируется
+# только после загрузки файла; без preload WorldBootstrap падает на parse-order.
+const _TerrainResourceManager = preload("res://scripts/data/TerrainResourceManager.gd")
 
 
 ## Result bundle returned after bootstrap completes.
@@ -23,6 +26,8 @@ class BootstrapResult:
 	var battle_coordinator: Node = null
 	var interaction_controller: Node = null
 	var resource_node_manager: Node = null
+	# terrain-resources: лес/горы как точки добычи (контакт/истощение/персистентность).
+	var terrain_resource_manager: Variant = null
 	var ui_manager: Node = null
 	var world_delta: Variant = null
 	var persistence: Variant = null
@@ -445,6 +450,13 @@ static func _create_resource_nodes(parent: Node2D, R: BootstrapResult) -> void:
 		"height": R.map_gen.map_height,
 	}
 	R.resource_node_manager.generate_nodes_for_map(map_data)
+
+	# terrain-resources: точки добычи на лесах/горах (аддитивно к hidden-жилам).
+	R.terrain_resource_manager = _TerrainResourceManager.new()
+	R.terrain_resource_manager.name = "TerrainResourceManager"
+	parent.add_child(R.terrain_resource_manager)
+	R.terrain_resource_manager.attach_delta(R.world_delta)
+	R.terrain_resource_manager.generate(map_data)
 
 
 static func _nearest_walkable(map_gen: MapGenerator, start: Vector2i) -> Vector2i:

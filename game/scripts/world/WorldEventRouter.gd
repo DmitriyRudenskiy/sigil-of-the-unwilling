@@ -17,6 +17,8 @@ var cities: Node = null
 var battle_coordinator: Node = null
 var interaction_controller: Node = null
 var resource_node_manager: Node = null
+# terrain-resources: точки добычи на лесу/горах (контактный сбор).
+var terrain_resource_manager: Variant = null
 var ui_manager: Node = null
 var world_delta: Variant = null
 var persistence: Variant = null
@@ -45,7 +47,8 @@ func setup(
 	p_world_delta: Variant, p_persistence: Variant,
 	p_resource_chain: Variant, p_visibility = null,
 	p_resource_registry: Node = null,
-	p_turn_scheduler: TurnScheduler = null
+	p_turn_scheduler: TurnScheduler = null,
+	p_terrain_resource_manager: Variant = null
 ) -> void:
 	hero = p_hero
 	map_gen = p_map_gen
@@ -54,6 +57,7 @@ func setup(
 	battle_coordinator = p_battle_coordinator
 	interaction_controller = p_interaction_controller
 	resource_node_manager = p_resource_node_manager
+	terrain_resource_manager = p_terrain_resource_manager
 	ui_manager = p_ui_manager
 	world_delta = p_world_delta
 	persistence = p_persistence
@@ -67,6 +71,10 @@ func setup(
 	# коннекты идемпотентны (is_connected-гард).
 	_connect_hero_signals()
 	_connect_ui_signals()
+
+	# terrain-resources: начальная маркировка добычи (всегда видна).
+	if terrain_resource_manager and ui_manager and ui_manager.marker_layer:
+		ui_manager.marker_layer.set_terrain_resource_markers(terrain_resource_manager)
 
 
 func _ready() -> void:
@@ -183,6 +191,17 @@ func _on_hero_moved(cell: Vector2i) -> void:
 		camera.follow(hero)
 	if interaction_controller:
 		interaction_controller.collect_resource_at(cell)
+		# terrain-resources: добыча по контакту (лес/гора) — эмитит
+		# resource_extracted (поп ап уже подписан) и истощает точку.
+		if terrain_resource_manager:
+			var harvested = terrain_resource_manager.harvest(cell)
+			var res_id: Variant = harvested.get("res_id", null)
+			var amount: int = harvested.get("amount", 0)
+			if res_id != null and amount > 0:
+				GameEventBus.resource_extracted.emit(cell, res_id, amount)
+				# terrain-resources: перерисовать маркировку добычи (истощение).
+				if ui_manager and ui_manager.marker_layer:
+					ui_manager.marker_layer.refresh_terrain_markers()
 		interaction_controller.pickup_scroll_at(cell)
 		interaction_controller.check_chest_contact(cell)
 	if battle_coordinator:

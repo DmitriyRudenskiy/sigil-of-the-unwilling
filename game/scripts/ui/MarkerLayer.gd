@@ -33,6 +33,10 @@ var _hex_size: float = 32.0  # default, recalculated on setup
 var _city_marks: Array = []  # {cell: Vector2i, pos: Vector2, city: City}
 # enemy-world-ai: кольца угрозы (враги в радиусе агрессии) — всегда видны.
 var _threat_pos: PackedVector2Array = PackedVector2Array()
+# terrain-resources: точки добычи (⛏️ — активные, ✗ — истощённые). Всегда
+# видны, без порога дистанции. terrain_mgr — TerrainResourceManager.
+var _terrain_mgr: Variant = null
+var _terrain_pos: Dictionary = {}  # cell -> {pos, exhausted}
 
 
 func setup(map: MapGenerator) -> void:
@@ -129,6 +133,31 @@ func set_threat_markers(cells: Array) -> void:
 			_threat_pos.append(_map_gen.map_to_local(c))
 	queue_redraw()
 
+## terrain-resources: маркировка добычи — ⛏️ активные, ✗ истощённые.
+func set_terrain_resource_markers(terrain_mgr: Variant) -> void:
+	_terrain_mgr = terrain_mgr
+	_terrain_pos.clear()
+	if _map_gen == null or not _map_gen.has_valid_tilemap() or terrain_mgr == null:
+		queue_redraw()
+		return
+	for cell in terrain_mgr.cells:
+		if cell is Vector2i:
+			_terrain_pos[cell] = {"pos": _map_gen.map_to_local(cell), "exhausted": terrain_mgr.is_exhausted(cell)}
+	queue_redraw()
+
+## terrain-resources: перерисовка при истощении точки (по сигналу).
+func refresh_terrain_markers() -> void:
+	if _terrain_mgr == null:
+		return
+	_terrain_pos.clear()
+	if _map_gen == null or not _map_gen.has_valid_tilemap():
+		queue_redraw()
+		return
+	for cell in _terrain_mgr.cells:
+		if cell is Vector2i:
+			_terrain_pos[cell] = {"pos": _map_gen.map_to_local(cell), "exhausted": _terrain_mgr.is_exhausted(cell)}
+	queue_redraw()
+
 
 func _process(_d: float) -> void:
 	# Анимация (пульс) нужна зелёным точкам и кольцам угрозы.
@@ -155,6 +184,15 @@ func _draw() -> void:
 			ThemeDB.fallback_font, pos + Vector2(0.0, -_hex_size * 0.30),
 			m.city.display_name, HORIZONTAL_ALIGNMENT_CENTER,
 			int(_hex_size * 2.0), 14, Color(1.0, 0.96, 0.85, 0.95))
+
+	# terrain-resources: точки добычи — ⛏️ активные, ✗ истощённые.
+	for cell in _terrain_pos:
+		var m: Dictionary = _terrain_pos[cell]
+		var pos: Vector2 = m["pos"]
+		var glyph: String = "✗" if m["exhausted"] else "⛏️"
+		var color: Color = Color(0.7, 0.7, 0.75, 0.9) if m["exhausted"] else Color(0.95, 0.85, 0.4, 0.95)
+		draw_string(ThemeDB.fallback_font, pos, glyph, HORIZONTAL_ALIGNMENT_CENTER,
+			int(_hex_size * 1.6), 14, color)
 
 	if not _visible:
 		return

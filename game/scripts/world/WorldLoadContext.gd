@@ -5,6 +5,8 @@ extends RefCounted
 var map_gen: MapGenerator
 var spawner: WorldSpawner
 var resource_node_manager: ResourceNodeManager
+# terrain-resources: точки добычи (восстановление истощения из сейва).
+var terrain_resource_manager: Variant = null
 var ui_manager: WorldUIManager
 var camera: WorldCamera
 var hero: HeroController

@@ -9,6 +9,9 @@ var opened_chests: Array[Vector2i] = []
 var removed_scrolls: Array[Vector2i] = []
 var discovered_nodes: Array[Vector2i] = []
 var exhausted_nodes: Array[Vector2i] = []
+# terrain-resources: истощённые точки добычи (лес/гора). Персистентность
+# истощения между ходами/сохранениями.
+var terrain_exhausted_cells: Array[Vector2i] = []
 # enemy-world-ai: состояние роста врагов (очередь респауна, гарнизоны).
 var enemy_growth_state: Dictionary = {}
 # fog-of-war: разведённая сетка (массив {x,y}) — сохраняется вместе с миром.
@@ -24,6 +27,7 @@ func serialize() -> Dictionary:
 		"removed_scrolls": _cells_to_array(removed_scrolls),
 		"discovered_nodes": _cells_to_array(discovered_nodes),
 		"exhausted_nodes": _cells_to_array(exhausted_nodes),
+		"terrain_exhausted_cells": _cells_to_array(terrain_exhausted_cells),
 		"enemy_growth_state": enemy_growth_state.duplicate(true),
 		"fog_explored": fog_explored.duplicate(true),
 	}
@@ -43,6 +47,7 @@ func deserialize(data: Dictionary) -> void:
 	removed_scrolls = _array_to_cells(data.get("removed_scrolls", []))
 	discovered_nodes = _array_to_cells(data.get("discovered_nodes", []))
 	exhausted_nodes = _array_to_cells(data.get("exhausted_nodes", []))
+	terrain_exhausted_cells = _array_to_cells(data.get("terrain_exhausted_cells", []))
 	var growth_raw: Variant = data.get("enemy_growth_state", {})
 	enemy_growth_state = growth_raw.duplicate(true) if growth_raw is Dictionary else {}
 	fog_explored = data.get("fog_explored", [])
@@ -76,6 +81,11 @@ func add_removed_scroll(cell: Vector2i) -> void:
 func add_discovered_node(cell: Vector2i) -> void:
 	if not discovered_nodes.has(cell):
 		discovered_nodes.append(cell)
+
+## terrain-resources: истощённая точка добычи (запись в момент добычи).
+func add_terrain_exhausted(cell: Vector2i) -> void:
+	if not terrain_exhausted_cells.has(cell):
+		terrain_exhausted_cells.append(cell)
 
 
 func add_exhausted_node(cell: Vector2i) -> void:

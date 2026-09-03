@@ -107,7 +107,8 @@ func _ready() -> void:
 		_world_delta, _persistence, _resource_chain,
 		_visibility,
 		_bootstrap_result.services.resources if _bootstrap_result.services != null else null,
-		_bootstrap_result.turn_scheduler
+		_bootstrap_result.turn_scheduler,
+		_bootstrap_result.terrain_resource_manager if _bootstrap_result != null else null
 	)
 
 	# Connect router outward signals
@@ -563,6 +564,8 @@ func _build_load_context():
 	ctx.map_gen = _map_gen
 	ctx.spawner = _bootstrap_result.spawner
 	ctx.resource_node_manager = resource_node_manager
+	if _bootstrap_result != null:
+		ctx.terrain_resource_manager = _bootstrap_result.terrain_resource_manager
 	ctx.ui_manager = _ui_manager
 	ctx.camera = _camera
 	ctx.hero = _hero
