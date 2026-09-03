@@ -8,6 +8,7 @@ const WorldEventRouterScript = preload("res://scripts/world/WorldEventRouter.gd"
 const WorldBootstrapScript = preload("res://scripts/world/WorldBootstrap.gd")
 const SuccessionControllerScript = preload("res://scripts/world/SuccessionController.gd")
 const _VisibilityMapScript = preload("res://scripts/core/VisibilityMap.gd")
+const ShardManagerScript = preload("res://scripts/core/ShardManager.gd")
 const DeathSequenceScript = preload("res://scripts/ui/DeathSequence.gd")
 const ChronicleScreenScript = preload("res://scripts/ui/ChronicleScreen.gd")
 
@@ -52,7 +53,10 @@ var _resurrection_city: City = null
 func _ready() -> void:
 	SoundManager.play_music_cue(&"music_world")
 	_rng = RandomNumberGenerator.new()
-	_bootstrap_result = WorldBootstrap.run(self, _Platform, _rng)
+	# astral-macro: фрагмент активного мира. shard #1 (seed 0) = новая игра,
+	# как раньше (случайный/редакторский сид); другие фрагменты — фиксированный сид.
+	var _shard := ShardManagerScript.instance().get_active()
+	_bootstrap_result = WorldBootstrap.run(self, _Platform, _rng, _shard.seed)
 
 	# Unpack bootstrap result
 	_map_gen = _bootstrap_result.map_gen
@@ -532,6 +536,11 @@ func save_game() -> bool:
 
 func load_game() -> SaveData:
 	return _persistence.load_game()
+
+## astral-macro (v7): последний сериализованный сейв для проверки round-trip
+## через сокет (SAVE_GAME).
+func get_last_save_dict() -> Dictionary:
+	return _persistence.last_save_dict()
 
 
 func request_load_game() -> void:

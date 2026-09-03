@@ -156,6 +156,17 @@ func _route_command(line: String) -> Dictionary:
 			die_hero.mark_combat_dead()
 			GameEventBus.hero_died.emit(&"battle")
 			return {"status": "hero_dead"}
+		"SAVE_GAME":
+			# astral-macro (v7): сохранить текущий фрагмент и вернуть сериализованный
+			# сейв (version/shards/active_shard_id) для проверки round-trip.
+			if world_ctrl == null or not world_ctrl.is_world_visible():
+				return {"error": "Not in World mode"}
+			return _save_game(world_ctrl)
+		"LOAD_GAME":
+			# astral-macro (v7): загрузить последний сейв и пересценить мир.
+			if world_ctrl == null or not world_ctrl.is_world_visible():
+				return {"error": "Not in World mode"}
+			return _load_game(world_ctrl)
 		"COLLECT_HERE":
 			# Собрать ресурс/сундук/скролл в клетке героя (сценарий «Collect All»).
 			if world_ctrl == null or not world_ctrl.is_world_visible():
@@ -642,6 +653,29 @@ func _start_game() -> Dictionary:
 	var world = world_scene.instantiate()
 	get_tree().root.add_child(world)
 	return {"status": "game_started"}
+
+# astral-macro (v7): сохранить текущий фрагмент и вернуть сериализованный сейв.
+func _save_game(world_ctrl) -> Dictionary:
+	if not bool(world_ctrl.save_game()):
+		return {"status": "save_failed"}
+	var snap: Dictionary = world_ctrl.get_last_save_dict()
+	return {
+		"status": "saved",
+		"version": snap.get("version", 0),
+		"active_shard_id": snap.get("active_shard_id", ""),
+		"shards": snap.get("shards", {}),
+		"run_seed": snap.get("run_seed", 0),
+	}
+
+# astral-macro (v7): загрузить последний сейв и пересценить мир (round-trip).
+func _load_game(world_ctrl) -> Dictionary:
+	var data = world_ctrl.load_game()
+	if data == null or not data.is_valid():
+		return {"status": "load_failed"}
+	world_ctrl.apply_save(data)
+	return {"status": "loaded"}
+
+# ==================== API METHODS ====================
 
 # ==================== API METHODS ====================
 

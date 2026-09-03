@@ -45,7 +45,8 @@ class BootstrapResult:
 static func run(
 	parent: Node2D,
 	platform: Variant,
-	rng: RandomNumberGenerator
+	rng: RandomNumberGenerator,
+	shard_seed: int = 0
 ) -> BootstrapResult:
 	var R := BootstrapResult.new()
 	R.rng = rng
@@ -60,8 +61,9 @@ static func run(
 	if not missing.is_empty():
 		push_error("[WorldBootstrap] Missing services: %s" % ", ".join(missing))
 
-	# 2. Resolve session / seed
-	R.loaded_save = _resolve_session(R)
+	# 2. Resolve session / shard. shard_seed != 0 pins a deterministic world
+	#    (shard #2); 0 = today's flow (shard #1 new game = random/editor seed).
+	R.loaded_save = _resolve_session(R, shard_seed)
 	rng.seed = R.session.run_seed
 
 	# 3. Map
@@ -119,10 +121,13 @@ static func _init_services(parent: Node2D, R: BootstrapResult) -> void:
 	R.resource_chain = ResourceChainServiceScript.new()
 
 
-static func _resolve_session(R: BootstrapResult) -> SaveData:
+static func _resolve_session(R: BootstrapResult, shard_seed: int) -> SaveData:
 	var loaded_save: SaveData = WorldPersistenceScript.pending_save
 	WorldPersistenceScript.pending_save = null
-	if loaded_save != null:
+	if shard_seed != 0:
+		## Astral-macro: загрузка конкретной фрагмента с фиксированным сидом.
+		R.persistence.session = R.persistence.get_session_for_seed(shard_seed)
+	elif loaded_save != null:
 		R.persistence.session = R.persistence.get_session_for_seed(loaded_save.run_seed)
 	else:
 		R.persistence.session = R.persistence.get_session_for_seed(R.persistence.get_run_seed())

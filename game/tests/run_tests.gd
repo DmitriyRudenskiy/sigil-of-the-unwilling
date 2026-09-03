@@ -18,6 +18,8 @@ const SKIP_FILES := [
 	"test_runtime_integration.gd",
 	# (test_audio_world_entry асинхронен: грузит World.tscn и ждёт музыку)
 	"test_audio_world_entry.gd",
+	# (test_shard.gd автономный SceneTree-раннер: quit() в _init — только через `godot -s`)
+	"test_shard.gd",
 	# Корутинный smoke-тест UI арены (ждёт кадры/таймеры) — только через `godot -s`.
 	"test_city_arena_view.gd",
 	"test_validation_runner.gd",

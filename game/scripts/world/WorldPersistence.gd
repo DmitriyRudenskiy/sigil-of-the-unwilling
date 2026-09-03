@@ -1,6 +1,7 @@
 class_name WorldPersistence
 extends RefCounted
 ## Save / load / restart / seed / session state.
+const _ShardManager = preload("res://scripts/core/ShardManager.gd")
 
 var _save_manager: SaveManager
 var session: GameSession = null
@@ -10,6 +11,11 @@ var _date: Dictionary = {"month": 1, "week": 1, "day": 1}
 var world_delta: WorldStateDelta = null
 ## fog-of-war: карта видимости (наследует WorldController). null — без fog.
 var visibility = null
+
+## astral-macro (v7): последний сериализованный сейв (to_dict) — для
+## проверки round-trip через сокет (SAVE_GAME/LOAD_GAME), без поиска
+## файла user:// на диске.
+var _last_save_dict: Dictionary = {}
 
 static var next_seed: int = 0
 static var pending_save: SaveData = null
@@ -24,6 +30,13 @@ func get_run_seed() -> int:
 		var s := next_seed
 		next_seed = 0
 		return s
+
+	## astral-macro: test seam — GAME_RUN_SEED имеет ПРИОРИТЕТ над
+	## EDITOR_SEED, чтобы сценарий мог зафиксировать мир (фрагмент #2 и т.д.)
+	## даже в headless-редакторе (OS.has_feature("editor") == true).
+	if OS.has_environment("GAME_RUN_SEED"):
+		var env_seed := int(OS.get_environment("GAME_RUN_SEED"))
+		return env_seed & 0x7FFFFFFF
 
 	if OS.has_feature("editor"):
 		return GameSettings.EDITOR_SEED
@@ -59,7 +72,24 @@ func save_game(hero: HeroController, cities: Array = [], characters: Array = [])
 	save_data.session = session.serialize()
 	# legend-chronicle: летопись поколений (save v6).
 	save_data.chronicle = chronicle.to_array()
+	# astral-macro (v7): фрагменты мира. Активный фрагмент целиком
+	# записывается под shards[active] — round-trip и база для
+	# многофрагментности (Stage 2 перемещения между фрагментами).
+	var _mgr := _ShardManager.instance()
+	var _active := _mgr.active_id
+	save_data.active_shard_id = _active
+	save_data.shards = {
+		_active: {
+			"world": world_delta.serialize(),
+			"cities": cities_arr,
+			"characters": characters,
+			"hero": hero.serialize(),
+			"date": _date.duplicate(),
+			"run_seed": session.run_seed,
+		}
+	}
 
+	_last_save_dict = save_data.to_dict()
 	var err := _save_manager.save_game(save_data)
 	if err == SaveManager.SaveError.OK:
 		GameLogger.world("Game saved to %s" % SaveManager.SAVE_PATH)
@@ -69,6 +99,10 @@ func save_game(hero: HeroController, cities: Array = [], characters: Array = [])
 func load_game() -> SaveData:
 	var result: Dictionary = _save_manager.load_game()
 	return result.get("data", null) as SaveData
+
+## astral-macro (v7): последний сериализованный сейв (для SAVE_GAME через сокет).
+func last_save_dict() -> Dictionary:
+	return _last_save_dict
 
 func load_game_with_error() -> Dictionary:
 	return _save_manager.load_game()

@@ -2,7 +2,7 @@ extends RefCounted
 class_name SaveData
 ## Save file data container.
 
-const CURRENT_VERSION := 6
+const CURRENT_VERSION := 7
 const CURRENT_GENERATOR_VERSION := 1
 
 var version: int = CURRENT_VERSION
@@ -30,6 +30,12 @@ var session: Dictionary = {}
 ## Записи Chronicle.to_array(): одна строка на героя (исход, слава, бои).
 ## v5-сейвы: пусто (легенда начинается с чистого листа).
 var chronicle: Array = []
+# --- Сохранение v7 (astral-macro): фрагменты мира ---
+## Состояние каждого фрагмента (ключ -> сериализованное миростостояние).
+## Активный фрагмент читается по active_shard_id.
+## v6-сейвы: пусто (один фрагмент, активный = shard_1).
+var shards: Dictionary = {}
+var active_shard_id: StringName = &"shard_1"
 
 
 func to_dict() -> Dictionary:
@@ -46,6 +52,8 @@ func to_dict() -> Dictionary:
 		"legend": legend,
 		"session": session,
 		"chronicle": chronicle,
+		"shards": shards,
+		"active_shard_id": str(active_shard_id),
 	}
 
 
@@ -94,6 +102,11 @@ func from_dict(data: Dictionary) -> void:
 	chronicle = data.get("chronicle", [])
 	if not (chronicle is Array):
 		chronicle = []
+	shards = data.get("shards", {})
+	if not (shards is Dictionary):
+		shards = {}
+	var _ashard: String = str(data.get("active_shard_id", "shard_1"))
+	active_shard_id = StringName(_ashard) if _ashard else &"shard_1"
 
 func _migrate_v1_to_v2(data: Dictionary) -> void:
 	## v2: ensure hero.time_mp_spent exists for mana persistence
@@ -137,6 +150,11 @@ func _migrate_v5_to_v6(data: Dictionary) -> void:
 	## легенда начинается с чистого листа.
 	if not data.has("chronicle") or not (data["chronicle"] is Array):
 		data["chronicle"] = []
+
+	# v7: фрагменты мира. В v6-сейвах их нет — один фрагмент shard_1
+	# (активный); shards пустой, active_shard_id = shard_1.
+	if not data.has("shards") or not (data["shards"] is Dictionary):
+		data["shards"] = {}
 
 
 func is_valid() -> bool:
