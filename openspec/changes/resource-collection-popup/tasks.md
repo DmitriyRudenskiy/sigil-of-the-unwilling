@@ -20,7 +20,7 @@
 
 ## 4. Verification
 
-- [ ] 4.1 Run `game/tools/shell/run_operability.sh`; ensure verdict is `CLEAN` (scenes, scenarios, unit tests).
+- [x] 4.1 Run `game/tools/shell/run_operability.sh`; ensure verdict is `CLEAN` (scenes, scenarios, unit tests).
 - [x] 4.2 Add any new console warning from the popup to `docs/CONSOLE_ALLOWLIST.md` if truly benign.
 
 ## 5. Docs
@@ -29,4 +29,4 @@
 
 ## 6. Commit
 
-- [ ] 6.1 Commit only files belonging to this change, scoped to `resource-collection-popup`.
+- [x] 6.1 Commit only files belonging to this change, scoped to `resource-collection-popup`.
