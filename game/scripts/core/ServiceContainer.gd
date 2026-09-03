@@ -28,9 +28,15 @@ var settings: Node = null       # Settings (autoload)
 var event_bus: Node = null      # GameEventBus (autoload)
 
 # ==================== ГЛОБАЛЬНЫЙ ДОСТУП (обратная совместимость) ====================
+## ponytail: DEPRECATED — глобальный fallback для неомобилизованного кода.
+## Единый путь сервисов — DI: передать ServiceContainer через setup() и хранить
+## в поле системы. Миграция вызывающих идет по системно (см. R4), а не одним
+## махом — чтобы не ломать боёв/героев/карту полуготовой миграцией.
+## callers, всё ещё использующие .current: ServiceLocator, MapGenerator,
+## WorldBattleCoordinator, BattleController, HeroController.
 static var current: ServiceContainer = null
 
-## Устанавливает глобальный контейнер. Вызывается ОДИН раз в WorldBootstrap.
+## DEPRECATED — см. comment у `current`. Вызывается ОДИН раз в WorldBootstrap.
 static func setup_global(container: ServiceContainer) -> void:
 	current = container
 
