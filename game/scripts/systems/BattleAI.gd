@@ -62,8 +62,8 @@ func decide_turn(unit: BattleState.BattleUnit, state: BattleState, blocked: Dict
 	var path_blocked := blocked.duplicate()
 	path_blocked.erase(nearest.cell)
 
-	var path: Array[Vector2i] = HexUtils.bfs_path(
-		unit.cell, nearest.cell, path_blocked, BattleState.BW, BattleState.BH
+	var path: Array[Vector2i] = HexUtils.find_path(
+		unit.cell, nearest.cell, path_blocked, BattleState.BW, BattleState.BH, "bfs"
 	)
 	if path.size() <= 1:
 		return result

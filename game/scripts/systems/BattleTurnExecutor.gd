@@ -160,12 +160,13 @@ func request_move(unit: BattleState.BattleUnit, target: Vector2i) -> void:
 	if unit.is_flying():
 		path = [unit.cell, target]
 	else:
-		path = HexUtils.bfs_path(
+		path = HexUtils.find_path(
 			unit.cell,
 			target,
 			blocked,
 			BattleState.BW,
-			BattleState.BH
+			BattleState.BH,
+			"bfs"
 		)
 
 	if path.size() < 2:

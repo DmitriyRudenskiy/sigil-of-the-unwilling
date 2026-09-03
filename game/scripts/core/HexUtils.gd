@@ -96,6 +96,20 @@ static func ring(center: Vector2i, r: int) -> Array[Vector2i]:
 	return out
 
 
+## Reconstruct a path from a parent-pointer map (used by bfs/astar).
+## ponytail: extracted so the two same-shaped pathfinders share one reconstruction
+## instead of duplicating the came_from walk (dijkstra_path reconstructs by
+## neighbor-scan and stays separate — different contract).
+static func _reconstruct_path(start: Vector2i, goal: Vector2i, came_from: Dictionary) -> Array[Vector2i]:
+	var path: Array[Vector2i] = []
+	var c: Vector2i = goal
+	while c != start:
+		path.append(c)
+		c = came_from[c]
+	path.append(start)
+	path.reverse()
+	return path
+
 static func bfs_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: int, h: int) -> Array[Vector2i]:
 	if start == goal:
 		return [start]
@@ -117,14 +131,7 @@ static func bfs_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: in
 			queue.append(nxt)
 	if not from.has(goal):
 		return []
-	var path: Array[Vector2i] = []
-	var c := goal
-	while c != start:
-		path.append(c)
-		c = from[c]
-	path.append(start)
-	path.reverse()
-	return path
+	return _reconstruct_path(start, goal, from)
 
 
 ## A* with hex_distance admissible heuristic. Faster than BFS for long paths.
@@ -151,15 +158,7 @@ static func astar_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: 
 			continue
 
 		if cur_cell == goal:
-			# Reconstruct path
-			var path: Array[Vector2i] = []
-			var c := goal
-			while c != start:
-				path.append(c)
-				c = came_from[c]
-			path.append(start)
-			path.reverse()
-			return path
+			return _reconstruct_path(start, goal, came_from)
 
 		for bit in 6:
 			var nxt := get_neighbor(cur_cell, bit)
@@ -177,6 +176,14 @@ static func astar_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: 
 			open.push([f_score, tentative_g, nxt])
 
 	return []
+
+## Unified entry point for the two same-shaped pathfinders (unweighted BFS and
+## heuristic A*). Dijkstra is intentionally excluded — it takes a precomputed
+## distance array + cost_fn, so it has a different contract.
+static func find_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: int, h: int, algo: String = "astar") -> Array[Vector2i]:
+	if algo == "bfs":
+		return bfs_path(start, goal, blocked, w, h)
+	return astar_path(start, goal, blocked, w, h)
 
 
 static func pos_to_idx(cell: Vector2i, w: int) -> int:

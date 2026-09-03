@@ -292,7 +292,7 @@ func _full_path_to(goal: Vector2i, base: Dictionary = {}) -> Array[Vector2i]:
 	# дают встать на клетку врага (даже на воде) и не отменяют контактный бой.
 	blocked.merge(_enemy_aura_blocked(goal))
 	# A* prunes search via heuristic — much faster than full-map Dijkstra
-	return _HexUtils.astar_path(current_cell, goal, blocked, _map_gen.map_width, _map_gen.map_height)
+	return _HexUtils.find_path(current_cell, goal, blocked, _map_gen.map_width, _map_gen.map_height, "astar")
 
 
 ## Если цель занята вражеским стеком, герой встанет на лучшую достижимую

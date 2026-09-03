@@ -54,6 +54,25 @@ func test_astar_same_as_dijkstra_length() -> void:
 		assert_eq(dijkstra_p[-1], astar_p[-1], "same goal")
 
 
+func test_find_path_dispatch_matches_underlying() -> void:
+	var blocked: Dictionary = {Vector2i(5, 5): true}
+	var start := Vector2i(0, 0)
+	var goal := Vector2i(10, 5)
+	# default algo is astar
+	var via_dispatch := _HexUtils.find_path(start, goal, blocked, 21, 21)
+	var via_astar := _HexUtils.astar_path(start, goal, blocked, 21, 21)
+	assert_eq(via_dispatch, via_astar, "find_path default == astar_path")
+
+	var via_bfs := _HexUtils.find_path(start, goal, blocked, 21, 21, "bfs")
+	var direct_bfs := _HexUtils.bfs_path(start, goal, blocked, 21, 21)
+	assert_eq(via_bfs, direct_bfs, "find_path bfs == bfs_path")
+
+	# unreachable → []
+	var surrounded := Vector2i(10, 10)
+	for nb in _HexUtils.get_all_neighbors(surrounded):
+		blocked[nb] = true
+	assert_true(_HexUtils.find_path(Vector2i(0, 0), surrounded, blocked, 21, 21).is_empty(), "unreachable → []")
+
 func test_bfs_cache_key_vector3i() -> void:
 	# Vector3i key should handle large coordinates without overflow
 	var key := Vector3i(300, 200, 50)
