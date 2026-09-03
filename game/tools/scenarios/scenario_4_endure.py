@@ -1,52 +1,31 @@
 """
-scenario_4_endure.py — Сценарий «Endure» (четвёр сценарий).
+scenario_4_endure.py — Сценарий «Endure».
 
-Проверяет долговременную стабильность игры в безголовом режиме: запуск игры
-и серия ходов (END_TURN) без перемещений. На каждом шаге проверяет, что:
-  * герой не покинул мировой режим (нет сбоев/рестартов сцены),
-  * очки действия (ОД) восстанавливаются до максимума каждый день,
-  * соединения не рвётся (сервер отвечает на каждый запрос).
+Проверяет долговременную стабильность игры в безголовом режиме: запуск игры и
+серия ходов (END_TURN) без перемещений. На каждом шаге: герой в world-режиме,
+ОД восстанавливаются до максимума каждый день, соединения не рвётся.
 
-Это регрессионная проверка: игра должна «жить» дольше, чем один авто-выход
-(1 сек в безголовом режиме) — см. WorldController._handle_headless_exit — и
-поддерживать цикл день/ОД скольгодно долго.
+Регрессионная проверка: игра «живёт» дольше одного авто-выхода (1 сек в
+безголовом режиме — WorldController._handle_headless_exit) и держит цикл
+день/ОД скольгодно долго.
 
 Запуск:
     python3 tools/scenarios/scenario_4_endure.py
-    # или через оркестратора:
-    ./tools/shell/play_scenario.sh 4
+    # или: ./tools/shell/play_scenario.sh 4
+    # или: ./tools/shell/run_all_scenarios.sh
 """
 
-import socket
-import json
 import sys
-import time
 
-HOST, PORT = "localhost", 9095
+from scenario_lib import connect, send_cmd, Reporter, scan_server_log
+
 DAYS = 20  # сколько дней проиграть
-
-
-def send_cmd(sock, action, args=None, top=None, cmd_id=0):
-    if args is None:
-        args = {}
-    msg = {"id": cmd_id, "action": action, "args": args}
-    if top:
-        msg.update(top)
-    sock.sendall((json.dumps(msg) + "\n").encode("utf-8"))
-    sock.settimeout(10.0)
-    buf = ""
-    while "\n" not in buf:
-        chunk = sock.recv(65536)
-        if not chunk:
-            break
-        buf += chunk.decode("utf-8")
-    return json.loads(buf.split("\n")[0])
 
 
 def run_scenario():
     print("--- Running Scenario 4 (Endure: stability + OD recovery) ---")
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((HOST, PORT))
+    rep = Reporter()
+    sock = connect()
 
     print("  start_game ->", send_cmd(sock, "START_GAME"))
 
@@ -57,18 +36,15 @@ def run_scenario():
     while day < max_days and recovered < DAYS:
         st = send_cmd(sock, "GET_STATE")
         mode = st.get("mode")
-
         if mode != "world":
-            print(f"  [{day}] unexpected mode '{mode}' — stopping")
+            rep.check("world mode", False, f"unexpected mode '{mode}'")
             break
 
-        hero = st.get("hero_pos")
-        if hero is None:
-            print(f"  [{day}] hero_pos missing — stopping")
+        if st.get("hero_pos") is None:
+            rep.check("hero_pos present", False, "hero_pos missing")
             break
 
-        # Ход: тратим день, ОД должны восстановиться.
-        send_cmd(sock, "END_TURN")
+        send_cmd(sock, "END_TURN")  # тратим день, ОД должны восстановиться
         day += 1
 
         # Ждём, пока ОД восстановятся до максимума (проверка восстановления).
@@ -79,19 +55,25 @@ def run_scenario():
                 recovered += 1
                 break
             if s.get("mode") != "world":
-                print(f"  [{day}] mode changed to '{s.get('mode')}' during recovery — stopping")
-                sock.close()
-                return False
+                rep.check("stable mode during recovery", False,
+                          f"mode changed to '{s.get('mode')}'")
+                break
+            import time
             time.sleep(0.05)
             waited += 1
 
+    rep.check(f"OD recovered {DAYS} days", recovered >= DAYS, f"{recovered}/{DAYS}")
+    rep.check("game stable", day > 0, f"{day} day(s)")
     sock.close()
 
-    if recovered >= DAYS:
-        print(f"✅ Scenario 4 SUCCESS — {recovered}/{DAYS} days recovered OD, stable for {day} day(s)")
-        return True
-    print(f"❌ Scenario 4 FAILED: only {recovered}/{DAYS} days recovered OD over {day} day(s)")
-    return False
+    errors, warnings = scan_server_log()
+    print(f"  console: {'CLEAN' if not errors else 'DIRTY'} "
+          f"(errors={len(errors)}, warnings={len(warnings)})")
+    for e in errors[:5]:
+        print(f"    [console] {e}")
+
+    print(f"{'PASS' if rep.ok else 'FAIL'} Scenario 4 ({rep.summary()})")
+    return rep.ok
 
 
 if __name__ == "__main__":

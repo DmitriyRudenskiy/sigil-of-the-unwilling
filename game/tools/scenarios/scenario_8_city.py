@@ -1,15 +1,14 @@
 """
 scenario_8_city.py — Сценарий «Город в мире» (city-in-world).
 
-Прогоняет реальную игру через сокет (localhost:9095, action-based,
-newline-delimited JSON) и проверяет городскую подсистему end-to-end:
+Прогоняет реальную игру через сокет (localhost:9095) и проверяет городскую
+подсистему end-to-end:
 
   1. Столица существует с начала игры (uid 0, owner "player", стартовый
      набор: промышленность/золото/еда/последователи).
   2. Герой входит в клетку столицы → экран города открывается сам
      (city_screen_open=true); CITY_CLOSE закрывает.
-  3. CITY_BUILD: ферма построена в столице (промышленность списана,
-     зданий +1).
+  3. CITY_BUILD: ферма построена в столице (промышленность списана, зданий +1).
   4. CITY_HIRE: последователь нанят (появился в команде героя,
      free_followers города уменьшилось).
   5. CITY_LEVEL: структурированный результат (ok или reason — уровень
@@ -25,53 +24,11 @@ newline-delimited JSON) и проверяет городскую подсист�
     ./game/tools/shell/play_scenario.sh 8
 """
 
-import json
 import socket
 import sys
 import time
 
-HOST, PORT = "localhost", 9095
-
-FAILURES = []
-
-
-def send_cmd(sock, action, args=None, top=None, cmd_id=0):
-    # Протокол: newline-delimited JSON.
-    if args is None:
-        args = {}
-    msg = {"id": cmd_id, "action": action, "args": args}
-    if top:
-        msg.update(top)
-    sock.sendall((json.dumps(msg) + "\n").encode("utf-8"))
-    sock.settimeout(10.0)
-    buf = ""
-    while "\n" not in buf:
-        chunk = sock.recv(65536)
-        if not chunk:
-            break
-        buf += chunk.decode("utf-8")
-    return json.loads(buf.split("\n")[0])
-
-
-def check(label, cond, detail=""):
-    mark = "✅" if cond else "❌"
-    suffix = f" — {detail}" if detail and not cond else ""
-    print(f"  {mark} {label}{suffix}")
-    if not cond:
-        FAILURES.append(f"{label}{suffix}")
-    return cond
-
-
-def wait_arrival(sock, target, tries=80):
-    # Движение анимировано: ждём, пока герой реально встанет на клетку.
-    for _ in range(tries):
-        s = send_cmd(sock, "GET_STATE")
-        if s.get("hero_pos") == target:
-            return True
-        if not s.get("moving", True) and s.get("hero_pos") != target:
-            return False  # остановился по исчерпании ОД
-        time.sleep(0.1)
-    return False
+from scenario_lib import connect, send_cmd, Reporter, scan_server_log, wait_arrival
 
 
 def move_to_cell(sock, cell, day_budget=40):
@@ -127,72 +84,57 @@ def find_village(sock):
 
 def run_scenario():
     print("--- Running Scenario 8 (City in World) ---")
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((HOST, PORT))
+    rep = Reporter()
+    sock = connect()
 
     send_cmd(sock, "START_GAME")
     time.sleep(1.0)  # даём сцене World отбутстрапиться
 
     st = send_cmd(sock, "GET_STATE")
-    if not check("режим world", st.get("mode") == "world", str(st.get("mode"))):
-        return False
+    rep.check("режим world", st.get("mode") == "world", str(st.get("mode")))
     cap = st.get("capital") or {}
-    check("столица есть (uid 0)", cap.get("uid") == 0, str(cap))
-    check("столица принадлежит игроку", cap.get("owner") == "player", cap.get("owner", ""))
-    check("стартовый набор: промышленность 30", abs(cap.get("industry", 0) - 30.0) < 0.01,
-          str(cap.get("industry")))
-    check("стартовый набор: свободные последователи 2", cap.get("free_followers") == 2,
-          str(cap.get("free_followers")))
+    rep.check("столица есть (uid 0)", cap.get("uid") == 0, str(cap))
+    rep.check("столица принадлежит игроку", cap.get("owner") == "player", cap.get("owner", ""))
+    rep.check("стартовый набор: промышленность 30", abs(cap.get("industry", 0) - 30.0) < 0.01, str(cap.get("industry")))
+    rep.check("стартовый набор: свободные последователи 2", cap.get("free_followers") == 2, str(cap.get("free_followers")))
     capital_cell = {"x": cap["center"]["x"], "y": cap["center"]["y"]}
 
     # ---- 2. Входим в столицу → экран открывается сам ----
-    check("ход к столице", move_to_cell(sock, capital_cell))
-    check("экран города открыт в столице",
-          send_cmd(sock, "GET_STATE").get("city_screen_open") is True)
+    rep.check("ход к столице", move_to_cell(sock, capital_cell))
+    rep.check("экран города открыт в столице", send_cmd(sock, "GET_STATE").get("city_screen_open") is True)
     send_cmd(sock, "CITY_CLOSE")
-    check("CITY_CLOSE закрыл экран",
-          send_cmd(sock, "GET_STATE").get("city_screen_open") is False)
-    # Чистый авто-открыт: выходим на соседнюю клетку и возвращаемся.
+    rep.check("CITY_CLOSE закрыл экран", send_cmd(sock, "GET_STATE").get("city_screen_open") is False)
     away = step_away(sock, capital_cell)
     if away is not None:
-        check("ход на соседнюю клетку", move_to_cell(sock, capital_cell))
-        check("экран открылся САН при входе в столицу",
-              send_cmd(sock, "GET_STATE").get("city_screen_open") is True)
+        rep.check("ход на соседнюю клетку", move_to_cell(sock, capital_cell))
+        rep.check("экран открылся САН при входе в столицу", send_cmd(sock, "GET_STATE").get("city_screen_open") is True)
     else:
-        check("ход на соседнюю клетку", move_to_cell(sock, capital_cell),
-              "нет свободной клетки — пропускаем чистую проверку авто-открытия")
+        rep.check("ход на соседнюю клетку", move_to_cell(sock, capital_cell), "нет свободной клетки — пропускаем чистую проверку авто-открытия")
 
-    # ---- 3. Постройка фермы в столице (uid явно, чтобы экран пере-привязался) ----
-    # Ходы к столице прошли несколько END_TURN — столица за это время
-    # напроизводила промышленность, поэтому проверяем Дельту (−12),
-    # а не абсолютный остаток.
+    # ---- 3. Постройка фермы в столице ----
     ind_before = float((send_cmd(sock, "GET_STATE").get("capital") or {}).get("industry", 0))
     r = send_cmd(sock, "CITY_BUILD", {"uid": 0, "building": "farm"})
-    check("CITY_BUILD: ферма построена", r.get("ok") is True, str(r.get("reason", r)))
-    check("CITY_BUILD: зданий стало 1", (r.get("city") or {}).get("buildings") == 1)
+    rep.check("CITY_BUILD: ферма построена", r.get("ok") is True, str(r.get("reason", r)))
+    rep.check("CITY_BUILD: зданий стало 1", (r.get("city") or {}).get("buildings") == 1)
     ind_after = (r.get("city") or {}).get("industry", -1)
-    check("CITY_BUILD: промышленность списана (стоимость фермы 12)",
-          abs((ind_before - float(ind_after)) - 12.0) < 0.01,
-          "before=%.2f after=%s" % (ind_before, ind_after))
+    rep.check("CITY_BUILD: промышленность списана (стоимость фермы 12)", abs((ind_before - float(ind_after)) - 12.0) < 0.01, "before=%.2f after=%s" % (ind_before, ind_after))
 
     # ---- 4. Найм последователя ----
     st = send_cmd(sock, "GET_STATE")
     followers_before = len(st.get("followers", []))
     r = send_cmd(sock, "CITY_HIRE", {"uid": 0})
-    check("CITY_HIRE: последователь нанят", r.get("ok") is True, str(r.get("reason", r)))
+    rep.check("CITY_HIRE: последователь нанят", r.get("ok") is True, str(r.get("reason", r)))
     f = r.get("follower") or {}
-    check("CITY_HIRE: есть имя и путь", bool(f.get("name")) and bool(f.get("path")), str(f))
-    check("CITY_HIRE: free_followers 2→1", (r.get("city") or {}).get("free_followers") == 1)
+    rep.check("CITY_HIRE: есть имя и путь", bool(f.get("name")) and bool(f.get("path")), str(f))
+    rep.check("CITY_HIRE: free_followers 2→1", (r.get("city") or {}).get("free_followers") == 1)
     st = send_cmd(sock, "GET_STATE")
-    check("CITY_HIRE: герой видит нового последователя",
-          len(st.get("followers", [])) == followers_before + 1)
+    rep.check("CITY_HIRE: герой видит нового последователя", len(st.get("followers", [])) == followers_before + 1)
 
-    # ---- 5. Улучшение уровня (структурированный ответ в любом случае) ----
+    # ---- 5. Улучшение уровня ----
     r = send_cmd(sock, "CITY_LEVEL", {"uid": 0})
-    check("CITY_LEVEL: структурированный результат",
-          "ok" in r and "city" in r, str(r))
+    rep.check("CITY_LEVEL: структурированный результат", "ok" in r and "city" in r, str(r))
     if r.get("ok"):
-        check("CITY_LEVEL: уровень вырос до 2", (r.get("city") or {}).get("level") == 2)
+        rep.check("CITY_LEVEL: уровень вырос до 2", (r.get("city") or {}).get("level") == 2)
 
     send_cmd(sock, "CITY_CLOSE")
 
@@ -203,51 +145,47 @@ def run_scenario():
     time.sleep(0.5)
     st = send_cmd(sock, "GET_STATE")
     gold_after = st.get("strategic_resources", {}).get("gold", 0)
-    check("END_TURN: дань пришла герою (золото выросло)", gold_after > gold_before,
-          f"{gold_before} → {gold_after}")
+    rep.check("END_TURN: дань пришла герою (золото выросло)", gold_after > gold_before, f"{gold_before} → {gold_after}")
 
     # ---- 7. Захват деревни ----
     village = find_village(sock)
-    if not check("найдена незахваченная деревня", village is not None):
-        return False
+    if not rep.check("найдена незахваченная деревня", village is not None):
+        sock.close()
+        print(f"{'PASS' if rep.ok else 'FAIL'} Scenario 8 ({rep.summary()})")
+        return rep.ok
     print(f"  деревня: ({village['x']}, {village['y']})")
-    check("ход к деревне", move_to_cell(sock, village))
+    rep.check("ход к деревне", move_to_cell(sock, village))
     st = send_cmd(sock, "GET_STATE")
-    new_cities = [c for c in st.get("cities", [])
-                  if c["center"] == {"x": village["x"], "y": village["y"]}]
-    if not check("деревня захвачена: город появился", len(new_cities) == 1,
-                 str(st.get("cities"))):
-        return False
+    new_cities = [c for c in st.get("cities", []) if c["center"] == {"x": village["x"], "y": village["y"]}]
+    if not rep.check("деревня захвачена: город появился", len(new_cities) == 1, str(st.get("cities"))):
+        sock.close()
+        print(f"{'PASS' if rep.ok else 'FAIL'} Scenario 8 ({rep.summary()})")
+        return rep.ok
     vc = new_cities[0]
-    check("захваченная деревня: owner player", vc.get("owner") == "player")
-    check("захваченная деревня: имя задано", bool(vc.get("name")))
-    check("захваченная деревня: набор (2 последователя, 30 пром-сти)",
-          vc.get("free_followers") == 2 and abs(vc.get("industry", 0) - 30.0) < 0.01,
-          str(vc))
-    check("захваченная деревня: экран открыт", st.get("city_screen_open") is True)
+    rep.check("захваченная деревня: owner player", vc.get("owner") == "player")
+    rep.check("захваченная деревня: имя задано", bool(vc.get("name")))
+    rep.check("захваченная деревня: набор (2 последователя, 30 пром-сти)", vc.get("free_followers") == 2 and abs(vc.get("industry", 0) - 30.0) < 0.01, str(vc))
+    rep.check("захваченная деревня: экран открыт", st.get("city_screen_open") is True)
 
     vuid = vc["uid"]
     r = send_cmd(sock, "CITY_BUILD", {"uid": vuid, "building": "farm"})
-    check("CITY_BUILD в деревне: ферма построена", r.get("ok") is True,
-          str(r.get("reason", r)))
+    rep.check("CITY_BUILD в деревне: ферма построена", r.get("ok") is True, str(r.get("reason", r)))
     r = send_cmd(sock, "CITY_HIRE", {"uid": vuid})
-    check("CITY_HIRE в деревне: последователь нанят", r.get("ok") is True,
-          str(r.get("reason", r)))
+    rep.check("CITY_HIRE в деревне: последователь нанят", r.get("ok") is True, str(r.get("reason", r)))
 
     send_cmd(sock, "CITY_CLOSE")
-    check("CITY_CLOSE после деревни",
-          send_cmd(sock, "GET_STATE").get("city_screen_open") is False)
-    # city-navigation: на старте уже два города (Перворечье + Город 2).
-    check("всего городов: 3 (столица + Город 2 + деревня)",
-          len(send_cmd(sock, "GET_STATE").get("cities", [])) == 3)
+    rep.check("CITY_CLOSE после деревни", send_cmd(sock, "GET_STATE").get("city_screen_open") is False)
+    rep.check("всего городов: 3 (столица + Город 2 + деревня)", len(send_cmd(sock, "GET_STATE").get("cities", [])) == 3)
 
     sock.close()
 
-    if FAILURES:
-        print(f"❌ Scenario 8 FAILED ({len(FAILURES)}): " + "; ".join(FAILURES))
-        return False
-    print("✅ Scenario 8 SUCCESS — city in world works end-to-end")
-    return True
+    errors, warnings = scan_server_log()
+    print(f"  console: {'CLEAN' if not errors else 'DIRTY'} (errors={len(errors)}, warnings={len(warnings)})")
+    for e in errors[:5]:
+        print(f"    [console] {e}")
+
+    print(f"{'PASS' if rep.ok else 'FAIL'} Scenario 8 ({rep.summary()})")
+    return rep.ok
 
 
 if __name__ == "__main__":

@@ -1,80 +1,34 @@
 """
-scenario_3_explore.py — Сценарий «Explore» (третий сценарий).
+scenario_3_explore.py — Сценарий «Explore».
 
-Прогоняет игру через сокет (localhost:9095) и обеспечивает ПОЛНОЕ
-изучение карты: герой посещает ВСЕ деревни (MAP_VILLAGE_COUNT) и собирает
-ВСЕ ресурсные узлы (MAP_RESOURCE_COUNT). Деревни в режиме игры не
-«сгорают» при посещении, поэтому сценарий ведёт учёт посещённых клеток
-сам (set). Каждый день берёт ближайшую цель (посещённая деревня исключена,
-клетка героя исключена), идёт к ней, собирает ресурс (COLLECT_HERE как
-страховка) и тратит день на восстановление ОД.
+Прогоняет игру через сокет (localhost:9095) и обеспечивает ПОЛНОЕ изучение
+карты: герой посещает ВСЕ деревни и собирает ВСЕ ресурсные узлы. Деревни не
+«сгорают» при посещении — сценарий ведёт учёт посещённых клеток сам. Каждый
+день берёт ближайшую цель (непосещённая деревня или ресурс), идёт к ней,
+собирает (COLLECT_HERE как страховка) и тратит день на восстановление ОД.
 
-Если герой заходит в клетку рядом с вражеским стеком — начинается бой,
-который в безголовом режиме не резолвится сам: сценарий выходит из боя
-FORCE_RETREAT и продолжает изучение.
+Бой (вблизи врага) — FORCE_RETREAT и дальше.
 
 Условие победы: все деревни посещены И все ресурсы собраны.
 
 Запуск:
     python3 tools/scenarios/scenario_3_explore.py
-    # или через оркестратора:
-    ./tools/shell/play_scenario.sh 3
+    # или: ./tools/shell/play_scenario.sh 3
+    # или: ./tools/shell/run_all_scenarios.sh
 """
 
-import socket
-import json
 import sys
-import time
 
-HOST, PORT = "localhost", 9095
-
-
-def send_cmd(sock, action, args=None, top=None, cmd_id=0):
-    if args is None:
-        args = {}
-    msg = {"id": cmd_id, "action": action, "args": args}
-    if top:
-        msg.update(top)
-    sock.sendall((json.dumps(msg) + "\n").encode("utf-8"))
-    sock.settimeout(10.0)
-    buf = ""
-    while "\n" not in buf:
-        chunk = sock.recv(65536)
-        if not chunk:
-            break
-        buf += chunk.decode("utf-8")
-    return json.loads(buf.split("\n")[0])
-
-
-def wait_arrival(sock, target, tries=100):
-    for _ in range(tries):
-        s = send_cmd(sock, "GET_STATE")
-        if s.get("hero_pos") == {"x": target["x"], "y": target["y"]}:
-            return True
-        if not s.get("moving", True) and s.get("hero_pos") != {"x": target["x"], "y": target["y"]}:
-            return False
-        time.sleep(0.1)
-    return False
-
-
-def handle_battle(sock):
-    # Если сейчас бой — отступаем и сдвигаем день.
-    st = send_cmd(sock, "GET_STATE")
-    if st.get("mode") == "battle":
-        send_cmd(sock, "FORCE_RETREAT")
-        send_cmd(sock, "END_TURN")
-        return True
-    return False
+from scenario_lib import connect, send_cmd, wait_arrival, Reporter, scan_server_log
 
 
 def run_scenario():
     print("--- Running Scenario 3 (Explore: all villages + all resources) ---")
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((HOST, PORT))
+    rep = Reporter()
+    sock = connect()
 
     print("  start_game ->", send_cmd(sock, "START_GAME"))
 
-    # Запоминаем общее число деревни для проверки посещения.
     init_st = send_cmd(sock, "GET_STATE")
     total_villages = len(init_st.get("map_villages", []))
 
@@ -82,32 +36,31 @@ def run_scenario():
     max_days = 400
     collected = 0
     visited = 0
-    visited_villages = set()  # посещённые деревни (клетки)
+    visited_villages = set()
 
     while day < max_days:
-        if handle_battle(sock):
+        # Если бой — отступаем и сдвигаем день.
+        st = send_cmd(sock, "GET_STATE")
+        if st.get("mode") == "battle":
+            send_cmd(sock, "FORCE_RETREAT")
+            send_cmd(sock, "END_TURN")
             day += 1
             continue
 
-        st = send_cmd(sock, "GET_STATE")
         mode = st.get("mode")
         if mode != "world":
-            print(f"  [{day}] unexpected mode '{mode}' — stopping")
+            rep.check("world mode", False, f"unexpected mode '{mode}'")
             break
 
         resources = st.get("map_resources", [])
         villages = st.get("map_villages", [])
-
-        # Деревни, которые ещё не посещены.
         unvisited = [v for v in villages if (v["x"], v["y"]) not in visited_villages]
         if not resources and not unvisited:
             break
 
-        hx = st["hero_pos"]["x"]
-        hy = st["hero_pos"]["y"]
+        hx, hy = st["hero_pos"]["x"], st["hero_pos"]["y"]
         hcell = (hx, hy)
 
-        # Цель: ближайшая из (непосещённые деревни + ресурсы), кроме клетки героя.
         targets = []
         for v in unvisited:
             if (v["x"], v["y"]) != hcell:
@@ -153,13 +106,21 @@ def run_scenario():
 
     st = send_cmd(sock, "GET_STATE")
     remaining_res = len(st.get("map_resources", []))
+    rep.check("all resources collected", remaining_res == 0, f"{remaining_res} left")
+    rep.check("all villages visited", visited >= total_villages,
+              f"{visited}/{total_villages}")
+    rep.check("game reached endgame", st.get("mode") in ("endgame", "world", None),
+              f"mode={st.get('mode')}")
     sock.close()
 
-    if remaining_res == 0 and visited >= total_villages:
-        print(f"✅ Scenario 3 SUCCESS — collected {collected} resource(s), visited {visited}/{total_villages} villages in {day} day(s)")
-        return True
-    print(f"❌ Scenario 3 FAILED: {remaining_res} resource(s) left, {visited}/{total_villages} villages visited after {day} day(s)")
-    return False
+    errors, warnings = scan_server_log()
+    print(f"  console: {'CLEAN' if not errors else 'DIRTY'} "
+          f"(errors={len(errors)}, warnings={len(warnings)})")
+    for e in errors[:5]:
+        print(f"    [console] {e}")
+
+    print(f"{'PASS' if rep.ok else 'FAIL'} Scenario 3 ({rep.summary()})")
+    return rep.ok
 
 
 if __name__ == "__main__":

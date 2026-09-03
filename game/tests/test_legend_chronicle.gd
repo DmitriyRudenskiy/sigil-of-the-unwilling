@@ -70,11 +70,11 @@ func test_savedata_v5_migrates_to_v6_with_empty_chronicle() -> void:
 	}
 	var sd: _SaveData = _SaveData.new()
 	sd.from_dict(v5)
-	assert_eq(int(sd.version), 6, "v5 → v6")
+	assert_eq(int(sd.version), SaveData.CURRENT_VERSION, "v5 → current")
 	assert_true(sd.chronicle.is_empty(), "u v5-сейва летопись пуста")
 	var sd2: _SaveData = _SaveData.new()
 	sd2.from_dict(sd.to_dict())
-	assert_eq(int(sd2.version), 6, "v6 roundtrip: версия")
+	assert_eq(int(sd2.version), SaveData.CURRENT_VERSION, "v6 roundtrip: версия")
 	assert_true(sd2.chronicle.is_empty(), "v6 roundtrip: пусто")
 
 func test_savedata_v6_chronicle_roundtrip() -> void:

@@ -121,3 +121,46 @@ against a **global registry** file `.godot/global_script_class_cache.cfg`.
 - **Timeout everything:** macOS has no `timeout` command, and a hung scene/script
   spins the main loop forever. Always wrap Godot invocations in a background+kill
   wrapper (see `AGENT.md` §8.1 / the `runwt.sh` helper).
+
+## Сценарный хэндлер (auto-game-scenarios)
+
+Автоматический прогон игры через сокет (localhost:9095, newline-delimited JSON,
+action-based). Сценарии проверяют **логику игры**, а не только чистоту консоли.
+
+### Структура
+- `game/tools/scenarios/scenario_lib.py` — общая библиотека:
+  - `connect(port, timeout)` — сокет-соединение;
+  - `send_cmd(sock, action, args=None, top=None, cmd_id=0)` — посылка команды
+    (`{"id","action",...}`); `MOVE_TO` читает `x`/`y` из top-level;
+  - `poll(sock, predicate, timeout, interval)` / `wait_arrival(sock, target)` —
+    ожидание условий;
+  - `Reporter` — `check/require/summary/ok`, считаетPass/Fail;
+  - `scan_log(text)` / `scan_server_log(path)` — скан лога таксономией
+    (в точности как `check_console_clean.sh`): `ERROR_PATTERNS`, `WARN_PATTERNS`,
+    `EXCLUDE_PATTERNS`, `ALLOWLIST_PATTERNS`.
+- `scenario_{1..13}_*.py` — сценарии (1–12 коннектятся к серверу
+  `play_scenario.sh`, 13 поднимает свой сервер сам).
+- `game/tools/shell/run_all_scenarios.sh` — оркестратор: свежий сервер на каждый
+  сценарий (1–12 через `play_scenario.sh`, 13 напрямую), отчёт PASS/FAIL,
+  `exit ≠0` при любом провале.
+
+### Запуск
+```bash
+./tools/shell/run_all_scenarios.sh            # все сценарии (1–12 + shard 13)
+./tools/shell/run_all_scenarios.sh 4 5 11     # только указанные
+./tools/shell/play_scenario.sh 5              # один через сервер play_scenario.sh
+```
+
+### Модель оценки (важно)
+- **exit-код сценария = logic-based** (утверждения `Reporter`): 0 = логика игры
+  проверена, 1 = провал утверждения. Скан консоли — **advisory**: печатается
+  строкой `console: CLEAN/DIRTY (errors=N, warnings=M)`, в exit-код не входит.
+- Таксономия скана повторяет канонический гейт `check_console_clean.sh`, чтобы
+  сценарий и гейт классифицировали лог идентично.
+
+### Известные пре-экстинг-провалы (out of scope, не регрессия рефактора)
+Сценарии 1, 2, 3, 8 падают по **логике** из-за пре-экстинг-багов игры
+(движение/путь к столицам и деревням, сбор ресурсов) — одинаково в HEAD-оригиналах.
+Сценарии 4, 10 оставляют в логе пре-екстинг `SCRIPT ERROR: Attempted to free a
+locked object` (`WorldController._remove_hero`, файлы не тронуты). Гейт
+`check_console_clean.sh` поэтому DIRTY — это пре-екстинг игры, не данного цикла.

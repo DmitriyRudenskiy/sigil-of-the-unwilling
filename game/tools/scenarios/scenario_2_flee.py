@@ -1,90 +1,52 @@
 """
-scenario_2_flee.py — Сценарий «Flee All» (второй сценарий).
+scenario_2_flee.py — Сценарий «Flee All».
 
-Прогоняет реальную игру через сокет (localhost:9095, action-based,
-newline-delimited JSON) и обходит ВСЕ вражеские стеки на карте (MAP_ENEMY_COUNT).
-Подходя к стеку, начинается бой, который в безголовом режиме не резолвится сам:
-сценарий выходит из боя командой FORCE_RETREAT и проверяет, что герой выжил
-(продолжает ходить в мировом режиме). Считает устроенные побеги.
+Прогоняет реальную игру через сокет (localhost:9095) и обходит ВСЕ вражеские
+стеки на карте. Подходя к стеку — бой, который в безголовом режиме не резолвится
+сам: FORCE_RETREAT + проверка, что герой выжил (продолжает ходить в world).
+Считает устроенные побеги.
 
 Запуск:
     python3 tools/scenarios/scenario_2_flee.py
-    # или через оркестратора:
-    ./tools/shell/play_scenario.sh 2
+    # или: ./tools/shell/play_scenario.sh 2
+    # или: ./tools/shell/run_all_scenarios.sh
 """
 
-import socket
-import json
 import sys
-import time
 
-HOST, PORT = "localhost", 9095
-
-
-def send_cmd(sock, action, args=None, top=None, cmd_id=0):
-    # Протокол: newline-delimited JSON. MOVE_TO читает x/y из ВЕРХНЕГО уровня.
-    if args is None:
-        args = {}
-    msg = {"id": cmd_id, "action": action, "args": args}
-    if top:
-        msg.update(top)
-    sock.sendall((json.dumps(msg) + "\n").encode("utf-8"))
-    sock.settimeout(10.0)
-    buf = ""
-    while "\n" not in buf:
-        chunk = sock.recv(65536)
-        if not chunk:
-            break
-        buf += chunk.decode("utf-8")
-    return json.loads(buf.split("\n")[0])
-
-
-def wait_arrival(sock, target, tries=100):
-    # Движение анимировано: ждём, пока герой реально встанет на клетку.
-    for _ in range(tries):
-        s = send_cmd(sock, "GET_STATE")
-        if s.get("hero_pos") == {"x": target["x"], "y": target["y"]}:
-            return True
-        if not s.get("moving", True) and s.get("hero_pos") != {"x": target["x"], "y": target["y"]}:
-            return False  # остановился по исчерпании ОД
-        time.sleep(0.1)
-    return False
+from scenario_lib import connect, send_cmd, Reporter, scan_server_log
 
 
 def run_scenario():
     print("--- Running Scenario 2 (Flee All) ---")
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((HOST, PORT))
+    rep = Reporter()
+    sock = connect()
 
     print("  start_game ->", send_cmd(sock, "START_GAME"))
 
     day = 0
     max_days = 400  # защита от зависания
-    fled = 0
     fled_cells = set()  # уже обойденные стеки (force_retreat не уничтожает их)
 
     while day < max_days:
         st = send_cmd(sock, "GET_STATE")
         mode = st.get("mode")
 
-        # Бой: в безголовом режиме он не резолвится сам — отступаем.
+        # Бой: в безголовом режиме не резолвится сам — отступаем.
         if mode == "battle":
             send_cmd(sock, "FORCE_RETREAT")
             send_cmd(sock, "END_TURN")
             day += 1
             continue
-
         if mode != "world":
-            print(f"  [{day}] unexpected mode '{mode}' — stopping")
+            rep.check("world mode", False, f"unexpected mode '{mode}'")
             break
 
         enemies = st.get("map_enemies", [])
         if not enemies:
             break
 
-        # Ближайший НЕ пройденный стек к герою (по манхэттену).
-        hx = st["hero_pos"]["x"]
-        hy = st["hero_pos"]["y"]
+        hx, hy = st["hero_pos"]["x"], st["hero_pos"]["y"]
         enemies = [e for e in enemies if (e["x"], e["y"]) not in fled_cells]
         if not enemies:
             break
@@ -106,30 +68,33 @@ def run_scenario():
                 engaged = True
                 break
             if s.get("hero_pos") == {"x": target["x"], "y": target["y"]}:
-                # дошли до клетки врага — бой мог не начаться (редкий случай)
-                engaged = True
+                engaged = True  # дошли до клетки врага — бой мог не начаться
                 break
             if not s.get("moving", True) and s.get("hero_pos") != {"x": target["x"], "y": target["y"]}:
                 break  # уперся в ОД — вернёмся за этим стеком за день
-            time.sleep(0.1)
 
         if engaged:
             fled_cells.add((target["x"], target["y"]))
 
-        # Продвигаем день (в бою END_TURN вернет ошибку — игнорируем).
-        send_cmd(sock, "END_TURN")
+        send_cmd(sock, "END_TURN")  # продвигаем день (в бою END_TURN — ошибка, игнор)
         day += 1
 
-    # Проверка: герой всё ещё жив (есть hero_pos и мировой режим).
     st = send_cmd(sock, "GET_STATE")
     alive = st.get("hero_pos") is not None
+    rep.check("fled at least one battle", len(fled_cells) > 0, f"fled={len(fled_cells)}")
+    rep.check("hero alive after flee loop", alive, "no hero_pos")
+    rep.check("game reached endgame", st.get("mode") in ("endgame", "world", None),
+              f"mode={st.get('mode')}")
     sock.close()
 
-    if len(fled_cells) > 0 and alive:
-        print(f"✅ Scenario 2 SUCCESS — fled {len(fled_cells)} distinct battle(s), hero alive after {day} day(s)")
-        return True
-    print(f"❌ Scenario 2 FAILED: fled={len(fled_cells)}, alive={alive} after {day} day(s)")
-    return False
+    errors, warnings = scan_server_log()
+    print(f"  console: {'CLEAN' if not errors else 'DIRTY'} "
+          f"(errors={len(errors)}, warnings={len(warnings)})")
+    for e in errors[:5]:
+        print(f"    [console] {e}")
+
+    print(f"{'PASS' if rep.ok else 'FAIL'} Scenario 2 ({rep.summary()})")
+    return rep.ok
 
 
 if __name__ == "__main__":

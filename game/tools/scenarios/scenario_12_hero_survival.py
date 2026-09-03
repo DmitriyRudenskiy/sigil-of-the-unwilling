@@ -19,59 +19,25 @@ scenario_12_hero_survival.py — Сценарий «Герой и смерть»
     ./game/tools/shell/play_scenario.sh 12
 """
 
-import json
 import socket
 import sys
 import time
 
-HOST, PORT = "localhost", 9095
-
-FAILURES = []
-
-
-def send_cmd(sock, action, args=None, top=None, cmd_id=0):
-    if args is None:
-        args = {}
-    msg = {"id": cmd_id, "action": action, "args": args}
-    if top:
-        msg.update(top)
-    sock.sendall((json.dumps(msg) + "\n").encode("utf-8"))
-    sock.settimeout(10.0)
-    buf = ""
-    while "\n" not in buf:
-        chunk = sock.recv(65536)
-        if not chunk:
-            break
-        buf += chunk.decode("utf-8")
-    return json.loads(buf.split("\n")[0])
-
-
-def check(label, cond, detail=""):
-    mark = "✅" if cond else "❌"
-    suffix = f" — {detail}" if detail and not cond else ""
-    print(f"  {mark} {label}{suffix}")
-    if not cond:
-        FAILURES.append(f"{label}{suffix}")
-    return cond
+from scenario_lib import connect, send_cmd, Reporter, scan_server_log
 
 
 def run_scenario():
     print("--- Running Scenario 12 (Hero Survival: death flow) ---")
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((HOST, PORT))
+    rep = Reporter()
+    sock = connect()
 
     send_cmd(sock, "START_GAME")
     time.sleep(1.2)  # даём сцене World ноутстрапиться
 
     st = send_cmd(sock, "GET_STATE")
-    if not check("режим world", st.get("mode") == "world", str(st.get("mode"))):
-        return False
-    if not check("есть города игрока", len(st.get("cities", [])) > 0,
-                 str([c.get("name") for c in st.get("cities", [])])):
-        return False
-    if not check("герой жив на старте", st.get("hero_pos") is not None,
-                 str(st.get("hero_pos"))):
-        return False
+    rep.check("режим world", st.get("mode") == "world", str(st.get("mode")))
+    rep.check("есть города игрока", len(st.get("cities", [])) > 0, str([c.get("name") for c in st.get("cities", [])]))
+    rep.check("герой жив на старте", st.get("hero_pos") is not None, str(st.get("hero_pos")))
 
     # ---- 2. Мир тикает: герой жив после ходов (need-tick в end_turn) ----
     alive_after_ticks = True
@@ -87,42 +53,36 @@ def run_scenario():
             alive_after_ticks = False
             break
         time.sleep(0.3)
-    check("мир тикает, герой жив после ходов", alive_after_ticks,
-          "hero_pos не пропал")
+    rep.check("мир тикает, герой жив после ходов", alive_after_ticks, "hero_pos не пропал")
 
     # ---- 3. Смерть по hero-survival (честная цепочка) ----
     r = send_cmd(sock, "HERO_DIE")
-    if not check("HERO_DIE принят", r.get("status") == "hero_dead", str(r)):
-        return False
+    if not rep.check("HERO_DIE принят", r.get("status") == "hero_dead", str(r)):
+        sock.close()
+        print(f"{'PASS' if rep.ok else 'FAIL'} Scenario 12 ({rep.summary()})")
+        return rep.ok
 
     st = send_cmd(sock, "GET_STATE")
     eg = st.get("endgame")
-    if not check("GET_STATE содержит блок endgame", isinstance(eg, dict), str(st.keys())):
-        return False
+    rep.check("GET_STATE содержит блок endgame", isinstance(eg, dict), str(st.keys()))
+    rep.check("смерть без преемника → DEFEAT", eg.get("state") == "DEFEAT", str(eg))
+    rep.check("end_reason = unsuccessored_death", eg.get("end_reason") == "unsuccessored_death", str(eg))
+    rep.check("герой снят с карты (hero_pos=None)", st.get("hero_pos") is None, str(st.get("hero_pos")))
 
-    # Свежий герой без последователей → по факту wiring'а преемника нет:
-    # «Знак переходит» некуда → забег идёт в DEFEAT (unsuccessored_death).
-    check("смерть без преемника → DEFEAT", eg.get("state") == "DEFEAT", str(eg))
-    check("end_reason = unsuccessored_death",
-          eg.get("end_reason") == "unsuccessored_death", str(eg))
-    check("герой снят с карты (hero_pos=None)", st.get("hero_pos") is None,
-          str(st.get("hero_pos")))
-
-    # Ввод заблокирован после окончания забега.
     r = send_cmd(sock, "END_TURN")
-    check("END_TURN после DEFEAT заблокирован", r.get("error") == "Game over", str(r))
+    rep.check("END_TURN после DEFEAT заблокирован", r.get("error") == "Game over", str(r))
     st = send_cmd(sock, "GET_STATE")
-    check("сервер жив (GET_STATE отвечает)", isinstance(st.get("endgame"), dict),
-          str(st.get("endgame")))
+    rep.check("сервер жив (GET_STATE отвечает)", isinstance(st.get("endgame"), dict), str(st.get("endgame")))
 
     sock.close()
 
-    if FAILURES:
-        print(f"❌ Scenario 12 FAILED ({len(FAILURES)}): " + "; ".join(FAILURES))
-        return False
-    print("✅ Scenario 12 SUCCESS — death flow works: "
-          "hero died unsuccessored → DEFEAT, world clean")
-    return True
+    errors, warnings = scan_server_log()
+    print(f"  console: {'CLEAN' if not errors else 'DIRTY'} (errors={len(errors)}, warnings={len(warnings)})")
+    for e in errors[:5]:
+        print(f"    [console] {e}")
+
+    print(f"{'PASS' if rep.ok else 'FAIL'} Scenario 12 ({rep.summary()})")
+    return rep.ok
 
 
 if __name__ == "__main__":
