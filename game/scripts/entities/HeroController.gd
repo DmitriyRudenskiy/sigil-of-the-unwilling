@@ -28,6 +28,15 @@ var inventory: HeroInventory = HeroInventory.new()
 ## succession-sigil: путь-легенда (build identity). Источник истины для
 ## выбора преемника (преемник должен быть последователем того же пути).
 var path_id: StringName = &""
+
+## hero-survival: core-потребности (hunger/rest/social/inspiration) и
+## флаг «уже воскрешён в этом цикле» (воскресение — один раз за жизнь героя).
+var needs := HeroNeeds.new()
+var resurrected_once := false
+
+## hero-survival: опциональная ссылка на города (world подставляет в setup;
+## headless-тесты ставят вручную). null — герой всегда «в поле».
+var city_manager: CityManager = null
 ## succession-sigil: бой. HP героя в бою; 0 = герой пал в бою.
 ## combat_hp обнуляется в _apply_results при полном уничтожении армии.
 var combat_hp := 0
@@ -268,6 +277,37 @@ func end_turn() -> void:
 	_apply_daily_resource_effects()
 	_restore_mana()
 	_reset_time_and_movement()
+	_tick_needs()
+
+
+## hero-survival: тик потребностей. В городе (центр под ногами) — recovery
+## по таблице citizens; в поле — только распад. Ноль DEATH_STREAK ходов
+## подряд → смерть: hero_died(cause) (succession/endgame/DeathSequence —
+## дальше по существующему потоку, как при боевой смерти).
+func _tick_needs() -> void:
+	if not is_alive:
+		return
+	var city: City = null
+	if city_manager != null:
+		city = city_manager.city_at(movement.current_cell)
+	var cause := needs.tick(city != null, city)
+	if cause != &"":
+		is_alive = false
+		GameLogger.world("Hero death by needs: %s" % String(cause))
+		GameEventBus.hero_died.emit(cause)
+
+
+## hero-survival: воскресение в великом храме. Возвращает героя в жизнь
+## на центре города-храма: HP/потребности восстановлены, path и spellbook
+## сохранены, инвентарь — шаблон (личное имущество гибнет с героем).
+func revive_at(city: City) -> void:
+	is_alive = true
+	combat_hp = max_combat_hp
+	needs.reset()
+	inventory.equipped.clear()
+	inventory.backpack.clear()
+	if city != null:
+		movement.current_cell = city.center
 
 
 func _apply_daily_resource_effects() -> void:
@@ -364,6 +404,9 @@ func serialize() -> Dictionary:
 		"time_mp_spent": time.mp_spent_today,
 		"followers": _followers_data(),
 		"planned_path": _planned_path_data(),
+		# hero-survival: потребности и флаг воскрешения (старые сейвы — дефолты).
+		"needs": needs.serialize(),
+		"resurrected_once": resurrected_once,
 	}
 
 func _planned_path_data() -> Array:
@@ -393,6 +436,9 @@ func deserialize(data: Dictionary) -> void:
 	magic.mana_max = int(data.get("mana_max", magic.mana_max))
 	magic.schools = data.get("magic_schools", magic.schools).duplicate()
 	magic.spellbook = data.get("spellbook", magic.spellbook).duplicate()
+	# hero-survival: потребности (старый сейв без ключа → 1.0), флаг воскрешения.
+	needs.deserialize(data.get("needs", {}))
+	resurrected_once = bool(data.get("resurrected_once", false))
 	if skills == null:
 		skills = HeroSkills.new()
 

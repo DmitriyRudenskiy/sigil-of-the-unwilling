@@ -2,8 +2,9 @@ extends PanelContainer
 class_name HeroStatusPanel
 ## legend-chronicle: состояние героя — кондиция, статы, последователи.
 ## Read-only: панель рисует то, что есть, и рендерит только секции с
-## данными. До `inspiration-core` у героя нет needs/inspiration — секция
-## «Кондиция» деградирует до HP/маны (graceful degradation).
+## данными. hero-survival: секция «Кондиция» включает четыре потребности
+## (🍞😴🤝💡, критический <25% — ⚠️); без needs-компонента — деградация
+## до HP/маны (graceful degradation).
 
 var _hero: HeroController = null
 
@@ -15,6 +16,13 @@ var _followers_label: Label
 ## остаток — «+N ещё». Если список станет длинным и начнёт жать —
 ## заменить на ScrollContainer.
 const _MAX_FOLLOWERS_SHOWN := 6
+
+const _NEED_ICONS: Dictionary = {
+	&"hunger": "🍞",
+	&"rest": "😴",
+	&"social": "🤝",
+	&"inspiration": "💡",
+}
 
 
 ## ponytail: билд в _init, а не _ready — headless-тесты (run_tests.gd) идут
@@ -78,22 +86,27 @@ func refresh() -> void:
 	_followers_label.text = _followers_text(h)
 
 
-## Кондиция: HP/мана; needs/inspiration — только если герой их несёт
-## (появятся после inspiration-core).
+## Кондиция: HP/мана; hero-survival: потребности (needs-компонент).
 func _condition_text(h: HeroController) -> String:
 	var parts: Array[String] = []
 	if h.max_combat_hp > 0:
 		parts.append("❤️ %d/%d" % [h.combat_hp, h.max_combat_hp])
 	if h.mana_max > 0:
 		parts.append("✨ %d/%d" % [h.mana_current, h.mana_max])
-	# inspiration-core (когда прилетит): "inspiration" в h — meter 0..1,
-	# "burnout" — флаг выгорания. Секция появляется без изменения панели.
-	if "inspiration" in h:
-		parts.append("💡 %.0f%%" % (float(h.inspiration) * 100.0))
-		if h.burnout:
-			parts.append("🔥 выгорание")
+	# hero-survival: needs всегда есть у реального героя; null-проверка —
+	# деградация для моков без компонента.
+	if h.needs != null:
+		parts.append(_needs_text(h.needs))
 	if parts.is_empty():
 		return ""
+	return "\n".join(parts)
+
+
+func _needs_text(n: HeroNeeds) -> String:
+	var parts: Array[String] = []
+	for k in HeroNeeds.NEED_KEYS:
+		var mark := "⚠️" if n.is_critical(k) else ""
+		parts.append("%s%s %.0f%%" % [_NEED_ICONS[k], mark, n.get_need(k) * 100.0])
 	return "\n".join(parts)
 
 

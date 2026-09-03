@@ -7,17 +7,23 @@ extends CanvasLayer
 ## Биты: (a) падение — имя героя + «цикл оборвался/продолжится»;
 ## (b) сводка забега (ходы, дата, города, слава, бои, поколения);
 ## (c) если есть преемник — карточка преемника + «Знак переходит»
-## (вызывает succession-поток в WorldController); иначе «В меню».
+## (вызывает succession-поток в WorldController); иначе «В меню»;
+## (d) hero-survival: если доступен великий храм — «Воскресить»
+## (альтернатива преемнику: герой возвращается, цикл не оборвался).
 ## Пока открыта — глотает весь unhandled-ввод (как GameOverScreen).
 
 signal successor_chosen
 signal return_to_menu
 signal chronicle_requested
+signal resurrection_chosen
 
 const _CAUSES: Dictionary = {
 	&"battle": "в бою",
-	&"hunger": "от голода",
-	&"fatigue": "от усталости",
+	# hero-survival: смерти по потребностям (HeroNeeds._death_cause).
+	&"starvation": "от голода",
+	&"exhaustion": "от истощения",
+	&"isolation": "от одиночества",
+	&"burnout": "от выгорания",
 }
 
 var _root: Control = null
@@ -29,12 +35,14 @@ func _init() -> void:
 
 
 ## successor == null → «цикл оборвался» + «В меню»; иначе карточка
-## преемника + «Знак переходит». summary — тот же формат, что у endgame.
+## преемника + «Знак переходит». res_city (hero-survival) — город с
+## великим храмом: третья кнопка «Воскресить». summary — формат endgame.
 func show_death(
 	deceased_name: String,
 	cause: StringName,
 	summary: Dictionary,
-	successor: HeroController = null
+	successor: HeroController = null,
+	res_city: City = null
 ) -> void:
 	_build()
 	var title: Label = _root.get_node("Panel/VBox/Title")
@@ -66,17 +74,26 @@ func show_death(
 	# Карточка преемника (только если преемник есть).
 	var card: VBoxContainer = _root.get_node("Panel/VBox/SuccessorCard")
 	var successor_btn: Button = _root.get_node("Panel/VBox/Buttons/SuccessorButton")
+	var resurrection_btn: Button = _root.get_node("Panel/VBox/Buttons/ResurrectionButton")
 	var menu_btn: Button = _root.get_node("Panel/VBox/Buttons/MenuButton")
+	# hero-survival: «Воскресить» — только при городе-кандидате (WorldController
+	# передаёт res_city лишь когда цикл жив и герой не воскрешал в цикле).
+	var res_cost := SuccessionController.RESURRECTION_INDUSTRY
+	var res_gold := SuccessionController.RESURRECTION_SPECIAL_AMOUNT
 	if successor != null:
 		var card_label: Label = card.get_node("CardLabel")
 		card_label.text = "Знак переходит к: %s" % _successor_caption(successor)
 		card.visible = true
 		successor_btn.visible = true
 		menu_btn.visible = false
+		resurrection_btn.visible = res_city != null
+		if res_city != null:
+			resurrection_btn.text = "Воскресить (%d⚙ + %d💰)" % [res_cost, res_gold]
 	else:
 		card.visible = false
 		successor_btn.visible = false
 		menu_btn.visible = true
+		resurrection_btn.visible = false
 
 	visible = true
 	# Твин требует ноду в дереве — в headless-тестах показываем без анимации.
@@ -175,6 +192,14 @@ func _build() -> void:
 	successor_btn.custom_minimum_size = Vector2(0, 48)
 	successor_btn.pressed.connect(func() -> void: successor_chosen.emit())
 	buttons.add_child(successor_btn)
+
+	# hero-survival: «Воскресить» — виден только с res_city (show_death).
+	var resurrection_btn := Button.new()
+	resurrection_btn.name = "ResurrectionButton"
+	resurrection_btn.custom_minimum_size = Vector2(0, 48)
+	resurrection_btn.visible = false
+	resurrection_btn.pressed.connect(func() -> void: resurrection_chosen.emit())
+	buttons.add_child(resurrection_btn)
 
 	var chronicle_btn := Button.new()
 	chronicle_btn.name = "ChronicleButton"

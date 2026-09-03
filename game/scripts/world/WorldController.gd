@@ -42,6 +42,11 @@ var _death_seq = null
 var _chronicle_screen = null
 var _pending_successor: HeroController = null
 var _deceased_snapshot: Dictionary = {}
+## hero-survival: умерший герой, удерживаемый в памяти до выбора игрока
+## (воскресение или преемник). null — труп уже освобождён.
+var _deceased_hero: HeroController = null
+## hero-survival: город с великим храмом-кандидатом на воскрешение.
+var _resurrection_city: City = null
 
 
 func _ready() -> void:
@@ -204,28 +209,43 @@ func _on_hero_died(cause: StringName) -> void:
 	var session := get_session()
 	if session != null and session.is_terminal():
 		_remove_hero(deceased)
-		_show_death_sequence(str(deceased.hero_name), cause, null)
+		_show_death_sequence(str(_deceased_snapshot.get("hero_name", "?")), cause, null)
 		return
 	var successor := _plan_succession(deceased)
 	if successor == null:
 		GameLogger.world("Succession: no eligible follower — run ends")
 		_remove_hero(deceased)
-		_show_death_sequence(str(deceased.hero_name), cause, null)
+		_show_death_sequence(str(_deceased_snapshot.get("hero_name", "?")), cause, null)
 		return
 	# legend-chronicle: перерождение отложено — «Знак переходит» в
 	# последовательности вызывает succession-поток (_execute_succession).
-	# Труп убираем сразу (UI/ввод не должны ходить по мёртвому герою);
-	# _reincarnate с _hero == null работает (old == null → просто добавляет).
-	_remove_hero(deceased)
 	_pending_successor = successor
-	_show_death_sequence(str(deceased.hero_name), cause, successor)
+	# hero-survival: кандидат на воскрешение — город с великим храмом, где
+	# герой ещё не воскрешал в этом цикле. Если есть — труп держим в памяти:
+	# игрок выбирает между «Воскресить» и «Знак переходит».
+	var res_city: City = _find_resurrection_city(deceased)
+	_resurrection_city = res_city
+	if res_city != null:
+		_deceased_hero = deceased
+		_detach_hero(deceased)
+	else:
+		_remove_hero(deceased)
+	# _reincarnate с _hero == null работает (old == null → просто добавляет).
+	# Труп уже освобождён (res_city == null) — имя берём из снапшота, а не из
+	# freed-объекта (use-after-free). Снапшот взят в начале _on_hero_died.
+	_show_death_sequence(str(_deceased_snapshot.get("hero_name", "?")), cause, successor, res_city)
 
 
 func is_death_sequence_open() -> bool:
 	return _death_seq != null and _death_seq.visible
 
 
-func _show_death_sequence(deceased_name: String, cause: StringName, successor: Node) -> void:
+func _show_death_sequence(
+	deceased_name: String,
+	cause: StringName,
+	successor: Node,
+	res_city: City = null
+) -> void:
 	if _death_seq == null:
 		_death_seq = DeathSequenceScript.new()
 		_death_seq.name = "DeathSequence"
@@ -233,7 +253,8 @@ func _show_death_sequence(deceased_name: String, cause: StringName, successor: N
 		_death_seq.successor_chosen.connect(_execute_succession)
 		_death_seq.return_to_menu.connect(_on_death_return_to_menu)
 		_death_seq.chronicle_requested.connect(_on_death_chronicle_requested)
-	_death_seq.show_death(deceased_name, cause, _run_summary(), successor)
+		_death_seq.resurrection_chosen.connect(_on_resurrection_chosen)
+	_death_seq.show_death(deceased_name, cause, _run_summary(), successor, res_city)
 
 
 ## Кнопка «Знак переходит»: перерождение + hero_successor + запись в летопись.
@@ -244,9 +265,64 @@ func _execute_succession() -> void:
 		return
 	if is_death_sequence_open():
 		_death_seq.visible = false
+	# hero-survival: игрок выбрал преемника — удерживаемый труп освобождается.
+	_free_deceased()
 	_reincarnate(successor)
 	GameEventBus.hero_successor.emit(successor)
 	_append_succession_entry()
+
+
+## hero-survival: первый город игрока, где доступно воскрешение (великий храм
+## + хранилище под стоимость по умолчанию). null — варианта нет.
+func _find_resurrection_city(deceased: HeroController) -> City:
+	if _succession == null or _cities == null:
+		return null
+	if deceased != null and deceased.resurrected_once:
+		return null
+	var cost: Dictionary = _succession.default_resurrection_cost()
+	for c in _cities.cities:
+		if c != null and c.owner == &"player" and c.can_resurrect(cost):
+			return c
+	return null
+
+
+## hero-survival: «Воскресить» — герой возвращается в город с великим храмом.
+## Цикл не оборвался: записи в летопись нет, hero_successor не эмитится.
+func _on_resurrection_chosen() -> void:
+	var city := _resurrection_city
+	var hero := _deceased_hero
+	_resurrection_city = null
+	_deceased_hero = null
+	if hero == null or city == null or _succession == null:
+		return
+	# Воскрешение заменяет преемника: pending-преемник освобождается.
+	if _pending_successor != null and is_instance_valid(_pending_successor):
+		_pending_successor.free()
+	_pending_successor = null
+	# Экран блокирует ходы — хранилище с момента проверки не меняется.
+	_succession.resurrect_hero(city)
+	hero.revive_at(city)
+	hero.resurrected_once = true
+	_install_hero(hero)
+	if is_death_sequence_open():
+		_death_seq.visible = false
+	GameLogger.world("Succession: %s resurrected in %s" % [hero.hero_name, city.display_name])
+
+
+## hero-survival: убрать героя из мира без free (выбор игрока ещё впереди).
+func _detach_hero(deceased: Node) -> void:
+	if deceased != null and is_instance_valid(deceased) and deceased.get_parent() != null:
+		deceased.get_parent().remove_child(deceased)
+	if _hero == deceased:
+		_hero = null
+
+
+## hero-survival: освободить удерживаемый труп (преемник / «В меню»).
+func _free_deceased() -> void:
+	if _deceased_hero != null and is_instance_valid(_deceased_hero):
+		_deceased_hero.free()
+	_deceased_hero = null
+	_resurrection_city = null
 
 
 ## legend-chronicle: запись завершённого цикла (умерший герой).
@@ -280,6 +356,8 @@ func _on_death_chronicle_requested() -> void:
 
 
 func _on_death_return_to_menu() -> void:
+	# hero-survival: труп без родителя — освободить явно, иначе утечка.
+	_free_deceased()
 	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
 
 
@@ -334,38 +412,46 @@ func _remove_hero(deceased: Node) -> void:
 ## ввод/router/UI — иначе freed-референсы = краш на следующем кадре).
 func _reincarnate(successor: HeroController) -> void:
 	var old := _hero
-	_hero = successor
 	_remove_hero(old)
-	add_child(successor)
+	_install_hero(successor)
+	GameLogger.world("Succession: successor took the legend")
+
+
+## hero-survival: поставить героя в мир (общая часть перерождения и
+## воскрешения): в дерево, setup, перенаправить рефы во всех системах.
+func _install_hero(hero: HeroController) -> void:
+	_hero = hero
+	add_child(hero)
+	hero.city_manager = _cities
 	# Гвард — для headless-тестов (карты нет); в игре _map_gen всегда есть.
 	if _map_gen != null:
-		successor.setup(_map_gen)
+		hero.setup(_map_gen)
 	if _map_gen != null and _map_gen.has_valid_tilemap():
-		successor.position = _map_gen.map_to_local(successor.current_cell)
+		hero.position = _map_gen.map_to_local(hero.current_cell)
 	if is_instance_valid(battle_coordinator):
-		battle_coordinator.hero = successor
+		battle_coordinator.hero = hero
 	if is_instance_valid(interaction_controller):
-		interaction_controller.hero = successor
+		interaction_controller.hero = hero
 	if _bootstrap_result != null:
 		# enemy-world-ai: без этого вражеский ИИ смотрит на freed-героя.
 		if _bootstrap_result.enemy_proc != null:
-			_bootstrap_result.enemy_proc._hero = successor
+			_bootstrap_result.enemy_proc._hero = hero
 		# endgame: ввод кликов по карте тоже держит реф на героя.
 		if _bootstrap_result.input_controller != null:
-			_bootstrap_result.input_controller.hero = successor
+			_bootstrap_result.input_controller.hero = hero
 		if _bootstrap_result.shortcuts != null:
-			_bootstrap_result.shortcuts._hero = successor
+			_bootstrap_result.shortcuts._hero = hero
 	if _event_router != null:
-		_event_router.hero = successor
+		_event_router.hero = hero
 		_event_router._connect_hero_signals()
 	if _ui_manager != null:
-		_ui_manager._hero = successor
-		_ui_manager.ui.reattach_hero(successor, _camera)
+		_ui_manager._hero = hero
+		_ui_manager.ui.reattach_hero(hero, _camera)
 		if is_instance_valid(_ui_manager.inventory_screen):
-			_ui_manager.inventory_screen.set_hero(successor)
+			_ui_manager.inventory_screen.set_hero(hero)
 		if is_instance_valid(_ui_manager.city_screen):
-			_ui_manager.city_screen.hero = successor
-	GameLogger.world("Succession: successor took the legend")
+			_ui_manager.city_screen.hero = hero
+
 
 
 # ==================== CAMERA ====================

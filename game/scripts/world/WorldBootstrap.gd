@@ -150,6 +150,10 @@ static func _create_hero(parent: Node2D, R: BootstrapResult) -> void:
 
 static func _init_hero(R: BootstrapResult) -> void:
 	R.hero.setup(R.map_gen)
+	# hero-survival: герой видит города (реcovery потребностей в городе).
+	R.hero.city_manager = R.cities
+	# hero-survival: герой видит города (реcovery потребностей в городе).
+	R.hero.city_manager = R.cities
 	if R.loaded_save != null:
 		R.hero.deserialize(R.loaded_save.hero)
 		if R.map_gen.has_valid_tilemap():

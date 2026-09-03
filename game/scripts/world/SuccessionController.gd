@@ -105,6 +105,11 @@ func transfer_legend(deceased: HeroController, successor: HeroController,
 
 # ==================== ВОСКРЕШЕНИЕ ====================
 
+## hero-survival: стоимость воскрешения по умолчанию (формат can_resurrect).
+func default_resurrection_cost() -> Dictionary:
+	return {"industry": RESURRECTION_INDUSTRY, RESURRECTION_SPECIAL: RESURRECTION_SPECIAL_AMOUNT}
+
+
 ## воскресить героя в великом храме города. Стоит industry + спец. ресурс.
 ## true, если храм уровня ≥ 1 и storage хватает (и ресурсы списаны).
 func resurrect_hero(city: City, cost: Dictionary = {}) -> bool:
