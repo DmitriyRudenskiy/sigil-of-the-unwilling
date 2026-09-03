@@ -1,6 +1,7 @@
 extends Node
 ## Центральный контроллер контекстного системного курсора (autoload).
-## Переключает системный курсор (Input.set_default_mouse_cursor) по контексту:
+## Переключает системный курсор (Input.set_custom_mouse_cursor /
+## set_default_cursor_shape) по контексту:
 ## DEFAULT (стрелка), WALK (ботинок), COLLECT (рука), ATTACK (два воина).
 ## Ассеты конфигурируемы; под неизвестный/нет ассета режим — стрелка (DEFAULT).
 ##
@@ -88,20 +89,22 @@ func _apply_cursor(mode: int) -> void:
 		return
 	if mode == Mode.DEFAULT:
 		# Стрелка: ни одного ассета, родной системный курсор Godot.
-		_input.set_default_mouse_cursor()
+		# Godot 4.7: reset через set_default_cursor_shape (set_default_mouse_cursor
+		# в API нет — SCRIPT ERROR на каждом запуске).
+		_input.set_default_cursor_shape(Input.CURSOR_ARROW)
 		return
 	var cfg = MODE_ASSETS.get(mode)
 	if cfg is Dictionary and str(cfg.get("path", "")).ends_with(".png") and not cfg.get("path", "").is_empty():
 		var tex := _load_texture(cfg.get("path", ""), int(cfg.get("size", 128)))
 		if tex != null:
-			_input.set_default_mouse_cursor(tex, cfg.get("hotspot", Vector2i.ZERO))
+			_input.set_custom_mouse_cursor(tex, cfg.get("hotspot", Vector2i.ZERO))
 			return
 		# Ассет не загрузился — остаться на стрелке, не ронять игру.
 		GameLogger.warn("cursor: asset failed to load, staying DEFAULT: %s" % cfg.get("path", ""), "Cursor")
 	_apply_default()
 
 func _apply_default() -> void:
-	_input.set_default_mouse_cursor()
+	_input.set_default_cursor_shape(Input.CURSOR_ARROW)
 
 func _load_texture(path: String, _size: int) -> Texture2D:
 	if _loaded.has(path):
