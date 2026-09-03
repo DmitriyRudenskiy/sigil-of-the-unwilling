@@ -103,6 +103,27 @@ func test_even_row_mode() -> void:
 	check("even mode: distance 2", d == 2)
 
 
+func test_min_heap_pop_empty_guard() -> void:
+	print("[test] min_heap empty-pop guard")
+	var heap = HexUtilsScript.MinHeap.new()
+	var popped = heap.pop()
+	check("pop on empty heap returns [] (no crash)",
+		popped is Array and popped.is_empty(), "got %s" % str(popped))
+
+func test_min_heap_ordering() -> void:
+	print("[test] min_heap ordering")
+	var heap = HexUtilsScript.MinHeap.new()
+	heap.push([5, "e"])
+	heap.push([1, "a"])
+	heap.push([3, "c"])
+	var p1 = heap.pop()
+	check("first pop is smallest (a)", p1[1] == "a", "got %s" % str(p1))
+	var p2 = heap.pop()
+	check("second pop is next (c)", p2[1] == "c", "got %s" % str(p2))
+	var p3 = heap.pop()
+	check("third pop is last (e)", p3[1] == "e", "got %s" % str(p3))
+	check("heap now empty", heap.pop().is_empty(), "")
+
 func test_cube_roundtrip() -> void:
 	print("[test] cube roundtrip")
 	HexUtils.get_config().odd_row_shift_right = true
@@ -123,6 +144,8 @@ func _init() -> void:
 	test_bfs_reachable()
 	test_even_row_mode()
 	test_cube_roundtrip()
+	test_min_heap_pop_empty_guard()
+	test_min_heap_ordering()
 	print("\n=== %d passed, %d failed ===" % [_passed, _failed])
 	await process_frame
 	quit(1 if _failed > 0 else 0)

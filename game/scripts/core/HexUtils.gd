@@ -325,6 +325,11 @@ class MinHeap:
 			else:
 				break
 	func pop() -> Array:
+		# ponytail: empty-heap guard — callers loop on `while not open.is_empty()`,
+		# so this is defensive (pop() must never index out of bounds). Return []
+		# rather than null to keep the Array contract for any future caller.
+		if _data.is_empty():
+			return []
 		var res = _data[0]
 		var last: Array = _data.pop_back()
 		if _data.size() > 0:
