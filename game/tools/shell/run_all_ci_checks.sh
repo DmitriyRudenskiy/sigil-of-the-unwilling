@@ -29,12 +29,23 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"      # корень Godot-проекта (game/)
 REPO_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)"      # корень репозитория
 
+# Директория захвата логов + шаблоны скана для итогового гейта «конец цикла» (AGENT.md 8.2).
+# Исключаем «Parse error»/«File not found» — их приложение логирует само (напр. SaveManager):
+# это ложные срабатывания, а не реальные ошибки (см. _godot_script). Строки app-логгера
+# ([color=]) исключаются при скане — это намеренные логи, не регрессия кода.
+CI_LOG_DIR="${CI_LOG_DIR:-/tmp/ci_logs}"
+CI_ERROR_RE='SCRIPT ERROR|Failed to load script|Can'"'"'t load script|Could not find type|does not inherit from|Nonexistent function|Nonexistent class|Nonexistent base|SOME TESTS FAILED|RESULT: FAILED'
+CI_WARN_RE='^WARNING|^NOTICE|leaked|LEAK|deprecated|^W [0-9]'
+rm -f "$CI_LOG_DIR"/*.log 2>/dev/null
+mkdir -p "$CI_LOG_DIR"
+
 # Запуск godot -s <script> с определением провала по ЛОГУ, а не по коду выхода.
 # Godot возвращает 0 даже когда скрипт не загрузился (Can't load script), поэтому
 # проверяем маркеры ошибок в выводе. $@ — аргументы к godot после --path.
 _godot_script() {
     local desc="$1"; shift
-    local out; out="$(mktemp)"
+    local out; out="$CI_LOG_DIR/$desc.log"
+    mkdir -p "$CI_LOG_DIR"
     "$GODOT" --headless --path "$PROJECT_DIR" "$@" >"$out" 2>&1
     # Маркеры — только с префиксами Godot (SCRIPT ERROR:, Failed to load script) и
     # собственные отчёты тулов (RESULT: FAILED / SOME TESTS FAILED). Избегаем
@@ -46,7 +57,6 @@ _godot_script() {
     else
         _pass "$desc"
     fi
-    rm -f "$out"
 }
 # ---------- 0. Автозагрузка реестра class_name ----------
 # Проверкам (-s) нужны глобальные class_name (BattleState, Spellbook, ...). В
@@ -144,11 +154,24 @@ if [ "${1:-}" != "--fast" ]; then
     _step "Console clean (scenarios 1-5)"
     if (
         cd "$PROJECT_DIR"
-        GODOT_BIN="$GODOT" bash tools/shell/check_console_clean.sh
+        LOG_DIR="$CI_LOG_DIR" GODOT_BIN="$GODOT" bash tools/shell/check_console_clean.sh
     ); then
         _pass "console_clean"
     else
         _fail "console_clean"
+    fi
+fi
+
+# ---------- Итог: скан логов (гейт «конец цикла», AGENT.md 8.2) ----------
+# Печатает ⚠️ WARNINGS / ❌ ERRORS по всем захваченным логам. В --fast — пропускается
+# (guard — не меняем вывод --fast). Выходит с ненулевым кодом при ошибках.
+if [ "${1:-}" != "--fast" ]; then
+    _step "Console scan (end-of-cycle gate)"
+    if [ -d "$CI_LOG_DIR" ]; then
+        total_errs=$(cat "$CI_LOG_DIR"/*.log 2>/dev/null | grep -vE '\[color=' | grep -ciE "$CI_ERROR_RE")
+        total_warns=$(cat "$CI_LOG_DIR"/*.log 2>/dev/null | grep -vE '\[color=' | grep -ciE "$CI_WARN_RE")
+        echo "  ⚠️  WARNINGS: $total_warns | ❌ ERRORS: $total_errs"
+        [ "$total_errs" -gt 0 ] && EXIT_CODE=1
     fi
 fi
 

@@ -194,7 +194,7 @@
    очистить `.godot/` (`rm -rf .godot`) и перезагрузить проект при странных ошибках.
    **Обязательно чистить `.godot/`** после любых перемещений файлов, смены версий
    `class_name` или если проверки начали падать с «Could not find type X» — иначе
-   устаревший реестр `global_script_class_cache.cfg` даёт ложные ошибки (см. 8.2).
+   устаревший реестр `global_script_class_cache.cfg` даёт ложные ошибки (см. 8.3).
 7. **Логи — через `GameLogger`.** Не слать `print()` в продакшн-код. Тег выбирается по
    домену: `GameLogger.battle(...)`, `world(...)`, `inventory(...)`, `ui(...)`,
    `warn(...)`, `error(...)`. Ошибки-граничные условия (лимиты, фолбэки) — через
@@ -228,7 +228,7 @@ bash tools/shell/run_all_ci_checks.sh
 
 # ⚠️ run_all_ci_checks.sh АВТОМАТИЧЕСКИ соберёт реестр class_name, если его нет —
 #    чистый checkout работает из коробки, .godot вручную собирать/чистить не надо
-#    (см. правило 8.2).
+#    (см. правило 8.3).
 
 # Облегённый вариант (README): compile + scene-refs + подборка тестов + world smoke
 ./tools/shell/run_all_ci_checks.sh
@@ -252,9 +252,17 @@ $GODOT --path game --scene scenes/MainMenu.tscn          # с окном, для
 
 ## 8.1. ⚠️ КРИТИЧЕСКОЕ ПРАВИЛО: запуск Godот-сцен/скриптов — только с жёстким таймаутом
 
-Запуск Godot (`--scene`, `-s script.gd`) **всегда** оборачиваем в жёсткий таймаут через
-фоновый процесс + `kill`, потому что зависшая сцена/скрипт гоняет main-loop бесконечно и
-может «повесить» всю команду (хэндлер отрубает через ~5000 с — теряется весь прогресс).
+**ЗАПРЕЩЕНО** гонять Godot голыми командами (`godot --scene ...`, `godot -s script.gd`,
+`godot --path game --scene ...`). Запуск Godot **всегда** оборачиваем в жёсткий таймаут через
+фоновый процесс + `kill` (обёртка `run_godot` ниже), потому что зависшая сцена/скрипт гоняет
+main-loop бесконечно и может «повесить» всю команду (хэндлер отрубает через ~5000 с — теряется
+весь прогресс).
+
+| ✅ Можно (с таймаутом / через CI) | ❌ Нельзя (гоые команды без обёртки) |
+|-----------------------------------|--------------------------------------|
+| `run_godot 40 $GODOT --headless --path game --scene scenes/World.tscn --quit-after 120` | `godot --headless --path game --scene scenes/World.tscn` |
+| `bash game/tools/shell/run_all_ci_checks.sh` (внутри уже с таймаутом) | `godot -s tests/run_tests.gd` без обёртки |
+| `run_godot 300 bash game/tools/shell/run_all_ci_checks.sh` | `$GODOT --headless --path game -s tools/compile_all.gd` без обёртки |
 
 ```bash
 GODOT=/Applications/Godot.app/Contents/MacOS/Godot
@@ -286,7 +294,44 @@ cat /tmp/godot_run.log | grep -vE 'loading_editor_layout|ready'
 - Если после `run_godot` в `/tmp/godot_run.log` есть `SCRIPT ERROR` / `Parse Error` —
   чиним; чистый прогон = только предупреждения импорта без ошибок скриптов.
 
-### 8.2. Реестр `class_name` и автозагрузка в CI
+### 8.2. Гейт «конец цикла» — run-and-debug (обязательный)
+
+**Перед коммитом любого цикла** прогоняем CI + релевантный smoke-сценарий через обёртку,
+ловим лог, сканируем на ошибки/предупреждения, чиним, гоняем до чистоты — и **только после
+чистоты** коммитим. Не коммитим «грязным» — это финальный контроль качества цикла.
+
+**Процедура:**
+1. Быстрый прогон: `run_godot 120 bash game/tools/shell/run_all_ci_checks.sh --fast`.
+2. Полный прогон (финальная верификация): `run_godot 540 bash game/tools/shell/run_all_ci_checks.sh`
+   — лог в `/tmp/godot_run_full.log`. Скрипт сам соберёт реестр class_name (см. 8.3).
+3. Скан лога шаблонами ниже. Есть error-маркеры → чиним → повторяем 1–3.
+4. Периодически проверять сам гейт (см. tasks цикла): внести намеренную ошибку, убедиться, что
+   гейт её ловит, затем отменить.
+
+**«Чисто» = в логе НЕТ:** `SCRIPT ERROR`, `Parse error`, `Invalid call`, `Nonexistent function`,
+`Nonexistent class`, `Nonexistent base`, `Too many arguments`, `Cannot infer`, `Invalid get/set`,
+`Failed to load script`, `Can't load script`, `Could not find type`, `does not inherit from`,
+`SOME TESTS FAILED`, `RESULT: FAILED`, `leaked` / `LEAK` (утечки ObjectDB/RID).
+
+**Разрешённые безобидные предупреждения** (не роняют гейт) — в `docs/CONSOLE_ALLOWLIST.md`:
+`WARNING: [1-9]`, `WARNING: 10-19`, `WARNING: 20 ObjectDB instances were leaked at exit` (20 —
+порог allowlist), SoundManager-предупреждения и т.п.
+
+**Шаблны скана** (grep по логу):
+```bash
+ERROR_RE='SCRIPT ERROR|Parse error|Invalid call|Nonexistent function|Nonexistent class|Nonexistent base|Too many arguments|Cannot infer|Invalid get/set|Failed to load script|Can'"'"'t load script|Could not find type|does not inherit from'
+WARN_RE='^WARNING|^NOTICE|LEAK|leaked|deprecated|^W [0-9]'
+echo "❌ ERRORS:   $(grep -ciE "$ERROR_RE" /tmp/godot_run_full.log)"
+echo "⚠️  WARNINGS: $(grep -ciE "$WARN_RE" /tmp/godot_run_full.log)"
+```
+
+**godot-run-and-fix** (навык `.pi/skills/godot-run-and-fix/`, скрипт `scripts/run_and_fix.sh`):
+автоматизирует цикл «запуск → ловля `SCRIPT ERROR`/parse-ошибок → исправление → повтор до
+чистоты». Используем его как движок правки: запускаем `run_and_fix.sh <скрипт_или_сцена>`, он
+печатаёт найденные ошибки и применяет правки; повторяем, пока лог чистый. Файлы-капчуры
+ошибок остаются в `.pi/skills/godot-run-and-fix/` — глянем для триажа.
+
+### 8.3. Реестр `class_name` и автозагрузка в CI
 
 Проект массово использует `class_name` (~91 класс). При загрузке GDScript Godot резолвит
 эти имена по **глобальному реестру** `.godot/global_script_class_cache.cfg`.
