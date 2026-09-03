@@ -157,12 +157,16 @@ static func _init_hero(R: BootstrapResult) -> void:
 	R.hero.setup(R.map_gen)
 	# hero-survival: герой видит города (реcovery потребностей в городе).
 	R.hero.city_manager = R.cities
-	# hero-survival: герой видит города (реcovery потребностей в городе).
-	R.hero.city_manager = R.cities
 	if R.loaded_save != null:
 		R.hero.deserialize(R.loaded_save.hero)
 		if R.map_gen.has_valid_tilemap():
 			R.hero.position = R.map_gen.map_to_local(R.hero.current_cell)
+	else:
+		# port-troles-heritage: новая игра из конструктора (Меню «Новая игра»).
+		var profile := WorldPersistence.pending_new_game
+		if profile != null:
+			R.hero.apply_build(profile)
+			WorldPersistence.pending_new_game = null
 
 
 

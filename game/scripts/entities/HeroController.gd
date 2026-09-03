@@ -4,6 +4,7 @@ class_name HeroController
 
 const _Platform = preload("res://scripts/core/Platform.gd")
 const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
+const _HeroProfile = preload("res://scripts/data/HeroBuildProfile.gd")
 
 signal hero_moved(cell: Vector2i)
 signal hero_entered_village(cell: Vector2i)
@@ -23,6 +24,11 @@ var visual: HeroVisualController
 
 var hero_name: String = "Darkstorn"
 var stats := {"attack": 0, "defense": 0, "spell_power": 4, "knowledge": 2}
+# port-troles-heritage: идентичность героя из конструктора (создание мира).
+var hero_race: String = ""
+var hero_class: String = ""
+var hero_culture: String = ""
+var hero_background: String = ""
 var inventory: HeroInventory = HeroInventory.new()
 
 ## succession-sigil: путь-легенда (build identity). Источник истины для
@@ -382,6 +388,19 @@ func get_hero_bonus() -> Dictionary:
 	}
 
 
+# ==================== HERO BUILD (port-troles-heritage) ====================
+
+## Применить профиль создания героя: имя, статы, идентичность.
+func apply_build(profile: _HeroProfile) -> void:
+	if profile == null:
+		return
+	hero_name = profile.name if not profile.name.is_empty() else hero_name
+	stats = profile.get_stats()
+	hero_race = profile.race
+	hero_class = profile.character_class
+	hero_culture = profile.culture
+	hero_background = profile.background
+
 # ==================== SERIALIZATION ====================
 
 func serialize() -> Dictionary:
@@ -390,6 +409,10 @@ func serialize() -> Dictionary:
 		"move_points": movement.move_points,
 		"hero_name": hero_name,
 		"stats": stats.duplicate(),
+		"hero_race": hero_race,
+		"hero_class": hero_class,
+		"hero_culture": hero_culture,
+		"hero_background": hero_background,
 		"path_id": String(path_id),
 		"resources": resources.serialize(),
 		"army": army.serialize(),
@@ -428,6 +451,11 @@ func deserialize(data: Dictionary) -> void:
 	movement.move_points = float(data.get("move_points", movement.move_points))
 	hero_name = str(data.get("hero_name", hero_name))
 	stats = data.get("stats", stats).duplicate()
+	# port-troles-heritage: идентичность (старые сейвы без ключей → "").
+	hero_race = str(data.get("hero_race", hero_race))
+	hero_class = str(data.get("hero_class", hero_class))
+	hero_culture = str(data.get("hero_culture", hero_culture))
+	hero_background = str(data.get("hero_background", hero_background))
 	path_id = StringName(str(data.get("path_id", path_id)))
 	resources.deserialize(data.get("resources", {}))
 	army.deserialize(data.get("army", []))

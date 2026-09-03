@@ -2,6 +2,7 @@ class_name WorldPersistence
 extends RefCounted
 ## Save / load / restart / seed / session state.
 const _ShardManager = preload("res://scripts/core/ShardManager.gd")
+const _HeroProfile = preload("res://scripts/data/HeroBuildProfile.gd")
 
 var _save_manager: SaveManager
 var session: GameSession = null
@@ -19,6 +20,9 @@ var _last_save_dict: Dictionary = {}
 
 static var next_seed: int = 0
 static var pending_save: SaveData = null
+## port-troles-heritage: профиль создания героя из конструктора (Меню →
+## «Новая игра»). Применяется в WorldBootstrap._init_hero, затем обнуляется.
+static var pending_new_game: _HeroProfile = null
 
 
 func _init(save_manager: SaveManager) -> void:

@@ -5,6 +5,7 @@ class_name MainMenu
 
 const _UIAnimator = preload("res://scripts/ui/UIAnimator.gd")
 const _SettingsScreen = preload("res://scripts/ui/SettingsScreen.gd")
+const _CharacterCreation = preload("res://scenes/ui/CharacterCreation.tscn")
 const _HeroModelFactory = preload("res://scripts/ui/HeroModelFactory.gd")
 const _ModelScreen = preload("res://scripts/ui/ArtifactInventoryScreen.gd")
 const _ChronicleScreen = preload("res://scripts/ui/ChronicleScreen.gd")
@@ -83,33 +84,8 @@ func _build_right_column() -> void:
 	col.add_theme_constant_override("separation", 20)
 	add_child(col)
 
-	# Серая панель с 🔒 (как на референсе)
-	var lock := PanelContainer.new()
-	lock.name = "LockPanel"
-	var ls := StyleBoxFlat.new()
-	ls.bg_color = Color(0.35, 0.35, 0.38, 0.85)
-	ls.set_corner_radius_all(8)
-	ls.set_border_width_all(2)
-	ls.border_color = Color(0.5, 0.5, 0.55)
-	lock.add_theme_stylebox_override("panel", ls)
-	lock.custom_minimum_size = Vector2(300, 180)
-	col.add_child(lock)
-
-	var lv := VBoxContainer.new()
-	lv.alignment = BoxContainer.ALIGNMENT_CENTER
-	lock.add_child(lv)
-	var li := Label.new()
-	li.name = "LockIcon"
-	li.text = "🔒"
-	li.add_theme_font_size_override("font_size", 64)
-	li.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lv.add_child(li)
-	var lt := Label.new()
-	lt.text = "Кампания недоступна"
-	lt.add_theme_font_size_override("font_size", 16)
-	lt.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
-	lt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lv.add_child(lt)
+	# port-troles-heritage: конструктор героя доступен — панель «недоступно»
+	# убрана; колонка начинается с кнопок.
 
 	# Три синие глянцевые кнопки
 	var btns: Array[Dictionary] = [
@@ -162,7 +138,10 @@ func _build_right_column() -> void:
 
 
 func _on_new_game() -> void:
-	get_tree().change_scene_to_file("res://scenes/World.tscn")
+	# port-troles-heritage: новая игра проходит конструктор героя (выбор
+	# расы/класса/культуры → HeroBuildProfile), затем мир берёт
+	# WorldPersistence.pending_new_game в WorldBootstrap._init_hero.
+	get_tree().change_scene_to_file(_CharacterCreation.resource_path)
 
 
 func _on_load_game() -> void:
