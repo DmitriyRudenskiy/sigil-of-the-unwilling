@@ -10,6 +10,7 @@ const _City = preload("res://scripts/world/City.gd")
 const _CityManager = preload("res://scripts/world/CityManager.gd")
 const _Succession = preload("res://scripts/world/SuccessionController.gd")
 const _WorldController = preload("res://scripts/world/WorldController.gd")
+const _HeroLifecycle = preload("res://scripts/world/HeroLifecycleSystem.gd")
 const _DeathSequence = preload("res://scripts/ui/DeathSequence.gd")
 const _StatusPanel = preload("res://scripts/ui/HeroStatusPanel.gd")
 const _Artifact = preload("res://scripts/data/Artifact.gd")
@@ -118,6 +119,11 @@ func _make_wc(cities: Array, persistence: _MockPersistence = null) -> _WorldCont
 	wc._cities = mgr
 	wc._succession = _Succession.new()
 	wc._persistence = persistence if persistence != null else _MockPersistence.new()
+	# succession-sigil: координатор-owned active-hero pointer остаётся на wc;
+	# death-flow working state + логика — в HeroLifecycleSystem (design.md R1).
+	var sys := _HeroLifecycle.new()
+	sys.setup(wc, wc._persistence, wc._rng, wc._cities, null, null, null, null, null, null, wc._succession, null)
+	wc._hero_lifecycle = sys
 	return wc
 
 ## Герой в дереве (нужно для _detach_hero/get_parent).
@@ -353,7 +359,7 @@ func _setup_death_with_resurrection() -> Dictionary:
 	var parent := _hero_in_tree(hero)
 	wc._hero = hero
 	var death := _MockDeath.new()
-	wc._death_seq = death
+	wc._hero_lifecycle._death_seq = death
 	wc._on_hero_died(&"starvation")
 	return {"wc": wc, "hero": hero, "city": city, "parent": parent, "death": death}
 
@@ -365,9 +371,9 @@ func test_wc_death_holds_corpse_shows_resurrection() -> void:
 	var city: _City = s["city"]
 	var death: Node = s["death"]
 	assert_true(is_instance_valid(hero), "corpse not freed")
-	assert_eq(wc._deceased_hero, hero, "wc holds the corpse")
-	assert_eq(wc._resurrection_city, city, "resurrection city chosen")
-	assert_not_null(wc._pending_successor, "pending successor planned")
+	assert_eq(wc._hero_lifecycle._deceased_hero, hero, "wc holds the corpse")
+	assert_eq(wc._hero_lifecycle._resurrection_city, city, "resurrection city chosen")
+	assert_not_null(wc._hero_lifecycle._pending_successor, "pending successor planned")
 	assert_null(hero.get_parent(), "corpse detached from tree")
 	assert_true(death.shown, "death sequence shown")
 	assert_eq(death.res_city, city, "res_city passed to sequence (button visible)")
@@ -375,7 +381,7 @@ func test_wc_death_holds_corpse_shows_resurrection() -> void:
 	hero.free()
 	s["parent"].free()
 	death.free()
-	_free_node(wc._pending_successor)
+	_free_node(wc._hero_lifecycle._pending_successor)
 	wc.free()
 
 
@@ -385,7 +391,7 @@ func test_wc_resurrection_chosen() -> void:
 	var hero: HeroController = s["hero"]
 	var city: _City = s["city"]
 	var death: Node = s["death"]
-	var successor: Node = wc._pending_successor
+	var successor: Node = wc._hero_lifecycle._pending_successor
 	var succ_emitted: Dictionary = {"v": false}  # лямбда-захват примитива по значению
 	var on_succ := func(_h: Node) -> void: succ_emitted["v"] = true
 	GameEventBus.hero_successor.connect(on_succ)
@@ -399,9 +405,9 @@ func test_wc_resurrection_chosen() -> void:
 	assert_eq(hero.movement.current_cell, city.center, "hero at temple city")
 	assert_approx(city.storage[&"industry"], 100.0, 0.5, "industry paid (600→100)")
 	assert_approx(city.storage[&"gold"], 50.0, 0.5, "gold paid (150→50)")
-	assert_null(wc._deceased_hero, "corpse ref cleared")
-	assert_null(wc._resurrection_city, "resurrection city cleared")
-	assert_null(wc._pending_successor, "pending successor cleared")
+	assert_null(wc._hero_lifecycle._deceased_hero, "corpse ref cleared")
+	assert_null(wc._hero_lifecycle._resurrection_city, "resurrection city cleared")
+	assert_null(wc._hero_lifecycle._pending_successor, "pending successor cleared")
 	assert_false(is_instance_valid(successor), "unused successor freed")
 	assert_eq(wc._hero, hero, "hero reinstalled as active")
 	assert_false(wc.is_death_sequence_open(), "death sequence closed")
@@ -420,14 +426,14 @@ func test_wc_second_death_in_cycle_no_resurrection() -> void:
 	# Повторная смерть в том же цикле (resurrected_once = true).
 	hero.followers.append(_make_follower(9, &"warrior"))
 	wc._on_hero_died(&"exhaustion")
-	assert_null(wc._deceased_hero, "no corpse hold on second death")
-	assert_null(wc._resurrection_city, "no resurrection city on second death")
+	assert_null(wc._hero_lifecycle._deceased_hero, "no corpse hold on second death")
+	assert_null(wc._hero_lifecycle._resurrection_city, "no resurrection city on second death")
 	assert_false(is_instance_valid(hero), "corpse freed on second death (old behavior)")
-	assert_not_null(wc._pending_successor, "successor still planned")
-	assert_true(is_instance_valid(wc._pending_successor), "successor alive")
+	assert_not_null(wc._hero_lifecycle._pending_successor, "successor still planned")
+	assert_true(is_instance_valid(wc._hero_lifecycle._pending_successor), "successor alive")
 	assert_eq(death.res_city, null, "sequence gets no res_city (button hidden)")
 	# Successor — Node: фрим (RefCounted-у SuccessionController не трогаем).
-	_free_node(wc._pending_successor)
+	_free_node(wc._hero_lifecycle._pending_successor)
 	s["parent"].free()
 	death.free()
 	wc.free()
@@ -438,9 +444,9 @@ func test_wc_succession_frees_held_corpse() -> void:
 	var wc: Node = s["wc"]
 	var hero: HeroController = s["hero"]
 	wc._execute_succession()
-	assert_null(wc._deceased_hero, "corpse ref cleared by succession")
+	assert_null(wc._hero_lifecycle._deceased_hero, "corpse ref cleared by succession")
 	assert_false(is_instance_valid(hero), "held corpse freed by succession")
-	assert_null(wc._pending_successor, "pending successor cleared")
+	assert_null(wc._hero_lifecycle._pending_successor, "pending successor cleared")
 	assert_not_null(wc._hero, "successor installed")
 	assert_true(is_instance_valid(wc._hero), "successor alive")
 	s["parent"].free()
@@ -456,14 +462,14 @@ func test_wc_no_temple_corpse_freed() -> void:
 	var parent := _hero_in_tree(hero)
 	wc._hero = hero
 	var death := _MockDeath.new()
-	wc._death_seq = death
+	wc._hero_lifecycle._death_seq = death
 	wc._on_hero_died(&"starvation")
-	assert_null(wc._deceased_hero, "no corpse hold without temple")
+	assert_null(wc._hero_lifecycle._deceased_hero, "no corpse hold without temple")
 	assert_false(is_instance_valid(hero), "corpse freed (old behavior)")
 	assert_eq(death.res_city, null, "no res_city (button hidden)")
 	parent.free()
 	death.free()
-	_free_node(wc._pending_successor)
+	_free_node(wc._hero_lifecycle._pending_successor)
 	wc.free()
 
 
@@ -477,8 +483,8 @@ func test_wc_fresh_cycle_resurrection_again() -> void:
 	var hero: HeroController = wc._hero
 	hero.followers.append(_make_follower(9, &"warrior"))
 	wc._on_hero_died(&"burnout")
-	assert_null(wc._resurrection_city, "resurrected hero: no resurrection again")
-	var succ: Node = wc._pending_successor
+	assert_null(wc._hero_lifecycle._resurrection_city, "resurrected hero: no resurrection again")
+	var succ: Node = wc._hero_lifecycle._pending_successor
 	wc._execute_succession()
 	# Новый герой = свежий цикл: склад пополнен → кнопка снова доступна.
 	var new_hero: HeroController = wc._hero
@@ -486,13 +492,13 @@ func test_wc_fresh_cycle_resurrection_again() -> void:
 	city.storage[&"industry"] = float(_Succession.RESURRECTION_INDUSTRY)
 	city.storage[&"gold"] = float(_Succession.RESURRECTION_SPECIAL_AMOUNT)
 	wc._on_hero_died(&"starvation")
-	assert_eq(wc._resurrection_city, city, "fresh cycle: resurrection offered again")
-	assert_eq(wc._deceased_hero, new_hero, "new hero's corpse held")
+	assert_eq(wc._hero_lifecycle._resurrection_city, city, "fresh cycle: resurrection offered again")
+	assert_eq(wc._hero_lifecycle._deceased_hero, new_hero, "new hero's corpse held")
 	assert_eq(death.res_city, city, "res_city passed again")
 	new_hero.free()
 	s["parent"].free()
 	death.free()
-	_free_node(wc._pending_successor)
+	_free_node(wc._hero_lifecycle._pending_successor)
 	wc.free()
 
 

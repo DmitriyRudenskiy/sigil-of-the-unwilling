@@ -5,6 +5,7 @@ extends "res://tests/test_base.gd"
 ## (снапшот → «Знак переходит» → hero_successor + запись в летопись).
 
 const _WorldController = preload("res://scripts/world/WorldController.gd")
+const _HeroLifecycle = preload("res://scripts/world/HeroLifecycleSystem.gd")
 const _Succession = preload("res://scripts/world/SuccessionController.gd")
 const _City = preload("res://scripts/world/City.gd")
 const _CityManager = preload("res://scripts/world/CityManager.gd")
@@ -209,6 +210,10 @@ func _make_wc() -> _WorldController:
 	var persistence: _WorldPersistence = _WorldPersistence.new(null)
 	persistence.session = _GameSession.new(42)
 	wc._persistence = persistence
+	# succession-sigil: делегация в HeroLifecycleSystem (design.md R1).
+	var sys := _HeroLifecycle.new()
+	sys.setup(wc, wc._persistence, wc._rng, wc._cities, null, null, null, null, null, null, wc._succession, null)
+	wc._hero_lifecycle = sys
 	return wc
 
 func test_on_hero_died_defers_succession() -> void:
@@ -221,8 +226,8 @@ func test_on_hero_died_defers_succession() -> void:
 	wc._on_hero_died(&"battle")
 	assert_null(wc.get_hero(), "труп убран сразу (hero == null)")
 	assert_true(wc.is_death_sequence_open(), "последовательность смерти открыта")
-	assert_not_null(wc._pending_successor, "преемник отложен до кнопки")
-	assert_eq(str(wc._deceased_snapshot.get("hero_name", "")), "Darkstorn", "снапшот имени")
+	assert_not_null(wc._hero_lifecycle._pending_successor, "преемник отложен до кнопки")
+	assert_eq(str(wc._hero_lifecycle._deceased_snapshot.get("hero_name", "")), "Darkstorn", "снапшот имени")
 	# «Знак переходит»: перерождение + сигнал + запись в летопись.
 	var fired: Array = []
 	var conn := func(hero): fired.append(hero)
@@ -260,7 +265,7 @@ func test_on_hero_died_terminal_no_succession() -> void:
 	wc._on_hero_died(&"battle")
 	assert_null(wc.get_hero(), "герой убран")
 	assert_true(wc.is_death_sequence_open(), "последовательность открыта")
-	assert_null(wc._pending_successor, "терминально: преемника не выбираем")
+	assert_null(wc._hero_lifecycle._pending_successor, "терминально: преемника не выбираем")
 	assert_true(wc._persistence.chronicle.entries.is_empty(), "терминальная смерть — без записи цикла")
 	h.free()
 	wc._cities.free()

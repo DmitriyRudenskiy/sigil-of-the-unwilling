@@ -9,6 +9,7 @@ const _City = preload("res://scripts/world/City.gd")
 const _CityManager = preload("res://scripts/world/CityManager.gd")
 const _Follower = preload("res://scripts/entities/Follower.gd")
 const _Hero = preload("res://scripts/entities/HeroController.gd")
+const _HeroLifecycle = preload("res://scripts/world/HeroLifecycleSystem.gd")
 
 func _make_follower(uid: int, path: StringName) -> Follower:
 	var f := _Follower.new()
@@ -37,6 +38,10 @@ func _make_wc(cities: Array[City], controller: _Succession) -> WorldController:
 		mgr.register_city(c)
 	wc._cities = mgr
 	wc._succession = controller
+	# succession-sigil: делегация _plan_succession → HeroLifecycleSystem.
+	var sys := _HeroLifecycle.new()
+	sys.setup(wc, null, wc._rng, wc._cities, null, null, null, null, null, null, wc._succession, null)
+	wc._hero_lifecycle = sys
 	return wc
 
 
