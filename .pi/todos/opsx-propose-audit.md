@@ -27,3 +27,13 @@ Senior-architect audit across 5 dimensions + OpenSpec proposal capturing highest
 ## Next (user decides)
 - `/opsx-apply` to implement R1/R2 (High) + verification.
 - Or refine open questions (0.1) first.
+
+## R1 Implementation (world-controller-decoupling) — DONE
+- [x] HeroLifecycleSystem.gd created (RefCounted, headless-safe, connects to hero_died)
+- [x] 14 death-flow methods moved out of WorldController (602 -> 376 lines, Req2 ≤400)
+- [x] WorldController: coordinator-owned `_hero` + thin delegations + set_hero()
+- [x] Tests updated (3 files): wire `_hero_lifecycle`, rename 4 death-flow fields
+- [x] compile clean (177 ok); 5672 tests pass, 0 fail
+- [x] committed d7131b1
+- [ ] operability check (background) — pending CLEAN verdict
+- Deferred: Req3 IHeroConsumer (Design D — keep `_install_hero` on WC), R2/R6/R4/R5/R7

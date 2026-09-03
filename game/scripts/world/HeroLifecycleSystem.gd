@@ -282,10 +282,13 @@ func _plan_succession(deceased: HeroController) -> HeroController:
 
 ## Убрать героя из дерева (смерть без преемника / замена на преемника).
 func _remove_hero(deceased: Node) -> void:
+	# active-реф берём ДО free(): get_hero() вернёт freed-объект и упадёт
+	# ("return a previously freed instance"), если снять реф после free).
+	var active := _hero_ptr()
 	if deceased != null and is_instance_valid(deceased) and deceased.get_parent() != null:
 		deceased.get_parent().remove_child(deceased)
 		deceased.free()
-	if _hero_ptr() == deceased:
+	if active == deceased:
 		_set_hero_ptr(null)
 
 ## Заменить активного героя на преемника: новый в дереве, инициализирован,
