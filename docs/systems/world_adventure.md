@@ -49,6 +49,25 @@
 управляется `WorldInput` + `WorldInteractionController` (лeft-click /右键,
 сундуки, деревни).
 
+### Попап сбора ресурсов (`ResourceCollectPopup`)
+
+Каждое событие сбора в мире показывает короткий не-блокирующий попап по
+центру: иконка ресурса, имя и точное целое количество. Попап живёт на
+`AdventureUI` (CanvasLayer поверх мира) и подписан на единый сигнал
+`GameEventBus.resource_extracted(cell, resource_id, amount)`:
+
+- **богатая жила** — `ResourceNodeManager.try_extract` (id из реестра,
+  количество из extraction-ключа);
+- **простой сбор** — `WorldInteractionController.collect_resource_at` читает
+  `res_type` с ноды до её удаления и шлёт id/сумму из таблицы
+  `ResourceIcons` (5, для gold 50).
+
+Закрытие — по нажатию OK **или** авто-исчезанию через ~4 с (one-shot таймер;
+повторный показ перезапускает его). Иконку/имя/цвет резолвит
+`ResourceIcons` (см. [`economy_runtime.md`](../economy/economy_runtime.md)):
+таблица `DATA` → autoload `Resources` → плейсхолдер
+(`PlaceholderTexture.circle` со стабильным цветом, имя = id).
+
 ### Планирование траектории и автоход (`HeroMovementController`)
 
 Движение по клеткам живёт в `HeroMovementController` (`move_to`, `_move_next_step`,
@@ -126,4 +145,6 @@ Array[Vector2i]` (ячейки в мировых координатах, гол�
 ## Тесты
 
 `tests/unit/test_world_persistence.gd`, а также тесты героев/городов/боёв,
-затрагивающие мир (`test_hero_movement.gd`, `test_city_system.gd`).
+затрагивающие мир (`test_hero_movement.gd`, `test_city_system.gd`),
+`tests/test_resource_collect_popup.gd` (попап сбора: показ/OK/авто-скрытие,
+резолвер `ResourceIcons`, сигнал из `collect_resource_at`).

@@ -85,11 +85,19 @@ func collect_resource_at(cell: Vector2i) -> bool:
 	if _reject(cell):
 		return false
 	if spawner:
+		# resource-collection-popup: res_type известен только ДО удаления ноды.
+		var res_type: int = spawner.get_res_type_at(cell)
 		var removed := spawner.remove_resource_at(cell)
 		if removed:
 			if world_delta:
 				world_delta.add_removed_resource(cell)
 			SoundManager.play_sfx_cue(&"resource_collected")
+			# Простой путь → единый сигнал (богатые жилы шлют его из
+			# ResourceNodeManager.try_extract). Кол-во — стандартный простой
+			# сбор (ResourceIcons.RES_TYPE_AMOUNTS = HeroResources.pickup_resource).
+			var res_id: StringName = ResourceIcons.res_type_id(res_type)
+			if res_id != &"":
+				GameEventBus.resource_extracted.emit(cell, res_id, ResourceIcons.res_type_amount(res_type))
 		return removed
 	return false
 

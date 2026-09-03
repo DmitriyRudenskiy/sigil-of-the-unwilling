@@ -53,6 +53,16 @@ func spawn_all() -> void:
 	_spawn_scrolls()
 
 
+## resource-collection-popup: res_type ресурсной ноды на клетке (meta из
+## _spawn_resources). Вызывается ДО remove_resource_at — после удаления
+## нода исчезает. -1 — ноды нет.
+func get_res_type_at(cell: Vector2i) -> int:
+	var node: Node2D = _resource_nodes.get(cell)
+	if node == null:
+		return -1
+	return int(node.get_meta("res_type", -1))
+
+
 func remove_resource_at(cell: Vector2i) -> bool:
 	if not _resource_nodes.has(cell):
 		return false

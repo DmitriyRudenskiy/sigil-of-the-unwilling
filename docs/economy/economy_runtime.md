@@ -78,6 +78,24 @@ City.process_turn (моалит, city_system.md)   ← рождения, еда,
 11 скрытых жил (oak/silver/quartz/saltpeter/…) + базовые wood/stone (последние
 не спавняются на карте — только городские цепочки).
 
+### `ResourceIcons` (презентация ресурсов)
+
+`scripts/data/ResourceIcons.gd` — статический резолвер «id → отображение»
+для миров (не города): отображаемое имя, текстура и цвет по `resource_id`.
+Цепочка: строковая таблица `DATA` (id + название + цвет) → autoload
+`Resources` (`ResourceDef.display_name` / `.icon`) → деградация: имя = сам id,
+текстура = `PlaceholderTexture.circle` со стабильным цветом (цвет из `DATA`
+или hash id через `Color.from_hsv`). Плюс маппинг простого сбора
+`res_type: int` (0–6: wood/mercury/ore/sulfur/crystal/gems/gold) → id и
+сумма (5, для gold 50).
+
+Оба интерактивных пути сбора в мире эмитят единый сигнал
+`GameEventBus.resource_extracted(cell, resource_id: StringName, amount: int)`:
+богатая жила (`ResourceNodeManager.try_extract`) и простой клик-сбор
+(`WorldInteractionController.collect_resource_at`, задача 1.2). Попап
+`ResourceCollectPopup` подписан на этот сигнал (см.
+[`world_adventure.md`](../systems/world_adventure.md)).
+
 ---
 
 ## 2. Цепочки производства: `ProductionChain`
@@ -286,7 +304,8 @@ arrivals = floor(base × glory_mod × season_mod)
 `tests/test_city_chains.gd` (цепочки/production), `test_city_system.gd`
 (циклический приток со славой/сезоном/храмом), `test_demographic_processor.gd`,
 `test_pop_unit.gd`, `test_city_housing.gd`, `test_city_processor.gd`,
-`test_city_manager.gd`, `test_capacity.gd`.
+`test_city_manager.gd`, `test_capacity.gd`, `test_resource_collect_popup.gd`
+(попап сбора + резолвер `ResourceIcons` + сигнал `resource_extracted`).
 
 ---
 

@@ -28,6 +28,9 @@ var _hero_status: HeroStatusPanel
 
 ## legend-chronicle: видимый прогресс славы (цель — ENDGAME_GlORY_VICTORY).
 var _cities_mgr: Node = null
+
+## resource-collection-popup: «Собрано ресурс» на любом событии сбора.
+var _collect_popup: ResourceCollectPopup
 var _glory_label: Label
 var _glory_bar: ProgressBar
 
@@ -39,6 +42,12 @@ var _border_check: CheckBox
 func _ready() -> void:
 	layer = 10
 	_build_right_column()
+	# resource-collection-popup: один попап на событие сбора (оба пути —
+	# богатые жилы и простой сбор шлют GameEventBus.resource_extracted).
+	# Связь живёт столько, сколько нод (GameEventBus — процессный autoload,
+	# коннект отваливается вместе с освобождением AdventureUI).
+	if not GameEventBus.resource_extracted.is_connected(_on_resource_extracted):
+		GameEventBus.resource_extracted.connect(_on_resource_extracted)
 
 
 func _build_right_column() -> void:
@@ -177,6 +186,18 @@ func set_cities(cities_mgr: Node) -> void:
 
 func _on_glory_changed(_window_total: float) -> void:
 	refresh_glory()
+
+
+## resource-collection-popup: «Собрано ресурс» — один попап на событие.
+## Оба пути сбора шлют единый GameEventBus.resource_extracted: богатые жилы —
+## из ResourceNodeManager.try_extract, простой — из
+## WorldInteractionController.collect_resource_at.
+func _on_resource_extracted(_cell: Vector2i, resource_id: StringName, amount: int) -> void:
+	if _collect_popup == null:
+		_collect_popup = ResourceCollectPopup.new()
+		_collect_popup.name = "ResourceCollectPopup"
+		add_child(_collect_popup)
+	_collect_popup.show_resource(resource_id, amount)
 
 
 func refresh_glory() -> void:
