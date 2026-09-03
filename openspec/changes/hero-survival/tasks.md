@@ -35,10 +35,10 @@
 
 ## 6. Сценарий и гейт
 
-- [ ] 6.1 `tools/scenarios/scenario_12_hero_survival.py`: hero needs → 0, 3 end_turn → смерть по needs, `GET_STATE` = DEFEAT (без преемника) или смерть с преемником (сценарий по факту wiring'а), консоль clean; добавить в `SCENARIOS` в `run_operability.sh`
-- [ ] 6.2 `run_operability.sh` — CLEAN (сценарии + full suite + console cleanliness)
+- [x] 6.1 `tools/scenarios/scenario_12_hero_survival.py`: hero needs → 0, 3 end_turn → смерть по needs, `GET_STATE` = DEFEAT (без преемника) или смерть с преемником (сценарий по факту wiring'а), консоль clean; добавить в `SCENARIOS` в `run_operability.sh`
+- [x] 6.2 `run_operability.sh` — CLEAN (сценарии + full suite + console cleanliness)
 
 ## 7. Финализация
 
-- [ ] 7.1 Прогнать полный тест-набор + гейт; ObjectDB/RID в рамках allowlist
-- [ ] 7.2 Коммит (только файлы change + сценарий, без чужих untracked)
+- [x] 7.1 Прогнать полный тест-набор + гейт; ObjectDB/RID в рамках allowlist
+- [x] 7.2 Коммит (только файлы change + сценарий, без чужих untracked) — 1b11888
