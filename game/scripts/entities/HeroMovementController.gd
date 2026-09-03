@@ -354,7 +354,7 @@ func _is_contact_position(cell: Vector2i) -> bool:
 func teleport(cell: Vector2i) -> void:
 	if _map_gen == null or not _map_gen.is_walkable(cell):
 		return
-	is_moving = false
+	_set_moving(false)
 	path.clear()
 	current_cell = cell
 	previous_cell = cell
@@ -394,18 +394,23 @@ func cancel_planned_path() -> void:
 	planned_route_changed.emit(false)
 
 
+## Установить флаг движения и уведомить шину (контекстный курсор WALK).
+func _set_moving(moving: bool) -> void:
+	is_moving = moving
+	GameEventBus.hero_moving_changed.emit(moving)
+
 func _start_moving() -> void:
 	if path.size() < 2:
 		return
 	GameLogger.trace("🚀 Starting movement. Path size: %d" % path.size(), "Movement")
-	is_moving = true
+	_set_moving(true)
 	_move_next_step()
 
 
 func _move_next_step() -> void:
 	if path.size() < 2:
 		GameLogger.trace("🏁 Path exhausted. Stopping.", "Movement")
-		is_moving = false
+		_set_moving(false)
 		# Достигли последней клетки маршрута (цели) — очистить зафиксированный маршрут.
 		if not planned_path.is_empty():
 			planned_path.clear()
@@ -424,7 +429,7 @@ func _move_next_step() -> void:
 		# Клетка стала непроходимой во время движения (динамическая блокировка).
 		# Останавливаемся штатно, не портя move_points (-INF застревал героя до конца хода).
 		GameLogger.trace("⛔ Path blocked at %s — stopping" % str(next_cell), "Movement")
-		is_moving = false
+		_set_moving(false)
 		path.clear()
 		reach_preview_cleared.emit()
 		request_idle_animation.emit()
@@ -466,7 +471,7 @@ func _on_step_complete(cell: Vector2i) -> void:
 		hero_entered_village.emit(cell)
 
 	if move_points <= 0:
-		is_moving = false
+		_set_moving(false)
 		# Остаток маршрута сохраняется на следующий ход (D3): path[0] == current_cell,
 		# поэтому planned_path = path.duplicate() держит голову = текущая клетка.
 		if not planned_path.is_empty():
@@ -480,7 +485,7 @@ func _on_step_complete(cell: Vector2i) -> void:
 
 
 func end_turn_movement() -> void:
-	is_moving = false
+	_set_moving(false)
 	# Не очищаем planned_path: зафиксированный маршрут должен пережить сброс хода
 	# и автоходиться в начале следующего хода (D2).
 	if not planned_path.is_empty():
@@ -509,7 +514,7 @@ func auto_follow_at_turn_start() -> void:
 
 
 func force_stop() -> void:
-	is_moving = false
+	_set_moving(false)
 	path.clear()
 	request_kill_tween.emit()
 	reach_preview_cleared.emit()

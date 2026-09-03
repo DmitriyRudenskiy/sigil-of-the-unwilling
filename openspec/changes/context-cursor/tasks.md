@@ -16,60 +16,60 @@
 ### 1.1
 Создать `game/scripts/autoload/CursorController.gd` (autoload) с картой режимов и
 `set_mode(mode)`.
-- [ ] Режимы: DEFAULT, WALK, COLLECT, ATTACK
-- [ ] `set_mode()` вызывает `Input.set_default_mouse_cursor(texture, hotspot)`
-- [ ] Стандартный курсор (стрелка) по умолчанию
+- [x] Режимы: DEFAULT, WALK, COLLECT, ATTACK
+- [x] `set_mode()` вызывает `Input.set_default_mouse_cursor(texture, hotspot)`
+- [x] Стандартный курсор (стрелка) по умолчанию
 
 ### 1.2
 Загрузить картинки курсоров с конфигурируемым размером и hotspot.
-- [ ] Размер/пути/hotspot берутся из конфига (шаг 0.2)
-- [ ] Если под режим нет картинки — не падать, оставить DEFAULT + лог
+- [x] Размер/пути/hotspot берутся из конфига (шаг 0.2) — `MODE_ASSETS`, `load_texture`
+- [x] Если под режим нет картинки — не падать, оставить DEFAULT + лог (юнит-тест `test_unconfigured_mode_does_not_crash`), null-guard `_input`
 
 ## 2. Контекст: ходьба (WALK)
 ### 2.1
 Определить движение героя.
-- [ ] Подписать `CursorController` на `HeroMovementController.is_moving` (или опрос в `_process`)
-- [ ] Старт движения → `WALK`; остановка → `DEFAULT`
+- [x] Подписан `CursorController` на `GameEventBus.hero_moving_changed` (эмитит `HeroMovementController._set_moving`)
+- [x] Старт движения → `WALK`; остановка → `DEFAULT`
 
 ### 2.2
 Проверить переключение ботинка.
-- [ ] При ходьбом героя курсор = ботинок; на стоячем = стрелка
-- [ ] Автотест/скриншот
+- [x] При ходьбом героя курсор = WALK (на стоячем = DEFAULT); юнит-тест `test_walk_moving_changes_mode` / `test_walk_still_changes_mode`
+- [ ] Скриншот — отложен: ассеты курсора не загружены (пути пустые → DEFAULT)
 
 ## 3. Контекст: сбор (COLLECT)
 ### 3.1
 Подписаться на сбор ресурсов.
-- [ ] `GameEventBus.resource_extracted` → `COLLECT`
-- [ ] По фазе сбора → возврат к `DEFAULT` (настройка из шага 0.1)
+- [x] `GameEventBus.resource_extracted` → `COLLECT`
+- [x] По фазе сбора → возврат к `DEFAULT` через таймер `COLLECT_HOLD_SECONDS` (юнит-тест `test_collect_timer_returns_to_default`)
 
 ### 3.2
 Проверить переключение руки.
-- [ ] При сборе курсор = рука
-- [ ] Автотест/скриншот
+- [x] При сборе курсор = COLLECT; юнит-тест `test_resource_extracted_sets_collect`
+- [ ] Скриншот — отложен: ассет не загружен (path пустой → DEFAULT)
 
-## 4. Контекст: атака (ATTACK)
+## 4. Контекст: атака (ATTACK) — ОТЛОЖЕНО
 ### 4.1
 Дать бою сигнал режима атаки.
 - [ ] `BattleController`/`BattleView` эмитят событие при `set_cursor_mode(ATTACK)`
-- [ ] `CursorController` ловит → `ATTACK`; выход из атаки → `DEFAULT`
+- [x] `CursorController` ловит → `ATTACK` (set_mode доступен); выход из атаки → `DEFAULT` (связан с `battle_completed`/`battle_lost`)
+- Отложено: пути ассетов пустые → ATTACK падает в DEFAULT, видимого эффекта нет; вопрос дизайна «заменяет ли „два воина“ меч-оверлей» (0.1) не закрыт. `CursorController` готов принять сигнал, когда ассеты будут мапаны.
 
 ### 4.2
 Проверить переключение «два воина».
-- [ ] В режиме атаки курсор = два воина (по решению пользователя, D3)
-- [ ] Сохранить работу `CursorOverlay` (режимы боя не сломаны)
+- [ ] Отложено вместе с 4.1 (ассеты не мапаны)
 
 ## 5. Проверка и коммит
 ### 5.1
 Запустить `bash game/tools/shell/run_operability.sh`, убедиться в вердикте CLEAN.
-- [ ] Исправить SCRIPT ERROR/Parse/Run ошибки
-- [ ] При необходимости обновить `docs/CONSOLE_ALLOWLIST.md`
+- [x] Вердикт: CLEAN (сцены, 12 сценариев, юнит-тесты, console-clean)
+- [x] SCRIPT ERROR/Parse/Run ошибки: нет
+- [x] docs/CONSOLE_ALLOWLIST.md: не требовался
 
 ### 5.2
 Добавить автотесты переключения режимов курсора (юнит-тесты `CursorController.set_mode`).
-- [ ] Проверка карты режимов и вызова `Input.set_default_mouse_cursor`
+- [x] `game/tests/test_cursor.gd` — 12 passed, 0 failed (карта режимов, шина, таймер COLLECT, graceful fallback)
 
 ### 5.3
 Комит только файлов цикла `context-cursor`.
-- [ ] `game/scripts/autoload/CursorController.gd`, правки `HeroMovementController`,
-      `BattleController`/`BattleView`, конфиг курсора
-- [ ] Не выносить файлы других циклов
+- [x] `game/scripts/autoload/CursorController.gd`, `game/tests/test_cursor.gd`, правки `HeroMovementController`, `GameEventBus`, `game/project.godot`
+- [x] Не выносить файлов других циклов

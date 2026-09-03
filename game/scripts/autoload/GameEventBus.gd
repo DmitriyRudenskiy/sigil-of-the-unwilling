@@ -11,6 +11,9 @@ signal battle_lost(enemy_cell: Vector2i)
 # ==================== МИР ====================
 signal village_captured(cell: Vector2i)
 signal turn_ended(turn: int, month: int)
+## Перемещение героя старт/остановка (для контекстного курсора WALK). Signal
+## hero_moving_changed(moving: bool) эмитит HeroMovementController.
+signal hero_moving_changed(moving: bool)
 
 # ==================== РЕСУРСЫ ====================
 signal resource_discovered(cell: Vector2i, resource_id: StringName)
