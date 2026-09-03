@@ -4,6 +4,7 @@ const MAX_BUFFER_SIZE := 1_048_576  # 1 MB per client
 const MAX_LINE_SIZE := 65_536  # 64 KB per command
 const IDLE_TIMEOUT_SEC := 30.0
 const BattleSpellBridge = preload("res://scripts/data/BattleSpellBridge.gd")
+const _Platform = preload("res://scripts/core/Platform.gd")
 
 var server: TCPServer
 # Cached controllers — avoid O(n) full tree walk on every request
@@ -22,12 +23,19 @@ var _total_time_ms: float = 0.0
 var _slow_count: int = 0
 
 func _ready():
-	server = TCPServer.new()
-	var err = server.listen(9095)
-	if err == OK:
-		GameLogger.info("✅ Listening on 127.0.0.1:9095", "SocketServer")
+	# Порт нужен только сценариям/тестам. Без флага — не слушаем: иначе
+	# второй инстанс процесса (оконная игра + тест-сервер) падает в EADDRINUSE.
+	if not _Platform.is_socket_server():
+		GameLogger.trace("Socket server disabled (no --test-server/--socket-server flag)", "SocketServer")
 	else:
-		GameLogger.error("❌ Failed to listen: %s" % err, "SocketServer")
+		server = TCPServer.new()
+		var err = server.listen(9095)
+		if err == OK:
+			GameLogger.info("✅ Listening on 127.0.0.1:9095", "SocketServer")
+		else:
+			# Порт занят (второй инстанс) — не фатально: работаем без сервера.
+			GameLogger.warn("⚠️ Failed to listen on 9095: %s — running without socket server" % err, "SocketServer")
+			server = null
 
 	# Invalidate controller cache on scene tree changes (RF-07)
 	get_tree().node_added.connect(_on_tree_changed)
@@ -38,6 +46,8 @@ func _on_tree_changed(_node: Node) -> void:
 	_battle_ctrl_cache = null
 
 func _process(_delta):
+	if server == null:
+		return
 	# Accept new connections
 	if server.is_connection_available():
 		var peer = server.take_connection()

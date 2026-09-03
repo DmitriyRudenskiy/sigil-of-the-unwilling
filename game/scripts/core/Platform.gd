@@ -16,5 +16,11 @@ static func is_test_server() -> bool:
 	return false
 
 
+## SocketController слушает 127.0.0.1:9095 только при этом флаге (или
+## --test-server) — иначе второй инстанс процесса получает EADDRINUSE.
+static func is_socket_server() -> bool:
+	return is_test_server() or "--socket-server" in OS.get_cmdline_args()
+
+
 static func should_auto_quit() -> bool:
 	return "--autoquit" in OS.get_cmdline_args()

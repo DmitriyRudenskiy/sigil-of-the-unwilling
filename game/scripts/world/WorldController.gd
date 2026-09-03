@@ -7,6 +7,11 @@ const _Platform = preload("res://scripts/core/Platform.gd")
 const WorldEventRouterScript = preload("res://scripts/world/WorldEventRouter.gd")
 const WorldBootstrapScript = preload("res://scripts/world/WorldBootstrap.gd")
 const SuccessionControllerScript = preload("res://scripts/world/SuccessionController.gd")
+const MapGeneratorScript = preload("res://scripts/world/MapGenerator.gd")
+const CityManagerScript = preload("res://scripts/world/CityManager.gd")
+const WorldUIManagerScript = preload("res://scripts/ui/WorldUIManager.gd")
+const WorldStateDeltaScript = preload("res://scripts/world/WorldStateDelta.gd")
+const ResourceChainServiceScript = preload("res://scripts/world/ResourceChainService.gd")
 const _VisibilityMapScript = preload("res://scripts/core/VisibilityMap.gd")
 const ShardManagerScript = preload("res://scripts/core/ShardManager.gd")
 const DeathSequenceScript = preload("res://scripts/ui/DeathSequence.gd")
@@ -20,22 +25,26 @@ var resource_node_manager: Node = null
 
 # Internal references
 var _hero: Node = null
-var _map_gen: Node = null
-var _camera: Node = null
-var _cities: Node = null
-var _ui_manager: Node = null
+var _map_gen: MapGeneratorScript = null
+var _camera: Camera2D = null
+var _cities: CityManagerScript = null
+var _ui_manager: WorldUIManagerScript = null
 var _rng: RandomNumberGenerator = null
-var _world_delta = null
+var _world_delta: WorldStateDeltaScript = null
+# ponytail: _persistence оставлен Variant — в detached-тестах _MockPersistence
+# extends RefCounted (минимальный стаб), а не WorldPersistence. Строкая
+# типизация сломала бы 3 тестовых файла. Апгрейд: _MockPersistence →
+# extends WorldPersistence, либо typed-аксессор.
 var _persistence = null
 ## fog-of-war: карта видимости мира.
-var _visibility = null
-var _resource_chain = null
+var _visibility: _VisibilityMapScript = null
+var _resource_chain: ResourceChainServiceScript = null
 var _event_router: WorldEventRouter = null
 var _bootstrap_result: WorldBootstrap.BootstrapResult = null
 # succession-sigil: смерть героя → преемник. Чистый RefCounted, headless-safe.
 # Типизация через локальный preload (const), а не через global class_name:
 # в detached-тестах class_name не регистрируется в classdb → компиляция падает.
-var _succession = null
+var _succession: SuccessionControllerScript = null
 ## Co-located subsystem: succession-sigil + legend-chronicle + hero-survival
 ## logic (extracted from the facade). Active-hero pointer stays here on the
 ## coordinator; the system owns the death-flow working state. See design.md.
@@ -353,7 +362,7 @@ func _build_load_context():
 
 # ==================== RESOURCE CHAIN DELEGATION ====================
 
-func try_extract_resource(cell: Vector2i) -> int:
+func try_extract_resource(cell: Vector2i) -> Dictionary:
 	return _resource_chain.try_extract(resource_node_manager, _hero, cell)
 
 
