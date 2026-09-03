@@ -35,5 +35,5 @@ Senior-architect audit across 5 dimensions + OpenSpec proposal capturing highest
 - [x] Tests updated (3 files): wire `_hero_lifecycle`, rename 4 death-flow fields
 - [x] compile clean (177 ok); 5672 tests pass, 0 fail
 - [x] committed d7131b1
-- [ ] operability check (background) — pending CLEAN verdict
+- [x] operability check: CLEAN (0 errors, 0 warnings)
 - Deferred: Req3 IHeroConsumer (Design D — keep `_install_hero` on WC), R2/R6/R4/R5/R7
