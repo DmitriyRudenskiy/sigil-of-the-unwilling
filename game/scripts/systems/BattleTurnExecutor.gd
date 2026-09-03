@@ -20,6 +20,8 @@ signal execute_attack(
 )
 signal spell_cast_executed(caster: BattleState.BattleUnit, target: BattleState.BattleUnit, result: Dictionary)
 signal spell_cast_failed(reason: String)
+signal execute_sacrifice(acting: BattleState.BattleUnit, target: BattleState.BattleUnit, cost: Variant, result: Dictionary)
+signal sacrifice_failed(reason: String)
 signal end_battle(winner: BattleState.Side, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack])
 
 enum State {
@@ -331,6 +333,33 @@ func on_spell_target_selected(spell_id: StringName, target: BattleState.BattleUn
 		spell_cast_failed.emit(result.get("result", "unknown"))
 		status_updated.emit("Заклинание не сработало: %s" % result.get("result", "unknown"))
 
+
+## Кнопка «Жертва» — доубивает цель в обход перерождения, расходует стоимость
+## (союзник-стек / ресурс / артефакт) и один ход. Валидирует, мутирует
+## BattleState (через apply_sacrifice), затем испускает сигнал для анимации.
+func request_sacrifice(
+	acting: BattleState.BattleUnit,
+	sacrifice: Dictionary,
+	target: BattleState.BattleUnit,
+	cost: Variant
+) -> void:
+	if _state != State.WAITING_INPUT:
+		return
+	if acting == null or target == null or sacrifice == null or cost == null:
+		return
+	if acting != _battle_state.active_unit:
+		return
+	if not acting.is_alive() or not target.is_alive():
+		return
+
+	var result := _battle_state.apply_sacrifice(sacrifice, acting, target, cost, _rng)
+
+	if result.get("result") == "success":
+		_transition_to(State.PLAYER_ANIMATING)
+		execute_sacrifice.emit(acting, target, cost, result)
+	else:
+		sacrifice_failed.emit(result.get("result", "unknown"))
+		status_updated.emit("Жертва не удалась: %s" % result.get("result", "unknown"))
 
 ## Кнопка «Защита»
 func request_defend() -> void:

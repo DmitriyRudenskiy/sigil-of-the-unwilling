@@ -56,6 +56,52 @@ func test_cast_emits_spell_cast_failed() -> void:
 	assert_true(failed_holder[0], "spell_cast_failed should fire on invalid spell")
 	exec.free()
 
+# РФ4-2: request_sacrifice emits execute_sacrifice + transitions to animating.
+func test_request_sacrifice_emits_and_finishes() -> void:
+	var state := _make_battle_state()
+	var exec := _Executor.new()
+	exec.name = "ExecSacrifice"
+	exec.setup(state, _BAI.new(), {})
+	var atk: BattleState.BattleUnit = state.attacker_units[0]
+	var def: BattleState.BattleUnit = state.defender_units[0]
+	exec._state = _Executor.State.WAITING_INPUT
+	state.active_unit = atk
+
+	var holder: Array = [false, {}]
+	exec.execute_sacrifice.connect(func(_a, _t, _c, r):
+		holder[0] = true
+		holder[1] = r
+	)
+	var storage := {&"gold": 100}
+	var sacrifice := {"type": &"resource", "resource": &"gold", "amount": 40}
+	exec.request_sacrifice(atk, sacrifice, def, storage)
+	assert_true(holder[0], "execute_sacrifice should fire on successful sacrifice")
+	assert_eq(holder[1].get("result"), "success", "result is success")
+	assert_eq(exec._state, _Executor.State.PLAYER_ANIMATING, "transitions to animating")
+	assert_false(def.is_alive(), "target finished off")
+	assert_eq(int(storage.get(&"gold", 0)), 60, "resource deducted")
+	exec.free()
+
+# РФ4-2: request_sacrifice is a no-op when not waiting for input.
+func test_request_sacrifice_guard_when_idle() -> void:
+	var state := _make_battle_state()
+	var exec := _Executor.new()
+	exec.name = "ExecSacrificeIdle"
+	exec.setup(state, _BAI.new(), {})
+	var atk: BattleState.BattleUnit = state.attacker_units[0]
+	var def: BattleState.BattleUnit = state.defender_units[0]
+	# _state == IDLE, active_unit not set → should not fire.
+	var fired := false
+	exec.execute_sacrifice.connect(func(_a, _t, _c, _r):
+		fired = true
+	)
+	var storage := {&"gold": 100}
+	var sacrifice := {"type": &"resource", "resource": &"gold", "amount": 40}
+	exec.request_sacrifice(atk, sacrifice, def, storage)
+	assert_false(fired, "no signal when not WAITING_INPUT")
+	assert_true(def.is_alive(), "target untouched when guard blocks")
+	exec.free()
+
 func _make_battle_state() -> BattleState:
 	var state := BattleState.new()
 	var atk_stack: UnitStack = _units.make_fixed_stack("swordsmen", 20)

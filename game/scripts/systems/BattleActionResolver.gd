@@ -122,6 +122,102 @@ static func apply_spell(
 	return result
 
 
+# ==================== ЖЕРТВА ====================
+## Жертва: доубивание цели (в обход перерождения) + расход стоимости
+## (союзник-стек, ресурс из экономики, артефакт) и одного хода.
+## Параллельно apply_attack/apply_spell. Возвращает:
+##   {"result":"success", "finished":target, "cost_type":...} — успех
+##   {"result":"invalid_actor"} — действующий юнит мёртв/null
+##   {"result":"invalid_target"} — цель мёртва/null
+##   {"result":"invalid_cost"} — описание жертвы неверно / нет союзника
+##   {"result":"insufficient_cost"} — ресурса/артефакта недостаточно
+## Изменения доски НЕ происходит при невалидном результате.
+##
+## Описание жертвы `sacrifice`:
+##   {"type":"follower", "unit": <BattleUnit>} — союзник на стороне acting
+##   {"type":"resource", "resource": &"gold", "amount": <int>} — расход из экономики
+##   {"type":"artifact", "slot": &"weapon"} — снятие с equipped (cost = HeroInventory)
+## `cost` — backing-хранилище для resource/artifact (storage-dict / HeroInventory);
+## для follower игнорируется (юнит лежит в sacrifice).
+static func apply_sacrifice(
+	state: BattleState,
+	acting: BattleState.BattleUnit,
+	sacrifice: Dictionary,
+	target: BattleState.BattleUnit,
+	cost: Variant,
+	rng: RandomNumberGenerator
+) -> Dictionary:
+	# --- Валидация (без мутации доски) ---
+	if acting == null or not acting.is_alive():
+		return {"result": "invalid_actor"}
+	if target == null or not target.is_alive():
+		return {"result": "invalid_target"}
+	if sacrifice == null:
+		return {"result": "invalid_cost"}
+
+	var cost_type := String(sacrifice.get("type", "")).to_lower()
+	var res_id: Variant = null
+	var amount: int = 0
+	var slot: Variant = null
+	var storage: Variant = null
+	if cost_type == &"follower":
+		var follower: BattleState.BattleUnit = sacrifice.get("unit", null)
+		if follower == null or not follower.is_alive() or follower.side != acting.side:
+			return {"result": "invalid_cost"}
+	elif cost_type == &"resource":
+		storage = cost
+		if not (storage is Dictionary):
+			return {"result": "insufficient_cost"}
+		res_id = sacrifice.get("resource", null)
+		amount = int(sacrifice.get("amount", 0))
+		if res_id == null or not storage.has(res_id):
+			return {"result": "insufficient_cost"}
+		if int(storage.get(res_id, 0)) < amount:
+			return {"result": "insufficient_cost"}
+	elif cost_type == &"artifact":
+		slot = sacrifice.get("slot", null)
+		if slot == null:
+			return {"result": "invalid_cost"}
+		if cost == null or not _artifact_available(cost, slot):
+			return {"result": "invalid_cost"}
+	else:
+		return {"result": "invalid_cost"}
+
+	# --- Разрешение: доубиваем цель (в обход rebirth) ---
+	target.set_count(0)
+	state.kill_unit(target)
+
+	# --- Расход стоимости ---
+	if cost_type == &"follower":
+		state.kill_unit(sacrifice.get("unit"))
+	elif cost_type == &"resource":
+		(storage as Dictionary)[res_id] = int(storage.get(res_id, 0)) - amount
+	elif cost_type == &"artifact":
+		_inventory_remove_artifact(cost, slot)
+
+	acting.has_moved = true
+	state.invalidate_board_cache()
+	state.check_end()
+
+	return {"result": "success", "finished": target, "cost_type": cost_type}
+
+static func _artifact_available(inventory: Variant, slot: Variant) -> bool:
+	if inventory == null:
+		return false
+	if inventory.has_method("get_equipped"):
+		return inventory.get_equipped(slot) != null
+	if inventory is Dictionary:
+		return inventory.has(slot) and inventory[slot] != null
+	return false
+
+static func _inventory_remove_artifact(inventory: Variant, slot: Variant) -> void:
+	if inventory == null:
+		return
+	if inventory.has_method("unequip"):
+		inventory.unequip(slot)
+	elif inventory is Dictionary:
+		inventory[slot] = null
+
 # ==================== ПРИВАТНЫЕ ХЕЛПЕРЫ ====================
 static func _get_hero_bonuses(
 	state: BattleState,

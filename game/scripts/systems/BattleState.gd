@@ -494,6 +494,17 @@ func apply_spell(
 		self, spell_id, caster, target, caster_hero_bonus, target_hero_bonus, rng
 	)
 
+## Delegates to BattleActionResolver for sacrifice resolution (finish-off +
+## cost consumption, bypassing rebirth).
+func apply_sacrifice(
+	sacrifice: Dictionary,
+	acting: BattleUnit,
+	target: BattleUnit,
+	cost: Variant,
+	rng: RandomNumberGenerator
+) -> Dictionary:
+	return BattleActionResolver.apply_sacrifice(self, acting, sacrifice, target, cost, rng)
+
 
 
 
