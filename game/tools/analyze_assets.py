@@ -28,7 +28,7 @@ ARCHIVE = os.path.join(os.path.dirname(ROOT), "_archive")  # repo root /_archive
 CATEGORIES = ["artifacts", "audio", "cursors", "data", "raw",
               "textures", "tiles", "ui", "units"]
 
-STATIC_EXTS = (".gd", ".tscn", ".json")
+STATIC_EXTS = (".gd", ".tscn", ".tres", ".json")
 ASSET_EXTS = (".png", ".jpg", ".jpeg", ".mp3", ".wav", ".ogg")
 
 
@@ -69,7 +69,9 @@ def _static_refs():
     refs = set()
     pat = re.compile(r'res://assets/([^\s"\')\]]+\.(?:png|jpg|jpeg|mp3|wav|ogg))')
     for dirpath, _dirs, files in os.walk(ROOT):
-        if ".godot" in dirpath:
+        # game/tools/ — только инструменты генерации: их референсы не считаются
+        # (задача 2.4, ambiguous -> keep).
+        if ".godot" in dirpath or "/tools/" in dirpath + "/":
             continue
         for f in files:
             if not f.lower().endswith(STATIC_EXTS):
@@ -112,7 +114,36 @@ def _data_driven():
     return used
 
 
+def _restore():
+    """Задача 4.2: откат из manifest.json — возвращает каждый перемещённый
+    ассет (+ .import sidecar) на исходный fs-путь, удаляет manifest."""
+    man_path = os.path.join(ARCHIVE, "manifest.json")
+    if not os.path.exists(man_path):
+        print("Manifest не найден: %s (нечего восстанавливать)" % man_path)
+        return
+    with open(man_path, "r", encoding="utf-8") as fh:
+        manifest = json.load(fh)
+    restored = 0
+    for e in manifest:
+        dest = e["destination"]
+        if not os.path.exists(dest):
+            continue
+        rel = e["original"][len("res://"):].replace("/", os.sep)
+        src = os.path.join(ROOT, rel)
+        os.makedirs(os.path.dirname(src), exist_ok=True)
+        shutil.move(dest, src)
+        imp = dest + ".import"
+        if os.path.exists(imp):
+            shutil.move(imp, src + ".import")
+        restored += 1
+    print("Восстановлено: %d" % restored)
+    os.remove(man_path)
+
+
 def main():
+    if "--restore" in sys.argv:
+        _restore()
+        return
     archive = "--archive" in sys.argv
     static = _static_refs()
     data = _data_driven()
@@ -124,7 +155,7 @@ def main():
     for a in assets:
         rp = _res(a)
         if rp not in used:
-            unused.append((a, rp, _category(a)))
+            unused.append((a, rp, _category(a), "no used path resolves to it"))
             by_cat[_category(a)].append((a, rp))
 
     # Отчёт
@@ -139,13 +170,13 @@ def main():
         items = by_cat[c]
         if items:
             print("\n[%s] — %d" % (c, len(items)))
-            for _a, rp in items:
-                print("   %s" % rp)
+            for _a, rp in by_cat[c]:
+                print("   %s  (no used path resolves to it)" % rp)
 
     if archive:
         os.makedirs(ARCHIVE, exist_ok=True)
         manifest = []
-        for a, rp, _c in unused:
+        for a, rp, _c, _reason in unused:
             dest = os.path.join(ARCHIVE, os.path.basename(a))
             i = 0
             while os.path.exists(dest):

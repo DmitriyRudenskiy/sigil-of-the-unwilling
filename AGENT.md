@@ -242,6 +242,12 @@ $GODOT --headless --path game -s tools/check_scene_refs.gd
 $GODOT --headless --path game -s tools/spell_validation/validate_spells.gd --strict --json
 $GODOT --headless --path game -s tools/check_tileset.gd
 
+# Анализ и архивация НЕИСПОЛЬЗУЕМЫХ ассетов (game/tools/analyze_assets.py):
+#   отчёт  — python3 game/tools/analyze_assets.py        (без перемещения)
+#   архив  — python3 game/tools/analyze_assets.py --archive  (в _archive/ + manifest)
+#   откат  — python3 game/tools/analyze_assets.py --restore
+# ⚠️ после --archive ОБЯЗАТЕЛЬНО прогнть operability/тесты (см. docs/howto/ASSET_ARCHIVING.md): #   перемещение файлов может сломать рантайм, если детекция пропустила референс.
+
 # Запуск сцены (--quit-after N, иначе зависнет; см. правило 8.1)
 $GODOT --headless --path game --scene scenes/World.tscn --quit-after 120
 $GODOT --path game --scene scenes/MainMenu.tscn          # с окном, для ручной проверки
@@ -421,6 +427,7 @@ SocketController, Units, Artifacts, Spells, Resources
 - `docs/overview/PLAN_MASTER.md`, `docs/overview/TASK.md` — дорожная карта.
 - `TESTING.md` — справка по headless-запуску сцен.
 - `howto/OPERABILITY.md` — полная проверка работоспособности (`run_operability.sh`).
+- `howto/ASSET_ARCHIVING.md` — архивация неиспользуемых ассетов (`game/tools/analyze_assets.py`).
 
 ---
 

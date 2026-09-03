@@ -1,0 +1,710 @@
+[
+  {
+    "original": "res://assets/ui/icons/naval.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/naval.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/spell_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/spell_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/cursor.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/sword2_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/sword2_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/horse2_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/horse2_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/gold2.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/gold2.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/fireball_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/fireball_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/map_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/map_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/cursor_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/naval_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/naval_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/horse4_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/horse4_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/hourglass3_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/hourglass3_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/dot.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/dot.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/horse3_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/horse3_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/sword2.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/sword2.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/map.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/map.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/atk_sword_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/atk_sword_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/alert.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/alert.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/gold2_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/gold2_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/point_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/point_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/hourglass2_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/hourglass2_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/hourglass_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/hourglass_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/ship_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/ship_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/hourglass2.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/hourglass2.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/hourglass3.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/hourglass3.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/swords_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/swords_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/hand.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/hand.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/point.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/point.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/gold_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/gold_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/helm_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/helm_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/help.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/help.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/help_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/help_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/scroll_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/scroll_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/horse4.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/horse4.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/horse_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/horse_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/fireball.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/fireball.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/scout_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/scout_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/horse3.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/horse3.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/treasure_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/treasure_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/horse2.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/horse2.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/alert_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/alert_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/hand_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/hand_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/icons/expand_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/expand_s.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/hero/check.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/check.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/ui/hero/x.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/x.png",
+    "category": "ui",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/units/archmages_alt.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/archmages_alt.png",
+    "category": "units",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/units/archmages_alt_s.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/archmages_alt_s.png",
+    "category": "units",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00016.jpeg",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00016.jpeg",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/1788192157361-01a0588d-3a96-77a3-b81e-20a9924dc2a3.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/1788192157361-01a0588d-3a96-77a3-b81e-20a9924dc2a3.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00017.jpeg",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00017.jpeg",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00027.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00027.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00026.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00026.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00024.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00024.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00018.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00018.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00019.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00019.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00025.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00025.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00009.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00009.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00021.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00021.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00020.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00020.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00008.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00008.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00011.jpeg",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00011.jpeg",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/seedream-5.0-lite_a_change_the_binomial_.jpeg",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/seedream-5.0-lite_a_change_the_binomial_.jpeg",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00022.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00022.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00023.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00023.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00012.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00012.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00006.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00006.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/seedream-5-9.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/seedream-5-9.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00007.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00007.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00013.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00013.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00005.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00005.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00011.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00011.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00004.jpeg",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00004.jpeg",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00010.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00010.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00004.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00004.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00012.jpeg",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00012.jpeg",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00013.jpeg",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00013.jpeg",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00028.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00028.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00005.jpeg",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00005.jpeg",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00014.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00014.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00015.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00015.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00029.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00029.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00017.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00017.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00003.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00003.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00016.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00016.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00014.jpeg",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00014.jpeg",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/seedream-5.0-pro_a_Sprite_sheet,_strict.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/seedream-5.0-pro_a_Sprite_sheet,_strict.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00015.jpeg",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00015.jpeg",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/img_00003.jpeg",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/img_00003.jpeg",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/_contact/icons4_contact.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/icons4_contact.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/_contact/icons5_contact.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/icons5_contact.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/raw/_contact/creatures_contact.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/creatures_contact.png",
+    "category": "raw",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_11.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_11.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_05.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_05.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_04.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_04.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_06.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_06.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_12.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_12.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_13.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_13.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_07.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_07.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_17.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_17.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_16.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_16.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_14.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_14.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_28.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_28.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_29.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_29.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_15.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_15.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_18.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_18.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_30.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_30.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_24.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_24.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_25.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_25.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_31.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_31.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_19.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_19.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_27.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_27.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_26.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_26.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_22.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_22.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_23.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_23.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_21.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_21.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_09.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_09.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_08.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_08.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  },
+  {
+    "original": "res://assets/cursors/cursor_20.png",
+    "destination": "/Users/user/sigil-of-the-unwilling/_archive/cursor_20.png",
+    "category": "cursors",
+    "reason": "no used path resolves to it"
+  }
+]
