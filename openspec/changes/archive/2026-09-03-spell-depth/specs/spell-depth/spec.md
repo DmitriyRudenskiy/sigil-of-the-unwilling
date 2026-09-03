@@ -2,6 +2,12 @@
 description: "Requirements for spell-system depth: condition coverage, widened secondary effects, HEAL_CLEAR/REVIVE/PORTAL templates, and speed-curve variety."
 ---
 
+## Purpose
+
+Adds depth to the spell system through meaningful conditions, widened secondary
+effects, three new spellbook templates (HEAL_CLEAR, REVIVE, PORTAL), and a
+less-dominated speed curve.
+
 ## ADDED Requirements
 
 ### Requirement: Spells carry conditions
