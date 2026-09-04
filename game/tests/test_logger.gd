@@ -8,6 +8,7 @@ extends "res://tests/gut_base.gd"
 ## - smoke: все 9 публичных методов вызываются без ошибок.
 
 const _LOGGER := preload("res://scripts/core/GameLogger.gd")
+const _Platform := preload("res://scripts/core/Platform.gd")
 
 ## Снимает ANSI-обёртку цвета и квадратные скобки: "[color=gray][X     ][/color]" -> "X     ".
 func _visible_tag(t: String) -> String:
@@ -20,6 +21,11 @@ func test_tag_pads_to_width() -> void:
 
 func test_tag_wraps_in_gray() -> void:
 	var t := _LOGGER._tag("Hero")
+	if _Platform.is_headless():
+		# ponytail: headless drops color markup (finding #11) — tag is plain.
+		assert_true(not t.begins_with("[color=gray]"), "в headless тег без color-обвязки")
+		assert_eq(_visible_tag(t), "Hero".rpad(_LOGGER.TAG_WIDTH), "видимая часть — имя + пробелы до TAG_WIDTH")
+		return
 	assert_true(t.begins_with("[color=gray]"), "тег начинается с [color=gray]")
 	assert_true(t.ends_with("[/color]"), "тег заканчивается [/color]")
 	assert_eq(_visible_tag(t), "Hero".rpad(_LOGGER.TAG_WIDTH), "видимая часть тега — имя + пробелы до TAG_WIDTH")

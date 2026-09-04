@@ -154,7 +154,7 @@ static func astar_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: 
 
 		# Stale entry (улучшенная копия уже в open) — skip
 		var best_g: float = g_score.get(cur_cell, INF)
-		if cur_g > best_g + 0.001:
+		if cur_g > best_g:  # ponytail: strict stale-entry test; best_g==cur_g is the live node, not stale (audit #3)
 			continue
 
 		if cur_cell == goal:
