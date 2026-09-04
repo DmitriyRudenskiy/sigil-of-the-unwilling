@@ -36,7 +36,7 @@ func _build() -> void:
 	var uid := 1000
 
 	# ---- Root: ArtifactInventoryScreen (Control) ----
-	_add_node("ArtifactInventoryScreen", "Control", "", "", uid)
+	_add_node("ArtifactInventoryScreen", "Control", "", "script = ExtResource(\"1\")", uid)
 	uid += 1
 
 	# ---- Center (CenterContainer) -- parent "." ----
