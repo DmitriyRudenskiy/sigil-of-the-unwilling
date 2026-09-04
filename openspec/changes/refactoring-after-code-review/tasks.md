@@ -17,7 +17,7 @@
 ## 3. Shared test factory helpers
 
 - [x] 3.1 Create `game/tests/helpers/test_factories.gd` (`class_name TestFactories`) exposing `make_hero`, `make_follower`, `make_city`. (Fixed broken `Follower` preload path that left `class_name` unregistered and broke 34 tests.)
-- [x] 3.2 Migrate the real-type factories that are drop-ins for the shared helper: `test_save_v3` and `test_city_chains` (`make_city`). The remaining `_make_*` redefinitions build local stub doppelgangers (`_City`/`_Hero`/`_Follower`/`_HeroStub`/`_HeroController`) for isolated internal-system testing -- excluded from migration per design D6, their signatures/behavior differ from the shared helper.
+- [x] 3.2 Migrate the real-type factories that are drop-ins for the shared helper: `test_city_systems`, `test_economic_processor`, `test_city_processor`, `test_city_chains` (`make_city(uid=1, stronghold=2)`) and `test_save_v3` (`make_city(0/1)`). The remaining `_make_*` redefinitions build local stub doppelgangers (`_City`/`_Hero`/`_Follower`/`_HeroStub`/`_HeroController`) for isolated internal-system testing -- excluded from migration per design D6, their signatures/behavior differ from the shared helper. `test_city_reputation` keeps `_make_city(stronghold=1)` (first param is stronghold, returns RefCounted) -- incompatible with the shared signature.
 - [x] 3.3 Full GUT suite passes (1136 tests, 0 failing). Real-type factories resolve to `TestFactories`; stub factories remain by design D6.
 
 ## 4. Socket command validation
@@ -38,4 +38,4 @@
 
 - [x] 6.1 Full GUT suite: 1136 pass, 0 fail.
 - [x] 6.2 `CityArenaModel.gd` = 126 lines (< 200). Decomposed systems ported verbatim per design (faithfulness over line count): ArenaClusterSystem 112, ArenaStorm 40, ArenaRingSystem 196 and ArenaTurnRunner 390 exceed the aspirational 150-line target by design choice.
-- [ ] 6.3 Commit the change; update task checkboxes in `tasks.md`.
+- [x] 6.3 Commit the change; update task checkboxes in `tasks.md`.

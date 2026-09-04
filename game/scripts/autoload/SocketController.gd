@@ -174,7 +174,7 @@ func _route_command(line: String) -> Dictionary:
 	# Валидация аргументов против схемы (требование spec: malformed input
 	# never crashes, wrong type rejected) — до маршрутизации, до поиска
 	# контроллеров (detached-инстанс в test_socket_routing не имеет дерева).
-	var vres := _validate_args(req, _ARG_SCHEMAS.get(action))
+	var vres := _validate_args(req, _ARG_SCHEMAS.get(action, {}))
 	if not vres.is_empty():
 		return vres
 
