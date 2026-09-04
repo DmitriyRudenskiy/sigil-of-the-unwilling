@@ -73,7 +73,10 @@ text = "⏳"
 custom_minimum_size = Vector2(56, 48)
 theme_override_font_size/font_size = 22
 
-[node name="collapse_btn" type="Button" parent="bottom_bar"]
+[node name="collapse_btn" type="Button" parent="."]
+anchors_preset = 12
+anchors_preset_inner_x = 0
+anchors_preset_inner_y = 0
 mouse_filter = 2
 text = "▲"
 custom_minimum_size = Vector2(56, 48)

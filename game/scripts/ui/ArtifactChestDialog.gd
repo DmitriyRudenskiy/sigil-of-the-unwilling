@@ -42,10 +42,16 @@ func _connect_skeleton() -> void:
 	_gold_label = get_node_or_null("Margin/VBox/gold_label") as Label
 	var take := get_node_or_null("Margin/VBox/buttons/take")
 	var gold := get_node_or_null("Margin/VBox/buttons/gold")
+	var cancel := get_node_or_null("Margin/VBox/cancel")
 	if take != null and not take.pressed.is_connected(_on_take):
 		take.pressed.connect(_on_take)
 	if gold != null and not gold.pressed.is_connected(_on_gold):
 		gold.pressed.connect(_on_gold)
+	# R1: Close/cancel button was present in the scene but never connected,
+	# so dismissing the dialog was a no-op. Hide without emitting choice_made
+	# (a cancel must not consume/remove the chest).
+	if cancel != null and not cancel.pressed.is_connected(_on_close):
+		cancel.pressed.connect(_on_close)
 
 
 func _update_display() -> void:

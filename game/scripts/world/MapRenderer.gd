@@ -63,11 +63,6 @@ func apply_fog(tile_map: TileMapLayer, visibility: _VisibilityMap) -> void:
 			tile_map.set_cell(cell, TileAtlas.SOURCE_ID, coords[0])
 	fog_refreshed.emit()
 
-## У биома один базовый вариант — диверсификация не нужна.
-func diversify(_tile_map: TileMapLayer) -> void:
-	pass
-
-
 ## В листе нет декор-объектов — декор-слой остаётся пустым.
 func paint_decor(_decor_layer: TileMapLayer) -> void:
 	pass

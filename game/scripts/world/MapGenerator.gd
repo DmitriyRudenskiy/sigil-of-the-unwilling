@@ -89,7 +89,6 @@ func generate() -> void:
 	model.generate_noise()
 	model.smooth_invalid_adjacencies()
 	renderer.paint(_tile_map)
-	renderer.diversify(_tile_map)
 	renderer.paint_decor(_decor_layer)
 
 	spawner.place_villages()

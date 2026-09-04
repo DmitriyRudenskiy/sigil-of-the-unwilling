@@ -76,7 +76,11 @@ func _connect_skeleton() -> void:
 	_connect_btn("attack_btn", _on_attack_mode, true)
 	_connect_btn("defend_btn", _on_defend, true)
 	_connect_btn("skip_btn", _on_skip, true)
-	_connect_btn("collapse_btn", _on_collapse, false)
+	# R2: collapse_btn lives at the root (not inside bottom_bar) so toggling
+	# _bottom_bar.visible does not hide the button that expands it again.
+	var _collapse_btn := get_node_or_null("collapse_btn") as Button
+	if _collapse_btn != null and not _collapse_btn.pressed.is_connected(_on_collapse):
+		_collapse_btn.pressed.connect(_on_collapse)
 	_connect_btn("spellbook_btn", _on_spellbook, true)
 	_connect_btn("settings_btn", _on_settings, true)
 	_attack_button = get_node_or_null("bottom_bar/attack_btn") as Button

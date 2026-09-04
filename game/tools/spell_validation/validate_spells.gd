@@ -36,13 +36,18 @@ static func _load_src(path: String) -> Script:
 		return null
 	var text := fa.get_as_text()
 	fa.close()
-	# Убираем «class_name X» из динамически загружаемого исходника:
-	# иначе Godот ругается «hides a global script class», когда имя класса
-	# уже зарегистрировано глобально (такой класс уже есть в проекте).
+	# Убираем объявление «class_name X» из динамически загружаемого
+	# исходника: иначе Godот ругается «hides a global script class», когда
+	# имя класса уже зарегистрировано глобально (такой класс уже есть в
+	# проекте). Регулярка совпадает только с объявлением
+	# `class_name <идентификатор>` в начале строки, а не с любой строкой,
+	# начинающейся на «class_name » (комментарий, строка, присваивание).
+	var _class_name_re := RegEx.new()
+	_class_name_re.compile(r"^\s*class_name\s+\w+")
 	var lines := text.split("\n", true)
 	var kept: Array = []
 	for line in lines:
-		if line.strip_edges().begins_with("class_name "):
+		if _class_name_re.search(line) != null:
 			continue
 		kept.append(line)
 	var gs := GDScript.new()

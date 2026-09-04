@@ -1,5 +1,7 @@
 class_name City
 extends RefCounted
+
+const _ArenaClusterSystem = preload("res://scripts/city/ArenaClusterSystem.gd")
 ## Чистая модель города: население (3 состояния), районы, уникальные здания,
 ## еда/рост, одобрение, безопасность. Не зависит от узлов Godot —
 ## UI подписывается на сигналы (паттерн BattleState).
@@ -755,6 +757,11 @@ func deserialize(data: Dictionary) -> void:
 			GameLogger.warn("City.deserialize: неизвестное здание '%s' — пропущено" % bl.get("def_id", ""))
 			continue
 		buildings.append(UniqueBuilding.deserialize(bl, def))
+
+	# R5: buildings changed — the arena cluster cache (keyed on city.uid) is
+	# only invalidated from ArenaTurnRunner.place_building, so a loaded city
+	# would report stale clusters. Invalidate it here too.
+	_ArenaClusterSystem.invalidate(uid)
 
 	# uid_seq — после максимального встреченного uid (и сохранённого значения).
 	var max_uid := int(data.get("uid_seq", 0))
