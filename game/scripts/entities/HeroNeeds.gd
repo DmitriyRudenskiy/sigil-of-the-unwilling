@@ -1,6 +1,7 @@
 extends RefCounted
 class_name HeroNeeds
-## hero-survival: core-потребности героя (hunger/rest/social/inspiration).
+## hero-survival: core-потребности героя (rest/social/inspiration).
+## remove-hunger-mechanic: голод удалён — еда не влияет на выживание.
 ##
 ## Чистый RefCounted-компонент (паттерн HeroMagic/HeroSkills): считает только.
 ## Распад — каждый ход; восстановление — только в дружественном городе
@@ -13,7 +14,6 @@ const NEED_KEYS: Array[StringName] = Character.NEED_KEYS
 
 ## Базовый ежедневный распад (дефолт DemographicTurnProcessor.DECAY).
 const DECAY: Dictionary = {
-	&"hunger": 0.15,
 	&"rest": 0.10,
 	&"social": 0.08,
 	&"inspiration": 0.05,
@@ -52,30 +52,26 @@ func tick(in_city: bool, city: City = null) -> StringName:
 	return &""
 
 
-## Таблица восстановления — копия citizens (DemographicTurnProcessor._recovery).
+## Таблица восстановления героя в городе: темп героя, не citizens.
+## (В citizens-таблице герой в поле выжить математически не может: inspiration
+## net 0.00 даже в городе — гарантированный burnout-дедлайн ~день 20, и
+## сценарии 1–4 умирали на днях 8–20.)
 func _recovery(need_id: StringName, city: City) -> float:
 	match need_id:
-		&"hunger":
-			# Город без еды не кормит.
-			if city.starving:
-				return -0.10
-			return 0.20
 		&"rest":
-			return 0.12
+			return 0.36
 		&"social":
 			# Компания есть, если население прилично.
 			if city.pop.size() >= 3:
-				return 0.10
+				return 0.30
 			return -0.05
 		&"inspiration":
-			return 0.05
+			return 0.15
 	return 0.0
 
 
 func _death_cause(need_id: StringName) -> StringName:
 	match need_id:
-		&"hunger":
-			return &"starvation"
 		&"rest":
 			return &"exhaustion"
 		&"social":

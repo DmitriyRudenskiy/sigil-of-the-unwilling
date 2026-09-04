@@ -550,6 +550,10 @@ func can_build_building(def: UniqueBuilding.Def, cell: Vector2i) -> Dictionary:
 		return _fail("Нет определения здания")
 	if cell == center or cell_is_built(cell):
 		return _fail("Клетка занята")
+	## Аудит #3: рабочая фигурка стоит на клетке — строить нельзя (рабочее место).
+	for u in pop:
+		if u.state == PopUnit.State.WORKER and u.tile == cell:
+			return _fail("Клетка занята рабочим")
 	if def.requires_site:
 		if not special_sites.has(cell):
 			return _fail("Здание требует специальной площадки")
@@ -840,11 +844,22 @@ func _assign_followers(bld: UniqueBuilding, n: int) -> void:
 const RELOCATE_MAX_DISTANCE := 3
 
 
-func relocate(new_center: Vector2i) -> Dictionary:
+func relocate(
+	new_center: Vector2i,
+	map_size: Vector2i = Vector2i(-1, -1),  # Аудит #18: (ширина, высота); (-1,-1) — неизвестна
+	occupied_cells: Dictionary = {}  # Аудит #18: клетки чужих городов (центр/застройка)
+) -> Dictionary:
 	if new_center == center:
 		return _fail("Новый центр совпадает со старым")
 	if HexUtils.hex_distance(center, new_center) > RELOCATE_MAX_DISTANCE:
 		return _fail("Слишком далеко: максимум %d клеток" % RELOCATE_MAX_DISTANCE)
+	# Аудит #18: за границей карты или на клетке другого города — отказ.
+	if map_size.x > 0 and map_size.y > 0:
+		if new_center.x < 0 or new_center.y < 0 \
+				or new_center.x >= map_size.x or new_center.y >= map_size.y:
+			return _fail("Новый центр вне карты")
+	if occupied_cells.get(new_center, false):
+		return _fail("На новом центре стоит другой город")
 	if cell_is_built(new_center):
 		return _fail("На новом центре уже застройка")
 	var delta := new_center - center

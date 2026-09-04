@@ -351,3 +351,15 @@ func test_migrate_v4_to_v5_defaults() -> void:
 	var s := _GameSession.new()
 	s.deserialize(d.session)
 	assert_eq(s.state, GameSession.GameState.RUNNING, "empty session → RUNNING")
+
+
+func test_double_setup_does_not_duplicate_counters() -> void:
+	# Аудит #17: setup идемпотентен — второй вызов не дублирует bus-коннекты.
+	_setup_endgame()
+	_ec.setup(_world, _battle, _map, _cities, _persistence, _enemy_proc)
+	GameEventBus.battle_won.emit(Vector2i(1, 1))
+	GameEventBus.battle_lost.emit(Vector2i(2, 2))
+	GameEventBus.hero_successor.emit(_world.hero)
+	assert_eq(_persistence.session.battles_won, 1, "battle_won ровно 1 после двойного setup")
+	assert_eq(_persistence.session.battles_lost, 1, "battle_lost ровно 1 после двойного setup")
+	assert_eq(_persistence.session.successions, 1, "succession ровно 1 после двойного setup")

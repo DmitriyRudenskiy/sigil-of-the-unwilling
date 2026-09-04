@@ -11,6 +11,10 @@ var spawner
 ## fog-of-war: карта видимости (заполняет WorldController). Тип нужен для
 ## вывода `:=` в гейтах HeroMovementController (is_explored/is_visible).
 var visibility: _VisibilityMap = null
+## Достижимое множество от спавна героя (первая проходимая клетка, row-major).
+## Используется WorldBootstrap: столица не должна попасть на другой остров
+## (иначе soft-lock — игрок не дойдёт до собственного города).
+var reachable_cells: Dictionary = {}
 
 var _tile_map: TileMapLayer
 var _decor_layer: TileMapLayer
@@ -93,10 +97,11 @@ func generate() -> void:
 
 	spawner.place_villages()
 	# Compute reachable cells once, reuse for resources + enemies
-	var reachable := _compute_reachable_cells()
-	spawner.place_resources(reachable)
+	# (и для размещения городов — см. reachable_cells).
+	reachable_cells = _compute_reachable_cells()
+	spawner.place_resources(reachable_cells)
 	spawner.place_decor()
-	spawner.place_enemies(reachable)
+	spawner.place_enemies(reachable_cells)
 
 
 ## Внедрить контейнер сервисов (units/resources). Аналог WorldSpawner.setup_services.

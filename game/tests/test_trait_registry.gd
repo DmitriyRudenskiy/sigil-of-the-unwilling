@@ -15,11 +15,11 @@ func before_each() -> void:
 # ==================== РЕЕСТР ====================
 
 func test_defaults_loaded() -> void:
-	assert_eq(reg.all().size(), 18, "18 default traits")
-	assert_true(reg.has(&"hardy"), "has hardy")
-	var t: TraitDef = reg.get_trait(&"hardy")
-	assert_eq(t.effect_type, &"hunger", "hardy affects hunger")
-	assert_eq(t.effect_value, 0.10, "hardy +0.10")
+	assert_eq(reg.all().size(), 15, "15 default traits")
+	assert_true(reg.has(&"sleepy"), "has sleepy")
+	var t: TraitDef = reg.get_trait(&"sleepy")
+	assert_eq(t.effect_type, &"rest", "sleepy affects rest")
+	assert_eq(t.effect_value, -0.08, "sleepy -0.08")
 
 
 func test_get_unknown() -> void:
@@ -33,10 +33,10 @@ func test_by_tag() -> void:
 
 
 func test_by_rarity_distribution() -> void:
-	## 6/4/4/4: commons — самая частая группа (18 черт всего).
-	assert_eq(reg.by_rarity(TraitDef.Rarity.COMMON).size(), 6, "common has 6")
-	assert_eq(reg.by_rarity(TraitDef.Rarity.UNCOMMON).size(), 4, "uncommon has 4")
-	assert_eq(reg.by_rarity(TraitDef.Rarity.RARE).size(), 4, "rare has 4")
+	## 5/3/3/4: commons — самая частая группа (15 черт всего).
+	assert_eq(reg.by_rarity(TraitDef.Rarity.COMMON).size(), 5, "common has 5")
+	assert_eq(reg.by_rarity(TraitDef.Rarity.UNCOMMON).size(), 3, "uncommon has 3")
+	assert_eq(reg.by_rarity(TraitDef.Rarity.RARE).size(), 3, "rare has 3")
 	assert_eq(reg.by_rarity(TraitDef.Rarity.LEGENDARY).size(), 4, "legendary has 4")
 
 
@@ -106,19 +106,19 @@ func test_custom_trait_add() -> void:
 
 func test_custom_trait_replaces_default() -> void:
 	var t := _TraitDef.new()
-	t.id = &"hardy"
+	t.id = &"sleepy"
 	t.effect_type = &"rest"
 	t.effect_value = 0.5
 	reg.add(t)
-	assert_eq(reg.all().size(), 18, "no growth on replace")
-	var g: TraitDef = reg.get_trait(&"hardy")
-	assert_eq(g.effect_type, &"rest", "replaced")
+	assert_eq(reg.all().size(), 15, "no growth on replace")
+	var g: TraitDef = reg.get_trait(&"sleepy")
+	assert_eq(g.effect_value, 0.5, "replaced value")
 
 
 # ==================== СЕРИАЛИЗАЦИЯ ====================
 
 func test_trait_serialize_roundtrip_single() -> void:
-	var t: TraitDef = reg.get_trait(&"hardy")
+	var t: TraitDef = reg.get_trait(&"sleepy")
 	var d := t.to_dict()
 	var t2 := _TraitDef.from_dict(d)
 	assert_eq(t2.id, t.id, "id")
@@ -136,4 +136,4 @@ func test_trait_serialize_roundtrip_multi_effect() -> void:
 	var t2 := _TraitDef.from_dict(d)
 	assert_eq(t2.modifier_for(&"rest"), -0.05, "rest effect")
 	assert_eq(t2.modifier_for(&"social"), 0.10, "social effect")
-	assert_eq(t2.modifier_for(&"hunger"), 0.0, "hunger unaffected")
+	assert_eq(t2.modifier_for(&"inspiration"), 0.0, "inspiration unaffected")

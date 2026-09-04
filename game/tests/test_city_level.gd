@@ -155,6 +155,20 @@ func test_ring_build_gate() -> void:
 		"level 3: ring 4 allowed")
 
 
+## Аудит #3: стройка на клетке с рабочим отклоняется, рабочий не страдает.
+func test_build_rejected_on_worker_cell() -> void:
+	var c: Variant = _city()
+	c.storage[&"industry"] = 100.0
+	var cell := _ring_cell(1)
+	c._add_pop(PopUnit.State.WORKER, 0, cell)
+	var res: Dictionary = c.can_build_building(BuildingDefs.farm(), cell)
+	assert_false(res.ok, "строительство на клетке рабочего отклонено")
+	assert_eq(str(res.reason), "Клетка занята рабочим", "reason = рабочий")
+	assert_eq(c.pop.size(), 1, "рабочий не затронут")
+	# Пустая клетка кольца 2 (в пределах радиуса) всё ещё строится.
+	assert_true(c.can_build_building(BuildingDefs.farm(), _ring_cell(2)).ok, "пустая клетка строится")
+
+
 func test_serialize_roundtrip() -> void:
 	var c: Variant = _city()
 	c.level = 3

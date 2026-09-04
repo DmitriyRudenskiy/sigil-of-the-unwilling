@@ -730,3 +730,39 @@ func _check_cell_taken_avoids_occupied() -> int:
 		errors += 1
 
 	return errors
+
+
+func test_reachable_reflects_move() -> void:
+	var errors := _check_reachable_reflects_move()
+	assert_eq(errors, 0, "test_reachable_reflects_move — no errors")
+
+func _check_reachable_reflects_move() -> int:
+	var errors := 0
+	# Аудит #11: после мутации доски (do_move) повторный запрос get_reachable
+	# отражает новую расстановку — кэш инвалидируется вместе с версией доски.
+	var state = load("res://scripts/systems/BattleState.gd").new()
+	var atk: Array[UnitStack] = []
+	atk.append(Units.make_fixed_stack("swordsmen", 10))
+	atk.append(Units.make_fixed_stack("swordsmen", 10))
+	var def: Array[UnitStack] = []
+	state.place_army(atk, def)
+
+	var units: Array = state.get_units_by_side(BattleState.Side.ATTACKER)
+	var A = units[0]  # (0, 0)
+	var B = units[1]  # (0, 1)
+
+	var X := Vector2i(1, 1)
+	var fn := func() -> Dictionary: return state.build_all_blocked(A, {})
+
+	var b_cell := Vector2i(0, 1)
+	var r1: Dictionary = state.get_reachable(X, 1, fn)
+	if r1.has(b_cell):
+		printerr("r1: клетка B (%s) должна быть заблокирована" % b_cell)
+		errors += 1
+
+	state.do_move(B, Vector2i(16, 10))
+	var r2: Dictionary = state.get_reachable(X, 1, fn)
+	if not r2.has(b_cell):
+		printerr("r2: после ухода B клетка %s должна стать достижимой (кэш не протух)" % b_cell)
+		errors += 1
+	return errors

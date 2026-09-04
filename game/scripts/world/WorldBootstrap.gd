@@ -248,9 +248,9 @@ static func _create_cities(parent: Node2D, R: BootstrapResult) -> void:
 	# Capital (РФ6-6: проверка проходимости)
 	var capital := City.new()
 	capital.display_name = "Перворечье"
-	var center := Vector2i(10, 10)
-	if not R.map_gen.is_walkable(center):
-		center = _nearest_walkable(R.map_gen, center)
+	# Аудит #23: не ставить город на занятую клетку (враг/ресурс/сундук).
+	var occupied := _occupied_map_cells(R)
+	var center := _place_in_hero_component(R.map_gen, Vector2i(10, 10), occupied)
 	capital.center = center
 	capital.special_sites = {Vector2i(12, 9): BuildingDefs.SITE_SHRINE}
 	# city-in-world: столица принадлежит игроку + стартовый набор (как у
@@ -262,7 +262,7 @@ static func _create_cities(parent: Node2D, R: BootstrapResult) -> void:
 	# city-navigation: второй стартовый город ~15 гексов от столицы (не столица;
 	# имя на навигационном значке = display_name «Город 2»).
 	var second := CityFactory.create_village(
-		_nearest_walkable(R.map_gen, Vector2i(center.x + 15, center.y)), "Город 2", 0)
+		_place_in_hero_component(R.map_gen, Vector2i(center.x + 15, center.y), occupied), "Город 2", 0)
 	R.cities.register_city(second, false)
 
 
@@ -457,6 +457,45 @@ static func _create_resource_nodes(parent: Node2D, R: BootstrapResult) -> void:
 	parent.add_child(R.terrain_resource_manager)
 	R.terrain_resource_manager.attach_delta(R.world_delta)
 	R.terrain_resource_manager.generate(map_data)
+
+
+## (10,10) или ближайшая проходимая клетка; если кандидат выпадает из
+## компоненты связности героя (карта с островами) — берём ближайшую к
+## кандидату клетку внутри компоненты. Иначе soft-lock: игрок никогда не
+## дойдёт до собственной столицы (и сценарии 1/4 гибнут на тумане).
+## Аудит #23: `excluded` — занятые клетки (вражеские стаки/ресурсы/сундуки):
+## кандидат и fallback не должны на них попадать.
+static func _place_in_hero_component(
+	map_gen: MapGenerator, preferred: Vector2i, excluded: Dictionary = {} ) -> Vector2i:
+	var comp: Dictionary = map_gen.reachable_cells
+	var cand := _nearest_walkable(map_gen, preferred)
+	if (comp.is_empty() or comp.has(cand)) and not excluded.has(cand):
+		return cand
+	# Кандидат не рассматриваем: чужая компонента или занятая клетка.
+	var best: Vector2i = cand
+	var best_d := INT32_MAX
+	var cells: Array = comp.keys() if not comp.is_empty() else [cand]
+	for cell in cells:
+		if excluded.has(cell):
+			continue
+		var d := HexUtils.hex_distance(preferred, cell)
+		if d < best_d:
+			best_d = d
+			best = cell
+	if best_d == INT32_MAX:
+		return cand  # вся компонента занята — вырожденный случай, не падаем
+	return best
+
+
+## Аудит #23: клетки карты, занятые под спавн (стаки/ресурсы/сундуки).
+static func _occupied_map_cells(R: BootstrapResult) -> Dictionary:
+	var out: Dictionary = R.map_gen.enemy_stacks.duplicate()
+	for cell in R.map_gen.resource_cells:
+		out[cell] = true
+	if R.spawner != null:
+		for cell in R.spawner.chest_cells():
+			out[cell] = true
+	return out
 
 
 static func _nearest_walkable(map_gen: MapGenerator, start: Vector2i) -> Vector2i:

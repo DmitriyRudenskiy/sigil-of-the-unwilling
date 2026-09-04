@@ -14,7 +14,7 @@ scenario_2_flee.py — Сценарий «Flee All».
 
 import sys
 
-from scenario_lib import connect, send_cmd, Reporter, scan_server_log
+from scenario_lib import connect, send_cmd, keep_alive, move_toward, Reporter, scan_server_log
 
 
 def run_scenario():
@@ -42,6 +42,9 @@ def run_scenario():
             rep.check("world mode", False, f"unexpected mode '{mode}'")
             break
 
+        # hero-survival: 20 стеков — долго; keep_alive не даёт герою сдохнуть.
+        st = keep_alive(sock, st)
+
         enemies = st.get("map_enemies", [])
         if not enemies:
             break
@@ -53,9 +56,10 @@ def run_scenario():
         enemies.sort(key=lambda e: abs(e["x"] - hx) + abs(e["y"] - hy))
         target = enemies[0]
 
-        resp = send_cmd(sock, "MOVE_TO", {}, top={"x": target["x"], "y": target["y"]})
-        if "error" in resp:
-            send_cmd(sock, "END_TURN")  # не хватает ОД — ждём новый день
+        # Туман режет прямой путь (unreachable) — move_toward шлёт к
+        # waypoint'у ближе к герою; каждый день explored расширяется.
+        if not move_toward(sock, st, target):
+            send_cmd(sock, "END_TURN")  # путь не построен — подходим завтра
             day += 1
             continue
 

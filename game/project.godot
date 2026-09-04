@@ -21,8 +21,9 @@ buses="res://assets/settings/default_bus_layout.tres"
 
 [autoload]
 
-SoundManager="*res://scripts/autoload/SoundManager.gd"
+# Аудит #19: Settings до SoundManager — toggle_mute опирается на Settings.is_muted.
 Settings="*res://scripts/autoload/Settings.gd"
+SoundManager="*res://scripts/autoload/SoundManager.gd"
 GameEventBus="*res://scripts/autoload/GameEventBus.gd"
 Spellbook="*res://scripts/autoload/SpellbookRegistry.gd"
 CursorController="*res://scripts/autoload/CursorController.gd"

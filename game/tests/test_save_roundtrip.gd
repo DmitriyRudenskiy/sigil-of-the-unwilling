@@ -84,3 +84,22 @@ func test_load_missing_returns_file_not_found() -> void:
 	var loaded: Dictionary = _sm.call("load_game")
 	assert_eq(loaded.get("error"), SaveManager.SaveError.FILE_NOT_FOUND, "missing save -> FILE_NOT_FOUND")
 	assert_null(loaded.get("data"), "missing save -> null data")
+
+## delete_save(): реальное удаление файла с диска + false при отсутствии.
+func test_delete_save_removes_file_from_disk() -> void:
+	var data := _SaveData.new()
+	data.run_seed = 999
+	data.hero = {"cell": {"x": 1, "y": 1}, "move_points": 5}
+	data.world = {"captured_villages": []}
+	assert_eq(_sm.call("save_game", data), SaveManager.SaveError.OK, "save ok")
+
+	var path: String = ProjectSettings.globalize_path(SaveManager.SAVE_PATH)
+	assert_true(FileAccess.file_exists(path), "файл есть на диске перед удалением")
+
+	var deleted: bool = _sm.call("delete_save")
+	assert_true(deleted, "delete_save -> true при наличии")
+	assert_true(not FileAccess.file_exists(path), "файл удалён с диска")
+
+	# Повторное удаление отсутствующего -> false, без ошибки.
+	var again: bool = _sm.call("delete_save")
+	assert_false(again, "delete_save -> false когда файла нет")

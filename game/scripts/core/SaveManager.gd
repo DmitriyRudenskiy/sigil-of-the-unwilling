@@ -99,7 +99,7 @@ func has_save() -> bool:
 func delete_save() -> bool:
 	if not has_save():
 		return false
-	DirAccess.remove_absolute(SAVE_PATH)
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE_PATH))
 	GameLogger.info("Save deleted: %s" % SAVE_PATH, "Save")
 	return true
 

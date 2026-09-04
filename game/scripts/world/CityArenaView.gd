@@ -289,9 +289,10 @@ func _draw_arena() -> void:
 			badge.text = str(firsts.get(cv, ""))
 
 
-## Сигнал CollisionObject2D.input_event(event, position, normal, shape_idx).
-func _on_cell_input(event: InputEvent, _pos: Vector2, _normal: Vector2,
-		_shape_idx: int, cv: Vector2i) -> void:
+## Сигнал Area2D.input_event(viewport, event, shape_idx, pos, normal) —
+## порядок аргументов Godot 4. `cv` подставляется через .bind() (последний аргумент).
+func _on_cell_input(viewport: Node, event: InputEvent, shape_idx: int, pos: Vector2, normal: Vector2,
+		cv: Vector2i) -> void:
 	if event is InputEventMouseButton:
 		var mb: InputEventMouseButton = event
 		if mb.button_index == MOUSE_BUTTON_LEFT and mb.pressed:

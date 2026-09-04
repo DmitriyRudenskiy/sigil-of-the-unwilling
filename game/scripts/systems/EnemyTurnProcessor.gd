@@ -55,6 +55,12 @@ func process(_ctx: TurnContext) -> Dictionary:
 	var report := {"moved": 0, "attacks": 0, "captures": 0}
 	if _map_gen == null or _hero == null:
 		return report
+	# Аудит #10: одно Dijkstra на (cell, mp) за ход — повторяющийся запрос
+	# берёт готовое поле. ponytail: ключ уникален при текущей итерации (одна
+	# армия на клетку), кэш — защита от будущих повторных запросов; cost_fn
+	# зависит от состояния stacks, поэтому переиспользование только внутри
+	# одного process().
+	var dist_cache: Dictionary = {}
 	var stacks: Dictionary = _map_gen.enemy_stacks
 	if not (stacks is Dictionary) or stacks.is_empty():
 		return report
@@ -86,12 +92,13 @@ func process(_ctx: TurnContext) -> Dictionary:
 			if not goals.is_empty():
 				var goal: Vector2i = _pick_goal(goals)
 				var cost_fn := _cost_fn(stacks, cell)
-				var dist := HexUtils.dijkstra(cell, float(profile.get("mp", 5.0)), cost_fn, _map_gen.map_width, _map_gen.map_height)
+				var mp: float = float(profile.get("mp", 5.0))
+				var dist := _dist_field(cell, mp, cost_fn, dist_cache)
 				var path: Array[Vector2i] = HexUtils.dijkstra_path(cell, goal, dist, cost_fn, _map_gen.map_width, _map_gen.map_height)
 
 				var cur := cell
 				var spent := 0.0
-				var mp_budget: float = float(profile.get("mp", 5.0))
+				var mp_budget: float = mp
 				for i in range(1, path.size()):
 					var nxt: Vector2i = path[i]
 					var step_cost := _enter_cost(nxt)
@@ -131,6 +138,15 @@ func process(_ctx: TurnContext) -> Dictionary:
 
 
 # ==================== Вспомогательное ====================
+
+
+## Поле расстояний Dijkstra с per-turn кэшем по (cell, mp).
+func _dist_field(cell: Vector2i, mp: float, cost_fn: Callable, cache: Dictionary) -> PackedFloat32Array:
+	var key := "%d;%d;%.4f" % [cell.x, cell.y, mp]
+	if not cache.has(key):
+		cache[key] = HexUtils.dijkstra(cell, mp, cost_fn, _map_gen.map_width, _map_gen.map_height)
+	return cache[key]
+
 
 func _garrisoned_set() -> Dictionary:
 	var out := {}

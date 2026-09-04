@@ -237,3 +237,25 @@ func test_growth_state_roundtrip() -> void:
 	assert_eq(back.enemy_growth_state.get("respawn_queue", []).size(), 1, "queue roundtrip")
 	assert_eq(back.enemy_growth_state.get("garrisoned", []).size(), 1, "garrisoned roundtrip")
 	assert_eq(int(back.enemy_growth_state["respawn_queue"][0]["turns_left"]), 2, "turns_left roundtrip")
+
+# ==================== Dijkstra-кэш (аудит #10) ====================
+
+func test_dist_field_cached_per_turn() -> void:
+	# Повторный запрос (cell, mp) берёт готовое поле — Dijkstra не пересчитывается.
+	var cache := {}
+	var cost := func(_c: Vector2i) -> float: return 1.0
+	var start := Vector2i(2, 2)
+	var d1 := proc._dist_field(start, 5.0, cost, cache)
+	assert_eq(cache.size(), 1, "первый запрос создал запись")
+	var d2 := proc._dist_field(start, 5.0, cost, cache)
+	assert_eq(cache.size(), 1, "повторный запрос не создал запись")
+	assert_eq(d1, d2, "поле идентично")
+	# Другой mp — отдельная запись.
+	proc._dist_field(start, 3.0, cost, cache)
+	assert_eq(cache.size(), 2, "другой mp — другая запись")
+	# Корректность: из поля строится путь к цели.
+	var goal := Vector2i(4, 2)
+	var path: Array[Vector2i] = HexUtils.dijkstra_path(start, goal, d1, cost, MAP_SIZE, MAP_SIZE)
+	assert_false(path.is_empty(), "путь не пуст")
+	assert_eq(path[0], start, "путь начинается из start")
+	assert_eq(path[path.size() - 1], goal, "путь заканчивается в goal")

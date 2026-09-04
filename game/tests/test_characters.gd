@@ -28,31 +28,31 @@ func test_new_character_defaults() -> void:
 
 func test_modify_need_clamps() -> void:
 	var ch := _Character.new()
-	ch.modify_need(&"hunger", 5.0)
-	assert_eq(ch.needs[&"hunger"], 1.0, "clamped to 1")
-	ch.modify_need(&"hunger", -5.0)
-	assert_eq(ch.needs[&"hunger"], 0.0, "clamped to 0")
+	ch.modify_need(&"rest", 5.0)
+	assert_eq(ch.needs[&"rest"], 1.0, "clamped to 1")
+	ch.modify_need(&"rest", -5.0)
+	assert_eq(ch.needs[&"rest"], 0.0, "clamped to 0")
 
 
 func test_is_need_critical() -> void:
 	var ch := _Character.new()
-	ch.modify_need(&"hunger", -0.7)
-	assert_true(ch.is_need_critical(&"hunger"), "0.1 < 0.2")
+	ch.modify_need(&"rest", -0.7)
+	assert_true(ch.is_need_critical(&"rest"), "0.1 < 0.2")
 	assert_false(ch.is_need_critical(&"inspiration"), "0.8 not critical")
-	ch.modify_need(&"hunger", 0.05)
-	assert_true(ch.is_need_critical(&"hunger"), "0.15 still critical")
+	ch.modify_need(&"rest", 0.05)
+	assert_true(ch.is_need_critical(&"rest"), "0.15 still critical")
 
 
 func test_trait_modifier_sums() -> void:
 	var ch := _Character.new()
 	var t1 := _TraitDef.new()
-	t1.effect_type = &"hunger"
+	t1.effect_type = &"rest"
 	t1.effect_value = 0.1
 	var t2 := _TraitDef.new()
-	t2.effect_type = &"hunger"
+	t2.effect_type = &"rest"
 	t2.effect_value = -0.05
 	ch.traits = [t1, t2]
-	assert_eq(ch.trait_modifier(&"hunger"), 0.05, "sum of modifiers")
+	assert_eq(ch.trait_modifier(&"rest"), 0.05, "sum of modifiers")
 	assert_eq(ch.trait_modifier(&"inspiration"), 0.0, "unaffected need")
 
 
@@ -71,11 +71,11 @@ func test_serialize_roundtrip() -> void:
 	ch.birth_turn = 3
 	ch.city_uid = 1
 	ch.pop_uid = 9
-	ch.modify_need(&"hunger", -0.3)
+	ch.modify_need(&"social", -0.3)
 	var t := _TraitDef.new()
-	t.id = &"hardy"
-	t.effect_type = &"hunger"
-	t.effect_value = 0.1
+	t.id = &"sleepy"
+	t.effect_type = &"rest"
+	t.effect_value = 0.05
 	ch.traits = [t]
 	ch.alive = false
 	var d := ch.serialize()
@@ -86,11 +86,11 @@ func test_serialize_roundtrip() -> void:
 	assert_eq(ch2.birth_turn, 3, "birth turn")
 	assert_eq(ch2.city_uid, 1, "city uid")
 	assert_eq(ch2.pop_uid, 9, "pop uid")
-	assert_eq(ch2.needs[&"hunger"], 0.5, "need value")
+	assert_eq(ch2.needs[&"social"], 0.5, "need value")
 	assert_eq(ch2.needs[&"rest"], 0.8, "untouched need")
 	assert_false(ch2.alive, "alive state")
 	assert_eq(ch2.traits.size(), 1, "trait count")
-	assert_eq(ch2.traits[0].id, &"hardy", "trait id")
+	assert_eq(ch2.traits[0].id, &"sleepy", "trait id")
 
 
 func test_deserialize_migrates_belief_to_inspiration() -> void:
@@ -110,6 +110,7 @@ func test_deserialize_migrates_belief_to_inspiration() -> void:
 	assert_true(ch.needs.has(&"inspiration"), "inspiration present after migration")
 	assert_eq(ch.needs[&"inspiration"], 0.4, "belief value carried over")
 	assert_false(ch.needs.has(&"belief"), "old key removed")
+	assert_false(ch.needs.has(&"hunger"), "removed hunger key ignored on load")
 	# Смешанный набор (вручную повреждённое сохранение): inspiration побеждает.
 	var mixed_save := {
 		"uid": 43, "name": "Микс", "icon": "🙂", "birth_turn": 0,

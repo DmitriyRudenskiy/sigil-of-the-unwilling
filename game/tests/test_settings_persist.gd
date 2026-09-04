@@ -3,6 +3,8 @@ extends "res://tests/gut_base.gd"
 const _Settings = preload("res://scripts/autoload/Settings.gd")
 
 var settings: Object
+var _ss_settings: Object = null
+var _ss_screen: SettingsScreen = null
 
 func before_each() -> void:
 	settings = _Settings.new()
@@ -11,6 +13,12 @@ func after_each() -> void:
 	if settings != null:
 		settings.free()
 		settings = null
+	if _ss_screen != null and is_instance_valid(_ss_screen):
+		_ss_screen.queue_free()
+		_ss_screen = null
+	if _ss_settings != null and is_instance_valid(_ss_settings):
+		_ss_settings.free()
+		_ss_settings = null
 
 
 # --- Settings persistence ---
@@ -97,3 +105,41 @@ func test_settings_volume_clamp() -> void:
 	assert_eq(settings.music_volume, 50, "music 50")
 	settings.set_sfx_volume(75)
 	assert_eq(settings.sfx_volume, 75, "sfx 75")
+
+## Аудит #4: SettingsScreen «Отмена» откатывает громкость к моменту открытия,
+## без сохранения на диск.
+func test_settings_screen_cancel_restores_volume() -> void:
+	_ss_settings = _Settings.new()
+	_ss_settings.master_volume = 10
+	_ss_settings.music_volume = 20
+	_ss_settings.sfx_volume = 30
+	_ss_settings.save()  # записать стартовое значение на диск
+
+	_ss_screen = SettingsScreen.new()
+	_ss_screen.setup(_ss_settings)
+	var main_root: Window = Engine.get_main_loop().root
+	main_root.add_child(_ss_screen)
+	await get_tree().process_frame  # _ready делает snapshot громкости
+
+	# Имитируем сдвиг слайдера в UI.
+	_ss_screen._settings.set_master_volume(95)
+	_ss_screen._settings.set_music_volume(85)
+	_ss_screen._settings.set_sfx_volume(40)
+	assert_eq(_ss_screen._settings.master_volume, 95, "volume changed in UI before cancel")
+
+	# Отмена.
+	_ss_screen._on_cancel()
+	await get_tree().process_frame
+
+	# Untyped: typed `Settings` (autoload type) не резолвится в headless-запусках GUT.
+	var s = _ss_settings
+	assert_eq(s.master_volume, 10, "master restored to snapshot on cancel")
+	assert_eq(s.music_volume, 20, "music restored to snapshot on cancel")
+	assert_eq(s.sfx_volume, 30, "sfx restored to snapshot on cancel")
+
+	# Отмена НЕ должна сохранять — на диске всё ещё стартовое значение.
+	s._config = ConfigFile.new()
+	s._load()
+	assert_eq(s.master_volume, 10, "cancel did not persist to disk")
+	assert_eq(s.music_volume, 20, "cancel did not persist music to disk")
+	assert_eq(s.sfx_volume, 30, "cancel did not persist sfx to disk")

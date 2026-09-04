@@ -54,6 +54,9 @@ func test_first_strike() -> void:
 	assert_eq(errors, 0, "test_first_strike — no errors")
 
 func _check_first_strike() -> int:
+	# Сид обязателен: без него первый удар может уничтожить всю атакующую
+	# группу -> основной результат пустой -> флаг first_strike теряется (флейка).
+	_rng.seed = 42
 	var bs := _BattleState.new()
 	var atk_stack := Units.make_fixed_stack("swordsmen", 10)
 	var def_stack := Units.make_fixed_stack("royal_griffin", 5)

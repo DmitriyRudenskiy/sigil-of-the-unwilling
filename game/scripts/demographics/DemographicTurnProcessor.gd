@@ -3,9 +3,9 @@ extends TurnPhaseProcessor
 ## Фаза 2 (M2: Демография). Исполняется ПОСЛЕ экономики (priority 20).
 ##
 ## Персонажи — нарративная оболочка над PopUnit; сам населенческий
-## контур (рождения/смерти от голода в монолите City.process_turn)
-## НЕ дублируется здесь — процессор только гарантирует персонажа
-## для каждой живой фигурки и тикает потребности.
+## контур (рождения в монолите City.process_turn) НЕ дублируется
+## здесь — процессор только гарантирует персонажа для каждой живой
+## фигурки и тикает потребности.
 ##
 ## Тик:
 ##  1. Для каждой pop без персонажа — create() + character_born;
@@ -31,8 +31,9 @@ const DEATH_STREAK := 3
 const OUTBREAK_COOLDOWN := 5
 
 ## Базовый ежедневный распад потребностей (без восстановлений).
+## remove-hunger-mechanic: голод удалён из потребностей — еда живёт только
+## в городской экономике (City: склад, starving/approval, рождения, рынок).
 const DECAY: Dictionary = {
-	&"hunger": 0.15,
 	&"rest": 0.10,
 	&"social": 0.08,
 	&"inspiration": 0.05,
@@ -177,11 +178,6 @@ func _promotable_follower(city: City) -> PopUnit:
 ## Восстановление потребности от состояния города.
 func _recovery(need_id: StringName, city: City, pop: PopUnit) -> float:
 	match need_id:
-		&"hunger":
-			# Есть еда — сытость восстанавливается; голодающий город — распад усиливается.
-			if city.starving:
-				return -0.10
-			return 0.20
 		&"rest":
 			# Рабочий живёт по ритму (норма сна), ополченец — дежурства.
 			if pop != null and pop.state == PopUnit.State.MILITIA:
@@ -201,8 +197,6 @@ func _death_cause(ch: Character) -> StringName:
 	for need_id in Character.NEED_KEYS:
 		if int(ch.need_zero_streak.get(need_id, 0)) >= DEATH_STREAK:
 			match need_id:
-				&"hunger":
-					return &"starvation"
 				&"rest":
 					return &"exhaustion"
 				&"social":

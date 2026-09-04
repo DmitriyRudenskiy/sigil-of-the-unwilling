@@ -27,6 +27,10 @@ var _music_slider: HSlider
 var _sfx_slider: HSlider
 var _tween: Tween = null
 var _settings: Node = null
+## Громкости на момент открытия экрана — откатываются при «Отмене» (аудит #4).
+var _cancel_vol_master := 0
+var _cancel_vol_music := 0
+var _cancel_vol_sfx := 0
 
 func setup(settings: Node) -> void:
 	_settings = settings
@@ -40,6 +44,10 @@ func _ready() -> void:
 		queue_free()
 		return
 	_build()
+	# Фиксируем исходные громкости для отката по «Отмене».
+	_cancel_vol_master = _settings.master_volume
+	_cancel_vol_music = _settings.music_volume
+	_cancel_vol_sfx = _settings.sfx_volume
 	if _settings.ui_animations:
 		modulate = Color.WHITE
 		modulate.a = 0.0
@@ -247,8 +255,8 @@ func _restore_state() -> void:
 # --- Callbacks ---
 
 func _on_zoom_selected(index: int) -> void:
+	# Аудит #25: сохранение только на Apply (как и остальные настройки экрана).
 	_settings.zoom_index = index
-	_settings.save()
 
 
 func _on_master_changed(value: float) -> void:
@@ -293,5 +301,10 @@ func _on_reset() -> void:
 
 
 func _on_cancel() -> void:
+	# Отмена: откатить громкость к моменту открытия экрана, без сохранения.
+	_settings.set_master_volume(_cancel_vol_master)
+	_settings.set_music_volume(_cancel_vol_music)
+	_settings.set_sfx_volume(_cancel_vol_sfx)
+	_settings._apply_audio()
 	closed.emit()
 	queue_free()

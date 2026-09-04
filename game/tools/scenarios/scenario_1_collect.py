@@ -17,7 +17,7 @@ scenario_1_collect.py — Сценарий «Collect All».
 
 import sys
 
-from scenario_lib import connect, send_cmd, wait_arrival, Reporter, scan_server_log
+from scenario_lib import connect, send_cmd, wait_arrival, keep_alive, move_toward, Reporter, scan_server_log
 
 
 def run_scenario():
@@ -29,7 +29,7 @@ def run_scenario():
 
     collected = 0
     day = 0
-    max_days = 120  # защита от зависания
+    max_days = 250  # защита от зависания (25 узлов × ход + survival-выходы в столицу)
 
     while day < max_days:
         st = send_cmd(sock, "GET_STATE")
@@ -45,6 +45,10 @@ def run_scenario():
             rep.check("world mode", False, f"unexpected mode '{mode}'")
             break
 
+        # hero-survival: герой в поле погибает от голода ~на 10-й день —
+        # при падении потребности keep_alive гоняет его в столицу.
+        st = keep_alive(sock, st)
+
         resources = st.get("map_resources", [])
         if not resources:
             break
@@ -54,22 +58,22 @@ def run_scenario():
         resources.sort(key=lambda n: abs(n["x"] - hx) + abs(n["y"] - hy))
         target = resources[0]
 
-        resp = send_cmd(sock, "MOVE_TO", {}, top={"x": target["x"], "y": target["y"]})
-        if "error" in resp:
-            send_cmd(sock, "END_TURN")  # не хватает ОД — ждём новый день
+        # Туман режет прямой путь (unreachable) — move_toward шлёт к
+        # waypoint'у ближе к герою; каждый день explored расширяется.
+        if not move_toward(sock, st, target):
+            send_cmd(sock, "END_TURN")  # путь не построен — подходим завтра
             day += 1
             continue
 
         if not wait_arrival(sock, target):
-            send_cmd(sock, "END_TURN")  # уперся в ОД, вернёмся завтра
+            send_cmd(sock, "END_TURN")  # застрял на промежуточной точке, вернёмся завтра
             day += 1
             continue
 
         # Страховка: если авто-подбор не сработал — собрать.
-        if resp.get("status") == "moving":
-            coll = send_cmd(sock, "COLLECT_HERE")
-            if coll.get("status") == "collected":
-                collected += 1
+        coll = send_cmd(sock, "COLLECT_HERE")
+        if coll.get("status") == "collected":
+            collected += 1
 
         send_cmd(sock, "END_TURN")  # тратим день — восстанавлием ОД
         day += 1

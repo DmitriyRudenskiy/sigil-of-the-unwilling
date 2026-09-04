@@ -171,3 +171,34 @@ func test_worker_switch_invalidates_yield() -> void:
 	c.process_turn(1)  # applies pending switch
 	var y1: float = c.get_yield()[&"food"]
 	assert_true(y1 > y0, "yield must rise after worker placed (cache invalidated)")
+
+## Аудит #3: здание нельзя поставить на клетку, занятую рабочей фигуркой.
+func test_can_build_rejects_worker_cell() -> void:
+	var c := _city()
+	c.add_followers(3)
+	c.storage[&"industry"] = 500.0  # рынок требует 25 индустрии: без него он
+	# отклоняется по индустрии, а не по рабочей клетке — проверка не работает.
+	# Ставим рабочего на свободную рабочую клетку.
+	var u: PopUnit = c.pop[0]
+	assert_true(c.request_switch(u.uid, PopUnit.State.WORKER, c.first_free_worker_tile()), "worker placed")
+	c.process_turn(1)  # применяем переключение
+	var worker_cell: Vector2i = u.tile
+	assert_eq(u.state, PopUnit.State.WORKER, "worker state applied")
+	assert_true(worker_cell.x >= 0, "worker tile set")
+
+	# Попытка строить на рабочей клетке — отклонено.
+	var chk := c.can_build_building(BuildingDefs.market(), worker_cell)
+	assert_false(chk.ok, "build on worker cell rejected")
+	assert_true(chk.has("reason"), "reason present: %s" % str(chk.get("reason", "")))
+
+	# Рабочий не пострадал — всё ещё на той же клетке, тот же state.
+	assert_eq(u.state, PopUnit.State.WORKER, "worker unaffected")
+	assert_eq(u.tile, worker_cell, "worker still on cell")
+	assert_eq(c.count_state(PopUnit.State.WORKER), 1, "worker count unchanged")
+
+	# На другой свободной клетке строить можно.
+	var other: Vector2i = c.first_free_worker_tile()
+	assert_false(other == worker_cell, "other cell differs")
+	var _dbg := c.can_build_building(BuildingDefs.market(), other)
+	assert_true(_dbg.ok, "DEBUG other=%s ok=%s reason=%s pop=%d worker=%s" % [str(other), _dbg.get("ok", false), _dbg.get("reason", "N/A"), c.pop.size(), str(worker_cell)])
+	assert_true(c.can_build_building(BuildingDefs.market(), other).ok, "build on free cell OK")

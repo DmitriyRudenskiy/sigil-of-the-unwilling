@@ -91,6 +91,36 @@ def poll(sock, predicate, timeout=30.0, interval=0.1):
     return state
 
 
+# fog-of-war: по не изученным клеткам A* не строит путь (INF-стоимость),
+# поэтому одиночный MOVE_TO на далёкую цель падает с 'unreachable' даже на
+# связанной карте. move_toward шлёт героя к waypoint'у на доли пути к цели —
+# клетка внутри explored-диска (sight=3) достижима, и каждый день герой
+# продвигается и расширяет explored ещё на радиус зрения.
+_FOG_FRACTIONS = (1.0, 0.6, 0.4, 0.25, 0.12)
+
+
+def move_toward(sock, st, target):
+    """MOVE_TO к target; если туман режет путь — к ближайшему waypoint'у
+    на прямой hero->target. True — команда принята (герой пошёл)."""
+    pos = st.get("hero_pos") or {}
+    hx, hy = pos.get("x"), pos.get("y")
+    if hx is None or hy is None:
+        return False
+    tx, ty = target["x"], target["y"]
+    for f in _FOG_FRACTIONS:
+        if f >= 1.0:
+            wx, wy = tx, ty
+        else:
+            wx = hx + round((tx - hx) * f)
+            wy = hy + round((ty - hy) * f)
+        if (wx, wy) == (hx, hy):
+            continue
+        r = send_cmd(sock, "MOVE_TO", {}, top={"x": wx, "y": wy})
+        if "error" not in r:
+            return True
+    return False
+
+
 def wait_arrival(sock, target, tries=100):
     """Ждать, пока hero доберётся до target={x,y}. True — дошёл; False — нет/застрял."""
     for _ in range(tries):
@@ -102,6 +132,44 @@ def wait_arrival(sock, target, tries=100):
             return False
         time.sleep(0.1)
     return False
+
+
+# hero-survival: в поле потребности (rest/social/inspiration) только распаляются
+# (смерть — 3 дня у нуля), в городе восстанавливаются в hero-темпе. keep_alive
+# возвращает героя в столицу при min < TRIGGER и держит до min >= TARGET.
+# Цикл ~3.3 полевых + ~2 городских дня: устойчивый запас по inspiration
+# (иначе burnout-дедлайн ~день 20 убивает любой длинный сценарий).
+KEEP_ALIVE_TRIGGER = 0.50
+KEEP_ALIVE_TARGET = 0.95
+
+
+def keep_alive(sock, st):
+    """Если любая потребность < TRIGGER — герой в столицу, сидим до TARGET.
+
+    Возвращает свежий GET_STATE. Если герой умер — возвращает state с
+    hero_pos=None (сценарий обрабатывает как обычный провал). Кап 20 ходов:
+    не зависаем, если что-то пошло не так.
+    """
+    needs = st.get("needs") or {}
+    capital = (st.get("capital") or {}).get("center")
+    if not needs or not capital or min(needs.values()) >= KEEP_ALIVE_TRIGGER:
+        return st
+    cx, cy = capital["x"], capital["y"]
+    for _ in range(20):
+        st = send_cmd(sock, "GET_STATE")
+        if st.get("mode") != "world":
+            return st  # бой на пути и т.п. — сценарий обработает в своём цикле
+        needs = st.get("needs") or {}
+        if not needs:
+            return st  # герой умер
+        if min(needs.values()) >= KEEP_ALIVE_TARGET:
+            return st
+        pos = st.get("hero_pos") or {}
+        if (pos.get("x"), pos.get("y")) != (cx, cy):
+            if move_toward(sock, st, {"x": cx, "y": cy}):
+                wait_arrival(sock, {"x": cx, "y": cy})
+        send_cmd(sock, "END_TURN")
+    return send_cmd(sock, "GET_STATE")
 
 
 class Reporter:

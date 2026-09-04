@@ -113,11 +113,10 @@ func _pick_weighted(pool: Dictionary, used: Array[StringName], r: RandomNumberGe
 	return candidates[candidates.size() - 1]
 
 
-## Базовый набор черт мира (16 шт., 4 на редкость).
+## Базовый набор черт мира (15 шт.; remove-hunger-mechanic: food-черты
+## hardy/appetite/iron_stomach удалены — еда больше не влияет на выживание).
 static func _default_traits() -> Array[TraitDef]:
 	return [
-		_trait(&"hardy", "Крепкий", "Редко голодает: +0.10 к сытости в день.",
-			TraitDef.Rarity.COMMON, &"hunger", 0.10, [&"body"]),
 		_trait(&"sleepy", "Соня", "Сильно устаёт: -0.08 к отдыху в день.",
 			TraitDef.Rarity.COMMON, &"rest", -0.08, [&"body"]),
 		_trait(&"chatty", "Болтун", "Обожает компанию: +0.10 к общению.",
@@ -128,24 +127,20 @@ static func _default_traits() -> Array[TraitDef]:
 			TraitDef.Rarity.COMMON, &"inspiration", 0.10, [&"soul", &"inspiration"]),
 		_trait(&"unmoved", "Равнодушный", "Сердце не горит: -0.08 к вдохновению.",
 			TraitDef.Rarity.COMMON, &"inspiration", -0.08, [&"soul", &"inspiration"]),
-		_trait(&"appetite", "Обжора", "Ест за троих: -0.12 к сытости в день.",
-			TraitDef.Rarity.UNCOMMON, &"hunger", -0.12, [&"body", "food"]),
 		_trait(&"insomniac", "Бессонница", "Не может уснуть: -0.10 к отдыху.",
 			TraitDef.Rarity.UNCOMMON, &"rest", -0.10, [&"body"]),
 		_trait(&"charismatic", "Обаятельный", "Сводит людей с ума: +0.15 к общению.",
 			TraitDef.Rarity.UNCOMMON, &"social", 0.15, [&"mind", "social"]),
 		_trait(&"jaded", "Выгоревший", "Пламя догорает: -0.12 к вдохновению.",
 			TraitDef.Rarity.UNCOMMON, &"inspiration", -0.12, [&"soul", &"inspiration"]),
-		_trait(&"iron_stomach", "Стальной желудок", "Еда почти не кончается: +0.25 к сытости.",
-			TraitDef.Rarity.RARE, &"hunger", 0.25, [&"body", "food"]),
 		_trait(&"restless", "Вечное движение", "Тело требует труда: -0.05 к отдыху, +0.10 к общению.",
 			TraitDef.Rarity.RARE, &"", 0.0, [&"body", "social"], {&"rest": -0.05, &"social": 0.10}),
 		_trait(&"path_listener", "Слышащий Путь", "Слышит зов ПУТИ: +0.20 к вдохновению.",
 			TraitDef.Rarity.RARE, &"inspiration", 0.20, [&"soul", &"inspiration"]),
 		_trait(&"nervous", "Тревожный", "Беспокоится в любое время: -0.06 к отдыху, но компания успокаивает: +0.06 к общению.",
 			TraitDef.Rarity.RARE, &"", 0.0, [&"body", "mind"], {&"rest": -0.06, &"social": 0.06}),
-		_trait(&"gorgon_taste", "Горгонский вкус", "Каждый глоток — праздник: +0.10 к сытости, +0.10 к общению.",
-			TraitDef.Rarity.LEGENDARY, &"", 0.0, [&"body", "food", "social"], {&"hunger": 0.10, &"social": 0.10}),
+		_trait(&"gorgon_taste", "Горгонский вкус", "Каждый глоток — праздник: +0.10 к общению.",
+			TraitDef.Rarity.LEGENDARY, &"", 0.0, [&"body", "food", "social"], {&"social": 0.10}),
 		_trait(&"legacy_mark", "Знак рода", "Родовое клеймо: +0.15 к вдохновению.",
 			TraitDef.Rarity.LEGENDARY, &"inspiration", 0.15, [&"soul", &"legacy", &"inspiration"]),
 		_trait(&"path_wanderer", "Странник ПУТИ", "Дом — дорога: -0.05 к отдыху, +0.20 к вдохновению.",

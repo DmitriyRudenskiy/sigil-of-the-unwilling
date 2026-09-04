@@ -26,7 +26,7 @@ var _skills_panel: SkillsPanel
 var _tools_panel: ToolsPanel
 var _hero_status: HeroStatusPanel
 
-## legend-chronicle: видимый прогресс славы (цель — ENDGAME_GlORY_VICTORY).
+## legend-chronicle: видимый прогресс славы (цель — ENDGAME_GLORY_VICTORY).
 var _cities_mgr: Node = null
 
 ## resource-collection-popup: «Собрано ресурс» на любом событии сбора.
@@ -204,7 +204,7 @@ func refresh_glory() -> void:
 	var total := 0.0
 	if _cities_mgr != null and _cities_mgr.glory != null:
 		total = _cities_mgr.glory.total
-	var target := float(GameSettings.ENDGAME_GlORY_VICTORY)
+	var target := float(GameSettings.ENDGAME_GLORY_VICTORY)
 	if _glory_label != null:
 		_glory_label.text = "👑 Слава: %d / %d" % [int(total), int(target)]
 	if _glory_bar != null:

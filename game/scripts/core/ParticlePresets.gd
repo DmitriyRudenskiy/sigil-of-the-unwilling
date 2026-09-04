@@ -2,6 +2,9 @@ extends RefCounted
 class_name ParticlePresets
 
 static func spawn_burst(parent: Node2D, pos: Vector2, color: Color) -> void:
+    # Аудит #21: в headless частицы не нужны (и finished-сигнал не срабатывает) — не спавним.
+    if OS.has_feature("headless"):
+        return
     var p := GPUParticles2D.new()
     p.emitting = true
     p.one_shot = true

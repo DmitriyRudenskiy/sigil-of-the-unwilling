@@ -2,8 +2,8 @@ extends PanelContainer
 class_name HeroStatusPanel
 ## legend-chronicle: состояние героя — кондиция, статы, последователи.
 ## Read-only: панель рисует то, что есть, и рендерит только секции с
-## данными. hero-survival: секция «Кондиция» включает четыре потребности
-## (🍞😴🤝💡, критический <25% — ⚠️); без needs-компонента — деградация
+## данными. hero-survival: секция «Кондиция» включает три потребности
+## (😴🤝💡, критический <25% — ⚠️); без needs-компонента — деградация
 ## до HP/маны (graceful degradation).
 
 var _hero: HeroController = null
@@ -18,7 +18,6 @@ var _followers_label: Label
 const _MAX_FOLLOWERS_SHOWN := 6
 
 const _NEED_ICONS: Dictionary = {
-	&"hunger": "🍞",
 	&"rest": "😴",
 	&"social": "🤝",
 	&"inspiration": "💡",

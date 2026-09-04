@@ -17,8 +17,8 @@ const DEFAULT_UI_ANIMATIONS := true
 const DEFAULT_PARTICLES := true
 const DEFAULT_AUTO_SAVE := false
 
-# --- ZOOM_LEVELS (truth) ---
-const ZOOM_LEVELS := [0.5, 0.7, 1.0, 1.1, 1.25, 1.5, 1.75, 2.0, 2.25]
+# --- ZOOM_LEVELS: single literal in GameSettings (audit #6), alias here. ---
+const ZOOM_LEVELS := GameSettings.ZOOM_LEVELS
 
 # --- Current values ---
 var zoom_index: int = DEFAULT_ZOOM_INDEX
@@ -84,6 +84,7 @@ func _load() -> void:
 	ui_animations = _config.get_value(SECTION, "ui_animations", DEFAULT_UI_ANIMATIONS)
 	particles = _config.get_value(SECTION, "particles", DEFAULT_PARTICLES)
 	auto_save = _config.get_value(SECTION, "auto_save", DEFAULT_AUTO_SAVE)
+	is_muted = _config.get_value(SECTION, "muted", false)
 
 
 func save() -> void:
@@ -95,6 +96,7 @@ func save() -> void:
 	_config.set_value(SECTION, "ui_animations", ui_animations)
 	_config.set_value(SECTION, "particles", particles)
 	_config.set_value(SECTION, "auto_save", auto_save)
+	_config.set_value(SECTION, "muted", is_muted)
 	_config.save(FILE)
 
 
@@ -108,6 +110,8 @@ func reset_to_defaults() -> void:
 	particles = DEFAULT_PARTICLES
 	auto_save = DEFAULT_AUTO_SAVE
 	_apply_audio()
+	# Аудит #24: reset — немедленное сохранение дефолтов.
+	save()
 
 
 # --- Audio ---
@@ -129,6 +133,8 @@ func _set_bus(bus_name: String, db: float) -> void:
 func toggle_mute() -> void:
 	is_muted = not is_muted
 	_apply_audio()
+	# Аудит #24: mute — немедленное сохранение (это действие, не черновик экрана).
+	save()
 
 
 func set_master_volume(val: int) -> void:

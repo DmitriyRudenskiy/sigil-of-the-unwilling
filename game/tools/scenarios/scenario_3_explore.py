@@ -19,7 +19,7 @@ scenario_3_explore.py — Сценарий «Explore».
 
 import sys
 
-from scenario_lib import connect, send_cmd, wait_arrival, Reporter, scan_server_log
+from scenario_lib import connect, send_cmd, wait_arrival, keep_alive, move_toward, Reporter, scan_server_log
 
 
 def run_scenario():
@@ -52,6 +52,10 @@ def run_scenario():
             rep.check("world mode", False, f"unexpected mode '{mode}'")
             break
 
+        # hero-survival: 33 цели (узлы+деревни) — долго; keep_alive не даёт
+        # герою сдохнуть от голода по дороге.
+        st = keep_alive(sock, st)
+
         resources = st.get("map_resources", [])
         villages = st.get("map_villages", [])
         unvisited = [v for v in villages if (v["x"], v["y"]) not in visited_villages]
@@ -82,18 +86,19 @@ def run_scenario():
         targets.sort(key=lambda n: abs(n["x"] - hx) + abs(n["y"] - hy))
         target = targets[0]
 
-        resp = send_cmd(sock, "MOVE_TO", {}, top={"x": target["x"], "y": target["y"]})
-        if "error" in resp:
-            send_cmd(sock, "END_TURN")  # не хватает ОД — ждём новый день
+        # Туман режет прямой путь (unreachable) — move_toward шлёт к
+        # waypoint'у ближе к герою; каждый день explored расширяется.
+        if not move_toward(sock, st, target):
+            send_cmd(sock, "END_TURN")  # путь не построен — подходим завтра
             day += 1
             continue
 
         if not wait_arrival(sock, target):
-            send_cmd(sock, "END_TURN")  # уперся в ОД, вернёмся завтра
+            send_cmd(sock, "END_TURN")  # застрял на промежуточной точке, вернёмся завтра
             day += 1
             continue
 
-        if target["type"] == "resource" and resp.get("status") == "moving":
+        if target["type"] == "resource":
             coll = send_cmd(sock, "COLLECT_HERE")
             if coll.get("status") == "collected":
                 collected += 1

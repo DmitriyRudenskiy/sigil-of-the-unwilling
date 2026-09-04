@@ -17,7 +17,7 @@ scenario_4_endure.py — Сценарий «Endure».
 
 import sys
 
-from scenario_lib import connect, send_cmd, Reporter, scan_server_log
+from scenario_lib import connect, send_cmd, keep_alive, Reporter, scan_server_log
 
 DAYS = 20  # сколько дней проиграть
 
@@ -39,6 +39,10 @@ def run_scenario():
         if mode != "world":
             rep.check("world mode", False, f"unexpected mode '{mode}'")
             break
+
+        # hero-survival: герой спавнится в поле (5,5), а столица — (10,10);
+        # без keep_alive 20 END_TURNов убьют его голодом на ~8-й день.
+        st = keep_alive(sock, st)
 
         if st.get("hero_pos") is None:
             rep.check("hero_pos present", False, "hero_pos missing")

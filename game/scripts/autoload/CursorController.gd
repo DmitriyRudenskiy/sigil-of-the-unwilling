@@ -22,17 +22,11 @@ const MODE_ASSETS := {
 const COLLECT_HOLD_SECONDS := 0.6
 
 var _current: int = Mode.DEFAULT
-# Динамический доступ к синглону Input: в headless-скане compile_all bare-идентификатор
-# "Input" не резolvesится (parse-error), в то время как OS резолвится. Храним ссылку.
-# ponytail: Engine.get_singleton — костыль ради прохода compile_all; на рунтайме Input
-# доступен как глобальный синглон, можно было бы писать Input.set_default_mouse_cursor().
-var _input: Object
 var _loaded: Dictionary = {}
 var _collect_left: float = 0.0
 var _collect_active: bool = false
 
 func _ready() -> void:
-	_input = Engine.get_singleton("Input")
 	_connect_context(GameEventBus)
 
 ## Подключить курсор к шине событий (вызвается из _ready; доступен для тестов).
@@ -86,27 +80,24 @@ func _change_mode(mode: int) -> void:
 	GameLogger.info("cursor -> %s" % _mode_name(mode), "Cursor")
 
 func _apply_cursor(mode: int) -> void:
-	# Без синглона Input (напр. в headless-тесте) — просто отметить режим, не падать.
-	if _input == null:
-		return
 	if mode == Mode.DEFAULT:
 		# Стрелка: ни одного ассета, родной системный курсор Godot.
 		# Godot 4.7: reset через set_default_cursor_shape (set_default_mouse_cursor
 		# в API нет — SCRIPT ERROR на каждом запуске).
-		_input.set_default_cursor_shape(Input.CURSOR_ARROW)
+		Input.set_default_cursor_shape(Input.CURSOR_ARROW)
 		return
 	var cfg = MODE_ASSETS.get(mode)
 	if cfg is Dictionary and str(cfg.get("path", "")).ends_with(".png") and not cfg.get("path", "").is_empty():
 		var tex := _load_texture(cfg.get("path", ""), int(cfg.get("size", 128)))
 		if tex != null:
-			_input.set_custom_mouse_cursor(tex, cfg.get("hotspot", Vector2i.ZERO))
+			Input.set_custom_mouse_cursor(tex, cfg.get("hotspot", Vector2i.ZERO))
 			return
 		# Ассет не загрузился — остаться на стрелке, не ронять игру.
 		GameLogger.warn("cursor: asset failed to load, staying DEFAULT: %s" % cfg.get("path", ""), "Cursor")
 	_apply_default()
 
 func _apply_default() -> void:
-	_input.set_default_cursor_shape(Input.CURSOR_ARROW)
+	Input.set_default_cursor_shape(Input.CURSOR_ARROW)
 
 func _load_texture(path: String, _size: int) -> Texture2D:
 	if _loaded.has(path):

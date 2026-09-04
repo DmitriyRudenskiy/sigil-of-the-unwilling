@@ -38,6 +38,20 @@ func test_chronicle_append_numbers_generations_and_emits() -> void:
 	assert_eq(got.size(), 2, "сигнал с id и текстом")
 	assert_true(str(got[1]).find("Nyx") != -1, "текст события про свежую запись")
 
+func test_chronicle_append_without_bus_does_not_crash() -> void:
+	# Аудит #22: guard bus — без GameEventBus (контекст -s скрипта) append
+	# не падает и запись сохраняется. Эмуляция: временно переименовать autoload.
+	var tree := Engine.get_main_loop() as SceneTree
+	var bus_node: Node = tree.root.get_node("/root/GameEventBus")
+	bus_node.name = "GameEventBusHidden"
+	var c: _Chronicle = _Chronicle.new()
+	var e: Dictionary = c.append(
+		{"hero_name": "Ghost", "path": "archivist", "outcome": "DEFEAT"})
+	bus_node.name = "GameEventBus"
+	assert_eq(c.entries.size(), 1, "запись сохранена без шины")
+	assert_eq(int(e.get("generation", 0)), 1, "поколение присвоено")
+
+
 func test_chronicle_roundtrip_and_garbage() -> void:
 	var c: _Chronicle = _Chronicle.new()
 	c.append({"hero_name": "A", "path": "x", "outcome": "succession"})

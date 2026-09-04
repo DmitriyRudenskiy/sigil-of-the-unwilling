@@ -78,14 +78,16 @@ func show_kill(cell: Vector2i, count: int) -> void:
 
 ## Play full attack animation sequence: animate → feedback → log → wait.
 ## @warning: must be awaited — `_executor.on_attack_completed()` fires after timer.
-## Asserts `is_inside_tree()` to catch missing `await`.
+## Аудит #14: вне дерева — guard + push_warning (в release ассерты вырезаны).
 func play_attack_sequence(
 	atk: BattleState.BattleUnit,
 	def: BattleState.BattleUnit,
 	result: Dictionary,
 	wait_time: float = GameSettings.BATTLE_ATTACK_ANIM_SEC
 ) -> SceneTreeTimer:
-	assert(is_inside_tree(), "BattleFX.play_attack_sequence: not in tree")
+	if not is_inside_tree():
+		push_warning("BattleFX.play_attack_sequence: not in tree — sequence skipped")
+		return null
 	_view.animate_attack(atk, def)
 
 	if result.get("is_retaliation", false):

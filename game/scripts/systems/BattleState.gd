@@ -411,8 +411,9 @@ func get_reachable_for_unit(unit: BattleUnit, blocked_fn: Callable) -> Dictionar
 
 
 func get_reachable(cell: Vector2i, speed: int, blocked_fn: Callable, _unit: BattleUnit = null) -> Dictionary:
-	# Vector3i key avoids bit-overflow; _board_version handled via invalidate_board_cache()
-	var key := Vector3i(cell.x, cell.y, speed)
+	# Аудит #11: версия доски в ключе — запись предыдущего поколения
+	# не сможет попасть даже если какая-то мутация забудет clear.
+	var key := "%d:%s:%d" % [_board_version, str(cell), speed]
 	if _reachable_cache.has(key):
 		return _reachable_cache[key].duplicate()
 

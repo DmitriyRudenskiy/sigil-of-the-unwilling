@@ -180,3 +180,16 @@ func test_processor_event_signal() -> void:
 	var report2: Dictionary = proc._process_city(c, 7)
 	assert_eq(int(report2.get("event_occurred", 0)), 0)
 	assert_eq(events.size(), 1, "второго сигнала нет")
+
+
+func test_relocate_rejects_out_of_bounds_and_other_city() -> void:
+	# Аудит #18: вне карты / на клетке другого города — отказ в переносе.
+	var c: Variant = _city()
+	var map_size := Vector2i(30, 30)
+	var r: Dictionary = c.relocate(Vector2i(-1, 0), map_size)
+	assert_false(r.ok, "вне карты — отказ")
+	assert_ne(c.center, Vector2i(-1, 0), "центр не сдвинулся")
+	r = c.relocate(Vector2i(1, 0), map_size, {Vector2i(1, 0): true})
+	assert_false(r.ok, "на клетке чужого города — отказ")
+	r = c.relocate(Vector2i(2, 0), map_size)
+	assert_true(r.ok, "валидная цель — перенос состоялся")

@@ -119,43 +119,27 @@ func test_fed_city_needs_stable() -> void:
 	proc.process(_ctx(1))
 	_clear_traits()
 	var ch: Character = _chars()[0]
-	var hunger_before: float = ch.needs[&"hunger"]
 	var rest_before: float = ch.needs[&"rest"]
 	proc.process(_ctx(2))
-	assert_true(ch.needs[&"hunger"] >= hunger_before, "hunger not worse in fed city")
 	assert_true(ch.needs[&"rest"] >= rest_before, "rest not worse (follower rhythm)")
 	assert_true(ch.needs[&"social"] >= 0.7, "social ok with 3 pop")
 
 
-func test_starving_city_hunger_decays() -> void:
+func test_trait_slow_rest_recovery() -> void:
 	city.add_followers(3)
 	proc.process(_ctx(1))
-	city.starving = true
 	_clear_traits()
 	var ch: Character = _chars()[0]
-	ch.needs[&"hunger"] = 0.8
-	ch.need_zero_streak[&"hunger"] = 0
+	var jaded := _TraitDef.new()
+	jaded.id = &"test_jaded"
+	jaded.effect_type = &"rest"
+	jaded.effect_value = -0.2
+	ch.traits = [jaded]
+	ch.needs[&"rest"] = 0.8
+	ch.need_zero_streak[&"rest"] = 0
 	proc.process(_ctx(2))
-	## 0.8 - 0.15 (распад) - 0.10 (голод) = 0.55
-	assert_true(absf(ch.needs[&"hunger"] - 0.55) < 0.001, "hunger 0.55 (got %f)" % ch.needs[&"hunger"])
-
-
-func test_trait_speeds_starvation() -> void:
-	city.add_followers(3)
-	proc.process(_ctx(1))
-	city.starving = true
-	_clear_traits()
-	var ch: Character = _chars()[0]
-	var glutton := _TraitDef.new()
-	glutton.id = &"test_glutton"
-	glutton.effect_type = &"hunger"
-	glutton.effect_value = -0.2
-	ch.traits = [glutton]
-	ch.needs[&"hunger"] = 0.8
-	ch.need_zero_streak[&"hunger"] = 0
-	proc.process(_ctx(2))
-	## 0.8 - 0.15 - 0.10 - 0.20 (черта) = 0.35
-	assert_true(absf(ch.needs[&"hunger"] - 0.35) < 0.001, "hunger 0.35 with trait (got %f)" % ch.needs[&"hunger"])
+	## 0.8 - 0.10 (распад) + 0.12 (восстановление) - 0.20 (черта) = 0.62
+	assert_true(absf(ch.needs[&"rest"] - 0.62) < 0.001, "rest 0.62 with trait (got %f)" % ch.needs[&"rest"])
 
 
 # ==================== КРИТИКА ====================
@@ -165,48 +149,47 @@ func test_critical_signal_once_per_episode() -> void:
 	# social упал бы в критику и добавил бы лишние сигналы.
 	city.add_followers(3)
 	proc.process(_ctx(1))
-	city.starving = true
 	var ch: Character = _chars()[0]
 	ch.traits.clear()
 	for c in _chars():
 		if c != ch:
 			c.traits.clear()
-	ch.needs[&"hunger"] = 0.15
-	ch.need_zero_streak[&"hunger"] = 0
+	ch.needs[&"rest"] = 0.15
+	ch.need_zero_streak[&"rest"] = 0
 	proc.process(_ctx(2))
+	## 0.15 - 0.10 + 0.12 = 0.17 < 0.2 — критика
 	assert_eq(crit.size(), 1, "one critical signal")
-	assert_eq(crit[0]["need"], &"hunger", "hunger critical")
+	assert_eq(crit[0]["need"], &"rest", "rest critical")
 	assert_eq(int(crit[0]["uid"]), ch.uid, "character uid")
 	proc.process(_ctx(3))
 	assert_eq(crit.size(), 1, "no repeat while still critical")
 	# Восстановление -> новый эпизод -> новый сигнал.
-	ch.needs[&"hunger"] = 0.9
-	ch.need_zero_streak[&"hunger"] = 0
-	city.starving = false
+	ch.needs[&"rest"] = 0.9
+	ch.need_zero_streak[&"rest"] = 0
 	proc.process(_ctx(4))
 	assert_eq(crit.size(), 1, "recovered, no signal")
-	ch.needs[&"hunger"] = 0.1
-	ch.need_zero_streak[&"hunger"] = 0
+	ch.needs[&"rest"] = 0.05
+	ch.need_zero_streak[&"rest"] = 0
 	proc.process(_ctx(5))
 	assert_eq(crit.size(), 2, "new episode -> new signal")
 
 
 # ==================== СМЕРТИ ====================
 
-func test_death_by_starvation() -> void:
+func test_death_by_isolation() -> void:
+	# Город на 1 жителя: social -0.08 (распад) - 0.05 (одиночество) → ноль держится.
 	city.add_followers(1)
 	proc.process(_ctx(1))
-	city.starving = true
 	var ch: Character = _chars()[0]
 	ch.traits.clear()
-	ch.needs[&"hunger"] = 0.0
+	ch.needs[&"social"] = 0.0
 	var pop_before: int = city.pop.size()
 	proc.process(_ctx(2))
 	proc.process(_ctx(3))
 	assert_eq(died.size(), 0, "not dead after 2 zero turns")
 	proc.process(_ctx(4))
 	assert_eq(died.size(), 1, "dead after 3 zero turns")
-	assert_eq(died[0]["cause"], &"starvation", "cause starvation")
+	assert_eq(died[0]["cause"], &"isolation", "cause isolation")
 	assert_eq(int(died[0]["uid"]), ch.uid, "right character")
 	assert_eq(int(died[0]["city"]), city.uid, "right city")
 	assert_false(ch.alive, "character marked dead")
@@ -220,12 +203,12 @@ func test_no_death_without_zero_streak() -> void:
 	proc.process(_ctx(1))
 	var ch: Character = _chars()[0]
 	ch.traits.clear()
-	ch.needs[&"hunger"] = 0.1
-	ch.need_zero_streak[&"hunger"] = 2  # было 2, но ход не нулевой
+	ch.needs[&"rest"] = 0.1
+	ch.need_zero_streak[&"rest"] = 2  # было 2, но ход не нулевой
 	proc.process(_ctx(2))
-	## 0.1 - 0.15 + 0.20 = 0.15 > 0 → streak сбросился
+	## 0.1 - 0.10 + 0.12 = 0.12 > 0 → streak сбросился
 	assert_eq(died.size(), 0, "alive (streak reset)")
-	assert_eq(ch.need_zero_streak[&"hunger"], 0, "streak reset to 0")
+	assert_eq(ch.need_zero_streak[&"rest"], 0, "streak reset to 0")
 
 
 # ==================== ЭПИДЕМИИ ====================
@@ -235,11 +218,11 @@ func test_outbreak_triggered_and_cooldown() -> void:
 	proc.process(_ctx(1))
 	_clear_traits()
 	var chars: Array = _chars()
-	chars[0].needs[&"hunger"] = 0.05
 	chars[0].needs[&"rest"] = 0.05
-	chars[1].needs[&"hunger"] = 0.05
+	chars[0].needs[&"social"] = 0.05
 	chars[1].needs[&"rest"] = 0.05
-	# Город сыт: hunger 0.05 -> 0.10, rest 0.05 -> 0.07 (оба < 0.2)
+	chars[1].needs[&"social"] = 0.05
+	# rest 0.05 -> 0.07, social 0.05 -> 0.07 (оба < 0.2)
 	var report: Dictionary = proc.process(_ctx(2))
 	assert_eq(int(report["outbreaks"]), 2, "2 affected in outbreak")
 	assert_eq(outbreak.size(), 2, "2 disease_outbreak signals")
@@ -248,8 +231,8 @@ func test_outbreak_triggered_and_cooldown() -> void:
 	var c0: Character = chars[0]
 	assert_true(c0.needs[&"inspiration"] < 0.75, "inspiration penalty applied")
 	# Каллдаун: повторное состояние, но меньше 5 ходов с эпидемии.
-	chars[1].needs[&"hunger"] = 0.05
 	chars[1].needs[&"rest"] = 0.05
+	chars[1].needs[&"social"] = 0.05
 	proc.process(_ctx(3))
 	assert_eq(outbreak.size(), 2, "cooldown blocks 2nd outbreak")
 
@@ -260,8 +243,8 @@ func test_no_outbreak_with_single_weak_character() -> void:
 	_clear_traits()
 	var chars: Array = _chars()
 	# Только один персонаж с критикой (нужны 2+ при населении 4+).
-	chars[0].needs[&"hunger"] = 0.05
 	chars[0].needs[&"rest"] = 0.05
+	chars[0].needs[&"social"] = 0.05
 	proc.process(_ctx(2))
 	assert_eq(outbreak.size(), 0, "no outbreak: only 1 critical char")
 
@@ -272,8 +255,8 @@ func test_outbreak_in_small_city_threshold_one() -> void:
 	_clear_traits()
 	var chars: Array = _chars()
 	# Город < 4: порог 1 персонаж с 2+ критическими потребностями.
-	chars[0].needs[&"hunger"] = 0.05
 	chars[0].needs[&"rest"] = 0.05
+	chars[0].needs[&"social"] = 0.05
 	var report: Dictionary = proc.process(_ctx(2))
 	assert_eq(int(report["outbreaks"]), 1, "small city: 1 affected")
 	assert_eq(outbreak.size(), 1, "signal emitted")

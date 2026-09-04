@@ -41,6 +41,13 @@ func get_state(world_ctrl, battle_ctrl) -> Dictionary:
 				else:
 					followers_out.append({"name": str(f)})
 			state.followers = followers_out
+			# hero-survival: потребности (0..1) — для сценарной survival-стратегии
+			# (scenario_lib.keep_alive): сценарий видит голод ДО смерти героя.
+			# (Godot 4.7 не поддерживает comprehension — поэтому явный цикл.)
+			var needs_out := {}
+			for _nkey in hero.needs.needs.keys():
+				needs_out[String(_nkey)] = float(hero.needs.needs[_nkey])
+			state.needs = needs_out
 
 		if map_gen:
 			# Map resources

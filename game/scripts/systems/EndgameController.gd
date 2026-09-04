@@ -8,7 +8,7 @@ extends Node
 ##   hero_died                — нет достойного преемника (тот же путь) -> DEFEAT
 ##   enemy_village_captured   — городов игрока не осталось             -> DEFEAT
 ##   turn_ended               — дублирующая проверка коллапса (fallback)
-##   CityManager.glory_changed— слава >= ENDGAME_GlORY_VICTORY         -> VICTORY
+##   CityManager.glory_changed— слава >= ENDGAME_GLORY_VICTORY         -> VICTORY
 ##   enemy_stack_defeated     — вражеских стеков не осталось           -> VICTORY
 ##
 ## Терминальное состояние липкое: _end() ровно один раз, state из
@@ -46,25 +46,33 @@ func setup(
 	if _session == null or _cities_mgr == null:
 		return
 
+	# Аудит #17: setup идемпотентен — is_connected-гарды (двойной setup не
+	# дублирует коннекты и не кривит счётчики забега).
 	# Поражения.
-	GameEventBus.hero_died.connect(_on_hero_died)
-	GameEventBus.turn_ended.connect(_on_turn_ended)
+	if not GameEventBus.hero_died.is_connected(_on_hero_died):
+		GameEventBus.hero_died.connect(_on_hero_died)
+	if not GameEventBus.turn_ended.is_connected(_on_turn_ended):
+		GameEventBus.turn_ended.connect(_on_turn_ended)
 	# Основной триггер коллапса — захват конкретного города (непосредственно
 	# в фазе врагов); turn_ended — дешёвый fallback на случай, если захват
 	# произошёл мимо нашего взгляда (например, через сейв/миграцию).
-	if p_enemy_proc != null and p_enemy_proc.has_signal("enemy_village_captured"):
+	if p_enemy_proc != null and p_enemy_proc.has_signal("enemy_village_captured") \
+			and not p_enemy_proc.enemy_village_captured.is_connected(_on_enemy_village_captured):
 		p_enemy_proc.enemy_village_captured.connect(_on_enemy_village_captured)
 	# Победы.
-	_cities_mgr.glory_changed.connect(_on_glory_changed)
-	if p_battle_coordinator != null:
+	if not _cities_mgr.glory_changed.is_connected(_on_glory_changed):
+		_cities_mgr.glory_changed.connect(_on_glory_changed)
+	if p_battle_coordinator != null \
+			and not p_battle_coordinator.enemy_stack_defeated.is_connected(_on_enemy_stack_defeated):
 		p_battle_coordinator.enemy_stack_defeated.connect(_on_enemy_stack_defeated)
-	# Счётчики забега для итогового отчёта.
-	GameEventBus.battle_won.connect(func(_cell: Vector2i) -> void:
-		_session.battles_won += 1)
-	GameEventBus.battle_lost.connect(func(_cell: Vector2i) -> void:
-		_session.battles_lost += 1)
-	GameEventBus.hero_successor.connect(func(_hero: Node) -> void:
-		_session.successions += 1)
+	# Счётчики забега для итогового отчёта (именованные хендлеры — чтобы
+	# is_connected работал; лямбды не позволяют).
+	if not GameEventBus.battle_won.is_connected(_on_run_battle_won):
+		GameEventBus.battle_won.connect(_on_run_battle_won)
+	if not GameEventBus.battle_lost.is_connected(_on_run_battle_lost):
+		GameEventBus.battle_lost.connect(_on_run_battle_lost)
+	if not GameEventBus.hero_successor.is_connected(_on_run_succession):
+		GameEventBus.hero_successor.connect(_on_run_succession)
 
 
 ## Загрузка сейва: если забег уже закончен — показать экран снова
@@ -109,7 +117,7 @@ func _on_enemy_village_captured(_city: City) -> void:
 
 func _on_glory_changed(_window_total: float) -> void:
 	if _cities_mgr != null and _cities_mgr.glory != null \
-			and _cities_mgr.glory.total >= GameSettings.ENDGAME_GlORY_VICTORY:
+			and _cities_mgr.glory.total >= GameSettings.ENDGAME_GLORY_VICTORY:
 		_end("VICTORY", &"path_completed")
 
 
@@ -119,6 +127,22 @@ func _on_enemy_stack_defeated(_cell: Vector2i, _army: Array) -> void:
 	if _map_gen != null and (_map_gen.enemy_stacks is Dictionary) \
 			and (_map_gen.enemy_stacks as Dictionary).is_empty():
 		_end("VICTORY", &"domination")
+
+
+## Счётчики забега (именованы ради is_connected-гардов в setup, аудит #17).
+func _on_run_battle_won(_cell: Vector2i) -> void:
+	if _session != null:
+		_session.battles_won += 1
+
+
+func _on_run_battle_lost(_cell: Vector2i) -> void:
+	if _session != null:
+		_session.battles_lost += 1
+
+
+func _on_run_succession(_hero: Node) -> void:
+	if _session != null:
+		_session.successions += 1
 
 
 func _player_cities_left() -> int:

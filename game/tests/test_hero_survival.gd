@@ -151,7 +151,6 @@ func test_needs_init_all_full() -> void:
 func test_needs_field_decay() -> void:
 	var n := _HeroNeeds.new()
 	assert_eq(n.tick(false), &"", "field tick — alive")
-	assert_approx(n.get_need(&"hunger"), 0.85, 0.0001, "hunger decay 0.15")
 	assert_approx(n.get_need(&"rest"), 0.90, 0.0001, "rest decay 0.10")
 	assert_approx(n.get_need(&"social"), 0.92, 0.0001, "social decay 0.08")
 	assert_approx(n.get_need(&"inspiration"), 0.95, 0.0001, "inspiration decay 0.05")
@@ -164,19 +163,9 @@ func test_needs_city_recovery() -> void:
 	var c := _make_temple_city()
 	c.pop = [_PopUnit.new(), _PopUnit.new(), _PopUnit.new()]  # pop >= 3
 	assert_eq(n.tick(true, c), &"", "city tick — alive")
-	assert_approx(n.get_need(&"hunger"), 0.55, 0.0001, "hunger 0.5 - 0.15 + 0.20")
-	assert_approx(n.get_need(&"rest"), 0.52, 0.0001, "rest 0.5 - 0.10 + 0.12")
-	assert_approx(n.get_need(&"social"), 0.52, 0.0001, "social 0.5 - 0.08 + 0.10 (pop>=3)")
-	assert_approx(n.get_need(&"inspiration"), 0.50, 0.0001, "inspiration 0.5 - 0.05 + 0.05")
-
-
-func test_needs_starving_city_hunger_drains() -> void:
-	var n := _HeroNeeds.new()
-	n.needs[&"hunger"] = 0.5
-	var c := _make_temple_city()
-	c.starving = true
-	n.tick(true, c)
-	assert_approx(n.get_need(&"hunger"), 0.25, 0.0001, "starving: hunger 0.5 - 0.15 - 0.10")
+	assert_approx(n.get_need(&"rest"), 0.76, 0.0001, "rest 0.5 - 0.10 + 0.36 (hero pace)")
+	assert_approx(n.get_need(&"social"), 0.72, 0.0001, "social 0.5 - 0.08 + 0.30 (pop>=3, hero pace)")
+	assert_approx(n.get_need(&"inspiration"), 0.60, 0.0001, "inspiration 0.5 - 0.05 + 0.15 (hero pace)")
 
 
 func test_needs_lonely_city_social_drains() -> void:
@@ -189,7 +178,6 @@ func test_needs_lonely_city_social_drains() -> void:
 
 func test_needs_zero_streak_all_causes() -> void:
 	var cases := {
-		&"hunger": &"starvation",
 		&"rest": &"exhaustion",
 		&"social": &"isolation",
 		&"inspiration": &"burnout",
@@ -209,7 +197,6 @@ func test_needs_serialize_roundtrip_and_old_save() -> void:
 	var m := _HeroNeeds.new()
 	m.deserialize(n.serialize())
 	assert_approx(m.get_need(&"rest"), 0.33, 0.0001, "rest survives roundtrip")
-	assert_approx(m.get_need(&"hunger"), 1.0, 0.0001, "hunger untouched")
 	assert_eq(m.zero_streak[&"rest"], 0, "streak is not persisted")
 	# Старый сейв (нет ключа needs) — все потребности полные.
 	var old := _HeroNeeds.new()
@@ -222,7 +209,7 @@ func test_needs_serialize_roundtrip_and_old_save() -> void:
 
 func test_hero_dies_by_needs_emits_hero_died() -> void:
 	var h := _make_hero()
-	h.needs.needs[&"hunger"] = 0.0
+	h.needs.needs[&"rest"] = 0.0
 	# ponytail: лямбда захватывает примитивы по значению — держатель-дикт
 	var captured: Dictionary = {"cause": &""}
 	var on_died := func(cause: StringName) -> void: captured["cause"] = cause
@@ -233,7 +220,7 @@ func test_hero_dies_by_needs_emits_hero_died() -> void:
 	h._tick_needs()
 	GameEventBus.hero_died.disconnect(on_died)
 	assert_false(h.is_alive, "dead after 3rd tick")
-	assert_eq(captured["cause"], &"starvation", "hero_died(&\"starvation\") emitted")
+	assert_eq(captured["cause"], &"exhaustion", "hero_died(&\"exhaustion\") emitted")
 	h.free()
 
 
@@ -248,8 +235,8 @@ func test_hero_city_tick_recovers() -> void:
 	for k in _HeroNeeds.NEED_KEYS:
 		h.needs.needs[k] = 0.5
 	h._tick_needs()
-	assert_approx(h.needs.get_need(&"hunger"), 0.55, 0.0001, "in-city tick recovers hunger")
-	assert_approx(h.needs.get_need(&"social"), 0.52, 0.0001, "pop>=3: social recovers")
+	assert_approx(h.needs.get_need(&"rest"), 0.76, 0.0001, "in-city tick recovers rest (hero pace)")
+	assert_approx(h.needs.get_need(&"social"), 0.72, 0.0001, "pop>=3: social recovers (hero pace)")
 	mgr.free()
 	h.free()
 
@@ -304,7 +291,6 @@ func test_hero_serialize_needs_roundtrip() -> void:
 	_setup_serializable(h2)
 	h2.deserialize(h.serialize())
 	assert_approx(h2.needs.get_need(&"rest"), 0.33, 0.0001, "rest survives save/load")
-	assert_approx(h2.needs.get_need(&"hunger"), 1.0, 0.0001, "hunger survives at 1.0")
 	assert_true(h2.resurrected_once, "resurrected_once survives save/load")
 	h.free(); h2.free()
 
@@ -360,7 +346,7 @@ func _setup_death_with_resurrection() -> Dictionary:
 	wc._hero = hero
 	var death := _MockDeath.new()
 	wc._hero_lifecycle._death_seq = death
-	wc._on_hero_died(&"starvation")
+	wc._on_hero_died(&"exhaustion")
 	return {"wc": wc, "hero": hero, "city": city, "parent": parent, "death": death}
 
 
@@ -463,7 +449,7 @@ func test_wc_no_temple_corpse_freed() -> void:
 	wc._hero = hero
 	var death := _MockDeath.new()
 	wc._hero_lifecycle._death_seq = death
-	wc._on_hero_died(&"starvation")
+	wc._on_hero_died(&"exhaustion")
 	assert_null(wc._hero_lifecycle._deceased_hero, "no corpse hold without temple")
 	assert_true(hero.is_queued_for_deletion(), "corpse queued for deletion (no temple)")
 	assert_eq(death.res_city, null, "no res_city (button hidden)")
@@ -491,7 +477,7 @@ func test_wc_fresh_cycle_resurrection_again() -> void:
 	new_hero.followers.append(_make_follower(10, &"warrior"))
 	city.storage[&"industry"] = float(_Succession.RESURRECTION_INDUSTRY)
 	city.storage[&"gold"] = float(_Succession.RESURRECTION_SPECIAL_AMOUNT)
-	wc._on_hero_died(&"starvation")
+	wc._on_hero_died(&"exhaustion")
 	assert_eq(wc._hero_lifecycle._resurrection_city, city, "fresh cycle: resurrection offered again")
 	assert_eq(wc._hero_lifecycle._deceased_hero, new_hero, "new hero's corpse held")
 	assert_eq(death.res_city, city, "res_city passed again")
@@ -510,7 +496,7 @@ func test_deathseq_resurrection_button_flow() -> void:
 	var succ := _make_hero()
 	var emitted: Dictionary = {"v": false}  # лямбда-захват примитива по значению
 	ds.resurrection_chosen.connect(func() -> void: emitted["v"] = true)
-	ds.show_death("Тест", &"starvation", {}, succ, city)
+	ds.show_death("Тест", &"exhaustion", {}, succ, city)
 	var btn: Button = ds.get_node("Root/Panel/VBox/Buttons/ResurrectionButton")
 	assert_true(btn.visible, "button visible with res_city + successor")
 	assert_eq(btn.text, "Воскресить (500⚙ + 100💰)", "button shows the cost")
@@ -540,12 +526,11 @@ func test_statuspanel_needs_line() -> void:
 	var panel := _StatusPanel.new()
 	var h := _make_hero()
 	h.hero_name = "Тест"
-	h.needs.needs[&"hunger"] = 0.1
+	h.needs.needs[&"rest"] = 0.1
 	panel.set_hero(h)
 	panel.refresh()
 	var text := panel._cond_label.text
-	assert_true(text.contains("🍞⚠️ 10%"), "critical hunger highlighted: " + text)
-	assert_true(text.contains("😴 100%"), "rest at 100%: " + text)
+	assert_true(text.contains("😴⚠️ 10%"), "critical rest highlighted: " + text)
 	assert_true(text.contains("🤝 100%"), "social at 100%: " + text)
 	assert_true(text.contains("💡 100%"), "inspiration at 100%: " + text)
 	panel.free()

@@ -43,6 +43,17 @@ func apply_fog_visibility(vis) -> void:
 		_village_nodes[cell].visible = vis.is_visible(cell)
 
 
+## Аудит #15: кэш placeholder-текстур — картинки константные, строим один
+## раз на спавнер, а не на каждую клетку (Image.create + fill_rect).
+var _sprite_cache: Dictionary = {}
+
+
+func _cached_texture(key: String, builder: Callable) -> ImageTexture:
+	if not _sprite_cache.has(key):
+		_sprite_cache[key] = builder.call()
+	return _sprite_cache[key]
+
+
 func spawn_all() -> void:
 	if map == null or not map.has_valid_tilemap():
 		return
@@ -131,16 +142,15 @@ func _spawn_villages() -> void:
 		var v := Node2D.new()
 		v.set_meta("cell", cell)
 		var sp := Sprite2D.new()
-		# Triangle + rectangle village placeholder
-		var img := Image.create(48, 48, false, Image.FORMAT_RGBA8)
-		# Triangle roof (y 0-19): fill_rect per row
-		for y in 20:
-			var half_w := int((24 - y) * 0.8)
-			if half_w > 0:
-				img.fill_rect(Rect2i(24 - half_w, y, half_w * 2, 1), Color(0.7, 0.2, 0.1))
-		# Rect body (y 20-41)
-		img.fill_rect(Rect2i(10, 20, 29, 22), Color(0.6, 0.5, 0.3))
-		sp.texture = ImageTexture.create_from_image(img)
+		# Triangle + rectangle village placeholder (аудит #15: кэш текстуры)
+		sp.texture = _cached_texture("village", func() -> ImageTexture:
+			var img := Image.create(48, 48, false, Image.FORMAT_RGBA8)
+			for y in 20:
+				var half_w := int((24 - y) * 0.8)
+				if half_w > 0:
+					img.fill_rect(Rect2i(24 - half_w, y, half_w * 2, 1), Color(0.7, 0.2, 0.1))
+			img.fill_rect(Rect2i(10, 20, 29, 22), Color(0.6, 0.5, 0.3))
+			return ImageTexture.create_from_image(img))
 		sp.z_index = 5
 		v.add_child(sp)
 		var flag := Label.new()
@@ -205,6 +215,12 @@ func _make_enemy_node(cell: Vector2i, army: Array) -> Node2D:
 	return e
 
 
+## Аудит #23: публичные клетки сундуков (WorldBootstrap использует для
+## размещения столиц/городов — не ставить город на сундук).
+func chest_cells() -> Array:
+	return _chests.keys()
+
+
 func remove_chest_at(cell: Vector2i) -> bool:
 	if not _chest_nodes.has(cell):
 		return false
@@ -231,6 +247,7 @@ func _spawn_chests() -> void:
 	var chest_rng := rng if rng != null else RandomNumberGenerator.new()
 	if rng == null:
 		chest_rng.seed = GameSettings.EDITOR_SEED
+
 	var placed := 0
 	var attempts := 0
 	while placed < GameSettings.CHEST_COUNT and attempts < GameSettings.CHEST_PLACE_ATTEMPTS:
@@ -263,11 +280,13 @@ func _spawn_chests() -> void:
 		n.position = map.map_to_local(cell)
 		n.z_index = 7
 		var sp := Sprite2D.new()
-		var img := Image.create(32, 24, false, Image.FORMAT_RGBA8)
-		img.fill_rect(Rect2i(0, 0, 32, 4), Color(0.8, 0.6, 0.2))
-		img.fill_rect(Rect2i(0, 4, 32, 15), Color(0.6, 0.4, 0.1))
-		img.fill_rect(Rect2i(0, 19, 32, 5), Color(0.4, 0.25, 0.08))
-		sp.texture = ImageTexture.create_from_image(img)
+		# Аудит #15: кэш текстуры (изображение константное)
+		sp.texture = _cached_texture("chest", func() -> ImageTexture:
+			var img := Image.create(32, 24, false, Image.FORMAT_RGBA8)
+			img.fill_rect(Rect2i(0, 0, 32, 4), Color(0.8, 0.6, 0.2))
+			img.fill_rect(Rect2i(0, 4, 32, 15), Color(0.6, 0.4, 0.1))
+			img.fill_rect(Rect2i(0, 19, 32, 5), Color(0.4, 0.25, 0.08))
+			return ImageTexture.create_from_image(img))
 		n.add_child(sp)
 		add_child(n)
 		_chest_nodes[cell] = n
@@ -307,11 +326,13 @@ func _spawn_scrolls() -> void:
 		n.position = map.map_to_local(cell)
 		n.z_index = 6
 		var sp := Sprite2D.new()
-		var img := Image.create(24, 32, false, Image.FORMAT_RGBA8)
-		img.fill_rect(Rect2i(0, 0, 24, 32), Color(0.3, 0.15, 0.5))
-		img.fill_rect(Rect2i(0, 0, 4, 32), Color(0.5, 0.3, 0.7))
-		img.fill_rect(Rect2i(20, 0, 4, 32), Color(0.5, 0.3, 0.7))
-		sp.texture = ImageTexture.create_from_image(img)
+		# Аудит #15: кэш текстуры (изображение константное)
+		sp.texture = _cached_texture("scroll", func() -> ImageTexture:
+			var img := Image.create(24, 32, false, Image.FORMAT_RGBA8)
+			img.fill_rect(Rect2i(0, 0, 24, 32), Color(0.3, 0.15, 0.5))
+			img.fill_rect(Rect2i(0, 0, 4, 32), Color(0.5, 0.3, 0.7))
+			img.fill_rect(Rect2i(20, 0, 4, 32), Color(0.5, 0.3, 0.7))
+			return ImageTexture.create_from_image(img))
 		n.add_child(sp)
 		add_child(n)
 		_scroll_nodes[cell] = n

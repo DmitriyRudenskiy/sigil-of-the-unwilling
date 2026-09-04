@@ -35,7 +35,7 @@ var inventory: HeroInventory = HeroInventory.new()
 ## выбора преемника (преемник должен быть последователем того же пути).
 var path_id: StringName = &""
 
-## hero-survival: core-потребности (hunger/rest/social/inspiration) и
+## hero-survival: core-потребности (rest/social/inspiration) и
 ## флаг «уже воскрешён в этом цикле» (воскресение — один раз за жизнь героя).
 var needs := HeroNeeds.new()
 var resurrected_once := false

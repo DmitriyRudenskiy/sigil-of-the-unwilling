@@ -110,15 +110,12 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 ## Мьют через Settings (единственный источник правды: Settings.is_muted).
-## Если Settings ещё не загружен (порядок autoload) — fallback на Master-шину.
+## Аудит #19: порядок autoload гарантирует, что Settings уже в дереве; lookup
+## по пути (не голый идентификатор) — автолоады не всегда видимы на compile-time.
 func toggle_mute() -> void:
-	var settings := get_node_or_null("/root/Settings")
+	var settings = get_node_or_null("/root/Settings")
 	if settings != null:
 		settings.toggle_mute()
-		return
-	var idx := AudioServer.get_bus_index("Master")
-	if idx != -1:
-		AudioServer.set_bus_mute(idx, not AudioServer.is_bus_mute(idx))
 
 
 # --- Helpers ---

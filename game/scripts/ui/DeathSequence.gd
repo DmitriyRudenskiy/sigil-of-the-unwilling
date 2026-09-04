@@ -20,7 +20,6 @@ signal resurrection_chosen
 const _CAUSES: Dictionary = {
 	&"battle": "в бою",
 	# hero-survival: смерти по потребностям (HeroNeeds._death_cause).
-	&"starvation": "от голода",
 	&"exhaustion": "от истощения",
 	&"isolation": "от одиночества",
 	&"burnout": "от выгорания",

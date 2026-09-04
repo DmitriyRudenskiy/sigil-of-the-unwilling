@@ -43,8 +43,8 @@ func _ready() -> void:
 # ==================== BUILD (data-driven) ====================
 
 func _build() -> void:
-	_add_styled(_root, "Label", "Создание героя", 20, HORIZONTAL_ALIGNMENT_CENTER)
-	_add_styled(_root, "Label", "Выберите облик героя для новой игры", 12, HORIZONTAL_ALIGNMENT_CENTER)
+	_add_styled(_root, "Создание героя", 20, HORIZONTAL_ALIGNMENT_CENTER)
+	_add_styled(_root, "Выберите облик героя для новой игры", 12, HORIZONTAL_ALIGNMENT_CENTER)
 
 	_name_edit = LineEdit.new()
 	_name_edit.placeholder_text = "Имя героя"
@@ -77,7 +77,7 @@ func _build() -> void:
 	_add_field("Прошлое:", _background_option)
 
 	_root.add_spacer(8)
-	_summary_label = _add_styled(_root, "Label", "", 12, HORIZONTAL_ALIGNMENT_LEFT)
+	_summary_label = _add_styled(_root, "", 12, HORIZONTAL_ALIGNMENT_LEFT)
 	_summary_label.custom_minimum_size = Vector2(640, 96)
 	_root.add_spacer(8)
 
@@ -85,12 +85,12 @@ func _build() -> void:
 	_root.add_child(buttons_row)
 	buttons_row.add_spacer(1)
 
-	var create_btn := _instantiate("Button")
+	var create_btn := Button.new()
 	create_btn.text = "Создать"
 	create_btn.pressed.connect(_on_create)
 	buttons_row.add_child(create_btn)
 
-	var back_btn := _instantiate("Button")
+	var back_btn := Button.new()
 	back_btn.text = "Назад"
 	back_btn.pressed.connect(_on_back)
 	buttons_row.add_child(back_btn)
@@ -176,27 +176,16 @@ func _add_field(label_text: String, control: Control) -> void:
 	row.custom_minimum_size = Vector2(720, 28)
 	row.add_theme_constant_override("separation", _row_spacing)
 	_add_child(_root, row)
-	_add_styled(row, "Label", label_text, 14, HORIZONTAL_ALIGNMENT_RIGHT)
+	_add_styled(row, label_text, 14, HORIZONTAL_ALIGNMENT_RIGHT)
 	row.add_child(control)
 
-func _add_styled(parent: Control, type_name: String, text: String, size: int, align: int) -> Control:
-	var c := _instantiate(type_name)
+func _add_styled(parent: Control, text: String, size: int, align: int) -> Control:
+	var c := Label.new()
 	c.add_theme_font_size_override("font_size", size)
 	c.horizontal_alignment = align
 	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_add_child(parent, c)
 	return c
-
-func _instantiate(type_name: String) -> Control:
-	match type_name:
-		"Label":
-			return Label.new()
-		"Button":
-			return Button.new()
-		"HBoxContainer":
-			return HBoxContainer.new()
-		_:
-			return Control.new()
 
 func _add_child(parent: Control, child: Control) -> void:
 	parent.add_child(child)
