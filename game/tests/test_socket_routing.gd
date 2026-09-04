@@ -53,9 +53,24 @@ func test_route_line_too_large_returns_error() -> void:
 	assert_true(resp.has("error"), "oversized line should error, got %s" % str(resp))
 	assert_true(str(resp["error"]).begins_with("Command too large"), "error says too large: %s" % str(resp.get("error")))
 
+func test_require_world_null_returns_error() -> void:
+	var err = _ctrl.call("_require_world", null)
+	assert_eq(err, {"error": "Not in World mode"}, "null world → Not in World mode")
+
+func test_require_world_visible_returns_empty() -> void:
+	var w := _FakeWorld.new()
+	var err = _ctrl.call("_require_world", w)
+	assert_eq(err, {}, "visible world → empty dict")
+	w.free()
+
 func test_extract_action_reads_field() -> void:
 	var line = JSON.stringify({"action": "MOVE_TO", "x": 3})
 	assert_eq(_ctrl.call("_extract_action", line), "MOVE_TO", "_extract_action returns the action")
 	var garbage_action = _ctrl.call("_extract_action", "garbage")
 	assert_engine_error("error != Error::OK")  # JSON.parse_string шлёт engine-error на "garbage"
 	assert_eq(garbage_action, "UNKNOWN", "unparseable line → UNKNOWN")
+
+
+class _FakeWorld extends Node:
+	func is_world_visible() -> bool:
+		return true

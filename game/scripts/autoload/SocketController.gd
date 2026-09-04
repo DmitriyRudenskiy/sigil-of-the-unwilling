@@ -259,9 +259,17 @@ func _cmd_start_game(_req, _wc, _bc) -> Dictionary:
 func _cmd_get_state(_req, wc, bc) -> Dictionary:
 	return _world_serializer.get_state(wc, bc)
 
-func _cmd_move_to(req, wc, _bc) -> Dictionary:
-	if wc == null or not wc.is_world_visible():
+## Единый guard для мировых хендлеров: пустой dict = мир доступен; иначе —
+## готовый error-ответ. Строки ошибок сохранены поблочно (D2).
+func _require_world(world: Node) -> Dictionary:
+	if world == null or not world.is_world_visible():
 		return {"error": "Not in World mode"}
+	return {}
+
+func _cmd_move_to(req, wc, _bc) -> Dictionary:
+	var err := _require_world(wc)
+	if not err.is_empty():
+		return err
 	if wc.has_method("is_terminal") and wc.is_terminal():
 		return {"error": "Game over"}
 	var x = req.get("x")
@@ -271,8 +279,9 @@ func _cmd_move_to(req, wc, _bc) -> Dictionary:
 	return _world_serializer.move_to(wc, int(x), int(y))
 
 func _cmd_end_turn(req, wc, _bc) -> Dictionary:
-	if wc == null or not wc.is_world_visible():
-		return {"error": "Not in World mode"}
+	var err := _require_world(wc)
+	if not err.is_empty():
+		return err
 	if wc.has_method("is_terminal") and wc.is_terminal():
 		return {"error": "Game over"}
 	return _world_serializer.end_turn(wc)
@@ -281,8 +290,9 @@ func _cmd_hero_die(_req, wc, _bc) -> Dictionary:
 	# endgame (тест-only): честная цепочка смерти героя — та же,
 	# что в WorldBattleCoordinator при потере боя (mark_combat_dead
 	# + hero_died). DETERMINISTIC-путь к сценарию 11 без случайного боя.
-	if wc == null or not wc.is_world_visible():
-		return {"error": "Not in World mode"}
+	var err := _require_world(wc)
+	if not err.is_empty():
+		return err
 	var die_hero = wc.get_hero()
 	if die_hero == null:
 		return {"error": "Hero not initialized"}
@@ -292,18 +302,21 @@ func _cmd_hero_die(_req, wc, _bc) -> Dictionary:
 	return {"status": "hero_dead"}
 
 func _cmd_save_game(_req, wc, _bc) -> Dictionary:
-	if wc == null or not wc.is_world_visible():
-		return {"error": "Not in World mode"}
+	var err := _require_world(wc)
+	if not err.is_empty():
+		return err
 	return _world_serializer.save_game(wc)
 
 func _cmd_load_game(_req, wc, _bc) -> Dictionary:
-	if wc == null or not wc.is_world_visible():
-		return {"error": "Not in World mode"}
+	var err := _require_world(wc)
+	if not err.is_empty():
+		return err
 	return _world_serializer.load_game(wc)
 
 func _cmd_collect_here(_req, wc, _bc) -> Dictionary:
-	if wc == null or not wc.is_world_visible():
-		return {"error": "Not in World mode"}
+	var err := _require_world(wc)
+	if not err.is_empty():
+		return err
 	var hero = wc.get_hero()
 	if hero == null:
 		return {"error": "Hero not initialized"}
@@ -323,8 +336,9 @@ func _cmd_city_hire(req, wc, _bc) -> Dictionary:
 	return _city_serializer.city_action(wc, req, "hire")
 
 func _cmd_city_close(_req, wc, _bc) -> Dictionary:
-	if wc == null or not wc.is_world_visible():
-		return {"error": "Not in World mode"}
+	var err := _require_world(wc)
+	if not err.is_empty():
+		return err
 	var ui_mgr = wc.get_ui_manager()
 	if ui_mgr == null:
 		return {"error": "No UI manager (city screen unavailable)"}

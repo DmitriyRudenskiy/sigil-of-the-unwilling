@@ -72,3 +72,53 @@ func test_emulate_battle_invalid_army_type() -> void:
 	var em = _Emulator.new()
 	var r = em.emulate_battle({"attacker_army": "nope", "defender_army": [weaker()]})
 	assert_true(r.has("error"), "non-array army should error")
+
+
+# ==================== SEQUENCE_BATTLE (ротация heal) ====================
+
+## sequence_battle последовательно прогоняет шаги: cast (heal) → enemy →
+## attack; каждый шаг попадает в steps с правильной командой.
+func test_sequence_battle_rotates_heal_and_actions() -> void:
+	var em = _Emulator.new()
+	var r = em.sequence_battle({
+		"sequence": [
+			{"cmd": "cast", "spell": "cure", "self": true},
+			{"cmd": "enemy"},
+			{"cmd": "attack"},
+		],
+	})
+	assert_false(r.has("error"), "sequence should run: %s" % str(r.get("error")))
+	var steps: Array = r.get("steps", [])
+	assert_eq(steps.size(), 3, "all three steps processed (rotation)")
+	assert_eq(steps[0]["cmd"], "cast", "step 0: cast (heal)")
+	assert_eq(steps[0]["spell"], "cure", "step 0 casts cure")
+	assert_eq(steps[1]["cmd"], "enemy", "step 1: enemy")
+	assert_eq(steps[2]["cmd"], "attack", "step 2: attack")
+	assert_true(steps[0].has("result"), "cast step returns a spell result")
+
+## sequence_battle на пустой последовательности: steps пуст, без ошибок.
+func test_sequence_battle_empty_sequence() -> void:
+	var em = _Emulator.new()
+	var r = em.sequence_battle({"sequence": []})
+	assert_false(r.has("error"), "empty sequence should not error")
+	var steps: Array = r.get("steps", [])
+	assert_eq(steps.size(), 0, "empty sequence → no steps")
+
+
+# ==================== CAST (воскрешение мёртвой цели) ====================
+
+## cast_in_battle: воскрешение мёртвой цели (target_count = 0). resurrect
+## устанавливает цель мёртвой, затем revive_count > 0 возрождает её.
+func test_cast_in_battle_resurrects_dead_target() -> void:
+	var em = _Emulator.new()
+	var r = em.cast_in_battle({
+		"spell_id": "resurrection",
+		"caster_hp": 60,
+		"caster_count": 10,
+		"target_hp": 100,
+		"target_count": 0,  # мёртвый
+	})
+	assert_false(r.has("error"), "cast should run: %s" % str(r.get("error")))
+	assert_eq(r.get("result"), "success", "resurrection applied: %s" % str(r))
+	assert_true(r.get("revived", false) == true, "target revived: %s" % str(r))
+	assert_true(int(r.get("revive_count", 0)) >= 1, "revived stack has units: %s" % str(r))
