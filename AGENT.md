@@ -83,9 +83,11 @@
     ├── tests/                      # GUT-тесты: test_*.gd (наследники gut_base.gd)
     │   ├── gut_base.gd             # Общая база (ServiceContainer + compat-шимы)
     │   ├── unit/                   # Unit-тесты (GUT, include_subdirs)
+    │   ├── functional/             # Инварианты (dev-tooling): compile/scene_refs/tileset/unit/spells/boot/bench/memory
     │   └── fakes/                  # Моки/фейки
     └── addons/gut/                 # GUT 9.7.1 (фреймворк тестов, CLI: gut_cmdln.gd)
-    └── tools/                      # Инструменты: compile_all, check_scene_refs, shell/
+    ├── scripts/build/              # Генераторы ассетов/баланса (headless SceneTree): gen_artifact_icons, gen_sound_wav, gen_inventory_scene, tune_city_arena
+    └── tools/                      # Сохранённые инструменты: shell/, scenarios/, comfy/, archived/, lint.sh, *.py
 ```
 
 ### Состав `game/` и правила для `tmp/`
@@ -252,14 +254,15 @@ GODOT=/Applications/Godot.app/Contents/MacOS/Godot  # macOS
 # GODOT=godot  # Linux (если godot в PATH)
 LOG=/tmp/godot_run.log
 
-# Компиляция ВСЕХ скриптов (быстро, без запуска игры)
-run_godot "$LOG" 60 --headless --path game -s tools/compile_all.gd
-# → "compile check: N ok, 0 errors"
+# Проверки инвариантов (компиляция ВСЕХ скриптов, ссылки в сценах, тайлсет,
+# реестр юнитов, карты, boot сцен, перф-бенчмарки) — это GUT-тесты в
+# res://tests/functional/ (см. 9). Отдельных `tools/*.gd` больше нет: их заменили
+# инварианты, падающие на CI. Прогон — ниже, в блоке «Юнит-тесты (GUT)».
 
-# Полный CI: компиляция + проверки сцен/данных/тайлсетов + юнит-тесты + console clean
+# Полный CI: GUT-инварианты + юнит-тесты + console clean
 # (bash-скрипты не оборачиваем — таймауты внутри CI, но логируем)
 bash game/tools/shell/run_all_ci_checks.sh >"$LOG" 2>&1
-# --fast  : только компиляция + проверки (без тестов и console clean) — допустим для quick sanity check
+# --fast  : только GUT-инварианты (без console clean) — допустим для quick sanity check
 
 # ⚠️ run_all_ci_checks.sh АВТОМАТИЧЕСКИ соберёт реестр class_name, если его нет —
 #    чистый checkout работает из коробки. Заранее собирать не надо; чистить после
@@ -275,10 +278,11 @@ run_godot "$LOG" 60 --headless --path game -s addons/gut/gut_cmdln.gd -gtest=res
 run_godot "$LOG" 60 --headless --path game -s addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs -gunit_test_name=hex_distance -gexit
 run_godot "$LOG" 60 --headless --path game -s addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs -gselect=battle -gexit
 
-# Проверка ссылок в сценах / валидация карт / целостность тайлсетов
-run_godot "$LOG" 60 --headless --path game -s tools/check_scene_refs.gd
-run_godot "$LOG" 60 --headless --path game -s tools/spell_validation/validate_spells.gd -- --strict --json
-run_godot "$LOG" 60 --headless --path game -s tools/check_tileset.gd
+# Инварианты «проверка ссылок в сценах / валидация карт / целостность тайлсетов /
+# реестр юнитов / boot сцен / перф-бенчмарки» — это GUT-тесты в
+# res://tests/functional/ (test_scene_refs, test_spells_json, test_tileset_integrity,
+# test_unit_registry, test_scene_boot, test_benchmarks, test_memory_profile).
+# Прогон всех — ниже, в блоке «Юнит-тесты (GUT)».
 
 # Анализ и архивация НЕИСПОЛЬЗУЕМЫХ ассетов (game/tools/analyze_assets.py):
 #   отчёт  — python3 game/tools/analyze_assets.py        (без перемещения)
@@ -344,7 +348,7 @@ run_godot() {
 }
 
 # Примеры (из корня репозитория):
-run_godot /tmp/godot_run.log 60 --headless --path game -s tools/compile_all.gd
+run_godot /tmp/godot_run.log 60 --headless --path game -s addons/gut/gut_cmdln.gd -gtest=res://tests/functional/test_compile_all.gd -gexit
 run_godot /tmp/godot_run.log 180 --headless --path game scenes/World.tscn --quit-after 120
 cat /tmp/godot_run.log | grep -vE 'loading_editor_layout|Godot Engine'
 ```
@@ -531,7 +535,7 @@ Resources="*res://scripts/autoload/Resources.gd"
 - **С `*`** (например `SoundManager="*res://..."`) — **editor-only**, загружается только в редакторе,
   в экспортированной игре отключён (нужно загружать явно, если требуется).
 
-**Опциональный dev-автозагрузчик:** `mcp_interaction_server.gd` (из раздела 13, godot-mcp).
+**Опциональный dev-автозагрузчик:** `mcp_interaction_server.gd` (из раздела 13).
 **Не коммитить включённым** в `project.godot`, никогда не включать в CI или релизных сборках.
 MCP = удалённое исполнение произвольного GDScript в живой игре → только локальные dev-сессии.
 Машинно проверяется в гейте 8.2.
@@ -569,7 +573,8 @@ MCP = удалённое исполнение произвольного GDScrip
 ## 13. Матрица выбора инструментов QA и отладки
 
 В проекте используется **GUT 9.7.1** (`game/addons/gut/`, CLI `addons/gut/gut_cmdln.gd`).
-Для интерактивного QA и live-отладки интегрирован **godot-mcp (Full Control)**.
+Для интерактивного QA и live-отладки используется dev-only сервер `mcp_interaction_server.gd`
+(MCP-совместимый TCP-рантайм-интерфейс — удалённое исполнение GDScript в живой игре).
 
 ### Зоны ответственности: Когда что использовать
 
@@ -580,8 +585,10 @@ MCP = удалённое исполнение произвольного GDScrip
 - Тестов, которые должны выполняться быстро, детерминированно и без рендеринга (`--headless`).
 - Проверки контрактов данных (JSON схемы, валидация спеллов).
 
-#### 2. godot-mcp (Full Control) — Runtime Interaction
-**Суть:** Расширенный MCP-сервер, внедряющийся в запущенную игру через TCP-сокет.
+#### 2. `mcp_interaction_server.gd` — dev-only TCP runtime interface
+**Суть:** MCP-совместимый сервер, внедряющийся в запущенную игру через TCP-сокет и
+отдающий команды (`game_eval`, `game_screenshot`, …). Описан как **опциональный**
+dev-only рантайм-интерфейс: в `project.godot` автозагрузка отключена по умолчанию.
 Требует добавления `mcp_interaction_server.gd` в AutoLoad (работает только на **Godot 4.4+**,
 что совместимо с нашим 4.7).
 
@@ -603,7 +610,7 @@ MCP = удалённое исполнение произвольного GDScrip
   игровой мультиплеер, не связанный с MCP), физики (joints, raycasts) и анимаций в реальном времени.
 
 **Правило:** Если баг воспроизводится только в "живом" геймплее или требует визуальной
-оценки — используем `godot-mcp`. Если это ошибка в чистой логике или расчётах — пишем
+оценки — используем `mcp_interaction_server.gd`. Если это ошибка в чистой логике или расчётах — пишем
 unit-тест и гоняем через `--headless`.
 
 ---
@@ -631,7 +638,7 @@ unit-тест и гоняем через `--headless`.
 - `feat(battle): добавить фазу отступления в BattleFlow`
 - `fix(world): HexUtils.distance возвращает 0 для одинаковых клеток`
 - `test(battle): покрыть тестами BattleState.turn_end`
-- `chore(ci): увеличить таймаут compile_all до 90 секунд`
+- `chore(ci): увеличить таймаут GUT-инвариантов (tests/functional) до 90 секунд`
 - `docs(architecture): обновить схему слоёв`
 
 ### Ветки

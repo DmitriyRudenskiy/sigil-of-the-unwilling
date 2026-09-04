@@ -10,20 +10,22 @@ All tools live under `tools/` — the single home for the project's tooling.
 ```
 tools/
 ├── shell/                 # shell orchestrators (CI + scenario runners)
-├── spell_validation/       # spell JSON validator + report model
 ├── texture_slicer/        # texture-slicer core (clustering + preview)
 ├── scenarios/             # Python scenario generators (collect / flee)
 ├── archived/              # retired builders + superseded asset/analysis drafts
-└── *.py  /  *.gd  /  *.sh # flat, self-descriptive tool scripts
+└── *.py  /  *.sh          # flat, self-descriptive tool scripts (no .gd left: invariants → GUT)
+
+scripts/build/             # headless generators (moved from the old tools/*.gd, dev-tooling-rebuild 2.x):
+                           #   gen_artifact_icons.gd, gen_sound_wav.gd, gen_inventory_scene.gd, tune_city_arena.gd
 ```
 
 ## Shell scripts (orchestration)
 
 | Script | Purpose |
 |---|---|
-| `tools/shell/run_all_ci_checks.sh` | Full CI: compile-all → scene-refs → spell validation → tileset integrity → unit tests (GUT 9.7.1, `addons/gut/gut_cmdln.gd`). `--fast` skips the test + console-clean steps. **Auto-bootstraps the `class_name` registry** (`.godot/global_script_class_cache.cfg`) via `godot --editor` if missing, so a clean checkout runs out of the box. Failure is detected from the log (`SCRIPT ERROR:`, `Failed to load script`, `Could not find type`, `does not inherit from`, `RESULT: FAILED`, `SOME TESTS FAILED`, **`All tests passed!` маркер для GUT-шага**), not the exit code (Godot returns 0 even when a script fails to load). A final **console-scan step** (end-of-cycle gate, AGENT.md 8.2) prints `⚠️ WARNINGS: N` / `❌ ERRORS: N` over all captured logs and exits non-zero on errors; it is skipped in `--fast` mode so `--fast` output stays unchanged. |
+| `tools/shell/run_all_ci_checks.sh` | Full CI: GUT invariant tests (`res://tests/functional/` — compile, scene-refs, spell validation, tileset integrity, unit registry, scene boot, perf/memory) → unit tests (GUT 9.7.1, `addons/gut/gut_cmdln.gd`) → console-clean. The old per-tool `tools/*.gd` steps (compile-all / scene-refs / spell / tileset) were replaced by the GUT functional tests; `--fast` runs **GUT invariants only, no console-clean**. **Auto-bootstraps the `class_name` registry** (`.godot/global_script_class_cache.cfg`) via `godot --editor` if missing, so a clean checkout runs out of the box. Failure is detected from the log (`SCRIPT ERROR:`, `Failed to load script`, `Could not find type`, `does not inherit from`, `RESULT: FAILED`, `SOME TESTS FAILED`, **`All tests passed!` маркер для GUT-шага**), not the exit code (Godot returns 0 even when a script fails to load). A final **console-scan step** (end-of-cycle gate, AGENT.md 8.2) prints `⚠️ WARNINGS: N` / `❌ ERRORS: N` over all captured logs and exits non-zero on errors; it is skipped in `--fast` mode so `--fast` output stays unchanged. |
 | `tools/shell/play_scenario.sh` | Runs a scenario end-to-end over the live socket (default N=1). `--log <file>` sets the log path. |
-| `tools/lint.sh` | Static linter: compile-all → scene-refs → grep regressions. `--runtime` adds a World.tscn smoke run. |
+| `tools/lint.sh` | Static linter: GUT compile/scene-refs invariant tests (`tests/functional/`) → grep regressions. `--runtime` adds a World.tscn smoke run. |
 
 ## Python scripts (asset pipeline & analysis)
 
@@ -42,20 +44,32 @@ tools/
 | `analyze_artifacts.py` | Analyzes artifact assets. |
 | `ai_agent.py` | Socket-based Godot client (AI agent that talks to the game). |
 
-## Godot CI / dev tools (GDScript)
+## Invariant checks (GUT functional tests) and build scripts
 
-| Tool | Purpose |
-|---|---|
-| `compile_all.gd` | Headless compile of every `.gd` — catches parse errors and broken `preload`s. |
-| `check_scene_refs.gd` | Verifies all `ext_resource`/`sub_resource` paths in scenes resolve. |
-| `check_tileset.gd` | Checks tileset integrity (`.tres`/`.atlas` consistency). |
-| `spell_validation/validate_spells.gd` | Validates spell definitions against `scripts/data/` JSON (with `--strict --json`). |
-| `spell_validation/SpellValidator.gd` | Validator logic used by `validate_spells.gd`. |
-| `spell_validation/ValidationReport.gd` | Structured report model for the validator. |
-| `benchmark_all.gd` | Profiler: map generation, spell registry, JSON stringify (run at 60×60). |
-| `memory_profile.gd` | Captures resource/RID allocation stats at exit. |
-| `dump_unit_report.gd` | Dumps a report of unit definitions. |
-| `tune_city_arena.gd` | Tuning harness for the city arena. |
+The standalone `tools/*.gd` CI/analysis tools were **deleted** (dev-tooling-rebuild 1.x–2.x)
+and split into two new homes:
+
+- **Deterministic invariant checks → GUT functional tests** under `res://tests/functional/`
+  (they fail CI). Run the whole suite via `run_all_ci_checks.sh` (or directly:
+  `godot --headless --path game -s addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs -gexit`).
+  - compile check → `test_compile_all.gd`
+  - scene refs → `test_scene_refs.gd`
+  - tileset integrity → `test_tileset_integrity.gd`
+  - unit registry → `test_unit_registry.gd`
+  - spell validation (incl. `--strict` parity) → `tests/spell_validation/` + `test_spells_json.gd`
+  - scene boot → `test_scene_boot.gd`
+  - perf benchmarks → `test_benchmarks.gd`, memory profile → `test_memory_profile.gd`
+- **File-producing generators / balance tuners → `scripts/build/`** (self-contained
+  `extends SceneTree`, run headless, `quit(0)` on completion):
+  - `gen_artifact_icons.gd` (was `artifact_icon_generator.gd`)
+  - `gen_sound_wav.gd` (was `sound_synth.gd`)
+  - `gen_inventory_scene.gd` (was `gen_inventory_scene.gd`)
+  - `tune_city_arena.gd` (was `tune_city_arena.gd`, tuning harness)
+
+Run a generator headless (from the repo root):
+```bash
+godot --headless --path game -s scripts/build/gen_artifact_icons.gd
+```
 
 ## Godot asset / texture tools (GDScript)
 
@@ -67,8 +81,8 @@ tools/
 | `texture_slicer/PreviewRenderer.gd` | Renders biome-transition and cluster-distribution previews. |
 | `biome_preview_tool.gd` | In-editor biome preview tool. |
 | `texture_preview_tool.gd` + `texture_preview_plugin.gd` + `texture_preview_dock.gd` (+ `.tscn`) | In-editor texture-preview plugin and dock UI. |
-| `artifact_icon_generator.gd` | Generates artifact icons. |
-| `sound_synth.gd` | Procedural sound synthesis. |
+| `artifact_icon_generator.gd` | ~~Deleted — moved to `scripts/build/gen_artifact_icons.gd`~~. |
+| `sound_synth.gd` | ~~Deleted — moved to `scripts/build/gen_sound_wav.gd`~~. |
 | `binom_cutter.gd` | Biome/cutter helper for sprite sheets. |
 | `test_screenshot_extraction.gd` / `test_slicer.gd` | Test helpers for screenshot extraction and slicing. |
 
