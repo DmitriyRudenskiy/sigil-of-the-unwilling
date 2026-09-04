@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Спринт 11: события, перенос города, специализации.
 
 const _City := preload("res://scripts/world/City.gd")

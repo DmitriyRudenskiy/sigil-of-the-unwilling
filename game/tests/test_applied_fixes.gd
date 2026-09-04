@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Регрессионные тесты для правок R1, R2, R3.
 
 const _BS = preload("res://scripts/systems/BattleState.gd")

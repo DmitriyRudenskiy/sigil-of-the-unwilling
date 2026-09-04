@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Regression tests for РФ7-1 / РФ7-2 / РФ7-5: settings guard, headless safety, backpack source.
 
 const _Settings = preload("res://scripts/autoload/Settings.gd")

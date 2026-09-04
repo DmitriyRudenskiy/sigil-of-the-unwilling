@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## M2: Персонажи — Character (потребности, черты, сериализация) и
 ## CharacterRegistry (связь с PopUnit, uid, сериализация).
 

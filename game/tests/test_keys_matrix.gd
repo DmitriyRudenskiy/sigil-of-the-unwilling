@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## ResourceRegistry keys matrix: discovery & extraction key validation.
 
 

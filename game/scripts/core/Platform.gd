@@ -24,3 +24,12 @@ static func is_socket_server() -> bool:
 
 static func should_auto_quit() -> bool:
 	return "--autoquit" in OS.get_cmdline_args()
+
+
+## Запуск GUT CLI (`-s addons/gut/gut_cmdln.gd -gtest=.../-gdir=...`): процесс
+## завершает сам GUT через -gexit, а не headless-авто-quit из WorldController.
+static func is_gut_run() -> bool:
+	for arg in OS.get_cmdline_args():
+		if arg.begins_with("-gtest") or arg.begins_with("-gdir"):
+			return true
+	return false

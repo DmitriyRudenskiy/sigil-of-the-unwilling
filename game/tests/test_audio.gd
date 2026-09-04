@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Audio-pass (capability: audio):
 ## - карта AudioCues полна, все пути существуют;
 ## - graceful degradation: missing file / unknown cue / headless → без crash;

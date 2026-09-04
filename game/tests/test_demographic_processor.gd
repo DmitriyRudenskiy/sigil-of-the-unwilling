@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## M2: DemographicTurnProcessor — персонажи для фигурок, тик потребностей,
 ## критика, смерти от истощения, эпидемии. Город создаётся вручную;
 ## city.process_turn() здесь НЕ вызывается (монолит — отдельный контур).

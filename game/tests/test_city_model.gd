@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Тесты модели города: население, районы, здания, экономика.
 
 const _City = preload("res://scripts/world/City.gd")

@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## city-navigation: второй стартовый город, навигационные значки городов на
 ## MarkerLayer (всегда видны, без порога), кнопка «Выход из города» CityScreen,
 ## роутинг клика по значку -> прокладка пути (WorldEventRouter).

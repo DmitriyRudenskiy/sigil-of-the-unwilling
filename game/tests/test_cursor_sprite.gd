@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Тесты enum CursorSprite: семантические + числовые значения, резолвер пути.
 
 const CursorSprite = preload("res://scripts/data/CursorSprite.gd")

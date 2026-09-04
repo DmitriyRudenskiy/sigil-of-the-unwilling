@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Tests for typed error handling: SaveManager, ResourceNodeManager, GameSettings.
 
 const _SaveManager = preload("res://scripts/core/SaveManager.gd")
@@ -22,6 +22,7 @@ func test_load_invalid_json() -> void:
 	f.store_string("not valid json {{{")
 	f.close()
 	var result: Dictionary = sm.load_game()
+	assert_push_error("parse error")  # SaveManager пушит push_error при PARSE_FAIL
 	assert_eq(result["error"], _SaveManager.SaveError.PARSE_FAIL, "parse error")
 	assert_null(result["data"], "data is null")
 	sm.delete_save()
@@ -34,6 +35,7 @@ func test_load_invalid_data() -> void:
 	f.store_string('{"version": 1, "run_seed": 0, "hero": {}, "world": {}}')
 	f.close()
 	var result: Dictionary = sm.load_game()
+	assert_push_error("invalid data")  # SaveManager пушит push_error при INVALID_DATA
 	assert_eq(result["error"], _SaveManager.SaveError.INVALID_DATA, "invalid data")
 	sm.delete_save()
 	sm.free()
@@ -42,6 +44,7 @@ func test_load_invalid_data() -> void:
 func test_save_null_data() -> void:
 	var sm := _SaveManager.new()
 	var err: int = sm.save_game(null)
+	assert_push_error("data is null")  # SaveManager пушит push_error на null-данных
 	assert_eq(err, _SaveManager.SaveError.INVALID_DATA, "null data rejected")
 	sm.free()
 

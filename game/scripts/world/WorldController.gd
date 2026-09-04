@@ -379,7 +379,7 @@ func hide_reach_markers() -> void:
 
 
 func _handle_headless_exit() -> void:
-	if (_Platform.is_headless() or _Platform.should_auto_quit()) and not _Platform.is_test_server():
+	if (_Platform.is_headless() or _Platform.should_auto_quit()) and not _Platform.is_test_server() and not _Platform.is_gut_run():
 		await get_tree().create_timer(1.0).timeout
 		get_tree().quit()
 

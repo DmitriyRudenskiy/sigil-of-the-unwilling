@@ -144,8 +144,15 @@ _godot_script "check_tileset" -s "$PROJECT_DIR/tools/check_tileset.gd"
 
 # ---------- 5. Юнит-тесты (если не --fast) ----------
 if [ "${1:-}" != "--fast" ]; then
-    _step "Unit tests (run_tests.gd)"
-    _godot_script "unit_tests" -s "$PROJECT_DIR/tests/run_tests.gd"
+    _step "Unit tests (GUT)"
+    _godot_script "unit_tests" -s "$PROJECT_DIR/addons/gut/gut_cmdln.gd" -gdir=res://tests -ginclude_subdirs -gexit
+    # Скан выше не видит падение ассертов (GUT печатает "[Failed]:") — гейтим
+    # на маркере успеха (печатается только при failing==0 && risky==0).
+    if ! grep -q "All tests passed!" "$CI_LOG_DIR/unit_tests.log"; then
+        _fail "unit_tests"
+        echo "  GUT: 'All tests passed!' не найдено — см. $CI_LOG_DIR/unit_tests.log"
+        tail -n 25 "$CI_LOG_DIR/unit_tests.log" | sed 's/^/    /'
+    fi
 
     # ---------- 6. Console clean (живые сценарии 1–5) ----------
     # Прогон 5 сценариев через play_scenario.sh + скан логов: любой error-маркер

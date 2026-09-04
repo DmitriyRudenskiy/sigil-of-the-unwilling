@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## hero-survival: потребности героя (HeroNeeds), смерть от истощения через
 ## GameEventBus.hero_died, воскрешение в великом храме как выбор игрока
 ## (DeathSequence, раз в цикл).
@@ -129,7 +129,7 @@ func _make_wc(cities: Array, persistence: _MockPersistence = null) -> _WorldCont
 ## Герой в дереве (нужно для _detach_hero/get_parent).
 func _hero_in_tree(hero: HeroController) -> Node:
 	var parent := Node.new()
-	root.add_child(parent)
+	add_child(parent)
 	parent.add_child(hero)
 	return parent
 
@@ -428,7 +428,7 @@ func test_wc_second_death_in_cycle_no_resurrection() -> void:
 	wc._on_hero_died(&"exhaustion")
 	assert_null(wc._hero_lifecycle._deceased_hero, "no corpse hold on second death")
 	assert_null(wc._hero_lifecycle._resurrection_city, "no resurrection city on second death")
-	assert_false(is_instance_valid(hero), "corpse freed on second death (old behavior)")
+	assert_true(hero.is_queued_for_deletion(), "corpse queued for deletion on second death")
 	assert_not_null(wc._hero_lifecycle._pending_successor, "successor still planned")
 	assert_true(is_instance_valid(wc._hero_lifecycle._pending_successor), "successor alive")
 	assert_eq(death.res_city, null, "sequence gets no res_city (button hidden)")
@@ -465,7 +465,7 @@ func test_wc_no_temple_corpse_freed() -> void:
 	wc._hero_lifecycle._death_seq = death
 	wc._on_hero_died(&"starvation")
 	assert_null(wc._hero_lifecycle._deceased_hero, "no corpse hold without temple")
-	assert_false(is_instance_valid(hero), "corpse freed (old behavior)")
+	assert_true(hero.is_queued_for_deletion(), "corpse queued for deletion (no temple)")
 	assert_eq(death.res_city, null, "no res_city (button hidden)")
 	parent.free()
 	death.free()

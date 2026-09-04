@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Regression tests for round 5 executor + spell flow (РФ5-1, РФ5-3, РФ5-4).
 
 const _Executor = preload("res://scripts/systems/BattleTurnExecutor.gd")

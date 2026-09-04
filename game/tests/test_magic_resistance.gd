@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Magic resistance: undead immunity, dragon level check, pendant negation, dwarf resistance.
 
 const _SpellCaster = preload("res://scripts/systems/SpellCaster.gd")

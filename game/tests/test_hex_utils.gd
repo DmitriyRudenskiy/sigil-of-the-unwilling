@@ -1,19 +1,8 @@
-extends SceneTree
+extends "res://tests/gut_base.gd"
 ## Headless tests for HexUtils.
 ## Run: godot --headless -s tests/test_hex_utils.gd
 
 const HexUtilsScript = preload("res://scripts/core/HexUtils.gd")
-
-var _failed: int = 0
-var _passed: int = 0
-
-func check(name: String, condition: bool, detail: String = "") -> void:
-	if condition:
-		_passed += 1
-		print("  PASS  ", name)
-	else:
-		_failed += 1
-		printerr("  FAIL  ", name, " — ", detail)
 
 
 func test_neighbors() -> void:
@@ -136,16 +125,3 @@ func test_cube_roundtrip() -> void:
 			check("roundtrip (%d,%d)" % [x, y], orig == back, "got %s" % str(back))
 
 
-func _init() -> void:
-	print("=== HexUtils headless tests ===")
-	test_neighbors()
-	test_hex_distance()
-	test_bfs_path()
-	test_bfs_reachable()
-	test_even_row_mode()
-	test_cube_roundtrip()
-	test_min_heap_pop_empty_guard()
-	test_min_heap_ordering()
-	print("\n=== %d passed, %d failed ===" % [_passed, _failed])
-	await process_frame
-	quit(1 if _failed > 0 else 0)

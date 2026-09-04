@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Saltpeter explosion tests: double damage to adjacent units.
 
 const _BattleState = preload("res://scripts/systems/BattleState.gd")

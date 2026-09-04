@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## TimeSystem tests: hour calculation, periods, wait actions.
 
 const _TimeSystem = preload("res://scripts/data/TimeSystem.gd")

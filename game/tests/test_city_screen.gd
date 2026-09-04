@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## city-in-world: экран управления городом (CityScreen) — списочный UI.
 ##  - setup/open/close; close_requested по кнопке «Выход из города»;
 ##  - build (успех/нехватка ресурсов/нет клетки) мутирует РЕАЛЬНЫЙ City;

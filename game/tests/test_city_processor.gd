@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## M3: Город — CityTurnProcessor (фаза &"city", приоритет 5).
 ## Масштаб, ёмкости, зоны, интеграция с TurnScheduler и экономикой.
 

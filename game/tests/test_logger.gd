@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Проверки GameLogger (scripts/core/GameLogger.gd).
 ##
 ## GameLogger не имеет захватываемого sink (print_rich / push_warning /
@@ -15,7 +15,6 @@ func _visible_tag(t: String) -> String:
 	return s.substr(1, s.length() - 2)
 
 func test_tag_pads_to_width() -> void:
-	tag("logger")
 	assert_eq(_visible_tag(_LOGGER._tag("Battle")).length(), _LOGGER.TAG_WIDTH, "короткий тег дополнен до TAG_WIDTH")
 	assert_eq(_visible_tag(_LOGGER._tag("")).length(), _LOGGER.TAG_WIDTH, "пустой тег даёт TAG_WIDTH пробелов")
 
@@ -26,7 +25,6 @@ func test_tag_wraps_in_gray() -> void:
 	assert_eq(_visible_tag(t), "Hero".rpad(_LOGGER.TAG_WIDTH), "видимая часть тега — имя + пробелы до TAG_WIDTH")
 
 func test_long_tag_not_truncated() -> void:
-	tag("logger")
 	var t := _LOGGER._tag("VeryLongTagName123")
 	assert_eq(_visible_tag(t), "VeryLongTagName123", "rpad не укорачивает длинный тег")
 	assert_gt(_visible_tag(t).length(), _LOGGER.TAG_WIDTH, "длинный тег шире TAG_WIDTH")
@@ -44,4 +42,5 @@ func test_public_methods_smoke() -> void:
 	# ожидаемо для этого теста (CI-маркеры на это не срабатывают).
 	_LOGGER.warn("warn smoke", "Test")
 	_LOGGER.error("error smoke", "Test")
+	assert_push_error("error smoke")  # GUT считает незахваченный push_error падением теста
 	assert_true(true, "публичные методы GameLogger вызваны без исключений")

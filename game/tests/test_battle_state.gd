@@ -1,40 +1,6 @@
-extends SceneTree
+extends "res://tests/gut_base.gd"
 
-var _passed: int = 0
-var _failed: int = 0
 ## Тесты BattleState: размещение, очередь, атака, конец боя, теги, отступление.
-
-func _init() -> void:
-	var failed := 0
-	failed += _test_battle_setup()
-	failed += _test_attack()
-	failed += _test_battle_end()
-	failed += _test_wait_order()
-	failed += _test_check_end_repeat_call()
-	failed += _test_attack_with_rng()
-	failed += _test_get_reachable_for_unit()
-	failed += _test_get_unreachable_ring()
-	failed += _test_flying_unit_placement()
-	failed += _test_ranged_unit_tag()
-	failed += _test_morale_tag()
-	failed += _test_retreat_survivors()
-	failed += _test_defend_bonus()
-	failed += _test_hero_bonuses()
-	failed += _test_get_unit_at_after_kill()
-	failed += _test_deployment_line_at_edge()
-	failed += _test_deployment_max_capacity()
-	failed += _test_cell_taken_avoids_occupied()
-
-	if failed == 0:
-		print("BattleState tests passed")
-	else:
-		printerr("BattleState tests failed: ", failed)
-	_failed = failed
-	_passed = 1 if failed == 0 else 0
-
-	await process_frame
-	quit(1 if failed > 0 else 0)
-
 
 func _create_state():
 	var state = load("res://scripts/systems/BattleState.gd").new()
@@ -47,7 +13,12 @@ func _create_state():
 	return state
 
 
-func _test_battle_setup() -> int:
+
+func test_battle_setup() -> void:
+	var errors := _check_battle_setup()
+	assert_eq(errors, 0, "test_battle_setup — no errors")
+
+func _check_battle_setup() -> int:
 	var errors := 0
 	var state = _create_state()
 
@@ -78,7 +49,12 @@ func _test_battle_setup() -> int:
 	return errors
 
 
-func _test_attack() -> int:
+
+func test_attack() -> void:
+	var errors := _check_attack()
+	assert_eq(errors, 0, "test_attack — no errors")
+
+func _check_attack() -> int:
 	var errors := 0
 	var state = _create_state()
 
@@ -100,7 +76,12 @@ func _test_attack() -> int:
 	return errors
 
 
-func _test_attack_with_rng() -> int:
+
+func test_attack_with_rng() -> void:
+	var errors := _check_attack_with_rng()
+	assert_eq(errors, 0, "test_attack_with_rng — no errors")
+
+func _check_attack_with_rng() -> int:
 	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
@@ -127,7 +108,12 @@ func _test_attack_with_rng() -> int:
 	return errors
 
 
-func _test_battle_end() -> int:
+
+func test_battle_end() -> void:
+	var errors := _check_battle_end()
+	assert_eq(errors, 0, "test_battle_end — no errors")
+
+func _check_battle_end() -> int:
 	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
@@ -167,7 +153,12 @@ func _test_battle_end() -> int:
 	return errors
 
 
-func _test_wait_order() -> int:
+
+func test_wait_order() -> void:
+	var errors := _check_wait_order()
+	assert_eq(errors, 0, "test_wait_order — no errors")
+
+func _check_wait_order() -> int:
 	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = [
@@ -211,7 +202,12 @@ func _test_wait_order() -> int:
 	return errors
 
 
-func _test_check_end_repeat_call() -> int:
+
+func test_check_end_repeat_call() -> void:
+	var errors := _check_check_end_repeat_call()
+	assert_eq(errors, 0, "test_check_end_repeat_call — no errors")
+
+func _check_check_end_repeat_call() -> int:
 	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
@@ -250,7 +246,12 @@ func _test_check_end_repeat_call() -> int:
 	return errors
 
 
-func _test_get_reachable_for_unit() -> int:
+
+func test_get_reachable_for_unit() -> void:
+	var errors := _check_get_reachable_for_unit()
+	assert_eq(errors, 0, "test_get_reachable_for_unit — no errors")
+
+func _check_get_reachable_for_unit() -> int:
 	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
@@ -274,7 +275,12 @@ func _test_get_reachable_for_unit() -> int:
 	return errors
 
 
-func _test_get_unreachable_ring() -> int:
+
+func test_get_unreachable_ring() -> void:
+	var errors := _check_get_unreachable_ring()
+	assert_eq(errors, 0, "test_get_unreachable_ring — no errors")
+
+func _check_get_unreachable_ring() -> int:
 	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
@@ -308,7 +314,12 @@ func _test_get_unreachable_ring() -> int:
 	return errors
 
 
-func _test_flying_unit_placement() -> int:
+
+func test_flying_unit_placement() -> void:
+	var errors := _check_flying_unit_placement()
+	assert_eq(errors, 0, "test_flying_unit_placement — no errors")
+
+func _check_flying_unit_placement() -> int:
 	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
@@ -323,7 +334,12 @@ func _test_flying_unit_placement() -> int:
 	return errors
 
 
-func _test_ranged_unit_tag() -> int:
+
+func test_ranged_unit_tag() -> void:
+	var errors := _check_ranged_unit_tag()
+	assert_eq(errors, 0, "test_ranged_unit_tag — no errors")
+
+func _check_ranged_unit_tag() -> int:
 	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
@@ -338,7 +354,12 @@ func _test_ranged_unit_tag() -> int:
 	return errors
 
 
-func _test_morale_tag() -> int:
+
+func test_morale_tag() -> void:
+	var errors := _check_morale_tag()
+	assert_eq(errors, 0, "test_morale_tag — no errors")
+
+func _check_morale_tag() -> int:
 	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
@@ -353,7 +374,12 @@ func _test_morale_tag() -> int:
 	return errors
 
 
-func _test_retreat_survivors() -> int:
+
+func test_retreat_survivors() -> void:
+	var errors := _check_retreat_survivors()
+	assert_eq(errors, 0, "test_retreat_survivors — no errors")
+
+func _check_retreat_survivors() -> int:
 	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = [
@@ -378,7 +404,12 @@ func _test_retreat_survivors() -> int:
 	return errors
 
 
-func _test_defend_bonus() -> int:
+
+func test_defend_bonus() -> void:
+	var errors := _check_defend_bonus()
+	assert_eq(errors, 0, "test_defend_bonus — no errors")
+
+func _check_defend_bonus() -> int:
 	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
@@ -402,7 +433,12 @@ func _test_defend_bonus() -> int:
 	return errors
 
 
-func _test_hero_bonuses() -> int:
+
+func test_hero_bonuses() -> void:
+	var errors := _check_hero_bonuses()
+	assert_eq(errors, 0, "test_hero_bonuses — no errors")
+
+func _check_hero_bonuses() -> int:
 	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
@@ -425,7 +461,12 @@ func _test_hero_bonuses() -> int:
 
 
 ## РФ-бой: в бою не может быть более 7 юнитов с каждой стороны.
-func _test_max_units_per_side_cap() -> int:
+
+func test_max_units_per_side_cap() -> void:
+	var errors := _check_max_units_per_side_cap()
+	assert_eq(errors, 0, "test_max_units_per_side_cap — no errors")
+
+func _check_max_units_per_side_cap() -> int:
 	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
@@ -446,7 +487,12 @@ func _test_max_units_per_side_cap() -> int:
 	return errors
 
 ## РФ-бой: очередь ходов (инициатива) строится по скорости — быстрее ходит первым.
-func _test_initiative_sorted_by_speed() -> int:
+
+func test_initiative_sorted_by_speed() -> void:
+	var errors := _check_initiative_sorted_by_speed()
+	assert_eq(errors, 0, "test_initiative_sorted_by_speed — no errors")
+
+func _check_initiative_sorted_by_speed() -> int:
 	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
@@ -481,7 +527,12 @@ func _test_initiative_sorted_by_speed() -> int:
 	return errors
 
 ## РФ-бой: инициатива пересчитывается каждый раунд (мертвые исключаются).
-func _test_initiative_rebuilt_each_round() -> int:
+
+func test_initiative_rebuilt_each_round() -> void:
+	var errors := _check_initiative_rebuilt_each_round()
+	assert_eq(errors, 0, "test_initiative_rebuilt_each_round — no errors")
+
+func _check_initiative_rebuilt_each_round() -> int:
 	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
@@ -515,7 +566,12 @@ func _test_initiative_rebuilt_each_round() -> int:
 		errors += 1
 	return errors
 
-func _test_get_unit_at_after_kill() -> int:
+
+func test_get_unit_at_after_kill() -> void:
+	var errors := _check_get_unit_at_after_kill()
+	assert_eq(errors, 0, "test_get_unit_at_after_kill — no errors")
+
+func _check_get_unit_at_after_kill() -> int:
 	# Regression: _unit_grid must not return dead units (Fix #9)
 	var errors := 0
 	var state = _create_state()
@@ -545,7 +601,12 @@ func _test_get_unit_at_after_kill() -> int:
 	return errors
 
 
-func _test_deployment_line_at_edge() -> int:
+
+func test_deployment_line_at_edge() -> void:
+	var errors := _check_deployment_line_at_edge()
+	assert_eq(errors, 0, "test_deployment_line_at_edge — no errors")
+
+func _check_deployment_line_at_edge() -> int:
 	# D1–D3: атакующие — одна вертикальная колонка у левого края, защитники — у правого;
 	# ряды 0..N-1 в порядке входных стэков, без наложений клеток.
 	var errors := 0
@@ -598,7 +659,12 @@ func _test_deployment_line_at_edge() -> int:
 	return errors
 
 
-func _test_deployment_max_capacity() -> int:
+
+func test_deployment_max_capacity() -> void:
+	var errors := _check_deployment_max_capacity()
+	assert_eq(errors, 0, "test_deployment_max_capacity — no errors")
+
+func _check_deployment_max_capacity() -> int:
 	# При лимите в 7 юнитов с каждой стороны все размещаются одной линией
 	# в рядах 0..6 без наложений (D2, D4 в предельном случае).
 	var errors := 0
@@ -633,7 +699,12 @@ func _test_deployment_max_capacity() -> int:
 	return errors
 
 
-func _test_cell_taken_avoids_occupied() -> int:
+
+func test_cell_taken_avoids_occupied() -> void:
+	var errors := _check_cell_taken_avoids_occupied()
+	assert_eq(errors, 0, "test_cell_taken_avoids_occupied — no errors")
+
+func _check_cell_taken_avoids_occupied() -> int:
 	# D4: _cell_taken определяет занятую клетку, чтобы занять следующую свободную
 	# в той же колонке.
 	var errors := 0

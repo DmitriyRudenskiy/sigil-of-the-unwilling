@@ -1,4 +1,4 @@
-extends "../test_base.gd"
+extends "../gut_base.gd"
 ## Тесты системы населения и градостроительства.
 
 const FOOD_PER_TILE := 100.0

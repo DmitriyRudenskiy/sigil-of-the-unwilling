@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 
 const _BattleFX = preload("res://scripts/core/BattleFX.gd")
 

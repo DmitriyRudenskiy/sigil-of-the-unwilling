@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## endgame-conditions: терминальные состояния забега.
 ## Триггеры EndgameController (первое условие wins, sticky), GameSession
 ## state + сериализация, SaveData v5, итоговый отчёт.
@@ -71,7 +71,7 @@ func _make_hero(path := &"archivist") -> HeroController:
 func _make_cities(player_count: int) -> CityManager:
 	var mgr := _CityManager.new()
 	mgr.name = "CitiesUnderTest"
-	root.add_child(mgr)
+	add_child(mgr)
 	for i in player_count:
 		var c := _City.new()
 		c.uid = 10 + i
@@ -95,12 +95,12 @@ func _setup_endgame() -> void:
 	_map = _MockMap.new()
 	_ec = _Endgame.new()
 	_ec.name = "EndgameUnderTest"
-	root.add_child(_ec)
-	root.add_child(_battle)
-	root.add_child(_enemy_proc)
-	root.add_child(_map)
-	root.add_child(_persistence)
-	root.add_child(_world)
+	add_child(_ec)
+	add_child(_battle)
+	add_child(_enemy_proc)
+	add_child(_map)
+	add_child(_persistence)
+	add_child(_world)
 	_ec.setup(_world, _battle, _map, _cities, _persistence, _enemy_proc)
 	# Bus-сигнал: коннектим/дисконнектим каждый тест (bus живёт весь ран).
 	_ended_cb = func(_r: String, _reason: StringName, s: Dictionary) -> void:

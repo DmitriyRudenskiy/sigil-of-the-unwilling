@@ -1,7 +1,4 @@
-extends SceneTree
-
-var _passed: int = 0
-var _failed: int = 0
+extends "res://tests/gut_base.gd"
 ## Тест: MapGenerator сохраняет seed_value до generate().
 
 # Предзагрузка зависимостей, чтобы class_name резолвились в headless-режиме
@@ -10,38 +7,25 @@ const _MapRenderer = preload("res://scripts/world/MapRenderer.gd")
 const _MapSpawner = preload("res://scripts/world/MapSpawner.gd")
 const _MapGenerator = preload("res://scripts/world/MapGenerator.gd")
 
-func _init() -> void:
-	var failed := 0
+var _mg: Node = null
 
+
+func after_each() -> void:
+	if _mg != null:
+		_mg.free()
+		_mg = null
+
+
+func test_seed_persistence_before_generate() -> void:
 	# new() без добавления в дерево — _ready() не вызывается
-	var mg = _MapGenerator.new()
-	mg.seed_value = 777
+	_mg = _MapGenerator.new()
+	_mg.seed_value = 777
+	assert_eq(_mg.seed_value, 777, "MapGenerator хранит seed_value до generate()")
 
-	if mg.seed_value != 777:
-		printerr("MapGenerator must store seed_value before generate()")
-		failed += 1
-	else:
-		print("MapGenerator seed persistence passed")
 
-	# Дополнительно: проверка map_width / map_height до generate()
-	mg.map_width = 80
-	mg.map_height = 40
-
-	if mg.map_width != 80:
-		printerr("MapGenerator must store map_width before generate()")
-		failed += 1
-	else:
-		print("MapGenerator map_width persistence passed")
-
-	if mg.map_height != 40:
-		printerr("MapGenerator must store map_height before generate()")
-		failed += 1
-	else:
-		print("MapGenerator map_height persistence passed")
-
-	_failed = failed
-	_passed = 3 - failed
-
-	mg.free()  # Node2D: освобождаем, чтобы не утекал в ObjectDB
-	await process_frame
-	quit(1 if failed > 0 else 0)
+func test_size_persistence_before_generate() -> void:
+	_mg = _MapGenerator.new()
+	_mg.map_width = 80
+	_mg.map_height = 40
+	assert_eq(_mg.map_width, 80, "MapGenerator хранит map_width до generate()")
+	assert_eq(_mg.map_height, 40, "MapGenerator хранит map_height до generate()")

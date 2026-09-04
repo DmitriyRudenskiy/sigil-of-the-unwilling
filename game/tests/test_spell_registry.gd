@@ -1,30 +1,13 @@
-extends SceneTree
+extends "res://tests/gut_base.gd"
 
-var _passed: int = 0
-var _failed: int = 0
 ## Spell registry: all 20 spells load and validate.
 
-func _init() -> void:
-	var failed := 0
-	failed += _test_spell_count()
-	failed += _test_all_spells_exist()
-	failed += _test_school_distribution()
-	failed += _test_level_range()
-	failed += _test_mana_positive()
-	failed += _test_target_type_valid()
 
-	if failed == 0:
-		print("test_spell_registry: 20/20 passed")
-	else:
-		printerr("test_spell_registry: %d failed" % failed)
-	_failed = failed
-	_passed = 1 if failed == 0 else 0
+func test_spell_count() -> void:
+	var errors := _check_spell_count()
+	assert_eq(errors, 0, "test_spell_count — no errors")
 
-	await process_frame
-	quit(1 if failed > 0 else 0)
-
-
-func _test_spell_count() -> int:
+func _check_spell_count() -> int:
 	var all := Spells.get_all_spells()
 	if all.size() != 20:
 		printerr("Expected 20 spells, got %d" % all.size())
@@ -32,7 +15,12 @@ func _test_spell_count() -> int:
 	return 0
 
 
-func _test_all_spells_exist() -> int:
+
+func test_all_spells_exist() -> void:
+	var errors := _check_all_spells_exist()
+	assert_eq(errors, 0, "test_all_spells_exist — no errors")
+
+func _check_all_spells_exist() -> int:
 	var expected := [&"magic_arrow", &"haste", &"lightning_bolt", &"precision", &"wind_wall",
 		&"bloodlust", &"fireball", &"curse", &"misfortune", &"armageddon",
 		&"bless", &"cure", &"slow", &"weakness", &"town_portal",
@@ -46,7 +34,12 @@ func _test_all_spells_exist() -> int:
 	return errors
 
 
-func _test_school_distribution() -> int:
+
+func test_school_distribution() -> void:
+	var errors := _check_school_distribution()
+	assert_eq(errors, 0, "test_school_distribution — no errors")
+
+func _check_school_distribution() -> int:
 	var errors := 0
 	for school in [SpellRegistry.School.AIR, SpellRegistry.School.FIRE,
 		SpellRegistry.School.WATER, SpellRegistry.School.EARTH]:
@@ -57,7 +50,12 @@ func _test_school_distribution() -> int:
 	return errors
 
 
-func _test_level_range() -> int:
+
+func test_level_range() -> void:
+	var errors := _check_level_range()
+	assert_eq(errors, 0, "test_level_range — no errors")
+
+func _check_level_range() -> int:
 	var errors := 0
 	for spell in Spells.get_all_spells():
 		if spell.level < 1 or spell.level > 4:
@@ -66,7 +64,12 @@ func _test_level_range() -> int:
 	return errors
 
 
-func _test_mana_positive() -> int:
+
+func test_mana_positive() -> void:
+	var errors := _check_mana_positive()
+	assert_eq(errors, 0, "test_mana_positive — no errors")
+
+func _check_mana_positive() -> int:
 	var errors := 0
 	for spell in Spells.get_all_spells():
 		if spell.base_mana <= 0:
@@ -75,7 +78,12 @@ func _test_mana_positive() -> int:
 	return errors
 
 
-func _test_target_type_valid() -> int:
+
+func test_target_type_valid() -> void:
+	var errors := _check_target_type_valid()
+	assert_eq(errors, 0, "test_target_type_valid — no errors")
+
+func _check_target_type_valid() -> int:
 	var errors := 0
 	for spell in Spells.get_all_spells():
 		if spell.target_type < 0 or spell.target_type > 5:

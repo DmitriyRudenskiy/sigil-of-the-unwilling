@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## M0: Ядро — TurnScheduler / TurnContext / TurnPhaseProcessor.
 ##
 ## Проверяем: порядок фаз по приоритету, отчёт хода, сигналы,
@@ -184,6 +184,7 @@ func test_signals_emitted() -> void:
 func test_null_ctx_returns_empty() -> void:
 	var sched := TurnScheduler.new()
 	var report: Dictionary = sched.execute_turn(null)
+	assert_push_error("ctx == null")  # ожидаемый push_error из execute_turn(null)
 	assert_true(report.is_empty(), "empty report on null ctx")
 	assert_eq(sched.get_turn(), 0, "turn not advanced on null ctx")
 

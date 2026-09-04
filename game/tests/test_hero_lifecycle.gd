@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## hero-lifecycle: изолированное тестирование HeroLifecycleSystem (RefCounted,
 ## detached — без дерева сцены). Охватываем то, чего нет в
 ## test_worldcontroller_succession_wiring (выбор преемника) / test_hero_combat_death
@@ -12,16 +12,19 @@ const _City = preload("res://scripts/world/City.gd")
 const _CityManager = preload("res://scripts/world/CityManager.gd")
 
 ## Хост-координатор: Node2D с get_hero/set_hero (владеет активным героем).
+## Типы — Node (class_name HeroController в headless GUT не резолвится).
 class MockHost extends Node2D:
-	var _hero: HeroController = null
-	func get_hero() -> HeroController:
+	var _hero: Node = null
+	func get_hero() -> Node:
 		return _hero
-	func set_hero(h: HeroController) -> void:
+	func set_hero(h: Node) -> void:
 		_hero = h
 
 ## Потребитель героя: battle_coordinator / interaction_controller держат реф.
+## _hero — для enemy_proc/shortcuts, hero — для battle/ic (как в production).
 class MockConsumer extends RefCounted:
 	var hero: Node = null
+	var _hero: Node = null
 
 ## bootstrap_result: enemy-ai + input + shortcuts — каждый держит hero.
 ## (re-wiring после перепричинения: иначе ИИ/ввод смотрят на freed-героя.)
@@ -56,7 +59,7 @@ func _make_sys(host: Node2D, bc: MockConsumer, ic: MockConsumer, boot: MockBoots
 
 func test_install_hero_rewires_all_consumers() -> void:
 	var host := MockHost.new()
-	root.add_child(host)
+	add_child(host)
 	var bc := MockConsumer.new()
 	var ic := MockConsumer.new()
 	var boot := MockBootstrap.new()
@@ -67,12 +70,12 @@ func test_install_hero_rewires_all_consumers() -> void:
 	sys._install_hero(hero)
 
 	assert_eq(host.get_hero(), hero, "active hero pointer обновлён")
-	assert_true(host.has_child(hero), "герой добавлен в мир")
+	assert_eq(hero.get_parent(), host, "герой добавлен в мир")
 	assert_eq(bc.hero, hero, "battle_coordinator перенаправлен на героя")
 	assert_eq(ic.hero, hero, "interaction_controller перенаправлен на героя")
-	assert_eq(boot.enemy_proc.hero, hero, "enemy-ai перенаправлен на героя")
+	assert_eq(boot.enemy_proc._hero, hero, "enemy-ai перенаправлен на героя")
 	assert_eq(boot.input_controller.hero, hero, "input перенаправлен на героя")
-	assert_eq(boot.shortcuts.hero, hero, "shortcuts перенаправлен на героя")
+	assert_eq(boot.shortcuts._hero, hero, "shortcuts перенаправлен на героя")
 
 	hero.free()
 	host.free()
@@ -92,9 +95,7 @@ func test_find_resurrection_city_null_when_already_resurrected() -> void:
 	assert_null(sys._find_resurrection_city(deceased),
 		"уже воскрешал — вариант воскрешения нет")
 	deceased.free()
-	(controller).free()
-	(mgr).free()
-	sys.free()
+	mgr.free()
 
 func test_find_resurrection_city_null_when_no_cities() -> void:
 	## Пустой мир — выбирать не из чего → null (воскрешения нет).
@@ -109,6 +110,4 @@ func test_find_resurrection_city_null_when_no_cities() -> void:
 	assert_null(sys._find_resurrection_city(deceased),
 		"нет городов — воскрешение недоступно")
 	deceased.free()
-	(controller).free()
-	(mgr).free()
-	sys.free()
+	mgr.free()

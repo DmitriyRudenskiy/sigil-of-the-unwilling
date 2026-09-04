@@ -1,30 +1,15 @@
-extends SceneTree
+extends "res://tests/gut_base.gd"
 
-var _passed: int = 0
-var _failed: int = 0
 ## Тесты MapModel: генерация, детерминизм, биомы, проходимость.
 
 const MapModelScript = preload("res://scripts/world/MapModel.gd")
 
-func _init() -> void:
-	var failed := 0
-	failed += _test_generation()
-	failed += _test_determinism()
-	failed += _test_biome_logic()
-	failed += _test_walkability()
 
-	if failed == 0:
-		print("MapModel tests passed")
-	else:
-		printerr("MapModel tests failed: ", failed)
-	_failed = failed
-	_passed = 1 if failed == 0 else 0
+func test_generation() -> void:
+	var errors := _check_generation()
+	assert_eq(errors, 0, "test_generation — no errors")
 
-	await process_frame
-	quit(1 if failed > 0 else 0)
-
-
-func _test_generation() -> int:
+func _check_generation() -> int:
 	var errors := 0
 	var model: RefCounted = MapModelScript.new()
 	model.map_width = 20
@@ -41,7 +26,12 @@ func _test_generation() -> int:
 	return errors
 
 
-func _test_determinism() -> int:
+
+func test_determinism() -> void:
+	var errors := _check_determinism()
+	assert_eq(errors, 0, "test_determinism — no errors")
+
+func _check_determinism() -> int:
 	var errors := 0
 	var a: RefCounted = MapModelScript.new()
 	a.map_width = 16
@@ -71,7 +61,12 @@ func _test_determinism() -> int:
 	return errors
 
 
-func _test_biome_logic() -> int:
+
+func test_biome_logic() -> void:
+	var errors := _check_biome_logic()
+	assert_eq(errors, 0, "test_biome_logic — no errors")
+
+func _check_biome_logic() -> int:
 	var errors := 0
 	var model: RefCounted = MapModelScript.new()
 
@@ -99,7 +94,12 @@ func _test_biome_logic() -> int:
 	return errors
 
 
-func _test_walkability() -> int:
+
+func test_walkability() -> void:
+	var errors := _check_walkability()
+	assert_eq(errors, 0, "test_walkability — no errors")
+
+func _check_walkability() -> int:
 	var errors := 0
 	var model: RefCounted = MapModelScript.new()
 	model.map_width = 10

@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Тесты GloryTracker: скользящее окно славы.
 
 const _GloryTracker = preload("res://scripts/world/GloryTracker.gd")

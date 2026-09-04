@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 
 func before_each() -> void:
 	Artifacts.reset()
@@ -62,12 +62,9 @@ func test_registry_rarity_distribution() -> void:
 	assert_eq(Artifacts.get_by_rarity(Artifact.Rarity.RELIC).size(), 34)
 
 func test_registry_unique_ids() -> void:
-	var ids: Array = []
 	var seen: Dictionary = {}
 	for art in Artifacts.get_all():
-		ids.append(art.id)
-		if art.id in seen:
-			push_error("[test] Duplicate artifact id: %s" % art.id)
+		assert_false(seen.has(art.id), "Duplicate artifact id: %s" % art.id)
 		seen[art.id] = true
 
 func test_registry_random_returns_valid() -> void:

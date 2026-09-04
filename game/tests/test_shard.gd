@@ -1,29 +1,17 @@
-extends SceneTree
+extends "res://tests/gut_base.gd"
 ## astral-macro Stage 1: ShardState + ShardManager unit tests.
 
 const _ShardState = preload("res://scripts/core/ShardState.gd")
 const _ShardManager = preload("res://scripts/core/ShardManager.gd")
 
-var _failed := 0
 
 
-func _init() -> void:
-	_failed += _test_shard_state_defaults()
-	_failed += _test_shard_state_custom()
-	_failed += _test_shard_state_roundtrip()
-	_failed += _test_manager_default_campaign()
-	_failed += _test_manager_active_switch()
-	_failed += _test_manager_list_ids()
 
-	if _failed == 0:
-		print("Shard tests passed")
-	else:
-		printerr("Shard tests failed: ", _failed)
-	await process_frame
-	quit(1 if _failed > 0 else 0)
+func test_shard_state_defaults() -> void:
+	var errors := _check_shard_state_defaults()
+	assert_eq(errors, 0, "test_shard_state_defaults — no errors")
 
-
-func _test_shard_state_defaults() -> int:
+func _check_shard_state_defaults() -> int:
 	var e := 0
 	var s := _ShardState.new()
 	if s.id != &"shard_1":
@@ -37,7 +25,12 @@ func _test_shard_state_defaults() -> int:
 	return e
 
 
-func _test_shard_state_custom() -> int:
+
+func test_shard_state_custom() -> void:
+	var errors := _check_shard_state_custom()
+	assert_eq(errors, 0, "test_shard_state_custom — no errors")
+
+func _check_shard_state_custom() -> int:
 	var e := 0
 	var s := _ShardState.new(&"shard_2", "Забвение", 0x2A1F3C7, "waste", Vector2i(3, 4))
 	if s.id != &"shard_2":
@@ -53,7 +46,12 @@ func _test_shard_state_custom() -> int:
 	return e
 
 
-func _test_shard_state_roundtrip() -> int:
+
+func test_shard_state_roundtrip() -> void:
+	var errors := _check_shard_state_roundtrip()
+	assert_eq(errors, 0, "test_shard_state_roundtrip — no errors")
+
+func _check_shard_state_roundtrip() -> int:
 	var e := 0
 	var s := _ShardState.new(&"shard_2", "Забвение", 0x2A1F3C7, "waste", Vector2i(3, 4))
 	s.completed = true
@@ -74,7 +72,12 @@ func _test_shard_state_roundtrip() -> int:
 	return e
 
 
-func _test_manager_default_campaign() -> int:
+
+func test_manager_default_campaign() -> void:
+	var errors := _check_manager_default_campaign()
+	assert_eq(errors, 0, "test_manager_default_campaign — no errors")
+
+func _check_manager_default_campaign() -> int:
 	var e := 0
 	_ShardManager.reset()
 	var m := _ShardManager.instance()
@@ -88,7 +91,12 @@ func _test_manager_default_campaign() -> int:
 	return e
 
 
-func _test_manager_active_switch() -> int:
+
+func test_manager_active_switch() -> void:
+	var errors := _check_manager_active_switch()
+	assert_eq(errors, 0, "test_manager_active_switch — no errors")
+
+func _check_manager_active_switch() -> int:
 	var e := 0
 	_ShardManager.reset()
 	var m := _ShardManager.instance()
@@ -104,7 +112,12 @@ func _test_manager_active_switch() -> int:
 	return e
 
 
-func _test_manager_list_ids() -> int:
+
+func test_manager_list_ids() -> void:
+	var errors := _check_manager_list_ids()
+	assert_eq(errors, 0, "test_manager_list_ids — no errors")
+
+func _check_manager_list_ids() -> int:
 	var e := 0
 	_ShardManager.reset()
 	var m := _ShardManager.instance()

@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## enemy-world-ai: профили фракций, ход врагов (движение/атака/захват),
 ## детерминизм, рост (ослабленное возрождение), сериализация growth state.
 

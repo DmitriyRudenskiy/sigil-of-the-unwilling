@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Save/Load roundtrip: SaveData → SaveManager → roundtrip.
 ##
 ## SaveManager API (by design): save_game -> SaveError code,
@@ -15,7 +15,7 @@ var _parent: Node
 func before_each() -> void:
 	_parent = Node.new()
 	_parent.name = "TestParent"
-	root.add_child(_parent)
+	add_child(_parent)
 	_sm = _SaveManager.new()
 	_sm.name = "SaveManager"
 	_parent.add_child(_sm)

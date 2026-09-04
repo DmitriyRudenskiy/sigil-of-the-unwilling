@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Regression tests for refactoring (Р1–Р11).
 
 # ==================== Т1: Signal winner type ====================

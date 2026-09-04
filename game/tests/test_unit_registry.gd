@@ -1,110 +1,72 @@
-extends SceneTree
+extends "res://tests/gut_base.gd"
+## Headless tests for UnitRegistry, UnitStats, UnitStack (GUT-конвертация).
 
-var _passed: int = 0
-var _failed: int = 0
-## Headless tests for UnitRegistry, UnitStats, UnitStack
-
-const _REGISTRY_PATH := "res://scripts/autoload/UnitRegistry.gd"
 const _STACK_PATH := "res://scripts/entities/UnitStack.gd"
 
-func _init() -> void:
-    print("=== Units headless tests ===")
-    var failed := 0
-    var rng := RandomNumberGenerator.new()
-    rng.seed = 123
-
-    # make_stack
-    var stack = _reg().make_stack("swordsmen", rng)
-    if stack == null or not stack.is_alive():
-        printerr("FAIL  make_stack swordsmen")
-        failed += 1
-    elif stack.stats.base_damage != 4 or stack.stats.hp != 10:
-        printerr("FAIL  swordsmen stats")
-        failed += 1
-    else:
-        print("PASS  make_stack swordsmen (count=%d)" % stack.count)
-
-    # invalid key
-    if _reg().make_stack("nonexistent_unit", rng) != null:
-        printerr("FAIL  invalid key")
-        failed += 1
-    else:
-        print("PASS  invalid key returns null")
-
-    # make_fixed_stack
-    var fixed = _reg().make_fixed_stack("archers", 36)
-    if fixed == null or fixed.count != 36:
-        printerr("FAIL  make_fixed_stack")
-        failed += 1
-    else:
-        print("PASS  make_fixed_stack archers count=36")
-
-    # to_dict
-    var d = fixed.to_dict() if fixed else {}
-    if d.get("key") != "archers" or d.get("count") != 36:
-        printerr("FAIL  to_dict")
-        failed += 1
-    else:
-        print("PASS  to_dict roundtrip")
-
-    # from_dict (pass stats explicitly)
-    var def_cav = _reg().get_definition("cavalry")
-    var restored = _stack().from_dict({"key": "cavalry", "count": 50}, def_cav)
-    if restored == null or restored.count != 50 or restored.stats.base_damage != 5:
-        printerr("FAIL  from_dict")
-        failed += 1
-    else:
-        print("PASS  from_dict roundtrip cavalry")
-
-    # duplicate_stack
-    var dup = fixed.duplicate_stack() if fixed else null
-    if dup == null or dup.count != fixed.count:
-        printerr("FAIL  duplicate_stack")
-        failed += 1
-    else:
-        print("PASS  duplicate_stack")
-
-    # is_alive
-    if fixed and not fixed.is_alive():
-        printerr("FAIL  is_alive true")
-        failed += 1
-    else:
-        print("PASS  is_alive true")
-
-    # is_alive zero count
-    var dead = _reg().make_fixed_stack("mages", 0)
-    if dead and dead.is_alive():
-        printerr("FAIL  is_alive false for zero")
-        failed += 1
-    else:
-        print("PASS  is_alive false for zero count")
-
-    # get_display_name
-    if fixed and fixed.get_display_name() != "Archer":
-        printerr("FAIL  get_display_name")
-        failed += 1
-    else:
-        print("PASS  get_display_name")
-
-    # get_definition
-    var def_s = _reg().get_definition("guardians")
-    if def_s == null:
-        printerr("FAIL  get_definition null")
-        failed += 1
-    elif def_s.base_damage != 6 or def_s.hp != 25:
-        printerr("FAIL  get_definition stats")
-        failed += 1
-    else:
-        print("PASS  get_definition guardians")
-
-    _failed = failed
-    _passed = 12 - failed
-    await process_frame
-    quit(1 if failed > 0 else 0)
-
-
 func _reg():
-    return Units
+	return Units
 
 func _stack():
-    return load(_STACK_PATH)
+	return load(_STACK_PATH)
+
+
+func test_make_stack_swordsmen() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 123
+	var stack = _reg().make_stack("swordsmen", rng)
+	assert_not_null(stack, "make_stack swordsmen")
+	assert_true(stack.is_alive(), "stack alive")
+	assert_eq(stack.stats.base_damage, 4, "swordsmen base_damage")
+	assert_eq(stack.stats.hp, 10, "swordsmen hp")
+
+
+func test_make_stack_invalid_key() -> void:
+	var rng := RandomNumberGenerator.new()
+	assert_null(_reg().make_stack("nonexistent_unit", rng), "invalid key returns null")
+
+
+func test_make_fixed_stack() -> void:
+	var fixed = _reg().make_fixed_stack("archers", 36)
+	assert_not_null(fixed, "make_fixed_stack archers")
+	assert_eq(fixed.count, 36, "count=36")
+
+
+func test_stack_to_dict() -> void:
+	var fixed = _reg().make_fixed_stack("archers", 36)
+	var d = fixed.to_dict() if fixed else {}
+	assert_eq(d.get("key"), "archers", "to_dict key")
+	assert_eq(d.get("count"), 36, "to_dict count")
+
+
+func test_stack_from_dict() -> void:
+	var def_cav = _reg().get_definition("cavalry")
+	var restored = _stack().from_dict({"key": "cavalry", "count": 50}, def_cav)
+	assert_not_null(restored, "from_dict cavalry")
+	assert_eq(restored.count, 50, "count preserved")
+	assert_eq(restored.stats.base_damage, 5, "cavalry base_damage")
+
+
+func test_duplicate_stack() -> void:
+	var fixed = _reg().make_fixed_stack("archers", 36)
+	var dup = fixed.duplicate_stack() if fixed else null
+	assert_not_null(dup, "duplicate_stack")
+	assert_eq(dup.count, fixed.count, "count preserved in duplicate")
+
+
+func test_is_alive() -> void:
+	var fixed = _reg().make_fixed_stack("archers", 36)
+	assert_true(fixed.is_alive(), "alive stack is alive")
+	var dead = _reg().make_fixed_stack("mages", 0)
+	assert_true(dead == null or not dead.is_alive(), "zero count stack not alive")
+
+
+func test_get_display_name() -> void:
+	var fixed = _reg().make_fixed_stack("archers", 36)
+	assert_eq(fixed.get_display_name(), "Archer", "display name")
+
+
+func test_get_definition() -> void:
+	var def_s = _reg().get_definition("guardians")
+	assert_not_null(def_s, "get_definition guardians")
+	assert_eq(def_s.base_damage, 6, "guardians base_damage")
+	assert_eq(def_s.hp, 25, "guardians hp")

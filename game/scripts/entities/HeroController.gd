@@ -132,7 +132,14 @@ func _ready() -> void:
 
 
 
+var _signals_wired := false
+
+## Идемпотентно: _ready() вызывается ПРИ КАЖДОМ входе в дерево (перерождение:
+## detach → attach), повторный connect() роняет ERR_INVALID_PARAMETER.
 func _wire_signals() -> void:
+	if _signals_wired:
+		return
+	_signals_wired = true
 	movement.hero_moved.connect(hero_moved.emit)
 	movement.movement_points_changed.connect(movement_points_changed.emit)
 	movement.path_previewed.connect(path_previewed.emit)

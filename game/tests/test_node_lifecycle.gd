@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## ResourceNode tests: state transitions, yield, exhaustion, daily tick.
 
 var node_state: int

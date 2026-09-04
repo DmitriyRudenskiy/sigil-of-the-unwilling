@@ -55,8 +55,8 @@ python3 game/tools/analyze_assets.py --restore
 игра не сломалась. Полный `run_operability.sh` долго гоняется (>10 мин) — в
 рабочем порядке достаточно быстрой выборки:
 
-1. **Юнит-тесты** — `run_godot 150 $GODOT --headless --path game -s tests/run_tests.gd`
-   → `ALL TESTS PASSED`, `0 failed`.
+1. **Юнит-тесты** — `run_godot 150 $GODOT --headless --path game -s addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs -gexit`
+   → `All tests passed!` (GUT 9.7.1).
 2. **Сборка ссылок в сценах** — `run_godot 120 $GODOT --headless --path game -s tools/check_scene_refs.gd`
    → `scene refs check: N ok, 0 errors` (ни один удалённый ассет не упомянут в сцене).
 3. **Компиляция** — `run_godot 120 $GODOT --headless --path game -s tools/compile_all.gd`

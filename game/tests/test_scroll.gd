@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 
 const _HeroMagic = preload("res://scripts/entities/HeroMagic.gd")
 const _ScrollRules = preload("res://scripts/data/ScrollRules.gd")

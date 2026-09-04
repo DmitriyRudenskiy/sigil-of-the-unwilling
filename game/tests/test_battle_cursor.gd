@@ -1,34 +1,16 @@
-extends SceneTree
+extends "res://tests/gut_base.gd"
 ## Курсор боя: режимы (меч/палочка/стрела/прицел) и видимость.
 
 const _BattleView = preload("res://scripts/systems/BattleView.gd")
 const _BattleInput = preload("res://scripts/systems/BattleInput.gd")
 
-var _passed: int = 0
-var _failed: int = 0
-
-func _init() -> void:
-	var failed := 0
-	failed += _test_cursor_modes_enum()
-	failed += _test_cursor_overlay_mode()
-	failed += _test_cursor_overlay_visibility()
-	failed += _test_view_cursor_methods()
-	failed += _test_input_setter_propagates()
-	failed += _test_walk_cursor_mode()
-	failed += _test_walk_cursor_distinct_from_ranged()
-
-	if failed == 0:
-		print("Battle cursor tests passed")
-	else:
-		printerr("Battle cursor tests failed: ", failed)
-	_failed = failed
-	_passed = 1 if failed == 0 else 0
-
-	await process_frame
-	quit(1 if failed > 0 else 0)
 
 
-func _test_cursor_modes_enum() -> int:
+func test_cursor_modes_enum() -> void:
+	var errors := _check_cursor_modes_enum()
+	assert_eq(errors, 0, "test_cursor_modes_enum — no errors")
+
+func _check_cursor_modes_enum() -> int:
 	var errors := 0
 	# DEFAULT=0, ATTACK=1, SPELL=2, RANGED=3
 	if _BattleView.CursorMode.ATTACK != 1:
@@ -43,7 +25,12 @@ func _test_cursor_modes_enum() -> int:
 	return errors
 
 
-func _test_cursor_overlay_mode() -> int:
+
+func test_cursor_overlay_mode() -> void:
+	var errors := _check_cursor_overlay_mode()
+	assert_eq(errors, 0, "test_cursor_overlay_mode — no errors")
+
+func _check_cursor_overlay_mode() -> int:
 	var errors := 0
 	var c := _BattleView.CursorOverlay.new()
 	c.set_mode(_BattleView.CursorMode.ATTACK)
@@ -70,7 +57,12 @@ func _test_cursor_overlay_mode() -> int:
 	return errors
 
 
-func _test_cursor_overlay_visibility() -> int:
+
+func test_cursor_overlay_visibility() -> void:
+	var errors := _check_cursor_overlay_visibility()
+	assert_eq(errors, 0, "test_cursor_overlay_visibility — no errors")
+
+func _check_cursor_overlay_visibility() -> int:
 	var errors := 0
 	var c := _BattleView.CursorOverlay.new()
 	c.visible_flag = true
@@ -88,7 +80,12 @@ func _test_cursor_overlay_visibility() -> int:
 
 
 ## BattleView.set_cursor_mode / set_cursor_visible / clear_cursor делегируют оверлею.
-func _test_view_cursor_methods() -> int:
+
+func test_view_cursor_methods() -> void:
+	var errors := _check_view_cursor_methods()
+	assert_eq(errors, 0, "test_view_cursor_methods — no errors")
+
+func _check_view_cursor_methods() -> int:
 	var errors := 0
 	var view := _BattleView.new()
 	# Без setup() курсор null — методы должны корректно игнорировать это.
@@ -117,7 +114,12 @@ func _test_view_cursor_methods() -> int:
 	return errors
 
 
-func _test_input_setter_propagates() -> int:
+
+func test_input_setter_propagates() -> void:
+	var errors := _check_input_setter_propagates()
+	assert_eq(errors, 0, "test_input_setter_propagates — no errors")
+
+func _check_input_setter_propagates() -> int:
 	var errors := 0
 	var input := _BattleInput.new()
 	# Без setup — дефолтный режим, сеттер работает.
@@ -145,7 +147,12 @@ func _test_input_setter_propagates() -> int:
 
 
 ## Режим ходьбы (MOVE) — отдельный курсор, не путается с атакой/стрелой.
-func _test_walk_cursor_mode() -> int:
+
+func test_walk_cursor_mode() -> void:
+	var errors := _check_walk_cursor_mode()
+	assert_eq(errors, 0, "test_walk_cursor_mode — no errors")
+
+func _check_walk_cursor_mode() -> int:
 	var errors := 0
 	if _BattleView.CursorMode.MOVE != 4:
 		printerr("CursorMode.MOVE should be 4 (added after RANGED=3)")
@@ -165,7 +172,12 @@ func _test_walk_cursor_mode() -> int:
 
 
 ## Курсор ходьбы должен отличаться от стрелого (RANGED) и дефолтного (DEFAULT).
-func _test_walk_cursor_distinct_from_ranged() -> int:
+
+func test_walk_cursor_distinct_from_ranged() -> void:
+	var errors := _check_walk_cursor_distinct_from_ranged()
+	assert_eq(errors, 0, "test_walk_cursor_distinct_from_ranged — no errors")
+
+func _check_walk_cursor_distinct_from_ranged() -> int:
 	var errors := 0
 	if _BattleView.CursorMode.MOVE == _BattleView.CursorMode.RANGED:
 		printerr("MOVE cursor mode must be distinct from RANGED")

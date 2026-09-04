@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 
 const _TerrainCostTable = preload("res://scripts/data/TerrainCostTable.gd")
 const _HexUtils = preload("res://scripts/core/HexUtils.gd")

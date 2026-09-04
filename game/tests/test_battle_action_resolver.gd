@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Tests for BattleActionResolver: attack, spell, rebirth, first_strike.
 
 const _Resolver = preload("res://scripts/systems/BattleActionResolver.gd")

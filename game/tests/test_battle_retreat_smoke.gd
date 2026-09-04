@@ -1,25 +1,13 @@
-extends SceneTree
+extends "res://tests/gut_base.gd"
 
-var _passed: int = 0
-var _failed: int = 0
 ## Тест отступления: BattleTurnExecutor + BattleState: ретрит → 50% стеков.
 
-func _init() -> void:
-	var failed := 0
-	failed += _test_retreat_smoke()
 
-	if failed == 0:
-		print("Battle retreat smoke test passed")
-	else:
-		printerr("Battle retreat smoke test failed: ", failed)
-	_failed = failed
-	_passed = 1 if failed == 0 else 0
+func test_retreat_smoke() -> void:
+	var errors := _check_retreat_smoke()
+	assert_eq(errors, 0, "test_retreat_smoke — no errors")
 
-	await process_frame
-	quit(1 if failed > 0 else 0)
-
-
-func _test_retreat_smoke() -> int:
+func _check_retreat_smoke() -> int:
 	var errors := 0
 
 	var state: BattleState = load("res://scripts/systems/BattleState.gd").new()

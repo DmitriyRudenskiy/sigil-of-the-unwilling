@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## city-in-world: таблица выходов клеток (CityYieldTable).
 ## Ключи ⊆ FIDSI; вода/неизвестная местность → нули; pin значений grass/mountain.
 

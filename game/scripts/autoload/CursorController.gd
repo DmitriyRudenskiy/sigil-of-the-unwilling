@@ -52,7 +52,9 @@ func _on_resource_extracted(_cell: Variant, _rid: Variant, _amount: Variant) -> 
 	_collect_left = COLLECT_HOLD_SECONDS
 	_change_mode(Mode.COLLECT)
 
-func _on_battle_ended(_cell: Variant) -> void:
+func _on_battle_ended(_winner_or_cell: Variant, _enemy_cell: Variant = null) -> void:
+	# battle_completed передаёт (winner, enemy_cell), battle_lost — один аргумент;
+	# опциональный параметр покрывает обе сигнатуры сигнала.
 	_change_mode(Mode.DEFAULT)
 
 # ==================== ПРОЦЕСС ====================

@@ -1,32 +1,16 @@
-extends SceneTree
+extends "res://tests/gut_base.gd"
 
-var _passed: int = 0
-var _failed: int = 0
 ## Сериализация армии и ресурсов: serialize → deserialize → roundtrip.
 
 const _HeroArmyController = preload("res://scripts/entities/HeroArmyController.gd")
 const _HeroResources = preload("res://scripts/entities/HeroResources.gd")
 
-func _init() -> void:
-	var failed := 0
-	failed += _test_army_serialize()
-	failed += _test_resources_roundtrip()
-	failed += _test_army_empty()
-	failed += _test_army_cap()
-	failed += _test_default_army_cap()
 
-	if failed == 0:
-		print("Hero serialize tests passed")
-	else:
-		printerr("Hero serialize tests failed: ", failed)
-	_failed = failed
-	_passed = 1 if failed == 0 else 0
+func test_army_serialize() -> void:
+	var errors := _check_army_serialize()
+	assert_eq(errors, 0, "test_army_serialize — no errors")
 
-	await process_frame
-	quit(1 if failed > 0 else 0)
-
-
-func _test_army_serialize() -> int:
+func _check_army_serialize() -> int:
 	var errors := 0
 	var army := _HeroArmyController.new()
 	var data := army.serialize()
@@ -54,7 +38,12 @@ func _test_army_serialize() -> int:
 	return errors
 
 
-func _test_resources_roundtrip() -> int:
+
+func test_resources_roundtrip() -> void:
+	var errors := _check_resources_roundtrip()
+	assert_eq(errors, 0, "test_resources_roundtrip — no errors")
+
+func _check_resources_roundtrip() -> int:
 	var errors := 0
 	var res := _HeroResources.new()
 	res.resources = {"wood": 100, "gold": 999, "gems": 42}
@@ -76,7 +65,12 @@ func _test_resources_roundtrip() -> int:
 	return errors
 
 
-func _test_army_empty() -> int:
+
+func test_army_empty() -> void:
+	var errors := _check_army_empty()
+	assert_eq(errors, 0, "test_army_empty — no errors")
+
+func _check_army_empty() -> int:
 	var errors := 0
 	var army := _HeroArmyController.new()
 	army.army = []
@@ -97,7 +91,12 @@ func _test_army_empty() -> int:
 	return errors
 
 ## РФ-герой: герой не может командовать более чем 7 юнитами в бою.
-func _test_army_cap() -> int:
+
+func test_army_cap() -> void:
+	var errors := _check_army_cap()
+	assert_eq(errors, 0, "test_army_cap — no errors")
+
+func _check_army_cap() -> int:
 	var errors := 0
 	var army := _HeroArmyController.new()
 	# Наполняем армию 12 стеками — больше лимита.
@@ -113,7 +112,12 @@ func _test_army_cap() -> int:
 	return errors
 
 ## Стартовая армия по умолчанию не превышает лимит 7 юнитов.
-func _test_default_army_cap() -> int:
+
+func test_default_army_cap() -> void:
+	var errors := _check_default_army_cap()
+	assert_eq(errors, 0, "test_default_army_cap — no errors")
+
+func _check_default_army_cap() -> int:
 	var errors := 0
 	var army := _HeroArmyController.new()
 	var for_battle := army.get_army_for_battle()

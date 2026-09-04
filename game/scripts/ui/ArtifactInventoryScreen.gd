@@ -468,13 +468,20 @@ func _set_offsets(c: Control, left: int, top: int, w: int, h: int) -> void:
 	c.offset_bottom = float(top + h)
 
 func _tex(path: String, w: int, h: int) -> Texture2D:
+	# Через импорт-пайплайн: файлы имеют .import, load() не роняет engine error.
 	var res := load(path)
-	var img: Image = (res as ImageTexture).get_image() if res is ImageTexture \
-		else Image.load_from_file(path)
-	if img == null:
+	if res is ImageTexture:
+		var img := (res as ImageTexture).get_image()
+		img.resize(w, h)
+		return ImageTexture.create_from_image(img)
+	if res is Texture2D:
+		return res
+	# Fallback для raw-файлов без .import.
+	var img2 := Image.load_from_file(path)
+	if img2 == null:
 		return res as Texture2D
-	img.resize(w, h)
-	return ImageTexture.create_from_image(img)
+	img2.resize(w, h)
+	return ImageTexture.create_from_image(img2)
 
 func _artifact_icon(art: Artifact) -> String:
 	if art == null:

@@ -17,7 +17,7 @@
 - `scenes/` — MainMenu, World, Battle, CityArena
 - `assets/` — спрайты, аудио, иконки, `data/` (spells.json), `settings/` (аудиобусы),
   `tilesets/` (гекс-тайлсеты)
-- `tests/` — тесты (`run_tests.gd`, `test_base.gd`, `fakes/`; раннер сканирует `res://tests/**`)
+- `tests/` — GUT-тесты (`gut_base.gd` + `test_*.gd`, `unit/`, `fakes/`); фреймворк GUT 9.7.1 в `addons/gut/`, конфиг `game/.gutconfig.json`
 - `tools/` — утилиты и dev-скрипты (`shell/`, `spell_validation/`, `scenarios/`)
 - `.godot/` — кэш импорта (можно удалить, Godot пересоздаст)
 

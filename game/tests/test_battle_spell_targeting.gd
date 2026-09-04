@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Regression tests for round 4 fixes (РФ4-1 through РФ4-4).
 
 const _Input = preload("res://scripts/systems/BattleInput.gd")

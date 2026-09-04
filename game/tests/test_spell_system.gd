@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Тесты карточной системы заклинаний: реестр, шаблоны, резолвер.
 
 const _Registry = preload("res://scripts/autoload/SpellbookRegistry.gd")

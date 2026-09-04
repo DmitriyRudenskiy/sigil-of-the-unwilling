@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Basic resource registry tests: wood/stone definitions.
 
 func test_wood_definition() -> void:

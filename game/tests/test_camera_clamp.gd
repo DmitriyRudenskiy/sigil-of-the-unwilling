@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 
 const _Camera = preload("res://scripts/world/WorldCamera.gd")
 const _Settings = preload("res://scripts/autoload/Settings.gd")

@@ -1,30 +1,10 @@
-extends SceneTree
+extends "res://tests/gut_base.gd"
 
-var _passed: int = 0
-var _failed: int = 0
 ## Тесты BattleAI: решения при отсутствии целей, атака, движение.
 
 const ACTION_SKIP := 0
 const ACTION_MOVE := 1
 const ACTION_ATTACK := 2
-
-func _init() -> void:
-	var failed := 0
-	failed += _test_no_target()
-	failed += _test_adjacent_attack()
-	failed += _test_move_towards_target()
-	failed += _test_attacker_ai_targets_defender()
-
-	if failed == 0:
-		print("BattleAI tests passed")
-	else:
-		printerr("BattleAI tests failed: ", failed)
-	_failed = failed
-	_passed = 1 if failed == 0 else 0
-
-	await process_frame
-	quit(1 if failed > 0 else 0)
-
 
 func _create_state(attacker_alive: bool, def_alive: bool):
 	var state = load("res://scripts/systems/BattleState.gd").new()
@@ -41,7 +21,12 @@ func _create_state(attacker_alive: bool, def_alive: bool):
 	return state
 
 
-func _test_no_target() -> int:
+
+func test_no_target() -> void:
+	var errors := _check_no_target()
+	assert_eq(errors, 0, "test_no_target — no errors")
+
+func _check_no_target() -> int:
 	var errors := 0
 	var state = _create_state(false, true)
 	var ai = load("res://scripts/systems/BattleAI.gd").new()
@@ -56,7 +41,12 @@ func _test_no_target() -> int:
 	return errors
 
 
-func _test_adjacent_attack() -> int:
+
+func test_adjacent_attack() -> void:
+	var errors := _check_adjacent_attack()
+	assert_eq(errors, 0, "test_adjacent_attack — no errors")
+
+func _check_adjacent_attack() -> int:
 	var errors := 0
 	var state = _create_state(true, true)
 	var ai = load("res://scripts/systems/BattleAI.gd").new()
@@ -83,7 +73,12 @@ func _test_adjacent_attack() -> int:
 	return errors
 
 
-func _test_move_towards_target() -> int:
+
+func test_move_towards_target() -> void:
+	var errors := _check_move_towards_target()
+	assert_eq(errors, 0, "test_move_towards_target — no errors")
+
+func _check_move_towards_target() -> int:
 	var errors := 0
 	var state = _create_state(true, true)
 	var ai = load("res://scripts/systems/BattleAI.gd").new()
@@ -129,7 +124,12 @@ func _test_move_towards_target() -> int:
 	return errors
 
 
-func _test_attacker_ai_targets_defender() -> int:
+
+func test_attacker_ai_targets_defender() -> void:
+	var errors := _check_attacker_ai_targets_defender()
+	assert_eq(errors, 0, "test_attacker_ai_targets_defender — no errors")
+
+func _check_attacker_ai_targets_defender() -> int:
 	var errors := 0
 	var state = _create_state(true, true)
 	var ai = load("res://scripts/systems/BattleAI.gd").new()

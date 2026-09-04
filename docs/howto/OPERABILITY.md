@@ -16,7 +16,7 @@ bash game/tools/shell/run_operability.sh
 
 - Сцены через SceneTree-скрипты (`-s`).
 - Авто-сценарии `scenario_{1..7}` через `play_scenario.sh`.
-- Юнит-тесты через `run_all_ci_checks.sh --tests`.
+- Юнит-тесты (GUT) через `run_all_ci_checks.sh` (шаг гейтится маркером `All tests passed!`) или напрямую: `godot --headless --path game -s addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs -gexit`.
 
 ## Интерпретация
 

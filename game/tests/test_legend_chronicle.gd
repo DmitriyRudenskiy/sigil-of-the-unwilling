@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## legend-chronicle: Chronicle (append/roundtrip/сигнал), save v6 (миграция
 ## v5), HeroStatusPanel (graceful), DeathSequence (оба режима),
 ## ChronicleScreen (newest-first), отложенная succession в WorldController
@@ -105,7 +105,7 @@ func test_hero_status_panel_with_hero() -> void:
 	h.max_combat_hp = 10
 	h.followers = [_make_follower(1, "Nyx", &"archivist")]
 	var panel: _HeroStatusPanel = _HeroStatusPanel.new()
-	root.add_child(panel)
+	add_child(panel)
 	panel.set_hero(h)
 	var title: String = str(panel.get_node("VBox/Title").text)
 	assert_true(title.find("Darkstorn") != -1, "имя в заголовке: %s" % title)
@@ -117,7 +117,7 @@ func test_hero_status_panel_with_hero() -> void:
 
 func test_hero_status_panel_without_hero() -> void:
 	var panel: _HeroStatusPanel = _HeroStatusPanel.new()
-	root.add_child(panel)
+	add_child(panel)
 	var title: String = str(panel.get_node("VBox/Title").text)
 	assert_true(title.find("Герой") != -1, "пустая панель: %s" % title)
 	var cond: String = str(panel.get_node("VBox/ConditionLabel").text)
@@ -129,7 +129,7 @@ func test_hero_status_panel_without_hero() -> void:
 
 func test_death_sequence_with_successor() -> void:
 	var ds: _DeathSequence = _DeathSequence.new()
-	root.add_child(ds)
+	add_child(ds)
 	var succ: _Hero = _Hero.new()
 	succ.hero_name = "Nyx"
 	succ.path_id = &"warrior"
@@ -145,7 +145,7 @@ func test_death_sequence_with_successor() -> void:
 
 func test_death_sequence_terminal() -> void:
 	var ds: _DeathSequence = _DeathSequence.new()
-	root.add_child(ds)
+	add_child(ds)
 	ds.show_death("Darkstorn", &"battle", {}, null)
 	var title: String = str(ds.get_node("Root/Panel/VBox/Title").text)
 	assert_true(title.find("цикл оборвался") != -1, "заголовок: %s" % title)
@@ -155,7 +155,7 @@ func test_death_sequence_terminal() -> void:
 
 func test_death_sequence_successor_signal() -> void:
 	var ds: _DeathSequence = _DeathSequence.new()
-	root.add_child(ds)
+	add_child(ds)
 	var fired: Array = []
 	ds.successor_chosen.connect(func(): fired.append(1))
 	var succ: _Hero = _Hero.new()
@@ -170,7 +170,7 @@ func test_death_sequence_successor_signal() -> void:
 
 func test_chronicle_screen_newest_first() -> void:
 	var cs: _ChronicleScreen = _ChronicleScreen.new()
-	root.add_child(cs)
+	add_child(cs)
 	var entries: Array = [
 		{"hero_name": "First", "path": "a", "outcome": "succession", "generation": 1, "end_turn": 5, "glory": 1, "battles_won": 0, "battles_lost": 0},
 		{"hero_name": "Last", "path": "b", "outcome": "DEFEAT", "generation": 2, "end_turn": 9, "glory": 9, "battles_won": 1, "battles_lost": 1},
@@ -184,7 +184,7 @@ func test_chronicle_screen_newest_first() -> void:
 
 func test_chronicle_screen_empty() -> void:
 	var cs: _ChronicleScreen = _ChronicleScreen.new()
-	root.add_child(cs)
+	add_child(cs)
 	cs.show_entries([])
 	var list: VBoxContainer = cs.get_node("Root/Panel/VBox/Scroll/List")
 	var txt: String = str(list.get_child(0).text)

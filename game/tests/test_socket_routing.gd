@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Tests for the SocketController command-routing table (_COMMANDS) and the
 ## pre-dispatch validation in _route_command (R2, world-controller-decoupling).
 ## The handler-dispatch path calls get_tree() (lazy scene-tree lookup), which
@@ -35,6 +35,7 @@ func test_commands_table_unknown_action_absent() -> void:
 
 func test_route_invalid_json_returns_error() -> void:
 	var resp = _ctrl.call("_route_command", "{not valid json")
+	assert_engine_error("error != Error::OK")  # JSON.parse_string шлёт engine-error на битом JSON
 	assert_true(resp.has("error"), "invalid JSON should error, got %s" % str(resp))
 	assert_true(str(resp["error"]).begins_with("Invalid JSON"), "error says Invalid JSON: %s" % str(resp.get("error")))
 
@@ -55,4 +56,6 @@ func test_route_line_too_large_returns_error() -> void:
 func test_extract_action_reads_field() -> void:
 	var line = JSON.stringify({"action": "MOVE_TO", "x": 3})
 	assert_eq(_ctrl.call("_extract_action", line), "MOVE_TO", "_extract_action returns the action")
-	assert_eq(_ctrl.call("_extract_action", "garbage"), "UNKNOWN", "unparseable line → UNKNOWN")
+	var garbage_action = _ctrl.call("_extract_action", "garbage")
+	assert_engine_error("error != Error::OK")  # JSON.parse_string шлёт engine-error на "garbage"
+	assert_eq(garbage_action, "UNKNOWN", "unparseable line → UNKNOWN")

@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## city-in-world: назначение расы/класса/архетипа и модификаторов
 ## в Follower и FollowerSystem.recruit.
 

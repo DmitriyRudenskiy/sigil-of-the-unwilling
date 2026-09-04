@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Тесты BoroughRules: стоимость, лимиты, уровни.
 
 const _BoroughRules = preload("res://scripts/world/BoroughRules.gd")

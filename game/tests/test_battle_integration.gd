@@ -1,29 +1,13 @@
-extends SceneTree
+extends "res://tests/gut_base.gd"
 
-var _passed: int = 0
-var _failed: int = 0
 ## Интеграционный тест: полный цикл боя через BattleState.
 
-func _init() -> void:
-	var failed := 0
-	failed += _test_attacker_wins()
-	failed += _test_defender_wins()
-	failed += _test_battle_rules_damage()
-	failed += _test_ranged_vs_flying()
-	failed += _test_morale_check()
 
-	if failed == 0:
-		print("Battle integration tests passed")
-	else:
-		printerr("Battle integration tests failed: ", failed)
-	_failed = failed
-	_passed = 1 if failed == 0 else 0
+func test_attacker_wins() -> void:
+	var errors := _check_attacker_wins()
+	assert_eq(errors, 0, "test_attacker_wins — no errors")
 
-	await process_frame
-	quit(1 if failed > 0 else 0)
-
-
-func _test_attacker_wins() -> int:
+func _check_attacker_wins() -> int:
 	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
@@ -57,7 +41,12 @@ func _test_attacker_wins() -> int:
 	return errors
 
 
-func _test_defender_wins() -> int:
+
+func test_defender_wins() -> void:
+	var errors := _check_defender_wins()
+	assert_eq(errors, 0, "test_defender_wins — no errors")
+
+func _check_defender_wins() -> int:
 	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
@@ -91,7 +80,12 @@ func _test_defender_wins() -> int:
 	return errors
 
 
-func _test_battle_rules_damage() -> int:
+
+func test_battle_rules_damage() -> void:
+	var errors := _check_battle_rules_damage()
+	assert_eq(errors, 0, "test_battle_rules_damage — no errors")
+
+func _check_battle_rules_damage() -> int:
 	var errors := 0
 
 	# Use BattleState to create proper BattleUnit wrappers
@@ -143,7 +137,12 @@ func _test_battle_rules_damage() -> int:
 	return errors
 
 
-func _test_ranged_vs_flying() -> int:
+
+func test_ranged_vs_flying() -> void:
+	var errors := _check_ranged_vs_flying()
+	assert_eq(errors, 0, "test_ranged_vs_flying — no errors")
+
+func _check_ranged_vs_flying() -> int:
 	var errors := 0
 
 	var state: BattleState = load("res://scripts/systems/BattleState.gd").new()
@@ -176,7 +175,12 @@ func _test_ranged_vs_flying() -> int:
 	return errors
 
 
-func _test_morale_check() -> int:
+
+func test_morale_check() -> void:
+	var errors := _check_morale_check()
+	assert_eq(errors, 0, "test_morale_check — no errors")
+
+func _check_morale_check() -> int:
 	var errors := 0
 
 	var state: BattleState = load("res://scripts/systems/BattleState.gd").new()

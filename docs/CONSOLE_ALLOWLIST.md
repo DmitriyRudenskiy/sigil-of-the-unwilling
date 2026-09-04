@@ -39,6 +39,8 @@ passed — это ожидаемый вывод, а не предупрежде�
 | `SoundManager: no file` | SoundManager: отсутствует аудиофайл |
 | `SoundManager: unknown .* cue` | SoundManager: неизвестный cue |
 | `SoundManager: bus '.*' not found` | SoundManager: авто-загрузка, сценарии operability |
+| `City.deserialize: неизвестное здание` | test_save_v3: некорректный def_id → пропуск (graceful-деградация) |
+| `\] warn smoke` | test_logger: smoke-проверка warn-канала app-логгера |
 | `WARNING: [1-9] ObjectDB instances were leaked at exit` | Godot 4.7 headless: недетерминированный teardown-шум при N≤20 (зонд 200×register/free → 0; реальный leak — сотни объектов) |
 | `WARNING: 1[0-9] ObjectDB instances were leaked at exit` | то же, N=10–19 |
 | `WARNING: 20 ObjectDB instances were leaked at exit` | то же, N=20

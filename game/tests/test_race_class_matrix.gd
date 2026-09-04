@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Тесты матрицы рас-классов: загрузка данных, доступ, взвешенный выбор.
 
 const _Registry = preload("res://scripts/data/RaceClassRegistry.gd")

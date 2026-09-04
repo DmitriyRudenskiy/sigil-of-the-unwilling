@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Tests for algorithmic optimizations: A*, cache keys, bounding box search.
 
 const _HexUtils = preload("res://scripts/core/HexUtils.gd")

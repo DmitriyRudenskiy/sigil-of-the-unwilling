@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## resource-collection-popup: unit-тесты попапа и простого пути сбора.
 ##
 ## Покрытие spec-сценариев:
@@ -97,7 +97,7 @@ func test_show_resource_unknown_degrades() -> void:
 
 func test_ok_dismisses_and_popup_reusable() -> void:
 	var p: ResourceCollectPopup = _Popup.new()
-	root.add_child(p)
+	add_child(p)
 	p.show_resource(&"gold", 50)
 	assert_true(p.visible, "visible before OK")
 	p._on_ok()
@@ -108,13 +108,13 @@ func test_ok_dismisses_and_popup_reusable() -> void:
 	assert_true(p.visible, "popup re-shown")
 	var label: Label = p.get_node("Margin/VBox/Label")
 	assert_true(label.text.contains("+5"), "content refreshed on re-show")
-	root.remove_child(p)
+	remove_child(p)
 	p.free()
 
 
 func test_auto_dismiss_hides_and_re_show_works() -> void:
 	var p: ResourceCollectPopup = _Popup.new()
-	root.add_child(p)
+	add_child(p)
 	p.show_resource(&"wood", 5)
 	assert_true(p.visible, "visible before auto-dismiss")
 	# Фреймы в синхронном раннере не крутятся — срабатывание таймера
@@ -128,7 +128,7 @@ func test_auto_dismiss_hides_and_re_show_works() -> void:
 	var label: Label = p.get_node("Margin/VBox/Label")
 	assert_true(label.text.contains("Руда"), "refreshed content: %s" % label.text)
 	p._on_ok()
-	root.remove_child(p)
+	remove_child(p)
 	p.free()
 
 

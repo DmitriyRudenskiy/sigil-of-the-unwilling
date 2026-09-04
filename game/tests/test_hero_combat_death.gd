@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## succession-sigil: поражение в бою + полное уничтожение армии → смерть героя.
 ## Проверяет гатя смерти в WorldBattleCoordinator._apply_results.
 

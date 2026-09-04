@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## city-in-world: фаза дани городов (CityIncomeProcessor).
 ## Игровые города платят долю казны; песочница CityArena (owner == &"none")
 ## пропускается; герой не трогается (внешний эффект — интеграционный слой).

@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## succession-sigil: смерть героя → выбор преемника → наследование легенды.
 ## Чистые unit-тесты SuccessionController / City.can_resurrect / SaveData v4.
 
@@ -44,7 +44,11 @@ func _make_city(uid: int, name: StringName, is_capital: bool) -> City:
 	c.display_name = name
 	c.is_capital = is_capital
 	# Boroughs / buildings / roads / pop / food / storage.
-	c.boroughs.append({"name": name, "buildings": []})
+	# Borough — класс (class_name), city держит Array[Borough]: словарь в typed
+	# array не влезает (push отбрасывается с engine-error).
+	var b := Borough.new()
+	b.uid = uid
+	c.boroughs.append(b)
 	var ub := UniqueBuilding.new()
 	ub.def = UniqueBuilding.Def.new()
 	ub.def.id = &"great_temple"

@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Спринт 6: репутация и миграция.
 
 const CityC = preload("res://scripts/world/City.gd")

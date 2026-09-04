@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## succession-sigil: PopUnit.path_id round-trips через serialize/deserialize.
 ## path_id — источник истины для наследования (наследник того же пути).
 

@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Тесты WorldBattleCoordinator: создание, API, граничные случаи.
 ##
 ## После рефакторинга WorldBattleCoordinator использует мягкие

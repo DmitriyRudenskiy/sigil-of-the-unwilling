@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## M1: Экономика — ProductionChain.
 ##
 ## Формула выхода, списание входов, атомарность при нехватке,

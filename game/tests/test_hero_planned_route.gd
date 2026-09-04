@@ -1,4 +1,4 @@
-extends RefCounted
+extends "res://tests/gut_base.gd"
 ## Тесты планирования маршрута и автохода (HeroMovementController).
 ##
 ## Покрывают hero-path-planning:
@@ -8,15 +8,12 @@ extends RefCounted
 ##  4. Автоход с остатком ходов → маршрут сохраняется на следующий ход.
 ##  5. Отмена маршрута (cancel_planned_path).
 ##
-## Запуск: godot --headless -s tests/run_tests.gd
+## Запуск: godot --headless -s addons/gut/gut_cmdln.gd -gtest=res://tests/test_hero_planned_route.gd -gexit
 
 const _MapGenerator = preload("res://scripts/world/MapGenerator.gd")
 const _Movement = preload("res://scripts/entities/HeroMovementController.gd")
 const _HexUtils = preload("res://scripts/core/HexUtils.gd")
 
-var _passed := 0
-var _failed := 0
-var _errors: Array[String] = []
 
 var _map  # MapGenerator (Node2D, без сцены)
 var _mov  # HeroMovementController (Node)
@@ -31,56 +28,14 @@ func after_each() -> void:
 
 # ==================== УТИЛИТЫ ====================
 
-func _pass(msg: String) -> void:
-	_passed += 1
-	print("[PASS] %s" % msg)
-
-func _fail(msg: String) -> void:
-	_failed += 1
-	_errors.append(msg)
-	printerr("[FAIL] %s" % msg)
-
-func assert_true(val: bool, msg: String) -> void:
-	if val:
-		_pass(msg)
-	else:
-		_fail(msg)
-
-func assert_false(val: bool, msg: String) -> void:
-	assert_true(not val, msg)
-
-func assert_eq(a: Variant, b: Variant, msg: String) -> void:
-	if a == b:
-		_pass(msg)
-	else:
-		_fail("%s (got %s, expected %s)" % [msg, str(a), str(b)])
-
 func assert_eq_cells(cells: Array, expected: Array, msg: String) -> void:
-	if cells != expected:
-		_fail("%s (got %s, expected %s)" % [msg, _cells_to_str(cells), _cells_to_str(expected)])
-	else:
-		_pass(msg)
+	assert_eq(_cells_to_str(cells), _cells_to_str(expected), msg)
 
 func _cells_to_str(cells: Array) -> String:
 	var parts: Array = []
 	for c in cells:
 		parts.append(str(c))
 	return "[" + ", ".join(parts) + "]"
-
-func get_results() -> String:
-	# Раннер вызывает before_each один лишний раз после последнего теста —
-	# освобождаем сиротский сетап, иначе он уйдёт в ObjectDB/ResourceCache.
-	_teardown()
-	var lines := _errors.duplicate()
-	lines.append("")
-	lines.append("Results: %d passed, %d failed" % [_passed, _failed])
-	if _failed == 0:
-		lines.append("ALL TESTS PASSED")
-	else:
-		lines.append("SOME TESTS FAILED")
-	return "\n".join(lines)
-
-# ==================== SETUP ====================
 
 func _teardown() -> void:
 	if _mov != null:

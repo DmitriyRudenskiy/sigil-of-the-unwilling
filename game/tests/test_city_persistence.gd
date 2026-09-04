@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## city-in-world: персистентность городов.
 ##  - round-trip serialize/deserialize: owner + display_name (city-in-world fix);
 ##  - гарнизон (MILITIA) переживает round-trip через pop-массив;

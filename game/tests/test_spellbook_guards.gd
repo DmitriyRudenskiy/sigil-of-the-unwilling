@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Regression tests for РФ6-2/РФ6-3: spellbook button and panel guards.
 
 const _Executor = preload("res://scripts/systems/BattleTurnExecutor.gd")

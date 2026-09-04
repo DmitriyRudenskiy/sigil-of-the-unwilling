@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Тесты шины событий: испускание, подписка, типы сигналов.
 
 const _GameEventBus = preload("res://scripts/autoload/GameEventBus.gd")

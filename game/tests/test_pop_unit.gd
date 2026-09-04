@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Тесты PopUnit: состояния, переключение, доступность.
 
 const _PopUnit = preload("res://scripts/world/PopUnit.gd")

@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## M3: Город — LogisticsCalculator, ZoningSystem, ScaleShiftManager.
 ## Чистые RefCounted-модели, город собирается вручную.
 

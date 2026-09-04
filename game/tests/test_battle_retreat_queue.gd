@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Семантика отступления в BattleTurnExecutor:
 ##  1) RETREAT в WAITING_INPUT — немедленное отступление;
 ##  2) RETREAT, отправленный до начала хода игрока (ранний запрос),

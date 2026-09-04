@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## succession-sigil: WorldController wiring — hero_died → SuccessionController.
 ## Проверяем _plan_succession (выбор преемника из мира) без полного
 ## перепричинения (оно лезет в дерево сцены / battle_coordinator).

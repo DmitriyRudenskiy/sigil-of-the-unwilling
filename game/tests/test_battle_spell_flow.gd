@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Regression tests for round 3 fixes.
 
 const _Executor = preload("res://scripts/systems/BattleTurnExecutor.gd")

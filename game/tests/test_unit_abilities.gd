@@ -1,7 +1,5 @@
-extends SceneTree
+extends "res://tests/gut_base.gd"
 
-var _passed: int = 0
-var _failed: int = 0
 ## Unit abilities: vampiric, breath, charge, first_strike, rebirth.
 
 const _BattleState = preload("res://scripts/systems/BattleState.gd")
@@ -9,30 +7,12 @@ const _BattleRules = preload("res://scripts/core/BattleRules.gd")
 
 var _rng := RandomNumberGenerator.new()
 
-func _init() -> void:
-	_rng.seed = 42
-	var failed := 0
-	failed += _test_vampiric_heal()
-	failed += _test_vampiric_cap()
-	failed += _test_charge_multiplier()
-	failed += _test_first_strike()
-	failed += _test_rebirth()
-	failed += _test_breath_splash()
-	failed += _test_max_count_set()
-	failed += _test_distance_moved()
 
-	if failed == 0:
-		print("test_unit_abilities: 22/22 passed")
-	else:
-		printerr("test_unit_abilities: %d failed" % failed)
-	_failed = failed
-	_passed = 1 if failed == 0 else 0
+func test_vampiric_heal() -> void:
+	var errors := _check_vampiric_heal()
+	assert_eq(errors, 0, "test_vampiric_heal — no errors")
 
-	await process_frame
-	quit(1 if failed > 0 else 0)
-
-
-func _test_vampiric_heal() -> int:
+func _check_vampiric_heal() -> int:
 	var stack := Units.make_fixed_stack("vampire", 5)
 	if not stack:
 		return 0
@@ -43,11 +23,21 @@ func _test_vampiric_heal() -> int:
 	return 0
 
 
-func _test_vampiric_cap() -> int:
+
+func test_vampiric_cap() -> void:
+	var errors := _check_vampiric_cap()
+	assert_eq(errors, 0, "test_vampiric_cap — no errors")
+
+func _check_vampiric_cap() -> int:
 	return 0  # Covered by vampiric_heal
 
 
-func _test_charge_multiplier() -> int:
+
+func test_charge_multiplier() -> void:
+	var errors := _check_charge_multiplier()
+	assert_eq(errors, 0, "test_charge_multiplier — no errors")
+
+func _check_charge_multiplier() -> int:
 	var stack := Units.make_fixed_stack("champions", 10)
 	if not stack:
 		return 0
@@ -58,7 +48,12 @@ func _test_charge_multiplier() -> int:
 	return 0
 
 
-func _test_first_strike() -> int:
+
+func test_first_strike() -> void:
+	var errors := _check_first_strike()
+	assert_eq(errors, 0, "test_first_strike — no errors")
+
+func _check_first_strike() -> int:
 	var bs := _BattleState.new()
 	var atk_stack := Units.make_fixed_stack("swordsmen", 10)
 	var def_stack := Units.make_fixed_stack("royal_griffin", 5)
@@ -80,7 +75,12 @@ func _test_first_strike() -> int:
 	return 0
 
 
-func _test_rebirth() -> int:
+
+func test_rebirth() -> void:
+	var errors := _check_rebirth()
+	assert_eq(errors, 0, "test_rebirth — no errors")
+
+func _check_rebirth() -> int:
 	var stack := Units.make_fixed_stack("phoenix", 3)
 	if not stack:
 		return 0
@@ -91,7 +91,12 @@ func _test_rebirth() -> int:
 	return 0
 
 
-func _test_breath_splash() -> int:
+
+func test_breath_splash() -> void:
+	var errors := _check_breath_splash()
+	assert_eq(errors, 0, "test_breath_splash — no errors")
+
+func _check_breath_splash() -> int:
 	var stack := Units.make_fixed_stack("red_dragon", 5)
 	if not stack:
 		return 0
@@ -102,7 +107,12 @@ func _test_breath_splash() -> int:
 	return 0
 
 
-func _test_max_count_set() -> int:
+
+func test_max_count_set() -> void:
+	var errors := _check_max_count_set()
+	assert_eq(errors, 0, "test_max_count_set — no errors")
+
+func _check_max_count_set() -> int:
 	var bs := _BattleState.new()
 	var stack := Units.make_fixed_stack("swordsmen", 42)
 
@@ -116,7 +126,12 @@ func _test_max_count_set() -> int:
 	return 0
 
 
-func _test_distance_moved() -> int:
+
+func test_distance_moved() -> void:
+	var errors := _check_distance_moved()
+	assert_eq(errors, 0, "test_distance_moved — no errors")
+
+func _check_distance_moved() -> int:
 	var bs := _BattleState.new()
 	var stack := Units.make_fixed_stack("swordsmen", 10)
 

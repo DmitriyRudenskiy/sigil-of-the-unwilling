@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Спринт 10: рынок, стены, рейды.
 
 const _City := preload("res://scripts/world/City.gd")

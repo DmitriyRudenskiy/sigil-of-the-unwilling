@@ -1,4 +1,4 @@
-extends RefCounted
+extends "res://tests/gut_base.gd"
 ## Тесты валидации data/spells.json.
 ## Используют ядро валидатора как библиотеку.
 ##
@@ -11,51 +11,12 @@ const _Validator = preload("res://tools/spell_validation/SpellValidator.gd")
 
 const JSON_PATH := "res://assets/data/spells.json"
 
-var _passed := 0
-var _failed := 0
-var _errors: Array = []
 var validator
 
-func _init() -> void:
+
+func before_all() -> void:
 	validator = _Validator.new()
 
-# ==================== УТИЛИТЫ ====================
-
-func assert_eq(a, b, msg: String = "") -> void:
-	if a != b:
-		_fail("assert_eq failed: %s (got %s, expected %s)" % [msg, str(a), str(b)])
-	else:
-		_pass(msg)
-
-func assert_true(val: bool, msg: String = "") -> void:
-	if not val:
-		_fail("assert_true failed: %s" % msg)
-	else:
-		_pass(msg)
-
-func assert_false(val: bool, msg: String = "") -> void:
-	if val:
-		_fail("assert_false failed: %s" % msg)
-	else:
-		_pass(msg)
-
-func _pass(msg: String) -> void:
-	_passed += 1
-
-func _fail(msg: String) -> void:
-	_failed += 1
-	_errors.append(msg)
-	printerr("[FAIL] %s" % msg)
-
-func get_results() -> String:
-	var lines: Array = _errors.duplicate()
-	lines.append("")
-	lines.append("Results: %d passed, %d failed" % [_passed, _failed])
-	if _failed == 0:
-		lines.append("ALL TESTS PASSED")
-	else:
-		lines.append("SOME TESTS FAILED")
-	return "\n".join(lines)
 
 func _write(path: String, content: String) -> void:
 	var f := FileAccess.open(path, FileAccess.WRITE)

@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Save v3 (Каскад Сложности): города и персонажи в сохранении.
 ## Сериализация City/PopUnit/UniqueBuilding/BuildingDefs, миграция v2->v3,
 ## JSON-совместимость, WorldPersistence._find_city.

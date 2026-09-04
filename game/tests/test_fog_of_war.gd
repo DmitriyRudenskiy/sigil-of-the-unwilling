@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## fog-of-war: VisibilityMap (видимое/разведённое, монотонность, сериализация),
 ## блокировка неразведённых клеток в pathfinding и действиях, сохранение fog.
 

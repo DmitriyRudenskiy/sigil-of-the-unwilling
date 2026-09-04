@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Regression tests for round 2 fixes.
 
 const _FakeMap = preload("res://tests/fakes/fake_battle_map.gd")

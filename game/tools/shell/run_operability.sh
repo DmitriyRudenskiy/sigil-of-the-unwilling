@@ -4,7 +4,7 @@
 # Run → capture → scan → verify, по ВСЕМ точках входа:
 #   • сцены:      MainMenu, CityArena, World, Battle   (tools/run_scene.gd)
 #   • сценарии:   scenario_{1..12}                      (play_scenario.sh)
-#   • тесты:      юнит-тесты                            (run_tests.gd)
+#   • тесты:      юнит-тесты (GUT)                      (addons/gut/gut_cmdln.gd)
 #   • console-clean: сценарии 1–5                       (check_console_clean.sh)
 #
 # Вердикт: «CLEAN» (0) / «DIRTY» (1). Отчёт: /tmp/operability_report.md
@@ -38,11 +38,15 @@ if [ -z "$GODOT_BIN" ] || [ ! -x "$GODOT_BIN" ]; then
 fi
 
 # ==================================================== 2. run_godot (обёртка)
-# Hang-preventing обёртка: запускает Godot в фоне, ждёт N сек, убивает.
+# Hang-preventing обёртка: запускает КОМАНДУ в фоне, ждёт N сек, убивает.
 # На macOS нет timeout — sleep + kill (AGENT.md, 8.1).
-run_godot() {  # run_godot <секунд> <лог> <godot_аргументы...>
+# Вызывающий передаёт полную команду (с бинарником): и Godot-прогоны
+# ("$GODOT_BIN" --headless ...), и bash-обёртки (play_scenario.sh — она сама
+# поднимает Godot с --test-server; дописанный бинарник превращал сценарий
+# в GUI-запуск игры и play_scenario.sh не исполнялся вовсе).
+run_godot() {  # run_godot <секунд> <лог> <команда...>
     local secs="$1"; local logf="$2"; shift 2
-    "$GODOT_BIN" "$@" >"$logf" 2>&1 &
+    "$@" >"$logf" 2>&1 &
     local pid=$!
     ( sleep "$secs"; kill "$pid" 2>/dev/null ) &
     local killer=$!
@@ -139,11 +143,19 @@ run_scenarios() {
 
 # --- 6c. Юнит-тесты ---
 run_tests() {
-    echo "  🧪 юнит-тесты"
+    echo "  🧪 юнит-тесты (GUT)"
     # Шум «N ObjectDB instances leaked at exit» (N≤20) нейтрализуется в EXCLUDE_RE
     # (см. выше): это недетерминированный teardown-артефакт Godot 4.7, не утечка
     # проекта. Реальные утечки (N≥21) сканер поймает. Повторы не нужны.
-    run_godot 150 /tmp/_op_tests.log "$GODOT_BIN" --headless --path "$PROJ_DIR" -s tests/run_tests.gd
+    run_godot 150 /tmp/_op_tests.log "$GODOT_BIN" --headless --path "$PROJ_DIR" \
+        -s addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs -gexit
+    # Скан логов не видит падение ассертов (GUT печатает "[Failed]:", не "ERROR:")
+    # — гейт держится на маркере успеха: GUT печатает его только при
+    # failing==0 && risky==0 && pending==0.
+    if ! grep -q "All tests passed!" /tmp/_op_tests.log; then
+        echo "  ❌ GUT: 'All tests passed!' не найдено в /tmp/_op_tests.log" >&2
+        findings_errors+=("tests :: GUT 'All tests passed!' не найдено — см. /tmp/_op_tests.log")
+    fi
 }
 
 # --- 6d. Console-clean (переиспользуем check_console_clean.sh) ---

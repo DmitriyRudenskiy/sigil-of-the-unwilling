@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## city-in-world: последователи.
 ##  - Follower round-trip (serialize/deserialize: имя, раса, путь, архетип,
 ##    черты, модификаторы, способности);

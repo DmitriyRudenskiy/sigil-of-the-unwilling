@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Тесты CityManager: регистрация, ход, циклический приток, слава.
 
 const _CityManager = preload("res://scripts/world/CityManager.gd")

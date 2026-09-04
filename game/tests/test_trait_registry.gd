@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## M2: Черты — TraitDef и TraitRegistry (реестр, выкатка по редкости,
 ## сериализация, пользовательские черты).
 

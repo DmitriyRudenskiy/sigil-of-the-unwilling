@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Спринт 7: жильё (хижина/особняк/казармы), назначение рабочих,
 ## повышение учёных.
 

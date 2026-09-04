@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## hero-build-profile: HeroBuildProfile — данные о герое, собранных при
 ## создании в CharacterCreationUI. is_valid(), get_stats() (базовые {2,2,2,2}
 ## + бонусы расы/класса/культуры/прошлого), summary() (ключи → RU-названия,

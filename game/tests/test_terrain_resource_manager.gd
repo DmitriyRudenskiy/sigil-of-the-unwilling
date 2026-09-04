@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## terrain-resources: unit-тесты TerrainResourceManager (контактный сбор с лесу/
 ## гор, истощение точек, сигналы, персистентность).
 

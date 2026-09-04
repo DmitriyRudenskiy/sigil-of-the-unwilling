@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Regression tests for РФ6-1: army stat integrity after battle.
 
 const _ArmyCtrl = preload("res://scripts/entities/HeroArmyController.gd")

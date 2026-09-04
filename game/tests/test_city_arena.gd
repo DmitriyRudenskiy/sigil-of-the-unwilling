@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Тесты строительной арены: CityArenaModel + ArenaBalance (синхронно).
 
 const _Model = preload("res://scripts/city/CityArenaModel.gd")

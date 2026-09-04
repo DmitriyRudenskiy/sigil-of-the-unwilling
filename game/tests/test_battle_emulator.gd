@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Tests for BattleEmulator (extracted from SocketController in the world-
 ## controller-decoupling refactor): pure helpers + auto-battle emulation.
 ## emulate_battle builds armies and runs the auto-battle loop; it does not
@@ -29,18 +29,15 @@ func test_total_count_sums_specs() -> void:
 	assert_eq(em.total_count(specs), 12, "total_count should sum counts")
 	assert_eq(em.total_count([]), 0, "empty specs → 0")
 	assert_eq(em.total_count([{"id": "x"}]), 0, "missing count → 0")
-	em.free()
 
 func test_total_count_ignores_non_dicts() -> void:
 	var em = _Emulator.new()
 	assert_eq(em.total_count([{"id": "a", "count": 3}, "junk", 42]), 3, "non-dicts ignored")
-	em.free()
 
 func test_side_name_attacker_and_defender() -> void:
 	var em = _Emulator.new()
 	assert_eq(em.side_name(BattleState.Side.ATTACKER), "attacker", "attacker side name")
 	assert_eq(em.side_name(BattleState.Side.DEFENDER), "defender", "defender side name")
-	em.free()
 
 func test_emulate_battle_requires_both_armies() -> void:
 	var em = _Emulator.new()
@@ -48,7 +45,6 @@ func test_emulate_battle_requires_both_armies() -> void:
 	assert_true(r1.has("error"), "empty defender army should error")
 	var r2 = em.emulate_battle({"attacker_army": [], "defender_army": [weaker()]})
 	assert_true(r2.has("error"), "empty attacker army should error")
-	em.free()
 
 func test_emulate_battle_report_structure() -> void:
 	var em = _Emulator.new()
@@ -61,7 +57,6 @@ func test_emulate_battle_report_structure() -> void:
 	assert_true(r.has("def_survivors"), "def_survivors present")
 	assert_true(r.get("atk_loss", -1) >= 0, "atk_loss non-negative")
 	assert_true(r.get("def_loss", -1) >= 0, "def_loss non-negative")
-	em.free()
 
 func test_emulate_battle_loss_accounting_is_sane() -> void:
 	var em = _Emulator.new()
@@ -72,10 +67,8 @@ func test_emulate_battle_loss_accounting_is_sane() -> void:
 	var def_loss: int = r.get("def_loss", -1)
 	assert_true(0 <= atk_loss and atk_loss <= 20, "atk_loss in [0,20]: %d" % atk_loss)
 	assert_true(0 <= def_loss and def_loss <= 10, "def_loss in [0,10]: %d" % def_loss)
-	em.free()
 
 func test_emulate_battle_invalid_army_type() -> void:
 	var em = _Emulator.new()
 	var r = em.emulate_battle({"attacker_army": "nope", "defender_army": [weaker()]})
 	assert_true(r.has("error"), "non-array army should error")
-	em.free()

@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## M1: Экономика — EconomicTurnProcessor.
 ##
 ## Цепочки зданий, поддержка (upkeep), авто-ресурсы, отчёт фазы.

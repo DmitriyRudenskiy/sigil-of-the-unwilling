@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Тесты BattleFlow: создание, запуск, завершение, защита от двойного запуска.
 
 const _BattleFlow = preload("res://scripts/systems/BattleFlow.gd")

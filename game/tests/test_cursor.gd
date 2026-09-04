@@ -1,4 +1,4 @@
-extends "res://tests/test_base.gd"
+extends "res://tests/gut_base.gd"
 ## Тесты контекстного курсора: переключение режимов по GameEventBus,
 ## таймер COLLECT, публичный API, graceful fallback (ассеты не заданы).
 

@@ -282,14 +282,19 @@ func _plan_succession(deceased: HeroController) -> HeroController:
 
 ## Убрать героя из дерева (смерть без преемника / замена на преемника).
 func _remove_hero(deceased: Node) -> void:
-	# active-реф берём ДО free(): get_hero() вернёт freed-объект и упадёт
-	# ("return a previously freed instance"), если снять реф после free).
+	# active-реф берём ДО удаления: get_hero() не должен вернуть труп.
 	var active := _hero_ptr()
 	if deceased != null and is_instance_valid(deceased) and deceased.get_parent() != null:
 		deceased.get_parent().remove_child(deceased)
-		deceased.free()
 	if active == deceased:
 		_set_hero_ptr(null)
+	# queue_free, а не free(): on_hero_died приходит из hero_died.emit(), а тот
+	# вызывается из _tick_needs — труп на стеке GDScript, free() = engine
+	# "Attempted to free a locked object" (сценарий 1). Указатель уже снят/
+	# переподключён (_install_hero), все рефы либо сняты, либо валидны до
+	# конца кадра — отложенный фрим строго безопаснее мгновенного.
+	if deceased != null and is_instance_valid(deceased):
+		deceased.queue_free()
 
 ## Заменить активного героя на преемника: новый в дереве, инициализирован,
 ## ВСЕ потребители героя переподключены на него (battle/interaction/враги/
