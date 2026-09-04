@@ -122,14 +122,16 @@ SCENARIOS=(1 2 3 4 5 6 7 8 9 10 11 12)
 FRAME_LIMIT=25
 REPORT="/tmp/operability_report.md"
 
-# --- 6a. Сцены (SceneTree-скрипт, self-quit после N кадров) ---
+# --- 6a. Сцены (dev-tooling-rebuild 3.2) — GUT-прогон test_scene_boot.gd ---
+# Вместо `-s tools/run_scene.gd`: тот же бот 4 сцен (MainMenu, CityArena, World,
+# Battle) через GUT — с отчётностью, self-quit и фиксацией паданий ассертов.
 run_scenes() {
-    local s
-    for s in "${SCENES[@]}"; do
-        echo "  🎬 сцена: $s"
-        SCENE_PATH="scenes/$s.tscn" MAX_FRAMES="$FRAME_LIMIT" \
-            run_godot 90 "/tmp/_op_$s.log" "$GODOT_BIN" --headless --path "$PROJ_DIR" -s tools/run_scene.gd
-    done
+    echo "  🎬 scene-boot (GUT test_scene_boot.gd)"
+    run_godot 90 "/tmp/_op_scenes.log" "$GODOT_BIN" --headless --path "$PROJ_DIR" \
+        -s addons/gut/gut_cmdln.gd -gtest=res://tests/functional/test_scene_boot.gd -gexit
+    if ! grep -q "All tests passed!" "/tmp/_op_scenes.log"; then
+        findings_errors+=("scenes :: GUT test_scene_boot.gd 'All tests passed!' не найдено — см. /tmp/_op_scenes.log")
+    fi
 }
 
 # --- 6b. Сценарии (живая игра, сокет-сервер) ---

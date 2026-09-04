@@ -3,9 +3,14 @@
 # Любая ошибка валит пайплайн (set -e).
 #
 # Использование:
-#   tools/shell/run_all_ci_checks.sh           # все проверки (включая console clean)
-#   tools/shell/run_all_ci_checks.sh --fast    # только компиляция + валидация (без тестов и console clean)
-#   tools/shell/run_all_ci_checks.sh --tests   # только тесты
+#   tools/shell/run_all_ci_checks.sh           # все проверки (GUT + console clean)
+#   tools/shell/run_all_ci_checks.sh --fast    # только GUT (инварианты без console clean)
+#   tools/shell/run_all_ci_checks.sh --tests   # только GUT (без console clean)
+#
+## Инварианты (компиляция, scene refs, тайлкет, валидация спеллов, бот scenes,
+## бенчи, memory, unit registry) теперь живут как GUT-тесты в res://tests/
+## functional/ — один шаг «Unit tests (GUT)» их все покрывает. Старые
+## godot -s tools/*.gd шаги удалены (см. dev-tooling-rebuild).
 #
 # Зависимости: godot 4.x в PATH
 
@@ -126,38 +131,24 @@ if ! _bootstrap_registry; then
     exit 1
 fi
 
-# ---------- 1. Компиляция всех скриптов ----------
-_step "Compile check (compile_all.gd)"
-_godot_script "compile_all" -s "$PROJECT_DIR/tools/compile_all.gd"
+# ---------- 1. Юнит-тесты (GUT) — покрывает все инварианты (dev-tooling-rebuild) ----------
+# compile_all / scene_refs / tileset / spell_validation / scene_boot / benchmarks /
+# memory / unit_report теперь живут как GUT-тесты в res://tests/functional/.
+_step "Unit tests (GUT)"
+_godot_script "unit_tests" -s "$PROJECT_DIR/addons/gut/gut_cmdln.gd" -gdir=res://tests -ginclude_subdirs -gexit
+# Скан выше не видит падение ассертов (GUT печатает "[Failed]:") — гейтим
+# на маркере успеха (печатается только при failing==0 && risky==0).
+if ! grep -q "All tests passed!" "$CI_LOG_DIR/unit_tests.log"; then
+    _fail "unit_tests"
+    echo "  GUT: 'All tests passed!' не найдено — см. $CI_LOG_DIR/unit_tests.log"
+    tail -n 25 "$CI_LOG_DIR/unit_tests.log" | sed 's/^/    /'
+fi
 
-# ---------- 2. Проверка ссылок в сценах ----------
-_step "Scene refs check (check_scene_refs.gd)"
-_godot_script "check_scene_refs" -s "$PROJECT_DIR/tools/check_scene_refs.gd"
-
-# ---------- 3. Валидация данных ----------
-_step "Spell validation"
-_godot_script "spell_validation" -s "$PROJECT_DIR/tools/spell_validation/validate_spells.gd" --strict --json
-
-# ---------- 4. Проверка тайлкетов ----------
-_step "Tileset integrity (check_tileset.gd)"
-_godot_script "check_tileset" -s "$PROJECT_DIR/tools/check_tileset.gd"
-
-# ---------- 5. Юнит-тесты (если не --fast) ----------
+# ---------- 2. Console clean (живые сценарии 1–5) ----------
+# Прогон 5 сценариев через play_scenario.sh + скан логов: любой error-маркер
+# валит шаг; warning валит, только если не в docs/CONSOLE_ALLOWLIST.md.
+# Длительный шаг (~3–5 мин) — --fast его пропускает.
 if [ "${1:-}" != "--fast" ]; then
-    _step "Unit tests (GUT)"
-    _godot_script "unit_tests" -s "$PROJECT_DIR/addons/gut/gut_cmdln.gd" -gdir=res://tests -ginclude_subdirs -gexit
-    # Скан выше не видит падение ассертов (GUT печатает "[Failed]:") — гейтим
-    # на маркере успеха (печатается только при failing==0 && risky==0).
-    if ! grep -q "All tests passed!" "$CI_LOG_DIR/unit_tests.log"; then
-        _fail "unit_tests"
-        echo "  GUT: 'All tests passed!' не найдено — см. $CI_LOG_DIR/unit_tests.log"
-        tail -n 25 "$CI_LOG_DIR/unit_tests.log" | sed 's/^/    /'
-    fi
-
-    # ---------- 6. Console clean (живые сценарии 1–5) ----------
-    # Прогон 5 сценариев через play_scenario.sh + скан логов: любой error-маркер
-    # валит шаг; warning валит, только если не в docs/CONSOLE_ALLOWLIST.md.
-    # Длительный шаг (~3–5 мин) — --fast его пропускает.
     _step "Console clean (scenarios 1-5)"
     if (
         cd "$PROJECT_DIR"
