@@ -70,6 +70,12 @@ func test_extract_action_reads_field() -> void:
 	assert_engine_error("error != Error::OK")  # JSON.parse_string шлёт engine-error на "garbage"
 	assert_eq(garbage_action, "UNKNOWN", "unparseable line → UNKNOWN")
 
+func test_find_controller_null_script_returns_null() -> void:
+	# Без guard null матчит get_script() == null на любом узле без скрипта
+	# (корень сцены) и кешировался бы как controller.
+	var found = _ctrl.call("_find_controller", null)
+	assert_eq(found, null, "_find_controller(null) → null, не случайный узел без скрипта")
+
 
 class _FakeWorld extends Node:
 	func is_world_visible() -> bool:

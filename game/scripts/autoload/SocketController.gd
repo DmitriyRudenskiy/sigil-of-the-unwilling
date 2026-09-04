@@ -223,6 +223,9 @@ func _value_has_type(value: Variant, type_name: String) -> bool:
 	return false
 
 func _find_controller(script: Script) -> Node:
+	# null матчит get_script() == null на любом узле без скрипта (корень и т.п.)
+	if script == null:
+		return null
 	# Recursive search through full scene tree (script-avoid autoload compile deps)
 	var stack: Array[Node] = [get_tree().root]
 	while not stack.is_empty():
