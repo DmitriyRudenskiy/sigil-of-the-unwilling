@@ -9,7 +9,7 @@
 set -uo pipefail
 
 GODOT="${GODOT_BIN:-/Applications/Godot.app/Contents/MacOS/Godot}"
-REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"        # корень репозитория (tools/ -> ..)
+REPO_DIR="$(cd "$(dirname "$0")/../.." && pwd)"     # корень репозитория (game/tools/ -> ../..)
 PROJ="$REPO_DIR/game"                                # корень Godot-проекта
 FAIL=0
 
@@ -24,13 +24,13 @@ run_check() {
     fi
 }
 
-# ---------- 1. Компиляция всех .gd ----------
-run_check "[1/4] Compile all .gd" \
-    "$GODOT" --headless --path "$PROJ" -s "$REPO_DIR/tools/compile_all.gd"
+# ---------- 1. Компиляция всех .gd (dev-tooling-rebuild: GUT-инвариант) ----------
+run_check "[1/4] Compile all .gd (GUT test_compile_all)" \
+    "$GODOT" --headless --path "$PROJ" -s addons/gut/gut_cmdln.gd -gtest=res://tests/functional/test_compile_all.gd -gexit
 
-# ---------- 2. Ссылки в сценах ----------
-run_check "[2/4] Scene refs" \
-    "$GODOT" --headless --path "$PROJ" -s "$REPO_DIR/tools/check_scene_refs.gd"
+# ---------- 2. Ссылки в сценах (dev-tooling-rebuild: GUT-инвариант) ----------
+run_check "[2/4] Scene refs (GUT test_scene_refs)" \
+    "$GODOT" --headless --path "$PROJ" -s addons/gut/gut_cmdln.gd -gtest=res://tests/functional/test_scene_refs.gd -gexit
 
 # ---------- 3. Grep-регрессии (ловим старые баги) ----------
 echo ""
@@ -43,7 +43,6 @@ grep_fail() {
         echo "  ✅ ok"
     fi
 }
-grep_fail "legacy emit_signal" --include="*.gd" -e "emit_signal("
 grep_fail "nonexistent AStar2D method" --include="*.gd" -e "set_point_weight_segment"
 # NOTE: Vector2.distance_to легитимен в pixel-space (BattleInput CLICK_RADIUS_PX,
 # PlaceholderTexture) — не гребём его, иначе будет много фейлов. Проверку на

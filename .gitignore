@@ -26,3 +26,6 @@ game/addons/venv/
 
 # Node (godot-mcp; ставится через npm install)
 node_modules/
+
+# Локальная копия godot-mcp (dev-only, никогда не коммитится)
+game/addons/godot-mcp/
