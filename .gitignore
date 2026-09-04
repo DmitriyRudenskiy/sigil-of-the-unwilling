@@ -19,3 +19,10 @@ godot*.log
 **/*.uid
 
 __pycache__/
+*.pyc
+
+# Python venv (functional-тесты; ставится через requirements.txt)
+game/addons/venv/
+
+# Node (godot-mcp; ставится через npm install)
+node_modules/

@@ -3,7 +3,7 @@
 Собрать ответы по Open Question рефакторинга.
 - [x ] R1: `HeroLifecycleSystem` — единый класс (RefCounted) с рефы на существующие
       подсистемы (SuccessionController, DeathSequence, ChronicleScreen). — РЕШЕНО.
-- [ ] R2: эмуляторы в `SocketController` — новые классы в `game/scripts/` или вынесенные методы?
+- [x] R2: эмуляторы в `SocketController` — новые классы в `game/scripts/` или вынесенные методы? — РЕШЕНО фактом: отдельные классы (`scripts/autoload/BattleEmulator.gd`, `scripts/socket/CityStateSerializer.gd`, `scripts/socket/WorldStateSerializer.gd`).
 - [ ] R3: 7 `Variant`-полей `WorldController` типизировать preload-ами или оставить (временно)?
 
 > _Design D (выбор по R1): активный герой (`_hero`) остаётся на WorldController как
@@ -51,44 +51,49 @@
 ## 3. R2 — Декомпозиция `SocketController` (High)
 ### 3.1
 Ввести `_COMMANDS: Dictionary<StringName, Callable>`; `_route_command` → lookup.
-- [ ] Перенести маппинг имени команды → Callable.
+- [x] Перенести маппинг имени команды → Callable. — Готово: `_COMMANDS: Dictionary<StringName, Callable>` в `SocketController`.
 
 ### 3.2
 Вынести эмуляцию боя → `BattleEmulator.gd`.
-- [ ] `_run_auto_battle`, `_emulate_battle`, `_battle_spell`, `_nearest_enemy`,
-      `_move_toward`, `_army_stack`, `_summarize`.
+- [x] `_run_auto_battle`, `_emulate_battle`, `_battle_spell`, `_nearest_enemy`,
+      `_move_toward`, `_army_stack`, `_summarize`. — Готово: `BattleEmulator` (RefCounted).
 
 ### 3.3
 Вынести сериализацию → `CityStateSerializer.gd` / `WorldStateSerializer.gd`.
-- [ ] `_city_state_dict`, `_resolve_city`, `_city_action`, `_get_state`,
-      `_move_to`, `_end_turn`, `_start_game`.
+- [x] `_city_state_dict`, `_resolve_city`, `_city_action`, `_get_state`,
+      `_move_to`, `_end_turn`, `_start_game`. — Готово: `CityStateSerializer` / `WorldStateSerializer`.
 
 ## 4. R6 — Резолвет порта `SocketController` (Low)
-- [ ] Старт `TCPServer.listen` только при `--socket-server`; без флага — не инициализировать.
-- [ ] Проверить, что в консоли нет `Failed to listen` при обычном запуске.
+- [x] Старт `TCPServer.listen` только при `--socket-server`; без флага — не инициализировать.
+      — Готово: без флага `TCPServer` не создаётся.
+- [x] Проверить, что в консоли нет `Failed to listen` при обычном запуске.
+      — Готово: operability сценарии 1–5 → 0 ошибок.
 
 ## 5. R4/R5/R7 — Medium/Low
 ### 5.1 (R4) Инвентаризация `ServiceContainer.current`
 - [ ] Найти все использования; где возможно — перейти на DI; fallback помечать `@deprecated`.
 
 ### 5.2 (R5) Единый `find_path()` в `HexUtils`
-- [ ] Dispatch между `bfs`/`astar`/`dijkstra` по параметрам; общая реконструкция пути.
+- [x] Dispatch между `bfs`/`astar`/`dijkstra` по параметрам; общая реконструкция пути.
+      — Готово: `find_path()` → `_search_graph` (bfs/astar; dijkstra — утилита с общим реконструктором).
 
 ### 5.3 (R7) Guard пустой кучи в `MinHeap.pop()`
-- [ ] Возвращать null / `push_error` при пустой куче.
+- [x] Возвращать null / `push_error` при пустой куче. — Готово: guard в `MinHeap.pop()`.
 
 ## 6. Тесты и верификация
 ### 6.1
 Добавить `tests/test_hero_lifecycle.gd` — изолированное тестирование наследования/смерти.
 ### 6.2
 Добавить `tests/test_socket_routing.gd` — роутинг команд через `_COMMANDS`.
+- [x] — закрыто: socket-controller-decomposition. Тест добавлен, прогон 1141/0 зелёный.
 ### 6.3
 Прогон:
 - [x ] `Godot --headless --path game -s tests/run_tests.gd` → тесты зелёные
       (5672 passed, 0 failed; учтено расширение набора тестов после реорганизации).
 - [x ] `Godot --headless --path game -s game/tools/compile_all.gd` → без ошибок компиляции.
 - [x ] `bash game/tools/shell/run_operability.sh` → CLEAN (0 ошибок, 0 предупреждений).
-- [ ] `bash game/tools/shell/check_console_clean.sh` → новых `SCRIPT ERROR` нет
-      (игнорируется пре-existing `SocketServer Failed to listen`).
+- [x] `bash game/tools/shell/check_console_clean.sh` → новых `SCRIPT ERROR` нет
+      (покрытие: `run_operability.sh` сценарии 1–5 → 0 ошибок; пре-existing
+      `Failed to listen` устранён R6).
 ### 6.4
 - [x ] `WorldController.gd` ≤ 400 строк. — 376 (с 602).
