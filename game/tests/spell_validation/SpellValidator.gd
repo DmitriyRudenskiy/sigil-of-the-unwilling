@@ -124,7 +124,8 @@ const VALID_CHOICE_SECONDARY := ["DEAL_1_DAMAGE", "BUFF_1_1", "HEAL_2", "GAIN_1_
 
 ## Базовая линия распределения (snapshot данных). Живёт в отдельном файле,
 ## чтобы при легитимном росте карты правил CI не ломался хардкодом.
-## Обновление: godot --headless -s tools/spell_validation/validate_spells.gd --update-baseline
+## Обновление baseline: вручную перезаписать baseline.json (старый CLI
+## tools/spell_validation/validate_spells.gd удалён — see dev-tooling-rebuild 1.8).
 ## Путь к baseline — относительно этого скрипта, а не через res:// (см. _dir()).
 func baseline_path() -> String:
 	return _dir().path_join("baseline.json")

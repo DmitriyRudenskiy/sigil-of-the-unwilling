@@ -2,7 +2,7 @@
 # run_operability.sh — Полная проверка работоспособности (скил godot-run-and-fix).
 #
 # Run → capture → scan → verify, по ВСЕМ точках входа:
-#   • сцены:      MainMenu, CityArena, World, Battle   (tools/run_scene.gd)
+#   • сцены:      MainMenu, CityArena, World, Battle   (GUT test_scene_boot.gd)
 #   • сценарии:   scenario_{1..12}                      (play_scenario.sh)
 #   • тесты:      юнит-тесты (GUT)                      (addons/gut/gut_cmdln.gd)
 #   • console-clean: сценарии 1–5                       (check_console_clean.sh)
