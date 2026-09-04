@@ -11,6 +11,8 @@
 
 set -u
 
+# Порт должен совпадать с SocketController.gd:9095 (server.listen). Не выносить
+# в константу: это hardsкод тестового драйвера, а сервер стартует из autoload.
 PORT=9095
 SCENARIO="${1:-1}"
 LOG="/tmp/godot_scenario.log"
