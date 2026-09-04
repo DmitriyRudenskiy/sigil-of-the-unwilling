@@ -1,15 +1,8 @@
 extends "res://tests/gut_base.gd"
+const TestFactories := preload("res://tests/helpers/test_factories.gd")
 ## Save v3 (Каскад Сложности): города и персонажи в сохранении.
 ## Сериализация City/PopUnit/UniqueBuilding/BuildingDefs, миграция v2->v3,
 ## JSON-совместимость, WorldPersistence._find_city.
-
-
-func _make_city(uid: int = 0) -> City:
-	var city := City.new()
-	city.uid = uid
-	city.display_name = "TestTown %d" % uid
-	city.center = Vector2i(5, 5)
-	return city
 
 
 # ==================== SaveData v3 ====================
@@ -45,7 +38,7 @@ func test_v3_roundtrip_json() -> void:
 	sd.run_seed = 7
 	sd.date = {"month": 1, "week": 1, "day": 1}
 	sd.hero = {"cell": {"x": 0, "y": 0}}
-	var city := _make_city(0)
+	var city := TestFactories.make_city(0)
 	city.add_followers(3)
 	var chars: Array = []
 	var ch := Character.new()
@@ -180,7 +173,7 @@ func test_building_roundtrip_no_chain() -> void:
 # ==================== City ====================
 
 func _rich_city() -> City:
-	var city := _make_city(0)
+	var city := TestFactories.make_city(0)
 	city.is_capital = true
 	city.stronghold_level = 2
 	city.faction = City.Faction.NECROPHAGE
@@ -339,7 +332,7 @@ func test_city_empty_deserialize() -> void:
 
 func test_registry_roundtrip() -> void:
 	var reg := CharacterRegistry.new()
-	var city := _make_city(0)
+	var city := TestFactories.make_city(0)
 	city.add_followers(3)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1234
@@ -390,8 +383,8 @@ func test_registry_roundtrip() -> void:
 
 func test_find_city_by_uid() -> void:
 	var p := WorldPersistence.new(null)
-	var a := _make_city(0)
-	var b := _make_city(1)
+	var a := TestFactories.make_city(0)
+	var b := TestFactories.make_city(1)
 	var all: Array = [a, b]
 	assert_eq(p._find_city(all, 1, 2), b, "found by uid")
 	assert_null(p._find_city(all, 5, 2), "not found, no fallback")

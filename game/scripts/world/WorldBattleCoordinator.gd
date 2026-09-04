@@ -71,8 +71,6 @@ func setup(
 	input_controller = inp
 	world_delta = delta
 	_services = services
-	if _services == null and ServiceContainer.current != null:
-		_services = ServiceContainer.current
 
 	_create_battle_flow()
 

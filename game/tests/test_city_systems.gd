@@ -1,15 +1,7 @@
 extends "res://tests/gut_base.gd"
+const TestFactories := preload("res://tests/helpers/test_factories.gd")
 ## M3: Город — LogisticsCalculator, ZoningSystem, ScaleShiftManager.
 ## Чистые RefCounted-модели, город собирается вручную.
-
-
-func _make_city(uid: int = 1) -> City:
-	var city := City.new()
-	city.uid = uid
-	city.display_name = "TestTown %d" % uid
-	city.center = Vector2i(5, 5)
-	return city
-
 
 ## Клетка на гекс-дистанции d от центра (BFS, не зависит от координат).
 func _cell_at_distance(city: City, d: int) -> Vector2i:
@@ -51,26 +43,26 @@ func _add_building(city: City, cell: Vector2i, zone: int) -> UniqueBuilding:
 # ==================== ЛОГИСТИКА ====================
 
 func test_logistics_adjacent_full() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var cell: Vector2i = _cell_at_distance(city, 1)
 	assert_true(absf(city.get_logistics_multiplier(cell) - 1.0) < 1e-9, "adjacent = 1.0")
 
 
 func test_logistics_distance_falloff() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	assert_true(absf(city.get_logistics_multiplier(_cell_at_distance(city, 2)) - 0.85) < 1e-9, "d2 = 0.85")
 	assert_true(absf(city.get_logistics_multiplier(_cell_at_distance(city, 3)) - 0.7) < 1e-9, "d3 = 0.7")
 	assert_true(absf(city.get_logistics_multiplier(_cell_at_distance(city, 5)) - 0.4) < 1e-9, "d5 = 0.4")
 
 
 func test_logistics_min_clamp() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var m: float = city.get_logistics_multiplier(_cell_at_distance(city, 10))
 	assert_eq(m, LogisticsCalculator.MIN_MULT, "far cell clamped to MIN")
 
 
 func test_logistics_borough_shortens_distance() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var far: Vector2i = _cell_at_distance(city, 4)
 	# До центра 4 клетки (0.55), но район в 1 клетке от неё → 1.0.
 	var b := Borough.new()
@@ -101,14 +93,14 @@ func _cell_at_distance_from(from: Vector2i, _city: City, d: int) -> Vector2i:
 
 
 func test_logistics_road_on_cell() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var cell: Vector2i = _cell_at_distance(city, 2)
 	city.add_road(cell)
 	assert_true(absf(city.get_logistics_multiplier(cell) - 1.0) < 1e-9, "d2 + road = 0.85 + 0.15")
 
 
 func test_logistics_road_adjacent() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var cell: Vector2i = _cell_at_distance(city, 2)
 	var road_cell: Vector2i = _cell_at_distance_from(cell, city, 1)
 	city.add_road(road_cell)
@@ -116,14 +108,14 @@ func test_logistics_road_adjacent() -> void:
 
 
 func test_logistics_road_cap() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var cell: Vector2i = _cell_at_distance(city, 1)
 	city.add_road(cell)
 	assert_true(absf(city.get_logistics_multiplier(cell) - 1.15) < 1e-9, "1.0 + bonus, not capped at 1.0")
 
 
 func test_logistics_road_removed() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var cell: Vector2i = _cell_at_distance(city, 2)
 	city.add_road(cell)
 	city.remove_road(cell)
@@ -133,7 +125,7 @@ func test_logistics_road_removed() -> void:
 # ==================== ЗОНИРОВАНИЕ ====================
 
 func test_zone_can_place_rules() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var adj: Vector2i = _cell_at_distance(city, 1)
 	var d2: Vector2i = _cell_at_distance(city, 2)
 	# NONE — всегда можно.
@@ -152,14 +144,14 @@ func test_zone_can_place_rules() -> void:
 
 
 func test_zone_multiplier_isolated() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var adj: Vector2i = _cell_at_distance(city, 1)
 	_add_building(city, adj, ZoningSystem.ZoneType.RESIDENTIAL)
 	assert_true(absf(ZoningSystem.zone_multiplier(city, adj, ZoningSystem.ZoneType.RESIDENTIAL) - 1.0) < 1e-9)
 
 
 func test_zone_agglomeration_bonus() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var a: Vector2i = _cell_at_distance(city, 2)
 	var b1: Vector2i = _neighbor_of(a, city.center)
 	var b2: Vector2i = _neighbor_of(a, b1)
@@ -181,7 +173,7 @@ func test_zone_agglomeration_bonus() -> void:
 
 
 func test_zone_commercial_near_residential() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var a: Vector2i = _cell_at_distance(city, 1)
 	var b: Vector2i = _cell_at_distance_from(a, city, 1)
 	_add_building(city, a, ZoningSystem.ZoneType.RESIDENTIAL)
@@ -192,7 +184,7 @@ func test_zone_commercial_near_residential() -> void:
 
 
 func test_zone_industrial_road_bonus() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var a: Vector2i = _cell_at_distance(city, 2)
 	_add_building(city, a, ZoningSystem.ZoneType.INDUSTRIAL)
 	var road_cell: Vector2i = _cell_at_distance_from(a, city, 1)
@@ -202,7 +194,7 @@ func test_zone_industrial_road_bonus() -> void:
 
 
 func test_zone_combined_bonuses() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var a: Vector2i = _cell_at_distance(city, 2)
 	var b1: Vector2i = _neighbor_of(a, city.center)
 	var b2: Vector2i = _neighbor_of(a, b1)
@@ -258,7 +250,7 @@ func test_scale_multipliers() -> void:
 # ==================== CITY-ПОЛЯ (ДОРОГИ) ====================
 
 func test_road_add_remove_signal() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var adj: Vector2i = _cell_at_distance(city, 1)
 	var changes: Array = []
 	city.buildings_changed.connect(func(): changes.append(1))

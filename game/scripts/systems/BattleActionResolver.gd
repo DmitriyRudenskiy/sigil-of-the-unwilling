@@ -80,7 +80,7 @@ static func apply_spell(
 	caster_hero_bonus: Dictionary,
 	target_hero_bonus: Dictionary,
 	rng: RandomNumberGenerator,
-	registry: Node = null  # SpellRegistry; null → ServiceContainer.current.spells
+	registry: Node = null  # SpellRegistry; null → ServiceLocator.resolve
 ) -> Dictionary:
 	var is_res := spell_id == &"resurrection"
 	if caster == null or target == null or not caster.is_alive():

@@ -7,17 +7,6 @@ extends GutTest
 const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
 
 func before_all() -> void:
-	# ServiceContainer для headless-тестов: корневые ноды Units/Resources/…
-	# в -s-режиме не существуют — get_node_or_null честно даёт null, как раньше.
-	var services := ServiceContainer.new()
-	var root := get_tree().root
-	services.units = root.get_node_or_null("Units")
-	services.resources = root.get_node_or_null("Resources")
-	services.spells = root.get_node_or_null("Spells")
-	services.artifacts = root.get_node_or_null("Artifacts")
-	services.spellbook = root.get_node_or_null("Spellbook")
-	ServiceContainer.setup_global(services)
-
 	# Godot 4.7 -s-режим сбрасывает layout AudioServer до дефолта (только Master)
 	# после инициализации дерева — пере-применяем layout из audio/buses
 	# (иначе test_audio видит только Master).

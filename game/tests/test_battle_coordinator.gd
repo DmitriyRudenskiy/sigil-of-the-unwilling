@@ -163,10 +163,8 @@ func test_create_battle_flow_signals_connected() -> void:
 ## Array[UnitStack] → SCRIPT ERROR). Армия оставалась пустой, каждый следующий
 ## контакт вызывал мгновенный бой, и агент уходил в 500-итерационный цикл.
 func test_fallback_stack_on_total_annihilation() -> void:
-	var prev_container: Variant = ServiceContainer.current
 	var container := ServiceContainer.new()
 	container.units = _UnitRegistry.new()
-	ServiceContainer.current = container
 
 	var army = _HeroArmy.new()
 	army.setup(container.units)
@@ -195,4 +193,3 @@ func test_fallback_stack_on_total_annihilation() -> void:
 	army.free()
 	container.units.free()
 	container.units = null
-	ServiceContainer.current = prev_container

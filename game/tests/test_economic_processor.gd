@@ -1,15 +1,9 @@
 extends "res://tests/gut_base.gd"
+const TestFactories := preload("res://tests/helpers/test_factories.gd")
 ## M1: Экономика — EconomicTurnProcessor.
 ##
 ## Цепочки зданий, поддержка (upkeep), авто-ресурсы, отчёт фазы.
 ## Город собирается вручную (City — чистый RefCounted).
-
-func _make_city(uid: int = 1) -> City:
-	var city := City.new()
-	city.uid = uid
-	city.display_name = "TestTown %d" % uid
-	city.center = Vector2i(5, 5)
-	return city
 
 
 func _add_worker(city: City, tile: Vector2i = Vector2i(6, 5)) -> PopUnit:
@@ -50,7 +44,7 @@ func test_phase_id_and_priority() -> void:
 
 func test_empty_city_only_auto_yield() -> void:
 	var ctx := TurnContext.new()
-	ctx.cities.append(_make_city())
+	ctx.cities.append(TestFactories.make_city())
 	var p := EconomicTurnProcessor.new()
 	var report: Dictionary = p.process(ctx)
 	assert_eq(int(report.get("chains_executed", -1)), 0, "no chains")
@@ -63,7 +57,7 @@ func test_empty_city_only_auto_yield() -> void:
 # ==================== ЦЕПОЧКИ ====================
 
 func test_chain_produces_with_workers() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	_add_worker(city)
 	_add_worker(city)
 	_make_lumber_building(city)
@@ -86,7 +80,7 @@ func test_chain_produces_with_workers() -> void:
 
 
 func test_chain_insufficient_workers_no_output() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	_add_worker(city)  # только 1 из 2
 	_make_lumber_building(city)
 	var p := EconomicTurnProcessor.new()
@@ -100,7 +94,7 @@ func test_chain_insufficient_workers_no_output() -> void:
 
 
 func test_chain_no_workers_skipped() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	_make_lumber_building(city)
 	var p := EconomicTurnProcessor.new()
 	var ctx := TurnContext.new()
@@ -113,7 +107,7 @@ func test_chain_no_workers_skipped() -> void:
 
 
 func test_chain_shortage_no_input_deduction() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	_add_worker(city)
 	_add_worker(city)
 	var b := _make_lumber_building(city)
@@ -131,7 +125,7 @@ func test_chain_shortage_no_input_deduction() -> void:
 # ==================== ПОДДЕРЖКА ====================
 
 func test_upkeep_paid() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	_add_worker(city)
 	_add_worker(city)
 	_make_lumber_building(city)
@@ -147,7 +141,7 @@ func test_upkeep_paid() -> void:
 
 
 func test_upkeep_failed_emits_signal() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	_add_worker(city)
 	_add_worker(city)
 	_make_lumber_building(city)
@@ -168,8 +162,8 @@ func test_upkeep_failed_emits_signal() -> void:
 
 func test_report_cities_entries() -> void:
 	var ctx := TurnContext.new()
-	ctx.cities.append(_make_city(1))
-	ctx.cities.append(_make_city(2))
+	ctx.cities.append(TestFactories.make_city(1))
+	ctx.cities.append(TestFactories.make_city(2))
 	var p := EconomicTurnProcessor.new()
 	var report: Dictionary = p.process(ctx)
 	var cities: Array = report.get("cities", [])
@@ -182,7 +176,7 @@ func test_integration_with_scheduler() -> void:
 	## Энд-ту-энд: планировщик + процессор в одном прогоне.
 	var sched := TurnScheduler.new()
 	sched.register_processor(EconomicTurnProcessor.new())
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	_add_worker(city)
 	_add_worker(city)
 	_make_lumber_building(city)

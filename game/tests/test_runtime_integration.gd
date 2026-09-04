@@ -3,6 +3,7 @@ extends "res://tests/gut_base.gd"
 ## _ready(), затем проверяет, что ключевые узлы на месте.
 
 const WORLD_SCENE: String = "res://scenes/World.tscn"
+const MAIN_MENU_SCENE: String = "res://scenes/MainMenu.tscn"
 const MAX_SECONDS: float = 4.0
 
 
@@ -38,3 +39,21 @@ func test_world_boots_with_key_nodes() -> void:
 	world_node.queue_free()
 	await get_tree().process_frame
 	await get_tree().process_frame
+
+
+func test_main_menu_boots() -> void:
+	var packed: PackedScene = load(MAIN_MENU_SCENE)
+	assert_not_null(packed, "MainMenu.tscn загружается")
+	if packed == null:
+		return
+
+	var menu: Node = packed.instantiate()
+	assert_not_null(menu, "MainMenu инстанцируется")
+	get_tree().root.add_child(menu)
+	await get_tree().create_timer(0.5).timeout
+
+	assert_true(menu.is_inside_tree(), "MainMenu в дереве сцены")
+	var script: Script = menu.get_script()
+	assert_not_null(script, "скрипт на корне MainMenu")
+	if script != null:
+		assert_eq(script.resource_path, "res://scripts/ui/MainMenu.gd", "MainMenu.gd на корне")

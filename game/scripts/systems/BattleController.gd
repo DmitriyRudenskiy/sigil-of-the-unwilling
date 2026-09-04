@@ -4,8 +4,6 @@ class_name BattleController
 ## Логика ходов → BattleTurnExecutor, ввод → BattleInput, AI → BattleAI.
 ## Контроллер только проигрывает анимации и ждёт их завершения.
 
-const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
-
 signal battle_finished(winner: BattleState.Side, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack])
 
 var _state: BattleState
@@ -38,10 +36,6 @@ func _ready() -> void:
 func _init_state() -> void:
 	_state = BattleState.new()
 	_ai = BattleAI.new()
-	# ServiceContainer для боя (если не создан в мире)
-	if ServiceContainer.current == null:
-		var services := ServiceContainer.from_autoloads()
-		ServiceContainer.setup_global(services)
 
 
 func _init_view() -> void:
@@ -196,7 +190,7 @@ func _on_spell_chosen(spell_id: StringName) -> void:
 func _on_spell_cast_requested(spell_id: StringName, target: BattleState.BattleUnit) -> void:
 	# РФ3-2: Расход маны
 	if _hero_magic != null:
-		var reg: Node = ServiceContainer.current.spells if ServiceContainer.current != null else null
+		var reg: Node = ServiceLocator.resolve(null, &"spells")
 		var spell = reg.get_spell(spell_id) if reg != null else null
 		if spell == null or not _hero_magic.can_cast_def(spell):
 			_ui.set_status("Недостаточно маны или школа не изучена.")

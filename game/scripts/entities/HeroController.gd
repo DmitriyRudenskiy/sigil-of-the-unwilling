@@ -170,15 +170,17 @@ func get_map_gen() -> MapGenerator:
 	return movement.get_map_gen()
 
 
-func setup(map: MapGenerator) -> void:
+var _services: ServiceContainer = null
+
+func setup(map: MapGenerator, services: ServiceContainer = null) -> void:
 	if _setup_done:
 		return
 	_setup_done = true
 	# Инъекция реестра в армию
-	army.setup(ServiceContainer.current.units if ServiceContainer.current != null else null)
+	army.setup(_services.units if _services != null else null)
 	# Инъекция реестра в стратегические ресурсы
 	strategic_resources.init_from_registry(
-		ServiceContainer.current.resources if ServiceContainer.current != null else null
+		_services.resources if _services != null else null
 	)
 
 	movement.set_artifact_effect_fn(has_artifact_effect)  # must be before movement.setup()

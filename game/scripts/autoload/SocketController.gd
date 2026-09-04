@@ -24,6 +24,11 @@ var _world_ctrl_cache: Node = null
 var _battle_ctrl_cache: Node = null
 var _world_ctrl_script: Script = null
 var _battle_ctrl_script: Script = null
+# Схемы обязательных полей/типов для аргументов команд (валидация до
+# маршрутизации, R2). Пустая схема = аргументы не проверяются (валидируются
+# в хендлере). Инициализация в _init, т.к. константный словарь с типами не
+# константное выражение в Godot.
+var _ARG_SCHEMAS: Dictionary = {}
 var peers: Array[StreamPeerTCP] = []
 var buffers: Dictionary = {}
 var _last_activity: Dictionary = {}  # peer -> unix timestamp
@@ -39,6 +44,12 @@ func _init():
 	_city_serializer = _CityStateSerializer.new()
 	_world_serializer = _WorldStateSerializer.new()
 	_world_serializer.setup(self, _city_serializer)
+	# _validate_args проверяет только поля, которые нельзя выразить одной
+	# проверкой в хендлере; MOVE_TO — канонический пример «обязательное поле
+	# + тип» из spec socket-command-validation.
+	_ARG_SCHEMAS = {
+		"MOVE_TO": {"x": ["int", "float"], "y": ["int", "float"]},
+	}
 	_COMMANDS = {
 		"START_GAME": Callable(self, "_cmd_start_game"),
 		"GET_STATE": Callable(self, "_cmd_get_state"),
@@ -160,6 +171,13 @@ func _route_command(line: String) -> Dictionary:
 	if not (action is String) or action.is_empty():
 		return {"error": "Field 'action' is required and must be a string"}
 
+	# Валидация аргументов против схемы (требование spec: malformed input
+	# never crashes, wrong type rejected) — до маршрутизации, до поиска
+	# контроллеров (detached-инстанс в test_socket_routing не имеет дерева).
+	var vres := _validate_args(req, _ARG_SCHEMAS.get(action))
+	if not vres.is_empty():
+		return vres
+
 	# Find active controllers in the scene tree (cached, lazy-load scripts to avoid autoload deps)
 	_ensure_scripts_loaded()
 	var world_ctrl = _get_cached_controller(_world_ctrl_script, true)
@@ -169,6 +187,40 @@ func _route_command(line: String) -> Dictionary:
 	if not handler.is_valid():
 		return {"error": "Unknown action: %s" % action}
 	return handler.call(req, world_ctrl, battle_ctrl)
+
+## Валидирует аргументы `args` против схемы `{field: [type_names]}` (типы
+## заданы именами: "int", "float", "String"...). Возвращает {"error": ...}
+## при провале (отсутствие поля / неверный тип), иначе null.
+func _validate_args(args: Dictionary, schema: Dictionary) -> Dictionary:
+	if schema.is_empty():
+		return {}
+	for field in schema:
+		if not args.has(field):
+			return {"error": "Field '%s' is required" % field}
+		var value = args[field]
+		var allowed_types: Array = schema[field]
+		var type_ok := false
+		for type_name in allowed_types:
+			if _value_has_type(value, type_name):
+				type_ok = true
+				break
+		if not type_ok:
+			return {"error": "Field '%s' must be of type %s" % [field, str(allowed_types)]}
+	return {}
+
+## Проверка типа через literal-`is` (runtime-тип в `is` не компилируется).
+func _value_has_type(value: Variant, type_name: String) -> bool:
+	if type_name == "int":
+		return value is int
+	if type_name == "float":
+		return value is float
+	if type_name == "String":
+		return value is String
+	if type_name == "bool":
+		return value is bool
+	if type_name == "Vector2i":
+		return value is Vector2i
+	return false
 
 func _find_controller(script: Script) -> Node:
 	# Recursive search through full scene tree (script-avoid autoload compile deps)

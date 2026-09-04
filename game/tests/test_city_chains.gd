@@ -1,19 +1,11 @@
 extends "res://tests/gut_base.gd"
+const TestFactories := preload("res://tests/helpers/test_factories.gd")
 ## Спринт 8: цепочки ресурсов + adjacency.
 ##
 ## - городские ресурсы в реестре (ёмкость амбара);
 ## - цепочки зданий BuildingDefs (ферма->мельница->пекарня и т.д.);
 ## - экономика считает назначенных рабочих (WorkerAssignment);
 ## - adjacency-бонусы (AdjacencySystem) в выходы и репутацию.
-
-func _make_city(uid: int = 1, stronghold: int = 2) -> City:
-	var city := City.new()
-	city.uid = uid
-	city.center = Vector2i(5, 5)
-	city.stronghold_level = stronghold
-	city.storage[&"industry"] = 500.0
-	return city
-
 
 func _add_workers(city: City, n: int) -> void:
 	for i in n:
@@ -70,7 +62,7 @@ func test_chain_defs_resolve() -> void:
 		assert_true(d.production_chain.outputs.size() > 0, "%s: outputs" % c[0])
 
 func test_chain_def_isolated_copy() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var b1: Variant = city.build_building(BuildingDefs.farm(), HexUtils.get_neighbor(city.center, 0))
 	var b2: Variant = city.build_building(BuildingDefs.farm(), HexUtils.get_neighbor(city.center, 1))
 	assert_not_null(b1, "farm1")
@@ -82,7 +74,7 @@ func test_chain_def_isolated_copy() -> void:
 # ==================== ПРОИЗВОДСТВО ====================
 
 func test_farm_produces_grain() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	city.build_building(BuildingDefs.farm(), HexUtils.get_neighbor(city.center, 0))
 	_add_workers(city, 2)
 	WorkerAssignment.assign_all(city)
@@ -90,7 +82,7 @@ func test_farm_produces_grain() -> void:
 	assert_eq(city.resource_ctx.amount(&"grain"), 3.0, "зерно +3")
 
 func test_mill_shortage_no_grain() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	city.build_building(BuildingDefs.mill(), HexUtils.get_neighbor(city.center, 0))
 	_add_workers(city, 1)
 	WorkerAssignment.assign_all(city)
@@ -98,7 +90,7 @@ func test_mill_shortage_no_grain() -> void:
 	assert_eq(city.resource_ctx.amount(&"flour"), 0.0, "муки нет (нет зерна)")
 
 func test_full_bread_chain() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var farm_cell: Vector2i = HexUtils.get_neighbor(city.center, 0)
 	var mill_cell: Vector2i = HexUtils.get_neighbor(city.center, 1)
 	var bakery_cell: Vector2i = _cell_adjacent_to(city, [mill_cell], [farm_cell, mill_cell])
@@ -118,7 +110,7 @@ func test_full_bread_chain() -> void:
 		"хлеб %f = 2 x логистика %f" % [city.resource_ctx.amount(&"bread"), expected_bread])
 
 func test_unassigned_workers_produce_nothing() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	city.build_building(BuildingDefs.farm(), HexUtils.get_neighbor(city.center, 0))
 	# Рабочих нет вовсе -> цепочка молчит.
 	_run_economy(city)
@@ -134,7 +126,7 @@ func test_unassigned_workers_produce_nothing() -> void:
 	assert_true(city.resource_ctx.amount(&"grain") > 0.0, "после назначения — зерно")
 
 func test_upkeep_blocks_chain_resources() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	city.build_building(BuildingDefs.mill(), HexUtils.get_neighbor(city.center, 0))
 	_add_workers(city, 1)
 	WorkerAssignment.assign_all(city)
@@ -149,7 +141,7 @@ func test_upkeep_blocks_chain_resources() -> void:
 # ==================== ADJACENCY ====================
 
 func test_adjacency_mill_bonus() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var farm1: Vector2i = HexUtils.get_neighbor(city.center, 0)
 	var mill: Vector2i = HexUtils.get_neighbor(city.center, 1)
 	var farm2: Vector2i = _cell_adjacent_to(city, [mill], [farm1, mill])
@@ -164,7 +156,7 @@ func test_adjacency_mill_bonus() -> void:
 	assert_eq(city.resource_ctx.amount(&"flour"), 3.0, "мука x1.5 у двух ферм")
 
 func test_adjacency_smithy_bonus() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var mine_cell: Vector2i = HexUtils.get_neighbor(city.center, 0)
 	var smithy_cell: Vector2i = _cell_adjacent_to(city, [mine_cell], [mine_cell])
 	city.build_building(BuildingDefs.mine(), mine_cell)
@@ -182,7 +174,7 @@ func test_adjacency_smithy_bonus() -> void:
 	assert_eq(city.resource_ctx.amount(&"ore"), 1.0, "руда 2-1=1")
 
 func test_adjacency_reputation_bonus() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var shack_cell: Vector2i = HexUtils.get_neighbor(city.center, 0)
 	var temple_cell: Vector2i = _cell_adjacent_to(city, [shack_cell], [shack_cell])
 	city.special_sites[temple_cell] = "temple"  # храм требует площадку
@@ -193,7 +185,7 @@ func test_adjacency_reputation_bonus() -> void:
 	assert_eq(city.reputation + bonus, ReputationSystem.process_turn(city),
 		"бонус входит в фактор хода")
 	# Особняк у рудника: минус.
-	var city2 := _make_city(2)
+	var city2 := TestFactories.make_city(2)
 	var mine_cell2: Vector2i = HexUtils.get_neighbor(city2.center, 0)
 	var manor_cell2: Vector2i = _cell_adjacent_to(city2, [mine_cell2], [mine_cell2])
 	city2.build_building(BuildingDefs.mine(), mine_cell2)
@@ -201,7 +193,7 @@ func test_adjacency_reputation_bonus() -> void:
 	assert_eq(AdjacencySystem.reputation_bonus(city2), -2, "особняк у рудника -2")
 
 func test_adjacency_no_neighbors_no_bonus() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var mill: Vector2i = HexUtils.get_neighbor(city.center, 0)
 	var b: Variant = city.build_building(BuildingDefs.mill(), mill)
 	assert_not_null(b, "мельница построена")

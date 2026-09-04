@@ -3,6 +3,7 @@ class_name MapGenerator
 ## Координатор карты: модель, рендерер, спавнер, тайлмапы.
 
 const _VisibilityMap = preload("res://scripts/core/VisibilityMap.gd")
+const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
 
 var model
 var renderer
@@ -14,6 +15,10 @@ var visibility: _VisibilityMap = null
 var _tile_map: TileMapLayer
 var _decor_layer: TileMapLayer
 var _resource_layer: Node2D
+## ponytail: DI — реестры сервисов (units/resources). Передаются из
+## WorldBootstrap через setup_services; в detached-тестах остаются null,
+## как раньше — в headless-тестах реестры были null.
+var _services: ServiceContainer = null
 
 # Публичные свойства — делегирование в модель
 var terrain_grid: Dictionary:
@@ -76,8 +81,8 @@ func generate() -> void:
 
 	renderer = MapRenderer.new(model)
 	spawner = MapSpawner.new(model)
-	if ServiceContainer.current != null:
-		spawner.setup_registry(ServiceContainer.current.units)
+	if _services != null:
+		spawner.setup_registry(_services.units)
 
 	HexUtils.calibrate(_tile_map)
 
@@ -94,6 +99,10 @@ func generate() -> void:
 	spawner.place_decor()
 	spawner.place_enemies(reachable)
 
+
+## Внедрить контейнер сервисов (units/resources). Аналог WorldSpawner.setup_services.
+func setup_services(services: ServiceContainer) -> void:
+	_services = services
 
 func _compute_reachable_cells() -> Dictionary:
 	# Find first walkable cell as BFS start point

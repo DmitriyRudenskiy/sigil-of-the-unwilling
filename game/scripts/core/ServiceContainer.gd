@@ -11,10 +11,8 @@ extends RefCounted
 ##   ...
 ##   my_system.setup(services)
 ##
-## Для обратной совместимости:
-##   ServiceContainer.current = services
-##   # В немобилизованном коде:
-##   var def := ServiceContainer.current.resources.get_resource(id)
+## refactoring-after-code-review (5.x): потребители получают container через
+## setup()/конструктор, а не через глобальный держатель сервисов.
 
 # ==================== РЕЕСТРЫ (RefCounted / Node) ====================
 var units: Node = null          # UnitRegistry   (autoload Units)
@@ -26,19 +24,6 @@ var spellbook: Node = null    # SpellbookRegistry (autoload Spellbook)
 # ==================== СИСТЕМНЫЕ СЕРВИСЫ (Node) ====================
 var settings: Node = null       # Settings (autoload)
 var event_bus: Node = null      # GameEventBus (autoload)
-
-# ==================== ГЛОБАЛЬНЫЙ ДОСТУП (обратная совместимость) ====================
-## ponytail: DEPRECATED — глобальный fallback для неомобилизованного кода.
-## Единый путь сервисов — DI: передать ServiceContainer через setup() и хранить
-## в поле системы. Миграция вызывающих идет по системно (см. R4), а не одним
-## махом — чтобы не ломать боёв/героев/карту полуготовой миграцией.
-## callers, всё ещё использующие .current: ServiceLocator, MapGenerator,
-## WorldBattleCoordinator, BattleController, HeroController.
-static var current: ServiceContainer = null
-
-## DEPRECATED — см. comment у `current`. Вызывается ОДИН раз в WorldBootstrap.
-static func setup_global(container: ServiceContainer) -> void:
-	current = container
 
 ## Создаёт контейнер, заполненный из autoload-ов.
 ## Вызывать только из дерева сцены (autoload уже готовы).

@@ -1,178 +1,155 @@
 class_name BuildingDefs
 extends RefCounted
 ## Каталог уникальных зданий. Только данные — логика в City/BoroughRules.
+##
+## Определения зданий вынесены в res://assets/data/buildings.json (см.
+## design.md — Building defs as data). Этот класс лениво парсит JSON в
+## первый вызов и собирает fresh `UniqueBuilding.Def` по каждому запросу,
+## поэтому поведение `def_by_id`/`all` совпадает с прежним: каждый вызов
+## возвращает новый объект, мутации потребителя не влияют на кэш.
 
 const SITE_RUINS := &"ruins"
 const SITE_SHRINE := &"shrine"
 const SITE_MEADOW := &"meadow"
 
-## Великий Храм: определяет циклический приток (База = 2 + L×2). Требует святилище.
-static func great_temple() -> UniqueBuilding.Def:
-	return _mk(&"great_temple", "Великий Храм", true, [
-		_req(30.0),
-		_req(60.0, 2),
-		_req(120.0, 3, &"gold", 50.0),
-	])
+const DATA_PATH := "res://assets/data/buildings.json"
+const PopUnit := preload("res://scripts/world/PopUnit.gd")
 
-static func market() -> UniqueBuilding.Def:
-	return _mk(&"market", "Рынок", false, [
-		_req(25.0),
-		_req(50.0, 2, &"gold", 40.0),
-		_req(100.0, 3, &"gold", 80.0),
-	])
-
-static func barracks() -> UniqueBuilding.Def:
-	## Казармы: +5 слотов ополчения (Спринт 7).
-	var d := _mk(&"barracks", "Казармы", false, [
-		_req(20.0),
-		_req(40.0, 2),
-		_req(80.0, 3, &"gold", 30.0),
-	])
-	d.housing[PopUnit.State.MILITIA] = 5
-	return d
-
-static func ancient_vault() -> UniqueBuilding.Def:
-	return _mk(&"ancient_vault", "Древнее хранилище", true, [
-		_req(35.0),
-		_req(70.0, 2),
-		_req(140.0, 3, &"gold", 60.0),
-	])
+## Разово распаршенные сырые записи зданий (список Dictionary).
+static var _raw_cache: Array = []
 
 
-static func walls() -> UniqueBuilding.Def:
-	## Стены (Спринт 10): защита города от рейдов.
-	## +RaidSystem.DEFENSE_PER_WALL к обороне за каждый уровень.
-	return _mk(&"walls", "Стены", false, [
-		_req(20.0),
-		_req(50.0, 2, &"gold", 30.0),
-		_req(100.0, 3, &"gold", 60.0),
-	])
+static func _ensure_loaded() -> void:
+	if not _raw_cache.is_empty():
+		return
+	var file := FileAccess.open(DATA_PATH, FileAccess.READ)
+	var text: String = ""
+	if file != null:
+		text = file.get_as_text()
+		file.close()
+	var data: Variant = JSON.parse_string(text)
+	if data is Array:
+		_raw_cache = data
 
 
-## --- Цепочки производства (Спринт 8) ---
-## Порядок цепочек: зерно->мука->хлеб, руда->инструменты,
-## училище->баллы учёных, таверна/торговый пост->золото.
-static func farm() -> UniqueBuilding.Def:
-	## Ферма: 2 рабочих -> зерно.
-	var d := _mk(&"farm", "Ферма", false, [_req(12.0)])
-	d.production_chain = _chain(&"farm_chain", 2, {}, {&"grain": 3.0})
+## Собирает fresh `UniqueBuilding.Def` из сырой записи из JSON.
+static func _build_def(raw: Dictionary) -> UniqueBuilding.Def:
+	var d := _mk(
+		StringName(raw.get("id", "")),
+		String(raw.get("display_name", "")),
+		bool(raw.get("requires_site", false)),
+		_levels(raw.get("levels", []))
+	)
+	var housing_raw: Variant = raw.get("housing", {})
+	if housing_raw is Dictionary:
+		for k in housing_raw:
+			d.housing[_state(String(k))] = int(housing_raw[k])
+	var chain_raw: Variant = raw.get("production_chain", {})
+	if chain_raw is Dictionary and not chain_raw.is_empty():
+		d.production_chain = _chain_from_dict(chain_raw)
+	var upkeep_raw: Variant = raw.get("default_upkeep", {})
+	for k in upkeep_raw:
+		d.default_upkeep[StringName(k)] = float(upkeep_raw[k])
 	return d
 
 
-static func mill() -> UniqueBuilding.Def:
-	## Мельница: 1 рабочий, зерно -> мука. Бонус: у 2+ ферм x1.5 (adjacency).
-	var d := _mk(&"mill", "Мельница", false, [_req(18.0)])
-	d.production_chain = _chain(&"mill_chain", 1, {&"grain": 2.0}, {&"flour": 2.0})
-	d.default_upkeep[&"wood"] = 1.0
-	return d
+## Уровни здания: список Dictionary -> Array[LevelReq].
+static func _levels(raw_levels: Array) -> Array:
+	var out: Array = []
+	for r in raw_levels:
+		if r is Dictionary:
+			out.append(_req(
+				float(r.get("industry", 0.0)),
+				int(r.get("followers", 0)),
+				StringName(r.get("special_resource", "")),
+				float(r.get("special_amount", 0.0))
+			))
+	return out
 
 
-static func bakery() -> UniqueBuilding.Def:
-	## Пекарня: 1 рабочий, мука -> хлеб.
-	var d := _mk(&"bakery", "Пекарня", false, [_req(18.0)])
-	d.production_chain = _chain(&"bakery_chain", 1, {&"flour": 2.0}, {&"bread": 2.0})
-	d.default_upkeep[&"wood"] = 1.0
-	return d
+## Ключ жилья ("WORKER"/"MILITIA"/"SCHOLAR") -> PopUnit.State.
+static func _state(name: String) -> int:
+	return PopUnit.State[StringName(name)]
 
 
-static func mine() -> UniqueBuilding.Def:
-	## Рудник: 2 рабочих -> руда.
-	var d := _mk(&"mine", "Рудник", false, [_req(20.0)])
-	d.production_chain = _chain(&"mine_chain", 2, {}, {&"ore": 2.0})
-	return d
+## Цепочка производства из записи JSON.
+static func _chain_from_dict(raw: Dictionary) -> ProductionChain:
+	return _chain(
+		StringName(raw.get("id", "")),
+		int(raw.get("workers", 1)),
+		raw.get("inputs", {}),
+		raw.get("outputs", {})
+	)
 
 
-static func smithy() -> UniqueBuilding.Def:
-	## Кузница: 1 рабочий, руда + дерево -> инструменты.
-	## Бонус: у рудника x3 (adjacency).
-	var d := _mk(&"smithy", "Кузница", false, [_req(25.0)])
-	d.production_chain = _chain(&"smithy_chain", 1,
-		{&"ore": 1.0, &"wood": 1.0}, {&"tools": 1.0})
-	d.default_upkeep[&"wood"] = 1.0
-	return d
+## --- Публичный API (сохранён) ---
 
-
-static func school() -> UniqueBuilding.Def:
-	## Училище: 1 рабочий -> баллы учёных (повышение, Спринт 7).
-	var d := _mk(&"school", "Училище", false, [_req(30.0)])
-	d.production_chain = _chain(&"school_chain", 1, {}, {&"scholar_points": 1.0})
-	d.default_upkeep[&"wood"] = 2.0
-	return d
-
-
-static func tavern() -> UniqueBuilding.Def:
-	## Таверна: 1 рабочий -> золото. Бонус: у жилья +2 репутации.
-	var d := _mk(&"tavern", "Таверна", false, [_req(22.0)])
-	d.production_chain = _chain(&"tavern_chain", 1, {}, {&"gold": 1.0})
-	return d
-
-
-static func trade_post() -> UniqueBuilding.Def:
-	## Торговый пост: 2 рабочих, хлеб -> золото (продажа излишков).
-	var d := _mk(&"trade_post", "Торговый пост", false, [_req(28.0)])
-	d.production_chain = _chain(&"trade_post_chain", 2, {&"bread": 1.0}, {&"gold": 2.0})
-	return d
-
-
-## --- Жильё (Спринт 7) ---
-static func shack() -> UniqueBuilding.Def:
-	## Хижина: +10 слотов рабочих.
-	var d := _mk(&"shack", "Хижина", false, [_req(15.0)])
-	d.housing[PopUnit.State.WORKER] = 10
-	return d
-
-
-static func manor() -> UniqueBuilding.Def:
-	## Особняк: +2 слота учёных (жильё для повышения).
-	var d := _mk(&"manor", "Особняк", false, [_req(40.0)])
-	d.housing[PopUnit.State.SCHOLAR] = 2
-	return d
-
-
-## city-in-world: полный каталог определений (CityScreen: список строящихся).
+## Полный каталог определений (CityScreen: список строящихся).
 static func all() -> Array[UniqueBuilding.Def]:
-	return [
-		great_temple(), market(), barracks(), ancient_vault(), walls(),
-		farm(), mill(), bakery(), mine(), smithy(), school(), tavern(),
-		trade_post(), shack(), manor(),
-	]
+	_ensure_loaded()
+	var out: Array[UniqueBuilding.Def] = []
+	for raw in _raw_cache:
+		if raw is Dictionary:
+			out.append(_build_def(raw))
+	return out
 
 
 ## Перевязка определения по id (save v3: восстановление зданий).
 ## Неизвестный id -> null (здание не восстанавливается).
 static func def_by_id(id: StringName) -> UniqueBuilding.Def:
-	match id:
-		&"great_temple":
-			return great_temple()
-		&"market":
-			return market()
-		&"barracks":
-			return barracks()
-		&"ancient_vault":
-			return ancient_vault()
-		&"walls":
-			return walls()
-		&"shack":
-			return shack()
-		&"manor":
-			return manor()
-		&"farm":
-			return farm()
-		&"mill":
-			return mill()
-		&"bakery":
-			return bakery()
-		&"mine":
-			return mine()
-		&"smithy":
-			return smithy()
-		&"school":
-			return school()
-		&"tavern":
-			return tavern()
-		&"trade_post":
-			return trade_post()
+	_ensure_loaded()
+	for raw in _raw_cache:
+		if raw is Dictionary and String(raw.get("id", "")) == String(id):
+			return _build_def(raw)
 	return null
+
+
+## Тонкие публичные обёртки-алиасы (сохранены для обратной совместимости,
+## включая тесты: BuildingDefs.farm() и т.п.). Реализация — через def_by_id.
+static func great_temple() -> UniqueBuilding.Def:
+	return def_by_id(&"great_temple")
+
+static func market() -> UniqueBuilding.Def:
+	return def_by_id(&"market")
+
+static func barracks() -> UniqueBuilding.Def:
+	return def_by_id(&"barracks")
+
+static func ancient_vault() -> UniqueBuilding.Def:
+	return def_by_id(&"ancient_vault")
+
+static func walls() -> UniqueBuilding.Def:
+	return def_by_id(&"walls")
+
+static func farm() -> UniqueBuilding.Def:
+	return def_by_id(&"farm")
+
+static func mill() -> UniqueBuilding.Def:
+	return def_by_id(&"mill")
+
+static func bakery() -> UniqueBuilding.Def:
+	return def_by_id(&"bakery")
+
+static func mine() -> UniqueBuilding.Def:
+	return def_by_id(&"mine")
+
+static func smithy() -> UniqueBuilding.Def:
+	return def_by_id(&"smithy")
+
+static func school() -> UniqueBuilding.Def:
+	return def_by_id(&"school")
+
+static func tavern() -> UniqueBuilding.Def:
+	return def_by_id(&"tavern")
+
+static func trade_post() -> UniqueBuilding.Def:
+	return def_by_id(&"trade_post")
+
+static func shack() -> UniqueBuilding.Def:
+	return def_by_id(&"shack")
+
+static func manor() -> UniqueBuilding.Def:
+	return def_by_id(&"manor")
 
 
 static func _mk(

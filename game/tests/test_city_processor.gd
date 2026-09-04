@@ -1,14 +1,8 @@
 extends "res://tests/gut_base.gd"
+const TestFactories := preload("res://tests/helpers/test_factories.gd")
 ## M3: Город — CityTurnProcessor (фаза &"city", приоритет 5).
 ## Масштаб, ёмкости, зоны, интеграция с TurnScheduler и экономикой.
 
-
-func _make_city(uid: int = 1) -> City:
-	var city := City.new()
-	city.uid = uid
-	city.display_name = "TestTown %d" % uid
-	city.center = Vector2i(5, 5)
-	return city
 
 
 func _cell_at_distance(city: City, d: int) -> Vector2i:
@@ -98,7 +92,7 @@ func test_empty_ctx() -> void:
 
 
 func test_no_scale_signal_on_same_tier() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	city.add_followers(3)  # tier 0
 	var p := CityTurnProcessor.new()
 	var shifts: Array = []
@@ -111,7 +105,7 @@ func test_no_scale_signal_on_same_tier() -> void:
 
 
 func test_scale_shift_signal() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var p := CityTurnProcessor.new()
 	var shifts: Array = []
 	p.city_scale_changed.connect(func(uid: int, tier: int): shifts.append([uid, tier]))
@@ -131,7 +125,7 @@ func test_scale_shift_signal() -> void:
 # ==================== ЁМКОСТИ ====================
 
 func test_capacity_scale_and_restore() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var def := ResourceDef.new()
 	def.id = &"ore"
 	def.capacity = 10.0
@@ -158,7 +152,7 @@ func test_capacity_scale_and_restore() -> void:
 
 
 func test_capacity_no_double_scaling() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var def := ResourceDef.new()
 	def.id = &"ore"
 	def.capacity = 10.0
@@ -175,7 +169,7 @@ func test_capacity_no_double_scaling() -> void:
 
 
 func test_capacity_inf_untouched() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var res := city.ensure_resource_ctx()  # без defs — всё INF
 	res.add(&"wood", 3.0)
 	assert_true(is_inf(res.get_capacity(&"wood")), "inf before")
@@ -188,7 +182,7 @@ func test_capacity_inf_untouched() -> void:
 # ==================== МУЛЬТИПЛИКАТОРЫ ГОРОДА ====================
 
 func test_auto_and_upkeep_mults_set() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	city.add_followers(15)  # tier 2
 	var p := CityTurnProcessor.new()
 	_run(p, city)
@@ -199,7 +193,7 @@ func test_auto_and_upkeep_mults_set() -> void:
 # ==================== ЗОНЫ ====================
 
 func test_zone_multiplier_applied_to_buildings() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var a: Vector2i = _cell_at_distance(city, 2)
 	var b1: Vector2i = _neighbor_of(a, city.center)
 	var b2: Vector2i = _neighbor_of(a, b1)
@@ -217,7 +211,7 @@ func test_zone_multiplier_applied_to_buildings() -> void:
 
 
 func test_zone_violation_emitted() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	var adj: Vector2i = _cell_at_distance(city, 1)  # d=1 < INDUSTRIAL_MIN_DISTANCE
 	_make_building(city, adj, ZoningSystem.ZoneType.INDUSTRIAL)
 	var violations: Array = []
@@ -235,7 +229,7 @@ func test_zone_violation_emitted() -> void:
 # ==================== ИНТЕГРАЦИЯ ====================
 
 func test_scheduler_city_before_economy() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	city.add_followers(5)  # tier 1: авто ×1.1
 	var c1: Vector2i = _cell_at_distance(city, 1)
 	var c2: Vector2i = _cell_at_distance_from(c1, 1)
@@ -266,7 +260,7 @@ func test_scheduler_city_before_economy() -> void:
 
 
 func test_scheduler_logistics_and_zone_in_economy() -> void:
-	var city := _make_city()
+	var city := TestFactories.make_city()
 	city.add_followers(5)
 	var far: Vector2i = _cell_at_distance(city, 3)  # логистика 0.7
 	var near: Vector2i = _cell_at_distance_from(far, 1)  # сосед, та же зона

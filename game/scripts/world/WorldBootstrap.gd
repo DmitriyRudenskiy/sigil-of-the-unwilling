@@ -61,7 +61,6 @@ static func run(
 
 	# 1b. Create ServiceContainer from autoloads
 	R.services = ServiceContainer.from_autoloads()
-	ServiceContainer.setup_global(R.services)
 	var missing := R.services.validate()
 	if not missing.is_empty():
 		push_error("[WorldBootstrap] Missing services: %s" % ", ".join(missing))
@@ -149,6 +148,7 @@ static func _create_map(parent: Node2D, R: BootstrapResult) -> void:
 	R.map_gen = MapGenerator.new()
 	R.map_gen.name = "MapGenerator"
 	R.map_gen.seed_value = R.rng.randi() % 999999
+	R.map_gen.setup_services(R.services)
 	parent.add_child(R.map_gen)
 
 
@@ -159,7 +159,7 @@ static func _create_hero(parent: Node2D, R: BootstrapResult) -> void:
 
 
 static func _init_hero(R: BootstrapResult) -> void:
-	R.hero.setup(R.map_gen)
+	R.hero.setup(R.map_gen, R.services)
 	# hero-survival: герой видит города (реcovery потребностей в городе).
 	R.hero.city_manager = R.cities
 	if R.loaded_save != null:
