@@ -7,7 +7,7 @@ extends "res://tests/gut_base.gd"
 ##   или standalone:
 ##   godot --headless -s tests/test_spells_json.gd
 
-const _Validator = preload("res://tools/spell_validation/SpellValidator.gd")
+const _Validator = preload("res://tests/spell_validation/SpellValidator.gd")
 
 const JSON_PATH := "res://assets/data/spells.json"
 
@@ -299,3 +299,40 @@ func test_no_w901_or_w910_in_project_data() -> void:
 		if issue.code == "W901" or issue.code == "W910":
 			bad += 1
 	assert_eq(bad, 0, "project data has no duplicate names or unmarked HARD_REMOVALs")
+
+# ==================== 1.9 STRICT-PARITY (old CI --strict semantics) ====================
+
+## Порт старого флага `validate_spells.gd --strict`: при --strict любые
+## предупреждения (warnings) считаются ошибкой и дают ненулевой exit code.
+## Этот тест воспроизводит ту же семантику как GUT-инвариант.
+func test_strict_mode_fails_on_any_warning() -> void:
+	var v = _Validator.new()
+	# HARD_REMOVAL без condition/unconditional даёт предупреждение W910
+	# (warning, НЕ ошибка), поэтому non-strict валидация ok=true, а strict
+	# (ok and warning_count == 0) — падает. Это точно воспроизводит семантику
+	# старого `validate_spells.gd --strict`.
+	_write("user://test_strict_warn.json",
+		JSON.stringify([
+			{"id": "w1", "name": "WarnMe", "template": "HARD_REMOVAL", "speed": "fast",
+			 "cost": 4, "color": "shadow", "params": {}, "description": "x"}
+		]))
+	v.validate_file("user://test_strict_warn.json")
+	# В исходном validate_spells.gd: `strict and report.warning_count() > 0 => ok = false`
+	var warnings := 0
+	for issue in v.report.issues:
+		if issue.code.begins_with("W"):
+			warnings += 1
+	assert_true(warnings > 0, "fixture produces at least one warning")
+	var ok: bool = v.validate_file("user://test_strict_warn.json")
+	# Без strict валидация сама по себе проходит (warnings не блокируют ok):
+	assert_true(ok, "non-strict validation passes despite warnings")
+	# А strict-паритет (эмулированный как ok and warning_count == 0) должен падать:
+	assert_false(ok and v.report.warning_count() == 0,
+		"strict parity fails when warnings present")
+
+func test_project_data_strict_errors_clean() -> void:
+	## Проектные данные должны проходить без ОШИБОК (error_count == 0). Это
+	## обязательное условие для --strict: при --strict любые предупреждения
+	## считаются ошибками, но сами по себе данные не должны иметь ошибок.
+	validator.validate_file(JSON_PATH)
+	assert_eq(validator.report.error_count(), 0, "project data: zero errors")
