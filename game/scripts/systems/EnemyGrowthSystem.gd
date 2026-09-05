@@ -59,9 +59,9 @@ func on_stack_defeated(cell: Vector2i, army: Array) -> void:
 		"x": cell.x,
 		"y": cell.y,
 		"units": units,
-		"turns_left": GameSettings.ENEMY_RESPAWN_TURNS,
+		"turns_left": MapConfig.ENEMY_RESPAWN_TURNS,
 	})
-	GameLogger.world("Enemy stack at %s will respawn in %d turns" % [str(cell), GameSettings.ENEMY_RESPAWN_TURNS])
+	GameLogger.world("Enemy stack at %s will respawn in %d turns" % [str(cell), MapConfig.ENEMY_RESPAWN_TURNS])
 
 
 func process(ctx: TurnContext) -> Dictionary:
@@ -83,7 +83,7 @@ func _process_respawns(report: Dictionary) -> void:
 		if int(q[i].get("turns_left", 0)) <= 0:
 			var cell := Vector2i(int(q[i].get("x", 0)), int(q[i].get("y", 0)))
 			var army := _build_army(q[i].get("units", []))
-			if not army.is_empty() and _stack_count() < GameSettings.MAP_ENEMY_COUNT and _can_spawn_at(cell):
+			if not army.is_empty() and _stack_count() < MapConfig.MAP_ENEMY_COUNT and _can_spawn_at(cell):
 				_map_gen.enemy_stacks[cell] = army
 				_world_delta.defeated_enemies.erase(cell)
 				if _spawner != null and _spawner.has_method("spawn_enemy_visual"):
@@ -104,7 +104,7 @@ func _process_season(season: int, report: Dictionary) -> void:
 	var rng_units: Node = ServiceLocator.resolve(null, &"units")
 	if rng_units == null or _faction_sets.is_empty():
 		return
-	while _stack_count() < GameSettings.MAP_ENEMY_COUNT:
+	while _stack_count() < MapConfig.MAP_ENEMY_COUNT:
 		var cell := _find_frontier_cell()
 		if cell == Vector2i(-1, -1):
 			break
@@ -115,7 +115,7 @@ func _process_season(season: int, report: Dictionary) -> void:
 		report["season_spawns"] = int(report.get("season_spawns", 0)) + 1
 		if _spawner != null and _spawner.has_method("spawn_enemy_visual"):
 			_spawner.spawn_enemy_visual(cell, army)
-	GameLogger.world("New season: enemy stacks = %d / %d" % [_stack_count(), GameSettings.MAP_ENEMY_COUNT])
+	GameLogger.world("New season: enemy stacks = %d / %d" % [_stack_count(), MapConfig.MAP_ENEMY_COUNT])
 
 
 func _queue() -> Array:
@@ -142,7 +142,7 @@ func _can_spawn_at(cell: Vector2i) -> bool:
 
 ## Граница карты: рамка SPAWN_ENEMY_MIN_BORDER, как в MapSpawner.place_enemies.
 func _find_frontier_cell() -> Vector2i:
-	var border: int = GameSettings.SPAWN_ENEMY_MIN_BORDER
+	var border: int = MapConfig.SPAWN_ENEMY_MIN_BORDER
 	for attempt in 200:
 		var cell := Vector2i(
 			_rng.randi_range(border, _map_gen.map_width - border - 1),

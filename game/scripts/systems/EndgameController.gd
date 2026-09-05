@@ -106,23 +106,23 @@ func _has_successor(deceased: HeroController) -> bool:
 func _on_turn_ended(_turn: int, _month: int) -> void:
 	## Fallback: фаза врагов ещё впереди — основной триггер коллапса
 	## enemy_village_captured (непосредственно при захвате последнего города).
-	if GameSettings.ENDGAME_COLLAPSE_ENABLED and _player_cities_left() == 0:
+	if EndgameConfig.ENDGAME_COLLAPSE_ENABLED and _player_cities_left() == 0:
 		_end("DEFEAT", &"total_collapse")
 
 
 func _on_enemy_village_captured(_city: City) -> void:
-	if GameSettings.ENDGAME_COLLAPSE_ENABLED and _player_cities_left() == 0:
+	if EndgameConfig.ENDGAME_COLLAPSE_ENABLED and _player_cities_left() == 0:
 		_end("DEFEAT", &"total_collapse")
 
 
 func _on_glory_changed(_window_total: float) -> void:
 	if _cities_mgr != null and _cities_mgr.glory != null \
-			and _cities_mgr.glory.total >= GameSettings.ENDGAME_GLORY_VICTORY:
+			and _cities_mgr.glory.total >= EndgameConfig.ENDGAME_GLORY_VICTORY:
 		_end("VICTORY", &"path_completed")
 
 
 func _on_enemy_stack_defeated(_cell: Vector2i, _army: Array) -> void:
-	if not GameSettings.ENDGAME_DOMINATION_ENABLED:
+	if not EndgameConfig.ENDGAME_DOMINATION_ENABLED:
 		return
 	if _map_gen != null and (_map_gen.enemy_stacks is Dictionary) \
 			and (_map_gen.enemy_stacks as Dictionary).is_empty():

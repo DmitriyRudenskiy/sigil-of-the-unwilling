@@ -176,7 +176,7 @@ func _finit_subsystems() -> void:
 			if c != null and c.owner == &"player" and c.center is Vector2i:
 				sight_sources.append(c.center)
 	_visibility.recompute(_hero.current_cell, sight_sources,
-		GameSettings.FOG_HERO_SIGHT, GameSettings.FOG_CITY_SIGHT)
+		MapConfig.FOG_HERO_SIGHT, MapConfig.FOG_CITY_SIGHT)
 	if _map_gen.has_valid_tilemap():
 		_map_gen.apply_fog(_visibility)
 

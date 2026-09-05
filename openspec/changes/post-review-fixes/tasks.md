@@ -29,7 +29,7 @@ High → Medium → Low → Architecture → Verification (see design.md).
 - [x] 3.2 — `Button.new()`/`Label.new()` напрямую, `_add_styled` упрощён[#13] `CharacterCreationUI.gd`: delete `_instantiate` match factory; call constructors directly
 - [x] 3.3 — guard + `push_warning` + `return null`[#14] `BattleFX.play_attack_sequence`: replace `assert(is_inside_tree())` with a guard + `push_warning`
 - [x] 3.4 — `_cached_texture(key, builder)` кэш на спавнере (village/chest/scroll — константные изображения)[#15] `WorldSpawner.gd`: replace per-spawn `Image.create` + `fill_rect` sprites with cached textures (cache keyed by sprite spec)
-- [ ] 3.5 [#16] (исполняется в 4.4 — архитектура)  Split `GameSettings.gd` into `BattleConfig` / `MapConfig` / `UIConfig` / `EndgameConfig`; `GameSettings` keeps only general constants (`INF`, `SAVE_MAGIC`); update all references
+- [x] 3.5 [#16] (исполняется в 4.4 — архитектура)  Split `GameSettings.gd` into `BattleConfig` / `MapConfig` / `UIConfig` / `EndgameConfig`; `GameSettings` keeps only general constants (`INF`, `SAVE_MAGIC`); update all references
 - [x] 3.6 — `is_connected`-гарды + именованные хендлеры вместо лямбд; `test_double_setup_does_not_duplicate_counters`[#17] `EndgameController.setup`: `is_connected` guards on every `connect`; extend `tests/test_endgame.gd` with a double-setup test
 - [x] 3.7 — опц. аргументы `map_size`/`occupied_cells` (backwards-compat); `test_relocate_rejects_out_of_bounds_and_other_city`[#18] `City.relocate`: reject new center outside map bounds or on another city's cell; extend `tests/test_city_events_relocation.gd`
 - [x] 3.8 — порядок autoload: Settings → SoundManager; lookup `/root/Settings` (голый идентификатор не резолвится на compile-time для autoload-скриптов)[#19] Mute sync: reorder `[autoload]` in `project.godot` (`Settings` before `SoundManager`); remove the `AudioServer` fallback from `SoundManager.toggle_mute`
@@ -46,7 +46,7 @@ High → Medium → Low → Architecture → Verification (see design.md).
 - [x] 4.1 Commit for #5: mcp server command modules + delegation + per-module unit tests; smoke: server routing unchanged
 - [x] 4.2 Commit for #8: templates extraction + registration + all-templates test
 - [x] 4.3 Commit for #9: MinHeap/HexPathfinding extraction + split tests
-- [ ] 4.4 Commit for #16: GameSettings domain configs + reference updates
+- [x] 4.4 Commit for #16: GameSettings domain configs + reference updates
 
 ## 5. Verification
 

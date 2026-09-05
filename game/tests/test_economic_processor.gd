@@ -50,8 +50,8 @@ func test_empty_city_only_auto_yield() -> void:
 	assert_eq(int(report.get("chains_executed", -1)), 0, "no chains")
 	assert_eq(int(report.get("upkeep_failed", -1)), 0, "no upkeep failures")
 	var auto: Dictionary = report.get("auto_yield", {})
-	assert_eq(float(auto.get(&"wood", -1.0)), float(GameSettings.RESOURCE_AUTO_WOOD_PER_DAY), "auto wood")
-	assert_eq(float(auto.get(&"stone", -1.0)), float(GameSettings.RESOURCE_AUTO_STONE_PER_DAY), "auto stone")
+	assert_eq(float(auto.get(&"wood", -1.0)), float(MapConfig.RESOURCE_AUTO_WOOD_PER_DAY), "auto wood")
+	assert_eq(float(auto.get(&"stone", -1.0)), float(MapConfig.RESOURCE_AUTO_STONE_PER_DAY), "auto stone")
 
 
 # ==================== ЦЕПОЧКИ ====================
@@ -103,7 +103,7 @@ func test_chain_no_workers_skipped() -> void:
 	assert_eq(int(report.get("chains_executed", -1)), 0, "skipped without workers")
 	assert_eq(city.resource_ctx.amount(&"planks"), 0.0, "no output")
 	# Авто-дрова остались (цепочка не трогала).
-	assert_eq(city.resource_ctx.amount(&"wood"), float(GameSettings.RESOURCE_AUTO_WOOD_PER_DAY), "wood untouched")
+	assert_eq(city.resource_ctx.amount(&"wood"), float(MapConfig.RESOURCE_AUTO_WOOD_PER_DAY), "wood untouched")
 
 
 func test_chain_shortage_no_input_deduction() -> void:

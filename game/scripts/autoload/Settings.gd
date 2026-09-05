@@ -18,7 +18,7 @@ const DEFAULT_PARTICLES := true
 const DEFAULT_AUTO_SAVE := false
 
 # --- ZOOM_LEVELS: single literal in GameSettings (audit #6), alias here. ---
-const ZOOM_LEVELS := GameSettings.ZOOM_LEVELS
+const ZOOM_LEVELS := UIConfig.ZOOM_LEVELS
 
 # --- Current values ---
 var zoom_index: int = DEFAULT_ZOOM_INDEX

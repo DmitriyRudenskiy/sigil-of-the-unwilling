@@ -8,7 +8,7 @@ signal equipped_changed
 signal backpack_changed
 signal modifiers_changed
 
-const MAX_BACKPACK := GameSettings.MAX_BACKPACK_SIZE
+const MAX_BACKPACK := MapConfig.MAX_BACKPACK_SIZE
 
 var equipped: Dictionary = {}  # Artifact.Slot -> Artifact
 var backpack: Array[Artifact] = []

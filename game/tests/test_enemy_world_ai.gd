@@ -80,8 +80,8 @@ func test_profile_faction_by_composition() -> void:
 	assert_true(p.has("weights") and p["weights"].has("village"), "profile has village weight")
 	assert_true(p["weights"].has("resource"), "profile has resource weight")
 	assert_true(p["weights"].has("hero"), "profile has hero weight")
-	assert_eq(int(p.get("aggro_radius", 0)), GameSettings.ENEMY_AGGRO_RADIUS, "aggro from settings")
-	assert_eq(int(p.get("mp", 0)), int(GameSettings.ENEMY_MP), "mp from settings")
+	assert_eq(int(p.get("aggro_radius", 0)), MapConfig.ENEMY_AGGRO_RADIUS, "aggro from settings")
+	assert_eq(int(p.get("mp", 0)), int(MapConfig.ENEMY_MP), "mp from settings")
 
 	# Неизвестная армия -> дефолтный профиль (фракция 0), не падает.
 	var unknown: Array = [_make_stack("goblins")[0]]
@@ -198,13 +198,13 @@ func test_weakened_respawn_after_cooldown() -> void:
 	assert_eq(int(q0[0]["units"][0]["count"]), 5, "halved: 10 -> 5")
 
 	var spawned_at: Array = []
-	for i in GameSettings.ENEMY_RESPAWN_TURNS + 1:
+	for i in MapConfig.ENEMY_RESPAWN_TURNS + 1:
 		growth.process(TurnContext.new())
 		if model.enemy_stacks.has(cell):
 			spawned_at.append(i)
 
 	assert_true(spawned_at.size() >= 1, "stack respawned")
-	assert_eq(spawned_at[0], GameSettings.ENEMY_RESPAWN_TURNS - 1, "respawned after full cooldown (0-based)")
+	assert_eq(spawned_at[0], MapConfig.ENEMY_RESPAWN_TURNS - 1, "respawned after full cooldown (0-based)")
 	var army: Array = model.enemy_stacks[cell]
 	assert_eq(army.size(), 1, "one stack unit type")
 	assert_eq(army[0].count, 5, "respawned weakened: 10 -> 5")

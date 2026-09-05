@@ -56,8 +56,8 @@ func place_resources(reachable = null, spacing := -1) -> void:
 	# Размер кольца запрета зависит от размера карты (Poisson-like равномерность).
 	if spacing < 0:
 		spacing = clampi(
-			int(float(model.map_width) / GameSettings.MAP_RESOURCE_SPACING_DIVISOR),
-			GameSettings.MAP_RESOURCE_SPACING_MIN, GameSettings.MAP_RESOURCE_SPACING_MAX)
+			int(float(model.map_width) / MapConfig.MAP_RESOURCE_SPACING_DIVISOR),
+			MapConfig.MAP_RESOURCE_SPACING_MIN, MapConfig.MAP_RESOURCE_SPACING_MAX)
 	
 	if reachable == null:
 		reachable = _get_reachable_cells()
@@ -83,9 +83,9 @@ func place_resources(reachable = null, spacing := -1) -> void:
 
 	# Равномерное размещение: проход по списку + кольцо запрета по гексам
 	# (Poisson-like), как в place_villages — ресурсы не кластеризуются и не
-	# оставляют пустых карманов. Размер кольца: GameSettings.MAP_RESOURCE_SPACING_DIVISOR.
+	# оставляют пустых карманов. Размер кольца: MapConfig.MAP_RESOURCE_SPACING_DIVISOR.
 	var blocked: Dictionary = {}
-	var target := GameSettings.MAP_RESOURCE_COUNT  # РФ7-3
+	var target := MapConfig.MAP_RESOURCE_COUNT  # РФ7-3
 	for cell in candidates:
 		if model.resource_cells.size() >= target:
 			break
@@ -117,7 +117,7 @@ func place_enemies(reachable = null) -> void:
 		reachable = _get_reachable_cells()
 	var placed := 0
 	var attempts := 0
-	while placed < GameSettings.MAP_ENEMY_COUNT and attempts < 5000:  # РФ7-3
+	while placed < MapConfig.MAP_ENEMY_COUNT and attempts < 5000:  # РФ7-3
 		attempts += 1
 		var cell := Vector2i(rng.randi_range(3, model.map_width - 4), rng.randi_range(3, model.map_height - 4))
 		if not reachable.has(cell) or model.enemy_stacks.has(cell) or cell in model.village_cells or model.resource_cells.has(cell):

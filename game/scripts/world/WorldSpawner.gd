@@ -238,21 +238,21 @@ func get_chest_at(cell: Vector2i) -> ArtifactChest:
 func get_enemy_defender_bonus() -> Dictionary:
 	var r = rng if rng != null else RandomNumberGenerator.new()
 	if rng == null:
-		r.seed = GameSettings.EDITOR_SEED
-	return {"defense": r.randi_range(GameSettings.MAP_ENEMY_DEFENSE_BONUS_MIN, GameSettings.MAP_ENEMY_DEFENSE_BONUS_MAX)}
+		r.seed = MapConfig.EDITOR_SEED
+	return {"defense": r.randi_range(MapConfig.MAP_ENEMY_DEFENSE_BONUS_MIN, MapConfig.MAP_ENEMY_DEFENSE_BONUS_MAX)}
 
 
 func _spawn_chests() -> void:
 
 	var chest_rng := rng if rng != null else RandomNumberGenerator.new()
 	if rng == null:
-		chest_rng.seed = GameSettings.EDITOR_SEED
+		chest_rng.seed = MapConfig.EDITOR_SEED
 
 	var placed := 0
 	var attempts := 0
-	while placed < GameSettings.CHEST_COUNT and attempts < GameSettings.CHEST_PLACE_ATTEMPTS:
+	while placed < MapConfig.CHEST_COUNT and attempts < MapConfig.CHEST_PLACE_ATTEMPTS:
 		attempts += 1
-		var cell := Vector2i(chest_rng.randi_range(GameSettings.SPAWN_CHEST_MIN_BORDER, map.map_width - 4), chest_rng.randi_range(GameSettings.SPAWN_CHEST_MIN_BORDER, map.map_height - 4))
+		var cell := Vector2i(chest_rng.randi_range(MapConfig.SPAWN_CHEST_MIN_BORDER, map.map_width - 4), chest_rng.randi_range(MapConfig.SPAWN_CHEST_MIN_BORDER, map.map_height - 4))
 		if not map.is_walkable(cell):
 			continue
 		if map.enemy_stacks.has(cell) or map.resource_cells.has(cell) or cell in map.village_cells:
@@ -274,7 +274,7 @@ func _spawn_chests() -> void:
 		chest.id = "chest_%s" % cell
 		chest.artifact = artifact
 		chest.cell = cell
-		chest.gold_reward = chest_rng.randi_range(GameSettings.CHEST_GOLD_MIN, GameSettings.CHEST_GOLD_MAX)
+		chest.gold_reward = chest_rng.randi_range(MapConfig.CHEST_GOLD_MIN, MapConfig.CHEST_GOLD_MAX)
 		_chests[cell] = chest
 		var n := Node2D.new()
 		n.position = map.map_to_local(cell)
@@ -305,9 +305,9 @@ func _spawn_scrolls() -> void:
 	var placed: int = 0
 	var attempts: int = 0
 	var chest_rng := rng if rng != null else RandomNumberGenerator.new()
-	while placed < scroll_count and attempts < GameSettings.SPAWN_SCROLL_MAX_ATTEMPTS:
+	while placed < scroll_count and attempts < MapConfig.SPAWN_SCROLL_MAX_ATTEMPTS:
 		attempts += 1
-		var cell := Vector2i(chest_rng.randi_range(GameSettings.SPAWN_CHEST_MIN_BORDER, map.map_width - 4), chest_rng.randi_range(GameSettings.SPAWN_CHEST_MIN_BORDER, map.map_height - 4))
+		var cell := Vector2i(chest_rng.randi_range(MapConfig.SPAWN_CHEST_MIN_BORDER, map.map_width - 4), chest_rng.randi_range(MapConfig.SPAWN_CHEST_MIN_BORDER, map.map_height - 4))
 		if not map.is_walkable(cell):
 			continue
 		if map.enemy_stacks.has(cell) or map.resource_cells.has(cell) or cell in map.village_cells:

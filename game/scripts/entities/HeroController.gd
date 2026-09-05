@@ -327,8 +327,8 @@ func revive_at(city: City) -> void:
 
 func _apply_daily_resource_effects() -> void:
 	resources.apply_daily_effects()
-	strategic_resources._add_internal(&"wood", GameSettings.RESOURCE_AUTO_WOOD_PER_DAY)
-	strategic_resources._add_internal(&"stone", GameSettings.RESOURCE_AUTO_STONE_PER_DAY)
+	strategic_resources._add_internal(&"wood", MapConfig.RESOURCE_AUTO_WOOD_PER_DAY)
+	strategic_resources._add_internal(&"stone", MapConfig.RESOURCE_AUTO_STONE_PER_DAY)
 	strategic_resources.emit_changed()
 
 

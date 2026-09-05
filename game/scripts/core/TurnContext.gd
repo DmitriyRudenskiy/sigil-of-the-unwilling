@@ -12,8 +12,8 @@ var week: int = 1
 var day: int = 1
 ## Сезон (Season.ID). Пересчитывается планировщиком из month.
 var season: int = Season.ID.SPRING
-## Погода (GameSettings.WEATHER_*). По умолчанию — ясно.
-var weather: int = GameSettings.WEATHER_CLEAR
+## Погода (MapConfig.WEATHER_*). По умолчанию — ясно.
+var weather: int = MapConfig.WEATHER_CLEAR
 
 ## Города мира (срединка: Array[City] городами CityManager).
 var cities: Array[City] = []

@@ -409,7 +409,7 @@ func _try_artifact_drop() -> void:
 	var inv: Variant = hero.get("inventory")
 	if inv == null or not inv.has_method("add_to_backpack"):
 		return
-	if rng.randf() < GameSettings.MONSTER_DROP_CHANCE:
+	if rng.randf() < MapConfig.MONSTER_DROP_CHANCE:
 		var art_reg: Node = ServiceLocator.resolve(null, &"artifacts")
 		var arts: Array[Artifact] = art_reg.get_by_rarity(Artifact.Rarity.MINOR)
 		if arts.size() > 0:

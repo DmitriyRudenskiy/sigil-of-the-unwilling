@@ -22,7 +22,7 @@ func test_saltpeter_tag_exists() -> void:
 
 
 func test_saltpeter_explosion_dmg_mult() -> void:
-	assert_eq(GameSettings.SALTPETER_EXPLOSION_DMG_MULT, 2.0, "double damage")
+	assert_eq(MapConfig.SALTPETER_EXPLOSION_DMG_MULT, 2.0, "double damage")
 
 
 func test_saltpeter_adjacent_kills() -> void:

@@ -58,9 +58,9 @@ func _process_city(city: City, _ctx: TurnContext) -> Dictionary:
 	# 1. Авто-ресурсы (базовый уклад) × масштабный бонус (M3: город).
 	var auto: Dictionary = {}
 	auto[&"wood"] = res.add(
-		&"wood", float(GameSettings.RESOURCE_AUTO_WOOD_PER_DAY) * city.auto_resource_mult)
+		&"wood", float(MapConfig.RESOURCE_AUTO_WOOD_PER_DAY) * city.auto_resource_mult)
 	auto[&"stone"] = res.add(
-		&"stone", float(GameSettings.RESOURCE_AUTO_STONE_PER_DAY) * city.auto_resource_mult)
+		&"stone", float(MapConfig.RESOURCE_AUTO_STONE_PER_DAY) * city.auto_resource_mult)
 	report["auto"] = auto
 
 	# 2. Цепочки производства.

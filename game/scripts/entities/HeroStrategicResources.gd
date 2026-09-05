@@ -36,7 +36,7 @@ func add(id: StringName, amount: int) -> int:
 	if not _resources.has(id):
 		_resources[id] = 0
 	var current: int = _resources[id]
-	var space: int = GameSettings.RESOURCE_CAPACITY - current
+	var space: int = MapConfig.RESOURCE_CAPACITY - current
 	var actual: int = min(amount, max(0, space))
 	_resources[id] = current + actual
 	strategic_resources_changed.emit(_resources)
@@ -59,7 +59,7 @@ func _add_internal(id: StringName, amount: int) -> void:
 	if not _resources.has(id):
 		_resources[id] = 0
 	var current: int = _resources[id]
-	var new_val: int = min(current + amount, GameSettings.RESOURCE_CAPACITY)
+	var new_val: int = min(current + amount, MapConfig.RESOURCE_CAPACITY)
 	if new_val != current:
 		_resources[id] = new_val
 

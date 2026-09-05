@@ -82,7 +82,7 @@ static func astar_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: 
 				continue
 			g_score[nxt] = tentative_g
 			came_from[nxt] = cur_cell
-			var f_score = tentative_g + GameSettings.ASTAR_HEURISTIC_WEIGHT * h_fn.call(nxt)
+			var f_score = tentative_g + BattleConfig.ASTAR_HEURISTIC_WEIGHT * h_fn.call(nxt)
 			open.push([f_score, tentative_g, nxt])
 
 	return []

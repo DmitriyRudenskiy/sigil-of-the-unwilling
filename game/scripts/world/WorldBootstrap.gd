@@ -365,7 +365,7 @@ static func _register_enemy_ai(R: BootstrapResult) -> void:
 					# fog-of-war: кольцо агрессии — только для видимых стеков.
 					var fog = map_gen.visibility
 					for c in map_gen.enemy_stacks:
-						if HexUtils.hex_distance(hp, c) <= GameSettings.ENEMY_AGGRO_RADIUS \
+						if HexUtils.hex_distance(hp, c) <= MapConfig.ENEMY_AGGRO_RADIUS \
 								and (fog == null or fog.is_visible(c)):
 							cells.append(c)
 				markers.set_threat_markers(cells)

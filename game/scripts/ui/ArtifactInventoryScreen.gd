@@ -422,7 +422,7 @@ func _refresh_side_slots() -> void:
 func _backpack_scroll_by(dir: int) -> void:
 	if _hero == null:
 		return
-	var max_page := int(floorf(float(GameSettings.MAX_BACKPACK_SIZE - 6) / 6.0))
+	var max_page := int(floorf(float(MapConfig.MAX_BACKPACK_SIZE - 6) / 6.0))
 	bp_page = clampi(bp_page + dir, 0, max_page)
 	_refresh_backpack()
 

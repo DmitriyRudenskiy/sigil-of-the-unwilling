@@ -43,7 +43,7 @@ func get_run_seed() -> int:
 		return env_seed & 0x7FFFFFFF
 
 	if OS.has_feature("editor"):
-		return GameSettings.EDITOR_SEED
+		return MapConfig.EDITOR_SEED
 
 	return int(Time.get_unix_time_from_system()) & 0x7FFFFFFF
 
@@ -243,7 +243,7 @@ func _recompute_visible(visibility, ctx) -> void:
 				sources.append(c.center)
 	visibility.set_map_size(ctx.map_gen.map_width, ctx.map_gen.map_height)
 	if visibility.recompute(ctx.hero.current_cell, sources,
-		GameSettings.FOG_HERO_SIGHT, GameSettings.FOG_CITY_SIGHT):
+		MapConfig.FOG_HERO_SIGHT, MapConfig.FOG_CITY_SIGHT):
 		if ctx.map_gen.visibility == null:
 			ctx.map_gen.visibility = visibility
 		ctx.map_gen.apply_fog(visibility)

@@ -2,9 +2,9 @@ class_name WorldCamera
 extends Camera2D
 ## Камера мира: движение, edge scroll, дискретный зум, кламп по краям карты.
 
-const CAM_SPEED := GameSettings.CAMERA_SPEED
-const EDGE := GameSettings.CAMERA_EDGE_ZONE
-const ZOOM_TWEEN_DURATION := GameSettings.CAMERA_ZOOM_TWEEN_SEC
+const CAM_SPEED := UIConfig.CAMERA_SPEED
+const EDGE := UIConfig.CAMERA_EDGE_ZONE
+const ZOOM_TWEEN_DURATION := UIConfig.CAMERA_ZOOM_TWEEN_SEC
 
 # Map bounds in world coords — set after map generation
 var _map_rect: Rect2 = Rect2(0, 0, 10000, 10000)  # generous default

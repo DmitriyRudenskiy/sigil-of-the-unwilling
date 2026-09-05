@@ -3,10 +3,10 @@ extends Node2D
 ## Визуальное представление боя: поле, спрайты, подсветка, камера, курсор.
 ## Не меняет BattleState и не принимает решений.
 
-const RING := GameSettings.BATTLE_FIELD_RING
-const HEX_OUTLINE_RADIUS := GameSettings.BATTLE_HEX_OUTLINE_RADIUS
-const ATTACK_LUNGE_PX := GameSettings.BATTLE_ATTACK_LUNGE_PX
-const MOVE_TWEEN_SEC := GameSettings.BATTLE_MOVE_TWEEN_SEC
+const RING := BattleConfig.BATTLE_FIELD_RING
+const HEX_OUTLINE_RADIUS := BattleConfig.BATTLE_HEX_OUTLINE_RADIUS
+const ATTACK_LUNGE_PX := BattleConfig.BATTLE_ATTACK_LUNGE_PX
+const MOVE_TWEEN_SEC := BattleConfig.BATTLE_MOVE_TWEEN_SEC
 const _HexDraw = preload("res://scripts/core/HexDraw.gd")
 const ParticlePresets = preload("res://scripts/core/ParticlePresets.gd")
 

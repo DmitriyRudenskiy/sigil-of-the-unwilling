@@ -153,7 +153,7 @@ func test_null_weather_normalized() -> void:
 	var ctx := TurnContext.new()
 	ctx.weather = -1
 	sched.execute_turn(ctx)
-	assert_eq(int(probe.captured.get("weather", -2)), GameSettings.WEATHER_CLEAR, "negative weather -> CLEAR")
+	assert_eq(int(probe.captured.get("weather", -2)), MapConfig.WEATHER_CLEAR, "negative weather -> CLEAR")
 
 
 # ==================== СИГНАЛЫ ====================

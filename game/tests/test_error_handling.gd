@@ -76,31 +76,31 @@ func test_save_and_load_round_trip() -> void:
 # ==================== GameSettings константы ====================
 
 func test_battle_constants_exist() -> void:
-	assert_true(GameSettings.BATTLE_HEX_OUTLINE_RADIUS > 0, "hex radius > 0")
-	assert_true(GameSettings.BATTLE_ATTACK_LUNGE_PX > 0, "lunge > 0")
-	assert_true(GameSettings.BATTLE_MOVE_TWEEN_SEC > 0, "tween > 0")
-	assert_true(GameSettings.BATTLE_FIELD_RING > 0, "ring > 0")
+	assert_true(BattleConfig.BATTLE_HEX_OUTLINE_RADIUS > 0, "hex radius > 0")
+	assert_true(BattleConfig.BATTLE_ATTACK_LUNGE_PX > 0, "lunge > 0")
+	assert_true(BattleConfig.BATTLE_MOVE_TWEEN_SEC > 0, "tween > 0")
+	assert_true(BattleConfig.BATTLE_FIELD_RING > 0, "ring > 0")
 
 
 func test_spawn_constants_exist() -> void:
-	assert_true(GameSettings.SPAWN_RESOURCE_NODE_CHANCE > 0, "resource chance > 0")
-	assert_true(GameSettings.SPAWN_DECOR_SAND_CHANCE > 0, "decor chance > 0")
-	assert_true(GameSettings.SPAWN_SCROLL_MAX_ATTEMPTS > 0, "scroll attempts > 0")
-	assert_true(GameSettings.SPAWN_CHEST_MIN_BORDER > 0, "chest border > 0")
+	assert_true(MapConfig.SPAWN_RESOURCE_NODE_CHANCE > 0, "resource chance > 0")
+	assert_true(MapConfig.SPAWN_DECOR_SAND_CHANCE > 0, "decor chance > 0")
+	assert_true(MapConfig.SPAWN_SCROLL_MAX_ATTEMPTS > 0, "scroll attempts > 0")
+	assert_true(MapConfig.SPAWN_CHEST_MIN_BORDER > 0, "chest border > 0")
 
 
 func test_camera_constants_exist() -> void:
-	assert_true(GameSettings.CAMERA_SPEED > 0, "camera speed > 0")
-	assert_true(GameSettings.CAMERA_EDGE_ZONE > 0, "edge zone > 0")
-	assert_true(GameSettings.CAMERA_ZOOM_TWEEN_SEC > 0, "zoom tween > 0")
+	assert_true(UIConfig.CAMERA_SPEED > 0, "camera speed > 0")
+	assert_true(UIConfig.CAMERA_EDGE_ZONE > 0, "edge zone > 0")
+	assert_true(UIConfig.CAMERA_ZOOM_TWEEN_SEC > 0, "zoom tween > 0")
 
 
 func test_menu_constants_exist() -> void:
-	assert_true(GameSettings.MENU_BTN_MIN_SIZE.x > 0, "menu btn width > 0")
-	assert_true(GameSettings.MENU_BTN_MIN_SIZE.y > 0, "menu btn height > 0")
-	assert_true(GameSettings.MENU_LOCK_MIN_SIZE.x > 0, "lock width > 0")
+	assert_true(UIConfig.MENU_BTN_MIN_SIZE.x > 0, "menu btn width > 0")
+	assert_true(UIConfig.MENU_BTN_MIN_SIZE.y > 0, "menu btn height > 0")
+	assert_true(UIConfig.MENU_LOCK_MIN_SIZE.x > 0, "lock width > 0")
 
 
 func test_city_constants_exist() -> void:
-	assert_true(GameSettings.CITY_PANEL_W > 0, "city panel width > 0")
-	assert_true(GameSettings.CITY_PANEL_TOP > 0, "city panel top > 0")
+	assert_true(UIConfig.CITY_PANEL_W > 0, "city panel width > 0")
+	assert_true(UIConfig.CITY_PANEL_TOP > 0, "city panel top > 0")

@@ -298,7 +298,7 @@ func _show_damage_feedback(target: BattleState.BattleUnit, result: Dictionary) -
 		_view.remove_unit(target)
 
 func _get_damage_wait() -> SceneTreeTimer:
-	return get_tree().create_timer(GameSettings.BATTLE_SPELL_ANIM_TIME, false)
+	return get_tree().create_timer(BattleConfig.BATTLE_SPELL_ANIM_TIME, false)
 
 func _on_status_updated(text: String) -> void:
 	_ui.set_status(text)

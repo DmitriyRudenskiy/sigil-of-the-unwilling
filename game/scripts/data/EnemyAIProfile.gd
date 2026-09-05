@@ -34,7 +34,7 @@ static func for_stack(army: Array, sets: Array) -> Dictionary:
 	var f: int = faction_of_army(army, sets)
 	return {
 		"faction": f,
-		"aggro_radius": GameSettings.ENEMY_AGGRO_RADIUS,
-		"mp": float(GameSettings.ENEMY_MP),
+		"aggro_radius": MapConfig.ENEMY_AGGRO_RADIUS,
+		"mp": float(MapConfig.ENEMY_MP),
 		"weights": FACTION_MODS[f % FACTION_MODS.size()].duplicate(),
 	}

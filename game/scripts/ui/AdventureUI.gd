@@ -204,7 +204,7 @@ func refresh_glory() -> void:
 	var total := 0.0
 	if _cities_mgr != null and _cities_mgr.glory != null:
 		total = _cities_mgr.glory.total
-	var target := float(GameSettings.ENDGAME_GLORY_VICTORY)
+	var target := float(EndgameConfig.ENDGAME_GLORY_VICTORY)
 	if _glory_label != null:
 		_glory_label.text = "👑 Слава: %d / %d" % [int(total), int(target)]
 	if _glory_bar != null:

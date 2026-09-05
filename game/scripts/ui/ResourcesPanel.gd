@@ -32,7 +32,7 @@ func _build_ui() -> void:
 		vbox.add_child(hbox)
 
 		var label := Label.new()
-		label.text = "%s %d/%d" % [def.icon, 0, GameSettings.RESOURCE_CAPACITY]
+		label.text = "%s %d/%d" % [def.icon, 0, MapConfig.RESOURCE_CAPACITY]
 		label.tooltip_text = def.display_name
 		label.add_theme_font_size_override("font_size", 12)
 		hbox.add_child(label)
@@ -47,6 +47,6 @@ func update_resources(resources: Dictionary) -> void:
 		var reg: Node = _resource_registry if _resource_registry != null else Resources
 		var def: ResourceDef = reg.get_resource(id) as ResourceDef
 		if def:
-			label.text = "%s %d/%d" % [def.icon, amount, GameSettings.RESOURCE_CAPACITY]
+			label.text = "%s %d/%d" % [def.icon, amount, MapConfig.RESOURCE_CAPACITY]
 		else:
-			label.text = "⛏️ %d/%d" % [amount, GameSettings.RESOURCE_CAPACITY]
+			label.text = "⛏️ %d/%d" % [amount, MapConfig.RESOURCE_CAPACITY]

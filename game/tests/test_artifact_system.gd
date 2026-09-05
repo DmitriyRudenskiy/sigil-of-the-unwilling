@@ -104,7 +104,7 @@ func test_inventory_equip_unequip() -> void:
 
 func test_inventory_backpack_limit() -> void:
 	var inv := HeroInventory.new()
-	assert_eq(inv.MAX_BACKPACK, GameSettings.MAX_BACKPACK_SIZE)
+	assert_eq(inv.MAX_BACKPACK, MapConfig.MAX_BACKPACK_SIZE)
 
 func test_inventory_add_remove_backpack() -> void:
 	var inv := HeroInventory.new()

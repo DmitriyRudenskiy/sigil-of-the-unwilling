@@ -24,6 +24,6 @@ func test_apply_display_mode_headless_safe() -> void:
 
 # РФ7-2: единый источник истины для размера бэкпака
 func test_backpack_single_source() -> void:
-	assert_eq(HeroInventory.MAX_BACKPACK, GameSettings.MAX_BACKPACK_SIZE,
-		"HeroInventory.MAX_BACKPACK must match GameSettings.MAX_BACKPACK_SIZE")
-	assert_eq(GameSettings.MAX_BACKPACK_SIZE, 16, "MAX_BACKPACK_SIZE should be 16 (UI builds 16 slots)")
+	assert_eq(HeroInventory.MAX_BACKPACK, MapConfig.MAX_BACKPACK_SIZE,
+		"HeroInventory.MAX_BACKPACK must match MapConfig.MAX_BACKPACK_SIZE")
+	assert_eq(MapConfig.MAX_BACKPACK_SIZE, 16, "MAX_BACKPACK_SIZE should be 16 (UI builds 16 slots)")

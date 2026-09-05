@@ -79,4 +79,4 @@ func test_dijkstra_mp_cap() -> void:
 # --- Daily MP cap ---
 
 func test_daily_cap_10() -> void:
-	assert_eq(GameSettings.HERO_DAILY_MOVEMENT, 10.0, "base MP=10")
+	assert_eq(MapConfig.HERO_DAILY_MOVEMENT, 10.0, "base MP=10")

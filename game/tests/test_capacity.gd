@@ -22,21 +22,21 @@ func test_add_under_capacity() -> void:
 
 
 func test_add_at_capacity() -> void:
-	hero.add_strategic_resource(&"oak", GameSettings.RESOURCE_CAPACITY)
-	assert_eq(hero.strategic_resources.get_all()[&"oak"], GameSettings.RESOURCE_CAPACITY, "at cap")
+	hero.add_strategic_resource(&"oak", MapConfig.RESOURCE_CAPACITY)
+	assert_eq(hero.strategic_resources.get_all()[&"oak"], MapConfig.RESOURCE_CAPACITY, "at cap")
 
 
 func test_add_over_capacity_clamped() -> void:
-	var added := hero.add_strategic_resource(&"oak", GameSettings.RESOURCE_CAPACITY + 10)
-	assert_eq(added, GameSettings.RESOURCE_CAPACITY, "clamped to cap")
-	assert_eq(hero.strategic_resources.get_all()[&"oak"], GameSettings.RESOURCE_CAPACITY, "at cap")
+	var added := hero.add_strategic_resource(&"oak", MapConfig.RESOURCE_CAPACITY + 10)
+	assert_eq(added, MapConfig.RESOURCE_CAPACITY, "clamped to cap")
+	assert_eq(hero.strategic_resources.get_all()[&"oak"], MapConfig.RESOURCE_CAPACITY, "at cap")
 
 
 func test_add_partial_fill() -> void:
 	hero.add_strategic_resource(&"oak", 7)
 	var added := hero.add_strategic_resource(&"oak", 6)
 	assert_eq(added, 3, "partial fill")
-	assert_eq(hero.strategic_resources.get_all()[&"oak"], GameSettings.RESOURCE_CAPACITY, "at cap")
+	assert_eq(hero.strategic_resources.get_all()[&"oak"], MapConfig.RESOURCE_CAPACITY, "at cap")
 
 
 func test_remove_resource() -> void:
@@ -60,18 +60,18 @@ func test_remove_zero() -> void:
 
 func test_auto_wood_per_day() -> void:
 	hero.end_turn()
-	assert_eq(hero.strategic_resources.get_all()[&"wood"], GameSettings.RESOURCE_AUTO_WOOD_PER_DAY, "auto wood")
+	assert_eq(hero.strategic_resources.get_all()[&"wood"], MapConfig.RESOURCE_AUTO_WOOD_PER_DAY, "auto wood")
 
 
 func test_auto_stone_per_day() -> void:
 	hero.end_turn()
-	assert_eq(hero.strategic_resources.get_all()[&"stone"], GameSettings.RESOURCE_AUTO_STONE_PER_DAY, "auto stone")
+	assert_eq(hero.strategic_resources.get_all()[&"stone"], MapConfig.RESOURCE_AUTO_STONE_PER_DAY, "auto stone")
 
 
 func test_auto_capped() -> void:
-	hero.add_strategic_resource(&"wood", GameSettings.RESOURCE_CAPACITY - 1)
+	hero.add_strategic_resource(&"wood", MapConfig.RESOURCE_CAPACITY - 1)
 	hero.end_turn()
-	assert_eq(hero.strategic_resources.get_all()[&"wood"], GameSettings.RESOURCE_CAPACITY, "capped auto")
+	assert_eq(hero.strategic_resources.get_all()[&"wood"], MapConfig.RESOURCE_CAPACITY, "capped auto")
 
 
 func _make_hero() -> HeroController:

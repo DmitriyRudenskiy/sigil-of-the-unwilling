@@ -81,7 +81,7 @@ func generate() -> void:
 	model.map_width = _map_width if _map_width > 0 else 60
 	model.map_height = _map_height if _map_height > 0 else 60
 	model.seed_value = _seed_value
-	model.village_count = GameSettings.MAP_VILLAGE_COUNT
+	model.village_count = MapConfig.MAP_VILLAGE_COUNT
 
 	renderer = MapRenderer.new(model)
 	spawner = MapSpawner.new(model)

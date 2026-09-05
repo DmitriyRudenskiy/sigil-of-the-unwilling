@@ -227,7 +227,7 @@ func _apply_artifact_effects(units: Array[BattleUnit], mods: Dictionary) -> void
 func _build_units(stacks: Array, is_atk: bool) -> Array[BattleUnit]:
 	var units: Array[BattleUnit] = []
 	var col := 0 if is_atk else BW - 1  # D1: одна вертикальная колонка у края (атк — лево, защ — право)
-	var max_stacks := GameSettings.BATTLE_MAX_UNITS_PER_SIDE
+	var max_stacks := BattleConfig.BATTLE_MAX_UNITS_PER_SIDE
 	for i in stacks.size():
 		# РФ-бой: не более BATTLE_MAX_UNITS_PER_SIDE юнитов с одной стороны.
 		if i >= max_stacks:
@@ -593,7 +593,7 @@ func get_retreat_survivors(side: BattleState.Side) -> Array[UnitStack]:
 	# Sort by count descending and keep top N
 	all_survivors.sort_custom(func(a: UnitStack, b: UnitStack): return a.count > b.count)
 	var result: Array[UnitStack] = []
-	for i in min(GameSettings.RETREAT_STACK_LIMIT, all_survivors.size()):
+	for i in min(BattleConfig.RETREAT_STACK_LIMIT, all_survivors.size()):
 		result.append(all_survivors[i])
 
 	return result

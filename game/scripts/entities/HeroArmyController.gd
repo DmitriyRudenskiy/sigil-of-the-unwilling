@@ -34,10 +34,10 @@ func get_army_for_battle() -> Array[UnitStack]:
 		if stack == null or not stack.is_alive():
 			continue
 		# РФ-герой: герой не может командовать более чем MAX_HERO_ARMY_SIZE юнитами.
-		if alive.size() >= GameSettings.MAX_HERO_ARMY_SIZE:
+		if alive.size() >= MapConfig.MAX_HERO_ARMY_SIZE:
 			GameLogger.hero(
 				"Армия героя достигла лимита юнитов (%d), остальные не участвуют в бою."
-				% GameSettings.MAX_HERO_ARMY_SIZE)
+				% MapConfig.MAX_HERO_ARMY_SIZE)
 			break
 		alive.append(stack.duplicate_stack())
 	return alive

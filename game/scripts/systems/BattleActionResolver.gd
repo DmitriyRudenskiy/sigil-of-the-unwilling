@@ -255,7 +255,7 @@ static func _apply_first_strike(
 
 static func _get_charge_multiplier(atk: BattleState.BattleUnit) -> float:
 	if atk.has_tag("charge") and atk.distance_moved_this_turn >= 3:
-		return GameSettings.CHARGE_MULT
+		return BattleConfig.CHARGE_MULT
 	return 1.0
 
 
@@ -283,7 +283,7 @@ static func _try_rebirth(
 ) -> bool:
 	if def == null or not def.has_tag("rebirth") or def.already_reborn:
 		return false
-	if rng.randf() >= GameSettings.REBIRTH_CHANCE:
+	if rng.randf() >= BattleConfig.REBIRTH_CHANCE:
 		return false
 	def.already_reborn = true
 	def.set_count(max(1, int(def.max_count * 0.5)))

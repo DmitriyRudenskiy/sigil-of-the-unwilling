@@ -141,7 +141,7 @@ func _unit_at_pixel(global_pos: Vector2, side: BattleState.Side) -> BattleState.
 		unit = _state.get_unit_at(nb, side)
 		if unit != null:
 			var unit_pos := _view.map_to_local(nb)
-			if local_pos.distance_to(unit_pos) < GameSettings.CLICK_RADIUS_PX:
+			if local_pos.distance_to(unit_pos) < BattleConfig.CLICK_RADIUS_PX:
 				return unit
 	return null
 

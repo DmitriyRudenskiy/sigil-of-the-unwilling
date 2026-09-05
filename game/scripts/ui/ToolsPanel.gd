@@ -26,7 +26,7 @@ func _build_ui() -> void:
 	title.add_theme_font_size_override("font_size", 14)
 	vbox.add_child(title)
 
-	for i in GameSettings.TOOL_INVENTORY_SLOTS:
+	for i in MapConfig.TOOL_INVENTORY_SLOTS:
 		var hbox := HBoxContainer.new()
 		vbox.add_child(hbox)
 
@@ -38,7 +38,7 @@ func _build_ui() -> void:
 
 
 func update_tools(tools: Array[Dictionary]) -> void:
-	for i in GameSettings.TOOL_INVENTORY_SLOTS:
+	for i in MapConfig.TOOL_INVENTORY_SLOTS:
 		if i >= _slot_labels.size():
 			break
 		var slot: Dictionary = tools[i] if i < tools.size() else {}

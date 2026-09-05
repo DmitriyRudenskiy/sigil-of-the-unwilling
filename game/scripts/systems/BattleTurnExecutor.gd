@@ -39,7 +39,7 @@ var _state_token: int = 0
 var _battle_state: BattleState
 var _ai: BattleAI
 var _obstacles: Dictionary = {}
-var _ai_think_time := GameSettings.BATTLE_AI_THINK_TIME
+var _ai_think_time := BattleConfig.BATTLE_AI_THINK_TIME
 var _rng := RandomNumberGenerator.new()
 var _end_emitted := false
 var _retreat_requested := false
@@ -462,7 +462,7 @@ func _advance_to_next_turn() -> void:
 
 	if _battle_state.is_player_turn:
 		var token := _state_token
-		await get_tree().create_timer(GameSettings.BATTLE_TURN_DELAY, false).timeout
+		await get_tree().create_timer(BattleConfig.BATTLE_TURN_DELAY, false).timeout
 
 		if _is_stale(token) or _paused:
 			return

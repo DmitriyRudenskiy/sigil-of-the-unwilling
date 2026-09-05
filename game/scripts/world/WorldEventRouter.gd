@@ -146,7 +146,7 @@ func _refresh_visibility() -> void:
 				sources.append(c.center)
 	visibility.set_map_size(map_gen.map_width, map_gen.map_height)
 	if visibility.recompute(hero.current_cell, sources,
-		GameSettings.FOG_HERO_SIGHT, GameSettings.FOG_CITY_SIGHT):
+		MapConfig.FOG_HERO_SIGHT, MapConfig.FOG_CITY_SIGHT):
 		map_gen.apply_fog(visibility)
 
 

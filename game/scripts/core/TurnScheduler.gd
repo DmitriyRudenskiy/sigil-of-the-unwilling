@@ -48,7 +48,7 @@ func execute_turn(ctx: TurnContext) -> Dictionary:
 	ctx.turn_number = _turn
 	ctx.season = Season.from_month(ctx.month)
 	if ctx.weather < 0:
-		ctx.weather = GameSettings.WEATHER_CLEAR
+		ctx.weather = MapConfig.WEATHER_CLEAR
 	GameLogger.world("[Turn %d] %s: старт (%d фаз)" % [_turn, ctx.get_date_label(), _processors.size()])
 	turn_started.emit(_turn)
 

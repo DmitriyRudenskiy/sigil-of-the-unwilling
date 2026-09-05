@@ -83,7 +83,7 @@ func play_attack_sequence(
 	atk: BattleState.BattleUnit,
 	def: BattleState.BattleUnit,
 	result: Dictionary,
-	wait_time: float = GameSettings.BATTLE_ATTACK_ANIM_SEC
+	wait_time: float = BattleConfig.BATTLE_ATTACK_ANIM_SEC
 ) -> SceneTreeTimer:
 	if not is_inside_tree():
 		push_warning("BattleFX.play_attack_sequence: not in tree — sequence skipped")
