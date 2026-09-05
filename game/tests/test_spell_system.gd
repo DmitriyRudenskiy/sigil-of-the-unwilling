@@ -175,6 +175,7 @@ func test_all_templates_exist() -> void:
 		&"TOKEN_GENERATION", &"RELIC_INTERACTION", &"KEYWORD_BUFF",
 		&"CHOICE_CYCLE", &"TOUCH_CYCLE", &"DISPLAY_CYCLE",
 		&"DISPEL_DRAW", &"MARKET_NICHE",
+		&"HEAL_CLEAR", &"REVIVE", &"PORTAL",
 	]
 	for t in templates:
 		var result: Dictionary = _Engine.execute(t, {}, {}, [], null, null, null)

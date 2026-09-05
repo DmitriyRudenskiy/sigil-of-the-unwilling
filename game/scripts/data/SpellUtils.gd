@@ -3,7 +3,7 @@ class_name SpellUtils
 extends RefCounted
 ## Shared reflection utilities for spell handlers.
 ## Deduplicates _has_method / _has_attr / _get_id across SpellResolver,
-## TemplateEngine, and TemplateHandlers.
+## TemplateEngine, and template handlers (scripts/data/templates/).
 
 
 ## Имя has_method занято нативным Object.has_method — используем has_obj_method.
