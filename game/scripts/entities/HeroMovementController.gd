@@ -25,6 +25,7 @@ signal request_resource_pickup(res_type: int)
 signal request_set_position(pos: Vector2)
 
 const _HexUtils = preload("res://scripts/core/HexUtils.gd")
+const _HexPathfinding = preload("res://scripts/core/HexPathfinding.gd")
 const _TerrainCostTable = preload("res://scripts/data/TerrainCostTable.gd")
 
 @export var max_move_points: float = 10.0
@@ -139,7 +140,7 @@ func on_map_clicked(cell: Vector2i) -> void:
 	
 	# Need the full dist map for the reach preview signal (array → dict)
 	var cost_fn := func(c: Vector2i) -> float: return _terrain_cost(c)
-	var dist_arr := _HexUtils.dijkstra(current_cell, move_points, cost_fn, _map_gen.map_width, _map_gen.map_height)
+	var dist_arr := _HexPathfinding.dijkstra(current_cell, move_points, cost_fn, _map_gen.map_width, _map_gen.map_height)
 	var dist: Dictionary = {}
 	for i in dist_arr.size():
 		if dist_arr[i] < INF:
@@ -292,7 +293,7 @@ func _full_path_to(goal: Vector2i, base: Dictionary = {}) -> Array[Vector2i]:
 	# дают встать на клетку врага (даже на воде) и не отменяют контактный бой.
 	blocked.merge(_enemy_aura_blocked(goal))
 	# A* prunes search via heuristic — much faster than full-map Dijkstra
-	return _HexUtils.find_path(current_cell, goal, blocked, _map_gen.map_width, _map_gen.map_height, "astar")
+	return _HexPathfinding.find_path(current_cell, goal, blocked, _map_gen.map_width, _map_gen.map_height, "astar")
 
 
 ## Если цель занята вражеским стеком, герой встанет на лучшую достижимую

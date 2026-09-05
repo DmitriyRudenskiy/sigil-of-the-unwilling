@@ -255,7 +255,7 @@ func test_dist_field_cached_per_turn() -> void:
 	assert_eq(cache.size(), 2, "другой mp — другая запись")
 	# Корректность: из поля строится путь к цели.
 	var goal := Vector2i(4, 2)
-	var path: Array[Vector2i] = HexUtils.dijkstra_path(start, goal, d1, cost, MAP_SIZE, MAP_SIZE)
+	var path: Array[Vector2i] = HexPathfinding.dijkstra_path(start, goal, d1, cost, MAP_SIZE, MAP_SIZE)
 	assert_false(path.is_empty(), "путь не пуст")
 	assert_eq(path[0], start, "путь начинается из start")
 	assert_eq(path[path.size() - 1], goal, "путь заканчивается в goal")

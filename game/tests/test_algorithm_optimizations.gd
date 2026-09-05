@@ -2,12 +2,13 @@ extends "res://tests/gut_base.gd"
 ## Tests for algorithmic optimizations: A*, cache keys, bounding box search.
 
 const _HexUtils = preload("res://scripts/core/HexUtils.gd")
+const _HexPathfinding = preload("res://scripts/core/HexPathfinding.gd")
 
 func test_astar_finds_path() -> void:
 	var blocked: Dictionary = {}
 	var start := Vector2i(0, 0)
 	var goal := Vector2i(10, 5)
-	var path := _HexUtils.astar_path(start, goal, blocked, 21, 21)
+	var path := _HexPathfinding.astar_path(start, goal, blocked, 21, 21)
 	assert_true(path.size() > 0, "path found")
 	assert_eq(path[0], start, "path starts at start")
 	assert_eq(path[-1], goal, "path ends at goal")
@@ -17,7 +18,7 @@ func test_astar_with_obstacles() -> void:
 	var blocked: Dictionary = {Vector2i(5, 5): true, Vector2i(5, 6): true}
 	var start := Vector2i(0, 5)
 	var goal := Vector2i(10, 5)
-	var path := _HexUtils.astar_path(start, goal, blocked, 21, 21)
+	var path := _HexPathfinding.astar_path(start, goal, blocked, 21, 21)
 	assert_true(path.size() > 0, "path found around obstacles")
 	assert_false(path.has(Vector2i(5, 5)), "avoids obstacle 1")
 	assert_false(path.has(Vector2i(5, 6)), "avoids obstacle 2")
@@ -28,7 +29,7 @@ func test_astar_no_path() -> void:
 	var goal := Vector2i(10, 10)
 	for nb in _HexUtils.get_all_neighbors(goal):
 		blocked[nb] = true
-	var path := _HexUtils.astar_path(Vector2i(0, 0), goal, blocked, 21, 21)
+	var path := _HexPathfinding.astar_path(Vector2i(0, 0), goal, blocked, 21, 21)
 	assert_true(path.is_empty(), "no path when surrounded")
 
 
@@ -40,12 +41,12 @@ func test_astar_same_as_dijkstra_length() -> void:
 	var blocked: Dictionary = {}
 	var start := Vector2i(0, 0)
 	var goal := Vector2i(10, 5)
-	var dist := _HexUtils.dijkstra(start, 100.0, cost_fn, 21, 21)
+	var dist := _HexPathfinding.dijkstra(start, 100.0, cost_fn, 21, 21)
 	var goal_idx := _HexUtils.pos_to_idx(goal, 21)
 	if dist[goal_idx] >= 1e9:
 		return  # no path for either
-	var dijkstra_p := _HexUtils.dijkstra_path(start, goal, dist, cost_fn, 21, 21)
-	var astar_p := _HexUtils.astar_path(start, goal, blocked, 21, 21)
+	var dijkstra_p := _HexPathfinding.dijkstra_path(start, goal, dist, cost_fn, 21, 21)
+	var astar_p := _HexPathfinding.astar_path(start, goal, blocked, 21, 21)
 	if dijkstra_p.size() > 0 and astar_p.size() > 0:
 		# Both should find a valid path (length may differ slightly due to tie-breaking)
 		assert_true(dijkstra_p.size() > 0, "dijkstra found path")
@@ -59,19 +60,19 @@ func test_find_path_dispatch_matches_underlying() -> void:
 	var start := Vector2i(0, 0)
 	var goal := Vector2i(10, 5)
 	# default algo is astar
-	var via_dispatch := _HexUtils.find_path(start, goal, blocked, 21, 21)
-	var via_astar := _HexUtils.astar_path(start, goal, blocked, 21, 21)
+	var via_dispatch := _HexPathfinding.find_path(start, goal, blocked, 21, 21)
+	var via_astar := _HexPathfinding.astar_path(start, goal, blocked, 21, 21)
 	assert_eq(via_dispatch, via_astar, "find_path default == astar_path")
 
-	var via_bfs := _HexUtils.find_path(start, goal, blocked, 21, 21, "bfs")
-	var direct_bfs := _HexUtils.bfs_path(start, goal, blocked, 21, 21)
+	var via_bfs := _HexPathfinding.find_path(start, goal, blocked, 21, 21, "bfs")
+	var direct_bfs := _HexPathfinding.bfs_path(start, goal, blocked, 21, 21)
 	assert_eq(via_bfs, direct_bfs, "find_path bfs == bfs_path")
 
 	# unreachable → []
 	var surrounded := Vector2i(10, 10)
 	for nb in _HexUtils.get_all_neighbors(surrounded):
 		blocked[nb] = true
-	assert_true(_HexUtils.find_path(Vector2i(0, 0), surrounded, blocked, 21, 21).is_empty(), "unreachable → []")
+	assert_true(_HexPathfinding.find_path(Vector2i(0, 0), surrounded, blocked, 21, 21).is_empty(), "unreachable → []")
 
 func test_bfs_cache_key_vector3i() -> void:
 	# Vector3i key should handle large coordinates without overflow

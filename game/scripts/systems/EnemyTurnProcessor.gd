@@ -94,7 +94,7 @@ func process(_ctx: TurnContext) -> Dictionary:
 				var cost_fn := _cost_fn(stacks, cell)
 				var mp: float = float(profile.get("mp", 5.0))
 				var dist := _dist_field(cell, mp, cost_fn, dist_cache)
-				var path: Array[Vector2i] = HexUtils.dijkstra_path(cell, goal, dist, cost_fn, _map_gen.map_width, _map_gen.map_height)
+				var path: Array[Vector2i] = HexPathfinding.dijkstra_path(cell, goal, dist, cost_fn, _map_gen.map_width, _map_gen.map_height)
 
 				var cur := cell
 				var spent := 0.0
@@ -144,7 +144,7 @@ func process(_ctx: TurnContext) -> Dictionary:
 func _dist_field(cell: Vector2i, mp: float, cost_fn: Callable, cache: Dictionary) -> PackedFloat32Array:
 	var key := "%d;%d;%.4f" % [cell.x, cell.y, mp]
 	if not cache.has(key):
-		cache[key] = HexUtils.dijkstra(cell, mp, cost_fn, _map_gen.map_width, _map_gen.map_height)
+		cache[key] = HexPathfinding.dijkstra(cell, mp, cost_fn, _map_gen.map_width, _map_gen.map_height)
 	return cache[key]
 
 

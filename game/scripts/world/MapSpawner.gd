@@ -151,5 +151,5 @@ func _get_reachable_cells() -> Dictionary:
 	if start_cell.x < 0:
 		return {}
 	# Переиспользуем кэшированную BFS из HexUtils
-	return HexUtils.bfs_reachable(start_cell, model.map_width + model.map_height,
+	return HexPathfinding.bfs_reachable(start_cell, model.map_width + model.map_height,
 		model.get_blocked_cells(), model.map_width, model.map_height)

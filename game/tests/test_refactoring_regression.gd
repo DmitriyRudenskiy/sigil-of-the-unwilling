@@ -25,7 +25,7 @@ func test_battle_completed_signal_type() -> void:
 
 func test_dijkstra_returns_array() -> void:
 	var cost_fn: Callable = func(c: Vector2i) -> float: return 1.0
-	var result = HexUtils.dijkstra(Vector2i(0, 0), 5.0, cost_fn, 10, 10)
+	var result = HexPathfinding.dijkstra(Vector2i(0, 0), 5.0, cost_fn, 10, 10)
 	assert_true(result is PackedFloat32Array)
 
 func test_array_to_dict_conversion() -> void:

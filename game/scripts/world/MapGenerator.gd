@@ -121,7 +121,7 @@ func _compute_reachable_cells() -> Dictionary:
 			break
 	if start_cell.x < 0:
 		return {}
-	return HexUtils.bfs_reachable(
+	return HexPathfinding.bfs_reachable(
 		start_cell,
 		model.map_width + model.map_height,
 		model.get_blocked_cells(),

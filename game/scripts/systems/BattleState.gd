@@ -418,7 +418,7 @@ func get_reachable(cell: Vector2i, speed: int, blocked_fn: Callable, _unit: Batt
 		return _reachable_cache[key].duplicate()
 
 	var blocked: Dictionary = blocked_fn.call()
-	var reachable := HexUtils.bfs_reachable(cell, speed, blocked, BW, BH)
+	var reachable := HexPathfinding.bfs_reachable(cell, speed, blocked, BW, BH)
 	_reachable_cache[key] = reachable.duplicate()
 	return reachable
 

@@ -18,7 +18,7 @@ High → Medium → Low → Architecture → Verification (see design.md).
 - [x] 2.2 [#6] `Settings.gd`: `ZOOM_LEVELS` becomes a const alias of `GameSettings.ZOOM_LEVELS` (single literal); verify `test_zoom_levels` + `test_camera_clamp` pass
 - [x] 2.3 [#7] Rename `ENDGAME_GlORY_VICTORY` → `ENDGAME_GLORY_VICTORY` in `GameSettings.gd`, `EndgameController.gd`, `AdventureUI.gd`; compile clean
 - [x] 2.4 [#8] Move `TemplateEngine.TemplateHandlers` to one `RefCounted` file per template in `scripts/data/templates/`; `TemplateBootstrap` registers by name; engine dispatches only; test executes every registered template with unchanged output (final phase, separate commit)
-- [ ] 2.5 [#9] Extract `MinHeap` → `scripts/core/MinHeap.gd` and pathfinding (`bfs_path`, `dijkstra`, `dijkstra_path`, `bfs_reachable`) → `scripts/core/HexPathfinding.gd`; update all call sites; split `tests/test_hex_utils.gd` to match (final phase, separate commit)
+- [x] 2.5 [#9] Extract `MinHeap` → `scripts/core/MinHeap.gd` and pathfinding (`bfs_path`, `dijkstra`, `dijkstra_path`, `bfs_reachable`) → `scripts/core/HexPathfinding.gd`; update all call sites; split `tests/test_hex_utils.gd` to match (final phase, separate commit)
 - [x] 2.6 [#10] `EnemyTurnProcessor.process`: cache Dijkstra results per turn keyed by `(cell, budget)`; extend `tests/test_enemy_world_ai.gd` (repeated query computed once / correct paths)
 - [x] 2.7 [#11] `BattleState.gd`: include `_board_version` in `_reachable_cache` key; extend a battle test: query → move → query reflects new board
 - [x] 2.8 Full GUT run green after Phase 2 (1157/1157; 2.1/2.4/2.5 — архитектура, исполняется в §4)
@@ -45,7 +45,7 @@ High → Medium → Low → Architecture → Verification (see design.md).
 
 - [x] 4.1 Commit for #5: mcp server command modules + delegation + per-module unit tests; smoke: server routing unchanged
 - [x] 4.2 Commit for #8: templates extraction + registration + all-templates test
-- [ ] 4.3 Commit for #9: MinHeap/HexPathfinding extraction + split tests
+- [x] 4.3 Commit for #9: MinHeap/HexPathfinding extraction + split tests
 - [ ] 4.4 Commit for #16: GameSettings domain configs + reference updates
 
 ## 5. Verification

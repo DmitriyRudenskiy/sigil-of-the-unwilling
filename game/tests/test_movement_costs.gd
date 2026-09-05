@@ -2,6 +2,7 @@ extends "res://tests/gut_base.gd"
 
 const _TerrainCostTable = preload("res://scripts/data/TerrainCostTable.gd")
 const _HexUtils = preload("res://scripts/core/HexUtils.gd")
+const _HexPathfinding = preload("res://scripts/core/HexPathfinding.gd")
 
 # --- Terrain cost table ---
 
@@ -33,7 +34,7 @@ func test_dijkstra_flat() -> void:
 		if c.x < 0 or c.y < 0 or c.x > 20 or c.y > 20:
 			return INF
 		return 1.0
-	var dist := _HexUtils.dijkstra(Vector2i(0, 0), 10.0, cost_fn, 21, 21)
+	var dist := _HexPathfinding.dijkstra(Vector2i(0, 0), 10.0, cost_fn, 21, 21)
 	var goal_idx := _HexUtils.pos_to_idx(Vector2i(5, 0), 21)
 	assert_true(dist[goal_idx] < INF, "5 cells reachable")
 	assert_eq(dist[goal_idx], 5.0, "cost=5")
@@ -45,7 +46,7 @@ func test_dijkstra_swamp_cost() -> void:
 		if c.x == 3 and c.y == 0:
 			return 1.75
 		return 1.0
-	var dist := _HexUtils.dijkstra(Vector2i(0, 0), 20.0, cost_fn, 21, 21)
+	var dist := _HexPathfinding.dijkstra(Vector2i(0, 0), 20.0, cost_fn, 21, 21)
 	var goal_idx := _HexUtils.pos_to_idx(Vector2i(3, 0), 21)
 	assert_true(dist[goal_idx] < INF, "swamp reachable")
 	# Path: (0,0)->(1,0)->(2,0)->(3,0), cost = 1.0+1.0+1.75 = 3.75
@@ -58,7 +59,7 @@ func test_dijkstra_water_blocked() -> void:
 		if c.x == 2 and c.y == 0:
 			return INF
 		return 1.0
-	var dist := _HexUtils.dijkstra(Vector2i(0, 0), 5.0, cost_fn, 21, 21)
+	var dist := _HexPathfinding.dijkstra(Vector2i(0, 0), 5.0, cost_fn, 21, 21)
 	var goal_idx := _HexUtils.pos_to_idx(Vector2i(2, 0), 21)
 	var past_idx := _HexUtils.pos_to_idx(Vector2i(5, 0), 21)
 	assert_false(dist[goal_idx] < INF, "water not reachable")
@@ -69,7 +70,7 @@ func test_dijkstra_mp_cap() -> void:
 		if c.x < 0 or c.y < 0 or c.x > 20 or c.y > 20:
 			return INF
 		return 1.0
-	var dist := _HexUtils.dijkstra(Vector2i(0, 0), 3.0, cost_fn, 21, 21)
+	var dist := _HexPathfinding.dijkstra(Vector2i(0, 0), 3.0, cost_fn, 21, 21)
 	var goal_idx := _HexUtils.pos_to_idx(Vector2i(3, 0), 21)
 	var down_idx := _HexUtils.pos_to_idx(Vector2i(0, 3), 21)
 	assert_true(dist[goal_idx] < INF, "exactly 3 MP reachable")
