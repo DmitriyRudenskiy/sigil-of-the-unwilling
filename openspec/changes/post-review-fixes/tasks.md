@@ -50,7 +50,7 @@ High → Medium → Low → Architecture → Verification (see design.md).
 
 ## 5. Verification
 
-- [ ] 5.1 Full GUT suite: 0 failing
-- [ ] 5.2 `bash game/tools/shell/run_all_ci_checks.sh --fast` → exit 0
-- [ ] 5.3 `bash game/tools/lint.sh` → ALL STATIC CHECKS PASSED
-- [ ] 5.4 Acceptance (audit §Критерии): arena clicks handled; `delete_save` removes file; worker-cell build rejected; "Cancel" restores volume — each covered by a test from §1
+- [x] 5.1 Full GUT suite: 0 failing
+- [x] 5.2 `bash game/tools/shell/run_all_ci_checks.sh --fast` → exit 0
+- [x] 5.3 `bash game/tools/lint.sh` → ALL STATIC CHECKS PASSED
+- [x] 5.4 Acceptance (audit §Критерии): arena clicks handled; `delete_save` removes file; worker-cell build rejected; "Cancel" restores volume — each covered by a test from §1
