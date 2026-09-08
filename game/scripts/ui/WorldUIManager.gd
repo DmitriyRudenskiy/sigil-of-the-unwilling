@@ -99,9 +99,9 @@ func _on_city_screen_close_requested() -> void:
 	close_city_screen()
 
 func city_screen_action(action: String, city: City, hero_cell: Vector2i,
-		building_id: String = "farm") -> Dictionary:
+		building_id: String = "farm") -> CityCheck:
 	if city == null:
-		return {"ok": false, "reason": "no city"}
+		return CityCheck.fail("no city")
 	open_city_screen(city, hero_cell)
 	match action:
 		"build":
@@ -110,7 +110,7 @@ func city_screen_action(action: String, city: City, hero_cell: Vector2i,
 			return city_screen.level_up_pressed()
 		"hire":
 			return city_screen.hire_pressed()
-	return {"ok": false, "reason": "unknown action: " + action}
+	return CityCheck.fail("unknown action: " + action)
 
 func set_status(text: String) -> void:
 	if ui:

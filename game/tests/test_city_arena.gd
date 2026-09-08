@@ -67,8 +67,8 @@ func test_place_farm() -> void:
 	var cell: Vector2i = _free_cell(1)
 	assert_bool(cell != Vector2i(-1, -1)).is_true()
 	var industry_before: float = float(city.storage.get(&"industry", 0.0))
-	var res: Dictionary = _Model.place_building(city, _BuildingDefs.def_by_id(&"farm"), cell)
-	assert_bool(bool(res.get("ok", false))).is_true()
+	var res: CityCheck = _Model.place_building(city, _BuildingDefs.def_by_id(&"farm"), cell)
+	assert_bool(bool(res.ok)).is_true()
 	assert_bool(city.cell_is_built(cell)).is_true()
 	var industry_after: float = float(city.storage.get(&"industry", 0.0))
 	assert_bool(industry_after < industry_before).is_true()
@@ -79,8 +79,8 @@ func test_place_farm() -> void:
 
 
 func test_place_outside_arena() -> void:
-	var res: Dictionary = _Model.place_building(city, _BuildingDefs.def_by_id(&"farm"), Vector2i(60, 60))
-	assert_bool(bool(res.get("ok", true))).is_false()
+	var res: CityCheck = _Model.place_building(city, _BuildingDefs.def_by_id(&"farm"), Vector2i(60, 60))
+	assert_bool(bool(res.ok)).is_false()
 
 
 func test_seating_unique_tiles() -> void:
@@ -158,8 +158,8 @@ const _CLUSTER_CELLS: Array = [
 
 
 func _place_farm(cell: Vector2i) -> void:
-	var res: Dictionary = _Model.place_building(city, _BuildingDefs.def_by_id(&"farm"), cell)
-	assert_bool(bool(res.get("ok", false))).is_true()
+	var res: CityCheck = _Model.place_building(city, _BuildingDefs.def_by_id(&"farm"), cell)
+	assert_bool(bool(res.ok)).is_true()
 
 
 func test_cluster_forms_on_four_connected() -> void:
@@ -182,8 +182,8 @@ func test_cluster_different_types_not_merged() -> void:
 	for c in [Vector2i(4, 1), Vector2i(5, 1)]:
 		_place_farm(c as Vector2i)
 	for c in [Vector2i(6, 1), Vector2i(7, 2)]:
-		var res: Dictionary = _Model.place_building(city, _BuildingDefs.def_by_id(&"mill"), c as Vector2i)
-		assert_bool(bool(res.get("ok", false))).is_true()
+		var res: CityCheck = _Model.place_building(city, _BuildingDefs.def_by_id(&"mill"), c as Vector2i)
+		assert_bool(bool(res.ok)).is_true()
 	assert_that(_Model.clusters(city).size()).is_equal(0)
 
 
@@ -246,9 +246,9 @@ func test_ruins_gold_bonus() -> void:
 	var cell := Vector2i(2, 3)
 	assert_that(_Model.cell_feature(city, cell)).is_equal(&"ruins")
 	var gold_before: float = float(city.storage.get(&"gold", 0.0))
-	var res: Dictionary = _Model.place_building(city, _BuildingDefs.def_by_id(&"shack"), cell)
-	assert_bool(bool(res.get("ok", false))).is_true()
-	assert_that(float(res.get("ruins_gold", 0.0))).is_equal(GameNumbers.ARENA_FEATURE_RUINS_GOLD)
+	var res: CityCheck = _Model.place_building(city, _BuildingDefs.def_by_id(&"shack"), cell)
+	assert_bool(bool(res.ok)).is_true()
+	assert_that(float(res.payload.get("ruins_gold", 0.0))).is_equal(GameNumbers.ARENA_FEATURE_RUINS_GOLD)
 	var gold_after: float = float(city.storage.get(&"gold", 0.0))
 	assert_that(gold_after).is_equal(gold_before + GameNumbers.ARENA_FEATURE_RUINS_GOLD)
 
@@ -280,8 +280,8 @@ func test_storm_food_and_production() -> void:
 
 func test_storm_mitigated_by_walls() -> void:
 	var cell: Vector2i = _free_cell(1)
-	var res: Dictionary = _Model.place_building(city, _BuildingDefs.def_by_id(&"walls"), cell)
-	assert_bool(bool(res.get("ok", false))).is_true()
+	var res: CityCheck = _Model.place_building(city, _BuildingDefs.def_by_id(&"walls"), cell)
+	assert_bool(bool(res.ok)).is_true()
 	var b: UniqueBuilding = city.get_building_at(cell)
 	assert_bool(b != null).is_true()
 	b.level = 2  

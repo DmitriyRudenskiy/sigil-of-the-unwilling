@@ -174,7 +174,7 @@ func test_can_build_rejects_worker_cell() -> void:
 
 	var chk := c.can_build_building(BuildingDefs.market(), worker_cell)
 	assert_bool(chk.ok).is_false()
-	assert_bool(chk.has("reason")).is_true()
+	assert_bool(chk.reason != "").is_true()
 
 	assert_that(u.state).is_equal(PopUnit.State.WORKER)
 	assert_that(u.tile).is_equal(worker_cell)

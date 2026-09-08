@@ -75,13 +75,16 @@ static func run_turn(city: City, turn: int, overrides: Dictionary = {}) -> Dicti
 
 
 static func place_building(
-	city: City, def: UniqueBuilding.Def, cell: Vector2i,
-	overrides: Dictionary = {}) -> Dictionary:
+	city: City,
+	def: UniqueBuilding.Def,
+	cell: Vector2i,
+	overrides: Dictionary = {}
+) -> CityCheck:
 	if def == null or def.levels.is_empty():
 		return _fail("Нет определения здания")
 	if not ArenaRingSystem.is_in_arena(cell):
 		return _fail("Клетка вне арены")
-	var check: Dictionary = city.can_build_building(def, cell)
+	var check: CityCheck = city.can_build_building(def, cell)
 	if not check.ok:
 		return check
 	var bld: UniqueBuilding = city.build_building(def, cell)
@@ -90,18 +93,17 @@ static func place_building(
 	var clm: Dictionary = ArenaClusterSystem.cluster_uids(city)
 	bld.zone_multiplier = (1.0 + ArenaRingSystem.ring_bonus(def.id, ArenaRingSystem.ring_of(cell), overrides)) \
 		* float(clm.get(bld.uid, 1.0)) * ArenaRingSystem.feature_mult(city, def.id, cell)
-	var res: Dictionary = {
-		"ok": true,
+	var p: Dictionary = {
 		"building": bld,
-		"cost": float(check.get("cost", 0.0)),
+		"cost": float(check.payload.get("cost", 0.0)),
 		"ring": ArenaRingSystem.ring_of(cell),
 	}
 	if ArenaRingSystem.cell_feature(city, cell) == &"ruins":
 		var g: float = GameNumbers.ARENA_FEATURE_RUINS_GOLD
 		city.storage[&"gold"] = float(city.storage.get(&"gold", 0.0)) + g
-		res["ruins_gold"] = g
+		p["ruins_gold"] = g
 	ArenaClusterSystem.invalidate(city.uid)
-	return res
+	return CityCheck.success(p)
 
 
 static func arena_tile_free(city: City, tile: Vector2i, except_uid: int = -1) -> bool:
@@ -197,5 +199,5 @@ static func _has_free_worker_slot(city: City) -> bool:
 	return false
 
 
-static func _fail(reason: String) -> Dictionary:
-	return {"ok": false, "reason": reason}
+static func _fail(reason: String) -> CityCheck:
+	return CityCheck.fail(reason)

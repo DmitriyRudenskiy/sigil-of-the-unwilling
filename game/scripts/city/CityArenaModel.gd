@@ -91,7 +91,7 @@ static func run_turn(city: City, turn: int, overrides: Dictionary = {}) -> Dicti
 
 static func place_building(
 	city: City, def: UniqueBuilding.Def, cell: Vector2i,
-	overrides: Dictionary = {}) -> Dictionary:
+	overrides: Dictionary = {}) -> CityCheck:
 	return ArenaTurnRunner.place_building(city, def, cell, overrides)
 
 static func arena_tile_free(city: City, tile: Vector2i, except_uid: int = -1) -> bool:

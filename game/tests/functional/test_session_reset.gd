@@ -23,9 +23,9 @@ func _place_farm_cluster() -> Array:
 	var neighbors: Array = HexUtils.get_all_neighbors(ArenaRingSystem.center())
 	var cells: Array = []
 	for i in 4:
-		var res: Dictionary = ArenaTurnRunner.place_building(
+		var res: CityCheck = ArenaTurnRunner.place_building(
 			city, BuildingDefs.farm(), neighbors[i])
-		assert_bool(bool(res.get("ok", false))).is_true()
+		assert_bool(bool(res.ok)).is_true()
 		cells.append(neighbors[i])
 	return cells
 
@@ -36,9 +36,9 @@ func _place_lone_mine() -> void:
 		farm_cells.append(b.cell)
 	for c in ArenaRingSystem.cells_in_arena():
 		if ArenaRingSystem.ring_of(c) == 2 and c not in farm_cells:
-			var res: Dictionary = ArenaTurnRunner.place_building(
+			var res: CityCheck = ArenaTurnRunner.place_building(
 				city, BuildingDefs.mine(), c)
-			assert_bool(bool(res.get("ok", false))).is_true()
+			assert_bool(bool(res.ok)).is_true()
 			return
 	assert_bool(true).is_false()
 

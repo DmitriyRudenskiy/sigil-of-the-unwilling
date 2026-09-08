@@ -79,7 +79,7 @@ func test_relocate_ok() -> void:
 	c.roads[Vector2i(3, 0)] = true
 	var centers: Array = []
 	c.relocation_completed.connect(func(nc: Vector2i): centers.append(nc))
-	var r: Dictionary = c.relocate(Vector2i(2, 1))
+	var r: CityCheck = c.relocate(Vector2i(2, 1))
 	assert_bool(bool(r.ok)).is_true()
 	assert_that(c.center).is_equal(Vector2i(2, 1))
 	assert_that(b.cell).is_equal(Vector2i(3, 1))
@@ -98,7 +98,7 @@ func test_relocate_failures() -> void:
 	b.def = _BuildingDefs.walls()
 	b.cell = Vector2i(1, 0)
 	c.buildings.append(b)
-	var r: Dictionary = c.relocate(Vector2i(0, 0))
+	var r: CityCheck = c.relocate(Vector2i(0, 0))
 	assert_bool(bool(r.ok)).is_false()
 	r = c.relocate(Vector2i(5, 0))
 	assert_bool(bool(r.ok)).is_false()
@@ -176,7 +176,7 @@ func test_processor_event_signal() -> void:
 func test_relocate_rejects_out_of_bounds_and_other_city() -> void:
 	var c: Variant = _city()
 	var map_size := Vector2i(30, 30)
-	var r: Dictionary = c.relocate(Vector2i(-1, 0), map_size)
+	var r: CityCheck = c.relocate(Vector2i(-1, 0), map_size)
 	assert_bool(r.ok).is_false()
 	assert_that(c.center).is_not_equal(Vector2i(-1, 0))
 	r = c.relocate(Vector2i(1, 0), map_size, {Vector2i(1, 0): true})

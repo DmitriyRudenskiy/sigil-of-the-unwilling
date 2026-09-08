@@ -61,50 +61,50 @@ func test_close_button_emits_close_requested() -> void:
 
 
 func test_build_farm_success() -> void:
-	var r: Dictionary = screen.build_pressed(&"farm")
-	assert_bool(bool(r.get("ok", false))).is_true()
-	assert_that(r.get("building")).is_equal("farm")
-	assert_that(int(r.get("level", 0))).is_equal(1)
+	var r: CityCheck = screen.build_pressed(&"farm")
+	assert_bool(bool(r.ok)).is_true()
+	assert_that(r.payload.get("building")).is_equal("farm")
+	assert_that(int(r.payload.get("level", 0))).is_equal(1)
 	assert_that(city.buildings.size()).is_equal(1)
-	assert_float(float(r.get("industry_left", -1.0))).is_equal_approx(18.0, 0.0001)
-	var cell: Dictionary = r.get("cell", {})
+	assert_float(float(r.payload.get("industry_left", -1.0))).is_equal_approx(18.0, 0.0001)
+	var cell: Dictionary = r.payload.get("cell", {})
 	assert_that(HexUtils.hex_distance(Vector2i(int(cell.x), int(cell.y)), city.center)).is_equal(1)
 
 
 func test_build_mine_cost() -> void:
-	var r: Dictionary = screen.build_pressed(&"mine")
-	assert_bool(bool(r.get("ok", false))).is_true()
-	assert_float(float(r.get("industry_left", -1.0))).is_equal_approx(10.0, 0.0001)
+	var r: CityCheck = screen.build_pressed(&"mine")
+	assert_bool(bool(r.ok)).is_true()
+	assert_float(float(r.payload.get("industry_left", -1.0))).is_equal_approx(10.0, 0.0001)
 
 
 func test_build_fails_without_industry() -> void:
 	city.storage[&"industry"] = 5.0  
-	var r: Dictionary = screen.build_pressed(&"farm")
-	assert_bool(bool(r.get("ok", false))).is_false()
-	assert_bool(str(r.get("reason", "")).contains("Промышленность")).is_true()
+	var r: CityCheck = screen.build_pressed(&"farm")
+	assert_bool(bool(r.ok)).is_false()
+	assert_bool(str(r.reason).contains("Промышленность")).is_true()
 	assert_that(city.buildings.size()).is_equal(0)
 
 
 func test_build_fails_without_free_cell() -> void:
 	city.center = Vector2i(0, 0)
 	screen.setup(city, hero, Vector2i(0, 0), _seeded(42), Vector2i(1, 1))
-	var r: Dictionary = screen.build_pressed(&"farm")
-	assert_bool(bool(r.get("ok", false))).is_false()
-	assert_bool(str(r.get("reason", "")).contains("клетки")).is_true()
+	var r: CityCheck = screen.build_pressed(&"farm")
+	assert_bool(bool(r.ok)).is_false()
+	assert_bool(str(r.reason).contains("клетки")).is_true()
 
 
 func test_build_unknown_def_fails() -> void:
-	var r: Dictionary = screen.build_pressed(&"nope")
-	assert_bool(bool(r.get("ok", false))).is_false()
+	var r: CityCheck = screen.build_pressed(&"nope")
+	assert_bool(bool(r.ok)).is_false()
 
 
 
 func test_hire_moves_follower_to_hero() -> void:
 	city.add_migrant(PopUnit.State.FOLLOWER, -1)
 	city.add_migrant(PopUnit.State.FOLLOWER, -1)
-	var r: Dictionary = screen.hire_pressed()
-	assert_bool(bool(r.get("ok", false))).is_true()
-	var f: Dictionary = r.get("follower", {})
+	var r: CityCheck = screen.hire_pressed()
+	assert_bool(bool(r.ok)).is_true()
+	var f: Dictionary = r.payload.get("follower", {})
 	assert_str(f.get("name", "")).is_not_empty()
 	assert_bool(String(f.get("race", "")).length() > 0).is_true()
 	assert_that(hero.followers.size()).is_equal(1)
@@ -113,19 +113,19 @@ func test_hire_moves_follower_to_hero() -> void:
 
 func test_hire_depletes_then_fails() -> void:
 	city.add_migrant(PopUnit.State.FOLLOWER, -1)
-	var r1: Dictionary = screen.hire_pressed()
-	assert_bool(bool(r1.get("ok", false))).is_true()
-	var r2: Dictionary = screen.hire_pressed()
-	assert_bool(bool(r2.get("ok", false))).is_false()
-	assert_bool(str(r2.get("reason", "")).contains("последователей")).is_true()
+	var r1: CityCheck = screen.hire_pressed()
+	assert_bool(bool(r1.ok)).is_true()
+	var r2: CityCheck = screen.hire_pressed()
+	assert_bool(bool(r2.ok)).is_false()
+	assert_bool(str(r2.reason).contains("последователей")).is_true()
 	assert_that(hero.followers.size()).is_equal(1)
 
 
 
 func test_level_up_fresh_village_fails() -> void:
-	var r: Dictionary = screen.level_up_pressed()
-	assert_bool(bool(r.get("ok", false))).is_false()
-	assert_bool(str(r.get("reason", "")).length() > 0).is_true()
+	var r: CityCheck = screen.level_up_pressed()
+	assert_bool(bool(r.ok)).is_false()
+	assert_bool(str(r.reason).length() > 0).is_true()
 	assert_that(city.level).is_equal(1)
 
 
@@ -137,17 +137,17 @@ func test_level_up_when_conditions_met() -> void:
 	screen.build_pressed(&"farm")
 	screen.build_pressed(&"mine")
 	assert_that(city.buildings.size()).is_equal(2)
-	var r: Dictionary = screen.level_up_pressed()
-	assert_bool(bool(r.get("ok", false))).is_true()
-	assert_that(int(r.get("level", 0))).is_equal(2)
+	var r: CityCheck = screen.level_up_pressed()
+	assert_bool(bool(r.ok)).is_true()
+	assert_that(int(r.payload.get("level", 0))).is_equal(2)
 	assert_that(city.level).is_equal(2)
 
 
 func test_level_up_max_level_fails() -> void:
 	city.level = GameNumbers.CITY_LEVEL_MAX
-	var r: Dictionary = screen.level_up_pressed()
-	assert_bool(bool(r.get("ok", false))).is_false()
-	assert_bool(str(r.get("reason", "")).contains("максимальном")).is_true()
+	var r: CityCheck = screen.level_up_pressed()
+	assert_bool(bool(r.ok)).is_false()
+	assert_bool(str(r.reason).contains("максимальном")).is_true()
 
 
 func _seeded(seed: int) -> RandomNumberGenerator:

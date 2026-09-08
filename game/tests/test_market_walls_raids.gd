@@ -52,9 +52,9 @@ func test_market_trade_ok() -> void:
 	_add_building(c, _BuildingDefs.market())
 	c.storage[&"grain"] = 10.0
 	var gold_before: float = float(c.storage.get(&"industry", 0.0))
-	var r: Dictionary = _Market.trade(c, &"grain", 4.0)
+	var r: CityCheck = _Market.trade(c, &"grain", 4.0)
 	assert_bool(bool(r.ok)).is_true()
-	assert_bool(absf(float(r.gold) - 7.5) < 1e-9).is_true()
+	assert_bool(absf(float(r.payload.get("gold", 0.0)) - 7.5) < 1e-9).is_true()
 	assert_bool(absf(float(c.storage[&"grain"]) - 6.0) < 1e-9).is_true()
 	assert_bool(absf(float(c.storage[&"industry"]) - (gold_before + 7.5)) < 1e-9).is_true()
 
@@ -71,7 +71,7 @@ func test_market_prosperity_rate() -> void:
 
 func test_market_trade_failures() -> void:
 	var c: Variant = _city()
-	var r: Dictionary = _Market.trade(c, &"grain", 1.0)
+	var r: CityCheck = _Market.trade(c, &"grain", 1.0)
 	assert_bool(bool(r.ok)).is_false()
 	assert_that(r.reason).is_equal("Нет рынка")
 	_add_building(c, _BuildingDefs.market())
@@ -90,9 +90,9 @@ func test_market_food_trade() -> void:
 	c.prosperity = 0.0  
 	c.food_stockpile = 5.0
 	var gold_before: float = float(c.storage.get(&"industry", 0.0))
-	var r: Dictionary = _Market.trade(c, &"food", 2.0)
+	var r: CityCheck = _Market.trade(c, &"food", 2.0)
 	assert_bool(bool(r.ok)).is_true()
-	assert_bool(absf(float(r.gold) - 2.0) < 1e-9).is_true()
+	assert_bool(absf(float(r.payload.get("gold", 0.0)) - 2.0) < 1e-9).is_true()
 	assert_bool(absf(c.food_stockpile - 3.0) < 1e-9).is_true()
 	assert_bool(absf(float(c.storage[&"industry"]) - (gold_before + 2.0)) < 1e-9).is_true()
 

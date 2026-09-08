@@ -36,7 +36,7 @@ async def test_session_reset_caches(world_scene):
         var neighbors = hex.get_all_neighbors(ring.center())
         for i in 4:
             var res = runner.place_building(city, defs.farm(), neighbors[i])
-            if not res.get("ok", false):
+            if not res.ok:
                 return {"ok": false, "reason": "не удалось построить ферму %d" % i}
         var clusters_before = acs.clusters(city)
 

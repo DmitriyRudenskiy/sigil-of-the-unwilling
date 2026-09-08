@@ -178,3 +178,28 @@ static func _take_free_followers(c: CityData, n: int, relocate_to: CityData) -> 
 			relocate_to.pop.append(u)
 		taken += 1
 	return taken
+
+# ─── R5: инлайн-методы City.gd (защита, переключение состояния) ──
+static func defense_strength(city: City) -> int:
+	var d := count_state(city, PopUnit.State.MILITIA) * GameNumbers.RAID_DEF_PER_MILITIA
+	for b in city.buildings:
+		if b != null and b.def != null and b.def.id == &"walls":
+			d += b.level * GameNumbers.RAID_DEF_PER_WALL
+	d += SpecializationSystem.defense_bonus(city)
+	return d
+
+
+static func request_switch(
+	city: City,
+	p_uid: int,
+	new_state: PopUnit.State,
+	new_tile: Vector2i = Vector2i(-1, -1)
+) -> CityCheck:
+	var u := find_pop(city, p_uid)
+	if u == null:
+		return CityCheck.fail("")
+	if new_state == PopUnit.State.WORKER and not CityBuildingService.is_worker_tile_free(city, new_tile, u.uid):
+		return CityCheck.fail("Клетка недоступна для рабочего")
+	if not u.request_switch(new_state, new_tile):
+		return CityCheck.fail("Фигурка занята (уже переключается или закреплена за зданием)")
+	return CityCheck.success()

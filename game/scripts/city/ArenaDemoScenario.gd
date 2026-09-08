@@ -90,7 +90,7 @@ static func run_demo_plan(turns: int = 48, overrides: Dictionary = {}) -> Dictio
 			elif kind == &"build":
 				var def: UniqueBuilding.Def = BuildingDefs.def_by_id(id)
 				if def != null and city.get_building_at(cell) == null:
-					var res: Dictionary = ArenaTurnRunner.place_building(city, def, cell, overrides)
+					var res: CityCheck = ArenaTurnRunner.place_building(city, def, cell, overrides)
 					if res.ok:
 						item.done = true
 			elif kind == &"upgrade":

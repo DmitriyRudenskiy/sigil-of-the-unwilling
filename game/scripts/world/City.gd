@@ -51,63 +51,18 @@ func send_followers_to(other: City, n: int) -> int: return CityService.send_foll
 func disband_followers(n: int) -> int: return CityService.disband_followers(self, n)
 func recruit_followers(n: int) -> int: return CityService.recruit_followers(self, n)
 
-# ─── Рабочие клетки ────────────────────────────────────────────
+# ─── Рабочие клетки (R5: логика в CityBuildingService) ─────────
 func _is_adjacent_to_city_body(cell: Vector2i) -> bool:
-	if HexUtils.hex_distance(cell, center) == 1:
-		return true
-	for b in boroughs:
-		if HexUtils.hex_distance(cell, b.cell) == 1:
-			return true
-	return false
+	return CityBuildingService.is_adjacent_to_city_body(self, cell)
 
 func is_worker_tile_free(tile: Vector2i, except_uid := -1) -> bool:
-	if tile.x < 0:
-		return false
-	if cell_is_built(tile):
-		return false
-	if not _is_adjacent_to_city_body(tile):
-		return false
-	for u in pop:
-		if u.uid != except_uid and u.state == PopUnit.State.WORKER and u.tile == tile:
-			return false
-	return true
+	return CityBuildingService.is_worker_tile_free(self, tile, except_uid)
 
 func first_free_worker_tile() -> Vector2i:
-	for nb in HexUtils.get_all_neighbors(center):
-		if is_worker_tile_free(nb):
-			return nb
-	for b in boroughs:
-		for nb in HexUtils.get_all_neighbors(b.cell):
-			if is_worker_tile_free(nb):
-				return nb
-	return Vector2i(-1, -1)
+	return CityBuildingService.first_free_worker_tile(self)
 
 func first_free_build_cell(def: UniqueBuilding.Def, bounds := Vector2i.ZERO) -> Vector2i:
-	if def == null or def.levels.is_empty():
-		return Vector2i(-1, -1)
-	if def.requires_site:
-		var sites: Array = special_sites.keys().duplicate()
-		sites.sort()
-		for s in sites:
-			var cell := Vector2i(s)
-			if bounds.x > 0 and bounds.y > 0:
-				if cell.x < 0 or cell.y < 0 or cell.x >= bounds.x or cell.y >= bounds.y:
-					continue
-			if not cell_is_built(cell):
-				return cell
-		return Vector2i(-1, -1)
-	var max_d := building_max_distance()
-	for r in range(1, max_d + 1):
-		for cell in HexUtils.ring(center, r):
-			if bounds.x > 0 and bounds.y > 0:
-				if cell.x < 0 or cell.y < 0 or cell.x >= bounds.x or cell.y >= bounds.y:
-					continue
-			if cell_is_built(cell):
-				continue
-			if not is_buildable_fn.call(cell):
-				continue
-			return cell
-	return Vector2i(-1, -1)
+	return CityBuildingService.first_free_build_cell(self, def, bounds)
 func food_consumption() -> float:
 	return CityGrowthService.food_consumption(self)
 
@@ -126,7 +81,7 @@ func process_turn(turn: int) -> Dictionary:
 	storage_changed.emit()
 	return r
 
-func can_build_borough(cell: Vector2i) -> Dictionary:
+func can_build_borough(cell: Vector2i) -> CityCheck:
 	return CityBuildingService.can_build_borough(self, cell)
 
 func build_borough(cell: Vector2i) -> bool:
@@ -139,7 +94,7 @@ func build_borough(cell: Vector2i) -> bool:
 	storage_changed.emit()
 	return true
 
-func can_build_building(def: UniqueBuilding.Def, cell: Vector2i) -> Dictionary:
+func can_build_building(def: UniqueBuilding.Def, cell: Vector2i) -> CityCheck:
 	return CityBuildingService.can_build_building(self, def, cell)
 
 func build_building(def: UniqueBuilding.Def, cell: Vector2i) -> UniqueBuilding:
@@ -153,7 +108,7 @@ func build_building(def: UniqueBuilding.Def, cell: Vector2i) -> UniqueBuilding:
 	population_changed.emit()
 	return r.bld
 
-func can_upgrade_building(bld: UniqueBuilding, hero_cell := Vector2i(-1, -1)) -> Dictionary:
+func can_upgrade_building(bld: UniqueBuilding, hero_cell := Vector2i(-1, -1)) -> CityCheck:
 	return CityBuildingService.can_upgrade_building(self, bld, hero_cell)
 
 func perform_upgrade(bld: UniqueBuilding) -> bool:
@@ -167,31 +122,23 @@ func perform_upgrade(bld: UniqueBuilding) -> bool:
 	return true
 
 func request_switch(p_uid: int, new_state: PopUnit.State, new_tile := Vector2i(-1, -1)) -> bool:
-	var u := find_pop(p_uid)
-	if u == null:
-		return false
-	if new_state == PopUnit.State.WORKER and not is_worker_tile_free(new_tile, u.uid):
-		status_message.emit("Клетка недоступна для рабочего")
-		return false
-	if not u.request_switch(new_state, new_tile):
-		status_message.emit("Фигурка занята (уже переключается или закреплена за зданием)")
+	# R5: логика в CityService; сигналы эмитит фасад.
+	var r := CityService.request_switch(self, p_uid, new_state, new_tile)
+	if not r.ok:
+		if r.reason != "":
+			status_message.emit(r.reason)
 		return false
 	_invalidate_exploited()
 	population_changed.emit()
 	return true
 
 func defense_strength() -> int:
-	var d := count_state(PopUnit.State.MILITIA) * GameNumbers.RAID_DEF_PER_MILITIA
-	for b in buildings:
-		if b != null and b.def != null and b.def.id == &"walls":
-			d += b.level * GameNumbers.RAID_DEF_PER_WALL
-	d += SpecializationSystem.defense_bonus(self)
-	return d
+	return CityService.defense_strength(self)
 
-func relocate(new_center: Vector2i, map_size: Vector2i = Vector2i(-1, -1), occupied_cells: Dictionary = {}) -> Dictionary:
+func relocate(new_center: Vector2i, map_size: Vector2i = Vector2i(-1, -1), occupied_cells: Dictionary = {}) -> CityCheck:
 	var r := CityBuildingService.relocate(self, new_center, map_size, occupied_cells)
 	if r.ok:
-		relocation_completed.emit(r.new_center)
+		relocation_completed.emit(r.payload.get("new_center"))
 	return r
 
 func serialize() -> Dictionary: return CitySerializer.serialize(self)

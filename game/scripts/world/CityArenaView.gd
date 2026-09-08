@@ -255,25 +255,25 @@ func _handle_cell_click(cv: Vector2i) -> void:
         _log(GameText.arena_select_msg())
         return
     if _selected == &"district":
-        var can: Dictionary = _city.can_build_borough(cv)
-        if bool(can.get("ok", false)):
+        var can: CityCheck = _city.can_build_borough(cv)
+        if can.ok:
             var ok: bool = _city.build_borough(cv)
             _log(GameText.arena_borough_built() if ok else GameText.arena_borough_not_built())
         else:
-            _log(GameText.arena_borough_reason(str(can.get("reason", ""))))
+            _log(GameText.arena_borough_reason(can.reason))
         _refresh()
         return
     var def: UniqueBuilding.Def = BuildingDefs.def_by_id(_selected)
     if def == null:
         return
-    var res: Dictionary = CityArenaModel.place_building(_city, def, cv)
-    if bool(res.get("ok", false)):
+    var res: CityCheck = CityArenaModel.place_building(_city, def, cv)
+    if res.ok:
         var ruins: String = ""
-        if res.has("ruins_gold"):
-            ruins = GameText.arena_ruins("%.0f" % float(res.get("ruins_gold", 0.0)))
-        _log(GameText.arena_built(def.display_name, int(res.get("cost", 0.0)), ruins))
+        if res.payload.has("ruins_gold"):
+            ruins = GameText.arena_ruins("%.0f" % float(res.payload.get("ruins_gold", 0.0)))
+        _log(GameText.arena_built(def.display_name, int(res.payload.get("cost", 0.0)), ruins))
     else:
-        _log(GameText.arena_not_built(str(res.get("reason", ""))))
+        _log(GameText.arena_not_built(res.reason))
     _refresh()
 
 func _try_upgrade(cv: Vector2i) -> void:
@@ -283,11 +283,11 @@ func _try_upgrade(cv: Vector2i) -> void:
         if bo != null:
             _log(GameText.arena_borough_info(bo.level))
         return
-    var can: Dictionary = _city.can_upgrade_building(b)
-    if bool(can.get("ok", false)) and _city.perform_upgrade(b):
+    var can: CityCheck = _city.can_upgrade_building(b)
+    if can.ok and _city.perform_upgrade(b):
         _log(GameText.arena_upgraded(b.def.display_name, b.level))
     else:
-        _log(GameText.arena_upgrade_failed(str(can.get("reason", ""))))
+        _log(GameText.arena_upgrade_failed(can.reason))
     _refresh()
 
 func _show_tooltip(cv: Vector2i) -> void:

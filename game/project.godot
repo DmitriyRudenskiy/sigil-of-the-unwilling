@@ -296,7 +296,6 @@ buses="res://assets/settings/default_bus_layout.tres"
 
 
 
-
 Settings="*res://scripts/autoload/Settings.gd"
 SoundManager="*res://scripts/autoload/SoundManager.gd"
 GameEventBus="*res://scripts/autoload/GameEventBus.gd"

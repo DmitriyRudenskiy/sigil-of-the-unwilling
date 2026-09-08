@@ -15,9 +15,10 @@ func city_action(world_ctrl, req: Dictionary, action: String) -> Dictionary:
 	if not (args is Dictionary):
 		args = {}
 	var building := str(args.get("building", "farm"))
-	var res: Dictionary = ui_mgr.city_screen_action(action, city, hero_cell, building)
-	res["city"] = city_state_dict(city)
-	return res
+	var res: CityCheck = ui_mgr.city_screen_action(action, city, hero_cell, building)
+	var d := res.to_dict()
+	d["city"] = city_state_dict(city)
+	return d
 
 func resolve_city(world_ctrl, req: Dictionary) -> City:
 	var cities = world_ctrl.get_cities()

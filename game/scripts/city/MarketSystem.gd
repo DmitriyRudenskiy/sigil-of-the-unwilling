@@ -34,7 +34,7 @@ static func stock_of(city: City, resource_id: StringName) -> float:
 	return float(city.storage.get(resource_id, 0.0))
 
 
-static func trade(city: City, resource_id: StringName, amount: float) -> Dictionary:
+static func trade(city: City, resource_id: StringName, amount: float) -> CityCheck:
 	if amount < GameNumbers.MARKET_MIN_AMOUNT:
 		return _fail("Минимум %f единиц" % GameNumbers.MARKET_MIN_AMOUNT)
 	if resource_id == &"gold":
@@ -50,8 +50,8 @@ static func trade(city: City, resource_id: StringName, amount: float) -> Diction
 	else:
 		city.storage[resource_id] = maxf(0.0, stock - amount)
 	city.storage[&"industry"] = float(city.storage.get(&"industry", 0.0)) + gold
-	return {"ok": true, "reason": "", "amount": amount, "gold": gold}
+	return CityCheck.success({"amount": amount, "gold": gold})
 
 
-static func _fail(reason: String) -> Dictionary:
-	return {"ok": false, "reason": reason, "amount": 0.0, "gold": 0.0}
+static func _fail(reason: String) -> CityCheck:
+	return CityCheck.fail(reason, {"amount": 0.0, "gold": 0.0})

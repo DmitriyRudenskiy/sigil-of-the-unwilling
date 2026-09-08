@@ -13,7 +13,7 @@ func _cell_adjacent_to(city: City, targets: Array, avoid: Array) -> Vector2i:
 				continue
 			if avoid.has(c) or city.cell_is_built(c):
 				continue
-			var check: Dictionary = city.can_build_building(BuildingDefs.farm(), c)
+			var check: CityCheck = city.can_build_building(BuildingDefs.farm(), c)
 			if check.ok:
 				return c
 	return Vector2i(-10, -10)

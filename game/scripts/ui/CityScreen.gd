@@ -116,7 +116,7 @@ func _on_hire_pressed() -> void:
 	hire_pressed()
 
 
-func build_pressed(def_id: StringName) -> Dictionary:
+func build_pressed(def_id: StringName) -> CityCheck:
 	if city == null:
 		return _fail(GameText.city_not_bound())
 	var def := BuildingDefs.def_by_id(def_id)
@@ -125,20 +125,20 @@ func build_pressed(def_id: StringName) -> Dictionary:
 	var cell := city.first_free_build_cell(def, map_bounds)
 	if cell == Vector2i(-1, -1):
 		return _fail(GameText.city_no_cell())
-	var check: Dictionary = city.can_build_building(def, cell)
-	if not bool(check.get("ok", false)):
-		return _fail(GameText.city_cannot_build(str(check.get("reason", "?"))))
+	var check: CityCheck = city.can_build_building(def, cell)
+	if not check.ok:
+		return _fail(GameText.city_cannot_build(str(check.reason if check.reason != "" else "?")))
 	var bld := city.build_building(def, cell)
 	if bld == null:
 		return _fail(GameText.city_build_failed())
 	_set_message(GameText.city_built(def.display_name, cell.x, cell.y, _format_cost(def)))
 	refresh()
-	return {"ok": true, "building": String(def_id), "level": bld.level,
+	return CityCheck.success({"building": String(def_id), "level": bld.level,
 		"cell": {"x": cell.x, "y": cell.y},
-		"industry_left": _storage_industry()}
+		"industry_left": _storage_industry()})
 
 
-func level_up_pressed() -> Dictionary:
+func level_up_pressed() -> CityCheck:
 	if city == null:
 		return _fail(GameText.city_not_bound())
 	if city.level >= GameNumbers.CITY_LEVEL_MAX:
@@ -151,10 +151,10 @@ func level_up_pressed() -> Dictionary:
 		return _fail(GameText.city_upgrade_failed())
 	_set_message(GameText.city_upgraded(prev_level, city.level))
 	refresh()
-	return {"ok": true, "level": city.level}
+	return CityCheck.success({"level": city.level})
 
 
-func hire_pressed() -> Dictionary:
+func hire_pressed() -> CityCheck:
 	if city == null:
 		return _fail(GameText.city_not_bound())
 	if hero == null:
@@ -164,16 +164,16 @@ func hire_pressed() -> Dictionary:
 		return _fail(GameText.city_no_followers())
 	_set_message(GameText.city_hired(f.describe(FollowerSystem.registry())))
 	refresh()
-	return {"ok": true, "follower": f.to_dict()}
+	return CityCheck.success({"follower": f.to_dict()})
 
 
 func _on_close_pressed() -> void:
 	close_requested.emit()
 
 
-func _fail(message: String) -> Dictionary:
+func _fail(message: String) -> CityCheck:
 	_set_message(message)
-	return {"ok": false, "reason": message}
+	return CityCheck.fail(message)
 
 
 

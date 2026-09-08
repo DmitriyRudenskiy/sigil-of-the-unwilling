@@ -84,7 +84,7 @@ func _process_city(city: City, turn: int) -> Dictionary:
 	for building in city.buildings:
 		if building == null:
 			continue
-		var check: Dictionary = ZoningSystem.can_place(
+		var check: CityCheck = ZoningSystem.can_place(
 			city, building.cell, building.zone_type)
 		if not check.ok:
 			report["violations"] += 1

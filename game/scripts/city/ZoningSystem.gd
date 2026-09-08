@@ -11,7 +11,7 @@ enum ZoneType {
 
 
 
-static func can_place(city: City, cell: Vector2i, zone: int) -> Dictionary:
+static func can_place(city: City, cell: Vector2i, zone: int) -> CityCheck:
 	match zone:
 		ZoneType.NONE:
 			return _ok()
@@ -59,9 +59,9 @@ static func adjacent_zone_count(city: City, cell: Vector2i, zone: int) -> int:
 	return n
 
 
-static func _ok() -> Dictionary:
-	return {"ok": true, "reason": ""}
+static func _ok() -> CityCheck:
+	return CityCheck.success()
 
 
-static func _fail(reason: String) -> Dictionary:
-	return {"ok": false, "reason": reason}
+static func _fail(reason: String) -> CityCheck:
+	return CityCheck.fail(reason)

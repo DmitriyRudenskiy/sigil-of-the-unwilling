@@ -153,7 +153,7 @@ func test_build_rejected_on_worker_cell() -> void:
 	c.storage[&"industry"] = 100.0
 	var cell := _ring_cell(1)
 	c._add_pop(PopUnit.State.WORKER, 0, cell)
-	var res: Dictionary = c.can_build_building(BuildingDefs.farm(), cell)
+	var res: CityCheck = c.can_build_building(BuildingDefs.farm(), cell)
 	assert_bool(res.ok).is_false()
 	assert_that(str(res.reason)).is_equal("Клетка занята рабочим")
 	assert_that(c.pop.size()).is_equal(1)
