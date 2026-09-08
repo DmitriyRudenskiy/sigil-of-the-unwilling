@@ -1,7 +1,5 @@
-## scripts/data/templates/t16_market_niche.gd
 class_name T16MarketNiche
 extends RefCounted
-## T16: MARKET / NICHE (аудит #8: вынесен из TemplateEngine).
 
 const _Utils = preload("res://scripts/data/SpellUtils.gd")
 

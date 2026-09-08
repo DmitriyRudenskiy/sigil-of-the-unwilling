@@ -1,9 +1,5 @@
 class_name WorldShortcuts
 extends Node
-## Keyboard shortcuts: I (inventory), F5 (save), F9 (load), Esc (close
-## city overlay / inventory). city-in-world: пока открыт city-оверлей,
-## только Esc действует (I/F5/F9 блокируются) — Esc проверяет город ПЕРЕД
-## инвентарём.
 
 var _persistence
 var _ui_manager: WorldUIManager
@@ -19,21 +15,14 @@ func setup(persistence: WorldPersistence, ui_manager: WorldUIManager, hero: Hero
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	# РФ6-4: в бою шорткаты мира не действуют
 	if _world_ctrl != null and _world_ctrl.has_method("is_world_visible") and not _world_ctrl.is_world_visible():
 		return
-	# endgame: терминальное состояние — шорткаты мира не действуют
-	# (F5-сейв после конца забега бессмыслен, экран уже открыт).
 	if _world_ctrl != null and _world_ctrl.has_method("is_terminal") and _world_ctrl.is_terminal():
 		return
-	# legend-chronicle: последовательность смерти открыта — шорткаты мира
-	# не действуют (момент, а не фон).
 	if _world_ctrl != null and _world_ctrl.has_method("is_death_sequence_open") \
 			and _world_ctrl.is_death_sequence_open():
 		return
 
-	# city-in-world: city-оверлей открыт — только Esc закрывает его;
-	# I/F5/F9 игнорируются (мир под оверлеем заморожен для ввода).
 	if _city_overlay_open():
 		if event is InputEventKey and event.pressed and not event.echo \
 				and event.keycode == KEY_ESCAPE:
@@ -48,8 +37,6 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 
 		if event.keycode == KEY_F5:
-			# save v3: через WorldController (берёт города и персонажей);
-			# fallback — только герой (старый путь).
 			var saved := false
 			if _world_ctrl != null and _world_ctrl.has_method("save_game"):
 				saved = bool(_world_ctrl.save_game())

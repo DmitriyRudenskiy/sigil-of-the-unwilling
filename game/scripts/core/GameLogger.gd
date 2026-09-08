@@ -1,6 +1,5 @@
 extends RefCounted
 class_name GameLogger
-## Structured logging with colored output via print_rich.
 
 const _Platform = preload("res://scripts/core/Platform.gd")
 const TAG_WIDTH := 14
@@ -12,9 +11,6 @@ const _RESET := "[/color]"
 
 static func _tag(tag: String) -> String:
 	var padded := "[%s]" % tag.rpad(TAG_WIDTH)
-	# ponytail: headless terminals render [color=…] literally — drop color
-	# markup here so info/warn/error/trace stay clean (finding #11). Single
-	# shared point; callers keep print_rich/push_warning/push_error streams.
 	if _Platform.is_headless():
 		return padded
 	return _COLOR_GRAY + padded + _RESET

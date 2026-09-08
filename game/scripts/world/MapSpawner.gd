@@ -1,6 +1,5 @@
 class_name MapSpawner
 extends RefCounted
-## Размещение объектов: деревни, ресурсы, декор, враги.
 
 const _MapModel = preload("res://scripts/world/MapModel.gd")
 
@@ -20,8 +19,6 @@ func place_villages() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = model.seed_value + 500
 
-	# Port: ForlornU/HexagonalMapGodot object_placer.gd (MIT)
-	# Poisson-disc placement: shuffle candidates, single pass, ring-distance guard.
 	var candidates: Array[Vector2i] = []
 	for cell in model.terrain_grid:
 		if model.is_walkable(cell):
@@ -40,7 +37,6 @@ func place_villages() -> void:
 			break
 		if blocked.has(cell):
 			continue
-		# O(n) вместо O(n²): помечаем всё кольцо spacing=4 сразу
 		model.village_cells.append(cell)
 		for y in range(cell.y - spacing, cell.y + spacing + 1):
 			for x in range(cell.x - spacing, cell.x + spacing + 1):
@@ -53,16 +49,14 @@ func place_resources(reachable = null, spacing := -1) -> void:
 	model.resource_cells.clear()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = model.seed_value + 700
-	# Размер кольца запрета зависит от размера карты (Poisson-like равномерность).
 	if spacing < 0:
 		spacing = clampi(
-			int(float(model.map_width) / MapConfig.MAP_RESOURCE_SPACING_DIVISOR),
-			MapConfig.MAP_RESOURCE_SPACING_MIN, MapConfig.MAP_RESOURCE_SPACING_MAX)
+			int(float(model.map_width) / GameNumbers.MAP_RESOURCE_SPACING_DIVISOR),
+			GameNumbers.MAP_RESOURCE_SPACING_MIN, GameNumbers.MAP_RESOURCE_SPACING_MAX)
 	
 	if reachable == null:
 		reachable = _get_reachable_cells()
 
-	# Кандидаты: проходимые клетки, не вода/горы, не деревня.
 	var candidates: Array[Vector2i] = []
 	for cell in model.terrain_grid:
 		if not reachable.has(cell):
@@ -74,18 +68,14 @@ func place_resources(reachable = null, spacing := -1) -> void:
 			continue
 		candidates.append(cell)
 
-	# Частичная перемешанка Фишера-Йейтса (хватит до target ресурсов).
 	for i in candidates.size():
 		var j := rng.randi_range(0, i)
 		var tmp := candidates[i]
 		candidates[i] = candidates[j]
 		candidates[j] = tmp
 
-	# Равномерное размещение: проход по списку + кольцо запрета по гексам
-	# (Poisson-like), как в place_villages — ресурсы не кластеризуются и не
-	# оставляют пустых карманов. Размер кольца: MapConfig.MAP_RESOURCE_SPACING_DIVISOR.
 	var blocked: Dictionary = {}
-	var target := MapConfig.MAP_RESOURCE_COUNT  # РФ7-3
+	var target := GameNumbers.MAP_RESOURCE_COUNT  
 	for cell in candidates:
 		if model.resource_cells.size() >= target:
 			break
@@ -112,22 +102,40 @@ func place_enemies(reachable = null) -> void:
 	model.enemy_stacks.clear()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = model.seed_value + 777
-	
+
 	if reachable == null:
 		reachable = _get_reachable_cells()
-	var placed := 0
-	var attempts := 0
-	while placed < MapConfig.MAP_ENEMY_COUNT and attempts < 5000:  # РФ7-3
-		attempts += 1
-		var cell := Vector2i(rng.randi_range(3, model.map_width - 4), rng.randi_range(3, model.map_height - 4))
-		if not reachable.has(cell) or model.enemy_stacks.has(cell) or cell in model.village_cells or model.resource_cells.has(cell):
-			continue
 
-		var reg: Node = ServiceLocator.resolve(_units_registry, &"units")
+	
+	
+	var candidates: Array[Vector2i] = []
+	for cell in reachable:
+		if cell in model.village_cells or model.resource_cells.has(cell):
+			continue
+		
+		if cell.x < 3 or cell.x >= model.map_width - 4 or cell.y < 3 or cell.y >= model.map_height - 4:
+			continue
+		candidates.append(cell)
+
+	for i in range(candidates.size() - 1, 0, -1):
+		var j := rng.randi_range(0, i)
+		var tmp := candidates[i]
+		candidates[i] = candidates[j]
+		candidates[j] = tmp
+
+	var placed := 0
+	# ИСПРАВЛЕНИЕ: единый путь
+	var reg: Node = Services.resolve(&"units")
+	for cell in candidates:
+		if placed >= GameNumbers.MAP_ENEMY_COUNT:
+			break
+
 		var faction_idx: int = rng.randi_range(0, reg.FACTION_SETS.size() - 1)
 		var faction_pool: Array = reg.FACTION_SETS[faction_idx]
 		var army: Array[UnitStack] = []
-		for i in rng.randi_range(1, 3):
+
+		var unit_count := rng.randi_range(1, 3)
+		for i in unit_count:
 			var unit_key: String = faction_pool[rng.randi_range(0, faction_pool.size() - 1)]
 			var stack = reg.make_stack(unit_key, rng)
 			if stack != null and stack.is_alive():
@@ -150,6 +158,5 @@ func _get_reachable_cells() -> Dictionary:
 		if start_cell.x >= 0: break
 	if start_cell.x < 0:
 		return {}
-	# Переиспользуем кэшированную BFS из HexUtils
 	return HexPathfinding.bfs_reachable(start_cell, model.map_width + model.map_height,
 		model.get_blocked_cells(), model.map_width, model.map_height)

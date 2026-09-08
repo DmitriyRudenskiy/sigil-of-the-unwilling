@@ -1,7 +1,7 @@
 extends Node2D
 class_name ResourceNode
-## A single resource node on the world map.
-## States: HIDDEN -> DISCOVERED -> EXHAUSTED
+
+const HIDDEN_ICON_SCALE := 0.4
 
 enum State { HIDDEN, DISCOVERED, EXHAUSTED }
 
@@ -75,23 +75,31 @@ func reduce_yield(amount: int) -> void:
 
 
 func _setup_visual() -> void:
-	sprite = Sprite2D.new()
-	add_child(sprite)
-	outline = Sprite2D.new()
-	outline.z_index = sprite.z_index + 1
-	add_child(outline)
+	# nodes come from res://scenes/entities/ResourceNode.tscn; bare .new() would have no $Sprite/$Outline
+	sprite = $Sprite
+	outline = $Outline
+	_apply_texture()
 	_update_visual()
+
+func _apply_texture() -> void:
+	var tex: Texture2D = ResourceAtlas.texture_for_id(resource_id)
+	if tex == null:
+		return
+	sprite.texture = tex
+	sprite.scale = Vector2(HIDDEN_ICON_SCALE, HIDDEN_ICON_SCALE)
+	outline.texture = tex          # жёлтая подсветка при обнаружении
+	outline.scale = sprite.scale
 
 
 func _update_visual() -> void:
 	match _state:
 		State.HIDDEN:
-			sprite.modulate = Color(1, 1, 1, 0.3)
+			sprite.modulate = ThemeConfig.C_WHITE_DIM_30
 			outline.visible = false
 		State.DISCOVERED:
-			sprite.modulate = Color(1, 1, 1, 1.0)
+			sprite.modulate = Color.WHITE
 			outline.visible = true
-			outline.modulate = Color(1, 1, 0, 0.6)
+			outline.modulate = ThemeConfig.C_GOLD_OUTLINE
 		State.EXHAUSTED:
-			sprite.modulate = Color(0.5, 0.5, 0.5, 0.4)
+			sprite.modulate = ThemeConfig.C_GRAY_DIM_40
 			outline.visible = false

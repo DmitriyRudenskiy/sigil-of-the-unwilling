@@ -1,19 +1,15 @@
 class_name HeroStrategicResources
 extends RefCounted
-## Strategic resource management (wood, stone, etc.) for the hero.
-## ResourceRegistry инжектируется через init_from_registry().
-
-const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
-const ServiceLocator = preload("res://scripts/core/ServiceLocator.gd")
 
 signal strategic_resources_changed(resources: Dictionary)
 
 var _resources: Dictionary = {}
-var _resource_registry: Node = null  # ResourceRegistry
+var _resource_registry: Node = null
 
 
 func init_from_registry(resource_registry: Node = null) -> void:
-	_resource_registry = ServiceLocator.resolve(resource_registry, &"resources")
+	# ИСПРАВЛЕНИЕ: единый путь
+	_resource_registry = resource_registry if resource_registry != null else Services.resolve(&"resources")
 
 	var all: Array = _resource_registry.get_all()
 	for def in all:
@@ -36,7 +32,7 @@ func add(id: StringName, amount: int) -> int:
 	if not _resources.has(id):
 		_resources[id] = 0
 	var current: int = _resources[id]
-	var space: int = MapConfig.RESOURCE_CAPACITY - current
+	var space: int = GameNumbers.RESOURCE_CAPACITY - current
 	var actual: int = min(amount, max(0, space))
 	_resources[id] = current + actual
 	strategic_resources_changed.emit(_resources)
@@ -59,7 +55,7 @@ func _add_internal(id: StringName, amount: int) -> void:
 	if not _resources.has(id):
 		_resources[id] = 0
 	var current: int = _resources[id]
-	var new_val: int = min(current + amount, MapConfig.RESOURCE_CAPACITY)
+	var new_val: int = min(current + amount, GameNumbers.RESOURCE_CAPACITY)
 	if new_val != current:
 		_resources[id] = new_val
 

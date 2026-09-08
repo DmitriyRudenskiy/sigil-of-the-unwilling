@@ -1,17 +1,8 @@
 extends RefCounted
 const _Self := preload("res://scripts/core/ShardState.gd")
-## A single world instance (map + cities + hero + enemy state).
-##
-## astral-macro Stage 1: the current game IS shard #1. A shard is a plain data
-## object — identity (id), generation parameters (seed, biome_mix), the hero's
-## landing cell, and completion flag. The live world for a shard is produced by
-## WorldBootstrap.run(..., shard_seed) using seed; biome_mix is a label today
-## (map generation is seed-driven) and a real generator hook in Stage 2+.
 
 var id: StringName = &"shard_1"
 var name: String = "Shard"
-## Deterministic world seed. 0 = "default" (today's random/editor flow for
-## shard #1 new games); a real seed pins shard #2's map deterministically.
 var seed: int = 0
 var biome_mix: String = ""
 var entry_cell: Vector2i = Vector2i(10, 10)

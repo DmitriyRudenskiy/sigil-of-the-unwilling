@@ -1,16 +1,12 @@
 extends RefCounted
 class_name GameSession
-## Single source of truth for run_seed and derived RNGs.
 
-## endgame: состояние забега. Терминальные состояния липкие (sticky):
-## один раз VICTORY/DEFEAT — навсегда (первая достигнутая причина wins).
 enum GameState { RUNNING, VICTORY, DEFEAT }
 
 var run_seed: int
 var rng: RandomNumberGenerator
 var state: GameState = GameState.RUNNING
 var end_reason: String = ""
-# endgame: счётчики для итогового отчёта (итог забега).
 var battles_won := 0
 var battles_lost := 0
 var successions := 0
@@ -26,12 +22,10 @@ func _init(seed_value: int = -1) -> void:
 	rng.seed = run_seed
 
 
-## Derive a new seed by consuming the main RNG.
 func next_seed() -> int:
 	return rng.randi()
 
 
-## Create a fresh RNG seeded from the main RNG (for independent subsystems).
 func make_rng() -> RandomNumberGenerator:
 	var child := RandomNumberGenerator.new()
 	child.seed = next_seed()
@@ -55,7 +49,6 @@ func serialize() -> Dictionary:
 func deserialize(d: Dictionary) -> void:
 	if d == null or d.is_empty():
 		return
-	# int → enum без вызова-конструктора (GDScript 4: enum не конструируется).
 	var raw := int(d.get("state", int(GameState.RUNNING)))
 	if raw == int(GameState.VICTORY):
 		state = GameState.VICTORY

@@ -1,7 +1,5 @@
-## scripts/data/SpellbookDef.gd
 class_name SpellbookDef
 extends RefCounted
-## Определение одного карточного заклинания.
 
 const _CE = preload("res://scripts/data/SpellEnums.gd")
 

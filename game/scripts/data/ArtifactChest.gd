@@ -1,6 +1,5 @@
 extends Resource
 class_name ArtifactChest
-## World chest: spawns on map, contains one artifact + gold fallback.
 
 @export var id: String = ""
 @export var artifact: Artifact = null

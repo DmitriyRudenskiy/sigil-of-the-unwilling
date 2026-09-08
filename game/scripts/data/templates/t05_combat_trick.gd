@@ -1,7 +1,5 @@
-## scripts/data/templates/t05_combat_trick.gd
 class_name T05CombatTrick
 extends RefCounted
-## T05: COMBAT TRICK (аудит #8: вынесен из TemplateEngine).
 
 const _Utils = preload("res://scripts/data/SpellUtils.gd")
 

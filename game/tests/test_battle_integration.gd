@@ -1,14 +1,8 @@
-extends "res://tests/gut_base.gd"
+extends GdUnitTestSuite
 
-## Интеграционный тест: полный цикл боя через BattleState.
 
 
 func test_attacker_wins() -> void:
-	var errors := _check_attacker_wins()
-	assert_eq(errors, 0, "test_attacker_wins — no errors")
-
-func _check_attacker_wins() -> int:
-	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 100))
@@ -29,25 +23,13 @@ func _check_attacker_wins() -> int:
 		state.apply_attack(attacker, defender, true, rng1)
 		guard += 1
 
-	if not state.battle_over:
-		printerr("battle should end when defender is destroyed")
-		errors += 1
-	if state.get_survivors(BattleState.Side.ATTACKER).size() != 1:
-		printerr("attacker should have survivors")
-		errors += 1
-	if state.get_survivors(BattleState.Side.DEFENDER).size() != 0:
-		printerr("defender should have no survivors")
-		errors += 1
-	return errors
+	assert_bool(state.battle_over).is_true().override_failure_message("battle should end when defender is destroyed")
+	assert_int(state.get_survivors(BattleState.Side.ATTACKER).size()).is_equal(1).override_failure_message("attacker should have survivors")
+	assert_int(state.get_survivors(BattleState.Side.DEFENDER).size()).is_zero().override_failure_message("defender should have no survivors")
 
 
 
 func test_defender_wins() -> void:
-	var errors := _check_defender_wins()
-	assert_eq(errors, 0, "test_defender_wins — no errors")
-
-func _check_defender_wins() -> int:
-	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("goblins", 1))
@@ -68,27 +50,13 @@ func _check_defender_wins() -> int:
 		state.apply_attack(defender, attacker, true, rng2)
 		guard += 1
 
-	if not state.battle_over:
-		printerr("battle should end when attacker is destroyed")
-		errors += 1
-	if state.get_survivors(BattleState.Side.ATTACKER).size() != 0:
-		printerr("attacker should have no survivors")
-		errors += 1
-	if state.get_survivors(BattleState.Side.DEFENDER).size() != 1:
-		printerr("defender should have survivors")
-		errors += 1
-	return errors
+	assert_bool(state.battle_over).is_true().override_failure_message("battle should end when attacker is destroyed")
+	assert_int(state.get_survivors(BattleState.Side.ATTACKER).size()).is_zero().override_failure_message("attacker should have no survivors")
+	assert_int(state.get_survivors(BattleState.Side.DEFENDER).size()).is_equal(1).override_failure_message("defender should have survivors")
 
 
 
 func test_battle_rules_damage() -> void:
-	var errors := _check_battle_rules_damage()
-	assert_eq(errors, 0, "test_battle_rules_damage — no errors")
-
-func _check_battle_rules_damage() -> int:
-	var errors := 0
-
-	# Use BattleState to create proper BattleUnit wrappers
 	var state: BattleState = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 50))
@@ -115,9 +83,7 @@ func _check_battle_rules_damage() -> int:
 
 	var damage: int = int(result.get("damage", 0))
 
-	if damage <= 0:
-		printerr("swordsmen should deal damage to goblins")
-		errors += 1
+	assert_int(damage).is_greater(0).override_failure_message("swordsmen should deal damage to goblins")
 
 	var def_result: Dictionary = rules.calculate_attack(
 		def_unit,
@@ -130,32 +96,21 @@ func _check_battle_rules_damage() -> int:
 
 	var def_damage: int = int(def_result.get("damage", 0))
 
-	if def_damage > damage:
-		printerr("goblins should deal less or equal damage to swordsmen")
-		errors += 1
-
-	return errors
+	assert_int(def_damage).is_less_equal(damage).override_failure_message("goblins should deal less or equal damage to swordsmen")
 
 
 
 func test_ranged_vs_flying() -> void:
-	var errors := _check_ranged_vs_flying()
-	assert_eq(errors, 0, "test_ranged_vs_flying — no errors")
-
-func _check_ranged_vs_flying() -> int:
-	var errors := 0
-
 	var state: BattleState = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("archers", 20))
 	atk.append(Units.make_fixed_stack("pegasus", 10))
 	var def: Array[UnitStack] = []
-	def.append(Units.make_fixed_stack("goblins", 5))  # needed for placement
+	def.append(Units.make_fixed_stack("goblins", 5))
 	state.place_army(atk, def)
 
 	var all_units: Array[BattleState.BattleUnit] = state.get_units_by_side(BattleState.Side.ATTACKER)
 
-	# Find archers and pegasus by key instead of position
 	var archer: BattleState.BattleUnit = null
 	var pegasus: BattleState.BattleUnit = null
 	for u in all_units:
@@ -164,31 +119,21 @@ func _check_ranged_vs_flying() -> int:
 		elif u.get_key() == "pegasus":
 			pegasus = u
 
-	if archer == null or not archer.is_ranged():
-		printerr("archers should be ranged")
-		errors += 1
+	assert_object(archer).is_not_null().override_failure_message("archers unit not found")
+	assert_bool(archer.is_ranged()).is_true().override_failure_message("archers should be ranged")
 
-	if pegasus == null or not pegasus.is_flying():
-		printerr("pegasus should be flying")
-		errors += 1
-
-	return errors
+	assert_object(pegasus).is_not_null().override_failure_message("pegasus unit not found")
+	assert_bool(pegasus.is_flying()).is_true().override_failure_message("pegasus should be flying")
 
 
 
 func test_morale_check() -> void:
-	var errors := _check_morale_check()
-	assert_eq(errors, 0, "test_morale_check — no errors")
-
-func _check_morale_check() -> int:
-	var errors := 0
-
 	var state: BattleState = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("champions", 10))
-	atk.append(Units.make_fixed_stack("skeleton", 10))  # undead = no morale
+	atk.append(Units.make_fixed_stack("skeleton", 10))
 	var def: Array[UnitStack] = []
-	def.append(Units.make_fixed_stack("goblins", 5))  # needed for placement
+	def.append(Units.make_fixed_stack("goblins", 5))
 	state.place_army(atk, def)
 
 	var all_units: Array[BattleState.BattleUnit] = state.get_units_by_side(BattleState.Side.ATTACKER)
@@ -202,12 +147,8 @@ func _check_morale_check() -> int:
 
 	var rules2: BattleRules = load("res://scripts/core/BattleRules.gd").new()
 
-	if champion == null or not rules2.can_morale(champion):
-		printerr("champions should be eligible for morale")
-		errors += 1
+	assert_object(champion).is_not_null().override_failure_message("champions unit not found")
+	assert_bool(rules2.can_morale(champion)).is_true().override_failure_message("champions should be eligible for morale")
 
-	if skeleton != null and rules2.can_morale(skeleton):
-		printerr("skeleton (undead) should NOT be eligible for morale")
-		errors += 1
-
-	return errors
+	if skeleton != null:
+		assert_bool(rules2.can_morale(skeleton)).is_false().override_failure_message("skeleton (undead) should NOT be eligible for morale")

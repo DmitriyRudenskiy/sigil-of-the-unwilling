@@ -1,7 +1,5 @@
-## scripts/data/templates/t09_token_generation.gd
 class_name T09TokenGeneration
 extends RefCounted
-## T09: TOKEN GENERATION (аудит #8: вынесен из TemplateEngine).
 
 const _Enums = preload("res://scripts/data/SpellEnums.gd")
 const _Utils = preload("res://scripts/data/SpellUtils.gd")

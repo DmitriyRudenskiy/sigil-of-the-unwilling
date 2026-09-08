@@ -1,47 +1,14 @@
 class_name DemographicTurnProcessor
 extends TurnPhaseProcessor
-## Фаза 2 (M2: Демография). Исполняется ПОСЛЕ экономики (priority 20).
-##
-## Персонажи — нарративная оболочка над PopUnit; сам населенческий
-## контур (рождения в монолите City.process_turn) НЕ дублируется
-## здесь — процессор только гарантирует персонажа для каждой живой
-## фигурки и тикает потребности.
-##
-## Тик:
-##  1. Для каждой pop без персонажа — create() + character_born;
-##  2. Дельты потребностей (базовый распад + восстановление от города
-##     + модификаторы черт);
-##  3. Критика (< 0.2) — сигнал раз в эпизод (не каждый ход);
-##  4. Смерть: потребность = 0.0 три хода подряд -> character_died,
-##     фигурка удаляется (city.remove_pop);
-##  5. Эпидемия: 2+ персонажа с 2+ критическими потребностями
-##     (или 1, если город маленький) -> disease_outbreak на каждого
-##     поражённого (кулдаун 5 ходов на город).
-##
-## НЕ вызывает city.process_turn() — монолит уже отработал ранее.
-## Внешние эффекты пробрасывает интеграционный слой (WorldBootstrap).
 
 signal character_born(character_uid: int, city_uid: int, name: String)
 signal character_died(character_uid: int, city_uid: int, cause: StringName)
-signal character_need_critical(character_uid: int, need_id: StringName)
+signal character_need_critical(character_uid: int, need_id: int)
 signal disease_outbreak(city_uid: int, character_uid: int)
 
-const CRITICAL_THRESHOLD := 0.2
-const DEATH_STREAK := 3
-const OUTBREAK_COOLDOWN := 5
-
-## Базовый ежедневный распад потребностей (без восстановлений).
-## remove-hunger-mechanic: голод удалён из потребностей — еда живёт только
-## в городской экономике (City: склад, starving/approval, рождения, рынок).
-const DECAY: Dictionary = {
-	&"rest": 0.10,
-	&"social": 0.08,
-	&"inspiration": 0.05,
-}
 
 var registry: CharacterRegistry = null
 var _rng := RandomNumberGenerator.new()
-## city_uid -> ход последней эпидемии
 var _outbreak_turn: Dictionary = {}
 
 
@@ -79,34 +46,30 @@ func _process_city(city: City, ctx: TurnContext) -> Dictionary:
 	var report := {"uid": city.uid, "ensured": 0, "critical": 0, "deaths": 0, "outbreaks": 0, "promoted": 0}
 	var rng := _rng_for(ctx, city)
 
-	# 1. Персонаж для каждой живой фигурки.
 	for pop in city.pop.duplicate():
 		if registry.get_by_pop(pop.uid) == null:
 			var ch := registry.create(city.uid, pop, rng)
 			report["ensured"] += 1
 			character_born.emit(ch.uid, city.uid, ch.name)
 
-	# 2. Тик потребностей.
 	var critical_chars: Array = []
 	for ch in registry.alive_in_city(city.uid).duplicate():
 		var pop: PopUnit = _find_pop(city, ch.pop_uid)
 		for need_id in Character.NEED_KEYS:
-			var delta := -float(DECAY[need_id])
-			delta += _recovery(need_id, city, pop)
-			delta += ch.trait_modifier(need_id)
+			var strat: NeedStrategy = NeedType.strategies()[need_id]
+			var delta := -strat.decay_rate + strat.get_recovery_pop(city, pop)
+			delta += ch.trait_modifier(NeedType.to_name(need_id))
 			ch.modify_need(need_id, delta)
 
-		# Счётчик нулевых ходов.
 		for need_id in Character.NEED_KEYS:
 			if float(ch.needs[need_id]) <= 0.0001:
 				ch.need_zero_streak[need_id] = int(ch.need_zero_streak.get(need_id, 0)) + 1
 			else:
 				ch.need_zero_streak[need_id] = 0
 
-		# 3. Критика (сигнал раз в эпизод).
 		var char_critical := 0
 		for need_id in Character.NEED_KEYS:
-			var crit: bool = ch.is_need_critical(need_id, CRITICAL_THRESHOLD)
+			var crit: bool = ch.is_need_critical(need_id, GameNumbers.DEMO_CRITICAL_THRESHOLD)
 			if crit:
 				char_critical += 1
 				if not bool(ch.was_critical.get(need_id, false)):
@@ -118,34 +81,28 @@ func _process_city(city: City, ctx: TurnContext) -> Dictionary:
 		if char_critical >= 2:
 			critical_chars.append(ch)
 
-	# 4. Смерти.
 	for ch in registry.alive_in_city(city.uid).duplicate():
 		var cause := _death_cause(ch)
 		if cause == &"":
 			continue
 		_kill(city, ch, cause, report)
 
-	# 5. Эпидемия.
 	var outbreak_due := false
 	if not critical_chars.is_empty():
 		var threshold := 2 if registry.alive_in_city(city.uid).size() >= 4 else 1
 		if critical_chars.size() >= threshold:
 			var last: int = int(_outbreak_turn.get(city.uid, -999))
-			if ctx.turn_number - last >= OUTBREAK_COOLDOWN:
+			if ctx.turn_number - last >= GameNumbers.DEMO_OUTBREAK_COOLDOWN:
 				outbreak_due = true
 	if outbreak_due:
 		_outbreak_turn[city.uid] = ctx.turn_number
 		for ch in registry.alive_in_city(city.uid):
 			if critical_chars.has(ch):
-				ch.modify_need(&"rest", -0.2)
-				ch.modify_need(&"inspiration", -0.1)
+				ch.modify_need(NeedType.ID.REST, -0.2)
+				ch.modify_need(NeedType.ID.INSPIRATION, -0.1)
 				report["outbreaks"] += 1
 				disease_outbreak.emit(city.uid, ch.uid)
 
-	# 6. Повышение учёных (Спринт 7): балл училища (scholar_points)
-	#    -> самый старый свободный последователь становится учёным
-	#    (персонаж не мешает — состояние живёт на PopUnit).
-	#    Особняк (slot SCHOLAR) обязателен.
 	var promoted := 0
 	var rc: ResourceContext = city.resource_ctx
 	if rc != null:
@@ -164,8 +121,6 @@ func _process_city(city: City, ctx: TurnContext) -> Dictionary:
 
 
 func _promotable_follower(city: City) -> PopUnit:
-	## Самый старый свободный последователь (исключая переключающихся
-	## и закреплённых — is_free_follower()).
 	var best: PopUnit = null
 	for u in city.pop:
 		if not u.is_free_follower():
@@ -175,34 +130,12 @@ func _promotable_follower(city: City) -> PopUnit:
 	return best
 
 
-## Восстановление потребности от состояния города.
-func _recovery(need_id: StringName, city: City, pop: PopUnit) -> float:
-	match need_id:
-		&"rest":
-			# Рабочий живёт по ритму (норма сна), ополченец — дежурства.
-			if pop != null and pop.state == PopUnit.State.MILITIA:
-				return 0.0
-			return 0.12
-		&"social":
-			# Компания есть, если население прилично.
-			if city.pop.size() >= 3:
-				return 0.10
-			return -0.05
-		&"inspiration":
-			return 0.05
-	return 0.0
-
 
 func _death_cause(ch: Character) -> StringName:
 	for need_id in Character.NEED_KEYS:
-		if int(ch.need_zero_streak.get(need_id, 0)) >= DEATH_STREAK:
-			match need_id:
-				&"rest":
-					return &"exhaustion"
-				&"social":
-					return &"isolation"
-				&"inspiration":
-					return &"burnout"
+		if int(ch.need_zero_streak.get(need_id, 0)) >= GameNumbers.DEMO_DEATH_STREAK:
+			var strat: NeedStrategy = NeedType.strategies()[need_id]
+			return strat.get_death_cause()
 	return &""
 
 
@@ -221,8 +154,6 @@ func _find_pop(city: City, pop_uid: int) -> PopUnit:
 
 
 func _rng_for(ctx: TurnContext, city: City) -> RandomNumberGenerator:
-	## Детерминированный rng: если контекст принёс свой — берём его,
-	## иначе сидируем от (ход, город) — воспроизводимо без внешнего RNG.
 	if ctx.rng != null:
 		return ctx.rng
 	_rng.seed = hash([ctx.turn_number, city.uid])

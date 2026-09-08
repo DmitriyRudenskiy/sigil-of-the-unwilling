@@ -1,0 +1,21 @@
+extends GdUnitTestSuite
+
+## R7: StaticCaches.reset_all() не падает и обнуляет кэши.
+
+
+func test_reset_all_clears_caches() -> void:
+	# Заполняем кэши.
+	HexUtils.get_config()
+	assert_bool(HexUtils._config != null)
+	var tex := PlaceholderTexture.circle(4, Color.WHITE, Color.BLACK)
+	assert_object(tex)
+	assert_bool(PlaceholderTexture._cache.size() > 0)
+	assert_bool(ResourceAtlas._ensure_map().size() > 0)
+
+	StaticCaches.reset_all()
+
+	assert_bool(HexUtils._config == null)
+	assert_bool(PlaceholderTexture._cache.is_empty())
+	assert_bool(ResourceAtlas._cache.is_empty())
+	assert_bool(ResourceAtlas._map.is_empty())
+	assert_bool(UnitSprites._portrait_cache.is_empty())

@@ -1,7 +1,5 @@
-## scripts/data/templates/t02_hard_removal.gd
 class_name T02HardRemoval
 extends RefCounted
-## T02: HARD REMOVAL (аудит #8: вынесен из TemplateEngine).
 
 const _Utils = preload("res://scripts/data/SpellUtils.gd")
 

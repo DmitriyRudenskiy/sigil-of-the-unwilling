@@ -1,7 +1,5 @@
-## scripts/data/templates/t06_debuff_control.gd
 class_name T06DebuffControl
 extends RefCounted
-## T06: DEBUFF / CONTROL (аудит #8: вынесен из TemplateEngine).
 
 const _Enums = preload("res://scripts/data/SpellEnums.gd")
 const _Utils = preload("res://scripts/data/SpellUtils.gd")

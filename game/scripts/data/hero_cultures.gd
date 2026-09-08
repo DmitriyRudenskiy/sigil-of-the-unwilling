@@ -1,6 +1,4 @@
 extends RefCounted
-## Культуры и прошлое героя (RU). Адаптация GAMES_TROLES cultures.gd.
-## Источник: GAMES_TROLES game/data/modules/cultures.gd.
 const CULTURES := {
 	"aedyr": {"name": "Эдир", "desc": "Правящая аристократия эльфов.", "bonuses": {"knowledge": 1, "spell_power": 1}},
 	"deadfire": {"name": "Мёртвые острова", "desc": "Заброшенная архипелаг разбойников.", "bonuses": {"attack": 1, "defense": 1}},
@@ -14,7 +12,6 @@ const CULTURES := {
 	"eir_glanfath": {"name": "Эир Гланфат", "desc": "Светящиеся поля рая.", "bonuses": {"spell_power": 1, "knowledge": 1}},
 }
 
-## Прошлое героя (выбор при создании).
 const BACKGROUNDS := {
 	"soldier": {"name": "Солдат", "desc": "Вырос в казармах.", "bonuses": {"attack": 1, "defense": 1}},
 	"scholar": {"name": "Учёный", "desc": "Провёл годы за книгами.", "bonuses": {"spell_power": 1, "knowledge": 1}},

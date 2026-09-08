@@ -1,7 +1,5 @@
 extends Node
 class_name BattleInput
-## Ввод боя: обработка кликов, подсветка ходов/атак, выбор юнитов.
-## Не содержит логики ходов или AI — только ввод и сигналы.
 
 signal unit_pick_requested(unit: BattleState.BattleUnit)
 signal unit_selected(unit: BattleState.BattleUnit)
@@ -26,8 +24,6 @@ var highlight_unreachable: Dictionary = {}
 
 var _cursor_mode := BattleView.CursorMode.DEFAULT
 
-## Курсор боя: меч (⚔️) — атака, палочка (🪄) — заклинание,
-## стрела (➹) — стрельба, прицел (🎯) — дефолт.
 func set_cursor_mode(mode: int) -> void:
 	_cursor_mode = mode
 	if _view != null:
@@ -45,13 +41,15 @@ func set_action_lock(locked: bool) -> void:
 
 
 func start_spell_targeting(spell_id: StringName, target_side: BattleState.Side, include_dead: bool = false) -> void:
+	# FIX TASK_09: сначала чистим старую подсветку/стейт, потом ставим новый —
+	# _clear_highlights() сбрасывает _pending_spell_id, порядок раньше терял заклинание.
+	_clear_highlights()
 	_pending_spell_id = spell_id
 	_pending_target_side = target_side
 	_include_dead = include_dead
 	_cursor_mode = BattleView.CursorMode.SPELL
 	if _view != null:
 		_view.set_cursor_mode(_cursor_mode)
-	_clear_highlights()
 	for u in _state.get_units_by_side(target_side):
 		if u.is_alive() or (include_dead and u.stack != null):
 			highlight_attack[u.cell] = 1
@@ -131,17 +129,15 @@ func _unhandled_input(ev: InputEvent) -> void:
 
 func _unit_at_pixel(global_pos: Vector2, side: BattleState.Side) -> BattleState.BattleUnit:
 	var cell := _view.global_to_map(global_pos)
-	# O(1) lookup via unit_grid instead of O(n) iteration
 	var unit := _state.get_unit_at(cell, side)
 	if unit != null:
 		return unit
-	# Check neighbors for clicks near hex edges
 	var local_pos := _view.to_local(global_pos)
 	for nb in HexUtils.get_all_neighbors(cell):
 		unit = _state.get_unit_at(nb, side)
 		if unit != null:
 			var unit_pos := _view.map_to_local(nb)
-			if local_pos.distance_to(unit_pos) < BattleConfig.CLICK_RADIUS_PX:
+			if local_pos.distance_to(unit_pos) < GameNumbers.BATTLE_CLICK_RADIUS_PX:
 				return unit
 	return null
 
@@ -159,7 +155,6 @@ func _select(u: BattleState.BattleUnit) -> void:
 
 	_view.set_highlights(highlight_move, highlight_attack)
 	_view.set_unreachable_highlights(highlight_unreachable)
-	# Режим ходьбы — курсор «идти» (MOVE), а не дефолтный прицел.
 	_cursor_mode = BattleView.CursorMode.MOVE
 	_view.set_cursor_mode(_cursor_mode)
 	unit_selected.emit(u)
@@ -197,7 +192,6 @@ func _update_attack_preview() -> void:
 func clear_highlights() -> void:
 	_clear_highlights()
 
-## Передать окрестность «не хватает ходов» на вид.
 func set_unreachable_highlights(cells: Dictionary) -> void:
 	highlight_unreachable = cells
 	if _view != null:
@@ -221,7 +215,6 @@ func show_attack_only() -> void:
 	var u := _state.active_unit
 	highlight_attack = _compute_attack_highlight(u)
 
-	# Стреляющий юнит бьёт стрелой — стрелочный курсор, мечом — курсор атаки.
 	if u.is_ranged():
 		_cursor_mode = BattleView.CursorMode.RANGED
 	else:

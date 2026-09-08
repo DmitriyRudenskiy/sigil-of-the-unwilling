@@ -1,6 +1,5 @@
 class_name UnitStack
 extends RefCounted
-## Runtime stack: reference to definition + mutable count.
 
 const _UnitStats = preload("res://scripts/entities/UnitStats.gd")
 
@@ -9,8 +8,6 @@ var count: int = 0
 
 
 func _init(p_stats: UnitStats = null, p_count: int = 0) -> void:
-    # Защитная копия: мутации рантайм-статов (артефакты в бою и т.п.)
-    # не должны просачиваться в общее определение реестра (РФ6-1).
     stats = p_stats.copy() if p_stats != null else null
     count = p_count
 

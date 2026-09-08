@@ -1,131 +1,109 @@
-extends "res://tests/gut_base.gd"
-## astral-macro Stage 1: ShardState + ShardManager unit tests.
+extends GdUnitTestSuite
 
 const _ShardState = preload("res://scripts/core/ShardState.gd")
 const _ShardManager = preload("res://scripts/core/ShardManager.gd")
+const _WorldPersistence = preload("res://scripts/world/WorldPersistence.gd")
+const _SaveManager = preload("res://scripts/core/SaveManager.gd")
+const _GameSession = preload("res://scripts/core/GameSession.gd")
+const _WorldStateDelta = preload("res://scripts/world/WorldStateDelta.gd")
+const _HeroController = preload("res://scripts/entities/HeroController.gd")
 
 
 
 
 func test_shard_state_defaults() -> void:
-	var errors := _check_shard_state_defaults()
-	assert_eq(errors, 0, "test_shard_state_defaults — no errors")
-
-func _check_shard_state_defaults() -> int:
-	var e := 0
 	var s := _ShardState.new()
-	if s.id != &"shard_1":
-		printerr("default id: ", str(s.id)); e += 1
-	if s.seed != 0:
-		printerr("default seed: ", s.seed); e += 1
-	if s.completed != false:
-		printerr("default completed: ", s.completed); e += 1
-	if s.entry_cell != Vector2i(10, 10):
-		printerr("default entry_cell: ", s.entry_cell); e += 1
-	return e
+	assert_bool(s.id == &"shard_1").is_true().override_failure_message("default id should be shard_1")
+	assert_int(s.seed).is_zero().override_failure_message("default seed should be 0")
+	assert_bool(s.completed).is_false().override_failure_message("default completed should be false")
+	assert_bool(s.entry_cell == Vector2i(10, 10)).is_true().override_failure_message("default entry_cell should be (10, 10)")
 
 
 
 func test_shard_state_custom() -> void:
-	var errors := _check_shard_state_custom()
-	assert_eq(errors, 0, "test_shard_state_custom — no errors")
-
-func _check_shard_state_custom() -> int:
-	var e := 0
 	var s := _ShardState.new(&"shard_2", "Забвение", 0x2A1F3C7, "waste", Vector2i(3, 4))
-	if s.id != &"shard_2":
-		printerr("custom id: ", str(s.id)); e += 1
-	if s.name != "Забвение":
-		printerr("custom name: ", s.name); e += 1
-	if s.seed != 0x2A1F3C7:
-		printerr("custom seed: ", s.seed); e += 1
-	if s.biome_mix != "waste":
-		printerr("custom biome: ", s.biome_mix); e += 1
-	if s.entry_cell != Vector2i(3, 4):
-		printerr("custom entry: ", s.entry_cell); e += 1
-	return e
+	assert_bool(s.id == &"shard_2").is_true().override_failure_message("custom id should be shard_2")
+	assert_str(s.name).is_equal("Забвение").override_failure_message("custom name should be 'Забвение'")
+	assert_int(s.seed).is_equal(0x2A1F3C7).override_failure_message("custom seed mismatch")
+	assert_str(s.biome_mix).is_equal("waste").override_failure_message("custom biome_mix should be 'waste'")
+	assert_bool(s.entry_cell == Vector2i(3, 4)).is_true().override_failure_message("custom entry_cell should be (3, 4)")
 
 
 
 func test_shard_state_roundtrip() -> void:
-	var errors := _check_shard_state_roundtrip()
-	assert_eq(errors, 0, "test_shard_state_roundtrip — no errors")
-
-func _check_shard_state_roundtrip() -> int:
-	var e := 0
 	var s := _ShardState.new(&"shard_2", "Забвение", 0x2A1F3C7, "waste", Vector2i(3, 4))
 	s.completed = true
 	var d := s.to_dict()
 	var s2 := _ShardState.from_dict(d)
-	if s2.id != s.id:
-		printerr("rt id: ", str(s2.id)); e += 1
-	if s2.name != s.name:
-		printerr("rt name: ", s2.name); e += 1
-	if s2.seed != s.seed:
-		printerr("rt seed: ", s2.seed); e += 1
-	if s2.biome_mix != s.biome_mix:
-		printerr("rt biome: ", s2.biome_mix); e += 1
-	if s2.entry_cell != s.entry_cell:
-		printerr("rt entry: ", s2.entry_cell); e += 1
-	if s2.completed != s.completed:
-		printerr("rt completed: ", s2.completed); e += 1
-	return e
+	assert_bool(s2.id == s.id).is_true().override_failure_message("roundtrip id mismatch")
+	assert_str(s2.name).is_equal(s.name).override_failure_message("roundtrip name mismatch")
+	assert_int(s2.seed).is_equal(s.seed).override_failure_message("roundtrip seed mismatch")
+	assert_str(s2.biome_mix).is_equal(s.biome_mix).override_failure_message("roundtrip biome_mix mismatch")
+	assert_bool(s2.entry_cell == s.entry_cell).is_true().override_failure_message("roundtrip entry_cell mismatch")
+	assert_bool(s2.completed == s.completed).is_true().override_failure_message("roundtrip completed mismatch")
 
 
 
 func test_manager_default_campaign() -> void:
-	var errors := _check_manager_default_campaign()
-	assert_eq(errors, 0, "test_manager_default_campaign — no errors")
-
-func _check_manager_default_campaign() -> int:
-	var e := 0
 	_ShardManager.reset()
 	var m := _ShardManager.instance()
-	if m.active_id != &"shard_1":
-		printerr("default active: ", str(m.active_id)); e += 1
-	if m.get_shard(&"shard_1") == null or m.get_shard(&"shard_1").seed != 0:
-		printerr("shard_1 seed: ", str(m.get_shard(&"shard_1").seed)); e += 1
+	assert_bool(m.active_id == &"shard_1").is_true().override_failure_message("default active should be shard_1")
+	var s1 = m.get_shard(&"shard_1")
+	assert_object(s1).is_not_null().override_failure_message("shard_1 not found")
+	assert_int(s1.seed).is_zero().override_failure_message("shard_1 seed should be 0")
 	var s2 := m.get_shard(&"shard_2")
-	if s2 == null or s2.seed != _ShardManager.SHARD_2_SEED:
-		printerr("shard_2 seed: ", str(s2.seed) if s2 != null else "null"); e += 1
-	return e
+	assert_object(s2).is_not_null().override_failure_message("shard_2 not found")
+	assert_int(s2.seed).is_equal(_ShardManager.SHARD_2_SEED).override_failure_message("shard_2 seed should be SHARD_2_SEED")
 
 
 
 func test_manager_active_switch() -> void:
-	var errors := _check_manager_active_switch()
-	assert_eq(errors, 0, "test_manager_active_switch — no errors")
-
-func _check_manager_active_switch() -> int:
-	var e := 0
 	_ShardManager.reset()
 	var m := _ShardManager.instance()
-	if m.set_active(&"shard_2") != true:
-		printerr("set shard_2 failed"); e += 1
-	if m.active_id != &"shard_2":
-		printerr("active after switch: ", str(m.active_id)); e += 1
-	if m.set_active(&"nope") != false:
-		printerr("set bogus should fail"); e += 1
-	if m.active_id != &"shard_2":
-		printerr("active after bogus: ", str(m.active_id)); e += 1
+	assert_bool(m.set_active(&"shard_2")).is_true().override_failure_message("set_active(shard_2) should succeed")
+	assert_bool(m.active_id == &"shard_2").is_true().override_failure_message("active should be shard_2 after switch")
+	assert_bool(m.set_active(&"nope")).is_false().override_failure_message("set_active with unknown id should fail")
+	assert_bool(m.active_id == &"shard_2").is_true().override_failure_message("active should stay shard_2 after failed switch")
 	m.set_active(&"shard_1")
-	return e
 
 
 
 func test_manager_list_ids() -> void:
-	var errors := _check_manager_list_ids()
-	assert_eq(errors, 0, "test_manager_list_ids — no errors")
-
-func _check_manager_list_ids() -> int:
-	var e := 0
 	_ShardManager.reset()
 	var m := _ShardManager.instance()
 	var ids := m.shard_ids()
-	if ids.size() != 2:
-		printerr("shard count: ", ids.size()); e += 1
-	if not (ids.has(&"shard_1") and ids.has(&"shard_2")):
-		printerr("shard ids content: ", ids); e += 1
-	if m.list().size() != 2:
-		printerr("list size: ", m.list().size()); e += 1
-	return e
+	assert_int(ids.size()).is_equal(2).override_failure_message("should have 2 shards")
+	assert_bool(ids.has(&"shard_1") and ids.has(&"shard_2")).is_true().override_failure_message("shard ids content mismatch")
+	assert_int(m.list().size()).is_equal(2).override_failure_message("list() should return 2 shards")
+
+
+
+func test_save_preserves_other_shards() -> void:
+	_ShardManager.reset()
+	var m := _ShardManager.instance()
+	var sm := _SaveManager.new()
+	sm.delete_save()
+	var p := _WorldPersistence.new(sm)
+	p.session = _GameSession.new(1)
+	p.world_delta = _WorldStateDelta.new()
+	var hero := _HeroController.new()
+	add_child(hero)
+
+	assert_bool(p.save_game(hero)).is_true().override_failure_message("save shard_1 failed")
+
+	m.set_active(&"shard_2")
+	assert_bool(p.save_game(hero)).is_true().override_failure_message("save shard_2 failed")
+
+	var res: Dictionary = sm.load_game()
+	var sd = res.get("data", null)
+	assert_object(sd).is_not_null().override_failure_message("no save on disk")
+	var found: Dictionary = {}
+	for k in sd.shards:
+		found[str(k)] = true
+	assert_bool(found.has("shard_1")).is_true().override_failure_message("shard_1 lost after save to shard_2")
+	assert_bool(found.has("shard_2")).is_true().override_failure_message("shard_2 missing")
+	assert_str(str(sd.active_shard_id)).is_equal("shard_2").override_failure_message("active_shard_id should be shard_2")
+
+	sm.delete_save()
+	hero.free()
+	sm.free()

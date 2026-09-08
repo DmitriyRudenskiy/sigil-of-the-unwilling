@@ -1,9 +1,7 @@
 extends Node
 class_name BattleTurnExecutor
-## State Machine для очередности ходов боя.
-## Управляет: начало хода → ожидание ввода / AI → анимация → конец хода.
-## Все эффекты через сигналы — контроллер подписывается и реагирует.
-## Мутация BattleState происходит ТОЛЬКО здесь.
+## Машина боя: фазы, очередь ходов, пауза, вход игрока, AI-цикл.
+## Секвенция атаки — BattleAttackSequence, отступление — BattleRetreatPolicy.
 
 signal status_updated(text: String)
 signal clear_highlights
@@ -39,17 +37,13 @@ var _state_token: int = 0
 var _battle_state: BattleState
 var _ai: BattleAI
 var _obstacles: Dictionary = {}
-var _ai_think_time := BattleConfig.BATTLE_AI_THINK_TIME
+var _ai_think_time := GameNumbers.BATTLE_AI_THINK_TIME
 var _rng := RandomNumberGenerator.new()
 var _end_emitted := false
-var _retreat_requested := false
 var _morale_allowed := false
 
-var _attack_attacker: BattleState.BattleUnit = null
-var _attack_defender: BattleState.BattleUnit = null
-var _attack_strikes_left := 0
-var _attack_is_melee := false
-var _retaliation_phase := false
+var _attack_seq: BattleAttackSequence
+var _retreat_policy: BattleRetreatPolicy
 var _pending_attack: BattleState.BattleUnit = null
 
 
@@ -62,8 +56,14 @@ func setup(bs: BattleState, ai: BattleAI, obstacles: Dictionary) -> void:
 	_rng.randomize()
 
 	_end_emitted = false
-	_retreat_requested = false
 	_morale_allowed = false
+
+	if _attack_seq == null:
+		_attack_seq = BattleAttackSequence.new()
+	if _retreat_policy == null:
+		_retreat_policy = BattleRetreatPolicy.new()
+	_attack_seq.setup(bs, _rng, self)
+	_retreat_policy.setup(bs, self)
 
 
 func get_current_state() -> State:
@@ -80,7 +80,6 @@ var _pending_completion: PendingAction = PendingAction.NONE
 
 func pause_battle() -> void:
 	_paused = true
-	# Freeze tree to stop all tweens and animations mid-frame
 	if is_inside_tree():
 		get_tree().paused = true
 
@@ -92,7 +91,6 @@ func resume_battle() -> void:
 	var pending := _pending_completion
 	_pending_completion = PendingAction.NONE
 
-	# Без активного боя возвращать pending-действие нечему (напр., resume до setup)
 	if _battle_state == null:
 		return
 
@@ -106,13 +104,12 @@ func is_paused() -> bool:
 	return _paused
 
 
-## Основной вход: начать бой
 func start_battle() -> void:
 	_paused = false
 	_pending_completion = PendingAction.NONE
 	_end_emitted = false
-	_retreat_requested = false
 	_morale_allowed = false
+	_retreat_policy.reset()
 
 	if _battle_state.check_end() != BattleState.Side.NONE:
 		_transition_to(State.BATTLE_OVER)
@@ -124,15 +121,12 @@ func start_battle() -> void:
 	_advance_to_next_turn()
 
 
-## Выбор юнита игроком: валидация + мутация state
 func request_select(unit: BattleState.BattleUnit) -> void:
 	if not is_input_active() or unit == null or not unit.is_alive():
 		return
 	_battle_state.active_unit = unit
 	active_unit_changed.emit(unit)
 
-## Вызывается игроком через BattleInput
-## Валидирует, мутирует BattleState, затем испускает сигнал для анимации.
 func request_move(unit: BattleState.BattleUnit, target: Vector2i) -> void:
 	if _state != State.WAITING_INPUT:
 		return
@@ -179,7 +173,6 @@ func request_move(unit: BattleState.BattleUnit, target: Vector2i) -> void:
 	execute_move.emit(unit, path)
 
 
-## Вызывается игроком через BattleInput
 func request_attack(atk: BattleState.BattleUnit, def: BattleState.BattleUnit) -> void:
 	if _state != State.WAITING_INPUT:
 		return
@@ -193,20 +186,18 @@ func request_attack(atk: BattleState.BattleUnit, def: BattleState.BattleUnit) ->
 	if not atk.is_alive() or not def.is_alive():
 		return
 
-	var adjacent_enemy := _has_adjacent_enemy(atk)
+	var adjacent_enemy := _attack_seq.has_adjacent_enemy(atk)
 
 	if atk.is_ranged() and not adjacent_enemy:
-		# Ranged can shoot any visible enemy.
 		pass
 	else:
 		if HexUtils.hex_distance(atk.cell, def.cell) != 1:
 			return
 
 	_morale_allowed = true
-	_start_attack(atk, def)
+	_attack_seq.start_attack(atk, def)
 
 
-## Вызывается после завершения анимации перемещения (controller → executor)
 func on_move_completed() -> void:
 	if _paused:
 		_pending_completion = PendingAction.MOVE
@@ -225,14 +216,13 @@ func on_move_completed() -> void:
 		var target := _pending_attack
 		_pending_attack = null
 		_morale_allowed = true
-		_start_attack(_battle_state.active_unit, target)
+		_attack_seq.start_attack(_battle_state.active_unit, target)
 		return
 
 	_morale_allowed = true
 	_on_action_completed()
 
 
-## Вызывается после завершения анимации каста (controller → executor)
 func on_spell_anim_completed() -> void:
 	if _paused:
 		_pending_completion = PendingAction.SPELL
@@ -245,7 +235,6 @@ func on_spell_anim_completed() -> void:
 		return
 	_on_action_completed()
 
-## Вызывается после завершения анимации атаки (controller → executor)
 func on_attack_completed() -> void:
 	if _paused:
 		_pending_completion = PendingAction.ATTACK
@@ -258,34 +247,31 @@ func on_attack_completed() -> void:
 		_emit_end()
 		return
 
-	if _attack_attacker != null:
-		if _retaliation_phase:
-			_attack_attacker = null
-			_attack_defender = null
-			_retaliation_phase = false
-			_finish_attack_sequence()
+	if _attack_seq.has_active():
+		if _attack_seq.is_retaliating():
+			_attack_seq.finish()
 			return
 
 		if (
-			_attack_strikes_left > 0
-			and _attack_attacker.is_alive()
-			and _attack_defender != null
-			and _attack_defender.is_alive()
+			_attack_seq.strikes_left() > 0
+			and _attack_seq.attacker() != null
+			and _attack_seq.attacker().is_alive()
+			and _attack_seq.defender() != null
+			and _attack_seq.defender().is_alive()
 		):
-			_do_next_attack_strike()
+			_attack_seq.next_strike()
 			return
 
-		if _can_retaliate():
-			_start_retaliation()
+		if _attack_seq.can_retaliate():
+			_attack_seq.start_retaliation()
 			return
 
-		_finish_attack_sequence()
+		_attack_seq.finish()
 		return
 
 	_on_action_completed()
 
 
-## Кнопка «Ждать» — переносит активного юнита в конец очереди
 func request_wait() -> void:
 	if _paused:
 		return
@@ -297,7 +283,6 @@ func request_wait() -> void:
 	_on_action_completed()
 
 
-## Кнопка «Пропустить»
 func request_skip() -> void:
 	if _paused:
 		return
@@ -312,7 +297,7 @@ func request_skip() -> void:
 func request_spell_cast(spell_id: StringName) -> void:
 	if _state != State.WAITING_INPUT or _battle_state.active_unit == null:
 		return
-	status_updated.emit("Выберите цель для заклинания… (ПКМ — отмена)")
+	status_updated.emit(GameText.battle_spell_target())
 
 
 func on_spell_target_selected(spell_id: StringName, target: BattleState.BattleUnit) -> void:
@@ -332,12 +317,9 @@ func on_spell_target_selected(spell_id: StringName, target: BattleState.BattleUn
 		spell_cast_executed.emit(caster, target, result)
 	else:
 		spell_cast_failed.emit(result.get("result", "unknown"))
-		status_updated.emit("Заклинание не сработало: %s" % result.get("result", "unknown"))
+		status_updated.emit(GameText.battle_spell_failed(str(result.get("result", "unknown"))))
 
 
-## Кнопка «Жертва» — доубивает цель в обход перерождения, расходует стоимость
-## (союзник-стек / ресурс / артефакт) и один ход. Валидирует, мутирует
-## BattleState (через apply_sacrifice), затем испускает сигнал для анимации.
 func request_sacrifice(
 	acting: BattleState.BattleUnit,
 	sacrifice: Dictionary,
@@ -360,9 +342,8 @@ func request_sacrifice(
 		execute_sacrifice.emit(acting, target, cost, result)
 	else:
 		sacrifice_failed.emit(result.get("result", "unknown"))
-		status_updated.emit("Жертва не удалась: %s" % result.get("result", "unknown"))
+		status_updated.emit(GameText.battle_sacrifice_failed(str(result.get("result", "unknown"))))
 
-## Кнопка «Защита»
 func request_defend() -> void:
 	if _paused:
 		return
@@ -370,54 +351,18 @@ func request_defend() -> void:
 		return
 
 	_battle_state.do_defend(_battle_state.active_unit)
-	status_updated.emit("🛡️ Защита: +20% DEF до конца раунда.")
+	status_updated.emit(GameText.battle_defend_bonus())
 	_morale_allowed = false
 	_on_action_completed()
 
 
-## Кнопка «Отступление».
-## Если запрос пришёл, пока ход игрока ещё не в WAITING_INPUT (TURN_START,
-## задержка начала хода, ход ИИ), отступление ставится в очередь и
-## выполняется при первом входе в WAITING_INPUT. Иначе ранний запрос
-## теряется: бой не завершён, без повтора RETREAT клиент зацикливается
-## на висящем бое.
 func request_retreat() -> void:
-	if _paused or _battle_state == null:
-		return
-	if _state == State.BATTLE_OVER or _battle_state.battle_over:
-		return
-	if _state != State.WAITING_INPUT:
-		_retreat_requested = true
-		status_updated.emit("Отступление: ждём начала хода игрока…")
-		return
-	_execute_retreat()
+	_retreat_policy.request()
 
 
-func _execute_retreat() -> void:
-	_retreat_requested = true
-	_battle_state.force_end(BattleState.Side.DEFENDER)
-	_transition_to(State.BATTLE_OVER)
-	status_updated.emit("Отступление! Потеря 50% стеков.")
-	_emit_end()
-
-
-## Принудительное отступление — аварийный выход из зависшего боя
-## (например, скрипт-ошибка рванула ход и стейт-машина не доходит до
-## WAITING_INPUT). В обход стейт-машины завершает бой отступлением.
-##
-## ВАЖНО: нельзя ставить guard по _battle_state.battle_over — боевой стейт
-## может быть уже завершён (последний удар убил последнего врага/юнита),
-## но end_battle ещё не испущен (executor завис в анимации). Тогда бой
-## «уже окончен» по стейту, но не завершён по стейт-машине — именно в этом
-## случае force_retreat обязан сработать. Идемпотентность даёт _end_emitted.
 func force_retreat() -> void:
-	if _battle_state == null or _end_emitted:
-		return
-	status_updated.emit("Принудительное отступление (бой завис).")
-	_execute_retreat()
+	_retreat_policy.force()
 
-
-## === Внутренняя логика ===
 
 func _advance_to_next_turn() -> void:
 	clear_highlights.emit()
@@ -432,11 +377,8 @@ func _advance_to_next_turn() -> void:
 		_on_action_completed()
 		return
 
-	# Reset charge tracker
 	u.distance_moved_this_turn = 0
 
-	# Статусы с длительностью 1 должны сработать до начала хода.
-	# Иначе длительность исчезнет до проверки stun, и ход не будет пропущен.
 	if u.is_stunned():
 		var stun_effect := -1
 		for eff in u.statuses.keys():
@@ -462,7 +404,7 @@ func _advance_to_next_turn() -> void:
 
 	if _battle_state.is_player_turn:
 		var token := _state_token
-		await get_tree().create_timer(BattleConfig.BATTLE_TURN_DELAY, false).timeout
+		await get_tree().create_timer(GameNumbers.BATTLE_TURN_DELAY, false).timeout
 
 		if _is_stale(token) or _paused:
 			return
@@ -498,7 +440,7 @@ func _run_ai_turn() -> void:
 
 	match decision.action:
 		BattleAI.Action.ATTACK:
-			_start_attack(_battle_state.active_unit, decision.attack_target)
+			_attack_seq.start_attack(_battle_state.active_unit, decision.attack_target)
 		BattleAI.Action.MOVE:
 			_execute_ai_move(decision)
 		_:
@@ -521,168 +463,11 @@ func _execute_ai_move(decision: BattleAI.AIResult) -> void:
 	execute_move.emit(u, decision.move_path)
 
 
-## === Боевая последовательность ===
-
-func _start_attack(atk: BattleState.BattleUnit, def: BattleState.BattleUnit) -> void:
-	if atk == null or def == null or not def.is_alive():
-		_on_action_completed()
-		return
-
-	if not atk.is_alive():
-		_on_action_completed()
-		return
-
-	var distance := HexUtils.hex_distance(atk.cell, def.cell)
-	var adjacent_enemy := _has_adjacent_enemy(atk)
-
-	var is_ranged_shot := atk.is_ranged() and distance > 1 and not adjacent_enemy
-	var is_melee_attack := not is_ranged_shot
-
-	_attack_attacker = atk
-	_attack_defender = def
-	_attack_is_melee = is_melee_attack
-	_attack_strikes_left = 2 if atk.is_double_strike() else 1
-	_retaliation_phase = false
-
-	var anim_state := State.PLAYER_ANIMATING if atk.side == BattleState.Side.ATTACKER else State.AI_ANIMATING
-	_transition_to(anim_state)
-
-	_do_next_attack_strike()
-
-
-func _do_next_attack_strike() -> void:
-	if _attack_attacker == null or _attack_defender == null:
-		_finish_attack_sequence()
-		return
-
-	if not _attack_attacker.is_alive() or not _attack_defender.is_alive():
-		_finish_attack_sequence()
-		return
-
-	if _attack_strikes_left <= 0:
-		_finish_attack_sequence()
-		return
-
-	_attack_strikes_left -= 1
-
-	var result := _battle_state.apply_attack(
-		_attack_attacker,
-		_attack_defender,
-		_attack_is_melee,
-		_rng,
-		not _retaliation_phase
-	)
-
-	if result.is_empty():
-		_finish_attack_sequence()
-		return
-
-	SoundManager.play_sfx_cue(&"battle_hit")
-	result["is_retaliation"] = _retaliation_phase
-
-	if result.get("luck", false):
-		floating_text.emit(_attack_defender.cell, "LUCK!", Color.RED)
-
-	execute_attack.emit(_attack_attacker, _attack_defender, result)
-
-
-func _finish_attack_sequence() -> void:
-	_attack_attacker = null
-	_attack_defender = null
-	_attack_strikes_left = 0
-	_retaliation_phase = false
-
-	_morale_allowed = true
-	_on_action_completed()
-
-
-func _can_retaliate() -> bool:
-	if _attack_attacker == null or _attack_defender == null:
-		return false
-
-	if not _attack_is_melee:
-		return false
-
-	if not _attack_defender.is_alive():
-		return false
-
-	if not _attack_attacker.is_alive():
-		return false
-
-	if _attack_defender.has_retaliated:
-		return false
-
-	if _attack_attacker.is_no_retaliation():
-		return false
-
-	return true
-
-
-func _start_retaliation() -> void:
-	var original_attacker := _attack_attacker
-	var original_defender := _attack_defender
-
-	_retaliation_phase = true
-	_attack_attacker = original_defender
-	_attack_defender = original_attacker
-	_attack_strikes_left = 1
-	_attack_is_melee = true
-
-	original_defender.has_retaliated = true
-
-	var anim_state := State.PLAYER_ANIMATING if _attack_attacker.side == BattleState.Side.ATTACKER else State.AI_ANIMATING
-	_transition_to(anim_state)
-
-	floating_text.emit(_attack_attacker.cell, "RETALIATION", Color.ORANGE)
-
-	_do_next_attack_strike()
-
-
-## === Мораль и вспомогательные ===
-
-func _try_morale_extra_turn() -> bool:
-	var unit := _battle_state.active_unit
-
-	if unit == null or not unit.is_alive():
-		return false
-
-	if not BattleRules.can_morale(unit):
-		return false
-
-	if _rng.randf() >= BattleRules.MORALE_CHANCE:
-		return false
-
-	floating_text.emit(unit.cell, "HIGH MORALE!", Color.YELLOW)
-
-	unit.has_moved = false
-
-	if _battle_state.is_player_turn:
-		_transition_to(State.WAITING_INPUT)
-	else:
-		_run_ai_turn()
-
-	return true
-
-
-func _has_adjacent_enemy(unit: BattleState.BattleUnit) -> bool:
-	if unit == null:
-		return false
-
-	var target_side := BattleState.Side.DEFENDER if unit.side == BattleState.Side.ATTACKER else BattleState.Side.ATTACKER
-
-	for nb in HexUtils.get_all_neighbors(unit.cell):
-		var u := _battle_state.get_unit_at(nb, target_side)
-		if u != null and u.is_alive():
-			return true
-
-	return false
-
-
 func _on_action_completed() -> void:
 	if _check_battle_over():
 		return
 
-	if _morale_allowed and _try_morale_extra_turn():
+	if _morale_allowed and _attack_seq.try_morale_extra_turn():
 		return
 
 	_morale_allowed = false
@@ -708,7 +493,7 @@ func _emit_end() -> void:
 	var surviving_atk: Array[UnitStack] = []
 	var surviving_def: Array[UnitStack] = _battle_state.get_survivors(BattleState.Side.DEFENDER)
 
-	if _retreat_requested and winner == BattleState.Side.DEFENDER:
+	if _retreat_policy.is_requested() and winner == BattleState.Side.DEFENDER:
 		surviving_atk = _battle_state.get_retreat_survivors(BattleState.Side.ATTACKER)
 	else:
 		surviving_atk = _battle_state.get_survivors(BattleState.Side.ATTACKER)
@@ -726,10 +511,8 @@ func _transition_to(new_state: State) -> void:
 	_state = new_state
 	_state_token += 1
 	phase_changed.emit(new_state)
-	# RETREAT, отправленный до начала хода игрока (ранний запрос): исполняем
-	# при входе в WAITING_INPUT — с любого пути входа (обычный ход, мораль).
-	if _retreat_requested and new_state == State.WAITING_INPUT:
-		_execute_retreat()
+	if _retreat_policy.is_requested() and new_state == State.WAITING_INPUT:
+		_retreat_policy._execute()
 
 
 func _is_stale(token: int) -> bool:

@@ -1,5 +1,4 @@
 extends BattleFlow
-## Тестовый фейк: фиксирует вызовы start_battle без инстанцирования сцены боя.
 var started := 0
 var last_enemy_army: Array = []
 

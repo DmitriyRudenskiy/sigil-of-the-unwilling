@@ -1,9 +1,13 @@
 class_name WorldSpawner
 extends Node2D
-## Спавн и удаление объектов мира: деревни, ресурсы, враги, сундуки.
 
-const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
-const ServiceLocator = preload("res://scripts/core/ServiceLocator.gd")
+const VillageEntityScene = preload("res://scenes/entities/VillageEntity.tscn")
+const ResourceEntityScene = preload("res://scenes/entities/ResourceEntity.tscn")
+const EnemyEntityScene = preload("res://scenes/entities/EnemyEntity.tscn")
+const ChestEntityScene = preload("res://scenes/entities/ChestEntity.tscn")
+const ScrollEntityScene = preload("res://scenes/entities/ScrollEntity.tscn")
+
+const MAP_RESOURCE_ICON_SCALE := 0.5  # 100px лист -> ~50px на карте
 
 var map: MapGenerator = null
 var rng: RandomNumberGenerator = null
@@ -15,18 +19,9 @@ var _chest_nodes: Dictionary = {}
 var _chests: Dictionary = {}
 var _scroll_nodes: Dictionary = {}
 var _scrolls: Dictionary = {}
-var _services: ServiceContainer = null
-## fog-of-war: карта видимости. null — без тумана (все ноды видны).
 var fog_vis = null
 
 
-func setup_services(services: ServiceContainer) -> void:
-	_services = services
-
-
-## fog-of-war: (пере)применить видимость всех нод мира. Вызывается на
-## каждом перерисе тумана (MapRenderer.fog_refreshed) — ноды на невидимых
-## клетках прячутся, чтобы не висели над «стертыми» тайлами.
 func apply_fog_visibility(vis) -> void:
 	fog_vis = vis
 	if vis == null:
@@ -43,8 +38,6 @@ func apply_fog_visibility(vis) -> void:
 		_village_nodes[cell].visible = vis.is_visible(cell)
 
 
-## Аудит #15: кэш placeholder-текстур — картинки константные, строим один
-## раз на спавнер, а не на каждую клетку (Image.create + fill_rect).
 var _sprite_cache: Dictionary = {}
 
 
@@ -64,9 +57,6 @@ func spawn_all() -> void:
 	_spawn_scrolls()
 
 
-## resource-collection-popup: res_type ресурсной ноды на клетке (meta из
-## _spawn_resources). Вызывается ДО remove_resource_at — после удаления
-## нода исчезает. -1 — ноды нет.
 func get_res_type_at(cell: Vector2i) -> int:
 	var node: Node2D = _resource_nodes.get(cell)
 	if node == null:
@@ -81,7 +71,6 @@ func remove_resource_at(cell: Vector2i) -> bool:
 	var node: Node2D = _resource_nodes[cell]
 	node.queue_free()
 	_resource_nodes.erase(cell)
-	# Синхронизируем модель, чтобы GET_STATE (map_resources) отражал сбор.
 	if map != null and map.resource_cells.has(cell):
 		map.resource_cells.erase(cell)
 
@@ -99,7 +88,6 @@ func remove_enemy_at(cell: Vector2i) -> bool:
 	return true
 
 
-## enemy-world-ai: перенос визуала вражеского стека при его ходе.
 func move_enemy_visual(from_cell: Vector2i, to_cell: Vector2i) -> void:
 	if map == null or not _enemy_nodes.has(from_cell):
 		return
@@ -112,7 +100,6 @@ func move_enemy_visual(from_cell: Vector2i, to_cell: Vector2i) -> void:
 		node.visible = fog_vis.is_visible(to_cell)
 
 
-## enemy-world-ai: создание визуала нового стека (респаун/рост).
 func spawn_enemy_visual(cell: Vector2i, army: Array) -> void:
 	if map == null or _enemy_nodes.has(cell) or army.is_empty():
 		return
@@ -139,10 +126,9 @@ func capture_village(cell: Vector2i) -> bool:
 
 func _spawn_villages() -> void:
 	for cell in map.village_cells:
-		var v := Node2D.new()
+		var v = VillageEntityScene.instantiate()
 		v.set_meta("cell", cell)
-		var sp := Sprite2D.new()
-		# Triangle + rectangle village placeholder (аудит #15: кэш текстуры)
+		var sp = v.get_node("Sprite")
 		sp.texture = _cached_texture("village", func() -> ImageTexture:
 			var img := Image.create(48, 48, false, Image.FORMAT_RGBA8)
 			for y in 20:
@@ -151,33 +137,27 @@ func _spawn_villages() -> void:
 					img.fill_rect(Rect2i(24 - half_w, y, half_w * 2, 1), Color(0.7, 0.2, 0.1))
 			img.fill_rect(Rect2i(10, 20, 29, 22), Color(0.6, 0.5, 0.3))
 			return ImageTexture.create_from_image(img))
-		sp.z_index = 5
-		v.add_child(sp)
-		var flag := Label.new()
-		flag.name = "Flag"
-		flag.text = "🚩"
-		flag.add_theme_font_size_override("font_size", 16)
-		flag.position = Vector2(18, -20)
-		v.add_child(flag)
 		v.position = map.map_to_local(cell)
 		add_child(v)
 		_village_nodes[cell] = v
 
 
 func _spawn_resources() -> void:
-	var icons := ["🪵", "🧪", "🪨", "🟡", "🔷", "💎", "🪙"]
 	for cell in map.resource_cells:
 		var res_type: int = map.resource_cells[cell]
-		var r := Node2D.new()
+		var r = ResourceEntityScene.instantiate()
 		r.set_meta("cell", cell)
 		r.set_meta("res_type", res_type)
-		var lbl := Label.new()
-		lbl.text = icons[res_type] if res_type < icons.size() else "?"
-		lbl.add_theme_font_size_override("font_size", 24)
-		lbl.position = Vector2(-12, -12)
-		r.add_child(lbl)
+		var sp = r.get_node("Icon")
+		sp.texture = ResourceAtlas.texture_for_type(res_type)
+		if sp.texture == null:
+			sp.texture = PlaceholderTexture.circle(
+				16,
+				ResourceIcons.get_color(ResourceIcons.res_type_id(res_type)),
+				Color(0.12, 0.10, 0.08)
+			)
+		sp.scale = Vector2(MAP_RESOURCE_ICON_SCALE, MAP_RESOURCE_ICON_SCALE)
 		r.position = map.map_to_local(cell)
-		r.z_index = 6
 		add_child(r)
 		_resource_nodes[cell] = r
 
@@ -194,10 +174,9 @@ func _spawn_enemies() -> void:
 func _make_enemy_node(cell: Vector2i, army: Array) -> Node2D:
 	if army.is_empty():
 		return null
-	var e := Node2D.new()
+	var e = EnemyEntityScene.instantiate()
 	e.set_meta("enemy_cell", cell)
-	var sp := Sprite2D.new()
-
+	var sp = e.get_node("Sprite")
 	var first_unit = army[0]
 	var key: String = first_unit.get_key()
 	var portrait_path := UnitSprites.find_portrait_small(key)
@@ -209,14 +188,10 @@ func _make_enemy_node(cell: Vector2i, army: Array) -> Node2D:
 			Color(0.7, 0.15, 0.1),
 			Color(0.2, 0.05, 0.05)
 		)
-	sp.z_index = 6
-	e.add_child(sp)
 	e.position = map.map_to_local(cell)
 	return e
 
 
-## Аудит #23: публичные клетки сундуков (WorldBootstrap использует для
-## размещения столиц/городов — не ставить город на сундук).
 func chest_cells() -> Array:
 	return _chests.keys()
 
@@ -238,21 +213,23 @@ func get_chest_at(cell: Vector2i) -> ArtifactChest:
 func get_enemy_defender_bonus() -> Dictionary:
 	var r = rng if rng != null else RandomNumberGenerator.new()
 	if rng == null:
-		r.seed = MapConfig.EDITOR_SEED
-	return {"defense": r.randi_range(MapConfig.MAP_ENEMY_DEFENSE_BONUS_MIN, MapConfig.MAP_ENEMY_DEFENSE_BONUS_MAX)}
+		r.seed = GameNumbers.EDITOR_SEED
+	return {"defense": r.randi_range(GameNumbers.MAP_ENEMY_DEF_BONUS_MIN, GameNumbers.MAP_ENEMY_DEF_BONUS_MAX)}
 
 
 func _spawn_chests() -> void:
-
 	var chest_rng := rng if rng != null else RandomNumberGenerator.new()
 	if rng == null:
-		chest_rng.seed = MapConfig.EDITOR_SEED
+		chest_rng.seed = GameNumbers.EDITOR_SEED
+	var art_reg: Node = Services.resolve(&"artifacts")
+	if art_reg == null:
+		return
 
 	var placed := 0
 	var attempts := 0
-	while placed < MapConfig.CHEST_COUNT and attempts < MapConfig.CHEST_PLACE_ATTEMPTS:
+	while placed < GameNumbers.CHEST_COUNT and attempts < GameNumbers.CHEST_PLACE_ATTEMPTS:
 		attempts += 1
-		var cell := Vector2i(chest_rng.randi_range(MapConfig.SPAWN_CHEST_MIN_BORDER, map.map_width - 4), chest_rng.randi_range(MapConfig.SPAWN_CHEST_MIN_BORDER, map.map_height - 4))
+		var cell := Vector2i(chest_rng.randi_range(GameNumbers.SPAWN_CHEST_MIN_BORDER, map.map_width - 4), chest_rng.randi_range(GameNumbers.SPAWN_CHEST_MIN_BORDER, map.map_height - 4))
 		if not map.is_walkable(cell):
 			continue
 		if map.enemy_stacks.has(cell) or map.resource_cells.has(cell) or cell in map.village_cells:
@@ -266,7 +243,6 @@ func _spawn_chests() -> void:
 				break
 		if nearby_enemy:
 			continue
-		var art_reg: Node = ServiceLocator.resolve(null, &"artifacts")
 		var artifact: Artifact = art_reg.random_of_rarity(Artifact.Rarity.MINOR, chest_rng)
 		if artifact == null:
 			continue
@@ -274,40 +250,39 @@ func _spawn_chests() -> void:
 		chest.id = "chest_%s" % cell
 		chest.artifact = artifact
 		chest.cell = cell
-		chest.gold_reward = chest_rng.randi_range(MapConfig.CHEST_GOLD_MIN, MapConfig.CHEST_GOLD_MAX)
+		chest.gold_reward = chest_rng.randi_range(GameNumbers.CHEST_GOLD_MIN, GameNumbers.CHEST_GOLD_MAX)
 		_chests[cell] = chest
-		var n := Node2D.new()
+		var n = ChestEntityScene.instantiate()
 		n.position = map.map_to_local(cell)
-		n.z_index = 7
-		var sp := Sprite2D.new()
-		# Аудит #15: кэш текстуры (изображение константное)
+		var sp = n.get_node("Sprite")
 		sp.texture = _cached_texture("chest", func() -> ImageTexture:
 			var img := Image.create(32, 24, false, Image.FORMAT_RGBA8)
 			img.fill_rect(Rect2i(0, 0, 32, 4), Color(0.8, 0.6, 0.2))
 			img.fill_rect(Rect2i(0, 4, 32, 15), Color(0.6, 0.4, 0.1))
 			img.fill_rect(Rect2i(0, 19, 32, 5), Color(0.4, 0.25, 0.08))
 			return ImageTexture.create_from_image(img))
-		n.add_child(sp)
 		add_child(n)
 		_chest_nodes[cell] = n
 		placed += 1
 
 
-# ==================== REMOVAL (for save/load) ====================
-# These are handled by the primary removal functions above.
-# (Removed duplicate definitions of remove_enemy_at, remove_resource_at, remove_chest_at, capture_village)
 
 
-# ==================== SCROLLS ====================
 
 func _spawn_scrolls() -> void:
 	var scroll_count: int = max(2, map.map_width / 3)
 	var placed: int = 0
 	var attempts: int = 0
 	var chest_rng := rng if rng != null else RandomNumberGenerator.new()
-	while placed < scroll_count and attempts < MapConfig.SPAWN_SCROLL_MAX_ATTEMPTS:
+	var spell_reg: Node = Services.resolve(&"spells")
+	if spell_reg == null:
+		return
+	var all_spells: Array = spell_reg.get_all_spells()
+	if all_spells.is_empty():
+		return
+	while placed < scroll_count and attempts < GameNumbers.SPAWN_SCROLL_MAX_ATTEMPTS:
 		attempts += 1
-		var cell := Vector2i(chest_rng.randi_range(MapConfig.SPAWN_CHEST_MIN_BORDER, map.map_width - 4), chest_rng.randi_range(MapConfig.SPAWN_CHEST_MIN_BORDER, map.map_height - 4))
+		var cell := Vector2i(chest_rng.randi_range(GameNumbers.SPAWN_CHEST_MIN_BORDER, map.map_width - 4), chest_rng.randi_range(GameNumbers.SPAWN_CHEST_MIN_BORDER, map.map_height - 4))
 		if not map.is_walkable(cell):
 			continue
 		if map.enemy_stacks.has(cell) or map.resource_cells.has(cell) or cell in map.village_cells:
@@ -316,24 +291,17 @@ func _spawn_scrolls() -> void:
 			continue
 		if _scrolls.has(cell):
 			continue
-		var spell_reg: Node = ServiceLocator.resolve(null, &"spells")
-		var all_spells: Array = spell_reg.get_all_spells()
-		if all_spells.is_empty():
-			continue
 		var spell = all_spells[chest_rng.randi() % all_spells.size()]
 		_scrolls[cell] = spell.id
-		var n := Node2D.new()
+		var n = ScrollEntityScene.instantiate()
 		n.position = map.map_to_local(cell)
-		n.z_index = 6
-		var sp := Sprite2D.new()
-		# Аудит #15: кэш текстуры (изображение константное)
+		var sp = n.get_node("Sprite")
 		sp.texture = _cached_texture("scroll", func() -> ImageTexture:
 			var img := Image.create(24, 32, false, Image.FORMAT_RGBA8)
 			img.fill_rect(Rect2i(0, 0, 24, 32), Color(0.3, 0.15, 0.5))
 			img.fill_rect(Rect2i(0, 0, 4, 32), Color(0.5, 0.3, 0.7))
 			img.fill_rect(Rect2i(20, 0, 4, 32), Color(0.5, 0.3, 0.7))
 			return ImageTexture.create_from_image(img))
-		n.add_child(sp)
 		add_child(n)
 		_scroll_nodes[cell] = n
 		placed += 1

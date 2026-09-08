@@ -1,7 +1,5 @@
-## scripts/data/templates/t15_dispel_draw.gd
 class_name T15DispelDraw
 extends RefCounted
-## T15: DISPEL & DRAW (аудит #8: вынесен из TemplateEngine).
 
 const _Utils = preload("res://scripts/data/SpellUtils.gd")
 

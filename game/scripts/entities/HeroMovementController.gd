@@ -1,19 +1,16 @@
 extends Node
 class_name HeroMovementController
-## Hero movement: Dijkstra pathfinding, float movement points, terrain costs.
 
 signal hero_moved(cell: Vector2i)
+signal movement_finished(cell: Vector2i)
 signal movement_points_changed(current: float, max_val: float)
 signal path_previewed(text: String)
 signal hero_entered_village(cell: Vector2i)
 signal step_taken(cost: float)
 signal reach_preview_changed(pts: Array[Vector2i], dist: Dictionary, mp: float)
 signal reach_preview_cleared
-## Эмитируется при фиксации/отмене маршрута автохода.
-## committed=true — маршрут зафиксирован (готов к автоходу), committed=false — отменён.
 signal planned_route_changed(committed: bool)
 
-## Signals to HeroController facade — replaces _parent back-references.
 signal facing_changed(delta: Vector2i)
 signal move_requested(target: Vector2, duration: float, callback: Callable)
 signal request_hide_path_visual
@@ -31,20 +28,16 @@ const _TerrainCostTable = preload("res://scripts/data/TerrainCostTable.gd")
 @export var max_move_points: float = 10.0
 
 var current_cell: Vector2i = Vector2i(5, 5)
-var previous_cell: Vector2i = Vector2i(-1, -1)  # клетка, с которой герой сделал последний шаг
+var previous_cell: Vector2i = Vector2i(-1, -1)  
 var move_points: float = 10.0
 var path: Array[Vector2i] = []
 var pending_cell: Vector2i = Vector2i(-1, -1)
 var pending_path: Array[Vector2i] = []
 var is_moving: bool = false
 
-## Зафиксированный многоклеточный маршрут автохода (необрезанный, до цели).
-## Голова — клетка, куда герой только что пришёл (равна current_cell после шага).
-## Сохраняется между ходами; см. auto_follow_at_turn_start().
 var planned_path: Array[Vector2i] = []
 
 var _map_gen: MapGenerator
-# _parent removed — use signals instead (R2)
 
 
 func get_map_gen() -> MapGenerator:
@@ -68,21 +61,17 @@ func _place_hero_on_map() -> void:
 				return
 
 
-func _terrain_cost(cell: Vector2i) -> float:
+func _terrain_cost(cell: Vector2i, levitation: bool = false) -> float:
 	if cell.x < 0 or cell.x >= _map_gen.map_width or cell.y < 0 or cell.y >= _map_gen.map_height:
 		return INF
 
-	# fog-of-war: неразведённые клетки непроходимы — единый гейт для
-	# Dijkstra-reach (предпросмотр) и всех стоимостей; A* тот же гейт в _base_blocked.
 	var vis_fog := _map_gen.visibility
 	if vis_fog != null and not vis_fog.is_explored(cell):
 		return INF
 
-	var levitation := _has_artifact_effect(&"boots_levitation")
 	if not _map_gen.is_walkable_with_effects(cell, levitation):
 		return INF
 
-	# int-API: без String-аллокаций в hot path Dijkstra
 	var terrain_id := _map_gen.get_terrain_id(cell)
 	return _TerrainCostTable.get_cost_with_effects_by_id(terrain_id, levitation)
 
@@ -95,17 +84,13 @@ func on_map_clicked(cell: Vector2i) -> void:
 		return
 
 	if cell == pending_cell and pending_path.size() > 1:
-		# Второй клик — состоятельное поведение по состоянию маршрута (D1).
 		if planned_path.is_empty():
-			# Маршрут ещё не зафиксирован — фиксируем полный (необрезанный) путь
-			# до цели как маршрут автохода; герой не двигается сразу.
 			var full: Array[Vector2i] = _full_path(cell)
 			if full.size() >= 2:
 				planned_path = full
 				planned_route_changed.emit(true)
 			return
 		else:
-			# Маршрут уже зафиксирован — немедленное движение вперёд.
 			path = planned_path.duplicate()
 			pending_cell = Vector2i(-1, -1)
 			pending_path = []
@@ -115,7 +100,6 @@ func on_map_clicked(cell: Vector2i) -> void:
 			return
 
 	if move_points <= 0:
-		# Контакт с врагом бесплатен: атака не тратит ОД.
 		if _is_contact_position(cell):
 			hero_moved.emit(current_cell)
 			path_previewed.emit("⚔️ Контакт с врагом — начинается бой")
@@ -126,8 +110,6 @@ func on_map_clicked(cell: Vector2i) -> void:
 	var affordable = _get_affordable_path(cell)
 	if affordable.size() < 2:
 		if _is_contact_position(cell):
-			# Герой уже стоит рядом с вражеским стеком — клик атакует.
-			# Повторный hero_moved триггерит check_enemy_contact → бой.
 			hero_moved.emit(current_cell)
 			path_previewed.emit("⚔️ Контакт с врагом — начинается бой")
 			return
@@ -137,9 +119,11 @@ func on_map_clicked(cell: Vector2i) -> void:
 
 	pending_cell = cell
 	pending_path = affordable
+
 	
-	# Need the full dist map for the reach preview signal (array → dict)
-	var cost_fn := func(c: Vector2i) -> float: return _terrain_cost(c)
+	
+	var levitation := _has_artifact_effect(&"boots_levitation")
+	var cost_fn := func(c: Vector2i) -> float: return _terrain_cost(c, levitation)
 	var dist_arr := _HexPathfinding.dijkstra(current_cell, move_points, cost_fn, _map_gen.map_width, _map_gen.map_height)
 	var dist: Dictionary = {}
 	for i in dist_arr.size():
@@ -147,30 +131,20 @@ func on_map_clicked(cell: Vector2i) -> void:
 			dist[_HexUtils.idx_to_pos(i, _map_gen.map_width)] = dist_arr[i]
 	reach_preview_changed.emit(affordable, dist, move_points)
 
-	# Marker at clicked cell (emitted via signal, facade handles it)
 	if _map_gen.has_valid_tilemap():
 		request_show_marker.emit(_map_gen.map_to_local(cell))
 
 	var cost := 0.0
 	for i in range(1, affordable.size()):
-		cost += _terrain_cost(affordable[i])
+		cost += _terrain_cost(affordable[i], levitation)
 	
 	var remaining := move_points - cost
 	var suffix := ""
-	# To check if path was trimmed, we'd need the full path. 
-	# For brevity in AI-led fixes, let's simplify the preview text a bit or keep it if we have the full path.
-	# Since we extracted _get_affordable_path, let's make it return both.
 	
 	path_previewed.emit("Путь: %d кл., стоимость: %.1f, останется: %.1f. Клик ещё раз — идти. ПКМ — отмена." % [
 		affordable.size() - 1, cost, remaining])
 
 
-## Запускает движение к `cell`. Если цель дальше ОД —
-## герой идёт в её сторону, пока хватает очков.
-## Если цель занята вражеским стеком — герой подходит к нему вплотную
-## (бой триггерится контактом, на клетку врага герой не вступает).
-## true — движение начато (или контакт уже есть); false — пути нет / уже идёт.
-## Клиент, которому важно знать, дойдёт ли герой, должен спросить can_reach() ДО вызова.
 func move_to_cell(cell: Vector2i) -> bool:
 	if is_moving or _map_gen == null:
 		return false
@@ -179,8 +153,6 @@ func move_to_cell(cell: Vector2i) -> bool:
 
 	var affordable := _get_affordable_path(cell)
 	if affordable.size() < 2:
-		# Герой уже в контактной позиции с вражеским стеком (стоят рядом):
-		# повторный hero_moved триггерит check_enemy_contact → бой.
 		if _is_contact_position(cell):
 			hero_moved.emit(current_cell)
 			return true
@@ -191,8 +163,6 @@ func move_to_cell(cell: Vector2i) -> bool:
 	return true
 
 
-## True, если `cell` полностью достижим с текущими точками движения.
-## Для вражеской цели — «достигнута контактная позиция» (соседняя клетка).
 func can_reach(cell: Vector2i) -> bool:
 	if cell == current_cell:
 		return true
@@ -200,13 +170,11 @@ func can_reach(cell: Vector2i) -> bool:
 	if goal == Vector2i(-1, -1):
 		return false
 	if goal == current_cell:
-		return true  # уже вплотную к врагу — контакт немедленный
+		return true  
 	var affordable := _get_affordable_path(cell)
 	return affordable.size() >= 2 and affordable.back() == goal
 
 
-## Диагностика недостижимости: "" — достижимо, "unreachable" — пути нет,
-## "insufficient_mp" — путь есть, но не хватает очков движения.
 func reach_problem(cell: Vector2i) -> String:
 	if cell == current_cell:
 		return ""
@@ -216,12 +184,10 @@ func reach_problem(cell: Vector2i) -> String:
 	if goal == current_cell:
 		return ""
 	if _full_path_to(goal).size() < 2:
-		return "unreachable"  # пути нет в принципе (а не только не хватает ОД)
+		return "unreachable"  
 	return "" if can_reach(cell) else "insufficient_mp"
 
 
-## Полный A* путь без обрезки по ОД (пусто, если пути нет).
-## Вражеские клетки непроходимы: в цель врага путь ведёт до соседней клетки.
 func _full_path(cell: Vector2i) -> Array[Vector2i]:
 	if _map_gen == null:
 		return []
@@ -230,17 +196,10 @@ func _full_path(cell: Vector2i) -> Array[Vector2i]:
 		return []
 	if goal == current_cell:
 		return [goal]
-	# base передаём, если цель была вражеской (base уже посчитан в resolve);
-	# для обычной цели — один _base_blocked() внутри.
 	var base := _base_blocked() if _map_gen.enemy_stacks.has(cell) else {}
 	return _full_path_to(goal, base)
 
 
-## Клетки, закрытые для прокладки пути из-за врагов: сами вражеские клетки
-## и все соседние («аура»). Шаг на клетку аурy немедленно триггерит
-## contact → бой (WorldBattleCoordinator.check_enemy_contact), поэтому через
-## чужую ауру герой ходить не может. `exempt` исключается — это сама цель
-## финального подхода к врагу (контакт там ожидаем и желаем).
 func _enemy_aura_blocked(exempt: Vector2i) -> Dictionary:
 	var blocked: Dictionary = {}
 	var stacks := _map_gen.enemy_stacks
@@ -252,8 +211,6 @@ func _enemy_aura_blocked(exempt: Vector2i) -> Dictionary:
 	return blocked
 
 
-## True, если с `cell` контактирует только `enemy_cell` (не другие враги).
-## Подход через клетку, соседнюю и к другому врагу, запустит бой не с целью.
 func _contacts_only_with(cell: Vector2i, enemy_cell: Vector2i) -> bool:
 	var stacks := _map_gen.enemy_stacks
 	for nb in _HexUtils.get_all_neighbors(cell):
@@ -262,19 +219,14 @@ func _contacts_only_with(cell: Vector2i, enemy_cell: Vector2i) -> bool:
 	return true
 
 
-## Базовый blocked-набор (terrain + levitation) — считается один раз на
-## операцию; `_full_path_to` дублирует его и добавляет ауру врагов.
 func _base_blocked() -> Dictionary:
 	var blocked: Dictionary = _map_gen.get_blocked_cells().duplicate()
 	var levitation := _has_artifact_effect(&"boots_levitation")
 	if levitation:
-		# Remove water cells from blocked if hero has levitation
 		for c in blocked.keys():
 			var terrain_id: int = _map_gen.get_terrain_id(c)
 			if terrain_id == _HexUtils.Terrain.WATER:
 				blocked.erase(c)
-	# fog-of-war: неразведённые клетки непроходимы — не попадают в reach и
-	# не открываются (единая точка для всех путей/предпросмотров).
 	var vis := _map_gen.visibility
 	if vis != null:
 		for cell in _map_gen.terrain_grid:
@@ -283,61 +235,46 @@ func _base_blocked() -> Dictionary:
 	return blocked
 
 
-## A* до `goal` (goal не должен быть вражеской клеткой).
-## `base` — готовый base-blocked (экономит levitation-скан; пустой — посчитать).
-## ВАЖНО: `base` не мутируем (дубликуем) — merge ауры добавляет ключи,
-## и мутация отравила бы переиспользуемый набор при нескольких вызовах.
 func _full_path_to(goal: Vector2i, base: Dictionary = {}) -> Array[Vector2i]:
 	var blocked: Dictionary = base.duplicate() if not base.is_empty() else _base_blocked()
-	# Вражеские клетки и их аура — после levitation: ботинки левитации не
-	# дают встать на клетку врага (даже на воде) и не отменяют контактный бой.
 	blocked.merge(_enemy_aura_blocked(goal))
-	# A* prunes search via heuristic — much faster than full-map Dijkstra
 	return _HexPathfinding.find_path(current_cell, goal, blocked, _map_gen.map_width, _map_gen.map_height, "astar")
 
 
-## Если цель занята вражеским стеком, герой встанет на лучшую достижимую
-## соседнюю клетку (контакт триггерит бой). Возвращает фактическую цель пути;
-## Vector2i(-1,-1) — ни одна соседняя клетка не достижима.
 func _resolve_enemy_goal(goal: Vector2i) -> Vector2i:
 	var stacks := _map_gen.enemy_stacks
 	if not stacks.has(goal):
 		return goal
 	var levitation := _has_artifact_effect(&"boots_levitation")
-	# Один base-blocked на все до 6 кандидатов (ранее — пересчёт на каждого)
 	var base := _base_blocked()
 	var best := Vector2i(-1, -1)
 	var best_cost := INF
 	for nb in _HexUtils.get_all_neighbors(goal):
 		if not _map_gen.is_walkable_with_effects(nb, levitation) or stacks.has(nb):
 			continue
-		# Кандидат должен контактировать только с целевым врагом: иначе
-		# contact запустит бой с соседним врагом, а не с целью.
 		if not _contacts_only_with(nb, goal):
 			continue
 		var c: float
 		if nb == current_cell:
-			c = 0.0  # уже на контактной позиции
+			c = 0.0  
 		else:
 			var p := _full_path_to(nb, base)
 			if p.size() < 2:
 				continue
-			c = _path_cost(p)
+			c = _path_cost(p, levitation)
 		if c < best_cost:
 			best_cost = c
 			best = nb
 	return best
 
 
-## Стоимость пути в очках движения (первая клетка — текущая, не учитывается).
-func _path_cost(path: Array[Vector2i]) -> float:
+func _path_cost(path: Array[Vector2i], levitation: bool = false) -> float:
 	var c := 0.0
 	for i in range(1, path.size()):
-		c += _terrain_cost(path[i])
+		c += _terrain_cost(path[i], levitation)
 	return c
 
 
-## Герой стоит вплотную к вражескому стеку на `cell` (контактная позиция).
 func _is_contact_position(cell: Vector2i) -> bool:
 	if _map_gen == null:
 		return false
@@ -350,8 +287,6 @@ func _is_contact_position(cell: Vector2i) -> bool:
 	return false
 
 
-## Перемещает героя на `cell` без анимации (восстановление позиции
-## после отступления из боя). Сигнал hero_moved идёт — мир/камера синхронны.
 func teleport(cell: Vector2i) -> void:
 	if _map_gen == null or not _map_gen.is_walkable(cell):
 		return
@@ -370,8 +305,9 @@ func _get_affordable_path(cell: Vector2i) -> Array[Vector2i]:
 
 	var cumulative: float = 0.0
 	var affordable: Array[Vector2i] = [found[0]]
+	var levitation := _has_artifact_effect(&"boots_levitation")
 	for i in range(1, found.size()):
-		var step_cost := _terrain_cost(found[i])
+		var step_cost := _terrain_cost(found[i], levitation)
 		if cumulative + step_cost > move_points + 0.001:
 			break
 		cumulative += step_cost
@@ -386,8 +322,6 @@ func cancel_pending(clear_text: bool = true) -> void:
 	if clear_text:
 		path_previewed.emit("")
 
-## Отменить зафиксированный маршрут автохода (ПКМ / кнопка отмены).
-## Очищает planned_path и эмитирует planned_route_changed(false).
 func cancel_planned_path() -> void:
 	if planned_path.is_empty():
 		return
@@ -395,7 +329,6 @@ func cancel_planned_path() -> void:
 	planned_route_changed.emit(false)
 
 
-## Установить флаг движения и уведомить шину (контекстный курсор WALK).
 func _set_moving(moving: bool) -> void:
 	is_moving = moving
 	GameEventBus.hero_moving_changed.emit(moving)
@@ -412,28 +345,28 @@ func _move_next_step() -> void:
 	if path.size() < 2:
 		GameLogger.trace("🏁 Path exhausted. Stopping.", "Movement")
 		_set_moving(false)
-		# Достигли последней клетки маршрута (цели) — очистить зафиксированный маршрут.
 		if not planned_path.is_empty():
 			planned_path.clear()
 			planned_route_changed.emit(false)
 		path.clear()
 		reach_preview_cleared.emit()
 		request_idle_animation.emit()
+		movement_finished.emit(current_cell)
 		return
 
 	var next_cell := path[1]
 	GameLogger.trace("➡️ Moving to %s. Remaining path: %d" % [str(next_cell), path.size()], "Movement")
 	path.remove_at(0)
 
-	var step_cost: float = _terrain_cost(next_cell)
+	var levitation := _has_artifact_effect(&"boots_levitation")
+	var step_cost: float = _terrain_cost(next_cell, levitation)
 	if step_cost >= INF:
-		# Клетка стала непроходимой во время движения (динамическая блокировка).
-		# Останавливаемся штатно, не портя move_points (-INF застревал героя до конца хода).
 		GameLogger.trace("⛔ Path blocked at %s — stopping" % str(next_cell), "Movement")
 		_set_moving(false)
 		path.clear()
 		reach_preview_cleared.emit()
 		request_idle_animation.emit()
+		movement_finished.emit(current_cell)
 		return
 	move_points -= step_cost
 	movement_points_changed.emit(move_points, get_daily_movement_points())
@@ -461,25 +394,22 @@ func _on_step_complete(cell: Vector2i) -> void:
 	_emit_position_update()
 	hero_moved.emit(cell)
 
-	# Pickup resource if present (emitted via signal)
 	if _map_gen and _map_gen.resource_cells.has(cell):
 		var res_type: int = _map_gen.resource_cells[cell]
 		request_resource_pickup.emit(res_type)
 		_map_gen.resource_cells.erase(cell)
 
-	# Check village entry
 	if _map_gen and cell in _map_gen.village_cells:
 		hero_entered_village.emit(cell)
 
 	if move_points <= 0:
 		_set_moving(false)
-		# Остаток маршрута сохраняется на следующий ход (D3): path[0] == current_cell,
-		# поэтому planned_path = path.duplicate() держит голову = текущая клетка.
 		if not planned_path.is_empty():
 			planned_path = path.duplicate()
 		path.clear()
 		reach_preview_cleared.emit()
 		request_idle_animation.emit()
+		movement_finished.emit(current_cell)
 		return
 
 	_move_next_step()
@@ -487,27 +417,19 @@ func _on_step_complete(cell: Vector2i) -> void:
 
 func end_turn_movement() -> void:
 	_set_moving(false)
-	# Не очищаем planned_path: зафиксированный маршрут должен пережить сброс хода
-	# и автоходиться в начале следующего хода (D2).
 	if not planned_path.is_empty():
 		return
 	path.clear()
 	cancel_pending()
 
-## Автоход в начале хода (D2/D3/D5). Если маршрут зафиксирован (size >= 2) и
-## герой ещё не в цели — стартует движение по нему; в цели — очищает маршрут.
-## Если цель стал недостижимой (путь исчез/заблокирован) — не запускает движение,
-## сохраняя planned_path, пока маршрут перефиксирован (D5 — без падений/циклов).
 func auto_follow_at_turn_start() -> void:
 	if planned_path.size() < 2:
 		return
 	var goal: Vector2i = planned_path.back()
 	if current_cell == goal:
-		# Цель достигнута — очистить маршрут.
 		planned_path.clear()
 		planned_route_changed.emit(false)
 		return
-	# Деградация при исчезновении цели: не гонить бесконечный старт/останов.
 	if _full_path(goal).size() < 2:
 		return
 	path = planned_path.duplicate()
@@ -515,11 +437,14 @@ func auto_follow_at_turn_start() -> void:
 
 
 func force_stop() -> void:
+	var was_moving := is_moving
 	_set_moving(false)
 	path.clear()
 	request_kill_tween.emit()
 	reach_preview_cleared.emit()
 	request_idle_animation.emit()
+	if was_moving:
+		movement_finished.emit(current_cell)
 
 
 func _emit_position_update() -> void:
@@ -530,8 +455,6 @@ func _emit_position_update() -> void:
 
 
 func _has_artifact_effect(effect: StringName) -> bool:
-	# Called by _terrain_cost — the facade (HeroController) should wire this.
-	# For now, emit a signal or use a callback. We pass it via a stored callback.
 	return _artifact_effect_fn.call(effect) if _artifact_effect_fn.is_valid() else false
 
 var _artifact_effect_fn: Callable

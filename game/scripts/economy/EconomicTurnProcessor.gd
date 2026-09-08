@@ -1,19 +1,5 @@
 class_name EconomicTurnProcessor
 extends TurnPhaseProcessor
-## Фаза 1 (M1: Экономика). Исполняется ПОСЛЕ монолита городов
-## (City.process_turn) — добавочная: не трогает легасийный
-## city.storage, работает через city.resource_ctx.
-##
-## Порядок внутри фазы:
-##  1. Авто-ресурсы — дрова/камень по GameSettings (базовый уклад мира;
-##     они — вход для цепочек, поэтому идут ПЕРВЫМИ);
-##  2. Цепочки производства зданий (production_chain) — входы списываются
-##     из resource_ctx, выходы добавляются туда же; рабочих считает
-##     здание (assigned_workers, Спринт 7: WorkerAssignment);
-##  3. Поддержка (upkeep) — списывается ресурс на содержание зданий.
-##
-## Внешние эффекты (GameEventBus/UI) не вызываются здесь: сигналы
-## процессора пробрасывает интеграционный слой (WorldBootstrap).
 
 signal production_completed(city_uid: int, chain_id: StringName, outputs: Dictionary)
 signal upkeep_failed(building_uid: int, resource_id: StringName)
@@ -55,33 +41,27 @@ func _process_city(city: City, _ctx: TurnContext) -> Dictionary:
 	var res := city.ensure_resource_ctx()
 	var report := {"uid": city.uid, "chains": 0, "upkeep_ok": 0, "upkeep_failed": 0, "auto": {}}
 
-	# 1. Авто-ресурсы (базовый уклад) × масштабный бонус (M3: город).
 	var auto: Dictionary = {}
-	auto[&"wood"] = res.add(
-		&"wood", float(MapConfig.RESOURCE_AUTO_WOOD_PER_DAY) * city.auto_resource_mult)
-	auto[&"stone"] = res.add(
-		&"stone", float(MapConfig.RESOURCE_AUTO_STONE_PER_DAY) * city.auto_resource_mult)
+	var wood_id: StringName = ResourceType.to_name(ResourceType.ID.WOOD)
+	var stone_id: StringName = ResourceType.to_name(ResourceType.ID.STONE)
+	auto[wood_id] = res.add(
+		wood_id, float(GameNumbers.RESOURCE_AUTO_WOOD) * city.auto_resource_mult)
+	auto[stone_id] = res.add(
+		stone_id, float(GameNumbers.RESOURCE_AUTO_STONE) * city.auto_resource_mult)
 	report["auto"] = auto
 
-	# 2. Цепочки производства.
 	for building in city.buildings:
 		if building == null:
 			continue
 		var chain: ProductionChain = building.get_production_chain()
 		if chain == null:
 			continue
-		# Спринт 7/8: рабочие, НАЗНАЧЕННЫЕ на это здание (WorkerAssignment),
-		# а не всё рабочее население города.
 		var workers: int = building.assigned_workers
-		# M3: логистика (дистанция/дороги) × зона здания (агломерация и т.п.).
-		# Спринт 8: × adjacency-бонус соседей (мельница у полей, кузница у рудника).
 		var logistics: float = city.get_logistics_multiplier(building.cell) \
 			* building.zone_multiplier \
 			* AdjacencySystem.building_output_mult(city, building)
 		var outputs: Dictionary = chain.execute(res, workers, logistics)
 		if outputs.is_empty():
-			# Цепочка не отработала (нет рабочих или нехватка входов);
-			# входы не списаны — execute() атомарен.
 			continue
 		for out_id in outputs:
 			var added: float = res.add(out_id, float(outputs[out_id]))
@@ -90,14 +70,12 @@ func _process_city(city: City, _ctx: TurnContext) -> Dictionary:
 		report["chains"] += 1
 		production_completed.emit(city.uid, chain.id, outputs)
 
-	# 3. Поддержка.
 	for building in city.buildings:
 		if building == null:
 			continue
 		var upkeep: Dictionary = building.get_upkeep()
 		if upkeep.is_empty():
 			continue
-		# M3: масштабная скидка на поддержку.
 		var effective: Dictionary = {}
 		for rid in upkeep:
 			effective[rid] = float(upkeep[rid]) * city.upkeep_mult

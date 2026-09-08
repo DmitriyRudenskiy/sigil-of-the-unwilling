@@ -1,13 +1,11 @@
 class_name WorldCamera
 extends Camera2D
-## Камера мира: движение, edge scroll, дискретный зум, кламп по краям карты.
 
-const CAM_SPEED := UIConfig.CAMERA_SPEED
-const EDGE := UIConfig.CAMERA_EDGE_ZONE
-const ZOOM_TWEEN_DURATION := UIConfig.CAMERA_ZOOM_TWEEN_SEC
+const CAM_SPEED := GameNumbers.CAMERA_SPEED
+const EDGE := GameNumbers.CAMERA_EDGE_ZONE
+const ZOOM_TWEEN_DURATION := GameNumbers.CAMERA_ZOOM_TWEEN_SEC
 
-# Map bounds in world coords — set after map generation
-var _map_rect: Rect2 = Rect2(0, 0, 10000, 10000)  # generous default
+var _map_rect: Rect2 = Rect2(0, 0, 10000, 10000)  
 var _tween: Tween = null
 var _settings: Node = null
 
@@ -33,7 +31,6 @@ func step_zoom(direction: int) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	# +/- zoom steps (no scroll zoom)
 	if _settings == null:
 		return
 	var s = _settings
@@ -85,11 +82,9 @@ func _process(delta: float) -> void:
 	if mv != Vector2.ZERO:
 		position += mv.normalized() * CAM_SPEED * delta / zoom.x
 
-	# Clamp every frame
 	_clamp_position()
 
 
-# --- Zoom ---
 
 func set_zoom_level(value: float) -> void:
 	_animate_zoom(value)
@@ -109,7 +104,6 @@ func _animate_zoom(value: float) -> void:
 	_tween.tween_callback(func(): _clamp_position())
 
 
-# --- Map bounds ---
 
 func set_map_rect(rect: Rect2) -> void:
 	_map_rect = rect
@@ -134,7 +128,6 @@ static func _clamp_val(v: float, mn: float, mx: float) -> float:
 	return clampf(v, mn, mx)
 
 
-# --- Positioning ---
 
 func center_on(world_pos: Vector2) -> void:
 	position = world_pos

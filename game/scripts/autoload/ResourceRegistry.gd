@@ -1,6 +1,5 @@
 extends Node
 class_name ResourceRegistry
-## Autoload: Resources. 11 hidden veins + 2 basic (wood/stone).
 
 const ResourceDef = preload("res://scripts/data/ResourceDef.gd")
 
@@ -14,17 +13,14 @@ func _ready() -> void:
 func reset() -> void:
 	_resources.clear()
 
-## Городские ресурсы цепочек производства (Спринт 8).
-## Не спавнятся на карте (пустые биомы) — только городские цепочки.
-## Ёмкость = вместимость амбара ResourceContext.
 const CITY_RESOURCE_CAPACITIES: Dictionary = {
-	&"grain": 20.0,      # зерно
-	&"flour": 20.0,      # мука
-	&"bread": 20.0,      # хлеб
-	&"ore": 20.0,        # руда
-	&"tools": 10.0,      # инструменты
-	&"gold": 50.0,       # золото (доход)
-	&"scholar_points": 10.0,  # баллы училища
+	&"grain": 20.0,      
+	&"flour": 20.0,      
+	&"bread": 20.0,      
+	&"ore": 20.0,        
+	&"tools": 10.0,      
+	&"gold": 50.0,       
+	&"scholar_points": 10.0,  
 }
 
 
@@ -32,84 +28,71 @@ func ensure_definitions() -> void:
 	if not _resources.is_empty():
 		return
 
-	# grass/forest — Oak
 	_add(&"oak", "Дуб", ["grass", "forest"], Rarity.COMMON,
 		&"nature_sense", "", false, [],
 		&"strong_strike", "", "", "", "", false,
 		3, 5, 2.0, "🪵")
 
-	# grass — Silver
 	_add(&"silver", "Серебро", ["grass"], Rarity.RARE,
 		&"keen_eye", "night", false, [],
 		&"precise_strike", "", "", "", "", false,
 		1, 2, 1.0, "🥈")
 
-	# sand — Quartz
 	_add(&"quartz", "Кварц", ["sand"], Rarity.COMMON,
 		&"navigation", "noon", false, [],
 		"", &"", &"worker", &"cart", "", false,
 		2, 4, 1.0, "💎")
 
-	# sand — Saltpeter
 	_add(&"saltpeter", "Селитра", ["sand"], Rarity.COMMON,
 		&"geology", "", false, [],
 		"", &"", &"worker", "", &"skin_protection", false,
 		2, 3, 1.0, "🧪")
 
-	# sand — Turquoise
 	_add(&"turquoise", "Бирюза", ["sand"], Rarity.RARE,
 		&"geology", "", false, [],
 		&"precise_strike", "", "", "", "", false,
 		1, 1, 0.5, "🟢")
 
-	# snow — Limonite
 	_add(&"limonite", "Лимонит", ["snow"], Rarity.COMMON,
-		&"", "", false, [],  # discovered via excavation: worker + shovel
-		"", &"", "", "", "", true,  # fire aura or fire spell
+		&"", "", false, [],  
+		"", &"", "", "", "", true,  
 		2, 3, 2.0, "🟤")
 
-	# snow — Coal
 	_add(&"coal", "Уголь", ["snow"], Rarity.COMMON,
 		&"geology", "", false, [],
 		"", &"", &"miner", "", "", false,
 		3, 5, 1.0, "⬛")
 
-	# snow — Gold
 	_add(&"gold_ore", "Золото", ["snow"], Rarity.RARE,
 		&"geology", "", false, [],
 		"", &"", &"miner", &"precise_strike", "", false,
 		1, 2, 1.0, "🥇")
 
-	# swamp — Coal (auto-discovered)
 	_add(&"coal_swamp", "Уголь (болото)", ["swamp"], Rarity.COMMON,
 		"", "", true, [&"undead", &"lizard"],
 		"", &"", &"miner", "", "", false,
 		3, 5, 1.0, "⬛")
 
-	# swamp — Bog Iron
 	_add(&"bog_iron", "Болотное железо", ["swamp"], Rarity.COMMON,
 		&"keen_eye", "", false, [],
 		"", &"", "", "", "", false,
 		2, 4, 2.0, "🔩")
 
-	# swamp — Cinnabar
 	_add(&"cinnabar", "Киноварь", ["swamp"], Rarity.RARE,
 		&"alchemy", "", false, [],
 		&"poison_immune", "", "", "", "", false,
 		1, 1, 1.0, "🔴")
 
-	# Basic resources (not hidden nodes)
-	_add(&"wood", "Дерево", ["grass", "forest"], Rarity.COMMON,
+	_add(ResourceType.to_name(ResourceType.ID.WOOD), "Дерево", ["grass", "forest"], Rarity.COMMON,
 		"", "", false, [],
 		"", &"", &"worker", "", "", false,
 		2, 2, 0.0, "🌲")
 
-	_add(&"stone", "Камень", ["mountain"], Rarity.COMMON,
+	_add(ResourceType.to_name(ResourceType.ID.STONE), "Камень", ["mountain"], Rarity.COMMON,
 		"", "", false, [],
 		"", &"", &"worker", "", "", false,
 		2, 2, 0.0, "🪨")
 
-	# Городские ресурсы цепочек (Спринт 8): не на карте, амбар-ёмкость.
 	_add_city(&"grain", "Зерно", float(CITY_RESOURCE_CAPACITIES[&"grain"]))
 	_add_city(&"flour", "Мука", float(CITY_RESOURCE_CAPACITIES[&"flour"]))
 	_add_city(&"bread", "Хлеб", float(CITY_RESOURCE_CAPACITIES[&"bread"]))
@@ -120,7 +103,6 @@ func ensure_definitions() -> void:
 		float(CITY_RESOURCE_CAPACITIES[&"scholar_points"]))
 
 
-## Городской ресурс: без биомов/добычи, только цепочки города.
 func _add_city(id: StringName, name: String, capacity: float) -> void:
 	var def := ResourceDef.new()
 	def.id = id
@@ -179,7 +161,6 @@ func get_by_biome(biome: String) -> Array[ResourceDef]:
 
 
 func is_hidden_resource(id: StringName) -> bool:
-	# Городские ресурсы цепочек (Спринт 8) — не жилы.
 	return id != &"wood" and id != &"stone" \
 		and not CITY_RESOURCE_CAPACITIES.has(id)
 

@@ -1,8 +1,4 @@
-extends "res://tests/gut_base.gd"
-## Save/Load roundtrip: SaveData → SaveManager → roundtrip.
-##
-## SaveManager API (by design): save_game -> SaveError code,
-## load_game -> {"error": SaveError, "data": SaveData|null, "message": String}.
+extends GdUnitTestSuite
 
 const _SaveData = preload("res://scripts/core/SaveData.gd")
 const _WorldStateDelta = preload("res://scripts/world/WorldStateDelta.gd")
@@ -12,7 +8,7 @@ var _sm: SaveManager
 var _parent: Node
 
 
-func before_each() -> void:
+func before_test() -> void:
 	_parent = Node.new()
 	_parent.name = "TestParent"
 	add_child(_parent)
@@ -22,7 +18,7 @@ func before_each() -> void:
 	_sm.call("delete_save")
 
 
-func after_each() -> void:
+func after_test() -> void:
 	_sm.call("delete_save")
 	_sm.queue_free()
 	_parent.queue_free()
@@ -40,9 +36,9 @@ func test_save_data_roundtrip() -> void:
 	var data2 := _SaveData.new()
 	data2.from_dict(dict)
 
-	assert_eq(data2.run_seed, 42, "run_seed roundtrip")
-	assert_eq(data2.hero["cell"]["x"], 10, "hero cell roundtrip")
-	assert_true(data2.is_valid(), "is_valid after roundtrip")
+	assert_that(data2.run_seed).is_equal(42)
+	assert_that(data2.hero["cell"]["x"]).is_equal(10)
+	assert_bool(data2.is_valid()).is_true()
 
 
 func test_world_delta_roundtrip() -> void:
@@ -57,10 +53,10 @@ func test_world_delta_roundtrip() -> void:
 	var delta2 := _WorldStateDelta.new()
 	delta2.deserialize(dict)
 
-	assert_eq(delta2.captured_villages.size(), 1, "village count")
-	assert_eq(delta2.defeated_enemies[0], Vector2i(5, 5), "enemy cell")
-	assert_eq(delta2.opened_chests.size(), 1, "chest count")
-	assert_eq(delta2.removed_resources[0], Vector2i(3, 3), "resource cell")
+	assert_that(delta2.captured_villages.size()).is_equal(1)
+	assert_that(delta2.defeated_enemies[0]).is_equal(Vector2i(5, 5))
+	assert_that(delta2.opened_chests.size()).is_equal(1)
+	assert_that(delta2.removed_resources[0]).is_equal(Vector2i(3, 3))
 
 
 func test_save_manager_roundtrip() -> void:
@@ -70,36 +66,35 @@ func test_save_manager_roundtrip() -> void:
 	data.world = {"captured_villages": []}
 
 	var err: int = _sm.call("save_game", data)
-	assert_eq(err, SaveManager.SaveError.OK, "save_game returns OK")
+	assert_that(err).is_equal(SaveManager.SaveError.OK)
 
 	var loaded: Dictionary = _sm.call("load_game")
-	assert_eq(loaded.get("error"), SaveManager.SaveError.OK, "load_game error OK")
+	assert_that(loaded.get("error")).is_equal(SaveManager.SaveError.OK)
 	var data2: SaveData = loaded.get("data")
-	assert_not_null(data2, "load_game data present")
-	assert_eq(data2.run_seed, 12345, "loaded run_seed")
-	assert_eq(data2.hero["cell"]["x"], 5, "loaded hero cell")
+	assert_that(data2).is_not_null()
+	assert_that(data2.run_seed).is_equal(12345)
+	
+	assert_that(int(data2.hero["cell"]["x"])).is_equal(5)
 
 
 func test_load_missing_returns_file_not_found() -> void:
 	var loaded: Dictionary = _sm.call("load_game")
-	assert_eq(loaded.get("error"), SaveManager.SaveError.FILE_NOT_FOUND, "missing save -> FILE_NOT_FOUND")
-	assert_null(loaded.get("data"), "missing save -> null data")
+	assert_that(loaded.get("error")).is_equal(SaveManager.SaveError.FILE_NOT_FOUND)
+	assert_that(loaded.get("data")).is_null()
 
-## delete_save(): реальное удаление файла с диска + false при отсутствии.
 func test_delete_save_removes_file_from_disk() -> void:
 	var data := _SaveData.new()
 	data.run_seed = 999
 	data.hero = {"cell": {"x": 1, "y": 1}, "move_points": 5}
 	data.world = {"captured_villages": []}
-	assert_eq(_sm.call("save_game", data), SaveManager.SaveError.OK, "save ok")
+	assert_that(_sm.call("save_game", data)).is_equal(SaveManager.SaveError.OK)
 
 	var path: String = ProjectSettings.globalize_path(SaveManager.SAVE_PATH)
-	assert_true(FileAccess.file_exists(path), "файл есть на диске перед удалением")
+	assert_bool(FileAccess.file_exists(path)).is_true()
 
 	var deleted: bool = _sm.call("delete_save")
-	assert_true(deleted, "delete_save -> true при наличии")
-	assert_true(not FileAccess.file_exists(path), "файл удалён с диска")
+	assert_bool(deleted).is_true()
+	assert_bool(not FileAccess.file_exists(path)).is_true()
 
-	# Повторное удаление отсутствующего -> false, без ошибки.
 	var again: bool = _sm.call("delete_save")
-	assert_false(again, "delete_save -> false когда файла нет")
+	assert_bool(again).is_false()

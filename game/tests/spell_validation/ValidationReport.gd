@@ -1,15 +1,14 @@
 class_name ValidationReport
 extends RefCounted
-## Сбор результатов валидации с уровнями серьёзности и группировкой.
 
 enum Severity { ERROR, WARNING, INFO }
 
 class Issue extends RefCounted:
 	var severity: int
-	var code: String        # машинный код, напр. "E103"
+	var code: String        
 	var message: String
-	var spell_id: String    # "" для глобальных проблем
-	var line_hint: String   # подсказка где искать
+	var spell_id: String    
+	var line_hint: String   
 
 	func format() -> String:
 		var sev_str: String
@@ -59,7 +58,6 @@ func info_count() -> int:
 func has_errors() -> bool:
 	return error_count() > 0
 
-## Отфильтровать по минимальной серьёзности (для --quiet)
 func filtered(min_severity: int) -> Array:
 	var result = []
 	for issue in issues:
@@ -67,14 +65,12 @@ func filtered(min_severity: int) -> Array:
 			result.append(issue)
 	return result
 
-## Текстовый отчёт
 func to_text() -> String:
 	var lines = []
 	lines.append("=".repeat(70))
 	lines.append("SPELLBOOK VALIDATION REPORT")
 	lines.append("=".repeat(70))
 
-	# Сводка по кодам
 	var by_code = {}
 	for issue in issues:
 		by_code[issue.code] = int(by_code.get(issue.code, 0)) + 1
@@ -113,7 +109,6 @@ func to_text() -> String:
 	lines.append("=".repeat(70))
 	return "\n".join(lines)
 
-## Машинно-читаемый отчёт (JSON)
 func to_json() -> String:
 	var arr = []
 	for issue in issues:

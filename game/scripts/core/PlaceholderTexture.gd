@@ -1,8 +1,12 @@
 extends RefCounted
 class_name PlaceholderTexture
-## Кэшированные заглушки-круги для спрайтов без портретов.
 
 static var _cache: Dictionary = {}
+
+
+static func clear() -> void:
+	_cache.clear()
+
 
 static func circle(radius: int, fill: Color, border: Color) -> ImageTexture:
 	var key := "%d_%s_%s" % [radius, fill.to_html(), border.to_html()]

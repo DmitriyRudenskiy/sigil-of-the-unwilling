@@ -1,15 +1,8 @@
 class_name EnemyTurnProcessor
 extends TurnPhaseProcessor
-## Ход врагов (enemy-world-ai): каждый неггарнизонный стек сам выбирает
-## цель (деревня/ресурс/герой — по весам EnemyAIProfile), идёт по Dijkstra
-## и действует: атакует героя при контакте, захватывает деревни игрока.
-## Детерминирован при данном seed мира: стабильный порядок итерации
-## (клетки по (x, y)) + один seeded-RNG.
 
-const ServiceLocator = preload("res://scripts/core/ServiceLocator.gd")
 const _TerrainCostTable = preload("res://scripts/data/TerrainCostTable.gd")
 
-## Атака: враг (army на enemy_cell) бьёт по герою — роли в бою поменяны.
 signal enemy_attack_requested(army: Array, enemy_cell: Vector2i)
 signal enemy_village_captured(city: City)
 signal enemy_turn_reported(report: Dictionary)
@@ -21,6 +14,11 @@ var _cities_mgr: CityManager = null
 var _world_delta: WorldStateDelta = null
 var _faction_sets: Array = []
 var _rng := RandomNumberGenerator.new()
+
+var _pf_stacks: Dictionary
+var _pf_self_cell: Vector2i
+var _hero_dist_field: PackedFloat32Array = PackedFloat32Array()
+var _hero_dist_field_valid: bool = false
 
 
 func get_phase_id() -> StringName:
@@ -45,8 +43,7 @@ func setup_world(
 	_cities_mgr = p_cities_mgr
 	_world_delta = p_world_delta
 	_rng.seed = p_world_seed + 777
-	# FACTION_SETS из реестра — профиль ИИ не хардкодит юнитов.
-	var units_reg: Node = ServiceLocator.resolve(null, &"units")
+	var units_reg: Node = Services.resolve(&"units")
 	if units_reg != null and "FACTION_SETS" in units_reg:
 		_faction_sets = units_reg.FACTION_SETS
 
@@ -55,11 +52,7 @@ func process(_ctx: TurnContext) -> Dictionary:
 	var report := {"moved": 0, "attacks": 0, "captures": 0}
 	if _map_gen == null or _hero == null:
 		return report
-	# Аудит #10: одно Dijkstra на (cell, mp) за ход — повторяющийся запрос
-	# берёт готовое поле. ponytail: ключ уникален при текущей итерации (одна
-	# армия на клетку), кэш — защита от будущих повторных запросов; cost_fn
-	# зависит от состояния stacks, поэтому переиспользование только внутри
-	# одного process().
+	_rebuild_hero_dist_field()
 	var dist_cache: Dictionary = {}
 	var stacks: Dictionary = _map_gen.enemy_stacks
 	if not (stacks is Dictionary) or stacks.is_empty():
@@ -67,7 +60,6 @@ func process(_ctx: TurnContext) -> Dictionary:
 
 	var garrisoned := _garrisoned_set()
 
-	# Детерминированный порядок: клетки по (x, y).
 	var cells: Array = stacks.keys()
 	cells.sort_custom(_cell_a_before_b)
 
@@ -81,7 +73,6 @@ func process(_ctx: TurnContext) -> Dictionary:
 		var aggro: int = int(profile.get("aggro_radius", 8))
 		var attacked := false
 
-		# Герой уже в радиусе атаки — бьём сразу, не тратя ход.
 		if hero_cell != Vector2i(-1, -1) and HexUtils.hex_distance(cell, hero_cell) <= 1:
 			enemy_attack_requested.emit(army, cell)
 			report["attacks"] += 1
@@ -91,8 +82,13 @@ func process(_ctx: TurnContext) -> Dictionary:
 			var goals := _candidate_goals(cell, hero_cell, aggro, profile)
 			if not goals.is_empty():
 				var goal: Vector2i = _pick_goal(goals)
-				var cost_fn := _cost_fn(stacks, cell)
+				_pf_stacks = stacks
+				_pf_self_cell = cell
+				var cost_fn: Callable = _pf_cost_fn
 				var mp: float = float(profile.get("mp", 5.0))
+				var goal_idx := HexUtils.pos_to_idx(goal, _map_gen.map_width)
+				if _hero_dist_field_valid and _hero_dist_field[goal_idx] >= INF:
+					continue  # цель недостижима (hero-поле покрывает всю карту)
 				var dist := _dist_field(cell, mp, cost_fn, dist_cache)
 				var path: Array[Vector2i] = HexPathfinding.dijkstra_path(cell, goal, dist, cost_fn, _map_gen.map_width, _map_gen.map_height)
 
@@ -115,14 +111,12 @@ func process(_ctx: TurnContext) -> Dictionary:
 						report["attacks"] += 1
 						attacked = true
 						break
-					# Деревня игрока: захват и гарнизон.
 					var city := _city_at(cur)
 					if city != null and city.owner == &"player":
 						_capture_city(city, cur)
 						report["captures"] += 1
 						break
 
-				# Герой оказался в радиусе атаки после хода.
 				if not attacked:
 					hero_cell = _hero_pos()
 					if hero_cell != Vector2i(-1, -1) and HexUtils.hex_distance(cur, hero_cell) <= 1:
@@ -131,21 +125,40 @@ func process(_ctx: TurnContext) -> Dictionary:
 						attacked = true
 
 		if attacked:
-			break  # один бой за ход врагов (BattleFlow._active)
+			break  
 
 	enemy_turn_reported.emit(report)
 	return report
 
 
-# ==================== Вспомогательное ====================
 
 
-## Поле расстояний Dijkstra с per-turn кэшем по (cell, mp).
+func _rebuild_hero_dist_field() -> void:
+	_hero_dist_field_valid = false
+	var hero_cell := _hero_pos()
+	if hero_cell == Vector2i(-1, -1) or _map_gen == null:
+		return
+	var cost_fn: Callable = _pf_cost_fn_global
+	_hero_dist_field = HexPathfinding.dijkstra(hero_cell, 9999.0, cost_fn, _map_gen.map_width, _map_gen.map_height)
+	_hero_dist_field_valid = true
+
+
 func _dist_field(cell: Vector2i, mp: float, cost_fn: Callable, cache: Dictionary) -> PackedFloat32Array:
-	var key := "%d;%d;%.4f" % [cell.x, cell.y, mp]
-	if not cache.has(key):
-		cache[key] = HexPathfinding.dijkstra(cell, mp, cost_fn, _map_gen.map_width, _map_gen.map_height)
-	return cache[key]
+	var key := Vector3i(cell.x, cell.y, int(mp * 1000.0))
+	if cache.has(key):
+		return cache[key]
+	var field := HexPathfinding.dijkstra(cell, mp, cost_fn, _map_gen.map_width, _map_gen.map_height)
+	cache[key] = field
+	return field
+
+
+func _pf_cost_fn_global(nxt: Vector2i) -> float:
+	if _map_gen == null:
+		return INF
+	if not _map_gen.is_walkable(nxt):
+		return INF
+	var tid: int = _map_gen.get_terrain_id(nxt)
+	return _TerrainCostTable.get_cost_with_effects_by_id(tid, false)
 
 
 func _garrisoned_set() -> Dictionary:
@@ -191,7 +204,6 @@ func _hero_pos() -> Vector2i:
 func _candidate_goals(cell: Vector2i, hero_cell: Vector2i, aggro: int, profile: Dictionary) -> Dictionary:
 	var goals := {}
 	var weights: Dictionary = profile.get("weights", {})
-	# Деревни: только города игрока.
 	if _cities_mgr != null:
 		for c in _cities_mgr.cities:
 			if c.owner != &"player":
@@ -199,13 +211,11 @@ func _candidate_goals(cell: Vector2i, hero_cell: Vector2i, aggro: int, profile: 
 			var d := HexUtils.hex_distance(cell, c.center)
 			if d <= aggro:
 				goals[c.center] = {"weight": float(weights.get("village", 1.0)), "dist": d}
-	# Ресурсы.
 	if _map_gen != null:
 		for rc in _map_gen.resource_cells:
 			var d := HexUtils.hex_distance(cell, rc)
 			if d <= aggro:
 				goals[rc] = {"weight": float(weights.get("resource", 0.6)), "dist": d}
-	# Герой (цель атаки).
 	if hero_cell != Vector2i(-1, -1):
 		var d := HexUtils.hex_distance(cell, hero_cell)
 		if d <= aggro:
@@ -213,24 +223,35 @@ func _candidate_goals(cell: Vector2i, hero_cell: Vector2i, aggro: int, profile: 
 	return goals
 
 
-## Лучшая цель: вес/дальность, детерминированный tie-break по (x, y).
 func _pick_goal(goals: Dictionary) -> Vector2i:
 	var best_cell: Vector2i = Vector2i(-1, -1)
 	var best_score := -1.0
-	var cells: Array = goals.keys()
-	cells.sort_custom(_cell_a_before_b)
-	for c in cells:
+	
+	
+	for c in goals.keys():
 		var info: Dictionary = goals[c]
 		var score := float(info["weight"]) / (float(int(info["dist"])) + 1.0)
+
 		if score > best_score + 0.000001:
 			best_score = score
 			best_cell = c
+		elif score > best_score - 0.000001 and score < best_score + 0.000001:
+			
+			if c.x < best_cell.x or (c.x == best_cell.x and c.y < best_cell.y):
+				best_cell = c
+
 	return best_cell
 
 
-func _cost_fn(stacks: Dictionary, self_cell: Vector2i) -> Callable:
-	return func(nxt: Vector2i) -> float:
-		return _enter_cost_blocked(nxt, stacks, self_cell)
+func _pf_cost_fn(nxt: Vector2i) -> float:
+	if _map_gen == null:
+		return INF
+	if not _map_gen.is_walkable(nxt):
+		return INF
+	if _pf_stacks.has(nxt) and nxt != _pf_self_cell:
+		return INF
+	var tid: int = _map_gen.get_terrain_id(nxt)
+	return _TerrainCostTable.get_cost_with_effects_by_id(tid, false)
 
 
 func _enter_cost(nxt: Vector2i) -> float:

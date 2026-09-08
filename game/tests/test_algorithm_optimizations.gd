@@ -1,5 +1,4 @@
-extends "res://tests/gut_base.gd"
-## Tests for algorithmic optimizations: A*, cache keys, bounding box search.
+extends GdUnitTestSuite
 
 const _HexUtils = preload("res://scripts/core/HexUtils.gd")
 const _HexPathfinding = preload("res://scripts/core/HexPathfinding.gd")
@@ -9,9 +8,9 @@ func test_astar_finds_path() -> void:
 	var start := Vector2i(0, 0)
 	var goal := Vector2i(10, 5)
 	var path := _HexPathfinding.astar_path(start, goal, blocked, 21, 21)
-	assert_true(path.size() > 0, "path found")
-	assert_eq(path[0], start, "path starts at start")
-	assert_eq(path[-1], goal, "path ends at goal")
+	assert_bool(path.size() > 0).is_true()
+	assert_that(path[0]).is_equal(start)
+	assert_that(path[-1]).is_equal(goal)
 
 
 func test_astar_with_obstacles() -> void:
@@ -19,9 +18,9 @@ func test_astar_with_obstacles() -> void:
 	var start := Vector2i(0, 5)
 	var goal := Vector2i(10, 5)
 	var path := _HexPathfinding.astar_path(start, goal, blocked, 21, 21)
-	assert_true(path.size() > 0, "path found around obstacles")
-	assert_false(path.has(Vector2i(5, 5)), "avoids obstacle 1")
-	assert_false(path.has(Vector2i(5, 6)), "avoids obstacle 2")
+	assert_bool(path.size() > 0).is_true()
+	assert_bool(path.has(Vector2i(5, 5))).is_false()
+	assert_bool(path.has(Vector2i(5, 6))).is_false()
 
 
 func test_astar_no_path() -> void:
@@ -30,7 +29,7 @@ func test_astar_no_path() -> void:
 	for nb in _HexUtils.get_all_neighbors(goal):
 		blocked[nb] = true
 	var path := _HexPathfinding.astar_path(Vector2i(0, 0), goal, blocked, 21, 21)
-	assert_true(path.is_empty(), "no path when surrounded")
+	assert_bool(path.is_empty()).is_true()
 
 
 func test_astar_same_as_dijkstra_length() -> void:
@@ -44,40 +43,36 @@ func test_astar_same_as_dijkstra_length() -> void:
 	var dist := _HexPathfinding.dijkstra(start, 100.0, cost_fn, 21, 21)
 	var goal_idx := _HexUtils.pos_to_idx(goal, 21)
 	if dist[goal_idx] >= 1e9:
-		return  # no path for either
+		return  
 	var dijkstra_p := _HexPathfinding.dijkstra_path(start, goal, dist, cost_fn, 21, 21)
 	var astar_p := _HexPathfinding.astar_path(start, goal, blocked, 21, 21)
 	if dijkstra_p.size() > 0 and astar_p.size() > 0:
-		# Both should find a valid path (length may differ slightly due to tie-breaking)
-		assert_true(dijkstra_p.size() > 0, "dijkstra found path")
-		assert_true(astar_p.size() > 0, "astar found path")
-		assert_eq(dijkstra_p[0], astar_p[0], "same start")
-		assert_eq(dijkstra_p[-1], astar_p[-1], "same goal")
+		assert_bool(dijkstra_p.size() > 0).is_true()
+		assert_bool(astar_p.size() > 0).is_true()
+		assert_that(dijkstra_p[0]).is_equal(astar_p[0])
+		assert_that(dijkstra_p[-1]).is_equal(astar_p[-1])
 
 
 func test_find_path_dispatch_matches_underlying() -> void:
 	var blocked: Dictionary = {Vector2i(5, 5): true}
 	var start := Vector2i(0, 0)
 	var goal := Vector2i(10, 5)
-	# default algo is astar
 	var via_dispatch := _HexPathfinding.find_path(start, goal, blocked, 21, 21)
 	var via_astar := _HexPathfinding.astar_path(start, goal, blocked, 21, 21)
-	assert_eq(via_dispatch, via_astar, "find_path default == astar_path")
+	assert_that(via_dispatch).is_equal(via_astar)
 
 	var via_bfs := _HexPathfinding.find_path(start, goal, blocked, 21, 21, "bfs")
 	var direct_bfs := _HexPathfinding.bfs_path(start, goal, blocked, 21, 21)
-	assert_eq(via_bfs, direct_bfs, "find_path bfs == bfs_path")
+	assert_that(via_bfs).is_equal(direct_bfs)
 
-	# unreachable → []
 	var surrounded := Vector2i(10, 10)
 	for nb in _HexUtils.get_all_neighbors(surrounded):
 		blocked[nb] = true
-	assert_true(_HexPathfinding.find_path(Vector2i(0, 0), surrounded, blocked, 21, 21).is_empty(), "unreachable → []")
+	assert_bool(_HexPathfinding.find_path(Vector2i(0, 0), surrounded, blocked, 21, 21).is_empty()).is_true()
 
 func test_bfs_cache_key_vector3i() -> void:
-	# Vector3i key should handle large coordinates without overflow
 	var key := Vector3i(300, 200, 50)
 	var d: Dictionary = {}
 	d[key] = "test"
-	assert_true(d.has(key), "Vector3i key works")
-	assert_eq(d[key], "test", "value stored correctly")
+	assert_bool(d.has(key)).is_true()
+	assert_that(d[key]).is_equal("test")

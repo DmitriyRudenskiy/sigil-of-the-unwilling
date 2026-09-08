@@ -1,27 +1,22 @@
 class_name WorldPersistence
 extends RefCounted
-## Save / load / restart / seed / session state.
 const _ShardManager = preload("res://scripts/core/ShardManager.gd")
 const _HeroProfile = preload("res://scripts/data/HeroBuildProfile.gd")
 
 var _save_manager: SaveManager
 var session: GameSession = null
-## legend-chronicle: летопись поколений (персистентная, save v6).
 var chronicle: Chronicle = Chronicle.new()
 var _date: Dictionary = {"month": 1, "week": 1, "day": 1}
 var world_delta: WorldStateDelta = null
-## fog-of-war: карта видимости (наследует WorldController). null — без fog.
 var visibility = null
 
-## astral-macro (v7): последний сериализованный сейв (to_dict) — для
-## проверки round-trip через сокет (SAVE_GAME/LOAD_GAME), без поиска
-## файла user:// на диске.
 var _last_save_dict: Dictionary = {}
+
+
+var _shards_memory: Dictionary = {}
 
 static var next_seed: int = 0
 static var pending_save: SaveData = null
-## port-troles-heritage: профиль создания героя из конструктора (Меню →
-## «Новая игра»). Применяется в WorldBootstrap._init_hero, затем обнуляется.
 static var pending_new_game: _HeroProfile = null
 
 
@@ -35,15 +30,12 @@ func get_run_seed() -> int:
 		next_seed = 0
 		return s
 
-	## astral-macro: test seam — GAME_RUN_SEED имеет ПРИОРИТЕТ над
-	## EDITOR_SEED, чтобы сценарий мог зафиксировать мир (фрагмент #2 и т.д.)
-	## даже в headless-редакторе (OS.has_feature("editor") == true).
 	if OS.has_environment("GAME_RUN_SEED"):
 		var env_seed := int(OS.get_environment("GAME_RUN_SEED"))
 		return env_seed & 0x7FFFFFFF
 
 	if OS.has_feature("editor"):
-		return MapConfig.EDITOR_SEED
+		return GameNumbers.EDITOR_SEED
 
 	return int(Time.get_unix_time_from_system()) & 0x7FFFFFFF
 
@@ -52,8 +44,6 @@ func get_session_for_seed(seed: int) -> GameSession:
 	return GameSession.new(seed)
 
 
-## cities — Array[City] (сериализуются сами); characters — результат
-## CharacterRegistry.serialize() (save v3: Каскад Сложности).
 func save_game(hero: HeroController, cities: Array = [], characters: Array = []) -> bool:
 	if session == null or hero == null or world_delta == null:
 		return false
@@ -62,7 +52,6 @@ func save_game(hero: HeroController, cities: Array = [], characters: Array = [])
 	save_data.run_seed = session.run_seed
 	save_data.date = _date.duplicate()
 	save_data.hero = hero.serialize()
-	# fog-of-war: разведённая сетка сохраняется вместе с миром.
 	if visibility != null:
 		world_delta.set_fog_explored(visibility.serialize_explored())
 	save_data.world = world_delta.serialize()
@@ -71,27 +60,27 @@ func save_game(hero: HeroController, cities: Array = [], characters: Array = [])
 		cities_arr.append(c.serialize())
 	save_data.cities = cities_arr
 	save_data.characters = characters
-	# endgame: состояние забега (state/end_reason/счётчики) — липкое
-	# терминальное состояние переживает save/load.
 	save_data.session = session.serialize()
-	# legend-chronicle: летопись поколений (save v6).
 	save_data.chronicle = chronicle.to_array()
-	# astral-macro (v7): фрагменты мира. Активный фрагмент целиком
-	# записывается под shards[active] — round-trip и база для
-	# многофрагментности (Stage 2 перемещения между фрагментами).
 	var _mgr := _ShardManager.instance()
 	var _active := _mgr.active_id
 	save_data.active_shard_id = _active
-	save_data.shards = {
-		_active: {
-			"world": world_delta.serialize(),
-			"cities": cities_arr,
-			"characters": characters,
-			"hero": hero.serialize(),
-			"date": _date.duplicate(),
-			"run_seed": session.run_seed,
-		}
+
+	
+	
+	var shards_data: Dictionary = _shards_memory.duplicate(true)
+	shards_data[_active] = {
+		"world": world_delta.serialize(),
+		"cities": cities_arr,
+		"characters": characters,
+		"hero": hero.serialize(),
+		"date": _date.duplicate(),
+		"run_seed": session.run_seed,
+		"last_active_turn": _date_turn(),
 	}
+	_prune_old_shards(shards_data, _date_turn())
+	save_data.shards = shards_data
+	_shards_memory = shards_data
 
 	_last_save_dict = save_data.to_dict()
 	var err := _save_manager.save_game(save_data)
@@ -100,11 +89,42 @@ func save_game(hero: HeroController, cities: Array = [], characters: Array = [])
 	return err == SaveManager.SaveError.OK
 
 
+func _date_turn() -> int:
+	# date linearization instead of a turn counter (GameSession has no current_turn field)
+	return int(_date.get("month", 1)) * 100000 + int(_date.get("week", 1)) * 100 + int(_date.get("day", 1))
+
+
+func _prune_old_shards(shards: Dictionary, current_turn: int) -> void:
+	const MAX_SHARDS := 10
+	const MAX_INACTIVE_TURNS := 50
+	if shards.size() <= MAX_SHARDS:
+		return
+	var to_remove: Array = []
+	for shard_id in shards:
+		var shard_data: Dictionary = shards[shard_id]
+		var last_active: int = int(shard_data.get("last_active_turn", 0))
+		if current_turn - last_active > MAX_INACTIVE_TURNS:
+			to_remove.append(shard_id)
+	for shard_id in to_remove:
+		shards.erase(shard_id)
+	if shards.size() > MAX_SHARDS:
+		var sorted_shards: Array = shards.keys()
+		sorted_shards.sort_custom(func(a, b):
+			var a_turn: int = int(shards[a].get("last_active_turn", 0))
+			var b_turn: int = int(shards[b].get("last_active_turn", 0))
+			return a_turn < b_turn
+		)
+		while shards.size() > MAX_SHARDS:
+			# FIX: no explicit String annotation — keys may be StringName, which would
+			# crash the Variant->String cast on erase(). Use untyped Variant.
+			var oldest = sorted_shards.pop_front()
+			shards.erase(oldest)
+
+
 func load_game() -> SaveData:
 	var result: Dictionary = _save_manager.load_game()
 	return result.get("data", null) as SaveData
 
-## astral-macro (v7): последний сериализованный сейв (для SAVE_GAME через сокет).
 func last_save_dict() -> Dictionary:
 	return _last_save_dict
 
@@ -134,6 +154,9 @@ func get_date() -> Dictionary:
 
 
 func apply_loaded_save(data: SaveData, ctx) -> void:
+	if ctx == null:
+		push_warning("WorldPersistence: apply_loaded_save called with null ctx")
+		return
 	if data == null or not data.is_valid():
 		return
 
@@ -142,14 +165,10 @@ func apply_loaded_save(data: SaveData, ctx) -> void:
 
 	ctx.world_delta.deserialize(data.world)
 
-	# endgame: восстановить состояние забега ДО любого использования
-	# (терминальный сейв → WorldController сразу покажет экран).
 	if session != null:
 		session.deserialize(data.session)
-	# legend-chronicle: восстановить летопись (save v6; v5-сейвы — пусто).
 	chronicle.from_array(data.chronicle)
 
-	# fog-of-war: восстановить разведённую сетку и пересчитывать видимое.
 	if visibility != null:
 		visibility.load_explored(data.world.get("fog_explored", []))
 		_recompute_visible(visibility, ctx)
@@ -167,14 +186,12 @@ func apply_loaded_save(data: SaveData, ctx) -> void:
 			int(get_date().get("day", 1))
 		)
 
-	# Remove defeated enemies
 	for cell in ctx.world_delta.defeated_enemies:
 		if ctx.map_gen:
 			ctx.map_gen.enemy_stacks.erase(cell)
 		if ctx.spawner:
 			ctx.spawner.remove_enemy_at(cell)
 
-	# Remove collected resources
 	for cell in ctx.world_delta.removed_resources:
 		if ctx.map_gen:
 			ctx.map_gen.resource_cells.erase(cell)
@@ -182,36 +199,34 @@ func apply_loaded_save(data: SaveData, ctx) -> void:
 			ctx.spawner.remove_resource_at(cell)
 
 
-	# Remove opened chests
 	for cell in ctx.world_delta.opened_chests:
 		if ctx.spawner:
 			ctx.spawner.remove_chest_at(cell)
 
-	# Remove picked scrolls
 	for cell in ctx.world_delta.removed_scrolls:
 		if ctx.spawner:
 			ctx.spawner.remove_scroll_at(cell)
 
-	# Capture villages
 	for cell in ctx.world_delta.captured_villages:
 		if ctx.spawner:
 			ctx.spawner.capture_village(cell)
 
-	# Restore resource node states
 	if ctx.resource_node_manager:
 		for cell in ctx.world_delta.discovered_nodes:
 			ctx.resource_node_manager.mark_discovered(cell)
 		for cell in ctx.world_delta.exhausted_nodes:
 			ctx.resource_node_manager.mark_exhausted(cell)
 
-	# terrain-resources: восстановить истощённые точки добычи (лес/гора).
 	if ctx.terrain_resource_manager != null:
 		ctx.terrain_resource_manager.mark_exhausted(
 			ctx.world_delta.terrain_exhausted_cells)
 
-	# --- Сохранение v3: города и персонажи (Каскад Сложности) ---
 	_restore_cities(data, ctx)
 	_restore_characters(data, ctx)
+
+	
+	if not data.shards.is_empty():
+		_shards_memory = data.shards.duplicate(true)
 
 	if ctx.camera and ctx.hero:
 		ctx.camera.center_on(ctx.hero.position)
@@ -227,15 +242,12 @@ func apply_loaded_save(data: SaveData, ctx) -> void:
 	)
 
 
-## Fog-of-war: пересчёт видимости из текущей позиции героя и городов
-## (разведённая сетка уже восстановлена в load_explored).
 func _recompute_visible(visibility, ctx) -> void:
 	if ctx.map_gen == null:
 		return
 	var sources: Array = []
 	if ctx.hero != null and ctx.hero.current_cell is Vector2i:
 		sources.append(ctx.hero.current_cell)
-	# ctx.cities — CityManager (Node), не Array.
 	var cm = ctx.cities
 	if cm != null:
 		for c in cm.cities:
@@ -243,19 +255,13 @@ func _recompute_visible(visibility, ctx) -> void:
 				sources.append(c.center)
 	visibility.set_map_size(ctx.map_gen.map_width, ctx.map_gen.map_height)
 	if visibility.recompute(ctx.hero.current_cell, sources,
-		MapConfig.FOG_HERO_SIGHT, MapConfig.FOG_CITY_SIGHT):
+		GameNumbers.FOG_HERO_SIGHT, GameNumbers.FOG_CITY_SIGHT):
 		if ctx.map_gen.visibility == null:
 			ctx.map_gen.visibility = visibility
 		ctx.map_gen.apply_fog(visibility)
 
 
 func _restore_cities(data: SaveData, ctx) -> void:
-	## Города пересозданы при бутстрапе — по uid возвращаем прогресс.
-	## v2-сейв (cities пусто) — не трогает.
-	## city-in-world: после бутстрапа существует только столица (uid 0), а
-	## захваченные деревни — нет. Пересоздаём их из world_delta
-	## (порядок регистрации: сначала столица, потом деревни в порядке захвата
-	## из delta — уиды совпадают с оригинальным прогоном), ПОСЛЕМатчируем по uid.
 	if not (ctx.cities is Node):
 		return
 	if not (data.cities is Array) or (data.cities as Array).is_empty():
@@ -263,9 +269,6 @@ func _restore_cities(data: SaveData, ctx) -> void:
 	var cities_mgr: CityManager = ctx.cities
 	if ctx.world_delta != null:
 		for cell in ctx.world_delta.captured_villages:
-			# Пересоздаём безусловно: у города из сейва центр может отличаться
-			# от capture-cell (перенос), а временное совпадение с бутстоп-столицей
-			# безопасно — deserialize сразу вернёт оба города на их места.
 			var village := CityFactory.create_village(
 				cell, CityFactory.village_name(data.run_seed, cell), data.run_seed)
 			cities_mgr.register_city(village)
@@ -273,7 +276,7 @@ func _restore_cities(data: SaveData, ctx) -> void:
 	var saved_count: int = (data.cities as Array).size()
 	var restored := 0
 	for d in data.cities:
-		var city := _find_city(all, int(d.get("uid", 0)), saved_count)
+		var city := _find_city(all, int(d.get("uid", 0)), saved_count, d.get("center", {}))
 		if city == null:
 			GameLogger.warn("Load: город uid=%s не найден — пропущен" % d.get("uid", "?"))
 			continue
@@ -283,11 +286,16 @@ func _restore_cities(data: SaveData, ctx) -> void:
 		GameLogger.world("Loaded cities: %d" % restored)
 
 
-func _find_city(all: Array, city_uid: int, saved_count: int) -> City:
+func _find_city(all: Array, city_uid: int, saved_count: int, saved_center: Variant) -> City:
 	for c in all:
 		if c.uid == city_uid:
 			return c
-	# Fallback: единственный город (столица) — единственный и в сейве.
+	
+	if saved_center is Dictionary:
+		var cell := Vector2i(int(saved_center.get("x", 0)), int(saved_center.get("y", 0)))
+		for c in all:
+			if c.center == cell:
+				return c
 	if all.size() == 1 and saved_count == 1:
 		return all[0]
 	return null

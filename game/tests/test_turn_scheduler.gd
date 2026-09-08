@@ -1,8 +1,4 @@
-extends "res://tests/gut_base.gd"
-## M0: Ядро — TurnScheduler / TurnContext / TurnPhaseProcessor.
-##
-## Проверяем: порядок фаз по приоритету, отчёт хода, сигналы,
-## повторная регистрация, null-контекст, пересчёт сезона из месяца.
+extends GdUnitTestSuite
 
 class _FakePhase extends TurnPhaseProcessor:
 	var id: StringName = &"fake"
@@ -21,7 +17,6 @@ class _FakePhase extends TurnPhaseProcessor:
 
 
 class _ProbePhase extends TurnPhaseProcessor:
-	## Ловит поля ctx в dict (для проверки пересчёта сезона/погоды).
 	var captured: Dictionary = {}
 
 	func get_phase_id() -> StringName:
@@ -45,15 +40,14 @@ func _make_phase(id: StringName, priority: int, log: Array) -> _FakePhase:
 	return p
 
 
-# ==================== РЕГИСТРАЦИЯ ====================
 
 func test_register_and_get_processors() -> void:
 	var sched := TurnScheduler.new()
 	var log: Array = []
 	var p := _make_phase(&"a", 10, log)
 	sched.register_processor(p)
-	assert_eq(sched.get_processors().size(), 1, "one processor registered")
-	assert_true(sched.get_processors()[0] == p, "same instance stored")
+	assert_that(sched.get_processors().size()).is_equal(1)
+	assert_bool(sched.get_processors()[0] == p).is_true()
 
 
 func test_duplicate_register_ignored() -> void:
@@ -62,13 +56,13 @@ func test_duplicate_register_ignored() -> void:
 	var p := _make_phase(&"a", 10, log)
 	sched.register_processor(p)
 	sched.register_processor(p)
-	assert_eq(sched.get_processors().size(), 1, "duplicate not added")
+	assert_that(sched.get_processors().size()).is_equal(1)
 
 
 func test_null_register_ignored() -> void:
 	var sched := TurnScheduler.new()
 	sched.register_processor(null)
-	assert_eq(sched.get_processors().size(), 0, "null not added")
+	assert_that(sched.get_processors().size()).is_equal(0)
 
 
 func test_unregister() -> void:
@@ -77,15 +71,13 @@ func test_unregister() -> void:
 	var p := _make_phase(&"a", 10, log)
 	sched.register_processor(p)
 	sched.unregister_processor(p)
-	assert_eq(sched.get_processors().size(), 0, "unregistered")
+	assert_that(sched.get_processors().size()).is_equal(0)
 
 
-# ==================== ПОРЯДОК ИСПОЛНЕНИЯ ====================
 
 func test_phases_run_by_priority() -> void:
 	var sched := TurnScheduler.new()
 	var log: Array = []
-	# Регистрируем в «перемешанном» порядке — исполнять должны по приоритету.
 	sched.register_processor(_make_phase(&"late", 30, log))
 	sched.register_processor(_make_phase(&"early", 10, log))
 	sched.register_processor(_make_phase(&"mid", 20, log))
@@ -94,10 +86,10 @@ func test_phases_run_by_priority() -> void:
 	ctx.month = 3
 	sched.execute_turn(ctx)
 
-	assert_eq(log.size(), 3, "all phases ran")
-	assert_eq(log[0], &"early", "priority 10 first")
-	assert_eq(log[1], &"mid", "priority 20 second")
-	assert_eq(log[2], &"late", "priority 30 third")
+	assert_that(log.size()).is_equal(3)
+	assert_that(log[0]).is_equal(&"early")
+	assert_that(log[1]).is_equal(&"mid")
+	assert_that(log[2]).is_equal(&"late")
 
 
 func test_report_contains_all_phases() -> void:
@@ -109,26 +101,25 @@ func test_report_contains_all_phases() -> void:
 	var ctx := TurnContext.new()
 	var report: Dictionary = sched.execute_turn(ctx)
 
-	assert_eq(report.get("turn"), 1, "report turn = 1")
+	assert_that(report.get("turn")).is_equal(1)
 	var phases: Dictionary = report.get("phases", {})
-	assert_true(phases.has(&"e1"), "phase e1 in report")
-	assert_true(phases.has(&"e2"), "phase e2 in report")
-	assert_eq(int((phases[&"e1"] as Dictionary).get("turn", -1)), 1, "ctx turn passed to phase")
+	assert_bool(phases.has(&"e1")).is_true()
+	assert_bool(phases.has(&"e2")).is_true()
+	assert_that(int((phases[&"e1"] as Dictionary).get("turn", -1))).is_equal(1)
 
 
 func test_turn_counter_increments() -> void:
 	var sched := TurnScheduler.new()
 	var log: Array = []
 	sched.register_processor(_make_phase(&"p", 10, log))
-	assert_eq(sched.get_turn(), 0, "turn 0 before execute")
+	assert_that(sched.get_turn()).is_equal(0)
 	sched.execute_turn(TurnContext.new())
-	assert_eq(sched.get_turn(), 1, "turn 1 after first execute")
+	assert_that(sched.get_turn()).is_equal(1)
 	sched.execute_turn(TurnContext.new())
-	assert_eq(sched.get_turn(), 2, "turn 2 after second execute")
-	assert_eq(log.size(), 2, "phase logged both turns")
+	assert_that(sched.get_turn()).is_equal(2)
+	assert_that(log.size()).is_equal(2)
 
 
-# ==================== КОНТЕКСТ И СЕЗОН ====================
 
 func test_season_derived_from_month() -> void:
 	var sched := TurnScheduler.new()
@@ -136,13 +127,13 @@ func test_season_derived_from_month() -> void:
 	sched.register_processor(probe)
 
 	var ctx := TurnContext.new()
-	ctx.month = 8  # лето
+	ctx.month = 8  
 	sched.execute_turn(ctx)
-	assert_eq(int(probe.captured.get("season", -1)), Season.ID.SUMMER, "month 8 -> SUMMER")
-	assert_eq(int(probe.captured.get("turn", -1)), 1, "ctx turn set on first execute")
-	ctx.month = 1  # зима
+	assert_that(int(probe.captured.get("season", -1))).is_equal(Season.ID.SUMMER)
+	assert_that(int(probe.captured.get("turn", -1))).is_equal(1)
+	ctx.month = 1  
 	sched.execute_turn(ctx)
-	assert_eq(int(probe.captured.get("season", -1)), Season.ID.WINTER, "month 1 -> WINTER")
+	assert_that(int(probe.captured.get("season", -1))).is_equal(Season.ID.WINTER)
 
 
 func test_null_weather_normalized() -> void:
@@ -153,10 +144,9 @@ func test_null_weather_normalized() -> void:
 	var ctx := TurnContext.new()
 	ctx.weather = -1
 	sched.execute_turn(ctx)
-	assert_eq(int(probe.captured.get("weather", -2)), MapConfig.WEATHER_CLEAR, "negative weather -> CLEAR")
+	assert_that(int(probe.captured.get("weather", -2))).is_equal(GameNumbers.WEATHER_CLEAR)
 
 
-# ==================== СИГНАЛЫ ====================
 
 func test_signals_emitted() -> void:
 	var sched := TurnScheduler.new()
@@ -172,21 +162,20 @@ func test_signals_emitted() -> void:
 
 	sched.execute_turn(TurnContext.new())
 
-	assert_eq(started.size(), 1, "turn_started emitted once")
-	assert_eq(started[0], 1, "turn_started payload")
-	assert_eq(phase_events.size(), 1, "phase_completed emitted once")
-	assert_eq(phase_events[0], &"sig", "phase_completed payload")
-	assert_eq(completed.size(), 1, "turn_completed emitted once")
+	assert_that(started.size()).is_equal(1)
+	assert_that(started[0]).is_equal(1)
+	assert_that(phase_events.size()).is_equal(1)
+	assert_that(phase_events[0]).is_equal(&"sig")
+	assert_that(completed.size()).is_equal(1)
 
 
-# ==================== ДЕГЕНЕРАТИВНЫЕ СЛУЧАИ ====================
 
 func test_null_ctx_returns_empty() -> void:
 	var sched := TurnScheduler.new()
-	var report: Dictionary = sched.execute_turn(null)
-	assert_push_error("ctx == null")  # ожидаемый push_error из execute_turn(null)
-	assert_true(report.is_empty(), "empty report on null ctx")
-	assert_eq(sched.get_turn(), 0, "turn not advanced on null ctx")
+	var report: Dictionary = {}
+	assert_error(func(): report = sched.execute_turn(null)).is_push_error(any_string())
+	assert_bool(report.is_empty()).is_true()
+	assert_that(sched.get_turn()).is_equal(0)
 
 
 func test_empty_scheduler_ok() -> void:
@@ -194,7 +183,7 @@ func test_empty_scheduler_ok() -> void:
 	var captured: Dictionary = {}
 	var ctx := TurnContext.new()
 	var report: Dictionary = sched.execute_turn(ctx)
-	assert_eq(report.get("turn"), 1, "turn advanced even with no phases")
-	assert_true((report.get("phases") as Dictionary).is_empty(), "no phases in report")
+	assert_that(report.get("turn")).is_equal(1)
+	assert_bool((report.get("phases") as Dictionary).is_empty()).is_true()
 	captured["ctx_turn"] = ctx.turn_number
-	assert_eq(int(captured["ctx_turn"]), 1, "ctx turn set")
+	assert_that(int(captured["ctx_turn"])).is_equal(1)

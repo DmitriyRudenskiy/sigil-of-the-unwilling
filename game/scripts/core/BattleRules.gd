@@ -1,17 +1,7 @@
 class_name BattleRules
 extends RefCounted
-## Правила боя: ATK/DEF multiplier, luck, morale, retaliation, retreat.
 
-const ATK_ADVANTAGE_PER_POINT := 0.05
-const DEF_ADVANTAGE_PER_POINT := 0.025
-const MAX_DAMAGE_MULTIPLIER := 5.0
-const MIN_DAMAGE_MULTIPLIER := 0.3
 
-const LUCK_CHANCE := 0.10
-const MORALE_CHANCE := 0.08  # (РФ5-6: рабочее значение; ранее дрейфило из GameSettings (0.5))
-const RETREAT_SURVIVAL_RATIO := 0.5
-const DEFEND_DEFENSE_BONUS := 1.2
-const RANGED_MELEE_PENALTY := 0.5
 
 
 static func can_luck(unit) -> bool:
@@ -57,25 +47,36 @@ static func damage_multiplier(
 
     var effective_def: int = defender.get_defense() + defender_bonus
     if defender.defending:
-        effective_def = int(float(effective_def) * DEFEND_DEFENSE_BONUS)
+        effective_def = int(float(effective_def) * GameNumbers.DEFEND_DEFENSE_BONUS)
 
     var diff: int = effective_atk - effective_def
 
     if diff > 0:
         return clampf(
-            1.0 + ATK_ADVANTAGE_PER_POINT * float(diff),
+            1.0 + GameNumbers.ATK_ADVANTAGE_PER_POINT * float(diff),
             1.0,
-            MAX_DAMAGE_MULTIPLIER
+            GameNumbers.MAX_DAMAGE_MULTIPLIER
         )
 
     if diff < 0:
         return clampf(
-            1.0 - DEF_ADVANTAGE_PER_POINT * float(absi(diff)),
-            MIN_DAMAGE_MULTIPLIER,
+            1.0 - GameNumbers.DEF_ADVANTAGE_PER_POINT * float(absi(diff)),
+            GameNumbers.MIN_DAMAGE_MULTIPLIER,
             1.0
         )
 
     return 1.0
+
+
+## TASK_06: общая оценка базового урона атакующего (min, max) на весь стек.
+## Используется и в расчёте, и в превью — один и тот же диапазон.
+static func _damage_range(attacker) -> Vector2i:
+    var stats: UnitStats = attacker.stack.stats
+    var count: int = attacker.get_count()
+    var min_base: int = stats.base_damage * count
+    var max_base: int = int(ceil(float(stats.base_damage) * 1.25)) * count
+    max_base = max(max_base, min_base)
+    return Vector2i(min_base, max_base)
 
 
 static func calculate_attack(
@@ -100,11 +101,8 @@ static func calculate_attack(
     if count <= 0:
         return {}
 
-    var min_base: int = stats.base_damage
-    var max_base: int = int(ceil(float(stats.base_damage) * 1.25))
-    max_base = max(max_base, min_base)
-
-    var base_total: int = rng.randi_range(min_base, max_base) * count
+    var range := _damage_range(attacker)
+    var base_total: int = rng.randi_range(range.x, range.y)
 
     var multiplier: float = damage_multiplier(
         attacker,
@@ -115,14 +113,13 @@ static func calculate_attack(
 
     var damage: int = int(float(base_total) * multiplier)
 
-    # Ranged unit forced into melee loses half damage.
     if is_melee_attack and attacker.is_ranged():
-        damage = int(float(damage) * RANGED_MELEE_PENALTY)
+        damage = int(float(damage) * GameNumbers.RANGED_MELEE_PENALTY)
 
     damage = max(1, damage)
 
     var luck: bool = false
-    if can_luck(attacker) and rng.randf() < LUCK_CHANCE:
+    if can_luck(attacker) and rng.randf() < GameNumbers.LUCK_CHANCE:
         damage *= 2
         luck = true
 
@@ -151,9 +148,7 @@ static func preview_text(
     if stats == null:
         return ""
 
-    var count: int = attacker.get_count()
-    var min_base: int = stats.base_damage * count
-    var max_base: int = int(ceil(float(stats.base_damage) * 1.25)) * count
+    var range := _damage_range(attacker)
 
     var multiplier: float = damage_multiplier(
         attacker,
@@ -162,13 +157,13 @@ static func preview_text(
         defender_bonus
     )
 
-    var min_damage: int = int(float(min_base) * multiplier)
-    var max_damage: int = int(float(max_base) * multiplier)
+    var min_damage: int = int(float(range.x) * multiplier)
+    var max_damage: int = int(float(range.y) * multiplier)
 
     var distance: int = HexUtils.hex_distance(attacker.cell, defender.cell)
     if attacker.is_ranged() and distance == 1:
-        min_damage = int(float(min_damage) * RANGED_MELEE_PENALTY)
-        max_damage = int(float(max_damage) * RANGED_MELEE_PENALTY)
+        min_damage = int(float(min_damage) * GameNumbers.RANGED_MELEE_PENALTY)
+        max_damage = int(float(max_damage) * GameNumbers.RANGED_MELEE_PENALTY)
 
     min_damage = max(1, min_damage)
     max_damage = max(1, max_damage)
@@ -180,9 +175,4 @@ static func preview_text(
     min_kills = min(min_kills, defender.get_count())
     max_kills = min(max_kills, defender.get_count())
 
-    return "Damage: ~%d-%d (kills ~%d-%d)" % [
-        min_damage,
-        max_damage,
-        min_kills,
-        max_kills
-    ]
+    return GameText.battle_damage_preview(min_damage, max_damage, min_kills, max_kills)

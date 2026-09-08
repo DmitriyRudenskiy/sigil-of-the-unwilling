@@ -1,221 +1,196 @@
 extends Control
 class_name MainMenu
-## Главное меню по референсу тронного зала:
-## фон — тронный зал; справа колонка: серая панель с 🔒 + три синие глянцевые кнопки
 
 const _UIAnimator = preload("res://scripts/ui/UIAnimator.gd")
-const _SettingsScreen = preload("res://scripts/ui/SettingsScreen.gd")
 const _CharacterCreation = preload("res://scenes/ui/CharacterCreation.tscn")
 const _HeroModelFactory = preload("res://scripts/ui/HeroModelFactory.gd")
-const _ModelScreen = preload("res://scripts/ui/ArtifactInventoryScreen.gd")
-const _ChronicleScreen = preload("res://scripts/ui/ChronicleScreen.gd")
+
+@onready var _background: TextureRect = $Background
+@onready var _new_game_btn: Button = $RightColumn/NewGameButton
+@onready var _load_game_btn: Button = $RightColumn/LoadGameButton
+@onready var _arena_btn: Button = $RightColumn/ArenaButton
+@onready var _model_warrior_btn: Button = $RightColumn/ModelWarriorButton
+@onready var _model_mage_btn: Button = $RightColumn/ModelMageButton
+@onready var _settings_btn: Button = $RightColumn/SettingsButton
+@onready var _chronicle_btn: Button = $RightColumn/ChronicleButton
+@onready var _exit_btn: Button = $RightColumn/ExitButton
+@onready var _version_label: Label = $RightColumn/VersionLabel
+@onready var _settings_screen: SettingsScreen = $SettingsScreen
+@onready var _chronicle_screen: ChronicleScreen = $ChronicleScreen
+@onready var _model_screen: ArtifactInventoryScreen = $HeroModelWindow
+
+signal hero_selected(hero_name: String, variant: String)
+var _selected_hero: String = &""
+@onready var _hero_selection = get_node_or_null("HeroSelection")
 
 func _ready() -> void:
-	# Don't auto-quit in test-server mode
-	for arg in OS.get_cmdline_args():
-		if arg.begins_with("--test-server"):
-			return
-	_build_background()
-	_build_right_column()
-	_UIAnimator.animate_in(self)
-	SoundManager.play_music_cue(&"music_menu")
+    for arg in OS.get_cmdline_args():
+        if arg.begins_with("--test-server"):
+            return
+    _load_background()
+    _style_buttons()
+    _localize()
+    _connect_buttons()
+    _UIAnimator.animate_in(self)
+    SoundManager.play_music_cue(&"music_menu")
 
-
-func _build_background() -> void:
-	var bg := TextureRect.new()
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	var tex := _find_bg()
-	if tex != null:
-		bg.texture = tex
-	else:
-		bg.texture = _placeholder()
-		GameLogger.trace("TODO: положить арт тронного зала в res://assets/ui/main_menu_bg.png", "MainMenu")
-	add_child(bg)
-
+func _load_background() -> void:
+    var tex := _find_bg()
+    if tex != null:
+        _background.texture = tex
+    else:
+        _background.texture = _placeholder()
 
 func _find_bg() -> Texture2D:
-	for c in ["res://assets/ui/main_menu_bg.png", "res://assets/ui/throne.png"]:
-		if ResourceLoader.exists(c):
-			return load(c)
-	# автопоиск в raw по имени
-	var dir := DirAccess.open("res://assets/raw")
-	if dir != null:
-		dir.list_dir_begin()
-		var f := dir.get_next()
-		while f != "":
-			var low := f.to_lower()
-			if low.find("throne") != -1 or low.find("menu") != -1 or low.find("tron") != -1:
-				var path := "res://assets/raw/" + f
-				if ResourceLoader.exists(path):
-					return load(path)
-				# Raw file not imported as resource — try direct image load
-				if FileAccess.file_exists(path):
-					var img := Image.load_from_file(path)
-					if img != null:
-						return ImageTexture.create_from_image(img)
-			f = dir.get_next()
-	return null
-
+    var candidates := [
+        "res://assets/ui/main_menu_bg.png",
+        "res://assets/ui/throne.png",
+        "res://assets/raw/throne.png",
+        "res://assets/raw/menu_bg.png",
+        "res://assets/backgrounds/throne.png",
+        "res://assets/backgrounds/menu.png",
+    ]
+    for path in candidates:
+        if ResourceLoader.exists(path):
+            return load(path)
+    return null
 
 func _placeholder() -> ImageTexture:
-	var img := Image.create(1920, 1080, false, Image.FORMAT_RGBA8)
-	img.fill(Color(0.05, 0.04, 0.10))
-	# Gradient via fill_rect strips (10 iterations instead of 2M pixels)
-	for i in 10:
-		var t := float(i) / 10.0
-		var y0 := int(t * 1080)
-		var h := 108
-		img.fill_rect(Rect2i(0, y0, 1920, h),
-			Color(lerpf(0.08, 0.02, t), lerpf(0.06, 0.01, t), lerpf(0.15, 0.05, t)))
-	return ImageTexture.create_from_image(img)
+    var img := Image.create(1920, 1080, false, Image.FORMAT_RGBA8)
+    img.fill(Color(0.05, 0.04, 0.10))
+    for i in 10:
+        var t := float(i) / 10.0
+        var y0 := int(t * 1080)
+        var h := 108
+        img.fill_rect(Rect2i(0, y0, 1920, h),
+            Color(lerpf(0.08, 0.02, t), lerpf(0.06, 0.01, t), lerpf(0.15, 0.05, t)))
+    return ImageTexture.create_from_image(img)
+
+func _style_buttons() -> void:
+    var buttons: Array[Button] = [
+        _new_game_btn, _load_game_btn, _arena_btn,
+        _model_warrior_btn, _model_mage_btn, _settings_btn,
+        _chronicle_btn, _exit_btn
+    ]
+    for btn in buttons:
+        var sn := StyleBoxFlat.new()
+        sn.bg_color = ThemeConfig.C_BTN_NORMAL
+        sn.set_corner_radius_all(10)
+        sn.set_border_width_all(2)
+        sn.border_color = ThemeConfig.C_BTN_BORDER
+        sn.shadow_color = ThemeConfig.C_BTN_SHADOW
+        sn.shadow_size = 4
+        btn.add_theme_stylebox_override("normal", sn)
+        var sh := sn.duplicate()
+        sh.bg_color = ThemeConfig.C_BTN_HOVER
+        btn.add_theme_stylebox_override("hover", sh)
+        var sp := sn.duplicate()
+        sp.bg_color = ThemeConfig.C_BTN_PRESSED
+        btn.add_theme_stylebox_override("pressed", sp)
+        btn.add_theme_color_override("font_color", ThemeConfig.C_BTN_TEXT)
+        btn.mouse_entered.connect(func() -> void: SoundManager.play_sfx_cue(&"ui_hover"))
+        btn.pressed.connect(func() -> void: SoundManager.play_sfx_cue(&"ui_click"))
+        _UIAnimator.setup_button(btn)
+
+func _localize() -> void:
+    _new_game_btn.text = GameText.menu_new_game()
+    _load_game_btn.text = GameText.menu_load_game()
+    _arena_btn.text = GameText.menu_arena()
+    _model_warrior_btn.text = GameText.menu_model_warrior()
+    _model_mage_btn.text = GameText.menu_model_mage()
+    _settings_btn.text = GameText.menu_settings()
+    _chronicle_btn.text = GameText.menu_chronicle()
+    _exit_btn.text = GameText.menu_exit()
+    _version_label.text = GameText.menu_version()
 
 
-func _build_right_column() -> void:
-	var col := VBoxContainer.new()
-	col.name = "RightColumn"
-	col.anchor_left = 1.0
-	col.anchor_right = 1.0
-	col.offset_left = -380
-	col.offset_right = -60
-	col.offset_top = 120
-	col.offset_bottom = -120
-	col.add_theme_constant_override("separation", 20)
-	add_child(col)
-
-	# port-troles-heritage: конструктор героя доступен — панель «недоступно»
-	# убрана; колонка начинается с кнопок.
-
-	# Три синие глянцевые кнопки
-	var btns: Array[Dictionary] = [
-		{"text": "Новая игра", "callback": _on_new_game},
-		{"text": "Загрузить", "callback": _on_load_game},
-		{"text": "🏙 Арена города", "callback": _on_arena},
-		{"text": "🗡 Модель: Рыцарь", "callback": _on_model_warrior},
-		{"text": "✨ Модель: Маг", "callback": _on_model_mage},
-		{"text": "Настройки", "callback": _on_settings},
-		{"text": "📜 Летопись", "callback": _on_chronicle},
-		{"text": "Выход", "callback": _on_exit},
-	]
-	for bd in btns:
-		var btn := Button.new()
-		btn.text = bd["text"]
-		btn.custom_minimum_size = Vector2(300, 70)
-		btn.add_theme_font_size_override("font_size", 24)
-		var sn := StyleBoxFlat.new()
-		sn.bg_color = Color(0.15, 0.35, 0.75)
-		sn.set_corner_radius_all(10)
-		sn.set_border_width_all(2)
-		sn.border_color = Color(0.3, 0.5, 0.9)
-		sn.shadow_color = Color(0.1, 0.2, 0.5, 0.5)
-		sn.shadow_size = 4
-		btn.add_theme_stylebox_override("normal", sn)
-		var sh := sn.duplicate()
-		sh.bg_color = Color(0.2, 0.45, 0.9)
-		btn.add_theme_stylebox_override("hover", sh)
-		var sp := sn.duplicate()
-		sp.bg_color = Color(0.1, 0.25, 0.6)
-		btn.add_theme_stylebox_override("pressed", sp)
-		btn.add_theme_color_override("font_color", Color(0.9, 0.95, 1.0))
-		var callback: Callable = bd["callback"]
-		btn.pressed.connect(callback)
-		btn.mouse_entered.connect(func() -> void: SoundManager.play_sfx_cue(&"ui_hover"))
-		btn.pressed.connect(func() -> void: SoundManager.play_sfx_cue(&"ui_click"))
-		_UIAnimator.setup_button(btn)
-		col.add_child(btn)
-
-	var spacer := Control.new()
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	col.add_child(spacer)
-
-	var ver := Label.new()
-	ver.text = "Sigil of the Unwilling v0.1 — Godot 4.7"
-	ver.add_theme_font_size_override("font_size", 12)
-	ver.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
-	ver.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	col.add_child(ver)
-
+func _connect_buttons() -> void:
+    _new_game_btn.pressed.connect(_on_new_game)
+    _load_game_btn.pressed.connect(_on_load_game)
+    _arena_btn.pressed.connect(_on_arena)
+    _model_warrior_btn.pressed.connect(_on_model_warrior)
+    _model_mage_btn.pressed.connect(_on_model_mage)
+    _settings_btn.pressed.connect(_on_settings)
+    _chronicle_btn.pressed.connect(_on_chronicle)
+    _exit_btn.pressed.connect(_on_exit)
 
 func _on_new_game() -> void:
-	# port-troles-heritage: новая игра проходит конструктор героя (выбор
-	# расы/класса/культуры → HeroBuildProfile), затем мир берёт
-	# WorldPersistence.pending_new_game в WorldBootstrap._init_hero.
-	get_tree().change_scene_to_file(_CharacterCreation.resource_path)
-
-
-func _on_load_game() -> void:
-	var result: Dictionary = SaveManager.load_slot()
-	var err: int = result.get("error", SaveManager.SaveError.FILE_NOT_FOUND)
-	if err != SaveManager.SaveError.OK:
-		_flash_lock()
-		GameLogger.warn("Load failed: %s" % SaveManager.error_to_string(err), "MainMenu")
-		return
-	var data: SaveData = result.get("data")
-	WorldPersistence.pending_save = data
-	get_tree().change_scene_to_file("res://scenes/World.tscn")
-
-
-func _flash_lock() -> void:
-	var lock := get_node_or_null("RightColumn/LockPanel")
-	if lock == null:
-		return
-
-	var tw := create_tween()
-	tw.tween_property(lock, "modulate", Color(1, 0.5, 0.5), 0.15)
-	tw.tween_property(lock, "modulate", Color.WHITE, 0.15)
+    _clear_session_caches()
+    get_tree().change_scene_to_file(_CharacterCreation.resource_path)
 
 
 func _on_arena() -> void:
-	get_tree().change_scene_to_file("res://scenes/CityArena.tscn")
+    _clear_session_caches()
+    get_tree().change_scene_to_file("res://scenes/CityArena.tscn")
 
 
-## legend-chronicle: летопись поколений — читается из последнего сейва
-## (save v6; для v5-сейвов список пуст — «легенда только начинается»).
+func _clear_session_caches() -> void:
+    # Единая точка сброса: Services.clear_session() → StaticCaches.reset_all().
+    Services.clear_session()
+
+func _on_load_game() -> void:
+    var result: Dictionary = SaveManager.load_slot()
+    var err: int = result.get("error", SaveManager.SaveError.FILE_NOT_FOUND)
+    if err != SaveManager.SaveError.OK:
+        _flash_lock()
+        GameLogger.warn("Load failed: %s" % SaveManager.error_to_string(err), "MainMenu")
+        return
+    var data: SaveData = result.get("data")
+    WorldPersistence.pending_save = data
+    get_tree().change_scene_to_file("res://scenes/World.tscn")
+
+func _flash_lock() -> void:
+    var lock := get_node_or_null("RightColumn/LockPanel")
+    if lock == null:
+        return
+    var tw := create_tween()
+    tw.tween_property(lock, "modulate", ThemeConfig.C_LOCK_FLASH, 0.15)
+    tw.tween_property(lock, "modulate", Color.WHITE, 0.15)
+
 func _on_chronicle() -> void:
-	var entries: Array = []
-	var result: Dictionary = SaveManager.load_slot()
-	if result.get("error", -1) == SaveManager.SaveError.OK:
-		var data: SaveData = result.get("data")
-		if data != null:
-			entries = data.chronicle
-	var screen: CanvasLayer = _ChronicleScreen.new()
-	add_child(screen)
-	screen.show_entries(entries)
+    var entries: Array = []
+    var result: Dictionary = SaveManager.load_slot()
+    if result.get("error", -1) == SaveManager.SaveError.OK:
+        var data: SaveData = result.get("data")
+        if data != null:
+            entries = data.chronicle
+    _chronicle_screen.show_entries(entries)
 
+func _on_hero_selected(name: String) -> void:
+    _selected_hero = name
+    _apply_hero_selection()
+
+func _on_cancel_selection() -> void:
+    _selected_hero = &""
+    if _hero_selection != null:
+        _hero_selection.visible = false
+
+func _apply_hero_selection() -> void:
+    if _hero_selection == null or _selected_hero == null:
+        return
+    hero_selected.emit(_selected_hero, "warrior")
 
 func _on_exit() -> void:
-	get_tree().quit()
-
+    get_tree().quit()
 
 func _on_settings() -> void:
-	var screen: Control = _SettingsScreen.new()
-	screen.setup(get_node_or_null("/root/Settings"))
-	screen.applied.connect(_on_settings_applied)
-	add_child(screen)
-
+    if not _settings_screen.applied.is_connected(_on_settings_applied):
+        _settings_screen.applied.connect(_on_settings_applied)
+    # ИСПРАВЛЕНИЕ: Services.resolve вместо get_node("/root/Settings")
+    var settings_node: Object = Services.resolve(&"settings")
+    _settings_screen.setup(settings_node)
+    _settings_screen.show()
 
 func _on_settings_applied() -> void:
-	# MainMenu не обязан иметь WorldCamera.
-	# Зум будет применён там, где камера реально существует.
-	pass
-
+    pass
 
 func _on_model_warrior() -> void:
-	_open_model_window("warrior")
-
+    _open_model_window("warrior")
 
 func _on_model_mage() -> void:
-	_open_model_window("mage")
+    _open_model_window("mage")
 
-
-# Открыть «модельное окно» (экран героя с куклой) для выбранного героя.
-# ArtifactInventoryScreen сам создаёт CenterContainer и рисует окно 942×706 по
-# макету Qwen_html_20260829_1ub90rx55.html; мир за ним виден сквозь прозрачность.
 func _open_model_window(variant: String) -> void:
-	# Имя героя отображается в «модельном окне» (экран героя с куклой).
-	var name := "Аджит — Рыцарь" if variant == "warrior" else "Аджит — Маг"
-	var screen := _ModelScreen.new()
-	screen.name = "HeroModelWindow"
-	screen.set_hero(_HeroModelFactory.build_hero(name, variant))
-	add_child(screen)
+    var name := GameText.model_hero_warrior() if variant == "warrior" else GameText.model_hero_mage()
+    _model_screen.set_hero(_HeroModelFactory.build_hero(name, variant))
+    _model_screen.show()

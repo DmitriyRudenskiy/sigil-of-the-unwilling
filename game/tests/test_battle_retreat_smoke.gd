@@ -1,15 +1,8 @@
-extends "res://tests/gut_base.gd"
+extends GdUnitTestSuite
 
-## Тест отступления: BattleTurnExecutor + BattleState: ретрит → 50% стеков.
 
 
 func test_retreat_smoke() -> void:
-	var errors := _check_retreat_smoke()
-	assert_eq(errors, 0, "test_retreat_smoke — no errors")
-
-func _check_retreat_smoke() -> int:
-	var errors := 0
-
 	var state: BattleState = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 40))
@@ -22,26 +15,16 @@ func _check_retreat_smoke() -> int:
 
 	state.force_end(BattleState.Side.DEFENDER)
 
-	if not state.battle_over:
-		printerr("force_end should set battle_over")
-		errors += 1
+	assert_bool(state.battle_over).is_true().override_failure_message("force_end should set battle_over")
 
 	var survivors: Array = state.get_retreat_survivors(BattleState.Side.ATTACKER)
 
-	if survivors.size() != 2:
-		printerr("retreat survivors should be 2, got %d" % survivors.size())
-		errors += 1
+	assert_int(survivors.size()).is_equal(2).override_failure_message("retreat survivors should be 2")
 
 	var total := 0
 	for s in survivors:
 		total += s.count
 
-	if total != 30:
-		printerr("total retreat survivors should be 30 (20 + 10), got %d" % total)
-		errors += 1
+	assert_int(total).is_equal(30).override_failure_message("total retreat survivors should be 30 (20 + 10)")
 
-	if survivors.size() > 0 and survivors[0].count != 20:
-		printerr("first retreat stack should have 20 (40/2), got %d" % survivors[0].count)
-		errors += 1
-
-	return errors
+	assert_int(survivors[0].count).is_equal(20).override_failure_message("first retreat stack should have 20 (40/2)")

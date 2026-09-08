@@ -1,9 +1,5 @@
 extends Control
 class_name ArtifactChestDialog
-## Chest open dialog: artifact preview + Take/Gold buttons.
-## Скетч (MarginContainer → VBoxContainer → title/labels/buttons) верстается в
-## сцене `ArtifactChestDialog.tscn`; данные подтягиваются в `_update_display()`.
-## Стиль — из общей темы (D3).
 
 const THEME_PATH := "res://assets/theme/game_theme.tres"
 
@@ -37,7 +33,6 @@ func _apply_theme() -> void:
 
 
 func _connect_skeleton() -> void:
-	# Ссылки на узлы-скелет (из сцены). Сигналы подключаем один раз.
 	_artifact_label = get_node_or_null("Margin/VBox/artifact_label") as Label
 	_gold_label = get_node_or_null("Margin/VBox/gold_label") as Label
 	var take := get_node_or_null("Margin/VBox/buttons/take")
@@ -47,9 +42,6 @@ func _connect_skeleton() -> void:
 		take.pressed.connect(_on_take)
 	if gold != null and not gold.pressed.is_connected(_on_gold):
 		gold.pressed.connect(_on_gold)
-	# R1: Close/cancel button was present in the scene but never connected,
-	# so dismissing the dialog was a no-op. Hide without emitting choice_made
-	# (a cancel must not consume/remove the chest).
 	if cancel != null and not cancel.pressed.is_connected(_on_close):
 		cancel.pressed.connect(_on_close)
 
@@ -66,7 +58,7 @@ func _update_display() -> void:
 		_artifact_label.add_theme_color_override("font_color", art.get_rarity_color())
 	else:
 		_artifact_label.text = "Empty"
-		_artifact_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+		_artifact_label.add_theme_color_override("font_color", ThemeConfig.C_TEXT_GRAY)
 
 	_gold_label.text = "%d Gold" % _current_chest.gold_reward
 

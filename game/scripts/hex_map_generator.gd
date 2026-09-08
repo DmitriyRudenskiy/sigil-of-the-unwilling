@@ -1,26 +1,22 @@
 extends Node2D
 class_name HexMapGenerator
-## Генератор карт под атласы hex_tiles_max_0/1.png (117 тайлов, 9 биомов).
-## Повороты тайлов — средством движка (rotation = 60°·k).
-## Режимы: noise (шум) / blueprint (схема) / shares (доля биомов 0..4).
 
-@export var sheet0: Texture2D          # 1-й лист (индексы 0..63)
-@export var sheet1: Texture2D          # 2-й лист (индексы 64..116)
+@export var sheet0: Texture2D          
+@export var sheet1: Texture2D          
 @export var map_w := 48
 @export var map_h := 32
 @export var noise_seed := 0
 @export var smooth_passes := 2
 
-# Режимы управления.
 @export_enum("noise", "blueprint", "shares") var mode := "noise"
-@export var edge_jitter := 0.6          # волнистость границы (0 = ровно по схеме)
+@export var edge_jitter := 0.6          
 @export var blueprint: PackedStringArray = PackedStringArray([
 	"GGGGSS",
-	"GGGGGS",                                # снег — правый верхний угол
+	"GGGGGS",                                
 	"GGGGGG",
 ])
-@export var biome_a := 0                 # «основной» биом (grass)
-@export var biome_b := 2                 # «чужой» биом (snow)
+@export var biome_a := 0                 
+@export var biome_b := 2                 
 @export var share_map: PackedStringArray = PackedStringArray([
 	"444400",
 	"444400",
@@ -28,27 +24,23 @@ class_name HexMapGenerator
 	"444440",
 ])
 const CHAR_TO_BIOME := {"G": 0, "S": 2, "D": 6, "W": 4, "R": 5, "L": 7, "P": 8, "M": 3}
-#                        grass  snow   dirt   water  rock  lava  road  swamp
 
-# Геометрия: тайл 64×74, ячейка атласа 66×76 (PAD=2), шаг центров 64/55.
 const TILE_W := 64.0
 const TILE_H := 74.0
-const COL_STEP := 64.0                 # гексы касаются вертикальными рёбрами
-const ROW_STEP := 55.0                 # ≈ 0.75 * TILE_H
-const PAD := 2.0                       # отступ в исходных PNG
-const CELL := Vector2(66.0, 76.0)      # шаг сетки атласа (64+2, 74+2)
-const ROT_SIGN := -1.0                 # Godot: «+» = по часовой; сдвиг рёбер E→NE = против
+const COL_STEP := 64.0                 
+const ROW_STEP := 55.0                 
+const PAD := 2.0                       
+const CELL := Vector2(66.0, 76.0)      
+const ROT_SIGN := -1.0                 
 
-# порядок биомов = как в Python-генераторе атласов
 const BIOMES := ["grass","sand","snow","swamp","water","rock","dirt","lava","road"]
 
-# направления: 0=E 1=NE 2=NW 3=W 4=SW 5=SE (even-r, как во всех скриптах)
 const DIR_EVEN := [Vector2i(1,0),Vector2i(1,-1),Vector2i(0,-1),Vector2i(-1,0),Vector2i(0,1),Vector2i(1,1)]
 const DIR_ODD  := [Vector2i(1,0),Vector2i(0,-1),Vector2i(-1,-1),Vector2i(-1,0),Vector2i(-1,1),Vector2i(0,1)]
 
-var _biome := {}                       # Vector2i -> int
-var _cells := {}                       # Vector2i -> {sheet, region, rot}
-var _share := {}                       # Vector2i -> 0..4 (режим shares)
+var _biome := {}                       
+var _cells := {}                       
+var _share := {}                       
 var _i100 := {}; var _i50 := {}; var _i30 := {}
 
 
@@ -84,7 +76,6 @@ func _on_mode_selected(idx: int) -> void:
 	generate()
 
 
-# ---------------- кнопка «пересобрать карту» (из сцены/UI) ----------------
 func _on_regenerate_button_pressed() -> void:
 	noise_seed = randi()
 	generate()
@@ -93,7 +84,6 @@ func _on_save_button_pressed() -> void:
 	_save_map()
 
 
-# ---------------- индексы тайлов (зеркало Python-порядка) ----------------
 func _build_index_maps() -> void:
 	var idx := 0
 	for b in 9: _i100[b] = idx; idx += 1
@@ -101,7 +91,7 @@ func _build_index_maps() -> void:
 		for j in range(i + 1, 9): _i50[Vector2i(i, j)] = idx; idx += 1
 	for i in 9:
 		for j in 9:
-			if i != j: _i30[Vector2i(i, j)] = idx; idx += 1   # (minor, major)
+			if i != j: _i30[Vector2i(i, j)] = idx; idx += 1   
 
 
 func _tile_ref(idx: int) -> Dictionary:
@@ -111,13 +101,12 @@ func _tile_ref(idx: int) -> Dictionary:
 			"region": Rect2(PAD + (c % 8) * CELL.x, PAD + (c / 8) * CELL.y, TILE_W, TILE_H)}
 
 
-# ---------------- генерация биомов (режимы) ----------------
 func generate() -> void:
 	_cells.clear()
 	match mode:
 		"shares": _gen_shares()
 		"blueprint": _gen_biomes_blueprint()
-		_: _gen_biomes_noise()                  # шумовой вариант по умолчанию
+		_: _gen_biomes_noise()                  
 	if mode != "shares":
 		for _p in smooth_passes: _smooth()
 		_assign_tiles()
@@ -134,7 +123,7 @@ func _gen_biomes_noise() -> void:
 	_biome.clear()
 	for y in map_h:
 		for x in map_w:
-			var n := noise.get_noise_2d(x, y * 0.9)            # -1..1
+			var n := noise.get_noise_2d(x, y * 0.9)            
 			_biome[Vector2i(x, y)] = clampi(int((n + 1.0) * 0.5 * 9), 0, 8)
 
 
@@ -143,7 +132,7 @@ func _gen_biomes_blueprint() -> void:
 	var jn := FastNoiseLite.new()
 	jn.noise_type = FastNoiseLite.TYPE_SIMPLEX
 	jn.seed = noise_seed + 77
-	jn.frequency = 0.15                     # мелкий шум для «рваной» кромки
+	jn.frequency = 0.15                     
 	for y in map_h:
 		for x in map_w:
 			var fx := float(x) / map_w * blueprint[0].length()
@@ -154,7 +143,6 @@ func _gen_biomes_blueprint() -> void:
 			_biome[Vector2i(x, y)] = CHAR_TO_BIOME[blueprint[by][bx]]
 
 
-# ---------------- соседство и сглаживание ----------------
 func _neighbors(c: Vector2i) -> Array:
 	var t := DIR_EVEN if c.y & 1 == 0 else DIR_ODD
 	var res := Array()
@@ -177,7 +165,6 @@ func _smooth() -> void:
 	_biome = next
 
 
-# ---------------- выбор тайла и поворота (шум/blueprint) ----------------
 func _assign_tiles() -> void:
 	_cells.clear()
 	for c in _biome:
@@ -185,11 +172,11 @@ func _assign_tiles() -> void:
 		var cnt := {}; var dirs := {}
 		for i in 6:
 			var n: Vector2i = _neighbors(c)[i]
-			var nb: int = _biome.get(n, own)                        # за картой = свой биом
+			var nb: int = _biome.get(n, own)                        
 			if nb != own:
 				cnt[nb] = cnt.get(nb, 0) + 1
 				dirs[nb] = dirs.get(nb, []) + [i]
-		if cnt.is_empty():                                      # чистый биом
+		if cnt.is_empty():                                      
 			var t := _tile_ref(_i100[own])
 			t.rot = randi() % 6
 			_cells[c] = t
@@ -198,13 +185,13 @@ func _assign_tiles() -> void:
 		for k in cnt:
 			if cnt[k] > bc: bc = cnt[k]; B = k
 		var ds: Array = dirs[B]
-		if bc >= 3:                                             # половина 50/50
+		if bc >= 3:                                             
 			var d := _centroid_dir(ds)
 			var key := Vector2i(mini(own, B), maxi(own, B))
 			var t := _tile_ref(_i50[key])
-			t.rot = (d + 5) % 6                                 # центр трапеции на d
+			t.rot = (d + 5) % 6                                 
 			_cells[c] = t
-		else:                                                   # уголок ~17% (B — минор)
+		else:                                                   
 			var t := _tile_ref(_i30[Vector2i(B, own)])
 			t.rot = ds[0] if ds.size() == 1 else _adj_rot(ds)
 			_cells[c] = t
@@ -215,14 +202,13 @@ func _gen_shares() -> void:
 	for y in share_map.size():
 		for x in share_map[y].length():
 			_share[Vector2i(x, y)] = share_map[y][x].to_int()
-	# если нарисованы только 4/0 — достроить лестницу 3/2/1 по дистанции
 	var has_mid := false
 	for c in _share:
 		if _share[c] in [1, 2, 3]: has_mid = true
 	if not has_mid: _auto_ladder()
 
 
-func _bfs(from_val: int) -> Dictionary:  # дистанция до ближайшей клетки with from_val
+func _bfs(from_val: int) -> Dictionary:  
 	var dist := {}; var q := []
 	for c in _share:
 		if _share[c] == from_val: dist[c] = 0; q.append(c)
@@ -236,8 +222,8 @@ func _bfs(from_val: int) -> Dictionary:  # дистанция до ближай�
 
 
 func _auto_ladder() -> void:
-	var d_snow := _bfs(biome_a)                 # расстояние до «основного» биома
-	var d_for := _bfs(biome_b)                  # расстояние до «чужой» биома
+	var d_snow := _bfs(biome_a)                 
+	var d_for := _bfs(biome_b)                  
 	for c in _share:
 		if _share[c] == 4:
 			var d: int = d_snow.get(c, 99)
@@ -252,10 +238,10 @@ func _orient(c: Vector2i, cls: int) -> int:
 	var targets := []
 	for i in 6:
 		var s: int = _share.get(_neighbors(c)[i], own)
-		if cls >= 2 and s < own: targets.append(i)     # 3 и 2 смотрят НА чужой биом
-		elif cls == 1 and s > own: targets.append(i)   # 1 смотрит НА основной биом
+		if cls >= 2 and s < own: targets.append(i)     
+		elif cls == 1 and s > own: targets.append(i)   
 	if targets.is_empty(): return 0
-	if cls == 2: return (_centroid_dir(targets) + 5) % 6   # центр трапеции на d
+	if cls == 2: return (_centroid_dir(targets) + 5) % 6   
 	return _adj_rot(targets) if targets.size() > 1 else targets[0]
 
 
@@ -273,7 +259,6 @@ func _assign_tiles_shares() -> void:
 		_cells[c] = t
 
 
-# ---------------- направление поворота ----------------
 func _centroid_dir(ds: Array) -> int:
 	var sx := 0.0; var sy := 0.0
 	for i in ds:
@@ -289,11 +274,10 @@ func _centroid_dir(ds: Array) -> int:
 
 func _adj_rot(ds: Array) -> int:
 	for a in ds:
-		if ds.has((a + 1) % 6): return a                        # пара смежных рёбер
+		if ds.has((a + 1) % 6): return a                        
 	return ds[0]
 
 
-# ---------------- сериализация и сохранение карты ----------------
 func _serialize_map() -> String:
 	var out := PackedStringArray()
 	out.append("# HexMap v1")
@@ -328,7 +312,6 @@ func _save_map() -> void:
 	print("HexMapGenerator: saved map (%d cells) to %s" % [_cells.size(), path])
 
 
-# ---------------- отрисовка с поворотами ----------------
 func _cell_pos(c: Vector2i) -> Vector2:
 	return Vector2(c.x * COL_STEP + (c.y & 1) * COL_STEP * 0.5, c.y * ROW_STEP)
 

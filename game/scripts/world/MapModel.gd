@@ -1,6 +1,5 @@
 class_name MapModel
 extends RefCounted
-## Данные карты: шум, биомы, проходимость.
 
 const _UnitStack = preload("res://scripts/entities/UnitStack.gd")
 
@@ -9,7 +8,6 @@ var map_height: int = 60
 var seed_value: int = 12345
 var village_count: int = 8
 
-# Пороги биомов — в одном месте для балансировки
 var WATER_THRESHOLD: float = 0.35
 var SAND_THRESHOLD: float = 0.40
 var GRASS_THRESHOLD: float = 0.65
@@ -85,7 +83,6 @@ func get_biome_terrain_id(height: float, temp: float, moist: float) -> int:
 func is_walkable(cell: Vector2i) -> bool:
 	if not terrain_grid.has(cell):
 		return false
-	# Без `in [a, b]`: не аллоцирует Array на каждом вызове (hot path)
 	var t: int = terrain_grid[cell]
 	return t != HexUtils.Terrain.WATER and t != HexUtils.Terrain.MOUNTAIN
 
@@ -133,8 +130,6 @@ func set_terrain(cell: Vector2i, terrain_id: int) -> void:
 	invalidate_blocked_cache()
 
 
-# Port: ForlornU/HexagonalMapGodot tile_factory.gd invalidate_ocean_hill_neighbors (MIT)
-# Голые горы не могут стоять вплотную к воде — вставляем песчаную кромку.
 func smooth_invalid_adjacencies() -> void:
 	var to_change: Array[Vector2i] = []
 	for cell in terrain_grid:

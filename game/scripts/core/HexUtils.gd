@@ -1,20 +1,27 @@
 extends RefCounted
 class_name HexUtils
-## Гекс-утилиты с АВТОКАЛИБРОВКОЙ чётности строк под реальный layout TileMapLayer.
-## Порядок doc-битов: [E, NE, NW, W, SW, SE] = 0..5
 
-# Таблицы соседей (Red Blob Games), odd-r и even-r
-const T_ODD_RIGHT := [  # нечётная строка смещена ВПРАВО
+const T_ODD_RIGHT := [  
 	Vector2i(1, 0), Vector2i(1, -1), Vector2i(0, -1),
 	Vector2i(-1, 0), Vector2i(0, 1), Vector2i(1, 1),
 ]
-const T_EVEN_RIGHT := [  # чётная строка (при odd-r)
+const T_EVEN_RIGHT := [  
 	Vector2i(1, 0), Vector2i(0, -1), Vector2i(-1, -1),
 	Vector2i(-1, 0), Vector2i(-1, 1), Vector2i(0, 1),
 ]
 
-# Калибруется по реальному TileMapLayer (см. calibrate)
+# R3 ACCEPTED: static var остаётся. Сброс через HexUtils.reset()
+# на границе сессии (вызывается в Services.clear_session()).
+# Полная миграция на инстанс-передачу
+# HexGridConfig нецелесообразна: ~200 вызовов в горячих циклах A*/BFS,
+# нулевой выигрыш, высокий риск регрессии.
 static var _config: HexGridConfig = null
+
+# hot-path (get_neighbor is called in A*/BFS). Cache the calibration
+# flag in a static bool so the hot methods avoid the get_config() method call and
+# property access. Recomputed only in calibrate(). Upgrade path: if HexGridConfig
+# gains more per-tile-set fields that these methods need, fold them back here.
+static var _shift_right: bool = true
 
 static func get_config() -> HexGridConfig:
 	if _config == null:
@@ -26,52 +33,57 @@ const TERRAIN_NAMES := ["water", "swamp", "sand", "grass", "forest", "mountain",
 
 
 static func calibrate(tm: TileMapLayer) -> void:
-	## Определяет, в какую сторону смещены НЕЧЁТНЫЕ строки в реальном рендере
 	if tm == null or tm.tile_set == null:
 		return
 	var a := tm.map_to_local(Vector2i(0, 0))
 	var b := tm.map_to_local(Vector2i(0, 1))
 	get_config().odd_row_shift_right = b.x > a.x
-	GameLogger.trace("calibrated: odd_row_shift_right = %s" % str(get_config().odd_row_shift_right), "HexUtils")
+	_shift_right = get_config().odd_row_shift_right
+	GameLogger.trace("calibrated: odd_row_shift_right = %s" % str(_shift_right), "HexUtils")
+
+
+## R3: сброс статического состояния на границе сессии.
+## Дефолты (_shift_right=true) совпадают с HexGridConfig; следующая calibrate()
+## в MapGenerator/BattleView пересчитает флаг по фактическому тайл-сету.
+static func reset() -> void:
+	_config = null
+	_shift_right = true
 
 
 static func get_neighbor(cell: Vector2i, bit: int) -> Vector2i:
 	var odd := (cell.y & 1) == 1
-	var table: Array
-	if get_config().odd_row_shift_right:
-		table = T_ODD_RIGHT if odd else T_EVEN_RIGHT
+	if _shift_right:
+		return cell + (T_ODD_RIGHT[bit] if odd else T_EVEN_RIGHT[bit])
 	else:
-		table = T_EVEN_RIGHT if odd else T_ODD_RIGHT
-	return cell + table[bit]
+		return cell + (T_EVEN_RIGHT[bit] if odd else T_ODD_RIGHT[bit])
 
 
 static func get_all_neighbors(cell: Vector2i) -> Array[Vector2i]:
 	var r: Array[Vector2i] = []
+	r.resize(6)
 	for i in 6:
-		r.append(get_neighbor(cell, i))
+		r[i] = get_neighbor(cell, i)
 	return r
 
 
-@warning_ignore("integer_division")
 static func offset_to_cube(cell: Vector2i) -> Vector3i:
 	var r := cell.y
 	var x: int
-	if get_config().odd_row_shift_right:
-		x = cell.x - (r - (r & 1)) / 2
+	if _shift_right:
+		x = cell.x - int((r - (r & 1)) / 2)
 	else:
-		x = cell.x - (r + (r & 1)) / 2
+		x = cell.x - int((r + (r & 1)) / 2)
 	var z := r
 	return Vector3i(x, -x - z, z)
 
 
-@warning_ignore("integer_division")
 static func cube_to_offset(c: Vector3i) -> Vector2i:
 	var r := c.z
 	var x: int
-	if get_config().odd_row_shift_right:
-		x = c.x + (r - (r & 1)) / 2
+	if _shift_right:
+		x = c.x + int((r - (r & 1)) / 2)
 	else:
-		x = c.x + (r + (r & 1)) / 2
+		x = c.x + int((r + (r & 1)) / 2)
 	return Vector2i(x, r)
 
 
@@ -81,18 +93,22 @@ static func hex_distance(a: Vector2i, b: Vector2i) -> int:
 	return max(max(absi(ac.x - bc.x), absi(ac.y - bc.y)), absi(ac.z - bc.z))
 
 
-## city-in-world: детерминированное кольцо клеток на расстоянии r от центра
-## (r <= 0 → [center]). Порядок обхода: строки сверху вниз, внутри строки
-## слева направо. Для автоматической расстановки зданий (CityScreen).
 static func ring(center: Vector2i, r: int) -> Array[Vector2i]:
 	if r <= 0:
 		return [center]
+
 	var out: Array[Vector2i] = []
-	for y in range(center.y - r, center.y + r + 1):
-		for x in range(center.x - r, center.x + r + 1):
-			var c := Vector2i(x, y)
-			if hex_distance(center, c) == r:
-				out.append(c)
+	# TASK_06: обход кольца за O(r), а не O(r^2).
+	# Идём по 6 кубическим направлениям от стартового угла кольца;
+	# cube-координаты полностью не зависят от калибровки offset-сетки,
+	# поэтому результат идентичен старому реализации.
+	var dirs := [Vector2i(1, 0), Vector2i(1, -1), Vector2i(0, -1), Vector2i(-1, 0), Vector2i(-1, 1), Vector2i(0, 1)]
+	var cube := offset_to_cube(center)
+	var cur := cube + Vector3i(dirs[4].x, -dirs[4].x - dirs[4].y, dirs[4].y) * r
+	for i in 6:
+		for _j in r:
+			out.append(cube_to_offset(cur))
+			cur += Vector3i(dirs[i].x, -dirs[i].x - dirs[i].y, dirs[i].y)
 	return out
 
 

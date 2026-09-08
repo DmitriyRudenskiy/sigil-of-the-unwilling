@@ -1,5 +1,4 @@
-extends "res://tests/gut_base.gd"
-## Regression tests for round 5 executor + spell flow (РФ5-1, РФ5-3, РФ5-4).
+extends GdUnitTestSuite
 
 const _Executor = preload("res://scripts/systems/BattleTurnExecutor.gd")
 const _Input = preload("res://scripts/systems/BattleInput.gd")
@@ -9,17 +8,15 @@ const _BAI = preload("res://scripts/systems/BattleAI.gd")
 
 var _units: Node
 
-func before_each() -> void:
-	_units = ServiceLocator.resolve(null, &"units")
+func before_test() -> void:
+	_units = Services.resolve(&"units")
 
-# РФ5-1: PendingAction.SPELL exists in enum
 func test_pending_action_spell_exists() -> void:
 	var exec = _Executor.new()
 	var val = exec.PendingAction.SPELL
-	assert_eq(val, 3, "SPELL action should be enum value 3")
+	assert_that(val).is_equal(3)
 	exec.free()
 
-# РФ5-1: on_spell_target_selected emits spell_cast_executed on success
 func test_cast_emits_spell_cast_executed() -> void:
 	var state := _make_battle_state()
 	var exec := _Executor.new()
@@ -35,11 +32,10 @@ func test_cast_emits_spell_cast_executed() -> void:
 		state_holder[1] = r
 	)
 	exec.on_spell_target_selected(&"magic_arrow", target)
-	assert_true(state_holder[0], "spell_cast_executed should fire on successful cast")
-	assert_eq(state_holder[1].get("result"), "success", "result is success")
+	assert_bool(state_holder[0]).is_true()
+	assert_that(state_holder[1].get("result")).is_equal("success")
 	exec.free()
 
-# РФ5-1: on_spell_target_selected emits spell_cast_failed on failure
 func test_cast_emits_spell_cast_failed() -> void:
 	var state := _make_battle_state()
 	var exec := _Executor.new()
@@ -53,10 +49,9 @@ func test_cast_emits_spell_cast_failed() -> void:
 		failed_holder[0] = true
 	)
 	exec.on_spell_target_selected(&"nonexistent_spell", caster)
-	assert_true(failed_holder[0], "spell_cast_failed should fire on invalid spell")
+	assert_bool(failed_holder[0]).is_true()
 	exec.free()
 
-# РФ4-2: request_sacrifice emits execute_sacrifice + transitions to animating.
 func test_request_sacrifice_emits_and_finishes() -> void:
 	var state := _make_battle_state()
 	var exec := _Executor.new()
@@ -75,14 +70,13 @@ func test_request_sacrifice_emits_and_finishes() -> void:
 	var storage := {&"gold": 100}
 	var sacrifice := {"type": &"resource", "resource": &"gold", "amount": 40}
 	exec.request_sacrifice(atk, sacrifice, def, storage)
-	assert_true(holder[0], "execute_sacrifice should fire on successful sacrifice")
-	assert_eq(holder[1].get("result"), "success", "result is success")
-	assert_eq(exec._state, _Executor.State.PLAYER_ANIMATING, "transitions to animating")
-	assert_false(def.is_alive(), "target finished off")
-	assert_eq(int(storage.get(&"gold", 0)), 60, "resource deducted")
+	assert_bool(holder[0]).is_true()
+	assert_that(holder[1].get("result")).is_equal("success")
+	assert_that(exec._state).is_equal(_Executor.State.PLAYER_ANIMATING)
+	assert_bool(def.is_alive()).is_false()
+	assert_that(int(storage.get(&"gold", 0))).is_equal(60)
 	exec.free()
 
-# РФ4-2: request_sacrifice is a no-op when not waiting for input.
 func test_request_sacrifice_guard_when_idle() -> void:
 	var state := _make_battle_state()
 	var exec := _Executor.new()
@@ -90,7 +84,6 @@ func test_request_sacrifice_guard_when_idle() -> void:
 	exec.setup(state, _BAI.new(), {})
 	var atk: BattleState.BattleUnit = state.attacker_units[0]
 	var def: BattleState.BattleUnit = state.defender_units[0]
-	# _state == IDLE, active_unit not set → should not fire.
 	var fired := false
 	exec.execute_sacrifice.connect(func(_a, _t, _c, _r):
 		fired = true
@@ -98,8 +91,8 @@ func test_request_sacrifice_guard_when_idle() -> void:
 	var storage := {&"gold": 100}
 	var sacrifice := {"type": &"resource", "resource": &"gold", "amount": 40}
 	exec.request_sacrifice(atk, sacrifice, def, storage)
-	assert_false(fired, "no signal when not WAITING_INPUT")
-	assert_true(def.is_alive(), "target untouched when guard blocks")
+	assert_bool(fired).is_false()
+	assert_bool(def.is_alive()).is_true()
 	exec.free()
 
 func _make_battle_state() -> BattleState:
@@ -109,53 +102,48 @@ func _make_battle_state() -> BattleState:
 	state.place_army([atk_stack], [def_stack])
 	return state
 
-# РФ5-3: refund_mana on HeroMagic
 func test_hero_magic_refund() -> void:
 	var magic = _HeroMagic.new()
 	magic.init_defaults()
 	magic.spend_mana(10)
-	assert_eq(magic.mana_current, 10, "Mana should be 10 after spending 10")
+	assert_that(magic.mana_current).is_equal(10)
 	magic.refund_mana(5)
-	assert_eq(magic.mana_current, 15, "Mana should be 15 after refunding 5")
+	assert_that(magic.mana_current).is_equal(15)
 	magic.refund_mana(10)
-	assert_eq(magic.mana_current, 20, "Mana should cap at max after over-refund")
+	assert_that(magic.mana_current).is_equal(20)
 
-# РФ5-4: _clear_highlights resets _pending_spell_id
 func test_clear_highlights_resets_pending_spell() -> void:
 	var input = _Input.new()
 	input._pending_spell_id = "fireball"
 	input.highlight_move["a"] = 1
 	input.highlight_attack["b"] = 1
 	input._clear_highlights()
-	assert_eq(input._pending_spell_id, "", "pending_spell_id should be cleared")
-	assert_eq(input.highlight_move.size(), 0, "move highlights should be cleared")
-	assert_eq(input.highlight_attack.size(), 0, "attack highlights should be cleared")
+	assert_that(input._pending_spell_id).is_equal("")
+	assert_that(input.highlight_move.size()).is_equal(0)
+	assert_that(input.highlight_attack.size()).is_equal(0)
 	input.free()
 
-# РФ5-6: HeroMagic.spend_mana returns false on insufficient mana
 func test_spend_mana_insufficient() -> void:
 	var magic = _HeroMagic.new()
 	magic.init_defaults()
 	var result = magic.spend_mana(999)
-	assert_false(result, "spend_mana should fail with insufficient mana")
-	assert_eq(magic.mana_current, 20, "Mana should be unchanged on failed spend")
+	assert_bool(result).is_false()
+	assert_that(magic.mana_current).is_equal(20)
 
-# РФ5-1: resume_battle handles SPELL pending action (без active state — no-op)
 func test_resume_battle_pending_spell() -> void:
 	var exec := _Executor.new()
 	exec.name = "ExecResumeSpell"
 	exec._pending_completion = _Executor.PendingAction.SPELL
 	exec.resume_battle()
-	assert_eq(exec._pending_completion, _Executor.PendingAction.NONE, "pending should reset after resume")
-	assert_false(exec.is_paused(), "executor unpaused after resume")
+	assert_that(exec._pending_completion).is_equal(_Executor.PendingAction.NONE)
+	assert_bool(exec.is_paused()).is_false()
 	exec.free()
 
-# РФ5-1: _paused guard in on_spell_anim_completed
 func test_spell_anim_paused_guard() -> void:
 	var exec := _Executor.new()
 	exec.name = "ExecSpellPaused"
 	exec._paused = true
 	exec.on_spell_anim_completed()
-	assert_eq(exec._pending_completion, _Executor.PendingAction.SPELL, "SPELL should be pending after paused guard")
-	assert_eq(exec._state, _Executor.State.IDLE, "state unchanged while paused")
+	assert_that(exec._pending_completion).is_equal(_Executor.PendingAction.SPELL)
+	assert_that(exec._state).is_equal(_Executor.State.IDLE)
 	exec.free()

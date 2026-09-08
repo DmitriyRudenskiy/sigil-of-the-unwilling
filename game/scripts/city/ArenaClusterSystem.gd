@@ -1,40 +1,32 @@
 class_name ArenaClusterSystem
 extends RefCounted
-## Механика кластеров ×4 (M3): связные группы из CLUSTER_MIN зданий одного
-## типа дают CLUSTER_MULT к производству каждого + CLUSTER_HOUSING слотов
-## рабочих. Связность — hex-соседство (get_all_neighbors). Перенос из
-## CityArenaModel + кэш по версии города.
 
-const ArenaBalance := preload("res://scripts/city/ArenaBalance.gd")
 const HexUtils := preload("res://scripts/core/HexUtils.gd")
 const City := preload("res://scripts/world/City.gd")
 const PopUnit := preload("res://scripts/world/PopUnit.gd")
 const UniqueBuilding := preload("res://scripts/world/UniqueBuilding.gd")
 
-## Кэш результатов: city_uid -> {"ver": int, "cl": Array}. Версия =
-## размер buildings + хэш uid зданий; пересчёт при любом изменении
-## состава (постройка/снос/пересборка). Сбрасывается invalidate().
-static var _cache: Dictionary = {}
+# TASK_06: кэш больше не живёт в статическом поле.
+# Он привязан к самому городу (city.set_meta / get_meta),
+# а версия кэша пересчитывается при каждом обращении,
+# поэтому при любом изменении города кэш автоматически становится невалидным.
 
 
-## Связные группы ≥CLUSTER_MIN зданий одного типа (hex-соседство).
-## Возвращает [ {"def_id", "cells": Array[Vector2i], "buildings"} ] в
-## детерминированном порядке (по первой клетке кластера: y, затем x).
 static func clusters(city: City) -> Array:
 	if city == null:
 		return []
-	var ver: int = _city_version(city)
-	var entry: Dictionary = _cache.get(city.uid, {})
-	if int(entry.get("ver", -1)) == ver and entry.has("cl"):
-		return entry["cl"]
+	var version: int = _city_version(city)
+	var cache: Dictionary = city.get_meta(&"arena_clusters_cache", {})
+	if int(cache.get(&"version", -1)) == version and cache.has(&"clusters"):
+		return cache[&"clusters"]
 	var result: Array = _compute_clusters(city)
-	_cache[city.uid] = {"ver": ver, "cl": result}
+	city.set_meta(&"arena_clusters_cache", {
+		&"version": version,
+		&"clusters": result
+	})
 	return result
 
 
-## ponytail: кэш держится бесконечно (одна запись на uid города); демо-планы
-## создают много городов → рост памяти. Потолок: LRU-ёмкость (напр. 32 записи)
-## или очистка по таймеру, если станет заметно в профайлере.
 static func _compute_clusters(city: City) -> Array:
 	var by_def: Dictionary = {}
 	for b in city.buildings:
@@ -65,7 +57,7 @@ static func _compute_clusters(city: City) -> Array:
 					if nb_b != null and not seen.has(nb_b.uid):
 						seen[nb_b.uid] = true
 						stack.append(nb_b)
-			if comp.size() >= ArenaBalance.CLUSTER_MIN:
+			if comp.size() >= GameNumbers.ARENA_CLUSTER_MIN:
 				var cells: Array[Vector2i] = []
 				for b in comp:
 					cells.append((b as UniqueBuilding).cell)
@@ -77,31 +69,42 @@ static func _compute_clusters(city: City) -> Array:
 	return out
 
 
-## uid здания -> множитель кластера (отсутствует = вне кластера).
 static func cluster_uids(city: City) -> Dictionary:
 	if city == null:
 		return {}
 	var m: Dictionary = {}
 	for cl in clusters(city):
 		for b in (cl as Dictionary)["buildings"]:
-			m[(b as UniqueBuilding).uid] = ArenaBalance.CLUSTER_MULT
+			m[(b as UniqueBuilding).uid] = GameNumbers.ARENA_CLUSTER_MULT
 	return m
 
 
-## Свободные слоты рабочих с учётом бонуса кластеров (+CLUSTER_HOUSING
-## на каждый кластер).
 static func cluster_worker_housing(city: City) -> int:
+	if city == null:
+		return 0
 	return city.free_housing(PopUnit.State.WORKER) \
-		+ ArenaBalance.CLUSTER_HOUSING * (clusters(city) as Array).size()
+		+ GameNumbers.ARENA_CLUSTER_HOUSING * (clusters(city) as Array).size()
 
 
-## Сброс кэша для города (вызывать при изменении buildings).
-static func invalidate(city_uid: int) -> void:
-	_cache.erase(city_uid)
+static func invalidate(_city_uid: int) -> void:
+	# TASK_06: старая сигнатура сохранена для совместимости.
+	# Теперь кэш привязан к объекту City и сам инвалидируется
+	# по версии (uid + def + cell + level + workers),
+	# поэтому отдельное удаление по uid не требуется.
+	pass
 
 
-## ponytail: хэш uid — быстрая, но теоретически коллизируемая оценка; для
-## 100% детерминизма кэша нужен полный построчный хэш buildings (дороже).
+static func invalidate_city(city: City) -> void:
+	if city != null and city.has_meta(&"arena_clusters_cache"):
+		city.remove_meta(&"arena_clusters_cache")
+
+
+static func reset() -> void:
+	# TASK_06: без статического кэша сбрасывать нечего.
+	# Кэш живёт в meta городов и исчезает вместе с ними.
+	pass
+
+
 static func _city_version(city: City) -> int:
 	if city == null:
 		return -1
@@ -109,4 +112,10 @@ static func _city_version(city: City) -> int:
 	for bld in city.buildings:
 		if bld != null:
 			h = (h * 131 + int(bld.uid)) & 0x7fffffff
+			h = (h * 137 + bld.level) & 0x7fffffff
+			h = (h * 139 + bld.assigned_workers) & 0x7fffffff
+			if bld.def != null:
+				h = (h * 149 + int(bld.def.id.hash())) & 0x7fffffff
+			h = (h * 151 + bld.cell.x) & 0x7fffffff
+			h = (h * 157 + bld.cell.y) & 0x7fffffff
 	return int(city.buildings.size()) * 1_000_003 + h

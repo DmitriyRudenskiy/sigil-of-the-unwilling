@@ -1,15 +1,5 @@
-## scripts/data/TemplateEngine.gd
 class_name TemplateEngine
 extends RefCounted
-## Реестр и диспетчер шаблонов заклинаний (аудит #8: только диспетч).
-## Конкретные обработчики — по одному файлу на шаблон в scripts/data/templates/
-## (T01DirectDamage, T02HardRemoval, ...), общие хелперы — TemplateContext.
-## Регистрация классов — в TemplateBootstrap.
-##
-## execute(template, params, condition, secondary, state, caster, target)
-##   → {"result": "...", "effects": [ {...}, ... ]}
-##
-## secondary: Array[Dictionary] — вторичные эффекты (используются T05 COMBAT TRICK).
 
 static var _handlers: Dictionary = {}
 

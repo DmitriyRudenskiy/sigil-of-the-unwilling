@@ -1,7 +1,5 @@
-## scripts/data/templates/t13_touch_cycle.gd
 class_name T13TouchCycle
 extends RefCounted
-## T13: TOUCH CYCLE (аудит #8: вынесен из TemplateEngine).
 
 const _Utils = preload("res://scripts/data/SpellUtils.gd")
 

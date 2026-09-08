@@ -1,9 +1,4 @@
-extends "res://tests/gut_base.gd"
-## GUT-инвариант: компилирует каждый .gd под res:// (порт tools/compile_all.gd).
-## Ловит parse-ошибки и битые preload. Скан пропускает .git/.godot/addons/tools/tests:
-## в portable-проекте у dev-тулзов нет своих tools/, а их own-валидация — отдельная.
-## В Godot 4.7 load() возвращает GDScript даже при parse-ошибке; can_instantiate()
-## == false — надёльный маркер битой компиляции.
+extends GdUnitTestSuite
 
 var _bad: Array[String] = []
 var _ok := 0
@@ -33,4 +28,4 @@ func test_all_gd_compiles() -> void:
 	_bad.clear()
 	_ok = 0
 	_scan("res://")
-	assert_eq(_bad.size(), 0, "all res:// GDScript compile (errors: %s)" % ", ".join(_bad))
+	assert_that(_bad.size()).is_equal(0)

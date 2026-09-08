@@ -1,17 +1,9 @@
 extends RefCounted
 class_name Chronicle
-## legend-chronicle: летопись поколений — персистентный список записей
-## «каждый герой — своя запись». Запись (Dictionary):
-##   hero_name, path, end_turn, cities, glory, battles_won, battles_lost,
-##   outcome ("succession" | "VICTORY" | "DEFEAT"), generation (авто).
-## Чистый RefCounted (без Node/ServiceLocator) — headless-тесты.
 
 var entries: Array[Dictionary] = []
 
 
-## Аудит #22: шина — guard-эмит. Chronicle — чистый RefCounted; в контексте
-## без autoload (-s скрипт) GameEventBus не существует, и прямой emit падал.
-## null — искать GameEventBus в корне SceneTree (кэш в том же поле).
 var bus: Object = null
 
 
@@ -29,9 +21,10 @@ func append(entry: Dictionary) -> Dictionary:
 func _resolve_bus() -> Object:
 	if bus != null:
 		return bus
-	var ml := Engine.get_main_loop()
-	if ml is SceneTree:
-		bus = (ml as SceneTree).root.get_node_or_null("/root/GameEventBus")
+	# ИСПРАВЛЕНИЕ: Services.resolve вместо get_node("/root/GameEventBus")
+	var resolved: Object = Services.resolve(&"event_bus")
+	if resolved != null:
+		bus = resolved
 	return bus
 
 

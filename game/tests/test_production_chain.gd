@@ -1,8 +1,4 @@
-extends "res://tests/gut_base.gd"
-## M1: Экономика — ProductionChain.
-##
-## Формула выхода, списание входов, атомарность при нехватке,
-## логистика, сериализация.
+extends GdUnitTestSuite
 
 func _make_chain() -> ProductionChain:
 	var chain := ProductionChain.new()
@@ -17,51 +13,49 @@ func _make_chain() -> ProductionChain:
 func test_calculate_output_full_staff() -> void:
 	var chain := _make_chain()
 	var out: Dictionary = chain.calculate_output(2, 1.0)
-	assert_eq(float(out.get("planks", -1.0)), 3.0, "full output")
+	assert_that(float(out.get("planks", -1.0))).is_equal(3.0)
 
 
 func test_calculate_output_worker_ratio() -> void:
 	var chain := _make_chain()
-	# 1 из 2 рабочих = 50%.
 	var out: Dictionary = chain.calculate_output(1, 1.0)
-	assert_eq(float(out.get("planks", -1.0)), 1.5, "half output")
+	assert_that(float(out.get("planks", -1.0))).is_equal(1.5)
 
 
 func test_calculate_output_capped_at_full() -> void:
 	var chain := _make_chain()
-	# Больше требуемых рабочих — не усиливает.
 	var out: Dictionary = chain.calculate_output(10, 1.0)
-	assert_eq(float(out.get("planks", -1.0)), 3.0, "capped")
+	assert_that(float(out.get("planks", -1.0))).is_equal(3.0)
 
 
 func test_calculate_output_zero_workers() -> void:
 	var chain := _make_chain()
 	var out: Dictionary = chain.calculate_output(0, 1.0)
-	assert_true(out.is_empty(), "no workers -> no output")
+	assert_bool(out.is_empty()).is_true()
 
 
 func test_calculate_output_logistics() -> void:
 	var chain := _make_chain()
 	var out: Dictionary = chain.calculate_output(2, 0.5)
-	assert_eq(float(out.get("planks", -1.0)), 1.5, "logistics halves")
+	assert_that(float(out.get("planks", -1.0))).is_equal(1.5)
 
 
 func test_building_eff_multiplier() -> void:
 	var chain := _make_chain()
 	chain.building_eff = 2.0
 	var out: Dictionary = chain.calculate_output(2, 1.0)
-	assert_eq(float(out.get("planks", -1.0)), 6.0, "eff doubles")
+	assert_that(float(out.get("planks", -1.0))).is_equal(6.0)
 
 
 func test_can_produce_requires_workers_and_inputs() -> void:
 	var rc := ResourceContext.new()
 	rc.add(&"wood", 2.0)
 	var chain := _make_chain()
-	assert_false(chain.can_produce(rc, 0), "no workers -> false")
+	assert_bool(chain.can_produce(rc, 0)).is_false()
 	rc.add(&"wood", 0.0)
-	assert_true(chain.can_produce(rc, 2), "with workers+input -> true")
+	assert_bool(chain.can_produce(rc, 2)).is_true()
 	rc.remove(&"wood", 1.0)
-	assert_false(chain.can_produce(rc, 2), "insufficient input -> false")
+	assert_bool(chain.can_produce(rc, 2)).is_false()
 
 
 func test_execute_deducts_inputs() -> void:
@@ -69,17 +63,17 @@ func test_execute_deducts_inputs() -> void:
 	rc.add(&"wood", 10.0)
 	var chain := _make_chain()
 	var out: Dictionary = chain.execute(rc, 2, 1.0)
-	assert_eq(float(out.get("planks", -1.0)), 3.0, "produced")
-	assert_eq(rc.amount(&"wood"), 8.0, "inputs deducted")
+	assert_that(float(out.get("planks", -1.0))).is_equal(3.0)
+	assert_that(rc.amount(&"wood")).is_equal(8.0)
 
 
 func test_execute_atomic_on_shortage() -> void:
 	var rc := ResourceContext.new()
-	rc.add(&"wood", 1.0)  # нужно 2
+	rc.add(&"wood", 1.0)  
 	var chain := _make_chain()
 	var out: Dictionary = chain.execute(rc, 2, 1.0)
-	assert_true(out.is_empty(), "no output")
-	assert_eq(rc.amount(&"wood"), 1.0, "inputs NOT deducted")
+	assert_bool(out.is_empty()).is_true()
+	assert_that(rc.amount(&"wood")).is_equal(1.0)
 
 
 func test_execute_multiple_outputs() -> void:
@@ -92,21 +86,20 @@ func test_execute_multiple_outputs() -> void:
 	chain.outputs = {"ale": 2.0, "hops_waste": 0.5}
 	chain.required_workers = 1
 	var out: Dictionary = chain.execute(rc, 1, 1.0)
-	assert_eq(float(out.get("ale", -1.0)), 2.0, "ale")
-	assert_eq(float(out.get("hops_waste", -1.0)), 0.5, "waste")
-	assert_eq(rc.amount(&"wood"), 9.0, "wood deducted")
-	assert_eq(rc.amount(&"water"), 8.0, "water deducted")
+	assert_that(float(out.get("ale", -1.0))).is_equal(2.0)
+	assert_that(float(out.get("hops_waste", -1.0))).is_equal(0.5)
+	assert_that(rc.amount(&"wood")).is_equal(9.0)
+	assert_that(rc.amount(&"water")).is_equal(8.0)
 
 
 func test_serialize_roundtrip() -> void:
 	var chain := _make_chain()
 	var data: Dictionary = chain.to_dict()
 	var restored := ProductionChain.from_dict(data)
-	assert_eq(restored.id, &"lumber", "id")
-	assert_eq(restored.required_workers, 2, "workers")
-	assert_eq(float(restored.inputs.get(&"wood", -1.0)), 2.0, "input")
-	assert_eq(float(restored.outputs.get(&"planks", -1.0)), 3.0, "output")
-	# Поведение восстановленной цепи идентично.
+	assert_that(restored.id).is_equal(&"lumber")
+	assert_that(restored.required_workers).is_equal(2)
+	assert_that(float(restored.inputs.get(&"wood", -1.0))).is_equal(2.0)
+	assert_that(float(restored.outputs.get(&"planks", -1.0))).is_equal(3.0)
 	var rc := ResourceContext.new()
 	rc.add(&"wood", 5.0)
-	assert_eq(float(restored.execute(rc, 2, 1.0).get("planks", -1.0)), 3.0, "restored works")
+	assert_that(float(restored.execute(rc, 2, 1.0).get("planks", -1.0))).is_equal(3.0)

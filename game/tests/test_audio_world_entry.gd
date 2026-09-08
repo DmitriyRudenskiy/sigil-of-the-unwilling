@@ -1,11 +1,4 @@
-extends "res://tests/gut_base.gd"
-## Audio-pass: вход в мир запускает music_world.
-##
-## Загружает World.tscn (полный bootstrap), ждёт до 6с, пока
-## SoundManager.last_music_path не станет music_world.
-##
-## ВАЖНО: ищем SoundManager по пути в рантайме (идентификаторы autoloads
-## недоступны на этапе компиляции тестов).
+extends GdUnitTestSuite
 
 const WORLD_SCENE := "res://scenes/World.tscn"
 const AudioCues = preload("res://scripts/data/AudioCues.gd")
@@ -16,10 +9,10 @@ const POLL := 0.5
 
 func test_world_entry_starts_world_music() -> void:
 	var sm: Node = get_tree().root.get_node_or_null("/root/SoundManager")
-	assert_not_null(sm, "/root/SoundManager in tree (autoload отключён?)")
+	assert_that(sm).is_not_null()
 
 	var world_packed: PackedScene = load(WORLD_SCENE)
-	assert_not_null(world_packed, "World.tscn загружается")
+	assert_that(world_packed).is_not_null()
 	if world_packed == null:
 		return
 
@@ -36,5 +29,5 @@ func test_world_entry_starts_world_music() -> void:
 			ok = true
 			break
 
-	assert_true(ok, "world music started. last_music_path='%s'" % str(sm.last_music_path))
+	assert_bool(ok).is_true()
 	world.queue_free()

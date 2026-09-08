@@ -1,11 +1,5 @@
 class_name TraitDef
 extends RefCounted
-## Черта персонажа (M2: Демография).
-##
-## effect_type — ключ потребности, на которую черта влияет:
-## &"rest", &"social", &"inspiration" (влияние = effect_value,
-## добавляется к ежедневному дельте; может быть отрицательным).
-## Сериализуется в Dictionary (JSON-совместимо).
 
 enum Rarity { COMMON = 0, UNCOMMON = 1, RARE = 2, LEGENDARY = 3 }
 
@@ -13,16 +7,12 @@ var id: StringName = &""
 var display_name := ""
 var description := ""
 var rarity: int = Rarity.COMMON
-## Основной эффект (удобно для одиночных черт). Может быть &"" —
-## тогда используется только effects.
 var effect_type: StringName = &""
 var effect_value: float = 0.0
-## Дополнительные (или единственные) эффекты: need -> модификатор в день.
-var effects: Dictionary = {}  # StringName -> float
+var effects: Dictionary = {}  
 var tags: Array[StringName] = []
 
 
-## Суммарный модификатор черты к потребностям типа [type] за день.
 func modifier_for(type: StringName) -> float:
 	var v := float(effects.get(type, 0.0))
 	if type == effect_type:

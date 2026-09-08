@@ -1,14 +1,13 @@
 class_name MinimapPanel
 extends VBoxContainer
-## Миникарта + NSWE-навигация.
 
 signal minimap_clicked(cell: Vector2i)
 signal camera_jump_requested(direction: String)
 
 const MINIMAP_COLORS := [
-	Color(0.15, 0.35, 0.75), Color(0.2, 0.45, 0.4), Color(0.85, 0.75, 0.45),
-	Color(0.35, 0.6, 0.3), Color(0.15, 0.35, 0.15), Color(0.45, 0.4, 0.35),
-	Color(0.9, 0.93, 0.98),
+	ThemeConfig.C_MINIMAP_TERRAIN_WATER, ThemeConfig.C_MINIMAP_TERRAIN_2, ThemeConfig.C_MINIMAP_TERRAIN_3,
+	ThemeConfig.C_MINIMAP_TERRAIN_GRASS, ThemeConfig.C_MINIMAP_TERRAIN_FOREST, ThemeConfig.C_MINIMAP_TERRAIN_6,
+	ThemeConfig.C_MINIMAP_TERRAIN_7,
 ]
 
 var map_ref: MapGenerator = null
@@ -16,93 +15,21 @@ var hero_ref: HeroController = null
 var cam_ref: Camera2D = null
 
 var _tex_rect: TextureRect
-var _overlay: MinimapOverlay
+@onready var _overlay: MinimapOverlay = $MapBox/Overlay
 
-
-class MinimapOverlay extends Control:
-	signal minimap_clicked(cell: Vector2i)
-
-	var map_ref: MapGenerator = null
-	var hero_ref: HeroController = null
-	var cam_ref: Camera2D = null
-	var _last_cam_pos := Vector2.ZERO
-	var _last_zoom := Vector2.ONE
-	var _last_hero_cell := Vector2i(-1, -1)
-
-
-	func _process(_delta: float) -> void:
-		if map_ref == null:
-			return
-		var dirty := false
-		if cam_ref != null:
-			if cam_ref.position != _last_cam_pos or cam_ref.zoom != _last_zoom:
-				dirty = true
-		if hero_ref != null and hero_ref.current_cell != _last_hero_cell:
-			dirty = true
-		if dirty:
-			if cam_ref != null:
-				_last_cam_pos = cam_ref.position
-				_last_zoom = cam_ref.zoom
-			if hero_ref != null:
-				_last_hero_cell = hero_ref.current_cell
-			queue_redraw()
-
-
-	func _draw() -> void:
-		if map_ref == null or not map_ref.has_valid_tilemap():
-			return
-		var s := size / Vector2(map_ref.map_width, map_ref.map_height)
-		if cam_ref != null:
-			var view_sz := get_viewport().get_visible_rect().size / cam_ref.zoom
-			var top_left := cam_ref.position - view_sz / 2.0
-			var c0 := map_ref.local_to_map(top_left)
-			var c1 := map_ref.local_to_map(top_left + view_sz)
-			draw_rect(Rect2(c0.x * s.x, c0.y * s.y, (c1.x - c0.x) * s.x, (c1.y - c0.y) * s.y),
-				Color(1, 1, 1, 0.8), false, 1.0)
-		if hero_ref != null:
-			var cell := hero_ref.current_cell
-			draw_rect(Rect2(cell.x * s.x - 2, cell.y * s.y - 2, 4, 4), Color(1.0, 0.85, 0.4))
-
-
-	func _gui_input(ev: InputEvent) -> void:
-		if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
-			if map_ref == null:
-				return
-			var s := size / Vector2(map_ref.map_width, map_ref.map_height)
-			minimap_clicked.emit(Vector2i(int(ev.position.x / s.x), int(ev.position.y / s.y)))
+var _minimap_image: Image = null
+var _minimap_texture: ImageTexture = null
 
 
 func _ready() -> void:
-	_build()
+	var box := get_node("MapBox") as Control
+	_tex_rect = box.get_node("TextureRect") as TextureRect
 
-
-func _build() -> void:
-	var box := Control.new()
-	box.custom_minimum_size = Vector2(228, 228)
-	add_child(box)
-
-	_tex_rect = TextureRect.new()
-	_tex_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_tex_rect.stretch_mode = TextureRect.STRETCH_SCALE
-	box.add_child(_tex_rect)
-
-	_overlay = MinimapOverlay.new()
-	_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	
 	_overlay.minimap_clicked.connect(func(cell): minimap_clicked.emit(cell))
-	box.add_child(_overlay)
-
-	var nswe := HBoxContainer.new()
-	nswe.alignment = BoxContainer.ALIGNMENT_CENTER
-	nswe.add_theme_constant_override("separation", 8)
-	add_child(nswe)
-
+	var nswe := get_node("NSWE") as HBoxContainer
 	for d in ["N", "S", "W", "E"]:
-		var b := Button.new()
-		b.text = d
-		b.custom_minimum_size = Vector2(36, 24)
-		b.add_theme_font_size_override("font_size", 12)
-		b.pressed.connect(func(): camera_jump_requested.emit(d))
-		nswe.add_child(b)
+		(nswe.get_node(d) as Button).pressed.connect(func(): camera_jump_requested.emit(d))
 
 
 func setup(map: MapGenerator, hero: HeroController, camera: Camera2D) -> void:
@@ -120,26 +47,24 @@ func setup(map: MapGenerator, hero: HeroController, camera: Camera2D) -> void:
 func _build_minimap_image(map: MapGenerator, visibility = null) -> void:
 	if map == null:
 		return
-	var img := Image.create(map.map_width, map.map_height, false, Image.FORMAT_RGBA8)
+	if _minimap_image == null or _minimap_image.get_width() != map.map_width or _minimap_image.get_height() != map.map_height:
+		_minimap_image = Image.create(map.map_width, map.map_height, false, Image.FORMAT_RGBA8)
+		_minimap_texture = ImageTexture.create_from_image(_minimap_image)
+		_tex_rect.texture = _minimap_texture
 	for y in map.map_height:
 		for x in map.map_width:
 			var cell := Vector2i(x, y)
 			var t: int = map.terrain_grid.get(cell, 0)
-			var color: Color = MINIMAP_COLORS[t]
-			# fog-of-war: неразведённое — чёрное, разведённое но невидимое —
-			# приглушённое, видимое — полный цвет.
+			var color: Color = MINIMAP_COLORS[t] if t < MINIMAP_COLORS.size() else Color.BLACK
 			if visibility != null:
 				if not visibility.is_explored(cell):
-					color = Color(0, 0, 0, 1)
+					color = Color.BLACK
 				elif not visibility.is_visible(cell):
-					color = color.lerp(Color(0.5, 0.5, 0.5, 1), 0.55)
-			img.set_pixel(x, y, color)
-	_tex_rect.texture = ImageTexture.create_from_image(img)
+					color = color.lerp(ThemeConfig.C_FOG_GRAY, 0.55)
+			_minimap_image.set_pixel(x, y, color)
+	_minimap_texture.update(_minimap_image)
 
-## fog-of-war: перерисовать мини-карту по текущей видимости (лениво, по
-## сигналу перериса тайлмапа). ponytail: rebuild всей картинки вместо
-## инкрементного драва — достаточно для 60×60, если станет узким местом,
-## рисовать только изменённые клетки.
 func refresh() -> void:
 	if map_ref != null:
 		_build_minimap_image(map_ref, map_ref.visibility)
+	_overlay.queue_redraw()

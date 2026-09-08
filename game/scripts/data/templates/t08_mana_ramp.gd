@@ -1,7 +1,5 @@
-## scripts/data/templates/t08_mana_ramp.gd
 class_name T08ManaRamp
 extends RefCounted
-## T08: MANA RAMP (аудит #8: вынесен из TemplateEngine).
 
 const _Utils = preload("res://scripts/data/SpellUtils.gd")
 

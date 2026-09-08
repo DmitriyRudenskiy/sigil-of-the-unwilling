@@ -1,7 +1,5 @@
-## scripts/data/templates/t04_countermagic.gd
 class_name T04Countermagic
 extends RefCounted
-## T04: COUNTERMAGIC (аудит #8: вынесен из TemplateEngine).
 
 const _Utils = preload("res://scripts/data/SpellUtils.gd")
 

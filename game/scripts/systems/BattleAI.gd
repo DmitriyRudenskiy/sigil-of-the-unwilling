@@ -1,7 +1,5 @@
 class_name BattleAI
 extends RefCounted
-## Чистая логика AI: принимает решения на основе BattleState и данных.
-## Без await, без узлов, без спрайтов, без таймеров.
 
 enum Action {
 	SKIP,
@@ -32,19 +30,16 @@ func decide_turn(unit: BattleState.BattleUnit, state: BattleState, blocked: Dict
 	var distance := HexUtils.hex_distance(unit.cell, nearest.cell)
 	var has_adjacent_enemy := _has_adjacent_enemy(unit, state, target_side)
 
-	# Ranged AI shoots if not blocked by adjacent enemy.
 	if unit.is_ranged() and distance > 1 and not has_adjacent_enemy:
 		result.action = Action.ATTACK
 		result.attack_target = nearest
 		return result
 
-	# Melee adjacent attack.
 	if distance == 1:
 		result.action = Action.ATTACK
 		result.attack_target = nearest
 		return result
 
-	# Flying movement.
 	if unit.is_flying():
 		var target_cell := _find_flying_landing_cell(unit, nearest, state, blocked)
 		if target_cell != Vector2i(-1, -1):
@@ -58,7 +53,6 @@ func decide_turn(unit: BattleState.BattleUnit, state: BattleState, blocked: Dict
 
 		return result
 
-	# Ground movement.
 	var path_blocked := blocked.duplicate()
 	path_blocked.erase(nearest.cell)
 
@@ -131,11 +125,15 @@ func _find_flying_landing_cell(
 	var best := Vector2i(-1, -1)
 	var best_score := GameSettings.INF
 	var speed := unit.get_speed()
-	# Limit search to bounding box of radius speed around the unit
 	var min_x := maxi(0, unit.cell.x - speed)
 	var max_x := mini(BattleState.BW - 1, unit.cell.x + speed)
 	var min_y := maxi(0, unit.cell.y - speed)
 	var max_y := mini(BattleState.BH - 1, unit.cell.y + speed)
+
+	var is_melee := not unit.is_ranged()
+
+	var fallback_best := Vector2i(-1, -1)
+	var fallback_best_score := GameSettings.INF
 
 	for y in range(min_y, max_y + 1):
 		for x in range(min_x, max_x + 1):
@@ -152,8 +150,16 @@ func _find_flying_landing_cell(
 				continue
 
 			var dist_to_target := HexUtils.hex_distance(cell, target.cell)
-			if dist_to_target < best_score:
+			if dist_to_target < fallback_best_score:
+				fallback_best_score = dist_to_target
+				fallback_best = cell
+
+			
+			
+			var can_attack := (dist_to_target == 1) if is_melee else true
+
+			if can_attack and dist_to_target < best_score:
 				best_score = dist_to_target
 				best = cell
 
-	return best
+	return best if best != Vector2i(-1, -1) else fallback_best

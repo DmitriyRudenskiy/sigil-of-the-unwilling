@@ -1,12 +1,7 @@
 class_name TraitRegistry
 extends RefCounted
-## Реестр черт (M2: Демография).
-##
-## Штатный набор определяется статически (_default_traits); реестр
-## расширяем через add() (контент-пакеты). roll_traits() выдаёт 0..3
-## черты с весами по редкости. Чистый RefCounted — без узлов.
 
-var _traits: Dictionary = {}  # StringName -> TraitDef
+var _traits: Dictionary = {}  
 var _rng := RandomNumberGenerator.new()
 
 
@@ -16,7 +11,6 @@ func _init() -> void:
 	_rng.seed = 20260829
 
 
-## (Параметр не trait: имя зарезервировано в GDScript 4.7.)
 func add(t_def: TraitDef) -> void:
 	if t_def == null or t_def.id == &"":
 		push_error("TraitRegistry.add: пустой id")
@@ -25,7 +19,6 @@ func add(t_def: TraitDef) -> void:
 
 
 func get_trait(id: StringName) -> TraitDef:
-	## (Не get(): переопределял бы Object.get() — ошибка при компиляции.)
 	return _traits.get(id, null)
 
 
@@ -56,9 +49,6 @@ func by_rarity(rarity: int) -> Array[TraitDef]:
 	return out
 
 
-## Выкатывает 0..3 черты с весами по редкости.
-## Количество: 0 (15%), 1 (35%), 2 (35%), 3 (15%).
-## Повторов одной черты нет.
 func roll_traits(rng: RandomNumberGenerator = null, max_count: int = 3) -> Array[TraitDef]:
 	var r: RandomNumberGenerator = rng if rng != null else _rng
 	var roll: int = r.randi_range(0, 99)
@@ -69,7 +59,7 @@ func roll_traits(rng: RandomNumberGenerator = null, max_count: int = 3) -> Array
 		count = 3
 	count = mini(count, max_count)
 
-	var pool: Dictionary = {}  # rarity -> Array[TraitDef]
+	var pool: Dictionary = {}  
 	for t in all():
 		if not pool.has(t.rarity):
 			pool[t.rarity] = []
@@ -85,7 +75,6 @@ func roll_traits(rng: RandomNumberGenerator = null, max_count: int = 3) -> Array
 	return result
 
 
-## Веса редкости: common 70 / uncommon 20 / rare 7 / legendary 3.
 func _pick_weighted(pool: Dictionary, used: Array[StringName], r: RandomNumberGenerator) -> TraitDef:
 	var weights: Array[int] = [70, 20, 7, 3]
 	var candidates: Array[TraitDef] = []
@@ -113,8 +102,6 @@ func _pick_weighted(pool: Dictionary, used: Array[StringName], r: RandomNumberGe
 	return candidates[candidates.size() - 1]
 
 
-## Базовый набор черт мира (15 шт.; remove-hunger-mechanic: food-черты
-## hardy/appetite/iron_stomach удалены — еда больше не влияет на выживание).
 static func _default_traits() -> Array[TraitDef]:
 	return [
 		_trait(&"sleepy", "Соня", "Сильно устаёт: -0.08 к отдыху в день.",

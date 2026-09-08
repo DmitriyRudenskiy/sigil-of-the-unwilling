@@ -1,4 +1,4 @@
-extends "res://tests/gut_base.gd"
+extends GdUnitTestSuite
 
 const _HeroMagic = preload("res://scripts/entities/HeroMagic.gd")
 
@@ -6,70 +6,70 @@ func test_init_defaults() -> void:
 	
 	var m := _HeroMagic.new()
 	m.init_defaults()
-	assert_eq(m.mana_max, 20, "mana_max")
-	assert_eq(m.mana_current, 20, "mana_current")
-	assert_eq(m.schools.get("air", 0), 1, "air school")
-	assert_true(m.knows("magic_arrow"), "knows magic_arrow")
-	assert_true(m.knows("haste"), "knows haste")
+	assert_that(m.mana_max).is_equal(20)
+	assert_that(m.mana_current).is_equal(20)
+	assert_that(m.schools.get(SchoolType.ID.AIR, 0)).is_equal(1)
+	assert_bool(m.knows("magic_arrow")).is_true()
+	assert_bool(m.knows("haste")).is_true()
 
 func test_learn_forget() -> void:
 	var m := _HeroMagic.new()
 	m.init_defaults()
-	assert_true(m.learn("healing_bolt"), "learn")
-	assert_true(m.knows("healing_bolt"), "knows after learn")
-	assert_false(m.learn("healing_bolt"), "no dup")
-	assert_true(m.forget("healing_bolt"), "forget")
-	assert_false(m.knows("healing_bolt"), "forgotten")
+	assert_bool(m.learn("healing_bolt")).is_true()
+	assert_bool(m.knows("healing_bolt")).is_true()
+	assert_bool(m.learn("healing_bolt")).is_false()
+	assert_bool(m.forget("healing_bolt")).is_true()
+	assert_bool(m.knows("healing_bolt")).is_false()
 
 func test_mana_cost_normal() -> void:
 	var m := _HeroMagic.new()
 	m.init_defaults()
 	var spell := {"base_mana": 5, "tags": []}
-	assert_eq(m.get_mana_cost(spell), 5, "normal cost")
+	assert_that(m.get_mana_cost(spell)).is_equal(5)
 
 func test_mana_cost_anti_magic() -> void:
 	var m := _HeroMagic.new()
 	m.init_defaults()
 	var spell := {"base_mana": 5, "tags": ["anti_magic"]}
-	assert_eq(m.get_mana_cost(spell), 7, "anti_magic +2")
+	assert_that(m.get_mana_cost(spell)).is_equal(7)
 
 func test_can_cast_success() -> void:
 	var m := _HeroMagic.new()
 	m.init_defaults()
 	var spell := {"base_mana": 3, "school": "air", "level": 1, "tags": []}
-	assert_true(m.can_cast(spell), "can cast")
+	assert_bool(m.can_cast(spell)).is_true()
 
 func test_can_cast_no_mana() -> void:
 	var m := _HeroMagic.new()
 	m.init_defaults()
 	m.mana_current = 2
 	var spell := {"base_mana": 5, "school": "air", "level": 1, "tags": []}
-	assert_false(m.can_cast(spell), "no mana")
+	assert_bool(m.can_cast(spell)).is_false()
 
 func test_can_cast_no_school() -> void:
 	var m := _HeroMagic.new()
 	m.init_defaults()
 	var spell := {"base_mana": 3, "school": "fire", "level": 2, "tags": []}
-	assert_false(m.can_cast(spell), "no school")
+	assert_bool(m.can_cast(spell)).is_false()
 
 func test_spend_refund() -> void:
 	var m := _HeroMagic.new()
 	m.init_defaults()
-	assert_true(m.spend_mana(8), "spend")
-	assert_eq(m.mana_current, 12, "after spend")
+	assert_bool(m.spend_mana(8)).is_true()
+	assert_that(m.mana_current).is_equal(12)
 	m.refund_mana(4)
-	assert_eq(m.mana_current, 16, "after refund")
+	assert_that(m.mana_current).is_equal(16)
 
 func test_restore_full() -> void:
 	var m := _HeroMagic.new()
 	m.init_defaults()
 	m.mana_current = 5
 	m.restore_full()
-	assert_eq(m.mana_current, 20, "restored")
+	assert_that(m.mana_current).is_equal(20)
 
 func test_tick_restore() -> void:
 	var m := _HeroMagic.new()
 	m.init_defaults()
 	m.mana_current = 18
 	m.tick_restore(5)
-	assert_eq(m.mana_current, 20, "capped")
+	assert_that(m.mana_current).is_equal(20)

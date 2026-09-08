@@ -1,7 +1,5 @@
-## scripts/data/SpellEnums.gd
 class_name SpellEnums
 extends RefCounted
-## Все перечисления системы заклинаний.
 
 enum TargetType {
 	NONE,
@@ -69,9 +67,9 @@ enum StatusType {
 }
 
 enum SpellSpeed {
-	FAST,    # может быть разыграно в ответ (instant)
-	SLOW,    # только в свой ход, main phase
-	BURST,   # не может быть отвечено
+	FAST,    
+	SLOW,    
+	BURST,   
 }
 
 enum SpellColor {
@@ -84,7 +82,6 @@ enum SpellColor {
 	COLORLESS,
 }
 
-## Строка → enum. Для парсинга JSON.
 static func parse_target(s: String) -> int:
 	return TargetType.get(s.to_upper(), TargetType.NONE)
 

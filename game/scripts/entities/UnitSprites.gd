@@ -1,9 +1,13 @@
 extends Node
 class_name UnitSprites
 
-## Helper to find portrait for a unit key, with caching.
 static var _portrait_cache: Dictionary = {}
 static var _portrait_small_cache: Dictionary = {}
+
+
+static func clear_caches() -> void:
+	_portrait_cache.clear()
+	_portrait_small_cache.clear()
 
 
 static func find_portrait(key: String) -> String:

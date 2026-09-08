@@ -1,20 +1,18 @@
 extends Control
 class_name SettingsScreen
-## Settings screen: Graphics, Audio, Gameplay sections.
-## Built procedurally; opened from menu, adventure, or battle.
 
 const _SettingsScript = preload("res://scripts/autoload/Settings.gd")
 
 signal applied
 signal closed
 
-const C_BG := Color(0.08, 0.06, 0.04, 0.95)
-const C_BORDER := Color(0.5, 0.38, 0.18)
-const C_TEXT := Color(0.95, 0.89, 0.72)
-const C_TITLE := Color(1.0, 0.85, 0.4)
-const C_BTN_BG := Color(0.15, 0.35, 0.75)
-const C_BTN_HOVER := Color(0.2, 0.45, 0.9)
-const C_BTN_PRESS := Color(0.1, 0.25, 0.6)
+const C_BG := ThemeConfig.C_PANEL_DARK
+const C_BORDER := ThemeConfig.C_PANEL_BORDER_ALT
+const C_TEXT := ThemeConfig.C_TEXT_PRIMARY
+const C_TITLE := ThemeConfig.C_TEXT_GOLD
+const C_BTN_BG := ThemeConfig.C_BTN_NORMAL
+const C_BTN_HOVER := ThemeConfig.C_BTN_HOVER
+const C_BTN_PRESS := ThemeConfig.C_BTN_PRESSED
 
 var _zoom_selector: OptionButton
 var _fullscreen_toggle: CheckBox
@@ -27,174 +25,142 @@ var _music_slider: HSlider
 var _sfx_slider: HSlider
 var _tween: Tween = null
 var _settings: Node = null
-## Громкости на момент открытия экрана — откатываются при «Отмене» (аудит #4).
-var _cancel_vol_master := 0
-var _cancel_vol_music := 0
-var _cancel_vol_sfx := 0
+
+
+@export var persistent := false
+var _content_ready := false
+
+var _initial_state: Dictionary = {}
 
 func setup(settings: Node) -> void:
 	_settings = settings
+	if not is_inside_tree():
+		return
+	if _content_ready:
+		_initial_state = _capture_state()
+		_restore_state()
+	else:
+		_init_content()
 
 func _ready() -> void:
 	z_index = 50
 	if not _settings:
-		# РФ7-5: не зависать без /root/Settings — закрыть экран и снять паузу
+		if persistent:
+			visible = false
+			return
 		push_warning("SettingsScreen: /root/Settings not found — closing")
 		closed.emit()
 		queue_free()
 		return
-	_build()
-	# Фиксируем исходные громкости для отката по «Отмене».
-	_cancel_vol_master = _settings.master_volume
-	_cancel_vol_music = _settings.music_volume
-	_cancel_vol_sfx = _settings.sfx_volume
+	_init_content()
+
+func _init_content() -> void:
+	_initial_state = _capture_state()
+	_bind_nodes()
+	_localize()
+	_apply_style()
+	_restore_state()
+	_content_ready = true
 	if _settings.ui_animations:
 		modulate = Color.WHITE
 		modulate.a = 0.0
 		_tween = create_tween()
 		_tween.tween_property(self, "modulate:a", 1.0, 0.15)
 
-
-func _build() -> void:
-	# Full-screen overlay
-	set_anchors_preset(Control.PRESET_FULL_RECT)
-
-	var bg := ColorRect.new()
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	bg.color = Color(0.0, 0.0, 0.0, 0.7)
-	bg.mouse_filter = Control.MOUSE_FILTER_STOP
-	add_child(bg)
-
-	# Panel container centered
-	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2i(520, 520)
-	panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	panel.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	add_child(panel)
-
-	var style := StyleBoxFlat.new()
-	style.bg_color = C_BG
-	style.set_border_width_all(2)
-	style.border_color = C_BORDER
-	panel.add_theme_stylebox_override("panel", style)
-
-	var vb := VBoxContainer.new()
-	vb.add_theme_constant_override("separation", 8)
-	panel.add_child(vb)
-
-	# Title
-	var title := Label.new()
-	title.text = "⚙️ Настройки"
-	title.add_theme_font_size_override("font_size", 22)
-	title.add_theme_color_override("font_color", C_TITLE)
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	vb.add_child(title)
-
-	# Sections
-	_build_graphics_section(vb)
-	_build_audio_section(vb)
-	_build_gameplay_section(vb)
-
-	# Buttons
-	var btn_row := HBoxContainer.new()
-	btn_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	btn_row.add_theme_constant_override("separation", 12)
-	vb.add_child(btn_row)
-
-	var apply_btn := _make_button("Применить и закрыть", _on_apply)
-	btn_row.add_child(apply_btn)
-
-	var reset_btn := _make_button("Сбросить по умолчанию", _on_reset)
-	btn_row.add_child(reset_btn)
-
-	var cancel_btn := _make_button("Отмена", _on_cancel)
-	btn_row.add_child(cancel_btn)
-
-	# Restore state
-	_restore_state()
+func _localize() -> void:
+	var box := get_node("Panel/Box")
+	(box.get_node("Title") as Label).text = GameText.settings_title()
+	(box.get_node("GraphicsHeader") as Label).text = GameText.settings_graphics()
+	(box.get_node("ZoomRow/ZoomLabel") as Label).text = GameText.settings_zoom()
+	(box.get_node("FullscreenToggle") as CheckBox).text = GameText.settings_fullscreen()
+	(box.get_node("UIAnimToggle") as CheckBox).text = GameText.settings_ui_anim()
+	(box.get_node("ParticlesToggle") as CheckBox).text = GameText.settings_particles()
+	(box.get_node("AudioHeader") as Label).text = GameText.settings_audio()
+	(box.get_node("MasterRow/MasterLabel") as Label).text = GameText.settings_master()
+	(box.get_node("MusicRow/MusicLabel") as Label).text = GameText.settings_music()
+	(box.get_node("SfxRow/SfxLabel") as Label).text = GameText.settings_sfx()
+	(box.get_node("MuteToggle") as CheckBox).text = GameText.settings_mute()
+	(box.get_node("GameplayHeader") as Label).text = GameText.settings_gameplay()
+	(box.get_node("AutoSaveToggle") as CheckBox).text = GameText.settings_autosave()
+	(box.get_node("ButtonRow/ApplyButton") as Button).text = GameText.settings_apply()
+	(box.get_node("ButtonRow/ResetButton") as Button).text = GameText.settings_reset()
+	(box.get_node("ButtonRow/CancelButton") as Button).text = GameText.settings_cancel()
 
 
-func _build_graphics_section(parent: Control) -> void:
-	_add_section_header(parent, "🖥️ Графика")
+func _capture_state() -> Dictionary:
+	return {
+		"zoom_index": _settings.zoom_index,
+		"fullscreen": _settings.fullscreen,
+		"ui_animations": _settings.ui_animations,
+		"particles": _settings.particles,
+		"auto_save": _settings.auto_save,
+		"master_volume": _settings.master_volume,
+		"music_volume": _settings.music_volume,
+		"sfx_volume": _settings.sfx_volume,
+		"is_muted": _settings.is_muted
+	}
 
-	var row := HBoxContainer.new()
-	parent.add_child(row)
 
-	var lbl := Label.new()
-	lbl.text = "Зум камеры:"
-	lbl.add_theme_color_override("font_color", C_TEXT)
-	lbl.custom_minimum_size = Vector2(130, 0)
-	row.add_child(lbl)
-
-	_zoom_selector = OptionButton.new()
+func _bind_nodes() -> void:
+	var box := get_node("Panel/Box")
+	_zoom_selector = box.get_node("ZoomRow/ZoomSelector") as OptionButton
 	for i in _settings.ZOOM_LEVELS.size():
 		_zoom_selector.add_item("%0.2f" % _settings.ZOOM_LEVELS[i], i)
 	_zoom_selector.selected = _settings.zoom_index
 	_zoom_selector.item_selected.connect(_on_zoom_selected)
-	row.add_child(_zoom_selector)
 
-	_fullscreen_toggle = _make_check("Полноэкранный режим", _settings.fullscreen)
-	parent.add_child(_fullscreen_toggle)
+	_fullscreen_toggle = box.get_node("FullscreenToggle") as CheckBox
+	_fullscreen_toggle.button_pressed = _settings.fullscreen
+	_ui_anim_toggle = box.get_node("UIAnimToggle") as CheckBox
+	_ui_anim_toggle.button_pressed = _settings.ui_animations
+	_particles_toggle = box.get_node("ParticlesToggle") as CheckBox
+	_particles_toggle.button_pressed = _settings.particles
 
-	_ui_anim_toggle = _make_check("Анимации UI", _settings.ui_animations)
-	parent.add_child(_ui_anim_toggle)
-
-	_particles_toggle = _make_check("Частицы", _settings.particles)
-	parent.add_child(_particles_toggle)
-
-
-func _build_audio_section(parent: Control) -> void:
-	_add_section_header(parent, "🔊 Звук")
-
-	_master_slider = _create_volume_row(parent, "Master", _settings.master_volume)
+	_master_slider = box.get_node("MasterRow/MasterSlider") as HSlider
+	_master_slider.value = float(_settings.master_volume)
+	_master_slider.set_meta("value_label", box.get_node("MasterRow/MasterValue"))
 	_master_slider.value_changed.connect(_on_master_changed)
 
-	_music_slider = _create_volume_row(parent, "Музыка", _settings.music_volume)
+	_music_slider = box.get_node("MusicRow/MusicSlider") as HSlider
+	_music_slider.value = float(_settings.music_volume)
+	_music_slider.set_meta("value_label", box.get_node("MusicRow/MusicValue"))
 	_music_slider.value_changed.connect(_on_music_changed)
 
-	_sfx_slider = _create_volume_row(parent, "Эффекты", _settings.sfx_volume)
+	_sfx_slider = box.get_node("SfxRow/SfxSlider") as HSlider
+	_sfx_slider.value = float(_settings.sfx_volume)
+	_sfx_slider.set_meta("value_label", box.get_node("SfxRow/SfxValue"))
 	_sfx_slider.value_changed.connect(_on_sfx_changed)
 
-	_mute_toggle = _make_check("🔇 Мьют (M)", _settings.is_muted)
+	_mute_toggle = box.get_node("MuteToggle") as CheckBox
+	_mute_toggle.button_pressed = _settings.is_muted
 	_mute_toggle.toggled.connect(_on_mute_toggled)
 
+	_auto_save_toggle = box.get_node("AutoSaveToggle") as CheckBox
+	_auto_save_toggle.button_pressed = _settings.auto_save
 
-func _build_gameplay_section(parent: Control) -> void:
-	_add_section_header(parent, "🎮 Игра")
-
-	_auto_save_toggle = _make_check("Автосохранение при выходе", _settings.auto_save)
-	parent.add_child(_auto_save_toggle)
-
-
-# --- Helpers ---
-
-func _add_section_header(parent: Control, text: String) -> void:
-	var lbl := Label.new()
-	lbl.text = text
-	lbl.add_theme_font_size_override("font_size", 16)
-	lbl.add_theme_color_override("font_color", C_TITLE)
-	parent.add_child(lbl)
+	(box.get_node("ButtonRow/ApplyButton") as Button).pressed.connect(_on_apply)
+	(box.get_node("ButtonRow/ResetButton") as Button).pressed.connect(_on_reset)
+	(box.get_node("ButtonRow/CancelButton") as Button).pressed.connect(_on_cancel)
 
 
-func _make_check(text: String, value: bool) -> CheckBox:
-	var cb := CheckBox.new()
-	cb.text = text
-	cb.button_pressed = value
-	cb.add_theme_color_override("font_color", C_TEXT)
-	return cb
+func _apply_style() -> void:
+	var style := StyleBoxFlat.new()
+	style.bg_color = C_BG
+	style.set_border_width_all(2)
+	style.border_color = C_BORDER
+	(get_node("Panel") as PanelContainer).add_theme_stylebox_override("panel", style)
+
+	var box := get_node("Panel/Box")
+	for btn_name in ["ApplyButton", "ResetButton", "CancelButton"]:
+		_style_button(box.get_node("ButtonRow/" + btn_name) as Button)
 
 
-func _make_button(text: String, callback: Callable) -> Button:
-	var btn := Button.new()
-	btn.text = text
-	btn.custom_minimum_size = Vector2(160, 36)
-	btn.add_theme_font_size_override("font_size", 14)
-
+func _style_button(btn: Button) -> void:
 	var sn := StyleBoxFlat.new()
 	sn.bg_color = C_BTN_BG
 	sn.set_corner_radius_all(6)
 	sn.set_border_width_all(1)
-	sn.border_color = Color(0.3, 0.5, 0.9)
+	sn.border_color = ThemeConfig.C_BTN_BORDER
 	btn.add_theme_stylebox_override("normal", sn)
 
 	var sh := sn.duplicate()
@@ -204,40 +170,6 @@ func _make_button(text: String, callback: Callable) -> Button:
 	var sp := sn.duplicate()
 	sp.bg_color = C_BTN_PRESS
 	btn.add_theme_stylebox_override("pressed", sp)
-
-	btn.add_theme_color_override("font_color", Color.WHITE)
-	btn.pressed.connect(callback)
-	return btn
-
-
-func _create_volume_row(parent: Control, label_text: String, value: int) -> HSlider:
-	var container := HBoxContainer.new()
-	container.add_theme_constant_override("separation", 8)
-
-	var lbl := Label.new()
-	lbl.text = label_text
-	lbl.add_theme_color_override("font_color", C_TEXT)
-	lbl.custom_minimum_size = Vector2(90, 0)
-	container.add_child(lbl)
-
-	var slider := HSlider.new()
-	slider.min_value = 0
-	slider.max_value = 100
-	slider.value = float(value)
-	slider.custom_minimum_size = Vector2(200, 0)
-	container.add_child(slider)
-
-	var val := Label.new()
-	val.text = "%d%%" % value
-	val.add_theme_color_override("font_color", C_TEXT)
-	val.custom_minimum_size = Vector2(40, 0)
-	container.add_child(val)
-
-	# Store label reference on the slider for access
-	slider.set_meta("value_label", val)
-
-	parent.add_child(container)
-	return slider
 
 
 func _restore_state() -> void:
@@ -252,10 +184,8 @@ func _restore_state() -> void:
 	_mute_toggle.button_pressed = _settings.is_muted
 
 
-# --- Callbacks ---
 
 func _on_zoom_selected(index: int) -> void:
-	# Аудит #25: сохранение только на Apply (как и остальные настройки экрана).
 	_settings.zoom_index = index
 
 
@@ -283,7 +213,6 @@ func _on_mute_toggled(pressed: bool) -> void:
 
 
 func _on_apply() -> void:
-	# Commit all toggles
 	_settings.fullscreen = _fullscreen_toggle.button_pressed
 	_settings.ui_animations = _ui_anim_toggle.button_pressed
 	_settings.particles = _particles_toggle.button_pressed
@@ -291,8 +220,7 @@ func _on_apply() -> void:
 	_settings.save()
 	_settings.apply_display_mode()
 	applied.emit()
-	closed.emit()
-	queue_free()
+	_do_close()
 
 
 func _on_reset() -> void:
@@ -301,10 +229,23 @@ func _on_reset() -> void:
 
 
 func _on_cancel() -> void:
-	# Отмена: откатить громкость к моменту открытия экрана, без сохранения.
-	_settings.set_master_volume(_cancel_vol_master)
-	_settings.set_music_volume(_cancel_vol_music)
-	_settings.set_sfx_volume(_cancel_vol_sfx)
+	_settings.zoom_index = _initial_state.zoom_index
+	_settings.fullscreen = _initial_state.fullscreen
+	_settings.ui_animations = _initial_state.ui_animations
+	_settings.particles = _initial_state.particles
+	_settings.auto_save = _initial_state.auto_save
+
+	_settings.set_master_volume(_initial_state.master_volume)
+	_settings.set_music_volume(_initial_state.music_volume)
+	_settings.set_sfx_volume(_initial_state.sfx_volume)
+	_settings.is_muted = _initial_state.is_muted
 	_settings._apply_audio()
+
+	_do_close()
+
+func _do_close() -> void:
 	closed.emit()
-	queue_free()
+	if persistent:
+		visible = false
+	elif is_inside_tree():
+		queue_free()

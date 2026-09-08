@@ -1,13 +1,6 @@
 class_name EnemyGrowthSystem
 extends TurnPhaseProcessor
-## Рост врагов (enemy-world-ai):
-## 1) уничтоженный стек через N ходов возрождается на той же клетке
-##    ослабленным на 1 ярус (число юнитов / 2, минимум 1);
-## 2) на смене сезона новые стеки спавнятся на границе карты,
-##    пока их не MAP_ENEMY_COUNT.
-## Состояние живёт в world_delta.enemy_growth_state (сериализуется в сейв).
 
-const ServiceLocator = preload("res://scripts/core/ServiceLocator.gd")
 
 var _map_gen: MapGenerator = null
 var _spawner: Node = null
@@ -38,12 +31,11 @@ func setup_growth(
 	_cities_mgr = p_cities_mgr
 	_world_delta = p_world_delta
 	_rng.seed = p_world_seed + 9000
-	var units_reg: Node = ServiceLocator.resolve(null, &"units")
+	var units_reg: Node = Services.resolve(&"units")
 	if units_reg != null and "FACTION_SETS" in units_reg:
 		_faction_sets = units_reg.FACTION_SETS
 
 
-## Уничтожен стек — планируем ослабленное возрождение на той же клетке.
 func on_stack_defeated(cell: Vector2i, army: Array) -> void:
 	if _world_delta == null:
 		return
@@ -59,9 +51,9 @@ func on_stack_defeated(cell: Vector2i, army: Array) -> void:
 		"x": cell.x,
 		"y": cell.y,
 		"units": units,
-		"turns_left": MapConfig.ENEMY_RESPAWN_TURNS,
+		"turns_left": GameNumbers.ENEMY_RESPAWN_TURNS,
 	})
-	GameLogger.world("Enemy stack at %s will respawn in %d turns" % [str(cell), MapConfig.ENEMY_RESPAWN_TURNS])
+	GameLogger.world("Enemy stack at %s will respawn in %d turns" % [str(cell), GameNumbers.ENEMY_RESPAWN_TURNS])
 
 
 func process(ctx: TurnContext) -> Dictionary:
@@ -73,7 +65,6 @@ func process(ctx: TurnContext) -> Dictionary:
 	return report
 
 
-# ==================== Внутреннее ====================
 
 func _process_respawns(report: Dictionary) -> void:
 	var q: Array = _queue()
@@ -83,7 +74,7 @@ func _process_respawns(report: Dictionary) -> void:
 		if int(q[i].get("turns_left", 0)) <= 0:
 			var cell := Vector2i(int(q[i].get("x", 0)), int(q[i].get("y", 0)))
 			var army := _build_army(q[i].get("units", []))
-			if not army.is_empty() and _stack_count() < MapConfig.MAP_ENEMY_COUNT and _can_spawn_at(cell):
+			if not army.is_empty() and _stack_count() < GameNumbers.MAP_ENEMY_COUNT and _can_spawn_at(cell):
 				_map_gen.enemy_stacks[cell] = army
 				_world_delta.defeated_enemies.erase(cell)
 				if _spawner != null and _spawner.has_method("spawn_enemy_visual"):
@@ -101,10 +92,10 @@ func _process_season(season: int, report: Dictionary) -> void:
 	if season == _last_season:
 		return
 	_last_season = season
-	var rng_units: Node = ServiceLocator.resolve(null, &"units")
+	var rng_units: Node = Services.resolve(&"units")
 	if rng_units == null or _faction_sets.is_empty():
 		return
-	while _stack_count() < MapConfig.MAP_ENEMY_COUNT:
+	while _stack_count() < GameNumbers.MAP_ENEMY_COUNT:
 		var cell := _find_frontier_cell()
 		if cell == Vector2i(-1, -1):
 			break
@@ -115,7 +106,7 @@ func _process_season(season: int, report: Dictionary) -> void:
 		report["season_spawns"] = int(report.get("season_spawns", 0)) + 1
 		if _spawner != null and _spawner.has_method("spawn_enemy_visual"):
 			_spawner.spawn_enemy_visual(cell, army)
-	GameLogger.world("New season: enemy stacks = %d / %d" % [_stack_count(), MapConfig.MAP_ENEMY_COUNT])
+	GameLogger.world("New season: enemy stacks = %d / %d" % [_stack_count(), GameNumbers.MAP_ENEMY_COUNT])
 
 
 func _queue() -> Array:
@@ -140,9 +131,8 @@ func _can_spawn_at(cell: Vector2i) -> bool:
 	return true
 
 
-## Граница карты: рамка SPAWN_ENEMY_MIN_BORDER, как в MapSpawner.place_enemies.
 func _find_frontier_cell() -> Vector2i:
-	var border: int = MapConfig.SPAWN_ENEMY_MIN_BORDER
+	var border: int = GameNumbers.SPAWN_ENEMY_MIN_BORDER
 	for attempt in 200:
 		var cell := Vector2i(
 			_rng.randi_range(border, _map_gen.map_width - border - 1),
@@ -170,7 +160,7 @@ func _random_army(units_reg: Node) -> Array:
 
 
 func _build_army(units: Array) -> Array:
-	var units_reg: Node = ServiceLocator.resolve(null, &"units")
+	var units_reg: Node = Services.resolve(&"units")
 	if units_reg == null:
 		return []
 	var army: Array = []

@@ -1,19 +1,6 @@
 class_name FollowerSystem
 extends RefCounted
-## city-in-world: найм последователей из населения города.
-## Город отдаёт свободного FOLLOWER-юнита (pop уменьшается — население/гарнизон
-## падают), герой получает именованного Follower (имя + черты). Детерминировано
-## при заданном rng.
-##
-## Матрица рас-классов (Pathfinder): при найме Follower получает
-## расу, класс, архетип; раса даёт модификаторы характеристик, класс —
-## способности. Модификаторы применяются в будущих циклах (не ломает
-## текущую модель героя).
-##
-## Все cross-file-типы — preload-константы (Godot резолвит preload-константу
-## как аннотацию типа, в отличие от class_name другого файла).
 
-## Имена для найма (статическая таблица; rng выбирает индекс).
 const FOLLOWER_NAMES: Array = [
 	"Аркадий", "Борис", "Вера", "Глеб", "Дарья", "Елизар", "Жанна", "Захар",
 	"Ирина", "Кирилл", "Люба", "Марк", "Настасья", "Олег", "Пелагея", "Родион",
@@ -32,22 +19,18 @@ static var _default_registry: _Trait = null
 static var _default_raceclass: _RaceClass = null
 
 
-## Реестр черт (ленивая инициализация; TraitRegistry.new() детерминированно
-## наполняет дефолтный набор).
 static func registry() -> _Trait:
 	if _default_registry == null:
 		_default_registry = _Trait.new()
 	return _default_registry
 
 
-## Реестр рас/классов (ленивая инициализация).
 static func raceclass_registry() -> _RaceClass:
 	if _default_raceclass == null:
 		_default_raceclass = _RaceClass.new()
 	return _default_raceclass
 
 
-## Чистый конструктор (для тестов и рестора из сейва).
 static func make_follower(uid: int, name: String, trait_ids: Array = []) -> _Follower:
 	var f := _Follower.new()
 	f.uid = uid
@@ -57,8 +40,6 @@ static func make_follower(uid: int, name: String, trait_ids: Array = []) -> _Fol
 	return f
 
 
-## Нанимает последователя из города. null — города/героя нет или свободных
-## FOLLOWER-юнитов не осталось. rng — сид мира (детермина).
 static func recruit(
 	city: _City, hero, rng: RandomNumberGenerator,
 	registry: _Trait = null
@@ -99,7 +80,6 @@ static func recruit(
 	return f
 
 
-## Способности последователя: features класса + traits расы.
 static func _collectabilities(class_def: _ClassDef, race_def: _RaceDef) -> Array[StringName]:
 	var out: Array[StringName] = []
 	if class_def != null:

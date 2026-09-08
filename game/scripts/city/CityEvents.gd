@@ -1,18 +1,5 @@
 class_name CityEvents
 extends RefCounted
-## Спринт 11: Случайные события города. Детерминированные от (uid, turn) —
-## headless-тестируемо без RNG. Каждый ход шанс CHANCE, что город выберет
-## событие из пула (hash-выбор) и получит его эффект.
-##
-## Эффекты (поле в описании отсутствует -> эффект не применяется):
-##   food      — прирост/убыль food_stockpile
-##   gold      — прирост/убыль storage[&"industry"]
-##   science   — прирост resource_ctx(&"science")
-##   pop_loss  — потеря населения (последний рабочий/последователь)
-##   rep       — дельта репутации (ReputationSystem.apply)
-##
-## Статический класс, без autoload. Сигнал эмитит CityTurnProcessor
-## (city_event_occurred), WorldBootstrap пробрасывает в GameEventBus.
 
 const CHANCE := 0.08
 
@@ -48,7 +35,6 @@ const POOL: Array[Dictionary] = [
 ]
 
 
-## Детерминированный бросок 0..1 от (uid, turn).
 static func roll_value(city: City, turn: int) -> float:
 	var h := hash([city.uid, turn, 0x5EE1])
 	return fmod(float(absi(h)), 10000.0) / 10000.0
@@ -63,8 +49,6 @@ static func pick_index(city: City, turn: int) -> int:
 	return absi(h) % POOL.size()
 
 
-## Разрешить события за ход. Возвращает {occurred, event_id, text}.
-## Мутации: food/gold/science/pop/репутация.
 static func resolve(city: City, turn: int) -> Dictionary:
 	if not occurs(city, turn):
 		return {"occurred": false, "event_id": &"", "text": ""}

@@ -1,0 +1,56 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/WorldUIManager.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/ui/AdventureUI.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ArtifactInventoryScreen.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ArtifactChestDialog.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/ui/CityScreen.tscn" id="5"]
+[ext_resource type="Script" path="res://scripts/ui/MarkerLayer.gd" id="6"]
+[ext_resource type="Script" path="res://scripts/world/HexGridOverlay.gd" id="7"]
+[ext_resource type="PackedScene" path="res://scenes/ui/DeathSequence.tscn" id="8"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ChronicleScreen.tscn" id="9"]
+[ext_resource type="PackedScene" path="res://scenes/ui/GameOverScreen.tscn" id="10"]
+
+[node name="WorldUI" type="Node"]
+script = ExtResource("1")
+
+[node name="WorldUILayer" type="CanvasLayer" parent="."]
+layer = 30
+
+[node name="AdventureUI" parent="WorldUILayer" instance=ExtResource("2")]
+
+[node name="ArtifactInventoryScreen" parent="WorldUILayer" instance=ExtResource("3")]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ArtifactChestDialog" parent="WorldUILayer" instance=ExtResource("4")]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CityScreenLayer" type="CanvasLayer" parent="."]
+layer = 40
+
+[node name="CityScreen" parent="CityScreenLayer" instance=ExtResource("5")]
+visible = false
+
+[node name="MarkerLayer" type="Node2D" parent="."]
+script = ExtResource("6")
+
+[node name="HexGridOverlay" type="Node2D" parent="."]
+visible = false
+script = ExtResource("7")
+
+[node name="DeathSequence" parent="." instance=ExtResource("8")]
+visible = false
+
+[node name="ChronicleScreen" parent="." instance=ExtResource("9")]
+visible = false
+
+[node name="GameOverScreen" parent="." instance=ExtResource("10")]
+visible = false

@@ -1,26 +1,13 @@
 class_name Follower
 extends RefCounted
-## city-in-world: именованный последатель героя. Индивид, вышедший из
-## населения города: имя, черты (id из TraitRegistry), путь героя (class path),
-## раса (матрица рас-классов Pathfinder).
-## Раса/класс/архетип назначаются при найме (FollowerSystem.recruit); раса даёт
-## модификаторы характеристик (stat_modifiers), класс — способности (abilities).
-## Чистый RefCounted — персистентность через serialize/deserialize.
 
 var uid := 0
 var name := ""
-## Раса (один из 7 в races_classes.json), напр. &"elf".
 var race: StringName = &"human"
-## Класс (один из 16), напр. &"wizard".
 var path: StringName = &"unaligned"
-## Архетип класса (пусто = базовый класс), напр. &"arcane_tradition".
 var archetype: StringName = &""
-## Ids черт (TraitRegistry). Храним id — разбор на TraitDef делает UI/системы
-## через реестр (Follower не зависит от конкретного реестра).
 var trait_ids: Array[StringName] = []
-## Модификаторы характеристик от расы: StringName (STR/DEX/CON/INT/WIS/CHA) → int.
 var stat_modifiers: Dictionary = {}
-## Способности: features класса + traits расы (подписи, как StringName).
 var abilities: Array[StringName] = []
 
 
@@ -47,8 +34,6 @@ func _mods_to_array() -> Array:
 	return out
 
 
-## JSON-совместимый словарь (сокет GET_STATE / ответ CITY_HIRE):
-## StringName → String, traits/abilities — Array[String], stat_modifiers — Array[[k,v]].
 func to_dict() -> Dictionary:
 	var traits: Array[String] = []
 	for id in trait_ids:
@@ -89,7 +74,6 @@ func deserialize(data: Dictionary) -> void:
 		abilities.append(StringName(a))
 
 
-## Человекочитаемая строка для UI: «Имя (Раса, Класс, [Архетип], черты)».
 func describe(registry: Variant = null) -> String:
 	var out := name
 	var parts: Array[String] = []

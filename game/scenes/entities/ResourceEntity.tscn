@@ -1,0 +1,7 @@
+[gd_scene format=3]
+
+[node name="ResourceEntity" type="Node2D"]
+z_index = 6
+
+[node name="Icon" type="Sprite2D" parent="."]
+z_index = 6

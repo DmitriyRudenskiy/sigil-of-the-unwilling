@@ -1,37 +1,29 @@
-extends "res://tests/gut_base.gd"
-## Регрессионные тесты для правок R1, R2, R3.
+extends GdUnitTestSuite
 
 const _BS = preload("res://scripts/systems/BattleState.gd")
 const _BTX = preload("res://scripts/systems/BattleTurnExecutor.gd")
 const _BAI = preload("res://scripts/systems/BattleAI.gd")
-# ==================== R1: obstacle seed determinism ====================
 
 func test_obstacle_different_seeds_differ() -> void:
 	var a := _generate_obstacles(42)
 	var b := _generate_obstacles(43)
-	assert_false(
-		a.keys().hash() == b.keys().hash(),
-		"different seeds must produce different obstacle layouts"
-	)
+	assert_bool(a.keys().hash() == b.keys().hash()).is_false()
 
 func test_obstacle_same_seed_reproducible() -> void:
 	var a := _generate_obstacles(42)
 	var b := _generate_obstacles(42)
-	assert_true(
-		a.keys().hash() == b.keys().hash(),
-		"same seed must produce identical obstacles"
-	)
+	assert_bool(a.keys().hash() == b.keys().hash()).is_true()
 
 func test_obstacle_count_is_eight() -> void:
 	var obstacles := _generate_obstacles(99)
-	assert_eq(obstacles.size(), 8, "exactly 8 obstacles")
+	assert_that(obstacles.size()).is_equal(8)
 
 func test_obstacle_cells_in_bounds() -> void:
 	var obstacles := _generate_obstacles(7)
 	for cell in obstacles:
 		var c: Vector2i = cell
-		assert_true(c.x >= 4 and c.x <= BattleState.BW - 5, "x in bounds")
-		assert_true(c.y >= 1 and c.y <= BattleState.BH - 2, "y in bounds")
+		assert_bool(c.x >= 4 and c.x <= BattleState.BW - 5).is_true()
+		assert_bool(c.y >= 1 and c.y <= BattleState.BH - 2).is_true()
 
 func _generate_obstacles(seed: int) -> Dictionary:
 	var rng := RandomNumberGenerator.new()
@@ -49,18 +41,17 @@ func _generate_obstacles(seed: int) -> Dictionary:
 		n += 1
 	return obstacles
 
-# ==================== R2: scroll spawn determinism ====================
 
 func test_scroll_spawn_determinism() -> void:
 	var a := _get_scroll_spell_ids(12345)
 	var b := _get_scroll_spell_ids(12345)
-	assert_true(a == b, "same run_seed must produce identical scroll spells")
+	assert_bool(a == b).is_true()
 
 func test_scroll_spawn_varies_with_seed() -> void:
 	var a := _get_scroll_spell_ids(111)
 	var b := _get_scroll_spell_ids(222)
-	assert_true(a.size() > 0, "scrolls generated for seed 111")
-	assert_true(b.size() > 0, "scrolls generated for seed 222")
+	assert_bool(a.size() > 0).is_true()
+	assert_bool(b.size() > 0).is_true()
 
 func _get_scroll_spell_ids(seed: int) -> Array[StringName]:
 	var chest_rng := RandomNumberGenerator.new()
@@ -73,25 +64,20 @@ func _get_scroll_spell_ids(seed: int) -> Array[StringName]:
 		result.append(spell.id)
 	return result
 
-# ==================== R3: PendingAction enum ====================
 
 func test_pending_action_enum_values() -> void:
-	assert_eq(_BTX.PendingAction.NONE, 0, "NONE = 0")
-	assert_eq(_BTX.PendingAction.MOVE, 1, "MOVE = 1")
-	assert_eq(_BTX.PendingAction.ATTACK, 2, "ATTACK = 2")
+	assert_that(_BTX.PendingAction.NONE).is_equal(0)
+	assert_that(_BTX.PendingAction.MOVE).is_equal(1)
+	assert_that(_BTX.PendingAction.ATTACK).is_equal(2)
 
 func test_pause_sets_pending_move() -> void:
 	var executor := _BTX.new()
 	executor.name = "TestExecutor"
 	executor.pause_battle()
 	executor._pending_completion = _BTX.PendingAction.MOVE
-	assert_eq(
-		executor._pending_completion,
-		_BTX.PendingAction.MOVE,
-		"pending is MOVE enum"
-	)
+	assert_that(executor._pending_completion).is_equal(_BTX.PendingAction.MOVE)
 	executor.resume_battle()
-	assert_false(executor.is_paused(), "resumed after resume_battle")
+	assert_bool(executor.is_paused()).is_false()
 	executor.free()
 
 func test_pause_sets_pending_attack() -> void:
@@ -99,11 +85,7 @@ func test_pause_sets_pending_attack() -> void:
 	executor.name = "TestExecutor2"
 	executor.pause_battle()
 	executor._pending_completion = _BTX.PendingAction.ATTACK
-	assert_eq(
-		executor._pending_completion,
-		_BTX.PendingAction.ATTACK,
-		"pending is ATTACK enum"
-	)
+	assert_that(executor._pending_completion).is_equal(_BTX.PendingAction.ATTACK)
 	executor.free()
 
 func test_resume_clears_pending() -> void:
@@ -112,11 +94,7 @@ func test_resume_clears_pending() -> void:
 	executor.pause_battle()
 	executor._pending_completion = _BTX.PendingAction.MOVE
 	executor.resume_battle()
-	assert_eq(
-		executor._pending_completion,
-		_BTX.PendingAction.NONE,
-		"pending cleared after resume"
-	)
+	assert_that(executor._pending_completion).is_equal(_BTX.PendingAction.NONE)
 	executor.free()
 
 func test_start_battle_resets_pending() -> void:
@@ -128,10 +106,6 @@ func test_start_battle_resets_pending() -> void:
 	var ai := _BAI.new()
 	executor.setup(bs, ai, {})
 	executor.start_battle()
-	assert_false(executor.is_paused(), "start_battle clears pause")
-	assert_eq(
-		executor._pending_completion,
-		_BTX.PendingAction.NONE,
-		"start_battle clears pending"
-	)
+	assert_bool(executor.is_paused()).is_false()
+	assert_that(executor._pending_completion).is_equal(_BTX.PendingAction.NONE)
 	executor.free()

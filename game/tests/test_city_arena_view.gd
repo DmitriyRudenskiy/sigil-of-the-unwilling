@@ -1,112 +1,95 @@
-extends "res://tests/gut_base.gd"
-## Smoke-тест CityArenaView: инстанс, палитра, клики по клеткам, ходы.
-## Асинхронный (await на кадры и таймер) — GUT поддерживает await в тестах.
+extends GdUnitTestSuite
 
 var _view: CityArenaView = null
 
 
-func after_each() -> void:
+# 3B: тяжёлая сцена инстанцируется в before_test, чистка в after_test.
+func before_test() -> void:
+	var packed := load("res://scenes/CityArena.tscn") as PackedScene
+	assert_object(packed).is_not_null()
+	_view = packed.instantiate() as CityArenaView
+	add_child(_view)
+	await get_tree().process_frame
+
+
+func after_test() -> void:
 	if _view != null and is_instance_valid(_view):
 		_view.free()
 		_view = null
 
 
 func test_arena_smoke() -> void:
-	var view: CityArenaView = CityArenaView.new()
-	_view = view
-	add_child(view)
-	# _ready() отработает на первом кадре — ждём.
-	await get_tree().process_frame
+	var view := _view
+	assert_bool(view._city != null).is_true()
 
-	check("city создан (после _ready)", view._city != null)
-
-	# 3 хода для промышленности.
 	for i in 3:
 		view._on_turn_pressed()
-	check("ходов: %d" % view._turn, view._turn == 3)
+	assert_bool(view._turn == 3).is_true()
 
-	# Ферма на свободной клетке кольца 1.
 	var farm_cell: Vector2i = _first_free_r1(view)
 	view._on_palette_pressed(&"farm")
 	view._handle_cell_click(farm_cell)
-	check("ферма построена на %s" % str(farm_cell), view._city.cell_is_built(farm_cell))
+	assert_bool(view._city.cell_is_built(farm_cell)).is_true()
 
-	# Район на другой клетке кольца 1.
 	var d_cell: Vector2i = _first_free_r1(view)
 	view._on_palette_pressed(&"district")
 	view._handle_cell_click(d_cell)
-	check("район построен (boroughs=%d)" % view._city.boroughs.size(), view._city.boroughs.size() == 1)
+	assert_bool(view._city.boroughs.size() == 1).is_true()
 
-	# Клик по построенному — попытка апгрейда (должна пройти без ошибок).
 	view._on_palette_pressed(&"")
 	view._handle_cell_click(farm_cell)
 
-	# Нанять + уровень.
 	view._on_hire_pressed()
 	view._on_level_pressed()
 
-	# Ещё 10 ходов.
 	for i in 10:
 		view._on_turn_pressed()
-	check("ходов: %d" % view._turn, view._turn == 13)
+	assert_bool(view._turn == 13).is_true()
 
-	# Авто-режим: включить, дождаться тиков, выключить.
 	view._on_auto_pressed()
-	check("авто включено", view._auto)
+	assert_bool(view._auto).is_true()
 	await view._timer.timeout
 	await view._timer.timeout
 	view._on_auto_pressed()
-	check("авто выключено", not view._auto)
-	check("авто крутит ходы (turn=%d)" % view._turn, view._turn > 13)
+	assert_bool(not view._auto).is_true()
+	assert_bool(view._turn > 13).is_true()
 
 	var score: float = CityArenaModel.score(view._city, view._starve_days)
-	check("score вменяемый: %.1f" % score, score > -100.0)
+	assert_bool(score > -100.0).is_true()
 
 
-## Клик по клетке через реальный путь сигнала Area2D.input_event (а не через
-## _handle_cell_click напрямую): левая кнопка должна дойти до обработчика
-## и построить здание / сменить состояние выбора.
 func test_cell_click_signal_path() -> void:
-	var view: CityArenaView = CityArenaView.new()
-	_view = view
-	add_child(view)
-	await get_tree().process_frame
-	check("city создан", view._city != null)
+	var view := _view
+	assert_bool(view._city != null).is_true()
 
 	var cell: Vector2i = _first_free_r1(view)
 
-	# 1) Выбор здания кликом по палитре — состояние меняется.
 	view._on_palette_pressed(&"farm")
-	check("выбрана ферма (до клика)", view._selected == &"farm")
+	assert_bool(view._selected == &"farm").is_true()
 
-	# 2) Стреляем левой кнопкой прямо в _on_cell_input (сигнальный путь).
 	var mb := InputEventMouseButton.new()
 	mb.button_index = MOUSE_BUTTON_LEFT
 	mb.pressed = true
 	view._on_cell_input(view, mb, 0, Vector2.ZERO, Vector2.ZERO, cell)
 
-	check("клик дошёл: ферма построена на %s" % str(cell), view._city.cell_is_built(cell))
+	assert_bool(view._city.cell_is_built(cell)).is_true()
 
-	# 3) Повторный клик по построенной клетке — апгрейд без ошибки.
 	view._on_cell_input(view, mb, 0, Vector2.ZERO, Vector2.ZERO, cell)
-	check("апгрейд прошёл без падения", view._city.cell_is_built(cell))
+	assert_bool(view._city.cell_is_built(cell)).is_true()
 
-	# 4) Клик по центру кольца 0 — «это центр города», без построения.
 	var center: Vector2i = Vector2i.ZERO
 	view._on_palette_pressed(&"farm")
 	view._on_cell_input(view, mb, 0, Vector2.ZERO, Vector2.ZERO, center)
-	check("центр не строится", not view._city.cell_is_built(center))
+	assert_bool(not view._city.cell_is_built(center)).is_true()
 
-	# 5) Пустое событие (не кнопка) — никуда не доходит, ошибок нет.
 	var me := InputEventMouseMotion.new()
 	view._on_cell_input(view, me, 0, Vector2.ZERO, Vector2.ZERO, cell)
-	check("mouse-движение игнорируется", view._city.cell_is_built(cell))
+	assert_bool(view._city.cell_is_built(cell)).is_true()
 
 
 func _first_free_r1(view: CityArenaView) -> Vector2i:
 	for cell in CityArenaModel.cells_in_arena():
 		var cv: Vector2i = cell
-		# Аудит #3: «свободная» = не построена и без рабочего (иначе стройка отклоняется).
 		if CityArenaModel.ring_of(cv) == 1 and not view._city.cell_is_built(cv) \
 				and not _worker_on(view._city, cv):
 			return cv

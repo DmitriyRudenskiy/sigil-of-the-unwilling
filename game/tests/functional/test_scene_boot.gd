@@ -1,14 +1,4 @@
-extends "res://tests/gut_base.gd"
-## 1.4 Порт tools/run_scene.gd: headless-boot четырёх игровых сцен и проверка,
-## что каждая инстанцируется без SCRIPT ERROR / parse-ошибок.
-##
-## Ключевой инвариант (как в run_scene.gd): сцена должна загрузиться
-## (ResourceLoader.load) и инстанцироваться (instantiate != null). Если у
-## сцены/её скрипта есть parse-ошибка или неверный ext_resource — instantiate()
-## вернёт null, и тест падает. Это детерминированная проверка «сцена ботается».
-##
-## Сцены простые (single-node), поэтому _ready/_process не должны падать в
-## headless; прокачиваем несколько кадров для sanity.
+extends GdUnitTestSuite
 
 const _SCENES := [
 	"res://scenes/MainMenu.tscn",
@@ -18,11 +8,6 @@ const _SCENES := [
 ]
 
 func _pump(node: Node, frames: int) -> void:
-	# _ready уже вызвался при add_child (add_child триггерит _ready). Повторный
-	# вызов _ready вручную привёл бы к двойному _new_game / повторному
-	# get_viewport().size_changed.connect(...), что для глобального viewport
-	# («already connected») считается Unexpected Error в GUT. Поэтому здесь —
-	# только прокачка кадров (_process), без повторного _ready.
 	if node != null and node.is_inside_tree():
 		var delta := 1.0 / 60.0
 		for _i in frames:
@@ -34,10 +19,9 @@ func _pump(node: Node, frames: int) -> void:
 func test_all_scenes_instantiate() -> void:
 	for path in _SCENES:
 		var res: Resource = ResourceLoader.load(path)
-		assert_not_null(res, "load scene %s" % path)
+		assert_that(res).is_not_null()
 		var node: Node = res.instantiate()
-		assert_not_null(node, "instantiate scene %s" % path)
-		# Прокачиваем кадры: _ready/_process не должны падать в headless.
+		assert_that(node).is_not_null()
 		_boot_and_pump(path, node)
 
 func _boot_and_pump(path: String, node: Node) -> void:

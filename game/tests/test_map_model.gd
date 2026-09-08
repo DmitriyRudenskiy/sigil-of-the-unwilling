@@ -1,38 +1,22 @@
-extends "res://tests/gut_base.gd"
+extends GdUnitTestSuite
 
-## Тесты MapModel: генерация, детерминизм, биомы, проходимость.
 
 const MapModelScript = preload("res://scripts/world/MapModel.gd")
 
 
 func test_generation() -> void:
-	var errors := _check_generation()
-	assert_eq(errors, 0, "test_generation — no errors")
-
-func _check_generation() -> int:
-	var errors := 0
 	var model: RefCounted = MapModelScript.new()
 	model.map_width = 20
 	model.map_height = 20
 	model.seed_value = 42
 	model.generate_noise()
 
-	if model.terrain_grid.size() != 400:
-		printerr("terrain_grid should contain 400 cells")
-		errors += 1
-	if model.height_grid.size() != 400:
-		printerr("height_grid should contain 400 cells")
-		errors += 1
-	return errors
+	assert_int(model.terrain_grid.size()).is_equal(400).override_failure_message("terrain_grid should contain 400 cells")
+	assert_int(model.height_grid.size()).is_equal(400).override_failure_message("height_grid should contain 400 cells")
 
 
 
 func test_determinism() -> void:
-	var errors := _check_determinism()
-	assert_eq(errors, 0, "test_determinism — no errors")
-
-func _check_determinism() -> int:
-	var errors := 0
 	var a: RefCounted = MapModelScript.new()
 	a.map_width = 16
 	a.map_height = 16
@@ -45,9 +29,7 @@ func _check_determinism() -> int:
 	b.seed_value = 123
 	b.generate_noise()
 
-	if a.terrain_grid != b.terrain_grid:
-		printerr("same seed should produce same terrain_grid")
-		errors += 1
+	assert_bool(a.terrain_grid == b.terrain_grid).is_true().override_failure_message("same seed should produce same terrain_grid")
 
 	var c: RefCounted = MapModelScript.new()
 	c.map_width = 16
@@ -55,52 +37,24 @@ func _check_determinism() -> int:
 	c.seed_value = 999
 	c.generate_noise()
 
-	if a.terrain_grid == c.terrain_grid:
-		printerr("different seeds should usually produce different terrain")
-		errors += 1
-	return errors
+	assert_bool(a.terrain_grid == c.terrain_grid).is_false().override_failure_message("different seeds should usually produce different terrain")
 
 
 
 func test_biome_logic() -> void:
-	var errors := _check_biome_logic()
-	assert_eq(errors, 0, "test_biome_logic — no errors")
-
-func _check_biome_logic() -> int:
-	var errors := 0
 	var model: RefCounted = MapModelScript.new()
 
-	if model.get_biome_terrain_id(0.10, 0.5, 0.5) != HexUtils.Terrain.WATER:
-		printerr("low height should be water")
-		errors += 1
-	if model.get_biome_terrain_id(0.36, 0.5, 0.7) != HexUtils.Terrain.SWAMP:
-		printerr("low land + high moisture should be swamp")
-		errors += 1
-	if model.get_biome_terrain_id(0.38, 0.5, 0.3) != HexUtils.Terrain.SAND:
-		printerr("dry low land should be sand")
-		errors += 1
-	if model.get_biome_terrain_id(0.50, 0.5, 0.5) != HexUtils.Terrain.GRASS:
-		printerr("normal land should be grass")
-		errors += 1
-	if model.get_biome_terrain_id(0.80, 0.5, 0.5) != HexUtils.Terrain.FOREST:
-		printerr("high moist highland should be forest")
-		errors += 1
-	if model.get_biome_terrain_id(0.90, 0.6, 0.5) != HexUtils.Terrain.MOUNTAIN:
-		printerr("very high warm terrain should be mountain")
-		errors += 1
-	if model.get_biome_terrain_id(0.90, 0.1, 0.5) != HexUtils.Terrain.SNOW:
-		printerr("very high cold terrain should be snow")
-		errors += 1
-	return errors
+	assert_int(model.get_biome_terrain_id(0.10, 0.5, 0.5)).is_equal(HexUtils.Terrain.WATER).override_failure_message("low height should be water")
+	assert_int(model.get_biome_terrain_id(0.36, 0.5, 0.7)).is_equal(HexUtils.Terrain.SWAMP).override_failure_message("low land + high moisture should be swamp")
+	assert_int(model.get_biome_terrain_id(0.38, 0.5, 0.3)).is_equal(HexUtils.Terrain.SAND).override_failure_message("dry low land should be sand")
+	assert_int(model.get_biome_terrain_id(0.50, 0.5, 0.5)).is_equal(HexUtils.Terrain.GRASS).override_failure_message("normal land should be grass")
+	assert_int(model.get_biome_terrain_id(0.80, 0.5, 0.5)).is_equal(HexUtils.Terrain.FOREST).override_failure_message("high moist highland should be forest")
+	assert_int(model.get_biome_terrain_id(0.90, 0.6, 0.5)).is_equal(HexUtils.Terrain.MOUNTAIN).override_failure_message("very high warm terrain should be mountain")
+	assert_int(model.get_biome_terrain_id(0.90, 0.1, 0.5)).is_equal(HexUtils.Terrain.SNOW).override_failure_message("very high cold terrain should be snow")
 
 
 
 func test_walkability() -> void:
-	var errors := _check_walkability()
-	assert_eq(errors, 0, "test_walkability — no errors")
-
-func _check_walkability() -> int:
-	var errors := 0
 	var model: RefCounted = MapModelScript.new()
 	model.map_width = 10
 	model.map_height = 10
@@ -112,20 +66,11 @@ func _check_walkability() -> int:
 		var terrain_id: int = model.terrain_grid[cell]
 		if model.is_walkable(cell):
 			walkable += 1
-			if terrain_id == HexUtils.Terrain.WATER or terrain_id == HexUtils.Terrain.MOUNTAIN:
-				printerr("walkable cell cannot be water or mountain")
-				errors += 1
+			assert_bool(terrain_id != HexUtils.Terrain.WATER and terrain_id != HexUtils.Terrain.MOUNTAIN).is_true().override_failure_message("walkable cell cannot be water or mountain")
 		else:
-			if terrain_id != HexUtils.Terrain.WATER and terrain_id != HexUtils.Terrain.MOUNTAIN:
-				printerr("blocked cell should be water or mountain")
-				errors += 1
+			assert_bool(terrain_id == HexUtils.Terrain.WATER or terrain_id == HexUtils.Terrain.MOUNTAIN).is_true().override_failure_message("blocked cell should be water or mountain")
 
-	if walkable == 0:
-		printerr("map should have at least one walkable cell")
-		errors += 1
+	assert_int(walkable).is_greater(0).override_failure_message("map should have at least one walkable cell")
 
 	var blocked: Dictionary = model.get_blocked_cells()
-	if blocked.size() != model.terrain_grid.size() - walkable:
-		printerr("blocked cells count mismatch")
-		errors += 1
-	return errors
+	assert_int(blocked.size()).is_equal(model.terrain_grid.size() - walkable).override_failure_message("blocked cells count mismatch")

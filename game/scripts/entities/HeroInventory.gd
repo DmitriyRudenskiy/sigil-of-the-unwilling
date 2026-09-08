@@ -1,16 +1,14 @@
 class_name HeroInventory
 extends RefCounted
-## Inventory of a hero: 11 equipped slots + backpack of 16.
 
-const ServiceLocator = preload("res://scripts/core/ServiceLocator.gd")
 
 signal equipped_changed
 signal backpack_changed
 signal modifiers_changed
 
-const MAX_BACKPACK := MapConfig.MAX_BACKPACK_SIZE
+const MAX_BACKPACK := GameNumbers.MAX_BACKPACK_SIZE
 
-var equipped: Dictionary = {}  # Artifact.Slot -> Artifact
+var equipped: Dictionary = {}  
 var backpack: Array[Artifact] = []
 
 
@@ -112,7 +110,6 @@ func _pick_ring_slot(slot: Artifact.Slot) -> Artifact.Slot:
 func _can_put_back(old: Artifact, remove_idx: int) -> bool:
 	if old == null:
 		return true
-	# If the item already lies in the backpack, removing it frees a slot.
 	if remove_idx >= 0:
 		return true
 	return backpack.size() < MAX_BACKPACK
@@ -127,7 +124,6 @@ func can_equip_to_slot(artifact: Artifact, slot: Artifact.Slot) -> bool:
 		return true
 	if artifact.slot != slot:
 		return false
-	# Двуручное оружие разрешено, даже если надет щит — equip() снимет щит сам.
 	if slot == Artifact.Slot.SHIELD:
 		var weapon: Artifact = equipped[Artifact.Slot.WEAPON]
 		if weapon != null and weapon.is_two_handed:
@@ -239,9 +235,8 @@ func deserialize(data: Dictionary) -> void:
 	for slot in equipped:
 		equipped[slot] = null
 	backpack.clear()
-	var art_reg: Node = ServiceLocator.resolve(null, &"artifacts")
+	var art_reg: Node = Services.resolve(&"artifacts")
 	if data.has("equipped"):
-		# Ключи могут быть String (внешний save) или int (наш serialize) — без типизации
 		for slot_key in data["equipped"]:
 			var slot: int = int(slot_key)
 			if not equipped.has(slot):

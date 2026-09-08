@@ -1,8 +1,4 @@
-extends "res://tests/gut_base.gd"
-## GUT-инвариант: ловит битые preload/ext_resource в сценах (порт tools/check_scene_refs.gd).
-## Сканирует res://scenes + res://tools. Два уровня:
-##   1) текстовый regex `path="(res://[^"]+)"` → проверка существования пути;
-##   2) полная загрузка PackedScene → ловит битые preload'ы в скриптах.
+extends GdUnitTestSuite
 
 var _ext_path_regexp: RegEx = RegEx.new()
 var _bad: Array[String] = []
@@ -47,4 +43,4 @@ func test_no_broken_scene_refs() -> void:
 	_ok = 0
 	_scan("res://scenes")
 	_scan("res://tools")
-	assert_eq(_bad.size(), 0, "no broken scene refs (broken: %s)" % ", ".join(_bad))
+	assert_that(_bad.size()).is_equal(0)

@@ -1,7 +1,5 @@
-## scripts/core/MinHeap.gd
 class_name MinHeap
 extends RefCounted
-## Бинарная min-куча (аудит #9: вынесена из HexUtils).
 var _data: Array = []
 func push(item: Array) -> void:
 	_data.append(item)
@@ -16,9 +14,6 @@ func push(item: Array) -> void:
 		else:
 			break
 func pop() -> Array:
-	# ponytail: empty-heap guard — callers loop on `while not open.is_empty()`,
-	# so this is defensive (pop() must never index out of bounds). Return []
-	# rather than null to keep the Array contract for any future caller.
 	if _data.is_empty():
 		return []
 	var res = _data[0]

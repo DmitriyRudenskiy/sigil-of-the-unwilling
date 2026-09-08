@@ -1,24 +1,17 @@
-## scripts/core/HexPathfinding.gd
 class_name HexPathfinding
 extends RefCounted
-## Поиск пути на гекс-сетке (аудит #9: вынесен из HexUtils).
-## Соседи/расстояния/индексы — через HexUtils.
 
-## Reconstruct a path from a parent-pointer map (used by bfs/astar).
-## ponytail: extracted so the two same-shaped pathfinders share one reconstruction
-## instead of duplicating the came_from walk (dijkstra_path reconstructs by
-## neighbor-scan and stays separate — different contract).
-static func _reconstruct_path(start: Vector2i, goal: Vector2i, came_from: Dictionary) -> Array[Vector2i]:
+
+
+static func _reconstruct_path(start: Vector2i, goal: Vector2i, from: Dictionary) -> Array[Vector2i]:
 	var path: Array[Vector2i] = []
 	var c: Vector2i = goal
 	while c != start:
 		path.append(c)
-		c = came_from[c]
+		c = from[c]
 	path.append(start)
 	path.reverse()
 	return path
-
-
 
 static func bfs_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: int, h: int) -> Array[Vector2i]:
 	if start == goal:
@@ -44,31 +37,45 @@ static func bfs_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: in
 	return _reconstruct_path(start, goal, from)
 
 
-## A* with hex_distance admissible heuristic. Faster than BFS for long paths.
 static func astar_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: int, h: int) -> Array[Vector2i]:
 	if start == goal:
 		return [start]
 	var h_fn := func(c: Vector2i) -> int: return HexUtils.hex_distance(c, goal)
 
-	var open := MinHeap.new()
-	var start_f: int = h_fn.call(start)
-	open.push([start_f, 0, start])  # [f, g, cell]
+	
+	
+	var n := w * h
+	var g_score := PackedFloat32Array()
+	g_score.resize(n)
+	g_score.fill(INF)
+	var came_from := PackedInt32Array()
+	came_from.resize(n)
+	came_from.fill(-1)
 
-	var g_score: Dictionary = {start: 0}
-	var came_from: Dictionary = {}
+	var open := MinHeap.new()
+	var start_idx := HexUtils.pos_to_idx(start, w)
+	g_score[start_idx] = 0.0
+	var start_f: int = h_fn.call(start)
+	open.push([start_f, 0, start])  
 
 	while not open.is_empty():
 		var cur: Array = open.pop()
 		var cur_g: float = cur[1]
 		var cur_cell: Vector2i = cur[2]
+		var cur_idx := HexUtils.pos_to_idx(cur_cell, w)
 
-		# Stale entry (улучшенная копия уже в open) — skip
-		var best_g: float = g_score.get(cur_cell, INF)
-		if cur_g > best_g:  # ponytail: strict stale-entry test; best_g==cur_g is the live node, not stale (audit #3)
+		if cur_g > g_score[cur_idx]:  
 			continue
 
 		if cur_cell == goal:
-			return _reconstruct_path(start, goal, came_from)
+			var path: Array[Vector2i] = []
+			var j := cur_idx
+			while j != start_idx:
+				path.append(HexUtils.idx_to_pos(j, w))
+				j = came_from[j]
+			path.append(start)
+			path.reverse()
+			return path
 
 		for bit in 6:
 			var nxt := HexUtils.get_neighbor(cur_cell, bit)
@@ -76,25 +83,19 @@ static func astar_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: 
 				continue
 			if blocked.has(nxt):
 				continue
+			var nxt_idx := HexUtils.pos_to_idx(nxt, w)
 			var tentative_g: float = cur_g + 1.0
-			var existing_g: float = g_score.get(nxt, INF)
-			if tentative_g >= existing_g:
+			if tentative_g >= g_score[nxt_idx]:
 				continue
-			g_score[nxt] = tentative_g
-			came_from[nxt] = cur_cell
-			var f_score = tentative_g + BattleConfig.ASTAR_HEURISTIC_WEIGHT * h_fn.call(nxt)
-			open.push([f_score, tentative_g, nxt])
+			g_score[nxt_idx] = tentative_g
+			came_from[nxt_idx] = cur_idx
+			var f_score = g_score[nxt_idx] + GameNumbers.ASTAR_HEURISTIC_WEIGHT * h_fn.call(nxt)
+			open.push([f_score, g_score[nxt_idx], nxt])
 
 	return []
 
-## Unified entry point for the two same-shaped pathfinders (unweighted BFS and
-## heuristic A*). Dijkstra is intentionally excluded — it takes a precomputed
-## distance array + cost_fn, so it has a different contract.
 
 
-## Unified entry point for the two same-shaped pathfinders (unweighted BFS and
-## heuristic A*). Dijkstra is intentionally excluded — it takes a precomputed
-## distance array + cost_fn, so it has a different contract.
 static func find_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: int, h: int, algo: String = "astar") -> Array[Vector2i]:
 	if algo == "bfs":
 		return bfs_path(start, goal, blocked, w, h)
@@ -103,11 +104,6 @@ static func find_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: i
 
 
 
-## Dijkstra with float terrain costs.
-## Dijkstra on hex grid using MinHeap for O((V+E) log V) pathfinding.
-## and far simpler than a hand-rolled binary heap in GDScript.
-## `cost_fn` — Callable(cell: Vector2i) -> float; returns cost to ENTER that cell (INF = blocked).
-## Returns PackedFloat32Array of cheapest cost from start to each cell. Indices: y * w + x.
 static func dijkstra(start: Vector2i, max_cost: float, cost_fn: Callable, w: int, h: int) -> PackedFloat32Array:
 	var dist := PackedFloat32Array()
 	dist.resize(w * h)
@@ -116,7 +112,6 @@ static func dijkstra(start: Vector2i, max_cost: float, cost_fn: Callable, w: int
 	var start_idx := HexUtils.pos_to_idx(start, w)
 	dist[start_idx] = 0.0
 
-	# Min-heap priority queue for O(log n) extraction
 	var open := MinHeap.new()
 	open.push([0.0, start])
 	var visited := {}
@@ -155,10 +150,8 @@ static func dijkstra(start: Vector2i, max_cost: float, cost_fn: Callable, w: int
 	return dist
 
 
-## Dijkstra path reconstruction: trace back from goal to start using dist map.
 
 
-## Dijkstra path reconstruction: trace back from goal to start using dist map.
 static func dijkstra_path(start: Vector2i, goal: Vector2i, dist: PackedFloat32Array, cost_fn: Callable, w: int, h: int) -> Array[Vector2i]:
 	var goal_idx := HexUtils.pos_to_idx(goal, w)
 	if dist[goal_idx] == INF:

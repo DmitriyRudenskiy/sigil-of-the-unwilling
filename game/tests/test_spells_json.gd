@@ -1,11 +1,4 @@
-extends "res://tests/gut_base.gd"
-## Тесты валидации data/spells.json.
-## Используют ядро валидатора как библиотеку.
-##
-## Запуск:
-##   godot --headless -s tests/test_runner.gd
-##   или standalone:
-##   godot --headless -s tests/test_spells_json.gd
+extends GdUnitTestSuite
 
 const _Validator = preload("res://tests/spell_validation/SpellValidator.gd")
 
@@ -14,7 +7,7 @@ const JSON_PATH := "res://assets/data/spells.json"
 var validator
 
 
-func before_all() -> void:
+func before() -> void:
 	validator = _Validator.new()
 
 
@@ -24,10 +17,9 @@ func _write(path: String, content: String) -> void:
 		f.store_string(content)
 		f.close()
 
-# ==================== СТРУКТУРА ====================
 
 func test_file_exists() -> void:
-	assert_true(FileAccess.file_exists(JSON_PATH), "spells.json exists")
+	assert_bool(FileAccess.file_exists(JSON_PATH)).is_true()
 
 func test_file_is_valid_json() -> void:
 	validator.validate_file(JSON_PATH)
@@ -35,7 +27,7 @@ func test_file_is_valid_json() -> void:
 	for issue in validator.report.issues:
 		if issue.code.begins_with("E01"):
 			has_parse_errors = true
-	assert_false(has_parse_errors, "no JSON parse errors")
+	assert_bool(has_parse_errors).is_false()
 
 func test_no_structural_errors() -> void:
 	validator.validate_file(JSON_PATH)
@@ -43,7 +35,7 @@ func test_no_structural_errors() -> void:
 	for issue in validator.report.issues:
 		if issue.code.begins_with("E1"):
 			structural += 1
-	assert_eq(structural, 0, "no structural errors")
+	assert_that(structural).is_equal(0)
 
 func test_no_type_errors() -> void:
 	validator.validate_file(JSON_PATH)
@@ -51,7 +43,7 @@ func test_no_type_errors() -> void:
 	for issue in validator.report.issues:
 		if issue.code.begins_with("E2"):
 			type_errors += 1
-	assert_eq(type_errors, 0, "no type errors")
+	assert_that(type_errors).is_equal(0)
 
 func test_no_value_errors() -> void:
 	validator.validate_file(JSON_PATH)
@@ -59,7 +51,7 @@ func test_no_value_errors() -> void:
 	for issue in validator.report.issues:
 		if issue.code.begins_with("E3"):
 			value_errors += 1
-	assert_eq(value_errors, 0, "no invalid-value errors")
+	assert_that(value_errors).is_equal(0)
 
 func test_no_semantic_errors() -> void:
 	validator.validate_file(JSON_PATH)
@@ -67,7 +59,7 @@ func test_no_semantic_errors() -> void:
 	for issue in validator.report.issues:
 		if issue.code.begins_with("E4"):
 			semantic += 1
-	assert_eq(semantic, 0, "no template-semantic errors")
+	assert_that(semantic).is_equal(0)
 
 func test_no_uniqueness_errors() -> void:
 	validator.validate_file(JSON_PATH)
@@ -75,41 +67,37 @@ func test_no_uniqueness_errors() -> void:
 	for issue in validator.report.issues:
 		if issue.code.begins_with("E5"):
 			dup += 1
-	assert_eq(dup, 0, "no uniqueness errors")
+	assert_that(dup).is_equal(0)
 
 func test_overall_passes() -> void:
 	var ok: bool = validator.validate_file(JSON_PATH)
-	assert_true(ok, "overall validation passes")
+	assert_bool(ok).is_true()
 
-# ==================== СОДЕРЖИМОЕ ====================
 
 func test_spell_count() -> void:
 	validator.validate_file(JSON_PATH)
 	var count: int = int(validator.report.stats.get("spell_count", 0))
-	assert_true(count > 0, "spell_count > 0 (actual: %d)" % count)
+	assert_bool(count > 0).is_true()
 
 func test_all_ids_unique() -> void:
 	validator.validate_file(JSON_PATH)
-	# Если есть дубли — будет E500
 	var dups := 0
 	for issue in validator.report.issues:
 		if issue.code == "E500":
 			dups += 1
-	assert_eq(dups, 0, "all ids unique")
+	assert_that(dups).is_equal(0)
 
 func test_all_templates_present() -> void:
 	validator.validate_file(JSON_PATH)
 	var dist = validator.report.stats.get("template_distribution", {})
 	for template in validator.TEMPLATES:
-		assert_true(dist.has(template) and int(dist[template]) > 0,
-			"template %s has spells" % template)
+		assert_bool(dist.has(template) and int(dist[template]) > 0).is_true()
 
 func test_average_cost_in_range() -> void:
 	validator.validate_file(JSON_PATH)
 	var avg: float = float(validator.report.stats.get("avg_cost", 0.0))
-	assert_true(avg >= 1.0 and avg <= 5.0, "avg cost %.2f in [1.0, 5.0]" % avg)
+	assert_bool(avg >= 1.0 and avg <= 5.0).is_true()
 
-# ==================== ОТРИЦАТЕЛЬНЫЕ КЕЙСЫ (юнит-тесты валидатора) ====================
 
 func test_validator_catches_missing_field() -> void:
 	var v = _Validator.new()
@@ -123,7 +111,7 @@ func test_validator_catches_missing_field() -> void:
 	for issue in v.report.issues:
 		if issue.code == "E105":
 			found = true
-	assert_true(found, "detects missing cost")
+	assert_bool(found).is_true()
 
 func test_validator_catches_bad_template() -> void:
 	var v = _Validator.new()
@@ -137,7 +125,7 @@ func test_validator_catches_bad_template() -> void:
 	for issue in v.report.issues:
 		if issue.code == "E302":
 			found = true
-	assert_true(found, "detects unknown template")
+	assert_bool(found).is_true()
 
 func test_validator_catches_bad_cost() -> void:
 	var v = _Validator.new()
@@ -152,7 +140,7 @@ func test_validator_catches_bad_cost() -> void:
 	for issue in v.report.issues:
 		if issue.code == "E304":
 			found = true
-	assert_true(found, "detects out-of-range cost")
+	assert_bool(found).is_true()
 
 func test_validator_catches_duplicate_id() -> void:
 	var v = _Validator.new()
@@ -168,11 +156,10 @@ func test_validator_catches_duplicate_id() -> void:
 	for issue in v.report.issues:
 		if issue.code == "E500":
 			found = true
-	assert_true(found, "detects duplicate id")
+	assert_bool(found).is_true()
 
 func test_validator_catches_missing_template_param() -> void:
 	var v = _Validator.new()
-	# DIRECT_DAMAGE требует amount, но его нет
 	var bad_json := JSON.stringify([
 		{"id": "dmg", "name": "Dmg", "template": "DIRECT_DAMAGE",
 		 "speed": "fast", "cost": 2, "color": "fire",
@@ -184,7 +171,7 @@ func test_validator_catches_missing_template_param() -> void:
 	for issue in v.report.issues:
 		if issue.code == "E400":
 			found = true
-	assert_true(found, "detects missing required param")
+	assert_bool(found).is_true()
 
 func test_validator_catches_bad_keyword() -> void:
 	var v = _Validator.new()
@@ -199,18 +186,16 @@ func test_validator_catches_bad_keyword() -> void:
 	for issue in v.report.issues:
 		if issue.code == "E321":
 			found = true
-	assert_true(found, "detects invalid keyword")
+	assert_bool(found).is_true()
 
-# ==================== BASELINE (DRIFT-ДЕТЕКЦИЯ) ====================
 
 func test_baseline_matches_current_data() -> void:
 	validator.validate_file(JSON_PATH)
 	var built: Dictionary = validator.build_baseline()
 	var committed: Dictionary = _Validator.load_baseline(validator.baseline_path())
-	assert_true(not committed.is_empty(), "baseline file exists and parses")
-	assert_eq(built.get("total", -1), committed.get("total", -2), "baseline total matches data")
-	assert_eq(built.get("templates", {}), committed.get("templates", {}),
-		"baseline template distribution matches data")
+	assert_bool(not committed.is_empty()).is_true()
+	assert_that(built.get("total", -1)).is_equal(committed.get("total", -2))
+	assert_that(built.get("templates", {})).is_equal(committed.get("templates", {}))
 
 func test_baseline_drift_total_warns() -> void:
 	var v = _Validator.new()
@@ -222,7 +207,7 @@ func test_baseline_drift_total_warns() -> void:
 	for issue in v.report.issues:
 		if issue.code == "W920":
 			found = true
-	assert_true(found, "W920 raised when total differs from baseline")
+	assert_bool(found).is_true()
 
 func test_baseline_drift_template_warns() -> void:
 	var v = _Validator.new()
@@ -238,18 +223,16 @@ func test_baseline_drift_template_warns() -> void:
 	for issue in v.report.issues:
 		if issue.code == "W921" and "BOUNCE" in issue.message:
 			found = true
-	assert_true(found, "W921 raised on per-template drift")
+	assert_bool(found).is_true()
 
 func test_baseline_save_load_roundtrip() -> void:
 	var v = _Validator.new()
 	v.validate_file(JSON_PATH)
 	var before: Dictionary = v.build_baseline()
-	assert_true(v.save_baseline("user://test_baseline_rt.json"),
-		"save_baseline returns true")
+	assert_bool(v.save_baseline("user://test_baseline_rt.json")).is_true()
 	var after: Dictionary = _Validator.load_baseline("user://test_baseline_rt.json")
-	assert_eq(after, before, "baseline roundtrip preserves data")
+	assert_that(after).is_equal(before)
 
-# ==================== W910 / W901 РЕГРЕССИИ ====================
 
 func test_unconditional_suppresses_w910() -> void:
 	var v = _Validator.new()
@@ -263,7 +246,7 @@ func test_unconditional_suppresses_w910() -> void:
 	for issue in v.report.issues:
 		if issue.code == "W910":
 			w910 += 1
-	assert_eq(w910, 0, "unconditional flag suppresses W910")
+	assert_that(w910).is_equal(0)
 
 	_write("user://test_hr_plain.json", JSON.stringify([
 		{"id": "hr2", "name": "HR2", "template": "HARD_REMOVAL", "speed": "fast",
@@ -275,7 +258,7 @@ func test_unconditional_suppresses_w910() -> void:
 	for issue in v.report.issues:
 		if issue.code == "W910":
 			w910b += 1
-	assert_eq(w910b, 1, "HARD_REMOVAL without condition/unconditional warns W910")
+	assert_that(w910b).is_equal(1)
 
 func test_duplicate_display_name_warns() -> void:
 	var v = _Validator.new()
@@ -290,7 +273,7 @@ func test_duplicate_display_name_warns() -> void:
 	for issue in v.report.issues:
 		if issue.code == "W901":
 			found = true
-	assert_true(found, "duplicate display name warns W901")
+	assert_bool(found).is_true()
 
 func test_no_w901_or_w910_in_project_data() -> void:
 	validator.validate_file(JSON_PATH)
@@ -298,41 +281,26 @@ func test_no_w901_or_w910_in_project_data() -> void:
 	for issue in validator.report.issues:
 		if issue.code == "W901" or issue.code == "W910":
 			bad += 1
-	assert_eq(bad, 0, "project data has no duplicate names or unmarked HARD_REMOVALs")
+	assert_that(bad).is_equal(0)
 
-# ==================== 1.9 STRICT-PARITY (old CI --strict semantics) ====================
 
-## Порт старого флага `validate_spells.gd --strict`: при --strict любые
-## предупреждения (warnings) считаются ошибкой и дают ненулевой exit code.
-## Этот тест воспроизводит ту же семантику как GUT-инвариант.
 func test_strict_mode_fails_on_any_warning() -> void:
 	var v = _Validator.new()
-	# HARD_REMOVAL без condition/unconditional даёт предупреждение W910
-	# (warning, НЕ ошибка), поэтому non-strict валидация ok=true, а strict
-	# (ok and warning_count == 0) — падает. Это точно воспроизводит семантику
-	# старого `validate_spells.gd --strict`.
 	_write("user://test_strict_warn.json",
 		JSON.stringify([
 			{"id": "w1", "name": "WarnMe", "template": "HARD_REMOVAL", "speed": "fast",
 			 "cost": 4, "color": "shadow", "params": {}, "description": "x"}
 		]))
 	v.validate_file("user://test_strict_warn.json")
-	# В исходном validate_spells.gd: `strict and report.warning_count() > 0 => ok = false`
 	var warnings := 0
 	for issue in v.report.issues:
 		if issue.code.begins_with("W"):
 			warnings += 1
-	assert_true(warnings > 0, "fixture produces at least one warning")
+	assert_bool(warnings > 0).is_true()
 	var ok: bool = v.validate_file("user://test_strict_warn.json")
-	# Без strict валидация сама по себе проходит (warnings не блокируют ok):
-	assert_true(ok, "non-strict validation passes despite warnings")
-	# А strict-паритет (эмулированный как ok and warning_count == 0) должен падать:
-	assert_false(ok and v.report.warning_count() == 0,
-		"strict parity fails when warnings present")
+	assert_bool(ok).is_true()
+	assert_bool(ok and v.report.warning_count() == 0).is_false()
 
 func test_project_data_strict_errors_clean() -> void:
-	## Проектные данные должны проходить без ОШИБОК (error_count == 0). Это
-	## обязательное условие для --strict: при --strict любые предупреждения
-	## считаются ошибками, но сами по себе данные не должны иметь ошибок.
 	validator.validate_file(JSON_PATH)
-	assert_eq(validator.report.error_count(), 0, "project data: zero errors")
+	assert_that(validator.report.error_count()).is_equal(0)

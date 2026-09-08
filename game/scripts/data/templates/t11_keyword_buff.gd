@@ -1,7 +1,5 @@
-## scripts/data/templates/t11_keyword_buff.gd
 class_name T11KeywordBuff
 extends RefCounted
-## T11: KEYWORD BUFF (аудит #8: вынесен из TemplateEngine).
 
 const _Enums = preload("res://scripts/data/SpellEnums.gd")
 const _Utils = preload("res://scripts/data/SpellUtils.gd")

@@ -1,6 +1,4 @@
-extends "res://tests/gut_base.gd"
-## enemy-world-ai: профили фракций, ход врагов (движение/атака/захват),
-## детерминизм, рост (ослабленное возрождение), сериализация growth state.
+extends GdUnitTestSuite
 
 const _Proc = preload("res://scripts/systems/EnemyTurnProcessor.gd")
 const _Growth = preload("res://scripts/systems/EnemyGrowthSystem.gd")
@@ -10,7 +8,6 @@ const _MapModel = preload("res://scripts/world/MapModel.gd")
 const _Delta = preload("res://scripts/world/WorldStateDelta.gd")
 const _CityMgr = preload("res://scripts/world/CityManager.gd")
 const _City = preload("res://scripts/world/City.gd")
-const _ServiceLocator = preload("res://scripts/core/ServiceLocator.gd")
 
 const MAP_SIZE := 12
 const SEED := 12345
@@ -30,9 +27,9 @@ var rng := RandomNumberGenerator.new()
 var units_reg: Node
 
 
-func before_each() -> void:
+func before_test() -> void:
 	rng.seed = SEED
-	units_reg = _ServiceLocator.resolve(null, &"units")
+	units_reg = Services.resolve(&"units")
 	map_gen = _MapGen.new()
 	model = _MapModel.new()
 	model.map_width = MAP_SIZE
@@ -48,8 +45,7 @@ func before_each() -> void:
 	proc.setup_world(map_gen, hero, null, cities, delta, SEED)
 
 
-func after_each() -> void:
-	# proc/delta — RefCounted: просто сбрасываем ссылки ниже.
+func after_test() -> void:
 	if map_gen != null:
 		map_gen.free()
 	if hero != null:
@@ -67,56 +63,53 @@ func _make_stack(key: String, count: int = 10) -> Array:
 	return [s]
 
 
-# ==================== ПРОФИЛИ ФРАКЦИЙ ====================
 
 func test_profile_faction_by_composition() -> void:
 	var sets: Array = units_reg.FACTION_SETS
 	var pikeman: Array = _make_stack("pikeman")
-	assert_eq(EnemyAIProfile.faction_of_army(pikeman, sets), 0, "pikeman -> faction 0")
+	assert_that(EnemyAIProfile.faction_of_army(pikeman, sets)).is_equal(0)
 	var skeleton: Array = _make_stack("skeleton")
-	assert_eq(EnemyAIProfile.faction_of_army(skeleton, sets), 2, "skeleton -> faction 2")
+	assert_that(EnemyAIProfile.faction_of_army(skeleton, sets)).is_equal(2)
 
 	var p: Dictionary = EnemyAIProfile.for_stack(pikeman, sets)
-	assert_true(p.has("weights") and p["weights"].has("village"), "profile has village weight")
-	assert_true(p["weights"].has("resource"), "profile has resource weight")
-	assert_true(p["weights"].has("hero"), "profile has hero weight")
-	assert_eq(int(p.get("aggro_radius", 0)), MapConfig.ENEMY_AGGRO_RADIUS, "aggro from settings")
-	assert_eq(int(p.get("mp", 0)), int(MapConfig.ENEMY_MP), "mp from settings")
+	assert_bool(p.has("weights") and p["weights"].has("village")).is_true()
+	assert_bool(p["weights"].has("resource")).is_true()
+	assert_bool(p["weights"].has("hero")).is_true()
+	assert_that(int(p.get("aggro_radius", 0))).is_equal(GameNumbers.ENEMY_AGGRO_RADIUS)
+	assert_that(int(p.get("mp", 0))).is_equal(int(GameNumbers.ENEMY_MP))
 
-	# Неизвестная армия -> дефолтный профиль (фракция 0), не падает.
 	var unknown: Array = [_make_stack("goblins")[0]]
 	var pu: Dictionary = EnemyAIProfile.for_stack(unknown, sets)
-	assert_true(pu.has("weights"), "unknown army gets default profile")
+	assert_bool(pu.has("weights")).is_true()
 
-# ==================== ХОД ВРАГОВ ====================
 
 func test_enemy_moves_toward_hero_and_attacks() -> void:
 	var start := Vector2i(2, 2)
 	model.enemy_stacks[start] = _make_stack("pikeman")
-	hero.current_cell = Vector2i(5, 2)  # hex-дистанция 3
+	hero.current_cell = Vector2i(5, 2)  
 
 	var attacks: Array = []
 	proc.enemy_attack_requested.connect(func(army: Array, cell: Vector2i): attacks.append(cell))
 
 	var report: Dictionary = proc.process(TurnContext.new())
-	assert_true(report["attacks"] >= 1, "enemy attacked hero")
-	assert_true(report["moved"] >= 1, "enemy moved")
-	assert_eq(model.enemy_stacks.size(), 1, "one stack left")
+	assert_bool(report["attacks"] >= 1).is_true()
+	assert_bool(report["moved"] >= 1).is_true()
+	assert_that(model.enemy_stacks.size()).is_equal(1)
 	var cur: Vector2i = model.enemy_stacks.keys()[0]
-	assert_eq(HexUtils.hex_distance(cur, hero.current_cell), 1, "enemy stopped adjacent to hero")
-	assert_eq(attacks[0], cur, "attack requested from the contact cell")
+	assert_that(HexUtils.hex_distance(cur, hero.current_cell)).is_equal(1)
+	assert_that(attacks[0]).is_equal(cur)
 
 func test_enemy_attacks_immediately_on_contact() -> void:
 	var start := Vector2i(2, 2)
 	model.enemy_stacks[start] = _make_stack("pikeman")
-	hero.current_cell = Vector2i(3, 2)  # уже рядом
+	hero.current_cell = Vector2i(3, 2)  
 
 	var attacks: Array = []
 	proc.enemy_attack_requested.connect(func(army: Array, cell: Vector2i): attacks.append(cell))
 	var report: Dictionary = proc.process(TurnContext.new())
-	assert_eq(report["attacks"], 1, "immediate attack")
-	assert_eq(report["moved"], 0, "no movement when already in range")
-	assert_eq(attacks[0], start, "attack from the start cell")
+	assert_that(report["attacks"]).is_equal(1)
+	assert_that(report["moved"]).is_equal(0)
+	assert_that(attacks[0]).is_equal(start)
 
 func test_village_capture_flips_owner_and_garrisons() -> void:
 	var center := Vector2i(2, 4)
@@ -127,25 +120,24 @@ func test_village_capture_flips_owner_and_garrisons() -> void:
 	cities.cities.append(city)
 
 	model.enemy_stacks[Vector2i(2, 2)] = _make_stack("pikeman")
-	hero.current_cell = Vector2i(11, 11)  # вне радиуса агрессии
+	hero.current_cell = Vector2i(11, 11)  
 
 	var captured: Array = []
 	proc.enemy_village_captured.connect(func(c: City): captured.append(c))
 	var report: Dictionary = proc.process(TurnContext.new())
 
-	assert_eq(captured.size(), 1, "village captured")
-	assert_eq(captured[0], city, "captured the right city")
-	assert_eq(city.owner, &"enemy", "owner flipped to enemy")
-	assert_eq(report["captures"], 1, "report captures = 1")
-	assert_true(model.enemy_stacks.has(center), "garrison stays at the village")
+	assert_that(captured.size()).is_equal(1)
+	assert_that(captured[0]).is_equal(city)
+	assert_that(city.owner).is_equal(&"enemy")
+	assert_that(report["captures"]).is_equal(1)
+	assert_bool(model.enemy_stacks.has(center)).is_true()
 
-	# Гарнизон не двигается на следующих ходах.
 	var report2: Dictionary = proc.process(TurnContext.new())
-	assert_eq(report2["moved"], 0, "garrison does not move")
-	assert_true(model.enemy_stacks.has(center), "garrison still there")
+	assert_that(report2["moved"]).is_equal(0)
+	assert_bool(model.enemy_stacks.has(center)).is_true()
 	var garrisoned: Array = delta.enemy_growth_state.get("garrisoned", [])
-	assert_eq(garrisoned.size(), 1, "one garrisoned cell in delta")
-	assert_eq(int(garrisoned[0].get("x", -1)), center.x, "garrison x persisted")
+	assert_that(garrisoned.size()).is_equal(1)
+	assert_that(int(garrisoned[0].get("x", -1))).is_equal(center.x)
 
 func test_enemy_turn_is_deterministic() -> void:
 	var results: Array = []
@@ -163,57 +155,56 @@ func test_enemy_turn_is_deterministic() -> void:
 		var h := FakeHero.new()
 		h.current_cell = Vector2i(6, 6)
 		var p2 := _Proc.new()
-		p2.setup_world(mg, h, null, _CityMgr.new(), _Delta.new(), SEED)
+		var cm := _CityMgr.new()
+		p2.setup_world(mg, h, null, cm, _Delta.new(), SEED)
 		var rep: Dictionary = p2.process(TurnContext.new())
 		results.append([rep["moved"], rep["attacks"], rep["captures"],
 			md.enemy_stacks.keys().duplicate()])
-		# p2 — RefCounted: ссылка сброшится
 		mg.free()
 		h.free()
+		cm.free()
 
 	var a: Array = results[0]
 	var b: Array = results[1]
-	assert_eq(a[0], b[0], "deterministic moves")
-	assert_eq(a[1], b[1], "deterministic attacks")
-	assert_eq(a[3], b[3], "deterministic final positions")
+	assert_that(a[0]).is_equal(b[0])
+	assert_that(a[1]).is_equal(b[1])
+	assert_that(a[3]).is_equal(b[3])
 
 func test_no_battle_when_hero_far() -> void:
 	model.enemy_stacks[Vector2i(2, 2)] = _make_stack("pikeman")
-	hero.current_cell = Vector2i(11, 11)  # дистанция 14 > радиуса 8
+	hero.current_cell = Vector2i(11, 11)  
 	var report: Dictionary = proc.process(TurnContext.new())
-	assert_eq(report["attacks"], 0, "no attack out of aggro")
-	assert_eq(report["moved"], 0, "no goals in range -> no movement")
+	assert_that(report["attacks"]).is_equal(0)
+	assert_that(report["moved"]).is_equal(0)
 
-# ==================== РОСТ: ВОЗРОЖДЕНИЕ ====================
 
 func test_weakened_respawn_after_cooldown() -> void:
 	var cell := Vector2i(3, 3)
 	var growth := _Growth.new()
 	growth.setup_growth(map_gen, null, cities, delta, SEED)
 
-	# Уничтожен стек из 10 — в очередь уходит ослабленный на 1 ярус (5).
 	growth.on_stack_defeated(cell, _make_stack("pikeman", 10))
 	var q0: Array = delta.enemy_growth_state.get("respawn_queue", [])
-	assert_eq(q0.size(), 1, "queue entry created")
-	assert_eq(int(q0[0]["units"][0]["count"]), 5, "halved: 10 -> 5")
+	assert_that(q0.size()).is_equal(1)
+	assert_that(int(q0[0]["units"][0]["count"])).is_equal(5)
 
 	var spawned_at: Array = []
-	for i in MapConfig.ENEMY_RESPAWN_TURNS + 1:
+	for i in GameNumbers.ENEMY_RESPAWN_TURNS + 1:
 		growth.process(TurnContext.new())
 		if model.enemy_stacks.has(cell):
 			spawned_at.append(i)
 
-	assert_true(spawned_at.size() >= 1, "stack respawned")
-	assert_eq(spawned_at[0], MapConfig.ENEMY_RESPAWN_TURNS - 1, "respawned after full cooldown (0-based)")
+	assert_bool(spawned_at.size() >= 1).is_true()
+	assert_that(spawned_at[0]).is_equal(GameNumbers.ENEMY_RESPAWN_TURNS - 1)
 	var army: Array = model.enemy_stacks[cell]
-	assert_eq(army.size(), 1, "one stack unit type")
-	assert_eq(army[0].count, 5, "respawned weakened: 10 -> 5")
+	assert_that(army.size()).is_equal(1)
+	assert_that(army[0].count).is_equal(5)
 	var q: Array = delta.enemy_growth_state.get("respawn_queue", [])
-	assert_eq(q.size(), 0, "queue entry consumed")
+	assert_that(q.size()).is_equal(0)
 
 func test_respawn_skipped_when_cell_occupied() -> void:
 	var cell := Vector2i(3, 3)
-	model.enemy_stacks[cell] = _make_stack("skeleton")  # клетка занята
+	model.enemy_stacks[cell] = _make_stack("skeleton")  
 	delta.enemy_growth_state["respawn_queue"] = [
 		{"x": cell.x, "y": cell.y, "units": [{"key": "pikeman", "count": 10}], "turns_left": 1},
 	]
@@ -221,10 +212,9 @@ func test_respawn_skipped_when_cell_occupied() -> void:
 	growth.setup_growth(map_gen, null, cities, delta, SEED)
 	growth.process(TurnContext.new())
 	var army: Array = model.enemy_stacks[cell]
-	assert_eq(army[0].get_key(), "skeleton", "existing stack untouched")
-	assert_eq(delta.enemy_growth_state.get("respawn_queue", []).size(), 0, "entry dropped (no infinite retry)")
+	assert_that(army[0].get_key()).is_equal("skeleton")
+	assert_that(delta.enemy_growth_state.get("respawn_queue", []).size()).is_equal(0)
 
-# ==================== СЕРИАЛИЗАЦИЯ GROWTH STATE ====================
 
 func test_growth_state_roundtrip() -> void:
 	delta.enemy_growth_state["respawn_queue"] = [
@@ -234,28 +224,27 @@ func test_growth_state_roundtrip() -> void:
 	var data: Dictionary = delta.serialize()
 	var back = _Delta.new()
 	back.deserialize(data)
-	assert_eq(back.enemy_growth_state.get("respawn_queue", []).size(), 1, "queue roundtrip")
-	assert_eq(back.enemy_growth_state.get("garrisoned", []).size(), 1, "garrisoned roundtrip")
-	assert_eq(int(back.enemy_growth_state["respawn_queue"][0]["turns_left"]), 2, "turns_left roundtrip")
+	assert_that(back.enemy_growth_state.get("respawn_queue", []).size()).is_equal(1)
+	assert_that(back.enemy_growth_state.get("garrisoned", []).size()).is_equal(1)
+	assert_that(int(back.enemy_growth_state["respawn_queue"][0]["turns_left"])).is_equal(2)
 
-# ==================== Dijkstra-кэш (аудит #10) ====================
 
-func test_dist_field_cached_per_turn() -> void:
-	# Повторный запрос (cell, mp) берёт готовое поле — Dijkstra не пересчитывается.
-	var cache := {}
+func test_dist_field_from_hero_per_turn() -> void:
 	var cost := func(_c: Vector2i) -> float: return 1.0
-	var start := Vector2i(2, 2)
-	var d1 := proc._dist_field(start, 5.0, cost, cache)
-	assert_eq(cache.size(), 1, "первый запрос создал запись")
-	var d2 := proc._dist_field(start, 5.0, cost, cache)
-	assert_eq(cache.size(), 1, "повторный запрос не создал запись")
-	assert_eq(d1, d2, "поле идентично")
-	# Другой mp — отдельная запись.
-	proc._dist_field(start, 3.0, cost, cache)
-	assert_eq(cache.size(), 2, "другой mp — другая запись")
-	# Корректность: из поля строится путь к цели.
-	var goal := Vector2i(4, 2)
+	# Hero-поле: строится от героя один раз за ход.
+	hero.current_cell = Vector2i(2, 2)
+	proc._rebuild_hero_dist_field()
+	assert_bool(proc._hero_dist_field_valid).is_true()
+	assert_that(proc._hero_dist_field[HexUtils.pos_to_idx(hero.current_cell, MAP_SIZE)]).is_equal(0.0)
+	# Per-stack поле: кэшируется в пределах хода.
+	var cache := {}
+	var start := Vector2i(8, 8)
+	var d1: PackedFloat32Array = proc._dist_field(start, 5.0, cost, cache)
+	var d2: PackedFloat32Array = proc._dist_field(start, 5.0, cost, cache)
+	assert_that(cache.size()).is_equal(1)
+	assert_that(d1).is_equal(d2)
+	var goal := Vector2i(9, 8)
 	var path: Array[Vector2i] = HexPathfinding.dijkstra_path(start, goal, d1, cost, MAP_SIZE, MAP_SIZE)
-	assert_false(path.is_empty(), "путь не пуст")
-	assert_eq(path[0], start, "путь начинается из start")
-	assert_eq(path[path.size() - 1], goal, "путь заканчивается в goal")
+	assert_bool(path.is_empty()).is_false()
+	assert_that(path[0]).is_equal(start)
+	assert_that(path[path.size() - 1]).is_equal(goal)

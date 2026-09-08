@@ -1,8 +1,5 @@
 extends RefCounted
 class_name TimeSystem
-## Day-time derived from movement points spent.
-## hour = 6.0 + mp_spent * 1.8; clamp to 24.
-## Noon = [11:00, 13:00); Night = [21:00, 24:00).
 
 signal time_changed(hour: float)
 
@@ -32,7 +29,6 @@ func spend_move_points(amount: float) -> void:
 func get_period_name() -> String:
 	if current_hour >= 11.0 and current_hour < 13.0:
 		return "noon"
-	# 24.0 (конец дня после clamp) тоже ночь.
 	if current_hour >= 21.0 and current_hour <= 24.0:
 		return "night"
 	return "day"
@@ -43,7 +39,6 @@ func is_noon() -> bool:
 
 
 func is_night() -> bool:
-	# 24.0 (конец дня после clamp) тоже ночь.
 	return current_hour >= 21.0 and current_hour <= 24.0
 
 
@@ -65,7 +60,7 @@ func wait_hours(hours: float) -> float:
 func wait_until_noon() -> float:
 	"""Wait until noon (11:00), returns MP cost. 0 if already past noon."""
 	if current_hour >= 13.0:
-		return 0.0  # Already past noon
+		return 0.0  
 	var hours := get_hours_until(11.0)
 	return wait_hours(hours)
 

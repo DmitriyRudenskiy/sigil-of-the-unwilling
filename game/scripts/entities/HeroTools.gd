@@ -1,11 +1,13 @@
 extends RefCounted
 class_name HeroTools
-## Separate 8-slot tool inventory.
-## Tools: shovel, pickaxe, cart, skin_protection, net.
 
 signal tools_changed
 
-const TOOL_TYPES := ["shovel", "pickaxe", "cart", "skin_protection", "net"]
+static var _tool_types: Array[int] = []
+static func tool_types() -> Array[int]:
+	if _tool_types.is_empty():
+		_tool_types = ToolType.all_ids()
+	return _tool_types
 const MAX_SLOTS := 8
 
 var slots: Array[Dictionary] = []
@@ -16,14 +18,14 @@ func _init() -> void:
 		slots.append({})
 
 
-func has_tool(tool_id: StringName) -> bool:
+func has_tool(tool_id: int) -> bool:
 	for slot in slots:
 		if slot.has("id") and slot.id == tool_id:
 			return true
 	return false
 
 
-func get_tool_count(tool_id: StringName) -> int:
+func get_tool_count(tool_id: int) -> int:
 	var count := 0
 	for slot in slots:
 		if slot.has("id") and slot.id == tool_id:
@@ -31,31 +33,24 @@ func get_tool_count(tool_id: StringName) -> int:
 	return count
 
 
-func add_tool(tool_id: StringName, quantity: int = 1) -> bool:
-	"""Add tool to inventory. Consumables stack."""
+func add_tool(tool_id: int, quantity: int = 1) -> bool:
 	if quantity <= 0:
 		return false
-
-	# Try to stack consumables
-	if tool_id in [&"skin_protection", &"net"]:
+	if tool_id in [ToolType.ID.SKIN_PROTECTION, ToolType.ID.NET]:
 		for slot in slots:
 			if slot.has("id") and slot.id == tool_id:
 				slot.quantity += quantity
 				tools_changed.emit()
 				return true
-
-	# Add to empty slot
 	for i in MAX_SLOTS:
 		if slots[i].is_empty():
 			slots[i] = {"id": tool_id, "quantity": quantity}
 			tools_changed.emit()
 			return true
+	return false
 
-	return false  # Full
 
-
-func remove_tool(tool_id: StringName, quantity: int = 1) -> bool:
-	"""Remove tool from inventory."""
+func remove_tool(tool_id: int, quantity: int = 1) -> bool:
 	var remaining := quantity
 	for i in MAX_SLOTS:
 		if remaining <= 0:
@@ -68,7 +63,6 @@ func remove_tool(tool_id: StringName, quantity: int = 1) -> bool:
 			else:
 				slots[i].quantity -= remaining
 				remaining = 0
-
 	if remaining == 0:
 		tools_changed.emit()
 		return true
@@ -94,14 +88,20 @@ func clear() -> void:
 
 
 func serialize() -> Array[Dictionary]:
-	return slots.duplicate(true)
+	var out: Array[Dictionary] = slots.duplicate(true)
+	for slot in out:
+		if slot.has("id"):
+			slot.id = ToolType.to_name(int(slot.id))
+	return out
 
 
 func deserialize(data: Array) -> void:
 	slots.clear()
 	for i in MAX_SLOTS:
 		if i < data.size():
-			slots.append(data[i].duplicate())
+			var s: Dictionary = data[i].duplicate()
+			if s.has("id"):
+				s.id = ToolType.from_name(s.id)
+			slots.append(s)
 		else:
 			slots.append({})
-	tools_changed.emit()

@@ -1,6 +1,5 @@
 extends RefCounted
 class_name StatusEffects
-## Status effect definitions and helpers.
 
 enum Effect {
 	HASTE, SLOW, BLESS, CURSE, SHIELD, STONESKIN,

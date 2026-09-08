@@ -1,34 +1,11 @@
 extends RefCounted
 class_name BattleSpellBridge
-## Мост между боевой системой заклинаний (SpellRegistry, 20 заклинаний) и
-## картовой («быстрой») архитектурой (SpellbookDef).
-##
-## Зачем нужно: боевые заклинания описаны в `SpellRegistry` (класс `SpellDef`
-## с полями `damage_multiplier` / `buff_effect`), а система заклинаний работает
-## с шаблонами (`template`) и параметрами (`params`). Этот класс делает два
-## вещи:
-##
-##   1. `to_spell()` — представляет боевое заклинание как быстрое («быстрое»)
-##      заклинание: `speed = FAST`, шаблон и параметры выведены из категории
-##      боевого заклинания.
-##   2. `apply_spell()` — применяет заклинание в контексте боя на
-##      реальном `BattleState.BattleUnit` (как обычное заклинание): урон,
-##      статус, лечение/очистка, воскрешение. Форма результата повторяет
-##      `SpellCaster.cast`, поэтому проверки бою однотипны.
-##
-## Использование:
-##   var spell: SpellbookDef = BattleSpellBridge.to_spell(spell_def)
-##   var result: Dictionary = BattleSpellBridge.apply_spell(spell, target, caster_bonus, target_bonus, rng)
 
 const _Def = preload("res://scripts/data/SpellbookDef.gd")
 const _Enums = preload("res://scripts/data/SpellEnums.gd")
 const _SE = preload("res://scripts/data/StatusEffects.gd")
 
-# ==================== МАППИНГИ ====================
 
-## Ключевое слово → StatusEffects.Effect.
-## Система заклинаний использует свой enum StatusType, но боевые эффекты —
-## в `StatusEffects.Effect`; маппинг нужен, чтобы применять статус на юните.
 static var KEYWORD_TO_EFFECT: Dictionary = {
 	"HASTE": _SE.Effect.HASTE,
 	"PRECISION": _SE.Effect.PRECISION,
@@ -43,10 +20,8 @@ static var KEYWORD_TO_EFFECT: Dictionary = {
 	"STONESKIN": _SE.Effect.STONESKIN,
 }
 
-## Обратный маппинг: StatusEffects.Effect → KEYWORD (верхний регистр).
 static var _EFFECT_TO_KEYWORD: Dictionary = {}
 
-## Школа SpellRegistry → цвет заклинания (палитра: fire/time/justice/primal/shadow).
 static var SCHOOL_TO_COLOR: Dictionary = {
 	"Air": "time",
 	"Fire": "fire",
@@ -54,18 +29,17 @@ static var SCHOOL_TO_COLOR: Dictionary = {
 	"Earth": "primal",
 }
 
-# Шаблонные константы (система заклинаний знает 16 шаблонов; здесь используются
-# DIRECT_DAMAGE / KEYWORD_BUFF / DEBUFF_CONTROL + 3 боевых спец-шаблона).
 const T_DIRECT_DAMAGE := &"DIRECT_DAMAGE"
 const T_KEYWORD_BUFF := &"KEYWORD_BUFF"
 const T_DEBUFF_CONTROL := &"DEBUFF_CONTROL"
-const T_HEAL_CLEAR := &"HEAL_CLEAR"     # cure: исцеление + очистка дебаффов
-const T_REVIVE := &"REVIVE"             # resurrection: воскрешение
-const T_PORTAL := &"PORTAL"             # town_portal: безопасный no-op
+const T_HEAL_CLEAR := &"HEAL_CLEAR"     
+const T_REVIVE := &"REVIVE"             
+const T_PORTAL := &"PORTAL"             
 
-# ==================== 1. КОНВЕРТЕР: боевое заклинание → карта ====================
+const UNDEAD_IMMUNE_SPELLS: Array[StringName] = [&"bless", &"cure", &"curse", &"weakness", &"slow"]
+const MIND_IMMUNE_SPELLS: Array[StringName] = [&"curse", &"misfortune", &"weakness", &"slow"]
 
-## Превратить `SpellRegistry.SpellDef` в быстрое («быстрое») заклинание.
+
 static func to_spell(def: Variant) -> _Def:
 	var s := def as SpellRegistry.SpellDef
 	if s == null:
@@ -81,7 +55,6 @@ static func to_spell(def: Variant) -> _Def:
 	spell.description = s.desc
 	return spell
 
-## Шаблон по категории боевого заклинания.
 static func _template_for(s: SpellRegistry.SpellDef) -> StringName:
 	if s.id == &"cure":
 		return T_HEAL_CLEAR
@@ -97,8 +70,6 @@ static func _template_for(s: SpellRegistry.SpellDef) -> StringName:
 		return T_KEYWORD_BUFF
 	return T_PORTAL
 
-## Параметры по категории. `level` несем в params для проверки иммунности
-## (драконы免疫 заклинаниям < 4 уровня) в apply_spell.
 static func _params_for(s: SpellRegistry.SpellDef) -> Dictionary:
 	var p: Dictionary = {"level": s.level}
 	if s.damage_multiplier > 0:
@@ -107,24 +78,18 @@ static func _params_for(s: SpellRegistry.SpellDef) -> Dictionary:
 		p["target"] = _damage_target(s.id)
 		return p
 	if s.buff_effect >= 0:
-		# Эффект — StatusEffects.Effect. Ключ = верхний регистр имени
-		# эффекта (маппинг KEYWORD_TO_EFFECT работает по верхнему регистру).
 		p["keyword"] = _keyword_for_effect(s.buff_effect)
 		if _SE.is_debuff(s.buff_effect):
 			p["mass"] = (s.id == &"slow_mass")
 		return p
 	return p
 
-## Верхний регистр имени эффекта StatusEffects.Effect (обратный маппинг
-## для KEYWORD_TO_EFFECT). get_name() не используем — он конфликтует с
-## встроенным Object.get_name() (0 аргументов).
 static func _keyword_for_effect(effect: int) -> String:
 	if _EFFECT_TO_KEYWORD.is_empty():
 		for kw in KEYWORD_TO_EFFECT:
 			_EFFECT_TO_KEYWORD[KEYWORD_TO_EFFECT[kw]] = String(kw)
 	return _EFFECT_TO_KEYWORD.get(effect, "UNKNOWN")
 
-## Куда летит урон: магия по одной/всем врагам.
 static func _damage_target(id: StringName) -> String:
 	match id:
 		&"fireball", &"armageddon", &"meteor_shower":
@@ -132,11 +97,7 @@ static func _damage_target(id: StringName) -> String:
 		_:
 			return "ENEMY_UNIT"
 
-# ==================== 2. ПРИМЕНЕНИЕ ЗАКЛИНАНИЯ В Ю ====================
 
-## Применить заклинание к юниту в контексте боя. Возвращает словарь
-## в форме, повторяющей `SpellCaster.cast`:
-##   {result, damage, kills, status, resisted, heal, revive_count, spell_id}.
 static func apply_spell(
 	spell: Variant,
 	target: BattleState.BattleUnit,
@@ -192,7 +153,6 @@ static func apply_spell(
 			pass
 	return result
 
-# ==================== ХЕЛПЕРЫ (аналог SpellCaster) ====================
 
 static func _apply_damage(unit: BattleState.BattleUnit, dmg: int, result: Dictionary) -> Dictionary:
 	var hp: int = max(1, unit.get_hp())
@@ -207,15 +167,12 @@ static func _check_immunity(unit: BattleState.BattleUnit, spell: Variant) -> boo
 		return false
 	var spell_id: StringName = spell.id
 	var spell_level: int = int(spell.params.get("level", 1))
-	# Нежить иммунна к исцелению/проклятиям/замедлению.
-	if unit.has_tag("undead") and spell_id in [&"bless", &"cure", &"curse", &"weakness", &"slow"]:
+	if unit.has_tag("undead") and spell_id in UNDEAD_IMMUNE_SPELLS:
 		return true
-	# Драконы иммунны к заклинаниям < 4 уровня.
 	if unit.has_tag("dragon") and spell_level < 4:
 		return true
-	# Иммунитет разума: дебаффы разума.
 	if unit.has_tag("immune_mind") or unit.has_tag("mind_immune"):
-		if spell_id in [&"curse", &"misfortune", &"weakness", &"slow"]:
+		if spell_id in MIND_IMMUNE_SPELLS:
 			return true
 	return false
 

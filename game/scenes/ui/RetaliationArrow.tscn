@@ -1,0 +1,6 @@
+[gd_scene load_steps=1 format=3]
+
+[node name="RetaliationArrow" type="Line2D"]
+z_index = 19
+width = 3.0
+default_color = Color(1, 0.8, 0.2, 0.95)

@@ -1,14 +1,11 @@
 class_name CityPanel
 extends Control
-## Панель города: фигурки населения, еда, районы, здания.
-## Пассивна: читает City, изменения приходят через сигналы города.
 
 signal building_upgrade_requested(building: UniqueBuilding)
 signal closed
 
-const W := 340.0
-const C_BG := Color(0.16, 0.11, 0.06, 0.95)
-const C_BORDER := Color(0.62, 0.47, 0.22)
+const C_BG := ThemeConfig.C_PANEL_BG
+const C_BORDER := ThemeConfig.C_PANEL_BORDER
 
 var _city: City = null
 var _title: Label
@@ -24,7 +21,35 @@ var _view_buildings: Array[UniqueBuilding] = []
 
 func _ready() -> void:
 	visible = false
-	_build_ui()
+	var box := get_node("Panel/Box")
+	_title = box.get_node("Title") as Label
+	_summary = box.get_node("Summary") as Label
+	_pops = box.get_node("Pops") as ItemList
+	_buildings = box.get_node("Buildings") as ItemList
+	_btn_worker = box.get_node("Row/WorkerButton") as Button
+	_btn_worker.text = GameText.cityjob_name(&"worker")
+	_btn_militia = box.get_node("Row/MilitiaButton") as Button
+	_btn_militia.text = GameText.cityjob_name(&"militia")
+	_btn_patrol = box.get_node("Row/PatrolButton") as Button
+	_btn_patrol.text = GameText.cityjob_name(&"patrol")
+	var reserve_btn := box.get_node("Row/ReserveButton") as Button
+	reserve_btn.text = GameText.cityjob_name(&"reserve")
+	reserve_btn.connect("pressed", _on_follower)
+	var close_btn := box.get_node("CloseButton") as Button
+	close_btn.text = GameText.ui_close()
+	close_btn.connect("pressed", close)
+
+	_pops.item_selected.connect(func(_i): _update_buttons())
+	_btn_worker.pressed.connect(_on_worker)
+	_btn_militia.pressed.connect(_on_militia)
+	_btn_patrol.pressed.connect(_on_patrol)
+	_buildings.item_activated.connect(_on_building_activated)
+
+	var s := StyleBoxFlat.new()
+	s.bg_color = C_BG
+	s.set_border_width_all(2)
+	s.border_color = C_BORDER
+	(get_node("Panel") as PanelContainer).add_theme_stylebox_override("panel", s)
 
 
 func open(city: City) -> void:
@@ -37,66 +62,6 @@ func close() -> void:
 	visible = false
 	closed.emit()
 
-
-func _build_ui() -> void:
-	set_anchors_preset(Control.PRESET_CENTER_RIGHT)
-	offset_left = -W - 12.0
-	offset_right = -12.0
-	offset_top = 40.0
-	offset_bottom = -40.0
-
-	var panel := PanelContainer.new()
-	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
-	var s := StyleBoxFlat.new()
-	s.bg_color = C_BG
-	s.set_border_width_all(2)
-	s.border_color = C_BORDER
-	panel.add_theme_stylebox_override("panel", s)
-	add_child(panel)
-
-	var vb := VBoxContainer.new()
-	vb.add_theme_constant_override("separation", 6)
-	panel.add_child(vb)
-
-	_title = Label.new()
-	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	vb.add_child(_title)
-
-	_summary = Label.new()
-	_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	vb.add_child(_summary)
-
-	_pops = ItemList.new()
-	_pops.custom_minimum_size = Vector2(0, 150)
-	_pops.item_selected.connect(func(_i): _update_buttons())
-	vb.add_child(_pops)
-
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 4)
-	vb.add_child(row)
-	_btn_worker = _mk_btn(row, "⚙ Рабочий", _on_worker)
-	_btn_militia = _mk_btn(row, "🛡 Ополченец", _on_militia)
-	var btn_res := _mk_btn(row, "👤 Резерв", _on_follower)
-	_btn_patrol = _mk_btn(row, "🐎 Патруль", _on_patrol)
-	btn_res.size_flags_horizontal = _btn_worker.size_flags_horizontal  # выравнивание
-
-	_buildings = ItemList.new()
-	_buildings.custom_minimum_size = Vector2(0, 90)
-	_buildings.item_activated.connect(_on_building_activated)
-	vb.add_child(_buildings)
-
-	var close_btn := Button.new()
-	close_btn.text = "Закрыть"
-	close_btn.pressed.connect(close)
-	vb.add_child(close_btn)
-
-
-func _mk_btn(parent: Control, text: String, cb: Callable) -> Button:
-	var b := Button.new()
-	b.text = text
-	b.pressed.connect(cb)
-	parent.add_child(b)
-	return b
 
 
 func _bind(city: City) -> void:
@@ -119,21 +84,21 @@ func _refresh() -> void:
 	if _city == null or not visible:
 		return
 	var c := _city
-	_title.text = "%s%s" % [c.display_name, " (столица)" if c.is_capital else ""]
+	_title.text = "%s%s" % [c.display_name, GameText.citypanel_capital() if c.is_capital else ""]
 
 	var over := ""
 	if c.over_limit() > 0:
-		over = "  ⚠ ПЕРЕЛИМИТ %d" % c.over_limit()
-	_summary.text = "Население: %d/%d%s\nРабочие %d · Свободных последователей %d · Ополченцы %d (патруль %d)\nЕда: %.0f/%.0f (нетто %+.1f/ход)%s\nОдобрение: %+d · Безопасность: %d\nРайоны: %d/%d · Промышленность: %.0f" % [
+		over = GameText.citypanel_over_limit(c.over_limit())
+	_summary.text = GameText.citypanel_summary(
 		c.pop_capped(), c.pop_cap(), over,
 		c.count_state(PopUnit.State.WORKER), c.free_followers(),
 		c.count_state(PopUnit.State.MILITIA), c.patrol_count(),
-		c.food_stockpile, c.growth_threshold(), c.net_food(),
-		"  🍂 ГОЛОД" if c.starving else "",
-		c.approval(), c.safety(),
+		"%.0f" % c.food_stockpile, "%.0f" % c.growth_threshold(), "%+.1f" % c.net_food(),
+		GameText.citypanel_starving() if c.starving else "",
+		"%+d" % c.approval(), c.safety(),
 		c.boroughs.size(), BoroughRules.max_boroughs(c),
-		float(c.storage.get(&"industry", 0.0)),
-	]
+		"%.0f" % float(c.storage.get(&"industry", 0.0)),
+	)
 
 	_pops.clear()
 	_view_uids.clear()
@@ -146,9 +111,9 @@ func _refresh() -> void:
 				extra = " %s" % u.tile
 			PopUnit.State.MILITIA:
 				tag = "🛡"
-				extra = " патруль" if u.patrol else ""
+				extra = GameText.citypanel_patrol_tag() if u.patrol else ""
 		if u.assigned_to != -1:
-			extra += " [в здании]"
+			extra += GameText.citypanel_in_building()
 		if u.pending_state != -1:
 			extra += " ⏳"
 		_pops.add_item("%s #%d%s" % [tag, u.uid, extra])
@@ -158,9 +123,8 @@ func _refresh() -> void:
 	_view_buildings.clear()
 	for b in c.buildings:
 		var up := c.can_upgrade_building(b)
-		_buildings.add_item("%s ур.%d/3%s" % [
-			b.def.display_name, b.level, "  [можно улучшить]" if up.ok else "",
-		])
+		_buildings.add_item(GameText.citypanel_building_line(
+			b.def.display_name, b.level, GameText.citypanel_can_upgrade() if up.ok else ""))
 		_view_buildings.append(b)
 
 	_update_buttons()
@@ -184,8 +148,8 @@ func _update_buttons() -> void:
 	_btn_worker.disabled = not has or _city.first_free_worker_tile().x < 0
 	_btn_militia.disabled = not has
 	_btn_patrol.disabled = u == null or u.state != PopUnit.State.MILITIA
-	_btn_patrol.text = "🐎 Патруль: ВЫКЛ" if _btn_patrol.disabled \
-		else ("🐎 Патруль: ВЫКЛ" if not u.patrol else "🐎 Патруль: ВКЛ")
+	_btn_patrol.text = GameText.citypanel_patrol_off() if _btn_patrol.disabled \
+		else (GameText.citypanel_patrol_off() if not u.patrol else GameText.citypanel_patrol_on())
 
 
 func _on_worker() -> void:

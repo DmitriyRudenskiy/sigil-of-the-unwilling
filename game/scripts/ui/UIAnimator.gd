@@ -1,6 +1,5 @@
 extends Node
 class_name UIAnimator
-## Utility for menu transitions and button animations.
 
 static func animate_in(control: Control, duration: float = 0.2) -> void:
     control.modulate.a = 0.0
@@ -17,7 +16,12 @@ static func animate_out(control: Control, duration: float = 0.15) -> void:
     tw.tween_property(control, "position:y", control.position.y + 20.0, duration)
     tw.chain().tween_callback(control.hide)
 
+const SETUP_META := &"ui_animator_setup"
+
 static func setup_button(btn: Button) -> void:
+    if btn.has_meta(SETUP_META):
+        return
+    btn.set_meta(SETUP_META, true)
     btn.pivot_offset = btn.size / 2.0
     btn.mouse_entered.connect(func(): 
         var tw = btn.create_tween()

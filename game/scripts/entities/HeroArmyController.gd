@@ -1,17 +1,13 @@
 extends Node
 class_name HeroArmyController
-## Hero army: init, battle serialization, results application.
-## UnitRegistry инжектируется через setup(); fallback → ServiceContainer → autoload.
-
-const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
-const ServiceLocator = preload("res://scripts/core/ServiceLocator.gd")
 
 var army: Array[UnitStack] = []
-var _units_registry: Node = null  # UnitRegistry
+var _units_registry: Node = null
 
 
 func setup(units_registry: Node = null) -> void:
-	_units_registry = ServiceLocator.resolve(units_registry, &"units")
+	# ИСПРАВЛЕНИЕ: единый путь
+	_units_registry = units_registry if units_registry != null else Services.resolve(&"units")
 	_init_default_army()
 
 
@@ -33,11 +29,10 @@ func get_army_for_battle() -> Array[UnitStack]:
 	for stack in army:
 		if stack == null or not stack.is_alive():
 			continue
-		# РФ-герой: герой не может командовать более чем MAX_HERO_ARMY_SIZE юнитами.
-		if alive.size() >= MapConfig.MAX_HERO_ARMY_SIZE:
+		if alive.size() >= GameNumbers.MAX_HERO_ARMY_SIZE:
 			GameLogger.hero(
 				"Армия героя достигла лимита юнитов (%d), остальные не участвуют в бою."
-				% MapConfig.MAX_HERO_ARMY_SIZE)
+				% GameNumbers.MAX_HERO_ARMY_SIZE)
 			break
 		alive.append(stack.duplicate_stack())
 	return alive
@@ -48,13 +43,10 @@ func apply_battle_results(surviving_army: Array[UnitStack]) -> void:
 	for stack in surviving_army:
 		if stack != null and stack.is_alive():
 			if _units_registry != null:
-				# РФ6-1: пересборка из реестра — статы каноничные, только численность сохраняется
 				var clean = _units_registry.make_fixed_stack(stack.get_key(), stack.count)
 				if clean != null:
 					new_army.append(clean)
 				continue
-			# ponytail: реестра нет (детаченные тесты) — дублируем стек как есть;
-			# в игре registry всегда на месте (HeroController._ready → setup).
 			new_army.append(stack.duplicate_stack())
 	army = new_army
 

@@ -1,19 +1,6 @@
 class_name WorkerAssignment
 extends RefCounted
-## Спринт 7: Назначение рабочих на здания с цепочками производства.
-##
-## Рабочий = PopUnit.State.WORKER. Назначение — PopUnit.assigned_to
-## (uid здания) + UniqueBuilding.assigned_workers (счётчик). Назначение
-## не требует клетки (рабочий здания != рабочий тайла legacy-контура).
-##
-## rebalance() вызывается CityTurnProcessor каждый ход:
-##  1. рабочих со сломанными ссылками (здание удалено) освобождаем;
-##  2. заполняем недостачу зданий (required_workers - assigned_workers).
-## Переназначение существующих рабочих не делается (стабильность):
-## если рабочее место высвободилось, его займёт свободный рабочий.
 
-## Назначить свободных рабочих на все здания с цепочками.
-## Возвращает число новых назначений.
 static func assign_all(city: City) -> int:
 	if city == null:
 		return 0
@@ -35,7 +22,7 @@ static func assign_all(city: City) -> int:
 			if u.assigned_to != -1:
 				continue
 			if u.pending_state != -1:
-				continue  # уже переключается — ждём применения
+				continue  
 			u.assigned_to = bld.uid
 			bld.assigned_workers += 1
 			need -= 1
@@ -45,7 +32,6 @@ static func assign_all(city: City) -> int:
 	return assigned
 
 
-## Освободить рабочих со сломанными ссылками. Возвращает число.
 static func release_orphans(city: City) -> int:
 	if city == null:
 		return 0
@@ -63,7 +49,6 @@ static func release_orphans(city: City) -> int:
 	return freed
 
 
-## Освободить всех рабочих конкретного здания (разрушение/снос).
 static func release_building(city: City, building_uid: int) -> int:
 	if city == null:
 		return 0
@@ -80,7 +65,6 @@ static func release_building(city: City, building_uid: int) -> int:
 	return freed
 
 
-## Полный ребаланс: osphans -> assign_all. Возвращает новых назначений.
 static func rebalance(city: City) -> int:
 	if city == null:
 		return 0

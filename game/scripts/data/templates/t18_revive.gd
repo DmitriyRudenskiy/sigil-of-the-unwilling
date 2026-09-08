@@ -1,7 +1,5 @@
-## scripts/data/templates/t18_revive.gd
 class_name T18Revive
 extends RefCounted
-## T18: REVIVE (аудит #8: вынесен из TemplateEngine).
 
 const _Utils = preload("res://scripts/data/SpellUtils.gd")
 

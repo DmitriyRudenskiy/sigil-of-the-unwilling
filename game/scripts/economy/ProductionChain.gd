@@ -1,24 +1,13 @@
 class_name ProductionChain
 extends RefCounted
-## Цепочка производства (M1: Экономика).
-##
-## Формула: output = base_output * worker_ratio * building_eff * logistics_eff
-##  - worker_ratio  — min(workers / required_workers, 1.0);
-##  - building_eff  — множитель эффективности здания (уровень и т.п.);
-##  - logistics_eff — множитель логистики (M3: расстояние до склада/дороги).
-##
-## execute() списывает входы из ResourceContext и возвращает словарь
-## выходов; при нехватке входов возвращает {} (цепочка не отработала).
-## Сериализуется в Dictionary для сохранения (state у зданий).
 
 var id: StringName = &""
-var inputs: Dictionary = {}  # StringName -> float (ресурсов в ход)
-var outputs: Dictionary = {}  # StringName -> float (базовый выход)
+var inputs: Dictionary = {}  
+var outputs: Dictionary = {}  
 var required_workers: int = 1
 var building_eff: float = 1.0
 
 
-## Расчёт выходов без изменения контекста.
 func calculate_output(workers: int, logistics: float = 1.0) -> Dictionary:
 	if required_workers <= 0 or workers <= 0:
 		return {}
@@ -30,15 +19,12 @@ func calculate_output(workers: int, logistics: float = 1.0) -> Dictionary:
 	return result
 
 
-## Достаточно ли входов в контексте?
 func can_produce(ctx: ResourceContext, workers: int) -> bool:
 	if workers <= 0:
 		return false
 	return ctx.can_afford(inputs)
 
 
-## Исполнение: списывает входы, возвращает фактические выходы.
-## При нехватке входов — {} (входы не списываются).
 func execute(ctx: ResourceContext, workers: int, logistics: float = 1.0) -> Dictionary:
 	if not can_produce(ctx, workers):
 		return {}

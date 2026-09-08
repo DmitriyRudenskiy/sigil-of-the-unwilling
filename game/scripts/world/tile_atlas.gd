@@ -1,42 +1,13 @@
 class_name TileAtlas
 extends RefCounted
-## TileAtlas — тайлсет 5x5 листа (82 px).
-##
-## Лист: res://assets/tiles/world_tiles.jpeg (410x410 = 5x5 ячеек по 82 px).
-##
-## База (9 шт.), каждая — ровно один вариант:
-##   (0,0) трава   (1,0) песок   (2,0) снег   (3,0) болото  (4,0) вода
-##   (0,1) камень  (1,1) грязь   (2,1) лава   (3,1) дорога
-##
-## Переходы (14 шт.):
-##   (4,1) трава|песок  diag    (0,2) трава|снег   diag
-##   (1,2) трава|вода   diag    (2,2) песок|вода   diag
-##   (3,2) снег|камень  diag    (4,2) болото|грязь diag
-##   (0,3) лава|камень  diag    (2,3) песок|трава  diag
-##   (3,3) снег|трава   diag    (0,4) вода|песок   diag
-##   (1,4) камень|снег  edge    (3,4) камень|лава  diag
-##   (4,3) вода|трава   edge    (2,4) болото|грязь edge
-##
-## Каждая запись TRANSITION_ART описывает ориг. ориентацию тайла:
-##   a — «свой» биом (доминирующий, рисуется под клеткой),
-##   b — «чужой» биом, shape — "diag" (угол) | "edge" (сторона),
-##   at — где на тайле нарисован биом b (угол или сторона), coord — позиция.
-## pick() ищет запись, где a == биом клетки; при повороте доминирование
-## не меняется — поэтому вопрос «сплит/уголок» на выбор не влияет.
-## Вращённые варианты (90/180/270 CW) — альтернативы тайла, отдельной
-## текстуры не нужно. Дорога — (3,1): alt 0 = полоса NW-SE, alt 1 = NE-SW.
 
 const SHEET_PATH := "res://assets/tiles/world_tiles.jpeg"
 const TILE := 82
 const SOURCE_ID := 0
-## fog-of-war: тот же лист, но затемнённый — для клеток «разведено, но не
-## видно» (у TileMapLayer нет per-cell modulate — только modulate всего
-## слоя, поэтому затемнение — отдельным источником тайлсета).
 const FOG_SOURCE_ID := 1
 
 enum Biome { GRASS, SAND, SNOW, SWAMP, WATER, ROCK, MUD, LAVA, ROAD }
 
-## База: биом -> список координат вариантов в листе (по одному).
 const BASE_COORDS := {
 	Biome.GRASS: [Vector2i(0, 0)],
 	Biome.SAND: [Vector2i(1, 0)],
@@ -73,8 +44,6 @@ var _tileset: TileSet
 var _src: TileSetAtlasSource
 
 
-## Собирает TileSet поверх оригинального листа. Возвращает false, если
-## текстура недоступна (например, в отчуждённом проекте).
 var _fog_src: TileSetAtlasSource
 
 
@@ -103,9 +72,6 @@ func build() -> bool:
 	return true
 
 
-## fog-of-war: дубликат листа с умножением яркости на 0.45 — те же коорд.
-## ponytail: по пикселю один раз на старте (410x410), не Image.adjust_colors
-## (смысл value-аргумента неочевиден — лучше явное умножение).
 func _build_fog_source(tex: Texture2D) -> void:
 	var img: Image = tex.get_image().duplicate()
 	var h := img.get_height()
@@ -128,23 +94,17 @@ func tileset() -> TileSet:
 	return _tileset
 
 
-## Координата базового тайла биома (alt 0); варианты выбираются случайно.
 func base_coords(biome: int, rng: RandomNumberGenerator) -> Vector2i:
 	var options: Array = BASE_COORDS[biome]
 	return options[rng.randi() % options.size()]
 
 
-## TileSet для ГЛАВНОЙ карты и боя: hex-раскладка (tile_shape=3 — Hexagon),
-## базовые тайлы всех 9 биомов (по одному на биом, без переходов —
-## главная карта рисует плоские тайлы, без автотайлинга). Тайлы — квадраты
-## 82×82, раскладываются гекс-паттерном. Возвращает null, если текстуру
-## не удалось загрузить.
-static func build_hex_tileset() -> TileSet:
+func build_hex() -> TileSet:
 	var tex := load(SHEET_PATH)
 	if not (tex is Texture2D):
 		return null
 	var ts := TileSet.new()
-	ts.tile_shape = 3  # Hexagon (как у прежнего hex_tileset.tres)
+	ts.tile_shape = 3
 	ts.tile_size = Vector2i(TILE, TILE)
 	var src := TileSetAtlasSource.new()
 	src.texture = tex
@@ -157,9 +117,34 @@ static func build_hex_tileset() -> TileSet:
 	return ts
 
 
-## Возвращает { "atlas": Vector2i, "alt": int } или {} — если пары нет.
-## `base` — биом клетки, `other` — биом соседа, `shape` — "edge" | "diag",
-## `at` — сторона/угол, куда смотрит чужой биом.
+func get_tileset() -> TileSet:
+	return _tileset
+
+
+static func build_hex_tileset() -> TileSet:
+	# TASK_06: совместимый статический мост.
+	# Внутри TileAtlas статического кэша НЕТ —
+	# кэш живёт в управляемом автозагрузочном узле TileAtlasCache.
+	var main_loop := Engine.get_main_loop()
+	if main_loop is SceneTree:
+		var tree := main_loop as SceneTree
+		var cache := tree.root.get_node_or_null("/root/TileAtlasCache")
+		if cache != null and cache.has_method("build_hex_tileset"):
+			return cache.call("build_hex_tileset")
+	# Fallback для тестов и сцен без автозагрузки TileAtlasCache.
+	return TileAtlas.new().build_hex()
+
+
+static func clear_cache() -> void:
+	# TASK_06: совместимый статический мост очистки кэша тайл-сета.
+	var main_loop := Engine.get_main_loop()
+	if main_loop is SceneTree:
+		var tree := main_loop as SceneTree
+		var cache := tree.root.get_node_or_null("/root/TileAtlasCache")
+		if cache != null and cache.has_method("clear_cache"):
+			cache.call("clear_cache")
+
+
 static func pick(base: int, other: int, shape: String, at: String) -> Dictionary:
 	for e in TRANSITION_ART:
 		if e["a"] != base or e["b"] != other or e["shape"] != shape:
@@ -168,7 +153,6 @@ static func pick(base: int, other: int, shape: String, at: String) -> Dictionary
 	return {}
 
 
-## На сколько поворотов (0..3) повернуть тайл, чтобы `from` совпал с `to`.
 static func rotation_count(shape: String, from: String, to: String) -> int:
 	var order: Array = _SIDES if shape == "edge" else _CORNERS
 	var f := order.find(from)
@@ -178,7 +162,6 @@ static func rotation_count(shape: String, from: String, to: String) -> int:
 	return (t - f + 4) % 4
 
 
-## Противоположная сторона/угол.
 static func opposite(shape: String, name: String) -> String:
 	if shape == "edge":
 		return _OPP_SIDE[name]
@@ -191,11 +174,6 @@ const _OPP_SIDE := { "N": "S", "S": "N", "E": "W", "W": "E" }
 const _OPP_CORNER := { "NW": "SE", "SE": "NW", "NE": "SW", "SW": "NE" }
 
 
-## Флаги TileData для поворота на k*90 CW (направление 90/270
-## верифицировано рендером по шейлеру canvas.glsl 4.7:
-## uv = src + abs(size)*(transpose ? vb.yx : vb.xy), зеркалирование
-## вершин при отрицательном src-size):
-##  90 CW  = transpose + flip_h,  180 = flip_h + flip_v,  270 CW = transpose + flip_v.
 func _apply_rotation(td: TileData, k: int) -> void:
 	match k:
 		1:

@@ -1,7 +1,5 @@
-## scripts/data/templates/t10_relic_interaction.gd
 class_name T10RelicInteraction
 extends RefCounted
-## T10: RELIC INTERACTION (аудит #8: вынесен из TemplateEngine).
 
 const _Utils = preload("res://scripts/data/SpellUtils.gd")
 

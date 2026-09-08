@@ -1,6 +1,5 @@
-extends "res://tests/gut_base.gd"
+extends GdUnitTestSuite
 
-## Тесты BattleState: размещение, очередь, атака, конец боя, теги, отступление.
 
 func _create_state():
 	var state = load("res://scripts/systems/BattleState.gd").new()
@@ -15,47 +14,22 @@ func _create_state():
 
 
 func test_battle_setup() -> void:
-	var errors := _check_battle_setup()
-	assert_eq(errors, 0, "test_battle_setup — no errors")
-
-func _check_battle_setup() -> int:
-	var errors := 0
 	var state = _create_state()
-
 	var attackers = state.get_units_by_side(BattleState.Side.ATTACKER)
 	var defenders = state.get_units_by_side(BattleState.Side.DEFENDER)
 
-	if attackers.size() != 1:
-		printerr("expected 1 attacker unit")
-		errors += 1
-	if defenders.size() != 1:
-		printerr("expected 1 defender unit")
-		errors += 1
-	if attackers.size() > 0 and not attackers[0].is_alive():
-		printerr("attacker should be alive after setup")
-		errors += 1
-	if defenders.size() > 0 and not defenders[0].is_alive():
-		printerr("defender should be alive after setup")
-		errors += 1
-	if state.turn_queue.is_empty():
-		printerr("turn queue should not be empty")
-		errors += 1
+	assert_int(attackers.size()).is_equal(1)
+	assert_int(defenders.size()).is_equal(1)
+	assert_bool(attackers[0].is_alive()).is_true().override_failure_message("attacker should be alive after setup")
+	assert_bool(defenders[0].is_alive()).is_true().override_failure_message("defender should be alive after setup")
+	assert_bool(state.turn_queue.is_empty()).is_false().override_failure_message("turn queue should not be empty")
 
-	if attackers.size() > 0:
-		var found = state.get_unit_at(attackers[0].cell, BattleState.Side.ATTACKER)
-		if found == null:
-			printerr("get_unit_at should find attacker at its cell")
-			errors += 1
-	return errors
+	var found = state.get_unit_at(attackers[0].cell, BattleState.Side.ATTACKER)
+	assert_object(found).is_not_null().override_failure_message("get_unit_at should find attacker at its cell")
 
 
 
 func test_attack() -> void:
-	var errors := _check_attack()
-	assert_eq(errors, 0, "test_attack — no errors")
-
-func _check_attack() -> int:
-	var errors := 0
 	var state = _create_state()
 
 	var attacker = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
@@ -67,22 +41,12 @@ func _check_attack() -> int:
 	var rng1 := RandomNumberGenerator.new()
 	state.apply_attack(attacker, defender, true, rng1)
 
-	if defender.get_count() >= defender_count_before:
-		printerr("attack should reduce defender count")
-		errors += 1
-	if not attacker.has_moved:
-		printerr("attacker should have has_moved after attack")
-		errors += 1
-	return errors
+	assert_int(defender.get_count()).is_less(defender_count_before).override_failure_message("attack should reduce defender count")
+	assert_bool(attacker.has_moved).is_true().override_failure_message("attacker should have has_moved after attack")
 
 
 
 func test_attack_with_rng() -> void:
-	var errors := _check_attack_with_rng()
-	assert_eq(errors, 0, "test_attack_with_rng — no errors")
-
-func _check_attack_with_rng() -> int:
-	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 50))
@@ -99,22 +63,12 @@ func _check_attack_with_rng() -> int:
 	rng.seed = 12345
 
 	var result: Dictionary = state.apply_attack(attacker, defender, true, rng)
-	if not result.has("damage"):
-		printerr("apply_attack with rng should return result with damage")
-		errors += 1
-	if result.get("damage", 0) <= 0:
-		printerr("damage should be > 0 for swordsmen vs goblins")
-		errors += 1
-	return errors
+	assert_dict(result).contains_keys("damage").override_failure_message("apply_attack with rng should return result with damage")
+	assert_int(result.get("damage", 0)).is_greater(0).override_failure_message("damage should be > 0 for swordsmen vs goblins")
 
 
 
 func test_battle_end() -> void:
-	var errors := _check_battle_end()
-	assert_eq(errors, 0, "test_battle_end — no errors")
-
-func _check_battle_end() -> int:
-	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 100))
@@ -134,32 +88,18 @@ func _check_battle_end() -> int:
 		state.apply_attack(attacker, defender, true, rng2)
 		guard += 1
 
-	if defender.is_alive():
-		printerr("defender should be dead after enough attacks")
-		errors += 1
-	if not state.battle_over:
-		printerr("battle should be over after defender extinction")
-		errors += 1
+	assert_bool(defender.is_alive()).is_false().override_failure_message("defender should be dead after enough attacks")
+	assert_bool(state.battle_over).is_true().override_failure_message("battle should be over after defender extinction")
 
 	var atk_survivors: Array = state.get_survivors(BattleState.Side.ATTACKER)
 	var def_survivors: Array = state.get_survivors(BattleState.Side.DEFENDER)
 
-	if atk_survivors.size() != 1:
-		printerr("attacker survivors should contain 1 stack")
-		errors += 1
-	if def_survivors.size() != 0:
-		printerr("defender survivors should be empty")
-		errors += 1
-	return errors
+	assert_int(atk_survivors.size()).is_equal(1).override_failure_message("attacker survivors should contain 1 stack")
+	assert_int(def_survivors.size()).is_zero().override_failure_message("defender survivors should be empty")
 
 
 
 func test_wait_order() -> void:
-	var errors := _check_wait_order()
-	assert_eq(errors, 0, "test_wait_order — no errors")
-
-func _check_wait_order() -> int:
-	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = [
 		Units.make_fixed_stack("swordsmen", 10),
@@ -183,32 +123,19 @@ func _check_wait_order() -> int:
 	state.turn_idx = 0
 	state.active_unit = a
 
-	# Wait with first unit → next should be b
 	state.do_wait(a)
 	state.advance_turn()
 
-	if state.active_unit != b:
-		printerr("After waiting with first unit, second unit should act")
-		errors += 1
+	assert_bool(state.active_unit == b).is_true().override_failure_message("After waiting with first unit, second unit should act")
 
-	# Wait with second unit → next should be c
 	state.do_wait(b)
 	state.advance_turn()
 
-	if state.active_unit != c:
-		printerr("After waiting with second unit, third unit should act")
-		errors += 1
-
-	return errors
+	assert_bool(state.active_unit == c).is_true().override_failure_message("After waiting with second unit, third unit should act")
 
 
 
 func test_check_end_repeat_call() -> void:
-	var errors := _check_check_end_repeat_call()
-	assert_eq(errors, 0, "test_check_end_repeat_call — no errors")
-
-func _check_check_end_repeat_call() -> int:
-	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 100))
@@ -225,34 +152,19 @@ func _check_check_end_repeat_call() -> int:
 	state.apply_attack(attacker, defender, true, rng3)
 
 	var winner1: BattleState.Side = state.check_end()
-	if winner1 != BattleState.Side.ATTACKER:
-		printerr("first check_end() should return 'attacker', got: ", winner1)
-		errors += 1
+	assert_int(winner1).is_equal(BattleState.Side.ATTACKER).override_failure_message("first check_end() should return 'attacker'")
 
 	var winner2: BattleState.Side = state.check_end()
-	if winner2 != BattleState.Side.ATTACKER:
-		printerr("second check_end() should return 'attacker', got: ", winner2)
-		errors += 1
+	assert_int(winner2).is_equal(BattleState.Side.ATTACKER).override_failure_message("second check_end() should return 'attacker'")
 
 	var state2 = load("res://scripts/systems/BattleState.gd").new()
 	state2.force_end(BattleState.Side.DEFENDER)
-	if not state2.battle_over:
-		printerr("force_end should set battle_over")
-		errors += 1
-	if state2.check_end() != BattleState.Side.DEFENDER:
-		printerr("check_end after force_end should return 'defender'")
-		errors += 1
-
-	return errors
+	assert_bool(state2.battle_over).is_true().override_failure_message("force_end should set battle_over")
+	assert_int(state2.check_end()).is_equal(BattleState.Side.DEFENDER).override_failure_message("check_end after force_end should return 'defender'")
 
 
 
 func test_get_reachable_for_unit() -> void:
-	var errors := _check_get_reachable_for_unit()
-	assert_eq(errors, 0, "test_get_reachable_for_unit — no errors")
-
-func _check_get_reachable_for_unit() -> int:
-	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 20))
@@ -264,24 +176,12 @@ func _check_get_reachable_for_unit() -> int:
 	var blocked := func() -> Dictionary: return {}
 	var reachable: Dictionary = state.get_reachable_for_unit(unit, blocked)
 
-	if reachable.size() <= 1:
-		printerr("reachable should include unit's own cell + neighbors")
-		errors += 1
-
-	# Клетка самого юнита не должна быть в области ходьбы.
-	if reachable.has(unit.cell):
-		printerr("reachable must not include the unit's own cell")
-		errors += 1
-	return errors
+	assert_int(reachable.size()).is_greater(1).override_failure_message("reachable should include unit's own cell + neighbors")
+	assert_bool(reachable.has(unit.cell)).is_false().override_failure_message("reachable must not include the unit's own cell")
 
 
 
 func test_get_unreachable_ring() -> void:
-	var errors := _check_get_unreachable_ring()
-	assert_eq(errors, 0, "test_get_unreachable_ring — no errors")
-
-func _check_get_unreachable_ring() -> int:
-	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 20))
@@ -294,33 +194,18 @@ func _check_get_unreachable_ring() -> int:
 	var reachable: Dictionary = state.get_reachable_for_unit(unit, blocked)
 	var ring: Dictionary = state.get_unreachable_ring(unit, blocked)
 
-	# Клетка юнита не в кольце «не хватает ходов».
-	if ring.has(unit.cell):
-		printerr("unreachable ring must not include the unit's own cell")
-		errors += 1
+	assert_bool(ring.has(unit.cell)).is_false().override_failure_message("unreachable ring must not include the unit's own cell")
 
-	# Клетки из области ходьбы не могут быть и «не хватает ходов».
 	for c in ring:
-		if reachable.has(c):
-			printerr("unreachable ring must not overlap the walkable set: %s" % c)
-			errors += 1
+		assert_bool(reachable.has(c)).is_false().override_failure_message("unreachable ring must not overlap the walkable set: %s" % c)
 
-	# Клетки в кольце реально достижимы за speed+1 (иначе это не «в шаге от цели»).
 	var near: Dictionary = state.get_reachable(unit.cell, unit.get_speed() + 1, blocked, unit)
 	for c in ring:
-		if not near.has(c):
-			printerr("unreachable ring cell must be reachable in speed+1 steps: %s" % c)
-			errors += 1
-	return errors
+		assert_bool(near.has(c)).is_true().override_failure_message("unreachable ring cell must be reachable in speed+1 steps: %s" % c)
 
 
 
 func test_flying_unit_placement() -> void:
-	var errors := _check_flying_unit_placement()
-	assert_eq(errors, 0, "test_flying_unit_placement — no errors")
-
-func _check_flying_unit_placement() -> int:
-	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("pegasus", 10))
@@ -328,19 +213,11 @@ func _check_flying_unit_placement() -> int:
 	state.place_army(atk, def)
 
 	var unit = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
-	if not unit.is_flying():
-		printerr("pegasus should be flying")
-		errors += 1
-	return errors
+	assert_bool(unit.is_flying()).is_true().override_failure_message("pegasus should be flying")
 
 
 
 func test_ranged_unit_tag() -> void:
-	var errors := _check_ranged_unit_tag()
-	assert_eq(errors, 0, "test_ranged_unit_tag — no errors")
-
-func _check_ranged_unit_tag() -> int:
-	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("archers", 10))
@@ -348,19 +225,11 @@ func _check_ranged_unit_tag() -> int:
 	state.place_army(atk, def)
 
 	var unit = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
-	if not unit.is_ranged():
-		printerr("archers should be ranged")
-		errors += 1
-	return errors
+	assert_bool(unit.is_ranged()).is_true().override_failure_message("archers should be ranged")
 
 
 
 func test_morale_tag() -> void:
-	var errors := _check_morale_tag()
-	assert_eq(errors, 0, "test_morale_tag — no errors")
-
-func _check_morale_tag() -> int:
-	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("champions", 10))
@@ -368,19 +237,11 @@ func _check_morale_tag() -> int:
 	state.place_army(atk, def)
 
 	var unit = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
-	if not unit.has_morale():
-		printerr("champions should have morale")
-		errors += 1
-	return errors
+	assert_bool(unit.has_morale()).is_true().override_failure_message("champions should have morale")
 
 
 
 func test_retreat_survivors() -> void:
-	var errors := _check_retreat_survivors()
-	assert_eq(errors, 0, "test_retreat_survivors — no errors")
-
-func _check_retreat_survivors() -> int:
-	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = [
 		Units.make_fixed_stack("swordsmen", 50),
@@ -392,25 +253,12 @@ func _check_retreat_survivors() -> int:
 
 	var survivors: Array = state.get_retreat_survivors(BattleState.Side.ATTACKER)
 
-	if survivors.size() != 2:
-		printerr("retreat survivors should be 2, got %d" % survivors.size())
-		errors += 1
-
-	if survivors.size() > 0:
-		var first_count: int = survivors[0].count
-		if first_count != 25:
-			printerr("first retreat stack should have 25 (50/2), got %d" % first_count)
-			errors += 1
-	return errors
+	assert_int(survivors.size()).is_equal(2).override_failure_message("retreat survivors should be 2")
+	assert_int(survivors[0].count).is_equal(25).override_failure_message("first retreat stack should have 25 (50/2)")
 
 
 
 func test_defend_bonus() -> void:
-	var errors := _check_defend_bonus()
-	assert_eq(errors, 0, "test_defend_bonus — no errors")
-
-func _check_defend_bonus() -> int:
-	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 50))
@@ -421,25 +269,14 @@ func _check_defend_bonus() -> int:
 	var defender = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
 	state.do_defend(defender)
 
-	if not defender.is_defending():
-		printerr("defender should be defending after do_defend")
-		errors += 1
+	assert_bool(defender.is_defending()).is_true().override_failure_message("defender should be defending after do_defend")
 
-	# DEFEND_DEFENSE_BONUS = 1.2 means +20% defense when defending
 	var rules := load("res://scripts/core/BattleRules.gd")
-	if rules.DEFEND_DEFENSE_BONUS != 1.2:
-		printerr("DEFEND_DEFENSE_BONUS should be 1.2")
-		errors += 1
-	return errors
+	assert_float(GameNumbers.DEFEND_DEFENSE_BONUS).is_equal(1.2).override_failure_message("DEFEND_DEFENSE_BONUS should be 1.2")
 
 
 
 func test_hero_bonuses() -> void:
-	var errors := _check_hero_bonuses()
-	assert_eq(errors, 0, "test_hero_bonuses — no errors")
-
-func _check_hero_bonuses() -> int:
-	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 50))
@@ -449,25 +286,12 @@ func _check_hero_bonuses() -> int:
 
 	state.set_hero_bonuses({"attack": 5, "defense": 3}, {"defense": 2})
 
-	var attacker = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
-	if state.attacker_hero_bonus.get("attack", 0) != 5:
-		printerr("attacker bonus attack should be 5")
-		errors += 1
-
-	if state.defender_hero_bonus.get("defense", 0) != 2:
-		printerr("defender bonus defense should be 2")
-		errors += 1
-	return errors
+	assert_int(state.attacker_hero_bonus.get("attack", 0)).is_equal(5).override_failure_message("attacker bonus attack should be 5")
+	assert_int(state.defender_hero_bonus.get("defense", 0)).is_equal(2).override_failure_message("defender bonus defense should be 2")
 
 
-## РФ-бой: в бою не может быть более 7 юнитов с каждой стороны.
 
 func test_max_units_per_side_cap() -> void:
-	var errors := _check_max_units_per_side_cap()
-	assert_eq(errors, 0, "test_max_units_per_side_cap — no errors")
-
-func _check_max_units_per_side_cap() -> int:
-	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	var def: Array[UnitStack] = []
@@ -478,22 +302,11 @@ func _check_max_units_per_side_cap() -> int:
 
 	var atk_units = state.get_units_by_side(BattleState.Side.ATTACKER)
 	var def_units = state.get_units_by_side(BattleState.Side.DEFENDER)
-	if atk_units.size() != 7:
-		printerr("attacker units should be capped at 7, got %d" % atk_units.size())
-		errors += 1
-	if def_units.size() != 7:
-		printerr("defender units should be capped at 7, got %d" % def_units.size())
-		errors += 1
-	return errors
+	assert_int(atk_units.size()).is_equal(7).override_failure_message("attacker units should be capped at 7")
+	assert_int(def_units.size()).is_equal(7).override_failure_message("defender units should be capped at 7")
 
-## РФ-бой: очередь ходов (инициатива) строится по скорости — быстрее ходит первым.
 
 func test_initiative_sorted_by_speed() -> void:
-	var errors := _check_initiative_sorted_by_speed()
-	assert_eq(errors, 0, "test_initiative_sorted_by_speed — no errors")
-
-func _check_initiative_sorted_by_speed() -> int:
-	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	var def: Array[UnitStack] = []
@@ -512,28 +325,16 @@ func _check_initiative_sorted_by_speed() -> int:
 	state.place_army(atk, def)
 	state.build_queue()
 
-	# Очередь должна быть отсортирована по скорости (убывание).
 	var prev: int = 100
 	for u in state.turn_queue:
-		if u.get_speed() > prev:
-			printerr("turn queue not sorted by speed descending: %d after %d"
-				% [u.get_speed(), prev])
-			errors += 1
+		assert_int(u.get_speed()).is_less_equal(prev).override_failure_message("turn queue not sorted by speed descending")
 		prev = u.get_speed()
-	if state.turn_queue.size() > 0 and state.turn_queue[0].get_speed() != 9:
-		printerr("fastest unit should act first, got speed %d"
-			% state.turn_queue[0].get_speed())
-		errors += 1
-	return errors
+	if state.turn_queue.size() > 0:
+		assert_int(state.turn_queue[0].get_speed()).is_equal(9).override_failure_message("fastest unit should act first")
 
-## РФ-бой: инициатива пересчитывается каждый раунд (мертвые исключаются).
+
 
 func test_initiative_rebuilt_each_round() -> void:
-	var errors := _check_initiative_rebuilt_each_round()
-	assert_eq(errors, 0, "test_initiative_rebuilt_each_round — no errors")
-
-func _check_initiative_rebuilt_each_round() -> int:
-	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	var def: Array[UnitStack] = []
@@ -547,69 +348,41 @@ func _check_initiative_rebuilt_each_round() -> int:
 	state.place_army(atk, def)
 	state.build_queue()
 
-	var goblin = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
-	var cavalry = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
 	var sword = state.get_units_by_side(BattleState.Side.ATTACKER)[1]
 
 	state.turn_queue.clear()
 	state.turn_queue.append(sword)
-	state.turn_queue.append(cavalry)
-	# Сдвигаем индекс за пределы очереди, чтобы advance_turn() вызвал
-	# start_new_round() → build_queue() (пересборка инициативы).
+	state.turn_queue.append(fast)
 	state.turn_idx = state.turn_queue.size()
 	state.active_unit = sword
 
 	state.advance_turn()
 
-	if state.turn_queue.is_empty():
-		printerr("turn queue should not be empty after round rebuild")
-		errors += 1
-	return errors
+	assert_bool(state.turn_queue.is_empty()).is_false().override_failure_message("turn queue should not be empty after round rebuild")
+
 
 
 func test_get_unit_at_after_kill() -> void:
-	var errors := _check_get_unit_at_after_kill()
-	assert_eq(errors, 0, "test_get_unit_at_after_kill — no errors")
-
-func _check_get_unit_at_after_kill() -> int:
-	# Regression: _unit_grid must not return dead units (Fix #9)
-	var errors := 0
 	var state = _create_state()
 	var def = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
 	var cell = def.cell
 
-	# Kill the defender
 	var attacker = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
 	attacker.cell = HexUtils.get_neighbor(def.cell, 0)
 	var rng := RandomNumberGenerator.new()
 	state.apply_attack(attacker, def, true, rng)
 
 	if def.is_alive():
-		# If still alive, kill it directly via _kill_unit
-		# (apply_attack may not kill if damage insufficient)
-		# Use a stronger approach: just verify the grid is consistent
-		var found = state.get_unit_at(cell, BattleState.Side.DEFENDER)
-		if found != null and not found.is_alive():
-			printerr("get_unit_at returned a dead unit")
-			errors += 1
-	else:
 		var found = state.get_unit_at(cell, BattleState.Side.DEFENDER)
 		if found != null:
-			printerr("dead unit still in grid at %s" % cell)
-			errors += 1
-
-	return errors
+			assert_bool(found.is_alive()).is_true().override_failure_message("get_unit_at returned a dead unit")
+	else:
+		var found = state.get_unit_at(cell, BattleState.Side.DEFENDER)
+		assert_object(found).is_null().override_failure_message("dead unit still in grid at %s" % cell)
 
 
 
 func test_deployment_line_at_edge() -> void:
-	var errors := _check_deployment_line_at_edge()
-	assert_eq(errors, 0, "test_deployment_line_at_edge — no errors")
-
-func _check_deployment_line_at_edge() -> int:
-	# D1–D3: атакующие — одна вертикальная колонка у левого края, защитники — у правого;
-	# ряды 0..N-1 в порядке входных стэков, без наложений клеток.
-	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 
 	var atk: Array[UnitStack] = []
@@ -622,52 +395,27 @@ func _check_deployment_line_at_edge() -> int:
 	var attackers = state.get_units_by_side(BattleState.Side.ATTACKER)
 	var defenders = state.get_units_by_side(BattleState.Side.DEFENDER)
 
-	if attackers.size() != 5:
-		printerr("expected 5 attacker units, got ", attackers.size())
-		errors += 1
-	if defenders.size() != 5:
-		printerr("expected 5 defender units, got ", defenders.size())
-		errors += 1
+	assert_int(attackers.size()).is_equal(5).override_failure_message("expected 5 attacker units")
+	assert_int(defenders.size()).is_equal(5).override_failure_message("expected 5 defender units")
 
 	var seen: Dictionary = {}
 	for k in attackers.size():
 		var u = attackers[k]
-		if u.cell.x != 0:
-			printerr("attacker ", k, " should be in column 0, got x=", u.cell.x)
-			errors += 1
-		if u.cell.y != k:
-			printerr("attacker ", k, " should be at row ", k, " got row=", u.cell.y)
-			errors += 1
-		if seen.has(u.cell):
-			printerr("duplicate attacker cell ", u.cell)
-			errors += 1
+		assert_int(u.cell.x).is_equal(0).override_failure_message("attacker %d should be in column 0" % k)
+		assert_int(u.cell.y).is_equal(k).override_failure_message("attacker %d should be at row %d" % [k, k])
+		assert_bool(seen.has(u.cell)).is_false().override_failure_message("duplicate attacker cell %s" % u.cell)
 		seen[u.cell] = true
 
 	for k in defenders.size():
 		var u = defenders[k]
-		if u.cell.x != BattleState.BW - 1:
-			printerr("defender ", k, " should be in column ", BattleState.BW - 1, " got x=", u.cell.x)
-			errors += 1
-		if u.cell.y != k:
-			printerr("defender ", k, " should be at row ", k, " got row=", u.cell.y)
-			errors += 1
-		if seen.has(u.cell):
-			printerr("duplicate defender cell ", u.cell)
-			errors += 1
+		assert_int(u.cell.x).is_equal(BattleState.BW - 1).override_failure_message("defender %d should be in column %d" % [k, BattleState.BW - 1])
+		assert_int(u.cell.y).is_equal(k).override_failure_message("defender %d should be at row %d" % [k, k])
+		assert_bool(seen.has(u.cell)).is_false().override_failure_message("duplicate defender cell %s" % u.cell)
 		seen[u.cell] = true
-
-	return errors
 
 
 
 func test_deployment_max_capacity() -> void:
-	var errors := _check_deployment_max_capacity()
-	assert_eq(errors, 0, "test_deployment_max_capacity — no errors")
-
-func _check_deployment_max_capacity() -> int:
-	# При лимите в 7 юнитов с каждой стороны все размещаются одной линией
-	# в рядах 0..6 без наложений (D2, D4 в предельном случае).
-	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 
 	var atk: Array[UnitStack] = []
@@ -680,66 +428,36 @@ func _check_deployment_max_capacity() -> int:
 	var attackers = state.get_units_by_side(BattleState.Side.ATTACKER)
 	var defenders = state.get_units_by_side(BattleState.Side.DEFENDER)
 
-	if attackers.size() != 7:
-		printerr("expected 7 attacker units, got ", attackers.size())
-		errors += 1
-	if defenders.size() != 7:
-		printerr("expected 7 defender units, got ", defenders.size())
-		errors += 1
+	assert_int(attackers.size()).is_equal(7).override_failure_message("expected 7 attacker units")
+	assert_int(defenders.size()).is_equal(7).override_failure_message("expected 7 defender units")
 
 	for k in attackers.size():
-		if attackers[k].cell.x != 0 or attackers[k].cell.y != k:
-			printerr("max-cap attacker ", k, " bad cell ", attackers[k].cell)
-			errors += 1
+		assert_bool(attackers[k].cell.x == 0 and attackers[k].cell.y == k).is_true().override_failure_message("max-cap attacker %d bad cell %s" % [k, attackers[k].cell])
 	for k in defenders.size():
-		if defenders[k].cell.x != BattleState.BW - 1 or defenders[k].cell.y != k:
-			printerr("max-cap defender ", k, " bad cell ", defenders[k].cell)
-			errors += 1
-
-	return errors
+		assert_bool(defenders[k].cell.x == BattleState.BW - 1 and defenders[k].cell.y == k).is_true().override_failure_message("max-cap defender %d bad cell %s" % [k, defenders[k].cell])
 
 
 
 func test_cell_taken_avoids_occupied() -> void:
-	var errors := _check_cell_taken_avoids_occupied()
-	assert_eq(errors, 0, "test_cell_taken_avoids_occupied — no errors")
-
-func _check_cell_taken_avoids_occupied() -> int:
-	# D4: _cell_taken определяет занятую клетку, чтобы занять следующую свободную
-	# в той же колонке.
-	var errors := 0
 	var state = load("res://scripts/systems/BattleState.gd").new()
 
 	var atk: Array[UnitStack] = [Units.make_fixed_stack("swordsmen", 5)]
 	var def: Array[UnitStack] = []
 	state.place_army(atk, def)
 
-	# Возьмём реальный юнит как « занятую » клетку.
 	var taken = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
 	taken.cell = Vector2i(0, 0)
 	var units: Array = [taken]
 
-	if not state._cell_taken(0, 0, units):
-		printerr("_cell_taken should report (0,0) as occupied")
-		errors += 1
-	if state._cell_taken(0, 1, units):
-		printerr("_cell_taken should report (0,1) as free")
-		errors += 1
-	if state._cell_taken(1, 0, units):
-		printerr("_cell_taken should report (1,0) as free")
-		errors += 1
+	# TASK_06: хелпер _cell_taken вынесен в BattleStateBuilder.
+	var builder: BattleStateBuilder = BattleStateBuilder.new()
+	assert_bool(builder._cell_taken(0, 0, units)).is_true().override_failure_message("_cell_taken should report (0,0) as occupied")
+	assert_bool(builder._cell_taken(0, 1, units)).is_false().override_failure_message("_cell_taken should report (0,1) as free")
+	assert_bool(builder._cell_taken(1, 0, units)).is_false().override_failure_message("_cell_taken should report (1,0) as free")
 
-	return errors
 
 
 func test_reachable_reflects_move() -> void:
-	var errors := _check_reachable_reflects_move()
-	assert_eq(errors, 0, "test_reachable_reflects_move — no errors")
-
-func _check_reachable_reflects_move() -> int:
-	var errors := 0
-	# Аудит #11: после мутации доски (do_move) повторный запрос get_reachable
-	# отражает новую расстановку — кэш инвалидируется вместе с версией доски.
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 10))
@@ -748,21 +466,16 @@ func _check_reachable_reflects_move() -> int:
 	state.place_army(atk, def)
 
 	var units: Array = state.get_units_by_side(BattleState.Side.ATTACKER)
-	var A = units[0]  # (0, 0)
-	var B = units[1]  # (0, 1)
+	var A = units[0]
+	var B = units[1]
 
 	var X := Vector2i(1, 1)
 	var fn := func() -> Dictionary: return state.build_all_blocked(A, {})
 
 	var b_cell := Vector2i(0, 1)
 	var r1: Dictionary = state.get_reachable(X, 1, fn)
-	if r1.has(b_cell):
-		printerr("r1: клетка B (%s) должна быть заблокирована" % b_cell)
-		errors += 1
+	assert_bool(r1.has(b_cell)).is_false().override_failure_message("r1: клетка B (%s) должна быть заблокирована" % b_cell)
 
 	state.do_move(B, Vector2i(16, 10))
 	var r2: Dictionary = state.get_reachable(X, 1, fn)
-	if not r2.has(b_cell):
-		printerr("r2: после ухода B клетка %s должна стать достижимой (кэш не протух)" % b_cell)
-		errors += 1
-	return errors
+	assert_bool(r2.has(b_cell)).is_true().override_failure_message("r2: после ухода B клетка %s должна стать достижимой (кэш не протух)" % b_cell)

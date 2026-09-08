@@ -1,7 +1,5 @@
 class_name BattleState
 extends RefCounted
-## Чистое состояние боя: юниты, очередь ходов, конец боя, кэш bfs.
-## Не зависит от Godot-уззлов — работает только с данными.
 
 const _StatusEffects = preload("res://scripts/data/StatusEffects.gd")
 const BattleActionResolver = preload("res://scripts/systems/BattleActionResolver.gd")
@@ -14,7 +12,6 @@ var turn_idx := 0
 var is_player_turn := true
 var battle_over := false
 
-# Стороны в бою
 enum Side { NONE, ATTACKER, DEFENDER }
 
 var battle_winner: BattleState.Side = Side.NONE
@@ -32,15 +29,12 @@ var defender_hero_bonus: Dictionary[StringName, int] = {
     &"knowledge": 0,
 }
 
-# BFS reachable cache
 var _reachable_cache: Dictionary = {}
 var _board_version: int = 0
 var _uid := 0
 
-# Unit grid for O(1) lookup: {Side: {cell: BattleUnit}}
 var _unit_grid: Dictionary = {}
 
-# Счётчики живых для O(1) check_end
 var _attacker_alive_count := 0
 var _defender_alive_count := 0
 
@@ -48,7 +42,6 @@ const BW := 17
 const BH := 11
 
 
-# ==================== БОЕВОЙ ЮНИТ ====================
 class BattleUnit extends RefCounted:
 	var stack: UnitStack
 	var cell := Vector2i(-1, -1)
@@ -58,11 +51,11 @@ class BattleUnit extends RefCounted:
 	var defending := false
 	var has_retaliated := false
 	var uid := 0
-	var statuses: Dictionary = {}  # StatusEffects.Effect -> int (turns remaining)
-	var max_count: int = 0         # For vampiric and rebirth
-	var distance_moved_this_turn: int = 0  # For charge
+	var statuses: Dictionary = {}  
+	var max_count: int = 0         
+	var distance_moved_this_turn: int = 0  
 	var already_reborn: bool = false
-	var spell: StringName = ""  # Pending spell for spell casting
+	var spell: StringName = ""  
 
 	func _init(p_stack = null) -> void:
 		stack = p_stack
@@ -91,7 +84,6 @@ class BattleUnit extends RefCounted:
 			return
 		stack.count = max(0, value)
 
-	## Direct stats accessor — replaces individual get_speed/get_attack/get_defense/get_hp/get_base_damage
 	var stats: UnitStats:
 		get: return stack.stats if stack != null and stack.stats != null else null
 
@@ -154,49 +146,39 @@ class BattleUnit extends RefCounted:
 		return false
 
 
-# ==================== РАЗМЕЩЕНИЕ АРМИЙ ====================
 func place_army(
 	attacker_stacks: Array[UnitStack],
 	defender_stacks: Array[UnitStack],
 	attacker_artifact_mods: Dictionary = {},
 	defender_artifact_mods: Dictionary = {}
 ) -> void:
-	_uid = 0  # Сброс UID для нового боя
-	attacker_units = _build_units(attacker_stacks, true)
-	defender_units = _build_units(defender_stacks, false)
-	_attacker_alive_count = attacker_units.size()
-	_defender_alive_count = defender_units.size()
-	_apply_artifact_effects(attacker_units, attacker_artifact_mods)
-	_apply_artifact_effects(defender_units, defender_artifact_mods)
-	_rebuild_unit_grid()
-	invalidate_board_cache()
-	check_end()
+	# TASK_06: конструирование, валидация и расстановка армий
+	# вынесены в BattleStateBuilder; BattleState — чистый контейнер.
+	var builder := BattleStateBuilder.new()
+	builder.set_attacker_army(attacker_stacks)
+	builder.set_defender_army(defender_stacks)
+	builder.set_attacker_artifact_mods(attacker_artifact_mods)
+	builder.set_defender_artifact_mods(defender_artifact_mods)
+	builder.build_into(self)
 
 
-# Вспомогательный: убить юнита + обновить счётчики
 func _kill_unit(unit: BattleUnit) -> void:
 	if not unit.alive: return
 	unit.alive = false
-	# Инвариант: мёртвый юнит всегда имеет count = 0 (воскрешение, сериализация
-	# и подсветка опираются на это; исходный состав хранится в max_count).
 	unit.set_count(0)
 	if unit.side == Side.ATTACKER: _attacker_alive_count -= 1
 	else: _defender_alive_count -= 1
 	_unit_grid.get(unit.side, {}).erase(unit.cell)
+	invalidate_board_cache()
 	check_end()
 
-## Публичная обёртка для вызова из DamageResolver
 func kill_unit(unit: BattleUnit) -> void:
 	_kill_unit(unit)
 
-## Восстановить убитого юнита (для rebirth/воскрешения)
 func revive_unit(unit: BattleUnit) -> void:
 	if unit == null: return
 	if not unit.alive:
 		unit.alive = true
-		# Если численность не установлена явно (вызовер сам сделал set_count
-		# до revive_unit — rebirth 50%, resurrection revive_count),
-		# восстанавливаем полный состав (max_count).
 		if unit.get_count() <= 0:
 			unit.set_count(unit.max_count)
 		if unit.side == Side.ATTACKER: _attacker_alive_count += 1
@@ -204,76 +186,6 @@ func revive_unit(unit: BattleUnit) -> void:
 	_unit_grid.get(unit.side, {})[unit.cell] = unit
 	invalidate_board_cache()
 
-func _apply_artifact_effects(units: Array[BattleUnit], mods: Dictionary) -> void:
-	if mods.is_empty():
-		return
-	var flat_hp: int = int(mods.get("stack_hp", 0))
-	var percent_hp: float = float(mods.get("stack_hp_percent", 0.0))
-	var speed_bonus: int = int(mods.get("stack_speed", 0))
-	for u in units:
-		if u.stack == null or u.stack.stats == null:
-			continue
-		if flat_hp > 0 or percent_hp > 0.0:
-			var new_hp := float(u.stack.stats.hp)
-			new_hp += float(flat_hp)
-			new_hp *= (1.0 + percent_hp)
-			u.stack.stats = u.stack.stats.duplicate()
-			u.stack.stats.hp = int(new_hp)
-		if speed_bonus > 0:
-			u.stack.stats = u.stack.stats.duplicate()
-			u.stack.stats.speed += speed_bonus
-
-
-func _build_units(stacks: Array, is_atk: bool) -> Array[BattleUnit]:
-	var units: Array[BattleUnit] = []
-	var col := 0 if is_atk else BW - 1  # D1: одна вертикальная колонка у края (атк — лево, защ — право)
-	var max_stacks := BattleConfig.BATTLE_MAX_UNITS_PER_SIDE
-	for i in stacks.size():
-		# РФ-бой: не более BATTLE_MAX_UNITS_PER_SIDE юнитов с одной стороны.
-		if i >= max_stacks:
-			GameLogger.battle(
-				"%s: лимит юнитов в бою (%d) достигнут, остальные отброшены."
-				% ["Атакующие" if is_atk else "Защитники", max_stacks])
-			break
-		var input_stack = stacks[i]
-		if input_stack == null or not input_stack.is_alive():
-			continue
-
-		var stack: UnitStack = input_stack.duplicate_stack()
-		if stack == null or stack.stats == null:
-			push_error("[Battle] Invalid UnitStack received")
-			continue
-
-		var unit := BattleUnit.new(stack)
-
-		# D2: i-й стэк → i-ряд (одна линия сверху вниз, в порядке входных стэков).
-		# D4: если клетка колонки занята — занять следующую свободную в той же колонке.
-		var row := i
-		if _cell_taken(col, row, units):
-			while row < BH and _cell_taken(col, row, units):
-				row += 1
-		if row >= BH:
-			push_error("[BattleState] Cannot place stack %d: row %d exceeds BH=%d. " % [i, row, BH]
-				+ "Max rows in column: %d" % (BH - 1))
-			continue
-		unit.cell = Vector2i(col, row)
-		unit.side = Side.ATTACKER if is_atk else Side.DEFENDER
-		unit.alive = true
-		unit.has_moved = false
-		unit.max_count = stack.count
-		unit.uid = _uid
-		_uid += 1
-		units.append(unit)
-	return units
-
-# D4: занята ли клетка (col,row) уже размещённым юнитом той же стороны.
-func _cell_taken(col: int, row: int, units: Array) -> bool:
-	for u in units:
-		if u.cell.x == col and u.cell.y == row:
-			return true
-	return false
-
-# ==================== ОЧЕРЕДЬ ХОДОВ ====================
 func build_queue() -> void:
 	turn_queue.clear()
 
@@ -352,11 +264,10 @@ func start_new_round() -> void:
 func get_turn_info() -> String:
 	if active_unit == null:
 		return ""
-	var side_txt := "Ваш ход" if is_player_turn else "Ход противника"
-	return "%s: %s (%d)" % [side_txt, active_unit.get_display_name(), active_unit.get_count()]
+	var side_txt := GameText.battle_your_turn() if is_player_turn else GameText.battle_enemy_turn()
+	return GameText.battle_turn_info(side_txt, active_unit.get_display_name(), active_unit.get_count())
 
 
-# ==================== ПОИСК ЮНИТОВ ====================
 func get_unit_at(cell: Vector2i, side: BattleState.Side) -> BattleUnit:
 	if not _unit_grid.has(side):
 		return null
@@ -377,7 +288,6 @@ func get_units_by_side(side: BattleState.Side) -> Array[BattleUnit]:
 	return attacker_units if side == Side.ATTACKER else defender_units
 
 
-# ==================== КЭШИРОВАННЫЙ BFS ====================
 func get_reachable_for_unit(unit: BattleUnit, blocked_fn: Callable) -> Dictionary:
 	if unit == null:
 		return {}
@@ -411,21 +321,19 @@ func get_reachable_for_unit(unit: BattleUnit, blocked_fn: Callable) -> Dictionar
 
 
 func get_reachable(cell: Vector2i, speed: int, blocked_fn: Callable, _unit: BattleUnit = null) -> Dictionary:
-	# Аудит #11: версия доски в ключе — запись предыдущего поколения
-	# не сможет попасть даже если какая-то мутация забудет clear.
-	var key := "%d:%s:%d" % [_board_version, str(cell), speed]
-	if _reachable_cache.has(key):
-		return _reachable_cache[key].duplicate()
+	
+	var speed_cache: Dictionary = _reachable_cache.get(cell, {})
+	if speed_cache.has(speed):
+		return speed_cache[speed].duplicate()
 
 	var blocked: Dictionary = blocked_fn.call()
 	var reachable := HexPathfinding.bfs_reachable(cell, speed, blocked, BW, BH)
-	_reachable_cache[key] = reachable.duplicate()
-	return reachable
 
-## Кольцо «не хватает ходов»: клетки, до которых доходят за speed+1 шагов,
-## но нельзя дойти за speed (наиболее близкие недостигаемые — «в шаге от цели»).
-## Используется для подсветки траектории: куда юнит уже доходит (cyan —
-## highlight_move) и куда ходов не хватает (красный — highlight_unreachable).
+	if not _reachable_cache.has(cell):
+		_reachable_cache[cell] = {}
+	_reachable_cache[cell][speed] = reachable
+	return reachable.duplicate()
+
 func get_unreachable_ring(unit: BattleUnit, blocked_fn: Callable) -> Dictionary:
 	if unit == null:
 		return {}
@@ -457,7 +365,6 @@ func invalidate_board_cache() -> void:
 	_reachable_cache.clear()
 
 
-# ==================== ПОСТРОЕНИЕ БЛОКИРОВКИ ====================
 func build_all_blocked(except_unit: BattleUnit, obstacles: Dictionary) -> Dictionary:
 	var b: Dictionary = {}
 	for u in attacker_units:
@@ -471,8 +378,6 @@ func build_all_blocked(except_unit: BattleUnit, obstacles: Dictionary) -> Dictio
 	return b
 
 
-# ==================== АТАКА (расчёт урона) ====================
-## Delegates to BattleActionResolver for pure attack logic.
 func apply_attack(
 	atk: BattleUnit,
 	def: BattleUnit,
@@ -482,7 +387,6 @@ func apply_attack(
 ) -> Dictionary:
 	return BattleActionResolver.apply_attack(self, atk, def, is_melee_attack, rng, consume_action)
 
-## Delegates to BattleActionResolver for spell resolution.
 func apply_spell(
 	spell_id: StringName,
 	caster: BattleUnit,
@@ -495,8 +399,6 @@ func apply_spell(
 		self, spell_id, caster, target, caster_hero_bonus, target_hero_bonus, rng
 	)
 
-## Delegates to BattleActionResolver for sacrifice resolution (finish-off +
-## cost consumption, bypassing rebirth).
 func apply_sacrifice(
 	sacrifice: Dictionary,
 	acting: BattleUnit,
@@ -525,6 +427,7 @@ func do_move(unit: BattleUnit, target: Vector2i) -> void:
 func do_defend(unit: BattleUnit) -> void:
 	unit.has_moved = true
 	unit.defending = true
+	invalidate_board_cache()
 
 
 func do_wait(unit: BattleUnit) -> void:
@@ -544,18 +447,19 @@ func do_wait(unit: BattleUnit) -> void:
 		turn_idx = idx
 	else:
 		turn_idx = idx - 1
+	invalidate_board_cache()
 
 
 func do_skip(unit: BattleUnit) -> void:
 	if unit != null:
 		unit.has_moved = true
+	invalidate_board_cache()
 
 
 func force_end(winner: BattleState.Side) -> void:
 	battle_over = true
 	battle_winner = winner
 
-# ==================== ПРОВЕРКА КОНЦА БОЯ ====================
 func check_end() -> BattleState.Side:
 	if battle_over:
 		return battle_winner
@@ -586,14 +490,13 @@ func get_retreat_survivors(side: BattleState.Side) -> Array[UnitStack]:
 			var stack: UnitStack = u.stack.duplicate_stack()
 			stack.count = max(
 				1,
-				int(ceil(float(stack.count) * BattleRules.RETREAT_SURVIVAL_RATIO))
+				int(ceil(float(stack.count) * GameNumbers.RETREAT_SURVIVAL_RATIO))
 			)
 			all_survivors.append(stack)
 
-	# Sort by count descending and keep top N
 	all_survivors.sort_custom(func(a: UnitStack, b: UnitStack): return a.count > b.count)
 	var result: Array[UnitStack] = []
-	for i in min(BattleConfig.RETREAT_STACK_LIMIT, all_survivors.size()):
+	for i in min(GameNumbers.RETREAT_STACK_LIMIT, all_survivors.size()):
 		result.append(all_survivors[i])
 
 	return result

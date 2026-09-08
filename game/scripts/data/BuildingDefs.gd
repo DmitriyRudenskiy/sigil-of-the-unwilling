@@ -1,12 +1,5 @@
 class_name BuildingDefs
 extends RefCounted
-## Каталог уникальных зданий. Только данные — логика в City/BoroughRules.
-##
-## Определения зданий вынесены в res://assets/data/buildings.json (см.
-## design.md — Building defs as data). Этот класс лениво парсит JSON в
-## первый вызов и собирает fresh `UniqueBuilding.Def` по каждому запросу,
-## поэтому поведение `def_by_id`/`all` совпадает с прежним: каждый вызов
-## возвращает новый объект, мутации потребителя не влияют на кэш.
 
 const SITE_RUINS := &"ruins"
 const SITE_SHRINE := &"shrine"
@@ -15,7 +8,6 @@ const SITE_MEADOW := &"meadow"
 const DATA_PATH := "res://assets/data/buildings.json"
 const PopUnit := preload("res://scripts/world/PopUnit.gd")
 
-## Разово распаршенные сырые записи зданий (список Dictionary).
 static var _raw_cache: Array = []
 
 
@@ -32,7 +24,6 @@ static func _ensure_loaded() -> void:
 		_raw_cache = data
 
 
-## Собирает fresh `UniqueBuilding.Def` из сырой записи из JSON.
 static func _build_def(raw: Dictionary) -> UniqueBuilding.Def:
 	var d := _mk(
 		StringName(raw.get("id", "")),
@@ -53,7 +44,6 @@ static func _build_def(raw: Dictionary) -> UniqueBuilding.Def:
 	return d
 
 
-## Уровни здания: список Dictionary -> Array[LevelReq].
 static func _levels(raw_levels: Array) -> Array:
 	var out: Array = []
 	for r in raw_levels:
@@ -67,12 +57,10 @@ static func _levels(raw_levels: Array) -> Array:
 	return out
 
 
-## Ключ жилья ("WORKER"/"MILITIA"/"SCHOLAR") -> PopUnit.State.
 static func _state(name: String) -> int:
 	return PopUnit.State[StringName(name)]
 
 
-## Цепочка производства из записи JSON.
 static func _chain_from_dict(raw: Dictionary) -> ProductionChain:
 	return _chain(
 		StringName(raw.get("id", "")),
@@ -82,9 +70,7 @@ static func _chain_from_dict(raw: Dictionary) -> ProductionChain:
 	)
 
 
-## --- Публичный API (сохранён) ---
 
-## Полный каталог определений (CityScreen: список строящихся).
 static func all() -> Array[UniqueBuilding.Def]:
 	_ensure_loaded()
 	var out: Array[UniqueBuilding.Def] = []
@@ -94,8 +80,6 @@ static func all() -> Array[UniqueBuilding.Def]:
 	return out
 
 
-## Перевязка определения по id (save v3: восстановление зданий).
-## Неизвестный id -> null (здание не восстанавливается).
 static func def_by_id(id: StringName) -> UniqueBuilding.Def:
 	_ensure_loaded()
 	for raw in _raw_cache:
@@ -104,8 +88,6 @@ static func def_by_id(id: StringName) -> UniqueBuilding.Def:
 	return null
 
 
-## Тонкие публичные обёртки-алиасы (сохранены для обратной совместимости,
-## включая тесты: BuildingDefs.farm() и т.п.). Реализация — через def_by_id.
 static func great_temple() -> UniqueBuilding.Def:
 	return def_by_id(&"great_temple")
 
@@ -163,7 +145,6 @@ static func _mk(
 	return d
 
 
-## Цепочка производства здания (копируется per-building при постройке).
 static func _chain(
 	id: StringName, workers: int,
 	inputs: Dictionary = {}, outputs: Dictionary = {}

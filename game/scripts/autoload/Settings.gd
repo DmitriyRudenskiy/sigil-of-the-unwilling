@@ -1,14 +1,11 @@
 extends Node
-## Autoload — persistent settings (zoom, audio, flags).
-## Saved to user://settings.cfg via ConfigFile.
 
 const _Platform = preload("res://scripts/core/Platform.gd")
 
 const SECTION := "settings"
 const FILE := "user://settings.cfg"
 
-# --- Defaults ---
-const DEFAULT_ZOOM_INDEX := 2  # 1.0
+const DEFAULT_ZOOM_INDEX := 2  
 const DEFAULT_MASTER_VOL := 80
 const DEFAULT_MUSIC_VOL := 70
 const DEFAULT_SFX_VOL := 80
@@ -17,10 +14,8 @@ const DEFAULT_UI_ANIMATIONS := true
 const DEFAULT_PARTICLES := true
 const DEFAULT_AUTO_SAVE := false
 
-# --- ZOOM_LEVELS: single literal in GameSettings (audit #6), alias here. ---
-const ZOOM_LEVELS := UIConfig.ZOOM_LEVELS
+const ZOOM_LEVELS := GameNumbers.ZOOM_LEVELS
 
-# --- Current values ---
 var zoom_index: int = DEFAULT_ZOOM_INDEX
 var master_volume: int = DEFAULT_MASTER_VOL
 var music_volume: int = DEFAULT_MUSIC_VOL
@@ -30,7 +25,6 @@ var ui_animations: bool = DEFAULT_UI_ANIMATIONS
 var particles: bool = DEFAULT_PARTICLES
 var auto_save: bool = DEFAULT_AUTO_SAVE
 
-# Mute state
 var is_muted: bool = false
 
 var _config := ConfigFile.new()
@@ -43,7 +37,6 @@ func _ready() -> void:
 
 
 func apply_display_mode() -> void:
-	# РФ7-1: сохранённый полноэкранный режим реально применяется
 	if _Platform.is_headless():
 		return
 	DisplayServer.window_set_mode(
@@ -57,7 +50,6 @@ func get_zoom() -> float:
 
 
 func step_zoom(direction: int) -> int:
-	# Returns the change in index (0 if at boundary)
 	var prev := zoom_index
 	zoom_index = clampi(zoom_index + direction, 0, ZOOM_LEVELS.size() - 1)
 	return zoom_index - prev
@@ -71,7 +63,6 @@ func set_zoom(value: float) -> void:
 	zoom_index = DEFAULT_ZOOM_INDEX
 
 
-# --- Persistence ---
 
 func _load() -> void:
 	if _config.load(FILE) != OK:
@@ -110,15 +101,11 @@ func reset_to_defaults() -> void:
 	particles = DEFAULT_PARTICLES
 	auto_save = DEFAULT_AUTO_SAVE
 	_apply_audio()
-	# Аудит #24: reset — немедленное сохранение дефолтов.
 	save()
 
 
-# --- Audio ---
 
 func _apply_audio() -> void:
-	# По имени шины, а не индексу: порядок в default_bus_layout.tres —
-	# [Master, SFX, Music], индексная запись путала Music/SFX громкости.
 	_set_bus("Master", _db_from_percent(master_volume if not is_muted else 0))
 	_set_bus("Music", _db_from_percent(music_volume if not is_muted else 0))
 	_set_bus("SFX", _db_from_percent(sfx_volume if not is_muted else 0))
@@ -133,7 +120,6 @@ func _set_bus(bus_name: String, db: float) -> void:
 func toggle_mute() -> void:
 	is_muted = not is_muted
 	_apply_audio()
-	# Аудит #24: mute — немедленное сохранение (это действие, не черновик экрана).
 	save()
 
 

@@ -1,34 +1,25 @@
 class_name RaceClassRegistry
 extends RefCounted
-## city-in-world: data-driven реестр рас и классов (Pathfinder) из
-## `races_classes.json`. Ленивая загрузка. Хранит 6 рас × 16 классов × 4
-## архетипа + подсистемы (bloodlines/domains/prestige/feats) как данные
-## для будущих циклов. Не ломает текущую модель героя — только модификаторы.
-##
-## Все cross-file-типы — preload-константы (Godot резолвит preload-константу
-## как аннотацию типа, в отличие от class_name другого файла).
 
 const JSON_PATH := "res://assets/data/races_classes.json"
 
 const _RaceDef = preload("res://scripts/data/RaceDef.gd")
 const _ClassDef = preload("res://scripts/data/ClassDef.gd")
 
-var _races: Dictionary[StringName, _RaceDef] = {}      # id -> RaceDef
-var _classes: Dictionary[StringName, _ClassDef] = {}   # id -> ClassDef
-var _bloodlines: Dictionary = {}  # id -> Dictionary
-var _domains: Dictionary = {}     # id -> Dictionary
-var _prestige: Dictionary = {}    # id -> Dictionary
-var _feats: Dictionary = {}       # id -> Dictionary
+var _races: Dictionary[StringName, _RaceDef] = {}      
+var _classes: Dictionary[StringName, _ClassDef] = {}   
+var _bloodlines: Dictionary = {}  
+var _domains: Dictionary = {}     
+var _prestige: Dictionary = {}    
+var _feats: Dictionary = {}       
 var _loaded: bool = false
 
-## Ленивая загрузка из JSON (один раз).
 func ensure() -> void:
 	if _loaded:
 		return
 	_loaded = true
 	_load_from_json()
 
-## Пересборка (для тестов/рестарта мира).
 func reset() -> void:
 	_races.clear()
 	_classes.clear()
@@ -82,7 +73,6 @@ func _index(entries: Array) -> Dictionary:
 			out[StringName(String(e["id"]))] = e
 	return out
 
-## --- Доступ ---
 func get_race(id: Variant) -> _RaceDef:
 	ensure()
 	return _races.get(String(id))
@@ -99,14 +89,12 @@ func all_classes() -> Array[_ClassDef]:
 	ensure()
 	return _classes.values()
 
-## Размер без авто-загрузки: чистый запрос текущего размера (после ensure()).
 func count_races() -> int:
 	return _races.size()
 
 func count_classes() -> int:
 	return _classes.size()
 
-## --- Подсистемы (данные для будущих циклов) ---
 func get_bloodline(id: Variant) -> Dictionary:
 	ensure()
 	var v: Dictionary = _bloodlines.get(String(id))
@@ -127,7 +115,6 @@ func get_feat(id: Variant) -> Dictionary:
 	var v: Dictionary = _feats.get(String(id))
 	return v if v != null else {}
 
-## --- Взвешенный выбор (веса = 1 по умолчанию) ---
 func pick_race(rng: RandomNumberGenerator) -> _RaceDef:
 	var list := all_races()
 	if list.is_empty():
@@ -140,7 +127,6 @@ func pick_class(rng: RandomNumberGenerator) -> _ClassDef:
 		return null
 	return list[rng.randi_range(0, list.size() - 1)]
 
-## Выбор архетипа класса (or null, если архетипов нет).
 func pick_archetype(class_def: _ClassDef, rng: RandomNumberGenerator) -> Dictionary:
 	if class_def == null:
 		return {}

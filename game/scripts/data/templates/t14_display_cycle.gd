@@ -1,7 +1,5 @@
-## scripts/data/templates/t14_display_cycle.gd
 class_name T14DisplayCycle
 extends RefCounted
-## T14: DISPLAY CYCLE (аудит #8: вынесен из TemplateEngine).
 
 const _Utils = preload("res://scripts/data/SpellUtils.gd")
 

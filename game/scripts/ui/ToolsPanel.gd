@@ -1,51 +1,33 @@
 extends PanelContainer
 class_name ToolsPanel
-## Displays tool inventory slots.
+
+const ToolType = preload("res://scripts/data/ToolType.gd")
 
 var _slot_labels: Array[Label] = []
-var _tool_names := {
-	&"shovel": "🔧 Лопата",
-	&"pickaxe": "⛏️ Кирка",
-	&"cart": "🛒 Телега",
-	&"skin_protection": "🛡️ Защита кожи",
-	&"net": "🥅 Сеть",
-}
-
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(160, 0)
-	_build_ui()
-
-
-func _build_ui() -> void:
-	var vbox := VBoxContainer.new()
-	add_child(vbox)
-
-	var title := Label.new()
-	title.text = "🧰 Инструменты"
-	title.add_theme_font_size_override("font_size", 14)
-	vbox.add_child(title)
-
-	for i in MapConfig.TOOL_INVENTORY_SLOTS:
-		var hbox := HBoxContainer.new()
-		vbox.add_child(hbox)
-
-		var label := Label.new()
-		label.text = "[%d] Пусто" % (i + 1)
-		label.add_theme_font_size_override("font_size", 12)
-		hbox.add_child(label)
-		_slot_labels.append(label)
-
+    var title := $VBox/Title as Label
+    title.add_theme_font_size_override("font_size", 14)
+    title.text = GameText.tools_title()
+    var container := $VBox/ToolContainer as VBoxContainer
+    for i in GameNumbers.TOOL_INVENTORY_SLOTS:
+        var row := container.get_node("Slot%d" % i) as HBoxContainer
+        if row == null:
+            continue
+        var label := row.get_node("SlotLabel") as Label
+        if label != null:
+            label.add_theme_font_size_override("font_size", 12)
+            _slot_labels.append(label)
 
 func update_tools(tools: Array[Dictionary]) -> void:
-	for i in MapConfig.TOOL_INVENTORY_SLOTS:
-		if i >= _slot_labels.size():
-			break
-		var slot: Dictionary = tools[i] if i < tools.size() else {}
-		if slot.is_empty():
-			_slot_labels[i].text = "[%d] Пусто" % (i + 1)
-		else:
-			var id: StringName = slot.get("id", "")
-			var qty: int = slot.get("quantity", 1)
-			var name: String = _tool_names.get(id, str(id))
-			_slot_labels[i].text = "[%d] %s x%d" % [i + 1, name, qty]
+    for i in GameNumbers.TOOL_INVENTORY_SLOTS:
+        if i >= _slot_labels.size():
+            break
+        var slot: Dictionary = tools[i] if i < tools.size() else {}
+        if slot.is_empty():
+            _slot_labels[i].text = GameText.tools_slot_empty(i + 1)
+        else:
+            var id: int = slot.get("id", 0)
+            var qty: int = slot.get("quantity", 1)
+            var name: String = GameText.tool_name(id)
+            _slot_labels[i].text = GameText.tools_slot_filled(i + 1, name, qty)

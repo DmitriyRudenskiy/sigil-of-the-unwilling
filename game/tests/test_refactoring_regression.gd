@@ -1,32 +1,27 @@
-extends "res://tests/gut_base.gd"
-## Regression tests for refactoring (Р1–Р11).
+extends GdUnitTestSuite
 
-# ==================== Т1: Signal winner type ====================
 
 func test_battle_state_side_enum_order() -> void:
-	# enum Side { NONE, ATTACKER, DEFENDER }
-	assert_eq(BattleState.Side.NONE, 0)
-	assert_eq(BattleState.Side.ATTACKER, 1)
-	assert_eq(BattleState.Side.DEFENDER, 2)
+	assert_that(BattleState.Side.NONE).is_equal(0)
+	assert_that(BattleState.Side.ATTACKER).is_equal(1)
+	assert_that(BattleState.Side.DEFENDER).is_equal(2)
 
 func test_battle_completed_signal_type() -> void:
 	var flow := BattleFlow.new()
 	flow.name = "TestFlow"
-	# Lambda захватывает локальные по значению — holder-Dictionary для мутации
 	var holder: Dictionary = {"winner": -1}
 	flow.battle_completed.connect(func(w: BattleState.Side, _a, _d):
 		holder["winner"] = w
 	)
 	flow.battle_completed.emit(BattleState.Side.DEFENDER, [], [])
-	assert_eq(holder["winner"], BattleState.Side.DEFENDER)
+	assert_that(holder["winner"]).is_equal(BattleState.Side.DEFENDER)
 	flow.free()
 
-# ==================== Т2: dist Dictionary conversion ====================
 
 func test_dijkstra_returns_array() -> void:
 	var cost_fn: Callable = func(c: Vector2i) -> float: return 1.0
 	var result = HexPathfinding.dijkstra(Vector2i(0, 0), 5.0, cost_fn, 10, 10)
-	assert_true(result is PackedFloat32Array)
+	assert_bool(result is PackedFloat32Array).is_true()
 
 func test_array_to_dict_conversion() -> void:
 	var arr := PackedFloat32Array([1.0, 2.0, INF, 3.0])
@@ -35,23 +30,21 @@ func test_array_to_dict_conversion() -> void:
 	for i in arr.size():
 		if arr[i] < INF:
 			dict[HexUtils.idx_to_pos(i, w)] = arr[i]
-	assert_eq(dict.size(), 3)
-	assert_true(dict.has(Vector2i(0, 0)))
-	assert_true(dict.has(Vector2i(1, 1)))
-	assert_false(dict.has(Vector2i(0, 1)))
+	assert_that(dict.size()).is_equal(3)
+	assert_bool(dict.has(Vector2i(0, 0))).is_true()
+	assert_bool(dict.has(Vector2i(1, 1))).is_true()
+	assert_bool(dict.has(Vector2i(0, 1))).is_false()
 
-# ==================== Т3: Pause guard ====================
 
 func test_executor_has_paused_property() -> void:
 	var executor := BattleTurnExecutor.new()
 	executor.name = "TestExecutor"
-	assert_eq(executor._paused, false)
+	assert_that(executor._paused).is_equal(false)
 	executor._paused = true
-	assert_true(executor._paused)
+	assert_bool(executor._paused).is_true()
 	executor._paused = false
 	executor.free()
 
-# ==================== Т4: Inventory deserialization ====================
 
 func test_deserialize_unknown_slot_warns() -> void:
 	var inv := HeroInventory.new()
@@ -60,7 +53,7 @@ func test_deserialize_unknown_slot_warns() -> void:
 		"backpack": []
 	}
 	inv.deserialize(data)
-	assert_true(true)
+	assert_bool(true).is_true()
 
 func test_deserialize_valid_slot() -> void:
 	var inv := HeroInventory.new()
@@ -69,40 +62,34 @@ func test_deserialize_valid_slot() -> void:
 		"backpack": []
 	}
 	inv.deserialize(data)
-	assert_true(true)
+	assert_bool(true).is_true()
 
-# ==================== Т5: No extraction cache ====================
 
 func test_resource_chain_service_no_cache_fields() -> void:
 	var service := ResourceChainService.new()
-	assert_true(true)
+	assert_bool(true).is_true()
 
-# ==================== Т6: ServiceLocator resolve chain ====================
 
-# ServiceLocator.resolve is tested via ServiceContainer mock in run_tests.gd
 
-# ==================== Т7: Rebirth via public API ====================
 
 func test_battle_state_has_revive_unit() -> void:
 	var state := BattleState.new()
-	assert_true(state.has_method("revive_unit"))
+	assert_bool(state.has_method("revive_unit")).is_true()
 
-# ==================== Т8: MapGenerator get_terrain_id passthrough ====================
 
 func test_map_generator_has_get_terrain_id() -> void:
 	var mg := MapGenerator.new()
 	mg.name = "TestMG"
-	assert_true(mg.has_method("get_terrain_id"))
+	assert_bool(mg.has_method("get_terrain_id")).is_true()
 	mg.free()
 
 func test_map_generator_get_terrain_id_null_model() -> void:
 	var mg := MapGenerator.new()
 	mg.name = "TestMG2"
 	var tid = mg.get_terrain_id(Vector2i(0, 0))
-	assert_eq(tid, HexUtils.Terrain.GRASS)
+	assert_that(tid).is_equal(HexUtils.Terrain.GRASS)
 	mg.free()
 
-# ==================== Т9: Marker signal chain (dict type) ====================
 
 func test_movement_signal_emits_dict() -> void:
 	var hc := HeroMovementController.new()
@@ -112,21 +99,18 @@ func test_movement_signal_emits_dict() -> void:
 		holder[0] = true
 	)
 	hc.reach_preview_changed.emit([], {}, 0.0)
-	assert_true(holder[0])
+	assert_bool(holder[0]).is_true()
 	hc.free()
 
-# ==================== Т10: BattleUI scene skeleton ====================
 
 func test_battle_ui_scene_has_skeleton() -> void:
 	var scene := load("res://scenes/ui/BattleUI.tscn")
-	assert_true(scene != null)
+	assert_bool(scene != null).is_true()
 	var battle_ui := scene.instantiate() as BattleUI
 	battle_ui.name = "TestBattleUI"
-	# Скелет: нижняя полоса с 7 кнопками (collapse_btn вынесен в корень, чтобы
-	# не прятаться вместе с полосой — R2), кнопка collapse есть в корне.
-	assert_true(battle_ui.has_method("_connect_skeleton"))
-	assert_eq(battle_ui.get_node_or_null("bottom_bar").get_child_count(), 7)
-	assert_true(battle_ui.get_node_or_null("collapse_btn") != null)
-	assert_true(battle_ui.has_method("set_status"))
-	assert_true(battle_ui.has_method("update_initiative"))
+	assert_bool(battle_ui.has_method("_connect_skeleton")).is_true()
+	assert_that(battle_ui.get_node_or_null("bottom_bar").get_child_count()).is_equal(7)
+	assert_bool(battle_ui.get_node_or_null("collapse_btn") != null).is_true()
+	assert_bool(battle_ui.has_method("set_status")).is_true()
+	assert_bool(battle_ui.has_method("update_initiative")).is_true()
 	battle_ui.free()

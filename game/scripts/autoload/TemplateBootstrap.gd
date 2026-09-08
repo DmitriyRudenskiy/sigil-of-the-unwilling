@@ -1,7 +1,4 @@
-## scripts/autoload/TemplateBootstrap.gd
 extends Node
-## Регистрация обработчиков шаблонов в TemplateEngine (аудит #8:
-## каждый шаблон — отдельный класс в scripts/data/templates/).
 
 func _ready() -> void:
 	TemplateEngine.register_handler(&"DIRECT_DAMAGE", T01DirectDamage.handle)

@@ -1,30 +1,18 @@
 extends Node2D
 class_name MapGenerator
-## Координатор карты: модель, рендерер, спавнер, тайлмапы.
 
 const _VisibilityMap = preload("res://scripts/core/VisibilityMap.gd")
-const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
 
 var model
 var renderer
 var spawner
-## fog-of-war: карта видимости (заполняет WorldController). Тип нужен для
-## вывода `:=` в гейтах HeroMovementController (is_explored/is_visible).
 var visibility: _VisibilityMap = null
-## Достижимое множество от спавна героя (первая проходимая клетка, row-major).
-## Используется WorldBootstrap: столица не должна попасть на другой остров
-## (иначе soft-lock — игрок не дойдёт до собственного города).
 var reachable_cells: Dictionary = {}
 
 var _tile_map: TileMapLayer
 var _decor_layer: TileMapLayer
 var _resource_layer: Node2D
-## ponytail: DI — реестры сервисов (units/resources). Передаются из
-## WorldBootstrap через setup_services; в detached-тестах остаются null,
-## как раньше — в headless-тестах реестры были null.
-var _services: ServiceContainer = null
 
-# Публичные свойства — делегирование в модель
 var terrain_grid: Dictionary:
 	get: return model.terrain_grid if model != null else {}
 
@@ -81,12 +69,13 @@ func generate() -> void:
 	model.map_width = _map_width if _map_width > 0 else 60
 	model.map_height = _map_height if _map_height > 0 else 60
 	model.seed_value = _seed_value
-	model.village_count = MapConfig.MAP_VILLAGE_COUNT
+	model.village_count = GameNumbers.MAP_VILLAGE_COUNT
 
 	renderer = MapRenderer.new(model)
 	spawner = MapSpawner.new(model)
-	if _services != null:
-		spawner.setup_registry(_services.units)
+	var units_reg: Node = Services.resolve(&"units")
+	if units_reg != null:
+		spawner.setup_registry(units_reg)
 
 	HexUtils.calibrate(_tile_map)
 
@@ -96,20 +85,14 @@ func generate() -> void:
 	renderer.paint_decor(_decor_layer)
 
 	spawner.place_villages()
-	# Compute reachable cells once, reuse for resources + enemies
-	# (и для размещения городов — см. reachable_cells).
 	reachable_cells = _compute_reachable_cells()
 	spawner.place_resources(reachable_cells)
 	spawner.place_decor()
 	spawner.place_enemies(reachable_cells)
 
 
-## Внедрить контейнер сервисов (units/resources). Аналог WorldSpawner.setup_services.
-func setup_services(services: ServiceContainer) -> void:
-	_services = services
 
 func _compute_reachable_cells() -> Dictionary:
-	# Find first walkable cell as BFS start point
 	var start_cell := Vector2i(-1, -1)
 	for y in model.map_height:
 		for x in model.map_width:
@@ -158,8 +141,6 @@ func _ensure_layers() -> void:
 		add_child(_resource_layer)
 
 
-# Публичный API — делегирование в модель
-## Fog-of-war: применить карту видимости к тайлмапу (перерисовать сетку).
 func apply_fog(visibility) -> void:
 	if visibility == null or renderer == null:
 		return
@@ -189,7 +170,6 @@ func get_blocked_cells() -> Dictionary:
 	return model.get_blocked_cells() if model != null else {}
 
 
-# Публичный API — тайлмап
 func has_valid_tilemap() -> bool:
 	return _tile_map != null and _tile_map.tile_set != null
 

@@ -1,7 +1,5 @@
 extends RefCounted
 class_name HeroSkills
-## Hero exploration skills: levels 0-3.
-## nature_sense, keen_eye, navigation, geology, alchemy.
 
 signal skills_changed
 

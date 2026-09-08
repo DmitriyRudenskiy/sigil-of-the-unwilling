@@ -1,21 +1,17 @@
 class_name WorldInput
 extends Node2D
-## Ввод мира: зум, отмена пути, клик по карте.
 
 var map: MapGenerator = null
 var hero: HeroController = null
 var camera: WorldCamera = null
-## endgame: WorldController — для проверки терминального состояния.
 var world: Node = null
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if map == null or hero == null or camera == null:
 		return
-	# endgame: терминальное состояние — ввод мира не проходит.
 	if world != null and world.has_method("is_terminal") and world.is_terminal():
 		return
-	# legend-chronicle: открыта последовательность смерти — ввод мира не проходит.
 	if world != null and world.has_method("is_death_sequence_open") \
 			and world.is_death_sequence_open():
 		return
@@ -27,7 +23,6 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 		camera.step_zoom(-1)
 	elif event.button_index == MOUSE_BUTTON_RIGHT:
-		# ПКМ отменяет зафиксированный маршрут автохода (если есть) и превью пути.
 		hero.cancel_planned_path()
 		hero.cancel_pending()
 	elif event.button_index == MOUSE_BUTTON_LEFT:

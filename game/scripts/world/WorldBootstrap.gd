@@ -1,21 +1,17 @@
-## scripts/world/WorldBootstrap.gd
 class_name WorldBootstrap
 extends RefCounted
-## Composition root: creates all world subsystems, wires signals, returns a result bundle.
-## Extracted from WorldController._ready() to keep the controller as a thin facade.
 
 const _Platform = preload("res://scripts/core/Platform.gd")
-const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
 const WorldPersistenceScript = preload("res://scripts/world/WorldPersistence.gd")
 const ResourceChainServiceScript = preload("res://scripts/world/ResourceChainService.gd")
 const WorldShortcutsScript = preload("res://scripts/world/WorldShortcuts.gd")
 const EndgameControllerScript = preload("res://scripts/systems/EndgameController.gd")
-# port-troles-heritage/terrain-resources: preload — class_name регистрируется
-# только после загрузки файла; без preload WorldBootstrap падает на parse-order.
 const _TerrainResourceManager = preload("res://scripts/data/TerrainResourceManager.gd")
+const WorldEventRouterScript = preload("res://scripts/world/WorldEventRouter.gd")
+const SuccessionControllerScript = preload("res://scripts/world/SuccessionController.gd")
+const HeroLifecycleSystemScript = preload("res://scripts/world/HeroLifecycleSystem.gd")
 
 
-## Result bundle returned after bootstrap completes.
 class BootstrapResult:
 	var map_gen: Node = null
 	var hero: Node = null
@@ -26,7 +22,6 @@ class BootstrapResult:
 	var battle_coordinator: Node = null
 	var interaction_controller: Node = null
 	var resource_node_manager: Node = null
-	# terrain-resources: лес/горы как точки добычи (контакт/истощение/персистентность).
 	var terrain_resource_manager: Variant = null
 	var ui_manager: Node = null
 	var world_delta: Variant = null
@@ -38,84 +33,139 @@ class BootstrapResult:
 	var session: Variant = null
 	var loaded_save: SaveData = null
 	var map_rect: Rect2 = Rect2(0, 0, 10000, 10000)
-	# ponytail: Variant — EnemyTurnProcessor наследует TurnPhaseProcessor
-	# (не Node); в detached-компиляции class_name может не резолвиться.
 	var enemy_proc: Variant = null
 	var shortcuts: Node = null
 	var endgame: Node = null
 	var event_bus_subscribers: Array[Callable] = []
-	var services: ServiceContainer = null
 
 
 static func run(
 	parent: Node2D,
 	platform: Variant,
 	rng: RandomNumberGenerator,
-	shard_seed: int = 0
+	shard_seed: int = 0,
+	ui_manager: Node = null
 ) -> BootstrapResult:
 	var R := BootstrapResult.new()
 	R.rng = rng
+	R.ui_manager = ui_manager
 
-	# 1. Services
 	_init_services(parent, R)
 
-	# 1b. Create ServiceContainer from autoloads
-	R.services = ServiceContainer.from_autoloads()
-	var missing := R.services.validate()
+	var missing: Array[String] = []
+	for k in [&"units", &"resources", &"spells", &"artifacts"]:
+		if Services.resolve(k) == null:
+			missing.append(str(k))
 	if not missing.is_empty():
 		push_error("[WorldBootstrap] Missing services: %s" % ", ".join(missing))
 
-	# 2. Resolve session / shard. shard_seed != 0 pins a deterministic world
-	#    (shard #2); 0 = today's flow (shard #1 new game = random/editor seed).
 	R.loaded_save = _resolve_session(R, shard_seed)
 	rng.seed = R.session.run_seed
 
-	# 3. Map
 	_create_map(parent, R)
 
-	# 4. Hero
 	_create_hero(parent, R)
 
-	# (await process_frame is caller's responsibility)
 
-	# 5. Init hero (requires map)
 	_init_hero(R)
 
-	# 6. Camera
 	_create_camera(parent, R)
 	R.map_rect = _compute_map_rect(R)
 
-	# 7. Input + spawner + cities (city-in-world: города — ПЕРЕД UI:
-	#    WorldShortcuts создаётся в _init_ui, потому что ему нужен ui_manager;
-	#    провайдер тайлового yield ставится до регистрации столицы).
 	_create_input(parent, R)
 	_create_spawner(parent, R)
 	_create_cities(parent, R)
 
-	# 8. UI (city-in-world: создаётся ВСЕГДА, включая headless — сокет-
-	#    сценарии открывают/закрывают city-экран без дисплея)
-	_init_ui(parent, platform, R)
+	_create_ui(parent, platform, R)
 
-	# 9. Subsystems + resource nodes
 	_create_subsystems(parent, R)
 	_create_resource_nodes(parent, R)
 
-	# Setup resource chain with services
-	R.resource_chain.setup(R.services)
-
-	# 10. endgame-conditions: терминальные состояния (создаётся ПОСЛЕ всех
-	# подсистем; коннекты ставятся ДО WorldController._ready — «первое
-	# условие wins»).
 	R.endgame = EndgameControllerScript.new()
 	R.endgame.name = "EndgameController"
 	parent.add_child(R.endgame)
-	# parent = WorldController (у него get_hero для проверки преемника).
-	R.endgame.setup(parent, R.battle_coordinator, R.map_gen, R.cities, R.persistence, R.enemy_proc)
+	R.endgame.setup(parent, R.battle_coordinator, R.map_gen, R.cities, R.persistence, R.enemy_proc, R.ui_manager)
 
 	return R
 
 
-# ==================== PRIVATE ====================
+## R1: вторая фаза сессии — пост-фреймовая обвязка (подсистемы, event router,
+## hero lifecycle, применение загруженного состояния). Вынесено из WorldController (SRP).
+## Возвращает созданный WorldEventRouter.
+static func finalize(parent: Node2D, R: BootstrapResult, visibility, persistence,
+				hero_mgr, rng, end_turn_cb: Callable) -> WorldEventRouter:
+	R.battle_coordinator.setup(
+		R.hero, R.map_gen, R.spawner, rng,
+		parent, R.ui_manager, R.camera, R.input_controller, R.world_delta
+	)
+	var chest_dialog: ArtifactChestDialog = R.ui_manager.chest_dialog if R.ui_manager != null else null
+	R.interaction_controller.setup(R.hero, R.spawner, chest_dialog)
+	R.interaction_controller.connect_chest_signals()
+	R.interaction_controller.world_delta = R.world_delta
+	R.interaction_controller.visibility = visibility
+	R.interaction_controller.status_cb = (
+		R.ui_manager.set_status if R.ui_manager != null and R.ui_manager.has_method("set_status") else Callable())
+	persistence.visibility = visibility
+	var sight_sources: Array = []
+	if R.cities != null:
+		for c in R.cities.cities:
+			if c != null and c.owner == &"player" and c.center is Vector2i:
+				sight_sources.append(c.center)
+	visibility.recompute(R.hero.current_cell, sight_sources,
+		GameNumbers.FOG_HERO_SIGHT, GameNumbers.FOG_CITY_SIGHT)
+	if R.map_gen.has_valid_tilemap():
+		R.map_gen.apply_fog(visibility)
+
+	persistence.world_delta = R.world_delta
+
+	var router := WorldEventRouterScript.new()
+	router.name = "EventRouter"
+	parent.add_child(router)
+	router.setup(
+		R.hero, R.map_gen, R.camera, R.cities,
+		R.battle_coordinator, R.interaction_controller,
+		R.resource_node_manager, R.ui_manager,
+		R.world_delta, persistence, R.resource_chain,
+		visibility,
+		Services.resolve(&"resources"),
+		R.turn_scheduler,
+		R.terrain_resource_manager if R != null else null
+	)
+	router.end_turn_requested.connect(end_turn_cb)
+
+	var succession := SuccessionControllerScript.new()
+	var lifecycle := HeroLifecycleSystemScript.new()
+	hero_mgr.setup_lifecycle(lifecycle)
+	lifecycle.setup(
+		parent, persistence, rng, R.cities, R.map_gen, router,
+		R.ui_manager, R.battle_coordinator, R.interaction_controller,
+		R, succession, R.camera)
+
+	if R.loaded_save != null:
+		persistence.apply_loaded_save(R.loaded_save, build_load_context(R))
+		if R.endgame != null:
+			R.endgame.restore()
+	elif R.map_gen.has_valid_tilemap():
+		R.map_gen.apply_fog(visibility)
+	return router
+
+
+## R1: контекст загрузки для WorldPersistence (общий для finalize и WorldSaveLoadService).
+static func build_load_context(R: BootstrapResult) -> Variant:
+	var ctx := WorldLoadContext.new()
+	ctx.map_gen = R.map_gen
+	ctx.spawner = R.spawner
+	ctx.resource_node_manager = R.resource_node_manager
+	ctx.terrain_resource_manager = R.terrain_resource_manager
+	ctx.ui_manager = R.ui_manager
+	ctx.camera = R.camera
+	ctx.hero = R.hero
+	ctx.world_delta = R.world_delta
+	ctx.cities = R.cities
+	ctx.character_registry = R.character_registry
+	return ctx
+
+
 
 static func _init_services(parent: Node2D, R: BootstrapResult) -> void:
 	var save_manager := SaveManager.new()
@@ -129,26 +179,22 @@ static func _resolve_session(R: BootstrapResult, shard_seed: int) -> SaveData:
 	var loaded_save: SaveData = WorldPersistenceScript.pending_save
 	WorldPersistenceScript.pending_save = null
 	if shard_seed != 0:
-		## Astral-macro: загрузка конкретной фрагмента с фиксированным сидом.
 		R.persistence.session = R.persistence.get_session_for_seed(shard_seed)
 	elif loaded_save != null:
 		R.persistence.session = R.persistence.get_session_for_seed(loaded_save.run_seed)
 	else:
 		R.persistence.session = R.persistence.get_session_for_seed(R.persistence.get_run_seed())
 	R.session = R.persistence.session
-	# Пустой дельта-снимок мира: нужен для save (в новой игре world_delta
-	# раньше оставался null -> F5 всегда возвращал false). При загрузке
-	# apply_loaded_save пересоздаёт/перезаполняет его из сейва.
 	if R.world_delta == null:
 		R.world_delta = WorldStateDelta.new()
 	return loaded_save
 
 
 static func _create_map(parent: Node2D, R: BootstrapResult) -> void:
-	R.map_gen = MapGenerator.new()
+	var map_scene: PackedScene = load("res://scenes/world/MapGenerator.tscn")
+	R.map_gen = map_scene.instantiate()
 	R.map_gen.name = "MapGenerator"
 	R.map_gen.seed_value = R.rng.randi() % 999999
-	R.map_gen.setup_services(R.services)
 	parent.add_child(R.map_gen)
 
 
@@ -159,15 +205,13 @@ static func _create_hero(parent: Node2D, R: BootstrapResult) -> void:
 
 
 static func _init_hero(R: BootstrapResult) -> void:
-	R.hero.setup(R.map_gen, R.services)
-	# hero-survival: герой видит города (реcovery потребностей в городе).
+	R.hero.setup(R.map_gen)
 	R.hero.city_manager = R.cities
 	if R.loaded_save != null:
 		R.hero.deserialize(R.loaded_save.hero)
 		if R.map_gen.has_valid_tilemap():
 			R.hero.position = R.map_gen.map_to_local(R.hero.current_cell)
 	else:
-		# port-troles-heritage: новая игра из конструктора (Меню «Новая игра»).
 		var profile := WorldPersistence.pending_new_game
 		if profile != null:
 			R.hero.apply_build(profile)
@@ -175,19 +219,15 @@ static func _init_hero(R: BootstrapResult) -> void:
 
 
 
-static func _init_ui(parent: Node2D, _platform: Variant, R: BootstrapResult) -> void:
-	# city-in-world: UI создаётся ВСЕГДА (включая headless) — сокет-сценарии
-	# открывают/закрывают city-экран без дисплея.
-	R.ui_manager = WorldUIManager.new()
-	R.ui_manager.name = "WorldUIManager"
-	parent.add_child(R.ui_manager)
+static func _create_ui(parent: Node2D, _platform: Variant, R: BootstrapResult) -> void:
+	if R.ui_manager == null:
+		push_error("WorldBootstrap: WorldUI node not found in scene tree!")
+		return
 	R.ui_manager.setup(R.hero, R.map_gen, R.camera, R.rng, R.cities)
 
-	# city-navigation: навигационные значки городов (всегда видны, без порога).
 	if R.cities != null and R.ui_manager.get("marker_layer") != null:
 		R.ui_manager.marker_layer.set_city_markers(R.cities.cities)
 
-	# Shortcuts — после ui_manager: guard по city-оверлею (city-in-world).
 	var shortcuts := WorldShortcutsScript.new()
 	shortcuts.name = "WorldShortcuts"
 	shortcuts.setup(R.persistence, R.ui_manager, R.hero, parent)
@@ -199,7 +239,7 @@ static func _create_camera(parent: Node2D, R: BootstrapResult) -> void:
 	R.camera = WorldCamera.new()
 	R.camera.name = "WorldCamera"
 	parent.add_child(R.camera)
-	var settings := parent.get_node_or_null("/root/Settings")
+	var settings: Object = Services.resolve(&"settings")
 	if settings:
 		R.camera.setup(settings)
 	if R.hero != null:
@@ -212,7 +252,6 @@ static func _create_input(parent: Node2D, R: BootstrapResult) -> void:
 	R.input_controller.map = R.map_gen
 	R.input_controller.hero = R.hero
 	R.input_controller.camera = R.camera
-	# endgame: блокировка ввода в терминальном состоянии.
 	R.input_controller.world = parent
 	parent.add_child(R.input_controller)
 
@@ -223,7 +262,6 @@ static func _create_spawner(parent: Node2D, R: BootstrapResult) -> void:
 	R.spawner.map = R.map_gen
 	R.spawner.rng = R.rng
 	parent.add_child(R.spawner)
-	R.spawner.setup_services(R.services)
 	R.spawner.spawn_all()
 
 
@@ -233,63 +271,53 @@ static func _create_cities(parent: Node2D, R: BootstrapResult) -> void:
 	parent.add_child(R.cities)
 	R.cities.status_message.connect(func(text: String):
 		if R.ui_manager: R.ui_manager.set_status(text))
-	# Спринт 11: перенос города -> шина событий.
 	R.cities.relocation_completed.connect(
 		func(city_uid: int, new_center: Vector2i):
 			GameEventBus.relocation_completed.emit(city_uid, new_center))
 
-	# FIDSI tile provider (city-in-world): выходы клеток из реального terrain.
-	# ВАЖНО: ставится ДО register_city — register_city применяет провайдер
-	# только если он уже есть (set_tile_yield_provider ниже его не заменяет).
 	R.cities.set_tile_yield_provider(func(cell: Vector2i) -> Dictionary:
 		return CityYieldTable.yield_for_terrain(R.map_gen.get_terrain_id(cell))
 	)
 
-	# Capital (РФ6-6: проверка проходимости)
+	R.cities.set_buildable_provider(func(cell: Vector2i) -> bool:
+		return R.map_gen.is_walkable(cell)
+	)
+
 	var capital := City.new()
 	capital.display_name = "Перворечье"
-	# Аудит #23: не ставить город на занятую клетку (враг/ресурс/сундук).
 	var occupied := _occupied_map_cells(R)
 	var center := _place_in_hero_component(R.map_gen, Vector2i(10, 10), occupied)
 	capital.center = center
-	capital.special_sites = {Vector2i(12, 9): BuildingDefs.SITE_SHRINE}
-	# city-in-world: столица принадлежит игроку + стартовый набор (как у
-	# захваченной деревни) — с первого хода доступны CITY_BUILD/CITY_HIRE.
+
+	
+	
+	var shrine_offset := Vector2i(2, -1)
+	var shrine_cell := center + shrine_offset
+	if not R.map_gen.is_walkable(shrine_cell) or occupied.has(shrine_cell):
+		shrine_cell = _nearest_walkable(R.map_gen, center + Vector2i(2, 0))
+	capital.special_sites = {shrine_cell: BuildingDefs.SITE_SHRINE}
 	capital.owner = &"player"
 	CityFactory.apply_starting_kit(capital)
 	R.cities.register_city(capital, true)
 
-	# city-navigation: второй стартовый город ~15 гексов от столицы (не столица;
-	# имя на навигационном значке = display_name «Город 2»).
 	var second := CityFactory.create_village(
 		_place_in_hero_component(R.map_gen, Vector2i(center.x + 15, center.y), occupied), "Город 2", 0)
 	R.cities.register_city(second, false)
 
 
 static func _create_subsystems(parent: Node2D, R: BootstrapResult) -> void:
-	# M0: Ядро — оркестратор фаз хода. Процессоры (M1 экономика, M2 демография,
-	# M3 город) регистрируются сюда по мере готовности (см. следующие шаги
-	# внедрения «Каскада сложности»); роутер событий вызывает execute_turn().
 	R.turn_scheduler = TurnScheduler.new()
 
-	# M3: Город — масштаб, ёмкости, зонирование (приоритет 5 — раньше
-	# экономики, чтобы мультипликаторы были готовы).
 	_register_city(R)
 
-	# M1: Экономика — инициализация хранилищ городов и процессор цепочек.
 	_register_economy(R)
 
-	# city-in-world: дань городов (приоритет 15 — после экономики, до демографии).
 	_register_city_income(R)
 
 	_register_demographics(R)
 
-	R.battle_coordinator = WorldBattleCoordinator.new()
-	R.battle_coordinator.name = "BattleCoordinator"
-	# setup is called by parent after bootstrap (parent reference needed)
-	parent.add_child(R.battle_coordinator)
+	_create_battle(parent, R)
 
-	# enemy-world-ai: ход и рост врагов (нужен battle_coordinator).
 	_register_enemy_ai(R)
 
 	R.interaction_controller = WorldInteractionController.new()
@@ -297,9 +325,13 @@ static func _create_subsystems(parent: Node2D, R: BootstrapResult) -> void:
 	parent.add_child(R.interaction_controller)
 
 
+static func _create_battle(parent: Node2D, R: BootstrapResult) -> void:
+	R.battle_coordinator = WorldBattleCoordinator.new()
+	R.battle_coordinator.name = "BattleCoordinator"
+	parent.add_child(R.battle_coordinator)
+
+
 static func _register_city(R: BootstrapResult) -> void:
-	## M3: Город — процессор фазы города (масштаб/ёмкости/зоны). Сигналы
-	## пробрасываются в GameEventBus (интеграционный слой).
 	if R.turn_scheduler == null or R.cities == null:
 		return
 
@@ -330,7 +362,6 @@ static func _register_city(R: BootstrapResult) -> void:
 
 
 static func _register_enemy_ai(R: BootstrapResult) -> void:
-	## enemy-world-ai: ход врагов (25) + рост (30). Детерминированы seed'ом мира.
 	if R.turn_scheduler == null or R.map_gen == null or R.cities == null:
 		return
 	var seed: int = R.session.run_seed if R.session != null else 0
@@ -344,15 +375,10 @@ static func _register_enemy_ai(R: BootstrapResult) -> void:
 	growth.setup_growth(R.map_gen, R.spawner, R.cities, R.world_delta, seed)
 	R.turn_scheduler.register_processor(growth)
 
-	# Проводка: атака врага → бой со сменой ролей (враг — атакующий).
 	proc.enemy_attack_requested.connect(R.battle_coordinator.start_enemy_attack)
-	# Проводка: уничтоженный стек → ослабленное возрождение.
 	R.battle_coordinator.enemy_stack_defeated.connect(growth.on_stack_defeated)
 
-	# UI: угрожающие маркеры (стеки в радиусе агрессии от героя).
 	if R.ui_manager != null and R.ui_manager.marker_layer != null:
-		# ponytail: узкие captures (Node, не R) — цикл R->scheduler->proc->lambda->R
-		# удерживал бы весь граф после выхода (RefCounted-циклы Godot не собирает).
 		var hero := R.hero
 		var map_gen := R.map_gen
 		var ui := R.ui_manager
@@ -362,29 +388,24 @@ static func _register_enemy_ai(R: BootstrapResult) -> void:
 				var cells: Array = []
 				var hp: Variant = hero.get("current_cell") if hero != null else null
 				if hp is Vector2i:
-					# fog-of-war: кольцо агрессии — только для видимых стеков.
 					var fog = map_gen.visibility
 					for c in map_gen.enemy_stacks:
-						if HexUtils.hex_distance(hp, c) <= MapConfig.ENEMY_AGGRO_RADIUS \
+						if HexUtils.hex_distance(hp, c) <= GameNumbers.ENEMY_AGGRO_RADIUS \
 								and (fog == null or fog.is_visible(c)):
 							cells.append(c)
 				markers.set_threat_markers(cells)
-				# Статус-строка: враги действовали в этом ходу.
 				if int(report.get("moved", 0)) > 0:
 					ui.set_status("Враги движутся")
 		)
 
 static func _register_economy(R: BootstrapResult) -> void:
-	## M1: Экономика — инициализирует city.resource_ctx (лимиты из
-	## ResourceRegistry), регистрирует EconomicTurnProcessor в планировщике
-	## и пробрасывает его сигналы в GameEventBus (интеграционный слой).
 	if R.turn_scheduler == null or R.cities == null:
 		return
 
-	# Лимиты ресурсов из реестра (если доступен).
 	var defs: Array[ResourceDef] = []
-	if R.services != null and R.services.resources != null:
-		defs = R.services.resources.get_all()
+	var resources_reg: Node = Services.resolve(&"resources")
+	if resources_reg != null:
+		defs = resources_reg.get_all()
 	for c in R.cities.cities:
 		c.ensure_resource_ctx(defs)
 
@@ -403,15 +424,12 @@ static func _register_economy(R: BootstrapResult) -> void:
 
 
 static func _register_city_income(R: BootstrapResult) -> void:
-	## city-in-world: дань городов → ресурсы героя (отчёт читает WorldEventRouter).
 	if R.turn_scheduler == null:
 		return
 	R.turn_scheduler.register_processor(CityIncomeProcessor.new())
 
 
 static func _register_demographics(R: BootstrapResult) -> void:
-	## M2: Демография — реестр персонажей + процессор фазы. Сигналы
-	## пробрасываются в GameEventBus (интеграционный слой).
 	if R.turn_scheduler == null or R.cities == null:
 		return
 
@@ -427,7 +445,7 @@ static func _register_demographics(R: BootstrapResult) -> void:
 		func(character_uid: int, city_uid: int, _cause: StringName):
 			GameEventBus.character_died.emit(city_uid, character_uid))
 	demo.character_need_critical.connect(
-		func(character_uid: int, need_id: StringName):
+		func(character_uid: int, need_id: int):
 			GameEventBus.character_need_critical.emit(character_uid, need_id))
 	demo.disease_outbreak.connect(
 		func(city_uid: int, character_uid: int):
@@ -442,7 +460,7 @@ static func _create_resource_nodes(parent: Node2D, R: BootstrapResult) -> void:
 	var node_container := Node2D.new()
 	node_container.name = "ResourceNodes"
 	parent.add_child(node_container)
-	R.resource_node_manager.setup(node_container, R.rng, R.services.resources, R.map_gen.map_to_local)
+	R.resource_node_manager.setup(node_container, R.rng, Services.resolve(&"resources"), R.map_gen.map_to_local)
 
 	var map_data := {
 		"terrain": R.map_gen.terrain_grid.duplicate(),
@@ -451,7 +469,6 @@ static func _create_resource_nodes(parent: Node2D, R: BootstrapResult) -> void:
 	}
 	R.resource_node_manager.generate_nodes_for_map(map_data)
 
-	# terrain-resources: точки добычи на лесах/горах (аддитивно к hidden-жилам).
 	R.terrain_resource_manager = _TerrainResourceManager.new()
 	R.terrain_resource_manager.name = "TerrainResourceManager"
 	parent.add_child(R.terrain_resource_manager)
@@ -459,22 +476,19 @@ static func _create_resource_nodes(parent: Node2D, R: BootstrapResult) -> void:
 	R.terrain_resource_manager.generate(map_data)
 
 
-## (10,10) или ближайшая проходимая клетка; если кандидат выпадает из
-## компоненты связности героя (карта с островами) — берём ближайшую к
-## кандидату клетку внутри компоненты. Иначе soft-lock: игрок никогда не
-## дойдёт до собственной столицы (и сценарии 1/4 гибнут на тумане).
-## Аудит #23: `excluded` — занятые клетки (вражеские стаки/ресурсы/сундуки):
-## кандидат и fallback не должны на них попадать.
 static func _place_in_hero_component(
 	map_gen: MapGenerator, preferred: Vector2i, excluded: Dictionary = {} ) -> Vector2i:
 	var comp: Dictionary = map_gen.reachable_cells
 	var cand := _nearest_walkable(map_gen, preferred)
-	if (comp.is_empty() or comp.has(cand)) and not excluded.has(cand):
+
+	
+	if not excluded.has(cand) and (comp.is_empty() or comp.has(cand)):
 		return cand
-	# Кандидат не рассматриваем: чужая компонента или занятая клетка.
-	var best: Vector2i = cand
+
+	var best: Vector2i = Vector2i(-1, -1)
 	var best_d := INT32_MAX
 	var cells: Array = comp.keys() if not comp.is_empty() else [cand]
+
 	for cell in cells:
 		if excluded.has(cell):
 			continue
@@ -482,12 +496,14 @@ static func _place_in_hero_component(
 		if d < best_d:
 			best_d = d
 			best = cell
+
+	
+	
 	if best_d == INT32_MAX:
-		return cand  # вся компонента занята — вырожденный случай, не падаем
+		return cand
 	return best
 
 
-## Аудит #23: клетки карты, занятые под спавн (стаки/ресурсы/сундуки).
 static func _occupied_map_cells(R: BootstrapResult) -> Dictionary:
 	var out: Dictionary = R.map_gen.enemy_stacks.duplicate()
 	for cell in R.map_gen.resource_cells:
@@ -504,8 +520,10 @@ static func _nearest_walkable(map_gen: MapGenerator, start: Vector2i) -> Vector2
 	var visited: Dictionary = {}
 	var queue: Array[Vector2i] = [start]
 	visited[start] = true
-	while queue.size() > 0:
-		var cell = queue.pop_front()
+	var head := 0
+	while head < queue.size():
+		var cell = queue[head]
+		head += 1
 		if map_gen.is_walkable(cell):
 			return cell
 		for nb in HexUtils.get_all_neighbors(cell):

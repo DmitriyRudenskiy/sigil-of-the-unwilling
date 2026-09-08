@@ -1,5 +1,4 @@
-extends "res://tests/gut_base.gd"
-## Спринт 9: процветание, уровень города, кольца застройки.
+extends GdUnitTestSuite
 
 const _City = preload("res://scripts/world/City.gd")
 const _Prosperity = preload("res://scripts/city/ProsperitySystem.gd")
@@ -33,17 +32,15 @@ func _add_workers(c: Variant, n: int, food_yield: float) -> void:
 func test_prosperity_empty_city() -> void:
 	var c: Variant = _city()
 	var v: float = _Prosperity.recalculate(c)
-	# 50 база + 10 еда (0 >= 0). Нет золота/зданий/населения/репутации.
-	assert_true(absf(v - 60.0) < 1e-9, "empty city = 60, got %s" % v)
-	assert_eq(c.prosperity, 60.0, "written to city")
+	assert_bool(absf(v - 60.0) < 1e-9).is_true()
+	assert_that(c.prosperity).is_equal(60.0)
 
 
 func test_prosperity_starving() -> void:
 	var c: Variant = _city()
-	_add_workers(c, 2, 0.0)  # расход 2.0, добычи нет
+	_add_workers(c, 2, 0.0)  
 	var v: float = _Prosperity.recalculate(c)
-	# 50 - 10 (голод)
-	assert_true(absf(v - 40.0) < 1e-9, "starving = 40, got %s" % v)
+	assert_bool(absf(v - 40.0) < 1e-9).is_true()
 
 
 func test_prosperity_full_city_clamped() -> void:
@@ -51,47 +48,45 @@ func test_prosperity_full_city_clamped() -> void:
 	c.stronghold_level = 2
 	c.storage[&"industry"] = 50.0
 	c.reputation = 50
-	c.add_followers(15)  # 15/20 = 0.75 >= POP_RATIO
-	for i in 10:  # 10 зданий = 20 (кап бонуса)
+	c.add_followers(15)  
+	for i in 10:  
 		var b := UniqueBuilding.new()
 		b.cell = _ring_cell(1) + Vector2i(i, 0)
 		c.buildings.append(b)
-	# Тайл рабочего — в другом секторе, не занят зданием (иначе yield = 0).
 	c._add_pop(PopUnit.State.WORKER, 0, HexUtils.get_neighbor(center, 5))
 	c.tile_yield_fn = func(_cell: Vector2i) -> Dictionary:
 		return {&"food": 20.0}
 	var v: float = _Prosperity.recalculate(c)
-	# 50 + 10 + 10 + 20 + 10 + 5 = 105 -> 100
-	assert_true(absf(v - 100.0) < 1e-9, "clamped to 100, got %s" % v)
+	assert_bool(absf(v - 100.0) < 1e-9).is_true()
 
 
 func test_gold_bonus() -> void:
 	var c: Variant = _city()
 	c.prosperity = 100.0
-	assert_true(absf(_Prosperity.gold_bonus(c) - 5.0) < 1e-9, "100 -> 5.0")
+	assert_bool(absf(_Prosperity.gold_bonus(c) - 5.0) < 1e-9).is_true()
 	c.prosperity = 40.0
-	assert_true(absf(_Prosperity.gold_bonus(c) - 2.0) < 1e-9, "40 -> 2.0")
+	assert_bool(absf(_Prosperity.gold_bonus(c) - 2.0) < 1e-9).is_true()
 	c.prosperity = 0.0
-	assert_true(absf(_Prosperity.gold_bonus(c) - 0.0) < 1e-9, "0 -> 0.0")
+	assert_bool(absf(_Prosperity.gold_bonus(c) - 0.0) < 1e-9).is_true()
 
 
 func test_reputation_mod_bands() -> void:
 	var c: Variant = _city()
 	c.prosperity = 60.0
-	assert_eq(_Prosperity.reputation_mod(c), 1, ">= 60 -> +1")
+	assert_that(_Prosperity.reputation_mod(c)).is_equal(1)
 	c.prosperity = 40.0
-	assert_eq(_Prosperity.reputation_mod(c), 0, "middle -> 0")
+	assert_that(_Prosperity.reputation_mod(c)).is_equal(0)
 	c.prosperity = 20.0
-	assert_eq(_Prosperity.reputation_mod(c), -1, "<= 20 -> -1")
+	assert_that(_Prosperity.reputation_mod(c)).is_equal(-1)
 
 
 func test_level_up_all_gates_fail() -> void:
 	var c: Variant = _city()
-	c.prosperity = 50.0  # < 60
-	c.add_followers(5)  # 5 < 12
+	c.prosperity = 50.0  
+	c.add_followers(5)  
 	var check: Dictionary = _Prosperity.can_level_up(c)
-	assert_false(bool(check.ok), "not allowed")
-	assert_eq(check.reasons.size(), 3, "3 reasons: prosperity/pop/buildings")
+	assert_bool(bool(check.ok)).is_false()
+	assert_that(check.reasons.size()).is_equal(3)
 
 
 func test_level_up_buildings_gate() -> void:
@@ -101,11 +96,11 @@ func test_level_up_buildings_gate() -> void:
 	c.add_followers(12)
 	c.buildings.append(UniqueBuilding.new())
 	var check: Dictionary = _Prosperity.can_level_up(c)
-	assert_false(bool(check.ok), "1 building < 2")
-	assert_eq(check.reasons.size(), 1, "only buildings missing")
+	assert_bool(bool(check.ok)).is_false()
+	assert_that(check.reasons.size()).is_equal(1)
 	c.buildings.append(UniqueBuilding.new())
 	check = _Prosperity.can_level_up(c)
-	assert_true(bool(check.ok), "2 buildings -> ok")
+	assert_bool(bool(check.ok)).is_true()
 
 
 func test_level_up_success() -> void:
@@ -115,17 +110,17 @@ func test_level_up_success() -> void:
 	c.add_followers(12)
 	c.buildings.append(UniqueBuilding.new())
 	c.buildings.append(UniqueBuilding.new())
-	assert_true(_Prosperity.try_level_up(c), "level up")
-	assert_eq(c.level, 2, "level 2")
-	assert_false(_Prosperity.try_level_up(c), "no double level-up")
+	assert_bool(_Prosperity.try_level_up(c)).is_true()
+	assert_that(c.level).is_equal(2)
+	assert_bool(_Prosperity.try_level_up(c)).is_false()
 
 
 func test_level_max() -> void:
 	var c: Variant = _city()
 	c.level = 5
 	var check: Dictionary = _Prosperity.can_level_up(c)
-	assert_false(bool(check.ok), "max level")
-	assert_eq(check.reasons.size(), 1, "one reason")
+	assert_bool(bool(check.ok)).is_false()
+	assert_that(check.reasons.size()).is_equal(1)
 
 
 func test_build_radius_by_level() -> void:
@@ -133,40 +128,36 @@ func test_build_radius_by_level() -> void:
 	for lvl in [1, 2, 3, 4, 5]:
 		c.level = lvl
 		var expected: int = [3, 4, 5, 5, 5][lvl - 1]
-		assert_eq(_Prosperity.build_radius_for_level(lvl), expected, "L%d radius" % lvl)
-		assert_eq(c.building_max_distance(), expected, "city sees radius")
+		assert_that(_Prosperity.build_radius_for_level(lvl)).is_equal(expected)
+		assert_that(c.building_max_distance()).is_equal(expected)
 
 
 func test_ring_of() -> void:
 	var c: Variant = _city()
-	assert_eq(c.ring_of(center), 0, "center = ring 0")
-	assert_eq(c.ring_of(_ring_cell(1)), 1, "neighbor = ring 1")
-	assert_eq(c.ring_of(_ring_cell(3)), 3, "far = ring 3")
+	assert_that(c.ring_of(center)).is_equal(0)
+	assert_that(c.ring_of(_ring_cell(1))).is_equal(1)
+	assert_that(c.ring_of(_ring_cell(3))).is_equal(3)
 
 
 func test_ring_build_gate() -> void:
 	var c: Variant = _city()
 	c.storage[&"industry"] = 1000.0
 	var far := _ring_cell(4)
-	assert_false(c.can_build_building(BuildingDefs.market(), far).ok,
-		"level 1: ring 4 rejected")
+	assert_bool(c.can_build_building(BuildingDefs.market(), far).ok).is_false()
 	c.level = 3
-	assert_true(c.can_build_building(BuildingDefs.market(), far).ok,
-		"level 3: ring 4 allowed")
+	assert_bool(c.can_build_building(BuildingDefs.market(), far).ok).is_true()
 
 
-## Аудит #3: стройка на клетке с рабочим отклоняется, рабочий не страдает.
 func test_build_rejected_on_worker_cell() -> void:
 	var c: Variant = _city()
 	c.storage[&"industry"] = 100.0
 	var cell := _ring_cell(1)
 	c._add_pop(PopUnit.State.WORKER, 0, cell)
 	var res: Dictionary = c.can_build_building(BuildingDefs.farm(), cell)
-	assert_false(res.ok, "строительство на клетке рабочего отклонено")
-	assert_eq(str(res.reason), "Клетка занята рабочим", "reason = рабочий")
-	assert_eq(c.pop.size(), 1, "рабочий не затронут")
-	# Пустая клетка кольца 2 (в пределах радиуса) всё ещё строится.
-	assert_true(c.can_build_building(BuildingDefs.farm(), _ring_cell(2)).ok, "пустая клетка строится")
+	assert_bool(res.ok).is_false()
+	assert_that(str(res.reason)).is_equal("Клетка занята рабочим")
+	assert_that(c.pop.size()).is_equal(1)
+	assert_bool(c.can_build_building(BuildingDefs.farm(), _ring_cell(2)).ok).is_true()
 
 
 func test_serialize_roundtrip() -> void:
@@ -175,16 +166,16 @@ func test_serialize_roundtrip() -> void:
 	c.prosperity = 77.5
 	var restored := _City.new()
 	restored.deserialize(c.serialize())
-	assert_eq(restored.level, 3, "level restored")
-	assert_true(absf(restored.prosperity - 77.5) < 1e-9, "prosperity restored")
+	assert_that(restored.level).is_equal(3)
+	assert_bool(absf(restored.prosperity - 77.5) < 1e-9).is_true()
 
 
 func test_serialize_clamps() -> void:
 	var c: Variant = _city()
 	var restored := _City.new()
 	restored.deserialize({"level": 99, "prosperity": -5.0})
-	assert_eq(restored.level, 5, "level clamped to max")
-	assert_true(absf(restored.prosperity - 0.0) < 1e-9, "prosperity clamped to 0")
+	assert_that(restored.level).is_equal(5)
+	assert_bool(absf(restored.prosperity - 0.0) < 1e-9).is_true()
 
 
 func test_processor_prosperity_and_level_up() -> void:
@@ -205,14 +196,9 @@ func test_processor_prosperity_and_level_up() -> void:
 	var gold_before: float = c.storage[&"industry"]
 	proc._process_city(c, 7)
 
-	# Репутация (шаг 6): +1 за избыток еды. Процветание (шаг 9):
-	# 50 + 10 (еда) + 10 (золото) + 4 (2 здания) + 0.1 (репутация 1) = 74.1.
-	assert_true(absf(c.prosperity - 74.1) < 1e-6, "prosperity 74.1, got %s" % c.prosperity)
-	# Бонус к золоту: 74.1 * 0.05 = 3.705.
-	assert_true(absf(c.storage[&"industry"] - (gold_before + 3.705)) < 1e-6,
-		"gold bonus 3.705")
-	# Уровень: 74.1 >= 60, 14 >= 12, 2 >= 2 -> уровень 2.
-	assert_eq(c.level, 2, "leveled up to 2")
-	assert_eq(got.size(), 1, "signal emitted once")
-	assert_eq(got[0][0], c.uid, "signal city uid")
-	assert_eq(got[0][1], 2, "signal new level")
+	assert_bool(absf(c.prosperity - 74.1) < 1e-6).is_true()
+	assert_bool(absf(c.storage[&"industry"] - (gold_before + 3.705)) < 1e-6).is_true()
+	assert_that(c.level).is_equal(2)
+	assert_that(got.size()).is_equal(1)
+	assert_that(got[0][0]).is_equal(c.uid)
+	assert_that(got[0][1]).is_equal(2)

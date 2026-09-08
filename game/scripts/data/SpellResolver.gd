@@ -1,7 +1,5 @@
-## scripts/data/SpellResolver.gd
 class_name SpellResolver
 extends RefCounted
-## Точка входа: валидация → оплата → диспетчеризация в шаблон.
 
 const _Engine = preload("res://scripts/data/TemplateEngine.gd")
 const _Utils = preload("res://scripts/data/SpellUtils.gd")
@@ -12,20 +10,17 @@ static func resolve(
 	caster: Variant,
 	target: Variant = null
 ) -> Dictionary:
-	# 1. Валидация
 	if spell == null:
 		return {"result": "invalid_spell", "effects": []}
 
 	if spell.template.is_empty():
 		return {"result": "no_template", "effects": []}
 
-	# 2. Проверка маны
 	if caster != null and _has_power(caster):
 		if caster.current_power < spell.cost:
 			return {"result": "insufficient_power", "effects": []}
 		caster.current_power -= spell.cost
 
-	# 3. Проверка influence requirements
 	if caster != null:
 		for color in spell.influence_req:
 			var required: int = int(spell.influence_req[color])
@@ -33,7 +28,6 @@ static func resolve(
 			if current < required:
 				return {"result": "insufficient_influence", "effects": []}
 
-	# 4. Диспетчеризация в шаблон
 	var result: Variant = _Engine.execute(
 		spell.template,
 		spell.params,
@@ -44,7 +38,6 @@ static func resolve(
 		target
 	)
 
-	# 5. Логирование
 	if result.get("result") == "success" and state != null:
 		if _Utils.has_obj_method(state, "add_to_history"):
 			state.add_to_history(spell.id, _get_player_id(caster), result.get("effects", []))
@@ -52,7 +45,6 @@ static func resolve(
 	return result
 
 
-# ==================== УТИЛИТЫ ====================
 
 static func _has_power(obj: Variant) -> bool:
 	if obj == null:

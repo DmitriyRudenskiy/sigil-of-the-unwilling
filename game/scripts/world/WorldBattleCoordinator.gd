@@ -1,54 +1,35 @@
 extends Node
 class_name WorldBattleCoordinator
-## Полный боевой цикл: контакт → бой → результаты → слава → дельта.
-## Мир прячется/показывается через GameEventBus.
-##
-## Зависимости внедряются как Callable/Node — координатор не зависит
-## от конкретных типов UI и WorldSpawner (DIP). Это позволяет
-## headless-тестирование через preload().
 
-const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
-const ServiceLocator = preload("res://scripts/core/ServiceLocator.gd")
 const UnitStack = preload("res://scripts/entities/UnitStack.gd")
 
-## Сигналы для декомпозиции (мокируются в тестах вместо реального UI).
 signal battle_world_hide_requested
 signal battle_world_show_requested
 
-## enemy-world-ai: вражеский стек уничтожен (до удаления из map_gen) —
-## рост планирует его ослабленное возрождение.
 signal enemy_stack_defeated(enemy_cell: Vector2i, army: Array)
 
-var hero: Node = null          # HeroController (Node)
-var map_gen: Node = null       # MapGenerator (Node, enemy_stacks dict)
-var spawner: Node = null       # WorldSpawner (Node)
+var hero: Node = null          
+var map_gen: Node = null       
+var spawner: Node = null       
 var battle_flow: BattleFlow = null
 var rng: RandomNumberGenerator = null
 var world_ctrl: Node = null
-var ui_manager: Node = null    # WorldUIManager — только Node, не типизировано
-var camera: Node = null        # Camera2D
+var ui_manager: Node = null    
+var camera: Node = null        
 var input_controller: Node = null
 var world_delta: WorldStateDelta = null
 
-## succession-sigil: боевая смерть (поражение + аннигиляция → combat_hp = 0 →
-## hero_died). За флагом, чтобы можно было тонко настраивать/отключить.
 var battle_death_enabled := true
 
-## Опциональные Callable-хуки (инъекция зависимостей вместо жёстких типов).
 var _on_ui_refresh: Callable = Callable()
-var _services: ServiceContainer = null
 
 var _pending_enemy_cell: Vector2i = Vector2i(-1, -1)
 
-## enemy-world-ai: роли в бою поменяны (враг — атакующий, герой — защищающийся).
 var _roles_swapped := false
 
-## Позиция героя до шага, вызвавшего контакт (для восстановления при отступлении).
 var _pre_battle_cell: Vector2i = Vector2i(-1, -1)
 
 
-## Лёгкая установка: все параметры — Node/Variant, нет жёстких типов.
-## Это позволяет preload() в headless-режиме.
 func setup(
 	h: Node,
 	m: Node,
@@ -58,8 +39,7 @@ func setup(
 	ui: Node,
 	cam: Node,
 	inp: Node,
-	delta: WorldStateDelta,
-	services: ServiceContainer = null
+	delta: WorldStateDelta
 ) -> void:
 	hero = h
 	map_gen = m
@@ -70,11 +50,9 @@ func setup(
 	camera = cam
 	input_controller = inp
 	world_delta = delta
-	_services = services
 
 	_create_battle_flow()
 
-## Установить callable для обновления UI после боя.
 func set_ui_refresh_hook(callback: Callable) -> void:
 	_on_ui_refresh = callback
 
@@ -87,9 +65,7 @@ func _create_battle_flow() -> void:
 	add_child(battle_flow)
 
 
-# ==================== КОНТАКТ С ВРАГОМ ====================
 
-## enemy-world-ai: атака с вражеского хода — враг атакующий, герой защищающийся.
 func start_enemy_attack(army: Array, enemy_cell: Vector2i) -> void:
 	if battle_flow == null or hero == null:
 		return
@@ -136,15 +112,10 @@ func check_enemy_contact(cell: Vector2i) -> void:
 	var enemy_cell := _find_contact_enemy(stacks, cell)
 	if enemy_cell == Vector2i(-1, -1):
 		return
-	# Запоминаем, где герой стоял ДО шага, вызвавшего контакт.
-	# При отступлении/поражении герой вернётся туда (иначе он остаётся
-	# вплотную к непобеждённому врагу — см. _restore_hero_after_retreat).
 	_pre_battle_cell = _capture_pre_battle_cell()
 	_start_battle(_as_unit_stack_array(stacks[enemy_cell]), enemy_cell)
 
 
-## Вражеская клетка, дающая контакт с `cell` (сама клетка или соседняя).
-## Vector2i(-1,-1), если контакта нет.
 func _find_contact_enemy(stacks: Dictionary, cell: Vector2i) -> Vector2i:
 	if stacks.has(cell):
 		return cell
@@ -154,7 +125,6 @@ func _find_contact_enemy(stacks: Dictionary, cell: Vector2i) -> Vector2i:
 	return Vector2i(-1, -1)
 
 
-## Клетка, на которой герой стоял до последнего шага.
 func _capture_pre_battle_cell() -> Vector2i:
 	if hero == null:
 		return Vector2i(-1, -1)
@@ -166,7 +136,6 @@ func _capture_pre_battle_cell() -> Vector2i:
 	return Vector2i(-1, -1)
 
 
-## enemy_stacks хранится в Dictionary как обычный Array — приводим к типизированному.
 static func _as_unit_stack_array(v: Variant) -> Array[UnitStack]:
 	var out: Array[UnitStack] = []
 	if v is Array:
@@ -208,13 +177,11 @@ func _start_battle(enemy_army: Array[UnitStack], enemy_cell: Vector2i) -> void:
 	)
 
 
-# ==================== ЖИЗНЕННЫЙ ЦИКЛ БОЯ ====================
 
 func _on_battle_started() -> void:
 	GameEventBus.battle_started.emit()
 	battle_world_hide_requested.emit()
 
-	## Деактивация мира через безопасные callable-вызовы.
 	if world_ctrl != null and world_ctrl.has_method("set_visible"):
 		world_ctrl.set_visible(false)
 	if ui_manager != null and ui_manager.has_method("set_ui_visible"):
@@ -230,7 +197,6 @@ func _on_battle_completed(
 	surv_atk: Array[UnitStack],
 	surv_def: Array[UnitStack]
 ) -> void:
-	## Возобновление мира.
 	if world_ctrl != null and world_ctrl.has_method("set_visible"):
 		world_ctrl.set_visible(true)
 	if ui_manager != null and ui_manager.has_method("set_ui_visible"):
@@ -259,7 +225,6 @@ func _on_battle_completed(
 	_roles_swapped = false
 
 
-## enemy-world-ai: победил ли ГЕРОЙ (при свопе ролей герой — защищающийся).
 func _hero_won(winner: BattleState.Side) -> bool:
 	if _roles_swapped:
 		return winner == BattleState.Side.DEFENDER
@@ -275,29 +240,21 @@ func _apply_results(
 		return
 
 	var hero_won: bool = _hero_won(winner)
-	## Выжившие юниты героя: при свопе герой — защищающаяся сторона.
 	var hero_survivors: Array[UnitStack] = surv_def if _roles_swapped else surv_atk
 
 	if hero.has_method("apply_battle_results"):
 		hero.call("apply_battle_results", hero_survivors)
 
-	## Fallback при полном уничтожении армии (РФ5-2: типизированный доступ)
 	var army_ref: Variant = hero.get("army")
 	if army_ref != null:
 		if army_ref is HeroArmyController:
 			if army_ref.army.is_empty():
 				var stack: UnitStack = _make_fallback_stack()
 				if stack != null:
-					# Типизированный массив: untyped `[stack]` в параметр
-					# Array[UnitStack] — runtime-ошибка в Godot 4.7 (бой с полным
-					# уничтожением армии оставлял героя без минимального стека).
 					var minimal: Array[UnitStack] = [stack]
 					army_ref.apply_battle_results(minimal)
 					GameLogger.hero("Hero routed: awarded minimal stack")
 
-	## succession-sigil: боевая смерть. При поражении полное уничтожение армии
-	## обнуляет combat_hp; combat_hp <= 0 = герой пал. Тогда — hero_died(&"battle")
-	## и отступление ОТКЛАЫВАЕТСЯ. Гат за battle_death_enabled.
 	if battle_death_enabled and not hero_won and hero != null:
 		if hero_survivors.is_empty() and hero.has_method("set_combat_hp"):
 			hero.call("set_combat_hp", 0)
@@ -311,7 +268,6 @@ func _apply_results(
 		if map_gen != null:
 			var stacks: Variant = map_gen.get("enemy_stacks")
 			if stacks is Dictionary:
-				## Снимок армии ДО удаления — для планирования роста (enemy-world-ai).
 				var defeated_army: Array = stacks.get(_pending_enemy_cell, [])
 				stacks.erase(_pending_enemy_cell)
 				enemy_stack_defeated.emit(_pending_enemy_cell, defeated_army)
@@ -324,7 +280,6 @@ func _apply_results(
 
 		_try_artifact_drop()
 
-		## UI refresh через хук (инъекция вместо прямого вызова).
 		if _on_ui_refresh.is_valid():
 			_on_ui_refresh.call()
 		elif ui_manager != null and ui_manager.has_method("refresh_ui"):
@@ -334,10 +289,6 @@ func _apply_results(
 		GameLogger.battle("Battle lost / retreated")
 
 
-## После отступления/поражения возвращает героя на позицию ДО контакта
-## (или на ближайшую безопасную клетку, если та сама даёт контакт).
-## Без этого герой остаётся на/вплотную к клетке непобеждённого врага, и любой
-## следующий шаг повторно триггерит бой с тем же врагом (герой «заперт»).
 func _restore_hero_after_retreat() -> void:
 	if hero == null or map_gen == null:
 		return
@@ -347,8 +298,6 @@ func _restore_hero_after_retreat() -> void:
 	var target := _pre_battle_cell
 	_pre_battle_cell = Vector2i(-1, -1)
 	if target == Vector2i(-1, -1) or not _is_safe_from_enemies(target):
-		# Позиция до контакта неизвестна или сама даёт контакт (например,
-		# герой шёл вдоль врага). Ищем ближайшую безопасную клетку.
 		target = _find_nearest_safe_cell(mov)
 	if target == Vector2i(-1, -1):
 		return
@@ -356,8 +305,6 @@ func _restore_hero_after_retreat() -> void:
 	mov.call("teleport", target)
 
 
-## Ближайшая безопасная клетка (не вражеская, без врагов по соседству) в
-## радиусе 1..4 от текущей позиции героя. Vector2i(-1,-1), если не найдена.
 func _find_nearest_safe_cell(mov) -> Vector2i:
 	var from_raw: Variant = mov.get("current_cell") if mov != null else null
 	if not (from_raw is Vector2i):
@@ -381,7 +328,6 @@ func _find_nearest_safe_cell(mov) -> Vector2i:
 	return Vector2i(-1, -1)
 
 
-## Клетка безопасна: на ней и на соседних нет вражеских стеков.
 func _is_safe_from_enemies(cell: Vector2i) -> bool:
 	var stacks: Variant = map_gen.get("enemy_stacks")
 	if not (stacks is Dictionary):
@@ -395,11 +341,9 @@ func _is_safe_from_enemies(cell: Vector2i) -> bool:
 
 
 func _make_fallback_stack() -> UnitStack:
-	## Безопасный вызов без жёсткой зависимости от autoload Units.
-	var units_reg: Node = ServiceLocator.resolve(null, &"units")
+	var units_reg: Node = Services.resolve(&"units")
 	if units_reg != null and units_reg.has_method("make_fixed_stack"):
 		return units_reg.make_fixed_stack("swordsmen", 10)
-	# Fallback: создать стек вручную
 	return UnitStack.new(null, 10)
 
 
@@ -409,8 +353,8 @@ func _try_artifact_drop() -> void:
 	var inv: Variant = hero.get("inventory")
 	if inv == null or not inv.has_method("add_to_backpack"):
 		return
-	if rng.randf() < MapConfig.MONSTER_DROP_CHANCE:
-		var art_reg: Node = ServiceLocator.resolve(null, &"artifacts")
+	if rng.randf() < GameNumbers.MONSTER_DROP_CHANCE:
+		var art_reg: Node = Services.resolve(&"artifacts")
 		var arts: Array[Artifact] = art_reg.get_by_rarity(Artifact.Rarity.MINOR)
 		if arts.size() > 0:
 			var drop: Artifact = arts[rng.randi() % arts.size()]
@@ -420,7 +364,6 @@ func _try_artifact_drop() -> void:
 				GameLogger.world("Backpack full, drop lost!")
 
 
-# ==================== ПУБЛИЧНЫЙ API ====================
 
 func get_pending_enemy_cell() -> Vector2i:
 	return _pending_enemy_cell

@@ -1,6 +1,5 @@
 class_name Season
 extends RefCounted
-## Сезоны по номеру месяца (1..12) и модификаторы циклического притока.
 
 enum ID { SPRING, SUMMER, AUTUMN, WINTER }
 
@@ -19,8 +18,8 @@ static func from_month(month: int) -> ID:
 static func growth_modifier(s: ID) -> float:
 	match s:
 		ID.WINTER:
-			return CityBalance.INFLOW_WINTER_MOD
+			return GameNumbers.INFLOW_WINTER_MOD
 		ID.SUMMER:
-			return CityBalance.INFLOW_SUMMER_MOD
+			return GameNumbers.INFLOW_SUMMER_MOD
 		_:
-			return CityBalance.INFLOW_SPRING_AUTUMN_MOD
+			return GameNumbers.INFLOW_SPRING_AUTUMN_MOD

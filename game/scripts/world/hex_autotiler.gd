@@ -1,21 +1,5 @@
 class_name HexAutotiler
 extends RefCounted
-## HexAutotiler — выбирает и кладёт тайлы на TileMapLayer по сетке биомов.
-##
-## Использование:
-##   var atlas := TileAtlas.new()
-##   assert(atlas.build())
-##   var autotiler := HexAutotiler.new(atlas)
-##   var layer := TileMapLayer.new()
-##   layer.tile_set = atlas.tileset()
-##   autotiler.apply(layer, grid, origin, rng)
-##
-## grid: Dictionary Vector2i -> int (TileAtlas.Biome) — локальные координаты;
-## origin — смещение при отрисовке на слое.
-##
-## Маска соседей: N=1, E=2, S=4, W=8 (своя сторона = бит не выставлен).
-## Дорога рисуется отдельно: на листе нет прямых дорог, только две диагональные
-## полосы (alt 0 = NW-SE, alt 1 = NE-SW).
 
 const N := 1
 const E := 2
@@ -32,7 +16,6 @@ func _init(atlas_: TileAtlas) -> void:
 	atlas = atlas_
 
 
-## Простая детерминированная сетка: базовый биом + круглые пятна.
 static func make_grid(w: int, h: int, base: int, blobs: Array, rng: RandomNumberGenerator) -> Dictionary:
 	var grid := {}
 	for y in h:
@@ -63,7 +46,6 @@ func apply(layer: TileMapLayer, grid: Dictionary, origin: Vector2i = Vector2i.ZE
 		layer.set_cell(origin + c, TileAtlas.SOURCE_ID, choice["atlas"], choice["alt"])
 
 
-## Публичный выбор одной клетки (обёртка над _choose для интеграции).
 func choose_tile(me: int, grid: Dictionary, c: Vector2i,
 		rng: RandomNumberGenerator = null) -> Dictionary:
 	if rng == null:
@@ -71,24 +53,20 @@ func choose_tile(me: int, grid: Dictionary, c: Vector2i,
 	return _choose(me, grid, c, rng)
 
 
-## Совместимость с прежним именем.
 func choose(biome: int, grid: Dictionary, c: Vector2i,
 		rng: RandomNumberGenerator = null) -> Dictionary:
 	return choose_tile(biome, grid, c, rng)
 
 
-## Выбор тайла: { "atlas": Vector2i, "alt": int }.
 func _choose(me: int, grid: Dictionary, c: Vector2i, rng: RandomNumberGenerator) -> Dictionary:
 	var m := _mask(me, grid, c)
 	if m == 0:
 		return _base(me, rng)
 	if me == TileAtlas.Biome.ROAD:
 		return _road_tile(me, grid, c)
-	# остров: со всех сторон чужое — рисуем свою базу (bug: раньше рисовал базу соседа)
 	if m == (N | E | S | W):
 		return _base(me, rng)
 	var other := _other_biom(me, grid, c)
-	# сосед-дорога: дорога рисуется как полоса, клетка у её края
 	if other == TileAtlas.Biome.ROAD:
 		return _road_tile(me, grid, c)
 	var n := _popcount(m)
@@ -127,7 +105,6 @@ func _choose_one(me: int, other: int, grid: Dictionary, c: Vector2i, m: int,
 	var side := _side_of_bit(m)
 	var p := atlas.pick(me, other, "edge", side)
 	if p.is_empty():
-		# edge-варианта нет (на листе только diag) — пробуем ближайшую диагональ
 		var corner := _diag_corner_of_other(me, grid, c, side)
 		p = atlas.pick(me, other, "diag", corner)
 	if not p.is_empty():
@@ -159,7 +136,6 @@ func _adjacent(a: String, b: String) -> bool:
 	var ia := _SIDE_ORDER.find(a)
 	var ib := _SIDE_ORDER.find(b)
 	var d := (ia - ib + 4) % 4
-	# bugfix: d==1 или d==3 — соседние стороны; d==2 — противоположные
 	return d == 1 or d == 3
 
 
@@ -214,7 +190,6 @@ func _road_tile(me: int, grid: Dictionary, c: Vector2i) -> Dictionary:
 	return { "atlas": Vector2i(3, 1), "alt": alt }
 
 
-## Дорога сама в клетке: выбираем, какая из двух диагональных полос подходит.
 func _road_own_alt(grid: Dictionary, c: Vector2i) -> int:
 	var road := TileAtlas.Biome.ROAD
 	var nw := _biom_at(grid, c + Vector2i(-1, -1))
@@ -228,8 +203,6 @@ func _road_own_alt(grid: Dictionary, c: Vector2i) -> int:
 	return 0
 
 
-## Чужая клетка у дороги: определяем направление полосы по стороне,
-## откуда пришла дорога, и ставим перпендикулярную/соосную полосу.
 func _road_neighbor_alt(grid: Dictionary, c: Vector2i) -> int:
 	var road := TileAtlas.Biome.ROAD
 	var nw := _biom_at(grid, c + Vector2i(-1, -1))
@@ -243,7 +216,6 @@ func _road_neighbor_alt(grid: Dictionary, c: Vector2i) -> int:
 	for side in _SIDE_ORDER:
 		var p := c + _delta(side)
 		if grid.has(p) and grid[p] == road:
-			# дорога на E/W -> полоса alt 1 (NE-SW); на N/S -> alt 0 (NW-SE)
 			return 1 if side == "E" or side == "W" else 0
 	return 0
 

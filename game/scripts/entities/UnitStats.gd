@@ -1,6 +1,5 @@
 class_name UnitStats
 extends RefCounted
-## Immutable definition of a unit type.
 
 var key: String = ""
 var display_name: String = ""
@@ -36,7 +35,5 @@ func has_tag(tag: String) -> bool:
     return tags.has(tag)
 
 
-## Копия определения: рантайм-стаки мутят статы (артефакты, бой),
-## поэтому каждая UnitStack владеет собственным экземпляром (РФ6-1).
 func copy() -> UnitStats:
     return UnitStats.new(key, display_name, attack, base_damage, hp, speed, defense, tags)

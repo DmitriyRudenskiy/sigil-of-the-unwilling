@@ -1,23 +1,6 @@
 class_name AdjacencySystem
 extends RefCounted
-## Спринт 8: Матрица adjacency-бонусов города.
-##
-## Два вида эффектов:
-##  1. Производственный (building_output_mult) — множитель выходов
-##     цепочки здания по соседним зданиям:
-##       мельница у 2+ полей  -> x1.5
-##       кузница у рудника    -> x3.0  (концепт: "+2 к выходу" при базе 1)
-##  2. Репутационный (reputation_bonus) — суммарная дельта репутации
-##     за ход:
-##       храм/таверна у жилья -> +2 за здание
-##       особняк у рудника    -> -2 за здание
-##
-## Соседство — 6 hex-клеток (HexUtils.get_all_neighbors).
-## Статика, без нод Godot.
 
-## "def_id" -> {сосед-предикат: {count, output_mult}}.
-## Предикаты: StringName def_id соседа либо &"housing" (любой
-## жилой объект, Спринт 7).
 const OUTPUT_MATRIX: Dictionary = {
 	&"mill": {
 		&"farm": {"count": 2, "output_mult": 1.5},
@@ -27,7 +10,6 @@ const OUTPUT_MATRIX: Dictionary = {
 	},
 }
 
-## "def_id" -> {сосед-предикат: {count, rep}}.
 const REPUTATION_MATRIX: Dictionary = {
 	&"great_temple": {
 		&"housing": {"count": 1, "rep": 2},
@@ -41,7 +23,6 @@ const REPUTATION_MATRIX: Dictionary = {
 }
 
 
-## Жилой ли объект (имеет хотя бы один слот жилья).
 static func is_housing(def: UniqueBuilding.Def) -> bool:
 	if def == null:
 		return false
@@ -51,8 +32,6 @@ static func is_housing(def: UniqueBuilding.Def) -> bool:
 	return false
 
 
-## Число соседей на клетках, удовлетворяющих предикату (def_id или
-## &"housing").
 static func _neighbor_count(city: City, cell: Vector2i, predicate: StringName) -> int:
 	var n := 0
 	for nb in HexUtils.get_all_neighbors(cell):
@@ -67,7 +46,6 @@ static func _neighbor_count(city: City, cell: Vector2i, predicate: StringName) -
 	return n
 
 
-## Множитель выходов цепочки здания (1.0 = без бонусов).
 static func building_output_mult(city: City, building: UniqueBuilding) -> float:
 	if city == null or building == null or building.def == null:
 		return 1.0
@@ -82,7 +60,6 @@ static func building_output_mult(city: City, building: UniqueBuilding) -> float:
 	return mult
 
 
-## Суммарный репутационный бонус города за ход.
 static func reputation_bonus(city: City) -> int:
 	if city == null:
 		return 0

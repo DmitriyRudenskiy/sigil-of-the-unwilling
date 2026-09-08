@@ -1,21 +1,9 @@
-## scripts/battle/BattleActionResolver.gd
 class_name BattleActionResolver
 extends RefCounted
-## Вся боевая логика: атака, заклинания, чардж, ребёрт, первый удар.
-## BattleState передаётся как параметр — резолвер НЕ хранит состояние.
-##
-## Использование:
-##   var result := BattleActionResolver.apply_attack(state, atk, def, true, rng)
-##   var spell_result := BattleActionResolver.apply_spell(state, id, caster, target, ...)
 
-const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
-const ServiceLocator = preload("res://scripts/core/ServiceLocator.gd")
 const BattleDamageResolver = preload("res://scripts/systems/BattleDamageResolver.gd")
 
 
-# ==================== АТАКА ====================
-## Полный цикл атаки: первый удар → урон → чардж → ребёрт → мутация состояния.
-## Возвращает Dictionary с результатом (damage, kills, first_strike, charge, rebirth, ...).
 static func apply_attack(
 	state: BattleState,
 	atk: BattleState.BattleUnit,
@@ -31,15 +19,12 @@ static func apply_attack(
 	var attacker_bonus: int = bonuses[0]
 	var defender_bonus: int = bonuses[1]
 
-	# Первый удар (до основной атаки)
 	var first_strike_triggered := _apply_first_strike(
 		state, atk, def, is_melee_attack, rng, attacker_bonus, defender_bonus
 	)
 
-	# Множитель чарджа
 	var charge_mult := _get_charge_multiplier(atk)
 
-	# Основной расчёт урона через BattleDamageResolver
 	var ctx := {
 		"is_melee": is_melee_attack,
 		"rng": rng,
@@ -50,12 +35,10 @@ static func apply_attack(
 	if result.is_empty():
 		return result
 
-	# Чардж
 	if first_strike_triggered:
 		result["first_strike"] = true
 	result = _apply_charge(atk, def, result, charge_mult)
 
-	# Мутация состояния
 	def.set_count(def.get_count() - int(result.get("kills", 0)))
 	if consume_action:
 		atk.has_moved = true
@@ -69,9 +52,6 @@ static func apply_attack(
 	return result
 
 
-# ==================== ЗАКЛИНАНИЕ ====================
-## Полный цикл каста: валидация → урон/эффект → мутация состояния.
-## `registry` — SpellRegistry (инъекция вместо autoload `Spells`).
 static func apply_spell(
 	state: BattleState,
 	spell_id: StringName,
@@ -80,7 +60,7 @@ static func apply_spell(
 	caster_hero_bonus: Dictionary,
 	target_hero_bonus: Dictionary,
 	rng: RandomNumberGenerator,
-	registry: Node = null  # SpellRegistry; null → ServiceLocator.resolve
+	registry: Node = null  
 ) -> Dictionary:
 	var is_res := spell_id == &"resurrection"
 	if caster == null or target == null or not caster.is_alive():
@@ -90,28 +70,25 @@ static func apply_spell(
 	if not is_res and not target.is_alive():
 		return {"result": "invalid_target"}
 
-	# Инъекция реестра: параметр → ServiceLocator → autoload
-	var spell_registry: Node = ServiceLocator.resolve(registry, &"spells")
+	# ИСПРАВЛЕНИЕ: единый путь
+	var spell_registry: Node = registry if registry != null else Services.resolve(&"spells")
 
 	var result := SpellCaster.cast(
 		spell_id, target, caster_hero_bonus, target_hero_bonus, rng, spell_registry
 	)
 
 	if result.get("result") == "success":
-		# Обработка урона
 		if result.has("damage") and int(result.get("damage", 0)) > 0:
 			var kills := int(result.get("kills", 0))
 			target.set_count(target.get_count() - kills)
 			if target.get_count() <= 0:
 				state.kill_unit(target)
-		# Обработка исцеления
 		if result.has("heal") and int(result.get("heal", 0)) > 0:
 			var hp: int = maxi(1, int(target.get_hp()))
 			var healed := mini(int(result.get("heal", 0)) / hp, target.max_count - target.get_count())
 			if healed > 0:
 				target.set_count(target.get_count() + healed)
 				result["healed"] = healed
-		# Обработка воскрешения (РФ4-2)
 		if result.has("revive_count"):
 			target.set_count(int(result["revive_count"]))
 			state.revive_unit(target)
@@ -122,23 +99,6 @@ static func apply_spell(
 	return result
 
 
-# ==================== ЖЕРТВА ====================
-## Жертва: доубивание цели (в обход перерождения) + расход стоимости
-## (союзник-стек, ресурс из экономики, артефакт) и одного хода.
-## Параллельно apply_attack/apply_spell. Возвращает:
-##   {"result":"success", "finished":target, "cost_type":...} — успех
-##   {"result":"invalid_actor"} — действующий юнит мёртв/null
-##   {"result":"invalid_target"} — цель мёртва/null
-##   {"result":"invalid_cost"} — описание жертвы неверно / нет союзника
-##   {"result":"insufficient_cost"} — ресурса/артефакта недостаточно
-## Изменения доски НЕ происходит при невалидном результате.
-##
-## Описание жертвы `sacrifice`:
-##   {"type":"follower", "unit": <BattleUnit>} — союзник на стороне acting
-##   {"type":"resource", "resource": &"gold", "amount": <int>} — расход из экономики
-##   {"type":"artifact", "slot": &"weapon"} — снятие с equipped (cost = HeroInventory)
-## `cost` — backing-хранилище для resource/artifact (storage-dict / HeroInventory);
-## для follower игнорируется (юнит лежит в sacrifice).
 static func apply_sacrifice(
 	state: BattleState,
 	acting: BattleState.BattleUnit,
@@ -147,7 +107,6 @@ static func apply_sacrifice(
 	cost: Variant,
 	rng: RandomNumberGenerator
 ) -> Dictionary:
-	# --- Валидация (без мутации доски) ---
 	if acting == null or not acting.is_alive():
 		return {"result": "invalid_actor"}
 	if target == null or not target.is_alive():
@@ -183,11 +142,9 @@ static func apply_sacrifice(
 	else:
 		return {"result": "invalid_cost"}
 
-	# --- Разрешение: доубиваем цель (в обход rebirth) ---
 	target.set_count(0)
 	state.kill_unit(target)
 
-	# --- Расход стоимости ---
 	if cost_type == &"follower":
 		state.kill_unit(sacrifice.get("unit"))
 	elif cost_type == &"resource":
@@ -218,7 +175,6 @@ static func _inventory_remove_artifact(inventory: Variant, slot: Variant) -> voi
 	elif inventory is Dictionary:
 		inventory[slot] = null
 
-# ==================== ПРИВАТНЫЕ ХЕЛПЕРЫ ====================
 static func _get_hero_bonuses(
 	state: BattleState,
 	atk: BattleState.BattleUnit,
@@ -255,7 +211,7 @@ static func _apply_first_strike(
 
 static func _get_charge_multiplier(atk: BattleState.BattleUnit) -> float:
 	if atk.has_tag("charge") and atk.distance_moved_this_turn >= 3:
-		return BattleConfig.CHARGE_MULT
+		return GameNumbers.CHARGE_MULT
 	return 1.0
 
 
@@ -283,7 +239,7 @@ static func _try_rebirth(
 ) -> bool:
 	if def == null or not def.has_tag("rebirth") or def.already_reborn:
 		return false
-	if rng.randf() >= BattleConfig.REBIRTH_CHANCE:
+	if rng.randf() >= GameNumbers.REBIRTH_CHANCE:
 		return false
 	def.already_reborn = true
 	def.set_count(max(1, int(def.max_count * 0.5)))

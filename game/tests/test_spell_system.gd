@@ -1,5 +1,4 @@
-extends "res://tests/gut_base.gd"
-## Тесты карточной системы заклинаний: реестр, шаблоны, резолвер.
+extends GdUnitTestSuite
 
 const _Registry = preload("res://scripts/autoload/SpellbookRegistry.gd")
 const _Def = preload("res://scripts/data/SpellbookDef.gd")
@@ -9,53 +8,49 @@ const _Resolver = preload("res://scripts/data/SpellResolver.gd")
 
 var registry: Variant = null
 
-func before_each() -> void:
+func before_test() -> void:
 	registry = _Registry.new()
 	registry.name = "TestReg"
 	registry.ensure_definitions()
 
-## SpellbookRegistry — это Node (Object): без free() каждый из ~1700 тестов
-## утаскивает в ObjectDB весь реестр с картами.
-func after_each() -> void:
+func after_test() -> void:
 	if registry != null:
 		registry.free()
 		registry = null
 
 
-# ==================== ENUM PARSING ====================
 
 func test_parse_target_enemy_unit() -> void:
-	assert_eq(_Enums.parse_target("ENEMY_UNIT"), _Enums.TargetType.ENEMY_UNIT, "parse ENEMY_UNIT")
+	assert_that(_Enums.parse_target("ENEMY_UNIT")).is_equal(_Enums.TargetType.ENEMY_UNIT)
 
 func test_parse_target_all_ally() -> void:
-	assert_eq(_Enums.parse_target("ALL_ALLY_UNITS"), _Enums.TargetType.ALL_ALLY_UNITS, "parse ALL_ALLY_UNITS")
+	assert_that(_Enums.parse_target("ALL_ALLY_UNITS")).is_equal(_Enums.TargetType.ALL_ALLY_UNITS)
 
 func test_parse_target_unknown_defaults_none() -> void:
-	assert_eq(_Enums.parse_target("INVALID"), _Enums.TargetType.NONE, "unknown → NONE")
+	assert_that(_Enums.parse_target("INVALID")).is_equal(_Enums.TargetType.NONE)
 
 func test_parse_effect_destroy() -> void:
-	assert_eq(_Enums.parse_effect("DESTROY"), _Enums.EffectType.DESTROY, "parse DESTROY")
+	assert_that(_Enums.parse_effect("DESTROY")).is_equal(_Enums.EffectType.DESTROY)
 
 func test_parse_status_frozen() -> void:
-	assert_eq(_Enums.parse_status("FROZEN"), _Enums.StatusType.FROZEN, "parse FROZEN")
+	assert_that(_Enums.parse_status("FROZEN")).is_equal(_Enums.StatusType.FROZEN)
 
 func test_parse_speed_fast() -> void:
-	assert_eq(_Enums.parse_speed("fast"), _Enums.SpellSpeed.FAST, "parse fast")
+	assert_that(_Enums.parse_speed("fast")).is_equal(_Enums.SpellSpeed.FAST)
 
 func test_parse_speed_slow() -> void:
-	assert_eq(_Enums.parse_speed("slow"), _Enums.SpellSpeed.SLOW, "parse slow")
+	assert_that(_Enums.parse_speed("slow")).is_equal(_Enums.SpellSpeed.SLOW)
 
 func test_parse_speed_burst() -> void:
-	assert_eq(_Enums.parse_speed("burst"), _Enums.SpellSpeed.BURST, "parse burst")
+	assert_that(_Enums.parse_speed("burst")).is_equal(_Enums.SpellSpeed.BURST)
 
 func test_parse_speed_unknown_defaults_fast() -> void:
-	assert_eq(_Enums.parse_speed("invalid"), _Enums.SpellSpeed.FAST, "unknown → FAST")
+	assert_that(_Enums.parse_speed("invalid")).is_equal(_Enums.SpellSpeed.FAST)
 
 func test_parse_color_fire() -> void:
-	assert_eq(_Enums.parse_color("FIRE"), _Enums.SpellColor.FIRE, "parse FIRE")
+	assert_that(_Enums.parse_color("FIRE")).is_equal(_Enums.SpellColor.FIRE)
 
 
-# ==================== SPELL DEF FROM DICT ====================
 
 func test_def_from_dict_ice_bolt() -> void:
 	var d := {
@@ -64,11 +59,11 @@ func test_def_from_dict_ice_bolt() -> void:
 		"params": {"amount": 2, "target": "ANY_NEXUS"},
 	}
 	var spell: Variant = _Def.from_dict(d)
-	assert_eq(spell.id, &"ice_bolt", "id")
-	assert_eq(spell.display_name, "Ice Bolt", "name")
-	assert_eq(spell.template, &"DIRECT_DAMAGE", "template")
-	assert_eq(spell.cost, 1, "cost")
-	assert_true(spell != null, "spell created")
+	assert_that(spell.id).is_equal(&"ice_bolt")
+	assert_that(spell.display_name).is_equal("Ice Bolt")
+	assert_that(spell.template).is_equal(&"DIRECT_DAMAGE")
+	assert_that(spell.cost).is_equal(1)
+	assert_bool(spell != null).is_true()
 
 func test_def_from_dict_with_condition() -> void:
 	var d := {
@@ -78,13 +73,13 @@ func test_def_from_dict_with_condition() -> void:
 		"condition": {"target_hp_max": 4},
 	}
 	var spell: Variant = _Def.from_dict(d)
-	assert_true(spell.condition.has("target_hp_max"), "condition parsed")
-	assert_eq(int(spell.condition["target_hp_max"]), 4, "hp max = 4")
+	assert_bool(spell.condition.has("target_hp_max")).is_true()
+	assert_that(int(spell.condition["target_hp_max"])).is_equal(4)
 
 func test_def_from_dict_empty() -> void:
 	var spell: Variant = _Def.from_dict({})
-	assert_eq(spell.id, &"", "empty id")
-	assert_eq(spell.template, &"", "empty template")
+	assert_that(spell.id).is_equal(&"")
+	assert_that(spell.template).is_equal(&"")
 
 func test_def_from_dict_secondary_effects() -> void:
 	var d := {
@@ -93,7 +88,7 @@ func test_def_from_dict_secondary_effects() -> void:
 		"secondary_effects": [{"effect": "DRAW", "count": 1}],
 	}
 	var spell: Variant = _Def.from_dict(d)
-	assert_eq(spell.secondary_effects.size(), 1, "1 secondary effect")
+	assert_that(spell.secondary_effects.size()).is_equal(1)
 
 func test_def_from_dict_influence_req() -> void:
 	var d := {
@@ -102,8 +97,8 @@ func test_def_from_dict_influence_req() -> void:
 		"params": {"amount": 5},
 	}
 	var spell: Variant = _Def.from_dict(d)
-	assert_eq(int(spell.influence_req["fire"]), 2, "fire req = 2")
-	assert_eq(int(spell.influence_req["time"]), 1, "time req = 1")
+	assert_that(int(spell.influence_req["fire"])).is_equal(2)
+	assert_that(int(spell.influence_req["time"])).is_equal(1)
 
 func test_def_to_dict_round_trip() -> void:
 	var d := {
@@ -113,60 +108,58 @@ func test_def_to_dict_round_trip() -> void:
 	}
 	var spell: Variant = _Def.from_dict(d)
 	var out: Variant = spell.to_dict()
-	assert_eq(out["id"], &"round", "round-trip id")
-	assert_eq(out["color"], "fire", "round-trip color")
-	assert_eq(out["speed"], "slow", "round-trip speed")
+	assert_that(out["id"]).is_equal(&"round")
+	assert_that(out["color"]).is_equal("fire")
+	assert_that(out["speed"]).is_equal("slow")
 
 
-# ==================== REGISTRY ====================
 
 func test_registry_fallback_loads() -> void:
-	assert_true(registry.get_count() > 0, "fallback loaded %d spells" % registry.get_count())
+	assert_bool(registry.get_count() > 0).is_true()
 
 func test_registry_get_spell() -> void:
 	var spell = registry.get_spell(&"ice_bolt")
-	assert_not_null(spell, "ice_bolt exists")
-	assert_eq(spell.template, &"DIRECT_DAMAGE", "template is DIRECT_DAMAGE")
+	assert_that(spell).is_not_null()
+	assert_that(spell.template).is_equal(&"DIRECT_DAMAGE")
 
 func test_registry_get_spell_missing() -> void:
 	var spell = registry.get_spell(&"nonexistent_spell")
-	assert_null(spell, "missing spell is null")
+	assert_that(spell).is_null()
 
 func test_registry_reset() -> void:
-	assert_true(registry.get_count() > 0, "has spells")
+	assert_bool(registry.get_count() > 0).is_true()
 	registry.reset()
-	assert_eq(registry.get_count(), 0, "empty after reset")
+	assert_that(registry.get_count()).is_equal(0)
 
 func test_registry_get_by_template() -> void:
 	var damage_spells: Array = registry.get_by_template(&"DIRECT_DAMAGE")
-	assert_true(damage_spells.size() > 0, "has damage spells")
+	assert_bool(damage_spells.size() > 0).is_true()
 	for spell in damage_spells:
-		assert_eq(spell.template, &"DIRECT_DAMAGE", "all are DIRECT_DAMAGE")
+		assert_that(spell.template).is_equal(&"DIRECT_DAMAGE")
 
 func test_registry_no_duplicate_ids() -> void:
 	var all: Array = registry.get_all()
 	var ids: Dictionary = {}
 	for spell in all:
-		assert_false(ids.has(spell.id), "no duplicate id: %s" % spell.id)
+		assert_bool(ids.has(spell.id)).is_false()
 		ids[spell.id] = true
 
 func test_registry_all_have_template() -> void:
 	for spell in registry.get_all():
-		assert_false(spell.template.is_empty(), "spell %s has template" % spell.id)
+		assert_bool(spell.template.is_empty()).is_false()
 
 func test_registry_all_have_cost() -> void:
 	for spell in registry.get_all():
-		assert_true(spell.cost >= 0, "spell %s cost >= 0" % spell.id)
+		assert_bool(spell.cost >= 0).is_true()
 
 func test_registry_template_count() -> void:
-	assert_true(registry.get_template_count() >= 5, "many templates represented")
+	assert_bool(registry.get_template_count() >= 5).is_true()
 
 
-# ==================== TEMPLATE ENGINE ====================
 
 func test_template_unknown_returns_error() -> void:
 	var result: Dictionary = _Engine.execute(&"NONEXISTENT", {}, {}, [], null, null, null)
-	assert_eq(result.get("result"), "unknown_template", "unknown template error")
+	assert_that(result.get("result")).is_equal("unknown_template")
 
 func test_all_templates_exist() -> void:
 	var templates := [
@@ -179,8 +172,8 @@ func test_all_templates_exist() -> void:
 	]
 	for t in templates:
 		var result: Dictionary = _Engine.execute(t, {}, {}, [], null, null, null)
-		assert_true(result.has("result"), "template %s returns result" % t)
-		assert_true(result.get("result") != "unknown_template", "template %s recognized" % t)
+		assert_bool(result.has("result")).is_true()
+		assert_bool(result.get("result") != "unknown_template").is_true()
 
 func test_template_count_is_16() -> void:
 	var templates := [
@@ -191,9 +184,8 @@ func test_template_count_is_16() -> void:
 		&"DISPEL_DRAW", &"MARKET_NICHE",
 		&"HEAL_CLEAR", &"REVIVE", &"PORTAL",
 	]
-	assert_eq(templates.size(), 19, "exactly 19 templates (16 + HEAL_CLEAR/REVIVE/PORTAL)")
+	assert_that(templates.size()).is_equal(19)
 
-# Лёгкий макет юнита: методы, которые вызывают новые обработчики.
 class _MockUnit extends RefCounted:
 	var _hp: int
 	var _debuffs: Array = []
@@ -221,37 +213,37 @@ func test_heal_clear_heals_and_clears_debuffs() -> void:
 	unit._debuffs.append(3)
 	var result: Dictionary = _Engine.execute(
 		&"HEAL_CLEAR", {"target": "ALLY_UNIT", "amount": 3}, {}, [], null, null, unit)
-	assert_eq(result["result"], "success", "HEAL_CLEAR resolves")
-	assert_eq(unit.get_hp(), 8, "heal adds amount")
-	assert_true(unit._debuffs.is_empty(), "debuffs cleared")
+	assert_that(result["result"]).is_equal("success")
+	assert_that(unit.get_hp()).is_equal(8)
+	assert_bool(unit._debuffs.is_empty()).is_true()
 	var types: Array = result["effects"]
-	assert_true(types.size() >= 2, "heal + debuff_clear effects present")
+	assert_bool(types.size() >= 2).is_true()
 
 func test_heal_clear_no_target() -> void:
 	var result: Dictionary = _Engine.execute(
 		&"HEAL_CLEAR", {"target": "ALLY_UNIT", "amount": 3}, {}, [], null, null, null)
-	assert_eq(result["result"], "no_target", "null target -> no_target")
+	assert_that(result["result"]).is_equal("no_target")
 
 func test_revive_resurrects_fallen_stack() -> void:
 	var unit := _MockUnit.new()
 	var result: Dictionary = _Engine.execute(
 		&"REVIVE", {"target": "ANY_UNIT", "amount": 2}, {}, [], null, null, unit)
-	assert_eq(result["result"], "success", "REVIVE resolves")
-	assert_eq(unit._revived, 2, "revive restores count")
+	assert_that(result["result"]).is_equal("success")
+	assert_that(unit._revived).is_equal(2)
 
 func test_portal_displaces_target() -> void:
 	var unit := _MockUnit.new()
 	var result: Dictionary = _Engine.execute(
 		&"PORTAL", {"target": "ALLY_UNIT", "to": "town"}, {}, [], null, null, unit)
-	assert_eq(result["result"], "success", "PORTAL resolves")
-	assert_eq(unit._displaced, "town", "target displaced to town")
+	assert_that(result["result"]).is_equal("success")
+	assert_that(unit._displaced).is_equal("town")
 
 func test_direct_damage_no_target() -> void:
 	var result: Dictionary = _Engine.execute(
 		&"DIRECT_DAMAGE", {"amount": 5, "target": "ENEMY_UNIT"}, {}, [], null, null, null
 	)
-	assert_eq(result["result"], "success", "success with no targets")
-	assert_true(result["effects"] is Array, "returns effects array")
+	assert_that(result["result"]).is_equal("success")
+	assert_bool(result["effects"] is Array).is_true()
 
 func test_direct_damage_dynamic_ally_count() -> void:
 	var caster: Dictionary = {"board": [1, 2, 3]}
@@ -259,141 +251,140 @@ func test_direct_damage_dynamic_ally_count() -> void:
 		&"DIRECT_DAMAGE", {"amount": 0, "amount_dynamic": "ally_count", "target": "ENEMY_UNIT"},
 		{}, [], null, caster, null
 	)
-	assert_eq(result["result"], "success", "success")
+	assert_that(result["result"]).is_equal("success")
 
 func test_hard_removal_no_target() -> void:
 	var result: Dictionary = _Engine.execute(
 		&"HARD_REMOVAL", {}, {}, [], null, null, null
 	)
-	assert_eq(result["result"], "no_target", "no target")
+	assert_that(result["result"]).is_equal("no_target")
 
 func test_bounce_no_target() -> void:
 	var result: Dictionary = _Engine.execute(
 		&"BOUNCE", {"target": "ALLY_UNIT"}, {}, [], null, null, null
 	)
-	assert_eq(result["result"], "no_target", "no target")
+	assert_that(result["result"]).is_equal("no_target")
 
 func test_countermagic_no_target() -> void:
 	var result: Dictionary = _Engine.execute(
 		&"COUNTERMAGIC", {}, {}, [], null, null, null
 	)
-	assert_eq(result["result"], "no_target", "no target")
+	assert_that(result["result"]).is_equal("no_target")
 
 func test_debuff_no_target() -> void:
 	var result: Dictionary = _Engine.execute(
 		&"DEBUFF_CONTROL", {"status": "SILENCE"}, {}, [], null, null, null
 	)
-	assert_eq(result["result"], "no_target", "no target")
+	assert_that(result["result"]).is_equal("no_target")
 
 func test_spell_draw_basic() -> void:
 	var caster: Dictionary = {"hand": []}
 	var result: Dictionary = _Engine.execute(
 		&"SPELL_DRAW", {"count": 2}, {}, [], null, caster, null
 	)
-	assert_eq(result["result"], "success", "success")
-	assert_true(result["effects"].size() > 0, "has effects")
+	assert_that(result["result"]).is_equal("success")
+	assert_bool(result["effects"].size() > 0).is_true()
 
 func test_mana_ramp_basic() -> void:
 	var caster: Dictionary = {"current_power": 5}
 	var result: Dictionary = _Engine.execute(
 		&"MANA_RAMP", {"power": 2, "influence": "fire"}, {}, [], null, caster, null
 	)
-	assert_eq(result["result"], "success", "success")
-	assert_true(result["effects"].size() > 0, "has effects")
+	assert_that(result["result"]).is_equal("success")
+	assert_bool(result["effects"].size() > 0).is_true()
 
 func test_token_generation_basic() -> void:
 	var result: Dictionary = _Engine.execute(
 		&"TOKEN_GENERATION", {"token_id": "soldier", "count": 3, "atk": 2, "hp": 2},
 		{}, [], null, null, null
 	)
-	assert_eq(result["result"], "success", "success")
-	assert_eq(result["effects"].size(), 3, "3 tokens")
+	assert_that(result["result"]).is_equal("success")
+	assert_that(result["effects"].size()).is_equal(3)
 
 func test_keyword_buff_no_target() -> void:
 	var result: Dictionary = _Engine.execute(
 		&"KEYWORD_BUFF", {"keyword": "ARMORED"}, {}, [], null, null, null
 	)
-	assert_eq(result["result"], "no_target", "no target")
+	assert_that(result["result"]).is_equal("no_target")
 
 func test_choice_cycle_draws() -> void:
 	var caster: Dictionary = {"hand": []}
 	var result: Dictionary = _Engine.execute(
 		&"CHOICE_CYCLE", {"draw": 1, "secondary": "HEAL_2"}, {}, [], null, caster, null
 	)
-	assert_eq(result["result"], "success", "success")
-	assert_true(result["effects"].size() >= 1, "has draw effect")
+	assert_that(result["result"]).is_equal("success")
+	assert_bool(result["effects"].size() >= 1).is_true()
 
 func test_touch_cycle_no_target() -> void:
 	var result: Dictionary = _Engine.execute(
 		&"TOUCH_CYCLE", {"atk": 1, "hp": 1}, {}, [], null, null, null
 	)
-	assert_eq(result["result"], "no_target", "no target")
+	assert_that(result["result"]).is_equal("no_target")
 
 func test_display_cycle_basic() -> void:
 	var caster: Dictionary = {}
 	var result: Dictionary = _Engine.execute(
 		&"DISPLAY_CYCLE", {"cost_reduction": 2, "influence": "time"}, {}, [], null, caster, null
 	)
-	assert_eq(result["result"], "success", "success")
+	assert_that(result["result"]).is_equal("success")
 
 func test_dispel_draw_not_enough() -> void:
 	var caster: Dictionary = {"hand": [1]}
 	var result: Dictionary = _Engine.execute(
 		&"DISPEL_DRAW", {"discard": 3, "draw": 1}, {}, [], null, caster, null
 	)
-	assert_eq(result["result"], "not_enough_cards", "not enough")
+	assert_that(result["result"]).is_equal("not_enough_cards")
 
 func test_dispel_draw_basic() -> void:
 	var caster: Dictionary = {"hand": [1, 2, 3]}
 	var result: Dictionary = _Engine.execute(
 		&"DISPEL_DRAW", {"discard": 1, "draw": 1}, {}, [], null, caster, null
 	)
-	assert_eq(result["result"], "success", "success")
+	assert_that(result["result"]).is_equal("success")
 
 func test_relic_interaction_no_target() -> void:
 	var result: Dictionary = _Engine.execute(
 		&"RELIC_INTERACTION", {"action": "destroy"}, {}, [], null, null, null
 	)
-	assert_eq(result["result"], "no_target", "no target")
+	assert_that(result["result"]).is_equal("no_target")
 
 func test_market_niche_basic() -> void:
 	var result: Dictionary = _Engine.execute(
 		&"MARKET_NICHE", {"action": "draw_from_market", "market_cost": 1}, {}, [], null, null, null
 	)
-	assert_eq(result["result"], "success", "success")
+	assert_that(result["result"]).is_equal("success")
 
 
-# ==================== RESOLVER ====================
 
 func test_resolve_null_spell() -> void:
 	var result: Dictionary = _Resolver.resolve(null, null, null)
-	assert_eq(result["result"], "invalid_spell", "invalid spell")
+	assert_that(result["result"]).is_equal("invalid_spell")
 
 func test_resolve_no_template() -> void:
 	var spell: Variant = _Def.from_dict({"id": "no_template", "cost": 0})
 	var result: Dictionary = _Resolver.resolve(spell, null, null)
-	assert_eq(result["result"], "no_template", "no template error")
+	assert_that(result["result"]).is_equal("no_template")
 
 func test_resolve_insufficient_power() -> void:
 	var spell = registry.get_spell(&"annihilate")
 	var player: Dictionary = {"current_power": 2}
 	var result: Dictionary = _Resolver.resolve(spell, null, player)
-	assert_eq(result["result"], "insufficient_power", "not enough power")
+	assert_that(result["result"]).is_equal("insufficient_power")
 
 func test_resolve_success_no_target() -> void:
 	var spell = registry.get_spell(&"bottled_insight")
 	var player: Dictionary = {"current_power": 10, "hand": []}
 	var result: Dictionary = _Resolver.resolve(spell, null, player)
-	assert_eq(result["result"], "success", "success")
-	assert_true(result.has("effects"), "has effects")
+	assert_that(result["result"]).is_equal("success")
+	assert_bool(result.has("effects")).is_true()
 
 func test_resolve_deducts_cost() -> void:
 	var spell = registry.get_spell(&"ice_bolt")
 	var player: Dictionary = {"current_power": 10, "hand": []}
 	var before: int = player.current_power
 	var result: Dictionary = _Resolver.resolve(spell, null, player)
-	assert_eq(result["result"], "success", "success")
-	assert_eq(player.current_power, before - spell.cost, "cost deducted")
+	assert_that(result["result"]).is_equal("success")
+	assert_that(player.current_power).is_equal(before - spell.cost)
 
 func test_resolve_insufficient_influence() -> void:
 	var spell: Variant = _Def.from_dict({
@@ -403,14 +394,13 @@ func test_resolve_insufficient_influence() -> void:
 	})
 	var player: Dictionary = {"current_power": 10, "influence": {"fire": 1}}
 	var result: Dictionary = _Resolver.resolve(spell, null, player)
-	assert_eq(result["result"], "insufficient_influence", "not enough influence")
+	assert_that(result["result"]).is_equal("insufficient_influence")
 
 func test_resolve_condition_not_met() -> void:
 	var spell = registry.get_spell(&"deathstrike")
 	var player: Dictionary = {"current_power": 10}
 	var result: Dictionary = _Resolver.resolve(spell, null, player, null)
-	# Без цели HARD_REMOVAL возвращает no_target — это корректное поведение.
-	assert_true(result["result"] in ["success", "condition_not_met", "no_target"], "resolved")
+	assert_bool(result["result"] in ["success", "condition_not_met", "no_target"]).is_true()
 
 func test_resolve_all_16_templates() -> void:
 	var templates := [
@@ -427,4 +417,4 @@ func test_resolve_all_16_templates() -> void:
 		})
 		var player: Dictionary = {"current_power": 10, "hand": [1]}
 		var result: Dictionary = _Resolver.resolve(spell, null, player)
-		assert_true(result["result"] != "unknown_template", "%s not unknown" % t)
+		assert_bool(result["result"] != "unknown_template").is_true()

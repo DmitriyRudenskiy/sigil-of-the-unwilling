@@ -1,7 +1,5 @@
-## scripts/data/templates/t19_portal.gd
 class_name T19Portal
 extends RefCounted
-## T19: PORTAL (аудит #8: вынесен из TemplateEngine).
 
 const _Utils = preload("res://scripts/data/SpellUtils.gd")
 

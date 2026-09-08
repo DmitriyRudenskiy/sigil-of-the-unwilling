@@ -1,23 +1,6 @@
 class_name SpellValidator
 extends RefCounted
-## Полный валидатор data/spells.json.
-## 7 уровней проверки: структура → поля → типы → enum → семантика → целостность → баланс.
-##
-## Коды ошибок:
-##   E0xx — файловая система / парсинг
-##   E1xx — структура записи
-##   E2xx — типы данных
-##   E3xx — недопустимые значения (вне диапазонов/множеств)
-##   E4xx — семантика шаблонов
-##   E5xx — целостность (уникальность, количество)
-##   E6xx — баланс и распределение
-##   E7xx — кросс-валидация с кодом
-##   W9xx — предупреждения (стиль, рекомендации)
 
-## Зависимости грузим из исходника (путь-независимо): при --path game нет
-## res://-маппинга на root/tools/, а load()/preload() по res://tools/... падают.
-## Каталог скрипта задаёт вызывающий (set_base_dir), так как загруженный из
-## исходника GDScript не знает свой реальный путь. Резерв — own resource_path.
 var _base_dir: String = ""
 
 func set_base_dir(path: String) -> void:
@@ -35,10 +18,6 @@ static func _load_src(path: String) -> Script:
 		return null
 	var text := fa.get_as_text()
 	fa.close()
-	# Убираем «class_name X» из динамически загружаемого исходника:
-	# иначе Godot ругается «hides a global script class», когда имя
-	# класса уже зарегистрировано глобально (такой класс уже есть в
-	# проекте). Само тело скрипта от этого не страдает.
 	var lines := text.split("\n", true)
 	var kept: Array = []
 	for line in lines:
@@ -52,9 +31,7 @@ static func _load_src(path: String) -> Script:
 
 var _report_script: Script
 
-# ==================== СПРАВОЧНИКИ (источник истины) ====================
 
-## 16 шаблонов. Значение — список ОБЯЗАТЕЛЬНЫХ параметров для этого шаблона.
 const TEMPLATES := {
 	"DIRECT_DAMAGE":    ["amount", "target"],
 	"HARD_REMOVAL":     [],
@@ -77,7 +54,6 @@ const TEMPLATES := {
 	"PORTAL":           ["target"],
 }
 
-## Допустимые цели
 const VALID_TARGETS := [
 	"NONE", "ALLY_UNIT", "ENEMY_UNIT", "ANY_UNIT",
 	"ALLY_NEXUS", "ENEMY_NEXUS", "ANY_NEXUS",
@@ -87,50 +63,37 @@ const VALID_TARGETS := [
 	"SELF", "SAME_AS_PREVIOUS",
 ]
 
-## Допустимые статусы/ключевые слова
 const VALID_STATUSES := [
 	"SILENCE", "FROZEN", "STUN", "QUICKDRAW", "UNBLOCKABLE",
 	"OVERWHELM", "ARMORED", "WARD", "CHALLENGE",
 	"CANNOT_BLOCK", "CANNOT_ATTACK", "FLYING",
 ]
 
-## Допустимые цвета/фракции
 const VALID_COLORS := [
 	"fire", "time", "justice", "primal", "shadow",
 	"multifaction", "colorless",
 ]
 
-## Допустимые скорости
 const VALID_SPEEDS := ["fast", "slow", "burst"]
 
-## Допустимые ключи условий
 const VALID_CONDITION_KEYS := [
 	"target_hp_max", "target_cost_max", "target_is_damaged",
 	"target_is_flying", "hand_size_max", "spell_cost_max",
 	"attacker_unblocked", "discard_cost", "min_ally_count",
 ]
 
-## Допустимые вторичные эффекты
 const VALID_SECONDARY_EFFECTS := [
 	"DRAW", "DEAL_DAMAGE", "HEAL_NEXUS", "APPLY_STATUS",
 ]
 
-## Допустимые значения RELIC_INTERACTION.action и MARKET_NICHE.action
 const VALID_RELIC_ACTIONS := ["destroy", "steal"]
 const VALID_MARKET_ACTIONS := ["draw_from_market", "trigger_on_discard", "repeat_attack"]
 
-## Допустимые значения CHOICE_CYCLE.secondary
 const VALID_CHOICE_SECONDARY := ["DEAL_1_DAMAGE", "BUFF_1_1", "HEAL_2", "GAIN_1_ARMOR"]
 
-## Базовая линия распределения (snapshot данных). Живёт в отдельном файле,
-## чтобы при легитимном росте карты правил CI не ломался хардкодом.
-## Обновление baseline: вручную перезаписать baseline.json (старый CLI
-## tools/spell_validation/validate_spells.gd удалён — see dev-tooling-rebuild 1.8).
-## Путь к baseline — относительно этого скрипта, а не через res:// (см. _dir()).
 func baseline_path() -> String:
 	return _dir().path_join("baseline.json")
 
-# Границы допустимых значений
 const COST_MIN := 0
 const COST_MAX := 10
 const DAMAGE_MIN := 1
@@ -142,13 +105,12 @@ const TOKEN_COUNT_MAX := 5
 const DRAW_COUNT_MIN := 1
 const DRAW_COUNT_MAX := 4
 
-# Стиль
 const MAX_NAME_LENGTH := 40
 const MAX_DESC_LENGTH := 200
 const ID_PATTERN := "^[a-z][a-z0-9_]*$"
 
 var report
-var _spells = []           # распарсенные записи
+var _spells = []           
 var _ids_seen = {}
 var _names_seen = {}
 var _baseline: Dictionary = {}
@@ -159,7 +121,6 @@ func _init(report_script: Script = null) -> void:
 	_report_script = report_script
 	report = _report_script.new()
 
-## Загрузить baseline. Пустой словарь, если файла нет или он битый.
 static func load_baseline(path: String) -> Dictionary:
 	if not FileAccess.file_exists(path):
 		return {}
@@ -172,12 +133,9 @@ static func load_baseline(path: String) -> Dictionary:
 		return _normalize_numbers(parsed)
 	return {}
 
-## Загрузить baseline в _baseline относительно текущего base_dir.
 func _load_baseline() -> void:
 	_baseline = load_baseline(baseline_path())
 
-## JSON.parse_string отдаёт целые как float — приводим числа к int,
-## чтобы baseline был сравним по равенству со срезом из build_baseline().
 static func _normalize_numbers(data: Dictionary) -> Dictionary:
 	var out := {}
 	for k in data:
@@ -190,22 +148,14 @@ static func _normalize_numbers(data: Dictionary) -> Dictionary:
 			out[k] = v
 	return out
 
-# ==================== ПУБЛИЧНЫЙ ВХОД ====================
 
-## Валидирует файл целиком. Возвращает true, если нет ошибок.
 func validate_file(path: String) -> bool:
-	# Сброс состояния для нового вызода
 	report = _report_script.new()
-	# Baseline грузим здесь (лениво), если он ещё не задан вызывающим.
-	# Это нужно, потому что base_dir (set_base_dir) устанавливается уже после
-	# конструктора, а в source-loaded валидаторе _dir() резолвится относительно
-	# пустого resource_path — поэтому грузить baseline в _init нельзя.
 	if _baseline.is_empty():
 		_load_baseline()
 	_spells = []
 	_ids_seen = {}
 	_names_seen = {}
-	# Уровень 0: файл
 	if not FileAccess.file_exists(path):
 		report.error("E001", "File does not exist: %s" % path)
 		return false
@@ -220,19 +170,15 @@ func validate_file(path: String) -> bool:
 
 	report.stats["file_size_bytes"] = text.length()
 
-	# Уровень 1: парсинг
 	if not _parse(text):
 		return false
 
-	# Уровень 2-4: каждая запись
 	for i in _spells.size():
 		_validate_entry(_spells[i], i)
 
-	# Уровень 5: целостность
 	_validate_uniqueness()
 	_validate_totals()
 
-	# Уровень 6: баланс
 	_validate_balance()
 
 	return not report.has_errors()
@@ -259,7 +205,6 @@ func _parse(text: String) -> bool:
 
 	return true
 
-# ==================== УРОВЕНЬ 2-4: ОДНА ЗАПИСЬ ====================
 
 func _validate_entry(entry, index: int) -> void:
 	if not (entry is Dictionary):
@@ -268,7 +213,6 @@ func _validate_entry(entry, index: int) -> void:
 
 	var spell_id: String = str(entry.get("id", ""))
 
-	# --- Обязательные поля ---
 	_require_field(entry, "id", "E101", index)
 	_require_field(entry, "name", "E102", index)
 	_require_field(entry, "template", "E103", index)
@@ -276,7 +220,6 @@ func _validate_entry(entry, index: int) -> void:
 	_require_field(entry, "cost", "E105", index)
 	_require_field(entry, "color", "E106", index)
 
-	# --- id: формат snake_case ---
 	if spell_id != "":
 		var regex := RegEx.new()
 		regex.compile(ID_PATTERN)
@@ -287,7 +230,6 @@ func _validate_entry(entry, index: int) -> void:
 		else:
 			_ids_seen[spell_id] = index
 
-	# --- name ---
 	var name: String = str(entry.get("name", ""))
 	if name.is_empty():
 		report.error("E301", "name is empty", spell_id)
@@ -299,17 +241,14 @@ func _validate_entry(entry, index: int) -> void:
 		else:
 			_names_seen[name.to_lower()] = index
 
-	# --- template ---
 	var template: String = str(entry.get("template", ""))
 	if template != "" and not TEMPLATES.has(template):
 		report.error("E302", "Unknown template '%s'. Valid: %s" % [template, _template_list()], spell_id)
 
-	# --- speed ---
 	var speed: String = str(entry.get("speed", ""))
 	if speed != "" and not VALID_SPEEDS.has(speed):
 		report.error("E303", "Invalid speed '%s'. Valid: %s" % [speed, ", ".join(VALID_SPEEDS)], spell_id)
 
-	# --- cost ---
 	var cost = entry.get("cost")
 	if cost != null:
 		if not (cost is int or cost is float):
@@ -317,18 +256,15 @@ func _validate_entry(entry, index: int) -> void:
 		elif int(cost) < COST_MIN or int(cost) > COST_MAX:
 			report.error("E304", "cost %d out of range [%d, %d]" % [int(cost), COST_MIN, COST_MAX], spell_id)
 
-	# --- color ---
 	var color: String = str(entry.get("color", ""))
 	if color != "" and not VALID_COLORS.has(color):
 		report.error("E305", "Invalid color '%s'. Valid: %s" % [color, ", ".join(VALID_COLORS)], spell_id)
 
-	# --- params ---
 	var params = entry.get("params", {})
 	if not (params is Dictionary):
 		report.error("E201", "params must be a Dictionary, got %s" % _type_name(params), spell_id)
 		params = {}
 
-	# --- condition ---
 	var condition = entry.get("condition", {})
 	if not (condition is Dictionary):
 		report.error("E202", "condition must be a Dictionary, got %s" % _type_name(condition), spell_id)
@@ -336,7 +272,6 @@ func _validate_entry(entry, index: int) -> void:
 	else:
 		_validate_condition(condition, spell_id)
 
-	# --- secondary_effects ---
 	var secondary = entry.get("secondary_effects", [])
 	if not (secondary is Array):
 		report.error("E203", "secondary_effects must be an Array, got %s" % _type_name(secondary), spell_id)
@@ -344,11 +279,9 @@ func _validate_entry(entry, index: int) -> void:
 	else:
 		_validate_secondary_effects(secondary, spell_id)
 
-	# --- Семантика шаблона ---
 	if TEMPLATES.has(template):
 		_validate_template_semantics(template, params, condition, entry, spell_id)
 
-	# --- description (опционально, но желательно) ---
 	if not entry.has("description"):
 		report.info("I001", "No description provided", spell_id)
 	else:
@@ -361,7 +294,6 @@ func _require_field(entry: Dictionary, field: String, code: String, index: int) 
 		var sid: String = str(entry.get("id", ""))
 		report.error(code, "Missing required field '%s' in entry #%d" % [field, index], sid)
 
-# ==================== УСЛОВИЯ ====================
 
 func _validate_condition(condition: Dictionary, spell_id: String) -> void:
 	for key in condition:
@@ -369,19 +301,16 @@ func _validate_condition(condition: Dictionary, spell_id: String) -> void:
 			report.error("E310", "Unknown condition key '%s'. Valid: %s" % [key, ", ".join(VALID_CONDITION_KEYS)], spell_id)
 			continue
 		var val = condition[key]
-		# Числовые ключи должны быть числами
 		if key in ["target_hp_max", "target_cost_max", "hand_size_max",
 				   "spell_cost_max", "discard_cost", "min_ally_count"]:
 			if not (val is int or val is float):
 				report.error("E210", "condition '%s' must be a number" % key, spell_id)
 			elif int(val) < 0:
 				report.error("E311", "condition '%s' must be >= 0" % key, spell_id)
-		# Булевы ключи
 		elif key in ["target_is_damaged", "target_is_flying", "attacker_unblocked"]:
 			if not (val is bool):
 				report.error("E211", "condition '%s' must be a bool" % key, spell_id)
 
-# ==================== ВТОРИЧНЫЕ ЭФФЕКТЫ ====================
 
 func _validate_secondary_effects(effects: Array, spell_id: String) -> void:
 	for i in effects.size():
@@ -393,7 +322,6 @@ func _validate_secondary_effects(effects: Array, spell_id: String) -> void:
 		if not VALID_SECONDARY_EFFECTS.has(eff_type):
 			report.error("E312", "Unknown secondary effect '%s'. Valid: %s" % [eff_type, ", ".join(VALID_SECONDARY_EFFECTS)], spell_id)
 			continue
-		# Числовые параметры вторичных эффектов
 		if eff_type in ["DRAW", "DEAL_DAMAGE", "HEAL_NEXUS"]:
 			var count = eff.get("count", eff.get("amount"))
 			if count == null:
@@ -401,13 +329,11 @@ func _validate_secondary_effects(effects: Array, spell_id: String) -> void:
 			elif not (count is int or count is float) or int(count) < 1:
 				report.error("E314", "Secondary effect '%s' count/amount must be >= 1" % eff_type, spell_id)
 
-# ==================== СЕМАНТИКА ШАБЛОНОВ ====================
 
 func _validate_template_semantics(
 	template: String, params: Dictionary, condition: Dictionary,
 	entry: Dictionary, spell_id: String
 ) -> void:
-	# Обязательные параметры для шаблона
 	var required = TEMPLATES.get(template, [])
 	for req in required:
 		if not params.has(req):
@@ -444,7 +370,6 @@ func _v_direct_damage(params: Dictionary, sid: String) -> void:
 		if dyn not in ["ally_count", "enemy_count", "hand_size"]:
 			report.error("E412", "Invalid amount_dynamic '%s'. Valid: ally_count, enemy_count, hand_size" % dyn, sid)
 	_check_target(params, sid, ["ENEMY_UNIT", "ANY_UNIT", "ANY_NEXUS", "ENEMY_NEXUS", "ALL_ENEMY_UNITS"])
-	# Статус при уроне (Ice Bolt → FROZEN)
 	if params.has("apply_status"):
 		_check_status(str(params.get("apply_status")), sid)
 
@@ -453,7 +378,6 @@ func _v_hard_removal(params: Dictionary, condition: Dictionary, sid: String) -> 
 		report.error("E220", "ignore_ward must be bool", sid)
 	if params.has("exile") and not (params["exile"] is bool):
 		report.error("E221", "exile must be bool", sid)
-	# Условие для условного удаления
 	var has_condition: bool = condition.size() > 0
 	var has_no_condition_reason: bool = params.has("unconditional")
 	if not has_condition and not has_no_condition_reason:
@@ -475,12 +399,10 @@ func _v_countermagic(params: Dictionary, sid: String) -> void:
 		_check_int_range(params["draw_on_counter"], 1, DRAW_COUNT_MAX, "E415", "draw_on_counter", sid)
 
 func _v_combat_trick(params: Dictionary, sid: String) -> void:
-	# atk/hp — числа или *_dynamic
 	for stat in ["atk", "hp"]:
 		var has_val: bool = params.has(stat)
 		var has_dyn: bool = params.has(stat + "_dynamic")
 		if not has_val and not has_dyn:
-			# Может быть только статус — ок
 			continue
 		if has_val:
 			_check_int_range(params[stat], STAT_MOD_MIN, STAT_MOD_MAX, "E416", stat, sid)
@@ -490,7 +412,6 @@ func _v_combat_trick(params: Dictionary, sid: String) -> void:
 				report.error("E417", "Invalid %s_dynamic '%s'" % [stat, dyn], sid)
 	if params.has("heal"):
 		_check_int_range(params["heal"], 1, DAMAGE_MAX, "E418", "heal", sid)
-	# Цель для боевых хитростей — обычно союзник или все союзники
 	if params.has("target"):
 		_check_target(params, sid, ["ALLY_UNIT", "ALL_ALLY_UNITS"])
 
@@ -505,7 +426,6 @@ func _v_debuff_control(params: Dictionary, sid: String) -> void:
 	for stat in ["atk", "hp"]:
 		if params.has(stat):
 			_check_int_range(params[stat], STAT_MOD_MIN, STAT_MOD_MAX, "E421", stat, sid)
-			# Для дебаффа значения должны быть отрицательными (предупреждение)
 			if int(params[stat]) > 0:
 				report.warning("W911", "DEBUFF_CONTROL has positive %s=%s (buff?)" % [stat, params[stat]], sid)
 	if has_control and not (params["change_control"] is bool):
@@ -521,7 +441,6 @@ func _v_spell_draw(params: Dictionary, condition: Dictionary, sid: String) -> vo
 		_check_int_range(params["scout"], 1, 5, "E424", "scout", sid)
 	if params.has("opponent_draw"):
 		_check_int_range(params["opponent_draw"], 1, DRAW_COUNT_MAX, "E425", "opponent_draw", sid)
-	# Если есть hand_max, это должно быть условие, не параметр
 	if params.has("hand_max"):
 		report.warning("W912", "hand_max should be in 'condition', not 'params'", sid)
 
@@ -537,7 +456,6 @@ func _v_token_generation(params: Dictionary, sid: String) -> void:
 	if token_id == null or str(token_id).is_empty():
 		report.error("E430", "TOKEN_GENERATION requires non-empty token_id", sid)
 	elif str(token_id) != "random_cheap":
-		# Для конкретных токенов проверяем статы
 		for stat in ["atk", "hp"]:
 			if params.has(stat):
 				_check_int_range(params[stat], 0, STAT_MOD_MAX, "E431", stat, sid)
@@ -577,7 +495,6 @@ func _v_choice_cycle(params: Dictionary, sid: String) -> void:
 func _v_touch_cycle(params: Dictionary, sid: String) -> void:
 	_check_int_range(params.get("atk"), 0, 3, "E438", "atk", sid)
 	_check_int_range(params.get("hp"), 0, 3, "E439", "hp", sid)
-	# Touch cycle — перманентный бафф, оба значения должны быть >= 0
 	if int(params.get("atk", 0)) < 0 or int(params.get("hp", 0)) < 0:
 		report.error("E440", "TOUCH_CYCLE must be a buff (non-negative stats)", sid)
 
@@ -617,10 +534,8 @@ func _v_market_niche(params: Dictionary, sid: String) -> void:
 		if not params.has("trigger_effect"):
 			report.error("E447", "trigger_on_discard requires 'trigger_effect'", sid)
 
-# ==================== УРОВЕНЬ 5: ЦЕЛОСТНОСТЬ ====================
 
 func _validate_uniqueness() -> void:
-	# Уникальность проверяется в _validate_entry (_ids_seen / _names_seen)
 	pass
 
 func _validate_totals() -> void:
@@ -641,7 +556,6 @@ func _validate_totals() -> void:
 		if template_actual != expected:
 			report.warning("W921", "Template '%s': expected %d (baseline), got %d" % [template, expected, template_actual])
 
-## Текущее распределение в формате baseline: {"total": N, "templates": {...}}
 func build_baseline() -> Dictionary:
 	var templates := {}
 	for entry in _spells:
@@ -655,7 +569,6 @@ func build_baseline() -> Dictionary:
 		sorted_templates[k] = templates[k]
 	return {"total": _spells.size(), "templates": sorted_templates}
 
-## Сохранить baseline из текущей валидированной выборки.
 func save_baseline(path: String) -> bool:
 	var data = build_baseline()
 	var fa := FileAccess.open(path, FileAccess.WRITE)
@@ -666,7 +579,6 @@ func save_baseline(path: String) -> bool:
 	fa.close()
 	return true
 
-# ==================== УРОВЕНЬ 6: БАЛАНС ====================
 
 func _validate_balance() -> void:
 	var template_counts = {}
@@ -686,10 +598,8 @@ func _validate_balance() -> void:
 		cost_counts[cost] = int(cost_counts.get(cost, 0)) + 1
 		speed_counts[sp] = int(speed_counts.get(sp, 0)) + 1
 
-	# --- Распределение по шаблонам (drift против baseline проверяется в _validate_totals) ---
 	report.stats["template_distribution"] = template_counts
 
-	# --- Распределение по цветам ---
 	report.stats["color_distribution"] = color_counts
 	var max_color := 0
 	var min_color := 999999
@@ -697,23 +607,19 @@ func _validate_balance() -> void:
 		max_color = maxi(max_color, int(color_counts[c]))
 		min_color = mini(min_color, int(color_counts[c]))
 	if color_counts.size() > 1 and float(max_color) > float(min_color) * 4.0:
-		# Наблюдение за балансом дизайна — advisory, не блокирует CI.
 		report.info("I922", "Color imbalance: max=%d, min=%d (ratio %.1f)" % [max_color, min_color, float(max_color) / float(min_color)])
 
-	# --- Распределение по стоимости (кривая маны) ---
 	report.stats["cost_curve"] = cost_counts
 	var low_cost: int = int(cost_counts.get(1, 0)) + int(cost_counts.get(2, 0))
 	var total: int = _spells.size()
 	if total > 0 and float(low_cost) / float(total) > 0.6:
 		report.info("I923", "Too many low-cost spells (%.0f%% cost 1-2)" % (100.0 * float(low_cost) / float(total)))
 
-	# --- Скорость ---
 	report.stats["speed_distribution"] = speed_counts
 	var fast_count: int = int(speed_counts.get("fast", 0))
 	if total > 0 and float(fast_count) / float(total) > 0.85:
 		report.info("I924", "Almost all spells are 'fast' (%.0f%%)" % (100.0 * float(fast_count) / float(total)))
 
-	# --- Средняя стоимость ---
 	var sum_cost := 0
 	for entry in _spells:
 		if entry is Dictionary:
@@ -721,7 +627,6 @@ func _validate_balance() -> void:
 	if total > 0:
 		report.stats["avg_cost"] = float(sum_cost) / float(total)
 
-# ==================== УТИЛИТЫ ====================
 
 func _check_int_range(val, lo: int, hi: int, code: String, field: String, sid: String) -> void:
 	if val == null:

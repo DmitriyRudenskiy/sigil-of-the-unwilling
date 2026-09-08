@@ -1,6 +1,4 @@
-extends "res://tests/gut_base.gd"
-## fog-of-war: VisibilityMap (видимое/разведённое, монотонность, сериализация),
-## блокировка неразведённых клеток в pathfinding и действиях, сохранение fog.
+extends GdUnitTestSuite
 
 const _Vis = preload("res://scripts/core/VisibilityMap.gd")
 const _MapGen = preload("res://scripts/world/MapGenerator.gd")
@@ -9,33 +7,28 @@ const _Delta = preload("res://scripts/world/WorldStateDelta.gd")
 const _HexUtils = preload("res://scripts/core/HexUtils.gd")
 
 
-# ==================== VisibilityMap ====================
 
 func test_visible_disk_around_hero() -> void:
 	var v := _Vis.new()
 	v.set_map_size(11, 11)
 	var changed := v.recompute(Vector2i(5, 5), [], 3, 4)
-	assert_true(changed, "first recompute reports change")
-	assert_true(v.is_visible(Vector2i(5, 5)), "hero cell visible")
-	assert_true(v.is_visible(Vector2i(6, 5)), "adjacent visible (sight=3)")
-	# клетка на расстоянии 4 за пределами диска обзора героя — не visible
-	assert_false(v.is_visible(Vector2i(9, 5)), "cell at dist 4 not visible")
-	assert_false(v.is_explored(Vector2i(9, 5)), "cell at dist 4 not explored")
-	assert_true(v.is_explored(Vector2i(6, 5)), "adjacent explored")
+	assert_bool(changed).is_true()
+	assert_bool(v.is_visible(Vector2i(5, 5))).is_true()
+	assert_bool(v.is_visible(Vector2i(6, 5))).is_true()
+	assert_bool(v.is_visible(Vector2i(9, 5))).is_false()
+	assert_bool(v.is_explored(Vector2i(9, 5))).is_false()
+	assert_bool(v.is_explored(Vector2i(6, 5))).is_true()
 
 
 func test_sight_sources_are_cities() -> void:
 	var v := _Vis.new()
 	v.set_map_size(21, 21)
-	# город в (15,15) с sight=4; герой в (5,5) далеко.
 	var changed := v.recompute(Vector2i(5, 5), [Vector2i(15, 15)], 3, 4)
-	assert_true(changed, "city adds new visible cells")
-	assert_true(v.is_visible(Vector2i(15, 15)), "city center visible from city sight")
-	# герой — тоже источник: его клетка видна.
-	assert_true(v.is_visible(Vector2i(5, 5)), "hero cell visible (hero is a sight source)")
-	# (10,10) — 5 от героя (sight 3) и 5 от города (sight 4) → не видно.
-	assert_false(v.is_visible(Vector2i(10, 10)), "cell far from both not visible")
-	assert_true(v.is_explored(Vector2i(15, 15)), "city explored")
+	assert_bool(changed).is_true()
+	assert_bool(v.is_visible(Vector2i(15, 15))).is_true()
+	assert_bool(v.is_visible(Vector2i(5, 5))).is_true()
+	assert_bool(v.is_visible(Vector2i(10, 10))).is_false()
+	assert_bool(v.is_explored(Vector2i(15, 15))).is_true()
 
 
 func test_explored_is_monotonic() -> void:
@@ -43,13 +36,11 @@ func test_explored_is_monotonic() -> void:
 	v.set_map_size(11, 11)
 	v.recompute(Vector2i(5, 5), [], 3, 4)
 	var explored_before := v.serialize_explored().size()
-	# перемещаем героя в угол — старые клетки разведёнными остаются.
 	var changed := v.recompute(Vector2i(0, 0), [], 3, 4)
-	assert_true(changed, "recompute after move reports change")
+	assert_bool(changed).is_true()
 	var explored_after := v.serialize_explored().size()
-	assert_gt(explored_after, explored_before, "explored grows, never shrinks")
-#	old explored cells still explored
-	assert_true(v.is_explored(Vector2i(5, 5)), "previously explored cell stays explored")
+	assert_int(explored_after).is_greater(explored_before)
+	assert_bool(v.is_explored(Vector2i(5, 5))).is_true()
 
 
 func test_serialize_and_load_roundtrip() -> void:
@@ -57,34 +48,28 @@ func test_serialize_and_load_roundtrip() -> void:
 	v.set_map_size(11, 11)
 	v.recompute(Vector2i(5, 5), [], 3, 4)
 	var arr := v.serialize_explored()
-	assert_not_empty(arr, "serialized explored is non-empty")
-	assert_true(arr[0] is Dictionary and arr[0].has("x") and arr[0].has("y"),
-		"serialized cells are {x,y} dicts")
+	assert_array(arr).is_not_empty()
+	assert_bool(arr[0] is Dictionary and arr[0].has("x") and arr[0].has("y")).is_true()
 
 	var v2 := _Vis.new()
 	v2.set_map_size(11, 11)
 	v2.load_explored(arr)
-	assert_eq(v2.serialize_explored().size(), arr.size(), "load restores explored count")
-#	roundtrip: same set of cells
+	assert_that(v2.serialize_explored().size()).is_equal(arr.size())
 	for item in arr:
-		assert_true(v2.is_explored(Vector2i(int(item["x"]), int(item["y"]))),
-			"loaded explored contains original cell")
+		assert_bool(v2.is_explored(Vector2i(int(item["x"]), int(item["y"])))).is_true()
 
 
 func test_is_visible_requires_explored() -> void:
 	var v := _Vis.new()
 	v.set_map_size(11, 11)
-#	ни одного источника — ничего не видно и не разведено.
 	v.recompute(Vector2i(5, 5), [], 3, 4)
-	assert_false(v.is_visible(Vector2i(0, 0)), "far empty cell not visible")
-	assert_false(v.is_explored(Vector2i(0, 0)), "far empty cell not explored")
+	assert_bool(v.is_visible(Vector2i(0, 0))).is_false()
+	assert_bool(v.is_explored(Vector2i(0, 0))).is_false()
 
 
-# ==================== HeroMovementController gating ====================
 
 class _MapGenStub:
 	extends MapGenerator
-	# terrain_grid/map_width — getter-ы на model, поэтому модель настоящая.
 	func get_terrain_id(cell: Vector2i) -> int:
 		return model.terrain_grid.get(cell, HexUtils.Terrain.GRASS)
 	func is_walkable_with_effects(cell: Vector2i, _lev: bool = false) -> bool:
@@ -114,22 +99,19 @@ func _make_movement(map_stub: MapGenerator) -> HeroMovementController:
 
 
 func test_terrain_cost_blocked_unexplored() -> void:
-	# Dijkstra-reach: неразведённые клетки имеют бесконечную стоимость
-	# (иначе предпросмотр reach рисовал бы точки в тумане).
 	var g := _make_map_gen_stub(11)
 	var v := _Vis.new()
 	v.set_map_size(11, 11)
 	v.recompute(Vector2i(5, 5), [], 3, 4)
 	g.visibility = v
 	var m := _make_movement(g)
-	assert_true(m._terrain_cost(Vector2i(6, 5)) < INF, "explored adjacent has finite cost")
-	assert_true(m._terrain_cost(Vector2i(0, 0)) == INF, "unexplored corner has INF cost")
+	assert_bool(m._terrain_cost(Vector2i(6, 5)) < INF).is_true()
+	assert_bool(m._terrain_cost(Vector2i(0, 0)) == INF).is_true()
 	g.free()
 	m.free()
 
 
 func test_base_blocked_contains_unexplored() -> void:
-	# A*: неразведённые клетки в base-blocked (единый гейт пути).
 	var g := _make_map_gen_stub(11)
 	var v := _Vis.new()
 	v.set_map_size(11, 11)
@@ -137,8 +119,8 @@ func test_base_blocked_contains_unexplored() -> void:
 	g.visibility = v
 	var m := _make_movement(g)
 	var blocked := m._base_blocked()
-	assert_true(blocked.has(Vector2i(0, 0)), "unexplored corner blocked")
-	assert_false(blocked.has(Vector2i(6, 5)), "explored adjacent not blocked")
+	assert_bool(blocked.has(Vector2i(0, 0))).is_true()
+	assert_bool(blocked.has(Vector2i(6, 5))).is_false()
 	g.free()
 	m.free()
 
@@ -165,16 +147,12 @@ func test_explored_reachable_marker() -> void:
 	var v := _Vis.new()
 	v.set_map_size(11, 11)
 	v.recompute(Vector2i(5, 5), [], 3, 4)
-	# разведённая соседняя клетка доступна для клика-маркера.
-	assert_true(v.is_explored(Vector2i(6, 5)), "adjacent explored")
-	assert_false(v.is_explored(Vector2i(10, 10)), "far corner unexplored")
+	assert_bool(v.is_explored(Vector2i(6, 5))).is_true()
+	assert_bool(v.is_explored(Vector2i(10, 10))).is_false()
 
 
-# ==================== WorldSpawner entity gating ====================
 
 func test_spawner_hides_nodes_on_hidden_cells() -> void:
-	# Ноды сущностей прячутся на невидимых клетках (иначе «висели» бы
-	# над стёртыми тайлами тумана).
 	var spawner := preload("res://scripts/world/WorldSpawner.gd").new()
 	var visible_node := Node2D.new()
 	var hidden_node := Node2D.new()
@@ -185,20 +163,18 @@ func test_spawner_hides_nodes_on_hidden_cells() -> void:
 	v.set_map_size(11, 11)
 	v.recompute(Vector2i(5, 5), [], 3, 4)
 	spawner.apply_fog_visibility(v)
-	assert_true(visible_node.visible, "node on visible cell stays visible")
-	assert_false(hidden_node.visible, "node on hidden cell is hidden")
+	assert_bool(visible_node.visible).is_true()
+	assert_bool(hidden_node.visible).is_false()
 
-	# враг переместился в видимую клетку → визуал снова виден.
 	spawner._enemy_nodes.erase(Vector2i(0, 0))
 	spawner._enemy_nodes[Vector2i(6, 5)] = hidden_node
 	spawner.apply_fog_visibility(v)
-	assert_true(hidden_node.visible, "node moved to visible cell shown again")
+	assert_bool(hidden_node.visible).is_true()
 	spawner.free()
 	visible_node.free()
 	hidden_node.free()
 
 
-# ==================== WorldInteractionController gating ====================
 
 func test_interaction_blocked_on_unexplored() -> void:
 	var vic := preload("res://scripts/world/WorldInteractionController.gd").new()
@@ -210,19 +186,17 @@ func test_interaction_blocked_on_unexplored() -> void:
 	var v := _Vis.new()
 	v.set_map_size(11, 11)
 	v.recompute(Vector2i(5, 5), [], 3, 4)
-#	(0,0) на расстоянии 8 от (5,5) → неразведённое.
-	assert_false(v.is_explored(Vector2i(0, 0)), "resource cell unexplored")
+	assert_bool(v.is_explored(Vector2i(0, 0))).is_false()
 	vic.visibility = v
 
-	# Godot 4.7: lambda копирует value-типы — статус ловим в массив-холдер.
 	var status_msgs: Array = []
 	vic.status_cb = func(m) -> void:
 		status_msgs.append(m)
 	var collected := vic.collect_resource_at(Vector2i(0, 0))
-	assert_false(collected, "collection blocked on unexplored cell")
-	assert_false(spawner._resources.is_empty(), "resource NOT removed")
-	assert_eq(status_msgs.size(), 1, "status callback fired once")
-	assert_eq(status_msgs[0], "Клетка не разведена", "status text: %s" % status_msgs[0])
+	assert_bool(collected).is_false()
+	assert_bool(spawner._resources.is_empty()).is_false()
+	assert_that(status_msgs.size()).is_equal(1)
+	assert_that(status_msgs[0]).is_equal("Клетка не разведена")
 	vic.free()
 	spawner.free()
 	hero.free()
@@ -238,27 +212,25 @@ func test_interaction_allowed_on_visible() -> void:
 	var v := _Vis.new()
 	v.set_map_size(11, 11)
 	v.recompute(Vector2i(5, 5), [], 3, 4)
-#	(6,5) соседняя → видимая и разведённая.
-	assert_true(v.is_visible(Vector2i(6, 5)), "resource cell visible")
+	assert_bool(v.is_visible(Vector2i(6, 5))).is_true()
 	vic.visibility = v
 
 	var collected := vic.collect_resource_at(Vector2i(6, 5))
-	assert_true(collected, "collection allowed on visible cell")
-	assert_true(spawner._resources.is_empty(), "resource removed")
+	assert_bool(collected).is_true()
+	assert_bool(spawner._resources.is_empty()).is_true()
 	vic.free()
 	spawner.free()
 	hero.free()
 
 
-# ==================== WorldStateDelta fog persistence ====================
 
 func test_delta_fog_persistence() -> void:
 	var d := _Delta.new()
 	d.set_fog_explored([{"x": 1, "y": 2}, {"x": 3, "y": 4}])
 	var data := d.serialize()
-	assert_true("fog_explored" in data, "serialize includes fog_explored")
-	assert_eq(data["fog_explored"].size(), 2, "fog_explored serialized count")
+	assert_bool("fog_explored" in data).is_true()
+	assert_that(data["fog_explored"].size()).is_equal(2)
 
 	var d2 := _Delta.new()
 	d2.deserialize(data)
-	assert_eq(d2.fog_explored.size(), 2, "deserialize restores fog_explored")
+	assert_that(d2.fog_explored.size()).is_equal(2)

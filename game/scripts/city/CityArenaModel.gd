@@ -1,13 +1,6 @@
 class_name CityArenaModel
 extends RefCounted
-## Тонкая фасадная обёртка над системами арены (M3). Все механики — в
-## ArenaRingSystem (кольца/особенности), ArenaClusterSystem (кластеры),
-## ArenaStorm (шторм), ArenaTurnRunner (ход/постройка/демо/счёт).
-##
-## Публичный API не менялся: CityArenaView и тесты вызывают те же
-## статические методы. Здесь только делегация.
 
-const ArenaBalance := preload("res://scripts/city/ArenaBalance.gd")
 const ArenaRingSystem := preload("res://scripts/city/ArenaRingSystem.gd")
 const ArenaClusterSystem := preload("res://scripts/city/ArenaClusterSystem.gd")
 const ArenaStorm := preload("res://scripts/city/ArenaStorm.gd")
@@ -15,12 +8,10 @@ const ArenaTurnRunner := preload("res://scripts/city/ArenaTurnRunner.gd")
 const City := preload("res://scripts/world/City.gd")
 const UniqueBuilding := preload("res://scripts/world/UniqueBuilding.gd")
 
-## Сохранённые константы публьного интерфейса (используются тестами/UI).
-const ARENA_RADIUS := ArenaBalance.ARENA_RADIUS
+const ARENA_RADIUS := GameNumbers.ARENA_RADIUS
 const ARENA_CENTER := ArenaRingSystem.ARENA_CENTER
 
 
-# ==================== ГЕОМЕТРИЯ / КОЛЬЦА ====================
 
 static func center() -> Vector2i:
 	return ArenaRingSystem.center()
@@ -55,7 +46,6 @@ static func apply_ring_multipliers(city: City, overrides: Dictionary = {},
 	return ArenaRingSystem.apply_ring_multipliers(city, overrides, turn)
 
 
-# ==================== ОСОБЕННОСТИ ====================
 
 static func cell_feature(city: City, cell: Vector2i) -> StringName:
 	return ArenaRingSystem.cell_feature(city, cell)
@@ -70,7 +60,6 @@ static func feature_name(feature: StringName) -> String:
 	return ArenaRingSystem.feature_name(feature)
 
 
-# ==================== КЛАСТЕРЫ ====================
 
 static func clusters(city: City) -> Array:
 	return ArenaClusterSystem.clusters(city)
@@ -82,7 +71,6 @@ static func cluster_worker_housing(city: City) -> int:
 	return ArenaClusterSystem.cluster_worker_housing(city)
 
 
-# ==================== ШТОРМ ====================
 
 static func is_storm_turn(turn: int) -> bool:
 	return ArenaStorm.is_storm_turn(turn)
@@ -94,7 +82,6 @@ static func storm_food_penalty(city: City, turn: int) -> float:
 	return ArenaStorm.storm_food_penalty(city, turn)
 
 
-# ==================== ХОД / ПОСТРОЙКА / СЧЁТ / ДЕМО ====================
 
 static func make_city(overrides: Dictionary = {}) -> City:
 	return ArenaTurnRunner.make_city(overrides)

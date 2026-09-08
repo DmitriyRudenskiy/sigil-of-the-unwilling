@@ -1,9 +1,4 @@
-extends "res://tests/gut_base.gd"
-## 1.6 Порт tools/memory_profile.gd: пять операций с профилированием памяти.
-##
-## Детерминированный инвариант для CI: дельта выделения памяти по каждой
-## операции должна быть конечной и неотрицательной (direction/sanity — не
-## конкретный КБ, как указано в design.md). Точные КБ зависят от железа/версии.
+extends GdUnitTestSuite
 
 const _UnitRegistry = preload("res://scripts/autoload/UnitRegistry.gd")
 
@@ -67,9 +62,9 @@ func test_memory_profile_deltas_finite_and_nonnegative() -> void:
 		return textures
 	)
 
-	assert_true(_deltas.size() == 5, "all five operations profiled (got: %d)" % _deltas.size())
+	assert_bool(_deltas.size() == 5).is_true()
 	for entry in _deltas:
 		var name: String = entry[0]
 		var delta: float = entry[1]
-		assert_true(delta == delta, "%s delta is finite (not NaN)" % name)
-		assert_true(delta >= 0.0, "%s delta is non-negative (%.1f KB)" % [name, delta])
+		assert_bool(delta == delta).is_true()
+		assert_bool(delta >= 0.0).is_true()

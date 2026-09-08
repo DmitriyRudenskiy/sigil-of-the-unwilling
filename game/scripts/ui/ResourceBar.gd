@@ -1,29 +1,21 @@
+# FILE: res://scripts/ui/ResourceBar.gd
 class_name ResourceBar
 extends HBoxContainer
-## Панель ресурсов: иконка + число.
 
-const C_TEXT := Color(0.95, 0.89, 0.72)
-const ICONS := {
-	"wood": "🪵", "mercury": "🧪", "ore": "🪨", "sulfur": "🟡",
-	"crystal": "🔷", "gems": "💎", "gold": "🪙",
-}
+const ResourceType = preload("res://scripts/data/ResourceType.gd")
 
 var _labels: Dictionary = {}
 
-
 func _ready() -> void:
-	alignment = BoxContainer.ALIGNMENT_CENTER
-	add_theme_constant_override("separation", 8)
-
-	for key in ICONS:
-		var l := Label.new()
-		l.text = "%s0" % ICONS[key]
-		l.add_theme_font_size_override("font_size", 12)
-		l.add_theme_color_override("font_color", C_TEXT)
-		add_child(l)
-		_labels[key] = l
-
+	for id in ResourceType.classic_ids():
+		var l := get_node(ResourceType.to_key(id).capitalize()) as Label
+		if l == null:
+			continue
+		l.add_theme_font_size_override("font_size", ThemeConfig.FONT_SIZE_SMALL)
+		l.add_theme_color_override("font_color", ThemeConfig.C_TEXT_PRIMARY)
+		_labels[id] = l
 
 func update_resources(resources: Dictionary) -> void:
-	for k in _labels:
-		_labels[k].text = "%s%d" % [ICONS[k], resources.get(k, 0)]
+	for id in _labels:
+		var icon := ThemeConfig.resource_icon(ResourceType.to_name(id))
+		_labels[id].text = "%s%d" % [icon, int(resources.get(id, 0))]

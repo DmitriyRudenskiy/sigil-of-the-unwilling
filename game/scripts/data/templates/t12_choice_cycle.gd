@@ -1,7 +1,5 @@
-## scripts/data/templates/t12_choice_cycle.gd
 class_name T12ChoiceCycle
 extends RefCounted
-## T12: CHOICE CYCLE (аудит #8: вынесен из TemplateEngine).
 
 const _Enums = preload("res://scripts/data/SpellEnums.gd")
 const _Utils = preload("res://scripts/data/SpellUtils.gd")

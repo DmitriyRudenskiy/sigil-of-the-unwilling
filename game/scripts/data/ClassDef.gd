@@ -1,25 +1,17 @@
 class_name ClassDef
 extends RefCounted
-## city-in-world: определение класса из `races_classes.json` (Pathfinder).
 const _Self := preload("res://scripts/data/ClassDef.gd")
-## hit die, спасброски, навыки, классовые способности, ресурсы, признак
-## заклинателя. Модификаторы — в будущих циклах; класс даёт способности.
 
 var id: StringName = &""
 var name: String = ""
 var hit_die: int = 6
 var bab: String = "medium"
-## saves: fort/ref/will → "good"/"bad".
 var saves: Dictionary = {}
 var skill_points: int = 2
-## class_skills: подписи навыков (напр. "Heal").
 var class_skills: Array[String] = []
-## spellcasting: {} для незалинателей; {type, tradition, ability, max_level}.
 var spellcasting: Dictionary = {}
 var class_resources: Array[Dictionary] = []
-## features: подписи классовых способностей (напр. "Mutagen").
 var features: Array[String] = []
-## archetypes: {id, name}.
 var archetypes: Array[Dictionary] = []
 
 func to_dict() -> Dictionary:
@@ -67,11 +59,9 @@ static func from_dict(data: Dictionary) -> _Self:
 	return d
 
 
-## Заклинатель ли класс (есть spellcasting + тип не empty).
 func is_spellcaster() -> bool:
 	return spellcasting != {} and String(spellcasting.get("type", "")).is_empty() == false
 
 
-## Способность, от которой зависят заклинания (пусто, если незалинатель).
 func spellcasting_ability() -> StringName:
 	return StringName(String(spellcasting.get("ability", "")))

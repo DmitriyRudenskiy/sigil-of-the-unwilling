@@ -1,15 +1,6 @@
 class_name MarketSystem
 extends RefCounted
-## Спринт 10: Городской рынок. Торговля запасами города на золото.
-##
-## Требуется здание «Рынок» (BuildingDefs.market()). Курс: базовая цена
-## ресурса × (1 + prosperity/200) — процветание 100 улучшает курс на 50%.
-## Еда продаётся из food_stockpile, остальные ресурсы — из storage.
-##
-## Статический класс — headless-тестируемый, без autoload. Сигнал
-## GameEventBus.trade_completed эмитит UI-слой/вызывающая сторона.
 
-## Базовые цены (золото за единицу). &"gold" не продаётся (это и есть золото).
 const RATES: Dictionary = {
 	&"food": 1.0,
 	&"grain": 1.5,
@@ -22,11 +13,8 @@ const RATES: Dictionary = {
 	&"scholar_points": 6.0,
 	&"influence": 5.0,
 }
-const DEFAULT_RATE := 2.0
-const MIN_AMOUNT := 1.0
 
 
-## Есть ли в городе рынок (хотя бы одно здание).
 static func has_market(city: City) -> bool:
 	for b in city.buildings:
 		if b != null and b.def != null and b.def.id == &"market":
@@ -34,26 +22,21 @@ static func has_market(city: City) -> bool:
 	return false
 
 
-## Курс ресурса при текущем процветании.
 static func rate_for(city: City, resource_id: StringName) -> float:
-	var base: float = float(RATES.get(resource_id, DEFAULT_RATE))
-	# Спринт 11: специализация merchant — повышенный курс.
+	var base: float = float(RATES.get(resource_id, GameNumbers.MARKET_DEFAULT_RATE))
 	return base * (1.0 + city.prosperity / 200.0) \
 		* SpecializationSystem.trade_rate_multiplier(city)
 
 
-## Запас ресурса: еда — из food_stockpile, остальное — из storage.
 static func stock_of(city: City, resource_id: StringName) -> float:
 	if resource_id == &"food":
 		return city.food_stockpile
 	return float(city.storage.get(resource_id, 0.0))
 
 
-## Сделка: продать `amount` единиц ресурса за золото.
-## Возвращает {ok, reason, amount, gold}.
 static func trade(city: City, resource_id: StringName, amount: float) -> Dictionary:
-	if amount < MIN_AMOUNT:
-		return _fail("Минимум %f единиц" % MIN_AMOUNT)
+	if amount < GameNumbers.MARKET_MIN_AMOUNT:
+		return _fail("Минимум %f единиц" % GameNumbers.MARKET_MIN_AMOUNT)
 	if resource_id == &"gold":
 		return _fail("Золото не продают")
 	if not has_market(city):

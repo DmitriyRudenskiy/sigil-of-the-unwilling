@@ -1,6 +1,4 @@
-extends "res://tests/gut_base.gd"
-## succession-sigil: смерть героя → выбор преемника → наследование легенды.
-## Чистые unit-тесты SuccessionController / City.can_resurrect / SaveData v4.
+extends GdUnitTestSuite
 
 const _Succession = preload("res://scripts/world/SuccessionController.gd")
 const _City = preload("res://scripts/world/City.gd")
@@ -25,14 +23,12 @@ func _make_hero(path := &"archivist") -> HeroController:
 	h.magic.schools = {&"air": 1, &"fire": 2}
 	h.magic.mana_current = 10
 	h.magic.mana_max = 20
-	# Инвентарь: артефакт в рюкзаке + надетое оружие.
 	var ring := _Artifact.new(&"ring_of_might", &"Ring of Might", _Artifact.Slot.RING_L,
 		_Artifact.Rarity.MINOR, {}, &"mana_regen", false, 100, "")
 	h.inventory.backpack.append(ring)
 	var blade := _Artifact.new(&"blade_of_light", &"Blade of Light", _Artifact.Slot.WEAPON,
 		_Artifact.Rarity.MAJOR, {}, &"", false, 250, "")
 	h.inventory.equipped[_Artifact.Slot.WEAPON] = blade
-	# Стратегические ресурсы.
 	h.strategic_resources.add(&"wood", 100)
 	h.strategic_resources.add(&"stone", 50)
 	return h
@@ -43,9 +39,6 @@ func _make_city(uid: int, name: StringName, is_capital: bool) -> City:
 	c.uid = uid
 	c.display_name = name
 	c.is_capital = is_capital
-	# Boroughs / buildings / roads / pop / food / storage.
-	# Borough — класс (class_name), city держит Array[Borough]: словарь в typed
-	# array не влезает (push отбрасывается с engine-error).
 	var b := Borough.new()
 	b.uid = uid
 	c.boroughs.append(b)
@@ -59,7 +52,6 @@ func _make_city(uid: int, name: StringName, is_capital: bool) -> City:
 	return c
 
 
-# ==================== ВЫБОР ПРЕЕМНИКА ====================
 
 func test_select_returns_same_path_follower() -> void:
 	var h := _make_hero(&"archivist")
@@ -68,8 +60,8 @@ func test_select_returns_same_path_follower() -> void:
 	h.followers = [f1, f2]
 
 	var succ := _Succession.new().select_successor(h)
-	assert_not_null(succ, "selected a same-path follower")
-	assert_eq(succ.path, &"archivist", "successor shares the path")
+	assert_that(succ).is_not_null()
+	assert_that(succ.path).is_equal(&"archivist")
 	h.free()
 
 
@@ -80,8 +72,8 @@ func test_select_never_different_path() -> void:
 	h.followers = [same, other]
 
 	var succ := _Succession.new().select_successor(h)
-	assert_not_null(succ, "ignored different-path followers")
-	assert_eq(succ.path, &"archivist", "never picks a different-path follower")
+	assert_that(succ).is_not_null()
+	assert_that(succ.path).is_equal(&"archivist")
 	h.free()
 
 
@@ -91,7 +83,7 @@ func test_select_null_when_no_eligible() -> void:
 	h.followers = [other]
 
 	var succ := _Succession.new().select_successor(h)
-	assert_null(succ, "no eligible follower → null")
+	assert_that(succ).is_null()
 	h.free()
 
 
@@ -99,30 +91,26 @@ func test_select_null_when_no_followers() -> void:
 	var h := _make_hero(&"archivist")
 	h.followers = []
 	var succ := _Succession.new().select_successor(h)
-	assert_null(succ, "no followers → null")
+	assert_that(succ).is_null()
 	h.free()
 
 
-# ==================== ПОСТРОЕНИЕ ПРЕЕМНИКА ====================
 
 func test_build_copies_path_magic_inventory() -> void:
 	var h := _make_hero(&"archivist")
 	var succ := _Succession.new().build_successor(h)
-	assert_not_null(succ, "successor built")
-	assert_eq(succ.path_id, &"archivist", "path_id inherited")
-	assert_eq(succ.magic.spellbook, [&"firebolt", &"heal"], "spellbook inherited")
-	assert_eq(succ.magic.schools, {&"air": 1, &"fire": 2}, "magic schools inherited")
-	assert_eq(succ.magic.mana_current, 10, "mana inherited")
-	# Инвентарь: глубокая копия (не тот же объект).
-	assert_true(succ.inventory.backpack.size() == 1, "backpack item inherited")
-	assert_true(succ.inventory.backpack[0] != h.inventory.backpack[0], "artifact deep-copied")
-	assert_true(succ.inventory.equipped[_Artifact.Slot.WEAPON] != h.inventory.equipped[_Artifact.Slot.WEAPON],
-		"equipped artifact deep-copied")
-	assert_eq(succ.strategic_resources.get_all(), h.strategic_resources.get_all(), "strategic resources inherited")
+	assert_that(succ).is_not_null()
+	assert_that(succ.path_id).is_equal(&"archivist")
+	assert_that(succ.magic.spellbook).is_equal([&"firebolt", &"heal"])
+	assert_that(succ.magic.schools).is_equal({&"air": 1, &"fire": 2})
+	assert_that(succ.magic.mana_current).is_equal(10)
+	assert_bool(succ.inventory.backpack.size() == 1).is_true()
+	assert_bool(succ.inventory.backpack[0] != h.inventory.backpack[0]).is_true()
+	assert_bool(succ.inventory.equipped[_Artifact.Slot.WEAPON] != h.inventory.equipped[_Artifact.Slot.WEAPON]).is_true()
+	assert_that(succ.strategic_resources.get_all()).is_equal(h.strategic_resources.get_all())
 	h.free(); succ.free()
 
 
-# ==================== ПЕРЕНОС ГОРОДОВ ====================
 
 func test_transfer_preserves_cities_identical() -> void:
 	var src := _make_city(1, &"Riverport", false)
@@ -140,19 +128,18 @@ func test_transfer_preserves_cities_identical() -> void:
 	for c in cities:
 		mgr.register_city(c)
 
-	# Перенос на тот же менеджер (тот же мир) — города остаются, capital/glory/turn intact.
 	_Succession.new().transfer_legend(h, succ, cities, mgr)
 
-	assert_eq(mgr.cities.size(), 3, "cities preserved after succession")
+	assert_that(mgr.cities.size()).is_equal(3)
 	var cap_after: City = mgr.get("capital")
-	assert_not_null(cap_after, "capital preserved")
-	assert_eq(cap_after.is_capital, true, "capital is_capital flag intact")
-	assert_eq(mgr.current_turn, 12, "current_turn preserved")
+	assert_that(cap_after).is_not_null()
+	assert_that(cap_after.is_capital).is_equal(true)
+	assert_that(mgr.current_turn).is_equal(12)
 
 	var total_storage := 0.0
 	for c in mgr.cities:
 		total_storage += float(c.storage.get("industry", 0.0))
-	assert_approx(total_storage, 1800.0, 0.01, "storage preserved across succession")
+	assert_float(total_storage).is_equal_approx(1800.0, 0.01)
 	h.free(); succ.free(); mgr.free()
 
 
@@ -165,36 +152,30 @@ func test_transfer_reregisters_fresh_manager() -> void:
 	var dest := _CityManager.new()
 	_Succession.new().transfer_legend(h, succ, cities, dest)
 
-	assert_eq(dest.cities.size(), 1, "city re-registered on new manager")
+	assert_that(dest.cities.size()).is_equal(1)
 	var re_cap: City = dest.get("capital")
-	assert_not_null(re_cap, "capital set on new manager")
-	assert_true(re_cap != cap, "re-registered as a fresh copy (not same object)")
+	assert_that(re_cap).is_not_null()
+	assert_bool(re_cap != cap).is_true()
 	h.free(); succ.free(); dest.free()
 
 
-# ==================== ВОСКРЕШЕНИЕ ====================
 
 func test_resurrect_requires_temple_and_resources() -> void:
-	# Без великого храма — нельзя.
 	var no_temple := _make_city(1, &"Village", false)
 	no_temple.buildings = []
 	no_temple.storage = {"industry": 999.0, "gold": 999.0}
-	assert_false(_Succession.new().resurrect_hero(no_temple), "no temple → cannot resurrect")
+	assert_bool(_Succession.new().resurrect_hero(no_temple)).is_false()
 
-	# Храм уровня 2, ресурсов хватает.
 	var temple := _make_city(2, &"TempleTown", true)
-	assert_true(_Succession.new().resurrect_hero(temple), "temple + resources → resurrect")
-	# Респисаны (industry 500, gold 100).
-	assert_approx(temple.storage.get("industry", 0.0), 100.0, 0.01, "industry spent")
-	assert_approx(temple.storage.get("gold", 0.0), 50.0, 0.01, "gold spent")
+	assert_bool(_Succession.new().resurrect_hero(temple)).is_true()
+	assert_float(temple.storage.get("industry", 0.0)).is_equal_approx(100.0, 0.01)
+	assert_float(temple.storage.get("gold", 0.0)).is_equal_approx(50.0, 0.01)
 
-	# Ресурсов мало — нельзя.
 	var poor := _make_city(3, &"PoorTown", true)
 	poor.storage = {"industry": 100.0, "gold": 10.0}
-	assert_false(_Succession.new().resurrect_hero(poor), "insufficient resources → cannot resurrect")
+	assert_bool(_Succession.new().resurrect_hero(poor)).is_false()
 
 
-# ==================== ОРКЕСТРАЦИЯ СМЕРТИ ====================
 
 func test_on_hero_died_returns_successor() -> void:
 	var h := _make_hero(&"archivist")
@@ -208,9 +189,9 @@ func test_on_hero_died_returns_successor() -> void:
 
 	var controller := _Succession.new()
 	var succ := controller.on_hero_died(h, null, cities, mgr)
-	assert_not_null(succ, "successor produced on death")
-	assert_eq(succ.path_id, &"archivist", "successor path matches")
-	assert_eq(mgr.cities.size(), 1, "cities still owned after succession")
+	assert_that(succ).is_not_null()
+	assert_that(succ.path_id).is_equal(&"archivist")
+	assert_that(mgr.cities.size()).is_equal(1)
 	h.free(); succ.free(); mgr.free()
 
 
@@ -220,11 +201,10 @@ func test_on_hero_died_null_when_no_follower() -> void:
 	var empty_cities: Array[City] = []
 	var controller := _Succession.new()
 	var succ := controller.on_hero_died(h, null, empty_cities, null)
-	assert_null(succ, "no follower → no successor (run ends)")
+	assert_that(succ).is_null()
 	h.free()
 
 
-# ==================== СЕРИАЛИЗАЦИЯ: SAVE v4 ====================
 
 func test_save_roundtrip_v4() -> void:
 	var d := _SaveData.new()
@@ -234,24 +214,23 @@ func test_save_roundtrip_v4() -> void:
 	d.legend = {"path_id": "archivist", "level": 3, "glory": 120.0}
 
 	var data := d.to_dict()
-	assert_eq(data["version"], _SaveData.CURRENT_VERSION, "save version is current")
+	assert_that(data["version"]).is_equal(_SaveData.CURRENT_VERSION)
 
 	var d2 := _SaveData.new()
 	d2.from_dict(data)
-	assert_eq(d2.version, _SaveData.CURRENT_VERSION, "loaded version is current")
-	assert_eq(d2.hero.get("path_id"), "archivist", "hero path_id preserved")
-	assert_eq(d2.successor.get("path"), "archivist", "successor preserved")
-	assert_eq(d2.legend.get("level"), 3, "legend level preserved")
+	assert_that(d2.version).is_equal(_SaveData.CURRENT_VERSION)
+	assert_that(d2.hero.get("path_id")).is_equal("archivist")
+	assert_that(d2.successor.get("path")).is_equal("archivist")
+	assert_that(d2.legend.get("level")).is_equal(3)
 
 
 func test_migrate_v3_to_v4_defaults() -> void:
-	# v3-сейв без successor/legend.
 	var v3 := {"version": 3, "run_seed": 99,
 		"hero": {"cell": {"x": 1, "y": 1}, "path_id": "archivist"},
 		"world": {}, "cities": [], "characters": []}
 	var d := _SaveData.new()
 	d.from_dict(v3)
-	assert_eq(d.version, _SaveData.CURRENT_VERSION, "v3 migrated to current")
-	assert_true(d.successor is Dictionary, "successor defaulted to dict")
-	assert_true(d.legend is Dictionary, "legend defaulted to dict")
-	assert_eq(d.run_seed, 99, "run_seed preserved through migration")
+	assert_that(d.version).is_equal(_SaveData.CURRENT_VERSION)
+	assert_bool(d.successor is Dictionary).is_true()
+	assert_bool(d.legend is Dictionary).is_true()
+	assert_that(d.run_seed).is_equal(99)

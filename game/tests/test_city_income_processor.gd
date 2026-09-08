@@ -1,7 +1,4 @@
-extends "res://tests/gut_base.gd"
-## city-in-world: фаза дани городов (CityIncomeProcessor).
-## Игровые города платят долю казны; песочница CityArena (owner == &"none")
-## пропускается; герой не трогается (внешний эффект — интеграционный слой).
+extends GdUnitTestSuite
 
 const _CityIncomeProcessor = preload("res://scripts/economy/CityIncomeProcessor.gd")
 const _City = preload("res://scripts/world/City.gd")
@@ -19,55 +16,52 @@ func _make_city(owner: StringName, gold: float) -> RefCounted:
 
 func test_phase_contract() -> void:
 	var proc := _CityIncomeProcessor.new()
-	assert_eq(proc.get_phase_id(), &"city_income", "phase id")
-	assert_eq(proc.get_priority(), 15, "приоритет 15 (после экономики, до демографии)")
+	assert_that(proc.get_phase_id()).is_equal(&"city_income")
+	assert_that(proc.get_priority()).is_equal(15)
 
 
 func test_player_city_pays_royalty() -> void:
-	# gold 10 × ROYALTY_FRACTION 0.25 = 2.5 → floor = 2.
 	var proc := _CityIncomeProcessor.new()
 	var city := _make_city(&"player", 10.0)
 	var ctx := TurnContext.new()
 	ctx.cities.append(city)
 	var report: Dictionary = proc.process(ctx)
 	var total: Dictionary = report.get("total", {})
-	assert_approx(float(total.get(&"gold", 0.0)), 2.0, 0.0001, "дань 2 в total")
-	assert_approx(city.resource_ctx.amount(&"gold"), 8.0, 0.0001, "казна −2")
+	assert_float(float(total.get(&"gold", 0.0))).is_equal_approx(2.0, 0.0001)
+	assert_float(city.resource_ctx.amount(&"gold")).is_equal_approx(8.0, 0.0001)
 	var per_city: Array = report.get("per_city", [])
-	assert_eq(per_city.size(), 1, "один город в отчёте")
-	assert_eq(int(per_city[0].get("royalty", 0)), 2, "royalty в записи")
+	assert_that(per_city.size()).is_equal(1)
+	assert_that(int(per_city[0].get("royalty", 0))).is_equal(2)
 
 
 func test_arena_city_skipped() -> void:
-	# CityArena: owner == &"none" — фаза его не видит, казна не трогается.
 	var proc := _CityIncomeProcessor.new()
 	var city := _make_city(&"none", 10.0)
 	var ctx := TurnContext.new()
 	ctx.cities.append(city)
 	var report: Dictionary = proc.process(ctx)
-	assert_true((report.get("total") as Dictionary).is_empty(), "дани нет")
-	assert_eq((report.get("per_city") as Array).size(), 0, "город не в отчёте")
-	assert_approx(city.resource_ctx.amount(&"gold"), 10.0, 0.0001, "казна цела")
+	assert_bool((report.get("total") as Dictionary).is_empty()).is_true()
+	assert_that((report.get("per_city") as Array).size()).is_equal(0)
+	assert_float(city.resource_ctx.amount(&"gold")).is_equal_approx(10.0, 0.0001)
 
 
 func test_zero_royalty_skipped() -> void:
-	# gold 3 × 0.25 = 0.75 → floor = 0: дани нет, казна не трогается.
 	var proc := _CityIncomeProcessor.new()
 	var city := _make_city(&"player", 3.0)
 	var ctx := TurnContext.new()
 	ctx.cities.append(city)
 	var report: Dictionary = proc.process(ctx)
-	assert_true((report.get("total") as Dictionary).is_empty(), "дани нет")
-	assert_approx(city.resource_ctx.amount(&"gold"), 3.0, 0.0001, "казна цела")
+	assert_bool((report.get("total") as Dictionary).is_empty()).is_true()
+	assert_float(city.resource_ctx.amount(&"gold")).is_equal_approx(3.0, 0.0001)
 
 
 func test_city_without_resource_ctx_skipped() -> void:
 	var proc := _CityIncomeProcessor.new()
-	var city := _make_city(&"player", 0.0)  # ensure_resource_ctx не вызывался
+	var city := _make_city(&"player", 0.0)  
 	var ctx := TurnContext.new()
 	ctx.cities.append(city)
 	var report: Dictionary = proc.process(ctx)
-	assert_true((report.get("total") as Dictionary).is_empty(), "без ctx — пропуск")
+	assert_bool((report.get("total") as Dictionary).is_empty()).is_true()
 
 
 func test_null_city_in_list_skipped() -> void:
@@ -76,12 +70,11 @@ func test_null_city_in_list_skipped() -> void:
 	ctx.cities.append(null)
 	ctx.cities.append(_make_city(&"player", 10.0))
 	var report: Dictionary = proc.process(ctx)
-	assert_approx(float((report.get("total") as Dictionary).get(&"gold", 0.0)),
-		2.0, 0.0001, "null пропущен, дань с города есть")
+	assert_float(float((report.get("total") as Dictionary).get(&"gold", 0.0))).is_equal_approx(2.0, 0.0001)
 
 
 func test_null_ctx() -> void:
 	var proc := _CityIncomeProcessor.new()
 	var report: Dictionary = proc.process(null)
-	assert_true((report.get("total") as Dictionary).is_empty(), "total пуст")
-	assert_eq((report.get("per_city") as Array).size(), 0, "per_city пусто")
+	assert_bool((report.get("total") as Dictionary).is_empty()).is_true()
+	assert_that((report.get("per_city") as Array).size()).is_equal(0)

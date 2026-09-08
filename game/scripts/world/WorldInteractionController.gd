@@ -1,14 +1,13 @@
 extends Node
 class_name WorldInteractionController
-## Handles chest contact, resource collection, and chest dialog.
+
+const ResourceType = preload("res://scripts/data/ResourceType.gd")
 
 var hero: HeroController
 var spawner: WorldSpawner
 var chest_dialog: ArtifactChestDialog
 var world_delta: WorldStateDelta = null
-## fog-of-war: карта видимости (наследует WorldController). null — без fog.
 var visibility = null
-## callback для статуса «клетка не разведена» (WorldUIManager.set_status).
 var status_cb: Callable = Callable()
 
 
@@ -18,13 +17,11 @@ func setup(h: HeroController, s: WorldSpawner, d: ArtifactChestDialog) -> void:
 	chest_dialog = d
 
 
-## fog-of-war: клетка невидима? (visibility != null и не в visible диске).
 func _is_hidden(cell: Vector2i) -> bool:
 	if visibility == null:
 		return false
 	return not visibility.is_visible(cell)
 
-## fog-of-war: действие запрещено — клетка не разведена; сигнал в UI.
 func _reject(cell: Vector2i) -> bool:
 	if _is_hidden(cell):
 		if status_cb.is_valid():
@@ -69,7 +66,8 @@ func _on_chest_choice(choice: String, chest: ArtifactChest) -> void:
 					GameLogger.inventory("Backpack full!")
 		"gold":
 			var res_dict: Dictionary = hero.resources.resources
-			res_dict["gold"] = int(res_dict.get("gold", 0)) + chest.gold_reward
+			var gold_id: int = ResourceType.ID.GOLD
+			res_dict[gold_id] = int(res_dict.get(gold_id, 0)) + chest.gold_reward
 			hero.resources.resources_changed.emit(res_dict)
 			GameLogger.world("Took %d gold from chest" % chest.gold_reward)
 
@@ -85,16 +83,12 @@ func collect_resource_at(cell: Vector2i) -> bool:
 	if _reject(cell):
 		return false
 	if spawner:
-		# resource-collection-popup: res_type известен только ДО удаления ноды.
 		var res_type: int = spawner.get_res_type_at(cell)
 		var removed := spawner.remove_resource_at(cell)
 		if removed:
 			if world_delta:
 				world_delta.add_removed_resource(cell)
 			SoundManager.play_sfx_cue(&"resource_collected")
-			# Простой путь → единый сигнал (богатые жилы шлют его из
-			# ResourceNodeManager.try_extract). Кол-во — стандартный простой
-			# сбор (ResourceIcons.RES_TYPE_AMOUNTS = HeroResources.pickup_resource).
 			var res_id: StringName = ResourceIcons.res_type_id(res_type)
 			if res_id != &"":
 				GameEventBus.resource_extracted.emit(cell, res_id, ResourceIcons.res_type_amount(res_type))
@@ -102,7 +96,6 @@ func collect_resource_at(cell: Vector2i) -> bool:
 	return false
 
 
-## city-in-world: true — деревня реально захвачена (флаг переключился).
 func capture_village_at(cell: Vector2i) -> bool:
 	if _reject(cell):
 		return false

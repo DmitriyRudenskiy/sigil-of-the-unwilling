@@ -1,7 +1,5 @@
-## scripts/data/templates/t01_direct_damage.gd
 class_name T01DirectDamage
 extends RefCounted
-## T01: DIRECT DAMAGE (аудит #8: вынесен из TemplateEngine).
 
 const _Enums = preload("res://scripts/data/SpellEnums.gd")
 const _Utils = preload("res://scripts/data/SpellUtils.gd")

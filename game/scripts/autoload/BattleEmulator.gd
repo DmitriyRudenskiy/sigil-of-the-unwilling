@@ -1,18 +1,10 @@
-## R2 (world-controller-decoupling): боевая эмуляция + тестирование заклинаний
-## вынесены из SocketController в отдельный класс (weak coupling, KISS).
-## RefCounted, без class_name — detached-тесты не грузят автозагрузки.
 extends RefCounted
 
-# Все типы ниже — class_name (автозагрузки), поэтому типизировать можно
-# напрямую, без preload.
 const BattleSpellBridge = preload("res://scripts/data/BattleSpellBridge.gd")
-const ServiceLocatorScript = preload("res://scripts/core/ServiceLocator.gd")
 
-# ---------- SPELL TESTING ----------
 
-## Вернуть все заклинания из автозагруженного SpellRegistry («Spells»). ##
 func get_spells() -> Dictionary:
-	var reg = ServiceLocatorScript.resolve(null, &"spells")
+	var reg: Object = Services.resolve(&"spells")
 	if reg == null:
 		return {"error": "SpellRegistry (autoload 'Spells') not found"}
 	if reg.get_all_spells().is_empty():
@@ -23,7 +15,6 @@ func get_spells() -> Dictionary:
 		out.append({"id": str(s.id), "name": s.display_name, "school": s.school, "level": s.level, "mana": s.base_mana})
 	return {"spells": out, "count": out.size()}
 
-## Бросить заклинание по синтетическому юниту и вернуть результат SpellCaster. ##
 func cast_spell(args: Dictionary) -> Dictionary:
 	var spell_id: Variant = args.get("spell_id", "")
 	if not (spell_id is String) or spell_id.is_empty():
@@ -44,16 +35,15 @@ func cast_spell(args: Dictionary) -> Dictionary:
 		unit.set_count(count)
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
-	var reg = ServiceLocatorScript.resolve(null, &"spells")
+	# ИСПРАВЛЕНИЕ: Services.resolve
+	var reg: Object = Services.resolve(&"spells")
 	if reg != null and reg.get_all_spells().is_empty():
 		reg.ensure_definitions()
 	var caster_bonus := {"spell_power": 8, "attack": 6, "defense": 5, "knowledge": 5}
 	var target_bonus := {"knowledge": int(resistant), "defense": 5}
-	return SpellCaster.cast(StringName(spell_id), unit, caster_bonus, target_bonus, rng, null)
+	return SpellCaster.cast(StringName(spell_id), unit, caster_bonus, target_bonus, rng, reg)
 
-# ---------- BATTLE EMULATION ----------
 
-## Построить UnitStack из спецификации {id, hp, count, tags, attack, ...}. ##
 func army_stack(spec: Dictionary) -> UnitStack:
 	var tags: Array = []
 	if spec.has("tags") and spec["tags"] is Array:
@@ -91,7 +81,6 @@ func nearest_enemy(ref_cell: Vector2i, units: Array) -> BattleState.BattleUnit:
 				best = u
 	return best
 
-## Простой авто-ИИ: идти к ближайшему врагу и бить, когда в зоне доступа. ##
 func advance_toward(state: BattleState, u: BattleState.BattleUnit, target: BattleState.BattleUnit) -> void:
 	var blocked := state.build_all_blocked(u, {})
 	var reachable := state.get_reachable_for_unit(u, func() -> Dictionary: return blocked)
@@ -105,7 +94,6 @@ func advance_toward(state: BattleState, u: BattleState.BattleUnit, target: Battl
 	if best != u.cell:
 		state.do_move(u, best)
 
-## Полный цикл боя до победы или лимита ходов. ##
 func run_auto_battle(state: BattleState, rng: RandomNumberGenerator) -> Dictionary:
 	state.build_queue()
 	var events: Array = []
@@ -144,7 +132,6 @@ func run_auto_battle(state: BattleState, rng: RandomNumberGenerator) -> Dictiona
 		"events": events,
 	}
 
-## Эмуляция боя: построить армии, прогнать авто-бой, вернуть результат. ##
 func emulate_battle(req: Dictionary) -> Dictionary:
 	var atk_specs: Variant = req.get("attacker_army", [])
 	var def_specs: Variant = req.get("defender_army", [])
@@ -183,7 +170,6 @@ func total_count(specs: Array) -> int:
 			total += maxi(0, int(s.get("count", 0)))
 	return total
 
-## Проверить одно заклинание в контексте боя (apply_spell, как в игре). ##
 func cast_in_battle(args: Dictionary) -> Dictionary:
 	var spell_id: Variant = args.get("spell_id", "")
 	if not (spell_id is String) or spell_id.is_empty():
@@ -203,7 +189,7 @@ func cast_in_battle(args: Dictionary) -> Dictionary:
 		target_tags.append("magic_resistant")
 	var caster_bonus: Dictionary = args.get("caster_bonus", {"spell_power": 8, "attack": 6, "defense": 5, "knowledge": 5})
 	var target_bonus: Dictionary = args.get("target_bonus", {"knowledge": int(resistant), "defense": 5})
-	var reg = ServiceLocatorScript.resolve(null, &"spells")
+	var reg: Object = Services.resolve(&"spells")
 	if reg != null and reg.get_all_spells().is_empty():
 		reg.ensure_definitions()
 	var caster_stack := UnitStack.new(
@@ -222,7 +208,6 @@ func cast_in_battle(args: Dictionary) -> Dictionary:
 	return state.apply_spell(
 		StringName(spell_id), caster_unit, target_unit, caster_bonus, target_bonus, rng)
 
-## Выполнить последовательность шагов на ОДНО BattleState подряд (ротация). ##
 func sequence_battle(args: Dictionary) -> Dictionary:
 	var sequence: Variant = args.get("sequence", [])
 	if not (sequence is Array):
@@ -243,7 +228,7 @@ func sequence_battle(args: Dictionary) -> Dictionary:
 		target_tags.append("magic_resistant")
 	var caster_bonus: Dictionary = args.get("caster_bonus", {"spell_power": 8, "attack": 6, "defense": 5, "knowledge": 5})
 	var target_bonus: Dictionary = args.get("target_bonus", {"knowledge": int(resistant), "defense": 5})
-	var reg = ServiceLocatorScript.resolve(null, &"spells")
+	var reg: Object = Services.resolve(&"spells")
 	if reg != null and reg.get_all_spells().is_empty():
 		reg.ensure_definitions()
 	var caster_stack := UnitStack.new(
@@ -295,12 +280,12 @@ func sequence_battle(args: Dictionary) -> Dictionary:
 		"target_count": target_unit.get_count(),
 	}
 
-## Конвертировать боевое заклинание в карточное и применить его в бою. ##
 func battle_spell(args: Dictionary) -> Dictionary:
 	var spell_id: Variant = args.get("spell_id", "")
 	if not (spell_id is String) or spell_id.is_empty():
 		return {"error": "Field 'spell_id' is required and must be a non-empty string"}
-	var reg = ServiceLocatorScript.resolve(null, &"spells")
+	# ИСПРАВЛЕНИЕ: Services.resolve
+	var reg: Object = Services.resolve(&"spells")
 	if reg == null:
 		return {"error": "SpellRegistry (autoload 'Spells') not found"}
 	if reg.get_all_spells().is_empty():
@@ -309,7 +294,8 @@ func battle_spell(args: Dictionary) -> Dictionary:
 	if def == null:
 		return {"spell": null, "apply": {"result": "not_found", "spell_id": spell_id}, "registered": false}
 	var spell = BattleSpellBridge.to_spell(def)
-	var spell_reg = ServiceLocatorScript.resolve(null, &"spellbook")
+	# ИСПРАВЛЕНИЕ: Services.resolve
+	var spell_reg: Object = Services.resolve(&"spellbook")
 	var registered := false
 	if spell_reg != null:
 		spell_reg.register(spell)
@@ -337,9 +323,9 @@ func battle_spell(args: Dictionary) -> Dictionary:
 	var apply_result = BattleSpellBridge.apply_spell(spell, unit, caster_bonus, target_bonus, rng)
 	return {"spell": spell.to_dict(), "apply": apply_result, "registered": registered}
 
-## Состояние карточной системы (для проверки интеграции конвертации). ##
 func spell_registry() -> Dictionary:
-	var spell_reg = ServiceLocatorScript.resolve(null, &"spellbook")
+	# ИСПРАВЛЕНИЕ: Services.resolve
+	var spell_reg: Object = Services.resolve(&"spellbook")
 	if spell_reg == null:
 		return {"error": "SpellbookRegistry (autoload 'Spellbook') not found"}
 	return {"count": spell_reg.get_count(), "template_count": spell_reg.get_template_count()}

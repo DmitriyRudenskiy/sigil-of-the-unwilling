@@ -1,7 +1,5 @@
-## scripts/data/templates/t07_spell_draw.gd
 class_name T07SpellDraw
 extends RefCounted
-## T07: SPELL DRAW (аудит #8: вынесен из TemplateEngine).
 
 const _Utils = preload("res://scripts/data/SpellUtils.gd")
 

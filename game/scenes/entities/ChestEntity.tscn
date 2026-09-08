@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[node name="ChestEntity" type="Node2D"]
+z_index = 7
+
+[node name="Sprite" type="Sprite2D" parent="."]

@@ -1,23 +1,17 @@
-## R2 (world-controller-decoupling): сериализация мирового состояния +
-## управляющие действия вынесены из SocketController в отдельный класс
-## (weak coupling, KISS). RefCounted, без class_name.
 extends RefCounted
+
+const NeedType = preload("res://scripts/data/NeedType.gd")
 
 var _city_serializer = null
 var _root: Node = null
 
-# root — узел-владелец дерева сцены (SocketController), нужен для start_game
-# (get_tree()/get_node_or_null); RefCounted их не имеет.
 func setup(root: Node, city_serializer) -> void:
 	_root = root
 	_city_serializer = city_serializer
 
-## Сводный снимок состояния мира/боя для GET_STATE. ##
 func get_state(world_ctrl, battle_ctrl) -> Dictionary:
 	var state = {"mode": "unknown"}
 
-	# Бой приоритетен: world_ctrl существует всегда (боевая сцена добавляется
-	# поверх мировой), поэтому «в боу ли» определяем по presence battle_ctrl.
 	var in_battle := battle_ctrl != null
 	state.mode = "battle" if in_battle else "world"
 
@@ -29,11 +23,9 @@ func get_state(world_ctrl, battle_ctrl) -> Dictionary:
 			state.hero_pos = {"x": hero.current_cell.x, "y": hero.current_cell.y}
 			state.move_points = hero.move_points
 			state.max_move_points = hero.get_daily_movement_points()
-			state.basic_resources = hero.resources.resources.duplicate()
+			state.basic_resources = hero.resources.to_string_dict()
 			state.strategic_resources = hero.strategic_resources.get_all()
-			# Идёт ли герой прямо сейчас (для честного ожидания частичного движения)
 			state.moving = hero.movement != null and hero.movement.is_moving
-			# city-in-world: именованные последователи героя (CITY_HIRE).
 			var followers_out: Array = []
 			for f in hero.followers:
 				if f != null and f.has_method("to_dict"):
@@ -41,22 +33,17 @@ func get_state(world_ctrl, battle_ctrl) -> Dictionary:
 				else:
 					followers_out.append({"name": str(f)})
 			state.followers = followers_out
-			# hero-survival: потребности (0..1) — для сценарной survival-стратегии
-			# (scenario_lib.keep_alive): сценарий видит голод ДО смерти героя.
-			# (Godot 4.7 не поддерживает comprehension — поэтому явный цикл.)
 			var needs_out := {}
 			for _nkey in hero.needs.needs.keys():
-				needs_out[String(_nkey)] = float(hero.needs.needs[_nkey])
+				needs_out[NeedType.to_name(int(_nkey))] = float(hero.needs.needs[_nkey])
 			state.needs = needs_out
 
 		if map_gen:
-			# Map resources
 			var res_nodes = []
 			for cell in map_gen.resource_cells:
 				res_nodes.append({"x": cell.x, "y": cell.y, "type": map_gen.resource_cells[cell]})
 			state.map_resources = res_nodes
 
-			# Map enemies
 			var enemies = []
 			if map_gen.enemy_stacks:
 				for cell in map_gen.enemy_stacks:
@@ -78,7 +65,6 @@ func get_state(world_ctrl, battle_ctrl) -> Dictionary:
 					})
 			state.map_enemies = enemies
 
-			# fog-of-war: туман для сценариев — счётчики + видимые стеки.
 			var fog = world_ctrl.get_fog() if world_ctrl.has_method("get_fog") else null
 			if fog != null:
 				state.fog = {"explored": fog.explored.size(), "visible": fog.visible.size()}
@@ -88,7 +74,6 @@ func get_state(world_ctrl, battle_ctrl) -> Dictionary:
 						visible_enemies.append({"x": cell.x, "y": cell.y})
 				state.visible_enemies = visible_enemies
 
-		# city-in-world: города мира + экран управления (CITY_* сценарии).
 		var cities_mgr = world_ctrl.get_cities()
 		if cities_mgr != null:
 			var city_list: Array = []
@@ -99,11 +84,9 @@ func get_state(world_ctrl, battle_ctrl) -> Dictionary:
 		var ui_mgr = world_ctrl.get_ui_manager()
 		state.city_screen_open = ui_mgr.city_overlay_open() if ui_mgr != null else false
 
-		# endgame: состояние забега (RUNNING/VICTORY/DEFEAT + reason).
 		if world_ctrl.has_method("get_endgame_state"):
 			state.endgame = world_ctrl.get_endgame_state()
 
-		# Деревни на карте (для сценария «Explore»).
 		var _villages: Array = []
 		for _c in map_gen.village_cells:
 			_villages.append({"x": _c.x, "y": _c.y})
@@ -129,9 +112,6 @@ func move_to(world_ctrl, x: int, y: int) -> Dictionary:
 		return {"error": "Out of bounds: (%d, %d)" % [x, y]}
 	if hero.current_cell == target:
 		return {"status": "already_at", "target": {"x": x, "y": y}}
-	# Семантика: цель farther ОД — герой идёт в её сторону.
-	# Честный протокол: will_reach говорит клиенту, стоит ли ждать прибытия
-	# (false — герой остановится по исерпанию ОД, клиент ждёт moving==false).
 	var will_reach: bool = hero.can_reach(target)
 	var success: bool = hero.move_to_cell(target)
 	if success:
@@ -152,7 +132,6 @@ func start_game() -> Dictionary:
 	_root.get_tree().root.add_child(world)
 	return {"status": "game_started"}
 
-## astral-macro (v7): сохранить текущий фрагмент и вернуть сериализованный сейв.
 func save_game(world_ctrl) -> Dictionary:
 	if not bool(world_ctrl.save_game()):
 		return {"status": "save_failed"}
@@ -165,7 +144,6 @@ func save_game(world_ctrl) -> Dictionary:
 		"run_seed": snap.get("run_seed", 0),
 	}
 
-## astral-macro (v7): загрузить последний сейв и пересценить мир (round-trip).
 func load_game(world_ctrl) -> Dictionary:
 	var data = world_ctrl.load_game()
 	if data == null or not data.is_valid():

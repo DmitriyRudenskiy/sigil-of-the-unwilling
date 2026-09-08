@@ -1,61 +1,50 @@
 extends Node
-## Autoload: UnitRegistry. Registry of unit definitions — instance node, not static.
-## Call reset() in tests to isolate data between runs.
-## Call reset() in tests to isolate data between runs.
 
 const _UnitStack = preload("res://scripts/entities/UnitStack.gd")
 const _UnitStats = preload("res://scripts/entities/UnitStats.gd")
 
 const UNITS_BASE := {
-    # базовые (герой + старые враги)
     "swordsmen": ["Swordsman", 4, 10, 5, 2], "archers": ["Archer", 3, 8, 4, 1],
     "cavalry": ["Cavalry", 5, 15, 7, 2], "mages": ["Mage", 7, 12, 5, 2],
     "guardians": ["Guardian", 6, 25, 3, 3], "archmages": ["Archmage", 9, 14, 6, 2],
     "champions": ["Champion", 12, 30, 8, 3], "knights": ["Knight", 8, 20, 9, 3],
     "goblins": ["Goblin", 2, 8, 4, 1], "wolves": ["Wolf", 4, 10, 6, 1], "trolls": ["Troll", 8, 20, 3, 2],
-    # набор 1
     "pikeman": ["Pikeman", 2, 10, 4, 1], "halberdier": ["Halberdier", 3, 13, 5, 2],
     "lancer": ["Lancer", 4, 18, 6, 2], "alchemist": ["Alchemist", 5, 20, 5, 2],
     "berserker": ["Berserker", 5, 22, 6, 2], "griffin": ["Griffin", 6, 25, 6, 3],
     "royal_griffin": ["Royal Griffin", 7, 30, 7, 4], "pegasus": ["Pegasus", 8, 30, 8, 4],
     "gargoyle": ["Gargoyle", 6, 22, 6, 3], "titan": ["Titan", 20, 150, 7, 6],
     "dwarf": ["Dwarf", 4, 20, 3, 2], "battle_dwarf": ["Battle Dwarf", 5, 25, 4, 3],
-    # набор 2
     "centaur": ["Centaur", 3, 10, 6, 1], "elf": ["Elf", 4, 15, 6, 2],
     "grand_elf": ["Grand Elf", 5, 18, 7, 2], "druid": ["Druid", 4, 18, 5, 2],
     "great_druid": ["Great Druid", 5, 22, 6, 3], "unicorn": ["Unicorn", 10, 40, 7, 4],
     "war_unicorn": ["War Unicorn", 12, 45, 8, 5], "treant": ["Treant", 9, 55, 3, 4],
     "dryad": ["Dryad", 5, 20, 6, 3], "green_dragon": ["Green Dragon", 25, 180, 6, 8],
     "gold_dragon": ["Gold Dragon", 30, 250, 7, 9], "black_dragon": ["Black Dragon", 35, 300, 9, 10],
-    # набор 3
     "skeleton": ["Skeleton", 3, 10, 4, 1], "zombie": ["Zombie", 2, 15, 3, 1],
     "ghost": ["Ghost", 5, 18, 7, 3], "wraith": ["Wraith", 6, 22, 8, 4],
     "vampire": ["Vampire", 8, 30, 8, 5], "lich": ["Lich", 12, 35, 6, 5],
     "orc": ["Orc", 4, 15, 4, 1], "ogre": ["Ogre", 6, 30, 4, 2],
     "behemoth": ["Behemoth", 12, 60, 5, 4], "harpy": ["Harpy", 5, 18, 6, 2],
     "minotaur": ["Minotaur", 8, 35, 5, 4], "hydra": ["Hydra", 14, 70, 4, 5],
-    # набор 4
     "gremlin": ["Gremlin", 2, 8, 4, 1], "master_gremlin": ["Master Gremlin", 3, 10, 5, 1],
     "stone_golem": ["Stone Golem", 5, 30, 3, 3], "iron_golem": ["Iron Golem", 6, 35, 4, 4],
     "gold_golem": ["Gold Golem", 7, 40, 4, 5], "diamond_golem": ["Diamond Golem", 8, 45, 4, 6],
     "magus": ["Magus", 7, 20, 5, 3], "genie": ["Genie", 10, 35, 7, 5],
     "master_genie": ["Master Genie", 12, 40, 8, 6], "naga": ["Naga", 10, 45, 5, 5],
     "naga_queen": ["Naga Queen", 12, 50, 6, 6], "giant": ["Giant", 15, 100, 7, 6],
-    # набор 5
     "gnoll": ["Gnoll", 2, 10, 4, 1], "gnoll_marauder": ["Gnoll Marauder", 3, 12, 5, 1],
     "lizardman": ["Lizardman", 3, 14, 4, 2], "lizard_warrior": ["Lizard Warrior", 4, 16, 5, 2],
     "serpent_fly": ["Serpent Fly", 4, 18, 6, 2], "dragon_fly": ["Dragon Fly", 5, 20, 7, 3],
     "basilisk": ["Basilisk", 6, 30, 5, 3], "greater_basilisk": ["Greater Basilisk", 7, 35, 6, 4],
     "wyvern": ["Wyvern", 8, 35, 6, 4], "wyvern_monarch": ["Wyvern Monarch", 9, 40, 7, 5],
     "gorgon": ["Gorgon", 10, 50, 4, 5], "mighty_gorgon": ["Mighty Gorgon", 12, 60, 5, 6],
-    # набор 6
     "hobgoblin": ["Hobgoblin", 2, 8, 5, 1], "wolf_rider": ["Wolf Rider", 4, 12, 6, 2],
     "wolf_raider": ["Wolf Raider", 5, 14, 7, 2], "orc_chieftain": ["Orc Chieftain", 5, 18, 4, 2],
     "ogre_mage": ["Ogre Mage", 7, 30, 4, 3], "roc": ["Roc", 8, 35, 6, 4],
     "thunderbird": ["Thunderbird", 9, 40, 7, 5], "cyclops": ["Cyclops", 10, 50, 4, 4],
     "cyclops_king": ["Cyclops King", 12, 60, 5, 5], "air_elemental": ["Air Elemental", 6, 25, 7, 4],
     "fire_elemental": ["Fire Elemental", 8, 30, 6, 4], "water_elemental": ["Water Elemental", 7, 35, 5, 4],
-    # набор 7
     "earth_elemental": ["Earth Elemental", 8, 40, 4, 5], "storm_elemental": ["Storm Elemental", 7, 30, 8, 4],
     "ice_elemental": ["Ice Elemental", 7, 35, 5, 4], "magma_elemental": ["Magma Elemental", 9, 40, 4, 5],
     "phoenix": ["Phoenix", 15, 90, 9, 6], "firebird": ["Firebird", 12, 80, 8, 5],
@@ -75,8 +64,6 @@ const FACTION_SETS := [
 ]
 
 const UNIT_ATTACK := {
-    # Пример переопределения:
-    # "swordsmen": 8,
 }
 
 const UNIT_TAGS := {
@@ -222,7 +209,6 @@ func ensure_definitions() -> void:
 
 
 func reset() -> void:
-    ## Для тестов: сброс определений.
     _definitions.clear()
 
 

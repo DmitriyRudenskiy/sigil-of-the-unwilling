@@ -1,14 +1,5 @@
 class_name CityIncomeProcessor
 extends TurnPhaseProcessor
-## city-in-world: фаза дани городов. Исполняется ПОСЛЕ экономики (10), чтобы
-## налог начислялся по золоту, уже произведённом за ход; ДО демографии (20).
-##
-## Правило: каждый город с owner == &"player" платит долю казны
-## (resource_ctx gold × CityBalance.ROYALTY_FRACTION). Сам процессор НЕ
-## трогает героя — внешний эффект (hero.add_strategic_resource) делает
-## интеграционный слой (WorldEventRouter._grant_city_income по отчёту фазы).
-##
-## Песочница CityArena: у города арены owner == &"none" → фаза его пропускает.
 
 
 func get_phase_id() -> StringName:
@@ -30,7 +21,7 @@ func process(ctx: TurnContext) -> Dictionary:
 		if city.resource_ctx == null:
 			continue
 		var gold: float = city.resource_ctx.amount(&"gold")
-		var royalty: int = int(floor(gold * CityBalance.ROYALTY_FRACTION))
+		var royalty: int = int(floor(gold * GameNumbers.ROYALTY_FRACTION))
 		if royalty <= 0:
 			continue
 		city.resource_ctx.remove(&"gold", float(royalty))

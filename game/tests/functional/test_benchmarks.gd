@@ -1,11 +1,4 @@
-extends "res://tests/gut_base.gd"
-## 1.5 Порт tools/benchmark_all.gd: пять бенчмарков (map gen, spell registry,
-## serialization, placeholder texture, JSON parse).
-##
-## Детерминированный инвариант для CI: каждый бенчмарк должен отработать и
-## вернуть конечное, неотрицательное среднее время (в мс). Абсолютные пороги
-## (50/20/5 мс из исходника) оставлены как информационные warning'и — их
-## жёсткая проверка в CI некорректна (зависит от железа, даёт флэки).
+extends GdUnitTestSuite
 
 const INF := 1e9
 var _iterations := 3
@@ -46,7 +39,6 @@ func _bench_spell_registry() -> void:
 		var t1 := Time.get_ticks_usec()
 		times.append((t1 - t0) / 1000.0)
 	_record("SpellbookRegistry.ensure_definitions", times)
-	# SpellbookRegistry — Node-autoload, без free станет orphan (GUT-фол).
 	reg.free()
 
 func _bench_serialization() -> void:
@@ -118,8 +110,8 @@ func test_benchmarks_run_and_report_finite_times() -> void:
 	_bench_serialization()
 	_bench_placeholder_texture()
 	_bench_json_parse()
-	assert_true(_results.size() == 5, "all five benchmarks ran (got: %d)" % _results.size())
+	assert_bool(_results.size() == 5).is_true()
 	for r in _results:
 		var avg: float = r["avg_ms"]
-		assert_true(avg == avg, "%s avg is finite (not NaN)" % r["name"])
-		assert_true(avg >= 0.0, "%s avg is non-negative (%.3f)" % [r["name"], avg])
+		assert_bool(avg == avg).is_true()
+		assert_bool(avg >= 0.0).is_true()

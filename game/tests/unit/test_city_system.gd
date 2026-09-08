@@ -1,5 +1,4 @@
-extends "../gut_base.gd"
-## Тесты системы населения и градостроительства.
+extends GdUnitTestSuite
 
 const FOOD_PER_TILE := 100.0
 
@@ -23,11 +22,8 @@ func _mk_borough(cell: Vector2i) -> Borough:
 	return b
 
 
-func assert_almost_eq(a: float, b: float, delta: float, msg: String = "") -> void:
-	if absf(a - b) > delta:
-		_fail("assert_almost_eq failed: %s (got %.4f, expected %.4f ±%.4f)" % [msg, a, b, delta])
-	else:
-		_pass(msg)
+func assert_almost_eq(a: float, b: float, delta: float, _msg: String = "") -> void:
+	assert_float(a).is_equal_approx(b, delta)
 
 
 func test_militia_excluded_from_pop_cap() -> void:
@@ -36,33 +32,29 @@ func test_militia_excluded_from_pop_cap() -> void:
 	for u in c.pop.slice(0, 5):
 		u.request_switch(PopUnit.State.MILITIA)
 	c.process_turn(1)
-	assert_eq(c.count_state(PopUnit.State.MILITIA), 5, "militia count")
-	assert_eq(c.pop_capped(), 7, "pop_capped excludes militia")
-	assert_eq(c.over_limit(), 0, "no overflow")
+	assert_that(c.count_state(PopUnit.State.MILITIA)).is_equal(5)
+	assert_that(c.pop_capped()).is_equal(7)
+	assert_that(c.over_limit()).is_equal(0)
 
 func test_switch_takes_full_turn() -> void:
 	var c := _city()
 	c.add_followers(1)
 	var u: PopUnit = c.pop[0]
-	assert_true(c.request_switch(u.uid, PopUnit.State.WORKER, c.first_free_worker_tile()), "request OK")
-	assert_eq(u.state, PopUnit.State.FOLLOWER, "still follower before turn")
-	assert_false(u.is_available(), "unavailable while pending")
+	assert_bool(c.request_switch(u.uid, PopUnit.State.WORKER, c.first_free_worker_tile())).is_true()
+	assert_that(u.state).is_equal(PopUnit.State.FOLLOWER)
+	assert_bool(u.is_available()).is_false()
 	c.process_turn(1)
-	assert_eq(u.state, PopUnit.State.WORKER, "worker after turn")
-	assert_true(u.is_available(), "available after apply")
+	assert_that(u.state).is_equal(PopUnit.State.WORKER)
+	assert_bool(u.is_available()).is_true()
 
 func test_growth_births_follow_threshold() -> void:
 	var c := _city()
 	c.tile_yield_fn = _food_yield
-	# ТЗ 4.1: доход дают только клетки рабочих (и соседи районов) —
-	# 1 рабочий (100 еды с его клетки) + 1 последователь (N=2, без дохода)
 	c.add_followers(2)
 	var u: PopUnit = c.pop[0]
 	c.request_switch(u.uid, PopUnit.State.WORKER, c.first_free_worker_tile())
 	var r := c.process_turn(1)
-	# Порог N=2: 5×2^2.75 ≈ 33.64 → 1 рождение; N=3: ≈ 102.5 > остатка 65.4
-	# Склад = 100 (клетка рабочего) − 1 (еда рабочего) − 33.64 (рождение)
-	assert_eq(r.births, 1, "one birth")
+	assert_that(r.births).is_equal(1)
 	assert_almost_eq(c.food_stockpile, FOOD_PER_TILE - 1.0 - 5.0 * pow(2.0, 2.75), 0.01, "food stockpile after birth")
 
 func test_cycle_inflow_summer_with_glory_and_temple() -> void:
@@ -71,30 +63,29 @@ func test_cycle_inflow_summer_with_glory_and_temple() -> void:
 	mgr.register_city(cap, true)
 	cap.storage[&"industry"] = 1000.0
 	cap.special_sites[HexUtils.get_all_neighbors(cap.center)[0]] = BuildingDefs.SITE_SHRINE
-	assert_not_null(cap.build_building(BuildingDefs.great_temple(), \
-		HexUtils.get_all_neighbors(cap.center)[0]), "temple built")
-	mgr.add_glory(50.0, &"test")  # модификатор = 1 + 50/50 = 2.0
-	for i in CityBalance.CITY_CYCLE_TURNS:
-		mgr.on_turn_ended(7)      # июль = лето = 1.0
-	# База = 2 + 1×2 = 4; итог floor(4 × 2 × 1) = 8
-	assert_eq(cap.pop_total(), 8, "8 followers from cycle")
+	assert_that(cap.build_building(BuildingDefs.great_temple(), \
+		HexUtils.get_all_neighbors(cap.center)[0])).is_not_null()
+	mgr.add_glory(50.0, &"test")  
+	for i in GameNumbers.CITY_CYCLE_TURNS:
+		mgr.on_turn_ended(7)      
+	assert_that(cap.pop_total()).is_equal(8)
 	mgr.free()
 
 func test_cycle_inflow_winter_halved() -> void:
 	var mgr := CityManager.new()
 	var cap := _city()
-	mgr.register_city(cap, true)  # без храма и славы
-	for i in CityBalance.CITY_CYCLE_TURNS:
-		mgr.on_turn_ended(1)      # январь = зима = 0.5
-	assert_eq(cap.pop_total(), 1, "winter halved to 1")  # floor(2 × 1 × 0.5)
+	mgr.register_city(cap, true)  
+	for i in GameNumbers.CITY_CYCLE_TURNS:
+		mgr.on_turn_ended(1)      
+	assert_that(cap.pop_total()).is_equal(1)  
 	mgr.free()
 
 func test_borough_limit_by_faction() -> void:
 	var c := _city()
 	c.add_followers(5)
-	assert_eq(BoroughRules.max_boroughs(c), 2, "default faction limit")
+	assert_that(BoroughRules.max_boroughs(c)).is_equal(2)
 	c.faction = City.Faction.NECROPHAGE
-	assert_eq(BoroughRules.max_boroughs(c), 5, "necrophage limit")
+	assert_that(BoroughRules.max_boroughs(c)).is_equal(5)
 
 func test_borough_levelup_needs_4_same_level() -> void:
 	var c := _city()
@@ -103,12 +94,11 @@ func test_borough_levelup_needs_4_same_level() -> void:
 	c.boroughs.append(_mk_borough(x))
 	for i in 4:
 		c.boroughs.append(_mk_borough(nb[i]))
-	assert_eq(BoroughRules.same_level_neighbors(c, c.boroughs[0]), 4, "4 same-level neighbors")
+	assert_that(BoroughRules.same_level_neighbors(c, c.boroughs[0])).is_equal(4)
 	var ups := BoroughRules.process_level_ups(c)
-	assert_eq(ups, 1, "one level-up")
-	assert_eq(c.boroughs[0].level, 2, "central borough level 2")
-	# Уровень 3 недоступен не-Культистам:
-	assert_false(BoroughRules.can_level_up(c, c.boroughs[0]), "no level 3 for non-cultists")
+	assert_that(ups).is_equal(1)
+	assert_that(c.boroughs[0].level).is_equal(2)
+	assert_bool(BoroughRules.can_level_up(c, c.boroughs[0])).is_false()
 
 func test_building_upgrade_requires_hero_and_followers() -> void:
 	var c := _city()
@@ -117,25 +107,25 @@ func test_building_upgrade_requires_hero_and_followers() -> void:
 	c.storage[&"gold"] = 500.0
 	var cell := c.first_free_worker_tile()
 	var bld := c.build_building(BuildingDefs.market(), cell)
-	assert_eq(bld.level, 1, "building level 1")
-	assert_false(c.can_upgrade_building(bld, Vector2i(99, 99)).ok, "hero not present")
-	assert_true(c.can_upgrade_building(bld, bld.cell).ok, "hero on cell OK")
-	assert_true(c.perform_upgrade(bld), "upgrade 1→2 OK")
-	assert_eq(bld.level, 2, "building level 2")
-	assert_eq(c.free_followers(), 3, "3 free followers after 2 assigned")
-	assert_true(c.perform_upgrade(bld), "upgrade 2→3 OK")
-	assert_eq(bld.level, 3, "building level 3")
-	assert_eq(c.free_followers(), 0, "0 free followers after 3 assigned")
+	assert_that(bld.level).is_equal(1)
+	assert_bool(c.can_upgrade_building(bld, Vector2i(99, 99)).ok).is_false()
+	assert_bool(c.can_upgrade_building(bld, bld.cell).ok).is_true()
+	assert_bool(c.perform_upgrade(bld)).is_true()
+	assert_that(bld.level).is_equal(2)
+	assert_that(c.free_followers()).is_equal(3)
+	assert_bool(c.perform_upgrade(bld)).is_true()
+	assert_that(bld.level).is_equal(3)
+	assert_that(c.free_followers()).is_equal(0)
 
 func test_free_building_placement_distance() -> void:
 	var c := _city()
 	c.storage[&"industry"] = 1000.0
 	var far := c.center
-	for i in CityBalance.BUILDING_MAX_BUILD_DISTANCE + 1:
+	for i in GameNumbers.BUILDING_MAX_DIST_BASE + 1:
 		far = HexUtils.get_all_neighbors(far)[0]
-	assert_false(c.can_build_building(BuildingDefs.market(), far).ok, "too far rejected")
+	assert_bool(c.can_build_building(BuildingDefs.market(), far).ok).is_false()
 	var near: Vector2i = HexUtils.get_all_neighbors(c.center)[0]
-	assert_true(c.can_build_building(BuildingDefs.market(), near).ok, "nearby OK")
+	assert_bool(c.can_build_building(BuildingDefs.market(), near).ok).is_true()
 
 func test_overflow_transfer_between_cities() -> void:
 	var mgr := CityManager.new()
@@ -144,12 +134,12 @@ func test_overflow_transfer_between_cities() -> void:
 	mgr.register_city(cap, true)
 	mgr.register_city(other)
 	cap.add_followers(9)
-	for i in CityBalance.CITY_CYCLE_TURNS:
-		mgr.on_turn_ended(7)  # +2 → 11 при капе 10
-	assert_eq(cap.over_limit(), 1, "overflow 1")
-	assert_eq(cap.send_followers_to(other, 1), 1, "transferred 1")
-	assert_eq(cap.over_limit(), 0, "no overflow after transfer")
-	assert_eq(other.pop_total(), 1, "other city has 1")
+	for i in GameNumbers.CITY_CYCLE_TURNS:
+		mgr.on_turn_ended(7)  
+	assert_that(cap.over_limit()).is_equal(1)
+	assert_that(cap.send_followers_to(other, 1)).is_equal(1)
+	assert_that(cap.over_limit()).is_equal(0)
+	assert_that(other.pop_total()).is_equal(1)
 	mgr.free()
 
 func test_patrol_gives_safety() -> void:
@@ -159,46 +149,39 @@ func test_patrol_gives_safety() -> void:
 		u.request_switch(PopUnit.State.MILITIA)
 	c.process_turn(1)
 	c.set_patrol(c.pop[0].uid, true)
-	assert_eq(c.safety(), CityBalance.SAFETY_PER_PATROL_MILITIA, "patrol safety")
+	assert_that(c.safety()).is_equal(GameNumbers.SAFETY_PER_PATROL)
 
 func test_worker_switch_invalidates_yield() -> void:
-	# Regression: cache invalidation on follower→worker switch (Fix #5)
 	var c := _city()
 	c.tile_yield_fn = _food_yield
 	c.add_followers(1)
 	var y0: float = c.get_yield()[&"food"]
 	c.request_switch(c.pop[0].uid, PopUnit.State.WORKER, c.first_free_worker_tile())
-	c.process_turn(1)  # applies pending switch
+	c.process_turn(1)  
 	var y1: float = c.get_yield()[&"food"]
-	assert_true(y1 > y0, "yield must rise after worker placed (cache invalidated)")
+	assert_bool(y1 > y0).is_true()
 
-## Аудит #3: здание нельзя поставить на клетку, занятую рабочей фигуркой.
 func test_can_build_rejects_worker_cell() -> void:
 	var c := _city()
 	c.add_followers(3)
-	c.storage[&"industry"] = 500.0  # рынок требует 25 индустрии: без него он
-	# отклоняется по индустрии, а не по рабочей клетке — проверка не работает.
-	# Ставим рабочего на свободную рабочую клетку.
+	c.storage[&"industry"] = 500.0  
 	var u: PopUnit = c.pop[0]
-	assert_true(c.request_switch(u.uid, PopUnit.State.WORKER, c.first_free_worker_tile()), "worker placed")
-	c.process_turn(1)  # применяем переключение
+	assert_bool(c.request_switch(u.uid, PopUnit.State.WORKER, c.first_free_worker_tile())).is_true()
+	c.process_turn(1)  
 	var worker_cell: Vector2i = u.tile
-	assert_eq(u.state, PopUnit.State.WORKER, "worker state applied")
-	assert_true(worker_cell.x >= 0, "worker tile set")
+	assert_that(u.state).is_equal(PopUnit.State.WORKER)
+	assert_bool(worker_cell.x >= 0).is_true()
 
-	# Попытка строить на рабочей клетке — отклонено.
 	var chk := c.can_build_building(BuildingDefs.market(), worker_cell)
-	assert_false(chk.ok, "build on worker cell rejected")
-	assert_true(chk.has("reason"), "reason present: %s" % str(chk.get("reason", "")))
+	assert_bool(chk.ok).is_false()
+	assert_bool(chk.has("reason")).is_true()
 
-	# Рабочий не пострадал — всё ещё на той же клетке, тот же state.
-	assert_eq(u.state, PopUnit.State.WORKER, "worker unaffected")
-	assert_eq(u.tile, worker_cell, "worker still on cell")
-	assert_eq(c.count_state(PopUnit.State.WORKER), 1, "worker count unchanged")
+	assert_that(u.state).is_equal(PopUnit.State.WORKER)
+	assert_that(u.tile).is_equal(worker_cell)
+	assert_that(c.count_state(PopUnit.State.WORKER)).is_equal(1)
 
-	# На другой свободной клетке строить можно.
 	var other: Vector2i = c.first_free_worker_tile()
-	assert_false(other == worker_cell, "other cell differs")
+	assert_bool(other == worker_cell).is_false()
 	var _dbg := c.can_build_building(BuildingDefs.market(), other)
-	assert_true(_dbg.ok, "DEBUG other=%s ok=%s reason=%s pop=%d worker=%s" % [str(other), _dbg.get("ok", false), _dbg.get("reason", "N/A"), c.pop.size(), str(worker_cell)])
-	assert_true(c.can_build_building(BuildingDefs.market(), other).ok, "build on free cell OK")
+	assert_bool(_dbg.ok).is_true()
+	assert_bool(c.can_build_building(BuildingDefs.market(), other).ok).is_true()

@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://battleui01"]
+[gd_scene load_steps=4 format=3 uid="uid://battleui01"]
 
 [ext_resource type="Script" path="res://scripts/ui/BattleUI.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/ui/BattleSpellbookPanel.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/ui/SettingsScreen.tscn" id="3"]
 
 [node name="BattleUI" type="CanvasLayer"]
 script = ExtResource("1")
@@ -19,7 +21,6 @@ theme_override_constants/separation = 2
 
 [node name="status" type="Label" parent="top_panel/top_vbox"]
 mouse_filter = 2
-text = "Выберите существо…"
 horizontal_alignment = 1
 theme_override_font_size/font_size = 18
 
@@ -103,5 +104,16 @@ offset_left = -190.0
 offset_top = 100.0
 offset_bottom = -80.0
 
-[node name="initiative_list" type="VBoxContainer" parent="initiative_panel"]
-theme_override_constants/separation = 4
+[node name="initiative_list" type="ItemList" parent="initiative_panel"]
+theme_override_constants/v_separation = 4
+
+[node name="BattleSpellbookPanel" parent="." instance=ExtResource("2")]
+visible = false
+
+[node name="SettingsScreen" parent="." instance=ExtResource("3")]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+persistent = true

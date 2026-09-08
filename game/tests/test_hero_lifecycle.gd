@@ -1,9 +1,4 @@
-extends "res://tests/gut_base.gd"
-## hero-lifecycle: изолированное тестирование HeroLifecycleSystem (RefCounted,
-## detached — без дерева сцены). Охватываем то, чего нет в
-## test_worldcontroller_succession_wiring (выбор преемника) / test_hero_combat_death
-## (гейт смерти): перепричинение (re-wiring потребителей героя), выбор преемника
-## / воскрешения.
+extends GdUnitTestSuite
 
 const _HeroLifecycle = preload("res://scripts/world/HeroLifecycleSystem.gd")
 const _Hero = preload("res://scripts/entities/HeroController.gd")
@@ -11,8 +6,6 @@ const _Succession = preload("res://scripts/world/SuccessionController.gd")
 const _City = preload("res://scripts/world/City.gd")
 const _CityManager = preload("res://scripts/world/CityManager.gd")
 
-## Хост-координатор: Node2D с get_hero/set_hero (владеет активным героем).
-## Типы — Node (class_name HeroController в headless GUT не резолвится).
 class MockHost extends Node2D:
 	var _hero: Node = null
 	func get_hero() -> Node:
@@ -20,14 +13,10 @@ class MockHost extends Node2D:
 	func set_hero(h: Node) -> void:
 		_hero = h
 
-## Потребитель героя: battle_coordinator / interaction_controller держат реф.
-## _hero — для enemy_proc/shortcuts, hero — для battle/ic (как в production).
 class MockConsumer extends RefCounted:
 	var hero: Node = null
 	var _hero: Node = null
 
-## bootstrap_result: enemy-ai + input + shortcuts — каждый держит hero.
-## (re-wiring после перепричинения: иначе ИИ/ввод смотрят на freed-героя.)
 class MockBootstrap extends RefCounted:
 	var enemy_proc = null
 	var input_controller = null
@@ -37,23 +26,21 @@ class MockBootstrap extends RefCounted:
 		input_controller = MockConsumer.new()
 		shortcuts = MockConsumer.new()
 
-## Собрать HeroLifecycleSystem с подставленными потребителями (map_gen/event_router/
-## ui_manager/camera — null, headless; все ветки загеджены).
 func _make_sys(host: Node2D, bc: MockConsumer, ic: MockConsumer, boot: MockBootstrap) -> RefCounted:
 	var sys := _HeroLifecycle.new()
 	sys.setup(
-		host,        # p (world)
-		null,        # persistence
-		null,        # rng
-		null,        # cities
-		null,        # map_gen (headless — setup героя пропускается)
-		null,        # event_router
-		null,        # ui_manager
-		bc,          # battle_coordinator
-		ic,          # interaction_controller
-		boot,        # bootstrap_result
-		null,        # succession
-		null         # camera
+		host,        
+		null,        
+		null,        
+		null,        
+		null,        
+		null,        
+		null,        
+		bc,          
+		ic,          
+		boot,        
+		null,        
+		null         
 	)
 	return sys
 
@@ -69,20 +56,18 @@ func test_install_hero_rewires_all_consumers() -> void:
 	hero.path_id = &"archivist"
 	sys._install_hero(hero)
 
-	assert_eq(host.get_hero(), hero, "active hero pointer обновлён")
-	assert_eq(hero.get_parent(), host, "герой добавлен в мир")
-	assert_eq(bc.hero, hero, "battle_coordinator перенаправлен на героя")
-	assert_eq(ic.hero, hero, "interaction_controller перенаправлен на героя")
-	assert_eq(boot.enemy_proc._hero, hero, "enemy-ai перенаправлен на героя")
-	assert_eq(boot.input_controller.hero, hero, "input перенаправлен на героя")
-	assert_eq(boot.shortcuts._hero, hero, "shortcuts перенаправлен на героя")
+	assert_that(host.get_hero()).is_equal(hero)
+	assert_that(hero.get_parent()).is_equal(host)
+	assert_that(bc.hero).is_equal(hero)
+	assert_that(ic.hero).is_equal(hero)
+	assert_that(boot.enemy_proc._hero).is_equal(hero)
+	assert_that(boot.input_controller.hero).is_equal(hero)
+	assert_that(boot.shortcuts._hero).is_equal(hero)
 
 	hero.free()
 	host.free()
 
 func test_find_resurrection_city_null_when_already_resurrected() -> void:
-	## _find_resurrection_city требует _succession + _cities (гвард), но
-	## resurrected_once отсеивает ДО проверки городов.
 	var sys := _HeroLifecycle.new()
 	var controller := _Succession.new()
 	var mgr := _CityManager.new()
@@ -92,13 +77,11 @@ func test_find_resurrection_city_null_when_already_resurrected() -> void:
 	)
 	var deceased := _Hero.new()
 	deceased.resurrected_once = true
-	assert_null(sys._find_resurrection_city(deceased),
-		"уже воскрешал — вариант воскрешения нет")
+	assert_that(sys._find_resurrection_city(deceased)).is_null()
 	deceased.free()
 	mgr.free()
 
 func test_find_resurrection_city_null_when_no_cities() -> void:
-	## Пустой мир — выбирать не из чего → null (воскрешения нет).
 	var sys := _HeroLifecycle.new()
 	var controller := _Succession.new()
 	var mgr := _CityManager.new()
@@ -107,7 +90,6 @@ func test_find_resurrection_city_null_when_no_cities() -> void:
 		null, null, null, controller, null
 	)
 	var deceased := _Hero.new()
-	assert_null(sys._find_resurrection_city(deceased),
-		"нет городов — воскрешение недоступно")
+	assert_that(sys._find_resurrection_city(deceased)).is_null()
 	deceased.free()
 	mgr.free()

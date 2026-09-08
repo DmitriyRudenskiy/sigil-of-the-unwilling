@@ -1,6 +1,5 @@
 extends Node2D
 class_name HexGridOverlay
-## Опциональная рамка гексов (по умолчанию выключена)
 
 const HexDraw = preload("res://scripts/core/HexDraw.gd")
 
@@ -32,4 +31,4 @@ func _draw() -> void:
     for x in range(c0.x - 1, c1.x + 2):
       var center: Vector2 = map_ref.map_to_local(Vector2i(x, y))
       var pts := HexDraw.points_at(center, R)
-      draw_polyline(pts, Color(0, 0, 0, 0.4), 2.0)
+      draw_polyline(pts, ThemeConfig.C_GRID_LINE, 2.0)

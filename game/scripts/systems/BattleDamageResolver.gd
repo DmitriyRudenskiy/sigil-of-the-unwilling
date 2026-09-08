@@ -24,10 +24,10 @@ static func resolve(state: BattleState, atk: BattleState.BattleUnit, def: Battle
 	return result
 
 static func _apply_status_procs(atk: BattleState.BattleUnit, def: BattleState.BattleUnit, rng: RandomNumberGenerator, result: Dictionary) -> void:
-	if atk.has_tag("petrify") and rng.randf() < BattleConfig.STATUS_PROC_CHANCE:
+	if atk.has_tag("petrify") and rng.randf() < GameNumbers.STATUS_PROC_CHANCE:
 		def.add_status(_StatusEffects.Effect.PETRIFIED, 1)
 		result["petrify"] = true
-	if atk.has_tag("blind") and rng.randf() < BattleConfig.STATUS_PROC_CHANCE:
+	if atk.has_tag("blind") and rng.randf() < GameNumbers.STATUS_PROC_CHANCE:
 		def.add_status(_StatusEffects.Effect.BLIND, 1)
 		result["blind"] = true
 
@@ -43,7 +43,7 @@ static func _apply_breath(state: BattleState, atk: BattleState.BattleUnit, def: 
 	if atk.has_tag("breath"):
 		result["breath_kills"] = _apply_area_damage(
 			state, atk, def.cell,
-			int(result.get("damage", 0) * BattleConfig.BREATH_DMG_RATIO),
+			int(result.get("damage", 0) * GameNumbers.BREATH_DMG_RATIO),
 			result, &"breath_kills"
 		)
 
@@ -70,7 +70,7 @@ static func _apply_area_damage(
 
 static func _apply_saltpeter(state: BattleState, atk: BattleState.BattleUnit, def: BattleState.BattleUnit, _rng: RandomNumberGenerator, result: Dictionary) -> void:
 	if atk.has_tag("saltpeter"):
-		var explosion_dmg: int = int(atk.get_base_damage() * MapConfig.SALTPETER_EXPLOSION_DMG_MULT)
+		var explosion_dmg: int = int(atk.get_base_damage() * GameNumbers.SALTPETER_EXPLOSION_MULT)
 		_apply_area_damage(
 			state, atk, def.cell, explosion_dmg,
 			result, &"saltpeter_kills"

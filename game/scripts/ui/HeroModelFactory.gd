@@ -1,13 +1,5 @@
 extends Node
 class_name HeroModelFactory
-## Фабрика героев для «модельных окон» (экран героя с куклой).
-##
-## Собирает HeroController с именем, статами и экипировкой по варианту, чтобы
-## экран ArtifactInventoryScreen мог отобразить модель героя на стартовом меню.
-##
-## Экипировка берётся из ArtifactRegistry (ensure_definitions вызывается здесь,
-## т.к. у фабрики нет _ready). Недостаточные ассеты игнорируются — get_by_id
-## возвращает null, а экран рисует пустые слоты стилизованными панелями.
 
 const _Artifact = preload("res://scripts/data/Artifact.gd")
 const _Registry = preload("res://scripts/autoload/ArtifactRegistry.gd")

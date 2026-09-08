@@ -1,8 +1,5 @@
-## scripts/data/templates/template_context.gd
 class_name TemplateContext
 extends RefCounted
-## Общие хелперы шаблонов заклинаний (бывшие TemplateEngine.TemplateHandlers
-## _check_condition/_resolve_targets/...; аудит #8).
 
 const _Utils = preload("res://scripts/data/SpellUtils.gd")
 

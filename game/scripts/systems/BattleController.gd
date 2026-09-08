@@ -1,15 +1,12 @@
 extends Node2D
 class_name BattleController
-## Координатор боя: инициализация, визуал, связка сигналов.
-## Логика ходов → BattleTurnExecutor, ввод → BattleInput, AI → BattleAI.
-## Контроллер только проигрывает анимации и ждёт их завершения.
 
 signal battle_finished(winner: BattleState.Side, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack])
 
 var _state: BattleState
 var _ai: BattleAI
-var _view: BattleView
-var _ui: BattleUI
+@onready var _view: BattleView = $BattleView
+@onready var _ui: BattleUI = $BattleUI
 var _input: BattleInput
 var _executor: BattleTurnExecutor
 var _fx: BattleFX
@@ -19,15 +16,15 @@ var _hero_magic: HeroMagic = null
 var _last_spell_cost := 0
 
 
-# ==================== READY ====================
 func _ready() -> void:
 	_init_state()
-	_init_view()
 	_init_executor()
-	_init_ui()
 	_init_input()
 	_init_fx()
 	_wire_signals()
+	_wire_ui_signals()
+	_view.setup()
+	_view.paint_field()
 
 	await get_tree().process_frame
 	_view.fit_camera()
@@ -38,14 +35,6 @@ func _init_state() -> void:
 	_ai = BattleAI.new()
 
 
-func _init_view() -> void:
-	_view = BattleView.new()
-	_view.name = "BattleView"
-	add_child(_view)
-	_view.setup()
-	_view.paint_field()
-
-
 func _init_executor() -> void:
 	_executor = BattleTurnExecutor.new()
 	_executor.name = "BattleTurnExecutor"
@@ -53,10 +42,7 @@ func _init_executor() -> void:
 	_executor.setup(_state, _ai, obstacles)
 
 
-func _init_ui() -> void:
-	_ui = load("res://scenes/ui/BattleUI.tscn").instantiate() as BattleUI
-	_ui.name = "BattleUI"
-	add_child(_ui)
+func _wire_ui_signals() -> void:
 	_ui.retreat_requested.connect(_on_retreat)
 	_ui.wait_requested.connect(_on_wait)
 	_ui.attack_mode_requested.connect(_on_attack_mode)
@@ -118,12 +104,8 @@ func _place_obstacles() -> void:
 		n += 1
 
 
-# ==================== INPUT CALLBACKS → EXECUTOR ====================
 func _on_unit_selected(u: BattleState.BattleUnit) -> void:
-	_on_status_updated(
-		"%s: синяя траектория — куда ходит, красная окрестность — ходов не хватает, красный контур — атака."
-		% u.get_display_name()
-	)
+	_on_status_updated(GameText.battle_move_help(u.get_display_name()))
 	_ui.update_active_unit(u)
 	_ui.set_attack_enabled(_input.highlight_attack.size() > 0)
 
@@ -140,7 +122,6 @@ func _on_attack_requested(atk: BattleState.BattleUnit, def: BattleState.BattleUn
 
 
 
-# ==================== BUTTON CALLBACKS → EXECUTOR ====================
 func _on_retreat() -> void:
 	_executor.request_retreat()
 
@@ -156,7 +137,7 @@ func _on_attack_mode() -> void:
 	else:
 		_input.set_cursor_mode(BattleView.CursorMode.ATTACK)
 	_view.set_cursor_visible(true)
-	_on_status_updated("⚔️ Кликните врага с красным контуром.")
+	_on_status_updated(GameText.battle_click_enemy())
 
 
 func _on_skip() -> void:
@@ -171,12 +152,10 @@ func _on_spellbook() -> void:
 	_ui.open_spellbook(_state, _hero_magic)
 
 
-# ==================== SPELL TARGETING ====================
 func _on_spell_chosen(spell_id: StringName) -> void:
-	# РФ6-2: игнорировать, если не фаза WAITING_INPUT
 	if not _executor.is_input_active():
 		return
-	var reg: Node = ServiceLocator.resolve(null, &"spells")
+	var reg: Node = Services.resolve(&"spells")
 	var spell = reg.get_spell(spell_id)
 	if spell == null: return
 	var ally_side := BattleState.Side.ATTACKER
@@ -188,12 +167,11 @@ func _on_spell_chosen(spell_id: StringName) -> void:
 
 
 func _on_spell_cast_requested(spell_id: StringName, target: BattleState.BattleUnit) -> void:
-	# РФ3-2: Расход маны
 	if _hero_magic != null:
-		var reg: Node = ServiceLocator.resolve(null, &"spells")
+		var reg: Node = Services.resolve(&"spells")
 		var spell = reg.get_spell(spell_id) if reg != null else null
 		if spell == null or not _hero_magic.can_cast_def(spell):
-			_ui.set_status("Недостаточно маны или школа не изучена.")
+			_ui.set_status(GameText.battle_no_mana())
 			return
 		var cost = _hero_magic.get_mana_cost_def(spell)
 		_hero_magic.spend_mana(cost)
@@ -211,38 +189,29 @@ func _on_cancel() -> void:
 	_input.set_cursor_mode(BattleView.CursorMode.DEFAULT)
 	_input.clear_highlights()
 	_view.set_cursor_visible(_executor.is_input_active())
-	_on_status_updated("Выберите существо…")
+	_on_status_updated(GameText.battle_select_unit())
 
 
 func _on_execute_spell(caster: BattleState.BattleUnit, target: BattleState.BattleUnit, result: Dictionary) -> void:
-	# 1. Визуал каста
 	_fx.show_spell_cast(target.cell, result.get("spell_id", &""))
 
-	# 1b. Визуал исцеления
 	if result.has("healed"):
 		_fx.show_heal(target.cell, int(result["healed"]))
 
-	# 2. Визуал урона/эффектов
 	_show_damage_feedback(target, result)
 	await _get_damage_wait()
 
-	# Бой мог завершиться в результате заклинания (убийство): executor обязан
-	# получить completion-колбэк, иначе зависнет в состоянии анимации.
-	# Флаг battle_over проверяет сам executor (см. _on_action_completed).
 	if not is_inside_tree():
 		return
 
-	# 3. Визуал статусов
 	if result.has("status") and int(result.get("status", -1)) != -1:
 		_fx.show_status(target.cell, int(result.get("status")))
 
-	# 4. Уведомляем Executor
 	if is_instance_valid(_executor):
 		_executor.on_spell_anim_completed()
 
 
 func _on_settings() -> void:
-	# Pause battle and open settings
 	_executor.pause_battle()
 	_ui.open_settings()
 
@@ -251,7 +220,6 @@ func resume_from_settings() -> void:
 	_executor.resume_battle()
 
 
-# ==================== EXECUTOR ACTIONS → VIEW ====================
 func _on_execute_move(unit: BattleState.BattleUnit, path: Array[Vector2i]) -> void:
 	var tween := _view.animate_move(unit, path)
 
@@ -260,7 +228,6 @@ func _on_execute_move(unit: BattleState.BattleUnit, path: Array[Vector2i]) -> vo
 		if not is_inside_tree():
 			return
 
-	# Completion передаём в любом случае (battle_over проверяет executor).
 	if is_instance_valid(_executor):
 		_executor.on_move_completed()
 
@@ -278,9 +245,6 @@ func _on_execute_attack(
 	_show_damage_feedback(def, result)
 	await _fx.play_attack_sequence(atk, def, result)
 
-	# Критично: последний удар может завершить бой (battle_over=true), но
-	# executor всё равно обязан получить on_attack_completed() — иначе
-	# стейт-машина зависнет в AI_ANIMATING и бой никогда не закончится.
 	if not is_inside_tree():
 		return
 
@@ -288,17 +252,16 @@ func _on_execute_attack(
 		_executor.on_attack_completed()
 
 
-# ==================== STATUS / HIGHLIGHTS ====================
 func _show_damage_feedback(target: BattleState.BattleUnit, result: Dictionary) -> void:
 	_view.update_unit_count(target)
 	_view.show_damage_number(target, int(result.get("damage", 0)))
 	if int(result.get("kills", 0)) > 0:
-		_view.show_floating_text(target.cell, "KILLED: %d" % int(result.get("kills", 0)), Color.WHITE)
+		_view.show_floating_text(target.cell, GameText.battle_killed(int(result.get("kills", 0))), Color.WHITE)
 	if target.get_count() <= 0:
 		_view.remove_unit(target)
 
 func _get_damage_wait() -> SceneTreeTimer:
-	return get_tree().create_timer(BattleConfig.BATTLE_SPELL_ANIM_TIME, false)
+	return get_tree().create_timer(GameNumbers.BATTLE_SPELL_ANIM_TIME, false)
 
 func _on_status_updated(text: String) -> void:
 	_ui.set_status(text)
@@ -310,7 +273,6 @@ func _on_clear_highlights() -> void:
 	_ui.set_attack_preview("")
 
 
-# ==================== PHASE CHANGED → INPUT LOCK ====================
 func _on_executor_phase_changed(phase: BattleTurnExecutor.State) -> void:
 	var locked := phase != BattleTurnExecutor.State.WAITING_INPUT
 
@@ -319,19 +281,15 @@ func _on_executor_phase_changed(phase: BattleTurnExecutor.State) -> void:
 
 	if locked:
 		_ui.set_attack_enabled(false)
-		# Во время хода ИИ / анимаций курсор прячем, режим сбрасываем.
 		_input.set_cursor_mode(BattleView.CursorMode.DEFAULT)
 		_view.set_cursor_visible(false)
 	else:
-		# Ход игрока: курсор видим, дефолтный прицел (моды сбрасываются
-		# кнопками атаки/магии, поэтому здесь — DEFAULT).
 		_input.set_cursor_mode(BattleView.CursorMode.DEFAULT)
 		_view.set_cursor_visible(true)
 
 	_on_initiative_changed()
 
 
-# ==================== START ====================
 func start_battle(
 	atk: Array[UnitStack],
 	def: Array[UnitStack],
@@ -365,14 +323,12 @@ func start_battle(
 func _on_initiative_changed() -> void:
 	_ui.update_initiative(_state.turn_queue, _state.active_unit)
 
-# Public accessors for SocketController / external callers
 func get_battle_state() -> BattleState:
 	return _state
 
 func do_retreat() -> void:
 	_on_retreat()
 
-## Аварийный выход из зависшего боя (см. BattleTurnExecutor.force_retreat).
 func force_retreat() -> void:
 	if _executor:
 		_executor.force_retreat()

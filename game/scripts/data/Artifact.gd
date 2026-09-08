@@ -1,6 +1,5 @@
 class_name Artifact
 extends Resource
-## Immutable definition of an artifact.
 
 enum Rarity { MINOR, MAJOR, RELIC }
 enum Slot {
@@ -9,14 +8,10 @@ enum Slot {
     MISC_A, MISC_B, SPELLBOOK,
 }
 
-## Physical damage types (D&D 3.5 / NWN2). Monsters often carry Damage
-## Reduction that only certain types (or materials) can bypass.
 enum DamageType { SLASHING, PIERCING, BLUDGEONING }
 enum WeaponSize { TINY, SMALL, MEDIUM, LARGE }
 enum WeaponCategory { SIMPLE, MARTIAL, EXOTIC }
 
-## AC bonus "type" for NWN2 stacking. Bonuses of the same type do NOT stack
-## (only the highest applies); Dodge is the exception and stacks additively.
 enum AcBonusType { NONE, ARMOR, SHIELD, NATURAL, DEFLECTION, DODGE }
 
 @export var id: StringName
@@ -30,13 +25,8 @@ enum AcBonusType { NONE, ARMOR, SHIELD, NATURAL, DEFLECTION, DODGE }
 @export var value_gold: int = 0
 @export var description: String = ""
 
-## NWN2/D&D 3.5 weapon profile: damage_dice ("2d6"), damage_types (Array of
-## DamageType), crit_threat (int, e.g. 19), crit_multiplier (float, e.g. 2.0),
-## proficiency (Array of StringName categories), weapon_size, is_ranged.
 var combat: Dictionary = {}
-## Armor profile: base_ac, max_dex_bonus, acp (armor check penalty), asf.
 var armor: Dictionary = {}
-## AC bonus type contributed by this item (shield/amulet/rings/boots etc.).
 var ac_bonus_type: AcBonusType = AcBonusType.NONE
 
 
@@ -116,7 +106,6 @@ func get_castle_growth_percent() -> int:
     return int(modifiers.get("castle_growth_percent", 0))
 
 
-# ---- Weapon profile accessors ------------------------------------------
 func get_damage_dice() -> String:
     return str(combat.get("damage_dice", ""))
 
@@ -144,7 +133,6 @@ func get_weapon_size() -> WeaponSize:
 func is_ranged() -> bool:
     return bool(combat.get("is_ranged", false))
 
-# ---- Armor profile accessors -------------------------------------------
 func get_base_ac() -> int:
     return int(armor.get("base_ac", 0))
 
@@ -160,7 +148,6 @@ func get_asf() -> float:
 func has_armor() -> bool:
     return armor.size() > 0 and get_base_ac() > 0
 
-# ---- AC bonus type -----------------------------------------------------
 func get_ac_bonus_type() -> AcBonusType:
     return ac_bonus_type
 
@@ -187,9 +174,9 @@ func get_rarity_name() -> String:
 
 func get_rarity_color() -> Color:
     match rarity:
-        Rarity.MINOR: return Color(0.8, 0.8, 0.6)
-        Rarity.MAJOR: return Color(0.4, 0.6, 1.0)
-        Rarity.RELIC: return Color(1.0, 0.75, 0.15)
+        Rarity.MINOR: return ThemeConfig.C_RARITY_MINOR
+        Rarity.MAJOR: return ThemeConfig.C_RARITY_MAJOR
+        Rarity.RELIC: return ThemeConfig.C_RARITY_RELIC
     return Color.WHITE
 
 

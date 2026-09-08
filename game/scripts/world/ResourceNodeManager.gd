@@ -1,17 +1,14 @@
 extends Node
 class_name ResourceNodeManager
-## Manages resource node lifecycle: generation, discovery, extraction, removal.
 
-const ServiceContainer = preload("res://scripts/core/ServiceContainer.gd")
-const ServiceLocator = preload("res://scripts/core/ServiceLocator.gd")
-const ResourceNode = preload("res://scripts/entities/ResourceNode.gd")
+const ResourceNodeScene = preload("res://scenes/entities/ResourceNode.tscn")
 const ResourceDef = preload("res://scripts/data/ResourceDef.gd")
 
 
-var _nodes: Dictionary = {}  # cell -> ResourceNode
+var _nodes: Dictionary = {}  
 var _container: Node2D = null
 var _rng: RandomNumberGenerator = null
-var _resource_registry: Node = null  # ResourceRegistry (инъекция)
+var _resource_registry: Node = null  
 var _map_to_local_fn: Callable = Callable()
 
 enum NodeError {
@@ -27,7 +24,6 @@ signal resource_discovered(cell: Vector2i, resource_id: StringName)
 signal resource_extracted(cell: Vector2i, resource_id: StringName, amount: int)
 signal resource_exhausted(cell: Vector2i, resource_id: StringName)
 
-## Bridge functions to resolve Variant inference from preload() calls.
 func _get_def(id: StringName) -> ResourceDef:
 	var reg := _resolve_registry()
 	if reg == null:
@@ -46,7 +42,8 @@ func _get_hidden_by_biome(biome: String) -> Array:
 	return hidden
 
 func _resolve_registry() -> Node:
-	var reg := ServiceLocator.resolve(_resource_registry, &"resources")
+	# ИСПРАВЛЕНИЕ: единый путь
+	var reg := Services.resolve(&"resources") if _resource_registry == null else _resource_registry
 	if reg == null:
 		push_error("ResourceNodeManager: resource registry unavailable")
 	return reg
@@ -60,12 +57,10 @@ func _get_biome_name(terrain_id: StringName) -> String:
 func setup(container: Node2D, rng: RandomNumberGenerator, resource_registry: Node = null, map_to_local_fn: Callable = Callable()) -> void:
 	_container = container
 	_rng = rng
-	_resource_registry = ServiceLocator.resolve(resource_registry, &"resources")
+	_resource_registry = resource_registry if resource_registry != null else Services.resolve(&"resources")
 	_map_to_local_fn = map_to_local_fn
 
 
-## fog-of-war: (пере)применить видимость ресурсных нод на невидимых клетках.
-## Вызывается на каждом перерисе тумана (см. WorldSpawner.apply_fog_visibility).
 func apply_fog_visibility(vis) -> void:
 	if vis == null:
 		return
@@ -88,7 +83,6 @@ func generate_nodes_for_map(map_data: Dictionary) -> void:
 	if width == 0 or height == 0:
 		return
 
-	# Determine biome for each cell and spawn appropriate resources
 	for y in height:
 		for x in width:
 			var cell := Vector2i(x, y)
@@ -99,8 +93,7 @@ func generate_nodes_for_map(map_data: Dictionary) -> void:
 			if biome == "":
 				continue
 
-			# Hidden resource chance
-			if _rng.randf() < 0.08:  # 8% chance per cell
+			if _rng.randf() < 0.08:  
 				var hidden: Array = _get_hidden_by_biome(biome)
 				if hidden.is_empty():
 					continue
@@ -117,7 +110,7 @@ func _terrain_to_biome(terrain_id: int) -> String:
 
 
 func _spawn_node(cell: Vector2i, resource_id: StringName, yield_amount: int) -> ResourceNode:
-	var node: ResourceNode = ResourceNode.new()
+	var node: ResourceNode = ResourceNodeScene.instantiate()
 	node.init_node(resource_id, cell, yield_amount)
 	if _container:
 		_container.add_child(node)
@@ -143,7 +136,6 @@ func try_discover(cell: Vector2i, discovery_keys: Dictionary) -> Dictionary:
 		GameLogger.error("ResourceNodeManager: unknown resource '%s' at %s" % [node.resource_id, cell], "World")
 		return {"error": NodeError.INVALID_RESOURCE_DEF, "discovered": false}
 
-	# Check auto-discovery (undead/lizard units)
 	if def.discovery_auto:
 		for tag in def.discovery_auto_tags:
 			if discovery_keys.get(tag, false):
@@ -152,11 +144,9 @@ func try_discover(cell: Vector2i, discovery_keys: Dictionary) -> Dictionary:
 				GameEventBus.resource_discovered.emit(cell, node.resource_id)
 				return {"error": NodeError.OK, "discovered": true}
 
-	# Check skill-based discovery
 	if not def.discovery_skill.is_empty():
 		var skill_level: int = int(discovery_keys.get(def.discovery_skill, 0))
 		if skill_level >= 1:
-			# Check time requirement
 			if not def.discovery_time.is_empty():
 				var time_match: bool = discovery_keys.get("time", "") == def.discovery_time
 				if not time_match:
@@ -185,6 +175,7 @@ func try_extract(cell: Vector2i, extraction_keys: Dictionary) -> Dictionary:
 		return {"error": NodeError.INVALID_RESOURCE_DEF, "amount": 0}
 
 	if not _check_extraction(def, extraction_keys):
+		GameLogger.warn("ResourceNodeManager: extraction denied at %s (missing keys for '%s')" % [cell, def.id], "World")
 		return {"error": NodeError.EXTRACTION_KEY_MISSING, "amount": 0}
 
 	var amount: int = node.get_yield()
@@ -198,40 +189,33 @@ func try_extract(cell: Vector2i, extraction_keys: Dictionary) -> Dictionary:
 
 
 func _check_extraction(def: ResourceDef, keys: Dictionary) -> bool:
-	# 1. Прямой тег
+	# FIX: Enforce strict AND logic for all extraction requirements. If a requirement
+	# is specified in the ResourceDef, it MUST be met (no early OR-style return).
 	if not def.extraction_tag.is_empty():
-		if keys.get(def.extraction_tag, false):
-			return true
+		if not keys.get(def.extraction_tag, false):
+			return false
 
-	# 2. Навык
 	if not def.extraction_skill.is_empty():
-		if int(keys.get(def.extraction_skill, 0)) >= 1:
-			return true
+		if int(keys.get(def.extraction_skill, 0)) < 1:
+			return false
 
-	# 3. Юнит + инструмент + расходник
 	if not def.extraction_unit.is_empty():
 		if not keys.get(def.extraction_unit, false):
 			return false
 
-		if not def.extraction_tool.is_empty():
-			if not keys.get(def.extraction_tool, false):
-				return false
+	if not def.extraction_tool.is_empty():
+		if not keys.get(def.extraction_tool, false):
+			return false
 
-		if not def.extraction_consumable.is_empty():
-			if not keys.get(def.extraction_consumable, false):
-				return false
+	if not def.extraction_consumable.is_empty():
+		if not keys.get(def.extraction_consumable, false):
+			return false
 
-		return true
-
-	# 4. Огонь
 	if def.extraction_fire:
-		return bool(keys.get("fire", false))
+		if not keys.get("fire", false):
+			return false
 
-	# 5. Если требований нет — разрешить базовую добычу
-	return def.extraction_tag.is_empty() \
-		and def.extraction_skill.is_empty() \
-		and def.extraction_unit.is_empty() \
-		and not def.extraction_fire
+	return true
 
 
 func tick_daily() -> Array[Vector2i]:

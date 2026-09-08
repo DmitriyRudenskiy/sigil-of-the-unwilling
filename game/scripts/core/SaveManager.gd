@@ -1,7 +1,5 @@
 extends Node
 class_name SaveManager
-## Save/Load manager: JSON to user:// directory.
-## Все ошибки возвращаются как коды, не как молчаливый null.
 
 const _SaveData = preload("res://scripts/core/SaveData.gd")
 
@@ -44,7 +42,6 @@ func save_game(data: Variant) -> SaveError:
 
 
 func load_game() -> Dictionary:
-	## Возвращает {"error": SaveError, "data": SaveData или null, "message": String}
 	if not FileAccess.file_exists(SAVE_PATH):
 		GameLogger.info("No save file at %s" % SAVE_PATH, "Save")
 		return {"error": SaveError.FILE_NOT_FOUND, "data": null, "message": ERROR_MESSAGES[SaveError.FILE_NOT_FOUND]}
@@ -79,7 +76,6 @@ func load_game() -> Dictionary:
 	return {"error": SaveError.OK, "data": data, "message": "OK"}
 
 
-## Legacy wrapper for callers that expect SaveData or null.
 func load_game_legacy() -> Variant:
 	var result: Dictionary = load_game()
 	return result.get("data", null)

@@ -1,7 +1,5 @@
-## scripts/data/templates/t17_heal_clear.gd
 class_name T17HealClear
 extends RefCounted
-## T17: HEAL CLEAR (аудит #8: вынесен из TemplateEngine).
 
 const _Utils = preload("res://scripts/data/SpellUtils.gd")
 

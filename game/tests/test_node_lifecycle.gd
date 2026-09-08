@@ -1,5 +1,4 @@
-extends "res://tests/gut_base.gd"
-## ResourceNode tests: state transitions, yield, exhaustion, daily tick.
+extends GdUnitTestSuite
 
 var node_state: int
 var node_yield: int
@@ -7,49 +6,49 @@ var node_days: int
 
 enum State { HIDDEN, DISCOVERED, EXHAUSTED }
 
-func before_each() -> void:
+func before_test() -> void:
 	node_state = State.HIDDEN
 	node_yield = 4
 	node_days = 0
 
 
 func test_starts_hidden() -> void:
-	assert_true(node_state == State.HIDDEN, "starts hidden")
-	assert_true(node_state != State.DISCOVERED, "not discovered")
-	assert_true(node_state != State.EXHAUSTED, "not exhausted")
+	assert_bool(node_state == State.HIDDEN).is_true()
+	assert_bool(node_state != State.DISCOVERED).is_true()
+	assert_bool(node_state != State.EXHAUSTED).is_true()
 
 
 func test_discover() -> void:
 	node_state = State.DISCOVERED
-	assert_true(node_state == State.DISCOVERED, "is discovered")
-	assert_true(node_state != State.HIDDEN, "not hidden")
+	assert_bool(node_state == State.DISCOVERED).is_true()
+	assert_bool(node_state != State.HIDDEN).is_true()
 
 
 func test_discover_twice_noop() -> void:
 	node_state = State.DISCOVERED
-	node_state = State.DISCOVERED  # idempotent
-	assert_true(node_state == State.DISCOVERED, "still discovered")
+	node_state = State.DISCOVERED  
+	assert_bool(node_state == State.DISCOVERED).is_true()
 
 
 func test_exhaust() -> void:
 	node_state = State.DISCOVERED
 	node_state = State.EXHAUSTED
-	assert_true(node_state == State.EXHAUSTED, "is exhausted")
-	assert_true(node_state != State.DISCOVERED, "not discovered")
+	assert_bool(node_state == State.EXHAUSTED).is_true()
+	assert_bool(node_state != State.DISCOVERED).is_true()
 
 
 func test_exhaust_from_hidden_fails() -> void:
 	node_state = State.HIDDEN
-	assert_true(node_state == State.HIDDEN, "still hidden")
+	assert_bool(node_state == State.HIDDEN).is_true()
 
 
 func test_yield_amount() -> void:
-	assert_eq(node_yield, 4, "initial yield")
+	assert_that(node_yield).is_equal(4)
 
 
 func test_reduce_yield() -> void:
 	node_yield = maxi(node_yield - 2, 0)
-	assert_eq(node_yield, 2, "reduced")
+	assert_that(node_yield).is_equal(2)
 
 
 func test_reduce_to_zero_exhausts() -> void:
@@ -57,7 +56,7 @@ func test_reduce_to_zero_exhausts() -> void:
 	node_yield = max(0, node_yield - 4)
 	if node_yield <= 0:
 		node_state = State.EXHAUSTED
-	assert_true(node_state == State.EXHAUSTED, "auto exhaust")
+	assert_bool(node_state == State.EXHAUSTED).is_true()
 
 
 func test_reduce_over_yield() -> void:
@@ -65,7 +64,7 @@ func test_reduce_over_yield() -> void:
 	node_yield = max(0, node_yield - 10)
 	if node_yield <= 0:
 		node_state = State.EXHAUSTED
-	assert_true(node_state == State.EXHAUSTED, "over-reduce exhausts")
+	assert_bool(node_state == State.EXHAUSTED).is_true()
 
 
 func test_daily_tick_removes() -> void:
@@ -73,13 +72,13 @@ func test_daily_tick_removes() -> void:
 	node_state = State.EXHAUSTED
 	node_days = 3
 	node_days -= 1
-	assert_eq(node_days, 2, "after 1 day")
+	assert_that(node_days).is_equal(2)
 	node_days -= 1
-	assert_eq(node_days, 1, "after 2 days")
+	assert_that(node_days).is_equal(1)
 	node_days -= 1
-	assert_eq(node_days, 0, "ready for removal")
+	assert_that(node_days).is_equal(0)
 
 
 func test_tick_non_exhausted() -> void:
 	node_state = State.DISCOVERED
-	assert_eq(node_days, 0, "discovered ticks return 0")
+	assert_that(node_days).is_equal(0)

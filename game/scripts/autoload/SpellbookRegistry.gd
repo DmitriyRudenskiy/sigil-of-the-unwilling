@@ -1,7 +1,5 @@
-## scripts/data/SpellbookRegistry.gd
 extends Node
 class_name SpellbookRegistry
-## Autoload: Spellbook. Загружает ~420 карт из JSON.
 
 const JSON_PATH := "res://assets/data/spells.json"
 
@@ -32,6 +30,11 @@ func _load_from_json() -> void:
 		return
 
 	var file := FileAccess.open(JSON_PATH, FileAccess.READ)
+	# TASK_06: явная проверка — файл мог исчезнуть между file_exists и open.
+	if file == null:
+		push_warning("SpellbookRegistry: %s не удалось открыть, using fallback" % JSON_PATH)
+		_load_fallback()
+		return
 	var text := file.get_as_text()
 	file.close()
 
@@ -51,7 +54,6 @@ func _load_from_json() -> void:
 	GameLogger.info("Loaded %d spells from JSON" % _spells.size(), "Spellbook")
 
 func _load_fallback() -> void:
-	# Минимальный набор для тестов
 	var fallback: Array[Dictionary] = [
 		{"id": "ice_bolt", "name": "Ice Bolt", "template": "DIRECT_DAMAGE", "speed": "fast", "cost": 1, "color": "primal",
 		 "params": {"amount": 2, "target": "ANY_NEXUS", "apply_status": "FROZEN", "status_duration": 1}},
@@ -99,10 +101,7 @@ func _register(spell) -> void:
 		_by_color[color_name] = []
 	_by_color[color_name].append(spell)
 
-# ==================== PUBLIC API ====================
 
-## Зарегистрировать карточное заклинание в системе (публично для мостов,
-## напр. BattleSpellBridge — конвертация боевых заклинаний в карточные).
 func register(spell) -> void:
 	_register(spell)
 

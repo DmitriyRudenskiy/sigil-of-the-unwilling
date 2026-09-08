@@ -1,23 +1,20 @@
 class_name CityManager
 extends Node
-## Координатор городов: ходовой цикл, циклический приток в столицу (ТЗ 3.2),
-## слава, события для UI. WorldController вызывает on_turn_ended() раз в ход.
 
 signal city_updated(city: City)
 signal cycle_completed(turn: int, arrivals: int)
 signal glory_changed(window_total: float)
 signal status_message(text: String)
 signal reputation_changed(city_uid: int, value: int, band: int)
-## Спринт 11: перенос города (City.relocation_completed агрегатором).
 signal relocation_completed(city_uid: int, new_center: Vector2i)
 
 var cities: Array[City] = []
 var capital: City = null
 var glory := GloryTracker.new()
-## Абсолютный счётчик завершённых ходов (дней).
 var current_turn := 0
-## city-in-world: провайдер FIDSI выходов клеток (CityYieldTable через terrain).
 var _tile_yield_provider: Callable = Callable()
+
+var _buildable_provider: Callable = Callable()
 
 
 func register_city(city: City, make_capital := false) -> void:
@@ -25,10 +22,12 @@ func register_city(city: City, make_capital := false) -> void:
 		return
 	city.uid = cities.size()
 	cities.append(city)
-	# city-in-world: провайдер ставится здесь (а не только в set_tile_yield_provider),
-	# иначе города, захваченные после бутстрапа, останутся без tile_yield_fn.
 	if _tile_yield_provider.is_valid():
 		city.tile_yield_fn = _tile_yield_provider
+
+	if _buildable_provider.is_valid():
+		city.is_buildable_fn = _buildable_provider
+
 	city.relocation_completed.connect(
 		func(new_center: Vector2i): relocation_completed.emit(city.uid, new_center))
 	if make_capital or capital == null:
@@ -45,15 +44,11 @@ func set_capital(city: City) -> void:
 
 
 func add_glory(amount: float, reason: StringName = &"") -> void:
-	## Слава за победы, деревни, квесты, подземелья (ТЗ 3.2).
-	## +1: событие принадлежит текущему незавершённому ходу.
 	glory.add_glory(amount, current_turn + 1, reason)
 	glory_changed.emit(glory.glory_last_window(current_turn + 1))
 
 
 func apply_reputation(city: City, delta: float) -> int:
-	## Дискретные события репутации (Спринт 6): победа +10, ЧП -10.
-	## Возвращает новое значение. Сигнал — для UI (хедер города).
 	if city == null:
 		return 0
 	var v: int = ReputationSystem.apply(city, delta)
@@ -66,8 +61,12 @@ func set_tile_yield_provider(fn: Callable) -> void:
 	for c in cities:
 		c.tile_yield_fn = fn
 
+func set_buildable_provider(fn: Callable) -> void:
+	_buildable_provider = fn
+	for c in cities:
+		c.is_buildable_fn = fn
 
-## city-in-world: город на клетке (центр совпадает) или null.
+
 func city_at(cell: Vector2i) -> City:
 	for c in cities:
 		if c != null and c.center == cell:
@@ -75,7 +74,6 @@ func city_at(cell: Vector2i) -> City:
 	return null
 
 
-## city-in-world: поиск города по uid (сокет-команды CITY_*).
 func get_city_by_uid(u: int) -> City:
 	for c in cities:
 		if c != null and c.uid == u:
@@ -84,8 +82,6 @@ func get_city_by_uid(u: int) -> City:
 
 
 func on_turn_ended(month: int) -> Dictionary:
-	## Конец хода: все города обрабатываются, затем (каждые 7 ходов) —
-	## циклический приток последователей в столицу.
 	current_turn += 1
 	var report := {
 		"turn": current_turn, "cities": [], "arrivals": 0, "cycle": false,
@@ -98,7 +94,7 @@ func on_turn_ended(month: int) -> Dictionary:
 		city_updated.emit(c)
 	glory.prune(current_turn)
 
-	if current_turn % CityBalance.CITY_CYCLE_TURNS == 0:
+	if current_turn % GameNumbers.CITY_CYCLE_TURNS == 0:
 		var arrivals := capital_inflow(month)
 		report["cycle"] = true
 		report["arrivals"] = arrivals
@@ -114,13 +110,12 @@ func on_turn_ended(month: int) -> Dictionary:
 
 
 func capital_inflow(month: int) -> int:
-	## Итог = floor(База × Слава × Сезон), ТЗ 3.2.
 	if capital == null:
 		return 0
-	var base := CityBalance.INFLOW_BASE \
-		+ CityBalance.INFLOW_PER_TEMPLE_LEVEL * capital.get_great_temple_level()
+	var base := GameNumbers.INFLOW_BASE \
+		+ GameNumbers.INFLOW_PER_TEMPLE * capital.get_great_temple_level()
 	var glory_mod := 1.0 \
-		+ glory.glory_last_window(current_turn) / CityBalance.INFLOW_GLORY_DIVISOR
+		+ glory.glory_last_window(current_turn) / GameNumbers.INFLOW_GLORY_DIVISOR
 	var season_mod := Season.growth_modifier(Season.from_month(month))
 	return int(floor(base * glory_mod * season_mod))
 

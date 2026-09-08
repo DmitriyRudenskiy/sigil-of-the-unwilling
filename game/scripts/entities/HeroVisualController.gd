@@ -1,12 +1,14 @@
 extends Node
 class_name HeroVisualController
-## Hero visual: sprite, animation from sheet, fallback circle.
-## Does not modify game state — only reacts to events.
 
 const _HexDraw = preload("res://scripts/core/HexDraw.gd")
+const HeroVisualsScene = preload("res://scenes/entities/HeroVisuals.tscn")
+const DestMarkerScene = preload("res://scenes/entities/DestMarker.tscn")
+const StatusOrbScene = preload("res://scenes/entities/StatusOrb.tscn")
 
 const HERO_SHEET_PATH := "res://assets/raw/hero_knight.jpg"
 
+var _visuals: Node2D = null
 var _anim: AnimatedSprite2D
 var _sheet_path_cache: String = ""
 var _fallback: Sprite2D
@@ -17,7 +19,6 @@ var _parent: HeroController
 var _map_gen: MapGenerator
 
 
-## Public accessor
 func get_avatar_texture() -> Texture2D:
 	return _avatar_tex
 
@@ -28,33 +29,34 @@ func setup(map: MapGenerator, hero: HeroController) -> void:
 
 
 func build_visual() -> void:
-	if _anim != null or _fallback != null:
+	if _visuals != null:
 		return
+	_visuals = HeroVisualsScene.instantiate()
+	_parent.add_child(_visuals)
+	_fallback = _visuals.get_node("Fallback")
+	_anim = _visuals.get_node("Anim")
 	var sheet_path := _find_sheet()
 	if sheet_path != "":
-		# Через импорт-пайплайн, а не Image.load_from_file: файл имеет .import
-		# (CompressedTexture2D) — прямая загрузка как Image-файла даёт варнинг
-		# "Loaded resource as image file, this will not work on export".
 		var sheet_res := load(sheet_path)
 		if sheet_res is ImageTexture:
 			_build_anim_from_sheet((sheet_res as ImageTexture).get_image())
-	if _anim == null:
-		_fallback = Sprite2D.new()
+	if _anim.sprite_frames == null or _anim.sprite_frames.get_animation_names().is_empty():
 		_fallback.texture = PlaceholderTexture.circle(20, Color(0.9, 0.7, 0.1), Color(0.3, 0.2, 0.0))
-		_fallback.z_index = 10
-		_parent.add_child(_fallback)
+		_fallback.visible = true
+		_anim.visible = false
+	else:
+		_fallback.visible = false
+		_anim.visible = true
 
 
 func _find_sheet() -> String:
 	if _sheet_path_cache != "":
 		return _sheet_path_cache
-	# 1) explicit names — no scanning needed
 	for c in ["hero_knight.png", "knight.png", "hero.png", "knight.jpeg", "hero.jpeg", "hero_knight.jpg"]:
 		var path: String = "res://assets/raw/" + str(c)
 		if FileAccess.file_exists(path):
 			_sheet_path_cache = path
 			return path
-	# 2) auto-detect: large square image in assets/raw (only if explicit names missed)
 	var dir := DirAccess.open("res://assets/raw")
 	if dir == null:
 		return ""
@@ -83,7 +85,6 @@ func _build_anim_from_sheet(sheet: Image) -> void:
 	if sheet.get_format() != Image.FORMAT_RGBA8:
 		sheet.convert(Image.FORMAT_RGBA8)
 	sheet.resize(512, 512, Image.INTERPOLATE_LANCZOS)
-	# Remove black background
 	for y in 512:
 		for x in 512:
 			var px := sheet.get_pixel(x, y)
@@ -106,11 +107,8 @@ func _build_anim_from_sheet(sheet: Image) -> void:
 		f_away.blit_rect(sheet, Rect2i(c * fs, 3 * fs, fs, fs), Vector2i(0, 0))
 		sf.add_frame("away", ImageTexture.create_from_image(f_away))
 	_avatar_tex = sf.get_frame_texture("side", 0)
-	_anim = AnimatedSprite2D.new()
 	_anim.sprite_frames = sf
 	_anim.scale = Vector2(0.62, 0.62)
-	_anim.z_index = 10
-	_parent.add_child(_anim)
 	_anim.stop()
 	_anim.frame = 0
 	GameLogger.hero("Knight animation built from %s" % HERO_SHEET_PATH)
@@ -142,17 +140,15 @@ func set_facing(delta: Vector2i) -> void:
 
 func setup_path_visual() -> void:
 	if _marker == null:
-		_marker = DestMarker.new()
+		_marker = DestMarkerScene.instantiate()
 		_parent.get_parent().add_child(_marker)
 	if _status_orb == null:
-		_status_orb = StatusOrb.new()
+		_status_orb = StatusOrbScene.instantiate()
 		_status_orb.name = "StatusOrb"
 		_parent.add_child(_status_orb)
 
 
-## Path line removed — markers now handled by MarkerLayer.
 func draw_path(_pts: Array[Vector2i]) -> void:
-	# no-op: markers replace path line
 	pass
 
 
@@ -169,58 +165,3 @@ func update_status_orb(mp_ratio: float) -> void:
 func show_marker(pos: Vector2) -> void:
 	if _marker:
 		_marker.show_at(pos)
-
-
-## DestMarker class (kept here to avoid a separate file)
-class DestMarker extends Node2D:
-	var active := false
-	var _t := 0.0
-
-	func _process(d: float) -> void:
-		if active:
-			_t += d
-			queue_redraw()
-
-	func show_at(pos: Vector2) -> void:
-		position = pos
-		active = true
-		queue_redraw()
-
-	func hide_marker() -> void:
-		active = false
-		queue_redraw()
-
-	func _draw() -> void:
-		if not active:
-			return
-		var r := 36.0 + sin(_t * 6.0) * 4.0
-		var pts := _HexDraw.points(r)
-		draw_polyline(pts, Color(1.0, 0.25, 0.2, 0.95), 3.0)
-
-
-## StatusOrb — small colored orb above hero token showing MP state.
-class StatusOrb extends Node2D:
-	var _ratio: float = 1.0
-	var _t := 0.0
-
-	func _ready() -> void:
-		position = Vector2(0, -40)
-		z_index = 11
-
-	func _process(d: float) -> void:
-		_t += d
-		queue_redraw()
-
-	func set_ratio(r: float) -> void:
-		_ratio = clampf(r, 0.0, 1.0)
-
-	func _draw() -> void:
-		var color: Color
-		if _ratio >= 0.4:
-			color = Color(0.2, 0.85, 0.2, 0.9)
-		elif _ratio >= 0.1:
-			color = Color(1.0, 0.85, 0.1, 0.9)
-		else:
-			color = Color(0.9, 0.2, 0.2, 0.9)
-		var r := 6.0 + sin(_t * 3.0) * 1.5
-		draw_circle(Vector2.ZERO, r, color)

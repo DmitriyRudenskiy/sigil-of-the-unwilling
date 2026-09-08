@@ -1,10 +1,7 @@
 extends Node
-## Тестовый фейк: HeroController для WorldBattleCoordinator.
-## Минимальный набор свойств/методов, к которым координатор обращается
-## через мягкие зависимости (get / has_method).
 
-var movement: Node = null   # FakeMovement
-var army: Node = null       # Опционально: HeroArmyController (fallback-стек)
+var movement: Node = null   
+var army: Node = null       
 var apply_calls := 0
 var force_stop_calls := 0
 

@@ -1,16 +1,8 @@
 class_name ShardManager
 extends RefCounted
-## Owns the shard list + the active shard. astral-macro Stage 1.
-##
-## ponytail: static registry (not an autoload) — avoids project.godot edits and
-## wiring for Stage 1; Stage 2 travel will drive set_active() from the UI. The
-## default campaign is shard #1 (today's world, seed 0 = random new games) +
-## shard #2 (a pinned seed/biome). Shards are cheap RefCounteds, so a static
-## instance leaks nothing meaningful.
 
 const SHARD_1_ID := &"shard_1"
 const SHARD_2_ID := &"shard_2"
-## Pinned seed for shard #2 (deterministic map, independent of shard #1).
 const SHARD_2_SEED := 0x2A1F3C7
 const _ShardState = preload("res://scripts/core/ShardState.gd")
 const _Self := preload("res://scripts/core/ShardManager.gd")
@@ -33,7 +25,6 @@ static func instance() -> _Self:
 
 
 static func reset() -> void:
-	## Test seam: drop the registry so the next get() rebuilds the default.
 	_instance = null
 
 

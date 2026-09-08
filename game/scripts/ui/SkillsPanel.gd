@@ -1,52 +1,39 @@
 extends PanelContainer
 class_name SkillsPanel
-## Displays hero skills with levels.
 
-var _labels: Dictionary = {}
 var _skill_order := [&"nature_sense", &"keen_eye", &"navigation", &"geology", &"alchemy"]
-var _skill_names := {
-	&"nature_sense": "Чувство Природы",
-	&"keen_eye": "Зоркий Взор",
-	&"navigation": "Навигация",
-	&"geology": "Геология",
-	&"alchemy": "Алхимия",
-}
-
+var _level_labels: Dictionary = {}
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(160, 0)
-	_build_ui()
-
-
-func _build_ui() -> void:
-	var vbox := VBoxContainer.new()
-	add_child(vbox)
-
-	var title := Label.new()
-	title.text = "🔮 Навыки"
-	title.add_theme_font_size_override("font_size", 14)
-	vbox.add_child(title)
-
-	for skill in _skill_order:
-		var hbox := HBoxContainer.new()
-		vbox.add_child(hbox)
-
-		var name_label := Label.new()
-		name_label.text = _skill_names.get(skill, skill)
-		name_label.add_theme_font_size_override("font_size", 12)
-		name_label.custom_minimum_size = Vector2(100, 0)
-		hbox.add_child(name_label)
-
-		var level_label := Label.new()
-		level_label.text = "0/3"
-		level_label.add_theme_font_size_override("font_size", 12)
-		hbox.add_child(level_label)
-
-		_labels[skill] = level_label
-
+    var title := $VBox/Title as Label
+    title.add_theme_font_size_override("font_size", 14)
+    title.text = GameText.skills_title()
+    var container := $VBox/SkillContainer as VBoxContainer
+    var row_names := {
+        &"nature_sense": "NatureSenseRow",
+        &"keen_eye": "KeenEyeRow",
+        &"navigation": "NavigationRow",
+        &"geology": "GeologyRow",
+        &"alchemy": "AlchemyRow",
+    }
+    for skill in _skill_order:
+        var row_name: String = row_names.get(skill, "")
+        if row_name.is_empty():
+            continue
+        var row := container.get_node(row_name) as HBoxContainer
+        if row == null:
+            continue
+        var name_label := row.get_node("NameLabel") as Label
+        if name_label != null:
+            name_label.add_theme_font_size_override("font_size", 12)
+            name_label.text = GameText.skill_name(skill)
+        var level_label := row.get_node("LevelLabel") as Label
+        if level_label != null:
+            level_label.add_theme_font_size_override("font_size", 12)
+            _level_labels[skill] = level_label
 
 func update_skills(skills: Dictionary) -> void:
-	for skill in _skill_order:
-		var level: int = int(skills.get(skill, 0))
-		if _labels.has(skill):
-			_labels[skill].text = "%d/3" % level
+    for skill in _skill_order:
+        var level: int = int(skills.get(skill, 0))
+        if _level_labels.has(skill):
+            _level_labels[skill].text = "%d/3" % level

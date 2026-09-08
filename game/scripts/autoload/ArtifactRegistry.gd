@@ -1,6 +1,5 @@
 extends Node
 class_name ArtifactRegistry
-## Autoload: Artifacts. Registry of all 30 artifacts.
 
 var _artifacts: Dictionary = {}
 var _by_rarity: Dictionary = {}
@@ -16,7 +15,6 @@ func ensure_definitions() -> void:
 	if not _artifacts.is_empty():
 		return
 
-	# ===== MINOR (10) =====
 	_register(&"helm_sentinel", "Sentinel's Helm", Artifact.Slot.HEAD, Artifact.Rarity.MINOR,
 		{"defense": 1}, &"", false, 500, "Light helm worn by watchmen.",
 		{}, {"base_ac": 1, "max_dex_bonus": 100, "acp": 0, "asf": 0.0})
@@ -52,7 +50,6 @@ func ensure_definitions() -> void:
 	_register(&"lucky_clover", "Four-Leaf Clover", Artifact.Slot.MISC_A, Artifact.Rarity.MINOR,
 		{"luck": 1}, &"", false, 400, "A lucky charm.")
 
-	# ===== MAJOR (10) =====
 	_register(&"crown_magi", "Crown of the Magi", Artifact.Slot.HEAD, Artifact.Rarity.MAJOR,
 		{"spell_power": 2, "knowledge": 1}, &"", false, 3000, "Crown of an archmage.",
 		{}, {"base_ac": 1, "max_dex_bonus": 100})
@@ -88,7 +85,6 @@ func ensure_definitions() -> void:
 	_register(&"cloak_undead", "Cloak of the Undead King", Artifact.Slot.MISC_A, Artifact.Rarity.MAJOR,
 		{"morale": 1}, &"undead_morale", false, 5000, "+1 morale to undead stacks.")
 
-	# ===== RELIC (10) =====
 	_register(&"helm_heavenly", "Helm of Heavenly Enlightenment", Artifact.Slot.HEAD, Artifact.Rarity.RELIC,
 		{"attack": 6, "defense": 6}, &"", false, 20000, "Legendary helm of angels.",
 		{}, {"base_ac": 2, "max_dex_bonus": 100})
@@ -123,7 +119,6 @@ func ensure_definitions() -> void:
 	_register(&"statue_legion", "Statue of Legion", Artifact.Slot.MISC_B, Artifact.Rarity.RELIC,
 		{"castle_growth_percent": 50}, &"", false, 20000, "+50% creature growth in castles.")
 
-	# ===== CLASS SET: WARRIOR (6) =====
 	_register(&"greatsword_might", "Warlord's Greatsword", Artifact.Slot.WEAPON, Artifact.Rarity.RELIC,
 		{"attack": 8}, &"", true, 22000, "Two-handed greatsword of a warlord.",
 		{"damage_dice": "2d6", "damage_types": [Artifact.DamageType.SLASHING], "crit_threat": 19, "crit_multiplier": 2.0, "proficiency": [Artifact.WeaponCategory.MARTIAL], "weapon_size": Artifact.WeaponSize.LARGE, "is_two_handed": true})
@@ -148,7 +143,6 @@ func ensure_definitions() -> void:
 		{"defense": 7}, &"", false, 20000, "A shield like a fortress wall.",
 		{}, {"base_ac": 4}, Artifact.AcBonusType.SHIELD)
 
-	# ===== CLASS SET: ARCHER (6) =====
 	_register(&"longbow_hawk", "Hawksey Longbow", Artifact.Slot.WEAPON, Artifact.Rarity.RELIC,
 		{"attack": 5}, &"", false, 16000, "A longbow with hawk-eyed precision.",
 		{"damage_dice": "1d8", "damage_types": [Artifact.DamageType.PIERCING], "crit_threat": 20, "crit_multiplier": 3.0, "proficiency": [Artifact.WeaponCategory.MARTIAL], "weapon_size": Artifact.WeaponSize.LARGE, "is_ranged": true})
@@ -172,7 +166,6 @@ func ensure_definitions() -> void:
 		{"defense": 4, "luck": 1}, &"", false, 14000, "A small shield that ripples with luck.",
 		{}, {"base_ac": 2}, Artifact.AcBonusType.SHIELD)
 
-	# ===== CLASS SET: MAGE (6) =====
 	_register(&"staff_void", "Staff of the Void", Artifact.Slot.WEAPON, Artifact.Rarity.RELIC,
 		{"spell_power": 8, "attack": 1}, &"", false, 18000, "A staff hollowed by the void.",
 		{"damage_dice": "1d6", "damage_types": [Artifact.DamageType.BLUDGEONING], "crit_threat": 20, "crit_multiplier": 2.0, "proficiency": [Artifact.WeaponCategory.SIMPLE], "weapon_size": Artifact.WeaponSize.LARGE})
@@ -197,7 +190,6 @@ func ensure_definitions() -> void:
 		{"defense": 3, "spell_power": 2}, &"magic_ward", false, 13000, "A ward woven from arcane force.",
 		{}, {"base_ac": 3}, Artifact.AcBonusType.SHIELD)
 
-	# ===== ACCESSORIES (6, maximally distinct) =====
 	_register(&"amulet_prescience", "Amulet of Prescience", Artifact.Slot.NECK, Artifact.Rarity.RELIC,
 		{"knowledge": 4, "spell_power": 3}, &"", false, 16000, "Grants foresight and spellcraft.",
 		{}, {"base_ac": 2}, Artifact.AcBonusType.NATURAL)
@@ -219,7 +211,6 @@ func ensure_definitions() -> void:
 	_register(&"tome_infinity", "Tome of Infinity", Artifact.Slot.SPELLBOOK, Artifact.Rarity.RELIC,
 		{"spell_power": 8, "daily_gems": 1}, &"", false, 16000, "A tome of endless spells; +1 gem/day.")
 
-	# Build rarity index
 	_by_rarity.clear()
 	for id in _artifacts:
 		var art: Artifact = _artifacts[id]

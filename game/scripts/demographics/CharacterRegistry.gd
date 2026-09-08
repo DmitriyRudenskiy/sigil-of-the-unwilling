@@ -1,18 +1,11 @@
 class_name CharacterRegistry
 extends RefCounted
-## Реестр персонажей мира (M2: Демография).
-##
-## Связывает персонажей с фигурками: pop_uid -> character_uid.
-## Uid персонажей не переиспользуются. Сериализуется в
-## Array[Dictionary] (JSON-совместимо) для сохранений.
-## Чистый RefCounted — без узлов.
 
-var _characters: Dictionary = {}  # uid -> Character
-var _by_pop: Dictionary = {}  # pop_uid -> character_uid
+var _characters: Dictionary = {}  
+var _by_pop: Dictionary = {}  
 var _uid_seq := 0
 var _trait_registry: TraitRegistry = null
 
-## Имена мира (нейтральные, 36 шт.) — детерминированно выбираются rng.
 const _NAMES: Array[String] = [
 	"Альдо", "Берил", "Велан", "Горм", "Делия", "Эрик",
 	"Фенна", "Гарет", "Хельма", "Ирена", "Касс", "Лора",
@@ -37,8 +30,6 @@ func _next_uid() -> int:
 	return uid
 
 
-## Создаёт персонажа для фигурки (идемпотентно: если уже есть — вернёт его).
-## Перечитывает pop.character_uid и обновляет его.
 func create(city_uid: int, pop: PopUnit, rng: RandomNumberGenerator = null) -> Character:
 	var existing := get_by_pop(pop.uid)
 	if existing != null and existing.alive:
@@ -73,7 +64,6 @@ func _pick_icon(rng: RandomNumberGenerator) -> String:
 
 
 func get_by_uid(uid: int) -> Character:
-	## (Не get(): переопределял бы Object.get() — ошибка при компиляции.)
 	return _characters.get(uid, null)
 
 
@@ -99,8 +89,6 @@ func alive_in_city(city_uid: int) -> Array[Character]:
 	return out
 
 
-## Фигурка умерла/удалена: разрываем связь, персонаж остаётся «мёртвым»
-## (хроники могут его упоминать).
 func on_pop_removed(pop_uid: int) -> Character:
 	if not _by_pop.has(pop_uid):
 		return null
@@ -117,7 +105,6 @@ func remove(uid: int) -> void:
 	_characters.erase(uid)
 
 
-## Сериализация: список персонажей (включая мёртвых — для хроник).
 func serialize() -> Array:
 	var out: Array = []
 	for uid in _characters:

@@ -1,0 +1,955 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: SigilOfTheUnwilling 0.1\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# ─── Меню ──────────────────────────────────────────────────────
+msgid "menu.new_game"
+msgstr "Новая игра"
+
+msgid "menu.load_game"
+msgstr "Загрузить"
+
+msgid "menu.arena"
+msgstr "🏙 Арена города"
+
+msgid "menu.model_warrior"
+msgstr "🗡 Модель: Рыцарь"
+
+msgid "menu.model_mage"
+msgstr "✨ Модель: Маг"
+
+msgid "menu.settings"
+msgstr "Настройки"
+
+msgid "menu.chronicle"
+msgstr "📜 Летопись"
+
+msgid "menu.exit"
+msgstr "Выход"
+
+msgid "menu.version"
+msgstr "Sigil of the Unwilling v0.1 — Godot 4.7"
+
+msgid "model.hero_warrior"
+msgstr "Аджит — Рыцарь"
+
+msgid "model.hero_mage"
+msgstr "Аджит — Маг"
+
+# ─── Бой ───────────────────────────────────────────────────────
+msgid "battle.select_unit"
+msgstr "Выберите существо…"
+
+msgid "battle.your_turn"
+msgstr "Ваш ход"
+
+msgid "battle.enemy_turn"
+msgstr "Ход противника"
+
+msgid "battle.retreat"
+msgstr "🏕️"
+
+msgid "battle.wait"
+msgstr "🏃"
+
+msgid "battle.attack"
+msgstr "⚔️"
+
+msgid "battle.defend"
+msgstr "🛡️"
+
+msgid "battle.skip"
+msgstr "⏳"
+
+msgid "battle.retaliation"
+msgstr "RETALIATION"
+
+msgid "battle.high_morale"
+msgstr "HIGH MORALE!"
+
+msgid "battle.luck"
+msgstr "LUCK!"
+
+msgid "battle.killed"
+msgstr "KILLED: {n}"
+
+msgid "battle.spell_label"
+msgstr "SPELL: {id}"
+
+msgid "battle.retreat_confirm"
+msgstr "Отступление! Потеря 50% стеков."
+
+msgid "battle.defend_bonus"
+msgstr "🛡️ Защита: +20% DEF до конца раунда."
+
+msgid "battle.damage_preview"
+msgstr "Damage: ~{dmin}-{dmax} (kills ~{kmin}-{kmax})"
+
+msgid "battle.move_help"
+msgstr "{name}: синяя траектория — куда ходит, красная окрестность — ходов не хватает, красный контур — атака."
+
+msgid "battle.click_enemy"
+msgstr "⚔️ Кликните врага с красным контуром."
+
+msgid "battle.no_mana"
+msgstr "Недостаточно маны или школа не изучена."
+
+msgid "battle.unit_info"
+msgstr "{name} | Числ: {count} | HP: {hp} | АТК: {atk} | ЗАЩ: {def} | СКОР: {spd} | {tags}"
+
+msgid "battle.unit_short"
+msgstr "{name} x{count}"
+
+msgid "battle.spell_target"
+msgstr "Выберите цель для заклинания… (ПКМ — отмена)"
+
+msgid "battle.spell_failed"
+msgstr "Заклинание не сработало: {reason}"
+
+msgid "battle.sacrifice_failed"
+msgstr "Жертва не удалась: {reason}"
+
+msgid "battle.forced_retreat"
+msgstr "Принудительное отступление (бой завис)."
+
+msgid "battle.retreat_wait"
+msgstr "Отступление: ждём начала хода игрока…"
+
+msgid "battle.heal"
+msgstr "+{n} HP"
+
+msgid "battle.hp_loss"
+msgstr "-{n} HP"
+
+msgid "battle.turn_info"
+msgstr "{side}: {name} ({count})"
+
+# ─── Город ─────────────────────────────────────────────────────
+msgid "city.title"
+msgstr "{name}"
+
+msgid "city.capital"
+msgstr " (столица)"
+
+msgid "city.population"
+msgstr "Население: {cur}/{cap}"
+
+msgid "city.food"
+msgstr "🌾 Еда"
+
+msgid "city.industry"
+msgstr "🏭 Промышленность"
+
+msgid "city.gold"
+msgstr "🪙 Золото"
+
+msgid "city.prosperity"
+msgstr "⭐ Процветание"
+
+msgid "city.reputation"
+msgstr "💠 Репутация"
+
+msgid "city.buildings"
+msgstr "Здания"
+
+msgid "city.hire"
+msgstr "👤 Нанять"
+
+msgid "city.level_up"
+msgstr "⬆️ Улучшить"
+
+msgid "city.close"
+msgstr "✕ Выход из города"
+
+msgid "city.build_farm"
+msgstr "🌾 Построить ферму"
+
+msgid "city.build_mine"
+msgstr "⛏️ Построить шахту"
+
+msgid "city.exit"
+msgstr "✕ Выход из города"
+
+msgid "city.no_industry"
+msgstr "Промышленность: {have}/{need}"
+
+msgid "city.no_cell"
+msgstr "Нет свободной клетки под постройку"
+
+msgid "city.hired"
+msgstr "Нанят: {name}"
+
+msgid "city.no_followers"
+msgstr "Нет свободных последователей для найма"
+
+msgid "city.max_level"
+msgstr "Город уже на максимальном уровне"
+
+msgid "city.level_title"
+msgstr "{name} — уровень {level}"
+
+msgid "city.population_detail"
+msgstr "👥 Население: {pop} (свободные последователи: {free})"
+
+msgid "city.food_netto"
+msgstr "🌾 Еда: {food} (нетто {netto} в ход)"
+
+msgid "city.industry_gold"
+msgstr "🏭 Промышленность: {industry}   🪙 Золото: {gold}"
+
+msgid "city.prosperity_reputation"
+msgstr "⭐ Процветание: {p}   💠 Репутация: {r}"
+
+msgid "city.building_line"
+msgstr "• {name}, ур. {level}, клетка ({x}, {y})"
+
+msgid "city.buildings_none"
+msgstr "Здания: (нет)"
+
+msgid "city.intro"
+msgstr "Экран управления городом. Esc — закрыть."
+
+msgid "city.not_bound"
+msgstr "Город не привязан"
+
+msgid "city.building_not_found"
+msgstr "Здание не найдено: {id}"
+
+msgid "city.cannot_build"
+msgstr "Нельзя построить: {reason}"
+
+msgid "city.build_failed"
+msgstr "Построить не удалось"
+
+msgid "city.built"
+msgstr "Построено: {name} ({x}, {y}). Расход: {cost}"
+
+msgid "city.cannot_upgrade"
+msgstr "Нельзя улучшить: {reasons}"
+
+msgid "city.upgrade_failed"
+msgstr "Улучшение не удалось"
+
+msgid "city.upgraded"
+msgstr "Город улучшен: уровень {from} → {to}"
+
+msgid "city.hire_no_hero"
+msgstr "Наём недоступен: нет героя"
+
+msgid "city.cost_industry"
+msgstr "промышленность: {n}"
+
+msgid "city.cost_special"
+msgstr "{res}: {n}"
+
+msgid "city.cost_followers"
+msgstr "последователи: {n}"
+
+msgid "city.cost_free"
+msgstr "бесплатно"
+
+# ─── Арена ─────────────────────────────────────────────────────
+msgid "arena.palette_hint"
+msgstr "Палитра (клик — выбор, повторный клик — снять)"
+
+msgid "arena.turn_button"
+msgstr "⏭ Ход"
+
+msgid "arena.auto_button"
+msgstr "▶ Авто"
+
+msgid "arena.hire_button"
+msgstr "🧑‍🌾 Нанять"
+
+msgid "arena.level_button"
+msgstr "🏛 Уровень"
+
+msgid "arena.reset_button"
+msgstr "↺ Заново"
+
+msgid "arena.menu_button"
+msgstr "⌂ Меню"
+
+msgid "arena.storm"
+msgstr "🌪 ШТОРМ"
+
+msgid "arena.starving"
+msgstr "⚠ ГОЛОД (день {day})"
+
+msgid "arena.cluster"
+msgstr "⚡кластеры: {n}"
+
+msgid "arena.center_msg"
+msgstr "Это центр города."
+
+msgid "arena.select_msg"
+msgstr "Сначала выберите здание в палитре (или кликните по построенному — апгрейд)."
+
+msgid "building.farm"
+msgstr "Ферма"
+
+msgid "building.mill"
+msgstr "Мельница"
+
+msgid "building.bakery"
+msgstr "Пекарня"
+
+msgid "building.mine"
+msgstr "Рудник"
+
+msgid "building.smithy"
+msgstr "Кузница"
+
+msgid "building.tavern"
+msgstr "Таверна"
+
+msgid "building.school"
+msgstr "Училище"
+
+msgid "building.trade_post"
+msgstr "Торговый пост"
+
+msgid "building.market"
+msgstr "Рынок"
+
+msgid "building.shack"
+msgstr "Хижина"
+
+msgid "building.walls"
+msgstr "Стены"
+
+msgid "building.district"
+msgstr "Район"
+
+msgid "arena.founded"
+msgstr "Город основан. Выберите здание в палитре и кликните по клетке."
+
+msgid "arena.palette_item"
+msgstr "{emoji} {name} {cost}"
+
+msgid "arena.borough_cost"
+msgstr "(район)"
+
+msgid "arena.cost"
+msgstr "({n})"
+
+msgid "arena.selected"
+msgstr "Выбрано: {name}"
+
+msgid "arena.nothing"
+msgstr "ничего (клик по зданию — апгрейд)"
+
+msgid "arena.selection"
+msgstr "{emoji} {name}"
+
+msgid "arena.cluster_badge"
+msgstr "⚡×{n}"
+
+msgid "arena.borough_built"
+msgstr "Район: построен"
+
+msgid "arena.borough_not_built"
+msgstr "Район: не построен"
+
+msgid "arena.borough_reason"
+msgstr "Район: {reason}"
+
+msgid "arena.ruins"
+msgstr " (руины: +{n} 🪙)"
+
+msgid "arena.built"
+msgstr "Построено: {name} (−{cost} промышленности){ruins}"
+
+msgid "arena.not_built"
+msgstr "Не построено: {reason}"
+
+msgid "arena.borough_info"
+msgstr "Район уровня {level}: даёт одобрение и распахивает соседние клетки."
+
+msgid "arena.upgraded"
+msgstr "Апгрейд: {name} → ур. {level}"
+
+msgid "arena.upgrade_failed"
+msgstr "Апгрейд не удался: {reason}"
+
+msgid "arena.cell_info"
+msgstr "Клетка ({x}, {y}), кольцо {ring}"
+
+msgid "arena.ring_outputs"
+msgstr "Выходы кольца: {list}"
+
+msgid "arena.cluster_note"
+msgstr " (кластер ×4)"
+
+msgid "arena.building_tip"
+msgstr "{name} ур.{level} — кольцо ×{ring}, суммарно ×{total}{cluster}, рабочих: {workers}"
+
+msgid "arena.borough_tip"
+msgstr "Район ур.{level} — одобрение {approval}, клетки-соседи в обороте"
+
+msgid "arena.stop"
+msgstr "⏸ Стоп"
+
+msgid "arena.auto_started"
+msgstr "Авто-режим: 1 ход / 0.3 с"
+
+msgid "arena.storm_info"
+msgstr "  🌪 ШТОРМ: производство ×{mult}, еда −{food} (стены ур.2 смягчают)"
+
+msgid "arena.turn_log"
+msgstr "Ход {turn}: еда {food} (нетто {netto}), процв. {prosperity}, уровень {level}{warn}{clusters}"
+
+msgid "arena.worker_hired"
+msgstr "Нанят работник (население {pop})."
+
+msgid "arena.no_worker"
+msgstr "Нанять некого: нет рабочих мест или жилья."
+
+msgid "arena.level_up"
+msgstr "Город → уровень {level}! Радиус застройки {radius}."
+
+msgid "arena.level_reasons"
+msgstr "Уровень: {reasons}"
+
+msgid "arena.cluster_mark"
+msgstr "⚡×4: {n}"
+
+msgid "arena.hud"
+msgstr "Ход: {turn}   🌾 {food} (нетто {netto})   🏭 {industry}   🪙 {gold}   👥 {pop}   ★ {prosperity}   Уровень {level}{storm}{cluster}"
+
+msgid "arena.score"
+msgstr "Score: {n}"
+
+# ─── Герой ─────────────────────────────────────────────────────
+msgid "hero.title"
+msgstr "🧙 {name} — {path}"
+
+msgid "hero.combat_hp"
+msgstr "❤️ {cur}/{max}"
+
+msgid "hero.mana"
+msgstr "✨ {cur}/{max}"
+
+msgid "hero.followers_label"
+msgstr "👥 Последователи"
+
+msgid "hero.no_followers"
+msgstr "нет"
+
+msgid "hero.default_title"
+msgstr "🧙 Герой"
+
+msgid "hero.stats"
+msgstr "⚔️ {atk}  🛡️ {def}  📖 {kn}  🧪 {sp}"
+
+msgid "hero.followers_none"
+msgstr "👥 Последователи: нет"
+
+msgid "hero.followers_more"
+msgstr "+{n} ещё"
+
+msgid "hero.no_path"
+msgstr "беспутный"
+
+msgid "adventure.glory"
+msgstr "👑 Слава: {cur} / {max}"
+
+msgid "info.date"
+msgstr "Месяц: {month}, Неделя: {week}, День: {day}"
+
+msgid "creation.background_value"
+msgstr "Прошлое: {value}"
+
+msgid "creation.stats"
+msgstr "Силы: Ур={atk}  Защ={def}  Маг={mag}  Муд={wis}"
+msgid "ui.close"
+msgstr "Закрыть"
+
+msgid "adventure.options"
+msgstr "Опции"
+
+msgid "adventure.show_markers"
+msgstr "Показать метки"
+
+msgid "adventure.hex_grid"
+msgstr "Гекс-сетка"
+
+msgid "info.tooltip_castle"
+msgstr "Замок"
+
+msgid "info.tooltip_flag"
+msgstr "Флаг"
+
+msgid "info.tooltip_camp"
+msgstr "Лагерь"
+
+msgid "info.tooltip_stable"
+msgstr "Конюшня"
+
+msgid "info.tooltip_ship"
+msgstr "Корабль"
+
+msgid "info.tooltip_smithy"
+msgstr "Кузница"
+
+msgid "info.tooltip_recon"
+msgstr "Разведка"
+
+msgid "info.tooltip_army"
+msgstr "Армия"
+
+msgid "info.tooltip_journal"
+msgstr "Журнал"
+
+msgid "info.tooltip_end_turn"
+msgstr "Конец хода"
+
+msgid "info.tooltip_kingdom"
+msgstr "Королевство"
+
+msgid "info.tooltip_options"
+msgstr "Опции"
+
+msgid "tools.title"
+msgstr "🧰 Инструменты"
+
+msgid "tools.slot_empty"
+msgstr "[{n}] Пусто"
+
+msgid "tools.slot_filled"
+msgstr "[{n}] {name} x{qty}"
+
+msgid "cityjob.worker"
+msgstr "⚙ Рабочий"
+
+msgid "cityjob.militia"
+msgstr "🛡 Ополченец"
+
+msgid "cityjob.reserve"
+msgstr "👤 Резерв"
+
+msgid "cityjob.patrol"
+msgstr "🐎 Патруль"
+
+msgid "creation.name_placeholder"
+msgstr "Имя героя"
+
+msgid "skills.title"
+msgstr "🔮 Навыки"
+msgid "tool.shovel"
+msgstr "🔧 Лопата"
+
+msgid "tool.pickaxe"
+msgstr "⛏️ Кирка"
+
+msgid "tool.cart"
+msgstr "🛒 Телега"
+
+msgid "tool.skin_protection"
+msgstr "🛡️ Защита кожи"
+
+msgid "tool.net"
+msgstr "🥅 Сеть"
+
+msgid "stat.attack"
+msgstr "Атака"
+
+msgid "stat.defense"
+msgstr "Защита"
+
+msgid "stat.spell_power"
+msgstr "Магия"
+
+msgid "stat.knowledge"
+msgstr "Знания"
+
+msgid "stat.mana"
+msgstr "Мана"
+
+msgid "stat.xp"
+msgstr "Опыт"
+
+msgid "stat.school"
+msgstr "Школа"
+
+msgid "stat.skills"
+msgstr "Навыки"
+
+msgid "artifact.default_name"
+msgstr "Герой"
+
+msgid "citypanel.capital"
+msgstr " (столица)"
+
+msgid "citypanel.over_limit"
+msgstr "⚠ ПЕРЕЛИМИТ {n}"
+
+msgid "citypanel.starving"
+msgstr "🍂 ГОЛОД"
+
+msgid "citypanel.patrol_tag"
+msgstr "патруль"
+
+msgid "citypanel.in_building"
+msgstr "[в здании]"
+
+msgid "citypanel.can_upgrade"
+msgstr "[можно улучшить]"
+
+msgid "citypanel.patrol_off"
+msgstr "🐎 Патруль: ВЫКЛ"
+
+msgid "citypanel.patrol_on"
+msgstr "🐎 Патруль: ВКЛ"
+
+msgid "citypanel.summary"
+msgstr "Население: {pop}/{cap}{over}\nРабочие {workers} · Свободных последователей {free} · Ополченцы {militia} (патруль {patrol})\nЕда: {food}/{cap_food} (нетто {netto}/ход){starving}\nОдобрение: {approval} · Безопасность: {safety}\nРайоны: {districts}/{max_districts} · Промышленность: {industry}"
+
+msgid "citypanel.building_line"
+msgstr "{name} ур.{level}/3{extra}"
+
+
+
+# ─── Создание персонажа ────────────────────────────────────────
+msgid "creation.title"
+msgstr "Создание героя"
+
+msgid "creation.subtitle"
+msgstr "Выберите облик героя для новой игры"
+
+msgid "creation.name_label"
+msgstr "Имя:"
+
+msgid "creation.sex_label"
+msgstr "Пол:"
+
+msgid "creation.race_label"
+msgstr "Раса:"
+
+msgid "creation.subrace_label"
+msgstr "Подраса:"
+
+msgid "creation.class_label"
+msgstr "Класс:"
+
+msgid "creation.culture_label"
+msgstr "Культура:"
+
+msgid "creation.background_label"
+msgstr "Прошлое:"
+
+msgid "creation.create"
+msgstr "Создать"
+
+msgid "creation.back"
+msgstr "Назад"
+
+msgid "creation.sex_male"
+msgstr "Мужской"
+
+msgid "creation.sex_female"
+msgstr "Женский"
+
+# ─── Конец игры ────────────────────────────────────────────────
+msgid "endgame.victory"
+msgstr "Путь завершён"
+
+msgid "endgame.defeat"
+msgstr "Знак угас"
+
+msgid "endgame.victory_title"
+msgstr "Путь завершён"
+
+msgid "endgame.defeat_title"
+msgstr "Знак угас"
+
+msgid "endgame.turns"
+msgstr "Ходы: {n}"
+
+msgid "endgame.date"
+msgstr "Дата: {m}/{w}/{d}"
+
+msgid "endgame.cities"
+msgstr "Города: {n}"
+
+msgid "endgame.glory"
+msgstr "Слава: {n}"
+
+msgid "endgame.battles"
+msgstr "Боёв: {w} побед / {l} поражений"
+
+msgid "endgame.generations"
+msgstr "Поколений: {n}"
+
+msgid "endgame.to_menu"
+msgstr "В главное меню"
+
+msgid "endgame.reason_unsuccessored_death"
+msgstr "Герой пал, и некому принять легенду."
+
+msgid "endgame.reason_total_collapse"
+msgstr "Все города пали."
+
+msgid "endgame.reason_path_completed"
+msgstr "Путь завершён — слава накоплена."
+
+msgid "endgame.reason_domination"
+msgstr "Все вражеские силы уничтожены."
+
+# ─── Смерть ────────────────────────────────────────────────────
+msgid "death.cycle_continues"
+msgstr "{name} — цикл продолжится"
+
+msgid "death.cycle_ends"
+msgstr "{name} — цикл оборвался"
+
+msgid "death.fell_in"
+msgstr "Герой пал {cause}."
+
+msgid "death.successor"
+msgstr "Знак переходит к: {name}"
+
+msgid "death.successor_button"
+msgstr "Знак переходит"
+
+msgid "death.resurrection_button"
+msgstr "Воскресить ({ind}⚙ + {gold}💰)"
+
+msgid "death.chronicle_button"
+msgstr "Летопись"
+
+msgid "death.menu_button"
+msgstr "В меню"
+
+# ─── Летопись ──────────────────────────────────────────────────
+msgid "chronicle.title"
+msgstr "📜 Летопись поколений"
+
+msgid "chronicle.empty"
+msgstr "Летопись пуста — легенда только начинается."
+
+msgid "chronicle.close"
+msgstr "Закрыть"
+
+msgid "chronicle.entry"
+msgstr "{icon} {gen}. {name} ({path}) — {outcome} | ходы {turns}, слава {glory}, боёв {w}/{l}"
+
+# ─── Настройки ─────────────────────────────────────────────────
+msgid "settings.title"
+msgstr "⚙️ Настройки"
+
+msgid "settings.graphics"
+msgstr "🖥️ Графика"
+
+msgid "settings.zoom"
+msgstr "Зум камеры:"
+
+msgid "settings.fullscreen"
+msgstr "Полноэкранный режим"
+
+msgid "settings.ui_anim"
+msgstr "Анимации UI"
+
+msgid "settings.particles"
+msgstr "Частицы"
+
+msgid "settings.audio"
+msgstr "🔊 Звук"
+
+msgid "settings.master"
+msgstr "Master"
+
+msgid "settings.music"
+msgstr "Музыка"
+
+msgid "settings.sfx"
+msgstr "Эффекты"
+
+msgid "settings.mute"
+msgstr "🔇 Мьют (M)"
+
+msgid "settings.gameplay"
+msgstr "🎮 Игра"
+
+msgid "settings.autosave"
+msgstr "Автосохранение при выходе"
+
+msgid "settings.apply"
+msgstr "Применить и закрыть"
+
+msgid "settings.reset"
+msgstr "Сбросить по умолчанию"
+
+msgid "settings.cancel"
+msgstr "Отмена"
+
+# ─── Ресурсы ───────────────────────────────────────────────────
+msgid "resource.panel_title"
+msgstr "📦 Ресурсы"
+
+msgid "resource.collected"
+msgstr "+{n}"
+
+msgid "resource.hidden_cell"
+msgstr "Клетка не разведена"
+
+msgid "resource.wood"
+msgstr "Дерево"
+
+msgid "resource.stone"
+msgstr "Камень"
+
+msgid "resource.mercury"
+msgstr "Ртуть"
+
+msgid "resource.ore"
+msgstr "Руда"
+
+msgid "resource.sulfur"
+msgstr "Сера"
+
+msgid "resource.crystal"
+msgstr "Кристалл"
+
+msgid "resource.gems"
+msgstr "Самоцветы"
+
+msgid "resource.gold"
+msgstr "Золото"
+
+msgid "resource.silver"
+msgstr "Серебро"
+
+msgid "resource.quartz"
+msgstr "Кварц"
+
+msgid "resource.saltpeter"
+msgstr "Селитра"
+
+msgid "resource.coal"
+msgstr "Уголь"
+
+msgid "resource.cinnabar"
+msgstr "Киноварь"
+
+msgid "resource.turquoise"
+msgstr "Бирюза"
+
+msgid "resource.limonite"
+msgstr "Лимонит"
+
+msgid "resource.bog_iron"
+msgstr "Болотное железо"
+
+msgid "resource.coal_swamp"
+msgstr "Уголь (болото)"
+
+msgid "resource.gold_ore"
+msgstr "Золото"
+
+msgid "resource.oak"
+msgstr "Дуб"
+
+# ─── Навыки ────────────────────────────────────────────────────
+msgid "skill.nature_sense"
+msgstr "Чувство Природы"
+
+msgid "skill.keen_eye"
+msgstr "Зоркий Взор"
+
+msgid "skill.navigation"
+msgstr "Навигация"
+
+msgid "skill.geology"
+msgstr "Геология"
+
+msgid "skill.alchemy"
+msgstr "Алхимия"
+
+# ─── Репутация ─────────────────────────────────────────────────
+msgid "rep.rebellion"
+msgstr "Бунт"
+
+msgid "rep.crisis"
+msgstr "Кризис"
+
+msgid "rep.discontent"
+msgstr "Недовольство"
+
+msgid "rep.normal"
+msgstr "Норма"
+
+msgid "rep.prosperity"
+msgstr "Процветание"
+
+msgid "rep.golden_age"
+msgstr "Золотой век"
+
+# ─── Сезоны ────────────────────────────────────────────────────
+msgid "season.spring"
+msgstr "Весна"
+
+msgid "season.summer"
+msgstr "Лето"
+
+msgid "season.autumn"
+msgstr "Осень"
+
+msgid "season.winter"
+msgstr "Зима"
+
+# ─── Погода ────────────────────────────────────────────────────
+msgid "weather.clear"
+msgstr "Ясно"
+
+msgid "weather.rain"
+msgstr "Дождь"
+
+msgid "weather.snow"
+msgstr "Снег"
+
+msgid "weather.storm"
+msgstr "Шторм"
+
+# ─── Причины смерти ────────────────────────────────────────────
+msgid "cause.battle"
+msgstr "в бою"
+
+msgid "cause.exhaustion"
+msgstr "от истощения"
+
+msgid "cause.isolation"
+msgstr "от одиночества"
+
+msgid "cause.burnout"
+msgstr "от выгорания"
+
+# ─── Результаты боя ────────────────────────────────────────────
+msgid "result.win"
+msgstr "Победа"
+
+msgid "result.lose"
+msgstr "Поражение"
+
+msgid "result.retreat"
+msgstr "Отступление"
+
+# ─── Сохранение ────────────────────────────────────────────────
+msgid "save.ok"
+msgstr "Игра сохранена"
+
+msgid "save.failed"
+msgstr "Ошибка сохранения"
+
+msgid "load.ok"
+msgstr "Игра загружена"
+
+msgid "load.failed"
+msgstr "Ошибка загрузки"
+
+msgid "load.no_save"
+msgstr "Сохранение не найдено"

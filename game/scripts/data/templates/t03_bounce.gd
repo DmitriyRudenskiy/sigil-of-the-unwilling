@@ -1,7 +1,5 @@
-## scripts/data/templates/t03_bounce.gd
 class_name T03Bounce
 extends RefCounted
-## T03: BOUNCE (аудит #8: вынесен из TemplateEngine).
 
 const _Utils = preload("res://scripts/data/SpellUtils.gd")
 

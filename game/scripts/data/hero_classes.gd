@@ -1,6 +1,4 @@
 extends RefCounted
-## Классы героя (RU). Адаптация GAMES_TROLES classes.gd под систему
-## характеристик проекта. Источник: GAMES_TROLES game/data/modules/classes.gd.
 const CLASSES := {
 	"barbarian": {
 		"name": "Варвар",

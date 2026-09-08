@@ -1,6 +1,5 @@
 extends RefCounted
 class_name SaveData
-## Save file data container.
 
 const CURRENT_VERSION := 7
 const CURRENT_GENERATOR_VERSION := 1
@@ -11,29 +10,12 @@ var run_seed: int = 0
 var date: Dictionary = {"month": 1, "week": 1, "day": 1}
 var hero: Dictionary = {}
 var world: Dictionary = {}
-# --- Сохранение v3 (Каскад Сложности): состояние городов и персонажей ---
-## Сериализованные города (City.serialize()). v2-сейвы: пустой список.
 var cities: Array = []
-## Сериализованные персонажи (CharacterRegistry.serialize()). v2: пусто.
 var characters: Array = []
-# --- Сохранение v4 (Succession-Sigil): преемник и легенда ---
-## Преемник (SuccessionController.build_successor serialize). Пусто, пока
-## герой жив или преемник не выбран.
 var successor: Dictionary = {}
-## Состояние легенды: путь, уровень, слава. Пусто по умолчанию.
 var legend: Dictionary = {}
-# --- Сохранение v5 (endgame-conditions): состояние забега ---
-## Состояние забега (GameSession.serialize): state/end_reason/счётчики.
-## v4-сейвы: пусто → RUNNING (миграция ниже).
 var session: Dictionary = {}
-# --- Сохранение v6 (legend-chronicle): летопись поколений ---
-## Записи Chronicle.to_array(): одна строка на героя (исход, слава, бои).
-## v5-сейвы: пусто (легенда начинается с чистого листа).
 var chronicle: Array = []
-# --- Сохранение v7 (astral-macro): фрагменты мира ---
-## Состояние каждого фрагмента (ключ -> сериализованное миростостояние).
-## Активный фрагмент читается по active_shard_id.
-## v6-сейвы: пусто (один фрагмент, активный = shard_1).
 var shards: Dictionary = {}
 var active_shard_id: StringName = &"shard_1"
 
@@ -61,7 +43,6 @@ func from_dict(data: Dictionary) -> void:
 	version = int(data.get("version", 1))
 	generator_version = int(data.get("generator_version", 1))
 
-	# Migrate save data across versions
 	if version < 2:
 		_migrate_v1_to_v2(data)
 	if version < 3:
@@ -109,7 +90,6 @@ func from_dict(data: Dictionary) -> void:
 	active_shard_id = StringName(_ashard) if _ashard else &"shard_1"
 
 func _migrate_v1_to_v2(data: Dictionary) -> void:
-	## v2: ensure hero.time_mp_spent exists for mana persistence
 	if not data.has("hero"):
 		data["hero"] = {}
 	if not data["hero"].has("time_mp_spent"):
@@ -117,48 +97,35 @@ func _migrate_v1_to_v2(data: Dictionary) -> void:
 
 
 func _migrate_v2_to_v3(data: Dictionary) -> void:
-	## v3: города и персонажи (Каскад Сложности). В v2-сейвах их нет —
-	## город пересоздаётся при загрузке, персонажи появятся в первый ход.
 	if not data.has("cities") or not (data["cities"] is Array):
 		data["cities"] = []
 	if not data.has("characters") or not (data["characters"] is Array):
 		data["characters"] = []
 
 func _migrate_v3_to_v4(data: Dictionary) -> void:
-	## v4: преемник и легенда. В v3-сейвах их нет — заполняем пустыми
-	## словарями (преемник не выбран, легенда не накоплена).
 	if not data.has("successor") or not (data["successor"] is Dictionary):
 		data["successor"] = {}
 	if not data.has("legend") or not (data["legend"] is Dictionary):
 		data["legend"] = {}
 
-	# path_id героя уже сериализуется с v4 (HeroController.path_id); для
-	# v3-сейвов без него — путь героя остаётся пустым (pristine run).
 	if not data["hero"].has("path_id"):
 		data["hero"]["path_id"] = ""
 
 
 func _migrate_v4_to_v5(data: Dictionary) -> void:
-	## v5: состояние забега (endgame). В v4-сейвах его нет — забег считается
-	## живым (RUNNING без причины).
 	if not data.has("session") or not (data["session"] is Dictionary):
 		data["session"] = {}
 
 
 func _migrate_v5_to_v6(data: Dictionary) -> void:
-	## v6: летопись поколений (legend-chronicle). В v5-сейвах её нет —
-	## легенда начинается с чистого листа.
 	if not data.has("chronicle") or not (data["chronicle"] is Array):
 		data["chronicle"] = []
 
-	# v7: фрагменты мира. В v6-сейвах их нет — один фрагмент shard_1
-	# (активный); shards пустой, active_shard_id = shard_1.
 	if not data.has("shards") or not (data["shards"] is Dictionary):
 		data["shards"] = {}
 
 
 func is_valid() -> bool:
-	# Version is already migrated in from_dict(); we only need structural checks
 	if run_seed <= 0:
 		return false
 	if not (hero is Dictionary) or hero.is_empty():

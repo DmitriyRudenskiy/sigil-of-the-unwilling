@@ -1,11 +1,4 @@
-extends "res://tests/gut_base.gd"
-## city-in-world: последователи.
-##  - Follower round-trip (serialize/deserialize: имя, раса, путь, архетип,
-##    черты, модификаторы, способности);
-##  - to_dict — JSON-совместимо (сокет CITY_HIRE / GET_STATE);
-##  - FollowerSystem.recruit: город отдаёт свободного FOLLOWER-юнита (pop падает),
-##    герой получает Follower; детерминировано по rng;
-##  - recruit → null, когда свободных FOLLOWER не осталось.
+extends GdUnitTestSuite
 
 const _City = preload("res://scripts/world/City.gd")
 const _Follower = preload("res://scripts/entities/Follower.gd")
@@ -36,24 +29,23 @@ func test_roundtrip_all_fields() -> void:
 	f.abilities.append(&"fireball")
 	var f2 := _Follower.new()
 	f2.deserialize(f.serialize())
-	assert_eq(f2.uid, 3, "uid")
-	assert_eq(f2.name, "Марк", "имя")
-	assert_eq(f2.race, &"elf", "раса")
-	assert_eq(f2.path, &"wizard", "путь")
-	assert_eq(f2.archetype, &"arcane_tradition", "архетип")
-	assert_eq(f2.trait_ids, [&"brave", &"curious"], "черты")
-	assert_eq(int(f2.stat_modifiers.get(&"INT", 0)), 3, "модификатор")
-	assert_eq(f2.abilities, [&"fireball"], "способности")
+	assert_that(f2.uid).is_equal(3)
+	assert_that(f2.name).is_equal("Марк")
+	assert_that(f2.race).is_equal(&"elf")
+	assert_that(f2.path).is_equal(&"wizard")
+	assert_that(f2.archetype).is_equal(&"arcane_tradition")
+	assert_that(f2.trait_ids).is_equal([&"brave", &"curious"])
+	assert_that(int(f2.stat_modifiers.get(&"INT", 0))).is_equal(3)
+	assert_that(f2.abilities).is_equal([&"fireball"])
 
 
 func test_roundtrip_defaults() -> void:
-	# Пустые/по-умолчанию поля не ломают deserialize.
 	var f := _Follower.new()
 	var f2 := _Follower.new()
 	f2.deserialize(f.serialize())
-	assert_eq(f2.race, f.race, "раса по умолчанию")
-	assert_true((f2.trait_ids as Array).is_empty(), "черты пусты")
-	assert_true((f2.abilities as Array).is_empty(), "способности пусты")
+	assert_that(f2.race).is_equal(f.race)
+	assert_bool((f2.trait_ids as Array).is_empty()).is_true()
+	assert_bool((f2.abilities as Array).is_empty()).is_true()
 
 
 func test_to_dict_json_compatible() -> void:
@@ -64,36 +56,35 @@ func test_to_dict_json_compatible() -> void:
 	f.trait_ids.append(&"honest")
 	f.stat_modifiers[&"CON"] = 2
 	var d: Dictionary = f.to_dict()
-	assert_eq(d.get("name"), "Вера", "имя в dict")
-	assert_eq(d.get("race"), "dwarf", "раса строкой (не StringName)")
-	assert_eq(d.get("path"), "cleric", "путь строкой")
-	assert_true(d.get("traits") is Array, "traits — массив")
-	assert_eq(String((d.get("traits") as Array)[0]), "honest", "trait id строкой")
+	assert_that(d.get("name")).is_equal("Вера")
+	assert_that(d.get("race")).is_equal("dwarf")
+	assert_that(d.get("path")).is_equal("cleric")
+	assert_bool(d.get("traits") is Array).is_true()
+	assert_that(String((d.get("traits") as Array)[0])).is_equal("honest")
 	var json := JSON.stringify(d)
-	assert_not_empty(json, "JSON сериализуется")
+	assert_str(json).is_not_empty()
 	var back: Variant = JSON.parse_string(json)
-	assert_true(back is Dictionary, "JSON парсится обратно")
+	assert_bool(back is Dictionary).is_true()
 
 
 func test_recruit_moves_follower_from_city_to_hero() -> void:
-	# Hero без дерева: recruit трогает только hero.followers.
 	var city := _make_city(2)
 	var hero := HeroController.new()
 	var before: int = city.pop.size()
 	var f := _FollowerSystem.recruit(city, hero, _seeded(42))
-	assert_not_null(f, "найден последователь")
-	assert_eq(city.pop.size(), before - 1, "pop города −1")
-	assert_eq(hero.followers.size(), 1, "у героя 1 последователь")
-	assert_true(hero.followers[0] == f, "тот же объект")
-	assert_not_empty(f.name, "имя назначено")
+	assert_that(f).is_not_null()
+	assert_that(city.pop.size()).is_equal(before - 1)
+	assert_that(hero.followers.size()).is_equal(1)
+	assert_bool(hero.followers[0] == f).is_true()
+	assert_str(f.name).is_not_empty()
 	hero.free()
 
 
 func test_recruit_null_without_free_followers() -> void:
-	var city := _make_city(0, 3)  # только рабочие
+	var city := _make_city(0, 3)  
 	var hero := HeroController.new()
-	assert_null(_FollowerSystem.recruit(city, hero, _seeded(1)), "без FOLLOWER — null")
-	assert_eq(hero.followers.size(), 0, "герой пуст")
+	assert_that(_FollowerSystem.recruit(city, hero, _seeded(1))).is_null()
+	assert_that(hero.followers.size()).is_equal(0)
 	hero.free()
 
 
@@ -104,10 +95,10 @@ func test_recruit_deterministic_with_same_seed() -> void:
 	var h2 := HeroController.new()
 	var f1 := _FollowerSystem.recruit(c1, h1, _seeded(7))
 	var f2 := _FollowerSystem.recruit(c2, h2, _seeded(7))
-	assert_eq(f1.name, f2.name, "имя детерминировано")
-	assert_eq(f1.race, f2.race, "раса детерминирована")
-	assert_eq(f1.path, f2.path, "путь детерминирован")
-	assert_eq(f1.trait_ids, f2.trait_ids, "черты детерминированы")
+	assert_that(f1.name).is_equal(f2.name)
+	assert_that(f1.race).is_equal(f2.race)
+	assert_that(f1.path).is_equal(f2.path)
+	assert_that(f1.trait_ids).is_equal(f2.trait_ids)
 	h1.free()
 	h2.free()
 
@@ -117,8 +108,8 @@ func test_recruit_uid_increments() -> void:
 	var hero := HeroController.new()
 	var f1 := _FollowerSystem.recruit(city, hero, _seeded(1))
 	var f2 := _FollowerSystem.recruit(city, hero, _seeded(2))
-	assert_eq(f1.uid, 1, "первый uid 1")
-	assert_eq(f2.uid, 2, "второй uid 2")
+	assert_that(f1.uid).is_equal(1)
+	assert_that(f2.uid).is_equal(2)
 	hero.free()
 
 

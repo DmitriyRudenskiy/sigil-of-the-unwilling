@@ -1,16 +1,15 @@
-extends "res://tests/gut_base.gd"
+extends GdUnitTestSuite
 
-func before_each() -> void:
+func before_test() -> void:
 	Artifacts.reset()
 
-# ======== Artifact resource tests ========
 func test_artifact_rarity_values() -> void:
-	assert_eq(Artifact.Rarity.MINOR, 0)
-	assert_eq(Artifact.Rarity.MAJOR, 1)
-	assert_eq(Artifact.Rarity.RELIC, 2)
+	assert_that(Artifact.Rarity.MINOR).is_equal(0)
+	assert_that(Artifact.Rarity.MAJOR).is_equal(1)
+	assert_that(Artifact.Rarity.RELIC).is_equal(2)
 
 func test_artifact_slot_count() -> void:
-	assert_true(Artifact.Slot.values().size() >= 11)
+	assert_bool(Artifact.Slot.values().size() >= 11).is_true()
 
 func test_artifact_stats() -> void:
 	var a := Artifact.new()
@@ -19,10 +18,10 @@ func test_artifact_stats() -> void:
 	a.slot = Artifact.Slot.WEAPON
 	a.rarity = Artifact.Rarity.MINOR
 	a.modifiers = {"attack": 10, "defense": 5, "spell_power": 3}
-	assert_eq(a.get_attack(), 10)
-	assert_eq(a.get_defense(), 5)
-	assert_eq(a.get_spell_power(), 3)
-	assert_eq(a.get_knowledge(), 0)
+	assert_that(a.get_attack()).is_equal(10)
+	assert_that(a.get_defense()).is_equal(5)
+	assert_that(a.get_spell_power()).is_equal(3)
+	assert_that(a.get_knowledge()).is_equal(0)
 
 func test_artifact_stack_modifiers() -> void:
 	var a := Artifact.new()
@@ -31,40 +30,38 @@ func test_artifact_stack_modifiers() -> void:
 	a.slot = Artifact.Slot.TORSO
 	a.rarity = Artifact.Rarity.MAJOR
 	a.modifiers = {"stack_hp": 15, "stack_hp_percent": 0.2, "stack_speed": 2}
-	assert_eq(a.get_stack_hp_bonus(), 15)
-	assert_eq(a.get_stack_hp_percent(), 0.2)
-	assert_eq(a.get_stack_speed_bonus(), 2)
+	assert_that(a.get_stack_hp_bonus()).is_equal(15)
+	assert_that(a.get_stack_hp_percent()).is_equal(0.2)
+	assert_that(a.get_stack_speed_bonus()).is_equal(2)
 
 func test_artifact_is_ring() -> void:
 	var a := Artifact.new()
 	a.slot = Artifact.Slot.RING_L
-	assert_true(a.is_ring())
+	assert_bool(a.is_ring()).is_true()
 	a.slot = Artifact.Slot.RING_R
-	assert_true(a.is_ring())
+	assert_bool(a.is_ring()).is_true()
 	a.slot = Artifact.Slot.WEAPON
-	assert_false(a.is_ring())
+	assert_bool(a.is_ring()).is_false()
 
 func test_artifact_is_two_handed() -> void:
 	var a := Artifact.new()
 	a.is_two_handed = true
-	assert_true(a.is_two_handed)
+	assert_bool(a.is_two_handed).is_true()
 	a.is_two_handed = false
-	assert_false(a.is_two_handed)
+	assert_bool(a.is_two_handed).is_false()
 
-# ======== ArtifactRegistry tests ========
 func test_registry_has_54() -> void:
-	# bfcf05f: +24 артефакта (6 типов x 3 класса + 6 аксессуаров).
-	assert_eq(Artifacts.get_all().size(), 54)
+	assert_that(Artifacts.get_all().size()).is_equal(54)
 
 func test_registry_rarity_distribution() -> void:
-	assert_eq(Artifacts.get_by_rarity(Artifact.Rarity.MINOR).size(), 10)
-	assert_eq(Artifacts.get_by_rarity(Artifact.Rarity.MAJOR).size(), 10)
-	assert_eq(Artifacts.get_by_rarity(Artifact.Rarity.RELIC).size(), 34)
+	assert_that(Artifacts.get_by_rarity(Artifact.Rarity.MINOR).size()).is_equal(10)
+	assert_that(Artifacts.get_by_rarity(Artifact.Rarity.MAJOR).size()).is_equal(10)
+	assert_that(Artifacts.get_by_rarity(Artifact.Rarity.RELIC).size()).is_equal(34)
 
 func test_registry_unique_ids() -> void:
 	var seen: Dictionary = {}
 	for art in Artifacts.get_all():
-		assert_false(seen.has(art.id), "Duplicate artifact id: %s" % art.id)
+		assert_bool(seen.has(art.id)).is_false()
 		seen[art.id] = true
 
 func test_registry_random_returns_valid() -> void:
@@ -72,21 +69,20 @@ func test_registry_random_returns_valid() -> void:
 	rng.seed = 42
 	for i in 100:
 		var art = Artifacts.random_of_rarity(Artifact.Rarity.MINOR, rng)
-		assert_true(art != null)
-		assert_eq(art.rarity, Artifact.Rarity.MINOR)
+		assert_bool(art != null).is_true()
+		assert_that(art.rarity).is_equal(Artifact.Rarity.MINOR)
 
 func test_registry_get_by_id() -> void:
 	var arts := Artifacts.get_all()
 	if arts.size() > 0:
 		var found := Artifacts.get_by_id(arts[0].id)
-		assert_true(found != null)
-		assert_eq(found.id, arts[0].id)
+		assert_bool(found != null).is_true()
+		assert_that(found.id).is_equal(arts[0].id)
 
-# ======== HeroInventory tests ========
 func test_inventory_init_empty() -> void:
 	var inv := HeroInventory.new()
-	assert_true(inv.equipped.size() >= 10)
-	assert_eq(inv.backpack.size(), 0)
+	assert_bool(inv.equipped.size() >= 10).is_true()
+	assert_that(inv.backpack.size()).is_equal(0)
 
 func test_inventory_equip_unequip() -> void:
 	var inv := HeroInventory.new()
@@ -96,15 +92,15 @@ func test_inventory_equip_unequip() -> void:
 	art.slot = Artifact.Slot.WEAPON
 	art.rarity = Artifact.Rarity.MINOR
 	inv.equip(art)
-	assert_true(inv.has_slot(Artifact.Slot.WEAPON))
-	assert_eq(inv.get_equipped(Artifact.Slot.WEAPON).id, &"inv_test")
+	assert_bool(inv.has_slot(Artifact.Slot.WEAPON)).is_true()
+	assert_that(inv.get_equipped(Artifact.Slot.WEAPON).id).is_equal(&"inv_test")
 	var returned := inv.unequip(Artifact.Slot.WEAPON)
-	assert_eq(returned.id, &"inv_test")
-	assert_false(inv.has_slot(Artifact.Slot.WEAPON))
+	assert_that(returned.id).is_equal(&"inv_test")
+	assert_bool(inv.has_slot(Artifact.Slot.WEAPON)).is_false()
 
 func test_inventory_backpack_limit() -> void:
 	var inv := HeroInventory.new()
-	assert_eq(inv.MAX_BACKPACK, MapConfig.MAX_BACKPACK_SIZE)
+	assert_that(inv.MAX_BACKPACK).is_equal(GameNumbers.MAX_BACKPACK_SIZE)
 
 func test_inventory_add_remove_backpack() -> void:
 	var inv := HeroInventory.new()
@@ -113,31 +109,31 @@ func test_inventory_add_remove_backpack() -> void:
 	art.display_name = "BP Test"
 	art.slot = Artifact.Slot.WEAPON
 	art.rarity = Artifact.Rarity.MINOR
-	assert_true(inv.add_to_backpack(art))
-	assert_eq(inv.backpack.size(), 1)
+	assert_bool(inv.add_to_backpack(art)).is_true()
+	assert_that(inv.backpack.size()).is_equal(1)
 	var removed := inv.remove_from_backpack(0)
-	assert_eq(removed.id, &"bp_test")
-	assert_eq(inv.backpack.size(), 0)
+	assert_that(removed.id).is_equal(&"bp_test")
+	assert_that(inv.backpack.size()).is_equal(0)
 
 func test_inventory_serialization() -> void:
 	var inv := HeroInventory.new()
 	var art := Artifacts.get_all()[0]
 	inv.equip(art)
 	var data := inv.serialize()
-	assert_true(data.has("equipped"))
-	assert_true(data.has("backpack"))
+	assert_bool(data.has("equipped")).is_true()
+	assert_bool(data.has("backpack")).is_true()
 	var inv2 := HeroInventory.new()
 	inv2.deserialize(data)
 	var eq := inv2.get_equipped(art.slot)
-	assert_true(eq != null)
-	assert_eq(eq.id, art.id)
+	assert_bool(eq != null).is_true()
+	assert_that(eq.id).is_equal(art.id)
 
 func test_inventory_total_modifiers() -> void:
 	var inv := HeroInventory.new()
 	var mods := inv.get_total_modifiers()
-	assert_true(mods.has("attack"))
-	assert_true(mods.has("stack_hp"))
-	assert_eq(mods["attack"], 0)
+	assert_bool(mods.has("attack")).is_true()
+	assert_bool(mods.has("stack_hp")).is_true()
+	assert_that(mods["attack"]).is_equal(0)
 
 func test_inventory_two_handed_excludes_shield() -> void:
 	var inv := HeroInventory.new()
@@ -154,8 +150,8 @@ func test_inventory_two_handed_excludes_shield() -> void:
 	shield.rarity = Artifact.Rarity.MINOR
 	inv.equip(shield)
 	inv.equip(weapon)
-	assert_true(inv.has_slot(Artifact.Slot.WEAPON))
-	assert_false(inv.has_slot(Artifact.Slot.SHIELD))
+	assert_bool(inv.has_slot(Artifact.Slot.WEAPON)).is_true()
+	assert_bool(inv.has_slot(Artifact.Slot.SHIELD)).is_false()
 
 func test_inventory_sell_artifact() -> void:
 	var inv := HeroInventory.new()
@@ -167,7 +163,7 @@ func test_inventory_sell_artifact() -> void:
 	art.value_gold = 200
 	inv.add_to_backpack(art)
 	var gold := inv.sell_artifact(0)
-	assert_eq(gold, 100)
+	assert_that(gold).is_equal(100)
 
 func test_inventory_no_duplicates() -> void:
 	var inv := HeroInventory.new()
@@ -181,12 +177,12 @@ func test_inventory_no_duplicates() -> void:
 	art2.display_name = "Dup"
 	art2.slot = Artifact.Slot.WEAPON
 	art2.rarity = Artifact.Rarity.MINOR
-	assert_true(inv.add_to_backpack(art1))
-	assert_false(inv.add_to_backpack(art2))
+	assert_bool(inv.add_to_backpack(art1)).is_true()
+	assert_bool(inv.add_to_backpack(art2)).is_false()
 
 func test_inventory_special_effects() -> void:
 	var inv := HeroInventory.new()
-	assert_false(inv.has_special_effect(&"morale_aura"))
+	assert_bool(inv.has_special_effect(&"morale_aura")).is_false()
 	var art := Artifact.new()
 	art.id = &"aura_test"
 	art.display_name = "Aura"
@@ -194,4 +190,4 @@ func test_inventory_special_effects() -> void:
 	art.rarity = Artifact.Rarity.MAJOR
 	art.special_effect = &"morale_aura"
 	inv.equip(art)
-	assert_true(inv.has_special_effect(&"morale_aura"))
+	assert_bool(inv.has_special_effect(&"morale_aura")).is_true()

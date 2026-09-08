@@ -1,5 +1,0 @@
-schema: spec-driven
-created: 2026-09-04
-# Pure tooling / audit-response: proposes NO behavior change (recommends against
-# the shell→GUT rewrite). No spec-level delta, so specs are skipped.
-skip_specs: true

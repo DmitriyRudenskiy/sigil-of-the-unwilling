@@ -1,10 +1,4 @@
 extends RefCounted
-## Расы героя (RU). Адаптация GAMES_TROLES races.gd под систему характеристик
-## проекта: attack / defense / spell_power / knowledge.
-## Источник: GAMES_TROLES game/data/modules/races.gd.
-##
-## ponytail: данные в виде таблицы key -> {name, desc, bonuses, subraces}.
-## UI читает ключи реестра обобщённо — замена содержания не ломает конструктор.
 const RACES := {
 	"human": {
 		"name": "Человек",

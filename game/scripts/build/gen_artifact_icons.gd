@@ -1,5 +1,4 @@
 extends SceneTree
-## Tool: generates 64x64 procedural icons for all artifacts.
 
 const SIZE := 64
 const OUTLINE := Color(0.1, 0.08, 0.06, 1.0)
@@ -10,8 +9,6 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-    # В standalone `-s`-режиме autoload-синглтон (Artifacts) не создаётся,
-    # поэтому инстанцируем реестр напрямую — get_all() сам собирает определения.
     var artifacts := preload("res://scripts/autoload/ArtifactRegistry.gd").new()
     var dir_path := "res://assets/artifacts"
     if not DirAccess.dir_exists_absolute(dir_path):

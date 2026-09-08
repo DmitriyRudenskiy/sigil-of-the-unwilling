@@ -1,18 +1,5 @@
 class_name HeroBuildProfile
 extends RefCounted
-## Профиль создания героя: имя, пол, раса, подраса, класс, культура, прошлое
-## и выведенные характеристики. Чистая функция «сборка -> статы».
-##
-## Источник данных: hero_races.gd / hero_classes.gd / hero_cultures.gd.
-##
-## ponytail: ability->stat маппинг задокументирован ниже. Базовые статы равны,
-## бонусы расы/класса/культуры/прошлого складываются. Никаких «скрытых»
-## формул — get_stats() детерминирован по составу сборки.
-##
-## Маппинг (бонусы из полей «bonuses» таблиц данных):
-##   race.bonuses, class.bonuses, culture.bonuses, background.bonuses
-##   -> складываются по ключу (attack / defense / spell_power / knowledge)
-##   с базовыми {attack:2, defense:2, spell_power:2, knowledge:2}.
 
 const _Races = preload("res://scripts/data/hero_races.gd")
 const _Classes = preload("res://scripts/data/hero_classes.gd")
@@ -20,11 +7,11 @@ const _Cultures = preload("res://scripts/data/hero_cultures.gd")
 
 var name: String = ""
 var sex: String = "male"
-var race: String = ""          # ключ в _Races.RACES
+var race: String = ""          
 var subrace: String = ""
-var character_class: String = ""  # ключ в _Classes.CLASSES
-var culture: String = ""       # ключ в _Cultures.CULTURES
-var background: String = ""    # ключ в _Cultures.BACKGROUNDS
+var character_class: String = ""  
+var culture: String = ""       
+var background: String = ""    
 
 var base_stats: Dictionary = {"attack": 2, "defense": 2, "spell_power": 2, "knowledge": 2}
 
@@ -33,7 +20,6 @@ func is_valid() -> bool:
 		and not character_class.is_empty() and not culture.is_empty() \
 		and not background.is_empty()
 
-## Детерминированные характеристики по составу сборки.
 func get_stats() -> Dictionary:
 	var s := base_stats.duplicate()
 	s = _add_bonuses(race, _Races.RACES, s)
@@ -42,11 +28,10 @@ func get_stats() -> Dictionary:
 	s = _add_bonuses(background, _Cultures.BACKGROUNDS, s)
 	return s
 
-## Отображаемые названия для сводки конструктора (RU).
 func summary() -> Dictionary:
 	return {
 		"name": name if not name.is_empty() else "—",
-		"sex": "Мужской" if sex == "male" else "Женский",
+		"sex": GameText.creation_sex_male() if sex == "male" else GameText.creation_sex_female(),
 		"race": _label(_Races.RACES, race),
 		"subrace": _label_subrace(race),
 		"class": _label(_Classes.CLASSES, character_class),
@@ -55,7 +40,6 @@ func summary() -> Dictionary:
 		"stats": get_stats(),
 	}
 
-## Словарь идентичности героя для применения в WorldBootstrap / сериализации.
 func to_identity() -> Dictionary:
 	return {
 		"hero_name": name,

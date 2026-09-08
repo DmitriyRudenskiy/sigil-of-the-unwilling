@@ -1,15 +1,7 @@
 class_name Character
 extends RefCounted
-## Персонаж (M2: Демография) — нарративная оболочка над PopUnit.
-##
-## Связь: PopUnit.character_uid -> Character.uid (один к одному;
-## персонаж живёт, пока жива фигурка). Потребности 0..1 (1 = полностью
-## удовлетворена); дельты считает DemographicTurnProcessor.
-## Чистый RefCounted: сериализуется в Dictionary, не зависит от узлов.
 
-## remove-hunger-mechanic: голод удалён как потребность — еда живёт только в
-## городской экономике (склад, рождения, approval, рынок).
-const NEED_KEYS: Array[StringName] = [&"rest", &"social", &"inspiration"]
+const NEED_KEYS := [NeedType.ID.REST, NeedType.ID.SOCIAL, NeedType.ID.INSPIRATION]
 
 var uid := 0
 var name := ""
@@ -18,12 +10,9 @@ var birth_turn := 0
 var city_uid := -1
 var pop_uid := -1
 var alive := true
-## 0..1: 1 = полностью удовлетворена.
 var needs: Dictionary = {}
 var traits: Array[TraitDef] = []
-## Сколько дней подряд потребность = 0.0 (проверка смерти).
 var need_zero_streak: Dictionary = {}
-## Потребности, находившиеся в критике в прошлом тике (анти-спам сигналов).
 var was_critical: Dictionary = {}
 
 
@@ -45,16 +34,14 @@ func age_in_days(turn: int) -> int:
 	return maxi(turn - birth_turn, 0)
 
 
-## Меняет потребность с зажимом в [0..1].
-func modify_need(id: StringName, delta: float) -> void:
+func modify_need(id: int, delta: float) -> void:
 	needs[id] = clampf(float(needs.get(id, 0.5)) + delta, 0.0, 1.0)
 
 
-func is_need_critical(id: StringName, threshold: float = 0.2) -> bool:
+func is_need_critical(id: int, threshold: float = 0.2) -> bool:
 	return float(needs.get(id, 1.0)) < threshold
 
 
-## Сумма модификаторов черт к потребности [type] за день.
 func trait_modifier(type: StringName) -> float:
 	var v := 0.0
 	for t in traits:
@@ -81,7 +68,7 @@ func serialize() -> Dictionary:
 static func _needs_to_str(src: Dictionary) -> Dictionary:
 	var out := {}
 	for k in src:
-		out[String(k)] = float(src[k])
+		out[String(NeedType.to_name(int(k)))] = float(src[k])
 	return out
 
 
@@ -95,17 +82,14 @@ static func deserialize(data: Dictionary) -> Character:
 	ch.pop_uid = int(data.get("pop_uid", -1))
 	ch.alive = bool(data.get("alive", true))
 	var raw_needs: Dictionary = data.get("needs", {})
-	# Миграция старых сохранений: потребность belief переименована в inspiration.
-	# Без переноса у героя пропадала бы одна из трёх потребностей.
-	# (Ключ "hunger" в старых сейвах просто не читается — потребность удалена.)
 	if raw_needs.has("belief"):
 		if not raw_needs.has("inspiration"):
 			raw_needs["inspiration"] = raw_needs["belief"]
 		raw_needs.erase("belief")
 	for k in NEED_KEYS:
-		if raw_needs.has(String(k)):
-			ch.needs[k] = float(raw_needs[String(k)])
-	# Ключи вне NEED_KEYS (например, "hunger" в старых сейвах) не читаются.
+		var key := String(NeedType.to_name(int(k)))
+		if raw_needs.has(key):
+			ch.needs[k] = float(raw_needs[key])
 	var raw_traits: Array = data.get("traits", [])
 	for d in raw_traits:
 		var t := TraitDef.from_dict(d)

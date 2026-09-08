@@ -1,7 +1,5 @@
 class_name BattleFlow
 extends Node
-## Поток боя: создание, ожидание, возврат результата.
-## Не прячет мир и не меняет героя — это остаётся в WorldController.
 
 signal battle_started
 signal battle_completed(winner: BattleState.Side, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack])
@@ -50,8 +48,7 @@ func start_battle(
 func _on_battle_finished(winner: BattleState.Side, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack], battle: Node) -> void:
 	_active = false
 	battle.queue_free()
-	RenderingServer.set_default_clear_color(Color(0.10, 0.10, 0.12))
-	# Победа/поражение + возврат к музыке мира (мир не пересоздаётся под боем).
+	RenderingServer.set_default_clear_color(ThemeConfig.C_BATTLE_BG_FLOW)
 	if winner == BattleState.Side.ATTACKER:
 		SoundManager.play_sfx_cue(&"battle_victory")
 	else:

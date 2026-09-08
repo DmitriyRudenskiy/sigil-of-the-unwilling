@@ -1,0 +1,955 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: SigilOfTheUnwilling 0.1\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# ─── Меню ──────────────────────────────────────────────────────
+msgid "menu.new_game"
+msgstr ""
+
+msgid "menu.load_game"
+msgstr ""
+
+msgid "menu.arena"
+msgstr ""
+
+msgid "menu.model_warrior"
+msgstr ""
+
+msgid "menu.model_mage"
+msgstr ""
+
+msgid "menu.settings"
+msgstr ""
+
+msgid "menu.chronicle"
+msgstr ""
+
+msgid "menu.exit"
+msgstr ""
+
+msgid "menu.version"
+msgstr ""
+
+msgid "model.hero_warrior"
+msgstr ""
+
+msgid "model.hero_mage"
+msgstr ""
+
+# ─── Бой ───────────────────────────────────────────────────────
+msgid "battle.select_unit"
+msgstr ""
+
+msgid "battle.your_turn"
+msgstr ""
+
+msgid "battle.enemy_turn"
+msgstr ""
+
+msgid "battle.retreat"
+msgstr ""
+
+msgid "battle.wait"
+msgstr ""
+
+msgid "battle.attack"
+msgstr ""
+
+msgid "battle.defend"
+msgstr ""
+
+msgid "battle.skip"
+msgstr ""
+
+msgid "battle.retaliation"
+msgstr ""
+
+msgid "battle.high_morale"
+msgstr ""
+
+msgid "battle.luck"
+msgstr ""
+
+msgid "battle.killed"
+msgstr ""
+
+msgid "battle.spell_label"
+msgstr ""
+
+msgid "battle.retreat_confirm"
+msgstr ""
+
+msgid "battle.defend_bonus"
+msgstr ""
+
+msgid "battle.damage_preview"
+msgstr ""
+
+msgid "battle.move_help"
+msgstr ""
+
+msgid "battle.click_enemy"
+msgstr ""
+
+msgid "battle.no_mana"
+msgstr ""
+
+msgid "battle.unit_info"
+msgstr ""
+
+msgid "battle.unit_short"
+msgstr ""
+
+msgid "battle.spell_target"
+msgstr ""
+
+msgid "battle.spell_failed"
+msgstr ""
+
+msgid "battle.sacrifice_failed"
+msgstr ""
+
+msgid "battle.forced_retreat"
+msgstr ""
+
+msgid "battle.retreat_wait"
+msgstr ""
+
+msgid "battle.heal"
+msgstr ""
+
+msgid "battle.hp_loss"
+msgstr ""
+
+msgid "battle.turn_info"
+msgstr ""
+
+# ─── Город ─────────────────────────────────────────────────────
+msgid "city.title"
+msgstr ""
+
+msgid "city.capital"
+msgstr ""
+
+msgid "city.population"
+msgstr ""
+
+msgid "city.food"
+msgstr ""
+
+msgid "city.industry"
+msgstr ""
+
+msgid "city.gold"
+msgstr ""
+
+msgid "city.prosperity"
+msgstr ""
+
+msgid "city.reputation"
+msgstr ""
+
+msgid "city.buildings"
+msgstr ""
+
+msgid "city.hire"
+msgstr ""
+
+msgid "city.level_up"
+msgstr ""
+
+msgid "city.close"
+msgstr ""
+
+msgid "city.build_farm"
+msgstr ""
+
+msgid "city.build_mine"
+msgstr ""
+
+msgid "city.exit"
+msgstr ""
+
+msgid "city.no_industry"
+msgstr ""
+
+msgid "city.no_cell"
+msgstr ""
+
+msgid "city.hired"
+msgstr ""
+
+msgid "city.no_followers"
+msgstr ""
+
+msgid "city.max_level"
+msgstr ""
+msgid "city.level_title"
+msgstr ""
+
+msgid "city.population_detail"
+msgstr ""
+
+msgid "city.food_netto"
+msgstr ""
+
+msgid "city.industry_gold"
+msgstr ""
+
+msgid "city.prosperity_reputation"
+msgstr ""
+
+msgid "city.building_line"
+msgstr ""
+
+msgid "city.buildings_none"
+msgstr ""
+
+msgid "city.intro"
+msgstr ""
+
+msgid "city.not_bound"
+msgstr ""
+
+msgid "city.building_not_found"
+msgstr ""
+
+msgid "city.cannot_build"
+msgstr ""
+
+msgid "city.build_failed"
+msgstr ""
+
+msgid "city.built"
+msgstr ""
+
+msgid "city.cannot_upgrade"
+msgstr ""
+
+msgid "city.upgrade_failed"
+msgstr ""
+
+msgid "city.upgraded"
+msgstr ""
+
+msgid "city.hire_no_hero"
+msgstr ""
+
+msgid "city.cost_industry"
+msgstr ""
+
+msgid "city.cost_special"
+msgstr ""
+
+msgid "city.cost_followers"
+msgstr ""
+
+msgid "city.cost_free"
+msgstr ""
+
+
+# ─── Арена ─────────────────────────────────────────────────────
+msgid "arena.palette_hint"
+msgstr ""
+
+msgid "arena.turn_button"
+msgstr ""
+
+msgid "arena.auto_button"
+msgstr ""
+
+msgid "arena.hire_button"
+msgstr ""
+
+msgid "arena.level_button"
+msgstr ""
+
+msgid "arena.reset_button"
+msgstr ""
+
+msgid "arena.menu_button"
+msgstr ""
+
+msgid "arena.storm"
+msgstr ""
+
+msgid "arena.starving"
+msgstr ""
+
+msgid "arena.cluster"
+msgstr ""
+
+msgid "arena.center_msg"
+msgstr ""
+
+msgid "arena.select_msg"
+msgstr ""
+
+msgid "building.farm"
+msgstr ""
+
+msgid "building.mill"
+msgstr ""
+
+msgid "building.bakery"
+msgstr ""
+
+msgid "building.mine"
+msgstr ""
+
+msgid "building.smithy"
+msgstr ""
+
+msgid "building.tavern"
+msgstr ""
+
+msgid "building.school"
+msgstr ""
+
+msgid "building.trade_post"
+msgstr ""
+
+msgid "building.market"
+msgstr ""
+
+msgid "building.shack"
+msgstr ""
+
+msgid "building.walls"
+msgstr ""
+
+msgid "building.district"
+msgstr ""
+
+msgid "arena.founded"
+msgstr ""
+
+msgid "arena.palette_item"
+msgstr ""
+
+msgid "arena.borough_cost"
+msgstr ""
+
+msgid "arena.cost"
+msgstr ""
+
+msgid "arena.selected"
+msgstr ""
+
+msgid "arena.nothing"
+msgstr ""
+
+msgid "arena.selection"
+msgstr ""
+
+msgid "arena.cluster_badge"
+msgstr ""
+
+msgid "arena.borough_built"
+msgstr ""
+
+msgid "arena.borough_not_built"
+msgstr ""
+
+msgid "arena.borough_reason"
+msgstr ""
+
+msgid "arena.ruins"
+msgstr ""
+
+msgid "arena.built"
+msgstr ""
+
+msgid "arena.not_built"
+msgstr ""
+
+msgid "arena.borough_info"
+msgstr ""
+
+msgid "arena.upgraded"
+msgstr ""
+
+msgid "arena.upgrade_failed"
+msgstr ""
+
+msgid "arena.cell_info"
+msgstr ""
+
+msgid "arena.ring_outputs"
+msgstr ""
+
+msgid "arena.cluster_note"
+msgstr ""
+
+msgid "arena.building_tip"
+msgstr ""
+
+msgid "arena.borough_tip"
+msgstr ""
+
+msgid "arena.stop"
+msgstr ""
+
+msgid "arena.auto_started"
+msgstr ""
+
+msgid "arena.storm_info"
+msgstr ""
+
+msgid "arena.turn_log"
+msgstr ""
+
+msgid "arena.worker_hired"
+msgstr ""
+
+msgid "arena.no_worker"
+msgstr ""
+
+msgid "arena.level_up"
+msgstr ""
+
+msgid "arena.level_reasons"
+msgstr ""
+
+msgid "arena.cluster_mark"
+msgstr ""
+
+msgid "arena.hud"
+msgstr ""
+
+msgid "arena.score"
+msgstr ""
+
+# ─── Герой ─────────────────────────────────────────────────────
+msgid "hero.title"
+msgstr ""
+
+msgid "hero.combat_hp"
+msgstr ""
+
+msgid "hero.mana"
+msgstr ""
+
+msgid "hero.followers_label"
+msgstr ""
+
+msgid "hero.no_followers"
+msgstr ""
+msgid "hero.default_title"
+msgstr ""
+
+msgid "hero.stats"
+msgstr ""
+
+msgid "hero.followers_none"
+msgstr ""
+
+msgid "hero.followers_more"
+msgstr ""
+
+msgid "hero.no_path"
+msgstr ""
+
+msgid "adventure.glory"
+msgstr ""
+
+msgid "info.date"
+msgstr ""
+
+msgid "creation.background_value"
+msgstr ""
+
+msgid "creation.stats"
+msgstr ""
+msgid "ui.close"
+msgstr ""
+
+msgid "adventure.options"
+msgstr ""
+
+msgid "adventure.show_markers"
+msgstr ""
+
+msgid "adventure.hex_grid"
+msgstr ""
+
+msgid "info.tooltip_castle"
+msgstr ""
+
+msgid "info.tooltip_flag"
+msgstr ""
+
+msgid "info.tooltip_camp"
+msgstr ""
+
+msgid "info.tooltip_stable"
+msgstr ""
+
+msgid "info.tooltip_ship"
+msgstr ""
+
+msgid "info.tooltip_smithy"
+msgstr ""
+
+msgid "info.tooltip_recon"
+msgstr ""
+
+msgid "info.tooltip_army"
+msgstr ""
+
+msgid "info.tooltip_journal"
+msgstr ""
+
+msgid "info.tooltip_end_turn"
+msgstr ""
+
+msgid "info.tooltip_kingdom"
+msgstr ""
+
+msgid "info.tooltip_options"
+msgstr ""
+
+msgid "tools.title"
+msgstr ""
+
+msgid "tools.slot_empty"
+msgstr ""
+
+msgid "tools.slot_filled"
+msgstr ""
+
+msgid "cityjob.worker"
+msgstr ""
+
+msgid "cityjob.militia"
+msgstr ""
+
+msgid "cityjob.reserve"
+msgstr ""
+
+msgid "cityjob.patrol"
+msgstr ""
+
+msgid "creation.name_placeholder"
+msgstr ""
+
+msgid "skills.title"
+msgstr ""
+msgid "tool.shovel"
+msgstr ""
+
+msgid "tool.pickaxe"
+msgstr ""
+
+msgid "tool.cart"
+msgstr ""
+
+msgid "tool.skin_protection"
+msgstr ""
+
+msgid "tool.net"
+msgstr ""
+
+msgid "stat.attack"
+msgstr ""
+
+msgid "stat.defense"
+msgstr ""
+
+msgid "stat.spell_power"
+msgstr ""
+
+msgid "stat.knowledge"
+msgstr ""
+
+msgid "stat.mana"
+msgstr ""
+
+msgid "stat.xp"
+msgstr ""
+
+msgid "stat.school"
+msgstr ""
+
+msgid "stat.skills"
+msgstr ""
+
+msgid "artifact.default_name"
+msgstr ""
+
+msgid "citypanel.capital"
+msgstr ""
+
+msgid "citypanel.over_limit"
+msgstr ""
+
+msgid "citypanel.starving"
+msgstr ""
+
+msgid "citypanel.patrol_tag"
+msgstr ""
+
+msgid "citypanel.in_building"
+msgstr ""
+
+msgid "citypanel.can_upgrade"
+msgstr ""
+
+msgid "citypanel.patrol_off"
+msgstr ""
+
+msgid "citypanel.patrol_on"
+msgstr ""
+
+msgid "citypanel.summary"
+msgstr ""
+
+msgid "citypanel.building_line"
+msgstr ""
+
+
+
+
+# ─── Создание персонажа ────────────────────────────────────────
+msgid "creation.title"
+msgstr ""
+
+msgid "creation.subtitle"
+msgstr ""
+
+msgid "creation.name_label"
+msgstr ""
+
+msgid "creation.sex_label"
+msgstr ""
+
+msgid "creation.race_label"
+msgstr ""
+
+msgid "creation.subrace_label"
+msgstr ""
+
+msgid "creation.class_label"
+msgstr ""
+
+msgid "creation.culture_label"
+msgstr ""
+
+msgid "creation.background_label"
+msgstr ""
+
+msgid "creation.create"
+msgstr ""
+
+msgid "creation.back"
+msgstr ""
+
+msgid "creation.sex_male"
+msgstr ""
+
+msgid "creation.sex_female"
+msgstr ""
+
+# ─── Конец игры ────────────────────────────────────────────────
+msgid "endgame.victory"
+msgstr ""
+
+msgid "endgame.defeat"
+msgstr ""
+
+msgid "endgame.victory_title"
+msgstr ""
+
+msgid "endgame.defeat_title"
+msgstr ""
+
+msgid "endgame.turns"
+msgstr ""
+
+msgid "endgame.date"
+msgstr ""
+
+msgid "endgame.cities"
+msgstr ""
+
+msgid "endgame.glory"
+msgstr ""
+
+msgid "endgame.battles"
+msgstr ""
+
+msgid "endgame.generations"
+msgstr ""
+
+msgid "endgame.to_menu"
+msgstr ""
+
+msgid "endgame.reason_unsuccessored_death"
+msgstr ""
+
+msgid "endgame.reason_total_collapse"
+msgstr ""
+
+msgid "endgame.reason_path_completed"
+msgstr ""
+
+msgid "endgame.reason_domination"
+msgstr ""
+
+# ─── Смерть ────────────────────────────────────────────────────
+msgid "death.cycle_continues"
+msgstr ""
+
+msgid "death.cycle_ends"
+msgstr ""
+
+msgid "death.fell_in"
+msgstr ""
+
+msgid "death.successor"
+msgstr ""
+
+msgid "death.successor_button"
+msgstr ""
+
+msgid "death.resurrection_button"
+msgstr ""
+
+msgid "death.chronicle_button"
+msgstr ""
+
+msgid "death.menu_button"
+msgstr ""
+
+# ─── Летопись ──────────────────────────────────────────────────
+msgid "chronicle.title"
+msgstr ""
+
+msgid "chronicle.empty"
+msgstr ""
+
+msgid "chronicle.close"
+msgstr ""
+
+msgid "chronicle.entry"
+msgstr ""
+
+# ─── Настройки ─────────────────────────────────────────────────
+msgid "settings.title"
+msgstr ""
+
+msgid "settings.graphics"
+msgstr ""
+
+msgid "settings.zoom"
+msgstr ""
+
+msgid "settings.fullscreen"
+msgstr ""
+
+msgid "settings.ui_anim"
+msgstr ""
+
+msgid "settings.particles"
+msgstr ""
+
+msgid "settings.audio"
+msgstr ""
+
+msgid "settings.master"
+msgstr ""
+
+msgid "settings.music"
+msgstr ""
+
+msgid "settings.sfx"
+msgstr ""
+
+msgid "settings.mute"
+msgstr ""
+
+msgid "settings.gameplay"
+msgstr ""
+
+msgid "settings.autosave"
+msgstr ""
+
+msgid "settings.apply"
+msgstr ""
+
+msgid "settings.reset"
+msgstr ""
+
+msgid "settings.cancel"
+msgstr ""
+
+# ─── Ресурсы ───────────────────────────────────────────────────
+msgid "resource.panel_title"
+msgstr ""
+
+msgid "resource.collected"
+msgstr ""
+
+msgid "resource.hidden_cell"
+msgstr ""
+
+msgid "resource.wood"
+msgstr ""
+
+msgid "resource.stone"
+msgstr ""
+
+msgid "resource.mercury"
+msgstr ""
+
+msgid "resource.ore"
+msgstr ""
+
+msgid "resource.sulfur"
+msgstr ""
+
+msgid "resource.crystal"
+msgstr ""
+
+msgid "resource.gems"
+msgstr ""
+
+msgid "resource.gold"
+msgstr ""
+
+msgid "resource.silver"
+msgstr ""
+
+msgid "resource.quartz"
+msgstr ""
+
+msgid "resource.saltpeter"
+msgstr ""
+
+msgid "resource.coal"
+msgstr ""
+
+msgid "resource.cinnabar"
+msgstr ""
+
+msgid "resource.turquoise"
+msgstr ""
+
+msgid "resource.limonite"
+msgstr ""
+
+msgid "resource.bog_iron"
+msgstr ""
+
+msgid "resource.coal_swamp"
+msgstr ""
+
+msgid "resource.gold_ore"
+msgstr ""
+
+msgid "resource.oak"
+msgstr ""
+
+# ─── Навыки ────────────────────────────────────────────────────
+msgid "skill.nature_sense"
+msgstr ""
+
+msgid "skill.keen_eye"
+msgstr ""
+
+msgid "skill.navigation"
+msgstr ""
+
+msgid "skill.geology"
+msgstr ""
+
+msgid "skill.alchemy"
+msgstr ""
+
+# ─── Репутация ─────────────────────────────────────────────────
+msgid "rep.rebellion"
+msgstr ""
+
+msgid "rep.crisis"
+msgstr ""
+
+msgid "rep.discontent"
+msgstr ""
+
+msgid "rep.normal"
+msgstr ""
+
+msgid "rep.prosperity"
+msgstr ""
+
+msgid "rep.golden_age"
+msgstr ""
+
+# ─── Сезоны ────────────────────────────────────────────────────
+msgid "season.spring"
+msgstr ""
+
+msgid "season.summer"
+msgstr ""
+
+msgid "season.autumn"
+msgstr ""
+
+msgid "season.winter"
+msgstr ""
+
+# ─── Погода ────────────────────────────────────────────────────
+msgid "weather.clear"
+msgstr ""
+
+msgid "weather.rain"
+msgstr ""
+
+msgid "weather.snow"
+msgstr ""
+
+msgid "weather.storm"
+msgstr ""
+
+# ─── Причины смерти ────────────────────────────────────────────
+msgid "cause.battle"
+msgstr ""
+
+msgid "cause.exhaustion"
+msgstr ""
+
+msgid "cause.isolation"
+msgstr ""
+
+msgid "cause.burnout"
+msgstr ""
+
+# ─── Результаты боя ────────────────────────────────────────────
+msgid "result.win"
+msgstr ""
+
+msgid "result.lose"
+msgstr ""
+
+msgid "result.retreat"
+msgstr ""
+
+# ─── Сохранение ────────────────────────────────────────────────
+msgid "save.ok"
+msgstr ""
+
+msgid "save.failed"
+msgstr ""
+
+msgid "load.ok"
+msgstr ""
+
+msgid "load.failed"
+msgstr ""
+
+msgid "load.no_save"
+msgstr ""

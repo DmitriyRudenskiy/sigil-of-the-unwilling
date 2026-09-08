@@ -1,10 +1,5 @@
-## R2 (world-controller-decoupling): сериализация городов вынесена из
-## SocketController в отдельный класс (weak coupling, KISS). RefCounted,
-## без class_name — detached-тесты не грузят автозагрузки.
 extends RefCounted
 
-## city-in-world: действие в городе через РЕАЛЬНЫЙ CityScreen: открыть
-## экран для города → выполнить то же действие, что делает кнопка → результат.
 func city_action(world_ctrl, req: Dictionary, action: String) -> Dictionary:
 	if world_ctrl == null or not world_ctrl.is_world_visible():
 		return {"error": "Not in World mode"}
@@ -24,8 +19,6 @@ func city_action(world_ctrl, req: Dictionary, action: String) -> Dictionary:
 	res["city"] = city_state_dict(city)
 	return res
 
-## city-in-world: город из args: {"uid": N} или {"cell": {"x","y"}}; если
-## ничего не передано — столица.
 func resolve_city(world_ctrl, req: Dictionary) -> City:
 	var cities = world_ctrl.get_cities()
 	if cities == null:
@@ -44,7 +37,6 @@ func resolve_city(world_ctrl, req: Dictionary) -> City:
 				return c
 	return cities.capital
 
-## city-in-world: JSON-совместимый снимок города (GET_STATE / ответы CITY_*).
 func city_state_dict(city: City) -> Dictionary:
 	if city == null:
 		return {}
