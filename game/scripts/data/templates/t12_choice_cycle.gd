@@ -7,7 +7,8 @@ const _S := _Enums.StatusType
 
 static func handle(
 	params: Dictionary, state: Variant,
-	caster: Variant, target: Variant
+	caster: Variant, target: Variant,
+	secondary: Array[Dictionary] = []
 ) -> Dictionary:
 	var effects: Array[Dictionary] = []
 	var draw_count: int = int(params.get("draw", 1))

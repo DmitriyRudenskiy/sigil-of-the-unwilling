@@ -1,3 +1,6 @@
+## Область применения: карточная система — резолв шаблонов TemplateEngine
+## (эмулятор BattleEmulator). Боевой каст не идёт через SpellResolver —
+## см. канонический путь в SpellCaster.gd.
 class_name SpellResolver
 extends RefCounted
 

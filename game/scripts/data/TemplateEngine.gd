@@ -22,6 +22,6 @@ static func execute(
 	if not _handlers.has(template):
 		return {"result": "unknown_template", "template": str(template), "effects": []}
 
-	if template == &"COMBAT_TRICK":
-		return _handlers[template].call(params, secondary, state, caster, target)
-	return _handlers[template].call(params, state, caster, target)
+	# R6: единая сигнатура handle(params, state, caster, target, secondary).
+	# secondary всегда передаётся (пустой массив, если нет вторичных эффектов).
+	return _handlers[template].call(params, state, caster, target, secondary)

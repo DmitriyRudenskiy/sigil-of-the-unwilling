@@ -4,8 +4,8 @@ extends RefCounted
 const _Utils = preload("res://scripts/data/SpellUtils.gd")
 
 static func handle(
-	params: Dictionary, secondary: Array[Dictionary],
-	state: Variant, caster: Variant, target: Variant
+	params: Dictionary, state: Variant,
+	caster: Variant, target: Variant, secondary: Array[Dictionary] = []
 ) -> Dictionary:
 	var effects: Array[Dictionary] = []
 	var target_type: String = str(params.get("target", "ALLY_UNIT"))

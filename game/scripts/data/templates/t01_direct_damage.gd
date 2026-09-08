@@ -6,7 +6,8 @@ const _Utils = preload("res://scripts/data/SpellUtils.gd")
 
 static func handle(
 	params: Dictionary, state: Variant,
-	caster: Variant, target: Variant
+	caster: Variant, target: Variant,
+	secondary: Array[Dictionary] = []
 ) -> Dictionary:
 	var amount: int = int(params.get("amount", 0))
 	var target_type: String = str(params.get("target", "ENEMY_UNIT"))

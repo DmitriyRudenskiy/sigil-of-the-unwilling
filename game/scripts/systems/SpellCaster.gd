@@ -1,3 +1,8 @@
+## Канонический путь боевого каста: SpellCaster + SpellRegistry (autoload "spells").
+## Мировые/боевые заклинания героя проходят именно отсюда (BattleActionResolver,
+## BattleEmulator). Карточная система (SpellbookRegistry/SpellResolver/
+## BattleSpellBridge, spells.json) — отдельная область применения: эмулятор
+## и карточный режим; боевой каст через неё не идёт.
 extends RefCounted
 class_name SpellCaster
 

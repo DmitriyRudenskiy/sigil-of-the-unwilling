@@ -1,3 +1,6 @@
+## Область применения: мост карточной системы (спеллы spells.json) → боевые
+## эффекты; используется эмулятором (BattleEmulator). Не часть канонического
+## пути боевого каста (SpellCaster + SpellRegistry).
 extends RefCounted
 class_name BattleSpellBridge
 

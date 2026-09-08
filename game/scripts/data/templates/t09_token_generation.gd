@@ -6,7 +6,8 @@ const _Utils = preload("res://scripts/data/SpellUtils.gd")
 
 static func handle(
 	params: Dictionary, state: Variant,
-	caster: Variant, target: Variant
+	caster: Variant, target: Variant,
+	secondary: Array[Dictionary] = []
 ) -> Dictionary:
 	var effects: Array[Dictionary] = []
 	var token_id: String = str(params.get("token_id", "soldier"))

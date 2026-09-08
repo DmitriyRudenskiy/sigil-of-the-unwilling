@@ -1,3 +1,6 @@
+## Область применения: карточная система (spells.json, шаблоны TemplateEngine).
+## НЕ канонический путь боевого каста — тот идёт через SpellCaster + SpellRegistry.
+## Используется эмулятором (BattleEmulator) и карточным режимом.
 extends Node
 class_name SpellbookRegistry
 

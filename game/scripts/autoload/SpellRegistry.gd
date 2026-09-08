@@ -1,3 +1,5 @@
+## Канонический реестр боевых заклинаний (школы/уровни, мани, эффекты боя).
+## Путь боевого каста: SpellCaster.cast() → BattleActionResolver. См. SpellCaster.gd.
 extends Node
 class_name SpellRegistry
 
