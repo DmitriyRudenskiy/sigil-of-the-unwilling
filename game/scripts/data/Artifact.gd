@@ -30,6 +30,25 @@ var armor: Dictionary = {}
 var ac_bonus_type: AcBonusType = AcBonusType.NONE
 
 
+## R10: типобезопасная сборка из именованных полей — для данных/лоадеров.
+## Позиционный _init оставлен для мелких случаев (тесты, простые new()).
+static func from_dict(data: Dictionary) -> Artifact:
+    var a := Artifact.new()
+    a.id = StringName(data.get("id", &""))
+    a.display_name = str(data.get("display_name", ""))
+    a.slot = data.get("slot", Slot.MISC_A)
+    a.rarity = data.get("rarity", Rarity.MINOR)
+    a.modifiers = (data.get("modifiers", {}) as Dictionary).duplicate()
+    a.special_effect = StringName(data.get("special_effect", &""))
+    a.is_two_handed = bool(data.get("is_two_handed", false))
+    a.value_gold = int(data.get("value_gold", 0))
+    a.description = str(data.get("description", ""))
+    a.combat = (data.get("combat", {}) as Dictionary).duplicate(true)
+    a.armor = (data.get("armor", {}) as Dictionary).duplicate(true)
+    a.ac_bonus_type = data.get("ac_bonus_type", AcBonusType.NONE)
+    return a
+
+
 func _init(
     p_id: StringName = &"",
     p_display_name: String = "",

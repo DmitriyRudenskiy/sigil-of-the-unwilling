@@ -24,14 +24,15 @@ class _HeroStub extends RefCounted:
 	var followers: Array = []
 
 
-func _make_hero() -> _HeroStub:
+## R8: не герой, а заглушка с followers — TestFactories.make_hero здесь не подходит.
+func _stub_hero() -> _HeroStub:
 	return _HeroStub.new()
 
 
 
 func test_recruit_assigns_race_and_class() -> void:
 	var city := _make_city()
-	var hero := _make_hero()
+	var hero := _stub_hero()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
 	var f: _Follower = _FollowerSystem.recruit(city, hero, rng)
@@ -42,7 +43,7 @@ func test_recruit_assigns_race_and_class() -> void:
 
 func test_recruit_removes_pop() -> void:
 	var city := _make_city()
-	var hero := _make_hero()
+	var hero := _stub_hero()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
 	_FollowerSystem.recruit(city, hero, rng)
@@ -50,7 +51,7 @@ func test_recruit_removes_pop() -> void:
 
 func test_recruit_null_when_no_follower() -> void:
 	var city := _City.new()  
-	var hero := _make_hero()
+	var hero := _stub_hero()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1
 	var f: _Follower = _FollowerSystem.recruit(city, hero, rng)
@@ -67,7 +68,7 @@ func test_recruit_null_when_no_hero() -> void:
 
 func test_elf_stat_modifiers() -> void:
 	var city := _make_city()
-	var hero := _make_hero()
+	var hero := _stub_hero()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 11
 	var f: _Follower = _FollowerSystem.recruit(city, hero, rng)
@@ -111,7 +112,7 @@ func test_collectabilities_race_traits() -> void:
 
 func test_recruit_archetype_assigned() -> void:
 	var city := _make_city()
-	var hero := _make_hero()
+	var hero := _stub_hero()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 42
 	var f: _Follower = _FollowerSystem.recruit(city, hero, rng)
@@ -122,7 +123,7 @@ func test_recruit_archetype_assigned() -> void:
 
 func test_describe_includes_race_class() -> void:
 	var city := _make_city()
-	var hero := _make_hero()
+	var hero := _stub_hero()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 101
 	var f: _Follower = _FollowerSystem.recruit(city, hero, rng)
@@ -133,7 +134,7 @@ func test_describe_includes_race_class() -> void:
 
 func test_serialize_roundtrip() -> void:
 	var city := _make_city()
-	var hero := _make_hero()
+	var hero := _stub_hero()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 202
 	var f: _Follower = _FollowerSystem.recruit(city, hero, rng)
@@ -150,13 +151,13 @@ func test_serialize_roundtrip() -> void:
 
 func test_recruit_deterministic() -> void:
 	var city1 := _make_city()
-	var hero1 := _make_hero()
+	var hero1 := _stub_hero()
 	var rng1 := RandomNumberGenerator.new()
 	rng1.seed = 555
 	var f1: Variant = _FollowerSystem.recruit(city1, hero1, rng1)
 
 	var city2 := _make_city()
-	var hero2 := _make_hero()
+	var hero2 := _stub_hero()
 	var rng2 := RandomNumberGenerator.new()
 	rng2.seed = 555
 	var f2: Variant = _FollowerSystem.recruit(city2, hero2, rng2)

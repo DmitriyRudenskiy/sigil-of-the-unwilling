@@ -124,7 +124,7 @@ func test_exit_button_renamed_and_closes() -> void:
 	holder.add_child(hero)
 	var screen = load("res://scenes/ui/CityScreen.tscn").instantiate() as CityScreen
 	holder.add_child(screen)
-	screen.setup(city, hero, Vector2i(10, 10), _seeded(42))
+	screen.setup(city, hero, Vector2i(10, 10), TestFactories.seeded(42))
 	var btn := screen.get_node("CityScreenBackground/CityScreenCenter/CityScreenPanel/CityScreenBox/CityScreenButtons/Close") as Button
 	assert_that(btn).is_not_null()
 	assert_bool(btn.text.contains("Выход из города")).is_true()
@@ -208,8 +208,3 @@ func test_city_marker_click_to_unwalkable_center_uses_nearby() -> void:
 	ml.free()
 	hero.free()
 
-
-func _seeded(seed: int) -> RandomNumberGenerator:
-	var r := RandomNumberGenerator.new()
-	r.seed = seed
-	return r

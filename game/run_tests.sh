@@ -35,3 +35,10 @@ python3 -m pytest -xvs --timeout=300 --tb=short \
   test_session_reset.py \
   test_shard_pruning.py \
   test_battle_profiling.py
+MCP_RC=$?
+cd "$(dirname "$0")"
+# Вендорный MCP-сервер инжектит mcp_interaction_server.gd + autoload в project.godot
+# и при выгрузке оставляет пустые строки — возвращаем чистое дерево.
+rm -f mcp_interaction_server.gd mcp_interaction_server.gd.uid
+git checkout -- project.godot 2>/dev/null || true
+exit "$MCP_RC"

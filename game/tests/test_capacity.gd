@@ -7,7 +7,7 @@ var hero: HeroController
 
 
 func before_test() -> void:
-	hero = _make_hero()
+	hero = _root_hero()
 
 
 func test_capacity_default_zero() -> void:
@@ -73,10 +73,11 @@ func test_auto_capped() -> void:
 	assert_that(hero.strategic_resources.get_all()[&"wood"]).is_equal(GameNumbers.RESOURCE_CAPACITY)
 
 
-func _make_hero() -> HeroController:
+## R8: база героя — TestFactories.make_hero.
+func _root_hero() -> HeroController:
 	if hero != null and is_instance_valid(hero):
 		hero.queue_free()
-	var h := _HeroController.new()
+	var h := TestFactories.make_hero()
 	h.name = "TestHero"
 	var root_node: Node = Engine.get_main_loop().root
 	root_node.add_child(h)

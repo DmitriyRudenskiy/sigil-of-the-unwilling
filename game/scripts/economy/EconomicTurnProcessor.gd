@@ -1,3 +1,8 @@
+## R10 (P8): что такое «ход» в процессоре экономики.
+## Ход = один игровой день (TurnContext: day/week/month/season). Его продвигает
+## WorldEventRouter (по «end turn» игрока/тики) через TurnScheduler.execute_turn:
+## процессоры идут по приоритету, economy (priority 10) считает производство,
+## содержание и авто-доход городов в рамках этого дня.
 class_name EconomicTurnProcessor
 extends TurnPhaseProcessor
 

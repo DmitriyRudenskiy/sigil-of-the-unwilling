@@ -16,9 +16,9 @@ func _make_follower(uid: int, path: StringName) -> Follower:
 	return f
 
 
-func _make_hero(path := &"archivist") -> HeroController:
-	var h := _Hero.new()
-	h.path_id = path
+## R8: база героя — TestFactories.make_hero, здесь только специфика сукцессии.
+func _succession_hero(path := &"archivist") -> HeroController:
+	var h := TestFactories.make_hero(path)
 	h.magic.spellbook = [&"firebolt", &"heal"]
 	h.magic.schools = {&"air": 1, &"fire": 2}
 	h.magic.mana_current = 10
@@ -54,7 +54,7 @@ func _make_city(uid: int, name: StringName, is_capital: bool) -> City:
 
 
 func test_select_returns_same_path_follower() -> void:
-	var h := _make_hero(&"archivist")
+	var h := _succession_hero(&"archivist")
 	var f1 := _make_follower(1, &"archivist")
 	var f2 := _make_follower(2, &"archivist")
 	h.followers = [f1, f2]
@@ -66,7 +66,7 @@ func test_select_returns_same_path_follower() -> void:
 
 
 func test_select_never_different_path() -> void:
-	var h := _make_hero(&"archivist")
+	var h := _succession_hero(&"archivist")
 	var same := _make_follower(1, &"archivist")
 	var other := _make_follower(2, &"warrior")
 	h.followers = [same, other]
@@ -78,7 +78,7 @@ func test_select_never_different_path() -> void:
 
 
 func test_select_null_when_no_eligible() -> void:
-	var h := _make_hero(&"archivist")
+	var h := _succession_hero(&"archivist")
 	var other := _make_follower(3, &"warrior")
 	h.followers = [other]
 
@@ -88,7 +88,7 @@ func test_select_null_when_no_eligible() -> void:
 
 
 func test_select_null_when_no_followers() -> void:
-	var h := _make_hero(&"archivist")
+	var h := _succession_hero(&"archivist")
 	h.followers = []
 	var succ := _Succession.new().select_successor(h)
 	assert_that(succ).is_null()
@@ -97,7 +97,7 @@ func test_select_null_when_no_followers() -> void:
 
 
 func test_build_copies_path_magic_inventory() -> void:
-	var h := _make_hero(&"archivist")
+	var h := _succession_hero(&"archivist")
 	var succ := _Succession.new().build_successor(h)
 	assert_that(succ).is_not_null()
 	assert_that(succ.path_id).is_equal(&"archivist")
@@ -118,7 +118,7 @@ func test_transfer_preserves_cities_identical() -> void:
 	var other := _make_city(3, &"Gravewater", false)
 	var cities: Array[City] = [src, cap, other]
 
-	var h := _make_hero(&"archivist")
+	var h := _succession_hero(&"archivist")
 	var succ := _Succession.new().build_successor(h)
 
 	var mgr := _CityManager.new()
@@ -146,7 +146,7 @@ func test_transfer_preserves_cities_identical() -> void:
 func test_transfer_reregisters_fresh_manager() -> void:
 	var cap := _make_city(2, &"Highhold", true)
 	var cities: Array[City] = [cap]
-	var h := _make_hero(&"archivist")
+	var h := _succession_hero(&"archivist")
 	var succ := _Succession.new().build_successor(h)
 
 	var dest := _CityManager.new()
@@ -178,7 +178,7 @@ func test_resurrect_requires_temple_and_resources() -> void:
 
 
 func test_on_hero_died_returns_successor() -> void:
-	var h := _make_hero(&"archivist")
+	var h := _succession_hero(&"archivist")
 	var f := _make_follower(1, &"archivist")
 	h.followers = [f]
 
@@ -196,7 +196,7 @@ func test_on_hero_died_returns_successor() -> void:
 
 
 func test_on_hero_died_null_when_no_follower() -> void:
-	var h := _make_hero(&"archivist")
+	var h := _succession_hero(&"archivist")
 	h.followers = []
 	var empty_cities: Array[City] = []
 	var controller := _Succession.new()

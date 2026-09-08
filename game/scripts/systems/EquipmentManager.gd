@@ -33,7 +33,8 @@ func compute_ac(equipped: Dictionary, dex_mod: int = 0) -> Dictionary:
 
 	var natural_ac := _highest_type(equipped, Artifact.Slot.NECK, Artifact.AcBonusType.NATURAL)
 
-	var deflection_ac := _highest_type(equipped, Artifact.Slot.RING_R, Artifact.AcBonusType.DEFLECTION,
+	var deflection_ac := _highest_type_two(equipped,
+		Artifact.Slot.RING_R, Artifact.AcBonusType.DEFLECTION,
 		Artifact.Slot.RING_L, Artifact.AcBonusType.DEFLECTION)
 
 	var dodge_ac := _sum_type(equipped, Artifact.AcBonusType.DODGE)
@@ -55,18 +56,18 @@ func compute_ac(equipped: Dictionary, dex_mod: int = 0) -> Dictionary:
 	}
 
 
-func _highest_type(equipped: Dictionary, a_slot: Artifact.Slot, a_type: Artifact.AcBonusType,
-		b_slot: Artifact.Slot = -1, b_type: Artifact.AcBonusType = -1) -> int:
-	var best := 0
-	for slot in [a_slot]:
-		var a: Artifact = equipped.get(slot, null)
-		if a != null and a.get_ac_bonus_type() == a_type:
-			best = max(best, a.get_base_ac())
-	if b_slot >= 0:
-		var b: Artifact = equipped.get(b_slot, null)
-		if b != null and b.get_ac_bonus_type() == b_type:
-			best = max(best, b.get_base_ac())
-	return best
+## R10: без -1-сентинела — вторая пара идёт отдельной функцией.
+func _highest_type(equipped: Dictionary, slot: Artifact.Slot, type: Artifact.AcBonusType) -> int:
+	var a: Artifact = equipped.get(slot, null)
+	if a != null and a.get_ac_bonus_type() == type:
+		return a.get_base_ac()
+	return 0
+
+
+func _highest_type_two(equipped: Dictionary,
+		a_slot: Artifact.Slot, a_type: Artifact.AcBonusType,
+		b_slot: Artifact.Slot, b_type: Artifact.AcBonusType) -> int:
+	return max(_highest_type(equipped, a_slot, a_type), _highest_type(equipped, b_slot, b_type))
 
 
 func _sum_type(equipped: Dictionary, target_type: Artifact.AcBonusType) -> int:

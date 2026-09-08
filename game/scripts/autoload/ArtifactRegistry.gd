@@ -233,11 +233,12 @@ func _register(
 	armor: Dictionary = {},
 	ac_type: Artifact.AcBonusType = Artifact.AcBonusType.NONE
 ) -> void:
-	var art := Artifact.new(
-		id, display_name, slot, rarity,
-		modifiers, special_effect, two_handed, gold, description,
-		combat, armor, ac_type
-	)
+	var art := Artifact.from_dict({
+		"id": id, "display_name": display_name, "slot": slot, "rarity": rarity,
+		"modifiers": modifiers, "special_effect": special_effect,
+		"is_two_handed": two_handed, "value_gold": gold, "description": description,
+		"combat": combat, "armor": armor, "ac_bonus_type": ac_type,
+	})
 	_artifacts[id] = art
 
 

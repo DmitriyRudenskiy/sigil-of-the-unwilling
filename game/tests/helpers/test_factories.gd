@@ -23,6 +23,14 @@ static func make_hero(path := &"archivist") -> HeroController:
 	return h
 
 
+## R8: один источник для тестовых RandomNumberGenerator (было: локальный _seeded в
+## test_city_navigation / test_follower / test_city_screen).
+static func seeded(seed: int) -> RandomNumberGenerator:
+	var r := RandomNumberGenerator.new()
+	r.seed = seed
+	return r
+
+
 static func make_follower(uid: int, path := &"archivist") -> Follower:
 	var f := Follower.new()
 	f.uid = uid

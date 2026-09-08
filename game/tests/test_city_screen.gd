@@ -24,7 +24,7 @@ func before_test() -> void:
 	hero = HeroController.new()
 	hero.name = "Hero"
 	_main_root().add_child(hero)
-	screen.setup(city, hero, Vector2i(10, 10), _seeded(42))
+	screen.setup(city, hero, Vector2i(10, 10), TestFactories.seeded(42))
 
 
 func after_test() -> void:
@@ -87,7 +87,7 @@ func test_build_fails_without_industry() -> void:
 
 func test_build_fails_without_free_cell() -> void:
 	city.center = Vector2i(0, 0)
-	screen.setup(city, hero, Vector2i(0, 0), _seeded(42), Vector2i(1, 1))
+	screen.setup(city, hero, Vector2i(0, 0), TestFactories.seeded(42), Vector2i(1, 1))
 	var r: CityCheck = screen.build_pressed(&"farm")
 	assert_bool(bool(r.ok)).is_false()
 	assert_bool(str(r.reason).contains("клетки")).is_true()
@@ -149,8 +149,3 @@ func test_level_up_max_level_fails() -> void:
 	assert_bool(bool(r.ok)).is_false()
 	assert_bool(str(r.reason).contains("максимальном")).is_true()
 
-
-func _seeded(seed: int) -> RandomNumberGenerator:
-	var r := RandomNumberGenerator.new()
-	r.seed = seed
-	return r

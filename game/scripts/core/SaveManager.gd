@@ -41,7 +41,9 @@ func save_game(data: Variant) -> SaveError:
 	return SaveError.OK
 
 
-func load_game() -> Dictionary:
+## R14 (P4): load_game чисто файловая (без состояния ноды) — static.
+## Был статический load_slot(), создававший одноразовый SaveManager.new().
+static func load_game() -> Dictionary:
 	if not FileAccess.file_exists(SAVE_PATH):
 		GameLogger.info("No save file at %s" % SAVE_PATH, "Save")
 		return {"error": SaveError.FILE_NOT_FOUND, "data": null, "message": ERROR_MESSAGES[SaveError.FILE_NOT_FOUND]}
@@ -76,16 +78,9 @@ func load_game() -> Dictionary:
 	return {"error": SaveError.OK, "data": data, "message": "OK"}
 
 
-func load_game_legacy() -> Variant:
+static func load_game_legacy() -> Variant:
 	var result: Dictionary = load_game()
 	return result.get("data", null)
-
-
-static func load_slot() -> Dictionary:
-	var manager := SaveManager.new()
-	var result: Dictionary = manager.load_game()
-	manager.free()
-	return result
 
 
 func has_save() -> bool:

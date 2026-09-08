@@ -129,7 +129,7 @@ func _clear_session_caches() -> void:
     Services.clear_session()
 
 func _on_load_game() -> void:
-    var result: Dictionary = SaveManager.load_slot()
+    var result: Dictionary = SaveManager.load_game()
     var err: int = result.get("error", SaveManager.SaveError.FILE_NOT_FOUND)
     if err != SaveManager.SaveError.OK:
         _flash_lock()
@@ -149,7 +149,7 @@ func _flash_lock() -> void:
 
 func _on_chronicle() -> void:
     var entries: Array = []
-    var result: Dictionary = SaveManager.load_slot()
+    var result: Dictionary = SaveManager.load_game()
     if result.get("error", -1) == SaveManager.SaveError.OK:
         var data: SaveData = result.get("data")
         if data != null:

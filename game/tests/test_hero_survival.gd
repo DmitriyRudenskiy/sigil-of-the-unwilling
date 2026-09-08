@@ -52,11 +52,10 @@ func _next_uid() -> int:
 	_uid += 1
 	return _uid
 
-func _make_hero(path := &"warrior") -> HeroController:
-	var h := _Hero.new()
+## R8: база героя — TestFactories.make_hero, здесь только специфика survival-теста.
+func _survival_hero(path := &"warrior") -> HeroController:
+	var h := TestFactories.make_hero(path)
 	h._ready()
-	h.hero_name = "Darkstorn"
-	h.path_id = path
 	h.max_combat_hp = 20
 	h.set_combat_hp(20)
 	h.is_alive = true
@@ -197,7 +196,7 @@ func test_needs_serialize_roundtrip_and_old_save() -> void:
 
 
 func test_hero_dies_by_needs_emits_hero_died() -> void:
-	var h := _make_hero()
+	var h := _survival_hero()
 	h.needs.needs[NeedType.ID.REST] = 0.0
 	var captured: Dictionary = {"cause": &""}
 	var on_died := func(cause: StringName) -> void: captured["cause"] = cause
@@ -213,7 +212,7 @@ func test_hero_dies_by_needs_emits_hero_died() -> void:
 
 
 func test_hero_city_tick_recovers() -> void:
-	var h := _make_hero()
+	var h := _survival_hero()
 	var c := _make_temple_city()
 	c.pop = [_PopUnit.new(), _PopUnit.new(), _PopUnit.new()]
 	var mgr := _CityManager.new()
@@ -230,7 +229,7 @@ func test_hero_city_tick_recovers() -> void:
 
 
 func test_hero_revive_at() -> void:
-	var h := _make_hero()
+	var h := _survival_hero()
 	h.is_alive = false
 	h.set_combat_hp(0)
 	h.inventory.backpack.append(_Artifact.new())
@@ -265,7 +264,7 @@ func _setup_serializable(h: HeroController) -> void:
 
 
 func test_hero_serialize_needs_roundtrip() -> void:
-	var h := _make_hero()
+	var h := _survival_hero()
 	h.hero_name = "Тест"
 	_setup_serializable(h)
 	h.needs.needs[NeedType.ID.REST] = 0.33
@@ -279,7 +278,7 @@ func test_hero_serialize_needs_roundtrip() -> void:
 
 
 func test_hero_deserialize_old_save_defaults() -> void:
-	var h := _make_hero()
+	var h := _survival_hero()
 	_setup_serializable(h)
 	var d := h.serialize()
 	d.erase("needs")
@@ -297,19 +296,19 @@ func test_hero_deserialize_old_save_defaults() -> void:
 func test_wc_find_resurrection_city() -> void:
 	var city := _make_temple_city()
 	var wc := _make_wc([city])
-	var fresh := _make_hero()
+	var fresh := _survival_hero()
 	assert_that(wc._find_resurrection_city(fresh)).is_equal(city)
 	fresh.resurrected_once = true
 	assert_that(wc._find_resurrection_city(fresh)).is_null()
 	fresh.free()
 	var poor := _make_temple_city(false)
 	var wc2 := _make_wc([poor])
-	var h2 := _make_hero()
+	var h2 := _survival_hero()
 	assert_that(wc2._find_resurrection_city(h2)).is_null()
 	h2.free()
 	var plain := _make_city()
 	var wc3 := _make_wc([plain])
-	var h3 := _make_hero()
+	var h3 := _survival_hero()
 	assert_that(wc3._find_resurrection_city(h3)).is_null()
 	h3.free()
 	wc.free(); wc2.free(); wc3.free()
@@ -318,7 +317,7 @@ func test_wc_find_resurrection_city() -> void:
 func _setup_death_with_resurrection() -> Dictionary:
 	var city := _make_temple_city()
 	var wc := _make_wc([city])
-	var hero := _make_hero()
+	var hero := _survival_hero()
 	hero.movement = _HeroMovement.new()
 	hero.add_child(hero.movement)
 	hero.followers.append(_make_follower(1, &"warrior"))
@@ -422,7 +421,7 @@ func test_wc_succession_frees_held_corpse() -> void:
 func test_wc_no_temple_corpse_freed() -> void:
 	var plain := _make_city()
 	var wc := _make_wc([plain])
-	var hero := _make_hero()
+	var hero := _survival_hero()
 	hero.followers.append(_make_follower(2, &"warrior"))
 	var parent := _hero_in_tree(hero)
 	wc._hero = hero
@@ -471,7 +470,7 @@ func test_wc_fresh_cycle_resurrection_again() -> void:
 func test_deathseq_resurrection_button_flow() -> void:
 	var ds := _DeathSequenceScene.instantiate() as DeathSequence
 	var city := _make_temple_city()
-	var succ := _make_hero()
+	var succ := _survival_hero()
 	var emitted: Dictionary = {"v": false}  
 	ds.resurrection_chosen.connect(func() -> void: emitted["v"] = true)
 	ds.show_death("Тест", &"exhaustion", {}, succ, city)
@@ -483,7 +482,7 @@ func test_deathseq_resurrection_button_flow() -> void:
 	ds.free()
 	succ.free()
 	var ds2 := _DeathSequenceScene.instantiate() as DeathSequence
-	var succ2 := _make_hero()
+	var succ2 := _survival_hero()
 	ds2.show_death("Тест", &"battle", {}, succ2, null)
 	assert_bool(ds2.get_node("Root/Panel/VBox/Buttons/ResurrectionButton").visible).is_false()
 	ds2.free()
@@ -497,7 +496,7 @@ func test_deathseq_resurrection_button_flow() -> void:
 
 func test_statuspanel_needs_line() -> void:
 	var panel := load("res://scenes/ui/HeroStatusPanel.tscn").instantiate() as _StatusPanel
-	var h := _make_hero()
+	var h := _survival_hero()
 	h.hero_name = "Тест"
 	h.needs.needs[NeedType.ID.REST] = 0.1
 	panel.set_hero(h)

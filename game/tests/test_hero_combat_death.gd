@@ -16,11 +16,11 @@ func _cleanup_test(on_died: Callable) -> void:
 		a.free()
 	GameEventBus.hero_died.disconnect(on_died)
 
-func _make_hero(path: StringName = &"rebel") -> HeroController:
-	var h := _Hero.new()
+## R8: база героя — TestFactories.make_hero, здесь только армия и боевой HP.
+func _combat_hero(path: StringName = &"rebel") -> HeroController:
+	var h := TestFactories.make_hero(path)
 	h.max_combat_hp = 20
 	h.set_combat_hp(20)
-	h.path_id = path
 	h.army = _HeroArmy.new()
 	h.army.army = [_UnitStack.new(null, 10)]
 	return h
@@ -39,7 +39,7 @@ func test_battle_loss_zero_hp_emits_hero_died() -> void:
 	var on_died := func(cause: Variant): data["cause"] = cause
 	GameEventBus.hero_died.connect(on_died)
 
-	_hero = _make_hero()
+	_hero = _combat_hero()
 	var coord := _make_coord(true)
 
 	var empty_u: Array[UnitStack] = []
@@ -58,7 +58,7 @@ func test_battle_won_no_death() -> void:
 	var on_died := func(cause: Variant): data["cause"] = cause
 	GameEventBus.hero_died.connect(on_died)
 
-	_hero = _make_hero()
+	_hero = _combat_hero()
 	var coord := _make_coord(true)
 
 	var empty_u: Array[UnitStack] = []
@@ -76,7 +76,7 @@ func test_death_gate_can_be_disabled() -> void:
 	var on_died := func(cause: Variant): data["cause"] = cause
 	GameEventBus.hero_died.connect(on_died)
 
-	_hero = _make_hero()
+	_hero = _combat_hero()
 	var coord := _make_coord(false)
 
 	var empty_u: Array[UnitStack] = []

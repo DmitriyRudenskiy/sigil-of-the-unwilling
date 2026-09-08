@@ -71,7 +71,7 @@ func test_recruit_moves_follower_from_city_to_hero() -> void:
 	var city := _make_city(2)
 	var hero := HeroController.new()
 	var before: int = city.pop.size()
-	var f := _FollowerSystem.recruit(city, hero, _seeded(42))
+	var f := _FollowerSystem.recruit(city, hero, TestFactories.seeded(42))
 	assert_that(f).is_not_null()
 	assert_that(city.pop.size()).is_equal(before - 1)
 	assert_that(hero.followers.size()).is_equal(1)
@@ -83,7 +83,7 @@ func test_recruit_moves_follower_from_city_to_hero() -> void:
 func test_recruit_null_without_free_followers() -> void:
 	var city := _make_city(0, 3)  
 	var hero := HeroController.new()
-	assert_that(_FollowerSystem.recruit(city, hero, _seeded(1))).is_null()
+	assert_that(_FollowerSystem.recruit(city, hero, TestFactories.seeded(1))).is_null()
 	assert_that(hero.followers.size()).is_equal(0)
 	hero.free()
 
@@ -93,8 +93,8 @@ func test_recruit_deterministic_with_same_seed() -> void:
 	var c2 := _make_city(1)
 	var h1 := HeroController.new()
 	var h2 := HeroController.new()
-	var f1 := _FollowerSystem.recruit(c1, h1, _seeded(7))
-	var f2 := _FollowerSystem.recruit(c2, h2, _seeded(7))
+	var f1 := _FollowerSystem.recruit(c1, h1, TestFactories.seeded(7))
+	var f2 := _FollowerSystem.recruit(c2, h2, TestFactories.seeded(7))
 	assert_that(f1.name).is_equal(f2.name)
 	assert_that(f1.race).is_equal(f2.race)
 	assert_that(f1.path).is_equal(f2.path)
@@ -106,14 +106,9 @@ func test_recruit_deterministic_with_same_seed() -> void:
 func test_recruit_uid_increments() -> void:
 	var city := _make_city(3)
 	var hero := HeroController.new()
-	var f1 := _FollowerSystem.recruit(city, hero, _seeded(1))
-	var f2 := _FollowerSystem.recruit(city, hero, _seeded(2))
+	var f1 := _FollowerSystem.recruit(city, hero, TestFactories.seeded(1))
+	var f2 := _FollowerSystem.recruit(city, hero, TestFactories.seeded(2))
 	assert_that(f1.uid).is_equal(1)
 	assert_that(f2.uid).is_equal(2)
 	hero.free()
 
-
-func _seeded(seed: int) -> RandomNumberGenerator:
-	var r := RandomNumberGenerator.new()
-	r.seed = seed
-	return r
