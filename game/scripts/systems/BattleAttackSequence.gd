@@ -182,7 +182,7 @@ func try_morale_extra_turn() -> bool:
 	if _rng.randf() >= GameNumbers.MORALE_CHANCE:
 		return false
 
-	_executor.floating_text.emit(unit.cell, GameText.battle_high_morale(), ThemeConfig.C_MORALE)
+	_executor.floating_text.emit(unit.cell, GameText.battle_high_morale(), ThemeConfig.C_BATTLE_MORALE)
 
 	unit.has_moved = false
 
