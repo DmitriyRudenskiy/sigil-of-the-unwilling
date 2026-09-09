@@ -29,7 +29,7 @@ func setup(hero: HeroController = null, magic: HeroMagic = null, registry: Node 
     _hero = hero
     _magic = magic
 
-    _spell_registry = Services.resolve(&"spells") if registry == null else registry
+    _spell_registry = Spells if registry == null else registry
     _refresh()
     if _magic != null and not _magic.changed.is_connected(_refresh):
         _magic.changed.connect(_refresh)

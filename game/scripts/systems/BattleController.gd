@@ -134,11 +134,7 @@ func _on_spellbook() -> void:
 func _on_spell_chosen(spell_id: StringName) -> void:
 	if not _executor.is_input_active():
 		return
-	var reg: Node = Services.resolve(&"spells")
-	if reg == null:
-		GameLogger.error("Spell registry unavailable", "Battle")
-		return
-	var spell = reg.get_spell(spell_id)
+	var spell = Spells.get_spell(spell_id)
 	if spell == null:
 		GameLogger.warn("Unknown spell: %s" % spell_id, "Battle")
 		return
@@ -151,8 +147,7 @@ func _on_spell_chosen(spell_id: StringName) -> void:
 
 func _on_spell_cast_requested(spell_id: StringName, target: BattleState.BattleUnit) -> void:
 	if _hero_magic != null:
-		var reg: Node = Services.resolve(&"spells")
-		var spell = reg.get_spell(spell_id) if reg != null else null
+		var spell = Spells.get_spell(spell_id)
 		if spell == null or not _hero_magic.can_cast_def(spell):
 			_ui.set_status(GameText.battle_no_mana())
 			return

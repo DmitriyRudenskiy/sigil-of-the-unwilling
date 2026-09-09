@@ -176,7 +176,7 @@ func _on_open_settings() -> void:
 		_options_popup.hide()
 	if not _settings_screen.applied.is_connected(_on_settings_applied):
 		_settings_screen.applied.connect(_on_settings_applied)
-	var settings_node: Object = Services.resolve(&"settings")
+	var settings_node: Object = Settings
 	_settings_screen.setup(settings_node)
 	_settings_screen.show()
 

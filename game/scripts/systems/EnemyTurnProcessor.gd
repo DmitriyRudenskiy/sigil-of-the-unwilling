@@ -49,7 +49,6 @@ func process(_ctx: TurnContext) -> Dictionary:
 	if _map_gen == null or _hero == null:
 		return report
 	_rebuild_hero_dist_field()
-	var dist_cache: Dictionary = {}
 	var stacks: Dictionary = _map_gen.enemy_stacks
 	if not (stacks is Dictionary) or stacks.is_empty():
 		return report
@@ -85,8 +84,7 @@ func process(_ctx: TurnContext) -> Dictionary:
 				var goal_idx := HexUtils.pos_to_idx(goal, _map_gen.map_width)
 				if _hero_dist_field_valid and _hero_dist_field[goal_idx] >= INF:
 					continue
-				var dist := _dist_field(cell, mp, cost_fn, dist_cache)
-				var path: Array[Vector2i] = HexPathfinding.dijkstra_path(cell, goal, dist, cost_fn, _map_gen.map_width, _map_gen.map_height)
+				var path: Array[Vector2i] = HexPathfinding.dijkstra_path_early(cell, goal, cost_fn, _map_gen.map_width, _map_gen.map_height)
 
 				var cur := cell
 				var spent := 0.0
@@ -134,14 +132,6 @@ func _rebuild_hero_dist_field() -> void:
 	var cost_fn: Callable = _pf_cost_fn_global
 	_hero_dist_field = HexPathfinding.dijkstra(hero_cell, 9999.0, cost_fn, _map_gen.map_width, _map_gen.map_height)
 	_hero_dist_field_valid = true
-
-func _dist_field(cell: Vector2i, mp: float, cost_fn: Callable, cache: Dictionary) -> PackedFloat32Array:
-	var key := Vector3i(cell.x, cell.y, int(mp * 1000.0))
-	if cache.has(key):
-		return cache[key]
-	var field := HexPathfinding.dijkstra(cell, mp, cost_fn, _map_gen.map_width, _map_gen.map_height)
-	cache[key] = field
-	return field
 
 func _pf_cost_fn_global(nxt: Vector2i) -> float:
 	if _map_gen == null:

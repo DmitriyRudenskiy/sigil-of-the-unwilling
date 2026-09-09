@@ -435,10 +435,10 @@ func _unit_icon(key: String) -> Texture2D:
 	return null
 
 func _mana_cur() -> int:
-	return _hero.mana_current if _hero != null else 0
+	return _hero.magic.mana_current if _hero != null else 0
 
 func _mana_max() -> int:
-	return _hero.mana_max if _hero != null else 0
+	return _hero.magic.mana_max if _hero != null else 0
 
 func _magic_school() -> String:
 	var schools: Dictionary = _hero.magic_schools if _hero != null else {}

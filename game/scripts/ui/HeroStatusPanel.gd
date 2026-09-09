@@ -54,8 +54,8 @@ func _condition_text(h: HeroController) -> String:
 	var parts: Array[String] = []
 	if h.max_combat_hp > 0:
 		parts.append(GameText.hero_combat_hp(h.combat_hp, h.max_combat_hp))
-	if h.mana_max > 0:
-		parts.append(GameText.hero_mana(h.mana_current, h.mana_max))
+	if h.magic.mana_max > 0:
+		parts.append(GameText.hero_mana(h.magic.mana_current, h.magic.mana_max))
 	if h.needs != null:
 		parts.append(_needs_text(h.needs))
 	if parts.is_empty():

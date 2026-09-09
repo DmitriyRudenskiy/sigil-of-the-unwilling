@@ -85,6 +85,33 @@ func test_dijkstra_path() -> void:
 	assert_vector(path.back()).is_equal(Vector2i(3, 1))
 	_assert_valid_steps(path)
 
+func test_dijkstra_path_early_found() -> void:
+	var cost_fn := func(_cell: Vector2i) -> float: return 1.0
+	var path := HexPathfinding.dijkstra_path_early(Vector2i.ZERO, Vector2i(3, 1), cost_fn, W, H)
+	assert_array(path).is_not_empty()
+	assert_vector(path[0]).is_equal(Vector2i.ZERO)
+	assert_vector(path.back()).is_equal(Vector2i(3, 1))
+	_assert_valid_steps(path)
+
+func test_dijkstra_path_early_same_cell() -> void:
+	var cost_fn := func(_cell: Vector2i) -> float: return 1.0
+	var path := HexPathfinding.dijkstra_path_early(Vector2i(4, 4), Vector2i(4, 4), cost_fn, W, H)
+	assert_array(path).has_size(1)
+	assert_vector(path[0]).is_equal(Vector2i(4, 4))
+
+func test_dijkstra_path_early_unreachable() -> void:
+	var cost_fn := func(cell: Vector2i) -> float: return INF if cell.x == 5 else 1.0
+	var path := HexPathfinding.dijkstra_path_early(Vector2i(0, 0), Vector2i(7, 0), cost_fn, W, H)
+	assert_array(path).is_empty()
+
+func test_dijkstra_path_early_avoids_wall() -> void:
+	var wall_cell := Vector2i(1, 0)
+	var cost_fn := func(cell: Vector2i) -> float: return INF if cell == wall_cell else 1.0
+	var path := HexPathfinding.dijkstra_path_early(Vector2i(0, 0), Vector2i(2, 0), cost_fn, W, H)
+	assert_array(path).is_not_empty()
+	for c in path:
+		assert_bool(c != wall_cell).is_true()
+
 func test_find_path_dispatch() -> void:
 	var p_bfs := HexPathfinding.find_path(Vector2i.ZERO, Vector2i(2, 2), {}, W, H, "bfs")
 	var p_astar := HexPathfinding.find_path(Vector2i.ZERO, Vector2i(2, 2), {}, W, H, "astar")

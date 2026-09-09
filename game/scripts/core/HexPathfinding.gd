@@ -139,6 +139,63 @@ static func dijkstra(start: Vector2i, max_cost: float, cost_fn: Callable, w: int
 			dist[i] = INF
 	return dist
 
+static func dijkstra_path_early(start: Vector2i, goal: Vector2i, cost_fn: Callable, w: int, h: int) -> Array[Vector2i]:
+	if start == goal:
+		return [start]
+
+	var dist := PackedFloat32Array()
+	dist.resize(w * h)
+	dist.fill(INF)
+	var came_from := PackedInt32Array()
+	came_from.resize(w * h)
+	came_from.fill(-1)
+
+	var start_idx := HexUtils.pos_to_idx(start, w)
+	var goal_idx := HexUtils.pos_to_idx(goal, w)
+	dist[start_idx] = 0.0
+
+	var open := MinHeap.new()
+	open.push([0.0, start])
+	var visited := {}
+
+	while not open.is_empty():
+		var cur: Array = open.pop()
+		var cur_d: float = cur[0]
+		var cur_cell: Vector2i = cur[1]
+		var cur_idx := HexUtils.pos_to_idx(cur_cell, w)
+
+		if visited.has(cur_idx):
+			continue
+		visited[cur_idx] = true
+		if cur_d > dist[cur_idx]:
+			continue
+
+		if cur_idx == goal_idx:
+			var path: Array[Vector2i] = []
+			var j := cur_idx
+			while j != start_idx:
+				path.append(HexUtils.idx_to_pos(j, w))
+				j = came_from[j]
+			path.append(start)
+			path.reverse()
+			return path
+
+		for bit in 6:
+			var nxt := HexUtils.get_neighbor(cur_cell, bit)
+			if nxt.x < 0 or nxt.x >= w or nxt.y < 0 or nxt.y >= h:
+				continue
+			var enter_cost: float = cost_fn.call(nxt)
+			if enter_cost >= INF:
+				continue
+			var new_d: float = cur_d + enter_cost
+			var nxt_idx := HexUtils.pos_to_idx(nxt, w)
+			if new_d < dist[nxt_idx]:
+				dist[nxt_idx] = new_d
+				came_from[nxt_idx] = cur_idx
+				open.push([new_d, nxt])
+
+	return []
+
 static func dijkstra_path(start: Vector2i, goal: Vector2i, dist: PackedFloat32Array, cost_fn: Callable, w: int, h: int) -> Array[Vector2i]:
 	var goal_idx := HexUtils.pos_to_idx(goal, w)
 	if dist[goal_idx] == INF:

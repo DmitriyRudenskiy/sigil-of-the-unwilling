@@ -49,15 +49,6 @@ var strategic_resources: HeroStrategicResources = HeroStrategicResources.new()
 
 var followers: Array = []
 
-var mana_current: int:
-	get: return magic.mana_current
-var mana_max: int:
-	get: return magic.mana_max
-var magic_schools: Dictionary:
-	get: return magic.schools
-var spellbook: Array[StringName]:
-	get: return magic.spellbook
-
 func is_combat_dead() -> bool:
 	return combat_hp <= 0
 
