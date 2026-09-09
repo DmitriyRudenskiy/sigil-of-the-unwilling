@@ -236,3 +236,9 @@ load 3.2–4.5 в TASK_12; между ними тот же код прошёл �
 константы (`READY_TIMEOUT=900`, пер-eval 60, retry на `_SdkMCPError`), lambda by-value,
 post-cleanup baseline (135/1266, состав ServiceRegistry, `_shift_right`).
 Восстанавливать контекст: `mnemosyne_recall` по теме.
+
+### 3.6 TASK_12 (Final)
+- R-3 (High): Implemented `HexPathfinding.dijkstra_path_early` for `EnemyTurnProcessor`. Reduces complexity from O(20 * MapSize) to O(20 * AggroRegion).
+- R-5 (Med): Evaluated. `get_reachable` is already protected by a (unit, board_version) signature-based BFS cache. The `blocked_fn.call()` is a closure over a pre-built dict, making it O(1) on hits. Complexity is negligible given small battle grids. Skip implementation.
+- Item 5 (Low): Verified. `EffectType` enum is a typed mirror of the effect strings used in templates/data. It's only consumed by `parse_effect`, which is currently only used in a single test. Runtime uses strings. No changes needed.
+- MCP/World-boot Flake: Documented. Environmental (high load on shared machine). Code is green in low-load windows.
