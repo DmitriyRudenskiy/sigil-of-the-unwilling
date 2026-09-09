@@ -157,7 +157,7 @@ func request_move(unit: BattleState.BattleUnit, target: Vector2i) -> void:
 	if path.size() < 2:
 		return
 
-	_battle_state.do_move(unit, target)
+	BattleActionResolver.do_move(_battle_state, unit, target)
 
 	var anim_state := State.PLAYER_ANIMATING if unit.side == BattleState.Side.ATTACKER else State.AI_ANIMATING
 	_transition_to(anim_state)
@@ -265,7 +265,7 @@ func request_wait() -> void:
 	if _state != State.WAITING_INPUT or _battle_state.active_unit == null:
 		return
 
-	_battle_state.do_wait(_battle_state.active_unit)
+	BattleActionResolver.do_wait(_battle_state, _battle_state.active_unit)
 	_morale_allowed = false
 	_on_action_completed()
 
@@ -275,7 +275,7 @@ func request_skip() -> void:
 	if _state != State.WAITING_INPUT or _battle_state.active_unit == null:
 		return
 
-	_battle_state.do_skip(_battle_state.active_unit)
+	BattleActionResolver.do_skip(_battle_state, _battle_state.active_unit)
 	_morale_allowed = false
 	_on_action_completed()
 
@@ -293,7 +293,9 @@ func on_spell_target_selected(spell_id: StringName, target: BattleState.BattleUn
 	var caster_bonus := _battle_state.attacker_hero_bonus if caster.side == BattleState.Side.ATTACKER else _battle_state.defender_hero_bonus
 	var target_bonus := _battle_state.defender_hero_bonus if target.side == BattleState.Side.DEFENDER else _battle_state.attacker_hero_bonus
 
-	var result := _battle_state.apply_spell(spell_id, caster, target, caster_bonus, target_bonus, _rng)
+	var result := BattleActionResolver.apply_spell(
+		_battle_state, spell_id, caster, target, caster_bonus, target_bonus, _rng
+	)
 
 	if result.get("result") == "success":
 		SoundManager.play_sfx_cue(&"spell_cast")
@@ -318,7 +320,9 @@ func request_sacrifice(
 	if not acting.is_alive() or not target.is_alive():
 		return
 
-	var result := _battle_state.apply_sacrifice(sacrifice, acting, target, cost, _rng)
+	var result := BattleActionResolver.apply_sacrifice(
+		_battle_state, acting, sacrifice, target, cost, _rng
+	)
 
 	if result.get("result") == "success":
 		_transition_to(State.PLAYER_ANIMATING)
@@ -333,7 +337,7 @@ func request_defend() -> void:
 	if _state != State.WAITING_INPUT or _battle_state.active_unit == null:
 		return
 
-	_battle_state.do_defend(_battle_state.active_unit)
+	BattleActionResolver.do_defend(_battle_state, _battle_state.active_unit)
 	status_updated.emit(GameText.battle_defend_bonus())
 	_morale_allowed = false
 	_on_action_completed()
@@ -433,7 +437,7 @@ func _execute_ai_move(decision: BattleAI.AIResult) -> void:
 
 	_pending_attack = decision.move_victim
 
-	_battle_state.do_move(u, decision.target_cell)
+	BattleActionResolver.do_move(_battle_state, u, decision.target_cell)
 
 	_transition_to(State.AI_ANIMATING)
 	clear_highlights.emit()

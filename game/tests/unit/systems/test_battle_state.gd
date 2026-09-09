@@ -34,7 +34,7 @@ func test_attack() -> void:
 
 	var defender_count_before = defender.get_count()
 	var rng1 := TestFactories.seeded(2748)
-	state.apply_attack(attacker, defender, true, rng1)
+	BattleActionResolver.apply_attack(state, attacker, defender, true, rng1)
 
 	assert_int(defender.get_count()).is_less(defender_count_before).override_failure_message("attack should reduce defender count")
 	assert_bool(attacker.has_moved).is_true().override_failure_message("attacker should have has_moved after attack")
@@ -55,7 +55,7 @@ func test_attack_with_rng() -> void:
 	var rng := TestFactories.seeded(2748)
 	rng.seed = 12345
 
-	var result: Dictionary = state.apply_attack(attacker, defender, true, rng)
+	var result: Dictionary = BattleActionResolver.apply_attack(state, attacker, defender, true, rng)
 	assert_dict(result).contains_keys("damage").override_failure_message("apply_attack with rng should return result with damage")
 	assert_int(result.get("damage", 0)).is_greater(0).override_failure_message("damage should be > 0 for swordsmen vs goblins")
 
@@ -76,7 +76,7 @@ func test_battle_end() -> void:
 	var guard := 0
 	var rng2 := TestFactories.seeded(2748)
 	while defender.is_alive() and guard < 100:
-		state.apply_attack(attacker, defender, true, rng2)
+		BattleActionResolver.apply_attack(state, attacker, defender, true, rng2)
 		guard += 1
 
 	assert_bool(defender.is_alive()).is_false().override_failure_message("defender should be dead after enough attacks")
@@ -112,12 +112,12 @@ func test_wait_order() -> void:
 	state.turn_idx = 0
 	state.active_unit = a
 
-	state.do_wait(a)
+	BattleActionResolver.do_wait(state, a)
 	state.advance_turn()
 
 	assert_bool(state.active_unit == b).is_true().override_failure_message("After waiting with first unit, second unit should act")
 
-	state.do_wait(b)
+	BattleActionResolver.do_wait(state, b)
 	state.advance_turn()
 
 	assert_bool(state.active_unit == c).is_true().override_failure_message("After waiting with second unit, third unit should act")
@@ -136,7 +136,7 @@ func test_check_end_repeat_call() -> void:
 	defender.cell = HexUtils.get_neighbor(attacker.cell, 0)
 
 	var rng3 := TestFactories.seeded(2748)
-	state.apply_attack(attacker, defender, true, rng3)
+	BattleActionResolver.apply_attack(state, attacker, defender, true, rng3)
 
 	var winner1: BattleState.Side = state.check_end()
 	assert_int(winner1).is_equal(BattleState.Side.ATTACKER).override_failure_message("first check_end() should return 'attacker'")
@@ -145,7 +145,7 @@ func test_check_end_repeat_call() -> void:
 	assert_int(winner2).is_equal(BattleState.Side.ATTACKER).override_failure_message("second check_end() should return 'attacker'")
 
 	var state2 = load("res://scripts/systems/BattleState.gd").new()
-	state2.force_end(BattleState.Side.DEFENDER)
+	BattleActionResolver.force_end(state2, BattleState.Side.DEFENDER)
 	assert_bool(state2.battle_over).is_true().override_failure_message("force_end should set battle_over")
 	assert_int(state2.check_end()).is_equal(BattleState.Side.DEFENDER).override_failure_message("check_end after force_end should return 'defender'")
 
@@ -240,7 +240,7 @@ func test_defend_bonus() -> void:
 	state.place_army(atk, def)
 
 	var defender = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
-	state.do_defend(defender)
+	BattleActionResolver.do_defend(state, defender)
 
 	assert_bool(defender.is_defending()).is_true().override_failure_message("defender should be defending after do_defend")
 
@@ -334,7 +334,7 @@ func test_get_unit_at_after_kill() -> void:
 	var attacker = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
 	attacker.cell = HexUtils.get_neighbor(def.cell, 0)
 	var rng := TestFactories.seeded(2748)
-	state.apply_attack(attacker, def, true, rng)
+	BattleActionResolver.apply_attack(state, attacker, def, true, rng)
 
 	if def.is_alive():
 		var found = state.get_unit_at(cell, BattleState.Side.DEFENDER)
@@ -431,7 +431,7 @@ func test_reachable_reflects_move() -> void:
 	var r1: Dictionary = state.get_reachable(X, 1, fn)
 	assert_bool(r1.has(b_cell)).is_false().override_failure_message("r1: клетка B (%s) должна быть заблокирована" % b_cell)
 
-	state.do_move(B, Vector2i(16, 10))
+	BattleActionResolver.do_move(state, B, Vector2i(16, 10))
 	var r2: Dictionary = state.get_reachable(X, 1, fn)
 	assert_bool(r2.has(b_cell)).is_true().override_failure_message("r2: после ухода B клетка %s должна стать достижимой (кэш не протух)" % b_cell)
 
@@ -456,7 +456,7 @@ func test_advance_turn_skips_dead_units() -> void:
 	state.turn_queue.append(d)
 	state.turn_idx = -1
 
-	state.kill_unit(a1)
+	BattleActionResolver.kill_unit(state, a1)
 	state.advance_turn()
 
 	assert_object(state.active_unit).is_equal(a2).override_failure_message(
@@ -476,7 +476,7 @@ func test_build_queue_excludes_dead_units() -> void:
 	assert_int(state.turn_queue.size()).is_equal(3)
 
 	var dead = state.attacker_units[0]
-	state.kill_unit(dead)
+	BattleActionResolver.kill_unit(state, dead)
 	state.build_queue()
 
 	assert_int(state.turn_queue.size()).is_equal(2).override_failure_message(

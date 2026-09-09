@@ -44,7 +44,7 @@ static func apply_attack(
 
 	if def.get_count() <= 0:
 		if not _try_rebirth(state, def, rng, result):
-			state.kill_unit(def)
+			kill_unit(state, def)
 
 	state.invalidate_board_cache()
 	state.check_end()
@@ -79,7 +79,7 @@ static func apply_spell(
 			var kills := int(result.get("kills", 0))
 			target.set_count(target.get_count() - kills)
 			if target.get_count() <= 0:
-				state.kill_unit(target)
+				kill_unit(state, target)
 		if result.has("heal") and int(result.get("heal", 0)) > 0:
 			var hp: int = maxi(1, int(target.get_hp()))
 			var healed := mini(int(result.get("heal", 0)) / hp, target.max_count - target.get_count())
@@ -88,7 +88,7 @@ static func apply_spell(
 				result["healed"] = healed
 		if result.has("revive_count"):
 			target.set_count(int(result["revive_count"]))
-			state.revive_unit(target)
+			revive_unit(state, target)
 			result["revived"] = true
 
 	state.invalidate_board_cache()
@@ -139,10 +139,10 @@ static func apply_sacrifice(
 		return {"result": "invalid_cost"}
 
 	target.set_count(0)
-	state.kill_unit(target)
+	kill_unit(state, target)
 
 	if cost_type == &"follower":
-		state.kill_unit(sacrifice.get("unit"))
+		kill_unit(state, sacrifice.get("unit"))
 	elif cost_type == &"resource":
 		(storage as Dictionary)[res_id] = int(storage.get(res_id, 0)) - amount
 	elif cost_type == &"artifact":
@@ -153,6 +153,77 @@ static func apply_sacrifice(
 	state.check_end()
 
 	return {"result": "success", "finished": target, "cost_type": cost_type}
+
+static func do_move(state: BattleState, unit: BattleState.BattleUnit, target: Vector2i) -> void:
+	var dist := HexUtils.hex_distance(unit.cell, target)
+	unit.distance_moved_this_turn += dist
+	var old_cell := unit.cell
+	unit.cell = target
+	unit.has_moved = true
+	var side_grid: Dictionary = state._unit_grid.get(unit.side, {})
+	side_grid.erase(old_cell)
+	side_grid[target] = unit
+	state.invalidate_board_cache()
+
+static func do_defend(state: BattleState, unit: BattleState.BattleUnit) -> void:
+	unit.has_moved = true
+	unit.defending = true
+	state.invalidate_board_cache()
+
+static func do_wait(state: BattleState, unit: BattleState.BattleUnit) -> void:
+	if unit == null:
+		return
+
+	var idx := state.turn_queue.find(unit)
+	if idx < 0:
+		return
+
+	var old_size := state.turn_queue.size()
+
+	state.turn_queue.remove_at(idx)
+	state.turn_queue.append(unit)
+
+	if idx == old_size - 1:
+		state.turn_idx = idx
+	else:
+		state.turn_idx = idx - 1
+	state.invalidate_board_cache()
+
+static func do_skip(state: BattleState, unit: BattleState.BattleUnit) -> void:
+	if unit != null:
+		unit.has_moved = true
+	state.invalidate_board_cache()
+
+static func kill_unit(state: BattleState, unit: BattleState.BattleUnit) -> void:
+	if unit == null or not unit.alive:
+		return
+	unit.alive = false
+	unit.set_count(0)
+	if unit.side == BattleState.Side.ATTACKER:
+		state._attacker_alive_count -= 1
+	else:
+		state._defender_alive_count -= 1
+	state._unit_grid.get(unit.side, {}).erase(unit.cell)
+	state.invalidate_board_cache()
+	state.check_end()
+
+static func revive_unit(state: BattleState, unit: BattleState.BattleUnit) -> void:
+	if unit == null:
+		return
+	if not unit.alive:
+		unit.alive = true
+		if unit.get_count() <= 0:
+			unit.set_count(unit.max_count)
+		if unit.side == BattleState.Side.ATTACKER:
+			state._attacker_alive_count += 1
+		else:
+			state._defender_alive_count += 1
+	state._unit_grid.get(unit.side, {})[unit.cell] = unit
+	state.invalidate_board_cache()
+
+static func force_end(state: BattleState, winner: BattleState.Side) -> void:
+	state.battle_over = true
+	state.battle_winner = winner
 
 static func _artifact_available(inventory: Variant, slot: Variant) -> bool:
 	if inventory == null:
@@ -200,7 +271,7 @@ static func _apply_first_strike(
 	if not fs_result.is_empty():
 		atk.set_count(atk.get_count() - int(fs_result.get("kills", 0)))
 		if atk.get_count() <= 0:
-			state.kill_unit(atk)
+			kill_unit(state, atk)
 	return true
 
 static func _get_charge_multiplier(atk: BattleState.BattleUnit) -> float:
@@ -235,6 +306,6 @@ static func _try_rebirth(
 		return false
 	def.already_reborn = true
 	def.set_count(max(1, int(def.max_count * 0.5)))
-	state.revive_unit(def)
+	revive_unit(state, def)
 	result["rebirth"] = true
 	return true

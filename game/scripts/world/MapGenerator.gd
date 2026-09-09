@@ -75,7 +75,7 @@ func generate() -> void:
 	if units_reg != null:
 		spawner.setup_registry(units_reg)
 
-	HexUtils.calibrate(_tile_map)
+	HexGrid.calibrate(_tile_map)
 
 	model.generate_noise()
 	model.smooth_invalid_adjacencies()

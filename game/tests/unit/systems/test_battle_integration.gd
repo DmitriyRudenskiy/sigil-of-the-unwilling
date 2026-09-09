@@ -18,7 +18,7 @@ func test_attacker_wins() -> void:
 	var rng1 := TestFactories.seeded(4479)
 	rng1.seed = 42
 	while not state.battle_over and guard < 100:
-		state.apply_attack(attacker, defender, true, rng1)
+		BattleActionResolver.apply_attack(state, attacker, defender, true, rng1)
 		guard += 1
 
 	assert_bool(state.battle_over).is_true().override_failure_message("battle should end when defender is destroyed")
@@ -43,7 +43,7 @@ func test_defender_wins() -> void:
 	var rng2 := TestFactories.seeded(4479)
 	rng2.seed = 42
 	while not state.battle_over and guard < 100:
-		state.apply_attack(defender, attacker, true, rng2)
+		BattleActionResolver.apply_attack(state, defender, attacker, true, rng2)
 		guard += 1
 
 	assert_bool(state.battle_over).is_true().override_failure_message("battle should end when attacker is destroyed")

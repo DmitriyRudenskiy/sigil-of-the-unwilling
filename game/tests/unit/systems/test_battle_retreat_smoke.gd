@@ -11,7 +11,7 @@ func test_retreat_smoke() -> void:
 
 	state.place_army(atk, def)
 
-	state.force_end(BattleState.Side.DEFENDER)
+	BattleActionResolver.force_end(state, BattleState.Side.DEFENDER)
 
 	assert_bool(state.battle_over).is_true().override_failure_message("force_end should set battle_over")
 

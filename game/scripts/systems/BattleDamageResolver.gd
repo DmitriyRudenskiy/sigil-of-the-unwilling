@@ -64,7 +64,7 @@ static func _apply_area_damage(
 			v.set_count(v.get_count() - kills)
 			total += kills
 			if v.get_count() <= 0:
-				state.kill_unit(v)
+				BattleActionResolver.kill_unit(state, v)
 	result[key] = total
 	return total
 

@@ -59,7 +59,7 @@ func _ready() -> void:
     _fit_camera()
 
 func _new_game() -> void:
-    _city = CityArenaModel.make_city()
+    _city = ArenaTurnRunner.make_city()
     _turn = 0
     _starve_days = 0
     _selected = &""
@@ -130,7 +130,7 @@ func _hex_to_pixel(cell: Vector2i) -> Vector2:
     return Vector2(x, y)
 
 func _ring_color(ring: int) -> Color:
-    return CityArenaModel.ring_color(ring)
+    return ArenaRingSystem.ring_color(ring)
 
 func _building_emoji(id: StringName) -> String:
     match id:
@@ -175,12 +175,12 @@ func _build_cells() -> void:
     for c in _hex_layer.get_children():
         c.queue_free()
     _cell_nodes.clear()
-    var cells: Array = CityArenaModel.cells_in_arena()
+    var cells: Array = ArenaRingSystem.cells_in_arena()
     for cell in cells:
         var cv: Vector2i = cell
-        var ring: int = CityArenaModel.ring_of(cv)
+        var ring: int = ArenaRingSystem.ring_of(cv)
         var pos: Vector2 = _hex_to_pixel(cv)
-        var feat_id: StringName = CityArenaModel.cell_feature(_city, cv)
+        var feat_id: StringName = ArenaRingSystem.cell_feature(_city, cv)
         var arena_cell: ArenaHexCell = ArenaHexCellScene.instantiate()
         arena_cell.cell = cv
         arena_cell.ring = ring
@@ -195,14 +195,14 @@ func _build_cells() -> void:
 func _draw_arena() -> void:
     if _city == null:
         return
-    var clu: Dictionary = CityArenaModel.cluster_uids(_city)
+    var clu: Dictionary = ArenaClusterSystem.cluster_uids(_city)
     var firsts: Dictionary = {}
-    for cl in CityArenaModel.clusters(_city):
+    for cl in ArenaClusterSystem.clusters(_city):
         var cells: Array = (cl as Dictionary)["cells"]
         firsts[cells[0]] = GameText.arena_cluster_badge(cells.size())
     for cv in _cell_nodes:
         var arena_cell: ArenaHexCell = _cell_nodes[cv]
-        var ring: int = CityArenaModel.ring_of(cv)
+        var ring: int = ArenaRingSystem.ring_of(cv)
         var poly: Polygon2D = arena_cell.get_poly()
         var b: UniqueBuilding = _city.get_building_at(cv)
         var in_cluster: bool = b != null and clu.has(b.uid)
@@ -231,7 +231,7 @@ func _on_cell_exited() -> void:
 func _handle_cell_click(cv: Vector2i) -> void:
     if _city == null:
         return
-    if CityArenaModel.ring_of(cv) == 0:
+    if ArenaRingSystem.ring_of(cv) == 0:
         _log(GameText.arena_center_msg())
         return
     if _city.cell_is_built(cv):
@@ -252,7 +252,7 @@ func _handle_cell_click(cv: Vector2i) -> void:
     var def: UniqueBuilding.Def = BuildingDefs.def_by_id(_selected)
     if def == null:
         return
-    var res: CityCheck = CityArenaModel.place_building(_city, def, cv)
+    var res: CityCheck = ArenaTurnRunner.place_building(_city, def, cv)
     if res.ok:
         var ruins: String = ""
         if res.payload.has("ruins_gold"):
@@ -279,7 +279,7 @@ func _try_upgrade(cv: Vector2i) -> void:
 func _show_tooltip(cv: Vector2i) -> void:
     if _tooltip == null or _city == null:
         return
-    var ring: int = CityArenaModel.ring_of(cv)
+    var ring: int = ArenaRingSystem.ring_of(cv)
     var lines: Array[String] = [GameText.arena_cell_info(cv.x, cv.y, ring)]
     if ring > 0:
         var y: Dictionary = GameNumbers.ring_yield(ring)
@@ -289,14 +289,14 @@ func _show_tooltip(cv: Vector2i) -> void:
             if v > 0.0:
                 parts.append(str(k) + " " + ("%.1f" % v))
         lines.append(GameText.arena_ring_outputs(", ".join(parts) if not parts.is_empty() else "—"))
-    var f: StringName = CityArenaModel.cell_feature(_city, cv)
+    var f: StringName = ArenaRingSystem.cell_feature(_city, cv)
     if f != &"":
-        lines.append(CityArenaModel.feature_name(f))
+        lines.append(ArenaRingSystem.feature_name(f))
     var b: UniqueBuilding = _city.get_building_at(cv)
     if b != null and b.def != null:
         var ring_bonus: float = 1.0 + GameNumbers.ring_bonus(b.def.id, ring)
-        var total: float = CityArenaModel.building_mult(_city, b)
-        var in_cluster: bool = CityArenaModel.cluster_uids(_city).has(b.uid)
+        var total: float = ArenaRingSystem.building_mult(_city, b)
+        var in_cluster: bool = ArenaClusterSystem.cluster_uids(_city).has(b.uid)
         var cluster_note: String = GameText.arena_cluster_note() if in_cluster else ""
         lines.append(GameText.arena_building_tip(
             b.def.display_name, b.level, "%.2f" % ring_bonus, "%.2f" % total,
@@ -333,14 +333,14 @@ func _advance_turn() -> void:
     if _city == null:
         return
     _turn += 1
-    var rep: Dictionary = CityArenaModel.run_turn(_city, _turn)
+    var rep: Dictionary = ArenaTurnRunner.run_turn(_city, _turn)
     if _city.starving:
         _starve_days += 1
     var net: float = float(rep.get("net_food", 0.0))
     var food: float = _city.food_stockpile
     var warn: String = ""
     if bool(rep.get("storm", false)):
-        var pm: float = CityArenaModel.storm_production_mult(_city, _turn)
+        var pm: float = ArenaStorm.storm_production_mult(_city, _turn)
         var sm: String = GameText.arena_storm_info("%.2f" % pm, "%.1f" % float(rep.get("storm_food", 0.0)))
         warn = sm + warn
     if _city.starving:
@@ -353,7 +353,7 @@ func _advance_turn() -> void:
     _refresh()
 
 func _on_hire_pressed() -> void:
-    var n: int = CityArenaModel.hire_worker(_city)
+    var n: int = ArenaTurnRunner.hire_worker(_city)
     if n > 0:
         _log(GameText.arena_worker_hired(_city.pop_total()))
     else:
@@ -390,19 +390,19 @@ func _refresh() -> void:
     var industry: float = float(_city.storage.get(&"industry", 0.0))
     var gold: float = float(_city.storage.get(&"gold", 0.0))
     var net: float = _city.net_food()
-    var storm_mark: String = GameText.arena_storm() if CityArenaModel.is_storm_turn(_turn) else ""
-    var clusters: int = (CityArenaModel.clusters(_city) as Array).size()
+    var storm_mark: String = GameText.arena_storm() if ArenaStorm.is_storm_turn(_turn) else ""
+    var clusters: int = (ArenaClusterSystem.clusters(_city) as Array).size()
     var cluster_mark: String = GameText.arena_cluster_mark(clusters) if clusters > 0 else ""
     _top_hud.text = GameText.arena_hud(
         _turn, "%.0f" % food, "%+.1f" % net, "%.0f" % industry, "%.0f" % gold,
         _city.pop_total(), "%.0f" % _city.prosperity, _city.level, storm_mark, cluster_mark)
-    var score: float = CityArenaModel.score(_city, _starve_days)
+    var score: float = ArenaDemoScenario.score(_city, _starve_days)
     _score_hud.text = GameText.arena_score("%.0f" % score)
 
 func _fit_camera() -> void:
     if _camera == null:
         return
-    var cells: Array = CityArenaModel.cells_in_arena()
+    var cells: Array = ArenaRingSystem.cells_in_arena()
     var minv := Vector2(INF, INF)
     var maxv := Vector2(-INF, -INF)
     for cell in cells:

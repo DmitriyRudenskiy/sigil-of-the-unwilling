@@ -37,7 +37,7 @@ func test_apply_attack_dead_units() -> void:
 	state.place_army([atk_stack], [def_stack])
 	var atk := state.attacker_units[0]
 	var def := state.defender_units[0]
-	state.kill_unit(def)
+	_Resolver.kill_unit(state, def)
 	var rng := TestFactories.seeded(4634)
 	var result := _Resolver.apply_attack(state, atk, def, true, rng)
 	assert_bool(result.is_empty()).is_true()
@@ -139,7 +139,7 @@ func test_apply_sacrifice_invalid_dead_target() -> void:
 	state.place_army([atk_stack], [def_stack])
 	var atk := state.attacker_units[0]
 	var def := state.defender_units[0]
-	state.kill_unit(def)
+	_Resolver.kill_unit(state, def)
 	var rng := TestFactories.seeded(4634)
 	var result := _Resolver.apply_sacrifice(
 		state, atk, {"type": &"resource", "resource": &"gold", "amount": 10}, def, {&"gold": 100}, rng)
@@ -153,7 +153,7 @@ func test_apply_sacrifice_invalid_dead_actor() -> void:
 	state.place_army([atk_stack], [def_stack])
 	var atk := state.attacker_units[0]
 	var def := state.defender_units[0]
-	state.kill_unit(atk)
+	_Resolver.kill_unit(state, atk)
 	var rng := TestFactories.seeded(4634)
 	var result := _Resolver.apply_sacrifice(
 		state, atk, {"type": &"resource", "resource": &"gold", "amount": 10}, def, {&"gold": 100}, rng)

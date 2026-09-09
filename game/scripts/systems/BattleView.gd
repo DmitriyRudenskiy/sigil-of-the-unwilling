@@ -38,7 +38,7 @@ func setup() -> void:
 	_tile_map.name = "BattleTerrain"
 	_tile_map.tile_set = TileAtlas.build_hex_tileset()
 	RenderingServer.set_default_clear_color(ThemeConfig.C_BATTLE_BG_VIEW)
-	HexUtils.calibrate(_tile_map)
+	HexGrid.calibrate(_tile_map)
 
 	_overlay.tm = _tile_map
 	_overlay.z_index = 5
@@ -127,8 +127,8 @@ func flash_unit(unit: BattleState.BattleUnit) -> void:
 	if node == null:
 		return
 	var tw := create_tween()
-	tw.tween_property(node, "modulate", ThemeConfig.C_HIT_FLASH, 0.1)
-	tw.tween_property(node, "modulate", Color.WHITE, 0.2)
+	tw.tween_property(node, "modulate", ThemeConfig.C_HIT_FLASH, GameNumbers.HIT_FLASH_SEC)
+	tw.tween_property(node, "modulate", Color.WHITE, GameNumbers.HIT_FLASH_RECOVER_SEC)
 
 func remove_unit(unit: BattleState.BattleUnit) -> void:
 	var node := _find_node(unit)
@@ -140,7 +140,7 @@ func remove_unit(unit: BattleState.BattleUnit) -> void:
 	ParticlePresets.spawn_burst(self, node.position, Color.RED)
 
 	var tw := create_tween()
-	tw.tween_property(node, "modulate", Color.TRANSPARENT, 0.25)
+	tw.tween_property(node, "modulate", Color.TRANSPARENT, GameNumbers.UNIT_REMOVE_FADE_SEC)
 	tw.tween_callback(node.queue_free)
 
 func animate_move(unit: BattleState.BattleUnit, path: Array[Vector2i]) -> Tween:
@@ -174,8 +174,8 @@ func animate_attack(attacker: BattleState.BattleUnit, defender: BattleState.Batt
 
 	var tw := create_tween()
 	_active_tweens[attacker.uid] = tw
-	tw.tween_property(attacker_node, "position", start_pos + dir, 0.08)
-	tw.tween_property(attacker_node, "position", start_pos, 0.12)
+	tw.tween_property(attacker_node, "position", start_pos + dir, GameNumbers.ATTACK_LUNGE_OUT_SEC)
+	tw.tween_property(attacker_node, "position", start_pos, GameNumbers.ATTACK_LUNGE_BACK_SEC)
 	tw.finished.connect(func(): _active_tweens.erase(attacker.uid))
 
 func show_floating_text(cell: Vector2i, text: String, color: Color) -> void:
@@ -188,8 +188,8 @@ func show_floating_text(cell: Vector2i, text: String, color: Color) -> void:
 	add_child(label)
 
 	var tw := create_tween()
-	tw.tween_property(label, "position:y", label.position.y - 30.0, 0.6)
-	tw.parallel().tween_property(label, "modulate:a", 0.0, 0.6)
+	tw.tween_property(label, "position:y", label.position.y - GameNumbers.FLOATING_TEXT_RISE_PX, GameNumbers.FLOATING_TEXT_FADE_SEC)
+	tw.parallel().tween_property(label, "modulate:a", 0.0, GameNumbers.FLOATING_TEXT_FADE_SEC)
 	tw.tween_callback(label.queue_free)
 
 func show_damage_number(unit: BattleState.BattleUnit, damage: int) -> void:
@@ -205,7 +205,7 @@ func show_damage_number(unit: BattleState.BattleUnit, damage: int) -> void:
 	add_child(label)
 
 	var tw := create_tween()
-	tw.tween_property(label, "position:y", label.position.y - 24.0, 0.5)
+	tw.tween_property(label, "position:y", label.position.y - GameNumbers.DAMAGE_NUMBER_RISE_PX, GameNumbers.DAMAGE_NUMBER_FADE_SEC)
 	tw.parallel().tween_property(label, "modulate:a", 0.0, 0.5)
 	tw.tween_callback(label.queue_free)
 
@@ -223,7 +223,7 @@ func show_retaliation_arrow(from_unit: BattleState.BattleUnit, to_unit: BattleSt
 	add_child(line)
 
 	var tw := create_tween()
-	tw.tween_property(line, "modulate:a", 0.0, 0.35)
+	tw.tween_property(line, "modulate:a", 0.0, GameNumbers.RETALIATION_ARROW_FADE_SEC)
 	tw.tween_callback(line.queue_free)
 
 func pulse_unit(unit: BattleState.BattleUnit) -> void:
@@ -231,8 +231,8 @@ func pulse_unit(unit: BattleState.BattleUnit) -> void:
 	if node == null:
 		return
 	var tw := create_tween()
-	tw.tween_property(node, "scale", Vector2(1.25, 1.25), 0.15)
-	tw.tween_property(node, "scale", Vector2(1, 1), 0.15)
+	tw.tween_property(node, "scale", Vector2(GameNumbers.PULSE_SCALE, GameNumbers.PULSE_SCALE), GameNumbers.PULSE_ANIM_SEC)
+	tw.tween_property(node, "scale", Vector2(1, 1), GameNumbers.PULSE_ANIM_SEC)
 
 func set_cursor_mode(mode: int) -> void:
 	if _cursor == null:

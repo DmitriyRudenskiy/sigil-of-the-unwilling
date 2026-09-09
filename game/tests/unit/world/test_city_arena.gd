@@ -1,22 +1,20 @@
 extends GdUnitTestSuite
-
-const _Model = preload("res://scripts/city/CityArenaModel.gd")
 const _BuildingDefs = preload("res://scripts/data/BuildingDefs.gd")
 const _PopUnit = preload("res://scripts/world/PopUnit.gd")
 
 var city: City
 
 func before_test() -> void:
-	city = _Model.make_city()
+	city = ArenaTurnRunner.make_city()
 
 func _free_cell(ring: int) -> Vector2i:
-	for c in _Model.cells_in_ring(ring):
+	for c in ArenaRingSystem.cells_in_ring(ring):
 		if not city.cell_is_built(c):
 			return c
 	return Vector2i(-1, -1)
 
 func test_arena_cells_unique() -> void:
-	var cells: Array = _Model.cells_in_arena()
+	var cells: Array = ArenaRingSystem.cells_in_arena()
 	var seen: Dictionary = {}
 	for c in cells:
 		seen[c] = true
@@ -24,21 +22,21 @@ func test_arena_cells_unique() -> void:
 	assert_that(cells.size()).is_equal(91)
 
 func test_center_ring_zero() -> void:
-	assert_that(_Model.ring_of(_Model.ARENA_CENTER)).is_equal(0)
-	assert_that(city.center).is_equal(_Model.ARENA_CENTER)
+	assert_that(ArenaRingSystem.ring_of(ArenaRingSystem.ARENA_CENTER)).is_equal(0)
+	assert_that(city.center).is_equal(ArenaRingSystem.ARENA_CENTER)
 	assert_bool(city.center.y % 2 == 0).is_true()
 
 func test_all_cells_within_radius() -> void:
 	var ok := true
-	for c in _Model.cells_in_arena():
-		if _Model.ring_of(c) > GameNumbers.ARENA_RADIUS:
+	for c in ArenaRingSystem.cells_in_arena():
+		if ArenaRingSystem.ring_of(c) > GameNumbers.ARENA_RADIUS:
 			ok = false
 	assert_bool(ok).is_true()
 
 func test_ring_colors_distinct() -> void:
 	var seen: Array = []
 	for r in range(0, GameNumbers.ARENA_RADIUS + 1):
-		seen.append(_Model.ring_color(r))
+		seen.append(ArenaRingSystem.ring_color(r))
 	var ok := true
 	for i in seen.size():
 		for j in range(i + 1, seen.size()):
@@ -56,7 +54,7 @@ func test_place_farm() -> void:
 	var cell: Vector2i = _free_cell(1)
 	assert_bool(cell != Vector2i(-1, -1)).is_true()
 	var industry_before: float = float(city.storage.get(&"industry", 0.0))
-	var res: CityCheck = _Model.place_building(city, _BuildingDefs.def_by_id(&"farm"), cell)
+	var res: CityCheck = ArenaTurnRunner.place_building(city, _BuildingDefs.def_by_id(&"farm"), cell)
 	assert_bool(bool(res.ok)).is_true()
 	assert_bool(city.cell_is_built(cell)).is_true()
 	var industry_after: float = float(city.storage.get(&"industry", 0.0))
@@ -67,11 +65,11 @@ func test_place_farm() -> void:
 			1.0 + GameNumbers.ring_bonus(&"farm", 1))).is_true()
 
 func test_place_outside_arena() -> void:
-	var res: CityCheck = _Model.place_building(city, _BuildingDefs.def_by_id(&"farm"), Vector2i(60, 60))
+	var res: CityCheck = ArenaTurnRunner.place_building(city, _BuildingDefs.def_by_id(&"farm"), Vector2i(60, 60))
 	assert_bool(bool(res.ok)).is_false()
 
 func test_seating_unique_tiles() -> void:
-	var seated: int = _Model.seat_workers(city)
+	var seated: int = ArenaTurnRunner.seat_workers(city)
 	assert_bool(seated >= 3).is_true()
 	var tiles: Dictionary = {}
 	var ok := true
@@ -84,11 +82,11 @@ func test_seating_unique_tiles() -> void:
 
 func test_seating_avoids_buildings() -> void:
 	var farm: Vector2i = _free_cell(1)
-	_Model.place_building(city, _BuildingDefs.def_by_id(&"farm"), farm)
+	ArenaTurnRunner.place_building(city, _BuildingDefs.def_by_id(&"farm"), farm)
 	for u in city.pop:
 		if u.state == _PopUnit.State.WORKER and u.tile == farm:
 			u.tile = Vector2i(-1, -1)
-	_Model.seat_workers(city)
+	ArenaTurnRunner.seat_workers(city)
 	var ok := true
 	for u in city.pop:
 		if u.state == _PopUnit.State.WORKER and u.tile == farm:
@@ -97,8 +95,8 @@ func test_seating_avoids_buildings() -> void:
 
 func test_hire_worker() -> void:
 	var farm: Vector2i = _free_cell(1)
-	_Model.place_building(city, _BuildingDefs.def_by_id(&"farm"), farm)
-	var hired: int = _Model.hire_worker(city)
+	ArenaTurnRunner.place_building(city, _BuildingDefs.def_by_id(&"farm"), farm)
+	var hired: int = ArenaTurnRunner.hire_worker(city)
 	assert_that(hired).is_equal(1)
 	assert_that(city.pop_total()).is_equal(9)
 
@@ -125,8 +123,8 @@ func test_ring_bonus() -> void:
 	assert_bool(any_positive).is_true()
 
 func test_demo_plan_deterministic() -> void:
-	var a: Dictionary = _Model.run_demo_plan(12)
-	var b: Dictionary = _Model.run_demo_plan(12)
+	var a: Dictionary = ArenaDemoScenario.run_demo_plan(12)
+	var b: Dictionary = ArenaDemoScenario.run_demo_plan(12)
 	assert_that(float(a["score"])).is_equal(float(b["score"]))
 	assert_that(int(a["starve_days"])).is_equal(int(b["starve_days"]))
 
@@ -135,35 +133,35 @@ const _CLUSTER_CELLS: Array = [
 ]
 
 func _place_farm(cell: Vector2i) -> void:
-	var res: CityCheck = _Model.place_building(city, _BuildingDefs.def_by_id(&"farm"), cell)
+	var res: CityCheck = ArenaTurnRunner.place_building(city, _BuildingDefs.def_by_id(&"farm"), cell)
 	assert_bool(bool(res.ok)).is_true()
 
 func test_cluster_forms_on_four_connected() -> void:
 	for i in 3:
 		_place_farm((_CLUSTER_CELLS[i] as Vector2i))
-	assert_that(_Model.clusters(city).size()).is_equal(0)
+	assert_that(ArenaClusterSystem.clusters(city).size()).is_equal(0)
 	_place_farm((_CLUSTER_CELLS[3] as Vector2i))
-	var cls: Array = _Model.clusters(city)
+	var cls: Array = ArenaClusterSystem.clusters(city)
 	assert_that(cls.size()).is_equal(1)
 	assert_that(((cls[0] as Dictionary)["cells"] as Array).size()).is_equal(4)
 
 func test_disconnected_groups_not_cluster() -> void:
 	for c in [Vector2i(4, 1), Vector2i(5, 1), Vector2i(2, 4), Vector2i(2, 5)]:
 		_place_farm(c as Vector2i)
-	assert_that(_Model.clusters(city).size()).is_equal(0)
+	assert_that(ArenaClusterSystem.clusters(city).size()).is_equal(0)
 
 func test_cluster_different_types_not_merged() -> void:
 	for c in [Vector2i(4, 1), Vector2i(5, 1)]:
 		_place_farm(c as Vector2i)
 	for c in [Vector2i(6, 1), Vector2i(7, 2)]:
-		var res: CityCheck = _Model.place_building(city, _BuildingDefs.def_by_id(&"mill"), c as Vector2i)
+		var res: CityCheck = ArenaTurnRunner.place_building(city, _BuildingDefs.def_by_id(&"mill"), c as Vector2i)
 		assert_bool(bool(res.ok)).is_true()
-	assert_that(_Model.clusters(city).size()).is_equal(0)
+	assert_that(ArenaClusterSystem.clusters(city).size()).is_equal(0)
 
 func test_cluster_multiplier_applied() -> void:
 	for c in _CLUSTER_CELLS:
 		_place_farm(c as Vector2i)
-	_Model.apply_ring_multipliers(city)
+	ArenaRingSystem.apply_ring_multipliers(city)
 	for c in _CLUSTER_CELLS:
 		var b: UniqueBuilding = city.get_building_at(c as Vector2i)
 		assert_bool(b != null and b.zone_multiplier >= 1.49).is_true()
@@ -171,16 +169,16 @@ func test_cluster_multiplier_applied() -> void:
 func test_cluster_housing_bonus() -> void:
 	for c in _CLUSTER_CELLS:
 		_place_farm(c as Vector2i)
-	assert_that(_Model.cluster_worker_housing(city)).is_equal(city.free_housing(_PopUnit.State.WORKER) + GameNumbers.ARENA_CLUSTER_HOUSING)
-	var city2 := _Model.make_city()
-	assert_that(_Model.cluster_worker_housing(city2)).is_equal(city2.free_housing(_PopUnit.State.WORKER))
+	assert_that(ArenaClusterSystem.cluster_worker_housing(city)).is_equal(city.free_housing(_PopUnit.State.WORKER) + GameNumbers.ARENA_CLUSTER_HOUSING)
+	var city2 := ArenaTurnRunner.make_city()
+	assert_that(ArenaClusterSystem.cluster_worker_housing(city2)).is_equal(city2.free_housing(_PopUnit.State.WORKER))
 
 func test_cell_features_deterministic() -> void:
-	var city2 := _Model.make_city()
+	var city2 := ArenaTurnRunner.make_city()
 	var count := 0
-	for c in _Model.cells_in_arena():
-		var f1: StringName = _Model.cell_feature(city, c as Vector2i)
-		var f2: StringName = _Model.cell_feature(city2, c as Vector2i)
+	for c in ArenaRingSystem.cells_in_arena():
+		var f1: StringName = ArenaRingSystem.cell_feature(city, c as Vector2i)
+		var f2: StringName = ArenaRingSystem.cell_feature(city2, c as Vector2i)
 		assert_that(f1).is_equal(f2)
 		if f1 != &"":
 			count += 1
@@ -189,53 +187,53 @@ func test_cell_features_deterministic() -> void:
 	assert_bool(count >= 5).is_true()
 
 func test_cell_features_rings_only() -> void:
-	for c in _Model.cells_in_ring(0):
-		assert_that(_Model.cell_feature(city, c as Vector2i)).is_equal(&"")
-	for c in _Model.cells_in_ring(1):
-		assert_that(_Model.cell_feature(city, c as Vector2i)).is_equal(&"")
-	for c in _Model.cells_in_ring(5):
-		assert_that(_Model.cell_feature(city, c as Vector2i)).is_equal(&"")
+	for c in ArenaRingSystem.cells_in_ring(0):
+		assert_that(ArenaRingSystem.cell_feature(city, c as Vector2i)).is_equal(&"")
+	for c in ArenaRingSystem.cells_in_ring(1):
+		assert_that(ArenaRingSystem.cell_feature(city, c as Vector2i)).is_equal(&"")
+	for c in ArenaRingSystem.cells_in_ring(5):
+		assert_that(ArenaRingSystem.cell_feature(city, c as Vector2i)).is_equal(&"")
 
 func test_feature_mults() -> void:
 	var quarry := Vector2i(2, 4)
 	var spring := Vector2i(2, 5)
 	var river := Vector2i(2, 2)
-	assert_that(_Model.cell_feature(city, quarry)).is_equal(&"quarry")
-	assert_that(_Model.cell_feature(city, spring)).is_equal(&"spring")
-	assert_that(_Model.cell_feature(city, river)).is_equal(&"river")
-	assert_that(_Model.feature_mult(city, &"mine", quarry)).is_equal(GameNumbers.ARENA_FEATURE_QUARRY)
-	assert_that(_Model.feature_mult(city, &"farm", quarry)).is_equal(1.0)
-	assert_that(_Model.feature_mult(city, &"farm", spring)).is_equal(GameNumbers.ARENA_FEATURE_SPRING)
-	assert_that(_Model.feature_mult(city, &"mine", spring)).is_equal(1.0)
-	assert_that(_Model.feature_mult(city, &"tavern", river)).is_equal(GameNumbers.ARENA_FEATURE_RIVER)
+	assert_that(ArenaRingSystem.cell_feature(city, quarry)).is_equal(&"quarry")
+	assert_that(ArenaRingSystem.cell_feature(city, spring)).is_equal(&"spring")
+	assert_that(ArenaRingSystem.cell_feature(city, river)).is_equal(&"river")
+	assert_that(ArenaRingSystem.feature_mult(city, &"mine", quarry)).is_equal(GameNumbers.ARENA_FEATURE_QUARRY)
+	assert_that(ArenaRingSystem.feature_mult(city, &"farm", quarry)).is_equal(1.0)
+	assert_that(ArenaRingSystem.feature_mult(city, &"farm", spring)).is_equal(GameNumbers.ARENA_FEATURE_SPRING)
+	assert_that(ArenaRingSystem.feature_mult(city, &"mine", spring)).is_equal(1.0)
+	assert_that(ArenaRingSystem.feature_mult(city, &"tavern", river)).is_equal(GameNumbers.ARENA_FEATURE_RIVER)
 
 func test_ruins_gold_bonus() -> void:
 	var cell := Vector2i(2, 3)
-	assert_that(_Model.cell_feature(city, cell)).is_equal(&"ruins")
+	assert_that(ArenaRingSystem.cell_feature(city, cell)).is_equal(&"ruins")
 	var gold_before: float = float(city.storage.get(&"gold", 0.0))
-	var res: CityCheck = _Model.place_building(city, _BuildingDefs.def_by_id(&"shack"), cell)
+	var res: CityCheck = ArenaTurnRunner.place_building(city, _BuildingDefs.def_by_id(&"shack"), cell)
 	assert_bool(bool(res.ok)).is_true()
 	assert_that(float(res.payload.get("ruins_gold", 0.0))).is_equal(GameNumbers.ARENA_FEATURE_RUINS_GOLD)
 	var gold_after: float = float(city.storage.get(&"gold", 0.0))
 	assert_that(gold_after).is_equal(gold_before + GameNumbers.ARENA_FEATURE_RUINS_GOLD)
 
 func test_storm_periodicity() -> void:
-	assert_bool(_Model.is_storm_turn(6)).is_true()
-	assert_bool(_Model.is_storm_turn(12)).is_true()
-	assert_bool(_Model.is_storm_turn(5)).is_false()
-	assert_bool(_Model.is_storm_turn(1)).is_false()
-	assert_bool(_Model.is_storm_turn(0)).is_false()
+	assert_bool(ArenaStorm.is_storm_turn(6)).is_true()
+	assert_bool(ArenaStorm.is_storm_turn(12)).is_true()
+	assert_bool(ArenaStorm.is_storm_turn(5)).is_false()
+	assert_bool(ArenaStorm.is_storm_turn(1)).is_false()
+	assert_bool(ArenaStorm.is_storm_turn(0)).is_false()
 
 func test_storm_food_and_production() -> void:
 	var cell := Vector2i(-1, -1)
-	for c in _Model.cells_in_ring(3):
+	for c in ArenaRingSystem.cells_in_ring(3):
 		var cc: Vector2i = c
-		if _Model.cell_feature(city, cc) == &"":
+		if ArenaRingSystem.cell_feature(city, cc) == &"":
 			cell = cc
 			break
 	assert_bool(cell != Vector2i(-1, -1)).is_true()
 	_place_farm(cell)
-	var rep: Dictionary = _Model.run_turn(city, 6)
+	var rep: Dictionary = ArenaTurnRunner.run_turn(city, 6)
 	assert_bool(bool(rep.get("storm", false))).is_true()
 	assert_that(float(rep.get("storm_food", 0.0))).is_equal(GameNumbers.ARENA_STORM_FOOD)
 	var b: UniqueBuilding = city.get_building_at(cell)
@@ -243,22 +241,22 @@ func test_storm_food_and_production() -> void:
 
 func test_storm_mitigated_by_walls() -> void:
 	var cell: Vector2i = _free_cell(1)
-	var res: CityCheck = _Model.place_building(city, _BuildingDefs.def_by_id(&"walls"), cell)
+	var res: CityCheck = ArenaTurnRunner.place_building(city, _BuildingDefs.def_by_id(&"walls"), cell)
 	assert_bool(bool(res.ok)).is_true()
 	var b: UniqueBuilding = city.get_building_at(cell)
 	assert_bool(b != null).is_true()
 	b.level = 2
-	assert_that(_Model.storm_production_mult(city, 6)).is_equal(GameNumbers.ARENA_STORM_MITIG_MULT)
-	assert_that(_Model.storm_food_penalty(city, 6)).is_equal(GameNumbers.ARENA_STORM_MITIG_FOOD)
+	assert_that(ArenaStorm.storm_production_mult(city, 6)).is_equal(GameNumbers.ARENA_STORM_MITIG_MULT)
+	assert_that(ArenaStorm.storm_food_penalty(city, 6)).is_equal(GameNumbers.ARENA_STORM_MITIG_FOOD)
 
 func test_storm_absent_turn() -> void:
-	var rep: Dictionary = _Model.run_turn(city, 5)
+	var rep: Dictionary = ArenaTurnRunner.run_turn(city, 5)
 	assert_bool(bool(rep.get("storm", false))).is_false()
 	assert_that(float(rep.get("storm_food", 0.0))).is_equal(0.0)
 
 func test_demo_plan_forms_farm_cluster() -> void:
-	var r: Dictionary = _Model.run_demo_plan(48)
-	var cls: Array = _Model.clusters(r["city"])
+	var r: Dictionary = ArenaDemoScenario.run_demo_plan(48)
+	var cls: Array = ArenaClusterSystem.clusters(r["city"])
 	assert_bool(cls.size() >= 1).is_true()
 	var last: Dictionary = r["last"]
 	assert_bool(last.has("storm") and last.has("clusters")).is_true()

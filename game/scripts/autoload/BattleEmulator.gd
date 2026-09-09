@@ -90,7 +90,7 @@ func advance_toward(state: BattleState, u: BattleState.BattleUnit, target: Battl
 			best_d = d
 			best = c
 	if best != u.cell:
-		state.do_move(u, best)
+		BattleActionResolver.do_move(state, u, best)
 
 func run_auto_battle(state: BattleState, rng: RandomNumberGenerator) -> Dictionary:
 	state.build_queue()
@@ -117,7 +117,7 @@ func run_auto_battle(state: BattleState, rng: RandomNumberGenerator) -> Dictiona
 		var adjacent := dist == 1
 		var ranged_shot := u.is_ranged() and dist > 1
 		if adjacent or ranged_shot:
-			var res := state.apply_attack(u, target, melee, rng, true)
+			var res := BattleActionResolver.apply_attack(state, u, target, melee, rng, true)
 			events.append({"turn": turn, "unit": u.get_display_name(), "action": "attack", "result": res})
 		else:
 			advance_toward(state, u, target)
@@ -203,8 +203,8 @@ func cast_in_battle(args: Dictionary) -> Dictionary:
 		target_unit.set_count(0)
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
-	return state.apply_spell(
-		StringName(spell_id), caster_unit, target_unit, caster_bonus, target_bonus, rng)
+	return BattleActionResolver.apply_spell(
+		state, StringName(spell_id), caster_unit, target_unit, caster_bonus, target_bonus, rng)
 
 func sequence_battle(args: Dictionary) -> Dictionary:
 	var sequence: Variant = args.get("sequence", [])
@@ -258,14 +258,14 @@ func sequence_battle(args: Dictionary) -> Dictionary:
 				target_for = caster_unit
 			if sid == "resurrection":
 				target_unit.set_count(0)
-			var r = state.apply_spell(
-				StringName(sid), caster_unit, target_for, caster_bonus, target_bonus, rng)
+			var r = BattleActionResolver.apply_spell(
+				state, StringName(sid), caster_unit, target_for, caster_bonus, target_bonus, rng)
 			steps.append({"cmd": "cast", "spell": sid, "result": r})
 		elif kind == "attack":
-			var r = state.apply_attack(caster_unit, target_unit, not caster_unit.is_ranged(), rng, true)
+			var r = BattleActionResolver.apply_attack(state, caster_unit, target_unit, not caster_unit.is_ranged(), rng, true)
 			steps.append({"cmd": "attack", "result": r})
 		elif kind == "enemy":
-			var r = state.apply_attack(target_unit, caster_unit, not target_unit.is_ranged(), rng, true)
+			var r = BattleActionResolver.apply_attack(state, target_unit, caster_unit, not target_unit.is_ranged(), rng, true)
 			steps.append({"cmd": "enemy", "result": r})
 	return {
 		"steps": steps,

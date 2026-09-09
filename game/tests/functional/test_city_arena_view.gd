@@ -50,7 +50,7 @@ func test_arena_smoke() -> void:
 	assert_bool(not view._auto).is_true()
 	assert_bool(view._turn > 13).is_true()
 
-	var score: float = CityArenaModel.score(view._city, view._starve_days)
+	var score: float = ArenaDemoScenario.score(view._city, view._starve_days)
 	assert_bool(score > -100.0).is_true()
 
 func test_cell_click_signal_path() -> void:
@@ -82,9 +82,9 @@ func test_cell_click_signal_path() -> void:
 	assert_bool(view._city.cell_is_built(cell)).is_true()
 
 func _first_free_r1(view: CityArenaView) -> Vector2i:
-	for cell in CityArenaModel.cells_in_arena():
+	for cell in ArenaRingSystem.cells_in_arena():
 		var cv: Vector2i = cell
-		if CityArenaModel.ring_of(cv) == 1 and not view._city.cell_is_built(cv) \
+		if ArenaRingSystem.ring_of(cv) == 1 and not view._city.cell_is_built(cv) \
 				and not _worker_on(view._city, cv):
 			return cv
 	return Vector2i.ZERO

@@ -33,7 +33,7 @@ func test_first_strike() -> void:
 	var def := bs.defender_units[0]
 	var atk_before := atk.get_count()
 
-	var result := bs.apply_attack(atk, def, true, _rng)
+	var result := BattleActionResolver.apply_attack(bs, atk, def, true, _rng)
 	assert_bool(result.get("first_strike", false)).is_true().override_failure_message("First strike should trigger")
 	assert_int(atk.get_count()).is_less(atk_before).override_failure_message("First strike should damage attacker")
 
@@ -70,5 +70,5 @@ func test_distance_moved() -> void:
 
 	assert_int(unit.distance_moved_this_turn).is_zero().override_failure_message("Initial distance should be 0")
 
-	bs.do_move(unit, Vector2i(10, 5))
+	BattleActionResolver.do_move(bs, unit, Vector2i(10, 5))
 	assert_int(unit.distance_moved_this_turn).is_greater(0).override_failure_message("Distance should be > 0 after move")

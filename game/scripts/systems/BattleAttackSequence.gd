@@ -85,7 +85,8 @@ func next_strike() -> void:
 
 	_attack_strikes_left -= 1
 
-	var result := _battle_state.apply_attack(
+	var result := BattleActionResolver.apply_attack(
+		_battle_state,
 		_attack_attacker,
 		_attack_defender,
 		_attack_is_melee,

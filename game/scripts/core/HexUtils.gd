@@ -10,25 +10,12 @@ const T_EVEN_RIGHT := [
 	Vector2i(-1, 0), Vector2i(-1, 1), Vector2i(0, 1),
 ]
 
-static var _shift_right: bool = true
-
 enum Terrain { WATER=0, SWAMP=1, SAND=2, GRASS=3, FOREST=4, MOUNTAIN=5, SNOW=6 }
 const TERRAIN_NAMES := ["water", "swamp", "sand", "grass", "forest", "mountain", "snow"]
 
-static func calibrate(tm: TileMapLayer) -> void:
-	if tm == null or tm.tile_set == null:
-		return
-	var a := tm.map_to_local(Vector2i(0, 0))
-	var b := tm.map_to_local(Vector2i(0, 1))
-	_shift_right = b.x > a.x
-	GameLogger.trace("calibrated: odd_row_shift_right = %s" % str(_shift_right), "HexUtils")
-
-static func reset() -> void:
-	_shift_right = true
-
 static func get_neighbor(cell: Vector2i, bit: int) -> Vector2i:
 	var odd := (cell.y & 1) == 1
-	if _shift_right:
+	if HexGrid.shift_right:
 		return cell + (T_ODD_RIGHT[bit] if odd else T_EVEN_RIGHT[bit])
 	else:
 		return cell + (T_EVEN_RIGHT[bit] if odd else T_ODD_RIGHT[bit])
@@ -43,7 +30,7 @@ static func get_all_neighbors(cell: Vector2i) -> Array[Vector2i]:
 static func offset_to_cube(cell: Vector2i) -> Vector3i:
 	var r := cell.y
 	var x: int
-	if _shift_right:
+	if HexGrid.shift_right:
 		x = cell.x - int((r - (r & 1)) / 2)
 	else:
 		x = cell.x - int((r + (r & 1)) / 2)
@@ -53,7 +40,7 @@ static func offset_to_cube(cell: Vector2i) -> Vector3i:
 static func cube_to_offset(c: Vector3i) -> Vector2i:
 	var r := c.z
 	var x: int
-	if _shift_right:
+	if HexGrid.shift_right:
 		x = c.x + int((r - (r & 1)) / 2)
 	else:
 		x = c.x + int((r + (r & 1)) / 2)

@@ -35,7 +35,7 @@ func force() -> void:
 
 func _execute() -> void:
 	_requested = true
-	_battle_state.force_end(BattleState.Side.DEFENDER)
+	BattleActionResolver.force_end(_battle_state, BattleState.Side.DEFENDER)
 	_executor._transition_to(BattleTurnExecutor.State.BATTLE_OVER)
 	_executor.status_updated.emit(GameText.battle_retreat_confirm())
 	_executor._emit_end()

@@ -4,8 +4,6 @@ class_name ArenaHexCell
 signal cell_input(viewport: Node, event: InputEvent, shape_idx: int, pos: Vector2, normal: Vector2, cell: Vector2i)
 signal cell_entered(cell: Vector2i)
 signal cell_exited()
-
-const _CityArenaModel = preload("res://scripts/city/CityArenaModel.gd")
 const _ArenaRingSystem = preload("res://scripts/city/ArenaRingSystem.gd")
 
 var cell: Vector2i = Vector2i.ZERO
@@ -34,7 +32,7 @@ func _ready() -> void:
     _ylab.text = _ArenaRingSystem.ring_yield_label(ring)
     _feat.visible = feature_id != &""
     if feature_id != &"":
-        _feat.text = _CityArenaModel.feature_glyph(feature_id)
+        _feat.text = ArenaRingSystem.feature_glyph(feature_id)
 
 func get_poly() -> Polygon2D:
     return _poly
@@ -63,4 +61,4 @@ func _on_mouse_exited() -> void:
     cell_exited.emit()
 
 func _ring_color(ring: int) -> Color:
-    return _CityArenaModel.ring_color(ring)
+    return ArenaRingSystem.ring_color(ring)

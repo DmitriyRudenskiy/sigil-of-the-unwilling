@@ -1,11 +1,11 @@
 extends GdUnitTestSuite
 
 func after_test() -> void:
-	HexUtils._shift_right = true
+	HexGrid.shift_right = true
 
 func test_neighbors() -> void:
 	print("[test] neighbors")
-	HexUtils._shift_right = true
+	HexGrid.shift_right = true
 
 	var even := Vector2i(0, 0)
 	var even_n := HexUtils.get_all_neighbors(even)
@@ -19,7 +19,7 @@ func test_neighbors() -> void:
 
 func test_hex_distance() -> void:
 	print("[test] hex_distance")
-	HexUtils._shift_right = true
+	HexGrid.shift_right = true
 
 	assert_bool(HexUtils.hex_distance(Vector2i(0, 0), Vector2i(0, 0)) == 0).is_true()
 	assert_bool(HexUtils.hex_distance(Vector2i(0, 0), Vector2i(1, 0)) == 1).is_true()
@@ -28,7 +28,7 @@ func test_hex_distance() -> void:
 
 func test_even_row_mode() -> void:
 	print("[test] even row mode")
-	HexUtils._shift_right = false
+	HexGrid.shift_right = false
 
 	var n := HexUtils.get_all_neighbors(Vector2i(0, 0))
 	assert_bool(n.size() == 6).is_true()
@@ -38,7 +38,7 @@ func test_even_row_mode() -> void:
 
 func test_cube_roundtrip() -> void:
 	print("[test] cube roundtrip")
-	HexUtils._shift_right = true
+	HexGrid.shift_right = true
 
 	for y in 4:
 		for x in 4:

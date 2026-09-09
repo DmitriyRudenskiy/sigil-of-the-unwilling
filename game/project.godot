@@ -308,6 +308,7 @@ Spells="*res://scripts/autoload/SpellRegistry.gd"
 Resources="*res://scripts/autoload/ResourceRegistry.gd"
 Services="*res://scripts/autoload/services.gd"
 TileAtlasCache="*res://scripts/autoload/tile_atlas_cache.gd"
+HexGrid="*res://scripts/autoload/hex_grid.gd"
 
 [config]
 

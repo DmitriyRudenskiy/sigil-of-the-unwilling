@@ -25,6 +25,9 @@ const ADVENTURE_INITIATIVE_PANEL_W := 190
 const ADVENTURE_BATTLE_STATUS_H    := 92
 const CITY_PANEL_OFFSET         := 12.0
 
+const BATTLE_BOARD_W             := 17
+const BATTLE_BOARD_H             := 11
+
 const BATTLE_HEX_OUTLINE_RADIUS := 38.0
 const BATTLE_ATTACK_LUNGE_PX    := 26.0
 const BATTLE_MOVE_TWEEN_SEC     := 0.15
@@ -56,6 +59,19 @@ const REBIRTH_CHANCE            := 0.20
 const BATTLE_RETREAT_LOSS_FRACTION := 0.5
 const BATTLE_DEFEND_BONUS_DEFENSE  := 0.20
 const ASTAR_HEURISTIC_WEIGHT       := 1.0
+
+const HIT_FLASH_SEC          := 0.1
+const HIT_FLASH_RECOVER_SEC  := 0.2
+const UNIT_REMOVE_FADE_SEC   := 0.25
+const ATTACK_LUNGE_OUT_SEC   := 0.08
+const ATTACK_LUNGE_BACK_SEC  := 0.12
+const FLOATING_TEXT_RISE_PX  := 30.0
+const FLOATING_TEXT_FADE_SEC := 0.6
+const DAMAGE_NUMBER_RISE_PX  := 24.0
+const DAMAGE_NUMBER_FADE_SEC := 0.5
+const RETALIATION_ARROW_FADE_SEC := 0.35
+const PULSE_ANIM_SEC         := 0.15
+const PULSE_SCALE            := 1.25
 
 const MAP_SIZE_MIN              := 40
 const MAP_SIZE_MAX              := 70

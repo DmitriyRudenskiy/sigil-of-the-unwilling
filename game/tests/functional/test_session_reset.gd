@@ -2,7 +2,6 @@ extends GdUnitTestSuite
 
 const City = preload("res://scripts/world/City.gd")
 const ArenaClusterSystem = preload("res://scripts/city/ArenaClusterSystem.gd")
-const CityArenaModel = preload("res://scripts/city/CityArenaModel.gd")
 const ArenaTurnRunner = preload("res://scripts/city/ArenaTurnRunner.gd")
 const ArenaRingSystem = preload("res://scripts/city/ArenaRingSystem.gd")
 const BuildingDefs = preload("res://scripts/data/BuildingDefs.gd")
@@ -13,7 +12,7 @@ var city: City
 func before_test() -> void:
 
 	ArenaClusterSystem.reset()
-	city = CityArenaModel.make_city()
+	city = ArenaTurnRunner.make_city()
 
 func _place_farm_cluster() -> Array:
 
@@ -68,7 +67,7 @@ func test_new_city_after_reset_no_contamination() -> void:
 	_place_farm_cluster()
 	_place_lone_mine()
 	ArenaClusterSystem.reset()
-	var city2 := CityArenaModel.make_city()
+	var city2 := ArenaTurnRunner.make_city()
 	assert_int(ArenaClusterSystem.clusters(city2).size()).is_equal(0)
 
 	var cl: Array = ArenaClusterSystem.clusters(city)

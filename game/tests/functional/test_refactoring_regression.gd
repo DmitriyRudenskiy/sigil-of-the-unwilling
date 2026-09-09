@@ -64,9 +64,9 @@ func test_resource_chain_service_no_cache_fields() -> void:
 	var service := ResourceChainService.new()
 	assert_bool(true).is_true()
 
-func test_battle_state_has_revive_unit() -> void:
-	var state := BattleState.new()
-	assert_bool(state.has_method("revive_unit")).is_true()
+func test_action_resolver_has_revive_unit() -> void:
+	var resolver := BattleActionResolver.new()
+	assert_bool(resolver.has_method("revive_unit")).is_true()
 
 func test_map_generator_has_get_terrain_id() -> void:
 	var mg := MapGenerator.new()

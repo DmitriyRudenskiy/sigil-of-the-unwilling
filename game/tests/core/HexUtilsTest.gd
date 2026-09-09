@@ -7,11 +7,11 @@ func test_offset_cube_roundtrip() -> void:
 		assert_vector(back).is_equal(c)
 
 func test_even_row_mode() -> void:
-	HexUtils._shift_right = false
+	HexGrid.shift_right = false
 	var n := HexUtils.get_all_neighbors(Vector2i(0, 0))
 	assert_array(n).has_size(6)
 	assert_int(HexUtils.hex_distance(Vector2i(0, 0), Vector2i(2, 0))).is_equal(2)
-	HexUtils._shift_right = true
+	HexGrid.shift_right = true
 
 func test_hex_distance_zero_and_symmetry() -> void:
 	var a := Vector2i(2, 5)

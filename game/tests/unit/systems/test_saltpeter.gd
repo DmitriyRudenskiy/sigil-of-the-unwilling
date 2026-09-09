@@ -39,9 +39,9 @@ func test_saltpeter_adjacent_kills() -> void:
 	var def_unit := state.defender_units[0]
 	var adj_unit := state.defender_units[1]
 
-	state.do_move(adj_unit, HexUtils.get_neighbor(def_unit.cell, 0))
+	BattleActionResolver.do_move(state, adj_unit, HexUtils.get_neighbor(def_unit.cell, 0))
 
-	var result := state.apply_attack(atk_unit, def_unit, true, rng)
+	var result := BattleActionResolver.apply_attack(state, atk_unit, def_unit, true, rng)
 	assert_bool(result.has("saltpeter_kills")).is_true()
 	assert_bool(int(result.get("saltpeter_kills", 0)) > 0).is_true()
 
@@ -57,6 +57,6 @@ func test_saltpeter_no_adjacent() -> void:
 	var atk_unit := state.attacker_units[0]
 	var def_unit := state.defender_units[0]
 
-	var result := state.apply_attack(atk_unit, def_unit, true, rng)
+	var result := BattleActionResolver.apply_attack(state, atk_unit, def_unit, true, rng)
 	assert_bool(result.has("saltpeter_kills")).is_true()
 	assert_that(result["saltpeter_kills"]).is_equal(0)

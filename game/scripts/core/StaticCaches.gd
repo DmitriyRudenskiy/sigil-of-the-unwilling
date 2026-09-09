@@ -1,7 +1,7 @@
 class_name StaticCaches
 
 static func reset_all() -> void:
-	HexUtils.reset()
+	HexGrid.shift_right = true
 	ShardManager.reset()
 	ArenaClusterSystem.reset()
 	ResourceIcons.clear_cache()

@@ -120,7 +120,7 @@ func _evaluate(yield_table: Array, bonus_table: Dictionary, turns: int) -> float
 		&"ring_yield": yield_table,
 		&"ring_bonus": bonus_table,
 	}
-	var rep: Dictionary = CityArenaModel.run_demo_plan(turns, overrides)
+	var rep: Dictionary = ArenaDemoScenario.run_demo_plan(turns, overrides)
 	return float(rep.get("score", 0.0))
 
 func _mutate(rng: RandomNumberGenerator, yield_cur: Array, bonus_cur: Dictionary,

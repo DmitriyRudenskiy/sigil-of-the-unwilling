@@ -31,6 +31,7 @@ var defender_hero_bonus: Dictionary[StringName, int] = {
 
 var _reachable_cache: Dictionary = {}
 var _board_version: int = 0
+var _cache_sig := -1
 var _uid := 0
 
 var _unit_grid: Dictionary = {}
@@ -38,8 +39,8 @@ var _unit_grid: Dictionary = {}
 var _attacker_alive_count := 0
 var _defender_alive_count := 0
 
-const BW := 17
-const BH := 11
+const BW := GameNumbers.BATTLE_BOARD_W
+const BH := GameNumbers.BATTLE_BOARD_H
 
 class BattleUnit extends RefCounted:
 	var stack: UnitStack
@@ -124,9 +125,6 @@ class BattleUnit extends RefCounted:
 	func is_defending() -> bool:
 		return defending
 
-	func do_defend() -> void:
-		defending = true
-
 	func add_status(effect: int, duration: int) -> void:
 		statuses[effect] = max(statuses.get(effect, 0), duration)
 
@@ -157,30 +155,6 @@ func place_army(
 	builder.set_attacker_artifact_mods(attacker_artifact_mods)
 	builder.set_defender_artifact_mods(defender_artifact_mods)
 	builder.build_into(self)
-
-func _kill_unit(unit: BattleUnit) -> void:
-	if not unit.alive: return
-	unit.alive = false
-	unit.set_count(0)
-	if unit.side == Side.ATTACKER: _attacker_alive_count -= 1
-	else: _defender_alive_count -= 1
-	_unit_grid.get(unit.side, {}).erase(unit.cell)
-	invalidate_board_cache()
-	check_end()
-
-func kill_unit(unit: BattleUnit) -> void:
-	_kill_unit(unit)
-
-func revive_unit(unit: BattleUnit) -> void:
-	if unit == null: return
-	if not unit.alive:
-		unit.alive = true
-		if unit.get_count() <= 0:
-			unit.set_count(unit.max_count)
-		if unit.side == Side.ATTACKER: _attacker_alive_count += 1
-		else: _defender_alive_count += 1
-	_unit_grid.get(unit.side, {})[unit.cell] = unit
-	invalidate_board_cache()
 
 func build_queue() -> void:
 	turn_queue.clear()
@@ -246,7 +220,7 @@ func start_new_round() -> void:
 	if turn_queue.is_empty():
 		check_end()
 		if not battle_over:
-			force_end(Side.DEFENDER)
+			BattleActionResolver.force_end(self, Side.DEFENDER)
 		return
 
 	turn_idx = 0
@@ -309,18 +283,31 @@ func get_reachable_for_unit(unit: BattleUnit, blocked_fn: Callable) -> Dictionar
 	)
 
 func get_reachable(cell: Vector2i, speed: int, blocked_fn: Callable, _unit: BattleUnit = null) -> Dictionary:
+	var blocked: Dictionary = blocked_fn.call()
+
+	var sig := _cache_signature(blocked)
+	if sig != _cache_sig:
+		_reachable_cache.clear()
+		_cache_sig = sig
 
 	var speed_cache: Dictionary = _reachable_cache.get(cell, {})
 	if speed_cache.has(speed):
 		return speed_cache[speed].duplicate()
 
-	var blocked: Dictionary = blocked_fn.call()
 	var reachable := HexPathfinding.bfs_reachable(cell, speed, blocked, BW, BH)
 
 	if not _reachable_cache.has(cell):
 		_reachable_cache[cell] = {}
 	_reachable_cache[cell][speed] = reachable
 	return reachable.duplicate()
+
+func _cache_signature(blocked: Dictionary) -> int:
+	var h := 0
+	for c in blocked:
+		var p := c as Vector2i
+		h = (h * 31 + p.x * 73856093) & 0x7FFFFFFF
+		h = (h * 31 + p.y * 19349663) & 0x7FFFFFFF
+	return (_board_version + 1) * 1000003 + h
 
 func get_unreachable_ring(unit: BattleUnit, blocked_fn: Callable) -> Dictionary:
 	if unit == null:
@@ -363,88 +350,14 @@ func build_all_blocked(except_unit: BattleUnit, obstacles: Dictionary) -> Dictio
 		b[o] = true
 	return b
 
-func apply_attack(
-	atk: BattleUnit,
-	def: BattleUnit,
-	is_melee_attack: bool,
-	rng: RandomNumberGenerator,
-	consume_action: bool = true
-) -> Dictionary:
-	return BattleActionResolver.apply_attack(self, atk, def, is_melee_attack, rng, consume_action)
-
-func apply_spell(
-	spell_id: StringName,
-	caster: BattleUnit,
-	target: BattleUnit,
-	caster_hero_bonus: Dictionary,
-	target_hero_bonus: Dictionary,
-	rng: RandomNumberGenerator
-) -> Dictionary:
-	return BattleActionResolver.apply_spell(
-		self, spell_id, caster, target, caster_hero_bonus, target_hero_bonus, rng
-	)
-
-func apply_sacrifice(
-	sacrifice: Dictionary,
-	acting: BattleUnit,
-	target: BattleUnit,
-	cost: Variant,
-	rng: RandomNumberGenerator
-) -> Dictionary:
-	return BattleActionResolver.apply_sacrifice(self, acting, sacrifice, target, cost, rng)
-
-func do_move(unit: BattleUnit, target: Vector2i) -> void:
-	var dist := HexUtils.hex_distance(unit.cell, target)
-	unit.distance_moved_this_turn += dist
-	var old_cell := unit.cell
-	unit.cell = target
-	unit.has_moved = true
-	var side_grid: Dictionary = _unit_grid.get(unit.side, {})
-	side_grid.erase(old_cell)
-	side_grid[target] = unit
-	invalidate_board_cache()
-
-func do_defend(unit: BattleUnit) -> void:
-	unit.has_moved = true
-	unit.defending = true
-	invalidate_board_cache()
-
-func do_wait(unit: BattleUnit) -> void:
-	if unit == null:
-		return
-
-	var idx := turn_queue.find(unit)
-	if idx < 0:
-		return
-
-	var old_size := turn_queue.size()
-
-	turn_queue.remove_at(idx)
-	turn_queue.append(unit)
-
-	if idx == old_size - 1:
-		turn_idx = idx
-	else:
-		turn_idx = idx - 1
-	invalidate_board_cache()
-
-func do_skip(unit: BattleUnit) -> void:
-	if unit != null:
-		unit.has_moved = true
-	invalidate_board_cache()
-
-func force_end(winner: BattleState.Side) -> void:
-	battle_over = true
-	battle_winner = winner
-
 func check_end() -> BattleState.Side:
 	if battle_over:
 		return battle_winner
 
 	if _attacker_alive_count == 0:
-		force_end(Side.DEFENDER)
+		BattleActionResolver.force_end(self, Side.DEFENDER)
 	elif _defender_alive_count == 0:
-		force_end(Side.ATTACKER)
+		BattleActionResolver.force_end(self, Side.ATTACKER)
 
 	return battle_winner
 

@@ -118,7 +118,7 @@ func test_force_retreat_on_over_state_without_end_emitted() -> void:
 	var end_events: Array = []
 	ex.end_battle.connect(func(w, a, d): end_events.append([w, a, d]))
 
-	bs.force_end(BattleState.Side.DEFENDER)
+	BattleActionResolver.force_end(bs, BattleState.Side.DEFENDER)
 	ex._state = BattleTurnExecutor.State.AI_ANIMATING
 
 	ex.force_retreat()
