@@ -43,7 +43,7 @@ func test_collect_partial_delta_stays_collect() -> void:
 	assert_that(cc.current_mode()).is_equal(_CursorController.Mode.COLLECT)
 
 func test_battle_completed_resets_to_default() -> void:
-	bus.battle_completed.emit(Vector2i(3, 3))
+	bus.battle_completed.emit(BattleState.Side.ATTACKER, Vector2i(3, 3))
 	assert_that(cc.current_mode()).is_equal(_CursorController.Mode.DEFAULT)
 
 func test_battle_lost_resets_to_default() -> void:

@@ -100,7 +100,7 @@ def test_move_then_attack_no_teleport(battle_scene):
         if "error" in pos:
             break
         positions.append(pos)
-        time.sleep(1 / 60.0)
+        mcp.wait_frames(1)
 
     TELEPORT_PX = 100.0
     teleports = 0

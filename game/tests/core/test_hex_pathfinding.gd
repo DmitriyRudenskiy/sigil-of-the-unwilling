@@ -92,3 +92,18 @@ func test_find_path_dispatch() -> void:
 	assert_array(p_astar).is_not_empty()
 	_assert_valid_steps(p_bfs)
 	_assert_valid_steps(p_astar)
+
+func test_min_heap_pop_empty_guard() -> void:
+	var heap = MinHeap.new()
+	var popped = heap.pop()
+	assert_array(popped).is_empty()
+
+func test_min_heap_ordering() -> void:
+	var heap = MinHeap.new()
+	heap.push([5, "e"])
+	heap.push([1, "a"])
+	heap.push([3, "c"])
+	assert_that(heap.pop()[1]).is_equal("a")
+	assert_that(heap.pop()[1]).is_equal("c")
+	assert_that(heap.pop()[1]).is_equal("e")
+	assert_array(heap.pop()).is_empty()

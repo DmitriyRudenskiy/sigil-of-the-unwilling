@@ -50,7 +50,8 @@ func test_get_battle_flow_before_setup() -> void:
 
 func test_check_enemy_contact_null_map_no_crash() -> void:
 	coordinator.setup(null, null, null, null, null, null, null, null, null)
-	assert_bool(true).is_true()
+	coordinator.check_enemy_contact(Vector2i(3, 3))
+	assert_that(coordinator.get_pending_enemy_cell()).is_equal(Vector2i(-1, -1))
 
 func test_on_battle_completed_null_hero_no_crash() -> void:
 	coordinator.setup(null, null, null, null, null, null, null, null, null)
@@ -60,7 +61,7 @@ func test_on_battle_completed_null_hero_no_crash() -> void:
 	var surv_def: Array[UnitStack] = []
 
 	coordinator._on_battle_completed(BattleState.Side.ATTACKER, surv_atk, surv_def)
-	assert_bool(true).is_true()
+	assert_that(coordinator.get_pending_enemy_cell()).is_equal(Vector2i(-1, -1))
 
 func test_on_battle_completed_resets_pending_cell() -> void:
 	coordinator.setup(null, null, null, null, null, null, null, null, null)

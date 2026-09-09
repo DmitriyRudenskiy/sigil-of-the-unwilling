@@ -31,10 +31,10 @@ func test_cure_heals_wounded() -> void:
 	target.set_count(max(1, original_count - 2))
 	assert_bool(target.get_count() < original_count).is_true()
 	var result = _ActionResolver.apply_spell(bs, &"cure", bs.attacker_units[0], target, {}, {}, TestFactories.seeded(9631))
-	if result.has("healed") and int(result.get("healed", 0)) > 0:
+	if int(result.get("healed", 0)) > 0:
 		assert_bool(target.get_count() > max(1, original_count - 2)).is_true()
 	else:
-		assert_bool(true).is_true()
+		assert_bool(result.has("result")).is_true()
 
 func test_cure_full_stack_no_overheal() -> void:
 	var bs = BattleState.new()
@@ -44,10 +44,7 @@ func test_cure_full_stack_no_overheal() -> void:
 	var target = bs.defender_units[0]
 	target.set_count(target.max_count)
 	var result = _ActionResolver.apply_spell(bs, &"cure", bs.attacker_units[0], target, {}, {}, TestFactories.seeded(9631))
-	if result.has("healed"):
-		assert_that(int(result.get("healed", 0))).is_equal(0)
-	else:
-		assert_bool(true).is_true()
+	assert_that(int(result.get("healed", 0))).is_equal(0)
 	assert_bool(target.get_count() <= target.max_count).is_true()
 
 func test_mana_gate() -> void:

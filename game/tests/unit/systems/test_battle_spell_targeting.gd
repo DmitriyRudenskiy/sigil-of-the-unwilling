@@ -111,4 +111,4 @@ func test_revive_unit_restores_counters() -> void:
 func test_revive_unit_null_safe() -> void:
 	var bs = BattleState.new()
 	_ActionResolver.revive_unit(bs, null)
-	assert_bool(true).is_true()
+	assert_that(bs).is_not_null()

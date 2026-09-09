@@ -315,10 +315,11 @@ func test_initiative_rebuilt_each_round() -> void:
 	state.build_queue()
 
 	var sword = state.get_units_by_side(BattleState.Side.ATTACKER)[1]
+	var horse = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
 
 	state.turn_queue.clear()
 	state.turn_queue.append(sword)
-	state.turn_queue.append(fast)
+	state.turn_queue.append(horse)
 	state.turn_idx = state.turn_queue.size()
 	state.active_unit = sword
 

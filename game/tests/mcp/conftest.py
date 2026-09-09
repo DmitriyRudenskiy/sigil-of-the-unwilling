@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import sys
 import threading
+import time
 from pathlib import Path
 
 import anyio
@@ -92,4 +93,23 @@ def battle_scene(mcp):
 def world_scene(mcp):
     mcp.run_scene(WORLD_SCENE)
     mcp.wait_ready()
+    yield mcp
+
+@pytest.fixture
+def full_game(mcp):
+    """World + завершённый ботст랩 (hero и map_gen готовы)."""
+    mcp.run_scene(WORLD_SCENE)
+    mcp.wait_ready()
+    deadline = time.time() + 120
+    while time.time() < deadline:
+        r = mcp.execute_code(
+            "var w = get_tree().current_scene\n"
+            "return {\"hero\": w != null and w.get_hero() != null, "
+            "\"map\": w != null and w.get_map_gen() != null}"
+        )
+        if r.get("hero") and r.get("map"):
+            break
+        time.sleep(1.0)
+    else:
+        raise MCPError("World не завершил ботст랩 за 120 с")
     yield mcp

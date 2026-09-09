@@ -49,7 +49,8 @@ func test_deserialize_unknown_slot_warns() -> void:
 		"backpack": []
 	}
 	inv.deserialize(data)
-	assert_bool(true).is_true()
+	for slot in inv.equipped:
+		assert_that(inv.equipped[slot]).is_null()
 
 func test_deserialize_valid_slot() -> void:
 	var inv := HeroInventory.new()
@@ -58,11 +59,13 @@ func test_deserialize_valid_slot() -> void:
 		"backpack": []
 	}
 	inv.deserialize(data)
-	assert_bool(true).is_true()
+	for slot in inv.equipped:
+		assert_that(inv.equipped[slot]).is_null()
 
 func test_resource_chain_service_no_cache_fields() -> void:
 	var service := ResourceChainService.new()
-	assert_bool(true).is_true()
+	assert_int(service._discovery_cache.size()).is_equal(0)
+	assert_int(service._extraction_cache.size()).is_equal(0)
 
 func test_action_resolver_has_revive_unit() -> void:
 	var resolver := BattleActionResolver.new()

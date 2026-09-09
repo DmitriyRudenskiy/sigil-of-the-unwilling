@@ -50,13 +50,15 @@ func _make_city(uid: int, name: StringName, is_capital: bool) -> City:
 
 func test_select_returns_same_path_follower() -> void:
 	var h := _succession_hero(&"archivist")
-	var f1 := _make_follower(1, &"archivist")
-	var f2 := _make_follower(2, &"archivist")
-	h.followers = [f1, f2]
+	var f1 := _make_follower(2, &"archivist")
+	var f2 := _make_follower(1, &"archivist")
+	var outsider := _make_follower(3, &"warrior")
+	h.followers = [f1, f2, outsider]
 
 	var succ := _Succession.new().select_successor(h)
 	assert_that(succ).is_not_null()
 	assert_that(succ.path).is_equal(&"archivist")
+	assert_int(succ.uid).is_equal(1)
 	h.free()
 
 func test_select_never_different_path() -> void:

@@ -43,16 +43,17 @@ func test_unknown_cue_path_empty() -> void:
 
 func test_missing_sfx_path_no_crash() -> void:
 	sm.play_sfx("res://assets/audio/sfx/definitely_missing.wav")
-	assert_bool(true).is_true()
+	assert_that(sm.last_sfx_path).is_equal("res://assets/audio/sfx/definitely_missing.wav")
 
 func test_missing_music_path_no_crash() -> void:
 	sm.play_music("res://assets/audio/music/definitely_missing.mp3")
-	assert_bool(true).is_true()
+	assert_that(sm.last_music_path).is_equal("res://assets/audio/music/definitely_missing.mp3")
 
 func test_unknown_cue_no_crash() -> void:
 	sm.play_sfx_cue(&"no_such_cue")
 	sm.play_music_cue(&"no_such_cue")
-	assert_bool(true).is_true()
+	assert_that(sm.last_sfx_path).is_equal("")
+	assert_that(sm.last_music_path).is_equal("")
 
 func test_music_cue_records_last_path() -> void:
 	sm.play_music_cue(&"music_menu")
@@ -63,7 +64,7 @@ func test_music_cue_records_last_path() -> void:
 
 func test_stop_music_no_crash() -> void:
 	sm.stop_music()
-	assert_bool(true).is_true()
+	assert_bool(sm._music_loop == false).is_true()
 
 func _db(pct: int) -> float:
 	return linear_to_db(pct / 100.0)

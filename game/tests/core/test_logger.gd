@@ -36,4 +36,3 @@ func test_public_methods_smoke() -> void:
 	_LOGGER.hero("hero smoke")
 	_LOGGER.warn("warn smoke", "Test")
 	assert_error(func(): _LOGGER.error("error smoke", "Test")).is_push_error(any_string())
-	assert_bool(true).is_true()

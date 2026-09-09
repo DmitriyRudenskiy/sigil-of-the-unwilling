@@ -15,9 +15,6 @@ func test_clamp_inverted_centers() -> void:
 func test_clamp_equal() -> void:
 	assert_that(_Camera._clamp_val(0.0, 5.0, 5.0)).is_equal(5.0)
 
-func test_zoom_0_5_small_map() -> void:
-	assert_bool(true).is_true()
-
 func test_zoom_2_25_large_map() -> void:
 	assert_that(_Camera._clamp_val(500.0, 100.0, 1000.0)).is_equal(500.0)
 	assert_that(_Camera._clamp_val(0.0, 100.0, 1000.0)).is_equal(100.0)
@@ -26,5 +23,3 @@ func test_all_zoom_levels_positive() -> void:
 	for i in _Settings.ZOOM_LEVELS.size():
 		assert_bool(_Settings.ZOOM_LEVELS[i] > 0).is_true()
 
-func test_resize_preserves_clamp() -> void:
-	assert_bool(true).is_true()
