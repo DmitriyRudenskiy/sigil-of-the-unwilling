@@ -11,7 +11,7 @@ from mcp.shared.exceptions import MCPError as _SdkMCPError
 
 MCP_INTERACTION_PORT = 9090
 DEFAULT_TIMEOUT = 120.0
-READY_TIMEOUT = 300.0
+READY_TIMEOUT = 900.0
 PORT_FREE_TIMEOUT = 60.0
 
 class MCPError(RuntimeError):

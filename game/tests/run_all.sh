@@ -19,7 +19,9 @@ latest=$(ls -dt reports/report_* 2>/dev/null | head -1)
 echo "XML-отчёт: $latest/results.xml"
 
 echo "=== 2/3 MCP (pytest) ==="
-( cd tests/mcp && "$PY" -m pytest -q )
+node --version || { echo "НЕТ Node.js (нужен для godot-mcp)"; exit 1; }
+[ -f addons/godot-mcp/build/index.js ] || { echo "НЕТ сервера godot-mcp: addons/godot-mcp/build/index.js"; exit 1; }
+( cd tests/mcp && "$PY" -m pytest -q -rs )
 
 echo "=== 3/3 структурные проверки ==="
 if ls tests/Test*.gd >/dev/null 2>&1; then
