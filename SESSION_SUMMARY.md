@@ -1,87 +1,189 @@
 # SESSION_SUMMARY — Sigil of the Unwilling (Godot 4.7)
 
-> Контекст для продолжения в новой сессии. Актуально после завершения **TASK_10** (аудит-рефакторинг, все фазы закрыты).
-> Предыдущие сводки: `SESSION_SUMMARY_01.md` (корень), `game/SESSION_SUMMARY_02.md` (TASK_08), `SESSION_SUMMARY_03.md` (корень, TASK_09_1).
-> Источники задач: `/Users/user/Downloads/TASK_10.md` (аудит R1–R10 + план по фазам), ранее TASK_08/TASK_09_1.
+> Контекст для продолжения в новой сессии. Актуально после: TASK_11 (Фазы 1–2),
+> ponytail-audit cleanup (п. 1–13), удаления всех комментариев, закрытия Фазы 2
+> (README, pre-checks, флейк-анализ). История: `SESSION_SUMMARY_01.md`,
+> `SESSION_SUMMARY_03.md` (устарели по числам и именам файлов).
 
 ## 1. Пути и окружение
 
 | Что | Где |
 |---|---|
-| Корень репозитория / CWD | `/Users/user/sigil-of-the-unwilling` (в корне только dev-материалы) |
+| Корень git-репозитория | `/Users/user/sigil-of-the-unwilling` (нет remote, нет CI) |
 | Корень Godot-проекта | `/Users/user/sigil-of-the-unwilling/game` (project.godot здесь) |
 | Godot 4.7.2 (headless) | `/Applications/Godot.app/Contents/MacOS/Godot` |
-| **Канонический запуск всех тестов** | `cd game && bash run_tests.sh` (gdUnit4 + MCP-тесты, EXIT=0 при успехе, без внешних env) |
-| Импорт/компиляция | `cd game && /Applications/Godot.app/Contents/MacOS/Godot --headless --path . --import` |
-| Один gdUnit4-файл | `cd game && "$GODOT" --headless --path . -s addons/gdunit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -a res://tests/<file>.gd` |
-| MCP-сервер (godot-mcp) | `game/addons/godot-mcp` (вендорный, `build/index.js`); MCP-тесты: `game/tests/mcp/*.py` + `game/tests/helpers/mcp_client.py` |
+| **Единственный гейт** | `cd game && bash tests/run_all.sh` (EXIT=0 при успехе) |
+| gdUnit4 (аддон) | `game/addons/gdunit4` |
+| MCP-сервер | `game/addons/godot-mcp` v3.1.0, вход `build/index.js`, interaction-порт **9090** |
+| MCP-тесты | `game/tests/mcp/*.py` (sync, pytest) |
+| Python-venv | `game/addons/venv` (python 3.12): **mcp 2.1.1, pytest 9.1.1, anyio 4.15.0** |
 
-macOS-особенности: BSD `sed`/`grep` без `-P`/`\b` (брать `perl -pi`/`awk`); `timeout` в этой сессии работал (coreutils установлен).
+macOS-особенности: нет `timeout`; BSD `sed` (брать `perl -pi`); BSD `grep` без `-P` (брать `awk`); locale с запятой в числах ломает `awk`-сравнения (брать `LC_ALL=C`).
 
-## 2. Статус: TASK_10 — ЗАВЕРШЁН (все фазы, все R-пункты закрыты)
+**Важно про venv:** `pip` сломан (старый shebang) — версии зафиксированы, НЕ устанавливать заново. `pytest-asyncio` УДАЛЁН намеренно (тесты sync, anyio BlockingPortal).
 
-**Базовый уровень (финальный прогон `bash run_tests.sh`):**
-- gdUnit4: **1300 тестов, 0 ошибок, 0 провалов**
-- MCP (pytest): **12 passed, 1 skipped** (skip по дизайну: `test_cluster_reset_in_battle_scene` возвращает `{"skipped": true}` в battle scene)
+## 2. Зелёная база (последняя подтверждённая)
 
-Коммиты TASK_10 (новые сверху):
+- gdUnit4: **135 сьютов / 1266 кейсов, 0 ошибок, 0 провалов**
+- MCP: **11 passed, 1 skipped** (32 с при низкой нагрузке)
+- Структурные проверки: 4/4 OK
+- `project.godot` без diff (конфест MCP делает pristine-capture и восстанавливает)
 
-| Коммит | Фаза | Содержание |
+Известный skip (легитимный, детерминированный):
+`test_battle_profiling.py::test_cluster_reset_in_battle_scene` — «нет узлов городов
+в сцене боя»: battle scene по дизайну не содержит узла `Cities`. Причина печатается
+`pytest -rs` (включено в `run_all.sh`).
+
+## 3. Что сделано в этой сессии
+
+### 3.1 TASK_11 (две фазы) — ЗАВЕРШЁН
+- **Фаза 1 (Godot-архитектура):** WorldPersistence де-статизован (сессионное
+  состояние — инстанс-поля, синглтон в `Services` под `&"persistence"`);
+  BattleUI — `@onready` (без `get_node_or_null`); ring_yield_label — один статик в
+  `ArenaRingSystem`; BattleFlow — `_active_battle: Node`; CursorController —
+  `_exit_tree()` + симметричные connect/disconnect.
+- **Фаза 2 (тесты):** GUT отсутствует; дубли `Test*` слиты; 117 файлов перенесено
+  в `tests/unit|functional|integration/...`; MCP-тесты мигрированы с самописного
+  `mcp_client.py` на официальный `mcp` SDK (клиент — `tests/mcp/godot_mcp.py`);
+  закрыты gap-тесты (battle queue, world_scenario polling, marker double-click,
+  chain-services, registry-fallback, shard pruning, settings guard, UI onready);
+  все RNG в тестах — через `TestFactories.seeded(seed)`.
+
+### 3.2 Ponytail-audit cleanup (п. 1–13) — СДЕЛАНО, ~4100 строк / 25 файлов
+Удалено: 6 `.bak`, HexMapGenerator + сцена, HexAutotiler, EquipmentManager +
+`tests/entities/`, CityPanel + сцена, ServiceLocator + тест, ItemSlotUI + сцена,
+CursorSprite + тест, BorderContainer, `fake_movement`, HexGridConfig,
+`CityArenaModel.demo_plan()`, MCP-профиль-тест ServiceLocator.
+- **ServiceRegistry переписан** (132→49 строк): только `_singletons`/`_autoloads`,
+  `register_singleton/register_autoload/try_resolve/resolve/clear`. Фабрики,
+  сигналы, `inject`, `unregister` — УБРАНЫ (фабрика `battle_state_builder` не
+  резолвилась никем).
+- **services.gd** (73→42): только `resolve`, `register_singleton`, `clear_session`.
+- **HexUtils:** `get_config()`/`_config` УБРАНЫ — `calibrate()` пишет
+  `_shift_right = b.x > a.x` напрямую. Тесты ставят `HexUtils._shift_right`
+  напрямую (старый путь через config был no-op на hot-пути); `test_hex_utils.gd`
+  имеет `after_test()` со сбросом флага в `true`.
+- 2 MCP-теста переведены с ServiceLocator на `Services` (autoload доступен по имени
+  в eval-контексте).
+
+### 3.3 Все комментарии удалены из `scripts/` и `tests/`
+GDScript `#`/`##` и Python-комментарии + docstrings (пустым телам вставлен `pass`).
+Строки с `#` внутри литералов (цвета `Color("#f0dcae")`) сохранены. Итог:
++500/−3877. Одноразовый инструмент `tests/mcp/_strip_comments.py` удалён после
+использования (не восстанавливать).
+
+### 3.4 Закрытие Фазы 2 (по оценочному документу)
+- `tests/README.md` создан: требования+версии, реальная структура, правила,
+  легитимный skip, флейк-режим.
+- `run_all.sh`: pre-check `node --version` + наличие `build/index.js`;
+  `pytest -q -rs` (причины скипов в выводе).
+- Флейк MCP продиагностирован: **environmental** (см. §6). `READY_TIMEOUT` 300→900с.
+
+## 4. Структура проекта (актуальная)
+
+**Автозагрузки** (project.godot): Settings, SoundManager, GameEventBus, Spellbook,
+CursorController, TemplateBootstrap, Units, Artifacts, Spells, Resources, Services,
+TileAtlasCache. (`class_name Services` в services.gd НЕ добавлять — конфликт с
+именем автозагрузки.)
+
+**Ключевые скрипты:**
+- `scripts/core/service_registry.gd` — DI (см. 3.2); `scripts/core/StaticCaches.gd` —
+  единый сброс статических кэшей на границе сессии (`reset_all()`; не сбрасывает
+  `TemplateEngine._handlers` — это per-process конфиг).
+- `scripts/core/HexUtils.gd` — статик-утилиты гексов, `_shift_right` (true=odd-right
+  дефолт), `reset()` возвращает дефолт.
+- `scripts/world/WorldPersistence.gd` — инстанс-сессионное состояние;
+  `WorldController._save_svc` настраивается ПОСЛЕДНИМ в `_ready`.
+- `scripts/autoload/services.gd` — `clear_session()` = `registry.clear()` +
+  перерегистрация + `StaticCaches.reset_all()`.
+- `scripts/world/MapGenerator.gd` — единственный генератор карт.
+
+**Тесты:**
+- `tests/core/` (24 сьюта), `tests/systems/`, `tests/world/` — легаси-каталоги,
+  не переносить без необходимости.
+- `tests/unit/` (data/, systems/, world/, entities/, ui/), `tests/functional/`,
+  `tests/integration/` — организованные.
+- `tests/helpers/factories.gd` — `TestFactories` (единственный источник фабрик;
+  `seeded(seed)` — каноничный RNG).
+- `tests/mcp/` — `conftest.py` (sync-фикстуры + anyio BlockingPortal),
+  `godot_mcp.py` (клиент), 6 test-файлов (12 тестов).
+- `tests/static_var_baseline.txt` — 14 зафиксированных `file: var`; `run_all.sh`
+  падает на любом дрейфе (новый static var — только через baseline с обоснованием).
+- `tests/run_all.sh` — гейт: 1) gdUnit4, 2) MCP, 3) структурные проверки.
+
+## 5. Команды
+
+```bash
+cd /Users/user/sigil-of-the-unwilling/game
+
+# Полный гейт (единственная точка входа):
+bash tests/run_all.sh
+
+# Только gdUnit4 (XML-отчёт сам в reports/report_*/results.xml):
+/Applications/Godot.app/Contents/MacOS/Godot --headless --path . \
+  -s addons/gdunit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -c -a res://tests
+
+# Только MCP:
+cd tests/mcp && ../../addons/venv/bin/python -m pytest -q -rs
+```
+
+## 6. MCP-подсистема — критические факты
+
+- Тесты **sync**: весь жизненный цикл сервера в ОДНОМ таске (anyio BlockingPortal из
+  conftest); `portal.call()` хоппит на loop; `portal.call()` из своего же loop =
+  deadlock. `stop_project()` убивает Godot и синхронно откатывает project.godot.
+- `tests/mcp/godot_mcp.py`: `READY_TIMEOUT=900.0`; polling готовости
+  `execute_code("return GameEventBus != null", timeout=60.0)` (60 > 30с внутреннего
+  таймаута godot-mcp на `eval`); один retry только на SDK-таймаут.
+- **Ловушка имён:** модуль определяет СВОЙ `class MCPError(RuntimeError)` — SDK-класс
+  импортировать только как `from mcp.shared.exceptions import MCPError as _SdkMCPError`.
+- Venv'овый `stdio_client` наследует минимум env — `GODOT_PATH` передаётся явно.
+- Порт 9090: старый Godot должен полностью отпустить порт (polling `wait_port_free`),
+  иначе новый Godot не привяжет interaction-сервер.
+
+### Флейк MCP (документированный, environmental)
+Машина — общая (5 пользователей; Chrome+Vivaldi). При load ~3.5–4.2 самый тяжёлый
+запуск сцены (World.tscn, в ~5 раз тяжелее боевой) не влезает даже в 900с, тогда как
+боевые сцены в том же прогоне стартуют; при низкой нагрузке вся секция = 32с.
+Наблюдено 3 красных / 3 зелёных, все красные коррелируют с load. **Не вешание игрового
+кода.** Митигация: закрыть тяжёлые приложения и перезапустить `run_all.sh` (записано
+в `tests/README.md`).
+
+## 7. Ловушки (список для следующей сессии)
+
+1. **GDScript-лямбды захватывают локальные по значению** — счётчики в контейнере
+   (`var clicks := [0]`).
+2. `var x := arr[0]` не инферит тип — явная аннотация.
+3. `signal.disconnect()` без `is_connected()` — ERROR; паттерн: `is_valid() and is_connected()`.
+4. Готовность мировой сцены: polling по `wc._save_svc != null` (не по `get_hero()`).
+5. `TestFactories.seeded()`: тело хелпера содержит `RandomNumberGenerator.new()` —
+   массовая замена по паттерну рекурсирует в само определение (исключать строку
+   определения).
+6. gdUnit4 4.x: **нет** `--reportJunit` и **нет** флага покрытия (3.x был
+   `--includeCoverage`). Отчёт — нативный `reports/report_*/results.xml`
+   (gitignored, держится 20).
+7. `Godot --check-only --script <file>` БЕЗ проекта не видит автозагрузки —
+   «Identifier not found: Services» = ложный шум; файл должен быть внутри проекта
+   (res://), иначе «File not found» и проверка не работает вовсе.
+8. `stop_project()` + ожидание освобождения порта — обязательно перед новым запуском.
+9. Пустые тела функций/классов = синтаксическая ошибка (GDScript и Python) — при
+   удалении docstring/комментариев вставлять `pass`.
+10. Статические кэши в baseline: имена `_cache|_handlers|_config` фильтруются
+    проверкой; комменты, содержащие «static var», — ложное срабатывание (фильтр
+    `:[0-9]+:#`).
+
+## 8. Открытые предметы
+
+| Приоритет | Предмет | Состояние |
 |---|---|---|
-| `2e410dd` | 6 (Low) | R8 тест-фабрики, R9 мёртвые сцены, R10 мелкие, R14 save-слоты + cleanup run_tests.sh |
-| `f441275` | 5 (Medium) | R6 единая сигнатура TemplateEngine, A2 doc канонического пути заклинаний |
-| `3240751` | 4 (High) | R4 CityCheck единый тип результата, R5 фасад City → сервисы (CityBuildingService и др.) |
-| `419c96c` | 3 (High) | R3 сплит BattleTurnExecutor → executor + BattleAttackSequence + BattleRetreatPolicy |
-| `82a0bb0` | 1–2 | R1 миникарта-точки, R2 единый DI-путь (Services), R7 StaticCaches (re-commit после восстановления .git из бэкапа 2026-09-05) |
+| **High** | Покрытие строк/веток | **Блок:** gdUnit4 4.x без флага; нужен внешний инструмент (решение не принято; pip в venv сломан — установка = новая инфраструктура) |
+| Medium | Прогон `run_all.sh` на чистой машине / свежем клоне | Не сделан; единственный способ снять residual risk по MCP-флейку |
+| Low | Нагрузочный тест World.tscn | Фактически закрыт флейк-анализом (§6) — остался только формальный прогон |
+| — | Коммит истории | Дерево чистое, последний коммит `fac6a27`; предыдущие ключевые: `520a5ae` (комментарии), `7ecebe9` (audit 1–13) |
 
-### Фаза 5 — R6 + A2 (детали)
-- **R6**: все 19 хэндлеров `scripts/data/templates/t0*.gd` — единая сигнатура `static func handle(params: Dictionary, state: Variant, caster: Variant, target: Variant, secondary: Array[Dictionary] = []) -> Dictionary`. `TemplateEngine.execute` диспатчит одним вызовом `_handlers[template].call(params, state, caster, target, secondary)` — ветки по имени `COMBAT_TRICK` больше нет (T05 переведён, `secondary` — последний аргумент).
-- **A2** (спелл-системы не слиты, задокументированы — так и задумано ТЗ):
-  - **Канонический путь боевого каста = `SpellCaster` + `SpellRegistry` (autoload "spells")** — через него идут мировые/боевые заклинания героя (BattleActionResolver, BattleEmulator).
-  - **Карточная система (эмулятор/карточный режим) = `SpellbookRegistry` (autoload "Spellbook", spells.json) + `SpellResolver` + `BattleSpellBridge`** — боевой каст через неё не идёт. Doc-заголовки проставлены во всех пяти файлах.
-  - Дупликация immunity/resistance между SpellCaster и BattleSpellBridge задокументирована, НЕ мерджилась (поведение прижато тестами).
+## 9. Mnemosyne
 
-### Фаза 6 — R8 + R9 + R10 + R14 (детали)
-- **R8**: `TestFactories` (`tests/helpers/test_factories.gd`, глобальный класс) — единственный источник: `make_hero/make_city/make_follower/make_battle_state/make_city_with_temple/seeded`. Локальные `_make_hero` из 5 файлов (succession/hero_survival/hero_combat_death/capacity/follower_race_class) переименованы в `_succession_hero/_survival_hero/_combat_hero/_root_hero/_stub_hero` и строятся на `TestFactories.make_hero(...)`. Три копии `_seeded` удалены → `TestFactories.seeded()`. **Критерий: `grep -rn "func _make_hero" tests/` → только фабрика.** `_make_city/_make_unit` в тестах НЕ переносились — это разные формы, а не дубли (ТЗ требует только `_make_hero`).
-- **R9**: `scenes/ui/HeroSlot.tscn` + `TownSlot.tscn` удалены (ноль ссылок). **CursorController НЕ мёртвый** — живой autoload (project.godot + `services.gd`), покрыт `tests/test_cursor.gd`; пункт P9 аудита устарел.
-- **R10**: `Artifact.from_dict(data)` добавлен, `ArtifactRegistry` (единственный production-лоадер) использует его — цепочка из 12 позиционных аргументов убрана (позиционный `_init` остался для тестов). `EquipmentManager._highest_type` — сентинел `-1` заменён явной `_highest_type_two()` (см. грабли §5). `EconomicTurnProcessor` — doc-комментарий: ход = игровой день, продвигает WorldEventRouter через TurnScheduler.execute_turn, процессоры по приоритету. **P3 и P6 аудита устарели** (`_by_color` уже с String-ключами; хардкод имён городов в HeroLifecycleSystem отсутствует — только runtime `display_name`).
-- **R14**: `SaveManager` (`scripts/core/SaveManager.gd`, НЕ autoload — инстанс создаёт WorldBootstrap) — `load_game()`/`load_game_legacy()` теперь **static** (чисто файловая логика), одноразовый `static load_slot()` (делал `SaveManager.new()` на каждый вызов) удалён; `MainMenu` зовёт `SaveManager.load_game()`. Одиночный слот `user://save_slot_1.json` — имя файла не менять (сиротит сейвы).
-- **run_tests.sh**: после MCP-секции делает `rm -f mcp_interaction_server.gd` + `git checkout -- project.godot` (причина — см. грабли §5).
-
-## 3. Ключевые решения архитектуры (накоплено)
-
-- **City = фасад**: `City extends CityData` (наследование, сознательное отклонение от composition-скетча TASK_09_1), операции — в `CityService` (static) и доменных сервисах (`CityBuildingService`, `CityCheck`, `MarketSystem`, `ZoningSystem`, `CityArenaModel`, `ArenaTurnRunner`). `CityCheck` — единый тип результата (R4).
-- **Battle**: `BattleTurnExecutor` (тонкий) + `BattleAttackSequence` + `BattleRetreatPolicy` (R3).
-- **DI**: единый путь через `Services` (`services.gd`) — registry autoload'ов и фабрик. `StaticCaches.reset_all()` **сознательно НЕ сбрасывает** `TemplateEngine._handlers` (это не сессионный кэш — комментарий в `StaticCaches.gd`).
-- **Заклинания**: см. A2 в §2 (канон vs карточная система).
-
-## 4. Git
-
-- HEAD: `2e410dd` (закрытие TASK_10). Репозиторий — `git` в корне; `game/` — подкаталог Godot-проекта.
-- **`.uid`-файлы ТРЕКИРОВАТЬ** (Godot 4.4+ UID-скриптов, 600+ в индексе) — новый `.gd` коммитить вместе со своим `.uid`.
-- `.gitignore`: `venv/`, `__pycache__/`, `tmp/`, `.godot/`, `reports/`.
-- После любой MCP-секции проверять `git status` на `project.godot` (см. §5) — но `run_tests.sh` теперь чистит сам.
-
-## 5. Грабли (научено на собственных костях)
-
-1. **Godot 4.7.2 не принимает nullable-enum в сигнатурах функций**: `b_slot: Artifact.Slot? = null` → `Parse Error: Expected closing ")" after function parameters`. Лечить: отдельная функция для пары/опциона (см. `_highest_type_two`) или plain-типы.
-2. **Касты enum-функций не работают**: `Slot(x)`, `Rarity(x)`, `AcBonusType(x)` → `Member "Slot" is not a function`. Enum-значения — это int: присваивать напрямую в enum-типизированную переменную (`a.slot = data.get("slot", Slot.MISC_A)`).
-3. **Вендорный MCP-сервер инжектит** `mcp_interaction_server.gd` + autoload-строку в `project.godot` на `run_project` и при выгрузке оставляет в project.godot пустые строки (autoload-строку убирает, строки — нет). Решение: cleanup в конце `run_tests.sh`. Если запускать MCP-тесты вручную — чистить руками: `rm -f mcp_interaction_server.gd mcp_interaction_server.gd.uid && git checkout -- project.godot`.
-4. **MCP-тесты чувствительны к состоянию**: запущенные подряд прогоны по грязному дереву (остаточный `mcp_interaction_server.gd`) дают ложные `TimeoutError: Game interaction server did not become ready in time`. Лечится очисткой + повтором. `GODOT_PROJECT_PATH` — **только абсолютный путь** (относительный → `run_project failed: Invalid project path`).
-5. **CursorController — не трогать**: живой autoload, работает через сигналы GameEventBus; `MODE_ASSETS` с пустыми `"path": ""` — осознанно (ассеты не идентифицированы, tasks 0.1–0.2 из git-истории), курсор всегда остаётся DEFAULT arrow.
-6. **Перед удалением «мёртвого» кода** из аудита: `grep -rn` по всем расширением (.gd/.tscn/.py/project.godot) + поиск тестов. Два пункта аудита (P9, и частично P3/P6) оказались устаревшими — код за временем аудита уже менялся.
-7. GDScript-глобы: `t0*.gd` НЕ накрывает `t10..t19` — использовать `t*.gd` или два глоба (попало на это при массовом правлении хэндлеров).
-8. GdUnit4 exit codes: 0 = pass, **101 = только orphan-предупреждения (допустимо)**, 100 и прочие = реальные падения (обёртка run_tests.sh это учитывает).
-
-## 6. Что можно делать дальше (кандидаты, не из TASK_10)
-
-- **tasks 0.1–0.2**: идентифицировать ассеты `assets/cursors/cursor_01..32.png` и заполнить `MODE_ASSETS` в `CursorController.gd` (сейчас курсор-моды визуально ничего не меняют).
-- Мульти-слот сейвов, если понадобится (сейчас один слот; `SaveManager.load_game` static, расширение на `save_game(slot)`/`load_game(slot)` ляжет ровно на имена файлов).
-- Опциональный дедуп immunity/resistance между `SpellCaster` и `BattleSpellBridge` (задокументировано в A2; сначала расширить тесты).
-- Рост тестовой базы: gdUnit4 1300 кейсов, MCP 13.
-
-## 7. Стилистика проекта
-
-- Комментарии/доки — на русском, код — английский идентификаторы.
-- Фазовая работа: коммит на фазу, зелёный прогон `run_tests.sh` перед коммитом, отклонения от скетча ТЗ фиксировать явно (как в TASK_09_1 с наследованием вместо composition).
-- Ponytail-принципы: минимальный diff, stdlib/нативное вперёд, YAGNI; осознанные упрощения помечать `ponytail:` с указанием потолка и пути апгрейда.
+В памяти проекта заведены: факты про gdUnit4/отчёты, MCP-флейк и финальные
+константы (`READY_TIMEOUT=900`, пер-eval 60, retry на `_SdkMCPError`), lambda by-value,
+post-cleanup baseline (135/1266, состав ServiceRegistry, `_shift_right`).
+Восстанавливать контекст: `mnemosyne_recall` по теме.
