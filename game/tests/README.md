@@ -26,9 +26,11 @@ bash tests/run_all.sh
 - `unit/` — модульные (data/, systems/, world/, entities/, ui/)
 - `functional/` — запуск сцен, перф
 - `integration/` — несколько систем + автозагрузки
-- `core/`, `systems/`, `world/` — легаси-каталоги (26 сьютов), не переносить
-  без необходимости
-- `mcp/` — Python-тесты через godot-mcp (conftest.py, godot_mcp.py)
+- `core/`, `systems/` — легаси-каталоги (24 сьюта), не переносить без
+  необходимости
+- `mcp/` — Python-тесты через godot-mcp (conftest.py, godot_mcp.py); фикстуры
+  `battle_scene` / `world_scene` / `full_game` (мир + `WorldBootstrap`
+  до конца)
 - `helpers/factories.gd` — фабрики (`TestFactories`), единственный источник
 - `fakes/`, `spell_validation/` — стабы и харнесс валидации заклинаний
 - `static_var_baseline.txt` — зафиксированный набор `static var`
@@ -49,6 +51,10 @@ bash tests/run_all.sh
 
 ## Правила
 
+- Именование сьютов — `test_*.gd` (gdUnit4 discovers по `extends
+  GdUnitTestSuite`, имена файлов свободны). `*Test.gd` — легаси, новые так не
+  называть. `gdunit4.cfg` / конфигурационный файл в gdUnit4 4.x отсутствует —
+  единая точка входа `bash tests/run_all.sh`.
 - Все `RandomNumberGenerator` в тестах — через `TestFactories.seeded(<seed>)`
   (seed по файлу; тело `seeded()` в factories.gd держать как есть —
   массовая замена рекурсирует в само определение).

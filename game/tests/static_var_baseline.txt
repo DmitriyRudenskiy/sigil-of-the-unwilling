@@ -1,4 +1,3 @@
-scripts/core/HexUtils.gd: _shift_right
 scripts/core/ShardManager.gd: _instance
 scripts/data/BattleSpellBridge.gd: _EFFECT_TO_KEYWORD
 scripts/data/BattleSpellBridge.gd: KEYWORD_TO_EFFECT

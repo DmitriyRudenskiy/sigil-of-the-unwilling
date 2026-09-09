@@ -6,7 +6,6 @@ def test_session_reset_caches(world_scene):
     result = mcp.execute_code("""
         var ri = load("res://scripts/data/ResourceIcons.gd")
         var acs = load("res://scripts/city/ArenaClusterSystem.gd")
-        var model = load("res://scripts/city/CityArenaModel.gd")
         var runner = load("res://scripts/city/ArenaTurnRunner.gd")
         var ring = load("res://scripts/city/ArenaRingSystem.gd")
         var defs = load("res://scripts/data/BuildingDefs.gd")
@@ -14,7 +13,7 @@ def test_session_reset_caches(world_scene):
 
         # ── Сессия 1: город с кластером из 4 ферм ──
         acs.reset()
-        var city = model.make_city()
+        var city = runner.make_city()
         var neighbors = hex.get_all_neighbors(ring.center())
         for i in 4:
             var res = runner.place_building(city, defs.farm(), neighbors[i])
