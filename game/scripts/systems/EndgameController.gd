@@ -105,8 +105,8 @@ func _player_cities_left() -> int:
 	var left := 0
 	if _cities_mgr == null:
 		return left
-	for c in _cities_mgr.cities:
-		if c != null and c.owner == &"player":
+	for city in _cities_mgr.cities:
+		if city != null and city.owner == &"player":
 			left += 1
 	return left
 

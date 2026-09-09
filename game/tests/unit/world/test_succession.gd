@@ -113,8 +113,8 @@ func test_transfer_preserves_cities_identical() -> void:
 	mgr.set_capital(cap)
 	mgr.current_turn = 12
 	mgr.add_glory(40.0, &"victory")
-	for c in cities:
-		mgr.register_city(c)
+	for city in cities:
+		mgr.register_city(city)
 
 	_Succession.new().transfer_legend(h, succ, cities, mgr)
 
@@ -125,8 +125,8 @@ func test_transfer_preserves_cities_identical() -> void:
 	assert_that(mgr.current_turn).is_equal(12)
 
 	var total_storage := 0.0
-	for c in mgr.cities:
-		total_storage += float(c.storage.get("industry", 0.0))
+	for city in mgr.cities:
+		total_storage += float(city.storage.get("industry", 0.0))
 	assert_float(total_storage).is_equal_approx(1800.0, 0.01)
 	h.free(); succ.free(); mgr.free()
 

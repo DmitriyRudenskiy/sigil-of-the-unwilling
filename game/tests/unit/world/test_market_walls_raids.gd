@@ -36,8 +36,8 @@ func test_defense_strength_militia_and_walls() -> void:
 	assert_that(c.defense_strength()).is_equal(6)
 	_add_building(c, _BuildingDefs.walls(), 1)
 	assert_that(c.defense_strength()).is_equal(11)
-	for b in c.buildings:
-		b.level = 3
+	for building in c.buildings:
+		building.level = 3
 	assert_that(c.defense_strength()).is_equal(21)
 
 func test_market_trade_ok() -> void:

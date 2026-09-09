@@ -115,8 +115,8 @@ func test_set_tile_yield_provider() -> void:
 	var yield_fn := func(_cell: Vector2i) -> Dictionary:
 		return {&"food": 50.0, &"industry": 5.0, &"dust": 0.0, &"science": 0.0, &"influence": 0.0}
 	manager.set_tile_yield_provider(yield_fn)
-	for c in manager.cities:
-		assert_bool(c.tile_yield_fn != null).is_true()
+	for city in manager.cities:
+		assert_bool(city.tile_yield_fn != null).is_true()
 
 func test_on_turn_ended_month_13() -> void:
 	var report := manager.on_turn_ended(13)

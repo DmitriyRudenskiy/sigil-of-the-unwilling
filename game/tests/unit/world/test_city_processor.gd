@@ -8,8 +8,8 @@ func _cell_at_distance(city: City, d: int) -> Vector2i:
 	var seen: Dictionary = {city.center: true}
 	for _i in 200:
 		var next: Array = []
-		for c in frontier:
-			for nb in HexUtils.get_all_neighbors(c):
+		for cell in frontier:
+			for nb in HexUtils.get_all_neighbors(cell):
 				if seen.has(nb):
 					continue
 				seen[nb] = true
@@ -24,8 +24,8 @@ func _cell_at_distance_from(from: Vector2i, d: int) -> Vector2i:
 	var seen: Dictionary = {from: true}
 	for _i in 200:
 		var next: Array = []
-		for c in frontier:
-			for nb in HexUtils.get_all_neighbors(c):
+		for cell in frontier:
+			for nb in HexUtils.get_all_neighbors(cell):
 				if seen.has(nb):
 					continue
 				seen[nb] = true

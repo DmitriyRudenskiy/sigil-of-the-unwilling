@@ -104,9 +104,9 @@ static func finalize(parent: Node2D, R: BootstrapResult, visibility, persistence
 	persistence.visibility = visibility
 	var sight_sources: Array = []
 	if R.cities != null:
-		for c in R.cities.cities:
-			if c != null and c.owner == &"player" and c.center is Vector2i:
-				sight_sources.append(c.center)
+		for city in R.cities.cities:
+			if city != null and city.owner == &"player" and city.center is Vector2i:
+				sight_sources.append(city.center)
 	visibility.recompute(R.hero.current_cell, sight_sources,
 		GameNumbers.FOG_HERO_SIGHT, GameNumbers.FOG_CITY_SIGHT)
 	if R.map_gen.has_valid_tilemap():
@@ -371,10 +371,10 @@ static func _register_enemy_ai(R: BootstrapResult) -> void:
 				var hp: Variant = hero.get("current_cell") if hero != null else null
 				if hp is Vector2i:
 					var fog = map_gen.visibility
-					for c in map_gen.enemy_stacks:
-						if HexUtils.hex_distance(hp, c) <= GameNumbers.ENEMY_AGGRO_RADIUS \
-								and (fog == null or fog.is_visible(c)):
-							cells.append(c)
+					for cell in map_gen.enemy_stacks:
+						if HexUtils.hex_distance(hp, cell) <= GameNumbers.ENEMY_AGGRO_RADIUS \
+								and (fog == null or fog.is_visible(cell)):
+							cells.append(cell)
 				markers.set_threat_markers(cells)
 				if int(report.get("moved", 0)) > 0:
 					ui.set_status("Враги движутся")
@@ -388,8 +388,8 @@ static func _register_economy(R: BootstrapResult) -> void:
 	var resources_reg: Node = Services.resolve(&"resources")
 	if resources_reg != null:
 		defs = resources_reg.get_all()
-	for c in R.cities.cities:
-		c.ensure_resource_ctx(defs)
+	for city in R.cities.cities:
+		city.ensure_resource_ctx(defs)
 
 	var econ := EconomicTurnProcessor.new()
 	R.turn_scheduler.register_processor(econ)

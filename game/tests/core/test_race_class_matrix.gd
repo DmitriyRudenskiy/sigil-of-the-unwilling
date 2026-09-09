@@ -32,9 +32,9 @@ func test_races_are_unique() -> void:
 func test_classes_are_unique() -> void:
 	registry.ensure()
 	var ids: Array = []
-	for c in registry.all_classes():
-		assert_bool(not ids.has(c.id)).is_true()
-		ids.append(c.id)
+	for cls in registry.all_classes():
+		assert_bool(not ids.has(cls.id)).is_true()
+		ids.append(cls.id)
 
 func test_elf_ability_adjustments() -> void:
 	registry.ensure()

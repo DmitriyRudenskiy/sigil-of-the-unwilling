@@ -91,10 +91,10 @@ func set_city_markers(cities: Array) -> void:
 	_city_marks.clear()
 	if _map_gen == null or not _map_gen.has_valid_tilemap():
 		return
-	for c in cities:
-		if c == null:
+	for city in cities:
+		if city == null:
 			continue
-		_city_marks.append({"cell": c.center, "pos": _map_gen.map_to_local(c.center), "city": c})
+		_city_marks.append({"cell": city.center, "pos": _map_gen.map_to_local(city.center), "city": city})
 	queue_redraw()
 
 func city_at_cell(cell: Vector2i) -> City:
@@ -108,9 +108,9 @@ func set_threat_markers(cells: Array) -> void:
 	if _map_gen == null or not _map_gen.has_valid_tilemap():
 		queue_redraw()
 		return
-	for c in cells:
-		if c is Vector2i:
-			_threat_pos.append(_map_gen.map_to_local(c))
+	for cell in cells:
+		if cell is Vector2i:
+			_threat_pos.append(_map_gen.map_to_local(cell))
 	queue_redraw()
 
 func set_terrain_resource_markers(terrain_mgr: Variant) -> void:

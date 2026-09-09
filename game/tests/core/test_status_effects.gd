@@ -14,8 +14,8 @@ func test_debuff_classification() -> void:
 
 	for d in debuffs:
 		assert_bool(_StatusEffects.is_debuff(d)).is_true()
-	for b in buffs:
-		assert_bool(_StatusEffects.is_debuff(b)).is_false()
+	for status in buffs:
+		assert_bool(_StatusEffects.is_debuff(status)).is_false()
 
 func test_stun_classification() -> void:
 	assert_bool(_StatusEffects.is_stun(_StatusEffects.Effect.PETRIFIED)).is_true()

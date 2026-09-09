@@ -15,8 +15,8 @@ const RATES: Dictionary = {
 }
 
 static func has_market(city: City) -> bool:
-	for b in city.buildings:
-		if b != null and b.def != null and b.def.id == &"market":
+	for building in city.buildings:
+		if building != null and building.def != null and building.def.id == &"market":
 			return true
 	return false
 

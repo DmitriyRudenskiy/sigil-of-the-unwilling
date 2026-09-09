@@ -27,7 +27,7 @@ func test_cast_emits_spell_cast_executed() -> void:
 	state.active_unit = caster
 
 	var state_holder: Array = [false, {}]
-	exec.spell_cast_executed.connect(func(_c, _t, r):
+	exec.spell_cast_executed.connect(func(_caster, _target, r):
 		state_holder[0] = true
 		state_holder[1] = r
 	)
@@ -63,7 +63,7 @@ func test_request_sacrifice_emits_and_finishes() -> void:
 	state.active_unit = atk
 
 	var holder: Array = [false, {}]
-	exec.execute_sacrifice.connect(func(_a, _t, _c, r):
+	exec.execute_sacrifice.connect(func(_acting, _target, _cost, r):
 		holder[0] = true
 		holder[1] = r
 	)
@@ -85,7 +85,7 @@ func test_request_sacrifice_guard_when_idle() -> void:
 	var atk: BattleState.BattleUnit = state.attacker_units[0]
 	var def: BattleState.BattleUnit = state.defender_units[0]
 	var fired := false
-	exec.execute_sacrifice.connect(func(_a, _t, _c, _r):
+	exec.execute_sacrifice.connect(func(_acting, _target, _cost, _r):
 		fired = true
 	)
 	var storage := {&"gold": 100}

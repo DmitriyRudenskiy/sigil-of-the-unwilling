@@ -84,11 +84,11 @@ func advance_toward(state: BattleState, u: BattleState.BattleUnit, target: Battl
 	var reachable := state.get_reachable_for_unit(u, func() -> Dictionary: return blocked)
 	var best := u.cell
 	var best_d := HexUtils.hex_distance(u.cell, target.cell)
-	for c in reachable:
-		var d := HexUtils.hex_distance(c, target.cell)
+	for cell in reachable:
+		var d := HexUtils.hex_distance(cell, target.cell)
 		if d < best_d:
 			best_d = d
-			best = c
+			best = cell
 	if best != u.cell:
 		BattleActionResolver.do_move(state, u, best)
 

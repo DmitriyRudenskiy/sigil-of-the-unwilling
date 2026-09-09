@@ -42,10 +42,10 @@ static func reputation_band(c: CityData) -> int:
 	return ReputationSystem.band(c.reputation)
 static func housing_capacity(c: CityData, state: int) -> int:
 	var n := 0
-	for b in c.buildings:
-		if b == null or b.def == null:
+	for building in c.buildings:
+		if building == null or building.def == null:
 			continue
-		n += int(b.def.housing.get(state, 0))
+		n += int(building.def.housing.get(state, 0))
 	return n
 static func housing_total(c: CityData) -> int:
 	var n := 0
@@ -67,8 +67,8 @@ static func immigrant_state(c: CityData) -> int:
 	return -1
 static func approval(c: CityData) -> int:
 	var a := 0
-	for b in c.boroughs:
-		a += b.net_approval()
+	for borough in c.boroughs:
+		a += borough.net_approval()
 	if c.starving:
 		a -= GameNumbers.STARVING_APPROVAL_PENALTY
 	return a
@@ -78,15 +78,15 @@ static func find_pop(c: CityData, p_uid: int) -> PopUnit:
 			return u
 	return null
 static func get_building_at(c: CityData, cell: Vector2i) -> UniqueBuilding:
-	for b in c.buildings:
-		if b.cell == cell:
-			return b
+	for building in c.buildings:
+		if building.cell == cell:
+			return building
 	return null
 static func cell_is_built(c: CityData, cell: Vector2i) -> bool:
 	if cell == c.center:
 		return true
-	for b in c.boroughs:
-		if b.cell == cell:
+	for borough in c.boroughs:
+		if borough.cell == cell:
 			return true
 	for bl in c.buildings:
 		if bl.cell == cell:
@@ -99,9 +99,9 @@ static func building_max_distance(c: CityData) -> int:
 static func ring_of(c: CityData, cell: Vector2i) -> int:
 	return HexUtils.hex_distance(cell, c.center)
 static func get_great_temple_level(c: CityData) -> int:
-	for b in c.buildings:
-		if b.def != null and b.def.id == &"great_temple":
-			return b.level
+	for building in c.buildings:
+		if building.def != null and building.def.id == &"great_temple":
+			return building.level
 	return 0
 static func can_resurrect(c: CityData, required: Dictionary) -> bool:
 	if get_great_temple_level(c) < 1:
@@ -179,9 +179,9 @@ static func _take_free_followers(c: CityData, n: int, relocate_to: CityData) -> 
 
 static func defense_strength(city: City) -> int:
 	var d := count_state(city, PopUnit.State.MILITIA) * GameNumbers.RAID_DEF_PER_MILITIA
-	for b in city.buildings:
-		if b != null and b.def != null and b.def.id == &"walls":
-			d += b.level * GameNumbers.RAID_DEF_PER_WALL
+	for building in city.buildings:
+		if building != null and building.def != null and building.def.id == &"walls":
+			d += building.level * GameNumbers.RAID_DEF_PER_WALL
 	d += SpecializationSystem.defense_bonus(city)
 	return d
 

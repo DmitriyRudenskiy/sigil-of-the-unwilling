@@ -20,8 +20,8 @@ func assert_eq_cells(cells: Array, expected: Array, msg: String) -> void:
 
 func _cells_to_str(cells: Array) -> String:
 	var parts: Array = []
-	for c in cells:
-		parts.append(str(c))
+	for cell in cells:
+		parts.append(str(cell))
 	return "[" + ", ".join(parts) + "]"
 
 func _teardown() -> void:

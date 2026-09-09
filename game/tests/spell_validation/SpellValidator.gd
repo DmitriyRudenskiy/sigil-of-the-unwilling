@@ -595,9 +595,9 @@ func _validate_balance() -> void:
 	report.stats["color_distribution"] = color_counts
 	var max_color := 0
 	var min_color := 999999
-	for c in color_counts:
-		max_color = maxi(max_color, int(color_counts[c]))
-		min_color = mini(min_color, int(color_counts[c]))
+	for color in color_counts:
+		max_color = maxi(max_color, int(color_counts[color]))
+		min_color = mini(min_color, int(color_counts[color]))
 	if color_counts.size() > 1 and float(max_color) > float(min_color) * 4.0:
 		report.info("I922", "Color imbalance: max=%d, min=%d (ratio %.1f)" % [max_color, min_color, float(max_color) / float(min_color)])
 

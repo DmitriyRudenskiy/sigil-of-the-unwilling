@@ -134,9 +134,9 @@ func _refresh_visibility() -> void:
 	if hero != null and hero.current_cell is Vector2i:
 		sources.append(hero.current_cell)
 	if cities != null:
-		for c in cities.cities:
-			if c != null and c.owner == &"player" and c.center is Vector2i:
-				sources.append(c.center)
+		for city in cities.cities:
+			if city != null and city.owner == &"player" and city.center is Vector2i:
+				sources.append(city.center)
 	visibility.set_map_size(map_gen.map_width, map_gen.map_height)
 	if visibility.recompute(hero.current_cell, sources,
 		GameNumbers.FOG_HERO_SIGHT, GameNumbers.FOG_CITY_SIGHT):
@@ -262,8 +262,8 @@ func _run_turn_scheduler(month: int) -> void:
 	ctx.month = int(date.get("month", 1))
 	ctx.week = int(date.get("week", 1))
 	ctx.day = int(date.get("day", 1))
-	for c in cities.cities:
-		ctx.cities.append(c)
+	for city in cities.cities:
+		ctx.cities.append(city)
 	if hero != null:
 		ctx.heroes.append(hero)
 	var report: Dictionary = turn_scheduler.execute_turn(ctx)

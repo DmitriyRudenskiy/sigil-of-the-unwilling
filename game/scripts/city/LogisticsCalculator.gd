@@ -14,8 +14,8 @@ static func distance_multiplier(city: City, cell: Vector2i) -> float:
 
 static func distance_to_body(city: City, cell: Vector2i) -> int:
 	var best: int = HexUtils.hex_distance(cell, city.center)
-	for b in city.boroughs:
-		best = mini(best, HexUtils.hex_distance(cell, b.cell))
+	for borough in city.boroughs:
+		best = mini(best, HexUtils.hex_distance(cell, borough.cell))
 	return best
 
 static func has_road_near(city: City, cell: Vector2i) -> bool:

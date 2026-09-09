@@ -2,9 +2,9 @@ extends GdUnitTestSuite
 
 func test_offset_cube_roundtrip() -> void:
 	var cells: Array[Vector2i] = [Vector2i.ZERO, Vector2i(3, -2), Vector2i(-5, 7), Vector2i(10, 10), Vector2i(-1, 0)]
-	for c in cells:
-		var back := HexUtils.cube_to_offset(HexUtils.offset_to_cube(c))
-		assert_vector(back).is_equal(c)
+	for cell in cells:
+		var back := HexUtils.cube_to_offset(HexUtils.offset_to_cube(cell))
+		assert_vector(back).is_equal(cell)
 
 func test_even_row_mode() -> void:
 	HexGrid.shift_right = false
@@ -42,8 +42,8 @@ func test_ring_sizes_and_distances() -> void:
 	for r in [2, 3, 5]:
 		var ring := HexUtils.ring(center, r)
 		assert_array(ring).has_size(r * 6)
-		for c in ring:
-			assert_int(HexUtils.hex_distance(center, c)).is_equal(r)
+		for cell in ring:
+			assert_int(HexUtils.hex_distance(center, cell)).is_equal(r)
 
 func test_get_all_neighbors_six_distinct() -> void:
 	var nbs := HexUtils.get_all_neighbors(Vector2i(5, 3))
@@ -57,6 +57,6 @@ func test_get_all_neighbors_six_distinct() -> void:
 func test_idx_roundtrip() -> void:
 	var w := 25
 	var h := 18
-	for c in [Vector2i.ZERO, Vector2i(w - 1, h - 1), Vector2i(7, 3)]:
-		var idx := HexUtils.pos_to_idx(c, w)
-		assert_vector(HexUtils.idx_to_pos(idx, w)).is_equal(c)
+	for cell in [Vector2i.ZERO, Vector2i(w - 1, h - 1), Vector2i(7, 3)]:
+		var idx := HexUtils.pos_to_idx(cell, w)
+		assert_vector(HexUtils.idx_to_pos(idx, w)).is_equal(cell)

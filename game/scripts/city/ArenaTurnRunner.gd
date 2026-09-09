@@ -104,8 +104,8 @@ static func arena_tile_free(city: City, tile: Vector2i, except_uid: int = -1) ->
 		return false
 	if HexUtils.hex_distance(tile, city.center) != 1:
 		var adj := false
-		for b in city.boroughs:
-			if HexUtils.hex_distance(tile, b.cell) == 1:
+		for borough in city.boroughs:
+			if HexUtils.hex_distance(tile, borough.cell) == 1:
 				adj = true
 				break
 		if not adj:
@@ -131,8 +131,8 @@ static func seat_workers(city: City) -> int:
 			continue
 		var ok: bool = HexUtils.hex_distance(cell, city.center) == 1
 		if not ok:
-			for b in city.boroughs:
-				if HexUtils.hex_distance(cell, b.cell) == 1:
+			for borough in city.boroughs:
+				if HexUtils.hex_distance(cell, borough.cell) == 1:
 					ok = true
 					break
 		if ok:
@@ -174,13 +174,13 @@ static func _hire_workers(city: City) -> int:
 	return hired
 
 static func _has_free_worker_slot(city: City) -> bool:
-	for b in city.buildings:
-		if b == null or b.def == null:
+	for building in city.buildings:
+		if building == null or building.def == null:
 			continue
-		var chain: ProductionChain = b.get_production_chain()
+		var chain: ProductionChain = building.get_production_chain()
 		if chain == null:
 			continue
-		if b.assigned_workers < chain.required_workers:
+		if building.assigned_workers < chain.required_workers:
 			return true
 	return false
 

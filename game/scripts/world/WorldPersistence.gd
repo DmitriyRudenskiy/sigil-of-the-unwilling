@@ -59,8 +59,8 @@ func save_game(hero: HeroController, cities: Array = [], characters: Array = [])
 		world_delta.set_fog_explored(visibility.serialize_explored())
 	save_data.world = world_delta.serialize()
 	var cities_arr: Array = []
-	for c in cities:
-		cities_arr.append(c.serialize())
+	for city in cities:
+		cities_arr.append(city.serialize())
 	save_data.cities = cities_arr
 	save_data.characters = characters
 	save_data.session = session.serialize()
@@ -239,9 +239,9 @@ func _recompute_visible(visibility, ctx) -> void:
 		sources.append(ctx.hero.current_cell)
 	var cm = ctx.cities
 	if cm != null:
-		for c in cm.cities:
-			if c != null and c.owner == &"player" and c.center is Vector2i:
-				sources.append(c.center)
+		for city in cm.cities:
+			if city != null and city.owner == &"player" and city.center is Vector2i:
+				sources.append(city.center)
 	visibility.set_map_size(ctx.map_gen.map_width, ctx.map_gen.map_height)
 	if visibility.recompute(ctx.hero.current_cell, sources,
 		GameNumbers.FOG_HERO_SIGHT, GameNumbers.FOG_CITY_SIGHT):
@@ -274,15 +274,15 @@ func _restore_cities(data: SaveData, ctx) -> void:
 		GameLogger.world("Loaded cities: %d" % restored)
 
 func _find_city(all: Array, city_uid: int, saved_count: int, saved_center: Variant) -> City:
-	for c in all:
-		if c.uid == city_uid:
-			return c
+	for city in all:
+		if city.uid == city_uid:
+			return city
 
 	if saved_center is Dictionary:
 		var cell := Vector2i(int(saved_center.get("x", 0)), int(saved_center.get("y", 0)))
-		for c in all:
-			if c.center == cell:
-				return c
+		for city in all:
+			if city.center == cell:
+				return city
 	if all.size() == 1 and saved_count == 1:
 		return all[0]
 	return null

@@ -22,18 +22,18 @@ static func clusters(city: City) -> Array:
 
 static func _compute_clusters(city: City) -> Array:
 	var by_def: Dictionary = {}
-	for b in city.buildings:
-		if b == null or b.def == null:
+	for building in city.buildings:
+		if building == null or building.def == null:
 			continue
-		if not by_def.has(b.def.id):
-			by_def[b.def.id] = []
-		(by_def[b.def.id] as Array).append(b)
+		if not by_def.has(building.def.id):
+			by_def[building.def.id] = []
+		(by_def[building.def.id] as Array).append(building)
 	var out: Array = []
 	for def_id in by_def:
 		var bldgs: Array = by_def[def_id]
 		var by_cell: Dictionary = {}
-		for b in bldgs:
-			by_cell[(b as UniqueBuilding).cell] = b
+		for building in bldgs:
+			by_cell[(building as UniqueBuilding).cell] = building
 		var seen: Dictionary = {}
 		for b0 in bldgs:
 			var start: UniqueBuilding = b0
@@ -52,8 +52,8 @@ static func _compute_clusters(city: City) -> Array:
 						stack.append(nb_b)
 			if comp.size() >= GameNumbers.ARENA_CLUSTER_MIN:
 				var cells: Array[Vector2i] = []
-				for b in comp:
-					cells.append((b as UniqueBuilding).cell)
+				for building in comp:
+					cells.append((building as UniqueBuilding).cell)
 				out.append({"def_id": def_id, "cells": cells, "buildings": comp})
 	out.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		var ca: Vector2i = (a["cells"] as Array)[0]
@@ -66,8 +66,8 @@ static func cluster_uids(city: City) -> Dictionary:
 		return {}
 	var m: Dictionary = {}
 	for cl in clusters(city):
-		for b in (cl as Dictionary)["buildings"]:
-			m[(b as UniqueBuilding).uid] = GameNumbers.ARENA_CLUSTER_MULT
+		for building in (cl as Dictionary)["buildings"]:
+			m[(building as UniqueBuilding).uid] = GameNumbers.ARENA_CLUSTER_MULT
 	return m
 
 static func cluster_worker_housing(city: City) -> int:

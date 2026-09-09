@@ -27,7 +27,7 @@ func test_spell_chosen_panel_closes() -> void:
 	exec.setup(state, BattleAI.new(), {})
 	state.active_unit = state.attacker_units[0]
 	var emitted_holder: Array = [false]
-	exec.spell_cast_executed.connect(func(_c, _t, _r):
+	exec.spell_cast_executed.connect(func(_caster, _target, _r):
 		emitted_holder[0] = true
 	)
 	exec.on_spell_target_selected(&"magic_arrow", state.defender_units[0])

@@ -82,15 +82,15 @@ static func apply_ring_multipliers(city: City, overrides: Dictionary = {},
 	var clm: Dictionary = ArenaClusterSystem.cluster_uids(city)
 	var storm: float = ArenaStorm.storm_production_mult(city, turn)
 	var n := 0
-	for b in city.buildings:
-		if b == null or b.def == null:
+	for building in city.buildings:
+		if building == null or building.def == null:
 			continue
-		var m: float = 1.0 + ring_bonus(b.def.id, ring_of(b.cell), overrides)
-		m *= float(clm.get(b.uid, 1.0))
-		m *= feature_mult(city, b.def.id, b.cell)
+		var m: float = 1.0 + ring_bonus(building.def.id, ring_of(building.cell), overrides)
+		m *= float(clm.get(building.uid, 1.0))
+		m *= feature_mult(city, building.def.id, building.cell)
 		if storm < 1.0:
 			m *= storm
-		b.zone_multiplier = m
+		building.zone_multiplier = m
 		n += 1
 	return n
 

@@ -24,8 +24,8 @@ func _make_wc(cities: Array[City], controller: _Succession) -> WorldController:
 	var wc := _WorldController.new()
 	wc._rng = TestFactories.seeded(7827)
 	var mgr := _CityManager.new()
-	for c in cities:
-		mgr.register_city(c)
+	for city in cities:
+		mgr.register_city(city)
 	wc._cities = mgr
 	wc._succession = controller
 	var sys := _HeroLifecycle.new()

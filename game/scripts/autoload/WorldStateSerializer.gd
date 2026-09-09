@@ -77,8 +77,8 @@ func get_state(world_ctrl, battle_ctrl) -> Dictionary:
 		var cities_mgr = world_ctrl.get_cities()
 		if cities_mgr != null:
 			var city_list: Array = []
-			for c in cities_mgr.cities:
-				city_list.append(_city_serializer.city_state_dict(c))
+			for city in cities_mgr.cities:
+				city_list.append(_city_serializer.city_state_dict(city))
 			state.cities = city_list
 			state.capital = _city_serializer.city_state_dict(cities_mgr.capital)
 		var ui_mgr = world_ctrl.get_ui_manager()

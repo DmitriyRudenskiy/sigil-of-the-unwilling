@@ -93,8 +93,8 @@ func _make_wc(cities: Array, persistence: _MockPersistence = null) -> _WorldCont
 	var wc := _WorldController.new()
 	wc._rng = TestFactories.seeded(2128)
 	var mgr := _CityManager.new()
-	for c in cities:
-		mgr.register_city(c)
+	for city in cities:
+		mgr.register_city(city)
 	wc.add_child(mgr)
 	wc._cities = mgr
 	wc._succession = _Succession.new()

@@ -16,8 +16,8 @@ func test_make_battle_state_custom_keys() -> void:
 func test_make_city_with_temple() -> void:
 	var city := TestFactories.make_city_with_temple()
 	var found := false
-	for b in city.buildings:
-		if b.def != null and b.def.id == &"great_temple" and b.level == 2:
+	for building in city.buildings:
+		if building.def != null and building.def.id == &"great_temple" and building.level == 2:
 			found = true
 	assert_bool(found).is_true()
 

@@ -179,12 +179,12 @@ func test_get_unreachable_ring() -> void:
 
 	assert_bool(ring.has(unit.cell)).is_false().override_failure_message("unreachable ring must not include the unit's own cell")
 
-	for c in ring:
-		assert_bool(reachable.has(c)).is_false().override_failure_message("unreachable ring must not overlap the walkable set: %s" % c)
+	for cell in ring:
+		assert_bool(reachable.has(cell)).is_false().override_failure_message("unreachable ring must not overlap the walkable set: %s" % cell)
 
 	var near: Dictionary = state.get_reachable(unit.cell, unit.get_speed() + 1, blocked, unit)
-	for c in ring:
-		assert_bool(near.has(c)).is_true().override_failure_message("unreachable ring cell must be reachable in speed+1 steps: %s" % c)
+	for cell in ring:
+		assert_bool(near.has(cell)).is_true().override_failure_message("unreachable ring cell must be reachable in speed+1 steps: %s" % cell)
 
 func test_flying_unit_placement() -> void:
 	var state = load("res://scripts/systems/BattleState.gd").new()

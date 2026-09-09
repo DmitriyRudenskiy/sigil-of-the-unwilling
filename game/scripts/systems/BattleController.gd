@@ -135,8 +135,13 @@ func _on_spell_chosen(spell_id: StringName) -> void:
 	if not _executor.is_input_active():
 		return
 	var reg: Node = Services.resolve(&"spells")
+	if reg == null:
+		GameLogger.error("Spell registry unavailable", "Battle")
+		return
 	var spell = reg.get_spell(spell_id)
-	if spell == null: return
+	if spell == null:
+		GameLogger.warn("Unknown spell: %s" % spell_id, "Battle")
+		return
 	var ally_side := BattleState.Side.ATTACKER
 	var enemy_side := BattleState.Side.DEFENDER
 	var side := ally_side if spell.target_type == SpellRegistry.TargetType.SINGLE_ALLY else enemy_side

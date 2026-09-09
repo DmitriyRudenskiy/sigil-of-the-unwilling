@@ -20,7 +20,7 @@ static func cast(
 	var is_res := spell_id == &"resurrection"
 
 	var reg: Node = registry if registry != null else Services.resolve(&"spells")
-	var spell: SpellRegistry.SpellDef = reg.get_spell(spell_id)
+	var spell: SpellRegistry.SpellDef = reg.get_spell(spell_id) if reg != null else null
 	if spell == null:
 		return {"result": "not_found"}
 

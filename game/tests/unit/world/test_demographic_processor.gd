@@ -124,9 +124,9 @@ func test_critical_signal_once_per_episode() -> void:
 	proc.process(_ctx(1))
 	var ch: Character = _chars()[0]
 	ch.traits.clear()
-	for c in _chars():
-		if c != ch:
-			c.traits.clear()
+	for character in _chars():
+		if character != ch:
+			character.traits.clear()
 	ch.needs[NeedType.ID.REST] = 0.15
 	ch.need_zero_streak[NeedType.ID.REST] = 0
 	proc.process(_ctx(2))

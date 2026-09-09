@@ -142,9 +142,9 @@ func _find_resurrection_city(deceased: HeroController) -> City:
 	if deceased != null and deceased.resurrected_once:
 		return null
 	var cost: Dictionary = _succession.default_resurrection_cost()
-	for c in _cities.cities:
-		if c != null and c.owner == &"player" and c.can_resurrect(cost):
-			return c
+	for city in _cities.cities:
+		if city != null and city.owner == &"player" and city.can_resurrect(cost):
+			return city
 	return null
 
 func _on_resurrection_chosen() -> void:
@@ -238,8 +238,8 @@ func _run_summary() -> Dictionary:
 		turns = int(_cities.current_turn)
 		if _cities.glory != null:
 			glory = int(round(_cities.glory.total))
-		for c in _cities.cities:
-			if c != null and c.owner == &"player":
+		for city in _cities.cities:
+			if city != null and city.owner == &"player":
 				cities_left += 1
 	var s: GameSession = _persistence.session if _persistence != null else null
 	var date: Dictionary = _persistence.get_date() if _persistence != null else {}

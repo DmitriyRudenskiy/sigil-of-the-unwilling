@@ -8,8 +8,8 @@ static func is_storm_turn(turn: int) -> bool:
 		and turn % GameNumbers.ARENA_STORM_PERIOD == 0
 
 static func _has_walls_lvl2(city: City) -> bool:
-	for b in city.buildings:
-		if b != null and b.def != null and b.def.id == &"walls" and b.level >= 2:
+	for building in city.buildings:
+		if building != null and building.def != null and building.def.id == &"walls" and building.level >= 2:
 			return true
 	return false
 

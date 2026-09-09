@@ -158,8 +158,8 @@ func test_city_captured_but_other_alive_stays_running() -> void:
 
 func test_turn_ended_fallback_collapse() -> void:
 	_setup_endgame()
-	for c in _cities.cities:
-		c.owner = &"enemy"
+	for city in _cities.cities:
+		city.owner = &"enemy"
 
 	GameEventBus.turn_ended.emit(5, 3)
 
@@ -203,8 +203,8 @@ func test_stack_survives_stays_running() -> void:
 
 func test_first_terminal_condition_wins_and_sticky() -> void:
 	_setup_endgame()
-	for c in _cities.cities:
-		c.owner = &"enemy"
+	for city in _cities.cities:
+		city.owner = &"enemy"
 	GameEventBus.turn_ended.emit(5, 3)
 	assert_that(_session().state).is_equal(GameSession.GameState.DEFEAT)
 
@@ -225,8 +225,8 @@ func test_summary_counters() -> void:
 	GameEventBus.hero_successor.emit(succ)
 	succ.free()
 
-	for c in _cities.cities:
-		c.owner = &"enemy"
+	for city in _cities.cities:
+		city.owner = &"enemy"
 	GameEventBus.turn_ended.emit(7, 1)
 
 	assert_that(_last_summary.get("battles_won")).is_equal(2)

@@ -22,8 +22,8 @@ func recompute(hero_cell: Vector2i, sight_sources: Array, hero_sight: int, city_
 			_explore(src, city_sight)
 	var changed := visible.size() != new_visible.size()
 	if not changed:
-		for c in new_visible:
-			if not visible.has(c):
+		for cell in new_visible:
+			if not visible.has(cell):
 				changed = true
 				break
 	visible = new_visible

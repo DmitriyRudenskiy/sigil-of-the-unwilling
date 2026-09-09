@@ -345,8 +345,8 @@ func serialize() -> Dictionary:
 
 func _planned_path_data() -> Array:
 	var out: Array = []
-	for c in movement.planned_path:
-		out.append({"x": c.x, "y": c.y})
+	for cell in movement.planned_path:
+		out.append({"x": cell.x, "y": cell.y})
 	return out
 
 func _planned_path_from(data: Array) -> Array[Vector2i]:

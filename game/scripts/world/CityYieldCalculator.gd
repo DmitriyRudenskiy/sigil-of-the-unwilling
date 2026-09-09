@@ -32,8 +32,8 @@ func _ensure_exploited(city: City) -> void:
 	if not _exploited_dirty:
 		return
 	_exploited_cache.clear()
-	for b in city.boroughs:
-		for nb in HexUtils.get_all_neighbors(b.cell):
+	for borough in city.boroughs:
+		for nb in HexUtils.get_all_neighbors(borough.cell):
 			if not city.cell_is_built(nb):
 				_exploited_cache[nb] = true
 	for u in city.pop:

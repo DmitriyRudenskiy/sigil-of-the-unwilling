@@ -35,9 +35,9 @@ static func process_level_ups(city: City) -> int:
 	var total := 0
 	for _pass in GameNumbers.BOROUGH_MAX_LEVEL:
 		var raised := 0
-		for b in city.boroughs:
-			if can_level_up(city, b):
-				b.level += 1
+		for borough in city.boroughs:
+			if can_level_up(city, borough):
+				borough.level += 1
 				raised += 1
 		total += raised
 		if raised == 0:

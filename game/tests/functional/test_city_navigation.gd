@@ -33,9 +33,9 @@ func _make_two_cities() -> Dictionary:
 	_WorldBootstrap._create_cities(holder, R)
 	var capital: City = R.cities.capital
 	var second: City = null
-	for c in R.cities.cities:
-		if c != capital:
-			second = c
+	for city in R.cities.cities:
+		if city != capital:
+			second = city
 	return {"mg": mg, "cities": R.cities, "capital": capital, "second": second}
 
 func test_bootstrap_creates_two_cities() -> void:
@@ -47,8 +47,8 @@ func test_bootstrap_creates_two_cities() -> void:
 	assert_bool(capital.is_capital).is_true()
 	assert_that(capital.display_name).is_equal("Перворечье")
 	var capitals := 0
-	for c in cities.cities:
-		if c.is_capital:
+	for city in cities.cities:
+		if city.is_capital:
 			capitals += 1
 	assert_that(capitals).is_equal(1)
 	var second: City = w.second

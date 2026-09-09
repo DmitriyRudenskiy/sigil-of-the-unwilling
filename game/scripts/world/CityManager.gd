@@ -53,24 +53,24 @@ func apply_reputation(city: City, delta: float) -> int:
 
 func set_tile_yield_provider(fn: Callable) -> void:
 	_tile_yield_provider = fn
-	for c in cities:
-		c.tile_yield_fn = fn
+	for city in cities:
+		city.tile_yield_fn = fn
 
 func set_buildable_provider(fn: Callable) -> void:
 	_buildable_provider = fn
-	for c in cities:
-		c.is_buildable_fn = fn
+	for city in cities:
+		city.is_buildable_fn = fn
 
 func city_at(cell: Vector2i) -> City:
-	for c in cities:
-		if c != null and c.center == cell:
-			return c
+	for city in cities:
+		if city != null and city.center == cell:
+			return city
 	return null
 
 func get_city_by_uid(u: int) -> City:
-	for c in cities:
-		if c != null and c.uid == u:
-			return c
+	for city in cities:
+		if city != null and city.uid == u:
+			return city
 	return null
 
 func on_turn_ended(month: int) -> Dictionary:
@@ -78,12 +78,12 @@ func on_turn_ended(month: int) -> Dictionary:
 	var report := {
 		"turn": current_turn, "cities": [], "arrivals": 0, "cycle": false,
 	}
-	for c in cities:
-		var r := c.process_turn(current_turn)
+	for city in cities:
+		var r := city.process_turn(current_turn)
 		(report["cities"] as Array).append({
-			"city": c.display_name, "births": r.births, "level_ups": r.level_ups,
+			"city": city.display_name, "births": r.births, "level_ups": r.level_ups,
 		})
-		city_updated.emit(c)
+		city_updated.emit(city)
 	glory.prune(current_turn)
 
 	if current_turn % GameNumbers.CITY_CYCLE_TURNS == 0:

@@ -191,9 +191,9 @@ func _full_path(cell: Vector2i) -> Array[Vector2i]:
 func _enemy_aura_blocked(exempt: Vector2i) -> Dictionary:
 	var blocked: Dictionary = {}
 	var stacks := _map_gen.enemy_stacks
-	for c in stacks:
-		blocked[c] = true
-		for nb in _HexUtils.get_all_neighbors(c):
+	for cell in stacks:
+		blocked[cell] = true
+		for nb in _HexUtils.get_all_neighbors(cell):
 			if nb != exempt:
 				blocked[nb] = true
 	return blocked
@@ -209,10 +209,10 @@ func _base_blocked() -> Dictionary:
 	var blocked: Dictionary = _map_gen.get_blocked_cells().duplicate()
 	var levitation := _has_artifact_effect(&"boots_levitation")
 	if levitation:
-		for c in blocked.keys():
-			var terrain_id: int = _map_gen.get_terrain_id(c)
+		for cell in blocked.keys():
+			var terrain_id: int = _map_gen.get_terrain_id(cell)
 			if terrain_id == _HexUtils.Terrain.WATER:
-				blocked.erase(c)
+				blocked.erase(cell)
 	var vis := _map_gen.visibility
 	if vis != null:
 		for cell in _map_gen.terrain_grid:

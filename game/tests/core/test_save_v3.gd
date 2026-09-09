@@ -257,8 +257,8 @@ func test_city_uid_seq_continuity() -> void:
 	var max_restored := -1
 	for u in city2.pop:
 		max_restored = maxi(max_restored, u.uid)
-	for b in city2.buildings:
-		max_restored = maxi(max_restored, b.uid)
+	for building in city2.buildings:
+		max_restored = maxi(max_restored, building.uid)
 	city2.add_followers(2)
 	var fresh := city2.pop[city2.pop.size() - 1]
 	assert_bool(fresh.uid > max_restored).is_true()

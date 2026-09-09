@@ -43,12 +43,12 @@ static func serialize(city: City) -> Dictionary:
 		pops_arr.append(u.serialize())
 	d["pop"] = pops_arr
 	var bhs_arr: Array = []
-	for b in city.boroughs:
-		bhs_arr.append({"cell": {"x": b.cell.x, "y": b.cell.y}, "level": b.level, "uid": b.uid})
+	for borough in city.boroughs:
+		bhs_arr.append({"cell": {"x": borough.cell.x, "y": borough.cell.y}, "level": borough.level, "uid": borough.uid})
 	d["boroughs"] = bhs_arr
 	var blds_arr: Array = []
-	for b in city.buildings:
-		blds_arr.append(b.serialize())
+	for building in city.buildings:
+		blds_arr.append(building.serialize())
 	d["buildings"] = blds_arr
 	return d
 
@@ -118,10 +118,10 @@ static func deserialize(city: City, data: Dictionary) -> void:
 	var max_uid := int(data.get("uid_seq", 0))
 	for u in city.pop:
 		max_uid = maxi(max_uid, u.uid + 1)
-	for b in city.boroughs:
-		max_uid = maxi(max_uid, b.uid + 1)
-	for b in city.buildings:
-		max_uid = maxi(max_uid, b.uid + 1)
+	for borough in city.boroughs:
+		max_uid = maxi(max_uid, borough.uid + 1)
+	for building in city.buildings:
+		max_uid = maxi(max_uid, building.uid + 1)
 	city._uid_seq = max_uid
 	city._invalidate_exploited()
 

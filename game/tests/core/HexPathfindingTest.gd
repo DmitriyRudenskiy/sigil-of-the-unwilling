@@ -34,8 +34,8 @@ func test_bfs_path_avoids_blocked_cell() -> void:
 	var blocked_cell := Vector2i(1, 1)
 	var path := HexPathfinding.bfs_path(Vector2i(0, 1), Vector2i(2, 1), {blocked_cell: true}, W, H)
 	assert_array(path).is_not_empty()
-	for c in path:
-		assert_bool(c != blocked_cell).is_true()
+	for cell in path:
+		assert_bool(cell != blocked_cell).is_true()
 
 func test_astar_path_valid() -> void:
 	var path := HexPathfinding.astar_path(Vector2i.ZERO, Vector2i(4, 3), {}, W, H)

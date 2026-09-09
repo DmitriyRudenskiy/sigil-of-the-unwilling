@@ -27,12 +27,12 @@ func _place_farm_cluster() -> Array:
 
 func _place_lone_mine() -> void:
 	var farm_cells: Array = []
-	for b in city.buildings:
-		farm_cells.append(b.cell)
-	for c in ArenaRingSystem.cells_in_arena():
-		if ArenaRingSystem.ring_of(c) == 2 and c not in farm_cells:
+	for building in city.buildings:
+		farm_cells.append(building.cell)
+	for cell in ArenaRingSystem.cells_in_arena():
+		if ArenaRingSystem.ring_of(cell) == 2 and cell not in farm_cells:
 			var res: CityCheck = ArenaTurnRunner.place_building(
-				city, BuildingDefs.mine(), c)
+				city, BuildingDefs.mine(), cell)
 			assert_bool(bool(res.ok)).is_true()
 			return
 	assert_bool(true).is_false()

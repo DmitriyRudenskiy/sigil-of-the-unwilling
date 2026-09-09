@@ -190,12 +190,12 @@ func _candidate_goals(cell: Vector2i, hero_cell: Vector2i, aggro: int, profile: 
 	var goals := {}
 	var weights: Dictionary = profile.get("weights", {})
 	if _cities_mgr != null:
-		for c in _cities_mgr.cities:
-			if c.owner != &"player":
+		for city in _cities_mgr.cities:
+			if city.owner != &"player":
 				continue
-			var d := HexUtils.hex_distance(cell, c.center)
+			var d := HexUtils.hex_distance(cell, city.center)
 			if d <= aggro:
-				goals[c.center] = {"weight": float(weights.get("village", 1.0)), "dist": d}
+				goals[city.center] = {"weight": float(weights.get("village", 1.0)), "dist": d}
 	if _map_gen != null:
 		for rc in _map_gen.resource_cells:
 			var d := HexUtils.hex_distance(cell, rc)
@@ -211,17 +211,17 @@ func _pick_goal(goals: Dictionary) -> Vector2i:
 	var best_cell: Vector2i = Vector2i(-1, -1)
 	var best_score := -1.0
 
-	for c in goals.keys():
-		var info: Dictionary = goals[c]
+	for cell in goals.keys():
+		var info: Dictionary = goals[cell]
 		var score := float(info["weight"]) / (float(int(info["dist"])) + 1.0)
 
 		if score > best_score + 0.000001:
 			best_score = score
-			best_cell = c
+			best_cell = cell
 		elif score > best_score - 0.000001 and score < best_score + 0.000001:
 
-			if c.x < best_cell.x or (c.x == best_cell.x and c.y < best_cell.y):
-				best_cell = c
+			if cell.x < best_cell.x or (cell.x == best_cell.x and cell.y < best_cell.y):
+				best_cell = cell
 
 	return best_cell
 

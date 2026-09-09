@@ -37,8 +37,8 @@ static func assign_followers(city: City, bld: UniqueBuilding, n: int) -> void:
 static func within_build_distance(city: City, cell: Vector2i) -> bool:
 	if HexUtils.hex_distance(cell, city.center) <= city.building_max_distance():
 		return true
-	for b in city.boroughs:
-		if HexUtils.hex_distance(cell, b.cell) <= city.building_max_distance():
+	for borough in city.boroughs:
+		if HexUtils.hex_distance(cell, borough.cell) <= city.building_max_distance():
 			return true
 	return false
 
@@ -152,10 +152,10 @@ static func relocate(
 	if city.cell_is_built(new_center):
 		return fail("На новом центре уже застройка")
 	var delta := new_center - city.center
-	for b in city.boroughs:
-		b.cell += delta
-	for b in city.buildings:
-		b.cell += delta
+	for borough in city.boroughs:
+		borough.cell += delta
+	for building in city.buildings:
+		building.cell += delta
 	var new_roads: Dictionary = {}
 	for cell in city.roads:
 		new_roads[(cell as Vector2i) + delta] = true
@@ -170,8 +170,8 @@ static func relocate(
 static func is_adjacent_to_city_body(city: City, cell: Vector2i) -> bool:
 	if HexUtils.hex_distance(cell, city.center) == 1:
 		return true
-	for b in city.boroughs:
-		if HexUtils.hex_distance(cell, b.cell) == 1:
+	for borough in city.boroughs:
+		if HexUtils.hex_distance(cell, borough.cell) == 1:
 			return true
 	return false
 
@@ -191,8 +191,8 @@ static func first_free_worker_tile(city: City) -> Vector2i:
 	for nb in HexUtils.get_all_neighbors(city.center):
 		if is_worker_tile_free(city, nb):
 			return nb
-	for b in city.boroughs:
-		for nb in HexUtils.get_all_neighbors(b.cell):
+	for borough in city.boroughs:
+		for nb in HexUtils.get_all_neighbors(borough.cell):
 			if is_worker_tile_free(city, nb):
 				return nb
 	return Vector2i(-1, -1)

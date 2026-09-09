@@ -303,8 +303,8 @@ func get_reachable(cell: Vector2i, speed: int, blocked_fn: Callable, _unit: Batt
 
 func _cache_signature(blocked: Dictionary) -> int:
 	var h := 0
-	for c in blocked:
-		var p := c as Vector2i
+	for cell in blocked:
+		var p := cell as Vector2i
 		h = (h * 31 + p.x * 73856093) & 0x7FFFFFFF
 		h = (h * 31 + p.y * 19349663) & 0x7FFFFFFF
 	return (_board_version + 1) * 1000003 + h
@@ -329,9 +329,9 @@ func get_unreachable_ring(unit: BattleUnit, blocked_fn: Callable) -> Dictionary:
 	var near: Dictionary = get_reachable(unit.cell, unit.get_speed() + 1, blocked_fn, unit)
 	var reach: Dictionary = get_reachable(unit.cell, unit.get_speed(), blocked_fn, unit)
 	var ring: Dictionary = {}
-	for c in near:
-		if not reach.has(c):
-			ring[c] = near[c]
+	for cell in near:
+		if not reach.has(cell):
+			ring[cell] = near[cell]
 	return ring
 
 func invalidate_board_cache() -> void:

@@ -46,22 +46,22 @@ func transfer_legend(deceased: HeroController, successor: HeroController,
 	if dest_manager == null or source_cities == null:
 		return
 	var already_has := true
-	for c in source_cities:
-		if c != null and not dest_manager.cities.has(c):
+	for city in source_cities:
+		if city != null and not dest_manager.cities.has(city):
 			already_has = false
 			break
 	if not already_has:
 		dest_manager.cities.clear()
-		for c in source_cities:
-			if c == null:
+		for city in source_cities:
+			if city == null:
 				continue
 			var copy: City = City.new()
-			copy.deserialize(c.serialize())
+			copy.deserialize(city.serialize())
 			dest_manager.register_city(copy)
 	var cap: City = null
-	for c in dest_manager.cities:
-		if c != null and c.is_capital:
-			cap = c
+	for city in dest_manager.cities:
+		if city != null and city.is_capital:
+			cap = city
 			break
 	if cap != null:
 		dest_manager.set_capital(cap)

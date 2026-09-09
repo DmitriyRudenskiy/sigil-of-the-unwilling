@@ -83,10 +83,10 @@ func refresh() -> void:
 	_stats_label.text = "\n".join(lines)
 
 	var b_lines: Array[String] = []
-	for b in city.buildings:
-		if b == null or b.def == null:
+	for building in city.buildings:
+		if building == null or building.def == null:
 			continue
-		b_lines.append(GameText.city_building_line(b.def.display_name, b.level, b.cell.x, b.cell.y))
+		b_lines.append(GameText.city_building_line(building.def.display_name, building.level, building.cell.x, building.cell.y))
 	_buildings_label.text = (GameText.city_buildings() + ":\n" + "\n".join(b_lines)) \
 		if not b_lines.is_empty() else GameText.city_buildings_none()
 	if _message_label.text == "":

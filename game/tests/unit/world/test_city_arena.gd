@@ -8,16 +8,16 @@ func before_test() -> void:
 	city = ArenaTurnRunner.make_city()
 
 func _free_cell(ring: int) -> Vector2i:
-	for c in ArenaRingSystem.cells_in_ring(ring):
-		if not city.cell_is_built(c):
-			return c
+	for cell in ArenaRingSystem.cells_in_ring(ring):
+		if not city.cell_is_built(cell):
+			return cell
 	return Vector2i(-1, -1)
 
 func test_arena_cells_unique() -> void:
 	var cells: Array = ArenaRingSystem.cells_in_arena()
 	var seen: Dictionary = {}
-	for c in cells:
-		seen[c] = true
+	for cell in cells:
+		seen[cell] = true
 	assert_that(seen.size()).is_equal(cells.size())
 	assert_that(cells.size()).is_equal(91)
 
@@ -28,8 +28,8 @@ func test_center_ring_zero() -> void:
 
 func test_all_cells_within_radius() -> void:
 	var ok := true
-	for c in ArenaRingSystem.cells_in_arena():
-		if ArenaRingSystem.ring_of(c) > GameNumbers.ARENA_RADIUS:
+	for cell in ArenaRingSystem.cells_in_arena():
+		if ArenaRingSystem.ring_of(cell) > GameNumbers.ARENA_RADIUS:
 			ok = false
 	assert_bool(ok).is_true()
 
@@ -146,29 +146,29 @@ func test_cluster_forms_on_four_connected() -> void:
 	assert_that(((cls[0] as Dictionary)["cells"] as Array).size()).is_equal(4)
 
 func test_disconnected_groups_not_cluster() -> void:
-	for c in [Vector2i(4, 1), Vector2i(5, 1), Vector2i(2, 4), Vector2i(2, 5)]:
-		_place_farm(c as Vector2i)
+	for cell in [Vector2i(4, 1), Vector2i(5, 1), Vector2i(2, 4), Vector2i(2, 5)]:
+		_place_farm(cell as Vector2i)
 	assert_that(ArenaClusterSystem.clusters(city).size()).is_equal(0)
 
 func test_cluster_different_types_not_merged() -> void:
-	for c in [Vector2i(4, 1), Vector2i(5, 1)]:
-		_place_farm(c as Vector2i)
-	for c in [Vector2i(6, 1), Vector2i(7, 2)]:
-		var res: CityCheck = ArenaTurnRunner.place_building(city, _BuildingDefs.def_by_id(&"mill"), c as Vector2i)
+	for cell in [Vector2i(4, 1), Vector2i(5, 1)]:
+		_place_farm(cell as Vector2i)
+	for cell in [Vector2i(6, 1), Vector2i(7, 2)]:
+		var res: CityCheck = ArenaTurnRunner.place_building(city, _BuildingDefs.def_by_id(&"mill"), cell as Vector2i)
 		assert_bool(bool(res.ok)).is_true()
 	assert_that(ArenaClusterSystem.clusters(city).size()).is_equal(0)
 
 func test_cluster_multiplier_applied() -> void:
-	for c in _CLUSTER_CELLS:
-		_place_farm(c as Vector2i)
+	for cell in _CLUSTER_CELLS:
+		_place_farm(cell as Vector2i)
 	ArenaRingSystem.apply_ring_multipliers(city)
-	for c in _CLUSTER_CELLS:
-		var b: UniqueBuilding = city.get_building_at(c as Vector2i)
+	for cell in _CLUSTER_CELLS:
+		var b: UniqueBuilding = city.get_building_at(cell as Vector2i)
 		assert_bool(b != null and b.zone_multiplier >= 1.49).is_true()
 
 func test_cluster_housing_bonus() -> void:
-	for c in _CLUSTER_CELLS:
-		_place_farm(c as Vector2i)
+	for cell in _CLUSTER_CELLS:
+		_place_farm(cell as Vector2i)
 	assert_that(ArenaClusterSystem.cluster_worker_housing(city)).is_equal(city.free_housing(_PopUnit.State.WORKER) + GameNumbers.ARENA_CLUSTER_HOUSING)
 	var city2 := ArenaTurnRunner.make_city()
 	assert_that(ArenaClusterSystem.cluster_worker_housing(city2)).is_equal(city2.free_housing(_PopUnit.State.WORKER))
@@ -176,9 +176,9 @@ func test_cluster_housing_bonus() -> void:
 func test_cell_features_deterministic() -> void:
 	var city2 := ArenaTurnRunner.make_city()
 	var count := 0
-	for c in ArenaRingSystem.cells_in_arena():
-		var f1: StringName = ArenaRingSystem.cell_feature(city, c as Vector2i)
-		var f2: StringName = ArenaRingSystem.cell_feature(city2, c as Vector2i)
+	for cell in ArenaRingSystem.cells_in_arena():
+		var f1: StringName = ArenaRingSystem.cell_feature(city, cell as Vector2i)
+		var f2: StringName = ArenaRingSystem.cell_feature(city2, cell as Vector2i)
 		assert_that(f1).is_equal(f2)
 		if f1 != &"":
 			count += 1
@@ -187,12 +187,12 @@ func test_cell_features_deterministic() -> void:
 	assert_bool(count >= 5).is_true()
 
 func test_cell_features_rings_only() -> void:
-	for c in ArenaRingSystem.cells_in_ring(0):
-		assert_that(ArenaRingSystem.cell_feature(city, c as Vector2i)).is_equal(&"")
-	for c in ArenaRingSystem.cells_in_ring(1):
-		assert_that(ArenaRingSystem.cell_feature(city, c as Vector2i)).is_equal(&"")
-	for c in ArenaRingSystem.cells_in_ring(5):
-		assert_that(ArenaRingSystem.cell_feature(city, c as Vector2i)).is_equal(&"")
+	for cell in ArenaRingSystem.cells_in_ring(0):
+		assert_that(ArenaRingSystem.cell_feature(city, cell as Vector2i)).is_equal(&"")
+	for cell in ArenaRingSystem.cells_in_ring(1):
+		assert_that(ArenaRingSystem.cell_feature(city, cell as Vector2i)).is_equal(&"")
+	for cell in ArenaRingSystem.cells_in_ring(5):
+		assert_that(ArenaRingSystem.cell_feature(city, cell as Vector2i)).is_equal(&"")
 
 func test_feature_mults() -> void:
 	var quarry := Vector2i(2, 4)
@@ -226,10 +226,9 @@ func test_storm_periodicity() -> void:
 
 func test_storm_food_and_production() -> void:
 	var cell := Vector2i(-1, -1)
-	for c in ArenaRingSystem.cells_in_ring(3):
-		var cc: Vector2i = c
-		if ArenaRingSystem.cell_feature(city, cc) == &"":
-			cell = cc
+	for cand in ArenaRingSystem.cells_in_ring(3):
+		if ArenaRingSystem.cell_feature(city, cand) == &"":
+			cell = cand
 			break
 	assert_bool(cell != Vector2i(-1, -1)).is_true()
 	_place_farm(cell)
