@@ -24,18 +24,18 @@ func _exit_tree() -> void:
 func _connect_context(bus: Node) -> void:
 	bus.hero_moving_changed.connect(_on_hero_moving_changed)
 	bus.resource_extracted.connect(_on_resource_extracted)
-	bus.battle_completed.connect(_on_battle_ended)
-	bus.battle_lost.connect(_on_battle_ended)
+	bus.battle_completed.connect(_on_battle_completed)
+	bus.battle_lost.connect(_on_battle_lost)
 
 func _disconnect_context(bus: Node) -> void:
 	if bus.hero_moving_changed.is_connected(_on_hero_moving_changed):
 		bus.hero_moving_changed.disconnect(_on_hero_moving_changed)
 	if bus.resource_extracted.is_connected(_on_resource_extracted):
 		bus.resource_extracted.disconnect(_on_resource_extracted)
-	if bus.battle_completed.is_connected(_on_battle_ended):
-		bus.battle_completed.disconnect(_on_battle_ended)
-	if bus.battle_lost.is_connected(_on_battle_ended):
-		bus.battle_lost.disconnect(_on_battle_ended)
+	if bus.battle_completed.is_connected(_on_battle_completed):
+		bus.battle_completed.disconnect(_on_battle_completed)
+	if bus.battle_lost.is_connected(_on_battle_lost):
+		bus.battle_lost.disconnect(_on_battle_lost)
 
 func _on_hero_moving_changed(moving: bool) -> void:
 	_change_mode(Mode.WALK if moving else Mode.DEFAULT)
@@ -45,7 +45,10 @@ func _on_resource_extracted(_cell: Variant, _rid: Variant, _amount: Variant) -> 
 	_collect_left = COLLECT_HOLD_SECONDS
 	_change_mode(Mode.COLLECT)
 
-func _on_battle_ended(_winner_or_cell: Variant, _enemy_cell: Variant = null) -> void:
+func _on_battle_completed(_winner: BattleState.Side, _enemy_cell: Vector2i) -> void:
+	_change_mode(Mode.DEFAULT)
+
+func _on_battle_lost(_enemy_cell: Vector2i) -> void:
 	_change_mode(Mode.DEFAULT)
 
 func _process(delta: float) -> void:

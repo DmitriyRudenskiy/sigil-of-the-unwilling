@@ -78,12 +78,15 @@ static func run(
 	_create_subsystems(parent, R)
 	_create_resource_nodes(parent, R)
 
+	_create_endgame(parent, R)
+
+	return R
+
+static func _create_endgame(parent: Node2D, R: BootstrapResult) -> void:
 	R.endgame = EndgameControllerScript.new()
 	R.endgame.name = "EndgameController"
 	parent.add_child(R.endgame)
 	R.endgame.setup(parent, R.battle_coordinator, R.map_gen, R.cities, R.persistence, R.enemy_proc, R.ui_manager)
-
-	return R
 
 static func finalize(parent: Node2D, R: BootstrapResult, visibility, persistence,
 				hero_mgr, rng, end_turn_cb: Callable) -> WorldEventRouter:

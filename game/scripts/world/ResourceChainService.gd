@@ -11,11 +11,10 @@ func invalidate_extraction_cache() -> void:
 	_discovery_cache.clear()
 
 func build_discovery_keys(hero: HeroController) -> Dictionary:
-	var iid: int = hero.get_instance_id()
-	var fp := _discovery_fingerprint(hero)
-	var cached: Dictionary = _discovery_cache.get(iid, {})
-	if cached.has("fp") and cached["fp"] == fp and cached.has("keys"):
-		return cached["keys"]
+	return _cached(hero.get_instance_id(), _discovery_cache,
+		_discovery_fingerprint(hero), _build_discovery_keys.bind(hero))
+
+func _build_discovery_keys(hero: HeroController) -> Dictionary:
 	var keys: Dictionary = {}
 
 	keys[&"nature_sense"] = hero.skills.get_skill(&"nature_sense")
@@ -34,7 +33,6 @@ func build_discovery_keys(hero: HeroController) -> Dictionary:
 				if tag in [&"undead", &"lizard"]:
 					keys[StringName(tag)] = true
 
-	_discovery_cache[iid] = {"fp": fp, "keys": keys}
 	return keys
 
 func _discovery_fingerprint(hero: HeroController) -> String:
@@ -51,11 +49,10 @@ func _discovery_fingerprint(hero: HeroController) -> String:
 	return fp
 
 func build_extraction_keys(hero: HeroController) -> Dictionary:
-	var iid: int = hero.get_instance_id()
-	var fp := _extraction_fingerprint(hero)
-	var cached: Dictionary = _extraction_cache.get(iid, {})
-	if cached.has("fp") and cached["fp"] == fp and cached.has("keys"):
-		return cached["keys"]
+	return _cached(hero.get_instance_id(), _extraction_cache,
+		_extraction_fingerprint(hero), _build_extraction_keys.bind(hero))
+
+func _build_extraction_keys(hero: HeroController) -> Dictionary:
 	var keys: Dictionary = {}
 
 	var units_reg: Node = Services.resolve(&"units")
@@ -75,7 +72,14 @@ func build_extraction_keys(hero: HeroController) -> Dictionary:
 
 	keys["fire"] = false
 
-	_extraction_cache[iid] = {"fp": fp, "keys": keys}
+	return keys
+
+func _cached(iid: int, cache: Dictionary, fp: String, build: Callable) -> Dictionary:
+	var cached: Dictionary = cache.get(iid, {})
+	if cached.has("fp") and cached["fp"] == fp and cached.has("keys"):
+		return cached["keys"]
+	var keys: Dictionary = build.call()
+	cache[iid] = {"fp": fp, "keys": keys}
 	return keys
 
 func _extraction_fingerprint(hero: HeroController) -> String:
