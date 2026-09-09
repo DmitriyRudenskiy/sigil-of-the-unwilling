@@ -1,16 +1,14 @@
 class_name HeroInventory
 extends RefCounted
 
-
 signal equipped_changed
 signal backpack_changed
 signal modifiers_changed
 
 const MAX_BACKPACK := GameNumbers.MAX_BACKPACK_SIZE
 
-var equipped: Dictionary = {}  
+var equipped: Dictionary = {}
 var backpack: Array[Artifact] = []
-
 
 func _init() -> void:
 	for slot in Artifact.Slot.values():
@@ -18,14 +16,11 @@ func _init() -> void:
 			continue
 		equipped[slot] = null
 
-
 func has_slot(slot: Artifact.Slot) -> bool:
 	return equipped.has(slot) and equipped[slot] != null
 
-
 func get_equipped(slot: Artifact.Slot) -> Artifact:
 	return equipped.get(slot, null)
-
 
 func can_equip(artifact: Artifact) -> bool:
 	if artifact == null:
@@ -48,7 +43,6 @@ func can_equip(artifact: Artifact) -> bool:
 			if other != null and other.id == artifact.id:
 				return false
 	return true
-
 
 func equip(artifact: Artifact, target_slot: Artifact.Slot = Artifact.Slot.RING_L) -> bool:
 	if artifact == null:
@@ -96,7 +90,6 @@ func equip(artifact: Artifact, target_slot: Artifact.Slot = Artifact.Slot.RING_L
 	modifiers_changed.emit()
 	return true
 
-
 func _pick_ring_slot(slot: Artifact.Slot) -> Artifact.Slot:
 	if slot == Artifact.Slot.RING_L or slot == Artifact.Slot.RING_R:
 		return slot
@@ -106,14 +99,12 @@ func _pick_ring_slot(slot: Artifact.Slot) -> Artifact.Slot:
 		return Artifact.Slot.RING_R
 	return Artifact.Slot.RING_L
 
-
 func _can_put_back(old: Artifact, remove_idx: int) -> bool:
 	if old == null:
 		return true
 	if remove_idx >= 0:
 		return true
 	return backpack.size() < MAX_BACKPACK
-
 
 func can_equip_to_slot(artifact: Artifact, slot: Artifact.Slot) -> bool:
 	if artifact == null:
@@ -135,7 +126,6 @@ func can_equip_to_slot(artifact: Artifact, slot: Artifact.Slot) -> bool:
 				return false
 	return true
 
-
 func unequip(slot: Artifact.Slot) -> Artifact:
 	if not equipped.has(slot):
 		return null
@@ -150,7 +140,6 @@ func unequip(slot: Artifact.Slot) -> Artifact:
 	backpack_changed.emit()
 	modifiers_changed.emit()
 	return art
-
 
 func add_to_backpack(artifact: Artifact) -> bool:
 	if artifact == null:
@@ -169,7 +158,6 @@ func add_to_backpack(artifact: Artifact) -> bool:
 	backpack_changed.emit()
 	return true
 
-
 func remove_from_backpack(idx: int) -> Artifact:
 	if idx < 0 or idx >= backpack.size():
 		return null
@@ -178,13 +166,11 @@ func remove_from_backpack(idx: int) -> Artifact:
 	backpack_changed.emit()
 	return art
 
-
 func sell_artifact(idx: int) -> int:
 	var art := remove_from_backpack(idx)
 	if art == null:
 		return 0
 	return int(float(art.value_gold) * 0.5)
-
 
 func get_total_modifiers() -> Dictionary:
 	var total := {
@@ -211,14 +197,12 @@ func get_total_modifiers() -> Dictionary:
 		total["castle_growth_percent"] += art.get_castle_growth_percent()
 	return total
 
-
 func has_special_effect(effect: StringName) -> bool:
 	for slot in equipped:
 		var art: Artifact = equipped[slot]
 		if art != null and art.special_effect == effect:
 			return true
 	return false
-
 
 func serialize() -> Dictionary:
 	var equipped_ids := {}
@@ -229,7 +213,6 @@ func serialize() -> Dictionary:
 	for art in backpack:
 		backpack_ids.append(str(art.id))
 	return {"equipped": equipped_ids, "backpack": backpack_ids}
-
 
 func deserialize(data: Dictionary) -> void:
 	for slot in equipped:
@@ -256,4 +239,3 @@ func deserialize(data: Dictionary) -> void:
 	equipped_changed.emit()
 	backpack_changed.emit()
 	modifiers_changed.emit()
-

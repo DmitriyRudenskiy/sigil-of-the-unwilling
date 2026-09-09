@@ -12,11 +12,9 @@ const MAX_SLOTS := 8
 
 var slots: Array[Dictionary] = []
 
-
 func _init() -> void:
 	for i in MAX_SLOTS:
 		slots.append({})
-
 
 func has_tool(tool_id: int) -> bool:
 	for slot in slots:
@@ -24,14 +22,12 @@ func has_tool(tool_id: int) -> bool:
 			return true
 	return false
 
-
 func get_tool_count(tool_id: int) -> int:
 	var count := 0
 	for slot in slots:
 		if slot.has("id") and slot.id == tool_id:
 			count += slot.get("quantity", 1)
 	return count
-
 
 func add_tool(tool_id: int, quantity: int = 1) -> bool:
 	if quantity <= 0:
@@ -48,7 +44,6 @@ func add_tool(tool_id: int, quantity: int = 1) -> bool:
 			tools_changed.emit()
 			return true
 	return false
-
 
 func remove_tool(tool_id: int, quantity: int = 1) -> bool:
 	var remaining := quantity
@@ -68,7 +63,6 @@ func remove_tool(tool_id: int, quantity: int = 1) -> bool:
 		return true
 	return false
 
-
 func get_empty_slots() -> int:
 	var count := 0
 	for slot in slots:
@@ -76,16 +70,13 @@ func get_empty_slots() -> int:
 			count += 1
 	return count
 
-
 func get_all() -> Array[Dictionary]:
 	return slots.duplicate(true)
-
 
 func clear() -> void:
 	for i in MAX_SLOTS:
 		slots[i] = {}
 	tools_changed.emit()
-
 
 func serialize() -> Array[Dictionary]:
 	var out: Array[Dictionary] = slots.duplicate(true)
@@ -93,7 +84,6 @@ func serialize() -> Array[Dictionary]:
 		if slot.has("id"):
 			slot.id = ToolType.to_name(int(slot.id))
 	return out
-
 
 func deserialize(data: Array) -> void:
 	slots.clear()

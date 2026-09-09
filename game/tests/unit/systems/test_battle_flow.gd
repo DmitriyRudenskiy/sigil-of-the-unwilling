@@ -2,7 +2,6 @@ extends GdUnitTestSuite
 
 const _BattleFlow = preload("res://scripts/systems/BattleFlow.gd")
 
-
 func test_flow_creation() -> void:
 	var flow := _BattleFlow.new()
 	assert_that(flow).is_not_null()
@@ -17,7 +16,6 @@ func test_flow_initial_inactive() -> void:
 	var flow := _BattleFlow.new()
 	assert_object(flow._active_battle).is_null()
 	flow.free()
-
 
 func test_battle_started_signal() -> void:
 	var flow := _BattleFlow.new()
@@ -45,21 +43,19 @@ func test_battle_completed_signal() -> void:
 	assert_that(result["def"]).is_equal(0)
 	flow.free()
 
-
 func test_active_flag_prevents_double_start() -> void:
 	var flow := _BattleFlow.new()
 	flow.name = "TestFlow3"
 	var fake := Node.new()
 	fake.name = "FakeBattle"
 	flow._active_battle = fake
-	# R6: живой _active_battle → ранний выход до instantiate/get_tree
+
 	var atk: Array[UnitStack] = []
 	var def: Array[UnitStack] = []
 	flow.start_battle(atk, def)
 	assert_that(flow._active_battle).is_equal(fake)
 	fake.free()
 	flow.free()
-
 
 func test_obstacle_seed_negative_gets_random() -> void:
 	var flow := _BattleFlow.new()

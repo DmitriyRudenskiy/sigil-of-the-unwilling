@@ -2,15 +2,12 @@ extends GdUnitTestSuite
 
 const _TRM = preload("res://scripts/data/TerrainResourceManager.gd")
 
-
 func _make_map(seed: int = 7) -> Dictionary:
 	var terrain := {}
-	terrain[Vector2i(0, 0)] = 4   
-	terrain[Vector2i(4, 4)] = 5   
-	terrain[Vector2i(2, 2)] = 4   
+	terrain[Vector2i(0, 0)] = 4
+	terrain[Vector2i(4, 4)] = 5
+	terrain[Vector2i(2, 2)] = 4
 	return {"terrain": terrain, "width": 5, "height": 5, "seed": seed}
-
-
 
 func test_generate_places_points_on_forest_and_mountains() -> void:
 	var trm := _TRM.new()
@@ -23,13 +20,11 @@ func test_generate_places_points_on_forest_and_mountains() -> void:
 	assert_bool(trm.is_exhausted(Vector2i(0, 0))).is_false()
 	trm.free()
 
-
 func test_generate_skips_plain() -> void:
 	var trm := _TRM.new()
 	trm.generate(_make_map())
 	assert_bool(trm.cells.has(Vector2i(1, 1))).is_false()
 	trm.free()
-
 
 func test_generate_density_controls_count() -> void:
 	var trm_low := _TRM.new()
@@ -41,8 +36,6 @@ func test_generate_density_controls_count() -> void:
 	trm_full.generate(_make_map(), 1.0)
 	assert_that(trm_full.cells.size()).is_equal(3)
 	trm_full.free()
-
-
 
 var _sig_res: Variant = null
 var _sig_amount: int = -1
@@ -65,7 +58,6 @@ func test_harvest_returns_res_and_amount() -> void:
 	assert_bool(trm.is_exhausted(cell)).is_true()
 	trm.free()
 
-
 func test_harvest_exhausted_returns_zero() -> void:
 	var trm := _TRM.new()
 	trm.generate(_make_map(), 1.0)
@@ -76,14 +68,12 @@ func test_harvest_exhausted_returns_zero() -> void:
 	assert_bool(trm.is_harvestable(cell)).is_false()
 	trm.free()
 
-
 func test_harvest_unknown_cell_returns_zero() -> void:
 	var trm := _TRM.new()
 	trm.generate(_make_map(), 1.0)
 	var harvested := trm.harvest(Vector2i(1, 1))
 	assert_that(harvested.get("amount")).is_equal(0)
 	trm.free()
-
 
 func test_is_harvestable() -> void:
 	var trm := _TRM.new()
@@ -92,24 +82,21 @@ func test_is_harvestable() -> void:
 	assert_bool(trm.is_harvestable(Vector2i(1, 1))).is_false()
 	trm.free()
 
-
-
 func test_persistence_roundtrip() -> void:
 	var trm := _TRM.new()
 	trm.generate(_make_map(), 1.0)
-	trm.harvest(Vector2i(0, 0))  
+	trm.harvest(Vector2i(0, 0))
 
 	var data: Dictionary = trm.to_dict()
 	assert_bool(data.has(str(Vector2i(0, 0)))).is_true()
 
 	var restored := _TRM.new()
-	restored.generate(_make_map(), 1.0)  
+	restored.generate(_make_map(), 1.0)
 	restored.restore_from_dict(data)
 	assert_bool(restored.is_exhausted(Vector2i(0, 0))).is_true()
 	assert_bool(restored.is_exhausted(Vector2i(4, 4))).is_false()
 	trm.free()
 	restored.free()
-
 
 func test_mark_exhausted() -> void:
 	var trm := _TRM.new()

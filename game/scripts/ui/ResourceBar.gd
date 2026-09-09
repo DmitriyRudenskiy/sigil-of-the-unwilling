@@ -1,4 +1,4 @@
-# FILE: res://scripts/ui/ResourceBar.gd
+
 class_name ResourceBar
 extends HBoxContainer
 

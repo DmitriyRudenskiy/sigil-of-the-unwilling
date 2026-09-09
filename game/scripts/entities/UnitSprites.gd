@@ -4,11 +4,9 @@ class_name UnitSprites
 static var _portrait_cache: Dictionary = {}
 static var _portrait_small_cache: Dictionary = {}
 
-
 static func clear_caches() -> void:
 	_portrait_cache.clear()
 	_portrait_small_cache.clear()
-
 
 static func find_portrait(key: String) -> String:
 	if _portrait_cache.has(key):
@@ -28,7 +26,6 @@ static func find_portrait(key: String) -> String:
 
 	_portrait_cache[key] = ""
 	return ""
-
 
 static func find_portrait_small(key: String) -> String:
 	if _portrait_small_cache.has(key):

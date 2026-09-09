@@ -10,8 +10,6 @@ func before_test() -> void:
 func after_test() -> void:
 	registry = null
 
-
-
 func test_registry_loads() -> void:
 	registry.ensure()
 	assert_int(registry.count_races()).is_greater(0)
@@ -38,8 +36,6 @@ func test_classes_are_unique() -> void:
 		assert_bool(not ids.has(c.id)).is_true()
 		ids.append(c.id)
 
-
-
 func test_elf_ability_adjustments() -> void:
 	registry.ensure()
 	var elf: Variant = registry.get_race(&"elf")
@@ -58,8 +54,6 @@ func test_dwarf_ability_adjustments() -> void:
 	assert_that(aj.get(&"CON", 0)).is_equal(2)
 	assert_that(aj.get(&"WIS", 0)).is_equal(2)
 	assert_that(aj.get(&"CHA", 0)).is_equal(-2)
-
-
 
 func test_alchemist_features() -> void:
 	registry.ensure()
@@ -90,8 +84,6 @@ func test_class_has_4_archetypes() -> void:
 	assert_that(c).is_not_null()
 	assert_that(c.archetypes.size()).is_equal(4)
 
-
-
 func test_pick_race_valid() -> void:
 	registry.ensure()
 	var rng := TestFactories.seeded(5842)
@@ -116,8 +108,6 @@ func test_pick_archetype_valid() -> void:
 	var arch: Variant = registry.pick_archetype(c, rng)
 	assert_that(arch).is_not_null()
 	assert_bool(arch.has("id")).is_true()
-
-
 
 func test_subsystems_loaded() -> void:
 	registry.ensure()

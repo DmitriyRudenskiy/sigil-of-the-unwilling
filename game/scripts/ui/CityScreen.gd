@@ -17,7 +17,6 @@ var _title_label: Label
 var _message_label: Label
 var _opened := false
 
-
 func _ready() -> void:
 	_bg = get_node("CityScreenBackground") as Panel
 	var box := get_node("CityScreenBackground/CityScreenCenter/CityScreenPanel/CityScreenBox")
@@ -42,7 +41,6 @@ func _ready() -> void:
 	close_btn.pressed.connect(_on_close_pressed)
 	close_btn.text = GameText.city_close()
 
-
 func setup(c: City, h: HeroController, h_cell: Vector2i,
 		r: RandomNumberGenerator = null, m_bounds: Vector2i = Vector2i.ZERO) -> void:
 	city = c
@@ -53,7 +51,6 @@ func setup(c: City, h: HeroController, h_cell: Vector2i,
 	_message_label.text = ""
 	refresh()
 
-
 func open() -> void:
 	if city == null:
 		return
@@ -63,7 +60,6 @@ func open() -> void:
 	refresh()
 	state_changed.emit()
 
-
 func close() -> void:
 	if not _opened:
 		return
@@ -71,10 +67,8 @@ func close() -> void:
 	visible = false
 	state_changed.emit()
 
-
 func is_open() -> bool:
 	return _opened
-
 
 func refresh() -> void:
 	if city == null or not is_instance_valid(city):
@@ -98,23 +92,17 @@ func refresh() -> void:
 	if _message_label.text == "":
 		_message_label.text = GameText.city_intro()
 
-
-
 func _on_build_farm_pressed() -> void:
 	build_pressed(&"farm")
-
 
 func _on_build_mine_pressed() -> void:
 	build_pressed(&"mine")
 
-
 func _on_level_up_pressed() -> void:
 	level_up_pressed()
 
-
 func _on_hire_pressed() -> void:
 	hire_pressed()
-
 
 func build_pressed(def_id: StringName) -> CityCheck:
 	if city == null:
@@ -137,7 +125,6 @@ func build_pressed(def_id: StringName) -> CityCheck:
 		"cell": {"x": cell.x, "y": cell.y},
 		"industry_left": _storage_industry()})
 
-
 func level_up_pressed() -> CityCheck:
 	if city == null:
 		return _fail(GameText.city_not_bound())
@@ -153,7 +140,6 @@ func level_up_pressed() -> CityCheck:
 	refresh()
 	return CityCheck.success({"level": city.level})
 
-
 func hire_pressed() -> CityCheck:
 	if city == null:
 		return _fail(GameText.city_not_bound())
@@ -166,32 +152,25 @@ func hire_pressed() -> CityCheck:
 	refresh()
 	return CityCheck.success({"follower": f.to_dict()})
 
-
 func _on_close_pressed() -> void:
 	close_requested.emit()
-
 
 func _fail(message: String) -> CityCheck:
 	_set_message(message)
 	return CityCheck.fail(message)
 
-
-
 func _set_message(text: String) -> void:
 	_message_label.text = text
-
 
 func _storage_industry() -> float:
 	if city == null:
 		return 0.0
 	return float(city.storage.get(&"industry", 0.0))
 
-
 func _gold() -> float:
 	if city == null or city.resource_ctx == null:
 		return 0.0
 	return city.resource_ctx.amount(&"gold")
-
 
 func _format_cost(def: UniqueBuilding.Def) -> String:
 	if def == null or def.levels.is_empty():

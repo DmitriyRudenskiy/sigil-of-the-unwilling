@@ -10,12 +10,10 @@ var world_delta: WorldStateDelta = null
 var visibility = null
 var status_cb: Callable = Callable()
 
-
 func setup(h: HeroController, s: WorldSpawner, d: ArtifactChestDialog) -> void:
 	hero = h
 	spawner = s
 	chest_dialog = d
-
 
 func _is_hidden(cell: Vector2i) -> bool:
 	if visibility == null:
@@ -29,11 +27,9 @@ func _reject(cell: Vector2i) -> bool:
 		return true
 	return false
 
-
 func connect_chest_signals() -> void:
 	if chest_dialog:
 		chest_dialog.choice_made.connect(_on_chest_choice)
-
 
 func check_chest_contact(cell: Vector2i) -> void:
 	if spawner == null or chest_dialog == null:
@@ -51,7 +47,6 @@ func check_chest_contact(cell: Vector2i) -> void:
 		if chest != null and not chest.is_opened:
 			chest_dialog.open(chest)
 			return
-
 
 func _on_chest_choice(choice: String, chest: ArtifactChest) -> void:
 	if chest == null:
@@ -78,7 +73,6 @@ func _on_chest_choice(choice: String, chest: ArtifactChest) -> void:
 	if world_delta:
 		world_delta.add_opened_chest(chest.cell)
 
-
 func collect_resource_at(cell: Vector2i) -> bool:
 	if _reject(cell):
 		return false
@@ -95,7 +89,6 @@ func collect_resource_at(cell: Vector2i) -> bool:
 		return removed
 	return false
 
-
 func capture_village_at(cell: Vector2i) -> bool:
 	if _reject(cell):
 		return false
@@ -105,7 +98,6 @@ func capture_village_at(cell: Vector2i) -> bool:
 		SoundManager.play_sfx_cue(&"village_captured")
 		return true
 	return false
-
 
 func pickup_scroll_at(cell: Vector2i) -> void:
 	if spawner == null or hero == null:

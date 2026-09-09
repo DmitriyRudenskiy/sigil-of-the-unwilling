@@ -22,7 +22,6 @@ const REPUTATION_MATRIX: Dictionary = {
 	},
 }
 
-
 static func is_housing(def: UniqueBuilding.Def) -> bool:
 	if def == null:
 		return false
@@ -30,7 +29,6 @@ static func is_housing(def: UniqueBuilding.Def) -> bool:
 		if int(def.housing[k]) > 0:
 			return true
 	return false
-
 
 static func _neighbor_count(city: City, cell: Vector2i, predicate: StringName) -> int:
 	var n := 0
@@ -45,7 +43,6 @@ static func _neighbor_count(city: City, cell: Vector2i, predicate: StringName) -
 			n += 1
 	return n
 
-
 static func building_output_mult(city: City, building: UniqueBuilding) -> float:
 	if city == null or building == null or building.def == null:
 		return 1.0
@@ -58,7 +55,6 @@ static func building_output_mult(city: City, building: UniqueBuilding) -> float:
 		if _neighbor_count(city, building.cell, StringName(predicate)) >= int(rule.count):
 			mult *= float(rule.output_mult)
 	return mult
-
 
 static func reputation_bonus(city: City) -> int:
 	if city == null:

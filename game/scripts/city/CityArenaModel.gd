@@ -11,8 +11,6 @@ const UniqueBuilding := preload("res://scripts/world/UniqueBuilding.gd")
 const ARENA_RADIUS := GameNumbers.ARENA_RADIUS
 const ARENA_CENTER := ArenaRingSystem.ARENA_CENTER
 
-
-
 static func center() -> Vector2i:
 	return ArenaRingSystem.center()
 
@@ -45,8 +43,6 @@ static func apply_ring_multipliers(city: City, overrides: Dictionary = {},
 		turn: int = -1) -> int:
 	return ArenaRingSystem.apply_ring_multipliers(city, overrides, turn)
 
-
-
 static func cell_feature(city: City, cell: Vector2i) -> StringName:
 	return ArenaRingSystem.cell_feature(city, cell)
 
@@ -59,8 +55,6 @@ static func feature_glyph(feature: StringName) -> String:
 static func feature_name(feature: StringName) -> String:
 	return ArenaRingSystem.feature_name(feature)
 
-
-
 static func clusters(city: City) -> Array:
 	return ArenaClusterSystem.clusters(city)
 
@@ -70,8 +64,6 @@ static func cluster_uids(city: City) -> Dictionary:
 static func cluster_worker_housing(city: City) -> int:
 	return ArenaClusterSystem.cluster_worker_housing(city)
 
-
-
 static func is_storm_turn(turn: int) -> bool:
 	return ArenaStorm.is_storm_turn(turn)
 
@@ -80,8 +72,6 @@ static func storm_production_mult(city: City, turn: int) -> float:
 
 static func storm_food_penalty(city: City, turn: int) -> float:
 	return ArenaStorm.storm_food_penalty(city, turn)
-
-
 
 static func make_city(overrides: Dictionary = {}) -> City:
 	return ArenaTurnRunner.make_city(overrides)

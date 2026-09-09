@@ -1,11 +1,6 @@
 class_name ProsperitySystem
 extends RefCounted
 
-
-
-
-
-
 static func recalculate(city: City) -> float:
 	var v := GameNumbers.PROSPERITY_BASE
 	if city.net_food() >= 0.0:
@@ -27,10 +22,8 @@ static func recalculate(city: City) -> float:
 	city.prosperity = v
 	return v
 
-
 static func gold_bonus(city: City) -> float:
 	return city.prosperity * GameNumbers.PROSPERITY_GOLD_PER_PT
-
 
 static func reputation_mod(city: City) -> int:
 	if city.prosperity >= GameNumbers.PROSPERITY_REP_HIGH:
@@ -39,19 +32,15 @@ static func reputation_mod(city: City) -> int:
 		return -1
 	return 0
 
-
 static func level_pop_req(level: int) -> int:
 	return GameNumbers.PROSPERITY_LEVEL_POP_BASE + GameNumbers.PROSPERITY_LEVEL_POP_STEP * (level - 1)
-
 
 static func level_buildings_req(level: int) -> int:
 	return GameNumbers.PROSPERITY_LEVEL_BLD_PER * level
 
-
 static func build_radius_for_level(level: int) -> int:
 	var l := clampi(level, GameNumbers.CITY_LEVEL_MIN, GameNumbers.CITY_LEVEL_MAX)
 	return mini(GameNumbers.BUILDING_MAX_DIST_BASE + (l - 1), GameNumbers.PROSPERITY_MAX_RADIUS)
-
 
 static func can_level_up(city: City) -> Dictionary:
 	var reasons: Array[String] = []
@@ -68,7 +57,6 @@ static func can_level_up(city: City) -> Dictionary:
 	if bld < level_buildings_req(city.level):
 		reasons.append("Здания: %d/%d" % [bld, level_buildings_req(city.level)])
 	return {"ok": reasons.is_empty(), "reasons": reasons}
-
 
 static func try_level_up(city: City) -> bool:
 	var check := can_level_up(city)

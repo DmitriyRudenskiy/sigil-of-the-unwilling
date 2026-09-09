@@ -1,31 +1,23 @@
 class_name RaidSystem
 extends RefCounted
 
-
-
-
 const PILLAGED_RESOURCES: Array[StringName] = [&"grain", &"flour", &"bread",
 	&"ore", &"tools", &"dust", &"science", &"influence"]
-
 
 static func chance(city: City) -> float:
 	return clampf(GameNumbers.RAID_CHANCE_BASE - float(city.reputation) / GameNumbers.RAID_REP_DIVISOR,
 		GameNumbers.RAID_CHANCE_MIN, GameNumbers.RAID_CHANCE_MAX)
 
-
 static func roll_value(city: City, turn: int) -> float:
 	var h := hash([city.uid, turn, 0x5EA1D])
 	return fmod(float(absi(h)), 10000.0) / 10000.0
 
-
 static func occurs(city: City, turn: int) -> bool:
 	return roll_value(city, turn) < chance(city)
-
 
 static func raid_strength(city: City, turn: int) -> int:
 	var h := hash([city.uid, turn, 0x5E25D])
 	return GameNumbers.RAID_STRENGTH_MIN + absi(h) % GameNumbers.RAID_STRENGTH_SPAN
-
 
 static func resolve(city: City, turn: int) -> Dictionary:
 	if not occurs(city, turn):

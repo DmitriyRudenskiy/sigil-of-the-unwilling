@@ -14,7 +14,6 @@ class _MockView extends BattleView:
 	func clear_highlights() -> void:
 		pass
 
-
 func before_test() -> void:
 	_units = Services.resolve(&"units")
 

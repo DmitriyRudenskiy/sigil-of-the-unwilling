@@ -1,47 +1,41 @@
-# FILE: res://scripts/data/ResourceAtlas.gd
+
 class_name ResourceAtlas
 extends RefCounted
 
 const ResourceType = preload("res://scripts/data/ResourceType.gd")
 
-## Лист ресурсов 4x4 (НЕ режется — регионы берутся через AtlasTexture).
 const SHEET_PATH := "res://assets/textures/resources.png"
 const GRID_COLS := 4
 const GRID_ROWS := 4
 
-## ID ресурса (ResourceRegistry / ResourceIcons) -> ячейка (col, row).
-## Классические ресурсы — через ResourceType (единый источник); теренные
-## (oak/silver/quartz/...) вне enum — строковые ключи.
 static var _map: Dictionary = {}
 
 static func _ensure_map() -> Dictionary:
     if _map.is_empty():
         _map = {
-            ResourceType.to_name(ResourceType.ID.WOOD): Vector2i(0, 0),  # брёвна
-            ResourceType.to_name(ResourceType.ID.MERCURY): Vector2i(1, 0),  # ртуть
-            ResourceType.to_name(ResourceType.ID.ORE): Vector2i(3, 0),  # классическая руда
-            ResourceType.to_name(ResourceType.ID.SULFUR): Vector2i(0, 2),  # пирит
-            ResourceType.to_name(ResourceType.ID.CRYSTAL): Vector2i(0, 1),  # синий кристалл
-            ResourceType.to_name(ResourceType.ID.GEMS): Vector2i(1, 2),  # аметист
+            ResourceType.to_name(ResourceType.ID.WOOD): Vector2i(0, 0),
+            ResourceType.to_name(ResourceType.ID.MERCURY): Vector2i(1, 0),
+            ResourceType.to_name(ResourceType.ID.ORE): Vector2i(3, 0),
+            ResourceType.to_name(ResourceType.ID.SULFUR): Vector2i(0, 2),
+            ResourceType.to_name(ResourceType.ID.CRYSTAL): Vector2i(0, 1),
+            ResourceType.to_name(ResourceType.ID.GEMS): Vector2i(1, 2),
             ResourceType.to_name(ResourceType.ID.GOLD): Vector2i(3, 1),
-            ResourceType.to_name(ResourceType.ID.STONE): Vector2i(3, 0),  # серый камень
-            # Теренные ресурсы (не в enum) — строковые ключи:
-            &"oak": Vector2i(0, 0),  # дуб = те же брёвна
-            &"silver": Vector2i(1, 0),  # серебристая руда
-            &"quartz": Vector2i(2, 0),  # белый кристалл
-            &"saltpeter": Vector2i(1, 1),  # розовые кристаллы
-            &"coal": Vector2i(2, 1),  # чёрный уголь
-            &"gold_ore": Vector2i(3, 1),  # золото в камне
-            &"cinnabar": Vector2i(2, 2),  # красные кристаллы
-            &"limonite": Vector2i(0, 3),  # бурый лимонит
-            &"bog_iron": Vector2i(1, 3),  # ржавое болотное железо
-            &"turquoise": Vector2i(2, 3),  # зелёная бирюза
-            &"coal_swamp": Vector2i(3, 3),  # чёрные осколки (болотный уголь)
+            ResourceType.to_name(ResourceType.ID.STONE): Vector2i(3, 0),
+
+            &"oak": Vector2i(0, 0),
+            &"silver": Vector2i(1, 0),
+            &"quartz": Vector2i(2, 0),
+            &"saltpeter": Vector2i(1, 1),
+            &"coal": Vector2i(2, 1),
+            &"gold_ore": Vector2i(3, 1),
+            &"cinnabar": Vector2i(2, 2),
+            &"limonite": Vector2i(0, 3),
+            &"bog_iron": Vector2i(1, 3),
+            &"turquoise": Vector2i(2, 3),
+            &"coal_swamp": Vector2i(3, 3),
         }
     return _map
 
-## Классические типы карты (индексы ResourceIcons.RES_TYPE_IDS:
-## 0 wood, 1 mercury, 2 ore, 3 sulfur, 4 crystal, 5 gems, 6 gold).
 const TYPE_TO_CELL := [
     Vector2i(0, 0),
     Vector2i(1, 0),
@@ -55,12 +49,10 @@ const TYPE_TO_CELL := [
 static var _sheet: Texture2D = null
 static var _cache: Dictionary = {}
 
-
 static func clear() -> void:
     _map = {}
     _sheet = null
     _cache = {}
-
 
 static func _load_sheet() -> Texture2D:
     if _sheet == null:

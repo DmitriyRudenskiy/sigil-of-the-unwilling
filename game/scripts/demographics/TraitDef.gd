@@ -9,16 +9,14 @@ var description := ""
 var rarity: int = Rarity.COMMON
 var effect_type: StringName = &""
 var effect_value: float = 0.0
-var effects: Dictionary = {}  
+var effects: Dictionary = {}
 var tags: Array[StringName] = []
-
 
 func modifier_for(type: StringName) -> float:
 	var v := float(effects.get(type, 0.0))
 	if type == effect_type:
 		v += effect_value
 	return v
-
 
 func to_dict() -> Dictionary:
 	return {
@@ -32,13 +30,11 @@ func to_dict() -> Dictionary:
 		"tags": tags.map(func(t: StringName) -> String: return String(t)),
 	}
 
-
 static func _effects_to_str(src: Dictionary) -> Dictionary:
 	var out := {}
 	for k in src:
 		out[String(k)] = float(src[k])
 	return out
-
 
 static func from_dict(data: Dictionary) -> TraitDef:
 	var t := TraitDef.new()

@@ -11,11 +11,9 @@ class _MockBattle:
 	extends Node
 	signal enemy_stack_defeated(cell: Vector2i, army: Array)
 
-
 class _MockEnemyProc:
 	extends Node
 	signal enemy_village_captured(city: City)
-
 
 class _MockPersistence:
 	extends Node
@@ -25,11 +23,9 @@ class _MockPersistence:
 	func get_date() -> Dictionary:
 		return {"month": 3, "week": 2, "day": 1}
 
-
 class _MockMap:
 	extends Node
 	var enemy_stacks: Dictionary = {}
-
 
 class _MockWorld:
 	extends Node
@@ -37,7 +33,6 @@ class _MockWorld:
 
 	func get_hero() -> HeroController:
 		return hero
-
 
 var _ec = null
 var _world: _MockWorld
@@ -49,7 +44,6 @@ var _persistence: _MockPersistence
 var _ended_count := 0
 var _last_summary: Dictionary = {}
 var _ended_cb: Callable = Callable()
-
 
 func _make_cities(player_count: int) -> CityManager:
 	var mgr := _CityManager.new()
@@ -63,7 +57,6 @@ func _make_cities(player_count: int) -> CityManager:
 		c.is_capital = (i == 0)
 		mgr.register_city(c)
 	return mgr
-
 
 func _setup_endgame() -> void:
 	_ended_count = 0
@@ -90,7 +83,6 @@ func _setup_endgame() -> void:
 		_last_summary = s
 	GameEventBus.game_ended.connect(_ended_cb)
 
-
 func after_test() -> void:
 	if _ended_cb.is_valid():
 		GameEventBus.game_ended.disconnect(_ended_cb)
@@ -110,11 +102,8 @@ func after_test() -> void:
 	_persistence = null
 	_cities = null
 
-
 func _session() -> GameSession:
 	return _persistence.session
-
-
 
 func test_death_without_successor_is_defeat() -> void:
 	_setup_endgame()
@@ -129,7 +118,6 @@ func test_death_without_successor_is_defeat() -> void:
 	assert_that(_last_summary.get("result")).is_equal("DEFEAT")
 	assert_that(_last_summary.get("reason")).is_equal("unsuccessored_death")
 
-
 func test_death_with_successor_keeps_run_running() -> void:
 	_setup_endgame()
 	_world.hero = TestFactories.make_hero()
@@ -143,8 +131,6 @@ func test_death_with_successor_keeps_run_running() -> void:
 	assert_that(_session().state).is_equal(GameSession.GameState.RUNNING)
 	assert_that(_ended_count).is_equal(0)
 
-
-
 func test_last_city_captured_is_defeat() -> void:
 	_setup_endgame()
 	var city: City = _cities.cities[0]
@@ -154,7 +140,6 @@ func test_last_city_captured_is_defeat() -> void:
 
 	assert_that(_session().state).is_equal(GameSession.GameState.DEFEAT)
 	assert_that(_session().end_reason).is_equal("total_collapse")
-
 
 func test_city_captured_but_other_alive_stays_running() -> void:
 	_setup_endgame()
@@ -171,7 +156,6 @@ func test_city_captured_but_other_alive_stays_running() -> void:
 
 	assert_that(_session().state).is_equal(GameSession.GameState.RUNNING)
 
-
 func test_turn_ended_fallback_collapse() -> void:
 	_setup_endgame()
 	for c in _cities.cities:
@@ -182,13 +166,10 @@ func test_turn_ended_fallback_collapse() -> void:
 	assert_that(_session().state).is_equal(GameSession.GameState.DEFEAT)
 	assert_that(_session().end_reason).is_equal("total_collapse")
 
-
 func test_turn_ended_with_cities_stays_running() -> void:
 	_setup_endgame()
 	GameEventBus.turn_ended.emit(5, 3)
 	assert_that(_session().state).is_equal(GameSession.GameState.RUNNING)
-
-
 
 func test_glory_threshold_is_victory() -> void:
 	_setup_endgame()
@@ -202,8 +183,6 @@ func test_glory_threshold_is_victory() -> void:
 	assert_that(_last_summary.get("turns")).is_equal(42)
 	assert_that(_last_summary.get("glory")).is_equal(500)
 
-
-
 func test_last_enemy_stack_defeated_is_victory() -> void:
 	_setup_endgame()
 	_map.enemy_stacks = {Vector2i(3, 4): {}}
@@ -214,7 +193,6 @@ func test_last_enemy_stack_defeated_is_victory() -> void:
 	assert_that(_session().state).is_equal(GameSession.GameState.VICTORY)
 	assert_that(_session().end_reason).is_equal("domination")
 
-
 func test_stack_survives_stays_running() -> void:
 	_setup_endgame()
 	_map.enemy_stacks = {Vector2i(3, 4): {}, Vector2i(5, 6): {}}
@@ -222,8 +200,6 @@ func test_stack_survives_stays_running() -> void:
 	_battle.enemy_stack_defeated.emit(Vector2i(3, 4), [])
 
 	assert_that(_session().state).is_equal(GameSession.GameState.RUNNING)
-
-
 
 func test_first_terminal_condition_wins_and_sticky() -> void:
 	_setup_endgame()
@@ -240,8 +216,6 @@ func test_first_terminal_condition_wins_and_sticky() -> void:
 	assert_that(_session().end_reason).is_equal("total_collapse")
 	assert_that(_ended_count).is_equal(1)
 
-
-
 func test_summary_counters() -> void:
 	_setup_endgame()
 	GameEventBus.battle_won.emit(Vector2i(1, 1))
@@ -249,7 +223,7 @@ func test_summary_counters() -> void:
 	GameEventBus.battle_lost.emit(Vector2i(3, 3))
 	var succ := TestFactories.make_hero()
 	GameEventBus.hero_successor.emit(succ)
-	succ.free()  
+	succ.free()
 
 	for c in _cities.cities:
 		c.owner = &"enemy"
@@ -260,8 +234,6 @@ func test_summary_counters() -> void:
 	assert_that(_last_summary.get("generations")).is_equal(2)
 	assert_that(_last_summary.get("date", {}).get("month")).is_equal(3)
 	assert_that(_last_summary.get("cities_owned")).is_equal(0)
-
-
 
 func test_session_serialize_roundtrip() -> void:
 	var s := _GameSession.new()
@@ -281,13 +253,10 @@ func test_session_serialize_roundtrip() -> void:
 	assert_that(d2.successions).is_equal(2)
 	assert_bool(d2.is_terminal()).is_true()
 
-
 func test_session_defaults_running() -> void:
 	var s := _GameSession.new()
 	assert_that(s.state).is_equal(GameSession.GameState.RUNNING)
 	assert_bool(s.is_terminal()).is_false()
-
-
 
 func test_save_v5_roundtrip_with_session() -> void:
 	var d := _SaveData.new()
@@ -305,7 +274,6 @@ func test_save_v5_roundtrip_with_session() -> void:
 	assert_that(d2.session.get("state")).is_equal(2)
 	assert_that(d2.session.get("end_reason")).is_equal("total_collapse")
 
-
 func test_migrate_v4_to_v5_defaults() -> void:
 	var v4 := {"version": 4, "run_seed": 99,
 		"hero": {"cell": {"x": 1, "y": 1}, "path_id": "archivist"},
@@ -319,7 +287,6 @@ func test_migrate_v4_to_v5_defaults() -> void:
 	var s := _GameSession.new()
 	s.deserialize(d.session)
 	assert_that(s.state).is_equal(GameSession.GameState.RUNNING)
-
 
 func test_double_setup_does_not_duplicate_counters() -> void:
 	_setup_endgame()

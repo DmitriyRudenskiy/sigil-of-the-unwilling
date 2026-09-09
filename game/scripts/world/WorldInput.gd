@@ -6,7 +6,6 @@ var hero: HeroController = null
 var camera: WorldCamera = null
 var world: Node = null
 
-
 func _unhandled_input(event: InputEvent) -> void:
 	if map == null or hero == null or camera == null:
 		return

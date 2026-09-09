@@ -18,7 +18,6 @@ static func build_hero(name: String, variant: String) -> HeroController:
 		_equip(hero, reg, "warrior")
 	return hero
 
-
 static func _equip(hero: HeroController, reg: Object, variant: String) -> void:
 	var eq: Dictionary = hero.inventory.equipped
 	var bp: Array = hero.inventory.backpack

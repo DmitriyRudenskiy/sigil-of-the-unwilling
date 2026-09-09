@@ -4,7 +4,6 @@ const _City = preload("res://scripts/world/City.gd")
 const _Follower = preload("res://scripts/entities/Follower.gd")
 const _FollowerSystem = preload("res://scripts/entities/FollowerSystem.gd")
 
-
 func _make_city(followers: int, workers: int = 0) -> RefCounted:
 	var c := _City.new()
 	c.display_name = "Город"
@@ -14,7 +13,6 @@ func _make_city(followers: int, workers: int = 0) -> RefCounted:
 	for i in followers:
 		c.add_migrant(PopUnit.State.FOLLOWER, -1)
 	return c
-
 
 func test_roundtrip_all_fields() -> void:
 	var f := _Follower.new()
@@ -38,7 +36,6 @@ func test_roundtrip_all_fields() -> void:
 	assert_that(int(f2.stat_modifiers.get(&"INT", 0))).is_equal(3)
 	assert_that(f2.abilities).is_equal([&"fireball"])
 
-
 func test_roundtrip_defaults() -> void:
 	var f := _Follower.new()
 	var f2 := _Follower.new()
@@ -46,7 +43,6 @@ func test_roundtrip_defaults() -> void:
 	assert_that(f2.race).is_equal(f.race)
 	assert_bool((f2.trait_ids as Array).is_empty()).is_true()
 	assert_bool((f2.abilities as Array).is_empty()).is_true()
-
 
 func test_to_dict_json_compatible() -> void:
 	var f := _Follower.new()
@@ -66,7 +62,6 @@ func test_to_dict_json_compatible() -> void:
 	var back: Variant = JSON.parse_string(json)
 	assert_bool(back is Dictionary).is_true()
 
-
 func test_recruit_moves_follower_from_city_to_hero() -> void:
 	var city := _make_city(2)
 	var hero := HeroController.new()
@@ -79,14 +74,12 @@ func test_recruit_moves_follower_from_city_to_hero() -> void:
 	assert_str(f.name).is_not_empty()
 	hero.free()
 
-
 func test_recruit_null_without_free_followers() -> void:
-	var city := _make_city(0, 3)  
+	var city := _make_city(0, 3)
 	var hero := HeroController.new()
 	assert_that(_FollowerSystem.recruit(city, hero, TestFactories.seeded(1))).is_null()
 	assert_that(hero.followers.size()).is_equal(0)
 	hero.free()
-
 
 func test_recruit_deterministic_with_same_seed() -> void:
 	var c1 := _make_city(1)
@@ -102,7 +95,6 @@ func test_recruit_deterministic_with_same_seed() -> void:
 	h1.free()
 	h2.free()
 
-
 func test_recruit_uid_increments() -> void:
 	var city := _make_city(3)
 	var hero := HeroController.new()
@@ -111,4 +103,3 @@ func test_recruit_uid_increments() -> void:
 	assert_that(f1.uid).is_equal(1)
 	assert_that(f2.uid).is_equal(2)
 	hero.free()
-

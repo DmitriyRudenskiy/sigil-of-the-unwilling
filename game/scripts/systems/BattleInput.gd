@@ -29,20 +29,16 @@ func set_cursor_mode(mode: int) -> void:
 	if _view != null:
 		_view.set_cursor_mode(mode)
 
-
 func setup(view: BattleView, state: BattleState, obstacles: Dictionary) -> void:
 	_view = view
 	_state = state
 	_obstacles = obstacles
 
-
 func set_action_lock(locked: bool) -> void:
 	_action_lock = locked
 
-
 func start_spell_targeting(spell_id: StringName, target_side: BattleState.Side, include_dead: bool = false) -> void:
-	# FIX TASK_09: сначала чистим старую подсветку/стейт, потом ставим новый —
-	# _clear_highlights() сбрасывает _pending_spell_id, порядок раньше терял заклинание.
+
 	_clear_highlights()
 	_pending_spell_id = spell_id
 	_pending_target_side = target_side
@@ -56,7 +52,6 @@ func start_spell_targeting(spell_id: StringName, target_side: BattleState.Side, 
 	_view.set_highlights({}, highlight_attack)
 	GameLogger.battle("Spell targeting started: %s" % spell_id)
 
-
 func _unhandled_input(ev: InputEvent) -> void:
 	if _action_lock or _state == null or _state.battle_over or not _state.is_player_turn:
 		return
@@ -69,7 +64,7 @@ func _unhandled_input(ev: InputEvent) -> void:
 				cancel_requested.emit()
 				get_viewport().set_input_as_handled()
 				return
-			
+
 			if ev.button_index == MOUSE_BUTTON_LEFT:
 				var global_pos := _view.get_global_mouse_position()
 				var cell := _view.global_to_map(global_pos)
@@ -126,7 +121,6 @@ func _unhandled_input(ev: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 
-
 func _unit_at_pixel(global_pos: Vector2, side: BattleState.Side) -> BattleState.BattleUnit:
 	var cell := _view.global_to_map(global_pos)
 	var unit := _state.get_unit_at(cell, side)
@@ -140,7 +134,6 @@ func _unit_at_pixel(global_pos: Vector2, side: BattleState.Side) -> BattleState.
 			if local_pos.distance_to(unit_pos) < GameNumbers.BATTLE_CLICK_RADIUS_PX:
 				return unit
 	return null
-
 
 func _select(u: BattleState.BattleUnit) -> void:
 	unit_pick_requested.emit(u)
@@ -161,7 +154,6 @@ func _select(u: BattleState.BattleUnit) -> void:
 	_update_attack_preview()
 
 	GameLogger.battle("selected %s moves=%d" % [u.get_display_name(), highlight_move.size()])
-
 
 func _update_attack_preview() -> void:
 	if _state.active_unit == null:
@@ -188,7 +180,6 @@ func _update_attack_preview() -> void:
 
 	attack_preview_updated.emit("")
 
-
 func clear_highlights() -> void:
 	_clear_highlights()
 
@@ -197,7 +188,6 @@ func set_unreachable_highlights(cells: Dictionary) -> void:
 	if _view != null:
 		_view.set_unreachable_highlights(cells)
 
-
 func _clear_highlights() -> void:
 	_pending_spell_id = ""
 	highlight_move.clear()
@@ -205,7 +195,6 @@ func _clear_highlights() -> void:
 	highlight_unreachable.clear()
 	if _view != null:
 		_view.clear_highlights()
-
 
 func show_attack_only() -> void:
 	if _state.active_unit == null or not _state.is_player_turn:
@@ -223,7 +212,6 @@ func show_attack_only() -> void:
 		_view.set_cursor_mode(_cursor_mode)
 
 	_view.set_highlights({}, highlight_attack)
-
 
 func _compute_attack_highlight(u: BattleState.BattleUnit) -> Dictionary:
 	var result: Dictionary = {}

@@ -38,4 +38,3 @@ func pop() -> Array:
 	return res
 func is_empty() -> bool:
 	return _data.is_empty()
-

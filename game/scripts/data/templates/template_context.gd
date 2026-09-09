@@ -3,7 +3,6 @@ extends RefCounted
 
 const _Utils = preload("res://scripts/data/SpellUtils.gd")
 
-
 static func check_condition(
 	cond: Dictionary, state: Variant,
 	caster: Variant, target: Variant

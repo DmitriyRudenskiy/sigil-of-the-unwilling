@@ -1,7 +1,5 @@
 extends GdUnitTestSuite
 
-
-
 func test_retreat_smoke() -> void:
 	var state: BattleState = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []

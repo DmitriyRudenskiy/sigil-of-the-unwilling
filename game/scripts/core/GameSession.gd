@@ -11,7 +11,6 @@ var battles_won := 0
 var battles_lost := 0
 var successions := 0
 
-
 func _init(seed_value: int = -1) -> void:
 	if seed_value < 0:
 		run_seed = int(Time.get_unix_time_from_system()) & 0x7FFFFFFF
@@ -21,20 +20,16 @@ func _init(seed_value: int = -1) -> void:
 	rng = RandomNumberGenerator.new()
 	rng.seed = run_seed
 
-
 func next_seed() -> int:
 	return rng.randi()
-
 
 func make_rng() -> RandomNumberGenerator:
 	var child := RandomNumberGenerator.new()
 	child.seed = next_seed()
 	return child
 
-
 func is_terminal() -> bool:
 	return state != GameState.RUNNING
-
 
 func serialize() -> Dictionary:
 	return {
@@ -44,7 +39,6 @@ func serialize() -> Dictionary:
 		"battles_lost": battles_lost,
 		"successions": successions,
 	}
-
 
 func deserialize(d: Dictionary) -> void:
 	if d == null or d.is_empty():

@@ -23,19 +23,19 @@ static func setup_button(btn: Button) -> void:
         return
     btn.set_meta(SETUP_META, true)
     btn.pivot_offset = btn.size / 2.0
-    btn.mouse_entered.connect(func(): 
+    btn.mouse_entered.connect(func():
         var tw = btn.create_tween()
         tw.tween_property(btn, "scale", Vector2(1.05, 1.05), 0.1)
     )
-    btn.mouse_exited.connect(func(): 
+    btn.mouse_exited.connect(func():
         var tw = btn.create_tween()
         tw.tween_property(btn, "scale", Vector2.ONE, 0.1)
     )
-    btn.button_down.connect(func(): 
+    btn.button_down.connect(func():
         var tw = btn.create_tween()
         tw.tween_property(btn, "scale", Vector2(0.95, 0.95), 0.05)
     )
-    btn.button_up.connect(func(): 
+    btn.button_up.connect(func():
         var tw = btn.create_tween()
         tw.tween_property(btn, "scale", Vector2(1.05, 1.05), 0.05)
     )

@@ -18,18 +18,15 @@ const _PopUnit = preload("res://scripts/world/PopUnit.gd")
 static var _default_registry: _Trait = null
 static var _default_raceclass: _RaceClass = null
 
-
 static func registry() -> _Trait:
 	if _default_registry == null:
 		_default_registry = _Trait.new()
 	return _default_registry
 
-
 static func raceclass_registry() -> _RaceClass:
 	if _default_raceclass == null:
 		_default_raceclass = _RaceClass.new()
 	return _default_raceclass
-
 
 static func make_follower(uid: int, name: String, trait_ids: Array = []) -> _Follower:
 	var f := _Follower.new()
@@ -38,7 +35,6 @@ static func make_follower(uid: int, name: String, trait_ids: Array = []) -> _Fol
 	for id in trait_ids:
 		f.trait_ids.append(StringName(id))
 	return f
-
 
 static func recruit(
 	city: _City, hero, rng: RandomNumberGenerator,
@@ -79,7 +75,6 @@ static func recruit(
 	hero.followers.append(f)
 	return f
 
-
 static func _collectabilities(class_def: _ClassDef, race_def: _RaceDef) -> Array[StringName]:
 	var out: Array[StringName] = []
 	if class_def != null:
@@ -90,13 +85,11 @@ static func _collectabilities(class_def: _ClassDef, race_def: _RaceDef) -> Array
 			out.append(StringName(tr))
 	return out
 
-
 static func _find_free_follower(city: _City) -> _PopUnit:
 	for u in city.pop:
 		if u != null and u.is_free_follower():
 			return u
 	return null
-
 
 static func _next_uid(hero) -> int:
 	var max_uid := 0

@@ -20,14 +20,11 @@ var _pf_self_cell: Vector2i
 var _hero_dist_field: PackedFloat32Array = PackedFloat32Array()
 var _hero_dist_field_valid: bool = false
 
-
 func get_phase_id() -> StringName:
 	return &"enemy_turn"
 
-
 func get_priority() -> int:
 	return 25
-
 
 func setup_world(
 	p_map_gen: MapGenerator,
@@ -46,7 +43,6 @@ func setup_world(
 	var units_reg: Node = Services.resolve(&"units")
 	if units_reg != null and "FACTION_SETS" in units_reg:
 		_faction_sets = units_reg.FACTION_SETS
-
 
 func process(_ctx: TurnContext) -> Dictionary:
 	var report := {"moved": 0, "attacks": 0, "captures": 0}
@@ -88,7 +84,7 @@ func process(_ctx: TurnContext) -> Dictionary:
 				var mp: float = float(profile.get("mp", 5.0))
 				var goal_idx := HexUtils.pos_to_idx(goal, _map_gen.map_width)
 				if _hero_dist_field_valid and _hero_dist_field[goal_idx] >= INF:
-					continue  # цель недостижима (hero-поле покрывает всю карту)
+					continue
 				var dist := _dist_field(cell, mp, cost_fn, dist_cache)
 				var path: Array[Vector2i] = HexPathfinding.dijkstra_path(cell, goal, dist, cost_fn, _map_gen.map_width, _map_gen.map_height)
 
@@ -125,13 +121,10 @@ func process(_ctx: TurnContext) -> Dictionary:
 						attacked = true
 
 		if attacked:
-			break  
+			break
 
 	enemy_turn_reported.emit(report)
 	return report
-
-
-
 
 func _rebuild_hero_dist_field() -> void:
 	_hero_dist_field_valid = false
@@ -142,7 +135,6 @@ func _rebuild_hero_dist_field() -> void:
 	_hero_dist_field = HexPathfinding.dijkstra(hero_cell, 9999.0, cost_fn, _map_gen.map_width, _map_gen.map_height)
 	_hero_dist_field_valid = true
 
-
 func _dist_field(cell: Vector2i, mp: float, cost_fn: Callable, cache: Dictionary) -> PackedFloat32Array:
 	var key := Vector3i(cell.x, cell.y, int(mp * 1000.0))
 	if cache.has(key):
@@ -150,7 +142,6 @@ func _dist_field(cell: Vector2i, mp: float, cost_fn: Callable, cache: Dictionary
 	var field := HexPathfinding.dijkstra(cell, mp, cost_fn, _map_gen.map_width, _map_gen.map_height)
 	cache[key] = field
 	return field
-
 
 func _pf_cost_fn_global(nxt: Vector2i) -> float:
 	if _map_gen == null:
@@ -160,7 +151,6 @@ func _pf_cost_fn_global(nxt: Vector2i) -> float:
 	var tid: int = _map_gen.get_terrain_id(nxt)
 	return _TerrainCostTable.get_cost_with_effects_by_id(tid, false)
 
-
 func _garrisoned_set() -> Dictionary:
 	var out := {}
 	if _world_delta == null:
@@ -168,7 +158,6 @@ func _garrisoned_set() -> Dictionary:
 	for item in _world_delta.enemy_growth_state.get("garrisoned", []):
 		out[Vector2i(int(item.get("x", 0)), int(item.get("y", 0)))] = true
 	return out
-
 
 func _capture_city(city: City, cell: Vector2i) -> void:
 	city.owner = &"enemy"
@@ -182,12 +171,10 @@ func _capture_city(city: City, cell: Vector2i) -> void:
 	GameLogger.world("Enemy captured %s at %s" % [city.display_name, str(cell)])
 	enemy_village_captured.emit(city)
 
-
 func _city_at(cell: Vector2i) -> City:
 	if _cities_mgr == null:
 		return null
 	return _cities_mgr.city_at(cell)
-
 
 func _move_stack(stacks: Dictionary, from: Vector2i, to: Vector2i, army: Array) -> void:
 	stacks.erase(from)
@@ -195,11 +182,9 @@ func _move_stack(stacks: Dictionary, from: Vector2i, to: Vector2i, army: Array) 
 	if _spawner != null and _spawner.has_method("move_enemy_visual"):
 		_spawner.move_enemy_visual(from, to)
 
-
 func _hero_pos() -> Vector2i:
 	var raw: Variant = _hero.get("current_cell")
 	return raw if raw is Vector2i else Vector2i(-1, -1)
-
 
 func _candidate_goals(cell: Vector2i, hero_cell: Vector2i, aggro: int, profile: Dictionary) -> Dictionary:
 	var goals := {}
@@ -222,12 +207,10 @@ func _candidate_goals(cell: Vector2i, hero_cell: Vector2i, aggro: int, profile: 
 			goals[hero_cell] = {"weight": float(weights.get("hero", 0.8)), "dist": d}
 	return goals
 
-
 func _pick_goal(goals: Dictionary) -> Vector2i:
 	var best_cell: Vector2i = Vector2i(-1, -1)
 	var best_score := -1.0
-	
-	
+
 	for c in goals.keys():
 		var info: Dictionary = goals[c]
 		var score := float(info["weight"]) / (float(int(info["dist"])) + 1.0)
@@ -236,12 +219,11 @@ func _pick_goal(goals: Dictionary) -> Vector2i:
 			best_score = score
 			best_cell = c
 		elif score > best_score - 0.000001 and score < best_score + 0.000001:
-			
+
 			if c.x < best_cell.x or (c.x == best_cell.x and c.y < best_cell.y):
 				best_cell = c
 
 	return best_cell
-
 
 func _pf_cost_fn(nxt: Vector2i) -> float:
 	if _map_gen == null:
@@ -253,10 +235,8 @@ func _pf_cost_fn(nxt: Vector2i) -> float:
 	var tid: int = _map_gen.get_terrain_id(nxt)
 	return _TerrainCostTable.get_cost_with_effects_by_id(tid, false)
 
-
 func _enter_cost(nxt: Vector2i) -> float:
 	return _enter_cost_blocked(nxt, {}, Vector2i(-1, -1))
-
 
 func _enter_cost_blocked(nxt: Vector2i, stacks: Dictionary, self_cell: Vector2i) -> float:
 	if _map_gen == null:
@@ -267,7 +247,6 @@ func _enter_cost_blocked(nxt: Vector2i, stacks: Dictionary, self_cell: Vector2i)
 		return INF
 	var tid: int = _map_gen.get_terrain_id(nxt)
 	return _TerrainCostTable.get_cost_with_effects_by_id(tid, false)
-
 
 static func _cell_a_before_b(a: Vector2i, b: Vector2i) -> bool:
 	if a.x != b.x:

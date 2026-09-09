@@ -18,10 +18,8 @@ const TERRAIN_TO_BIOME := {
 
 var model
 
-
 func _init(p_model) -> void:
 	model = p_model
-
 
 func paint(tile_map: TileMapLayer) -> void:
 	tile_map.clear()
@@ -32,7 +30,6 @@ func paint(tile_map: TileMapLayer) -> void:
 		var biome: int = TERRAIN_TO_BIOME[terrain_id]
 		var coords: Array = TileAtlas.BASE_COORDS[biome]
 		tile_map.set_cell(cell, TileAtlas.SOURCE_ID, coords[0])
-
 
 func apply_fog(tile_map: TileMapLayer, visibility: _VisibilityMap) -> void:
 	if visibility == null or tile_map == null:

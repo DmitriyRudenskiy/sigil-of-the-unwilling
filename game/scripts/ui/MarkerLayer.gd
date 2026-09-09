@@ -16,27 +16,25 @@ const _COLOR_RED := ThemeConfig.C_MARKER_RED
 var _map_gen: MapGenerator
 var _hero_cell: Vector2i
 var _mp_current: float = 0.0
-var _dist: Dictionary = {}  
-var _reachable: Dictionary = {}  
-var _red_frontier: Dictionary = {}  
+var _dist: Dictionary = {}
+var _reachable: Dictionary = {}
+var _red_frontier: Dictionary = {}
 var _visible: bool = false
 var _green_pos: PackedVector2Array = PackedVector2Array()
 var _yellow_pos: PackedVector2Array = PackedVector2Array()
 var _red_pos: PackedVector2Array = PackedVector2Array()
 
-var _hex_size: float = 32.0  
-var _city_marks: Array = []  
+var _hex_size: float = 32.0
+var _city_marks: Array = []
 var _threat_pos: PackedVector2Array = PackedVector2Array()
 var _terrain_mgr: Variant = null
-var _terrain_pos: Dictionary = {}  
-
+var _terrain_pos: Dictionary = {}
 
 func setup(map: MapGenerator) -> void:
 	_map_gen = map
 	z_index = 5
 	if _map_gen and _map_gen.has_valid_tilemap():
 		_hex_size = _map_gen.get_tile_size().x * 0.5
-
 
 func show_markers(hero_cell: Vector2i, mp: float, dist_map: Dictionary) -> void:
 	_hero_cell = hero_cell
@@ -80,7 +78,6 @@ func show_markers(hero_cell: Vector2i, mp: float, dist_map: Dictionary) -> void:
 
 	queue_redraw()
 
-
 func hide_markers() -> void:
 	_visible = false
 	_reachable.clear()
@@ -89,7 +86,6 @@ func hide_markers() -> void:
 	_yellow_pos.clear()
 	_red_pos.clear()
 	queue_redraw()
-
 
 func set_city_markers(cities: Array) -> void:
 	_city_marks.clear()
@@ -101,13 +97,11 @@ func set_city_markers(cities: Array) -> void:
 		_city_marks.append({"cell": c.center, "pos": _map_gen.map_to_local(c.center), "city": c})
 	queue_redraw()
 
-
 func city_at_cell(cell: Vector2i) -> City:
 	for m in _city_marks:
 		if m.cell == cell:
 			return m.city
 	return null
-
 
 func set_threat_markers(cells: Array) -> void:
 	_threat_pos.clear()
@@ -142,11 +136,9 @@ func refresh_terrain_markers() -> void:
 			_terrain_pos[cell] = {"pos": _map_gen.map_to_local(cell), "exhausted": _terrain_mgr.is_exhausted(cell)}
 	queue_redraw()
 
-
 func _process(_d: float) -> void:
 	if (_visible and not _green_pos.is_empty()) or not _threat_pos.is_empty():
 		queue_redraw()
-
 
 func _draw() -> void:
 	if not _map_gen or not _map_gen.has_valid_tilemap():
@@ -190,7 +182,6 @@ func _draw() -> void:
 	for pos in _red_pos:
 		draw_circle(pos, r_red, _COLOR_RED)
 
-
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed:
 		var cell := _screen_to_cell(get_global_mouse_position())
@@ -201,7 +192,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			_handle_left_click(cell)
 
 		elif event.button_index == MOUSE_BUTTON_RIGHT:
-			pass  
+			pass
 
 	elif event is InputEventMouseMotion and _visible:
 		var cell := _screen_to_cell(get_global_mouse_position())
@@ -210,9 +201,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			var cost: float = _dist.get(cell, INF)
 			var remaining: float = _mp_current - cost
 			if not is_reachable and _red_frontier.has(cell):
-				remaining = -remaining  
+				remaining = -remaining
 			marker_hovered.emit(cell, cost, remaining, is_reachable)
-
 
 func _handle_left_click(cell: Vector2i) -> void:
 	var c: City = city_at_cell(cell)
@@ -227,7 +217,6 @@ func _handle_left_click(cell: Vector2i) -> void:
 	elif _red_frontier.has(cell):
 		marker_clicked.emit(cell, false)
 		get_viewport().set_input_as_handled()
-
 
 func _screen_to_cell(world_pos: Vector2) -> Vector2i:
 	if not _map_gen or not _map_gen.has_valid_tilemap():

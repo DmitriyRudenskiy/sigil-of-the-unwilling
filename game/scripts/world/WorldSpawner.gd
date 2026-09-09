@@ -7,7 +7,7 @@ const EnemyEntityScene = preload("res://scenes/entities/EnemyEntity.tscn")
 const ChestEntityScene = preload("res://scenes/entities/ChestEntity.tscn")
 const ScrollEntityScene = preload("res://scenes/entities/ScrollEntity.tscn")
 
-const MAP_RESOURCE_ICON_SCALE := 0.5  # 100px лист -> ~50px на карте
+const MAP_RESOURCE_ICON_SCALE := 0.5
 
 var map: MapGenerator = null
 var rng: RandomNumberGenerator = null
@@ -20,7 +20,6 @@ var _chests: Dictionary = {}
 var _scroll_nodes: Dictionary = {}
 var _scrolls: Dictionary = {}
 var fog_vis = null
-
 
 func apply_fog_visibility(vis) -> void:
 	fog_vis = vis
@@ -37,15 +36,12 @@ func apply_fog_visibility(vis) -> void:
 	for cell in _village_nodes:
 		_village_nodes[cell].visible = vis.is_visible(cell)
 
-
 var _sprite_cache: Dictionary = {}
-
 
 func _cached_texture(key: String, builder: Callable) -> ImageTexture:
 	if not _sprite_cache.has(key):
 		_sprite_cache[key] = builder.call()
 	return _sprite_cache[key]
-
 
 func spawn_all() -> void:
 	if map == null or not map.has_valid_tilemap():
@@ -56,13 +52,11 @@ func spawn_all() -> void:
 	_spawn_chests()
 	_spawn_scrolls()
 
-
 func get_res_type_at(cell: Vector2i) -> int:
 	var node: Node2D = _resource_nodes.get(cell)
 	if node == null:
 		return -1
 	return int(node.get_meta("res_type", -1))
-
 
 func remove_resource_at(cell: Vector2i) -> bool:
 	if not _resource_nodes.has(cell):
@@ -76,7 +70,6 @@ func remove_resource_at(cell: Vector2i) -> bool:
 
 	return true
 
-
 func remove_enemy_at(cell: Vector2i) -> bool:
 	if not _enemy_nodes.has(cell):
 		return false
@@ -86,7 +79,6 @@ func remove_enemy_at(cell: Vector2i) -> bool:
 	_enemy_nodes.erase(cell)
 
 	return true
-
 
 func move_enemy_visual(from_cell: Vector2i, to_cell: Vector2i) -> void:
 	if map == null or not _enemy_nodes.has(from_cell):
@@ -99,7 +91,6 @@ func move_enemy_visual(from_cell: Vector2i, to_cell: Vector2i) -> void:
 	if fog_vis != null:
 		node.visible = fog_vis.is_visible(to_cell)
 
-
 func spawn_enemy_visual(cell: Vector2i, army: Array) -> void:
 	if map == null or _enemy_nodes.has(cell) or army.is_empty():
 		return
@@ -111,7 +102,6 @@ func spawn_enemy_visual(cell: Vector2i, army: Array) -> void:
 	if fog_vis != null:
 		e.visible = fog_vis.is_visible(cell)
 
-
 func capture_village(cell: Vector2i) -> bool:
 	if not _village_nodes.has(cell):
 		return false
@@ -122,7 +112,6 @@ func capture_village(cell: Vector2i) -> bool:
 		flag.text = "🏳️"
 		return true
 	return false
-
 
 func _spawn_villages() -> void:
 	for cell in map.village_cells:
@@ -140,7 +129,6 @@ func _spawn_villages() -> void:
 		v.position = map.map_to_local(cell)
 		add_child(v)
 		_village_nodes[cell] = v
-
 
 func _spawn_resources() -> void:
 	for cell in map.resource_cells:
@@ -161,7 +149,6 @@ func _spawn_resources() -> void:
 		add_child(r)
 		_resource_nodes[cell] = r
 
-
 func _spawn_enemies() -> void:
 	for cell in map.enemy_stacks:
 		var e := _make_enemy_node(cell, map.enemy_stacks[cell])
@@ -169,7 +156,6 @@ func _spawn_enemies() -> void:
 			continue
 		add_child(e)
 		_enemy_nodes[cell] = e
-
 
 func _make_enemy_node(cell: Vector2i, army: Array) -> Node2D:
 	if army.is_empty():
@@ -191,10 +177,8 @@ func _make_enemy_node(cell: Vector2i, army: Array) -> Node2D:
 	e.position = map.map_to_local(cell)
 	return e
 
-
 func chest_cells() -> Array:
 	return _chests.keys()
-
 
 func remove_chest_at(cell: Vector2i) -> bool:
 	if not _chest_nodes.has(cell):
@@ -205,17 +189,14 @@ func remove_chest_at(cell: Vector2i) -> bool:
 	_chests.erase(cell)
 	return true
 
-
 func get_chest_at(cell: Vector2i) -> ArtifactChest:
 	return _chests.get(cell, null)
-
 
 func get_enemy_defender_bonus() -> Dictionary:
 	var r = rng if rng != null else RandomNumberGenerator.new()
 	if rng == null:
 		r.seed = GameNumbers.EDITOR_SEED
 	return {"defense": r.randi_range(GameNumbers.MAP_ENEMY_DEF_BONUS_MIN, GameNumbers.MAP_ENEMY_DEF_BONUS_MAX)}
-
 
 func _spawn_chests() -> void:
 	var chest_rng := rng if rng != null else RandomNumberGenerator.new()
@@ -265,10 +246,6 @@ func _spawn_chests() -> void:
 		_chest_nodes[cell] = n
 		placed += 1
 
-
-
-
-
 func _spawn_scrolls() -> void:
 	var scroll_count: int = max(2, map.map_width / 3)
 	var placed: int = 0
@@ -306,14 +283,11 @@ func _spawn_scrolls() -> void:
 		_scroll_nodes[cell] = n
 		placed += 1
 
-
 func remove_scroll_at(cell: Vector2i) -> void:
 	if _scroll_nodes.has(cell):
 		_scroll_nodes[cell].queue_free()
 		_scroll_nodes.erase(cell)
 	_scrolls.erase(cell)
 
-
 func get_scroll_at(cell: Vector2i) -> StringName:
 	return _scrolls.get(cell, &"")
-

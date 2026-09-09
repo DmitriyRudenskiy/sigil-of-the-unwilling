@@ -96,7 +96,6 @@ func _wire_ui() -> void:
     _wire_button(bar, "MenuButton", GameText.arena_menu_button(), _on_menu_pressed)
     _timer.timeout.connect(_on_auto_tick)
 
-
 func _wire_button(parent: Control, name: String, text: String, cb: Callable) -> Button:
     var btn := parent.get_node(name) as Button
     btn.text = text
@@ -124,8 +123,6 @@ func _selection_name() -> String:
         if row[0] == _selected:
             return GameText.arena_selection(row[1], GameText.building_name(_selected))
     return str(_selected)
-
-
 
 func _hex_to_pixel(cell: Vector2i) -> Vector2:
     var x: float = HEX_SIZE * SQRT3 * (float(cell.x) + 0.5 * (cell.y & 1))

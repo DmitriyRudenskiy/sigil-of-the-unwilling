@@ -1,16 +1,8 @@
-"""
-MCP-тест: отсутствие телепортаций при быстром переключении Движение → Атака.
-Использует tugcantopaloglu/godot-mcp для управления живой сценой боя.
-"""
 from __future__ import annotations
 
 import time
 
-
-
-
 def _init_battle(mcp):
-    """Инициализация боя через game_eval."""
     return mcp.execute_code("""
         var battle = get_tree().current_scene
         if battle == null or not battle.has_method("start_battle"):
@@ -28,9 +20,7 @@ def _init_battle(mcp):
         return {"status": "battle_started"}
     """)
 
-
 def _get_units(mcp):
-    """Получить список юнитов боя."""
     return mcp.execute_code("""
         var battle = get_tree().current_scene
         var bs = battle.get_battle_state()
@@ -51,9 +41,7 @@ def _get_units(mcp):
                 "battle_over": bs.battle_over, "units": units}
     """)
 
-
 def test_move_then_attack_no_teleport(battle_scene):
-    """Движение + сразу атака — без телепортаций."""
     mcp = battle_scene
 
     init = _init_battle(mcp)
@@ -72,7 +60,6 @@ def test_move_then_attack_no_teleport(battle_scene):
     player = attackers[0]
     enemy = defenders[0]
 
-    # Команда движения
     mcp.execute_code(f"""
         var battle = get_tree().current_scene
         var executor = battle.get_node("BattleTurnExecutor")
@@ -89,7 +76,6 @@ def test_move_then_attack_no_teleport(battle_scene):
         return {{"moved": target != Vector2i(-1, -1)}}
     """)
 
-    # Сразу атака (не ждём окончания движения)
     mcp.execute_code(f"""
         var battle = get_tree().current_scene
         var executor = battle.get_node("BattleTurnExecutor")
@@ -100,7 +86,6 @@ def test_move_then_attack_no_teleport(battle_scene):
         return {{"attacked": true}}
     """)
 
-    # Сбор позиций спрайта
     positions = []
     for _ in range(30):
         pos = mcp.execute_code(f"""
@@ -117,7 +102,6 @@ def test_move_then_attack_no_teleport(battle_scene):
         positions.append(pos)
         time.sleep(1 / 60.0)
 
-    # Проверка: нет скачков > 100px за кадр
     TELEPORT_PX = 100.0
     teleports = 0
     for i in range(1, len(positions)):
@@ -129,7 +113,6 @@ def test_move_then_attack_no_teleport(battle_scene):
 
     assert teleports == 0, f"Найдено {teleports} телепортаций спрайта"
 
-    # Бой не завис
     mcp.wait_frames(60)
     final = mcp.execute_code("""
         var bs = get_tree().current_scene.get_battle_state()

@@ -6,12 +6,12 @@ const JSON_PATH := "res://assets/data/races_classes.json"
 const _RaceDef = preload("res://scripts/data/RaceDef.gd")
 const _ClassDef = preload("res://scripts/data/ClassDef.gd")
 
-var _races: Dictionary[StringName, _RaceDef] = {}      
-var _classes: Dictionary[StringName, _ClassDef] = {}   
-var _bloodlines: Dictionary = {}  
-var _domains: Dictionary = {}     
-var _prestige: Dictionary = {}    
-var _feats: Dictionary = {}       
+var _races: Dictionary[StringName, _RaceDef] = {}
+var _classes: Dictionary[StringName, _ClassDef] = {}
+var _bloodlines: Dictionary = {}
+var _domains: Dictionary = {}
+var _prestige: Dictionary = {}
+var _feats: Dictionary = {}
 var _loaded: bool = false
 
 func ensure() -> void:

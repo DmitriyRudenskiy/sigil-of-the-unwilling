@@ -15,10 +15,9 @@ var _stream_cache: Dictionary = {}
 var _rr := 0
 var _music_loop := true
 
-
 func _ready() -> void:
 	if _Platform.is_headless():
-		return  
+		return
 
 	if AudioServer.get_bus_index("SFX") == -1:
 		push_warning("SoundManager: bus 'SFX' not found")
@@ -36,20 +35,17 @@ func _ready() -> void:
 	music_player.finished.connect(_on_music_finished)
 	add_child(music_player)
 
-
-
 func play_sfx(path: String) -> void:
 	last_sfx_path = path
 	var stream := _cached_stream(path)
 	if stream == null:
 		return
 	if sfx_players.is_empty():
-		return  
+		return
 	var p: AudioStreamPlayer = sfx_players[_rr % SFX_POOL]
 	_rr = (_rr + 1) % SFX_POOL
 	p.stream = stream
 	p.play()
-
 
 func play_sfx_cue(cue: StringName) -> void:
 	var path: String = AudioCues.path(cue)
@@ -58,19 +54,16 @@ func play_sfx_cue(cue: StringName) -> void:
 		return
 	play_sfx(path)
 
-
-
 func play_music(path: String, loop: bool = true) -> void:
 	last_music_path = path
 	var stream := _cached_stream(path)
 	if stream == null:
 		return
 	if music_player == null:
-		return  
+		return
 	_music_loop = loop
 	music_player.stream = stream
 	music_player.play()
-
 
 func play_music_cue(cue: StringName) -> void:
 	var path: String = AudioCues.path(cue)
@@ -79,32 +72,25 @@ func play_music_cue(cue: StringName) -> void:
 		return
 	play_music(path)
 
-
 func stop_music() -> void:
 	_music_loop = false
 	if music_player != null:
 		music_player.stop()
 
-
 func _on_music_finished() -> void:
 	if _music_loop and music_player != null:
 		music_player.play()
-
-
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"mute"):
 		toggle_mute()
 		get_viewport().set_input_as_handled()
 
-
 func toggle_mute() -> void:
-	# ИСПРАВЛЕНИЕ: Services.resolve вместо get_node("/root/Settings")
+
 	var settings: Object = Services.resolve(&"settings")
 	if settings != null:
 		settings.toggle_mute()
-
-
 
 func _cached_stream(path: String) -> AudioStream:
 	if not _stream_cache.has(path):

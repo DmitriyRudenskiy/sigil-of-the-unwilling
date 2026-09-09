@@ -1,8 +1,6 @@
 extends GdUnitTestSuite
 
-
 const MapModelScript = preload("res://scripts/world/MapModel.gd")
-
 
 func test_generation() -> void:
 	var model: RefCounted = MapModelScript.new()
@@ -13,8 +11,6 @@ func test_generation() -> void:
 
 	assert_int(model.terrain_grid.size()).is_equal(400).override_failure_message("terrain_grid should contain 400 cells")
 	assert_int(model.height_grid.size()).is_equal(400).override_failure_message("height_grid should contain 400 cells")
-
-
 
 func test_determinism() -> void:
 	var a: RefCounted = MapModelScript.new()
@@ -39,8 +35,6 @@ func test_determinism() -> void:
 
 	assert_bool(a.terrain_grid == c.terrain_grid).is_false().override_failure_message("different seeds should usually produce different terrain")
 
-
-
 func test_biome_logic() -> void:
 	var model: RefCounted = MapModelScript.new()
 
@@ -51,8 +45,6 @@ func test_biome_logic() -> void:
 	assert_int(model.get_biome_terrain_id(0.80, 0.5, 0.5)).is_equal(HexUtils.Terrain.FOREST).override_failure_message("high moist highland should be forest")
 	assert_int(model.get_biome_terrain_id(0.90, 0.6, 0.5)).is_equal(HexUtils.Terrain.MOUNTAIN).override_failure_message("very high warm terrain should be mountain")
 	assert_int(model.get_biome_terrain_id(0.90, 0.1, 0.5)).is_equal(HexUtils.Terrain.SNOW).override_failure_message("very high cold terrain should be snow")
-
-
 
 func test_walkability() -> void:
 	var model: RefCounted = MapModelScript.new()

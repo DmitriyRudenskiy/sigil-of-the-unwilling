@@ -9,43 +9,36 @@ func _make_chain() -> ProductionChain:
 	chain.building_eff = 1.0
 	return chain
 
-
 func test_calculate_output_full_staff() -> void:
 	var chain := _make_chain()
 	var out: Dictionary = chain.calculate_output(2, 1.0)
 	assert_that(float(out.get("planks", -1.0))).is_equal(3.0)
-
 
 func test_calculate_output_worker_ratio() -> void:
 	var chain := _make_chain()
 	var out: Dictionary = chain.calculate_output(1, 1.0)
 	assert_that(float(out.get("planks", -1.0))).is_equal(1.5)
 
-
 func test_calculate_output_capped_at_full() -> void:
 	var chain := _make_chain()
 	var out: Dictionary = chain.calculate_output(10, 1.0)
 	assert_that(float(out.get("planks", -1.0))).is_equal(3.0)
-
 
 func test_calculate_output_zero_workers() -> void:
 	var chain := _make_chain()
 	var out: Dictionary = chain.calculate_output(0, 1.0)
 	assert_bool(out.is_empty()).is_true()
 
-
 func test_calculate_output_logistics() -> void:
 	var chain := _make_chain()
 	var out: Dictionary = chain.calculate_output(2, 0.5)
 	assert_that(float(out.get("planks", -1.0))).is_equal(1.5)
-
 
 func test_building_eff_multiplier() -> void:
 	var chain := _make_chain()
 	chain.building_eff = 2.0
 	var out: Dictionary = chain.calculate_output(2, 1.0)
 	assert_that(float(out.get("planks", -1.0))).is_equal(6.0)
-
 
 func test_can_produce_requires_workers_and_inputs() -> void:
 	var rc := ResourceContext.new()
@@ -57,7 +50,6 @@ func test_can_produce_requires_workers_and_inputs() -> void:
 	rc.remove(&"wood", 1.0)
 	assert_bool(chain.can_produce(rc, 2)).is_false()
 
-
 func test_execute_deducts_inputs() -> void:
 	var rc := ResourceContext.new()
 	rc.add(&"wood", 10.0)
@@ -66,15 +58,13 @@ func test_execute_deducts_inputs() -> void:
 	assert_that(float(out.get("planks", -1.0))).is_equal(3.0)
 	assert_that(rc.amount(&"wood")).is_equal(8.0)
 
-
 func test_execute_atomic_on_shortage() -> void:
 	var rc := ResourceContext.new()
-	rc.add(&"wood", 1.0)  
+	rc.add(&"wood", 1.0)
 	var chain := _make_chain()
 	var out: Dictionary = chain.execute(rc, 2, 1.0)
 	assert_bool(out.is_empty()).is_true()
 	assert_that(rc.amount(&"wood")).is_equal(1.0)
-
 
 func test_execute_multiple_outputs() -> void:
 	var rc := ResourceContext.new()
@@ -90,7 +80,6 @@ func test_execute_multiple_outputs() -> void:
 	assert_that(float(out.get("hops_waste", -1.0))).is_equal(0.5)
 	assert_that(rc.amount(&"wood")).is_equal(9.0)
 	assert_that(rc.amount(&"water")).is_equal(8.0)
-
 
 func test_serialize_roundtrip() -> void:
 	var chain := _make_chain()

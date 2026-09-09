@@ -24,7 +24,6 @@ func _run_economy(city: City) -> Dictionary:
 	var p := EconomicTurnProcessor.new()
 	return p.process(ctx)
 
-
 func test_registry_city_resources() -> void:
 	var reg: Node = ResourceRegistry.new()
 	reg.ensure_definitions()
@@ -37,7 +36,6 @@ func test_registry_city_resources() -> void:
 	assert_that(oak).is_not_null()
 	assert_bool(oak.biomes.size() > 0).is_true()
 	reg.free()
-
 
 func test_chain_defs_resolve() -> void:
 	var cases: Array = [
@@ -60,7 +58,6 @@ func test_chain_def_isolated_copy() -> void:
 	assert_bool(b1.production_chain != b2.production_chain).is_true()
 	b1.production_chain.building_eff = 2.0
 	assert_that(b2.production_chain.building_eff).is_equal(1.0)
-
 
 func test_farm_produces_grain() -> void:
 	var city := TestFactories.make_city()
@@ -86,7 +83,7 @@ func test_full_bread_chain() -> void:
 	city.build_building(BuildingDefs.farm(), farm_cell)
 	city.build_building(BuildingDefs.mill(), mill_cell)
 	var bakery: Variant = city.build_building(BuildingDefs.bakery(), bakery_cell)
-	_add_workers(city, 4)  
+	_add_workers(city, 4)
 	WorkerAssignment.assign_all(city)
 	_run_economy(city)
 	assert_that(city.resource_ctx.amount(&"grain")).is_equal(1.0)
@@ -120,7 +117,6 @@ func test_upkeep_blocks_chain_resources() -> void:
 	assert_that(int(report.get("upkeep_ok", -1))).is_equal(1)
 	assert_that(city.resource_ctx.amount(&"flour")).is_equal(2.0)
 
-
 func test_adjacency_mill_bonus() -> void:
 	var city := TestFactories.make_city()
 	var farm1: Vector2i = HexUtils.get_neighbor(city.center, 0)
@@ -153,14 +149,10 @@ func test_adjacency_reputation_bonus() -> void:
 	var city := TestFactories.make_city()
 	var shack_cell: Vector2i = HexUtils.get_neighbor(city.center, 0)
 	var temple_cell: Vector2i = _cell_adjacent_to(city, [shack_cell], [shack_cell])
-	city.special_sites[temple_cell] = "temple"  
+	city.special_sites[temple_cell] = "temple"
 	city.build_building(BuildingDefs.shack(), shack_cell)
 	city.build_building(BuildingDefs.great_temple(), temple_cell)
-	
-	
-	
-	
-	
+
 	var bonus: int = AdjacencySystem.reputation_bonus(city)
 	var rep_before := city.reputation
 	ReputationSystem.process_turn(city)

@@ -1,18 +1,8 @@
-"""
-ArenaClusterSystem в живой сцене боя.
-
-Сценарий: проверка, что reset() не ломает пересчёт кластеров.
-"""
 from __future__ import annotations
 
 import pytest
 
-
-
-
-
 def test_cluster_reset_in_battle_scene(battle_scene):
-    """reset() не крашится в бою и пересчёт кластеров даёт тот же результат."""
     mcp = battle_scene
 
     result = mcp.execute_code("""

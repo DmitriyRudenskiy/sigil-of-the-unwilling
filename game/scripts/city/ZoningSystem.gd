@@ -2,14 +2,12 @@ class_name ZoningSystem
 extends RefCounted
 
 enum ZoneType {
-	NONE = 0,        
-	RESIDENTIAL = 1, 
-	COMMERCIAL = 2,  
-	INDUSTRIAL = 3,  
-	SPECIAL = 4,     
+	NONE = 0,
+	RESIDENTIAL = 1,
+	COMMERCIAL = 2,
+	INDUSTRIAL = 3,
+	SPECIAL = 4,
 }
-
-
 
 static func can_place(city: City, cell: Vector2i, zone: int) -> CityCheck:
 	match zone:
@@ -32,7 +30,6 @@ static func can_place(city: City, cell: Vector2i, zone: int) -> CityCheck:
 		_:
 			return _fail("Неизвестный тип зоны")
 
-
 static func zone_multiplier(city: City, cell: Vector2i, zone: int) -> float:
 	if zone == ZoneType.NONE:
 		return 1.0
@@ -45,10 +42,8 @@ static func zone_multiplier(city: City, cell: Vector2i, zone: int) -> float:
 		mult += GameNumbers.ZONE_INDUSTRIAL_ROAD
 	return minf(mult, GameNumbers.ZONE_MAX_MULT)
 
-
 static func adjacent_same_zone_count(city: City, cell: Vector2i, zone: int) -> int:
 	return adjacent_zone_count(city, cell, zone)
-
 
 static func adjacent_zone_count(city: City, cell: Vector2i, zone: int) -> int:
 	var n := 0
@@ -58,10 +53,8 @@ static func adjacent_zone_count(city: City, cell: Vector2i, zone: int) -> int:
 			n += 1
 	return n
 
-
 static func _ok() -> CityCheck:
 	return CityCheck.success()
-
 
 static func _fail(reason: String) -> CityCheck:
 	return CityCheck.fail(reason)

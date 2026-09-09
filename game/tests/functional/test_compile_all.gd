@@ -3,7 +3,6 @@ extends GdUnitTestSuite
 var _bad: Array[String] = []
 var _ok := 0
 
-
 func _scan(path: String) -> void:
 	var dir := DirAccess.open(path)
 	if dir == null or dir.list_dir_begin() != OK:
@@ -22,7 +21,6 @@ func _scan(path: String) -> void:
 				_ok += 1
 		f = dir.get_next()
 	dir.list_dir_end()
-
 
 func test_all_gd_compiles() -> void:
 	_bad.clear()

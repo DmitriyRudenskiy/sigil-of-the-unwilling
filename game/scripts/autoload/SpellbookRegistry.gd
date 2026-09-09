@@ -1,6 +1,4 @@
-## Область применения: карточная система (spells.json, шаблоны TemplateEngine).
-## НЕ канонический путь боевого каста — тот идёт через SpellCaster + SpellRegistry.
-## Используется эмулятором (BattleEmulator) и карточным режимом.
+
 extends Node
 class_name SpellbookRegistry
 
@@ -33,7 +31,7 @@ func _load_from_json() -> void:
 		return
 
 	var file := FileAccess.open(JSON_PATH, FileAccess.READ)
-	# TASK_06: явная проверка — файл мог исчезнуть между file_exists и open.
+
 	if file == null:
 		push_warning("SpellbookRegistry: %s не удалось открыть, using fallback" % JSON_PATH)
 		_load_fallback()
@@ -103,7 +101,6 @@ func _register(spell) -> void:
 	if not _by_color.has(color_name):
 		_by_color[color_name] = []
 	_by_color[color_name].append(spell)
-
 
 func register(spell) -> void:
 	_register(spell)

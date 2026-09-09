@@ -1,14 +1,11 @@
 class_name CityIncomeProcessor
 extends TurnPhaseProcessor
 
-
 func get_phase_id() -> StringName:
 	return &"city_income"
 
-
 func get_priority() -> int:
 	return 15
-
 
 func process(ctx: TurnContext) -> Dictionary:
 	var total := {}

@@ -67,9 +67,9 @@ enum StatusType {
 }
 
 enum SpellSpeed {
-	FAST,    
-	SLOW,    
-	BURST,   
+	FAST,
+	SLOW,
+	BURST,
 }
 
 enum SpellColor {

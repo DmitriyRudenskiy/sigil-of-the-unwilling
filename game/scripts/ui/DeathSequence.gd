@@ -8,7 +8,6 @@ signal resurrection_chosen
 
 var _wired := false
 
-
 func show_death(
 	deceased_name: String,
 	cause: StringName,
@@ -68,7 +67,6 @@ func show_death(
 	if (get_node("Root/Panel") as Control).is_inside_tree():
 		UIAnimator.animate_in(get_node("Root/Panel"))
 
-
 func _wire_once() -> void:
 	if _wired:
 		return
@@ -85,7 +83,6 @@ func _wire_once() -> void:
 	menu_btn.text = GameText.death_menu_button()
 	menu_btn.pressed.connect(_on_menu_pressed)
 
-
 func _successor_caption(successor: HeroController) -> String:
 	var parts: Array[String] = [successor.hero_name]
 	var registry = FollowerSystem.raceclass_registry()
@@ -97,28 +94,22 @@ func _successor_caption(successor: HeroController) -> String:
 		parts.append(path)
 	return parts[0] + (" (%s)" % ", ".join(parts.slice(1)) if parts.size() > 1 else "")
 
-
 func _on_successor_pressed() -> void:
 	_close_and_emit(successor_chosen)
-
 
 func _on_resurrection_pressed() -> void:
 	_close_and_emit(resurrection_chosen)
 
-
 func _on_chronicle_pressed() -> void:
 	chronicle_requested.emit()
 
-
 func _on_menu_pressed() -> void:
 	_close_and_emit(return_to_menu)
-
 
 func _close_and_emit(sig: Signal) -> void:
 	visible = false
 	sig.emit()
 	queue_free()
-
 
 func _unhandled_input(_event: InputEvent) -> void:
 	if visible:

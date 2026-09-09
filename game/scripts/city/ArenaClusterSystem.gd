@@ -6,12 +6,6 @@ const City := preload("res://scripts/world/City.gd")
 const PopUnit := preload("res://scripts/world/PopUnit.gd")
 const UniqueBuilding := preload("res://scripts/world/UniqueBuilding.gd")
 
-# TASK_06: кэш больше не живёт в статическом поле.
-# Он привязан к самому городу (city.set_meta / get_meta),
-# а версия кэша пересчитывается при каждом обращении,
-# поэтому при любом изменении города кэш автоматически становится невалидным.
-
-
 static func clusters(city: City) -> Array:
 	if city == null:
 		return []
@@ -25,7 +19,6 @@ static func clusters(city: City) -> Array:
 		&"clusters": result
 	})
 	return result
-
 
 static func _compute_clusters(city: City) -> Array:
 	var by_def: Dictionary = {}
@@ -68,7 +61,6 @@ static func _compute_clusters(city: City) -> Array:
 		return ca.y * 10000 + ca.x < cb.y * 10000 + cb.x)
 	return out
 
-
 static func cluster_uids(city: City) -> Dictionary:
 	if city == null:
 		return {}
@@ -78,32 +70,23 @@ static func cluster_uids(city: City) -> Dictionary:
 			m[(b as UniqueBuilding).uid] = GameNumbers.ARENA_CLUSTER_MULT
 	return m
 
-
 static func cluster_worker_housing(city: City) -> int:
 	if city == null:
 		return 0
 	return city.free_housing(PopUnit.State.WORKER) \
 		+ GameNumbers.ARENA_CLUSTER_HOUSING * (clusters(city) as Array).size()
 
-
 static func invalidate(_city_uid: int) -> void:
-	# TASK_06: старая сигнатура сохранена для совместимости.
-	# Теперь кэш привязан к объекту City и сам инвалидируется
-	# по версии (uid + def + cell + level + workers),
-	# поэтому отдельное удаление по uid не требуется.
-	pass
 
+	pass
 
 static func invalidate_city(city: City) -> void:
 	if city != null and city.has_meta(&"arena_clusters_cache"):
 		city.remove_meta(&"arena_clusters_cache")
 
-
 static func reset() -> void:
-	# TASK_06: без статического кэша сбрасывать нечего.
-	# Кэш живёт в meta городов и исчезает вместе с ними.
-	pass
 
+	pass
 
 static func _city_version(city: City) -> int:
 	if city == null:

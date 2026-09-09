@@ -1,11 +1,8 @@
 extends GdUnitTestSuite
 const TestFactories := preload("res://tests/helpers/factories.gd")
 
-
-
 func test_version_is_current() -> void:
 	assert_bool(SaveData.CURRENT_VERSION >= 6).is_true()
-
 
 func test_v2_migration_adds_empty_cities() -> void:
 	var v2 := {
@@ -23,7 +20,6 @@ func test_v2_migration_adds_empty_cities() -> void:
 	assert_that((sd.characters as Array).size()).is_equal(0)
 	assert_bool(sd.is_valid()).is_true()
 	assert_that(sd.run_seed).is_equal(42)
-
 
 func test_v3_roundtrip_json() -> void:
 	var sd := SaveData.new()
@@ -55,14 +51,11 @@ func test_v3_roundtrip_json() -> void:
 	assert_that(int(cd.get("uid", -1))).is_equal(0)
 	assert_that((cd.get("pop", []) as Array).size()).is_equal(3)
 
-
 func test_from_dict_garbage_collections() -> void:
 	var sd := SaveData.new()
 	sd.from_dict({"version": 3, "cities": "oops", "characters": 5, "hero": {"cell": {"x": 0, "y": 0}}, "run_seed": 1})
 	assert_that(sd.cities.size()).is_equal(0)
 	assert_that(sd.characters.size()).is_equal(0)
-
-
 
 func test_popunit_roundtrip() -> void:
 	var u := PopUnit.new()
@@ -83,7 +76,6 @@ func test_popunit_roundtrip() -> void:
 	assert_that(u2.born_turn).is_equal(9)
 	assert_that(u2.character_uid).is_equal(33)
 
-
 func test_popunit_pending_roundtrip() -> void:
 	var u := PopUnit.new()
 	u.uid = 1
@@ -97,7 +89,6 @@ func test_popunit_pending_roundtrip() -> void:
 	u2.apply_pending()
 	assert_that(u2.state).is_equal(PopUnit.State.MILITIA)
 
-
 func test_popunit_defaults() -> void:
 	var u2: PopUnit = PopUnit.deserialize({})
 	assert_that(u2.uid).is_equal(0)
@@ -105,15 +96,12 @@ func test_popunit_defaults() -> void:
 	assert_that(u2.tile).is_equal(Vector2i(-1, -1))
 	assert_that(u2.character_uid).is_equal(-1)
 
-
-
 func test_building_defs_by_id() -> void:
 	assert_that(BuildingDefs.def_by_id(&"great_temple")).is_not_null()
 	assert_that(BuildingDefs.def_by_id(&"market")).is_not_null()
 	assert_that(BuildingDefs.def_by_id(&"barracks")).is_not_null()
 	assert_that(BuildingDefs.def_by_id(&"ancient_vault")).is_not_null()
 	assert_that(BuildingDefs.def_by_id(&"nope")).is_null()
-
 
 func test_building_roundtrip() -> void:
 	var b := UniqueBuilding.new()
@@ -148,7 +136,6 @@ func test_building_roundtrip() -> void:
 	assert_that(b2.production_chain.required_workers).is_equal(3)
 	assert_bool(absf(float(b2.production_chain.inputs.get(&"wood", 0.0)) - 2.0) < 1e-9).is_true()
 
-
 func test_building_roundtrip_no_chain() -> void:
 	var b := UniqueBuilding.new()
 	b.def = BuildingDefs.barracks()
@@ -158,8 +145,6 @@ func test_building_roundtrip_no_chain() -> void:
 	var b2: UniqueBuilding = UniqueBuilding.deserialize(b.serialize(), BuildingDefs.def_by_id(&"barracks"))
 	assert_that(b2.production_chain).is_null()
 	assert_bool(b2.upkeep.is_empty()).is_true()
-
-
 
 func _rich_city() -> City:
 	var city := TestFactories.make_city(0)
@@ -218,7 +203,6 @@ func _rich_city() -> City:
 	city.buildings.append(temple)
 	return city
 
-
 func test_city_roundtrip_full() -> void:
 	var city := _rich_city()
 	var d := city.serialize()
@@ -265,7 +249,6 @@ func test_city_roundtrip_full() -> void:
 	assert_bool(absf(city2.buildings[0].zone_multiplier - 1.15) < 1e-9).is_true()
 	assert_that(city2.get_great_temple_level()).is_equal(1)
 
-
 func test_city_uid_seq_continuity() -> void:
 	var city := _rich_city()
 	var d := city.serialize()
@@ -280,14 +263,12 @@ func test_city_uid_seq_continuity() -> void:
 	var fresh := city2.pop[city2.pop.size() - 1]
 	assert_bool(fresh.uid > max_restored).is_true()
 
-
 func test_city_json_safe() -> void:
 	var city := _rich_city()
 	var s := JSON.stringify(city.serialize())
 	assert_bool(s.length() > 0).is_true()
 	var parsed: Variant = JSON.parse_string(s)
 	assert_bool(parsed is Dictionary).is_true()
-
 
 func test_city_unknown_building_skipped() -> void:
 	var city := _rich_city()
@@ -300,7 +281,6 @@ func test_city_unknown_building_skipped() -> void:
 	var fresh := city2._add_pop(PopUnit.State.FOLLOWER, 1)
 	assert_bool(fresh.uid != 77).is_true()
 
-
 func test_city_empty_deserialize() -> void:
 	var city := City.new()
 	city.deserialize({})
@@ -308,8 +288,6 @@ func test_city_empty_deserialize() -> void:
 	assert_that(city.pop.size()).is_equal(0)
 	assert_that(city.buildings.size()).is_equal(0)
 	assert_bool(city.storage.is_empty()).is_true()
-
-
 
 func test_registry_roundtrip() -> void:
 	var reg := CharacterRegistry.new()
@@ -356,8 +334,6 @@ func test_registry_roundtrip() -> void:
 	var ch2: Character = reg2.create(0, pop3, rng)
 	assert_bool(ch2.uid > dead.uid).is_true()
 
-
-
 func test_find_city_by_uid() -> void:
 	var p := WorldPersistence.new(null)
 	var a := TestFactories.make_city(0)
@@ -368,7 +344,6 @@ func test_find_city_by_uid() -> void:
 	var only: Array = [a]
 	assert_that(p._find_city(only, 99, 1, null)).is_equal(a)
 	assert_that(p._find_city(only, 99, 2, null)).is_null()
-
 
 func test_find_city_empty() -> void:
 	var p := WorldPersistence.new(null)

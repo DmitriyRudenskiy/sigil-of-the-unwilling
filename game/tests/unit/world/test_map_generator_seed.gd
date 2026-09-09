@@ -7,18 +7,15 @@ const _MapGenerator = preload("res://scripts/world/MapGenerator.gd")
 
 var _mg: Node = null
 
-
 func after_test() -> void:
 	if _mg != null:
 		_mg.free()
 		_mg = null
 
-
 func test_seed_persistence_before_generate() -> void:
 	_mg = _MapGenerator.new()
 	_mg.seed_value = 777
 	assert_that(_mg.seed_value).is_equal(777)
-
 
 func test_size_persistence_before_generate() -> void:
 	_mg = _MapGenerator.new()

@@ -6,7 +6,6 @@ func test_min_heap_pop_empty_guard() -> void:
 	var popped = heap.pop()
 	assert_bool(popped is Array and popped.is_empty()).is_true()
 
-
 func test_min_heap_ordering() -> void:
 	print("[test] min_heap ordering")
 	var heap = MinHeap.new()

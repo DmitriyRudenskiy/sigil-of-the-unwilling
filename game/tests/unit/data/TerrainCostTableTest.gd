@@ -4,7 +4,6 @@ const _TerrainCostTable = preload("res://scripts/data/TerrainCostTable.gd")
 const _HexUtils = preload("res://scripts/core/HexUtils.gd")
 const _HexPathfinding = preload("res://scripts/core/HexPathfinding.gd")
 
-
 func test_cost_grass() -> void:
 	assert_that(_TerrainCostTable.get_cost("grass")).is_equal(1.0)
 
@@ -25,7 +24,6 @@ func test_cost_levitation_water() -> void:
 
 func test_cost_all_terains() -> void:
 	assert_bool(_TerrainCostTable.get_all_terrains().size() >= 6).is_true()
-
 
 func test_dijkstra_flat() -> void:
 	var cost_fn := func(c: Vector2i) -> float:
@@ -72,7 +70,6 @@ func test_dijkstra_mp_cap() -> void:
 	var down_idx := _HexUtils.pos_to_idx(Vector2i(0, 3), 21)
 	assert_bool(dist[goal_idx] < INF).is_true()
 	assert_bool(dist[down_idx] < INF).is_true()
-
 
 func test_daily_cap_10() -> void:
 	assert_that(GameNumbers.HERO_DAILY_MOVEMENT).is_equal(10.0)

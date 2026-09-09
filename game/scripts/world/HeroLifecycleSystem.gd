@@ -5,26 +5,25 @@ const ChronicleScreenScene = preload("res://scenes/ui/ChronicleScreen.tscn")
 
 var _world_ref: WeakRef = null
 
-var _persistence = null            
+var _persistence = null
 var _rng: RandomNumberGenerator = null
-var _cities = null                 
-var _map_gen = null                
-var _event_router = null           
-var _ui_manager = null             
-var battle_coordinator = null      
-var interaction_controller = null  
-var _bootstrap_result = null       
-var _succession = null             
+var _cities = null
+var _map_gen = null
+var _event_router = null
+var _ui_manager = null
+var battle_coordinator = null
+var interaction_controller = null
+var _bootstrap_result = null
+var _succession = null
 var _camera: Node = null
 
-var _death_seq = null              
-var _chronicle_screen = null       
+var _death_seq = null
+var _chronicle_screen = null
 var _pending_successor: HeroController = null
 var _deceased_snapshot: Dictionary = {}
 var _deceased_hero: HeroController = null
 var _resurrection_city: City = null
 var _connected_hero_signals: bool = false
-
 
 func setup(
 	p: Node2D,
@@ -55,13 +54,10 @@ func setup(
 	if not GameEventBus.hero_died.is_connected(on_hero_died):
 		GameEventBus.hero_died.connect(on_hero_died)
 
-
 func _get_world() -> Node2D:
 	if _world_ref == null:
 		return null
 	return _world_ref.get_ref()
-
-
 
 func on_hero_died(cause: StringName) -> void:
 	var world := _get_world()
@@ -99,10 +95,8 @@ func on_hero_died(cause: StringName) -> void:
 		_remove_hero(deceased)
 	_show_death_sequence(str(_deceased_snapshot.get("hero_name", "?")), cause, successor, res_city)
 
-
 func is_death_sequence_open() -> bool:
 	return _death_seq != null and is_instance_valid(_death_seq) and _death_seq.visible
-
 
 func _show_death_sequence(
 	deceased_name: String,
@@ -130,7 +124,6 @@ func _show_death_sequence(
 			_death_seq.resurrection_chosen.connect(_on_resurrection_chosen)
 	_death_seq.show_death(deceased_name, cause, _run_summary(), successor, res_city)
 
-
 func _execute_succession() -> void:
 	var successor := _pending_successor
 	_pending_successor = null
@@ -143,7 +136,6 @@ func _execute_succession() -> void:
 	GameEventBus.hero_successor.emit(successor)
 	_append_succession_entry()
 
-
 func _find_resurrection_city(deceased: HeroController) -> City:
 	if _succession == null or _cities == null:
 		return null
@@ -154,7 +146,6 @@ func _find_resurrection_city(deceased: HeroController) -> City:
 		if c != null and c.owner == &"player" and c.can_resurrect(cost):
 			return c
 	return null
-
 
 func _on_resurrection_chosen() -> void:
 	var city := _resurrection_city
@@ -175,14 +166,12 @@ func _on_resurrection_chosen() -> void:
 		_death_seq.visible = false
 	GameLogger.world("Succession: %s resurrected in %s" % [hero.hero_name, city.display_name])
 
-
 func _disconnect_hero_signals(hero: Node) -> void:
 	if hero == null or not is_instance_valid(hero):
 		return
 	if _event_router != null and _event_router.has_method("_disconnect_hero_signals"):
 		_event_router.call("_disconnect_hero_signals", hero)
 	_connected_hero_signals = false
-
 
 func _connect_hero_signals(hero: Node) -> void:
 	if hero == null or not is_instance_valid(hero):
@@ -191,20 +180,17 @@ func _connect_hero_signals(hero: Node) -> void:
 		_event_router.call("_connect_hero_signals", hero)
 	_connected_hero_signals = true
 
-
 func _detach_hero(deceased: Node) -> void:
 	if deceased != null and is_instance_valid(deceased) and deceased.get_parent() != null:
 		deceased.get_parent().remove_child(deceased)
 	if _hero_ptr() == deceased:
 		_set_hero_ptr(null)
 
-
 func _free_deceased() -> void:
 	if _deceased_hero != null and is_instance_valid(_deceased_hero):
 		_deceased_hero.free()
 	_deceased_hero = null
 	_resurrection_city = null
-
 
 func _append_succession_entry() -> void:
 	if _persistence == null or _persistence.chronicle == null:
@@ -222,7 +208,6 @@ func _append_succession_entry() -> void:
 	})
 	_deceased_snapshot = {}
 
-
 func _on_death_chronicle_requested() -> void:
 	var entries: Array = []
 	if _persistence != null and _persistence.chronicle != null:
@@ -239,13 +224,11 @@ func _on_death_chronicle_requested() -> void:
 			world.add_child(_chronicle_screen)
 	_chronicle_screen.show_entries(entries)
 
-
 func _on_death_return_to_menu() -> void:
 	_free_deceased()
 	var world := _get_world()
 	if world != null:
 		world.get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
-
 
 func _run_summary() -> Dictionary:
 	var turns := 0
@@ -329,8 +312,6 @@ func _install_hero(hero: HeroController) -> void:
 			_ui_manager.inventory_screen.set_hero(hero)
 		if is_instance_valid(_ui_manager.city_screen):
 			_ui_manager.city_screen.hero = hero
-
-
 
 func _hero_ptr() -> HeroController:
 	var world := _get_world()

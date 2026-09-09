@@ -13,33 +13,29 @@ class Def extends RefCounted:
 
 class LevelReq extends RefCounted:
 	var industry := 0.0
-	var special_resource: StringName = &""  
+	var special_resource: StringName = &""
 	var special_amount := 0.0
-	var followers := 0  
+	var followers := 0
 
 var def: Def = null
 var cell := Vector2i(-1, -1)
-var level := 0  
+var level := 0
 var uid := 0
 var assigned_followers := 0
 var assigned_workers := 0
 var zone_type: int = 0
 var production_chain: ProductionChain = null
-var upkeep: Dictionary = {}  
+var upkeep: Dictionary = {}
 var zone_multiplier: float = 1.0
-
 
 func get_zone_type() -> int:
 	return zone_type
 
-
 func get_production_chain() -> ProductionChain:
 	return production_chain
 
-
 func get_upkeep() -> Dictionary:
 	return upkeep
-
 
 func next_level_req() -> LevelReq:
 	if def == null or level >= GameNumbers.BUILDING_MAX_LEVEL:
@@ -47,7 +43,6 @@ func next_level_req() -> LevelReq:
 	if level >= def.levels.size():
 		return null
 	return def.levels[level]
-
 
 func serialize() -> Dictionary:
 	var d := {
@@ -68,7 +63,6 @@ func serialize() -> Dictionary:
 	if production_chain != null:
 		d["chain"] = production_chain.to_dict()
 	return d
-
 
 static func deserialize(data: Dictionary, def: UniqueBuilding.Def) -> UniqueBuilding:
 	var b := UniqueBuilding.new()

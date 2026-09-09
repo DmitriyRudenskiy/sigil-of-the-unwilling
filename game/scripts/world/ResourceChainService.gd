@@ -4,12 +4,11 @@ extends RefCounted
 const ToolType = preload("res://scripts/data/ToolType.gd")
 
 var _extraction_cache: Dictionary = {}
-var _discovery_cache: Dictionary = {} 
+var _discovery_cache: Dictionary = {}
 
 func invalidate_extraction_cache() -> void:
 	_extraction_cache.clear()
 	_discovery_cache.clear()
-
 
 func build_discovery_keys(hero: HeroController) -> Dictionary:
 	var iid: int = hero.get_instance_id()
@@ -38,7 +37,6 @@ func build_discovery_keys(hero: HeroController) -> Dictionary:
 	_discovery_cache[iid] = {"fp": fp, "keys": keys}
 	return keys
 
-
 func _discovery_fingerprint(hero: HeroController) -> String:
 	var fp := ""
 	if hero.skills != null:
@@ -51,7 +49,6 @@ func _discovery_fingerprint(hero: HeroController) -> String:
 			if stack == null or not stack.is_alive(): continue
 			fp += StringName(stack.get_key()) + ";"
 	return fp
-
 
 func build_extraction_keys(hero: HeroController) -> Dictionary:
 	var iid: int = hero.get_instance_id()
@@ -81,7 +78,6 @@ func build_extraction_keys(hero: HeroController) -> Dictionary:
 	_extraction_cache[iid] = {"fp": fp, "keys": keys}
 	return keys
 
-
 func _extraction_fingerprint(hero: HeroController) -> String:
 	var fp := ""
 	if hero.army != null:
@@ -96,7 +92,6 @@ func _extraction_fingerprint(hero: HeroController) -> String:
 			if hero.tools.has_tool(tool_id):
 				fp += "T" + ToolType.to_name(tool_id)
 	return fp
-
 
 func try_extract(mgr: ResourceNodeManager, hero: HeroController, cell: Vector2i) -> Dictionary:
 	if mgr == null:

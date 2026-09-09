@@ -2,14 +2,13 @@ class_name ReputationSystem
 extends RefCounted
 
 enum Band {
-	REBELLION = 0,    
-	CRISIS = 1,       
-	DISCONTENT = 2,   
-	NORMAL = 3,       
-	PROSPERITY = 4,   
-	GOLDEN_AGE = 5,   
+	REBELLION = 0,
+	CRISIS = 1,
+	DISCONTENT = 2,
+	NORMAL = 3,
+	PROSPERITY = 4,
+	GOLDEN_AGE = 5,
 }
-
 
 static func band(value: int) -> int:
 	if value >= GameNumbers.REP_BAND_GOLDEN_AGE:
@@ -24,14 +23,11 @@ static func band(value: int) -> int:
 		return Band.CRISIS
 	return Band.REBELLION
 
-
 static func band_name(value: int) -> String:
 	return GameText.rep_band(band(value))
 
-
 static func clamp_value(v: int) -> int:
 	return clampi(v, GameNumbers.REP_MIN, GameNumbers.REP_MAX)
-
 
 static func turn_factor(city: City) -> int:
 	var f := 0
@@ -43,15 +39,12 @@ static func turn_factor(city: City) -> int:
 	f += AdjacencySystem.reputation_bonus(city)
 	return f
 
-
 static func apply(city: City, delta: float) -> int:
 	city.reputation = clamp_value(int(city.reputation) + int(roundf(delta)))
 	return city.reputation
 
-
 static func process_turn(city: City) -> int:
 	return apply(city, turn_factor(city))
-
 
 static func process_migration(city: City) -> Dictionary:
 	var immigrants := 0
@@ -72,7 +65,6 @@ static func process_migration(city: City) -> Dictionary:
 	if immigrants > 0 or emigrants > 0:
 		city.population_changed.emit()
 	return {"immigrants": immigrants, "emigrants": emigrants}
-
 
 static func _emigrate_one(city: City) -> bool:
 	var order: Array = [

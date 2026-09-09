@@ -1,4 +1,4 @@
-# FILE: res://scripts/entities/HeroResources.gd  (ПОЛНАЯ ЗАМЕНА)
+
 extends Node
 class_name HeroResources
 
@@ -9,7 +9,6 @@ signal resources_changed(resources: Dictionary)
 var inventory: HeroInventory:
 	set(v): inventory = v
 
-## Ключи — ResourceType.ID (int), значения — int.
 var resources: Dictionary = {}
 
 func _init() -> void:
@@ -40,14 +39,12 @@ func get_dict() -> Dictionary:
 func set_from_dict(data: Dictionary) -> void:
 	resources = data
 
-## В сейв — строковые ключи (обратная совместимость формата).
 func serialize() -> Dictionary:
 	var out: Dictionary = {}
 	for id in resources:
 		out[ResourceType.to_key(int(id))] = int(resources[id])
 	return out
 
-## Читает и старые сейвы (строковые ключи), и новые (int).
 func deserialize(data: Dictionary) -> void:
 	resources.clear()
 	for key in data:

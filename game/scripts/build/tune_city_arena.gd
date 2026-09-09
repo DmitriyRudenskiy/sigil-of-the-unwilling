@@ -16,7 +16,6 @@ const YIELD_STEP: Array = [0.5, 0.5, 0.25, 0.25, 0.25]
 const BONUS_STEP := 0.05
 const NO_IMPROVE_LIMIT := 1500
 
-
 func _initialize() -> void:
 	var args: PackedStringArray = OS.get_cmdline_user_args()
 	var evals := 8000
@@ -116,7 +115,6 @@ func _initialize() -> void:
 		print("dry-run: ", TUNE_FILE, " НЕ изменён")
 	quit()
 
-
 func _evaluate(yield_table: Array, bonus_table: Dictionary, turns: int) -> float:
 	var overrides := {
 		&"ring_yield": yield_table,
@@ -124,7 +122,6 @@ func _evaluate(yield_table: Array, bonus_table: Dictionary, turns: int) -> float
 	}
 	var rep: Dictionary = CityArenaModel.run_demo_plan(turns, overrides)
 	return float(rep.get("score", 0.0))
-
 
 func _mutate(rng: RandomNumberGenerator, yield_cur: Array, bonus_cur: Dictionary,
 			 k: int, strength: float) -> Array:
@@ -151,14 +148,12 @@ func _mutate(rng: RandomNumberGenerator, yield_cur: Array, bonus_cur: Dictionary
 			changes.append([1, bi, ring, before])
 	return changes
 
-
 func _undo(yield_cur: Array, bonus_cur: Dictionary, changes: Array) -> void:
 	for ch in changes:
 		if int(ch[0]) == 0:
 			yield_cur[int(ch[1])][int(ch[2])] = ch[3]
 		else:
 			bonus_cur[TUNED_BUILDINGS[int(ch[1])]][int(ch[2])] = ch[3]
-
 
 func _current_tables() -> Dictionary:
 	var yt: Array = []
@@ -177,7 +172,6 @@ func _current_tables() -> Dictionary:
 		bt[bid] = rowd
 	return {"yield_table": yt, "bonus_table": bt}
 
-
 func _deep_copy_yield(t: Array) -> Array:
 	var out: Array = []
 	for row in t:
@@ -187,7 +181,6 @@ func _deep_copy_yield(t: Array) -> Array:
 			nr.append(float(v))
 		out.append(nr)
 	return out
-
 
 func _deep_copy_bonus(t: Dictionary) -> Dictionary:
 	var out: Dictionary = {}
@@ -199,10 +192,8 @@ func _deep_copy_bonus(t: Dictionary) -> Dictionary:
 		out[k] = rowd
 	return out
 
-
 func _clamp(v: float, lo: float, hi: float) -> float:
 	return clampf(v, lo, hi)
-
 
 func _fmt_row(row: Array) -> String:
 	var parts: Array[String] = []
@@ -210,9 +201,8 @@ func _fmt_row(row: Array) -> String:
 		parts.append("%.2f" % float(row[i]))
 	return "[ " + ", ".join(parts) + " ]"
 
-
 func _write_balance_file(yield_table: Array, bonus_table: Dictionary) -> void:
-	## Точечная замена блоков RING_YIELD / RING_BONUS в GameNumbers.gd (по строкам).
+
 	var f := FileAccess.open(TUNE_FILE, FileAccess.READ)
 	if f == null:
 		push_error("Не удалось открыть %s для чтения" % TUNE_FILE)
@@ -257,5 +247,3 @@ func _write_balance_file(yield_table: Array, bonus_table: Dictionary) -> void:
 		return
 	w.store_string("\n".join(out))
 	w.close()
-
-

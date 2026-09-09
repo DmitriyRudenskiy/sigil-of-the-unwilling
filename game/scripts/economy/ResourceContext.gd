@@ -4,9 +4,8 @@ extends RefCounted
 signal resource_changed(id: StringName, old_val: float, new_val: float)
 signal capacity_reached(id: StringName)
 
-var _resources: Dictionary = {}  
-var _capacities: Dictionary = {}  
-
+var _resources: Dictionary = {}
+var _capacities: Dictionary = {}
 
 func setup(defs: Array) -> void:
 	for def in defs:
@@ -16,29 +15,23 @@ func setup(defs: Array) -> void:
 		if not _capacities.has(def.id):
 			_capacities[def.id] = cap
 
-
 static func get_def_capacity(def: ResourceDef) -> float:
 	return def.capacity if def.capacity > 0.0 else INF
-
 
 func amount(id: StringName) -> float:
 	return float(_resources.get(id, 0.0))
 
-
 func get_all() -> Dictionary:
 	return _resources.duplicate()
 
-
 func has(id: StringName) -> bool:
 	return _resources.has(id) and amount(id) > 0.0
-
 
 func is_empty() -> bool:
 	for id in _resources:
 		if amount(id) > 0.0:
 			return false
 	return true
-
 
 func add(id: StringName, add_amount: float) -> float:
 	if add_amount <= 0.0:
@@ -55,7 +48,6 @@ func add(id: StringName, add_amount: float) -> float:
 		capacity_reached.emit(id)
 	return actual
 
-
 func remove(id: StringName, remove_amount: float) -> float:
 	if remove_amount <= 0.0:
 		return 0.0
@@ -65,10 +57,8 @@ func remove(id: StringName, remove_amount: float) -> float:
 	resource_changed.emit(id, old, old - actual)
 	return actual
 
-
 func get_capacity(id: StringName) -> float:
 	return float(_capacities.get(id, INF))
-
 
 func set_capacity(id: StringName, cap: float) -> void:
 	_capacities[id] = cap
@@ -77,13 +67,11 @@ func set_capacity(id: StringName, cap: float) -> void:
 		_resources[id] = cap
 		resource_changed.emit(id, cur, cap)
 
-
 func can_afford(costs: Dictionary) -> bool:
 	for id in costs:
 		if amount(id) < float(costs[id]):
 			return false
 	return true
-
 
 func spend(costs: Dictionary) -> bool:
 	if not can_afford(costs):
@@ -92,13 +80,11 @@ func spend(costs: Dictionary) -> bool:
 		remove(id, float(costs[id]))
 	return true
 
-
 func serialize() -> Dictionary:
 	var out := {}
 	for id in _resources:
 		out[String(id)] = amount(id)
 	return out
-
 
 func deserialize(data: Dictionary) -> void:
 	_resources.clear()

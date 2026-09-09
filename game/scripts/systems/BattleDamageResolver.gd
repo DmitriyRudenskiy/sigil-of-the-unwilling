@@ -8,19 +8,19 @@ static func resolve(state: BattleState, atk: BattleState.BattleUnit, def: Battle
 	var rng: RandomNumberGenerator = ctx.get("rng")
 	var atk_bonus: int = ctx.get("atk_bonus", 0)
 	var def_bonus: int = ctx.get("def_bonus", 0)
-	
+
 	if atk == null or def == null or not atk.is_alive() or not def.is_alive():
 		return {}
 
 	var result: Dictionary = BattleRules.calculate_attack(atk, def, is_melee, rng, atk_bonus, def_bonus)
-	if result.is_empty(): 
+	if result.is_empty():
 		return result
-	
+
 	_apply_status_procs(atk, def, rng, result)
 	_apply_vampiric(atk, result)
 	_apply_breath(state, atk, def, result, rng)
 	_apply_saltpeter(state, atk, def, rng, result)
-	
+
 	return result
 
 static func _apply_status_procs(atk: BattleState.BattleUnit, def: BattleState.BattleUnit, rng: RandomNumberGenerator, result: Dictionary) -> void:
@@ -32,7 +32,7 @@ static func _apply_status_procs(atk: BattleState.BattleUnit, def: BattleState.Ba
 		result["blind"] = true
 
 static func _apply_vampiric(atk: BattleState.BattleUnit, result: Dictionary) -> void:
-	if not atk.has_tag("vampiric") or int(result.get("kills", 0)) <= 0: 
+	if not atk.has_tag("vampiric") or int(result.get("kills", 0)) <= 0:
 		return
 	var healed: int = min(int(result.get("kills", 0)), atk.max_count - atk.get_count())
 	if healed > 0:

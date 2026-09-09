@@ -4,10 +4,8 @@ var _ext_path_regexp: RegEx = RegEx.new()
 var _bad: Array[String] = []
 var _ok := 0
 
-
 func _init() -> void:
 	_ext_path_regexp.compile('path="(res://[^"]+)"')
-
 
 func _scan(path: String) -> void:
 	var dir := DirAccess.open(path)
@@ -36,7 +34,6 @@ func _scan(path: String) -> void:
 				_ok += 1
 		f = dir.get_next()
 	dir.list_dir_end()
-
 
 func test_no_broken_scene_refs() -> void:
 	_bad.clear()

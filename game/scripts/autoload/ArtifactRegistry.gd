@@ -218,7 +218,6 @@ func ensure_definitions() -> void:
 			_by_rarity[art.rarity] = []
 		_by_rarity[art.rarity].append(art)
 
-
 func _register(
 	id: StringName,
 	display_name: String,
@@ -241,11 +240,9 @@ func _register(
 	})
 	_artifacts[id] = art
 
-
 func get_by_id(id: StringName) -> Artifact:
 	ensure_definitions()
 	return _artifacts.get(id, null)
-
 
 func get_all() -> Array[Artifact]:
 	ensure_definitions()
@@ -253,7 +250,6 @@ func get_all() -> Array[Artifact]:
 	for id in _artifacts:
 		result.append(_artifacts[id])
 	return result
-
 
 func get_by_rarity(rarity: Artifact.Rarity) -> Array[Artifact]:
 	ensure_definitions()
@@ -263,13 +259,11 @@ func get_by_rarity(rarity: Artifact.Rarity) -> Array[Artifact]:
 			result.append(art)
 	return result
 
-
 func random_of_rarity(rarity: Artifact.Rarity, rng: RandomNumberGenerator) -> Artifact:
 	var pool := get_by_rarity(rarity)
 	if pool.is_empty():
 		return null
 	return pool[rng.randi_range(0, pool.size() - 1)]
-
 
 func random_any(rng: RandomNumberGenerator) -> Artifact:
 	ensure_definitions()

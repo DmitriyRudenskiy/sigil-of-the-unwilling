@@ -18,8 +18,6 @@ func after_test() -> void:
 		registry.free()
 		registry = null
 
-
-
 func test_parse_target_enemy_unit() -> void:
 	assert_that(_Enums.parse_target("ENEMY_UNIT")).is_equal(_Enums.TargetType.ENEMY_UNIT)
 
@@ -49,8 +47,6 @@ func test_parse_speed_unknown_defaults_fast() -> void:
 
 func test_parse_color_fire() -> void:
 	assert_that(_Enums.parse_color("FIRE")).is_equal(_Enums.SpellColor.FIRE)
-
-
 
 func test_def_from_dict_ice_bolt() -> void:
 	var d := {
@@ -112,8 +108,6 @@ func test_def_to_dict_round_trip() -> void:
 	assert_that(out["color"]).is_equal("fire")
 	assert_that(out["speed"]).is_equal("slow")
 
-
-
 func test_registry_fallback_loads() -> void:
 	assert_bool(registry.get_count() > 0).is_true()
 
@@ -154,8 +148,6 @@ func test_registry_all_have_cost() -> void:
 
 func test_registry_template_count() -> void:
 	assert_bool(registry.get_template_count() >= 5).is_true()
-
-
 
 func test_template_unknown_returns_error() -> void:
 	var result: Dictionary = _Engine.execute(&"NONEXISTENT", {}, {}, [], null, null, null)
@@ -353,8 +345,6 @@ func test_market_niche_basic() -> void:
 		&"MARKET_NICHE", {"action": "draw_from_market", "market_cost": 1}, {}, [], null, null, null
 	)
 	assert_that(result["result"]).is_equal("success")
-
-
 
 func test_resolve_null_spell() -> void:
 	var result: Dictionary = _Resolver.resolve(null, null, null)

@@ -12,8 +12,6 @@ func after_test() -> void:
 		settings.free()
 		settings = null
 
-
-
 func test_zoom_levels_count() -> void:
 	assert_that(_Settings.ZOOM_LEVELS.size()).is_equal(9)
 

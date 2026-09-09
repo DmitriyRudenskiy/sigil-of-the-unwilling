@@ -5,7 +5,6 @@ const _SaveData = preload("res://scripts/core/SaveData.gd")
 
 const SAVE_PATH := "user://save_slot_1.json"
 
-
 enum SaveError {
 	OK,
 	FILE_NOT_FOUND,
@@ -24,7 +23,6 @@ const ERROR_MESSAGES := {
 	SaveError.WRITE_FAIL: "Cannot write save file",
 }
 
-
 func save_game(data: Variant) -> SaveError:
 	if data == null or not data.has_method("to_dict"):
 		GameLogger.error("SaveManager: data is null or has no to_dict()", "Save")
@@ -40,9 +38,6 @@ func save_game(data: Variant) -> SaveError:
 	GameLogger.info("Game saved to %s" % SAVE_PATH, "Save")
 	return SaveError.OK
 
-
-## R14 (P4): load_game чисто файловая (без состояния ноды) — static.
-## Был статический load_slot(), создававший одноразовый SaveManager.new().
 static func load_game() -> Dictionary:
 	if not FileAccess.file_exists(SAVE_PATH):
 		GameLogger.info("No save file at %s" % SAVE_PATH, "Save")
@@ -77,15 +72,12 @@ static func load_game() -> Dictionary:
 	GameLogger.info("Loaded save from %s (seed=%d)" % [SAVE_PATH, data.run_seed], "Save")
 	return {"error": SaveError.OK, "data": data, "message": "OK"}
 
-
 static func load_game_legacy() -> Variant:
 	var result: Dictionary = load_game()
 	return result.get("data", null)
 
-
 func has_save() -> bool:
 	return FileAccess.file_exists(SAVE_PATH)
-
 
 func delete_save() -> bool:
 	if not has_save():
@@ -93,7 +85,6 @@ func delete_save() -> bool:
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE_PATH))
 	GameLogger.info("Save deleted: %s" % SAVE_PATH, "Save")
 	return true
-
 
 static func error_to_string(err: SaveError) -> String:
 	return ERROR_MESSAGES.get(err, "Unknown error")

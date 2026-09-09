@@ -4,7 +4,6 @@ const WORLD_SCENE: String = "res://scenes/World.tscn"
 const MAIN_MENU_SCENE: String = "res://scenes/MainMenu.tscn"
 const MAX_SECONDS: float = 4.0
 
-
 func test_world_boots_with_key_nodes() -> void:
 	var world_packed: PackedScene = load(WORLD_SCENE)
 	assert_that(world_packed).is_not_null()
@@ -33,7 +32,6 @@ func test_world_boots_with_key_nodes() -> void:
 	world_node.queue_free()
 	await get_tree().process_frame
 	await get_tree().process_frame
-
 
 func test_main_menu_boots() -> void:
 	var packed: PackedScene = load(MAIN_MENU_SCENE)

@@ -2,7 +2,6 @@ extends GdUnitTestSuite
 
 const _Executor = preload("res://scripts/systems/BattleTurnExecutor.gd")
 
-
 func _make_executor() -> Dictionary:
 	var bs: BattleState = BattleState.new()
 	var atk: Array[UnitStack] = []
@@ -15,7 +14,6 @@ func _make_executor() -> Dictionary:
 	ex.name = "TestRetreatExec"
 	ex.setup(bs, BattleAI.new(), {})
 	return {"executor": ex, "state": bs}
-
 
 func _survivor_total(a: Array) -> int:
 	var total := 0

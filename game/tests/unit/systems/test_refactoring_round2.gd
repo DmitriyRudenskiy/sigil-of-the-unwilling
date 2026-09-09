@@ -50,7 +50,6 @@ func test_setup_idempotent() -> void:
 	hero.free()
 	fake_map.free()
 
-## Спрайты теперь вложены в HeroVisuals — считаем по поддереву.
 func _count_visual_sprites(node: Node) -> int:
 	var count = 0
 	for child in node.get_children():
@@ -69,7 +68,7 @@ func test_map_spawner_setup_registry() -> void:
 	mg.free()
 
 func test_marker_click_no_double() -> void:
-	# Регрессия: один клик = ровно один эмит сигнала (двойной эмит/коннект).
+
 	var layer := MarkerLayer.new()
 	get_tree().root.add_child(layer)
 	var map := _ClickMapStub.new()
@@ -79,7 +78,6 @@ func test_marker_click_no_double() -> void:
 	layer._red_frontier = {}
 	layer._city_marks = []
 
-	# lambda захватывает locals by value — счётчик в массиве (передача по ссылке)
 	var clicks := [0]
 	layer.marker_clicked.connect(func(_cell: Vector2i, _reachable_flag: bool) -> void:
 		clicks[0] += 1
@@ -97,7 +95,6 @@ func test_marker_click_no_double() -> void:
 	layer._unhandled_input(release)
 	assert_int(clicks[0]).is_equal(1).override_failure_message("release-событие не должно эмитить повторно")
 
-	# Городская клетка: city_marker_clicked ровно один раз, marker_clicked не дублируется.
 	var city := City.new()
 	city.center = Vector2i(3, 3)
 	layer._city_marks = [{"cell": Vector2i(3, 3), "city": city}]
@@ -124,7 +121,6 @@ func test_battle_controller_stores_magic() -> void:
 	bc.name = "TestBC"
 	assert_bool(bc.has_method("get")).is_true()
 	bc.free()
-
 
 class _ClickMapStub:
 	extends MapGenerator

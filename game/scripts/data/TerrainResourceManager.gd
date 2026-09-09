@@ -1,4 +1,4 @@
-# FILE: res://scripts/data/TerrainResourceManager.gd  (ПОЛНАЯ ЗАМЕНА)
+
 extends Node
 class_name TerrainResourceManager
 
@@ -14,7 +14,7 @@ const HARVEST_AMOUNT := 2
 signal terrain_harvested(cell: Vector2i, res_id: StringName, amount: int)
 signal terrain_exhausted(cell: Vector2i, res_id: StringName)
 
-var cells: Dictionary = {}   # cell -> {"res": int(ResourceType.ID), "exhausted": bool}
+var cells: Dictionary = {}
 var density: float = 1.0
 var _world_delta: Variant = null
 

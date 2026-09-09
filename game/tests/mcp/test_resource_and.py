@@ -1,20 +1,8 @@
-"""
-MCP-тест: строгая логика AND для добычи ресурсов.
-Ресурс с несколькими требованиями требует ВСЕ условия одновременно.
-"""
 from __future__ import annotations
 
-
-
-
 def test_extraction_strict_and(world_scene):
-    """
-    Селитра: навык 'geology' + юнит 'worker' + расходник 'skin_protection'.
-    Без любого из условий — отказ.
-    """
     mcp = world_scene
 
-    # Создаём тестовый узел
     setup = mcp.execute_code("""
         var world = get_tree().current_scene
         var rnm = world.get_node_or_null("ResourceNodeManager")
@@ -33,7 +21,6 @@ def test_extraction_strict_and(world_scene):
     cell = setup["cell"]
     KEY_MISSING = setup["key_missing"]
 
-    # Пустые ключи — отказ
     r1 = mcp.execute_code(f"""
         var rnm = get_tree().current_scene.get_node("ResourceNodeManager")
         var res = rnm.try_extract(Vector2i({cell['x']}, {cell['y']}), {{}})
@@ -42,7 +29,6 @@ def test_extraction_strict_and(world_scene):
     assert r1["code"] == KEY_MISSING
     assert r1["amount"] == 0
 
-    # Только навык — отказ (нет юнита и расходника)
     r2 = mcp.execute_code(f"""
         var rnm = get_tree().current_scene.get_node("ResourceNodeManager")
         var res = rnm.try_extract(Vector2i({cell['x']}, {cell['y']}), {{"geology": 1}})
@@ -50,7 +36,6 @@ def test_extraction_strict_and(world_scene):
     """)
     assert r2["code"] == KEY_MISSING
 
-    # Навык + юнит, без расходника — отказ
     r3 = mcp.execute_code(f"""
         var rnm = get_tree().current_scene.get_node("ResourceNodeManager")
         var res = rnm.try_extract(Vector2i({cell['x']}, {cell['y']}),
@@ -59,7 +44,6 @@ def test_extraction_strict_and(world_scene):
     """)
     assert r3["code"] == KEY_MISSING
 
-    # Полный набор — успех
     r4 = mcp.execute_code(f"""
         var rnm = get_tree().current_scene.get_node("ResourceNodeManager")
         var res = rnm.try_extract(Vector2i({cell['x']}, {cell['y']}),

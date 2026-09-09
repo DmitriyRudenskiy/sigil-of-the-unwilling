@@ -1,9 +1,6 @@
 extends RefCounted
 class_name SuccessionController
 
-
-
-
 func select_successor(deceased: HeroController, rng: RandomNumberGenerator = null) -> Follower:
 	if deceased == null:
 		return null
@@ -19,8 +16,6 @@ func select_successor(deceased: HeroController, rng: RandomNumberGenerator = nul
 		idx = rng.randi() % candidates.size()
 	return candidates[idx]
 
-
-
 func build_successor(deceased: HeroController, rng: RandomNumberGenerator = null) -> HeroController:
 	var succ := HeroController.new()
 	succ.path_id = deceased.path_id
@@ -34,7 +29,6 @@ func build_successor(deceased: HeroController, rng: RandomNumberGenerator = null
 		succ.strategic_resources.set_all(deceased.strategic_resources.get_all())
 	return succ
 
-
 func _transfer_inventory(deceased: HeroController, succ: HeroController) -> void:
 	var src = deceased.inventory
 	if src == null:
@@ -46,8 +40,6 @@ func _transfer_inventory(deceased: HeroController, succ: HeroController) -> void
 	succ.inventory.backpack.clear()
 	for art in src.backpack:
 		succ.inventory.backpack.append(art.duplicate(true))
-
-
 
 func transfer_legend(deceased: HeroController, successor: HeroController,
                     source_cities: Array[City], dest_manager: CityManager) -> void:
@@ -74,11 +66,8 @@ func transfer_legend(deceased: HeroController, successor: HeroController,
 	if cap != null:
 		dest_manager.set_capital(cap)
 
-
-
 func default_resurrection_cost() -> Dictionary:
 	return {"industry": GameNumbers.SUCCESSION_RESURRECT_IND, GameNumbers.SUCCESSION_SPECIAL_KEY: GameNumbers.SUCCESSION_RESURRECT_GOLD}
-
 
 func resurrect_hero(city: City, cost: Dictionary = {}) -> bool:
 	if city == null:
@@ -94,8 +83,6 @@ func resurrect_hero(city: City, cost: Dictionary = {}) -> bool:
 		if city.storage.has(key):
 			city.storage[key] = maxf(0.0, float(city.storage[key]) - float(c[key]))
 	return true
-
-
 
 func on_hero_died(deceased: HeroController, rng: RandomNumberGenerator = null,
                   source_cities: Array[City] = [], dest_manager: CityManager = null) -> HeroController:

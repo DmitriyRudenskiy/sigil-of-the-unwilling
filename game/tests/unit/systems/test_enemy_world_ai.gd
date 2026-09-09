@@ -16,7 +16,6 @@ class FakeHero:
 	extends Node
 	var current_cell: Vector2i = Vector2i(-1, -1)
 
-
 var map_gen: MapGenerator
 var model: MapModel
 var hero: FakeHero
@@ -25,7 +24,6 @@ var cities: CityManager
 var proc: EnemyTurnProcessor
 var rng := TestFactories.seeded(8896)
 var units_reg: Node
-
 
 func before_test() -> void:
 	rng.seed = SEED
@@ -44,7 +42,6 @@ func before_test() -> void:
 	proc = _Proc.new()
 	proc.setup_world(map_gen, hero, null, cities, delta, SEED)
 
-
 func after_test() -> void:
 	if map_gen != null:
 		map_gen.free()
@@ -57,12 +54,9 @@ func after_test() -> void:
 	hero = null
 	cities = null
 
-
 func _make_stack(key: String, count: int = 10) -> Array:
 	var s = units_reg.make_fixed_stack(key, count)
 	return [s]
-
-
 
 func test_profile_faction_by_composition() -> void:
 	var sets: Array = units_reg.FACTION_SETS
@@ -82,11 +76,10 @@ func test_profile_faction_by_composition() -> void:
 	var pu: Dictionary = EnemyAIProfile.for_stack(unknown, sets)
 	assert_bool(pu.has("weights")).is_true()
 
-
 func test_enemy_moves_toward_hero_and_attacks() -> void:
 	var start := Vector2i(2, 2)
 	model.enemy_stacks[start] = _make_stack("pikeman")
-	hero.current_cell = Vector2i(5, 2)  
+	hero.current_cell = Vector2i(5, 2)
 
 	var attacks: Array = []
 	proc.enemy_attack_requested.connect(func(army: Array, cell: Vector2i): attacks.append(cell))
@@ -102,7 +95,7 @@ func test_enemy_moves_toward_hero_and_attacks() -> void:
 func test_enemy_attacks_immediately_on_contact() -> void:
 	var start := Vector2i(2, 2)
 	model.enemy_stacks[start] = _make_stack("pikeman")
-	hero.current_cell = Vector2i(3, 2)  
+	hero.current_cell = Vector2i(3, 2)
 
 	var attacks: Array = []
 	proc.enemy_attack_requested.connect(func(army: Array, cell: Vector2i): attacks.append(cell))
@@ -120,7 +113,7 @@ func test_village_capture_flips_owner_and_garrisons() -> void:
 	cities.cities.append(city)
 
 	model.enemy_stacks[Vector2i(2, 2)] = _make_stack("pikeman")
-	hero.current_cell = Vector2i(11, 11)  
+	hero.current_cell = Vector2i(11, 11)
 
 	var captured: Array = []
 	proc.enemy_village_captured.connect(func(c: City): captured.append(c))
@@ -172,11 +165,10 @@ func test_enemy_turn_is_deterministic() -> void:
 
 func test_no_battle_when_hero_far() -> void:
 	model.enemy_stacks[Vector2i(2, 2)] = _make_stack("pikeman")
-	hero.current_cell = Vector2i(11, 11)  
+	hero.current_cell = Vector2i(11, 11)
 	var report: Dictionary = proc.process(TurnContext.new())
 	assert_that(report["attacks"]).is_equal(0)
 	assert_that(report["moved"]).is_equal(0)
-
 
 func test_weakened_respawn_after_cooldown() -> void:
 	var cell := Vector2i(3, 3)
@@ -204,7 +196,7 @@ func test_weakened_respawn_after_cooldown() -> void:
 
 func test_respawn_skipped_when_cell_occupied() -> void:
 	var cell := Vector2i(3, 3)
-	model.enemy_stacks[cell] = _make_stack("skeleton")  
+	model.enemy_stacks[cell] = _make_stack("skeleton")
 	delta.enemy_growth_state["respawn_queue"] = [
 		{"x": cell.x, "y": cell.y, "units": [{"key": "pikeman", "count": 10}], "turns_left": 1},
 	]
@@ -214,7 +206,6 @@ func test_respawn_skipped_when_cell_occupied() -> void:
 	var army: Array = model.enemy_stacks[cell]
 	assert_that(army[0].get_key()).is_equal("skeleton")
 	assert_that(delta.enemy_growth_state.get("respawn_queue", []).size()).is_equal(0)
-
 
 func test_growth_state_roundtrip() -> void:
 	delta.enemy_growth_state["respawn_queue"] = [
@@ -228,15 +219,14 @@ func test_growth_state_roundtrip() -> void:
 	assert_that(back.enemy_growth_state.get("garrisoned", []).size()).is_equal(1)
 	assert_that(int(back.enemy_growth_state["respawn_queue"][0]["turns_left"])).is_equal(2)
 
-
 func test_dist_field_from_hero_per_turn() -> void:
 	var cost := func(_c: Vector2i) -> float: return 1.0
-	# Hero-поле: строится от героя один раз за ход.
+
 	hero.current_cell = Vector2i(2, 2)
 	proc._rebuild_hero_dist_field()
 	assert_bool(proc._hero_dist_field_valid).is_true()
 	assert_that(proc._hero_dist_field[HexUtils.pos_to_idx(hero.current_cell, MAP_SIZE)]).is_equal(0.0)
-	# Per-stack поле: кэшируется в пределах хода.
+
 	var cache := {}
 	var start := Vector2i(8, 8)
 	var d1: PackedFloat32Array = proc._dist_field(start, 5.0, cost, cache)

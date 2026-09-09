@@ -12,21 +12,17 @@ static var _instance: _Self = null
 var active_id: StringName = SHARD_1_ID
 var _shards: Dictionary = {}
 
-
 func _init() -> void:
 	add_shard(_ShardState.new(SHARD_1_ID, "Перворечье", 0, "mixed"))
 	add_shard(_ShardState.new(SHARD_2_ID, "Забвение", SHARD_2_SEED, "waste"))
-
 
 static func instance() -> _Self:
 	if _instance == null:
 		_instance = _Self.new()
 	return _instance
 
-
 static func reset() -> void:
 	_instance = null
-
 
 func add_shard(s: _ShardState) -> _ShardState:
 	_shards[s.id] = s
@@ -34,14 +30,11 @@ func add_shard(s: _ShardState) -> _ShardState:
 		active_id = s.id
 	return s
 
-
 func get_shard(id: StringName) -> _ShardState:
 	return _shards.get(id)
 
-
 func get_active() -> _ShardState:
 	return _shards.get(active_id)
-
 
 func set_active(id: StringName) -> bool:
 	if _shards.has(id):
@@ -49,10 +42,8 @@ func set_active(id: StringName) -> bool:
 		return true
 	return false
 
-
 func shard_ids() -> Array:
 	return _shards.keys().duplicate()
-
 
 func list() -> Array:
 	return _shards.values().duplicate()

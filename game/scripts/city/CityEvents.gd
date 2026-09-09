@@ -34,20 +34,16 @@ const POOL: Array[Dictionary] = [
 	},
 ]
 
-
 static func roll_value(city: City, turn: int) -> float:
 	var h := hash([city.uid, turn, 0x5EE1])
 	return fmod(float(absi(h)), 10000.0) / 10000.0
 
-
 static func occurs(city: City, turn: int) -> bool:
 	return roll_value(city, turn) < CHANCE
-
 
 static func pick_index(city: City, turn: int) -> int:
 	var h := hash([city.uid, turn, 0x5EE2])
 	return absi(h) % POOL.size()
-
 
 static func resolve(city: City, turn: int) -> Dictionary:
 	if not occurs(city, turn):

@@ -8,17 +8,12 @@ const _GameSession = preload("res://scripts/core/GameSession.gd")
 const _WorldStateDelta = preload("res://scripts/world/WorldStateDelta.gd")
 const _HeroController = preload("res://scripts/entities/HeroController.gd")
 
-
-
-
 func test_shard_state_defaults() -> void:
 	var s := _ShardState.new()
 	assert_bool(s.id == &"shard_1").is_true().override_failure_message("default id should be shard_1")
 	assert_int(s.seed).is_zero().override_failure_message("default seed should be 0")
 	assert_bool(s.completed).is_false().override_failure_message("default completed should be false")
 	assert_bool(s.entry_cell == Vector2i(10, 10)).is_true().override_failure_message("default entry_cell should be (10, 10)")
-
-
 
 func test_shard_state_custom() -> void:
 	var s := _ShardState.new(&"shard_2", "Забвение", 0x2A1F3C7, "waste", Vector2i(3, 4))
@@ -27,8 +22,6 @@ func test_shard_state_custom() -> void:
 	assert_int(s.seed).is_equal(0x2A1F3C7).override_failure_message("custom seed mismatch")
 	assert_str(s.biome_mix).is_equal("waste").override_failure_message("custom biome_mix should be 'waste'")
 	assert_bool(s.entry_cell == Vector2i(3, 4)).is_true().override_failure_message("custom entry_cell should be (3, 4)")
-
-
 
 func test_shard_state_roundtrip() -> void:
 	var s := _ShardState.new(&"shard_2", "Забвение", 0x2A1F3C7, "waste", Vector2i(3, 4))
@@ -42,8 +35,6 @@ func test_shard_state_roundtrip() -> void:
 	assert_bool(s2.entry_cell == s.entry_cell).is_true().override_failure_message("roundtrip entry_cell mismatch")
 	assert_bool(s2.completed == s.completed).is_true().override_failure_message("roundtrip completed mismatch")
 
-
-
 func test_manager_default_campaign() -> void:
 	_ShardManager.reset()
 	var m := _ShardManager.instance()
@@ -55,8 +46,6 @@ func test_manager_default_campaign() -> void:
 	assert_object(s2).is_not_null().override_failure_message("shard_2 not found")
 	assert_int(s2.seed).is_equal(_ShardManager.SHARD_2_SEED).override_failure_message("shard_2 seed should be SHARD_2_SEED")
 
-
-
 func test_manager_active_switch() -> void:
 	_ShardManager.reset()
 	var m := _ShardManager.instance()
@@ -66,8 +55,6 @@ func test_manager_active_switch() -> void:
 	assert_bool(m.active_id == &"shard_2").is_true().override_failure_message("active should stay shard_2 after failed switch")
 	m.set_active(&"shard_1")
 
-
-
 func test_manager_list_ids() -> void:
 	_ShardManager.reset()
 	var m := _ShardManager.instance()
@@ -75,8 +62,6 @@ func test_manager_list_ids() -> void:
 	assert_int(ids.size()).is_equal(2).override_failure_message("should have 2 shards")
 	assert_bool(ids.has(&"shard_1") and ids.has(&"shard_2")).is_true().override_failure_message("shard ids content mismatch")
 	assert_int(m.list().size()).is_equal(2).override_failure_message("list() should return 2 shards")
-
-
 
 func test_save_preserves_other_shards() -> void:
 	_ShardManager.reset()

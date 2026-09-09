@@ -14,7 +14,6 @@ const EconomicTurnProcessor := preload("res://scripts/economy/EconomicTurnProces
 const TurnContext := preload("res://scripts/core/TurnContext.gd")
 const ProductionChain := preload("res://scripts/economy/ProductionChain.gd")
 
-
 static func make_city(overrides: Dictionary = {}) -> City:
 	var c := City.new()
 	c.uid = 1
@@ -33,8 +32,6 @@ static func make_city(overrides: Dictionary = {}) -> City:
 	c.ensure_resource_ctx()
 	return c
 
-
-
 static func run_turn(city: City, turn: int, overrides: Dictionary = {}) -> Dictionary:
 	seat_workers(city)
 	var mono: Dictionary = city.process_turn(turn)
@@ -42,8 +39,7 @@ static func run_turn(city: City, turn: int, overrides: Dictionary = {}) -> Dicti
 	var cs: Array[City] = [city]
 	ctx.cities = cs
 	ctx.turn_number = turn
-	
-	
+
 	var city_phase := CityTurnProcessor.new()
 	var city_report: Dictionary = city_phase.process(ctx)
 	var applied: int = ArenaRingSystem.apply_ring_multipliers(city, overrides, turn)
@@ -71,8 +67,6 @@ static func run_turn(city: City, turn: int, overrides: Dictionary = {}) -> Dicti
 		"level": city.level,
 		"prosperity": city.prosperity,
 	}
-
-
 
 static func place_building(
 	city: City,
@@ -105,7 +99,6 @@ static func place_building(
 	ArenaClusterSystem.invalidate(city.uid)
 	return CityCheck.success(p)
 
-
 static func arena_tile_free(city: City, tile: Vector2i, except_uid: int = -1) -> bool:
 	if city.cell_is_built(tile):
 		return false
@@ -121,7 +114,6 @@ static func arena_tile_free(city: City, tile: Vector2i, except_uid: int = -1) ->
 		if u.uid != except_uid and u.state == PopUnit.State.WORKER and u.tile == tile:
 			return false
 	return true
-
 
 static func seat_workers(city: City) -> int:
 	var seated := 0
@@ -152,7 +144,7 @@ static func seat_workers(city: City) -> int:
 		var cur := u.tile
 		if cur.x >= 0 and not city.cell_is_built(cur) \
 				and int(occupied.get(cur, -1)) == u.uid:
-			continue  
+			continue
 		if fi >= free_tiles.size():
 			break
 		var t: Vector2i = free_tiles[fi]
@@ -162,10 +154,6 @@ static func seat_workers(city: City) -> int:
 		seated += 1
 	return seated
 
-
-
-
-
 static func hire_worker(city: City) -> int:
 	if ArenaClusterSystem.cluster_worker_housing(city) <= 0:
 		return 0
@@ -173,7 +161,6 @@ static func hire_worker(city: City) -> int:
 		return 0
 	city.add_migrant(PopUnit.State.WORKER)
 	return 1
-
 
 static func _hire_workers(city: City) -> int:
 	var hired := 0
@@ -186,7 +173,6 @@ static func _hire_workers(city: City) -> int:
 		hired += 1
 	return hired
 
-
 static func _has_free_worker_slot(city: City) -> bool:
 	for b in city.buildings:
 		if b == null or b.def == null:
@@ -197,7 +183,6 @@ static func _has_free_worker_slot(city: City) -> bool:
 		if b.assigned_workers < chain.required_workers:
 			return true
 	return false
-
 
 static func _fail(reason: String) -> CityCheck:
 	return CityCheck.fail(reason)

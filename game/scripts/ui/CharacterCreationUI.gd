@@ -52,29 +52,29 @@ func _localize() -> void:
     _back_btn.text = GameText.creation_back()
 
 func _populate_options() -> void:
-    
+
     for item in _sexes():
         _sex_option.add_item(item["name"])
         _sex_keys.append(item["id"])
-    
+
     var race_data := _keys_labels(_Races.RACES)
     for item in race_data:
         _race_option.add_item(item["name"])
         _race_keys.append(item["id"])
-    
+
     _subrace_option.add_item("—")
     _subrace_option.disabled = true
-    
+
     var class_data := _keys_labels(_Classes.CLASSES)
     for item in class_data:
         _class_option.add_item(item["name"])
         _class_keys.append(item["id"])
-    
+
     var culture_data := _keys_labels(_Cultures.CULTURES)
     for item in culture_data:
         _culture_option.add_item(item["name"])
         _culture_keys.append(item["id"])
-    
+
     var bg_data := _keys_labels(_Cultures.BACKGROUNDS)
     for item in bg_data:
         _background_option.add_item(item["name"])

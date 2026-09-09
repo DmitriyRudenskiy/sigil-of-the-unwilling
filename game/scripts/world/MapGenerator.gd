@@ -57,10 +57,8 @@ var map_height: int:
 		if model != null:
 			model.map_height = v
 
-
 func _ready() -> void:
 	generate()
-
 
 func generate() -> void:
 	_ensure_layers()
@@ -90,8 +88,6 @@ func generate() -> void:
 	spawner.place_decor()
 	spawner.place_enemies(reachable_cells)
 
-
-
 func _compute_reachable_cells() -> Dictionary:
 	var start_cell := Vector2i(-1, -1)
 	for y in model.map_height:
@@ -111,7 +107,6 @@ func _compute_reachable_cells() -> Dictionary:
 		model.map_width,
 		model.map_height
 	)
-
 
 func _ensure_layers() -> void:
 	var tileset := TileAtlas.build_hex_tileset()
@@ -140,7 +135,6 @@ func _ensure_layers() -> void:
 		_resource_layer.name = "ResourceLayer"
 		add_child(_resource_layer)
 
-
 func apply_fog(visibility) -> void:
 	if visibility == null or renderer == null:
 		return
@@ -149,54 +143,43 @@ func apply_fog(visibility) -> void:
 func is_walkable(cell: Vector2i) -> bool:
 	return model.is_walkable(cell) if model != null else false
 
-
 func is_walkable_with_effects(cell: Vector2i, has_levitation: bool = false) -> bool:
 	return model.is_walkable_with_effects(cell, has_levitation) if model != null else false
-
 
 func is_in_bounds(cell: Vector2i) -> bool:
 	return cell.x >= 0 and cell.x < map_width and cell.y >= 0 and cell.y < map_height
 
-
 func get_terrain_name(cell: Vector2i) -> String:
 	return model.get_terrain_name(cell) if model != null else "grass"
-
 
 func get_terrain_id(cell: Vector2i) -> int:
 	return model.get_terrain_id(cell) if model != null else HexUtils.Terrain.GRASS
 
-
 func get_blocked_cells() -> Dictionary:
 	return model.get_blocked_cells() if model != null else {}
 
-
 func has_valid_tilemap() -> bool:
 	return _tile_map != null and _tile_map.tile_set != null
-
 
 func get_tile_size() -> Vector2i:
 	if has_valid_tilemap():
 		return _tile_map.tile_set.tile_size
 	return Vector2i(82, 82)
 
-
 func world_to_map(world_pos: Vector2) -> Vector2i:
 	if not has_valid_tilemap():
 		return Vector2i(-1, -1)
 	return _tile_map.local_to_map(_tile_map.to_local(world_pos))
-
 
 func local_to_map(world_pos: Vector2) -> Vector2i:
 	if not has_valid_tilemap():
 		return Vector2i(-1, -1)
 	return _tile_map.local_to_map(world_pos)
 
-
 func map_to_local(cell: Vector2i) -> Vector2:
 	if not has_valid_tilemap():
 		return Vector2.ZERO
 	return _tile_map.map_to_local(cell)
-
 
 func get_map_world_rect() -> Rect2:
 	if not has_valid_tilemap():

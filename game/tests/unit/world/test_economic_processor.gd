@@ -1,7 +1,6 @@
 extends GdUnitTestSuite
 const TestFactories := preload("res://tests/helpers/factories.gd")
 
-
 func _add_worker(city: City, tile: Vector2i = Vector2i(6, 5)) -> PopUnit:
 	var u := PopUnit.new()
 	u.state = PopUnit.State.WORKER
@@ -9,7 +8,6 @@ func _add_worker(city: City, tile: Vector2i = Vector2i(6, 5)) -> PopUnit:
 	u.born_turn = 0
 	city.pop.append(u)
 	return u
-
 
 func _make_lumber_building(city: City) -> UniqueBuilding:
 	var b := UniqueBuilding.new()
@@ -27,13 +25,10 @@ func _make_lumber_building(city: City) -> UniqueBuilding:
 	WorkerAssignment.assign_all(city)
 	return b
 
-
-
 func test_phase_id_and_priority() -> void:
 	var p := EconomicTurnProcessor.new()
 	assert_that(p.get_phase_id()).is_equal(&"economy")
 	assert_that(p.get_priority()).is_equal(10)
-
 
 func test_empty_city_only_auto_yield() -> void:
 	var ctx := TurnContext.new()
@@ -45,8 +40,6 @@ func test_empty_city_only_auto_yield() -> void:
 	var auto: Dictionary = report.get("auto_yield", {})
 	assert_that(float(auto.get(&"wood", -1.0))).is_equal(float(GameNumbers.RESOURCE_AUTO_WOOD))
 	assert_that(float(auto.get(&"stone", -1.0))).is_equal(float(GameNumbers.RESOURCE_AUTO_STONE))
-
-
 
 func test_chain_produces_with_workers() -> void:
 	var city := TestFactories.make_city()
@@ -69,10 +62,9 @@ func test_chain_produces_with_workers() -> void:
 	assert_that(city.resource_ctx.amount(&"wood")).is_equal(0.0)
 	assert_that(city.resource_ctx.amount(&"planks")).is_equal(3.0)
 
-
 func test_chain_insufficient_workers_no_output() -> void:
 	var city := TestFactories.make_city()
-	_add_worker(city)  
+	_add_worker(city)
 	_make_lumber_building(city)
 	var p := EconomicTurnProcessor.new()
 	var ctx := TurnContext.new()
@@ -81,7 +73,6 @@ func test_chain_insufficient_workers_no_output() -> void:
 	assert_that(int(report.get("chains_executed", -1))).is_equal(1)
 	assert_that(city.resource_ctx.amount(&"planks")).is_equal(1.5)
 	assert_that(city.resource_ctx.amount(&"wood")).is_equal(0.0)
-
 
 func test_chain_no_workers_skipped() -> void:
 	var city := TestFactories.make_city()
@@ -93,7 +84,6 @@ func test_chain_no_workers_skipped() -> void:
 	assert_that(int(report.get("chains_executed", -1))).is_equal(0)
 	assert_that(city.resource_ctx.amount(&"planks")).is_equal(0.0)
 	assert_that(city.resource_ctx.amount(&"wood")).is_equal(float(GameNumbers.RESOURCE_AUTO_WOOD))
-
 
 func test_chain_shortage_no_input_deduction() -> void:
 	var city := TestFactories.make_city()
@@ -107,8 +97,6 @@ func test_chain_shortage_no_input_deduction() -> void:
 	var report: Dictionary = p.process(ctx)
 	assert_that(int(report.get("chains_executed", -1))).is_equal(0)
 	assert_that(city.resource_ctx.amount(&"wood")).is_equal(2.0)
-
-
 
 func test_upkeep_paid() -> void:
 	var city := TestFactories.make_city()
@@ -125,14 +113,13 @@ func test_upkeep_paid() -> void:
 	assert_that(int(report.get("upkeep_failed", -1))).is_equal(0)
 	assert_that(city.resource_ctx.amount(&"stone")).is_equal(1.0)
 
-
 func test_upkeep_failed_emits_signal() -> void:
 	var city := TestFactories.make_city()
 	_add_worker(city)
 	_add_worker(city)
 	_make_lumber_building(city)
 	var b: UniqueBuilding = city.buildings[0]
-	b.upkeep = {"gold": 10.0}  
+	b.upkeep = {"gold": 10.0}
 	var p := EconomicTurnProcessor.new()
 	var failed: Array = []
 	p.upkeep_failed.connect(func(buid: int, rid: StringName): failed.append([buid, rid]))
@@ -142,8 +129,6 @@ func test_upkeep_failed_emits_signal() -> void:
 	assert_that(int(report.get("upkeep_failed", -1))).is_equal(1)
 	assert_that(failed.size()).is_equal(1)
 	assert_that(failed[0][1]).is_equal(&"gold")
-
-
 
 func test_report_cities_entries() -> void:
 	var ctx := TurnContext.new()
@@ -155,7 +140,6 @@ func test_report_cities_entries() -> void:
 	assert_that(cities.size()).is_equal(2)
 	assert_that(int((cities[0] as Dictionary).get("uid", -1))).is_equal(1)
 	assert_that(int((cities[1] as Dictionary).get("uid", -1))).is_equal(2)
-
 
 func test_integration_with_scheduler() -> void:
 	var sched := TurnScheduler.new()

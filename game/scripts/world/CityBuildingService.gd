@@ -1,14 +1,10 @@
 class_name CityBuildingService
 extends RefCounted
-# R3: операции строительства/апгрейда/переноса вынесены из City.gd (паттерн BoroughRules:
-# статические правила, city — аргумент; сигналы эмитит City в тонких обёртках).
 
 const RELOCATE_MAX_DISTANCE := 3
 
-
 static func fail(reason: String) -> CityCheck:
 	return CityCheck.fail(reason, {"cost": 0.0})
-
 
 static func check_req(city: City, req: UniqueBuilding.LevelReq) -> CityCheck:
 	if float(city.storage.get(&"industry", 0.0)) < req.industry:
@@ -23,12 +19,10 @@ static func check_req(city: City, req: UniqueBuilding.LevelReq) -> CityCheck:
 		return fail("Свободных последователей: %d/%d" % [city.free_followers(), req.followers])
 	return CityCheck.success({"cost": req.industry})
 
-
 static func spend_req(city: City, req: UniqueBuilding.LevelReq) -> void:
 	city.storage[&"industry"] = float(city.storage.get(&"industry", 0.0)) - req.industry
 	if req.special_amount > 0.0:
 		city.storage[req.special_resource] = float(city.storage.get(req.special_resource, 0.0)) - req.special_amount
-
 
 static func assign_followers(city: City, bld: UniqueBuilding, n: int) -> void:
 	var left := n
@@ -40,7 +34,6 @@ static func assign_followers(city: City, bld: UniqueBuilding, n: int) -> void:
 			left -= 1
 	bld.assigned_followers += n - left
 
-
 static func within_build_distance(city: City, cell: Vector2i) -> bool:
 	if HexUtils.hex_distance(cell, city.center) <= city.building_max_distance():
 		return true
@@ -48,7 +41,6 @@ static func within_build_distance(city: City, cell: Vector2i) -> bool:
 		if HexUtils.hex_distance(cell, b.cell) <= city.building_max_distance():
 			return true
 	return false
-
 
 static func can_build_borough(city: City, cell: Vector2i) -> CityCheck:
 	if cell == city.center:
@@ -64,7 +56,6 @@ static func can_build_borough(city: City, cell: Vector2i) -> CityCheck:
 		return fail("Промышленность: %.0f/%.0f" % [float(city.storage.get(&"industry", 0.0)), cost])
 	return CityCheck.success({"cost": cost})
 
-
 static func build_borough(city: City, cell: Vector2i) -> CityCheck:
 	var check := can_build_borough(city, cell)
 	if not check.ok:
@@ -78,7 +69,6 @@ static func build_borough(city: City, cell: Vector2i) -> CityCheck:
 	city.boroughs.append(b)
 	BoroughRules.process_level_ups(city)
 	return CityCheck.success()
-
 
 static func can_build_building(city: City, def: UniqueBuilding.Def, cell: Vector2i) -> CityCheck:
 	if def == null or def.levels.is_empty():
@@ -96,7 +86,6 @@ static func can_build_building(city: City, def: UniqueBuilding.Def, cell: Vector
 			return fail("Не дальше %d клеток от города или района" % city.building_max_distance())
 	var req: UniqueBuilding.LevelReq = def.levels[0]
 	return check_req(city, req)
-
 
 static func build_building(city: City, def: UniqueBuilding.Def, cell: Vector2i) -> Dictionary:
 	var check := can_build_building(city, def, cell)
@@ -119,7 +108,6 @@ static func build_building(city: City, def: UniqueBuilding.Def, cell: Vector2i) 
 	city.buildings.append(bld)
 	return {"bld": bld, "reason": ""}
 
-
 static func can_upgrade_building(city: City, bld: UniqueBuilding, hero_cell: Vector2i = Vector2i(-1, -1)) -> CityCheck:
 	if bld == null or not city.buildings.has(bld):
 		return fail("Здание не найдено")
@@ -135,7 +123,6 @@ static func can_upgrade_building(city: City, bld: UniqueBuilding, hero_cell: Vec
 		return fail("Герой должен находиться на клетке здания")
 	return check
 
-
 static func perform_upgrade(city: City, bld: UniqueBuilding) -> CityCheck:
 	var check := can_upgrade_building(city, bld)
 	if not check.ok:
@@ -145,7 +132,6 @@ static func perform_upgrade(city: City, bld: UniqueBuilding) -> CityCheck:
 	assign_followers(city, bld, req.followers)
 	bld.level += 1
 	return CityCheck.success()
-
 
 static func relocate(
 	city: City,
@@ -181,7 +167,6 @@ static func relocate(
 	city._invalidate_exploited()
 	return CityCheck.success({"new_center": new_center})
 
-# ─── R5: рабочие клетки и выбор клетки (из City.gd) ─────────────
 static func is_adjacent_to_city_body(city: City, cell: Vector2i) -> bool:
 	if HexUtils.hex_distance(cell, city.center) == 1:
 		return true
@@ -189,7 +174,6 @@ static func is_adjacent_to_city_body(city: City, cell: Vector2i) -> bool:
 		if HexUtils.hex_distance(cell, b.cell) == 1:
 			return true
 	return false
-
 
 static func is_worker_tile_free(city: City, tile: Vector2i, except_uid := -1) -> bool:
 	if tile.x < 0:
@@ -203,7 +187,6 @@ static func is_worker_tile_free(city: City, tile: Vector2i, except_uid := -1) ->
 			return false
 	return true
 
-
 static func first_free_worker_tile(city: City) -> Vector2i:
 	for nb in HexUtils.get_all_neighbors(city.center):
 		if is_worker_tile_free(city, nb):
@@ -213,7 +196,6 @@ static func first_free_worker_tile(city: City) -> Vector2i:
 			if is_worker_tile_free(city, nb):
 				return nb
 	return Vector2i(-1, -1)
-
 
 static func first_free_build_cell(city: City, def: UniqueBuilding.Def, bounds := Vector2i.ZERO) -> Vector2i:
 	if def == null or def.levels.is_empty():

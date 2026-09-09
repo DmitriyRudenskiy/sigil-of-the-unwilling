@@ -1,8 +1,6 @@
 extends GdUnitTestSuite
-# TASK_09 / R4: CityYieldCalculator — кэш доходности (паттерн BoroughRules).
 
 var c: City
-
 
 func before_test() -> void:
 	c = City.new()
@@ -12,11 +10,9 @@ func before_test() -> void:
 	c.upkeep_mult = 1.0
 	c.owner = &"player"
 
-
 func test_empty_city_zero_yield() -> void:
 	var y := CityYieldCalculator.new().calculate(c)
 	assert_float(y[&"food"]).is_equal_approx(0.0, 0.0001)
-
 
 func test_worker_on_tile_generates_yield() -> void:
 	c.resource_ctx = null
@@ -30,7 +26,6 @@ func test_worker_on_tile_generates_yield() -> void:
 	var y := calc.calculate(c)
 	assert_float(y[&"food"]).is_equal_approx(2.0, 0.0001)
 
-
 func test_cached_result_no_recalc() -> void:
 	c.tile_yield_fn = func(_cell: Vector2i) -> Dictionary:
 		return {&"food": 1.0}
@@ -42,7 +37,6 @@ func test_cached_result_no_recalc() -> void:
 		return {&"food": 999.0}
 	var y2 := calc.calculate(c)
 	assert_float(y2[&"food"]).is_equal_approx(y1[&"food"], 0.0001)
-
 
 func test_invalidate_triggers_recalc() -> void:
 	c.tile_yield_fn = func(_cell: Vector2i) -> Dictionary:
@@ -57,9 +51,8 @@ func test_invalidate_triggers_recalc() -> void:
 	var y := calc.calculate(c)
 	assert_float(y[&"food"]).is_equal_approx(3.0, 0.0001)
 
-
 func test_agrarian_specialization_multiplier() -> void:
-	# 4.1: специализация «аграрный» умножает еду (x1.5)
+
 	c.tile_yield_fn = func(_cell: Vector2i) -> Dictionary:
 		return {&"food": 1.0}
 	var u = c.add_migrant(PopUnit.State.WORKER, 0)

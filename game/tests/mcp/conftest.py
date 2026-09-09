@@ -1,19 +1,3 @@
-"""Fixtures для MCP-тестов (официальный mcp SDK, stdio-транспорт).
-
-Каждый тест получает собственный godot-mcp сервер + живой Godot (function scope):
-это исключает конфликт порта 9090 между тестами — Godot предыдущего теста
-гарантированно остановлен до старта следующего (polling в wait_port_free).
-
-Ключевое ограничение anyio: cancel scope stdio_client нельзя входить/выходить
-в разных тасках. pytest-asyncio разносит async-fixture setup/teardown по разным
-таскам — поэтому весь серверный цикл (enter stdio_client → ClientSession →
-initialize → stop → exit) живёт в ОДНОМ таске на отдельном event loop
-(anyio BlockingPortal), а тесты синхронные и ходят на этот loop через портал.
-
-Переменные окружения:
-  NODE_BIN   — путь к node (по умолчанию "node" из PATH)
-  GODOT_PATH — путь к бинарнику Godot (по умолчанию /Applications/Godot.app/...)
-"""
 from __future__ import annotations
 
 import os
@@ -28,11 +12,11 @@ from mcp import ClientSession
 from mcp.client.stdio import StdioServerParameters, stdio_client
 
 MCP_DIR = Path(__file__).parent
-GAME_DIR = MCP_DIR.parent.parent  # <repo>/game
+GAME_DIR = MCP_DIR.parent.parent
 GODOT_MCP_DIR = GAME_DIR / "addons" / "godot-mcp"
 
 sys.path.insert(0, str(MCP_DIR))
-from godot_mcp import GodotMCPClient, MCPError  # noqa: E402  локальный модуль
+from godot_mcp import GodotMCPClient, MCPError
 
 NODE_BIN = os.environ.get("NODE_BIN", "node")
 GODOT_BIN = os.environ.get("GODOT_PATH", "/Applications/Godot.app/Contents/MacOS/Godot")
@@ -42,14 +26,9 @@ BATTLE_SCENE = "res://scenes/Battle.tscn"
 
 PROJECT_GODOT = GAME_DIR / "project.godot"
 
-# stdio SDK наследует только минимальное окружение (HOME/PATH/...),
-# поэтому GODOT_PATH для сервера передаём явно.
 SERVER_ENV = {"GODOT_PATH": GODOT_BIN}
 
-# Страховка от нечистого выхода node (SIGKILL-путь SDK-шатдауна): содержимое
-# project.godot на момент запуска тестов.
 _PRISTINE_PROJECT_GODOT = PROJECT_GODOT.read_text()
-
 
 def _restore_project_godot_if_dirty() -> None:
     try:
@@ -59,7 +38,6 @@ def _restore_project_godot_if_dirty() -> None:
     except OSError as e:
         print(f"[mcp] не удалось проверить project.godot: {e}", file=sys.stderr)
 
-
 def _server_params() -> StdioServerParameters:
     return StdioServerParameters(
         command=NODE_BIN,
@@ -68,14 +46,8 @@ def _server_params() -> StdioServerParameters:
         env=SERVER_ENV,
     )
 
-
 @pytest.fixture
 def mcp():
-    """Живой godot-mcp сервер (stdio) + готовый ClientSession.
-
-    Цикл сервера — один таск на loop портала (enter/exit stdio_client вместе).
-    Завершение: сигнал stop → stop Godot + восстановление project.godot → выход таска.
-    """
     box: dict = {}
     ready = threading.Event()
     done = threading.Event()
@@ -91,7 +63,7 @@ def mcp():
                     ready.set()
                     await stop_evt.wait()
                     await box["client"]._stop_on_loop(120.0)
-        except BaseException as e:  # noqa: BLE001 — доставить в тест
+        except BaseException as e:
             box["error"] = e
             ready.set()
         finally:
@@ -110,18 +82,14 @@ def mcp():
         if not done.wait(180):
             print("[mcp] WARNING: очистка сервера не завершилась за 180 с", file=sys.stderr)
 
-
 @pytest.fixture
 def battle_scene(mcp):
-    """МCP-клиент с уже запущенной сценой боя (res://scenes/Battle.tscn)."""
     mcp.run_scene(BATTLE_SCENE)
     mcp.wait_ready()
     yield mcp
 
-
 @pytest.fixture
 def world_scene(mcp):
-    """МCP-клиент с уже запущенным миром (res://scenes/World.tscn)."""
     mcp.run_scene(WORLD_SCENE)
     mcp.wait_ready()
     yield mcp

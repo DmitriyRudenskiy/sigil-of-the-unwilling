@@ -3,10 +3,8 @@ class_name PlaceholderTexture
 
 static var _cache: Dictionary = {}
 
-
 static func clear() -> void:
 	_cache.clear()
-
 
 static func circle(radius: int, fill: Color, border: Color) -> ImageTexture:
 	var key := "%d_%s_%s" % [radius, fill.to_html(), border.to_html()]

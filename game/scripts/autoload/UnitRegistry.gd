@@ -173,7 +173,6 @@ const UNIT_TAGS := {
 
 var _definitions: Dictionary = {}
 
-
 func ensure_definitions() -> void:
     if not _definitions.is_empty():
         return
@@ -207,10 +206,8 @@ func ensure_definitions() -> void:
             tags
         )
 
-
 func reset() -> void:
     _definitions.clear()
-
 
 func get_all_keys() -> Array[String]:
     ensure_definitions()
@@ -222,11 +219,9 @@ func get_all_keys() -> Array[String]:
     keys.sort()
     return keys
 
-
 func get_definition(key: String) -> UnitStats:
     ensure_definitions()
     return _definitions.get(key, null)
-
 
 func make_stack(key: String, rng: RandomNumberGenerator) -> UnitStack:
     var stats: UnitStats = get_definition(key)
@@ -238,7 +233,6 @@ func make_stack(key: String, rng: RandomNumberGenerator) -> UnitStack:
         120
     )
     return UnitStack.new(stats, count)
-
 
 func make_fixed_stack(key: String, count: int) -> UnitStack:
     var stats: UnitStats = get_definition(key)

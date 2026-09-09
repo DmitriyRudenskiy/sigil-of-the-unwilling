@@ -18,20 +18,14 @@ func after_test() -> void:
 		coordinator.free()
 		coordinator = null
 
-
-
 func test_coordinator_creation() -> void:
 	assert_that(coordinator).is_not_null()
 
 func test_coordinator_is_node() -> void:
 	assert_bool(coordinator is Node).is_true()
 
-
-
 func test_pending_cell_initial() -> void:
 	assert_that(coordinator._pending_enemy_cell).is_equal(Vector2i(-1, -1))
-
-
 
 func test_setup_creates_battle_flow() -> void:
 	coordinator.setup(null, null, null, null, null, null, null, null, null)
@@ -41,8 +35,6 @@ func test_setup_stores_refs() -> void:
 	var rng := TestFactories.seeded(7251)
 	coordinator.setup(null, null, null, rng, null, null, null, null, null)
 	assert_that(coordinator.rng).is_not_null()
-
-
 
 func test_get_pending_enemy_cell() -> void:
 	coordinator._pending_enemy_cell = Vector2i(3, 3)
@@ -56,13 +48,9 @@ func test_get_battle_flow_after_setup() -> void:
 func test_get_battle_flow_before_setup() -> void:
 	assert_bool(coordinator.battle_flow == null).is_true()
 
-
-
 func test_check_enemy_contact_null_map_no_crash() -> void:
 	coordinator.setup(null, null, null, null, null, null, null, null, null)
 	assert_bool(true).is_true()
-
-
 
 func test_on_battle_completed_null_hero_no_crash() -> void:
 	coordinator.setup(null, null, null, null, null, null, null, null, null)
@@ -94,8 +82,6 @@ func test_on_battle_completed_resets_pending_cell_defender() -> void:
 	coordinator._on_battle_completed(BattleState.Side.DEFENDER, surv_atk, surv_def)
 	assert_that(coordinator._pending_enemy_cell).is_equal(Vector2i(-1, -1))
 
-
-
 func test_battle_started_emitted() -> void:
 	coordinator.setup(null, null, null, null, null, null, null, null, null)
 
@@ -118,12 +104,8 @@ func test_battle_completed_emitted() -> void:
 	coordinator.battle_flow.battle_completed.emit(BattleState.Side.ATTACKER, empty_atk, empty_def)
 	assert_that(data.get("winner", -1)).is_equal(BattleState.Side.ATTACKER)
 
-
-
 func test_artifact_drop_chance_positive() -> void:
 	assert_bool(0.05 > 0).is_true()
-
-
 
 func test_create_battle_flow_signals_connected() -> void:
 	coordinator.setup(null, null, null, null, null, null, null, null, null)
@@ -138,14 +120,12 @@ func test_create_battle_flow_signals_connected() -> void:
 
 	assert_that(connected_count).is_equal(2)
 
-
-
 func test_fallback_stack_on_total_annihilation() -> void:
 	var units := _UnitRegistry.new()
 
 	var army = _HeroArmy.new()
 	army.setup(units)
-	army.army.clear()  
+	army.army.clear()
 
 	var hero = _FakeHero.new()
 	hero.army = army
@@ -166,5 +146,5 @@ func test_fallback_stack_on_total_annihilation() -> void:
 	map.free()
 	hero.free()
 	army.free()
-	# параллельный рефакторинг убрал container — чистим registry напрямую
+
 	units.free()

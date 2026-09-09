@@ -6,7 +6,6 @@ const AudioCues = preload("res://scripts/data/AudioCues.gd")
 const MAX_SECONDS := 6.0
 const POLL := 0.5
 
-
 func test_world_entry_starts_world_music() -> void:
 	var sm: Node = get_tree().root.get_node_or_null("/root/SoundManager")
 	assert_that(sm).is_not_null()

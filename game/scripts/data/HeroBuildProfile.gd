@@ -7,11 +7,11 @@ const _Cultures = preload("res://scripts/data/hero_cultures.gd")
 
 var name: String = ""
 var sex: String = "male"
-var race: String = ""          
+var race: String = ""
 var subrace: String = ""
-var character_class: String = ""  
-var culture: String = ""       
-var background: String = ""    
+var character_class: String = ""
+var culture: String = ""
+var background: String = ""
 
 var base_stats: Dictionary = {"attack": 2, "defense": 2, "spell_power": 2, "knowledge": 2}
 

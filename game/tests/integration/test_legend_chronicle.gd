@@ -16,15 +16,11 @@ const _ChronicleScreen = preload("res://scripts/ui/ChronicleScreen.gd")
 const _ChronicleScreenScene = preload("res://scenes/ui/ChronicleScreen.tscn")
 const _HeroStatusPanel = preload("res://scripts/ui/HeroStatusPanel.gd")
 
-# Изоляция GameEventBus: все подписки регистрируются в _bus() и гарантированно
-# отключаются в after_test (страховка от утечки при падении теста на assert).
 var _bus_conns: Array = []
-
 
 func _bus(sig: Signal, cb: Callable) -> void:
 	sig.connect(cb)
 	_bus_conns.append([sig, cb])
-
 
 func _bus_clear() -> void:
 	for p in _bus_conns:
@@ -32,11 +28,8 @@ func _bus_clear() -> void:
 			p[0].disconnect(p[1])
 	_bus_conns.clear()
 
-
 func after_test() -> void:
 	_bus_clear()
-
-
 
 func test_chronicle_append_numbers_generations_and_emits() -> void:
 	var c: _Chronicle = _Chronicle.new()
@@ -63,7 +56,6 @@ func test_chronicle_append_without_bus_does_not_crash() -> void:
 	assert_that(c.entries.size()).is_equal(1)
 	assert_that(int(e.get("generation", 0))).is_equal(1)
 
-
 func test_chronicle_roundtrip_and_garbage() -> void:
 	var c: _Chronicle = _Chronicle.new()
 	c.append({"hero_name": "A", "path": "x", "outcome": "succession"})
@@ -76,8 +68,6 @@ func test_chronicle_roundtrip_and_garbage() -> void:
 	c2.from_array([42, "junk", {"hero_name": "B"}])
 	assert_that(c2.entries.size()).is_equal(1)
 	assert_that(str(c2.entries[0]["hero_name"])).is_equal("B")
-
-
 
 func test_savedata_v5_migrates_to_v6_with_empty_chronicle() -> void:
 	var v5 := {
@@ -110,8 +100,6 @@ func test_savedata_v6_chronicle_roundtrip() -> void:
 	sd2.from_dict(sd.to_dict())
 	assert_that(sd2.chronicle.size()).is_equal(1)
 	assert_that(str(sd2.chronicle[0]["hero_name"])).is_equal("A")
-
-
 
 func _make_follower(uid: int, name: String, path: StringName) -> _Follower:
 	var f: _Follower = _Follower.new()
@@ -146,8 +134,6 @@ func test_hero_status_panel_without_hero() -> void:
 	var cond: String = str(panel.get_node("VBox/ConditionLabel").text)
 	assert_that(cond).is_equal("")
 	panel.free()
-
-
 
 func test_death_sequence_with_successor() -> void:
 	var ds: DeathSequence = _DeathSequenceScene.instantiate()
@@ -187,8 +173,6 @@ func test_death_sequence_successor_signal() -> void:
 	succ.free()
 	ds.free()
 
-
-
 func test_chronicle_screen_newest_first() -> void:
 	var cs: _ChronicleScreen = _ChronicleScreenScene.instantiate()
 	add_child(cs)
@@ -211,8 +195,6 @@ func test_chronicle_screen_empty() -> void:
 	var txt: String = str(list.get_child(0).text)
 	assert_bool(txt.find("Летопись пуста") != -1).is_true()
 	cs.free()
-
-
 
 func _make_wc() -> _WorldController:
 	var wc: _WorldController = _WorldController.new()
@@ -269,7 +251,7 @@ func test_on_hero_died_defers_succession() -> void:
 
 func test_on_hero_died_terminal_no_succession() -> void:
 	var wc := _make_wc()
-	wc._persistence.session.state = 2  
+	wc._persistence.session.state = 2
 	var h: _Hero = _Hero.new()
 	h.hero_name = "Last"
 	h.path_id = &"archivist"

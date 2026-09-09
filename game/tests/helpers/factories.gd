@@ -5,7 +5,6 @@ const City := preload("res://scripts/world/City.gd")
 const HeroController := preload("res://scripts/entities/HeroController.gd")
 const Follower := preload("res://scripts/entities/Follower.gd")
 
-
 static func make_city(uid: int = 1, stronghold: int = 2) -> City:
 	var city := City.new()
 	city.uid = uid
@@ -15,21 +14,16 @@ static func make_city(uid: int = 1, stronghold: int = 2) -> City:
 	city.storage[&"industry"] = 500.0
 	return city
 
-
 static func make_hero(path := &"archivist") -> HeroController:
 	var h := HeroController.new()
 	h.hero_name = "Darkstorn"
 	h.path_id = path
 	return h
 
-
-## R8: один источник для тестовых RandomNumberGenerator (было: локальный _seeded в
-## test_city_navigation / test_follower / test_city_screen).
 static func seeded(seed: int) -> RandomNumberGenerator:
 	var r := RandomNumberGenerator.new()
 	r.seed = seed
 	return r
-
 
 static func make_follower(uid: int, path := &"archivist") -> Follower:
 	var f := Follower.new()
@@ -37,7 +31,6 @@ static func make_follower(uid: int, path := &"archivist") -> Follower:
 	f.path = path
 	return f
 
-## R6: стандартное боевое состояние для тестов (один атакующий + один обороняющийся отряд).
 static func make_battle_state(
 	atk_key: String = "swordsmen",
 	def_key: String = "goblins",
@@ -45,8 +38,7 @@ static func make_battle_state(
 	def_count: int = 5,
 	units: Node = null
 ) -> BattleState:
-	# L5: реестр можно передать явно; фолбэк — свежий UnitRegistry (определения
-	# строятся из const-таблиц, файлы не нужны).
+
 	if units == null:
 		units = Services.resolve(&"units")
 	if units == null:
@@ -57,7 +49,6 @@ static func make_battle_state(
 	bs.place_army(atk, def)
 	return bs
 
-## R6: город с Great Temple (для тестов сукцессии/воскрешения).
 static func make_city_with_temple(uid: int = 1, stronghold: int = 2, temple_level: int = 2) -> City:
 	var city := make_city(uid, stronghold)
 	var ub := UniqueBuilding.new()

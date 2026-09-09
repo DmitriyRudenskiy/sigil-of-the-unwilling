@@ -7,7 +7,6 @@ var tracker: RefCounted
 func before_test() -> void:
 	tracker = _GloryTracker.new()
 
-
 func test_initial_glory_zero() -> void:
 	assert_that(tracker.glory_last_window(1)).is_equal(0.0)
 
@@ -28,7 +27,6 @@ func test_add_negative_glory() -> void:
 	tracker.add_glory(-5.0, 1, &"test")
 	assert_that(tracker.glory_last_window(1)).is_equal(0.0)
 
-
 func test_glory_window_expires() -> void:
 	tracker.add_glory(10.0, 1, &"battle")
 	assert_that(tracker.glory_last_window(7)).is_equal(10.0)
@@ -44,7 +42,6 @@ func test_glory_window_all_expired() -> void:
 	tracker.add_glory(5.0, 2, &"village")
 	assert_that(tracker.glory_last_window(100)).is_equal(0.0)
 
-
 func test_prune_removes_old_events() -> void:
 	tracker.add_glory(10.0, 1, &"battle")
 	tracker.add_glory(5.0, 5, &"village")
@@ -54,7 +51,6 @@ func test_prune_removes_old_events() -> void:
 func test_prune_empty_tracker() -> void:
 	tracker.prune(1)
 	assert_that(tracker.glory_last_window(1)).is_equal(0.0)
-
 
 func test_window_size_minimum() -> void:
 	var t := _GloryTracker.new(0)

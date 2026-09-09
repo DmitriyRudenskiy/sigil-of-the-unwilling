@@ -9,28 +9,24 @@ const _City = preload("res://scripts/world/City.gd")
 
 var holder: Node2D = null
 
-
 func _main_root() -> Node:
 	return Engine.get_main_loop().root
-
 
 func before_test() -> void:
 	holder = Node2D.new()
 	holder.name = "NavTestHolder"
 	_main_root().add_child(holder)
 
-
 func after_test() -> void:
 	if holder != null and is_instance_valid(holder):
 		holder.free()
 	holder = null
 
-
 func _make_two_cities() -> Dictionary:
 	var mg := _MapGenerator.new()
 	mg.name = "MapGenerator"
 	mg.seed_value = 42
-	holder.add_child(mg)  
+	holder.add_child(mg)
 	assert_bool(mg.has_valid_tilemap()).is_true()
 	var R = _WorldBootstrap.BootstrapResult.new()
 	R.map_gen = mg
@@ -41,8 +37,6 @@ func _make_two_cities() -> Dictionary:
 		if c != capital:
 			second = c
 	return {"mg": mg, "cities": R.cities, "capital": capital, "second": second}
-
-
 
 func test_bootstrap_creates_two_cities() -> void:
 	var w: Dictionary = _make_two_cities()
@@ -68,8 +62,6 @@ func test_bootstrap_creates_two_cities() -> void:
 	assert_bool(w.mg.is_walkable(second.center)).is_true()
 	assert_bool(w.mg.is_walkable(capital.center)).is_true()
 
-
-
 func test_city_markers_shown_and_resolved() -> void:
 	var w: Dictionary = _make_two_cities()
 	var mg = w.mg
@@ -83,7 +75,6 @@ func test_city_markers_shown_and_resolved() -> void:
 	assert_that(ml.city_at_cell(w.capital.center)).is_equal(w.capital)
 	assert_that(ml.city_at_cell(Vector2i(0, 0))).is_null()
 
-
 func test_city_marker_click_emits_city_and_consumes_input() -> void:
 	var w: Dictionary = _make_two_cities()
 	var ml := _MarkerLayer.new()
@@ -95,7 +86,6 @@ func test_city_marker_click_emits_city_and_consumes_input() -> void:
 	ml.city_marker_clicked.connect(func(c: City) -> void: clicked[0] = c)
 	ml._handle_left_click(w.second.center)
 	assert_that(clicked[0]).is_equal(w.second)
-
 
 func test_set_city_markers_empty_and_replaces() -> void:
 	var w: Dictionary = _make_two_cities()
@@ -110,8 +100,6 @@ func test_set_city_markers_empty_and_replaces() -> void:
 	ml.set_city_markers([w.capital])
 	assert_that(ml._city_marks.size()).is_equal(1)
 	assert_that(ml.city_at_cell(w.second.center)).is_equal(null)
-
-
 
 func test_exit_button_renamed_and_closes() -> void:
 	var city := _City.new()
@@ -137,8 +125,6 @@ func test_exit_button_renamed_and_closes() -> void:
 	if is_instance_valid(hero):
 		hero.free()
 
-
-
 class NavMockMovement extends Node:
 	signal reach_preview_changed(path: Array)
 	signal reach_preview_cleared()
@@ -156,14 +142,12 @@ class NavMockHero extends Node:
 	func on_map_clicked(cell: Vector2i) -> void:
 		clicked.append(cell)
 
-
 func _make_router(mg: MapGenerator, cities: CityManager, hero: NavMockHero) -> WorldEventRouter:
 	var r := _WorldEventRouter.new()
 	r.name = "EventRouter"
 	_main_root().add_child(r)
 	r.setup(hero, mg, null, cities, null, null, null, null, null, null, null, null)
 	return r
-
 
 func test_city_marker_click_routes_path_to_city() -> void:
 	var w := _make_two_cities()
@@ -186,7 +170,6 @@ func test_city_marker_click_routes_path_to_city() -> void:
 	ml.free()
 	hero.free()
 
-
 func test_city_marker_click_to_unwalkable_center_uses_nearby() -> void:
 	var w := _make_two_cities()
 	var capital: City = w.capital
@@ -207,4 +190,3 @@ func test_city_marker_click_to_unwalkable_center_uses_nearby() -> void:
 	router.free()
 	ml.free()
 	hero.free()
-

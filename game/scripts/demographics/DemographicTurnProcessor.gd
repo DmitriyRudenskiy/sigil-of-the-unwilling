@@ -6,23 +6,18 @@ signal character_died(character_uid: int, city_uid: int, cause: StringName)
 signal character_need_critical(character_uid: int, need_id: int)
 signal disease_outbreak(city_uid: int, character_uid: int)
 
-
 var registry: CharacterRegistry = null
 var _rng := RandomNumberGenerator.new()
 var _outbreak_turn: Dictionary = {}
 
-
 func setup(r: CharacterRegistry) -> void:
 	registry = r
-
 
 func get_phase_id() -> StringName:
 	return &"demographics"
 
-
 func get_priority() -> int:
 	return 20
-
 
 func process(ctx: TurnContext) -> Dictionary:
 	var report := {"ensured": 0, "critical": 0, "deaths": 0, "outbreaks": 0, "cities": []}
@@ -40,7 +35,6 @@ func process(ctx: TurnContext) -> Dictionary:
 		report["outbreaks"] += int(city_report.get("outbreaks", 0))
 		(report["cities"] as Array).append(city_report)
 	return report
-
 
 func _process_city(city: City, ctx: TurnContext) -> Dictionary:
 	var report := {"uid": city.uid, "ensured": 0, "critical": 0, "deaths": 0, "outbreaks": 0, "promoted": 0}
@@ -119,7 +113,6 @@ func _process_city(city: City, ctx: TurnContext) -> Dictionary:
 		report["promoted"] = promoted
 	return report
 
-
 func _promotable_follower(city: City) -> PopUnit:
 	var best: PopUnit = null
 	for u in city.pop:
@@ -129,15 +122,12 @@ func _promotable_follower(city: City) -> PopUnit:
 			best = u
 	return best
 
-
-
 func _death_cause(ch: Character) -> StringName:
 	for need_id in Character.NEED_KEYS:
 		if int(ch.need_zero_streak.get(need_id, 0)) >= GameNumbers.DEMO_DEATH_STREAK:
 			var strat: NeedStrategy = NeedType.strategies()[need_id]
 			return strat.get_death_cause()
 	return &""
-
 
 func _kill(city: City, ch: Character, cause: StringName, report: Dictionary) -> void:
 	ch.alive = false
@@ -148,10 +138,8 @@ func _kill(city: City, ch: Character, cause: StringName, report: Dictionary) -> 
 	registry.on_pop_removed(ch.pop_uid)
 	character_died.emit(ch.uid, city.uid, cause)
 
-
 func _find_pop(city: City, pop_uid: int) -> PopUnit:
 	return city.find_pop(pop_uid)
-
 
 func _rng_for(ctx: TurnContext, city: City) -> RandomNumberGenerator:
 	if ctx.rng != null:

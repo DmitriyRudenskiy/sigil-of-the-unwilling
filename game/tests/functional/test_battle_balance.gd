@@ -2,10 +2,7 @@ extends GdUnitTestSuite
 
 const Emulator = preload("res://scripts/autoload/BattleEmulator.gd")
 
-
-
 const BATTLES := 200
-
 
 func _simulate(atk_key: String, def_key: String, seed: int) -> Dictionary:
 	var emu := Emulator.new()
@@ -19,8 +16,6 @@ func _simulate(atk_key: String, def_key: String, seed: int) -> Dictionary:
 	report["decided"] = bool(report.get("battle_over", false))
 	return report
 
-
-
 func _side_rate(atk_key: String, def_key: String, seed_base: int, side: String) -> float:
 	var wins := 0
 	var decided := 0
@@ -32,25 +27,16 @@ func _side_rate(atk_key: String, def_key: String, seed_base: int, side: String) 
 		if report["winner"] == side:
 			wins += 1
 	if decided == 0:
-		return 0.5  # нет решённых боёв — считаем 50/50, иначе NaN
+		return 0.5
 	return float(wins) / float(decided)
-
-
-
-
-
 
 func test_even_melee_fight_defender_advantage() -> void:
 	var defender_rate := _side_rate("swordsmen", "swordsmen", 1000, "defender")
 	assert_bool(defender_rate >= 0.50).is_true()
 
-
-
-
 func test_ranged_wins_against_melee_at_distance() -> void:
 	var attacker_rate := _side_rate("archers", "swordsmen", 2000, "attacker")
 	assert_bool(attacker_rate >= 0.80).is_true()
-
 
 func test_simulated_battles_are_deterministic_per_seed() -> void:
 	var a := _simulate("archers", "swordsmen", 42)

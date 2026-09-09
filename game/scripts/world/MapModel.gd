@@ -30,7 +30,6 @@ var chest_cells: Array[Vector2i] = []
 var _blocked_cache: Dictionary = {}
 var _blocked_cache_dirty: bool = true
 
-
 func generate_noise() -> void:
 	var hn := FastNoiseLite.new()
 	hn.seed = seed_value
@@ -60,7 +59,6 @@ func generate_noise() -> void:
 			height_grid[cell] = h
 			terrain_grid[cell] = get_biome_terrain_id(h, t, m)
 
-
 func get_biome_terrain_id(height: float, temp: float, moist: float) -> int:
 	if height < WATER_THRESHOLD:
 		return HexUtils.Terrain.WATER
@@ -79,13 +77,11 @@ func get_biome_terrain_id(height: float, temp: float, moist: float) -> int:
 			return HexUtils.Terrain.SAND
 		return HexUtils.Terrain.SNOW if temp < TEMP_SNOW_GRASS else HexUtils.Terrain.GRASS
 
-
 func is_walkable(cell: Vector2i) -> bool:
 	if not terrain_grid.has(cell):
 		return false
 	var t: int = terrain_grid[cell]
 	return t != HexUtils.Terrain.WATER and t != HexUtils.Terrain.MOUNTAIN
-
 
 func is_walkable_with_effects(cell: Vector2i, has_levitation: bool = false) -> bool:
 	if not terrain_grid.has(cell):
@@ -97,15 +93,12 @@ func is_walkable_with_effects(cell: Vector2i, has_levitation: bool = false) -> b
 
 	return t != HexUtils.Terrain.MOUNTAIN
 
-
 func get_terrain_name(cell: Vector2i) -> String:
 	var tid: int = terrain_grid.get(cell, HexUtils.Terrain.GRASS)
 	return HexUtils.TERRAIN_NAMES[tid] if tid < HexUtils.TERRAIN_NAMES.size() else "grass"
 
-
 func get_terrain_id(cell: Vector2i) -> int:
 	return terrain_grid.get(cell, HexUtils.Terrain.GRASS)
-
 
 func get_blocked_cells() -> Dictionary:
 	if _blocked_cache_dirty:
@@ -128,7 +121,6 @@ func invalidate_blocked_cache() -> void:
 func set_terrain(cell: Vector2i, terrain_id: int) -> void:
 	terrain_grid[cell] = terrain_id
 	invalidate_blocked_cache()
-
 
 func smooth_invalid_adjacencies() -> void:
 	var to_change: Array[Vector2i] = []

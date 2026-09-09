@@ -1,19 +1,5 @@
 class_name BattleStateBuilder
 extends RefCounted
-## Построитель боя.
-##
-## TASK_06: конструирование, валидация и расстановка армий вынесены
-## из BattleState.place_army(). BattleState остаётся чистым
-## контейнером состояния.
-##
-## Использование:
-##   var builder := BattleStateBuilder.new()
-##   builder.set_attacker_army(stacks_a)
-##   builder.set_defender_army(stacks_d)
-##   var state := builder.build()
-##
-##   # или заполнить существующий state:
-##   builder.build_into(existing_state)
 
 var _attacker_stacks: Array = []
 var _defender_stacks: Array = []
@@ -24,26 +10,21 @@ var _defender_bonus: Dictionary = {}
 var _has_hero_bonuses := false
 var _max_units_per_side: int = GameNumbers.MAX_UNITS_PER_SIDE
 
-
 func set_attacker_army(stacks: Array) -> BattleStateBuilder:
 	_attacker_stacks = stacks
 	return self
-
 
 func set_defender_army(stacks: Array) -> BattleStateBuilder:
 	_defender_stacks = stacks
 	return self
 
-
 func set_attacker_artifact_mods(mods: Dictionary) -> BattleStateBuilder:
 	_attacker_artifact_mods = mods
 	return self
 
-
 func set_defender_artifact_mods(mods: Dictionary) -> BattleStateBuilder:
 	_defender_artifact_mods = mods
 	return self
-
 
 func set_hero_bonuses(attacker_bonus: Dictionary, defender_bonus: Dictionary) -> BattleStateBuilder:
 	_attacker_bonus = attacker_bonus
@@ -51,12 +32,10 @@ func set_hero_bonuses(attacker_bonus: Dictionary, defender_bonus: Dictionary) ->
 	_has_hero_bonuses = true
 	return self
 
-
 func build() -> BattleState:
 	var state := BattleState.new()
 	build_into(state)
 	return state
-
 
 func build_into(state: BattleState) -> BattleState:
 	state._uid = 0
@@ -81,7 +60,6 @@ func build_into(state: BattleState) -> BattleState:
 	state.check_end()
 
 	return state
-
 
 func _build_units(state: BattleState, stacks: Array, is_atk: bool) -> Array[BattleState.BattleUnit]:
 	var units: Array[BattleState.BattleUnit] = []
@@ -138,13 +116,11 @@ func _build_units(state: BattleState, stacks: Array, is_atk: bool) -> Array[Batt
 
 	return units
 
-
 func _cell_taken(col: int, row: int, units: Array) -> bool:
 	for u in units:
 		if u.cell.x == col and u.cell.y == row:
 			return true
 	return false
-
 
 func _apply_artifact_effects(units: Array[BattleState.BattleUnit], mods: Dictionary) -> void:
 	if mods.is_empty():
@@ -164,7 +140,6 @@ func _apply_artifact_effects(units: Array[BattleState.BattleUnit], mods: Diction
 		if speed_bonus > 0:
 			u.stack.stats = u.stack.stats.duplicate()
 			u.stack.stats.speed += speed_bonus
-
 
 static func from_existing(
 	state: BattleState,

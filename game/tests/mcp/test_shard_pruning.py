@@ -1,23 +1,6 @@
-"""
-Тест 4: Сохранения — проверка безопасности типов при обрезке шардов.
-
-Сценарий:
-  1. Создаём 12+ шардов в WorldPersistence.
-  2. Запускаем _prune_old_shards.
-  3. Проверяем, что нет краша и количество шардов ≤ MAX_SHARDS.
-  4. Повторяем для StringName-ключей (проверка типа).
-"""
 from __future__ import annotations
 
-
-
-
-
 def test_prune_shards_no_crash(world_scene):
-    """
-    Создаём 15 шардов и проверяем, что _prune_old_shards
-    корректно удаляет старые без краша.
-    """
     mcp = world_scene
 
     result = mcp.execute_code("""
@@ -52,12 +35,7 @@ def test_prune_shards_no_crash(world_scene):
         f"получено {result['shards_remaining']}"
     )
 
-
 def test_prune_shards_with_stringname_keys(world_scene):
-    """
-    Проверяем, что обрезка работает с StringName-ключами
-    (основной баг: присвоение Variant к String).
-    """
     mcp = world_scene
 
     result = mcp.execute_code("""
@@ -94,12 +72,7 @@ def test_prune_shards_with_stringname_keys(world_scene):
     assert result["no_crash"], "Краш при обрезке StringName-шардов"
     assert result["shards_remaining"] <= 10
 
-
 def test_full_save_load_cycle_with_many_shards(world_scene):
-    """
-    Полный цикл: сохранение с 12+ шардами → загрузка → проверка.
-    Имитируем реальное автосохранение.
-    """
     mcp = world_scene
 
     result = mcp.execute_code("""
@@ -154,15 +127,10 @@ def test_full_save_load_cycle_with_many_shards(world_scene):
     assert result["save_ok"], "Сохранение не удалось"
     assert result["load_ok"], "Загрузка не удалась"
     assert result["run_seed"] == 12345
-    # После обрезки может быть ≤ 10 шардов
+
     assert result["shards_count"] <= 12
 
-
 def test_prune_preserves_newest_shards(world_scene):
-    """
-    Проверяем, что обрезка удаляет СТАРЕЙШИЕ шарды,
-    а не новейшие.
-    """
     mcp = world_scene
 
     result = mcp.execute_code("""
@@ -195,5 +163,3 @@ def test_prune_preserves_newest_shards(world_scene):
 
     assert result["remaining_count"] <= 10
     assert result["has_newest"], "Новейший шард должен остаться"
-    # Старейший может быть удалён
-    # (не строго обязательно, зависит от реализации)

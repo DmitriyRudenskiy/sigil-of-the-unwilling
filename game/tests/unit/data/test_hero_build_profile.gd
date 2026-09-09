@@ -16,11 +16,9 @@ func _full_profile() -> _Profile:
 	p.sex = "male"
 	return p
 
-
 func test_profile_invalid_when_empty() -> void:
 	var p := _Profile.new()
 	assert_bool(p.is_valid()).is_false()
-
 
 func test_profile_requires_all_fields() -> void:
 	var cases := {
@@ -40,10 +38,8 @@ func test_profile_requires_all_fields() -> void:
 		p.set(field, "")
 		assert_bool(p.is_valid()).is_false()
 
-
 func test_profile_valid_when_all_set() -> void:
 	assert_bool(_full_profile().is_valid()).is_true()
-
 
 func test_get_stats_base_only() -> void:
 	var p := _Profile.new()
@@ -58,7 +54,6 @@ func test_get_stats_base_only() -> void:
 	assert_that(s["spell_power"]).is_equal(4)
 	assert_that(s["knowledge"]).is_equal(4)
 
-
 func test_get_stats_dwarf_bonuses() -> void:
 	var p := _full_profile()
 	var s := p.get_stats()
@@ -66,7 +61,6 @@ func test_get_stats_dwarf_bonuses() -> void:
 	assert_that(s["defense"]).is_equal(6)
 	assert_that(s["spell_power"]).is_equal(2)
 	assert_that(s["knowledge"]).is_equal(3)
-
 
 func test_get_stats_negative_bonus_applied() -> void:
 	var p := _Profile.new()
@@ -81,7 +75,6 @@ func test_get_stats_negative_bonus_applied() -> void:
 	assert_that(s["spell_power"]).is_equal(6)
 	assert_that(s["knowledge"]).is_equal(7)
 
-
 func test_get_stats_no_bonus_unknown_key() -> void:
 	var p := _full_profile()
 	p.race = "does_not_exist"
@@ -94,14 +87,12 @@ func test_get_stats_no_bonus_unknown_key() -> void:
 	assert_that(s["spell_power"]).is_equal(2)
 	assert_that(s["knowledge"]).is_equal(2)
 
-
 func test_get_stats_returns_copy() -> void:
 	var p := _full_profile()
 	var s1 := p.get_stats()
 	s1["attack"] = 999
 	var s2 := p.get_stats()
 	assert_that(s2["attack"]).is_equal(6)
-
 
 func test_summary_maps_keys_to_names() -> void:
 	var p := _full_profile()
@@ -115,14 +106,12 @@ func test_summary_maps_keys_to_names() -> void:
 	assert_that(s["background"]).is_equal("Солдат")
 	assert_that(s["stats"]).is_equal({"attack": 6, "defense": 6, "spell_power": 2, "knowledge": 3})
 
-
 func test_summary_sex_mapping() -> void:
 	var cases := {"male": "Мужской", "female": "Женский"}
 	for key in cases:
 		var p := _full_profile()
 		p.sex = key
 		assert_that(p.summary()["sex"]).is_equal(cases[key])
-
 
 func test_summary_empty_profile() -> void:
 	var p := _Profile.new()
@@ -136,7 +125,6 @@ func test_summary_empty_profile() -> void:
 	assert_that(s["background"]).is_equal("—")
 	assert_that(s["stats"]).is_equal({"attack": 2, "defense": 2, "spell_power": 2, "knowledge": 2})
 
-
 func test_to_identity_returns_dict() -> void:
 	var p := _full_profile()
 	var d := p.to_identity()
@@ -146,7 +134,6 @@ func test_to_identity_returns_dict() -> void:
 	assert_that(d["hero_culture"]).is_equal("aedyr")
 	assert_that(d["hero_background"]).is_equal("soldier")
 	assert_that(d["hero_stats"]).is_equal({"attack": 6, "defense": 6, "spell_power": 2, "knowledge": 3})
-
 
 func test_registries_have_expected_keys() -> void:
 	for k in ["human", "elf", "dwarf", "aumaua", "orlan", "godlike"]:

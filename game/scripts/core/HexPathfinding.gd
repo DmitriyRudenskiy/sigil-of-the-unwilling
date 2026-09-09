@@ -1,8 +1,6 @@
 class_name HexPathfinding
 extends RefCounted
 
-
-
 static func _reconstruct_path(start: Vector2i, goal: Vector2i, from: Dictionary) -> Array[Vector2i]:
 	var path: Array[Vector2i] = []
 	var c: Vector2i = goal
@@ -36,14 +34,11 @@ static func bfs_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: in
 		return []
 	return _reconstruct_path(start, goal, from)
 
-
 static func astar_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: int, h: int) -> Array[Vector2i]:
 	if start == goal:
 		return [start]
 	var h_fn := func(c: Vector2i) -> int: return HexUtils.hex_distance(c, goal)
 
-	
-	
 	var n := w * h
 	var g_score := PackedFloat32Array()
 	g_score.resize(n)
@@ -56,7 +51,7 @@ static func astar_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: 
 	var start_idx := HexUtils.pos_to_idx(start, w)
 	g_score[start_idx] = 0.0
 	var start_f: int = h_fn.call(start)
-	open.push([start_f, 0, start])  
+	open.push([start_f, 0, start])
 
 	while not open.is_empty():
 		var cur: Array = open.pop()
@@ -64,7 +59,7 @@ static func astar_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: 
 		var cur_cell: Vector2i = cur[2]
 		var cur_idx := HexUtils.pos_to_idx(cur_cell, w)
 
-		if cur_g > g_score[cur_idx]:  
+		if cur_g > g_score[cur_idx]:
 			continue
 
 		if cur_cell == goal:
@@ -94,15 +89,10 @@ static func astar_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: 
 
 	return []
 
-
-
 static func find_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: int, h: int, algo: String = "astar") -> Array[Vector2i]:
 	if algo == "bfs":
 		return bfs_path(start, goal, blocked, w, h)
 	return astar_path(start, goal, blocked, w, h)
-
-
-
 
 static func dijkstra(start: Vector2i, max_cost: float, cost_fn: Callable, w: int, h: int) -> PackedFloat32Array:
 	var dist := PackedFloat32Array()
@@ -148,9 +138,6 @@ static func dijkstra(start: Vector2i, max_cost: float, cost_fn: Callable, w: int
 		if dist[i] > max_cost + 0.001:
 			dist[i] = INF
 	return dist
-
-
-
 
 static func dijkstra_path(start: Vector2i, goal: Vector2i, dist: PackedFloat32Array, cost_fn: Callable, w: int, h: int) -> Array[Vector2i]:
 	var goal_idx := HexUtils.pos_to_idx(goal, w)
@@ -198,9 +185,6 @@ static func dijkstra_path(start: Vector2i, goal: Vector2i, dist: PackedFloat32Ar
 	path.reverse()
 	return path
 
-
-
-
 static func bfs_reachable(start: Vector2i, steps: int, blocked: Dictionary, w: int, h: int) -> Dictionary:
 	var result: Dictionary = {start: 0}
 	var queue: Array[Vector2i] = [start]
@@ -221,5 +205,3 @@ static func bfs_reachable(start: Vector2i, steps: int, blocked: Dictionary, w: i
 			queue.append(nxt)
 	result.erase(start)
 	return result
-
-

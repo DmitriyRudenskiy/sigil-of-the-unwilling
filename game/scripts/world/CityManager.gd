@@ -16,7 +16,6 @@ var _tile_yield_provider: Callable = Callable()
 
 var _buildable_provider: Callable = Callable()
 
-
 func register_city(city: City, make_capital := false) -> void:
 	if city == null or cities.has(city):
 		return
@@ -33,7 +32,6 @@ func register_city(city: City, make_capital := false) -> void:
 	if make_capital or capital == null:
 		set_capital(city)
 
-
 func set_capital(city: City) -> void:
 	if not cities.has(city):
 		return
@@ -42,11 +40,9 @@ func set_capital(city: City) -> void:
 	capital = city
 	city.is_capital = true
 
-
 func add_glory(amount: float, reason: StringName = &"") -> void:
 	glory.add_glory(amount, current_turn + 1, reason)
 	glory_changed.emit(glory.glory_last_window(current_turn + 1))
-
 
 func apply_reputation(city: City, delta: float) -> int:
 	if city == null:
@@ -54,7 +50,6 @@ func apply_reputation(city: City, delta: float) -> int:
 	var v: int = ReputationSystem.apply(city, delta)
 	reputation_changed.emit(city.uid, v, city.reputation_band())
 	return v
-
 
 func set_tile_yield_provider(fn: Callable) -> void:
 	_tile_yield_provider = fn
@@ -66,20 +61,17 @@ func set_buildable_provider(fn: Callable) -> void:
 	for c in cities:
 		c.is_buildable_fn = fn
 
-
 func city_at(cell: Vector2i) -> City:
 	for c in cities:
 		if c != null and c.center == cell:
 			return c
 	return null
 
-
 func get_city_by_uid(u: int) -> City:
 	for c in cities:
 		if c != null and c.uid == u:
 			return c
 	return null
-
 
 func on_turn_ended(month: int) -> Dictionary:
 	current_turn += 1
@@ -108,7 +100,6 @@ func on_turn_ended(month: int) -> Dictionary:
 			city_updated.emit(capital)
 	return report
 
-
 func capital_inflow(month: int) -> int:
 	if capital == null:
 		return 0
@@ -119,7 +110,5 @@ func capital_inflow(month: int) -> int:
 	var season_mod := Season.growth_modifier(Season.from_month(month))
 	return int(floor(base * glory_mod * season_mod))
 
-
 func get_season(month: int) -> Season.ID:
 	return Season.from_month(month)
-

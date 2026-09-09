@@ -8,14 +8,14 @@ signal battle_world_show_requested
 
 signal enemy_stack_defeated(enemy_cell: Vector2i, army: Array)
 
-var hero: Node = null          
-var map_gen: Node = null       
-var spawner: Node = null       
+var hero: Node = null
+var map_gen: Node = null
+var spawner: Node = null
 var battle_flow: BattleFlow = null
 var rng: RandomNumberGenerator = null
 var world_ctrl: Node = null
-var ui_manager: Node = null    
-var camera: Node = null        
+var ui_manager: Node = null
+var camera: Node = null
 var input_controller: Node = null
 var world_delta: WorldStateDelta = null
 
@@ -28,7 +28,6 @@ var _pending_enemy_cell: Vector2i = Vector2i(-1, -1)
 var _roles_swapped := false
 
 var _pre_battle_cell: Vector2i = Vector2i(-1, -1)
-
 
 func setup(
 	h: Node,
@@ -56,15 +55,12 @@ func setup(
 func set_ui_refresh_hook(callback: Callable) -> void:
 	_on_ui_refresh = callback
 
-
 func _create_battle_flow() -> void:
 	battle_flow = BattleFlow.new()
 	battle_flow.name = "BattleFlow"
 	battle_flow.battle_started.connect(_on_battle_started)
 	battle_flow.battle_completed.connect(_on_battle_completed)
 	add_child(battle_flow)
-
-
 
 func start_enemy_attack(army: Array, enemy_cell: Vector2i) -> void:
 	if battle_flow == null or hero == null:
@@ -102,7 +98,6 @@ func start_enemy_attack(army: Array, enemy_cell: Vector2i) -> void:
 		hero_magic
 	)
 
-
 func check_enemy_contact(cell: Vector2i) -> void:
 	if map_gen == null:
 		return
@@ -115,7 +110,6 @@ func check_enemy_contact(cell: Vector2i) -> void:
 	_pre_battle_cell = _capture_pre_battle_cell()
 	_start_battle(_as_unit_stack_array(stacks[enemy_cell]), enemy_cell)
 
-
 func _find_contact_enemy(stacks: Dictionary, cell: Vector2i) -> Vector2i:
 	if stacks.has(cell):
 		return cell
@@ -123,7 +117,6 @@ func _find_contact_enemy(stacks: Dictionary, cell: Vector2i) -> Vector2i:
 		if stacks.has(nb):
 			return nb
 	return Vector2i(-1, -1)
-
 
 func _capture_pre_battle_cell() -> Vector2i:
 	if hero == null:
@@ -135,7 +128,6 @@ func _capture_pre_battle_cell() -> Vector2i:
 			return prev
 	return Vector2i(-1, -1)
 
-
 static func _as_unit_stack_array(v: Variant) -> Array[UnitStack]:
 	var out: Array[UnitStack] = []
 	if v is Array:
@@ -143,7 +135,6 @@ static func _as_unit_stack_array(v: Variant) -> Array[UnitStack]:
 			if s is UnitStack:
 				out.append(s)
 	return out
-
 
 func _start_battle(enemy_army: Array[UnitStack], enemy_cell: Vector2i) -> void:
 	if battle_flow == null or hero == null:
@@ -176,8 +167,6 @@ func _start_battle(enemy_army: Array[UnitStack], enemy_cell: Vector2i) -> void:
 		hero_magic
 	)
 
-
-
 func _on_battle_started() -> void:
 	GameEventBus.battle_started.emit()
 	battle_world_hide_requested.emit()
@@ -190,7 +179,6 @@ func _on_battle_started() -> void:
 		camera.set_process(false)
 	if input_controller != null and input_controller.has_method("set_process_unhandled_input"):
 		input_controller.set_process_unhandled_input(false)
-
 
 func _on_battle_completed(
 	winner: BattleState.Side,
@@ -224,12 +212,10 @@ func _on_battle_completed(
 	_pending_enemy_cell = Vector2i(-1, -1)
 	_roles_swapped = false
 
-
 func _hero_won(winner: BattleState.Side) -> bool:
 	if _roles_swapped:
 		return winner == BattleState.Side.DEFENDER
 	return winner == BattleState.Side.ATTACKER
-
 
 func _apply_results(
 	winner: BattleState.Side,
@@ -288,7 +274,6 @@ func _apply_results(
 		_restore_hero_after_retreat()
 		GameLogger.battle("Battle lost / retreated")
 
-
 func _restore_hero_after_retreat() -> void:
 	if hero == null or map_gen == null:
 		return
@@ -303,7 +288,6 @@ func _restore_hero_after_retreat() -> void:
 		return
 	GameLogger.world("Hero retreats to %s after battle" % str(target))
 	mov.call("teleport", target)
-
 
 func _find_nearest_safe_cell(mov) -> Vector2i:
 	var from_raw: Variant = mov.get("current_cell") if mov != null else null
@@ -327,7 +311,6 @@ func _find_nearest_safe_cell(mov) -> Vector2i:
 			return best
 	return Vector2i(-1, -1)
 
-
 func _is_safe_from_enemies(cell: Vector2i) -> bool:
 	var stacks: Variant = map_gen.get("enemy_stacks")
 	if not (stacks is Dictionary):
@@ -339,13 +322,11 @@ func _is_safe_from_enemies(cell: Vector2i) -> bool:
 			return false
 	return true
 
-
 func _make_fallback_stack() -> UnitStack:
 	var units_reg: Node = Services.resolve(&"units")
 	if units_reg != null and units_reg.has_method("make_fixed_stack"):
 		return units_reg.make_fixed_stack("swordsmen", 10)
 	return UnitStack.new(null, 10)
-
 
 func _try_artifact_drop() -> void:
 	if hero == null:
@@ -363,12 +344,8 @@ func _try_artifact_drop() -> void:
 			else:
 				GameLogger.world("Backpack full, drop lost!")
 
-
-
 func get_pending_enemy_cell() -> Vector2i:
 	return _pending_enemy_cell
 
-
 func get_battle_flow() -> BattleFlow:
 	return battle_flow
-

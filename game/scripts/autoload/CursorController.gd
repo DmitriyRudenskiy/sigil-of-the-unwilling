@@ -17,20 +17,15 @@ var _collect_active: bool = false
 func _ready() -> void:
 	_connect_context(GameEventBus)
 
-
-# R7: шина глобальная — отключаемся при выходе из дерева, иначе подписки копятся
-# (между сценами/тестами) и один сигнал зовёт несколько мёртвых контроллеров.
 func _exit_tree() -> void:
 	if is_node_ready():
 		_disconnect_context(GameEventBus)
-
 
 func _connect_context(bus: Node) -> void:
 	bus.hero_moving_changed.connect(_on_hero_moving_changed)
 	bus.resource_extracted.connect(_on_resource_extracted)
 	bus.battle_completed.connect(_on_battle_ended)
 	bus.battle_lost.connect(_on_battle_ended)
-
 
 func _disconnect_context(bus: Node) -> void:
 	if bus.hero_moving_changed.is_connected(_on_hero_moving_changed):
@@ -41,7 +36,6 @@ func _disconnect_context(bus: Node) -> void:
 		bus.battle_completed.disconnect(_on_battle_ended)
 	if bus.battle_lost.is_connected(_on_battle_ended):
 		bus.battle_lost.disconnect(_on_battle_ended)
-
 
 func _on_hero_moving_changed(moving: bool) -> void:
 	_change_mode(Mode.WALK if moving else Mode.DEFAULT)
@@ -54,7 +48,6 @@ func _on_resource_extracted(_cell: Variant, _rid: Variant, _amount: Variant) -> 
 func _on_battle_ended(_winner_or_cell: Variant, _enemy_cell: Variant = null) -> void:
 	_change_mode(Mode.DEFAULT)
 
-
 func _process(delta: float) -> void:
 	if _collect_active:
 		_advance_collect(delta)
@@ -64,7 +57,6 @@ func _advance_collect(delta: float) -> void:
 	if _collect_left <= 0.0:
 		_collect_active = false
 		_change_mode(Mode.DEFAULT)
-
 
 func set_mode(mode: int) -> void:
 	_change_mode(mode)

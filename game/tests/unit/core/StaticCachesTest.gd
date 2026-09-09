@@ -1,10 +1,7 @@
 extends GdUnitTestSuite
 
-## R7: StaticCaches.reset_all() не падает и обнуляет кэши.
-
-
 func test_reset_all_clears_caches() -> void:
-	# Заполняем кэши.
+
 	HexUtils._shift_right = false
 	var tex := PlaceholderTexture.circle(4, Color.WHITE, Color.BLACK)
 	assert_object(tex)

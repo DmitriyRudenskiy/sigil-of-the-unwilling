@@ -1,7 +1,5 @@
 extends Node
 class_name BattleTurnExecutor
-## Машина боя: фазы, очередь ходов, пауза, вход игрока, AI-цикл.
-## Секвенция атаки — BattleAttackSequence, отступление — BattleRetreatPolicy.
 
 signal status_updated(text: String)
 signal clear_highlights
@@ -46,7 +44,6 @@ var _attack_seq: BattleAttackSequence
 var _retreat_policy: BattleRetreatPolicy
 var _pending_attack: BattleState.BattleUnit = null
 
-
 func setup(bs: BattleState, ai: BattleAI, obstacles: Dictionary) -> void:
 	_battle_state = bs
 	_ai = ai
@@ -65,14 +62,11 @@ func setup(bs: BattleState, ai: BattleAI, obstacles: Dictionary) -> void:
 	_attack_seq.setup(bs, _rng, self)
 	_retreat_policy.setup(bs, self)
 
-
 func get_current_state() -> State:
 	return _state
 
-
 func is_input_active() -> bool:
 	return _state == State.WAITING_INPUT
-
 
 var _paused := false
 enum PendingAction { NONE, MOVE, ATTACK, SPELL }
@@ -99,10 +93,8 @@ func resume_battle() -> void:
 		PendingAction.ATTACK: on_attack_completed()
 		PendingAction.SPELL: on_spell_anim_completed()
 
-
 func is_paused() -> bool:
 	return _paused
-
 
 func start_battle() -> void:
 	_paused = false
@@ -119,7 +111,6 @@ func start_battle() -> void:
 	_battle_state.build_queue()
 	_state = State.TURN_START
 	_advance_to_next_turn()
-
 
 func request_select(unit: BattleState.BattleUnit) -> void:
 	if not is_input_active() or unit == null or not unit.is_alive():
@@ -172,7 +163,6 @@ func request_move(unit: BattleState.BattleUnit, target: Vector2i) -> void:
 	_transition_to(anim_state)
 	execute_move.emit(unit, path)
 
-
 func request_attack(atk: BattleState.BattleUnit, def: BattleState.BattleUnit) -> void:
 	if _state != State.WAITING_INPUT:
 		return
@@ -197,7 +187,6 @@ func request_attack(atk: BattleState.BattleUnit, def: BattleState.BattleUnit) ->
 	_morale_allowed = true
 	_attack_seq.start_attack(atk, def)
 
-
 func on_move_completed() -> void:
 	if _paused:
 		_pending_completion = PendingAction.MOVE
@@ -221,7 +210,6 @@ func on_move_completed() -> void:
 
 	_morale_allowed = true
 	_on_action_completed()
-
 
 func on_spell_anim_completed() -> void:
 	if _paused:
@@ -271,7 +259,6 @@ func on_attack_completed() -> void:
 
 	_on_action_completed()
 
-
 func request_wait() -> void:
 	if _paused:
 		return
@@ -281,7 +268,6 @@ func request_wait() -> void:
 	_battle_state.do_wait(_battle_state.active_unit)
 	_morale_allowed = false
 	_on_action_completed()
-
 
 func request_skip() -> void:
 	if _paused:
@@ -293,12 +279,10 @@ func request_skip() -> void:
 	_morale_allowed = false
 	_on_action_completed()
 
-
 func request_spell_cast(spell_id: StringName) -> void:
 	if _state != State.WAITING_INPUT or _battle_state.active_unit == null:
 		return
 	status_updated.emit(GameText.battle_spell_target())
-
 
 func on_spell_target_selected(spell_id: StringName, target: BattleState.BattleUnit) -> void:
 	var caster := _battle_state.active_unit
@@ -318,7 +302,6 @@ func on_spell_target_selected(spell_id: StringName, target: BattleState.BattleUn
 	else:
 		spell_cast_failed.emit(result.get("result", "unknown"))
 		status_updated.emit(GameText.battle_spell_failed(str(result.get("result", "unknown"))))
-
 
 func request_sacrifice(
 	acting: BattleState.BattleUnit,
@@ -355,14 +338,11 @@ func request_defend() -> void:
 	_morale_allowed = false
 	_on_action_completed()
 
-
 func request_retreat() -> void:
 	_retreat_policy.request()
 
-
 func force_retreat() -> void:
 	_retreat_policy.force()
-
 
 func _advance_to_next_turn() -> void:
 	clear_highlights.emit()
@@ -413,7 +393,6 @@ func _advance_to_next_turn() -> void:
 	else:
 		_run_ai_turn()
 
-
 func _tick_statuses(u: BattleState.BattleUnit) -> void:
 	var to_remove: Array[int] = []
 
@@ -424,7 +403,6 @@ func _tick_statuses(u: BattleState.BattleUnit) -> void:
 
 	for eff in to_remove:
 		u.statuses.erase(eff)
-
 
 func _run_ai_turn() -> void:
 	_transition_to(State.AI_THINKING)
@@ -446,7 +424,6 @@ func _run_ai_turn() -> void:
 		_:
 			_on_action_completed()
 
-
 func _execute_ai_move(decision: BattleAI.AIResult) -> void:
 	var u := _battle_state.active_unit
 
@@ -462,7 +439,6 @@ func _execute_ai_move(decision: BattleAI.AIResult) -> void:
 	clear_highlights.emit()
 	execute_move.emit(u, decision.move_path)
 
-
 func _on_action_completed() -> void:
 	if _check_battle_over():
 		return
@@ -473,14 +449,12 @@ func _on_action_completed() -> void:
 	_morale_allowed = false
 	_advance_to_next_turn()
 
-
 func _check_battle_over() -> bool:
 	if _battle_state.battle_over:
 		_transition_to(State.BATTLE_OVER)
 		_emit_end()
 		return true
 	return false
-
 
 func _emit_end() -> void:
 	if _end_emitted:
@@ -506,14 +480,12 @@ func _emit_end() -> void:
 		surviving_def
 	)
 
-
 func _transition_to(new_state: State) -> void:
 	_state = new_state
 	_state_token += 1
 	phase_changed.emit(new_state)
 	if _retreat_policy.is_requested() and new_state == State.WAITING_INPUT:
 		_retreat_policy._execute()
-
 
 func _is_stale(token: int) -> bool:
 	return _state == State.BATTLE_OVER or token != _state_token

@@ -1,9 +1,7 @@
 class_name City
 extends CityData
-## R2: тонкий фасад над CityData (состояние) + CityService (операции); API не меняется.
 
 signal status_message(text: String)
-
 
 func _invalidate_exploited() -> void: _yield_calc.invalidate()
 
@@ -13,7 +11,6 @@ func get_yield() -> Dictionary:
 func get_logistics_multiplier(cell: Vector2i) -> float:
 	return LogisticsCalculator.compute(self, cell)
 
-# ─── Делегирование в CityService ─────────────────────────────────
 func pop_total() -> int: return CityService.pop_total(self)
 func pop_capped() -> int: return CityService.pop_capped(self)
 func pop_cap() -> int: return CityService.pop_cap(self)
@@ -51,7 +48,6 @@ func send_followers_to(other: City, n: int) -> int: return CityService.send_foll
 func disband_followers(n: int) -> int: return CityService.disband_followers(self, n)
 func recruit_followers(n: int) -> int: return CityService.recruit_followers(self, n)
 
-# ─── Рабочие клетки (R5: логика в CityBuildingService) ─────────
 func _is_adjacent_to_city_body(cell: Vector2i) -> bool:
 	return CityBuildingService.is_adjacent_to_city_body(self, cell)
 
@@ -122,7 +118,7 @@ func perform_upgrade(bld: UniqueBuilding) -> bool:
 	return true
 
 func request_switch(p_uid: int, new_state: PopUnit.State, new_tile := Vector2i(-1, -1)) -> bool:
-	# R5: логика в CityService; сигналы эмитит фасад.
+
 	var r := CityService.request_switch(self, p_uid, new_state, new_tile)
 	if not r.ok:
 		if r.reason != "":

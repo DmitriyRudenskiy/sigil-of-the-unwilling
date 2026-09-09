@@ -5,7 +5,7 @@ const _Platform = preload("res://scripts/core/Platform.gd")
 const SECTION := "settings"
 const FILE := "user://settings.cfg"
 
-const DEFAULT_ZOOM_INDEX := 2  
+const DEFAULT_ZOOM_INDEX := 2
 const DEFAULT_MASTER_VOL := 80
 const DEFAULT_MUSIC_VOL := 70
 const DEFAULT_SFX_VOL := 80
@@ -29,12 +29,10 @@ var is_muted: bool = false
 
 var _config := ConfigFile.new()
 
-
 func _ready() -> void:
 	_load()
 	_apply_audio()
 	apply_display_mode()
-
 
 func apply_display_mode() -> void:
 	if _Platform.is_headless():
@@ -43,17 +41,14 @@ func apply_display_mode() -> void:
 		DisplayServer.WINDOW_MODE_FULLSCREEN if fullscreen
 		else DisplayServer.WINDOW_MODE_WINDOWED)
 
-
 func get_zoom() -> float:
 	var idx: int = clampi(zoom_index, 0, ZOOM_LEVELS.size() - 1)
 	return ZOOM_LEVELS[idx]
-
 
 func step_zoom(direction: int) -> int:
 	var prev := zoom_index
 	zoom_index = clampi(zoom_index + direction, 0, ZOOM_LEVELS.size() - 1)
 	return zoom_index - prev
-
 
 func set_zoom(value: float) -> void:
 	for i in ZOOM_LEVELS.size():
@@ -61,8 +56,6 @@ func set_zoom(value: float) -> void:
 			zoom_index = i
 			return
 	zoom_index = DEFAULT_ZOOM_INDEX
-
-
 
 func _load() -> void:
 	if _config.load(FILE) != OK:
@@ -77,7 +70,6 @@ func _load() -> void:
 	auto_save = _config.get_value(SECTION, "auto_save", DEFAULT_AUTO_SAVE)
 	is_muted = _config.get_value(SECTION, "muted", false)
 
-
 func save() -> void:
 	_config.set_value(SECTION, "zoom_index", zoom_index)
 	_config.set_value(SECTION, "master_volume", master_volume)
@@ -89,7 +81,6 @@ func save() -> void:
 	_config.set_value(SECTION, "auto_save", auto_save)
 	_config.set_value(SECTION, "muted", is_muted)
 	_config.save(FILE)
-
 
 func reset_to_defaults() -> void:
 	zoom_index = DEFAULT_ZOOM_INDEX
@@ -103,40 +94,32 @@ func reset_to_defaults() -> void:
 	_apply_audio()
 	save()
 
-
-
 func _apply_audio() -> void:
 	_set_bus("Master", _db_from_percent(master_volume if not is_muted else 0))
 	_set_bus("Music", _db_from_percent(music_volume if not is_muted else 0))
 	_set_bus("SFX", _db_from_percent(sfx_volume if not is_muted else 0))
-
 
 func _set_bus(bus_name: String, db: float) -> void:
 	var idx := AudioServer.get_bus_index(bus_name)
 	if idx != -1:
 		AudioServer.set_bus_volume_db(idx, db)
 
-
 func toggle_mute() -> void:
 	is_muted = not is_muted
 	_apply_audio()
 	save()
 
-
 func set_master_volume(val: int) -> void:
 	master_volume = clampi(val, 0, 100)
 	_apply_audio()
-
 
 func set_music_volume(val: int) -> void:
 	music_volume = clampi(val, 0, 100)
 	_apply_audio()
 
-
 func set_sfx_volume(val: int) -> void:
 	sfx_volume = clampi(val, 0, 100)
 	_apply_audio()
-
 
 static func _db_from_percent(pct: int) -> float:
 	if pct <= 0:

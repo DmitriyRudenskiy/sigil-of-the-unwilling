@@ -1,9 +1,7 @@
-# FILE: res://scripts/data/ResourceType.gd
+
 class_name ResourceType
 extends RefCounted
 
-## Классические ресурсы приключенческой карты.
-## Порядок значений = индексам в map.resource_cells и аргументу pickup_resource().
 enum ID {
     WOOD = 0,
     MERCURY = 1,
@@ -12,7 +10,7 @@ enum ID {
     CRYSTAL = 4,
     GEMS = 5,
     GOLD = 6,
-    ## Строительный ресурс terrain-систеры (не выпадает как классический).
+
     STONE = 7,
 }
 
@@ -42,24 +40,20 @@ static func classic_ids() -> Array[int]:
 static func is_valid(id: int) -> bool:
     return id >= 0 and id < ID.size()
 
-## Имя-ключ для StringName-API (реестры, сигналы): &"wood".
 static func to_name(id: int) -> StringName:
     if not is_valid(id):
         return &""
     return StringName(_key_of(id))
 
-## Строковый ключ для сериализации и имён узлов сцены: "wood".
 static func to_key(id: int) -> String:
     return _key_of(id) if is_valid(id) else ""
 
-## -1, если имя не из enum.
 static func from_name(value: Variant) -> int:
     return ID.get(str(value).to_upper(), -1)
 
 static func start_amount(id: int) -> int:
     return int(_START_AMOUNTS.get(id, 0))
 
-## Количество при подборе на карте: 5, золото — 50.
 static func pickup_amount(id: int) -> int:
     if id == ID.GOLD:
         return 50

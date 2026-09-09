@@ -19,10 +19,8 @@ const CUES: Dictionary = {
 	&"music_battle": "res://assets/audio/music/battle_music.mp3",
 }
 
-
 static func has(cue: StringName) -> bool:
 	return CUES.has(cue)
-
 
 static func path(cue: StringName) -> String:
 	return CUES.get(cue, "")

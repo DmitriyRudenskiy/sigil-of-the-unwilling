@@ -18,15 +18,12 @@ var _status_orb: StatusOrb
 var _parent: HeroController
 var _map_gen: MapGenerator
 
-
 func get_avatar_texture() -> Texture2D:
 	return _avatar_tex
-
 
 func setup(map: MapGenerator, hero: HeroController) -> void:
 	_map_gen = map
 	_parent = hero
-
 
 func build_visual() -> void:
 	if _visuals != null:
@@ -47,7 +44,6 @@ func build_visual() -> void:
 	else:
 		_fallback.visible = false
 		_anim.visible = true
-
 
 func _find_sheet() -> String:
 	if _sheet_path_cache != "":
@@ -79,7 +75,6 @@ func _find_sheet() -> String:
 	if best != "":
 		GameLogger.hero("sheet auto-detected: %s" % best)
 	return best
-
 
 func _build_anim_from_sheet(sheet: Image) -> void:
 	if sheet.get_format() != Image.FORMAT_RGBA8:
@@ -113,12 +108,10 @@ func _build_anim_from_sheet(sheet: Image) -> void:
 	_anim.frame = 0
 	GameLogger.hero("Knight animation built from %s" % HERO_SHEET_PATH)
 
-
 func idle_animation() -> void:
 	if _anim != null:
 		_anim.stop()
 		_anim.frame = 0
-
 
 func set_facing(delta: Vector2i) -> void:
 	if _anim == null:
@@ -137,7 +130,6 @@ func set_facing(delta: Vector2i) -> void:
 		_anim.flip_h = true
 	_anim.play()
 
-
 func setup_path_visual() -> void:
 	if _marker == null:
 		_marker = DestMarkerScene.instantiate()
@@ -147,20 +139,16 @@ func setup_path_visual() -> void:
 		_status_orb.name = "StatusOrb"
 		_parent.add_child(_status_orb)
 
-
 func draw_path(_pts: Array[Vector2i]) -> void:
 	pass
-
 
 func clear_path_visual() -> void:
 	if _marker:
 		_marker.hide_marker()
 
-
 func update_status_orb(mp_ratio: float) -> void:
 	if _status_orb:
 		_status_orb.set_ratio(mp_ratio)
-
 
 func show_marker(pos: Vector2) -> void:
 	if _marker:

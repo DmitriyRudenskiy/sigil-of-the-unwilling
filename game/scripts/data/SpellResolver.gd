@@ -1,6 +1,4 @@
-## Область применения: карточная система — резолв шаблонов TemplateEngine
-## (эмулятор BattleEmulator). Боевой каст не идёт через SpellResolver —
-## см. канонический путь в SpellCaster.gd.
+
 class_name SpellResolver
 extends RefCounted
 
@@ -46,8 +44,6 @@ static func resolve(
 			state.add_to_history(spell.id, _get_player_id(caster), result.get("effects", []))
 
 	return result
-
-
 
 static func _has_power(obj: Variant) -> bool:
 	if obj == null:

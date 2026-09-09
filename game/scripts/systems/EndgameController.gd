@@ -11,7 +11,6 @@ var _persistence: Variant = null
 var _ui_manager: Node = null
 var _screen: CanvasLayer = null
 
-
 func setup(
 	p_world_ctrl: Node,
 	p_battle_coordinator: Node,
@@ -51,13 +50,11 @@ func setup(
 	if not GameEventBus.hero_successor.is_connected(_on_run_succession):
 		GameEventBus.hero_successor.connect(_on_run_succession)
 
-
 func restore() -> void:
 	if _session == null or not _session.is_terminal():
 		return
 	var result := "VICTORY" if _session.state == GameSession.GameState.VICTORY else "DEFEAT"
 	_show_screen(result, StringName(_session.end_reason), _build_summary(result, StringName(_session.end_reason)))
-
 
 func _on_hero_died(_cause: StringName) -> void:
 	var deceased = _world_ctrl.get_hero() if _world_ctrl != null else null
@@ -66,29 +63,24 @@ func _on_hero_died(_cause: StringName) -> void:
 	if not _has_successor(deceased):
 		_end("DEFEAT", &"unsuccessored_death")
 
-
 func _has_successor(deceased: HeroController) -> bool:
 	for f in deceased.followers:
 		if f != null and f.path == deceased.path_id:
 			return true
 	return false
 
-
 func _on_turn_ended(_turn: int, _month: int) -> void:
 	if GameNumbers.ENDGAME_COLLAPSE_ENABLED and _player_cities_left() == 0:
 		_end("DEFEAT", &"total_collapse")
-
 
 func _on_enemy_village_captured(_city: City) -> void:
 	if GameNumbers.ENDGAME_COLLAPSE_ENABLED and _player_cities_left() == 0:
 		_end("DEFEAT", &"total_collapse")
 
-
 func _on_glory_changed(_window_total: float) -> void:
 	if _cities_mgr != null and _cities_mgr.glory != null \
 			and _cities_mgr.glory.total >= GameNumbers.GLORY_VICTORY_THRESHOLD:
 		_end("VICTORY", &"path_completed")
-
 
 func _on_enemy_stack_defeated(_cell: Vector2i, _army: Array) -> void:
 	if not GameNumbers.ENDGAME_DOMINATION_ENABLED:
@@ -97,21 +89,17 @@ func _on_enemy_stack_defeated(_cell: Vector2i, _army: Array) -> void:
 			and (_map_gen.enemy_stacks as Dictionary).is_empty():
 		_end("VICTORY", &"domination")
 
-
 func _on_run_battle_won(_cell: Vector2i) -> void:
 	if _session != null:
 		_session.battles_won += 1
-
 
 func _on_run_battle_lost(_cell: Vector2i) -> void:
 	if _session != null:
 		_session.battles_lost += 1
 
-
 func _on_run_succession(_hero: Node) -> void:
 	if _session != null:
 		_session.successions += 1
-
 
 func _player_cities_left() -> int:
 	var left := 0
@@ -121,7 +109,6 @@ func _player_cities_left() -> int:
 		if c != null and c.owner == &"player":
 			left += 1
 	return left
-
 
 func _end(result: String, reason: StringName) -> void:
 	if _session == null or _session.is_terminal():
@@ -134,7 +121,6 @@ func _end(result: String, reason: StringName) -> void:
 	GameEventBus.game_ended.emit(result, reason, summary)
 	_append_chronicle_entry(result, summary)
 	GameLogger.world("Endgame: %s — %s" % [result, String(reason)])
-
 
 func _append_chronicle_entry(result: String, summary: Dictionary) -> void:
 	if _persistence == null:
@@ -154,7 +140,6 @@ func _append_chronicle_entry(result: String, summary: Dictionary) -> void:
 		"battles_lost": int(summary.get("battles_lost", 0)),
 		"outcome": result,
 	})
-
 
 func _build_summary(result: String, reason: StringName) -> Dictionary:
 	var s := _session
@@ -181,7 +166,6 @@ func _build_summary(result: String, reason: StringName) -> Dictionary:
 		"generations": (int(s.successions) if s != null else 0) + 1,
 	}
 
-
 func _show_screen(result: String, reason: StringName, summary: Dictionary) -> void:
 	if _screen == null:
 		if _ui_manager != null and is_instance_valid(_ui_manager.game_over_screen):
@@ -194,8 +178,7 @@ func _show_screen(result: String, reason: StringName, summary: Dictionary) -> vo
 			_screen.return_to_menu.connect(_return_to_menu)
 	_screen.show_result(result, reason, summary)
 
-
 func _return_to_menu() -> void:
-	# Единая точка сброса: Services.clear_session() → StaticCaches.reset_all().
+
 	Services.clear_session()
 	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")

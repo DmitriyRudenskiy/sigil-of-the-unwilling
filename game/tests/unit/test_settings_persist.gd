@@ -20,8 +20,6 @@ func after_test() -> void:
 		_ss_settings.free()
 		_ss_settings = null
 
-
-
 func test_settings_defaults() -> void:
 	settings.reset_to_defaults()
 	assert_that(settings.zoom_index).is_equal(2)
@@ -107,13 +105,13 @@ func test_settings_screen_cancel_restores_volume() -> void:
 	_ss_settings.master_volume = 10
 	_ss_settings.music_volume = 20
 	_ss_settings.sfx_volume = 30
-	_ss_settings.save()  
+	_ss_settings.save()
 
 	_ss_screen = load("res://scenes/ui/SettingsScreen.tscn").instantiate()
 	_ss_screen.setup(_ss_settings)
 	var main_root: Window = Engine.get_main_loop().root
 	main_root.add_child(_ss_screen)
-	await get_tree().process_frame  
+	await get_tree().process_frame
 
 	_ss_screen._settings.set_master_volume(95)
 	_ss_screen._settings.set_music_volume(85)

@@ -28,7 +28,7 @@ func _collect_buttons() -> void:
 func setup(hero: HeroController = null, magic: HeroMagic = null, registry: Node = null) -> void:
     _hero = hero
     _magic = magic
-    # ИСПРАВЛЕНИЕ: единый путь через Services, registry-параметр для тестов
+
     _spell_registry = Services.resolve(&"spells") if registry == null else registry
     _refresh()
     if _magic != null and not _magic.changed.is_connected(_refresh):
@@ -42,7 +42,7 @@ func _apply_theme() -> void:
         add_theme_stylebox_override("panel", sb)
 
 func _refresh() -> void:
-    
+
     for btn in _spell_buttons:
         btn.visible = false
     if _magic == null:
@@ -66,7 +66,7 @@ func _refresh() -> void:
             if bsb:
                 btn.add_theme_stylebox_override("panel", bsb)
         btn.add_theme_color_override("font_color", ThemeConfig.C_TEXT_GOLD_SOFT)
-        
+
         if btn.pressed.is_connected(_on_spell_pressed):
             btn.pressed.disconnect(_on_spell_pressed)
         btn.pressed.connect(_on_spell_pressed.bind(spell_id))

@@ -14,15 +14,14 @@ func reset() -> void:
 	_resources.clear()
 
 const CITY_RESOURCE_CAPACITIES: Dictionary = {
-	&"grain": 20.0,      
-	&"flour": 20.0,      
-	&"bread": 20.0,      
-	&"ore": 20.0,        
-	&"tools": 10.0,      
-	&"gold": 50.0,       
-	&"scholar_points": 10.0,  
+	&"grain": 20.0,
+	&"flour": 20.0,
+	&"bread": 20.0,
+	&"ore": 20.0,
+	&"tools": 10.0,
+	&"gold": 50.0,
+	&"scholar_points": 10.0,
 }
-
 
 func ensure_definitions() -> void:
 	if not _resources.is_empty():
@@ -54,8 +53,8 @@ func ensure_definitions() -> void:
 		1, 1, 0.5, "🟢")
 
 	_add(&"limonite", "Лимонит", ["snow"], Rarity.COMMON,
-		&"", "", false, [],  
-		"", &"", "", "", "", true,  
+		&"", "", false, [],
+		"", &"", "", "", "", true,
 		2, 3, 2.0, "🟤")
 
 	_add(&"coal", "Уголь", ["snow"], Rarity.COMMON,
@@ -102,14 +101,12 @@ func ensure_definitions() -> void:
 	_add_city(&"scholar_points", "Баллы училища",
 		float(CITY_RESOURCE_CAPACITIES[&"scholar_points"]))
 
-
 func _add_city(id: StringName, name: String, capacity: float) -> void:
 	var def := ResourceDef.new()
 	def.id = id
 	def.display_name = name
 	def.capacity = capacity
 	_resources[id] = def
-
 
 func _add(id: StringName, name: String, biomes: Array[String], rarity: int,
 		discovery_skill: StringName, discovery_time: String, discovery_auto: bool, discovery_auto_tags: Array[StringName],
@@ -136,11 +133,9 @@ func _add(id: StringName, name: String, biomes: Array[String], rarity: int,
 	def.icon = icon
 	_resources[id] = def
 
-
 func get_resource(id: StringName) -> ResourceDef:
 	ensure_definitions()
 	return _resources.get(id, null) as ResourceDef
-
 
 func get_all() -> Array[ResourceDef]:
 	ensure_definitions()
@@ -148,7 +143,6 @@ func get_all() -> Array[ResourceDef]:
 	for id in _resources:
 		result.append(_resources[id])
 	return result
-
 
 func get_by_biome(biome: String) -> Array[ResourceDef]:
 	ensure_definitions()
@@ -159,11 +153,9 @@ func get_by_biome(biome: String) -> Array[ResourceDef]:
 			result.append(def)
 	return result
 
-
 func is_hidden_resource(id: StringName) -> bool:
 	return id != &"wood" and id != &"stone" \
 		and not CITY_RESOURCE_CAPACITIES.has(id)
-
 
 func get_hidden_resource_ids() -> Array[StringName]:
 	ensure_definitions()

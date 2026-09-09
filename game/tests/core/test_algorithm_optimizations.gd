@@ -12,7 +12,6 @@ func test_astar_finds_path() -> void:
 	assert_that(path[0]).is_equal(start)
 	assert_that(path[-1]).is_equal(goal)
 
-
 func test_astar_with_obstacles() -> void:
 	var blocked: Dictionary = {Vector2i(5, 5): true, Vector2i(5, 6): true}
 	var start := Vector2i(0, 5)
@@ -22,7 +21,6 @@ func test_astar_with_obstacles() -> void:
 	assert_bool(path.has(Vector2i(5, 5))).is_false()
 	assert_bool(path.has(Vector2i(5, 6))).is_false()
 
-
 func test_astar_no_path() -> void:
 	var blocked: Dictionary = {}
 	var goal := Vector2i(10, 10)
@@ -30,7 +28,6 @@ func test_astar_no_path() -> void:
 		blocked[nb] = true
 	var path := _HexPathfinding.astar_path(Vector2i(0, 0), goal, blocked, 21, 21)
 	assert_bool(path.is_empty()).is_true()
-
 
 func test_astar_same_as_dijkstra_length() -> void:
 	var cost_fn := func(c: Vector2i) -> float:
@@ -43,7 +40,7 @@ func test_astar_same_as_dijkstra_length() -> void:
 	var dist := _HexPathfinding.dijkstra(start, 100.0, cost_fn, 21, 21)
 	var goal_idx := _HexUtils.pos_to_idx(goal, 21)
 	if dist[goal_idx] >= 1e9:
-		return  
+		return
 	var dijkstra_p := _HexPathfinding.dijkstra_path(start, goal, dist, cost_fn, 21, 21)
 	var astar_p := _HexPathfinding.astar_path(start, goal, blocked, 21, 21)
 	if dijkstra_p.size() > 0 and astar_p.size() > 0:
@@ -51,7 +48,6 @@ func test_astar_same_as_dijkstra_length() -> void:
 		assert_bool(astar_p.size() > 0).is_true()
 		assert_that(dijkstra_p[0]).is_equal(astar_p[0])
 		assert_that(dijkstra_p[-1]).is_equal(astar_p[-1])
-
 
 func test_find_path_dispatch_matches_underlying() -> void:
 	var blocked: Dictionary = {Vector2i(5, 5): true}

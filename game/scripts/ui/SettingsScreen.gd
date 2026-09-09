@@ -26,7 +26,6 @@ var _sfx_slider: HSlider
 var _tween: Tween = null
 var _settings: Node = null
 
-
 @export var persistent := false
 var _content_ready := false
 
@@ -86,7 +85,6 @@ func _localize() -> void:
 	(box.get_node("ButtonRow/ResetButton") as Button).text = GameText.settings_reset()
 	(box.get_node("ButtonRow/CancelButton") as Button).text = GameText.settings_cancel()
 
-
 func _capture_state() -> Dictionary:
 	return {
 		"zoom_index": _settings.zoom_index,
@@ -99,7 +97,6 @@ func _capture_state() -> Dictionary:
 		"sfx_volume": _settings.sfx_volume,
 		"is_muted": _settings.is_muted
 	}
-
 
 func _bind_nodes() -> void:
 	var box := get_node("Panel/Box")
@@ -142,7 +139,6 @@ func _bind_nodes() -> void:
 	(box.get_node("ButtonRow/ResetButton") as Button).pressed.connect(_on_reset)
 	(box.get_node("ButtonRow/CancelButton") as Button).pressed.connect(_on_cancel)
 
-
 func _apply_style() -> void:
 	var style := StyleBoxFlat.new()
 	style.bg_color = C_BG
@@ -153,7 +149,6 @@ func _apply_style() -> void:
 	var box := get_node("Panel/Box")
 	for btn_name in ["ApplyButton", "ResetButton", "CancelButton"]:
 		_style_button(box.get_node("ButtonRow/" + btn_name) as Button)
-
 
 func _style_button(btn: Button) -> void:
 	var sn := StyleBoxFlat.new()
@@ -171,7 +166,6 @@ func _style_button(btn: Button) -> void:
 	sp.bg_color = C_BTN_PRESS
 	btn.add_theme_stylebox_override("pressed", sp)
 
-
 func _restore_state() -> void:
 	_zoom_selector.selected = _settings.zoom_index
 	_fullscreen_toggle.button_pressed = _settings.fullscreen
@@ -183,34 +177,27 @@ func _restore_state() -> void:
 	_sfx_slider.value = float(_settings.sfx_volume)
 	_mute_toggle.button_pressed = _settings.is_muted
 
-
-
 func _on_zoom_selected(index: int) -> void:
 	_settings.zoom_index = index
-
 
 func _on_master_changed(value: float) -> void:
 	_master_slider.get_meta("value_label").text = "%d%%" % int(value)
 	_settings.master_volume = int(value)
 	_settings._apply_audio()
 
-
 func _on_music_changed(value: float) -> void:
 	_music_slider.get_meta("value_label").text = "%d%%" % int(value)
 	_settings.music_volume = int(value)
 	_settings._apply_audio()
-
 
 func _on_sfx_changed(value: float) -> void:
 	_sfx_slider.get_meta("value_label").text = "%d%%" % int(value)
 	_settings.sfx_volume = int(value)
 	_settings._apply_audio()
 
-
 func _on_mute_toggled(pressed: bool) -> void:
 	_settings.is_muted = pressed
 	_settings._apply_audio()
-
 
 func _on_apply() -> void:
 	_settings.fullscreen = _fullscreen_toggle.button_pressed
@@ -222,11 +209,9 @@ func _on_apply() -> void:
 	applied.emit()
 	_do_close()
 
-
 func _on_reset() -> void:
 	_settings.reset_to_defaults()
 	_restore_state()
-
 
 func _on_cancel() -> void:
 	_settings.zoom_index = _initial_state.zoom_index

@@ -3,7 +3,7 @@ extends GdUnitTestSuite
 const _Executor = preload("res://scripts/systems/BattleTurnExecutor.gd")
 
 func test_spellbook_button_is_action_button() -> void:
-	var action = true  
+	var action = true
 	assert_bool(action).is_true()
 
 func test_spell_chosen_ignored_when_locked() -> void:

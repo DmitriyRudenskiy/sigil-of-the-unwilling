@@ -6,13 +6,11 @@ var _ui_manager: WorldUIManager
 var _hero: HeroController
 var _world_ctrl: Node
 
-
 func setup(persistence: WorldPersistence, ui_manager: WorldUIManager, hero: HeroController, world_ctrl: Node = null) -> void:
 	_persistence = persistence
 	_ui_manager = ui_manager
 	_hero = hero
 	_world_ctrl = world_ctrl
-
 
 func _unhandled_input(event: InputEvent) -> void:
 	if _world_ctrl != null and _world_ctrl.has_method("is_world_visible") and not _world_ctrl.is_world_visible():
@@ -61,10 +59,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 				return
 
-
 func _city_overlay_open() -> bool:
 	return _ui_manager != null and _ui_manager.city_overlay_open()
-
 
 func _toggle_inventory() -> void:
 	if _ui_manager:

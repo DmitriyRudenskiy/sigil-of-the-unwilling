@@ -30,7 +30,7 @@ func show_entries(entries: Array) -> void:
         UIAnimator.animate_in(_panel)
 
 func _populate_list(entries: Array) -> void:
-    
+
     for child in _list.get_children():
         child.queue_free()
     var count := entries.size()

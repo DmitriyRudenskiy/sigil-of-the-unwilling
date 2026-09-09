@@ -10,17 +10,13 @@ signal city_level_up(city_uid: int, new_level: int)
 signal raid_occurred(city_uid: int, repelled: bool)
 signal city_event_occurred(city_uid: int, event_id: StringName)
 
-
 var _base_caps: Dictionary = {}
-
 
 func get_phase_id() -> StringName:
 	return &"city"
 
-
 func get_priority() -> int:
 	return 5
-
 
 func process(ctx: TurnContext) -> Dictionary:
 	var report := {"cities": [], "scale_changes": 0, "zone_violations": 0,
@@ -38,7 +34,6 @@ func process(ctx: TurnContext) -> Dictionary:
 		report["raids"] += int(city_report.get("raid_occurred", 0))
 		report["events"] += int(city_report.get("event_occurred", 0))
 	return report
-
 
 func _process_city(city: City, turn: int) -> Dictionary:
 	var report := {"uid": city.uid, "scale_changed": 0, "violations": 0, "tier": 0,
@@ -59,9 +54,9 @@ func _process_city(city: City, turn: int) -> Dictionary:
 		for rid in _known_resource_ids(res):
 			var cur_cap: float = res.get_capacity(rid)
 			if cur_cap >= GameSettings.INF / 2.0:
-				continue  
+				continue
 			if not base.has(rid):
-				base[rid] = cur_cap  
+				base[rid] = cur_cap
 			res.set_capacity(rid, float(base[rid]) * storage_mult)
 		_base_caps[city.uid] = base
 	elif _base_caps.has(city.uid):
@@ -137,7 +132,6 @@ func _process_city(city: City, turn: int) -> Dictionary:
 		report["event"] = String(ev.event_id)
 		city_event_occurred.emit(city.uid, ev.event_id)
 	return report
-
 
 func _known_resource_ids(res: ResourceContext) -> Array:
 	var ids: Array = []

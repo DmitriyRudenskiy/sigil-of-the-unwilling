@@ -26,7 +26,7 @@ static func from_name(value: Variant) -> int:
 		"rest": return ID.REST
 		"social": return ID.SOCIAL
 		"inspiration": return ID.INSPIRATION
-		"belief": return ID.INSPIRATION # Legacy migration
+		"belief": return ID.INSPIRATION
 	return -1
 
 static func is_valid(id: int) -> bool: return id >= 0 and id < COUNT

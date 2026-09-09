@@ -14,25 +14,21 @@ const RATES: Dictionary = {
 	&"influence": 5.0,
 }
 
-
 static func has_market(city: City) -> bool:
 	for b in city.buildings:
 		if b != null and b.def != null and b.def.id == &"market":
 			return true
 	return false
 
-
 static func rate_for(city: City, resource_id: StringName) -> float:
 	var base: float = float(RATES.get(resource_id, GameNumbers.MARKET_DEFAULT_RATE))
 	return base * (1.0 + city.prosperity / 200.0) \
 		* SpecializationSystem.trade_rate_multiplier(city)
 
-
 static func stock_of(city: City, resource_id: StringName) -> float:
 	if resource_id == &"food":
 		return city.food_stockpile
 	return float(city.storage.get(resource_id, 0.0))
-
 
 static func trade(city: City, resource_id: StringName, amount: float) -> CityCheck:
 	if amount < GameNumbers.MARKET_MIN_AMOUNT:
@@ -51,7 +47,6 @@ static func trade(city: City, resource_id: StringName, amount: float) -> CityChe
 		city.storage[resource_id] = maxf(0.0, stock - amount)
 	city.storage[&"industry"] = float(city.storage.get(&"industry", 0.0)) + gold
 	return CityCheck.success({"amount": amount, "gold": gold})
-
 
 static func _fail(reason: String) -> CityCheck:
 	return CityCheck.fail(reason, {"amount": 0.0, "gold": 0.0})

@@ -3,14 +3,10 @@ extends GdUnitTestSuite
 const _BattleView = preload("res://scripts/systems/BattleView.gd")
 const _BattleInput = preload("res://scripts/systems/BattleInput.gd")
 
-
-
 func test_cursor_modes_enum() -> void:
 	assert_int(_BattleView.CursorMode.ATTACK).is_equal(1).override_failure_message("CursorMode.ATTACK should be 1")
 	assert_int(_BattleView.CursorMode.SPELL).is_equal(2).override_failure_message("CursorMode.SPELL should be 2")
 	assert_int(_BattleView.CursorMode.RANGED).is_equal(3).override_failure_message("CursorMode.RANGED should be 3")
-
-
 
 func test_cursor_overlay_mode() -> void:
 	var c := _BattleView.CursorOverlay.new()
@@ -28,8 +24,6 @@ func test_cursor_overlay_mode() -> void:
 
 	c.queue_free()
 
-
-
 func test_cursor_overlay_visibility() -> void:
 	var c := _BattleView.CursorOverlay.new()
 	c.visible_flag = true
@@ -39,8 +33,6 @@ func test_cursor_overlay_visibility() -> void:
 	assert_bool(c.visible_flag).is_false().override_failure_message("cursor should be hidden when visible_flag = false")
 
 	c.queue_free()
-
-
 
 func test_view_cursor_methods() -> void:
 	var view := _BattleView.new()
@@ -60,8 +52,6 @@ func test_view_cursor_methods() -> void:
 	view._cursor.queue_free()
 	view.queue_free()
 
-
-
 func test_input_setter_propagates() -> void:
 	var input := _BattleInput.new()
 	assert_int(input._cursor_mode).is_equal(_BattleView.CursorMode.DEFAULT).override_failure_message("input cursor mode should default to DEFAULT")
@@ -77,8 +67,6 @@ func test_input_setter_propagates() -> void:
 
 	input.queue_free()
 
-
-
 func test_walk_cursor_mode() -> void:
 	assert_int(_BattleView.CursorMode.MOVE).is_equal(4).override_failure_message("CursorMode.MOVE should be 4 (added after RANGED=3)")
 	assert_bool(_BattleView.CursorMode.DEFAULT == 0 and _BattleView.CursorMode.ATTACK == 1).is_true().override_failure_message("existing cursor mode values must not change")
@@ -87,8 +75,6 @@ func test_walk_cursor_mode() -> void:
 	c.set_mode(_BattleView.CursorMode.MOVE)
 	assert_int(c.mode).is_equal(_BattleView.CursorMode.MOVE).override_failure_message("cursor overlay should be MOVE after set_mode(MOVE)")
 	c.queue_free()
-
-
 
 func test_walk_cursor_distinct_from_ranged() -> void:
 	assert_int(_BattleView.CursorMode.MOVE).is_not_equal(_BattleView.CursorMode.RANGED).override_failure_message("MOVE cursor mode must be distinct from RANGED")

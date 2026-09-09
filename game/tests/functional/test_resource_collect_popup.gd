@@ -4,7 +4,6 @@ const _Popup = preload("res://scenes/ui/ResourceCollectPopup.tscn")
 const _Spawner = preload("res://scripts/world/WorldSpawner.gd")
 const _VIC = preload("res://scripts/world/WorldInteractionController.gd")
 
-
 class _SpawnerStub:
 	extends WorldSpawner
 	var _resources: Dictionary = {}
@@ -18,11 +17,8 @@ class _SpawnerStub:
 	func capture_village(cell: Vector2i) -> bool:
 		return false
 
-
 class _HeroStub:
 	extends HeroController
-
-
 
 func test_popup_structure_and_initial_state() -> void:
 	var p: ResourceCollectPopup = _Popup.instantiate() as ResourceCollectPopup
@@ -41,7 +37,6 @@ func test_popup_structure_and_initial_state() -> void:
 	assert_float(timer.wait_time).is_equal_approx(ResourceCollectPopup.AUTO_DISMISS_SECONDS, 0.001)
 	p.free()
 
-
 func test_show_resource_simple_known() -> void:
 	var p: ResourceCollectPopup = _Popup.instantiate() as ResourceCollectPopup
 	p.show_resource(&"wood", 5)
@@ -53,7 +48,6 @@ func test_show_resource_simple_known() -> void:
 	assert_that(image.texture).is_not_null()
 	p.free()
 
-
 func test_show_resource_rich_vein() -> void:
 	var p: ResourceCollectPopup = _Popup.instantiate() as ResourceCollectPopup
 	p.show_resource(&"quartz", 12)
@@ -63,7 +57,6 @@ func test_show_resource_rich_vein() -> void:
 	assert_that(image.texture).is_not_null()
 	assert_bool(label.text.contains("Кварц") or label.text.contains("quartz")).is_true()
 	p.free()
-
 
 func test_show_resource_unknown_degrades() -> void:
 	var p: ResourceCollectPopup = _Popup.instantiate() as ResourceCollectPopup
@@ -75,8 +68,6 @@ func test_show_resource_unknown_degrades() -> void:
 	assert_bool(label.text.contains("+0")).is_true()
 	assert_that(image.texture).is_not_null()
 	p.free()
-
-
 
 func test_ok_dismisses_and_popup_reusable() -> void:
 	var p: ResourceCollectPopup = _Popup.instantiate() as ResourceCollectPopup
@@ -93,7 +84,6 @@ func test_ok_dismisses_and_popup_reusable() -> void:
 	remove_child(p)
 	p.free()
 
-
 func test_auto_dismiss_hides_and_re_show_works() -> void:
 	var p: ResourceCollectPopup = _Popup.instantiate() as ResourceCollectPopup
 	add_child(p)
@@ -109,8 +99,6 @@ func test_auto_dismiss_hides_and_re_show_works() -> void:
 	remove_child(p)
 	p.free()
 
-
-
 func test_icons_res_type_mapping() -> void:
 	assert_that(ResourceIcons.res_type_id(0)).is_equal(&"wood")
 	assert_that(ResourceIcons.res_type_id(6)).is_equal(&"gold")
@@ -120,7 +108,6 @@ func test_icons_res_type_mapping() -> void:
 	assert_that(ResourceIcons.res_type_amount(6)).is_equal(50)
 	assert_that(ResourceIcons.res_type_amount(99)).is_equal(0)
 
-
 func test_icons_name_color_texture() -> void:
 	assert_that(GameText.resource_name(&"wood")).is_equal("Дерево")
 	assert_that(GameText.resource_name(&"no_such_id")).is_equal("no_such_id")
@@ -129,8 +116,6 @@ func test_icons_name_color_texture() -> void:
 	assert_bool(c1.is_equal_approx(Color(0.62, 0.44, 0.24))).is_true()
 	assert_bool(ResourceIcons.get_color(&"quartz")
 			.is_equal_approx(ResourceIcons.get_color(&"quartz"))).is_true()
-
-
 
 func test_spawner_get_res_type_at() -> void:
 	var spawner: WorldSpawner = _Spawner.new()
@@ -143,8 +128,6 @@ func test_spawner_get_res_type_at() -> void:
 	node.free()
 	spawner.free()
 
-
-
 func test_collect_emits_resource_extracted() -> void:
 	var vic := _VIC.new()
 	var spawner := _SpawnerStub.new()
@@ -152,7 +135,7 @@ func test_collect_emits_resource_extracted() -> void:
 	var cell := Vector2i(2, 2)
 	spawner._resources[cell] = true
 	var node := Node2D.new()
-	node.set_meta("res_type", 2)  
+	node.set_meta("res_type", 2)
 	spawner._resource_nodes[cell] = node
 	vic.setup(hero, spawner, null)
 
@@ -174,7 +157,6 @@ func test_collect_emits_resource_extracted() -> void:
 	vic.free()
 	spawner.free()
 	hero.free()
-
 
 func test_collect_no_node_no_signal() -> void:
 	var vic := _VIC.new()

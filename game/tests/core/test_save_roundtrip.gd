@@ -7,7 +7,6 @@ const _SaveManager = preload("res://scripts/core/SaveManager.gd")
 var _sm: SaveManager
 var _parent: Node
 
-
 func before_test() -> void:
 	_parent = Node.new()
 	_parent.name = "TestParent"
@@ -17,12 +16,10 @@ func before_test() -> void:
 	_parent.add_child(_sm)
 	_sm.call("delete_save")
 
-
 func after_test() -> void:
 	_sm.call("delete_save")
 	_sm.queue_free()
 	_parent.queue_free()
-
 
 func test_save_data_roundtrip() -> void:
 	var data := _SaveData.new()
@@ -39,7 +36,6 @@ func test_save_data_roundtrip() -> void:
 	assert_that(data2.run_seed).is_equal(42)
 	assert_that(data2.hero["cell"]["x"]).is_equal(10)
 	assert_bool(data2.is_valid()).is_true()
-
 
 func test_world_delta_roundtrip() -> void:
 	var delta := _WorldStateDelta.new()
@@ -58,7 +54,6 @@ func test_world_delta_roundtrip() -> void:
 	assert_that(delta2.opened_chests.size()).is_equal(1)
 	assert_that(delta2.removed_resources[0]).is_equal(Vector2i(3, 3))
 
-
 func test_save_manager_roundtrip() -> void:
 	var data := _SaveData.new()
 	data.run_seed = 12345
@@ -73,9 +68,8 @@ func test_save_manager_roundtrip() -> void:
 	var data2: SaveData = loaded.get("data")
 	assert_that(data2).is_not_null()
 	assert_that(data2.run_seed).is_equal(12345)
-	
-	assert_that(int(data2.hero["cell"]["x"])).is_equal(5)
 
+	assert_that(int(data2.hero["cell"]["x"])).is_equal(5)
 
 func test_load_missing_returns_file_not_found() -> void:
 	var loaded: Dictionary = _sm.call("load_game")

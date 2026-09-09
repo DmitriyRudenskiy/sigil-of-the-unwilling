@@ -4,7 +4,7 @@ class_name MinimapOverlay
 signal minimap_clicked(cell: Vector2i)
 
 var map_ref: MapGenerator = null
-# Duck-typed: нужен только property `current_cell` (в прод. — HeroController).
+
 var hero_ref: Node = null
 var cam_ref: Camera2D = null
 
@@ -15,10 +15,8 @@ var _last_hero_cell: Vector2i = Vector2i.ZERO
 const MOVE_THRESHOLD := 8.0
 const HERO_RADIUS := 4.0
 
-
 func _ready() -> void:
 	queue_redraw()
-
 
 func _process(delta: float) -> void:
 	if cam_ref == null:
@@ -31,7 +29,6 @@ func _process(delta: float) -> void:
 		_last_zoom = zoom
 		queue_redraw()
 
-
 func _draw() -> void:
 	var size := get_rect().size
 	if map_ref != null and _texture != null:
@@ -42,12 +39,10 @@ func _draw() -> void:
 	_draw_camera_rect(size)
 	_draw_hero_dot(size)
 
-
 func _draw_cross(size: Vector2) -> void:
 	var c := ThemeConfig.C_MINIMAP_CROSS
 	draw_line(Vector2(size.x * 0.5, 0), Vector2(size.x * 0.5, size.y), c, 1.0)
 	draw_line(Vector2(0, size.y * 0.5), Vector2(size.x, size.y * 0.5), c, 1.0)
-
 
 func _draw_camera_rect(size: Vector2) -> void:
 	if cam_ref == null or map_ref == null:
@@ -60,11 +55,10 @@ func _draw_camera_rect(size: Vector2) -> void:
 	draw_rect(Rect2(rect_pos - rect_sz * 0.5, rect_sz), ThemeConfig.C_MINIMAP_VIEWPORT, true)
 	draw_rect(Rect2(rect_pos - rect_sz * 0.5, rect_sz), ThemeConfig.C_MINIMAP_BORDER, false, 1.0)
 
-
 func _draw_hero_dot(size: Vector2) -> void:
 	if hero_ref == null or map_ref == null:
 		return
-	# current_cell — свойство, не метод: проверяем через `in` и рисуем всегда.
+
 	if not ("current_cell" in hero_ref):
 		return
 	var cell: Vector2i = hero_ref.current_cell
@@ -73,14 +67,12 @@ func _draw_hero_dot(size: Vector2) -> void:
 	draw_circle(pos, HERO_RADIUS, ThemeConfig.C_MINIMAP_HERO)
 	draw_arc(pos, HERO_RADIUS + 2.0, 0, TAU, 16, ThemeConfig.C_MINIMAP_HERO_RING, 1.0)
 
-
 func _world_to_overlay(world_pos: Vector2, size: Vector2) -> Vector2:
 	if map_ref == null or map_ref.map_width <= 0 or map_ref.map_height <= 0:
 		return world_pos
 	var sx := size.x / float(map_ref.map_width)
 	var sy := size.y / float(map_ref.map_height)
 	return Vector2(world_pos.x * sx, world_pos.y * sy)
-
 
 func _gui_input(event: InputEvent) -> void:
 	var pe := event as InputEventMouseButton
@@ -96,7 +88,6 @@ func _gui_input(event: InputEvent) -> void:
 	cell.x = clampi(cell.x, 0, map_ref.map_width - 1)
 	cell.y = clampi(cell.y, 0, map_ref.map_height - 1)
 	minimap_clicked.emit(cell)
-
 
 func update_texture(tex: ImageTexture) -> void:
 	_texture = tex

@@ -4,10 +4,9 @@ const _MapGenerator = preload("res://scripts/world/MapGenerator.gd")
 const _Movement = preload("res://scripts/entities/HeroMovementController.gd")
 const _HexUtils = preload("res://scripts/core/HexUtils.gd")
 
-
-var _map  
-var _mov  
-var _route_committed := false  
+var _map
+var _mov
+var _route_committed := false
 
 func before_test() -> void:
 	_route_committed = false
@@ -15,7 +14,6 @@ func before_test() -> void:
 
 func after_test() -> void:
 	_teardown()
-
 
 func assert_eq_cells(cells: Array, expected: Array, msg: String) -> void:
 	assert_that(_cells_to_str(cells)).is_equal(_cells_to_str(expected))
@@ -33,7 +31,6 @@ func _teardown() -> void:
 	if _map != null:
 		_map.free()
 		_map = null
-
 
 func _setup_map() -> void:
 	_teardown()
@@ -59,7 +56,6 @@ func _on_move_requested(_pos: Vector2, _dur: float, cb: Callable) -> void:
 func _on_planned_route_changed(committed: bool) -> void:
 	_route_committed = committed
 
-
 func test_second_click_fixates_route() -> void:
 	_mov.move_points = 10.0
 	var target := Vector2i(5, 0)
@@ -78,8 +74,8 @@ func test_second_click_fixates_route() -> void:
 func test_second_click_moves_immediately_when_fixed() -> void:
 	_mov.move_points = 10.0
 	var target := Vector2i(5, 0)
-	_mov.on_map_clicked(target)  
-	_mov.on_map_clicked(target)  
+	_mov.on_map_clicked(target)
+	_mov.on_map_clicked(target)
 	assert_bool(_mov.planned_path.size() >= 2).is_true()
 	assert_that(_mov.current_cell).is_equal(Vector2i(0, 0))
 
@@ -91,7 +87,7 @@ func test_auto_follow_reaches_goal_clears_route() -> void:
 	_mov.move_points = 10.0
 	var target := Vector2i(3, 0)
 	_mov.on_map_clicked(target)
-	_mov.on_map_clicked(target)  
+	_mov.on_map_clicked(target)
 	assert_bool(_mov.planned_path.size() >= 2).is_true()
 
 	_mov.auto_follow_at_turn_start()
@@ -99,10 +95,10 @@ func test_auto_follow_reaches_goal_clears_route() -> void:
 	assert_bool(_mov.planned_path.is_empty()).is_true()
 
 func test_auto_follow_keeps_remainder_when_out_of_mp() -> void:
-	_mov.move_points = 3.0  
+	_mov.move_points = 3.0
 	var target := Vector2i(5, 0)
 	_mov.on_map_clicked(target)
-	_mov.on_map_clicked(target)  
+	_mov.on_map_clicked(target)
 	assert_bool(_mov.planned_path.size() >= 2).is_true()
 
 	_mov.auto_follow_at_turn_start()
@@ -116,8 +112,8 @@ func test_auto_follow_continues_remainder_next_turn() -> void:
 	_mov.move_points = 3.0
 	var target := Vector2i(5, 0)
 	_mov.on_map_clicked(target)
-	_mov.on_map_clicked(target)  
-	_mov.auto_follow_at_turn_start()  
+	_mov.on_map_clicked(target)
+	_mov.auto_follow_at_turn_start()
 	assert_that(_mov.current_cell).is_equal(Vector2i(3, 0))
 
 	_mov.move_points = 10.0
@@ -129,7 +125,7 @@ func test_cancel_planned_path() -> void:
 	_mov.move_points = 10.0
 	var target := Vector2i(5, 0)
 	_mov.on_map_clicked(target)
-	_mov.on_map_clicked(target)  
+	_mov.on_map_clicked(target)
 	assert_bool(_mov.planned_path.size() >= 2).is_true()
 
 	_mov.cancel_planned_path()

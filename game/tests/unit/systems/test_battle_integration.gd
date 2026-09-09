@@ -1,7 +1,5 @@
 extends GdUnitTestSuite
 
-
-
 func test_attacker_wins() -> void:
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
@@ -27,8 +25,6 @@ func test_attacker_wins() -> void:
 	assert_int(state.get_survivors(BattleState.Side.ATTACKER).size()).is_equal(1).override_failure_message("attacker should have survivors")
 	assert_int(state.get_survivors(BattleState.Side.DEFENDER).size()).is_zero().override_failure_message("defender should have no survivors")
 
-
-
 func test_defender_wins() -> void:
 	var state = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
@@ -53,8 +49,6 @@ func test_defender_wins() -> void:
 	assert_bool(state.battle_over).is_true().override_failure_message("battle should end when attacker is destroyed")
 	assert_int(state.get_survivors(BattleState.Side.ATTACKER).size()).is_zero().override_failure_message("attacker should have no survivors")
 	assert_int(state.get_survivors(BattleState.Side.DEFENDER).size()).is_equal(1).override_failure_message("defender should have survivors")
-
-
 
 func test_battle_rules_damage() -> void:
 	var state: BattleState = load("res://scripts/systems/BattleState.gd").new()
@@ -98,8 +92,6 @@ func test_battle_rules_damage() -> void:
 
 	assert_int(def_damage).is_less_equal(damage).override_failure_message("goblins should deal less or equal damage to swordsmen")
 
-
-
 func test_ranged_vs_flying() -> void:
 	var state: BattleState = load("res://scripts/systems/BattleState.gd").new()
 	var atk: Array[UnitStack] = []
@@ -124,8 +116,6 @@ func test_ranged_vs_flying() -> void:
 
 	assert_object(pegasus).is_not_null().override_failure_message("pegasus unit not found")
 	assert_bool(pegasus.is_flying()).is_true().override_failure_message("pegasus should be flying")
-
-
 
 func test_morale_check() -> void:
 	var state: BattleState = load("res://scripts/systems/BattleState.gd").new()

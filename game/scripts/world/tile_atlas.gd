@@ -43,9 +43,7 @@ const _BIOME_ORDER := [Biome.GRASS, Biome.SAND, Biome.SNOW, Biome.SWAMP, Biome.W
 var _tileset: TileSet
 var _src: TileSetAtlasSource
 
-
 var _fog_src: TileSetAtlasSource
-
 
 func build() -> bool:
 	var tex := load(SHEET_PATH)
@@ -71,7 +69,6 @@ func build() -> bool:
 			_apply_rotation(_src.get_tile_data(c, k + 1), k + 1)
 	return true
 
-
 func _build_fog_source(tex: Texture2D) -> void:
 	var img: Image = tex.get_image().duplicate()
 	var h := img.get_height()
@@ -89,15 +86,12 @@ func _build_fog_source(tex: Texture2D) -> void:
 		for ci in coords.size():
 			_fog_src.create_tile(coords[ci])
 
-
 func tileset() -> TileSet:
 	return _tileset
-
 
 func base_coords(biome: int, rng: RandomNumberGenerator) -> Vector2i:
 	var options: Array = BASE_COORDS[biome]
 	return options[rng.randi() % options.size()]
-
 
 func build_hex() -> TileSet:
 	var tex := load(SHEET_PATH)
@@ -116,27 +110,22 @@ func build_hex() -> TileSet:
 			src.create_tile(coords[ci])
 	return ts
 
-
 func get_tileset() -> TileSet:
 	return _tileset
 
-
 static func build_hex_tileset() -> TileSet:
-	# TASK_06: совместимый статический мост.
-	# Внутри TileAtlas статического кэша НЕТ —
-	# кэш живёт в управляемом автозагрузочном узле TileAtlasCache.
+
 	var main_loop := Engine.get_main_loop()
 	if main_loop is SceneTree:
 		var tree := main_loop as SceneTree
 		var cache := tree.root.get_node_or_null("/root/TileAtlasCache")
 		if cache != null and cache.has_method("build_hex_tileset"):
 			return cache.call("build_hex_tileset")
-	# Fallback для тестов и сцен без автозагрузки TileAtlasCache.
+
 	return TileAtlas.new().build_hex()
 
-
 static func clear_cache() -> void:
-	# TASK_06: совместимый статический мост очистки кэша тайл-сета.
+
 	var main_loop := Engine.get_main_loop()
 	if main_loop is SceneTree:
 		var tree := main_loop as SceneTree
@@ -144,14 +133,12 @@ static func clear_cache() -> void:
 		if cache != null and cache.has_method("clear_cache"):
 			cache.call("clear_cache")
 
-
 static func pick(base: int, other: int, shape: String, at: String) -> Dictionary:
 	for e in TRANSITION_ART:
 		if e["a"] != base or e["b"] != other or e["shape"] != shape:
 			continue
 		return { "atlas": e["coord"], "alt": rotation_count(shape, e["at"], at) }
 	return {}
-
 
 static func rotation_count(shape: String, from: String, to: String) -> int:
 	var order: Array = _SIDES if shape == "edge" else _CORNERS
@@ -161,18 +148,15 @@ static func rotation_count(shape: String, from: String, to: String) -> int:
 		return 0
 	return (t - f + 4) % 4
 
-
 static func opposite(shape: String, name: String) -> String:
 	if shape == "edge":
 		return _OPP_SIDE[name]
 	return _OPP_CORNER[name]
 
-
 const _SIDES := ["N", "E", "S", "W"]
 const _CORNERS := ["NW", "NE", "SE", "SW"]
 const _OPP_SIDE := { "N": "S", "S": "N", "E": "W", "W": "E" }
 const _OPP_CORNER := { "NW": "SE", "SE": "NW", "NE": "SW", "SW": "NE" }
-
 
 func _apply_rotation(td: TileData, k: int) -> void:
 	match k:

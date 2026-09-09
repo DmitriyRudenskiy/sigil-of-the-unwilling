@@ -29,9 +29,6 @@ var combat: Dictionary = {}
 var armor: Dictionary = {}
 var ac_bonus_type: AcBonusType = AcBonusType.NONE
 
-
-## R10: типобезопасная сборка из именованных полей — для данных/лоадеров.
-## Позиционный _init оставлен для мелких случаев (тесты, простые new()).
 static func from_dict(data: Dictionary) -> Artifact:
     var a := Artifact.new()
     a.id = StringName(data.get("id", &""))
@@ -47,7 +44,6 @@ static func from_dict(data: Dictionary) -> Artifact:
     a.armor = (data.get("armor", {}) as Dictionary).duplicate(true)
     a.ac_bonus_type = data.get("ac_bonus_type", AcBonusType.NONE)
     return a
-
 
 func _init(
     p_id: StringName = &"",
@@ -76,54 +72,41 @@ func _init(
     armor = p_armor.duplicate(true)
     ac_bonus_type = p_ac_bonus_type
 
-
 func get_attack() -> int:
     return int(modifiers.get("attack", 0))
-
 
 func get_defense() -> int:
     return int(modifiers.get("defense", 0))
 
-
 func get_spell_power() -> int:
     return int(modifiers.get("spell_power", 0))
-
 
 func get_knowledge() -> int:
     return int(modifiers.get("knowledge", 0))
 
-
 func get_luck() -> int:
     return int(modifiers.get("luck", 0))
-
 
 func get_morale() -> int:
     return int(modifiers.get("morale", 0))
 
-
 func get_movement() -> int:
     return int(modifiers.get("movement", 0))
-
 
 func get_stack_hp_bonus() -> int:
     return int(modifiers.get("stack_hp", 0))
 
-
 func get_stack_hp_percent() -> float:
     return float(modifiers.get("stack_hp_percent", 0.0))
-
 
 func get_stack_speed_bonus() -> int:
     return int(modifiers.get("stack_speed", 0))
 
-
 func get_daily_gems() -> int:
     return int(modifiers.get("daily_gems", 0))
 
-
 func get_castle_growth_percent() -> int:
     return int(modifiers.get("castle_growth_percent", 0))
-
 
 func get_damage_dice() -> String:
     return str(combat.get("damage_dice", ""))
@@ -170,7 +153,6 @@ func has_armor() -> bool:
 func get_ac_bonus_type() -> AcBonusType:
     return ac_bonus_type
 
-
 static func damage_type_name(dt: DamageType) -> String:
     match dt:
         DamageType.SLASHING: return "Рубящий"
@@ -178,10 +160,8 @@ static func damage_type_name(dt: DamageType) -> String:
         DamageType.BLUDGEONING: return "Дробящий"
     return ""
 
-
 func is_ring() -> bool:
     return slot == Slot.RING_L or slot == Slot.RING_R
-
 
 func get_rarity_name() -> String:
     match rarity:
@@ -190,14 +170,12 @@ func get_rarity_name() -> String:
         Rarity.RELIC: return "Relic"
     return ""
 
-
 func get_rarity_color() -> Color:
     match rarity:
         Rarity.MINOR: return ThemeConfig.C_RARITY_MINOR
         Rarity.MAJOR: return ThemeConfig.C_RARITY_MAJOR
         Rarity.RELIC: return ThemeConfig.C_RARITY_RELIC
     return Color.WHITE
-
 
 func get_slot_name() -> String:
     match slot:

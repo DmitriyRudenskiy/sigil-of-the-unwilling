@@ -3,7 +3,7 @@ extends GdUnitTestSuite
 const _HeroMagic = preload("res://scripts/entities/HeroMagic.gd")
 
 func test_init_defaults() -> void:
-	
+
 	var m := _HeroMagic.new()
 	m.init_defaults()
 	assert_that(m.mana_max).is_equal(20)

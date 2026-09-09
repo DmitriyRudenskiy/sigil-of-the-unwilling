@@ -9,5 +9,5 @@ var ui_manager: WorldUIManager
 var camera: WorldCamera
 var hero: HeroController
 var world_delta: WorldStateDelta
-var cities: Node = null  
+var cities: Node = null
 var character_registry: CharacterRegistry = null

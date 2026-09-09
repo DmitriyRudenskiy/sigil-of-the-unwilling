@@ -1,8 +1,6 @@
 class_name CityService
 extends RefCounted
-## R2: операции города (сплит City.gd). Чистое состояние — CityData,
-## фасад City делегирует сюда. Сигналы эмитятся на CityData (City наследует).
-# ─── Запросы ───────────────────────────────────────────────────
+
 static func pop_total(c: CityData) -> int:
 	return c.pop.size()
 static func pop_capped(c: CityData) -> int:
@@ -114,7 +112,7 @@ static func can_resurrect(c: CityData, required: Dictionary) -> bool:
 		if float(c.storage.get(key, 0.0)) < float(required[key]):
 			return false
 	return true
-# ─── Мутации ──────────────────────────────────────────────────
+
 static func add_migrant(c: CityData, state: PopUnit.State, turn: int, tile := Vector2i(-1, -1)) -> PopUnit:
 	var u := PopUnit.new()
 	u.uid = c._uid_seq
@@ -179,7 +177,6 @@ static func _take_free_followers(c: CityData, n: int, relocate_to: CityData) -> 
 		taken += 1
 	return taken
 
-# ─── R5: инлайн-методы City.gd (защита, переключение состояния) ──
 static func defense_strength(city: City) -> int:
 	var d := count_state(city, PopUnit.State.MILITIA) * GameNumbers.RAID_DEF_PER_MILITIA
 	for b in city.buildings:
@@ -187,7 +184,6 @@ static func defense_strength(city: City) -> int:
 			d += b.level * GameNumbers.RAID_DEF_PER_WALL
 	d += SpecializationSystem.defense_bonus(city)
 	return d
-
 
 static func request_switch(
 	city: City,

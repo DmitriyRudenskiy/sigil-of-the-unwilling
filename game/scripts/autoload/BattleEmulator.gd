@@ -2,7 +2,6 @@ extends RefCounted
 
 const BattleSpellBridge = preload("res://scripts/data/BattleSpellBridge.gd")
 
-
 func get_spells() -> Dictionary:
 	var reg: Object = Services.resolve(&"spells")
 	if reg == null:
@@ -35,14 +34,13 @@ func cast_spell(args: Dictionary) -> Dictionary:
 		unit.set_count(count)
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
-	# ИСПРАВЛЕНИЕ: Services.resolve
+
 	var reg: Object = Services.resolve(&"spells")
 	if reg != null and reg.get_all_spells().is_empty():
 		reg.ensure_definitions()
 	var caster_bonus := {"spell_power": 8, "attack": 6, "defense": 5, "knowledge": 5}
 	var target_bonus := {"knowledge": int(resistant), "defense": 5}
 	return SpellCaster.cast(StringName(spell_id), unit, caster_bonus, target_bonus, rng, reg)
-
 
 func army_stack(spec: Dictionary) -> UnitStack:
 	var tags: Array = []
@@ -284,7 +282,7 @@ func battle_spell(args: Dictionary) -> Dictionary:
 	var spell_id: Variant = args.get("spell_id", "")
 	if not (spell_id is String) or spell_id.is_empty():
 		return {"error": "Field 'spell_id' is required and must be a non-empty string"}
-	# ИСПРАВЛЕНИЕ: Services.resolve
+
 	var reg: Object = Services.resolve(&"spells")
 	if reg == null:
 		return {"error": "SpellRegistry (autoload 'Spells') not found"}
@@ -294,7 +292,7 @@ func battle_spell(args: Dictionary) -> Dictionary:
 	if def == null:
 		return {"spell": null, "apply": {"result": "not_found", "spell_id": spell_id}, "registered": false}
 	var spell = BattleSpellBridge.to_spell(def)
-	# ИСПРАВЛЕНИЕ: Services.resolve
+
 	var spell_reg: Object = Services.resolve(&"spellbook")
 	var registered := false
 	if spell_reg != null:
@@ -324,7 +322,7 @@ func battle_spell(args: Dictionary) -> Dictionary:
 	return {"spell": spell.to_dict(), "apply": apply_result, "registered": registered}
 
 func spell_registry() -> Dictionary:
-	# ИСПРАВЛЕНИЕ: Services.resolve
+
 	var spell_reg: Object = Services.resolve(&"spellbook")
 	if spell_reg == null:
 		return {"error": "SpellbookRegistry (autoload 'Spellbook') not found"}

@@ -1,8 +1,8 @@
 extends RefCounted
 class_name VisibilityMap
 
-var visible: Dictionary = {}   
-var explored: Dictionary = {}  
+var visible: Dictionary = {}
+var explored: Dictionary = {}
 
 var _map_width: int = 0
 var _map_height: int = 0
@@ -29,8 +29,6 @@ func recompute(hero_cell: Vector2i, sight_sources: Array, hero_sight: int, city_
 	visible = new_visible
 	return changed
 
-## O(r) вместо O(r^2): обход по гекс-кольцам через HexUtils.ring().
-## Для radius=4: 37 итераций вместо 81.
 func _fill_disk(center: Vector2i, radius: int, out: Dictionary) -> void:
 	if radius < 0:
 		return
@@ -41,7 +39,6 @@ func _fill_disk(center: Vector2i, radius: int, out: Dictionary) -> void:
 			if is_in_bounds(cell):
 				out[cell] = 1
 
-## Аналогично для explored — O(r).
 func _explore(center: Vector2i, radius: int) -> void:
 	if radius < 0:
 		return

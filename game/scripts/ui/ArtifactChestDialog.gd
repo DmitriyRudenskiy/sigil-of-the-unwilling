@@ -10,12 +10,10 @@ var _artifact_label: Label = null
 var _gold_label: Label = null
 var _theme: Theme = null
 
-
 func _ready() -> void:
 	_theme = load(THEME_PATH)
 	_apply_theme()
 	_connect_skeleton()
-
 
 func open(chest: ArtifactChest) -> void:
 	_current_chest = chest
@@ -23,14 +21,12 @@ func open(chest: ArtifactChest) -> void:
 	visible = true
 	GameLogger.ui("Chest dialog opened at %s" % chest.cell)
 
-
 func _apply_theme() -> void:
 	if _theme == null:
 		return
 	var sb := _theme.get_stylebox("panel", "Panel")
 	if sb:
 		add_theme_stylebox_override("panel", sb)
-
 
 func _connect_skeleton() -> void:
 	_artifact_label = get_node_or_null("Margin/VBox/artifact_label") as Label
@@ -44,7 +40,6 @@ func _connect_skeleton() -> void:
 		gold.pressed.connect(_on_gold)
 	if cancel != null and not cancel.pressed.is_connected(_on_close):
 		cancel.pressed.connect(_on_close)
-
 
 func _update_display() -> void:
 	if _current_chest == null:
@@ -62,22 +57,18 @@ func _update_display() -> void:
 
 	_gold_label.text = "%d Gold" % _current_chest.gold_reward
 
-
 func _on_take() -> void:
 	if _current_chest != null:
 		choice_made.emit("take", _current_chest)
 	_close()
-
 
 func _on_gold() -> void:
 	if _current_chest != null:
 		choice_made.emit("gold", _current_chest)
 	_close()
 
-
 func _on_close() -> void:
 	_close()
-
 
 func _close() -> void:
 	_current_chest = null

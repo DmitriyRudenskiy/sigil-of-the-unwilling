@@ -8,21 +8,17 @@ const _HexUtils = preload("res://scripts/core/HexUtils.gd")
 var state: BattleState
 var rng: RandomNumberGenerator
 
-
 func before_test() -> void:
 	state = BattleState.new()
 	rng = TestFactories.seeded(4328)
 	rng.seed = 42
 
-
 func test_saltpeter_tag_exists() -> void:
 	var def := Resources.get_resource(&"saltpeter")
 	assert_that(def).is_not_null()
 
-
 func test_saltpeter_explosion_dmg_mult() -> void:
 	assert_that(GameNumbers.SALTPETER_EXPLOSION_MULT).is_equal(2.0)
-
 
 func test_saltpeter_adjacent_kills() -> void:
 	var atk_stats := UnitStats.new("saltpeter_unit", "Saltpeter", 5, 5, 10, 3, 2, ["melee", "saltpeter"])
@@ -48,7 +44,6 @@ func test_saltpeter_adjacent_kills() -> void:
 	var result := state.apply_attack(atk_unit, def_unit, true, rng)
 	assert_bool(result.has("saltpeter_kills")).is_true()
 	assert_bool(int(result.get("saltpeter_kills", 0)) > 0).is_true()
-
 
 func test_saltpeter_no_adjacent() -> void:
 	var atk_stats := UnitStats.new("saltpeter_unit", "Saltpeter", 5, 5, 10, 3, 2, ["melee", "saltpeter"])

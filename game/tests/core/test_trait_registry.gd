@@ -5,11 +5,8 @@ const _TraitRegistry = preload("res://scripts/demographics/TraitRegistry.gd")
 
 var reg: Variant
 
-
 func before_test() -> void:
 	reg = _TraitRegistry.new()
-
-
 
 func test_defaults_loaded() -> void:
 	assert_that(reg.all().size()).is_equal(15)
@@ -18,24 +15,19 @@ func test_defaults_loaded() -> void:
 	assert_that(t.effect_type).is_equal(&"rest")
 	assert_that(t.effect_value).is_equal(-0.08)
 
-
 func test_get_unknown() -> void:
 	assert_that(reg.get_trait(&"no_such_trait")).is_null()
-
 
 func test_by_tag() -> void:
 	var body: Array = reg.by_tag(&"body")
 	assert_bool(body.size() >= 4).is_true()
 	assert_that(reg.by_tag(&"nonexistent_tag_xyz").size()).is_equal(0)
 
-
 func test_by_rarity_distribution() -> void:
 	assert_that(reg.by_rarity(TraitDef.Rarity.COMMON).size()).is_equal(5)
 	assert_that(reg.by_rarity(TraitDef.Rarity.UNCOMMON).size()).is_equal(3)
 	assert_that(reg.by_rarity(TraitDef.Rarity.RARE).size()).is_equal(3)
 	assert_that(reg.by_rarity(TraitDef.Rarity.LEGENDARY).size()).is_equal(4)
-
-
 
 func test_roll_deterministic_with_seed() -> void:
 	var r1 := TestFactories.seeded(4035)
@@ -47,7 +39,6 @@ func test_roll_deterministic_with_seed() -> void:
 	assert_that(a.size()).is_equal(b.size())
 	for i in a.size():
 		assert_that((a[i] as TraitDef).id).is_equal((b[i] as TraitDef).id)
-
 
 func test_roll_range_and_no_dups() -> void:
 	var r := TestFactories.seeded(4035)
@@ -63,14 +54,12 @@ func test_roll_range_and_no_dups() -> void:
 			seen[t.id] = true
 	assert_bool(seen.size() >= 8).is_true()
 
-
 func test_roll_max_count() -> void:
 	var r := TestFactories.seeded(4035)
 	r.seed = 1
 	for i in 50:
 		var ts: Array = reg.roll_traits(r, 1)
 		assert_bool(ts.size() <= 1).is_true()
-
 
 func test_roll_zero_possible() -> void:
 	var r := TestFactories.seeded(4035)
@@ -80,8 +69,6 @@ func test_roll_zero_possible() -> void:
 		if reg.roll_traits(r).is_empty():
 			zeros += 1
 	assert_bool(zeros >= 1).is_true()
-
-
 
 func test_custom_trait_add() -> void:
 	var t := _TraitDef.new()
@@ -96,7 +83,6 @@ func test_custom_trait_add() -> void:
 	assert_that(g.effect_value).is_equal(-0.5)
 	assert_that(g.rarity).is_equal(_TraitDef.Rarity.RARE)
 
-
 func test_custom_trait_replaces_default() -> void:
 	var t := _TraitDef.new()
 	t.id = &"sleepy"
@@ -106,8 +92,6 @@ func test_custom_trait_replaces_default() -> void:
 	assert_that(reg.all().size()).is_equal(15)
 	var g: TraitDef = reg.get_trait(&"sleepy")
 	assert_that(g.effect_value).is_equal(0.5)
-
-
 
 func test_trait_serialize_roundtrip_single() -> void:
 	var t: TraitDef = reg.get_trait(&"sleepy")
@@ -120,7 +104,6 @@ func test_trait_serialize_roundtrip_single() -> void:
 	assert_that(t2.rarity).is_equal(t.rarity)
 	assert_that(t2.tags).is_equal(t.tags)
 	assert_that(t2.modifier_for(t.effect_type)).is_equal(t.effect_value)
-
 
 func test_trait_serialize_roundtrip_multi_effect() -> void:
 	var t: TraitDef = reg.get_trait(&"restless")

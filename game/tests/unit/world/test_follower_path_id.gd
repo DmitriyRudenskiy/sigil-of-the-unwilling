@@ -15,7 +15,6 @@ func test_popunit_path_id_roundtrip() -> void:
 	assert_that(back.path_id).is_equal(&"archivist")
 	assert_that(back.uid).is_equal(7)
 
-
 func test_popunit_path_id_default_empty() -> void:
 	var u: _PopUnit = _PopUnit.new()
 	var d: Dictionary = u.serialize()
@@ -23,7 +22,6 @@ func test_popunit_path_id_default_empty() -> void:
 
 	var back: _PopUnit = _PopUnit.deserialize(d)
 	assert_bool(back.path_id.is_empty()).is_true()
-
 
 func test_popunit_path_id_missing_key_stays_default() -> void:
 	var back: _PopUnit = _PopUnit.deserialize({"uid": 3, "state": 1})

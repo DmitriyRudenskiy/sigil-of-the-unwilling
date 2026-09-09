@@ -1,9 +1,6 @@
 class_name BattleRules
 extends RefCounted
 
-
-
-
 static func can_luck(unit) -> bool:
     if unit == null or not unit.has_method("has_tag"):
         return false
@@ -16,7 +13,6 @@ static func can_luck(unit) -> bool:
         return false
 
     return true
-
 
 static func can_morale(unit) -> bool:
     if unit == null or not unit.has_method("has_tag"):
@@ -32,7 +28,6 @@ static func can_morale(unit) -> bool:
         return false
 
     return true
-
 
 static func damage_multiplier(
     attacker,
@@ -67,9 +62,6 @@ static func damage_multiplier(
 
     return 1.0
 
-
-## TASK_06: общая оценка базового урона атакующего (min, max) на весь стек.
-## Используется и в расчёте, и в превью — один и тот же диапазон.
 static func _damage_range(attacker) -> Vector2i:
     var stats: UnitStats = attacker.stack.stats
     var count: int = attacker.get_count()
@@ -77,7 +69,6 @@ static func _damage_range(attacker) -> Vector2i:
     var max_base: int = int(ceil(float(stats.base_damage) * 1.25)) * count
     max_base = max(max_base, min_base)
     return Vector2i(min_base, max_base)
-
 
 static func calculate_attack(
     attacker,
@@ -133,7 +124,6 @@ static func calculate_attack(
         "luck": luck,
         "is_retaliation": false,
     }
-
 
 static func preview_text(
     attacker,

@@ -10,7 +10,6 @@ const _Registry = preload("res://scripts/demographics/CharacterRegistry.gd")
 var city: Variant
 var center := Vector2i(5, 5)
 
-
 func before_test() -> void:
 	city = _City.new()
 	city.uid = 7
@@ -18,7 +17,6 @@ func before_test() -> void:
 	city.stronghold_level = 1
 	city.add_followers(10)
 	city.storage[&"industry"] = 200.0
-
 
 func _chain_def(id: StringName, workers: int) -> Variant:
 	var d := UniqueBuilding.Def.new()
@@ -34,14 +32,12 @@ func _chain_def(id: StringName, workers: int) -> Variant:
 	d.production_chain = c
 	return d
 
-
 func test_no_housing_base() -> void:
 	assert_that(city.housing_total()).is_equal(0)
 	assert_that(city.pop_cap()).is_equal(GameNumbers.POP_CAP_BY_STRONGHOLD[0])
 	assert_that(city.free_housing(PopUnit.State.WORKER)).is_equal(GameNumbers.BASE_SETTLEMENT_HOUSING)
 	assert_that(city.free_housing(PopUnit.State.SCHOLAR)).is_equal(0)
 	assert_that(city.immigrant_state()).is_equal(PopUnit.State.WORKER)
-
 
 func test_shack_extends_cap_and_housing() -> void:
 	var cap_before: int = city.pop_cap()
@@ -53,7 +49,6 @@ func test_shack_extends_cap_and_housing() -> void:
 	assert_that(city.housing_total()).is_equal(10)
 	assert_that(city.free_housing(PopUnit.State.WORKER)).is_equal(10 + 10 - city.count_state(PopUnit.State.WORKER))
 
-
 func test_manor_and_barracks_housing() -> void:
 	var b1: Variant = city.build_building(_Defs.manor(), HexUtils.get_neighbor(center, 1))
 	assert_that(b1).is_not_null()
@@ -61,7 +56,6 @@ func test_manor_and_barracks_housing() -> void:
 	assert_that(b2).is_not_null()
 	assert_that(city.housing_capacity(PopUnit.State.SCHOLAR)).is_equal(2)
 	assert_that(city.housing_capacity(PopUnit.State.MILITIA)).is_equal(5)
-
 
 func test_immigrant_state_priority() -> void:
 	var b1: Variant = city.build_building(_Defs.barracks(), HexUtils.get_neighbor(center, 0))
@@ -79,7 +73,6 @@ func test_immigrant_state_priority() -> void:
 		city.add_migrant(PopUnit.State.SCHOLAR)
 	assert_that(city.immigrant_state()).is_equal(-1)
 
-
 func test_assignment_fills_buildings() -> void:
 	var d: Variant = _chain_def(&"farm_a", 2)
 	var bld: Variant = city.build_building(d, HexUtils.get_neighbor(center, 0))
@@ -96,7 +89,6 @@ func test_assignment_fills_buildings() -> void:
 	assert_that(assigned_count).is_equal(2)
 	assert_that(_Assignment.rebalance(city)).is_equal(0)
 
-
 func test_assignment_never_overfills() -> void:
 	var d: Variant = _chain_def(&"mine_a", 4)
 	var bld: Variant = city.build_building(d, HexUtils.get_neighbor(center, 0))
@@ -111,7 +103,6 @@ func test_assignment_never_overfills() -> void:
 	city.add_migrant(PopUnit.State.WORKER)
 	_Assignment.rebalance(city)
 	assert_that(int(bld.assigned_workers)).is_equal(4)
-
 
 func test_release_building_frees_workers() -> void:
 	var d: Variant = _chain_def(&"mill_a", 2)
@@ -128,7 +119,6 @@ func test_release_building_frees_workers() -> void:
 		if u.state == PopUnit.State.WORKER and u.assigned_to == -1:
 			free_workers += 1
 	assert_that(free_workers).is_equal(4)
-
 
 func test_orphans_released_on_rebalance() -> void:
 	var d: Variant = _chain_def(&"bakery_a", 1)
@@ -147,7 +137,6 @@ func test_orphans_released_on_rebalance() -> void:
 			orphan += 1
 	assert_that(orphan).is_equal(0)
 
-
 func test_building_def_applies_chain_upkeep_zone() -> void:
 	var d: Variant = _chain_def(&"smithy_a", 2)
 	d.default_upkeep[&"wood"] = 2.0
@@ -161,7 +150,6 @@ func test_building_def_applies_chain_upkeep_zone() -> void:
 	assert_that(int(bld.zone_type)).is_equal(2)
 	bld.get_production_chain().building_eff = 3.0
 	assert_that(float(d.production_chain.building_eff)).is_equal(1.0)
-
 
 func test_scholar_promotion() -> void:
 	var b1: Variant = city.build_building(_Defs.manor(), HexUtils.get_neighbor(center, 0))
@@ -182,7 +170,6 @@ func test_scholar_promotion() -> void:
 	var city_report2: Dictionary = (report2.cities as Array)[0]
 	assert_that(int(city_report2.get("promoted", 0))).is_equal(0)
 
-
 func test_scholar_promotion_needs_manor() -> void:
 	city.ensure_resource_ctx().add(&"scholar_points", 3.0)
 	var reg := _Registry.new()
@@ -197,10 +184,9 @@ func test_scholar_promotion_needs_manor() -> void:
 	assert_that(city.count_state(PopUnit.State.SCHOLAR)).is_equal(0)
 	assert_bool(city.resource_ctx.amount(&"scholar_points") > 2.0).is_true()
 
-
 func test_scholar_promotion_respects_manor_slots() -> void:
 	var b1: Variant = city.build_building(_Defs.manor(), HexUtils.get_neighbor(center, 0))
-	assert_that(b1).is_not_null()  
+	assert_that(b1).is_not_null()
 	city.ensure_resource_ctx().add(&"scholar_points", 5.0)
 	var reg := _Registry.new()
 	var proc := _DemoProc.new()

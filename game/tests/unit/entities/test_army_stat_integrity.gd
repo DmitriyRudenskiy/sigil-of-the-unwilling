@@ -15,7 +15,7 @@ func test_artifact_mods_do_not_compound() -> void:
 
 	var dirty: Array[UnitStack] = []
 	var dirty_stack = ctrl.army[0].duplicate_stack()
-	dirty_stack.stats.hp = base_hp + 10  
+	dirty_stack.stats.hp = base_hp + 10
 	dirty_stack.count = 50
 	dirty.append(dirty_stack)
 

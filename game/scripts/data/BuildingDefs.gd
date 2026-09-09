@@ -10,7 +10,6 @@ const PopUnit := preload("res://scripts/world/PopUnit.gd")
 
 static var _raw_cache: Array = []
 
-
 static func _ensure_loaded() -> void:
 	if not _raw_cache.is_empty():
 		return
@@ -22,7 +21,6 @@ static func _ensure_loaded() -> void:
 	var data: Variant = JSON.parse_string(text)
 	if data is Array:
 		_raw_cache = data
-
 
 static func _build_def(raw: Dictionary) -> UniqueBuilding.Def:
 	var d := _mk(
@@ -43,7 +41,6 @@ static func _build_def(raw: Dictionary) -> UniqueBuilding.Def:
 		d.default_upkeep[StringName(k)] = float(upkeep_raw[k])
 	return d
 
-
 static func _levels(raw_levels: Array) -> Array:
 	var out: Array = []
 	for r in raw_levels:
@@ -56,10 +53,8 @@ static func _levels(raw_levels: Array) -> Array:
 			))
 	return out
 
-
 static func _state(name: String) -> int:
 	return PopUnit.State[StringName(name)]
-
 
 static func _chain_from_dict(raw: Dictionary) -> ProductionChain:
 	return _chain(
@@ -69,8 +64,6 @@ static func _chain_from_dict(raw: Dictionary) -> ProductionChain:
 		raw.get("outputs", {})
 	)
 
-
-
 static func all() -> Array[UniqueBuilding.Def]:
 	_ensure_loaded()
 	var out: Array[UniqueBuilding.Def] = []
@@ -79,14 +72,12 @@ static func all() -> Array[UniqueBuilding.Def]:
 			out.append(_build_def(raw))
 	return out
 
-
 static func def_by_id(id: StringName) -> UniqueBuilding.Def:
 	_ensure_loaded()
 	for raw in _raw_cache:
 		if raw is Dictionary and String(raw.get("id", "")) == String(id):
 			return _build_def(raw)
 	return null
-
 
 static func great_temple() -> UniqueBuilding.Def:
 	return def_by_id(&"great_temple")
@@ -133,7 +124,6 @@ static func shack() -> UniqueBuilding.Def:
 static func manor() -> UniqueBuilding.Def:
 	return def_by_id(&"manor")
 
-
 static func _mk(
 	id: StringName, display_name: String, requires_site: bool, levels: Array
 ) -> UniqueBuilding.Def:
@@ -143,7 +133,6 @@ static func _mk(
 	d.requires_site = requires_site
 	d.levels = levels
 	return d
-
 
 static func _chain(
 	id: StringName, workers: int,
@@ -157,7 +146,6 @@ static func _chain(
 	for k in outputs:
 		c.outputs[StringName(k)] = float(outputs[k])
 	return c
-
 
 static func _req(
 	industry: float, followers := 0, res := &"", amount := 0.0

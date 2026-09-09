@@ -28,7 +28,7 @@ const _TerrainCostTable = preload("res://scripts/data/TerrainCostTable.gd")
 @export var max_move_points: float = 10.0
 
 var current_cell: Vector2i = Vector2i(5, 5)
-var previous_cell: Vector2i = Vector2i(-1, -1)  
+var previous_cell: Vector2i = Vector2i(-1, -1)
 var move_points: float = 10.0
 var path: Array[Vector2i] = []
 var pending_cell: Vector2i = Vector2i(-1, -1)
@@ -39,16 +39,13 @@ var planned_path: Array[Vector2i] = []
 
 var _map_gen: MapGenerator
 
-
 func get_map_gen() -> MapGenerator:
 	return _map_gen
-
 
 func setup(map: MapGenerator) -> void:
 	_map_gen = map
 	_place_hero_on_map()
 	move_points = get_daily_movement_points()
-
 
 func _place_hero_on_map() -> void:
 	for y in _map_gen.map_height:
@@ -59,7 +56,6 @@ func _place_hero_on_map() -> void:
 				previous_cell = cell
 				_emit_position_update()
 				return
-
 
 func _terrain_cost(cell: Vector2i, levitation: bool = false) -> float:
 	if cell.x < 0 or cell.x >= _map_gen.map_width or cell.y < 0 or cell.y >= _map_gen.map_height:
@@ -74,7 +70,6 @@ func _terrain_cost(cell: Vector2i, levitation: bool = false) -> float:
 
 	var terrain_id := _map_gen.get_terrain_id(cell)
 	return _TerrainCostTable.get_cost_with_effects_by_id(terrain_id, levitation)
-
 
 func on_map_clicked(cell: Vector2i) -> void:
 	if is_moving or _map_gen == null or not _map_gen.has_valid_tilemap():
@@ -120,8 +115,6 @@ func on_map_clicked(cell: Vector2i) -> void:
 	pending_cell = cell
 	pending_path = affordable
 
-	
-	
 	var levitation := _has_artifact_effect(&"boots_levitation")
 	var cost_fn := func(c: Vector2i) -> float: return _terrain_cost(c, levitation)
 	var dist_arr := _HexPathfinding.dijkstra(current_cell, move_points, cost_fn, _map_gen.map_width, _map_gen.map_height)
@@ -137,13 +130,12 @@ func on_map_clicked(cell: Vector2i) -> void:
 	var cost := 0.0
 	for i in range(1, affordable.size()):
 		cost += _terrain_cost(affordable[i], levitation)
-	
+
 	var remaining := move_points - cost
 	var suffix := ""
-	
+
 	path_previewed.emit("Путь: %d кл., стоимость: %.1f, останется: %.1f. Клик ещё раз — идти. ПКМ — отмена." % [
 		affordable.size() - 1, cost, remaining])
-
 
 func move_to_cell(cell: Vector2i) -> bool:
 	if is_moving or _map_gen == null:
@@ -162,7 +154,6 @@ func move_to_cell(cell: Vector2i) -> bool:
 	_start_moving()
 	return true
 
-
 func can_reach(cell: Vector2i) -> bool:
 	if cell == current_cell:
 		return true
@@ -170,10 +161,9 @@ func can_reach(cell: Vector2i) -> bool:
 	if goal == Vector2i(-1, -1):
 		return false
 	if goal == current_cell:
-		return true  
+		return true
 	var affordable := _get_affordable_path(cell)
 	return affordable.size() >= 2 and affordable.back() == goal
-
 
 func reach_problem(cell: Vector2i) -> String:
 	if cell == current_cell:
@@ -184,9 +174,8 @@ func reach_problem(cell: Vector2i) -> String:
 	if goal == current_cell:
 		return ""
 	if _full_path_to(goal).size() < 2:
-		return "unreachable"  
+		return "unreachable"
 	return "" if can_reach(cell) else "insufficient_mp"
-
 
 func _full_path(cell: Vector2i) -> Array[Vector2i]:
 	if _map_gen == null:
@@ -199,7 +188,6 @@ func _full_path(cell: Vector2i) -> Array[Vector2i]:
 	var base := _base_blocked() if _map_gen.enemy_stacks.has(cell) else {}
 	return _full_path_to(goal, base)
 
-
 func _enemy_aura_blocked(exempt: Vector2i) -> Dictionary:
 	var blocked: Dictionary = {}
 	var stacks := _map_gen.enemy_stacks
@@ -210,14 +198,12 @@ func _enemy_aura_blocked(exempt: Vector2i) -> Dictionary:
 				blocked[nb] = true
 	return blocked
 
-
 func _contacts_only_with(cell: Vector2i, enemy_cell: Vector2i) -> bool:
 	var stacks := _map_gen.enemy_stacks
 	for nb in _HexUtils.get_all_neighbors(cell):
 		if nb != enemy_cell and stacks.has(nb):
 			return false
 	return true
-
 
 func _base_blocked() -> Dictionary:
 	var blocked: Dictionary = _map_gen.get_blocked_cells().duplicate()
@@ -234,12 +220,10 @@ func _base_blocked() -> Dictionary:
 				blocked[cell] = true
 	return blocked
 
-
 func _full_path_to(goal: Vector2i, base: Dictionary = {}) -> Array[Vector2i]:
 	var blocked: Dictionary = base.duplicate() if not base.is_empty() else _base_blocked()
 	blocked.merge(_enemy_aura_blocked(goal))
 	return _HexPathfinding.find_path(current_cell, goal, blocked, _map_gen.map_width, _map_gen.map_height, "astar")
-
 
 func _resolve_enemy_goal(goal: Vector2i) -> Vector2i:
 	var stacks := _map_gen.enemy_stacks
@@ -256,7 +240,7 @@ func _resolve_enemy_goal(goal: Vector2i) -> Vector2i:
 			continue
 		var c: float
 		if nb == current_cell:
-			c = 0.0  
+			c = 0.0
 		else:
 			var p := _full_path_to(nb, base)
 			if p.size() < 2:
@@ -267,13 +251,11 @@ func _resolve_enemy_goal(goal: Vector2i) -> Vector2i:
 			best = nb
 	return best
 
-
 func _path_cost(path: Array[Vector2i], levitation: bool = false) -> float:
 	var c := 0.0
 	for i in range(1, path.size()):
 		c += _terrain_cost(path[i], levitation)
 	return c
-
 
 func _is_contact_position(cell: Vector2i) -> bool:
 	if _map_gen == null:
@@ -286,7 +268,6 @@ func _is_contact_position(cell: Vector2i) -> bool:
 			return true
 	return false
 
-
 func teleport(cell: Vector2i) -> void:
 	if _map_gen == null or not _map_gen.is_walkable(cell):
 		return
@@ -296,7 +277,6 @@ func teleport(cell: Vector2i) -> void:
 	previous_cell = cell
 	_emit_position_update()
 	hero_moved.emit(cell)
-
 
 func _get_affordable_path(cell: Vector2i) -> Array[Vector2i]:
 	var found := _full_path(cell)
@@ -314,7 +294,6 @@ func _get_affordable_path(cell: Vector2i) -> Array[Vector2i]:
 		affordable.append(found[i])
 	return affordable
 
-
 func cancel_pending(clear_text: bool = true) -> void:
 	pending_cell = Vector2i(-1, -1)
 	pending_path = []
@@ -328,7 +307,6 @@ func cancel_planned_path() -> void:
 	planned_path.clear()
 	planned_route_changed.emit(false)
 
-
 func _set_moving(moving: bool) -> void:
 	is_moving = moving
 	GameEventBus.hero_moving_changed.emit(moving)
@@ -339,7 +317,6 @@ func _start_moving() -> void:
 	GameLogger.trace("🚀 Starting movement. Path size: %d" % path.size(), "Movement")
 	_set_moving(true)
 	_move_next_step()
-
 
 func _move_next_step() -> void:
 	if path.size() < 2:
@@ -386,7 +363,6 @@ func _move_next_step() -> void:
 
 	move_requested.emit(target_pos, 0.35, _on_step_complete.bind(next_cell))
 
-
 func _on_step_complete(cell: Vector2i) -> void:
 	GameLogger.trace("✅ Step complete: %s" % str(cell), "Movement")
 	previous_cell = current_cell
@@ -414,7 +390,6 @@ func _on_step_complete(cell: Vector2i) -> void:
 
 	_move_next_step()
 
-
 func end_turn_movement() -> void:
 	_set_moving(false)
 	if not planned_path.is_empty():
@@ -435,7 +410,6 @@ func auto_follow_at_turn_start() -> void:
 	path = planned_path.duplicate()
 	_start_moving()
 
-
 func force_stop() -> void:
 	var was_moving := is_moving
 	_set_moving(false)
@@ -446,13 +420,11 @@ func force_stop() -> void:
 	if was_moving:
 		movement_finished.emit(current_cell)
 
-
 func _emit_position_update() -> void:
 	if _map_gen and _map_gen.has_valid_tilemap():
 		request_set_position.emit(_map_gen.map_to_local(current_cell))
 	else:
 		request_set_position.emit(Vector2(current_cell.x * 64 + 32, current_cell.y * 56 + 28))
-
 
 func _has_artifact_effect(effect: StringName) -> bool:
 	return _artifact_effect_fn.call(effect) if _artifact_effect_fn.is_valid() else false

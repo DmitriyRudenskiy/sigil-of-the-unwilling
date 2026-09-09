@@ -1,9 +1,7 @@
 extends GdUnitTestSuite
 
-
 const _HeroArmyController = preload("res://scripts/entities/HeroArmyController.gd")
 const _HeroResources = preload("res://scripts/entities/HeroResources.gd")
-
 
 func test_army_serialize() -> void:
 	var army := _HeroArmyController.new()
@@ -21,8 +19,6 @@ func test_army_serialize() -> void:
 
 	army.free()
 	army2.free()
-
-
 
 func test_resources_roundtrip() -> void:
 	var res := _HeroResources.new()
@@ -45,8 +41,6 @@ func test_resources_roundtrip() -> void:
 	res.free()
 	res2.free()
 
-
-
 func test_army_empty() -> void:
 	var army := _HeroArmyController.new()
 	army.army = []
@@ -61,7 +55,6 @@ func test_army_empty() -> void:
 	army.free()
 	army2.free()
 
-
 func test_army_cap() -> void:
 	var army := _HeroArmyController.new()
 	for i in 12:
@@ -71,7 +64,6 @@ func test_army_cap() -> void:
 	assert_int(for_battle.size()).is_equal(7).override_failure_message("get_army_for_battle should cap at 7")
 
 	army.free()
-
 
 func test_default_army_cap() -> void:
 	var army := _HeroArmyController.new()

@@ -15,8 +15,6 @@ func _make_follower(uid: int, path: StringName) -> Follower:
 	f.path = path
 	return f
 
-
-## R8: база героя — TestFactories.make_hero, здесь только специфика сукцессии.
 func _succession_hero(path := &"archivist") -> HeroController:
 	var h := TestFactories.make_hero(path)
 	h.magic.spellbook = [&"firebolt", &"heal"]
@@ -32,7 +30,6 @@ func _succession_hero(path := &"archivist") -> HeroController:
 	h.strategic_resources.add(&"wood", 100)
 	h.strategic_resources.add(&"stone", 50)
 	return h
-
 
 func _make_city(uid: int, name: StringName, is_capital: bool) -> City:
 	var c := _City.new()
@@ -51,8 +48,6 @@ func _make_city(uid: int, name: StringName, is_capital: bool) -> City:
 	c.storage = {"industry": 600.0, "gold": 150.0}
 	return c
 
-
-
 func test_select_returns_same_path_follower() -> void:
 	var h := _succession_hero(&"archivist")
 	var f1 := _make_follower(1, &"archivist")
@@ -63,7 +58,6 @@ func test_select_returns_same_path_follower() -> void:
 	assert_that(succ).is_not_null()
 	assert_that(succ.path).is_equal(&"archivist")
 	h.free()
-
 
 func test_select_never_different_path() -> void:
 	var h := _succession_hero(&"archivist")
@@ -76,7 +70,6 @@ func test_select_never_different_path() -> void:
 	assert_that(succ.path).is_equal(&"archivist")
 	h.free()
 
-
 func test_select_null_when_no_eligible() -> void:
 	var h := _succession_hero(&"archivist")
 	var other := _make_follower(3, &"warrior")
@@ -86,15 +79,12 @@ func test_select_null_when_no_eligible() -> void:
 	assert_that(succ).is_null()
 	h.free()
 
-
 func test_select_null_when_no_followers() -> void:
 	var h := _succession_hero(&"archivist")
 	h.followers = []
 	var succ := _Succession.new().select_successor(h)
 	assert_that(succ).is_null()
 	h.free()
-
-
 
 func test_build_copies_path_magic_inventory() -> void:
 	var h := _succession_hero(&"archivist")
@@ -109,8 +99,6 @@ func test_build_copies_path_magic_inventory() -> void:
 	assert_bool(succ.inventory.equipped[_Artifact.Slot.WEAPON] != h.inventory.equipped[_Artifact.Slot.WEAPON]).is_true()
 	assert_that(succ.strategic_resources.get_all()).is_equal(h.strategic_resources.get_all())
 	h.free(); succ.free()
-
-
 
 func test_transfer_preserves_cities_identical() -> void:
 	var src := _make_city(1, &"Riverport", false)
@@ -142,7 +130,6 @@ func test_transfer_preserves_cities_identical() -> void:
 	assert_float(total_storage).is_equal_approx(1800.0, 0.01)
 	h.free(); succ.free(); mgr.free()
 
-
 func test_transfer_reregisters_fresh_manager() -> void:
 	var cap := _make_city(2, &"Highhold", true)
 	var cities: Array[City] = [cap]
@@ -158,8 +145,6 @@ func test_transfer_reregisters_fresh_manager() -> void:
 	assert_bool(re_cap != cap).is_true()
 	h.free(); succ.free(); dest.free()
 
-
-
 func test_resurrect_requires_temple_and_resources() -> void:
 	var no_temple := _make_city(1, &"Village", false)
 	no_temple.buildings = []
@@ -174,8 +159,6 @@ func test_resurrect_requires_temple_and_resources() -> void:
 	var poor := _make_city(3, &"PoorTown", true)
 	poor.storage = {"industry": 100.0, "gold": 10.0}
 	assert_bool(_Succession.new().resurrect_hero(poor)).is_false()
-
-
 
 func test_on_hero_died_returns_successor() -> void:
 	var h := _succession_hero(&"archivist")
@@ -194,7 +177,6 @@ func test_on_hero_died_returns_successor() -> void:
 	assert_that(mgr.cities.size()).is_equal(1)
 	h.free(); succ.free(); mgr.free()
 
-
 func test_on_hero_died_null_when_no_follower() -> void:
 	var h := _succession_hero(&"archivist")
 	h.followers = []
@@ -203,8 +185,6 @@ func test_on_hero_died_null_when_no_follower() -> void:
 	var succ := controller.on_hero_died(h, null, empty_cities, null)
 	assert_that(succ).is_null()
 	h.free()
-
-
 
 func test_save_roundtrip_v4() -> void:
 	var d := _SaveData.new()
@@ -222,7 +202,6 @@ func test_save_roundtrip_v4() -> void:
 	assert_that(d2.hero.get("path_id")).is_equal("archivist")
 	assert_that(d2.successor.get("path")).is_equal("archivist")
 	assert_that(d2.legend.get("level")).is_equal(3)
-
 
 func test_migrate_v3_to_v4_defaults() -> void:
 	var v3 := {"version": 3, "run_seed": 99,

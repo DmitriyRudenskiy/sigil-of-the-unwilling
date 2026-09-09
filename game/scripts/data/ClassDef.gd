@@ -29,7 +29,6 @@ func to_dict() -> Dictionary:
 		"archetypes": archetypes.duplicate(),
 	}
 
-
 static func from_dict(data: Dictionary) -> _Self:
 	var d := _Self.new()
 	d.id = StringName(data.get("id", ""))
@@ -58,10 +57,8 @@ static func from_dict(data: Dictionary) -> _Self:
 	d.archetypes = arches
 	return d
 
-
 func is_spellcaster() -> bool:
 	return spellcasting != {} and String(spellcasting.get("type", "")).is_empty() == false
-
 
 func spellcasting_ability() -> StringName:
 	return StringName(String(spellcasting.get("ability", "")))

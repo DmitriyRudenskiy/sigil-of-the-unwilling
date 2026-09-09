@@ -1,10 +1,9 @@
 extends SceneTree
 
-
 var OUT := "res://scenes/ui/ArtifactInventoryScreen.tscn"
 
-var _ext: Array = []          
-var _node_lines: Array = []   
+var _ext: Array = []
+var _node_lines: Array = []
 
 const _DOLL_X := [258, 318, 180, 6, 68, 318, 180, 318, 6, 22, 318, 46, 258, 6, 68, 318]
 const _DOLL_Y := [6, 6, 66, 58, 58, 68, 146, 130, 160, 230, 218, 300, 298, 370, 370, 392]

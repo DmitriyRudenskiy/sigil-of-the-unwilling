@@ -1,11 +1,6 @@
-## Канонический путь боевого каста: SpellCaster + SpellRegistry (autoload "spells").
-## Мировые/боевые заклинания героя проходят именно отсюда (BattleActionResolver,
-## BattleEmulator). Карточная система (SpellbookRegistry/SpellResolver/
-## BattleSpellBridge, spells.json) — отдельная область применения: эмулятор
-## и карточный режим; боевой каст через неё не идёт.
+
 extends RefCounted
 class_name SpellCaster
-
 
 const _UNDEAD_IMMUNE_SPELLS := {
 	&"bless": true, &"cure": true, &"curse": true, &"weakness": true, &"slow": true
@@ -14,17 +9,16 @@ const _MIND_IMMUNE_SPELLS := {
 	&"curse": true, &"misfortune": true, &"weakness": true, &"slow": true
 }
 
-
 static func cast(
 	spell_id: StringName,
 	target_unit: BattleState.BattleUnit,
 	caster_hero_bonus: Dictionary,
 	target_hero_bonus: Dictionary,
 	rng: RandomNumberGenerator,
-	registry: Node = null  
+	registry: Node = null
 ) -> Dictionary:
 	var is_res := spell_id == &"resurrection"
-	# ИСПРАВЛЕНИЕ: единый путь — переданный registry или Services.resolve
+
 	var reg: Node = registry if registry != null else Services.resolve(&"spells")
 	var spell: SpellRegistry.SpellDef = reg.get_spell(spell_id)
 	if spell == null:
@@ -44,8 +38,6 @@ static func cast(
 	var sp: int = caster_hero_bonus.get("spell_power", 0)
 	var result := {"result": "success", "damage": 0, "status": -1, "resisted": resisted, "spell_id": spell_id}
 
-	# R4: спец-эффекты (cure/slow_mass/resurrection) описаны лямбдами в
-	# SpellRegistry — здесь только общий пайплайн, без match по spell_id.
 	if spell.custom_handler.is_valid():
 		result = spell.custom_handler.call(target_unit, sp, rng, result)
 	elif spell.damage_multiplier > 0:
@@ -58,7 +50,6 @@ static func cast(
 
 	return result
 
-
 static func _apply_damage(unit: BattleState.BattleUnit, dmg: int, rng: RandomNumberGenerator, result: Dictionary) -> Dictionary:
 	var hp: int = max(1, unit.get_hp())
 	var kills: int = max(1, dmg / hp)
@@ -67,14 +58,13 @@ static func _apply_damage(unit: BattleState.BattleUnit, dmg: int, rng: RandomNum
 	result.kills = kills
 	return result
 
-
 static func _check_immunity(unit: BattleState.BattleUnit, spell: Variant) -> bool:
 	if spell == null: return false
 	var s := spell as SpellRegistry.SpellDef
 	if s == null: return false
 	var spell_id: StringName = s.id
 	var spell_level: int = s.level
-	
+
 	if unit.has_tag("undead") and _UNDEAD_IMMUNE_SPELLS.has(spell_id):
 		return true
 	if unit.has_tag("dragon") and spell_level < 4:
@@ -83,7 +73,6 @@ static func _check_immunity(unit: BattleState.BattleUnit, spell: Variant) -> boo
 		if _MIND_IMMUNE_SPELLS.has(spell_id):
 			return true
 	return false
-
 
 static func _calc_resistance(unit: BattleState.BattleUnit, hero_bonus: Dictionary) -> float:
 	var base: float = 0.05 * hero_bonus.get("knowledge", 0)

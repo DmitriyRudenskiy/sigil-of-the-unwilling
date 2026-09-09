@@ -7,6 +7,5 @@ class_name ArtifactChest
 @export var is_opened: bool = false
 @export var cell: Vector2i = Vector2i(-1, -1)
 
-
 func open() -> void:
     is_opened = true

@@ -1,7 +1,5 @@
 class_name CityGrowthService
 extends RefCounted
-# R3: рост города (еда, порог, тактовый цикл) вынесен из City.gd (паттерн BoroughRules).
-
 
 static func food_consumption(city: City) -> float:
 	return city.count_state(PopUnit.State.WORKER) * GameNumbers.FOOD_PER_WORKER \
@@ -9,15 +7,12 @@ static func food_consumption(city: City) -> float:
 		+ city.count_state(PopUnit.State.FOLLOWER) * GameNumbers.FOOD_PER_FOLLOWER \
 		+ city.count_state(PopUnit.State.SCHOLAR) * GameNumbers.FOOD_PER_SCHOLAR
 
-
 static func net_food(city: City) -> float:
 	return float(city.get_yield()[&"food"]) - food_consumption(city)
-
 
 static func growth_threshold(city: City) -> float:
 	return GameNumbers.GROWTH_THRESHOLD_BASE \
 		* pow(float(maxi(1, city.pop_capped())), GameNumbers.GROWTH_THRESHOLD_EXP)
-
 
 static func process_turn(city: City, turn: int) -> Dictionary:
 	var switched := 0

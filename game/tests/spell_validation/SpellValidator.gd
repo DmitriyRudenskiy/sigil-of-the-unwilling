@@ -31,7 +31,6 @@ static func _load_src(path: String) -> Script:
 
 var _report_script: Script
 
-
 const TEMPLATES := {
 	"DIRECT_DAMAGE":    ["amount", "target"],
 	"HARD_REMOVAL":     [],
@@ -110,7 +109,7 @@ const MAX_DESC_LENGTH := 200
 const ID_PATTERN := "^[a-z][a-z0-9_]*$"
 
 var report
-var _spells = []           
+var _spells = []
 var _ids_seen = {}
 var _names_seen = {}
 var _baseline: Dictionary = {}
@@ -147,7 +146,6 @@ static func _normalize_numbers(data: Dictionary) -> Dictionary:
 		else:
 			out[k] = v
 	return out
-
 
 func validate_file(path: String) -> bool:
 	report = _report_script.new()
@@ -204,7 +202,6 @@ func _parse(text: String) -> bool:
 		return false
 
 	return true
-
 
 func _validate_entry(entry, index: int) -> void:
 	if not (entry is Dictionary):
@@ -294,7 +291,6 @@ func _require_field(entry: Dictionary, field: String, code: String, index: int) 
 		var sid: String = str(entry.get("id", ""))
 		report.error(code, "Missing required field '%s' in entry #%d" % [field, index], sid)
 
-
 func _validate_condition(condition: Dictionary, spell_id: String) -> void:
 	for key in condition:
 		if not VALID_CONDITION_KEYS.has(key):
@@ -310,7 +306,6 @@ func _validate_condition(condition: Dictionary, spell_id: String) -> void:
 		elif key in ["target_is_damaged", "target_is_flying", "attacker_unblocked"]:
 			if not (val is bool):
 				report.error("E211", "condition '%s' must be a bool" % key, spell_id)
-
 
 func _validate_secondary_effects(effects: Array, spell_id: String) -> void:
 	for i in effects.size():
@@ -328,7 +323,6 @@ func _validate_secondary_effects(effects: Array, spell_id: String) -> void:
 				report.error("E313", "Secondary effect '%s' requires 'count' or 'amount'" % eff_type, spell_id)
 			elif not (count is int or count is float) or int(count) < 1:
 				report.error("E314", "Secondary effect '%s' count/amount must be >= 1" % eff_type, spell_id)
-
 
 func _validate_template_semantics(
 	template: String, params: Dictionary, condition: Dictionary,
@@ -534,7 +528,6 @@ func _v_market_niche(params: Dictionary, sid: String) -> void:
 		if not params.has("trigger_effect"):
 			report.error("E447", "trigger_on_discard requires 'trigger_effect'", sid)
 
-
 func _validate_uniqueness() -> void:
 	pass
 
@@ -578,7 +571,6 @@ func save_baseline(path: String) -> bool:
 	fa.store_string(JSON.stringify(data, "\t"))
 	fa.close()
 	return true
-
 
 func _validate_balance() -> void:
 	var template_counts = {}
@@ -626,7 +618,6 @@ func _validate_balance() -> void:
 			sum_cost += int(entry.get("cost", 0))
 	if total > 0:
 		report.stats["avg_cost"] = float(sum_cost) / float(total)
-
 
 func _check_int_range(val, lo: int, hi: int, code: String, field: String, sid: String) -> void:
 	if val == null:

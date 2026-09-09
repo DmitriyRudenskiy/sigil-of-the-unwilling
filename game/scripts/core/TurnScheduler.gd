@@ -8,7 +8,6 @@ signal turn_completed(turn: int, report: Dictionary)
 var _processors: Array[TurnPhaseProcessor] = []
 var _turn := 0
 
-
 func register_processor(proc: TurnPhaseProcessor) -> void:
 	if proc == null or _processors.has(proc):
 		return
@@ -16,14 +15,11 @@ func register_processor(proc: TurnPhaseProcessor) -> void:
 	_processors.sort_custom(func(a: TurnPhaseProcessor, b: TurnPhaseProcessor) -> bool:
 		return a.get_priority() < b.get_priority())
 
-
 func unregister_processor(proc: TurnPhaseProcessor) -> void:
 	_processors.erase(proc)
 
-
 func get_processors() -> Array[TurnPhaseProcessor]:
 	return _processors
-
 
 func execute_turn(ctx: TurnContext) -> Dictionary:
 	if ctx == null:
@@ -47,7 +43,6 @@ func execute_turn(ctx: TurnContext) -> Dictionary:
 
 	turn_completed.emit(_turn, report)
 	return report
-
 
 func get_turn() -> int:
 	return _turn

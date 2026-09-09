@@ -108,7 +108,6 @@ func _bench_json_parse() -> void:
 		times.append((t1 - t0) / 1000.0)
 	_record("JSON.parse (save payload)", times)
 
-## Из TestBattleRules (root): бой 7 стаков на 7 стаков (по 15 юнитов) < 1000 мс.
 func test_battle_7v7_performance_under_1000ms() -> void:
 	var units := UnitRegistry.new()
 	units.ensure_definitions()
@@ -121,8 +120,7 @@ func test_battle_7v7_performance_under_1000ms() -> void:
 	for k in keys:
 		var st: UnitStats = units.get_definition(k)
 		assert_bool(st != null).is_true()
-		# emulate_battle собирает UnitStats из полей spec'а, а не из
-		# реестра — передаём реальные статы, иначе бой из дефолтных 3/50 не решится.
+
 		var spec := {
 			"id": k, "name": k, "count": 15,
 			"attack": st.attack, "base_damage": st.base_damage,
@@ -142,7 +140,6 @@ func test_battle_7v7_performance_under_1000ms() -> void:
 	assert_int(int(report.get("turns", 0))).is_greater(0)
 	assert_float(ms).is_less(1000.0)
 	units.free()
-
 
 func test_benchmarks_run_and_report_finite_times() -> void:
 	_bench_map_generation()

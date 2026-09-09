@@ -1,12 +1,9 @@
 extends Node
-## Центральная точка композиции сервисов.
 
 var registry := ServiceRegistry.new()
 
-
 func _ready() -> void:
 	_register_core_services()
-
 
 func _register_core_services() -> void:
 	registry.register_singleton(&"services", self)
@@ -26,14 +23,11 @@ func _register_core_services() -> void:
 
 	registry.register_singleton(&"persistence", WorldPersistence.new())
 
-
 func resolve(key: StringName) -> Object:
 	return registry.try_resolve(key)
 
-
 func register_singleton(key: StringName, service: Object) -> void:
 	registry.register_singleton(key, service)
-
 
 func clear_session() -> void:
 	registry.clear()

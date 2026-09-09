@@ -1,21 +1,6 @@
-"""
-Граничные сценарий: смена «сессии» через чистку статических кэшей.
-
-Сценарий (в живой мировой сцене):
-  1. Собираем город арены с кластером из 4 ферм.
-  2. Симулируем новую сессию: Services.clear_session() +
-     ArenaClusterSystem.reset() + ResourceIcons.clear_cache().
-  3. Проверяем, что пересчёт кластеров даёт тот же результат,
-     а resolve() снова находит автозагрузки.
-"""
 from __future__ import annotations
 
-
-
-
-
 def test_session_reset_caches(world_scene):
-    """Полная чистка кэшей на границе сессии не ломает игровой код."""
     mcp = world_scene
 
     result = mcp.execute_code("""

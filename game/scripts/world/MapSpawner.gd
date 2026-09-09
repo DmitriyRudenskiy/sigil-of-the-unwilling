@@ -9,10 +9,8 @@ var _units_registry: Node = null
 func setup_registry(units_registry: Node) -> void:
 	_units_registry = units_registry
 
-
 func _init(p_model) -> void:
 	model = p_model
-
 
 func place_villages() -> void:
 	model.village_cells.clear()
@@ -44,7 +42,6 @@ func place_villages() -> void:
 				if HexUtils.hex_distance(cell, nb) <= spacing:
 					blocked[nb] = true
 
-
 func place_resources(reachable = null, spacing := -1) -> void:
 	model.resource_cells.clear()
 	var rng := RandomNumberGenerator.new()
@@ -53,7 +50,7 @@ func place_resources(reachable = null, spacing := -1) -> void:
 		spacing = clampi(
 			int(float(model.map_width) / GameNumbers.MAP_RESOURCE_SPACING_DIVISOR),
 			GameNumbers.MAP_RESOURCE_SPACING_MIN, GameNumbers.MAP_RESOURCE_SPACING_MAX)
-	
+
 	if reachable == null:
 		reachable = _get_reachable_cells()
 
@@ -75,7 +72,7 @@ func place_resources(reachable = null, spacing := -1) -> void:
 		candidates[j] = tmp
 
 	var blocked: Dictionary = {}
-	var target := GameNumbers.MAP_RESOURCE_COUNT  
+	var target := GameNumbers.MAP_RESOURCE_COUNT
 	for cell in candidates:
 		if model.resource_cells.size() >= target:
 			break
@@ -88,7 +85,6 @@ func place_resources(reachable = null, spacing := -1) -> void:
 				if HexUtils.hex_distance(cell, nb) <= spacing:
 					blocked[nb] = true
 
-
 func place_decor() -> void:
 	model.decor_cells.clear()
 	var rng := RandomNumberGenerator.new()
@@ -96,7 +92,6 @@ func place_decor() -> void:
 	for cell in model.terrain_grid:
 		if model.terrain_grid[cell] == HexUtils.Terrain.SAND and rng.randf() < 0.04:
 			model.decor_cells[cell] = "palm" if rng.randf() > 0.5 else "cactus"
-
 
 func place_enemies(reachable = null) -> void:
 	model.enemy_stacks.clear()
@@ -106,13 +101,11 @@ func place_enemies(reachable = null) -> void:
 	if reachable == null:
 		reachable = _get_reachable_cells()
 
-	
-	
 	var candidates: Array[Vector2i] = []
 	for cell in reachable:
 		if cell in model.village_cells or model.resource_cells.has(cell):
 			continue
-		
+
 		if cell.x < 3 or cell.x >= model.map_width - 4 or cell.y < 3 or cell.y >= model.map_height - 4:
 			continue
 		candidates.append(cell)
@@ -124,7 +117,7 @@ func place_enemies(reachable = null) -> void:
 		candidates[j] = tmp
 
 	var placed := 0
-	# ИСПРАВЛЕНИЕ: единый путь
+
 	var reg: Node = Services.resolve(&"units")
 	for cell in candidates:
 		if placed >= GameNumbers.MAP_ENEMY_COUNT:
@@ -144,8 +137,6 @@ func place_enemies(reachable = null) -> void:
 		if army.size() > 0:
 			model.enemy_stacks[cell] = army
 			placed += 1
-
-
 
 func _get_reachable_cells() -> Dictionary:
 	var start_cell := Vector2i(-1, -1)

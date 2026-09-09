@@ -13,7 +13,7 @@ static func is_test_framework_run() -> bool:
 			return true
 		if arg.begins_with("--gdUnit4"):
 			return true
-		# run_tests.sh передаёт GdUnitCmdTool.gd — вариант из ТЗ это не ловил
+
 		if arg.ends_with("GdUnitCmdTool.gd"):
 			return true
 	return false

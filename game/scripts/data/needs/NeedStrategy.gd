@@ -1,4 +1,4 @@
-# Базовый класс стратегии потребностей (паттерн Strategy).
+
 class_name NeedStrategy
 extends RefCounted
 

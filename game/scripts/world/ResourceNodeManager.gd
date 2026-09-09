@@ -4,11 +4,10 @@ class_name ResourceNodeManager
 const ResourceNodeScene = preload("res://scenes/entities/ResourceNode.tscn")
 const ResourceDef = preload("res://scripts/data/ResourceDef.gd")
 
-
-var _nodes: Dictionary = {}  
+var _nodes: Dictionary = {}
 var _container: Node2D = null
 var _rng: RandomNumberGenerator = null
-var _resource_registry: Node = null  
+var _resource_registry: Node = null
 var _map_to_local_fn: Callable = Callable()
 
 enum NodeError {
@@ -42,7 +41,7 @@ func _get_hidden_by_biome(biome: String) -> Array:
 	return hidden
 
 func _resolve_registry() -> Node:
-	# ИСПРАВЛЕНИЕ: единый путь
+
 	var reg := Services.resolve(&"resources") if _resource_registry == null else _resource_registry
 	if reg == null:
 		push_error("ResourceNodeManager: resource registry unavailable")
@@ -60,17 +59,14 @@ func setup(container: Node2D, rng: RandomNumberGenerator, resource_registry: Nod
 	_resource_registry = resource_registry if resource_registry != null else Services.resolve(&"resources")
 	_map_to_local_fn = map_to_local_fn
 
-
 func apply_fog_visibility(vis) -> void:
 	if vis == null:
 		return
 	for cell in _nodes:
 		_nodes[cell].visible = vis.is_visible(cell)
 
-
 func get_node_at(cell: Vector2i) -> ResourceNode:
 	return _nodes.get(cell, null)
-
 
 func generate_nodes_for_map(map_data: Dictionary) -> void:
 	"""Generate hidden resource nodes based on biome data."""
@@ -93,7 +89,7 @@ func generate_nodes_for_map(map_data: Dictionary) -> void:
 			if biome == "":
 				continue
 
-			if _rng.randf() < 0.08:  
+			if _rng.randf() < 0.08:
 				var hidden: Array = _get_hidden_by_biome(biome)
 				if hidden.is_empty():
 					continue
@@ -102,12 +98,10 @@ func generate_nodes_for_map(map_data: Dictionary) -> void:
 				var yield_amt := _rng.randi_range(def.yield_min, def.yield_max)
 				_spawn_node(cell, def.id, yield_amt)
 
-
 func _terrain_to_biome(terrain_id: int) -> String:
 	if terrain_id < 0 or terrain_id >= HexUtils.TERRAIN_NAMES.size():
 		return ""
 	return HexUtils.TERRAIN_NAMES[terrain_id]
-
 
 func _spawn_node(cell: Vector2i, resource_id: StringName, yield_amount: int) -> ResourceNode:
 	var node: ResourceNode = ResourceNodeScene.instantiate()
@@ -118,7 +112,6 @@ func _spawn_node(cell: Vector2i, resource_id: StringName, yield_amount: int) -> 
 			node.position = _map_to_local_fn.call(cell)
 	_nodes[cell] = node
 	return node
-
 
 func try_discover(cell: Vector2i, discovery_keys: Dictionary) -> Dictionary:
 	"""Try to discover a hidden resource at cell.
@@ -158,7 +151,6 @@ func try_discover(cell: Vector2i, discovery_keys: Dictionary) -> Dictionary:
 
 	return {"error": NodeError.OK, "discovered": false}
 
-
 func try_extract(cell: Vector2i, extraction_keys: Dictionary) -> Dictionary:
 	"""Try to extract resources. Returns {"error": NodeError, "amount": int}.
 	extraction_keys: {tag: bool, skill: int, unit: bool, tool: bool, consumable: bool, fire: bool}
@@ -187,10 +179,8 @@ func try_extract(cell: Vector2i, extraction_keys: Dictionary) -> Dictionary:
 	GameEventBus.resource_extracted.emit(cell, node.resource_id, amount)
 	return {"error": NodeError.OK, "amount": amount}
 
-
 func _check_extraction(def: ResourceDef, keys: Dictionary) -> bool:
-	# FIX: Enforce strict AND logic for all extraction requirements. If a requirement
-	# is specified in the ResourceDef, it MUST be met (no early OR-style return).
+
 	if not def.extraction_tag.is_empty():
 		if not keys.get(def.extraction_tag, false):
 			return false
@@ -217,7 +207,6 @@ func _check_extraction(def: ResourceDef, keys: Dictionary) -> bool:
 
 	return true
 
-
 func tick_daily() -> Array[Vector2i]:
 	"""Called at end of day. Returns cells ready for removal."""
 	var remove_cells: Array[Vector2i] = []
@@ -235,13 +224,11 @@ func tick_daily() -> Array[Vector2i]:
 
 	return remove_cells
 
-
 func remove_node(cell: Vector2i) -> void:
 	if _nodes.has(cell):
 		var node: ResourceNode = _nodes[cell]
 		node.queue_free()
 		_nodes.erase(cell)
-
 
 func mark_discovered(cell: Vector2i) -> void:
 	var node: ResourceNode = _nodes.get(cell, null)
@@ -250,7 +237,6 @@ func mark_discovered(cell: Vector2i) -> void:
 
 	if node.is_hidden():
 		node.discover()
-
 
 func mark_exhausted(cell: Vector2i) -> void:
 	var node: ResourceNode = _nodes.get(cell, null)

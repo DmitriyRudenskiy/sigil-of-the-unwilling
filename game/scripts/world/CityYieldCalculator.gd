@@ -1,9 +1,6 @@
 class_name CityYieldCalculator
 extends RefCounted
 
-# R2: кэш доходности (get_yield) и кэш занятых клеток вынесены из City (SRP).
-# Один калькулятор на экземпляр City — City делегирует сюда.
-
 const _YIELD_KEYS := [&"food", &"industry", &"dust", &"science", &"influence"]
 
 var _exploited_cache: Dictionary = {}
@@ -11,11 +8,9 @@ var _exploited_dirty: bool = true
 var _yield_cache: Dictionary = {}
 var _yield_cache_dirty: bool = true
 
-
 func invalidate() -> void:
 	_exploited_dirty = true
 	_yield_cache_dirty = true
-
 
 func calculate(city: City) -> Dictionary:
 	if not _yield_cache_dirty:
@@ -32,7 +27,6 @@ func calculate(city: City) -> Dictionary:
 	_yield_cache = total
 	_yield_cache_dirty = false
 	return total.duplicate()
-
 
 func _ensure_exploited(city: City) -> void:
 	if not _exploited_dirty:

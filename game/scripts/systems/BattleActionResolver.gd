@@ -3,7 +3,6 @@ extends RefCounted
 
 const BattleDamageResolver = preload("res://scripts/systems/BattleDamageResolver.gd")
 
-
 static func apply_attack(
 	state: BattleState,
 	atk: BattleState.BattleUnit,
@@ -51,7 +50,6 @@ static func apply_attack(
 	state.check_end()
 	return result
 
-
 static func apply_spell(
 	state: BattleState,
 	spell_id: StringName,
@@ -60,7 +58,7 @@ static func apply_spell(
 	caster_hero_bonus: Dictionary,
 	target_hero_bonus: Dictionary,
 	rng: RandomNumberGenerator,
-	registry: Node = null  
+	registry: Node = null
 ) -> Dictionary:
 	var is_res := spell_id == &"resurrection"
 	if caster == null or target == null or not caster.is_alive():
@@ -70,7 +68,6 @@ static func apply_spell(
 	if not is_res and not target.is_alive():
 		return {"result": "invalid_target"}
 
-	# ИСПРАВЛЕНИЕ: единый путь
 	var spell_registry: Node = registry if registry != null else Services.resolve(&"spells")
 
 	var result := SpellCaster.cast(
@@ -97,7 +94,6 @@ static func apply_spell(
 	state.invalidate_board_cache()
 	state.check_end()
 	return result
-
 
 static func apply_sacrifice(
 	state: BattleState,
@@ -188,7 +184,6 @@ static func _get_hero_bonuses(
 		else int(state.attacker_hero_bonus.get(&"defense", 0))
 	return [atk_bonus, def_bonus]
 
-
 static func _apply_first_strike(
 	state: BattleState,
 	atk: BattleState.BattleUnit,
@@ -208,12 +203,10 @@ static func _apply_first_strike(
 			state.kill_unit(atk)
 	return true
 
-
 static func _get_charge_multiplier(atk: BattleState.BattleUnit) -> float:
 	if atk.has_tag("charge") and atk.distance_moved_this_turn >= 3:
 		return GameNumbers.CHARGE_MULT
 	return 1.0
-
 
 static func _apply_charge(
 	atk: BattleState.BattleUnit,
@@ -229,7 +222,6 @@ static func _apply_charge(
 	result["kills"] = min(result["kills"], def.get_count())
 	result["charge"] = true
 	return result
-
 
 static func _try_rebirth(
 	state: BattleState,

@@ -10,7 +10,6 @@ var speed: int = 0
 var defense: int = 0
 var tags: Array[String] = []
 
-
 func _init(
     p_key: String = "",
     p_display_name: String = "",
@@ -30,10 +29,8 @@ func _init(
     defense = p_defense
     tags.assign(p_tags)
 
-
 func has_tag(tag: String) -> bool:
     return tags.has(tag)
-
 
 func copy() -> UnitStats:
     return UnitStats.new(key, display_name, attack, base_damage, hp, speed, defense, tags)

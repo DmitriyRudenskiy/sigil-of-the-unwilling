@@ -3,7 +3,6 @@ extends Node
 
 const ResourceDef = preload("res://scripts/data/ResourceDef.gd")
 
-
 var hero: Node = null
 var map_gen: Node = null
 var camera: Node = null
@@ -17,9 +16,8 @@ var world_delta: Variant = null
 var persistence: Variant = null
 var visibility = null
 var resource_chain: Variant = null
-var turn_scheduler: TurnScheduler = null  
+var turn_scheduler: TurnScheduler = null
 var _resource_registry: Node = null
-
 
 signal end_turn_requested
 signal hero_moved_to(cell: Vector2i)
@@ -29,7 +27,6 @@ signal resource_extracted_at(cell: Vector2i, resource_id: StringName, amount: in
 signal reach_preview_changed(pts: Array[Vector2i], dist: Dictionary, mp: float)
 signal reach_preview_cleared
 signal marker_clicked(cell: Vector2i)
-
 
 func setup(
 	p_hero: Node, p_map_gen: Node, p_camera: Node, p_cities: Node,
@@ -63,14 +60,11 @@ func setup(
 	if terrain_resource_manager and ui_manager and ui_manager.marker_layer:
 		ui_manager.marker_layer.set_terrain_resource_markers(terrain_resource_manager)
 
-
 func _ready() -> void:
 	if hero == null or ui_manager == null:
 		_connect_hero_signals()
 		_connect_ui_signals()
 	_connect_event_bus()
-
-
 
 func _connect_hero_signals(p_hero: Node = null) -> void:
 	var h: Node = p_hero if p_hero != null else hero
@@ -89,7 +83,6 @@ func _connect_hero_signals(p_hero: Node = null) -> void:
 		if mov.reach_preview_cleared and not mov.reach_preview_cleared.is_connected(_on_reach_preview_cleared):
 			mov.reach_preview_cleared.connect(_on_reach_preview_cleared)
 
-
 func _disconnect_hero_signals(old_hero: Node = null) -> void:
 	var h: Node = old_hero if old_hero != null else hero
 	if h == null or not is_instance_valid(h):
@@ -106,8 +99,6 @@ func _disconnect_hero_signals(old_hero: Node = null) -> void:
 			mov.reach_preview_changed.disconnect(_on_reach_preview_changed)
 		if mov.has_signal("reach_preview_cleared") and mov.reach_preview_cleared.is_connected(_on_reach_preview_cleared):
 			mov.reach_preview_cleared.disconnect(_on_reach_preview_cleared)
-
-
 
 func _connect_ui_signals() -> void:
 	if ui_manager and ui_manager.get("ui") and ui_manager.get("marker_layer"):
@@ -132,11 +123,9 @@ func _connect_ui_signals() -> void:
 		if not m.city_marker_clicked.is_connected(_on_city_marker_clicked):
 			m.city_marker_clicked.connect(_on_city_marker_clicked)
 
-
 func _on_minimap_cell_activated(cell: Vector2i) -> void:
 	if map_gen and map_gen.has_valid_tilemap():
 		camera.center_on(map_gen.map_to_local(cell))
-
 
 func _refresh_visibility() -> void:
 	if visibility == null or map_gen == null:
@@ -153,11 +142,9 @@ func _refresh_visibility() -> void:
 		GameNumbers.FOG_HERO_SIGHT, GameNumbers.FOG_CITY_SIGHT):
 		map_gen.apply_fog(visibility)
 
-
 func _on_hex_borders_toggled(on: bool) -> void:
 	if ui_manager:
 		ui_manager.set_hex_borders(on)
-
 
 func _on_city_marker_clicked(city: City) -> void:
 	if hero == null or city == null or map_gen == null:
@@ -168,12 +155,9 @@ func _on_city_marker_clicked(city: City) -> void:
 	if target != hero.current_cell:
 		hero.on_map_clicked(target)
 
-
 func _refresh_city_markers() -> void:
 	if ui_manager and cities and ui_manager.get("marker_layer"):
 		ui_manager.marker_layer.set_city_markers(cities.cities)
-
-
 
 func _connect_event_bus() -> void:
 	GameEventBus.battle_won.connect(_on_battle_won)
@@ -181,8 +165,6 @@ func _connect_event_bus() -> void:
 	GameEventBus.resource_discovered.connect(_on_resource_discovered)
 	GameEventBus.resource_extracted.connect(_on_resource_extracted)
 	GameEventBus.resource_exhausted.connect(_on_resource_exhausted)
-
-
 
 func _on_hero_moved(cell: Vector2i) -> void:
 	if camera:
@@ -202,8 +184,6 @@ func _on_hero_moved(cell: Vector2i) -> void:
 	if battle_coordinator:
 		battle_coordinator.check_enemy_contact(cell)
 
-	
-	
 	var is_still_moving := false
 	if hero != null and hero.movement != null:
 		is_still_moving = hero.movement.is_moving
@@ -224,12 +204,9 @@ func _on_hero_moved(cell: Vector2i) -> void:
 			if entered != null:
 				ui_manager.open_city_screen(entered, hero.current_cell)
 
-
 func _on_movement_finished(_cell: Vector2i) -> void:
-	
-	
-	_refresh_visibility()
 
+	_refresh_visibility()
 
 func _on_village(cell: Vector2i) -> void:
 	var city: City = null
@@ -252,7 +229,6 @@ func _on_village(cell: Vector2i) -> void:
 	if city != null and ui_manager:
 		var hero_cell: Vector2i = hero.current_cell if hero else cell
 		ui_manager.open_city_screen(city, hero_cell)
-
 
 func request_end_turn() -> void:
 	_on_end_turn()
@@ -277,7 +253,6 @@ func _on_end_turn() -> void:
 
 	end_turn_requested.emit()
 
-
 func _run_turn_scheduler(month: int) -> void:
 	if turn_scheduler == null or cities == null:
 		return
@@ -294,7 +269,6 @@ func _run_turn_scheduler(month: int) -> void:
 	var report: Dictionary = turn_scheduler.execute_turn(ctx)
 	_grant_city_income(report)
 
-
 func _grant_city_income(report: Dictionary) -> void:
 	var phases: Dictionary = report.get("phases", {})
 	var income: Dictionary = phases.get(&"city_income", {})
@@ -307,18 +281,15 @@ func _grant_city_income(report: Dictionary) -> void:
 			hero.add_strategic_resource(rid, float(amount))
 			GameLogger.world("Городская дань: +%d %s" % [amount, String(rid)])
 
-
 func _on_date_changed(month: int, week: int, day: int) -> void:
 	if persistence:
 		persistence.set_date(month, week, day)
-
 
 func _on_settings_applied() -> void:
 	if camera and camera.has_method("set_zoom_level"):
 		var settings_node: Object = Services.resolve(&"settings")
 		if settings_node:
 			camera.set_zoom_level(settings_node.get_zoom())
-
 
 func _on_camera_jump(direction: String) -> void:
 	if map_gen == null:
@@ -334,44 +305,35 @@ func _on_camera_jump(direction: String) -> void:
 	if map_gen.has_valid_tilemap():
 		camera.center_on(map_gen.map_to_local(target))
 
-
 func _on_battle_won(enemy_cell: Vector2i) -> void:
 	if cities:
 		cities.add_glory(15.0, &"battle_won")
 		cities.apply_reputation(cities.capital, GameNumbers.REP_VICTORY)
 
-
 func _on_turn_ended_bus(turn: int, month: int) -> void:
 	if cities:
 		cities.on_turn_ended(month)
 
-
 func _on_marker_hovered(cell: Vector2i, cost: float, remaining: float, is_reachable: bool) -> void:
-	pass  
-
+	pass
 
 func _on_marker_clicked(cell: Vector2i, is_reachable: bool) -> void:
-	marker_clicked.emit(cell)  
-
+	marker_clicked.emit(cell)
 
 func _on_reach_preview_changed(pts: Array[Vector2i], dist: Dictionary, mp: float) -> void:
 	if ui_manager and hero:
 		ui_manager.show_reach_markers(hero.current_cell, mp, dist)
 	reach_preview_changed.emit(pts, dist, mp)
 
-
 func _on_reach_preview_cleared() -> void:
 	if ui_manager:
 		ui_manager.hide_reach_markers()
 	reach_preview_cleared.emit()
 
-
-
 func _on_resource_discovered(cell: Vector2i, resource_id: StringName) -> void:
 	GameLogger.world("Resource discovered at %s: %s" % [cell, resource_id])
 	if world_delta:
 		world_delta.add_discovered_node(cell)
-
 
 func _on_resource_extracted(cell: Vector2i, resource_id: StringName, amount: int) -> void:
 	var skill_mult: float = 1.0
@@ -385,7 +347,6 @@ func _on_resource_extracted(cell: Vector2i, resource_id: StringName, amount: int
 		GameLogger.world("Extracted %d of %s at %s (actual: %d)" % [
 			final_amount, resource_id, cell, actual])
 	resource_extracted_at.emit(cell, resource_id, final_amount)
-
 
 func _on_resource_exhausted(cell: Vector2i, resource_id: StringName) -> void:
 	GameLogger.world("Resource exhausted at %s: %s" % [cell, resource_id])

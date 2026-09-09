@@ -1,7 +1,5 @@
 extends GdUnitTestSuite
 
-
-
 func test_oak_discovery_by_nature_sense() -> void:
 	var def = Resources.get_resource(&"oak")
 	assert_that(def).is_not_null()

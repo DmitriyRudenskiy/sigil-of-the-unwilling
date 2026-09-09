@@ -6,7 +6,7 @@ const SchoolType = preload("res://scripts/data/SchoolType.gd")
 var _hero: HeroController = null
 var _theme: Theme = null
 
-var _tex_cache: Dictionary = {}  
+var _tex_cache: Dictionary = {}
 
 var bp_page := 0
 var bp_slots: Array = []
@@ -402,8 +402,7 @@ func _tex(path: String, w: int, h: int) -> Texture2D:
 	if res is Texture2D:
 		var img: Image = res.get_image()
 		if img != null:
-		
-		
+
 			if img.get_width() != w or img.get_height() != h:
 				img.resize(w, h, Image.INTERPOLATE_BILINEAR)
 			var tex := ImageTexture.create_from_image(img)

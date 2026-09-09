@@ -1,13 +1,10 @@
-## Область применения: мост карточной системы (спеллы spells.json) → боевые
-## эффекты; используется эмулятором (BattleEmulator). Не часть канонического
-## пути боевого каста (SpellCaster + SpellRegistry).
+
 extends RefCounted
 class_name BattleSpellBridge
 
 const _Def = preload("res://scripts/data/SpellbookDef.gd")
 const _Enums = preload("res://scripts/data/SpellEnums.gd")
 const _SE = preload("res://scripts/data/StatusEffects.gd")
-
 
 static var KEYWORD_TO_EFFECT: Dictionary = {
 	"HASTE": _SE.Effect.HASTE,
@@ -35,13 +32,12 @@ static var SCHOOL_TO_COLOR: Dictionary = {
 const T_DIRECT_DAMAGE := &"DIRECT_DAMAGE"
 const T_KEYWORD_BUFF := &"KEYWORD_BUFF"
 const T_DEBUFF_CONTROL := &"DEBUFF_CONTROL"
-const T_HEAL_CLEAR := &"HEAL_CLEAR"     
-const T_REVIVE := &"REVIVE"             
-const T_PORTAL := &"PORTAL"             
+const T_HEAL_CLEAR := &"HEAL_CLEAR"
+const T_REVIVE := &"REVIVE"
+const T_PORTAL := &"PORTAL"
 
 const UNDEAD_IMMUNE_SPELLS: Array[StringName] = [&"bless", &"cure", &"curse", &"weakness", &"slow"]
 const MIND_IMMUNE_SPELLS: Array[StringName] = [&"curse", &"misfortune", &"weakness", &"slow"]
-
 
 static func to_spell(def: Variant) -> _Def:
 	var s := def as SpellRegistry.SpellDef
@@ -100,7 +96,6 @@ static func _damage_target(id: StringName) -> String:
 		_:
 			return "ENEMY_UNIT"
 
-
 static func apply_spell(
 	spell: Variant,
 	target: BattleState.BattleUnit,
@@ -155,7 +150,6 @@ static func apply_spell(
 		T_PORTAL:
 			pass
 	return result
-
 
 static func _apply_damage(unit: BattleState.BattleUnit, dmg: int, result: Dictionary) -> Dictionary:
 	var hp: int = max(1, unit.get_hp())

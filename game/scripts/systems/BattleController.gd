@@ -15,7 +15,6 @@ var _obstacle_seed: int = -1
 var _hero_magic: HeroMagic = null
 var _last_spell_cost := 0
 
-
 func _ready() -> void:
 	_init_state()
 	_init_executor()
@@ -29,18 +28,15 @@ func _ready() -> void:
 	await get_tree().process_frame
 	_view.fit_camera()
 
-
 func _init_state() -> void:
 	_state = BattleState.new()
 	_ai = BattleAI.new()
-
 
 func _init_executor() -> void:
 	_executor = BattleTurnExecutor.new()
 	_executor.name = "BattleTurnExecutor"
 	add_child(_executor)
 	_executor.setup(_state, _ai, obstacles)
-
 
 func _wire_ui_signals() -> void:
 	_ui.retreat_requested.connect(_on_retreat)
@@ -52,7 +48,6 @@ func _wire_ui_signals() -> void:
 	_ui.spell_chosen.connect(_on_spell_chosen)
 	_ui.settings_requested.connect(_on_settings)
 	_ui.settings_closed.connect(resume_from_settings)
-
 
 func _init_input() -> void:
 	_input = BattleInput.new()
@@ -66,13 +61,11 @@ func _init_input() -> void:
 	_input.spell_cast_requested.connect(_on_spell_cast_requested)
 	_input.cancel_requested.connect(_on_cancel)
 
-
 func _init_fx() -> void:
 	_fx = BattleFX.new()
 	_fx.name = "BattleFX"
 	add_child(_fx)
 	_fx.setup(_view)
-
 
 func _wire_signals() -> void:
 	_executor.status_updated.connect(_on_status_updated)
@@ -89,7 +82,6 @@ func _wire_signals() -> void:
 	_executor.floating_text.connect(_view.show_floating_text)
 	_input.attack_preview_updated.connect(_ui.set_attack_preview)
 
-
 func _place_obstacles() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = _obstacle_seed
@@ -103,32 +95,23 @@ func _place_obstacles() -> void:
 		_view.add_obstacle(cell, emoji)
 		n += 1
 
-
 func _on_unit_selected(u: BattleState.BattleUnit) -> void:
 	_on_status_updated(GameText.battle_move_help(u.get_display_name()))
 	_ui.update_active_unit(u)
 	_ui.set_attack_enabled(_input.highlight_attack.size() > 0)
 
-
 func _on_move_requested(unit: BattleState.BattleUnit, target: Vector2i) -> void:
 	_executor.request_move(unit, target)
-
 
 func _on_attack_requested(atk: BattleState.BattleUnit, def: BattleState.BattleUnit) -> void:
 	if _executor.is_input_active():
 		_executor.request_attack(atk, def)
 
-
-
-
-
 func _on_retreat() -> void:
 	_executor.request_retreat()
 
-
 func _on_wait() -> void:
 	_executor.request_wait()
-
 
 func _on_attack_mode() -> void:
 	_input.show_attack_only()
@@ -139,18 +122,14 @@ func _on_attack_mode() -> void:
 	_view.set_cursor_visible(true)
 	_on_status_updated(GameText.battle_click_enemy())
 
-
 func _on_skip() -> void:
 	_executor.request_skip()
-
 
 func _on_defend() -> void:
 	_executor.request_defend()
 
-
 func _on_spellbook() -> void:
 	_ui.open_spellbook(_state, _hero_magic)
-
 
 func _on_spell_chosen(spell_id: StringName) -> void:
 	if not _executor.is_input_active():
@@ -165,7 +144,6 @@ func _on_spell_chosen(spell_id: StringName) -> void:
 	_executor.request_spell_cast(spell_id)
 	_input.start_spell_targeting(spell_id, side, include_dead)
 
-
 func _on_spell_cast_requested(spell_id: StringName, target: BattleState.BattleUnit) -> void:
 	if _hero_magic != null:
 		var reg: Node = Services.resolve(&"spells")
@@ -178,7 +156,6 @@ func _on_spell_cast_requested(spell_id: StringName, target: BattleState.BattleUn
 		_last_spell_cost = cost
 	_executor.on_spell_target_selected(spell_id, target)
 
-
 func _on_spell_cast_failed(_reason: String) -> void:
 	if _hero_magic != null and _last_spell_cost > 0:
 		_hero_magic.refund_mana(_last_spell_cost)
@@ -190,7 +167,6 @@ func _on_cancel() -> void:
 	_input.clear_highlights()
 	_view.set_cursor_visible(_executor.is_input_active())
 	_on_status_updated(GameText.battle_select_unit())
-
 
 func _on_execute_spell(caster: BattleState.BattleUnit, target: BattleState.BattleUnit, result: Dictionary) -> void:
 	_fx.show_spell_cast(target.cell, result.get("spell_id", &""))
@@ -210,15 +186,12 @@ func _on_execute_spell(caster: BattleState.BattleUnit, target: BattleState.Battl
 	if is_instance_valid(_executor):
 		_executor.on_spell_anim_completed()
 
-
 func _on_settings() -> void:
 	_executor.pause_battle()
 	_ui.open_settings()
 
-
 func resume_from_settings() -> void:
 	_executor.resume_battle()
-
 
 func _on_execute_move(unit: BattleState.BattleUnit, path: Array[Vector2i]) -> void:
 	var tween := _view.animate_move(unit, path)
@@ -230,7 +203,6 @@ func _on_execute_move(unit: BattleState.BattleUnit, path: Array[Vector2i]) -> vo
 
 	if is_instance_valid(_executor):
 		_executor.on_move_completed()
-
 
 func _on_execute_attack(
 	atk: BattleState.BattleUnit,
@@ -251,7 +223,6 @@ func _on_execute_attack(
 	if is_instance_valid(_executor):
 		_executor.on_attack_completed()
 
-
 func _show_damage_feedback(target: BattleState.BattleUnit, result: Dictionary) -> void:
 	_view.update_unit_count(target)
 	_view.show_damage_number(target, int(result.get("damage", 0)))
@@ -266,12 +237,10 @@ func _get_damage_wait() -> SceneTreeTimer:
 func _on_status_updated(text: String) -> void:
 	_ui.set_status(text)
 
-
 func _on_clear_highlights() -> void:
 	_input.clear_highlights()
 	_ui.set_attack_enabled(false)
 	_ui.set_attack_preview("")
-
 
 func _on_executor_phase_changed(phase: BattleTurnExecutor.State) -> void:
 	var locked := phase != BattleTurnExecutor.State.WAITING_INPUT
@@ -288,7 +257,6 @@ func _on_executor_phase_changed(phase: BattleTurnExecutor.State) -> void:
 		_view.set_cursor_visible(true)
 
 	_on_initiative_changed()
-
 
 func start_battle(
 	atk: Array[UnitStack],
@@ -318,7 +286,6 @@ func start_battle(
 	_view.fit_camera()
 
 	_executor.start_battle()
-
 
 func _on_initiative_changed() -> void:
 	_ui.update_initiative(_state.turn_queue, _state.active_unit)

@@ -1,5 +1,4 @@
-## Канонический реестр боевых заклинаний (школы/уровни, мани, эффекты боя).
-## Путь боевого каста: SpellCaster.cast() → BattleActionResolver. См. SpellCaster.gd.
+
 extends Node
 class_name SpellRegistry
 
@@ -19,10 +18,9 @@ class SpellDef extends RefCounted:
 	var tags: Array[String] = []
 	var desc: String
 	var expert_desc: String
-	var damage_multiplier: int = 0  
-	var buff_effect: int = -1       
-	var custom_handler: Callable = Callable()  # R4: special-эффект вместо match по spell_id в SpellCaster
-
+	var damage_multiplier: int = 0
+	var buff_effect: int = -1
+	var custom_handler: Callable = Callable()
 
 var _spells: Dictionary = {}
 
@@ -60,8 +58,6 @@ func ensure_definitions() -> void:
 	_reg(&"slow_mass", "Slow (Mass)", School.EARTH, 3, 12, TargetType.ALL_ENEMIES, "Slow all", "+Duration", [], -1, StatusEffects.Effect.SLOW)
 	_reg(&"resurrection", "Resurrection", School.EARTH, 4, 20, TargetType.SINGLE_ALLY, "Revive 20x SP HP", "Permanent", [], -1)
 
-	# R4: спец-эффекты вынесены из elif-цепочки SpellCaster.cast().
-	# Подпись: func(target_unit, sp: int, rng, result: Dictionary) -> Dictionary
 	_spells[&"cure"].custom_handler = func(unit, sp, _rng, result):
 		unit.clear_debuffs()
 		result["heal"] = int(sp) * 10
@@ -76,7 +72,6 @@ func ensure_definitions() -> void:
 			var revived: int = int(sp) * 20 / hp
 			result["revive_count"] = min(max(revived, 1), unit.max_count)
 		return result
-
 
 func _reg(id: StringName, name: String, school: int, lvl: int, mana: int, target: int, desc: String, exp_desc: String, tags: Array[String], damage_multiplier: int = 0, buff_effect: int = -1) -> void:
 	var s := SpellDef.new()
@@ -94,11 +89,9 @@ func _reg(id: StringName, name: String, school: int, lvl: int, mana: int, target
 	s.buff_effect = buff_effect
 	_spells[id] = s
 
-
 func get_spell(id: StringName) -> SpellDef:
 	ensure_definitions()
 	return _spells.get(id, null)
-
 
 func get_all_spells() -> Array:
 	ensure_definitions()
@@ -108,7 +101,6 @@ func get_all_spells() -> Array:
 	result.sort_custom(func(a: SpellDef, b: SpellDef): return (a.school_int * 10 + a.level) < (b.school_int * 10 + b.level))
 	return result
 
-
 func get_spells_by_school(school: int) -> Array:
 	ensure_definitions()
 	var result: Array = []
@@ -117,7 +109,6 @@ func get_spells_by_school(school: int) -> Array:
 		if s.school_int == school:
 			result.append(s)
 	return result
-
 
 func get_school_name(school: int) -> String:
 	match school:

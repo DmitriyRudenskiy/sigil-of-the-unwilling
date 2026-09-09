@@ -45,14 +45,12 @@ class _MockPersistence extends RefCounted:
 	func get_date() -> Dictionary:
 		return {"month": 3, "week": 2, "day": 5}
 
-
 var _uid := 100
 
 func _next_uid() -> int:
 	_uid += 1
 	return _uid
 
-## R8: база героя — TestFactories.make_hero, здесь только специфика survival-теста.
 func _survival_hero(path := &"warrior") -> HeroController:
 	var h := TestFactories.make_hero(path)
 	h._ready()
@@ -116,23 +114,15 @@ func _hero_in_tree(hero: HeroController) -> Node:
 	return parent
 
 func _free_node(o: Variant) -> void:
-	
-	
+
 	if is_instance_valid(o) and o is Node:
 		o.free()
 
-
-
-
-# Изоляция GameEventBus: подписки регистрируются в _bus() и гарантированно
-# отключаются в after_test (страховка от утечки при падении теста на assert).
 var _bus_conns: Array = []
-
 
 func _bus(sig: Signal, cb: Callable) -> void:
 	sig.connect(cb)
 	_bus_conns.append([sig, cb])
-
 
 func after_test() -> void:
 	for p in _tree_parents:
@@ -143,14 +133,11 @@ func after_test() -> void:
 			pair[0].disconnect(pair[1])
 	_bus_conns.clear()
 
-
-
 func test_needs_init_all_full() -> void:
 	var n := _HeroNeeds.new()
 	for k in NeedType.all_ids():
 		assert_float(n.get_need(k)).is_equal_approx(1.0, 0.0001)
 		assert_that(n.zero_streak[k]).is_equal(0)
-
 
 func test_needs_field_decay() -> void:
 	var n := _HeroNeeds.new()
@@ -159,26 +146,23 @@ func test_needs_field_decay() -> void:
 	assert_float(n.get_need(NeedType.ID.SOCIAL)).is_equal_approx(0.87, 0.0001)
 	assert_float(n.get_need(NeedType.ID.INSPIRATION)).is_equal_approx(0.95, 0.0001)
 
-
 func test_needs_city_recovery() -> void:
 	var n := _HeroNeeds.new()
 	for k in NeedType.all_ids():
 		n.needs[k] = 0.5
 	var c := _make_temple_city()
-	c.pop = [_PopUnit.new(), _PopUnit.new(), _PopUnit.new()]  
+	c.pop = [_PopUnit.new(), _PopUnit.new(), _PopUnit.new()]
 	assert_that(n.tick(true, c)).is_equal(&"")
 	assert_float(n.get_need(NeedType.ID.REST)).is_equal_approx(0.76, 0.0001)
 	assert_float(n.get_need(NeedType.ID.SOCIAL)).is_equal_approx(0.72, 0.0001)
 	assert_float(n.get_need(NeedType.ID.INSPIRATION)).is_equal_approx(0.60, 0.0001)
 
-
 func test_needs_lonely_city_social_drains() -> void:
 	var n := _HeroNeeds.new()
 	n.needs[NeedType.ID.SOCIAL] = 0.5
-	var c := _make_temple_city()  
+	var c := _make_temple_city()
 	n.tick(true, c)
 	assert_float(n.get_need(NeedType.ID.SOCIAL)).is_equal_approx(0.37, 0.0001)
-
 
 func test_needs_zero_streak_all_causes() -> void:
 	var cases := {
@@ -193,7 +177,6 @@ func test_needs_zero_streak_all_causes() -> void:
 		assert_that(m.tick(false)).is_equal(&"")
 		assert_that(m.tick(false)).is_equal(cases[need_id])
 
-
 func test_needs_serialize_roundtrip_and_old_save() -> void:
 	var n := _HeroNeeds.new()
 	n.needs[NeedType.ID.REST] = 0.33
@@ -206,8 +189,6 @@ func test_needs_serialize_roundtrip_and_old_save() -> void:
 	old.deserialize({})
 	for k in NeedType.all_ids():
 		assert_float(old.get_need(k)).is_equal_approx(1.0, 0.0001)
-
-
 
 func test_hero_dies_by_needs_emits_hero_died() -> void:
 	var h := _survival_hero()
@@ -224,7 +205,6 @@ func test_hero_dies_by_needs_emits_hero_died() -> void:
 	assert_that(captured["cause"]).is_equal(&"exhaustion")
 	h.free()
 
-
 func test_hero_city_tick_recovers() -> void:
 	var h := _survival_hero()
 	var c := _make_temple_city()
@@ -240,7 +220,6 @@ func test_hero_city_tick_recovers() -> void:
 	assert_float(h.needs.get_need(NeedType.ID.SOCIAL)).is_equal_approx(0.72, 0.0001)
 	mgr.free()
 	h.free()
-
 
 func test_hero_revive_at() -> void:
 	var h := _survival_hero()
@@ -262,7 +241,6 @@ func test_hero_revive_at() -> void:
 	assert_that(h.movement.current_cell).is_equal(Vector2i(9, 9))
 	h.free()
 
-
 func _setup_serializable(h: HeroController) -> void:
 	h.movement = _HeroMovement.new()
 	h.army = _HeroArmy.new()
@@ -275,7 +253,6 @@ func _setup_serializable(h: HeroController) -> void:
 	h.tools = _HeroTools.new()
 	h.time = _TimeSystem.new()
 	h.strategic_resources = _HeroStrategic.new()
-
 
 func test_hero_serialize_needs_roundtrip() -> void:
 	var h := _survival_hero()
@@ -290,7 +267,6 @@ func test_hero_serialize_needs_roundtrip() -> void:
 	assert_bool(h2.resurrected_once).is_true()
 	h.free(); h2.free()
 
-
 func test_hero_deserialize_old_save_defaults() -> void:
 	var h := _survival_hero()
 	_setup_serializable(h)
@@ -304,8 +280,6 @@ func test_hero_deserialize_old_save_defaults() -> void:
 		assert_float(h2.needs.get_need(k)).is_equal_approx(1.0, 0.0001)
 	assert_bool(h2.resurrected_once).is_false()
 	h.free(); h2.free()
-
-
 
 func test_wc_find_resurrection_city() -> void:
 	var city := _make_temple_city()
@@ -327,7 +301,6 @@ func test_wc_find_resurrection_city() -> void:
 	h3.free()
 	wc.free(); wc2.free(); wc3.free()
 
-
 func _setup_death_with_resurrection() -> Dictionary:
 	var city := _make_temple_city()
 	var wc := _make_wc([city])
@@ -341,7 +314,6 @@ func _setup_death_with_resurrection() -> Dictionary:
 	wc._hero_lifecycle._death_seq = death
 	wc._on_hero_died(&"exhaustion")
 	return {"wc": wc, "hero": hero, "city": city, "parent": parent, "death": death}
-
 
 func test_wc_death_holds_corpse_shows_resurrection() -> void:
 	var s := _setup_death_with_resurrection()
@@ -363,7 +335,6 @@ func test_wc_death_holds_corpse_shows_resurrection() -> void:
 	_free_node(wc._hero_lifecycle._pending_successor)
 	wc.free()
 
-
 func test_wc_resurrection_chosen() -> void:
 	var s := _setup_death_with_resurrection()
 	var wc: Node = s["wc"]
@@ -371,7 +342,7 @@ func test_wc_resurrection_chosen() -> void:
 	var city: _City = s["city"]
 	var death: Node = s["death"]
 	var successor: Node = wc._hero_lifecycle._pending_successor
-	var succ_emitted: Dictionary = {"v": false}  
+	var succ_emitted: Dictionary = {"v": false}
 	var on_succ := func(_h: Node) -> void: succ_emitted["v"] = true
 	GameEventBus.hero_successor.connect(on_succ)
 	wc._on_resurrection_chosen()
@@ -393,8 +364,7 @@ func test_wc_resurrection_chosen() -> void:
 	assert_bool(succ_emitted["v"]).is_false()
 	s["parent"].free()
 	death.free()
-	wc.free()  
-
+	wc.free()
 
 func test_wc_second_death_in_cycle_no_resurrection() -> void:
 	var s := _setup_death_with_resurrection()
@@ -410,12 +380,11 @@ func test_wc_second_death_in_cycle_no_resurrection() -> void:
 	assert_that(wc._hero_lifecycle._pending_successor).is_not_null()
 	assert_bool(is_instance_valid(wc._hero_lifecycle._pending_successor)).is_true()
 	assert_that(death.res_city).is_equal(null)
-	if is_instance_valid(hero): hero.free()  
+	if is_instance_valid(hero): hero.free()
 	_free_node(wc._hero_lifecycle._pending_successor)
 	s["parent"].free()
 	death.free()
 	wc.free()
-
 
 func test_wc_succession_frees_held_corpse() -> void:
 	var s := _setup_death_with_resurrection()
@@ -429,8 +398,7 @@ func test_wc_succession_frees_held_corpse() -> void:
 	assert_bool(is_instance_valid(wc._hero)).is_true()
 	s["parent"].free()
 	s["death"].free()
-	wc.free()  
-
+	wc.free()
 
 func test_wc_no_temple_corpse_freed() -> void:
 	var plain := _make_city()
@@ -445,12 +413,11 @@ func test_wc_no_temple_corpse_freed() -> void:
 	assert_that(wc._hero_lifecycle._deceased_hero).is_null()
 	assert_bool(hero.is_queued_for_deletion()).is_true()
 	assert_that(death.res_city).is_equal(null)
-	if is_instance_valid(hero): hero.free()  
+	if is_instance_valid(hero): hero.free()
 	parent.free()
 	death.free()
 	_free_node(wc._hero_lifecycle._pending_successor)
 	wc.free()
-
 
 func test_wc_fresh_cycle_resurrection_again() -> void:
 	var s := _setup_death_with_resurrection()
@@ -472,20 +439,18 @@ func test_wc_fresh_cycle_resurrection_again() -> void:
 	assert_that(wc._hero_lifecycle._resurrection_city).is_equal(city)
 	assert_that(wc._hero_lifecycle._deceased_hero).is_equal(new_hero)
 	assert_that(death.res_city).is_equal(city)
-	if is_instance_valid(hero): hero.free()  
+	if is_instance_valid(hero): hero.free()
 	new_hero.free()
 	s["parent"].free()
 	death.free()
 	_free_node(wc._hero_lifecycle._pending_successor)
 	wc.free()
 
-
-
 func test_deathseq_resurrection_button_flow() -> void:
 	var ds := _DeathSequenceScene.instantiate() as DeathSequence
 	var city := _make_temple_city()
 	var succ := _survival_hero()
-	var emitted: Dictionary = {"v": false}  
+	var emitted: Dictionary = {"v": false}
 	ds.resurrection_chosen.connect(func() -> void: emitted["v"] = true)
 	ds.show_death("Тест", &"exhaustion", {}, succ, city)
 	var btn: Button = ds.get_node("Root/Panel/VBox/Buttons/ResurrectionButton")
@@ -505,8 +470,6 @@ func test_deathseq_resurrection_button_flow() -> void:
 	ds3.show_death("Тест", &"battle", {}, null, city)
 	assert_bool(ds3.get_node("Root/Panel/VBox/Buttons/ResurrectionButton").visible).is_false()
 	ds3.free()
-
-
 
 func test_statuspanel_needs_line() -> void:
 	var panel := load("res://scenes/ui/HeroStatusPanel.tscn").instantiate() as _StatusPanel

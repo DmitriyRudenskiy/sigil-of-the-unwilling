@@ -2,8 +2,6 @@ extends GdUnitTestSuite
 
 var _view: CityArenaView = null
 
-
-# 3B: тяжёлая сцена инстанцируется в before_test, чистка в after_test.
 func before_test() -> void:
 	var packed := load("res://scenes/CityArena.tscn") as PackedScene
 	assert_object(packed).is_not_null()
@@ -11,12 +9,10 @@ func before_test() -> void:
 	add_child(_view)
 	await get_tree().process_frame
 
-
 func after_test() -> void:
 	if _view != null and is_instance_valid(_view):
 		_view.free()
 		_view = null
-
 
 func test_arena_smoke() -> void:
 	var view := _view
@@ -57,7 +53,6 @@ func test_arena_smoke() -> void:
 	var score: float = CityArenaModel.score(view._city, view._starve_days)
 	assert_bool(score > -100.0).is_true()
 
-
 func test_cell_click_signal_path() -> void:
 	var view := _view
 	assert_bool(view._city != null).is_true()
@@ -86,7 +81,6 @@ func test_cell_click_signal_path() -> void:
 	view._on_cell_input(view, me, 0, Vector2.ZERO, Vector2.ZERO, cell)
 	assert_bool(view._city.cell_is_built(cell)).is_true()
 
-
 func _first_free_r1(view: CityArenaView) -> Vector2i:
 	for cell in CityArenaModel.cells_in_arena():
 		var cv: Vector2i = cell
@@ -94,7 +88,6 @@ func _first_free_r1(view: CityArenaView) -> Vector2i:
 				and not _worker_on(view._city, cv):
 			return cv
 	return Vector2i.ZERO
-
 
 func _worker_on(city: City, cv: Vector2i) -> bool:
 	for u in city.pop:

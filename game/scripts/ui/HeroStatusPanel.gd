@@ -13,7 +13,6 @@ const NeedType = preload("res://scripts/data/NeedType.gd")
 
 var _wired := false
 
-
 func _wire() -> void:
 	if _wired:
 		return
@@ -27,18 +26,15 @@ func _wire() -> void:
 	_stats_label.add_theme_font_size_override("font_size", 12)
 	_followers_label.add_theme_font_size_override("font_size", 12)
 
-
 func _ready() -> void:
 	_wire()
 	if _title != null:
 		_title.text = GameText.hero_default_title()
 
-
 func set_hero(hero: HeroController) -> void:
 	_wire()
 	_hero = hero
 	refresh()
-
 
 func refresh() -> void:
 	_wire()
@@ -54,7 +50,6 @@ func refresh() -> void:
 	_stats_label.text = _stats_text(h)
 	_followers_label.text = _followers_text(h)
 
-
 func _condition_text(h: HeroController) -> String:
 	var parts: Array[String] = []
 	if h.max_combat_hp > 0:
@@ -67,7 +62,6 @@ func _condition_text(h: HeroController) -> String:
 		return ""
 	return "\n".join(parts)
 
-
 func _needs_text(n: HeroNeeds) -> String:
 	var parts: Array[String] = []
 	for k in NeedType.all_ids():
@@ -76,14 +70,12 @@ func _needs_text(n: HeroNeeds) -> String:
 		parts.append("%s%s %.0f%%" % [icon, mark, n.get_need(k) * 100.0])
 	return "\n".join(parts)
 
-
 func _stats_text(h: HeroController) -> String:
 	var s: Dictionary = h.stats
 	return GameText.hero_stats(
 		int(s.get("attack", 0)), int(s.get("defense", 0)),
 		int(s.get("knowledge", 0)), int(s.get("spell_power", 0)),
 	)
-
 
 func _followers_text(h: HeroController) -> String:
 	var fs: Array = h.followers
@@ -98,7 +90,6 @@ func _followers_text(h: HeroController) -> String:
 	if fs.size() > shown:
 		lines.append(GameText.hero_followers_more(fs.size() - shown))
 	return "\n".join(lines)
-
 
 func _path_name(path: StringName) -> String:
 	var p := String(path)

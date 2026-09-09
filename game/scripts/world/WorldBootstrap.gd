@@ -11,7 +11,6 @@ const WorldEventRouterScript = preload("res://scripts/world/WorldEventRouter.gd"
 const SuccessionControllerScript = preload("res://scripts/world/SuccessionController.gd")
 const HeroLifecycleSystemScript = preload("res://scripts/world/HeroLifecycleSystem.gd")
 
-
 class BootstrapResult:
 	var map_gen: Node = null
 	var hero: Node = null
@@ -37,7 +36,6 @@ class BootstrapResult:
 	var shortcuts: Node = null
 	var endgame: Node = null
 	var event_bus_subscribers: Array[Callable] = []
-
 
 static func run(
 	parent: Node2D,
@@ -66,7 +64,6 @@ static func run(
 
 	_create_hero(parent, R)
 
-
 	_init_hero(R)
 
 	_create_camera(parent, R)
@@ -88,10 +85,6 @@ static func run(
 
 	return R
 
-
-## R1: вторая фаза сессии — пост-фреймовая обвязка (подсистемы, event router,
-## hero lifecycle, применение загруженного состояния). Вынесено из WorldController (SRP).
-## Возвращает созданный WorldEventRouter.
 static func finalize(parent: Node2D, R: BootstrapResult, visibility, persistence,
 				hero_mgr, rng, end_turn_cb: Callable) -> WorldEventRouter:
 	R.battle_coordinator.setup(
@@ -149,8 +142,6 @@ static func finalize(parent: Node2D, R: BootstrapResult, visibility, persistence
 		R.map_gen.apply_fog(visibility)
 	return router
 
-
-## R1: контекст загрузки для WorldPersistence (общий для finalize и WorldSaveLoadService).
 static func build_load_context(R: BootstrapResult) -> Variant:
 	var ctx := WorldLoadContext.new()
 	ctx.map_gen = R.map_gen
@@ -165,14 +156,11 @@ static func build_load_context(R: BootstrapResult) -> Variant:
 	ctx.character_registry = R.character_registry
 	return ctx
 
-
-
 static func _init_services(parent: Node2D, R: BootstrapResult) -> void:
 	var save_manager := SaveManager.new()
 	save_manager.name = "SaveManager"
 	parent.add_child(save_manager)
-	# R2: экземпляр живёт в Services (там же, где UI ставит pending_*),
-	# сюда только подвешиваем SaveManager текущей сцены.
+
 	R.persistence = Services.resolve(&"persistence")
 	if R.persistence == null:
 		R.persistence = WorldPersistenceScript.new(save_manager)
@@ -180,7 +168,6 @@ static func _init_services(parent: Node2D, R: BootstrapResult) -> void:
 	else:
 		R.persistence.set_save_manager(save_manager)
 	R.resource_chain = ResourceChainServiceScript.new()
-
 
 static func _resolve_session(R: BootstrapResult, shard_seed: int) -> SaveData:
 	var loaded_save: SaveData = R.persistence.pending_save
@@ -196,7 +183,6 @@ static func _resolve_session(R: BootstrapResult, shard_seed: int) -> SaveData:
 		R.world_delta = WorldStateDelta.new()
 	return loaded_save
 
-
 static func _create_map(parent: Node2D, R: BootstrapResult) -> void:
 	var map_scene: PackedScene = load("res://scenes/world/MapGenerator.tscn")
 	R.map_gen = map_scene.instantiate()
@@ -204,12 +190,10 @@ static func _create_map(parent: Node2D, R: BootstrapResult) -> void:
 	R.map_gen.seed_value = R.rng.randi() % 999999
 	parent.add_child(R.map_gen)
 
-
 static func _create_hero(parent: Node2D, R: BootstrapResult) -> void:
 	R.hero = HeroController.new()
 	R.hero.name = "Hero"
 	parent.add_child(R.hero)
-
 
 static func _init_hero(R: BootstrapResult) -> void:
 	R.hero.setup(R.map_gen)
@@ -223,8 +207,6 @@ static func _init_hero(R: BootstrapResult) -> void:
 		if profile != null:
 			R.hero.apply_build(profile)
 			R.persistence.pending_new_game = null
-
-
 
 static func _create_ui(parent: Node2D, _platform: Variant, R: BootstrapResult) -> void:
 	if R.ui_manager == null:
@@ -241,7 +223,6 @@ static func _create_ui(parent: Node2D, _platform: Variant, R: BootstrapResult) -
 	parent.add_child(shortcuts)
 	R.shortcuts = shortcuts
 
-
 static func _create_camera(parent: Node2D, R: BootstrapResult) -> void:
 	R.camera = WorldCamera.new()
 	R.camera.name = "WorldCamera"
@@ -252,7 +233,6 @@ static func _create_camera(parent: Node2D, R: BootstrapResult) -> void:
 	if R.hero != null:
 		R.camera.center_on(R.hero.position)
 
-
 static func _create_input(parent: Node2D, R: BootstrapResult) -> void:
 	R.input_controller = WorldInput.new()
 	R.input_controller.name = "WorldInput"
@@ -262,7 +242,6 @@ static func _create_input(parent: Node2D, R: BootstrapResult) -> void:
 	R.input_controller.world = parent
 	parent.add_child(R.input_controller)
 
-
 static func _create_spawner(parent: Node2D, R: BootstrapResult) -> void:
 	R.spawner = WorldSpawner.new()
 	R.spawner.name = "WorldSpawner"
@@ -270,7 +249,6 @@ static func _create_spawner(parent: Node2D, R: BootstrapResult) -> void:
 	R.spawner.rng = R.rng
 	parent.add_child(R.spawner)
 	R.spawner.spawn_all()
-
 
 static func _create_cities(parent: Node2D, R: BootstrapResult) -> void:
 	R.cities = CityManager.new()
@@ -296,8 +274,6 @@ static func _create_cities(parent: Node2D, R: BootstrapResult) -> void:
 	var center := _place_in_hero_component(R.map_gen, Vector2i(10, 10), occupied)
 	capital.center = center
 
-	
-	
 	var shrine_offset := Vector2i(2, -1)
 	var shrine_cell := center + shrine_offset
 	if not R.map_gen.is_walkable(shrine_cell) or occupied.has(shrine_cell):
@@ -310,7 +286,6 @@ static func _create_cities(parent: Node2D, R: BootstrapResult) -> void:
 	var second := CityFactory.create_village(
 		_place_in_hero_component(R.map_gen, Vector2i(center.x + 15, center.y), occupied), "Город 2", 0)
 	R.cities.register_city(second, false)
-
 
 static func _create_subsystems(parent: Node2D, R: BootstrapResult) -> void:
 	R.turn_scheduler = TurnScheduler.new()
@@ -331,12 +306,10 @@ static func _create_subsystems(parent: Node2D, R: BootstrapResult) -> void:
 	R.interaction_controller.name = "InteractionController"
 	parent.add_child(R.interaction_controller)
 
-
 static func _create_battle(parent: Node2D, R: BootstrapResult) -> void:
 	R.battle_coordinator = WorldBattleCoordinator.new()
 	R.battle_coordinator.name = "BattleCoordinator"
 	parent.add_child(R.battle_coordinator)
-
 
 static func _register_city(R: BootstrapResult) -> void:
 	if R.turn_scheduler == null or R.cities == null:
@@ -366,7 +339,6 @@ static func _register_city(R: BootstrapResult) -> void:
 	city_proc.city_event_occurred.connect(
 		func(city_uid: int, event_id: StringName):
 			GameEventBus.city_event_occurred.emit(city_uid, event_id))
-
 
 static func _register_enemy_ai(R: BootstrapResult) -> void:
 	if R.turn_scheduler == null or R.map_gen == null or R.cities == null:
@@ -429,12 +401,10 @@ static func _register_economy(R: BootstrapResult) -> void:
 		func(city_uid: int, resource_id: StringName):
 			GameEventBus.resource_depleted.emit(city_uid, resource_id))
 
-
 static func _register_city_income(R: BootstrapResult) -> void:
 	if R.turn_scheduler == null:
 		return
 	R.turn_scheduler.register_processor(CityIncomeProcessor.new())
-
 
 static func _register_demographics(R: BootstrapResult) -> void:
 	if R.turn_scheduler == null or R.cities == null:
@@ -457,7 +427,6 @@ static func _register_demographics(R: BootstrapResult) -> void:
 	demo.disease_outbreak.connect(
 		func(city_uid: int, character_uid: int):
 			GameEventBus.disease_outbreak.emit(city_uid, character_uid))
-
 
 static func _create_resource_nodes(parent: Node2D, R: BootstrapResult) -> void:
 	R.resource_node_manager = ResourceNodeManager.new()
@@ -482,13 +451,11 @@ static func _create_resource_nodes(parent: Node2D, R: BootstrapResult) -> void:
 	R.terrain_resource_manager.attach_delta(R.world_delta)
 	R.terrain_resource_manager.generate(map_data)
 
-
 static func _place_in_hero_component(
 	map_gen: MapGenerator, preferred: Vector2i, excluded: Dictionary = {} ) -> Vector2i:
 	var comp: Dictionary = map_gen.reachable_cells
 	var cand := _nearest_walkable(map_gen, preferred)
 
-	
 	if not excluded.has(cand) and (comp.is_empty() or comp.has(cand)):
 		return cand
 
@@ -504,12 +471,9 @@ static func _place_in_hero_component(
 			best_d = d
 			best = cell
 
-	
-	
 	if best_d == INT32_MAX:
 		return cand
 	return best
-
 
 static func _occupied_map_cells(R: BootstrapResult) -> Dictionary:
 	var out: Dictionary = R.map_gen.enemy_stacks.duplicate()
@@ -519,7 +483,6 @@ static func _occupied_map_cells(R: BootstrapResult) -> Dictionary:
 		for cell in R.spawner.chest_cells():
 			out[cell] = true
 	return out
-
 
 static func _nearest_walkable(map_gen: MapGenerator, start: Vector2i) -> Vector2i:
 	if map_gen == null or map_gen.model == null:
@@ -539,7 +502,6 @@ static func _nearest_walkable(map_gen: MapGenerator, start: Vector2i) -> Vector2
 				queue.append(nb)
 	push_error("WorldBootstrap: no walkable cell found from %s" % start)
 	return start
-
 
 static func _compute_map_rect(R: BootstrapResult) -> Rect2:
 	if R.map_gen:

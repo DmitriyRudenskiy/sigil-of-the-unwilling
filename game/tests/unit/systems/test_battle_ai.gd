@@ -1,6 +1,5 @@
 extends GdUnitTestSuite
 
-
 const ACTION_SKIP := 0
 const ACTION_MOVE := 1
 const ACTION_ATTACK := 2
@@ -19,8 +18,6 @@ func _create_state(attacker_alive: bool, def_alive: bool):
 	state.build_queue()
 	return state
 
-
-
 func test_no_target() -> void:
 	var state = _create_state(false, true)
 	var ai = load("res://scripts/systems/BattleAI.gd").new()
@@ -30,8 +27,6 @@ func test_no_target() -> void:
 	var decision = ai.decide_turn(defender, state, blocked)
 
 	assert_int(decision.action).is_equal(ACTION_SKIP).override_failure_message("AI should skip when no attackers exist")
-
-
 
 func test_adjacent_attack() -> void:
 	var state = _create_state(true, true)
@@ -49,8 +44,6 @@ func test_adjacent_attack() -> void:
 
 	assert_int(decision.action).is_equal(ACTION_ATTACK).override_failure_message("AI should attack adjacent enemy")
 	assert_bool(decision.attack_target == attacker).is_true().override_failure_message("AI should target the adjacent attacker")
-
-
 
 func test_move_towards_target() -> void:
 	var state = _create_state(true, true)
@@ -79,8 +72,6 @@ func test_move_towards_target() -> void:
 	assert_bool(decision.target_cell == attacker.cell).is_false().override_failure_message("AI must not move onto occupied enemy cell")
 	assert_bool(blocked.has(decision.target_cell)).is_false().override_failure_message("AI target cell must not be blocked")
 
-
-
 func test_attacker_ai_targets_defender() -> void:
 	var state = _create_state(true, true)
 	var ai = load("res://scripts/systems/BattleAI.gd").new()
@@ -105,7 +96,6 @@ func test_attacker_ai_targets_defender() -> void:
 
 	assert_int(decision.action).is_equal(ACTION_ATTACK).override_failure_message("Attacker AI should attack adjacent defender")
 	assert_bool(decision.attack_target == defender).is_true().override_failure_message("Attacker AI should target the adjacent defender")
-
 
 func test_flying_ai_lands_on_attackable_cell() -> void:
 	var setup: Dictionary = _setup_flying_vs_ground()

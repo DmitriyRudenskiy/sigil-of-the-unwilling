@@ -29,18 +29,18 @@ class MockBootstrap extends RefCounted:
 func _make_sys(host: Node2D, bc: MockConsumer, ic: MockConsumer, boot: MockBootstrap) -> RefCounted:
 	var sys := _HeroLifecycle.new()
 	sys.setup(
-		host,        
-		null,        
-		null,        
-		null,        
-		null,        
-		null,        
-		null,        
-		bc,          
-		ic,          
-		boot,        
-		null,        
-		null         
+		host,
+		null,
+		null,
+		null,
+		null,
+		null,
+		null,
+		bc,
+		ic,
+		boot,
+		null,
+		null
 	)
 	return sys
 

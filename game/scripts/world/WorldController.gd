@@ -1,9 +1,6 @@
 class_name WorldController
 extends Node2D
 
-# R1: тонкий оркестратор. Save/load — WorldSaveLoadService, герой — WorldHeroManager,
-# пост-фреймовая обвязка — WorldBootstrap.finalize.
-
 const _Platform = preload("res://scripts/core/Platform.gd")
 const WorldBootstrapScript = preload("res://scripts/world/WorldBootstrap.gd")
 const MapGeneratorScript = preload("res://scripts/world/MapGenerator.gd")
@@ -37,12 +34,10 @@ var _hero_lifecycle = null
 var _hero_mgr: WorldHeroManager = null
 var _save_svc: WorldSaveLoadService = null
 
-## Тесты привязывают _hero_lifecycle напрямую; в игре — через WorldHeroManager.
 func _lifecycle():
 	if _hero_mgr != null:
 		return _hero_mgr.get_lifecycle()
 	return _hero_lifecycle
-
 
 func _ready() -> void:
 	SoundManager.play_music_cue(&"music_world")
@@ -78,15 +73,12 @@ func _ready() -> void:
 	GameLogger.world("Scene ready, seed=%d" % _persistence.session.run_seed)
 	_save_svc.handle_headless_exit(_Platform)
 
-
 func _on_fog_refreshed() -> void:
 	if _bootstrap_result != null and _bootstrap_result.spawner != null:
 		_bootstrap_result.spawner.apply_fog_visibility(_visibility)
 	if resource_node_manager != null and resource_node_manager.has_method("apply_fog_visibility"):
 		resource_node_manager.apply_fog_visibility(_visibility)
 
-
-# R1: тонкая делегация — публичный API контроллера без изменений.
 func get_fog(): return _visibility
 func _on_end_turn_from_router() -> void: pass
 func get_camera() -> Camera2D: return _camera

@@ -41,7 +41,6 @@ var _defender_alive_count := 0
 const BW := 17
 const BH := 11
 
-
 class BattleUnit extends RefCounted:
 	var stack: UnitStack
 	var cell := Vector2i(-1, -1)
@@ -51,11 +50,11 @@ class BattleUnit extends RefCounted:
 	var defending := false
 	var has_retaliated := false
 	var uid := 0
-	var statuses: Dictionary = {}  
-	var max_count: int = 0         
-	var distance_moved_this_turn: int = 0  
+	var statuses: Dictionary = {}
+	var max_count: int = 0
+	var distance_moved_this_turn: int = 0
 	var already_reborn: bool = false
-	var spell: StringName = ""  
+	var spell: StringName = ""
 
 	func _init(p_stack = null) -> void:
 		stack = p_stack
@@ -145,22 +144,19 @@ class BattleUnit extends RefCounted:
 				return true
 		return false
 
-
 func place_army(
 	attacker_stacks: Array[UnitStack],
 	defender_stacks: Array[UnitStack],
 	attacker_artifact_mods: Dictionary = {},
 	defender_artifact_mods: Dictionary = {}
 ) -> void:
-	# TASK_06: конструирование, валидация и расстановка армий
-	# вынесены в BattleStateBuilder; BattleState — чистый контейнер.
+
 	var builder := BattleStateBuilder.new()
 	builder.set_attacker_army(attacker_stacks)
 	builder.set_defender_army(defender_stacks)
 	builder.set_attacker_artifact_mods(attacker_artifact_mods)
 	builder.set_defender_artifact_mods(defender_artifact_mods)
 	builder.build_into(self)
-
 
 func _kill_unit(unit: BattleUnit) -> void:
 	if not unit.alive: return
@@ -212,11 +208,9 @@ func build_queue() -> void:
 
 	turn_idx = -1
 
-
 func advance_turn() -> void:
 	turn_idx += 1
 	_normalize_active_unit()
-
 
 func _normalize_active_unit() -> void:
 	while turn_idx < turn_queue.size():
@@ -231,7 +225,6 @@ func _normalize_active_unit() -> void:
 
 	active_unit = turn_queue[turn_idx]
 	is_player_turn = (active_unit.side == Side.ATTACKER)
-
 
 func start_new_round() -> void:
 	for u in attacker_units:
@@ -260,13 +253,11 @@ func start_new_round() -> void:
 	active_unit = turn_queue[0]
 	is_player_turn = (active_unit.side == Side.ATTACKER)
 
-
 func get_turn_info() -> String:
 	if active_unit == null:
 		return ""
 	var side_txt := GameText.battle_your_turn() if is_player_turn else GameText.battle_enemy_turn()
 	return GameText.battle_turn_info(side_txt, active_unit.get_display_name(), active_unit.get_count())
-
 
 func get_unit_at(cell: Vector2i, side: BattleState.Side) -> BattleUnit:
 	if not _unit_grid.has(side):
@@ -283,10 +274,8 @@ func _rebuild_unit_grid() -> void:
 		if u.is_alive():
 			_unit_grid[Side.DEFENDER][u.cell] = u
 
-
 func get_units_by_side(side: BattleState.Side) -> Array[BattleUnit]:
 	return attacker_units if side == Side.ATTACKER else defender_units
-
 
 func get_reachable_for_unit(unit: BattleUnit, blocked_fn: Callable) -> Dictionary:
 	if unit == null:
@@ -319,9 +308,8 @@ func get_reachable_for_unit(unit: BattleUnit, blocked_fn: Callable) -> Dictionar
 		unit
 	)
 
-
 func get_reachable(cell: Vector2i, speed: int, blocked_fn: Callable, _unit: BattleUnit = null) -> Dictionary:
-	
+
 	var speed_cache: Dictionary = _reachable_cache.get(cell, {})
 	if speed_cache.has(speed):
 		return speed_cache[speed].duplicate()
@@ -359,11 +347,9 @@ func get_unreachable_ring(unit: BattleUnit, blocked_fn: Callable) -> Dictionary:
 			ring[c] = near[c]
 	return ring
 
-
 func invalidate_board_cache() -> void:
 	_board_version += 1
 	_reachable_cache.clear()
-
 
 func build_all_blocked(except_unit: BattleUnit, obstacles: Dictionary) -> Dictionary:
 	var b: Dictionary = {}
@@ -376,7 +362,6 @@ func build_all_blocked(except_unit: BattleUnit, obstacles: Dictionary) -> Dictio
 	for o in obstacles:
 		b[o] = true
 	return b
-
 
 func apply_attack(
 	atk: BattleUnit,
@@ -408,10 +393,6 @@ func apply_sacrifice(
 ) -> Dictionary:
 	return BattleActionResolver.apply_sacrifice(self, acting, sacrifice, target, cost, rng)
 
-
-
-
-
 func do_move(unit: BattleUnit, target: Vector2i) -> void:
 	var dist := HexUtils.hex_distance(unit.cell, target)
 	unit.distance_moved_this_turn += dist
@@ -423,12 +404,10 @@ func do_move(unit: BattleUnit, target: Vector2i) -> void:
 	side_grid[target] = unit
 	invalidate_board_cache()
 
-
 func do_defend(unit: BattleUnit) -> void:
 	unit.has_moved = true
 	unit.defending = true
 	invalidate_board_cache()
-
 
 func do_wait(unit: BattleUnit) -> void:
 	if unit == null:
@@ -449,12 +428,10 @@ func do_wait(unit: BattleUnit) -> void:
 		turn_idx = idx - 1
 	invalidate_board_cache()
 
-
 func do_skip(unit: BattleUnit) -> void:
 	if unit != null:
 		unit.has_moved = true
 	invalidate_board_cache()
-
 
 func force_end(winner: BattleState.Side) -> void:
 	battle_over = true
@@ -471,7 +448,6 @@ func check_end() -> BattleState.Side:
 
 	return battle_winner
 
-
 func get_survivors(side: BattleState.Side) -> Array[UnitStack]:
 	var r: Array[UnitStack] = []
 	var units := attacker_units if side == Side.ATTACKER else defender_units
@@ -479,7 +455,6 @@ func get_survivors(side: BattleState.Side) -> Array[UnitStack]:
 		if u.is_alive():
 			r.append(u.stack)
 	return r
-
 
 func get_retreat_survivors(side: BattleState.Side) -> Array[UnitStack]:
 	var all_survivors: Array[UnitStack] = []
@@ -501,11 +476,9 @@ func get_retreat_survivors(side: BattleState.Side) -> Array[UnitStack]:
 
 	return result
 
-
 func set_hero_bonuses(attacker_bonus: Dictionary, defender_bonus: Dictionary) -> void:
 	attacker_hero_bonus = _normalize_hero_bonus(attacker_bonus)
 	defender_hero_bonus = _normalize_hero_bonus(defender_bonus)
-
 
 func _normalize_hero_bonus(bonus: Dictionary) -> Dictionary[StringName, int]:
 	return {

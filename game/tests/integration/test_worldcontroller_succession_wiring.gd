@@ -33,7 +33,6 @@ func _make_wc(cities: Array[City], controller: _Succession) -> WorldController:
 	wc._hero_lifecycle = sys
 	return wc
 
-
 func test_plan_succession_returns_same_path() -> void:
 	var h := TestFactories.make_hero(&"archivist")
 	h.followers = [_make_follower(1, &"archivist")]
@@ -53,10 +52,9 @@ func test_plan_succession_returns_same_path() -> void:
 	(wc.get("_cities")).free()
 	wc.free()
 
-
 func test_plan_succession_null_when_no_follower() -> void:
 	var h := TestFactories.make_hero(&"archivist")
-	h.followers = [_make_follower(5, &"warrior")]  
+	h.followers = [_make_follower(5, &"warrior")]
 
 	var controller := _Succession.new()
 	var wc := _make_wc([_make_city(2, &"Highhold")], controller)
@@ -65,7 +63,6 @@ func test_plan_succession_null_when_no_follower() -> void:
 	h.free()
 	(wc.get("_cities")).free()
 	wc.free()
-
 
 func test_plan_succession_null_when_unwired() -> void:
 	var wc := _WorldController.new()

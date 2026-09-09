@@ -12,29 +12,22 @@ var visibility = null
 
 var _last_save_dict: Dictionary = {}
 
-
 var _shards_memory: Dictionary = {}
 
-# Сессионное состояние — нестатическое: экземпляр живёт в Services
-# (ключ &"persistence"), сброс — через reset_session_state() из StaticCaches.reset_all().
 var next_seed: int = 0
 var pending_save: SaveData = null
 var pending_new_game: _HeroProfile = null
 
-
 func _init(save_manager: SaveManager = null) -> void:
 	_save_manager = save_manager
 
-
 func set_save_manager(save_manager: SaveManager) -> void:
 	_save_manager = save_manager
-
 
 func reset_session_state() -> void:
 	pending_save = null
 	pending_new_game = null
 	next_seed = 0
-
 
 func get_run_seed() -> int:
 	if next_seed != 0:
@@ -51,10 +44,8 @@ func get_run_seed() -> int:
 
 	return int(Time.get_unix_time_from_system()) & 0x7FFFFFFF
 
-
 func get_session_for_seed(seed: int) -> GameSession:
 	return GameSession.new(seed)
-
 
 func save_game(hero: HeroController, cities: Array = [], characters: Array = []) -> bool:
 	if session == null or hero == null or world_delta == null:
@@ -78,8 +69,6 @@ func save_game(hero: HeroController, cities: Array = [], characters: Array = [])
 	var _active := _mgr.active_id
 	save_data.active_shard_id = _active
 
-	
-	
 	var shards_data: Dictionary = _shards_memory.duplicate(true)
 	shards_data[_active] = {
 		"world": world_delta.serialize(),
@@ -100,11 +89,9 @@ func save_game(hero: HeroController, cities: Array = [], characters: Array = [])
 		GameLogger.world("Game saved to %s" % SaveManager.SAVE_PATH)
 	return err == SaveManager.SaveError.OK
 
-
 func _date_turn() -> int:
-	# date linearization instead of a turn counter (GameSession has no current_turn field)
-	return int(_date.get("month", 1)) * 100000 + int(_date.get("week", 1)) * 100 + int(_date.get("day", 1))
 
+	return int(_date.get("month", 1)) * 100000 + int(_date.get("week", 1)) * 100 + int(_date.get("day", 1))
 
 func _prune_old_shards(shards: Dictionary, current_turn: int) -> void:
 	const MAX_SHARDS := 10
@@ -127,11 +114,9 @@ func _prune_old_shards(shards: Dictionary, current_turn: int) -> void:
 			return a_turn < b_turn
 		)
 		while shards.size() > MAX_SHARDS:
-			# FIX: no explicit String annotation — keys may be StringName, which would
-			# crash the Variant->String cast on erase(). Use untyped Variant.
+
 			var oldest = sorted_shards.pop_front()
 			shards.erase(oldest)
-
 
 func load_game() -> SaveData:
 	var result: Dictionary = _save_manager.load_game()
@@ -143,7 +128,6 @@ func last_save_dict() -> Dictionary:
 func load_game_with_error() -> Dictionary:
 	return _save_manager.load_game()
 
-
 func request_load_game() -> SaveData:
 	var data := load_game()
 	if data == null or not data.is_valid():
@@ -152,18 +136,14 @@ func request_load_game() -> SaveData:
 	pending_save = data
 	return data
 
-
 func restart_game(seed_value: int) -> void:
 	next_seed = seed_value
-
 
 func set_date(month: int, week: int, day: int) -> void:
 	_date = {"month": month, "week": week, "day": day}
 
-
 func get_date() -> Dictionary:
 	return _date.duplicate()
-
 
 func apply_loaded_save(data: SaveData, ctx) -> void:
 	if ctx == null:
@@ -210,7 +190,6 @@ func apply_loaded_save(data: SaveData, ctx) -> void:
 		if ctx.spawner:
 			ctx.spawner.remove_resource_at(cell)
 
-
 	for cell in ctx.world_delta.opened_chests:
 		if ctx.spawner:
 			ctx.spawner.remove_chest_at(cell)
@@ -236,7 +215,6 @@ func apply_loaded_save(data: SaveData, ctx) -> void:
 	_restore_cities(data, ctx)
 	_restore_characters(data, ctx)
 
-	
 	if not data.shards.is_empty():
 		_shards_memory = data.shards.duplicate(true)
 
@@ -252,7 +230,6 @@ func apply_loaded_save(data: SaveData, ctx) -> void:
 			str(ctx.hero.current_cell if ctx.hero else Vector2i(-1, -1))
 		]
 	)
-
 
 func _recompute_visible(visibility, ctx) -> void:
 	if ctx.map_gen == null:
@@ -271,7 +248,6 @@ func _recompute_visible(visibility, ctx) -> void:
 		if ctx.map_gen.visibility == null:
 			ctx.map_gen.visibility = visibility
 		ctx.map_gen.apply_fog(visibility)
-
 
 func _restore_cities(data: SaveData, ctx) -> void:
 	if not (ctx.cities is Node):
@@ -297,12 +273,11 @@ func _restore_cities(data: SaveData, ctx) -> void:
 	if restored > 0:
 		GameLogger.world("Loaded cities: %d" % restored)
 
-
 func _find_city(all: Array, city_uid: int, saved_count: int, saved_center: Variant) -> City:
 	for c in all:
 		if c.uid == city_uid:
 			return c
-	
+
 	if saved_center is Dictionary:
 		var cell := Vector2i(int(saved_center.get("x", 0)), int(saved_center.get("y", 0)))
 		for c in all:
@@ -311,7 +286,6 @@ func _find_city(all: Array, city_uid: int, saved_count: int, saved_center: Varia
 	if all.size() == 1 and saved_count == 1:
 		return all[0]
 	return null
-
 
 func _restore_characters(data: SaveData, ctx) -> void:
 	if ctx.character_registry == null:

@@ -16,7 +16,6 @@ func _cleanup_test(on_died: Callable) -> void:
 		a.free()
 	GameEventBus.hero_died.disconnect(on_died)
 
-## R8: база героя — TestFactories.make_hero, здесь только армия и боевой HP.
 func _combat_hero(path: StringName = &"rebel") -> HeroController:
 	var h := TestFactories.make_hero(path)
 	h.max_combat_hp = 20
@@ -32,7 +31,6 @@ func _make_coord(enabled: bool = true) -> Object:
 	c.battle_death_enabled = enabled
 	c._pending_enemy_cell = Vector2i(3, 4)
 	return c
-
 
 func test_battle_loss_zero_hp_emits_hero_died() -> void:
 	var data: Dictionary = {}
@@ -52,7 +50,6 @@ func test_battle_loss_zero_hp_emits_hero_died() -> void:
 	_cleanup_test(on_died)
 	coord.free()
 
-
 func test_battle_won_no_death() -> void:
 	var data: Dictionary = {}
 	var on_died := func(cause: Variant): data["cause"] = cause
@@ -69,7 +66,6 @@ func test_battle_won_no_death() -> void:
 
 	_cleanup_test(on_died)
 	coord.free()
-
 
 func test_death_gate_can_be_disabled() -> void:
 	var data: Dictionary = {}

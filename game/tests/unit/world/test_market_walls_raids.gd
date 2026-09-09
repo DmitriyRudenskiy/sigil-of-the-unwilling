@@ -9,14 +9,12 @@ const _Raid := preload("res://scripts/city/RaidSystem.gd")
 const _Reputation := preload("res://scripts/city/ReputationSystem.gd")
 const _CityProc := preload("res://scripts/city/CityTurnProcessor.gd")
 
-
 func _city(uid := 1) -> Variant:
 	var c := _City.new()
 	c.uid = uid
 	c.center = Vector2i(0, 0)
-	c.stronghold_level = 2  
+	c.stronghold_level = 2
 	return c
-
 
 func _add_building(c: Variant, def: Variant, level := 1, cell := Vector2i(1, 0)) -> Variant:
 	var b := _UniqueBuilding.new()
@@ -26,13 +24,10 @@ func _add_building(c: Variant, def: Variant, level := 1, cell := Vector2i(1, 0))
 	c.buildings.append(b)
 	return b
 
-
-
 func test_walls_def_registered() -> void:
 	var d: Variant = _BuildingDefs.walls()
 	assert_that(d.id).is_equal(&"walls")
 	assert_bool(_BuildingDefs.def_by_id(&"walls") != null).is_true()
-
 
 func test_defense_strength_militia_and_walls() -> void:
 	var c: Variant = _city()
@@ -45,8 +40,6 @@ func test_defense_strength_militia_and_walls() -> void:
 		b.level = 3
 	assert_that(c.defense_strength()).is_equal(21)
 
-
-
 func test_market_trade_ok() -> void:
 	var c: Variant = _city()
 	_add_building(c, _BuildingDefs.market())
@@ -58,16 +51,14 @@ func test_market_trade_ok() -> void:
 	assert_bool(absf(float(c.storage[&"grain"]) - 6.0) < 1e-9).is_true()
 	assert_bool(absf(float(c.storage[&"industry"]) - (gold_before + 7.5)) < 1e-9).is_true()
 
-
 func test_market_prosperity_rate() -> void:
 	var c: Variant = _city()
-	c.prosperity = 100.0  
+	c.prosperity = 100.0
 	_add_building(c, _BuildingDefs.market())
 	var rate: float = _Market.rate_for(c, &"grain")
 	assert_bool(absf(rate - 2.25) < 1e-9).is_true()
 	c.prosperity = 0.0
 	assert_bool(absf(_Market.rate_for(c, &"grain") - 1.5) < 1e-9).is_true()
-
 
 func test_market_trade_failures() -> void:
 	var c: Variant = _city()
@@ -83,11 +74,10 @@ func test_market_trade_failures() -> void:
 	assert_bool(bool(r.ok)).is_false()
 	assert_that(r.reason).is_equal("Золото не продают")
 
-
 func test_market_food_trade() -> void:
 	var c: Variant = _city()
 	_add_building(c, _BuildingDefs.market())
-	c.prosperity = 0.0  
+	c.prosperity = 0.0
 	c.food_stockpile = 5.0
 	var gold_before: float = float(c.storage.get(&"industry", 0.0))
 	var r: CityCheck = _Market.trade(c, &"food", 2.0)
@@ -95,8 +85,6 @@ func test_market_food_trade() -> void:
 	assert_bool(absf(float(r.payload.get("gold", 0.0)) - 2.0) < 1e-9).is_true()
 	assert_bool(absf(c.food_stockpile - 3.0) < 1e-9).is_true()
 	assert_bool(absf(float(c.storage[&"industry"]) - (gold_before + 2.0)) < 1e-9).is_true()
-
-
 
 func test_raid_chance_bounds() -> void:
 	var c: Variant = _city()
@@ -107,20 +95,17 @@ func test_raid_chance_bounds() -> void:
 	c.reputation = 0
 	assert_bool(absf(_Raid.chance(c) - 0.10) < 1e-9).is_true()
 
-
 func test_raid_strength_range() -> void:
 	var c: Variant = _city()
 	for t in range(1, 31):
 		var s: int = _Raid.raid_strength(c, t)
 		assert_bool(s >= 5 and s <= 15).is_true()
 
-
 func test_raid_occurs_deterministic() -> void:
 	var c: Variant = _city(99)
 	assert_bool(_Raid.occurs(c, 12)).is_true()
 	var c2: Variant = _city(42)
 	assert_bool(_Raid.occurs(c2, 7)).is_false()
-
 
 func test_raid_repelled() -> void:
 	var c: Variant = _city(99)
@@ -138,7 +123,6 @@ func test_raid_repelled() -> void:
 	assert_that(_Reputation.clamp_value(0 + GameNumbers.RAID_REP_RELIEF)).is_equal(5)
 	assert_that(c.reputation).is_equal(5)
 
-
 func test_raid_loses() -> void:
 	var c: Variant = _city(99)
 	c.food_stockpile = 10.0
@@ -152,7 +136,6 @@ func test_raid_loses() -> void:
 	assert_bool(absf(c.resource_ctx.amount(&"grain") - 7.0) < 1e-6).is_true()
 	assert_that(c.reputation).is_equal(GameNumbers.RAID_REP_LOSS)
 
-
 func test_raid_no_raid_no_mutation() -> void:
 	var c: Variant = _city(42)
 	c.food_stockpile = 10.0
@@ -161,7 +144,6 @@ func test_raid_no_raid_no_mutation() -> void:
 	assert_bool(bool(res.occurred)).is_false()
 	assert_bool(absf(c.food_stockpile - 10.0) < 1e-9).is_true()
 	assert_that(c.reputation).is_equal(0)
-
 
 func test_processor_raid_signal() -> void:
 	var c: Variant = _city(99)

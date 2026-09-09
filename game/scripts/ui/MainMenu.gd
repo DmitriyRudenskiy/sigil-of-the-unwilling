@@ -103,7 +103,6 @@ func _localize() -> void:
     _exit_btn.text = GameText.menu_exit()
     _version_label.text = GameText.menu_version()
 
-
 func _connect_buttons() -> void:
     _new_game_btn.pressed.connect(_on_new_game)
     _load_game_btn.pressed.connect(_on_load_game)
@@ -118,14 +117,12 @@ func _on_new_game() -> void:
     _clear_session_caches()
     get_tree().change_scene_to_file(_CharacterCreation.resource_path)
 
-
 func _on_arena() -> void:
     _clear_session_caches()
     get_tree().change_scene_to_file("res://scenes/CityArena.tscn")
 
-
 func _clear_session_caches() -> void:
-    # Единая точка сброса: Services.clear_session() → StaticCaches.reset_all().
+
     Services.clear_session()
 
 func _on_load_game() -> void:
@@ -177,7 +174,7 @@ func _on_exit() -> void:
 func _on_settings() -> void:
     if not _settings_screen.applied.is_connected(_on_settings_applied):
         _settings_screen.applied.connect(_on_settings_applied)
-    # ИСПРАВЛЕНИЕ: Services.resolve вместо get_node("/root/Settings")
+
     var settings_node: Object = Services.resolve(&"settings")
     _settings_screen.setup(settings_node)
     _settings_screen.show()

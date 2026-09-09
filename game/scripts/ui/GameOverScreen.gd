@@ -5,7 +5,6 @@ signal return_to_menu
 
 var _wired := false
 
-
 func show_result(result: String, reason: StringName, summary: Dictionary) -> void:
 	_wire_once()
 	var title: Label = get_node("Root/Panel/VBox/Title")
@@ -32,7 +31,6 @@ func show_result(result: String, reason: StringName, summary: Dictionary) -> voi
 		grid.get_node(row_name).text = str(values[row_name])
 	visible = true
 
-
 func _wire_once() -> void:
 	if _wired:
 		return
@@ -40,7 +38,6 @@ func _wire_once() -> void:
 	var menu_btn := get_node("Root/Panel/VBox/MenuButton") as Button
 	menu_btn.text = GameText.endgame_to_menu()
 	menu_btn.pressed.connect(func() -> void: return_to_menu.emit())
-
 
 func _unhandled_input(_event: InputEvent) -> void:
 	if visible:

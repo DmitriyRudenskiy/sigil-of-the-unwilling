@@ -1,10 +1,6 @@
 class_name GameText
 extends RefCounted
 
-## Все пользовательские тексты. Локализуемые строки обёрнуты в tr().
-## Нелокализуемые (логи, отладка) остаются как есть.
-
-# ─── Главное меню ──────────────────────────────────────────────
 static func menu_new_game() -> String: return TranslationServer.translate("menu.new_game")
 static func menu_load_game() -> String: return TranslationServer.translate("menu.load_game")
 static func menu_arena() -> String: return TranslationServer.translate("menu.arena")
@@ -16,7 +12,6 @@ static func menu_exit() -> String: return TranslationServer.translate("menu.exit
 static func menu_version() -> String: return TranslationServer.translate("menu.version")
 static func model_hero_warrior() -> String: return TranslationServer.translate("model.hero_warrior")
 
-# === Здания (CityArena) ===
 static func building_name(id: StringName) -> String:
 	return TranslationServer.translate("building." + str(id))
 static func arena_founded() -> String: return TranslationServer.translate("arena.founded")
@@ -80,7 +75,6 @@ static func arena_hud(turn: int, food: String, netto: String, industry: String, 
 static func arena_score(n: String) -> String: return TranslationServer.translate("arena.score").format({"n": n})
 static func model_hero_mage() -> String: return TranslationServer.translate("model.hero_mage")
 
-# ─── Бой ───────────────────────────────────────────────────────
 static func battle_select_unit() -> String: return TranslationServer.translate("battle.select_unit")
 static func battle_your_turn() -> String: return TranslationServer.translate("battle.your_turn")
 static func battle_enemy_turn() -> String: return TranslationServer.translate("battle.enemy_turn")
@@ -116,7 +110,6 @@ static func battle_hp_loss(n: int) -> String: return TranslationServer.translate
 static func battle_turn_info(side: String, name: String, count: int) -> String:
 	return TranslationServer.translate("battle.turn_info").format({"side": side, "name": name, "count": count})
 
-# ─── Город ─────────────────────────────────────────────────────
 static func city_title(name: String) -> String: return TranslationServer.translate("city.title").format({"name": name})
 static func city_capital() -> String: return TranslationServer.translate("city.capital")
 static func city_population(cur: int, cap: int) -> String: return TranslationServer.translate("city.population").format({"cur": cur, "cap": cap})
@@ -171,7 +164,6 @@ static func city_cost_special(res: String, n: String) -> String:
 static func city_cost_followers(n: int) -> String: return TranslationServer.translate("city.cost_followers").format({"n": n})
 static func city_cost_free() -> String: return TranslationServer.translate("city.cost_free")
 
-# ─── Арена ─────────────────────────────────────────────────────
 static func arena_palette_hint() -> String: return TranslationServer.translate("arena.palette_hint")
 static func arena_turn_button() -> String: return TranslationServer.translate("arena.turn_button")
 static func arena_auto_button() -> String: return TranslationServer.translate("arena.auto_button")
@@ -185,7 +177,6 @@ static func arena_cluster(n: int) -> String: return TranslationServer.translate(
 static func arena_center_msg() -> String: return TranslationServer.translate("arena.center_msg")
 static func arena_select_msg() -> String: return TranslationServer.translate("arena.select_msg")
 
-# ─── Герой ─────────────────────────────────────────────────────
 static func hero_title(name: String, path: String) -> String: return TranslationServer.translate("hero.title").format({"name": name, "path": path})
 static func hero_combat_hp(cur: int, max: int) -> String: return TranslationServer.translate("hero.combat_hp").format({"cur": cur, "max": max})
 static func hero_mana(cur: int, max: int) -> String: return TranslationServer.translate("hero.mana").format({"cur": cur, "max": max})
@@ -208,7 +199,6 @@ static func creation_stats(atk: int, def_v: int, mag: int, wis: int) -> String:
 	return TranslationServer.translate("creation.stats").format({"atk": atk, "def": def_v, "mag": mag, "wis": wis})
 static func creation_name_placeholder() -> String: return TranslationServer.translate("creation.name_placeholder")
 
-# === Панели мира ===
 static func ui_close() -> String: return TranslationServer.translate("ui.close")
 static func adventure_options() -> String: return TranslationServer.translate("adventure.options")
 static func adventure_show_markers() -> String: return TranslationServer.translate("adventure.show_markers")
@@ -267,7 +257,6 @@ static func citypanel_summary(pop: int, cap: int, over: String, workers: int, fr
 static func citypanel_building_line(name: String, level: int, extra: String) -> String:
 	return TranslationServer.translate("citypanel.building_line").format({"name": name, "level": level, "extra": extra})
 
-# ─── Создание персонажа ────────────────────────────────────────
 static func creation_title() -> String: return TranslationServer.translate("creation.title")
 static func creation_subtitle() -> String: return TranslationServer.translate("creation.subtitle")
 static func creation_name_label() -> String: return TranslationServer.translate("creation.name_label")
@@ -282,7 +271,6 @@ static func creation_back() -> String: return TranslationServer.translate("creat
 static func creation_sex_male() -> String: return TranslationServer.translate("creation.sex_male")
 static func creation_sex_female() -> String: return TranslationServer.translate("creation.sex_female")
 
-# ─── Конец игры ────────────────────────────────────────────────
 static func endgame_victory() -> String: return TranslationServer.translate("endgame.victory")
 static func endgame_defeat() -> String: return TranslationServer.translate("endgame.defeat")
 static func endgame_victory_title() -> String: return TranslationServer.translate("endgame.victory_title")
@@ -302,7 +290,6 @@ static func endgame_reason(reason: StringName) -> String:
 		&"domination":        return TranslationServer.translate("endgame.reason_domination")
 		_: return str(reason)
 
-# ─── Смерть героя ──────────────────────────────────────────────
 static func death_cycle_continues(name: String) -> String: return TranslationServer.translate("death.cycle_continues").format({"name": name})
 static func death_cycle_ends(name: String) -> String: return TranslationServer.translate("death.cycle_ends").format({"name": name})
 static func death_fell_in(cause: String) -> String: return TranslationServer.translate("death.fell_in").format({"cause": cause})
@@ -313,7 +300,6 @@ static func death_resurrection_button(cost_ind: int, cost_gold: int) -> String:
 static func death_chronicle_button() -> String: return TranslationServer.translate("death.chronicle_button")
 static func death_menu_button() -> String: return TranslationServer.translate("death.menu_button")
 
-# ─── Летопись ──────────────────────────────────────────────────
 static func chronicle_title() -> String: return TranslationServer.translate("chronicle.title")
 static func chronicle_empty() -> String: return TranslationServer.translate("chronicle.empty")
 static func chronicle_close() -> String: return TranslationServer.translate("chronicle.close")
@@ -322,7 +308,6 @@ static func chronicle_entry(icon: String, gen: int, name: String, path: String, 
 		{"icon": icon, "gen": gen, "name": name, "path": path, "outcome": outcome,
 		 "turns": turns, "glory": glory, "w": w, "l": l})
 
-# ─── Настройки ─────────────────────────────────────────────────
 static func settings_title() -> String: return TranslationServer.translate("settings.title")
 static func settings_graphics() -> String: return TranslationServer.translate("settings.graphics")
 static func settings_zoom() -> String: return TranslationServer.translate("settings.zoom")
@@ -340,7 +325,6 @@ static func settings_apply() -> String: return TranslationServer.translate("sett
 static func settings_reset() -> String: return TranslationServer.translate("settings.reset")
 static func settings_cancel() -> String: return TranslationServer.translate("settings.cancel")
 
-# ─── Ресурсы ───────────────────────────────────────────────────
 static func resource_panel_title() -> String: return TranslationServer.translate("resource.panel_title")
 static func resource_collected(amount: int) -> String: return TranslationServer.translate("resource.collected").format({"n": amount})
 static func resource_hidden_cell() -> String: return TranslationServer.translate("resource.hidden_cell")
@@ -367,7 +351,6 @@ static func resource_name(id: StringName) -> String:
 		&"oak":     return TranslationServer.translate("resource.oak")
 		_:          return str(id)
 
-# ─── Навыки ────────────────────────────────────────────────────
 static func skill_name(id: StringName) -> String:
 	match id:
 		&"nature_sense": return TranslationServer.translate("skill.nature_sense")
@@ -377,7 +360,6 @@ static func skill_name(id: StringName) -> String:
 		&"alchemy":      return TranslationServer.translate("skill.alchemy")
 		_: return str(id)
 
-# ─── Приём: репутация ──────────────────────────────────────────
 static func rep_band(band: int) -> String:
 	match band:
 		0: return TranslationServer.translate("rep.rebellion")
@@ -388,7 +370,6 @@ static func rep_band(band: int) -> String:
 		5: return TranslationServer.translate("rep.golden_age")
 		_: return str(band)
 
-# ─── Приём: сезон ──────────────────────────────────────────────
 static func season_name(id: int) -> String:
 	match id:
 		Season.ID.SPRING: return TranslationServer.translate("season.spring")
@@ -397,7 +378,6 @@ static func season_name(id: int) -> String:
 		Season.ID.WINTER: return TranslationServer.translate("season.winter")
 		_: return str(id)
 
-# ─── Приём: погода ─────────────────────────────────────────────
 static func weather_name(id: int) -> String:
 	match id:
 		GameNumbers.WEATHER_CLEAR: return TranslationServer.translate("weather.clear")
@@ -406,7 +386,6 @@ static func weather_name(id: int) -> String:
 		GameNumbers.WEATHER_STORM: return TranslationServer.translate("weather.storm")
 		_: return str(id)
 
-# ─── Приём: причина смерти ─────────────────────────────────────
 static func death_cause(cause: StringName) -> String:
 	match cause:
 		&"battle":     return TranslationServer.translate("cause.battle")
@@ -415,12 +394,10 @@ static func death_cause(cause: StringName) -> String:
 		&"burnout":    return TranslationServer.translate("cause.burnout")
 		_: return str(cause)
 
-# ─── Приём: результат боя ──────────────────────────────────────
 static func battle_result_win() -> String: return TranslationServer.translate("result.win")
 static func battle_result_lose() -> String: return TranslationServer.translate("result.lose")
 static func battle_result_retreat() -> String: return TranslationServer.translate("result.retreat")
 
-# ─── Служебные ─────────────────────────────────────────────────
 static func save_ok() -> String: return TranslationServer.translate("save.ok")
 static func save_failed() -> String: return TranslationServer.translate("save.failed")
 static func load_ok() -> String: return TranslationServer.translate("load.ok")

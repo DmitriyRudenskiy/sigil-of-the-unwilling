@@ -7,7 +7,6 @@ const C_TEXT := ThemeConfig.C_TEXT_PRIMARY
 
 var _slots: Array[Panel] = []
 
-
 func _ready() -> void:
 	var aps := StyleBoxFlat.new()
 	aps.bg_color = ThemeConfig.C_PANEL_MID
@@ -29,7 +28,6 @@ func _ready() -> void:
 		ct.add_theme_color_override("font_color", C_TEXT)
 
 		_slots.append(slot)
-
 
 func update_army(army: Array[UnitStack]) -> void:
 	for i in range(8):

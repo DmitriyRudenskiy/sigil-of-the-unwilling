@@ -9,7 +9,6 @@ func before_test() -> void:
 	unit.uid = 1
 	unit.state = _PopUnit.State.FOLLOWER
 
-
 func test_initial_state_follower() -> void:
 	assert_that(unit.state).is_equal(_PopUnit.State.FOLLOWER)
 
@@ -27,7 +26,6 @@ func test_initial_no_pending() -> void:
 
 func test_initial_not_assigned() -> void:
 	assert_that(unit.assigned_to).is_equal(-1)
-
 
 func test_request_switch_to_worker() -> void:
 	var result: bool = unit.request_switch(_PopUnit.State.WORKER, Vector2i(3, 3))
@@ -59,7 +57,6 @@ func test_request_switch_while_assigned() -> void:
 	unit.assigned_to = 5
 	var result: bool = unit.request_switch(_PopUnit.State.MILITIA)
 	assert_bool(result).is_false()
-
 
 func test_apply_pending_to_worker() -> void:
 	unit.request_switch(_PopUnit.State.WORKER, Vector2i(3, 3))
@@ -99,7 +96,6 @@ func test_apply_pending_clears_patrol_for_non_militia() -> void:
 	unit.request_switch(_PopUnit.State.FOLLOWER)
 	unit.apply_pending()
 	assert_bool(unit.patrol).is_false()
-
 
 func test_not_available_while_pending() -> void:
 	unit.request_switch(_PopUnit.State.WORKER, Vector2i(3, 3))

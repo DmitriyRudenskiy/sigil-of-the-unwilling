@@ -58,7 +58,6 @@ var magic_schools: Dictionary:
 var spellbook: Array[StringName]:
 	get: return magic.spellbook
 
-
 func is_combat_dead() -> bool:
 	return combat_hp <= 0
 
@@ -77,7 +76,6 @@ var current_cell: Vector2i:
 	get: return movement.current_cell
 var move_points: float:
 	get: return movement.move_points
-
 
 func _ready() -> void:
 	movement = HeroMovementController.new()
@@ -104,12 +102,7 @@ func _ready() -> void:
 	skills = HeroSkills.new()
 	tools = HeroTools.new()
 
-
 	_wire_signals()
-
-
-
-
 
 var _signals_wired := false
 
@@ -142,10 +135,8 @@ func _wire_signals() -> void:
 	skills.skills_changed.connect(skills_changed.emit)
 	tools.tools_changed.connect(tools_changed.emit)
 
-
 func get_map_gen() -> MapGenerator:
 	return movement.get_map_gen()
-
 
 func setup(map: MapGenerator) -> void:
 	if _setup_done:
@@ -154,29 +145,23 @@ func setup(map: MapGenerator) -> void:
 	army.setup(Services.resolve(&"units"))
 	strategic_resources.init_from_registry(Services.resolve(&"resources"))
 
-	movement.set_artifact_effect_fn(has_artifact_effect)  
+	movement.set_artifact_effect_fn(has_artifact_effect)
 	movement.setup(map)
 	visual.setup(map, self)
 	visual.build_visual()
 	visual.setup_path_visual()
 
-
-
 func on_map_clicked(cell: Vector2i) -> void:
 	movement.on_map_clicked(cell)
-
 
 func move_to_cell(cell: Vector2i) -> bool:
 	return movement.move_to_cell(cell)
 
-
 func can_reach(cell: Vector2i) -> bool:
 	return movement.can_reach(cell)
 
-
 func reach_problem(cell: Vector2i) -> String:
 	return movement.reach_problem(cell)
-
 
 func cancel_pending(clear_text: bool = true) -> void:
 	movement.cancel_pending(clear_text)
@@ -184,56 +169,41 @@ func cancel_pending(clear_text: bool = true) -> void:
 func cancel_planned_path() -> void:
 	movement.cancel_planned_path()
 
-
-
 func get_army_for_battle() -> Array[UnitStack]:
 	return army.get_army_for_battle()
-
 
 func apply_battle_results(surviving_army: Array[UnitStack]) -> void:
 	army.apply_battle_results(surviving_army)
 
-
 func get_army() -> HeroArmyController:
 	return army
-
-
 
 func _on_resource_pickup(res_type: int) -> void:
 	resources.pickup_resource(res_type)
 
-
-
 func _idle_animation() -> void:
 	visual.idle_animation()
-
 
 func _set_facing(delta: Vector2i) -> void:
 	visual.set_facing(delta)
 
-
 func _draw_path(pts: Array[Vector2i]) -> void:
 	visual.draw_path(pts)
-
 
 func _clear_path_visual() -> void:
 	visual.clear_path_visual()
 
-
 func _on_reach_preview(_pts: Array[Vector2i], _dist: Dictionary, _mp: float) -> void:
-	pass  
+	pass
 
 func _on_reach_cleared() -> void:
 	pass
 
-
 func _hide_path_visual() -> void:
 	visual.clear_path_visual()
 
-
 func _show_marker(pos: Vector2) -> void:
 	visual.show_marker(pos)
-
 
 func _tween_to(target: Vector2, duration: float, callback: Callable) -> void:
 	if _Platform.is_headless():
@@ -246,19 +216,15 @@ func _tween_to(target: Vector2, duration: float, callback: Callable) -> void:
 	_tween.tween_property(self, "position", target, duration)
 	_tween.tween_callback(callback)
 
-
 func _kill_tween() -> void:
 	if _tween and _tween.is_valid():
 		_tween.kill()
-
-
 
 func end_turn() -> void:
 	_apply_daily_resource_effects()
 	_restore_mana()
 	_reset_time_and_movement()
 	_tick_needs()
-
 
 func _tick_needs() -> void:
 	if not is_alive:
@@ -272,7 +238,6 @@ func _tick_needs() -> void:
 		GameLogger.world("Hero death by needs: %s" % String(cause))
 		GameEventBus.hero_died.emit(cause)
 
-
 func revive_at(city: City) -> void:
 	is_alive = true
 	combat_hp = max_combat_hp
@@ -282,7 +247,6 @@ func revive_at(city: City) -> void:
 	if city != null:
 		movement.current_cell = city.center
 
-
 func _apply_daily_resource_effects() -> void:
 	resources.apply_daily_effects()
 	strategic_resources._add_internal(
@@ -291,10 +255,8 @@ func _apply_daily_resource_effects() -> void:
 		ResourceType.to_name(ResourceType.ID.STONE), GameNumbers.RESOURCE_AUTO_STONE)
 	strategic_resources.emit_changed()
 
-
 func _restore_mana() -> void:
 	magic.tick_restore(stats.get("knowledge", 0))
-
 
 func _reset_time_and_movement() -> void:
 	time.reset_for_new_day()
@@ -303,32 +265,24 @@ func _reset_time_and_movement() -> void:
 	movement.end_turn_movement()
 	movement.auto_follow_at_turn_start()
 
-
 func add_strategic_resource(id: StringName, amount: int) -> int:
 	return strategic_resources.add(id, amount)
-
 
 func remove_strategic_resource(id: StringName, amount: int) -> int:
 	return strategic_resources.remove(id, amount)
 
-
 func force_stop() -> void:
 	movement.force_stop()
-
 
 func get_daily_movement_points() -> float:
 	var mods := inventory.get_total_modifiers()
 	return movement.get_daily_movement_points(mods.get("movement", 0))
 
-
 func get_avatar_texture() -> Texture2D:
 	return visual.get_avatar_texture() if visual != null else null
 
-
 func _on_time_update(step_cost: float) -> void:
 	time.spend_move_points(step_cost)
-
-
 
 func get_battle_bonus() -> Dictionary:
 	var mods := inventory.get_total_modifiers()
@@ -341,10 +295,8 @@ func get_battle_bonus() -> Dictionary:
 		"morale": int(mods.get("morale", 0)),
 	}
 
-
 func has_artifact_effect(effect: StringName) -> bool:
 	return inventory.has_special_effect(effect)
-
 
 func get_hero_bonus() -> Dictionary:
 	return {
@@ -352,8 +304,6 @@ func get_hero_bonus() -> Dictionary:
 		"defense": stats.get("defense", 0),
 		"spell_power": stats.get("spell_power", 0),
 	}
-
-
 
 func apply_build(profile: _HeroProfile) -> void:
 	if profile == null:
@@ -364,7 +314,6 @@ func apply_build(profile: _HeroProfile) -> void:
 	hero_class = profile.character_class
 	hero_culture = profile.culture
 	hero_background = profile.background
-
 
 func serialize() -> Dictionary:
 	return {
@@ -407,7 +356,6 @@ func _planned_path_from(data: Array) -> Array[Vector2i]:
 			out.append(Vector2i(int(p.get("x", -1)), int(p.get("y", -1))))
 	return out
 
-
 func deserialize(data: Dictionary) -> void:
 	movement.current_cell = Vector2i(int(data["cell"]["x"]), int(data["cell"]["y"]))
 	movement.move_points = float(data.get("move_points", movement.move_points))
@@ -446,11 +394,9 @@ func deserialize(data: Dictionary) -> void:
 		f.deserialize(f_data)
 		followers.append(f)
 
-
 func _followers_data() -> Array:
 	var out: Array = []
 	for f in followers:
 		if f != null:
 			out.append(f.serialize())
 	return out
-

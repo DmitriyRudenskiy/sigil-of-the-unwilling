@@ -1,7 +1,7 @@
 class_name PopUnit
 extends RefCounted
 
-enum State { WORKER, FOLLOWER, MILITIA, SCHOLAR }  
+enum State { WORKER, FOLLOWER, MILITIA, SCHOLAR }
 
 var uid := 0
 var state: State = State.FOLLOWER
@@ -14,14 +14,11 @@ var born_turn := -1
 var character_uid: int = -1
 var path_id: StringName = &""
 
-
 func is_available() -> bool:
 	return pending_state == -1 and assigned_to == -1
 
-
 func is_free_follower() -> bool:
 	return state == State.FOLLOWER and is_available()
-
 
 func request_switch(new_state: State, new_tile := Vector2i(-1, -1)) -> bool:
 	if pending_state != -1 or assigned_to != -1:
@@ -32,7 +29,6 @@ func request_switch(new_state: State, new_tile := Vector2i(-1, -1)) -> bool:
 	pending_tile = new_tile
 	return true
 
-
 func apply_pending() -> bool:
 	if pending_state == -1:
 		return false
@@ -42,7 +38,6 @@ func apply_pending() -> bool:
 	pending_state = -1
 	pending_tile = Vector2i(-1, -1)
 	return true
-
 
 func serialize() -> Dictionary:
 	return {
@@ -57,7 +52,6 @@ func serialize() -> Dictionary:
 		"character_uid": character_uid,
 		"path_id": String(path_id),
 	}
-
 
 static func deserialize(data: Dictionary) -> PopUnit:
 	var u := PopUnit.new()

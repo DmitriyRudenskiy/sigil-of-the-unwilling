@@ -3,10 +3,8 @@ extends SceneTree
 const SIZE := 64
 const OUTLINE := Color(0.1, 0.08, 0.06, 1.0)
 
-
 func _initialize() -> void:
     call_deferred("_run")
-
 
 func _run() -> void:
     var artifacts := preload("res://scripts/autoload/ArtifactRegistry.gd").new()
@@ -18,7 +16,6 @@ func _run() -> void:
         img.save_png("%s/%s.png" % [dir_path, art.id])
     print("[ArtifactIconGenerator] Generated %d icons in %s" % [artifacts.get_all().size(), dir_path])
     quit(0)
-
 
 func _build_icon(art: Artifact) -> Image:
     var img := Image.create(SIZE, SIZE, false, Image.FORMAT_RGBA8)
@@ -48,11 +45,9 @@ func _build_icon(art: Artifact) -> Image:
     _draw_border(img, border_col)
     return img
 
-
 func _sp(img: Image, x: int, y: int, c: Color) -> void:
     if x >= 0 and x < img.get_width() and y >= 0 and y < img.get_height():
         img.set_pixel(x, y, c)
-
 
 func _ellipse(img: Image, cx: int, cy: int, rx: int, ry: int, c: Color) -> void:
     for y in range(cy - ry, cy + ry + 1):
@@ -61,17 +56,14 @@ func _ellipse(img: Image, cx: int, cy: int, rx: int, ry: int, c: Color) -> void:
             var dy := float(y - cy) / float(ry)
             if dx * dx + dy * dy <= 1.0: _sp(img, x, y, c)
 
-
 func _rect(img: Image, x1: int, y1: int, x2: int, y2: int, c: Color) -> void:
     for y in range(y1, y2 + 1):
         for x in range(x1, x2 + 1):
             _sp(img, x, y, c)
 
-
 func _draw_border(img: Image, c: Color) -> void:
     for i in SIZE:
         _sp(img, i, 0, c); _sp(img, i, SIZE-1, c); _sp(img, 0, i, c); _sp(img, SIZE-1, i, c)
-
 
 func _draw_crown(img: Image, b: Color, hi: Color, _s: Color) -> void:
     _rect(img, 12, 30, 52, 48, b); _rect(img, 12, 30, 52, 34, hi); _rect(img, 12, 44, 52, 48, b.darkened(0.4))
@@ -81,7 +73,6 @@ func _draw_crown(img: Image, b: Color, hi: Color, _s: Color) -> void:
             _rect(img, sx - hw, y, sx + hw, y, b); _sp(img, sx, y, hi)
         _sp(img, sx, 20, Color.RED)
 
-
 func _draw_necklace(img: Image, b: Color, hi: Color, sh: Color) -> void:
     for i in 40:
         var a := PI + (float(i) / 40.0) * PI
@@ -89,11 +80,9 @@ func _draw_necklace(img: Image, b: Color, hi: Color, sh: Color) -> void:
         _sp(img, x, y, b); _sp(img, x, y+1, sh)
     _ellipse(img, 32, 42, 6, 8, b); _ellipse(img, 31, 41, 3, 4, hi)
 
-
 func _draw_armor(img: Image, b: Color, hi: Color, sh: Color) -> void:
     _rect(img, 16, 14, 48, 52, b); _rect(img, 16, 14, 48, 18, hi); _rect(img, 16, 48, 48, 52, sh)
     _ellipse(img, 16, 18, 6, 6, b); _ellipse(img, 48, 18, 6, 6, b); _rect(img, 31, 20, 33, 48, sh)
-
 
 func _draw_sword(img: Image, _b: Color, hi: Color, _s: Color, two: bool) -> void:
     var bt := 8; var bb := 40 if two else 44
@@ -105,26 +94,22 @@ func _draw_sword(img: Image, _b: Color, hi: Color, _s: Color, two: bool) -> void
     _rect(img, 30, bb+4, 34, hb, Color(0.4, 0.25, 0.15))
     _ellipse(img, 32, hb+2, 3, 3, Color(0.8, 0.7, 0.2))
 
-
 func _draw_shield(img: Image, b: Color, hi: Color, sh: Color) -> void:
     for y in range(12, 54):
         var t := float(y-12) / 42.0; var hw := int(20 - t*t*8)
         _rect(img, 32-hw, y, 32+hw, y, b)
     _rect(img, 12, 12, 52, 16, hi); _rect(img, 20, 48, 44, 52, sh); _ellipse(img, 32, 32, 5, 5, hi)
 
-
 func _draw_legs(img: Image, b: Color, hi: Color, sh: Color) -> void:
     _rect(img, 16, 14, 30, 50, b); _rect(img, 34, 14, 48, 50, b)
     _rect(img, 16, 14, 30, 18, hi); _rect(img, 34, 14, 48, 18, hi)
     _rect(img, 16, 46, 30, 50, sh); _rect(img, 34, 46, 48, 50, sh); _rect(img, 31, 14, 33, 50, OUTLINE)
-
 
 func _draw_boots(img: Image, b: Color, hi: Color, sh: Color) -> void:
     _rect(img, 12, 20, 28, 44, b); _rect(img, 12, 44, 32, 52, b)
     _rect(img, 12, 20, 28, 24, hi); _rect(img, 12, 48, 32, 52, sh)
     _rect(img, 36, 20, 52, 44, b); _rect(img, 32, 44, 52, 52, b)
     _rect(img, 36, 20, 52, 24, hi); _rect(img, 32, 48, 52, 52, sh)
-
 
 func _draw_ring(img: Image, _b: Color, hi: Color, sh: Color) -> void:
     for y in range(12, 52):
@@ -133,7 +118,6 @@ func _draw_ring(img: Image, _b: Color, hi: Color, sh: Color) -> void:
             if d >= 14 and d <= 20:
                 var t := (d-14) / 6.0; _sp(img, x, y, hi.lerp(sh, t))
     _ellipse(img, 32, 18, 4, 4, Color.RED); _sp(img, 31, 17, Color(1.0, 0.7, 0.7))
-
 
 func _draw_misc(img: Image, b: Color, hi: Color, sh: Color, art: Artifact) -> void:
     match art.id:
@@ -163,7 +147,6 @@ func _draw_misc(img: Image, b: Color, hi: Color, sh: Color, art: Artifact) -> vo
             _ellipse(img, 46, 32, 4, 16, Color(0.7, 0.6, 0.4))
             for y in range(22, 42, 4):
                 _rect(img, 24, y, 40, y+1, OUTLINE)
-
 
 func _draw_book(img: Image, _b: Color, hi: Color, sh: Color) -> void:
     _rect(img, 14, 14, 50, 50, Color(0.4, 0.15, 0.15))

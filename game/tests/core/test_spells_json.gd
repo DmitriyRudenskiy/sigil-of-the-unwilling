@@ -6,17 +6,14 @@ const JSON_PATH := "res://assets/data/spells.json"
 
 var validator
 
-
 func before() -> void:
 	validator = _Validator.new()
-
 
 func _write(path: String, content: String) -> void:
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	if f != null:
 		f.store_string(content)
 		f.close()
-
 
 func test_file_exists() -> void:
 	assert_bool(FileAccess.file_exists(JSON_PATH)).is_true()
@@ -73,7 +70,6 @@ func test_overall_passes() -> void:
 	var ok: bool = validator.validate_file(JSON_PATH)
 	assert_bool(ok).is_true()
 
-
 func test_spell_count() -> void:
 	validator.validate_file(JSON_PATH)
 	var count: int = int(validator.report.stats.get("spell_count", 0))
@@ -97,7 +93,6 @@ func test_average_cost_in_range() -> void:
 	validator.validate_file(JSON_PATH)
 	var avg: float = float(validator.report.stats.get("avg_cost", 0.0))
 	assert_bool(avg >= 1.0 and avg <= 5.0).is_true()
-
 
 func test_validator_catches_missing_field() -> void:
 	var v = _Validator.new()
@@ -188,7 +183,6 @@ func test_validator_catches_bad_keyword() -> void:
 			found = true
 	assert_bool(found).is_true()
 
-
 func test_baseline_matches_current_data() -> void:
 	validator.validate_file(JSON_PATH)
 	var built: Dictionary = validator.build_baseline()
@@ -232,7 +226,6 @@ func test_baseline_save_load_roundtrip() -> void:
 	assert_bool(v.save_baseline("user://test_baseline_rt.json")).is_true()
 	var after: Dictionary = _Validator.load_baseline("user://test_baseline_rt.json")
 	assert_that(after).is_equal(before)
-
 
 func test_unconditional_suppresses_w910() -> void:
 	var v = _Validator.new()
@@ -282,7 +275,6 @@ func test_no_w901_or_w910_in_project_data() -> void:
 		if issue.code == "W901" or issue.code == "W910":
 			bad += 1
 	assert_that(bad).is_equal(0)
-
 
 func test_strict_mode_fails_on_any_warning() -> void:
 	var v = _Validator.new()

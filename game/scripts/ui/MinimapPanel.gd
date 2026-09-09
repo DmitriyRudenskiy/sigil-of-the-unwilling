@@ -20,17 +20,14 @@ var _tex_rect: TextureRect
 var _minimap_image: Image = null
 var _minimap_texture: ImageTexture = null
 
-
 func _ready() -> void:
 	var box := get_node("MapBox") as Control
 	_tex_rect = box.get_node("TextureRect") as TextureRect
 
-	
 	_overlay.minimap_clicked.connect(func(cell): minimap_clicked.emit(cell))
 	var nswe := get_node("NSWE") as HBoxContainer
 	for d in ["N", "S", "W", "E"]:
 		(nswe.get_node(d) as Button).pressed.connect(func(): camera_jump_requested.emit(d))
-
 
 func setup(map: MapGenerator, hero: HeroController, camera: Camera2D) -> void:
 	map_ref = map
@@ -42,7 +39,6 @@ func setup(map: MapGenerator, hero: HeroController, camera: Camera2D) -> void:
 	_overlay.cam_ref = camera
 
 	_build_minimap_image(map)
-
 
 func _build_minimap_image(map: MapGenerator, visibility = null) -> void:
 	if map == null:

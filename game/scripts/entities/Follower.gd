@@ -10,7 +10,6 @@ var trait_ids: Array[StringName] = []
 var stat_modifiers: Dictionary = {}
 var abilities: Array[StringName] = []
 
-
 func serialize() -> Dictionary:
 	var abils: Array[String] = []
 	for a in abilities:
@@ -26,13 +25,11 @@ func serialize() -> Dictionary:
 		"abilities": abils,
 	}
 
-
 func _mods_to_array() -> Array:
 	var out: Array = []
 	for k in stat_modifiers:
 		out.append([String(k), int(stat_modifiers[k])])
 	return out
-
 
 func to_dict() -> Dictionary:
 	var traits: Array[String] = []
@@ -55,7 +52,6 @@ func to_dict() -> Dictionary:
 		"abilities": abils,
 	}
 
-
 func deserialize(data: Dictionary) -> void:
 	uid = int(data.get("uid", 0))
 	name = String(data.get("name", name))
@@ -72,7 +68,6 @@ func deserialize(data: Dictionary) -> void:
 	abilities.clear()
 	for a in data.get("abilities", []):
 		abilities.append(StringName(a))
-
 
 func describe(registry: Variant = null) -> String:
 	var out := name

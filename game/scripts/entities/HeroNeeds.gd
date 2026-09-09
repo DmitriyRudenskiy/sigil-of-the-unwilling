@@ -1,7 +1,7 @@
 class_name HeroNeeds
 extends RefCounted
 
-var needs: Dictionary = {} # Ключи: NeedType.ID (int)
+var needs: Dictionary = {}
 var zero_streak: Dictionary = {}
 
 func _init() -> void: reset()

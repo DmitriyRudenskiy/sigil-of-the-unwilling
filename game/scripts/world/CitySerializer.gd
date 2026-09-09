@@ -1,9 +1,7 @@
 class_name CitySerializer
 extends RefCounted
-# R3: сериализация города вынесена из City.gd (чистое state <-> Dictionary, без сигналов).
 
 const _ArenaClusterSystem = preload("res://scripts/city/ArenaClusterSystem.gd")
-
 
 static func serialize(city: City) -> Dictionary:
 	var d := {
@@ -53,7 +51,6 @@ static func serialize(city: City) -> Dictionary:
 		blds_arr.append(b.serialize())
 	d["buildings"] = blds_arr
 	return d
-
 
 static func deserialize(city: City, data: Dictionary) -> void:
 	var version: int = int(data.get("version", 1))
@@ -127,7 +124,6 @@ static func deserialize(city: City, data: Dictionary) -> void:
 		max_uid = maxi(max_uid, b.uid + 1)
 	city._uid_seq = max_uid
 	city._invalidate_exploited()
-
 
 static func _migrate_city_data(data: Dictionary, from_version: int) -> Dictionary:
 	var migrated := data.duplicate(true)

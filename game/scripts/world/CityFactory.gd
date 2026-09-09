@@ -12,7 +12,6 @@ static func village_name(seed: int, cell: Vector2i) -> String:
 	var h: int = hash([seed, cell.x, cell.y])
 	return VILLAGE_NAMES[absi(h) % VILLAGE_NAMES.size()]
 
-
 static func create_village(center: Vector2i, display_name: String, seed: int = 0) -> City:
 	var city := City.new()
 	city.center = center
@@ -22,7 +21,6 @@ static func create_village(center: Vector2i, display_name: String, seed: int = 0
 	city.faction = City.Faction.DEFAULT
 	apply_starting_kit(city)
 	return city
-
 
 static func apply_starting_kit(city: City) -> void:
 	if city == null:
@@ -36,7 +34,6 @@ static func apply_starting_kit(city: City) -> void:
 		u.tile = _first_free_worker_tile(city)
 	for i in GameNumbers.VILLAGE_START_FOLLOWERS:
 		city.add_migrant(PopUnit.State.FOLLOWER, -1)
-
 
 static func _first_free_worker_tile(city: City) -> Vector2i:
 	for nb in HexUtils.get_all_neighbors(city.center):

@@ -4,7 +4,7 @@ signal changed
 
 var mana_current: int = 0
 var mana_max: int = 0
-var schools: Dictionary = {} # Ключи: SchoolType.ID (int)
+var schools: Dictionary = {}
 var spellbook: Array[StringName] = []
 
 func init_defaults() -> void:

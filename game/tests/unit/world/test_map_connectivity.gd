@@ -7,12 +7,10 @@ const SEEDS := [1, 7, 42, 1337, 5555, 20260903, 808080, 1234567, 424242, 999983]
 
 var _mg: Node = null
 
-
 func after_test() -> void:
 	if _mg != null:
 		_mg.free()
 		_mg = null
-
 
 func _gen(seed: int) -> void:
 	if _mg != null:
@@ -21,14 +19,12 @@ func _gen(seed: int) -> void:
 	_mg.seed_value = seed
 	_mg.generate()
 
-
 func _hero_spawn(model) -> Vector2i:
 	for y in model.map_height:
 		for x in model.map_width:
 			if model.is_walkable(Vector2i(x, y)):
 				return Vector2i(x, y)
 	return Vector2i(-1, -1)
-
 
 func _plain_candidate(model, start: Vector2i) -> Vector2i:
 	if model.is_walkable(start):
@@ -49,7 +45,6 @@ func _plain_candidate(model, start: Vector2i) -> Vector2i:
 			queue.append(nb)
 	return start
 
-
 func _component(model, start: Vector2i) -> Dictionary:
 	var queue: Array[Vector2i] = [start]
 	var seen := {start: 1}
@@ -61,7 +56,6 @@ func _component(model, start: Vector2i) -> Dictionary:
 			seen[nb] = 1
 			queue.append(nb)
 	return seen
-
 
 func test_capital_placement_stays_in_hero_component() -> void:
 	for seed in SEEDS:
@@ -80,7 +74,6 @@ func test_capital_placement_stays_in_hero_component() -> void:
 
 		var second := WorldBootstrap._place_in_hero_component(_mg, Vector2i(placed.x + 15, placed.y))
 		assert_bool(comp.has(second)).is_true()
-
 
 func test_place_excludes_occupied_cells() -> void:
 	_gen(42)

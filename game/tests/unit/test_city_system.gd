@@ -2,18 +2,15 @@ extends GdUnitTestSuite
 
 const FOOD_PER_TILE := 100.0
 
-
 func _city() -> City:
 	var c := City.new()
 	c.display_name = "Тест-город"
 	c.center = Vector2i(5, 5)
 	return c
 
-
 func _food_yield(_cell: Vector2i) -> Dictionary:
 	return {&"food": FOOD_PER_TILE, &"industry": 10.0, &"dust": 0.0,
 		&"science": 0.0, &"influence": 0.0}
-
 
 func _mk_borough(cell: Vector2i) -> Borough:
 	var b := Borough.new()
@@ -21,10 +18,8 @@ func _mk_borough(cell: Vector2i) -> Borough:
 	b.level = 1
 	return b
 
-
 func assert_almost_eq(a: float, b: float, delta: float, _msg: String = "") -> void:
 	assert_float(a).is_equal_approx(b, delta)
-
 
 func test_militia_excluded_from_pop_cap() -> void:
 	var c := _city()
@@ -65,19 +60,19 @@ func test_cycle_inflow_summer_with_glory_and_temple() -> void:
 	cap.special_sites[HexUtils.get_all_neighbors(cap.center)[0]] = BuildingDefs.SITE_SHRINE
 	assert_that(cap.build_building(BuildingDefs.great_temple(), \
 		HexUtils.get_all_neighbors(cap.center)[0])).is_not_null()
-	mgr.add_glory(50.0, &"test")  
+	mgr.add_glory(50.0, &"test")
 	for i in GameNumbers.CITY_CYCLE_TURNS:
-		mgr.on_turn_ended(7)      
+		mgr.on_turn_ended(7)
 	assert_that(cap.pop_total()).is_equal(8)
 	mgr.free()
 
 func test_cycle_inflow_winter_halved() -> void:
 	var mgr := CityManager.new()
 	var cap := _city()
-	mgr.register_city(cap, true)  
+	mgr.register_city(cap, true)
 	for i in GameNumbers.CITY_CYCLE_TURNS:
-		mgr.on_turn_ended(1)      
-	assert_that(cap.pop_total()).is_equal(1)  
+		mgr.on_turn_ended(1)
+	assert_that(cap.pop_total()).is_equal(1)
 	mgr.free()
 
 func test_borough_limit_by_faction() -> void:
@@ -135,7 +130,7 @@ func test_overflow_transfer_between_cities() -> void:
 	mgr.register_city(other)
 	cap.add_followers(9)
 	for i in GameNumbers.CITY_CYCLE_TURNS:
-		mgr.on_turn_ended(7)  
+		mgr.on_turn_ended(7)
 	assert_that(cap.over_limit()).is_equal(1)
 	assert_that(cap.send_followers_to(other, 1)).is_equal(1)
 	assert_that(cap.over_limit()).is_equal(0)
@@ -157,17 +152,17 @@ func test_worker_switch_invalidates_yield() -> void:
 	c.add_followers(1)
 	var y0: float = c.get_yield()[&"food"]
 	c.request_switch(c.pop[0].uid, PopUnit.State.WORKER, c.first_free_worker_tile())
-	c.process_turn(1)  
+	c.process_turn(1)
 	var y1: float = c.get_yield()[&"food"]
 	assert_bool(y1 > y0).is_true()
 
 func test_can_build_rejects_worker_cell() -> void:
 	var c := _city()
 	c.add_followers(3)
-	c.storage[&"industry"] = 500.0  
+	c.storage[&"industry"] = 500.0
 	var u: PopUnit = c.pop[0]
 	assert_bool(c.request_switch(u.uid, PopUnit.State.WORKER, c.first_free_worker_tile())).is_true()
-	c.process_turn(1)  
+	c.process_turn(1)
 	var worker_cell: Vector2i = u.tile
 	assert_that(u.state).is_equal(PopUnit.State.WORKER)
 	assert_bool(worker_cell.x >= 0).is_true()

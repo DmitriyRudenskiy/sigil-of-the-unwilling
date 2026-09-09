@@ -13,8 +13,7 @@ func test_settings_screen_closed_without_settings() -> void:
 	assert_bool(is_instance_valid(screen)).is_false()
 
 func test_apply_display_mode_headless_safe() -> void:
-	# L12: поведение вместо «не упало»: в headless guard _Platform.is_headless()
-	# не даёт трогать режим окна даже при fullscreen = true.
+
 	var settings = _Settings.new()
 	var mode_before := DisplayServer.window_get_mode()
 	settings.fullscreen = true

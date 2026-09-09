@@ -1,27 +1,11 @@
-"""
-Тест 3: Производительность — проверка оптимизации HexUtils.get_neighbor.
-
-Сценарий:
-  1. Генерируем карту 80×80.
-  2. Замеряем время A* пути через всю карту.
-  3. Проверяем, что время укладывается в допустимый порог.
-  4. Сравниваем с эталонным значением.
-"""
 from __future__ import annotations
 
 import time
 
-
-
-
-# Допустимое время для A* на карте 80×80 (мс).
-# До оптимизации: ~150–300 мс. После: ~80–150 мс.
 ASTAR_MAX_TIME_MS = 200.0
 MAP_GEN_MAX_TIME_MS = 3000.0
 
-
 def test_map_generation_80x80(world_scene):
-    """Генерация карты 80×80 должна укладываться в лимит."""
     mcp = world_scene
 
     start = time.perf_counter()
@@ -49,12 +33,7 @@ def test_map_generation_80x80(world_scene):
         f"(лимит {MAP_GEN_MAX_TIME_MS} мс)"
     )
 
-
 def test_astar_pathfinding_performance(world_scene):
-    """
-    A* путь через всю карту 80×80 должен быть быстрым.
-    Запускаем 10 итераций и проверяем среднее время.
-    """
     mcp = world_scene
 
     result = mcp.execute_code("""
@@ -110,9 +89,7 @@ def test_astar_pathfinding_performance(world_scene):
         f"Мин: {result['min_ms']:.1f}, Макс: {result['max_ms']:.1f}"
     )
 
-
 def test_bfs_reachable_performance(world_scene):
-    """BFS-достижимость на карте 80×80 должна быть быстрой."""
     mcp = world_scene
 
     result = mcp.execute_code("""
@@ -143,12 +120,7 @@ def test_bfs_reachable_performance(world_scene):
     )
     assert result["reachable_count"] > 0, "BFS не нашёл достижимых клеток"
 
-
 def test_get_neighbor_no_config_call_overhead(world_scene):
-    """
-    Проверяем, что get_neighbor не вызывает get_config() каждый раз.
-    Кэширование _shift_right должно устранять оверхед.
-    """
     mcp = world_scene
 
     result = mcp.execute_code("""
@@ -166,7 +138,6 @@ def test_get_neighbor_no_config_call_overhead(world_scene):
         }
     """)
 
-    # 600 000 вызовов get_neighbor должны занять < 500 мс
     assert result["elapsed_ms"] < 500, (
         f"600K вызовов get_neighbor заняли {result['elapsed_ms']} мс "
         f"(лимит 500 мс). Оптимизация кэширования не работает."

@@ -20,7 +20,6 @@ func after_test() -> void:
 		manager.free()
 		manager = null
 
-
 func test_register_city() -> void:
 	assert_that(manager.cities.size()).is_equal(1)
 
@@ -45,7 +44,6 @@ func test_register_second_city() -> void:
 	assert_bool(manager.capital.is_capital).is_true()
 	assert_bool(city2.is_capital).is_false()
 
-
 func test_add_glory() -> void:
 	manager.add_glory(15.0, &"battle_won")
 	var glory := manager.glory.glory_last_window(manager.current_turn + 1)
@@ -60,7 +58,6 @@ func test_add_glory_negative() -> void:
 	manager.add_glory(-5.0, &"test")
 	var glory := manager.glory.glory_last_window(manager.current_turn + 1)
 	assert_that(glory).is_equal(0.0)
-
 
 func test_on_turn_ended_increments_turn() -> void:
 	var before := manager.current_turn
@@ -84,7 +81,6 @@ func test_on_turn_ended_cycle_on_turn_7() -> void:
 	var report := manager.on_turn_ended(1)
 	assert_bool(report.cycle).is_true()
 
-
 func test_capital_inflow_no_capital() -> void:
 	var mgr := _CityManager.new()
 	mgr.name = "TestMgr2"
@@ -93,11 +89,11 @@ func test_capital_inflow_no_capital() -> void:
 	mgr.free()
 
 func test_capital_inflow_base() -> void:
-	var inflow := manager.capital_inflow(7)  
+	var inflow := manager.capital_inflow(7)
 	assert_that(inflow).is_equal(2)
 
 func test_capital_inflow_winter() -> void:
-	var inflow := manager.capital_inflow(1)  
+	var inflow := manager.capital_inflow(1)
 	assert_that(inflow).is_equal(1)
 
 func test_capital_inflow_with_glory() -> void:
@@ -115,14 +111,12 @@ func test_capital_inflow_with_temple() -> void:
 	var inflow := manager.capital_inflow(7)
 	assert_that(inflow).is_equal(4)
 
-
 func test_set_tile_yield_provider() -> void:
 	var yield_fn := func(_cell: Vector2i) -> Dictionary:
 		return {&"food": 50.0, &"industry": 5.0, &"dust": 0.0, &"science": 0.0, &"influence": 0.0}
 	manager.set_tile_yield_provider(yield_fn)
 	for c in manager.cities:
 		assert_bool(c.tile_yield_fn != null).is_true()
-
 
 func test_on_turn_ended_month_13() -> void:
 	var report := manager.on_turn_ended(13)

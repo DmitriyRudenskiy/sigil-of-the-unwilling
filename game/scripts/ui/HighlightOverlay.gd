@@ -6,10 +6,8 @@ var atk_cells: Dictionary = {}
 var unreachable_cells: Dictionary = {}
 var tm: TileMapLayer
 
-
 func refresh() -> void:
     queue_redraw()
-
 
 func _draw() -> void:
     if tm == null:
@@ -23,14 +21,12 @@ func _draw() -> void:
     for k in atk_cells:
         _hex(tm.map_to_local(k), ThemeConfig.C_BATTLE_HIGHLIGHT_ATK)
 
-
 func _hex(center: Vector2, col: Color) -> void:
     var pts := PackedVector2Array()
     for i in 7:
         var ang := deg_to_rad(60.0 * i - 90.0)
         pts.append(center + Vector2(cos(ang), sin(ang)) * BattleView.HEX_OUTLINE_RADIUS)
     draw_polyline(pts, col, 3.0)
-
 
 func _hex_fill(center: Vector2, col: Color) -> void:
     var pts := PackedVector2Array()

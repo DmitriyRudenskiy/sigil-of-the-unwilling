@@ -1,7 +1,6 @@
 class_name EnemyGrowthSystem
 extends TurnPhaseProcessor
 
-
 var _map_gen: MapGenerator = null
 var _spawner: Node = null
 var _cities_mgr: CityManager = null
@@ -10,14 +9,11 @@ var _faction_sets: Array = []
 var _rng := RandomNumberGenerator.new()
 var _last_season: int = -1
 
-
 func get_phase_id() -> StringName:
 	return &"enemy_growth"
 
-
 func get_priority() -> int:
 	return 30
-
 
 func setup_growth(
 	p_map_gen: MapGenerator,
@@ -34,7 +30,6 @@ func setup_growth(
 	var units_reg: Node = Services.resolve(&"units")
 	if units_reg != null and "FACTION_SETS" in units_reg:
 		_faction_sets = units_reg.FACTION_SETS
-
 
 func on_stack_defeated(cell: Vector2i, army: Array) -> void:
 	if _world_delta == null:
@@ -55,7 +50,6 @@ func on_stack_defeated(cell: Vector2i, army: Array) -> void:
 	})
 	GameLogger.world("Enemy stack at %s will respawn in %d turns" % [str(cell), GameNumbers.ENEMY_RESPAWN_TURNS])
 
-
 func process(ctx: TurnContext) -> Dictionary:
 	var report := {"respawns": 0, "season_spawns": 0}
 	if _map_gen == null or _world_delta == null:
@@ -63,8 +57,6 @@ func process(ctx: TurnContext) -> Dictionary:
 	_process_respawns(report)
 	_process_season(ctx.season, report)
 	return report
-
-
 
 func _process_respawns(report: Dictionary) -> void:
 	var q: Array = _queue()
@@ -83,7 +75,6 @@ func _process_respawns(report: Dictionary) -> void:
 				GameLogger.world("Enemy stack respawned at %s (weakened)" % str(cell))
 			q.remove_at(i)
 		i -= 1
-
 
 func _process_season(season: int, report: Dictionary) -> void:
 	if _last_season == -1:
@@ -108,7 +99,6 @@ func _process_season(season: int, report: Dictionary) -> void:
 			_spawner.spawn_enemy_visual(cell, army)
 	GameLogger.world("New season: enemy stacks = %d / %d" % [_stack_count(), GameNumbers.MAP_ENEMY_COUNT])
 
-
 func _queue() -> Array:
 	var q: Variant = _world_delta.enemy_growth_state.get("respawn_queue", null)
 	if q == null:
@@ -116,10 +106,8 @@ func _queue() -> Array:
 		_world_delta.enemy_growth_state["respawn_queue"] = q
 	return q
 
-
 func _stack_count() -> int:
 	return _map_gen.enemy_stacks.size()
-
 
 func _can_spawn_at(cell: Vector2i) -> bool:
 	if _map_gen == null or not _map_gen.is_walkable(cell):
@@ -129,7 +117,6 @@ func _can_spawn_at(cell: Vector2i) -> bool:
 	if _cities_mgr != null and _cities_mgr.city_at(cell) != null:
 		return false
 	return true
-
 
 func _find_frontier_cell() -> Vector2i:
 	var border: int = GameNumbers.SPAWN_ENEMY_MIN_BORDER
@@ -141,7 +128,6 @@ func _find_frontier_cell() -> Vector2i:
 		if _can_spawn_at(cell):
 			return cell
 	return Vector2i(-1, -1)
-
 
 func _random_army(units_reg: Node) -> Array:
 	var faction: Array = _faction_sets[_rng.randi() % _faction_sets.size()]
@@ -157,7 +143,6 @@ func _random_army(units_reg: Node) -> Array:
 		if stack != null:
 			army.append(stack)
 	return army
-
 
 func _build_army(units: Array) -> Array:
 	var units_reg: Node = Services.resolve(&"units")

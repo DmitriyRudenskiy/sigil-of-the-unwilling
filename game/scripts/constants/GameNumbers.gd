@@ -1,21 +1,12 @@
 class_name GameNumbers
 extends RefCounted
-## Все магические числа проекта в одном месте.
-## Разделены по домену. Не менять без изменения баланса.
-## Сюда консолидовано: BattleConfig, MapConfig, UIConfig, EndgameConfig,
-## CityBalance, ArenaBalance + локальные константы BattleRules, MarketSystem,
-## ZoningSystem, ScaleShiftManager, ProsperitySystem, RaidSystem,
-## LogisticsCalculator, DemographicTurnProcessor, SuccessionController
-## и стратегий нужд.
 
-# ─── Камера и зум ──────────────────────────────────────────────
 const CAMERA_SPEED          := 600.0
 const CAMERA_EDGE_ZONE      := 20
 const CAMERA_ZOOM_TWEEN_SEC := 0.175
 const ZOOM_LEVELS           := [0.5, 0.7, 1.0, 1.1, 1.25, 1.5, 1.75, 2.0, 2.25]
 const ZOOM_DEFAULT_INDEX    := 2
 
-# ─── UI: размеры панелей ──────────────────────────────────────
 const ADVENTURE_RIGHT_PANEL_W   := 252
 const ADVENTURE_BOTTOM_BAR_H    := 58
 const CITY_PANEL_W              := 340.0
@@ -25,7 +16,6 @@ const MENU_BTN_MIN_W            := 300
 const MENU_BTN_MIN_H            := 70
 const MENU_COL_SEPARATION       := 20
 
-# ─── UI: прочее (UIConfig) ────────────────────────────────────
 const MENU_COL_OFFSET_LEFT      := -380
 const MENU_COL_OFFSET_RIGHT     := -60
 const MENU_COL_OFFSET_TOP       := 120
@@ -35,7 +25,6 @@ const ADVENTURE_INITIATIVE_PANEL_W := 190
 const ADVENTURE_BATTLE_STATUS_H    := 92
 const CITY_PANEL_OFFSET         := 12.0
 
-# ─── Бой: анимации ────────────────────────────────────────────
 const BATTLE_HEX_OUTLINE_RADIUS := 38.0
 const BATTLE_ATTACK_LUNGE_PX    := 26.0
 const BATTLE_MOVE_TWEEN_SEC     := 0.15
@@ -48,7 +37,6 @@ const BATTLE_CLICK_RADIUS_PX    := 60.0
 const BATTLE_FLOATING_TEXT_OFFSET := Vector2(-30, -60)
 const BATTLE_DAMAGE_NUMBER_OFFSET := Vector2(-16, -50)
 
-# ─── Бой: правила ─────────────────────────────────────────────
 const ATK_ADVANTAGE_PER_POINT   := 0.05
 const DEF_ADVANTAGE_PER_POINT   := 0.025
 const MAX_DAMAGE_MULTIPLIER     := 5.0
@@ -65,12 +53,10 @@ const BREATH_DMG_RATIO          := 0.5
 const STATUS_PROC_CHANCE        := 0.20
 const REBIRTH_CHANCE            := 0.20
 
-# ─── Бой: прочее (BattleConfig) ───────────────────────────────
 const BATTLE_RETREAT_LOSS_FRACTION := 0.5
 const BATTLE_DEFEND_BONUS_DEFENSE  := 0.20
 const ASTAR_HEURISTIC_WEIGHT       := 1.0
 
-# ─── Карта ─────────────────────────────────────────────────────
 const MAP_SIZE_MIN              := 40
 const MAP_SIZE_MAX              := 70
 const MAP_VILLAGE_COUNT         := 8
@@ -101,7 +87,6 @@ const SPAWN_ENEMY_MIN_BORDER    := 3
 const TOOL_INVENTORY_SLOTS      := 8
 const SALTPETER_EXPLOSION_MULT  := 2.0
 
-# ─── Карта: прочее (MapConfig) ────────────────────────────────
 const MAX_BACKPACK_SIZE         := 16
 const MAX_HERO_ARMY_SIZE        := 7
 const HERO_RETREAT_LOSS_FRACTION := 0.5
@@ -119,7 +104,6 @@ const WEATHER_RAIN              := 1
 const WEATHER_SNOW              := 2
 const WEATHER_STORM             := 3
 
-# ─── Город ─────────────────────────────────────────────────────
 const CITY_CYCLE_TURNS          := 7
 const INFLOW_BASE               := 2.0
 const INFLOW_PER_TEMPLE         := 2.0
@@ -164,7 +148,6 @@ const ROYALTY_FRACTION          := 0.25
 const POP_CAP_BY_STRONGHOLD     := [10, 20, 35]
 const APPROVAL_NET_PER_BOROUGH_LEVEL := [-10, 5, 15]
 
-# ─── Процветание (ProsperitySystem) ────────────────────────────
 const PROSPERITY_BASE           := 50.0
 const PROSPERITY_MAX            := 100.0
 const PROSPERITY_FOOD_BONUS     := 10.0
@@ -186,14 +169,12 @@ const PROSPERITY_GOLD_BONUS     := 10.0
 const PROSPERITY_REP_HIGH       := 60.0
 const PROSPERITY_REP_LOW        := 20.0
 
-# ─── Деревня: стартовые значения (CityBalance) ─────────────────
 const VILLAGE_START_WORKERS     := 4
 const VILLAGE_START_FOLLOWERS   := 2
 const VILLAGE_START_INDUSTRY    := 30.0
 const VILLAGE_START_GOLD        := 5.0
 const VILLAGE_START_FOOD        := 10.0
 
-# ─── Рейд ──────────────────────────────────────────────────────
 const RAID_CHANCE_BASE          := 0.10
 const RAID_CHANCE_MIN           := 0.02
 const RAID_CHANCE_MAX           := 0.30
@@ -206,11 +187,9 @@ const RAID_REP_RELIEF           := 5
 const RAID_REP_LOSS             := -10
 const RAID_PILLAGE_FRACTION     := 0.30
 
-# ─── Рынок ─────────────────────────────────────────────────────
 const MARKET_DEFAULT_RATE       := 2.0
 const MARKET_MIN_AMOUNT         := 1.0
 
-# ─── Зоны ──────────────────────────────────────────────────────
 const ZONE_INDUSTRIAL_MIN_DIST  := 2
 const ZONE_AGGLOMERATION_COUNT  := 2
 const ZONE_AGGLOMERATION_BONUS  := 0.10
@@ -218,26 +197,22 @@ const ZONE_COMMERCIAL_MARKET    := 0.10
 const ZONE_INDUSTRIAL_ROAD      := 0.10
 const ZONE_MAX_MULT             := 1.5
 
-# ─── Логистика ─────────────────────────────────────────────────
 const LOGISTICS_DIST_FALLOFF    := 0.15
 const LOGISTICS_MIN_MULT        := 0.25
 const LOGISTICS_MAX_MULT        := 1.0
 const LOGISTICS_ROAD_BONUS      := 0.15
 const LOGISTICS_ROAD_MAX        := 1.5
 
-# ─── Масштабирование ───────────────────────────────────────────
 const SCALE_TIERS               := [4, 14, 29]
 const SCALE_STORAGE_MULT        := [1.0, 1.25, 1.5, 2.0]
 const SCALE_AUTO_MULT           := [1.0, 1.1, 1.2, 1.4]
 const SCALE_UPKEEP_MULT         := [1.0, 0.95, 0.9, 0.85]
 
-# ─── Демография ────────────────────────────────────────────────
 const DEMO_CRITICAL_THRESHOLD   := 0.2
 const DEMO_DEATH_STREAK         := 3
 const DEMO_OUTBREAK_COOLDOWN    := 5
 const DEMO_MAX_TRAITS           := 3
 
-# ─── Потребности ───────────────────────────────────────────────
 const NEED_REST_DECAY           := 0.10
 const NEED_SOCIAL_DECAY         := 0.08
 const NEED_INSP_DECAY           := 0.05
@@ -249,7 +224,6 @@ const NEED_INSP_RECOVERY_CITY   := 0.15
 const NEED_INSP_RECOVERY_POP    := 0.05
 const NEED_SOCIAL_RECOVERY_LOW  := -0.05
 
-# ─── Арена города ──────────────────────────────────────────────
 const ARENA_RADIUS              := 5
 const ARENA_CLUSTER_MIN         := 4
 const ARENA_CLUSTER_MULT        := 1.5
@@ -265,7 +239,6 @@ const ARENA_STORM_MITIG_MULT    := 0.875
 const ARENA_STORM_FOOD          := 2.0
 const ARENA_STORM_MITIG_FOOD    := 1.0
 
-# Урожайность по кольцам арены: [ед, пром, пыль, наука, влияние], индекс = кольцо
 const RING_YIELD: Array = [
 	[0.00, 0.00, 0.00, 0.00, 0.00],
 	[3.00, 6.00, 0.00, 0.00, 0.00],
@@ -275,7 +248,6 @@ const RING_YIELD: Array = [
 	[2.00, 1.00, 1.50, 1.00, 1.50],
 ]
 
-# Доп. бонусы по типу здания и кольцу
 const RING_BONUS: Dictionary = {
 	&"farm": { 1: 0.00, 2: 0.00, 3: 0.00, 4: 0.00, 5: 0.00 },
 	&"mill": { 1: 0.15, 2: 0.00, 3: 0.00, 4: 0.00, 5: 0.00 },
@@ -290,7 +262,6 @@ const RING_BONUS: Dictionary = {
 	&"walls": { 1: 0.00, 2: 0.00, 3: 0.10, 4: 0.25, 5: 0.00 },
 }
 
-
 static func ring_yield(ring: int, table: Array = RING_YIELD) -> Dictionary:
 	if ring < 1 or ring > ARENA_RADIUS:
 		return {}
@@ -303,20 +274,16 @@ static func ring_yield(ring: int, table: Array = RING_YIELD) -> Dictionary:
 		&"influence": float(row[4]),
 	}
 
-
 static func ring_bonus(def_id: StringName, ring: int, table: Dictionary = RING_BONUS) -> float:
 	if not table.has(def_id):
 		return 0.0
 	var row: Dictionary = table[def_id]
 	return float(row.get(ring, 0.0))
 
-
-# ─── Сукцессия ─────────────────────────────────────────────────
 const SUCCESSION_RESURRECT_IND  := 500.0
 const SUCCESSION_RESURRECT_GOLD := 100.0
 const SUCCESSION_SPECIAL_KEY    := &"gold"
 
-# ─── Слава ─────────────────────────────────────────────────────
 const GLORY_VICTORY_THRESHOLD   := 500
 const ENDGAME_DOMINATION_ENABLED := true
 const ENDGAME_COLLAPSE_ENABLED   := true

@@ -3,7 +3,6 @@ extends GdUnitTestSuite
 const _Camera = preload("res://scripts/world/WorldCamera.gd")
 const _Settings = preload("res://scripts/autoload/Settings.gd")
 
-
 func test_clamp_basic() -> void:
 	assert_that(_Camera._clamp_val(5.0, 0.0, 10.0)).is_equal(5.0)
 	assert_that(_Camera._clamp_val(-5.0, 0.0, 10.0)).is_equal(0.0)

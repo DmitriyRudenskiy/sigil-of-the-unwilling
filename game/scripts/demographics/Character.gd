@@ -15,10 +15,8 @@ var traits: Array[TraitDef] = []
 var need_zero_streak: Dictionary = {}
 var was_critical: Dictionary = {}
 
-
 func _init() -> void:
 	reset_needs()
-
 
 func reset_needs() -> void:
 	needs.clear()
@@ -29,18 +27,14 @@ func reset_needs() -> void:
 		need_zero_streak[k] = 0
 		was_critical[k] = false
 
-
 func age_in_days(turn: int) -> int:
 	return maxi(turn - birth_turn, 0)
-
 
 func modify_need(id: int, delta: float) -> void:
 	needs[id] = clampf(float(needs.get(id, 0.5)) + delta, 0.0, 1.0)
 
-
 func is_need_critical(id: int, threshold: float = 0.2) -> bool:
 	return float(needs.get(id, 1.0)) < threshold
-
 
 func trait_modifier(type: StringName) -> float:
 	var v := 0.0
@@ -48,7 +42,6 @@ func trait_modifier(type: StringName) -> float:
 		if t != null:
 			v += t.modifier_for(type)
 	return v
-
 
 func serialize() -> Dictionary:
 	return {
@@ -64,13 +57,11 @@ func serialize() -> Dictionary:
 			return t.to_dict() if t != null else {}),
 	}
 
-
 static func _needs_to_str(src: Dictionary) -> Dictionary:
 	var out := {}
 	for k in src:
 		out[String(NeedType.to_name(int(k)))] = float(src[k])
 	return out
-
 
 static func deserialize(data: Dictionary) -> Character:
 	var ch := Character.new()

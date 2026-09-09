@@ -1,15 +1,13 @@
 class_name TraitRegistry
 extends RefCounted
 
-var _traits: Dictionary = {}  
+var _traits: Dictionary = {}
 var _rng := RandomNumberGenerator.new()
-
 
 func _init() -> void:
 	for t in _default_traits():
 		_traits[t.id] = t
 	_rng.seed = 20260829
-
 
 func add(t_def: TraitDef) -> void:
 	if t_def == null or t_def.id == &"":
@@ -17,21 +15,17 @@ func add(t_def: TraitDef) -> void:
 		return
 	_traits[t_def.id] = t_def
 
-
 func get_trait(id: StringName) -> TraitDef:
 	return _traits.get(id, null)
 
-
 func has(id: StringName) -> bool:
 	return _traits.has(id)
-
 
 func all() -> Array[TraitDef]:
 	var out: Array[TraitDef] = []
 	for id in _traits:
 		out.append(_traits[id])
 	return out
-
 
 func by_tag(tag: StringName) -> Array[TraitDef]:
 	var out: Array[TraitDef] = []
@@ -40,14 +34,12 @@ func by_tag(tag: StringName) -> Array[TraitDef]:
 			out.append(t)
 	return out
 
-
 func by_rarity(rarity: int) -> Array[TraitDef]:
 	var out: Array[TraitDef] = []
 	for t in all():
 		if t.rarity == rarity:
 			out.append(t)
 	return out
-
 
 func roll_traits(rng: RandomNumberGenerator = null, max_count: int = 3) -> Array[TraitDef]:
 	var r: RandomNumberGenerator = rng if rng != null else _rng
@@ -59,7 +51,7 @@ func roll_traits(rng: RandomNumberGenerator = null, max_count: int = 3) -> Array
 		count = 3
 	count = mini(count, max_count)
 
-	var pool: Dictionary = {}  
+	var pool: Dictionary = {}
 	for t in all():
 		if not pool.has(t.rarity):
 			pool[t.rarity] = []
@@ -73,7 +65,6 @@ func roll_traits(rng: RandomNumberGenerator = null, max_count: int = 3) -> Array
 			result.append(picked)
 			used.append(picked.id)
 	return result
-
 
 func _pick_weighted(pool: Dictionary, used: Array[StringName], r: RandomNumberGenerator) -> TraitDef:
 	var weights: Array[int] = [70, 20, 7, 3]
@@ -100,7 +91,6 @@ func _pick_weighted(pool: Dictionary, used: Array[StringName], r: RandomNumberGe
 		if roll < 0:
 			return candidates[i]
 	return candidates[candidates.size() - 1]
-
 
 static func _default_traits() -> Array[TraitDef]:
 	return [
@@ -135,7 +125,6 @@ static func _default_traits() -> Array[TraitDef]:
 		_trait(&"stone_heart", "Каменное сердце", "Не устаёт, но и не согревается: +0.15 к отдыху, -0.15 к общению.",
 			TraitDef.Rarity.LEGENDARY, &"", 0.0, [&"body", "soul"], {&"rest": 0.15, &"social": -0.15}),
 	]
-
 
 static func _trait(id: StringName, name: String, desc: String, rarity: int,
 		effect_type: StringName, value: float, tags: Array, effects: Dictionary = {}) -> TraitDef:

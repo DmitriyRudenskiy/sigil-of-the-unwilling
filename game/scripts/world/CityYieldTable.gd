@@ -24,7 +24,6 @@ static func yield_for_terrain(terrain_id: int) -> Dictionary:
 			out[&"food"] = 1.0
 	return out
 
-
 static func _zero() -> Dictionary:
 	var out := {}
 	for k in KEYS:

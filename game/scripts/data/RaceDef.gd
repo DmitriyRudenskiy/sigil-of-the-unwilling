@@ -21,7 +21,6 @@ func to_dict() -> Dictionary:
 		"subraces": subraces.duplicate(),
 	}
 
-
 static func from_dict(data: Dictionary) -> _Self:
 	var d := _Self.new()
 	d.id = StringName(data.get("id", ""))

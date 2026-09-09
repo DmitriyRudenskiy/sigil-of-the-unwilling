@@ -21,7 +21,6 @@ var _ylab: Label
 var _feat: Label
 var _badge: Label
 
-
 func _ready() -> void:
     _poly = $Hex
     _mark = $Mark
@@ -37,10 +36,8 @@ func _ready() -> void:
     if feature_id != &"":
         _feat.text = _CityArenaModel.feature_glyph(feature_id)
 
-
 func get_poly() -> Polygon2D:
     return _poly
-
 
 func update() -> void:
     if _mark != null:
@@ -50,25 +47,20 @@ func update() -> void:
     if _badge != null:
         _badge.text = badge_id
 
-
 func _mark_label_text() -> String:
     if ring == 0:
         return "🏰"
     return mark_id
 
-
 func _on_area_input(viewport: Node, event: InputEvent, shape_idx: int) -> void:
-    
-    cell_input.emit(viewport, event, shape_idx, Vector2.ZERO, Vector2.ZERO, cell)
 
+    cell_input.emit(viewport, event, shape_idx, Vector2.ZERO, Vector2.ZERO, cell)
 
 func _on_mouse_entered() -> void:
     cell_entered.emit(cell)
 
-
 func _on_mouse_exited() -> void:
     cell_exited.emit()
-
 
 func _ring_color(ring: int) -> Color:
     return _CityArenaModel.ring_color(ring)

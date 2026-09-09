@@ -70,8 +70,6 @@ func refresh_ui() -> void:
 	if ui:
 		ui.refresh_all()
 
-
-
 func open_city_screen(city: City, hero_cell: Vector2i) -> void:
 	if city == null or city_screen == null:
 		return

@@ -9,7 +9,6 @@ var enabled := false
 var _last_cam_pos := Vector2.ZERO
 var _last_zoom := Vector2.ONE
 
-
 func _process(_d: float) -> void:
   if not enabled:
     return
@@ -18,7 +17,6 @@ func _process(_d: float) -> void:
       _last_cam_pos = cam_ref.position
       _last_zoom = cam_ref.zoom
       queue_redraw()
-
 
 func _draw() -> void:
   if not enabled or map_ref == null or not map_ref.has_valid_tilemap() or cam_ref == null:

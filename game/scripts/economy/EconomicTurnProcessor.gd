@@ -1,8 +1,4 @@
-## R10 (P8): что такое «ход» в процессоре экономики.
-## Ход = один игровой день (TurnContext: day/week/month/season). Его продвигает
-## WorldEventRouter (по «end turn» игрока/тики) через TurnScheduler.execute_turn:
-## процессоры идут по приоритету, economy (priority 10) считает производство,
-## содержание и авто-доход городов в рамках этого дня.
+
 class_name EconomicTurnProcessor
 extends TurnPhaseProcessor
 
@@ -10,14 +6,11 @@ signal production_completed(city_uid: int, chain_id: StringName, outputs: Dictio
 signal upkeep_failed(building_uid: int, resource_id: StringName)
 signal resource_depleted(city_uid: int, resource_id: StringName)
 
-
 func get_phase_id() -> StringName:
 	return &"economy"
 
-
 func get_priority() -> int:
 	return 10
-
 
 func process(ctx: TurnContext) -> Dictionary:
 	var report := {
@@ -40,7 +33,6 @@ func process(ctx: TurnContext) -> Dictionary:
 		for rid in auto:
 			report["auto_yield"][rid] = float(report["auto_yield"].get(rid, 0.0)) + float(auto[rid])
 	return report
-
 
 func _process_city(city: City, _ctx: TurnContext) -> Dictionary:
 	var res := city.ensure_resource_ctx()

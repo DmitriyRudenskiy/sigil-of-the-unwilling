@@ -14,6 +14,5 @@ var global_resources: Variant = null
 var event_queue: Array[Dictionary] = []
 var rng: RandomNumberGenerator = null
 
-
 func get_date_label() -> String:
 	return "день %d (%d/%d/%d)" % [turn_number, day, week, month]

@@ -1,8 +1,6 @@
 class_name ArenaDemoScenario
 extends RefCounted
 
-
-
 static func score(city: City, starve_days: int) -> float:
 	var s := 0.0
 	s += float(city.storage.get(&"gold", 0.0)) * 1.0
@@ -16,53 +14,49 @@ static func score(city: City, starve_days: int) -> float:
 	s -= city.over_limit() * 10.0
 	return s
 
-
-
-
 static func demo_plan() -> Array:
 	var p := []
-	p.append([1, &"borough", &"", Vector2i(-1, -1)])      
-	p.append([2, &"build", &"farm", Vector2i(-1, 0)])     
+	p.append([1, &"borough", &"", Vector2i(-1, -1)])
+	p.append([2, &"build", &"farm", Vector2i(-1, 0)])
 	p.append([2, &"hire", &"", Vector2i.ZERO])
-	p.append([3, &"borough", &"", Vector2i(-1, -2)])      
-	p.append([4, &"build", &"farm", Vector2i(0, 1)])      
-	p.append([5, &"build", &"mill", Vector2i(-1, 1)])     
+	p.append([3, &"borough", &"", Vector2i(-1, -2)])
+	p.append([4, &"build", &"farm", Vector2i(0, 1)])
+	p.append([5, &"build", &"mill", Vector2i(-1, 1)])
 	p.append([5, &"hire", &"", Vector2i.ZERO])
-	p.append([6, &"borough", &"", Vector2i(0, -2)])       
-	p.append([6, &"build", &"farm", Vector2i(0, -3)])     
-	p.append([7, &"build", &"bakery", Vector2i(2, 0)])    
-	p.append([7, &"build", &"farm", Vector2i(-1, -3)])    
-	p.append([8, &"build", &"farm", Vector2i(1, -3)])     
-	p.append([9, &"build", &"farm", Vector2i(2, -2)])     
+	p.append([6, &"borough", &"", Vector2i(0, -2)])
+	p.append([6, &"build", &"farm", Vector2i(0, -3)])
+	p.append([7, &"build", &"bakery", Vector2i(2, 0)])
+	p.append([7, &"build", &"farm", Vector2i(-1, -3)])
+	p.append([8, &"build", &"farm", Vector2i(1, -3)])
+	p.append([9, &"build", &"farm", Vector2i(2, -2)])
 	p.append([7, &"hire", &"", Vector2i.ZERO])
-	p.append([8, &"borough", &"", Vector2i(-2, -3)])      
-	p.append([9, &"build", &"mine", Vector2i(1, -1)])     
+	p.append([8, &"borough", &"", Vector2i(-2, -3)])
+	p.append([9, &"build", &"mine", Vector2i(1, -1)])
 	p.append([9, &"hire", &"", Vector2i.ZERO])
-	p.append([10, &"build", &"smithy", Vector2i(1, 0)])   
+	p.append([10, &"build", &"smithy", Vector2i(1, 0)])
 	p.append([10, &"hire", &"", Vector2i.ZERO])
-	p.append([11, &"build", &"shack", Vector2i(1, 1)])    
-	p.append([12, &"build", &"tavern", Vector2i(-2, -1)]) 
+	p.append([11, &"build", &"shack", Vector2i(1, 1)])
+	p.append([12, &"build", &"tavern", Vector2i(-2, -1)])
 	p.append([12, &"hire", &"", Vector2i.ZERO])
-	p.append([14, &"build", &"market", Vector2i(0, 2)])   
-	p.append([16, &"build", &"walls", Vector2i(-3, -1)])  
-	p.append([18, &"build", &"trade_post", Vector2i(-1, 2)]) 
+	p.append([14, &"build", &"market", Vector2i(0, 2)])
+	p.append([16, &"build", &"walls", Vector2i(-3, -1)])
+	p.append([18, &"build", &"trade_post", Vector2i(-1, 2)])
 	p.append([18, &"hire", &"", Vector2i.ZERO])
-	p.append([20, &"build", &"school", Vector2i(-2, 1)])  
+	p.append([20, &"build", &"school", Vector2i(-2, 1)])
 	p.append([20, &"hire", &"", Vector2i.ZERO])
 	p.append([24, &"hire", &"", Vector2i.ZERO])
-	p.append([22, &"upgrade", &"market", Vector2i(0, 2)]) 
+	p.append([22, &"upgrade", &"market", Vector2i(0, 2)])
 	p.append([26, &"upgrade", &"walls", Vector2i(-3, -1)])
-	p.append([28, &"build", &"barracks", Vector2i(2, -1)]) 
-	p.append([30, &"upgrade", &"market", Vector2i(0, 2)]) 
+	p.append([28, &"build", &"barracks", Vector2i(2, -1)])
+	p.append([30, &"upgrade", &"market", Vector2i(0, 2)])
 	p.append([32, &"upgrade", &"walls", Vector2i(-3, -1)])
 	p.append([34, &"hire", &"", Vector2i.ZERO])
-	p.append([36, &"build", &"tavern", Vector2i(-2, 0)])  
+	p.append([36, &"build", &"tavern", Vector2i(-2, 0)])
 	p.append([36, &"hire", &"", Vector2i.ZERO])
-	p.append([40, &"build", &"manor", Vector2i(1, 2)])    
+	p.append([40, &"build", &"manor", Vector2i(1, 2)])
 	p.append([42, &"upgrade", &"barracks", Vector2i(2, -1)])
 	p.append([44, &"hire", &"", Vector2i.ZERO])
 	return p
-
 
 static func run_demo_plan(turns: int = 48, overrides: Dictionary = {}) -> Dictionary:
 	var city := ArenaTurnRunner.make_city(overrides)

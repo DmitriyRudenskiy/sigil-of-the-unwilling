@@ -11,7 +11,6 @@ func before_test() -> void:
 	city.display_name = "Тест"
 	city.center = Vector2i(5, 5)
 
-
 func test_pop_ratio_default() -> void:
 	var ratio := _BoroughRules.pop_ratio(_City.Faction.DEFAULT)
 	assert_that(ratio).is_equal(GameNumbers.BOROUGH_POP_RATIO_DEFAULT)
@@ -28,7 +27,6 @@ func test_pop_ratio_cultists() -> void:
 	var ratio := _BoroughRules.pop_ratio(_City.Faction.CULTISTS)
 	assert_that(ratio).is_equal(GameNumbers.BOROUGH_POP_RATIO_DEFAULT)
 
-
 func test_max_boroughs_empty_city() -> void:
 	assert_that(_BoroughRules.max_boroughs(city)).is_equal(0)
 
@@ -43,7 +41,6 @@ func test_max_boroughs_wide_ratio() -> void:
 		city.add_followers(1)
 	assert_that(_BoroughRules.max_boroughs(city)).is_equal(4)
 
-
 func test_cost_initial() -> void:
 	assert_that(_BoroughRules.cost(city)).is_equal(GameNumbers.BOROUGH_BASE_COST)
 
@@ -51,7 +48,6 @@ func test_cost_increases_with_boroughs() -> void:
 	city.boroughs.append(_Borough.new())
 	var cost2 := _BoroughRules.cost(city)
 	assert_that(cost2).is_equal(GameNumbers.BOROUGH_BASE_COST + GameNumbers.BOROUGH_COST_STEP)
-
 
 func test_level_up_max_level() -> void:
 	var b := _Borough.new()
@@ -84,7 +80,6 @@ func test_same_level_neighbors() -> void:
 	b.level = 1
 	assert_that(_BoroughRules.same_level_neighbors(city, b)).is_equal(0)
 
-
 func test_process_level_ups_empty() -> void:
 	var result := _BoroughRules.process_level_ups(city)
 	assert_that(result).is_equal(0)
@@ -96,6 +91,6 @@ func test_process_level_ups_returns_count() -> void:
 	var neighbors := HexUtils.get_all_neighbors(city.center)
 	for nb in neighbors:
 		city.build_borough(nb)
-	
+
 	var raised := _BoroughRules.process_level_ups(city)
 	assert_bool(raised >= 0).is_true()

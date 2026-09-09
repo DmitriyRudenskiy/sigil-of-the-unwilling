@@ -8,13 +8,11 @@ func _make_def(id: StringName, cap: float = -1.0) -> ResourceDef:
 		d.capacity = cap
 	return d
 
-
 func test_setup_applies_capacity() -> void:
 	var rc := ResourceContext.new()
 	rc.setup([_make_def(&"wood", 100.0), _make_def(&"stone")])
 	assert_that(rc.get_capacity(&"wood")).is_equal(100.0)
 	assert_that(rc.get_capacity(&"stone")).is_equal(INF)
-
 
 func test_add_and_get() -> void:
 	var rc := ResourceContext.new()
@@ -25,7 +23,6 @@ func test_add_and_get() -> void:
 	assert_bool(rc.has(&"wood")).is_true()
 	assert_bool(rc.has(&"stone")).is_false()
 
-
 func test_add_clamped_to_capacity() -> void:
 	var rc := ResourceContext.new()
 	rc.setup([_make_def(&"wood", 10.0)])
@@ -35,7 +32,6 @@ func test_add_clamped_to_capacity() -> void:
 	assert_that(added2).is_equal(3.0)
 	assert_that(rc.amount(&"wood")).is_equal(10.0)
 
-
 func test_capacity_reached_signal() -> void:
 	var rc := ResourceContext.new()
 	rc.setup([_make_def(&"wood", 5.0)])
@@ -44,7 +40,6 @@ func test_capacity_reached_signal() -> void:
 	rc.add(&"wood", 6.0)
 	assert_that(reached.size()).is_equal(1)
 	assert_that(reached[0]).is_equal(&"wood")
-
 
 func test_resource_changed_signal() -> void:
 	var rc := ResourceContext.new()
@@ -58,7 +53,6 @@ func test_resource_changed_signal() -> void:
 	assert_that(events[0][2]).is_equal(3.0)
 	assert_that(events[1][2]).is_equal(2.0)
 
-
 func test_remove_clamped_to_zero() -> void:
 	var rc := ResourceContext.new()
 	rc.add(&"wood", 4.0)
@@ -66,13 +60,11 @@ func test_remove_clamped_to_zero() -> void:
 	assert_that(removed).is_equal(4.0)
 	assert_that(rc.amount(&"wood")).is_equal(0.0)
 
-
 func test_unknown_id_auto_inf_capacity() -> void:
 	var rc := ResourceContext.new()
 	var added: float = rc.add(&"mystery", 123.0)
 	assert_that(added).is_equal(123.0)
 	assert_that(rc.get_capacity(&"mystery")).is_equal(INF)
-
 
 func test_can_afford_and_spend() -> void:
 	var rc := ResourceContext.new()
@@ -84,7 +76,6 @@ func test_can_afford_and_spend() -> void:
 	assert_that(rc.amount(&"wood")).is_equal(5.0)
 	assert_that(rc.amount(&"stone")).is_equal(0.0)
 
-
 func test_spend_fails_without_mutation() -> void:
 	var rc := ResourceContext.new()
 	rc.add(&"wood", 2.0)
@@ -94,14 +85,12 @@ func test_spend_fails_without_mutation() -> void:
 	assert_that(rc.amount(&"wood")).is_equal(2.0)
 	assert_that(rc.amount(&"stone")).is_equal(0.0)
 
-
 func test_empty() -> void:
 	var rc := ResourceContext.new()
 	assert_bool(rc.is_empty()).is_true()
 	rc.add(&"wood", 1.0)
 	rc.remove(&"wood", 1.0)
 	assert_bool(rc.is_empty()).is_true()
-
 
 func test_serialize_deserialize_roundtrip() -> void:
 	var rc := ResourceContext.new()
@@ -116,7 +105,6 @@ func test_serialize_deserialize_roundtrip() -> void:
 	rc2.deserialize(data)
 	assert_that(rc2.amount(&"wood")).is_equal(42.5)
 	assert_that(rc2.amount(&"stone")).is_equal(7.0)
-
 
 func test_set_capacity_trims() -> void:
 	var rc := ResourceContext.new()

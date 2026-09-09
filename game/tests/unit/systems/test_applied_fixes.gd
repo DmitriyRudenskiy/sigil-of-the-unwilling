@@ -41,7 +41,6 @@ func _generate_obstacles(seed: int) -> Dictionary:
 		n += 1
 	return obstacles
 
-
 func test_scroll_spawn_determinism() -> void:
 	var a := _get_scroll_spell_ids(12345)
 	var b := _get_scroll_spell_ids(12345)
@@ -63,7 +62,6 @@ func _get_scroll_spell_ids(seed: int) -> Array[StringName]:
 		var spell = all_spells[chest_rng.randi() % all_spells.size()]
 		result.append(spell.id)
 	return result
-
 
 func test_pending_action_enum_values() -> void:
 	assert_that(_BTX.PendingAction.NONE).is_equal(0)

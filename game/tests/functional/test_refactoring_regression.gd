@@ -1,6 +1,5 @@
 extends GdUnitTestSuite
 
-
 func test_battle_state_side_enum_order() -> void:
 	assert_that(BattleState.Side.NONE).is_equal(0)
 	assert_that(BattleState.Side.ATTACKER).is_equal(1)
@@ -16,7 +15,6 @@ func test_battle_completed_signal_type() -> void:
 	flow.battle_completed.emit(BattleState.Side.DEFENDER, [], [])
 	assert_that(holder["winner"]).is_equal(BattleState.Side.DEFENDER)
 	flow.free()
-
 
 func test_dijkstra_returns_array() -> void:
 	var cost_fn: Callable = func(c: Vector2i) -> float: return 1.0
@@ -35,7 +33,6 @@ func test_array_to_dict_conversion() -> void:
 	assert_bool(dict.has(Vector2i(1, 1))).is_true()
 	assert_bool(dict.has(Vector2i(0, 1))).is_false()
 
-
 func test_executor_has_paused_property() -> void:
 	var executor := BattleTurnExecutor.new()
 	executor.name = "TestExecutor"
@@ -44,7 +41,6 @@ func test_executor_has_paused_property() -> void:
 	assert_bool(executor._paused).is_true()
 	executor._paused = false
 	executor.free()
-
 
 func test_deserialize_unknown_slot_warns() -> void:
 	var inv := HeroInventory.new()
@@ -64,18 +60,13 @@ func test_deserialize_valid_slot() -> void:
 	inv.deserialize(data)
 	assert_bool(true).is_true()
 
-
 func test_resource_chain_service_no_cache_fields() -> void:
 	var service := ResourceChainService.new()
 	assert_bool(true).is_true()
 
-
-
-
 func test_battle_state_has_revive_unit() -> void:
 	var state := BattleState.new()
 	assert_bool(state.has_method("revive_unit")).is_true()
-
 
 func test_map_generator_has_get_terrain_id() -> void:
 	var mg := MapGenerator.new()
@@ -90,7 +81,6 @@ func test_map_generator_get_terrain_id_null_model() -> void:
 	assert_that(tid).is_equal(HexUtils.Terrain.GRASS)
 	mg.free()
 
-
 func test_movement_signal_emits_dict() -> void:
 	var hc := HeroMovementController.new()
 	hc.name = "TestHMC"
@@ -101,7 +91,6 @@ func test_movement_signal_emits_dict() -> void:
 	hc.reach_preview_changed.emit([], {}, 0.0)
 	assert_bool(holder[0]).is_true()
 	hc.free()
-
 
 func test_battle_ui_scene_has_skeleton() -> void:
 	var scene := load("res://scenes/ui/BattleUI.tscn")

@@ -6,7 +6,6 @@ signal battle_completed(winner: BattleState.Side, surviving_atk: Array[UnitStack
 
 const _BATTLE_SCENE := preload("res://scenes/Battle.tscn")
 
-# R6: защита от дубля сцены — держим саму ноду боя, а не bool-флаг.
 var _active_battle: Node = null
 
 func start_battle(
@@ -43,7 +42,6 @@ func start_battle(
 		obstacle_seed,
 		hero_magic
 	)
-
 
 func _on_battle_finished(winner: BattleState.Side, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack], battle: Node) -> void:
 	_active_battle = null

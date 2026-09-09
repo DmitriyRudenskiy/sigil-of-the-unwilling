@@ -1,14 +1,10 @@
 class_name BattleAttackSequence
 extends RefCounted
-## Секвенция атаки: удары, двойной удар, реприза, моральная доп. инициатива.
-## Составляющая BattleTurnExecutor — инстанс владеет исполнителем.
-
 
 func setup(state: BattleState, rng: RandomNumberGenerator, executor: BattleTurnExecutor) -> void:
 	_battle_state = state
 	_rng = rng
 	_executor = executor
-
 
 var _executor: BattleTurnExecutor
 var _battle_state: BattleState
@@ -20,26 +16,20 @@ var _attack_strikes_left := 0
 var _attack_is_melee := false
 var _retaliation_phase := false
 
-
 func has_active() -> bool:
 	return _attack_attacker != null
-
 
 func is_retaliating() -> bool:
 	return _retaliation_phase
 
-
 func strikes_left() -> int:
 	return _attack_strikes_left
-
 
 func attacker() -> BattleState.BattleUnit:
 	return _attack_attacker
 
-
 func defender() -> BattleState.BattleUnit:
 	return _attack_defender
-
 
 func has_adjacent_enemy(unit: BattleState.BattleUnit) -> bool:
 	if unit == null:
@@ -53,7 +43,6 @@ func has_adjacent_enemy(unit: BattleState.BattleUnit) -> bool:
 			return true
 
 	return false
-
 
 func start_attack(atk: BattleState.BattleUnit, def: BattleState.BattleUnit) -> void:
 	if atk == null or def == null or not def.is_alive():
@@ -80,7 +69,6 @@ func start_attack(atk: BattleState.BattleUnit, def: BattleState.BattleUnit) -> v
 	_executor._transition_to(anim_state)
 
 	next_strike()
-
 
 func next_strike() -> void:
 	if _attack_attacker == null or _attack_defender == null:
@@ -117,7 +105,6 @@ func next_strike() -> void:
 
 	_executor.execute_attack.emit(_attack_attacker, _attack_defender, result)
 
-
 func finish() -> void:
 	_attack_attacker = null
 	_attack_defender = null
@@ -126,7 +113,6 @@ func finish() -> void:
 
 	_executor._morale_allowed = true
 	_executor._on_action_completed()
-
 
 func can_retaliate() -> bool:
 	if _attack_attacker == null or _attack_defender == null:
@@ -149,7 +135,6 @@ func can_retaliate() -> bool:
 
 	return true
 
-
 func start_retaliation() -> void:
 	var original_attacker := _attack_attacker
 	var original_defender := _attack_defender
@@ -168,7 +153,6 @@ func start_retaliation() -> void:
 	_executor.floating_text.emit(_attack_attacker.cell, GameText.battle_retaliation(), ThemeConfig.C_BATTLE_RETALIATION)
 
 	next_strike()
-
 
 func try_morale_extra_turn() -> bool:
 	var unit := _battle_state.active_unit

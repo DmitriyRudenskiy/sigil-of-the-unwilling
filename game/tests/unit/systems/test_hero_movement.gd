@@ -4,10 +4,9 @@ const _MapGenerator = preload("res://scripts/world/MapGenerator.gd")
 const _Movement = preload("res://scripts/entities/HeroMovementController.gd")
 const _HexUtils = preload("res://scripts/core/HexUtils.gd")
 
-
-var _map  
-var _mov  
-var _block_next_step: bool = false  
+var _map
+var _mov
+var _block_next_step: bool = false
 
 func before_test() -> void:
 	_block_next_step = false
@@ -16,7 +15,6 @@ func before_test() -> void:
 func after_test() -> void:
 	_teardown()
 
-
 func _teardown() -> void:
 	if _mov != null:
 		_mov.free()
@@ -24,7 +22,6 @@ func _teardown() -> void:
 	if _map != null:
 		_map.free()
 		_map = null
-
 
 func _setup_map() -> void:
 	_teardown()
@@ -52,7 +49,6 @@ func _on_hero_moved(cell: Vector2i) -> void:
 		return
 	if _mov.path.size() >= 2:
 		_map.model.set_terrain(_mov.path[1], _HexUtils.Terrain.MOUNTAIN)
-
 
 func test_can_reach_within_mp() -> void:
 	assert_bool(_mov.can_reach(Vector2i(11, 0))).is_false()

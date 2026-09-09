@@ -5,10 +5,10 @@ enum Severity { ERROR, WARNING, INFO }
 
 class Issue extends RefCounted:
 	var severity: int
-	var code: String        
+	var code: String
 	var message: String
-	var spell_id: String    
-	var line_hint: String   
+	var spell_id: String
+	var line_hint: String
 
 	func format() -> String:
 		var sev_str: String

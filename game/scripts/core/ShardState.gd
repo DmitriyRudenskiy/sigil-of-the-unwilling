@@ -8,7 +8,6 @@ var biome_mix: String = ""
 var entry_cell: Vector2i = Vector2i(10, 10)
 var completed: bool = false
 
-
 func _init(
 	_id: StringName = &"shard_1",
 	_name: String = "Shard",
@@ -22,7 +21,6 @@ func _init(
 	biome_mix = _biome
 	entry_cell = _entry
 
-
 func to_dict() -> Dictionary:
 	return {
 		"id": id,
@@ -32,7 +30,6 @@ func to_dict() -> Dictionary:
 		"entry_cell": [entry_cell.x, entry_cell.y],
 		"completed": completed,
 	}
-
 
 static func from_dict(d: Dictionary) -> _Self:
 	var e: Array = d.get("entry_cell", [10, 10])

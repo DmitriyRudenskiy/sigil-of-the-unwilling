@@ -6,8 +6,6 @@ const _MapModel = preload("res://scripts/world/MapModel.gd")
 const _Delta = preload("res://scripts/world/WorldStateDelta.gd")
 const _HexUtils = preload("res://scripts/core/HexUtils.gd")
 
-
-
 func test_visible_disk_around_hero() -> void:
 	var v := _Vis.new()
 	v.set_map_size(11, 11)
@@ -19,7 +17,6 @@ func test_visible_disk_around_hero() -> void:
 	assert_bool(v.is_explored(Vector2i(9, 5))).is_false()
 	assert_bool(v.is_explored(Vector2i(6, 5))).is_true()
 
-
 func test_sight_sources_are_cities() -> void:
 	var v := _Vis.new()
 	v.set_map_size(21, 21)
@@ -29,7 +26,6 @@ func test_sight_sources_are_cities() -> void:
 	assert_bool(v.is_visible(Vector2i(5, 5))).is_true()
 	assert_bool(v.is_visible(Vector2i(10, 10))).is_false()
 	assert_bool(v.is_explored(Vector2i(15, 15))).is_true()
-
 
 func test_explored_is_monotonic() -> void:
 	var v := _Vis.new()
@@ -41,7 +37,6 @@ func test_explored_is_monotonic() -> void:
 	var explored_after := v.serialize_explored().size()
 	assert_int(explored_after).is_greater(explored_before)
 	assert_bool(v.is_explored(Vector2i(5, 5))).is_true()
-
 
 func test_serialize_and_load_roundtrip() -> void:
 	var v := _Vis.new()
@@ -58,15 +53,12 @@ func test_serialize_and_load_roundtrip() -> void:
 	for item in arr:
 		assert_bool(v2.is_explored(Vector2i(int(item["x"]), int(item["y"])))).is_true()
 
-
 func test_is_visible_requires_explored() -> void:
 	var v := _Vis.new()
 	v.set_map_size(11, 11)
 	v.recompute(Vector2i(5, 5), [], 3, 4)
 	assert_bool(v.is_visible(Vector2i(0, 0))).is_false()
 	assert_bool(v.is_explored(Vector2i(0, 0))).is_false()
-
-
 
 class _MapGenStub:
 	extends MapGenerator
@@ -76,7 +68,6 @@ class _MapGenStub:
 		return true
 	func get_blocked_cells() -> Dictionary:
 		return {}
-
 
 func _make_map_gen_stub(size: int) -> MapGenerator:
 	var g := _MapGenStub.new()
@@ -91,12 +82,10 @@ func _make_map_gen_stub(size: int) -> MapGenerator:
 	g.map_height = size
 	return g
 
-
 func _make_movement(map_stub: MapGenerator) -> HeroMovementController:
 	var m = preload("res://scripts/entities/HeroMovementController.gd").new()
 	m._map_gen = map_stub
 	return m
-
 
 func test_terrain_cost_blocked_unexplored() -> void:
 	var g := _make_map_gen_stub(11)
@@ -109,7 +98,6 @@ func test_terrain_cost_blocked_unexplored() -> void:
 	assert_bool(m._terrain_cost(Vector2i(0, 0)) == INF).is_true()
 	g.free()
 	m.free()
-
 
 func test_base_blocked_contains_unexplored() -> void:
 	var g := _make_map_gen_stub(11)
@@ -124,7 +112,6 @@ func test_base_blocked_contains_unexplored() -> void:
 	g.free()
 	m.free()
 
-
 class _SpawnerStub:
 	extends WorldSpawner
 	var _resources: Dictionary = {}
@@ -138,10 +125,8 @@ class _SpawnerStub:
 	func capture_village(cell: Vector2i) -> bool:
 		return false
 
-
 class _HeroStub:
 	extends HeroController
-
 
 func test_explored_reachable_marker() -> void:
 	var v := _Vis.new()
@@ -149,8 +134,6 @@ func test_explored_reachable_marker() -> void:
 	v.recompute(Vector2i(5, 5), [], 3, 4)
 	assert_bool(v.is_explored(Vector2i(6, 5))).is_true()
 	assert_bool(v.is_explored(Vector2i(10, 10))).is_false()
-
-
 
 func test_spawner_hides_nodes_on_hidden_cells() -> void:
 	var spawner := preload("res://scripts/world/WorldSpawner.gd").new()
@@ -173,8 +156,6 @@ func test_spawner_hides_nodes_on_hidden_cells() -> void:
 	spawner.free()
 	visible_node.free()
 	hidden_node.free()
-
-
 
 func test_interaction_blocked_on_unexplored() -> void:
 	var vic := preload("res://scripts/world/WorldInteractionController.gd").new()
@@ -201,7 +182,6 @@ func test_interaction_blocked_on_unexplored() -> void:
 	spawner.free()
 	hero.free()
 
-
 func test_interaction_allowed_on_visible() -> void:
 	var vic := preload("res://scripts/world/WorldInteractionController.gd").new()
 	var spawner := _SpawnerStub.new()
@@ -221,8 +201,6 @@ func test_interaction_allowed_on_visible() -> void:
 	vic.free()
 	spawner.free()
 	hero.free()
-
-
 
 func test_delta_fog_persistence() -> void:
 	var d := _Delta.new()

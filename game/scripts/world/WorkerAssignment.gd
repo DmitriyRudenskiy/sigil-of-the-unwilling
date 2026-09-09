@@ -22,7 +22,7 @@ static func assign_all(city: City) -> int:
 			if u.assigned_to != -1:
 				continue
 			if u.pending_state != -1:
-				continue  
+				continue
 			u.assigned_to = bld.uid
 			bld.assigned_workers += 1
 			need -= 1
@@ -30,7 +30,6 @@ static func assign_all(city: City) -> int:
 	if assigned > 0:
 		city.population_changed.emit()
 	return assigned
-
 
 static func release_orphans(city: City) -> int:
 	if city == null:
@@ -48,7 +47,6 @@ static func release_orphans(city: City) -> int:
 		city.population_changed.emit()
 	return freed
 
-
 static func release_building(city: City, building_uid: int) -> int:
 	if city == null:
 		return 0
@@ -63,7 +61,6 @@ static func release_building(city: City, building_uid: int) -> int:
 	if freed > 0:
 		city.population_changed.emit()
 	return freed
-
 
 static func rebalance(city: City) -> int:
 	if city == null:

@@ -32,7 +32,6 @@ var _hero_controller: HeroController
 var popup_open: bool = false
 var _border_check: CheckBox
 
-
 func _ready() -> void:
 	layer = 10
 	var p := get_node("RightColumn") as PanelContainer
@@ -62,7 +61,6 @@ func _ready() -> void:
 	if not GameEventBus.resource_extracted.is_connected(_on_resource_extracted):
 		GameEventBus.resource_extracted.connect(_on_resource_extracted)
 
-
 func setup(hero: HeroController, camera: Camera2D = null) -> void:
 	_hero_controller = hero
 	hero.movement_points_changed.connect(func(c, m): _update_mp_display(c, m))
@@ -88,7 +86,6 @@ func setup(hero: HeroController, camera: Camera2D = null) -> void:
 
 	refresh_all()
 
-
 func reattach_hero(hero: HeroController, camera: Camera2D = null) -> void:
 	_hero_controller = hero
 	hero.movement_points_changed.connect(func(c, m): _update_mp_display(c, m))
@@ -105,7 +102,6 @@ func reattach_hero(hero: HeroController, camera: Camera2D = null) -> void:
 	set_cities(_cities_mgr)
 	refresh_all()
 
-
 func refresh_all() -> void:
 	if _hero_controller == null:
 		return
@@ -117,7 +113,6 @@ func refresh_all() -> void:
 	_hero_status.refresh()
 	refresh_glory()
 
-
 func set_cities(cities_mgr: Node) -> void:
 	if _cities_mgr == cities_mgr:
 		return
@@ -127,15 +122,12 @@ func set_cities(cities_mgr: Node) -> void:
 		_cities_mgr.glory_changed.connect(_on_glory_changed)
 	refresh_glory()
 
-
 func _on_glory_changed(_window_total: float) -> void:
 	refresh_glory()
-
 
 func _on_resource_extracted(_cell: Vector2i, resource_id: StringName, amount: int) -> void:
 	if _collect_popup != null:
 		_collect_popup.show_resource(resource_id, amount)
-
 
 func refresh_glory() -> void:
 	var total := 0.0
@@ -148,37 +140,29 @@ func refresh_glory() -> void:
 		_glory_bar.max_value = target
 		_glory_bar.value = clampf(total, 0.0, target)
 
-
 func set_status(text: String) -> void:
 	_info.set_status(text)
 
-
 func add_city(city_name: String) -> void:
 	_info.add_city(city_name)
-
 
 func advance_day() -> void:
 	_info.advance_day()
 	date_changed.emit(_info.month, _info.week, _info.day)
 
-
 func set_date(month: int, week: int, day: int) -> void:
 	_info.set_date(month, week, day)
-
 
 func _on_minimap_clicked(cell: Vector2i) -> void:
 	minimap_cell_activated.emit(cell)
 
-
 func _on_camera_jump(direction: String) -> void:
 	camera_jump_requested_dir.emit(direction)
-
 
 func _on_end_turn() -> void:
 	SoundManager.play_sfx_cue(&"ui_click")
 	advance_day()
 	end_turn_pressed.emit()
-
 
 func _on_options() -> void:
 	popup_open = not popup_open
@@ -186,7 +170,6 @@ func _on_options() -> void:
 		_options_popup.show()
 	else:
 		_options_popup.hide()
-
 
 func _on_open_settings() -> void:
 	if _options_popup != null:
@@ -197,14 +180,11 @@ func _on_open_settings() -> void:
 	_settings_screen.setup(settings_node)
 	_settings_screen.show()
 
-
 func _on_settings_applied() -> void:
 	settings_applied.emit()
 
-
 func _on_border_toggled(on: bool) -> void:
 	hex_borders_toggled.emit(on)
-
 
 func _update_mp_display(current: float, max_val: float) -> void:
 	var text := "🚶 %.1f / %.0f" % [current, max_val]

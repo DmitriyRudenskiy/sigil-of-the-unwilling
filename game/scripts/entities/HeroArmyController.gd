@@ -4,12 +4,10 @@ class_name HeroArmyController
 var army: Array[UnitStack] = []
 var _units_registry: Node = null
 
-
 func setup(units_registry: Node = null) -> void:
-	# ИСПРАВЛЕНИЕ: единый путь
+
 	_units_registry = units_registry if units_registry != null else Services.resolve(&"units")
 	_init_default_army()
-
 
 func _init_default_army() -> void:
 	army = [
@@ -22,7 +20,6 @@ func _init_default_army() -> void:
 		_units_registry.make_fixed_stack("champions", 6),
 		_units_registry.make_fixed_stack("knights", 12),
 	]
-
 
 func get_army_for_battle() -> Array[UnitStack]:
 	var alive: Array[UnitStack] = []
@@ -37,7 +34,6 @@ func get_army_for_battle() -> Array[UnitStack]:
 		alive.append(stack.duplicate_stack())
 	return alive
 
-
 func apply_battle_results(surviving_army: Array[UnitStack]) -> void:
 	var new_army: Array[UnitStack] = []
 	for stack in surviving_army:
@@ -50,14 +46,12 @@ func apply_battle_results(surviving_army: Array[UnitStack]) -> void:
 			new_army.append(stack.duplicate_stack())
 	army = new_army
 
-
 func serialize() -> Array:
 	var result: Array = []
 	for stack in army:
 		if stack != null and stack.is_alive():
 			result.append({"key": stack.get_key(), "count": stack.count})
 	return result
-
 
 func deserialize(data: Array) -> void:
 	army.clear()

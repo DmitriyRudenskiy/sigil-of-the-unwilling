@@ -2,11 +2,10 @@ class_name ProductionChain
 extends RefCounted
 
 var id: StringName = &""
-var inputs: Dictionary = {}  
-var outputs: Dictionary = {}  
+var inputs: Dictionary = {}
+var outputs: Dictionary = {}
 var required_workers: int = 1
 var building_eff: float = 1.0
-
 
 func calculate_output(workers: int, logistics: float = 1.0) -> Dictionary:
 	if required_workers <= 0 or workers <= 0:
@@ -18,12 +17,10 @@ func calculate_output(workers: int, logistics: float = 1.0) -> Dictionary:
 		result[out_id] = float(outputs[out_id]) * eff
 	return result
 
-
 func can_produce(ctx: ResourceContext, workers: int) -> bool:
 	if workers <= 0:
 		return false
 	return ctx.can_afford(inputs)
-
 
 func execute(ctx: ResourceContext, workers: int, logistics: float = 1.0) -> Dictionary:
 	if not can_produce(ctx, workers):
@@ -31,7 +28,6 @@ func execute(ctx: ResourceContext, workers: int, logistics: float = 1.0) -> Dict
 	for in_id in inputs:
 		ctx.remove(in_id, float(inputs[in_id]))
 	return calculate_output(workers, logistics)
-
 
 func to_dict() -> Dictionary:
 	return {
@@ -42,7 +38,6 @@ func to_dict() -> Dictionary:
 		"building_eff": building_eff,
 	}
 
-
 static func from_dict(data: Dictionary) -> ProductionChain:
 	var chain := ProductionChain.new()
 	chain.id = StringName(data.get("id", ""))
@@ -52,13 +47,11 @@ static func from_dict(data: Dictionary) -> ProductionChain:
 	chain.building_eff = float(data.get("building_eff", 1.0))
 	return chain
 
-
 static func _sn_dict_to_str(src: Dictionary) -> Dictionary:
 	var out := {}
 	for k in src:
 		out[String(k)] = src[k]
 	return out
-
 
 static func _str_dict_to_sn(src: Dictionary) -> Dictionary:
 	var out := {}

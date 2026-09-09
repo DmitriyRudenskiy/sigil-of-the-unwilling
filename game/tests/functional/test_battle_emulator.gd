@@ -66,8 +66,6 @@ func test_emulate_battle_invalid_army_type() -> void:
 	var r = em.emulate_battle({"attacker_army": "nope", "defender_army": [weaker()]})
 	assert_bool(r.has("error")).is_true()
 
-
-
 func test_sequence_battle_rotates_heal_and_actions() -> void:
 	var em = _Emulator.new()
 	var r = em.sequence_battle({
@@ -93,8 +91,6 @@ func test_sequence_battle_empty_sequence() -> void:
 	var steps: Array = r.get("steps", [])
 	assert_that(steps.size()).is_equal(0)
 
-
-
 func test_cast_in_battle_resurrects_dead_target() -> void:
 	var em = _Emulator.new()
 	var r = em.cast_in_battle({
@@ -102,7 +98,7 @@ func test_cast_in_battle_resurrects_dead_target() -> void:
 		"caster_hp": 60,
 		"caster_count": 10,
 		"target_hp": 100,
-		"target_count": 0,  
+		"target_count": 0,
 	})
 	assert_bool(r.has("error")).is_false()
 	assert_that(r.get("result")).is_equal("success")

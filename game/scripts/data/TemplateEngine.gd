@@ -3,14 +3,11 @@ extends RefCounted
 
 static var _handlers: Dictionary = {}
 
-
 static func register_handler(template: StringName, handler: Callable) -> void:
 	_handlers[template] = handler
 
-
 static func reset() -> void:
 	_handlers.clear()
-
 
 static func execute(
 	template: StringName, params: Dictionary, condition: Dictionary,
@@ -22,6 +19,4 @@ static func execute(
 	if not _handlers.has(template):
 		return {"result": "unknown_template", "template": str(template), "effects": []}
 
-	# R6: единая сигнатура handle(params, state, caster, target, secondary).
-	# secondary всегда передаётся (пустой массив, если нет вторичных эффектов).
 	return _handlers[template].call(params, state, caster, target, secondary)

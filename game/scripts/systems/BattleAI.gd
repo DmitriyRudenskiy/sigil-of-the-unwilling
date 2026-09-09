@@ -14,7 +14,6 @@ class AIResult extends RefCounted:
 	var attack_target: BattleState.BattleUnit = null
 	var move_victim: BattleState.BattleUnit = null
 
-
 func decide_turn(unit: BattleState.BattleUnit, state: BattleState, blocked: Dictionary) -> AIResult:
 	var result := AIResult.new()
 
@@ -79,7 +78,6 @@ func decide_turn(unit: BattleState.BattleUnit, state: BattleState, blocked: Dict
 
 	return result
 
-
 func _find_nearest(unit: BattleState.BattleUnit, state: BattleState, target_side: BattleState.Side) -> BattleState.BattleUnit:
 	var nearest: BattleState.BattleUnit = null
 	var nearest_distance := GameSettings.INF
@@ -93,7 +91,6 @@ func _find_nearest(unit: BattleState.BattleUnit, state: BattleState, target_side
 
 	return nearest
 
-
 func _find_victim_near(cell: Vector2i, state: BattleState, target_side: BattleState.Side) -> BattleState.BattleUnit:
 	for neighbor in HexUtils.get_all_neighbors(cell):
 		var u := state.get_unit_at(neighbor, target_side)
@@ -101,7 +98,6 @@ func _find_victim_near(cell: Vector2i, state: BattleState, target_side: BattleSt
 			return u
 
 	return null
-
 
 func _has_adjacent_enemy(
 	unit: BattleState.BattleUnit,
@@ -114,7 +110,6 @@ func _has_adjacent_enemy(
 			return true
 
 	return false
-
 
 func _find_flying_landing_cell(
 	unit: BattleState.BattleUnit,
@@ -154,8 +149,6 @@ func _find_flying_landing_cell(
 				fallback_best_score = dist_to_target
 				fallback_best = cell
 
-			
-			
 			var can_attack := (dist_to_target == 1) if is_melee else true
 
 			if can_attack and dist_to_target < best_score:
