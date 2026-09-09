@@ -6,6 +6,7 @@ signal cell_entered(cell: Vector2i)
 signal cell_exited()
 
 const _CityArenaModel = preload("res://scripts/city/CityArenaModel.gd")
+const _ArenaRingSystem = preload("res://scripts/city/ArenaRingSystem.gd")
 
 var cell: Vector2i = Vector2i.ZERO
 var ring: int = 0
@@ -31,7 +32,7 @@ func _ready() -> void:
     _mark.text = _mark_label_text()
     _mark.add_theme_font_size_override("font_size", 18 if ring == 0 else 13)
     _ylab.visible = ring > 0
-    _ylab.text = _ring_yield_short(ring)
+    _ylab.text = _ArenaRingSystem.ring_yield_label(ring)
     _feat.visible = feature_id != &""
     if feature_id != &"":
         _feat.text = _CityArenaModel.feature_glyph(feature_id)
@@ -45,7 +46,7 @@ func update() -> void:
     if _mark != null:
         _mark.text = _mark_label_text()
     if _ylab != null:
-        _ylab.text = _ring_yield_short(ring)
+        _ylab.text = _ArenaRingSystem.ring_yield_label(ring)
     if _badge != null:
         _badge.text = badge_id
 
@@ -71,15 +72,3 @@ func _on_mouse_exited() -> void:
 
 func _ring_color(ring: int) -> Color:
     return _CityArenaModel.ring_color(ring)
-
-
-func _ring_yield_short(ring: int) -> String:
-    var y: Dictionary = GameNumbers.ring_yield(ring)
-    var food: float = float(y.get(&"food", 0.0))
-    var ind: float = float(y.get(&"industry", 0.0))
-    var parts: Array[String] = []
-    if food > 0.0:
-        parts.append("🌾" + ("%.1f" % food))
-    if ind > 0.0:
-        parts.append("🏭" + ("%.1f" % ind))
-    return ", ".join(parts)

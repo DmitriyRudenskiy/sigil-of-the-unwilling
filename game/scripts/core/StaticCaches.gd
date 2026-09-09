@@ -15,3 +15,11 @@ static func reset_all() -> void:
 	PlaceholderTexture.clear()
 	ResourceAtlas.clear()
 	TileAtlasCache.clear_cache()
+	# WorldPersistence: сессионное состояние живёт на экземпляре в Services (не static).
+	# clear_session() перерегистрирует экземпляр до этого вызова, поэтому на практике
+	# сбрасываем свежий — страховка от stale pending_* при любых других путях сброса.
+	var services: Variant = Services
+	if services != null:
+		var persistence: Variant = services.resolve(&"persistence")
+		if persistence != null:
+			persistence.reset_session_state()

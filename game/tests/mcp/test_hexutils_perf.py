@@ -11,10 +11,8 @@ from __future__ import annotations
 
 import time
 
-import pytest
 
 
-pytestmark = pytest.mark.asyncio
 
 # Допустимое время для A* на карте 80×80 (мс).
 # До оптимизации: ~150–300 мс. После: ~80–150 мс.
@@ -22,12 +20,12 @@ ASTAR_MAX_TIME_MS = 200.0
 MAP_GEN_MAX_TIME_MS = 3000.0
 
 
-async def test_map_generation_80x80(world_scene):
+def test_map_generation_80x80(world_scene):
     """Генерация карты 80×80 должна укладываться в лимит."""
     mcp = world_scene
 
     start = time.perf_counter()
-    result = await mcp.execute_code("""
+    result = mcp.execute_code("""
         var t0 = Time.get_ticks_msec()
         var model = MapModel.new()
         model.map_width = 80
@@ -52,14 +50,14 @@ async def test_map_generation_80x80(world_scene):
     )
 
 
-async def test_astar_pathfinding_performance(world_scene):
+def test_astar_pathfinding_performance(world_scene):
     """
     A* путь через всю карту 80×80 должен быть быстрым.
     Запускаем 10 итераций и проверяем среднее время.
     """
     mcp = world_scene
 
-    result = await mcp.execute_code("""
+    result = mcp.execute_code("""
         var model = MapModel.new()
         model.map_width = 80
         model.map_height = 80
@@ -113,11 +111,11 @@ async def test_astar_pathfinding_performance(world_scene):
     )
 
 
-async def test_bfs_reachable_performance(world_scene):
+def test_bfs_reachable_performance(world_scene):
     """BFS-достижимость на карте 80×80 должна быть быстрой."""
     mcp = world_scene
 
-    result = await mcp.execute_code("""
+    result = mcp.execute_code("""
         var model = MapModel.new()
         model.map_width = 80
         model.map_height = 80
@@ -146,14 +144,14 @@ async def test_bfs_reachable_performance(world_scene):
     assert result["reachable_count"] > 0, "BFS не нашёл достижимых клеток"
 
 
-async def test_get_neighbor_no_config_call_overhead(world_scene):
+def test_get_neighbor_no_config_call_overhead(world_scene):
     """
     Проверяем, что get_neighbor не вызывает get_config() каждый раз.
     Кэширование _shift_right должно устранять оверхед.
     """
     mcp = world_scene
 
-    result = await mcp.execute_code("""
+    result = mcp.execute_code("""
         var t0 := Time.get_ticks_msec()
         var results := 0
         for i in 100000:

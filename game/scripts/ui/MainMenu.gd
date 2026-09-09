@@ -136,7 +136,8 @@ func _on_load_game() -> void:
         GameLogger.warn("Load failed: %s" % SaveManager.error_to_string(err), "MainMenu")
         return
     var data: SaveData = result.get("data")
-    WorldPersistence.pending_save = data
+    var persistence: WorldPersistence = Services.resolve(&"persistence")
+    persistence.pending_save = data
     get_tree().change_scene_to_file("res://scenes/World.tscn")
 
 func _flash_lock() -> void:

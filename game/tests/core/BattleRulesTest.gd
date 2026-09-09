@@ -8,7 +8,7 @@ func _unit(stats: UnitStats, count := 5) -> BattleState.BattleUnit:
 
 
 func _seeded_rng(seed: int) -> RandomNumberGenerator:
-	var rng := RandomNumberGenerator.new()
+	var rng := TestFactories.seeded(9651)
 	rng.seed = seed
 	return rng
 
@@ -69,6 +69,17 @@ func test_calculate_attack_deterministic_and_shaped() -> void:
 	assert_int(r1["damage"]).is_greater(0)
 	assert_int(r1["kills"]).is_greater_equal(1)
 	assert_int(r1["kills"]).is_less_equal(5)
+
+
+## Из TestBattleRules (root): порог базового урона при ATK 10 vs DEF 5.
+func test_calculate_attack_base_damage_atk_advantage() -> void:
+	var atk := _unit(UnitStats.new("orc", "Orc", 10, 5, 20, 5, 2, ["melee"]), 10)
+	var def := _unit(UnitStats.new("human", "Human", 5, 3, 10, 4, 5, ["melee"]), 10)
+	var result := BattleRules.calculate_attack(atk, def, true, _seeded_rng(12345), 0, 0)
+	assert_bool(result.is_empty()).is_false()
+	assert_int(result.get("damage", 0)).is_greater(0)
+	# base_damage 5 * 10 юнитов = 50..70 до множителя
+	assert_int(result.get("damage", 0)).is_greater_equal(50)
 
 
 func test_calculate_attack_dead_units_return_empty() -> void:

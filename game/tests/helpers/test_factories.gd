@@ -1,62 +1,35 @@
-class_name TestFactories
-extends RefCounted
+extends GdUnitTestSuite
 
-const City := preload("res://scripts/world/City.gd")
-const HeroController := preload("res://scripts/entities/HeroController.gd")
-const Follower := preload("res://scripts/entities/Follower.gd")
+# R6: дымовой тест для общих фабрик — новый метод без вызывающего теста
+# остаётся непроверенным, пока не появится первый потребитель.
 
-
-static func make_city(uid: int = 1, stronghold: int = 2) -> City:
-	var city := City.new()
-	city.uid = uid
-	city.display_name = "TestTown %d" % uid
-	city.center = Vector2i(5, 5)
-	city.stronghold_level = stronghold
-	city.storage[&"industry"] = 500.0
-	return city
+func test_make_battle_state_places_both_sides() -> void:
+	var bs := TestFactories.make_battle_state()
+	assert_that(bs.attacker_units.size()).is_equal(1)
+	assert_that(bs.defender_units.size()).is_equal(1)
+	assert_that(bs.attacker_units[0].get_key()).is_equal("swordsmen")
+	assert_that(bs.defender_units[0].get_key()).is_equal("goblins")
+	assert_that(bs.attacker_units[0].get_count()).is_equal(20)
 
 
-static func make_hero(path := &"archivist") -> HeroController:
-	var h := HeroController.new()
-	h.hero_name = "Darkstorn"
-	h.path_id = path
-	return h
+func test_make_battle_state_custom_keys() -> void:
+	var bs := TestFactories.make_battle_state("archers", "skeleton", 3, 4)
+	assert_that(bs.attacker_units[0].get_key()).is_equal("archers")
+	assert_that(bs.defender_units[0].get_count()).is_equal(4)
 
 
-## R8: один источник для тестовых RandomNumberGenerator (было: локальный _seeded в
-## test_city_navigation / test_follower / test_city_screen).
-static func seeded(seed: int) -> RandomNumberGenerator:
-	var r := RandomNumberGenerator.new()
-	r.seed = seed
-	return r
+func test_make_city_with_temple() -> void:
+	var city := TestFactories.make_city_with_temple()
+	var found := false
+	for b in city.buildings:
+		if b.def != null and b.def.id == &"great_temple" and b.level == 2:
+			found = true
+	assert_bool(found).is_true()
 
 
-static func make_follower(uid: int, path := &"archivist") -> Follower:
-	var f := Follower.new()
-	f.uid = uid
-	f.path = path
-	return f
-
-## R6: стандартное боевое состояние для тестов (один атакующий + один обороняющийся отряд).
-static func make_battle_state(
-	atk_key: String = "swordsmen",
-	def_key: String = "goblins",
-	atk_count: int = 20,
-	def_count: int = 5
-) -> BattleState:
-	var units: Node = Services.resolve(&"units")
-	var atk: Array[UnitStack] = [units.make_fixed_stack(atk_key, atk_count)]
-	var def: Array[UnitStack] = [units.make_fixed_stack(def_key, def_count)]
-	var bs := BattleState.new()
-	bs.place_army(atk, def)
-	return bs
-
-## R6: город с Great Temple (для тестов сукцессии/воскрешения).
-static func make_city_with_temple(uid: int = 1, stronghold: int = 2, temple_level: int = 2) -> City:
-	var city := make_city(uid, stronghold)
-	var ub := UniqueBuilding.new()
-	ub.def = UniqueBuilding.Def.new()
-	ub.def.id = &"great_temple"
-	ub.level = temple_level
-	city.buildings.append(ub)
-	return city
+func test_make_hero_and_follower() -> void:
+	var h := TestFactories.make_hero(&"warrior")
+	assert_that(h.path_id).is_equal(&"warrior")
+	var f := TestFactories.make_follower(7)
+	assert_that(f.uid).is_equal(7)
+	h.free()

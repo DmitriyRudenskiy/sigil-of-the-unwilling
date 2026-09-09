@@ -13,13 +13,23 @@ signal spell_chosen(spell_id: StringName)
 signal settings_requested
 signal settings_closed
 
-var _status: Label
-var _active_info: Label
-var _preview: Label
-var _bottom_bar: HBoxContainer
-var _initiative_list: ItemList
+# R3: пути нод — @onready + $ (проверяются при загрузке сцены, без парсинга строк).
+@onready var _top_panel: PanelContainer = $top_panel
+@onready var _status: Label = $"top_panel/top_vbox/status"
+@onready var _active_info: Label = $"top_panel/top_vbox/active_info"
+@onready var _preview: Label = $"top_panel/top_vbox/preview"
+@onready var _bottom_bar: HBoxContainer = $bottom_bar
+@onready var _retreat_btn: Button = $"bottom_bar/retreat_btn"
+@onready var _wait_btn: Button = $"bottom_bar/wait_btn"
+@onready var _attack_button: Button = $"bottom_bar/attack_btn"
+@onready var _defend_btn: Button = $"bottom_bar/defend_btn"
+@onready var _skip_btn: Button = $"bottom_bar/skip_btn"
+@onready var _spellbook_btn: Button = $"bottom_bar/spellbook_btn"
+@onready var _settings_btn: Button = $"bottom_bar/settings_btn"
+@onready var _collapse_btn: Button = $collapse_btn
+@onready var _initiative_panel: PanelContainer = $initiative_panel
+@onready var _initiative_list: ItemList = $"initiative_panel/initiative_list"
 var _action_buttons: Array[Button] = []
-var _attack_button: Button = null
 @onready var _settings_screen: SettingsScreen = $SettingsScreen
 @onready var _spellbook_panel: BattleSpellbookPanel = $BattleSpellbookPanel
 
@@ -44,51 +54,27 @@ func _apply_theme() -> void:
 	var sb := _theme.get_stylebox("panel", "Panel")
 	if sb == null:
 		return
-	var tp := get_node_or_null("top_panel") as PanelContainer
-	if tp != null:
-		tp.add_theme_stylebox_override("panel", sb)
-	var ip := get_node_or_null("initiative_panel") as PanelContainer
-	if ip != null:
-		ip.add_theme_stylebox_override("panel", sb)
+	_top_panel.add_theme_stylebox_override("panel", sb)
+	_initiative_panel.add_theme_stylebox_override("panel", sb)
 
 
 func _connect_skeleton() -> void:
-	_status = get_node_or_null("top_panel/top_vbox/status") as Label
-	_active_info = get_node_or_null("top_panel/top_vbox/active_info") as Label
-	_preview = get_node_or_null("top_panel/top_vbox/preview") as Label
-	_bottom_bar = get_node_or_null("bottom_bar") as HBoxContainer
-	_initiative_list = get_node_or_null("initiative_panel/initiative_list") as ItemList
+	# Только сигналы и стили — ноды уже разрешены в @onready.
+	_status.add_theme_color_override("font_color", ThemeConfig.C_TEXT_PRIMARY)
+	_active_info.add_theme_color_override("font_color", ThemeConfig.C_ACTIVE_INFO)
+	_preview.add_theme_color_override("font_color", ThemeConfig.C_TEXT_GOLD)
 
-	if _status != null:
-		_status.add_theme_color_override("font_color", ThemeConfig.C_TEXT_PRIMARY)
-	if _active_info != null:
-		_active_info.add_theme_color_override("font_color", ThemeConfig.C_ACTIVE_INFO)
-	if _preview != null:
-		_preview.add_theme_color_override("font_color", ThemeConfig.C_TEXT_GOLD)
-
-	_action_buttons = []
-	_connect_btn("retreat_btn", _on_retreat, true)
-	_connect_btn("wait_btn", _on_wait, true)
-	_connect_btn("attack_btn", _on_attack_mode, true)
-	_connect_btn("defend_btn", _on_defend, true)
-	_connect_btn("skip_btn", _on_skip, true)
-	var _collapse_btn := get_node_or_null("collapse_btn") as Button
-	if _collapse_btn != null and not _collapse_btn.pressed.is_connected(_on_collapse):
+	_action_buttons = [_retreat_btn, _wait_btn, _attack_button, _defend_btn, _skip_btn]
+	_retreat_btn.pressed.connect(_on_retreat)
+	_wait_btn.pressed.connect(_on_wait)
+	_attack_button.pressed.connect(_on_attack_mode)
+	_defend_btn.pressed.connect(_on_defend)
+	_skip_btn.pressed.connect(_on_skip)
+	_spellbook_btn.pressed.connect(_on_spellbook)
+	_settings_btn.pressed.connect(_on_settings)
+	if not _collapse_btn.pressed.is_connected(_on_collapse):
 		_collapse_btn.pressed.connect(_on_collapse)
-	_connect_btn("spellbook_btn", _on_spellbook, true)
-	_connect_btn("settings_btn", _on_settings, true)
-	_attack_button = get_node_or_null("bottom_bar/attack_btn") as Button
-	if _attack_button != null:
-		_attack_button.disabled = true
-
-
-func _connect_btn(name: String, cb: Callable, is_action: bool) -> void:
-	var btn := get_node_or_null("bottom_bar/%s" % name) as Button
-	if btn == null:
-		return
-	btn.pressed.connect(cb)
-	if is_action:
-		_action_buttons.append(btn)
+	_attack_button.disabled = true
 
 
 func set_status(text: String) -> void:

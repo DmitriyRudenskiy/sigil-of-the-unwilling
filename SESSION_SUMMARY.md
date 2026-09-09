@@ -1,139 +1,87 @@
 # SESSION_SUMMARY — Sigil of the Unwilling (Godot 4.7)
 
-> Контекст для продолжения в новой сессии. Актуально после завершения **TASK_09_1**.
-> Предыдущая сводка (TASK_06/07): `SESSION_SUMMARY_01.md`.
+> Контекст для продолжения в новой сессии. Актуально после завершения **TASK_10** (аудит-рефакторинг, все фазы закрыты).
+> Предыдущие сводки: `SESSION_SUMMARY_01.md` (корень), `game/SESSION_SUMMARY_02.md` (TASK_08), `SESSION_SUMMARY_03.md` (корень, TASK_09_1).
+> Источники задач: `/Users/user/Downloads/TASK_10.md` (аудит R1–R10 + план по фазам), ранее TASK_08/TASK_09_1.
 
 ## 1. Пути и окружение
 
 | Что | Где |
 |---|---|
-| Корень репозитория / CWD | `/Users/user/sigil-of-the-unwilling` |
+| Корень репозитория / CWD | `/Users/user/sigil-of-the-unwilling` (в корне только dev-материалы) |
 | Корень Godot-проекта | `/Users/user/sigil-of-the-unwilling/game` (project.godot здесь) |
 | Godot 4.7.2 (headless) | `/Applications/Godot.app/Contents/MacOS/Godot` |
-| Запуск всех тестов | `cd game && bash run_tests.sh` (gdUnit4 + MCP-тесты, EXIT=0 при успехе, **без внешних env**) |
+| **Канонический запуск всех тестов** | `cd game && bash run_tests.sh` (gdUnit4 + MCP-тесты, EXIT=0 при успехе, без внешних env) |
 | Импорт/компиляция | `cd game && /Applications/Godot.app/Contents/MacOS/Godot --headless --path . --import` |
-| Исходник задачи | `/Users/user/Downloads/TASK_09_1.md` |
-| MCP-сервер (godot-mcp v3.1.0) | `game/addons/godot-mcp` (восстановлен из github.com/tugcantopaloglu/godot-mcp; `npm run build` → `build/index.js`) |
-| MCP-тесты (pytest) | `game/tests/mcp/*.py` + `game/tests/helpers/mcp_client.py` |
+| Один gdUnit4-файл | `cd game && "$GODOT" --headless --path . -s addons/gdunit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -a res://tests/<file>.gd` |
+| MCP-сервер (godot-mcp) | `game/addons/godot-mcp` (вендорный, `build/index.js`); MCP-тесты: `game/tests/mcp/*.py` + `game/tests/helpers/mcp_client.py` |
 
-macOS-особенности: нет `timeout`, BSD `sed` без `\b` (брать `perl -pi`), BSD `grep` без `-P` (брать `awk`).
+macOS-особенности: BSD `sed`/`grep` без `-P`/`\b` (брать `perl -pi`/`awk`); `timeout` в этой сессии работал (coreutils установлен).
 
-## 2. Статус: TASK_09_1 — ЗАВЕРШЁН
+## 2. Статус: TASK_10 — ЗАВЕРШЁН (все фазы, все R-пункты закрыты)
 
-**Финальная верификация (последний прогон, `bash run_tests.sh` без env): EXIT=0**
-- gdUnit4: **1297 тестов, 0 ошибок, 0 провалов**
-- MCP (pytest): **12 passed, 1 skipped** — skip по дизайну (`test_cluster_reset_in_battle_scene`: в battle scene нет узлов городов, тест сам возвращает `{"skipped": true}`)
-- Все критерии приёмки выполнены (см. §4)
+**Базовый уровень (финальный прогон `bash run_tests.sh`):**
+- gdUnit4: **1300 тестов, 0 ошибок, 0 провалов**
+- MCP (pytest): **12 passed, 1 skipped** (skip по дизайну: `test_cluster_reset_in_battle_scene` возвращает `{"skipped": true}` в battle scene)
 
-### R2 — сплит City.gd (High) — СДЕЛАНО
+Коммиты TASK_10 (новые сверху):
 
-Был 490 строк, критерий < 200 на файл. Итог:
-
-| Файл | Строк | Роль |
+| Коммит | Фаза | Содержание |
 |---|---|---|
-| `game/scripts/world/CityData.gd` | 65 | чистое состояние: 5 сигналов, `enum Faction`, `SERIALIZATION_VERSION`, 26 state-переменных, колбэки `tile_yield_fn`/`is_buildable_fn`, `_uid_seq`, `_yield_calc`, `invalidate_yield()`, `ensure_resource_ctx()` |
-| `game/scripts/world/CityService.gd` | 180 | `static func`-операции над `CityData` (население, жильё, дороги, фолловеры, yield, защита); сигналы эмитятся на `CityData` |
-| `game/scripts/world/City.gd` | 198 | тонкий фасад `class_name City extends CityData` |
+| `2e410dd` | 6 (Low) | R8 тест-фабрики, R9 мёртвые сцены, R10 мелкие, R14 save-слоты + cleanup run_tests.sh |
+| `f441275` | 5 (Medium) | R6 единая сигнатура TemplateEngine, A2 doc канонического пути заклинаний |
+| `3240751` | 4 (High) | R4 CityCheck единый тип результата, R5 фасад City → сервисы (CityBuildingService и др.) |
+| `419c96c` | 3 (High) | R3 сплит BattleTurnExecutor → executor + BattleAttackSequence + BattleRetreatPolicy |
+| `82a0bb0` | 1–2 | R1 миникарта-точки, R2 единый DI-путь (Services), R7 StaticCaches (re-commit после восстановления .git из бэкапа 2026-09-05) |
 
-**ОТКЛОНЕНИЕ от скетча задачи (сознательное, зафиксировать!):** в задаче было задано composition — `City` владеет `_data: CityData` + 26 прокси-свойств + `_wire_signals()`. Это давало ≥ 200 строк только прокси и ломало бы «< 200». Сделано **наследование** `City extends CityData`: состояние и сигналы наследуются напрямую, без прокси и без риска API. Все критерии приёмки при этом соблюдены, diff меньше.
+### Фаза 5 — R6 + A2 (детали)
+- **R6**: все 19 хэндлеров `scripts/data/templates/t0*.gd` — единая сигнатура `static func handle(params: Dictionary, state: Variant, caster: Variant, target: Variant, secondary: Array[Dictionary] = []) -> Dictionary`. `TemplateEngine.execute` диспатчит одним вызовом `_handlers[template].call(params, state, caster, target, secondary)` — ветки по имени `COMBAT_TRICK` больше нет (T05 переведён, `secondary` — последний аргумент).
+- **A2** (спелл-системы не слиты, задокументированы — так и задумано ТЗ):
+  - **Канонический путь боевого каста = `SpellCaster` + `SpellRegistry` (autoload "spells")** — через него идут мировые/боевые заклинания героя (BattleActionResolver, BattleEmulator).
+  - **Карточная система (эмулятор/карточный режим) = `SpellbookRegistry` (autoload "Spellbook", spells.json) + `SpellResolver` + `BattleSpellBridge`** — боевой каст через неё не идёт. Doc-заголовки проставлены во всех пяти файлах.
+  - Дупликация immunity/resistance между SpellCaster и BattleSpellBridge задокументирована, НЕ мерджилась (поведение прижато тестами).
 
-Что осталось в фасадe `City` (не в CityService):
-- `signal status_message(text)` — только в `City` (UI-уровень, в `CityData` нет);
-- `request_switch`, `build_borough`, `build_building`, `perform_upgrade`, `relocate`, `process_turn` — оркестрация, эмитят `status_message`/зовут City-typed сервисы;
-- `_add_pop(state, turn, tile)` — тесты зовут его напрямую (`c._add_pop(...)`);
-- worker-tile методы: `_is_adjacent_to_city_body` (зовётся из `CityBuildingService`), `is_worker_tile_free`, `first_free_worker_tile`, `first_free_build_cell`;
-- `garrison_count()` и `garrison_size()` — оба были в исходном публичном API, оба сохранены.
+### Фаза 6 — R8 + R9 + R10 + R14 (детали)
+- **R8**: `TestFactories` (`tests/helpers/test_factories.gd`, глобальный класс) — единственный источник: `make_hero/make_city/make_follower/make_battle_state/make_city_with_temple/seeded`. Локальные `_make_hero` из 5 файлов (succession/hero_survival/hero_combat_death/capacity/follower_race_class) переименованы в `_succession_hero/_survival_hero/_combat_hero/_root_hero/_stub_hero` и строятся на `TestFactories.make_hero(...)`. Три копии `_seeded` удалены → `TestFactories.seeded()`. **Критерий: `grep -rn "func _make_hero" tests/` → только фабрика.** `_make_city/_make_unit` в тестах НЕ переносились — это разные формы, а не дубли (ТЗ требует только `_make_hero`).
+- **R9**: `scenes/ui/HeroSlot.tscn` + `TownSlot.tscn` удалены (ноль ссылок). **CursorController НЕ мёртвый** — живой autoload (project.godot + `services.gd`), покрыт `tests/test_cursor.gd`; пункт P9 аудита устарел.
+- **R10**: `Artifact.from_dict(data)` добавлен, `ArtifactRegistry` (единственный production-лоадер) использует его — цепочка из 12 позиционных аргументов убрана (позиционный `_init` остался для тестов). `EquipmentManager._highest_type` — сентинел `-1` заменён явной `_highest_type_two()` (см. грабли §5). `EconomicTurnProcessor` — doc-комментарий: ход = игровой день, продвигает WorldEventRouter через TurnScheduler.execute_turn, процессоры по приоритету. **P3 и P6 аудита устарели** (`_by_color` уже с String-ключами; хардкод имён городов в HeroLifecycleSystem отсутствует — только runtime `display_name`).
+- **R14**: `SaveManager` (`scripts/core/SaveManager.gd`, НЕ autoload — инстанс создаёт WorldBootstrap) — `load_game()`/`load_game_legacy()` теперь **static** (чисто файловая логика), одноразовый `static load_slot()` (делал `SaveManager.new()` на каждый вызов) удалён; `MainMenu` зовёт `SaveManager.load_game()`. Одиночный слот `user://save_slot_1.json` — имя файла не менять (сиротит сейвы).
+- **run_tests.sh**: после MCP-секции делает `rm -f mcp_interaction_server.gd` + `git checkout -- project.godot` (причина — см. грабли §5).
 
-**Существующие сервисы НЕ тронуты** и остаются типизированными `city: City` (City IS-A CityData, фасад передаёт `self`): `CityGrowthService`, `CityBuildingService`, `CitySerializer`, `CityYieldCalculator`, `SpecializationSystem`, `LogisticsCalculator`.
+## 3. Ключевые решения архитектуры (накоплено)
 
-Внешний API `City` сохранён полностью: все 26 свойств assignable извне (`c.pop = [...]`, `city.roads = ...`, `city._uid_seq += 1`, `city.resource_ctx = null` и т.д.), тесты не правились.
+- **City = фасад**: `City extends CityData` (наследование, сознательное отклонение от composition-скетча TASK_09_1), операции — в `CityService` (static) и доменных сервисах (`CityBuildingService`, `CityCheck`, `MarketSystem`, `ZoningSystem`, `CityArenaModel`, `ArenaTurnRunner`). `CityCheck` — единый тип результата (R4).
+- **Battle**: `BattleTurnExecutor` (тонкий) + `BattleAttackSequence` + `BattleRetreatPolicy` (R3).
+- **DI**: единый путь через `Services` (`services.gd`) — registry autoload'ов и фабрик. `StaticCaches.reset_all()` **сознательно НЕ сбрасывает** `TemplateEngine._handlers` (это не сессионный кэш — комментарий в `StaticCaches.gd`).
+- **Заклинания**: см. A2 в §2 (канон vs карточная система).
 
-### R3 — HexUtils static var — СДЕЛАНО
+## 4. Git
 
-Комментарий `R3 ACCEPTED: ...` добавлен в `game/scripts/core/HexUtils.gd` над `static var _config: HexGridConfig = null`. Миграция на инстанс-передачу нецелесообразна (~200 вызовов в горячих A*/BFS, сброс через `HexUtils.reset()` в `Services.clear_session()`).
+- HEAD: `2e410dd` (закрытие TASK_10). Репозиторий — `git` в корне; `game/` — подкаталог Godot-проекта.
+- **`.uid`-файлы ТРЕКИРОВАТЬ** (Godot 4.4+ UID-скриптов, 600+ в индексе) — новый `.gd` коммитить вместе со своим `.uid`.
+- `.gitignore`: `venv/`, `__pycache__/`, `tmp/`, `.godot/`, `reports/`.
+- После любой MCP-секции проверять `git status` на `project.godot` (см. §5) — но `run_tests.sh` теперь чистит сам.
 
-### R4, A3, A5, дерево tests/ — закрыты без кода (решения в TASK_09_1.md)
+## 5. Грабли (научено на собственных костях)
 
-- R4: кэш с dirty-флагом достаточен, батчинг не нужен.
-- A3: Dijkstra-кэш уже работает в `EnemyTurnProcessor._dist_field`; хеширование Callable нецелесообразно.
-- A5: 4900 Фишера-Йетса < 1 мс.
-- tests/: плоская структура остаётся, переносы не делаются.
+1. **Godot 4.7.2 не принимает nullable-enum в сигнатурах функций**: `b_slot: Artifact.Slot? = null` → `Parse Error: Expected closing ")" after function parameters`. Лечить: отдельная функция для пары/опциона (см. `_highest_type_two`) или plain-типы.
+2. **Касты enum-функций не работают**: `Slot(x)`, `Rarity(x)`, `AcBonusType(x)` → `Member "Slot" is not a function`. Enum-значения — это int: присваивать напрямую в enum-типизированную переменную (`a.slot = data.get("slot", Slot.MISC_A)`).
+3. **Вендорный MCP-сервер инжектит** `mcp_interaction_server.gd` + autoload-строку в `project.godot` на `run_project` и при выгрузке оставляет в project.godot пустые строки (autoload-строку убирает, строки — нет). Решение: cleanup в конце `run_tests.sh`. Если запускать MCP-тесты вручную — чистить руками: `rm -f mcp_interaction_server.gd mcp_interaction_server.gd.uid && git checkout -- project.godot`.
+4. **MCP-тесты чувствительны к состоянию**: запущенные подряд прогоны по грязному дереву (остаточный `mcp_interaction_server.gd`) дают ложные `TimeoutError: Game interaction server did not become ready in time`. Лечится очисткой + повтором. `GODOT_PROJECT_PATH` — **только абсолютный путь** (относительный → `run_project failed: Invalid project path`).
+5. **CursorController — не трогать**: живой autoload, работает через сигналы GameEventBus; `MODE_ASSETS` с пустыми `"path": ""` — осознанно (ассеты не идентифицированы, tasks 0.1–0.2 из git-истории), курсор всегда остаётся DEFAULT arrow.
+6. **Перед удалением «мёртвого» кода** из аудита: `grep -rn` по всем расширением (.gd/.tscn/.py/project.godot) + поиск тестов. Два пункта аудита (P9, и частично P3/P6) оказались устаревшими — код за временем аудита уже менялся.
+7. GDScript-глобы: `t0*.gd` НЕ накрывает `t10..t19` — использовать `t*.gd` или два глоба (попало на это при массовом правлении хэндлеров).
+8. GdUnit4 exit codes: 0 = pass, **101 = только orphan-предупреждения (допустимо)**, 100 и прочие = реальные падения (обёртка run_tests.sh это учитывает).
 
-### §6 — Покрытие — ИЗМЕРЕНО (ручная методика задачи)
+## 6. Что можно делать дальше (кандидаты, не из TASK_10)
 
-Методика: `find <dir> -name "*.gd" | xargs grep -cve '^[[:space:]]*$' -e '^[[:space:]]*#'` (строки без пустых/комментариев).
+- **tasks 0.1–0.2**: идентифицировать ассеты `assets/cursors/cursor_01..32.png` и заполнить `MODE_ASSETS` в `CursorController.gd` (сейчас курсор-моды визуально ничего не меняют).
+- Мульти-слот сейвов, если понадобится (сейчас один слот; `SaveManager.load_game` static, расширение на `save_game(slot)`/`load_game(slot)` ляжет ровно на имена файлов).
+- Опциональный дедуп immunity/resistance между `SpellCaster` и `BattleSpellBridge` (задокументировано в A2; сначала расширить тесты).
+- Рост тестовой базы: gdUnit4 1300 кейсов, MCP 13.
 
-| Метрика | Значение |
-|---|---|
-| Строки кода `scripts/` | **21 712** (235 `.gd`) |
-| Строки тестов `tests/*.gd` | **13 983** (108 `.gd` в `tests/` + 6 pytest в `tests/mcp/`) |
-| Файлов без упоминания в тестах (basename-grep, методика §6 задачи) | **81** — в основном `scripts/ui/*` (32 файла: визуальный слой, не покрывается unit-тестами) + вспомогательные (`HexDraw`, `ParticlePresets`, `GameSettings`, `service_registry`, `WorldShortcuts`, `ArenaStorm`, `ArenaDemoScenario`, `LogisticsCalculator` и др.); полный список: команда в §5 |
+## 7. Стилистика проекта
 
-По модулям (файлов / строк кода): core 24/1204, world 43/5238, city 17/1178, economy 4/229, demographics 5/475, systems 15/2845, entities 17/1784, ui 32/3007, autoload 15/1648, data 55/2349, constants 2/649, build 4/636, + root `scripts/*.gd` ~70 строк.
-Оценка покрытия (по таблице §6 задачи): ~80–85% по игровым модулям; UI-слой сознательно не покрывается.
-
-## 3. Ключевые решения (не ломать)
-
-1. **`City extends CityData` — наследование, не composition.** Не «чинить» обратно на скетч с прокси: это ≥200 строк и риск API. Сигналы живут в `CityData`, фасад их наследует; `CityService` эмитит на `CityData`-ссылке — коннекты снаружи на `City` получают (одни и те же signal-объекты).
-2. **Тесты не модифицировать** — явное требование задачи; текущие 1297+13 проходят без правок.
-3. **MCP-сервер:** править `_indent_code` нужно в **двух** копиях — `addons/godot-mcp/src/scripts/mcp_interaction_server.gd` (источник) и `addons/godot-mcp/build/scripts/mcp_interaction_server.gd` (то, что реально грузится). Node-сервер при каждом старте **копирует** `build/scripts/mcp_interaction_server.gd` → `<project>/mcp_interaction_server.gd` и добавляет autoload `McpInteractionServer="*res://mcp_interaction_server.gd"` в `project.godot`; при штатном выходе удаляет копию и autoload. Не пугаться, что файл появляется/исчезает в корне проекта.
-4. **Патч `_indent_code`** (src+build): срезает общий отступ пользовательского кода и переводит относительную вложенность (таб или ≤4 пробела = 1 уровень) в табы. Без него GDScript с пробельной отступкой → `Parser Error: Mixed use of tabs and spaces` → в debug-режиме (`-d`) это **debugger break, замораживающий игру** → все `game_eval` таймаутятся через 30 с.
-5. `run_tests.sh`: дефолт `MCP_SERVER=$PWD/addons/godot-mcp/build/index.js`, **export-ит** `GODOT_MCP_SERVER` и `GODOT_PROJECT_PATH` (conftest.py читает их сам; shell-переменная без export в pytest не видна).
-6. Стек TASK_06/07 (ServiceLocator, GameText, ThemeConfig, po-файлы) — не трогать, см. `SESSION_SUMMARY_01.md`.
-
-## 4. Критерии приёмки TASK_09_1 — все выполнены
-
-| Критерий | Статус |
-|---|---|
-| `City.gd` < 200 строк (фасад) | ✅ 198 |
-| `CityData.gd` < 200 строк | ✅ 65 |
-| `CityService.gd` < 200 строк | ✅ 180 |
-| Все существующие тесты зелёные без изменений | ✅ 1297 gdUnit4, 0 правок тестов |
-| `HexUtils.gd` содержит комментарий о принятом решении (R3) | ✅ |
-| MCP-тесты проходят | ✅ 12 passed, 1 skipped по дизайну |
-| Покрытие измерено (§6) | ✅ цифры в §2 |
-
-## 5. Быстрые команды для следующей сессии
-
-```bash
-cd /Users/user/sigil-of-the-unwilling/game
-bash run_tests.sh        # ВСЁ: gdUnit4 (1297) + MCP (12+1skip), EXIT=0; ~7 мин
-
-# gdUnit4 exit codes: 0 = pass, 101 = только orphan-предупреждения (гигиена), 100+ = реальные падения.
-
-# только MCP-тесты:
-cd tests && GODOT_MCP_SERVER=../addons/godot-mcp/build/index.js \
-  GODOT_PROJECT_PATH=/Users/user/sigil-of-the-unwilling/game \
-  python3 -m pytest mcp/ -v --timeout=300
-
-# файлы без упоминания в тестах (методика §6):
-for f in $(find scripts/ -name "*.gd"); do b=$(basename "$f" .gd);
-  grep -rql "$b" tests/ 2>/dev/null || echo "$f"; done
-
-# строки кода/тестов:
-find scripts/ -name "*.gd" | xargs grep -cve '^[[:space:]]*$' -e '^[[:space:]]*#' | awk -F: '{s+=$2} END {print s}'
-```
-
-## 6. Известные грабли (Godot 4.7 / MCP / macOS)
-
-- **Parser error в debug-режиме = debugger break = замороженная игра.** Любой синтаксис в eval-коде, в т.ч. mixed tabs/spaces, вешает всю сессию MCP. Симптомы: `game_eval` таймаут 30 с, в stderr Godot `Debugger Break, Reason: 'Parser Error...'`.
-- **GDScript: нет `String * int`** — повторять строку через `"x".repeat(n)`.
-- GDScript: `if x: stmt` в одну строку — валидно; `;` между операторами — НЕТ.
-- Типизированные параметры проверяют тип в рантайме; унаследованные const/enum резолвятся через имя потомка (`City.Faction.X` работает, т.к. `City extends CityData`).
-- `--import` нужен перед gdUnit4, если добавляли новые `class_name` (иначе parse errors про глобальные классы).
-- `--import` НЕ парсит тесты — ошибки в тестах видны только в `run_tests.sh`.
-- MCP-тесты function-scoped по клиенту (anyio cancel scope) — не «улучшать» до session-scoped, проверено empirически (см. conftest.py).
-- Из `SESSION_SUMMARY_01.md`: `tr()` нельзя из static-функций (брать `TranslationServer.translate()`), RegEx.DOTALL нет, реальный newline внутри msgstr po ломает парсер.
-
-## 7. Память (Mnemosyne)
-
-- MCP-инфраструктура + патчи + пути: id `7983742e56e439c1`
-- TASK_06: id `d13b49db3182f203`; TASK_07: id `a9de1a42366ef99c` (source=task07)
-
-## 8. Что НЕ в скопе / осознанно не тронуто
-
-- Перенос 60+ тестов в целевое дерево — закрыто (плоская `tests/` остаётся).
-- Полный line-coverage (gcov-инструменты) — gdUnit4 не считает; принята ручная методика §6.
-- `scripts/ui/*` (32 файла) — без unit-тестов по дизайну (визуальный слой).
-- Батчинг yield-кэша (R4), Dijkstra-кэш по cost_fn (A3), частичное перемешивание (A5) — закрыты обоснованием, код не нужен.
-- Возможные кандидаты на будущие задачи (не обязательны): прямые unit-тесты на `CityService`, миграция оставшейся кириллицы в реестрах данных (см. §9 SESSION_SUMMARY_01).
+- Комментарии/доки — на русском, код — английский идентификаторы.
+- Фазовая работа: коммит на фазу, зелёный прогон `run_tests.sh` перед коммитом, отклонения от скетча ТЗ фиксировать явно (как в TASK_09_1 с наследованием вместо composition).
+- Ponytail-принципы: минимальный diff, stdlib/нативное вперёд, YAGNI; осознанные упрощения помечать `ponytail:` с указанием потолка и пути апгрейда.

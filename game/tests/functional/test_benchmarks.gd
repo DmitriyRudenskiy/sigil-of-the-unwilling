@@ -1,6 +1,10 @@
 extends GdUnitTestSuite
 
 const INF := 1e9
+const BattleEmulator = preload("res://scripts/autoload/BattleEmulator.gd")
+const UnitRegistry = preload("res://scripts/autoload/UnitRegistry.gd")
+const UnitStats = preload("res://scripts/entities/UnitStats.gd")
+
 var _iterations := 3
 var _results: Array = []
 
@@ -103,6 +107,42 @@ func _bench_json_parse() -> void:
 		var t1 := Time.get_ticks_usec()
 		times.append((t1 - t0) / 1000.0)
 	_record("JSON.parse (save payload)", times)
+
+## Из TestBattleRules (root): бой 7 стаков на 7 стаков (по 15 юнитов) < 1000 мс.
+func test_battle_7v7_performance_under_1000ms() -> void:
+	var units := UnitRegistry.new()
+	units.ensure_definitions()
+	var keys: Array[String] = [
+		"swordsmen", "archers", "cavalry", "mages",
+		"guardians", "champions", "knights",
+	]
+	var atk_army: Array = []
+	var def_army: Array = []
+	for k in keys:
+		var st: UnitStats = units.get_definition(k)
+		assert_bool(st != null).is_true()
+		# emulate_battle собирает UnitStats из полей spec'а, а не из
+		# реестра — передаём реальные статы, иначе бой из дефолтных 3/50 не решится.
+		var spec := {
+			"id": k, "name": k, "count": 15,
+			"attack": st.attack, "base_damage": st.base_damage,
+			"hp": st.hp, "speed": st.speed, "defense": st.defense,
+			"tags": st.tags,
+		}
+		atk_army.append(spec.duplicate())
+		def_army.append(spec.duplicate())
+	var em := BattleEmulator.new()
+	var t0 := Time.get_ticks_msec()
+	var report: Dictionary = em.emulate_battle({
+		"attacker_army": atk_army, "defender_army": def_army,
+	})
+	var ms := float(Time.get_ticks_msec() - t0)
+	assert_bool(bool(report.get("battle_over", false))).is_true()
+	assert_str(str(report.get("winner", ""))).is_not_empty()
+	assert_int(int(report.get("turns", 0))).is_greater(0)
+	assert_float(ms).is_less(1000.0)
+	units.free()
+
 
 func test_benchmarks_run_and_report_finite_times() -> void:
 	_bench_map_generation()

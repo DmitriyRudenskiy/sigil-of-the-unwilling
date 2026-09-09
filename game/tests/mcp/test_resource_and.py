@@ -4,12 +4,10 @@ MCP-тест: строгая логика AND для добычи ресурсо
 """
 from __future__ import annotations
 
-import pytest
-
-pytestmark = pytest.mark.asyncio
 
 
-async def test_extraction_strict_and(world_scene):
+
+def test_extraction_strict_and(world_scene):
     """
     Селитра: навык 'geology' + юнит 'worker' + расходник 'skin_protection'.
     Без любого из условий — отказ.
@@ -17,7 +15,7 @@ async def test_extraction_strict_and(world_scene):
     mcp = world_scene
 
     # Создаём тестовый узел
-    setup = await mcp.execute_code("""
+    setup = mcp.execute_code("""
         var world = get_tree().current_scene
         var rnm = world.get_node_or_null("ResourceNodeManager")
         if rnm == null:
@@ -36,7 +34,7 @@ async def test_extraction_strict_and(world_scene):
     KEY_MISSING = setup["key_missing"]
 
     # Пустые ключи — отказ
-    r1 = await mcp.execute_code(f"""
+    r1 = mcp.execute_code(f"""
         var rnm = get_tree().current_scene.get_node("ResourceNodeManager")
         var res = rnm.try_extract(Vector2i({cell['x']}, {cell['y']}), {{}})
         return {{"code": res.get("error", -1), "amount": res.get("amount", 0)}}
@@ -45,7 +43,7 @@ async def test_extraction_strict_and(world_scene):
     assert r1["amount"] == 0
 
     # Только навык — отказ (нет юнита и расходника)
-    r2 = await mcp.execute_code(f"""
+    r2 = mcp.execute_code(f"""
         var rnm = get_tree().current_scene.get_node("ResourceNodeManager")
         var res = rnm.try_extract(Vector2i({cell['x']}, {cell['y']}), {{"geology": 1}})
         return {{"code": res.get("error", -1), "amount": res.get("amount", 0)}}
@@ -53,7 +51,7 @@ async def test_extraction_strict_and(world_scene):
     assert r2["code"] == KEY_MISSING
 
     # Навык + юнит, без расходника — отказ
-    r3 = await mcp.execute_code(f"""
+    r3 = mcp.execute_code(f"""
         var rnm = get_tree().current_scene.get_node("ResourceNodeManager")
         var res = rnm.try_extract(Vector2i({cell['x']}, {cell['y']}),
             {{"geology": 1, "worker": true}})
@@ -62,7 +60,7 @@ async def test_extraction_strict_and(world_scene):
     assert r3["code"] == KEY_MISSING
 
     # Полный набор — успех
-    r4 = await mcp.execute_code(f"""
+    r4 = mcp.execute_code(f"""
         var rnm = get_tree().current_scene.get_node("ResourceNodeManager")
         var res = rnm.try_extract(Vector2i({cell['x']}, {cell['y']}),
             {{"geology": 1, "worker": true, "skin_protection": true}})

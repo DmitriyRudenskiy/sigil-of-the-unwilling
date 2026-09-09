@@ -9,20 +9,18 @@
 """
 from __future__ import annotations
 
-import pytest
 
 
-pytestmark = pytest.mark.asyncio
 
 
-async def test_prune_shards_no_crash(world_scene):
+def test_prune_shards_no_crash(world_scene):
     """
     Создаём 15 шардов и проверяем, что _prune_old_shards
     корректно удаляет старые без краша.
     """
     mcp = world_scene
 
-    result = await mcp.execute_code("""
+    result = mcp.execute_code("""
         var world = get_tree().current_scene
         var persistence = world.get_node_or_null("SaveManager")
         # Используем WorldPersistence напрямую через код
@@ -55,14 +53,14 @@ async def test_prune_shards_no_crash(world_scene):
     )
 
 
-async def test_prune_shards_with_stringname_keys(world_scene):
+def test_prune_shards_with_stringname_keys(world_scene):
     """
     Проверяем, что обрезка работает с StringName-ключами
     (основной баг: присвоение Variant к String).
     """
     mcp = world_scene
 
-    result = await mcp.execute_code("""
+    result = mcp.execute_code("""
         var wp = load("res://scripts/world/WorldPersistence.gd").new(null)
 
         # Создаём шарды со StringName-ключами (как в реальной игре)
@@ -97,14 +95,14 @@ async def test_prune_shards_with_stringname_keys(world_scene):
     assert result["shards_remaining"] <= 10
 
 
-async def test_full_save_load_cycle_with_many_shards(world_scene):
+def test_full_save_load_cycle_with_many_shards(world_scene):
     """
     Полный цикл: сохранение с 12+ шардами → загрузка → проверка.
     Имитируем реальное автосохранение.
     """
     mcp = world_scene
 
-    result = await mcp.execute_code("""
+    result = mcp.execute_code("""
         var world = get_tree().current_scene
         var save_manager = SaveManager.new()
 
@@ -160,14 +158,14 @@ async def test_full_save_load_cycle_with_many_shards(world_scene):
     assert result["shards_count"] <= 12
 
 
-async def test_prune_preserves_newest_shards(world_scene):
+def test_prune_preserves_newest_shards(world_scene):
     """
     Проверяем, что обрезка удаляет СТАРЕЙШИЕ шарды,
     а не новейшие.
     """
     mcp = world_scene
 
-    result = await mcp.execute_code("""
+    result = mcp.execute_code("""
         var wp = load("res://scripts/world/WorldPersistence.gd").new(null)
 
         var shards := {}

@@ -171,13 +171,20 @@ static func _init_services(parent: Node2D, R: BootstrapResult) -> void:
 	var save_manager := SaveManager.new()
 	save_manager.name = "SaveManager"
 	parent.add_child(save_manager)
-	R.persistence = WorldPersistenceScript.new(save_manager)
+	# R2: экземпляр живёт в Services (там же, где UI ставит pending_*),
+	# сюда только подвешиваем SaveManager текущей сцены.
+	R.persistence = Services.resolve(&"persistence")
+	if R.persistence == null:
+		R.persistence = WorldPersistenceScript.new(save_manager)
+		Services.register_singleton(&"persistence", R.persistence)
+	else:
+		R.persistence.set_save_manager(save_manager)
 	R.resource_chain = ResourceChainServiceScript.new()
 
 
 static func _resolve_session(R: BootstrapResult, shard_seed: int) -> SaveData:
-	var loaded_save: SaveData = WorldPersistenceScript.pending_save
-	WorldPersistenceScript.pending_save = null
+	var loaded_save: SaveData = R.persistence.pending_save
+	R.persistence.pending_save = null
 	if shard_seed != 0:
 		R.persistence.session = R.persistence.get_session_for_seed(shard_seed)
 	elif loaded_save != null:
@@ -212,10 +219,10 @@ static func _init_hero(R: BootstrapResult) -> void:
 		if R.map_gen.has_valid_tilemap():
 			R.hero.position = R.map_gen.map_to_local(R.hero.current_cell)
 	else:
-		var profile := WorldPersistence.pending_new_game
+		var profile = R.persistence.pending_new_game
 		if profile != null:
 			R.hero.apply_build(profile)
-			WorldPersistence.pending_new_game = null
+			R.persistence.pending_new_game = null
 
 
 

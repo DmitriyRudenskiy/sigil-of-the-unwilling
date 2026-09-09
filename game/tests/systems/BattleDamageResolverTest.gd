@@ -8,7 +8,7 @@ func _unit(stats: UnitStats, count := 5) -> BattleState.BattleUnit:
 
 
 func _seeded_rng(seed: int) -> RandomNumberGenerator:
-	var rng := RandomNumberGenerator.new()
+	var rng := TestFactories.seeded(9000)
 	rng.seed = seed
 	return rng
 

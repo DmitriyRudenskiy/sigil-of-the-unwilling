@@ -4,18 +4,27 @@ const WorldLoadContext = preload("res://scripts/world/WorldLoadContext.gd")
 const ResourceChainService = preload("res://scripts/world/ResourceChainService.gd")
 
 
-func test_chain_service_has_methods() -> void:
+func test_extraction_keys_cache_and_fingerprint() -> void:
+	# Поведение вместо проверки наличия методов: кэш по instance_id + fingerprint героя.
 	var chain := ResourceChainService.new()
-	assert_bool(chain.has_method("build_discovery_keys")).is_true()
-	assert_bool(chain.has_method("build_extraction_keys")).is_true()
-	assert_bool(chain.has_method("invalidate_extraction_cache")).is_true()
-	assert_bool(chain.has_method("try_extract")).is_true()
+	var hero := TestFactories.make_hero()
+	get_tree().root.add_child(hero)
 
+	var keys1: Dictionary = chain.build_extraction_keys(hero)
+	var keys2: Dictionary = chain.build_extraction_keys(hero)
+	assert_dict(keys2).is_equal(keys1).override_failure_message("повторный вызов возвращает идентичный кэш")
 
-func test_extraction_cache_invalidation() -> void:
-	var chain := ResourceChainService.new()
+	# Смена состояния героя (армия) -> fingerprint меняется -> ключи пересчитываются.
+	hero.army.army.append(Units.make_fixed_stack("swordsmen", 5))
+	var keys3: Dictionary = chain.build_extraction_keys(hero)
+	assert_dict(keys3).contains_keys(&"swordsmen").override_failure_message("новые ключи должны учитывать добавленного юнита")
+	assert_bool(keys3 != keys1).is_true().override_failure_message("после изменения героя кэш должен пересчитаться")
+
 	chain.invalidate_extraction_cache()
-	assert_bool(chain.get_script() == ResourceChainService).is_true()
+	var keys4: Dictionary = chain.build_extraction_keys(hero)
+	assert_dict(keys4).is_equal(keys3).override_failure_message("после invalidate ключи пересчитываются идентично")
+
+	hero.queue_free()
 
 
 

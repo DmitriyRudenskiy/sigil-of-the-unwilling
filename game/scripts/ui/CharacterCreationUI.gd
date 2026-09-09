@@ -123,7 +123,8 @@ func _on_change(_value: Variant = 0) -> void:
 func _on_create() -> void:
     if not _profile.is_valid():
         return
-    WorldPersistence.pending_new_game = _profile
+    var persistence: WorldPersistence = Services.resolve(&"persistence")
+    persistence.pending_new_game = _profile
     get_tree().change_scene_to_file(_WORLD_SCENE)
 
 func _on_back() -> void:

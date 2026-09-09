@@ -61,6 +61,18 @@ static func tile_yield(cell: Vector2i, overrides: Dictionary = {}) -> Dictionary
 	return GameNumbers.ring_yield(ring)
 
 
+## R4: единая метка кратного выхода кольца (было продублировано в CityArenaView и ArenaHexCell).
+static func ring_yield_label(ring: int) -> String:
+	var y: Dictionary = GameNumbers.ring_yield(ring)
+	var parts: Array[String] = []
+	for key in [&"food", &"industry"]:
+		var v: float = float(y.get(key, 0.0))
+		if v > 0.0:
+			var icon := "🌾" if key == &"food" else "🏭"
+			parts.append(icon + ("%.1f" % v))
+	return ", ".join(parts)
+
+
 static func ring_bonus(def_id: StringName, ring: int, overrides: Dictionary = {}) -> float:
 	if overrides.has(&"ring_bonus"):
 		return GameNumbers.ring_bonus(def_id, ring, overrides[&"ring_bonus"])

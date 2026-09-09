@@ -17,9 +17,25 @@ func test_bfs_path_found() -> void:
 	_assert_valid_steps(path)
 
 
+## Из test_hex_pathfinding (root): старт == финиш → путь из одной клетки.
+func test_bfs_path_same_cell_returns_singleton() -> void:
+	var path := HexPathfinding.bfs_path(Vector2i(0, 0), Vector2i(0, 0), {}, W, H)
+	assert_array(path).has_size(1)
+	assert_vector(path[0]).is_equal(Vector2i(0, 0))
+
+
 func test_bfs_path_empty_when_goal_blocked() -> void:
 	var path := HexPathfinding.bfs_path(Vector2i.ZERO, Vector2i(1, 0), {Vector2i(1, 0): true}, W, H)
 	assert_array(path).is_empty()
+
+
+## Из test_hex_pathfinding (root): стена из соседей делает клетку недостижимой.
+func test_bfs_path_wall_makes_goal_unreachable() -> void:
+	var wall: Dictionary = {}
+	for n in HexUtils.get_all_neighbors(Vector2i(2, 2)):
+		wall[n] = true
+	var unreachable := HexPathfinding.bfs_path(Vector2i(0, 0), Vector2i(2, 2), wall, W, H)
+	assert_array(unreachable).is_empty()
 
 
 func test_bfs_path_avoids_blocked_cell() -> void:
@@ -52,6 +68,15 @@ func test_bfs_reachable_steps() -> void:
 	assert_dict(reach).has_size(6)
 	for d in reach.values():
 		assert_int(d).is_equal(1)
+
+
+## Из test_hex_pathfinding (root): 2 шага = 18 клеток, на краю карты меньше 6.
+func test_bfs_reachable_two_steps_and_edge() -> void:
+	var reach2 := HexPathfinding.bfs_reachable(Vector2i(5, 5), 2, {}, 20, 20)
+	assert_dict(reach2).has_size(18)
+	var edge := HexPathfinding.bfs_reachable(Vector2i(0, 0), 1, {}, W, H)
+	assert_dict(edge).not_contains_keys([Vector2i(0, 0)])
+	assert_int(edge.size()).is_less(6)
 
 
 func test_dijkstra_accumulates_costs() -> void:

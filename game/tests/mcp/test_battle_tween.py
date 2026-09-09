@@ -4,16 +4,14 @@ MCP-тест: отсутствие телепортаций при быстро�
 """
 from __future__ import annotations
 
-import asyncio
-
-import pytest
-
-pytestmark = pytest.mark.asyncio
+import time
 
 
-async def _init_battle(mcp):
+
+
+def _init_battle(mcp):
     """Инициализация боя через game_eval."""
-    return await mcp.execute_code("""
+    return mcp.execute_code("""
         var battle = get_tree().current_scene
         if battle == null or not battle.has_method("start_battle"):
             return {"error": "Battle scene not ready"}
@@ -31,9 +29,9 @@ async def _init_battle(mcp):
     """)
 
 
-async def _get_units(mcp):
+def _get_units(mcp):
     """Получить список юнитов боя."""
-    return await mcp.execute_code("""
+    return mcp.execute_code("""
         var battle = get_tree().current_scene
         var bs = battle.get_battle_state()
         var units = []
@@ -54,15 +52,15 @@ async def _get_units(mcp):
     """)
 
 
-async def test_move_then_attack_no_teleport(battle_scene):
+def test_move_then_attack_no_teleport(battle_scene):
     """Движение + сразу атака — без телепортаций."""
     mcp = battle_scene
 
-    init = await _init_battle(mcp)
+    init = _init_battle(mcp)
     assert init.get("status") == "battle_started", f"Init failed: {init}"
-    await mcp.wait_frames(20)
+    mcp.wait_frames(20)
 
-    state = await _get_units(mcp)
+    state = _get_units(mcp)
     assert not state["battle_over"]
     assert state["is_player_turn"]
 
@@ -75,7 +73,7 @@ async def test_move_then_attack_no_teleport(battle_scene):
     enemy = defenders[0]
 
     # Команда движения
-    await mcp.execute_code(f"""
+    mcp.execute_code(f"""
         var battle = get_tree().current_scene
         var executor = battle.get_node("BattleTurnExecutor")
         var bs = battle.get_battle_state()
@@ -92,7 +90,7 @@ async def test_move_then_attack_no_teleport(battle_scene):
     """)
 
     # Сразу атака (не ждём окончания движения)
-    await mcp.execute_code(f"""
+    mcp.execute_code(f"""
         var battle = get_tree().current_scene
         var executor = battle.get_node("BattleTurnExecutor")
         var bs = battle.get_battle_state()
@@ -105,7 +103,7 @@ async def test_move_then_attack_no_teleport(battle_scene):
     # Сбор позиций спрайта
     positions = []
     for _ in range(30):
-        pos = await mcp.execute_code(f"""
+        pos = mcp.execute_code(f"""
             var battle = get_tree().current_scene
             var view = battle.get_node("BattleView")
             var unit = battle.get_battle_state().attacker_units[{player['idx']}]
@@ -117,7 +115,7 @@ async def test_move_then_attack_no_teleport(battle_scene):
         if "error" in pos:
             break
         positions.append(pos)
-        await asyncio.sleep(1 / 60.0)
+        time.sleep(1 / 60.0)
 
     # Проверка: нет скачков > 100px за кадр
     TELEPORT_PX = 100.0
@@ -132,8 +130,8 @@ async def test_move_then_attack_no_teleport(battle_scene):
     assert teleports == 0, f"Найдено {teleports} телепортаций спрайта"
 
     # Бой не завис
-    await mcp.wait_frames(60)
-    final = await mcp.execute_code("""
+    mcp.wait_frames(60)
+    final = mcp.execute_code("""
         var bs = get_tree().current_scene.get_battle_state()
         return {"battle_over": bs.battle_over}
     """)

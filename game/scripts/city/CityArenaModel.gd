@@ -106,8 +106,5 @@ static func hire_worker(city: City) -> int:
 static func score(city: City, starve_days: int) -> float:
 	return ArenaDemoScenario.score(city, starve_days)
 
-static func demo_plan() -> Array:
-	return ArenaDemoScenario.demo_plan()
-
 static func run_demo_plan(turns: int = 48, overrides: Dictionary = {}) -> Dictionary:
 	return ArenaDemoScenario.run_demo_plan(turns, overrides)

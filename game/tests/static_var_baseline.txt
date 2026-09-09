@@ -1,0 +1,14 @@
+scripts/core/HexUtils.gd: _shift_right
+scripts/core/ShardManager.gd: _instance
+scripts/data/BattleSpellBridge.gd: _EFFECT_TO_KEYWORD
+scripts/data/BattleSpellBridge.gd: KEYWORD_TO_EFFECT
+scripts/data/BattleSpellBridge.gd: SCHOOL_TO_COLOR
+scripts/data/NeedType.gd: _strategies
+scripts/data/ResourceAtlas.gd: _map
+scripts/data/ResourceAtlas.gd: _sheet
+scripts/data/TerrainCostTable.gd: _costs
+scripts/data/TerrainCostTable.gd: _costs_by_id
+scripts/data/TerrainCostTable.gd: _levitation_costs_by_id
+scripts/entities/FollowerSystem.gd: _default_raceclass
+scripts/entities/FollowerSystem.gd: _default_registry
+scripts/entities/HeroTools.gd: _tool_types

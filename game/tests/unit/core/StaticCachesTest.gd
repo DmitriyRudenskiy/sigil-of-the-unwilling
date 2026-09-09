@@ -5,8 +5,7 @@ extends GdUnitTestSuite
 
 func test_reset_all_clears_caches() -> void:
 	# Заполняем кэши.
-	HexUtils.get_config()
-	assert_bool(HexUtils._config != null)
+	HexUtils._shift_right = false
 	var tex := PlaceholderTexture.circle(4, Color.WHITE, Color.BLACK)
 	assert_object(tex)
 	assert_bool(PlaceholderTexture._cache.size() > 0)
@@ -14,7 +13,7 @@ func test_reset_all_clears_caches() -> void:
 
 	StaticCaches.reset_all()
 
-	assert_bool(HexUtils._config == null)
+	assert_bool(HexUtils._shift_right == true)
 	assert_bool(PlaceholderTexture._cache.is_empty())
 	assert_bool(ResourceAtlas._cache.is_empty())
 	assert_bool(ResourceAtlas._map.is_empty())

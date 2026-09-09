@@ -3,25 +3,22 @@
 
 Сценарий (в живой мировой сцене):
   1. Собираем город арены с кластером из 4 ферм.
-  2. Симулируем новую сессию: ServiceLocator.clear_cache() +
+  2. Симулируем новую сессию: Services.clear_session() +
      ArenaClusterSystem.reset() + ResourceIcons.clear_cache().
   3. Проверяем, что пересчёт кластеров даёт тот же результат,
      а resolve() снова находит автозагрузки.
 """
 from __future__ import annotations
 
-import pytest
 
 
-pytestmark = pytest.mark.asyncio
 
 
-async def test_session_reset_caches(world_scene):
+def test_session_reset_caches(world_scene):
     """Полная чистка кэшей на границе сессии не ломает игровой код."""
     mcp = world_scene
 
-    result = await mcp.execute_code("""
-        var sl = load("res://scripts/core/ServiceLocator.gd")
+    result = mcp.execute_code("""
         var ri = load("res://scripts/data/ResourceIcons.gd")
         var acs = load("res://scripts/city/ArenaClusterSystem.gd")
         var model = load("res://scripts/city/CityArenaModel.gd")
@@ -41,13 +38,13 @@ async def test_session_reset_caches(world_scene):
         var clusters_before = acs.clusters(city)
 
         # ── Граница сессии: чистим все статические кэши ──
-        sl.clear_cache()
+        Services.clear_session()
         acs.reset()
         ri.clear_cache()
 
         # ── Сессия 2: пересчёт даёт тот же результат ──
         var clusters_after = acs.clusters(city)
-        var units = sl.resolve(null, &"units")
+        var units = Services.resolve(&"units")
         var color_stable = ri.get_color(&"gold").a == 1.0
         return {
             "ok": true,

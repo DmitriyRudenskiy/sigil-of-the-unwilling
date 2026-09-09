@@ -151,17 +151,6 @@ func _building_emoji(id: StringName) -> String:
         &"district": return "🏘"
         _: return "❓"
 
-func _ring_yield_short(ring: int) -> String:
-    var y: Dictionary = GameNumbers.ring_yield(ring)
-    var food: float = float(y.get(&"food", 0.0))
-    var ind: float = float(y.get(&"industry", 0.0))
-    var parts: Array[String] = []
-    if food > 0.0:
-        parts.append("🌾" + ("%.1f" % food))
-    if ind > 0.0:
-        parts.append("🏭" + ("%.1f" % ind))
-    return ", ".join(parts)
-
 func _borough_at(cv: Vector2i) -> Borough:
     if _city == null:
         return null

@@ -7,7 +7,7 @@ var _rng: RandomNumberGenerator
 
 func before_test() -> void:
 	_rnm = ResourceNodeManager.new()
-	_rng = RandomNumberGenerator.new()
+	_rng = TestFactories.seeded(6861)
 	_rng.seed = 42
 	_rnm.setup(null, _rng)
 

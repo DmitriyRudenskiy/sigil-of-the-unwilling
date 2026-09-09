@@ -15,13 +15,25 @@ var _last_save_dict: Dictionary = {}
 
 var _shards_memory: Dictionary = {}
 
-static var next_seed: int = 0
-static var pending_save: SaveData = null
-static var pending_new_game: _HeroProfile = null
+# Сессионное состояние — нестатическое: экземпляр живёт в Services
+# (ключ &"persistence"), сброс — через reset_session_state() из StaticCaches.reset_all().
+var next_seed: int = 0
+var pending_save: SaveData = null
+var pending_new_game: _HeroProfile = null
 
 
-func _init(save_manager: SaveManager) -> void:
+func _init(save_manager: SaveManager = null) -> void:
 	_save_manager = save_manager
+
+
+func set_save_manager(save_manager: SaveManager) -> void:
+	_save_manager = save_manager
+
+
+func reset_session_state() -> void:
+	pending_save = null
+	pending_new_game = null
+	next_seed = 0
 
 
 func get_run_seed() -> int:

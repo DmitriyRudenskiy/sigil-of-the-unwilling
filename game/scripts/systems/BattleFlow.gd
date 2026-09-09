@@ -6,7 +6,8 @@ signal battle_completed(winner: BattleState.Side, surviving_atk: Array[UnitStack
 
 const _BATTLE_SCENE := preload("res://scenes/Battle.tscn")
 
-var _active := false
+# R6: защита от дубля сцены — держим саму ноду боя, а не bool-флаг.
+var _active_battle: Node = null
 
 func start_battle(
 	attacker_army: Array[UnitStack],
@@ -20,19 +21,18 @@ func start_battle(
 ) -> void:
 	if obstacle_seed < 0:
 		obstacle_seed = randi()
-	if _active:
+	if _active_battle != null and is_instance_valid(_active_battle):
 		return
-	_active = true
 	SoundManager.play_music_cue(&"music_battle")
 	battle_started.emit()
 
-	var battle := _BATTLE_SCENE.instantiate()
-	battle.name = "Battle"
+	_active_battle = _BATTLE_SCENE.instantiate()
+	_active_battle.name = "Battle"
 
-	get_tree().root.add_child(battle)
+	get_tree().root.add_child(_active_battle)
 
-	battle.battle_finished.connect(_on_battle_finished.bind(battle))
-	battle.call_deferred(
+	_active_battle.battle_finished.connect(_on_battle_finished.bind(_active_battle))
+	_active_battle.call_deferred(
 		"start_battle",
 		attacker_army,
 		defender_army,
@@ -46,7 +46,7 @@ func start_battle(
 
 
 func _on_battle_finished(winner: BattleState.Side, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack], battle: Node) -> void:
-	_active = false
+	_active_battle = null
 	battle.queue_free()
 	RenderingServer.set_default_clear_color(ThemeConfig.C_BATTLE_BG_FLOW)
 	if winner == BattleState.Side.ATTACKER:

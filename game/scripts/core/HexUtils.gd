@@ -10,23 +10,7 @@ const T_EVEN_RIGHT := [
 	Vector2i(-1, 0), Vector2i(-1, 1), Vector2i(0, 1),
 ]
 
-# R3 ACCEPTED: static var остаётся. Сброс через HexUtils.reset()
-# на границе сессии (вызывается в Services.clear_session()).
-# Полная миграция на инстанс-передачу
-# HexGridConfig нецелесообразна: ~200 вызовов в горячих циклах A*/BFS,
-# нулевой выигрыш, высокий риск регрессии.
-static var _config: HexGridConfig = null
-
-# hot-path (get_neighbor is called in A*/BFS). Cache the calibration
-# flag in a static bool so the hot methods avoid the get_config() method call and
-# property access. Recomputed only in calibrate(). Upgrade path: if HexGridConfig
-# gains more per-tile-set fields that these methods need, fold them back here.
 static var _shift_right: bool = true
-
-static func get_config() -> HexGridConfig:
-	if _config == null:
-		_config = HexGridConfig.new()
-	return _config
 
 enum Terrain { WATER=0, SWAMP=1, SAND=2, GRASS=3, FOREST=4, MOUNTAIN=5, SNOW=6 }
 const TERRAIN_NAMES := ["water", "swamp", "sand", "grass", "forest", "mountain", "snow"]
@@ -37,16 +21,11 @@ static func calibrate(tm: TileMapLayer) -> void:
 		return
 	var a := tm.map_to_local(Vector2i(0, 0))
 	var b := tm.map_to_local(Vector2i(0, 1))
-	get_config().odd_row_shift_right = b.x > a.x
-	_shift_right = get_config().odd_row_shift_right
+	_shift_right = b.x > a.x
 	GameLogger.trace("calibrated: odd_row_shift_right = %s" % str(_shift_right), "HexUtils")
 
 
-## R3: сброс статического состояния на границе сессии.
-## Дефолты (_shift_right=true) совпадают с HexGridConfig; следующая calibrate()
-## в MapGenerator/BattleView пересчитает флаг по фактическому тайл-сету.
 static func reset() -> void:
-	_config = null
 	_shift_right = true
 
 
