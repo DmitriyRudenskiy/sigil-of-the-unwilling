@@ -8,6 +8,11 @@ const StatusOrbScene = preload("res://scenes/entities/StatusOrb.tscn")
 
 const HERO_SHEET_PATH := "res://assets/raw/hero_knight.jpg"
 
+# Ориентация «бокового» кадра: новый PNG (8x5) смотрит вправо, старый JPG (1024) — влево.
+# Управляет знаком flip_h в set_facing. Если рыцарь «идёт задом» при движении вправо —
+# инвертировать значение в соответствующей ветке build_visual.
+var _side_faces_right := true
+
 var _visuals: Node2D = null
 var _anim: AnimatedSprite2D
 var _sheet_path_cache: String = ""
@@ -34,9 +39,22 @@ func build_visual() -> void:
 	_anim = _visuals.get_node("Anim")
 	var sheet_path := _find_sheet()
 	if sheet_path != "":
-		var sheet_res := load(sheet_path)
-		if sheet_res is ImageTexture:
-			_build_anim_from_sheet((sheet_res as ImageTexture).get_image())
+		if sheet_path.ends_with(".png"):
+			# TASK_21: новый лист 8x5 — нормализация по alpha-bbox (иначе анимация дрожит).
+			var sf_new := KnightFramesBuilder.build_from_file(sheet_path)
+			if sf_new != null and not sf_new.get_animation_names().is_empty():
+				_avatar_tex = sf_new.get_frame_texture(&"side", 0)
+				_anim.sprite_frames = sf_new
+				_anim.scale = Vector2(0.62, 0.62)
+				_anim.stop()
+				_anim.frame = 0
+				_side_faces_right = true
+				GameLogger.hero("Knight animation built from %s" % sheet_path)
+		else:
+			_side_faces_right = false
+			var sheet_res := load(sheet_path)
+			if sheet_res is ImageTexture:
+				_build_anim_from_sheet((sheet_res as ImageTexture).get_image())
 	if _anim.sprite_frames == null or _anim.sprite_frames.get_animation_names().is_empty():
 		_fallback.texture = PlaceholderTexture.circle(20, Color(0.9, 0.7, 0.1), Color(0.3, 0.2, 0.0))
 		_fallback.visible = true
@@ -114,14 +132,11 @@ func idle_animation() -> void:
 		_anim.frame = 0
 
 func set_facing(delta: Vector2i) -> void:
-	if _anim == null:
+	if _anim == null or _anim.sprite_frames == null:
 		return
-	if delta.x > 0:
+	if delta.x != 0:
 		_anim.animation = "side"
-		_anim.flip_h = true
-	elif delta.x < 0:
-		_anim.animation = "side"
-		_anim.flip_h = false
+		_anim.flip_h = (delta.x < 0) if _side_faces_right else (delta.x > 0)
 	elif delta.y < 0:
 		_anim.animation = "away"
 		_anim.flip_h = false
@@ -129,6 +144,17 @@ func set_facing(delta: Vector2i) -> void:
 		_anim.animation = "away"
 		_anim.flip_h = true
 	_anim.play()
+
+## Галоп вместо шага (ряд 2 листа; вызывается во время движения, если подключат).
+func set_running(enabled: bool) -> void:
+	if _anim == null or _anim.sprite_frames == null:
+		return
+	if not _anim.sprite_frames.has_animation(&"run"):
+		return
+	if _anim.animation == &"side" or _anim.animation == &"run":
+		_anim.animation = &"run" if enabled else &"side"
+		if enabled:
+			_anim.play()
 
 func setup_path_visual() -> void:
 	if _marker == null:
