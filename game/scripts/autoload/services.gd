@@ -15,6 +15,7 @@ func _register_core_services() -> void:
 	registry.register_singleton(&"spells", Spells)
 	registry.register_singleton(&"artifacts", Artifacts)
 	registry.register_singleton(&"units", Units)
+	registry.register_singleton(&"settings", Settings)
 
 func resolve(key: StringName) -> Object:
 	return registry.try_resolve(key)

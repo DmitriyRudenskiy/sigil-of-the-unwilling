@@ -32,6 +32,9 @@ var _content_ready := false
 var _initial_state: Dictionary = {}
 
 func setup(settings: Node) -> void:
+	if settings == null:
+		push_warning("SettingsScreen: settings null — ignoring setup")
+		return
 	_settings = settings
 	if not is_inside_tree():
 		return
