@@ -1,5 +1,15 @@
 extends BaseTest
 
+# TASK_20_1: HexGrid.shift_right — глобальное состояние; восстанавливаем после каждого теста,
+# чтобы провал на середине не протекал в соседние тесты.
+var _saved_shift_right: bool
+
+func before_test() -> void:
+	_saved_shift_right = HexGrid.shift_right
+
+func after_test() -> void:
+	HexGrid.shift_right = _saved_shift_right
+
 func test_reset_all_clears_caches() -> void:
 
 	HexGrid.shift_right = false

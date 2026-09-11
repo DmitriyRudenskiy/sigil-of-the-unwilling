@@ -21,5 +21,7 @@ static func fail(r: String, p: Dictionary = {}) -> CityCheck:
 func to_dict() -> Dictionary:
 	var d := {"ok": ok, "reason": reason}
 	for k in payload:
-		d[k] = payload[k]
+		# TASK_20_1: служебные ключи не перезаписываются данными payload.
+		if k != "ok" and k != "reason":
+			d[k] = payload[k]
 	return d

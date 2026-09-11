@@ -92,3 +92,15 @@ func test_def_cache_reset() -> void:
 	# После reset — новый объект (RefCounted: == тождество).
 	assert_bool(a == b).is_false()
 	assert_that(b.id).is_equal(&"farm")
+
+func test_check_to_dict_payload_cannot_override_ok_reason() -> void:
+	# TASK_20_1: служебные ключи payload не маскируют реальный статус.
+	var c := CityCheck.fail("no_funds", {"ok": true, "reason": "hacked", "funds": 3})
+	var d := c.to_dict()
+	assert_bool(d["ok"]).is_false()
+	assert_that(d["reason"]).is_equal("no_funds")
+	assert_that(d["funds"]).is_equal(3)
+	var ok_c := CityCheck.success({"reason": "should_be_empty", "x": 1})
+	var d2 := ok_c.to_dict()
+	assert_bool(d2["ok"]).is_true()
+	assert_that(d2["reason"]).is_equal("")
