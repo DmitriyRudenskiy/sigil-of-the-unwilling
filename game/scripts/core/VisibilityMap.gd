@@ -12,6 +12,8 @@ var _city_visible: Dictionary = {}
 var _cached_sources: Array = []
 var _cached_city_sight: int = -1
 var _cached_shift_right: bool = true
+# TASK_19_1 P1: смещения колец не зависят от центра — кэшируем по (radius, shift, паритет ряда).
+var _ring_offsets: Dictionary = {}
 
 func set_map_size(width: int, height: int) -> void:
 	_map_width = width
@@ -41,13 +43,28 @@ func recompute(hero_cell: Vector2i, sight_sources: Array, hero_sight: int, city_
 	visible = new_visible
 	return changed
 
+func _ring_offsets_for(radius: int, shift_right: bool, center: Vector2i) -> Array:
+	# [0] — чётный ряд, [1] — нечётный (сдвиг hex-сетки зависит от par(y)).
+	var key := Vector2i(radius, int(shift_right))
+	if not _ring_offsets.has(key):
+		var pair: Array = []
+		for p in [0, 1]:
+			var base := Vector2i(0, p)
+			var offs: Array = []
+			for o in HexUtils.ring(base, radius, shift_right):
+				offs.append(o - base)
+			pair.append(offs)
+		_ring_offsets[key] = pair
+	return _ring_offsets[key][center.y & 1]
+
 func _fill_disk(center: Vector2i, radius: int, out: Dictionary, shift_right: bool = true) -> void:
 	if radius < 0:
 		return
 	if is_in_bounds(center):
 		out[center] = 1
 	for r in range(1, radius + 1):
-		for cell in HexUtils.ring(center, r, shift_right):
+		for offset in _ring_offsets_for(r, shift_right, center):
+			var cell: Vector2i = center + offset
 			if is_in_bounds(cell):
 				out[cell] = 1
 
@@ -57,7 +74,8 @@ func _explore(center: Vector2i, radius: int, shift_right: bool = true) -> void:
 	if is_in_bounds(center):
 		explored[center] = 1
 	for r in range(1, radius + 1):
-		for cell in HexUtils.ring(center, r, shift_right):
+		for offset in _ring_offsets_for(r, shift_right, center):
+			var cell: Vector2i = center + offset
 			if is_in_bounds(cell):
 				explored[cell] = 1
 

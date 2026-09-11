@@ -13,12 +13,13 @@ func before_test() -> void:
 		SaveManager.delete_slot(s)
 	_screen = _ScreenScene.instantiate()
 	add_child(_screen)
+	# TASK_19_1 T1: auto_free вместо ручного free/queue_free в after_test.
+	auto_free(_sm)
+	auto_free(_screen)
 
 func after_test() -> void:
 	for s in range(1, SaveManager.SLOT_COUNT + 1):
 		SaveManager.delete_slot(s)
-	_screen.free()
-	_sm.queue_free()
 
 func _slot_nodes(i: int) -> Dictionary:
 	return {

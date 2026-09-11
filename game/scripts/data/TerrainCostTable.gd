@@ -33,25 +33,22 @@ static func ensure() -> void:
 		_levitation_costs_by_id.append(get_cost_with_effects(name, true))
 
 static func get_cost(terrain: String) -> float:
-	ensure()
+	# TASK_19_1 P3: ensure() вызывается один раз при инициализации мира.
 	if terrain == "water":
 		return WATER
 	return _costs.get(terrain, GRASS)
 
 static func get_cost_with_effects(terrain: String, has_levitation: bool) -> float:
-	ensure()
 	if terrain == "water":
 		return GRASS if has_levitation else WATER
 	return _costs.get(terrain, GRASS)
 
 static func get_cost_with_effects_by_id(terrain_id: int, has_levitation: bool) -> float:
-	ensure()
 	if terrain_id < 0 or terrain_id >= _costs_by_id.size():
 		return GRASS
 	return _levitation_costs_by_id[terrain_id] if has_levitation else _costs_by_id[terrain_id]
 
 static func get_all_terrains() -> Array[String]:
-	ensure()
 	var r: Array[String] = []
 	for k in _costs:
 		r.append(k)

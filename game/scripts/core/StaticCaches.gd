@@ -5,6 +5,7 @@ static func reset_all() -> void:
 	ShardManager.reset()
 	ArenaClusterSystem.reset()
 	ResourceIcons.clear_cache()
+	BuildingDefs.reset_cache()  # TASK_19_1 R2
 	UnitSprites.clear_caches()
 	PlaceholderTexture.clear()
 	ResourceAtlas.clear()

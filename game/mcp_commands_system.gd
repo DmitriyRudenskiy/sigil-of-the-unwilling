@@ -1247,7 +1247,7 @@ func _cmd_await_signal(params: Dictionary) -> void:
 		result[0] = true
 	node.connect(signal_name, cb, CONNECT_ONE_SHOT)
 	# TASK_19: защита от бесконечного цикла, если process_frame не наступает.
-	var max_frames := 10_000
+	var max_frames := 30_000
 	var frames := 0
 	while not result[0] and timer.time_left > 0 and frames < max_frames:
 		await server.get_tree().process_frame

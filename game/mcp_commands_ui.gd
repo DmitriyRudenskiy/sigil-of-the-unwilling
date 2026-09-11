@@ -1,7 +1,7 @@
 class_name McpCommandsUI
 extends McpCommandsBase
 
-var _canvas_draw_node: Node2D = null
+var _canvas_draw_node: McpCanvasDrawNode = null
 var _draw_commands: Array = []
 
 func get_commands() -> Dictionary:
@@ -499,15 +499,15 @@ func _cmd_canvas_draw(params: Dictionary) -> void:
 		if parent == null:
 			server._send_response({"error": "Parent not found: %s" % parent_path})
 			return
-		_canvas_draw_node = Node2D.new()
+		# TASK_19_1 S3: обычный класс вместо GDScript.new() + reload() из строки.
+		_canvas_draw_node = McpCanvasDrawNode.new()
 		_canvas_draw_node.name = "_McpCanvasDraw"
-		_canvas_draw_node.set_script(_create_draw_script())
 		parent.add_child(_canvas_draw_node)
-		_canvas_draw_node.set("draw_commands", _draw_commands)
+		_canvas_draw_node.draw_commands = _draw_commands
 	var color_d: Dictionary = params.get("color", {"r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0})
 	var color: Color = Color(float(color_d.get("r", 1)), float(color_d.get("g", 1)), float(color_d.get("b", 1)), float(color_d.get("a", 1)))
 	_draw_commands.append({"action": action, "params": params, "color": color})
-	_canvas_draw_node.set("draw_commands", _draw_commands)
+	_canvas_draw_node.draw_commands = _draw_commands
 	_canvas_draw_node.queue_redraw()
 	server._send_response({"success": true, "action": action})
 
@@ -639,35 +639,3 @@ func _collect_tree_items(item: TreeItem, result: Array, depth: int) -> void:
 		child = child.get_next()
 
 
-func _create_draw_script() -> GDScript:
-	var s: GDScript = GDScript.new()
-	s.source_code = """extends Node2D
-var draw_commands: Array = []
-func _draw():
-	for cmd in draw_commands:
-		var p = cmd.params
-		var c = cmd.color
-		match cmd.action:
-			"line":
-				var f = p.get("from", {})
-				var t = p.get("to", {})
-				draw_line(Vector2(float(f.get("x",0)),float(f.get("y",0))),Vector2(float(t.get("x",0)),float(t.get("y",0))),c,float(p.get("width",2)))
-			"rect":
-				var r = p.get("rect", {})
-				draw_rect(Rect2(float(r.get("x",0)),float(r.get("y",0)),float(r.get("w",10)),float(r.get("h",10))),c,bool(p.get("filled",true)))
-			"circle":
-				var ct = p.get("center", {})
-				draw_circle(Vector2(float(ct.get("x",0)),float(ct.get("y",0))),float(p.get("radius",10)),c)
-			"polygon":
-				var pts = p.get("points", [])
-				var pv = PackedVector2Array()
-				for pt in pts:
-					pv.append(Vector2(float(pt.get("x",0)),float(pt.get("y",0))))
-				if pv.size() >= 3:
-					draw_colored_polygon(pv, c)
-			"text":
-				var pos = p.get("position", p.get("pos", {}))
-				draw_string(ThemeDB.fallback_font, Vector2(float(pos.get("x",0)),float(pos.get("y",0))), str(p.get("text","")), HORIZONTAL_ALIGNMENT_LEFT, -1, int(p.get("font_size",16)), c)
-"""
-	s.reload()
-	return s

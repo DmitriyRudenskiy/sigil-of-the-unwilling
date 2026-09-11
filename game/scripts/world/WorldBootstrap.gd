@@ -159,6 +159,8 @@ static func build_load_context(R: BootstrapResult) -> Variant:
 	return ctx
 
 static func _init_services(parent: Node2D, R: BootstrapResult) -> void:
+	# TASK_19_1 P3: горячие методы TerrainCostTable больше не делают lazy-ensure.
+	TerrainCostTable.ensure()
 	var save_manager := SaveManager.new()
 	save_manager.name = "SaveManager"
 	parent.add_child(save_manager)

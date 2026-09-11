@@ -112,7 +112,9 @@ static func dijkstra(start: Vector2i, max_cost: float, cost_fn: Callable, w: int
 
 	var open := MinHeap.new()
 	open.push([0.0, start])
-	var visited := {}
+	# TASK_19_1 B1: PackedByteArray фиксированного размера вместо Dictionary (local — утечки не было, просто быстрее).
+	var visited := PackedByteArray()
+	visited.resize(w * h)
 
 	while not open.is_empty():
 		var cur: Array = open.pop()
@@ -120,9 +122,9 @@ static func dijkstra(start: Vector2i, max_cost: float, cost_fn: Callable, w: int
 		var cur_cell: Vector2i = cur[1]
 		var cur_idx := HexUtils.pos_to_idx(cur_cell, w)
 
-		if visited.has(cur_idx):
+		if visited[cur_idx] == 1:
 			continue
-		visited[cur_idx] = true
+		visited[cur_idx] = 1
 
 		if cur_d > dist[cur_idx]:
 			continue
@@ -164,7 +166,9 @@ static func dijkstra_path_early(start: Vector2i, goal: Vector2i, cost_fn: Callab
 
 	var open := MinHeap.new()
 	open.push([0.0, start])
-	var visited := {}
+	# TASK_19_1 B1: PackedByteArray вместо Dictionary.
+	var visited := PackedByteArray()
+	visited.resize(w * h)
 
 	while not open.is_empty():
 		var cur: Array = open.pop()
@@ -172,9 +176,9 @@ static func dijkstra_path_early(start: Vector2i, goal: Vector2i, cost_fn: Callab
 		var cur_cell: Vector2i = cur[1]
 		var cur_idx := HexUtils.pos_to_idx(cur_cell, w)
 
-		if visited.has(cur_idx):
+		if visited[cur_idx] == 1:
 			continue
-		visited[cur_idx] = true
+		visited[cur_idx] = 1
 		if cur_d > dist[cur_idx]:
 			continue
 

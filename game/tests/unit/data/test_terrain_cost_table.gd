@@ -1,7 +1,9 @@
 extends BaseTest
 
 
-
+func before_test() -> void:
+	# TASK_19_1 P3: таблица теперь инициализируется явно.
+	TerrainCostTable.ensure()
 
 func test_cost_grass() -> void:
 	assert_that(TerrainCostTable.get_cost("grass")).is_equal(1.0)

@@ -215,7 +215,14 @@ func _on_execute_attack(
 		return
 
 	_show_damage_feedback(def, result)
-	await _fx.play_attack_sequence(atk, def, result)
+	# TASK_19_1 B2: вне дерева play_attack_sequence возвращает null — await null
+	# мгновенно завершается, но явная проверка не даёт зависнуть в цепочке.
+	var timer := _fx.play_attack_sequence(atk, def, result)
+	if timer == null:
+		if is_instance_valid(_executor):
+			_executor.on_attack_completed()
+		return
+	await timer
 
 	if not is_inside_tree():
 		return
