@@ -8,6 +8,13 @@ const _GameSession = preload("res://scripts/core/GameSession.gd")
 const _WorldStateDelta = preload("res://scripts/world/WorldStateDelta.gd")
 const _HeroController = preload("res://scripts/entities/HeroController.gd")
 
+var _hero: Node = null
+
+func after_test() -> void:
+	if _hero != null and is_instance_valid(_hero):
+		_hero.free()
+	_hero = null
+
 func test_shard_state_defaults() -> void:
 	var s := _ShardState.new()
 	assert_bool(s.id == &"shard_1").is_true().override_failure_message("default id should be shard_1")
@@ -72,6 +79,7 @@ func test_save_preserves_other_shards() -> void:
 	p.session = _GameSession.new(1)
 	p.world_delta = _WorldStateDelta.new()
 	var hero := _HeroController.new()
+	_hero = hero
 	add_child(hero)
 
 	assert_bool(p.save_game(hero)).is_true().override_failure_message("save shard_1 failed")
@@ -90,5 +98,4 @@ func test_save_preserves_other_shards() -> void:
 	assert_str(str(sd.active_shard_id)).is_equal("shard_2").override_failure_message("active_shard_id should be shard_2")
 
 	sm.delete_save()
-	hero.free()
 	sm.free()

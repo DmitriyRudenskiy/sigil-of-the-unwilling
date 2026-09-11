@@ -26,6 +26,13 @@ class MockBootstrap extends RefCounted:
 		input_controller = MockConsumer.new()
 		shortcuts = MockConsumer.new()
 
+var _host: Node = null
+
+func after_test() -> void:
+	if _host != null and is_instance_valid(_host):
+		_host.free()
+	_host = null
+
 func _make_sys(host: Node2D, bc: MockConsumer, ic: MockConsumer, boot: MockBootstrap) -> RefCounted:
 	var sys := _HeroLifecycle.new()
 	sys.setup(
@@ -46,6 +53,7 @@ func _make_sys(host: Node2D, bc: MockConsumer, ic: MockConsumer, boot: MockBoots
 
 func test_install_hero_rewires_all_consumers() -> void:
 	var host := MockHost.new()
+	_host = host
 	add_child(host)
 	var bc := MockConsumer.new()
 	var ic := MockConsumer.new()
@@ -65,7 +73,6 @@ func test_install_hero_rewires_all_consumers() -> void:
 	assert_that(boot.shortcuts._hero).is_equal(hero)
 
 	hero.free()
-	host.free()
 
 func test_find_resurrection_city_null_when_already_resurrected() -> void:
 	var sys := _HeroLifecycle.new()

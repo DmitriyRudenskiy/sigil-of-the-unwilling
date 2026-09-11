@@ -18,6 +18,7 @@ const _HeroModelFactory = preload("res://scripts/ui/HeroModelFactory.gd")
 @onready var _settings_screen: SettingsScreen = $SettingsScreen
 @onready var _chronicle_screen: ChronicleScreen = $ChronicleScreen
 @onready var _model_screen: ArtifactInventoryScreen = $HeroModelWindow
+@onready var _save_load_screen: SaveLoadScreen = $SaveLoadScreen
 
 signal hero_selected(hero_name: String, variant: String)
 var _selected_hero: String = &""
@@ -31,6 +32,7 @@ func _ready() -> void:
     _style_buttons()
     _localize()
     _connect_buttons()
+    _create_save_load_screen()
     _UIAnimator.animate_in(self)
     SoundManager.play_music_cue(&"music_menu")
 
@@ -126,24 +128,17 @@ func _clear_session_caches() -> void:
     Services.clear_session()
 
 func _on_load_game() -> void:
-    var result: Dictionary = SaveManager.load_game()
-    var err: int = result.get("error", SaveManager.SaveError.FILE_NOT_FOUND)
-    if err != SaveManager.SaveError.OK:
-        _flash_lock()
-        GameLogger.warn("Load failed: %s" % SaveManager.error_to_string(err), "MainMenu")
-        return
-    var data: SaveData = result.get("data")
-    var persistence: WorldPersistence = Services.resolve(&"persistence")
-    persistence.pending_save = data
-    get_tree().change_scene_to_file("res://scenes/World.tscn")
+    _save_load_screen.open("load")
 
-func _flash_lock() -> void:
-    var lock := get_node_or_null("RightColumn/LockPanel")
-    if lock == null:
-        return
-    var tw := create_tween()
-    tw.tween_property(lock, "modulate", ThemeConfig.C_LOCK_FLASH, 0.15)
-    tw.tween_property(lock, "modulate", Color.WHITE, 0.15)
+func _create_save_load_screen() -> void:
+    _save_load_screen.load_requested.connect(_on_slot_load_requested)
+    _save_load_screen.delete_requested.connect(_on_slot_delete_requested)
+
+func _on_slot_load_requested(slot: int) -> void:
+    _save_load_screen.perform_load(slot)
+
+func _on_slot_delete_requested(slot: int) -> void:
+    _save_load_screen.perform_delete(slot)
 
 func _on_chronicle() -> void:
     var entries: Array = []

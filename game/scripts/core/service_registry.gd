@@ -6,7 +6,7 @@ var _autoloads: Dictionary = {}
 
 func register_singleton(key: StringName, service: Object) -> void:
 	if key == StringName(""):
-		push_error("ServiceRegistry: попытка зарегистрировать сервис с пустым ключом.")
+		push_error("ServiceRegistry: attempted to register a service with an empty key.")
 		return
 	_singletons[key] = service
 
@@ -31,7 +31,7 @@ func try_resolve(key: StringName) -> Object:
 func resolve(key: StringName) -> Object:
 	var service := try_resolve(key)
 	if service == null:
-		push_error("ServiceRegistry: сервис не найден: %s" % String(key))
+		push_error("ServiceRegistry: service not found: %s" % String(key))
 	return service
 
 func _find_autoload(autoload_name: StringName) -> Object:

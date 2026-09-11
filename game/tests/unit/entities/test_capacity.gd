@@ -7,6 +7,11 @@ var hero: HeroController
 func before_test() -> void:
 	hero = _root_hero()
 
+func after_test() -> void:
+	if hero != null and is_instance_valid(hero):
+		hero.free()
+	hero = null
+
 func test_capacity_default_zero() -> void:
 	assert_that(hero.strategic_resources.get_all().get(&"oak", -1)).is_equal(0)
 

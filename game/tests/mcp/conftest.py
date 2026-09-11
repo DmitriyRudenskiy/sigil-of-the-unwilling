@@ -113,3 +113,61 @@ def full_game(mcp):
     else:
         raise MCPError("World не завершил ботст랩 за 120 с")
     yield mcp
+
+
+def _wait_for_scene(mcp, marker: str, timeout: float = 60.0) -> None:
+    """Ждём, пока current_scene станет сценой, чей скрипт содержит marker."""
+    code = (
+        "var s = get_tree().current_scene\n"
+        'return {"marker": s != null and s.get_script() != null and '
+        's.get_script().resource_path.contains("' + marker + '")}'
+    )
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        r = mcp.execute_code(code)
+        if r.get("marker"):
+            return
+        time.sleep(0.5)
+    raise MCPError(f"Сцена {marker} не загрузилась за {timeout:.0f} с")
+
+
+@pytest.fixture
+def full_cycle(mcp):
+    """Полный цикл: меню → создание персонажа → мир с ботстлабом."""
+    mcp.run_scene("res://scenes/MainMenu.tscn")
+    mcp.wait_ready()
+    mcp.execute_code(
+        "get_tree().current_scene._on_new_game()\nreturn {\"ok\": true}"
+    )
+    _wait_for_scene(mcp, "CharacterCreation")
+    mcp.execute_code(
+        "var cc = get_tree().current_scene\n"
+        'cc._profile.name = "McpCycleHero"\n'
+        "cc._profile.race = cc._race_keys[0]\n"
+        "cc._profile.character_class = cc._class_keys[0]\n"
+        "cc._profile.culture = cc._culture_keys[0]\n"
+        "cc._profile.background = cc._background_keys[0]\n"
+        "cc._on_create()\n"
+        'return {"ok": true}'
+    )
+    _wait_for_scene(mcp, "WorldController")
+    deadline = time.time() + 120
+    r = {}
+    while time.time() < deadline:
+        try:
+            r = mcp.execute_code(
+                "var w = get_tree().current_scene\n"
+                "var h = w.get_hero() if w != null else null\n"
+                'return {"hero": h != null, "name": h.hero_name if h != null else ""}',
+                timeout=15.0,
+            )
+        except Exception as e:  # noqa: BLE001 — bootstrap может блокировать main loop
+            time.sleep(1.0)
+            continue
+        if r.get("hero"):
+            break
+        time.sleep(1.0)
+    else:
+        raise MCPError("World не завершил ботст랩 за 120 с")
+    assert r.get("name") == "McpCycleHero", f"Не тот герой: {r.get('name')}"
+    yield mcp

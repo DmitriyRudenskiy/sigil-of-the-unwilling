@@ -20,8 +20,20 @@ class _SpawnerStub:
 class _HeroStub:
 	extends HeroController
 
+var _nodes: Array[Node] = []
+
+func after_test() -> void:
+	for n in _nodes:
+		if is_instance_valid(n):
+			n.free()
+	_nodes.clear()
+
+func _track(n: Node) -> void:
+	_nodes.append(n)
+
 func test_popup_structure_and_initial_state() -> void:
 	var p: ResourceCollectPopup = _Popup.instantiate() as ResourceCollectPopup
+	_track(p)
 	assert_bool(p.visible).is_false()
 	assert_that(p.get_node_or_null("Margin")).is_not_null()
 	assert_that(p.get_node_or_null("Margin/VBox")).is_not_null()
@@ -35,10 +47,10 @@ func test_popup_structure_and_initial_state() -> void:
 	assert_bool(timer is Timer).is_true()
 	assert_bool(timer.one_shot).is_true()
 	assert_float(timer.wait_time).is_equal_approx(ResourceCollectPopup.AUTO_DISMISS_SECONDS, 0.001)
-	p.free()
 
 func test_show_resource_simple_known() -> void:
 	var p: ResourceCollectPopup = _Popup.instantiate() as ResourceCollectPopup
+	_track(p)
 	p.show_resource(&"wood", 5)
 	assert_bool(p.visible).is_true()
 	var label: Label = p.get_node("Margin/VBox/Label")
@@ -46,20 +58,20 @@ func test_show_resource_simple_known() -> void:
 	assert_bool(label.text.contains("Дерево")).is_true()
 	assert_bool(label.text.contains("+5")).is_true()
 	assert_that(image.texture).is_not_null()
-	p.free()
 
 func test_show_resource_rich_vein() -> void:
 	var p: ResourceCollectPopup = _Popup.instantiate() as ResourceCollectPopup
+	_track(p)
 	p.show_resource(&"quartz", 12)
 	var label: Label = p.get_node("Margin/VBox/Label")
 	var image: TextureRect = p.get_node("Margin/VBox/Image")
 	assert_bool(label.text.contains("+12")).is_true()
 	assert_that(image.texture).is_not_null()
 	assert_bool(label.text.contains("Кварц") or label.text.contains("quartz")).is_true()
-	p.free()
 
 func test_show_resource_unknown_degrades() -> void:
 	var p: ResourceCollectPopup = _Popup.instantiate() as ResourceCollectPopup
+	_track(p)
 	p.show_resource(&"bogus_xyz_42", 0)
 	assert_bool(p.visible).is_true()
 	var label: Label = p.get_node("Margin/VBox/Label")
@@ -67,10 +79,10 @@ func test_show_resource_unknown_degrades() -> void:
 	assert_bool(label.text.contains("bogus_xyz_42")).is_true()
 	assert_bool(label.text.contains("+0")).is_true()
 	assert_that(image.texture).is_not_null()
-	p.free()
 
 func test_ok_dismisses_and_popup_reusable() -> void:
 	var p: ResourceCollectPopup = _Popup.instantiate() as ResourceCollectPopup
+	_track(p)
 	add_child(p)
 	p.show_resource(&"gold", 50)
 	assert_bool(p.visible).is_true()
@@ -82,10 +94,10 @@ func test_ok_dismisses_and_popup_reusable() -> void:
 	var label: Label = p.get_node("Margin/VBox/Label")
 	assert_bool(label.text.contains("+5")).is_true()
 	remove_child(p)
-	p.free()
 
 func test_auto_dismiss_hides_and_re_show_works() -> void:
 	var p: ResourceCollectPopup = _Popup.instantiate() as ResourceCollectPopup
+	_track(p)
 	add_child(p)
 	p.show_resource(&"wood", 5)
 	assert_bool(p.visible).is_true()
@@ -97,7 +109,6 @@ func test_auto_dismiss_hides_and_re_show_works() -> void:
 	assert_bool(label.text.contains("Руда")).is_true()
 	p._on_ok()
 	remove_child(p)
-	p.free()
 
 func test_icons_res_type_mapping() -> void:
 	assert_that(ResourceIcons.res_type_id(0)).is_equal(&"wood")

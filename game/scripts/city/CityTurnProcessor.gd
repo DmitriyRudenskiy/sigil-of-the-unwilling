@@ -1,5 +1,7 @@
 class_name CityTurnProcessor
 extends TurnPhaseProcessor
+## Orchestrates the city turn: runs the sub-processors in scripts/city/processors/
+## in fixed order and forwards their signals outward.
 
 signal city_scale_changed(city_uid: int, new_scale: int)
 signal zone_violation(city_uid: int, cell: Vector2i)
@@ -10,7 +12,43 @@ signal city_level_up(city_uid: int, new_level: int)
 signal raid_occurred(city_uid: int, repelled: bool)
 signal city_event_occurred(city_uid: int, event_id: StringName)
 
-var _base_caps: Dictionary = {}
+var _scale: ScaleProcessor
+var _zoning: ZoningProcessor
+var _reputation: ReputationProcessor
+var _migration: MigrationProcessor
+var _workers: WorkerAssignmentProcessor
+var _prosperity: ProsperityProcessor
+var _level_up: LevelUpProcessor
+var _raid: RaidProcessor
+var _science: ScienceProcessor
+var _events: CityEventsProcessor
+var _sub_processors: Array = []
+
+func _init() -> void:
+	_scale = ScaleProcessor.new()
+	_zoning = ZoningProcessor.new()
+	_reputation = ReputationProcessor.new()
+	_migration = MigrationProcessor.new()
+	_workers = WorkerAssignmentProcessor.new()
+	_prosperity = ProsperityProcessor.new()
+	_level_up = LevelUpProcessor.new()
+	_raid = RaidProcessor.new()
+	_science = ScienceProcessor.new()
+	_events = CityEventsProcessor.new()
+	_sub_processors = [
+		_scale, _zoning, _reputation, _migration, _workers,
+		_prosperity, _level_up, _raid, _science, _events,
+	]
+	# Forward sub-processor signals (bootstrap and tests subscribe to the processor).
+	_scale.city_scale_changed.connect(func(uid: int, s: int): city_scale_changed.emit(uid, s))
+	_zoning.zone_violation.connect(func(uid: int, c: Vector2i): zone_violation.emit(uid, c))
+	_reputation.reputation_changed.connect(func(uid: int, v: int, b: int): reputation_changed.emit(uid, v, b))
+	_migration.migration_occurred.connect(func(uid: int, i: int, e: int): migration_occurred.emit(uid, i, e))
+	_workers.worker_assignment_changed.connect(func(uid: int, a: int): worker_assignment_changed.emit(uid, a))
+	_level_up.city_level_up.connect(func(uid: int, l: int): city_level_up.emit(uid, l))
+	_raid.raid_occurred.connect(func(uid: int, r: bool): raid_occurred.emit(uid, r))
+	_events.city_event_occurred.connect(func(uid: int, e: StringName): city_event_occurred.emit(uid, e))
+
 
 func get_phase_id() -> StringName:
 	return &"city"
@@ -39,102 +77,6 @@ func _process_city(city: City, turn: int) -> Dictionary:
 	var report := {"uid": city.uid, "scale_changed": 0, "violations": 0, "tier": 0,
 		"rep_delta": 0, "immigrants": 0, "emigrants": 0, "raid_occurred": 0,
 		"event_occurred": 0, "event": ""}
-
-	var new_tier: int = ScaleShiftManager.tier_for(city.pop_capped())
-	if new_tier != city.scale_tier:
-		city.scale_tier = new_tier
-		report["scale_changed"] = 1
-		city_scale_changed.emit(city.uid, new_tier)
-	report["tier"] = new_tier
-
-	var res := city.ensure_resource_ctx()
-	var storage_mult: float = ScaleShiftManager.storage_multiplier(new_tier)
-	if storage_mult != 1.0:
-		var base: Dictionary = _base_caps.get(city.uid, {})
-		for rid in _known_resource_ids(res):
-			var cur_cap: float = res.get_capacity(rid)
-			if cur_cap >= GameSettings.INF / 2.0:
-				continue
-			if not base.has(rid):
-				base[rid] = cur_cap
-			res.set_capacity(rid, float(base[rid]) * storage_mult)
-		_base_caps[city.uid] = base
-	elif _base_caps.has(city.uid):
-		var base: Dictionary = _base_caps[city.uid]
-		for rid in base:
-			res.set_capacity(rid, float(base[rid]))
-
-	city.auto_resource_mult = ScaleShiftManager.auto_resource_multiplier(new_tier)
-	city.upkeep_mult = ScaleShiftManager.upkeep_multiplier(new_tier)
-
-	for building in city.buildings:
-		if building == null:
-			continue
-		if building.zone_type == ZoningSystem.ZoneType.NONE:
-			building.zone_multiplier = 1.0
-		else:
-			building.zone_multiplier = ZoningSystem.zone_multiplier(
-				city, building.cell, building.zone_type)
-
-	for building in city.buildings:
-		if building == null:
-			continue
-		var check: CityCheck = ZoningSystem.can_place(
-			city, building.cell, building.zone_type)
-		if not check.ok:
-			report["violations"] += 1
-			zone_violation.emit(city.uid, building.cell)
-
-	var rep_before: int = city.reputation
-	ReputationSystem.process_turn(city)
-	if city.reputation != rep_before:
-		report["rep_delta"] = city.reputation - rep_before
-		reputation_changed.emit(city.uid, city.reputation, city.reputation_band())
-
-	var mig: Dictionary = ReputationSystem.process_migration(city)
-	report["immigrants"] = int(mig.immigrants)
-	report["emigrants"] = int(mig.emigrants)
-	if int(mig.immigrants) > 0 or int(mig.emigrants) > 0:
-		migration_occurred.emit(city.uid, int(mig.immigrants), int(mig.emigrants))
-
-	var assigned: int = WorkerAssignment.rebalance(city)
-	if assigned > 0:
-		report["workers_assigned"] = assigned
-		worker_assignment_changed.emit(city.uid, assigned)
-
-	var prosperity: float = ProsperitySystem.recalculate(city)
-	var gold_bonus: float = ProsperitySystem.gold_bonus(city)
-	if gold_bonus > 0.0:
-		city.storage[&"industry"] = float(city.storage.get(&"industry", 0.0)) + gold_bonus
-	var rep_mod: int = ProsperitySystem.reputation_mod(city)
-	if rep_mod != 0:
-		ReputationSystem.apply(city, float(rep_mod))
-	report["prosperity"] = prosperity
-	report["gold_bonus"] = gold_bonus
-
-	if ProsperitySystem.try_level_up(city):
-		report["level_up"] = city.level
-		city_level_up.emit(city.uid, city.level)
-
-	var raid: Dictionary = RaidSystem.resolve(city, turn)
-	if bool(raid.occurred):
-		report["raid_occurred"] = 1
-		report["raid_repelled"] = bool(raid.repelled)
-		report["raid_strength"] = int(raid.strength)
-		raid_occurred.emit(city.uid, bool(raid.repelled))
-
-	var sci: float = SpecializationSystem.science_per_turn(city)
-	if sci > 0.0:
-		res.add(&"science", sci)
-	var ev: Dictionary = CityEvents.resolve(city, turn)
-	if bool(ev.occurred):
-		report["event_occurred"] = 1
-		report["event"] = String(ev.event_id)
-		city_event_occurred.emit(city.uid, ev.event_id)
+	for sub in _sub_processors:
+		(sub as CitySubProcessor).process(city, turn, report)
 	return report
-
-func _known_resource_ids(res: ResourceContext) -> Array:
-	var ids: Array = []
-	for id in res.get_all():
-		ids.append(id)
-	return ids

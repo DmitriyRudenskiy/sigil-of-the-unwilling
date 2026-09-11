@@ -80,6 +80,26 @@ func test_same_level_neighbors() -> void:
 	b.level = 1
 	assert_that(_BoroughRules.same_level_neighbors(city, b)).is_equal(0)
 
+func test_level_up_requires_neighbors() -> void:
+	var b := _Borough.new()
+	b.cell = Vector2i(5, 5)
+	b.level = 1
+	city.boroughs.append(b)
+	assert_bool(_BoroughRules.can_level_up(city, b)).is_false()
+
+func test_level_up_with_enough_same_level_neighbors() -> void:
+	var b := _Borough.new()
+	b.cell = Vector2i(5, 5)
+	b.level = 1
+	city.boroughs.append(b)
+	for nb in HexUtils.get_all_neighbors(b.cell):
+		var nb_b := _Borough.new()
+		nb_b.cell = nb
+		nb_b.level = 1
+		city.boroughs.append(nb_b)
+	assert_that(_BoroughRules.same_level_neighbors(city, b)).is_equal(6)
+	assert_bool(_BoroughRules.can_level_up(city, b)).is_true()
+
 func test_process_level_ups_empty() -> void:
 	var result := _BoroughRules.process_level_ups(city)
 	assert_that(result).is_equal(0)
@@ -88,9 +108,16 @@ func test_process_level_ups_returns_count() -> void:
 	city.faction = _City.Faction.CULTISTS
 	city.add_followers(10)
 	city.storage["industry"] = 1000.0
-	var neighbors := HexUtils.get_all_neighbors(city.center)
-	for nb in neighbors:
-		city.build_borough(nb)
-
+	var center: Vector2i = city.center
+	var center_borough := _Borough.new()
+	center_borough.cell = center
+	center_borough.level = 1
+	city.boroughs.append(center_borough)
+	for nb in HexUtils.get_all_neighbors(center):
+		var nb_b := _Borough.new()
+		nb_b.cell = nb
+		nb_b.level = 1
+		city.boroughs.append(nb_b)
 	var raised := _BoroughRules.process_level_ups(city)
-	assert_bool(raised >= 0).is_true()
+	assert_int(raised).is_greater(0)
+	assert_int(center_borough.level).is_greater(1)

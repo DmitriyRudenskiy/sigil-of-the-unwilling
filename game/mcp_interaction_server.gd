@@ -1,0 +1,172 @@
+extends Node
+
+# MCP Interaction Server - TCP server for game interaction
+# Runs as an autoload inside the Godot game, accepting JSON commands over TCP.
+# No class_name to avoid autoload conflict.
+# Command handlers live in mcp_commands_*.gd groups (see _handlers below).
+
+var _server: TCPServer
+var _client: StreamPeerTCP
+var _buffer: String = ""
+var _busy: bool = false
+var _busy_since: float = 0.0
+var _current_id: Variant = null
+const PORT: int = 9090
+const BUSY_TIMEOUT: float = 120.0
+
+var _grp_input: McpCommandsInput
+var _grp_ui: McpCommandsUI
+var _grp_system: McpCommandsSystem
+var _grp_render: McpCommandsRender
+var _grp_network: McpCommandsNetwork
+var _handlers: Dictionary = {}
+
+func _ready() -> void:
+	# Ensure MCP server keeps processing even when game is paused
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	_grp_input = McpCommandsInput.new(self)
+	_grp_ui = McpCommandsUI.new(self)
+	_grp_system = McpCommandsSystem.new(self)
+	_grp_render = McpCommandsRender.new(self)
+	_grp_network = McpCommandsNetwork.new(self)
+	for group in [_grp_input, _grp_ui, _grp_system, _grp_render, _grp_network]:
+		var cmds: Dictionary = group.get_commands()
+		for name in cmds:
+			_handlers[name] = cmds[name]
+	_server = TCPServer.new()
+	var err: int = _server.listen(PORT, "127.0.0.1")
+	if err != OK:
+		push_error("McpInteractionServer: Failed to listen on port %d, error: %d" % [PORT, err])
+		return
+	print("McpInteractionServer: Listening on 127.0.0.1:%d" % PORT)
+
+
+func _process(_delta: float) -> void:
+	if _server == null:
+		return
+
+	# Safety timeout: force-reset _busy if it's been stuck too long
+	if _busy and _busy_since > 0.0:
+		var elapsed: float = Time.get_ticks_msec() / 1000.0 - _busy_since
+		if elapsed > BUSY_TIMEOUT:
+			push_warning("McpInteractionServer: _busy flag stuck for %.1fs, force-resetting" % elapsed)
+			_busy = false
+			_busy_since = 0.0
+			_current_id = null
+
+	# Accept new connections
+	if _server.is_connection_available():
+		var new_client: StreamPeerTCP = _server.take_connection()
+		if new_client != null:
+			if _client != null:
+				_client.disconnect_from_host()
+			_client = new_client
+			_buffer = ""
+			print("McpInteractionServer: Client connected")
+
+	# Read data from client
+	if _client == null:
+		return
+
+	_client.poll()
+	var status: int = _client.get_status()
+	if status == StreamPeerTCP.STATUS_ERROR or status == StreamPeerTCP.STATUS_NONE:
+		print("McpInteractionServer: Client disconnected")
+		_client = null
+		_buffer = ""
+		_busy = false
+		_busy_since = 0.0
+		_current_id = null
+		return
+
+	if status != StreamPeerTCP.STATUS_CONNECTED:
+		return
+
+	var available: int = _client.get_available_bytes()
+	if available > 0:
+		var data: Array = _client.get_data(available)
+		if data[0] == OK:
+			var bytes: PackedByteArray = data[1]
+			_buffer += bytes.get_string_from_utf8()
+
+			# Process complete lines (newline-delimited JSON)
+			while _buffer.find("\n") >= 0:
+				var newline_pos: int = _buffer.find("\n")
+				var line: String = _buffer.substr(0, newline_pos).strip_edges()
+				_buffer = _buffer.substr(newline_pos + 1)
+				if line.length() > 0:
+					_handle_command(line)
+
+
+func _handle_command(json_str: String) -> void:
+	var json: JSON = JSON.new()
+	var parse_err: int = json.parse(json_str)
+	if parse_err != OK:
+		_send_response_raw({"error": "Invalid JSON: %s" % json.get_error_message()})
+		return
+
+	var data: Variant = json.data
+	if not data is Dictionary:
+		_send_response_raw({"error": "Expected JSON object"})
+		return
+
+	var req_id: Variant = data.get("id", null)
+
+	if _busy:
+		_send_response_raw({"error": "Server busy processing another command. Try again.", "id": req_id})
+		return
+	_busy = true
+	_busy_since = Time.get_ticks_msec() / 1000.0
+	_current_id = req_id
+
+	var command: String = data.get("command", "")
+	var params: Dictionary = data.get("params", {})
+
+	if not _handlers.has(command):
+		_send_response({"error": "Unknown command: %s" % command})
+		return
+	var handler: Callable = _handlers[command]
+	# Awaiting a non-coroutine handler returns immediately, so one path covers sync and async.
+	await handler.call(params)
+
+
+# Send response and clear busy flag
+func _send_response(data: Dictionary) -> void:
+	_busy = false
+	_busy_since = 0.0
+	if _current_id != null and not data.has("id"):
+		data["id"] = _current_id
+	_current_id = null
+	_send_response_raw(data)
+
+
+
+# Send response without clearing busy flag (used when rejecting during busy state)
+func _send_response_raw(data: Dictionary) -> void:
+	if _client == null:
+		push_warning("McpInteractionServer: no client, response dropped")
+		return
+	if _client.get_status() != StreamPeerTCP.STATUS_CONNECTED:
+		push_error("McpInteractionServer: client not connected, dropping response and resetting")
+		_client.disconnect_from_host()
+		_client = null
+		_busy = false
+		_busy_since = 0.0
+		_current_id = null
+		return
+	var json_str: String = JSON.stringify(data) + "\n"
+	var bytes: PackedByteArray = json_str.to_utf8_buffer()
+	_client.put_data(bytes)
+
+
+
+func _exit_tree() -> void:
+	_grp_system._clear_debug_draw()
+	_grp_network._close_websocket()
+	if _client != null:
+		_client.disconnect_from_host()
+		_client = null
+	if _server != null:
+		_server.stop()
+		_server = null
+	print("McpInteractionServer: Stopped")

@@ -2,6 +2,7 @@ extends RefCounted
 
 const DeathSequenceScene = preload("res://scenes/ui/DeathSequence.tscn")
 const ChronicleScreenScene = preload("res://scenes/ui/ChronicleScreen.tscn")
+const _LegendTracker = preload("res://scripts/world/LegendTracker.gd")
 
 var _world_ref: WeakRef = null
 
@@ -15,6 +16,7 @@ var battle_coordinator = null
 var interaction_controller = null
 var _bootstrap_result = null
 var _succession = null
+var _legend: _LegendTracker = null
 var _camera: Node = null
 
 var _death_seq = null
@@ -50,6 +52,7 @@ func setup(
 	interaction_controller = interaction
 	_bootstrap_result = bootstrap_result
 	_succession = succession
+	_legend = _LegendTracker.new()
 	_camera = camera
 	if not GameEventBus.hero_died.is_connected(on_hero_died):
 		GameEventBus.hero_died.connect(on_hero_died)
@@ -70,6 +73,8 @@ func on_hero_died(cause: StringName) -> void:
 		"hero_name": str(deceased.hero_name),
 		"path": String(deceased.path_id),
 	}
+	if _legend != null:
+		_legend.record_death(cause)
 	var session = _persistence.session if _persistence != null else null
 	if session != null and session.is_terminal():
 		_disconnect_hero_signals(deceased)
@@ -133,6 +138,8 @@ func _execute_succession() -> void:
 		_death_seq.visible = false
 	_free_deceased()
 	_reincarnate(successor)
+	if _legend != null:
+		_legend.advance_generation(str(successor.hero_name))
 	GameEventBus.hero_successor.emit(successor)
 	_append_succession_entry()
 
@@ -158,6 +165,8 @@ func _on_resurrection_chosen() -> void:
 		_pending_successor.free()
 	_pending_successor = null
 	_succession.resurrect_hero(city)
+	if _legend != null:
+		_legend.record_resurrection()
 	hero.revive_at(city)
 	hero.resurrected_once = true
 	_install_hero(hero)
@@ -254,8 +263,9 @@ func _run_summary() -> Dictionary:
 		"glory": glory,
 		"battles_won": int(s.battles_won) if s != null else 0,
 		"battles_lost": int(s.battles_lost) if s != null else 0,
-		"generations": (int(s.successions) if s != null else 0) + 1,
+		"generations": _legend.generation_count if _legend != null else (int(s.successions) if s != null else 0) + 1,
 	}
+
 
 func _plan_succession(deceased: HeroController) -> HeroController:
 	if _succession == null or _cities == null or deceased == null:

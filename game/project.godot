@@ -19,6 +19,8 @@ buses="res://assets/settings/default_bus_layout.tres"
 
 [autoload]
 
+McpInteractionServer="*res://mcp_interaction_server.gd"
+
 
 
 

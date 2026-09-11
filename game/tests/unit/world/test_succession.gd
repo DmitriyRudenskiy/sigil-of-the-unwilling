@@ -1,6 +1,7 @@
 extends GdUnitTestSuite
 
 const _Succession = preload("res://scripts/world/SuccessionController.gd")
+const _LegendTracker = preload("res://scripts/world/LegendTracker.gd")
 const _City = preload("res://scripts/world/City.gd")
 const _CityManager = preload("res://scripts/world/CityManager.gd")
 const _Follower = preload("res://scripts/entities/Follower.gd")
@@ -88,6 +89,19 @@ func test_select_null_when_no_followers() -> void:
 	assert_that(succ).is_null()
 	h.free()
 
+func test_select_null_when_null_hero() -> void:
+	assert_that(_Succession.new().select_successor(null)).is_null()
+
+func test_build_copies_skills() -> void:
+	var h := _succession_hero(&"archivist")
+	h.skills.set_skill(&"navigation", 2)
+	h.skills.set_skill(&"alchemy", 1)
+	var succ := _Succession.new().build_successor(h)
+	assert_that(succ.skills.get_skill(&"navigation")).is_equal(2)
+	assert_that(succ.skills.get_skill(&"alchemy")).is_equal(1)
+	assert_that(succ.skills.get_skill(&"geology")).is_equal(0)
+	h.free(); succ.free()
+
 func test_build_copies_path_magic_inventory() -> void:
 	var h := _succession_hero(&"archivist")
 	var succ := _Succession.new().build_successor(h)
@@ -161,6 +175,81 @@ func test_resurrect_requires_temple_and_resources() -> void:
 	var poor := _make_city(3, &"PoorTown", true)
 	poor.storage = {"industry": 100.0, "gold": 10.0}
 	assert_bool(_Succession.new().resurrect_hero(poor)).is_false()
+
+func test_can_resurrect_requires_temple() -> void:
+	var city := _make_city(1, &"Village", false)
+	city.buildings = []
+	assert_bool(_Succession.new().can_resurrect(city)).is_false()
+
+func test_can_resurrect_requires_resources() -> void:
+	var city := _make_city(2, &"TempleTown", true)
+	city.storage["industry"] = 10.0
+	assert_bool(_Succession.new().can_resurrect(city)).is_false()
+	city.storage["industry"] = 600.0
+	city.storage["gold"] = 5.0
+	assert_bool(_Succession.new().can_resurrect(city)).is_false()
+
+func test_can_resurrect_ok() -> void:
+	var city := _make_city(3, &"TempleTown", true)
+	assert_bool(_Succession.new().can_resurrect(city)).is_true()
+
+func test_resurrect_null_city() -> void:
+	assert_bool(_Succession.new().resurrect_hero(null)).is_false()
+
+func test_legend_init() -> void:
+	var l := _LegendTracker.new()
+	l.init_legend(&"archivist")
+	assert_that(l.path_id).is_equal(&"archivist")
+	assert_that(l.generation_count).is_equal(1)
+	assert_that(l.battles_won).is_equal(0)
+
+func test_legend_record_death() -> void:
+	var l := _LegendTracker.new()
+	l.init_legend(&"archivist")
+	l.record_death(&"battle")
+	l.record_death(&"battle")
+	l.record_death(&"exhaustion")
+	assert_that(l.deaths_by_cause[&"battle"]).is_equal(2)
+	assert_that(l.deaths_by_cause[&"exhaustion"]).is_equal(1)
+
+func test_legend_advance_generation() -> void:
+	var l := _LegendTracker.new()
+	l.init_legend(&"archivist")
+	var events: Array = []
+	l.generation_completed.connect(func(g, n, o): events.append([g, n, o]))
+	l.advance_generation("Lyra", "succession")
+	assert_that(l.generation_count).is_equal(2)
+	assert_that(events.size()).is_equal(1)
+	assert_that(events[0][1]).is_equal("Lyra")
+
+func test_legend_resurrection_count() -> void:
+	var l := _LegendTracker.new()
+	l.init_legend(&"archivist")
+	l.record_resurrection()
+	l.record_resurrection()
+	assert_that(l.resurrection_count).is_equal(2)
+
+func test_legend_serialize_roundtrip() -> void:
+	var l := _LegendTracker.new()
+	l.init_legend(&"archivist")
+	l.add_glory(42.0)
+	l.record_battle_won()
+	l.record_death(&"battle")
+	var data := l.serialize()
+	var l2 := _LegendTracker.new()
+	l2.deserialize(data)
+	assert_that(l2.path_id).is_equal(&"archivist")
+	assert_that(l2.generation_count).is_equal(1)
+	assert_float(l2.total_glory).is_equal_approx(42.0, 0.01)
+	assert_that(l2.battles_won).is_equal(1)
+	assert_that(l2.deaths_by_cause[&"battle"]).is_equal(1)
+
+func test_legend_path_complete() -> void:
+	var l := _LegendTracker.new()
+	l.init_legend(&"archivist")
+	assert_bool(l.is_path_complete(500.0)).is_false()
+	l.add_glory(500.0)
+	assert_bool(l.is_path_complete(500.0)).is_true()
 
 func test_on_hero_died_returns_successor() -> void:
 	var h := _succession_hero(&"archivist")

@@ -3,15 +3,29 @@ extends GdUnitTestSuite
 const _FakeMap = preload("res://tests/fakes/fake_battle_map.gd")
 const _FakeFlow = preload("res://tests/fakes/fake_battle_flow.gd")
 
+var _root_nodes: Array[Node] = []
+
+func after_test() -> void:
+	for n in _root_nodes:
+		if is_instance_valid(n):
+			n.free()
+	_root_nodes.clear()
+
+func _track_root(n: Node) -> void:
+	_root_nodes.append(n)
+
 func test_contact_triggers_battle() -> void:
+	# Контракт BattleHandoff: бой стартует только с валидными армиями обеих сторон
+	var units = Services.resolve(&"units")
 	var fake_map = _FakeMap.new()
 	fake_map.name = "FakeMap"
-	fake_map.enemy_stacks[Vector2i(5, 5)] = []
+	fake_map.enemy_stacks[Vector2i(5, 5)] = [units.make_fixed_stack("goblins", 10)]
 	var coordinator = WorldBattleCoordinator.new()
 	coordinator.name = "Coord"
 	coordinator.map_gen = fake_map
-	var fake_hero: Node = Node.new()
+	var fake_hero = HeroController.new()
 	fake_hero.name = "FakeHero"
+	fake_hero.get_army().setup(units)
 	coordinator.hero = fake_hero
 	var flow = _FakeFlow.new()
 	flow.name = "BF"
@@ -38,6 +52,7 @@ func test_setup_idempotent() -> void:
 	var hero = HeroController.new()
 	hero.name = "TestHero2"
 	var root_node: Node = Engine.get_main_loop().root
+	_track_root(hero)
 	root_node.add_child(hero)
 	var fake_map = MapGenerator.new()
 	fake_map.name = "FakeMap2"
@@ -47,7 +62,6 @@ func test_setup_idempotent() -> void:
 	var c2 = _count_visual_sprites(hero)
 	assert_that(c1).is_equal(c2)
 	assert_bool(c1 > 0).is_true()
-	hero.free()
 	fake_map.free()
 
 func _count_visual_sprites(node: Node) -> int:
@@ -70,6 +84,7 @@ func test_map_spawner_setup_registry() -> void:
 func test_marker_click_no_double() -> void:
 
 	var layer := MarkerLayer.new()
+	_track_root(layer)
 	get_tree().root.add_child(layer)
 	var map := _ClickMapStub.new()
 	layer.setup(map)
@@ -107,7 +122,6 @@ func test_marker_click_no_double() -> void:
 	assert_int(city_clicks[0]).is_equal(1).override_failure_message("один клик по городу = ровно один city_marker_clicked")
 	assert_int(clicks[0]).is_equal(clicks_before).override_failure_message("клики по городу не должны дублировать marker_clicked")
 
-	layer.queue_free()
 	map.free()
 
 func test_battle_flow_accepts_magic() -> void:

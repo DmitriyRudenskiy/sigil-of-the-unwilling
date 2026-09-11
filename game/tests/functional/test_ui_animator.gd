@@ -2,10 +2,19 @@ extends GdUnitTestSuite
 
 const UIAnimator = preload("res://scripts/ui/UIAnimator.gd")
 
+var _buttons: Array[Node] = []
+
+func after_test() -> void:
+	for b in _buttons:
+		if is_instance_valid(b):
+			b.free()
+	_buttons.clear()
+
 func _make_button() -> Button:
 	var btn := Button.new()
 	btn.size = Vector2(100, 32)
 	add_child(btn)
+	_buttons.append(btn)
 	return btn
 
 func test_setup_button_still_connects_each_signal() -> void:

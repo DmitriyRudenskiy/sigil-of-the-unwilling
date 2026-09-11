@@ -2,8 +2,16 @@ extends GdUnitTestSuite
 
 const _BattleUIScene := preload("res://scenes/ui/BattleUI.tscn")
 
+var _ui: Node = null
+
+func after_test() -> void:
+	if _ui != null and is_instance_valid(_ui):
+		_ui.free()
+	_ui = null
+
 func test_battle_ui_onready_resolved_and_connected() -> void:
 	var ui: BattleUI = _BattleUIScene.instantiate()
+	_ui = ui
 	get_tree().root.add_child(ui)
 
 	assert_object(ui._top_panel).is_not_null().override_failure_message("_top_panel не разрешился")
@@ -22,5 +30,3 @@ func test_battle_ui_onready_resolved_and_connected() -> void:
 	assert_bool(ui._skip_btn.pressed.is_connected(ui._on_skip)).is_true().override_failure_message("skip_btn.pressed не подключён")
 
 	assert_bool(ui._spellbook_panel.spell_chosen.is_connected(ui._on_spellbook_chosen)).is_true().override_failure_message("spell_chosen не подключён")
-
-	ui.queue_free()

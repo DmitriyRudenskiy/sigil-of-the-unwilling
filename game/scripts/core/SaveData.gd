@@ -63,8 +63,10 @@ func from_dict(data: Dictionary) -> void:
 		"week": int(raw_date.get("week", 1)),
 		"day": int(raw_date.get("day", 1)),
 	}
-	hero = data.get("hero", {})
-	world = data.get("world", {})
+	var raw_hero = data.get("hero", {})
+	hero = raw_hero if raw_hero is Dictionary else {}
+	var raw_world = data.get("world", {})
+	world = raw_world if raw_world is Dictionary else {}
 	var raw_cities = data.get("cities", [])
 	cities = raw_cities if raw_cities is Array else []
 	var raw_chars = data.get("characters", [])

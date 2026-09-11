@@ -11,6 +11,8 @@ func invalidate_extraction_cache() -> void:
 	_discovery_cache.clear()
 
 func build_discovery_keys(hero: HeroController) -> Dictionary:
+	if hero == null:
+		return {}
 	return _cached(hero.get_instance_id(), _discovery_cache,
 		_discovery_fingerprint(hero), _build_discovery_keys.bind(hero))
 
@@ -25,13 +27,14 @@ func _build_discovery_keys(hero: HeroController) -> Dictionary:
 	keys["time"] = hero.time.get_period_name()
 
 	var units_reg: Node = Services.resolve(&"units")
-	for stack in hero.army.army:
-		if stack == null or not stack.is_alive(): continue
-		var unit_def = units_reg.get_definition(stack.get_key())
-		if unit_def:
-			for tag in unit_def.tags:
-				if tag in [&"undead", &"lizard"]:
-					keys[StringName(tag)] = true
+	if hero.army != null:
+		for stack in hero.army.army:
+			if stack == null or not stack.is_alive(): continue
+			var unit_def = units_reg.get_definition(stack.get_key())
+			if unit_def:
+				for tag in unit_def.tags:
+					if tag in [&"undead", &"lizard"]:
+						keys[StringName(tag)] = true
 
 	return keys
 
@@ -49,6 +52,8 @@ func _discovery_fingerprint(hero: HeroController) -> String:
 	return fp
 
 func build_extraction_keys(hero: HeroController) -> Dictionary:
+	if hero == null:
+		return {}
 	return _cached(hero.get_instance_id(), _extraction_cache,
 		_extraction_fingerprint(hero), _build_extraction_keys.bind(hero))
 
@@ -56,19 +61,22 @@ func _build_extraction_keys(hero: HeroController) -> Dictionary:
 	var keys: Dictionary = {}
 
 	var units_reg: Node = Services.resolve(&"units")
-	for stack in hero.army.army:
-		if stack == null or not stack.is_alive(): continue
-		var unit_def = units_reg.get_definition(stack.get_key())
-		if unit_def:
-			for tag in unit_def.tags:
-				keys[StringName(tag)] = true
-		keys[StringName(stack.get_key())] = true
+	if hero.army != null:
+		for stack in hero.army.army:
+			if stack == null or not stack.is_alive(): continue
+			var unit_def = units_reg.get_definition(stack.get_key())
+			if unit_def:
+				for tag in unit_def.tags:
+					keys[StringName(tag)] = true
+			keys[StringName(stack.get_key())] = true
 
-	for skill in hero.skills.get_all():
-		keys[StringName(skill)] = hero.skills.get_skill(skill)
+	if hero.skills != null:
+		for skill in hero.skills.get_all():
+			keys[StringName(skill)] = hero.skills.get_skill(skill)
 
-	for tool_id in HeroTools.tool_types():
-		keys[ToolType.to_name(tool_id)] = hero.tools.has_tool(tool_id)
+	if hero.tools != null:
+		for tool_id in HeroTools.tool_types():
+			keys[ToolType.to_name(tool_id)] = hero.tools.has_tool(tool_id)
 
 	keys["fire"] = false
 

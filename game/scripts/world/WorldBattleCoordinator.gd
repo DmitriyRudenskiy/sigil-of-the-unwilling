@@ -2,6 +2,7 @@ extends Node
 class_name WorldBattleCoordinator
 
 const UnitStack = preload("res://scripts/entities/UnitStack.gd")
+const _BattleHandoff = preload("res://scripts/systems/BattleHandoff.gd")
 
 signal battle_world_hide_requested
 signal battle_world_show_requested
@@ -62,41 +63,14 @@ func _create_battle_flow() -> void:
 	battle_flow.battle_completed.connect(_on_battle_completed)
 	add_child(battle_flow)
 
+## Враг атакует героя (роли перевёрнуты).
 func start_enemy_attack(army: Array, enemy_cell: Vector2i) -> void:
 	if battle_flow == null or hero == null:
-		return
-	var enemy_army := _as_unit_stack_array(army)
-	if enemy_army.is_empty():
 		return
 	var stacks: Variant = map_gen.get("enemy_stacks") if map_gen != null else null
 	if not (stacks is Dictionary) or not stacks.has(enemy_cell):
 		return
-	_roles_swapped = true
-	_pending_enemy_cell = enemy_cell
-	if hero.has_method("force_stop"):
-		hero.call("force_stop")
-
-	var enemy_bonus: Dictionary = {}
-	if spawner != null and spawner.has_method("get_enemy_defender_bonus"):
-		enemy_bonus = spawner.call("get_enemy_defender_bonus")
-	var hero_bonus: Dictionary = hero.call("get_battle_bonus") if hero.has_method("get_battle_bonus") else {}
-	var hero_army_raw: Variant = hero.call("get_army_for_battle") if hero.has_method("get_army_for_battle") else []
-	var hero_army: Array[UnitStack] = _as_unit_stack_array(hero_army_raw)
-	var artifact_mods: Dictionary = {}
-	var inv: Variant = hero.get("inventory")
-	if inv != null and inv.has_method("get_total_modifiers"):
-		artifact_mods = inv.call("get_total_modifiers")
-	var hero_magic = hero.get("magic") if hero != null else null
-	battle_flow.start_battle(
-		enemy_army,
-		hero_army,
-		enemy_bonus,
-		hero_bonus,
-		{},
-		artifact_mods,
-		rng.randi(),
-		hero_magic
-	)
+	_launch_battle(army, enemy_cell, true)
 
 func check_enemy_contact(cell: Vector2i) -> void:
 	if map_gen == null:
@@ -108,7 +82,7 @@ func check_enemy_contact(cell: Vector2i) -> void:
 	if enemy_cell == Vector2i(-1, -1):
 		return
 	_pre_battle_cell = _capture_pre_battle_cell()
-	_start_battle(_as_unit_stack_array(stacks[enemy_cell]), enemy_cell)
+	_launch_battle(stacks[enemy_cell], enemy_cell, false)
 
 func _find_contact_enemy(stacks: Dictionary, cell: Vector2i) -> Vector2i:
 	if stacks.has(cell):
@@ -128,43 +102,38 @@ func _capture_pre_battle_cell() -> Vector2i:
 			return prev
 	return Vector2i(-1, -1)
 
-static func _as_unit_stack_array(v: Variant) -> Array[UnitStack]:
-	var out: Array[UnitStack] = []
-	if v is Array:
-		for s in v:
-			if s is UnitStack:
-				out.append(s)
-	return out
-
-func _start_battle(enemy_army: Array[UnitStack], enemy_cell: Vector2i) -> void:
+## Единая точка запуска боя: сбор и валидация данных через BattleHandoff.
+func _launch_battle(
+	enemy_army_raw: Variant,
+	enemy_cell: Vector2i,
+	p_roles_swapped: bool
+) -> void:
 	if battle_flow == null or hero == null:
 		return
+	var handoff: BattleHandoff = _BattleHandoff.collect(
+		hero, enemy_army_raw, enemy_cell, spawner, rng, p_roles_swapped
+	)
+	if not handoff.is_valid:
+		GameLogger.warn(
+			"Battle handoff invalid: %s" % ", ".join(handoff.validation_errors),
+			"BattleCoordinator"
+		)
+		return
+
 	_pending_enemy_cell = enemy_cell
+	_roles_swapped = p_roles_swapped
 	if hero.has_method("force_stop"):
 		hero.call("force_stop")
 
-	var attacker_bonus: Dictionary = hero.call("get_battle_bonus") if hero.has_method("get_battle_bonus") else {}
-	var defender_bonus: Dictionary = {}
-	if spawner != null and spawner.has_method("get_enemy_defender_bonus"):
-		defender_bonus = spawner.call("get_enemy_defender_bonus")
-
-	var attacker_army_raw: Variant = hero.call("get_army_for_battle") if hero.has_method("get_army_for_battle") else []
-	var attacker_army: Array[UnitStack] = _as_unit_stack_array(attacker_army_raw)
-	var artifact_mods: Dictionary = {}
-	var inv: Variant = hero.get("inventory")
-	if inv != null and inv.has_method("get_total_modifiers"):
-		artifact_mods = inv.call("get_total_modifiers")
-
-	var hero_magic = hero.get("magic") if hero != null else null
 	battle_flow.start_battle(
-		attacker_army,
-		enemy_army,
-		attacker_bonus,
-		defender_bonus,
-		artifact_mods,
-		{},
-		rng.randi(),
-		hero_magic
+		handoff.get_attacker_army(),
+		handoff.get_defender_army(),
+		handoff.get_attacker_bonus(),
+		handoff.get_defender_bonus(),
+		handoff.get_attacker_artifact_mods(),
+		handoff.get_defender_artifact_mods(),
+		handoff.obstacle_seed,
+		handoff.get_hero_magic()
 	)
 
 func _on_battle_started() -> void:

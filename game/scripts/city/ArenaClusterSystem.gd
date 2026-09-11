@@ -77,7 +77,6 @@ static func cluster_worker_housing(city: City) -> int:
 		+ GameNumbers.ARENA_CLUSTER_HOUSING * (clusters(city) as Array).size()
 
 static func invalidate(_city_uid: int) -> void:
-
 	pass
 
 static func invalidate_city(city: City) -> void:
@@ -85,20 +84,16 @@ static func invalidate_city(city: City) -> void:
 		city.remove_meta(&"arena_clusters_cache")
 
 static func reset() -> void:
-
 	pass
+
+## Bump the cluster cache version. Called from the city's building mutation
+## paths (build/upgrade) instead of re-hashing all buildings per lookup.
+static func bump_version(city: City) -> void:
+	if city == null:
+		return
+	city.set_meta(&"arena_clusters_version", int(city.get_meta(&"arena_clusters_version", 0)) + 1)
 
 static func _city_version(city: City) -> int:
 	if city == null:
 		return -1
-	var h: int = 0
-	for bld in city.buildings:
-		if bld != null:
-			h = (h * 131 + int(bld.uid)) & 0x7fffffff
-			h = (h * 137 + bld.level) & 0x7fffffff
-			h = (h * 139 + bld.assigned_workers) & 0x7fffffff
-			if bld.def != null:
-				h = (h * 149 + int(bld.def.id.hash())) & 0x7fffffff
-			h = (h * 151 + bld.cell.x) & 0x7fffffff
-			h = (h * 157 + bld.cell.y) & 0x7fffffff
-	return int(city.buildings.size()) * 1_000_003 + h
+	return int(city.get_meta(&"arena_clusters_version", 0))

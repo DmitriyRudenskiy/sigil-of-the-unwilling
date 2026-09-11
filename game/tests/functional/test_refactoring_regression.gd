@@ -1,5 +1,16 @@
 extends GdUnitTestSuite
 
+var _nodes: Array[Node] = []
+
+func after_test() -> void:
+	for n in _nodes:
+		if is_instance_valid(n):
+			n.free()
+	_nodes.clear()
+
+func _track(n: Node) -> void:
+	_nodes.append(n)
+
 func test_battle_state_side_enum_order() -> void:
 	assert_that(BattleState.Side.NONE).is_equal(0)
 	assert_that(BattleState.Side.ATTACKER).is_equal(1)
@@ -7,6 +18,7 @@ func test_battle_state_side_enum_order() -> void:
 
 func test_battle_completed_signal_type() -> void:
 	var flow := BattleFlow.new()
+	_track(flow)
 	flow.name = "TestFlow"
 	var holder: Dictionary = {"winner": -1}
 	flow.battle_completed.connect(func(w: BattleState.Side, _a, _d):
@@ -14,7 +26,6 @@ func test_battle_completed_signal_type() -> void:
 	)
 	flow.battle_completed.emit(BattleState.Side.DEFENDER, [], [])
 	assert_that(holder["winner"]).is_equal(BattleState.Side.DEFENDER)
-	flow.free()
 
 func test_dijkstra_returns_array() -> void:
 	var cost_fn: Callable = func(c: Vector2i) -> float: return 1.0
@@ -35,12 +46,12 @@ func test_array_to_dict_conversion() -> void:
 
 func test_executor_has_paused_property() -> void:
 	var executor := BattleTurnExecutor.new()
+	_track(executor)
 	executor.name = "TestExecutor"
 	assert_that(executor._paused).is_equal(false)
 	executor._paused = true
 	assert_bool(executor._paused).is_true()
 	executor._paused = false
-	executor.free()
 
 func test_deserialize_unknown_slot_warns() -> void:
 	var inv := HeroInventory.new()
@@ -73,19 +84,20 @@ func test_action_resolver_has_revive_unit() -> void:
 
 func test_map_generator_has_get_terrain_id() -> void:
 	var mg := MapGenerator.new()
+	_track(mg)
 	mg.name = "TestMG"
 	assert_bool(mg.has_method("get_terrain_id")).is_true()
-	mg.free()
 
 func test_map_generator_get_terrain_id_null_model() -> void:
 	var mg := MapGenerator.new()
+	_track(mg)
 	mg.name = "TestMG2"
 	var tid = mg.get_terrain_id(Vector2i(0, 0))
 	assert_that(tid).is_equal(HexUtils.Terrain.GRASS)
-	mg.free()
 
 func test_movement_signal_emits_dict() -> void:
 	var hc := HeroMovementController.new()
+	_track(hc)
 	hc.name = "TestHMC"
 	var holder: Array = [false]
 	hc.reach_preview_changed.connect(func(_pts, _dist: Dictionary, _mp):
@@ -93,16 +105,15 @@ func test_movement_signal_emits_dict() -> void:
 	)
 	hc.reach_preview_changed.emit([], {}, 0.0)
 	assert_bool(holder[0]).is_true()
-	hc.free()
 
 func test_battle_ui_scene_has_skeleton() -> void:
 	var scene := load("res://scenes/ui/BattleUI.tscn")
 	assert_bool(scene != null).is_true()
 	var battle_ui := scene.instantiate() as BattleUI
+	_track(battle_ui)
 	battle_ui.name = "TestBattleUI"
 	assert_bool(battle_ui.has_method("_connect_skeleton")).is_true()
 	assert_that(battle_ui.get_node_or_null("bottom_bar").get_child_count()).is_equal(7)
 	assert_bool(battle_ui.get_node_or_null("collapse_btn") != null).is_true()
 	assert_bool(battle_ui.has_method("set_status")).is_true()
 	assert_bool(battle_ui.has_method("update_initiative")).is_true()
-	battle_ui.free()

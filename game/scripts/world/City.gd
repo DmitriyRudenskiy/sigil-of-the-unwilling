@@ -102,6 +102,7 @@ func build_building(def: UniqueBuilding.Def, cell: Vector2i) -> UniqueBuilding:
 	buildings_changed.emit()
 	storage_changed.emit()
 	population_changed.emit()
+	ArenaClusterSystem.bump_version(self)
 	return r.bld
 
 func can_upgrade_building(bld: UniqueBuilding, hero_cell := Vector2i(-1, -1)) -> CityCheck:
@@ -115,6 +116,7 @@ func perform_upgrade(bld: UniqueBuilding) -> bool:
 	buildings_changed.emit()
 	storage_changed.emit()
 	population_changed.emit()
+	ArenaClusterSystem.bump_version(self)
 	return true
 
 func request_switch(p_uid: int, new_state: PopUnit.State, new_tile := Vector2i(-1, -1)) -> bool:

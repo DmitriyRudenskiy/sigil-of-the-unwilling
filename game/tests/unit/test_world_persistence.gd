@@ -3,10 +3,18 @@ extends GdUnitTestSuite
 const WorldLoadContext = preload("res://scripts/world/WorldLoadContext.gd")
 const ResourceChainService = preload("res://scripts/world/ResourceChainService.gd")
 
+var _hero: Node = null
+
+func after_test() -> void:
+	if _hero != null and is_instance_valid(_hero):
+		_hero.free()
+	_hero = null
+
 func test_extraction_keys_cache_and_fingerprint() -> void:
 
 	var chain := ResourceChainService.new()
 	var hero := TestFactories.make_hero()
+	_hero = hero
 	get_tree().root.add_child(hero)
 
 	var keys1: Dictionary = chain.build_extraction_keys(hero)
@@ -21,8 +29,6 @@ func test_extraction_keys_cache_and_fingerprint() -> void:
 	chain.invalidate_extraction_cache()
 	var keys4: Dictionary = chain.build_extraction_keys(hero)
 	assert_dict(keys4).is_equal(keys3).override_failure_message("после invalidate ключи пересчитываются идентично")
-
-	hero.queue_free()
 
 func test_load_context_fields() -> void:
 	var ctx := WorldLoadContext.new()

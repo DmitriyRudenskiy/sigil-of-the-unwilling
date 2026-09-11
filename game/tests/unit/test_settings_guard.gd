@@ -2,8 +2,16 @@ extends GdUnitTestSuite
 
 const _Settings = preload("res://scripts/autoload/Settings.gd")
 
+var _screen: Node = null
+
+func after_test() -> void:
+	if _screen != null and is_instance_valid(_screen):
+		_screen.free()
+	_screen = null
+
 func test_settings_screen_closed_without_settings() -> void:
 	var screen = load("res://scenes/ui/SettingsScreen.tscn").instantiate()
+	_screen = screen
 	var flags: Array = [false]
 	screen.closed.connect(func(): flags[0] = true)
 	var main_root: Window = Engine.get_main_loop().root

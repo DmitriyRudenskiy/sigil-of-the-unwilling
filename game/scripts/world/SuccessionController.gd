@@ -27,6 +27,10 @@ func build_successor(deceased: HeroController, rng: RandomNumberGenerator = null
 	_transfer_inventory(deceased, succ)
 	if deceased.strategic_resources != null and deceased.strategic_resources.has_method("get_all"):
 		succ.strategic_resources.set_all(deceased.strategic_resources.get_all())
+	# Навыки
+	if deceased.skills != null:
+		for skill_name in deceased.skills.levels:
+			succ.skills.set_skill(StringName(skill_name), int(deceased.skills.levels[skill_name]))
 	return succ
 
 func _transfer_inventory(deceased: HeroController, succ: HeroController) -> void:
@@ -68,6 +72,18 @@ func transfer_legend(deceased: HeroController, successor: HeroController,
 
 func default_resurrection_cost() -> Dictionary:
 	return {"industry": GameNumbers.SUCCESSION_RESURRECT_IND, GameNumbers.SUCCESSION_SPECIAL_KEY: GameNumbers.SUCCESSION_RESURRECT_GOLD}
+
+## Проверяет, можно ли воскресить героя в данном городе (храм + ресурсы).
+func can_resurrect(city: City) -> bool:
+	if city == null:
+		return false
+	if city.get_great_temple_level() < 1:
+		return false
+	if float(city.storage.get(&"industry", 0.0)) < GameNumbers.SUCCESSION_RESURRECT_IND:
+		return false
+	if float(city.storage.get(GameNumbers.SUCCESSION_SPECIAL_KEY, 0.0)) < GameNumbers.SUCCESSION_RESURRECT_GOLD:
+		return false
+	return true
 
 func resurrect_hero(city: City, cost: Dictionary = {}) -> bool:
 	if city == null:
