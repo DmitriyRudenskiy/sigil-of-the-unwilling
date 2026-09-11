@@ -3,6 +3,8 @@ extends McpCommandsBase
 
 var _canvas_draw_node: McpCanvasDrawNode = null
 var _draw_commands: Array = []
+# TASK_20: потолок роста _draw_commands — хранятся только последние N команд.
+const MAX_DRAW_COMMANDS: int = 5000
 
 func get_commands() -> Dictionary:
 	return {
@@ -507,6 +509,9 @@ func _cmd_canvas_draw(params: Dictionary) -> void:
 	var color_d: Dictionary = params.get("color", {"r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0})
 	var color: Color = Color(float(color_d.get("r", 1)), float(color_d.get("g", 1)), float(color_d.get("b", 1)), float(color_d.get("a", 1)))
 	_draw_commands.append({"action": action, "params": params, "color": color})
+	# TASK_20: slice не принимает отрицательные индексы — обрезаем с конца явно.
+	if _draw_commands.size() > MAX_DRAW_COMMANDS:
+		_draw_commands = _draw_commands.slice(_draw_commands.size() - MAX_DRAW_COMMANDS)
 	_canvas_draw_node.draw_commands = _draw_commands
 	_canvas_draw_node.queue_redraw()
 	server._send_response({"success": true, "action": action})

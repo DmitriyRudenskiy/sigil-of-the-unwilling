@@ -828,7 +828,7 @@ func _cmd_serialize_state(params: Dictionary) -> void:
 
 	match action:
 		"save":
-			var state: Dictionary = _serialize_node(node, max_depth, 0)
+			var state: Dictionary = _serialize_node(node, max_depth)
 			server._send_response({"success": true, "action": "save", "state": state})
 		"load":
 			var data: Dictionary = params.get("data", {})
@@ -1148,7 +1148,8 @@ func _cmd_debug_draw(params: Dictionary) -> void:
 	var action: String = params.get("action", "line")
 	var color_dict: Dictionary = params.get("color", {"r": 1.0, "g": 0.0, "b": 0.0})
 	var color: Color = Color(float(color_dict.get("r", 1)), float(color_dict.get("g", 0)), float(color_dict.get("b", 0)), float(color_dict.get("a", 1)))
-	var duration: int = int(params.get("duration", 0))
+	# TASK_20: -1 = перманентно (тик не декрементирует); 0 = исчезает на следующем кадре.
+	var duration: int = int(params.get("duration", -1))
 
 	if action == "clear":
 		_clear_debug_draw()
@@ -1534,17 +1535,31 @@ func _cmd_locale(params: Dictionary) -> void:
 # ==========================================================================
 
 
-func _build_tree_node(node: Node) -> Dictionary:
-	var info: Dictionary = {
-		"name": node.name,
-		"type": node.get_class(),
-	}
-	var children_arr: Array = []
-	for child in node.get_children():
-		children_arr.append(_build_tree_node(child))
-	if children_arr.size() > 0:
-		info["children"] = children_arr
-	return info
+## TASK_20: итеративный обход (два прохода) — нет Stack Overflow на глубоких сценах,
+## порядок детей сохранён.
+func _build_tree_node(root: Node) -> Dictionary:
+	if root == null:
+		return {}
+	var node_to_dict: Dictionary = {}
+	var stack: Array[Node] = [root]
+	var order: Array[Node] = []
+	while not stack.is_empty():
+		var n: Node = stack.pop_back()
+		order.append(n)
+		node_to_dict[n] = {"name": n.name, "type": n.get_class()}
+		var children: Array = n.get_children()
+		for i in range(children.size() - 1, -1, -1):
+			stack.append(children[i])
+	for i in range(order.size() - 1, -1, -1):
+		var n: Node = order[i]
+		var info: Dictionary = node_to_dict[n]
+		var children: Array = n.get_children()
+		if children.size() > 0:
+			var children_arr: Array = []
+			for child in children:
+				children_arr.append(node_to_dict[child])
+			info["children"] = children_arr
+	return node_to_dict[root]
 
 
 # --- Key String to Keycode ---
@@ -1630,60 +1645,106 @@ func _json_to_variant_for_property(node: Node, property: String, value: Variant)
 # --- Reparent Node ---
 
 
-func _serialize_node(node: Node, max_depth: int, depth: int) -> Dictionary:
-	var result: Dictionary = {
-		"class": node.get_class(),
-		"name": node.name,
-		"path": str(node.get_path()),
-	}
-	# Capture editor-visible properties
-	var props: Dictionary = {}
-	for prop in node.get_property_list():
-		var prop_dict: Dictionary = prop
-		if prop_dict.get("usage", 0) & PROPERTY_USAGE_STORAGE:
-			var prop_name: String = prop_dict.get("name", "")
-			if prop_name.is_empty() or prop_name.begins_with("_"):
-				continue
-			props[prop_name] = McpSerialization.variant_to_json(node.get(prop_name))
-	result["properties"] = props
+## TASK_20: итеративная сериализация (два прохода) — нет Stack Overflow;
+## пропускается server (был баг `child == self`: self — RefCounted, условие никогда не срабатывало).
+func _serialize_node(root: Node, max_depth: int) -> Dictionary:
+	if root == null:
+		return {}
+	var node_to_dict: Dictionary = {}
+	var stack: Array = [[root, 0]]
+	var order: Array = []
+	while not stack.is_empty():
+		var item: Array = stack.pop_back()
+		var n: Node = item[0]
+		var d: int = item[1]
+		order.append([n, d])
+		var result: Dictionary = {
+			"class": n.get_class(),
+			"name": n.name,
+			"path": str(n.get_path()),
+		}
+		# Capture editor-visible properties
+		var props: Dictionary = {}
+		for prop in n.get_property_list():
+			var prop_dict: Dictionary = prop
+			if prop_dict.get("usage", 0) & PROPERTY_USAGE_STORAGE:
+				var prop_name: String = prop_dict.get("name", "")
+				if prop_name.is_empty() or prop_name.begins_with("_"):
+					continue
+				props[prop_name] = McpSerialization.variant_to_json(n.get(prop_name))
+		result["properties"] = props
+		node_to_dict[n] = result
+		if d < max_depth:
+			var children: Array = n.get_children()
+			for i in range(children.size() - 1, -1, -1):
+				var child: Node = children[i]
+				if child == server:
+					continue
+				stack.append([child, d + 1])
+	for i in range(order.size() - 1, -1, -1):
+		var item: Array = order[i]
+		var n: Node = item[0]
+		var d: int = item[1]
+		var result: Dictionary = node_to_dict[n]
+		if d < max_depth:
+			var children: Array = n.get_children()
+			var children_arr: Array = []
+			for child in children:
+				if child == server:
+					continue
+				children_arr.append(node_to_dict[child])
+			result["children"] = children_arr
+	return node_to_dict[root]
 
-	if depth < max_depth:
-		var children: Array = []
-		for child in node.get_children():
-			# Skip the MCP interaction server itself
-			if child == self:
-				continue
-			children.append(_serialize_node(child, max_depth, depth + 1))
-		result["children"] = children
 
-	return result
-
-
-func _deserialize_node(node: Node, data: Dictionary) -> int:
+## TASK_20: итеративное восстановление. count — число обработанных нод (стара семантика).
+func _deserialize_node(root: Node, root_data: Dictionary) -> int:
 	var count: int = 0
-	# Restore properties
-	var props: Dictionary = data.get("properties", {})
-	for prop_name in props:
-		var value: Variant = _json_to_variant_for_property(node, prop_name, props[prop_name])
-		node.set(prop_name, value)
-	count += 1
-
-	# Restore children
-	var children_data: Array = data.get("children", [])
-	for child_data in children_data:
-		var child_name: String = child_data.get("name", "")
-		var child: Node = null
-		for c in node.get_children():
-			if c.name == child_name:
-				child = c
-				break
-		if child != null:
-			count += _deserialize_node(child, child_data)
+	var stack: Array = [[root, root_data]]
+	while not stack.is_empty():
+		var item: Array = stack.pop_back()
+		var n: Node = item[0]
+		var data: Dictionary = item[1]
+		# Restore properties
+		var props: Dictionary = data.get("properties", {})
+		for prop_name in props:
+			var value: Variant = _json_to_variant_for_property(n, prop_name, props[prop_name])
+			n.set(prop_name, value)
+		count += 1
+		# Restore children
+		var children_data: Array = data.get("children", [])
+		for i in range(children_data.size() - 1, -1, -1):
+			var child_data: Dictionary = children_data[i]
+			var child_name: String = child_data.get("name", "")
+			var child: Node = null
+			for c in n.get_children():
+				if c.name == child_name:
+					child = c
+					break
+			if child != null:
+				stack.append([child, child_data])
 	return count
 
 
 # --- Physics Body ---
 
+
+## TASK_20: тик вызывается из McpInteractionServer._process —
+## frames_left < 0 (перманентно) не декрементируется, <= 0 — освобождается.
+func tick_debug_draw() -> void:
+	if _debug_meshes.is_empty():
+		return
+	var i: int = 0
+	while i < _debug_meshes.size():
+		var entry: Dictionary = _debug_meshes[i]
+		if int(entry["frames_left"]) >= 0:
+			entry["frames_left"] = int(entry["frames_left"]) - 1
+			if int(entry["frames_left"]) <= 0:
+				if is_instance_valid(entry["node"]):
+					entry["node"].queue_free()
+				_debug_meshes.remove_at(i)
+				continue
+		i += 1
 
 func _clear_debug_draw() -> void:
 	for entry in _debug_meshes:

@@ -9,6 +9,10 @@ class _TestServer extends _Srv:
 
 	func _send_response(data: Dictionary) -> void:
 		responses.append(data)
+		# TASK_20: зеркалим реальный сервер — ответ сбрасывает busy-состояние.
+		_busy = false
+		_busy_since = 0.0
+		_current_id = null
 
 	func _send_response_raw(data: Dictionary) -> void:
 		responses.append(data)

@@ -54,6 +54,10 @@ func _process(_delta: float) -> void:
 	if _server == null:
 		return
 
+	# TASK_20: тик debug-мешей — frames_left декрементируется, истёкшие освобождаются.
+	if _grp_system != null:
+		_grp_system.tick_debug_draw()
+
 	# Safety timeout: force-reset _busy if it's been stuck too long
 	if _busy and _busy_since > 0.0:
 		var elapsed: float = Time.get_ticks_msec() / 1000.0 - _busy_since
@@ -146,6 +150,12 @@ func _handle_command(json_str: String) -> void:
 	var handler: Callable = _handlers[command]
 	# Awaiting a non-coroutine handler returns immediately, so one path covers sync and async.
 	await handler.call(params)
+
+	# TASK_20 safety-net: если хендлер завершился, не отправив ответ (ранний return в команде),
+	# сбрасываем _busy сразу, а не через 120-секундный таймаут.
+	if _busy:
+		push_warning("McpInteractionServer: handler for '%s' did not send a response, force-clearing busy flag" % command)
+		_send_response({"error": "Handler did not send response"})
 
 
 # Send response and clear busy flag

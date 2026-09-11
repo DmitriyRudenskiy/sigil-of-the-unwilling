@@ -19,7 +19,8 @@ func get_commands() -> Dictionary:
 ## Rejects the request unless the server is in the scene tree. Returns false if rejected.
 func _require_scene_tree() -> bool:
 	if not server.is_inside_tree():
-		server._send_response_raw({"error": "Server not in scene tree"})
+		# TASK_20: _send_response (не raw) — гарантированно сбрасывает _busy, исключая deadlock.
+		server._send_response({"error": "Server not in scene tree"})
 		return false
 	return true
 
