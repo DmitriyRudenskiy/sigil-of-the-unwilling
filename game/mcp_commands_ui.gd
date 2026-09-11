@@ -595,7 +595,7 @@ func _collect_ui_elements(node: Node, elements: Array) -> void:
 
 			elements.append(info)
 
-	for child in node.get_children():
+	for child: Node in node.get_children():
 		_collect_ui_elements(child, elements)
 
 

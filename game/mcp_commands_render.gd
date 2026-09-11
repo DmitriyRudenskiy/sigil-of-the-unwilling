@@ -1574,7 +1574,7 @@ func _find_audio_players(node: Node, results: Array) -> void:
 	elif node is AudioStreamPlayer3D:
 		var p: AudioStreamPlayer3D = node as AudioStreamPlayer3D
 		results.append({"path": str(p.get_path()), "type": "AudioStreamPlayer3D", "playing": p.playing, "bus": p.bus})
-	for child in node.get_children():
+	for child: Node in node.get_children():
 		_find_audio_players(child, results)
 
 
@@ -1624,7 +1624,7 @@ func _get_or_create_environment() -> Environment:
 	if cam != null and cam.get_environment() != null:
 		return cam.get_environment()
 	var we: WorldEnvironment = null
-	for child in server.get_tree().root.get_children():
+	for child: Node in server.get_tree().root.get_children():
 		if child is WorldEnvironment:
 			we = child as WorldEnvironment
 			break
