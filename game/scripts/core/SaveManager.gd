@@ -33,9 +33,14 @@ static func has_save_in_slot(slot: int) -> bool:
 
 static func delete_slot(slot: int) -> bool:
 	var path := get_slot_path(slot)
-	if not FileAccess.file_exists(path):
+	var had_file := FileAccess.file_exists(path)
+	if had_file:
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	var bak := path + ".bak"
+	if FileAccess.file_exists(bak):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(bak))
+	if not had_file and not FileAccess.file_exists(bak):
 		return false
-	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 	GameLogger.info("Save deleted: %s" % path, "Save")
 	return true
 
@@ -79,6 +84,11 @@ func save_to_slot(data: Variant, slot: int) -> SaveError:
 		GameLogger.error("SaveManager: data is null or has no to_dict()", "Save")
 		return SaveError.INVALID_DATA
 	var path := get_slot_path(slot)
+	# Резервная копия предыдущего сейва (восстановление при повреждении)
+	if FileAccess.file_exists(path):
+		var bak_err: int = DirAccess.copy_absolute(path, path + ".bak")
+		if bak_err != OK:
+			GameLogger.warn("SaveManager: .bak copy failed (error %d), continuing" % bak_err)
 	var json_str := JSON.stringify(data.to_dict(), "\t")
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	if file == null:

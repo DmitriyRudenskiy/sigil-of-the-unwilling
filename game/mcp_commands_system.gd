@@ -12,6 +12,10 @@ var _debug_draw_node: Node = null
 var _debug_meshes: Array = []
 
 ## Returns the first blocked pattern found in code, or "" if the code is clean.
+# Whitelist: project scenes only, no parent-directory traversal.
+static func _is_allowed_scene_path(path: String) -> bool:
+	return path.begins_with("res://scenes/") and path.ends_with(".tscn") and not path.contains("..")
+
 func _find_blocked_pattern(code: String) -> String:
 	for pattern in EVAL_BLOCKED_PATTERNS:
 		if code.contains(pattern):
@@ -242,6 +246,9 @@ func _cmd_instantiate_scene(params: Dictionary) -> void:
 		server._send_response({"error": "scene_path is required"})
 		return
 
+	if not _is_allowed_scene_path(scene_path):
+		server._send_response({"error": "Scene path not allowed: %s (must be res://scenes/*.tscn)" % scene_path})
+		return
 	var packed: PackedScene = load(scene_path) as PackedScene
 	if packed == null:
 		server._send_response({"error": "Failed to load scene: %s" % scene_path})
@@ -253,6 +260,9 @@ func _cmd_instantiate_scene(params: Dictionary) -> void:
 		return
 
 	var instance: Node = packed.instantiate()
+	if instance == null:
+		server._send_response({"error": "Scene instantiation failed: %s" % scene_path})
+		return
 	parent.add_child(instance)
 	server._send_response({"success": true, "instance_name": instance.name, "instance_path": str(instance.get_path())})
 
@@ -283,6 +293,10 @@ func _cmd_change_scene(params: Dictionary) -> void:
 	var scene_path: String = params.get("scene_path", "")
 	if scene_path.is_empty():
 		server._send_response({"error": "scene_path is required"})
+		return
+	# Whitelist: only project scenes, no parent-directory traversal.
+	if not _is_allowed_scene_path(scene_path):
+		server._send_response({"error": "Scene path not allowed: %s (must be res://scenes/*.tscn)" % scene_path})
 		return
 
 	var err: int = server.get_tree().change_scene_to_file(scene_path)

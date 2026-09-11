@@ -29,6 +29,39 @@ func test_get_slot_path_clamped() -> void:
 func test_has_save_in_slot_initially_false() -> void:
 	assert_bool(SaveManager.has_save_in_slot(SLOT)).is_false()
 
+func test_backup_created_on_resave() -> void:
+	var path := SaveManager.get_slot_path(SLOT)
+	var sm = auto_free(SaveManager.new())
+	var a := _valid_save_data()
+	a.run_seed = 111
+	assert_int(sm.save_to_slot(a, SLOT)).is_equal(SaveManager.SaveError.OK)
+	# Первая запись: .bak ещё нет (нечего копировать)
+	assert_bool(FileAccess.file_exists(path + ".bak")).is_false()
+
+	var b := _valid_save_data()
+	b.run_seed = 222
+	assert_int(sm.save_to_slot(b, SLOT)).is_equal(SaveManager.SaveError.OK)
+	# Вторая запись: .bak содержит предыдущий сейв
+	assert_bool(FileAccess.file_exists(path + ".bak")).is_true()
+	var bak_file := FileAccess.open(path + ".bak", FileAccess.READ)
+	assert_that(bak_file).is_not_null()
+	var bak_json: JSON = JSON.new()
+	assert_int(bak_json.parse(bak_file.get_as_text())).is_equal(OK)
+	assert_int(int(bak_json.data.get("run_seed"))).is_equal(111)
+	# Основной файл — актуальный
+	var res := SaveManager.load_slot(SLOT)
+	assert_int(res["data"].run_seed).is_equal(222)
+
+func test_delete_slot_removes_backup() -> void:
+	var path := SaveManager.get_slot_path(SLOT)
+	var sm = auto_free(SaveManager.new())
+	assert_int(sm.save_to_slot(_valid_save_data(), SLOT)).is_equal(SaveManager.SaveError.OK)
+	assert_int(sm.save_to_slot(_valid_save_data(), SLOT)).is_equal(SaveManager.SaveError.OK)
+	assert_bool(FileAccess.file_exists(path + ".bak")).is_true()
+	assert_bool(SaveManager.delete_slot(SLOT)).is_true()
+	assert_bool(FileAccess.file_exists(path)).is_false()
+	assert_bool(FileAccess.file_exists(path + ".bak")).is_false()
+
 func test_save_load_roundtrip() -> void:
 	var sm = auto_free(SaveManager.new())
 	var err: int = sm.save_to_slot(_valid_save_data(), SLOT)

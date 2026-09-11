@@ -33,6 +33,25 @@ func test_handlers_registered() -> void:
 	assert_bool(handlers.has("eval")).is_true()
 
 
+func test_scene_path_whitelist() -> void:
+	assert_bool(McpCommandsSystem._is_allowed_scene_path("res://scenes/World.tscn")).is_true()
+	assert_bool(McpCommandsSystem._is_allowed_scene_path("res://scenes/ui/GameOverScreen.tscn")).is_true()
+	assert_bool(McpCommandsSystem._is_allowed_scene_path("res://icon.svg")).is_false()
+	assert_bool(McpCommandsSystem._is_allowed_scene_path("res://evil.gd")).is_false()
+	assert_bool(McpCommandsSystem._is_allowed_scene_path("res://scenes/../icon.svg")).is_false()
+	assert_bool(McpCommandsSystem._is_allowed_scene_path("")).is_false()
+
+
+func test_port_default_and_env_override() -> void:
+	# Default: no env, no ProjectSettings override
+	OS.set_environment("MCP_PORT", "")
+	assert_int(_Srv.port()).is_equal(9090)
+	# Env override
+	OS.set_environment("MCP_PORT", "9123")
+	assert_int(_Srv.port()).is_equal(9123)
+	OS.set_environment("MCP_PORT", "")
+
+
 func test_handle_command_valid() -> void:
 	_server._handle_command("{\"command\": \"os_info\", \"params\": {}}")
 	assert_that(_server.responses.size()).is_equal(1)

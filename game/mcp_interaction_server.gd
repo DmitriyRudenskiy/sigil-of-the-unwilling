@@ -11,7 +11,13 @@ var _buffer: String = ""
 var _busy: bool = false
 var _busy_since: float = 0.0
 var _current_id: Variant = null
-const PORT: int = 9090
+# Port: MCP_PORT env → ProjectSettings "mcp/port" → 9090.
+static func port() -> int:
+	var env := OS.get_environment("MCP_PORT")
+	if env.is_valid_int():
+		return env.to_int()
+	return int(ProjectSettings.get_setting("mcp/port", 9090))
+
 const BUSY_TIMEOUT: float = 120.0
 const AUTH_TOKEN_ENV := "MCP_AUTH_TOKEN"
 var _auth_token: String = ""
@@ -37,11 +43,12 @@ func _ready() -> void:
 		for name in cmds:
 			_handlers[name] = cmds[name]
 	_server = TCPServer.new()
-	var err: int = _server.listen(PORT, "127.0.0.1")
+	var port := port()
+	var err: int = _server.listen(port, "127.0.0.1")
 	if err != OK:
-		push_error("McpInteractionServer: Failed to listen on port %d, error: %d" % [PORT, err])
+		push_error("McpInteractionServer: Failed to listen on port %d, error: %d" % [port, err])
 		return
-	print("McpInteractionServer: Listening on 127.0.0.1:%d" % PORT)
+	print("McpInteractionServer: Listening on 127.0.0.1:%d" % port)
 
 
 func _process(_delta: float) -> void:
