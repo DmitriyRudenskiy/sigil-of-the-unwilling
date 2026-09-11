@@ -61,3 +61,22 @@ func test_serialize_explored() -> void:
 	v2.set_map_size(10, 10)
 	v2.load_explored(arr)
 	assert_bool(v2.is_explored(Vector2i(5, 5))).is_true()
+
+func test_hero_move_keeps_city_visibility() -> void:
+	# TASK_19 2.3: кэш городских дисков — герой сдвинулся, города всё видны.
+	var v := VisibilityMap.new()
+	v.set_map_size(20, 20)
+	v.recompute(Vector2i(1, 1), [Vector2i(10, 10)], 1, 2)
+	assert_bool(v.is_visible(Vector2i(10, 10))).is_true()
+	var changed: bool = v.recompute(Vector2i(2, 1), [Vector2i(10, 10)], 1, 2)
+	assert_bool(v.is_visible(Vector2i(10, 10))).is_true()
+	assert_bool(v.is_visible(Vector2i(2, 1))).is_true()
+	assert_bool(changed).is_true()
+
+func test_city_cache_invalidates_on_source_change() -> void:
+	var v := VisibilityMap.new()
+	v.set_map_size(20, 20)
+	v.recompute(Vector2i(1, 1), [Vector2i(10, 10)], 1, 2)
+	v.recompute(Vector2i(1, 1), [Vector2i(15, 15)], 1, 2)
+	assert_bool(v.is_visible(Vector2i(15, 15))).is_true()
+	assert_bool(v.is_visible(Vector2i(10, 10))).is_false()

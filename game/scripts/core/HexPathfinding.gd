@@ -11,7 +11,15 @@ static func _reconstruct_path(start: Vector2i, goal: Vector2i, from: Dictionary)
 	path.reverse()
 	return path
 
-static func bfs_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: int, h: int) -> Array[Vector2i]:
+## blocked: PackedByteArray (размер w*h, 1 = блокировано) или Dictionary (Vector2i -> true).
+## PackedByteArray быстрее (без хэш-таблицы) — TASK_19 M2.
+static func _is_blocked(blocked: Variant, cell: Vector2i, w: int) -> bool:
+	if blocked is PackedByteArray:
+		var idx := HexUtils.pos_to_idx(cell, w)
+		return blocked.size() > idx and blocked[idx] == 1
+	return (blocked as Dictionary).has(cell)
+
+static func bfs_path(start: Vector2i, goal: Vector2i, blocked: Variant, w: int, h: int, shift_right: bool = true) -> Array[Vector2i]:
 	if start == goal:
 		return [start]
 	var queue: Array[Vector2i] = [start]
@@ -23,10 +31,10 @@ static func bfs_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: in
 		if cur == goal:
 			break
 		for bit in 6:
-			var nxt := HexUtils.get_neighbor(cur, bit)
+			var nxt := HexUtils.get_neighbor(cur, bit, shift_right)
 			if nxt.x < 0 or nxt.x >= w or nxt.y < 0 or nxt.y >= h:
 				continue
-			if blocked.has(nxt) or from.has(nxt):
+			if _is_blocked(blocked, nxt, w) or from.has(nxt):
 				continue
 			from[nxt] = cur
 			queue.append(nxt)
@@ -34,10 +42,10 @@ static func bfs_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: in
 		return []
 	return _reconstruct_path(start, goal, from)
 
-static func astar_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: int, h: int) -> Array[Vector2i]:
+static func astar_path(start: Vector2i, goal: Vector2i, blocked: Variant, w: int, h: int, shift_right: bool = true) -> Array[Vector2i]:
 	if start == goal:
 		return [start]
-	var h_fn := func(c: Vector2i) -> int: return HexUtils.hex_distance(c, goal)
+	var h_fn := func(c: Vector2i) -> int: return HexUtils.hex_distance(c, goal, shift_right)
 
 	var n := w * h
 	var g_score := PackedFloat32Array()
@@ -73,10 +81,10 @@ static func astar_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: 
 			return path
 
 		for bit in 6:
-			var nxt := HexUtils.get_neighbor(cur_cell, bit)
+			var nxt := HexUtils.get_neighbor(cur_cell, bit, shift_right)
 			if nxt.x < 0 or nxt.x >= w or nxt.y < 0 or nxt.y >= h:
 				continue
-			if blocked.has(nxt):
+			if _is_blocked(blocked, nxt, w):
 				continue
 			var nxt_idx := HexUtils.pos_to_idx(nxt, w)
 			var tentative_g: float = cur_g + 1.0
@@ -89,12 +97,12 @@ static func astar_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: 
 
 	return []
 
-static func find_path(start: Vector2i, goal: Vector2i, blocked: Dictionary, w: int, h: int, algo: String = "astar") -> Array[Vector2i]:
+static func find_path(start: Vector2i, goal: Vector2i, blocked: Variant, w: int, h: int, shift_right: bool = true, algo: String = "astar") -> Array[Vector2i]:
 	if algo == "bfs":
-		return bfs_path(start, goal, blocked, w, h)
-	return astar_path(start, goal, blocked, w, h)
+		return bfs_path(start, goal, blocked, w, h, shift_right)
+	return astar_path(start, goal, blocked, w, h, shift_right)
 
-static func dijkstra(start: Vector2i, max_cost: float, cost_fn: Callable, w: int, h: int) -> PackedFloat32Array:
+static func dijkstra(start: Vector2i, max_cost: float, cost_fn: Callable, w: int, h: int, shift_right: bool = true) -> PackedFloat32Array:
 	var dist := PackedFloat32Array()
 	dist.resize(w * h)
 	dist.fill(INF)
@@ -122,7 +130,7 @@ static func dijkstra(start: Vector2i, max_cost: float, cost_fn: Callable, w: int
 			continue
 
 		for bit in 6:
-			var nxt := HexUtils.get_neighbor(cur_cell, bit)
+			var nxt := HexUtils.get_neighbor(cur_cell, bit, shift_right)
 			if nxt.x < 0 or nxt.x >= w or nxt.y < 0 or nxt.y >= h:
 				continue
 			var enter_cost: float = cost_fn.call(nxt)
@@ -139,7 +147,7 @@ static func dijkstra(start: Vector2i, max_cost: float, cost_fn: Callable, w: int
 			dist[i] = INF
 	return dist
 
-static func dijkstra_path_early(start: Vector2i, goal: Vector2i, cost_fn: Callable, w: int, h: int) -> Array[Vector2i]:
+static func dijkstra_path_early(start: Vector2i, goal: Vector2i, cost_fn: Callable, w: int, h: int, shift_right: bool = true) -> Array[Vector2i]:
 	if start == goal:
 		return [start]
 
@@ -181,7 +189,7 @@ static func dijkstra_path_early(start: Vector2i, goal: Vector2i, cost_fn: Callab
 			return path
 
 		for bit in 6:
-			var nxt := HexUtils.get_neighbor(cur_cell, bit)
+			var nxt := HexUtils.get_neighbor(cur_cell, bit, shift_right)
 			if nxt.x < 0 or nxt.x >= w or nxt.y < 0 or nxt.y >= h:
 				continue
 			var enter_cost: float = cost_fn.call(nxt)
@@ -196,7 +204,7 @@ static func dijkstra_path_early(start: Vector2i, goal: Vector2i, cost_fn: Callab
 
 	return []
 
-static func dijkstra_path(start: Vector2i, goal: Vector2i, dist: PackedFloat32Array, cost_fn: Callable, w: int, h: int) -> Array[Vector2i]:
+static func dijkstra_path(start: Vector2i, goal: Vector2i, dist: PackedFloat32Array, cost_fn: Callable, w: int, h: int, shift_right: bool = true) -> Array[Vector2i]:
 	var goal_idx := HexUtils.pos_to_idx(goal, w)
 	if dist[goal_idx] == INF:
 		return []
@@ -218,7 +226,7 @@ static func dijkstra_path(start: Vector2i, goal: Vector2i, dist: PackedFloat32Ar
 			break
 
 		for bit in 6:
-			var nb: Vector2i = HexUtils.get_neighbor(c, bit)
+			var nb: Vector2i = HexUtils.get_neighbor(c, bit, shift_right)
 			if nb.x < 0 or nb.x >= w or nb.y < 0 or nb.y >= h:
 				continue
 			var nb_idx := HexUtils.pos_to_idx(nb, w)
@@ -242,7 +250,7 @@ static func dijkstra_path(start: Vector2i, goal: Vector2i, dist: PackedFloat32Ar
 	path.reverse()
 	return path
 
-static func bfs_reachable(start: Vector2i, steps: int, blocked: Dictionary, w: int, h: int) -> Dictionary:
+static func bfs_reachable(start: Vector2i, steps: int, blocked: Variant, w: int, h: int, shift_right: bool = true) -> Dictionary:
 	var result: Dictionary = {start: 0}
 	var queue: Array[Vector2i] = [start]
 	var head: int = 0
@@ -253,10 +261,10 @@ static func bfs_reachable(start: Vector2i, steps: int, blocked: Dictionary, w: i
 		if dist >= steps:
 			continue
 		for bit in 6:
-			var nxt: Vector2i = HexUtils.get_neighbor(cur, bit)
+			var nxt: Vector2i = HexUtils.get_neighbor(cur, bit, shift_right)
 			if nxt.x < 0 or nxt.x >= w or nxt.y < 0 or nxt.y >= h:
 				continue
-			if blocked.has(nxt) or result.has(nxt):
+			if _is_blocked(blocked, nxt, w) or result.has(nxt):
 				continue
 			result[nxt] = dist + 1
 			queue.append(nxt)

@@ -29,6 +29,9 @@ func execute(command: String, params: Dictionary) -> Variant:
 	var handler: Callable = get_commands().get(command, Callable())
 	if not handler.is_valid():
 		return {"error": "Unknown command: %s" % command}
+	# TASK_19 M3: центральная проверка — отдельные команды её не дублируют.
+	if not _require_scene_tree():
+		return null
 	return await handler.call(params)
 
 

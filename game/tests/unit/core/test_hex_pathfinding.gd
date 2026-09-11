@@ -134,3 +134,19 @@ func test_min_heap_ordering() -> void:
 	assert_that(heap.pop()[1]).is_equal("c")
 	assert_that(heap.pop()[1]).is_equal("e")
 	assert_array(heap.pop()).is_empty()
+
+func test_blocked_packed_byte_array_equivalent() -> void:
+	# TASK_19 M2: PackedByteArray даёт тот же результат, что Dictionary.
+	var wall := Vector2i(1, 0)
+	var arr := PackedByteArray()
+	arr.resize(W * H)
+	arr[HexUtils.pos_to_idx(wall, W)] = 1
+	var p_dict := HexPathfinding.bfs_path(Vector2i(0, 0), Vector2i(2, 0), {wall: true}, W, H)
+	var p_arr := HexPathfinding.bfs_path(Vector2i(0, 0), Vector2i(2, 0), arr, W, H)
+	assert_bool(p_dict.size() > 0).is_true()
+	assert_that(p_arr).is_equal(p_dict)
+	var a2 := HexPathfinding.astar_path(Vector2i(0, 0), Vector2i(2, 0), arr, W, H)
+	assert_that(a2).is_equal(p_dict)
+	var empty_arr := PackedByteArray()
+	var p_empty := HexPathfinding.bfs_path(Vector2i(0, 0), Vector2i(1, 0), empty_arr, W, H)
+	assert_that(p_empty).is_equal([Vector2i(0, 0), Vector2i(1, 0)])

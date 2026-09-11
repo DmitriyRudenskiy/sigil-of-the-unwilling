@@ -44,12 +44,22 @@ static func run(
 	shard_seed: int = 0,
 	ui_manager: Node = null
 ) -> BootstrapResult:
+	# TASK_19 M1: run() — только оркестрация; порядок фаз сохранён:
+	# сервисы → сессия → мир → города/UI → подсистемы → endgame.
 	var R := BootstrapResult.new()
 	R.rng = rng
 	R.ui_manager = ui_manager
-
 	_init_services(parent, R)
+	_assert_core_services()
+	R.loaded_save = _resolve_session(R, shard_seed)
+	rng.seed = R.session.run_seed
+	_create_world(parent, R)
+	_create_city_layer(parent, platform, R)
+	_create_subsystems(parent, R)
+	_create_endgame(parent, R)
+	return R
 
+static func _assert_core_services() -> void:
 	var missing: Array[String] = []
 	for k in [&"units", &"resources", &"spells", &"artifacts"]:
 		if Services.resolve(k) == null:
@@ -57,30 +67,19 @@ static func run(
 	if not missing.is_empty():
 		push_error("[WorldBootstrap] Missing services: %s" % ", ".join(missing))
 
-	R.loaded_save = _resolve_session(R, shard_seed)
-	rng.seed = R.session.run_seed
-
+static func _create_world(parent: Node2D, R: BootstrapResult) -> void:
 	_create_map(parent, R)
-
 	_create_hero(parent, R)
-
 	_init_hero(R)
-
 	_create_camera(parent, R)
 	R.map_rect = _compute_map_rect(R)
-
 	_create_input(parent, R)
 	_create_spawner(parent, R)
+
+static func _create_city_layer(parent: Node2D, platform: Variant, R: BootstrapResult) -> void:
 	_create_cities(parent, R)
-
 	_create_ui(parent, platform, R)
-
-	_create_subsystems(parent, R)
 	_create_resource_nodes(parent, R)
-
-	_create_endgame(parent, R)
-
-	return R
 
 static func _create_endgame(parent: Node2D, R: BootstrapResult) -> void:
 	R.endgame = EndgameControllerScript.new()
@@ -439,7 +438,7 @@ static func _create_resource_nodes(parent: Node2D, R: BootstrapResult) -> void:
 	var node_container := Node2D.new()
 	node_container.name = "ResourceNodes"
 	parent.add_child(node_container)
-	R.resource_node_manager.setup(node_container, R.rng, Services.resolve(&"resources"), R.map_gen.map_to_local)
+	R.resource_node_manager.setup(node_container, R.rng, Resources, R.map_gen.map_to_local)
 
 	var map_data := {
 		"terrain": R.map_gen.terrain_grid.duplicate(),

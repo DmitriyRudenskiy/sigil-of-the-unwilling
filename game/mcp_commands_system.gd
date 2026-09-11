@@ -14,7 +14,8 @@ var _debug_meshes: Array = []
 ## Returns the first blocked pattern found in code, or "" if the code is clean.
 # Whitelist: project scenes only, no parent-directory traversal.
 static func _is_allowed_scene_path(path: String) -> bool:
-	return path.begins_with("res://scenes/") and path.ends_with(".tscn") and not path.contains("..")
+	return path.begins_with("res://scenes/") and path.ends_with(".tscn") and not path.contains("..") \
+		and ResourceLoader.exists(path)
 
 func _find_blocked_pattern(code: String) -> String:
 	for pattern in EVAL_BLOCKED_PATTERNS:
@@ -23,8 +24,7 @@ func _find_blocked_pattern(code: String) -> String:
 	return ""
 
 func get_commands() -> Dictionary:
-	return {
-		"eval": _cmd_eval,
+	var commands := {
 		"get_scene_tree": _cmd_get_scene_tree,
 		"get_property": _cmd_get_property,
 		"set_property": _cmd_set_property,
@@ -56,7 +56,6 @@ func get_commands() -> Dictionary:
 		"debug_draw": _cmd_debug_draw,
 		"list_signals": _cmd_list_signals,
 		"await_signal": _cmd_await_signal,
-		"script": _cmd_script,
 		"os_info": _cmd_os_info,
 		"time_scale": _cmd_time_scale,
 		"process_mode": _cmd_process_mode,
@@ -66,6 +65,11 @@ func get_commands() -> Dictionary:
 		"terrain": _cmd_terrain,
 		"locale": _cmd_locale,
 	}
+	# TASK_19 H1: eval/script — произвольный GDScript, только для debug-сборки.
+	if OS.is_debug_build():
+		commands["eval"] = _cmd_eval
+		commands["script"] = _cmd_script
+	return commands
 
 func _cmd_eval(params: Dictionary) -> void:
 	var code: String = params.get("code", "")
@@ -1242,8 +1246,12 @@ func _cmd_await_signal(params: Dictionary) -> void:
 	var cb: Callable = func():
 		result[0] = true
 	node.connect(signal_name, cb, CONNECT_ONE_SHOT)
-	while not result[0] and timer.time_left > 0:
+	# TASK_19: защита от бесконечного цикла, если process_frame не наступает.
+	var max_frames := 10_000
+	var frames := 0
+	while not result[0] and timer.time_left > 0 and frames < max_frames:
 		await server.get_tree().process_frame
+		frames += 1
 	if node.is_connected(signal_name, cb):
 		node.disconnect(signal_name, cb)
 	if result[0]:
@@ -1550,7 +1558,7 @@ func _indent_code(code: String) -> String:
 	for line in lines:
 		if line.strip_edges().is_empty():
 			continue
-		min_indent = mini(min_indent, _leading_ws_len(line))
+		min_indent = mini(min_indent, line.length() - line.lstrip(" \t").length())
 	if min_indent == 9999:
 		min_indent = 0
 	var indented: String = ""
@@ -1559,7 +1567,7 @@ func _indent_code(code: String) -> String:
 			indented += "\n"
 			continue
 		var body: String = line.substr(min_indent)
-		var ws: int = _leading_ws_len(body)
+		var ws: int = body.length() - body.lstrip(" \t").length()
 		# Каждая вложенность: 1 таб или до 4 пробелов. Итог: только табы.
 		var level: int = 0
 		var i: int = 0
@@ -1571,13 +1579,6 @@ func _indent_code(code: String) -> String:
 			level += 1
 		indented += "\t".repeat(1 + level) + body.substr(ws) + "\n"
 	return indented
-
-
-func _leading_ws_len(s: String) -> int:
-	var n: int = 0
-	while n < s.length() and (s[n] == " " or s[n] == "\t"):
-		n += 1
-	return n
 
 
 # --- Get Property ---

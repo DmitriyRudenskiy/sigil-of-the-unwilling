@@ -9,6 +9,8 @@ const DATA_PATH := "res://assets/data/buildings.json"
 const PopUnit := preload("res://scripts/world/PopUnit.gd")
 
 static var _raw_cache: Array = []
+# TASK_19 H2: кэш собранных Def — def_by_id() возвращает тот же объект (===).
+static var _def_cache: Dictionary = {}
 
 static func _ensure_loaded() -> void:
 	if not _raw_cache.is_empty():
@@ -69,15 +71,26 @@ static func all() -> Array[UniqueBuilding.Def]:
 	var out: Array[UniqueBuilding.Def] = []
 	for raw in _raw_cache:
 		if raw is Dictionary:
-			out.append(_build_def(raw))
+			var id := StringName(raw.get("id", ""))
+			if not _def_cache.has(id):
+				_def_cache[id] = _build_def(raw)
+			out.append(_def_cache[id])
 	return out
 
 static func def_by_id(id: StringName) -> UniqueBuilding.Def:
 	_ensure_loaded()
+	if _def_cache.has(id):
+		return _def_cache[id]
 	for raw in _raw_cache:
 		if raw is Dictionary and String(raw.get("id", "")) == String(id):
-			return _build_def(raw)
+			var def := _build_def(raw)
+			_def_cache[id] = def
+			return def
 	return null
+
+static func reset_cache() -> void:
+	_def_cache.clear()
+	_raw_cache.clear()
 
 static func great_temple() -> UniqueBuilding.Def:
 	return def_by_id(&"great_temple")

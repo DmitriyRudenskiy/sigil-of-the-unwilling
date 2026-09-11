@@ -26,7 +26,6 @@ var _grp_input: McpCommandsInput
 var _grp_ui: McpCommandsUI
 var _grp_system: McpCommandsSystem
 var _grp_render: McpCommandsRender
-var _grp_network: McpCommandsNetwork
 var _handlers: Dictionary = {}
 
 func _ready() -> void:
@@ -37,8 +36,8 @@ func _ready() -> void:
 	_grp_ui = McpCommandsUI.new(self)
 	_grp_system = McpCommandsSystem.new(self)
 	_grp_render = McpCommandsRender.new(self)
-	_grp_network = McpCommandsNetwork.new(self)
-	for group in [_grp_input, _grp_ui, _grp_system, _grp_render, _grp_network]:
+	# TASK_19 L1: McpCommandsNetwork (пустая заглушка) удалён.
+	for group in [_grp_input, _grp_ui, _grp_system, _grp_render]:
 		var cmds: Dictionary = group.get_commands()
 		for name in cmds:
 			_handlers[name] = cmds[name]
@@ -139,6 +138,10 @@ func _handle_command(json_str: String) -> void:
 
 	if not _handlers.has(command):
 		_send_response({"error": "Unknown command: %s" % command})
+		return
+	# TASK_19 M3: центральная проверка сцены (заменяет дубли в командах).
+	if not is_inside_tree():
+		_send_response({"error": "Server not in scene tree"})
 		return
 	var handler: Callable = _handlers[command]
 	# Awaiting a non-coroutine handler returns immediately, so one path covers sync and async.

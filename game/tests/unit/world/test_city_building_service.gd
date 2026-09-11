@@ -75,3 +75,20 @@ func test_upgrade_max_level_fails() -> void:
 	var up := CityBuildingService.perform_upgrade(c, bld)
 	assert_that(up.ok).is_false()
 	assert_that(bld.level).is_equal(3)
+
+func test_def_by_id_returns_cached_object() -> void:
+	# TASK_19 H2: повторный вызов — тот же объект (===).
+	var a := BuildingDefs.def_by_id(&"market")
+	var b := BuildingDefs.def_by_id(&"market")
+	assert_that(a).is_not_null()
+	assert_bool(a == b).is_true()
+
+func test_def_cache_reset() -> void:
+	var a := BuildingDefs.def_by_id(&"farm")
+	BuildingDefs.reset_cache()
+	var b := BuildingDefs.def_by_id(&"farm")
+	assert_that(a).is_not_null()
+	assert_that(b).is_not_null()
+	# После reset — новый объект (RefCounted: == тождество).
+	assert_bool(a == b).is_false()
+	assert_that(b.id).is_equal(&"farm")

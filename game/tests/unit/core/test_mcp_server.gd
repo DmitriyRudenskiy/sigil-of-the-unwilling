@@ -157,3 +157,13 @@ func test_json_to_variant_with_type_hint() -> void:
 	var d: Variant = McpSerialization.json_to_variant("{\"x\": 5}", "Dictionary")
 	assert_bool(d is Dictionary).is_true()
 	assert_that(int((d as Dictionary)["x"])).is_equal(5)
+
+func test_eval_and_script_debug_only() -> void:
+	# TASK_19 H1: произвольный GDScript доступен только в debug-сборке.
+	var handlers: Dictionary = _server._handlers
+	if OS.is_debug_build():
+		assert_bool(handlers.has("eval")).is_true()
+		assert_bool(handlers.has("script")).is_true()
+	else:
+		assert_bool(handlers.has("eval")).is_false()
+		assert_bool(handlers.has("script")).is_false()
