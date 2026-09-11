@@ -1,0 +1,40 @@
+class_name GameNumbersMap
+extends RefCounted
+
+const TILE_SIZE                  := 82    # тайл карты в тайл-шиде, px (TileAtlas)
+const MAP_SIZE_MIN              := 40
+const MAP_SIZE_MAX              := 70
+const MAP_VILLAGE_COUNT         := 8
+const MAP_RESOURCE_COUNT        := 25
+const MAP_ENEMY_COUNT           := 20
+const MAP_ENEMY_DEF_BONUS_MIN   := 2
+const MAP_ENEMY_DEF_BONUS_MAX   := 6
+const ENEMY_AGGRO_RADIUS        := 8
+const ENEMY_MP                  := 5.0
+const ENEMY_RESPAWN_TURNS       := 6
+const FOG_HERO_SIGHT            := 3
+const FOG_CITY_SIGHT            := 4
+const CHEST_GOLD_MIN            := 30
+const CHEST_GOLD_MAX            := 80
+const CHEST_COUNT               := 5
+const MONSTER_DROP_CHANCE       := 0.05
+const RESOURCE_CAPACITY         := 10
+const RESOURCE_AUTO_WOOD        := 2
+const RESOURCE_AUTO_STONE       := 2
+const RESOURCE_NODE_REMOVE_DAYS := 3
+const RESOURCE_NODE_CHANCE      := 0.08
+const SPAWN_DECOR_SAND_CHANCE   := 0.04
+const SPAWN_SCROLL_MAX_ATTEMPTS := 200
+const SPAWN_CHEST_MIN_BORDER    := 3
+const SPAWN_ENEMY_MIN_BORDER    := 3
+const SALTPETER_EXPLOSION_MULT  := 2.0
+const CHEST_PLACE_ATTEMPTS      := 2000
+const MAP_RESOURCE_SPACING_DIVISOR := 6.0
+const MAP_RESOURCE_SPACING_MIN  := 5
+const MAP_RESOURCE_SPACING_MAX  := 13
+const EDITOR_SEED               := 12345
+const SPAWN_RESOURCE_NODE_CHANCE := 0.08
+const WEATHER_CLEAR             := 0
+const WEATHER_RAIN              := 1
+const WEATHER_SNOW              := 2
+const WEATHER_STORM             := 3

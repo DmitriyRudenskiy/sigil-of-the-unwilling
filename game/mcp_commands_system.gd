@@ -1,8 +1,22 @@
 class_name McpCommandsSystem
 extends McpCommandsBase
 
+## Operations that must not be reachable from eval/script commands (TASK_18 R3).
+const EVAL_BLOCKED_PATTERNS: Array[String] = [
+	"OS.execute", "OS.shell_open", "FileAccess.open",
+	"DirAccess.open", "ResourceLoader.load", "load(",
+	"get_tree().quit", "get_tree().change_scene(",
+]
+
 var _debug_draw_node: Node = null
 var _debug_meshes: Array = []
+
+## Returns the first blocked pattern found in code, or "" if the code is clean.
+func _find_blocked_pattern(code: String) -> String:
+	for pattern in EVAL_BLOCKED_PATTERNS:
+		if code.contains(pattern):
+			return pattern
+	return ""
 
 func get_commands() -> Dictionary:
 	return {
@@ -53,6 +67,10 @@ func _cmd_eval(params: Dictionary) -> void:
 	var code: String = params.get("code", "")
 	if code.is_empty():
 		server._send_response({"error": "No code provided"})
+		return
+	var blocked: String = _find_blocked_pattern(code)
+	if not blocked.is_empty():
+		server._send_response({"error": "Blocked operation: %s" % blocked})
 		return
 
 	# Wrap user code in a function so we can capture the return value
@@ -1238,6 +1256,10 @@ func _cmd_script(params: Dictionary) -> void:
 			var source: String = params.get("source", "")
 			if source.is_empty():
 				server._send_response({"error": "source is required for attach"})
+				return
+			var blocked: String = _find_blocked_pattern(source)
+			if not blocked.is_empty():
+				server._send_response({"error": "Blocked operation: %s" % blocked})
 				return
 			var s: GDScript = GDScript.new()
 			s.source_code = source

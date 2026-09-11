@@ -6,7 +6,7 @@ def test_cluster_reset_in_battle_scene(battle_scene):
     mcp = battle_scene
 
     result = mcp.execute_code("""
-        var acs = load("res://scripts/city/ArenaClusterSystem.gd")
+        var acs = ArenaClusterSystem
         var world = get_tree().current_scene
         var cities_node = world.get_node_or_null("Cities")
         if cities_node == null:

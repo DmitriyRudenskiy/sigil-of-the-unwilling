@@ -24,8 +24,7 @@ func get_commands() -> Dictionary:
 	}
 
 func _cmd_click(params: Dictionary) -> void:
-	if not server.is_inside_tree():
-		server._send_response_raw({"error": "Server not in scene tree"})
+	if not _require_scene_tree():
 		return
 	var x: float = float(params.get("x", 0))
 	var y: float = float(params.get("y", 0))
@@ -58,8 +57,7 @@ func _cmd_click(params: Dictionary) -> void:
 
 
 func _cmd_key_press(params: Dictionary) -> void:
-	if not server.is_inside_tree():
-		server._send_response_raw({"error": "Server not in scene tree"})
+	if not _require_scene_tree():
 		return
 	var action: String = params.get("action", "")
 	var key: String = params.get("key", "")

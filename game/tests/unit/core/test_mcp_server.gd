@@ -28,7 +28,7 @@ func after_test() -> void:
 
 func test_handlers_registered() -> void:
 	var handlers: Dictionary = _server._handlers
-	assert_that(handlers.size()).is_greater(100)
+	assert_that(handlers.size()).is_greater(90)  # 3D/network dead-weights removed (TASK_18 Phase 5)
 	assert_bool(handlers.has("os_info")).is_true()
 	assert_bool(handlers.has("eval")).is_true()
 
@@ -56,6 +56,37 @@ func test_handle_command_non_object_json() -> void:
 	_server._handle_command("[1, 2]")
 	var r: Dictionary = _server.responses[0]
 	assert_that(String(r.get("error", ""))).contains("Expected JSON object")
+
+
+func test_handle_command_requires_auth_token_when_set() -> void:
+	_server._auth_token = "secret"
+	_server._handle_command("{\"command\": \"os_info\", \"params\": {}}")
+	var rejected: Dictionary = _server.responses[0]
+	assert_that(String(rejected.get("error", ""))).is_equal("Unauthorized")
+	_server._handle_command("{\"command\": \"os_info\", \"params\": {}, \"token\": \"secret\"}")
+	var accepted: Dictionary = _server.responses[1]
+	assert_that(String(accepted.get("error", ""))).is_empty()
+	_server._auth_token = ""
+
+
+func test_eval_blocks_dangerous_operations() -> void:
+	var sys := McpCommandsSystem.new(_server)
+	sys._cmd_eval({"code": "OS.execute(\"ls\", [])"})
+	var r: Dictionary = _server.responses[0]
+	assert_that(String(r.get("error", ""))).contains("Blocked operation")
+	sys._cmd_eval({"code": "var f = FileAccess.open('user://x', FileAccess.WRITE)"})
+	r = _server.responses[1]
+	assert_that(String(r.get("error", ""))).contains("Blocked operation")
+	sys._cmd_eval({"code": "load('res://x.gd')"})
+	r = _server.responses[2]
+	assert_that(String(r.get("error", ""))).contains("Blocked operation")
+
+
+func test_script_attach_blocks_dangerous_operations() -> void:
+	var sys := McpCommandsSystem.new(_server)
+	sys._cmd_script({"node_path": "/root", "action": "attach", "source": "func _ready(): OS.execute('ls', [])"})
+	var r: Dictionary = _server.responses[0]
+	assert_that(String(r.get("error", ""))).contains("Blocked operation")
 
 
 func test_handle_command_busy_rejects() -> void:

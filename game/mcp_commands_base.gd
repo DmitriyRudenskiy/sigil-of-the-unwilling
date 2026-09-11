@@ -16,9 +16,12 @@ func get_commands() -> Dictionary:
 	return {}
 
 
-## Whether the given command suspends (its implementation uses await).
-func is_async(command: String) -> bool:
-	return false
+## Rejects the request unless the server is in the scene tree. Returns false if rejected.
+func _require_scene_tree() -> bool:
+	if not server.is_inside_tree():
+		server._send_response_raw({"error": "Server not in scene tree"})
+		return false
+	return true
 
 
 ## Execute a command by name. Returns the handler result (or an error dict).
@@ -30,12 +33,17 @@ func execute(command: String, params: Dictionary) -> Variant:
 
 
 ## Shared helper: collect nodes of a class under a root (used by render + system groups).
-func _find_by_class_recursive(node: Node, class_filter: String, results: Array) -> void:
-	if node.get_class() == class_filter or node.is_class(class_filter):
-		results.append({
-			"name": node.name,
-			"type": node.get_class(),
-			"path": str(node.get_path())
-		})
-	for child in node.get_children():
-		_find_by_class_recursive(child, class_filter, results)
+## Iterative DFS (TASK_18 R8): no stack overflow on deep trees, no infinite
+## recursion if a cycle is ever introduced into the node tree.
+func _find_by_class_recursive(root: Node, class_filter: String, results: Array) -> void:
+	var stack: Array[Node] = [root]
+	while not stack.is_empty():
+		var node: Node = stack.pop_back()
+		if node.get_class() == class_filter or node.is_class(class_filter):
+			results.append({
+				"name": node.name,
+				"type": node.get_class(),
+				"path": str(node.get_path())
+			})
+		for child: Node in node.get_children():
+			stack.push_back(child)

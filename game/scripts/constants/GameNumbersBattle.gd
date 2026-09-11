@@ -1,0 +1,46 @@
+class_name GameNumbersBattle
+extends RefCounted
+
+const BATTLE_BOARD_W             := 17
+const BATTLE_BOARD_H             := 11
+const BATTLE_HEX_OUTLINE_RADIUS := 38.0
+const BATTLE_ATTACK_LUNGE_PX    := 26.0
+const BATTLE_MOVE_TWEEN_SEC     := 0.15
+const BATTLE_ATTACK_ANIM_SEC    := 0.3
+const BATTLE_SPELL_ANIM_TIME    := 0.35
+const BATTLE_AI_THINK_TIME      := 0.7
+const BATTLE_TURN_DELAY         := 0.15
+const BATTLE_FIELD_RING         := 5
+const BATTLE_CLICK_RADIUS_PX    := 60.0
+const BATTLE_FLOATING_TEXT_OFFSET := Vector2(-30, -60)
+const BATTLE_DAMAGE_NUMBER_OFFSET := Vector2(-16, -50)
+const ATK_ADVANTAGE_PER_POINT   := 0.05
+const DEF_ADVANTAGE_PER_POINT   := 0.025
+const MAX_DAMAGE_MULTIPLIER     := 5.0
+const MIN_DAMAGE_MULTIPLIER     := 0.3
+const LUCK_CHANCE               := 0.10
+const MORALE_CHANCE             := 0.08
+const DEFEND_DEFENSE_BONUS      := 1.2
+const RANGED_MELEE_PENALTY      := 0.5
+const RETREAT_SURVIVAL_RATIO    := 0.5
+const RETREAT_STACK_LIMIT       := 2
+const MAX_UNITS_PER_SIDE        := 7
+const CHARGE_MULT               := 1.5
+const BREATH_DMG_RATIO          := 0.5
+const STATUS_PROC_CHANCE        := 0.20
+const REBIRTH_CHANCE            := 0.20
+const BATTLE_RETREAT_LOSS_FRACTION := 0.5
+const BATTLE_DEFEND_BONUS_DEFENSE  := 0.20
+const ASTAR_HEURISTIC_WEIGHT       := 1.0
+const HIT_FLASH_SEC          := 0.1
+const HIT_FLASH_RECOVER_SEC  := 0.2
+const UNIT_REMOVE_FADE_SEC   := 0.25
+const ATTACK_LUNGE_OUT_SEC   := 0.08
+const ATTACK_LUNGE_BACK_SEC  := 0.12
+const FLOATING_TEXT_RISE_PX  := 30.0
+const FLOATING_TEXT_FADE_SEC := 0.6
+const DAMAGE_NUMBER_RISE_PX  := 24.0
+const DAMAGE_NUMBER_FADE_SEC := 0.5
+const RETALIATION_ARROW_FADE_SEC := 0.35
+const PULSE_ANIM_SEC         := 0.15
+const PULSE_SCALE            := 1.25

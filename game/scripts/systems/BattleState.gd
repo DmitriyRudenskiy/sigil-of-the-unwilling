@@ -15,6 +15,7 @@ var battle_over := false
 enum Side { NONE, ATTACKER, DEFENDER }
 
 var battle_winner: BattleState.Side = Side.NONE
+var hex_shift_right: bool = true
 var attacker_hero_bonus: Dictionary[StringName, int] = {
     &"attack": 0,
     &"defense": 0,
@@ -31,10 +32,11 @@ var defender_hero_bonus: Dictionary[StringName, int] = {
 
 var _reachable_cache: Dictionary = {}
 var _board_version: int = 0
-var _cache_sig := -1
+var _cache_sig: String = ""
 var _uid := 0
 
 var _unit_grid: Dictionary = {}
+var _all_units_cells: Dictionary = {}
 
 var _attacker_alive_count := 0
 var _defender_alive_count := 0
@@ -155,6 +157,7 @@ func place_army(
 	builder.set_attacker_artifact_mods(attacker_artifact_mods)
 	builder.set_defender_artifact_mods(defender_artifact_mods)
 	builder.build_into(self)
+	assert(not (attacker_units.is_empty() and defender_units.is_empty()), "place_army: battle has no units")
 
 func build_queue() -> void:
 	turn_queue.clear()
@@ -180,11 +183,26 @@ func build_queue() -> void:
 		return a.uid < b.uid
 	)
 
+	# TASK_18 R9 invariants: queue holds exactly the alive units.
+	var _alive: int = 0
+	for u in attacker_units:
+		if u.is_alive():
+			_alive += 1
+	for u in defender_units:
+		if u.is_alive():
+			_alive += 1
+	for u in turn_queue:
+		assert(u.is_alive(), "build_queue: dead unit in turn queue")
+	assert(turn_queue.size() == _alive, "build_queue: queue size != alive units")
+
 	turn_idx = -1
 
 func advance_turn() -> void:
 	turn_idx += 1
 	_normalize_active_unit()
+	# TASK_18 R9 invariant: after normalization the active unit is alive (or battle is over).
+	if active_unit != null:
+		assert(active_unit.is_alive() or battle_over, "advance_turn: active unit is dead")
 
 func _normalize_active_unit() -> void:
 	while turn_idx < turn_queue.size():
@@ -241,12 +259,22 @@ func get_unit_at(cell: Vector2i, side: BattleState.Side) -> BattleUnit:
 
 func _rebuild_unit_grid() -> void:
 	_unit_grid = {Side.ATTACKER: {}, Side.DEFENDER: {}}
+	_rebuild_all_units_cells()
 	for u in attacker_units:
 		if u.is_alive():
 			_unit_grid[Side.ATTACKER][u.cell] = u
 	for u in defender_units:
 		if u.is_alive():
 			_unit_grid[Side.DEFENDER][u.cell] = u
+
+func _rebuild_all_units_cells() -> void:
+	_all_units_cells.clear()
+	for u in attacker_units:
+		if u.is_alive():
+			_all_units_cells[u.cell] = true
+	for u in defender_units:
+		if u.is_alive():
+			_all_units_cells[u.cell] = true
 
 func get_units_by_side(side: BattleState.Side) -> Array[BattleUnit]:
 	return attacker_units if side == Side.ATTACKER else defender_units
@@ -269,7 +297,7 @@ func get_reachable_for_unit(unit: BattleUnit, blocked_fn: Callable) -> Dictionar
 				if blocked.has(c):
 					continue
 
-				var dist: int = HexUtils.hex_distance(unit.cell, c)
+				var dist: int = HexUtils.hex_distance(unit.cell, c, hex_shift_right)
 				if dist <= unit.get_speed():
 					result[c] = dist
 
@@ -285,29 +313,34 @@ func get_reachable_for_unit(unit: BattleUnit, blocked_fn: Callable) -> Dictionar
 func get_reachable(cell: Vector2i, speed: int, blocked_fn: Callable, _unit: BattleUnit = null) -> Dictionary:
 	var blocked: Dictionary = blocked_fn.call()
 
-	var sig := _cache_signature(blocked)
-	if sig != _cache_sig:
-		_reachable_cache.clear()
-		_cache_sig = sig
+	var sig := _cache_signature(blocked, _unit)
+	
+	if not _reachable_cache.has(sig):
+		_reachable_cache[sig] = {}
+	
+	var sig_cache: Dictionary = _reachable_cache[sig]
+	if sig_cache.has(cell):
+		var speed_cache: Dictionary = sig_cache[cell]
+		if speed_cache.has(speed):
+			return speed_cache[speed].duplicate()
 
-	var speed_cache: Dictionary = _reachable_cache.get(cell, {})
-	if speed_cache.has(speed):
-		return speed_cache[speed].duplicate()
+	var reachable := HexPathfinding.bfs_reachable(cell, speed, blocked, BW, BH, hex_shift_right)
 
-	var reachable := HexPathfinding.bfs_reachable(cell, speed, blocked, BW, BH)
-
-	if not _reachable_cache.has(cell):
-		_reachable_cache[cell] = {}
-	_reachable_cache[cell][speed] = reachable
+	if not sig_cache.has(cell):
+		sig_cache[cell] = {}
+	sig_cache[cell][speed] = reachable
 	return reachable.duplicate()
 
-func _cache_signature(blocked: Dictionary) -> int:
-	var h := 0
-	for cell in blocked:
-		var p := cell as Vector2i
-		h = (h * 31 + p.x * 73856093) & 0x7FFFFFFF
-		h = (h * 31 + p.y * 19349663) & 0x7FFFFFFF
-	return (_board_version + 1) * 1000003 + h
+func _cache_signature(blocked: Dictionary, unit: BattleUnit = null) -> String:
+	if unit != null:
+		return str(_board_version) + "|" + str(unit.uid)
+	
+	var cells: Array = blocked.keys()
+	cells.sort()
+	var s := ""
+	for c in cells:
+		s += str(c) + ","
+	return str(_board_version) + "|" + s
 
 func get_unreachable_ring(unit: BattleUnit, blocked_fn: Callable) -> Dictionary:
 	if unit == null:
@@ -322,8 +355,8 @@ func get_unreachable_ring(unit: BattleUnit, blocked_fn: Callable) -> Dictionary:
 				var c := Vector2i(x, y)
 				if c == unit.cell or blocked.has(c):
 					continue
-				if HexUtils.hex_distance(unit.cell, c) == speed + 1:
-					ring[c] = HexUtils.hex_distance(unit.cell, c)
+				if HexUtils.hex_distance(unit.cell, c, hex_shift_right) == speed + 1:
+					ring[c] = HexUtils.hex_distance(unit.cell, c, hex_shift_right)
 		return ring
 
 	var near: Dictionary = get_reachable(unit.cell, unit.get_speed() + 1, blocked_fn, unit)
@@ -337,15 +370,12 @@ func get_unreachable_ring(unit: BattleUnit, blocked_fn: Callable) -> Dictionary:
 func invalidate_board_cache() -> void:
 	_board_version += 1
 	_reachable_cache.clear()
+	_rebuild_all_units_cells()
 
 func build_all_blocked(except_unit: BattleUnit, obstacles: Dictionary) -> Dictionary:
-	var b: Dictionary = {}
-	for u in attacker_units:
-		if u != except_unit and u.is_alive():
-			b[u.cell] = true
-	for u in defender_units:
-		if u != except_unit and u.is_alive():
-			b[u.cell] = true
+	var b: Dictionary = _all_units_cells.duplicate()
+	if except_unit != null and except_unit.is_alive():
+		b.erase(except_unit.cell)
 	for o in obstacles:
 		b[o] = true
 	return b

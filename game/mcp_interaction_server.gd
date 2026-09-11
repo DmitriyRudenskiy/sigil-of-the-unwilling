@@ -13,6 +13,8 @@ var _busy_since: float = 0.0
 var _current_id: Variant = null
 const PORT: int = 9090
 const BUSY_TIMEOUT: float = 120.0
+const AUTH_TOKEN_ENV := "MCP_AUTH_TOKEN"
+var _auth_token: String = ""
 
 var _grp_input: McpCommandsInput
 var _grp_ui: McpCommandsUI
@@ -24,6 +26,7 @@ var _handlers: Dictionary = {}
 func _ready() -> void:
 	# Ensure MCP server keeps processing even when game is paused
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_auth_token = OS.get_environment(AUTH_TOKEN_ENV)
 	_grp_input = McpCommandsInput.new(self)
 	_grp_ui = McpCommandsUI.new(self)
 	_grp_system = McpCommandsSystem.new(self)
@@ -112,6 +115,11 @@ func _handle_command(json_str: String) -> void:
 
 	var req_id: Variant = data.get("id", null)
 
+	# Auth is opt-in: when MCP_AUTH_TOKEN is set, every request must carry it.
+	if not _auth_token.is_empty() and str(data.get("token", "")) != _auth_token:
+		_send_response_raw({"error": "Unauthorized", "id": req_id})
+		return
+
 	if _busy:
 		_send_response_raw({"error": "Server busy processing another command. Try again.", "id": req_id})
 		return
@@ -162,7 +170,6 @@ func _send_response_raw(data: Dictionary) -> void:
 
 func _exit_tree() -> void:
 	_grp_system._clear_debug_draw()
-	_grp_network._close_websocket()
 	if _client != null:
 		_client.disconnect_from_host()
 		_client = null

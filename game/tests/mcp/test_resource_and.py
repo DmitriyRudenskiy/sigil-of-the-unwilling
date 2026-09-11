@@ -11,7 +11,7 @@ def test_extraction_strict_and(world_scene):
         var cell = Vector2i(15, 15)
         var node = rnm._spawn_node(cell, &"saltpeter", 5)
         node.discover()
-        var nm = load("res://scripts/world/ResourceNodeManager.gd")
+        var nm = ResourceNodeManager
         return {
             "key_missing": int(nm.NodeError.EXTRACTION_KEY_MISSING),
             "cell": {"x": cell.x, "y": cell.y},

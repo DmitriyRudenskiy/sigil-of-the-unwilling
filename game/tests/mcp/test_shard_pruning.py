@@ -7,7 +7,7 @@ def test_prune_shards_no_crash(world_scene):
         var world = get_tree().current_scene
         var persistence = world.get_node_or_null("SaveManager")
         # Используем WorldPersistence напрямую через код
-        var wp = load("res://scripts/world/WorldPersistence.gd").new(null)
+        var wp = WorldPersistence.new(null)
 
         # Создаём 15 шардов с разными датами активности
         var shards := {}
@@ -39,7 +39,7 @@ def test_prune_shards_with_stringname_keys(world_scene):
     mcp = world_scene
 
     result = mcp.execute_code("""
-        var wp = load("res://scripts/world/WorldPersistence.gd").new(null)
+        var wp = WorldPersistence.new(null)
 
         # Создаём шарды со StringName-ключами (как в реальной игре)
         var shards := {}
@@ -80,7 +80,7 @@ def test_full_save_load_cycle_with_many_shards(world_scene):
         var save_manager = SaveManager.new()
 
         # Создаём SaveData с большим количеством шардов
-        var save_data = load("res://scripts/core/SaveData.gd").new()
+        var save_data = SaveData.new()
         save_data.run_seed = 12345
         save_data.date = {"month": 1, "week": 1, "day": 1}
         save_data.hero = {
@@ -134,7 +134,7 @@ def test_prune_preserves_newest_shards(world_scene):
     mcp = world_scene
 
     result = mcp.execute_code("""
-        var wp = load("res://scripts/world/WorldPersistence.gd").new(null)
+        var wp = WorldPersistence.new(null)
 
         var shards := {}
         # Все шарды активны (не старше 50 ходов от current_turn=150),

@@ -4,12 +4,12 @@ def test_session_reset_caches(world_scene):
     mcp = world_scene
 
     result = mcp.execute_code("""
-        var ri = load("res://scripts/data/ResourceIcons.gd")
-        var acs = load("res://scripts/city/ArenaClusterSystem.gd")
-        var runner = load("res://scripts/city/ArenaTurnRunner.gd")
-        var ring = load("res://scripts/city/ArenaRingSystem.gd")
-        var defs = load("res://scripts/data/BuildingDefs.gd")
-        var hex = load("res://scripts/core/HexUtils.gd")
+        var ri = ResourceIcons
+        var acs = ArenaClusterSystem
+        var runner = ArenaTurnRunner
+        var ring = ArenaRingSystem
+        var defs = BuildingDefs
+        var hex = HexUtils
 
         # ── Сессия 1: город с кластером из 4 ферм ──
         acs.reset()
