@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 const FOOD_PER_TILE := 100.0
 
@@ -53,7 +53,7 @@ func test_growth_births_follow_threshold() -> void:
 	assert_almost_eq(c.food_stockpile, FOOD_PER_TILE - 1.0 - 5.0 * pow(2.0, 2.75), 0.01, "food stockpile after birth")
 
 func test_cycle_inflow_summer_with_glory_and_temple() -> void:
-	var mgr := CityManager.new()
+	var mgr = auto_free( CityManager.new())
 	var cap := _city()
 	mgr.register_city(cap, true)
 	cap.storage[&"industry"] = 1000.0
@@ -67,7 +67,7 @@ func test_cycle_inflow_summer_with_glory_and_temple() -> void:
 	mgr.free()
 
 func test_cycle_inflow_winter_halved() -> void:
-	var mgr := CityManager.new()
+	var mgr = auto_free( CityManager.new())
 	var cap := _city()
 	mgr.register_city(cap, true)
 	for i in GameNumbers.CITY_CYCLE_TURNS:
@@ -123,7 +123,7 @@ func test_free_building_placement_distance() -> void:
 	assert_bool(c.can_build_building(BuildingDefs.market(), near).ok).is_true()
 
 func test_overflow_transfer_between_cities() -> void:
-	var mgr := CityManager.new()
+	var mgr = auto_free( CityManager.new())
 	var cap := _city()
 	var other := _city()
 	mgr.register_city(cap, true)

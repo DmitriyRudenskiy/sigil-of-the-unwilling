@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 func test_initially_unexplored() -> void:
 	var v := VisibilityMap.new()

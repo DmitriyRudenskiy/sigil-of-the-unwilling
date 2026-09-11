@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 const _Scene := preload("res://scenes/BattleView.tscn")
 

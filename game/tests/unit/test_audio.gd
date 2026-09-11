@@ -1,15 +1,14 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _Settings = preload("res://scripts/autoload/Settings.gd")
-const _SoundManager = preload("res://scripts/autoload/SoundManager.gd")
-const AudioCues = preload("res://scripts/data/AudioCues.gd")
+
+
 
 var settings: Object
 var sm: Object
 
 func before_test() -> void:
-	settings = _Settings.new()
-	sm = _SoundManager.new()
+	settings = SettingsAutoload.new()
+	sm = SoundManagerAutoload.new()
 
 	for _b in ["SFX", "Music"]:
 		if AudioServer.get_bus_index(_b) == -1:

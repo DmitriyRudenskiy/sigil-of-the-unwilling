@@ -1,18 +1,17 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _Executor = preload("res://scripts/systems/BattleTurnExecutor.gd")
 
 func test_spellbook_button_is_action_button() -> void:
 	var action = true
 	assert_bool(action).is_true()
 
 func test_spell_chosen_ignored_when_locked() -> void:
-	var exec = _Executor.new()
+	var exec = BattleTurnExecutor.new()
 	assert_bool(exec.is_input_active()).is_false()
 	exec.free()
 
 func test_is_input_active_states() -> void:
-	var exec = _Executor.new()
+	var exec = BattleTurnExecutor.new()
 	assert_bool(exec.is_input_active()).is_false()
 	exec.free()
 
@@ -22,7 +21,7 @@ func test_spell_chosen_panel_closes() -> void:
 	var atk_stack: UnitStack = units.make_fixed_stack("swordsmen", 20)
 	var def_stack: UnitStack = units.make_fixed_stack("goblins", 20)
 	state.place_army([atk_stack], [def_stack])
-	var exec := _Executor.new()
+	var exec = auto_free( BattleTurnExecutor.new())
 	exec.name = "ExecSpellbook"
 	exec.setup(state, BattleAI.new(), {})
 	state.active_unit = state.attacker_units[0]

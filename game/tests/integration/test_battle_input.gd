@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 const MockBattleView := preload("res://tests/fakes/MockBattleView.gd")
 
@@ -7,17 +7,11 @@ var _view: MockBattleView
 var _state: BattleState
 var _unit_a: BattleState.BattleUnit
 
-func _make_unit(key: String, count: int, side: BattleState.Side) -> BattleState.BattleUnit:
-	var u := BattleState.BattleUnit.new(UnitStack.new(UnitStats.new(key, key, 5, 3, 5, 3, 2), count))
-	u.side = side
-	u.max_count = count
-	return u
-
 func before_test() -> void:
 	_input = BattleInput.new()
 	_view = MockBattleView.new()
 	_state = BattleState.new()
-	_unit_a = _make_unit("swordsmen", 5, BattleState.Side.ATTACKER)
+	_unit_a = TestFactories.make_battle_unit_raw("swordsmen", 5, BattleState.Side.ATTACKER)
 	_unit_a.cell = Vector2i(2, 2)
 	_state.attacker_units.append(_unit_a)
 
@@ -51,7 +45,7 @@ func test_clear_highlights_resets_visuals_and_state() -> void:
 func test_attack_highlight_melee() -> void:
 
 	_input.setup(_view, _state, {})
-	var enemy := _make_unit("goblins", 5, BattleState.Side.DEFENDER)
+	var enemy := TestFactories.make_battle_unit_raw("goblins", 5, BattleState.Side.DEFENDER)
 	enemy.cell = HexUtils.get_all_neighbors(_unit_a.cell)[0]
 	_state.defender_units.append(enemy)
 	_state._rebuild_unit_grid()
@@ -61,11 +55,11 @@ func test_attack_highlight_melee() -> void:
 func test_attack_highlight_ranged_no_adjacent() -> void:
 
 	_input.setup(_view, _state, {})
-	var ranged := _make_unit("archers", 5, BattleState.Side.ATTACKER)
+	var ranged := TestFactories.make_battle_unit_raw("archers", 5, BattleState.Side.ATTACKER)
 	ranged.stack.stats.tags.append("ranged")
 	ranged.cell = Vector2i(2, 8)
 	_state.attacker_units.append(ranged)
-	var enemy := _make_unit("goblins", 5, BattleState.Side.DEFENDER)
+	var enemy := TestFactories.make_battle_unit_raw("goblins", 5, BattleState.Side.DEFENDER)
 	enemy.cell = Vector2i(10, 10)
 	_state.defender_units.append(enemy)
 	_state._rebuild_unit_grid()

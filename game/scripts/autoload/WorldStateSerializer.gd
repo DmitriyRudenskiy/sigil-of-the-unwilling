@@ -20,7 +20,7 @@ func get_state(world_ctrl, battle_ctrl) -> Dictionary:
 		var map_gen = world_ctrl.get_map_gen()
 
 		if hero:
-			state.hero_pos = {"x": hero.current_cell.x, "y": hero.current_cell.y}
+			state.hero_pos = SerializationUtils.vec2i_to_dict(hero.current_cell)
 			state.move_points = hero.move_points
 			state.max_move_points = hero.get_daily_movement_points()
 			state.basic_resources = hero.resources.to_string_dict()
@@ -71,7 +71,7 @@ func get_state(world_ctrl, battle_ctrl) -> Dictionary:
 				var visible_enemies: Array = []
 				for cell in map_gen.enemy_stacks:
 					if fog.is_visible(cell):
-						visible_enemies.append({"x": cell.x, "y": cell.y})
+						visible_enemies.append(SerializationUtils.vec2i_to_dict(cell))
 				state.visible_enemies = visible_enemies
 
 		var cities_mgr = world_ctrl.get_cities()
@@ -89,7 +89,7 @@ func get_state(world_ctrl, battle_ctrl) -> Dictionary:
 
 		var _villages: Array = []
 		for _c in map_gen.village_cells:
-			_villages.append({"x": _c.x, "y": _c.y})
+			_villages.append(SerializationUtils.vec2i_to_dict(_c))
 		state.map_villages = _villages
 
 	if battle_ctrl:

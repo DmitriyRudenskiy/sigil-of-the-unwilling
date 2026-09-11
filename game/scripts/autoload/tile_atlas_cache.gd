@@ -15,12 +15,12 @@ func clear_cache() -> void:
 func _build_tileset() -> TileSet:
 	var atlas_script := load("res://scripts/world/tile_atlas.gd")
 	if atlas_script == null:
-		push_error("TileAtlasCache: не найден скрипт тайл-атласа.")
+		push_error("TileAtlasCache: tile atlas script not found.")
 		return null
 
 	var atlas = atlas_script.new()
 	if atlas == null:
-		push_error("TileAtlasCache: не удалось создать экземпляр тайл-атласа.")
+		push_error("TileAtlasCache: failed to create tile atlas instance.")
 		return null
 
 	if atlas.has_method("build_hex"):
@@ -28,5 +28,5 @@ func _build_tileset() -> TileSet:
 		if ts is TileSet:
 			return ts
 
-	push_error("TileAtlasCache: тайл-атлас не вернул тайл-сет.")
+	push_error("TileAtlasCache: tile atlas did not return a tileset.")
 	return null

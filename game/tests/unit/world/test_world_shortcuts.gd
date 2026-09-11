@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 ## WorldShortcuts: hotkey handling, city-overlay priority, visibility guards.
 
 class _StubUI extends WorldUIManager:

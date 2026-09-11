@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 ## WorldInput: click / right-click / wheel handling and overlay guards.
 
 class _StubHero extends HeroController:

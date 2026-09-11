@@ -1,7 +1,6 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const City = preload("res://scripts/world/City.gd")
-const PopUnit = preload("res://scripts/world/PopUnit.gd")
+
 
 var _city: City
 

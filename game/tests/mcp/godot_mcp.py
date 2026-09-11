@@ -5,9 +5,15 @@ import socket
 import time
 from typing import Any
 
+import inspect
+from datetime import timedelta
+
 import anyio
 from mcp import ClientSession
-from mcp.shared.exceptions import MCPError as _SdkMCPError
+try:
+    from mcp.shared.exceptions import MCPError as _SdkMCPError
+except ImportError:  #新版 mcp SDK: McpError
+    from mcp.shared.exceptions import McpError as _SdkMCPError
 
 MCP_INTERACTION_PORT = 9090
 DEFAULT_TIMEOUT = 120.0
@@ -16,6 +22,15 @@ PORT_FREE_TIMEOUT = 60.0
 
 class MCPError(RuntimeError):
     pass
+
+# Новый mcp SDK ожидает timedelta в read_timeout_seconds, старый — float.
+try:
+    _SDK_WANTS_TIMEDI = "timedelta" in str(inspect.signature(ClientSession.call_tool))
+except Exception:
+    _SDK_WANTS_TIMEDI = False
+
+def _timeout_for(seconds: float) -> Any:
+    return timedelta(seconds=seconds) if _SDK_WANTS_TIMEDI else seconds
 
 async def wait_port_free(
     port: int = MCP_INTERACTION_PORT,
@@ -102,13 +117,13 @@ class GodotMCPClient:
 
     async def _call(self, name: str, args: dict, timeout: float) -> Any:
         try:
-            result = await self._session.call_tool(name, args, read_timeout_seconds=timeout)
+            result = await self._session.call_tool(name, args, read_timeout_seconds=_timeout_for(timeout))
         except _SdkMCPError as e:
 
             if "timed out" not in str(e):
                 raise
-            result = await self._session.call_tool(name, args, read_timeout_seconds=timeout)
-        if result.is_error:
+            result = await self._session.call_tool(name, args, read_timeout_seconds=_timeout_for(timeout))
+        if _is_error(result):
             raise MCPError(f"тулз {name} вернул ошибку: {_first_text(result)}")
         text = _first_text(result)
         try:
@@ -118,6 +133,14 @@ class GodotMCPClient:
         if isinstance(data, dict) and data.get("error"):
             raise MCPError(f"тулз {name}: {data['error']}")
         return data
+
+def _is_error(result) -> bool:
+    for attr in ("is_error", "isError"):
+        try:
+            return bool(getattr(result, attr))
+        except AttributeError:
+            continue
+    return False
 
 def _first_text(result) -> str:
     for block in result.content:

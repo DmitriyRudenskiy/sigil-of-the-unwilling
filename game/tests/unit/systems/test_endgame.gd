@@ -1,11 +1,10 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _Endgame = preload("res://scripts/systems/EndgameController.gd")
-const _City = preload("res://scripts/world/City.gd")
-const _CityManager = preload("res://scripts/world/CityManager.gd")
-const _Follower = preload("res://scripts/entities/Follower.gd")
-const _GameSession = preload("res://scripts/core/GameSession.gd")
-const _SaveData = preload("res://scripts/core/SaveData.gd")
+
+
+
+
+
 
 class _MockBattle:
 	extends Node
@@ -46,11 +45,11 @@ var _last_summary: Dictionary = {}
 var _ended_cb: Callable = Callable()
 
 func _make_cities(player_count: int) -> CityManager:
-	var mgr := _CityManager.new()
+	var mgr = auto_free( CityManager.new())
 	mgr.name = "CitiesUnderTest"
 	add_child(mgr)
 	for i in player_count:
-		var c := _City.new()
+		var c := City.new()
 		c.uid = 10 + i
 		c.display_name = &"City%d" % i
 		c.owner = &"player"
@@ -61,7 +60,7 @@ func _make_cities(player_count: int) -> CityManager:
 func _setup_endgame() -> void:
 	_ended_count = 0
 	_last_summary = {}
-	var session := _GameSession.new()
+	var session := GameSession.new()
 	_persistence = _MockPersistence.new()
 	_persistence.session = session
 	_world = _MockWorld.new()
@@ -69,7 +68,7 @@ func _setup_endgame() -> void:
 	_battle = _MockBattle.new()
 	_enemy_proc = _MockEnemyProc.new()
 	_map = _MockMap.new()
-	_ec = _Endgame.new()
+	_ec = EndgameController.new()
 	_ec.name = "EndgameUnderTest"
 	add_child(_ec)
 	add_child(_battle)
@@ -121,7 +120,7 @@ func test_death_without_successor_is_defeat() -> void:
 func test_death_with_successor_keeps_run_running() -> void:
 	_setup_endgame()
 	_world.hero = TestFactories.make_hero()
-	var f := _Follower.new()
+	var f := Follower.new()
 	f.uid = 1
 	f.path = &"archivist"
 	_world.hero.followers = [f]
@@ -143,7 +142,7 @@ func test_last_city_captured_is_defeat() -> void:
 
 func test_city_captured_but_other_alive_stays_running() -> void:
 	_setup_endgame()
-	var c2 := _City.new()
+	var c2 := City.new()
 	c2.uid = 11
 	c2.display_name = &"City2"
 	c2.owner = &"player"
@@ -236,14 +235,14 @@ func test_summary_counters() -> void:
 	assert_that(_last_summary.get("cities_owned")).is_equal(0)
 
 func test_session_serialize_roundtrip() -> void:
-	var s := _GameSession.new()
+	var s := GameSession.new()
 	s.state = GameSession.GameState.DEFEAT
 	s.end_reason = "unsuccessored_death"
 	s.battles_won = 3
 	s.battles_lost = 1
 	s.successions = 2
 
-	var d2: GameSession = _GameSession.new()
+	var d2: GameSession = GameSession.new()
 	d2.deserialize(s.serialize())
 
 	assert_that(d2.state).is_equal(GameSession.GameState.DEFEAT)
@@ -254,23 +253,23 @@ func test_session_serialize_roundtrip() -> void:
 	assert_bool(d2.is_terminal()).is_true()
 
 func test_session_defaults_running() -> void:
-	var s := _GameSession.new()
+	var s := GameSession.new()
 	assert_that(s.state).is_equal(GameSession.GameState.RUNNING)
 	assert_bool(s.is_terminal()).is_false()
 
 func test_save_v5_roundtrip_with_session() -> void:
-	var d := _SaveData.new()
+	var d := SaveData.new()
 	d.run_seed = 777
 	d.hero = {"cell": {"x": 3, "y": 4}, "path_id": "archivist"}
 	d.session = {"state": 2, "end_reason": "total_collapse",
 		"battles_won": 4, "battles_lost": 2, "successions": 1}
 
 	var data := d.to_dict()
-	assert_that(data["version"]).is_equal(_SaveData.CURRENT_VERSION)
+	assert_that(data["version"]).is_equal(SaveData.CURRENT_VERSION)
 
-	var d2 := _SaveData.new()
+	var d2 := SaveData.new()
 	d2.from_dict(data)
-	assert_that(d2.version).is_equal(_SaveData.CURRENT_VERSION)
+	assert_that(d2.version).is_equal(SaveData.CURRENT_VERSION)
 	assert_that(d2.session.get("state")).is_equal(2)
 	assert_that(d2.session.get("end_reason")).is_equal("total_collapse")
 
@@ -279,12 +278,12 @@ func test_migrate_v4_to_v5_defaults() -> void:
 		"hero": {"cell": {"x": 1, "y": 1}, "path_id": "archivist"},
 		"world": {}, "cities": [], "characters": [],
 		"successor": {}, "legend": {}}
-	var d := _SaveData.new()
+	var d := SaveData.new()
 	d.from_dict(v4)
-	assert_that(d.version).is_equal(_SaveData.CURRENT_VERSION)
+	assert_that(d.version).is_equal(SaveData.CURRENT_VERSION)
 	assert_bool(d.session is Dictionary).is_true()
 	assert_that(d.run_seed).is_equal(99)
-	var s := _GameSession.new()
+	var s := GameSession.new()
 	s.deserialize(d.session)
 	assert_that(s.state).is_equal(GameSession.GameState.RUNNING)
 

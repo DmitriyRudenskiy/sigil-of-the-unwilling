@@ -1,6 +1,5 @@
-extends GdUnitTestSuite
-const _BuildingDefs = preload("res://scripts/data/BuildingDefs.gd")
-const _PopUnit = preload("res://scripts/world/PopUnit.gd")
+extends BaseTest
+
 
 var city: City
 
@@ -46,15 +45,15 @@ func test_ring_colors_distinct() -> void:
 
 func test_start_city() -> void:
 	assert_that(city.pop_total()).is_equal(8)
-	assert_that(city.count_state(_PopUnit.State.WORKER)).is_equal(4)
-	assert_that(city.count_state(_PopUnit.State.FOLLOWER)).is_equal(4)
+	assert_that(city.count_state(PopUnit.State.WORKER)).is_equal(4)
+	assert_that(city.count_state(PopUnit.State.FOLLOWER)).is_equal(4)
 	assert_bool(city.food_stockpile >= 20.0).is_true()
 
 func test_place_farm() -> void:
 	var cell: Vector2i = _free_cell(1)
 	assert_bool(cell != Vector2i(-1, -1)).is_true()
 	var industry_before: float = float(city.storage.get(&"industry", 0.0))
-	var res: CityCheck = ArenaTurnRunner.place_building(city, _BuildingDefs.def_by_id(&"farm"), cell)
+	var res: CityCheck = ArenaTurnRunner.place_building(city, BuildingDefs.def_by_id(&"farm"), cell)
 	assert_bool(bool(res.ok)).is_true()
 	assert_bool(city.cell_is_built(cell)).is_true()
 	var industry_after: float = float(city.storage.get(&"industry", 0.0))
@@ -65,7 +64,7 @@ func test_place_farm() -> void:
 			1.0 + GameNumbers.ring_bonus(&"farm", 1))).is_true()
 
 func test_place_outside_arena() -> void:
-	var res: CityCheck = ArenaTurnRunner.place_building(city, _BuildingDefs.def_by_id(&"farm"), Vector2i(60, 60))
+	var res: CityCheck = ArenaTurnRunner.place_building(city, BuildingDefs.def_by_id(&"farm"), Vector2i(60, 60))
 	assert_bool(bool(res.ok)).is_false()
 
 func test_seating_unique_tiles() -> void:
@@ -74,7 +73,7 @@ func test_seating_unique_tiles() -> void:
 	var tiles: Dictionary = {}
 	var ok := true
 	for u in city.pop:
-		if u.state == _PopUnit.State.WORKER and u.tile.x >= 0:
+		if u.state == PopUnit.State.WORKER and u.tile.x >= 0:
 			if tiles.has(u.tile):
 				ok = false
 			tiles[u.tile] = true
@@ -82,20 +81,20 @@ func test_seating_unique_tiles() -> void:
 
 func test_seating_avoids_buildings() -> void:
 	var farm: Vector2i = _free_cell(1)
-	ArenaTurnRunner.place_building(city, _BuildingDefs.def_by_id(&"farm"), farm)
+	ArenaTurnRunner.place_building(city, BuildingDefs.def_by_id(&"farm"), farm)
 	for u in city.pop:
-		if u.state == _PopUnit.State.WORKER and u.tile == farm:
+		if u.state == PopUnit.State.WORKER and u.tile == farm:
 			u.tile = Vector2i(-1, -1)
 	ArenaTurnRunner.seat_workers(city)
 	var ok := true
 	for u in city.pop:
-		if u.state == _PopUnit.State.WORKER and u.tile == farm:
+		if u.state == PopUnit.State.WORKER and u.tile == farm:
 			ok = false
 	assert_bool(ok).is_true()
 
 func test_hire_worker() -> void:
 	var farm: Vector2i = _free_cell(1)
-	ArenaTurnRunner.place_building(city, _BuildingDefs.def_by_id(&"farm"), farm)
+	ArenaTurnRunner.place_building(city, BuildingDefs.def_by_id(&"farm"), farm)
 	var hired: int = ArenaTurnRunner.hire_worker(city)
 	assert_that(hired).is_equal(1)
 	assert_that(city.pop_total()).is_equal(9)
@@ -133,7 +132,7 @@ const _CLUSTER_CELLS: Array = [
 ]
 
 func _place_farm(cell: Vector2i) -> void:
-	var res: CityCheck = ArenaTurnRunner.place_building(city, _BuildingDefs.def_by_id(&"farm"), cell)
+	var res: CityCheck = ArenaTurnRunner.place_building(city, BuildingDefs.def_by_id(&"farm"), cell)
 	assert_bool(bool(res.ok)).is_true()
 
 func test_cluster_forms_on_four_connected() -> void:
@@ -154,7 +153,7 @@ func test_cluster_different_types_not_merged() -> void:
 	for cell in [Vector2i(4, 1), Vector2i(5, 1)]:
 		_place_farm(cell as Vector2i)
 	for cell in [Vector2i(6, 1), Vector2i(7, 2)]:
-		var res: CityCheck = ArenaTurnRunner.place_building(city, _BuildingDefs.def_by_id(&"mill"), cell as Vector2i)
+		var res: CityCheck = ArenaTurnRunner.place_building(city, BuildingDefs.def_by_id(&"mill"), cell as Vector2i)
 		assert_bool(bool(res.ok)).is_true()
 	assert_that(ArenaClusterSystem.clusters(city).size()).is_equal(0)
 
@@ -169,9 +168,9 @@ func test_cluster_multiplier_applied() -> void:
 func test_cluster_housing_bonus() -> void:
 	for cell in _CLUSTER_CELLS:
 		_place_farm(cell as Vector2i)
-	assert_that(ArenaClusterSystem.cluster_worker_housing(city)).is_equal(city.free_housing(_PopUnit.State.WORKER) + GameNumbers.ARENA_CLUSTER_HOUSING)
+	assert_that(ArenaClusterSystem.cluster_worker_housing(city)).is_equal(city.free_housing(PopUnit.State.WORKER) + GameNumbers.ARENA_CLUSTER_HOUSING)
 	var city2 := ArenaTurnRunner.make_city()
-	assert_that(ArenaClusterSystem.cluster_worker_housing(city2)).is_equal(city2.free_housing(_PopUnit.State.WORKER))
+	assert_that(ArenaClusterSystem.cluster_worker_housing(city2)).is_equal(city2.free_housing(PopUnit.State.WORKER))
 
 func test_cell_features_deterministic() -> void:
 	var city2 := ArenaTurnRunner.make_city()
@@ -211,7 +210,7 @@ func test_ruins_gold_bonus() -> void:
 	var cell := Vector2i(2, 3)
 	assert_that(ArenaRingSystem.cell_feature(city, cell)).is_equal(&"ruins")
 	var gold_before: float = float(city.storage.get(&"gold", 0.0))
-	var res: CityCheck = ArenaTurnRunner.place_building(city, _BuildingDefs.def_by_id(&"shack"), cell)
+	var res: CityCheck = ArenaTurnRunner.place_building(city, BuildingDefs.def_by_id(&"shack"), cell)
 	assert_bool(bool(res.ok)).is_true()
 	assert_that(float(res.payload.get("ruins_gold", 0.0))).is_equal(GameNumbers.ARENA_FEATURE_RUINS_GOLD)
 	var gold_after: float = float(city.storage.get(&"gold", 0.0))
@@ -240,7 +239,7 @@ func test_storm_food_and_production() -> void:
 
 func test_storm_mitigated_by_walls() -> void:
 	var cell: Vector2i = _free_cell(1)
-	var res: CityCheck = ArenaTurnRunner.place_building(city, _BuildingDefs.def_by_id(&"walls"), cell)
+	var res: CityCheck = ArenaTurnRunner.place_building(city, BuildingDefs.def_by_id(&"walls"), cell)
 	assert_bool(bool(res.ok)).is_true()
 	var b: UniqueBuilding = city.get_building_at(cell)
 	assert_bool(b != null).is_true()

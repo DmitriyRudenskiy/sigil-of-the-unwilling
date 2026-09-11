@@ -1,11 +1,10 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _Settings = preload("res://scripts/autoload/Settings.gd")
 
 var settings: Object
 
 func before_test() -> void:
-	settings = _Settings.new()
+	settings = SettingsAutoload.new()
 
 func after_test() -> void:
 	if settings != null:
@@ -13,20 +12,20 @@ func after_test() -> void:
 		settings = null
 
 func test_zoom_levels_count() -> void:
-	assert_that(_Settings.ZOOM_LEVELS.size()).is_equal(9)
+	assert_that(SettingsAutoload.ZOOM_LEVELS.size()).is_equal(9)
 
 func test_zoom_levels_order() -> void:
-	var levels := _Settings.ZOOM_LEVELS
+	var levels := SettingsAutoload.ZOOM_LEVELS
 	for i in levels.size() - 1:
 		assert_bool(levels[i] < levels[i + 1]).is_true()
 
 func test_zoom_default() -> void:
-	assert_that(_Settings.DEFAULT_ZOOM_INDEX).is_equal(2)
-	assert_that(_Settings.ZOOM_LEVELS[_Settings.DEFAULT_ZOOM_INDEX]).is_equal(1.0)
+	assert_that(SettingsAutoload.DEFAULT_ZOOM_INDEX).is_equal(2)
+	assert_that(SettingsAutoload.ZOOM_LEVELS[SettingsAutoload.DEFAULT_ZOOM_INDEX]).is_equal(1.0)
 
 func test_zoom_min_max() -> void:
-	assert_that(_Settings.ZOOM_LEVELS[0]).is_equal(0.5)
-	assert_that(_Settings.ZOOM_LEVELS[-1]).is_equal(2.25)
+	assert_that(SettingsAutoload.ZOOM_LEVELS[0]).is_equal(0.5)
+	assert_that(SettingsAutoload.ZOOM_LEVELS[-1]).is_equal(2.25)
 
 func test_zoom_get() -> void:
 	settings.zoom_index = 0
@@ -65,4 +64,4 @@ func test_zoom_set_exact() -> void:
 func test_zoom_values_exact() -> void:
 	var expected := [0.5, 0.7, 1.0, 1.1, 1.25, 1.5, 1.75, 2.0, 2.25]
 	for i in expected.size():
-		assert_that(_Settings.ZOOM_LEVELS[i]).is_equal(expected[i])
+		assert_that(SettingsAutoload.ZOOM_LEVELS[i]).is_equal(expected[i])

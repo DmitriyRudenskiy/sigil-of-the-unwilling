@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 const _STACK_PATH := "res://scripts/entities/UnitStack.gd"
 

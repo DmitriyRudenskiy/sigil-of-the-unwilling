@@ -1,4 +1,5 @@
 extends RefCounted
+class_name BattleEmulator
 
 const BattleSpellBridge = preload("res://scripts/data/BattleSpellBridge.gd")
 

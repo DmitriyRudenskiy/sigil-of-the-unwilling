@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 const _WORLD_SCENE := "res://scenes/World.tscn"
 const TestWait := preload("res://tests/helpers/wait_helpers.gd")

@@ -1,4 +1,5 @@
 extends RefCounted
+class_name HeroRaces
 const RACES := {
 	"human": {
 		"name": "Человек",

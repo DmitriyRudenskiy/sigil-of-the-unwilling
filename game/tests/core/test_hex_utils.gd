@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 func after_test() -> void:
 	HexGrid.shift_right = true

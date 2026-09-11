@@ -1,4 +1,5 @@
 extends Node
+class_name CursorControllerAutoload
 
 enum Mode { DEFAULT = 0, WALK = 1, COLLECT = 2, ATTACK = 3 }
 

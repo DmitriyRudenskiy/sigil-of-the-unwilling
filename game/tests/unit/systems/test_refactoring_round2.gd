@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 const _FakeMap = preload("res://tests/fakes/fake_battle_map.gd")
 const _FakeFlow = preload("res://tests/fakes/fake_battle_flow.gd")
@@ -83,7 +83,7 @@ func test_map_spawner_setup_registry() -> void:
 
 func test_marker_click_no_double() -> void:
 
-	var layer := MarkerLayer.new()
+	var layer = auto_free( MarkerLayer.new())
 	_track_root(layer)
 	get_tree().root.add_child(layer)
 	var map := _ClickMapStub.new()

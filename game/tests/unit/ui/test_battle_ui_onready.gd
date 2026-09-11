@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 const _BattleUIScene := preload("res://scenes/ui/BattleUI.tscn")
 

@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 func _make_grass_model(w: int, h: int) -> MapModel:
 	var model := MapModel.new()

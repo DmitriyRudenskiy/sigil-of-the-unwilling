@@ -1,11 +1,10 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _City = preload("res://scripts/world/City.gd")
-const _Follower = preload("res://scripts/entities/Follower.gd")
-const _FollowerSystem = preload("res://scripts/entities/FollowerSystem.gd")
+
+
 
 func _make_city(followers: int, workers: int = 0) -> RefCounted:
-	var c := _City.new()
+	var c := City.new()
 	c.display_name = "Город"
 	c.center = Vector2i(10, 10)
 	for i in workers:
@@ -15,7 +14,7 @@ func _make_city(followers: int, workers: int = 0) -> RefCounted:
 	return c
 
 func test_roundtrip_all_fields() -> void:
-	var f := _Follower.new()
+	var f := Follower.new()
 	f.uid = 3
 	f.name = "Марк"
 	f.race = &"elf"
@@ -25,7 +24,7 @@ func test_roundtrip_all_fields() -> void:
 	f.trait_ids.append(&"curious")
 	f.stat_modifiers[&"INT"] = 3
 	f.abilities.append(&"fireball")
-	var f2 := _Follower.new()
+	var f2 := Follower.new()
 	f2.deserialize(f.serialize())
 	assert_that(f2.uid).is_equal(3)
 	assert_that(f2.name).is_equal("Марк")
@@ -37,15 +36,15 @@ func test_roundtrip_all_fields() -> void:
 	assert_that(f2.abilities).is_equal([&"fireball"])
 
 func test_roundtrip_defaults() -> void:
-	var f := _Follower.new()
-	var f2 := _Follower.new()
+	var f := Follower.new()
+	var f2 := Follower.new()
 	f2.deserialize(f.serialize())
 	assert_that(f2.race).is_equal(f.race)
 	assert_bool((f2.trait_ids as Array).is_empty()).is_true()
 	assert_bool((f2.abilities as Array).is_empty()).is_true()
 
 func test_to_dict_json_compatible() -> void:
-	var f := _Follower.new()
+	var f := Follower.new()
 	f.name = "Вера"
 	f.race = &"dwarf"
 	f.path = &"cleric"
@@ -64,9 +63,9 @@ func test_to_dict_json_compatible() -> void:
 
 func test_recruit_moves_follower_from_city_to_hero() -> void:
 	var city := _make_city(2)
-	var hero := HeroController.new()
+	var hero = auto_free( HeroController.new())
 	var before: int = city.pop.size()
-	var f := _FollowerSystem.recruit(city, hero, TestFactories.seeded(42))
+	var f := FollowerSystem.recruit(city, hero, TestFactories.seeded(42))
 	assert_that(f).is_not_null()
 	assert_that(city.pop.size()).is_equal(before - 1)
 	assert_that(hero.followers.size()).is_equal(1)
@@ -76,18 +75,18 @@ func test_recruit_moves_follower_from_city_to_hero() -> void:
 
 func test_recruit_null_without_free_followers() -> void:
 	var city := _make_city(0, 3)
-	var hero := HeroController.new()
-	assert_that(_FollowerSystem.recruit(city, hero, TestFactories.seeded(1))).is_null()
+	var hero = auto_free( HeroController.new())
+	assert_that(FollowerSystem.recruit(city, hero, TestFactories.seeded(1))).is_null()
 	assert_that(hero.followers.size()).is_equal(0)
 	hero.free()
 
 func test_recruit_deterministic_with_same_seed() -> void:
 	var c1 := _make_city(1)
 	var c2 := _make_city(1)
-	var h1 := HeroController.new()
-	var h2 := HeroController.new()
-	var f1 := _FollowerSystem.recruit(c1, h1, TestFactories.seeded(7))
-	var f2 := _FollowerSystem.recruit(c2, h2, TestFactories.seeded(7))
+	var h1 = auto_free( HeroController.new())
+	var h2 = auto_free( HeroController.new())
+	var f1 := FollowerSystem.recruit(c1, h1, TestFactories.seeded(7))
+	var f2 := FollowerSystem.recruit(c2, h2, TestFactories.seeded(7))
 	assert_that(f1.name).is_equal(f2.name)
 	assert_that(f1.race).is_equal(f2.race)
 	assert_that(f1.path).is_equal(f2.path)
@@ -97,9 +96,9 @@ func test_recruit_deterministic_with_same_seed() -> void:
 
 func test_recruit_uid_increments() -> void:
 	var city := _make_city(3)
-	var hero := HeroController.new()
-	var f1 := _FollowerSystem.recruit(city, hero, TestFactories.seeded(1))
-	var f2 := _FollowerSystem.recruit(city, hero, TestFactories.seeded(2))
+	var hero = auto_free( HeroController.new())
+	var f1 := FollowerSystem.recruit(city, hero, TestFactories.seeded(1))
+	var f2 := FollowerSystem.recruit(city, hero, TestFactories.seeded(2))
 	assert_that(f1.uid).is_equal(1)
 	assert_that(f2.uid).is_equal(2)
 	hero.free()

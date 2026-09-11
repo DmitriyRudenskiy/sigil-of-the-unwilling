@@ -1,6 +1,5 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _Settings = preload("res://scripts/autoload/Settings.gd")
 
 var _screen: Node = null
 
@@ -22,7 +21,7 @@ func test_settings_screen_closed_without_settings() -> void:
 
 func test_apply_display_mode_headless_safe() -> void:
 
-	var settings = _Settings.new()
+	var settings = SettingsAutoload.new()
 	var mode_before := DisplayServer.window_get_mode()
 	settings.fullscreen = true
 	settings.apply_display_mode()

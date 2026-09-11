@@ -1,6 +1,5 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _Emulator = preload("res://scripts/autoload/BattleEmulator.gd")
 
 func weaker() -> Dictionary:
 	return {
@@ -15,7 +14,7 @@ func stronger() -> Dictionary:
 	}
 
 func test_total_count_sums_specs() -> void:
-	var em = _Emulator.new()
+	var em = BattleEmulator.new()
 	var specs := [
 		{"id": "a", "count": 5},
 		{"id": "b", "count": 7},
@@ -26,23 +25,23 @@ func test_total_count_sums_specs() -> void:
 	assert_that(em.total_count([{"id": "x"}])).is_equal(0)
 
 func test_total_count_ignores_non_dicts() -> void:
-	var em = _Emulator.new()
+	var em = BattleEmulator.new()
 	assert_that(em.total_count([{"id": "a", "count": 3}, "junk", 42])).is_equal(3)
 
 func test_side_name_attacker_and_defender() -> void:
-	var em = _Emulator.new()
+	var em = BattleEmulator.new()
 	assert_that(em.side_name(BattleState.Side.ATTACKER)).is_equal("attacker")
 	assert_that(em.side_name(BattleState.Side.DEFENDER)).is_equal("defender")
 
 func test_emulate_battle_requires_both_armies() -> void:
-	var em = _Emulator.new()
+	var em = BattleEmulator.new()
 	var r1 = em.emulate_battle({"attacker_army": [stronger()], "defender_army": []})
 	assert_bool(r1.has("error")).is_true()
 	var r2 = em.emulate_battle({"attacker_army": [], "defender_army": [weaker()]})
 	assert_bool(r2.has("error")).is_true()
 
 func test_emulate_battle_report_structure() -> void:
-	var em = _Emulator.new()
+	var em = BattleEmulator.new()
 	var r = em.emulate_battle({"attacker_army": [stronger()], "defender_army": [weaker()]})
 	assert_bool(r.has("error")).is_false()
 	assert_bool(r.get("battle_over", false)).is_true()
@@ -54,7 +53,7 @@ func test_emulate_battle_report_structure() -> void:
 	assert_bool(r.get("def_loss", -1) >= 0).is_true()
 
 func test_emulate_battle_loss_accounting_is_sane() -> void:
-	var em = _Emulator.new()
+	var em = BattleEmulator.new()
 	var r = em.emulate_battle({"attacker_army": [stronger()], "defender_army": [weaker()]})
 	var atk_loss: int = r.get("atk_loss", -1)
 	var def_loss: int = r.get("def_loss", -1)
@@ -62,12 +61,12 @@ func test_emulate_battle_loss_accounting_is_sane() -> void:
 	assert_bool(0 <= def_loss and def_loss <= 10).is_true()
 
 func test_emulate_battle_invalid_army_type() -> void:
-	var em = _Emulator.new()
+	var em = BattleEmulator.new()
 	var r = em.emulate_battle({"attacker_army": "nope", "defender_army": [weaker()]})
 	assert_bool(r.has("error")).is_true()
 
 func test_sequence_battle_rotates_heal_and_actions() -> void:
-	var em = _Emulator.new()
+	var em = BattleEmulator.new()
 	var r = em.sequence_battle({
 		"sequence": [
 			{"cmd": "cast", "spell": "cure", "self": true},
@@ -85,14 +84,14 @@ func test_sequence_battle_rotates_heal_and_actions() -> void:
 	assert_bool(steps[0].has("result")).is_true()
 
 func test_sequence_battle_empty_sequence() -> void:
-	var em = _Emulator.new()
+	var em = BattleEmulator.new()
 	var r = em.sequence_battle({"sequence": []})
 	assert_bool(r.has("error")).is_false()
 	var steps: Array = r.get("steps", [])
 	assert_that(steps.size()).is_equal(0)
 
 func test_cast_in_battle_resurrects_dead_target() -> void:
-	var em = _Emulator.new()
+	var em = BattleEmulator.new()
 	var r = em.cast_in_battle({
 		"spell_id": "resurrection",
 		"caster_hp": 60,

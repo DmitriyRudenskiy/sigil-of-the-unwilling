@@ -1,12 +1,11 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _TraitDef = preload("res://scripts/demographics/TraitDef.gd")
-const _TraitRegistry = preload("res://scripts/demographics/TraitRegistry.gd")
+
 
 var reg: Variant
 
 func before_test() -> void:
-	reg = _TraitRegistry.new()
+	reg = TraitRegistry.new()
 
 func test_defaults_loaded() -> void:
 	assert_that(reg.all().size()).is_equal(15)
@@ -71,20 +70,20 @@ func test_roll_zero_possible() -> void:
 	assert_bool(zeros >= 1).is_true()
 
 func test_custom_trait_add() -> void:
-	var t := _TraitDef.new()
+	var t := TraitDef.new()
 	t.id = &"custom"
 	t.display_name = "Кастом"
-	t.rarity = _TraitDef.Rarity.RARE
+	t.rarity = TraitDef.Rarity.RARE
 	t.effect_type = &"inspiration"
 	t.effect_value = -0.5
 	reg.add(t)
 	assert_bool(reg.has(&"custom")).is_true()
 	var g: TraitDef = reg.get_trait(&"custom")
 	assert_that(g.effect_value).is_equal(-0.5)
-	assert_that(g.rarity).is_equal(_TraitDef.Rarity.RARE)
+	assert_that(g.rarity).is_equal(TraitDef.Rarity.RARE)
 
 func test_custom_trait_replaces_default() -> void:
-	var t := _TraitDef.new()
+	var t := TraitDef.new()
 	t.id = &"sleepy"
 	t.effect_type = &"rest"
 	t.effect_value = 0.5
@@ -96,7 +95,7 @@ func test_custom_trait_replaces_default() -> void:
 func test_trait_serialize_roundtrip_single() -> void:
 	var t: TraitDef = reg.get_trait(&"sleepy")
 	var d := t.to_dict()
-	var t2 := _TraitDef.from_dict(d)
+	var t2 := TraitDef.from_dict(d)
 	assert_that(t2.id).is_equal(t.id)
 	assert_that(t2.display_name).is_equal(t.display_name)
 	assert_that(t2.effect_type).is_equal(t.effect_type)
@@ -108,7 +107,7 @@ func test_trait_serialize_roundtrip_single() -> void:
 func test_trait_serialize_roundtrip_multi_effect() -> void:
 	var t: TraitDef = reg.get_trait(&"restless")
 	var d := t.to_dict()
-	var t2 := _TraitDef.from_dict(d)
+	var t2 := TraitDef.from_dict(d)
 	assert_that(t2.modifier_for(&"rest")).is_equal(-0.05)
 	assert_that(t2.modifier_for(&"social")).is_equal(0.10)
 	assert_that(t2.modifier_for(&"inspiration")).is_equal(0.0)

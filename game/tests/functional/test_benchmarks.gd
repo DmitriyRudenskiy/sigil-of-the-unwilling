@@ -1,9 +1,8 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 const INF := 1e9
-const BattleEmulator = preload("res://scripts/autoload/BattleEmulator.gd")
-const UnitRegistry = preload("res://scripts/autoload/UnitRegistry.gd")
-const UnitStats = preload("res://scripts/entities/UnitStats.gd")
+
+
 
 var _iterations := 3
 var _results: Array = []
@@ -24,7 +23,7 @@ func _record(name: String, times: Array) -> void:
 func _bench_map_generation() -> void:
 	var times: Array = []
 	for i in _iterations:
-		var model = load("res://scripts/world/MapModel.gd").new()
+		var model = MapModel.new()
 		model.map_width = 60
 		model.map_height = 60
 		model.seed_value = 42 + i
@@ -36,7 +35,7 @@ func _bench_map_generation() -> void:
 
 func _bench_spell_registry() -> void:
 	var times: Array = []
-	var reg = load("res://scripts/autoload/SpellbookRegistry.gd").new()
+	var reg = SpellbookRegistry.new()
 	for i in _iterations:
 		var t0 := Time.get_ticks_usec()
 		reg.ensure_definitions()
@@ -46,7 +45,7 @@ func _bench_spell_registry() -> void:
 	reg.free()
 
 func _bench_serialization() -> void:
-	var save_data = load("res://scripts/core/SaveData.gd").new()
+	var save_data = SaveData.new()
 	save_data.run_seed = 12345
 	save_data.hero = {
 		"cell": {"x": 10, "y": 20},
@@ -94,7 +93,7 @@ func _bench_placeholder_texture() -> void:
 	_record("PlaceholderTexture: 10 circles", times)
 
 func _bench_json_parse() -> void:
-	var save_data = load("res://scripts/core/SaveData.gd").new()
+	var save_data = SaveData.new()
 	save_data.run_seed = 12345
 	save_data.hero = {"cell": {"x": 10, "y": 20}, "army": [], "inventory": {}}
 	save_data.world = {}
@@ -109,7 +108,7 @@ func _bench_json_parse() -> void:
 	_record("JSON.parse (save payload)", times)
 
 func test_battle_7v7_performance_under_1000ms() -> void:
-	var units := UnitRegistry.new()
+	var units = auto_free( UnitRegistry.new())
 	units.ensure_definitions()
 	var keys: Array[String] = [
 		"swordsmen", "archers", "cavalry", "mages",

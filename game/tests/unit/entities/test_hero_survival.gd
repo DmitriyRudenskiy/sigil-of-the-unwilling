@@ -1,28 +1,27 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _HeroNeeds = preload("res://scripts/entities/HeroNeeds.gd")
-const _Hero = preload("res://scripts/entities/HeroController.gd")
-const _Follower = preload("res://scripts/entities/Follower.gd")
-const _City = preload("res://scripts/world/City.gd")
-const _CityManager = preload("res://scripts/world/CityManager.gd")
-const _Succession = preload("res://scripts/world/SuccessionController.gd")
-const _WorldController = preload("res://scripts/world/WorldController.gd")
-const _HeroLifecycle = preload("res://scripts/world/HeroLifecycleSystem.gd")
+
+
+
+
+
+
+
+
 const _DeathSequenceScene = preload("res://scenes/ui/DeathSequence.tscn")
-const _StatusPanel = preload("res://scripts/ui/HeroStatusPanel.gd")
-const _Artifact = preload("res://scripts/data/Artifact.gd")
-const _PopUnit = preload("res://scripts/world/PopUnit.gd")
-const _BuildingDefs = preload("res://scripts/data/BuildingDefs.gd")
-const _UniqueBuilding = preload("res://scripts/world/UniqueBuilding.gd")
-const _GameSession = preload("res://scripts/core/GameSession.gd")
-const _HeroMovement = preload("res://scripts/entities/HeroMovementController.gd")
-const _HeroArmy = preload("res://scripts/entities/HeroArmyController.gd")
-const _HeroResources = preload("res://scripts/entities/HeroResources.gd")
-const _HeroMagic = preload("res://scripts/entities/HeroMagic.gd")
-const _HeroSkills = preload("res://scripts/entities/HeroSkills.gd")
-const _HeroTools = preload("res://scripts/entities/HeroTools.gd")
-const _TimeSystem = preload("res://scripts/data/TimeSystem.gd")
-const _HeroStrategic = preload("res://scripts/entities/HeroStrategicResources.gd")
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class _MockDeath extends Node:
 	var visible := true
@@ -31,16 +30,16 @@ class _MockDeath extends Node:
 	signal chronicle_requested
 	signal resurrection_chosen
 	var shown := false
-	var res_city: _City = null
+	var res_city: City = null
 	var successor: Node = null
-	func show_death(_n: String, _c: StringName, _s: Dictionary, succ: Node = null, rc: _City = null) -> void:
+	func show_death(_n: String, _c: StringName, _s: Dictionary, succ: Node = null, rc: City = null) -> void:
 		shown = true
 		visible = true
 		res_city = rc
 		successor = succ
 
 class _MockPersistence extends RefCounted:
-	var session := _GameSession.new()
+	var session := GameSession.new()
 	var chronicle = null
 	func get_date() -> Dictionary:
 		return {"month": 3, "week": 2, "day": 5}
@@ -57,25 +56,25 @@ func _survival_hero(path := &"warrior") -> HeroController:
 	h.max_combat_hp = 20
 	h.set_combat_hp(20)
 	h.is_alive = true
-	h.movement = _HeroMovement.new()
+	h.movement = HeroMovementController.new()
 	h.add_child(h.movement)
 	return h
 
 func _make_follower(uid: int, path: StringName) -> Follower:
-	var f := _Follower.new()
+	var f := Follower.new()
 	f.uid = uid
 	f.path = path
 	return f
 
-func _make_city() -> _City:
-	var c := _City.new()
+func _make_city() -> City:
+	var c := City.new()
 	c.uid = _next_uid()
 	c.display_name = &"Testhold"
 	c.owner = &"player"
 	c.center = Vector2i(5, 5)
 	return c
 
-func _make_temple_city(resources_ok := true) -> _City:
+func _make_temple_city(resources_ok := true) -> City:
 	var c := _make_city()
 	if resources_ok:
 		c.storage[&"industry"] = float(GameNumbers.SUCCESSION_RESURRECT_IND) + 100.0
@@ -83,23 +82,23 @@ func _make_temple_city(resources_ok := true) -> _City:
 	else:
 		c.storage[&"industry"] = 1.0
 		c.storage[&"gold"] = 1.0
-	var bld := _UniqueBuilding.new()
-	bld.def = _BuildingDefs.great_temple()
+	var bld := UniqueBuilding.new()
+	bld.def = BuildingDefs.great_temple()
 	bld.level = 1
 	c.buildings.append(bld)
 	return c
 
-func _make_wc(cities: Array, persistence: _MockPersistence = null) -> _WorldController:
-	var wc := _WorldController.new()
+func _make_wc(cities: Array, persistence: _MockPersistence = null) -> WorldController:
+	var wc = auto_free( WorldController.new())
 	wc._rng = TestFactories.seeded(2128)
-	var mgr := _CityManager.new()
+	var mgr = auto_free( CityManager.new())
 	for city in cities:
 		mgr.register_city(city)
 	wc.add_child(mgr)
 	wc._cities = mgr
-	wc._succession = _Succession.new()
+	wc._succession = SuccessionController.new()
 	wc._persistence = persistence if persistence != null else _MockPersistence.new()
-	var sys := _HeroLifecycle.new()
+	var sys := HeroLifecycleSystem.new()
 	sys.setup(wc, wc._persistence, wc._rng, wc._cities, null, null, null, null, null, null, wc._succession, null)
 	wc._hero_lifecycle = sys
 	return wc
@@ -134,31 +133,31 @@ func after_test() -> void:
 	_bus_conns.clear()
 
 func test_needs_init_all_full() -> void:
-	var n := _HeroNeeds.new()
+	var n := HeroNeeds.new()
 	for k in NeedType.all_ids():
 		assert_float(n.get_need(k)).is_equal_approx(1.0, 0.0001)
 		assert_that(n.zero_streak[k]).is_equal(0)
 
 func test_needs_field_decay() -> void:
-	var n := _HeroNeeds.new()
+	var n := HeroNeeds.new()
 	assert_that(n.tick(false)).is_equal(&"")
 	assert_float(n.get_need(NeedType.ID.REST)).is_equal_approx(0.90, 0.0001)
 	assert_float(n.get_need(NeedType.ID.SOCIAL)).is_equal_approx(0.87, 0.0001)
 	assert_float(n.get_need(NeedType.ID.INSPIRATION)).is_equal_approx(0.95, 0.0001)
 
 func test_needs_city_recovery() -> void:
-	var n := _HeroNeeds.new()
+	var n := HeroNeeds.new()
 	for k in NeedType.all_ids():
 		n.needs[k] = 0.5
 	var c := _make_temple_city()
-	c.pop = [_PopUnit.new(), _PopUnit.new(), _PopUnit.new()]
+	c.pop = [PopUnit.new(), PopUnit.new(), PopUnit.new()]
 	assert_that(n.tick(true, c)).is_equal(&"")
 	assert_float(n.get_need(NeedType.ID.REST)).is_equal_approx(0.76, 0.0001)
 	assert_float(n.get_need(NeedType.ID.SOCIAL)).is_equal_approx(0.72, 0.0001)
 	assert_float(n.get_need(NeedType.ID.INSPIRATION)).is_equal_approx(0.60, 0.0001)
 
 func test_needs_lonely_city_social_drains() -> void:
-	var n := _HeroNeeds.new()
+	var n := HeroNeeds.new()
 	n.needs[NeedType.ID.SOCIAL] = 0.5
 	var c := _make_temple_city()
 	n.tick(true, c)
@@ -171,21 +170,21 @@ func test_needs_zero_streak_all_causes() -> void:
 		NeedType.ID.INSPIRATION: &"burnout",
 	}
 	for need_id in cases:
-		var m := _HeroNeeds.new()
+		var m := HeroNeeds.new()
 		m.needs[need_id] = 0.0
 		assert_that(m.tick(false)).is_equal(&"")
 		assert_that(m.tick(false)).is_equal(&"")
 		assert_that(m.tick(false)).is_equal(cases[need_id])
 
 func test_needs_serialize_roundtrip_and_old_save() -> void:
-	var n := _HeroNeeds.new()
+	var n := HeroNeeds.new()
 	n.needs[NeedType.ID.REST] = 0.33
 	n.zero_streak[NeedType.ID.REST] = 2
-	var m := _HeroNeeds.new()
+	var m := HeroNeeds.new()
 	m.deserialize(n.serialize())
 	assert_float(m.get_need(NeedType.ID.REST)).is_equal_approx(0.33, 0.0001)
 	assert_that(m.zero_streak[NeedType.ID.REST]).is_equal(0)
-	var old := _HeroNeeds.new()
+	var old := HeroNeeds.new()
 	old.deserialize({})
 	for k in NeedType.all_ids():
 		assert_float(old.get_need(k)).is_equal_approx(1.0, 0.0001)
@@ -208,8 +207,8 @@ func test_hero_dies_by_needs_emits_hero_died() -> void:
 func test_hero_city_tick_recovers() -> void:
 	var h := _survival_hero()
 	var c := _make_temple_city()
-	c.pop = [_PopUnit.new(), _PopUnit.new(), _PopUnit.new()]
-	var mgr := _CityManager.new()
+	c.pop = [PopUnit.new(), PopUnit.new(), PopUnit.new()]
+	var mgr = auto_free( CityManager.new())
 	mgr.register_city(c)
 	h.city_manager = mgr
 	h.movement.current_cell = c.center
@@ -225,8 +224,8 @@ func test_hero_revive_at() -> void:
 	var h := _survival_hero()
 	h.is_alive = false
 	h.set_combat_hp(0)
-	h.inventory.backpack.append(_Artifact.new())
-	h.inventory.equipped["weapon"] = _Artifact.new()
+	h.inventory.backpack.append(Artifact.new())
+	h.inventory.equipped["weapon"] = Artifact.new()
 	for k in NeedType.all_ids():
 		h.needs.needs[k] = 0.2
 	var c := _make_temple_city()
@@ -242,17 +241,17 @@ func test_hero_revive_at() -> void:
 	h.free()
 
 func _setup_serializable(h: HeroController) -> void:
-	h.movement = _HeroMovement.new()
-	h.army = _HeroArmy.new()
-	h.resources = _HeroResources.new()
+	h.movement = HeroMovementController.new()
+	h.army = HeroArmyController.new()
+	h.resources = HeroResources.new()
 	h.add_child(h.movement)
 	h.add_child(h.army)
 	h.add_child(h.resources)
-	h.magic = _HeroMagic.new()
-	h.skills = _HeroSkills.new()
-	h.tools = _HeroTools.new()
-	h.time = _TimeSystem.new()
-	h.strategic_resources = _HeroStrategic.new()
+	h.magic = HeroMagic.new()
+	h.skills = HeroSkills.new()
+	h.tools = HeroTools.new()
+	h.time = TimeSystem.new()
+	h.strategic_resources = HeroStrategicResources.new()
 
 func test_hero_serialize_needs_roundtrip() -> void:
 	var h := _survival_hero()
@@ -260,7 +259,7 @@ func test_hero_serialize_needs_roundtrip() -> void:
 	_setup_serializable(h)
 	h.needs.needs[NeedType.ID.REST] = 0.33
 	h.resurrected_once = true
-	var h2 := _Hero.new()
+	var h2 = auto_free( HeroController.new())
 	_setup_serializable(h2)
 	h2.deserialize(h.serialize())
 	assert_float(h2.needs.get_need(NeedType.ID.REST)).is_equal_approx(0.33, 0.0001)
@@ -273,7 +272,7 @@ func test_hero_deserialize_old_save_defaults() -> void:
 	var d := h.serialize()
 	d.erase("needs")
 	d.erase("resurrected_once")
-	var h2 := _Hero.new()
+	var h2 = auto_free( HeroController.new())
 	_setup_serializable(h2)
 	h2.deserialize(d)
 	for k in NeedType.all_ids():
@@ -305,7 +304,7 @@ func _setup_death_with_resurrection() -> Dictionary:
 	var city := _make_temple_city()
 	var wc := _make_wc([city])
 	var hero := _survival_hero()
-	hero.movement = _HeroMovement.new()
+	hero.movement = HeroMovementController.new()
 	hero.add_child(hero.movement)
 	hero.followers.append(_make_follower(1, &"warrior"))
 	var parent := _hero_in_tree(hero)
@@ -319,7 +318,7 @@ func test_wc_death_holds_corpse_shows_resurrection() -> void:
 	var s := _setup_death_with_resurrection()
 	var wc: Node = s["wc"]
 	var hero: HeroController = s["hero"]
-	var city: _City = s["city"]
+	var city: City = s["city"]
 	var death: Node = s["death"]
 	assert_bool(is_instance_valid(hero)).is_true()
 	assert_that(wc._hero_lifecycle._deceased_hero).is_equal(hero)
@@ -339,7 +338,7 @@ func test_wc_resurrection_chosen() -> void:
 	var s := _setup_death_with_resurrection()
 	var wc: Node = s["wc"]
 	var hero: HeroController = s["hero"]
-	var city: _City = s["city"]
+	var city: City = s["city"]
 	var death: Node = s["death"]
 	var successor: Node = wc._hero_lifecycle._pending_successor
 	var succ_emitted: Dictionary = {"v": false}
@@ -422,7 +421,7 @@ func test_wc_no_temple_corpse_freed() -> void:
 func test_wc_fresh_cycle_resurrection_again() -> void:
 	var s := _setup_death_with_resurrection()
 	var wc: Node = s["wc"]
-	var city: _City = s["city"]
+	var city: City = s["city"]
 	var death: Node = s["death"]
 	wc._on_resurrection_chosen()
 	var hero: HeroController = wc._hero
@@ -472,7 +471,7 @@ func test_deathseq_resurrection_button_flow() -> void:
 	ds3.free()
 
 func test_statuspanel_needs_line() -> void:
-	var panel := load("res://scenes/ui/HeroStatusPanel.tscn").instantiate() as _StatusPanel
+	var panel := load("res://scenes/ui/HeroStatusPanel.tscn").instantiate() as HeroStatusPanel
 	var h := _survival_hero()
 	h.hero_name = "Тест"
 	h.needs.needs[NeedType.ID.REST] = 0.1

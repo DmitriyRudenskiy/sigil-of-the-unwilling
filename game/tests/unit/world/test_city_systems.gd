@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 const TestFactories := preload("res://tests/helpers/factories.gd")
 
 func _cell_at_distance(city: City, d: int) -> Vector2i:

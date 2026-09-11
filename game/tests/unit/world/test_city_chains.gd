@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 const TestFactories := preload("res://tests/helpers/factories.gd")
 
 func _add_workers(city: City, n: int) -> void:

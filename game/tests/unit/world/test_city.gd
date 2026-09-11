@@ -1,15 +1,14 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _City = preload("res://scripts/world/City.gd")
-const _Borough = preload("res://scripts/world/Borough.gd")
-const _PopUnit = preload("res://scripts/world/PopUnit.gd")
-const _UniqueBuilding = preload("res://scripts/world/UniqueBuilding.gd")
-const _BuildingDefs = preload("res://scripts/data/BuildingDefs.gd")
+
+
+
+
 
 var city: City
 
 func before_test() -> void:
-	city = _City.new()
+	city = City.new()
 	city.display_name = "Тест-город"
 	city.center = Vector2i(5, 5)
 
@@ -42,8 +41,8 @@ func test_pop_cap_level_3() -> void:
 
 func test_count_state() -> void:
 	city.add_followers(3)
-	assert_that(city.count_state(_PopUnit.State.FOLLOWER)).is_equal(3)
-	assert_that(city.count_state(_PopUnit.State.WORKER)).is_equal(0)
+	assert_that(city.count_state(PopUnit.State.FOLLOWER)).is_equal(3)
+	assert_that(city.count_state(PopUnit.State.WORKER)).is_equal(0)
 
 func test_free_followers() -> void:
 	city.add_followers(5)
@@ -97,14 +96,14 @@ func test_can_build_building() -> void:
 	city.storage[&"industry"] = 100.0
 	city.add_followers(5)
 	var nb := HexUtils.get_all_neighbors(city.center)[0]
-	var check := city.can_build_building(_BuildingDefs.market(), nb)
+	var check := city.can_build_building(BuildingDefs.market(), nb)
 	assert_bool(check.ok).is_true()
 
 func test_build_building() -> void:
 	city.storage[&"industry"] = 100.0
 	city.add_followers(5)
 	var nb := HexUtils.get_all_neighbors(city.center)[0]
-	var bld := city.build_building(_BuildingDefs.market(), nb)
+	var bld := city.build_building(BuildingDefs.market(), nb)
 	assert_that(bld).is_not_null()
 	assert_that(bld.level).is_equal(1)
 
@@ -112,15 +111,15 @@ func test_building_requires_site() -> void:
 	city.storage[&"industry"] = 100.0
 	city.add_followers(5)
 	var nb := HexUtils.get_all_neighbors(city.center)[0]
-	var check := city.can_build_building(_BuildingDefs.great_temple(), nb)
+	var check := city.can_build_building(BuildingDefs.great_temple(), nb)
 	assert_bool(check.ok).is_false()
 
 func test_building_with_site() -> void:
 	city.storage[&"industry"] = 100.0
 	city.add_followers(5)
 	var site_cell := HexUtils.get_all_neighbors(city.center)[0]
-	city.special_sites[site_cell] = _BuildingDefs.SITE_SHRINE
-	var check := city.can_build_building(_BuildingDefs.great_temple(), site_cell)
+	city.special_sites[site_cell] = BuildingDefs.SITE_SHRINE
+	var check := city.can_build_building(BuildingDefs.great_temple(), site_cell)
 	assert_bool(check.ok).is_true()
 
 func test_get_yield_empty_city() -> void:
@@ -199,7 +198,7 @@ func test_city_center() -> void:
 	assert_that(city.center).is_equal(Vector2i(5, 5))
 
 func test_city_faction_default() -> void:
-	assert_that(city.faction).is_equal(_City.Faction.DEFAULT)
+	assert_that(city.faction).is_equal(City.Faction.DEFAULT)
 
 func test_city_is_capital() -> void:
 	assert_bool(city.is_capital).is_false()

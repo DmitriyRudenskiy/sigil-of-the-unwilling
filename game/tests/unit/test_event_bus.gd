@@ -1,11 +1,10 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _GameEventBus = preload("res://scripts/autoload/GameEventBus.gd")
 
 var bus: Node
 
 func before_test() -> void:
-	bus = _GameEventBus.new()
+	bus = GameEventBusAutoload.new()
 
 func after_test() -> void:
 	if bus != null:

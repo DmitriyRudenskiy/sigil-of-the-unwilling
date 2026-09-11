@@ -1,4 +1,5 @@
 extends RefCounted
+class_name ShardState
 const _Self := preload("res://scripts/core/ShardState.gd")
 
 var id: StringName = &"shard_1"

@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 func _unit(stats: UnitStats, count := 5) -> BattleState.BattleUnit:
 	var u := BattleState.BattleUnit.new(UnitStack.new(stats, count))

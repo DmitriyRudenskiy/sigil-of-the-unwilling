@@ -1,7 +1,7 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 func test_retreat_smoke() -> void:
-	var state: BattleState = load("res://scripts/systems/BattleState.gd").new()
+	var state: BattleState = BattleState.new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 40))
 	atk.append(Units.make_fixed_stack("archers", 20))

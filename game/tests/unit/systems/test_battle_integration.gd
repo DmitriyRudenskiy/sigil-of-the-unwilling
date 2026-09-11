@@ -1,7 +1,7 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 func test_attacker_wins() -> void:
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 100))
 	var def: Array[UnitStack] = []
@@ -26,7 +26,7 @@ func test_attacker_wins() -> void:
 	assert_int(state.get_survivors(BattleState.Side.DEFENDER).size()).is_zero().override_failure_message("defender should have no survivors")
 
 func test_defender_wins() -> void:
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("goblins", 1))
 	var def: Array[UnitStack] = []
@@ -51,7 +51,7 @@ func test_defender_wins() -> void:
 	assert_int(state.get_survivors(BattleState.Side.DEFENDER).size()).is_equal(1).override_failure_message("defender should have survivors")
 
 func test_battle_rules_damage() -> void:
-	var state: BattleState = load("res://scripts/systems/BattleState.gd").new()
+	var state: BattleState = BattleState.new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 50))
 	var def: Array[UnitStack] = []
@@ -61,7 +61,7 @@ func test_battle_rules_damage() -> void:
 	var atk_unit: BattleState.BattleUnit = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
 	var def_unit: BattleState.BattleUnit = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
 
-	var rules: BattleRules = load("res://scripts/core/BattleRules.gd").new()
+	var rules: BattleRules = BattleRules.new()
 
 	var test_rng := TestFactories.seeded(4479)
 	test_rng.seed = 42
@@ -93,7 +93,7 @@ func test_battle_rules_damage() -> void:
 	assert_int(def_damage).is_less_equal(damage).override_failure_message("goblins should deal less or equal damage to swordsmen")
 
 func test_ranged_vs_flying() -> void:
-	var state: BattleState = load("res://scripts/systems/BattleState.gd").new()
+	var state: BattleState = BattleState.new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("archers", 20))
 	atk.append(Units.make_fixed_stack("pegasus", 10))
@@ -118,7 +118,7 @@ func test_ranged_vs_flying() -> void:
 	assert_bool(pegasus.is_flying()).is_true().override_failure_message("pegasus should be flying")
 
 func test_morale_check() -> void:
-	var state: BattleState = load("res://scripts/systems/BattleState.gd").new()
+	var state: BattleState = BattleState.new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("champions", 10))
 	atk.append(Units.make_fixed_stack("skeleton", 10))
@@ -135,7 +135,7 @@ func test_morale_check() -> void:
 		elif u.get_key() == "skeleton":
 			skeleton = u
 
-	var rules2: BattleRules = load("res://scripts/core/BattleRules.gd").new()
+	var rules2: BattleRules = BattleRules.new()
 
 	assert_object(champion).is_not_null().override_failure_message("champions unit not found")
 	assert_bool(rules2.can_morale(champion)).is_true().override_failure_message("champions should be eligible for morale")

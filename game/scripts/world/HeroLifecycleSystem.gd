@@ -1,4 +1,5 @@
 extends RefCounted
+class_name HeroLifecycleSystem
 
 const DeathSequenceScene = preload("res://scenes/ui/DeathSequence.tscn")
 const ChronicleScreenScene = preload("res://scenes/ui/ChronicleScreen.tscn")

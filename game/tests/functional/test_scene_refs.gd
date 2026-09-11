@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 var _ext_path_regexp: RegEx = RegEx.new()
 var _bad: Array[String] = []

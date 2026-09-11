@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 func test_spell_count() -> void:
 	var all := Spells.get_all_spells()

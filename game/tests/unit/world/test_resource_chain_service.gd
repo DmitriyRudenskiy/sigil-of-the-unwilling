@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 var _heroes: Array = []
 

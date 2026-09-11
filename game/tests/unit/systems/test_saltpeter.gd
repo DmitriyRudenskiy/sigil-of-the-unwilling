@@ -1,10 +1,10 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _BattleState = preload("res://scripts/systems/BattleState.gd")
-const _BattleRules = preload("res://scripts/core/BattleRules.gd")
-const _UnitStack = preload("res://scripts/entities/UnitStack.gd")
-const _UnitStats = preload("res://scripts/entities/UnitStats.gd")
-const _HexUtils = preload("res://scripts/core/HexUtils.gd")
+
+
+
+
+
 var state: BattleState
 var rng: RandomNumberGenerator
 

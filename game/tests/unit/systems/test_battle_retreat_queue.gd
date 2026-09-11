@@ -1,6 +1,5 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _Executor = preload("res://scripts/systems/BattleTurnExecutor.gd")
 
 func _make_executor() -> Dictionary:
 	var bs: BattleState = BattleState.new()
@@ -10,7 +9,7 @@ func _make_executor() -> Dictionary:
 	var def: Array[UnitStack] = []
 	def.append(Units.make_fixed_stack("goblins", 50))
 	bs.place_army(atk, def)
-	var ex := _Executor.new()
+	var ex = auto_free( BattleTurnExecutor.new())
 	ex.name = "TestRetreatExec"
 	ex.setup(bs, BattleAI.new(), {})
 	return {"executor": ex, "state": bs}

@@ -1,14 +1,13 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _BattleFX = preload("res://scripts/core/BattleFX.gd")
 
 func test_fx_instantiation() -> void:
-	var fx := _BattleFX.new()
+	var fx = auto_free( BattleFX.new())
 	assert_that(fx).is_not_null()
 	fx.free()
 
 func test_setup_null_show_calls_no_crash() -> void:
-	var fx := _BattleFX.new()
+	var fx = auto_free( BattleFX.new())
 	fx.setup(null)
 	fx.show_spell_cast(Vector2i.ZERO, &"test")
 	fx.show_heal(Vector2i.ZERO, 10)

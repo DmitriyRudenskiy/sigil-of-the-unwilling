@@ -1,12 +1,11 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _State = preload("res://scripts/systems/BattleState.gd")
-const _Resolver = preload("res://scripts/systems/BattleActionResolver.gd")
+
 
 var state: Variant
 
 func before_test() -> void:
-	state = _State.new()
+	state = BattleState.new()
 	var atk: Array[UnitStack] = [Units.make_fixed_stack("swordsmen", 10)]
 	var def: Array[UnitStack] = [
 		Units.make_fixed_stack("goblins", 10),
@@ -31,7 +30,7 @@ func test_reachable_cache_invalidated_on_kill() -> void:
 	var r1: Dictionary = state.get_reachable(X, 1, fn)
 	assert_int(r1.size()).is_greater(0)
 	assert_bool(r1.has(v_cell)).is_false()
-	_Resolver.kill_unit(state, victim)
+	BattleActionResolver.kill_unit(state, victim)
 	var r2: Dictionary = state.get_reachable(X, 1, fn)
 	assert_bool(r2.has(v_cell)).is_true()
 
@@ -40,10 +39,10 @@ func test_reachable_cache_invalidated_on_revive() -> void:
 	var v_cell = victim.cell
 	var X := _neighbor_of(v_cell)
 	var fn := func() -> Dictionary: return state.build_all_blocked(state.attacker_units[0], {})
-	_Resolver.kill_unit(state, victim)
+	BattleActionResolver.kill_unit(state, victim)
 	var r1: Dictionary = state.get_reachable(X, 1, fn)
 	assert_bool(r1.has(v_cell)).is_true()
-	_Resolver.revive_unit(state, victim)
+	BattleActionResolver.revive_unit(state, victim)
 	var r2: Dictionary = state.get_reachable(X, 1, fn)
 	assert_bool(r2.has(v_cell)).is_false()
 
@@ -62,7 +61,7 @@ func test_reachable_cache_invalidated_on_move() -> void:
 	for c in reach:
 		moved_to = c
 		break
-	_Resolver.do_move(state, other, moved_to)
+	BattleActionResolver.do_move(state, other, moved_to)
 	var r2: Dictionary = state.get_reachable(X, 1, fn)
 	assert_bool(r2.has(old_cell)).is_true()
 

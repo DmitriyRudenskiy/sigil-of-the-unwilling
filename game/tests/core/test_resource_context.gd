@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 func _make_def(id: StringName, cap: float = -1.0) -> ResourceDef:
 	var d := ResourceDef.new()

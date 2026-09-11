@@ -1,10 +1,9 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _City = preload("res://scripts/world/City.gd")
-const _Processor = preload("res://scripts/demographics/DemographicTurnProcessor.gd")
-const _Registry = preload("res://scripts/demographics/CharacterRegistry.gd")
-const _Character = preload("res://scripts/demographics/Character.gd")
-const _TraitDef = preload("res://scripts/demographics/TraitDef.gd")
+
+
+
+
 
 var city: Variant
 var reg: Variant
@@ -15,11 +14,11 @@ var crit: Array = []
 var outbreak: Array = []
 
 func before_test() -> void:
-	city = _City.new()
+	city = City.new()
 	city.center = Vector2i(5, 5)
 	city.uid = 100
-	reg = _Registry.new()
-	proc = _Processor.new()
+	reg = CharacterRegistry.new()
+	proc = DemographicTurnProcessor.new()
 	proc.setup(reg)
 	born = []
 	died = []
@@ -52,7 +51,7 @@ func test_phase_id_and_priority() -> void:
 	assert_that(proc.get_priority()).is_equal(20)
 
 func test_without_registry_empty_report() -> void:
-	var p2 := _Processor.new()
+	var p2 := DemographicTurnProcessor.new()
 	var report: Dictionary = p2.process(_ctx(1))
 	assert_that(int(report.get("ensured", -1))).is_equal(0)
 	assert_bool((report.get("cities", []) as Array).is_empty()).is_true()
@@ -109,7 +108,7 @@ func test_trait_slow_rest_recovery() -> void:
 	proc.process(_ctx(1))
 	_clear_traits()
 	var ch: Character = _chars()[0]
-	var jaded := _TraitDef.new()
+	var jaded := TraitDef.new()
 	jaded.id = &"test_jaded"
 	jaded.effect_type = &"rest"
 	jaded.effect_value = -0.2

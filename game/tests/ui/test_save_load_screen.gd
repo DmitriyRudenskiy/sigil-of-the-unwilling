@@ -1,14 +1,13 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 const _ScreenScene = preload("res://scenes/ui/SaveLoadScreen.tscn")
-const _SaveManager = preload("res://scripts/core/SaveManager.gd")
-const _SaveData = preload("res://scripts/core/SaveData.gd")
+
 
 var _sm: SaveManager
 var _screen: SaveLoadScreen
 
 func before_test() -> void:
-	_sm = _SaveManager.new()
+	_sm = SaveManager.new()
 	add_child(_sm)
 	for s in range(1, SaveManager.SLOT_COUNT + 1):
 		SaveManager.delete_slot(s)
@@ -37,7 +36,7 @@ func test_all_slots_empty_when_no_saves() -> void:
 		assert_that(n["info"].text).is_equal(GameText.no_save_found())
 
 func test_slot_shows_info_and_delete_clears_it() -> void:
-	var data := _SaveData.new()
+	var data := SaveData.new()
 	data.run_seed = 42
 	data.hero = {"hero_name": "TestHero", "cell": {"x": 1, "y": 2}}
 	data.cities = [{"uid": 1}, {"uid": 2}]

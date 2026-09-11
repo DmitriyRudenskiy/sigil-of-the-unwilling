@@ -1,6 +1,5 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const ResourceIcons = preload("res://scripts/data/ResourceIcons.gd")
 
 func before_test() -> void:
 	ResourceIcons.clear_cache()

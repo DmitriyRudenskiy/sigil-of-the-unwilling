@@ -1,8 +1,7 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _MapGenerator = preload("res://scripts/world/MapGenerator.gd")
-const _Movement = preload("res://scripts/entities/HeroMovementController.gd")
-const _HexUtils = preload("res://scripts/core/HexUtils.gd")
+
+
 
 var _map
 var _mov
@@ -34,16 +33,16 @@ func _teardown() -> void:
 
 func _setup_map() -> void:
 	_teardown()
-	_map = _MapGenerator.new()
+	_map = MapGenerator.new()
 	_map.map_width = 12
 	_map.map_height = 12
 	_map.seed_value = 1
 	_map.generate()
 	for y in _map.map_height:
 		for x in _map.map_width:
-			_map.model.set_terrain(Vector2i(x, y), _HexUtils.Terrain.GRASS)
+			_map.model.set_terrain(Vector2i(x, y), HexUtils.Terrain.GRASS)
 
-	_mov = _Movement.new()
+	_mov = HeroMovementController.new()
 	_mov.set_artifact_effect_fn(func(_e: StringName) -> bool: return false)
 	_mov.setup(_map)
 	_mov.move_requested.connect(_on_move_requested)
@@ -140,8 +139,8 @@ func test_cancel_empty_route_is_noop() -> void:
 func test_auto_follow_unreachable_goal_noop() -> void:
 	_mov.move_points = 10.0
 	var start: Vector2i = _mov.current_cell
-	for nb: Vector2i in _HexUtils.get_all_neighbors(start):
-		_map.model.set_terrain(nb, _HexUtils.Terrain.MOUNTAIN)
+	for nb: Vector2i in HexUtils.get_all_neighbors(start):
+		_map.model.set_terrain(nb, HexUtils.Terrain.MOUNTAIN)
 	_mov.on_map_clicked(Vector2i(5, 5))
 	_mov.on_map_clicked(Vector2i(5, 5))
 	assert_bool(_mov.planned_path.is_empty()).is_true()

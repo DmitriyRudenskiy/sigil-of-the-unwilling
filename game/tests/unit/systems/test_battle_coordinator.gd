@@ -1,8 +1,8 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _Coordinator = preload("res://scripts/world/WorldBattleCoordinator.gd")
-const _UnitRegistry = preload("res://scripts/autoload/UnitRegistry.gd")
-const _HeroArmy = preload("res://scripts/entities/HeroArmyController.gd")
+
+
+
 const _FakeHero = preload("res://tests/fakes/fake_hero.gd")
 const _FakeMap = preload("res://tests/fakes/fake_battle_map.gd")
 
@@ -10,7 +10,7 @@ var coordinator: Node
 
 func before_test() -> void:
 	coordinator = null
-	coordinator = _Coordinator.new()
+	coordinator = WorldBattleCoordinator.new()
 	coordinator.name = "TestCoordinator"
 
 func after_test() -> void:
@@ -122,9 +122,9 @@ func test_create_battle_flow_signals_connected() -> void:
 	assert_that(connected_count).is_equal(2)
 
 func test_fallback_stack_on_total_annihilation() -> void:
-	var units := _UnitRegistry.new()
+	var units = auto_free( UnitRegistry.new())
 
-	var army = _HeroArmy.new()
+	var army = HeroArmyController.new()
 	army.setup(units)
 	army.army.clear()
 

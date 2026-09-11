@@ -1,15 +1,14 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _HeroArmyController = preload("res://scripts/entities/HeroArmyController.gd")
-const _HeroResources = preload("res://scripts/entities/HeroResources.gd")
+
 
 func test_army_serialize() -> void:
-	var army := _HeroArmyController.new()
-	var data := army.serialize()
+	var army = auto_free( HeroArmyController.new())
+	var data = army.serialize()
 
 	assert_int(data.size()).is_equal(army.army.size()).override_failure_message("serialize: entry count mismatch")
 
-	var army2 := _HeroArmyController.new()
+	var army2 = auto_free( HeroArmyController.new())
 	army2.deserialize(data)
 
 	assert_int(army2.army.size()).is_equal(army.army.size()).override_failure_message("deserialize: stack count mismatch")
@@ -21,18 +20,18 @@ func test_army_serialize() -> void:
 	army2.free()
 
 func test_resources_roundtrip() -> void:
-	var res := _HeroResources.new()
+	var res = auto_free( HeroResources.new())
 	res.resources = {
 		ResourceType.ID.WOOD: 100,
 		ResourceType.ID.GOLD: 999,
 		ResourceType.ID.GEMS: 42,
 	}
 
-	var data := res.serialize()
+	var data = res.serialize()
 	assert_int(data["wood"]).is_equal(100).override_failure_message("serialize: wood should be 100")
 	assert_int(data["gold"]).is_equal(999).override_failure_message("serialize: gold should be 999")
 
-	var res2 := _HeroResources.new()
+	var res2 = auto_free( HeroResources.new())
 	res2.deserialize(data)
 
 	assert_int(res2.resources[ResourceType.ID.WOOD]).is_equal(100).override_failure_message("deserialize: wood should be 100")
@@ -42,13 +41,13 @@ func test_resources_roundtrip() -> void:
 	res2.free()
 
 func test_army_empty() -> void:
-	var army := _HeroArmyController.new()
-	army.army = []
+	var army = auto_free( HeroArmyController.new())
+	army.army = [] as Array[UnitStack]  # duck-typed through Variant: no auto-convert
 
-	var data := army.serialize()
+	var data = army.serialize()
 	assert_int(data.size()).is_zero().override_failure_message("empty army should serialize to empty array")
 
-	var army2 := _HeroArmyController.new()
+	var army2 = auto_free( HeroArmyController.new())
 	army2.deserialize(data)
 	assert_int(army2.army.size()).is_zero().override_failure_message("empty deserialize should result in empty army")
 
@@ -56,18 +55,18 @@ func test_army_empty() -> void:
 	army2.free()
 
 func test_army_cap() -> void:
-	var army := _HeroArmyController.new()
+	var army = auto_free( HeroArmyController.new())
 	for i in 12:
 		army.army.append(Units.make_fixed_stack("swordsmen", 10))
 
-	var for_battle := army.get_army_for_battle()
+	var for_battle = army.get_army_for_battle()
 	assert_int(for_battle.size()).is_equal(7).override_failure_message("get_army_for_battle should cap at 7")
 
 	army.free()
 
 func test_default_army_cap() -> void:
-	var army := _HeroArmyController.new()
-	var for_battle := army.get_army_for_battle()
+	var army = auto_free( HeroArmyController.new())
+	var for_battle = army.get_army_for_battle()
 	assert_int(for_battle.size()).is_less_equal(7).override_failure_message("default army should not exceed 7 units")
 
 	army.free()

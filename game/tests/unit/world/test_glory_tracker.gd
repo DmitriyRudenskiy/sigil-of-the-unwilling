@@ -1,11 +1,10 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _GloryTracker = preload("res://scripts/world/GloryTracker.gd")
 
 var tracker: RefCounted
 
 func before_test() -> void:
-	tracker = _GloryTracker.new()
+	tracker = GloryTracker.new()
 
 func test_initial_glory_zero() -> void:
 	assert_that(tracker.glory_last_window(1)).is_equal(0.0)
@@ -53,15 +52,15 @@ func test_prune_empty_tracker() -> void:
 	assert_that(tracker.glory_last_window(1)).is_equal(0.0)
 
 func test_window_size_minimum() -> void:
-	var t := _GloryTracker.new(0)
+	var t := GloryTracker.new(0)
 	assert_that(t._window).is_equal(1)
 
 func test_window_size_negative() -> void:
-	var t := _GloryTracker.new(-5)
+	var t := GloryTracker.new(-5)
 	assert_that(t._window).is_equal(1)
 
 func test_custom_window_size() -> void:
-	var t := _GloryTracker.new(3)
+	var t := GloryTracker.new(3)
 	assert_that(t._window).is_equal(3)
 	t.add_glory(10.0, 1, &"test")
 	assert_that(t.glory_last_window(3)).is_equal(10.0)

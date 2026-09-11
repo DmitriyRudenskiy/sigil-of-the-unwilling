@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 var c: City
 

@@ -1,11 +1,10 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const Emulator = preload("res://scripts/autoload/BattleEmulator.gd")
 
 const BATTLES := 200
 
 func _simulate(atk_key: String, def_key: String, seed: int) -> Dictionary:
-	var emu := Emulator.new()
+	var emu := BattleEmulator.new()
 	var atk: Array[UnitStack] = [Units.make_fixed_stack(atk_key, 10)]
 	var def: Array[UnitStack] = [Units.make_fixed_stack(def_key, 10)]
 	var state := BattleState.new()

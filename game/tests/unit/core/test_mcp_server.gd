@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 ## Tests for the MCP server dispatcher and serialization (no real TCP).
 ## _TestServer overrides the response senders to capture them in memory.
 

@@ -1,7 +1,7 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 func _create_state():
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 20))
 	var def: Array[UnitStack] = []
@@ -40,7 +40,7 @@ func test_attack() -> void:
 	assert_bool(attacker.has_moved).is_true().override_failure_message("attacker should have has_moved after attack")
 
 func test_attack_with_rng() -> void:
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 50))
 	var def: Array[UnitStack] = []
@@ -60,7 +60,7 @@ func test_attack_with_rng() -> void:
 	assert_int(result.get("damage", 0)).is_greater(0).override_failure_message("damage should be > 0 for swordsmen vs goblins")
 
 func test_battle_end() -> void:
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 100))
 	var def: Array[UnitStack] = []
@@ -89,7 +89,7 @@ func test_battle_end() -> void:
 	assert_int(def_survivors.size()).is_zero().override_failure_message("defender survivors should be empty")
 
 func test_wait_order() -> void:
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 	var atk: Array[UnitStack] = [
 		Units.make_fixed_stack("swordsmen", 10),
 		Units.make_fixed_stack("archers", 10),
@@ -123,7 +123,7 @@ func test_wait_order() -> void:
 	assert_bool(state.active_unit == c).is_true().override_failure_message("After waiting with second unit, third unit should act")
 
 func test_check_end_repeat_call() -> void:
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 100))
 	var def: Array[UnitStack] = []
@@ -144,13 +144,13 @@ func test_check_end_repeat_call() -> void:
 	var winner2: BattleState.Side = state.check_end()
 	assert_int(winner2).is_equal(BattleState.Side.ATTACKER).override_failure_message("second check_end() should return 'attacker'")
 
-	var state2 = load("res://scripts/systems/BattleState.gd").new()
+	var state2 = BattleState.new()
 	BattleActionResolver.force_end(state2, BattleState.Side.DEFENDER)
 	assert_bool(state2.battle_over).is_true().override_failure_message("force_end should set battle_over")
 	assert_int(state2.check_end()).is_equal(BattleState.Side.DEFENDER).override_failure_message("check_end after force_end should return 'defender'")
 
 func test_get_reachable_for_unit() -> void:
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 20))
 	var def: Array[UnitStack] = []
@@ -165,7 +165,7 @@ func test_get_reachable_for_unit() -> void:
 	assert_bool(reachable.has(unit.cell)).is_false().override_failure_message("reachable must not include the unit's own cell")
 
 func test_get_unreachable_ring() -> void:
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 20))
 	var def: Array[UnitStack] = []
@@ -187,7 +187,7 @@ func test_get_unreachable_ring() -> void:
 		assert_bool(near.has(cell)).is_true().override_failure_message("unreachable ring cell must be reachable in speed+1 steps: %s" % cell)
 
 func test_flying_unit_placement() -> void:
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("pegasus", 10))
 	var def: Array[UnitStack] = []
@@ -197,7 +197,7 @@ func test_flying_unit_placement() -> void:
 	assert_bool(unit.is_flying()).is_true().override_failure_message("pegasus should be flying")
 
 func test_ranged_unit_tag() -> void:
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("archers", 10))
 	var def: Array[UnitStack] = []
@@ -207,7 +207,7 @@ func test_ranged_unit_tag() -> void:
 	assert_bool(unit.is_ranged()).is_true().override_failure_message("archers should be ranged")
 
 func test_morale_tag() -> void:
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("champions", 10))
 	var def: Array[UnitStack] = []
@@ -217,7 +217,7 @@ func test_morale_tag() -> void:
 	assert_bool(unit.has_morale()).is_true().override_failure_message("champions should have morale")
 
 func test_retreat_survivors() -> void:
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 	var atk: Array[UnitStack] = [
 		Units.make_fixed_stack("swordsmen", 50),
 		Units.make_fixed_stack("archers", 20),
@@ -232,7 +232,7 @@ func test_retreat_survivors() -> void:
 	assert_int(survivors[0].count).is_equal(25).override_failure_message("first retreat stack should have 25 (50/2)")
 
 func test_defend_bonus() -> void:
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 50))
 	var def: Array[UnitStack] = []
@@ -244,11 +244,11 @@ func test_defend_bonus() -> void:
 
 	assert_bool(defender.is_defending()).is_true().override_failure_message("defender should be defending after do_defend")
 
-	var rules := load("res://scripts/core/BattleRules.gd")
+	var rules := BattleRules
 	assert_float(GameNumbers.DEFEND_DEFENSE_BONUS).is_equal(1.2).override_failure_message("DEFEND_DEFENSE_BONUS should be 1.2")
 
 func test_hero_bonuses() -> void:
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 50))
 	var def: Array[UnitStack] = []
@@ -261,7 +261,7 @@ func test_hero_bonuses() -> void:
 	assert_int(state.defender_hero_bonus.get("defense", 0)).is_equal(2).override_failure_message("defender bonus defense should be 2")
 
 func test_max_units_per_side_cap() -> void:
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 	var atk: Array[UnitStack] = []
 	var def: Array[UnitStack] = []
 	for i in 10:
@@ -275,7 +275,7 @@ func test_max_units_per_side_cap() -> void:
 	assert_int(def_units.size()).is_equal(7).override_failure_message("defender units should be capped at 7")
 
 func test_initiative_sorted_by_speed() -> void:
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 	var atk: Array[UnitStack] = []
 	var def: Array[UnitStack] = []
 
@@ -301,7 +301,7 @@ func test_initiative_sorted_by_speed() -> void:
 		assert_int(state.turn_queue[0].get_speed()).is_equal(9).override_failure_message("fastest unit should act first")
 
 func test_initiative_rebuilt_each_round() -> void:
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 	var atk: Array[UnitStack] = []
 	var def: Array[UnitStack] = []
 	var fast := Units.make_fixed_stack("cavalry", 10)
@@ -346,7 +346,7 @@ func test_get_unit_at_after_kill() -> void:
 		assert_object(found).is_null().override_failure_message("dead unit still in grid at %s" % cell)
 
 func test_deployment_line_at_edge() -> void:
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 
 	var atk: Array[UnitStack] = []
 	var def: Array[UnitStack] = []
@@ -377,7 +377,7 @@ func test_deployment_line_at_edge() -> void:
 		seen[u.cell] = true
 
 func test_deployment_max_capacity() -> void:
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 
 	var atk: Array[UnitStack] = []
 	var def: Array[UnitStack] = []
@@ -398,7 +398,7 @@ func test_deployment_max_capacity() -> void:
 		assert_bool(defenders[k].cell.x == BattleState.BW - 1 and defenders[k].cell.y == k).is_true().override_failure_message("max-cap defender %d bad cell %s" % [k, defenders[k].cell])
 
 func test_cell_taken_avoids_occupied() -> void:
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 
 	var atk: Array[UnitStack] = [Units.make_fixed_stack("swordsmen", 5)]
 	var def: Array[UnitStack] = []
@@ -414,7 +414,7 @@ func test_cell_taken_avoids_occupied() -> void:
 	assert_bool(builder._cell_taken(1, 0, units)).is_false().override_failure_message("_cell_taken should report (1,0) as free")
 
 func test_reachable_reflects_move() -> void:
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("swordsmen", 10))
 	atk.append(Units.make_fixed_stack("swordsmen", 10))
@@ -437,7 +437,7 @@ func test_reachable_reflects_move() -> void:
 	assert_bool(r2.has(b_cell)).is_true().override_failure_message("r2: после ухода B клетка %s должна стать достижимой (кэш не протух)" % b_cell)
 
 func test_advance_turn_skips_dead_units() -> void:
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 	var atk: Array[UnitStack] = [
 		Units.make_fixed_stack("swordsmen", 10),
 		Units.make_fixed_stack("archers", 10),
@@ -464,7 +464,7 @@ func test_advance_turn_skips_dead_units() -> void:
 		"advance_turn должен пропустить мёртвую юнит и активировать следующего живого")
 
 func test_build_queue_excludes_dead_units() -> void:
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 	var atk: Array[UnitStack] = [
 		Units.make_fixed_stack("swordsmen", 10),
 		Units.make_fixed_stack("archers", 10),
@@ -487,7 +487,7 @@ func test_build_queue_excludes_dead_units() -> void:
 			"build_queue не должен включать мёртвых")
 
 func test_new_round_resets_flags() -> void:
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 	var atk: Array[UnitStack] = [Units.make_fixed_stack("swordsmen", 10)]
 	var def: Array[UnitStack] = [Units.make_fixed_stack("goblins", 10)]
 	state.place_army(atk, def)

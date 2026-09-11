@@ -1,4 +1,5 @@
 extends Node
+class_name SettingsAutoload
 
 const _Platform = preload("res://scripts/core/Platform.gd")
 

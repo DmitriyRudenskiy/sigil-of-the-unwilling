@@ -1,8 +1,7 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _MapGenerator = preload("res://scripts/world/MapGenerator.gd")
-const _Movement = preload("res://scripts/entities/HeroMovementController.gd")
-const _HexUtils = preload("res://scripts/core/HexUtils.gd")
+
+
 
 var _map
 var _mov
@@ -25,16 +24,16 @@ func _teardown() -> void:
 
 func _setup_map() -> void:
 	_teardown()
-	_map = _MapGenerator.new()
+	_map = MapGenerator.new()
 	_map.map_width = 12
 	_map.map_height = 12
 	_map.seed_value = 1
 	_map.generate()
 	for y in _map.map_height:
 		for x in _map.map_width:
-			_map.model.set_terrain(Vector2i(x, y), _HexUtils.Terrain.GRASS)
+			_map.model.set_terrain(Vector2i(x, y), HexUtils.Terrain.GRASS)
 
-	_mov = _Movement.new()
+	_mov = HeroMovementController.new()
 	_mov.set_artifact_effect_fn(func(_e: StringName) -> bool: return false)
 	_mov.setup(_map)
 	_mov.move_requested.connect(_on_move_requested)
@@ -48,7 +47,7 @@ func _on_hero_moved(cell: Vector2i) -> void:
 	if not _block_next_step:
 		return
 	if _mov.path.size() >= 2:
-		_map.model.set_terrain(_mov.path[1], _HexUtils.Terrain.MOUNTAIN)
+		_map.model.set_terrain(_mov.path[1], HexUtils.Terrain.MOUNTAIN)
 
 func test_can_reach_within_mp() -> void:
 	assert_bool(_mov.can_reach(Vector2i(11, 0))).is_false()
@@ -74,8 +73,8 @@ func test_move_to_cell_full_move() -> void:
 
 func test_move_to_cell_unreachable() -> void:
 	var start: Vector2i = _mov.current_cell
-	for nb in _HexUtils.get_all_neighbors(start):
-		_map.model.set_terrain(nb, _HexUtils.Terrain.MOUNTAIN)
+	for nb in HexUtils.get_all_neighbors(start):
+		_map.model.set_terrain(nb, HexUtils.Terrain.MOUNTAIN)
 	assert_bool(_mov.move_to_cell(Vector2i(5, 5))).is_false()
 	assert_that(_mov.reach_problem(Vector2i(5, 5))).is_equal("unreachable")
 
@@ -95,7 +94,7 @@ func test_partial_walk_progresses_toward_target() -> void:
 	var ok: bool = _mov.move_to_cell(Vector2i(4, 0))
 	assert_bool(ok).is_true()
 	assert_bool(_mov.current_cell != start).is_true()
-	assert_bool(_HexUtils.hex_distance(_mov.current_cell, Vector2i(4, 0)) < _HexUtils.hex_distance(start, Vector2i(4, 0))).is_true()
+	assert_bool(HexUtils.hex_distance(_mov.current_cell, Vector2i(4, 0)) < HexUtils.hex_distance(start, Vector2i(4, 0))).is_true()
 	assert_bool(_mov.is_moving).is_false()
 	_mov.move_points = _mov.get_daily_movement_points()
 	assert_bool(_mov.can_reach(Vector2i(4, 0))).is_true()

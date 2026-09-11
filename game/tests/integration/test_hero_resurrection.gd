@@ -2,11 +2,10 @@
 # Интеграционный сценарий: смерть героя → выбор воскресения в городе
 # → восстаёт тот же герой (не дубль), кандидат наследника освобождён.
 
-extends GdUnitTestSuite
+extends BaseTest
 
-const _HeroLifecycle = preload("res://scripts/world/HeroLifecycleSystem.gd")
-const _Hero = preload("res://scripts/entities/HeroController.gd")
-const CityManager = preload("res://scripts/world/CityManager.gd")
+
+
 
 class MockHost extends Node2D:
 	var _hero: Node = null
@@ -42,7 +41,7 @@ class MockSuccession extends RefCounted:
 		return last_created
 
 func _make_system(host: Node2D, mgr: CityManager, succ: MockSuccession) -> RefCounted:
-	var sys := _HeroLifecycle.new()
+	var sys := HeroLifecycleSystem.new()
 	sys.setup(
 		host, null, TestFactories.seeded(7), mgr, null, null, null,
 		MockConsumer.new(), MockConsumer.new(), MockBootstrap.new(), succ, null
@@ -52,7 +51,7 @@ func _make_system(host: Node2D, mgr: CityManager, succ: MockSuccession) -> RefCo
 func _hero_children(host: Node2D) -> int:
 	var n := 0
 	for c in host.get_children():
-		if c is _Hero:
+		if c is HeroController:
 			n += 1
 	return n
 
@@ -80,7 +79,7 @@ func test_resurrection_revives_same_hero_without_duplicate() -> void:
 	var city := TestFactories.make_city_with_temple()
 	city.owner = &"player"
 	city.storage[&"gold"] = 1000.0
-	var mgr := CityManager.new()
+	var mgr = auto_free( CityManager.new())
 	_mgr = mgr
 	add_child(mgr)
 	mgr.cities.append(city)
@@ -113,7 +112,7 @@ func test_second_death_cannot_resurrect() -> void:
 	var city := TestFactories.make_city_with_temple()
 	city.owner = &"player"
 	city.storage[&"gold"] = 1000.0
-	var mgr := CityManager.new()
+	var mgr = auto_free( CityManager.new())
 	_mgr = mgr
 	add_child(mgr)
 	mgr.cities.append(city)

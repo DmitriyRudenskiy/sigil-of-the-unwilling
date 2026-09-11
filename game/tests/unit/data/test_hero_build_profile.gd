@@ -1,12 +1,11 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _Profile = preload("res://scripts/data/HeroBuildProfile.gd")
-const _Races = preload("res://scripts/data/hero_races.gd")
-const _Classes = preload("res://scripts/data/hero_classes.gd")
-const _Cultures = preload("res://scripts/data/hero_cultures.gd")
 
-func _full_profile() -> _Profile:
-	var p := _Profile.new()
+
+
+
+func _full_profile() -> HeroBuildProfile:
+	var p := HeroBuildProfile.new()
 	p.name = "Darkstorn"
 	p.race = "dwarf"
 	p.subrace = "mountain"
@@ -17,7 +16,7 @@ func _full_profile() -> _Profile:
 	return p
 
 func test_profile_invalid_when_empty() -> void:
-	var p := _Profile.new()
+	var p := HeroBuildProfile.new()
 	assert_bool(p.is_valid()).is_false()
 
 func test_profile_requires_all_fields() -> void:
@@ -29,7 +28,7 @@ func test_profile_requires_all_fields() -> void:
 		"background": "scholar",
 	}
 	for field in cases:
-		var p := _Profile.new()
+		var p := HeroBuildProfile.new()
 		p.name = "Dwarf"
 		p.race = "elf"
 		p.character_class = "wizard"
@@ -42,7 +41,7 @@ func test_profile_valid_when_all_set() -> void:
 	assert_bool(_full_profile().is_valid()).is_true()
 
 func test_get_stats_base_only() -> void:
-	var p := _Profile.new()
+	var p := HeroBuildProfile.new()
 	p.name = "Dwarf"
 	p.race = "human"
 	p.character_class = "fighter"
@@ -63,7 +62,7 @@ func test_get_stats_dwarf_bonuses() -> void:
 	assert_that(s["knowledge"]).is_equal(3)
 
 func test_get_stats_negative_bonus_applied() -> void:
-	var p := _Profile.new()
+	var p := HeroBuildProfile.new()
 	p.name = "Dwarf"
 	p.race = "orlan"
 	p.character_class = "priest"
@@ -114,7 +113,7 @@ func test_summary_sex_mapping() -> void:
 		assert_that(p.summary()["sex"]).is_equal(cases[key])
 
 func test_summary_empty_profile() -> void:
-	var p := _Profile.new()
+	var p := HeroBuildProfile.new()
 	var s := p.summary()
 	assert_that(s["name"]).is_equal("—")
 	assert_that(s["sex"]).is_equal("Мужской")
@@ -137,10 +136,10 @@ func test_to_identity_returns_dict() -> void:
 
 func test_registries_have_expected_keys() -> void:
 	for k in ["human", "elf", "dwarf", "aumaua", "orlan", "godlike"]:
-		assert_bool(_Races.RACES.has(k)).is_true()
+		assert_bool(HeroRaces.RACES.has(k)).is_true()
 	for k in ["barbarian", "fighter", "monk", "paladin", "priest", "druid", "cipher", "wizard", "ranger", "rogue", "chanter"]:
-		assert_bool(_Classes.CLASSES.has(k)).is_true()
+		assert_bool(HeroClasses.CLASSES.has(k)).is_true()
 	for k in ["aedyr", "deadfire", "ixamitl", "old_vailia", "rauatai", "living_lands", "white_that_wends", "dyrwood", "naasitaq", "eir_glanfath"]:
-		assert_bool(_Cultures.CULTURES.has(k)).is_true()
+		assert_bool(HeroCultures.CULTURES.has(k)).is_true()
 	for k in ["soldier", "scholar", "criminal", "sailor", "zealot", "merchant"]:
-		assert_bool(_Cultures.BACKGROUNDS.has(k)).is_true()
+		assert_bool(HeroCultures.BACKGROUNDS.has(k)).is_true()

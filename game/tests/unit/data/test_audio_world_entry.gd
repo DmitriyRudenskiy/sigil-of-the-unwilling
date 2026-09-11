@@ -1,7 +1,6 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 const WORLD_SCENE := "res://scenes/World.tscn"
-const AudioCues = preload("res://scripts/data/AudioCues.gd")
 
 const MAX_SECONDS := 6.0
 const POLL := 0.5

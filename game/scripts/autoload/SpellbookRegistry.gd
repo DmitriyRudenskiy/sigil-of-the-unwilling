@@ -47,7 +47,7 @@ func _read_json_array(path: String) -> Variant:
 		return null
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
-		push_warning("SpellbookRegistry: %s не удалось открыть" % path)
+		push_warning("SpellbookRegistry: %s failed to open" % path)
 		return null
 	var data = JSON.parse_string(file.get_as_text())
 	file.close()

@@ -1,6 +1,5 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _UnitRegistry = preload("res://scripts/autoload/UnitRegistry.gd")
 
 var _deltas: Array = []
 
@@ -13,7 +12,7 @@ func _measure(name: String, fn: Callable) -> void:
 
 func test_memory_profile_deltas_finite_and_nonnegative() -> void:
 	_measure("MapModel 60x60 generate", func():
-		var model = load("res://scripts/world/MapModel.gd").new()
+		var model = MapModel.new()
 		model.map_width = 60
 		model.map_height = 60
 		model.seed_value = 42
@@ -22,8 +21,8 @@ func test_memory_profile_deltas_finite_and_nonnegative() -> void:
 	)
 
 	_measure("BattleState full battle", func():
-		var state = load("res://scripts/systems/BattleState.gd").new()
-		var ureg = _UnitRegistry.new()
+		var state = BattleState.new()
+		var ureg = UnitRegistry.new()
 		var atk: Array[UnitStack] = []
 		var def: Array[UnitStack] = []
 		for i in 8:
@@ -36,20 +35,20 @@ func test_memory_profile_deltas_finite_and_nonnegative() -> void:
 	)
 
 	_measure("SpellbookRegistry 420 spells", func():
-		var reg = load("res://scripts/autoload/SpellbookRegistry.gd").new()
+		var reg = SpellbookRegistry.new()
 		reg.ensure_definitions()
 		reg.free()
 		return reg
 	)
 
 	_measure("SaveData roundtrip", func():
-		var data = load("res://scripts/core/SaveData.gd").new()
+		var data = SaveData.new()
 		data.run_seed = 12345
 		data.hero = {"cell": {"x": 10, "y": 20}, "army": [], "inventory": {}}
 		data.world = {}
 		var json := JSON.stringify(data.to_dict())
 		var parsed = JSON.parse_string(json)
-		var data2 = load("res://scripts/core/SaveData.gd").new()
+		var data2 = SaveData.new()
 		data2.from_dict(parsed)
 		return data2
 	)

@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 ## WorldSaveLoadService: delegation to persistence + endgame state.
 
 class _StubPersistence:

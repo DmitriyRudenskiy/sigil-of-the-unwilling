@@ -1,4 +1,5 @@
 extends RefCounted
+class_name HeroCultures
 const CULTURES := {
 	"aedyr": {"name": "Эдир", "desc": "Правящая аристократия эльфов.", "bonuses": {"knowledge": 1, "spell_power": 1}},
 	"deadfire": {"name": "Мёртвые острова", "desc": "Заброшенная архипелаг разбойников.", "bonuses": {"attack": 1, "defense": 1}},

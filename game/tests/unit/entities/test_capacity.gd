@@ -1,6 +1,5 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _HeroController = preload("res://scripts/entities/HeroController.gd")
 
 var hero: HeroController
 

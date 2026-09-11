@@ -1,4 +1,5 @@
 extends RefCounted
+class_name HeroClasses
 const CLASSES := {
 	"barbarian": {
 		"name": "Варвар",

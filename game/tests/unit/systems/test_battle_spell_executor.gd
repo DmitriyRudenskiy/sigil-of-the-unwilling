@@ -1,10 +1,9 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _Executor = preload("res://scripts/systems/BattleTurnExecutor.gd")
-const _Input = preload("res://scripts/systems/BattleInput.gd")
-const _ActionResolver = preload("res://scripts/systems/BattleActionResolver.gd")
-const _HeroMagic = preload("res://scripts/entities/HeroMagic.gd")
-const _BAI = preload("res://scripts/systems/BattleAI.gd")
+
+
+
+
 
 var _units: Node
 
@@ -12,16 +11,16 @@ func before_test() -> void:
 	_units = Services.resolve(&"units")
 
 func test_pending_action_spell_exists() -> void:
-	var exec = _Executor.new()
+	var exec = BattleTurnExecutor.new()
 	var val = exec.PendingAction.SPELL
 	assert_that(val).is_equal(3)
 	exec.free()
 
 func test_cast_emits_spell_cast_executed() -> void:
 	var state := _make_battle_state()
-	var exec := _Executor.new()
+	var exec = auto_free( BattleTurnExecutor.new())
 	exec.name = "ExecCastOK"
-	exec.setup(state, _BAI.new(), {})
+	exec.setup(state, BattleAI.new(), {})
 	var caster: BattleState.BattleUnit = state.attacker_units[0]
 	var target: BattleState.BattleUnit = state.defender_units[0]
 	state.active_unit = caster
@@ -38,9 +37,9 @@ func test_cast_emits_spell_cast_executed() -> void:
 
 func test_cast_emits_spell_cast_failed() -> void:
 	var state := _make_battle_state()
-	var exec := _Executor.new()
+	var exec = auto_free( BattleTurnExecutor.new())
 	exec.name = "ExecCastFail"
-	exec.setup(state, _BAI.new(), {})
+	exec.setup(state, BattleAI.new(), {})
 	var caster: BattleState.BattleUnit = state.attacker_units[0]
 	state.active_unit = caster
 
@@ -54,12 +53,12 @@ func test_cast_emits_spell_cast_failed() -> void:
 
 func test_request_sacrifice_emits_and_finishes() -> void:
 	var state := _make_battle_state()
-	var exec := _Executor.new()
+	var exec = auto_free( BattleTurnExecutor.new())
 	exec.name = "ExecSacrifice"
-	exec.setup(state, _BAI.new(), {})
+	exec.setup(state, BattleAI.new(), {})
 	var atk: BattleState.BattleUnit = state.attacker_units[0]
 	var def: BattleState.BattleUnit = state.defender_units[0]
-	exec._state = _Executor.State.WAITING_INPUT
+	exec._state = BattleTurnExecutor.State.WAITING_INPUT
 	state.active_unit = atk
 
 	var holder: Array = [false, {}]
@@ -72,16 +71,16 @@ func test_request_sacrifice_emits_and_finishes() -> void:
 	exec.request_sacrifice(atk, sacrifice, def, storage)
 	assert_bool(holder[0]).is_true()
 	assert_that(holder[1].get("result")).is_equal("success")
-	assert_that(exec._state).is_equal(_Executor.State.PLAYER_ANIMATING)
+	assert_that(exec._state).is_equal(BattleTurnExecutor.State.PLAYER_ANIMATING)
 	assert_bool(def.is_alive()).is_false()
 	assert_that(int(storage.get(&"gold", 0))).is_equal(60)
 	exec.free()
 
 func test_request_sacrifice_guard_when_idle() -> void:
 	var state := _make_battle_state()
-	var exec := _Executor.new()
+	var exec = auto_free( BattleTurnExecutor.new())
 	exec.name = "ExecSacrificeIdle"
-	exec.setup(state, _BAI.new(), {})
+	exec.setup(state, BattleAI.new(), {})
 	var atk: BattleState.BattleUnit = state.attacker_units[0]
 	var def: BattleState.BattleUnit = state.defender_units[0]
 	var fired := false
@@ -103,7 +102,7 @@ func _make_battle_state() -> BattleState:
 	return state
 
 func test_hero_magic_refund() -> void:
-	var magic = _HeroMagic.new()
+	var magic = HeroMagic.new()
 	magic.init_defaults()
 	magic.spend_mana(10)
 	assert_that(magic.mana_current).is_equal(10)
@@ -113,7 +112,7 @@ func test_hero_magic_refund() -> void:
 	assert_that(magic.mana_current).is_equal(20)
 
 func test_clear_highlights_resets_pending_spell() -> void:
-	var input = _Input.new()
+	var input = BattleInput.new()
 	input._pending_spell_id = "fireball"
 	input.highlight_move["a"] = 1
 	input.highlight_attack["b"] = 1
@@ -124,26 +123,26 @@ func test_clear_highlights_resets_pending_spell() -> void:
 	input.free()
 
 func test_spend_mana_insufficient() -> void:
-	var magic = _HeroMagic.new()
+	var magic = HeroMagic.new()
 	magic.init_defaults()
 	var result = magic.spend_mana(999)
 	assert_bool(result).is_false()
 	assert_that(magic.mana_current).is_equal(20)
 
 func test_resume_battle_pending_spell() -> void:
-	var exec := _Executor.new()
+	var exec = auto_free( BattleTurnExecutor.new())
 	exec.name = "ExecResumeSpell"
-	exec._pending_completion = _Executor.PendingAction.SPELL
+	exec._pending_completion = BattleTurnExecutor.PendingAction.SPELL
 	exec.resume_battle()
-	assert_that(exec._pending_completion).is_equal(_Executor.PendingAction.NONE)
+	assert_that(exec._pending_completion).is_equal(BattleTurnExecutor.PendingAction.NONE)
 	assert_bool(exec.is_paused()).is_false()
 	exec.free()
 
 func test_spell_anim_paused_guard() -> void:
-	var exec := _Executor.new()
+	var exec = auto_free( BattleTurnExecutor.new())
 	exec.name = "ExecSpellPaused"
 	exec._paused = true
 	exec.on_spell_anim_completed()
-	assert_that(exec._pending_completion).is_equal(_Executor.PendingAction.SPELL)
-	assert_that(exec._state).is_equal(_Executor.State.IDLE)
+	assert_that(exec._pending_completion).is_equal(BattleTurnExecutor.PendingAction.SPELL)
+	assert_that(exec._state).is_equal(BattleTurnExecutor.State.IDLE)
 	exec.free()

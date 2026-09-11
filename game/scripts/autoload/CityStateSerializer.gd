@@ -33,7 +33,7 @@ func resolve_city(world_ctrl, req: Dictionary) -> City:
 			return null
 		if args.has("cell") and args.get("cell") is Dictionary:
 			var cell: Dictionary = args.get("cell")
-			var c = cities.city_at(Vector2i(int(cell.get("x", -1)), int(cell.get("y", -1))))
+			var c = cities.city_at(SerializationUtils.vec2i_from_dict(cell, Vector2i(-1, -1)))
 			if c != null:
 				return c
 	return cities.capital
@@ -44,7 +44,7 @@ func city_state_dict(city: City) -> Dictionary:
 	return {
 		"uid": city.uid,
 		"name": city.display_name,
-		"center": {"x": city.center.x, "y": city.center.y},
+		"center": SerializationUtils.vec2i_to_dict(city.center),
 		"level": city.level,
 		"owner": String(city.owner),
 		"population": city.pop_capped(),

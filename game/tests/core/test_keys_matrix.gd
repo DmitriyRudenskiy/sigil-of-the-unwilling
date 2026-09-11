@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 func test_oak_discovery_by_nature_sense() -> void:
 	var def = Resources.get_resource(&"oak")

@@ -1,11 +1,10 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _MapGenerator = preload("res://scripts/world/MapGenerator.gd")
-const _MarkerLayer = preload("res://scripts/ui/MarkerLayer.gd")
-const _WorldBootstrap = preload("res://scripts/world/WorldBootstrap.gd")
-const _CityYieldTable = preload("res://scripts/world/CityYieldTable.gd")
-const _WorldEventRouter = preload("res://scripts/world/WorldEventRouter.gd")
-const _City = preload("res://scripts/world/City.gd")
+
+
+
+
+
 
 var holder: Node2D = null
 
@@ -23,14 +22,14 @@ func after_test() -> void:
 	holder = null
 
 func _make_two_cities() -> Dictionary:
-	var mg := _MapGenerator.new()
+	var mg = auto_free( MapGenerator.new())
 	mg.name = "MapGenerator"
 	mg.seed_value = 42
 	holder.add_child(mg)
 	assert_bool(mg.has_valid_tilemap()).is_true()
-	var R = _WorldBootstrap.BootstrapResult.new()
+	var R = WorldBootstrap.BootstrapResult.new()
 	R.map_gen = mg
-	_WorldBootstrap._create_cities(holder, R)
+	WorldBootstrap._create_cities(holder, R)
 	var capital: City = R.cities.capital
 	var second: City = null
 	for city in R.cities.cities:
@@ -65,7 +64,7 @@ func test_bootstrap_creates_two_cities() -> void:
 func test_city_markers_shown_and_resolved() -> void:
 	var w: Dictionary = _make_two_cities()
 	var mg = w.mg
-	var ml := _MarkerLayer.new()
+	var ml = auto_free( MarkerLayer.new())
 	ml.name = "MarkerLayer"
 	holder.add_child(ml)
 	ml.setup(mg)
@@ -77,7 +76,7 @@ func test_city_markers_shown_and_resolved() -> void:
 
 func test_city_marker_click_emits_city_and_consumes_input() -> void:
 	var w: Dictionary = _make_two_cities()
-	var ml := _MarkerLayer.new()
+	var ml = auto_free( MarkerLayer.new())
 	ml.name = "MarkerLayer"
 	holder.add_child(ml)
 	ml.setup(w.mg)
@@ -89,7 +88,7 @@ func test_city_marker_click_emits_city_and_consumes_input() -> void:
 
 func test_set_city_markers_empty_and_replaces() -> void:
 	var w: Dictionary = _make_two_cities()
-	var ml := _MarkerLayer.new()
+	var ml = auto_free( MarkerLayer.new())
 	ml.name = "MarkerLayer"
 	holder.add_child(ml)
 	ml.setup(w.mg)
@@ -102,12 +101,12 @@ func test_set_city_markers_empty_and_replaces() -> void:
 	assert_that(ml.city_at_cell(w.second.center)).is_equal(null)
 
 func test_exit_button_renamed_and_closes() -> void:
-	var city := _City.new()
+	var city := City.new()
 	city.display_name = "Перворечье"
 	city.center = Vector2i(10, 10)
 	city.tile_yield_fn = func(_cell: Vector2i) -> Dictionary:
-		return _CityYieldTable.yield_for_terrain(HexUtils.Terrain.GRASS)
-	var hero = preload("res://scripts/entities/HeroController.gd").new()
+		return CityYieldTable.yield_for_terrain(HexUtils.Terrain.GRASS)
+	var hero = HeroController.new()
 	hero.name = "Hero"
 	holder.add_child(hero)
 	var screen = load("res://scenes/ui/CityScreen.tscn").instantiate() as CityScreen
@@ -143,7 +142,7 @@ class NavMockHero extends Node:
 		clicked.append(cell)
 
 func _make_router(mg: MapGenerator, cities: CityManager, hero: NavMockHero) -> WorldEventRouter:
-	var r := _WorldEventRouter.new()
+	var r = auto_free( WorldEventRouter.new())
 	r.name = "EventRouter"
 	_main_root().add_child(r)
 	r.setup(hero, mg, null, cities, null, null, null, null, null, null, null, null)
@@ -155,7 +154,7 @@ func test_city_marker_click_routes_path_to_city() -> void:
 	hero.current_cell = Vector2i(0, 0)
 	hero._init_moved()
 	var router := _make_router(w.mg, w.cities, hero)
-	var ml := _MarkerLayer.new()
+	var ml = auto_free( MarkerLayer.new())
 	ml.name = "MarkerLayer"
 	_main_root().add_child(ml)
 	ml.setup(w.mg)
@@ -178,7 +177,7 @@ func test_city_marker_click_to_unwalkable_center_uses_nearby() -> void:
 	hero.current_cell = Vector2i(0, 0)
 	hero._init_moved()
 	var router := _make_router(w.mg, w.cities, hero)
-	var ml := _MarkerLayer.new()
+	var ml = auto_free( MarkerLayer.new())
 	ml.name = "MarkerLayer"
 	_main_root().add_child(ml)
 	ml.setup(w.mg)

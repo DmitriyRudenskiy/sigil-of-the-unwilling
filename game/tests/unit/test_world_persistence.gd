@@ -1,7 +1,6 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const WorldLoadContext = preload("res://scripts/world/WorldLoadContext.gd")
-const ResourceChainService = preload("res://scripts/world/ResourceChainService.gd")
+
 
 var _hero: Node = null
 

@@ -1,9 +1,8 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _SaveData = preload("res://scripts/core/SaveData.gd")
 
 func _load(dict: Dictionary) -> RefCounted:
-	var sd := _SaveData.new()
+	var sd := SaveData.new()
 	sd.from_dict(dict)
 	return sd
 
@@ -21,7 +20,7 @@ func test_from_dict_missing_hero() -> void:
 
 func test_from_dict_future_version() -> void:
 	var sd := _load({"version": 999, "run_seed": 1, "hero": {"cell": {"x": 0, "y": 0}}, "world": {}})
-	assert_that(sd.version).is_equal(_SaveData.CURRENT_VERSION)
+	assert_that(sd.version).is_equal(SaveData.CURRENT_VERSION)
 
 func test_from_dict_garbage_collections() -> void:
 	var sd := _load({

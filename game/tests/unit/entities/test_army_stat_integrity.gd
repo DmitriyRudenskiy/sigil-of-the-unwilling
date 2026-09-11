@@ -1,6 +1,5 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _ArmyCtrl = preload("res://scripts/entities/HeroArmyController.gd")
 
 var _units: Node
 
@@ -8,7 +7,7 @@ func before_test() -> void:
 	_units = Services.resolve(&"units")
 
 func test_artifact_mods_do_not_compound() -> void:
-	var ctrl = _ArmyCtrl.new()
+	var ctrl = HeroArmyController.new()
 	ctrl.setup(_units)
 	var base_hp: int = ctrl.army[0].stats.hp
 	var base_key: String = ctrl.army[0].get_key()
@@ -26,7 +25,7 @@ func test_artifact_mods_do_not_compound() -> void:
 	ctrl.free()
 
 func test_two_battles_no_compound() -> void:
-	var ctrl = _ArmyCtrl.new()
+	var ctrl = HeroArmyController.new()
 	ctrl.setup(_units)
 	var base_hp: int = ctrl.army[0].stats.hp
 
@@ -49,7 +48,7 @@ func test_two_battles_no_compound() -> void:
 	ctrl.free()
 
 func test_retreat_survivors_clean_stats() -> void:
-	var ctrl = _ArmyCtrl.new()
+	var ctrl = HeroArmyController.new()
 	ctrl.setup(_units)
 	var base_hp: int = ctrl.army[0].stats.hp
 

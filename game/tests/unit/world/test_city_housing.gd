@@ -1,17 +1,16 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _City = preload("res://scripts/world/City.gd")
-const _Defs = preload("res://scripts/data/BuildingDefs.gd")
-const _Chain = preload("res://scripts/economy/ProductionChain.gd")
-const _Assignment = preload("res://scripts/world/WorkerAssignment.gd")
-const _DemoProc = preload("res://scripts/demographics/DemographicTurnProcessor.gd")
-const _Registry = preload("res://scripts/demographics/CharacterRegistry.gd")
+
+
+
+
+
 
 var city: Variant
 var center := Vector2i(5, 5)
 
 func before_test() -> void:
-	city = _City.new()
+	city = City.new()
 	city.uid = 7
 	city.center = center
 	city.stronghold_level = 1
@@ -25,7 +24,7 @@ func _chain_def(id: StringName, workers: int) -> Variant:
 	var req := UniqueBuilding.LevelReq.new()
 	req.industry = 10.0
 	d.levels = [req]
-	var c := _Chain.new()
+	var c := ProductionChain.new()
 	c.id = id + "_chain"
 	c.required_workers = workers
 	c.outputs[&"grain"] = 2.0
@@ -42,7 +41,7 @@ func test_no_housing_base() -> void:
 func test_shack_extends_cap_and_housing() -> void:
 	var cap_before: int = city.pop_cap()
 	var shack_cell := HexUtils.get_neighbor(center, 0)
-	var bld: Variant = city.build_building(_Defs.shack(), shack_cell)
+	var bld: Variant = city.build_building(BuildingDefs.shack(), shack_cell)
 	assert_that(bld).is_not_null()
 	assert_that(city.pop_cap()).is_equal(cap_before + 10)
 	assert_that(city.housing_capacity(PopUnit.State.WORKER)).is_equal(10)
@@ -50,16 +49,16 @@ func test_shack_extends_cap_and_housing() -> void:
 	assert_that(city.free_housing(PopUnit.State.WORKER)).is_equal(10 + 10 - city.count_state(PopUnit.State.WORKER))
 
 func test_manor_and_barracks_housing() -> void:
-	var b1: Variant = city.build_building(_Defs.manor(), HexUtils.get_neighbor(center, 1))
+	var b1: Variant = city.build_building(BuildingDefs.manor(), HexUtils.get_neighbor(center, 1))
 	assert_that(b1).is_not_null()
-	var b2: Variant = city.build_building(_Defs.barracks(), HexUtils.get_neighbor(center, 3))
+	var b2: Variant = city.build_building(BuildingDefs.barracks(), HexUtils.get_neighbor(center, 3))
 	assert_that(b2).is_not_null()
 	assert_that(city.housing_capacity(PopUnit.State.SCHOLAR)).is_equal(2)
 	assert_that(city.housing_capacity(PopUnit.State.MILITIA)).is_equal(5)
 
 func test_immigrant_state_priority() -> void:
-	var b1: Variant = city.build_building(_Defs.barracks(), HexUtils.get_neighbor(center, 0))
-	var b2: Variant = city.build_building(_Defs.manor(), HexUtils.get_neighbor(center, 2))
+	var b1: Variant = city.build_building(BuildingDefs.barracks(), HexUtils.get_neighbor(center, 0))
+	var b2: Variant = city.build_building(BuildingDefs.manor(), HexUtils.get_neighbor(center, 2))
 	assert_that(b1).is_not_null()
 	assert_that(b2).is_not_null()
 	assert_that(city.immigrant_state()).is_equal(PopUnit.State.WORKER)
@@ -79,7 +78,7 @@ func test_assignment_fills_buildings() -> void:
 	assert_that(bld).is_not_null()
 	for i in 12:
 		city.add_migrant(PopUnit.State.WORKER)
-	var n: int = _Assignment.rebalance(city)
+	var n: int = WorkerAssignment.rebalance(city)
 	assert_that(n).is_equal(2)
 	assert_that(int(bld.assigned_workers)).is_equal(2)
 	var assigned_count := 0
@@ -87,7 +86,7 @@ func test_assignment_fills_buildings() -> void:
 		if u.assigned_to == bld.uid:
 			assigned_count += 1
 	assert_that(assigned_count).is_equal(2)
-	assert_that(_Assignment.rebalance(city)).is_equal(0)
+	assert_that(WorkerAssignment.rebalance(city)).is_equal(0)
 
 func test_assignment_never_overfills() -> void:
 	var d: Variant = _chain_def(&"mine_a", 4)
@@ -95,13 +94,13 @@ func test_assignment_never_overfills() -> void:
 	assert_that(bld).is_not_null()
 	for i in 3:
 		city.add_migrant(PopUnit.State.WORKER)
-	_Assignment.rebalance(city)
+	WorkerAssignment.rebalance(city)
 	assert_that(int(bld.assigned_workers)).is_equal(3)
 	city.add_migrant(PopUnit.State.WORKER)
-	_Assignment.rebalance(city)
+	WorkerAssignment.rebalance(city)
 	assert_that(int(bld.assigned_workers)).is_equal(4)
 	city.add_migrant(PopUnit.State.WORKER)
-	_Assignment.rebalance(city)
+	WorkerAssignment.rebalance(city)
 	assert_that(int(bld.assigned_workers)).is_equal(4)
 
 func test_release_building_frees_workers() -> void:
@@ -110,9 +109,9 @@ func test_release_building_frees_workers() -> void:
 	assert_that(bld).is_not_null()
 	for i in 4:
 		city.add_migrant(PopUnit.State.WORKER)
-	_Assignment.rebalance(city)
+	WorkerAssignment.rebalance(city)
 	assert_that(int(bld.assigned_workers)).is_equal(2)
-	var freed: int = _Assignment.release_building(city, bld.uid)
+	var freed: int = WorkerAssignment.release_building(city, bld.uid)
 	assert_that(freed).is_equal(2)
 	var free_workers := 0
 	for u in city.pop:
@@ -126,10 +125,10 @@ func test_orphans_released_on_rebalance() -> void:
 	assert_that(bld).is_not_null()
 	for i in 2:
 		city.add_migrant(PopUnit.State.WORKER)
-	_Assignment.rebalance(city)
+	WorkerAssignment.rebalance(city)
 	city.pop[1].assigned_to = 999
 	bld.assigned_workers = 0
-	var n: int = _Assignment.rebalance(city)
+	var n: int = WorkerAssignment.rebalance(city)
 	assert_bool(n >= 1).is_true()
 	var orphan := 0
 	for u in city.pop:
@@ -152,11 +151,11 @@ func test_building_def_applies_chain_upkeep_zone() -> void:
 	assert_that(float(d.production_chain.building_eff)).is_equal(1.0)
 
 func test_scholar_promotion() -> void:
-	var b1: Variant = city.build_building(_Defs.manor(), HexUtils.get_neighbor(center, 0))
+	var b1: Variant = city.build_building(BuildingDefs.manor(), HexUtils.get_neighbor(center, 0))
 	assert_that(b1).is_not_null()
 	city.ensure_resource_ctx().add(&"scholar_points", 2.0)
-	var reg := _Registry.new()
-	var proc := _DemoProc.new()
+	var reg := CharacterRegistry.new()
+	var proc := DemographicTurnProcessor.new()
 	proc.setup(reg)
 	var ctx := TurnContext.new()
 	ctx.turn_number = 5
@@ -172,8 +171,8 @@ func test_scholar_promotion() -> void:
 
 func test_scholar_promotion_needs_manor() -> void:
 	city.ensure_resource_ctx().add(&"scholar_points", 3.0)
-	var reg := _Registry.new()
-	var proc := _DemoProc.new()
+	var reg := CharacterRegistry.new()
+	var proc := DemographicTurnProcessor.new()
 	proc.setup(reg)
 	var ctx := TurnContext.new()
 	ctx.turn_number = 5
@@ -185,11 +184,11 @@ func test_scholar_promotion_needs_manor() -> void:
 	assert_bool(city.resource_ctx.amount(&"scholar_points") > 2.0).is_true()
 
 func test_scholar_promotion_respects_manor_slots() -> void:
-	var b1: Variant = city.build_building(_Defs.manor(), HexUtils.get_neighbor(center, 0))
+	var b1: Variant = city.build_building(BuildingDefs.manor(), HexUtils.get_neighbor(center, 0))
 	assert_that(b1).is_not_null()
 	city.ensure_resource_ctx().add(&"scholar_points", 5.0)
-	var reg := _Registry.new()
-	var proc := _DemoProc.new()
+	var reg := CharacterRegistry.new()
+	var proc := DemographicTurnProcessor.new()
 	proc.setup(reg)
 	var ctx := TurnContext.new()
 	ctx.turn_number = 5

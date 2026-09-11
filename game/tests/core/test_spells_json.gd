@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 const _Validator = preload("res://tests/spell_validation/SpellValidator.gd")
 

@@ -1,11 +1,10 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _TimeSystem = preload("res://scripts/data/TimeSystem.gd")
 
 var ts: TimeSystem
 
 func before_test() -> void:
-	ts = _TimeSystem.new()
+	ts = TimeSystem.new()
 
 func test_init_hour_is_six() -> void:
 	assert_that(ts.current_hour).is_equal(6.0)

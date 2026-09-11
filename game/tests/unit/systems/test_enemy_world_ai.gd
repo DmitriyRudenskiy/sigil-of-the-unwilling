@@ -1,13 +1,12 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _Proc = preload("res://scripts/systems/EnemyTurnProcessor.gd")
-const _Growth = preload("res://scripts/systems/EnemyGrowthSystem.gd")
-const _Profile = preload("res://scripts/data/EnemyAIProfile.gd")
-const _MapGen = preload("res://scripts/world/MapGenerator.gd")
-const _MapModel = preload("res://scripts/world/MapModel.gd")
-const _Delta = preload("res://scripts/world/WorldStateDelta.gd")
-const _CityMgr = preload("res://scripts/world/CityManager.gd")
-const _City = preload("res://scripts/world/City.gd")
+
+
+
+
+
+
+
 
 const MAP_SIZE := 12
 const SEED := 12345
@@ -28,8 +27,8 @@ var units_reg: Node
 func before_test() -> void:
 	rng.seed = SEED
 	units_reg = Services.resolve(&"units")
-	map_gen = _MapGen.new()
-	model = _MapModel.new()
+	map_gen = MapGenerator.new()
+	model = MapModel.new()
 	model.map_width = MAP_SIZE
 	model.map_height = MAP_SIZE
 	for x in MAP_SIZE:
@@ -37,9 +36,9 @@ func before_test() -> void:
 			model.terrain_grid[Vector2i(x, y)] = HexUtils.Terrain.GRASS
 	map_gen.model = model
 	hero = FakeHero.new()
-	delta = _Delta.new()
-	cities = _CityMgr.new()
-	proc = _Proc.new()
+	delta = WorldStateDelta.new()
+	cities = CityManager.new()
+	proc = EnemyTurnProcessor.new()
 	proc.setup_world(map_gen, hero, null, cities, delta, SEED)
 
 func after_test() -> void:
@@ -106,7 +105,7 @@ func test_enemy_attacks_immediately_on_contact() -> void:
 
 func test_village_capture_flips_owner_and_garrisons() -> void:
 	var center := Vector2i(2, 4)
-	var city = _City.new()
+	var city = City.new()
 	city.display_name = "Тестовая деревня"
 	city.center = center
 	city.owner = &"player"
@@ -135,8 +134,8 @@ func test_village_capture_flips_owner_and_garrisons() -> void:
 func test_enemy_turn_is_deterministic() -> void:
 	var results: Array = []
 	for i in 2:
-		var mg := _MapGen.new()
-		var md := _MapModel.new()
+		var mg = auto_free( MapGenerator.new())
+		var md := MapModel.new()
 		md.map_width = MAP_SIZE
 		md.map_height = MAP_SIZE
 		for x in MAP_SIZE:
@@ -147,9 +146,9 @@ func test_enemy_turn_is_deterministic() -> void:
 		md.enemy_stacks[Vector2i(8, 3)] = _make_stack("skeleton")
 		var h := FakeHero.new()
 		h.current_cell = Vector2i(6, 6)
-		var p2 := _Proc.new()
-		var cm := _CityMgr.new()
-		p2.setup_world(mg, h, null, cm, _Delta.new(), SEED)
+		var p2 := EnemyTurnProcessor.new()
+		var cm = auto_free( CityManager.new())
+		p2.setup_world(mg, h, null, cm, WorldStateDelta.new(), SEED)
 		var rep: Dictionary = p2.process(TurnContext.new())
 		results.append([rep["moved"], rep["attacks"], rep["captures"],
 			md.enemy_stacks.keys().duplicate()])
@@ -172,7 +171,7 @@ func test_no_battle_when_hero_far() -> void:
 
 func test_weakened_respawn_after_cooldown() -> void:
 	var cell := Vector2i(3, 3)
-	var growth := _Growth.new()
+	var growth := EnemyGrowthSystem.new()
 	growth.setup_growth(map_gen, null, cities, delta, SEED)
 
 	growth.on_stack_defeated(cell, _make_stack("pikeman", 10))
@@ -200,7 +199,7 @@ func test_respawn_skipped_when_cell_occupied() -> void:
 	delta.enemy_growth_state["respawn_queue"] = [
 		{"x": cell.x, "y": cell.y, "units": [{"key": "pikeman", "count": 10}], "turns_left": 1},
 	]
-	var growth := _Growth.new()
+	var growth := EnemyGrowthSystem.new()
 	growth.setup_growth(map_gen, null, cities, delta, SEED)
 	growth.process(TurnContext.new())
 	var army: Array = model.enemy_stacks[cell]
@@ -213,7 +212,7 @@ func test_growth_state_roundtrip() -> void:
 	]
 	delta.enemy_growth_state["garrisoned"] = [{"x": 7, "y": 8}]
 	var data: Dictionary = delta.serialize()
-	var back = _Delta.new()
+	var back = WorldStateDelta.new()
 	back.deserialize(data)
 	assert_that(back.enemy_growth_state.get("respawn_queue", []).size()).is_equal(1)
 	assert_that(back.enemy_growth_state.get("garrisoned", []).size()).is_equal(1)

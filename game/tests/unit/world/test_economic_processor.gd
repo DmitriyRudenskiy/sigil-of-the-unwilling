@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 const TestFactories := preload("res://tests/helpers/factories.gd")
 
 func _add_worker(city: City, tile: Vector2i = Vector2i(6, 5)) -> PopUnit:

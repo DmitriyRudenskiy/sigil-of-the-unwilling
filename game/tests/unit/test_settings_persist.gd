@@ -1,13 +1,12 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _Settings = preload("res://scripts/autoload/Settings.gd")
 
 var settings: Object
 var _ss_settings: Object = null
 var _ss_screen: SettingsScreen = null
 
 func before_test() -> void:
-	settings = _Settings.new()
+	settings = SettingsAutoload.new()
 
 func after_test() -> void:
 	if settings != null:
@@ -101,7 +100,7 @@ func test_settings_volume_clamp() -> void:
 	assert_that(settings.sfx_volume).is_equal(75)
 
 func test_settings_screen_cancel_restores_volume() -> void:
-	_ss_settings = _Settings.new()
+	_ss_settings = SettingsAutoload.new()
 	_ss_settings.master_volume = 10
 	_ss_settings.music_volume = 20
 	_ss_settings.sfx_volume = 30

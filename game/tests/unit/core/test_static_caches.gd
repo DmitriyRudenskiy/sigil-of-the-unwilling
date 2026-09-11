@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 func test_reset_all_clears_caches() -> void:
 

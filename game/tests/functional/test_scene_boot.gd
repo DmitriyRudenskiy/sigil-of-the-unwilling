@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 const _SCENES := [
 	"res://scenes/MainMenu.tscn",

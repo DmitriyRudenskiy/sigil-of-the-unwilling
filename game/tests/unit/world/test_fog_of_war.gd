@@ -1,13 +1,12 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _Vis = preload("res://scripts/core/VisibilityMap.gd")
-const _MapGen = preload("res://scripts/world/MapGenerator.gd")
-const _MapModel = preload("res://scripts/world/MapModel.gd")
-const _Delta = preload("res://scripts/world/WorldStateDelta.gd")
-const _HexUtils = preload("res://scripts/core/HexUtils.gd")
+
+
+
+
 
 func test_visible_disk_around_hero() -> void:
-	var v := _Vis.new()
+	var v := VisibilityMap.new()
 	v.set_map_size(11, 11)
 	var changed := v.recompute(Vector2i(5, 5), [], 3, 4)
 	assert_bool(changed).is_true()
@@ -18,7 +17,7 @@ func test_visible_disk_around_hero() -> void:
 	assert_bool(v.is_explored(Vector2i(6, 5))).is_true()
 
 func test_sight_sources_are_cities() -> void:
-	var v := _Vis.new()
+	var v := VisibilityMap.new()
 	v.set_map_size(21, 21)
 	var changed := v.recompute(Vector2i(5, 5), [Vector2i(15, 15)], 3, 4)
 	assert_bool(changed).is_true()
@@ -28,7 +27,7 @@ func test_sight_sources_are_cities() -> void:
 	assert_bool(v.is_explored(Vector2i(15, 15))).is_true()
 
 func test_explored_is_monotonic() -> void:
-	var v := _Vis.new()
+	var v := VisibilityMap.new()
 	v.set_map_size(11, 11)
 	v.recompute(Vector2i(5, 5), [], 3, 4)
 	var explored_before := v.serialize_explored().size()
@@ -39,14 +38,14 @@ func test_explored_is_monotonic() -> void:
 	assert_bool(v.is_explored(Vector2i(5, 5))).is_true()
 
 func test_serialize_and_load_roundtrip() -> void:
-	var v := _Vis.new()
+	var v := VisibilityMap.new()
 	v.set_map_size(11, 11)
 	v.recompute(Vector2i(5, 5), [], 3, 4)
 	var arr := v.serialize_explored()
 	assert_array(arr).is_not_empty()
 	assert_bool(arr[0] is Dictionary and arr[0].has("x") and arr[0].has("y")).is_true()
 
-	var v2 := _Vis.new()
+	var v2 := VisibilityMap.new()
 	v2.set_map_size(11, 11)
 	v2.load_explored(arr)
 	assert_that(v2.serialize_explored().size()).is_equal(arr.size())
@@ -54,7 +53,7 @@ func test_serialize_and_load_roundtrip() -> void:
 		assert_bool(v2.is_explored(Vector2i(int(item["x"]), int(item["y"])))).is_true()
 
 func test_is_visible_requires_explored() -> void:
-	var v := _Vis.new()
+	var v := VisibilityMap.new()
 	v.set_map_size(11, 11)
 	v.recompute(Vector2i(5, 5), [], 3, 4)
 	assert_bool(v.is_visible(Vector2i(0, 0))).is_false()
@@ -83,13 +82,13 @@ func _make_map_gen_stub(size: int) -> MapGenerator:
 	return g
 
 func _make_movement(map_stub: MapGenerator) -> HeroMovementController:
-	var m = preload("res://scripts/entities/HeroMovementController.gd").new()
+	var m = HeroMovementController.new()
 	m._map_gen = map_stub
 	return m
 
 func test_terrain_cost_blocked_unexplored() -> void:
 	var g := _make_map_gen_stub(11)
-	var v := _Vis.new()
+	var v := VisibilityMap.new()
 	v.set_map_size(11, 11)
 	v.recompute(Vector2i(5, 5), [], 3, 4)
 	g.visibility = v
@@ -101,7 +100,7 @@ func test_terrain_cost_blocked_unexplored() -> void:
 
 func test_base_blocked_contains_unexplored() -> void:
 	var g := _make_map_gen_stub(11)
-	var v := _Vis.new()
+	var v := VisibilityMap.new()
 	v.set_map_size(11, 11)
 	v.recompute(Vector2i(5, 5), [], 3, 4)
 	g.visibility = v
@@ -129,20 +128,20 @@ class _HeroStub:
 	extends HeroController
 
 func test_explored_reachable_marker() -> void:
-	var v := _Vis.new()
+	var v := VisibilityMap.new()
 	v.set_map_size(11, 11)
 	v.recompute(Vector2i(5, 5), [], 3, 4)
 	assert_bool(v.is_explored(Vector2i(6, 5))).is_true()
 	assert_bool(v.is_explored(Vector2i(10, 10))).is_false()
 
 func test_spawner_hides_nodes_on_hidden_cells() -> void:
-	var spawner := preload("res://scripts/world/WorldSpawner.gd").new()
+	var spawner = auto_free( WorldSpawner.new())
 	var visible_node := Node2D.new()
 	var hidden_node := Node2D.new()
 	spawner._enemy_nodes[Vector2i(6, 5)] = visible_node
 	spawner._enemy_nodes[Vector2i(0, 0)] = hidden_node
 
-	var v := _Vis.new()
+	var v := VisibilityMap.new()
 	v.set_map_size(11, 11)
 	v.recompute(Vector2i(5, 5), [], 3, 4)
 	spawner.apply_fog_visibility(v)
@@ -158,13 +157,13 @@ func test_spawner_hides_nodes_on_hidden_cells() -> void:
 	hidden_node.free()
 
 func test_interaction_blocked_on_unexplored() -> void:
-	var vic := preload("res://scripts/world/WorldInteractionController.gd").new()
+	var vic = auto_free( WorldInteractionController.new())
 	var spawner := _SpawnerStub.new()
 	spawner._resources[Vector2i(0, 0)] = true
 	var hero := _HeroStub.new()
 	vic.setup(hero, spawner, null)
 
-	var v := _Vis.new()
+	var v := VisibilityMap.new()
 	v.set_map_size(11, 11)
 	v.recompute(Vector2i(5, 5), [], 3, 4)
 	assert_bool(v.is_explored(Vector2i(0, 0))).is_false()
@@ -173,7 +172,7 @@ func test_interaction_blocked_on_unexplored() -> void:
 	var status_msgs: Array = []
 	vic.status_cb = func(m) -> void:
 		status_msgs.append(m)
-	var collected := vic.collect_resource_at(Vector2i(0, 0))
+	var collected = vic.collect_resource_at(Vector2i(0, 0))
 	assert_bool(collected).is_false()
 	assert_bool(spawner._resources.is_empty()).is_false()
 	assert_that(status_msgs.size()).is_equal(1)
@@ -183,19 +182,19 @@ func test_interaction_blocked_on_unexplored() -> void:
 	hero.free()
 
 func test_interaction_allowed_on_visible() -> void:
-	var vic := preload("res://scripts/world/WorldInteractionController.gd").new()
+	var vic = auto_free( WorldInteractionController.new())
 	var spawner := _SpawnerStub.new()
 	spawner._resources[Vector2i(6, 5)] = true
 	var hero := _HeroStub.new()
 	vic.setup(hero, spawner, null)
 
-	var v := _Vis.new()
+	var v := VisibilityMap.new()
 	v.set_map_size(11, 11)
 	v.recompute(Vector2i(5, 5), [], 3, 4)
 	assert_bool(v.is_visible(Vector2i(6, 5))).is_true()
 	vic.visibility = v
 
-	var collected := vic.collect_resource_at(Vector2i(6, 5))
+	var collected = vic.collect_resource_at(Vector2i(6, 5))
 	assert_bool(collected).is_true()
 	assert_bool(spawner._resources.is_empty()).is_true()
 	vic.free()
@@ -203,12 +202,12 @@ func test_interaction_allowed_on_visible() -> void:
 	hero.free()
 
 func test_delta_fog_persistence() -> void:
-	var d := _Delta.new()
+	var d := WorldStateDelta.new()
 	d.set_fog_explored([{"x": 1, "y": 2}, {"x": 3, "y": 4}])
 	var data := d.serialize()
 	assert_bool("fog_explored" in data).is_true()
 	assert_that(data["fog_explored"].size()).is_equal(2)
 
-	var d2 := _Delta.new()
+	var d2 := WorldStateDelta.new()
 	d2.deserialize(data)
 	assert_that(d2.fog_explored.size()).is_equal(2)

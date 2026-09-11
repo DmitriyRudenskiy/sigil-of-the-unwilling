@@ -1,4 +1,5 @@
 extends Node
+class_name GameEventBusAutoload
 
 signal battle_started
 signal battle_completed(winner: BattleState.Side, enemy_cell: Vector2i)

@@ -1,8 +1,7 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _SaveData = preload("res://scripts/core/SaveData.gd")
-const _WorldStateDelta = preload("res://scripts/world/WorldStateDelta.gd")
-const _SaveManager = preload("res://scripts/core/SaveManager.gd")
+
+
 
 var _sm: SaveManager
 var _parent: Node
@@ -11,7 +10,7 @@ func before_test() -> void:
 	_parent = Node.new()
 	_parent.name = "TestParent"
 	add_child(_parent)
-	_sm = _SaveManager.new()
+	_sm = SaveManager.new()
 	_sm.name = "SaveManager"
 	_parent.add_child(_sm)
 	_sm.call("delete_save")
@@ -22,7 +21,7 @@ func after_test() -> void:
 	_parent.queue_free()
 
 func test_save_data_roundtrip() -> void:
-	var data := _SaveData.new()
+	var data := SaveData.new()
 	data.run_seed = 42
 	data.date = {"month": 5, "week": 2, "day": 10}
 	data.hero = {"cell": {"x": 10, "y": 20}, "move_points": 15}
@@ -30,7 +29,7 @@ func test_save_data_roundtrip() -> void:
 
 	var dict := data.to_dict()
 
-	var data2 := _SaveData.new()
+	var data2 := SaveData.new()
 	data2.from_dict(dict)
 
 	assert_that(data2.run_seed).is_equal(42)
@@ -38,7 +37,7 @@ func test_save_data_roundtrip() -> void:
 	assert_bool(data2.is_valid()).is_true()
 
 func test_world_delta_roundtrip() -> void:
-	var delta := _WorldStateDelta.new()
+	var delta := WorldStateDelta.new()
 	delta.add_village(Vector2i(1, 2))
 	delta.add_defeated_enemy(Vector2i(5, 5))
 	delta.add_removed_resource(Vector2i(3, 3))
@@ -46,7 +45,7 @@ func test_world_delta_roundtrip() -> void:
 
 	var dict := delta.serialize()
 
-	var delta2 := _WorldStateDelta.new()
+	var delta2 := WorldStateDelta.new()
 	delta2.deserialize(dict)
 
 	assert_that(delta2.captured_villages.size()).is_equal(1)
@@ -55,7 +54,7 @@ func test_world_delta_roundtrip() -> void:
 	assert_that(delta2.removed_resources[0]).is_equal(Vector2i(3, 3))
 
 func test_save_manager_roundtrip() -> void:
-	var data := _SaveData.new()
+	var data := SaveData.new()
 	data.run_seed = 12345
 	data.hero = {"cell": {"x": 5, "y": 5}, "move_points": 10}
 	data.world = {"captured_villages": []}
@@ -77,7 +76,7 @@ func test_load_missing_returns_file_not_found() -> void:
 	assert_that(loaded.get("data")).is_null()
 
 func test_delete_save_removes_file_from_disk() -> void:
-	var data := _SaveData.new()
+	var data := SaveData.new()
 	data.run_seed = 999
 	data.hero = {"cell": {"x": 1, "y": 1}, "move_points": 5}
 	data.world = {"captured_villages": []}

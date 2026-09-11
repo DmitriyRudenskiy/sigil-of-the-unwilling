@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 func test_wood_definition() -> void:
 	var def := Resources.get_resource(&"wood")

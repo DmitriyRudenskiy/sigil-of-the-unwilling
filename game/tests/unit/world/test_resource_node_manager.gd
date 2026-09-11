@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 var _rnm: ResourceNodeManager
 var _rng: RandomNumberGenerator
@@ -7,7 +7,7 @@ func before_test() -> void:
 	_rnm = ResourceNodeManager.new()
 	_rng = TestFactories.seeded(6861)
 	_rng.seed = 42
-	_rnm.setup(null, _rng)
+	_rnm.setup(null, _rng, Resources)
 
 func test_discover_fails_on_empty_cell() -> void:
 	var r := _rnm.try_discover(Vector2i(0, 0), {})

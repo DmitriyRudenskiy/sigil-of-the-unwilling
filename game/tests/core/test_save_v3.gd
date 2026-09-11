@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 const TestFactories := preload("res://tests/helpers/factories.gd")
 
 func test_version_is_current() -> void:

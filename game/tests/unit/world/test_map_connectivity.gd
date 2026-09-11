@@ -1,7 +1,6 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _MapGen = preload("res://scripts/world/MapGenerator.gd")
-const _HexUtils = preload("res://scripts/core/HexUtils.gd")
+
 
 const SEEDS := [1, 7, 42, 1337, 5555, 20260903, 808080, 1234567, 424242, 999983]
 
@@ -15,7 +14,7 @@ func after_test() -> void:
 func _gen(seed: int) -> void:
 	if _mg != null:
 		_mg.free()
-	_mg = _MapGen.new()
+	_mg = MapGenerator.new()
 	_mg.seed_value = seed
 	_mg.generate()
 
@@ -34,7 +33,7 @@ func _plain_candidate(model, start: Vector2i) -> Vector2i:
 	visited[start] = true
 	while queue.size() > 0:
 		var cell = queue.pop_front()
-		for nb in _HexUtils.get_all_neighbors(cell):
+		for nb in HexUtils.get_all_neighbors(cell):
 			if nb.x < 0 or nb.y < 0 or nb.x >= model.map_width or nb.y >= model.map_height:
 				continue
 			if visited.has(nb):
@@ -50,7 +49,7 @@ func _component(model, start: Vector2i) -> Dictionary:
 	var seen := {start: 1}
 	while queue.size() > 0:
 		var cell = queue.pop_front()
-		for nb in _HexUtils.get_all_neighbors(cell):
+		for nb in HexUtils.get_all_neighbors(cell):
 			if seen.has(nb) or not model.is_walkable(nb):
 				continue
 			seen[nb] = 1

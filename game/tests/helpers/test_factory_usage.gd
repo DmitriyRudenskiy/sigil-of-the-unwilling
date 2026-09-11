@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 func test_make_battle_state_places_both_sides() -> void:
 	var bs := TestFactories.make_battle_state()

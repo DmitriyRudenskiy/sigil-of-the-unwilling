@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 var _nodes: Array[Node] = []
 
@@ -17,7 +17,7 @@ func test_battle_state_side_enum_order() -> void:
 	assert_that(BattleState.Side.DEFENDER).is_equal(2)
 
 func test_battle_completed_signal_type() -> void:
-	var flow := BattleFlow.new()
+	var flow = auto_free( BattleFlow.new())
 	_track(flow)
 	flow.name = "TestFlow"
 	var holder: Dictionary = {"winner": -1}
@@ -45,7 +45,7 @@ func test_array_to_dict_conversion() -> void:
 	assert_bool(dict.has(Vector2i(0, 1))).is_false()
 
 func test_executor_has_paused_property() -> void:
-	var executor := BattleTurnExecutor.new()
+	var executor = auto_free( BattleTurnExecutor.new())
 	_track(executor)
 	executor.name = "TestExecutor"
 	assert_that(executor._paused).is_equal(false)
@@ -83,20 +83,20 @@ func test_action_resolver_has_revive_unit() -> void:
 	assert_bool(resolver.has_method("revive_unit")).is_true()
 
 func test_map_generator_has_get_terrain_id() -> void:
-	var mg := MapGenerator.new()
+	var mg = auto_free( MapGenerator.new())
 	_track(mg)
 	mg.name = "TestMG"
 	assert_bool(mg.has_method("get_terrain_id")).is_true()
 
 func test_map_generator_get_terrain_id_null_model() -> void:
-	var mg := MapGenerator.new()
+	var mg = auto_free( MapGenerator.new())
 	_track(mg)
 	mg.name = "TestMG2"
 	var tid = mg.get_terrain_id(Vector2i(0, 0))
 	assert_that(tid).is_equal(HexUtils.Terrain.GRASS)
 
 func test_movement_signal_emits_dict() -> void:
-	var hc := HeroMovementController.new()
+	var hc = auto_free( HeroMovementController.new())
 	_track(hc)
 	hc.name = "TestHMC"
 	var holder: Array = [false]

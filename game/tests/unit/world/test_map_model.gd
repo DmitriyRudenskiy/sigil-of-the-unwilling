@@ -1,9 +1,8 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const MapModelScript = preload("res://scripts/world/MapModel.gd")
 
 func test_generation() -> void:
-	var model: RefCounted = MapModelScript.new()
+	var model: RefCounted = MapModel.new()
 	model.map_width = 20
 	model.map_height = 20
 	model.seed_value = 42
@@ -13,13 +12,13 @@ func test_generation() -> void:
 	assert_int(model.height_grid.size()).is_equal(400).override_failure_message("height_grid should contain 400 cells")
 
 func test_determinism() -> void:
-	var a: RefCounted = MapModelScript.new()
+	var a: RefCounted = MapModel.new()
 	a.map_width = 16
 	a.map_height = 16
 	a.seed_value = 123
 	a.generate_noise()
 
-	var b: RefCounted = MapModelScript.new()
+	var b: RefCounted = MapModel.new()
 	b.map_width = 16
 	b.map_height = 16
 	b.seed_value = 123
@@ -27,7 +26,7 @@ func test_determinism() -> void:
 
 	assert_bool(a.terrain_grid == b.terrain_grid).is_true().override_failure_message("same seed should produce same terrain_grid")
 
-	var c: RefCounted = MapModelScript.new()
+	var c: RefCounted = MapModel.new()
 	c.map_width = 16
 	c.map_height = 16
 	c.seed_value = 999
@@ -36,7 +35,7 @@ func test_determinism() -> void:
 	assert_bool(a.terrain_grid == c.terrain_grid).is_false().override_failure_message("different seeds should usually produce different terrain")
 
 func test_biome_logic() -> void:
-	var model: RefCounted = MapModelScript.new()
+	var model: RefCounted = MapModel.new()
 
 	assert_int(model.get_biome_terrain_id(0.10, 0.5, 0.5)).is_equal(HexUtils.Terrain.WATER).override_failure_message("low height should be water")
 	assert_int(model.get_biome_terrain_id(0.36, 0.5, 0.7)).is_equal(HexUtils.Terrain.SWAMP).override_failure_message("low land + high moisture should be swamp")
@@ -47,7 +46,7 @@ func test_biome_logic() -> void:
 	assert_int(model.get_biome_terrain_id(0.90, 0.1, 0.5)).is_equal(HexUtils.Terrain.SNOW).override_failure_message("very high cold terrain should be snow")
 
 func test_walkability() -> void:
-	var model: RefCounted = MapModelScript.new()
+	var model: RefCounted = MapModel.new()
 	model.map_width = 10
 	model.map_height = 10
 	model.seed_value = 7

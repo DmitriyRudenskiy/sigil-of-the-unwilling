@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 class _StubHero extends Node:
 	var current_cell: Vector2i = Vector2i(3, 4)
@@ -14,7 +14,7 @@ func after_test() -> void:
 		_map = null
 
 func _make_overlay() -> MinimapOverlay:
-	var overlay := MinimapOverlay.new()
+	var overlay = auto_free( MinimapOverlay.new())
 	add_child(overlay)
 
 	_map = MapGenerator.new()

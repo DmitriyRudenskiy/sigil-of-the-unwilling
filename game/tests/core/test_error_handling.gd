@@ -1,60 +1,59 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _SaveManager = preload("res://scripts/core/SaveManager.gd")
-const _SaveData = preload("res://scripts/core/SaveData.gd")
+
 
 func test_load_no_file() -> void:
-	var sm := _SaveManager.new()
+	var sm = auto_free( SaveManager.new())
 	sm.delete_save()
 	var result: Dictionary = sm.load_game()
-	assert_that(result["error"]).is_equal(_SaveManager.SaveError.FILE_NOT_FOUND)
+	assert_that(result["error"]).is_equal(SaveManager.SaveError.FILE_NOT_FOUND)
 	assert_that(result["data"]).is_null()
 	sm.free()
 
 func test_load_invalid_json() -> void:
-	var sm := _SaveManager.new()
-	var f := FileAccess.open(_SaveManager.SAVE_PATH, FileAccess.WRITE)
+	var sm = auto_free( SaveManager.new())
+	var f := FileAccess.open(SaveManager.SAVE_PATH, FileAccess.WRITE)
 	f.store_string("not valid json {{{")
 	f.close()
 	var result: Dictionary = sm.load_game()
-	assert_that(result["error"]).is_equal(_SaveManager.SaveError.PARSE_FAIL)
+	assert_that(result["error"]).is_equal(SaveManager.SaveError.PARSE_FAIL)
 	assert_that(result["data"]).is_null()
 	sm.delete_save()
 	sm.free()
 
 func test_load_invalid_data() -> void:
-	var sm := _SaveManager.new()
-	var f := FileAccess.open(_SaveManager.SAVE_PATH, FileAccess.WRITE)
+	var sm = auto_free( SaveManager.new())
+	var f := FileAccess.open(SaveManager.SAVE_PATH, FileAccess.WRITE)
 	f.store_string('{"version": 1, "run_seed": 0, "hero": {}, "world": {}}')
 	f.close()
 	var result: Dictionary = sm.load_game()
-	assert_that(result["error"]).is_equal(_SaveManager.SaveError.INVALID_DATA)
+	assert_that(result["error"]).is_equal(SaveManager.SaveError.INVALID_DATA)
 	sm.delete_save()
 	sm.free()
 
 func test_save_null_data() -> void:
-	var sm := _SaveManager.new()
+	var sm = auto_free( SaveManager.new())
 	var err: int = sm.save_game(null)
-	assert_that(err).is_equal(_SaveManager.SaveError.INVALID_DATA)
+	assert_that(err).is_equal(SaveManager.SaveError.INVALID_DATA)
 	sm.free()
 
 func test_error_to_string() -> void:
-	assert_that(_SaveManager.error_to_string(_SaveManager.SaveError.OK)).is_equal("OK")
-	assert_that(_SaveManager.error_to_string(_SaveManager.SaveError.PARSE_FAIL)).is_equal("JSON parse error")
-	assert_bool(_SaveManager.error_to_string(_SaveManager.SaveError.WRITE_FAIL).is_empty()).is_false()
+	assert_that(SaveManager.error_to_string(SaveManager.SaveError.OK)).is_equal("OK")
+	assert_that(SaveManager.error_to_string(SaveManager.SaveError.PARSE_FAIL)).is_equal("JSON parse error")
+	assert_bool(SaveManager.error_to_string(SaveManager.SaveError.WRITE_FAIL).is_empty()).is_false()
 
 func test_save_and_load_round_trip() -> void:
-	var sm := _SaveManager.new()
+	var sm = auto_free( SaveManager.new())
 	sm.delete_save()
-	var data := _SaveData.new()
+	var data := SaveData.new()
 	data.run_seed = 42
-	data.version = _SaveData.CURRENT_VERSION
+	data.version = SaveData.CURRENT_VERSION
 	data.hero = {"cell": {"x": 5, "y": 5}, "level": 5}
 	data.world = {}
-	var err := sm.save_game(data)
-	assert_that(err).is_equal(_SaveManager.SaveError.OK)
+	var err = sm.save_game(data)
+	assert_that(err).is_equal(SaveManager.SaveError.OK)
 	var result: Dictionary = sm.load_game()
-	assert_that(result["error"]).is_equal(_SaveManager.SaveError.OK)
+	assert_that(result["error"]).is_equal(SaveManager.SaveError.OK)
 	assert_that(result["data"]).is_not_null()
 	assert_that(result["data"].run_seed).is_equal(42)
 	sm.delete_save()

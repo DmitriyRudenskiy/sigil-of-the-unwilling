@@ -1,11 +1,11 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 const ACTION_SKIP := 0
 const ACTION_MOVE := 1
 const ACTION_ATTACK := 2
 
 func _create_state(attacker_alive: bool, def_alive: bool):
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 	var atk: Array[UnitStack] = []
 	var def: Array[UnitStack] = []
 
@@ -20,7 +20,7 @@ func _create_state(attacker_alive: bool, def_alive: bool):
 
 func test_no_target() -> void:
 	var state = _create_state(false, true)
-	var ai = load("res://scripts/systems/BattleAI.gd").new()
+	var ai = BattleAI.new()
 
 	var defender = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
 	var blocked: Dictionary = state.build_all_blocked(defender, {})
@@ -30,7 +30,7 @@ func test_no_target() -> void:
 
 func test_adjacent_attack() -> void:
 	var state = _create_state(true, true)
-	var ai = load("res://scripts/systems/BattleAI.gd").new()
+	var ai = BattleAI.new()
 
 	var attacker = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
 	var defender = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
@@ -47,7 +47,7 @@ func test_adjacent_attack() -> void:
 
 func test_move_towards_target() -> void:
 	var state = _create_state(true, true)
-	var ai = load("res://scripts/systems/BattleAI.gd").new()
+	var ai = BattleAI.new()
 
 	var attacker = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
 	var defender = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
@@ -74,7 +74,7 @@ func test_move_towards_target() -> void:
 
 func test_attacker_ai_targets_defender() -> void:
 	var state = _create_state(true, true)
-	var ai = load("res://scripts/systems/BattleAI.gd").new()
+	var ai = BattleAI.new()
 
 	var attacker = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
 	var defender = state.get_units_by_side(BattleState.Side.DEFENDER)[0]
@@ -109,7 +109,7 @@ func test_flying_ai_falls_back_when_adjacent_blocked() -> void:
 	_assert_flying_landing(obstacles, setup)
 
 func _setup_flying_vs_ground():
-	var state = load("res://scripts/systems/BattleState.gd").new()
+	var state = BattleState.new()
 	var atk: Array[UnitStack] = []
 	atk.append(Units.make_fixed_stack("pegasus", 10))
 	var def: Array[UnitStack] = []
@@ -126,7 +126,7 @@ func _assert_flying_landing(obstacles: Dictionary, setup: Dictionary) -> void:
 	var state: RefCounted = setup["state"]
 	var pegasus: RefCounted = setup["flying"]
 	var goblins: RefCounted = setup["defender"]
-	var ai = load("res://scripts/systems/BattleAI.gd").new()
+	var ai = BattleAI.new()
 
 	var blocked: Dictionary = state.build_all_blocked(pegasus, obstacles)
 	var decision = ai.decide_turn(pegasus, state, blocked)

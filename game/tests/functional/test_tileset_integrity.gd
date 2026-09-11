@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 const SHEET_PATH := "res://assets/tiles/world_tiles.jpeg"
 

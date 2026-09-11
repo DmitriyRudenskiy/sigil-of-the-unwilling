@@ -1,10 +1,9 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _CityIncomeProcessor = preload("res://scripts/economy/CityIncomeProcessor.gd")
-const _City = preload("res://scripts/world/City.gd")
+
 
 func _make_city(owner: StringName, gold: float) -> RefCounted:
-	var c := _City.new()
+	var c := City.new()
 	c.display_name = "Тест"
 	c.center = Vector2i(5, 5)
 	c.owner = owner
@@ -13,12 +12,12 @@ func _make_city(owner: StringName, gold: float) -> RefCounted:
 	return c
 
 func test_phase_contract() -> void:
-	var proc := _CityIncomeProcessor.new()
+	var proc := CityIncomeProcessor.new()
 	assert_that(proc.get_phase_id()).is_equal(&"city_income")
 	assert_that(proc.get_priority()).is_equal(15)
 
 func test_player_city_pays_royalty() -> void:
-	var proc := _CityIncomeProcessor.new()
+	var proc := CityIncomeProcessor.new()
 	var city := _make_city(&"player", 10.0)
 	var ctx := TurnContext.new()
 	ctx.cities.append(city)
@@ -31,7 +30,7 @@ func test_player_city_pays_royalty() -> void:
 	assert_that(int(per_city[0].get("royalty", 0))).is_equal(2)
 
 func test_arena_city_skipped() -> void:
-	var proc := _CityIncomeProcessor.new()
+	var proc := CityIncomeProcessor.new()
 	var city := _make_city(&"none", 10.0)
 	var ctx := TurnContext.new()
 	ctx.cities.append(city)
@@ -41,7 +40,7 @@ func test_arena_city_skipped() -> void:
 	assert_float(city.resource_ctx.amount(&"gold")).is_equal_approx(10.0, 0.0001)
 
 func test_zero_royalty_skipped() -> void:
-	var proc := _CityIncomeProcessor.new()
+	var proc := CityIncomeProcessor.new()
 	var city := _make_city(&"player", 3.0)
 	var ctx := TurnContext.new()
 	ctx.cities.append(city)
@@ -50,7 +49,7 @@ func test_zero_royalty_skipped() -> void:
 	assert_float(city.resource_ctx.amount(&"gold")).is_equal_approx(3.0, 0.0001)
 
 func test_city_without_resource_ctx_skipped() -> void:
-	var proc := _CityIncomeProcessor.new()
+	var proc := CityIncomeProcessor.new()
 	var city := _make_city(&"player", 0.0)
 	var ctx := TurnContext.new()
 	ctx.cities.append(city)
@@ -58,7 +57,7 @@ func test_city_without_resource_ctx_skipped() -> void:
 	assert_bool((report.get("total") as Dictionary).is_empty()).is_true()
 
 func test_null_city_in_list_skipped() -> void:
-	var proc := _CityIncomeProcessor.new()
+	var proc := CityIncomeProcessor.new()
 	var ctx := TurnContext.new()
 	ctx.cities.append(null)
 	ctx.cities.append(_make_city(&"player", 10.0))
@@ -66,7 +65,7 @@ func test_null_city_in_list_skipped() -> void:
 	assert_float(float((report.get("total") as Dictionary).get(&"gold", 0.0))).is_equal_approx(2.0, 0.0001)
 
 func test_null_ctx() -> void:
-	var proc := _CityIncomeProcessor.new()
+	var proc := CityIncomeProcessor.new()
 	var report: Dictionary = proc.process(null)
 	assert_bool((report.get("total") as Dictionary).is_empty()).is_true()
 	assert_that((report.get("per_city") as Array).size()).is_equal(0)

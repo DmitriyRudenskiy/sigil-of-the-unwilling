@@ -1,8 +1,7 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _BS = preload("res://scripts/systems/BattleState.gd")
-const _BTX = preload("res://scripts/systems/BattleTurnExecutor.gd")
-const _BAI = preload("res://scripts/systems/BattleAI.gd")
+
+
 
 func test_obstacle_different_seeds_differ() -> void:
 	var a := _generate_obstacles(42)
@@ -64,46 +63,46 @@ func _get_scroll_spell_ids(seed: int) -> Array[StringName]:
 	return result
 
 func test_pending_action_enum_values() -> void:
-	assert_that(_BTX.PendingAction.NONE).is_equal(0)
-	assert_that(_BTX.PendingAction.MOVE).is_equal(1)
-	assert_that(_BTX.PendingAction.ATTACK).is_equal(2)
+	assert_that(BattleTurnExecutor.PendingAction.NONE).is_equal(0)
+	assert_that(BattleTurnExecutor.PendingAction.MOVE).is_equal(1)
+	assert_that(BattleTurnExecutor.PendingAction.ATTACK).is_equal(2)
 
 func test_pause_sets_pending_move() -> void:
-	var executor := _BTX.new()
+	var executor = auto_free( BattleTurnExecutor.new())
 	executor.name = "TestExecutor"
 	executor.pause_battle()
-	executor._pending_completion = _BTX.PendingAction.MOVE
-	assert_that(executor._pending_completion).is_equal(_BTX.PendingAction.MOVE)
+	executor._pending_completion = BattleTurnExecutor.PendingAction.MOVE
+	assert_that(executor._pending_completion).is_equal(BattleTurnExecutor.PendingAction.MOVE)
 	executor.resume_battle()
 	assert_bool(executor.is_paused()).is_false()
 	executor.free()
 
 func test_pause_sets_pending_attack() -> void:
-	var executor := _BTX.new()
+	var executor = auto_free( BattleTurnExecutor.new())
 	executor.name = "TestExecutor2"
 	executor.pause_battle()
-	executor._pending_completion = _BTX.PendingAction.ATTACK
-	assert_that(executor._pending_completion).is_equal(_BTX.PendingAction.ATTACK)
+	executor._pending_completion = BattleTurnExecutor.PendingAction.ATTACK
+	assert_that(executor._pending_completion).is_equal(BattleTurnExecutor.PendingAction.ATTACK)
 	executor.free()
 
 func test_resume_clears_pending() -> void:
-	var executor := _BTX.new()
+	var executor = auto_free( BattleTurnExecutor.new())
 	executor.name = "TestExecutor3"
 	executor.pause_battle()
-	executor._pending_completion = _BTX.PendingAction.MOVE
+	executor._pending_completion = BattleTurnExecutor.PendingAction.MOVE
 	executor.resume_battle()
-	assert_that(executor._pending_completion).is_equal(_BTX.PendingAction.NONE)
+	assert_that(executor._pending_completion).is_equal(BattleTurnExecutor.PendingAction.NONE)
 	executor.free()
 
 func test_start_battle_resets_pending() -> void:
-	var executor := _BTX.new()
+	var executor = auto_free( BattleTurnExecutor.new())
 	executor.name = "TestExecutor5"
-	executor._pending_completion = _BTX.PendingAction.ATTACK
+	executor._pending_completion = BattleTurnExecutor.PendingAction.ATTACK
 	executor._paused = true
 	var bs := BattleState.new()
-	var ai := _BAI.new()
+	var ai := BattleAI.new()
 	executor.setup(bs, ai, {})
 	executor.start_battle()
 	assert_bool(executor.is_paused()).is_false()
-	assert_that(executor._pending_completion).is_equal(_BTX.PendingAction.NONE)
+	assert_that(executor._pending_completion).is_equal(BattleTurnExecutor.PendingAction.NONE)
 	executor.free()

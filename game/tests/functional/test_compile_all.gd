@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 var _bad: Array[String] = []
 var _ok := 0

@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 func before_test() -> void:
 	Artifacts.reset()

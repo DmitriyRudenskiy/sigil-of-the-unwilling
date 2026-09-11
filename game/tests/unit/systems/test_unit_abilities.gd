@@ -1,14 +1,13 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _BattleState = preload("res://scripts/systems/BattleState.gd")
-const _BattleRules = preload("res://scripts/core/BattleRules.gd")
+
 
 var _rng := TestFactories.seeded(8212)
 
 func test_vampiric_heal() -> void:
 	var stack := Units.make_fixed_stack("vampire", 5)
 	assert_object(stack).is_not_null().override_failure_message("vampire unit not found in registry")
-	var unit := _BattleState.BattleUnit.new(stack)
+	var unit := BattleState.BattleUnit.new(stack)
 	assert_bool(unit.has_tag("vampiric")).is_true().override_failure_message("Vampire should have vampiric tag")
 
 func test_vampiric_cap() -> void:
@@ -17,12 +16,12 @@ func test_vampiric_cap() -> void:
 func test_charge_multiplier() -> void:
 	var stack := Units.make_fixed_stack("champions", 10)
 	assert_object(stack).is_not_null().override_failure_message("champions unit not found in registry")
-	var unit := _BattleState.BattleUnit.new(stack)
+	var unit := BattleState.BattleUnit.new(stack)
 	assert_bool(unit.has_tag("charge")).is_true().override_failure_message("Champion should have charge tag")
 
 func test_first_strike() -> void:
 	_rng.seed = 42
-	var bs := _BattleState.new()
+	var bs := BattleState.new()
 	var atk_stack := Units.make_fixed_stack("swordsmen", 10)
 	var def_stack := Units.make_fixed_stack("royal_griffin", 5)
 
@@ -40,17 +39,17 @@ func test_first_strike() -> void:
 func test_rebirth() -> void:
 	var stack := Units.make_fixed_stack("phoenix", 3)
 	assert_object(stack).is_not_null().override_failure_message("phoenix unit not found in registry")
-	var unit := _BattleState.BattleUnit.new(stack)
+	var unit := BattleState.BattleUnit.new(stack)
 	assert_bool(unit.has_tag("rebirth")).is_true().override_failure_message("Phoenix should have rebirth tag")
 
 func test_breath_splash() -> void:
 	var stack := Units.make_fixed_stack("red_dragon", 5)
 	assert_object(stack).is_not_null().override_failure_message("red_dragon unit not found in registry")
-	var unit := _BattleState.BattleUnit.new(stack)
+	var unit := BattleState.BattleUnit.new(stack)
 	assert_bool(unit.has_tag("breath")).is_true().override_failure_message("Red dragon should have breath tag")
 
 func test_max_count_set() -> void:
-	var bs := _BattleState.new()
+	var bs := BattleState.new()
 	var stack := Units.make_fixed_stack("swordsmen", 42)
 	assert_object(stack).is_not_null().override_failure_message("swordsmen unit not found in registry")
 
@@ -60,7 +59,7 @@ func test_max_count_set() -> void:
 	assert_int(unit.max_count).is_equal(42).override_failure_message("max_count should be 42")
 
 func test_distance_moved() -> void:
-	var bs := _BattleState.new()
+	var bs := BattleState.new()
 	var stack := Units.make_fixed_stack("swordsmen", 10)
 	assert_object(stack).is_not_null().override_failure_message("swordsmen unit not found in registry")
 

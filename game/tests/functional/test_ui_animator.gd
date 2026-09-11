@@ -1,6 +1,5 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const UIAnimator = preload("res://scripts/ui/UIAnimator.gd")
 
 var _buttons: Array[Node] = []
 

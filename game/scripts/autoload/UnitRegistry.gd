@@ -1,4 +1,5 @@
 extends Node
+class_name UnitRegistry
 
 const _UnitStack = preload("res://scripts/entities/UnitStack.gd")
 const _UnitStats = preload("res://scripts/entities/UnitStats.gd")

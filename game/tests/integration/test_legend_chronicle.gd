@@ -1,20 +1,19 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _WorldController = preload("res://scripts/world/WorldController.gd")
-const _HeroLifecycle = preload("res://scripts/world/HeroLifecycleSystem.gd")
-const _Succession = preload("res://scripts/world/SuccessionController.gd")
-const _City = preload("res://scripts/world/City.gd")
-const _CityManager = preload("res://scripts/world/CityManager.gd")
-const _Follower = preload("res://scripts/entities/Follower.gd")
-const _Hero = preload("res://scripts/entities/HeroController.gd")
-const _Chronicle = preload("res://scripts/core/Chronicle.gd")
-const _SaveData = preload("res://scripts/core/SaveData.gd")
-const _WorldPersistence = preload("res://scripts/world/WorldPersistence.gd")
-const _GameSession = preload("res://scripts/core/GameSession.gd")
+
+
+
+
+
+
+
+
+
+
+
 const _DeathSequenceScene = preload("res://scenes/ui/DeathSequence.tscn")
-const _ChronicleScreen = preload("res://scripts/ui/ChronicleScreen.gd")
+
 const _ChronicleScreenScene = preload("res://scenes/ui/ChronicleScreen.tscn")
-const _HeroStatusPanel = preload("res://scripts/ui/HeroStatusPanel.gd")
 
 var _bus_conns: Array = []
 
@@ -32,7 +31,7 @@ func after_test() -> void:
 	_bus_clear()
 
 func test_chronicle_append_numbers_generations_and_emits() -> void:
-	var c: _Chronicle = _Chronicle.new()
+	var c: Chronicle = Chronicle.new()
 	var got: Array = []
 	var conn := func(id, text): got.append([id, text])
 	_bus(GameEventBus.chronicle_entry_added, conn)
@@ -49,7 +48,7 @@ func test_chronicle_append_without_bus_does_not_crash() -> void:
 	var tree := Engine.get_main_loop() as SceneTree
 	var bus_node: Node = tree.root.get_node("/root/GameEventBus")
 	bus_node.name = "GameEventBusHidden"
-	var c: _Chronicle = _Chronicle.new()
+	var c: Chronicle = Chronicle.new()
 	var e: Dictionary = c.append(
 		{"hero_name": "Ghost", "path": "archivist", "outcome": "DEFEAT"})
 	bus_node.name = "GameEventBus"
@@ -57,9 +56,9 @@ func test_chronicle_append_without_bus_does_not_crash() -> void:
 	assert_that(int(e.get("generation", 0))).is_equal(1)
 
 func test_chronicle_roundtrip_and_garbage() -> void:
-	var c: _Chronicle = _Chronicle.new()
+	var c: Chronicle = Chronicle.new()
 	c.append({"hero_name": "A", "path": "x", "outcome": "succession"})
-	var c2: _Chronicle = _Chronicle.new()
+	var c2: Chronicle = Chronicle.new()
 	c2.from_array(c.to_array())
 	assert_that(c2.entries.size()).is_equal(1)
 	assert_that(str(c2.entries[0]["hero_name"])).is_equal("A")
@@ -83,39 +82,39 @@ func test_savedata_v5_migrates_to_v6_with_empty_chronicle() -> void:
 		"legend": {},
 		"session": {},
 	}
-	var sd: _SaveData = _SaveData.new()
+	var sd: SaveData = SaveData.new()
 	sd.from_dict(v5)
 	assert_that(int(sd.version)).is_equal(SaveData.CURRENT_VERSION)
 	assert_bool(sd.chronicle.is_empty()).is_true()
-	var sd2: _SaveData = _SaveData.new()
+	var sd2: SaveData = SaveData.new()
 	sd2.from_dict(sd.to_dict())
 	assert_that(int(sd2.version)).is_equal(SaveData.CURRENT_VERSION)
 	assert_bool(sd2.chronicle.is_empty()).is_true()
 
 func test_savedata_v6_chronicle_roundtrip() -> void:
-	var sd: _SaveData = _SaveData.new()
+	var sd: SaveData = SaveData.new()
 	sd.version = 6
 	sd.chronicle.append({"hero_name": "A", "path": "x", "outcome": "succession", "generation": 1})
-	var sd2: _SaveData = _SaveData.new()
+	var sd2: SaveData = SaveData.new()
 	sd2.from_dict(sd.to_dict())
 	assert_that(sd2.chronicle.size()).is_equal(1)
 	assert_that(str(sd2.chronicle[0]["hero_name"])).is_equal("A")
 
-func _make_follower(uid: int, name: String, path: StringName) -> _Follower:
-	var f: _Follower = _Follower.new()
+func _make_follower(uid: int, name: String, path: StringName) -> Follower:
+	var f: Follower = Follower.new()
 	f.uid = uid
 	f.name = name
 	f.path = path
 	return f
 
 func test_hero_status_panel_with_hero() -> void:
-	var h: _Hero = _Hero.new()
+	var h = auto_free( HeroController.new())
 	h.hero_name = "Darkstorn"
 	h.path_id = &"archivist"
 	h.combat_hp = 5
 	h.max_combat_hp = 10
 	h.followers = [_make_follower(1, "Nyx", &"archivist")]
-	var panel: _HeroStatusPanel = load("res://scenes/ui/HeroStatusPanel.tscn").instantiate() as _HeroStatusPanel
+	var panel: HeroStatusPanel = load("res://scenes/ui/HeroStatusPanel.tscn").instantiate() as HeroStatusPanel
 	add_child(panel)
 	panel.set_hero(h)
 	var title: String = str(panel.get_node("VBox/Title").text)
@@ -127,7 +126,7 @@ func test_hero_status_panel_with_hero() -> void:
 	panel.free()
 
 func test_hero_status_panel_without_hero() -> void:
-	var panel: _HeroStatusPanel = load("res://scenes/ui/HeroStatusPanel.tscn").instantiate() as _HeroStatusPanel
+	var panel: HeroStatusPanel = load("res://scenes/ui/HeroStatusPanel.tscn").instantiate() as HeroStatusPanel
 	add_child(panel)
 	var title: String = str(panel.get_node("VBox/Title").text)
 	assert_bool(title.find("Герой") != -1).is_true()
@@ -138,7 +137,7 @@ func test_hero_status_panel_without_hero() -> void:
 func test_death_sequence_with_successor() -> void:
 	var ds: DeathSequence = _DeathSequenceScene.instantiate()
 	add_child(ds)
-	var succ: _Hero = _Hero.new()
+	var succ = auto_free( HeroController.new())
 	succ.hero_name = "Nyx"
 	succ.path_id = &"warrior"
 	ds.show_death("Darkstorn", &"battle", {"turns": 10, "date": {"month": 1, "week": 2, "day": 3}}, succ)
@@ -166,7 +165,7 @@ func test_death_sequence_successor_signal() -> void:
 	add_child(ds)
 	var fired: Array = []
 	ds.successor_chosen.connect(func(): fired.append(1))
-	var succ: _Hero = _Hero.new()
+	var succ = auto_free( HeroController.new())
 	ds.show_death("A", &"battle", {}, succ)
 	ds.get_node("Root/Panel/VBox/Buttons/SuccessorButton").pressed.emit()
 	assert_that(fired.size()).is_equal(1)
@@ -174,7 +173,7 @@ func test_death_sequence_successor_signal() -> void:
 	ds.free()
 
 func test_chronicle_screen_newest_first() -> void:
-	var cs: _ChronicleScreen = _ChronicleScreenScene.instantiate()
+	var cs: ChronicleScreen = _ChronicleScreenScene.instantiate()
 	add_child(cs)
 	var entries: Array = [
 		{"hero_name": "First", "path": "a", "outcome": "succession", "generation": 1, "end_turn": 5, "glory": 1, "battles_won": 0, "battles_lost": 0},
@@ -188,7 +187,7 @@ func test_chronicle_screen_newest_first() -> void:
 	cs.free()
 
 func test_chronicle_screen_empty() -> void:
-	var cs: _ChronicleScreen = _ChronicleScreenScene.instantiate()
+	var cs: ChronicleScreen = _ChronicleScreenScene.instantiate()
 	add_child(cs)
 	cs.show_entries([])
 	var list: VBoxContainer = cs.get_node("Root/Panel/VBox/Scroll/List")
@@ -196,28 +195,28 @@ func test_chronicle_screen_empty() -> void:
 	assert_bool(txt.find("Летопись пуста") != -1).is_true()
 	cs.free()
 
-func _make_wc() -> _WorldController:
-	var wc: _WorldController = _WorldController.new()
+func _make_wc() -> WorldController:
+	var wc = auto_free( WorldController.new())
 	wc._rng = TestFactories.seeded(7225)
-	var mgr: _CityManager = _CityManager.new()
-	var c: _City = _City.new()
+	var mgr = auto_free( CityManager.new())
+	var c: City = City.new()
 	c.uid = 1
 	c.display_name = &"Highhold"
 	c.owner = &"player"
 	mgr.register_city(c)
 	wc._cities = mgr
-	wc._succession = _Succession.new()
-	var persistence: _WorldPersistence = _WorldPersistence.new(null)
-	persistence.session = _GameSession.new(42)
+	wc._succession = SuccessionController.new()
+	var persistence: WorldPersistence = WorldPersistence.new(null)
+	persistence.session = GameSession.new(42)
 	wc._persistence = persistence
-	var sys := _HeroLifecycle.new()
+	var sys := HeroLifecycleSystem.new()
 	sys.setup(wc, wc._persistence, wc._rng, wc._cities, null, null, null, null, null, null, wc._succession, null)
 	wc._hero_lifecycle = sys
 	return wc
 
 func test_on_hero_died_defers_succession() -> void:
 	var wc := _make_wc()
-	var h: _Hero = _Hero.new()
+	var h = auto_free( HeroController.new())
 	h.hero_name = "Darkstorn"
 	h.path_id = &"archivist"
 	h.followers = [_make_follower(1, "Nyx", &"archivist")]
@@ -252,7 +251,7 @@ func test_on_hero_died_defers_succession() -> void:
 func test_on_hero_died_terminal_no_succession() -> void:
 	var wc := _make_wc()
 	wc._persistence.session.state = 2
-	var h: _Hero = _Hero.new()
+	var h = auto_free( HeroController.new())
 	h.hero_name = "Last"
 	h.path_id = &"archivist"
 	h.followers = [_make_follower(1, "Nyx", &"archivist")]

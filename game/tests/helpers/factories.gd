@@ -1,9 +1,8 @@
 class_name TestFactories
 extends RefCounted
 
-const City := preload("res://scripts/world/City.gd")
-const HeroController := preload("res://scripts/entities/HeroController.gd")
-const Follower := preload("res://scripts/entities/Follower.gd")
+
+
 
 static func make_city(uid: int = 1, stronghold: int = 2) -> City:
 	var city := City.new()
@@ -42,12 +41,30 @@ static func make_battle_state(
 	if units == null:
 		units = Services.resolve(&"units")
 	if units == null:
-		units = load("res://scripts/autoload/UnitRegistry.gd").new()
+		units = UnitRegistry.new()
 	var atk: Array[UnitStack] = [units.make_fixed_stack(atk_key, atk_count)]
 	var def: Array[UnitStack] = [units.make_fixed_stack(def_key, def_count)]
 	var bs := BattleState.new()
 	bs.place_army(atk, def)
 	return bs
+
+static func make_battle_unit(key: String = "swordsmen", count: int = 10, side: int = 0) -> BattleState.BattleUnit:
+	var stack = Units.make_fixed_stack(key, count)
+	if stack == null:
+		stack = Units.make_fixed_stack("skeleton", count)
+	if stack == null:
+		return null
+	var unit := BattleState.BattleUnit.new(stack)
+	unit.side = side
+	unit.max_count = count
+	return unit
+
+# Raw UnitStats (not from UnitRegistry) — for tests that need fixed stats independent of the registry.
+static func make_battle_unit_raw(key: String, count: int, side: int) -> BattleState.BattleUnit:
+	var u := BattleState.BattleUnit.new(UnitStack.new(UnitStats.new(key, key, 5, 3, 5, 3, 2), count))
+	u.side = side
+	u.max_count = count
+	return u
 
 static func make_city_with_temple(uid: int = 1, stronghold: int = 2, temple_level: int = 2) -> City:
 	var city := make_city(uid, stronghold)

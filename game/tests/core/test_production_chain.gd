@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 func _make_chain() -> ProductionChain:
 	var chain := ProductionChain.new()

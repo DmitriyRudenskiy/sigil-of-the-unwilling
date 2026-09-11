@@ -1,11 +1,10 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const City = preload("res://scripts/world/City.gd")
-const ArenaClusterSystem = preload("res://scripts/city/ArenaClusterSystem.gd")
-const ArenaTurnRunner = preload("res://scripts/city/ArenaTurnRunner.gd")
-const ArenaRingSystem = preload("res://scripts/city/ArenaRingSystem.gd")
-const BuildingDefs = preload("res://scripts/data/BuildingDefs.gd")
-const HexUtils = preload("res://scripts/core/HexUtils.gd")
+
+
+
+
+
 
 var city: City
 

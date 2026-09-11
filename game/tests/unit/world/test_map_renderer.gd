@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 ## MapRenderer: paint() and apply_fog() against a real TileMapLayer.
 
 class _FakeModel:

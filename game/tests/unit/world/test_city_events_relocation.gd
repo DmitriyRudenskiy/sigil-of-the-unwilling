@@ -1,16 +1,15 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _City := preload("res://scripts/world/City.gd")
-const _UniqueBuilding := preload("res://scripts/world/UniqueBuilding.gd")
-const _PopUnit := preload("res://scripts/world/PopUnit.gd")
-const _BuildingDefs := preload("res://scripts/data/BuildingDefs.gd")
-const _Market := preload("res://scripts/city/MarketSystem.gd")
-const _Events := preload("res://scripts/city/CityEvents.gd")
-const _Spec := preload("res://scripts/city/SpecializationSystem.gd")
-const _CityProc := preload("res://scripts/city/CityTurnProcessor.gd")
+
+
+
+
+
+
+
 
 func _city(uid := 1) -> Variant:
-	var c := _City.new()
+	var c := City.new()
 	c.uid = uid
 	c.center = Vector2i(0, 0)
 	c.stronghold_level = 2
@@ -19,54 +18,54 @@ func _city(uid := 1) -> Variant:
 func test_specialization_level_gate() -> void:
 	var c: Variant = _city()
 	assert_that(c.level).is_equal(1)
-	assert_bool(_Spec.set_specialization(c, &"agrarian")).is_false()
+	assert_bool(SpecializationSystem.set_specialization(c, &"agrarian")).is_false()
 	assert_that(c.specialization).is_equal(&"")
 	c.level = 2
-	assert_bool(_Spec.set_specialization(c, &"agrarian")).is_true()
+	assert_bool(SpecializationSystem.set_specialization(c, &"agrarian")).is_true()
 	assert_that(c.specialization).is_equal(&"agrarian")
-	assert_bool(_Spec.set_specialization(c, &"nope")).is_false()
+	assert_bool(SpecializationSystem.set_specialization(c, &"nope")).is_false()
 
 func test_agrarian_food_yield() -> void:
 	var c: Variant = _city()
-	c._add_pop(_PopUnit.State.WORKER, 0, Vector2i(1, 0))
+	c._add_pop(PopUnit.State.WORKER, 0, Vector2i(1, 0))
 	c.tile_yield_fn = func(_cell: Vector2i) -> Dictionary: return {&"food": 10.0}
 	var y: Dictionary = c.get_yield()
 	assert_bool(absf(float(y[&"food"]) - 10.0) < 1e-9).is_true()
 	c.level = 2
-	_Spec.set_specialization(c, &"agrarian")
+	SpecializationSystem.set_specialization(c, &"agrarian")
 	y = c.get_yield()
 	assert_bool(absf(float(y[&"food"]) - 15.0) < 1e-9).is_true()
 
 func test_merchant_rate() -> void:
 	var c: Variant = _city()
 	c.prosperity = 0.0
-	assert_bool(absf(_Market.rate_for(c, &"grain") - 1.5) < 1e-9).is_true()
+	assert_bool(absf(MarketSystem.rate_for(c, &"grain") - 1.5) < 1e-9).is_true()
 	c.level = 2
-	_Spec.set_specialization(c, &"merchant")
-	assert_bool(absf(_Market.rate_for(c, &"grain") - 1.875) < 1e-9).is_true()
+	SpecializationSystem.set_specialization(c, &"merchant")
+	assert_bool(absf(MarketSystem.rate_for(c, &"grain") - 1.875) < 1e-9).is_true()
 
 func test_militarist_defense() -> void:
 	var c: Variant = _city()
 	assert_that(c.defense_strength()).is_equal(0)
 	c.level = 2
-	_Spec.set_specialization(c, &"militarist")
+	SpecializationSystem.set_specialization(c, &"militarist")
 	assert_that(c.defense_strength()).is_equal(5)
 
 func test_scholar_science_per_turn() -> void:
 	var c: Variant = _city(42)
 	c.level = 2
-	_Spec.set_specialization(c, &"scholar")
-	var proc := _CityProc.new()
+	SpecializationSystem.set_specialization(c, &"scholar")
+	var proc := CityTurnProcessor.new()
 	proc._process_city(c, 7)
 	assert_bool(absf(c.resource_ctx.amount(&"science") - 2.0) < 1e-9).is_true()
 
 func test_relocate_ok() -> void:
 	var c: Variant = _city()
-	var b := _UniqueBuilding.new()
-	b.def = _BuildingDefs.walls()
+	var b := UniqueBuilding.new()
+	b.def = BuildingDefs.walls()
 	b.cell = Vector2i(1, 0)
 	c.buildings.append(b)
-	c._add_pop(_PopUnit.State.WORKER, 0, Vector2i(2, 0))
+	c._add_pop(PopUnit.State.WORKER, 0, Vector2i(2, 0))
 	c.roads[Vector2i(3, 0)] = true
 	var centers: Array = []
 	c.relocation_completed.connect(func(nc: Vector2i): centers.append(nc))
@@ -84,8 +83,8 @@ func test_relocate_ok() -> void:
 
 func test_relocate_failures() -> void:
 	var c: Variant = _city()
-	var b := _UniqueBuilding.new()
-	b.def = _BuildingDefs.walls()
+	var b := UniqueBuilding.new()
+	b.def = BuildingDefs.walls()
 	b.cell = Vector2i(1, 0)
 	c.buildings.append(b)
 	var r: CityCheck = c.relocate(Vector2i(0, 0))
@@ -98,15 +97,15 @@ func test_relocate_failures() -> void:
 
 func test_events_deterministic() -> void:
 	var c: Variant = _city(51)
-	assert_bool(_Events.occurs(c, 9)).is_true()
-	assert_bool(_Events.occurs(c, 7)).is_false()
+	assert_bool(CityEvents.occurs(c, 9)).is_true()
+	assert_bool(CityEvents.occurs(c, 7)).is_false()
 	var c2: Variant = _city(42)
-	assert_bool(_Events.occurs(c2, 7)).is_false()
+	assert_bool(CityEvents.occurs(c2, 7)).is_false()
 
 func test_event_harvest_festival() -> void:
 	var c: Variant = _city(51)
 	c.food_stockpile = 4.0
-	var r: Dictionary = _Events.resolve(c, 9)
+	var r: Dictionary = CityEvents.resolve(c, 9)
 	assert_bool(bool(r.occurred)).is_true()
 	assert_that(r.event_id).is_equal(&"harvest_festival")
 	assert_bool(absf(c.food_stockpile - 9.0) < 1e-9).is_true()
@@ -115,7 +114,7 @@ func test_event_harvest_festival() -> void:
 func test_event_tax_inspector() -> void:
 	var c: Variant = _city(2)
 	c.storage[&"industry"] = 20.0
-	var r: Dictionary = _Events.resolve(c, 1)
+	var r: Dictionary = CityEvents.resolve(c, 1)
 	assert_bool(bool(r.occurred)).is_true()
 	assert_that(r.event_id).is_equal(&"tax_inspector")
 	assert_bool(absf(float(c.storage[&"industry"]) - 15.0) < 1e-9).is_true()
@@ -123,8 +122,8 @@ func test_event_tax_inspector() -> void:
 func test_event_plague() -> void:
 	var c: Variant = _city(5)
 	for i in 3:
-		c._add_pop(_PopUnit.State.WORKER, 0)
-	var r: Dictionary = _Events.resolve(c, 8)
+		c._add_pop(PopUnit.State.WORKER, 0)
+	var r: Dictionary = CityEvents.resolve(c, 8)
 	assert_bool(bool(r.occurred)).is_true()
 	assert_that(r.event_id).is_equal(&"plague_outbreak")
 	assert_that(c.pop.size()).is_equal(2)
@@ -134,7 +133,7 @@ func test_event_no_no_mutation() -> void:
 	var c: Variant = _city(42)
 	c.food_stockpile = 10.0
 	c.storage[&"industry"] = 20.0
-	var r: Dictionary = _Events.resolve(c, 7)
+	var r: Dictionary = CityEvents.resolve(c, 7)
 	assert_bool(bool(r.occurred)).is_false()
 	assert_bool(absf(c.food_stockpile - 10.0) < 1e-9).is_true()
 	assert_that(c.reputation).is_equal(0)
@@ -142,7 +141,7 @@ func test_event_no_no_mutation() -> void:
 func test_processor_event_signal() -> void:
 	var c: Variant = _city(51)
 	var events: Array = []
-	var proc := _CityProc.new()
+	var proc := CityTurnProcessor.new()
 	proc.city_event_occurred.connect(
 		func(uid: int, id: StringName): events.append([uid, id]))
 	var report: Dictionary = proc._process_city(c, 9)

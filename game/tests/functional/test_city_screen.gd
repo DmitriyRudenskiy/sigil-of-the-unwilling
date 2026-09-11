@@ -1,7 +1,6 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _City = preload("res://scripts/world/City.gd")
-const _CityYieldTable = preload("res://scripts/world/CityYieldTable.gd")
+
 
 var screen: CityScreen = null
 var city: RefCounted = null
@@ -13,11 +12,11 @@ func _main_root() -> Node:
 func before_test() -> void:
 	screen = load("res://scenes/ui/CityScreen.tscn").instantiate() as CityScreen
 	_main_root().add_child(screen)
-	city = _City.new()
+	city = City.new()
 	city.display_name = "Тестгород"
 	city.center = Vector2i(10, 10)
 	city.tile_yield_fn = func(_cell: Vector2i) -> Dictionary:
-		return _CityYieldTable.yield_for_terrain(HexUtils.Terrain.GRASS)
+		return CityYieldTable.yield_for_terrain(HexUtils.Terrain.GRASS)
 	city.storage[&"industry"] = 30.0
 	hero = HeroController.new()
 	hero.name = "Hero"

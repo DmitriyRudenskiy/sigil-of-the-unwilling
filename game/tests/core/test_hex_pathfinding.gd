@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 const W := 10
 const H := 10
@@ -113,8 +113,8 @@ func test_dijkstra_path_early_avoids_wall() -> void:
 		assert_bool(c != wall_cell).is_true()
 
 func test_find_path_dispatch() -> void:
-	var p_bfs := HexPathfinding.find_path(Vector2i.ZERO, Vector2i(2, 2), {}, W, H, "bfs")
-	var p_astar := HexPathfinding.find_path(Vector2i.ZERO, Vector2i(2, 2), {}, W, H, "astar")
+	var p_bfs := HexPathfinding.find_path(Vector2i.ZERO, Vector2i(2, 2), {}, W, H, true, "bfs")
+	var p_astar := HexPathfinding.find_path(Vector2i.ZERO, Vector2i(2, 2), {}, W, H, true, "astar")
 	assert_array(p_bfs).is_not_empty()
 	assert_array(p_astar).is_not_empty()
 	_assert_valid_steps(p_bfs)

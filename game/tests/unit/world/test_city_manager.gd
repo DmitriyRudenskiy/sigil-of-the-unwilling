@@ -1,16 +1,15 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _CityManager = preload("res://scripts/world/CityManager.gd")
-const _City = preload("res://scripts/world/City.gd")
-const _BuildingDefs = preload("res://scripts/data/BuildingDefs.gd")
+
+
 
 var manager: CityManager
 var capital: RefCounted
 
 func before_test() -> void:
-	manager = _CityManager.new()
+	manager = CityManager.new()
 	manager.name = "TestCityManager"
-	capital = _City.new()
+	capital = City.new()
 	capital.display_name = "Столица"
 	capital.center = Vector2i(10, 10)
 	manager.register_city(capital, true)
@@ -36,7 +35,7 @@ func test_register_null_city() -> void:
 	assert_that(manager.cities.size()).is_equal(1)
 
 func test_register_second_city() -> void:
-	var city2 := _City.new()
+	var city2 := City.new()
 	city2.display_name = "Второй город"
 	city2.center = Vector2i(20, 20)
 	manager.register_city(city2)
@@ -82,9 +81,9 @@ func test_on_turn_ended_cycle_on_turn_7() -> void:
 	assert_bool(report.cycle).is_true()
 
 func test_capital_inflow_no_capital() -> void:
-	var mgr := _CityManager.new()
+	var mgr = auto_free( CityManager.new())
 	mgr.name = "TestMgr2"
-	var inflow := mgr.capital_inflow(1)
+	var inflow = mgr.capital_inflow(1)
 	assert_that(inflow).is_equal(0)
 	mgr.free()
 
@@ -105,8 +104,8 @@ func test_capital_inflow_with_temple() -> void:
 	capital.storage[&"industry"] = 1000.0
 	capital.add_followers(5)
 	var site := HexUtils.get_all_neighbors(capital.center)[0]
-	capital.special_sites[site] = _BuildingDefs.SITE_SHRINE
-	capital.build_building(_BuildingDefs.great_temple(), site)
+	capital.special_sites[site] = BuildingDefs.SITE_SHRINE
+	capital.build_building(BuildingDefs.great_temple(), site)
 
 	var inflow := manager.capital_inflow(7)
 	assert_that(inflow).is_equal(4)

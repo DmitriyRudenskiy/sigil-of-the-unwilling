@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 class _HeroStub extends Node:
 	signal hero_moved(cell: Vector2i)
@@ -14,6 +14,7 @@ class _HeroStub extends Node:
 class _MapStub extends Node:
 	var map_width := 12
 	var map_height := 12
+	var hex_shift_right := true
 
 	func is_walkable(_cell: Vector2i) -> bool:
 		return true

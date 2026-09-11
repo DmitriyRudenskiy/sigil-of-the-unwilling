@@ -1,8 +1,7 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 const _Popup = preload("res://scenes/ui/ResourceCollectPopup.tscn")
-const _Spawner = preload("res://scripts/world/WorldSpawner.gd")
-const _VIC = preload("res://scripts/world/WorldInteractionController.gd")
+
 
 class _SpawnerStub:
 	extends WorldSpawner
@@ -129,7 +128,7 @@ func test_icons_name_color_texture() -> void:
 			.is_equal_approx(ResourceIcons.get_color(&"quartz"))).is_true()
 
 func test_spawner_get_res_type_at() -> void:
-	var spawner: WorldSpawner = _Spawner.new()
+	var spawner = auto_free( WorldSpawner.new())
 	var cell := Vector2i(3, 3)
 	var node := Node2D.new()
 	node.set_meta("res_type", 2)
@@ -140,7 +139,7 @@ func test_spawner_get_res_type_at() -> void:
 	spawner.free()
 
 func test_collect_emits_resource_extracted() -> void:
-	var vic := _VIC.new()
+	var vic = auto_free( WorldInteractionController.new())
 	var spawner := _SpawnerStub.new()
 	var hero := _HeroStub.new()
 	var cell := Vector2i(2, 2)
@@ -155,7 +154,7 @@ func test_collect_emits_resource_extracted() -> void:
 		events.append([c, rid, amount])
 	GameEventBus.resource_extracted.connect(cb)
 
-	var collected := vic.collect_resource_at(cell)
+	var collected = vic.collect_resource_at(cell)
 	GameEventBus.resource_extracted.disconnect(cb)
 
 	assert_bool(collected).is_true()
@@ -170,7 +169,7 @@ func test_collect_emits_resource_extracted() -> void:
 	hero.free()
 
 func test_collect_no_node_no_signal() -> void:
-	var vic := _VIC.new()
+	var vic = auto_free( WorldInteractionController.new())
 	var spawner := _SpawnerStub.new()
 	var hero := _HeroStub.new()
 	vic.setup(hero, spawner, null)
@@ -180,7 +179,7 @@ func test_collect_no_node_no_signal() -> void:
 		events.append(true)
 	GameEventBus.resource_extracted.connect(cb)
 
-	var collected := vic.collect_resource_at(Vector2i(9, 9))
+	var collected = vic.collect_resource_at(Vector2i(9, 9))
 	GameEventBus.resource_extracted.disconnect(cb)
 
 	assert_bool(collected).is_false()

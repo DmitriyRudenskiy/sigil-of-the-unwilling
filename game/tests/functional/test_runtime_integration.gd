@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 const WORLD_SCENE: String = "res://scenes/World.tscn"
 const MAIN_MENU_SCENE: String = "res://scenes/MainMenu.tscn"

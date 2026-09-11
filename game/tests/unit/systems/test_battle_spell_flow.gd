@@ -1,8 +1,7 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _Executor = preload("res://scripts/systems/BattleTurnExecutor.gd")
-const _ActionResolver = preload("res://scripts/systems/BattleActionResolver.gd")
-const _Controller = preload("res://scripts/systems/BattleController.gd")
+
+
 
 var _units: Node
 
@@ -10,7 +9,7 @@ func before_test() -> void:
 	_units = Services.resolve(&"units")
 
 func test_cast_keeps_waiting_input() -> void:
-	var executor = _Executor.new()
+	var executor = BattleTurnExecutor.new()
 	executor.name = "TestExec"
 	var bs = BattleState.new()
 	var ai = BattleAI.new()
@@ -30,7 +29,7 @@ func test_cure_heals_wounded() -> void:
 	var original_count = target.get_count()
 	target.set_count(max(1, original_count - 2))
 	assert_bool(target.get_count() < original_count).is_true()
-	var result = _ActionResolver.apply_spell(bs, &"cure", bs.attacker_units[0], target, {}, {}, TestFactories.seeded(9631))
+	var result = BattleActionResolver.apply_spell(bs, &"cure", bs.attacker_units[0], target, {}, {}, TestFactories.seeded(9631))
 	if int(result.get("healed", 0)) > 0:
 		assert_bool(target.get_count() > max(1, original_count - 2)).is_true()
 	else:
@@ -43,7 +42,7 @@ func test_cure_full_stack_no_overheal() -> void:
 	bs.place_army([atk_stack], [def_stack])
 	var target = bs.defender_units[0]
 	target.set_count(target.max_count)
-	var result = _ActionResolver.apply_spell(bs, &"cure", bs.attacker_units[0], target, {}, {}, TestFactories.seeded(9631))
+	var result = BattleActionResolver.apply_spell(bs, &"cure", bs.attacker_units[0], target, {}, {}, TestFactories.seeded(9631))
 	assert_that(int(result.get("healed", 0))).is_equal(0)
 	assert_bool(target.get_count() <= target.max_count).is_true()
 
@@ -61,7 +60,7 @@ func test_avatar_texture_passthrough() -> void:
 	hero.free()
 
 func test_controller_spell_handlers_exist() -> void:
-	var bc = _Controller.new()
+	var bc = BattleController.new()
 	bc.name = "TestBC"
 	assert_bool(bc.has_method("_on_spell_chosen")).is_true()
 	assert_bool(bc.has_method("_on_spell_cast_requested")).is_true()

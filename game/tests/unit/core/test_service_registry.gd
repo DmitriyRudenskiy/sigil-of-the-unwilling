@@ -1,9 +1,9 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 var registry: RefCounted
 
 func before_test() -> void:
-	registry = preload("res://scripts/core/service_registry.gd").new()
+	registry = ServiceRegistry.new()
 
 func after_test() -> void:
 	registry = null

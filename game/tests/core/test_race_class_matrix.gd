@@ -1,11 +1,10 @@
-extends GdUnitTestSuite
+extends BaseTest
 
-const _Registry = preload("res://scripts/data/RaceClassRegistry.gd")
 
 var registry: Variant = null
 
 func before_test() -> void:
-	registry = _Registry.new()
+	registry = RaceClassRegistry.new()
 
 func after_test() -> void:
 	registry = null

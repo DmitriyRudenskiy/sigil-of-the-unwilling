@@ -1,4 +1,4 @@
-extends GdUnitTestSuite
+extends BaseTest
 
 class _Proc extends TurnPhaseProcessor:
 	var id: StringName
