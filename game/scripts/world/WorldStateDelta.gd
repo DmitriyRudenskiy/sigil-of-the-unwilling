@@ -77,11 +77,11 @@ func add_exhausted_node(cell: Vector2i) -> void:
 static func serialize_cells(cells: Array[Vector2i]) -> Array:
 	var result: Array = []
 	for cell in cells:
-		result.append({"x": cell.x, "y": cell.y})
+		result.append(SerializationUtils.vec2i_to_dict(cell))
 	return result
 
 static func deserialize_cells(arr: Array) -> Array[Vector2i]:
 	var result: Array[Vector2i] = []
 	for item in arr:
-		result.append(Vector2i(int(item.get("x", 0)), int(item.get("y", 0))))
+		result.append(SerializationUtils.vec2i_from_dict(item))
 	return result

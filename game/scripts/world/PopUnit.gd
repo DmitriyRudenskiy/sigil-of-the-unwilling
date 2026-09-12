@@ -32,7 +32,7 @@ func request_switch(new_state: State, new_tile := Vector2i(-1, -1)) -> bool:
 func apply_pending() -> bool:
 	if pending_state == -1:
 		return false
-	state = pending_state
+	state = pending_state as State
 	tile = pending_tile if state == State.WORKER else Vector2i(-1, -1)
 	patrol = patrol and state == State.MILITIA
 	pending_state = -1
@@ -43,10 +43,10 @@ func serialize() -> Dictionary:
 	return {
 		"uid": uid,
 		"state": state,
-		"tile": {"x": tile.x, "y": tile.y},
+		"tile": SerializationUtils.vec2i_to_dict(tile),
 		"patrol": patrol,
 		"pending_state": pending_state,
-		"pending_tile": {"x": pending_tile.x, "y": pending_tile.y},
+		"pending_tile": SerializationUtils.vec2i_to_dict(pending_tile),
 		"assigned_to": assigned_to,
 		"born_turn": born_turn,
 		"character_uid": character_uid,
@@ -56,13 +56,11 @@ func serialize() -> Dictionary:
 static func deserialize(data: Dictionary) -> PopUnit:
 	var u := PopUnit.new()
 	u.uid = int(data.get("uid", 0))
-	u.state = int(data.get("state", State.FOLLOWER))
-	var t: Dictionary = data.get("tile", {})
-	u.tile = Vector2i(int(t.get("x", -1)), int(t.get("y", -1)))
+	u.state = int(data.get("state", State.FOLLOWER)) as State
+	u.tile = SerializationUtils.vec2i_from_dict(data.get("tile", {}), Vector2i(-1, -1))
 	u.patrol = bool(data.get("patrol", false))
 	u.pending_state = int(data.get("pending_state", -1))
-	var pt: Dictionary = data.get("pending_tile", {})
-	u.pending_tile = Vector2i(int(pt.get("x", -1)), int(pt.get("y", -1)))
+	u.pending_tile = SerializationUtils.vec2i_from_dict(data.get("pending_tile", {}), Vector2i(-1, -1))
 	u.assigned_to = int(data.get("assigned_to", -1))
 	u.born_turn = int(data.get("born_turn", -1))
 	u.character_uid = int(data.get("character_uid", -1))

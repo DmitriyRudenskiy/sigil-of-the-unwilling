@@ -1,7 +1,7 @@
 extends Node
 class_name WorldInteractionController
 
-const ResourceType = preload("res://scripts/data/ResourceType.gd")
+
 
 var hero: HeroController
 var spawner: WorldSpawner

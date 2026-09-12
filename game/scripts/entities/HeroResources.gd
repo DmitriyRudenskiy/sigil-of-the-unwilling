@@ -2,7 +2,7 @@
 extends Node
 class_name HeroResources
 
-const ResourceType = preload("res://scripts/data/ResourceType.gd")
+
 
 signal resources_changed(resources: Dictionary)
 
@@ -16,7 +16,9 @@ func _init() -> void:
 		resources[id] = ResourceType.start_amount(id)
 
 func _ready() -> void:
-	inventory.modifiers_changed.connect(_on_inventory_changed)
+	# Инвентарь может быть назначен позже (подмена в тестах) — не падать на null.
+	if inventory != null and not inventory.modifiers_changed.is_connected(_on_inventory_changed):
+		inventory.modifiers_changed.connect(_on_inventory_changed)
 
 func pickup_resource(res_type: int) -> void:
 	if not ResourceType.is_valid(res_type):

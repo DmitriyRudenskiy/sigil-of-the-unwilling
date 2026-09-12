@@ -43,7 +43,7 @@ func _ready() -> void:
 	SoundManager.play_music_cue(&"music_world")
 	_rng = RandomNumberGenerator.new()
 	var _shard := ShardManagerScript.instance().get_active()
-	_bootstrap_result = WorldBootstrapScript.run(self, _Platform, _rng, _shard.seed, _ui_manager)
+	_bootstrap_result = WorldBootstrapScript.run(self, _Platform, _rng, _shard.seed_val, _ui_manager)
 	_map_gen = _bootstrap_result.map_gen
 	_hero = _bootstrap_result.hero
 	_camera = _bootstrap_result.camera
@@ -97,7 +97,7 @@ func get_last_save_dict() -> Dictionary: return _save_svc.get_last_save_dict()
 func apply_save(data: SaveData) -> void: _save_svc.apply_save(data)
 func request_load_game() -> void: _save_svc.request_load_game()
 func restart_game(seed_value: int) -> void: _save_svc.restart_game(seed_value)
-func is_terminal() -> bool: return _save_svc.is_terminal()
+func is_terminal() -> bool: return _save_svc != null and _save_svc.is_terminal()
 func get_endgame_state() -> Dictionary: return _save_svc.get_endgame_state()
 func save_game() -> bool: return _save_svc.save_game()
 func is_world_visible() -> bool: return _Platform.is_headless() or visible

@@ -8,11 +8,11 @@ const VILLAGE_NAMES: Array = [
 	"Млиный Утёс", "Тёплый Рудник", "Северное Село", "Дальний Посад",
 ]
 
-static func village_name(seed: int, cell: Vector2i) -> String:
-	var h: int = hash([seed, cell.x, cell.y])
+static func village_name(seed_val: int, cell: Vector2i) -> String:
+	var h: int = hash([seed_val, cell.x, cell.y])
 	return VILLAGE_NAMES[absi(h) % VILLAGE_NAMES.size()]
 
-static func create_village(center: Vector2i, display_name: String, seed: int = 0) -> City:
+static func create_village(center: Vector2i, display_name: String, _seed: int = 0) -> City:
 	var city := City.new()
 	city.center = center
 	city.display_name = display_name

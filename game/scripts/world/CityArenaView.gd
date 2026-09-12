@@ -1,7 +1,7 @@
 class_name CityArenaView
 extends Node2D
 
-const HEX_SIZE := 26.0
+const HEX_SIZE := GameNumbers.HEX_SIZE
 const SQRT3: float = 1.7320508
 const ArenaHexCellScene = preload("res://scenes/ui/ArenaHexCell.tscn")
 
@@ -172,7 +172,7 @@ func _cell_mark(cv: Vector2i) -> String:
     return ""
 
 func _build_cells() -> void:
-    for c in _hex_layer.get_children():
+    for c: Node2D in _hex_layer.get_children():
         c.queue_free()
     _cell_nodes.clear()
     var cells: Array = ArenaRingSystem.cells_in_arena()

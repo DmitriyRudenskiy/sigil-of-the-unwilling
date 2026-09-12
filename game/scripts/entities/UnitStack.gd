@@ -36,7 +36,7 @@ func to_dict() -> Dictionary:
         "defense": stats.defense,
     }
 
-static func from_dict(data: Dictionary, stats: UnitStats) -> UnitStack:
-    if stats == null:
+static func from_dict(data: Dictionary, stats_: UnitStats) -> UnitStack:
+    if stats_ == null:
         return null
-    return UnitStack.new(stats, int(data.get("count", 0)))
+    return UnitStack.new(stats_, int(data.get("count", 0)))

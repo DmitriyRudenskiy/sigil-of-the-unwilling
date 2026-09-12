@@ -44,8 +44,8 @@ func get_run_seed() -> int:
 
 	return int(Time.get_unix_time_from_system()) & 0x7FFFFFFF
 
-func get_session_for_seed(seed: int) -> GameSession:
-	return GameSession.new(seed)
+func get_session_for_seed(seed_val: int) -> GameSession:
+	return GameSession.new(seed_val)
 
 func save_game(hero: HeroController, cities: Array = [], characters: Array = []) -> bool:
 	if session == null or hero == null or world_delta == null:
@@ -119,14 +119,14 @@ func _prune_old_shards(shards: Dictionary, current_turn: int) -> void:
 			shards.erase(oldest)
 
 func load_game() -> SaveData:
-	var result: Dictionary = _save_manager.load_game()
+	var result: Dictionary = SaveManager.load_game()
 	return result.get("data", null) as SaveData
 
 func last_save_dict() -> Dictionary:
 	return _last_save_dict
 
 func load_game_with_error() -> Dictionary:
-	return _save_manager.load_game()
+	return SaveManager.load_game()
 
 func request_load_game() -> SaveData:
 	var data := load_game()
@@ -231,7 +231,7 @@ func apply_loaded_save(data: SaveData, ctx) -> void:
 		]
 	)
 
-func _recompute_visible(visibility, ctx) -> void:
+func _recompute_visible(visibility_, ctx) -> void:
 	if ctx.map_gen == null:
 		return
 	var sources: Array = []
@@ -242,12 +242,12 @@ func _recompute_visible(visibility, ctx) -> void:
 		for city in cm.cities:
 			if city != null and city.owner == &"player" and city.center is Vector2i:
 				sources.append(city.center)
-	visibility.set_map_size(ctx.map_gen.map_width, ctx.map_gen.map_height)
-	if visibility.recompute(ctx.hero.current_cell, sources,
+	visibility_.set_map_size(ctx.map_gen.map_width, ctx.map_gen.map_height)
+	if visibility_.recompute(ctx.hero.current_cell, sources,
 		GameNumbers.FOG_HERO_SIGHT, GameNumbers.FOG_CITY_SIGHT):
 		if ctx.map_gen.visibility == null:
-			ctx.map_gen.visibility = visibility
-		ctx.map_gen.apply_fog(visibility)
+			ctx.map_gen.visibility = visibility_
+		ctx.map_gen.apply_fog(visibility_)
 
 func _restore_cities(data: SaveData, ctx) -> void:
 	if not (ctx.cities is Node):
@@ -279,7 +279,7 @@ func _find_city(all: Array, city_uid: int, saved_count: int, saved_center: Varia
 			return city
 
 	if saved_center is Dictionary:
-		var cell := Vector2i(int(saved_center.get("x", 0)), int(saved_center.get("y", 0)))
+		var cell := SerializationUtils.vec2i_from_dict(saved_center)
 		for city in all:
 			if city.center == cell:
 				return city

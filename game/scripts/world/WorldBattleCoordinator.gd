@@ -1,7 +1,7 @@
 extends Node
 class_name WorldBattleCoordinator
 
-const UnitStack = preload("res://scripts/entities/UnitStack.gd")
+
 const _BattleHandoff = preload("res://scripts/systems/BattleHandoff.gd")
 
 signal battle_world_hide_requested

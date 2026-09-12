@@ -24,7 +24,7 @@ func process(ctx: TurnContext) -> Dictionary:
 	if ctx == null:
 		return report
 	if registry == null:
-		push_warning("DemographicTurnProcessor: registry не задан (setup())")
+		push_warning("DemographicTurnProcessor: registry not set (setup())")
 		return report
 
 	for city in ctx.cities:

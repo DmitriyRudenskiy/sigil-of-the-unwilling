@@ -117,7 +117,8 @@ func on_map_clicked(cell: Vector2i) -> void:
 
 	var levitation := _has_artifact_effect(&"boots_levitation")
 	var cost_fn := func(c: Vector2i) -> float: return _terrain_cost(c, levitation)
-	var dist_arr := _HexPathfinding.dijkstra(current_cell, move_points, cost_fn, _map_gen.map_width, _map_gen.map_height)
+	var shift := _map_gen.hex_shift_right if _map_gen else true
+	var dist_arr := _HexPathfinding.dijkstra(current_cell, move_points, cost_fn, _map_gen.map_width, _map_gen.map_height, shift)
 	var dist: Dictionary = {}
 	for i in dist_arr.size():
 		if dist_arr[i] < INF:
@@ -132,7 +133,6 @@ func on_map_clicked(cell: Vector2i) -> void:
 		cost += _terrain_cost(affordable[i], levitation)
 
 	var remaining := move_points - cost
-	var suffix := ""
 
 	path_previewed.emit("Путь: %d кл., стоимость: %.1f, останется: %.1f. Клик ещё раз — идти. ПКМ — отмена." % [
 		affordable.size() - 1, cost, remaining])
@@ -193,14 +193,14 @@ func _enemy_aura_blocked(exempt: Vector2i) -> Dictionary:
 	var stacks := _map_gen.enemy_stacks
 	for cell in stacks:
 		blocked[cell] = true
-		for nb in _HexUtils.get_all_neighbors(cell):
+		for nb in _HexUtils.get_all_neighbors(cell, _map_gen.hex_shift_right):
 			if nb != exempt:
 				blocked[nb] = true
 	return blocked
 
 func _contacts_only_with(cell: Vector2i, enemy_cell: Vector2i) -> bool:
 	var stacks := _map_gen.enemy_stacks
-	for nb in _HexUtils.get_all_neighbors(cell):
+	for nb in _HexUtils.get_all_neighbors(cell, _map_gen.hex_shift_right):
 		if nb != enemy_cell and stacks.has(nb):
 			return false
 	return true
@@ -223,7 +223,7 @@ func _base_blocked() -> Dictionary:
 func _full_path_to(goal: Vector2i, base: Dictionary = {}) -> Array[Vector2i]:
 	var blocked: Dictionary = base.duplicate() if not base.is_empty() else _base_blocked()
 	blocked.merge(_enemy_aura_blocked(goal))
-	return _HexPathfinding.find_path(current_cell, goal, blocked, _map_gen.map_width, _map_gen.map_height, "astar")
+	return _HexPathfinding.find_path(current_cell, goal, blocked, _map_gen.map_width, _map_gen.map_height, _map_gen.hex_shift_right, "astar")
 
 func _resolve_enemy_goal(goal: Vector2i) -> Vector2i:
 	var stacks := _map_gen.enemy_stacks
@@ -233,7 +233,7 @@ func _resolve_enemy_goal(goal: Vector2i) -> Vector2i:
 	var base := _base_blocked()
 	var best := Vector2i(-1, -1)
 	var best_cost := INF
-	for nb in _HexUtils.get_all_neighbors(goal):
+	for nb in _HexUtils.get_all_neighbors(goal, _map_gen.hex_shift_right):
 		if not _map_gen.is_walkable_with_effects(nb, levitation) or stacks.has(nb):
 			continue
 		if not _contacts_only_with(nb, goal):
@@ -251,10 +251,10 @@ func _resolve_enemy_goal(goal: Vector2i) -> Vector2i:
 			best = nb
 	return best
 
-func _path_cost(path: Array[Vector2i], levitation: bool = false) -> float:
+func _path_cost(path_: Array[Vector2i], levitation: bool = false) -> float:
 	var c := 0.0
-	for i in range(1, path.size()):
-		c += _terrain_cost(path[i], levitation)
+	for i in range(1, path_.size()):
+		c += _terrain_cost(path_[i], levitation)
 	return c
 
 func _is_contact_position(cell: Vector2i) -> bool:
@@ -263,7 +263,7 @@ func _is_contact_position(cell: Vector2i) -> bool:
 	var stacks := _map_gen.enemy_stacks
 	if not stacks.has(cell):
 		return false
-	for nb in _HexUtils.get_all_neighbors(current_cell):
+	for nb in _HexUtils.get_all_neighbors(current_cell, _map_gen.hex_shift_right):
 		if nb == cell:
 			return true
 	return false

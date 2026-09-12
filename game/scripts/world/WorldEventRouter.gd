@@ -1,7 +1,7 @@
 class_name WorldEventRouter
 extends Node
 
-const ResourceDef = preload("res://scripts/data/ResourceDef.gd")
+
 
 var hero: Node = null
 var map_gen: Node = null
@@ -139,7 +139,7 @@ func _refresh_visibility() -> void:
 				sources.append(city.center)
 	visibility.set_map_size(map_gen.map_width, map_gen.map_height)
 	if visibility.recompute(hero.current_cell, sources,
-		GameNumbers.FOG_HERO_SIGHT, GameNumbers.FOG_CITY_SIGHT):
+		GameNumbers.FOG_HERO_SIGHT, GameNumbers.FOG_CITY_SIGHT, map_gen.hex_shift_right):
 		map_gen.apply_fog(visibility)
 
 func _on_hex_borders_toggled(on: bool) -> void:
@@ -217,9 +217,9 @@ func _on_village(cell: Vector2i) -> void:
 		if interaction_controller:
 			captured = interaction_controller.capture_village_at(cell)
 		if captured:
-			var seed: int = persistence.session.run_seed if persistence != null else 0
+			var seed_val: int = persistence.session.run_seed if persistence != null else 0
 			city = CityFactory.create_village(
-				cell, CityFactory.village_name(seed, cell), seed)
+				cell, CityFactory.village_name(seed_val, cell), seed_val)
 			cities.register_city(city)
 			_refresh_city_markers()
 			if ui_manager:
@@ -305,19 +305,19 @@ func _on_camera_jump(direction: String) -> void:
 	if map_gen.has_valid_tilemap():
 		camera.center_on(map_gen.map_to_local(target))
 
-func _on_battle_won(enemy_cell: Vector2i) -> void:
+func _on_battle_won(_enemy_cell: Vector2i) -> void:
 	if cities:
 		cities.add_glory(15.0, &"battle_won")
 		cities.apply_reputation(cities.capital, GameNumbers.REP_VICTORY)
 
-func _on_turn_ended_bus(turn: int, month: int) -> void:
+func _on_turn_ended_bus(_turn: int, month: int) -> void:
 	if cities:
 		cities.on_turn_ended(month)
 
-func _on_marker_hovered(cell: Vector2i, cost: float, remaining: float, is_reachable: bool) -> void:
+func _on_marker_hovered(_cell: Vector2i, _cost: float, _remaining: float, _is_reachable: bool) -> void:
 	pass
 
-func _on_marker_clicked(cell: Vector2i, is_reachable: bool) -> void:
+func _on_marker_clicked(cell: Vector2i, _is_reachable: bool) -> void:
 	marker_clicked.emit(cell)
 
 func _on_reach_preview_changed(pts: Array[Vector2i], dist: Dictionary, mp: float) -> void:

@@ -16,7 +16,7 @@ func select_successor(deceased: HeroController, rng: RandomNumberGenerator = nul
 		idx = rng.randi() % candidates.size()
 	return candidates[idx]
 
-func build_successor(deceased: HeroController, rng: RandomNumberGenerator = null) -> HeroController:
+func build_successor(deceased: HeroController, _rng: RandomNumberGenerator = null) -> HeroController:
 	var succ := HeroController.new()
 	succ.path_id = deceased.path_id
 	if deceased.magic != null:
@@ -45,7 +45,7 @@ func _transfer_inventory(deceased: HeroController, succ: HeroController) -> void
 	for art in src.backpack:
 		succ.inventory.backpack.append(art.duplicate(true))
 
-func transfer_legend(deceased: HeroController, successor: HeroController,
+func transfer_legend(_deceased: HeroController, _successor: HeroController,
                     source_cities: Array[City], dest_manager: CityManager) -> void:
 	if dest_manager == null or source_cities == null:
 		return

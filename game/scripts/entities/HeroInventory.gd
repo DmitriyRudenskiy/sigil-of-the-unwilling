@@ -51,19 +51,19 @@ func equip(artifact: Artifact, target_slot: Artifact.Slot = Artifact.Slot.RING_L
 	var idx := backpack.find(artifact)
 
 	if artifact.is_ring():
-		var slot := _pick_ring_slot(target_slot)
-		var old: Artifact = equipped[slot]
+		var ring_slot := _pick_ring_slot(target_slot)
+		var ring_old: Artifact = equipped[ring_slot]
 
-		if not _can_put_back(old, idx):
+		if not _can_put_back(ring_old, idx):
 			return false
 
 		if idx >= 0:
 			backpack.remove_at(idx)
 
-		equipped[slot] = artifact
+		equipped[ring_slot] = artifact
 
-		if old != null:
-			backpack.append(old)
+		if ring_old != null:
+			backpack.append(ring_old)
 
 		equipped_changed.emit()
 		backpack_changed.emit()
@@ -208,7 +208,7 @@ func serialize() -> Dictionary:
 	var equipped_ids := {}
 	for slot in equipped:
 		var art: Artifact = equipped[slot]
-		equipped_ids[slot] = art.id if art != null else ""
+		equipped_ids[slot] = art.id if art != null else &""
 	var backpack_ids: Array = []
 	for art in backpack:
 		backpack_ids.append(str(art.id))

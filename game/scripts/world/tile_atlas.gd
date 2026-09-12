@@ -2,7 +2,7 @@ class_name TileAtlas
 extends RefCounted
 
 const SHEET_PATH := "res://assets/tiles/world_tiles.jpeg"
-const TILE := 82
+const TILE := GameNumbers.TILE_SIZE
 const SOURCE_ID := 0
 const FOG_SOURCE_ID := 1
 
@@ -98,7 +98,7 @@ func build_hex() -> TileSet:
 	if not (tex is Texture2D):
 		return null
 	var ts := TileSet.new()
-	ts.tile_shape = 3
+	ts.tile_shape = 3 as TileSet.TileShape
 	ts.tile_size = Vector2i(TILE, TILE)
 	var src := TileSetAtlasSource.new()
 	src.texture = tex

@@ -1,7 +1,7 @@
 class_name ResourceChainService
 extends RefCounted
 
-const ToolType = preload("res://scripts/data/ToolType.gd")
+
 
 var _extraction_cache: Dictionary = {}
 var _discovery_cache: Dictionary = {}

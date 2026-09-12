@@ -8,7 +8,7 @@ static func serialize(city: City) -> Dictionary:
 		"version": City.SERIALIZATION_VERSION,
 		"uid": city.uid,
 		"display_name": city.display_name,
-		"center": {"x": city.center.x, "y": city.center.y},
+		"center": SerializationUtils.vec2i_to_dict(city.center),
 		"reputation": city.reputation,
 		"prosperity": city.prosperity,
 		"level": city.level,
@@ -30,11 +30,11 @@ static func serialize(city: City) -> Dictionary:
 	d["storage"] = storage_str
 	var sites: Array = []
 	for cell in city.special_sites:
-		sites.append({"cell": {"x": cell.x, "y": cell.y}, "site": String(city.special_sites[cell])})
+		sites.append({"cell": SerializationUtils.vec2i_to_dict(cell), "site": String(city.special_sites[cell])})
 	d["special_sites"] = sites
 	var roads_arr: Array = []
 	for cell in city.roads:
-		roads_arr.append({"x": cell.x, "y": cell.y})
+		roads_arr.append(SerializationUtils.vec2i_to_dict(cell))
 	d["roads"] = roads_arr
 	if city.resource_ctx != null:
 		d["resource_ctx"] = city.resource_ctx.serialize()
@@ -44,7 +44,7 @@ static func serialize(city: City) -> Dictionary:
 	d["pop"] = pops_arr
 	var bhs_arr: Array = []
 	for borough in city.boroughs:
-		bhs_arr.append({"cell": {"x": borough.cell.x, "y": borough.cell.y}, "level": borough.level, "uid": borough.uid})
+		bhs_arr.append({"cell": SerializationUtils.vec2i_to_dict(borough.cell), "level": borough.level, "uid": borough.uid})
 	d["boroughs"] = bhs_arr
 	var blds_arr: Array = []
 	for building in city.buildings:
@@ -56,8 +56,7 @@ static func deserialize(city: City, data: Dictionary) -> void:
 	var version: int = int(data.get("version", 1))
 	if version < City.SERIALIZATION_VERSION:
 		data = _migrate_city_data(data, version)
-	var c: Dictionary = data.get("center", {})
-	city.center = Vector2i(int(c.get("x", -1)), int(c.get("y", -1)))
+	city.center = SerializationUtils.vec2i_from_dict(data.get("center", {}), Vector2i(-1, -1))
 	city.reputation = int(data.get("reputation", 0))
 	city.prosperity = clampf(float(data.get("prosperity", 50.0)), 0.0, 100.0)
 	city.level = clampi(int(data.get("level", 1)), 1, GameNumbers.CITY_LEVEL_MAX)
@@ -81,12 +80,11 @@ static func deserialize(city: City, data: Dictionary) -> void:
 	city.special_sites.clear()
 	for s in data.get("special_sites", []):
 		var sc: Dictionary = s.cell
-		city.special_sites[Vector2i(int(sc.get("x", 0)), int(sc.get("y", 0)))] \
-			= StringName(s.site)
+		city.special_sites[SerializationUtils.vec2i_from_dict(sc)] = StringName(s.site)
 
 	city.roads.clear()
 	for rc in data.get("roads", []):
-		city.roads[Vector2i(int(rc.get("x", 0)), int(rc.get("y", 0)))] = true
+		city.roads[SerializationUtils.vec2i_from_dict(rc)] = true
 
 	if data.has("resource_ctx"):
 		city.ensure_resource_ctx()
@@ -100,7 +98,7 @@ static func deserialize(city: City, data: Dictionary) -> void:
 	for bd in data.get("boroughs", []):
 		var bcell: Dictionary = bd.cell
 		var bh := Borough.new()
-		bh.cell = Vector2i(int(bcell.get("x", 0)), int(bcell.get("y", 0)))
+		bh.cell = SerializationUtils.vec2i_from_dict(bcell)
 		bh.level = int(bd.get("level", 1))
 		bh.uid = int(bd.get("uid", 0))
 		city.boroughs.append(bh)

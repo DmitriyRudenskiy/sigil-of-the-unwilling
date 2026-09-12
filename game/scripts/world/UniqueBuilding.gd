@@ -47,7 +47,7 @@ func next_level_req() -> LevelReq:
 func serialize() -> Dictionary:
 	var d := {
 		"def_id": String(def.id) if def != null else "",
-		"cell": {"x": cell.x, "y": cell.y},
+		"cell": SerializationUtils.vec2i_to_dict(cell),
 		"level": level,
 		"uid": uid,
 		"assigned_followers": assigned_followers,
@@ -64,11 +64,11 @@ func serialize() -> Dictionary:
 		d["chain"] = production_chain.to_dict()
 	return d
 
-static func deserialize(data: Dictionary, def: UniqueBuilding.Def) -> UniqueBuilding:
+static func deserialize(data: Dictionary, def_: UniqueBuilding.Def) -> UniqueBuilding:
 	var b := UniqueBuilding.new()
-	b.def = def
+	b.def = def_
 	var c: Dictionary = data.get("cell", {})
-	b.cell = Vector2i(int(c.get("x", -1)), int(c.get("y", -1)))
+	b.cell = SerializationUtils.vec2i_from_dict(c, Vector2i(-1, -1))
 	b.level = int(data.get("level", 0))
 	b.uid = int(data.get("uid", 0))
 	b.assigned_followers = int(data.get("assigned_followers", 0))

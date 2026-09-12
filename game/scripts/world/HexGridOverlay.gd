@@ -1,7 +1,7 @@
 extends Node2D
 class_name HexGridOverlay
 
-const HexDraw = preload("res://scripts/core/HexDraw.gd")
+
 
 var map_ref: MapGenerator
 var cam_ref: Camera2D

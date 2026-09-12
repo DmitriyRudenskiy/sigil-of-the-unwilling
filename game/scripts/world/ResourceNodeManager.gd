@@ -2,7 +2,7 @@ extends Node
 class_name ResourceNodeManager
 
 const ResourceNodeScene = preload("res://scenes/entities/ResourceNode.tscn")
-const ResourceDef = preload("res://scripts/data/ResourceDef.gd")
+
 
 var _nodes: Dictionary = {}
 var _container: Node2D = null
@@ -41,11 +41,9 @@ func _get_hidden_by_biome(biome: String) -> Array:
 	return hidden
 
 func _resolve_registry() -> Node:
-
-	var reg := Services.resolve(&"resources") if _resource_registry == null else _resource_registry
-	if reg == null:
+	if _resource_registry == null:
 		push_error("ResourceNodeManager: resource registry unavailable")
-	return reg
+	return _resource_registry
 
 func _get_biome_name(terrain_id: StringName) -> String:
 	for i in HexUtils.TERRAIN_NAMES.size():
@@ -53,10 +51,10 @@ func _get_biome_name(terrain_id: StringName) -> String:
 			return terrain_id as String
 	return ""
 
-func setup(container: Node2D, rng: RandomNumberGenerator, resource_registry: Node = null, map_to_local_fn: Callable = Callable()) -> void:
+func setup(container: Node2D, rng: RandomNumberGenerator, resource_registry: Node, map_to_local_fn: Callable = Callable()) -> void:
 	_container = container
 	_rng = rng
-	_resource_registry = resource_registry if resource_registry != null else Services.resolve(&"resources")
+	_resource_registry = resource_registry
 	_map_to_local_fn = map_to_local_fn
 
 func apply_fog_visibility(vis) -> void:

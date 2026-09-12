@@ -17,11 +17,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventMouseButton) or not event.pressed:
 		return
 
-	if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-		camera.step_zoom(1)
-	elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-		camera.step_zoom(-1)
-	elif event.button_index == MOUSE_BUTTON_RIGHT:
+	if event.button_index == MOUSE_BUTTON_RIGHT:
 		hero.cancel_planned_path()
 		hero.cancel_pending()
 	elif event.button_index == MOUSE_BUTTON_LEFT:

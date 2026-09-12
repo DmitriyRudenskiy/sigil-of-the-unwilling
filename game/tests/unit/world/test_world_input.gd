@@ -80,11 +80,11 @@ func _mouse(btn: int, pressed: bool = true) -> InputEventMouseButton:
 	return e
 
 
-func test_wheel_zooms() -> void:
+func test_wheel_does_not_zoom() -> void:
 	_input._unhandled_input(_mouse(MOUSE_BUTTON_WHEEL_UP))
 	_input._unhandled_input(_mouse(MOUSE_BUTTON_WHEEL_UP))
 	_input._unhandled_input(_mouse(MOUSE_BUTTON_WHEEL_DOWN))
-	assert_that(_camera.zoom_delta).is_equal(1)
+	assert_that(_camera.zoom_delta).is_equal(0)
 
 
 func test_right_click_cancels_path() -> void:

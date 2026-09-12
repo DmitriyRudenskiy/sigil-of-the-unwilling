@@ -11,7 +11,7 @@ func _init() -> void:
 
 func add(t_def: TraitDef) -> void:
 	if t_def == null or t_def.id == &"":
-		push_error("TraitRegistry.add: пустой id")
+		push_error("TraitRegistry.add: empty id")
 		return
 	_traits[t_def.id] = t_def
 

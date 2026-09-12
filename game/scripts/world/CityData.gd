@@ -42,6 +42,7 @@ var is_buildable_fn: Callable = func(_cell: Vector2i) -> bool: return true
 
 var _uid_seq := 0
 
+
 var _yield_calc := CityYieldCalculator.new()
 
 func invalidate_yield() -> void:

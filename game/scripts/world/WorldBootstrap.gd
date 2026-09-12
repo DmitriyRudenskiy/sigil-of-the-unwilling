@@ -347,15 +347,15 @@ static func _register_city(R: BootstrapResult) -> void:
 static func _register_enemy_ai(R: BootstrapResult) -> void:
 	if R.turn_scheduler == null or R.map_gen == null or R.cities == null:
 		return
-	var seed: int = R.session.run_seed if R.session != null else 0
+	var seed_val: int = R.session.run_seed if R.session != null else 0
 
 	var proc := EnemyTurnProcessor.new()
-	proc.setup_world(R.map_gen, R.hero, R.spawner, R.cities, R.world_delta, seed)
+	proc.setup_world(R.map_gen, R.hero, R.spawner, R.cities, R.world_delta, seed_val)
 	R.turn_scheduler.register_processor(proc)
 	R.enemy_proc = proc
 
 	var growth := EnemyGrowthSystem.new()
-	growth.setup_growth(R.map_gen, R.spawner, R.cities, R.world_delta, seed)
+	growth.setup_growth(R.map_gen, R.spawner, R.cities, R.world_delta, seed_val)
 	R.turn_scheduler.register_processor(growth)
 
 	proc.enemy_attack_requested.connect(R.battle_coordinator.start_enemy_attack)

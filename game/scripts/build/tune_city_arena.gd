@@ -205,7 +205,7 @@ func _write_balance_file(yield_table: Array, bonus_table: Dictionary) -> void:
 
 	var f := FileAccess.open(TUNE_FILE, FileAccess.READ)
 	if f == null:
-		push_error("Не удалось открыть %s для чтения" % TUNE_FILE)
+		push_error("Failed to open %s for reading" % TUNE_FILE)
 		return
 	var lines: PackedStringArray = f.get_as_text().split("\n")
 	f.close()
@@ -243,7 +243,7 @@ func _write_balance_file(yield_table: Array, bonus_table: Dictionary) -> void:
 		i += 1
 	var w := FileAccess.open(TUNE_FILE, FileAccess.WRITE)
 	if w == null:
-		push_error("Не удалось открыть %s для записи" % TUNE_FILE)
+		push_error("Failed to open %s for writing" % TUNE_FILE)
 		return
 	w.store_string("\n".join(out))
 	w.close()

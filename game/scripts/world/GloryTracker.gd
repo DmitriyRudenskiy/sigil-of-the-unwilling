@@ -15,12 +15,12 @@ func add_glory(amount: float, turn: int, reason: StringName = &"") -> void:
 	total += amount
 
 func glory_last_window(current_turn: int) -> float:
-	var total := 0.0
+	var total_ := 0.0
 	var from_turn := current_turn - _window + 1
 	for e in _events:
 		if int(e.turn) >= from_turn:
-			total += float(e.amount)
-	return total
+			total_ += float(e.amount)
+	return total_
 
 func prune(current_turn: int) -> void:
 	var cutoff := current_turn - _window

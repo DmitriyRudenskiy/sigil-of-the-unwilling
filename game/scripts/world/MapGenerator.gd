@@ -34,6 +34,7 @@ var enemy_stacks: Dictionary:
 var _seed_value: int = 0
 var _map_width: int = 0
 var _map_height: int = 0
+var hex_shift_right: bool = true
 
 var seed_value: int:
 	get:
@@ -75,7 +76,7 @@ func generate() -> void:
 	if units_reg != null:
 		spawner.setup_registry(units_reg)
 
-	HexGrid.calibrate(_tile_map)
+	hex_shift_right = HexGrid.calibrate(_tile_map)
 
 	model.generate_noise()
 	model.smooth_invalid_adjacencies()
@@ -105,7 +106,8 @@ func _compute_reachable_cells() -> Dictionary:
 		model.map_width + model.map_height,
 		model.get_blocked_cells(),
 		model.map_width,
-		model.map_height
+		model.map_height,
+		hex_shift_right
 	)
 
 func _ensure_layers() -> void:
@@ -117,7 +119,7 @@ func _ensure_layers() -> void:
 		_tile_map.name = "TileMapTerrain"
 		add_child(_tile_map)
 	if tileset == null:
-		push_error("TileAtlas: не удалось построить hex-тайлсет (нет %s)" % TileAtlas.SHEET_PATH)
+		push_error("TileAtlas: failed to build hex tileset (missing %s)" % TileAtlas.SHEET_PATH)
 	else:
 		_tile_map.tile_set = tileset
 
@@ -135,10 +137,10 @@ func _ensure_layers() -> void:
 		_resource_layer.name = "ResourceLayer"
 		add_child(_resource_layer)
 
-func apply_fog(visibility) -> void:
-	if visibility == null or renderer == null:
+func apply_fog(visibility_) -> void:
+	if visibility_ == null or renderer == null:
 		return
-	renderer.apply_fog(_tile_map, visibility)
+	renderer.apply_fog(_tile_map, visibility_)
 
 func is_walkable(cell: Vector2i) -> bool:
 	return model.is_walkable(cell) if model != null else false

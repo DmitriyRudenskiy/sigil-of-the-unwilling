@@ -5,7 +5,7 @@ enum ID { SPRING, SUMMER, AUTUMN, WINTER }
 
 static func from_month(month: int) -> ID:
 	if month <= 0 or month > 12:
-		push_warning("Season: некорректный месяц %d, считаем весной" % month)
+		push_warning("Season: invalid month %d, treating as spring" % month)
 		return ID.SPRING
 	if month <= 2 or month == 12:
 		return ID.WINTER

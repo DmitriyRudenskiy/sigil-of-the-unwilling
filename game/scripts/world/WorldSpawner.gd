@@ -247,7 +247,7 @@ func _spawn_chests() -> void:
 		placed += 1
 
 func _spawn_scrolls() -> void:
-	var scroll_count: int = max(2, map.map_width / 3)
+	var scroll_count: int = max(2, int(map.map_width / 3.0))
 	var placed: int = 0
 	var attempts: int = 0
 	var chest_rng := rng if rng != null else RandomNumberGenerator.new()
