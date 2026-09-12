@@ -1,6 +1,6 @@
 class_name ScrollRules
 extends RefCounted
-static func can_pickup(hero: Object, scroll_spell_id: StringName) -> bool:
+static func can_pickup(_hero: Object, _scroll_spell_id: StringName) -> bool:
 	return true
 
 static func apply_pickup(hero: Object, scroll_spell_id: StringName) -> void:

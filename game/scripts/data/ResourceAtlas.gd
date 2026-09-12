@@ -2,7 +2,7 @@
 class_name ResourceAtlas
 extends RefCounted
 
-const ResourceType = preload("res://scripts/data/ResourceType.gd")
+
 
 const SHEET_PATH := "res://assets/textures/resources.png"
 const GRID_COLS := 4
@@ -60,7 +60,7 @@ static func _load_sheet() -> Texture2D:
         if tex is Texture2D:
             _sheet = tex
         else:
-            push_warning("ResourceAtlas: лист не найден: %s" % SHEET_PATH)
+            push_warning("ResourceAtlas: sheet not found: %s" % SHEET_PATH)
     return _sheet
 
 static func _cell_size() -> Vector2:

@@ -5,9 +5,9 @@ const _Enums = preload("res://scripts/data/SpellEnums.gd")
 const _Utils = preload("res://scripts/data/SpellUtils.gd")
 
 static func handle(
-	params: Dictionary, state: Variant,
-	caster: Variant, target: Variant,
-	secondary: Array[Dictionary] = []
+	params: Dictionary, _state: Variant,
+	caster: Variant, _target: Variant,
+	_secondary: Array[Dictionary] = []
 ) -> Dictionary:
 	var effects: Array[Dictionary] = []
 	var token_id: String = str(params.get("token_id", "soldier"))

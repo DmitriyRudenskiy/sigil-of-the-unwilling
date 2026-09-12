@@ -2,7 +2,7 @@ extends Node
 class_name SoundManagerAutoload
 
 const _Platform = preload("res://scripts/core/Platform.gd")
-const AudioCues = preload("res://scripts/data/AudioCues.gd")
+
 
 const SFX_POOL := 8
 

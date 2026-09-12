@@ -4,9 +4,9 @@ extends RefCounted
 const _Utils = preload("res://scripts/data/SpellUtils.gd")
 
 static func handle(
-	params: Dictionary, state: Variant,
-	caster: Variant, target: Variant,
-	secondary: Array[Dictionary] = []
+	params: Dictionary, _state: Variant,
+	_caster: Variant, target: Variant,
+	_secondary: Array[Dictionary] = []
 ) -> Dictionary:
 	var effects: Array[Dictionary] = []
 	if target == null:

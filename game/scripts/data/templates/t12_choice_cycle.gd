@@ -6,9 +6,9 @@ const _Utils = preload("res://scripts/data/SpellUtils.gd")
 const _S := _Enums.StatusType
 
 static func handle(
-	params: Dictionary, state: Variant,
+	params: Dictionary, _state: Variant,
 	caster: Variant, target: Variant,
-	secondary: Array[Dictionary] = []
+	_secondary: Array[Dictionary] = []
 ) -> Dictionary:
 	var effects: Array[Dictionary] = []
 	var draw_count: int = int(params.get("draw", 1))

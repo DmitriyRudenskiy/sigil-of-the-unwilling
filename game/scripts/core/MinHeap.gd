@@ -5,7 +5,7 @@ func push(item: Array) -> void:
 	_data.append(item)
 	var idx := _data.size() - 1
 	while idx > 0:
-		var parent := (idx - 1) / 2
+		var parent: int = int((idx - 1) / 2.0)
 		if _data[idx][0] < _data[parent][0]:
 			var tmp: Array = _data[idx]
 			_data[idx] = _data[parent]

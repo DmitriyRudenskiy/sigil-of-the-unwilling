@@ -6,7 +6,7 @@ const SITE_SHRINE := &"shrine"
 const SITE_MEADOW := &"meadow"
 
 const DATA_PATH := "res://assets/data/buildings.json"
-const PopUnit := preload("res://scripts/world/PopUnit.gd")
+
 
 static var _raw_cache: Array = []
 # TASK_19 H2: кэш собранных Def — def_by_id() возвращает тот же объект (===).

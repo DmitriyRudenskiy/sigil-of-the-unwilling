@@ -18,9 +18,12 @@ const BG_EPS_HARD := 0.035
 const BG_EPS_SOFT := 0.140
 
 static func build_from_file(path: String) -> SpriteFrames:
-	if path.is_empty() or not FileAccess.file_exists(path):
+	if path.is_empty() or not ResourceLoader.exists(path):
 		return null
-	var img := Image.load_from_file(path)
+	var res := load(path)
+	if not (res is Texture2D):
+		return null
+	var img: Image = res.get_image()
 	if img == null or img.is_empty():
 		return null
 	return build_from_image(img)
@@ -38,8 +41,8 @@ static func build_from_image(src: Image) -> SpriteFrames:
 	var h := sheet.get_height()
 	# Канвас — единый размер клетки (вверх по округлению): 574x574 -> 72x115,
 	# чтобы все кадры одного аним-цикла были пиксель-в-пиксель одного размера.
-	var cw := (w + GRID_COLS - 1) / GRID_COLS
-	var ch := (h + GRID_ROWS - 1) / GRID_ROWS
+	var cw := int((w + GRID_COLS - 1) / float(GRID_COLS))
+	var ch := int((h + GRID_ROWS - 1) / float(GRID_ROWS))
 	if cw <= 0 or ch <= 0:
 		return null
 
@@ -49,14 +52,14 @@ static func build_from_image(src: Image) -> SpriteFrames:
 	var frames := {}  # row -> Array[GRID_COLS] of {"img": Image, "w": int, "h": int} | null
 	var ground_pad := ch
 	for row in GRID_ROWS:
-		var y0 := int(row * h / GRID_ROWS)
-		var y1 := int((row + 1) * h / GRID_ROWS)
+		var y0 := int(row * h / float(GRID_ROWS))
+		var y1 := int((row + 1) * h / float(GRID_ROWS))
 		var row_ch: int = y1 - y0
 		var row_frames: Array = []
 		row_frames.resize(GRID_COLS)
 		for col in GRID_COLS:
-			var x0 := int(col * w / GRID_COLS)
-			var x1 := int((col + 1) * w / GRID_COLS)
+			var x0 := int(col * w / float(GRID_COLS))
+			var x1 := int((col + 1) * w / float(GRID_COLS))
 			var cell := sheet.get_region(Rect2i(x0, y0, x1 - x0, row_ch))
 			var used := cell.get_used_rect()
 			if used.size.x <= 0 or used.size.y <= 0:

@@ -1,7 +1,7 @@
 extends Node
 class_name ResourceRegistry
 
-const ResourceDef = preload("res://scripts/data/ResourceDef.gd")
+
 
 enum Rarity { COMMON, RARE }
 
@@ -101,20 +101,20 @@ func ensure_definitions() -> void:
 	_add_city(&"scholar_points", "Баллы училища",
 		float(CITY_RESOURCE_CAPACITIES[&"scholar_points"]))
 
-func _add_city(id: StringName, name: String, capacity: float) -> void:
+func _add_city(id: StringName, name_: String, capacity: float) -> void:
 	var def := ResourceDef.new()
 	def.id = id
-	def.display_name = name
+	def.display_name = name_
 	def.capacity = capacity
 	_resources[id] = def
 
-func _add(id: StringName, name: String, biomes: Array[String], rarity: int,
+func _add(id: StringName, name_: String, biomes: Array[String], rarity: int,
 		discovery_skill: StringName, discovery_time: String, discovery_auto: bool, discovery_auto_tags: Array[StringName],
 		extraction_tag: StringName, extraction_skill: StringName, extraction_unit: StringName, extraction_tool: StringName, extraction_consumable: StringName, extraction_fire: bool,
 		ymin: int, ymax: int, weight: float, icon: String) -> void:
 	var def := ResourceDef.new()
 	def.id = id
-	def.display_name = name
+	def.display_name = name_
 	def.biomes = biomes
 	def.rarity = rarity
 	def.discovery_skill = discovery_skill

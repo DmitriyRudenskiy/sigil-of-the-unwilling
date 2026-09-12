@@ -2,9 +2,9 @@
 extends Node
 class_name TerrainResourceManager
 
-const HexUtils = preload("res://scripts/core/HexUtils.gd")
-const GameLogger = preload("res://scripts/core/GameLogger.gd")
-const ResourceType = preload("res://scripts/data/ResourceType.gd")
+
+
+
 
 const TERRAIN_RESOURCE_MAP: Dictionary = {
 	HexUtils.Terrain.FOREST: ResourceType.ID.WOOD,
@@ -24,13 +24,13 @@ func attach_delta(delta: Variant) -> void:
 func _ready() -> void:
 	pass
 
-func generate(map_data: Dictionary, density: float = -1.0) -> void:
+func generate(map_data: Dictionary, density_: float = -1.0) -> void:
 	cells.clear()
-	if density < 0.0:
-		density = self.density
-	elif density >= 0.0:
-		self.density = density
-	if density <= 0.0:
+	if density_ < 0.0:
+		density_ = density
+	elif density_ >= 0.0:
+		self.density = density_
+	if density_ <= 0.0:
 		return
 	var rng := RandomNumberGenerator.new()
 	rng.seed = int(map_data.get("seed", 0))
@@ -48,7 +48,7 @@ func generate(map_data: Dictionary, density: float = -1.0) -> void:
 			var res_id: Variant = TERRAIN_RESOURCE_MAP.get(terrain_id)
 			if res_id == null:
 				continue
-			if rng.randf() <= density:
+			if rng.randf() <= density_:
 				cells[cell] = {"res": int(res_id), "exhausted": false}
 
 func is_harvestable(cell: Vector2i) -> bool:

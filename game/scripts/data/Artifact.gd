@@ -130,7 +130,7 @@ func is_proficient_in(cat: StringName) -> bool:
     return get_proficiency().has(cat)
 
 func get_weapon_size() -> WeaponSize:
-    return int(combat.get("weapon_size", WeaponSize.MEDIUM))
+    return combat.get("weapon_size", WeaponSize.MEDIUM) as WeaponSize
 
 func is_ranged() -> bool:
     return bool(combat.get("is_ranged", false))

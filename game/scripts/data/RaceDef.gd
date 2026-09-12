@@ -1,6 +1,5 @@
 class_name RaceDef
 extends RefCounted
-const _Self := preload("res://scripts/data/RaceDef.gd")
 
 var id: StringName = &""
 var name: String = ""
@@ -21,8 +20,8 @@ func to_dict() -> Dictionary:
 		"subraces": subraces.duplicate(),
 	}
 
-static func from_dict(data: Dictionary) -> _Self:
-	var d := _Self.new()
+static func from_dict(data: Dictionary) -> RaceDef:
+	var d := RaceDef.new()
 	d.id = StringName(data.get("id", ""))
 	d.name = String(data.get("name", ""))
 	d.size = String(data.get("size", "medium"))
@@ -32,10 +31,10 @@ static func from_dict(data: Dictionary) -> _Self:
 	for k in src_mods:
 		mods[k] = int(src_mods[k])
 	d.ability_adjustments = mods
-	var traits: Array[String] = []
+	var traits_: Array[String] = []
 	for x in data.get("traits", []):
-		traits.append(String(x))
-	d.traits = traits
+		traits_.append(String(x))
+	d.traits = traits_
 	var subs: Array[Dictionary] = []
 	for x in data.get("subraces", []):
 		subs.append(Dictionary(x))

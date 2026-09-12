@@ -92,8 +92,8 @@ static func calculate_attack(
     if count <= 0:
         return {}
 
-    var range := _damage_range(attacker)
-    var base_total: int = rng.randi_range(range.x, range.y)
+    var range_val := _damage_range(attacker)
+    var base_total: int = rng.randi_range(range_val.x, range_val.y)
 
     var multiplier: float = damage_multiplier(
         attacker,
@@ -115,7 +115,7 @@ static func calculate_attack(
         luck = true
 
     var hp: int = max(1, defender.get_hp())
-    var kills: int = max(1, damage / hp)
+    var kills: int = max(1, int(damage / float(hp)))
     kills = min(kills, defender.get_count())
 
     return {
@@ -138,7 +138,7 @@ static func preview_text(
     if stats == null:
         return ""
 
-    var range := _damage_range(attacker)
+    var range_val := _damage_range(attacker)
 
     var multiplier: float = damage_multiplier(
         attacker,
@@ -147,8 +147,8 @@ static func preview_text(
         defender_bonus
     )
 
-    var min_damage: int = int(float(range.x) * multiplier)
-    var max_damage: int = int(float(range.y) * multiplier)
+    var min_damage: int = int(float(range_val.x) * multiplier)
+    var max_damage: int = int(float(range_val.y) * multiplier)
 
     var distance: int = HexUtils.hex_distance(attacker.cell, defender.cell)
     if attacker.is_ranged() and distance == 1:
@@ -159,8 +159,8 @@ static func preview_text(
     max_damage = max(1, max_damage)
 
     var hp: int = max(1, defender.get_hp())
-    var min_kills: int = max(1, min_damage / hp)
-    var max_kills: int = max(1, max_damage / hp)
+    var min_kills: int = max(1, int(min_damage / float(hp)))
+    var max_kills: int = max(1, int(max_damage / float(hp)))
 
     min_kills = min(min_kills, defender.get_count())
     max_kills = min(max_kills, defender.get_count())

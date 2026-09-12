@@ -2,7 +2,7 @@
 extends Node
 class_name SpellRegistry
 
-const StatusEffects = preload("res://scripts/data/StatusEffects.gd")
+
 
 enum School { AIR, FIRE, WATER, EARTH }
 enum TargetType { SINGLE_ENEMY, SINGLE_ALLY, ALL_ENEMIES, ALL_ALLIES, HEX_AOE, SELF }
@@ -69,14 +69,14 @@ func ensure_definitions() -> void:
 	_spells[&"resurrection"].custom_handler = func(unit, sp, _rng, result):
 		if unit.get_count() <= 0:
 			var hp: int = max(1, int(unit.get_hp()))
-			var revived: int = int(sp) * 20 / hp
+			var revived: int = int(int(sp) * 20 / float(hp))
 			result["revive_count"] = min(max(revived, 1), unit.max_count)
 		return result
 
-func _reg(id: StringName, name: String, school: int, lvl: int, mana: int, target: int, desc: String, exp_desc: String, tags: Array[String], damage_multiplier: int = 0, buff_effect: int = -1) -> void:
+func _reg(id: StringName, name_: String, school: int, lvl: int, mana: int, target: int, desc: String, exp_desc: String, tags: Array[String], damage_multiplier: int = 0, buff_effect: int = -1) -> void:
 	var s := SpellDef.new()
 	s.id = id
-	s.display_name = name
+	s.display_name = name_
 	s.school = get_school_name(school)
 	s.school_int = school
 	s.level = lvl

@@ -1,6 +1,5 @@
 class_name ClassDef
 extends RefCounted
-const _Self := preload("res://scripts/data/ClassDef.gd")
 
 var id: StringName = &""
 var name: String = ""
@@ -29,8 +28,8 @@ func to_dict() -> Dictionary:
 		"archetypes": archetypes.duplicate(),
 	}
 
-static func from_dict(data: Dictionary) -> _Self:
-	var d := _Self.new()
+static func from_dict(data: Dictionary) -> ClassDef:
+	var d := ClassDef.new()
 	d.id = StringName(data.get("id", ""))
 	d.name = String(data.get("name", ""))
 	d.hit_die = int(data.get("hit_die", 6))
@@ -47,10 +46,10 @@ static func from_dict(data: Dictionary) -> _Self:
 	for x in data.get("class_resources", []):
 		resources.append(Dictionary(x))
 	d.class_resources = resources
-	var features: Array[String] = []
+	var features_: Array[String] = []
 	for x in data.get("features", []):
-		features.append(String(x))
-	d.features = features
+		features_.append(String(x))
+	d.features = features_
 	var arches: Array[Dictionary] = []
 	for x in data.get("archetypes", []):
 		arches.append(Dictionary(x))
