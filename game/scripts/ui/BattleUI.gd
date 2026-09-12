@@ -13,26 +13,28 @@ signal spell_chosen(spell_id: StringName)
 signal settings_requested
 signal settings_closed
 
-@onready var _top_panel: PanelContainer = $top_panel
-@onready var _status: Label = $"top_panel/top_vbox/status"
-@onready var _active_info: Label = $"top_panel/top_vbox/active_info"
-@onready var _preview: Label = $"top_panel/top_vbox/preview"
-@onready var _bottom_bar: HBoxContainer = $bottom_bar
-@onready var _retreat_btn: Button = $"bottom_bar/retreat_btn"
-@onready var _wait_btn: Button = $"bottom_bar/wait_btn"
-@onready var _attack_button: Button = $"bottom_bar/attack_btn"
-@onready var _defend_btn: Button = $"bottom_bar/defend_btn"
-@onready var _skip_btn: Button = $"bottom_bar/skip_btn"
-@onready var _spellbook_btn: Button = $"bottom_bar/spellbook_btn"
-@onready var _settings_btn: Button = $"bottom_bar/settings_btn"
-@onready var _collapse_btn: Button = $collapse_btn
-@onready var _initiative_panel: PanelContainer = $initiative_panel
-@onready var _initiative_list: ItemList = $"initiative_panel/initiative_list"
+@onready var _bottom_bar: PanelContainer = $bottom_bar
+@onready var _settings_btn: Button = $"bottom_bar/bar_box/left_box/settings_btn"
+@onready var _retreat_btn: Button = $"bottom_bar/bar_box/left_box/retreat_btn"
+@onready var _wait_btn: Button = $"bottom_bar/bar_box/left_box/wait_btn"
+@onready var _attack_button: Button = $"bottom_bar/bar_box/left_box/attack_btn"
+@onready var _turn_line: Label = $"bottom_bar/bar_box/center_box/turn_line"
+@onready var _log_line: Label = $"bottom_bar/bar_box/center_box/log_row/log_line"
+@onready var _history_up: Button = $"bottom_bar/bar_box/center_box/log_row/history_nav/history_up"
+@onready var _history_down: Button = $"bottom_bar/bar_box/center_box/log_row/history_nav/history_down"
+@onready var _history_btn: Button = $"bottom_bar/bar_box/center_box/log_row/history_btn"
+@onready var _defend_btn: Button = $"bottom_bar/bar_box/right_box/defend_btn"
+@onready var _skip_btn: Button = $"bottom_bar/bar_box/right_box/skip_btn"
+@onready var _spellbook_btn: Button = $"bottom_bar/bar_box/right_box/spellbook_btn"
+@onready var _history_panel: PanelContainer = $history_panel
+@onready var _history_list: ItemList = $"history_panel/history_list"
 var _action_buttons: Array[Button] = []
 @onready var _settings_screen: SettingsScreen = $SettingsScreen
 @onready var _spellbook_panel: BattleSpellbookPanel = $BattleSpellbookPanel
 
 var _theme: Theme = null
+var _history: Array[String] = []
+var _history_pos := 0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -40,8 +42,12 @@ func _ready() -> void:
 	_theme = load(THEME_PATH)
 	_apply_theme()
 	_connect_skeleton()
-	if _status != null:
-		_status.text = GameText.battle_select_unit()
+	if not _history_up.pressed.is_connected(_on_history_up):
+		_history_up.pressed.connect(_on_history_up)
+	if not _history_down.pressed.is_connected(_on_history_down):
+		_history_down.pressed.connect(_on_history_down)
+	if not _history_btn.pressed.is_connected(_on_history_toggle):
+		_history_btn.pressed.connect(_on_history_toggle)
 	if not _spellbook_panel.spell_chosen.is_connected(_on_spellbook_chosen):
 		_spellbook_panel.spell_chosen.connect(_on_spellbook_chosen)
 
@@ -51,15 +57,10 @@ func _apply_theme() -> void:
 	var sb := _theme.get_stylebox("panel", "Panel")
 	if sb == null:
 		return
-	_top_panel.add_theme_stylebox_override("panel", sb)
-	_initiative_panel.add_theme_stylebox_override("panel", sb)
+	_bottom_bar.add_theme_stylebox_override("panel", sb)
+	_history_panel.add_theme_stylebox_override("panel", sb)
 
 func _connect_skeleton() -> void:
-
-	_status.add_theme_color_override("font_color", ThemeConfig.C_TEXT_PRIMARY)
-	_active_info.add_theme_color_override("font_color", ThemeConfig.C_ACTIVE_INFO)
-	_preview.add_theme_color_override("font_color", ThemeConfig.C_TEXT_GOLD)
-
 	_action_buttons = [_retreat_btn, _wait_btn, _attack_button, _defend_btn, _skip_btn]
 	_retreat_btn.pressed.connect(_on_retreat)
 	_wait_btn.pressed.connect(_on_wait)
@@ -68,48 +69,27 @@ func _connect_skeleton() -> void:
 	_skip_btn.pressed.connect(_on_skip)
 	_spellbook_btn.pressed.connect(_on_spellbook)
 	_settings_btn.pressed.connect(_on_settings)
-	if not _collapse_btn.pressed.is_connected(_on_collapse):
-		_collapse_btn.pressed.connect(_on_collapse)
 	_attack_button.disabled = true
 
 func set_status(text: String) -> void:
-	_status.text = text
+	_history.append(text)
+	if _history.size() > 50:
+		_history.pop_front()
+	_history_pos = _history.size() - 1
+	_log_line.text = text
 
-func set_attack_preview(text: String) -> void:
-	_preview.text = text
+# ponytail: top_panel (status/active_info/preview) удалён из сцены — методы оставлены
+# no-op, чтобы не трогать подключения в BattleController. Вернуть UI — добавить узлы обратно.
+func set_attack_preview(_text: String) -> void:
+	pass
 
-func update_active_unit(unit: BattleState.BattleUnit) -> void:
-	if unit == null or unit.stack == null or unit.stack.stats == null:
-		_active_info.text = ""
-		return
+func update_active_unit(_unit: BattleState.BattleUnit) -> void:
+	pass
 
-	var stats: UnitStats = unit.stack.stats
-
-	_active_info.text = GameText.battle_unit_info(
-		stats.display_name,
-		unit.get_count(),
-		stats.hp,
-		stats.attack,
-		stats.defense,
-		stats.speed,
-		", ".join(stats.tags)
-	)
-
-func update_initiative(units: Array[BattleState.BattleUnit], active_unit: BattleState.BattleUnit) -> void:
-	if _initiative_list == null:
-		return
-	_initiative_list.clear()
-	for unit in units:
-		if unit == null:
-			continue
-		var text = GameText.battle_unit_short(unit.get_display_name().left(8), unit.get_count())
-		var idx = _initiative_list.add_item(text)
-		if unit == active_unit:
-			_initiative_list.set_item_custom_fg_color(idx, Color.GOLD)
-		elif unit.side == BattleState.Side.ATTACKER:
-			_initiative_list.set_item_custom_fg_color(idx, ThemeConfig.C_INITIATIVE_YOUR)
-		else:
-			_initiative_list.set_item_custom_fg_color(idx, ThemeConfig.C_INITIATIVE_ENEMY)
+# ponytail: initiative_panel удалён из сцены — метод оставлен no-op
+# (BattleController:298), turn_line больше не получает счётчик ходов.
+func update_initiative(_units: Array[BattleState.BattleUnit], _active_unit: BattleState.BattleUnit) -> void:
+	pass
 
 func set_controls_enabled(enabled: bool) -> void:
 	for btn in _action_buttons:
@@ -145,8 +125,24 @@ func _on_defend() -> void:
 func _on_skip() -> void:
 	skip_requested.emit()
 
-func _on_collapse() -> void:
-	_bottom_bar.visible = not _bottom_bar.visible
+func _on_history_up() -> void:
+	if _history_pos > 0:
+		_history_pos -= 1
+		_log_line.text = _history[_history_pos]
+
+func _on_history_down() -> void:
+	if _history_pos < _history.size() - 1:
+		_history_pos += 1
+		_log_line.text = _history[_history_pos]
+
+func _on_history_toggle() -> void:
+	if _history_panel.visible:
+		_history_panel.visible = false
+		return
+	_history_list.clear()
+	for line in _history:
+		_history_list.add_item(line)
+	_history_panel.visible = true
 
 func _on_spellbook() -> void:
 	spellbook_requested.emit()
