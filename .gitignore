@@ -29,3 +29,6 @@ node_modules/
 
 # Локальная копия godot-mcp (dev-only, никогда не коммитится)
 game/addons/godot-mcp/
+
+# graphify output (graph, wiki, cache)
+graphify-out/
