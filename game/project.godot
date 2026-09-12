@@ -20,7 +20,7 @@ buses="res://assets/settings/default_bus_layout.tres"
 
 [autoload]
 
-McpInteractionServer="*res://mcp_interaction_server.gd"
+McpInteractionServer="*res://tools/mcp/mcp_interaction_server.gd"
 Settings="*res://scripts/autoload/Settings.gd"
 SoundManager="*res://scripts/autoload/SoundManager.gd"
 GameEventBus="*res://scripts/autoload/GameEventBus.gd"

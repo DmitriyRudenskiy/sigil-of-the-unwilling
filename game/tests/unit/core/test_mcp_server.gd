@@ -2,7 +2,7 @@ extends BaseTest
 ## Tests for the MCP server dispatcher and serialization (no real TCP).
 ## _TestServer overrides the response senders to capture them in memory.
 
-const _Srv := preload("res://mcp_interaction_server.gd")
+const _Srv := preload("res://tools/mcp/mcp_interaction_server.gd")
 
 class _TestServer extends _Srv:
 	var responses: Array = []
