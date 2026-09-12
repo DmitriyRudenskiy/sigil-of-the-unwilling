@@ -199,7 +199,23 @@ static func _create_hero(parent: Node2D, R: BootstrapResult) -> void:
 	R.hero.name = "Hero"
 	parent.add_child(R.hero)
 
+## Пассивные эффекты классов на старте партии (early-game-foundation).
+## Воин/Следопыт/Плут/Жрец/Друид действуют в бою через тег класса на бойце-герое.
+static func _apply_class_effects(hero: Node, profile: HeroBuildProfile) -> void:
+	if profile == null or profile.character_class == "cipher":
+		return
+	var magic: Variant = hero.get("magic")
+	if magic == null:
+		return
+	# Чародей: стартовый боевой spell
+	magic.schools[SchoolType.ID.FIRE] = 3
+	magic.learn(&"fireball")
+
+
 static func _init_hero(R: BootstrapResult) -> void:
+	# Ранняя игра: новая партия стартует без армии (early-game-foundation)
+	if R.loaded_save == null:
+		R.hero.solo_start = true
 	R.hero.setup(R.map_gen)
 	R.hero.city_manager = R.cities
 	if R.loaded_save != null:
@@ -211,6 +227,7 @@ static func _init_hero(R: BootstrapResult) -> void:
 		if profile != null:
 			R.hero.apply_build(profile)
 			R.persistence.pending_new_game = null
+			_apply_class_effects(R.hero, profile)
 
 static func _create_ui(parent: Node2D, _platform: Variant, R: BootstrapResult) -> void:
 	if R.ui_manager == null:

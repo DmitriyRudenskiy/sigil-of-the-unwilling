@@ -9,6 +9,15 @@ const MAX_HERO_ARMY_SIZE        := 7
 const HERO_RETREAT_LOSS_FRACTION := 0.5
 const HERO_LEVEL_UP_EXP         := 100
 const HERO_BASE_MANA            := 20
+# Ранняя игра: личный боец героя (early-game-foundation)
+const HERO_BATTLE_KEY           := "hero"
+const HERO_PERSONAL_SPEED       := 5
+const RANGER_ANIMAL_DAMAGE_BONUS := 3
+const ROGUE_CRIT_CHANCE         := 0.15
+const ROGUE_CRIT_MULTIPLIER     := 2
+const PRIEST_TURN_HEAL          := 2
+# Дикие животные 1-го кольца (Druid: убегают; Ranger: +урон)
+const WILD_ANIMAL_KEYS          := ["wolves", "gremlin"]
 const HERO_MANA_TICK            := 1
 const NEED_REST_DECAY           := 0.10
 const NEED_SOCIAL_DECAY         := 0.08

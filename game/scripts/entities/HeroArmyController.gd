@@ -4,10 +4,12 @@ class_name HeroArmyController
 var army: Array[UnitStack] = []
 var _units_registry: Node = null
 
-func setup(units_registry: Node = null) -> void:
+func setup(units_registry: Node = null, start_empty: bool = false) -> void:
 
 	_units_registry = units_registry if units_registry != null else Services.resolve(&"units")
-	_init_default_army()
+	# Ранняя игра: новая партия начинается с пустой армией (early-game-foundation).
+	if not start_empty:
+		_init_default_army()
 
 func _init_default_army() -> void:
 	army = [

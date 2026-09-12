@@ -31,7 +31,7 @@ func _make_coord(enabled: bool = true) -> Object:
 	c._pending_enemy_cell = Vector2i(3, 4)
 	return c
 
-func test_battle_loss_zero_hp_emits_hero_died() -> void:
+func test_battle_loss_hero_wounded_not_dead() -> void:
 	var data: Dictionary = {}
 	var on_died := func(cause: Variant): data["cause"] = cause
 	GameEventBus.hero_died.connect(on_died)
@@ -42,9 +42,10 @@ func test_battle_loss_zero_hp_emits_hero_died() -> void:
 	var empty_u: Array[UnitStack] = []
 	coord.call("_apply_results", BattleState.Side.DEFENDER, empty_u, empty_u)
 
-	assert_bool(_hero.is_combat_dead()).is_true()
-	assert_bool(_hero.get("is_alive")).is_false()
-	assert_that(data.get("cause")).is_equal(&"battle")
+	# Ранняя игра: герой не погибает в одном бою — раненый выживает (early-game-foundation)
+	assert_bool(_hero.is_combat_dead() == false).is_true()
+	assert_that(_hero.get("combat_hp")).is_equal(1)
+	assert_bool(not data.has("cause")).is_true()
 
 	_cleanup_test(on_died)
 	coord.free()

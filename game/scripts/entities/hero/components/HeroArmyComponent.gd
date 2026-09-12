@@ -10,7 +10,7 @@ func setup_hero(hero: HeroController) -> void:
 	add_child(_controller)
 
 func initialize() -> void:
-	_controller.setup(Services.resolve(&"units"))
+	_controller.setup(Services.resolve(&"units"), _hero.solo_start)
 
 func set_controller(v: HeroArmyController) -> void:
 	_controller = v

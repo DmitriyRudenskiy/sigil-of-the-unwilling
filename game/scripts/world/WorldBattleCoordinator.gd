@@ -81,8 +81,31 @@ func check_enemy_contact(cell: Vector2i) -> void:
 	var enemy_cell := _find_contact_enemy(stacks, cell)
 	if enemy_cell == Vector2i(-1, -1):
 		return
+
+	# Друид: дикие животные 1-го кольца убегают без боя (early-game-foundation)
+	if _hero_is_druid() and _stacks_are_wild(stacks[enemy_cell]):
+		stacks.erase(enemy_cell)
+		if spawner != null and spawner.has_method("remove_enemy_at"):
+			spawner.call("remove_enemy_at", enemy_cell)
+		GameLogger.hero("Дикие животные отступили перед друидом")
+		return
+
 	_pre_battle_cell = _capture_pre_battle_cell()
 	_launch_battle(stacks[enemy_cell], enemy_cell, false)
+
+func _hero_is_druid() -> bool:
+	if hero == null:
+		return false
+	var cls: Variant = hero.get("hero_class")
+	return str(cls) == "druid"
+
+func _stacks_are_wild(stacks_raw: Variant) -> bool:
+	if not (stacks_raw is Array) or (stacks_raw as Array).is_empty():
+		return false
+	for s in stacks_raw:
+		if s is UnitStack and GameNumbersHero.WILD_ANIMAL_KEYS.has(s.get_key()):
+			return true
+	return false
 
 func _find_contact_enemy(stacks: Dictionary, cell: Vector2i) -> Vector2i:
 	if stacks.has(cell):
@@ -197,8 +220,19 @@ func _apply_results(
 	var hero_won: bool = _hero_won(winner)
 	var hero_survivors: Array[UnitStack] = surv_def if _roles_swapped else surv_atk
 
+	# Личный боец не юнит армии: отделяем и переводим в HP героя
+	var fighter_alive := false
+	var fighter_hp := 1
+	for i in range(hero_survivors.size() - 1, -1, -1):
+		if hero_survivors[i] != null and hero_survivors[i].get_key() == GameNumbersHero.HERO_BATTLE_KEY:
+			fighter_alive = hero_survivors[i].is_alive()
+			fighter_hp = hero_survivors[i].count
+			hero_survivors.remove_at(i)
+	
 	if hero.has_method("apply_battle_results"):
 		hero.call("apply_battle_results", hero_survivors)
+	if fighter_alive and hero.has_method("set_combat_hp"):
+		hero.call("set_combat_hp", max(1, fighter_hp))
 
 	var army_ref: Variant = hero.get("army")
 	if army_ref != null:
@@ -211,13 +245,9 @@ func _apply_results(
 					GameLogger.hero("Hero routed: awarded minimal stack")
 
 	if battle_death_enabled and not hero_won and hero != null:
-		if hero_survivors.is_empty() and hero.has_method("set_combat_hp"):
-			hero.call("set_combat_hp", 0)
-		if hero.has_method("is_combat_dead") and hero.call("is_combat_dead"):
-			hero.call("mark_combat_dead")
-			GameEventBus.hero_died.emit(&"battle")
-			GameLogger.hero("Hero died in battle at %s" % _pending_enemy_cell)
-			return
+		# Ранняя игра: герой не погибает в одном бою — раненый выживает (early-game-foundation)
+		if hero.has_method("set_combat_hp") and not fighter_alive:
+			hero.call("set_combat_hp", 1)
 
 	if hero_won:
 		if map_gen != null:

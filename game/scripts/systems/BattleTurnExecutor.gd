@@ -380,6 +380,11 @@ func _advance_to_next_turn() -> void:
 
 	_tick_statuses(u)
 
+	# Жрец: лечение себя в начале хода (early-game-foundation)
+	if u.has_tag("priest") and u.get_count() < u.max_count:
+		u.set_count(min(u.max_count, u.get_count() + GameNumbersHero.PRIEST_TURN_HEAL))
+		status_updated.emit("%s heals %d" % [u.get_display_name(), GameNumbersHero.PRIEST_TURN_HEAL])
+
 	_transition_to(State.TURN_START)
 	status_updated.emit(_battle_state.get_turn_info())
 

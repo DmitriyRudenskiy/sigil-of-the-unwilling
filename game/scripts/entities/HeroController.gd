@@ -54,6 +54,10 @@ var stats_comp: HeroStatsComponent
 #  ИНИЦИАЛИЗАЦИЯ
 # ═══════════════════════════════════════════
 
+## Ранняя игра: новая партия — без стартовой армии, герой стартует один.
+var solo_start := false
+
+
 func _init() -> void:
 	_register_components()
 	_wire_cross_component_signals()
@@ -218,6 +222,27 @@ var hero_race: String:
 var hero_class: String:
 	get: return stats_comp.hero_class if stats_comp else ""
 	set(v): if stats_comp: stats_comp.hero_class = v
+
+## Личный боец: герой участвует в бою как юнит на доске (early-game-foundation).
+## count = личное HP (модель боя считает «убийства» с юнитов стека),
+## hp = 1, тег класса — для классовых эффектов в бою.
+func get_hero_battle_stack() -> UnitStack:
+	if stats_comp == null or combat_comp == null:
+		return null
+	var battle_stats: Dictionary = stats_comp.get_battle_bonus({})
+	var atk: int = max(1, int(battle_stats.get("attack", 3)))
+	var def: int = max(0, int(battle_stats.get("defense", 3)))
+	var hp: int = combat_comp.combat_hp if combat_comp.combat_hp > 0 else 1
+	var speed: int = GameNumbersHero.HERO_PERSONAL_SPEED
+	if stats_comp.hero_class == "ranger":
+		speed += 1
+	var unit_stats := UnitStats.new(
+		GameNumbersHero.HERO_BATTLE_KEY,
+		"Герой",
+		atk, atk, 1, speed, def,
+		[GameNumbersHero.HERO_BATTLE_KEY, stats_comp.hero_class]
+	)
+	return UnitStack.new(unit_stats, hp)
 
 var hero_culture: String:
 	get: return stats_comp.hero_culture if stats_comp else ""

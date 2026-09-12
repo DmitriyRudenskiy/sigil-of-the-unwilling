@@ -38,8 +38,9 @@ func test_collect_valid_handoff() -> void:
 
 	assert_bool(handoff.is_valid).is_true()
 	assert_that(handoff.validation_errors.size()).is_equal(0)
-	# MAX_HERO_ARMY_SIZE = 7 — девятый стек отрезается в get_army_for_battle()
-	assert_that(handoff.hero_army.size()).is_equal(GameNumbers.MAX_HERO_ARMY_SIZE)
+	# MAX_HERO_ARMY_SIZE = 7 — девятый стек отрезается в get_army_for_battle(),
+	# +1 — личный боец героя (early-game-foundation)
+	assert_that(handoff.hero_army.size()).is_equal(GameNumbers.MAX_HERO_ARMY_SIZE + 1)
 	assert_that(handoff.enemy_army.size()).is_equal(1)
 	assert_that(handoff.enemy_cell).is_equal(Vector2i(5, 5))
 	assert_bool(handoff.roles_swapped).is_false()

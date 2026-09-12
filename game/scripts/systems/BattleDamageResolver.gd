@@ -17,6 +17,7 @@ static func resolve(state: BattleState, atk: BattleState.BattleUnit, def: Battle
 		return result
 
 	_apply_status_procs(atk, def, rng, result)
+	_apply_hero_class_procs(atk, def, rng, result)
 	_apply_vampiric(atk, result)
 	_apply_breath(state, atk, def, result, rng, state.hex_shift_right)
 	_apply_saltpeter(state, atk, def, rng, result, state.hex_shift_right)
@@ -30,6 +31,23 @@ static func _apply_status_procs(atk: BattleState.BattleUnit, def: BattleState.Ba
 	if atk.has_tag("blind") and rng.randf() < GameNumbers.STATUS_PROC_CHANCE:
 		def.add_status(_StatusEffects.Effect.BLIND, 1)
 		result["blind"] = true
+
+## Классовые эффекты бойца-героя (early-game-foundation): тег = ключ класса.
+static func _apply_hero_class_procs(
+	atk: BattleState.BattleUnit,
+	def: BattleState.BattleUnit,
+	rng: RandomNumberGenerator,
+	result: Dictionary
+) -> void:
+	if atk == null or def == null or result.is_empty():
+		return
+	if atk.has_tag("ranger") and GameNumbersHero.WILD_ANIMAL_KEYS.has(def.get_key()):
+		result["kills"] = int(result.get("kills", 0)) + GameNumbersHero.RANGER_ANIMAL_DAMAGE_BONUS
+		result["ranger_bonus"] = true
+	if atk.has_tag("rogue") and rng.randf() < GameNumbersHero.ROGUE_CRIT_CHANCE:
+		result["kills"] = int(result.get("kills", 0)) * GameNumbersHero.ROGUE_CRIT_MULTIPLIER
+		result["crit"] = true
+
 
 static func _apply_vampiric(atk: BattleState.BattleUnit, result: Dictionary) -> void:
 	if not atk.has_tag("vampiric") or int(result.get("kills", 0)) <= 0:

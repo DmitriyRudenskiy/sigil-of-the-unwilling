@@ -87,6 +87,12 @@ func _collect_hero_data(hero: Node) -> void:
 		var raw: Variant = hero.call("get_army_for_battle")
 		hero_army = _to_stack_array(raw)
 
+	# Личный боец: герой всегда на доске (early-game-foundation)
+	if hero.has_method("get_hero_battle_stack"):
+		var fighter: UnitStack = hero.call("get_hero_battle_stack")
+		if fighter != null:
+			hero_army.append(fighter)
+
 	# Бонусы героя (атака, защита, магия, знание, удача, мораль)
 	if hero.has_method("get_battle_bonus"):
 		var bonus: Variant = hero.call("get_battle_bonus")
