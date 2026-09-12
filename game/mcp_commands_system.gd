@@ -1318,7 +1318,7 @@ func _cmd_process_mode(params: Dictionary) -> void:
 		server._send_response({"error": "Node not found: %s" % node_path})
 		return
 	var mode_str: String = params.get("mode", "inherit")
-	var mode_val: int = Node.PROCESS_MODE_INHERIT
+	var mode_val: Node.ProcessMode = Node.PROCESS_MODE_INHERIT
 	match mode_str:
 		"pausable": mode_val = Node.PROCESS_MODE_PAUSABLE
 		"when_paused": mode_val = Node.PROCESS_MODE_WHEN_PAUSED

@@ -39,15 +39,15 @@ func _ready() -> void:
 	# TASK_19 L1: McpCommandsNetwork (пустая заглушка) удалён.
 	for group in [_grp_input, _grp_ui, _grp_system, _grp_render]:
 		var cmds: Dictionary = group.get_commands()
-		for name in cmds:
-			_handlers[name] = cmds[name]
+		for cmd in cmds:
+			_handlers[cmd] = cmds[cmd]
 	_server = TCPServer.new()
-	var port := port()
-	var err: int = _server.listen(port, "127.0.0.1")
+	var port_ := port()
+	var err: int = _server.listen(port_, "127.0.0.1")
 	if err != OK:
-		push_error("McpInteractionServer: Failed to listen on port %d, error: %d" % [port, err])
+		push_error("McpInteractionServer: Failed to listen on port %d, error: %d" % [port_, err])
 		return
-	print("McpInteractionServer: Listening on 127.0.0.1:%d" % port)
+	print("McpInteractionServer: Listening on 127.0.0.1:%d" % port_)
 
 
 func _process(_delta: float) -> void:

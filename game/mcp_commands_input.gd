@@ -354,7 +354,7 @@ func _cmd_input_state(params: Dictionary) -> void:
 			server._send_response({"success": true, "action": "warp_mouse", "position": {"x": pos.x, "y": pos.y}})
 		"set_mouse_mode":
 			var mode_str: String = params.get("mouse_mode", "visible")
-			var mode_val: int = Input.MOUSE_MODE_VISIBLE
+			var mode_val: Input.MouseMode = Input.MOUSE_MODE_VISIBLE
 			match mode_str:
 				"hidden": mode_val = Input.MOUSE_MODE_HIDDEN
 				"captured": mode_val = Input.MOUSE_MODE_CAPTURED
