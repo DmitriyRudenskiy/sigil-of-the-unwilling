@@ -7,6 +7,9 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 # ─── Меню ──────────────────────────────────────────────────────
+msgid "menu.continue"
+msgstr "Continue"
+
 msgid "menu.new_game"
 msgstr "New game"
 
@@ -774,6 +777,18 @@ msgstr "🔇 Mute (M)"
 
 msgid "settings.gameplay"
 msgstr "🎮 Gameplay"
+
+msgid "settings.additional"
+msgstr "📁 Additional"
+
+msgid "settings.arena"
+msgstr "🏙 City arena"
+
+msgid "settings.chronicle"
+msgstr "📜 Chronicle"
+
+msgid "settings.model"
+msgstr "🗡 Hero model"
 
 msgid "settings.autosave"
 msgstr "Autosave on exit"

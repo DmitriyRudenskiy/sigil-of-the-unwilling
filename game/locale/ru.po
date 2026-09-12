@@ -7,6 +7,9 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 # ─── Меню ──────────────────────────────────────────────────────
+msgid "menu.continue"
+msgstr "Продолжить"
+
 msgid "menu.new_game"
 msgstr "Новая игра"
 
@@ -774,6 +777,18 @@ msgstr "🔇 Мьют (M)"
 
 msgid "settings.gameplay"
 msgstr "🎮 Игра"
+
+msgid "settings.additional"
+msgstr "📁 Дополнительно"
+
+msgid "settings.arena"
+msgstr "🏙 Арена города"
+
+msgid "settings.chronicle"
+msgstr "📜 Летопись"
+
+msgid "settings.model"
+msgstr "🗡 Модель героя"
 
 msgid "settings.autosave"
 msgstr "Автосохранение при выходе"

@@ -1,6 +1,7 @@
 class_name GameText
 extends RefCounted
 
+static func menu_continue() -> String: return TranslationServer.translate("menu.continue")
 static func menu_new_game() -> String: return TranslationServer.translate("menu.new_game")
 static func menu_load_game() -> String: return TranslationServer.translate("menu.load_game")
 static func menu_arena() -> String: return TranslationServer.translate("menu.arena")
@@ -178,8 +179,8 @@ static func arena_center_msg() -> String: return TranslationServer.translate("ar
 static func arena_select_msg() -> String: return TranslationServer.translate("arena.select_msg")
 
 static func hero_title(name: String, path: String) -> String: return TranslationServer.translate("hero.title").format({"name": name, "path": path})
-static func hero_combat_hp(cur: int, max: int) -> String: return TranslationServer.translate("hero.combat_hp").format({"cur": cur, "max": max})
-static func hero_mana(cur: int, max: int) -> String: return TranslationServer.translate("hero.mana").format({"cur": cur, "max": max})
+static func hero_combat_hp(cur: int, max_val: int) -> String: return TranslationServer.translate("hero.combat_hp").format({"cur": cur, "max": max_val})
+static func hero_mana(cur: int, max_val: int) -> String: return TranslationServer.translate("hero.mana").format({"cur": cur, "max": max_val})
 static func hero_followers_label() -> String: return TranslationServer.translate("hero.followers_label")
 static func hero_no_followers() -> String: return TranslationServer.translate("hero.no_followers")
 static func hero_default_title() -> String: return TranslationServer.translate("hero.default_title")
@@ -215,11 +216,9 @@ static func info_tooltip(node_name: String) -> String:
 		"ArmyButton": "info.tooltip_army",
 		"JournalButton": "info.tooltip_journal",
 		"EndTurnButton": "info.tooltip_end_turn",
-		"KingdomButton": "info.tooltip_kingdom",
-		"OptionsButton": "info.tooltip_options",
 	}
 	var key: String = keys.get(node_name, "")
-	return TranslationServer.translate(key) if key != "" else node_name
+	return String(TranslationServer.translate(key)) if key != "" else node_name
 static func tools_title() -> String: return TranslationServer.translate("tools.title")
 static func tools_slot_empty(n: int) -> String: return TranslationServer.translate("tools.slot_empty").format({"n": n})
 static func tools_slot_filled(n: int, name: String, qty: int) -> String:
@@ -228,7 +227,7 @@ static func cityjob_name(id: StringName) -> String: return TranslationServer.tra
 static func skills_title() -> String: return TranslationServer.translate("skills.title")
 static func tool_name(id: int) -> String:
 	var name: StringName = ToolType.to_name(id)
-	return TranslationServer.translate("tool." + str(name)) if name != &"" else str(id)
+	return String(TranslationServer.translate("tool." + str(name))) if name != &"" else str(id)
 static func stat_label(key: String) -> String: return TranslationServer.translate("stat." + key)
 static func artifact_default_name() -> String: return TranslationServer.translate("artifact.default_name")
 static func citypanel_capital() -> String: return TranslationServer.translate("citypanel.capital")
@@ -324,6 +323,10 @@ static func settings_autosave() -> String: return TranslationServer.translate("s
 static func settings_apply() -> String: return TranslationServer.translate("settings.apply")
 static func settings_reset() -> String: return TranslationServer.translate("settings.reset")
 static func settings_cancel() -> String: return TranslationServer.translate("settings.cancel")
+static func settings_additional() -> String: return TranslationServer.translate("settings.additional")
+static func settings_button_arena() -> String: return TranslationServer.translate("settings.arena")
+static func settings_button_chronicle() -> String: return TranslationServer.translate("settings.chronicle")
+static func settings_button_model() -> String: return TranslationServer.translate("settings.model")
 
 static func resource_panel_title() -> String: return TranslationServer.translate("resource.panel_title")
 static func resource_collected(amount: int) -> String: return TranslationServer.translate("resource.collected").format({"n": amount})

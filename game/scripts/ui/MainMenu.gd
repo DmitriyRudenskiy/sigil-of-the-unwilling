@@ -6,15 +6,12 @@ const _CharacterCreation = preload("res://scenes/ui/CharacterCreation.tscn")
 const _HeroModelFactory = preload("res://scripts/ui/HeroModelFactory.gd")
 
 @onready var _background: TextureRect = $Background
+@onready var _continue_btn: Button = $RightColumn/ContinueButton
 @onready var _new_game_btn: Button = $RightColumn/NewGameButton
 @onready var _load_game_btn: Button = $RightColumn/LoadGameButton
-@onready var _arena_btn: Button = $RightColumn/ArenaButton
-@onready var _model_warrior_btn: Button = $RightColumn/ModelWarriorButton
-@onready var _model_mage_btn: Button = $RightColumn/ModelMageButton
 @onready var _settings_btn: Button = $RightColumn/SettingsButton
-@onready var _chronicle_btn: Button = $RightColumn/ChronicleButton
 @onready var _exit_btn: Button = $RightColumn/ExitButton
-@onready var _version_label: Label = $RightColumn/VersionLabel
+@onready var _version_label: Label = $VersionLabel
 @onready var _settings_screen: SettingsScreen = $SettingsScreen
 @onready var _chronicle_screen: ChronicleScreen = $ChronicleScreen
 @onready var _model_screen: ArtifactInventoryScreen = $HeroModelWindow
@@ -32,6 +29,8 @@ func _ready() -> void:
     _style_buttons()
     _localize()
     _connect_buttons()
+    _connect_settings_extras()
+    _refresh_continue_button()
     _create_save_load_screen()
     _UIAnimator.animate_in(self)
     SoundManager.play_music_cue(&"music_menu")
@@ -70,9 +69,8 @@ func _placeholder() -> ImageTexture:
 
 func _style_buttons() -> void:
     var buttons: Array[Button] = [
-        _new_game_btn, _load_game_btn, _arena_btn,
-        _model_warrior_btn, _model_mage_btn, _settings_btn,
-        _chronicle_btn, _exit_btn
+        _continue_btn, _new_game_btn, _load_game_btn,
+        _settings_btn, _exit_btn
     ]
     for btn in buttons:
         var sn := StyleBoxFlat.new()
@@ -95,25 +93,38 @@ func _style_buttons() -> void:
         _UIAnimator.setup_button(btn)
 
 func _localize() -> void:
+    _continue_btn.text = GameText.menu_continue()
     _new_game_btn.text = GameText.menu_new_game()
     _load_game_btn.text = GameText.menu_load_game()
-    _arena_btn.text = GameText.menu_arena()
-    _model_warrior_btn.text = GameText.menu_model_warrior()
-    _model_mage_btn.text = GameText.menu_model_mage()
     _settings_btn.text = GameText.menu_settings()
-    _chronicle_btn.text = GameText.menu_chronicle()
     _exit_btn.text = GameText.menu_exit()
     _version_label.text = GameText.menu_version()
 
 func _connect_buttons() -> void:
+    _continue_btn.pressed.connect(_on_continue)
     _new_game_btn.pressed.connect(_on_new_game)
     _load_game_btn.pressed.connect(_on_load_game)
-    _arena_btn.pressed.connect(_on_arena)
-    _model_warrior_btn.pressed.connect(_on_model_warrior)
-    _model_mage_btn.pressed.connect(_on_model_mage)
     _settings_btn.pressed.connect(_on_settings)
-    _chronicle_btn.pressed.connect(_on_chronicle)
     _exit_btn.pressed.connect(_on_exit)
+
+func _connect_settings_extras() -> void:
+    if not _settings_screen.arena_requested.is_connected(_on_arena):
+        _settings_screen.arena_requested.connect(_on_arena)
+    if not _settings_screen.chronicle_requested.is_connected(_on_chronicle):
+        _settings_screen.chronicle_requested.connect(_on_chronicle)
+    if not _settings_screen.model_requested.is_connected(_on_model_variant):
+        _settings_screen.model_requested.connect(_on_model_variant)
+
+func _loc() -> String:
+    return TranslationServer.get_locale()
+
+func _refresh_continue_button() -> void:
+    _continue_btn.disabled = not SaveManager.has_save_in_slot(1)
+
+func _on_continue() -> void:
+    if not SaveManager.has_save_in_slot(1):
+        return
+    _save_load_screen.perform_load(1)
 
 func _on_new_game() -> void:
     _clear_session_caches()
@@ -177,11 +188,8 @@ func _on_settings() -> void:
 func _on_settings_applied() -> void:
     pass
 
-func _on_model_warrior() -> void:
-    _open_model_window("warrior")
-
-func _on_model_mage() -> void:
-    _open_model_window("mage")
+func _on_model_variant(variant: String) -> void:
+    _open_model_window(variant)
 
 func _open_model_window(variant: String) -> void:
     var name := GameText.model_hero_warrior() if variant == "warrior" else GameText.model_hero_mage()

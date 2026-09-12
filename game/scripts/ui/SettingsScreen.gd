@@ -5,6 +5,9 @@ const _SettingsScript = preload("res://scripts/autoload/Settings.gd")
 
 signal applied
 signal closed
+signal arena_requested
+signal chronicle_requested
+signal model_requested(variant: String)
 
 const C_BG := ThemeConfig.C_PANEL_DARK
 const C_BORDER := ThemeConfig.C_PANEL_BORDER_ALT
@@ -27,7 +30,11 @@ var _tween: Tween = null
 var _settings: Node = null
 
 @export var persistent := false
+@export var show_additional := true
+
 var _content_ready := false
+var _additional_header: Label = null
+var _additional_btns: Array[Button] = []
 
 var _initial_state: Dictionary = {}
 
@@ -57,6 +64,7 @@ func _ready() -> void:
 	_init_content()
 
 func _init_content() -> void:
+	_ensure_additional_section()
 	_initial_state = _capture_state()
 	_bind_nodes()
 	_localize()
@@ -87,6 +95,16 @@ func _localize() -> void:
 	(box.get_node("ButtonRow/ApplyButton") as Button).text = GameText.settings_apply()
 	(box.get_node("ButtonRow/ResetButton") as Button).text = GameText.settings_reset()
 	(box.get_node("ButtonRow/CancelButton") as Button).text = GameText.settings_cancel()
+	if _additional_header != null:
+		_additional_header.text = GameText.settings_additional()
+		for i in _additional_btns.size():
+			_additional_btns[i].text = _additional_key_text(i)
+
+func _additional_key_text(i: int) -> String:
+	match i:
+		0: return GameText.settings_button_arena()
+		1: return GameText.settings_button_chronicle()
+		_: return GameText.settings_button_model()
 
 func _capture_state() -> Dictionary:
 	return {
@@ -141,6 +159,44 @@ func _bind_nodes() -> void:
 	(box.get_node("ButtonRow/ApplyButton") as Button).pressed.connect(_on_apply)
 	(box.get_node("ButtonRow/ResetButton") as Button).pressed.connect(_on_reset)
 	(box.get_node("ButtonRow/CancelButton") as Button).pressed.connect(_on_cancel)
+	if _additional_btns.size() == 3:
+		_additional_btns[0].pressed.connect(_on_additional_arena)
+		_additional_btns[1].pressed.connect(_on_additional_chronicle)
+		_additional_btns[2].pressed.connect(_on_additional_model)
+
+func _ensure_additional_section() -> void:
+	if not show_additional or _additional_header != null:
+		return
+	var box := get_node("Panel/Box") as VBoxContainer
+	if box == null:
+		return
+	var header := Label.new()
+	header.name = "AdditionalHeader"
+	var row := HBoxContainer.new()
+	row.name = "AdditionalRow"
+	for i in 3:
+		var btn := Button.new()
+		btn.name = "AdditionalBtn_%d" % i
+		row.add_child(btn)
+		_additional_btns.append(btn)
+	var anchor := box.get_node_or_null("AutoSaveToggle")
+	var idx: int = box.get_child_count()
+	if anchor != null:
+		idx = box.get_children().find(anchor)
+	box.add_child(header)
+	box.add_child(row)
+	box.move_child(header, idx)
+	box.move_child(row, idx + 1)
+	_additional_header = header
+
+func _on_additional_arena() -> void:
+	arena_requested.emit()
+
+func _on_additional_chronicle() -> void:
+	chronicle_requested.emit()
+
+func _on_additional_model() -> void:
+	model_requested.emit("warrior")
 
 func _apply_style() -> void:
 	var style := StyleBoxFlat.new()
@@ -152,6 +208,8 @@ func _apply_style() -> void:
 	var box := get_node("Panel/Box")
 	for btn_name in ["ApplyButton", "ResetButton", "CancelButton"]:
 		_style_button(box.get_node("ButtonRow/" + btn_name) as Button)
+	for btn in _additional_btns:
+		_style_button(btn)
 
 func _style_button(btn: Button) -> void:
 	var sn := StyleBoxFlat.new()
