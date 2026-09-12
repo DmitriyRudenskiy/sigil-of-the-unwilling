@@ -159,6 +159,18 @@ static func city_upgrade_failed() -> String: return TranslationServer.translate(
 static func city_upgraded(from_level: int, to_level: int) -> String:
 	return TranslationServer.translate("city.upgraded").format({"from": from_level, "to": to_level})
 static func city_hire_no_hero() -> String: return TranslationServer.translate("city.hire_no_hero")
+static func city_unload() -> String: return TranslationServer.translate("city.unload")
+static func city_unloaded(moved: int) -> String:
+	return TranslationServer.translate("city.unloaded").format({"moved": moved})
+static func city_unload_empty() -> String: return TranslationServer.translate("city.unload_empty")
+static func city_cart() -> String: return TranslationServer.translate("city.cart")
+static func city_cart_no_market() -> String: return TranslationServer.translate("city.cart_no_market")
+static func city_cart_bought(cap: int) -> String:
+	return TranslationServer.translate("city.cart_bought").format({"cap": cap})
+static func city_cart_no_funds(cost: float) -> String:
+	return TranslationServer.translate("city.cart_no_funds").format({"cost": "%.0f" % cost})
+static func resource_total(total: int, cap: int) -> String:
+	return TranslationServer.translate("resource.total").format({"total": total, "cap": cap})
 static func city_cost_industry(n: String) -> String: return TranslationServer.translate("city.cost_industry").format({"n": n})
 static func city_cost_special(res: String, n: String) -> String:
 	return TranslationServer.translate("city.cost_special").format({"res": res, "n": n})

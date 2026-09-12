@@ -162,6 +162,30 @@ msgstr "Buildings"
 msgid "city.hire"
 msgstr "👤 Hire"
 
+msgid "city.unload"
+msgstr "📦 Unload"
+
+msgid "city.unloaded"
+msgstr "Unloaded {moved} resources into the city storeroom."
+
+msgid "city.unload_empty"
+msgstr "Your pack is empty."
+
+msgid "city.cart"
+msgstr "🛒 Market cart (+6)"
+
+msgid "city.cart_no_market"
+msgstr "No market in this city — cannot buy a cart."
+
+msgid "city.cart_bought"
+msgstr "Cart bought. Carry capacity: {cap}."
+
+msgid "city.cart_no_funds"
+msgstr "Not enough industry (need {cost})."
+
+msgid "resource.total"
+msgstr "Pack: {total}/{cap}"
+
 msgid "city.level_up"
 msgstr "⬆️ Upgrade"
 

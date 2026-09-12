@@ -5,6 +5,17 @@ signal strategic_resources_changed(resources: Dictionary)
 
 var _resources: Dictionary = {}
 var _resource_registry: Node = null
+# Ранняя игра: расширение провозной способности (рыночная телега)
+var capacity_bonus: int = 0
+
+func total() -> int:
+	var s := 0
+	for id in _resources:
+		s += int(_resources[id])
+	return s
+
+func total_cap() -> int:
+	return GameNumbersHero.BACKPACK_TOTAL_CAP + capacity_bonus
 
 func init_from_registry(resource_registry: Node = null) -> void:
 
@@ -28,7 +39,8 @@ func add(id: StringName, amount: int) -> int:
 	if not _resources.has(id):
 		_resources[id] = 0
 	var current: int = _resources[id]
-	var space: int = GameNumbers.RESOURCE_CAPACITY - current
+	# Ранняя игра: общий лимит рюкзака, а не на тип (early-game-foundation)
+	var space: int = total_cap() - total()
 	var actual: int = min(amount, max(0, space))
 	_resources[id] = current + actual
 	strategic_resources_changed.emit(_resources)
@@ -49,7 +61,7 @@ func _add_internal(id: StringName, amount: int) -> void:
 	if not _resources.has(id):
 		_resources[id] = 0
 	var current: int = _resources[id]
-	var new_val: int = min(current + amount, GameNumbers.RESOURCE_CAPACITY)
+	var new_val: int = min(current + amount, max(0, total_cap() - (total() - current)))
 	if new_val != current:
 		_resources[id] = new_val
 

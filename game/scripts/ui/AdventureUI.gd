@@ -67,6 +67,7 @@ func _ready() -> void:
 
 func setup(hero: HeroController, camera: Camera2D = null) -> void:
 	_hero_controller = hero
+	_strat_resources.hero_resources = hero.strategic_resources
 	hero.movement_points_changed.connect(func(c, m): _update_mp_display(c, m))
 	hero.resources_changed.connect(func(res): _resources.update_resources(res))
 	hero.path_previewed.connect(func(t): _info.set_status(t))
@@ -92,6 +93,7 @@ func setup(hero: HeroController, camera: Camera2D = null) -> void:
 
 func reattach_hero(hero: HeroController, camera: Camera2D = null) -> void:
 	_hero_controller = hero
+	_strat_resources.hero_resources = hero.strategic_resources
 	hero.movement_points_changed.connect(func(c, m): _update_mp_display(c, m))
 	hero.resources_changed.connect(func(res): _resources.update_resources(res))
 	hero.path_previewed.connect(func(t): _info.set_status(t))

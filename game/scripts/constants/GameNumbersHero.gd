@@ -18,6 +18,10 @@ const ROGUE_CRIT_MULTIPLIER     := 2
 const PRIEST_TURN_HEAL          := 2
 # Дикие животные 1-го кольца (Druid: убегают; Ranger: +урон)
 const WILD_ANIMAL_KEYS          := ["wolves", "gremlin"]
+# Рюкзак героя: общий лимит и расширение (early-game-foundation)
+const BACKPACK_TOTAL_CAP        := 12
+const BACKPACK_CART_BONUS       := 6
+const BACKPACK_CART_COST        := 20.0
 const HERO_MANA_TICK            := 1
 const NEED_REST_DECAY           := 0.10
 const NEED_SOCIAL_DECAY         := 0.08

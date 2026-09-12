@@ -162,6 +162,30 @@ msgstr "Здания"
 msgid "city.hire"
 msgstr "👤 Нанять"
 
+msgid "city.unload"
+msgstr "📦 Выгрузить"
+
+msgid "city.unloaded"
+msgstr "Выгружено {moved} ресурс(ов) в кладовую города."
+
+msgid "city.unload_empty"
+msgstr "Рюкзак пуст."
+
+msgid "city.cart"
+msgstr "🛒 Телега рынка (+6)"
+
+msgid "city.cart_no_market"
+msgstr "В этом городе нет рынка — купить телегу нельзя."
+
+msgid "city.cart_bought"
+msgstr "Телега куплена. Провозная способность: {cap}."
+
+msgid "city.cart_no_funds"
+msgstr "Не хватает промышленности (нужно {cost})."
+
+msgid "resource.total"
+msgstr "Рюкзак: {total}/{cap}"
+
 msgid "city.level_up"
 msgstr "⬆️ Улучшить"
 

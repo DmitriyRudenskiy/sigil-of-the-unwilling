@@ -45,12 +45,22 @@ func _ready() -> void:
         _labels[def.id] = label
 
 func update_resources(resources: Dictionary) -> void:
+    var total := 0
     for id in _labels:
         var label: Label = _labels[id]
         var amount: int = int(resources.get(ResourceType.from_name(id), 0))
+        total += amount
         var reg: Node = _resource_registry if _resource_registry != null else Resources
         var def: ResourceDef = reg.get_resource(id) as ResourceDef
         if def:
-            label.text = "%s %d/%d" % [def.icon, amount, GameNumbers.RESOURCE_CAPACITY]
+            label.text = "%s %d" % [def.icon, amount]
         else:
-            label.text = "⛏️ %d/%d" % [amount, GameNumbers.RESOURCE_CAPACITY]
+            label.text = "⛏️ %d" % amount
+    var title := $VBox/Title as Label
+    # Ранняя игра: общий лимит рюкзака (early-game-foundation)
+    var cap: int = GameNumbersHero.BACKPACK_TOTAL_CAP
+    if hero_resources != null:
+        cap = hero_resources.total_cap()
+    title.text = "%s — %s" % [GameText.resource_panel_title(), GameText.resource_total(total, cap)]
+
+var hero_resources: HeroStrategicResources = null

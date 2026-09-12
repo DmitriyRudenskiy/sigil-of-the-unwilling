@@ -37,6 +37,12 @@ func _ready() -> void:
 	var hire := buttons.get_node("Hire") as Button
 	hire.pressed.connect(_on_hire_pressed)
 	hire.text = GameText.city_hire()
+	var unload := buttons.get_node("Unload") as Button
+	unload.pressed.connect(_on_unload_pressed)
+	unload.text = GameText.city_unload()
+	var cart := buttons.get_node("Cart") as Button
+	cart.pressed.connect(_on_cart_pressed)
+	cart.text = GameText.city_cart()
 	var close_btn := buttons.get_node("Close") as Button
 	close_btn.pressed.connect(_on_close_pressed)
 	close_btn.text = GameText.city_close()
@@ -151,6 +157,60 @@ func hire_pressed() -> CityCheck:
 	_set_message(GameText.city_hired(f.describe(FollowerSystem.registry())))
 	refresh()
 	return CityCheck.success({"follower": f.to_dict()})
+
+func _on_unload_pressed() -> void:
+	unload_pressed()
+
+func _on_cart_pressed() -> void:
+	buy_cart_pressed()
+
+## Ранняя игра: выгрузка рюкзака в хранилище города (early-game-foundation)
+func unload_pressed() -> CityCheck:
+	if city == null:
+		return _fail(GameText.city_not_bound())
+	if hero == null or hero.strategic_resources == null:
+		return _fail(GameText.city_hire_no_hero())
+	var all: Dictionary = hero.strategic_resources.get_all()
+	var moved := 0
+	for id in all:
+		var amount: int = int(all[id])
+		if amount <= 0:
+			continue
+		var actual: int = hero.remove_strategic_resource(id, amount)
+		if actual > 0:
+			city.storage[id] = float(city.storage.get(id, 0.0)) + float(actual)
+			moved += actual
+	if moved == 0:
+		return _fail(GameText.city_unload_empty())
+	city.storage_changed.emit()
+	_set_message(GameText.city_unloaded(moved))
+	refresh()
+	return CityCheck.success({"moved": moved})
+
+## Ранняя игра: рыночная телега — расширение рюкзака (early-game-foundation)
+func buy_cart_pressed() -> CityCheck:
+	if city == null:
+		return _fail(GameText.city_not_bound())
+	if hero == null or hero.strategic_resources == null:
+		return _fail(GameText.city_hire_no_hero())
+	if not _has_market():
+		return _fail(GameText.city_cart_no_market())
+	var cost: float = GameNumbersHero.BACKPACK_CART_COST
+	if _storage_industry() < cost:
+		return _fail(GameText.city_cart_no_funds(cost))
+	city.storage[&"industry"] = _storage_industry() - cost
+	city.storage_changed.emit()
+	hero.strategic_resources.capacity_bonus += GameNumbersHero.BACKPACK_CART_BONUS
+	_set_message(GameText.city_cart_bought(hero.strategic_resources.total_cap()))
+	refresh()
+	return CityCheck.success({"cap": hero.strategic_resources.total_cap()})
+
+func _has_market() -> bool:
+	for b in city.buildings:
+		if b != null and b.def != null and b.def.id == &"market":
+			return true
+	return false
+
 
 func _on_close_pressed() -> void:
 	close_requested.emit()

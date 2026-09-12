@@ -35,7 +35,9 @@ func end_turn() -> void:
 	strategic.emit_changed()
 
 func serialize() -> Dictionary:
-	return {"strategic_resources": strategic.get_all()}
+	return {"strategic_resources": strategic.get_all(),
+		"backpack_bonus": strategic.capacity_bonus}
 
 func deserialize(data: Dictionary) -> void:
 	strategic.set_all(data.get("strategic_resources", strategic.get_all()))
+	strategic.capacity_bonus = int(data.get("backpack_bonus", 0))
