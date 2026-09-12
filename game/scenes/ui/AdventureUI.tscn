@@ -39,32 +39,35 @@ theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="PanelsBox" type="VBoxContainer" parent="RightColumn/Box"]
+[node name="Scroll" type="ScrollContainer" parent="RightColumn/Box"]
+layout_mode = 2
+
+[node name="PanelsBox" type="VBoxContainer" parent="RightColumn/Box/Scroll"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="MinimapPanel" parent="RightColumn/Box/PanelsBox" instance=ExtResource("2")]
+[node name="InfoPanel" parent="RightColumn/Box/Scroll/PanelsBox" instance=ExtResource("3")]
 layout_mode = 2
 
-[node name="InfoPanel" parent="RightColumn/Box/PanelsBox" instance=ExtResource("3")]
+[node name="MinimapPanel" parent="RightColumn/Box/Scroll/PanelsBox" instance=ExtResource("2")]
 layout_mode = 2
 
-[node name="ArmyPanel" parent="RightColumn/Box/PanelsBox" instance=ExtResource("4")]
+[node name="ArmyPanel" parent="RightColumn/Box/Scroll/PanelsBox" instance=ExtResource("4")]
 layout_mode = 2
 
-[node name="ResourceBar" parent="RightColumn/Box/PanelsBox" instance=ExtResource("5")]
+[node name="ResourceBar" parent="RightColumn/Box/Scroll/PanelsBox" instance=ExtResource("5")]
 layout_mode = 2
 
-[node name="ResourcesPanel" parent="RightColumn/Box/PanelsBox" instance=ExtResource("6")]
+[node name="ResourcesPanel" parent="RightColumn/Box/Scroll/PanelsBox" instance=ExtResource("6")]
 layout_mode = 2
 
-[node name="SkillsPanel" parent="RightColumn/Box/PanelsBox" instance=ExtResource("7")]
+[node name="SkillsPanel" parent="RightColumn/Box/Scroll/PanelsBox" instance=ExtResource("7")]
 layout_mode = 2
 
-[node name="ToolsPanel" parent="RightColumn/Box/PanelsBox" instance=ExtResource("8")]
+[node name="ToolsPanel" parent="RightColumn/Box/Scroll/PanelsBox" instance=ExtResource("8")]
 layout_mode = 2
 
-[node name="HeroStatusPanel" parent="RightColumn/Box/PanelsBox" instance=ExtResource("9")]
+[node name="HeroStatusPanel" parent="RightColumn/Box/Scroll/PanelsBox" instance=ExtResource("9")]
 layout_mode = 2
 
 [node name="GloryBox" type="VBoxContainer" parent="RightColumn/Box"]

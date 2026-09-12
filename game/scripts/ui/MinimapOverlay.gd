@@ -14,6 +14,8 @@ var _last_zoom: float = 1.0
 var _last_hero_cell: Vector2i = Vector2i.ZERO
 const MOVE_THRESHOLD := 8.0
 const HERO_RADIUS := 4.0
+# Прототип: #minimap { border: 2px solid var(--gold-hi) } — рисуем поверх текстуры карты.
+const C_MAP_BORDER := Color("#f3d68c")
 
 func _ready() -> void:
 	queue_redraw()
@@ -38,6 +40,10 @@ func _draw() -> void:
 		_draw_cross(size)
 	_draw_camera_rect(size)
 	_draw_hero_dot(size)
+	_draw_map_border(size)
+
+func _draw_map_border(size: Vector2) -> void:
+	draw_rect(Rect2(Vector2.ZERO, size), C_MAP_BORDER, false, UILayout.MINIMAP_MAP_BORDER)
 
 func _draw_cross(size: Vector2) -> void:
 	var c := ThemeConfig.C_MINIMAP_CROSS

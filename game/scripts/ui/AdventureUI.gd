@@ -12,14 +12,14 @@ const RIGHT_W := 252
 const C_BG := ThemeConfig.C_PANEL_BG
 const C_BORDER := ThemeConfig.C_PANEL_BORDER
 
-@onready var _minimap: MinimapPanel = $RightColumn/Box/PanelsBox/MinimapPanel
-@onready var _army: ArmyPanel = $RightColumn/Box/PanelsBox/ArmyPanel
-@onready var _resources: ResourceBar = $RightColumn/Box/PanelsBox/ResourceBar
-@onready var _info: InfoPanel = $RightColumn/Box/PanelsBox/InfoPanel
-@onready var _strat_resources: ResourcesPanel = $RightColumn/Box/PanelsBox/ResourcesPanel
-@onready var _skills_panel: SkillsPanel = $RightColumn/Box/PanelsBox/SkillsPanel
-@onready var _tools_panel: ToolsPanel = $RightColumn/Box/PanelsBox/ToolsPanel
-@onready var _hero_status: HeroStatusPanel = $RightColumn/Box/PanelsBox/HeroStatusPanel
+@onready var _minimap: MinimapPanel = $RightColumn/Box/Scroll/PanelsBox/MinimapPanel
+@onready var _army: ArmyPanel = $RightColumn/Box/Scroll/PanelsBox/ArmyPanel
+@onready var _resources: ResourceBar = $RightColumn/Box/Scroll/PanelsBox/ResourceBar
+@onready var _info: InfoPanel = $RightColumn/Box/Scroll/PanelsBox/InfoPanel
+@onready var _strat_resources: ResourcesPanel = $RightColumn/Box/Scroll/PanelsBox/ResourcesPanel
+@onready var _skills_panel: SkillsPanel = $RightColumn/Box/Scroll/PanelsBox/SkillsPanel
+@onready var _tools_panel: ToolsPanel = $RightColumn/Box/Scroll/PanelsBox/ToolsPanel
+@onready var _hero_status: HeroStatusPanel = $RightColumn/Box/Scroll/PanelsBox/HeroStatusPanel
 @onready var _collect_popup: ResourceCollectPopup = $ResourceCollectPopup
 @onready var _settings_screen: SettingsScreen = $SettingsScreen
 
@@ -61,6 +61,9 @@ func _ready() -> void:
 	if not GameEventBus.resource_extracted.is_connected(_on_resource_extracted):
 		GameEventBus.resource_extracted.connect(_on_resource_extracted)
 
+	_apply_sidebar_layout()
+	get_viewport().size_changed.connect(_apply_sidebar_layout)
+
 func setup(hero: HeroController, camera: Camera2D = null) -> void:
 	_hero_controller = hero
 	hero.movement_points_changed.connect(func(c, m): _update_mp_display(c, m))
@@ -101,6 +104,19 @@ func reattach_hero(hero: HeroController, camera: Camera2D = null) -> void:
 	_info.fill_hero_slot(0, hero)
 	set_cities(_cities_mgr)
 	refresh_all()
+
+## Ширина сайдбара по прототипу: clamp(25vw, 300, 430); колонка на всю высоту
+## (margin 14px), а не жёстко (-320/80/-10/-80 из старого tscn).
+func _apply_sidebar_layout() -> void:
+	var col := $RightColumn as PanelContainer
+	if col == null:
+		return
+	var vp := get_viewport().get_visible_rect().size.x
+	var sbw := UILayout.sidebar_width(vp)
+	col.offset_left = -sbw - UILayout.FRAME_GAP
+	col.offset_top = UILayout.FRAME_PADDING
+	col.offset_right = -UILayout.FRAME_PADDING
+	col.offset_bottom = -UILayout.FRAME_PADDING
 
 func refresh_all() -> void:
 	if _hero_controller == null:
