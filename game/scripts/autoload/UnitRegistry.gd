@@ -228,8 +228,10 @@ func make_stack(key: String, rng: RandomNumberGenerator, size_mult: float = 1.0)
     var stats: UnitStats = get_definition(key)
     if stats == null:
         return null
+    # Ранняя игра: база 6-18 юнитов (было 30-80) — старт-герой с рекрутами
+    # должен побеждать 1-е кольцо; рост даёт враждебность/сезон (early-game-foundation)
     var count := clampi(
-        int(float(rng.randi_range(30, 80)) * 6.0 / float(stats.base_damage) * size_mult),
+        int(float(rng.randi_range(6, 18)) * 6.0 / float(stats.base_damage) * size_mult),
         3,
         120
     )

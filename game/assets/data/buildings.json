@@ -1,459 +1,473 @@
 [
- {
-  "id": "great_temple",
-  "display_name": "Великий Храм",
-  "requires_site": true,
-  "levels": [
-   {
-    "industry": 30.0
-   },
-   {
-    "industry": 60.0,
-    "followers": 2
-   },
-   {
-    "industry": 120.0,
-    "special_resource": "gold",
-    "special_amount": 50.0,
-    "followers": 3
-   }
-  ],
-  "production_chain": null,
-  "housing": {},
-  "default_upkeep": {},
-  "min_city_level": 9
- },
- {
-  "id": "market",
-  "display_name": "Рынок",
-  "requires_site": false,
-  "levels": [
-   {
-    "industry": 25.0
-   },
-   {
-    "industry": 50.0,
-    "followers": 2,
-    "special_resource": "gold",
-    "special_amount": 40.0
-   },
-   {
-    "industry": 100.0,
-    "followers": 3,
-    "special_resource": "gold",
-    "special_amount": 80.0
-   }
-  ],
-  "production_chain": null,
-  "housing": {},
-  "default_upkeep": {},
-  "min_city_level": 1
- },
- {
-  "id": "barracks",
-  "display_name": "Казармы",
-  "requires_site": false,
-  "levels": [
-   {
-    "industry": 20.0
-   },
-   {
-    "industry": 40.0,
-    "followers": 2
-   },
-   {
-    "industry": 80.0,
-    "followers": 3,
-    "special_resource": "gold",
-    "special_amount": 30.0
-   }
-  ],
-  "production_chain": null,
-  "housing": {
-   "MILITIA": 5
+  {
+    "id": "great_temple",
+    "display_name": "Великий Храм",
+    "requires_site": true,
+    "levels": [
+      {
+        "industry": 30.0
+      },
+      {
+        "industry": 60.0,
+        "followers": 2
+      },
+      {
+        "industry": 120.0,
+        "special_resource": "gold",
+        "special_amount": 50.0,
+        "followers": 3
+      }
+    ],
+    "production_chain": null,
+    "housing": {},
+    "default_upkeep": {},
+    "min_city_level": 9
   },
-  "default_upkeep": {},
-  "min_city_level": 1
- },
- {
-  "id": "ancient_vault",
-  "display_name": "Древнее хранилище",
-  "requires_site": true,
-  "levels": [
-   {
-    "industry": 35.0
-   },
-   {
-    "industry": 70.0,
-    "followers": 2
-   },
-   {
-    "industry": 140.0,
-    "followers": 3,
-    "special_resource": "gold",
-    "special_amount": 60.0
-   }
-  ],
-  "production_chain": null,
-  "housing": {},
-  "default_upkeep": {},
-  "min_city_level": 11
- },
- {
-  "id": "walls",
-  "display_name": "Стены",
-  "requires_site": false,
-  "levels": [
-   {
-    "industry": 20.0
-   },
-   {
-    "industry": 50.0,
-    "followers": 2,
-    "special_resource": "gold",
-    "special_amount": 30.0
-   },
-   {
-    "industry": 100.0,
-    "followers": 3,
-    "special_resource": "gold",
-    "special_amount": 60.0
-   }
-  ],
-  "production_chain": null,
-  "housing": {},
-  "default_upkeep": {},
-  "min_city_level": 5
- },
- {
-  "id": "farm",
-  "display_name": "Ферма",
-  "requires_site": false,
-  "levels": [
-   {
-    "industry": 12.0
-   }
-  ],
-  "production_chain": {
-   "id": "farm_chain",
-   "workers": 2,
-   "inputs": {},
-   "outputs": {
-    "grain": 3.0
-   }
+  {
+    "id": "market",
+    "display_name": "Рынок",
+    "requires_site": false,
+    "levels": [
+      {
+        "industry": 25.0
+      },
+      {
+        "industry": 50.0,
+        "followers": 2,
+        "special_resource": "gold",
+        "special_amount": 40.0
+      },
+      {
+        "industry": 100.0,
+        "followers": 3,
+        "special_resource": "gold",
+        "special_amount": 80.0
+      }
+    ],
+    "production_chain": null,
+    "housing": {},
+    "default_upkeep": {},
+    "min_city_level": 1
   },
-  "housing": {},
-  "default_upkeep": {},
-  "min_city_level": 1
- },
- {
-  "id": "mill",
-  "display_name": "Мельница",
-  "requires_site": false,
-  "levels": [
-   {
-    "industry": 18.0
-   }
-  ],
-  "production_chain": {
-   "id": "mill_chain",
-   "workers": 1,
-   "inputs": {
-    "grain": 2.0
-   },
-   "outputs": {
-    "flour": 2.0
-   }
-  },
-  "housing": {},
-  "default_upkeep": {
-   "wood": 1.0
-  },
-  "min_city_level": 3
- },
- {
-  "id": "bakery",
-  "display_name": "Пекарня",
-  "requires_site": false,
-  "levels": [
-   {
-    "industry": 18.0
-   }
-  ],
-  "production_chain": {
-   "id": "bakery_chain",
-   "workers": 1,
-   "inputs": {
-    "flour": 2.0
-   },
-   "outputs": {
-    "bread": 2.0
-   }
-  },
-  "housing": {},
-  "default_upkeep": {
-   "wood": 1.0
-  },
-  "min_city_level": 3
- },
- {
-  "id": "mine",
-  "display_name": "Рудник",
-  "requires_site": false,
-  "levels": [
-   {
-    "industry": 20.0
-   }
-  ],
-  "production_chain": {
-   "id": "mine_chain",
-   "workers": 2,
-   "inputs": {},
-   "outputs": {
-    "ore": 2.0
-   }
-  },
-  "housing": {},
-  "default_upkeep": {},
-  "min_city_level": 4
- },
- {
-  "id": "smithy",
-  "display_name": "Кузница",
-  "requires_site": false,
-  "levels": [
-   {
-    "industry": 25.0
-   }
-  ],
-  "production_chain": {
-   "id": "smithy_chain",
-   "workers": 1,
-   "inputs": {
-    "ore": 1.0,
-    "wood": 1.0
-   },
-   "outputs": {
-    "tools": 1.0
-   }
-  },
-  "housing": {},
-  "default_upkeep": {
-   "wood": 1.0
-  },
-  "min_city_level": 2
- },
- {
-  "id": "school",
-  "display_name": "Училище",
-  "requires_site": false,
-  "levels": [
-   {
-    "industry": 30.0
-   }
-  ],
-  "production_chain": {
-   "id": "school_chain",
-   "workers": 1,
-   "inputs": {},
-   "outputs": {
-    "scholar_points": 1.0
-   }
-  },
-  "housing": {},
-  "default_upkeep": {
-   "wood": 2.0
-  },
-  "min_city_level": 4
- },
- {
-  "id": "tavern",
-  "display_name": "Таверна",
-  "requires_site": false,
-  "levels": [
-   {
-    "industry": 22.0
-   }
-  ],
-  "production_chain": {
-   "id": "tavern_chain",
-   "workers": 1,
-   "inputs": {},
-   "outputs": {
-    "gold": 1.0
-   }
-  },
-  "housing": {},
-  "default_upkeep": {},
-  "min_city_level": 2
- },
- {
-  "id": "trade_post",
-  "display_name": "Торговый пост",
-  "requires_site": false,
-  "levels": [
-   {
-    "industry": 28.0
-   }
-  ],
-  "production_chain": {
-   "id": "trade_post_chain",
-   "workers": 2,
-   "inputs": {
-    "bread": 1.0
-   },
-   "outputs": {
-    "gold": 2.0
-   }
-  },
-  "housing": {},
-  "default_upkeep": {},
-  "min_city_level": 4
- },
- {
-  "id": "shack",
-  "display_name": "Хижина",
-  "requires_site": false,
-  "levels": [
-   {
-    "industry": 15.0
-   }
-  ],
-  "production_chain": null,
-  "housing": {
-   "WORKER": 10
-  },
-  "default_upkeep": {},
-  "min_city_level": 1
- },
- {
-  "id": "manor",
-  "display_name": "Особняк",
-  "requires_site": false,
-  "levels": [
-   {
-    "industry": 40.0
-   }
-  ],
-  "production_chain": null,
-  "housing": {
-   "SCHOLAR": 2
-  },
-  "default_upkeep": {},
-  "min_city_level": 8
- },
- {
-  "id": "range",
-  "display_name": "Стрельбище",
-  "requires_site": false,
-  "min_city_level": 3,
-  "levels": [
-   {
-    "industry": 30.0
-   },
-   {
-    "industry": 70.0,
-    "followers": 2
-   },
-   {
-    "industry": 120.0,
-    "followers": 3
-   }
-  ],
-  "military_chain": {
-   "unit_key": "archers",
-   "costs": [
-    {
-     "silver": 8
+  {
+    "id": "barracks",
+    "display_name": "Казармы",
+    "requires_site": false,
+    "levels": [
+      {
+        "industry": 20.0
+      },
+      {
+        "industry": 40.0,
+        "followers": 2
+      },
+      {
+        "industry": 80.0,
+        "followers": 3,
+        "special_resource": "gold",
+        "special_amount": 30.0
+      }
+    ],
+    "production_chain": null,
+    "housing": {
+      "MILITIA": 5
     },
-    {
-     "silver": 10
-    },
-    {
-     "silver": 14
+    "default_upkeep": {},
+    "min_city_level": 1,
+    "military_chain": {
+      "unit_key": "swordsmen",
+      "costs": [
+        {
+          "silver": 10
+        },
+        {
+          "silver": 14
+        },
+        {
+          "silver": 20
+        }
+      ]
     }
-   ],
-   "tiers": [
-    1,
-    2,
-    3
-   ]
-  }
- },
- {
-  "id": "library",
-  "display_name": "Библиотека",
-  "requires_site": false,
-  "min_city_level": 7,
-  "levels": [
-   {
-    "industry": 60.0
-   },
-   {
-    "industry": 120.0,
-    "followers": 2
-   },
-   {
-    "industry": 200.0,
-    "followers": 3
-   }
-  ],
-  "military_chain": {
-   "unit_key": "mages",
-   "costs": [
-    {
-     "silver": 10
+  },
+  {
+    "id": "ancient_vault",
+    "display_name": "Древнее хранилище",
+    "requires_site": true,
+    "levels": [
+      {
+        "industry": 35.0
+      },
+      {
+        "industry": 70.0,
+        "followers": 2
+      },
+      {
+        "industry": 140.0,
+        "followers": 3,
+        "special_resource": "gold",
+        "special_amount": 60.0
+      }
+    ],
+    "production_chain": null,
+    "housing": {},
+    "default_upkeep": {},
+    "min_city_level": 11
+  },
+  {
+    "id": "walls",
+    "display_name": "Стены",
+    "requires_site": false,
+    "levels": [
+      {
+        "industry": 20.0
+      },
+      {
+        "industry": 50.0,
+        "followers": 2,
+        "special_resource": "gold",
+        "special_amount": 30.0
+      },
+      {
+        "industry": 100.0,
+        "followers": 3,
+        "special_resource": "gold",
+        "special_amount": 60.0
+      }
+    ],
+    "production_chain": null,
+    "housing": {},
+    "default_upkeep": {},
+    "min_city_level": 5
+  },
+  {
+    "id": "farm",
+    "display_name": "Ферма",
+    "requires_site": false,
+    "levels": [
+      {
+        "industry": 12.0
+      }
+    ],
+    "production_chain": {
+      "id": "farm_chain",
+      "workers": 2,
+      "inputs": {},
+      "outputs": {
+        "grain": 3.0
+      }
     },
-    {
-     "silver": 14
+    "housing": {},
+    "default_upkeep": {},
+    "min_city_level": 1
+  },
+  {
+    "id": "mill",
+    "display_name": "Мельница",
+    "requires_site": false,
+    "levels": [
+      {
+        "industry": 18.0
+      }
+    ],
+    "production_chain": {
+      "id": "mill_chain",
+      "workers": 1,
+      "inputs": {
+        "grain": 2.0
+      },
+      "outputs": {
+        "flour": 2.0
+      }
     },
-    {
-     "silver": 20
+    "housing": {},
+    "default_upkeep": {
+      "wood": 1.0
+    },
+    "min_city_level": 3
+  },
+  {
+    "id": "bakery",
+    "display_name": "Пекарня",
+    "requires_site": false,
+    "levels": [
+      {
+        "industry": 18.0
+      }
+    ],
+    "production_chain": {
+      "id": "bakery_chain",
+      "workers": 1,
+      "inputs": {
+        "flour": 2.0
+      },
+      "outputs": {
+        "bread": 2.0
+      }
+    },
+    "housing": {},
+    "default_upkeep": {
+      "wood": 1.0
+    },
+    "min_city_level": 3
+  },
+  {
+    "id": "mine",
+    "display_name": "Рудник",
+    "requires_site": false,
+    "levels": [
+      {
+        "industry": 20.0
+      }
+    ],
+    "production_chain": {
+      "id": "mine_chain",
+      "workers": 2,
+      "inputs": {},
+      "outputs": {
+        "ore": 2.0
+      }
+    },
+    "housing": {},
+    "default_upkeep": {},
+    "min_city_level": 4
+  },
+  {
+    "id": "smithy",
+    "display_name": "Кузница",
+    "requires_site": false,
+    "levels": [
+      {
+        "industry": 25.0
+      }
+    ],
+    "production_chain": {
+      "id": "smithy_chain",
+      "workers": 1,
+      "inputs": {
+        "ore": 1.0,
+        "wood": 1.0
+      },
+      "outputs": {
+        "tools": 1.0
+      }
+    },
+    "housing": {},
+    "default_upkeep": {
+      "wood": 1.0
+    },
+    "min_city_level": 2
+  },
+  {
+    "id": "school",
+    "display_name": "Училище",
+    "requires_site": false,
+    "levels": [
+      {
+        "industry": 30.0
+      }
+    ],
+    "production_chain": {
+      "id": "school_chain",
+      "workers": 1,
+      "inputs": {},
+      "outputs": {
+        "scholar_points": 1.0
+      }
+    },
+    "housing": {},
+    "default_upkeep": {
+      "wood": 2.0
+    },
+    "min_city_level": 4
+  },
+  {
+    "id": "tavern",
+    "display_name": "Таверна",
+    "requires_site": false,
+    "levels": [
+      {
+        "industry": 22.0
+      }
+    ],
+    "production_chain": {
+      "id": "tavern_chain",
+      "workers": 1,
+      "inputs": {},
+      "outputs": {
+        "gold": 1.0
+      }
+    },
+    "housing": {},
+    "default_upkeep": {},
+    "min_city_level": 2
+  },
+  {
+    "id": "trade_post",
+    "display_name": "Торговый пост",
+    "requires_site": false,
+    "levels": [
+      {
+        "industry": 28.0
+      }
+    ],
+    "production_chain": {
+      "id": "trade_post_chain",
+      "workers": 2,
+      "inputs": {
+        "bread": 1.0
+      },
+      "outputs": {
+        "gold": 2.0
+      }
+    },
+    "housing": {},
+    "default_upkeep": {},
+    "min_city_level": 4
+  },
+  {
+    "id": "shack",
+    "display_name": "Хижина",
+    "requires_site": false,
+    "levels": [
+      {
+        "industry": 15.0
+      }
+    ],
+    "production_chain": null,
+    "housing": {
+      "WORKER": 10
+    },
+    "default_upkeep": {},
+    "min_city_level": 1
+  },
+  {
+    "id": "manor",
+    "display_name": "Особняк",
+    "requires_site": false,
+    "levels": [
+      {
+        "industry": 40.0
+      }
+    ],
+    "production_chain": null,
+    "housing": {
+      "SCHOLAR": 2
+    },
+    "default_upkeep": {},
+    "min_city_level": 8
+  },
+  {
+    "id": "range",
+    "display_name": "Стрельбище",
+    "requires_site": false,
+    "min_city_level": 3,
+    "levels": [
+      {
+        "industry": 30.0
+      },
+      {
+        "industry": 70.0,
+        "followers": 2
+      },
+      {
+        "industry": 120.0,
+        "followers": 3
+      }
+    ],
+    "military_chain": {
+      "unit_key": "archers",
+      "costs": [
+        {
+          "silver": 8
+        },
+        {
+          "silver": 10
+        },
+        {
+          "silver": 14
+        }
+      ],
+      "tiers": [
+        1,
+        2,
+        3
+      ]
     }
-   ],
-   "tiers": [
-    1,
-    2,
-    3
-   ]
-  }
- },
- {
-  "id": "stables",
-  "display_name": "Конюшня",
-  "requires_site": false,
-  "min_city_level": 6,
-  "levels": [
-   {
-    "industry": 50.0
-   },
-   {
-    "industry": 100.0,
-    "followers": 2
-   },
-   {
-    "industry": 180.0,
-    "followers": 3
-   }
-  ],
-  "military_chain": {
-   "unit_key": "cavalry",
-   "costs": [
-    {
-     "silver": 12
-    },
-    {
-     "silver": 16
-    },
-    {
-     "silver": 22
+  },
+  {
+    "id": "library",
+    "display_name": "Библиотека",
+    "requires_site": false,
+    "min_city_level": 7,
+    "levels": [
+      {
+        "industry": 60.0
+      },
+      {
+        "industry": 120.0,
+        "followers": 2
+      },
+      {
+        "industry": 200.0,
+        "followers": 3
+      }
+    ],
+    "military_chain": {
+      "unit_key": "mages",
+      "costs": [
+        {
+          "silver": 10
+        },
+        {
+          "silver": 14
+        },
+        {
+          "silver": 20
+        }
+      ],
+      "tiers": [
+        1,
+        2,
+        3
+      ]
     }
-   ],
-   "tiers": [
-    1,
-    2,
-    3
-   ]
+  },
+  {
+    "id": "stables",
+    "display_name": "Конюшня",
+    "requires_site": false,
+    "min_city_level": 6,
+    "levels": [
+      {
+        "industry": 50.0
+      },
+      {
+        "industry": 100.0,
+        "followers": 2
+      },
+      {
+        "industry": 180.0,
+        "followers": 3
+      }
+    ],
+    "military_chain": {
+      "unit_key": "cavalry",
+      "costs": [
+        {
+          "silver": 12
+        },
+        {
+          "silver": 16
+        },
+        {
+          "silver": 22
+        }
+      ],
+      "tiers": [
+        1,
+        2,
+        3
+      ]
+    }
   }
- }
 ]
