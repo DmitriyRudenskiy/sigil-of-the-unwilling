@@ -96,6 +96,14 @@ static func has_road(c: CityData, cell: Vector2i) -> bool:
 	return c.roads.has(cell)
 static func building_max_distance(c: CityData) -> int:
 	return ProsperitySystem.build_radius_for_level(c.level)
+
+## Ранняя игра: тир оружия по уровню города (early-game-foundation): 1-4 → T1, 5-8 → T2, 9-11 → T3
+static func weapon_tier_for_city(level: int) -> int:
+	if level >= 9:
+		return 3
+	if level >= 5:
+		return 2
+	return 1
 static func ring_of(c: CityData, cell: Vector2i) -> int:
 	return HexUtils.hex_distance(cell, c.center)
 static func get_great_temple_level(c: CityData) -> int:
@@ -103,6 +111,37 @@ static func get_great_temple_level(c: CityData) -> int:
 		if building.def != null and building.def.id == &"great_temple":
 			return building.level
 	return 0
+## Ранняя игра: военная рекрутка (early-game-foundation).
+## Здание с military_chain рекрутирует отряд в армию героя; плата — ресурсы хранилища.
+static func recruit_military(c: CityData, building: UniqueBuilding, hero: Node) -> CityCheck:
+	if building == null or building.def == null:
+		return CityCheck.fail("Нет здания")
+	var chain: Dictionary = building.def.military_chain
+	if chain.is_empty():
+		return CityCheck.fail("Здание не рекрутирует войска")
+	var costs: Array = chain.get("costs", [])
+	var idx: int = clampi(building.level - 1, 0, maxi(costs.size() - 1, 0))
+	var cost: Dictionary = costs[idx] if idx < costs.size() else {}
+	for key in cost:
+		if float(c.storage.get(key, 0.0)) < float(cost[key]):
+			return CityCheck.fail("Не хватает %s: %.0f/%.0f" % [str(key), float(c.storage.get(key, 0.0)), float(cost[key])])
+	if hero == null or not (hero is HeroController) or hero.get_army() == null:
+		return CityCheck.fail("Нет героя")
+	var army: Array = hero.get_army().army
+	if army.size() >= GameNumbers.HERO_ARMY_MAX_STACKS:
+		return CityCheck.fail("Армия героя заполнена (%d отрядов)" % GameNumbers.HERO_ARMY_MAX_STACKS)
+	for key in cost:
+		c.storage[key] = float(c.storage.get(key, 0.0)) - float(cost[key])
+	var unit_key := String(chain.get("unit_key", ""))
+	# Ранняя игра: тир оружия определяется уровнем города (early-game-foundation)
+	var tier: int = weapon_tier_for_city(c.level)
+	var reg: Node = Services.resolve(&"units")
+	var stack: UnitStack = reg.make_recruit_stack(unit_key, GameNumbers.RECRUIT_BATCH_SIZE, tier)
+	if stack == null:
+		return CityCheck.fail("Нет определения юнита: %s" % unit_key)
+	army.append(stack)
+	return CityCheck.success({"unit": unit_key, "count": GameNumbers.RECRUIT_BATCH_SIZE, "tier": tier})
+
 static func can_resurrect(c: CityData, required: Dictionary) -> bool:
 	if get_great_temple_level(c) < 1:
 		return false

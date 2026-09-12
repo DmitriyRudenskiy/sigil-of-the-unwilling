@@ -67,6 +67,9 @@ layout_mode = 2
 [node name="Cart" type="Button" parent="CityScreenBackground/CityScreenCenter/CityScreenPanel/CityScreenBox/CityScreenButtons"]
 layout_mode = 2
 
+[node name="Recruit" type="Button" parent="CityScreenBackground/CityScreenCenter/CityScreenPanel/CityScreenBox/CityScreenButtons"]
+layout_mode = 2
+
 [node name="Close" type="Button" parent="CityScreenBackground/CityScreenCenter/CityScreenPanel/CityScreenBox/CityScreenButtons"]
 layout_mode = 2
 

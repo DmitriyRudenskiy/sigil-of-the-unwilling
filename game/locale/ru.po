@@ -186,6 +186,18 @@ msgstr "Не хватает промышленности (нужно {cost})."
 msgid "resource.total"
 msgstr "Рюкзак: {total}/{cap}"
 
+msgid "city.recruit"
+msgstr "⚔️ Рекрутка"
+
+msgid "city.recruit_no_building"
+msgstr "В городе нет военного здания."
+
+msgid "city.cannot_recruit"
+msgstr "Не удалось рекрутировать: {reason}"
+
+msgid "city.recruited"
+msgstr "Рекрутирован отряд: {count} {unit} (уровень оружия {tier})."
+
 msgid "city.level_up"
 msgstr "⬆️ Улучшить"
 

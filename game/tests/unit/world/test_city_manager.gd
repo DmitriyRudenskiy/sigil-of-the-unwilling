@@ -12,6 +12,8 @@ func before_test() -> void:
 	capital = City.new()
 	capital.display_name = "Столица"
 	capital.center = Vector2i(10, 10)
+	# Ранняя игра: дымовая — храм требует уровень (early-game-foundation)
+	capital.level = 11
 	manager.register_city(capital, true)
 
 func after_test() -> void:

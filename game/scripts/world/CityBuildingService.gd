@@ -73,6 +73,9 @@ static func build_borough(city: City, cell: Vector2i) -> CityCheck:
 static func can_build_building(city: City, def: UniqueBuilding.Def, cell: Vector2i) -> CityCheck:
 	if def == null or def.levels.is_empty():
 		return fail("Нет определения здания")
+	# Ранняя игра: дымовая — здание доступно только с уровня города (early-game-foundation)
+	if def.min_city_level > city.level:
+		return fail("Нужен город %d уровня" % def.min_city_level)
 	if cell == city.center or city.cell_is_built(cell):
 		return fail("Клетка занята")
 	for u in city.pop:

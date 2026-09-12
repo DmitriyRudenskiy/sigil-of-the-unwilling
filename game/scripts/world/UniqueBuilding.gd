@@ -10,6 +10,10 @@ class Def extends RefCounted:
 	var production_chain: ProductionChain = null
 	var default_upkeep: Dictionary = {}
 	var default_zone := 0
+	# Ранняя игра: дымовая (tech tree) — мин. уровень города (early-game-foundation)
+	var min_city_level := 1
+	# Военная цепочка: unit_key, costs: Array[Dictionary], tiers: Array[int]
+	var military_chain: Dictionary = {}
 
 class LevelReq extends RefCounted:
 	var industry := 0.0

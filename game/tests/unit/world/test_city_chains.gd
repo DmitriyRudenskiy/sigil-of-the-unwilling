@@ -77,6 +77,8 @@ func test_mill_shortage_no_grain() -> void:
 
 func test_full_bread_chain() -> void:
 	var city := TestFactories.make_city()
+	# Ранняя игра: дымовая — здание требует уровень (early-game-foundation)
+	city.level = 11
 	var farm_cell: Vector2i = HexUtils.get_neighbor(city.center, 0)
 	var mill_cell: Vector2i = HexUtils.get_neighbor(city.center, 1)
 	var bakery_cell: Vector2i = _cell_adjacent_to(city, [mill_cell], [farm_cell, mill_cell])
@@ -107,6 +109,8 @@ func test_unassigned_workers_produce_nothing() -> void:
 
 func test_upkeep_blocks_chain_resources() -> void:
 	var city := TestFactories.make_city()
+	# Ранняя игра: дымовая — здание требует уровень (early-game-foundation)
+	city.level = 11
 	city.build_building(BuildingDefs.mill(), HexUtils.get_neighbor(city.center, 0))
 	_add_workers(city, 1)
 	WorkerAssignment.assign_all(city)
@@ -119,6 +123,8 @@ func test_upkeep_blocks_chain_resources() -> void:
 
 func test_adjacency_mill_bonus() -> void:
 	var city := TestFactories.make_city()
+	# Ранняя игра: дымовая — здание требует уровень (early-game-foundation)
+	city.level = 11
 	var farm1: Vector2i = HexUtils.get_neighbor(city.center, 0)
 	var mill: Vector2i = HexUtils.get_neighbor(city.center, 1)
 	var farm2: Vector2i = _cell_adjacent_to(city, [mill], [farm1, mill])
@@ -133,6 +139,8 @@ func test_adjacency_mill_bonus() -> void:
 
 func test_adjacency_smithy_bonus() -> void:
 	var city := TestFactories.make_city()
+	# Ранняя игра: дымовая — здание требует уровень (early-game-foundation)
+	city.level = 11
 	var mine_cell: Vector2i = HexUtils.get_neighbor(city.center, 0)
 	var smithy_cell: Vector2i = _cell_adjacent_to(city, [mine_cell], [mine_cell])
 	city.build_building(BuildingDefs.mine(), mine_cell)
@@ -147,6 +155,8 @@ func test_adjacency_smithy_bonus() -> void:
 
 func test_adjacency_reputation_bonus() -> void:
 	var city := TestFactories.make_city()
+	# Ранняя игра: дымовая — здание требует уровень (early-game-foundation)
+	city.level = 11
 	var shack_cell: Vector2i = HexUtils.get_neighbor(city.center, 0)
 	var temple_cell: Vector2i = _cell_adjacent_to(city, [shack_cell], [shack_cell])
 	city.special_sites[temple_cell] = "temple"
@@ -159,6 +169,8 @@ func test_adjacency_reputation_bonus() -> void:
 	assert_that(bonus).is_equal(2)
 	assert_that(city.reputation - rep_before).is_equal(bonus)
 	var city2 := TestFactories.make_city(2)
+	# Ранняя игра: дымовая — здание требует уровень (early-game-foundation)
+	city2.level = 11
 	var mine_cell2: Vector2i = HexUtils.get_neighbor(city2.center, 0)
 	var manor_cell2: Vector2i = _cell_adjacent_to(city2, [mine_cell2], [mine_cell2])
 	city2.build_building(BuildingDefs.mine(), mine_cell2)
@@ -167,6 +179,8 @@ func test_adjacency_reputation_bonus() -> void:
 
 func test_adjacency_no_neighbors_no_bonus() -> void:
 	var city := TestFactories.make_city()
+	# Ранняя игра: дымовая — здание требует уровень (early-game-foundation)
+	city.level = 11
 	var mill: Vector2i = HexUtils.get_neighbor(city.center, 0)
 	var b: Variant = city.build_building(BuildingDefs.mill(), mill)
 	assert_that(b).is_not_null()

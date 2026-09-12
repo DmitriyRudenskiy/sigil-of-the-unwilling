@@ -240,3 +240,24 @@ func make_fixed_stack(key: String, count: int) -> UnitStack:
     if stats == null:
         return null
     return UnitStack.new(stats, count)
+
+## Ранняя игра: рекрут с уровнем оружия (early-game-foundation).
+## tier 1 — базовый, 2 — усиленный, 3 — усиленный + метка magic_weapon
+func make_recruit_stack(key: String, count: int, tier: int = 1) -> UnitStack:
+    var base: UnitStats = get_definition(key)
+    if base == null:
+        return null
+    var stats: UnitStats = base.copy()
+    var mult := _weapon_tier_multiplier(tier)
+    stats.base_damage = int(round(stats.base_damage * mult))
+    stats.attack = int(round(stats.attack * mult))
+    if tier >= 3:
+        stats.tags.append("magic_weapon")
+    return UnitStack.new(stats, count)
+
+static func _weapon_tier_multiplier(tier: int) -> float:
+    if tier >= 3:
+        return 2.66
+    if tier == 2:
+        return 1.6
+    return 1.0

@@ -186,6 +186,18 @@ msgstr "Not enough industry (need {cost})."
 msgid "resource.total"
 msgstr "Pack: {total}/{cap}"
 
+msgid "city.recruit"
+msgstr "⚔️ Recruit"
+
+msgid "city.recruit_no_building"
+msgstr "No military building in this city."
+
+msgid "city.cannot_recruit"
+msgstr "Cannot recruit: {reason}"
+
+msgid "city.recruited"
+msgstr "Recruited {count} {unit} (weapon tier {tier})."
+
 msgid "city.level_up"
 msgstr "⬆️ Upgrade"
 

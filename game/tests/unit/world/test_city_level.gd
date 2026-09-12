@@ -83,7 +83,7 @@ func test_level_up_buildings_gate() -> void:
 	c.stronghold_level = 2
 	c.prosperity = 80.0
 	c.add_followers(12)
-	c.buildings.append(UniqueBuilding.new())
+	# Ранняя игра: порог зданий — 1 (early-game-foundation)
 	var check: Dictionary = ProsperitySystem.can_level_up(c)
 	assert_bool(bool(check.ok)).is_false()
 	assert_that(check.reasons.size()).is_equal(1)
@@ -100,11 +100,15 @@ func test_level_up_success() -> void:
 	c.buildings.append(UniqueBuilding.new())
 	assert_bool(ProsperitySystem.try_level_up(c)).is_true()
 	assert_that(c.level).is_equal(2)
-	assert_bool(ProsperitySystem.try_level_up(c)).is_false()
+	# Ранняя игра: дымовая до 11 — уровень 2 не потолок (early-game-foundation)
+	c.prosperity = 80.0
+	assert_bool(ProsperitySystem.try_level_up(c)).is_true()
+	assert_that(c.level).is_equal(3)
 
 func test_level_max() -> void:
 	var c: Variant = _city()
-	c.level = 5
+	c.level = GameNumbers.CITY_LEVEL_MAX
+	c.prosperity = 99.0
 	var check: Dictionary = ProsperitySystem.can_level_up(c)
 	assert_bool(bool(check.ok)).is_false()
 	assert_that(check.reasons.size()).is_equal(1)
@@ -155,7 +159,7 @@ func test_serialize_clamps() -> void:
 	var c: Variant = _city()
 	var restored := City.new()
 	restored.deserialize({"level": 99, "prosperity": -5.0})
-	assert_that(restored.level).is_equal(5)
+	assert_that(restored.level).is_equal(GameNumbers.CITY_LEVEL_MAX)
 	assert_bool(absf(restored.prosperity - 0.0) < 1e-9).is_true()
 
 func test_processor_prosperity_and_level_up() -> void:

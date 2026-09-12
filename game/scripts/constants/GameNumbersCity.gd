@@ -54,12 +54,17 @@ const PROSPERITY_BLD_CAP        := 20.0
 const PROSPERITY_POP_BONUS      := 10.0
 const PROSPERITY_POP_RATIO      := 0.75
 const PROSPERITY_GOLD_PER_PT    := 0.05
-const PROSPERITY_LEVEL_REQ      := 60.0
-const PROSPERITY_LEVEL_POP_BASE := 12
-const PROSPERITY_LEVEL_POP_STEP := 8
-const PROSPERITY_LEVEL_BLD_PER  := 2
+# Ранняя игра: пороги уровней 2..11 (early-game-foundation)
+const PROSPERITY_LEVEL_REQ      := 55.0
+const PROSPERITY_LEVEL_REQS     := [55.0, 58.0, 62.0, 66.0, 70.0, 74.0, 78.0, 82.0, 86.0, 92.0]
+const PROSPERITY_LEVEL_POP_BASE := 8
+const PROSPERITY_LEVEL_POP_STEP := 4
+const PROSPERITY_LEVEL_BLD_PER  := 1
 const PROSPERITY_MAX_RADIUS     := 5
-const CITY_LEVEL_MAX            := 5
+# Ранняя игра: дымовая города 1..11 и военная рекрутка (early-game-foundation)
+const CITY_LEVEL_MAX            := 11
+const RECRUIT_BATCH_SIZE        := 20
+const HERO_ARMY_MAX_STACKS      := 12
 const CITY_LEVEL_MIN            := 1
 const PROSPERITY_MIN            := 0.0
 const PROSPERITY_GOLD_BONUS     := 10.0

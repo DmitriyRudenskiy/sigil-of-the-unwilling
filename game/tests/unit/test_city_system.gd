@@ -58,6 +58,8 @@ func test_cycle_inflow_summer_with_glory_and_temple() -> void:
 	mgr.register_city(cap, true)
 	cap.storage[&"industry"] = 1000.0
 	cap.special_sites[HexUtils.get_all_neighbors(cap.center)[0]] = BuildingDefs.SITE_SHRINE
+	# Ранняя игра: дымовая — храм требует уровень (early-game-foundation)
+	cap.level = 11
 	assert_that(cap.build_building(BuildingDefs.great_temple(), \
 		HexUtils.get_all_neighbors(cap.center)[0])).is_not_null()
 	mgr.add_glory(50.0, &"test")

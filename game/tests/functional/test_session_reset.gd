@@ -25,6 +25,8 @@ func _place_farm_cluster() -> Array:
 	return cells
 
 func _place_lone_mine() -> void:
+	# Ранняя игра: рудник доступен с 4-го уровня города (early-game-foundation)
+	city.level = 4
 	var farm_cells: Array = []
 	for building in city.buildings:
 		farm_cells.append(building.cell)

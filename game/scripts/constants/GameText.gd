@@ -171,6 +171,12 @@ static func city_cart_no_funds(cost: float) -> String:
 	return TranslationServer.translate("city.cart_no_funds").format({"cost": "%.0f" % cost})
 static func resource_total(total: int, cap: int) -> String:
 	return TranslationServer.translate("resource.total").format({"total": total, "cap": cap})
+static func city_recruit() -> String: return TranslationServer.translate("city.recruit")
+static func city_recruit_no_building() -> String: return TranslationServer.translate("city.recruit_no_building")
+static func city_cannot_recruit(reason: String) -> String:
+	return TranslationServer.translate("city.cannot_recruit").format({"reason": reason})
+static func city_recruited(unit: String, count: int, tier: int) -> String:
+	return TranslationServer.translate("city.recruited").format({"unit": unit, "count": count, "tier": tier})
 static func city_cost_industry(n: String) -> String: return TranslationServer.translate("city.cost_industry").format({"n": n})
 static func city_cost_special(res: String, n: String) -> String:
 	return TranslationServer.translate("city.cost_special").format({"res": res, "n": n})

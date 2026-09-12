@@ -43,6 +43,9 @@ func _ready() -> void:
 	var cart := buttons.get_node("Cart") as Button
 	cart.pressed.connect(_on_cart_pressed)
 	cart.text = GameText.city_cart()
+	var recruit := buttons.get_node("Recruit") as Button
+	recruit.pressed.connect(_on_recruit_pressed)
+	recruit.text = GameText.city_recruit()
 	var close_btn := buttons.get_node("Close") as Button
 	close_btn.pressed.connect(_on_close_pressed)
 	close_btn.text = GameText.city_close()
@@ -204,6 +207,31 @@ func buy_cart_pressed() -> CityCheck:
 	_set_message(GameText.city_cart_bought(hero.strategic_resources.total_cap()))
 	refresh()
 	return CityCheck.success({"cap": hero.strategic_resources.total_cap()})
+
+## Ранняя игра: военная рекрутка (early-game-foundation)
+func _on_recruit_pressed() -> void:
+	recruit_pressed()
+
+func recruit_pressed() -> CityCheck:
+	if city == null:
+		return _fail(GameText.city_not_bound())
+	if hero == null:
+		return _fail(GameText.city_hire_no_hero())
+	var bld: UniqueBuilding = null
+	for b in city.buildings:
+		if b != null and b.def != null and not b.def.military_chain.is_empty():
+			bld = b
+			break
+	if bld == null:
+		return _fail(GameText.city_recruit_no_building())
+	var check: CityCheck = CityService.recruit_military(city, bld, hero)
+	if not check.ok:
+		return _fail(GameText.city_cannot_recruit(str(check.reason)))
+	city.storage_changed.emit()
+	_set_message(GameText.city_recruited(String(check.payload.get("unit", "")),
+		int(check.payload.get("count", 0)), int(check.payload.get("tier", 1))))
+	refresh()
+	return check
 
 func _has_market() -> bool:
 	for b in city.buildings:

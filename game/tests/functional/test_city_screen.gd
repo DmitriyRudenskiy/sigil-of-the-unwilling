@@ -62,6 +62,8 @@ func test_build_farm_success() -> void:
 	assert_that(HexUtils.hex_distance(Vector2i(int(cell.x), int(cell.y)), city.center)).is_equal(1)
 
 func test_build_mine_cost() -> void:
+	# Ранняя игра: рудник доступен с 4-го уровня города (early-game-foundation)
+	city.level = 4
 	var r: CityCheck = screen.build_pressed(&"mine")
 	assert_bool(bool(r.ok)).is_true()
 	assert_float(float(r.payload.get("industry_left", -1.0))).is_equal_approx(10.0, 0.0001)
@@ -115,8 +117,9 @@ func test_level_up_when_conditions_met() -> void:
 	city.storage[&"industry"] = 40.0
 	for i in 12:
 		city.add_migrant(PopUnit.State.WORKER, -1)
+	# Ранняя игра: фермы строятся с 1-го уровня; рудник требует 2-й (early-game-foundation)
 	screen.build_pressed(&"farm")
-	screen.build_pressed(&"mine")
+	screen.build_pressed(&"farm")
 	assert_that(city.buildings.size()).is_equal(2)
 	var r: CityCheck = screen.level_up_pressed()
 	assert_bool(bool(r.ok)).is_true()

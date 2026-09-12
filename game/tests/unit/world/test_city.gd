@@ -117,6 +117,8 @@ func test_building_requires_site() -> void:
 func test_building_with_site() -> void:
 	city.storage[&"industry"] = 100.0
 	city.add_followers(5)
+	# Ранняя игра: дымовая — Великий храм требует город 9 уровня (early-game-foundation)
+	city.level = 9
 	var site_cell := HexUtils.get_all_neighbors(city.center)[0]
 	city.special_sites[site_cell] = BuildingDefs.SITE_SHRINE
 	var check := city.can_build_building(BuildingDefs.great_temple(), site_cell)

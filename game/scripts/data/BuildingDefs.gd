@@ -41,6 +41,25 @@ static func _build_def(raw: Dictionary) -> UniqueBuilding.Def:
 	var upkeep_raw: Variant = raw.get("default_upkeep", {})
 	for k in upkeep_raw:
 		d.default_upkeep[StringName(k)] = float(upkeep_raw[k])
+	# Ранняя игра: дымовая и военная цепочка (early-game-foundation)
+	d.min_city_level = int(raw.get("min_city_level", 1))
+	var mil_raw: Variant = raw.get("military_chain", {})
+	if mil_raw is Dictionary and not mil_raw.is_empty():
+		var chain: Dictionary = {}
+		chain["unit_key"] = StringName(mil_raw.get("unit_key", ""))
+		var costs: Array = []
+		for c in mil_raw.get("costs", []):
+			if c is Dictionary:
+				var cost: Dictionary = {}
+				for rk in c:
+					cost[StringName(rk)] = float(c[rk])
+				costs.append(cost)
+		chain["costs"] = costs
+		var tiers: Array = []
+		for t in mil_raw.get("tiers", [1]):
+			tiers.append(int(t))
+		chain["tiers"] = tiers
+		d.military_chain = chain
 	return d
 
 static func _levels(raw_levels: Array) -> Array:

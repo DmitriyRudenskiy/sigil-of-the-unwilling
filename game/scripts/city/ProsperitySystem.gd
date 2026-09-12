@@ -35,6 +35,11 @@ static func reputation_mod(city: City) -> int:
 static func level_pop_req(level: int) -> int:
 	return GameNumbers.PROSPERITY_LEVEL_POP_BASE + GameNumbers.PROSPERITY_LEVEL_POP_STEP * (level - 1)
 
+## Ранняя игра: порог процветания для перехода на следующий уровень (early-game-foundation)
+static func level_up_req(level: int) -> float:
+	var idx := clampi(level - 2, 0, GameNumbers.PROSPERITY_LEVEL_REQS.size() - 1)
+	return GameNumbers.PROSPERITY_LEVEL_REQS[idx]
+
 static func level_buildings_req(level: int) -> int:
 	return GameNumbers.PROSPERITY_LEVEL_BLD_PER * level
 
@@ -46,8 +51,9 @@ static func can_level_up(city: City) -> Dictionary:
 	var reasons: Array[String] = []
 	if city.level >= GameNumbers.CITY_LEVEL_MAX:
 		return {"ok": false, "reasons": ["Максимальный уровень"]}
-	if city.prosperity < GameNumbers.PROSPERITY_LEVEL_REQ:
-		reasons.append("Процветание: %.0f/%.0f" % [city.prosperity, GameNumbers.PROSPERITY_LEVEL_REQ])
+	var req: float = level_up_req(city.level)
+	if city.prosperity < req:
+		reasons.append("Процветание: %.0f/%.0f" % [city.prosperity, req])
 	if city.pop_capped() < level_pop_req(city.level):
 		reasons.append("Население: %d/%d" % [city.pop_capped(), level_pop_req(city.level)])
 	var bld := 0

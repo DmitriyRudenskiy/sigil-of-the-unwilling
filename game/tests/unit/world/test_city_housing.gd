@@ -14,6 +14,8 @@ func before_test() -> void:
 	city.uid = 7
 	city.center = center
 	city.stronghold_level = 1
+	# Ранняя игра: дымовая — особняк требует уровень (early-game-foundation)
+	city.level = 11
 	city.add_followers(10)
 	city.storage[&"industry"] = 200.0
 

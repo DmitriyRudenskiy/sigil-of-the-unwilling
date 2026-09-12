@@ -5,6 +5,8 @@ var city: City
 
 func before_test() -> void:
 	city = ArenaTurnRunner.make_city()
+	# Ранняя игра: дымовая — мельница/стены требуют уровень (early-game-foundation)
+	city.level = 11
 
 func _free_cell(ring: int) -> Vector2i:
 	for cell in ArenaRingSystem.cells_in_ring(ring):
