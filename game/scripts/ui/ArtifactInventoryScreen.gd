@@ -1,7 +1,7 @@
 extends Control
 class_name ArtifactInventoryScreen
 
-const SchoolType = preload("res://scripts/data/SchoolType.gd")
+
 
 var _hero: HeroController = null
 var _theme: Theme = null
@@ -110,9 +110,9 @@ func _style(path: String, theme_name: String) -> void:
 		if sb:
 			n.add_theme_stylebox_override("panel", sb)
 
-func _theme_font_size(path: String, name: String) -> void:
+func _theme_font_size(path: String, name_: String) -> void:
 	var sizes := {"small": 14, "default": 16, "large": 22, "stat": 16}
-	var sz: int = int(sizes.get(name, 16))
+	var sz: int = int(sizes.get(name_, 16))
 	var n := get_node_or_null(path)
 	if n is Label and sz > 0:
 		n.add_theme_font_size_override("font", sz)
@@ -167,9 +167,9 @@ func _build_left() -> void:
 	var portrait := get_node_or_null("Center/Window/Left/Portrait")
 	if portrait is TextureRect:
 		portrait.texture = _tex("res://assets/ui/hero/portrait.png", 80, 80)
-	var name := get_node_or_null("Center/Window/Left/Name")
-	if name is Label:
-		name.text = _hero.hero_name if _hero else GameText.artifact_default_name()
+	var name_ := get_node_or_null("Center/Window/Left/Name")
+	if name_ is Label:
+		name_.text = _hero.hero_name if _hero else GameText.artifact_default_name()
 	_theme_font_size("Center/Window/Left/Name", "large")
 	var primary := [
 		["attack", GameText.stat_label("attack"), _hero.stats.get("attack", 0) if _hero else 0],
@@ -261,9 +261,9 @@ func _build_side() -> void:
 	var banner := get_node_or_null("Center/Window/Side/Banner")
 	if banner is TextureRect:
 		banner.texture = _tex("res://assets/ui/hero/banner.png", 62, 62)
-	var mini := get_node_or_null("Center/Window/Side/Mini")
-	if mini is TextureRect:
-		mini.texture = _tex("res://assets/ui/hero/mini.png", 62, 46)
+	var mini_val := get_node_or_null("Center/Window/Side/Mini")
+	if mini_val is TextureRect:
+		mini_val.texture = _tex("res://assets/ui/hero/mini.png", 62, 46)
 
 func _build_bottom() -> void:
 	var bottom := get_node_or_null("Center/Window/Bottom")
@@ -400,23 +400,14 @@ func _tex(path: String, w: int, h: int) -> Texture2D:
 
 	var res := load(path)
 	if res is Texture2D:
-		var img: Image = res.get_image()
-		if img != null:
-
-			if img.get_width() != w or img.get_height() != h:
-				img.resize(w, h, Image.INTERPOLATE_BILINEAR)
-			var tex := ImageTexture.create_from_image(img)
+		var timg: Image = res.get_image()
+		if timg != null:
+			if timg.get_width() != w or timg.get_height() != h:
+				timg.resize(w, h, Image.INTERPOLATE_BILINEAR)
+			var tex := ImageTexture.create_from_image(timg)
 			_tex_cache[key] = tex
 			return tex
 		return res
-
-	var img := Image.load_from_file(path)
-	if img != null:
-		if img.get_width() != w or img.get_height() != h:
-			img.resize(w, h, Image.INTERPOLATE_BILINEAR)
-		var tex := ImageTexture.create_from_image(img)
-		_tex_cache[key] = tex
-		return tex
 
 	return null
 
@@ -441,7 +432,9 @@ func _mana_max() -> int:
 	return _hero.magic.mana_max if _hero != null else 0
 
 func _magic_school() -> String:
-	var schools: Dictionary = _hero.magic_schools if _hero != null else {}
+	if _hero == null or _hero.magic == null:
+		return "—"
+	var schools: Dictionary = _hero.magic.schools
 	var active: Array = []
 	for k in schools:
 		if int(schools[k]) > 0:

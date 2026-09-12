@@ -49,3 +49,52 @@ func test_compass_centers_match_prototype() -> void:
 	assert_float(e.position.x + e.size.x * 0.5).is_equal_approx(ecx, 0.51)
 	assert_float(n.position.x + n.size.x * 0.5).is_equal_approx(215.0, 0.51)
 	assert_float(w.position.y + w.size.y * 0.5).is_equal_approx(panel_h * 0.5, 0.51)
+
+# --- Города на миникарте (2026-09: маркеры были совсем не нарисованы) ---
+
+class _StubMap:
+	extends MapGenerator
+	func map_to_local(cell: Vector2i) -> Vector2:
+		return Vector2(cell) * 4.0
+
+class _StubCities:
+	extends Node
+	var cities: Array = []
+
+func _make_overlay_stub() -> Dictionary:
+	var p := _make_panel()
+	var overlay: MinimapOverlay = p.get_node("MapBox/Overlay")
+	var m := _StubMap.new()
+	m.map_width = 20
+	m.map_height = 15
+	overlay.map_ref = m
+	auto_free(m)
+	return {"panel": p, "overlay": overlay}
+
+func test_set_cities_forwards_to_overlay() -> void:
+	var d := _make_overlay_stub()
+	var mgr := _StubCities.new()
+	var p: MinimapPanel = d["panel"]
+	p.set_cities(mgr)
+	assert_that(d["overlay"].city_mgr).is_equal(mgr)
+	mgr.queue_free()
+
+func test_city_markers_draw_no_crash() -> void:
+	var d := _make_overlay_stub()
+	var overlay: MinimapOverlay = d["overlay"]
+	var mgr := _StubCities.new()
+	var c1 := CityData.new()
+	c1.center = Vector2i(5, 5)
+	var c2 := CityData.new()
+	c2.center = Vector2i(8, 3)
+	c2.is_capital = true
+	mgr.cities = [c1, c2]
+	overlay.city_mgr = mgr
+	await get_tree().process_frame
+	await get_tree().process_frame
+	assert_bool(is_instance_valid(overlay)).is_true()
+	# Перерисовка при изменении числа городов.
+	mgr.cities = [c1]
+	await get_tree().process_frame
+	assert_int(overlay._last_city_count).is_equal(1)
+	mgr.queue_free()

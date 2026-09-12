@@ -122,7 +122,7 @@ func build_pressed(def_id: StringName) -> CityCheck:
 	_set_message(GameText.city_built(def.display_name, cell.x, cell.y, _format_cost(def)))
 	refresh()
 	return CityCheck.success({"building": String(def_id), "level": bld.level,
-		"cell": {"x": cell.x, "y": cell.y},
+		"cell": SerializationUtils.vec2i_to_dict(cell),
 		"industry_left": _storage_industry()})
 
 func level_up_pressed() -> CityCheck:

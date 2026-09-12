@@ -6,7 +6,7 @@ var visible_flag := false
 var mouse_pos := Vector2.ZERO
 
 func set_mode(m: int) -> void:
-    mode = m
+    mode = m as BattleView.CursorMode
     if is_inside_tree():
         queue_redraw()
 

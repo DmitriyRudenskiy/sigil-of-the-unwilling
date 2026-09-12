@@ -2,7 +2,7 @@
 class_name ResourceBar
 extends HBoxContainer
 
-const ResourceType = preload("res://scripts/data/ResourceType.gd")
+
 
 var _labels: Dictionary = {}
 

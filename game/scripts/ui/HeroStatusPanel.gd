@@ -9,7 +9,7 @@ var _stats_label: Label
 var _followers_label: Label
 const _MAX_FOLLOWERS_SHOWN := 6
 
-const NeedType = preload("res://scripts/data/NeedType.gd")
+
 
 var _wired := false
 

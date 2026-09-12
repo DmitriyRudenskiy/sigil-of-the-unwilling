@@ -106,18 +106,26 @@ func reattach_hero(hero: HeroController, camera: Camera2D = null) -> void:
 	set_cities(_cities_mgr)
 	refresh_all()
 
-## Ширина сайдбара по прототипу: clamp(25vw, 300, 430); колонка на всю высоту
-## (margin 14px), а не жёстко (-320/80/-10/-80 из старого tscn).
+## Правая колонка: прибита к верхнему краю, высота = весь экран,
+## ширина по прототипу clamp(300, 25vw, 430).
+## Якоря выставляются из кода: точечный пресет в .tscn + отрицательный
+## offset_bottom однажды дали высоту 0 (колонка схлопывалась в линию).
 func _apply_sidebar_layout() -> void:
 	var col := $RightColumn as PanelContainer
 	if col == null:
 		return
-	var vp := get_viewport().get_visible_rect().size.x
-	var sbw := UILayout.sidebar_width(vp)
+	var vp := get_viewport().get_visible_rect().size
+	if vp.x <= 1.0 or vp.y <= 1.0:
+		return
+	var sbw := UILayout.sidebar_width(vp.x)
+	col.anchor_left = 1.0
+	col.anchor_top = 0.0
+	col.anchor_right = 1.0
+	col.anchor_bottom = 1.0
 	col.offset_left = -sbw - UILayout.FRAME_GAP
-	col.offset_top = UILayout.FRAME_PADDING
+	col.offset_top = 0.0
 	col.offset_right = -UILayout.FRAME_PADDING
-	col.offset_bottom = -UILayout.FRAME_PADDING
+	col.offset_bottom = 0.0
 
 func refresh_all() -> void:
 	if _hero_controller == null:
@@ -134,6 +142,7 @@ func set_cities(cities_mgr: Node) -> void:
 	if _cities_mgr == cities_mgr:
 		return
 	_cities_mgr = cities_mgr
+	_minimap.set_cities(cities_mgr)
 	if _cities_mgr != null and _cities_mgr.has_signal("glory_changed") \
 			and not _cities_mgr.glory_changed.is_connected(_on_glory_changed):
 		_cities_mgr.glory_changed.connect(_on_glory_changed)

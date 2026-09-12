@@ -38,7 +38,7 @@ func show_death(
 		"GenerationsLabel": GameText.endgame_generations(int(summary.get("generations", 1))),
 	}
 	var grid: VBoxContainer = get_node("Root/Panel/VBox/Grid")
-	for l in grid.get_children():
+	for l: Control in grid.get_children():
 		if l is Label:
 			l.text = str(values.get(l.name, l.text))
 

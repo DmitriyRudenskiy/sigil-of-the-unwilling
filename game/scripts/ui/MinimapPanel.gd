@@ -95,6 +95,12 @@ func setup(map: MapGenerator, hero: HeroController, camera: Camera2D) -> void:
 	_overlay.cam_ref = camera
 	_build_minimap_image(map)
 
+func set_cities(mgr: Node) -> void:
+	if mgr == null:
+		return
+	_overlay.city_mgr = mgr
+	_overlay.queue_redraw()
+
 func _build_minimap_image(map: MapGenerator, visibility = null) -> void:
 	if map == null:
 		return

@@ -21,8 +21,8 @@ func test_sidebar_paths_and_order() -> void:
 	var names: Array[String] = []
 	for c in box.get_children():
 		names.append(c.name)
-	assert_str(names[0]).is_equal("InfoPanel")
-	assert_str(names[1]).is_equal("MinimapPanel")
+	assert_str(names[0]).is_equal("MinimapPanel")
+	assert_str(names[1]).is_equal("InfoPanel")
 	assert_bool(names.has("SkillsPanel")).is_true()
 	assert_bool(names.has("HeroStatusPanel")).is_true()
 	assert_bool(names.has("GloryBox")).is_true()
@@ -35,7 +35,7 @@ func test_sidebar_geometry_matches_prototype() -> void:
 	var vp := get_viewport().get_visible_rect().size.x
 	var expect_w := UILayout.sidebar_width(vp) + UILayout.FRAME_GAP - UILayout.FRAME_PADDING
 	assert_float(col.size.x).is_equal_approx(expect_w, 1.0)
-	assert_float(col.global_position.y).is_equal(UILayout.FRAME_PADDING)
+	assert_float(col.global_position.y).is_equal(0.0)
 	# Колонка видима и прижата к правому краю.
 	assert_bool(col.visible).is_true()
 	assert_float(col.global_position.x + col.size.x).is_equal_approx(vp - UILayout.FRAME_PADDING, 1.0)
@@ -52,3 +52,19 @@ func test_scroll_vertical_only_and_content_expands() -> void:
 	# Контент шире нуля и не шире колонки (не схлопнулся).
 	assert_bool(box.size.x > 100.0).is_true()
 	assert_bool(box.size.x <= scroll.size.x + 1.0).is_true()
+
+func test_sidebar_pinned_top_full_height() -> void:
+	_ui = _Scene.instantiate()
+	get_tree().root.add_child(_ui)
+	await get_tree().process_frame
+	var col: Control = _ui.get_node("RightColumn")
+	var vp := get_viewport().get_visible_rect().size
+	# Прибита к верху.
+	assert_float(col.anchor_top).is_equal(0.0)
+	assert_float(col.global_position.y).is_equal(0.0)
+	# Высота = весь экран (не схлопнулась в ноль).
+	assert_float(col.anchor_bottom).is_equal(1.0)
+	assert_float(col.size.y).is_equal_approx(vp.y, 1.0)
+	# Ширина из прототипа, прижата к правому краю.
+	assert_float(col.size.x).is_equal_approx(UILayout.sidebar_width(vp.x) + UILayout.FRAME_GAP - UILayout.FRAME_PADDING, 1.0)
+	assert_float(col.global_position.x + col.size.x).is_equal_approx(vp.x - UILayout.FRAME_PADDING, 1.0)

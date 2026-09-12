@@ -5,7 +5,6 @@ signal closed
 
 const _Entry = preload("res://scenes/ui/ChronicleEntry.tscn")
 
-@onready var _root: Control = $Root
 @onready var _panel: Panel = $Root/Panel
 @onready var _list: VBoxContainer = $Root/Panel/VBox/Scroll/List
 @onready var _close_btn: Button = $Root/Panel/VBox/CloseButton
@@ -31,7 +30,7 @@ func show_entries(entries: Array) -> void:
 
 func _populate_list(entries: Array) -> void:
 
-    for child in _list.get_children():
+    for child: Control in _list.get_children():
         child.queue_free()
     var count := entries.size()
     for i in range(count - 1, -1, -1):

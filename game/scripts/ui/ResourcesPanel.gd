@@ -1,8 +1,8 @@
 extends PanelContainer
 class_name ResourcesPanel
 
-const ResourceDef = preload("res://scripts/data/ResourceDef.gd")
-const ResourceType = preload("res://scripts/data/ResourceType.gd")
+
+
 
 var _labels: Dictionary = {}
 var _resource_registry: Node = null

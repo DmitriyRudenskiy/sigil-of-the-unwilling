@@ -1,7 +1,7 @@
 extends PanelContainer
 class_name ToolsPanel
 
-const ToolType = preload("res://scripts/data/ToolType.gd")
+
 
 var _slot_labels: Array[Label] = []
 
@@ -29,5 +29,5 @@ func update_tools(tools: Array[Dictionary]) -> void:
         else:
             var id: int = slot.get("id", 0)
             var qty: int = slot.get("quantity", 1)
-            var name: String = GameText.tool_name(id)
-            _slot_labels[i].text = GameText.tools_slot_filled(i + 1, name, qty)
+            var name_: String = GameText.tool_name(id)
+            _slot_labels[i].text = GameText.tools_slot_filled(i + 1, name_, qty)

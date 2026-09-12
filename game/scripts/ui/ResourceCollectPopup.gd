@@ -37,9 +37,9 @@ func _on_auto_dismiss() -> void:
 	visible = false
 
 func _apply_style() -> void:
-	var theme: Theme = load("res://assets/theme/game_theme.tres")
-	if theme == null:
+	var theme_: Theme = load("res://assets/theme/game_theme.tres")
+	if theme_ == null:
 		return
-	var sb := theme.get_stylebox("panel", "Panel")
+	var sb := theme_.get_stylebox("panel", "Panel")
 	if sb != null:
 		add_theme_stylebox_override("panel", sb)
