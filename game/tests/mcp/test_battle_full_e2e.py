@@ -102,6 +102,7 @@ def test_full_battle_runs_to_winner(battle_scene):
         raise AssertionError(f"Бой не завершился за 150 итераций; last={last_action}")
 
     # Победитель — атакующие (Side.ATTACKER == 1)
+    mcp.wait_frames(30)
     assert state["winner"] == 1, f"Неожиданный победитель: {state}"
 
     end_emitted = mcp.execute_code(

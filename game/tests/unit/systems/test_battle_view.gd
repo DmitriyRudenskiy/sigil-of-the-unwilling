@@ -50,6 +50,18 @@ func test_animate_move_null_guard() -> void:
 	var tw := _view.animate_move(null, [])
 	assert_that(tw).is_null()
 
+func test_fit_camera_centers_on_field() -> void:
+	_view.paint_field()
+	_view.fit_camera()
+	var cam: Camera2D = _view.get_node("Camera")
+	var used: Rect2i = _view._tile_map.get_used_rect()
+	assert_bool(used.size.x > 0 and used.size.y > 0).is_true()
+	var p0: Vector2 = _view._tile_map.map_to_local(used.position)
+	var p1: Vector2 = _view._tile_map.map_to_local(used.position + used.size - Vector2i(1, 1))
+	var expected: Vector2 = (p0 + p1) / 2.0
+	assert_bool(cam.position.distance_to(expected) < 0.01).is_true()
+
+
 func test_floating_text() -> void:
 
 	_view.show_floating_text(Vector2i(3, 3), "Тест", Color.WHITE)

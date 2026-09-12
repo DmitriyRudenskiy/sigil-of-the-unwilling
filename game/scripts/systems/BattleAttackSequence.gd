@@ -37,7 +37,7 @@ func has_adjacent_enemy(unit: BattleState.BattleUnit) -> bool:
 
 	var target_side := BattleState.Side.DEFENDER if unit.side == BattleState.Side.ATTACKER else BattleState.Side.ATTACKER
 
-	for nb in HexUtils.get_all_neighbors(unit.cell):
+	for nb in HexUtils.get_all_neighbors(unit.cell, _battle_state.hex_shift_right):
 		var u := _battle_state.get_unit_at(nb, target_side)
 		if u != null and u.is_alive():
 			return true
@@ -53,7 +53,7 @@ func start_attack(atk: BattleState.BattleUnit, def: BattleState.BattleUnit) -> v
 		_executor._on_action_completed()
 		return
 
-	var distance := HexUtils.hex_distance(atk.cell, def.cell)
+	var distance := HexUtils.hex_distance(atk.cell, def.cell, _battle_state.hex_shift_right)
 	var adjacent_enemy := has_adjacent_enemy(atk)
 
 	var is_ranged_shot := atk.is_ranged() and distance > 1 and not adjacent_enemy

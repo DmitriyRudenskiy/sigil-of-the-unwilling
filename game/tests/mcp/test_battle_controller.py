@@ -102,6 +102,7 @@ def test_battle_via_controller_reaches_winner(battle_scene):
         raise AssertionError(f"Бой не завершился за 150 итераций; last={last_action}")
 
     # Несимметричный бой: победитель — атакующие (Side.ATTACKER == 1)
+    mcp.wait_frames(30)
     assert state["winner"] == 1, f"Неожиданный победитель: {state}"
 
     finished = mcp.execute_code(

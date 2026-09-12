@@ -25,7 +25,7 @@ var highlight_unreachable: Dictionary = {}
 var _cursor_mode := BattleView.CursorMode.DEFAULT
 
 func set_cursor_mode(mode: int) -> void:
-	_cursor_mode = mode
+	_cursor_mode = mode as BattleView.CursorMode
 	if _view != null:
 		_view.set_cursor_mode(mode)
 
@@ -66,13 +66,13 @@ func _unhandled_input(ev: InputEvent) -> void:
 				return
 
 			if ev.button_index == MOUSE_BUTTON_LEFT:
-				var global_pos := _view.get_global_mouse_position()
-				var cell := _view.global_to_map(global_pos)
-				if highlight_attack.has(cell):
-					var target := _state.get_unit_at(cell, _pending_target_side)
+				var sp_pos := _view.get_global_mouse_position()
+				var sp_cell := _view.global_to_map(sp_pos)
+				if highlight_attack.has(sp_cell):
+					var target := _state.get_unit_at(sp_cell, _pending_target_side)
 					if _include_dead and target == null:
 						for u in _state.get_units_by_side(_pending_target_side):
-							if u.cell == cell and not u.is_alive():
+							if u.cell == sp_cell and not u.is_alive():
 								target = u
 								break
 					if target != null:
@@ -127,7 +127,7 @@ func _unit_at_pixel(global_pos: Vector2, side: BattleState.Side) -> BattleState.
 	if unit != null:
 		return unit
 	var local_pos := _view.to_local(global_pos)
-	for nb in HexUtils.get_all_neighbors(cell):
+	for nb in HexUtils.get_all_neighbors(cell, _state.hex_shift_right):
 		unit = _state.get_unit_at(nb, side)
 		if unit != null:
 			var unit_pos := _view.map_to_local(nb)
@@ -217,7 +217,7 @@ func _compute_attack_highlight(u: BattleState.BattleUnit) -> Dictionary:
 	var result: Dictionary = {}
 	var adjacent_enemies: Array[Vector2i] = []
 
-	for nb in HexUtils.get_all_neighbors(u.cell):
+	for nb in HexUtils.get_all_neighbors(u.cell, _state.hex_shift_right):
 		var enemy := _state.get_unit_at(nb, BattleState.Side.DEFENDER)
 		if enemy != null and enemy.is_alive():
 			adjacent_enemies.append(nb)

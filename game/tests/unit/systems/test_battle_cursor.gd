@@ -8,7 +8,7 @@ func test_cursor_modes_enum() -> void:
 	assert_int(BattleView.CursorMode.RANGED).is_equal(3).override_failure_message("CursorMode.RANGED should be 3")
 
 func test_cursor_overlay_mode() -> void:
-	var c := BattleView.CursorOverlay.new()
+	var c := CursorOverlay.new()
 	c.set_mode(BattleView.CursorMode.ATTACK)
 	assert_int(c.mode).is_equal(BattleView.CursorMode.ATTACK).override_failure_message("cursor overlay mode should be ATTACK after set_cursor_mode")
 
@@ -24,7 +24,7 @@ func test_cursor_overlay_mode() -> void:
 	c.queue_free()
 
 func test_cursor_overlay_visibility() -> void:
-	var c := BattleView.CursorOverlay.new()
+	var c := CursorOverlay.new()
 	c.visible_flag = true
 	assert_bool(c.visible_flag).is_true().override_failure_message("cursor should be visible when visible_flag = true")
 
@@ -38,7 +38,7 @@ func test_view_cursor_methods() -> void:
 	view.set_cursor_mode(BattleView.CursorMode.ATTACK)
 	view.set_cursor_visible(true)
 
-	view._cursor = BattleView.CursorOverlay.new()
+	view._cursor = CursorOverlay.new()
 	view.set_cursor_mode(BattleView.CursorMode.SPELL)
 	assert_int(view._cursor.mode).is_equal(BattleView.CursorMode.SPELL).override_failure_message("view.set_cursor_mode should propagate to overlay")
 
@@ -70,7 +70,7 @@ func test_walk_cursor_mode() -> void:
 	assert_int(BattleView.CursorMode.MOVE).is_equal(4).override_failure_message("CursorMode.MOVE should be 4 (added after RANGED=3)")
 	assert_bool(BattleView.CursorMode.DEFAULT == 0 and BattleView.CursorMode.ATTACK == 1).is_true().override_failure_message("existing cursor mode values must not change")
 
-	var c := BattleView.CursorOverlay.new()
+	var c := CursorOverlay.new()
 	c.set_mode(BattleView.CursorMode.MOVE)
 	assert_int(c.mode).is_equal(BattleView.CursorMode.MOVE).override_failure_message("cursor overlay should be MOVE after set_mode(MOVE)")
 	c.queue_free()

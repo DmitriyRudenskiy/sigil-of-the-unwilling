@@ -48,7 +48,6 @@ func process(_ctx: TurnContext) -> Dictionary:
 	var report := {"moved": 0, "attacks": 0, "captures": 0}
 	if _map_gen == null or _hero == null:
 		return report
-	_rebuild_hero_dist_field()
 	var stacks: Dictionary = _map_gen.enemy_stacks
 	if not (stacks is Dictionary) or stacks.is_empty():
 		return report
@@ -79,12 +78,12 @@ func process(_ctx: TurnContext) -> Dictionary:
 				var goal: Vector2i = _pick_goal(goals)
 				_pf_stacks = stacks
 				_pf_self_cell = cell
-				var cost_fn: Callable = _pf_cost_fn
 				var mp: float = float(profile.get("mp", 5.0))
-				var goal_idx := HexUtils.pos_to_idx(goal, _map_gen.map_width)
-				if _hero_dist_field_valid and _hero_dist_field[goal_idx] >= INF:
+				var path: Array[Vector2i] = HexPathfinding.dijkstra_path_early(
+					cell, goal, _pf_cost_fn, _map_gen.map_width, _map_gen.map_height, _map_gen.hex_shift_right)
+
+				if path.is_empty():
 					continue
-				var path: Array[Vector2i] = HexPathfinding.dijkstra_path_early(cell, goal, cost_fn, _map_gen.map_width, _map_gen.map_height)
 
 				var cur := cell
 				var spent := 0.0
@@ -130,7 +129,7 @@ func _rebuild_hero_dist_field() -> void:
 	if hero_cell == Vector2i(-1, -1) or _map_gen == null:
 		return
 	var cost_fn: Callable = _pf_cost_fn_global
-	_hero_dist_field = HexPathfinding.dijkstra(hero_cell, 9999.0, cost_fn, _map_gen.map_width, _map_gen.map_height)
+	_hero_dist_field = HexPathfinding.dijkstra(hero_cell, 9999.0, cost_fn, _map_gen.map_width, _map_gen.map_height, _map_gen.hex_shift_right)
 	_hero_dist_field_valid = true
 
 func _pf_cost_fn_global(nxt: Vector2i) -> float:
@@ -146,7 +145,7 @@ func _garrisoned_set() -> Dictionary:
 	if _world_delta == null:
 		return out
 	for item in _world_delta.enemy_growth_state.get("garrisoned", []):
-		out[Vector2i(int(item.get("x", 0)), int(item.get("y", 0)))] = true
+		out[SerializationUtils.vec2i_from_dict(item)] = true
 	return out
 
 func _capture_city(city: City, cell: Vector2i) -> void:
@@ -157,7 +156,7 @@ func _capture_city(city: City, cell: Vector2i) -> void:
 			garrisoned = []
 			_world_delta.enemy_growth_state["garrisoned"] = garrisoned
 		if not _garrisoned_set().has(cell):
-			garrisoned.append({"x": cell.x, "y": cell.y})
+			garrisoned.append(SerializationUtils.vec2i_to_dict(cell))
 	GameLogger.world("Enemy captured %s at %s" % [city.display_name, str(cell)])
 	enemy_village_captured.emit(city)
 
@@ -224,6 +223,11 @@ func _pf_cost_fn(nxt: Vector2i) -> float:
 		return INF
 	var tid: int = _map_gen.get_terrain_id(nxt)
 	return _TerrainCostTable.get_cost_with_effects_by_id(tid, false)
+
+func _dist_field(from: Vector2i, mp: float, cost: Callable, cache: Dictionary) -> PackedFloat32Array:
+	if not cache.has(from):
+		cache[from] = HexPathfinding.dijkstra(from, mp, cost, _map_gen.map_width, _map_gen.map_height, _map_gen.hex_shift_right)
+	return cache[from]
 
 func _enter_cost(nxt: Vector2i) -> float:
 	return _enter_cost_blocked(nxt, {}, Vector2i(-1, -1))

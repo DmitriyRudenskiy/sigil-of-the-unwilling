@@ -2,7 +2,7 @@ class_name BattleState
 extends RefCounted
 
 const _StatusEffects = preload("res://scripts/data/StatusEffects.gd")
-const BattleActionResolver = preload("res://scripts/systems/BattleActionResolver.gd")
+
 
 var attacker_units: Array[BattleUnit] = []
 var defender_units: Array[BattleUnit] = []
@@ -349,15 +349,15 @@ func get_unreachable_ring(unit: BattleUnit, blocked_fn: Callable) -> Dictionary:
 	if unit.is_flying():
 		var blocked: Dictionary = blocked_fn.call()
 		var speed := unit.get_speed()
-		var ring: Dictionary = {}
+		var f_ring: Dictionary = {}
 		for y in BH:
 			for x in BW:
 				var c := Vector2i(x, y)
 				if c == unit.cell or blocked.has(c):
 					continue
 				if HexUtils.hex_distance(unit.cell, c, hex_shift_right) == speed + 1:
-					ring[c] = HexUtils.hex_distance(unit.cell, c, hex_shift_right)
-		return ring
+					f_ring[c] = HexUtils.hex_distance(unit.cell, c, hex_shift_right)
+		return f_ring
 
 	var near: Dictionary = get_reachable(unit.cell, unit.get_speed() + 1, blocked_fn, unit)
 	var reach: Dictionary = get_reachable(unit.cell, unit.get_speed(), blocked_fn, unit)

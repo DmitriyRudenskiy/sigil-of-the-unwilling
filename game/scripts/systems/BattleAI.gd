@@ -26,7 +26,7 @@ func decide_turn(unit: BattleState.BattleUnit, state: BattleState, blocked: Dict
 	if nearest == null:
 		return result
 
-	var distance := HexUtils.hex_distance(unit.cell, nearest.cell)
+	var distance := HexUtils.hex_distance(unit.cell, nearest.cell, state.hex_shift_right)
 	var has_adjacent_enemy := _has_adjacent_enemy(unit, state, target_side)
 
 	if unit.is_ranged() and distance > 1 and not has_adjacent_enemy:
@@ -40,15 +40,15 @@ func decide_turn(unit: BattleState.BattleUnit, state: BattleState, blocked: Dict
 		return result
 
 	if unit.is_flying():
-		var target_cell := _find_flying_landing_cell(unit, nearest, state, blocked)
-		if target_cell != Vector2i(-1, -1):
-			var victim := _find_victim_near(target_cell, state, target_side)
+		var fly_cell := _find_flying_landing_cell(unit, nearest, state, blocked)
+		if fly_cell != Vector2i(-1, -1):
+			var fly_victim := _find_victim_near(fly_cell, state, target_side)
 
 			result.action = Action.MOVE
-			result.move_path = [unit.cell, target_cell]
-			result.target_cell = target_cell
-			result.attack_target = victim
-			result.move_victim = victim
+			result.move_path = [unit.cell, fly_cell]
+			result.target_cell = fly_cell
+			result.attack_target = fly_victim
+			result.move_victim = fly_victim
 
 		return result
 
@@ -56,7 +56,7 @@ func decide_turn(unit: BattleState.BattleUnit, state: BattleState, blocked: Dict
 	path_blocked.erase(nearest.cell)
 
 	var path: Array[Vector2i] = HexPathfinding.find_path(
-		unit.cell, nearest.cell, path_blocked, BattleState.BW, BattleState.BH, "bfs"
+		unit.cell, nearest.cell, path_blocked, BattleState.BW, BattleState.BH, state.hex_shift_right, "bfs"
 	)
 	if path.size() <= 1:
 		return result
@@ -84,7 +84,7 @@ func _find_nearest(unit: BattleState.BattleUnit, state: BattleState, target_side
 
 	for u in state.get_units_by_side(target_side):
 		if u.is_alive():
-			var d := HexUtils.hex_distance(unit.cell, u.cell)
+			var d := HexUtils.hex_distance(unit.cell, u.cell, state.hex_shift_right)
 			if d < nearest_distance:
 				nearest_distance = d
 				nearest = u
@@ -92,7 +92,7 @@ func _find_nearest(unit: BattleState.BattleUnit, state: BattleState, target_side
 	return nearest
 
 func _find_victim_near(cell: Vector2i, state: BattleState, target_side: BattleState.Side) -> BattleState.BattleUnit:
-	for neighbor in HexUtils.get_all_neighbors(cell):
+	for neighbor in HexUtils.get_all_neighbors(cell, state.hex_shift_right):
 		var u := state.get_unit_at(neighbor, target_side)
 		if u != null and u.is_alive():
 			return u
@@ -104,7 +104,7 @@ func _has_adjacent_enemy(
 	state: BattleState,
 	target_side: BattleState.Side
 ) -> bool:
-	for nb in HexUtils.get_all_neighbors(unit.cell):
+	for nb in HexUtils.get_all_neighbors(unit.cell, state.hex_shift_right):
 		var u := state.get_unit_at(nb, target_side)
 		if u != null and u.is_alive():
 			return true
@@ -140,11 +140,11 @@ func _find_flying_landing_cell(
 			if blocked.has(cell):
 				continue
 
-			var dist_to_unit := HexUtils.hex_distance(unit.cell, cell)
+			var dist_to_unit := HexUtils.hex_distance(unit.cell, cell, state.hex_shift_right)
 			if dist_to_unit > speed:
 				continue
 
-			var dist_to_target := HexUtils.hex_distance(cell, target.cell)
+			var dist_to_target := HexUtils.hex_distance(cell, target.cell, state.hex_shift_right)
 			if dist_to_target < fallback_best_score:
 				fallback_best_score = dist_to_target
 				fallback_best = cell

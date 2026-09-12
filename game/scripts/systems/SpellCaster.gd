@@ -50,9 +50,9 @@ static func cast(
 
 	return result
 
-static func _apply_damage(unit: BattleState.BattleUnit, dmg: int, rng: RandomNumberGenerator, result: Dictionary) -> Dictionary:
+static func _apply_damage(unit: BattleState.BattleUnit, dmg: int, _rng: RandomNumberGenerator, result: Dictionary) -> Dictionary:
 	var hp: int = max(1, unit.get_hp())
-	var kills: int = max(1, dmg / hp)
+	var kills: int = max(1, int(dmg / float(hp)))
 	kills = min(kills, unit.get_count())
 	result.damage = dmg
 	result.kills = kills

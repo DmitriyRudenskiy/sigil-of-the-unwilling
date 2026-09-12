@@ -168,14 +168,14 @@ func _on_cancel() -> void:
 	_view.set_cursor_visible(_executor.is_input_active())
 	_on_status_updated(GameText.battle_select_unit())
 
-func _on_execute_spell(caster: BattleState.BattleUnit, target: BattleState.BattleUnit, result: Dictionary) -> void:
+func _on_execute_spell(_caster: BattleState.BattleUnit, target: BattleState.BattleUnit, result: Dictionary) -> void:
 	_fx.show_spell_cast(target.cell, result.get("spell_id", &""))
 
 	if result.has("healed"):
 		_fx.show_heal(target.cell, int(result["healed"]))
 
 	_show_damage_feedback(target, result)
-	await _get_damage_wait()
+	await _get_damage_wait().timeout
 
 	if not is_inside_tree():
 		return
@@ -222,7 +222,7 @@ func _on_execute_attack(
 		if is_instance_valid(_executor):
 			_executor.on_attack_completed()
 		return
-	await timer
+	await timer.timeout
 
 	if not is_inside_tree():
 		return

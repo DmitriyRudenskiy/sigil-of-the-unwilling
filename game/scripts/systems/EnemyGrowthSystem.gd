@@ -64,7 +64,7 @@ func _process_respawns(report: Dictionary) -> void:
 	while i >= 0:
 		q[i]["turns_left"] = int(q[i].get("turns_left", 0)) - 1
 		if int(q[i].get("turns_left", 0)) <= 0:
-			var cell := Vector2i(int(q[i].get("x", 0)), int(q[i].get("y", 0)))
+			var cell := SerializationUtils.vec2i_from_dict(q[i])
 			var army := _build_army(q[i].get("units", []))
 			if not army.is_empty() and _stack_count() < GameNumbers.MAP_ENEMY_COUNT and _can_spawn_at(cell):
 				_map_gen.enemy_stacks[cell] = army

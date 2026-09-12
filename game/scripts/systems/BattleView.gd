@@ -12,9 +12,6 @@ const _DamageNumber = preload("res://scenes/ui/DamageNumber.tscn")
 const _UnitSprite = preload("res://scenes/ui/UnitSprite.tscn")
 const _HeroFigure = preload("res://scenes/ui/HeroFigure.tscn")
 const _RetaliationArrow = preload("res://scenes/ui/RetaliationArrow.tscn")
-const ParticlePresets = preload("res://scripts/core/ParticlePresets.gd")
-const CursorOverlay = preload("res://scripts/ui/CursorOverlay.gd")
-const HighlightOverlay = preload("res://scripts/ui/HighlightOverlay.gd")
 
 enum CursorMode { DEFAULT, ATTACK, SPELL, RANGED, MOVE }
 
@@ -48,6 +45,9 @@ func setup() -> void:
 	_cursor.name = "BattleCursor"
 	_cursor.z_index = 30
 	_cursor.visible = false
+
+	if not get_viewport().size_changed.is_connected(fit_camera):
+		get_viewport().size_changed.connect(fit_camera)
 
 func paint_field() -> void:
 	var grass: Vector2i = TileAtlas.BASE_COORDS[TileAtlas.Biome.GRASS][0]
@@ -85,7 +85,7 @@ func fit_camera() -> void:
 	var field_sz := Vector2(absf(p1.x - p0.x) + 60.0, absf(p1.y - p0.y) + 60.0)
 	var center := (p0 + p1) / 2.0
 	var vp_sz := get_viewport().get_visible_rect().size
-	var z: float = maxf(vp_sz.x / field_sz.x, vp_sz.y / field_sz.y)
+	var z: float = minf(vp_sz.x / field_sz.x, vp_sz.y / field_sz.y)
 	_camera.zoom = Vector2(z, z)
 	_camera.position = center
 
@@ -239,11 +239,11 @@ func set_cursor_mode(mode: int) -> void:
 		return
 	_cursor.set_mode(mode)
 
-func set_cursor_visible(visible: bool) -> void:
+func set_cursor_visible(visible_: bool) -> void:
 	if _cursor == null:
 		return
-	_cursor.visible_flag = visible
-	_cursor.visible = visible
+	_cursor.visible_flag = visible_
+	_cursor.visible = visible_
 	_cursor.queue_redraw()
 
 func clear_cursor() -> void:

@@ -1,7 +1,7 @@
 class_name BattleActionResolver
 extends RefCounted
 
-const BattleDamageResolver = preload("res://scripts/systems/BattleDamageResolver.gd")
+
 
 static func apply_attack(
 	state: BattleState,
@@ -82,7 +82,7 @@ static func apply_spell(
 				kill_unit(state, target)
 		if result.has("heal") and int(result.get("heal", 0)) > 0:
 			var hp: int = maxi(1, int(target.get_hp()))
-			var healed := mini(int(result.get("heal", 0)) / hp, target.max_count - target.get_count())
+			var healed := mini(int(int(result.get("heal", 0)) / float(hp)), target.max_count - target.get_count())
 			if healed > 0:
 				target.set_count(target.get_count() + healed)
 				result["healed"] = healed
@@ -101,7 +101,7 @@ static func apply_sacrifice(
 	sacrifice: Dictionary,
 	target: BattleState.BattleUnit,
 	cost: Variant,
-	rng: RandomNumberGenerator
+	_rng: RandomNumberGenerator
 ) -> Dictionary:
 	if acting == null or not acting.is_alive():
 		return {"result": "invalid_actor"}
@@ -280,7 +280,7 @@ static func _get_charge_multiplier(atk: BattleState.BattleUnit) -> float:
 	return 1.0
 
 static func _apply_charge(
-	atk: BattleState.BattleUnit,
+	_atk: BattleState.BattleUnit,
 	def: BattleState.BattleUnit,
 	result: Dictionary,
 	charge_mult: float

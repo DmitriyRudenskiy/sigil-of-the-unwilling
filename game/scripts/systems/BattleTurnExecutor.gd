@@ -151,6 +151,7 @@ func request_move(unit: BattleState.BattleUnit, target: Vector2i) -> void:
 			blocked,
 			BattleState.BW,
 			BattleState.BH,
+			_battle_state.hex_shift_right,
 			"bfs"
 		)
 
@@ -279,7 +280,7 @@ func request_skip() -> void:
 	_morale_allowed = false
 	_on_action_completed()
 
-func request_spell_cast(spell_id: StringName) -> void:
+func request_spell_cast(_spell_id: StringName) -> void:
 	if _state != State.WAITING_INPUT or _battle_state.active_unit == null:
 		return
 	status_updated.emit(GameText.battle_spell_target())
