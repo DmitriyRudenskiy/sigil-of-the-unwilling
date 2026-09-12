@@ -12,14 +12,14 @@ const RIGHT_W := 252
 const C_BG := ThemeConfig.C_PANEL_BG
 const C_BORDER := ThemeConfig.C_PANEL_BORDER
 
-@onready var _minimap: MinimapPanel = $RightColumn/Box/Scroll/PanelsBox/MinimapPanel
-@onready var _army: ArmyPanel = $RightColumn/Box/Scroll/PanelsBox/ArmyPanel
-@onready var _resources: ResourceBar = $RightColumn/Box/Scroll/PanelsBox/ResourceBar
-@onready var _info: InfoPanel = $RightColumn/Box/Scroll/PanelsBox/InfoPanel
-@onready var _strat_resources: ResourcesPanel = $RightColumn/Box/Scroll/PanelsBox/ResourcesPanel
-@onready var _skills_panel: SkillsPanel = $RightColumn/Box/Scroll/PanelsBox/SkillsPanel
-@onready var _tools_panel: ToolsPanel = $RightColumn/Box/Scroll/PanelsBox/ToolsPanel
-@onready var _hero_status: HeroStatusPanel = $RightColumn/Box/Scroll/PanelsBox/HeroStatusPanel
+@onready var _minimap: MinimapPanel = $RightColumn/Box/PanelsBox/MinimapPanel
+@onready var _army: ArmyPanel = $RightColumn/Box/PanelsBox/ArmyPanel
+@onready var _resources: ResourceBar = $RightColumn/Box/PanelsBox/ResourceBar
+@onready var _info: InfoPanel = $RightColumn/Box/PanelsBox/InfoPanel
+@onready var _strat_resources: ResourcesPanel = $RightColumn/Box/PanelsBox/ResourcesPanel
+@onready var _skills_panel: SkillsPanel = $RightColumn/Box/PanelsBox/SkillsPanel
+@onready var _tools_panel: ToolsPanel = $RightColumn/Box/PanelsBox/ToolsPanel
+@onready var _hero_status: HeroStatusPanel = $RightColumn/Box/PanelsBox/HeroStatusPanel
 @onready var _collect_popup: ResourceCollectPopup = $ResourceCollectPopup
 @onready var _settings_screen: SettingsScreen = $SettingsScreen
 
@@ -38,6 +38,7 @@ func _ready() -> void:
 	var s := StyleBoxFlat.new()
 	s.bg_color = C_BG
 	s.set_border_width_all(2)
+	s.set_content_margin_all(10.0)
 	s.border_color = C_BORDER
 	p.add_theme_stylebox_override("panel", s)
 
@@ -53,7 +54,7 @@ func _ready() -> void:
 		settings_btn.pressed.connect(_on_open_settings)
 	_options_popup.get_node("CloseOptionsButton").text = GameText.ui_close()
 
-	var glory_box := get_node("RightColumn/Box/GloryBox") as VBoxContainer
+	var glory_box := get_node("RightColumn/Box/PanelsBox/GloryBox") as VBoxContainer
 	_glory_label = glory_box.get_node("GloryLabel") as Label
 	_glory_bar = glory_box.get_node("GloryBar") as ProgressBar
 	refresh_glory()

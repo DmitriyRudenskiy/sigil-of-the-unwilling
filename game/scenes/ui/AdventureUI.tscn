@@ -32,60 +32,53 @@ offset_top = 80.0
 offset_right = -10.0
 offset_bottom = -80.0
 
-[node name="Box" type="MarginContainer" parent="RightColumn"]
+[node name="Box" type="ScrollContainer" parent="RightColumn"]
 layout_mode = 2
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 10
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 1
 
-[node name="Scroll" type="ScrollContainer" parent="RightColumn/Box"]
+[node name="PanelsBox" type="VBoxContainer" parent="RightColumn/Box"]
 layout_mode = 2
-
-[node name="PanelsBox" type="VBoxContainer" parent="RightColumn/Box/Scroll"]
-layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="InfoPanel" parent="RightColumn/Box/Scroll/PanelsBox" instance=ExtResource("3")]
+[node name="InfoPanel" parent="RightColumn/Box/PanelsBox" instance=ExtResource("3")]
 layout_mode = 2
 
-[node name="MinimapPanel" parent="RightColumn/Box/Scroll/PanelsBox" instance=ExtResource("2")]
+[node name="MinimapPanel" parent="RightColumn/Box/PanelsBox" instance=ExtResource("2")]
 layout_mode = 2
 
-[node name="ArmyPanel" parent="RightColumn/Box/Scroll/PanelsBox" instance=ExtResource("4")]
+[node name="ArmyPanel" parent="RightColumn/Box/PanelsBox" instance=ExtResource("4")]
 layout_mode = 2
 
-[node name="ResourceBar" parent="RightColumn/Box/Scroll/PanelsBox" instance=ExtResource("5")]
+[node name="ResourceBar" parent="RightColumn/Box/PanelsBox" instance=ExtResource("5")]
 layout_mode = 2
 
-[node name="ResourcesPanel" parent="RightColumn/Box/Scroll/PanelsBox" instance=ExtResource("6")]
+[node name="ResourcesPanel" parent="RightColumn/Box/PanelsBox" instance=ExtResource("6")]
 layout_mode = 2
 
-[node name="SkillsPanel" parent="RightColumn/Box/Scroll/PanelsBox" instance=ExtResource("7")]
+[node name="SkillsPanel" parent="RightColumn/Box/PanelsBox" instance=ExtResource("7")]
 layout_mode = 2
 
-[node name="ToolsPanel" parent="RightColumn/Box/Scroll/PanelsBox" instance=ExtResource("8")]
+[node name="ToolsPanel" parent="RightColumn/Box/PanelsBox" instance=ExtResource("8")]
 layout_mode = 2
 
-[node name="HeroStatusPanel" parent="RightColumn/Box/Scroll/PanelsBox" instance=ExtResource("9")]
+[node name="HeroStatusPanel" parent="RightColumn/Box/PanelsBox" instance=ExtResource("9")]
 layout_mode = 2
 
-[node name="GloryBox" type="VBoxContainer" parent="RightColumn/Box"]
+[node name="GloryBox" type="VBoxContainer" parent="RightColumn/Box/PanelsBox"]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
-[node name="GloryLabel" type="Label" parent="RightColumn/Box/GloryBox"]
+[node name="GloryLabel" type="Label" parent="RightColumn/Box/PanelsBox/GloryBox"]
 layout_mode = 2
 
-[node name="GloryBar" type="ProgressBar" parent="RightColumn/Box/GloryBox"]
+[node name="GloryBar" type="ProgressBar" parent="RightColumn/Box/PanelsBox/GloryBox"]
 layout_mode = 2
 max_value = 1000.0
 value = 0.0
 show_percentage = false
-
-[node name="Spacer" type="Control" parent="RightColumn/Box"]
-layout_mode = 2
-size_flags_vertical = 3
 
 [node name="OptionsPopup" type="VBoxContainer" parent="."]
 visible = false
