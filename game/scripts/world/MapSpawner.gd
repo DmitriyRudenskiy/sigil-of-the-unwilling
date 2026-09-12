@@ -93,6 +93,17 @@ func place_decor() -> void:
 		if model.terrain_grid[cell] == HexUtils.Terrain.SAND and rng.randf() < 0.04:
 			model.decor_cells[cell] = "palm" if rng.randf() > 0.5 else "cactus"
 
+# Ранняя игра: кольцевые тиры врагов (early-game-foundation, world-threat-rings).
+# Кольцо 1 — дикие животные, 2 — гуманоиды, 3 — монстры.
+const THREAT_RING1: Array = GameNumbersHero.WILD_ANIMAL_KEYS
+const THREAT_RING2 := ["goblins", "gnoll", "lizardman", "orc", "ogre", "hobgoblin",
+	"skeleton", "zombie", "harpy", "wraith"]
+const THREAT_RING3 := ["trolls", "stone_golem", "iron_golem", "fire_elemental",
+	"storm_elemental", "red_dragon", "green_dragon", "gargoyle", "titan",
+	"minotaur", "hydra", "medusa", "beholder", "phoenix"]
+const THREAT_RING2_RADIUS := 12
+const THREAT_RING3_RADIUS := 24
+
 func place_enemies(reachable = null) -> void:
 	model.enemy_stacks.clear()
 	var rng := RandomNumberGenerator.new()
@@ -100,6 +111,7 @@ func place_enemies(reachable = null) -> void:
 
 	if reachable == null:
 		reachable = _get_reachable_cells()
+	var start_cell := _start_cell()
 
 	var candidates: Array[Vector2i] = []
 	for cell in reachable:
@@ -123,20 +135,39 @@ func place_enemies(reachable = null) -> void:
 		if placed >= GameNumbers.MAP_ENEMY_COUNT:
 			break
 
-		var faction_idx: int = rng.randi_range(0, reg.FACTION_SETS.size() - 1)
-		var faction_pool: Array = reg.FACTION_SETS[faction_idx]
+		# Ранняя игра: тир по дистанции от старта, случайный выбор из общего пула запрещён
+		var dist: int = HexUtils.hex_distance(cell, start_cell) if start_cell.x >= 0 else THREAT_RING3_RADIUS
+		var pool: Array = _threat_pool(dist)
 		var army: Array[UnitStack] = []
 
+		# Ранняя игра: размер стай — враждебность партии + сезон (early-game-foundation)
+		var size_mult: float = WorldSeasons.hostility_mult() * WorldSeasons.enemy_mult()
 		var unit_count := rng.randi_range(1, 3)
 		for i in unit_count:
-			var unit_key: String = faction_pool[rng.randi_range(0, faction_pool.size() - 1)]
-			var stack = reg.make_stack(unit_key, rng)
+			var unit_key: String = pool[rng.randi_range(0, pool.size() - 1)]
+			var stack = reg.make_stack(unit_key, rng, size_mult)
 			if stack != null and stack.is_alive():
 				army.append(stack)
 
 		if army.size() > 0:
 			model.enemy_stacks[cell] = army
 			placed += 1
+
+func _start_cell() -> Vector2i:
+	# Стартовая клетка героя (та же, что и в _get_reachable_cells)
+	for y in model.map_height:
+		for x in model.map_width:
+			var cell := Vector2i(x, y)
+			if model.is_walkable(cell):
+				return cell
+	return Vector2i(-1, -1)
+
+static func _threat_pool(dist: int) -> Array:
+	if dist < THREAT_RING2_RADIUS:
+		return THREAT_RING1
+	if dist < THREAT_RING3_RADIUS:
+		return THREAT_RING2
+	return THREAT_RING3
 
 func _get_reachable_cells() -> Dictionary:
 	var start_cell := Vector2i(-1, -1)

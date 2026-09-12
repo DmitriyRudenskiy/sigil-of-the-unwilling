@@ -73,7 +73,8 @@ func _connect_buttons() -> void:
 func set_time(hour: float) -> void:
 	var h := int(floor(hour))
 	var m := int(round((hour - floor(hour)) * 60))
-	_time_label.text = "🕐 %02d:%02d" % [h, m]
+	# Ранняя игра: текущий сезон виден игроку (early-game-foundation)
+	_time_label.text = "🕐 %02d:%02d · %s" % [h, m, WorldSeasons.season_name()]
 	if hour >= 21.0:
 		_time_label.add_theme_color_override("font_color", ThemeConfig.C_TIME_NIGHT)
 	elif hour >= 17.0:

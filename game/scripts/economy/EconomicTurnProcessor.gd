@@ -54,9 +54,11 @@ func _process_city(city: City, _ctx: TurnContext) -> Dictionary:
 		if chain == null:
 			continue
 		var workers: int = building.assigned_workers
+		# Ранняя игра: сезонный цикл масштабирует производство (early-game-foundation)
 		var logistics: float = city.get_logistics_multiplier(building.cell) \
 			* building.zone_multiplier \
-			* AdjacencySystem.building_output_mult(city, building)
+			* AdjacencySystem.building_output_mult(city, building) \
+			* WorldSeasons.production_mult()
 		var outputs: Dictionary = chain.execute(res, workers, logistics)
 		if outputs.is_empty():
 			continue

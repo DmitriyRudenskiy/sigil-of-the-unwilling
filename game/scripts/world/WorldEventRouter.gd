@@ -268,6 +268,8 @@ func _run_turn_scheduler(month: int) -> void:
 		ctx.heroes.append(hero)
 	var report: Dictionary = turn_scheduler.execute_turn(ctx)
 	_grant_city_income(report)
+	# Ранняя игра: глобальный сезонный цикл (early-game-foundation)
+	WorldSeasons.advance_turn()
 
 func _grant_city_income(report: Dictionary) -> void:
 	var phases: Dictionary = report.get("phases", {})

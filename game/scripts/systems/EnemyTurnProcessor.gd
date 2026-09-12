@@ -45,9 +45,10 @@ func setup_world(
 		_faction_sets = units_reg.FACTION_SETS
 
 func process(_ctx: TurnContext) -> Dictionary:
-	var report := {"moved": 0, "attacks": 0, "captures": 0}
+	var report := {"moved": 0, "attacks": 0, "captures": 0, "reinforced": 0}
 	if _map_gen == null or _hero == null:
 		return report
+	_reinforce_stacks(report)
 	var stacks: Dictionary = _map_gen.enemy_stacks
 	if not (stacks is Dictionary) or stacks.is_empty():
 		return report
@@ -139,6 +140,31 @@ func _pf_cost_fn_global(nxt: Vector2i) -> float:
 		return INF
 	var tid: int = _map_gen.get_terrain_id(nxt)
 	return _TerrainCostTable.get_cost_with_effects_by_id(tid, false)
+
+## Ранняя игра: подкрепления — стаи растут со враждебностью и сезоном (early-game-foundation)
+var _turns_since_reinforce := 0
+
+const REINFORCE_EVERY := 5
+const REINFORCE_GROWTH := 0.06
+
+func _reinforce_stacks(report: Dictionary) -> void:
+	_turns_since_reinforce += 1
+	if _turns_since_reinforce < REINFORCE_EVERY:
+		return
+	_turns_since_reinforce = 0
+	var stacks: Dictionary = _map_gen.enemy_stacks
+	if not (stacks is Dictionary):
+		return
+	var growth: float = REINFORCE_GROWTH * WorldSeasons.hostility_mult() * WorldSeasons.enemy_mult()
+	for cell in stacks:
+		var army: Array = stacks[cell]
+		if army == null or army.is_empty():
+			continue
+		for stack in army:
+			if stack != null and stack.is_alive():
+				stack.count = mini(stack.count + maxi(1, int(stack.count * growth)), 120)
+	report["reinforced"] = 1
+
 
 func _garrisoned_set() -> Dictionary:
 	var out := {}

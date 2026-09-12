@@ -224,12 +224,12 @@ func get_definition(key: String) -> UnitStats:
     ensure_definitions()
     return _definitions.get(key, null)
 
-func make_stack(key: String, rng: RandomNumberGenerator) -> UnitStack:
+func make_stack(key: String, rng: RandomNumberGenerator, size_mult: float = 1.0) -> UnitStack:
     var stats: UnitStats = get_definition(key)
     if stats == null:
         return null
     var count := clampi(
-        int(float(rng.randi_range(30, 80)) * 6.0 / float(stats.base_damage)),
+        int(float(rng.randi_range(30, 80)) * 6.0 / float(stats.base_damage) * size_mult),
         3,
         120
     )
