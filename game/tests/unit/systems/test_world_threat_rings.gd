@@ -96,3 +96,29 @@ func test_storm_boosts_spawns() -> void:
 		WorldSeasons.advance_turn()
 	stormy = reg.make_stack("wolves", rng, WorldSeasons.hostility_mult() * WorldSeasons.enemy_mult())
 	assert_bool(stormy.count >= calm.count).is_true()
+
+
+func test_no_enemy_spawn_near_cities() -> void:
+	# Города (capital + вилладж) спавнятся после generate(): место для
+	# врагов вокруг городов должно быть заблокировано (ENEMY_CITY_SPAWN_GAP).
+	var model := MapModel.new()
+	model.map_width = 40
+	model.map_height = 40
+	model.seed_value = 42
+	for y in model.map_height:
+		for x in model.map_width:
+			model.terrain_grid[Vector2i(x, y)] = HexUtils.Terrain.GRASS
+	var spawner := MapSpawner.new(model)
+	var reachable: Dictionary = {}
+	for y in range(2, 38):
+		for x in range(2, 38):
+			reachable[Vector2i(x, y)] = true
+	var city := City.new()
+	city.center = Vector2i(20, 20)
+	spawner.set_known_cities([city])
+	spawner.place_enemies(reachable)
+	assert_bool(model.enemy_stacks.size() > 0).is_true()
+	for cell in model.enemy_stacks:
+		assert_bool(
+			HexUtils.hex_distance(cell, city.center) >= MapSpawner.ENEMY_CITY_SPAWN_GAP
+		).is_true()

@@ -39,23 +39,26 @@ def _restore_project_godot_if_dirty() -> None:
     except OSError as e:
         print(f"[mcp] не удалось проверить project.godot: {e}", file=sys.stderr)
 
-def _server_params() -> StdioServerParameters:
+def _server_params(extra_env: dict | None = None) -> StdioServerParameters:
+    env = dict(SERVER_ENV)
+    if extra_env:
+        env.update(extra_env)
     return StdioServerParameters(
         command=NODE_BIN,
         args=[str(GODOT_MCP_DIR / "build" / "index.js")],
         cwd=str(GAME_DIR),
-        env=SERVER_ENV,
+        env=env,
     )
 
 @pytest.fixture
-def mcp():
+def mcp(_server_env: dict = None):
     box: dict = {}
     ready = threading.Event()
     done = threading.Event()
 
     async def main() -> None:
         try:
-            async with stdio_client(_server_params()) as (read, write):
+            async with stdio_client(_server_params(_server_env)) as (read, write):
                 async with ClientSession(read, write) as session:
                     await session.initialize()
                     box["client"] = GodotMCPClient(portal, session, str(GAME_DIR))

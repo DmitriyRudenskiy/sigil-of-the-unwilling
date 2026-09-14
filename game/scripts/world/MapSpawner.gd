@@ -104,6 +104,18 @@ const THREAT_RING3 := ["trolls", "stone_golem", "iron_golem", "fire_elemental",
 const THREAT_RING2_RADIUS := 12
 const THREAT_RING3_RADIUS := 24
 
+# Минимальная дистанция спавна врага от клеток города. >= ENEMY_AGGRO_RADIUS (8),
+# иначе стая сразу в aggro радиусе города захватывает его за 1–2 хода —
+# DEFEAT на ходу 2, ранняя игра непроходима (найдено balance-core прогонкой).
+const ENEMY_CITY_SPAWN_GAP := GameNumbers.ENEMY_AGGRO_RADIUS
+
+var known_cities: Array = []  # заполняется после generate(): см. WorldBootstrap._create_cities
+
+# ponytail: known_cities — сеттер-защита: из-за раннего кэша класса спавнер
+# может иметь старую схему полей, и прямое присваивание падает runtime-error.
+func set_known_cities(cities: Array) -> void:
+	known_cities.assign(cities)
+
 func place_enemies(reachable = null) -> void:
 	model.enemy_stacks.clear()
 	var rng := RandomNumberGenerator.new()
@@ -119,6 +131,10 @@ func place_enemies(reachable = null) -> void:
 			continue
 
 		if cell.x < 3 or cell.x >= model.map_width - 4 or cell.y < 3 or cell.y >= model.map_height - 4:
+			continue
+
+		# Не спавнить у ворот городов: см. ENEMY_CITY_SPAWN_GAP.
+		if _near_city(cell):
 			continue
 		candidates.append(cell)
 
@@ -161,6 +177,33 @@ func _start_cell() -> Vector2i:
 			if model.is_walkable(cell):
 				return cell
 	return Vector2i(-1, -1)
+
+func _city_cells() -> Dictionary:
+	# Клетки городов: столицы/вилладжи (known_cities, появляются после
+	# generate()) + вилладжи из model.village_cells (есть ещё во время
+	# place_enemies — их клетки уже известны).
+	var out: Dictionary = {}
+	for vc in model.village_cells:
+		out[vc] = true
+	for city in known_cities:
+		if city == null:
+			continue
+		out[city.center] = true
+		for b in city.buildings:
+			if b != null and b.cell is Vector2i:
+				out[b.cell] = true
+	return out
+
+# Без кэша: place_enemies вызывается дважды (generate + после городов),
+# города — ≤2, клетки — единицы; пересчёт дёшев.
+func _near_city(cell: Vector2i) -> bool:
+	var city_cells := _city_cells()
+	if city_cells.is_empty():
+		return false
+	for c in city_cells:
+		if HexUtils.hex_distance(cell, c) <= ENEMY_CITY_SPAWN_GAP:
+			return true
+	return false
 
 static func _threat_pool(dist: int) -> Array:
 	if dist < THREAT_RING2_RADIUS:

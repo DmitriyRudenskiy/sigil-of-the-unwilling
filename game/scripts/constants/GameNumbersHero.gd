@@ -32,10 +32,23 @@ const NEED_SOCIAL_RECOVERY_CITY := 0.30
 const NEED_SOCIAL_RECOVERY_POP  := 0.10
 const NEED_INSP_RECOVERY_CITY   := 0.15
 const NEED_INSP_RECOVERY_POP    := 0.05
-const NEED_SOCIAL_RECOVERY_LOW  := -0.05
+# ponytail: «низкий» (не в городе) соц.реставр — +0.05, был -0.05: герой вне
+# города не должен терять социальность быстрее, чем отдыхает (отдых вне
+# города +0.02) — баланс по balance-core прогону: одинокий герой умирал от
+# изоляции на 9-м ходу, не успев ни построить, ни рекрутить. Если ранняя
+# игра станет слишком прощённой — поднимать SOCIAL_DECAY, не возвращать LOW.
+# ponytail: «низкий» (вне города) реставр — ≈ decay, чистый спад −0.01/ход:
+# герой без города умирает от needs ~на 100-м ходу, а не на 9–12-м (ранние
+# DEFEAT balance-core: изоляция на 9, истощение на 12). Механика «нужно
+# посещать город» сохранена, но давит на длинной дистанции, а не в ранней
+# игре. Если герой станет бессмертным — поднимать DECAY, не опускать LOW.
+const NEED_SOCIAL_RECOVERY_LOW  := 0.07
+const NEED_REST_RECOVERY_LOW    := 0.09
+const NEED_INSP_RECOVERY_LOW    := 0.04
 const SUCCESSION_RESURRECT_IND  := 500.0
 const SUCCESSION_RESURRECT_GOLD := 100.0
 const SUCCESSION_SPECIAL_KEY    := &"gold"
 const GLORY_VICTORY_THRESHOLD   := 500
 const ENDGAME_DOMINATION_ENABLED := true
 const ENDGAME_COLLAPSE_ENABLED   := true
+

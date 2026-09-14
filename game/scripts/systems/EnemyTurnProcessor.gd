@@ -223,10 +223,16 @@ func _candidate_goals(cell: Vector2i, hero_cell: Vector2i, aggro: int, profile: 
 	return goals
 
 func _pick_goal(goals: Dictionary) -> Vector2i:
+	# ponytail: детерминизм — порядок Dictionary не гарантирован; раньше
+	# при равных scores победителя решал случайный порядок вставок (разные
+	# runs одного seed играли по-разному). Сортируем ключи явно.
+	var sorted_keys: Array = goals.keys()
+	sorted_keys.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		return a.x < b.x or (a.x == b.x and a.y < b.y))
 	var best_cell: Vector2i = Vector2i(-1, -1)
 	var best_score := -1.0
 
-	for cell in goals.keys():
+	for cell in sorted_keys:
 		var info: Dictionary = goals[cell]
 		var score := float(info["weight"]) / (float(int(info["dist"])) + 1.0)
 

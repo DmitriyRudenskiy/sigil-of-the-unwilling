@@ -272,6 +272,8 @@ static func _create_spawner(parent: Node2D, R: BootstrapResult) -> void:
 	R.spawner.spawn_all()
 
 static func _create_cities(parent: Node2D, R: BootstrapResult) -> void:
+	# Карта строится в generate() (до городов): place_enemies() дёргает
+	# MapSpawner._near_city() в runtime — кэш пересчитается, когда города появятся.
 	R.cities = CityManager.new()
 	R.cities.name = "CityManager"
 	parent.add_child(R.cities)
@@ -307,6 +309,16 @@ static func _create_cities(parent: Node2D, R: BootstrapResult) -> void:
 	var second := CityFactory.create_village(
 		_place_in_hero_component(R.map_gen, Vector2i(center.x + 15, center.y), occupied), "Город 2", 0)
 	R.cities.register_city(second, false)
+
+	# Столицы записаны. place_enemies уже прошёл в generate() (до городов):
+	# пересчитываем детерминированно (тот же seed) с учётом ENEMY_CITY_SPAWN_GAP
+	# и пересоздаём вражеские ноды. Иначе стая в 3–7 клетках от столицы
+	# захватывает её за 1–2 хода: DEFEAT на ходу 2, ранняя игра неиграбельна.
+	if R.map_gen != null and R.map_gen.spawner != null:
+		R.map_gen.spawner.set_known_cities(R.cities.cities)
+		R.map_gen.spawner.place_enemies()
+		if R.spawner != null:
+			R.spawner.respawn_enemies()
 
 static func _create_subsystems(parent: Node2D, R: BootstrapResult) -> void:
 	R.turn_scheduler = TurnScheduler.new()

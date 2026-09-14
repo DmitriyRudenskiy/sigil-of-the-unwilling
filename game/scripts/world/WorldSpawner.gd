@@ -149,6 +149,14 @@ func _spawn_resources() -> void:
 		add_child(r)
 		_resource_nodes[cell] = r
 
+## Пересоздать вражеские ноды из model.enemy_stacks (после ре-спавна моделей,
+## например, когда place_enemies пересчитан с учётом городов).
+func respawn_enemies() -> void:
+	for n in _enemy_nodes.values():
+		n.queue_free()
+	_enemy_nodes.clear()
+	_spawn_enemies()
+
 func _spawn_enemies() -> void:
 	for cell in map.enemy_stacks:
 		var e := _make_enemy_node(cell, map.enemy_stacks[cell])

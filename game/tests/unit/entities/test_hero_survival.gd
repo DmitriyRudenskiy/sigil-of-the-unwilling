@@ -140,10 +140,11 @@ func test_needs_init_all_full() -> void:
 
 func test_needs_field_decay() -> void:
 	var n := HeroNeeds.new()
+	# Вне города: LOW ≈ decay → чистый спад −0.01/ход по всем трём needs.
 	assert_that(n.tick(false)).is_equal(&"")
-	assert_float(n.get_need(NeedType.ID.REST)).is_equal_approx(0.90, 0.0001)
-	assert_float(n.get_need(NeedType.ID.SOCIAL)).is_equal_approx(0.87, 0.0001)
-	assert_float(n.get_need(NeedType.ID.INSPIRATION)).is_equal_approx(0.95, 0.0001)
+	assert_float(n.get_need(NeedType.ID.REST)).is_equal_approx(0.99, 0.0001)
+	assert_float(n.get_need(NeedType.ID.SOCIAL)).is_equal_approx(0.99, 0.0001)
+	assert_float(n.get_need(NeedType.ID.INSPIRATION)).is_equal_approx(0.99, 0.0001)
 
 func test_needs_city_recovery() -> void:
 	var n := HeroNeeds.new()
@@ -157,13 +158,18 @@ func test_needs_city_recovery() -> void:
 	assert_float(n.get_need(NeedType.ID.INSPIRATION)).is_equal_approx(0.60, 0.0001)
 
 func test_needs_lonely_city_social_drains() -> void:
+	# Город без населения (pop < 3) — «низкий» соц.реставр (+0.07 ≈ decay):
+	# нет людей вокруг, социальность медленнее тает (0.08 − 0.07 = −0.01).
 	var n := HeroNeeds.new()
 	n.needs[NeedType.ID.SOCIAL] = 0.5
 	var c := _make_temple_city()
 	n.tick(true, c)
-	assert_float(n.get_need(NeedType.ID.SOCIAL)).is_equal_approx(0.37, 0.0001)
+	assert_float(n.get_need(NeedType.ID.SOCIAL)).is_equal_approx(0.49, 0.0001)
 
 func test_needs_zero_streak_all_causes() -> void:
+	# Вне города спад −0.01/ход (LOW ≈ decay) — все три needs доходят до
+	# zero_streak и дают свою причину смерти. В городе (pop >= 3) — наоборот,
+	# восстановление (см. test_needs_city_recovery).
 	var cases := {
 		NeedType.ID.REST: &"exhaustion",
 		NeedType.ID.SOCIAL: &"isolation",
@@ -175,6 +181,14 @@ func test_needs_zero_streak_all_causes() -> void:
 		assert_that(m.tick(false)).is_equal(&"")
 		assert_that(m.tick(false)).is_equal(&"")
 		assert_that(m.tick(false)).is_equal(cases[need_id])
+	# sanity: в населённом городе needs=0 восстанавливается, смерть не наступает
+	var m := HeroNeeds.new()
+	var c := _make_temple_city()
+	c.pop = [PopUnit.new(), PopUnit.new(), PopUnit.new()]
+	for k in NeedType.all_ids():
+		m.needs[k] = 0.0
+	for _i in 3:
+		assert_that(m.tick(true, c)).is_equal(&"")
 
 func test_needs_serialize_roundtrip_and_old_save() -> void:
 	var n := HeroNeeds.new()
@@ -190,8 +204,9 @@ func test_needs_serialize_roundtrip_and_old_save() -> void:
 		assert_float(old.get_need(k)).is_equal_approx(1.0, 0.0001)
 
 func test_hero_dies_by_needs_emits_hero_died() -> void:
+	# Смерть от SOCIAL (тает вне города), не REST — REST вне города не тает.
 	var h := _survival_hero()
-	h.needs.needs[NeedType.ID.REST] = 0.0
+	h.needs.needs[NeedType.ID.SOCIAL] = 0.0
 	var captured: Dictionary = {"cause": &""}
 	var on_died := func(cause: StringName) -> void: captured["cause"] = cause
 	_bus(GameEventBus.hero_died, on_died)
@@ -201,7 +216,7 @@ func test_hero_dies_by_needs_emits_hero_died() -> void:
 	h._tick_needs()
 	GameEventBus.hero_died.disconnect(on_died)
 	assert_bool(h.is_alive).is_false()
-	assert_that(captured["cause"]).is_equal(&"exhaustion")
+	assert_that(captured["cause"]).is_equal(&"isolation")
 	h.free()
 
 func test_hero_city_tick_recovers() -> void:

@@ -64,6 +64,13 @@ class GodotMCPClient:
             return data.get("result")
         return data
 
+    def instantiate_scene(self, scene_path: str, parent_path: str = "/root",
+                          timeout: float = DEFAULT_TIMEOUT) -> Any:
+        return self._portal.call(
+            self._call, "game_instantiate_scene",
+            {"scenePath": scene_path, "parentPath": parent_path}, timeout,
+        )
+
     def wait_frames(
         self, frames: int = 1, frame_type: str = "render", timeout: float = DEFAULT_TIMEOUT
     ) -> None:
