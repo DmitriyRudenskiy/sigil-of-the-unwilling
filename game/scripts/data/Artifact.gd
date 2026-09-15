@@ -24,6 +24,7 @@ enum AcBonusType { NONE, ARMOR, SHIELD, NATURAL, DEFLECTION, DODGE }
 @export var is_two_handed: bool = false
 @export var value_gold: int = 0
 @export var description: String = ""
+@export var weight: float = 0.0
 
 var combat: Dictionary = {}
 var armor: Dictionary = {}
@@ -40,6 +41,7 @@ static func from_dict(data: Dictionary) -> Artifact:
     a.is_two_handed = bool(data.get("is_two_handed", false))
     a.value_gold = int(data.get("value_gold", 0))
     a.description = str(data.get("description", ""))
+    a.weight = float(data.get("weight", 0.0))
     a.combat = (data.get("combat", {}) as Dictionary).duplicate(true)
     a.armor = (data.get("armor", {}) as Dictionary).duplicate(true)
     a.ac_bonus_type = data.get("ac_bonus_type", AcBonusType.NONE)
@@ -55,6 +57,7 @@ func _init(
     p_is_two_handed: bool = false,
     p_value_gold: int = 0,
     p_description: String = "",
+    p_weight: float = 0.0,
     p_combat: Dictionary = {},
     p_armor: Dictionary = {},
     p_ac_bonus_type: AcBonusType = AcBonusType.NONE
@@ -68,6 +71,7 @@ func _init(
     is_two_handed = p_is_two_handed
     value_gold = p_value_gold
     description = p_description
+    weight = p_weight
     combat = p_combat.duplicate(true)
     armor = p_armor.duplicate(true)
     ac_bonus_type = p_ac_bonus_type

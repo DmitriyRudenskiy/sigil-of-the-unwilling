@@ -323,7 +323,12 @@ func remove_strategic_resource(id: StringName, amount: int) -> int:
 
 func get_daily_movement_points() -> float:
 	var mods := inventory_comp.get_total_modifiers()
-	return movement_comp.get_daily_movement_points(int(mods.get("movement", 0)))
+	var base: float = movement_comp.get_daily_movement_points(int(mods.get("movement", 0)))
+	# attribute-weight-system: перегруз экипировкой → −MP (не запрещает ходить)
+	var overload: float = LoadCalculator.overload_fraction(
+		inventory_comp.inventory, int(stats.get("defense", 2)))
+	base -= base * LoadCalculator.overload_mp_penalty(overload)
+	return maxf(base, 1.0)
 
 func get_avatar_texture() -> Texture2D:
 	return visual_comp.get_avatar_texture()

@@ -22,6 +22,24 @@ const WILD_ANIMAL_KEYS          := ["wolves", "gremlin"]
 const BACKPACK_TOTAL_CAP        := 12
 const BACKPACK_CART_BONUS       := 6
 const BACKPACK_CART_COST        := 20.0
+# attribute-weight-system: весовая переноска.
+# ponytail: базовая 16 + defense*1.0 — грубая калибровка под defense 2–8;
+# upgrade path: отдельная таблица по defense, если баланс-проба покажет
+# непропорциональность на высоких defense.
+const WEIGHT_BASE_CAP           := 16.0
+const WEIGHT_PER_DEFENSE        := 1.0
+# Штраф экипировки сверх лимита: доля превышения → −20% MP и +0.10 REST/ход
+# на максимум превышения (50%+). ponytail: линейно, без ступеней.
+const OVERLOAD_MP_PENALTY_MAX   := 0.20
+const OVERLOAD_REST_PENALTY_MAX := 0.10
+# Сила: добыча (REST-штраф −50% при attack 8+, улов +1 при attack 6+).
+# ponytail: две ступени, не формула; upgrade: плавная шкала, если захочется
+# более тонкого баланса.
+const EXTRACT_REST_REDUCE_MIN_ATTACK := 8
+const EXTRACT_YIELD_BONUS_ATTACK     := 6
+# Внимательность: шанс скрытого узла +5% на уровень 2+ (база 0.08).
+const HIDDEN_NODE_CHANCE_BASE   := 0.08
+const HIDDEN_NODE_KNOWLEDGE_BONUS := 0.05
 const HERO_MANA_TICK            := 1
 const NEED_REST_DECAY           := 0.10
 const NEED_SOCIAL_DECAY         := 0.08

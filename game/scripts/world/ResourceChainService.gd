@@ -109,4 +109,8 @@ func try_extract(mgr: ResourceNodeManager, hero: HeroController, cell: Vector2i)
 	if mgr == null:
 		return {"error": ResourceNodeManager.NodeError.NODE_NOT_FOUND, "amount": 0}
 	var keys: Dictionary = build_extraction_keys(hero)
-	return mgr.try_extract(cell, keys)
+	# attribute-weight-system: сила героя влияет на улов
+	var attack := 0
+	if hero != null and hero.stats != null:
+		attack = int(hero.stats.get("attack", 0))
+	return mgr.try_extract(cell, keys, attack)

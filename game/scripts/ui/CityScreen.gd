@@ -89,6 +89,11 @@ func refresh() -> void:
 	lines.append(GameText.city_food_netto("%.0f" % city.food_stockpile, "%+.1f" % city.net_food()))
 	lines.append(GameText.city_industry_gold("%.0f" % _storage_industry(), "%.0f" % _gold()))
 	lines.append(GameText.city_prosperity_reputation("%.0f" % city.prosperity, city.reputation))
+	# attribute-weight-system: вес/лимит рюкзака героя
+	if hero != null and hero.strategic_resources != null:
+		var w: float = hero.strategic_resources.current_weight()
+		var cap: float = hero.strategic_resources.weight_cap
+		lines.append("Рюкзак: %.1f / %.1f" % [w, cap])
 	_stats_label.text = "\n".join(lines)
 
 	var b_lines: Array[String] = []

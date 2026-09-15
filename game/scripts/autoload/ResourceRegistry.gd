@@ -35,7 +35,7 @@ func ensure_definitions() -> void:
 	_add(&"silver", "Серебро", ["grass"], Rarity.RARE,
 		&"keen_eye", "night", false, [],
 		&"precise_strike", "", "", "", "", false,
-		1, 2, 1.0, "🥈")
+		1, 2, 1.5, "🥈")
 
 	_add(&"quartz", "Кварц", ["sand"], Rarity.COMMON,
 		&"navigation", "noon", false, [],
@@ -65,7 +65,7 @@ func ensure_definitions() -> void:
 	_add(&"gold_ore", "Золото", ["snow"], Rarity.RARE,
 		&"geology", "", false, [],
 		"", &"", &"miner", &"precise_strike", "", false,
-		1, 2, 1.0, "🥇")
+		1, 2, 1.5, "🥇")
 
 	_add(&"coal_swamp", "Уголь (болото)", ["swamp"], Rarity.COMMON,
 		"", "", true, [&"undead", &"lizard"],
@@ -80,8 +80,11 @@ func ensure_definitions() -> void:
 	_add(&"cinnabar", "Киноварь", ["swamp"], Rarity.RARE,
 		&"alchemy", "", false, [],
 		&"poison_immune", "", "", "", "", false,
-		1, 1, 1.0, "🔴")
+		1, 1, 1.5, "🔴")
 
+	# ponytail: weight=0.0 — «безвесовая» масса (старый count-based лимит);
+	# upgrade path: реальные веса для wood/stone, если balance-проба покажет,
+	# что переноска дерева/камня не влияет на игру.
 	_add(ResourceType.to_name(ResourceType.ID.WOOD), "Дерево", ["grass", "forest"], Rarity.COMMON,
 		"", "", false, [],
 		"", &"", &"worker", "", "", false,

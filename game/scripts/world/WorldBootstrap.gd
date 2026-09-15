@@ -476,6 +476,9 @@ static func _create_resource_nodes(parent: Node2D, R: BootstrapResult) -> void:
 		"width": R.map_gen.map_width,
 		"height": R.map_gen.map_height,
 	}
+	# attribute-weight-system: внимательность героя влияет на шанс скрытых узлов
+	if R.hero != null and R.hero.stats != null and not R.hero.stats.is_empty():
+		map_data["hero_knowledge"] = int(R.hero.stats.get("knowledge", 0))
 	R.resource_node_manager.generate_nodes_for_map(map_data)
 
 	R.terrain_resource_manager = _TerrainResourceManager.new()

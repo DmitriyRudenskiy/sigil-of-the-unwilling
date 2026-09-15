@@ -104,6 +104,20 @@ def test_balance_probe_runs_early_game(mcp):
     # ── Hard-fail: только техсбои (смерть героя → error внутри прогона) ──
     assert report.get("turns", 0) > 0, "Прогон не сделал ни одного хода"
 
+    # attribute-weight-system: герой доживает 60 ходов (RUNNING, не DEFEAT)
+    assert report.get("endgame") != "DEFEAT", (
+        f"attribute-weight-system: герой погиб на ходу {report.get('turns')} "
+        f"(endgame={report.get('endgame')})"
+    )
+    # Ресурсы добываются (весовая система не блокирует полностью)
+    # ponytail: проверяем по отчёту, если поле есть; если нет — warning, не fail
+    extracted = report.get("resources_extracted", 0)
+    if extracted == 0 and report.get("turns", 0) >= 10:
+        warnings.append(
+            "attribute-weight-system: ресурсы не добываются (0 extracted) — "
+            "возможно, весовая система слишком жёсткая"
+        )
+
     # ── Сохраняем отчёт в репо (артефакт калибровки) ───────────────────────
     file_report_text = mcp.execute_code(PROBE_REPORT_FILE)
     report_out = REPORT_OUT / f"balance_{PROBE_SEED}.json"

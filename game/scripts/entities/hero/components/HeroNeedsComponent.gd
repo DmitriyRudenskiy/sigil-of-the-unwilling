@@ -30,6 +30,13 @@ func end_turn() -> void:
 		if mov_comp != null:
 			city = _hero.city_manager.city_at(mov_comp.get_current_cell())
 	var cause := tick(city != null, city)
+	# attribute-weight-system: перегруз экипировкой ускоряет спад REST
+	if _hero.inventory_comp != null:
+		var overload: float = LoadCalculator.overload_fraction(
+			_hero.inventory_comp.inventory, int(_hero.stats.get("defense", 2)))
+		var extra_rest: float = LoadCalculator.overload_rest_penalty(overload)
+		if extra_rest > 0.0:
+			needs.reduce(NeedType.ID.REST, extra_rest)
 	if cause != &"":
 		_hero.mark_combat_dead()
 		GameLogger.world("Hero death by needs: %s" % String(cause))

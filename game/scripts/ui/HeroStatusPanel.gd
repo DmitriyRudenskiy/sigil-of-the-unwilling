@@ -72,10 +72,17 @@ func _needs_text(n: HeroNeeds) -> String:
 
 func _stats_text(h: HeroController) -> String:
 	var s: Dictionary = h.stats
-	return GameText.hero_stats(
+	var base: String = GameText.hero_stats(
 		int(s.get("attack", 0)), int(s.get("defense", 0)),
 		int(s.get("knowledge", 0)), int(s.get("spell_power", 0)),
 	)
+	# attribute-weight-system: вес экипировки / лимит
+	if h.inventory != null:
+		var eq_w: float = LoadCalculator.equipment_weight(h.inventory)
+		var cap: float = LoadCalculator.carry_cap(float(int(s.get("defense", 2))))
+		var mark: String = " ⚠" if eq_w > cap else ""
+		base += "\nВес: %.1f / %.1f%s" % [eq_w, cap, mark]
+	return base
 
 func _followers_text(h: HeroController) -> String:
 	var fs: Array = h.followers

@@ -77,6 +77,12 @@ func generate_nodes_for_map(map_data: Dictionary) -> void:
 	if width == 0 or height == 0:
 		return
 
+	# attribute-weight-system: шанс скрытого узла от внимательности героя
+	# (по умолчанию 0.08; knowledge 2+ → +0.05).
+	var hidden_chance: float = GameNumbersHero.HIDDEN_NODE_CHANCE_BASE
+	if map_data.has("hero_knowledge"):
+		hidden_chance = LogisticsCalculator.hidden_chance(int(map_data.get("hero_knowledge", 0)))
+
 	for y in height:
 		for x in width:
 			var cell := Vector2i(x, y)
@@ -87,7 +93,7 @@ func generate_nodes_for_map(map_data: Dictionary) -> void:
 			if biome == "":
 				continue
 
-			if _rng.randf() < 0.08:
+			if _rng.randf() < hidden_chance:
 				var hidden: Array = _get_hidden_by_biome(biome)
 				if hidden.is_empty():
 					continue
@@ -149,9 +155,10 @@ func try_discover(cell: Vector2i, discovery_keys: Dictionary) -> Dictionary:
 
 	return {"error": NodeError.OK, "discovered": false}
 
-func try_extract(cell: Vector2i, extraction_keys: Dictionary) -> Dictionary:
+func try_extract(cell: Vector2i, extraction_keys: Dictionary, hero_attack: int = 0) -> Dictionary:
 	"""Try to extract resources. Returns {"error": NodeError, "amount": int}.
 	extraction_keys: {tag: bool, skill: int, unit: bool, tool: bool, consumable: bool, fire: bool}
+	hero_attack: сила героя — влияет на улов (attribute-weight-system).
 	"""
 	var node: ResourceNode = _nodes.get(cell, null)
 	if node == null:
@@ -168,7 +175,8 @@ func try_extract(cell: Vector2i, extraction_keys: Dictionary) -> Dictionary:
 		GameLogger.warn("ResourceNodeManager: extraction denied at %s (missing keys for '%s')" % [cell, def.id], "World")
 		return {"error": NodeError.EXTRACTION_KEY_MISSING, "amount": 0}
 
-	var amount: int = node.get_yield()
+	# attribute-weight-system: сила героя — до 1 единицы сверх улова узла
+	var amount: int = node.get_yield() + LogisticsCalculator.yield_bonus(hero_attack)
 	node.reduce_yield(amount)
 	if node.is_exhausted():
 		resource_exhausted.emit(cell, node.resource_id)

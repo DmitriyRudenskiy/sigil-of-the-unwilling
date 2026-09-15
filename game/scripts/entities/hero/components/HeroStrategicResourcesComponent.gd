@@ -11,6 +11,20 @@ func setup_hero(hero: HeroController) -> void:
 
 func initialize() -> void:
 	strategic.init_from_registry(Services.resolve(&"resources"))
+	_reapply_weight_cap()
+
+func _reapply_weight_cap() -> void:
+	if _hero == null:
+		return
+	var stats: Dictionary = _hero.stats
+	if stats == null or stats.is_empty():
+		return
+	strategic.set_weight_cap(
+		LoadCalculator.carry_cap(float(int(stats.get("defense", 2)))))
+
+func on_stats_changed() -> void:
+	_reapply_weight_cap()
+	strategic.emit_changed()
 
 func set_strategic(v: HeroStrategicResources) -> void:
 	strategic = v
@@ -36,8 +50,13 @@ func end_turn() -> void:
 
 func serialize() -> Dictionary:
 	return {"strategic_resources": strategic.get_all(),
-		"backpack_bonus": strategic.capacity_bonus}
+		"backpack_bonus": strategic.capacity_bonus,
+		"weight_cap": strategic.weight_cap}
 
 func deserialize(data: Dictionary) -> void:
 	strategic.set_all(data.get("strategic_resources", strategic.get_all()))
 	strategic.capacity_bonus = int(data.get("backpack_bonus", 0))
+	# attribute-weight-system: старый сейв без weight_cap — пересчитываем из defense
+	if data.has("weight_cap"):
+		strategic.set_weight_cap(float(data.get("weight_cap", strategic.weight_cap)))
+	_reapply_weight_cap()

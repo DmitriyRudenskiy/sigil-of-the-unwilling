@@ -24,6 +24,10 @@ func tick(in_city: bool, city: City = null) -> StringName:
 func is_critical(id: int) -> bool: return float(needs.get(id, 0.0)) < 0.2
 func get_need(id: int) -> float: return float(needs.get(id, 0.0))
 
+## attribute-weight-system: мгновенный спад потребности (добыча, перегруз)
+func reduce(id: int, amount: float) -> void:
+	needs[id] = clampf(float(needs.get(id, 1.0)) - amount, 0.0, 1.0)
+
 func reset() -> void:
 	for id in NeedType.all_ids():
 		needs[id] = 1.0
