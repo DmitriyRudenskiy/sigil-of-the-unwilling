@@ -111,6 +111,7 @@ def test_balance_probe_runs_early_game(mcp):
     )
     # Ресурсы добываются (весовая система не блокирует полностью)
     # ponytail: проверяем по отчёту, если поле есть; если нет — warning, не fail
+    warnings = list(report.get("warnings", []))
     extracted = report.get("resources_extracted", 0)
     if extracted == 0 and report.get("turns", 0) >= 10:
         warnings.append(
@@ -128,7 +129,6 @@ def test_balance_probe_runs_early_game(mcp):
         _save_report(report, report_out)
 
     # ── Warnings — в stdout, не fail ────────────────────────────────────────
-    warnings = report.get("warnings", [])
     print(
         "\n[balance-probe] seed=%s turns=%s first_building=%s first_recruit=%s "
         "first_collision=%s first_win=%s losses=%s stuck_max=%s season=%s endgame=%s"

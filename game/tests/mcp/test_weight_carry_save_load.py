@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import time
 
-from conftest import MCPError
+
 
 GET_BASELINE = """
 var world = get_tree().current_scene
@@ -82,7 +82,7 @@ def _wait_world(mcp, timeout: float = 120.0) -> dict:
     last: dict = {}
     while time.time() < deadline:
         try:
-            r = mcp.eval("var w = get_tree().current_scene; return w != null and w.get_hero() != null")
+            r = mcp.execute_code("var w = get_tree().current_scene; return w != null and w.get_hero() != null")
             last = {"ready": bool(r)}
             if last["ready"]:
                 return last
@@ -91,11 +91,12 @@ def _wait_world(mcp, timeout: float = 120.0) -> dict:
         time.sleep(2.0)
     raise TimeoutError(f"world not ready in {timeout}s: {last}")
 
-def test_weight_carry_save_load(mcp) -> None:
+def test_weight_carry_save_load(full_game) -> None:
+    mcp = full_game
     _wait_world(mcp)
 
     # 1. Базовый весовой cap
-    base = mcp.eval(GET_BASELINE)
+    base = mcp.execute_code(GET_BASELINE)
     assert "error" not in base, base
     assert base["weight_cap"] > 0, f"weight_cap must be > 0, got {base['weight_cap']}"
     assert abs(base["weight_cap"] - base["expected_cap"]) < 0.01, (
@@ -103,15 +104,15 @@ def test_weight_carry_save_load(mcp) -> None:
     )
 
     # 2. Save
-    mcp.eval(SAVE_GAME)
+    mcp.execute_code(SAVE_GAME)
 
     # 3. Load
-    mcp.eval(LOAD_GAME)
+    mcp.execute_code(LOAD_GAME)
     time.sleep(5.0)
     _wait_world(mcp)
 
     # 4. After load: weight_cap восстановлен
-    after = mcp.eval(AFTER_LOAD)
+    after = mcp.execute_code(AFTER_LOAD)
     assert after.get("ready") is True, after
     assert after["weight_cap"] > 0, f"weight_cap after load must be > 0, got {after['weight_cap']}"
     assert abs(after["weight_cap"] - after["expected_cap"]) < 0.01, (
@@ -120,5 +121,5 @@ def test_weight_carry_save_load(mcp) -> None:
 
     # 5. Игра продолжает ходить
     for _ in range(3):
-        r = mcp.eval(END_TURN)
+        r = mcp.execute_code(END_TURN)
         assert "turn" in r, r
