@@ -1,6 +1,11 @@
 class_name CityScreen
 extends Control
 
+const DeceptionCheck = preload("res://scripts/systems/DeceptionCheck.gd")
+const ReputationSystem = preload("res://scripts/city/ReputationSystem.gd")
+const WeaponTechService = preload("res://scripts/systems/WeaponTechService.gd")
+const LeadershipCheck = preload("res://scripts/systems/LeadershipCheck.gd")
+
 signal close_requested
 signal state_changed
 
@@ -94,6 +99,12 @@ func refresh() -> void:
 		var w: float = hero.strategic_resources.current_weight()
 		var cap: float = hero.strategic_resources.weight_cap
 		lines.append("Рюкзак: %.1f / %.1f" % [w, cap])
+	# social-stats-weapon-tech: тир технологий и cap отряда
+	if hero != null:
+		var cha: int = int(hero.stats.get("cha", 2))
+		var tier: int = WeaponTechService.city_weapon_tier(city, cha)
+		var cap: int = mini(LeadershipCheck.max_army_stacks(cha), GameNumbers.HERO_ARMY_MAX_STACKS)
+		lines.append("Технологии: тир %d | Отряд: %d/%d" % [tier, hero.get_army().army.size() if hero.get_army() != null else 0, cap])
 	_stats_label.text = "\n".join(lines)
 
 	var b_lines: Array[String] = []
@@ -159,6 +170,13 @@ func hire_pressed() -> CityCheck:
 		return _fail(GameText.city_not_bound())
 	if hero == null:
 		return _fail(GameText.city_hire_no_hero())
+	# social-stats-weapon-tech: найм — договорная сделка (обман)
+	var dec: Dictionary = _deception("contract")
+	if bool(dec.get("deceived", false)) and int(dec.get("severity", 1)) >= 3:
+		ReputationSystem.apply(city, -10)
+		_set_message(str(dec.get("note", "")))
+		refresh()
+		return _fail(GameText.city_no_followers())
 	var f := FollowerSystem.recruit(city, hero, rng)
 	if f == null:
 		return _fail(GameText.city_no_followers())
@@ -203,13 +221,27 @@ func buy_cart_pressed() -> CityCheck:
 		return _fail(GameText.city_hire_no_hero())
 	if not _has_market():
 		return _fail(GameText.city_cart_no_market())
+	var message := ""
 	var cost: float = GameNumbersHero.BACKPACK_CART_COST
+	# social-stats-weapon-tech: покупка телеги — важная сделка (обман)
+	var dec: Dictionary = _deception("purchase")
+	if bool(dec.get("deceived", false)):
+		var sev: int = int(dec.get("severity", 1))
+		var surcharge: float = float(GameNumbers.DECEPTION_SEVERITIES[sev].get("surcharge", 0.15))
+		cost = cost * (1.0 + surcharge)
+		if sev >= 3 and city != null:
+			ReputationSystem.apply(city, -10)  # кабальный договор
+		message += " %s" % str(dec.get("note", ""))
+	elif bool(dec.get("revealed", false)):
+		message += " %s" % str(dec.get("note", ""))
+	else:
+		cost = cost * (1.0 - float(dec.get("discount", 0.0)))
 	if _storage_industry() < cost:
 		return _fail(GameText.city_cart_no_funds(cost))
 	city.storage[&"industry"] = _storage_industry() - cost
 	city.storage_changed.emit()
 	hero.strategic_resources.capacity_bonus += GameNumbersHero.BACKPACK_CART_BONUS
-	_set_message(GameText.city_cart_bought(hero.strategic_resources.total_cap()))
+	_set_message((GameText.city_cart_bought(hero.strategic_resources.total_cap()) + message).strip_edges())
 	refresh()
 	return CityCheck.success({"cap": hero.strategic_resources.total_cap()})
 
@@ -251,6 +283,18 @@ func _on_close_pressed() -> void:
 func _fail(message: String) -> CityCheck:
 	_set_message(message)
 	return CityCheck.fail(message)
+
+## social-stats-weapon-tech: бросок обмана по статам героя; мелкая торговля не проверяется
+func _deception(kind: String) -> Dictionary:
+	if hero == null:
+		return {"deceived": false, "severity": 0, "note": "", "discount": 0.0, "revealed": false}
+	var s: Dictionary = hero.stats
+	var r: RandomNumberGenerator = rng if rng != null else RandomNumberGenerator.new()
+	var base: int = int(GameNumbers.DECEPTION_BASE.get(kind, 10))
+	return DeceptionCheck.roll(r,
+		int(s.get("int", 2)), int(s.get("wis", 2)),
+		int(s.get("cha", 2)), int(s.get("luk", 2)),
+		base, 14)
 
 func _set_message(text: String) -> void:
 	_message_label.text = text

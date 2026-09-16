@@ -261,3 +261,18 @@ static func ring_yield(ring: int, table: Array = GameNumbersCity.RING_YIELD) -> 
 
 static func ring_bonus(def_id: StringName, ring: int, table: Dictionary = GameNumbersCity.RING_BONUS) -> float:
 	return GameNumbersCity.ring_bonus(def_id, ring, table)
+
+# social-stats-weapon-tech
+const DECEPTION_BASE := GameNumbersCity.DECEPTION_BASE
+const DECEPTION_TRAP_DC := GameNumbersCity.DECEPTION_TRAP_DC
+const DECEPTION_SEVERITIES := GameNumbersCity.DECEPTION_SEVERITIES
+const DECEPTION_CRITICAL_MARGIN := GameNumbersCity.DECEPTION_CRITICAL_MARGIN
+const DECEPTION_MIN_PCT := GameNumbersCity.DECEPTION_MIN_PCT
+const DECEPTION_MAX_PCT := GameNumbersCity.DECEPTION_MAX_PCT
+const SOCIAL_CHA_TABLES := {
+	"immigration": GameNumbersCity.SOCIAL_IMMIGRATION_MOD,
+	"max_stacks": GameNumbersCity.SOCIAL_MAX_STACKS,
+	"recruit_quality": GameNumbersCity.SOCIAL_RECRUIT_QUALITY,
+}
+const SOCIAL_ATTRITION_CHA := GameNumbersCity.SOCIAL_ATTRITION_CHA
+const RECRUIT_DC := GameNumbersCity.RECRUIT_DC

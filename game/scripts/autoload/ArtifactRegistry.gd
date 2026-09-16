@@ -27,6 +27,31 @@ func ensure_definitions() -> void:
 		{"defense": 1}, &"", false, 300, "Sturdy leather armor.",
 		{}, {"base_ac": 4, "max_dex_bonus": 3, "acp": -2, "asf": 10.0}, Artifact.AcBonusType.NONE, 3.0)
 
+	# social-stats-weapon-tech: изделия WeaponCatalog (вес из MATERIALS по тиру)
+	_register(&"club", "Дубина", Artifact.Slot.WEAPON, Artifact.Rarity.MINOR,
+		{"attack": 1}, &"", false, 5, "Простая палка. Верная, как смерть.",
+		{"damage_dice": "1d4", "damage_types": [Artifact.DamageType.BLUDGEONING], "crit_threat": 20, "crit_multiplier": 2.0, "proficiency": [Artifact.WeaponCategory.SIMPLE], "weapon_size": Artifact.WeaponSize.MEDIUM}, {}, Artifact.AcBonusType.NONE, 1.0)
+
+	_register(&"stone_axe", "Каменный топор", Artifact.Slot.WEAPON, Artifact.Rarity.MINOR,
+		{"attack": 1}, &"", true, 8, "Окаменевшее терпение.",
+		{"damage_dice": "1d6", "damage_types": [Artifact.DamageType.SLASHING], "crit_threat": 20, "crit_multiplier": 2.0, "proficiency": [Artifact.WeaponCategory.SIMPLE], "weapon_size": Artifact.WeaponSize.LARGE}, {}, Artifact.AcBonusType.NONE, 1.0)
+
+	_register(&"iron_sword", "Железный меч", Artifact.Slot.WEAPON, Artifact.Rarity.MINOR,
+		{"attack": 2}, &"", false, 20, "Первый настоящий клинок.",
+		{"damage_dice": "1d8", "damage_types": [Artifact.DamageType.PIERCING], "crit_threat": 20, "crit_multiplier": 2.0, "proficiency": [Artifact.WeaponCategory.MARTIAL], "weapon_size": Artifact.WeaponSize.MEDIUM}, {}, Artifact.AcBonusType.NONE, 2.0)
+
+	_register(&"steel_longsword", "Стальной длинный меч", Artifact.Slot.WEAPON, Artifact.Rarity.MAJOR,
+		{"attack": 3}, &"", true, 45, "Тяжёлая сталь тяжёлых решений.",
+		{"damage_dice": "2d6", "damage_types": [Artifact.DamageType.SLASHING], "crit_threat": 19, "crit_multiplier": 2.0, "proficiency": [Artifact.WeaponCategory.MARTIAL], "weapon_size": Artifact.WeaponSize.LARGE}, {}, Artifact.AcBonusType.NONE, 1.8)
+
+	_register(&"runic_blade", "Рунный клинок", Artifact.Slot.WEAPON, Artifact.Rarity.MAJOR,
+		{"attack": 3, "spell_power": 1}, &"", false, 90, "Руны шепчут о будущем враге.",
+		{"damage_dice": "2d8", "damage_types": [Artifact.DamageType.PIERCING], "crit_threat": 19, "crit_multiplier": 2.0, "proficiency": [Artifact.WeaponCategory.MARTIAL], "weapon_size": Artifact.WeaponSize.MEDIUM}, {}, Artifact.AcBonusType.NONE, 2.5)
+
+	_register(&"rune_sword", "Рун. меч", Artifact.Slot.WEAPON, Artifact.Rarity.RELIC,
+		{"attack": 4, "spell_power": 2}, &"", false, 160, "Легенда, которую можно воткнуть в кого-нибудь.",
+		{"damage_dice": "3d8", "damage_types": [Artifact.DamageType.PIERCING], "crit_threat": 18, "crit_multiplier": 2.0, "proficiency": [Artifact.WeaponCategory.MARTIAL], "weapon_size": Artifact.WeaponSize.MEDIUM}, {}, Artifact.AcBonusType.NONE, 2.5)
+
 	_register(&"wooden_sword", "Wooden Sword", Artifact.Slot.WEAPON, Artifact.Rarity.MINOR,
 		{"attack": 1}, &"", false, 200, "A training sword.",
 		{"damage_dice": "1d6", "damage_types": [Artifact.DamageType.BLUDGEONING], "crit_threat": 20, "crit_multiplier": 2.0, "proficiency": [Artifact.WeaponCategory.SIMPLE], "weapon_size": Artifact.WeaponSize.MEDIUM}, {}, Artifact.AcBonusType.NONE, 2.0)

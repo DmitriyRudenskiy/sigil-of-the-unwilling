@@ -29,6 +29,7 @@ enum AcBonusType { NONE, ARMOR, SHIELD, NATURAL, DEFLECTION, DODGE }
 var combat: Dictionary = {}
 var armor: Dictionary = {}
 var ac_bonus_type: AcBonusType = AcBonusType.NONE
+var tier: int = 1  # social-stats-weapon-tech: тир оружия (1..5)
 
 static func from_dict(data: Dictionary) -> Artifact:
     var a := Artifact.new()

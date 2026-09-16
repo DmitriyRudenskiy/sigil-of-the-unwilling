@@ -160,3 +160,42 @@ static func ring_bonus(def_id: StringName, ring: int, table: Dictionary = RING_B
 		return 0.0
 	var row: Dictionary = table[def_id]
 	return float(row.get(ring, 0.0))
+
+
+# --- social-stats-weapon-tech: социальные системы ---
+# Базовые шансы обмана по виду сделки, % (D2)
+const DECEPTION_BASE := {
+	"purchase": 10,       # обычная важная покупка
+	"contract": 20,       # договор / найм-контракт
+	"questionable": 35,   # сомнительное задание
+}
+# d20-сложности ловушек (trap_dc) по "зловредности" мошенника
+const DECEPTION_TRAP_DC := {
+	"minor": 10, "small": 13, "standard": 14,
+	"hard": 16, "brutal": 18, "lethal": 20,
+}
+# 4 степени последствий: {discount/наценка, label}
+const DECEPTION_SEVERITIES := [
+	{"id": "none", "surcharge": 0.0},
+	{"id": "light", "surcharge": 0.15, "desc": "Наценка 10-30%"},
+	{"id": "medium", "surcharge": 0.30, "desc": "Товар низкого качества / недоплата"},
+	{"id": "severe", "surcharge": 0.50, "desc": "Поддельный документ / скрытый долг / штраф"},
+	{"id": "critical", "surcharge": 1.00, "desc": "Кража / ловушка / репутационный ущерб"},
+]
+# Порог d20-провала для повышения степени (провал на N+ => серьёзная/крит)
+const DECEPTION_CRITICAL_MARGIN := 5
+const DECEPTION_MIN_PCT := 5
+const DECEPTION_MAX_PCT := 85
+
+# Таблицы харизмы (D3): индексы = cha-1 (cha 1..20+)
+const SOCIAL_IMMIGRATION_MOD := [0.5, 0.5, 0.5, 0.65, 0.65, 0.8, 0.8, 0.95, 0.95, 1.0, 1.1, 1.1, 1.1, 1.2, 1.2, 1.2, 1.35, 1.35, 1.5, 1.5]
+const SOCIAL_MAX_STACKS := [1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 7, 7]
+const SOCIAL_RECRUIT_QUALITY := [0.8, 0.8, 0.8, 0.8, 0.8, 1.0, 1.0, 1.0, 1.0, 1.0, 1.1, 1.1, 1.1, 1.2, 1.2, 1.2, 1.25, 1.25, 1.25, 1.25]
+# порог cha для доп. оттока жителей
+const SOCIAL_ATTRITION_CHA := 5
+
+# Сложность найма по типу бойца (d20, ТЗ)
+const RECRUIT_DC := {
+	"desperate": 8, "militia": 10, "hunter": 12, "veteran": 14,
+	"elite": 18, "champion": 20, "smith": 14,
+}

@@ -1,6 +1,23 @@
 class_name CityService
 extends RefCounted
 
+const LeadershipCheck = preload("res://scripts/systems/LeadershipCheck.gd")
+const WeaponTechService = preload("res://scripts/systems/WeaponTechService.gd")
+
+# social-stats-weapon-tech: управляемый rng для проверок найма
+static var _rng := RandomNumberGenerator.new()
+static var _rng_override: RandomNumberGenerator = null
+
+static func set_rng(rng: RandomNumberGenerator) -> void:
+	_rng_override = rng
+
+static func _recruit_difficulty(city_level: int) -> String:
+	if city_level >= 7:
+		return "veteran"
+	if city_level >= 4:
+		return "hunter"
+	return "militia"
+
 static func pop_total(c: CityData) -> int:
 	return c.pop.size()
 static func pop_capped(c: CityData) -> int:
@@ -128,17 +145,37 @@ static func recruit_military(c: CityData, building: UniqueBuilding, hero: Node) 
 	if hero == null or not (hero is HeroController) or hero.get_army() == null:
 		return CityCheck.fail("Нет героя")
 	var army: Array = hero.get_army().army
-	if army.size() >= GameNumbers.HERO_ARMY_MAX_STACKS:
-		return CityCheck.fail("Армия героя заполнена (%d отрядов)" % GameNumbers.HERO_ARMY_MAX_STACKS)
+	# social-stats-weapon-tech: cap стеков от харизмы героя (мин 3)
+	var cha: int = int(hero.stats.get("cha", 2))
+	var cap: int = mini(LeadershipCheck.max_army_stacks(cha), GameNumbers.HERO_ARMY_MAX_STACKS)
+	if army.size() >= cap:
+		return CityCheck.fail("Армия героя заполнена (%d/%d отрядов)" % [army.size(), cap])
+	# d20-проверка найма: успех/слухи/отказ/крит-инцидент
+	var check: Dictionary = LeadershipCheck.recruit_check(
+		_rng_override if _rng_override != null else _rng, cha, c.reputation, 1, _recruit_difficulty(c.level))
+	match str(check.get("outcome", "success")):
+		"refused":
+			return CityCheck.fail("Наёмники отказались (харизма/репутация)")
+		"rumor":
+			ReputationSystem.apply(c, float(check.get("rep_delta", -5)))
+			return CityCheck.fail("Наём сорвался — пошли слухи (репутация -5)")
+		"critical":
+			ReputationSystem.apply(c, float(check.get("rep_delta", -10)))
+			return CityCheck.fail("Крит-инцидент на найме (репутация -10)")
 	for key in cost:
 		c.storage[key] = float(c.storage.get(key, 0.0)) - float(cost[key])
 	var unit_key := String(chain.get("unit_key", ""))
-	# Ранняя игра: тир оружия определяется уровнем города (early-game-foundation)
-	var tier: int = weapon_tier_for_city(c.level)
+	# social-stats-weapon-tech: тир = max(fallback по уровню, tech по кузнице/ресурсам)
+	var tier: int = WeaponTechService.city_weapon_tier(c, cha)
 	var reg: Node = Services.resolve(&"units")
 	var stack: UnitStack = reg.make_recruit_stack(unit_key, GameNumbers.RECRUIT_BATCH_SIZE, tier)
 	if stack == null:
 		return CityCheck.fail("Нет определения юнита: %s" % unit_key)
+	# качество найма: множитель cha на базовые характеристики стека
+	var quality: float = LeadershipCheck.recruit_quality(cha)
+	if absf(quality - 1.0) > 0.001 and stack.stats != null:
+		stack.stats.base_damage = int(round(float(stack.stats.base_damage) * quality))
+		stack.stats.attack = int(round(float(stack.stats.attack) * quality))
 	army.append(stack)
 	return CityCheck.success({"unit": unit_key, "count": GameNumbers.RECRUIT_BATCH_SIZE, "tier": tier})
 

@@ -350,6 +350,8 @@ static func _register_city(R: BootstrapResult) -> void:
 
 	var city_proc := CityTurnProcessor.new()
 	R.turn_scheduler.register_processor(city_proc)
+	# social-stats-weapon-tech: cha героя влияет на иммиграцию его города
+	city_proc.set_hero_provider(func(): return R.hero)
 
 	city_proc.city_scale_changed.connect(
 		func(city_uid: int, new_scale: int):

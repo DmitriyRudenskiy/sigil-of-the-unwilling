@@ -56,6 +56,9 @@ func get_phase_id() -> StringName:
 func get_priority() -> int:
 	return 5
 
+func set_hero_provider(fn: Callable) -> void:
+	(_migration as MigrationProcessor).hero_provider = fn
+
 func process(ctx: TurnContext) -> Dictionary:
 	var report := {"cities": [], "scale_changes": 0, "zone_violations": 0,
 		"rep_deltas": 0, "immigrants": 0, "emigrants": 0, "raids": 0, "events": 0}

@@ -1,4 +1,6 @@
 extends BaseTest
+const TestFactories = preload("res://tests/helpers/factories.gd")
+
 
 # Ранняя игра: дымовая города (early-game-foundation, city-tech-tree).
 
@@ -16,6 +18,8 @@ func _solo_hero() -> HeroController:
 	var hero := TestFactories.make_hero()
 	_main_root().add_child(hero)
 	hero.get_army().setup(Services.resolve(&"units"), true)
+	# social-stats-weapon-tech: cha 20 — cap 7 стеков (тесты набирают до 3+)
+	hero.stats["cha"] = 20
 	return hero
 
 func _main_root() -> Node:
@@ -92,6 +96,7 @@ func test_make_recruit_stack_tiers() -> void:
 
 
 func test_recruit_military_flow() -> void:
+	CityService.set_rng(TestFactories.seeded(1))
 	BuildingDefs._def_cache.clear()
 	BuildingDefs._raw_cache = []
 	var c := _city_at(3)
@@ -110,6 +115,7 @@ func test_recruit_military_flow() -> void:
 
 
 func test_recruit_tier_follows_city_level() -> void:
+	CityService.set_rng(TestFactories.seeded(1))
 	BuildingDefs._def_cache.clear()
 	BuildingDefs._raw_cache = []
 	var hero := _solo_hero()

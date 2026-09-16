@@ -54,6 +54,8 @@ func test_city_unload_moves_backpack_to_storage() -> void:
 	var hero := _hero_with_backpack({&"oak": 5, &"silver": 2})
 	_main_root().add_child(hero)
 	screen.setup(city, hero, Vector2i(10, 10), TestFactories.seeded(42))
+	# social-stats-weapon-tech: int 20 — шанс обмана 5%, seed 42 не падает
+	hero.stats["int"] = 20
 
 	var check: CityCheck = screen.unload_pressed()
 	assert_bool(check.ok).is_true()
@@ -74,6 +76,8 @@ func test_city_unload_empty_fails() -> void:
 	var hero := _hero_with_backpack({&"oak": 0})
 	_main_root().add_child(hero)
 	screen.setup(city, hero, Vector2i(10, 10), TestFactories.seeded(42))
+	# social-stats-weapon-tech: int 20 — шанс обмана 5%, seed 42 не падает
+	hero.stats["int"] = 20
 
 	var check: CityCheck = screen.unload_pressed()
 	assert_bool(check.ok).is_false()
@@ -91,6 +95,8 @@ func test_cart_buy_requires_market_and_funds() -> void:
 	var hero := _hero_with_backpack({&"oak": 0})
 	_main_root().add_child(hero)
 	screen.setup(city, hero, Vector2i(10, 10), TestFactories.seeded(42))
+	# social-stats-weapon-tech: int 20 — шанс обмана 5%, seed 42 не падает
+	hero.stats["int"] = 20
 
 	# Нет рынка
 	var check: CityCheck = screen.buy_cart_pressed()

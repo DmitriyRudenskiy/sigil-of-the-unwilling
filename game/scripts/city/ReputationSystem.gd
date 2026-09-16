@@ -1,6 +1,8 @@
 class_name ReputationSystem
 extends RefCounted
 
+const LeadershipCheck = preload("res://scripts/systems/LeadershipCheck.gd")
+
 enum Band {
 	REBELLION = 0,
 	CRISIS = 1,
@@ -46,16 +48,29 @@ static func apply(city: City, delta: float) -> int:
 static func process_turn(city: City) -> int:
 	return apply(city, turn_factor(city))
 
-static func process_migration(city: City) -> Dictionary:
+## cha — харизма героя, находящегося в городе (-1 = героя нет)
+static var _rng := RandomNumberGenerator.new()
+static func process_migration(city: City, cha: int = -1) -> Dictionary:
 	var immigrants := 0
 	var emigrants := 0
+	var cha_mod: float = LeadershipCheck.immigration_modifier(cha) if cha >= 0 else 1.0
 	if city.reputation >= GameNumbers.MIGRATE_IN_AT:
 		if city.pop_capped() < city.pop_cap():
 			var st: int = city.immigrant_state()
 			if st >= 0:
 				city.add_migrant(st)
 				immigrants = GameNumbers.MIGRATE_IN_PER_TURN
+				# множитель иммиграции: 50% шанс доп. иммигранта
+				if cha_mod > 1.0 and _rng.chancei(int(cha_mod * 100.0)) < 100:
+					city.add_migrant(st)
+					immigrants += 1
 	elif city.reputation <= GameNumbers.MIGRATE_OUT_AT:
+		# cha <= 5: доп. отток +1 (недовольство правителем)
+		if cha >= 0 and cha <= GameNumbers.SOCIAL_ATTRITION_CHA:
+			if _emigrate_one(city):
+				emigrants += 1
+
+	if city.reputation <= GameNumbers.MIGRATE_OUT_AT:
 		var per: int = GameNumbers.MIGRATE_CRISIS_PER_TURN \
 			if city.reputation <= GameNumbers.MIGRATE_CRISIS_AT \
 			else 1

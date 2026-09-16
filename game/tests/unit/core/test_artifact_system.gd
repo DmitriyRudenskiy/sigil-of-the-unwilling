@@ -51,12 +51,12 @@ func test_artifact_is_two_handed() -> void:
 	assert_bool(a.is_two_handed).is_false()
 
 func test_registry_has_54() -> void:
-	assert_that(Artifacts.get_all().size()).is_equal(54)
+	assert_that(Artifacts.get_all().size()).is_equal(60)  # 54 + 6 WeaponCatalog (social-stats-weapon-tech)
 
 func test_registry_rarity_distribution() -> void:
-	assert_that(Artifacts.get_by_rarity(Artifact.Rarity.MINOR).size()).is_equal(10)
-	assert_that(Artifacts.get_by_rarity(Artifact.Rarity.MAJOR).size()).is_equal(10)
-	assert_that(Artifacts.get_by_rarity(Artifact.Rarity.RELIC).size()).is_equal(34)
+	assert_that(Artifacts.get_by_rarity(Artifact.Rarity.MINOR).size()).is_equal(13)
+	assert_that(Artifacts.get_by_rarity(Artifact.Rarity.MAJOR).size()).is_equal(12)
+	assert_that(Artifacts.get_by_rarity(Artifact.Rarity.RELIC).size()).is_equal(35)
 
 func test_registry_unique_ids() -> void:
 	var seen: Dictionary = {}

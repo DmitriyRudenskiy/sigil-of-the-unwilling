@@ -56,6 +56,7 @@ func test_full_early_game_loop() -> void:
 
 	# 4. Рекрутка: казармы + серебро из хранилища → отряд в армии
 	var barracks: UniqueBuilding = city.buildings[0]
+	CityService.set_rng(TestFactories.seeded(1))
 	var recruit: CityCheck = CityService.recruit_military(city, barracks, hero)
 	assert_bool(recruit.ok).is_true()
 	assert_int(hero.get_army().army.size()).is_equal(1)
