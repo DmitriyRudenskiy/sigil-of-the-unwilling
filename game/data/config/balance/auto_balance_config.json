@@ -1,0 +1,124 @@
+{
+  "version": "1.0",
+  "description": "Auto-balanced configuration for early game resources and buildings",
+  "generated_by": "AutoBalancer",
+  "last_updated": "2024-01-15",
+  
+  "resources": {
+    "wood": {
+      "base_production": 10.0,
+      "base_consumption": 1.0,
+      "starting_amount": 50,
+      "max_storage": 500
+    },
+    "food": {
+      "base_production": 8.0,
+      "base_consumption": 3.0,
+      "starting_amount": 30,
+      "max_storage": 300,
+      "spoilage_rate": 0.05
+    },
+    "stone": {
+      "base_production": 5.0,
+      "base_consumption": 0.5,
+      "starting_amount": 20,
+      "max_storage": 200
+    },
+    "gold": {
+      "base_production": 2.0,
+      "base_consumption": 1.5,
+      "starting_amount": 10,
+      "max_storage": 1000
+    }
+  },
+  
+  "buildings": {
+    "farm": {
+      "cost": {
+        "wood": 20,
+        "stone": 5
+      },
+      "production": {
+        "food": 5.0
+      },
+      "upkeep": {
+        "wood": 0.5
+      },
+      "build_time_days": 2
+    },
+    "mine": {
+      "cost": {
+        "wood": 30,
+        "stone": 10
+      },
+      "production": {
+        "stone": 3.0,
+        "ore": 1.0
+      },
+      "upkeep": {
+        "wood": 1.0
+      },
+      "build_time_days": 3
+    },
+    "lumber_camp": {
+      "cost": {
+        "wood": 15,
+        "stone": 3
+      },
+      "production": {
+        "wood": 4.0
+      },
+      "upkeep": {
+        "food": 1.0
+      },
+      "build_time_days": 1
+    },
+    "market": {
+      "cost": {
+        "wood": 40,
+        "stone": 20,
+        "gold": 50
+      },
+      "production": {
+        "gold": 3.0
+      },
+      "upkeep": {
+        "gold": 1.0
+      },
+      "build_time_days": 5
+    }
+  },
+  
+  "difficulty_multipliers": {
+    "easy": {
+      "production": 1.2,
+      "consumption": 0.8,
+      "event_frequency": 0.5
+    },
+    "normal": {
+      "production": 1.0,
+      "consumption": 1.0,
+      "event_frequency": 1.0
+    },
+    "hard": {
+      "production": 0.8,
+      "consumption": 1.5,
+      "event_frequency": 1.5
+    }
+  },
+  
+  "balance_targets": {
+    "survival_rate_day_10": 0.85,
+    "survival_rate_day_30": 0.60,
+    "avg_resource_buffer_days": 3,
+    "min_buildings_day_10": 3,
+    "max_events_per_day": 2
+  },
+  
+  "events": {
+    "base_frequency": 0.1,
+    "negative_weight": 0.4,
+    "positive_weight": 0.4,
+    "neutral_weight": 0.2
+  }
+}
