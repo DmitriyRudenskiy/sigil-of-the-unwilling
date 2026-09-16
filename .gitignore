@@ -1,34 +1,81 @@
-# Godot 4+ specific ignores
-.godot/
-/android/
-
-# Временные/черновые файлы (scratch): сама директория закоммичена (маркер
-# tmp/.gitignore), содержимое игнорируется.
-tmp/*
-!tmp/.gitignore
-
-# macOS
-.DS_Store
-
-# Logs
-*.log
-godot*.log
-
-# Godot imported assets
-**/*.import
-**/*.uid
-
-__pycache__/
+```gitignore
+# Compiled and binary files
 *.pyc
+__pycache__/
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.a
+*.out
 
-# Python venv (functional-тесты; ставится через requirements.txt)
-game/addons/venv/
-
-# Node (godot-mcp; ставится через npm install)
+# Dependencies
 node_modules/
+venv/
+.venv/
+.env
+.env.local
+*.env.*
 
-# Локальная копия godot-mcp (dev-only, никогда не коммитится)
-game/addons/godot-mcp/
+# Build artifacts
+dist/
+build/
+target/
+*.class
+*.jar
 
-# graphify output (graph, wiki, cache)
-graphify-out/
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Editors and IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Coverage and testing
+.coverage
+coverage/
+htmlcov/
+
+# Compressed files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
+
+# Gradle
+.gradle/
+
+# MyPy cache
+.mypy_cache/
+
+# PyTest cache
+.pytest_cache/
+```
