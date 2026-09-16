@@ -1,0 +1,59 @@
+{
+  "id": "crisis_02_famine",
+  "title": "🍞 ГОЛОДНАЯ ЗИМА!",
+  "description": "Запасы пищи катастрофически уменьшаются! Зима затянулась, охота не приносит результатов. Люди голодают и начинают роптать.",
+  "crisis_type": 1,
+  "severity": 4,
+  "duration_days": 5,
+  "icon_path": "res://assets/ui/events/famine_crisis.png",
+  "ongoing_effects": {
+    "morale_penalty": -3,
+    "population_drain": 1
+  },
+  "resolution_effects": {},
+  "choices": [
+    {
+      "text": "Урезать пайки ( -10 мораль, но все выживут)",
+      "tooltip": "Каждый получит половину порции",
+      "impact": 3,
+      "effects": {
+        "morale_change": -10,
+        "resource_change": {"food": 15}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Отправить охотников ( риск потери людей, +20 еды при успехе)",
+      "tooltip": "Опасная экспедиция в леса",
+      "impact": 4,
+      "effects": {
+        "population_change": -1,
+        "resource_change": {"food": 20}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Просить помощи у соседей ( -15 золота, +10 еды, -5 репутации)",
+      "tooltip": "Унизительно, но необходимо",
+      "impact": 3,
+      "effects": {
+        "resource_change": {"gold": -15, "food": 10},
+        "reputation_change": -5
+      },
+      "requirements": {
+        "building_required": "trade_post"
+      }
+    },
+    {
+      "text": "Разрешить каннибализм ( -50 мораль, +30 еды, население стабильно)",
+      "tooltip": "Тёмный путь выживания... навсегда изменит поселение",
+      "impact": 5,
+      "effects": {
+        "morale_change": -50,
+        "resource_change": {"food": 30},
+        "permanent_modifier": {"id": "cannibals", "effect": "max_morale -= 20"}
+      },
+      "requirements": {}
+    }
+  ]
+}

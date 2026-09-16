@@ -1,72 +1,50 @@
-# Godot Engine
-.godot/
-godot.*
-*.import
-*.translation
+```
+# Dependencies
+node_modules/
+venv/
+.venv/
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+.julia/
+zig*/
+target/
+.gradle/
 
-# Godot specific
-*.tscn.import
-*.tres.import
-*.gdimport
-
-# Build artifacts
+# Compiled/Build artifacts
+*.pyc
+*.class
+*.o
 *.exe
 *.dll
 *.so
-*.dylib
-*.app
-
-# Temporary files
-tmp/
-*.tmp
-*.temp
-*.log
+*.a
+*.obj
+*.out
+dist/
+build/
+coverage/
+htmlcov/
+.coverage
 
 # Environment
 .env
 .env.local
 *.env.*
 
-# Editors
+# Editors/IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
+*.tmp
 
-# OS specific
+# System
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
+*.log
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-.Python
-env/
-venv/
-.venv/
-*.egg-info/
-.pytest_cache/
-
-# Dependencies
-node_modules/
-dist/
-build/
-target/
-.gradle/
-
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
-# Compression
+# Compressed files
 *.zip
 *.gz
 *.tar
@@ -85,10 +63,8 @@ htmlcov/
 *.Z
 *.lz
 *.lzo
-
-# Test config
-.gutconfig.json
-gut_config.cfg
-
-# Local configuration (optional)
-# config.local.yaml
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
+```
