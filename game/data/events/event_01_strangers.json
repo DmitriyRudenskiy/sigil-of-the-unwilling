@@ -1,0 +1,55 @@
+{
+  "id": "event_01_strangers",
+  "title": "Незнакомцы у ворот",
+  "description": "Группа путников приблизилась к вашему поселению. Они просят убежища и пищи. Среди них есть ремесленники, но также и подозрительные личности.",
+  "icon_path": "res://assets/ui/events/strangers.png",
+  "frequency": 3,
+  "min_day": 3,
+  "weight": 1.5,
+  "triggers": {
+    "population_min": 5
+  },
+  "choices": [
+    {
+      "text": "Принять всех ( +3 населения, -20 еды)",
+      "tooltip": "Новые жители помогут в работе, но запасы пищи уменьшатся",
+      "impact": 1,
+      "effects": {
+        "population_change": 3,
+        "resource_change": {"food": -20}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Принять только ремесленников ( +1 население, +1 инструмент, -10 еды)",
+      "tooltip": "Вы выбираете только полезных жителей",
+      "impact": 2,
+      "effects": {
+        "population_change": 1,
+        "resource_change": {"tools": 1, "food": -10}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Отказать всем ( -5 мораль)",
+      "tooltip": "Путники уходят разочарованными",
+      "impact": 4,
+      "effects": {
+        "morale_change": -5
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Ограбить путников ( +15 еды, +5 материалов, -15 мораль)",
+      "tooltip": "Жестокий выбор даст ресурсы, но повлияет на репутацию",
+      "impact": 5,
+      "effects": {
+        "resource_change": {"food": 15, "materials": 5},
+        "morale_change": -15
+      },
+      "requirements": {
+        "building_required": "barracks"
+      }
+    }
+  ]
+}

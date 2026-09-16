@@ -12,8 +12,11 @@ const TERRAIN_TO_BIOME := {
 	HexUtils.Terrain.SAND:     TileAtlas.Biome.SAND,
 	HexUtils.Terrain.GRASS:    TileAtlas.Biome.GRASS,
 	HexUtils.Terrain.FOREST:   TileAtlas.Biome.GRASS,
+	HexUtils.Terrain.DENSE_FOREST: TileAtlas.Biome.GRASS,
 	HexUtils.Terrain.MOUNTAIN: TileAtlas.Biome.ROCK,
 	HexUtils.Terrain.SNOW:     TileAtlas.Biome.SNOW,
+	HexUtils.Terrain.RIVER:    TileAtlas.Biome.WATER,
+	HexUtils.Terrain.ROAD:     TileAtlas.Biome.ROAD,
 }
 
 var model

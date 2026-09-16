@@ -1,0 +1,79 @@
+{
+  "early_survival": [
+    {
+      "id": "evt_001_find_wood",
+      "title": "Запасы древесины",
+      "description": "Зима приближается. Чтобы построить первые укрытия, нужна древесина.",
+      "min_day": 1,
+      "max_day": 5,
+      "choices": [
+        {"text": "Рубить деревья (+15 дерева, -2 HP)", "effects": {"resources": {"wood": 15}, "hero_damage": 2}},
+        {"text": "Купить (+20 дерева, -30 золота)", "effects": {"resources": {"wood": 20, "gold": -30}}},
+        {"text": "Ждать", "effects": {}}
+      ]
+    },
+    {
+      "id": "evt_002_wolves",
+      "title": "Волчья стая",
+      "description": "Волки напали на поселение!",
+      "min_day": 2,
+      "max_day": 10,
+      "choices": [
+        {"text": "[Воин] Атаковать (+репутация, риск)", "effects": {"reputation": 10}, "class_required": "warrior"},
+        {"text": "Отпугнуть факелами", "effects": {}},
+        {"text": "Оставить еду (-10 еды)", "effects": {"resources": {"food": -10}}}
+      ]
+    },
+    {
+      "id": "evt_003_stray_cart",
+      "title": "Брошенная телега",
+      "description": "Найдена телега, требует ремонта.",
+      "min_day": 3,
+      "max_day": 8,
+      "choices": [
+        {"text": "Починить (-10 дерева, +телега)", "effects": {"resources": {"wood": -10}, "unlock_building": "cart"}},
+        {"text": "Разобрать (+15 дерева)", "effects": {"resources": {"wood": 15}}},
+        {"text": "Оставить", "effects": {}}
+      ]
+    }
+  ],
+  "mid_development": [
+    {
+      "id": "evt_010_merchant_guild",
+      "title": "Гильдия торговцев",
+      "description": "Предложение вступить в гильдию.",
+      "min_day": 10,
+      "max_day": 25,
+      "choices": [
+        {"text": "Вступить (-100 золота)", "effects": {"resources": {"gold": -100}, "unlock_building": "trade_post"}},
+        {"text": "Отказать", "effects": {}},
+        {"text": "[Купец] Скидка (-70 золота)", "effects": {"resources": {"gold": -70}, "unlock_building": "trade_post"}, "class_required": "merchant"}
+      ]
+    }
+  ],
+  "late_prosperity": [],
+  "crises": [
+    {
+      "id": "crisis_001_famine",
+      "title": "Голод",
+      "description": "Запасы еды на исходе!",
+      "time_limit": 3,
+      "choices": [
+        {"text": "Рационирование", "effects": {"population_growth": -0.5}},
+        {"text": "Охота (риск)", "effects": {"resources": {"food": 20}, "population": -1}},
+        {"text": "Торговля (-50 золота)", "effects": {"resources": {"gold": -50, "food": 30}}}
+      ]
+    },
+    {
+      "id": "crisis_002_plague",
+      "title": "Чума",
+      "description": "Болезнь распространяется!",
+      "time_limit": 5,
+      "choices": [
+        {"text": "Карантин", "effects": {"production": -0.5}},
+        {"text": "[Травник] Лечить", "effects": {}, "class_required": "herbalist"},
+        {"text": "Молиться", "effects": {"reputation": 5}}
+      ]
+    }
+  ]
+}

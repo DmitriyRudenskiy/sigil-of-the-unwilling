@@ -1,0 +1,54 @@
+{
+  "id": "event_02_harvest",
+  "title": "Богатый урожай",
+  "description": "В этом сезоне урожай превзошёл все ожидания! Фермеры сообщают о небывалом изобилии. Однако нужно решить, как распорядиться излишками.",
+  "icon_path": "res://assets/ui/events/harvest.png",
+  "frequency": 2,
+  "min_day": 10,
+  "weight": 1.2,
+  "triggers": {
+    "building_required": "farm"
+  },
+  "choices": [
+    {
+      "text": "Сделать праздник ( +15 мораль, -10 еды)",
+      "tooltip": "Народ ликует! Праздник укрепит дух поселения",
+      "impact": 2,
+      "effects": {
+        "morale_change": 15,
+        "resource_change": {"food": -10}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Запасти в амбары ( +30 еды)",
+      "tooltip": "Разумное решение на чёрный день",
+      "impact": 2,
+      "effects": {
+        "resource_change": {"food": 30}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Обменять с торговцами ( +20 золота)",
+      "tooltip": "Излишки можно выгодно продать",
+      "impact": 2,
+      "effects": {
+        "resource_change": {"gold": 20}
+      },
+      "requirements": {
+        "building_required": "trade_post"
+      }
+    },
+    {
+      "text": "Отдать бедным районам ( +10 мораль, +5 лояльность)",
+      "tooltip": "Щедрость укрепит единство поселения",
+      "impact": 1,
+      "effects": {
+        "morale_change": 10,
+        "loyalty_change": 5
+      },
+      "requirements": {}
+    }
+  ]
+}

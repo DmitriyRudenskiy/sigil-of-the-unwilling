@@ -1,0 +1,59 @@
+{
+  "id": "crisis_01_fire",
+  "title": "🔥 ПОЖАР В ПОСЕЛЕНИИ!",
+  "description": "Сильный пожар охватил жилые постройки! Огонь быстро распространяется из-за сухого ветра. Нужно действовать немедленно!",
+  "crisis_type": 0,
+  "severity": 3,
+  "duration_days": 3,
+  "icon_path": "res://assets/ui/events/fire_crisis.png",
+  "ongoing_effects": {
+    "resource_drain": {"food": 5, "materials": 3},
+    "morale_penalty": -2
+  },
+  "resolution_effects": {
+    "population_change": -2
+  },
+  "choices": [
+    {
+      "text": "Все на тушение! ( -5 мораль, спасено 80% построек)",
+      "tooltip": "Мобилизуем всех жителей для борьбы с огнём",
+      "impact": 3,
+      "effects": {
+        "morale_change": -5,
+        "resource_change": {"materials": -10}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Создать противопожарную полосу ( -15 материалов, спасено 60%)",
+      "tooltip": "Сносим постройки чтобы остановить огонь",
+      "impact": 4,
+      "effects": {
+        "resource_change": {"materials": -15, "food": -5}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Эвакуировать людей ( +5 мораль, спасены все люди, потеряно 50% имущества)",
+      "tooltip": "Люди важнее вещей",
+      "impact": 2,
+      "effects": {
+        "morale_change": 5,
+        "resource_change": {"materials": -25, "food": -10}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Использовать магию воды ( -20 маны, спасено 90%)",
+      "tooltip": "Только если есть маг воды",
+      "impact": 1,
+      "effects": {
+        "mana_change": -20,
+        "resource_change": {"materials": -5}
+      },
+      "requirements": {
+        "building_required": "school"
+      }
+    }
+  ]
+}
