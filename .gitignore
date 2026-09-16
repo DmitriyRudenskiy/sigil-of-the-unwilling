@@ -1,7 +1,10 @@
-```
-# Godot specific
+# Godot Engine
 .godot/
+godot.*
 *.import
+*.translation
+
+# Godot specific
 *.tscn.import
 *.tres.import
 *.gdimport
@@ -14,6 +17,7 @@
 *.app
 
 # Temporary files
+tmp/
 *.tmp
 *.temp
 *.log
@@ -28,21 +32,34 @@
 .idea/
 *.swp
 *.swo
+*~
+
+# OS specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+.pytest_cache/
 
 # Dependencies
 node_modules/
-venv/
-.venv/
-__pycache__/
-*.egg-info/
 dist/
 build/
 target/
 .gradle/
-
-# OS specific
-.DS_Store
-Thumbs.db
 
 # Coverage
 coverage/
@@ -68,4 +85,10 @@ htmlcov/
 *.Z
 *.lz
 *.lzo
-```
+
+# Test config
+.gutconfig.json
+gut_config.cfg
+
+# Local configuration (optional)
+# config.local.yaml
