@@ -1,0 +1,28 @@
+[gd_scene load_steps=6 format=3 uid="uid://main123"]
+
+[ext_resource type="Script" path="res://scripts/main/Main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/managers/GameManager.gd" id="2_gm"]
+[ext_resource type="Script" path="res://scripts/managers/UIManager.gd" id="3_ui"]
+
+[node name="Main" type="Node"]
+script = ExtResource("1_main")
+
+[node name="GameManager" type="Node" parent="."]
+script = ExtResource("2_gm")
+
+[node name="UIManager" type="Node" parent="."]
+script = ExtResource("3_ui")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="DayLabel" type="Label" parent="CanvasLayer"]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 200.0
+offset_bottom = 50.0
+text = "День: 1"
+theme_override_font_sizes/font_size = 24
+
+[node name="CrisisEventSystem" type="Node" parent="."]
+script = ExtResource("4_crisis")
