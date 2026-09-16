@@ -1,12 +1,14 @@
 extends Node
 class_name CursorControllerAutoload
 
-enum Mode { DEFAULT = 0, WALK = 1, COLLECT = 2, ATTACK = 3 }
+enum Mode { DEFAULT = 0, WALK = 1, COLLECT = 2, ATTACK = 3, CAST_SPELL = 4, TALK = 5 }
 
 const MODE_ASSETS := {
-	Mode.WALK:     {"path": "", "size": 128, "hotspot": Vector2i(16, 96)},
-	Mode.COLLECT:  {"path": "", "size": 128, "hotspot": Vector2i(96, 32)},
-	Mode.ATTACK:   {"path": "", "size": 128, "hotspot": Vector2i(96, 32)},
+	Mode.WALK:     {"path": "res://assets/cursors/cursor_walk.png", "size": 32, "hotspot": Vector2i(16, 28)},
+	Mode.COLLECT:  {"path": "res://assets/cursors/cursor_collect.png", "size": 32, "hotspot": Vector2i(24, 8)},
+	Mode.ATTACK:   {"path": "res://assets/cursors/cursor_attack.png", "size": 32, "hotspot": Vector2i(24, 24)},
+	Mode.CAST_SPELL: {"path": "res://assets/cursors/cursor_spell.png", "size": 32, "hotspot": Vector2i(20, 20)},
+	Mode.TALK: {"path": "res://assets/cursors/cursor_talk.png", "size": 32, "hotspot": Vector2i(16, 28)},
 }
 const COLLECT_HOLD_SECONDS := 0.6
 
@@ -105,4 +107,6 @@ func _mode_name(mode: int) -> String:
 		Mode.WALK: return "WALK"
 		Mode.COLLECT: return "COLLECT"
 		Mode.ATTACK: return "ATTACK"
+		Mode.CAST_SPELL: return "CAST_SPELL"
+		Mode.TALK: return "TALK"
 		_: return "DEFAULT"
