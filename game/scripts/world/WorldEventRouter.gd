@@ -351,7 +351,7 @@ func _on_resource_extracted(cell: Vector2i, resource_id: StringName, amount: int
 		# attribute-weight-system: добыча утомляет (REST), сила снижает спад
 		var rest_cost: float = 0.0
 		if hero.stats != null:
-			rest_cost = LogisticsCalculator.rest_cost(int(hero.stats.get("attack", 0)))
+			rest_cost = ExtractRules.rest_cost(int(hero.stats.get("attack", 0)))
 		if rest_cost > 0.0 and hero.needs_comp != null:
 			hero.needs_comp.needs.reduce(NeedType.ID.REST, rest_cost)
 	resource_extracted_at.emit(cell, resource_id, final_amount)

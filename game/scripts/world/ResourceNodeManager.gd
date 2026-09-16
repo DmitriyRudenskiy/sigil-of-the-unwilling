@@ -81,7 +81,7 @@ func generate_nodes_for_map(map_data: Dictionary) -> void:
 	# (по умолчанию 0.08; knowledge 2+ → +0.05).
 	var hidden_chance: float = GameNumbersHero.HIDDEN_NODE_CHANCE_BASE
 	if map_data.has("hero_knowledge"):
-		hidden_chance = LogisticsCalculator.hidden_chance(int(map_data.get("hero_knowledge", 0)))
+		hidden_chance = ExtractRules.hidden_chance(int(map_data.get("hero_knowledge", 0)))
 
 	for y in height:
 		for x in width:
@@ -176,7 +176,7 @@ func try_extract(cell: Vector2i, extraction_keys: Dictionary, hero_attack: int =
 		return {"error": NodeError.EXTRACTION_KEY_MISSING, "amount": 0}
 
 	# attribute-weight-system: сила героя — до 1 единицы сверх улова узла
-	var amount: int = node.get_yield() + LogisticsCalculator.yield_bonus(hero_attack)
+	var amount: int = node.get_yield() + ExtractRules.yield_bonus(hero_attack)
 	node.reduce_yield(amount)
 	if node.is_exhausted():
 		resource_exhausted.emit(cell, node.resource_id)

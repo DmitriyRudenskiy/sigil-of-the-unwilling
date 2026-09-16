@@ -1,4 +1,4 @@
-class_name LogisticsCalculator
+class_name ExtractRules
 extends RefCounted
 ## attribute-weight-system: правила добычи узлов от характеристик.
 ## Сила (attack) — скорость/усталость; внимательность (knowledge) —

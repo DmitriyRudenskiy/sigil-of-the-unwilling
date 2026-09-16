@@ -20,27 +20,35 @@ func test_add_under_capacity() -> void:
 	assert_that(hero.strategic_resources.get_all()[&"oak"]).is_equal(5)
 
 # Ранняя игра: общий лимит рюкзака (early-game-foundation)
+# wood — нулевой вес, поэтому здесь чистый count-лимит
 func test_add_at_capacity() -> void:
-	hero.add_strategic_resource(&"oak", GameNumbersHero.BACKPACK_TOTAL_CAP)
-	assert_that(hero.strategic_resources.get_all()[&"oak"]).is_equal(GameNumbersHero.BACKPACK_TOTAL_CAP)
+	hero.add_strategic_resource(&"wood", GameNumbersHero.BACKPACK_TOTAL_CAP)
+	assert_that(hero.strategic_resources.get_all()[&"wood"]).is_equal(GameNumbersHero.BACKPACK_TOTAL_CAP)
 
 func test_add_over_capacity_clamped() -> void:
-	var added := hero.add_strategic_resource(&"oak", GameNumbersHero.BACKPACK_TOTAL_CAP + 10)
+	var added := hero.add_strategic_resource(&"wood", GameNumbersHero.BACKPACK_TOTAL_CAP + 10)
 	assert_that(added).is_equal(GameNumbersHero.BACKPACK_TOTAL_CAP)
-	assert_that(hero.strategic_resources.get_all()[&"oak"]).is_equal(GameNumbersHero.BACKPACK_TOTAL_CAP)
+	assert_that(hero.strategic_resources.get_all()[&"wood"]).is_equal(GameNumbersHero.BACKPACK_TOTAL_CAP)
 
 func test_add_partial_fill() -> void:
-	hero.add_strategic_resource(&"oak", 7)
-	var added := hero.add_strategic_resource(&"oak", 6)
+	hero.add_strategic_resource(&"wood", 7)
+	var added := hero.add_strategic_resource(&"wood", 6)
 	assert_that(added).is_equal(5)
-	assert_that(hero.strategic_resources.get_all()[&"oak"]).is_equal(GameNumbersHero.BACKPACK_TOTAL_CAP)
+	assert_that(hero.strategic_resources.get_all()[&"wood"]).is_equal(GameNumbersHero.BACKPACK_TOTAL_CAP)
 
 func test_total_cap_is_across_types() -> void:
-	hero.add_strategic_resource(&"oak", 8)
-	hero.add_strategic_resource(&"silver", 3)
+	hero.add_strategic_resource(&"wood", 8)
+	hero.add_strategic_resource(&"stone", 3)
 	var added := hero.add_strategic_resource(&"wood", 3)
 	assert_that(added).is_equal(1)
 	assert_that(hero.strategic_resources.total()).is_equal(GameNumbersHero.BACKPACK_TOTAL_CAP)
+
+# attribute-weight-system: весовой лимит поверх count-лимита
+func test_weight_cap_limits_heavy_resources() -> void:
+	var added := hero.add_strategic_resource(&"oak", 99)
+	var expected: int = int(hero.strategic_resources.weight_cap / 2.0)
+	assert_that(added).is_equal(expected)
+	assert_that(hero.strategic_resources.current_weight() <= hero.strategic_resources.weight_cap).is_true()
 
 func test_remove_resource() -> void:
 	hero.add_strategic_resource(&"oak", 5)
