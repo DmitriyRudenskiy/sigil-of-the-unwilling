@@ -16,7 +16,7 @@ var BASE_WIDTH: float = 0.8
 
 class River:
 	var source: Vector2i
-	var path: Array[Vector2i]
+	var path: Array  # ponytail: untyped — literal [source] не инферится как Array[Vector2i]
 	var width: float = 1.0
 	var tributaries: Array = []
 
@@ -100,7 +100,7 @@ func _trace_river(source: Vector2i) -> River:
 	_calculate_width(river)
 	return river
 
-func _find_downhill_neighbor(cell: Vector2i) -> Vector2i:
+func _find_downhill_neighbor(cell: Vector2i):  # Variant: null = соседа нет
 	var current_height = model.height_grid.get(cell, 0.0)
 	var best_neighbor: Vector2i = Vector2i(-1, -1)
 	var best_height = current_height

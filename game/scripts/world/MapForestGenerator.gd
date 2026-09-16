@@ -24,7 +24,7 @@ const FOREST_SUITABILITY = {
 
 class ForestCluster:
 	var center: Vector2i
-	var tiles: Array[Vector2i] = []
+	var tiles: Array = []  # ponytail: untyped — literal [seed] не инферится как Array[Vector2i]
 	var density: float = 1.0
 	var type: String = "dense"
 

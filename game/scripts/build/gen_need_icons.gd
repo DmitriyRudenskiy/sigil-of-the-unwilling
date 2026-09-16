@@ -53,8 +53,8 @@ func _sp(img: Image, x: int, y: int, c: Color) -> void:
 func _ellipse(img: Image, cx: int, cy: int, rx: int, ry: int, c: Color) -> void:
     for y in range(cy - ry, cy + ry + 1):
         for x in range(cx - rx, cx + rx + 1):
-            var dx := float(x - cx) / float(rx) if rx > 0 else 0
-            var dy := float(y - cy) / float(ry) if ry > 0 else 0
+            var dx: float = float(x - cx) / float(rx) if rx > 0 else 0.0
+            var dy: float = float(y - cy) / float(ry) if ry > 0 else 0.0
             if dx * dx + dy * dy <= 1.0:
                 _sp(img, x, y, c)
 
@@ -64,16 +64,16 @@ func _rect(img: Image, x1: int, y1: int, x2: int, y2: int, c: Color) -> void:
             _sp(img, x, y, c)
 
 func _line(img: Image, x1: int, y1: int, x2: int, y2: int, c: Color) -> void:
-    var dx := abs(x2 - x1)
-    var dy := abs(y2 - y1)
+    var dx: int = abs(x2 - x1)
+    var dy: int = abs(y2 - y1)
     var sx := 1 if x1 < x2 else -1
     var sy := 1 if y1 < y2 else -1
-    var err := dx - dy
+    var err: int = dx - dy
     while true:
         _sp(img, x1, y1, c)
         if x1 == x2 and y1 == y2:
             break
-        var e2 := 2 * err
+        var e2: int = 2 * err
         if e2 > -dy:
             err -= dy
             x1 += sx

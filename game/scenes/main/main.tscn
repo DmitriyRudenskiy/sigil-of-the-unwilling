@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scripts/main/Main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/managers/GameManager.gd" id="2_gm"]
 [ext_resource type="Script" path="res://scripts/managers/UIManager.gd" id="3_ui"]
+[ext_resource type="Script" path="res://scripts/systems/crisis_event_system.gd" id="4_crisis"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_main")

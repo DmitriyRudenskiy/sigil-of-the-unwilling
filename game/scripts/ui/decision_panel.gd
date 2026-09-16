@@ -1,6 +1,9 @@
 class_name DecisionPanel
 extends Control
 
+const CrisisEventSystem = preload("res://scripts/systems/crisis_event_system.gd")
+
+
 ## UI панель для отображения событий и кризисов
 ## Блокирует возможность пропуска хода во время кризиса
 
@@ -23,7 +26,7 @@ func _ready():
 		child.queue_free()
 
 ## Показать обычное событие
-func show_event(event: DynamicEventData):
+func show_event(event):
 	is_crisis = false
 	current_event_data = event
 	
@@ -42,7 +45,7 @@ func show_event(event: DynamicEventData):
 	get_tree().paused = true
 
 ## Показать кризис
-func show_crisis(crisis: CrisisEventData):
+func show_crisis(crisis):
 	is_crisis = true
 	current_event_data = crisis
 	days_remaining = crisis.duration_days

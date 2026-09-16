@@ -15,8 +15,9 @@ enum DamageType {
 	POISON,
 	RADIANT,
 	NECROTIC,
-	PYCHIC,
-	FORCE
+	PSYCHIC,
+	FORCE,
+	NONE  # Special: no damage
 }
 
 const DAMAGE_TYPE_NAMES = [

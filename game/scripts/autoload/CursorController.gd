@@ -85,7 +85,7 @@ func _apply_cursor(mode: int) -> void:
 	if cfg is Dictionary and str(cfg.get("path", "")).ends_with(".png") and not cfg.get("path", "").is_empty():
 		var tex := _load_texture(cfg.get("path", ""), int(cfg.get("size", 128)))
 		if tex != null:
-			Input.set_custom_mouse_cursor(tex, cfg.get("hotspot", Vector2i.ZERO))
+			Input.set_custom_mouse_cursor(tex, 1, Vector2(cfg.get("hotspot", Vector2i.ZERO)))
 			return
 		GameLogger.warn("cursor: asset failed to load, staying DEFAULT: %s" % cfg.get("path", ""), "Cursor")
 	_apply_default()

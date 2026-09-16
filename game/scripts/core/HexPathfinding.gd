@@ -43,9 +43,9 @@ static func bfs_path(start: Vector2i, goal: Vector2i, blocked: Variant, w: int, 
 	return _reconstruct_path(start, goal, from)
 
 static func astar_path(start: Vector2i, goal: Vector2i, blocked: Variant, w: int, h: int, shift_right: bool = true) -> Array[Vector2i]:
-	return astar(start, goal, blocked, null, w, h, shift_right)
+	return astar(start, goal, blocked, Callable(), w, h, shift_right)
 
-static func astar(start: Vector2i, goal: Vector2i, blocked: Variant, cost_func: Callable, w: int, h: int, shift_right: bool = true) -> Array[Vector2i]:
+static func astar(start: Vector2i, goal: Vector2i, blocked: Variant, cost_func: Callable = Callable(), w: int = 0, h: int = 0, shift_right: bool = true) -> Array[Vector2i]:
 	if start == goal:
 		return [start]
 	var h_fn := func(c: Vector2i) -> int: return HexUtils.hex_distance(c, goal, shift_right)
@@ -91,7 +91,7 @@ static func astar(start: Vector2i, goal: Vector2i, blocked: Variant, cost_func: 
 				continue
 			var nxt_idx := HexUtils.pos_to_idx(nxt, w)
 			var move_cost: float = 1.0
-			if cost_func != null:
+			if cost_func.is_valid():
 				move_cost = cost_func.call(nxt)
 			var tentative_g: float = cur_g + move_cost
 			if tentative_g >= g_score[nxt_idx]:

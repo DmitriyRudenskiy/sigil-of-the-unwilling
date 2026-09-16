@@ -77,8 +77,8 @@ func _sp(img: Image, x: int, y: int, c: Color) -> void:
 func _ellipse(img: Image, cx: int, cy: int, rx: int, ry: int, c: Color) -> void:
     for y in range(cy - ry, cy + ry + 1):
         for x in range(cx - rx, cx + rx + 1):
-            var dx := float(x - cx) / float(rx) if rx > 0 else 0
-            var dy := float(y - cy) / float(ry) if ry > 0 else 0
+            var dx: float = float(x - cx) / float(rx) if rx > 0 else 0.0
+            var dy: float = float(y - cy) / float(ry) if ry > 0 else 0.0
             if dx * dx + dy * dy <= 1.0:
                 _sp(img, x, y, c)
 
@@ -88,16 +88,16 @@ func _rect(img: Image, x1: int, y1: int, x2: int, y2: int, c: Color) -> void:
             _sp(img, x, y, c)
 
 func _line(img: Image, x1: int, y1: int, x2: int, y2: int, c: Color) -> void:
-    var dx := abs(x2 - x1)
-    var dy := abs(y2 - y1)
+    var dx: int = abs(x2 - x1)
+    var dy: int = abs(y2 - y1)
     var sx := 1 if x1 < x2 else -1
     var sy := 1 if y1 < y2 else -1
-    var err := dx - dy
+    var err: int = dx - dy
     while true:
         _sp(img, x1, y1, c)
         if x1 == x2 and y1 == y2:
             break
-        var e2 := 2 * err
+        var e2: int = 2 * err
         if e2 > -dy:
             err -= dy
             x1 += sx
@@ -164,11 +164,11 @@ func _draw_rock(img: Image, base: Color, hi: Color, sh: Color, outline: Color, s
     for y in range(size):
         var intersections := []
         for i in range(points.size()):
-            var p1 := points[i]
-            var p2 := points[(i + 1) % points.size()]
+            var p1: Vector2 = points[i]
+            var p2: Vector2 = points[(i + 1) % points.size()]
             if (p1.y <= y and p2.y > y) or (p2.y <= y and p1.y > y):
                 var t := float(y - p1.y) / float(p2.y - p1.y)
-                var x := p1.x + t * (p2.x - p1.x)
+                var x: float = p1.x + t * (p2.x - p1.x)
                 intersections.append(x)
         
         intersections.sort()
@@ -185,7 +185,7 @@ func _draw_crystals(img: Image, base: Color, hi: Color, sh: Color, outline: Colo
     for i in 3:
         var cx := center - 8 + i * 8
         var cy := size - 8
-        var height := 12 + i * 4
+        var height: int = 12 + i * 4
         # Ромб
         _line(img, cx, cy - height, cx - 4, cy, base)
         _line(img, cx, cy - height, cx + 4, cy, base)
@@ -261,7 +261,7 @@ func _draw_quartz_cluster(img: Image, base: Color, hi: Color, sh: Color, outline
         var angle := -PI/4 + float(i) * (PI/2) / 4
         var cx := center + cos(angle) * 8
         var cy := size - 10 + sin(angle) * 4
-        var height := 14 - abs(i - 2) * 2
+        var height: int = 14 - abs(i - 2) * 2
         # Кристалл
         _line(img, int(cx), int(cy), int(cx + sin(angle) * 4), int(cy - height), base)
         _line(img, int(cx), int(cy), int(cx - sin(angle) * 4), int(cy - height), base)
@@ -284,11 +284,11 @@ func _draw_coal_lump(img: Image, base: Color, hi: Color, sh: Color, outline: Col
     for y in range(size):
         var intersections := []
         for i in range(points.size()):
-            var p1 := points[i]
-            var p2 := points[(i + 1) % points.size()]
+            var p1: Vector2 = points[i]
+            var p2: Vector2 = points[(i + 1) % points.size()]
             if (p1.y <= y and p2.y > y) or (p2.y <= y and p1.y > y):
                 var t := float(y - p1.y) / float(p2.y - p1.y)
-                var x := p1.x + t * (p2.x - p1.x)
+                var x: float = p1.x + t * (p2.x - p1.x)
                 intersections.append(x)
         
         intersections.sort()
