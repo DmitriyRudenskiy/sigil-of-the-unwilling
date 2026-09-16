@@ -1,96 +1,36 @@
-# Specification: Event Manager System
+# Event Manager Specification
 
-## Overview
-Система управления событиями, отвечающая за генерацию, планирование и выполнение событий в игре.
+## ADDED Requirements
 
-## Architecture
-```
-EventManager (Singleton)
-├── event_queue: Array[Event]
-├── active_events: Dictionary[event_id, Event]
-├── event_history: Array[EventRecord]
-├── difficulty_modifier: float
-└── season_context: Season
-```
+### Requirement: Типы и частота событий
+Система событий SHALL поддерживать типы Common, Rare, Crisis, Seasonal с весами (weight) для случайного выбора; каждое событие имеет условия активации (conditions) и варианты выбора (choices).
 
-## Core Components
+#### Scenario: Событие с невыполненными условиями
+- **WHEN** проверяется событие, чей condition не выполнен (например, день < min_day)
+- **THEN** событие не триггерится
 
-### 1. Event Types
-- **Common**: Рутинные события (торговец, находка ресурсов)
-- **Rare**: Уникальные события (герой присоединяется, артефакт)
-- **Crisis**: Критические события (эпидемия, нападение, пожар) - блокируют ход
-- **Seasonal**: Сезонные события (урожай, зима, засуха)
+#### Scenario: Событие по расписанию
+- **WHEN** наступил день, запланированный для события (next_event_day)
+- **THEN** событие срабатывает и emit'ится сигнал event_triggered
 
-### 2. Event Structure (GDScript Class)
-```gdscript
-class Event:
-    var id: String
-    var title: String
-    var description: String
-    var type: EventType  # COMMON, RARE, CRISIS, SEASONAL
-    var weight: float  # Вероятность появления
-    var conditions: Array[Condition]  # Требования для активации
-    var choices: Array[Choice]  # Варианты решений
-    var duration: int  # Длительность в ходах
-    var icon: Texture2D
-```
+### Requirement: Ежедневная проверка событий
+При наступлении нового дня (on_day_passed) система SHALL проверять триггеры доступных событий и запускать не более одного обычного события за день; кризисы запускаются отдельно по своим условиям.
 
-### 3. Choice Structure
-```gdscript
-class Choice:
-    var text: String
-    var requirements: Array[Requirement]
-    var effects: Array[Effect]
-    var law_unlock: String  # Открываемый закон (опционально)
-```
+#### Scenario: Обычный день
+- **WHEN** день прошёл и нет активных кризисов
+- **THEN** система проверяет очередь событий и при срабатывании триггера открывает панель решения
 
-### 4. Effect System
-```gdscript
-class Effect:
-    var target: String  # "resources.gold", "population.happiness"
-    var operation: String  # "add", "multiply", "set"
-    var value: Variant
-    var duration: int  # Для временных эффектов
-```
+### Requirement: Структура выбора и эффекты
+Каждый выбор (Choice) SHALL содержать текст, требования (requirements) и эффекты (effects); недоступные выборы (не выполненные требования) отображаются заблокированными.
 
-## Methods
+#### Scenario: Выбор с требованием ресурса
+- **WHEN** выбор требует 10 золота, а у игрока 5
+- **THEN** кнопка выбора заблокирована
+- **AND** требование показано как невыполненное
 
-### `queue_event(event_template: EventTemplate)`
-Добавляет событие в очередь на основе шаблона и контекста.
+### Requirement: История и лог решений
+Система SHALL вести историю событий (event_history) и журнал решений игрока (decision_log) с указанием дня, id события и индекса выбора.
 
-### `process_turn()`
-Вызывается каждый ход:
-- Проверяет активные события
-- Обновляет таймеры
-- Генерирует новые события (если нет активных кризисов)
-
-### `resolve_crisis(event_id: String, choice_index: int)`
-Обрабатывает выбор игрока в кризисном событии:
-- Применяет эффекты
-- Обновляет историю
-- Снимает блокировку хода
-
-### `get_available_events(context: Dictionary) -> Array[EventTemplate]`
-Возвращает список доступных событий с учетом веса и условий.
-
-## Data Flow
-1. Turn Start → `process_turn()`
-2. Check Active Events → Update Timers
-3. If No Crisis → Generate New Event (Weighted Random)
-4. If Crisis → Block Input, Show Dialog
-5. Player Chooses → `resolve_crisis()` → Apply Effects → Unblock Input
-
-## Integration Points
-- **GameManager**: Вызывает `process_turn()` в начале хода
-- **UIManager**: Отображает диалог события
-- **SaveSystem**: Сохраняет `active_events` и `event_history`
-- **DifficultySystem**: Модифицирует `weight` событий
-
-## Error Handling
-- Если событие не имеет допустимых выборов → авто-разрешение с негативным эффектом
-- Если база событий пуста → логирование ошибки, пропуск генерации
-
-## Performance Considerations
-- Кэширование доступных событий на 5 ходов
-- Lazy loading иконок событий
-- Ограничение истории (последние 50 событий)
+#### Scenario: Запись решения
+- **WHEN** игрок выбирает вариант 2 в событии "merchant_visit"
+- **THEN** в decision_log записывается {day, event_id: "merchant_visit", choice_index: 2}

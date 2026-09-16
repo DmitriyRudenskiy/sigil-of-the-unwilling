@@ -1,108 +1,31 @@
-# Terrain Enhancement Specification: Mountains and Forests
+# Terrain Specification
 
-## Overview
-Improves mountain range formation and forest distribution for realistic biome patterns.
+## ADDED Requirements
 
-## Mountain Range Generation
+### Requirement: Генерация горных хребтов
+Генератор SHALL создавать горные хребты вдоль разломов (FAULT_COUNT линий): подъём высоты (uplift) затухает с расстоянием от линии разлома, затем сглаживается эрозией.
 
-### 1. Fault Line Simulation
-```gdscript
-func generate_fault_lines(count: int) -> Array[FaultLine]:
-    var faults = []
-    for i in count:
-        var start = random_edge_point()
-        var direction = random_direction()
-        var fault = trace_fault_line(start, direction)
-        faults.append(fault)
-    return faults
-```
+#### Scenario: Хребет вдоль разлома
+- **WHEN** проложена линия разлома длиной N клеток
+- **THEN** клетки в радиусе 4 от линии получают прибавку высоты, убывающую с расстоянием
+- **AND** острые пики сглаживаются в округлые формы
 
-### 2. Uplift Along Faults
-```gdscript
-func apply_uplift(fault: FaultLine, intensity: float) -> void:
-    for cell in get_nearby_cells(fault.path, radius=4):
-        var distance = hex_distance(cell, fault.path)
-        var uplift = intensity * (1.0 - distance / 4.0)
-        height_grid[cell] += uplift
-```
+### Requirement: Снежные шапки
+Клетки с высотой > 0.9 и низкой температурой SHALL получать terrain SNOW; клетки с высотой > 0.85 — MOUNTAIN.
 
-### 3. Erosion Smoothing
-- Apply hydraulic erosion simulation
-- Smooth sharp peaks into rounded mountains
-- Create foothills transition zones (elevation 0.6-0.75)
+#### Scenario: Вершина в снегу
+- **WHEN** elevation клетки > 0.9 и temperature < 0.3
+- **THEN** terrain_grid[cell] = SNOW
 
-### 4. Snow Cap Calculation
-```gdscript
-func apply_snow_caps() -> void:
-    for cell in mountain_cells:
-        if elevation > 0.9 and temperature < 0.3:
-            terrain_grid[cell] = SNOW
-        elif elevation > 0.85:
-            terrain_grid[cell] = MOUNTAIN
-```
+### Requirement: Кластерное распределение лесов
+Леса SHALL генерироваться кластерами (5–20 клеток): рост кластера от семени по подходящим соседям с учётом пригодности биомов (GRASS 0.6, SNOW 0.1, MOUNTAIN/SAND 0).
 
-## Forest Distribution
+#### Scenario: Рост кластера
+- **WHEN** кластер леса размером < целевого (5–20)
+- **THEN** к случайной грани кластера добавляется подходящий сосед
+- **AND** кластер останавливается на непригодных биомах
 
-### 1. Biome Suitability Map
-```gdscript
-const FOREST_SUITABILITY = {
-    GRASS: 0.6,    # Moderate chance
-    SAND: 0.0,     # No forests
-    SWAMP: 0.3,    # Sparse mangroves
-    SNOW: 0.1,     # Boreal forests only
-    MOUNTAIN: 0.0  # Too high
-}
-```
-
-### 2. Clustering Algorithm
-```gdscript
-func generate_forest_clusters() -> void:
-    var seeds = select_cluster_seeds()
-    for seed in seeds:
-        grow_forest_cluster(seed, size=random(5, 20))
-```
-
-### 3. Growth Simulation
-```gdscript
-func grow_forest_cluster(seed: Vector2i, size: int) -> void:
-    var cluster = [seed]
-    while cluster.size() < size:
-        var edge = pick_random_edge(cluster)
-        var neighbor = find_suitable_neighbor(edge)
-        if neighbor and suitability > random():
-            cluster.append(neighbor)
-```
-
-### 4. Density Variation
-- Core tiles: DENSE_FOREST (movement cost 2x)
-- Edge tiles: SPARSE_FOREST (movement cost 1.5x)
-- Clearings: Preserve 10-20% open space within clusters
-
-## Data Structure
-```gdscript
-class FaultLine:
-    var path: Array[Vector2i]
-    var uplift: float
-    var length: int
-
-class ForestCluster:
-    var center: Vector2i
-    var tiles: Array[Vector2i]
-    var density: float  # 0.0-1.0
-    var type: String    # "dense", "sparse", "boreal"
-```
-
-## Integration Points
-- Mountain generation: Before `generate_noise()` biome assignment
-- Forest generation: After biome assignment, before resource placement
-- Modifies `height_grid` and `terrain_grid` in MapModel
-
-## Parameters
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| FAULT_COUNT | 5 | Number of fault lines |
-| UPLIFT_INTENSITY | 0.4 | Height increase along faults |
-| FOREST_COVERAGE | 0.25 | Target forest % of map |
-| CLUSTER_SIZE_MIN | 5 | Minimum forest cluster size |
-| CLUSTER_SIZE_MAX | 20 | Maximum forest cluster size |
-| CLEARING_RATIO | 0.15 | Open space within forests |
+#### Scenario: Ядро и кромка леса
+- **WHEN** клетка внутри ядра кластера
+- **THEN** terrain = DENSE_FOREST
+- **AND** клетки кромки кластера имеют пониженную плотность

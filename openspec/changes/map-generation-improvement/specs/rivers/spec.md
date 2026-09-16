@@ -1,58 +1,31 @@
-# River Generation System Specification
+# Rivers Specification
 
-## Overview
-Generates realistic river networks that flow from high elevation (mountains/snow) to low elevation (water bodies/map edges).
+## ADDED Requirements
 
-## Algorithm
+### Requirement: Выбор истоков рек
+Генератор рек SHALL выбирать истоки на клетках с высотой >= 0.75, не примыкающих к воде, с минимальным расстоянием между истоками 8 тайлов (SOURCE_SPACING).
 
-### 1. River Source Selection
-```gdscript
-# Find potential river sources
-- Elevation > 0.75 (mountain/snow biome)
-- Not adjacent to existing water body
-- Minimum distance between sources: 8 tiles
-```
+#### Scenario: Исток в горах
+- **WHEN** клетка имеет height_grid >= 0.75 и ни одна соседняя клетка не WATER
+- **THEN** клетка попадает в список потенциальных истоков
+- **AND** после выбора истока радиус 8 тайлов блокируется для других истоков
 
-### 2. Flow Simulation
-```gdscript
-func trace_river(source: Vector2i) -> Array[Vector2i]:
-    var path = [source]
-    var current = source
-    while true:
-        var next = find_downhill_neighbor(current)
-        if next == null or is_water(next):
-            break
-        path.append(next)
-        current = next
-    return path
-```
+### Requirement: Протекание реки вниз по склону
+Река SHALL трассироваться от истока к соседу с минимальной высотой до достижения клетки WATER/RIVER или границы карты; реки короче MIN_LENGTH (5) удаляются.
 
-### 3. River Merging
-- When two rivers converge within 3 tiles, merge into wider river
-- Width calculation: `base_width + sqrt(flow_accumulation)`
+#### Scenario: Река доходит до воды
+- **WHEN** трассировка достигает клетки с terrain RIVER или WATER
+- **THEN** трасса завершается
+- **AND** клетки трассы получают terrain RIVER в terrain_grid
 
-### 4. River Smoothing
-- Apply Catmull-Rom spline smoothing to jagged paths
-- Remove sharp 60-degree turns where possible
+#### Scenario: Слишком короткая река
+- **WHEN** длина трассы < 5 клеток
+- **THEN** река не наносится на карту
 
-## Data Structure
-```gdscript
-class River:
-    var source: Vector2i
-    var path: Array[Vector2i]
-    var width: float
-    var tributaries: Array[River]
-```
+### Requirement: Слияние и ширина рек
+При сближении двух рек на <= 3 тайлов (MERGE_DISTANCE) они SHALL сливаться; ширина рассчитывается как base_width + sqrt(flow_accumulation).
 
-## Integration Points
-- Called after `generate_noise()` in MapModel
-- Modifies terrain_grid to set RIVER terrain type
-- Updates blocked_cells for pathfinding
-
-## Parameters
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| MIN_ELEVATION | 0.75 | Minimum height for river source |
-| SOURCE_SPACING | 8 | Minimum tiles between sources |
-| MERGE_DISTANCE | 3 | Tiles before rivers merge |
-| MIN_LENGTH | 5 | Minimum river length before removal |
+#### Scenario: Слияние притока
+- **WHEN** трасса новой реки пересекает существующую в пределах 3 тайлов
+- **THEN** приток присоединяется к основному руслу
+- **AND** ширина основного русла увеличивается
