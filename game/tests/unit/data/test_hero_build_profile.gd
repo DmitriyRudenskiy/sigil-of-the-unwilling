@@ -103,7 +103,7 @@ func test_summary_maps_keys_to_names() -> void:
 	assert_that(s["class"]).is_equal("Варвар")
 	assert_that(s["culture"]).is_equal("Эдир")
 	assert_that(s["background"]).is_equal("Солдат")
-	assert_that(s["stats"]).is_equal({"attack": 6, "defense": 6, "spell_power": 2, "knowledge": 3})
+	assert_that(s["stats"]).is_equal({"attack": 6, "defense": 6, "spell_power": 2, "knowledge": 3, "int": 2, "wis": 3, "cha": 4, "luk": 2})
 
 func test_summary_sex_mapping() -> void:
 	var cases := {"male": "Мужской", "female": "Женский"}
@@ -122,7 +122,7 @@ func test_summary_empty_profile() -> void:
 	assert_that(s["class"]).is_equal("—")
 	assert_that(s["culture"]).is_equal("—")
 	assert_that(s["background"]).is_equal("—")
-	assert_that(s["stats"]).is_equal({"attack": 2, "defense": 2, "spell_power": 2, "knowledge": 2})
+	assert_that(s["stats"]).is_equal({"attack": 2, "defense": 2, "spell_power": 2, "knowledge": 2, "int": 2, "wis": 2, "cha": 2, "luk": 2})
 
 func test_to_identity_returns_dict() -> void:
 	var p := _full_profile()
@@ -132,7 +132,7 @@ func test_to_identity_returns_dict() -> void:
 	assert_that(d["hero_class"]).is_equal("barbarian")
 	assert_that(d["hero_culture"]).is_equal("aedyr")
 	assert_that(d["hero_background"]).is_equal("soldier")
-	assert_that(d["hero_stats"]).is_equal({"attack": 6, "defense": 6, "spell_power": 2, "knowledge": 3})
+	assert_that(d["hero_stats"]).is_equal({"attack": 6, "defense": 6, "spell_power": 2, "knowledge": 3, "int": 2, "wis": 3, "cha": 4, "luk": 2})
 
 func test_registries_have_expected_keys() -> void:
 	for k in ["human", "elf", "dwarf", "aumaua", "orlan", "godlike"]:
@@ -143,3 +143,57 @@ func test_registries_have_expected_keys() -> void:
 		assert_bool(HeroCultures.CULTURES.has(k)).is_true()
 	for k in ["soldier", "scholar", "criminal", "sailor", "zealot", "merchant"]:
 		assert_bool(HeroCultures.BACKGROUNDS.has(k)).is_true()
+
+# --- social-stats-weapon-tech: 8 статов ---
+
+const SOCIAL_KEYS := ["int", "wis", "cha", "luk"]
+
+func test_every_race_class_has_all_8_stats() -> void:
+	var races := HeroRaces.RACES
+	var classes := HeroClasses.CLASSES
+	for race in races:
+		for cls in classes:
+			var p := HeroBuildProfile.new()
+			p.name = "T"
+			p.race = race
+			p.character_class = cls
+			p.culture = "aedyr"
+			p.background = "soldier"
+			var s := p.get_stats()
+			for key in ["attack", "defense", "spell_power", "knowledge"] + SOCIAL_KEYS:
+				assert_bool(s.has(key)).override_failure_message("race=%s class=%s stat=%s" % [race, cls, key])
+
+func test_battle_stats_unchanged_by_social() -> void:
+	var p := _full_profile()
+	var s := p.get_stats()
+	# до социальных бонусов: attack 6 / defense 6 / spell 2 / knowledge 3
+	assert_that(s["attack"]).is_equal(6)
+	assert_that(s["defense"]).is_equal(6)
+	assert_that(s["spell_power"]).is_equal(2)
+	assert_that(s["knowledge"]).is_equal(3)
+
+func test_social_bonuses_meaningful() -> void:
+	# маг: +wis +int; плут: +luk; варвар: +cha
+	var wizard := _social("wizard")
+	assert_bool(wizard["wis"] > 2 and wizard["int"] > 2)
+	var rogue := _social("rogue")
+	assert_bool(rogue["luk"] > 2)
+	var barbarian := _social("barbarian")
+	assert_bool(barbarian["cha"] > 2)
+
+func _social(class_id: String) -> Dictionary:
+	var p := HeroBuildProfile.new()
+	p.name = "T"
+	p.race = "human"
+	p.character_class = class_id
+	p.culture = "aedyr"
+	p.background = "soldier"
+	return p.get_stats()
+
+func test_battle_bonus_excludes_social_stats() -> void:
+	var comp := HeroStatsComponent.new()
+	comp.stats = {"attack": 3, "defense": 1, "spell_power": 2, "knowledge": 1, "int": 10, "wis": 10, "cha": 10, "luk": 10}
+	var b := comp.get_battle_bonus({})
+	assert_that(b["attack"]).is_equal(3)
+	assert_that(b["defense"]).is_equal(1)
+	assert_bool(not b.has("int") and not b.has("cha"))

@@ -13,7 +13,9 @@ var character_class: String = ""
 var culture: String = ""
 var background: String = ""
 
-var base_stats: Dictionary = {"attack": 2, "defense": 2, "spell_power": 2, "knowledge": 2}
+# social-stats-weapon-tech: 4 боевых + 4 социальных (int/wis/cha/luk)
+var base_stats: Dictionary = {"attack": 2, "defense": 2, "spell_power": 2, "knowledge": 2,
+	"int": 2, "wis": 2, "cha": 2, "luk": 2}
 
 func is_valid() -> bool:
 	return not name.is_empty() and not race.is_empty() \

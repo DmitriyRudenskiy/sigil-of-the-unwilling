@@ -82,6 +82,12 @@ func _stats_text(h: HeroController) -> String:
 		var cap: float = LoadCalculator.carry_cap(float(int(s.get("defense", 2))))
 		var mark: String = " ⚠" if eq_w > cap else ""
 		base += "\nВес: %.1f / %.1f%s" % [eq_w, cap, mark]
+	# social-stats-weapon-tech: социальные статы рядом с боевыми
+	var soc := "Инт %d | Муд %d | Хар %d | Уд %d" % [
+		int(s.get("int", 2)), int(s.get("wis", 2)),
+		int(s.get("cha", 2)), int(s.get("luk", 2)),
+	]
+	base += "\n" + soc
 	return base
 
 func _followers_text(h: HeroController) -> String:

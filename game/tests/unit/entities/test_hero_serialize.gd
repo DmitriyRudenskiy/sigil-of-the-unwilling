@@ -70,3 +70,52 @@ func test_default_army_cap() -> void:
 	assert_int(for_battle.size()).is_less_equal(7).override_failure_message("default army should not exceed 7 units")
 
 	army.free()
+
+# --- social-stats-weapon-tech: миграция старого сейва (4 стата -> 8) ---
+
+func test_stats_migration_old_save_gets_social_stats() -> void:
+	var comp := HeroStatsComponent.new()
+	comp.hero_race = "elf"
+	comp.hero_class = "wizard"
+	# старый формат: только 4 боевых стата
+	var data := {
+		"hero_name": "Old",
+		"stats": {"attack": 5, "defense": 2, "spell_power": 8, "knowledge": 4},
+		"hero_race": "elf", "hero_class": "wizard",
+		"hero_culture": "aedyr", "hero_background": "scholar",
+	}
+	comp.deserialize(data)
+	# elf +wis 1, wizard +wis 1 +int 1, scholar +int 1, aedyr +cha 1 -> от base 2
+	assert_int(comp.stats["attack"]).is_equal(5)
+	assert_int(comp.stats["wis"]).is_equal(4)
+	assert_int(comp.stats["int"]).is_equal(4)
+	assert_int(comp.stats["cha"]).is_equal(3)
+	assert_int(comp.stats["luk"]).is_equal(2)
+
+func test_stats_migration_new_save_untouched() -> void:
+	var comp := HeroStatsComponent.new()
+	var data := {
+		"hero_name": "New",
+		"stats": {"attack": 5, "defense": 2, "spell_power": 8, "knowledge": 4,
+			"int": 7, "wis": 9, "cha": 3, "luk": 6},
+		"hero_race": "elf", "hero_class": "wizard",
+		"hero_culture": "aedyr", "hero_background": "scholar",
+	}
+	comp.deserialize(data)
+	assert_int(comp.stats["int"]).is_equal(7)
+	assert_int(comp.stats["wis"]).is_equal(9)
+	assert_int(comp.stats["cha"]).is_equal(3)
+	assert_int(comp.stats["luk"]).is_equal(6)
+
+func test_stats_roundtrip_8_stats() -> void:
+	var comp := HeroStatsComponent.new()
+	comp.apply_build((func() -> HeroBuildProfile:
+		var p := HeroBuildProfile.new()
+		p.name = "X"; p.race = "dwarf"; p.character_class = "barbarian"
+		p.culture = "aedyr"; p.background = "soldier"
+		return p
+	).call())
+	var data := comp.serialize()
+	var comp2 := HeroStatsComponent.new()
+	comp2.deserialize(data)
+	assert_dict(comp2.stats).is_equal(comp.stats)

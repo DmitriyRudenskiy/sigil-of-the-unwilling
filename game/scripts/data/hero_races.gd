@@ -14,7 +14,7 @@ const RACES := {
 	"elf": {
 		"name": "Эльф",
 		"desc": "Ловкие и мудрые стражи лесов.",
-		"bonuses": {"spell_power": 1, "knowledge": 1},
+		"bonuses": {"spell_power": 1, "knowledge": 1, "wis": 1},
 		"subraces": [
 			{"id": "wood", "name": "Лесной"},
 			{"id": "pale", "name": "Бледный"},
@@ -23,7 +23,7 @@ const RACES := {
 	"dwarf": {
 		"name": "Дварф",
 		"desc": "Крепкие горные кузнецы.",
-		"bonuses": {"defense": 2, "attack": 1, "spell_power": -1},
+		"bonuses": {"defense": 2, "attack": 1, "spell_power": -1, "wis": 1},
 		"subraces": [
 			{"id": "mountain", "name": "Горный"},
 			{"id": "boreal", "name": "Северный"},
@@ -32,7 +32,7 @@ const RACES := {
 	"aumaua": {
 		"name": "Амауа",
 		"desc": "Высокие морские воители.",
-		"bonuses": {"attack": 2},
+		"bonuses": {"attack": 2, "cha": 1},
 		"subraces": [
 			{"id": "coastal", "name": "Прибрежный"},
 			{"id": "island", "name": "Островной"},
@@ -41,7 +41,7 @@ const RACES := {
 	"orlan": {
 		"name": "Орлан",
 		"desc": "Хитрые тёмные следопыты.",
-		"bonuses": {"knowledge": 2, "spell_power": 1, "attack": -1},
+		"bonuses": {"knowledge": 2, "spell_power": 1, "attack": -1, "luk": 1},
 		"subraces": [
 			{"id": "hearth", "name": "Кострищный"},
 			{"id": "wild", "name": "Дикий"},
@@ -50,7 +50,7 @@ const RACES := {
 	"godlike": {
 		"name": "Богоподобный",
 		"desc": "Рождённые сверхлюди.",
-		"bonuses": {"spell_power": 1, "knowledge": 1},
+		"bonuses": {"spell_power": 1, "knowledge": 1, "int": 1},
 		"subraces": [
 			{"id": "death", "name": "Смертный"},
 			{"id": "fire", "name": "Огненный"},
