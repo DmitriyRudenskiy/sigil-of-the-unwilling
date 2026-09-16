@@ -6,7 +6,7 @@ const TILE := GameNumbers.TILE_SIZE
 const SOURCE_ID := 0
 const FOG_SOURCE_ID := 1
 
-enum Biome { GRASS, SAND, SNOW, SWAMP, WATER, ROCK, MUD, LAVA, ROAD }
+enum Biome { GRASS, SAND, SNOW, SWAMP, WATER, ROCK, MUD, LAVA, ROAD, DENSE_FOREST }
 
 const BASE_COORDS := {
 	Biome.GRASS: [Vector2i(0, 0)],
@@ -18,6 +18,7 @@ const BASE_COORDS := {
 	Biome.MUD: [Vector2i(1, 1)],
 	Biome.LAVA: [Vector2i(2, 1)],
 	Biome.ROAD: [Vector2i(3, 1)],
+	Biome.DENSE_FOREST: [Vector2i(4, 1)],
 }
 
 const TRANSITION_ART := [
@@ -38,7 +39,7 @@ const TRANSITION_ART := [
 ]
 
 const _BIOME_ORDER := [Biome.GRASS, Biome.SAND, Biome.SNOW, Biome.SWAMP, Biome.WATER,
-	Biome.ROCK, Biome.MUD, Biome.LAVA, Biome.ROAD]
+	Biome.ROCK, Biome.MUD, Biome.LAVA, Biome.ROAD, Biome.DENSE_FOREST]
 
 var _tileset: TileSet
 var _src: TileSetAtlasSource

@@ -20,6 +20,9 @@ var TEMP_SNOW_FOREST: float = 0.3
 
 var terrain_grid: Dictionary = {}
 var height_grid: Dictionary = {}
+var river_grid: Dictionary = {}
+var road_grid: Dictionary = {}
+var forest_clusters: Array = []
 
 var village_cells: Array[Vector2i] = []
 var resource_cells: Dictionary = {}
@@ -121,6 +124,18 @@ func invalidate_blocked_cache() -> void:
 func set_terrain(cell: Vector2i, terrain_id: int) -> void:
 	terrain_grid[cell] = terrain_id
 	invalidate_blocked_cache()
+
+func is_river(cell: Vector2i) -> bool:
+	return river_grid.has(cell) and river_grid[cell] > 0
+
+func is_road(cell: Vector2i) -> bool:
+	return road_grid.has(cell)
+
+func get_forest_density(cell: Vector2i) -> float:
+	for cluster in forest_clusters:
+		if cluster.tiles.has(cell):
+			return cluster.density
+	return 0.0
 
 func smooth_invalid_adjacencies() -> void:
 	var to_change: Array[Vector2i] = []

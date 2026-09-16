@@ -10,8 +10,8 @@ const T_EVEN_RIGHT := [
 	Vector2i(-1, 0), Vector2i(-1, 1), Vector2i(0, 1),
 ]
 
-enum Terrain { WATER=0, SWAMP=1, SAND=2, GRASS=3, FOREST=4, MOUNTAIN=5, SNOW=6 }
-const TERRAIN_NAMES := ["water", "swamp", "sand", "grass", "forest", "mountain", "snow"]
+enum Terrain { WATER=0, SWAMP=1, SAND=2, GRASS=3, FOREST=4, MOUNTAIN=5, SNOW=6, RIVER=7, ROAD=8, DENSE_FOREST=9 }
+const TERRAIN_NAMES := ["water", "swamp", "sand", "grass", "forest", "mountain", "snow", "river", "road", "dense_forest"]
 
 static func get_neighbor(cell: Vector2i, bit: int, shift_right: bool = true) -> Vector2i:
 	var odd := (cell.y & 1) == 1
