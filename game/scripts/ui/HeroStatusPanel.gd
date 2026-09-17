@@ -8,6 +8,7 @@ var _cond_label: Label
 var _stats_label: Label
 var _followers_label: Label
 const _MAX_FOLLOWERS_SHOWN := 6
+const IR = preload("res://scripts/theme/IconRegistry.gd")
 
 
 
@@ -69,6 +70,13 @@ func _needs_text(n: HeroNeeds) -> String:
 		var icon := ThemeConfig.need_icon(NeedType.to_name(k))
 		parts.append("%s%s %.0f%%" % [icon, mark, n.get_need(k) * 100.0])
 	return "\n".join(parts)
+
+# Task 10: иконки потребностей (rest/social/inspiration) — TextureRect-ряд
+func _needs_icons() -> Array[Texture2D]:
+	var out: Array[Texture2D] = []
+	for id in ["rest", "social", "inspiration"]:
+		out.append(IR.need_texture(id))
+	return out
 
 func _stats_text(h: HeroController) -> String:
 	var s: Dictionary = h.stats

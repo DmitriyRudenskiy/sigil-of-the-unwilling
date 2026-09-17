@@ -122,19 +122,19 @@
 
 **Priority:** High  
 **Effort:** Large  
-**Status:** Todo  
+**Status:** Done  
 
 Создать текстуры для кнопок, панелей, прогресс-баров и других UI элементов.
 
 **Acceptance Criteria:**
-- [ ] Создана директория `game/assets/ui/widgets/`
-- [ ] Поддиректории: buttons/, panels/, progress_bars/, sliders/, decorators/
-- [ ] Кнопки: normal, hover, pressed, disabled состояния (9-slice текстуры)
-- [ ] Панели: фон + рамка с закруглёнными углами
-- [ ] Прогресс-бары: фон + заполнение для здоровья, маны, опыта
-- [ ] Слайдеры: дорожка + ползунок
-- [ ] Чекбоксы: checked/unchecked состояния
-- [ ] Интеграция с game_theme.tres
+- [x] Создана директория `game/assets/ui/widgets/`
+- [x] Поддиректории: buttons/, panels/, progress_bars/, sliders/, decorators/
+- [x] Кнопки: normal, hover, pressed, disabled состояния (9-slice текстуры)
+- [x] Панели: фон + рамка с закруглёнными углами
+- [x] Прогресс-бары: фон + заполнение для здоровья, маны, опыта
+- [x] Слайдеры: дорожка + ползунок
+- [x] Чекбоксы: checked/unchecked состояния
+- [x] Интеграция с game_theme.tres
 
 ---
 
@@ -142,16 +142,16 @@
 
 **Priority:** High  
 **Effort:** Medium  
-**Status:** Todo  
+**Status:** Done  
 
 Заменить StyleBoxFlat заглушки на текстуры из widgets/.
 
 **Acceptance Criteria:**
-- [ ] StyleBoxFlat_button заменён на текстуры кнопок
-- [ ] StyleBoxFlat_panel заменён на текстуру панели с рамкой
-- [ ] StyleBoxFlat_slot заменён на текстуру слота
-- [ ] Progress bar стили используют новые текстуры заполнения
-- [ ] Тема загружается без ошибок
+- [x] StyleBoxFlat_button заменён на текстуры кнопок
+- [x] StyleBoxFlat_panel заменён на текстуру панели с рамкой
+- [x] StyleBoxFlat_slot заменён на текстуру слота
+- [x] Progress bar стили используют новые текстуры заполнения
+- [x] Тема загружается без ошибок
 
 ---
 
@@ -159,16 +159,16 @@
 
 **Priority:** Medium  
 **Effort:** Small  
-**Status:** Todo  
+**Status:** Done  
 
 Добавить методы get_icon() в Registry классы и константы путей в ThemeConfig.
 
 **Acceptance Criteria:**
-- [ ] ThemeConfig содержит пути ICON_DIR_RESOURCES, ICON_DIR_BUILDINGS, etc.
-- [ ] ResourceRegistry.get_icon(id) возвращает Texture2D
-- [ ] BuildingDefs.get_icon(id) возвращает Texture2D
-- [ ] Кэширование загруженных текстур
-- [ ] Fallback иконка для отсутствующих ресурсов
+- [x] ThemeConfig содержит пути ICON_DIR_RESOURCES, ICON_DIR_BUILDINGS, etc.
+- [x] ResourceRegistry.get_icon(id) возвращает Texture2D
+- [x] BuildingDefs.get_icon(id) возвращает Texture2D
+- [x] Кэширование загруженных текстур
+- [x] Fallback иконка для отсутствующих ресурсов
 
 ---
 
@@ -176,17 +176,17 @@
 
 **Priority:** Medium  
 **Effort:** Large  
-**Status:** Todo  
+**Status:** Done  
 
 Обновить существующие UI сцены (.tscn) для использования новых иконок вместо эмодзи.
 
 **Acceptance Criteria:**
-- [ ] ResourceBar.tscn использует иконки ресурсов из assets/ui/icons/resources/
-- [ ] ResourcesPanel.tscn использует новые иконки
-- [ ] CityScreen.tscn использует иконки зданий
-- [ ] HeroStatusPanel.tscn использует иконки потребностей
-- [ ] BattleSpellbookPanel.tscn использует иконки школ магии
-- [ ] Все TextureRect узлы имеют корректные texture пути
+- [x] ResourceBar.tscn использует иконки ресурсов из assets/ui/icons/resources/
+- [x] ResourcesPanel.tscn использует новые иконки
+- [x] CityScreen.tscn использует иконки зданий
+- [x] HeroStatusPanel.tscn использует иконки потребностей
+- [x] BattleSpellbookPanel.tscn использует иконки школ магии
+- [x] Все TextureRect узлы имеют корректные texture пути
 
 ---
 
@@ -194,16 +194,16 @@
 
 **Priority:** Low  
 **Effort:** Medium  
-**Status:** Todo  
+**Status:** Done  
 
 Создать тесты для проверки загрузки иконок, курсоров, кэширования.
 
 **Acceptance Criteria:**
-- [ ] test_icon_loading.gd: проверка загрузки всех иконок ресурсов
-- [ ] test_cursor_sprites.gd: проверка загрузки спрайтов курсоров
-- [ ] test_icon_cache.gd: проверка кэширования текстур
-- [ ] test_fallback_icon.gd: проверка fallback иконки
-- [ ] Все тесты проходят успешно
+- [x] test_icon_loading.gd: проверка загрузки всех иконок ресурсов
+- [x] test_cursor_sprites.gd: проверка загрузки спрайтов курсоров
+- [x] test_icon_cache.gd: проверка кэширования текстур
+- [x] test_fallback_icon.gd: проверка fallback иконки
+- [x] Все тесты проходят успешно
 
 ---
 
@@ -211,13 +211,13 @@
 
 **Priority:** Low  
 **Effort:** Small  
-**Status:** Todo  
+**Status:** Done  
 
 Обновить документацию проекта и провести финальную проверку всех изменений.
 
 **Acceptance Criteria:**
-- [ ] README.md обновлён с информацией о новой системе иконок
-- [ ] doc/task/ обновлён новыми задачами
-- [ ] Все ассеты проверены на наличие артефактов сжатия
-- [ ] Производительность UI проверена в игре
-- [ ] Change log обновлён
+- [x] README.md обновлён с информацией о новой системе иконок
+- [x] doc/task/ обновлён новыми задачами
+- [x] Все ассеты проверены на наличие артефактов сжатия
+- [x] Производительность UI проверена в игре
+- [x] Change log обновлён

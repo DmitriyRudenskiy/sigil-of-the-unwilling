@@ -85,6 +85,11 @@ static func _chain_from_dict(raw: Dictionary) -> ProductionChain:
 		raw.get("outputs", {})
 	)
 
+## Task 9: иконка здания (Texture2D, с кэшем и fallback)
+static func get_icon(id: StringName) -> Texture2D:
+	const IR = preload("res://scripts/theme/IconRegistry.gd")
+	return IR.building_texture(String(id))
+
 static func all() -> Array[UniqueBuilding.Def]:
 	_ensure_loaded()
 	var out: Array[UniqueBuilding.Def] = []

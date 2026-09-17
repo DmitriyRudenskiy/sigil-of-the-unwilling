@@ -3,6 +3,7 @@ extends Control
 
 const THEME_PATH := "res://assets/theme/game_theme.tres"
 const MAX_SPELL_BUTTONS := 10
+const IR = preload("res://scripts/theme/IconRegistry.gd")
 
 signal spell_chosen(spell_id: StringName)
 
@@ -61,6 +62,10 @@ func _refresh() -> void:
         var btn := _spell_buttons[btn_idx]
         btn.text = "%s (%d)" % [spell.display_name, _magic.get_mana_cost_def(spell)]
         btn.tooltip_text = "%s | Lv.%d" % [spell.school, spell.level]
+        # Task 10: иконка школы магии
+        var school_id: int = SchoolType.from_key(spell.school)
+        if SchoolType.is_valid(school_id):
+            btn.icon = IR.school_texture(SchoolType.to_key(school_id))
         if _theme != null:
             var bsb := _theme.get_stylebox("button", "Panel")
             if bsb:

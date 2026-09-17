@@ -136,6 +136,11 @@ func _add(id: StringName, name_: String, biomes: Array[String], rarity: int,
 	def.icon = icon
 	_resources[id] = def
 
+## Task 9: иконка ресурса (Texture2D, с кэшем и fallback)
+func get_icon(id: StringName) -> Texture2D:
+	const IR = preload("res://scripts/theme/IconRegistry.gd")
+	return IR.resource_texture(String(id))
+
 func get_resource(id: StringName) -> ResourceDef:
 	ensure_definitions()
 	return _resources.get(id, null) as ResourceDef

@@ -143,6 +143,13 @@ const FONT_SIZE_SMALL := 14
 
 const AUDIO_DIR := "res://assets/audio/"
 
+const ICON_DIR_RESOURCES := "res://assets/ui/icons/resources/"
+const ICON_DIR_BUILDINGS := "res://assets/ui/icons/buildings/"
+const ICON_DIR_NEEDS := "res://assets/ui/icons/needs/"
+const ICON_DIR_SCHOOLS := "res://assets/ui/icons/schools/"
+const CURSOR_DIR := "res://assets/cursors/"
+const ICON_FALLBACK_PATH := "res://assets/ui/icons/fallback.png"
+
 static func resource_icon(id: StringName) -> String:
 	match id:
 		&"wood":    return "🌲"

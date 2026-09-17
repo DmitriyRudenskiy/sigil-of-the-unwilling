@@ -2,6 +2,8 @@ class_name CityScreen
 extends Control
 
 const DeceptionCheck = preload("res://scripts/systems/DeceptionCheck.gd")
+const IR = preload("res://scripts/theme/IconRegistry.gd")
+const TC = preload("res://scripts/theme/ThemeConfig.gd")
 const ReputationSystem = preload("res://scripts/city/ReputationSystem.gd")
 const WeaponTechService = preload("res://scripts/systems/WeaponTechService.gd")
 const LeadershipCheck = preload("res://scripts/systems/LeadershipCheck.gd")
@@ -111,7 +113,10 @@ func refresh() -> void:
 	for building in city.buildings:
 		if building == null or building.def == null:
 			continue
-		b_lines.append(GameText.city_building_line(building.def.display_name, building.level, building.cell.x, building.cell.y))
+		# Task 10: иконка здания (fallback при отсутствии текстуры)
+		var bicon: Texture2D = IR.building_texture(String(building.def.id))
+		var bmark: String = "" if bicon.resource_path.begins_with(TC.ICON_DIR_BUILDINGS) else "(нет иконки) "
+		b_lines.append(bmark + GameText.city_building_line(building.def.display_name, building.level, building.cell.x, building.cell.y))
 	_buildings_label.text = (GameText.city_buildings() + ":\n" + "\n".join(b_lines)) \
 		if not b_lines.is_empty() else GameText.city_buildings_none()
 	if _message_label.text == "":

@@ -61,6 +61,9 @@ fission-ai/
 ├── game/                      # Основной проект Godot
 │   ├── assets/                # Ресурсы игры
 │   │   ├── ui/                # UI элементы (иконки, курсоры, виджеты)
+│   │   │   ├── icons/         # resources/, buildings/, needs/, schools/ + fallback.png
+│   │   │   └── widgets/       # 9-slice текстуры: buttons/, panels/, progress_bars/, sliders/, decorators/
+│   │   └── cursors/           # спрайты курсоров 6 режимов (default/walk/collect/attack/spell/talk)
 │   │   ├── tilesets/          # Гексагональные тайлсеты
 │   │   ├── data/              # JSON данные (заклинания, баланс)
 │   │   └── ...                # Спрайты, аудио
