@@ -102,6 +102,10 @@ static func get_building_at(c: CityData, cell: Vector2i) -> UniqueBuilding:
 static func cell_is_built(c: CityData, cell: Vector2i) -> bool:
 	if cell == c.center:
 		return true
+	# city-hex-layout: ядро (ромб 2×2) занято
+	for cc in c.core_cells:
+		if cell == cc:
+			return true
 	for borough in c.boroughs:
 		if borough.cell == cell:
 			return true
@@ -111,8 +115,9 @@ static func cell_is_built(c: CityData, cell: Vector2i) -> bool:
 	return false
 static func has_road(c: CityData, cell: Vector2i) -> bool:
 	return c.roads.has(cell)
-static func building_max_distance(c: CityData) -> int:
-	return ProsperitySystem.build_radius_for_level(c.level)
+## city-hex-layout: фикс 3 (кольца 1–3 вокруг ядра)
+static func building_max_distance(_c: CityData) -> int:
+	return GameNumbers.CITY_RING_MAX
 
 ## Ранняя игра: тир оружия по уровню города (early-game-foundation): 1-4 → T1, 5-8 → T2, 9-11 → T3
 ## social-systems-delta D1: fallback по уровню (железо+ сдвинуто на +1).

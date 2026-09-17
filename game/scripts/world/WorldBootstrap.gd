@@ -296,6 +296,7 @@ static func _create_cities(parent: Node2D, R: BootstrapResult) -> void:
 	var occupied := _occupied_map_cells(R)
 	var center := _place_in_hero_component(R.map_gen, Vector2i(10, 10), occupied)
 	capital.center = center
+	capital.core_cells = CityFactory.core_cells_for(center)
 
 	var shrine_offset := Vector2i(2, -1)
 	var shrine_cell := center + shrine_offset

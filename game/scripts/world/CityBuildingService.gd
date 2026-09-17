@@ -211,7 +211,7 @@ static func first_free_build_cell(city: City, def: UniqueBuilding.Def, bounds :=
 			if bounds.x > 0 and bounds.y > 0:
 				if cell.x < 0 or cell.y < 0 or cell.x >= bounds.x or cell.y >= bounds.y:
 					continue
-			if not city.cell_is_built(cell):
+			if not city.cell_is_built(cell) and not _cell_occupied_by_worker(city, cell):
 				return cell
 		return Vector2i(-1, -1)
 	var max_d := city.building_max_distance()
@@ -222,7 +222,15 @@ static func first_free_build_cell(city: City, def: UniqueBuilding.Def, bounds :=
 					continue
 			if city.cell_is_built(cell):
 				continue
+			if _cell_occupied_by_worker(city, cell):
+				continue
 			if not city.is_buildable_fn.call(cell):
 				continue
 			return cell
 	return Vector2i(-1, -1)
+
+static func _cell_occupied_by_worker(city: City, cell: Vector2i) -> bool:
+	for u in city.pop:
+		if u.state == PopUnit.State.WORKER and u.tile == cell:
+			return true
+	return false

@@ -12,9 +12,14 @@ static func village_name(seed_val: int, cell: Vector2i) -> String:
 	var h: int = hash([seed_val, cell.x, cell.y])
 	return VILLAGE_NAMES[absi(h) % VILLAGE_NAMES.size()]
 
+## city-hex-layout D2: ромб 2×2 — center, (1,0), (0,1), (1,1).
+static func core_cells_for(center: Vector2i) -> Array[Vector2i]:
+	return [center, center + Vector2i(1, 0), center + Vector2i(0, 1), center + Vector2i(1, 1)]
+
 static func create_village(center: Vector2i, display_name: String, _seed: int = 0) -> City:
 	var city := City.new()
 	city.center = center
+	city.core_cells = core_cells_for(center)
 	city.display_name = display_name
 	city.owner = &"player"
 	city.stronghold_level = 1

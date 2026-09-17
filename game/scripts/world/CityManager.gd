@@ -2,6 +2,8 @@ class_name CityManager
 extends Node
 
 signal city_updated(city: City)
+## city-hex-layout 4.1: состав городов изменился (добавление/перенос) — пересчитать кэш тайл→город
+signal cities_changed
 signal cycle_completed(turn: int, arrivals: int)
 signal glory_changed(window_total: float)
 signal status_message(text: String)
@@ -31,6 +33,7 @@ func register_city(city: City, make_capital := false) -> void:
 		func(new_center: Vector2i): relocation_completed.emit(city.uid, new_center))
 	if make_capital or capital == null:
 		set_capital(city)
+	cities_changed.emit()
 
 func set_capital(city: City) -> void:
 	if not cities.has(city):

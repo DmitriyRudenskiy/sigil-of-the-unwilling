@@ -24,6 +24,8 @@ const BOROUGH_LEVELUP_NEIGHBORS := 4
 const BOROUGH_MAX_LEVEL         := 3
 const BUILDING_MAX_LEVEL        := 3
 const BUILDING_MAX_DIST_BASE    := 3
+# city-hex-layout: фиксированный радиус застройки (кольца 1–3 вокруг ядра)
+const CITY_RING_MAX             := 3
 const SAFETY_PER_PATROL         := 5
 const STARVING_APPROVAL_PENALTY := 10
 const REP_MIN                   := -100

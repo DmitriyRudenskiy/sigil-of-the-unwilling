@@ -9,6 +9,7 @@ static func serialize(city: City) -> Dictionary:
 		"uid": city.uid,
 		"display_name": city.display_name,
 		"center": SerializationUtils.vec2i_to_dict(city.center),
+		"core_cells": _core_cells_to_list(city.core_cells),
 		"reputation": city.reputation,
 		"prosperity": city.prosperity,
 		"level": city.level,
@@ -58,6 +59,12 @@ static func deserialize(city: City, data: Dictionary) -> void:
 	if version < City.SERIALIZATION_VERSION:
 		data = _migrate_city_data(data, version)
 	city.center = SerializationUtils.vec2i_from_dict(data.get("center", {}), Vector2i(-1, -1))
+	# city-hex-layout: ленивая миграция — нет/пусто → вычислить из center
+	var raw_core: Array = data.get("core_cells", [])
+	if raw_core.is_empty():
+		city.core_cells = CityFactory.core_cells_for(city.center)
+	else:
+		city.core_cells = _core_cells_from_list(raw_core)
 	city.reputation = int(data.get("reputation", 0))
 	city.prosperity = clampf(float(data.get("prosperity", 50.0)), 0.0, 100.0)
 	city.level = clampi(int(data.get("level", 1)), 1, GameNumbers.CITY_LEVEL_MAX)
@@ -135,3 +142,15 @@ static func _migrate_city_data(data: Dictionary, from_version: int) -> Dictionar
 		if not migrated.has("upkeep_mult"):
 			migrated["upkeep_mult"] = 1.0
 	return migrated
+
+static func _core_cells_to_list(cells: Array[Vector2i]) -> Array:
+	var out: Array = []
+	for c in cells:
+		out.append(SerializationUtils.vec2i_to_dict(c))
+	return out
+
+static func _core_cells_from_list(raw: Array) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	for d in raw:
+		out.append(SerializationUtils.vec2i_from_dict(d, Vector2i(-1, -1)))
+	return out

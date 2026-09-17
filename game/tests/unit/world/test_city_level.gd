@@ -119,7 +119,11 @@ func test_build_radius_by_level() -> void:
 		c.level = lvl
 		var expected: int = [3, 4, 5, 5, 5][lvl - 1]
 		assert_that(ProsperitySystem.build_radius_for_level(lvl)).is_equal(expected)
-		assert_that(c.building_max_distance()).is_equal(expected)
+	# city-hex-layout: building_max_distance — фикс 3 (кольца 1–3 вокруг ядра)
+	c.level = 1
+	assert_that(c.building_max_distance()).is_equal(3)
+	c.level = 12
+	assert_that(c.building_max_distance()).is_equal(3)
 
 func test_ring_of() -> void:
 	var c: Variant = _city()
@@ -128,12 +132,15 @@ func test_ring_of() -> void:
 	assert_that(c.ring_of(_ring_cell(3))).is_equal(3)
 
 func test_ring_build_gate() -> void:
+	# city-hex-layout: радиус фикс 3 — кольцо 4 никогда недоступно, кольцо 3 всегда
 	var c: Variant = _city()
 	c.storage[&"industry"] = 1000.0
 	var far := _ring_cell(4)
 	assert_bool(c.can_build_building(BuildingDefs.market(), far).ok).is_false()
 	c.level = 3
-	assert_bool(c.can_build_building(BuildingDefs.market(), far).ok).is_true()
+	assert_bool(c.can_build_building(BuildingDefs.market(), far).ok).is_false()
+	var near := _ring_cell(3)
+	assert_bool(c.can_build_building(BuildingDefs.market(), near).ok).is_true()
 
 func test_build_rejected_on_worker_cell() -> void:
 	var c: Variant = _city()

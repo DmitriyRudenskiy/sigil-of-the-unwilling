@@ -56,9 +56,26 @@ func setup(
 
 	_connect_hero_signals()
 	_connect_ui_signals()
+	_connect_city_signals()
 
 	if terrain_resource_manager and ui_manager and ui_manager.marker_layer:
 		ui_manager.marker_layer.set_terrain_resource_markers(terrain_resource_manager)
+
+## city-hex-layout 4.1: кэш тайл→город пересчитывается при cities_changed
+func _connect_city_signals() -> void:
+	if cities == null or map_gen == null or map_gen.get("renderer") == null:
+		return
+	if not cities.cities_changed.is_connected(_on_cities_changed):
+		cities.cities_changed.connect(_on_cities_changed)
+	_on_cities_changed()
+
+func _on_cities_changed() -> void:
+	var renderer = map_gen.get("renderer") if map_gen != null else null
+	if renderer == null:
+		return
+	renderer.rebuild_city_zones(cities.cities)
+	map_gen.apply_fog(visibility)
+	renderer.paint_city_zones(map_gen.get("_tile_map"))
 
 func _ready() -> void:
 	if hero == null or ui_manager == null:
@@ -141,6 +158,9 @@ func _refresh_visibility() -> void:
 	if visibility.recompute(hero.current_cell, sources,
 		GameNumbers.FOG_HERO_SIGHT, GameNumbers.FOG_CITY_SIGHT, map_gen.hex_shift_right):
 		map_gen.apply_fog(visibility)
+		var renderer = map_gen.get("renderer")
+		if renderer != null:
+			renderer.paint_city_zones(map_gen.get("_tile_map"))
 
 func _on_hex_borders_toggled(on: bool) -> void:
 	if ui_manager:

@@ -14,6 +14,8 @@ const SERIALIZATION_VERSION := 2
 var uid := 0
 var display_name := ""
 var center := Vector2i(-1, -1)
+## city-hex-layout D2: ядро города, ромб 2×2 (кэш; источник — center + CityFactory.core_cells_for)
+var core_cells: Array[Vector2i] = []
 var owner: StringName = &"none"
 var is_capital := false
 var faction: int = Faction.DEFAULT

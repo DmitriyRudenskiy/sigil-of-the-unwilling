@@ -21,8 +21,36 @@ const TERRAIN_TO_BIOME := {
 
 var model
 
+## city-hex-layout 4.1: кэш "тайл → город" (ядро/кольцо N); пересчёт при cities_changed.
+## cell -> {city, ring} (0 = ядро)
+var city_zones: Dictionary = {}
+
 func _init(p_model) -> void:
 	model = p_model
+
+func rebuild_city_zones(cities: Array) -> void:
+	city_zones.clear()
+	for city in cities:
+		if city == null:
+			continue
+		for cc in city.core_cells:
+			city_zones[cc] = {"city": city, "ring": 0}
+		for r in range(1, GameNumbers.CITY_RING_MAX + 1):
+			for cell in HexUtils.ring(city.center, r):
+				if not city_zones.has(cell):
+					city_zones[cell] = {"city": city, "ring": r}
+
+## city-hex-layout 4.2: окраска ядра и колец 1–3 (палитра TileAtlas, без новых текстур).
+## Ядро — MUD, кольцо 1 — ROAD, кольца 2–3 — SAND.
+func paint_city_zones(tile_map: TileMapLayer) -> void:
+	if tile_map == null:
+		return
+	for cell in city_zones:
+		var zone: Dictionary = city_zones[cell]
+		var r: int = int(zone.ring)
+		var biome: int = TileAtlas.Biome.MUD if r == 0 else (TileAtlas.Biome.ROAD if r == 1 else TileAtlas.Biome.SAND)
+		var coords: Array = TileAtlas.BASE_COORDS[biome]
+		tile_map.set_cell(cell, TileAtlas.SOURCE_ID, coords[0])
 
 func paint(tile_map: TileMapLayer) -> void:
 	tile_map.clear()
@@ -54,3 +82,9 @@ func apply_fog(tile_map: TileMapLayer, visibility: _VisibilityMap) -> void:
 
 func paint_decor(_decor_layer: TileMapLayer) -> void:
 	pass
+
+func clear_city_zones(tile_map: TileMapLayer) -> void:
+	if tile_map == null:
+		return
+	for cell in city_zones:
+		tile_map.erase_cell(cell)
