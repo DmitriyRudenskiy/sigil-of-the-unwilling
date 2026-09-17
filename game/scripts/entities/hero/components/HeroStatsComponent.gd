@@ -1,6 +1,9 @@
 class_name HeroStatsComponent
 extends HeroComponent
 
+const FactionReputation = preload("res://scripts/systems/FactionReputation.gd")
+const QuestSystem = preload("res://scripts/systems/QuestSystem.gd")
+
 var hero_name: String = "Darkstorn"
 # social-stats-weapon-tech: 8 статов (4 боевых + int/wis/cha/luk)
 var stats := {"attack": 0, "defense": 0, "spell_power": 4, "knowledge": 2, "int": 2, "wis": 2, "cha": 2, "luk": 2}
@@ -10,6 +13,10 @@ var hero_culture: String = ""
 var hero_background: String = ""
 var path_id: StringName = &""
 var resurrected_once: bool = false
+## quests-reputation-system: состояние квестов и репутации с фракциями
+var quest_state: Dictionary = {}
+var faction_rep: Dictionary = {}
+var rep_history: Array = []
 
 func apply_build(profile: HeroBuildProfile) -> void:
 	if profile == null:
@@ -20,6 +27,11 @@ func apply_build(profile: HeroBuildProfile) -> void:
 	hero_class = profile.character_class
 	hero_culture = profile.culture
 	hero_background = profile.background
+	# quests-reputation-system: начальная репутация (раса +10, класс +5) и пустые квесты
+	if faction_rep.is_empty() and (hero_race != "" or hero_class != ""):
+		faction_rep = FactionReputation.initial_state(hero_race, hero_class)
+	if quest_state.is_empty():
+		quest_state = QuestSystem.new_state()
 
 func get_battle_bonus(inventory_mods: Dictionary) -> Dictionary:
 	return {
@@ -48,6 +60,9 @@ func serialize() -> Dictionary:
 		"hero_background": hero_background,
 		"path_id": String(path_id),
 		"resurrected_once": resurrected_once,
+		"quest_state": quest_state,
+		"faction_rep": faction_rep,
+		"rep_history": rep_history,
 	}
 
 func deserialize(data: Dictionary) -> void:
@@ -60,6 +75,10 @@ func deserialize(data: Dictionary) -> void:
 	path_id = StringName(str(data.get("path_id", path_id)))
 	resurrected_once = bool(data.get("resurrected_once", false))
 	stats = _migrate_social_stats(loaded)
+	quest_state = data.get("quest_state", quest_state)
+	faction_rep = data.get("faction_rep", faction_rep)
+	var loaded_history: Array = data.get("rep_history", rep_history)
+	rep_history = loaded_history
 
 # social-stats-weapon-tech D6: старый сейв (4 стата) — недостающие социальные
 # пересчитываем из HeroBuildProfile.get_stats расы/класса/культуры, не хардкод 2
