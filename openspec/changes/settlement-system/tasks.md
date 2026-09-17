@@ -2,55 +2,74 @@
 
 ## Фаза 1: Виды и караван
 
-- [ ] 1.1 `scripts/data/settlement_species.gd` — 5 видов (статистика
-  прототипа 1:1: Base Resolve, порог, голод, перелом, черты)
-- [ ] 1.2 `scripts/settlement/Settlement.gd` — сущность поселения
-  (state Dictionary: settlers, buildings, resources, day)
-- [ ] 1.3 Караван: ≤3 видов, формирование поселения из каравана
-- [ ] 1.4 Тесты: таблица видов, караван 3/4, создание поселенца
+- [ ] 1.1 `scripts/data/settlement_species.gd` — 7 видов (статистика
+  1:1: Resolve/Demand/Decadence/голод/перерыв/черты; bat — заглушка
+  `available: false`; frog/bat — dlc-флаг)
+- [ ] 1.2 `scripts/settlement/Settlement.gd` — сущность (state:
+  settlers, buildings, resources, day, hostility, reputation)
+- [ ] 1.3 Караван: ≤3 видов, формирование поселения
+- [ ] 1.4 Тесты: таблица 7 видов, караван 3/4, frog DLC-gate
 
 ## Фаза 2: Resolve и потребности
 
-- [ ] 2.1 `scripts/settlement/SettlementResolve.gd` — Resolve,
-  голод (толерантность вида), перелом (интервал → ходы)
-- [ ] 2.2 Потребности: еда (сырая/сложная), одежда (coats/boots),
-  жильё, сервис — бонусы Resolve
-- [ ] 2.3 Уход поселенца при Resolve 0 (освобождение жилья/места)
-- [ ] 2.4 Тесты: голод lizard/harpy, перелом, уход, автопереселение
+- [ ] 2.1 `SettlementResolve.gd` — Resolve, голод (толерантность),
+  перерывы (Break Interval → ходы)
+- [ ] 2.2 Потребности: еда (сырая/сложная), одежда (coats +5/+3
+  шторм, boots +5/+15%), жильё, сервис (бонусы +4..+10)
+- [ ] 2.3 Firekeeper (вид-бонус: harpy скорость, lizard Resolve)
+- [ ] 2.4 Уход при Resolve 0 (освобождение жилья/места)
+- [ ] 2.5 Тесты: голод lizard/harpy/fox, перерыв, Firekeeper, уход
 
 ## Фаза 3: Здания
 
-- [ ] 3.1 `scripts/data/settlement_buildings.gd` — здания, рецепты,
-  стоимость, требования уровня
-- [ ] 3.2 `scripts/settlement/SettlementBuildings.gd` — hearth
-  (уровни 1–3), warehouse, лагеря (5), производство (1 рецепт),
-  жильё (Shelter 3 / дома 2)
-- [ ] 3.3 Стройка свободными поселенцами (циклы, материалы)
-- [ ] 3.4 Автопереселение + радиус hearth (жильё только в радиусе)
-- [ ] 3.5 Тесты: стартовые здания, 1 рецепт, стройка, радиус
+- [ ] 3.1 `settlement_buildings.gd` — здания, рецепты, цены домов,
+  ункилоки
+- [ ] 3.2 `SettlementBuildings.gd` — hearth (L1–3 за дома/декор),
+  warehouse, лагеря (5, малые узлы), производство (1 рецепт: Lumber
+  Mill, Bakery, Granary, Crude Workstation, Cooperage, Tinctury)
+- [ ] 3.3 Жильё: Shelter (3, frog нет), Big Shelter (3), дома видов
+  (2, цены/унлоки); радиус hearth
+- [ ] 3.4 Стройка свободными поселенцами (циклы, материалы)
+- [ ] 3.5 Автопереселение
+- [ ] 3.6 Тесты: стартовые, 1 рецепт, малые узлы, радиус, стройка
 
 ## Фаза 4: Репутация, враждебность, штормы
 
-- [ ] 4.1 `scripts/settlement/SettlementReputation.gd` — метр
-  репутации (из среднего Resolve), победа
-- [ ] 4.2 Forest Hostility: рост (год/поселенец/glade/лагерь),
-  сдерживание (Small Hearth)
-- [ ] 4.3 Шторм: штраф Resolve ∝ Hostility, coats +3, массовый исход
+- [ ] 4.1 `SettlementReputation.gd` — Demand/Decadence (Resolve >
+  Demand → очки; порог −Decadence за очко), общий метр, победа
+- [ ] 4.2 Hostility: рост (год/поселенец/glade/лагерь), Small
+  Hearth, glade (Dangerous/Forbidden)
+- [ ] 4.3 Шторм: ∝ Hostility, coats +3, увольнение лесорубов,
+  массовый исход
 - [ ] 4.4 Поражение: нет поселенцев / нестабильность
-- [ ] 4.5 Тесты: победа, рост Hostility, шторм, 2 поражения
+- [ ] 4.5 Тесты: Demand/Decadence, рост Hostility, шторм, 2
+  поражения, победа
 
 ## Фаза 5: Smoldering City (meta)
 
-- [ ] 5.1 `scripts/settlement/SmolderingCity.gd` — Citadel-ресурсы,
-  апгрейды (const-таблица `smoldering_upgrades.gd`)
-- [ ] 5.2 Доля ресурсов из поселения (поражение 50% / победа 100%)
-- [ ] 5.3 Meta-сейв: отдельный ключ в сейве, переживает прогоны
-- [ ] 5.4 Тесты: покупка апгрейда, стартовый бонус, meta-сейв
+- [ ] 5.1 `SmolderingCity.gd` — Citadel-ресурсы (Ancient Tablets),
+  доля из поселения (поражение 50% / победа 100%)
+- [ ] 5.2 `smoldering_upgrades.gd` — апгрейды (стартовые здания,
+  виды, ресурсы)
+- [ ] 5.3 Ункилоки: frog L9+DLC, bat L11+DLC, Unified L6, дома
+  V1–6, улучшения L11/12
+- [ ] 5.4 Meta-сейв (отдельный ключ, переживает прогоны)
+- [ ] 5.5 Тесты: покупка, ункилоки, meta-сейв
 
-## Фаза 6: Интеграция и регрессия
+## Фаза 6: Продвинутые + Prestige
 
-- [ ] 6.1 Поселение на hex-кластере (после city-hex-layout-prototype;
-      дефолт [center] до того)
-- [ ] 6.2 MCP-сценарий "поселение доживает до шторма" (детерминизм)
-- [ ] 6.3 GdUnit4: все тесты зелёные (регрессия 1605+)
-- [ ] 6.4 MCP: 27+ passed, 60-ходовая проба героя RUNNING
+- [ ] 6.1 Улучшения домов (2 уровня, выбор 1 из 2 бонуса)
+- [ ] 6.2 Сервис (таверна) + Unified/Commons (SC L6, меньше бонус)
+- [ ] 6.3 Small Warehouse, Trading Post (Amber), Rainpunk,
+  дождевая вода
+- [ ] 6.4 Prestige 1–10 (const-таблица модификаторов, флаг после
+  победы)
+- [ ] 6.5 Тесты: улучшения, Unified, торговля, каждый Prestige
+
+## Фаза 7: Интеграция и регрессия
+
+- [ ] 7.1 Поселение на hex-кластере (после city-hex-layout;
+      дефолт [center])
+- [ ] 7.2 MCP-сценарий "поселение доживает до шторма" (детерминизм)
+- [ ] 7.3 GdUnit4: все тесты зелёные (регрессия 1605+)
+- [ ] 7.4 MCP: 27+ passed, 60-ходовая проба RUNNING
