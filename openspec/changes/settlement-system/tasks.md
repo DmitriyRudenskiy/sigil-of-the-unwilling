@@ -47,14 +47,14 @@
 
 ## Фаза 5: Smoldering City (meta)
 
-- [ ] 5.1 `SmolderingCity.gd` — Citadel-ресурсы (Ancient Tablets),
+- [x] 5.1 `SmolderingCity.gd` — Citadel-ресурсы (Ancient Tablets),
   доля из поселения (поражение 50% / победа 100%)
-- [ ] 5.2 `smoldering_upgrades.gd` — апгрейды (стартовые здания,
+- [x] 5.2 `smoldering_upgrades.gd` — апгрейды (стартовые здания,
   виды, ресурсы)
-- [ ] 5.3 Ункилоки: frog L9+DLC, bat L11+DLC, Unified L6, дома
+- [x] 5.3 Ункилоки: frog L9+DLC, bat L11+DLC, Unified L6, дома
   V1–6, улучшения L11/12
-- [ ] 5.4 Meta-сейв (отдельный ключ, переживает прогоны)
-- [ ] 5.5 Тесты: покупка, ункилоки, meta-сейв
+- [x] 5.4 Meta-сейв (отдельный ключ, переживает прогоны)
+- [x] 5.5 Тесты: покупка, ункилоки, meta-сейв
 
 ## Фаза 6: Продвинутые + Prestige
 
