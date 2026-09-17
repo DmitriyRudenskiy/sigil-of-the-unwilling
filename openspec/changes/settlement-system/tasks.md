@@ -2,23 +2,23 @@
 
 ## Фаза 1: Виды и караван
 
-- [ ] 1.1 `scripts/data/settlement_species.gd` — 7 видов (статистика
+- [x] 1.1 `scripts/data/settlement_species.gd` — 7 видов (статистика
   1:1: Resolve/Demand/Decadence/голод/перерыв/черты; bat — заглушка
   `available: false`; frog/bat — dlc-флаг)
-- [ ] 1.2 `scripts/settlement/Settlement.gd` — сущность (state:
+- [x] 1.2 `scripts/settlement/Settlement.gd` — сущность (state:
   settlers, buildings, resources, day, hostility, reputation)
-- [ ] 1.3 Караван: ≤3 видов, формирование поселения
-- [ ] 1.4 Тесты: таблица 7 видов, караван 3/4, frog DLC-gate
+- [x] 1.3 Караван: ≤3 видов, формирование поселения
+- [x] 1.4 Тесты: таблица 7 видов, караван 3/4, frog DLC-gate
 
 ## Фаза 2: Resolve и потребности
 
-- [ ] 2.1 `SettlementResolve.gd` — Resolve, голод (толерантность),
+- [x] 2.1 `SettlementResolve.gd` — Resolve, голод (толерантность),
   перерывы (Break Interval → ходы)
-- [ ] 2.2 Потребности: еда (сырая/сложная), одежда (coats +5/+3
+- [x] 2.2 Потребности: еда (сырая/сложная), одежда (coats +5/+3
   шторм, boots +5/+15%), жильё, сервис (бонусы +4..+10)
-- [ ] 2.3 Firekeeper (вид-бонус: harpy скорость, lizard Resolve)
-- [ ] 2.4 Уход при Resolve 0 (освобождение жилья/места)
-- [ ] 2.5 Тесты: голод lizard/harpy/fox, перерыв, Firekeeper, уход
+- [x] 2.3 Firekeeper (вид-бонус: harpy скорость, lizard Resolve)
+- [x] 2.4 Уход при Resolve 0 (освобождение жилья/места)
+- [x] 2.5 Тесты: голод lizard/harpy/fox, перерыв, Firekeeper, уход
 
 ## Фаза 3: Здания
 
