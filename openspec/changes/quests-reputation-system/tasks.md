@@ -8,9 +8,9 @@
 
 ## 2. Система квестов
 
-- [ ] 2.1 `scripts/data/quest_templates.gd` — шаблоны 4 типов (kill, gather, deliver, escort), сложность по кольцу (1–3), награды (опыт, золото, репутация)
-- [ ] 2.2 `scripts/systems/QuestSystem.gd` — генерация процедурных квестов (без дублей активных), отслеживание прогресса (kill/gather/deliver/escort), награды при завершении, провал (таймер, гибель NPC эскорта), цепочки (`next_quest_id`), журнал (active/completed/failed)
-- [ ] 2.3 Unit-тесты `tests/unit/systems/test_quest_system.gd`: генерация по кольцу, прогресс kill/gather, награды + репутация, провал по таймеру, цепочка, уникальность
+- [x] 2.1 `scripts/data/quest_templates.gd` — шаблоны 4 типов (kill, gather, deliver, escort), сложность по кольцу (1–3), награды (опыт, золото, репутация)
+- [x] 2.2 `scripts/systems/QuestSystem.gd` — генерация процедурных квестов (без дублей активных), отслеживание прогресса (kill/gather/deliver/escort), награды при завершении, провал (таймер, гибель NPC эскорта), цепочки (`next_quest_id`), журнал (active/completed/failed)
+- [x] 2.3 Unit-тесты `tests/unit/systems/test_quest_system.gd`: генерация по кольцу, прогресс kill/gather, награды + репутация, провал по таймеру, цепочка, уникальность
 
 ## 3. Интеграция и сохранение
 
