@@ -1,3 +1,4 @@
+class_name SettlementResolve
 extends RefCounted
 ## Resolve, голод, перерывы, уход (фаза 2). Д2: статик + state.
 ## D4: цикл = 1 ход.

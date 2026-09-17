@@ -1,3 +1,4 @@
+class_name SettlementBuildings
 extends RefCounted
 ## Стройка, hearth, производство, переселение (фаза 3). Д2: статик + state.
 

@@ -1,3 +1,4 @@
+class_name SettlementReputation
 extends RefCounted
 ## Demand/Decadence, Hostility, штормы, победа/поражение (фаза 4). Д2/Д5.
 

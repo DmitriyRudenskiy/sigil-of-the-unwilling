@@ -1,3 +1,4 @@
+class_name Settlement
 extends RefCounted
 ## Поселение — отдельная сущность мира (D1), state-Dictionary (D2).
 
@@ -93,5 +94,11 @@ func buildings_of(type: String) -> Array:
 		if b["type"] == type:
 			out.append(b)
 	return out
+
+# 7.1 Hex-кластер (D3): core_cells из city-hex-layout, дефолт [center]
+func assign_cluster(center: Vector2i) -> void:
+	state["center"] = center
+	if state["core_cells"].is_empty():
+		state["core_cells"] = [center]
 
 const GameNumbersSettlement = preload("res://scripts/constants/GameNumbersSettlement.gd")
