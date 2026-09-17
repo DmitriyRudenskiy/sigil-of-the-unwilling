@@ -58,8 +58,11 @@ static func _process_settler(settle, s: Dictionary, rng: RandomNumberGenerator, 
 		s["break_in"] = int(s["break_in"]) - 1
 
 static func _housing_bonus(settle, s: Dictionary) -> float:
+	var home_id: String = s.get("home", "")
+	if home_id == "":
+		return 0.0
 	for b in settle.state["buildings"]:
-		if b["data"].get("resident", "") == s["id"]:
+		if b["id"] == home_id:
 			if b["type"] == "shelter" and s["species"] == "frog":
 				return 0.0  # лягушки отказываются от Shelter
 			if b["type"] == "shelter" or b["type"] == "big_shelter":
@@ -82,9 +85,7 @@ static func apply_firekeeper(settle) -> void:
 
 # 2.4 Уход при Resolve 0: освобождение жилья
 static func _settle_leaves(settle, s: Dictionary) -> void:
-	for b in settle.state["buildings"]:
-		if b["data"].get("resident", "") == s["id"]:
-			b["data"]["resident"] = ""
+	s["home"] = ""
 	settle.remove_settler(s)
 	if settle.state.get("firekeeper_id", "") == s["id"]:
 		settle.state["firekeeper_id"] = ""

@@ -84,16 +84,16 @@ func test_leave_at_zero_resolve_frees_home() -> void:
 	st["resolve"] = -5.0  # ниже, чем бонус жилья +2
 	st["break_in"] = 2  # без перерыва в первые ходы
 	var shelter := s.add_building("shelter", Vector2i(0, 1))
-	shelter["data"]["resident"] = st["id"]
+	st["home"] = shelter["id"]
 	Resolve.on_day_passed(s, _rng(5))
 	assert_that(s.state["settlers"].size()).is_equal(0)
-	assert_that(shelter["data"]["resident"]).is_equal("")
+	assert_that(st["home"]).is_equal("")
 
 func test_frog_refuses_shelter() -> void:
 	var s := Settlement.new()
 	var frog := s.add_settler("frog")
 	var shelter := s.add_building("shelter", Vector2i(0, 1))
-	shelter["data"]["resident"] = frog["id"]
+	frog["home"] = shelter["id"]
 	var before: float = float(frog["resolve"])
 	Resolve.on_day_passed(s, _rng(7))
 	# frog не получил бонус жилья (но мог потерять от голода)
