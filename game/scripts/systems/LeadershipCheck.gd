@@ -21,16 +21,23 @@ static func max_army_stacks(cha: int) -> int:
 static func recruit_quality(cha: int) -> float:
 	return float(GameNumbers.SOCIAL_CHA_TABLES["recruit_quality"][_idx(cha)])
 
+## social-systems-delta D5: модификаторы условий найма (ТЗ 3.4).
+const RECRUIT_MODS := {"pay": 2, "food": 2, "rescue": 4, "bad_terms": -3, "cruelty": -5}
+
 ## d20-проверка найма.
 ## difficulty — ключ в RECRUIT_DC ("desperate"…"champion").
-## rep — репутация города (±3 к броску), offers — свободные вакансии (до +3).
+## rep — репутация города (±3 к броску), offers — свободные вакансии (до +3),
+## mods — условия ("pay" +2, "food" +2, "rescue" +4, "bad_terms" −3, "cruelty" −5).
 ## Возвращает: {outcome: "success"|"rumor"|"refused"|"critical", d20, total, dc, rep_delta}
 static func recruit_check(rng: RandomNumberGenerator, cha: int, rep: int,
-		offers: int, difficulty: String) -> Dictionary:
+		offers: int, difficulty: String, mods: Array = []) -> Dictionary:
 	var dc: int = int(GameNumbers.RECRUIT_DC.get(difficulty, 10))
 	var d20: int = rng.randi_range(1, 20)
 	var rep_bonus: int = clampi(int(roundf(float(rep) / 10.0)), -3, 3)
-	var total: int = d20 + maxi(cha - 10, 0) + rep_bonus + mini(offers, 3)
+	var mod_bonus: int = 0
+	for m in mods:
+		mod_bonus += int(RECRUIT_MODS.get(str(m), 0))
+	var total: int = d20 + maxi(cha - 10, 0) + rep_bonus + mini(offers, 3) + mod_bonus
 	var out := {"outcome": "success", "d20": d20, "total": total, "dc": dc, "rep_delta": 0}
 	if d20 == 1:
 		out["outcome"] = "critical"

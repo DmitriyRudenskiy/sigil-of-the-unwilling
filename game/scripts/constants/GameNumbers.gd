@@ -275,4 +275,5 @@ const SOCIAL_CHA_TABLES := {
 	"recruit_quality": GameNumbersCity.SOCIAL_RECRUIT_QUALITY,
 }
 const SOCIAL_ATTRITION_CHA := GameNumbersCity.SOCIAL_ATTRITION_CHA
+const CHA_MUTINY_DC := GameNumbersCity.CHA_MUTINY_DC
 const RECRUIT_DC := GameNumbersCity.RECRUIT_DC

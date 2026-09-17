@@ -13,25 +13,59 @@ static func set_rng(rng: RandomNumberGenerator) -> void:
 	_rng = rng
 
 ## Тир оружия города: max(fallback по уровню, tech по зданиям/ресурсам).
-## tech-лестница: кузница + железо + уголь -> 2; + золото -> 3; + кварц -> 4; + киноварь -> 5.
+## tech-лестница (social-systems-delta D1): кузница + железо + уголь -> 3;
+## + золото -> 4; + кварц -> 5 (редкое/магия).
 ## Без кузницы на lvl 5+ можно нанять кузнеца (d20 + cha vs 14) — тогда tech = fallback.
-static func city_weapon_tier(city: City, hero_cha: int = -1) -> int:
-	var fallback: int = CityService.weapon_tier_for_city(city.level)
-	var smithy_level := 0
+static func _smithy_level(city: City) -> int:
+	var lvl := 0
 	for b in city.buildings:
 		if b != null and b.def != null and b.def.id == &"smithy":
-			smithy_level = maxi(smithy_level, b.level)
+			lvl = maxi(lvl, b.level)
+	return lvl
+
+## social-systems-delta D3: требования переходов этапов.
+## 2 — камень + дерево (крепления); 3 — кузница + уголь + руда + кузнец;
+## 4 — кузница 2 (закалка); 5 — кузница 2 + кварц.
+static func stage_requirements_met(city: City, target_tier: int) -> bool:
+	match target_tier:
+		1:
+			return true
+		2:
+			return float(city.storage.get(&"stone", 0.0)) > 0.0 \
+				and float(city.storage.get(&"wood", 0.0)) > 0.0
+		3:
+			return _smithy_level(city) >= 1 \
+				and float(city.storage.get(&"coal", 0.0)) > 0.0 \
+				and float(city.storage.get(&"bog_iron", 0.0)) > 0.0 \
+				and city.smith_hired
+		4:
+			return _smithy_level(city) >= 2
+		5:
+			return _smithy_level(city) >= 2 \
+				and float(city.storage.get(&"quartz", 0.0)) > 0.0
+	return false
+
+## Наём кузнеца (д20 + cha vs DC 14) — флаг city.smith_hired.
+static func try_hire_smith(city: City, hero_cha: int, rng: RandomNumberGenerator) -> bool:
+	if city.smith_hired:
+		return true
+	var check: Dictionary = LeadershipCheck.recruit_check(rng, hero_cha, city.reputation, 0, "smith")
+	if str(check.get("outcome", "refused")) == "success":
+		city.smith_hired = true
+	return city.smith_hired
+
+static func city_weapon_tier(city: City, hero_cha: int = -1) -> int:
+	var fallback: int = CityService.weapon_tier_for_city(city.level)
+	var smithy_level: int = _smithy_level(city)
 	var tech: int = 1
 	if smithy_level >= 1:
 		if float(city.storage.get(&"bog_iron", 0.0)) > 0.0 \
 				and float(city.storage.get(&"coal", 0.0)) > 0.0:
-			tech = 2
+			tech = 3
 			if float(city.storage.get(&"gold_ore", 0.0)) > 0.0:
-				tech = 3
+				tech = 4
 				if float(city.storage.get(&"quartz", 0.0)) > 0.0:
-					tech = 4
-					if float(city.storage.get(&"cinnabar", 0.0)) > 0.0:
-						tech = 5
+					tech = 5
 	elif city.level >= 5 and hero_cha >= 0:
 		# наём свободного кузнеца: успех -> tech = fallback (не выше)
 		var check: Dictionary = LeadershipCheck.recruit_check(_rng, hero_cha, city.reputation, 0, "smith")

@@ -115,11 +115,12 @@ static func building_max_distance(c: CityData) -> int:
 	return ProsperitySystem.build_radius_for_level(c.level)
 
 ## Ранняя игра: тир оружия по уровню города (early-game-foundation): 1-4 → T1, 5-8 → T2, 9-11 → T3
+## social-systems-delta D1: fallback по уровню (железо+ сдвинуто на +1).
 static func weapon_tier_for_city(level: int) -> int:
 	if level >= 9:
-		return 3
+		return 4
 	if level >= 5:
-		return 2
+		return 3
 	return 1
 static func ring_of(c: CityData, cell: Vector2i) -> int:
 	return HexUtils.hex_distance(cell, c.center)

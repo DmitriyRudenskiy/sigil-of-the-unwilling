@@ -22,6 +22,7 @@ static func serialize(city: City) -> Dictionary:
 		"scale_tier": city.scale_tier,
 		"auto_resource_mult": city.auto_resource_mult,
 		"upkeep_mult": city.upkeep_mult,
+		"smith_hired": city.smith_hired,
 		"uid_seq": city._uid_seq,
 	}
 	var storage_str: Dictionary = {}
@@ -71,6 +72,7 @@ static func deserialize(city: City, data: Dictionary) -> void:
 	city.scale_tier = int(data.get("scale_tier", 0))
 	city.auto_resource_mult = float(data.get("auto_resource_mult", 1.0))
 	city.upkeep_mult = float(data.get("upkeep_mult", 1.0))
+	city.smith_hired = bool(data.get("smith_hired", false))
 
 	city.storage.clear()
 	var raw_storage: Dictionary = data.get("storage", {})

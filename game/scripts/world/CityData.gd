@@ -28,6 +28,8 @@ var starving := false
 var scale_tier := 0
 var auto_resource_mult := 1.0
 var upkeep_mult := 1.0
+## social-systems-delta: найм кузнеца (д20 + cha vs 14) — флаг для этапа 3 (железо).
+var smith_hired := false
 
 var pop: Array[PopUnit] = []
 var boroughs: Array[Borough] = []

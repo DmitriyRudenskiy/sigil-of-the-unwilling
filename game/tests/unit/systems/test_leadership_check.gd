@@ -99,3 +99,35 @@ func test_recruit_check_determinism() -> void:
 func test_unknown_difficulty_defaults_10() -> void:
 	var out := LeadershipCheck.recruit_check(_rng(3), 10, 0, 0, "nonexistent")
 	assert_int(int(out["dc"])).is_equal(10)
+
+# --- social-systems-delta D5: модификаторы найма ---
+
+func test_recruit_mod_pay_food() -> void:
+	var base := LeadershipCheck.recruit_check(_rng(7), 10, 0, 0, "militia")
+	var modded := LeadershipCheck.recruit_check(_rng(7), 10, 0, 0, "militia", ["pay", "food"])
+	assert_int(int(modded["total"]) - int(base["total"])).is_equal(4)
+
+func test_recruit_mod_rescue() -> void:
+	var base := LeadershipCheck.recruit_check(_rng(7), 10, 0, 0, "militia")
+	var modded := LeadershipCheck.recruit_check(_rng(7), 10, 0, 0, "militia", ["rescue"])
+	assert_int(int(modded["total"]) - int(base["total"])).is_equal(4)
+
+func test_recruit_mod_bad_terms_and_cruelty() -> void:
+	var base := LeadershipCheck.recruit_check(_rng(7), 10, 0, 0, "militia")
+	var modded := LeadershipCheck.recruit_check(_rng(7), 10, 0, 0, "militia", ["bad_terms", "cruelty"])
+	assert_int(int(modded["total"]) - int(base["total"])).is_equal(-8)
+
+func test_recruit_mod_unknown_ignored() -> void:
+	var base := LeadershipCheck.recruit_check(_rng(7), 10, 0, 0, "militia")
+	var modded := LeadershipCheck.recruit_check(_rng(7), 10, 0, 0, "militia", ["nonexistent"])
+	assert_int(int(modded["total"])).is_equal(int(base["total"]))
+
+func test_recruit_mods_cannot_override_critical() -> void:
+	# d20=1 -> critical независимо от модов
+	var saw: bool = false
+	for seed in 60:
+		var out := LeadershipCheck.recruit_check(_rng(seed), 20, 100, 3, "desperate", ["pay", "food", "rescue"])
+		if int(out["d20"]) == 1:
+			saw = true
+			assert_that(out["outcome"]).is_equal("critical")
+	assert_bool(saw)

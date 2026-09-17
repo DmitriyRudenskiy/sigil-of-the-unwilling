@@ -193,6 +193,8 @@ const SOCIAL_MAX_STACKS := [1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6
 const SOCIAL_RECRUIT_QUALITY := [0.8, 0.8, 0.8, 0.8, 0.8, 1.0, 1.0, 1.0, 1.0, 1.0, 1.1, 1.1, 1.1, 1.2, 1.2, 1.2, 1.25, 1.25, 1.25, 1.25]
 # порог cha для доп. оттока жителей
 const SOCIAL_ATTRITION_CHA := 5
+# social-systems-delta: d20-порог бунта/дезертирства при cha 1–3 (~1 раз в 10 ходов)
+const CHA_MUTINY_DC := 18
 
 # Сложность найма по типу бойца (d20, ТЗ)
 const RECRUIT_DC := {
