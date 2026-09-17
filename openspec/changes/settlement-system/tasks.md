@@ -35,14 +35,14 @@
 
 ## Фаза 4: Репутация, враждебность, штормы
 
-- [ ] 4.1 `SettlementReputation.gd` — Demand/Decadence (Resolve >
+- [x] 4.1 `SettlementReputation.gd` — Demand/Decadence (Resolve >
   Demand → очки; порог −Decadence за очко), общий метр, победа
-- [ ] 4.2 Hostility: рост (год/поселенец/glade/лагерь), Small
+- [x] 4.2 Hostility: рост (год/поселенец/glade/лагерь), Small
   Hearth, glade (Dangerous/Forbidden)
-- [ ] 4.3 Шторм: ∝ Hostility, coats +3, увольнение лесорубов,
+- [x] 4.3 Шторм: ∝ Hostility, coats +3, увольнение лесорубов,
   массовый исход
-- [ ] 4.4 Поражение: нет поселенцев / нестабильность
-- [ ] 4.5 Тесты: Demand/Decadence, рост Hostility, шторм, 2
+- [x] 4.4 Поражение: нет поселенцев / нестабильность
+- [x] 4.5 Тесты: Demand/Decadence, рост Hostility, шторм, 2
   поражения, победа
 
 ## Фаза 5: Smoldering City (meta)
