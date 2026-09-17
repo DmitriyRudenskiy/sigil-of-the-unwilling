@@ -112,10 +112,11 @@ Workstation, Cooperage-гарпии, Tinctury-бобры) SHALL производ
 - **THEN** постройка не начинается, материалы не списываются
 
 ### Requirement: Продвинутые здания
-Small Warehouse (рядом с удалённым производством — меньше время
-переноски), Trading Post (товары → Amber, покупка ресурсов/зданий),
-Rainpunk Engines (в зданиях — +Resolve работников), дождевая вода
-(в производство — скорость/крит/Resolve).
+Поселение SHALL строить продвинутые здания: Small Warehouse (рядом
+с удалённым производством — меньше время переноски), Trading Post
+(товары → Amber, покупка ресурсов/зданий), Rainpunk Engines (в
+зданиях — +Resolve работников), дождевую воду (в производство —
+скорость/крит/Resolve).
 
 #### Scenario: Small Warehouse
 - **WHEN** постройка Small Warehouse рядом с фермой
