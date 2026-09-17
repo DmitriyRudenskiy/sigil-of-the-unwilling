@@ -68,6 +68,10 @@ func _terrain_cost(cell: Vector2i, levitation: bool = false) -> float:
 	if not _map_gen.is_walkable_with_effects(cell, levitation):
 		return INF
 
+	# дорога поверх любой местности — дешевле (юниты предпочитают дороги)
+	if _map_gen.model != null and _map_gen.model.road_grid.has(cell):
+		return _TerrainCostTable.ROAD
+
 	var terrain_id := _map_gen.get_terrain_id(cell)
 	return _TerrainCostTable.get_cost_with_effects_by_id(terrain_id, levitation)
 

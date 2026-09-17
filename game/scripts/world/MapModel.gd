@@ -84,7 +84,10 @@ func is_walkable(cell: Vector2i) -> bool:
 	if not terrain_grid.has(cell):
 		return false
 	var t: int = terrain_grid[cell]
-	return t != HexUtils.Terrain.WATER and t != HexUtils.Terrain.MOUNTAIN
+	if t == HexUtils.Terrain.WATER or t == HexUtils.Terrain.MOUNTAIN:
+		return false
+	# река непроходима без моста (мост = дорога поверх реки)
+	return not is_river(cell) or road_grid.has(cell)
 
 func is_walkable_with_effects(cell: Vector2i, has_levitation: bool = false) -> bool:
 	if not terrain_grid.has(cell):
@@ -93,8 +96,12 @@ func is_walkable_with_effects(cell: Vector2i, has_levitation: bool = false) -> b
 	var t: int = terrain_grid[cell]
 	if t == HexUtils.Terrain.WATER:
 		return has_levitation
-
-	return t != HexUtils.Terrain.MOUNTAIN
+	if t == HexUtils.Terrain.MOUNTAIN:
+		return false
+	# левитация перелетает реку без моста
+	if is_river(cell):
+		return has_levitation or road_grid.has(cell)
+	return true
 
 func get_terrain_name(cell: Vector2i) -> String:
 	var tid: int = terrain_grid.get(cell, HexUtils.Terrain.GRASS)
