@@ -394,7 +394,8 @@ func _advance_to_next_turn() -> void:
 
 	if _battle_state.is_player_turn:
 		var token := _state_token
-		await get_tree().create_timer(GameNumbers.BATTLE_TURN_DELAY, false).timeout
+		var delay: float = 0.0 if ProbeFastMode.enabled else GameNumbers.BATTLE_TURN_DELAY
+		await get_tree().create_timer(delay, false).timeout
 
 		if _is_stale(token) or _paused:
 			return
@@ -418,7 +419,8 @@ func _run_ai_turn() -> void:
 	_transition_to(State.AI_THINKING)
 	var token := _state_token
 
-	await get_tree().create_timer(_ai_think_time, false).timeout
+	var think: float = 0.0 if ProbeFastMode.enabled else _ai_think_time
+	await get_tree().create_timer(think, false).timeout
 
 	if _is_stale(token) or _paused:
 		return

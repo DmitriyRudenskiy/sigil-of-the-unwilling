@@ -15,8 +15,16 @@ const THRESHOLDS := {
 	"stuck_max": 3,
 }
 const MAX_ACTION_RETRIES := 3
+## Любая потребность ниже порога → герой идёт на центр города и ждёт там
+## реквери (в городе REST +0.26/ход, SOCIAL +0.22/ход — ~5 ходов до 0.5).
+const NEED_RETURN_THRESHOLD := 0.5
+## Враг в этом радиусе от центра города — угроза: герой перехватывает его
+## до сбора/боев с другими. Без этого EnemyTurnProcessor захватывает город
+## (total_collapse → DEFEAT), пока герой отвлёкся (headless: wizard, ход 15).
+const CITY_DEFEND_RADIUS := 6
 
 var seed_value: int = 42
+var max_turns: int = MAX_TURNS  # autopilot-scenario-matrix: роль может переопределить
 var done := false
 var error_msg := ""
 var turn := 0
@@ -35,7 +43,9 @@ var _city_screen: Node = null
 var _player_city: Variant = null  # City — RefCounted, не Node
 
 func start_probe(world: Node, p_seed: int) -> Dictionary:
+	ProbeFastMode.enabled = true
 	seed_value = p_seed
+	max_turns = MAX_TURNS
 	turn = 0
 	stuck = 0
 	stuck_max_seen = 0
@@ -61,6 +71,8 @@ func start_probe(world: Node, p_seed: int) -> Dictionary:
 	_city_screen.visible = false
 	add_child(_city_screen)
 	_city_screen.setup(_player_city, _hero, Vector2i.ZERO)
+	if not GameEventBus.battle_completed.is_connected(_on_battle_completed):
+		GameEventBus.battle_completed.connect(_on_battle_completed)
 	set_process(true)
 	return {"status": "probe_started", "turn": 0}
 
@@ -108,6 +120,8 @@ func _handle_battle() -> bool:
 	if bs == null or bs.battle_over:
 		battles_fought += 1
 		return true
+	if first_collision_turn < 0:
+		first_collision_turn = turn
 	var unit = bs.active_unit
 	if unit == null or not unit.is_alive():
 		return true
@@ -163,6 +177,35 @@ func _step() -> void:
 		return
 	var progress := false
 
+	# 0. Потребности: ниже порога — на центр города и ждать реквери.
+	# Вне города чистый спад −0.01/ход (+ штрафы за добычу/перегруз) —
+	# без возвратов герой умирает от истощения (headless-прогон:
+	# DEFEAT на 52-м ходу при активном исследовании).
+	if _needs_low():
+		if _hero_cell() == _city_center():
+			_end_turn()  # ход в городе: потребности восстанавливаются
+			return
+		if _walk_to(_city_center()):
+			return
+		var home_t: Vector2i = _explore_target(_city_center())
+		if home_t != Vector2i(-1, -1) and _walk_to(home_t):
+			return
+		# Город сейчас недоступен (туман/блок) — обычный цикл; спад небольшой
+		# (−0.01/ход), город обычно рядом. Застрянет — _commit в шагах ниже.
+
+	# 0.5. Защита города: враг в радиусе от центра — перехватить (город без
+	# защиты падает: EnemyTurnProcessor марширует к нему, total_collapse).
+	var threat: Vector2i = _nearest_city_threat()
+	if threat != Vector2i(-1, -1):
+		var mv_t: Node = _hero.get_component("Movement")
+		if mv_t != null and not mv_t.is_moving():
+			if mv_t.move_to_cell(threat):
+				_commit(true)
+				return
+			var probe_t: Vector2i = _explore_target(threat)
+			if probe_t != Vector2i(-1, -1) and _walk_to(probe_t):
+				return
+
 	# 1. Сбор: ближайший ресурсный узел
 	var res_cell := _nearest_resource()
 	if res_cell != Vector2i(-1, -1):
@@ -170,27 +213,32 @@ func _step() -> void:
 		if mv != null and mv.is_moving():
 			return  # движение в кадре — не дёргаем контроллер
 		if mv != null:
-			if mv.move_to_cell(res_cell):
-				# Путь к узлу начат (headless: шаг/кадр). Прибытие и сбор —
-				# в следующем кадре, когда is_moving снова false.
+			if mv.get_current_cell() == res_cell:
+				# Уже у узла: сбор через игровую цепочку (WorldSpawner +
+				# GameEventBus → WorldEventRouter кладёт в рюкзак героя).
+				# ResourceNodeManager-узлы в resource_cells не генерируются —
+				# try_discover/try_extract всегда NODE_NOT_FOUND (headless-баг
+				# balance-core, исправлен в autopilot-scenario-matrix).
+				var collected: bool = _try_collect_at(res_cell)
+				_action_fails = 0
+				progress = collected
+			elif _walk_to(res_cell):
+				# Дошли, доживая ходами (MP восстанавливается каждый ход).
 				_action_fails = 0
 				progress = true
-			elif mv.get_current_cell() == res_cell:
-				# Уже у узла: узлы спавнятся скрытыми — обнаружение, как в
-				# WorldEventRouter (try_discover), затем сбор через игровую цепочку.
-				var disc: Dictionary = _world.resource_node_manager.try_discover(
-						res_cell, _res_chain.build_discovery_keys(_hero))
-				var extracted: Dictionary = _world.try_extract_resource(res_cell)
-				_action_fails = 0
-				progress = true
-				if int(extracted.get("amount", 0)) > 0 and _spawner != null:
-					_spawner.remove_resource_at(res_cell)
 			else:
-				_action_fails += 1
-				if _action_fails >= MAX_ACTION_RETRIES:
+				# Узел в тумане/недосягаем — идём к границе тумана в его сторону
+				# (ход к границе расширяет поле зрения, FOG_HERO_SIGHT = 3).
+				var probe_cell: Vector2i = _explore_target(res_cell)
+				if probe_cell != Vector2i(-1, -1) and _walk_to(probe_cell):
 					_action_fails = 0
-					mv.cancel_pending(false)
-					res_cell = Vector2i(-1, -1)  # узел недосягаем — пропускаем до хода
+					progress = true
+				else:
+					_action_fails += 1
+					if _action_fails >= MAX_ACTION_RETRIES:
+						_action_fails = 0
+						mv.cancel_pending(false)
+						res_cell = Vector2i(-1, -1)  # ничего досягаемого — пропускаем до хода
 		# Не удалось уехать — продолжаем к стройке/бою в этом же кадре.
 
 	# 2. Выгрузка в городе (рядом с центром игрока)
@@ -284,7 +332,106 @@ func _unload_backpack() -> int:
 	return moved
 
 func _nearest_resource() -> Vector2i:
-	return _nearest_cell(_map().resource_cells.keys())
+	# Только реально собируемые узлы (маркер WorldSpawner на клетке).
+	var cells: Array = []
+	for c in _map().resource_cells.keys():
+		if _spawner == null or int(_spawner.get_res_type_at(c)) >= 0:
+			cells.append(c)
+	return _nearest_cell(cells)
+
+## Сбор через игровую цепочку: WorldSpawner удаляет маркер, GameEventBus
+## доставляет ресурс в рюкзак героя (WorldEventRouter._on_resource_extracted).
+func _try_collect_at(cell: Vector2i) -> bool:
+	if _spawner == null:
+		return false
+	var rt: int = int(_spawner.get_res_type_at(cell))
+	if rt < 0:
+		return false
+	var removed: bool = _spawner.remove_resource_at(cell)
+	var rid: StringName = ResourceIcons.res_type_id(rt)
+	if rid != &"":
+		GameEventBus.resource_extracted.emit(cell, rid, ResourceIcons.res_type_amount(rt))
+	return removed
+
+## Дойти до клетки, доживая ходами: move_to_cell идёт на остаток MP,
+## после do_end_turn MP восстанавливается — двигаемся дальше по тому же пути.
+func _walk_to(cell: Vector2i) -> bool:
+	var mv: Node = _hero.get_component("Movement")
+	if mv == null:
+		return false
+	for _i in 60:  # ponytail: жёсткий потолок итераций — 60 ходов на один маршрут
+		if mv.is_moving():
+			return true  # кадр движения — разберёмся в следующем кадре
+		if mv.get_current_cell() == cell:
+			return true
+		var ctrl: Node = mv.get_controller()
+		if ctrl != null and ctrl.reach_problem(cell) == "unreachable":
+			return false  # пути нет (туман/блок) — не сжигаем ходы зацикливанием
+		if mv.move_to_cell(cell):
+			continue  # путь на остаток MP начат; дойдём в следующих кадрах
+		# MP кончились — дожить ход (MP восстановится) и пробовать снова
+		var was_cell: Vector2i = mv.get_current_cell()
+		_end_turn()
+		if done:
+			return false
+		if mv.get_current_cell() == was_cell:
+			return false  # не сдвинулся даже за полный ход — маршрут мёртв
+	return mv.get_current_cell() == cell
+
+## Вражеский отряд в CITY_DEFEND_RADIUS от центра города (ближайший к городу).
+func _nearest_city_threat() -> Vector2i:
+	var city_c: Vector2i = _city_center()
+	if city_c == Vector2i(-1000, -1000):
+		return Vector2i(-1, -1)
+	var best := Vector2i(-1, -1)
+	var best_d := INF
+	for c in _map().enemy_stacks.keys():
+		var dc: int = HexUtils.hex_distance(c, city_c)
+		if dc <= CITY_DEFEND_RADIUS and dc < best_d:
+			best_d = dc
+			best = c
+	return best
+
+## Любая потребность ниже NEED_RETURN_THRESHOLD.
+func _needs_low() -> bool:
+	if _hero == null:
+		return false
+	var nc: Variant = _hero.get("needs_comp")
+	if nc == null:
+		return false
+	for id in NeedType.all_ids():
+		if float(nc.get_need(id)) < NEED_RETURN_THRESHOLD:
+			return true
+	return false
+
+## Ближайшая к `toward` изведанная клетка на границе тумана (у неё есть
+## неизведанный сосед) и досягаемая: шаг к ней расширяет поле зрения.
+## Без этого герой не находит узлы дальше FOG_HERO_SIGHT от пройденного пути.
+func _explore_target(toward: Vector2i) -> Vector2i:
+	var vis = _map().visibility  # VisibilityMap — RefCounted, не Node (типизация крашит)
+	if vis == null or toward == Vector2i(-1, -1):
+		return Vector2i(-1, -1)
+	var ctrl: Node = _hero.get_component("Movement").get_controller()
+	var best := Vector2i(-1, -1)
+	var best_d := INF
+	for c in _map().terrain_grid:
+		if not vis.is_explored(c) or not _map().is_walkable(c):
+			continue
+		var at_edge := false
+		for nb in HexUtils.get_all_neighbors(c, _map().hex_shift_right):
+			if vis.is_in_bounds(nb) and not vis.is_explored(nb):
+				at_edge = true
+				break
+		if not at_edge:
+			continue
+		var d := HexUtils.hex_distance(c, toward)
+		if d >= best_d:
+			continue
+		if ctrl != null and ctrl.reach_problem(c) == "unreachable":
+			continue
+		best_d = d
+		best = c
+	return best
 
 func _nearest_enemy() -> Vector2i:
 	var cells: Array = _map().enemy_stacks.keys()
@@ -316,7 +463,7 @@ func _end_turn() -> void:
 		return
 	if turn % 5 == 0:
 		_snapshot()
-	if turn >= MAX_TURNS:
+	if turn >= max_turns:
 		_finish()
 
 func _commit(progress: bool) -> void:
@@ -343,15 +490,32 @@ func _snapshot() -> void:
 		snap["endgame"] = _world.get_endgame_state()
 	snapshots.append(snap)
 
+## Итог боя (WorldBattleCoordinator → GameEventBus). Пробе-герой всегда
+## атакующий (сам идёт к врагу): ATTACKER — победа, иначе поражение.
+func _on_battle_completed(winner: BattleState.Side, _cell: Vector2i) -> void:
+	if done:
+		return
+	if winner == BattleState.Side.ATTACKER:
+		if first_win_turn < 0:
+			first_win_turn = turn
+	else:
+		losses += 1
+
 func _fail(msg: String) -> void:
 	error_msg = msg
 	done = true
 	set_process(false)
+	ProbeFastMode.enabled = false
+	if GameEventBus.battle_completed.is_connected(_on_battle_completed):
+		GameEventBus.battle_completed.disconnect(_on_battle_completed)
 	GameLogger.error("BalanceProbe: %s" % msg, "BalanceProbe")
 
 func _finish() -> void:
 	done = true
 	set_process(false)
+	ProbeFastMode.enabled = false
+	if GameEventBus.battle_completed.is_connected(_on_battle_completed):
+		GameEventBus.battle_completed.disconnect(_on_battle_completed)
 	_check_thresholds()
 	_save_report()
 

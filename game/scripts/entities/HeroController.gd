@@ -412,7 +412,7 @@ func _on_set_position(pos: Vector2) -> void:
 	position = pos
 
 func _on_move_requested(target: Vector2, duration: float, callback: Callable) -> void:
-	if _Platform.is_headless():
+	if _Platform.is_headless() or ProbeFastMode.enabled:
 		callback.call()
 		return
 	if _tween and _tween.is_valid():

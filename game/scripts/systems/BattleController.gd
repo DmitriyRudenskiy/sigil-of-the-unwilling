@@ -194,12 +194,13 @@ func resume_from_settings() -> void:
 	_executor.resume_battle()
 
 func _on_execute_move(unit: BattleState.BattleUnit, path: Array[Vector2i]) -> void:
-	var tween := _view.animate_move(unit, path)
+	if not ProbeFastMode.enabled:
+		var tween := _view.animate_move(unit, path)
 
-	if tween != null:
-		await tween.finished
-		if not is_inside_tree():
-			return
+		if tween != null:
+			await tween.finished
+			if not is_inside_tree():
+				return
 
 	if is_instance_valid(_executor):
 		_executor.on_move_completed()
@@ -217,7 +218,8 @@ func _on_execute_attack(
 	_show_damage_feedback(def, result)
 	# TASK_19_1 B2: вне дерева play_attack_sequence возвращает null — await null
 	# мгновенно завершается, но явная проверка не даёт зависнуть в цепочке.
-	var timer := _fx.play_attack_sequence(atk, def, result)
+	var timer := _fx.play_attack_sequence(
+		atk, def, result, 0.0 if ProbeFastMode.enabled else GameNumbers.BATTLE_ATTACK_ANIM_SEC)
 	if timer == null:
 		if is_instance_valid(_executor):
 			_executor.on_attack_completed()
@@ -239,7 +241,8 @@ func _show_damage_feedback(target: BattleState.BattleUnit, result: Dictionary) -
 		_view.remove_unit(target)
 
 func _get_damage_wait() -> SceneTreeTimer:
-	return get_tree().create_timer(GameNumbers.BATTLE_SPELL_ANIM_TIME, false)
+	var t: float = 0.0 if ProbeFastMode.enabled else GameNumbers.BATTLE_SPELL_ANIM_TIME
+	return get_tree().create_timer(t, false)
 
 func _on_status_updated(text: String) -> void:
 	_ui.set_status(text)
