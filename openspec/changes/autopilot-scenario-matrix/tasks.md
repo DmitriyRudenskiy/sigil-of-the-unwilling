@@ -2,9 +2,9 @@
 
 ## Фаза 1: Базовый пайлот + роль Собиратель
 
-- [ ] 1.1 `scripts/probe/ScenarioPilot.gd` — базовый автопайлот
+- [x] 1.1 `scripts/probe/ScenarioPilot.gd` — базовый автопайлот
   (паттерн BalanceProbe: seed, _step, _fail/_finish, _snapshot)
-- [ ] 1.2 `scripts/data/scenario_targets.gd` — цели ролей (const,
+- [x] 1.2 `scripts/data/scenario_targets.gd` — цели ролей (const,
   дефолты из design)
 - [ ] 1.3 Роль Собиратель: политика (добыча редких, выживание) +
   метрика (ресурсы/день, выжил)
