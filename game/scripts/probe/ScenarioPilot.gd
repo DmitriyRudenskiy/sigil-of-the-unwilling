@@ -1,11 +1,9 @@
 class_name ScenarioPilot
 extends BalanceProbe
-## autopilot-scenario-matrix: базовый пилот сцenario-матрицы.
-## Переиспользует автоигрока BalanceProbe (D1); роль — политика (pick_action
-## через базовый _step, goal_met/metrics — через ScenarioRole).
+## autopilot-scenario-matrix: базовый пилот сценарной матрицы.
+## Переиспользует автоигрока BalanceProbe (D1); роль — политика (D1):
+## goal_met/metrics + хуки (act, collect_target, enemy_target, on_battle_won).
 ## Класс героя задаётся ДО ботстлаба мира (pending_new_game), не после.
-
-const _CollectorRole = preload("res://scripts/probe/CollectorRole.gd")
 
 var role: ScenarioRole = null
 var class_id: String = ""
@@ -29,10 +27,11 @@ func start_scenario(world: Node, p_seed: int, role_id: String, p_class_id: Strin
 	_rare_count = 0
 	extracted_total = 0
 	goal_reached_turn = -1
-	max_turns = int(target.get("max_turns", MAX_TURNS))
 	var r: Dictionary = start_probe(world, p_seed)
 	if r.get("error") != null or r.get("status") != "probe_started":
 		return r
+	# start_probe сбрасывает max_turns в MAX_TURNS — роль переопределяет после.
+	max_turns = int(target.get("max_turns", MAX_TURNS))
 	# Класс проверяется по факту: prepare_world должен был зайти в ботстлаб.
 	var hero: Node = world.get_hero()
 	if hero != null and hero.get("hero_class") != null:
@@ -42,10 +41,31 @@ func start_scenario(world: Node, p_seed: int, role_id: String, p_class_id: Strin
 	return {"status": "scenario_started", "role": role_id, "class": class_id,
 		"seed": p_seed, "max_turns": max_turns}
 
+## Фабрика ролей (D1): каждая роль — свой класс-политика.
 static func make_role(role_id: String, target: Dictionary) -> ScenarioRole:
 	match role_id:
 		"collector":
-			var r: ScenarioRole = _CollectorRole.new()
+			var r := CollectorRole.new()
+			r.id = role_id
+			r.target = target
+			return r
+		"traveler":
+			var r := TravelerRole.new()
+			r.id = role_id
+			r.target = target
+			return r
+		"trader":
+			var r := TraderRole.new()
+			r.id = role_id
+			r.target = target
+			return r
+		"adventurer":
+			var r := AdventurerRole.new()
+			r.id = role_id
+			r.target = target
+			return r
+		"builder":
+			var r := BuilderRole.new()
 			r.id = role_id
 			r.target = target
 			return r
@@ -60,6 +80,7 @@ func _on_resource_extracted(_cell: Vector2i, resource_id: StringName, amount: in
 		_rare_count += amount
 
 ## Ранний финиш: цель роли достигнута (проверяется перед каждым шагом).
+## Хук act: роль сама обрабатывает кадр (базовый цикл не вызывается).
 func _step() -> void:
 	if done:
 		return
@@ -67,7 +88,30 @@ func _step() -> void:
 		goal_reached_turn = turn
 		_finish()
 		return
+	if role != null and role.act(self):
+		return
 	super._step()
+
+## Хук роли: цель сбора (null — базовая логика BalanceProbe).
+func _nearest_resource() -> Vector2i:
+	if role != null:
+		var t = role.collect_target(self)
+		if t != null:
+			return t
+	return super._nearest_resource()
+
+## Хук роли: цель атаки (null — базовая логика BalanceProbe).
+func _nearest_enemy() -> Vector2i:
+	if role != null:
+		var t = role.enemy_target(self)
+		if t != null:
+			return t
+	return super._nearest_enemy()
+
+func _on_battle_completed(winner: BattleState.Side, cell: Vector2i) -> void:
+	super._on_battle_completed(winner, cell)
+	if role != null and winner == BattleState.Side.ATTACKER:
+		role.on_battle_won(self, cell)
 
 ## autopilot-scenario-matrix: сбор — через игровую цепочку (WorldSpawner +
 ## GameEventBus), а не через ResourceNodeManager: скрытые узлы в
