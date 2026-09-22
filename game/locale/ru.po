@@ -829,6 +829,9 @@ msgstr "🗡 Модель героя"
 msgid "settings.autosave"
 msgstr "Автосохранение при выходе"
 
+msgid "settings.adult_content"
+msgstr "Взрослый контент в диалогах (18+)"
+
 msgid "settings.apply"
 msgstr "Применить и закрыть"
 

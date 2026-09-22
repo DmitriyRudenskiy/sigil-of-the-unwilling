@@ -338,6 +338,7 @@ static func settings_sfx() -> String: return TranslationServer.translate("settin
 static func settings_mute() -> String: return TranslationServer.translate("settings.mute")
 static func settings_gameplay() -> String: return TranslationServer.translate("settings.gameplay")
 static func settings_autosave() -> String: return TranslationServer.translate("settings.autosave")
+static func settings_adult_content() -> String: return TranslationServer.translate("settings.adult_content")
 static func settings_apply() -> String: return TranslationServer.translate("settings.apply")
 static func settings_reset() -> String: return TranslationServer.translate("settings.reset")
 static func settings_cancel() -> String: return TranslationServer.translate("settings.cancel")

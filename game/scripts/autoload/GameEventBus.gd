@@ -28,6 +28,12 @@ signal disease_outbreak(city_uid: int, char_uid: int)
 signal hero_died(cause: StringName)
 signal hero_successor(hero: Node)
 
+# team-romance-roleplay: события отношений команды
+signal relationship_stage_changed(uid: int, stage: int, is_romance: bool)
+signal romance_event(kind: String, uid: int)
+signal follower_betrayal(uid: int)
+signal marriage(uid: int)
+
 signal game_ended(result: String, reason: StringName, summary: Dictionary)
 
 signal building_constructed(city_uid: int, building_uid: int)

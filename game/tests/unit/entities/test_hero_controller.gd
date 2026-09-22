@@ -15,10 +15,11 @@ func after_test() -> void:
 	_hero = null
 
 func test_all_components_registered() -> void:
-	assert_int(_hero._components.size()).is_equal(14)
+	assert_int(_hero._components.size()).is_equal(15)
 	for comp_name in [&"Movement", &"Army", &"Magic", &"Resources", &"Visual",
 			&"Needs", &"Inventory", &"Skills", &"Tools", &"Time",
-			&"StrategicResources", &"Followers", &"Combat", &"Stats"]:
+			&"StrategicResources", &"Followers", &"Combat", &"Stats",
+			&"Relationships"]:
 		assert_that(_hero.get_component(str(comp_name))).is_not_null() \
 				.override_failure_message("missing component: " + str(comp_name))
 

@@ -1,0 +1,46 @@
+{
+  "id": "talk_friend",
+  "entry": "n1",
+  "nodes": {
+    "n1": {
+      "speaker": "follower",
+      "lines": [
+        {"text": "Слышал, вы тут без меня не справляетесь. Пришёл помочь.", "cond": {}},
+        {"text": "Давно мы не поговорили по-настоящему. Как у вас на душе?", "cond": {"min_bond": 40}}
+      ],
+      "choices": [
+        {"text": "Расскажи что-нибудь, о чём не расскажешь другим.", "tier": "pg", "cond": {}, "effects": [{"bond": 10, "trust": 5}], "next": "n2"},
+        {"text": "Сегодня день для подвигов, а не для разговоров.", "tier": "pg", "cond": {}, "effects": [{"bond": -3}], "next": "n3"},
+        {"text": "Вдохновляющая речь. (Хар 4+)", "tier": "pg", "cond": {"min_cha": 4}, "effects": [{"buff": "morale", "value": 2, "turns": 5, "bond": 5}], "next": "n4"}
+      ]
+    },
+    "n2": {
+      "speaker": "follower",
+      "lines": [
+        {"text": "Знаете... я не верил, что за этими дорогами кто-то будет. А вы — будете.", "cond": {}}
+      ],
+      "choices": [
+        {"text": "Я всегда буду рядом.", "tier": "pg", "cond": {}, "effects": [{"trust": 10}], "next": null},
+        {"text": "Дорога не ждёт.", "tier": "pg", "cond": {}, "effects": [], "next": null}
+      ]
+    },
+    "n3": {
+      "speaker": "follower",
+      "lines": [
+        {"text": "Понимаю. Но и поговорить иногда не грех.", "cond": {}}
+      ],
+      "choices": [
+        {"text": "В следующий раз.", "tier": "pg", "cond": {}, "effects": [], "next": null}
+      ]
+    },
+    "n4": {
+      "speaker": "follower",
+      "lines": [
+        {"text": "Ваш голос... от него внутри всё горит. Я готов на что угодно!", "cond": {}}
+      ],
+      "choices": [
+        {"text": "Тогда вперёд, вместе.", "tier": "pg", "cond": {}, "effects": [{"trust": 5}], "next": null}
+      ]
+    }
+  }
+}

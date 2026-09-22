@@ -1,0 +1,35 @@
+{
+  "id": "wedding",
+  "entry": "n1",
+  "nodes": {
+    "n1": {
+      "speaker": "follower",
+      "lines": [
+        {"text": "Все собрались. Дорога была длинной, но мы дошли. Ты готов(а) стать моей семьёй?", "cond": {}},
+        {"text": "Перед всеми: клянёшься ли идти со мной до конца — в битвах и в покое?", "cond": {}}
+      ],
+      "choices": [
+        {"id": "confirm", "text": "Клянусь. Мы — вместе.", "tier": "pg", "cond": {}, "effects": [], "next": "n2"},
+        {"id": "decline", "text": "Я... не могу.", "tier": "pg", "cond": {}, "effects": [], "next": "n3"}
+      ]
+    },
+    "n2": {
+      "speaker": "follower",
+      "lines": [
+        {"text": "Тогда пусть так будет. Отныне — муж и жена. Пусть дорога нас хранит.", "cond": {}}
+      ],
+      "choices": [
+        {"id": "close", "text": "(поднять чашу)", "tier": "pg", "cond": {}, "effects": [], "next": null}
+      ]
+    },
+    "n3": {
+      "speaker": "follower",
+      "lines": [
+        {"text": "Я... пойму. Но мне будет больно. Останься хотя бы рядом, как друг.", "cond": {}}
+      ],
+      "choices": [
+        {"id": "close", "text": "(молча кивнуть)", "tier": "pg", "cond": {}, "effects": [], "next": null}
+      ]
+    }
+  }
+}

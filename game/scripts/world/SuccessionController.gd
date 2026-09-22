@@ -10,11 +10,38 @@ func select_successor(deceased: HeroController, rng: RandomNumberGenerator = nul
 			candidates.append(f)
 	if candidates.is_empty():
 		return null
-	candidates.sort_custom(func(a, b): return int(a.uid) < int(b.uid))
+	# team-romance-roleplay 3.2: приоритет — супруг того же пути → bond ≥ 60 (по
+	# убыванию bond) → остальные (по uid, как раньше). rng — случайный выбор
+	# только внутри лучшей группы.
+	var rel = deceased.relationships
+	var tier := func(f: Follower) -> int:
+		if rel != null and rel.has_pair(int(f.uid)):
+			var p: Dictionary = rel.pair(int(f.uid))
+			if bool(p.get("spouse", false)):
+				return 0
+			if int(p.get("bond", 0)) >= 60:
+				return 1
+		return 2
+	var best_tier := 2
+	for f in candidates:
+		best_tier = mini(best_tier, tier.call(f))
+	var top: Array = []
+	for f in candidates:
+		if tier.call(f) == best_tier:
+			top.append(f)
+	if best_tier == 1:
+		top.sort_custom(func(a, b):
+			var ba := int(rel.pair(int(a.uid))["bond"]) if rel != null else 0
+			var bb := int(rel.pair(int(b.uid))["bond"]) if rel != null else 0
+			if ba != bb:
+				return ba > bb
+			return int(a.uid) < int(b.uid))
+	else:
+		top.sort_custom(func(a, b): return int(a.uid) < int(b.uid))
 	var idx := 0
-	if rng != null:
-		idx = rng.randi() % candidates.size()
-	return candidates[idx]
+	if rng != null and top.size() > 1:
+		idx = rng.randi() % top.size()
+	return top[idx]
 
 func build_successor(deceased: HeroController, _rng: RandomNumberGenerator = null) -> HeroController:
 	var succ := HeroController.new()

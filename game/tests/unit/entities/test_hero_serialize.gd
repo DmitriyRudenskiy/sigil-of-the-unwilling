@@ -2,6 +2,30 @@ extends BaseTest
 
 
 
+func test_stats_sex_roundtrip_and_old_save() -> void:
+	# team-romance-roleplay: пол героя сохраняется в сейв, старый сейв → male
+	var comp := HeroStatsComponent.new()
+	var profile := HeroBuildProfile.new()
+	profile.name = "Тест"
+	profile.sex = "female"
+	profile.race = "human"
+	profile.character_class = "fighter"
+	profile.culture = "northern"
+	profile.background = "soldier"
+	comp.apply_build(profile)
+	assert_that(comp.sex).is_equal("female")
+	var data: Dictionary = comp.serialize()
+	assert_that(data.get("sex")).is_equal("female")
+	var comp2 := HeroStatsComponent.new()
+	comp2.deserialize(data)
+	assert_that(comp2.sex).is_equal("female")
+	# старый сейв без поля sex
+	data.erase("sex")
+	var comp3 := HeroStatsComponent.new()
+	comp3.deserialize(data)
+	assert_that(comp3.sex).is_equal("male")
+
+
 func test_army_serialize() -> void:
 	var army = auto_free( HeroArmyController.new())
 	var data = army.serialize()

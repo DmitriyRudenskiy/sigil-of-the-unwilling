@@ -829,6 +829,9 @@ msgstr "🗡 Hero model"
 msgid "settings.autosave"
 msgstr "Autosave on exit"
 
+msgid "settings.adult_content"
+msgstr "Adult content in dialogs (18+)"
+
 msgid "settings.apply"
 msgstr "Apply and close"
 

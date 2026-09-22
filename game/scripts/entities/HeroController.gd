@@ -49,6 +49,7 @@ var strategic_comp: HeroStrategicResourcesComponent
 var followers_comp: HeroFollowersComponent
 var combat_comp: HeroCombatComponent
 var stats_comp: HeroStatsComponent
+var relationships_comp: HeroRelationshipsComponent
 
 # ═══════════════════════════════════════════
 #  ИНИЦИАЛИЗАЦИЯ
@@ -85,6 +86,7 @@ func _register_components() -> void:
 	followers_comp = _add_component("Followers", HeroFollowersComponent.new())
 	combat_comp = _add_component("Combat", HeroCombatComponent.new())
 	stats_comp = _add_component("Stats", HeroStatsComponent.new())
+	relationships_comp = _add_component("Relationships", HeroRelationshipsComponent.new())
 
 func _add_component(comp_name: String, comp: HeroComponent) -> HeroComponent:
 	comp.name = comp_name
@@ -207,6 +209,9 @@ var followers: Array:
 	get: return followers_comp.followers if followers_comp else []
 	set(v): if followers_comp: followers_comp.followers = v
 
+var relationships: HeroRelationshipsComponent:
+	get: return relationships_comp if relationships_comp else null
+
 var hero_name: String:
 	get: return stats_comp.hero_name if stats_comp else "Darkstorn"
 	set(v): if stats_comp: stats_comp.hero_name = v
@@ -226,12 +231,20 @@ var hero_class: String:
 ## Личный боец: герой участвует в бою как юнит на доске (early-game-foundation).
 ## count = личное HP (модель боя считает «убийства» с юнитов стека),
 ## hp = 1, тег класса — для классовых эффектов в бою.
+## team-romance-roleplay 3.1: боевой дух — средний bond команды → бонус атак/оборон
+## + временные диалоговые баффы.
+func morale_bonus() -> int:
+	if relationships_comp == null:
+		return 0
+	return clampi(int(relationships_comp.average_bond()) / 20, -2, 3) + relationships_comp.active_morale()
+
 func get_hero_battle_stack() -> UnitStack:
 	if stats_comp == null or combat_comp == null:
 		return null
 	var battle_stats: Dictionary = stats_comp.get_battle_bonus({})
-	var atk: int = max(1, int(battle_stats.get("attack", 3)))
-	var def: int = max(0, int(battle_stats.get("defense", 3)))
+	var morale := morale_bonus()
+	var atk: int = max(1, int(battle_stats.get("attack", 3))) + morale
+	var def: int = max(0, int(battle_stats.get("defense", 3))) + morale
 	var hp: int = combat_comp.combat_hp if combat_comp.combat_hp > 0 else 1
 	var speed: int = GameNumbersHero.HERO_PERSONAL_SPEED
 	if stats_comp.hero_class == "ranger":
@@ -378,6 +391,8 @@ func end_turn() -> void:
 	movement_points_changed.emit(movement_comp.get_move_points(), get_daily_movement_points())
 	movement_comp.end_turn()
 	needs_comp.end_turn()
+	# team-romance-roleplay: тик отношений (пассивный рост, верность, ревность, конфликты)
+	relationships_comp.end_turn()
 
 	if movement_comp != null:
 		movement_comp.auto_follow_at_turn_start()

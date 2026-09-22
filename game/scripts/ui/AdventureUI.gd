@@ -22,6 +22,7 @@ const C_BORDER := ThemeConfig.C_PANEL_BORDER
 @onready var _hero_status: HeroStatusPanel = $RightColumn/Box/PanelsBox/HeroStatusPanel
 @onready var _collect_popup: ResourceCollectPopup = $ResourceCollectPopup
 @onready var _settings_screen: SettingsScreen = $SettingsScreen
+@onready var _team_dialog: TeamDialogScreen = $TeamDialogScreen
 
 var _cities_mgr: Node = null
 var _glory_label: Label
@@ -61,6 +62,11 @@ func _ready() -> void:
 
 	if not GameEventBus.resource_extracted.is_connected(_on_resource_extracted):
 		GameEventBus.resource_extracted.connect(_on_resource_extracted)
+	# team-romance-roleplay 5.3: сцены-события отношений
+	if not GameEventBus.turn_ended.is_connected(_on_turn_ended):
+		GameEventBus.turn_ended.connect(_on_turn_ended)
+	if not GameEventBus.follower_betrayal.is_connected(_on_follower_betrayal):
+		GameEventBus.follower_betrayal.connect(_on_follower_betrayal)
 
 	_apply_sidebar_layout()
 	get_viewport().size_changed.connect(_apply_sidebar_layout)
@@ -76,6 +82,8 @@ func setup(hero: HeroController, camera: Camera2D = null) -> void:
 	hero.tools_changed.connect(func(): _tools_panel.update_tools(hero.tools.get_all()))
 	hero.time_changed.connect(_info.set_time)
 	_hero_status.set_hero(hero)
+	if not _hero_status.talk_requested.is_connected(_on_talk_requested):
+		_hero_status.talk_requested.connect(_on_talk_requested)
 
 	var map_gen := hero.get_map_gen()
 	_minimap.setup(map_gen, hero, camera)
@@ -213,6 +221,34 @@ func _on_settings_applied() -> void:
 
 func _on_border_toggled(on: bool) -> void:
 	hex_borders_toggled.emit(on)
+
+# ═══════════════════════════════════════════
+#  team-romance-roleplay 5.1/5.3: диалоги команды и сцены-события
+# ═══════════════════════════════════════════
+
+func _on_talk_requested(uid: int) -> void:
+	if _hero_controller == null or _team_dialog == null:
+		return
+	for f in _hero_controller.followers:
+		if f != null and int(f.uid) == uid:
+			_team_dialog.open_dialog(_hero_controller, f)
+			return
+
+## Конец хода: если накопились сцены-события (ревность/конфликт/свадьба) — открыть.
+func _on_turn_ended(_turn: int, _month: int) -> void:
+	if _team_dialog == null or not _team_dialog.ui_enabled or _team_dialog.is_open():
+		return
+	if _hero_controller == null or _hero_controller.relationships == null:
+		return
+	if not _hero_controller.relationships.pending_scenes.is_empty():
+		_team_dialog.open_event(_hero_controller, 0)
+
+func _on_follower_betrayal(uid: int) -> void:
+	if _team_dialog == null or not _team_dialog.ui_enabled or _team_dialog.is_open():
+		return
+	if _hero_controller == null:
+		return
+	_team_dialog.open_betrayal(_hero_controller, uid)
 
 func _update_mp_display(current: float, max_val: float) -> void:
 	var text := "🚶 %.1f / %.0f" % [current, max_val]

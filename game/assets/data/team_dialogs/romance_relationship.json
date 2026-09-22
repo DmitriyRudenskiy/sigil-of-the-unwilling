@@ -1,0 +1,48 @@
+{
+  "id": "romance_relationship",
+  "entry": "n1",
+  "nodes": {
+    "n1": {
+      "speaker": "follower",
+      "lines": [
+        {"text": "Я подумал о том, что сказал у костра. Я хочу, чтобы мы были... ближе. Не только команда.", "cond": {}},
+        {"text": "С вами я дома. Даже когда мы в дороге.", "cond": {"race": "elf"}}
+      ],
+      "choices": [
+        {"text": "И я. Мы вместе — и в пути, и в жизни.", "tier": "pg", "cond": {}, "effects": [{"romance": 15, "bond": 10}], "next": "n2"},
+        {"text": "Мне нужно время подумать.", "tier": "pg", "cond": {}, "effects": [{"romance": -5}], "next": "n3"},
+        {"text": "Ты — единственное, чего я хочу. (18+)", "tier": "adult", "cond": {"orientation_compatible": true}, "effects": [{"romance": 20, "bond": 12, "trust": 5}], "next": "n4",
+          "pg_fallback": {"text": "Ты — самое дорогое, что у меня есть.", "effects": [{"romance": 15, "bond": 10}], "next": "n4"}},
+        {"text": "Предложить руку", "tier": "pg", "cond": {"min_romance": 75, "orientation_compatible": true}, "effects": [{"event": "proposal"}], "next": null}
+      ]
+    },
+    "n2": {
+      "speaker": "follower",
+      "lines": [
+        {"text": "Знаете, я боюсь. Не врагов, не дороги. Я боюсь вас потерять.", "cond": {}}
+      ],
+      "choices": [
+        {"text": "Я никуда не денусь.", "tier": "pg", "cond": {}, "effects": [{"trust": 10}], "next": null},
+        {"text": "Я сделаю всё, чтобы вы были рядом.", "tier": "pg", "cond": {}, "effects": [{"trust": 15, "bond": 5}], "next": null}
+      ]
+    },
+    "n3": {
+      "speaker": "follower",
+      "lines": [
+        {"text": "Конечно. Я подожду. Сколько нужно.", "cond": {}}
+      ],
+      "choices": [
+        {"text": "Спасибо за терпение.", "tier": "pg", "cond": {}, "effects": [{"trust": 5}], "next": null}
+      ]
+    },
+    "n4": {
+      "speaker": "follower",
+      "lines": [
+        {"text": "Тогда... пусть дорога будет длинной. А мы — рядом.", "cond": {}}
+      ],
+      "choices": [
+        {"text": "Вместе.", "tier": "pg", "cond": {}, "effects": [{"bond": 5}], "next": null}
+      ]
+    }
+  }
+}

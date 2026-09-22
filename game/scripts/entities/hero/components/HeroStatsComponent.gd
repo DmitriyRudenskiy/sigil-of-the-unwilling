@@ -13,6 +13,8 @@ var hero_culture: String = ""
 var hero_background: String = ""
 var path_id: StringName = &""
 var resurrected_once: bool = false
+## team-romance-roleplay: пол героя (male/female) — часть идентичности, сохраняется в сейв
+var sex: String = "male"
 ## quests-reputation-system: состояние квестов и репутации с фракциями
 var quest_state: Dictionary = {}
 var faction_rep: Dictionary = {}
@@ -27,6 +29,7 @@ func apply_build(profile: HeroBuildProfile) -> void:
 	hero_class = profile.character_class
 	hero_culture = profile.culture
 	hero_background = profile.background
+	sex = profile.sex if profile.sex != "" else sex
 	# quests-reputation-system: начальная репутация (раса +10, класс +5) и пустые квесты
 	if faction_rep.is_empty() and (hero_race != "" or hero_class != ""):
 		faction_rep = FactionReputation.initial_state(hero_race, hero_class)
@@ -60,6 +63,7 @@ func serialize() -> Dictionary:
 		"hero_background": hero_background,
 		"path_id": String(path_id),
 		"resurrected_once": resurrected_once,
+		"sex": sex,
 		"quest_state": quest_state,
 		"faction_rep": faction_rep,
 		"rep_history": rep_history,
@@ -74,6 +78,7 @@ func deserialize(data: Dictionary) -> void:
 	hero_background = str(data.get("hero_background", hero_background))
 	path_id = StringName(str(data.get("path_id", path_id)))
 	resurrected_once = bool(data.get("resurrected_once", false))
+	sex = str(data.get("sex", "male"))  # старый сейв без пола → male
 	stats = _migrate_social_stats(loaded)
 	quest_state = data.get("quest_state", quest_state)
 	faction_rep = data.get("faction_rep", faction_rep)

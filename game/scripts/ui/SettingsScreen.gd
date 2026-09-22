@@ -22,6 +22,7 @@ var _fullscreen_toggle: CheckBox
 var _ui_anim_toggle: CheckBox
 var _particles_toggle: CheckBox
 var _auto_save_toggle: CheckBox
+var _adult_toggle: CheckBox
 var _mute_toggle: CheckBox
 var _master_slider: HSlider
 var _music_slider: HSlider
@@ -92,6 +93,7 @@ func _localize() -> void:
 	(box.get_node("MuteToggle") as CheckBox).text = GameText.settings_mute()
 	(box.get_node("GameplayHeader") as Label).text = GameText.settings_gameplay()
 	(box.get_node("AutoSaveToggle") as CheckBox).text = GameText.settings_autosave()
+	(box.get_node("AdultContentToggle") as CheckBox).text = GameText.settings_adult_content()
 	(box.get_node("ButtonRow/ApplyButton") as Button).text = GameText.settings_apply()
 	(box.get_node("ButtonRow/ResetButton") as Button).text = GameText.settings_reset()
 	(box.get_node("ButtonRow/CancelButton") as Button).text = GameText.settings_cancel()
@@ -113,6 +115,7 @@ func _capture_state() -> Dictionary:
 		"ui_animations": _settings.ui_animations,
 		"particles": _settings.particles,
 		"auto_save": _settings.auto_save,
+		"content_adult": _settings.content_adult,
 		"master_volume": _settings.master_volume,
 		"music_volume": _settings.music_volume,
 		"sfx_volume": _settings.sfx_volume,
@@ -155,6 +158,9 @@ func _bind_nodes() -> void:
 
 	_auto_save_toggle = box.get_node("AutoSaveToggle") as CheckBox
 	_auto_save_toggle.button_pressed = _settings.auto_save
+
+	_adult_toggle = box.get_node("AdultContentToggle") as CheckBox
+	_adult_toggle.button_pressed = _settings.content_adult
 
 	(box.get_node("ButtonRow/ApplyButton") as Button).pressed.connect(_on_apply)
 	(box.get_node("ButtonRow/ResetButton") as Button).pressed.connect(_on_reset)
@@ -233,6 +239,7 @@ func _restore_state() -> void:
 	_ui_anim_toggle.button_pressed = _settings.ui_animations
 	_particles_toggle.button_pressed = _settings.particles
 	_auto_save_toggle.button_pressed = _settings.auto_save
+	_adult_toggle.button_pressed = _settings.content_adult
 	_master_slider.value = float(_settings.master_volume)
 	_music_slider.value = float(_settings.music_volume)
 	_sfx_slider.value = float(_settings.sfx_volume)
@@ -265,6 +272,7 @@ func _on_apply() -> void:
 	_settings.ui_animations = _ui_anim_toggle.button_pressed
 	_settings.particles = _particles_toggle.button_pressed
 	_settings.auto_save = _auto_save_toggle.button_pressed
+	_settings.content_adult = _adult_toggle.button_pressed
 	_settings.save()
 	_settings.apply_display_mode()
 	applied.emit()
@@ -285,6 +293,7 @@ func _on_cancel() -> void:
 	_settings.set_music_volume(_initial_state.music_volume)
 	_settings.set_sfx_volume(_initial_state.sfx_volume)
 	_settings.is_muted = _initial_state.is_muted
+	_settings.content_adult = _initial_state.content_adult
 	_settings._apply_audio()
 
 	_do_close()

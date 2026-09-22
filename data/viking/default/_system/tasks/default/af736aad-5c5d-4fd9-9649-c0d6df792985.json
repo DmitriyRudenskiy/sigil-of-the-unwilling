@@ -1,0 +1,1 @@
+{"task_id": "af736aad-5c5d-4fd9-9649-c0d6df792985", "task_type": "session_commit", "status": "failed", "created_at": 1789656546.523805, "updated_at": 1789656573.594656, "resource_id": "pi-01a08c25-55b3-7209-ad94-4b3efe4bfe31", "account_id": "default", "user_id": "default", "meta": {}, "stage": "failed", "result": null, "error": "Connection error.", "auth": {}}

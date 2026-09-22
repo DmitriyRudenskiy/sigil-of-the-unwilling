@@ -7,6 +7,12 @@ const FOLLOWER_NAMES: Array = [
 	"Светлана", "Тимур", "Устинья", "Фёдор",
 ]
 
+## team-romance-roleplay 6.1: женские имена — пол выводится из имени
+## (чистая функция, без дополнительного ролла → не ломает детерминизм).
+const FEMALE_NAMES: Array = [
+	"Вера", "Дарья", "Жанна", "Ирина", "Люба", "Настасья", "Пелагея", "Светлана", "Устинья",
+]
+
 
 static var _default_registry: TraitRegistry = null
 static var _default_raceclass: RaceClassRegistry = null
@@ -64,9 +70,23 @@ static func recruit(
 	f.archetype = StringName(String(rc_arch.get("id", ""))) if rc_arch != null else &""
 	f.stat_modifiers = rc_race.ability_adjustments.duplicate() if rc_race != null else {}
 	f.abilities = _collectabilities(rc_class, rc_race)
+	# team-romance-roleplay 6.1: пол по имени (детерминированно)
+	f.gender = &"female" if FEMALE_NAMES.has(f.name) else &"male"
+	# team-romance-roleplay D4: скрытая ориентация 60/20/20 (последний ролл — не ломает
+	# детерминизм имени/расы/пути/черт)
+	f.orientation = roll_orientation(r)
 
 	hero.followers.append(f)
 	return f
+
+## team-romance-roleplay: ролл ориентации (hetero 60%, homo 20%, bi 20%)
+static func roll_orientation(rng: RandomNumberGenerator) -> StringName:
+	var roll := rng.randi_range(1, 100)
+	if roll <= 60:
+		return &"hetero"
+	if roll <= 80:
+		return &"homo"
+	return &"bi"
 
 static func _collectabilities(class_def: ClassDef, race_def: RaceDef) -> Array[StringName]:
 	var out: Array[StringName] = []

@@ -1,0 +1,47 @@
+{
+  "id": "romance_flirt",
+  "entry": "n1",
+  "nodes": {
+    "n1": {
+      "speaker": "follower",
+      "lines": [
+        {"text": "Вы снова рядом... Я заметил. Заметил давно.", "cond": {}},
+        {"text": "Знаете, с вами даже дорога кажется короче. И теплее.", "cond": {"race": "elf"}}
+      ],
+      "choices": [
+        {"text": "Я тоже это замечаю. (ответить взаимностью)", "tier": "pg", "cond": {}, "effects": [{"romance": 10, "bond": 5}], "next": "n2"},
+        {"text": "Мы — команда. Не больше.", "tier": "pg", "cond": {}, "effects": [{"romance": -10, "bond": -5}], "next": "n3"},
+        {"text": "Посмотри на меня... так, чтобы запомнил. (18+)", "tier": "adult", "cond": {"orientation_compatible": true}, "effects": [{"romance": 15, "bond": 8}], "next": "n4",
+          "pg_fallback": {"text": "Посмотри на меня. (взгляд, полный обещаний)", "effects": [{"romance": 12, "bond": 6}], "next": "n4"}}
+      ]
+    },
+    "n2": {
+      "speaker": "follower",
+      "lines": [
+        {"text": "Тогда... может, после боя — у костра? Только мы вдвоём.", "cond": {}}
+      ],
+      "choices": [
+        {"text": "У костра. Договорились.", "tier": "pg", "cond": {}, "effects": [{"romance": 5}], "next": null},
+        {"text": "Сначала дело.", "tier": "pg", "cond": {}, "effects": [], "next": null}
+      ]
+    },
+    "n3": {
+      "speaker": "follower",
+      "lines": [
+        {"text": "Понял. Простите... Я больше не буду.", "cond": {}}
+      ],
+      "choices": [
+        {"text": "Не извиняйся. Мы же команда.", "tier": "pg", "cond": {}, "effects": [{"bond": 5}], "next": null}
+      ]
+    },
+    "n4": {
+      "speaker": "follower",
+      "lines": [
+        {"text": "Я... не могу отвести взгляд. Это плохо, да?", "cond": {}}
+      ],
+      "choices": [
+        {"text": "Нет. Это хорошо.", "tier": "pg", "cond": {}, "effects": [{"romance": 5, "trust": 5}], "next": null}
+      ]
+    }
+  }
+}

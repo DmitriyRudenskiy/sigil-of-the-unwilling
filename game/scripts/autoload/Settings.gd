@@ -14,6 +14,7 @@ const DEFAULT_FULLSCREEN := false
 const DEFAULT_UI_ANIMATIONS := true
 const DEFAULT_PARTICLES := true
 const DEFAULT_AUTO_SAVE := false
+const DEFAULT_CONTENT_ADULT := false
 
 const ZOOM_LEVELS := GameNumbers.ZOOM_LEVELS
 
@@ -25,6 +26,8 @@ var fullscreen: bool = DEFAULT_FULLSCREEN
 var ui_animations: bool = DEFAULT_UI_ANIMATIONS
 var particles: bool = DEFAULT_PARTICLES
 var auto_save: bool = DEFAULT_AUTO_SAVE
+## team-romance-roleplay 4.4: взрослый контент в диалогах (по умолчанию выключен)
+var content_adult: bool = DEFAULT_CONTENT_ADULT
 
 var is_muted: bool = false
 
@@ -69,6 +72,7 @@ func _load() -> void:
 	ui_animations = _config.get_value(SECTION, "ui_animations", DEFAULT_UI_ANIMATIONS)
 	particles = _config.get_value(SECTION, "particles", DEFAULT_PARTICLES)
 	auto_save = _config.get_value(SECTION, "auto_save", DEFAULT_AUTO_SAVE)
+	content_adult = _config.get_value(SECTION, "content_adult", DEFAULT_CONTENT_ADULT)
 	is_muted = _config.get_value(SECTION, "muted", false)
 
 func save() -> void:
@@ -80,6 +84,7 @@ func save() -> void:
 	_config.set_value(SECTION, "ui_animations", ui_animations)
 	_config.set_value(SECTION, "particles", particles)
 	_config.set_value(SECTION, "auto_save", auto_save)
+	_config.set_value(SECTION, "content_adult", content_adult)
 	_config.set_value(SECTION, "muted", is_muted)
 	_config.save(FILE)
 
@@ -92,6 +97,7 @@ func reset_to_defaults() -> void:
 	ui_animations = DEFAULT_UI_ANIMATIONS
 	particles = DEFAULT_PARTICLES
 	auto_save = DEFAULT_AUTO_SAVE
+	content_adult = DEFAULT_CONTENT_ADULT
 	_apply_audio()
 	save()
 

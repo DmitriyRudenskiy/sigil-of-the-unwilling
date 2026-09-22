@@ -91,6 +91,41 @@ func test_select_null_when_no_followers() -> void:
 func test_select_null_when_null_hero() -> void:
 	assert_that(SuccessionController.new().select_successor(null)).is_null()
 
+func test_select_spouse_priority() -> void:
+	# team-romance-roleplay 3.2: супруг того же пути — приоритет над остальными
+	var h := _succession_hero(&"archivist")
+	var low_uid := _make_follower(1, &"archivist")   # маленький uid, но без связей
+	var spouse := _make_follower(5, &"archivist")    # супруг
+	h.followers = [low_uid, spouse]
+	h.relationships.pair(5)["spouse"] = true
+	h.relationships.pair(1)["bond"] = 80
+	var succ := SuccessionController.new().select_successor(h)
+	assert_that(succ).is_not_null()
+	assert_that(int(succ.uid)).is_equal(5)
+	h.free()
+
+func test_select_bond_priority_over_uid() -> void:
+	var h := _succession_hero(&"archivist")
+	var low := _make_follower(1, &"archivist")
+	var high_bond := _make_follower(2, &"archivist")
+	h.followers = [low, high_bond]
+	h.relationships.pair(2)["bond"] = 60  # ≥ 60 → приоритетная группа
+	h.relationships.pair(1)["bond"] = 10
+	var succ := SuccessionController.new().select_successor(h)
+	assert_that(int(succ.uid)).is_equal(2)
+	h.free()
+
+func test_select_bond_descending_within_tier() -> void:
+	var h := _succession_hero(&"archivist")
+	var a := _make_follower(1, &"archivist")
+	var b := _make_follower(2, &"archivist")
+	h.followers = [a, b]
+	h.relationships.pair(1)["bond"] = 60
+	h.relationships.pair(2)["bond"] = 90
+	var succ := SuccessionController.new().select_successor(h)
+	assert_that(int(succ.uid)).is_equal(2)  # больший bond
+	h.free()
+
 func test_build_copies_skills() -> void:
 	var h := _succession_hero(&"archivist")
 	h.skills.set_skill(&"navigation", 2)

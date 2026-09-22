@@ -1,0 +1,38 @@
+{
+  "id": "talk_stranger",
+  "entry": "n1",
+  "nodes": {
+    "n1": {
+      "speaker": "follower",
+      "lines": [
+        {"text": "Вы — тот самый герой, о котором слагают песни? Не подведу ли я вас?", "cond": {}},
+        {"text": "Слышал, вам нужны люди. Я знаю эти земли лучше, чем кто-либо.", "cond": {"race": "elf"}}
+      ],
+      "choices": [
+        {"text": "Расскажи о себе.", "tier": "pg", "cond": {}, "effects": [{"bond": 5}], "next": "n2"},
+        {"text": "Мне нужны не разговоры, а дела.", "tier": "pg", "cond": {}, "effects": [{"bond": -5, "trust": -5}], "next": "n3"},
+        {"text": "Я чувствую, нам суждено вместе. (Хар 4+)", "tier": "pg", "cond": {"min_cha": 4}, "effects": [{"bond": 10}], "next": "n2"}
+      ]
+    },
+    "n2": {
+      "speaker": "follower",
+      "lines": [
+        {"text": "Хорошо, что вы так говорите. Я не привык, чтобы меня слушали.", "cond": {"max_trust": 60}},
+        {"text": "Спасибо. Это значит многое для меня.", "cond": {}}
+      ],
+      "choices": [
+        {"text": "Удачи в пути.", "tier": "pg", "cond": {}, "effects": [], "next": null},
+        {"text": "Вот, держи на дорогу. (подарок)", "tier": "pg", "cond": {"min_wis": 3}, "effects": [{"item": "gift_small", "bond": 8}], "next": null}
+      ]
+    },
+    "n3": {
+      "speaker": "follower",
+      "lines": [
+        {"text": "Хм. Ладно, посмотрим, на что вы способны.", "cond": {}}
+      ],
+      "choices": [
+        {"text": "(молча отвернуться)", "tier": "pg", "cond": {}, "effects": [], "next": null}
+      ]
+    }
+  }
+}

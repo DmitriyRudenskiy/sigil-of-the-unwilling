@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/AdventureUI.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/ui/MinimapPanel.tscn" id="2"]
@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/HeroStatusPanel.tscn" id="9"]
 [ext_resource type="PackedScene" path="res://scenes/ui/ResourceCollectPopup.tscn" id="10"]
 [ext_resource type="PackedScene" path="res://scenes/ui/SettingsScreen.tscn" id="11"]
+[ext_resource type="PackedScene" path="res://scenes/ui/TeamDialogScreen.tscn" id="12"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_opt"]
 bg_color = Color(0.16, 0.11, 0.06, 0.95)
@@ -123,3 +124,5 @@ visible = false
 visible = false
 persistent = true
 show_additional = false
+
+[node name="TeamDialogScreen" parent="." instance=ExtResource("12")]

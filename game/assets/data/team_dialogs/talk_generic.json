@@ -1,0 +1,16 @@
+{
+  "id": "talk_generic",
+  "entry": "n1",
+  "nodes": {
+    "n1": {
+      "speaker": "follower",
+      "lines": [
+        {"text": "Что-то на душе неспокойно перед дорогой. Что думаете?", "cond": {}}
+      ],
+      "choices": [
+        {"text": "Всё будет хорошо.", "tier": "pg", "cond": {}, "effects": [{"bond": 3, "trust": 3}], "next": null},
+        {"text": "Дорога покажет.", "tier": "pg", "cond": {}, "effects": [], "next": null}
+      ]
+    }
+  }
+}

@@ -53,6 +53,10 @@ static func run(
 	_assert_core_services()
 	R.loaded_save = _resolve_session(R, shard_seed)
 	rng.seed = R.session.run_seed
+	# team-romance-roleplay D10: роллы верности/ревности/конфликтов — из session RNG
+	RelationshipSystem.set_rng(rng)
+	# team-romance-roleplay D6: JSON-сцены диалогов — один раз на загрузку мира
+	TeamDialogSystem.load_dialogs()
 	_create_world(parent, R)
 	_create_city_layer(parent, platform, R)
 	_create_subsystems(parent, R)

@@ -9,6 +9,10 @@ var archetype: StringName = &""
 var trait_ids: Array[StringName] = []
 var stat_modifiers: Dictionary = {}
 var abilities: Array[StringName] = []
+## team-romance-roleplay: пол персонажа (male/female)
+var gender: StringName = &"male"
+## team-romance-roleplay: скрытая ориентация (hetero/homo/bi), роллится при рекруте
+var orientation: StringName = &"hetero"
 
 func serialize() -> Dictionary:
 	var abils: Array[String] = []
@@ -23,6 +27,8 @@ func serialize() -> Dictionary:
 		"traits": trait_ids.duplicate(),
 		"stat_modifiers": _mods_to_array(),
 		"abilities": abils,
+		"gender": String(gender),
+		"orientation": String(orientation),
 	}
 
 func _mods_to_array() -> Array:
@@ -50,6 +56,8 @@ func to_dict() -> Dictionary:
 		"traits": traits,
 		"stat_modifiers": mods,
 		"abilities": abils,
+		"gender": String(gender),
+		"orientation": String(orientation),
 	}
 
 func deserialize(data: Dictionary) -> void:
@@ -58,6 +66,8 @@ func deserialize(data: Dictionary) -> void:
 	race = StringName(data.get("race", "human"))
 	path = StringName(data.get("path", "unaligned"))
 	archetype = StringName(data.get("archetype", ""))
+	gender = StringName(data.get("gender", "male"))  # старые сейвы без пола → male
+	orientation = StringName(data.get("orientation", "hetero"))  # старые сейвы → hetero
 	trait_ids.clear()
 	for id in data.get("traits", []):
 		trait_ids.append(StringName(id))
