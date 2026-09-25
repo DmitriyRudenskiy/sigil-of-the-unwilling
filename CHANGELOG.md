@@ -4,6 +4,20 @@
 
 ## 2026-09-25
 
+### dnd-battle-system — Phase 5: Saving Throws & Death (TASK_19–20)
+- `saving_throw.gd` — `DNDSavingThrow`: d20 + ability mod + proficiency, `calculate_dc` (8 + prof + mod + bonus), `ThrowResult` (success/failure/crit-success/crit-failure), `succeeded()`
+- `death_saves.gd` — `DNDDeathSaves`: 0 HP → dying, d20 (10+/9−), 3 success = stable, 3 fail = death, nat 20 = +1 HP, nat 1 = 2 fail, `stabilize()` (Medicine), `heal()` (wakes), serialization
+- Тесты: `tests/unit/battle/test_dnd_saves.gd` (16 тестов, rigged d20 через наследование от `RandomNumberGenerator`)
+- Отложено (Phase 6): integration tests с spells/эффектами
+
+### dnd-battle-system — Phase 4: Special Maneuvers (TASK_16–18)
+- `ability_check.gd` — `DNDAbilityCheck`: общий d20 + mod с advantage/disadvantage (contested checks, escape, stealth)
+- `grapple.gd` — `DNDGrapple`: contested Athletics vs Athletics/Acrobatics (tie → grappler), speed 0, half speed при перемещении, escape с действием (tie → grappler)
+- `shove.gd` — `DNDShove`: contested check (tie → target), PRONE/PUSHED (5 ft), free hand + reach gates
+- `condition_manager.gd` — `DNDConditionManager`: 14 условий, data-driven таблица эффектов → merged `Effects`, stacking, duration (`tick()`, −1 = until removed), serialization
+- Тесты: `tests/unit/battle/test_dnd_maneuvers.gd` (20 тестов)
+- Отложено (Phase 6): per-action runtime effects, UI индикаторы условий, integration tests
+
 ### dnd-battle-system — Phase 3: Action Economy (TASK_13–15)
 - `action_economy.gd` — `DNDActionEconomy`: 1 action/turn, bonus action (only if source allows), 1 reaction/round (resets at turn start), 10 standard actions enum, validation (no same action twice), `available_actions()`, save/load
 - `opportunity_attack.gd` — `DNDOpportunityAttack`: trigger logic (leaves reach, not Disengage, not forced/teleport, has sight + reaction), single attack
