@@ -1,0 +1,46 @@
+{
+  "id": "crisis_06_anomaly",
+  "title": "🔮 МАГИЧЕСКАЯ АНОМАЛИЯ!",
+  "description": "В центре поселения открылся разлом. Воздух гудит, предметы летают, а жители видят странные тени. Магия может принести благословение — или поглотить всё.",
+  "crisis_type": 5,
+  "severity": 5,
+  "duration_days": 2,
+  "icon_path": "res://assets/ui/events/magic_event.png",
+  "ongoing_effects": {
+    "morale_penalty": -1
+  },
+  "resolution_effects": {},
+  "choices": [
+    {
+      "text": "Запечатать разлом ( -10 материалов, мирно)",
+      "tooltip": "Ритуал затворения потребует редких материалов",
+      "impact": 2,
+      "effects": {
+        "resource_change": {"materials": -10},
+        "reputation_change": 5
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Поглотить мощь разлома ( +20 материалов, -10 мораль, риск)",
+      "tooltip": "Впитать магию в поселение. Что-то останется навсегда.",
+      "impact": 5,
+      "effects": {
+        "resource_change": {"materials": 20},
+        "morale_change": -10,
+        "permanent_modifier": {"id": "touched_by_magic", "effect": "magic_power += 10"}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Провести ритуал поклонения ( +15 мораль, открывает ветку Faith)",
+      "tooltip": "Принять дар богов и возвести храм",
+      "impact": 3,
+      "effects": {
+        "morale_change": 15,
+        "unlock_law": "faith_temple"
+      },
+      "requirements": {}
+    }
+  ]
+}

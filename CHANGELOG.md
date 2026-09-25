@@ -4,6 +4,15 @@
 
 ## 2026-09-25
 
+### dynamic-world-crisis-system — Law System + 8 Crisis Events (Task 2.3, Task 4.2)
+- `LawManager.gd` (RefCounted, standalone-тестируемый) — дерево законов: 3 ветки (Order/Faith/Survival), 6 законов (2/ветку), `requires` = prerequisite, `unlock_law()` с проверкой предков, `get_passive_effects()` (merged modifiers по key), `to_dict`/`from_dict`
+- Интеграция: `CrisisEventSystem.law_manager` + эффект `unlock_law` в `apply_choice_effects`
+- 8 кризисов (все 6 типов CrisisType): fire, famine, riot, raiders, plague, anomaly, flood, fuel — по 3 выбора, эффекты в рамках data-model
+- Исправлены битые иконки в `crisis_01_fire`/`crisis_02_famine` (реальные `crisis_fire.png`/`crisis_famine.png`)
+- Тесты: `test_law_manager.gd` (11) + `test_crisis_events.gd` (7: 8 шаблонов, покрытие типов, иконки, well-formed choices)
+- **Known deviation (pre-existing)**: pipeline кризисов→GameManager не провязан (`modify_*` методы отсутствуют, ресурс `materials`/`mana_change`/`reputation_change`/`population_drain` не моделируются в `player_data`). Headless не видит (early-return). Требуется решение по маппингу ресурсов — отдельно.
+- Полный сьют: **1754/1754 passed, 0 failures** (129 orphans)
+
 ### dnd-battle-system — Phase 6: Integration (TASK_21 PARTIAL, TASK_22/23 DEFERRED)
 - `combatant_profile.gd` — `DnDCombatantProfile`: per-character stat block (abilities, proficiency, armor/AC, weapon, ranged flag), `get_ac()` (syncs DEX), `get_attack_ability_mod()` (STR melee / DEX ranged), `to_dict`/`from_dict`
 - `battle_bridge.gd` — `DnDBattleBridge`: `resolve_attack()` (attack roll vs AC, nat-20 crit, damage dice — delegates to `DNDAttackRoll`/`DNDDamageCalculator`), `build_initiative()` (via `DNDInitiativeTracker`)

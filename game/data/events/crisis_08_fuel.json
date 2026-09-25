@@ -1,0 +1,44 @@
+{
+  "id": "crisis_08_fuel",
+  "title": "🔥 НЕЧЕГО ТОПИТЬ!",
+  "description": "Дрова закончились, а зима в самом разгаре. Печи гаснут, люди мёрзнут. Без топлива поселение замёрзнет за несколько дней.",
+  "crisis_type": 1,
+  "severity": 4,
+  "duration_days": 5,
+  "icon_path": "res://assets/ui/events/wood_event.png",
+  "ongoing_effects": {
+    "morale_penalty": -3
+  },
+  "resolution_effects": {},
+  "choices": [
+    {
+      "text": "Отправить лесорубов ( -2 населения, +25 материалов)",
+      "tooltip": "Опасный выезд в глухой лес",
+      "impact": 3,
+      "effects": {
+        "population_change": -2,
+        "resource_change": {"materials": 25}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Купить топливо у торговцев ( -30 золота, +20 материалов)",
+      "tooltip": "Дорого, но надёжно",
+      "impact": 2,
+      "effects": {
+        "resource_change": {"gold": -30, "materials": 20}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Ввести комендантский час и нормирование ( -10 мораль, открывает ветку Survival)",
+      "tooltip": "Равная доля тепла для всех. Жёстко, но справедливо.",
+      "impact": 4,
+      "effects": {
+        "morale_change": -10,
+        "unlock_law": "survival_granary"
+      },
+      "requirements": {}
+    }
+  ]
+}

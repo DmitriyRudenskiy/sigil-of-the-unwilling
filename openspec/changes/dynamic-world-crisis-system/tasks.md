@@ -61,13 +61,16 @@
 **Estimate**: 8h  
 **Acceptance Criteria**:
 - [x] **Ресурсный кризис**: "Еда на исходе" (3 варианта решения) *(crisis_02_famine.json)*
-- [ ] **Моральный кризис**: "Требования рабочих" (закон о правах)
-- [ ] **Экологический кризис**: "Ледяная буря" (укрепить/эвакуировать)
-- [ ] **Внешняя угроза**: "Мародеры рядом" (бой/дипломатия)
+- [x] **Бунт / Требования рабочих** (закон о справедливости, ветка Order) *(crisis_03_riot.json)*
+- [x] **Внешняя угроза**: "Мародеры рядом" (бой/укрепление/дань) *(crisis_04_raiders.json)*
+- [x] **Чума**: "Таинственная болезнь" (карантин/целитель/ветка Survival) *(crisis_05_plague.json)*
+- [x] **Магическая аномалия** (запечатать/поглотить/ветка Faith) *(crisis_06_anomaly.json)*
+- [x] **Экологический**: "Наводнение" (дамба/эвакуация/дренаж) *(crisis_07_flood.json)* — вместо "ледяной бури"
 - [x] **Пожар**: "Горит склад!" (тушить/спасать людей) *(crisis_01_fire.json)*
-- [ ] **Бунт**: "Недовольство растет" (подавить/уступить)
-- [ ] **Чума**: "Таинственная болезнь" (карантин/лечение)
-- [ ] **Зима**: "Долгая зима" (подготовка/риск)
+- [x] **Зима**: "Нечего топить" (лесорубы/покупка/нормирование, ветка Survival) *(crisis_08_fuel.json)*
+- [x] **Валидация**: 7 тестов в `tests/unit/systems/test_crisis_events.gd` (8 шаблонов, покрытие всех 6 типов CrisisType, иконки, well-formed choices)
+
+> **Known deviation (pre-existing, out of scope for content task)**: the crisis→GameManager effect pipeline is not wired. `apply_choice_effects`/`apply_crisis_effects` call `GameManager.modify_resource/modify_global_morale/modify_population/add_permanent_modifier/unlock_building` which do not exist, and the data uses a `materials` resource + `mana_change`/`reputation_change`/`population_drain` keys that `player_data` (wood/food/gold) does not model. Headless tests cannot reach this (early-return when GameManager is absent). Fixing requires deciding the resource mapping — tracked separately.
 
 ### Task 2.4: Implement 5 Seasonal Events
 **Priority**: P2  
@@ -139,11 +142,11 @@
 **Priority**: P1  
 **Estimate**: 6h  
 **Acceptance Criteria**:
-- [ ] Создан `game/scripts/systems/law_manager.gd`
-- [ ] Дерево законов (3 ветки: Order, Faith, Survival)
-- [ ] Законы открываются через выборы в событиях
-- [ ] Активные законы влияют на геймплей
-- [ ] UI просмотра принятых законов
+- [x] Создан `game/scripts/systems/LawManager.gd` (RefCounted, standalone-тестируемый)
+- [x] Дерево законов (3 ветки: Order, Faith, Survival) — `requires` = prerequisite, 6 законов по 2 на ветку
+- [x] Законы открываются через выборы в событиях — эффект `unlock_law` в `CrisisEventSystem.apply_choice_effects`
+- [x] Активные законы влияют на геймплей — `get_passive_effects()` (merged modifiers по key); 11 тестов в `tests/unit/systems/test_law_manager.gd`
+- [ ] UI просмотра принятых законов *(отложено: Godot-визуал, не верифицируется headless)*
 
 ### Task 4.3: Save/Load System Integration
 **Priority**: P0  

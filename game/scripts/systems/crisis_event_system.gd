@@ -120,10 +120,16 @@ var max_active_events: int = 3
 var event_templates: Array[DynamicEventData] = []
 var crisis_templates: Array[CrisisEventData] = []
 
+## Law system (unlocked via event choices, apply passive modifiers).
+var law_manager: LawManager = null
+
 func _ready():
 	load_event_templates()
 	load_crisis_templates()
 	update_next_event_day()
+	if law_manager == null:
+		law_manager = LawManager.new()
+		law_manager.load_default_catalog()
 
 ## Загрузка шаблонов событий из JSON
 func load_event_templates():
@@ -403,6 +409,9 @@ func apply_choice_effects(effects: Dictionary):
 			game_manager.unlock_building(value)
 		elif effect_type == "permanent_modifier":
 			game_manager.add_permanent_modifier(value["id"], value["effect"])
+		elif effect_type == "unlock_law":
+			if law_manager:
+				law_manager.unlock_law(str(value))
 
 ## Показать панель события (UI)
 func show_event_panel(event: DynamicEventData):

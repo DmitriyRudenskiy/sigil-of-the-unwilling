@@ -5,7 +5,7 @@
   "crisis_type": 0,
   "severity": 3,
   "duration_days": 3,
-  "icon_path": "res://assets/ui/events/fire_crisis.png",
+  "icon_path": "res://assets/ui/events/crisis_fire.png",
   "ongoing_effects": {
     "resource_drain": {"food": 5, "materials": 3},
     "morale_penalty": -2
