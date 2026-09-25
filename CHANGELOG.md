@@ -4,6 +4,14 @@
 
 ## 2026-09-25
 
+### dnd-battle-system — Phase 2: Height & Positioning (TASK_07–10)
+- `elevation_system.gd` — `DNDElevationSystem`: дискретные уровни (5-фут. инкременты), set/get, `height_feet()`, `is_high_ground()`, сериализация `to_dict`/`from_dict`
+- `height_modifier.gd` — `DNDHeightModifier`: бонусы высокой точки (ranged +1/+2/+3, melee +1/+2), штрафы снизу (ranged −1/−2, melee 0/−1/−2/−3), `range_bonus()`, `describe()`
+- `line_of_sight.gd` — `DNDLineOfSight`: 3D LoS (Брезенхэм + интерполяция высоты линии огня), `min_clearance()` для расчёта укрытия
+- `cover_calculator.gd` — `DNDCoverCalculator`: 4 уровня укрытия (none/half/three-quarters/full), half = +2 AC/+2 DEX, full = немишень, `describe()`
+- Тесты: `tests/unit/battle/test_dnd_height.gd` (20 тестов) — elevation, таблицы бонусов, LoS (стена/через стену/диагональ), укрытия, интеграция с `DNDAttackRoll`
+- Отложено (не в height-system spec): TASK_11 vertical movement, TASK_12 falling damage, soft cover от существ, debug-визуализация, creature size в LoS, UI-индикаторы (Phase 6)
+
 ### map-generation-improvement — верификация, фиксы, тесты
 - Фикс: `MapMountainGenerator` вызывался до `generate_noise()` и не работал — порядок исправлен (`MapGenerator.gd`)
 - Фикс: лес давал 1.5% карты вместо 25% — сиды кластеров теперь с любого подходящего биома, spacing 4, убран двойной случайный гейт роста (`MapForestGenerator.gd`)

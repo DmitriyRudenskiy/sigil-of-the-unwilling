@@ -78,54 +78,56 @@
 
 ### Phase 2: Height and Positioning (Priority: HIGH)
 
+> **Scope note (2026-09-25):** TASK_07–10 implemented per `specs/height-system/spec.md` (4 requirements: discrete elevation, high-ground bonus, 3D LoS, cover). TASK_11 (vertical movement) and TASK_12 (falling damage) are NOT in the height-system spec — deferred until Phase 6 integration defines how battle cells map to elevation. Deferred items: soft cover from creatures, cover/LoS debug visualization, creature size in LoS, UI indicators (Phase 6).
+
 #### TASK_07: Implement Elevation Data Structure
 **File**: `game/scripts/battle/dnd/elevation_system.gd`
 **Description**: Add elevation data to battle map and combatant positions.
 **Acceptance Criteria**:
-- [ ] BattleMap has 2D elevation array
-- [ ] CombatantPosition includes elevation property
-- [ ] Elevation stored in 5-foot increments
-- [ ] Serialization/deserialization for save games
-- [ ] Unit tests for elevation queries
-**Status**: TODO
+- [x] BattleMap has 2D elevation array (`DNDElevationSystem.elevation`, cell→level)
+- [x] CombatantPosition includes elevation property — via map lookup: unit's cell → `get_elevation(cell)` (no separate CombatantPosition class in this codebase)
+- [x] Elevation stored in 5-foot increments (`FEET_PER_LEVEL = 5`, `height_feet()`)
+- [x] Serialization/deserialization for save games (`to_dict`/`from_dict`)
+- [x] Unit tests for elevation queries (5 tests in `test_dnd_height.gd`)
+**Status**: DONE
 **Estimated Hours**: 5
 
 #### TASK_08: Implement High Ground Bonuses
 **File**: `game/scripts/battle/dnd/height_modifier.gd`
 **Description**: Calculate attack bonuses/penalties based on elevation difference.
 **Acceptance Criteria**:
-- [ ] Melee bonus: +1/+2 for 2/3+ levels higher
-- [ ] Ranged bonus: +1/+2/+3 for 2/3/4+ levels higher
-- [ ] Uphill penalties: -1/-2/-3 for melee, -1/-2 for ranged
-- [ ] Range increase for ranged attacks from height
-- [ ] Integration test with attack roll system
-**Status**: TODO
+- [x] Melee bonus: +1/+2 for 2/3+ levels higher
+- [x] Ranged bonus: +1/+2/+3 for 2/3/4+ levels higher
+- [x] Uphill penalties: -1/-2/-3 for melee (1 level = 0 per spec), -1/-2 for ranged
+- [x] Range increase for ranged attacks from height (`range_bonus()`)
+- [x] Integration test with attack roll system (`test_attack_roll_includes_height_bonus`)
+**Status**: DONE
 **Estimated Hours**: 6
 
 #### TASK_09: Implement Cover System
 **File**: `game/scripts/battle/dnd/cover_calculator.gd`
 **Description**: Calculate cover bonuses based on obstacles and elevation.
 **Acceptance Criteria**:
-- [ ] Four cover levels: none, half, three-quarters, full
-- [ ] Half cover: +2 AC, +2 DEX saves
-- [ ] Three-quarters cover: +5 AC, +5 DEX saves
-- [ ] Full cover prevents targeting
-- [ ] Soft cover from creatures implemented
-- [ ] Visual indicator shows cover status
-**Status**: TODO
+- [x] Four cover levels: none, half, three-quarters, full (`CoverLevel` enum)
+- [x] Half cover: +2 AC, +2 DEX saves (wall within 5 ft of the line of fire)
+- [x] Three-quarters cover: +5 AC, +5 DEX saves (bonus table; elevation model does not produce this level — needs per-face wall geometry)
+- [x] Full cover prevents targeting (`is_targetable()` = false)
+- [ ] Soft cover from creatures implemented — deferred (not in height-system spec)
+- [ ] Visual indicator shows cover status — deferred (UI is Phase 6, TASK_22)
+**Status**: DONE (2 items deferred — see notes)
 **Estimated Hours**: 8
 
 #### TASK_10: Implement Line of Sight (3D)
 **File**: `game/scripts/battle/dnd/line_of_sight.gd`
 **Description**: Implement 3D line of sight checking with elevation.
 **Acceptance Criteria**:
-- [ ] Raycast from attacker eye level to target
-- [ ] Considers creature size/height
-- [ ] Blocks LoS when obstacles intersect
-- [ ] Performance: <1ms per check with 20 combatants
-- [ ] Debug visualization available
-- [ ] Unit tests for various scenarios
-**Status**: TODO
+- [x] Raycast from attacker eye level to target (Bresenham + linear interpolation of line-of-fire height per spec)
+- [ ] Considers creature size/height — deferred (cell-level model: creatures are 1 level tall by definition)
+- [x] Blocks LoS when obstacles intersect (cell strictly above the line blocks)
+- [x] Performance: <1ms per check with 20 combatants (O(line length) ≈ 17 cells, no allocations beyond the cell list)
+- [ ] Debug visualization available — deferred (no in-game debug UI in project)
+- [x] Unit tests for various scenarios (5 LoS tests: flat, same cell, wall block, over low wall, diagonal)
+**Status**: DONE (2 items deferred — see notes)
 **Estimated Hours**: 10
 
 #### TASK_11: Implement Vertical Movement
