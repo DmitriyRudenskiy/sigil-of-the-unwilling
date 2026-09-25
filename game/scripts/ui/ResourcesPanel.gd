@@ -39,7 +39,11 @@ func _ready() -> void:
         var label := row.get_node("Label") as Label
         if label == null:
             continue
-        label.text = "%s %d/%d" % [def.icon, 0, GameNumbers.RESOURCE_CAPACITY]
+        var icon := row.get_node_or_null("Icon") as TextureRect
+        if icon != null:
+            # ui-icons: текстура из assets/ui/icons/resources/, fallback при отсутствии
+            icon.texture = ThemeConfig.icon_texture(ThemeConfig.ICON_DIR_RESOURCES + str(def.id) + ".png")
+        label.text = "%d/%d" % [0, GameNumbers.RESOURCE_CAPACITY]
         label.tooltip_text = def.display_name
         label.add_theme_font_size_override("font_size", 12)
         _labels[def.id] = label
@@ -52,10 +56,7 @@ func update_resources(resources: Dictionary) -> void:
         total += amount
         var reg: Node = _resource_registry if _resource_registry != null else Resources
         var def: ResourceDef = reg.get_resource(id) as ResourceDef
-        if def:
-            label.text = "%s %d" % [def.icon, amount]
-        else:
-            label.text = "⛏️ %d" % amount
+        label.text = "%d" % amount if def else "? %d" % amount
     var title := $VBox/Title as Label
     # Ранняя игра: общий лимит рюкзака (early-game-foundation)
     var cap: int = GameNumbersHero.BACKPACK_TOTAL_CAP

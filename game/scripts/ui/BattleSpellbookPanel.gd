@@ -61,6 +61,8 @@ func _refresh() -> void:
         var btn := _spell_buttons[btn_idx]
         btn.text = "%s (%d)" % [spell.display_name, _magic.get_mana_cost_def(spell)]
         btn.tooltip_text = "%s | Lv.%d" % [spell.school, spell.level]
+        # ui-icons: иконка школы магии (schools/air|fire|water|earth.png)
+        btn.icon = ThemeConfig.icon_texture(ThemeConfig.ICON_DIR_SCHOOLS + str(spell.school).to_lower() + ".png")
         if _theme != null:
             var bsb := _theme.get_stylebox("button", "Panel")
             if bsb:

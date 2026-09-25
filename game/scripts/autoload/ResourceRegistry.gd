@@ -13,6 +13,10 @@ func _ready() -> void:
 func reset() -> void:
 	_resources.clear()
 
+# ui-icons: текстура иконки ресурса (assets/ui/icons/resources/), fallback при отсутствии.
+func get_icon(id: StringName) -> Texture2D:
+	return ThemeConfig.icon_texture(ThemeConfig.ICON_DIR_RESOURCES + str(id) + ".png")
+
 const CITY_RESOURCE_CAPACITIES: Dictionary = {
 	&"grain": 20.0,
 	&"flour": 20.0,

@@ -139,9 +139,32 @@ const SPRITE_UNITS_DIR      := "res://assets/units/"
 
 const THEME_PATH := "res://assets/theme/game_theme.tres"
 
+const ICON_DIR := "res://assets/ui/icons/"
+const ICON_DIR_RESOURCES := ICON_DIR + "resources/"
+const ICON_DIR_BUILDINGS := ICON_DIR + "buildings/"
+const ICON_DIR_NEEDS := ICON_DIR + "needs/"
+const ICON_DIR_SCHOOLS := ICON_DIR + "schools/"
+const ICON_DIR_WIDGETS := "res://assets/ui/widgets/"
+const ICON_FALLBACK := ICON_DIR + "fallback.png"
+
 const FONT_SIZE_SMALL := 14
 
 const AUDIO_DIR := "res://assets/audio/"
+
+# ui-icons: кэшированная загрузка иконки; при отсутствии — fallback-текстура.
+static var _icon_cache: Dictionary = {}
+
+static func icon_texture(path: String) -> Texture2D:
+	if _icon_cache.has(path):
+		return _icon_cache[path]
+	var tex: Texture2D = null
+	if ResourceLoader.exists(path):
+		tex = load(path) as Texture2D
+	if tex == null:
+		path = ICON_FALLBACK
+		tex = load(path) as Texture2D if ResourceLoader.exists(path) else null
+	_icon_cache[path] = tex
+	return tex
 
 static func resource_icon(id: StringName) -> String:
 	match id:

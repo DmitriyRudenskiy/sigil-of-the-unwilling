@@ -171,6 +171,13 @@ godot --path game --unit-testing --gut-log-level=1
 - Слайдеры и чекбоксы
 - Декоративные элементы
 
+### Система загрузки иконок
+- Пути каталогов — константы `ICON_DIR_*` в `scripts/theme/ThemeConfig.gd`
+- `ThemeConfig.icon_texture(path)` — кэшированная загрузка, fallback на `fallback.png` при отсутствии файла
+- `ResourceRegistry.get_icon(id)` и `BuildingDefs.get_icon(id)` — текстура по id ресурса/здания
+- `game_theme.tres` использует 9-slice `StyleBoxTexture` для кнопок, панелей, слотов и прогресс-баров
+- Тесты: `tests/unit/theme/` (загрузка, курсоры, кэш, fallback)
+
 ## 🤝 Вклад в проект
 
 Мы приветствуем вклад в проект! Пожалуйста, следуйте правилам [OpenSpec](https://github.com/Fission-AI/OpenSpec):

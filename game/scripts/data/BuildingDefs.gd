@@ -12,6 +12,10 @@ static var _raw_cache: Array = []
 # TASK_19 H2: кэш собранных Def — def_by_id() возвращает тот же объект (===).
 static var _def_cache: Dictionary = {}
 
+# ui-icons: текстура иконки здания (assets/ui/icons/buildings/), fallback при отсутствии.
+static func get_icon(id: StringName) -> Texture2D:
+	return ThemeConfig.icon_texture(ThemeConfig.ICON_DIR_BUILDINGS + str(id) + ".png")
+
 static func _ensure_loaded() -> void:
 	if not _raw_cache.is_empty():
 		return

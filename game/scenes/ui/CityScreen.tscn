@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/CityScreen.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/buildings/farm.png" id="2_farm"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/buildings/mine.png" id="3_mine"]
 
 [node name="CityScreen" type="Control"]
 layout_mode = 3
@@ -51,9 +53,11 @@ alignment = 1
 
 [node name="BuildFarm" type="Button" parent="CityScreenBackground/CityScreenCenter/CityScreenPanel/CityScreenBox/CityScreenButtons"]
 layout_mode = 2
+icon = ExtResource("2_farm")
 
 [node name="BuildMine" type="Button" parent="CityScreenBackground/CityScreenCenter/CityScreenPanel/CityScreenBox/CityScreenButtons"]
 layout_mode = 2
+icon = ExtResource("3_mine")
 
 [node name="LevelUp" type="Button" parent="CityScreenBackground/CityScreenCenter/CityScreenPanel/CityScreenBox/CityScreenButtons"]
 layout_mode = 2

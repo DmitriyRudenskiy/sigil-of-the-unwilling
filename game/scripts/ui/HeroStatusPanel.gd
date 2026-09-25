@@ -7,6 +7,7 @@ var _title: Label
 var _cond_label: Label
 var _stats_label: Label
 var _followers_label: Label
+var _need_icons: Dictionary = {}
 const _MAX_FOLLOWERS_SHOWN := 6
 
 
@@ -21,6 +22,14 @@ func _wire() -> void:
 	_cond_label = get_node("VBox/ConditionLabel") as Label
 	_stats_label = get_node("VBox/StatsLabel") as Label
 	_followers_label = get_node("VBox/FollowersLabel") as Label
+	# ui-icons: иконки потребностей (needs/rest|social|inspiration.png)
+	var needs_box := get_node_or_null("VBox/Needs") as HBoxContainer
+	if needs_box != null:
+		for k in NeedType.all_ids():
+			var tr := needs_box.get_node_or_null(NeedType.to_name(k).capitalize()) as TextureRect
+			if tr != null:
+				tr.texture = ThemeConfig.icon_texture(ThemeConfig.ICON_DIR_NEEDS + NeedType.to_name(k) + ".png")
+				_need_icons[k] = tr
 	_title.add_theme_font_size_override("font_size", 14)
 	_cond_label.add_theme_font_size_override("font_size", 12)
 	_stats_label.add_theme_font_size_override("font_size", 12)
@@ -43,12 +52,17 @@ func refresh() -> void:
 		_cond_label.text = ""
 		_stats_label.text = ""
 		_followers_label.text = ""
+		for k in _need_icons:
+			(_need_icons[k] as TextureRect).modulate = Color(0.4, 0.4, 0.4)
 		return
 	var h: HeroController = _hero
 	_title.text = GameText.hero_title(h.hero_name, _path_name(h.path_id))
 	_cond_label.text = _condition_text(h)
 	_stats_label.text = _stats_text(h)
 	_followers_label.text = _followers_text(h)
+	for k in _need_icons:
+		var critical := h.needs != null and h.needs.is_critical(k)
+		(_need_icons[k] as TextureRect).modulate = Color(1.0, 0.3, 0.25) if critical else Color.WHITE
 
 func _condition_text(h: HeroController) -> String:
 	var parts: Array[String] = []
