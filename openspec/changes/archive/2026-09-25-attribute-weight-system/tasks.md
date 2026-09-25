@@ -37,6 +37,6 @@
 
 ## 7. Регрессия и калибровка
 
-- [ ] 7.1 Все 1512+ GdUnit4-тестов зелёные (старые тесты рюкзака перестроить под вес)
-- [ ] 7.2 MCP `test_balance_probe.py`: герой доживает 60 ходов RUNNING на seed 20260913; при деградации — калибровка CARRY_BASE/REST_EXTRACT_COST
-- [ ] 7.3 `openspec validate attribute-weight-system` + commit + push
+- [x] 7.1 Все 1512+ GdUnit4-тестов зелёные (старые тесты рюкзака перестроить под вес) — подтверждено полным gdUnit-прогоном в balance-core 4.4 (seed 20260913)
+- [x] 7.2 MCP `test_balance_probe.py`: герой доживает 60 ходов RUNNING на seed 20260913; при деградации — калибровка CARRY_BASE/REST_EXTRACT_COST — прогон balance-core: 60 turns RUNNING (calibration-report.md)
+- [x] 7.3 `openspec validate attribute-weight-system` + commit + push (validate valid, archived 2026-09-25)

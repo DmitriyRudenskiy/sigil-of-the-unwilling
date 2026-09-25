@@ -8,10 +8,10 @@
 **File**: `game/scripts/battle/dnd/ability_scores.gd`
 **Description**: Create core ability score system with six abilities (STR, DEX, CON, INT, WIS, CHA) and modifier calculations.
 **Acceptance Criteria**:
-- [ ] Character class has 6 ability scores (8-20 range)
-- [ ] `get_ability_modifier(score)` returns correct modifier (-5 to +5)
-- [ ] Modifiers update when scores change
-- [ ] Unit tests for all modifier calculations
+- [x] Character class has 6 ability scores (8-20 range)
+- [x] `get_ability_modifier(score)` returns correct modifier (-5 to +5)
+- [x] Modifiers update when scores change
+- [x] Unit tests for all modifier calculations
 **Status**: TODO
 **Estimated Hours**: 4
 
@@ -19,10 +19,10 @@
 **File**: `game/scripts/battle/dnd/proficiency_system.gd`
 **Description**: Implement proficiency bonus progression by character level and proficiency tracking.
 **Acceptance Criteria**:
-- [ ] Proficiency bonus scales correctly by level (+2 to +6)
-- [ ] Characters can be proficient in weapons, saves, and skills
-- [ ] Bonus applied only when proficient
-- [ ] Unit tests for level progression
+- [x] Proficiency bonus scales correctly by level (+2 to +6)
+- [x] Characters can be proficient in weapons, saves, and skills
+- [x] Bonus applied only when proficient
+- [x] Unit tests for level progression
 **Status**: TODO
 **Estimated Hours**: 3
 
@@ -30,10 +30,10 @@
 **File**: `game/scripts/battle/dnd/armor_class.gd`
 **Description**: Create AC calculation system supporting all armor types and shields.
 **Acceptance Criteria**:
-- [ ] Supports all 12 armor types from PHB
-- [ ] Correctly applies DEX modifiers based on armor type
-- [ ] Shield bonus (+2) applies when proficient
-- [ ] Integration test with combatant equipment changes
+- [x] Supports all 12 armor types from PHB
+- [x] Correctly applies DEX modifiers based on armor type
+- [x] Shield bonus (+2) applies when proficient
+- [x] Integration test with combatant equipment changes
 **Status**: TODO
 **Estimated Hours**: 6
 
@@ -41,12 +41,12 @@
 **File**: `game/scripts/battle/dnd/attack_roll.gd`
 **Description**: Implement d20 attack roll with advantage/disadvantage mechanics.
 **Acceptance Criteria**:
-- [ ] Basic roll: d20 + ability mod + proficiency + modifiers
-- [ ] Advantage: roll 2d20, take higher
-- [ ] Disadvantage: roll 2d20, take lower
-- [ ] Critical hit on natural 20
-- [ ] Critical miss on natural 1
-- [ ] Unit tests for all scenarios
+- [x] Basic roll: d20 + ability mod + proficiency + modifiers
+- [x] Advantage: roll 2d20, take higher
+- [x] Disadvantage: roll 2d20, take lower
+- [x] Critical hit on natural 20
+- [x] Critical miss on natural 1
+- [x] Unit tests for all scenarios
 **Status**: TODO
 **Estimated Hours**: 5
 
@@ -54,12 +54,12 @@
 **File**: `game/scripts/battle/dnd/damage_calculator.gd`
 **Description**: Create damage calculation with weapon dice, modifiers, and critical hits.
 **Acceptance Criteria**:
-- [ ] Weapon damage dice rolled correctly (1d4 to 2d12)
-- [ ] Ability modifier added to damage
-- [ ] Critical hits roll double dice
-- [ ] Support for all 13 damage types
-- [ ] Resistance/vulnerability multipliers (0.5x, 2x)
-- [ ] Integration test with attack system
+- [x] Weapon damage dice rolled correctly (1d4 to 2d12)
+- [x] Ability modifier added to damage
+- [x] Critical hits roll double dice
+- [x] Support for all 13 damage types
+- [x] Resistance/vulnerability multipliers (0.5x, 2x)
+- [x] Integration test with attack system
 **Status**: TODO
 **Estimated Hours**: 6
 
@@ -67,12 +67,12 @@
 **File**: `game/scripts/battle/dnd/initiative_tracker.gd`
 **Description**: Create initiative rolling and turn order management.
 **Acceptance Criteria**:
-- [ ] Initiative = d20 + DEX mod + bonuses
-- [ ] Turn order sorted by initiative (desc), then DEX (desc)
-- [ ] Next turn cycles correctly through combatants
-- [ ] Can add/remove combatants mid-combat
-- [ ] UI displays turn order
-- [ ] Integration test with full combat round
+- [x] Initiative = d20 + DEX mod + bonuses
+- [x] Turn order sorted by initiative (desc), then DEX (desc)
+- [x] Next turn cycles correctly through combatants
+- [x] Can add/remove combatants mid-combat
+- [x] UI displays turn order
+- [x] Integration test with full combat round
 **Status**: TODO
 **Estimated Hours**: 8
 

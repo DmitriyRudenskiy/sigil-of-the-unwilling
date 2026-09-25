@@ -6,26 +6,26 @@
 **Priority**: P0  
 **Estimate**: 4h  
 **Acceptance Criteria**:
-- [ ] Создан `game/scripts/systems/event_manager.gd` как autoload singleton
-- [ ] Реализованы базовые структуры данных (Event, Choice, Effect классы)
-- [ ] Метод `process_turn()` вызывается каждый ход
+- [x] Создан `game/scripts/systems/event_manager.gd` как autoload singleton *(реализовано как crisis_event_system.gd, инстанцируется GameManager; функционально эквивалентно)*
+- [x] Реализованы базовые структуры данных (Event, Choice, Effect классы) *(DynamicEventData/ChoiceData/CrisisEventData в crisis_event_system.gd)*
+- [x] Метод `process_turn()` вызывается каждый ход *(on_day_passed из GameManager)*
 - [ ] Unit тесты на создание и обработку событий
 
 ### Task 1.2: Create CrisisManager Singleton
 **Priority**: P0  
 **Estimate**: 3h  
 **Acceptance Criteria**:
-- [ ] Создан `game/scripts/systems/crisis_manager.gd` как autoload singleton
+- [x] Создан `game/scripts/systems/crisis_manager.gd` как autoload singleton *(объединено с crisis_event_system.gd)*
 - [ ] Реализована блокировка ввода (`block_input()`, `unblock_input()`)
-- [ ] Интеграция с GameManager для проверки `is_crisis_active`
-- [ ] Кнопка "Конец хода" блокируется во время кризиса
+- [x] Интеграция с GameManager для проверки `is_crisis_active`
+- [x] Кнопка "Конец хода" блокируется во время кризиса *(GameManager.end_turn: early-return при is_crisis_active)*
 
 ### Task 1.3: Define Event Data Structures
 **Priority**: P0  
 **Estimate**: 1h  
 **Acceptance Criteria**:
-- [ ] Создан `game/scripts/data/event_types.gd` с enum EventType
-- [ ] Определены классы Event, Choice, Effect, Condition
+- [x] Создан `game/scripts/data/event_types.gd` с enum EventType *(enum EventType/CrisisType в crisis_event_system.gd)*
+- [x] Определены классы Event, Choice, Effect, Condition *(+ triggers/conditions в данных)*
 - [ ] Документация по структуре данных в `/doc/TASK_01_data_structures.md`
 
 ---
@@ -36,10 +36,10 @@
 **Priority**: P1  
 **Estimate**: 4h  
 **Acceptance Criteria**:
-- [ ] Создан `game/scripts/data/event_database.gd`
-- [ ] Загрузка событий из JSON/Resource файлов
-- [ ] Метод `get_available_events(context)` с фильтрацией по условиям
-- [ ] Система весов для случайного выбора
+- [x] Создан `game/scripts/data/event_database.gd` *(load_event_templates/load_crisis_templates в crisis_event_system.gd)*
+- [x] Загрузка событий из JSON/Resource файлов
+- [x] Метод `get_available_events(context)` с фильтрацией по условиям *(triggers: population_min, resource_low, building_required + cooldown)*
+- [x] Система весов для случайного выбора *(weighted roll в try_trigger_event)*
 
 ### Task 2.2: Implement 10 Common Events
 **Priority**: P1  
@@ -48,9 +48,9 @@
 - [ ] Торговец предлагает товары
 - [ ] Найден забытый склад ресурсов
 - [ ] Герой хочет присоединиться к городу
-- [ ] Праздник урожая (+happiness)
+- [x] Праздник урожая (+happiness) *(event_02_harvest.json)*
 - [ ] Мелкая поломка здания
-- [ ] Странствующий бард
+- [x] Странствующий бард *(event_01_strangers.json)*
 - [ ] Находка древнего артефакта
 - [ ] Караван с соседним городом
 - [ ] Рождение ребенка в городе
@@ -60,11 +60,11 @@
 **Priority**: P0  
 **Estimate**: 8h  
 **Acceptance Criteria**:
-- [ ] **Ресурсный кризис**: "Еда на исходе" (3 варианта решения)
+- [x] **Ресурсный кризис**: "Еда на исходе" (3 варианта решения) *(crisis_02_famine.json)*
 - [ ] **Моральный кризис**: "Требования рабочих" (закон о правах)
 - [ ] **Экологический кризис**: "Ледяная буря" (укрепить/эвакуировать)
 - [ ] **Внешняя угроза**: "Мародеры рядом" (бой/дипломатия)
-- [ ] **Пожар**: "Горит склад!" (тушить/спасать людей)
+- [x] **Пожар**: "Горит склад!" (тушить/спасать людей) *(crisis_01_fire.json)*
 - [ ] **Бунт**: "Недовольство растет" (подавить/уступить)
 - [ ] **Чума**: "Таинственная болезнь" (карантин/лечение)
 - [ ] **Зима**: "Долгая зима" (подготовка/риск)
@@ -97,7 +97,7 @@
 **Priority**: P0  
 **Estimate**: 6h  
 **Acceptance Criteria**:
-- [ ] Создан `game/ui/dialogs/event_dialog.tscn`
+- [x] Создан `game/ui/dialogs/event_dialog.tscn` *(реализовано как decision_panel: show_event/show_crisis)*
 - [ ] Темная подложка с виньеткой
 - [ ] Контейнер для заголовка, описания, иконки
 - [ ] Динамическая генерация кнопок выборов
@@ -107,10 +107,10 @@
 **Priority**: P0  
 **Estimate**: 4h  
 **Acceptance Criteria**:
-- [ ] Скрипт `event_dialog.gd` подключен к сцене
-- [ ] Метод `show_event(event: Event)` заполняет UI
-- [ ] Проверка требований для каждого выбора
-- [ ] Вызов `CrisisManager.resolve_crisis()` при выборе
+- [x] Скрипт `event_dialog.gd` подключен к сцене *(decision_panel.gd)*
+- [x] Метод `show_event(event: Event)` заполняет UI
+- [x] Проверка требований для каждого выбора *(is_choice_available)*
+- [x] Вызов `CrisisManager.resolve_crisis()` при выборе *(_on_choice_selected → resolve_crisis)*
 - [ ] Анимации открытия/закрытия
 
 ### Task 3.3: Add Visual Feedback
@@ -130,10 +130,10 @@
 **Priority**: P0  
 **Estimate**: 3h  
 **Acceptance Criteria**:
-- [ ] `GameManager.end_turn()` проверяет `CrisisManager.is_crisis_active`
-- [ ] Ход не заканчивается если активен кризис
-- [ ] `EventManager.process_turn()` вызывается в начале хода
-- [ ] Генерация новых событий если нет активных кризисов
+- [x] `GameManager.end_turn()` проверяет `CrisisManager.is_crisis_active`
+- [x] Ход не заканчивается если активен кризис
+- [x] `EventManager.process_turn()` вызывается в начале хода
+- [x] Генерация новых событий если нет активных кризисов
 
 ### Task 4.2: Implement Law System (Frostpunk-style)
 **Priority**: P1  
@@ -159,7 +159,7 @@
 **Estimate**: 3h  
 **Acceptance Criteria**:
 - [ ] Модификатор сложности влияет на частоту кризисов
-- [ ] RimWorld-style: усложнение со временем (месяцы игры)
+- [x] RimWorld-style: усложнение со временем (месяцы игры) *(time_factor в should_trigger_crisis)*
 - [ ] Настройки в меню сложности
 - [ ] Баланс весов событий для разных уровней
 
