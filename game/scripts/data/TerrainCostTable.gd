@@ -8,6 +8,9 @@ const SAND := 1.5
 const SNOW := 1.5
 const SWAMP := 1.75
 const WATER := INF
+const ROAD := 0.5
+const RIVER := 2.0
+const DENSE_FOREST := 2.0
 
 static var _costs: Dictionary = {}
 static var _costs_by_id: PackedFloat32Array = PackedFloat32Array()
@@ -24,6 +27,9 @@ static func ensure() -> void:
 		"snow": SNOW,
 		"swamp": SWAMP,
 		"water": WATER,
+		"river": RIVER,
+		"road": ROAD,
+		"dense_forest": DENSE_FOREST,
 	}
 	_costs_by_id = PackedFloat32Array()
 	_levitation_costs_by_id = PackedFloat32Array()

@@ -67,4 +67,6 @@ htmlcov/
 .Python
 *.so
 .libs/
-```.pi/hindsight/
+
+# Pi agent infrastructure
+.pi/hindsight/

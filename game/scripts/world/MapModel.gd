@@ -22,6 +22,7 @@ var terrain_grid: Dictionary = {}
 var height_grid: Dictionary = {}
 var river_grid: Dictionary = {}
 var road_grid: Dictionary = {}
+var bridge_cells: Dictionary = {}
 var forest_clusters: Array = []
 
 var village_cells: Array[Vector2i] = []
@@ -84,17 +85,22 @@ func is_walkable(cell: Vector2i) -> bool:
 	if not terrain_grid.has(cell):
 		return false
 	var t: int = terrain_grid[cell]
-	return t != HexUtils.Terrain.WATER and t != HexUtils.Terrain.MOUNTAIN
+	if t == HexUtils.Terrain.WATER or t == HexUtils.Terrain.MOUNTAIN:
+		return false
+	if t == HexUtils.Terrain.RIVER:
+		return bridge_cells.has(cell)
+	return true
 
 func is_walkable_with_effects(cell: Vector2i, has_levitation: bool = false) -> bool:
 	if not terrain_grid.has(cell):
 		return false
 
 	var t: int = terrain_grid[cell]
-	if t == HexUtils.Terrain.WATER:
-		return has_levitation
-
-	return t != HexUtils.Terrain.MOUNTAIN
+	if t == HexUtils.Terrain.WATER or t == HexUtils.Terrain.RIVER:
+		return bridge_cells.has(cell) or has_levitation
+	if t == HexUtils.Terrain.MOUNTAIN:
+		return false
+	return true
 
 func get_terrain_name(cell: Vector2i) -> String:
 	var tid: int = terrain_grid.get(cell, HexUtils.Terrain.GRASS)

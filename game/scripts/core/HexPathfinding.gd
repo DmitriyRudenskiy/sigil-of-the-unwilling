@@ -103,10 +103,10 @@ static func astar(start: Vector2i, goal: Vector2i, blocked: Variant, cost_func: 
 
 	return []
 
-static func find_path(start: Vector2i, goal: Vector2i, blocked: Variant, w: int, h: int, shift_right: bool = true, algo: String = "astar") -> Array[Vector2i]:
+static func find_path(start: Vector2i, goal: Vector2i, blocked: Variant, w: int, h: int, shift_right: bool = true, algo: String = "astar", cost_func: Callable = Callable()) -> Array[Vector2i]:
 	if algo == "bfs":
 		return bfs_path(start, goal, blocked, w, h, shift_right)
-	return astar_path(start, goal, blocked, w, h, shift_right)
+	return astar(start, goal, blocked, cost_func, w, h, shift_right)
 
 static func dijkstra(start: Vector2i, max_cost: float, cost_fn: Callable, w: int, h: int, shift_right: bool = true) -> PackedFloat32Array:
 	var dist := PackedFloat32Array()

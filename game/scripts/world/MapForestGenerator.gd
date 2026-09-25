@@ -57,15 +57,12 @@ func generate() -> void:
 
 func _select_cluster_seeds() -> Array[Vector2i]:
 	var seeds: Array[Vector2i] = []
-	var min_spacing = 8
+	var min_spacing = 4
 	
 	for y in model.map_height:
 		for x in model.map_width:
 			var cell = Vector2i(x, y)
 			var terrain = model.terrain_grid.get(cell, -1)
-			
-			if terrain != _HexUtils.Terrain.FOREST:
-				continue
 			
 			var suitability = FOREST_SUITABILITY.get(terrain, 0.0)
 			if suitability < 0.3:
@@ -106,13 +103,11 @@ func _grow_forest_cluster(seed: Vector2i, target_size: int) -> ForestCluster:
 		if cluster.tiles.has(candidate):
 			continue
 		
-		if _is_suitable_for_forest(candidate):
-			cluster.tiles.append(candidate)
-			
-			for neighbor in _HexUtils.get_all_neighbors(candidate):
-				if not cluster.tiles.has(neighbor) and not frontier.has(neighbor):
-					if _is_suitable_for_forest(neighbor):
-						frontier.append(neighbor)
+		cluster.tiles.append(candidate)
+		for neighbor in _HexUtils.get_all_neighbors(candidate):
+			if not cluster.tiles.has(neighbor) and not frontier.has(neighbor):
+				if _is_suitable_for_forest(neighbor):
+					frontier.append(neighbor)
 	
 	_create_clearings(cluster)
 	_calculate_density(cluster)

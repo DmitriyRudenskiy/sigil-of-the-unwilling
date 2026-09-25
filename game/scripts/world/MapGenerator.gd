@@ -79,11 +79,11 @@ func generate() -> void:
 	hex_shift_right = HexGrid.calibrate(_tile_map)
 
 	# Generate enhanced terrain with mountains, rivers, forests
-	var mountain_gen = MapMountainGenerator.new(model)
-	mountain_gen.generate()
-	
 	model.generate_noise()
 	model.smooth_invalid_adjacencies()
+	
+	var mountain_gen = MapMountainGenerator.new(model)
+	mountain_gen.generate()
 	
 	var river_gen = MapRiverGenerator.new(model)
 	river_gen.generate()

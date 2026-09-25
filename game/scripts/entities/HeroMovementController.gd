@@ -223,7 +223,10 @@ func _base_blocked() -> Dictionary:
 func _full_path_to(goal: Vector2i, base: Dictionary = {}) -> Array[Vector2i]:
 	var blocked: Dictionary = base.duplicate() if not base.is_empty() else _base_blocked()
 	blocked.merge(_enemy_aura_blocked(goal))
-	return _HexPathfinding.find_path(current_cell, goal, blocked, _map_gen.map_width, _map_gen.map_height, _map_gen.hex_shift_right, "astar")
+	var levitation := _has_artifact_effect(&"boots_levitation")
+	var cost := func(cell: Vector2i) -> float:
+		return _TerrainCostTable.get_cost_with_effects_by_id(_map_gen.get_terrain_id(cell), levitation)
+	return _HexPathfinding.find_path(current_cell, goal, blocked, _map_gen.map_width, _map_gen.map_height, _map_gen.hex_shift_right, "astar", cost)
 
 func _resolve_enemy_goal(goal: Vector2i) -> Vector2i:
 	var stacks := _map_gen.enemy_stacks

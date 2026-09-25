@@ -65,6 +65,7 @@ func _connect_villages() -> void:
 			segment.path = path
 			_detect_bridges(segment)
 			_paint_road(segment)
+			_persist_bridges(segment)
 
 func _build_minimum_spanning_tree(villages: Array[Vector2i]) -> Array:
 	var mst: Array = []
@@ -108,6 +109,7 @@ func _connect_resources() -> void:
 				segment.path = path
 				_detect_bridges(segment)
 				_paint_road(segment)
+				_persist_bridges(segment)
 
 func _find_nearest_village(cell: Vector2i) -> Vector2i:
 	var nearest: Vector2i = Vector2i(-1, -1)
@@ -140,6 +142,13 @@ func _detect_bridges(segment: RoadSegment) -> void:
 	for cell in segment.path:
 		if model.river_grid.has(cell):
 			segment.bridges.append(cell)
+
+func _persist_bridges(segment: RoadSegment) -> void:
+	if segment.bridges.is_empty():
+		return
+	for cell in segment.bridges:
+		model.bridge_cells[cell] = true
+	model.invalidate_blocked_cache()
 
 func _paint_road(segment: RoadSegment) -> void:
 	for cell in segment.path:

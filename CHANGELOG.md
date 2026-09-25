@@ -2,6 +2,16 @@
 
 Формат: записи по завершённым OpenSpec-циклам. Детали — в `openspec/changes/archive/`.
 
+## 2026-09-25
+
+### map-generation-improvement — верификация, фиксы, тесты
+- Фикс: `MapMountainGenerator` вызывался до `generate_noise()` и не работал — порядок исправлен (`MapGenerator.gd`)
+- Фикс: лес давал 1.5% карты вместо 25% — сиды кластеров теперь с любого подходящего биома, spacing 4, убран двойной случайный гейт роста (`MapForestGenerator.gd`)
+- Реки — препятствие без моста: `model.bridge_cells` сохраняется `MapRoadGenerator`, `is_walkable()` учитывает мосты и levitation (`MapModel.gd`)
+- Pathfinding юнитов: `HeroMovementController` передаёт cost_func через `TerrainCostTable` (ROAD 0.5, RIVER/DENSE_FOREST 2.0); `HexPathfinding.find_path` получил параметр `cost_func`
+- Тесты: `tests/unit/world/test_map_generators.gd` (9 тестов) — сток рек, связность дорог, хребты, покрываемость леса, время генерации, рендер, предпочтение дорог, мосты
+- Документация: `doc/task/TASK_MAP_GENERATION.md` (порядок генерации, параметры, правила проходимости)
+
 ## 2026-02-22
 
 ### ui-icons-cursors-improvement — завершение
