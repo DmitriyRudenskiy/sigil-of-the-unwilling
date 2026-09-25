@@ -58,6 +58,8 @@ class BattleUnit extends RefCounted:
 	var distance_moved_this_turn: int = 0
 	var already_reborn: bool = false
 	var spell: StringName = ""
+	# Optional D&D 5e per-character stat block (null = pure stack-model unit).
+	var dnd_profile: DnDCombatantProfile = null
 
 	func _init(p_stack = null) -> void:
 		stack = p_stack

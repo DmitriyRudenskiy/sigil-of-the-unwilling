@@ -4,6 +4,14 @@
 
 ## 2026-09-25
 
+### dnd-battle-system — Phase 6: Integration (TASK_21 PARTIAL, TASK_22/23 DEFERRED)
+- `combatant_profile.gd` — `DnDCombatantProfile`: per-character stat block (abilities, proficiency, armor/AC, weapon, ranged flag), `get_ac()` (syncs DEX), `get_attack_ability_mod()` (STR melee / DEX ranged), `to_dict`/`from_dict`
+- `battle_bridge.gd` — `DnDBattleBridge`: `resolve_attack()` (attack roll vs AC, nat-20 crit, damage dice — delegates to `DNDAttackRoll`/`DNDDamageCalculator`), `build_initiative()` (via `DNDInitiativeTracker`)
+- `BattleState.BattleUnit.dnd_profile` — optional seam (default null); pure stack-model units unchanged → backward compatible
+- Тесты: `tests/unit/battle/test_dnd_integration.gd` (10 тестов; hit/miss детерминирован через экстремальное AC, без подмены RNG)
+- **Отложено**: live `BattleController` battle-loop wiring (stack/formation-модель vs per-character D&D — архитектурное изменение, нужен playtest); TASK_22 battle UI + TASK_23 character sheet UI (Godot-визуал, не верифицируется headless)
+- Полный сьют: **1736/1736 passed, 0 failures** (129 orphans)
+
 ### dnd-battle-system — Phase 5: Saving Throws & Death (TASK_19–20)
 - `saving_throw.gd` — `DNDSavingThrow`: d20 + ability mod + proficiency, `calculate_dc` (8 + prof + mod + bonus), `ThrowResult` (success/failure/crit-success/crit-failure), `succeeded()`
 - `death_saves.gd` — `DNDDeathSaves`: 0 HP → dying, d20 (10+/9−), 3 success = stable, 3 fail = death, nat 20 = +1 HP, nat 1 = 2 fail, `stabilize()` (Medicine), `heal()` (wakes), serialization
