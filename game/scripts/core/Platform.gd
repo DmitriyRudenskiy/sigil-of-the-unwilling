@@ -12,4 +12,5 @@ static func is_test_framework_run() -> bool:
 	for arg in args:
 		if "--add" in arg or "--gdUnit4" in arg or "GdUnitCmdTool.gd" in arg:
 			return true
-	return false
+	# MCP-тесты (обёртка godot-headless ставит MCP_TEST=1) — игра не должна auto-quit в headless.
+	return OS.get_environment("MCP_TEST") != ""

@@ -3,3 +3,10 @@ __pycache__/
 tmp/
 .godot/
 reports/
+# Godot-генерация (per-machine, репорт не трекает .import)
+*.import
+*.gd.uid
+# Вендорный MCP-сервер (устанавливается локально: git clone + npm install + npm run build)
+addons/godot-mcp/
+# Артефакт инъекции godot-mcp
+mcp_interaction_server.gd

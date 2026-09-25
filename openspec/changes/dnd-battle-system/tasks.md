@@ -12,7 +12,7 @@
 - [x] `get_ability_modifier(score)` returns correct modifier (-5 to +5)
 - [x] Modifiers update when scores change
 - [x] Unit tests for all modifier calculations
-**Status**: TODO
+**Status**: DONE
 **Estimated Hours**: 4
 
 #### TASK_02: Implement Proficiency Bonus System
@@ -23,7 +23,7 @@
 - [x] Characters can be proficient in weapons, saves, and skills
 - [x] Bonus applied only when proficient
 - [x] Unit tests for level progression
-**Status**: TODO
+**Status**: DONE
 **Estimated Hours**: 3
 
 #### TASK_03: Implement Armor Class Calculation
@@ -34,7 +34,7 @@
 - [x] Correctly applies DEX modifiers based on armor type
 - [x] Shield bonus (+2) applies when proficient
 - [x] Integration test with combatant equipment changes
-**Status**: TODO
+**Status**: DONE
 **Estimated Hours**: 6
 
 #### TASK_04: Implement Attack Roll System
@@ -47,7 +47,7 @@
 - [x] Critical hit on natural 20
 - [x] Critical miss on natural 1
 - [x] Unit tests for all scenarios
-**Status**: TODO
+**Status**: DONE
 **Estimated Hours**: 5
 
 #### TASK_05: Implement Damage Calculation
@@ -60,7 +60,7 @@
 - [x] Support for all 13 damage types
 - [x] Resistance/vulnerability multipliers (0.5x, 2x)
 - [x] Integration test with attack system
-**Status**: TODO
+**Status**: DONE
 **Estimated Hours**: 6
 
 #### TASK_06: Implement Initiative System
@@ -73,7 +73,7 @@
 - [x] Can add/remove combatants mid-combat
 - [x] UI displays turn order
 - [x] Integration test with full combat round
-**Status**: TODO
+**Status**: DONE
 **Estimated Hours**: 8
 
 ### Phase 2: Height and Positioning (Priority: HIGH)
