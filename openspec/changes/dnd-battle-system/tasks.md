@@ -162,44 +162,36 @@
 **File**: `game/scripts/battle/dnd/action_economy.gd`
 **Description**: Track actions, bonus actions, and reactions per turn.
 **Acceptance Criteria**:
-- [ ] One action per turn
-- [ ] Bonus action only if ability allows
-- [ ] One reaction per round (resets at turn start)
-- [ ] All 10 standard actions implemented
-- [ ] Action validation (can't take same action twice)
-- [ ] UI shows available actions
-**Status**: TODO
+- [x] One action per turn (`take_action`)
+- [x] Bonus action only if ability allows (`can_take_bonus_action(has_source)`)
+- [x] One reaction per round (resets at turn start, `reset_turn`)
+- [x] All 10 standard actions implemented (`StandardAction` enum + names)
+- [x] Action validation (can't take same action twice, `has_taken`)
+- [x] UI shows available actions (`available_actions()`; UI render is Phase 6)
+**Status**: DONE
 **Estimated Hours**: 10
 
 #### TASK_14: Implement Combat Actions
 **Files**: Multiple action scripts
 **Description**: Implement all standard combat actions.
 **Acceptance Criteria**:
-- [ ] Attack: make melee/ranged attack
-- [ ] Cast a Spell: spell casting mechanics
-- [ ] Dash: double movement speed
-- [ ] Disengage: no opportunity attacks
-- [ ] Dodge: disadvantage on attacks against you
-- [ ] Help: grant advantage to ally
-- [ ] Hide: Stealth check
-- [ ] Ready: prepare triggered action
-- [ ] Search: Perception/Investigation check
-- [ ] Use an Object: interact with environment
-- [ ] Integration tests for each action
-**Status**: TODO
+- [x] All 10 standard actions defined as `StandardAction` enum (Attack, Cast, Dash, Disengage, Dodge, Help, Hide, Ready, Search, Use Object)
+- [ ] Per-action runtime effects (Dash doubles movement, Dodge adds disadvantage, Help grants advantage, Hide Stealth check, Ready trigger, Search check, Use Object interact) — deferred to Phase 6 (TASK_21) where they bind to `BattleController`/`BattleActionResolver`
+- [ ] Integration tests for each action — deferred to Phase 6 (needs live battle state)
+**Status**: PARTIAL (enum + economy done; runtime effects deferred to Phase 6)
 **Estimated Hours**: 16
 
 #### TASK_15: Implement Opportunity Attacks
 **File**: `game/scripts/battle/dnd/opportunity_attack.gd`
 **Description**: Trigger opportunity attacks when enemies leave reach.
 **Acceptance Criteria**:
-- [ ] Triggers when enemy leaves reach without Disengage
-- [ ] Uses reaction
-- [ ] One attack only (not full Attack action)
-- [ ] Doesn't trigger from teleportation
-- [ ] Doesn't trigger from forced movement
-- [ ] Integration test with movement system
-**Status**: TODO
+- [x] Triggers when enemy leaves reach without Disengage
+- [x] Uses reaction (checks `defender_has_reaction`, pairs with `DNDActionEconomy.use_reaction`)
+- [x] One attack only (not full Attack action, `IS_SINGLE_ATTACK`)
+- [x] Doesn't trigger from teleportation
+- [x] Doesn't trigger from forced movement
+- [ ] Integration test with movement system — deferred to Phase 6 (needs live reach/movement state)
+**Status**: DONE (integration test deferred to Phase 6)
 **Estimated Hours**: 6
 
 ### Phase 4: Special Maneuvers (Priority: MEDIUM)

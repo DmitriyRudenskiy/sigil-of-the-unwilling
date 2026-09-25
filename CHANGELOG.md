@@ -4,6 +4,12 @@
 
 ## 2026-09-25
 
+### dnd-battle-system — Phase 3: Action Economy (TASK_13–15)
+- `action_economy.gd` — `DNDActionEconomy`: 1 action/turn, bonus action (only if source allows), 1 reaction/round (resets at turn start), 10 standard actions enum, validation (no same action twice), `available_actions()`, save/load
+- `opportunity_attack.gd` — `DNDOpportunityAttack`: trigger logic (leaves reach, not Disengage, not forced/teleport, has sight + reaction), single attack
+- Тесты: `tests/unit/battle/test_dnd_actions.gd` (14 тестов)
+- Отложено (Phase 6): per-action runtime effects (Dash/Dodge/Help/Hide/Ready/Search/Use Object), integration tests с живой battle state
+
 ### dnd-battle-system — Phase 2: Height & Positioning (TASK_07–10)
 - `elevation_system.gd` — `DNDElevationSystem`: дискретные уровни (5-фут. инкременты), set/get, `height_feet()`, `is_high_ground()`, сериализация `to_dict`/`from_dict`
 - `height_modifier.gd` — `DNDHeightModifier`: бонусы высокой точки (ranged +1/+2/+3, melee +1/+2), штрафы снизу (ranged −1/−2, melee 0/−1/−2/−3), `range_bonus()`, `describe()`
