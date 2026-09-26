@@ -1,6 +1,6 @@
 class_name CrisisEventSystem
 extends Node
-const GameLogger := preload("res://scripts/core/GameLogger.gd")
+const GameLogger := preload("res://scripts/core/game_logger.gd")
 
 ## Система динамических событий и кризисов (RimWorld + Frostpunk style)
 ## - Генерация событий на основе состояния поселения
@@ -149,11 +149,10 @@ var crisis_templates: Array[CrisisEventData] = []
 ## Law system (unlocked via event choices, apply passive modifiers).
 var law_manager: LawManager = null
 
-## Зависимости внедряются явно (см. GameManager._connect_signals и Main),
-## а не через магический путь /root/GameManager: в main.tscn менеджеры —
-## дети ноды Main, а не autoload'ы, поэтому прямой get_node("/root/...")
-## в рантайме никогда не резолвил их и эффекты событий молча терялись.
-## В тестах GameManager монтируется на /root напрямую — это тоже поддержано.
+## Зависимости внедряются явно (см. GameManager._connect_signals и Main) либо
+## резолвятся через группы ("game_manager", "ui_manager"), которые менеджеры
+## регистрируют в своих _ready. Обход дерева через get_parent()/магические
+## пути запрещен конвенциями проекта (слабая связанность).
 var game_manager: Node = null
 var ui_manager: Node = null
 
@@ -164,27 +163,21 @@ func _ready():
 	if law_manager == null:
 		law_manager = LawManager.new()
 		law_manager.load_default_catalog()
-	# UIManager — autoload-подобный узел; ищем по группе, затем по соседству.
+	# UIManager регистрирует группу "ui_manager" в своем _ready.
 	if ui_manager == null:
 		ui_manager = get_tree().get_first_node_in_group("ui_manager") \
 			if get_tree() != null else null
-		if ui_manager == null and get_parent() != null:
-			var sibling := get_parent().get_node_or_null("UIManager")
-			if sibling != null and sibling.get_script() is Script \
-					and (sibling.get_script() as Script).get_global_name() == &"UIManager":
-				ui_manager = sibling
 
-## Разрешение game_manager: явно внедрённый → /root/GameManager (тесты) →
-## сосед по сцене (main.tscn). Резолв ленивый и кэшируется.
+## Разрешение game_manager: явно внедрённый → группа "game_manager"
+## (работает и для смонтированного на /root в тестах, и для ноды в main.tscn).
+## Резолв ленивый и кэшируется.
 func _gm() -> Node:
 	if game_manager != null and is_instance_valid(game_manager):
 		return game_manager
 	game_manager = null
 	if get_tree() == null:
 		return null
-	var candidate := get_tree().root.get_node_or_null("GameManager")
-	if candidate == null and get_parent() != null:
-		candidate = get_parent().get_node_or_null("GameManager")
+	var candidate := get_tree().get_first_node_in_group("game_manager")
 	if candidate != null and candidate.has_method("modify_resource"):
 		game_manager = candidate
 	return game_manager
@@ -478,9 +471,8 @@ func get_crisis_start_day() -> int:
 	return _crisis_start_day
 
 ## Разрешение ui_manager: явно внедрённый → группа "ui_manager" (UIManager
-## регистрирует её в _ready) → сосед по сцене. Резолв ленивый и кэшируется —
-## прямой get_node("/root/UIManager") не работает, т.к. в main.tscn UIManager
-## является дочерней нодой Main, а не autoload.
+## регистрирует её в _ready). Резолв ленивый и кэшируется; обход дерева
+## через get_parent() запрещен конвенциями проекта.
 func _ui() -> Node:
 	if ui_manager != null and is_instance_valid(ui_manager):
 		return ui_manager
@@ -488,8 +480,6 @@ func _ui() -> Node:
 	if get_tree() == null:
 		return null
 	var candidate := get_tree().get_first_node_in_group("ui_manager")
-	if candidate == null and get_parent() != null:
-		candidate = get_parent().get_node_or_null("UIManager")
 	if candidate != null and candidate.has_method("show_decision_panel"):
 		ui_manager = candidate
 	return ui_manager

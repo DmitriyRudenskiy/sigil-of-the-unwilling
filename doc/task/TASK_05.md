@@ -198,7 +198,7 @@ func _cmd_http_request(params: Dictionary) -> void:
 ---
 
 #### 2. Исправление утечки статического кэша
-**FILE: `res://game/scripts/city/ArenaClusterSystem.gd`**
+**FILE: `res://game/scripts/city/arena_cluster_system.gd`**
 
 Замените начало файла (переменные и функцию `clusters`), чтобы использовать `WeakRef` для автоматической инвалидации кэша при уничтожении города.
 
@@ -207,10 +207,10 @@ class_name ArenaClusterSystem
 extends RefCounted
 
 const ArenaBalance := preload("res://scripts/city/ArenaBalance.gd")
-const HexUtils := preload("res://scripts/core/HexUtils.gd")
-const City := preload("res://scripts/world/City.gd")
-const PopUnit := preload("res://scripts/world/PopUnit.gd")
-const UniqueBuilding := preload("res://scripts/world/UniqueBuilding.gd")
+const HexUtils := preload("res://scripts/core/hex_utils.gd")
+const City := preload("res://scripts/world/city.gd")
+const PopUnit := preload("res://scripts/world/pop_unit.gd")
+const UniqueBuilding := preload("res://scripts/world/unique_building.gd")
 
 # Храним WeakRef, чтобы кэш не держал удаленные города в памяти
 static var _cache: Dictionary = {} # uid -> {"ver": int, "cl": Array, "city_ref": WeakRef}
@@ -319,7 +319,7 @@ static func _compute_clusters(city: City) -> Array:
    - Добавьте `var _buffer_bytes: PackedByteArray = PackedByteArray()` в блок переменных класса (строка ~8).
    - Найдите блок `# Read data from client` внутри `_process` и замените его целиком на код из **Шага 1.2**.
    - Найдите функции `_cmd_eval`, `_indent_code` и `_cmd_http_request`. Замените их тела на реализации из **Шагов 1.3 и 1.4**.
-2. Откройте файл `res://game/scripts/city/ArenaClusterSystem.gd`.
+2. Откройте файл `res://game/scripts/city/arena_cluster_system.gd`.
    - Полностью замените содержимое файла на код из **Блока 2**.
 
 #### Шаг 2: Интеграционные проверки
@@ -364,8 +364,8 @@ func _check_attack() -> int:
 ```gdscript
 extends GdUnitTestSuite
 
-const _BattleState = preload("res://scripts/systems/BattleState.gd")
-const _HexUtils = preload("res://scripts/core/HexUtils.gd")
+const _BattleState = preload("res://scripts/systems/battle_state.gd")
+const _HexUtils = preload("res://scripts/core/hex_utils.gd")
 # ... другие импорты
 
 func _create_state() -> BattleState:
@@ -552,7 +552,7 @@ func _tool_input(args: Dictionary) -> Dictionary:
 ```gdscript
 extends GdUnitTestSuite
 
-const _Season = preload("res://scripts/world/Season.gd")
+const _Season = preload("res://scripts/world/season.gd")
 
 # Вместо 10 отдельных тестов используем параметризацию через массивы
 var _month_to_season_map := {
@@ -585,7 +585,7 @@ var _view: CityArenaView = null
 
 func before_test() -> void:
     # Инстанцируем сцену один раз перед каждым тестом
-    var packed := load("res://scenes/CityArena.tscn") as PackedScene
+    var packed := load("res://scenes/city_arena.tscn") as PackedScene
     assert_object(packed).is_not_null()
     _view = packed.instantiate() as CityArenaView
     add_child(_view)

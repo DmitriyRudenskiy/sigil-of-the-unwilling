@@ -1,6 +1,6 @@
 extends BaseTest
 
-const _Popup = preload("res://scenes/ui/ResourceCollectPopup.tscn")
+const _Popup = preload("res://scenes/ui/resource_collect_popup.tscn")
 
 
 class _SpawnerStub:

@@ -787,15 +787,15 @@ tests/
 **Проблема:** 15+ тестов используют `load()` для создания объектов, хотя все классы имеют `class_name`.
 
 **Где:**
-- `test_battle_state.gd`: `load("res://scripts/systems/BattleState.gd").new()`
-- `test_battle_ai.gd`: `load("res://scripts/systems/BattleAI.gd").new()`
-- `test_map_model.gd`: `load("res://scripts/world/MapModel.gd").new()`
-- `test_battle_integration.gd`: `load("res://scripts/core/BattleRules.gd").new()`
+- `test_battle_state.gd`: `load("res://scripts/systems/battle_state.gd").new()`
+- `test_battle_ai.gd`: `load("res://scripts/systems/battle_ai.gd").new()`
+- `test_map_model.gd`: `load("res://scripts/world/map_model.gd").new()`
+- `test_battle_integration.gd`: `load("res://scripts/core/battle_rules.gd").new()`
 
 **До:**
 ```gdscript
 func _create_state():
-    var state = load("res://scripts/systems/BattleState.gd").new()
+    var state = load("res://scripts/systems/battle_state.gd").new()
 ```
 
 **После:**
@@ -868,7 +868,7 @@ func _create_state():
 func _create_state() -> BattleState:
     var units: Node = Services.resolve(&"units")
     if units == null:
-        units = auto_free(load("res://scripts/autoload/UnitRegistry.gd").new())
+        units = auto_free(load("res://scripts/autoload/unit_registry.gd").new())
     var state := BattleState.new()
     var atk: Array[UnitStack] = [units.make_fixed_stack("swordsmen", 20)]
     var def: Array[UnitStack] = [units.make_fixed_stack("goblins", 20)]
@@ -938,12 +938,12 @@ assert_int(c.pop_capped()).is_equal(7)
 ```gdscript
 # В test_battle_ai.gd
 func _setup_flying_vs_ground():
-    var state = load("res://scripts/systems/BattleState.gd").new()
+    var state = load("res://scripts/systems/battle_state.gd").new()
     ...
 
 # В test_battle_state.gd
 func _create_state():
-    var state = load("res://scripts/systems/BattleState.gd").new()
+    var state = load("res://scripts/systems/battle_state.gd").new()
     ...
 ```
 
@@ -1071,14 +1071,14 @@ extends GdUnitTestSuite
 static func ensure_units() -> Node:
     var units: Node = Services.resolve(&"units")
     if units == null:
-        units = load("res://scripts/autoload/UnitRegistry.gd").new()
+        units = load("res://scripts/autoload/unit_registry.gd").new()
         units.ensure_definitions()
     return units
 
 static func ensure_resources() -> Node:
     var res: Node = Services.resolve(&"resources")
     if res == null:
-        res = load("res://scripts/autoload/ResourceRegistry.gd").new()
+        res = load("res://scripts/autoload/resource_registry.gd").new()
         res.ensure_definitions()
     return res
 

@@ -1,7 +1,7 @@
 class_name TemplateContext
 extends RefCounted
 
-const _Utils = preload("res://scripts/data/SpellUtils.gd")
+const _Utils = preload("res://scripts/data/spell_utils.gd")
 
 static func check_condition(
 	cond: Dictionary, state: Variant,

@@ -1,6 +1,6 @@
 extends BaseTest
 
-const _WORLD_SCENE := "res://scenes/World.tscn"
+const _WORLD_SCENE := "res://scenes/world.tscn"
 const TestWait := preload("res://tests/helpers/wait_helpers.gd")
 
 var _world: Node = null

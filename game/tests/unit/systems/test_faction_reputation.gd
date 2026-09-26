@@ -1,6 +1,6 @@
 extends BaseTest
 
-const FactionReputation = preload("res://scripts/systems/FactionReputation.gd")
+const FactionReputation = preload("res://scripts/systems/faction_reputation.gd")
 ## quests-reputation-system 1.3: уровни, модификаторы, бонусы, clamp, история.
 
 func test_bands() -> void:

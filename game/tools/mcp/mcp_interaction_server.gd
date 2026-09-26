@@ -1,5 +1,5 @@
 extends Node
-const GameLogger := preload("res://scripts/core/GameLogger.gd")
+const GameLogger := preload("res://scripts/core/game_logger.gd")
 
 # MCP Interaction Server - TCP server for game interaction
 # Runs as an autoload inside the Godot game, accepting JSON commands over TCP.

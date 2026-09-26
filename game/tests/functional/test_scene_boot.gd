@@ -1,10 +1,10 @@
 extends BaseTest
 
 const _SCENES := [
-	"res://scenes/MainMenu.tscn",
-	"res://scenes/CityArena.tscn",
-	"res://scenes/World.tscn",
-	"res://scenes/Battle.tscn",
+	"res://scenes/main_menu.tscn",
+	"res://scenes/city_arena.tscn",
+	"res://scenes/world.tscn",
+	"res://scenes/battle.tscn",
 ]
 
 func _pump(node: Node, frames: int) -> void:

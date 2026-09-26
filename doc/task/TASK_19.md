@@ -412,25 +412,25 @@ var auto: Dictionary = auto_raw if auto_raw is Dictionary else {}
 
 Фаза 2 — Производительность (2 дня)
 ├── Шаг 2.1: Кэшировать BuildingDefs.def_by_id()
-│   Файл: game/scripts/data/BuildingDefs.gd
+│   Файл: game/scripts/data/building_defs.gd
 │   Критерий: повторный вызов возвращает тот же объект (===)
 │   Тест: добавить в test_city_building_service.gd
 │
 ├── Шаг 2.2: Заменить Dictionary blocked на PackedByteArray в HexPathfinding
-│   Файл: game/scripts/core/HexPathfinding.gd
+│   Файл: game/scripts/core/hex_pathfinding.gd
 │   Затрагивает: astar_path, bfs_path, bfs_reachable, dijkstra*
 │   Бенчмарк: test_astar_pathfinding_performance (уже есть)
 │   Критерий: время не увеличилось, результаты идентичны
 │
 └── Шаг 2.3: Инкрементальный пересчёт VisibilityMap
-    Файл: game/scripts/core/VisibilityMap.gd
+    Файл: game/scripts/core/visibility_map.gd
     Блок: recompute()
     Критерий: при перемещении героя на 1 клетку пересчитывается
     только дельта, а не вся карта
 
 Фаза 3 — Рефакторинг архитектуры (2 дня)
 ├── Шаг 3.1: Разбить WorldBootstrap.run() на 5 подфункций
-│   Файл: game/scripts/world/WorldBootstrap.gd
+│   Файл: game/scripts/world/world_bootstrap.gd
 │   Критерий: run() ≤ 20 строк, подфункции приватные
 │
 ├── Шаг 3.2: Вынести валидацию сцены из каждой команды в execute()
@@ -476,7 +476,7 @@ python -m pytest test_battle_full_e2e.py -xvs
 godot --headless --path game -s res://tests/functional/test_benchmarks.gd
 
 # Проверка синтаксиса (без запуска)
-godot --headless --path game --check-only --script res://scripts/systems/BattleState.gd
+godot --headless --path game --check-only --script res://scripts/systems/battle_state.gd
 ```
 
 ### 5.3. Критерии приёмки

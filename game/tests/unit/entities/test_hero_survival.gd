@@ -8,7 +8,7 @@ extends BaseTest
 
 
 
-const _DeathSequenceScene = preload("res://scenes/ui/DeathSequence.tscn")
+const _DeathSequenceScene = preload("res://scenes/ui/death_sequence.tscn")
 
 
 
@@ -486,7 +486,7 @@ func test_deathseq_resurrection_button_flow() -> void:
 	ds3.free()
 
 func test_statuspanel_needs_line() -> void:
-	var panel := load("res://scenes/ui/HeroStatusPanel.tscn").instantiate() as HeroStatusPanel
+	var panel := load("res://scenes/ui/hero_status_panel.tscn").instantiate() as HeroStatusPanel
 	var h := _survival_hero()
 	h.hero_name = "Тест"
 	h.needs.needs[NeedType.ID.REST] = 0.1

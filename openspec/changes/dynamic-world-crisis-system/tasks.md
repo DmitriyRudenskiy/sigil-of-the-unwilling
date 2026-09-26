@@ -144,7 +144,7 @@
 **Priority**: P1  
 **Estimate**: 6h  
 **Acceptance Criteria**:
-- [x] Создан `game/scripts/systems/LawManager.gd` (RefCounted, standalone-тестируемый)
+- [x] Создан `game/scripts/systems/law_manager.gd` (RefCounted, standalone-тестируемый)
 - [x] Дерево законов (3 ветки: Order, Faith, Survival) — `requires` = prerequisite, 6 законов по 2 на ветку
 - [x] Законы открываются через выборы в событиях — эффект `unlock_law` в `CrisisEventSystem.apply_choice_effects`
 - [x] Активные законы влияют на геймплей — `get_passive_effects()` (merged modifiers по key); 11 тестов в `tests/unit/systems/test_law_manager.gd`

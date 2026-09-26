@@ -687,7 +687,7 @@ tests/
 # tests/integration/test_battle_full_flow.gd
 extends GdUnitTestSuite
 
-const UNITS := preload("res://scripts/autoload/UnitRegistry.gd")
+const UNITS := preload("res://scripts/autoload/unit_registry.gd")
 
 func _make_units():
     var reg := UNITS.new()
@@ -967,7 +967,7 @@ import time
 
 def test_battle_starts_and_completes(mcp):
     """Бой запускается и завершается."""
-    mcp.run_scene("res://scenes/Battle.tscn")
+    mcp.run_scene("res://scenes/battle.tscn")
     mcp.wait_ready()
     
     # Запускаем бой
@@ -1006,7 +1006,7 @@ def test_battle_starts_and_completes(mcp):
 
 def test_battle_retreat_gives_survivors(mcp):
     """Отступление даёт выживших."""
-    mcp.run_scene("res://scenes/Battle.tscn")
+    mcp.run_scene("res://scenes/battle.tscn")
     mcp.wait_ready()
     
     mcp.execute_code("""
@@ -1111,7 +1111,7 @@ from __future__ import annotations
 
 def test_main_menu_to_world(mcp):
     """Переход из меню в мир."""
-    mcp.run_scene("res://scenes/MainMenu.tscn")
+    mcp.run_scene("res://scenes/main_menu.tscn")
     mcp.wait_ready()
     
     # Нажимаем "Новая игра"
@@ -1179,7 +1179,7 @@ from __future__ import annotations
 
 def test_city_arena_build_and_turn(mcp):
     """Городская арена: строим здание и прогоняем ход."""
-    mcp.run_scene("res://scenes/CityArena.tscn")
+    mcp.run_scene("res://scenes/city_arena.tscn")
     mcp.wait_ready()
     
     # Выбираем ферму и строим
@@ -1249,7 +1249,7 @@ def test_frame_time_under_budget(full_game):
 
 def test_map_generation_under_budget(mcp):
     """Генерация карты < 3 секунд."""
-    mcp.run_scene("res://scenes/World.tscn")
+    mcp.run_scene("res://scenes/world.tscn")
     mcp.wait_ready()
     
     start = time.time()

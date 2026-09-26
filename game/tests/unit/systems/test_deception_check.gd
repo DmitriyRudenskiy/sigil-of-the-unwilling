@@ -1,6 +1,6 @@
 extends BaseTest
 
-const DeceptionCheck = preload("res://scripts/systems/DeceptionCheck.gd")
+const DeceptionCheck = preload("res://scripts/systems/deception_check.gd")
 
 # social-stats-weapon-tech: DeceptionCheck (D2)
 

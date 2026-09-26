@@ -45,7 +45,7 @@ func test_component_serializes_bonus() -> void:
 
 
 func test_city_unload_moves_backpack_to_storage() -> void:
-	var screen: CityScreen = load("res://scenes/ui/CityScreen.tscn").instantiate() as CityScreen
+	var screen: CityScreen = load("res://scenes/ui/city_screen.tscn").instantiate() as CityScreen
 	_main_root().add_child(screen)
 	var city := City.new()
 	city.display_name = "Тестгород"
@@ -68,7 +68,7 @@ func test_city_unload_moves_backpack_to_storage() -> void:
 
 
 func test_city_unload_empty_fails() -> void:
-	var screen: CityScreen = load("res://scenes/ui/CityScreen.tscn").instantiate() as CityScreen
+	var screen: CityScreen = load("res://scenes/ui/city_screen.tscn").instantiate() as CityScreen
 	_main_root().add_child(screen)
 	var city := City.new()
 	city.display_name = "Тестгород"
@@ -86,7 +86,7 @@ func test_city_unload_empty_fails() -> void:
 
 
 func test_cart_buy_requires_market_and_funds() -> void:
-	var screen: CityScreen = load("res://scenes/ui/CityScreen.tscn").instantiate() as CityScreen
+	var screen: CityScreen = load("res://scenes/ui/city_screen.tscn").instantiate() as CityScreen
 	_main_root().add_child(screen)
 	var city := City.new()
 	city.display_name = "Тестгород"

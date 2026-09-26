@@ -107,7 +107,7 @@ func test_movement_signal_emits_dict() -> void:
 	assert_bool(holder[0]).is_true()
 
 func test_battle_ui_scene_has_skeleton() -> void:
-	var scene := load("res://scenes/ui/BattleUI.tscn")
+	var scene := load("res://scenes/ui/battle_ui.tscn")
 	assert_bool(scene != null).is_true()
 	var battle_ui := scene.instantiate() as BattleUI
 	_track(battle_ui)

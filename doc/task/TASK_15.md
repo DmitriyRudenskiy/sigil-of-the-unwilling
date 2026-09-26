@@ -917,7 +917,7 @@ extends Node2D
 ##   3. Сериализацию/десериализацию (делегирование)
 ##   4. Обратную совместимость через свойства-аксессоры
 
-const _Platform = preload("res://scripts/core/Platform.gd")
+const _Platform = preload("res://scripts/core/platform.gd")
 
 # ── Сигналы (проброс из компонентов) ──
 signal hero_moved(cell: Vector2i)

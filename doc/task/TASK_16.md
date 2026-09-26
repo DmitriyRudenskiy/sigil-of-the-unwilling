@@ -2,12 +2,12 @@
 
 Ниже представлен **целиком написанный код** для этих файлов, который идеально интегрируется в вашу архитектуру, поддерживает `StringName` ключи и корректно обрабатывает обрезку шардов (pruning).
 
-### 1. `res://scripts/world/WorldPersistence.gd`
+### 1. `res://scripts/world/world_persistence.gd`
 Этот класс регистрируется в `services.gd` как синглтон `&"persistence"`. Он управляет жизненным циклом сохранений и обрезкой старых шардов, чтобы избежать утечек памяти и раздувания файла сохранения.
 
 ```gdscript
 ==========================================================================
-ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/world/WorldPersistence.gd
+ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/world/world_persistence.gd
 ==========================================================================
 class_name WorldPersistence
 extends RefCounted
@@ -48,12 +48,12 @@ func _prune_old_shards(shards: Dictionary, current_turn: int) -> void:
 			shards.erase(k)
 ```
 
-### 2. `res://scripts/world/WorldStateDelta.gd`
+### 2. `res://scripts/world/world_state_delta.gd`
 Класс для накопления изменений состояния мира (дельты) между сохранениями или для отслеживания глобальных событий (убитые враги, захваченные деревни, туман войны). Активно используется в тестах `test_world_persistence.gd` и `test_enemy_world_ai.gd`.
 
 ```gdscript
 ==========================================================================
-ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/world/WorldStateDelta.gd
+ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/world/world_state_delta.gd
 ==========================================================================
 class_name WorldStateDelta
 extends RefCounted
@@ -98,12 +98,12 @@ func deserialize(data: Dictionary) -> void:
 	fog_explored = data.get("fog_explored", [])
 ```
 
-### 3. `res://scripts/world/WorldLoadContext.gd`
+### 3. `res://scripts/world/world_load_context.gd`
 Контекстный объект, который используется для передачи ссылок на тяжелые объекты мира (генератор карты, спавнер, герой) в различные сервисы при загрузке игры, избегая жестких зависимостей (hard dependencies).
 
 ```gdscript
 ==========================================================================
-ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/world/WorldLoadContext.gd
+ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/world/world_load_context.gd
 ==========================================================================
 class_name WorldLoadContext
 extends RefCounted
@@ -134,7 +134,7 @@ func _init() -> void:
 
 ```gdscript
 ==========================================================================
-ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/systems/BattleHandoff.gd
+ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/systems/battle_handoff.gd
 ==========================================================================
 class_name BattleHandoff
 extends RefCounted
@@ -288,13 +288,13 @@ static func _to_stack_array(raw: Variant) -> Array[UnitStack]:
 
 ```gdscript
 ==========================================================================
-ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/world/WorldBattleCoordinator.gd
+ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/world/world_battle_coordinator.gd
 ==========================================================================
 extends Node
 class_name WorldBattleCoordinator
 
-const UnitStack = preload("res://scripts/entities/UnitStack.gd")
-const _BattleHandoff = preload("res://scripts/systems/BattleHandoff.gd")
+const UnitStack = preload("res://scripts/entities/unit_stack.gd")
+const _BattleHandoff = preload("res://scripts/systems/battle_handoff.gd")
 
 signal battle_world_hide_requested
 signal battle_world_show_requested
@@ -636,8 +636,8 @@ func _try_artifact_drop() -> void:
 ==========================================================================
 extends GdUnitTestSuite
 
-const _BattleHandoff = preload("res://scripts/systems/BattleHandoff.gd")
-const _Coordinator = preload("res://scripts/world/WorldBattleCoordinator.gd")
+const _BattleHandoff = preload("res://scripts/systems/battle_handoff.gd")
+const _Coordinator = preload("res://scripts/world/world_battle_coordinator.gd")
 const _FakeMap = preload("res://tests/fakes/fake_battle_map.gd")
 const _FakeFlow = preload("res://tests/fakes/fake_battle_flow.gd")
 
@@ -1022,7 +1022,7 @@ func test_coordinator_empty_enemy_army_no_battle() -> void:
 
 ```bash
 # Создать файл
-touch game/scripts/systems/BattleHandoff.gd
+touch game/scripts/systems/battle_handoff.gd
 # Вставить код из раздела 1
 ```
 
@@ -1109,7 +1109,7 @@ EndgameController / GameEventBus.game_ended
 
 ```gdscript
 ==========================================================================
-ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/world/LegendTracker.gd
+ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/world/legend_tracker.gd
 ==========================================================================
 class_name LegendTracker
 extends RefCounted
@@ -1198,18 +1198,18 @@ func deserialize(data: Dictionary) -> void:
 
 ```gdscript
 ==========================================================================
-ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/world/SuccessionController.gd
+ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/world/succession_controller.gd
 ==========================================================================
 class_name SuccessionController
 extends RefCounted
 ## Управляет процессом наследования: выбор преемника, передача наследия,
 ## воскрешение, завершение цикла.
 
-const _Follower = preload("res://scripts/entities/Follower.gd")
-const _Hero = preload("res://scripts/entities/HeroController.gd")
-const _City = preload("res://scripts/world/City.gd")
-const _CityManager = preload("res://scripts/world/CityManager.gd")
-const _Artifact = preload("res://scripts/data/Artifact.gd")
+const _Follower = preload("res://scripts/entities/follower.gd")
+const _Hero = preload("res://scripts/entities/hero_controller.gd")
+const _City = preload("res://scripts/world/city.gd")
+const _CityManager = preload("res://scripts/world/city_manager.gd")
+const _Artifact = preload("res://scripts/data/artifact.gd")
 
 ## ── Стоимость воскрешения ──
 const RESURRECT_INDUSTRY := 500.0
@@ -1369,19 +1369,19 @@ func on_hero_died(
 
 ```gdscript
 ==========================================================================
-ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/world/HeroLifecycleSystem.gd
+ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/world/hero_lifecycle_system.gd
 ==========================================================================
 class_name HeroLifecycleSystem
 extends RefCounted
 ## Управляет полным жизненным циклом героя:
 ## смерть → последовательность смерти → наследование/воскрешение → новый герой.
 
-const DeathSequenceScene = preload("res://scenes/ui/DeathSequence.tscn")
-const _Hero = preload("res://scripts/entities/HeroController.gd")
-const _City = preload("res://scripts/world/City.gd")
-const _Follower = preload("res://scripts/entities/Follower.gd")
-const _Succession = preload("res://scripts/world/SuccessionController.gd")
-const _LegendTracker = preload("res://scripts/world/LegendTracker.gd")
+const DeathSequenceScene = preload("res://scenes/ui/death_sequence.tscn")
+const _Hero = preload("res://scripts/entities/hero_controller.gd")
+const _City = preload("res://scripts/world/city.gd")
+const _Follower = preload("res://scripts/entities/follower.gd")
+const _Succession = preload("res://scripts/world/succession_controller.gd")
+const _LegendTracker = preload("res://scripts/world/legend_tracker.gd")
 
 var _world_ref: WeakRef = null
 var _persistence = null
@@ -1721,7 +1721,7 @@ func _on_death_return_to_menu() -> void:
 	_free_deceased()
 	var world := _get_world()
 	if world != null:
-		world.get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
+		world.get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 
 func _on_death_chronicle() -> void:
 	var entries: Array = []
@@ -1744,7 +1744,7 @@ func is_death_sequence_open() -> bool:
 
 ```gdscript
 ==========================================================================
-ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/ui/DeathSequence.gd
+ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/ui/death_sequence.gd
 ==========================================================================
 class_name DeathSequence
 extends CanvasLayer
@@ -1883,16 +1883,16 @@ func _unhandled_input(_event: InputEvent) -> void:
 ПУТЬ: /Users/user/sigil-of-the-unwilling/game/tests/unit/world/test_succession.gd
 ==========================================================================
 extends GdUnitTestSuite
-const _Succession = preload("res://scripts/world/SuccessionController.gd")
-const _LegendTracker = preload("res://scripts/world/LegendTracker.gd")
-const _Hero = preload("res://scripts/entities/HeroController.gd")
-const _Follower = preload("res://scripts/entities/Follower.gd")
-const _City = preload("res://scripts/world/City.gd")
-const _CityManager = preload("res://scripts/world/CityManager.gd")
-const _Artifact = preload("res://scripts/data/Artifact.gd")
-const _UniqueBuilding = preload("res://scripts/world/UniqueBuilding.gd")
-const _BuildingDefs = preload("res://scripts/data/BuildingDefs.gd")
-const _PopUnit = preload("res://scripts/world/PopUnit.gd")
+const _Succession = preload("res://scripts/world/succession_controller.gd")
+const _LegendTracker = preload("res://scripts/world/legend_tracker.gd")
+const _Hero = preload("res://scripts/entities/hero_controller.gd")
+const _Follower = preload("res://scripts/entities/follower.gd")
+const _City = preload("res://scripts/world/city.gd")
+const _CityManager = preload("res://scripts/world/city_manager.gd")
+const _Artifact = preload("res://scripts/data/artifact.gd")
+const _UniqueBuilding = preload("res://scripts/world/unique_building.gd")
+const _BuildingDefs = preload("res://scripts/data/building_defs.gd")
+const _PopUnit = preload("res://scripts/world/pop_unit.gd")
 
 func _make_follower(uid: int, path: StringName) -> _Follower:
 	var f := _Follower.new()
@@ -2163,7 +2163,7 @@ godot --headless --path game --run-tests
 
 ```gdscript
 ==========================================================================
-ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/ui/SaveLoadScreen.gd
+ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/ui/save_load_screen.gd
 ==========================================================================
 class_name SaveLoadScreen
 extends Control
@@ -2176,7 +2176,7 @@ signal closed
 
 const SLOT_COUNT := 5
 const SAVE_PATH_TEMPLATE := "user://save_slot_%d.json"
-const _SaveData = preload("res://scripts/core/SaveData.gd")
+const _SaveData = preload("res://scripts/core/save_data.gd")
 
 var _mode: String = "load"  # "load" | "save"
 var _slot_buttons: Array = []
@@ -2336,7 +2336,7 @@ func perform_load(slot: int) -> void:
 	var persistence: WorldPersistence = Services.resolve(&"persistence")
 	if persistence != null:
 		persistence.pending_save = data
-	get_tree().change_scene_to_file("res://scenes/World.tscn")
+	get_tree().change_scene_to_file("res://scenes/world.tscn")
 
 
 func perform_delete(slot: int) -> void:
@@ -2373,10 +2373,10 @@ func _load_from_path(path: String) -> Dictionary:
 
 ```
 ==========================================================================
-ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scenes/ui/SaveLoadScreen.tscn
+ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scenes/ui/save_load_screen.tscn
 ==========================================================================
 [gd_scene load_steps=2 format=3]
-[ext_resource type="Script" path="res://scripts/ui/SaveLoadScreen.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/ui/save_load_screen.gd" id="1"]
 [node name="SaveLoadScreen" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -2563,15 +2563,15 @@ text = "Назад"
 
 ```gdscript
 ==========================================================================
-ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/ui/MainMenu.gd
+ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/ui/main_menu.gd
 ==========================================================================
 extends Control
 class_name MainMenu
 
-const _UIAnimator = preload("res://scripts/ui/UIAnimator.gd")
-const _CharacterCreation = preload("res://scenes/ui/CharacterCreation.tscn")
-const _HeroModelFactory = preload("res://scripts/ui/HeroModelFactory.gd")
-const SaveLoadScreenScene = preload("res://scenes/ui/SaveLoadScreen.tscn")
+const _UIAnimator = preload("res://scripts/ui/ui_animator.gd")
+const _CharacterCreation = preload("res://scenes/ui/character_creation.tscn")
+const _HeroModelFactory = preload("res://scripts/ui/hero_model_factory.gd")
+const SaveLoadScreenScene = preload("res://scenes/ui/save_load_screen.tscn")
 
 @onready var _background: TextureRect = $Background
 @onready var _new_game_btn: Button = $RightColumn/NewGameButton
@@ -2717,7 +2717,7 @@ func _on_save_load_closed() -> void:
 
 func _on_arena() -> void:
 	SoundManager.play_sfx_cue(&"ui_click")
-	get_tree().change_scene_to_file("res://scenes/CityArena.tscn")
+	get_tree().change_scene_to_file("res://scenes/city_arena.tscn")
 
 
 func _on_model_warrior() -> void:
@@ -2767,7 +2767,7 @@ func _on_exit() -> void:
 
 ```
 ==========================================================================
-ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scenes/MainMenu.tscn
+ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scenes/main_menu.tscn
 (добавить в конец файла, перед закрывающим маркером)
 ==========================================================================
 ```
@@ -2775,7 +2775,7 @@ func _on_exit() -> void:
 В существующий `MainMenu.tscn` добавить `ext_resource` и ноду:
 
 ```
-[ext_resource type="PackedScene" path="res://scenes/ui/SaveLoadScreen.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/ui/save_load_screen.tscn" id="5"]
 ```
 
 И в секцию нод, после `HeroModelWindow`:
@@ -2795,7 +2795,7 @@ grow_vertical = 2
 
 ```gdscript
 ==========================================================================
-ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/core/SaveManager.gd
+ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/core/save_manager.gd
 (добавить методы для работы со слотами)
 ==========================================================================
 ```

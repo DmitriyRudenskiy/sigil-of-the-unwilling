@@ -1,8 +1,8 @@
 class_name T12ChoiceCycle
 extends RefCounted
 
-const _Enums = preload("res://scripts/data/SpellEnums.gd")
-const _Utils = preload("res://scripts/data/SpellUtils.gd")
+const _Enums = preload("res://scripts/data/spell_enums.gd")
+const _Utils = preload("res://scripts/data/spell_utils.gd")
 const _S := _Enums.StatusType
 
 static func handle(
