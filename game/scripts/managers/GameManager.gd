@@ -201,7 +201,8 @@ func save_game(slot: String = "quicksave") -> bool:
 		"player_data": player_data,
 		"world_state": world_state,
 		"event_history": event_history,
-		"decision_log": decision_log
+		"decision_log": decision_log,
+		"crisis_state": event_system.serialize_state() if event_system else {}
 	}
 
 	var file = FileAccess.open(SAVE_DIR + slot + ".save", FileAccess.WRITE)
@@ -225,6 +226,8 @@ func load_game(slot: String = "quicksave") -> bool:
 		world_state = save_data.get("world_state", {})
 		event_history = save_data.get("event_history", [])
 		decision_log = save_data.get("decision_log", [])
+		if event_system:
+			event_system.deserialize_state(save_data.get("crisis_state", {}))
 
 		game_loaded.emit(slot)
 		return true

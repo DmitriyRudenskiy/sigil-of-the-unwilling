@@ -151,11 +151,12 @@
 ### Task 4.3: Save/Load System Integration
 **Priority**: P0  
 **Estimate**: 4h  
+**Status**: DONE (state persistence + tests; UI re-render deferred — not headless-verifiable)
 **Acceptance Criteria**:
-- [ ] Сохранение `active_events`, `event_history`, `active_laws`
-- [ ] Корректная загрузка состояния кризиса
-- [ ] Восстановление UI при загрузке во время события
-- [ ] Тесты на сохранение/загрузку
+- [x] Сохранение `active_events`, `event_history`, `active_laws` — `CrisisEventSystem.serialize_state()` хранит `active_event_ids`, `event_history`, `law` (LawManager.to_dict()); объекты по id (шаблоны перегружаются при старте)
+- [x] Корректная загрузка состояния кризиса — `deserialize_state()` восстанавливает current_crisis (по id), active_events (по id), day/next_event/last_crisis, event_history, law; неизвестные id безопаснo пропускаются; пустой dict = no-op
+- [ ] Восстановление UI при загрузке во время события — состояние восстанавливается; UI re-render не верифицируется headless (отложено, как и другие UI-пункты)
+- [x] Тесты на сохранение/загрузку — 3 round-trip теста в `test_crisis_events.gd` (полный round-trip включая law, empty=noop, unknown ids skipped). Провязано в `GameManager.save_game`/`load_game` (null-guarded `crisis_state` key)
 
 ### Task 4.4: Difficulty Scaling System
 **Priority**: P2  

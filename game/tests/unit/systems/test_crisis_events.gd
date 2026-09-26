@@ -79,3 +79,49 @@ func test_crisis_ids_are_unique() -> void:
 	for c in sys.crisis_templates:
 		assert_that(ids.has(c.id)).is_false()
 		ids.append(c.id)
+
+
+## --- Save/Load round-trip (Task 4.3) ---
+
+func test_serialize_deserialize_roundtrip() -> void:
+	var sys := _sys()
+	sys.current_crisis = sys.crisis_templates[0]
+	# event_templates[1] = event_01_strangers (has a real id; [0] is the
+	# events_database wrapper with an empty id, which round-trips to nothing)
+	sys.active_events.append(sys.event_templates[1])
+	sys.day_counter = 42
+	sys.next_event_day = 17
+	sys.event_history.append({"id": "ev_x", "day": 3})
+	sys.law_manager.unlock_law("order_tax_code")
+
+	var data: Dictionary = sys.serialize_state()
+
+	var sys2 := _sys()
+	sys2.deserialize_state(data)
+
+	assert_that(sys2.current_crisis.id).is_equal(sys.current_crisis.id)
+	assert_that(sys2.active_events.size()).is_equal(1)
+	assert_that(sys2.active_events[0].id).is_equal(sys.event_templates[1].id)
+	assert_that(sys2.day_counter).is_equal(42)
+	assert_that(sys2.next_event_day).is_equal(17)
+	assert_that(sys2.event_history.size()).is_equal(1)
+	assert_that(sys2.event_history[0].get("id")).is_equal("ev_x")
+	assert_that(sys2.law_manager.is_law_active("order_tax_code")).is_true()
+
+
+func test_deserialize_empty_is_noop() -> void:
+	var sys := _sys()
+	sys.day_counter = 99
+	sys.deserialize_state({})
+	assert_that(sys.day_counter).is_equal(99)
+
+
+func test_deserialize_unknown_ids_are_skipped() -> void:
+	var sys := _sys()
+	var data: Dictionary = sys.serialize_state()
+	data["current_crisis_id"] = "nonexistent"
+	data["active_event_ids"] = ["nope"]
+	var sys2 := _sys()
+	sys2.deserialize_state(data)
+	assert_that(sys2.current_crisis == null).is_true()
+	assert_that(sys2.active_events.size()).is_equal(0)

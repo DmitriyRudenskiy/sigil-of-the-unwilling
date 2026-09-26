@@ -131,6 +131,58 @@ func _ready():
 		law_manager = LawManager.new()
 		law_manager.load_default_catalog()
 
+## Сериализация состояния (события/кризис/законы) для сохранения.
+## Объекты событий/кризисов хранятся по id — шаблоны перезагружаются при старте.
+func serialize_state() -> Dictionary:
+	var active_ids: Array[String] = []
+	for e in active_events:
+		active_ids.append(e.id)
+	return {
+		"day_counter": day_counter,
+		"next_event_day": next_event_day,
+		"last_crisis_day": last_crisis_day,
+		"current_crisis_id": current_crisis.id if current_crisis else "",
+		"active_event_ids": active_ids,
+		"event_history": event_history.duplicate(true),
+		"law": law_manager.to_dict() if law_manager else {},
+	}
+
+## Восстановление состояния из сохранения. Шаблоны должны быть загружены.
+func deserialize_state(data: Dictionary) -> void:
+	if data == null or data.is_empty():
+		return
+	day_counter = int(data.get("day_counter", 0))
+	next_event_day = int(data.get("next_event_day", 5))
+	last_crisis_day = int(data.get("last_crisis_day", -crisis_cooldown_days))
+	event_history.clear()
+	for h in data.get("event_history", []):
+		if h is Dictionary:
+			event_history.append(h)
+	current_crisis = _find_crisis_template(str(data.get("current_crisis_id", "")))
+	active_events.clear()
+	for eid in data.get("active_event_ids", []):
+		var ev := _find_event_template(str(eid))
+		if ev != null:
+			active_events.append(ev)
+	if law_manager != null:
+		law_manager.from_dict(data.get("law", {}))
+
+func _find_crisis_template(id: String) -> CrisisEventData:
+	if id == "":
+		return null
+	for c in crisis_templates:
+		if c.id == id:
+			return c
+	return null
+
+func _find_event_template(id: String) -> DynamicEventData:
+	if id == "":
+		return null
+	for e in event_templates:
+		if e.id == id:
+			return e
+	return null
+
 ## Загрузка шаблонов событий из JSON
 func load_event_templates():
 	event_templates.clear()

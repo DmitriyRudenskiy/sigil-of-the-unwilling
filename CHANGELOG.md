@@ -4,6 +4,13 @@
 
 ## 2026-09-25
 
+### dynamic-world-crisis-system — Save/Load Integration (Task 4.3)
+- `CrisisEventSystem.serialize_state()`/`deserialize_state()` — состояние (current_crisis по id, active_event_ids, day/next_event/last_crisis, event_history, law via `LawManager.to_dict`); неизвестные id безопасно пропускаются, пустой dict = no-op
+- Провязано в `GameManager.save_game`/`load_game` (null-guarded ключ `crisis_state`)
+- Тесты: +3 round-trip в `test_crisis_events.gd` (полный round-trip включая law, empty=noop, unknown ids skipped)
+- **Отложено**: UI re-render при загрузке во время события (не верифицируется headless)
+- Полный сьют: **1757/1757 passed, 0 failures** (129 orphans)
+
 ### dynamic-world-crisis-system — Law System + 8 Crisis Events (Task 2.3, Task 4.2)
 - `LawManager.gd` (RefCounted, standalone-тестируемый) — дерево законов: 3 ветки (Order/Faith/Survival), 6 законов (2/ветку), `requires` = prerequisite, `unlock_law()` с проверкой предков, `get_passive_effects()` (merged modifiers по key), `to_dict`/`from_dict`
 - Интеграция: `CrisisEventSystem.law_manager` + эффект `unlock_law` в `apply_choice_effects`
