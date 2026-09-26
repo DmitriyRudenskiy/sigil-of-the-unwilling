@@ -3,8 +3,8 @@
 ## to ensure a smooth early-game experience. It uses simulation-based tuning to find optimal values.
 
 extends RefCounted
-const GameLogger := preload("res://scripts/core/GameLogger.gd")
 class_name AutoBalancer
+const GameLogger := preload("res://scripts/core/GameLogger.gd")
 
 # Configuration
 @export var target_survival_rate: float = 0.85  # 85% of simulations should survive 10 days
