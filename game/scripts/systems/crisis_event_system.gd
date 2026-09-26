@@ -132,6 +132,10 @@ var day_counter: int = 0
 var next_event_day: int = 5
 var crisis_cooldown_days: int = 20
 var last_crisis_day: int = -crisis_cooldown_days
+## День начала текущего кризиса (O(1)-проверка duration в process_ongoing_crisis).
+## var — а не const-выражение на месте использования, чтобы deserialize_state
+## мог восстановить его из истории при загрузке сейва.
+var _crisis_start_day: int = 0
 
 # Конфигурация
 var base_event_chance: float = 0.3  # Базовый шанс события каждый день
@@ -213,6 +217,17 @@ func deserialize_state(data: Dictionary) -> void:
 		if h is Dictionary:
 			event_history.append(h)
 	current_crisis = _find_crisis_template(str(data.get("current_crisis_id", "")))
+	# Восстановление дня начала кризиса из записи истории (serialize_state её
+	# не хранит явно); без этого duration-таймер стартовал бы с 0 и кризис
+	# разрешался автоматически в первый же день после загрузки.
+	_crisis_start_day = day_counter
+	if current_crisis != null:
+		for i in range(event_history.size() - 1, -1, -1):
+			var record: Dictionary = event_history[i]
+			if record.get("type") == "crisis" and record.get("id") == current_crisis.id \
+					and not bool(record.get("resolved", false)):
+				_crisis_start_day = int(record.get("day", day_counter))
+				break
 	active_events.clear()
 	for eid in data.get("active_event_ids", []):
 		var ev := _find_event_template(str(eid))
@@ -458,9 +473,26 @@ func process_ongoing_crisis():
 func get_crisis_start_day() -> int:
 	return _crisis_start_day
 
+## Разрешение ui_manager: явно внедрённый → группа "ui_manager" (UIManager
+## регистрирует её в _ready) → сосед по сцене. Резолв ленивый и кэшируется —
+## прямой get_node("/root/UIManager") не работает, т.к. в main.tscn UIManager
+## является дочерней нодой Main, а не autoload.
+func _ui() -> Node:
+	if ui_manager != null and is_instance_valid(ui_manager):
+		return ui_manager
+	ui_manager = null
+	if get_tree() == null:
+		return null
+	var candidate := get_tree().get_first_node_in_group("ui_manager")
+	if candidate == null and get_parent() != null:
+		candidate = get_parent().get_node_or_null("UIManager")
+	if candidate != null and candidate.has_method("show_decision_panel"):
+		ui_manager = candidate
+	return ui_manager
+
 ## Применение эффектов кризиса
 func apply_crisis_effects(effects: Dictionary):
-	var game_manager = get_node_or_null("/root/GameManager")
+	var game_manager := _gm()
 	if not game_manager:
 		return
 	
@@ -501,7 +533,7 @@ func resolve_crisis(choice_index: int):
 
 ## Применение эффектов выбора
 func apply_choice_effects(effects: Dictionary):
-	var game_manager = get_node_or_null("/root/GameManager")
+	var game_manager := _gm()
 	if not game_manager:
 		return
 	
@@ -522,23 +554,44 @@ func apply_choice_effects(effects: Dictionary):
 			if law_manager:
 				law_manager.unlock_law(str(value))
 
-## Показать панель события (UI)
+## Показать панель события (UI).
+## Словарь-адаптер вместо объекта: show_decision_panel ожидает Dictionary
+## (title/description/choices), передача DynamicEventData вызывала ошибку
+## типов в рантайме.
 func show_event_panel(event: DynamicEventData):
-	var ui_manager = get_node_or_null("/root/UIManager")
-	if ui_manager and ui_manager.has_method("show_decision_panel"):
-		ui_manager.show_decision_panel(event)
+	var um := _ui()
+	if um != null:
+		um.show_decision_panel(_event_to_panel_data(event), event.id)
 
-## Показать панель кризиса (UI)
+static func _event_to_panel_data(event) -> Dictionary:
+	var choices: Array = []
+	for c in event.choices:
+		choices.append({"text": c.text, "tooltip": c.tooltip})
+	return {
+		"title": event.title,
+		"description": event.description,
+		"icon_path": event.icon_path,
+		"choices": choices,
+	}
+
+## Показать панель кризиса (UI).
+## Панель показывает CrisisEventSystem (владелец данных); GameManager через
+## _on_crisis_triggered управляет только состоянием паузы — иначе popup
+## рендерился бы дважды. close-метод UIManager называется
+## close_crisis_panel (hide_crisis_panel у него нет).
 func show_crisis_panel(crisis: CrisisEventData):
-	var ui_manager = get_node_or_null("/root/UIManager")
-	if ui_manager and ui_manager.has_method("show_crisis_panel"):
-		ui_manager.show_crisis_panel(crisis)
+	var um := _ui()
+	if um != null:
+		var data := _event_to_panel_data(crisis)
+		data["severity"] = crisis.severity
+		data["time_limit"] = crisis.duration_days
+		um.show_crisis_panel(data, crisis.id)
 
 ## Скрыть панель кризиса
 func hide_crisis_panel():
-	var ui_manager = get_node_or_null("/root/UIManager")
-	if ui_manager and ui_manager.has_method("hide_crisis_panel"):
-		ui_manager.hide_crisis_panel()
+	var um := _ui()
+	if um != null and um.has_method("close_crisis_panel"):
+		um.close_crisis_panel()
 
 ## Проверка было ли событие недавно
 func is_event_recently_occurred(event_id: String) -> bool:
@@ -561,3 +614,4 @@ func reset():
 	day_counter = 0
 	next_event_day = 5
 	last_crisis_day = -crisis_cooldown_days
+	_crisis_start_day = 0

@@ -22,6 +22,10 @@ func push(item: Array) -> void:
 
 func pop() -> Array:
 	if _data.is_empty():
+		# Контракт вызывающего — проверять is_empty(); тихий [] маскирует баг
+		# извлечения из пустой кучи, логируем его (тесты-гарды по-прежнему
+		# получают []).
+		push_error("MinHeap.pop() called on empty heap")
 		return []
 	var res: Array = _data[0][0]
 	var last: Array = _data.pop_back()

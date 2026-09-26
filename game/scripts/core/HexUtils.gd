@@ -70,4 +70,6 @@ static func pos_to_idx(cell: Vector2i, w: int) -> int:
 	return cell.y * w + cell.x
 
 static func idx_to_pos(idx: int, w: int) -> Vector2i:
-	return Vector2i(idx % w, int(idx / float(w)))
+	# Целочисленное деление: float-путь (int(idx / float(w))) — лишняя операция
+	# на горячем маршруте восстановления пути из came_from в HexPathfinding.
+	return Vector2i(idx % w, idx / w)

@@ -141,15 +141,17 @@ func _on_crisis_resolved(crisis_id: String, choice_index: int) -> void:
 	end_crisis(crisis_id, true)
 
 
-## Кризис запущен CrisisEventSystem
+## Кризис запущен CrisisEventSystem. Показ панели — ответственность системы
+## (она резолвит UIManager явно и владеет данными кризиса); здесь только
+## состояние паузы/блока игры. Прямой show_crisis_panel отсюда рендерил бы
+## второй popup поверх системного.
 func _on_crisis_triggered(crisis_event) -> void:
 	if is_crisis_active or crisis_event == null:
 		return
-	start_crisis({
-		"title": crisis_event.title,
-		"description": crisis_event.description,
-		"severity": crisis_event.severity
-	}, crisis_event.id)
+	is_crisis_active = true
+	active_crisis_id = crisis_event.id
+	is_game_paused = true
+	crisis_started.emit(crisis_event.id)
 
 
 ## Применение эффектов (ресурсы, репутация, разблокировка и т.д.)
