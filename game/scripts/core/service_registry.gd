@@ -19,10 +19,6 @@ func clear() -> void:
 	_singletons.clear()
 	_autoloads.clear()
 
-func clear(key: StringName) -> void:
-	_singletons.erase(key)
-	_autoloads.erase(key)
-
 func try_resolve(key: StringName) -> Object:
 	if key == StringName(""):
 		return null

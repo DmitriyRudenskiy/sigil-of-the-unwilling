@@ -14,10 +14,8 @@ func _register_core_services() -> void:
 	# в WorldBootstrap._init_services (set_save_manager), а до bootstrap
 	# (экраны меню/создания персонажа) здесь — экземпляр без save-менеджера,
 	# достаточный для передачи pending_new_game / pending_save.
-	var early_persistence := WorldPersistence.new()
-	early_persistence.name = "WorldPersistence"
-	add_child(early_persistence)
-	registry.register_singleton(&"persistence", early_persistence)
+	# WorldPersistence — RefCounted, поэтому в дерево не добавляется.
+	registry.register_singleton(&"persistence", WorldPersistence.new())
 	registry.register_autoload(&"event_bus", &"GameEventBus")
 	registry.register_singleton(&"resources", Resources)
 	registry.register_singleton(&"spells", Spells)
