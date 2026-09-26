@@ -201,15 +201,30 @@ static func _create_hero(parent: Node2D, R: BootstrapResult) -> void:
 
 ## Пассивные эффекты классов на старте партии (early-game-foundation).
 ## Воин/Следопыт/Плут/Жрец/Друид действуют в бою через тег класса на бойце-герое.
+## Стартовые магические бонусы класса для новой партии (бонусы
+## характеристик уже выданы через HeroBuildProfile.apply_build).
+## Ключи — id классов из HeroClasses.CLASSES; классы вне таблицы не
+## получают магических эффектов. cipher исключён осознанно: его источник
+## силы — «Фокус», а не классические школы магии.
+const _CLASS_STARTER_SPELLS := {
+	"wizard":  {"school": SchoolType.ID.FIRE,  "level": 3, "spell": &"fireball"},
+	"druid":   {"school": SchoolType.ID.EARTH, "level": 1, "spell": &"shield"},
+	"priest":  {"school": SchoolType.ID.WATER, "level": 1, "spell": &"cure"},
+	"chanter": {"school": SchoolType.ID.WATER, "level": 1, "spell": &"bless"},
+	"ranger":  {"school": SchoolType.ID.AIR,   "level": 2, "spell": &"precision"},
+}
+
 static func _apply_class_effects(hero: Node, profile: HeroBuildProfile) -> void:
-	if profile == null or profile.character_class == "cipher":
+	if profile == null:
+		return
+	var starter: Variant = _CLASS_STARTER_SPELLS.get(profile.character_class)
+	if starter == null:
 		return
 	var magic: Variant = hero.get("magic")
 	if magic == null:
 		return
-	# Чародей: стартовый боевой spell
-	magic.schools[SchoolType.ID.FIRE] = 3
-	magic.learn(&"fireball")
+	magic.schools[int(starter["school"])] = int(starter["level"])
+	magic.learn(starter["spell"])
 
 
 static func _init_hero(R: BootstrapResult) -> void:
