@@ -4,6 +4,7 @@
 
 extends RefCounted
 class_name AutoBalancer
+const GameLogger := preload("res://scripts/core/GameLogger.gd")
 
 # Configuration
 @export var target_survival_rate: float = 0.85  # 85% of simulations should survive 10 days
@@ -170,9 +171,9 @@ func _calculate_adjustments(results: Dictionary) -> Dictionary:
 ## Apply calculated corrections to game config
 func apply_corrections(adjustments: Dictionary):
 	# TODO: Write adjustments back to config files
-	print("Applying balance corrections:")
+	GameLogger.info("Applying balance corrections:", "Balance")
 	for key in adjustments:
-		print("  %s: %.2f" % [key, adjustments[key]])
+		GameLogger.info("  %s: %.2f" % [key, adjustments[key]], "Balance")
 	
 	# In production, this would update:
 	# - game/data/config/resources.json
@@ -181,17 +182,17 @@ func apply_corrections(adjustments: Dictionary):
 
 ## Main entry point for auto-balancing
 func balance_early_game():
-	print("Starting auto-balance simulation...")
+	GameLogger.info("Starting auto-balance simulation...", "Balance")
 	var results = run_simulation()
 	
-	print("Survival rate: %.1f%%" % (results.survival_rate * 100))
-	print("Average resource buffer: %.1f days" % results.avg_resource_buffer)
-	print("Bottlenecks: ", results.bottlenecks)
+	GameLogger.info("Survival rate: %.1f%%" % (results.survival_rate * 100), "Balance")
+	GameLogger.info("Average resource buffer: %.1f days" % results.avg_resource_buffer, "Balance")
+	GameLogger.info("Bottlenecks: %s" % str(results.bottlenecks), "Balance")
 	
 	if results.suggested_adjustments.size() > 0:
-		print("Suggested adjustments:")
+		GameLogger.info("Suggested adjustments:", "Balance")
 		apply_corrections(results.suggested_adjustments)
 	else:
-		print("Game balance is within acceptable parameters.")
+		GameLogger.info("Game balance is within acceptable parameters.", "Balance")
 	
 	return results

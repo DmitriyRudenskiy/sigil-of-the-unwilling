@@ -69,17 +69,19 @@ func is_input_active() -> bool:
 	return _state == State.WAITING_INPUT
 
 var _paused := false
+var _pause_token: int = 0
 enum PendingAction { NONE, MOVE, ATTACK, SPELL }
 var _pending_completion: PendingAction = PendingAction.NONE
 
 func pause_battle() -> void:
 	_paused = true
-	if is_inside_tree():
-		get_tree().paused = true
+	if _pause_token == 0:
+		_pause_token = PauseController.acquire(&"BattleTurnExecutor")
 
 func resume_battle() -> void:
-	if is_inside_tree():
-		get_tree().paused = false
+	if _pause_token != 0:
+		PauseController.release(_pause_token, &"BattleTurnExecutor")
+		_pause_token = 0
 	_paused = false
 
 	var pending := _pending_completion
@@ -366,7 +368,7 @@ func _advance_to_next_turn() -> void:
 
 	if u.is_stunned():
 		var stun_effect := -1
-		for eff in u.statuses.keys():
+		for eff in u.statuses:
 			if StatusEffects.is_stun(eff):
 				stun_effect = eff
 				break
@@ -406,7 +408,7 @@ func _advance_to_next_turn() -> void:
 func _tick_statuses(u: BattleState.BattleUnit) -> void:
 	var to_remove: Array[int] = []
 
-	for eff in u.statuses.keys():
+	for eff in u.statuses:
 		u.statuses[eff] -= 1
 		if u.statuses[eff] <= 0:
 			to_remove.append(eff)

@@ -11,6 +11,8 @@ signal crisis_ended(crisis_id: String, resolved: bool)
 
 const SAVE_DIR := "user://saves/"
 const MAX_SAVE_SLOTS := 5
+## Версия формата сейва GameManager (JSON). Инкремент при изменении схемы.
+const SAVE_FORMAT_VERSION := 1
 
 var current_day: int = 1
 var is_game_paused: bool = false
@@ -194,56 +196,97 @@ func _apply_crisis_penalties(crisis_id: String) -> void:
 	pass
 
 
-## Сохранение игры
+## Сохранение игры (JSON — единый формат с SaveManager, без бинарного store_var)
 func save_game(slot: String = "quicksave") -> bool:
-	var save_data = {
+	var save_data := {
+		"version": SAVE_FORMAT_VERSION,
 		"day": current_day,
 		"player_data": player_data,
 		"world_state": world_state,
-		"event_history": event_history,
-		"decision_log": decision_log,
-		"crisis_state": event_system.serialize_state() if event_system else {}
+		"event_history": Array(event_history),
+		"decision_log": Array(decision_log),
+		"crisis_state": event_system.serialize_state() if event_system else {},
 	}
 
-	var file = FileAccess.open(SAVE_DIR + slot + ".save", FileAccess.WRITE)
-	if file:
-		file.store_var(save_data)
-		file.close()
-		game_saved.emit(slot)
-		return true
-	return false
+	var path := _slot_path(slot)
+	if not DirAccess.dir_exists_absolute(SAVE_DIR):
+		DirAccess.make_dir_recursive_absolute(SAVE_DIR)
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	if file == null:
+		GameLogger.error("GameManager: cannot write %s (error %d)" % [path, FileAccess.get_open_error()], "Save")
+		return false
+	file.store_string(JSON.stringify(save_data, "\t"))
+	file.close()
+	game_saved.emit(slot)
+	return true
 
 
-## Загрузка игры
+## Загрузка игры. Возвращает false при отсутствии/повреждении файла или невалидных данных.
 func load_game(slot: String = "quicksave") -> bool:
-	var file = FileAccess.open(SAVE_DIR + slot + ".save", FileAccess.READ)
-	if file:
-		var save_data = file.get_var()
-		file.close()
+	var path := _slot_path(slot)
+	if not FileAccess.file_exists(path):
+		GameLogger.warn("GameManager: no save at %s" % path, "Save")
+		return false
 
-		current_day = save_data.get("day", 1)
-		player_data = save_data.get("player_data", {})
-		world_state = save_data.get("world_state", {})
-		event_history = save_data.get("event_history", [])
-		decision_log = save_data.get("decision_log", [])
-		if event_system:
-			event_system.deserialize_state(save_data.get("crisis_state", {}))
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		GameLogger.error("GameManager: cannot read %s" % path, "Save")
+		return false
+	var text := file.get_as_text()
+	file.close()
 
-		game_loaded.emit(slot)
-		return true
-	return false
+	var json := JSON.new()
+	if json.parse(text) != OK or not (json.data is Dictionary):
+		GameLogger.error("GameManager: corrupt save %s: %s" % [path, json.get_error_message()], "Save")
+		return false
+	var save_data: Dictionary = json.data
+
+	# Валидация структуры: обязательные секции должны иметь ожидаемые типы,
+	# иначе состояние менеджера будет повреждено частично загруженными данными.
+	if not (save_data.get("player_data", {}) is Dictionary) \
+			or not (save_data.get("world_state", {}) is Dictionary) \
+			or not (save_data.get("event_history", []) is Array) \
+			or not (save_data.get("decision_log", []) is Array):
+		GameLogger.error("GameManager: invalid save structure in %s" % path, "Save")
+		return false
+
+	current_day = int(save_data.get("day", 1))
+	player_data = save_data["player_data"]
+	world_state = save_data["world_state"]
+	event_history.clear()
+	for e in save_data["event_history"]:
+		event_history.append(str(e))
+	decision_log.clear()
+	for d in save_data["decision_log"]:
+		if d is Dictionary:
+			decision_log.append(d)
+	if event_system:
+		event_system.deserialize_state(save_data.get("crisis_state", {}))
+
+	game_loaded.emit(slot)
+	return true
+
+
+func _slot_path(slot: String) -> String:
+	# Защита от path traversal: слот — только [A-Za-z0-9_-]
+	var safe_slot := slot.replace("/", "").replace("\\", "").replace("..", "")
+	if safe_slot.is_empty():
+		safe_slot = "quicksave"
+	return SAVE_DIR + safe_slot + ".json"
 
 
 ## Получить список доступных сохранений
 func get_save_slots() -> Array[String]:
 	var slots: Array[String] = []
 	if DirAccess.dir_exists_absolute(SAVE_DIR):
-		var dir = DirAccess.open(SAVE_DIR)
+		var dir := DirAccess.open(SAVE_DIR)
+		if dir == null:
+			return slots
 		dir.list_dir_begin()
-		var file_name = dir.get_next()
+		var file_name := dir.get_next()
 		while file_name != "":
-			if file_name.ends_with(".save"):
-				slots.append(file_name.replace(".save", ""))
+			if not dir.current_is_dir() and file_name.ends_with(".json"):
+				slots.append(file_name.trim_suffix(".json"))
 			file_name = dir.get_next()
 		dir.list_dir_end()
 	return slots

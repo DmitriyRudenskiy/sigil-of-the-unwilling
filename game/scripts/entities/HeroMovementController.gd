@@ -209,7 +209,7 @@ func _base_blocked() -> Dictionary:
 	var blocked: Dictionary = _map_gen.get_blocked_cells().duplicate()
 	var levitation := _has_artifact_effect(&"boots_levitation")
 	if levitation:
-		for cell in blocked.keys():
+		for cell in blocked:
 			var terrain_id: int = _map_gen.get_terrain_id(cell)
 			if terrain_id == _HexUtils.Terrain.WATER:
 				blocked.erase(cell)

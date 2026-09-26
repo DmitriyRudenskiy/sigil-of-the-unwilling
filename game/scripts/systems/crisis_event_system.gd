@@ -1,5 +1,6 @@
 class_name CrisisEventSystem
 extends Node
+const GameLogger := preload("res://scripts/core/GameLogger.gd")
 
 ## Система динамических событий и кризисов (RimWorld + Frostpunk style)
 ## - Генерация событий на основе состояния поселения
@@ -196,7 +197,7 @@ func load_event_templates():
 				if event_data:
 					event_templates.append(DynamicEventData.new(event_data))
 			file_name = dir.get_next()
-	print("Loaded %d event templates" % event_templates.size())
+	GameLogger.info("Loaded %d event templates" % event_templates.size(), "CrisisEvents")
 
 ## Загрузка шаблонов кризисов
 func load_crisis_templates():
@@ -211,7 +212,7 @@ func load_crisis_templates():
 				if crisis_data:
 					crisis_templates.append(CrisisEventData.new(crisis_data))
 			file_name = dir.get_next()
-	print("Loaded %d crisis templates" % crisis_templates.size())
+	GameLogger.info("Loaded %d crisis templates" % crisis_templates.size(), "CrisisEvents")
 
 ## Загрузка JSON события
 func load_event_json(path: String) -> Dictionary:

@@ -79,7 +79,7 @@ func _build_minimum_spanning_tree(villages: Array[Vector2i]) -> Array:
 		var best_edge: Array = []
 		var best_dist = INF
 		
-		for connected_cell in connected.keys():
+		for connected_cell in connected:
 			for i in range(unconnected.size()):
 				var unconnected_cell = unconnected[i]
 				var dist = _HexUtils.hex_distance(connected_cell, unconnected_cell)
@@ -97,7 +97,7 @@ func _build_minimum_spanning_tree(villages: Array[Vector2i]) -> Array:
 	return mst
 
 func _connect_resources() -> void:
-	for resource_cell in model.resource_cells.keys():
+	for resource_cell in model.resource_cells:
 		var nearest = _find_nearest_village(resource_cell)
 		if nearest != null:
 			var path = _find_path(resource_cell, nearest)

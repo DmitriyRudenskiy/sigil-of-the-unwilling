@@ -145,7 +145,7 @@ func _handle_battle() -> bool:
 			var reachable = bs.get_reachable_for_unit(unit, func() -> Dictionary: return blocked)
 			var best_cell := Vector2i(-1, -1)
 			var best_d := best
-			for c in reachable.keys():
+			for c in reachable:
 				var dc := HexUtils.hex_distance(c, nearest.cell, bs.hex_shift_right)
 				if dc < best_d:
 					best_d = dc
