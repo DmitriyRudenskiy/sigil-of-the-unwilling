@@ -87,6 +87,25 @@ enum CombatAction {
 - Эффект: `defense *= 1.2` до следующего хода
 - Контратака: если враг входит в соседний гекс, автоматическая атака без расхода действия
 
+#### Расхождения с реализацией (Phase 4)
+
+**Дальний бой (task 4.3) — DEFERRED.** Реализовано: дальнобойный юнит бьёт на
+distance > 1 (гейт в `BattleAttackSequence`/`BattleInput`/`BattleAI`), при дистанции 1
+применяется `RANGED_MELEE_PENALTY = 0.5` (штраф за ближний бой). НЕ реализовано из спеки:
+линия видимости (raycast), штраф за дальность («−5% за гекс сверх 3»), max range и
+«препятствия блокируют видимость». Причина: LoS/препятствия требуют типов местности
+(Phase 5, ещё не реализована), а штраф за дальность опционален по спеке («если
+применимо») и живёт в `BattleRules.gd` (вне мандата «приведения кода» — там
+BattleController/BattleAI/BattleTurnExecutor). Реализовать вместе с Phase 5.
+
+**Ожидание (task 4.4) — реализовано под другими именами.** Спека: «ожидание → +20%
+защиты + контратака». В коде это два механизма: `do_defend` → `defending = true` →
+`DEFEND_DEFENSE_BONUS = 1.2` (ровно +20% защиты, `BattleRules.damage_multiplier`) +
+retaliation-система (`BattleAttackSequence.can_retaliate`/`start_retaliation`: melee-
+защитник бьёт в ответ, 1/раунд). Отдельный `do_wait` = «задержка» (перенос хода в конец
+очереди раунда), не «оборонительное ожидание». Тесты: `test_damage_multiplier_defending_boosts_defense`,
+`test_calculate_attack_ranged_melee_penalty`, `test_first_strike_triggers`, `test_wait_order`.
+
 ### Бонусы местности
 
 | Тип | Защита | Атака | Движение | Видимость |

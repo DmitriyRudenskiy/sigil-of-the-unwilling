@@ -24,9 +24,9 @@
 
 - [x] 4.1 `BattleActionResolver`: полный набор действий (атака ближняя/дальняя, заклинание, ожидание, отступление) *(+move/defend/skip/sacrifice, BattleRetreatPolicy)*
 - [x] 4.2 Атака ближнего боя: требование соседства, формула урона (атака − защита × модификаторы) *(BattleDamageResolver.resolve + BattleRules)*
-- [ ] 4.3 Атака дальнего боя: линия видимости, штраф дистанции, препятствия
-- [ ] 4.4 Ожидание: бонус защиты +20%, контратака при ходе врага
-- [ ] 4.5 Unit-тесты: каждое действие с проверкой условий и результатов
+- [ ] 4.3 Атака дальнего боя: линия видимости, штраф дистанции, препятствия — DEFERRED (LoS/препятствия требуют местности из Phase 5; штраф за дальность опционален по спеке и в не-мандатном `BattleRules.gd`; существующий ranged работает — см. design.md «Расхождения с реализацией»)
+- [x] 4.4 Ожидание: +20% защиты + контратака — реализовано как `do_defend` (`DEFEND_DEFENSE_BONUS=1.2`) + retaliation (`BattleAttackSequence`); `do_wait` = «задержка». Маппинг задокументирован в design.md
+- [x] 4.5 Unit-тесты: каждое действие с проверкой условий и результатов — покрытие уже есть: `test_adjacent_attack` (melee-adjacency), `test_ranged_wins_against_melee_at_distance` + `test_attack_highlight_ranged_no_adjacent` (ranged), `test_calculate_attack_ranged_melee_penalty`, `test_damage_multiplier_defending_boosts_defense` (+20%), `test_first_strike_triggers` (контратака), `test_wait_order` (delay), `test_apply_attack_*` (BattleActionResolver)
 
 ## 5. Бонусы местности
 
