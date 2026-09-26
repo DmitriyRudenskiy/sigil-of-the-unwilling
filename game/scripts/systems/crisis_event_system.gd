@@ -62,11 +62,11 @@ class ChoiceData:
 	var requirements: Dictionary = {}  # Требования для доступности
 
 	func _init(data: Dictionary = {}):
-		text = _as_string(data.get("text", ""), "")
-		tooltip = _as_string(data.get("tooltip", ""), "")
-		impact = _as_int(data.get("impact"), ChoiceImpact.NEUTRAL) as ChoiceImpact
-		effects = _as_dict(data.get("effects"))
-		requirements = _as_dict(data.get("requirements"))
+		text = CrisisEventSystem._as_string(data.get("text", ""), "")
+		tooltip = CrisisEventSystem._as_string(data.get("tooltip", ""), "")
+		impact = CrisisEventSystem._as_int(data.get("impact"), ChoiceImpact.NEUTRAL) as ChoiceImpact
+		effects = CrisisEventSystem._as_dict(data.get("effects"))
+		requirements = CrisisEventSystem._as_dict(data.get("requirements"))
 
 # Данные события
 class DynamicEventData:
@@ -81,15 +81,15 @@ class DynamicEventData:
 	var weight: float = 1.0
 
 	func _init(data: Dictionary = {}):
-		id = _as_string(data.get("id", ""), "")
-		title = _as_string(data.get("title", ""), "")
-		description = _as_string(data.get("description", ""), "")
-		icon_path = _as_string(data.get("icon_path", ""), "")
-		frequency = _as_int(data.get("frequency"), EventFrequency.COMMON) as EventFrequency
-		min_day = _as_int(data.get("min_day"), 1)
-		triggers = _as_dict(data.get("triggers"))
-		weight = _as_float(data.get("weight"), 1.0)
-		for c in _as_array(data.get("choices")):
+		id = CrisisEventSystem._as_string(data.get("id", ""), "")
+		title = CrisisEventSystem._as_string(data.get("title", ""), "")
+		description = CrisisEventSystem._as_string(data.get("description", ""), "")
+		icon_path = CrisisEventSystem._as_string(data.get("icon_path", ""), "")
+		frequency = CrisisEventSystem._as_int(data.get("frequency"), EventFrequency.COMMON) as EventFrequency
+		min_day = CrisisEventSystem._as_int(data.get("min_day"), 1)
+		triggers = CrisisEventSystem._as_dict(data.get("triggers"))
+		weight = CrisisEventSystem._as_float(data.get("weight"), 1.0)
+		for c in CrisisEventSystem._as_array(data.get("choices")):
 			if c is Dictionary:
 				choices.append(ChoiceData.new(c))
 
@@ -109,18 +109,18 @@ class CrisisEventData:
 	var resolution_effects: Dictionary = {}  # Эффекты после разрешения
 
 	func _init(data: Dictionary = {}):
-		id = _as_string(data.get("id", ""), "")
-		title = _as_string(data.get("title", ""), "")
-		description = _as_string(data.get("description", ""), "")
-		crisis_type = _as_int(data.get("crisis_type"), CrisisType.NATURAL_DISASTER) as CrisisType
-		severity = clampi(_as_int(data.get("severity"), 1), 1, 5)
-		duration_days = maxi(1, _as_int(data.get("duration_days"), 1))
-		icon_path = _as_string(data.get("icon_path", ""), "")
-		min_day = _as_int(data.get("min_day"), 1)
-		triggers = _as_dict(data.get("triggers"))
-		ongoing_effects = _as_dict(data.get("ongoing_effects"))
-		resolution_effects = _as_dict(data.get("resolution_effects"))
-		for c in _as_array(data.get("choices")):
+		id = CrisisEventSystem._as_string(data.get("id", ""), "")
+		title = CrisisEventSystem._as_string(data.get("title", ""), "")
+		description = CrisisEventSystem._as_string(data.get("description", ""), "")
+		crisis_type = CrisisEventSystem._as_int(data.get("crisis_type"), CrisisType.NATURAL_DISASTER) as CrisisType
+		severity = clampi(CrisisEventSystem._as_int(data.get("severity"), 1), 1, 5)
+		duration_days = maxi(1, CrisisEventSystem._as_int(data.get("duration_days"), 1))
+		icon_path = CrisisEventSystem._as_string(data.get("icon_path", ""), "")
+		min_day = CrisisEventSystem._as_int(data.get("min_day"), 1)
+		triggers = CrisisEventSystem._as_dict(data.get("triggers"))
+		ongoing_effects = CrisisEventSystem._as_dict(data.get("ongoing_effects"))
+		resolution_effects = CrisisEventSystem._as_dict(data.get("resolution_effects"))
+		for c in CrisisEventSystem._as_array(data.get("choices")):
 			if c is Dictionary:
 				choices.append(ChoiceData.new(c))
 
@@ -364,26 +364,34 @@ func get_available_events() -> Array[DynamicEventData]:
 
 ## Проверка триггеров события
 func check_event_triggers(event: DynamicEventData) -> bool:
-	if event.triggers.is_empty():
+	return _check_triggers(event.triggers)
+
+## Проверка триггеров кризиса (те же условия, что и у обычных событий — DRY).
+func check_crisis_triggers(crisis: CrisisEventData) -> bool:
+	return _check_triggers(crisis.triggers)
+
+## Общая проверка триггеров: события и кризисы имеют одинаковую структуру.
+func _check_triggers(triggers: Dictionary) -> bool:
+	if triggers.is_empty():
 		return true
 
 	var game_manager := _gm()
 	if not game_manager:
-		# Без GameManager проверить условия нельзя — не блокируем событие.
+		# Без GameManager проверить условия нельзя — не блокируем.
 		return true
 
-	if event.triggers.has("population_min"):
-		if game_manager.get_population() < int(event.triggers["population_min"]):
+	if triggers.has("population_min"):
+		if game_manager.get_population() < int(triggers["population_min"]):
 			return false
 
-	if event.triggers.has("resource_low"):
-		var low = event.triggers["resource_low"]
+	if triggers.has("resource_low"):
+		var low = triggers["resource_low"]
 		if low is Dictionary and low.has("resource") and low.has("threshold"):
 			if game_manager.get_resource(str(low["resource"])) >= int(low["threshold"]):
 				return false
 
-	if event.triggers.has("building_required"):
-		var building = event.triggers["building_required"]
+	if triggers.has("building_required"):
+		var building = triggers["building_required"]
 		if not game_manager.has_building(str(building)):
 			return false
 
@@ -453,10 +461,6 @@ func get_available_crises() -> Array[CrisisEventData]:
 			continue
 		available.append(crisis)
 	return available
-
-## Проверка триггеров кризиса (те же условия, что и у обычных событий — DRY).
-func check_crisis_triggers(crisis: CrisisEventData) -> bool:
-	return check_event_triggers(crisis)
 
 ## Обработка продолжающегося кризиса
 func process_ongoing_crisis():
