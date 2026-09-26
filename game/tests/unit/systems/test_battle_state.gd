@@ -413,6 +413,46 @@ func test_cell_taken_avoids_occupied() -> void:
 	assert_bool(builder._cell_taken(0, 1, units)).is_false().override_failure_message("_cell_taken should report (0,1) as free")
 	assert_bool(builder._cell_taken(1, 0, units)).is_false().override_failure_message("_cell_taken should report (1,0) as free")
 
+
+func test_deployment_rules_min_gap_and_bounds() -> void:
+	# 2.2: starting positions stay in bounds and keep >= 5 hex between the two deployment lines.
+	var state = BattleState.new()
+	var atk: Array[UnitStack] = []
+	var def: Array[UnitStack] = []
+	for k in 7:  # MAX_UNITS_PER_SIDE
+		atk.append(Units.make_fixed_stack("swordsmen", 5))
+		def.append(Units.make_fixed_stack("goblins", 5))
+	state.place_army(atk, def)
+
+	var attackers = state.get_units_by_side(BattleState.Side.ATTACKER)
+	var defenders = state.get_units_by_side(BattleState.Side.DEFENDER)
+	assert_int(attackers.size()).is_equal(7).override_failure_message("expected 7 attacker units")
+	assert_int(defenders.size()).is_equal(7).override_failure_message("expected 7 defender units")
+
+	var seen: Dictionary = {}
+	var atk_max_col := -1
+	var def_min_col := BattleState.BW
+	for u in attackers:
+		assert_int(u.cell.x).is_greater_equal(0).override_failure_message("attacker out of bounds %s" % u.cell)
+		assert_int(u.cell.x).is_less(BattleState.BW).override_failure_message("attacker out of bounds %s" % u.cell)
+		assert_int(u.cell.y).is_greater_equal(0).override_failure_message("attacker out of bounds %s" % u.cell)
+		assert_int(u.cell.y).is_less(BattleState.BH).override_failure_message("attacker out of bounds %s" % u.cell)
+		assert_bool(seen.has(u.cell)).is_false().override_failure_message("duplicate cell %s" % u.cell)
+		seen[u.cell] = true
+		atk_max_col = maxi(atk_max_col, u.cell.x)
+	for u in defenders:
+		assert_int(u.cell.x).is_greater_equal(0).override_failure_message("defender out of bounds %s" % u.cell)
+		assert_int(u.cell.x).is_less(BattleState.BW).override_failure_message("defender out of bounds %s" % u.cell)
+		assert_int(u.cell.y).is_greater_equal(0).override_failure_message("defender out of bounds %s" % u.cell)
+		assert_int(u.cell.y).is_less(BattleState.BH).override_failure_message("defender out of bounds %s" % u.cell)
+		assert_bool(seen.has(u.cell)).is_false().override_failure_message("duplicate cell %s" % u.cell)
+		seen[u.cell] = true
+		def_min_col = mini(def_min_col, u.cell.x)
+
+	# Distance between the two front lines is at least 5 hexes.
+	var gap := def_min_col - atk_max_col - 1
+	assert_int(gap).is_greater_equal(5).override_failure_message("deployment lines closer than 5 hexes: gap=%d" % gap)
+
 func test_reachable_reflects_move() -> void:
 	var state = BattleState.new()
 	var atk: Array[UnitStack] = []

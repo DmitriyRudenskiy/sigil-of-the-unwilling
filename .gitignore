@@ -15,3 +15,6 @@
 
 # Конфиг Claude Code (slash-команды в commands/) — локальный тулинг, не в общий репо.
 .claude/
+
+# Hindsight transient agent state (not for VCS)
+.pi/hindsight/
