@@ -27,7 +27,7 @@
 **Priority:** P1 (High)  
 **Status:** ✅ DONE  
 **Acceptance Criteria:**
-- [x] Create `game/scripts/world/MapRiverGenerator.gd`
+- [x] Create `game/scripts/world/map_river_generator.gd`
 - [x] Implement source selection from high elevation tiles
 - [x] Implement flow simulation following steepest descent
 - [x] Implement river merging when paths converge
@@ -40,7 +40,7 @@
 **Priority:** P1 (High)  
 **Status:** ✅ DONE  
 **Acceptance Criteria:**
-- [x] Create `game/scripts/world/MapRoadGenerator.gd`
+- [x] Create `game/scripts/world/map_road_generator.gd`
 - [x] Implement minimum spanning tree for village connections
 - [x] Implement A* pathfinding with terrain costs
 - [x] Detect river crossings and place bridges
@@ -53,7 +53,7 @@
 **Priority:** P1 (High)  
 **Status:** ✅ DONE  
 **Acceptance Criteria:**
-- [x] Create `game/scripts/world/MapMountainGenerator.gd`
+- [x] Create `game/scripts/world/map_mountain_generator.gd`
 - [x] Implement fault line generation algorithm
 - [x] Apply uplift along fault lines to height_grid
 - [x] Implement erosion smoothing pass
@@ -66,7 +66,7 @@
 **Priority:** P1 (High)  
 **Status:** ✅ DONE  
 **Acceptance Criteria:**
-- [x] Create `game/scripts/world/MapForestGenerator.gd`
+- [x] Create `game/scripts/world/map_forest_generator.gd`
 - [x] Implement biome suitability calculation
 - [x] Implement forest clustering algorithm
 - [x] Vary density between core and edge tiles

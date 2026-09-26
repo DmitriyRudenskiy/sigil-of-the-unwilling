@@ -1,6 +1,6 @@
 extends BaseTest
 
-const MockBattleView := preload("res://tests/fakes/MockBattleView.gd")
+const MockBattleView := preload("res://tests/fakes/mock_battle_view.gd")
 
 var _input: BattleInput
 var _view: MockBattleView

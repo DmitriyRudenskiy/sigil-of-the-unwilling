@@ -4,7 +4,7 @@
 
 extends RefCounted
 class_name AutoBalancer
-const GameLogger := preload("res://scripts/core/GameLogger.gd")
+const GameLogger := preload("res://scripts/core/game_logger.gd")
 
 # Configuration
 @export var target_survival_rate: float = 0.85  # 85% of simulations should survive 10 days

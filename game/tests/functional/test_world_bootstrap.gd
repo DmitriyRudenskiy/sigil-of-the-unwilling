@@ -13,7 +13,7 @@ func after_test() -> void:
 # Бут: World.tscn + помпа реальных кадров. _ready контроллера содержит await-цепочку,
 # поэтому ждём, пока finalize доберётся до _event_router (до 120 кадров).
 func _boot_world() -> WorldController:
-	var res: Resource = ResourceLoader.load("res://scenes/World.tscn")
+	var res: Resource = ResourceLoader.load("res://scenes/world.tscn")
 	var node: Node = res.instantiate()
 	node.name = "TestWorld"
 	get_tree().root.add_child(node)

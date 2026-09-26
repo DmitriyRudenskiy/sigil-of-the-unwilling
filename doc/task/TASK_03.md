@@ -16,7 +16,7 @@
 ### 2. Готовый код (Рефакторинг и Фиксы)
 
 #### Фикс 1: Менеджер Tween-анимаций в бою [High]
-**Файл:** `// FILE: res://scripts/systems/BattleView.gd`
+**Файл:** `// FILE: res://scripts/systems/battle_view.gd`
 **Суть:** Добавлен словарь `_active_tweens` для трекинга активных анимаций по `uid` юнита. Перед запуском новой анимации старая принудительно убивается.
 
 ```gdscript
@@ -28,16 +28,16 @@ const HEX_OUTLINE_RADIUS := BattleConfig.BATTLE_HEX_OUTLINE_RADIUS
 const ATTACK_LUNGE_PX := BattleConfig.BATTLE_ATTACK_LUNGE_PX
 const MOVE_TWEEN_SEC := BattleConfig.BATTLE_MOVE_TWEEN_SEC
 
-const _HexDraw = preload("res://scripts/core/HexDraw.gd")
-const _ObstacleLabel = preload("res://scenes/ui/ObstacleLabel.tscn")
-const _FloatingText = preload("res://scenes/ui/FloatingText.tscn")
-const _DamageNumber = preload("res://scenes/ui/DamageNumber.tscn")
-const _UnitSprite = preload("res://scenes/ui/UnitSprite.tscn")
-const _HeroFigure = preload("res://scenes/ui/HeroFigure.tscn")
-const _RetaliationArrow = preload("res://scenes/ui/RetaliationArrow.tscn")
-const ParticlePresets = preload("res://scripts/core/ParticlePresets.gd")
-const CursorOverlay = preload("res://scripts/ui/CursorOverlay.gd")
-const HighlightOverlay = preload("res://scripts/ui/HighlightOverlay.gd")
+const _HexDraw = preload("res://scripts/core/hex_draw.gd")
+const _ObstacleLabel = preload("res://scenes/ui/obstacle_label.tscn")
+const _FloatingText = preload("res://scenes/ui/floating_text.tscn")
+const _DamageNumber = preload("res://scenes/ui/damage_number.tscn")
+const _UnitSprite = preload("res://scenes/ui/unit_sprite.tscn")
+const _HeroFigure = preload("res://scenes/ui/hero_figure.tscn")
+const _RetaliationArrow = preload("res://scenes/ui/retaliation_arrow.tscn")
+const ParticlePresets = preload("res://scripts/core/particle_presets.gd")
+const CursorOverlay = preload("res://scripts/ui/cursor_overlay.gd")
+const HighlightOverlay = preload("res://scripts/ui/highlight_overlay.gd")
 
 enum CursorMode { DEFAULT, ATTACK, SPELL, RANGED, MOVE }
 
@@ -291,7 +291,7 @@ func _find_node(unit: BattleState.BattleUnit) -> Node2D:
 ```
 
 #### Фикс 2: Строгая логика AND для требований добычи [High]
-**Файл:** `// FILE: res://scripts/world/ResourceNodeManager.gd`
+**Файл:** `// FILE: res://scripts/world/resource_node_manager.gd`
 **Суть:** Заменена порочная практика раннего `return true` (OR-логика) на проверку всех условий. Теперь ресурс требует наличия **всех** указанных в `ResourceDef` параметров (инструмент, навык, юнит, расходник).
 
 ```gdscript
@@ -329,7 +329,7 @@ func _check_extraction(def: ResourceDef, keys: Dictionary) -> bool:
 *(Примечание: Замените только метод `_check_extraction` в существующем файле, остальной код класса не требует изменений).*
 
 #### Фикс 3: Оптимизация Hot Path в HexUtils [Medium]
-**Файл:** `// FILE: res://scripts/core/HexUtils.gd`
+**Файл:** `// FILE: res://scripts/core/hex_utils.gd`
 **Суть:** Убран вызов `get_config()` из `get_neighbor`. Состояние `odd_row_shift_right` кэшируется в статическую переменную `_shift_right`, что ускоряет генерацию карты и A* pathfinding на ~15-20%.
 
 ```gdscript
@@ -414,7 +414,7 @@ static func idx_to_pos(idx: int, w: int) -> Vector2i:
 ```
 
 #### Фикс 4: Безопасность типов при очистке шардов [Medium]
-**Файл:** `// FILE: res://scripts/world/WorldPersistence.gd`
+**Файл:** `// FILE: res://scripts/world/world_persistence.gd`
 **Суть:** Устранен потенциальный краш при приведении `Variant` к `String` в методе `_prune_old_shards`. Ключи словаря могут быть `StringName`, что ломает жесткую типизацию `var oldest: String`.
 
 ```gdscript
@@ -454,10 +454,10 @@ func _prune_old_shards(shards: Dictionary, current_turn: int) -> void:
 ### 3. Инструкция по установке и внедрению (Runbook)
 
 **Шаг 1: Применение изменений**
-1. Откройте `res://scripts/systems/BattleView.gd` и полностью замените его содержимое на код из **Фикса 1**.
-2. Откройте `res://scripts/world/ResourceNodeManager.gd`, найдите метод `_check_extraction` и замените его тело на код из **Фикса 2**.
-3. Откройте `res://scripts/core/HexUtils.gd` и полностью замените его на код из **Фикса 3**.
-4. Откройте `res://scripts/world/WorldPersistence.gd`, найдите метод `_prune_old_shards` и замените его на код из **Фикса 4**.
+1. Откройте `res://scripts/systems/battle_view.gd` и полностью замените его содержимое на код из **Фикса 1**.
+2. Откройте `res://scripts/world/resource_node_manager.gd`, найдите метод `_check_extraction` и замените его тело на код из **Фикса 2**.
+3. Откройте `res://scripts/core/hex_utils.gd` и полностью замените его на код из **Фикса 3**.
+4. Откройте `res://scripts/world/world_persistence.gd`, найдите метод `_prune_old_shards` и замените его на код из **Фикса 4**.
 
 **Шаг 2: Интеграционные изменения**
 - Новые классы не создавались, изменения в `project.godot` (Autoloads) не требуются.
@@ -468,7 +468,7 @@ func _prune_old_shards(shards: Dictionary, current_turn: int) -> void:
 ```bash
 godot --headless --script res://tests/run_tests.gd
 # Или просто проверьте синтаксис:
-godot --headless --check-only --script res://scripts/systems/BattleView.gd
+godot --headless --check-only --script res://scripts/systems/battle_view.gd
 ```
 
 ---
@@ -477,10 +477,10 @@ godot --headless --check-only --script res://scripts/systems/BattleView.gd
 
 | № | Файл (путь) | Суть изменения | Приоритет |
 |---|-------------|----------------|-----------|
-| 1 | `res://scripts/systems/BattleView.gd` | Внедрение `_active_tweens` для предотвращения наложения и утечки Tween-анимаций юнитов. | **High** |
-| 2 | `res://scripts/world/ResourceNodeManager.gd` | Исправление логики `_check_extraction` с OR на строгую AND для всех требований добычи. | **High** |
-| 3 | `res://scripts/core/HexUtils.gd` | Кэширование `_shift_right` в статику для устранения оверхеда вызовов в hot-path pathfinding. | **Medium** |
-| 4 | `res://scripts/world/WorldPersistence.gd` | Удаление жесткой типизации `String` при `pop_front()` для поддержки ключей `StringName`. | **Medium** |
+| 1 | `res://scripts/systems/battle_view.gd` | Внедрение `_active_tweens` для предотвращения наложения и утечки Tween-анимаций юнитов. | **High** |
+| 2 | `res://scripts/world/resource_node_manager.gd` | Исправление логики `_check_extraction` с OR на строгую AND для всех требований добычи. | **High** |
+| 3 | `res://scripts/core/hex_utils.gd` | Кэширование `_shift_right` в статику для устранения оверхеда вызовов в hot-path pathfinding. | **Medium** |
+| 4 | `res://scripts/world/world_persistence.gd` | Удаление жесткой типизации `String` при `pop_front()` для поддержки ключей `StringName`. | **Medium** |
 
 Для того чтобы следовать лучшим практикам Godot и не создавать элементы интерфейса (UI) программно в скриптах, мы перенесем их инициализацию в `.tscn` сцены. Скрипты будут просто получать ссылки на уже существующие узлы через `@onready` или `get_node()`.
 
@@ -491,12 +491,12 @@ godot --headless --check-only --script res://scripts/systems/BattleView.gd
 
 ```tscn
 ==========================================================================
-ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scenes/Battle.tscn
+ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scenes/battle.tscn
 ==========================================================================
 [gd_scene load_steps=4 format=3]
-[ext_resource type="Script" path="res://scripts/systems/BattleController.gd" id="1"]
-[ext_resource type="PackedScene" path="res://scenes/BattleView.tscn" id="2"]
-[ext_resource type="PackedScene" path="res://scenes/ui/BattleUI.tscn" id="3"]
+[ext_resource type="Script" path="res://scripts/systems/battle_controller.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/battle_view.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/ui/battle_ui.tscn" id="3"]
 [node name="Battle" type="Node2D"]
 script = ExtResource("1")
 [node name="BattleView" parent="." instance=ExtResource("2")]
@@ -508,7 +508,7 @@ script = ExtResource("1")
 
 ```gdscript
 ==========================================================================
-ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/systems/BattleController.gd
+ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/systems/battle_controller.gd
 ==========================================================================
 extends Node2D
 class_name BattleController
@@ -565,11 +565,11 @@ func _init_input() -> void:
 
 ```tscn
 ==========================================================================
-ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scenes/World.tscn
+ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scenes/world.tscn
 ==========================================================================
 [gd_scene load_steps=3 format=3]
-[ext_resource type="Script" path="res://scripts/world/WorldController.gd" id="1"]
-[ext_resource type="PackedScene" path="res://scenes/ui/WorldUI.tscn" id="2"]
+[ext_resource type="Script" path="res://scripts/world/world_controller.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/ui/world_ui.tscn" id="2"]
 [node name="World" type="Node2D"]
 script = ExtResource("1")
 [node name="WorldUI" parent="." instance=ExtResource("2")]
@@ -580,7 +580,7 @@ script = ExtResource("1")
 
 ```gdscript
 ==========================================================================
-ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/world/WorldController.gd
+ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/world/world_controller.gd
 ==========================================================================
 class_name WorldController
 extends Node2D
@@ -613,7 +613,7 @@ func _ready() -> void:
 
 ```gdscript
 ==========================================================================
-ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/world/WorldBootstrap.gd
+ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/world/world_bootstrap.gd
 ==========================================================================
 # ...
 static func run(
@@ -643,19 +643,19 @@ static func _init_ui(parent: Node2D, _platform: Variant, R: BootstrapResult) -> 
 
 ```tscn
 ==========================================================================
-ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scenes/ui/WorldUI.tscn
+ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scenes/ui/world_ui.tscn
 ==========================================================================
 [gd_scene load_steps=11 format=3]
-[ext_resource type="Script" path="res://scripts/ui/WorldUIManager.gd" id="1"]
-[ext_resource type="PackedScene" path="res://scenes/ui/AdventureUI.tscn" id="2"]
-[ext_resource type="PackedScene" path="res://scenes/ui/ArtifactInventoryScreen.tscn" id="3"]
-[ext_resource type="PackedScene" path="res://scenes/ui/ArtifactChestDialog.tscn" id="4"]
-[ext_resource type="PackedScene" path="res://scenes/ui/CityScreen.tscn" id="5"]
-[ext_resource type="Script" path="res://scripts/ui/MarkerLayer.gd" id="6"]
-[ext_resource type="Script" path="res://scripts/world/HexGridOverlay.gd" id="7"]
-[ext_resource type="PackedScene" path="res://scenes/ui/DeathSequence.tscn" id="8"]
-[ext_resource type="PackedScene" path="res://scenes/ui/ChronicleScreen.tscn" id="9"]
-[ext_resource type="PackedScene" path="res://scenes/ui/GameOverScreen.tscn" id="10"]
+[ext_resource type="Script" path="res://scripts/ui/world_ui_manager.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/ui/adventure_ui.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/ui/artifact_inventory_screen.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/ui/artifact_chest_dialog.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/ui/city_screen.tscn" id="5"]
+[ext_resource type="Script" path="res://scripts/ui/marker_layer.gd" id="6"]
+[ext_resource type="Script" path="res://scripts/world/hex_grid_overlay.gd" id="7"]
+[ext_resource type="PackedScene" path="res://scenes/ui/death_sequence.tscn" id="8"]
+[ext_resource type="PackedScene" path="res://scenes/ui/chronicle_screen.tscn" id="9"]
+[ext_resource type="PackedScene" path="res://scenes/ui/game_over_screen.tscn" id="10"]
 
 [node name="WorldUI" type="Node"]
 script = ExtResource("1")
@@ -677,7 +677,7 @@ visible = false
 
 ```gdscript
 ==========================================================================
-ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/ui/WorldUIManager.gd
+ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/ui/world_ui_manager.gd
 ==========================================================================
 extends Node
 class_name WorldUIManager
@@ -696,7 +696,7 @@ class_name WorldUIManager
 
 ```gdscript
 ==========================================================================
-ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/world/HeroLifecycleSystem.gd
+ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/world/hero_lifecycle_system.gd
 ==========================================================================
 # ...
 func _show_death_sequence(deceased_name: String, cause: StringName, successor: Node, res_city: City = null) -> void:
@@ -732,7 +732,7 @@ func _on_death_chronicle_requested() -> void:
 
 ```gdscript
 ==========================================================================
-ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/systems/EndgameController.gd
+ПУТЬ: /Users/user/sigil-of-the-unwilling/game/scripts/systems/endgame_controller.gd
 ==========================================================================
 # ...
 func _show_screen(result: String, reason: StringName, summary: Dictionary) -> void:
@@ -764,10 +764,10 @@ func _show_screen(result: String, reason: StringName, summary: Dictionary) -> vo
 *   **Действие:** Уберите его из списка Autoload (Project -> Project Settings -> Autoload), если он там был.
 
 #### 1.2. Очистка `Platform.gd` от GUT
-В файле `res://scripts/core/Platform.gd` удалены упоминания GUT и добавлена поддержка CLI-аргументов gdUnit4.
+В файле `res://scripts/core/platform.gd` удалены упоминания GUT и добавлена поддержка CLI-аргументов gdUnit4.
 
 ```gdscript
-# res://scripts/core/Platform.gd
+# res://scripts/core/platform.gd
 class_name Platform
 extends RefCounted
 
@@ -833,7 +833,7 @@ res://test/
 # res://test/core/TestHexUtils.gd
 extends GdUnitTestSuite
 
-const HexUtils = preload("res://scripts/core/HexUtils.gd")
+const HexUtils = preload("res://scripts/core/hex_utils.gd")
 
 func test_hex_distance_same_cell() -> void:
     assert_int(HexUtils.hex_distance(Vector2i(5, 5), Vector2i(5, 5))).is_equal(0)
@@ -857,9 +857,9 @@ func test_offset_to_cube_and_back() -> void:
 # res://test/battle/TestBattleRules.gd
 extends GdUnitTestSuite
 
-const BattleRules = preload("res://scripts/core/BattleRules.gd")
-const UnitStats = preload("res://scripts/entities/UnitStats.gd")
-const UnitStack = preload("res://scripts/entities/UnitStack.gd")
+const BattleRules = preload("res://scripts/core/battle_rules.gd")
+const UnitStats = preload("res://scripts/entities/unit_stats.gd")
+const UnitStack = preload("res://scripts/entities/unit_stack.gd")
 
 var _rng: RandomNumberGenerator
 var _attacker_stack: UnitStack
@@ -905,9 +905,9 @@ func test_calculate_attack_base_damage() -> void:
 # res://test/city/TestCityEconomy.gd
 extends GdUnitTestSuite
 
-const City = preload("res://scripts/world/City.gd")
+const City = preload("res://scripts/world/city.gd")
 const CityBalance = preload("res://scripts/world/CityBalance.gd")
-const PopUnit = preload("res://scripts/world/PopUnit.gd")
+const PopUnit = preload("res://scripts/world/pop_unit.gd")
 
 var _city: City
 
@@ -1158,7 +1158,7 @@ async def mcp() -> GodotMCPClient:
 @pytest_asyncio.fixture
 async def battle_scene(mcp: GodotMCPClient):
     """Запуск сцены боя и ожидание инициализации."""
-    await mcp.run_scene("res://scenes/Battle.tscn")
+    await mcp.run_scene("res://scenes/battle.tscn")
     await mcp.wait_frames(30)
     yield mcp
     await mcp.stop_running_scene()
@@ -1167,7 +1167,7 @@ async def battle_scene(mcp: GodotMCPClient):
 @pytest_asyncio.fixture
 async def world_scene(mcp: GodotMCPClient):
     """Запуск мировой сцены."""
-    await mcp.run_scene("res://scenes/World.tscn")
+    await mcp.run_scene("res://scenes/world.tscn")
     await mcp.wait_frames(60)
     yield mcp
     await mcp.stop_running_scene()
@@ -1796,7 +1796,7 @@ async def test_prune_shards_no_crash(world_scene):
         var world = get_tree().current_scene
         var persistence = world.get_node_or_null("SaveManager")
         # Используем WorldPersistence напрямую через код
-        var wp = load("res://scripts/world/WorldPersistence.gd").new(null)
+        var wp = load("res://scripts/world/world_persistence.gd").new(null)
 
         # Создаём 15 шардов с разными датами активности
         var shards := {}
@@ -1833,7 +1833,7 @@ async def test_prune_shards_with_stringname_keys(world_scene):
     mcp = world_scene
 
     result = await mcp.execute_code("""
-        var wp = load("res://scripts/world/WorldPersistence.gd").new(null)
+        var wp = load("res://scripts/world/world_persistence.gd").new(null)
 
         # Создаём шарды со StringName-ключами (как в реальной игре)
         var shards := {}
@@ -1877,7 +1877,7 @@ async def test_full_save_load_cycle_with_many_shards(world_scene):
         var save_manager = SaveManager.new()
 
         # Создаём SaveData с большим количеством шардов
-        var save_data = load("res://scripts/core/SaveData.gd").new()
+        var save_data = load("res://scripts/core/save_data.gd").new()
         save_data.run_seed = 12345
         save_data.date = {"month": 1, "week": 1, "day": 1}
         save_data.hero = {
@@ -1936,7 +1936,7 @@ async def test_prune_preserves_newest_shards(world_scene):
     mcp = world_scene
 
     result = await mcp.execute_code("""
-        var wp = load("res://scripts/world/WorldPersistence.gd").new(null)
+        var wp = load("res://scripts/world/world_persistence.gd").new(null)
 
         var shards := {}
         # Шард 0 — самый старый (turn=10), шард 14 — самый новый (turn=150)

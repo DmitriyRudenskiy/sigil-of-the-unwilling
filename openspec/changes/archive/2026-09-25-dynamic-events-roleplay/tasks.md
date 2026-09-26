@@ -6,7 +6,7 @@
 
 #### Task 1: UIManager с методами show_decision_panel() и show_crisis_panel()
 - **Статус**: Done
-- **Файл**: `game/scripts/managers/UIManager.gd`
+- **Файл**: `game/scripts/managers/ui_manager.gd`
 - **Acceptance Criteria**:
   - [x] Метод `show_decision_panel(event_data, event_id)` реализован
   - [x] Метод `show_crisis_panel(crisis_data, crisis_id)` реализован
@@ -15,7 +15,7 @@
 
 #### Task 2: GameManager с недостающими методами
 - **Статус**: Done  
-- **Файл**: `game/scripts/managers/GameManager.gd`
+- **Файл**: `game/scripts/managers/game_manager.gd`
 - **Acceptance Criteria**:
   - [x] Метод `on_day_passed()` вызывает триггеры событий
   - [x] Метод `start_crisis()` блокирует игровой цикл
@@ -42,7 +42,7 @@
 
 #### Task 5: Интеграция в основной цикл
 - **Статус**: Done
-- **Файл**: `game/scripts/main/Main.gd`
+- **Файл**: `game/scripts/main/main.gd`
 - **Acceptance Criteria**:
   - [x] Вызов `on_day_passed()` в цикле
   - [x] Блокировка цикла во время кризиса

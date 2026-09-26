@@ -2,9 +2,9 @@ extends BaseTest
 ## Генераторы карты: реки, дороги, горы, лес + pathfinding-стоимости.
 ## Критерии из openspec/changes/map-generation-improvement (Tasks 3–10, 11).
 
-const _HexUtils = preload("res://scripts/core/HexUtils.gd")
-const _HexPathfinding = preload("res://scripts/core/HexPathfinding.gd")
-const _TerrainCostTable = preload("res://scripts/data/TerrainCostTable.gd")
+const _HexUtils = preload("res://scripts/core/hex_utils.gd")
+const _HexPathfinding = preload("res://scripts/core/hex_pathfinding.gd")
+const _TerrainCostTable = preload("res://scripts/data/terrain_cost_table.gd")
 
 const MAP_SIZE := 60
 

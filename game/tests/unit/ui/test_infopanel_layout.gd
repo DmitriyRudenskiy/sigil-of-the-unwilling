@@ -2,8 +2,8 @@
 # миникарта — первая панель сайдбара. Структуру менять нельзя (манифест 2026-09-11).
 extends BaseTest
 
-const _Scene := preload("res://scenes/ui/InfoPanel.tscn")
-const _Adventure := preload("res://scenes/ui/AdventureUI.tscn")
+const _Scene := preload("res://scenes/ui/info_panel.tscn")
+const _Adventure := preload("res://scenes/ui/adventure_ui.tscn")
 var _panel: Node = null
 var _ui: Node = null
 

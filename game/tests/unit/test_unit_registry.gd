@@ -1,6 +1,6 @@
 extends BaseTest
 
-const _STACK_PATH := "res://scripts/entities/UnitStack.gd"
+const _STACK_PATH := "res://scripts/entities/unit_stack.gd"
 
 func _reg():
 	return Units

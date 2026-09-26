@@ -1,7 +1,7 @@
 extends BaseTest
 
-const WORLD_SCENE: String = "res://scenes/World.tscn"
-const MAIN_MENU_SCENE: String = "res://scenes/MainMenu.tscn"
+const WORLD_SCENE: String = "res://scenes/world.tscn"
+const MAIN_MENU_SCENE: String = "res://scenes/main_menu.tscn"
 const MAX_SECONDS: float = 4.0
 
 var _nodes: Array[Node] = []
@@ -33,7 +33,7 @@ func test_world_boots_with_key_nodes() -> void:
 	var wc_script: Script = world_node.get_script()
 	assert_that(wc_script).is_not_null()
 	if wc_script != null:
-		assert_that(wc_script.resource_path).is_equal("res://scripts/world/WorldController.gd")
+		assert_that(wc_script.resource_path).is_equal("res://scripts/world/world_controller.gd")
 
 	var ui: Node = world_node.get_node_or_null("WorldUI")
 	assert_that(ui).is_not_null()
@@ -58,4 +58,4 @@ func test_main_menu_boots() -> void:
 	var script: Script = menu.get_script()
 	assert_that(script).is_not_null()
 	if script != null:
-		assert_that(script.resource_path).is_equal("res://scripts/ui/MainMenu.gd")
+		assert_that(script.resource_path).is_equal("res://scripts/ui/main_menu.gd")

@@ -1,6 +1,6 @@
 extends SceneTree
 
-const TUNE_FILE := "res://scripts/constants/GameNumbers.gd"
+const TUNE_FILE := "res://scripts/constants/game_numbers.gd"
 const RESOURCES: Array[StringName] = [&"food", &"industry", &"dust", &"science", &"influence"]
 
 const TUNED_BUILDINGS: Array[StringName] = [

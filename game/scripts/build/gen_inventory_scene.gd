@@ -1,6 +1,6 @@
 extends SceneTree
 
-var OUT := "res://scenes/ui/ArtifactInventoryScreen.tscn"
+var OUT := "res://scenes/ui/artifact_inventory_screen.tscn"
 
 var _ext: Array = []
 var _node_lines: Array = []
@@ -25,7 +25,7 @@ func _add_node(name: String, typ: String, parent_path: String, extra: String = "
 	_node_lines.append(line)
 
 func _build() -> void:
-	_ext_resource("Script", "res://scripts/ui/ArtifactInventoryScreen.gd", 1)
+	_ext_resource("Script", "res://scripts/ui/artifact_inventory_screen.gd", 1)
 
 	var uid := 1000
 

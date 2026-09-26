@@ -10,7 +10,7 @@ func _main_root() -> Node:
 	return Engine.get_main_loop().root
 
 func before_test() -> void:
-	screen = load("res://scenes/ui/CityScreen.tscn").instantiate() as CityScreen
+	screen = load("res://scenes/ui/city_screen.tscn").instantiate() as CityScreen
 	_main_root().add_child(screen)
 	city = City.new()
 	city.display_name = "Тестгород"

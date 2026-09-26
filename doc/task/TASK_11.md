@@ -822,7 +822,7 @@ async def mcp():
 @pytest_asyncio.fixture
 async def battle_scene(mcp: GodotMCP):
     """Запуск сцены боя + ожидание готовности."""
-    await mcp.run_scene("res://scenes/Battle.tscn")
+    await mcp.run_scene("res://scenes/battle.tscn")
     await mcp.wait_ready(STARTUP_TIMEOUT)
     await mcp.wait_frames(30)
     yield mcp
@@ -832,7 +832,7 @@ async def battle_scene(mcp: GodotMCP):
 @pytest_asyncio.fixture
 async def world_scene(mcp: GodotMCP):
     """Запуск мировой сцены + ожидание готовности."""
-    await mcp.run_scene("res://scenes/World.tscn")
+    await mcp.run_scene("res://scenes/world.tscn")
     await mcp.wait_ready(STARTUP_TIMEOUT)
     await mcp.wait_frames(60)
     yield mcp
