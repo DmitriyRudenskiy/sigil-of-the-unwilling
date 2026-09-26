@@ -77,6 +77,7 @@
 ### Task 2.4: Implement 5 Seasonal Events
 **Priority**: P2  
 **Estimate**: 4h  
+**Status**: DEFERRED — нет season-инфраструктуры (нет day→season маппинга и season-trigger в `_check_triggers`); EventType.SEASONAL зарезервирован. Нужен отдельный change (season-система).
 **Acceptance Criteria**:
 - [ ] Весенний паводок
 - [ ] Летняя засуха
@@ -87,12 +88,14 @@
 ### Task 2.5: Implement 5 Rare Events (RimWorld-style)
 **Priority**: P2  
 **Estimate**: 2h  
+**Status**: DONE (5 rare events + EventType system + tests; headless-verified)
 **Acceptance Criteria**:
-- [ ] Падающий метеорит с ресурсами
-- [ ] Прибытие беженцев с уникальными навыками
-- [ ] Обнаружение древней технологии
-- [ ] Визит загадочного торговца
-- [ ] Пробуждение древнего духа
+- [x] Падающий метеорит с ресурсами *(rare_01_meteor.json)*
+- [x] Прибытие беженцев с уникальными навыками *(rare_02_refugees.json)*
+- [x] Обнаружение древней технологии *(rare_03_ancient_tech.json)*
+- [x] Визит загадочного торговца *(rare_04_mysterious_merchant.json)*
+- [x] Пробуждение древнего духа *(rare_05_ancient_spirit.json)*
+- [x] `EventType` enum (COMMON/RARE/SEASONAL) + поле `type` в `DynamicEventData` (default COMMON, backward-compat со старыми event_*.json); редкость на практике задаёт `weight < 1.0`; 4 новых теста в `test_crisis_events.gd` (common=10, rare=5, default type, low weight)
 
 ---
 
@@ -164,9 +167,9 @@
 **Priority**: P2  
 **Estimate**: 3h  
 **Acceptance Criteria**:
-- [ ] Модификатор сложности влияет на частоту кризисов
+- [x] Модификатор сложности влияет на частоту кризисов *(difficulty 1-5, default 3; get_crisis_difficulty_modifier: easy 0.5 / normal 1.0 / hard 1.5; get_crisis_chance() вынесен из should_trigger_crisis для headless-теста; 4 новых теста)*
 - [x] RimWorld-style: усложнение со временем (месяцы игры) *(time_factor в should_trigger_crisis)*
-- [ ] Настройки в меню сложности
+- [ ] Настройки в меню сложности *(отложено: UI, не верифицируется headless)*
 - [ ] Баланс весов событий для разных уровней
 
 ---

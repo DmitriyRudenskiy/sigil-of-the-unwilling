@@ -10,7 +10,8 @@
 
 # Локальное хранилище OpenViking (memory-stack): runtime-данные —
 # sqlite-очереди, vectordb, сессии, identity. Не в общий репо.
-data/
+# Только top-level /data/ — НЕ game/data/ (там контент игры: event/crisis JSON).
+/data/
 
 # Конфиг Claude Code (slash-команды в commands/) — локальный тулинг, не в общий репо.
 .claude/

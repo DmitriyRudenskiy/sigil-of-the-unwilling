@@ -28,6 +28,15 @@ enum EventFrequency {
 	FREQUENT = 5      # 1 раз в 3-7 дней
 }
 
+## Категории обычных событий (spec: Common/Rare/Crisis/Seasonal). Кризисы —
+## отдельный класс (CrisisEventData); здесь типы событий DynamicEventData.
+## Редкость на практике задаёт weight (см. try_trigger_event); type — категория.
+enum EventType {
+	COMMON,
+	RARE,
+	SEASONAL
+}
+
 enum ChoiceImpact {
 	POSITIVE_MAJOR,   # +Значительный бонус
 	POSITIVE_MINOR,   # +Небольшой бонус
@@ -52,6 +61,22 @@ static func _as_dict(v) -> Dictionary:
 
 static func _as_array(v) -> Array:
 	return v if v is Array else []
+
+## Тип события из JSON: принимает int (enum-значение) или читаемое имя
+## ("rare"/"seasonal"/"common"). Неизвестное/отсутствующее → COMMON
+## (backward-compat со старыми event_*.json без поля type).
+static func _as_event_type(v) -> int:
+	if v is int or v is float:
+		return int(v)
+	if v is String:
+		match str(v).to_lower():
+			"rare":
+				return EventType.RARE
+			"seasonal":
+				return EventType.SEASONAL
+			_:
+				return EventType.COMMON
+	return EventType.COMMON
 
 # Данные выбора в событии
 class ChoiceData:
@@ -79,6 +104,7 @@ class DynamicEventData:
 	var triggers: Dictionary = {}  # Условия активации
 	var choices: Array[ChoiceData] = []
 	var weight: float = 1.0
+	var type: EventType = EventType.COMMON  # Категория события (Common/Rare/Seasonal)
 
 	func _init(data: Dictionary = {}):
 		id = CrisisEventSystem._as_string(data.get("id", ""), "")
@@ -89,6 +115,7 @@ class DynamicEventData:
 		min_day = CrisisEventSystem._as_int(data.get("min_day"), 1)
 		triggers = CrisisEventSystem._as_dict(data.get("triggers"))
 		weight = CrisisEventSystem._as_float(data.get("weight"), 1.0)
+		type = CrisisEventSystem._as_event_type(data.get("type")) as EventType
 		for c in CrisisEventSystem._as_array(data.get("choices")):
 			if c is Dictionary:
 				choices.append(ChoiceData.new(c))
@@ -141,6 +168,9 @@ var _crisis_start_day: int = 0
 var base_event_chance: float = 0.3  # Базовый шанс события каждый день
 var crisis_chance_multiplier: float = 0.05  # Шанс кризиса растёт со временем
 var max_active_events: int = 3
+## Уровень сложности (1=лёгкая, 3=нормальная, 5=сложная). Влияет на частоту
+## кризисов (Task 4.4). Меню сложности (UI) вне scope — это ядро-модификатор.
+var difficulty: int = 3
 
 # Загруженные данные
 var event_templates: Array[DynamicEventData] = []
@@ -427,13 +457,23 @@ func _mark_resolved(type: String, id: String, choice_index: int = -1) -> void:
 func can_trigger_crisis() -> bool:
 	return day_counter - last_crisis_day >= crisis_cooldown_days
 
-## Проверка шанса кризиса
-func should_trigger_crisis() -> bool:
-	# Шанс растёт со временем и от сложности
+## Множитель частоты кризисов от сложности: easy 0.5, normal 1.0, hard 1.5.
+func get_crisis_difficulty_modifier() -> float:
+	return clampf(1.0 + (difficulty - 3) * 0.25, 0.25, 2.0)
+
+func set_difficulty(level: int) -> void:
+	difficulty = clampi(level, 1, 5)
+
+## Рассчитанный шанс кризиса на день. Вынесен из should_trigger_crisis для
+## headless-тестов (randf() не детерминирован): тесты проверяют само значение.
+func get_crisis_chance() -> float:
 	var base_chance = crisis_chance_multiplier
 	var time_factor = float(day_counter) / 100.0  # Увеличивается каждые 100 дней
-	var total_chance = base_chance + time_factor
-	return randf() < total_chance
+	return (base_chance + time_factor) * get_crisis_difficulty_modifier()
+
+## Проверка шанса кризиса
+func should_trigger_crisis() -> bool:
+	return randf() < get_crisis_chance()
 
 ## Trigger случайного кризиса
 func trigger_random_crisis():

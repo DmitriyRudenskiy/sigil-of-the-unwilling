@@ -1,0 +1,40 @@
+{
+  "id": "rare_04_mysterious_merchant",
+  "title": "Загадочный торговец",
+  "description": "В тумане у ворот остановилась повозка без опознавательных знаков. Незнакомец в капюшоне предлагает товары, которых не бывает на обычных рынках.",
+  "icon_path": "res://assets/ui/events/merchant_event.png",
+  "type": "rare",
+  "frequency": 2,
+  "min_day": 30,
+  "weight": 0.4,
+  "triggers": {},
+  "choices": [
+    {
+      "text": "Купить редкое (-80 золота, +25 материалов)",
+      "tooltip": "Дорого, но товар уникален",
+      "impact": 2,
+      "effects": {
+        "resource_change": {"gold": -80, "materials": 25}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Обменяться (-20 дерева, +30 еды)",
+      "tooltip": "Честный обмен, если верить незнакомцу",
+      "impact": 1,
+      "effects": {
+        "resource_change": {"wood": -20, "food": 30}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Отказаться (-3 морали)",
+      "tooltip": "Жители не понимают, почему вы упустили такую возможность",
+      "impact": 3,
+      "effects": {
+        "morale_change": -3
+      },
+      "requirements": {}
+    }
+  ]
+}
