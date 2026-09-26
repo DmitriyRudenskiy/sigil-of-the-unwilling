@@ -164,26 +164,40 @@ func place_army(
 func build_queue() -> void:
 	turn_queue.clear()
 
+	# Party-based turn order (tactical-combat spec, «Инициатива и ходы»):
+	# each round one side's whole party acts, then the other. The side with the
+	# higher top initiative (speed) acts first; within a party, units act by
+	# speed desc, then hp, then uid. (Replaces the old globally speed-sorted
+	# interleaved queue.)
+	var atk: Array = []
+	var def: Array = []
 	for u in attacker_units:
 		if u.is_alive():
-			turn_queue.append(u)
-
+			atk.append(u)
 	for u in defender_units:
 		if u.is_alive():
-			turn_queue.append(u)
+			def.append(u)
 
-	turn_queue.sort_custom(func(a: BattleUnit, b: BattleUnit) -> bool:
+	var first: Array
+	var second: Array
+	if _top_initiative(atk) >= _top_initiative(def):
+		first = atk
+		second = def
+	else:
+		first = def
+		second = atk
+	var party_cmp := func(a: BattleUnit, b: BattleUnit) -> bool:
 		if a.get_speed() != b.get_speed():
 			return a.get_speed() > b.get_speed()
-
 		if a.get_hp() != b.get_hp():
 			return a.get_hp() > b.get_hp()
-
-		if a.side != b.side:
-			return a.side == Side.ATTACKER
-
 		return a.uid < b.uid
-	)
+	first.sort_custom(party_cmp)
+	second.sort_custom(party_cmp)
+	for u in first:
+		turn_queue.append(u)
+	for u in second:
+		turn_queue.append(u)
 
 	# TASK_18 R9 invariants: queue holds exactly the alive units.
 	var _alive: int = 0
@@ -198,6 +212,12 @@ func build_queue() -> void:
 	assert(turn_queue.size() == _alive, "build_queue: queue size != alive units")
 
 	turn_idx = -1
+
+func _top_initiative(p: Array) -> int:
+	var top := 0
+	for u in p:
+		top = maxi(top, u.get_speed())
+	return top
 
 func advance_turn() -> void:
 	turn_idx += 1
