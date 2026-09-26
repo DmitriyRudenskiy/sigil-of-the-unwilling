@@ -8,5 +8,7 @@ reports/
 *.gd.uid
 # Вендорный MCP-сервер (устанавливается локально: git clone + npm install + npm run build)
 addons/godot-mcp/
+# Тестовый фреймворк gdUnit4 (устанавливается локально из репозитория вендора, см. game/tests/README.md)
+addons/gdunit4/
 # Артефакт инъекции godot-mcp
 mcp_interaction_server.gd

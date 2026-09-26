@@ -15,7 +15,8 @@ bash tests/run_all.sh
 ## Требования
 
 - Godot 4.7+ (headless). Путь переопределяется: `GODOT_BIN=/path/to/Godot`
-- gdUnit4 4.x — аддон в `addons/gdunit4`
+- gdUnit4 **6.2.1** — аддон в `addons/gdunit4` (не трекается в git,
+  устанавливается из репозитория вендора, см. «Установка gdUnit4» ниже)
 - Node.js 18+ — для MCP-сервера (проверяется в `run_all.sh`)
 - godot-mcp **v3.1.0** — ставится локально (не коммитится, gitignored):
   `git clone https://github.com/tugcantopaloglu/godot-mcp.git addons/godot-mcp && cd addons/godot-mcp && npm install && npm run build`;
@@ -24,6 +25,30 @@ bash tests/run_all.sh
 - Python 3.12, venv в `addons/venv` (переопределяется `MCP_PY`):
   **mcp 2.1.1, pytest 9.1.1, anyio 4.15.0**. `pip` в venv сломан —
   версии фиксированы, не устанавливать заново.
+
+## Установка gdUnit4
+
+Аддон исключён из репозитория (`.gitignore`: `addons/gdunit4/`) и ставится
+локально одной командой из релиза вендора
+([MikeSchulze/gdUnit4](https://github.com/MikeSchulze/gdUnit4), тег `v6.2.1` — версия,
+с которой зафиксирована зелёная точка тестов):
+
+```bash
+cd game
+git clone --depth 1 --branch v6.2.1 https://github.com/MikeSchulze/gdUnit4.git /tmp/gdunit4-install
+cp -r /tmp/gdunit4-install/addons/gdunit4 addons/gdunit4
+rm -rf /tmp/gdunit4-install
+```
+
+После этого включите плагин (в редакторе: Project → Project Settings → Plugins;
+в CLI-прогонах это делает сам `run_all.sh`) и проверьте установку:
+
+```bash
+bash tests/run_all.sh   # секция gdUnit4 должна запуститься без ошибок загрузки аддона
+```
+
+Обновление версии вендора — заменить тег в команде выше и синхронизировать
+базовую зелёную точку (количество сьютов/кейсов) в этом README.
 
 ## Структура
 

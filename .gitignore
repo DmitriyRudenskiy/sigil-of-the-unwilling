@@ -1,3 +1,13 @@
+# Godot
+*.import
+*.uid
+
+# GDScript compiled files
+*.gdc
+
+# Logs
+*.log
+
 # Локальное хранилище OpenViking (memory-stack): runtime-данные —
 # sqlite-очереди, vectordb, сессии, identity. Не в общий репо.
 data/

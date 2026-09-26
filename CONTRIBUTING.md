@@ -142,21 +142,31 @@ player.position += velocity * delta
 
 ### Тесты
 
-Используйте фреймворк GUT:
+Используйте фреймворк gdUnit4 (аддон `game/addons/gdunit4/` не трекается в git —
+инструкция по установке из репозитория вендора: [doc/testing.md](doc/testing.md#установка-gdunit4)):
 
 ```gdscript
-extends GutTest
+extends GdUnitTestSuite
 
 func test_player_takes_damage() -> void:
     var player = Player.new()
     var initial_health = player.health
-    
+
     player.take_damage(10)
-    
-    assert_eq(player.health, initial_health - 10)
+
+    assert_int(player.health).is_equal(initial_health - 10)
 ```
 
 ## 🧪 Запуск тестов
+
+Перед первым прогоном установите аддон gdUnit4 (см. ссылку выше):
+
+```bash
+cd game
+git clone --depth 1 --branch v6.2.1 https://github.com/MikeSchulze/gdUnit4.git /tmp/gdunit4-install
+cp -r /tmp/gdunit4-install/addons/gdunit4 addons/gdunit4
+rm -rf /tmp/gdunit4-install
+```
 
 ```bash
 cd game
@@ -164,11 +174,11 @@ cd game
 # Все тесты
 ./run_tests.sh
 
-# Конкретный тест
-godot --path game --unit-testing --test-res res://tests/test_<name>.gd
+# Полный прогон (gdUnit4 + MCP + структурные проверки)
+bash tests/run_all.sh
 
-# С подробными логами
-godot --path game --unit-testing --gut-log-level=1
+# Конкретный тест
+godot --headless --path . -s addons/gdunit4/bin/GdUnitCmdTool.gd --add res://tests/test_<name>.gd
 ```
 
 ## 🔀 Ветвление
@@ -224,7 +234,7 @@ godot --path game --unit-testing --gut-log-level=1
 
 - [Документация Godot](https://docs.godotengine.org/)
 - [OpenSpec Guidelines](https://github.com/Fission-AI/OpenSpec)
-- [GUT Testing Framework](https://github.com/bitbrain/gut)
+- [gdUnit4](https://github.com/MikeSchulze/gdUnit4)
 - [GDScript Style Guide](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_styleguide.html)
 
 ## ❓ Вопросы?

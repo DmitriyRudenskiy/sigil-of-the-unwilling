@@ -92,7 +92,7 @@ fission-ai/
 │   │   ├── ui/                # UI логика
 │   │   ├── economy/           # Экономика
 │   │   └── demographics/      # Демография
-│   ├── tests/                 # Тесты (gdUnit4 4.x); полный прогон: tests/run_all.sh
+│   ├── tests/                 # Тесты (gdUnit4 6.2.1, аддон ставится отдельно); прогон: tests/run_all.sh
 │   ├── tools/                 # Инструменты разработки
 │   ├── project.godot          # Конфигурация проекта
 │   └── run_tests.sh           # Скрипт запуска тестов
@@ -145,7 +145,16 @@ godot --path game --script tools/scenarios/<scenario>.gd
 
 ### Тестирование
 
-Проект использует **gdUnit4 4.x** (аддон `game/addons/gdunit4`).
+Проект использует фреймворк **gdUnit4 6.2.1** для тестирования. Аддон
+`game/addons/gdunit4/` не трекается в git — перед прогоном установите его из
+репозитория вендора (полная инструкция: [doc/testing.md](doc/testing.md#установка-gdunit4)):
+
+```bash
+cd game
+git clone --depth 1 --branch v6.2.1 https://github.com/MikeSchulze/gdUnit4.git /tmp/gdunit4-install
+cp -r /tmp/gdunit4-install/addons/gdunit4 addons/gdunit4
+rm -rf /tmp/gdunit4-install
+```
 
 ```bash
 # Полный прогон (gdUnit4 + MCP + структурные проверки) — единственная точка входа
