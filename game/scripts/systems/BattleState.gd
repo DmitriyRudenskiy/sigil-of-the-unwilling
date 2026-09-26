@@ -134,14 +134,14 @@ class BattleUnit extends RefCounted:
 
 	func clear_debuffs() -> void:
 		var to_remove: Array = []
-		for eff in statuses.keys():
+		for eff in statuses:
 			if _StatusEffects.is_debuff(eff):
 				to_remove.append(eff)
 		for eff in to_remove:
 			statuses.erase(eff)
 
 	func is_stunned() -> bool:
-		for eff in statuses.keys():
+		for eff in statuses:
 			if _StatusEffects.is_stun(eff):
 				return true
 		return false

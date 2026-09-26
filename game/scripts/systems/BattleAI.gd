@@ -52,12 +52,17 @@ func decide_turn(unit: BattleState.BattleUnit, state: BattleState, blocked: Dict
 
 		return result
 
-	var path_blocked := blocked.duplicate()
-	path_blocked.erase(nearest.cell)
+	# Перемещаемся в обход всех, кроме цели. Дублировать всю карту занятости
+	# на каждый ход AI дорого (O(N) аллокаций за бой); вместо этого временно
+	# снимаем блокировку клетки цели и восстанавливаем её сразу после поиска пути.
+	blocked.erase(nearest.cell)
 
 	var path: Array[Vector2i] = HexPathfinding.find_path(
-		unit.cell, nearest.cell, path_blocked, BattleState.BW, BattleState.BH, state.hex_shift_right, "bfs"
+		unit.cell, nearest.cell, blocked, BattleState.BW, BattleState.BH, state.hex_shift_right, "bfs"
 	)
+
+	if nearest.cell != unit.cell:
+		blocked[nearest.cell] = true
 	if path.size() <= 1:
 		return result
 

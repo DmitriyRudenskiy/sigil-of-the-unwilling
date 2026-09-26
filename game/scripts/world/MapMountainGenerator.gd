@@ -116,7 +116,7 @@ func _apply_erosion() -> void:
 	for pass_idx in EROSION_PASSES:
 		var changes: Dictionary = {}
 		
-		for cell in model.height_grid.keys():
+		for cell in model.height_grid:
 			var current = model.height_grid[cell]
 			var avg = current
 			var count = 1
@@ -130,7 +130,7 @@ func _apply_erosion() -> void:
 			var smoothed = current * 0.7 + avg * 0.3
 			changes[cell] = smoothed
 		
-		for cell in changes.keys():
+		for cell in changes:
 			model.height_grid[cell] = changes[cell]
 
 func _apply_snow_caps() -> void:
@@ -138,7 +138,7 @@ func _apply_snow_caps() -> void:
 	temp_noise.seed = model.seed_value + 999
 	temp_noise.frequency = 0.02
 	
-	for cell in model.height_grid.keys():
+	for cell in model.height_grid:
 		var height = model.height_grid[cell]
 		var temp = (temp_noise.get_noise_2d(cell.x, cell.y) + 1.0) / 2.0
 		

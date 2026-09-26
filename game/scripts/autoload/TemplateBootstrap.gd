@@ -1,4 +1,5 @@
 extends Node
+const GameLogger := preload("res://scripts/core/GameLogger.gd")
 
 func _ready() -> void:
 	TemplateEngine.register_handler(&"DIRECT_DAMAGE", T01DirectDamage.handle)
@@ -20,4 +21,4 @@ func _ready() -> void:
 	TemplateEngine.register_handler(&"HEAL_CLEAR", T17HealClear.handle)
 	TemplateEngine.register_handler(&"REVIVE", T18Revive.handle)
 	TemplateEngine.register_handler(&"PORTAL", T19Portal.handle)
-	print("[TemplateBootstrap] 19 template handlers registered")
+	GameLogger.info("19 template handlers registered", "Templates")

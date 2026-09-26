@@ -102,7 +102,7 @@ func get_active() -> Array:
 ## Returns the list of conditions that expired this tick.
 func tick() -> Array:
 	var expired: Array = []
-	for cond in active.keys():
+	for cond in active:
 		var d: int = active[cond]
 		if d < 0:
 			continue
@@ -117,7 +117,7 @@ func tick() -> Array:
 ## Merge all active conditions into a single Effects struct.
 func get_effects() -> Effects:
 	var e := Effects.new()
-	for cond in active.keys():
+	for cond in active:
 		var sig: Dictionary = EFFECTS[cond]
 		if sig.has("atk_dis"): e.attack_disadvantage = true
 		if sig.has("atk_adv_against"): e.attack_advantage_against = true

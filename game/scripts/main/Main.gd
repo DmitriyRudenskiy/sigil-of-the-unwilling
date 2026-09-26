@@ -1,4 +1,5 @@
 extends Node
+const GameLogger := preload("res://scripts/core/GameLogger.gd")
 
 ## Главная сцена игры - координирует менеджеры и игровой цикл
 
@@ -14,7 +15,7 @@ var _is_day_cycle_active: bool = true
 
 func _ready():
 	_connect_ui()
-	print("🎮 Игра запущена! День: %d" % game_manager.get_current_day())
+	GameLogger.info("Игра запущена. День: %d" % game_manager.get_current_day(), "Main")
 
 
 func _connect_ui():
@@ -41,14 +42,14 @@ func _advance_day():
 
 
 func _on_day_passed(day: int):
-	print("📅 Наступил день %d" % day)
+	GameLogger.world("Наступил день %d" % day)
 
 
 func _on_crisis_started(crisis_id: String):
 	_is_day_cycle_active = false
-	print("⚠️ КРИЗИС НАЧАЛСЯ: %s" % crisis_id)
+	GameLogger.warn("КРИЗИС НАЧАЛСЯ: %s" % crisis_id, "Main")
 
 
 func _on_crisis_ended(crisis_id: String, resolved: bool):
 	_is_day_cycle_active = true
-	print("✅ Кризис завершен: %s" % ("успешно" if resolved else "провалено"))
+	GameLogger.info("Кризис завершен: %s" % ("успешно" if resolved else "провалено"), "Main")

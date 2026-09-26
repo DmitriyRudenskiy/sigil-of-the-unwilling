@@ -214,7 +214,7 @@ func get_all_keys() -> Array[String]:
     ensure_definitions()
 
     var keys: Array[String] = []
-    for k in _definitions.keys():
+    for k in _definitions:
         keys.append(str(k))
 
     keys.sort()

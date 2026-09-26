@@ -309,7 +309,7 @@ func _rebuild_equipped() -> void:
 		return
 	var eq: HeroInventory = _hero.inventory
 	var shown := {}
-	for slot in eq.equipped.keys():
+	for slot in eq.equipped:
 		var art: Artifact = eq.equipped[slot]
 		if art == null:
 			continue

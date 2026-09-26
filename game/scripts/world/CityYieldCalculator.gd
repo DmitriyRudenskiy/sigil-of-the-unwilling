@@ -19,7 +19,7 @@ func calculate(city: City) -> Dictionary:
 	var total := {}
 	for k in _YIELD_KEYS:
 		total[k] = 0.0
-	for cell in _exploited_cache.keys():
+	for cell in _exploited_cache:
 		var y: Dictionary = city.tile_yield_fn.call(cell)
 		for k in _YIELD_KEYS:
 			total[k] = float(total[k]) + float(y.get(k, 0.0))

@@ -34,7 +34,7 @@ func get_state(world_ctrl, battle_ctrl) -> Dictionary:
 					followers_out.append({"name": str(f)})
 			state.followers = followers_out
 			var needs_out := {}
-			for _nkey in hero.needs.needs.keys():
+			for _nkey in hero.needs.needs:
 				needs_out[NeedType.to_name(int(_nkey))] = float(hero.needs.needs[_nkey])
 			state.needs = needs_out
 

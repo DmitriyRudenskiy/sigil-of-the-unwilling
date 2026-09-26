@@ -1,4 +1,5 @@
 extends Node
+const GameLogger := preload("res://scripts/core/GameLogger.gd")
 
 # MCP Interaction Server - TCP server for game interaction
 # Runs as an autoload inside the Godot game, accepting JSON commands over TCP.
@@ -29,6 +30,11 @@ var _grp_render: McpCommandsRender
 var _handlers: Dictionary = {}
 
 func _ready() -> void:
+	# SECURITY: MCP-сервер — инструмент разработки. В релизных сборках
+	# TCP-эндпоинт с полным доступом к игре должен быть полностью отключён.
+	if not OS.is_debug_build():
+		set_process(false)
+		return
 	# Ensure MCP server keeps processing even when game is paused
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_auth_token = OS.get_environment(AUTH_TOKEN_ENV)
@@ -47,7 +53,7 @@ func _ready() -> void:
 	if err != OK:
 		push_error("McpInteractionServer: Failed to listen on port %d, error: %d" % [port_, err])
 		return
-	print("McpInteractionServer: Listening on 127.0.0.1:%d" % port_)
+	GameLogger.info("Listening on 127.0.0.1:%d" % port_, "MCP")
 
 
 func _process(_delta: float) -> void:
@@ -75,7 +81,7 @@ func _process(_delta: float) -> void:
 				_client.disconnect_from_host()
 			_client = new_client
 			_buffer = ""
-			print("McpInteractionServer: Client connected")
+			GameLogger.trace("Client connected", "MCP")
 
 	# Read data from client
 	if _client == null:
@@ -84,7 +90,7 @@ func _process(_delta: float) -> void:
 	_client.poll()
 	var status: int = _client.get_status()
 	if status == StreamPeerTCP.STATUS_ERROR or status == StreamPeerTCP.STATUS_NONE:
-		print("McpInteractionServer: Client disconnected")
+		GameLogger.trace("Client disconnected", "MCP")
 		_client = null
 		_buffer = ""
 		_busy = false
@@ -196,4 +202,4 @@ func _exit_tree() -> void:
 	if _server != null:
 		_server.stop()
 		_server = null
-	print("McpInteractionServer: Stopped")
+	GameLogger.trace("Stopped", "MCP")
