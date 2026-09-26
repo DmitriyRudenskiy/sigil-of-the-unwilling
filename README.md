@@ -50,9 +50,22 @@
 
 4. **Запуск тестов**:
    ```bash
-   cd game
-   ./run_tests.sh
+   cd game && bash tests/run_all.sh   # полный прогон: gdUnit4 + MCP + структурные
    ```
+   Подробности (требования, правила, baseline) — в [doc/testing.md](doc/testing.md).
+
+5. **MCP-сервер (опционально, для AI-интеракции и MCP-тестов)**: вендорный
+   проект [tugcantopaloglu/godot-mcp](https://github.com/tugcantopaloglu/godot-mcp)
+   **не коммитится** (gitignored) и ставится локально один раз:
+   ```bash
+   cd game
+   git clone https://github.com/tugcantopaloglu/godot-mcp.git addons/godot-mcp
+   cd addons/godot-mcp && npm install && npm run build
+   ```
+   Точка входа: `game/addons/godot-mcp/build/index.js` (interaction-порт 9090).
+   Без него игра и gdUnit4-тесты работают; MCP-секция `run_all.sh` пропускается.
+   Сервер на время теста инжектит `game/mcp_interaction_server.gd` — транзиентный
+   артефакт (gitignored, чистится в конце прогона).
 
 ## 📁 Структура проекта
 
@@ -79,7 +92,7 @@ fission-ai/
 │   │   ├── ui/                # UI логика
 │   │   ├── economy/           # Экономика
 │   │   └── demographics/      # Демография
-│   ├── tests/                 # Тесты (GUT framework)
+│   ├── tests/                 # Тесты (gdUnit4 4.x); полный прогон: tests/run_all.sh
 │   ├── tools/                 # Инструменты разработки
 │   ├── project.godot          # Конфигурация проекта
 │   └── run_tests.sh           # Скрипт запуска тестов
@@ -132,25 +145,39 @@ godot --path game --script tools/scenarios/<scenario>.gd
 
 ### Тестирование
 
-Проект использует фреймворк **GUT 9.7.1** для тестирования:
+Проект использует **gdUnit4 4.x** (аддон `game/addons/gdunit4`).
 
 ```bash
-# Запустить все тесты
-cd game && ./run_tests.sh
+# Полный прогон (gdUnit4 + MCP + структурные проверки) — единственная точка входа
+cd game && bash tests/run_all.sh
 
-# Запустить конкретный тест
-godot --path game --unit-testing --test-res res://tests/test_map_generation.gd
-
-# Запустить тесты с выводом логов
-godot --path game --unit-testing --gut-log-level=1
+# Только gdUnit4 (headless)
+cd game && godot --headless --path . -s addons/gdunit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -c -a res://tests
 ```
+
+Подробное руководство (требования, структура, правила именования, baseline,
+известные skip) — в [doc/testing.md](doc/testing.md).
 
 ## 📚 Документация
 
-- [Игровая механика](doc/task/game_mechanics.md)
+Документация живёт в `doc/`:
+
+- [Тестирование](doc/testing.md) — требования, правила, baseline
+- [Задачи и требования](doc/task/) — `TASK_*.md`
 - [Система магии](game/assets/data/spells.json)
 - [Спецификации OpenSpec](openspec/specs/)
-- [API документация](doc/api/)
+
+### Формат задачи (`doc/task/TASK_*.md`)
+
+```markdown
+# TASK_XX: Название задачи
+
+## Описание
+## Требования
+## Критерии приёмки
+## Ресурсы
+## Статус          # Не начата / В работе / На проверке / Завершена
+```
 
 ## 🎨 Ассеты
 
@@ -202,7 +229,7 @@ godot --path game --unit-testing --gut-log-level=1
 
 - [Godot Engine](https://godotengine.org/)
 - [OpenSpec](https://github.com/Fission-AI/OpenSpec)
-- [GUT Testing Framework](https://github.com/bitbrain/gut)
+- [gdUnit4](https://github.com/MikeSchulze/gdUnit4)
 - [Документация Godot](https://docs.godotengine.org/)
 
 ## 📞 Контакты

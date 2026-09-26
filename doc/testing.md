@@ -1,4 +1,6 @@
-# Тесты
+# Тестирование
+
+> Пути в этом документе относительны к `game/`.
 
 Полный прогон (единственная точка входа):
 
@@ -15,8 +17,10 @@ bash tests/run_all.sh
 - Godot 4.7+ (headless). Путь переопределяется: `GODOT_BIN=/path/to/Godot`
 - gdUnit4 4.x — аддон в `addons/gdunit4`
 - Node.js 18+ — для MCP-сервера (проверяется в `run_all.sh`)
-- godot-mcp **v3.1.0** — вендорен в `addons/godot-mcp`, точка входа
-  `addons/godot-mcp/build/index.js`, interaction-порт 9090
+- godot-mcp **v3.1.0** — ставится локально (не коммитится, gitignored):
+  `git clone https://github.com/tugcantopaloglu/godot-mcp.git addons/godot-mcp && cd addons/godot-mcp && npm install && npm run build`;
+  точка входа `addons/godot-mcp/build/index.js`, interaction-порт 9090. Без него
+  MCP-тесты пропускаются (см. `run_tests.sh`).
 - Python 3.12, venv в `addons/venv` (переопределяется `MCP_PY`):
   **mcp 2.1.1, pytest 9.1.1, anyio 4.15.0**. `pip` в venv сломан —
   версии фиксированы, не устанавливать заново.
