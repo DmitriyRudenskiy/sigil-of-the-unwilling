@@ -12,6 +12,10 @@ var current_decision_popup: Control
 var current_crisis_popup: Control
 
 func _ready():
+	# Контракт поиска для CrisisEventSystem (см. его _ready/_ui): в main.tscn
+	# UIManager — дочерняя нода Main, а не autoload, поэтому /root/UIManager
+	# никогда не резолвится; группа — канонический способ найти менеджер.
+	add_to_group("ui_manager")
 	# Предзагрузка сцен панелей (пути могут быть изменены при создании UI)
 	decision_panel = load("res://assets/ui/panels/decision_panel.tscn") if ResourceLoader.exists("res://assets/ui/panels/decision_panel.tscn") else null
 	crisis_panel = load("res://assets/ui/panels/crisis_panel.tscn") if ResourceLoader.exists("res://assets/ui/panels/crisis_panel.tscn") else null
@@ -47,7 +51,7 @@ func show_crisis_panel(crisis_data: Dictionary, crisis_id: String):
 		_create_simple_crisis_panel(crisis_data, crisis_id)
 		return
 	
-	var popup = crisis_panel.institute()
+	var popup = crisis_panel.instantiate()
 	get_tree().root.add_child(popup)
 	current_crisis_popup = popup
 	

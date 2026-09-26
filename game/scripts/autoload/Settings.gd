@@ -58,18 +58,32 @@ func set_zoom(value: float) -> void:
 			return
 	zoom_index = DEFAULT_ZOOM_INDEX
 
+## Безопасное чтение ConfigFile в типизированные поля: значение из повреждённого
+## или чужого файла может иметь любой тип; прямое присваивание Variant в
+## `var x: int` — ошибка рантайма. Диапазоны клампятся, чтобы невалидные данные
+## не ломали UI-слайдеры/индексы.
+static func _cfg_int(cfg: ConfigFile, key: String, default: int, lo: int, hi: int) -> int:
+	var v: Variant = cfg.get_value(SECTION, key, default)
+	if v is int or v is float:
+		return clampi(int(v), lo, hi)
+	return default
+
+static func _cfg_bool(cfg: ConfigFile, key: String, default: bool) -> bool:
+	var v: Variant = cfg.get_value(SECTION, key, default)
+	return bool(v) if v is bool else default
+
 func _load() -> void:
 	if _config.load(FILE) != OK:
 		return
-	zoom_index = _config.get_value(SECTION, "zoom_index", DEFAULT_ZOOM_INDEX)
-	master_volume = _config.get_value(SECTION, "master_volume", DEFAULT_MASTER_VOL)
-	music_volume = _config.get_value(SECTION, "music_volume", DEFAULT_MUSIC_VOL)
-	sfx_volume = _config.get_value(SECTION, "sfx_volume", DEFAULT_SFX_VOL)
-	fullscreen = _config.get_value(SECTION, "fullscreen", DEFAULT_FULLSCREEN)
-	ui_animations = _config.get_value(SECTION, "ui_animations", DEFAULT_UI_ANIMATIONS)
-	particles = _config.get_value(SECTION, "particles", DEFAULT_PARTICLES)
-	auto_save = _config.get_value(SECTION, "auto_save", DEFAULT_AUTO_SAVE)
-	is_muted = _config.get_value(SECTION, "muted", false)
+	zoom_index = _cfg_int(_config, "zoom_index", DEFAULT_ZOOM_INDEX, 0, ZOOM_LEVELS.size() - 1)
+	master_volume = _cfg_int(_config, "master_volume", DEFAULT_MASTER_VOL, 0, 100)
+	music_volume = _cfg_int(_config, "music_volume", DEFAULT_MUSIC_VOL, 0, 100)
+	sfx_volume = _cfg_int(_config, "sfx_volume", DEFAULT_SFX_VOL, 0, 100)
+	fullscreen = _cfg_bool(_config, "fullscreen", DEFAULT_FULLSCREEN)
+	ui_animations = _cfg_bool(_config, "ui_animations", DEFAULT_UI_ANIMATIONS)
+	particles = _cfg_bool(_config, "particles", DEFAULT_PARTICLES)
+	auto_save = _cfg_bool(_config, "auto_save", DEFAULT_AUTO_SAVE)
+	is_muted = _cfg_bool(_config, "muted", false)
 
 func save() -> void:
 	_config.set_value(SECTION, "zoom_index", zoom_index)

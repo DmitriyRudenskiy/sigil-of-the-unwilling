@@ -54,7 +54,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 
 		if event.keycode == KEY_ESCAPE:
-			if _ui_manager and _ui_manager.inventory_screen.visible:
+			# inventory_screen — @onready у WorldUIManager: до его ready (или при
+			# отсутствии ноды в сцене) поле null; прямой доступ к .visible паникует.
+			if _ui_manager and _ui_manager.inventory_screen != null \
+					and _ui_manager.inventory_screen.visible:
 				_ui_manager.inventory_screen.hide()
 				get_viewport().set_input_as_handled()
 				return
