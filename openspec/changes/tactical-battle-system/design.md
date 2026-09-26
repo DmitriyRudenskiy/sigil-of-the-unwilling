@@ -116,7 +116,19 @@ retaliation-система (`BattleAttackSequence.can_retaliate`/`start_retaliat
 | Укрепление | +75% | 0% | −50% | Полная |
 | Вода | N/A | N/A | Блокирует | Полная |
 
-Реализация: `BattleState.get_hex_terrain(q, r) → TerrainType`
+Реализация (Phase 5, `BattleTerrain.gd` + `BattleState` + `BattleDamageResolver`):
+
+- **Источник местности** — вариант 1 (подтверждён пользователем): генерация из seed боя, а не с карты. Самодостаточно, детерминировано, не трогает стратегический слой (ограничение proposal).
+- **`BattleTerrain.gd`** (новый, `class_name` + `preload` в ссылках): enum `TerrainType {PLAIN, FOREST, HILL, FORT, WATER}`; таблицы защиты `1.0/1.3/1.5/1.75/1.0`, высоты `0/0/1/1/0`, скорости `1.0/0.6/0.7/0.5/0.0`; `DOWNHILL_ATTACK_MULT = 1.2`; `is_blocking()` = только вода.
+- **Генератор** `generate(rng, bw, bh, density=0.1)`: Fisher–Yates, пропускает колонки развёртки (`x≤0`, `x≥BW-1`), взвешенно 45% лес / 25% холм / 15% укрепление / 15% вода (вода редкая, чтобы не резать поле). Плотность 0.1 → ~16 клеток на 17×11.
+- **Seed**: `_generate_terrain()` в `BattleController.start_battle` переиспользует `_obstacle_seed` отдельным экземпляром RNG (не смешивает поток с препятствиями). Вызывается после `_place_obstacles()`, до `place_army`.
+- **Урон**: `BattleRules.damage_multiplier` и `calculate_attack` расширены параметрами `terrain_atk_mult`, `terrain_def_mult` (int→float арифметика, `absi`→`absf`; при =1.0 математика идентична старой). `BattleDamageResolver` считает `terrain_def_mult` по гексу защитника и `terrain_atk_mult=1.2` если высота атакующего > высоты защитника.
+- **Вода блокирует движение**: `BattleState.build_all_blocked` добавляет блокирующие клетки из `terrain_grid`.
+
+Расхождения/отложено:
+- **Снижение скорости по местности** (−20/−30/−50%) — DEFERRED: BFS (`HexPathfinding.bfs_reachable`) использует единый радиус, без стоимости на клетку. `speed_multiplier()` уже в `BattleTerrain` для будущего использования.
+- **Preview-функция** (`calculate_attack` → String) не имеет доступа к state/местности → оставляет дефолты 1.0 (косметический gap в превью-тексте).
+- **`BattleView` (5.2)** — DEFERRED (UI, не верифицируется headless); данные для рендера уже в `BattleState.terrain_grid`.
 
 ### Фланговые атаки
 

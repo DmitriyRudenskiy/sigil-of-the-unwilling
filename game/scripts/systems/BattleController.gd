@@ -82,6 +82,11 @@ func _wire_signals() -> void:
 	_executor.floating_text.connect(_view.show_floating_text)
 	_input.attack_preview_updated.connect(_ui.set_attack_preview)
 
+func _generate_terrain() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = _obstacle_seed
+	_state.generate_terrain(rng)
+
 func _place_obstacles() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = _obstacle_seed
@@ -280,6 +285,7 @@ func start_battle(
 		obstacle_seed = randi()
 	_obstacle_seed = obstacle_seed
 	_place_obstacles()
+	_generate_terrain()
 	_state.set_hero_bonuses(attacker_bonus, defender_bonus)
 	_state.place_army(atk, def, attacker_artifact_mods, defender_artifact_mods)
 

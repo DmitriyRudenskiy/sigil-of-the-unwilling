@@ -33,29 +33,31 @@ static func damage_multiplier(
     attacker,
     defender,
     attacker_bonus: int,
-    defender_bonus: int
+    defender_bonus: int,
+    terrain_atk_mult: float = 1.0,
+    terrain_def_mult: float = 1.0
 ) -> float:
     if attacker == null or defender == null:
         return 1.0
 
-    var effective_atk: int = attacker.get_attack() + attacker_bonus
+    var effective_atk: float = float(attacker.get_attack() + attacker_bonus) * terrain_atk_mult
 
-    var effective_def: int = defender.get_defense() + defender_bonus
+    var effective_def: float = float(defender.get_defense() + defender_bonus) * terrain_def_mult
     if defender.defending:
-        effective_def = int(float(effective_def) * GameNumbers.DEFEND_DEFENSE_BONUS)
+        effective_def = effective_def * GameNumbers.DEFEND_DEFENSE_BONUS
 
-    var diff: int = effective_atk - effective_def
+    var diff: float = effective_atk - effective_def
 
-    if diff > 0:
+    if diff > 0.0:
         return clampf(
-            1.0 + GameNumbers.ATK_ADVANTAGE_PER_POINT * float(diff),
+            1.0 + GameNumbers.ATK_ADVANTAGE_PER_POINT * diff,
             1.0,
             GameNumbers.MAX_DAMAGE_MULTIPLIER
         )
 
-    if diff < 0:
+    if diff < 0.0:
         return clampf(
-            1.0 - GameNumbers.DEF_ADVANTAGE_PER_POINT * float(absi(diff)),
+            1.0 - GameNumbers.DEF_ADVANTAGE_PER_POINT * absf(diff),
             GameNumbers.MIN_DAMAGE_MULTIPLIER,
             1.0
         )
@@ -76,7 +78,9 @@ static func calculate_attack(
     is_melee_attack: bool,
     rng: RandomNumberGenerator,
     attacker_bonus: int,
-    defender_bonus: int
+    defender_bonus: int,
+    terrain_atk_mult: float = 1.0,
+    terrain_def_mult: float = 1.0
 ) -> Dictionary:
     if attacker == null or defender == null:
         return {}
@@ -99,7 +103,9 @@ static func calculate_attack(
         attacker,
         defender,
         attacker_bonus,
-        defender_bonus
+        defender_bonus,
+        terrain_atk_mult,
+        terrain_def_mult
     )
 
     var damage: int = int(float(base_total) * multiplier)

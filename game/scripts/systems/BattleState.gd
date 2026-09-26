@@ -2,6 +2,7 @@ class_name BattleState
 extends RefCounted
 
 const _StatusEffects = preload("res://scripts/data/StatusEffects.gd")
+const _BattleTerrain = preload("res://scripts/systems/BattleTerrain.gd")
 
 
 var attacker_units: Array[BattleUnit] = []
@@ -16,6 +17,7 @@ enum Side { NONE, ATTACKER, DEFENDER }
 
 var battle_winner: BattleState.Side = Side.NONE
 var hex_shift_right: bool = true
+var terrain_grid: Dictionary = {}
 var attacker_hero_bonus: Dictionary[StringName, int] = {
     &"attack": 0,
     &"defense": 0,
@@ -400,7 +402,27 @@ func build_all_blocked(except_unit: BattleUnit, obstacles: Dictionary) -> Dictio
 		b.erase(except_unit.cell)
 	for o in obstacles:
 		b[o] = true
+	for c in terrain_grid:
+		if _BattleTerrain.is_blocking(int(terrain_grid[c])):
+			b[c] = true
 	return b
+
+
+func get_hex_terrain(cell: Vector2i) -> int:
+	return int(terrain_grid.get(cell, _BattleTerrain.TerrainType.PLAIN))
+
+func set_terrain(cell: Vector2i, t: int) -> void:
+	terrain_grid[cell] = t
+	invalidate_board_cache()
+
+func clear_terrain() -> void:
+	terrain_grid.clear()
+	invalidate_board_cache()
+
+
+func generate_terrain(rng: RandomNumberGenerator, density: float = 0.1) -> void:
+	terrain_grid = _BattleTerrain.generate(rng, BW, BH, density)
+	invalidate_board_cache()
 
 func check_end() -> BattleState.Side:
 	if battle_over:

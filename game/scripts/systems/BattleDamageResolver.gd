@@ -2,6 +2,7 @@ class_name BattleDamageResolver
 extends RefCounted
 
 const _StatusEffects = preload("res://scripts/data/StatusEffects.gd")
+const _BattleTerrain = preload("res://scripts/systems/BattleTerrain.gd")
 
 static func resolve(state: BattleState, atk: BattleState.BattleUnit, def: BattleState.BattleUnit, ctx: Dictionary) -> Dictionary:
 	var is_melee: bool = ctx.get("is_melee", true)
@@ -12,7 +13,14 @@ static func resolve(state: BattleState, atk: BattleState.BattleUnit, def: Battle
 	if atk == null or def == null or not atk.is_alive() or not def.is_alive():
 		return {}
 
-	var result: Dictionary = BattleRules.calculate_attack(atk, def, is_melee, rng, atk_bonus, def_bonus)
+	var terrain_atk_mult: float = 1.0
+	var terrain_def_mult: float = _BattleTerrain.defense_multiplier(state.get_hex_terrain(def.cell))
+	if _BattleTerrain.elevation(state.get_hex_terrain(atk.cell)) > _BattleTerrain.elevation(state.get_hex_terrain(def.cell)):
+		terrain_atk_mult = _BattleTerrain.DOWNHILL_ATTACK_MULT
+
+	var result: Dictionary = BattleRules.calculate_attack(
+		atk, def, is_melee, rng, atk_bonus, def_bonus, terrain_atk_mult, terrain_def_mult
+	)
 	if result.is_empty():
 		return result
 
