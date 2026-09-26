@@ -44,13 +44,22 @@ var _attack_seq: BattleAttackSequence
 var _retreat_policy: BattleRetreatPolicy
 var _pending_attack: BattleState.BattleUnit = null
 
-func setup(bs: BattleState, ai: BattleAI, obstacles: Dictionary) -> void:
+## Deterministic RNG injection (testability): tests/replays seed the
+## executor's RNG instead of relying on randomize(). Production callers keep
+## using setup(...) without a seed — runtime behaviour is unchanged.
+func set_rng_seed(seed_value: int) -> void:
+	_rng.seed = seed_value
+
+func setup(bs: BattleState, ai: BattleAI, obstacles: Dictionary, rng_seed: int = -1) -> void:
 	_battle_state = bs
 	_ai = ai
 	_obstacles = obstacles
 	_state = State.IDLE
 
-	_rng.randomize()
+	if rng_seed >= 0:
+		_rng.seed = rng_seed
+	else:
+		_rng.randomize()
 
 	_end_emitted = false
 	_morale_allowed = false
