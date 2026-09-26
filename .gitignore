@@ -1,1 +1,6 @@
-(empty)
+# Локальное хранилище OpenViking (memory-stack): runtime-данные —
+# sqlite-очереди, vectordb, сессии, identity. Не в общий репо.
+data/
+
+# Конфиг Claude Code (slash-команды в commands/) — локальный тулинг, не в общий репо.
+.claude/
