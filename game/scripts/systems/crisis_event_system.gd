@@ -36,6 +36,38 @@ enum ChoiceImpact {
 	NEGATIVE_MAJOR    # -Значительный урон
 }
 
+## Безопасные конвертеры из JSON (числа приходят как float): без приведения к int
+## присваивание float в типизированное var severity:int — ошибка рантайма.
+static func _as_int(v, fallback: int) -> int:
+	return int(v) if (v is int or v is float) else fallback
+
+static func _as_float(v, fallback: float) -> float:
+	return float(v) if (v is int or v is float) else fallback
+
+static func _as_string(v, fallback: String) -> String:
+	return v if v is String else fallback
+
+static func _as_dict(v) -> Dictionary:
+	return v if v is Dictionary else {}
+
+static func _as_array(v) -> Array:
+	return v if v is Array else []
+
+# Данные выбора в событии
+class ChoiceData:
+	var text: String
+	var tooltip: String
+	var impact: ChoiceImpact
+	var effects: Dictionary = {}  # Последствия выбора
+	var requirements: Dictionary = {}  # Требования для доступности
+
+	func _init(data: Dictionary = {}):
+		text = _as_string(data.get("text", ""), "")
+		tooltip = _as_string(data.get("tooltip", ""), "")
+		impact = _as_int(data.get("impact"), ChoiceImpact.NEUTRAL) as ChoiceImpact
+		effects = _as_dict(data.get("effects"))
+		requirements = _as_dict(data.get("requirements"))
+
 # Данные события
 class DynamicEventData:
 	var id: String
@@ -47,34 +79,19 @@ class DynamicEventData:
 	var triggers: Dictionary = {}  # Условия активации
 	var choices: Array[ChoiceData] = []
 	var weight: float = 1.0
-	
-	func _init(data: Dictionary = {}):
-		if data.has("id"): id = data["id"]
-		if data.has("title"): title = data["title"]
-		if data.has("description"): description = data["description"]
-		if data.has("icon_path"): icon_path = data["icon_path"]
-		if data.has("frequency"): frequency = data["frequency"]
-		if data.has("min_day"): min_day = data["min_day"]
-		if data.has("triggers"): triggers = data["triggers"]
-		if data.has("choices"): 
-			for c in data["choices"]:
-				choices.append(ChoiceData.new(c))
-		if data.has("weight"): weight = data["weight"]
 
-# Данные выбора в событии
-class ChoiceData:
-	var text: String
-	var tooltip: String
-	var impact: ChoiceImpact
-	var effects: Dictionary = {}  # Последствия выбора
-	var requirements: Dictionary = {}  # Требования для доступности
-	
 	func _init(data: Dictionary = {}):
-		if data.has("text"): text = data["text"]
-		if data.has("tooltip"): tooltip = data["tooltip"]
-		if data.has("impact"): impact = data["impact"]
-		if data.has("effects"): effects = data["effects"]
-		if data.has("requirements"): requirements = data["requirements"]
+		id = _as_string(data.get("id", ""), "")
+		title = _as_string(data.get("title", ""), "")
+		description = _as_string(data.get("description", ""), "")
+		icon_path = _as_string(data.get("icon_path", ""), "")
+		frequency = _as_int(data.get("frequency"), EventFrequency.COMMON) as EventFrequency
+		min_day = _as_int(data.get("min_day"), 1)
+		triggers = _as_dict(data.get("triggers"))
+		weight = _as_float(data.get("weight"), 1.0)
+		for c in _as_array(data.get("choices")):
+			if c is Dictionary:
+				choices.append(ChoiceData.new(c))
 
 # Данные кризиса
 class CrisisEventData:
@@ -82,26 +99,30 @@ class CrisisEventData:
 	var title: String
 	var description: String
 	var crisis_type: CrisisType
-	var severity: int  # 1-5 масштаб кризиса
-	var duration_days: int  # Сколько длится
+	var severity: int = 1  # 1-5 масштаб кризиса
+	var duration_days: int = 1  # Сколько длится
 	var icon_path: String
+	var min_day: int = 1
+	var triggers: Dictionary = {}  # Условия активации (как у DynamicEventData)
 	var choices: Array[ChoiceData] = []
 	var ongoing_effects: Dictionary = {}  # Эффекты во время кризиса
 	var resolution_effects: Dictionary = {}  # Эффекты после разрешения
-	
+
 	func _init(data: Dictionary = {}):
-		if data.has("id"): id = data["id"]
-		if data.has("title"): title = data["title"]
-		if data.has("description"): description = data["description"]
-		if data.has("crisis_type"): crisis_type = data["crisis_type"]
-		if data.has("severity"): severity = data["severity"]
-		if data.has("duration_days"): duration_days = data["duration_days"]
-		if data.has("icon_path"): icon_path = data["icon_path"]
-		if data.has("choices"): 
-			for c in data["choices"]:
+		id = _as_string(data.get("id", ""), "")
+		title = _as_string(data.get("title", ""), "")
+		description = _as_string(data.get("description", ""), "")
+		crisis_type = _as_int(data.get("crisis_type"), CrisisType.NATURAL_DISASTER) as CrisisType
+		severity = clampi(_as_int(data.get("severity"), 1), 1, 5)
+		duration_days = maxi(1, _as_int(data.get("duration_days"), 1))
+		icon_path = _as_string(data.get("icon_path", ""), "")
+		min_day = _as_int(data.get("min_day"), 1)
+		triggers = _as_dict(data.get("triggers"))
+		ongoing_effects = _as_dict(data.get("ongoing_effects"))
+		resolution_effects = _as_dict(data.get("resolution_effects"))
+		for c in _as_array(data.get("choices")):
+			if c is Dictionary:
 				choices.append(ChoiceData.new(c))
-		if data.has("ongoing_effects"): ongoing_effects = data["ongoing_effects"]
-		if data.has("resolution_effects"): resolution_effects = data["resolution_effects"]
 
 # Состояние системы
 var current_crisis: CrisisEventData = null
@@ -124,6 +145,14 @@ var crisis_templates: Array[CrisisEventData] = []
 ## Law system (unlocked via event choices, apply passive modifiers).
 var law_manager: LawManager = null
 
+## Зависимости внедряются явно (см. GameManager._connect_signals и Main),
+## а не через магический путь /root/GameManager: в main.tscn менеджеры —
+## дети ноды Main, а не autoload'ы, поэтому прямой get_node("/root/...")
+## в рантайме никогда не резолвил их и эффекты событий молча терялись.
+## В тестах GameManager монтируется на /root напрямую — это тоже поддержано.
+var game_manager: Node = null
+var ui_manager: Node = null
+
 func _ready():
 	load_event_templates()
 	load_crisis_templates()
@@ -131,6 +160,30 @@ func _ready():
 	if law_manager == null:
 		law_manager = LawManager.new()
 		law_manager.load_default_catalog()
+	# UIManager — autoload-подобный узел; ищем по группе, затем по соседству.
+	if ui_manager == null:
+		ui_manager = get_tree().get_first_node_in_group("ui_manager") \
+			if get_tree() != null else null
+		if ui_manager == null and get_parent() != null:
+			var sibling := get_parent().get_node_or_null("UIManager")
+			if sibling != null and sibling.get_script() is Script \
+					and (sibling.get_script() as Script).get_global_name() == &"UIManager":
+				ui_manager = sibling
+
+## Разрешение game_manager: явно внедрённый → /root/GameManager (тесты) →
+## сосед по сцене (main.tscn). Резолв ленивый и кэшируется.
+func _gm() -> Node:
+	if game_manager != null and is_instance_valid(game_manager):
+		return game_manager
+	game_manager = null
+	if get_tree() == null:
+		return null
+	var candidate := get_tree().root.get_node_or_null("GameManager")
+	if candidate == null and get_parent() != null:
+		candidate = get_parent().get_node_or_null("GameManager")
+	if candidate != null and candidate.has_method("modify_resource"):
+		game_manager = candidate
+	return game_manager
 
 ## Сериализация состояния (события/кризис/законы) для сохранения.
 ## Объекты событий/кризисов хранятся по id — шаблоны перезагружаются при старте.
@@ -184,7 +237,9 @@ func _find_event_template(id: String) -> DynamicEventData:
 			return e
 	return null
 
-## Загрузка шаблонов событий из JSON
+## Загрузка шаблонов событий из JSON.
+## Формат: один файл = одно событие (event_*.json). events_database.json —
+## легаси-сборник другого формата, загрузчиком игнорируется (см. комментарий).
 func load_event_templates():
 	event_templates.clear()
 	var dir = DirAccess.open("res://data/events/")
@@ -192,7 +247,9 @@ func load_event_templates():
 		dir.list_dir_begin()
 		var file_name = dir.get_next()
 		while file_name != "":
-			if file_name.ends_with(".json") and not file_name.begins_with("crisis_"):
+			# "crisis_" — кризисы; "events_database" — легаси-формат без поля id.
+			if file_name.ends_with(".json") and not file_name.begins_with("crisis_") \
+					and not file_name.begins_with("events_database"):
 				var event_data = load_event_json("res://data/events/" + file_name)
 				if event_data:
 					event_templates.append(DynamicEventData.new(event_data))
@@ -294,40 +351,54 @@ func get_available_events() -> Array[DynamicEventData]:
 func check_event_triggers(event: DynamicEventData) -> bool:
 	if event.triggers.is_empty():
 		return true
-	
-	# Пример проверок (должны быть реализованы в GameManager)
-	var game_manager = get_node_or_null("/root/GameManager")
+
+	var game_manager := _gm()
 	if not game_manager:
+		# Без GameManager проверить условия нельзя — не блокируем событие.
 		return true
-	
+
 	if event.triggers.has("population_min"):
-		if game_manager.get_population() < event.triggers["population_min"]:
+		if game_manager.get_population() < int(event.triggers["population_min"]):
 			return false
-	
+
 	if event.triggers.has("resource_low"):
-		var resource = event.triggers["resource_low"]["resource"]
-		var threshold = event.triggers["resource_low"]["threshold"]
-		if game_manager.get_resource(resource) >= threshold:
-			return false
-	
+		var low = event.triggers["resource_low"]
+		if low is Dictionary and low.has("resource") and low.has("threshold"):
+			if game_manager.get_resource(str(low["resource"])) >= int(low["threshold"]):
+				return false
+
 	if event.triggers.has("building_required"):
 		var building = event.triggers["building_required"]
-		if not game_manager.has_building(building):
+		if not game_manager.has_building(str(building)):
 			return false
-	
+
 	return true
 
 ## Trigger события
 func trigger_event(event: DynamicEventData):
 	active_events.append(event)
-	event_history.append({
-		"type": "event",
-		"id": event.id,
-		"day": day_counter,
-		"resolved": false
-	})
+	_record_history("event", event.id)
 	event_triggered.emit(event)
 	show_event_panel(event)
+
+## Максимум записей истории (история растёт неограниченно при длинной партии;
+## для cooldown-проверок и serialize хватает хвоста).
+const MAX_HISTORY_ENTRIES := 200
+
+func _record_history(type: String, id: String) -> void:
+	event_history.append({"type": type, "id": id, "day": day_counter, "resolved": false})
+	if event_history.size() > MAX_HISTORY_ENTRIES:
+		event_history.pop_front()
+
+func _mark_resolved(type: String, id: String, choice_index: int = -1) -> void:
+	for i in range(event_history.size() - 1, -1, -1):
+		var record: Dictionary = event_history[i]
+		if record.get("type") == type and record.get("id") == id \
+				and not bool(record.get("resolved", false)):
+			record["resolved"] = true
+			if choice_index >= 0:
+				record["choice"] = choice_index
+			return
 
 ## Проверка возможности кризиса
 func can_trigger_crisis() -> bool:
@@ -350,15 +421,11 @@ func trigger_random_crisis():
 	var crisis = available_crises[randi() % available_crises.size()]
 	current_crisis = crisis
 	last_crisis_day = day_counter
-	
+	_crisis_start_day = day_counter
+
 	crisis_started.emit(crisis)
-	event_history.append({
-		"type": "crisis",
-		"id": crisis.id,
-		"day": day_counter,
-		"resolved": false
-	})
-	
+	_record_history("crisis", crisis.id)
+
 	show_crisis_panel(crisis)
 
 ## Получение доступных кризисов
@@ -372,35 +439,24 @@ func get_available_crises() -> Array[CrisisEventData]:
 		available.append(crisis)
 	return available
 
-## Проверка триггеров кризиса
+## Проверка триггеров кризиса (те же условия, что и у обычных событий — DRY).
 func check_crisis_triggers(crisis: CrisisEventData) -> bool:
-	# Аналогично событиям, но для кризисов
-	var game_manager = get_node_or_null("/root/GameManager")
-	if not game_manager:
-		return true
-	
-	if crisis.triggers.has("population_min"):
-		if game_manager.get_population() < crisis.triggers["population_min"]:
-			return false
-	
-	return true
+	return check_event_triggers(crisis)
 
 ## Обработка продолжающегося кризиса
 func process_ongoing_crisis():
+	if current_crisis == null:
+		return
 	# Применение ongoing эффектов
 	apply_crisis_effects(current_crisis.ongoing_effects)
-	
+
 	# Проверка завершения
-	var crisis_start = get_crisis_start_day()
-	if day_counter - crisis_start >= current_crisis.duration_days:
+	if day_counter - _crisis_start_day >= current_crisis.duration_days:
 		resolve_crisis(-1)  # Автоматическое разрешение если игрок бездействовал
 
-## Получение дня начала кризиса
+## День начала текущего кризиса (O(1); синхронизируется с историей при load).
 func get_crisis_start_day() -> int:
-	for record in event_history:
-		if record["type"] == "crisis" and record["id"] == current_crisis.id and not record["resolved"]:
-			return record["day"]
-	return day_counter
+	return _crisis_start_day
 
 ## Применение эффектов кризиса
 func apply_crisis_effects(effects: Dictionary):
