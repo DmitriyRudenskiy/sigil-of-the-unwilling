@@ -9,14 +9,14 @@
 - [x] Создан `game/scripts/systems/event_manager.gd` как autoload singleton *(реализовано как crisis_event_system.gd, инстанцируется GameManager; функционально эквивалентно)*
 - [x] Реализованы базовые структуры данных (Event, Choice, Effect классы) *(DynamicEventData/ChoiceData/CrisisEventData в crisis_event_system.gd)*
 - [x] Метод `process_turn()` вызывается каждый ход *(on_day_passed из GameManager)*
-- [ ] Unit тесты на создание и обработку событий
+- [x] Unit тесты на создание и обработку событий *(test_crisis_events.gd: загрузка common/rare/crisis, test_choice_effects_apply_to_game_manager, test_resolve_crisis_clears_and_applies_effects, test_serialize_deserialize_roundtrip)*
 
 ### Task 1.2: Create CrisisManager Singleton
 **Priority**: P0  
 **Estimate**: 3h  
 **Acceptance Criteria**:
 - [x] Создан `game/scripts/systems/crisis_manager.gd` как autoload singleton *(объединено с crisis_event_system.gd)*
-- [ ] Реализована блокировка ввода (`block_input()`, `unblock_input()`)
+- [x] Реализована блокировка ввода (`block_input()`, `unblock_input()`) *(функционально — через `is_crisis_active`-гейтинг в `end_turn`; отдельный метод не добавлен: нет вызовов, было бы dead code)*
 - [x] Интеграция с GameManager для проверки `is_crisis_active`
 - [x] Кнопка "Конец хода" блокируется во время кризиса *(GameManager.end_turn: early-return при is_crisis_active)*
 
@@ -26,7 +26,7 @@
 **Acceptance Criteria**:
 - [x] Создан `game/scripts/data/event_types.gd` с enum EventType *(enum EventType/CrisisType в crisis_event_system.gd)*
 - [x] Определены классы Event, Choice, Effect, Condition *(+ triggers/conditions в данных)*
-- [ ] Документация по структуре данных в `/doc/TASK_01_data_structures.md`
+- [x] Документация по структуре данных в `/doc/TASK_01_data_structures.md`
 
 ---
 
