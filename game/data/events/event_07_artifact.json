@@ -1,0 +1,51 @@
+{
+  "id": "event_07_artifact",
+  "title": "Древний артефакт",
+  "description": "В глубине леса найден предмет, который помнит другую эпоху. Он вибрирует едва заметной силой. Жрецы говорят, что в нём спит старая магия.",
+  "icon_path": "res://assets/ui/events/magic_event.png",
+  "frequency": 1,
+  "min_day": 15,
+  "weight": 0.5,
+  "triggers": {},
+  "choices": [
+    {
+      "text": "Изучить в храме (открывает закон паломничества)",
+      "tooltip": "Жрецы раскроют силу реликвии — поселение обретёт духовную опору",
+      "impact": 1,
+      "effects": {
+        "unlock_law": "faith_relic_pilgrimage"
+      },
+      "requirements": {
+        "building_required": "temple"
+      }
+    },
+    {
+      "text": "Продать коллекционеру (+50 золота, -10 морали)",
+      "tooltip": "Целое состояние, но святыня уйдёт в чужие руки",
+      "impact": 3,
+      "effects": {
+        "resource_change": {"gold": 50},
+        "morale_change": -10
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Спрятать и не афишировать (+5 морали)",
+      "tooltip": "Мудрое решение: сила останется при вас, не привлекая врагов",
+      "impact": 2,
+      "effects": {
+        "morale_change": 5
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Пробудить силу (постоянный магический прирост)",
+      "tooltip": "Опасно, но артефакт начнёт питать поселение силой",
+      "impact": 2,
+      "effects": {
+        "permanent_modifier": {"id": "awakened_artifact", "effect": {"magic": 0.1}}
+      },
+      "requirements": {}
+    }
+  ]
+}

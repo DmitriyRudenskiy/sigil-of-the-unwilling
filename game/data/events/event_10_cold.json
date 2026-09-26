@@ -1,0 +1,45 @@
+{
+  "id": "event_10_cold",
+  "title": "Простуда в поселении",
+  "description": "Среди жителей началось лёгкое заболевание. Пока ничего страшного, но без внимания болезнь может распространиться и ослабить рабочих.",
+  "icon_path": "res://assets/ui/events/crisis_plague.png",
+  "frequency": 3,
+  "min_day": 10,
+  "weight": 0.8,
+  "triggers": {
+    "population_min": 8
+  },
+  "choices": [
+    {
+      "text": "Лечить травами (-10 еды, +5 морали, постоянное улучшение здоровья)",
+      "tooltip": "Травник заварит отвары — болезнь отступит, жители будут здоровее",
+      "impact": 1,
+      "effects": {
+        "resource_change": {"food": -10},
+        "morale_change": 5,
+        "permanent_modifier": {"id": "herbal_cure", "effect": {"health": 0.05}}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Изолировать больных (-5 морали, -5 еды)",
+      "tooltip": "Карантин остановит распространение, но жители обеспокоены",
+      "impact": 2,
+      "effects": {
+        "morale_change": -5,
+        "resource_change": {"food": -5}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Игнорировать (-10 морали, -2 населения)",
+      "tooltip": "Болезнь пройдёт сама, но часть жителей может не выдержать",
+      "impact": 4,
+      "effects": {
+        "morale_change": -10,
+        "population_change": -2
+      },
+      "requirements": {}
+    }
+  ]
+}

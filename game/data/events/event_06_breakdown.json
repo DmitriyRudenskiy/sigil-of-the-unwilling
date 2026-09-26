@@ -1,0 +1,44 @@
+{
+  "id": "event_06_breakdown",
+  "title": "Поломка в хозяйстве",
+  "description": "В одном из построек вышла из строя часть механизмов. Ремонт нужен, но материалы и рабочие сейчас заняты другими делами.",
+  "icon_path": "res://assets/ui/events/wood_event.png",
+  "frequency": 4,
+  "min_day": 6,
+  "weight": 1.0,
+  "triggers": {
+    "building_required": "farm"
+  },
+  "choices": [
+    {
+      "text": "Починить немедленно (-8 дерева, +5 морали)",
+      "tooltip": "Быстрый ремонт сохранит производство и настроение",
+      "impact": 1,
+      "effects": {
+        "resource_change": {"wood": -8},
+        "morale_change": 5
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Отложить ремонт (-5 морали, падение производства)",
+      "tooltip": "Сэкономить сейчас, но постройка будет работать хуже",
+      "impact": 3,
+      "effects": {
+        "morale_change": -5,
+        "permanent_modifier": {"id": "worn_building", "effect": {"production": -0.1}}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Закрыть постройку (-5 морали, -5 еды)",
+      "tooltip": "Полная остановка: производство и настроение пострадают",
+      "impact": 4,
+      "effects": {
+        "morale_change": -5,
+        "resource_change": {"food": -5}
+      },
+      "requirements": {}
+    }
+  ]
+}

@@ -45,16 +45,18 @@
 **Priority**: P1  
 **Estimate**: 6h  
 **Acceptance Criteria**:
-- [ ] Торговец предлагает товары
-- [ ] Найден забытый склад ресурсов
-- [ ] Герой хочет присоединиться к городу
+- [x] Торговец предлагает товары *(event_03_merchant.json)*
+- [x] Найден забытый склад ресурсов *(event_04_storage.json)*
+- [x] Герой хочет присоединиться к городу *(event_05_hero.json)*
 - [x] Праздник урожая (+happiness) *(event_02_harvest.json)*
-- [ ] Мелкая поломка здания
+- [x] Мелкая поломка здания *(event_06_breakdown.json)*
 - [x] Странствующий бард *(event_01_strangers.json)*
-- [ ] Находка древнего артефакта
-- [ ] Караван с соседним городом
-- [ ] Рождение ребенка в городе
-- [ ] Небольшая эпидемия простуды
+- [x] Находка древнего артефакта *(event_07_artifact.json)*
+- [x] Караван с соседним городом *(event_08_caravan.json)*
+- [x] Рождение ребенка в городе *(event_09_birth.json)*
+- [x] Небольшая эпидемия простуды *(event_10_cold.json)*
+
+> Все 10 событий написаны: только wired-ключи эффектов (resource_change/morale_change/population_change/unlock_building/permanent_modifier/unlock_law) и реальные ресурсы (wood/food/gold). Иконки — существующие `assets/ui/events/*.png` (исправлены битые ссылки в event_01/02). Проверено тестами `test_ten_common_events_loaded` / `test_common_event_icons_exist` / `test_common_event_choices_use_wired_keys`.
 
 ### Task 2.3: Implement 8 Crisis Events (Frostpunk-style)
 **Priority**: P0  
@@ -70,7 +72,7 @@
 - [x] **Зима**: "Нечего топить" (лесорубы/покупка/нормирование, ветка Survival) *(crisis_08_fuel.json)*
 - [x] **Валидация**: 7 тестов в `tests/unit/systems/test_crisis_events.gd` (8 шаблонов, покрытие всех 6 типов CrisisType, иконки, well-formed choices)
 
-> **Known deviation (pre-existing, out of scope for content task)**: the crisis→GameManager effect pipeline is not wired. `apply_choice_effects`/`apply_crisis_effects` call `GameManager.modify_resource/modify_global_morale/modify_population/add_permanent_modifier/unlock_building` which do not exist, and the data uses a `materials` resource + `mana_change`/`reputation_change`/`population_drain` keys that `player_data` (wood/food/gold) does not model. Headless tests cannot reach this (early-return when GameManager is absent). Fixing requires deciding the resource mapping — tracked separately.
+> **P0 gap RESOLVED (this pass)**: the crisis→GameManager effect pipeline is now wired. Added to `GameManager`: `get_population`, `modify_resource`, `modify_population`, `get_global_morale`, `modify_global_morale`, `unlock_building`, `add_permanent_modifier`, `apply_production_modifier` (thin wrappers over real `player_data`, clamped ≥0 / morale 0–100). All 18 event+crisis JSONs now use only wired effect keys and real resources (wood/food/gold); dead keys (`mana_change`/`reputation_change`/`loyalty_change`/`population_drain`) removed from data. Verified by integration tests `test_choice_effects_apply_to_game_manager` / `test_ongoing_crisis_effects_apply` / `test_unlock_and_modifier_effects_apply` / `test_resolve_crisis_clears_and_applies_effects` (real GameManager mounted at /root/GameManager).
 
 ### Task 2.4: Implement 5 Seasonal Events
 **Priority**: P2  
@@ -193,11 +195,10 @@
 **Priority**: P1  
 **Estimate**: 6h  
 **Acceptance Criteria**:
-- [ ] GUT тесты для EventManager
-- [ ] GUT тесты для CrisisManager
-- [ ] Integration тесты с GameManager
-- [ ] Тесты на сохранение/загрузку
-- [ ] Покрытие >80%
+- [x] Тесты CrisisEventSystem (события + кризисы) — 17 тестов в `tests/unit/systems/test_crisis_events.gd` *(GUT удалён из проекта — используется GdUnit4; "EventManager"/"CrisisManager" реализованы в crisis_event_system.gd)*
+- [x] Integration тесты с GameManager — выбор/ongoing/unlock-эффекты реально мутируют player_data (GameManager монтируется в /root/GameManager)
+- [x] Тесты на сохранение/загрузку — 3 round-trip (см. Task 4.3)
+- [ ] Покрытие >80% *(не измеряется headless; поведенческое покрытие ключевых путей есть)*
 
 ### Task 5.4: Balance & Playtesting
 **Priority**: P1  

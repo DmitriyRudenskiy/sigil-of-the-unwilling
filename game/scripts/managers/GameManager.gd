@@ -302,6 +302,59 @@ func get_resource(resource: String) -> int:
 	return int(player_data.get("resources", {}).get(resource, 0))
 
 
+## Население (для триггеров и эффектов событий)
+func get_population() -> int:
+	return int(player_data.get("population", 0))
+
+
+## Изменение ресурса (создаёт ключ при первом изменении; не уходит в минус).
+## ponytail: ресурсы с нуля (tools/materials из событий) — не каноничный набор
+## wood/food/gold; при появлении ResourceType-реестра валидировать ключ.
+func modify_resource(resource: String, amount: int) -> void:
+	var res: Dictionary = player_data.get("resources", {})
+	res[resource] = max(0, int(res.get(resource, 0)) + amount)
+	player_data["resources"] = res
+
+
+## Изменение населения (не уходит в минус)
+func modify_population(amount: int) -> void:
+	player_data["population"] = max(0, int(player_data.get("population", 0)) + amount)
+
+
+## Глобальная мораль поселения (0..100, дефолт 50).
+## ponytail: поле "morale" изобретено (в player_data его не было); дефолт 50,
+## clamp 0..100. При появлении UI-бара/баланса — пересмотреть диапазон/старт.
+func get_global_morale() -> int:
+	return int(player_data.get("morale", 50))
+
+
+func modify_global_morale(amount: int) -> void:
+	player_data["morale"] = clampi(int(player_data.get("morale", 50)) + amount, 0, 100)
+
+
+## Разблокировка здания (для эффектов событий)
+func unlock_building(building_id: String) -> void:
+	var buildings: Array = player_data.get("buildings", [])
+	if not buildings.has(building_id):
+		buildings.append(building_id)
+		player_data["buildings"] = buildings
+
+
+## Постоянные модификаторы (id -> effect) из эффектов выбора.
+## ponytail: храним id->effect, агрегация на мораль/производство не сделана —
+## при появлении системы пассивных эффектов (LawManager.passive_effects) свести.
+func add_permanent_modifier(mod_id: String, effect: Dictionary) -> void:
+	if not player_data.has("permanent_modifiers"):
+		player_data["permanent_modifiers"] = {}
+	player_data["permanent_modifiers"][mod_id] = effect
+
+
+## Модификатор производства (накапливаемый float, напр. -0.2 = -20%).
+## ponytail: простое накопление; применение к реальному производству — позже.
+func apply_production_modifier(value: float) -> void:
+	player_data["production_modifier"] = float(player_data.get("production_modifier", 0.0)) + value
+
+
 ## Получить данные игрока
 func get_player_data() -> Dictionary:
 	return player_data

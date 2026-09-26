@@ -1,0 +1,52 @@
+{
+  "id": "event_08_caravan",
+  "title": "Караван из соседнего города",
+  "description": "По дороге к поселению приближается большой караван. Торговцы предлагают заключить сделку: они заинтересованы в вашем дереве и еде, а у них есть то, чего вам не хватает.",
+  "icon_path": "res://assets/ui/events/cart_event.png",
+  "frequency": 3,
+  "min_day": 10,
+  "weight": 0.9,
+  "triggers": {
+    "population_min": 8
+  },
+  "choices": [
+    {
+      "text": "Равный обмен (+15 еды, -15 дерева)",
+      "tooltip": "Честная сделка: зерно в обмен на древесину",
+      "impact": 1,
+      "effects": {
+        "resource_change": {"food": 15, "wood": -15}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Купить материалы (+15 материалов, -25 золота)",
+      "tooltip": "Дорого, но материалы ускорят развитие",
+      "impact": 2,
+      "effects": {
+        "resource_change": {"materials": 15, "gold": -25}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Заключить торговый договор (+10 морали, постоянный прирост торговли)",
+      "tooltip": "Долгосрочное партнёрство принесёт стабильную выгоду",
+      "impact": 1,
+      "effects": {
+        "morale_change": 10,
+        "permanent_modifier": {"id": "trade_deal", "effect": {"production": 0.05}}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Обложить пошлиной (+20 золота, -10 морали)",
+      "tooltip": "Снять лишний налог, но караван может больше не вернуться",
+      "impact": 3,
+      "effects": {
+        "resource_change": {"gold": 20},
+        "morale_change": -10
+      },
+      "requirements": {}
+    }
+  ]
+}

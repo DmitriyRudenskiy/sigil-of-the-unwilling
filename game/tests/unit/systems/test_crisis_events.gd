@@ -21,6 +21,121 @@ func _sys() -> CrisisEventSystem:
 	return make_node(CrisisEventSystem)  # _ready loads event + crisis templates
 
 
+## Integration target: a real GameManager mounted at /root/GameManager so
+## CrisisEventSystem's get_node_or_null("/root/GameManager") resolves to it.
+var _gm: GameManager = null
+
+func _wire_game_manager() -> GameManager:
+	_gm = GameManager.new()
+	_gm.name = "GameManager"
+	get_tree().root.add_child(_gm)
+	return _gm
+
+func after_test() -> void:
+	if is_instance_valid(_gm):
+		get_tree().root.remove_child(_gm)
+		_gm.queue_free()
+	_gm = null
+
+
+## --- Common event database (Task 2.2) ---
+
+const COMMON_EVENT_IDS: Array[String] = [
+	"event_01_strangers", "event_02_harvest", "event_03_merchant",
+	"event_04_storage", "event_05_hero", "event_06_breakdown",
+	"event_07_artifact", "event_08_caravan", "event_09_birth", "event_10_cold",
+]
+
+# Keys apply_choice_effects actually applies (the extras in KNOWN_EFFECT_KEYS are
+# recognized data keys but not yet wired to GameManager).
+const WIRED_EFFECT_KEYS: Array[String] = [
+	"resource_change", "morale_change", "population_change",
+	"unlock_building", "permanent_modifier", "unlock_law",
+]
+
+func test_ten_common_events_loaded() -> void:
+	var sys := _sys()
+	var ids: Array[String] = []
+	for e in sys.event_templates:
+		if e.id != "":
+			ids.append(e.id)
+	assert_that(ids.size()).is_equal(10)
+	for id in COMMON_EVENT_IDS:
+		assert_that(ids.has(id)).is_true()
+
+func test_common_event_icons_exist() -> void:
+	var sys := _sys()
+	for e in sys.event_templates:
+		if e.id == "":
+			continue
+		assert_that(FileAccess.file_exists(e.icon_path)).is_true()
+
+func test_common_event_choices_use_wired_keys() -> void:
+	var sys := _sys()
+	for e in sys.event_templates:
+		if e.id == "":
+			continue
+		assert_that(e.choices.size()).is_greater_equal(2)
+		for choice in e.choices:
+			assert_that(choice.text.length() > 0).is_true()
+			assert_that(choice.effects is Dictionary).is_true()
+			for key in choice.effects:
+				assert_that(WIRED_EFFECT_KEYS.has(str(key))).is_true()
+
+
+## --- Integration: choice/ongoing effects actually mutate GameManager (P0 gap fix) ---
+
+func test_choice_effects_apply_to_game_manager() -> void:
+	var gm := _wire_game_manager()
+	var sys := _sys()
+	sys.apply_choice_effects({
+		"resource_change": {"food": -10, "gold": 20},
+		"population_change": 3,
+		"morale_change": -5,
+	})
+	assert_that(gm.get_resource("food")).is_equal(20)   # 30 - 10
+	assert_that(gm.get_resource("gold")).is_equal(120)  # 100 + 20
+	assert_that(gm.get_population()).is_equal(8)         # 5 + 3
+	assert_that(gm.get_global_morale()).is_equal(45)     # 50 - 5
+
+func test_ongoing_crisis_effects_apply() -> void:
+	var gm := _wire_game_manager()
+	var sys := _sys()
+	# Data convention (see crisis_*.json): resource_drain is a positive magnitude
+	# (negated in code); morale_penalty/production_reduction are stored signed.
+	sys.apply_crisis_effects({
+		"resource_drain": {"food": 5},
+		"morale_penalty": -8,
+		"production_reduction": -0.2,
+	})
+	assert_that(gm.get_resource("food")).is_equal(25)   # 30 - 5
+	assert_that(gm.get_global_morale()).is_equal(42)     # 50 - 8
+	assert_that(gm.player_data.get("production_modifier", 0.0)).is_less(0.0)
+
+func test_unlock_and_modifier_effects_apply() -> void:
+	var gm := _wire_game_manager()
+	var sys := _sys()
+	sys.apply_choice_effects({
+		"unlock_building": "barracks",
+		"permanent_modifier": {"id": "m1", "effect": {"production": 0.1}},
+		"unlock_law": "order_tax_code",
+	})
+	assert_that(gm.has_building("barracks")).is_true()
+	# add_permanent_modifier stores the effect dict directly (no "effect" wrapper)
+	assert_that(gm.player_data["permanent_modifiers"]["m1"].has("production")).is_true()
+	assert_that(sys.law_manager.is_law_active("order_tax_code")).is_true()
+
+func test_resolve_crisis_clears_and_applies_effects() -> void:
+	var gm := _wire_game_manager()
+	var sys := _sys()
+	sys.current_crisis = sys.crisis_templates[0]
+	var food_before: int = gm.get_resource("food")
+	sys.resolve_crisis(0)
+	assert_that(sys.current_crisis == null).is_true()
+	# choice 0 effects + resolution_effects must have been applied (food only drains)
+	assert_that(gm.get_resource("food")).is_less_equal(food_before)
+
+
 func test_eight_crisis_templates_loaded() -> void:
 	var sys := _sys()
 	assert_that(sys.crisis_templates.size()).is_equal(8)
