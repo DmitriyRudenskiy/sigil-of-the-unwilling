@@ -192,6 +192,15 @@ final_score = threat_score + wounded_score + ranged_score
 - Гуманоиды: `aggression = 1.0` (баланс атаки/защиты)
 - Монстры: `aggression = 0.5` (медленные, но мощные; игнорируют малые потери)
 
+Реализация (Phase 7, `BattleAI.gd`):
+- `_pick_target` + `_score_target`: `score = threat + wounded + ranged`, где `threat = attack * health_pct * (1.0 / max(1, dist))`, `wounded = WOUNDED_BONUS * (1.0 - health_pct)` при `health_pct < WOUNDED_THRESHOLD`, `ranged = RANGED_BONUS`. Максимальный score выигрывает; при равенстве — ближе. С одним врагом возвращается именно он (совпадает со старым «ближайший»).
+- `_pick_landing_cell`: по умолчанию `path[steps]` (ближе всех к цели). Под огнём (`_is_under_fire` — есть живой дальний враг) сканирует `path[1..steps-1]` и берёт гекс с бóльшим `defense_multiplier`, только если строго лучше (не жертвует подходом к цели).
+- Отступление: `_should_retreat` (`_army_health_pct < RETREAT_ARMY_PCT`, health = `sum(count)/sum(max_count)` по стороне) + `_try_retreat` (BFS к ближайшему краю из 4 кандидатов, `MOVE` вдоль пути).
+- `_aggression` по тегам юнита: `beast|animal|wild` → 1.5, `monster|undead|dragon|elemental` → 0.5, иначе 1.0 (гуманоид).
+- **Ключевое решение**: отступают ТОЛЬКО гуманоиды (`aggression == AGGR_HUMANOID`). Дикие животные и монстры не отступают — оба типа держатся (spec: «дикие животные — агрессивны, монстры — игнорируют потери»). Проверка `_should_retreat`: `if _aggression(unit) != AGGR_HUMANOID: return false`.
+- Константы в `BattleAI.gd`: `RETREAT_ARMY_PCT=0.3`, `WOUNDED_THRESHOLD=0.3`, `WOUNDED_BONUS=2.0`, `RANGED_BONUS=1.5`, `AGGR_ANIMAL=1.5`, `AGGR_HUMANOID=1.0`, `AGGR_MONSTER=0.5`.
+- Тесты: `tests/unit/systems/test_battle_ai_doctrine.gd` (5 тестов). Полный свит 1806 тестов, 0 ошибок/падений.
+
 ### Исход боя
 
 **Победа:**
