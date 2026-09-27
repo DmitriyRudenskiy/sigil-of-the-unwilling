@@ -75,9 +75,17 @@
 
 ## 9. Интеграция с hero-identity
 
-- [ ] 9.1 Боевые эффекты классов: тактические проявления (Следопыт +движение в лесу, Воин +атака с фронта)
-- [ ] 9.2 Расовые бонусы: применение в тактическом бою (гномы +защита на холмах, эльфы +крит в лесу)
-- [ ] 9.3 Unit-тесты: каждый класс/раса с проверкой тактических бонусов
+- [x] 9.1 Боевые эффекты классов: тактические проявления (Следопыт +движение в лесу, Воин +атака с фронта)
+  - `HeroTactics.gd` — чистый статический модуль (RefCounted, headless-тестируемый): `movement_bonus` (ranger в лесу +1 к скорости), `front_attack_bonus` (fighter при aspect==0 +2 к атаке).
+  - Следопыт: `BattleState.get_reachable_for_unit` (ground-ветка) использует `eff_speed = speed + HeroTactics.movement_bonus(unit, terrain of unit.cell)` — +1 шаг, пока стоит в лесу. Летающие не получают бонус.
+  - Воин: `BattleDamageResolver.resolve` добавляет `atk_bonus += HeroTactics.front_attack_bonus(atk, flank_aspect)` после расчёта аспекта.
+- [x] 9.2 Расовые бонусы: применение в тактическом бою (гномы +защита на холмах, эльфы +крит в лесу)
+  - Дварф: `terrain_def_mult *= HeroTactics.hill_defense_mult(def, terrain of def.cell)` (×1.25 на холмах) в `BattleDamageResolver.resolve`.
+  - Эльф: новый параметр `extra_crit_chance: float = 0.0` в `BattleRules.calculate_attack`; `crit_chance += extra_crit_chance` после flank/rear; `BattleDamageResolver` передаёт `HeroTactics.forest_crit_bonus(atk, terrain of atk.cell)` (+0.15 в лесу).
+  - `HeroController.get_hero_battle_stack` теперь добавляет тег класса И расы (условно, пустые пропускаются) — боец-герой несёт `hero_race`, по которому срабатывают расовые бонусы.
+- [x] 9.3 Unit-тесты: каждый класс/раса с проверкой тактических бонусов
+  - `test_hero_tactics.gd` — 6 тестов: ranger-forest movement, fighter-front attack, dwarf-hill defense, elf-forest crit (каждый: matching + non-matching + null), glue «боец-герой несёт тег класса и расы».
+  - Свит: 1818 test cases | 0 errors | 0 failures | 129 orphans.
 
 ## 10. Регрессия и калибровка
 

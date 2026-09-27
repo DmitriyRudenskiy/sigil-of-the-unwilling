@@ -228,6 +228,20 @@ final_score = threat_score + wounded_score + ranged_score
 - **Deferred:** декремент `wounded_turns` по ходам мира (нужен world-turn hook); персист XP/ранения в сейв.
 - Тесты: `test_battle_rewards.gd` (6 тестов). Полный свит: 1812, 0 ошибок, 0 падений.
 
+### Интеграция с hero-identity (класс + раса)
+
+Тактические проявления бойца-героя определяются **тегами** (класс + раса), местостью и фланговым аспектом. Чистый статический модуль — headless-тестируемый.
+
+Реализация (Phase 9, `HeroTactics.gd` + `BattleState` + `BattleDamageResolver` + `BattleRules` + `HeroController`):
+- `HeroTactics` — чистый статический модуль (RefCounted): `movement_bonus`, `front_attack_bonus`, `hill_defense_mult`, `forest_crit_bonus` + terrain-хелперы. Все функции null-safe (null → 0 / 1.0).
+  - Константы: `RANGER_FOREST_SPEED=1`, `FIGHTER_FRONT_BONUS=2`, `DWARF_HILL_DEF_MULT=1.25`, `ELF_FOREST_CRIT=0.15`, `ASPECT_FRONT=0`.
+- **Следопыт** (9.1): +1 к эффективной скорости, пока стоит в лесу. `BattleState.get_reachable_for_unit` (ground-ветка) считает `eff_speed = speed + movement_bonus(unit, terrain(unit.cell))`. Летающие — без бонуса.
+- **Воин** (9.1): +2 к атаке при ударе с фронта (`aspect == 0`). `BattleDamageResolver.resolve`: `atk_bonus += front_attack_bonus(atk, flank_aspect)`.
+- **Дварф/гном** (9.2): защита ×1.25 на холмах. `terrain_def_mult *= hill_defense_mult(def, terrain(def.cell))`.
+- **Эльф** (9.2): +0.15 к шансу крита в лесу. Новый параметр `extra_crit_chance` в `BattleRules.calculate_attack` (`crit_chance += extra_crit_chance` после flank/rear); резолвер передаёт `forest_crit_bonus(atk, terrain(atk.cell))`.
+- `HeroController.get_hero_battle_stack`: боец несёт тег класса И расы (условно, пустые пропускаются) — расовые бонусы срабатывают по `hero_race`.
+- Тесты: `test_hero_tactics.gd` (6 тестов). Полный свит: 1818, 0 ошибок, 0 падений.
+
 ## Data Structures
 
 ### BattleState

@@ -81,7 +81,8 @@ static func calculate_attack(
     defender_bonus: int,
     terrain_atk_mult: float = 1.0,
     terrain_def_mult: float = 1.0,
-    flank_aspect: int = -1
+    flank_aspect: int = -1,
+    extra_crit_chance: float = 0.0
 ) -> Dictionary:
     if attacker == null or defender == null:
         return {}
@@ -109,6 +110,8 @@ static func calculate_attack(
     elif flank_aspect == 2:
         crit_chance = GameNumbers.FLANK_CRIT_CHANCE_REAR
         eff_terrain_def_mult *= GameNumbers.REAR_DEFENSE_MULT
+    # Phase 9: бонус к шансу крита (например, Эльф в лесу).
+    crit_chance += extra_crit_chance
 
     var multiplier: float = damage_multiplier(
         attacker,

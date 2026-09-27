@@ -240,11 +240,18 @@ func get_hero_battle_stack() -> UnitStack:
 	var speed: int = GameNumbersHero.HERO_PERSONAL_SPEED
 	if stats_comp.hero_class == "ranger":
 		speed += 1
+	# Phase 9: боец-герой несёт тег класса И расы — тактические проявления
+	# (HeroTactics) срабатывают по этим тегам в боевом резолвере.
+	var hero_tags: Array = [GameNumbersHero.HERO_BATTLE_KEY]
+	if stats_comp.hero_class != "":
+		hero_tags.append(stats_comp.hero_class)
+	if stats_comp.hero_race != "":
+		hero_tags.append(stats_comp.hero_race)
 	var unit_stats := UnitStats.new(
 		GameNumbersHero.HERO_BATTLE_KEY,
 		"Герой",
 		atk, atk, 1, speed, def,
-		[GameNumbersHero.HERO_BATTLE_KEY, stats_comp.hero_class]
+		hero_tags
 	)
 	return UnitStack.new(unit_stats, hp)
 

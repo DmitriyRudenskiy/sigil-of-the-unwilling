@@ -338,9 +338,11 @@ func get_reachable_for_unit(unit: BattleUnit, blocked_fn: Callable) -> Dictionar
 
 		return result
 
+	# Phase 9: тактические проявления класса (Следопыт +движение в лесу).
+	var eff_speed: int = unit.get_speed() + HeroTactics.movement_bonus(unit, get_hex_terrain(unit.cell))
 	return get_reachable(
 		unit.cell,
-		unit.get_speed(),
+		eff_speed,
 		blocked_fn,
 		unit
 	)

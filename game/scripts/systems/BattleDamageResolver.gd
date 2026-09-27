@@ -21,9 +21,15 @@ static func resolve(state: BattleState, atk: BattleState.BattleUnit, def: Battle
 	# Phase 6 (flanking): melee attacker adjacent to defender → front/flank/rear
 	# aspect from the defender's facing; ranged/non-adjacent → -1 (no flanking).
 	var flank_aspect: int = state.attack_aspect(atk.cell, def)
+
+	# Phase 9: тактические проявления класса и расы героя.
+	terrain_def_mult *= HeroTactics.hill_defense_mult(def, state.get_hex_terrain(def.cell))
+	atk_bonus += HeroTactics.front_attack_bonus(atk, flank_aspect)
+	var extra_crit: float = HeroTactics.forest_crit_bonus(atk, state.get_hex_terrain(atk.cell))
+
 	var result: Dictionary = BattleRules.calculate_attack(
 		atk, def, is_melee, rng, atk_bonus, def_bonus, terrain_atk_mult, terrain_def_mult,
-		flank_aspect
+		flank_aspect, extra_crit
 	)
 	if result.is_empty():
 		return result
