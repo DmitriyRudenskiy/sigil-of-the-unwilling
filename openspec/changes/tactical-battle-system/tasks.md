@@ -63,15 +63,15 @@
   - `_aggression` по тегам: beast/animal/wild → 1.5, monster/undead/dragon/elemental → 0.5, иначе 1.0 (гуманоид). Отступают ТОЛЬКО гуманоиды; животные и монстры держатся.
 - [x] 7.6 Unit-тесты: сценарии выбора целей, отступление, использование местности
   - `tests/unit/systems/test_battle_ai_doctrine.gd` (5 тестов): приоритет угрозы (сильнее/ближе), приоритет раненого + концентрация, укрытие FORT под огнём, отступление гуманоида при 20%, монстр (undead) не отступает при 20%.
-  - Полный свит: 1806 тестов, 0 ошибок, 0 падений (exit 101 — только orphans).
+  - Полный свит: 1812 тестов, 0 ошибок, 0 падений (exit 101 — только orphans).
 
 ## 8. Исход боя
 
 - [x] 8.1 `BattleFlow`: условия победы (все враги уничтожены/отступили) *(winner + BattleRetreatPolicy.force)*
 - [x] 8.2 Отступление: доступный гекс края, сохранение выживших юнитов *(battle_completed с surviving_atk/def)*
-- [ ] 8.3 Трофеи: расчёт наград (опыт, ресурсы, предметы) за победу
-- [ ] 8.4 Ранение героя: при поражении статус "ранен" (−N% статов на M ходов)
-- [ ] 8.5 Unit-тесты: все условия победы/поражения, отступление, трофеи
+- [x] 8.3 Трофеи: расчёт наград (опыт, ресурсы, предметы) за победу *(BattleRewards.compute_trophies: xp=5×солдат, gold=20+1/враг; предметы — существующий _try_artifact_drop; подключение в WorldBattleCoordinator._apply_trophies, guard has_method)*
+- [x] 8.4 Ранение героя: при поражении статус "ранен" (−N% статов на M ходов) *(BattleRewards.hero_should_be_wounded + apply_wounded_penalty (×0.7); HeroController.set_wounded/is_wounded + штраф в get_hero_battle_stack; WorldBattleCoordinator._apply_defeat_wound. Декремент wounded_turns по ходам мира — deferred)*
+- [x] 8.5 Unit-тесты: все условия победы/поражения, отступление, трофеи *(test_battle_rewards.gd: 6 тестов — трофеи/условие ранения/штраф статов)*
 
 ## 9. Интеграция с hero-identity
 

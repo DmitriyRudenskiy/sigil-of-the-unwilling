@@ -217,6 +217,17 @@ final_score = threat_score + wounded_score + ranged_score
 - Эффект: `hero.stats *= 0.7` пока `wounded = true`
 - Снятие: после боя или отдых 3 хода
 
+Реализация (Phase 8, `BattleRewards.gd` + `HeroController` + `WorldBattleCoordinator`):
+- `BattleRewards` — чистый статический модуль (headless-тестируемый):
+  - `compute_trophies(defeated_army)` → `{xp, resources}`; `xp = 5×сумма солдат`, `gold = 20 + 1/врага` (детерминированно; предметы — отдельно в `_try_artifact_drop`).
+  - `hero_should_be_wounded(hero_won, hero_survived)` → `(not hero_won) and hero_survived`.
+  - `apply_wounded_penalty(atk, def)` → статы ×`WOUNDED_STAT_MULT` (0.7), пол `attack>=1` / `defense>=0`.
+  - Константы: `XP_PER_SOLDIER=5`, `VICTORY_GOLD_ID=&"gold"`, `VICTORY_GOLD_BASE=20`, `WOUNDED_STAT_MULT=0.7`, `WOUNDED_TURNS=3`.
+- `HeroController`: `add_xp`/`get_xp` (аккумулятор), `set_wounded`/`is_wounded`; штраф ранения применяется в `get_hero_battle_stack` (atk/def ×0.7, только когда `is_wounded()` — по умолчанию выключен, существующие тесты не задеты).
+- `WorldBattleCoordinator._apply_results`: при победе `_apply_trophies(defeated_army)` (xp + gold через `add_strategic_resource`), при поражении `_apply_defeat_wound()` (выжил → `set_wounded(3)`). Все вызовы guard-ом `has_method`.
+- **Deferred:** декремент `wounded_turns` по ходам мира (нужен world-turn hook); персист XP/ранения в сейв.
+- Тесты: `test_battle_rewards.gd` (6 тестов). Полный свит: 1812, 0 ошибок, 0 падений.
+
 ## Data Structures
 
 ### BattleState
