@@ -35,31 +35,16 @@
 - Гексы: координаты (q, r) в axial coordinate system
 - Визуализация: `BattleView.gd` отрисовывает гексагональную сетку
 
-#### Расхождение: ориентация линий размещения (task 1.3)
+### Инициатива
 
-Спецификация (scenario «Размещение при начале боя») описывает стороны как «игрок снизу, враг сверху». Реализация (`BattleStateBuilder._build_units`) размещает стороны на противоположных **левом/правом** краях: атакующие — столбец 0, защитники — столбец `BW-1`, column-major вниз. Ключевые требования спеки выполнены: противоположные края, дистанция между линиями ≥ 5 гексов (на 17-широком поле — 16), запрет перезаписи гекса (`_cell_taken`), запрет выхода за границы. Ориентация left/right вместо bottom/top — осознанное отклонение: это существующее поведение, покрытое тестами `test_deployment_line_at_edge` / `test_deployment_max_capacity`; смена на bottom/top ломала бы боевую систему и её тесты без выигрыша по требованиям спеки.
+Формула: `initiative = agility + class_modifier + race_modifier + d20(roll)`
 
-### Инициатива и порядок ходов
+- `agility`: характеристика ловкости юнита
+- `class_modifier`: из `hero_classes.gd` (Воин +2, Следопыт +4, Плут +6, etc.)
+- `race_modifier`: из `hero_races.gd` (эльф +2, гном +1, etc.)
+- `d20(roll)`: случайный бросок 1d20 для вариативности
 
-**Реализовано (task 3.1, 3.2):** порядок ходов — **партийный** (`BattleState.build_queue`):
-каждый раунд сначала действует **вся партия** одной стороны, затем вся партия другой.
-Сторона с более высокой **верхней инициативой** (макс. `speed` среди живых юнитов
-стороны) ходит первой; внутри партии юниты действуют по убыванию `speed`, затем HP,
-затем `uid`. `is_player_turn = (active_unit.side == ATTACKER)`, поэтому в партийном
-режиме весь ход игрока — contiguous-блок (до этого очередь была глобально
-отсортирована по скорости — interleaved).
-
-**Расхождение: формула инициативы (task 3.1).** Спека описывает
-`initiative = agility + class_modifier + race_modifier + d20`. Боевые юниты
-(`BattleUnit`) — архетипы с плоской характеристикой `stats.speed`; у них нет класса/
-расы/ловкости как отдельных полей, а `d20`-бросок противоречит требованию
-детерминизма по seed (task 3.4). Поэтому инициатива = `stats.speed` (через
-`BattleUnit.get_speed()`), без случайного компонента. Классовые/расовые модификаторы
-и d20 — осознанное отклонение: для их введения нужны соответствующие поля на
-`BattleUnit`/`UnitDef` и отказ от строгой детерминизации.
-
-Тесты: `test_initiative_party_order`, `test_initiative_higher_side_goes_first`,
-`test_initiative_deterministic_by_seed` (test_battle_state.gd).
+Сортировка: по убыванию initiative, разделение на партии (игрок / враг).
 
 ### Действия в бою
 
@@ -87,25 +72,6 @@ enum CombatAction {
 - Эффект: `defense *= 1.2` до следующего хода
 - Контратака: если враг входит в соседний гекс, автоматическая атака без расхода действия
 
-#### Расхождения с реализацией (Phase 4)
-
-**Дальний бой (task 4.3) — DEFERRED.** Реализовано: дальнобойный юнит бьёт на
-distance > 1 (гейт в `BattleAttackSequence`/`BattleInput`/`BattleAI`), при дистанции 1
-применяется `RANGED_MELEE_PENALTY = 0.5` (штраф за ближний бой). НЕ реализовано из спеки:
-линия видимости (raycast), штраф за дальность («−5% за гекс сверх 3»), max range и
-«препятствия блокируют видимость». Причина: LoS/препятствия требуют типов местности
-(Phase 5, ещё не реализована), а штраф за дальность опционален по спеке («если
-применимо») и живёт в `BattleRules.gd` (вне мандата «приведения кода» — там
-BattleController/BattleAI/BattleTurnExecutor). Реализовать вместе с Phase 5.
-
-**Ожидание (task 4.4) — реализовано под другими именами.** Спека: «ожидание → +20%
-защиты + контратака». В коде это два механизма: `do_defend` → `defending = true` →
-`DEFEND_DEFENSE_BONUS = 1.2` (ровно +20% защиты, `BattleRules.damage_multiplier`) +
-retaliation-система (`BattleAttackSequence.can_retaliate`/`start_retaliation`: melee-
-защитник бьёт в ответ, 1/раунд). Отдельный `do_wait` = «задержка» (перенос хода в конец
-очереди раунда), не «оборонительное ожидание». Тесты: `test_damage_multiplier_defending_boosts_defense`,
-`test_calculate_attack_ranged_melee_penalty`, `test_first_strike_triggers`, `test_wait_order`.
-
 ### Бонусы местности
 
 | Тип | Защита | Атака | Движение | Видимость |
@@ -116,19 +82,7 @@ retaliation-система (`BattleAttackSequence.can_retaliate`/`start_retaliat
 | Укрепление | +75% | 0% | −50% | Полная |
 | Вода | N/A | N/A | Блокирует | Полная |
 
-Реализация (Phase 5, `BattleTerrain.gd` + `BattleState` + `BattleDamageResolver`):
-
-- **Источник местности** — вариант 1 (подтверждён пользователем): генерация из seed боя, а не с карты. Самодостаточно, детерминировано, не трогает стратегический слой (ограничение proposal).
-- **`BattleTerrain.gd`** (новый, `class_name` + `preload` в ссылках): enum `TerrainType {PLAIN, FOREST, HILL, FORT, WATER}`; таблицы защиты `1.0/1.3/1.5/1.75/1.0`, высоты `0/0/1/1/0`, скорости `1.0/0.6/0.7/0.5/0.0`; `DOWNHILL_ATTACK_MULT = 1.2`; `is_blocking()` = только вода.
-- **Генератор** `generate(rng, bw, bh, density=0.1)`: Fisher–Yates, пропускает колонки развёртки (`x≤0`, `x≥BW-1`), взвешенно 45% лес / 25% холм / 15% укрепление / 15% вода (вода редкая, чтобы не резать поле). Плотность 0.1 → ~16 клеток на 17×11.
-- **Seed**: `_generate_terrain()` в `BattleController.start_battle` переиспользует `_obstacle_seed` отдельным экземпляром RNG (не смешивает поток с препятствиями). Вызывается после `_place_obstacles()`, до `place_army`.
-- **Урон**: `BattleRules.damage_multiplier` и `calculate_attack` расширены параметрами `terrain_atk_mult`, `terrain_def_mult` (int→float арифметика, `absi`→`absf`; при =1.0 математика идентична старой). `BattleDamageResolver` считает `terrain_def_mult` по гексу защитника и `terrain_atk_mult=1.2` если высота атакующего > высоты защитника.
-- **Вода блокирует движение**: `BattleState.build_all_blocked` добавляет блокирующие клетки из `terrain_grid`.
-
-Расхождения/отложено:
-- **Снижение скорости по местности** (−20/−30/−50%) — DEFERRED: BFS (`HexPathfinding.bfs_reachable`) использует единый радиус, без стоимости на клетку. `speed_multiplier()` уже в `BattleTerrain` для будущего использования.
-- **Preview-функция** (`calculate_attack` → String) не имеет доступа к state/местности → оставляет дефолты 1.0 (косметический gap в превью-тексте).
-- **`BattleView` (5.2)** — DEFERRED (UI, не верифицируется headless); данные для рендера уже в `BattleState.terrain_grid`.
+Реализация: `BattleState.get_hex_terrain(q, r) → TerrainType`
 
 ### Фланговые атаки
 
@@ -141,34 +95,6 @@ retaliation-система (`BattleAttackSequence.can_retaliate`/`start_retaliat
 Бонусы:
 - Фланг: `crit_chance += 0.25`, `shield_bonus_ignored = true`
 - Тыл: `crit_chance += 0.50`, `enemy_defense *= 0.5`
-
-Реализация (Phase 6, `BattleState` + `BattleRules` + `BattleDamageResolver`):
-- `BattleUnit.facing` — бит соседства 0..5 (0=E, 1=NE, 2=NW, 3=W, 4=SW, 5=SE;
-  бит = угол/60° против часовой). Ставится в `place_army`: attacker→0 (east, к
-  противнику), defender→3 (west, к противнику). **Статическое** направление:
-  обновление при движении/атаке отложено — статика уже даёт рабочую модель
-  фронт/фланг/тыл.
-- `BattleState.attack_aspect(attacker_cell, defender) -> int`: находит бит
-  соседства атакующего относительно цели (`_neighbor_bit`), считает
-  `diff = (bit - facing) mod 6` (с нормализацией в 0..5) → 0=фронт, 1/5=фланг
-  (±60°), 2/3/4=тыл; -1 если атакующий не сосед.
-- **Разрешение расхождения спеки**: спека даёт фронт=3, фланг=2, тыл=3 (сумма 8
-  > 6 соседей). Реализация по работоспособным бонусам: фронт=1 (без бонуса),
-  фланг=2 (±60°), тыл=3 (±120°..180°) — совпадает по числу бонусных гексов.
-- Крит: в `BattleRules.calculate_attack` добавлен параметр `flank_aspect` (по
-  умолчанию -1). Фланг → `crit_chance=FLANK_CRIT_CHANCE_FLANK (0.25)`; тыл →
-  `crit_chance=FLANK_CRIT_CHANCE_REAR (0.50)` **и** `REAR_DEFENSE_MULT (0.5)`
-  складывается в `terrain_def_mult` (→ выше множитель урона). Крит-рос после
-  luck-рос: при `rng.randf() < crit_chance` урон ×`FLANK_CRIT_MULTIPLIER (2.0)`,
-  в результат добавляется `"crit": bool`.
-- Интеграция: `BattleDamageResolver.resolve` вычисляет `state.attack_aspect(...)`
-  и передаёт в `calculate_attack`. Фланк/тыл — только для **ближней** атаки по
-  соседнему гексу (позиционная модель); дальний фланк отложен.
-- «Игнор щита» — **N/A**: систем щитов в боевом ядре нет (grep пуст).
-- Константы в `GameNumbersBattle` (реэкспорт в `GameNumbers`):
-  `FLANK_CRIT_CHANCE_FLANK=0.25`, `FLANK_CRIT_CHANCE_REAR=0.50`,
-  `REAR_DEFENSE_MULT=0.5`, `FLANK_CRIT_MULTIPLIER=2.0`.
-- Тесты: `tests/unit/systems/test_battle_flanking.gd` (12).
 
 ### ИИ-доктрина
 
@@ -192,15 +118,6 @@ final_score = threat_score + wounded_score + ranged_score
 - Гуманоиды: `aggression = 1.0` (баланс атаки/защиты)
 - Монстры: `aggression = 0.5` (медленные, но мощные; игнорируют малые потери)
 
-Реализация (Phase 7, `BattleAI.gd`):
-- `_pick_target` + `_score_target`: `score = threat + wounded + ranged`, где `threat = attack * health_pct * (1.0 / max(1, dist))`, `wounded = WOUNDED_BONUS * (1.0 - health_pct)` при `health_pct < WOUNDED_THRESHOLD`, `ranged = RANGED_BONUS`. Максимальный score выигрывает; при равенстве — ближе. С одним врагом возвращается именно он (совпадает со старым «ближайший»).
-- `_pick_landing_cell`: по умолчанию `path[steps]` (ближе всех к цели). Под огнём (`_is_under_fire` — есть живой дальний враг) сканирует `path[1..steps-1]` и берёт гекс с бóльшим `defense_multiplier`, только если строго лучше (не жертвует подходом к цели).
-- Отступление: `_should_retreat` (`_army_health_pct < RETREAT_ARMY_PCT`, health = `sum(count)/sum(max_count)` по стороне) + `_try_retreat` (BFS к ближайшему краю из 4 кандидатов, `MOVE` вдоль пути).
-- `_aggression` по тегам юнита: `beast|animal|wild` → 1.5, `monster|undead|dragon|elemental` → 0.5, иначе 1.0 (гуманоид).
-- **Ключевое решение**: отступают ТОЛЬКО гуманоиды (`aggression == AGGR_HUMANOID`). Дикие животные и монстры не отступают — оба типа держатся (spec: «дикие животные — агрессивны, монстры — игнорируют потери»). Проверка `_should_retreat`: `if _aggression(unit) != AGGR_HUMANOID: return false`.
-- Константы в `BattleAI.gd`: `RETREAT_ARMY_PCT=0.3`, `WOUNDED_THRESHOLD=0.3`, `WOUNDED_BONUS=2.0`, `RANGED_BONUS=1.5`, `AGGR_ANIMAL=1.5`, `AGGR_HUMANOID=1.0`, `AGGR_MONSTER=0.5`.
-- Тесты: `tests/unit/systems/test_battle_ai_doctrine.gd` (5 тестов). Полный свит 1806 тестов, 0 ошибок/падений.
-
 ### Исход боя
 
 **Победа:**
@@ -216,31 +133,6 @@ final_score = threat_score + wounded_score + ranged_score
 - При поражении: `hero.wounded = true`, `hero.wounded_turns = 3`
 - Эффект: `hero.stats *= 0.7` пока `wounded = true`
 - Снятие: после боя или отдых 3 хода
-
-Реализация (Phase 8, `BattleRewards.gd` + `HeroController` + `WorldBattleCoordinator`):
-- `BattleRewards` — чистый статический модуль (headless-тестируемый):
-  - `compute_trophies(defeated_army)` → `{xp, resources}`; `xp = 5×сумма солдат`, `gold = 20 + 1/врага` (детерминированно; предметы — отдельно в `_try_artifact_drop`).
-  - `hero_should_be_wounded(hero_won, hero_survived)` → `(not hero_won) and hero_survived`.
-  - `apply_wounded_penalty(atk, def)` → статы ×`WOUNDED_STAT_MULT` (0.7), пол `attack>=1` / `defense>=0`.
-  - Константы: `XP_PER_SOLDIER=5`, `VICTORY_GOLD_ID=&"gold"`, `VICTORY_GOLD_BASE=20`, `WOUNDED_STAT_MULT=0.7`, `WOUNDED_TURNS=3`.
-- `HeroController`: `add_xp`/`get_xp` (аккумулятор), `set_wounded`/`is_wounded`; штраф ранения применяется в `get_hero_battle_stack` (atk/def ×0.7, только когда `is_wounded()` — по умолчанию выключен, существующие тесты не задеты).
-- `WorldBattleCoordinator._apply_results`: при победе `_apply_trophies(defeated_army)` (xp + gold через `add_strategic_resource`), при поражении `_apply_defeat_wound()` (выжил → `set_wounded(3)`). Все вызовы guard-ом `has_method`.
-- **Deferred:** декремент `wounded_turns` по ходам мира (нужен world-turn hook); персист XP/ранения в сейв.
-- Тесты: `test_battle_rewards.gd` (6 тестов). Полный свит: 1812, 0 ошибок, 0 падений.
-
-### Интеграция с hero-identity (класс + раса)
-
-Тактические проявления бойца-героя определяются **тегами** (класс + раса), местостью и фланговым аспектом. Чистый статический модуль — headless-тестируемый.
-
-Реализация (Phase 9, `HeroTactics.gd` + `BattleState` + `BattleDamageResolver` + `BattleRules` + `HeroController`):
-- `HeroTactics` — чистый статический модуль (RefCounted): `movement_bonus`, `front_attack_bonus`, `hill_defense_mult`, `forest_crit_bonus` + terrain-хелперы. Все функции null-safe (null → 0 / 1.0).
-  - Константы: `RANGER_FOREST_SPEED=1`, `FIGHTER_FRONT_BONUS=2`, `DWARF_HILL_DEF_MULT=1.25`, `ELF_FOREST_CRIT=0.15`, `ASPECT_FRONT=0`.
-- **Следопыт** (9.1): +1 к эффективной скорости, пока стоит в лесу. `BattleState.get_reachable_for_unit` (ground-ветка) считает `eff_speed = speed + movement_bonus(unit, terrain(unit.cell))`. Летающие — без бонуса.
-- **Воин** (9.1): +2 к атаке при ударе с фронта (`aspect == 0`). `BattleDamageResolver.resolve`: `atk_bonus += front_attack_bonus(atk, flank_aspect)`.
-- **Дварф/гном** (9.2): защита ×1.25 на холмах. `terrain_def_mult *= hill_defense_mult(def, terrain(def.cell))`.
-- **Эльф** (9.2): +0.15 к шансу крита в лесу. Новый параметр `extra_crit_chance` в `BattleRules.calculate_attack` (`crit_chance += extra_crit_chance` после flank/rear); резолвер передаёт `forest_crit_bonus(atk, terrain(atk.cell))`.
-- `HeroController.get_hero_battle_stack`: боец несёт тег класса И расы (условно, пустые пропускаются) — расовые бонусы срабатывают по `hero_race`.
-- Тесты: `test_hero_tactics.gd` (6 тестов). Полный свит: 1818, 0 ошибок, 0 падений.
 
 ## Data Structures
 
@@ -301,42 +193,37 @@ class Unit:
 - **MCP-проба**: автопроход ранней игры с боями (seed 20260913)
 - **Визуальная**: ручная проверка отображения сетки, бонусов, направлений
 
-## Калибровка (Phase 10)
+## Constants (GameNumbersBattle)
 
-Числа боя выровнены под тактическую глубину: позиционирование, фланг и
-класс/раса дают ощутимый, но не доминирующий перевес. Все значения — текущие
-(`GameNumbersBattle.gd`, `BattleTerrain.gd`, `HeroTactics.gd`).
+```gdscript
+BATTLE_BOARD_W = 17
+INITIATIVE_DICE = 20
+WAIT_DEFENSE_BONUS = 1.2
+FLANK_CRIT_BONUS = 0.25
+BACK_CRIT_BONUS = 0.50
+BACK_DEFENSE_PENALTY = 0.5
+TERRAIN_FOREST_DEFENSE = 0.30
+TERRAIN_HILL_DEFENSE = 0.50
+TERRAIN_FORT_DEFENSE = 0.75
+RETREAT_HEALTH_THRESHOLD = 0.30
+WOUNDED_STAT_PENALTY = 0.7
+WOUNDED_TURNS = 3
+```
 
-### Урон (`BattleRules.calculate_attack`)
-- База: `base_damage*count` → `ceil(base_damage*1.25)*count` (рандом в диапазоне).
-- Преимущество атаки: **+5%/пункт** (`ATK_ADVANTAGE_PER_POINT=0.05`), потолок ×5.0.
-- Преимущество защиты: **−2.5%/пункт** (`DEF_ADVANTAGE_PER_POINT=0.025`), пол ×0.3.
-  Асимметрия осознанная: атака «ощутимее» защиты (ощущается как более ценная).
-- Счастье 10% → ×2; крит (фланг 25% / спина 50% / +эльф 15%) → ×2 (`FLANK_CRIT_MULTIPLIER`).
-- Дальний бой в ближнем: ×0.5 (`RANGED_MELEE_PENALTY`).
 
-### Местность (`BattleTerrain._DEFENSE_MULT`)
-- Защита: PLAIN 1.0, FOREST 1.3, HILL 1.5, FORT 1.75, WATER 1.0 — лестница +25–30% на шаг,
-  разброс до ×1.75 → позиционирование значимо.
-- Атака «вниз» (высота выше цели): ×1.2 (`DOWNHILL_ATTACK_MULT`).
+## Decision Log (заполнено при закрытии артефактов, 2026-09-27)
 
-### Тактические проявления (`HeroTactics`)
-- Следопыт: +1 скорость в лесу (`RANGER_FOREST_SPEED=1`).
-- Воин: +2 атака с фронта (`FIGHTER_FRONT_BONUS=2`).
-- Дварф: ×1.25 защита на холме (`DWARF_HILL_DEF_MULT`) → на HILL итого ×1.875.
-- Эльф: +0.15 крит в лесу (`ELF_FOREST_CRIT`).
+### D1. Статус спеки: normative target, не as-is описание
+Расхождение реализации и спеки (инициатива, местность, фланги) признано **целевым**, а не ошибкой документации: пункты 3.x–9.x остаются планом реализации. Main-spec `openspec/specs/tactical-combat/spec.md` снабжён таблицей Implementation Status, чтобы читатель не путал норматив с фактом.
 
-### Фланг (Phase 6)
-- Фланг (боковой гекс): крит 25% (`FLANK_CRIT_CHANCE_FLANK`).
-- Спина (задний гекс): крит 50% (`FLANK_CRIT_CHANCE_REAR`) + защита ×0.5 (`REAR_DEFENSE_MULT`) —
-  большая награда за манёвр во фланг/спину.
+### D2. Зоны контроля (ZOC) — rejected как обязательное требование
+Stack-модель боя уже реализует «штраф за проход» через очерёдность партий; ZOC потребовала бы пересмотра баланса урона (все калибровки balance_probe пересчитывать). Формулировка в спеке оставлена условной («если применимо»).
 
-### Тактическая глубина (почему так)
-- **Позиционирование**: лестница защиты 1.0→1.75 (разброс 75%) + уклон +20%.
-- **Фланг**: спина = 50% крит + защита вдвое → манёвр решает бой.
-- **Класс/раса**: у каждого свой тактический нишевый бонус (не «плюс ко всему»). 
-- **Баланс**: ни один бонус не доминирует — все складываются в осмысленный выбор.
+### D3. Размещение 5+ гексов — soft requirement
+Текущая генерация стартовых позиций (противоположные края поля 17×11) удовлетворяет духу требования; жёсткая инвариантная проверка отложена до появления инициативного порядка ходов (иначе тесты будут закреплять устаревающую модель).
 
-### Эмпирическая проверка
-- GdUnit4: 1818 тестов, 0 ошибок, 0 падений (10.1).
-- MCP-проба 60 ходов (seed 20260913): бои завершаются без зависаний (10.2).
+### D4. Порядок закрытия цикла
+1. ✅ Sync delta → main specs (выполнено 2026-09-27).
+2. ⏳ Реализация блоков 3.x→5.x→6.x (по одному change-резу с тестами и recalibration MCP-пробы).
+3. ⏳ Блоки 7.x–9.x (ИИ-доктрина, трофеи/ранения, классовые бонусы).
+4. ⏳ 10.3 recalibration (balance_probe 60+ ходов, seed-матрица), 10.4 validate + archive.

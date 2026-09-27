@@ -1,7 +1,10 @@
 # Event Manager Specification
 
-## Requirements
+## Purpose
 
+Определяет событийный менеджер: каталог событий (JSON), триггеры по дням/сезонам/населению, веса и очередность срабатываний.
+
+## Requirements
 ### Requirement: Типы и частота событий
 Система событий SHALL поддерживать типы Common, Rare, Crisis, Seasonal с весами (weight) для случайного выбора; каждое событие имеет условия активации (conditions) и варианты выбора (choices).
 

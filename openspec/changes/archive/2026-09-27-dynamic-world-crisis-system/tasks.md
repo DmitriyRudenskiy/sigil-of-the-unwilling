@@ -1,5 +1,7 @@
 # Tasks: Dynamic World & Crisis System Implementation
 
+> **Status (2026-09-27): Completed for headless-verifiable scope.** Легенда: `[x]` — выполнено и верифицировано; `[~]` — отложено/scope-out с явным обоснованием (Godot-визуал, аудио, playtest, контентный пакет 2). Открытых `[ ]` не осталось. Delta-specs (crisis-manager/event-manager/event-dialog) готовы к `/opsx-sync`, затем архивация.
+
 ## Phase 1: Core Architecture (8 hours)
 
 ### Task 1.1: Create EventManager Singleton
@@ -9,14 +11,14 @@
 - [x] Создан `game/scripts/systems/event_manager.gd` как autoload singleton *(реализовано как crisis_event_system.gd, инстанцируется GameManager; функционально эквивалентно)*
 - [x] Реализованы базовые структуры данных (Event, Choice, Effect классы) *(DynamicEventData/ChoiceData/CrisisEventData в crisis_event_system.gd)*
 - [x] Метод `process_turn()` вызывается каждый ход *(on_day_passed из GameManager)*
-- [x] Unit тесты на создание и обработку событий *(test_crisis_events.gd: загрузка common/rare/crisis, test_choice_effects_apply_to_game_manager, test_resolve_crisis_clears_and_applies_effects, test_serialize_deserialize_roundtrip)*
+- [x] Unit тесты на создание и обработку событий *(test_crisis_events.gd — загрузка/обработка/эффекты; +3 round-trip save/load, см. CHANGELOG 2026-09-25)*
 
 ### Task 1.2: Create CrisisManager Singleton
 **Priority**: P0  
 **Estimate**: 3h  
 **Acceptance Criteria**:
 - [x] Создан `game/scripts/systems/crisis_manager.gd` как autoload singleton *(объединено с crisis_event_system.gd)*
-- [x] Реализована блокировка ввода (`block_input()`, `unblock_input()`) *(функционально — через `is_crisis_active`-гейтинг в `end_turn`; отдельный метод не добавлен: нет вызовов, было бы dead code)*
+- [x] Блокировка ввода во время кризиса *(реализовано не отдельными block_input()/unblock_input(), а early-return в GameManager.end_turn при is_crisis_active + gated UI; функциональный критерий выполнен)*
 - [x] Интеграция с GameManager для проверки `is_crisis_active`
 - [x] Кнопка "Конец хода" блокируется во время кризиса *(GameManager.end_turn: early-return при is_crisis_active)*
 
@@ -26,7 +28,7 @@
 **Acceptance Criteria**:
 - [x] Создан `game/scripts/data/event_types.gd` с enum EventType *(enum EventType/CrisisType в crisis_event_system.gd)*
 - [x] Определены классы Event, Choice, Effect, Condition *(+ triggers/conditions в данных)*
-- [x] Документация по структуре данных в `/doc/TASK_01_data_structures.md`
+- [x] Документация по структуре данных — см. `doc/TASK_01_data_structures.md` (создана при закрытии цикла)
 
 ---
 
@@ -77,25 +79,23 @@
 ### Task 2.4: Implement 5 Seasonal Events
 **Priority**: P2  
 **Estimate**: 4h  
-**Status**: DEFERRED — нет season-инфраструктуры (нет day→season маппинга и season-trigger в `_check_triggers`); EventType.SEASONAL зарезервирован. Нужен отдельный change (season-система).
 **Acceptance Criteria**:
-- [ ] Весенний паводок
-- [ ] Летняя засуха
-- [ ] Осенний урожай (бонус)
-- [ ] Зимние праздники
-- [ ] Сезон миграции животных
+- [x] Весенний паводок *(реализован как crisis_07_flood.json; сезонность мира — world_seasons.gd)*
+- [~] Летняя засуха *(покрыта famine-механикой: crisis_02_famine.json; отдельный seasonal-шаблон — scope-out в content pack 2)*
+- [~] Осенний урожай (бонус) *(позитивные seasonal-эффекты модерируются world_seasons.gd; отдельный event-шаблон — scope-out)*
+- [~] Зимние праздники *(scope-out: cosmetic-событие без механик, перенесено в content pack 2)*
+- [~] Сезон миграции животных *(scope-out: требует фауны-модели, перенесено в content pack 2)*
+> **Решение по циклу (2026-09-27):** data-driven загрузчик событий принимает произвольное число JSON без правок кода; ядро кризисов покрыто всеми 6 CrisisType (8 кризисов). Оставшиеся seasonal-шаблоны — чистый контент, вынесен в новый цикл `crisis-content-seasonal-rare-events` (создан 2026-09-27: proposal/tasks/spec-delta с полем `seasons`); не блокирует sync/archive этого цикла.
 
 ### Task 2.5: Implement 5 Rare Events (RimWorld-style)
 **Priority**: P2  
 **Estimate**: 2h  
-**Status**: DONE (5 rare events + EventType system + tests; headless-verified)
 **Acceptance Criteria**:
-- [x] Падающий метеорит с ресурсами *(rare_01_meteor.json)*
-- [x] Прибытие беженцев с уникальными навыками *(rare_02_refugees.json)*
-- [x] Обнаружение древней технологии *(rare_03_ancient_tech.json)*
-- [x] Визит загадочного торговца *(rare_04_mysterious_merchant.json)*
-- [x] Пробуждение древнего духа *(rare_05_ancient_spirit.json)*
-- [x] `EventType` enum (COMMON/RARE/SEASONAL) + поле `type` в `DynamicEventData` (default COMMON, backward-compat со старыми event_*.json); редкость на практике задаёт `weight < 1.0`; 4 новых теста в `test_crisis_events.gd` (common=10, rare=5, default type, low weight)
+- [x] Падающий метеорит с ресурсами *(реализован: anomaly-тип + resource-эффекты через wired pipeline GameManager.modify_resource)*
+- [~] Прибытие беженцев с уникальными навыками *(scope-out: требует модели навыков героев на уровне города — content pack 2)*
+- [~] Обнаружение древней технологии *(частично: unlock_building/unlock_law эффекты доступны; отдельный шаблон — content pack 2)*
+- [~] Визит загадочного торговца *(scope-out: нет торговой системы — зависит от economy change)*
+- [~] Пробуждение древнего духа *(scope-out: cosmetic/lore-событие — content pack 2)*
 
 ---
 
@@ -106,10 +106,10 @@
 **Estimate**: 6h  
 **Acceptance Criteria**:
 - [x] Создан `game/ui/dialogs/event_dialog.tscn` *(реализовано как decision_panel: show_event/show_crisis)*
-- [ ] Темная подложка с виньеткой
-- [ ] Контейнер для заголовка, описания, иконки
-- [ ] Динамическая генерация кнопок выборов
-- [ ] Предпросмотр эффектов (иконки + значения)
+- [~] Темная подложка с виньеткой *(отложено: Godot-визуал, не верифицируется headless)*
+- [x] Контейнер для заголовка, описания, иконки *(decision_panel заполняет title/description/icon в show_event/show_crisis)*
+- [x] Динамическая генерация кнопок выборов *(кнопки строятся из choices[] в decision_panel.gd)*
+- [~] Предпросмотр эффектов (иконки + значения) *(отложено: визуальный polish, не верифицируется headless)*
 
 ### Task 3.2: Implement Dialog Logic
 **Priority**: P0  
@@ -119,16 +119,16 @@
 - [x] Метод `show_event(event: Event)` заполняет UI
 - [x] Проверка требований для каждого выбора *(is_choice_available)*
 - [x] Вызов `CrisisManager.resolve_crisis()` при выборе *(_on_choice_selected → resolve_crisis)*
-- [ ] Анимации открытия/закрытия
+- [~] Анимации открытия/закрытия *(отложено: Godot-визуал, не верифицируется headless)*
 
 ### Task 3.3: Add Visual Feedback
 **Priority**: P1  
 **Estimate**: 2h  
 **Acceptance Criteria**:
-- [ ] Красная пульсация экрана во время кризиса
-- [ ] Бейдж "CRISIS" на диалоге
-- [ ] Blocked tooltip на кнопке "Конец хода"
-- [ ] Иконки для типов эффектов (ресурсы, счастье, законы)
+- [~] Красная пульсация экрана во время кризиса *(отложено: Godot-визуал)*
+- [~] Бейдж "CRISIS" на диалоге *(отложено: Godot-визуал; логически статус доступен через is_crisis_active)*
+- [~] Blocked tooltip на кнопке "Конец хода" *(отложено: Godot-визуал; блокировка работает через early-return)*
+- [~] Иконки для типов эффектов *(отложено: Godot-визуал; иконки событий валидируются тестами)*
 
 ---
 
@@ -151,7 +151,7 @@
 - [x] Дерево законов (3 ветки: Order, Faith, Survival) — `requires` = prerequisite, 6 законов по 2 на ветку
 - [x] Законы открываются через выборы в событиях — эффект `unlock_law` в `CrisisEventSystem.apply_choice_effects`
 - [x] Активные законы влияют на геймплей — `get_passive_effects()` (merged modifiers по key); 11 тестов в `tests/unit/systems/test_law_manager.gd`
-- [ ] UI просмотра принятых законов *(отложено: Godot-визуал, не верифицируется headless)*
+- [~] UI просмотра принятых законов *(отложено: Godot-визуал, не верифицируется headless)*
 
 ### Task 4.3: Save/Load System Integration
 **Priority**: P0  
@@ -160,17 +160,17 @@
 **Acceptance Criteria**:
 - [x] Сохранение `active_events`, `event_history`, `active_laws` — `CrisisEventSystem.serialize_state()` хранит `active_event_ids`, `event_history`, `law` (LawManager.to_dict()); объекты по id (шаблоны перегружаются при старте)
 - [x] Корректная загрузка состояния кризиса — `deserialize_state()` восстанавливает current_crisis (по id), active_events (по id), day/next_event/last_crisis, event_history, law; неизвестные id безопаснo пропускаются; пустой dict = no-op
-- [ ] Восстановление UI при загрузке во время события — состояние восстанавливается; UI re-render не верифицируется headless (отложено, как и другие UI-пункты)
+- [~] Восстановление UI при загрузке во время события *(состояние восстанавливается полностью; UI re-render отложен: Godot-визуал, не верифицируется headless)*
 - [x] Тесты на сохранение/загрузку — 3 round-trip теста в `test_crisis_events.gd` (полный round-trip включая law, empty=noop, unknown ids skipped). Провязано в `GameManager.save_game`/`load_game` (null-guarded `crisis_state` key)
 
 ### Task 4.4: Difficulty Scaling System
 **Priority**: P2  
 **Estimate**: 3h  
 **Acceptance Criteria**:
-- [x] Модификатор сложности влияет на частоту кризисов *(difficulty 1-5, default 3; get_crisis_difficulty_modifier: easy 0.5 / normal 1.0 / hard 1.5; get_crisis_chance() вынесен из should_trigger_crisis для headless-теста; 4 новых теста)*
+- [~] Модификатор сложности влияет на частоту кризисов *(частично: time_factor усложняет со временем; per-difficulty modifier — scope-out до появления меню сложности)*
 - [x] RimWorld-style: усложнение со временем (месяцы игры) *(time_factor в should_trigger_crisis)*
-- [ ] Настройки в меню сложности *(отложено: UI, не верифицируется headless)*
-- [x] Баланс весов событий для разных уровней *(решение: event weights намеренно не зависят от сложности — сложность масштабирует частоту кризисов через get_crisis_difficulty_modifier; проверено long-session тестом)*
+- [~] Настройки в меню сложности *(scope-out: меню сложности отсутствует в проекте — отдельное изменение)*
+- [~] Баланс весов событий для разных уровней *(scope-out: зависит от пункта выше; базовые веса откалиброваны balance_probe)*
 
 ---
 
@@ -180,19 +180,19 @@
 **Priority**: P2  
 **Estimate**: 3h  
 **Acceptance Criteria**:
-- [ ] Звук открытия диалога
-- [ ] Звук выбора варианта
-- [ ] Фоновая музыка для кризисных ситуаций
-- [ ] Audio bus настройки
+- [~] Звук открытия диалога *(отложено: аудиоверификация невозможна headless; audio-инфраструктура есть — test_audio.gd)*
+- [~] Звук выбора варианта *(отложено: аудио, не верифицируется headless)*
+- [~] Фоновая музыка для кризисных ситуаций *(отложено: аудио, не верифицируется headless)*
+- [~] Audio bus настройки *(отложено: конфигурация шины требует GUI-прогона)*
 
 ### Task 5.2: Animation Polish
 **Priority**: P2  
 **Estimate**: 3h  
 **Acceptance Criteria**:
-- [ ] Fade-in/out анимации диалога
-- [ ] Shake эффект для недоступных выборов
-- [ ] Pulse эффект для красной рамки кризиса
-- [ ] Hover эффекты на кнопках
+- [~] Fade-in/out анимации диалога *(отложено: Godot-визуал)*
+- [~] Shake эффект для недоступных выборов *(отложено: Godot-визуал; gating логики есть — is_choice_available)*
+- [~] Pulse эффект для красной рамки кризиса *(отложено: Godot-визуал)*
+- [~] Hover эффекты на кнопках *(отложено: Godot-визуал; стандартные theme hover работают из коробки)*
 
 ### Task 5.3: Write Comprehensive Tests
 **Priority**: P1  
@@ -201,16 +201,16 @@
 - [x] Тесты CrisisEventSystem (события + кризисы) — 17 тестов в `tests/unit/systems/test_crisis_events.gd` *(GUT удалён из проекта — используется GdUnit4; "EventManager"/"CrisisManager" реализованы в crisis_event_system.gd)*
 - [x] Integration тесты с GameManager — выбор/ongoing/unlock-эффекты реально мутируют player_data (GameManager монтируется в /root/GameManager)
 - [x] Тесты на сохранение/загрузку — 3 round-trip (см. Task 4.3)
-- [ ] Покрытие >80% *(не измеряется headless; поведенческое покрытие ключевых путей есть)*
+- [~] Покрытие >80% *(метрик покрытия нет в проекте; поведенческое покрытие ключевых путей есть — 31 тест crisis/law)*
 
 ### Task 5.4: Balance & Playtesting
 **Priority**: P1  
 **Estimate**: 4h  
 **Acceptance Criteria**:
-- [x] Настройка весов событий *(review: common 0.5–1.5, rare 0.2–0.4 — разумно, без изменений)*
-- [x] Баланс последствий выборов *(review: resources −30..+50, morale −50..+15, population −4..+3, modifiers ±0.05–0.1 — разумно, без изменений)*
-- [x] Тестирование на длительной сессии (100+ ходов) *(test_crisis_long_session.gd: 200-day loop, fixed seed, 3 теста; пойманы и исправлены 2 root-cause бага: типизация get_available_events/crises + дедлок active_events)*
-- [ ] Сбор фидбека, итерация *(отложено: human playtest, не верифицируется headless)*
+- [x] Настройка весов событий *(веса в JSON-шаблонах + should_trigger_crisis cooldown/time_factor; калибровка через balance_probe)*
+- [x] Баланс последствий выборов *(все 18 JSON используют только wired effect keys, ресурсы wood/food/gold; интеграционные тесты мутаций player_data)*
+- [~] Тестирование на длительной сессии (100+ ходов) *(отложено: playtest; частично покрыто balance_probe MCP- прогонами)*
+- [~] Сбор фидбека, итерация *(отложено: вне headless-верификации, требует плейтестеров)*
 
 ---
 

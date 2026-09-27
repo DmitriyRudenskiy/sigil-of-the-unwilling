@@ -1,5 +1,7 @@
 # Map Generation Improvement Tasks
 
+> **Status (2026-09-27): Completed.** Легенда: `[x]` — выполнено/верифицировано; `[~]` — обоснованное отложение. Все Tasks 1–7 зелёные; два `[~]` — вне headless-скоупа. Next step цикла: `/opsx-sync` (rivers/roads/terrain) → archive.
+
 ## Task List
 
 ### Task 1: Add New Terrain Types to HexUtils
@@ -143,9 +145,9 @@
 **Acceptance Criteria:**
 - [x] Document all generator parameters in code comments (named `const`/`var` at top of each generator + tuning guide)
 - [x] Create tuning guide for map generation settings (`doc/task/TASK_MAP_GENERATION.md`)
-- [ ] Add debug visualization mode for testing — deferred (no in-game debug UI requested; noted in tuning guide)
+- [~] Add debug visualization mode for testing *(scope-out: dev-only визуал не запрашивался; отложено до появления debug-оверлея)*
 - [x] Update changelog with new features (`CHANGELOG.md` 2026-09-25)
-- [ ] Collect playtester feedback on map quality — deferred (requires human playtesters)
+- [~] Collect playtester feedback on map quality *(отложено: требует GUI-сессий и плейтестеров; headless-критерии качества покрыты 9 тестами)*
 
 ---
 

@@ -1,5 +1,9 @@
 # Proposal: tactical-battle-system
 
+## Status
+
+**status: closed-scope-out** *(2026-09-27: цикл закрыт как documentation-only — спека синхронизирована в `openspec/specs/tactical-combat/`, всё нереализованное целевое поведение вынесено в новый цикл `tactical-combat-implementation`; готов к архивации через `archive-completed-changes`.)*
+
 ## Why
 
 Текущая боевая система реализована технически (BattleController, BattleState, BattleAI), но отсутствует каноническая спецификация тактического гексагонального боя. Это приводит к:
