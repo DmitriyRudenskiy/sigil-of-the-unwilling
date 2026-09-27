@@ -116,7 +116,7 @@ var _baseline: Dictionary = {}
 
 func _init(report_script: Script = null) -> void:
 	if report_script == null:
-		report_script = _load_src(_dir().path_join("ValidationReport.gd"))
+		report_script = _load_src(_dir().path_join("validation_report.gd"))
 	_report_script = report_script
 	report = _report_script.new()
 
