@@ -2,6 +2,23 @@
 
 Формат: записи по завершённым OpenSpec-циклам. Детали — в `openspec/changes/archive/`.
 
+## 2026-09-27
+
+### tactical-battle-system — тактический гекс-бой (Phases 1–10, полный цикл)
+- **Phase 2** — `BattleState.place_army()`: развёртывание на противоположных краях 17-гекс. поля, `facing` на центр поля
+- **Phase 3** — инициатива = agi + модификаторы класса/расы; ходы партией (все юниты игрока → противника)
+- **Phase 4** — действия юнитов: ближний/дальний бой, ожидание, отступление
+- **Phase 5** — `BattleTerrain.gd`: защита PLAIN 1.0 / FOREST 1.3 / HILL 1.5 / FORT 1.75 / WATER 1.0, downhill-атака ×1.2
+- **Phase 6** — фланговые атаки: `BattleUnit.facing` (статический), `attack_aspect()` (front=1 / flank=2 ±60° / rear=3 ±120°..180°); +25% крит за фланг, +50% крит + def ×0.5 за тыл; только ближний бой по соседнему гексу
+- **Phase 7** — AI-доктрина (`BattleAI.gd`): приоритет целей (угроза→раненые→дальние), укрытия, концентрация огня, отступление (только гуманоиды; животные/монстры не отступают)
+- **Phase 8** — `BattleRewards.gd` (трофеи: gold = стоимость павшей армии / 10, XP героя) + ранение героя при поражении (wounded, сниженные статы)
+- **Phase 9** — `HeroTactics.gd`: ranger +1 скорость в лесу, fighter +2 атака в лоб, dwarf ×1.25 защита на холме, elf +0.15 крит в лесу; race-tag добавлен к герою
+- **Phase 10** — калибровка (задокументирована в design.md), регрессия, MCP 60-ходовой прогон (боевые завершаются без зависаний)
+- Тесты: `test_battle_flanking.gd` (12), `test_battle_ai_doctrine.gd` (5), `test_battle_rewards.gd` (6), `test_hero_tactics.gd` (6) + terrain/state
+- **Отложено (не headless / UI)**: 2.3 зоны контроля, 3.3 UI-инициатива, 4.3 дальний LoS, 5.2 UI-местность, 6.4 UI-индикатор фланга, decrement `wounded_turns`, персист XP/wounded
+- Spec синхронизирован в `openspec/specs/tactical-combat/spec.md` (7 требований, 17 сценариев)
+- Полный сьют: **1818/1818 passed, 0 failures** (129 orphans)
+
 ## 2026-09-25
 
 ### dynamic-world-crisis-system — Save/Load Integration (Task 4.3)
