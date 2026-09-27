@@ -11,6 +11,9 @@ var turn_queue: Array[BattleUnit] = []
 var turn_idx := 0
 var is_player_turn := true
 var battle_over := false
+## tactical-combat: per-unit initiative ordering in build_queue().
+## Compatibility flag: legacy speed-first ordering for old tests/replays.
+var initiative_order := true
 
 enum Side { NONE, ATTACKER, DEFENDER }
 
@@ -34,6 +37,9 @@ var _reachable_cache: Dictionary = {}
 var _board_version: int = 0
 var _cache_sig: String = ""
 var _uid := 0
+## tactical-combat: per-cell battle terrain (cell -> BattleTerrain type).
+## Empty = all plain (legacy behavior, BFS fast path).
+var battle_terrain: Dictionary = {}
 
 var _unit_grid: Dictionary = {}
 var _all_units_cells: Dictionary = {}
@@ -60,6 +66,14 @@ class BattleUnit extends RefCounted:
 	var spell: StringName = ""
 	# Optional D&D 5e per-character stat block (null = pure stack-model unit).
 	var dnd_profile: DnDCombatantProfile = null
+
+	## Initiative (tactical-combat spec): dexterity + class/race modifiers.
+	## DnD-profile units use 10 + DEX modifier (5e: no class-based initiative
+	## bonus exists); pure stack-model units use speed as the agility proxy.
+	func get_initiative() -> int:
+		if dnd_profile != null:
+			return 10 + dnd_profile.abilities.get_dex_mod()
+		return get_speed()
 
 	func _init(p_stack = null) -> void:
 		stack = p_stack
@@ -160,6 +174,7 @@ func place_army(
 	builder.set_defender_artifact_mods(defender_artifact_mods)
 	builder.build_into(self)
 	assert(not (attacker_units.is_empty() and defender_units.is_empty()), "place_army: battle has no units")
+	_resolve_blocked_placement()
 
 func build_queue() -> void:
 	turn_queue.clear()
@@ -173,8 +188,12 @@ func build_queue() -> void:
 			turn_queue.append(u)
 
 	turn_queue.sort_custom(func(a: BattleUnit, b: BattleUnit) -> bool:
-		if a.get_speed() != b.get_speed():
-			return a.get_speed() > b.get_speed()
+		# tactical-combat: initiative (DEX + class/race) first; legacy flag
+		# keeps the old speed-first ordering for compatibility.
+		var ia: int = a.get_initiative() if initiative_order else a.get_speed()
+		var ib: int = b.get_initiative() if initiative_order else b.get_speed()
+		if ia != ib:
+			return ia > ib
 
 		if a.get_hp() != b.get_hp():
 			return a.get_hp() > b.get_hp()
@@ -281,9 +300,89 @@ func _rebuild_all_units_cells() -> void:
 func get_units_by_side(side: BattleState.Side) -> Array[BattleUnit]:
 	return attacker_units if side == Side.ATTACKER else defender_units
 
+## tactical-combat: set the battle terrain map (cell -> terrain type).
+func set_battle_terrain(map: Dictionary) -> void:
+	battle_terrain.clear()
+	for c in map:
+		battle_terrain[c] = str(map[c])
+	invalidate_board_cache()
+
+func get_terrain_at(cell: Vector2i) -> String:
+	return str(battle_terrain.get(cell, BattleTerrain.PLAIN))
+
+func is_cell_blocked(cell: Vector2i) -> bool:
+	return BattleTerrain.is_blocked(get_terrain_at(cell))
+
+## tactical-combat: blocked terrain (water) forbids placement — relocate the
+## affected unit to the nearest free in-bounds cell.
+func _resolve_blocked_placement() -> void:
+	if battle_terrain.is_empty():
+		return
+	for u in attacker_units:
+		_relocate_if_blocked(u)
+	for u in defender_units:
+		_relocate_if_blocked(u)
+
+func _relocate_if_blocked(u: BattleUnit) -> void:
+	if u == null or not u.is_alive() or not is_cell_blocked(u.cell):
+		return
+	var target := _find_nearest_free_cell(u.cell)
+	if target == Vector2i(-1, -1):
+		return
+	var side_grid: Dictionary = _unit_grid.get(u.side, {})
+	side_grid.erase(u.cell)
+	side_grid[target] = u
+	_all_units_cells.erase(u.cell)
+	_all_units_cells[target] = true
+	u.cell = target
+	invalidate_board_cache()
+
+func _find_nearest_free_cell(from: Vector2i) -> Vector2i:
+	var dist := HexPathfinding.dijkstra(
+		from, 1000.0,
+		func(_c: Vector2i) -> float: return 1.0,
+		BW, BH, hex_shift_right
+	)
+	var best := Vector2i(-1, -1)
+	var best_d := INF
+	for y in BH:
+		for x in BW:
+			var c := Vector2i(x, y)
+			if _all_units_cells.has(c) or is_cell_blocked(c):
+				continue
+			var d: float = dist[HexUtils.pos_to_idx(c, BW)]
+			if d < best_d:
+				best_d = d
+				best = c
+	return best
+
 func get_reachable_for_unit(unit: BattleUnit, blocked_fn: Callable) -> Dictionary:
 	if unit == null:
 		return {}
+
+	# tactical-combat: ground movement on a terrained board uses costed
+	# Dijkstra (forest/hill raise the cost, water blocks). Flying units
+	# ignore terrain (they fly over it).
+	if not unit.is_flying() and BattleTerrain.map_has_effects(battle_terrain):
+		var blocked_t: Dictionary = blocked_fn.call()
+		for c in battle_terrain:
+			if BattleTerrain.is_blocked(str(battle_terrain[c])):
+				blocked_t[c] = true
+		var dist := HexPathfinding.dijkstra(
+			unit.cell, float(unit.get_speed()),
+			func(c: Vector2i) -> float: return BattleTerrain.move_cost(get_terrain_at(c)),
+			BW, BH, hex_shift_right
+		)
+		var reachable: Dictionary = {}
+		for y in BH:
+			for x in BW:
+				var c := Vector2i(x, y)
+				if c == unit.cell:
+					continue
+				var d: float = dist[HexUtils.pos_to_idx(c, BW)]
+				if d < INF:
+					reachable[c] = d
+		return reachable
 
 	if unit.is_flying():
 		var blocked: Dictionary = blocked_fn.call()

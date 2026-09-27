@@ -12,6 +12,14 @@ static func resolve(state: BattleState, atk: BattleState.BattleUnit, def: Battle
 	if atk == null or def == null or not atk.is_alive() or not def.is_alive():
 		return {}
 
+	# tactical-combat: terrain modifiers (forest/hill/fort defense bonus,
+	# hill attack bonus when the target is not on a hill).
+	var def_terr: String = state.get_terrain_at(def.cell)
+	def_bonus += int(round(float(def.get_defense()) * BattleTerrain.defense_bonus(def_terr)))
+	var atk_terr: String = state.get_terrain_at(atk.cell)
+	if BattleTerrain.attack_bonus(atk_terr) > 0.0 and BattleTerrain.attack_bonus(def_terr) <= 0.0:
+		atk_bonus += int(round(float(atk.get_attack()) * BattleTerrain.attack_bonus(atk_terr)))
+
 	var result: Dictionary = BattleRules.calculate_attack(atk, def, is_melee, rng, atk_bonus, def_bonus)
 	if result.is_empty():
 		return result
