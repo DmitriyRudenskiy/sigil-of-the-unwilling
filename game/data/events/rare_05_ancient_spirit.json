@@ -1,0 +1,41 @@
+{
+  "id": "rare_05_ancient_spirit",
+  "title": "Пробуждение древнего духа",
+  "description": "В старом лесу проснулся дух, спавший с древнейших времён. Он не враждебен, но требует внимания: благословение или дань — выбор за вами.",
+  "icon_path": "res://assets/ui/events/magic_event.png",
+  "type": "rare",
+  "frequency": 1,
+  "min_day": 70,
+  "weight": 0.2,
+  "triggers": {},
+  "choices": [
+    {
+      "text": "Принять благословение (+15 морали, +10% производства)",
+      "tooltip": "Дух дарует поселению свою милость",
+      "impact": 1,
+      "effects": {
+        "morale_change": 15,
+        "permanent_modifier": {"id": "spirit_blessing", "effect": {"production": 0.1}}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Уплатить дань (-30 золота, +10 еды)",
+      "tooltip": "Дух уйдёт, оставив поселение в покое",
+      "impact": 2,
+      "effects": {
+        "resource_change": {"gold": -30, "food": 10}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Прогнать духа (-20 морали)",
+      "tooltip": "Жители напуганы: древнее не прощает",
+      "impact": 3,
+      "effects": {
+        "morale_change": -20
+      },
+      "requirements": {}
+    }
+  ]
+}

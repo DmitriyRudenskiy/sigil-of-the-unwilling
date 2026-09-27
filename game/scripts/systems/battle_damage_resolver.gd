@@ -2,6 +2,7 @@ class_name BattleDamageResolver
 extends RefCounted
 
 const _StatusEffects = preload("res://scripts/data/status_effects.gd")
+const _BattleTerrain = preload("res://scripts/systems/BattleTerrain.gd")
 
 static func resolve(state: BattleState, atk: BattleState.BattleUnit, def: BattleState.BattleUnit, ctx: Dictionary) -> Dictionary:
 	var is_melee: bool = ctx.get("is_melee", true)
@@ -12,7 +13,24 @@ static func resolve(state: BattleState, atk: BattleState.BattleUnit, def: Battle
 	if atk == null or def == null or not atk.is_alive() or not def.is_alive():
 		return {}
 
-	var result: Dictionary = BattleRules.calculate_attack(atk, def, is_melee, rng, atk_bonus, def_bonus)
+	var terrain_atk_mult: float = 1.0
+	var terrain_def_mult: float = _BattleTerrain.defense_multiplier(state.get_hex_terrain(def.cell))
+	if _BattleTerrain.elevation(state.get_hex_terrain(atk.cell)) > _BattleTerrain.elevation(state.get_hex_terrain(def.cell)):
+		terrain_atk_mult = _BattleTerrain.DOWNHILL_ATTACK_MULT
+
+	# Phase 6 (flanking): melee attacker adjacent to defender → front/flank/rear
+	# aspect from the defender's facing; ranged/non-adjacent → -1 (no flanking).
+	var flank_aspect: int = state.attack_aspect(atk.cell, def)
+
+	# Phase 9: тактические проявления класса и расы героя.
+	terrain_def_mult *= HeroTactics.hill_defense_mult(def, state.get_hex_terrain(def.cell))
+	atk_bonus += HeroTactics.front_attack_bonus(atk, flank_aspect)
+	var extra_crit: float = HeroTactics.forest_crit_bonus(atk, state.get_hex_terrain(atk.cell))
+
+	var result: Dictionary = BattleRules.calculate_attack(
+		atk, def, is_melee, rng, atk_bonus, def_bonus, terrain_atk_mult, terrain_def_mult,
+		flank_aspect, extra_crit
+	)
 	if result.is_empty():
 		return result
 

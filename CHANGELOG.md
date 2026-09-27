@@ -2,6 +2,32 @@
 
 Формат: записи по завершённым OpenSpec-циклам. Детали — в `openspec/changes/archive/`.
 
+## 2026-09-27
+
+### dynamic-world-crisis-system — Balance & Long-Session (Task 4.4, 5.4) + 2 root-cause bug fixes
+- **Long-session test** (`test_crisis_long_session.gd`, 3 теста): 200-day loop, fixed seed — стабильность (no crash, crises+events fire, population/morale/resources clamped ≥0 / morale 0–100), save/load round-trip mid-session
+- **Bug 1 (root cause)**: `get_available_events()`/`get_available_crises()` возвращали plain `Array` из typed-функции `Array[...]` → runtime-ошибка типов в Godot 4.7; спавн через `on_day_passed` → `try_trigger_event`/`trigger_random_crisis` **всегда падал** (в реальной игре спавн событий/кризисов через on_day_passed не работал). Fix: `var available: Array[...] = []`
+- **Bug 2 (root cause)**: `active_events` очищался только при load/reset → рос вечно; после 3 событий гейт `active_events.size() < max_active_events` **дедлокировал** спавн событий навсегда. Fix: `active_events.clear()` в начале `on_day_passed` (события мгновенные, без duration_days)
+- **Balance review**: weights (common 0.5–1.5, rare 0.2–0.4) и magnitudes (resources −30..+50, morale −50..+15, population −4..+3, modifiers ±0.05–0.1) — разумно, без изменений; event weights намеренно не зависят от сложности (сложность масштабирует частоту кризисов)
+- **Отложено (не headless / UI)**: Task 2.4 seasonal events, 3.1/3.2/3.3 UI-диалог+анимации, 4.4 menu settings, 5.1 звук, 5.2 анимации, 5.3 покрытие >80%, 5.4 human playtest
+- Spec синхронизирован в `openspec/specs/{crisis-manager,event-dialog,event-manager}/spec.md` (11 требований)
+- Полный сьют: **1821/1821 passed, 0 failures** (129 orphans)
+
+### tactical-battle-system — тактический гекс-бой (Phases 1–10, полный цикл)
+- **Phase 2** — `BattleState.place_army()`: развёртывание на противоположных краях 17-гекс. поля, `facing` на центр поля
+- **Phase 3** — инициатива = agi + модификаторы класса/расы; ходы партией (все юниты игрока → противника)
+- **Phase 4** — действия юнитов: ближний/дальний бой, ожидание, отступление
+- **Phase 5** — `BattleTerrain.gd`: защита PLAIN 1.0 / FOREST 1.3 / HILL 1.5 / FORT 1.75 / WATER 1.0, downhill-атака ×1.2
+- **Phase 6** — фланговые атаки: `BattleUnit.facing` (статический), `attack_aspect()` (front=1 / flank=2 ±60° / rear=3 ±120°..180°); +25% крит за фланг, +50% крит + def ×0.5 за тыл; только ближний бой по соседнему гексу
+- **Phase 7** — AI-доктрина (`BattleAI.gd`): приоритет целей (угроза→раненые→дальние), укрытия, концентрация огня, отступление (только гуманоиды; животные/монстры не отступают)
+- **Phase 8** — `BattleRewards.gd` (трофеи: gold = стоимость павшей армии / 10, XP героя) + ранение героя при поражении (wounded, сниженные статы)
+- **Phase 9** — `HeroTactics.gd`: ranger +1 скорость в лесу, fighter +2 атака в лоб, dwarf ×1.25 защита на холме, elf +0.15 крит в лесу; race-tag добавлен к герою
+- **Phase 10** — калибровка (задокументирована в design.md), регрессия, MCP 60-ходовой прогон (боевые завершаются без зависаний)
+- Тесты: `test_battle_flanking.gd` (12), `test_battle_ai_doctrine.gd` (5), `test_battle_rewards.gd` (6), `test_hero_tactics.gd` (6) + terrain/state
+- **Отложено (не headless / UI)**: 2.3 зоны контроля, 3.3 UI-инициатива, 4.3 дальний LoS, 5.2 UI-местность, 6.4 UI-индикатор фланга, decrement `wounded_turns`, персист XP/wounded
+- Spec синхронизирован в `openspec/specs/tactical-combat/spec.md` (7 требований, 17 сценариев)
+- Полный сьют: **1818/1818 passed, 0 failures** (129 orphans)
+
 ## 2026-09-25
 
 ### dynamic-world-crisis-system — Save/Load Integration (Task 4.3)

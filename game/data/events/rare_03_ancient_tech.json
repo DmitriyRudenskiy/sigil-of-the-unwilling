@@ -1,0 +1,41 @@
+{
+  "id": "rare_03_ancient_tech",
+  "title": "Древняя технология",
+  "description": "При раскопках рабочие вскрыли заброшенный цех: механизмы, которых не существует в здравом мире, и чертежи, понятые лишь отчасти.",
+  "icon_path": "res://assets/ui/events/ruins_event.png",
+  "type": "rare",
+  "frequency": 1,
+  "min_day": 60,
+  "weight": 0.25,
+  "triggers": {},
+  "choices": [
+    {
+      "text": "Восстановить цех (кузница, +10 материалов)",
+      "tooltip": "Древние чертежи дадут новый уровень мастерства",
+      "impact": 1,
+      "effects": {
+        "unlock_building": "smithy",
+        "resource_change": {"materials": 10}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Продать артефакты (+60 золота)",
+      "tooltip": "Купцы платят за диковины щедро",
+      "impact": 1,
+      "effects": {
+        "resource_change": {"gold": 60}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Зарыть и забыть (-3 морали)",
+      "tooltip": "Не всё стоит вытаскивать на свет",
+      "impact": 3,
+      "effects": {
+        "morale_change": -3
+      },
+      "requirements": {}
+    }
+  ]
+}

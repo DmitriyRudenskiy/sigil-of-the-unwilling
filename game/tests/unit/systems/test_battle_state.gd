@@ -274,7 +274,10 @@ func test_max_units_per_side_cap() -> void:
 	assert_int(atk_units.size()).is_equal(7).override_failure_message("attacker units should be capped at 7")
 	assert_int(def_units.size()).is_equal(7).override_failure_message("defender units should be capped at 7")
 
-func test_initiative_sorted_by_speed() -> void:
+func test_initiative_party_order() -> void:
+	# tactical-combat spec: rounds are party-based (whole side acts, then the
+	# other). The side with the higher top initiative goes first; within a party
+	# units act by speed desc.
 	var state = BattleState.new()
 	var atk: Array[UnitStack] = []
 	var def: Array[UnitStack] = []
@@ -283,22 +286,78 @@ func test_initiative_sorted_by_speed() -> void:
 	slow.stats.speed = 3
 	var fast := Units.make_fixed_stack("archers", 10)
 	fast.stats.speed = 9
-	var mid := Units.make_fixed_stack("cavalry", 10)
-	mid.stats.speed = 6
-
 	atk.append(slow)
 	atk.append(fast)
-	atk.append(mid)
-	def.append(Units.make_fixed_stack("goblins", 10))
+
+	var d_slow := Units.make_fixed_stack("goblins", 10)
+	d_slow.stats.speed = 5
+	var d_fast := Units.make_fixed_stack("goblins", 10)
+	d_fast.stats.speed = 7
+	def.append(d_slow)
+	def.append(d_fast)
+
 	state.place_army(atk, def)
 	state.build_queue()
 
-	var prev: int = 100
+	assert_int(state.turn_queue.size()).is_equal(4).override_failure_message("expected 4 units in queue")
+	# Attacker top initiative (9) >= defender top (7) -> attacker party first.
+	assert_bool(state.turn_queue[0].side == BattleState.Side.ATTACKER).is_true().override_failure_message("attacker party should act first")
+	assert_bool(state.turn_queue[1].side == BattleState.Side.ATTACKER).is_true().override_failure_message("attacker party should act first")
+	assert_bool(state.turn_queue[2].side == BattleState.Side.DEFENDER).is_true().override_failure_message("defender party should act second")
+	assert_bool(state.turn_queue[3].side == BattleState.Side.DEFENDER).is_true().override_failure_message("defender party should act second")
+	# Within attacker party: speed desc (9 before 3).
+	assert_int(state.turn_queue[0].get_speed()).is_equal(9).override_failure_message("attacker party not speed-sorted")
+	assert_int(state.turn_queue[1].get_speed()).is_equal(3).override_failure_message("attacker party not speed-sorted")
+	# Within defender party: speed desc (7 before 5).
+	assert_int(state.turn_queue[2].get_speed()).is_equal(7).override_failure_message("defender party not speed-sorted")
+	assert_int(state.turn_queue[3].get_speed()).is_equal(5).override_failure_message("defender party not speed-sorted")
+
+func test_initiative_higher_side_goes_first() -> void:
+	# Defender has the higher top initiative -> defender party acts first.
+	var state = BattleState.new()
+	var atk: Array[UnitStack] = []
+	var def: Array[UnitStack] = []
+	var a_slow := Units.make_fixed_stack("swordsmen", 10)
+	a_slow.stats.speed = 3
+	atk.append(a_slow)
+	var d_fast := Units.make_fixed_stack("cavalry", 10)
+	d_fast.stats.speed = 9
+	def.append(d_fast)
+
+	state.place_army(atk, def)
+	state.build_queue()
+
+	assert_bool(state.turn_queue[0].side == BattleState.Side.DEFENDER).is_true().override_failure_message("higher-initiative side should act first")
+	assert_bool(state.turn_queue[1].side == BattleState.Side.ATTACKER).is_true().override_failure_message("lower-initiative side second")
+
+func test_initiative_deterministic_by_seed() -> void:
+	# Identical armies -> identical turn order across two fresh states.
+	var order_a := _party_order_signature(9, 3, 7, 5)
+	var order_b := _party_order_signature(9, 3, 7, 5)
+	assert_bool(order_a == order_b).is_true().override_failure_message("turn order must be deterministic for identical armies")
+
+func _party_order_signature(a1: int, a2: int, d1: int, d2: int) -> Array:
+	var state = BattleState.new()
+	var atk: Array[UnitStack] = []
+	var def: Array[UnitStack] = []
+	var u1 := Units.make_fixed_stack("swordsmen", 10)
+	u1.stats.speed = a1
+	atk.append(u1)
+	var u2 := Units.make_fixed_stack("archers", 10)
+	u2.stats.speed = a2
+	atk.append(u2)
+	var u3 := Units.make_fixed_stack("goblins", 10)
+	u3.stats.speed = d1
+	def.append(u3)
+	var u4 := Units.make_fixed_stack("goblins", 10)
+	u4.stats.speed = d2
+	def.append(u4)
+	state.place_army(atk, def)
+	state.build_queue()
+	var sig: Array = []
 	for u in state.turn_queue:
-		assert_int(u.get_speed()).is_less_equal(prev).override_failure_message("turn queue not sorted by speed descending")
-		prev = u.get_speed()
-	if state.turn_queue.size() > 0:
-		assert_int(state.turn_queue[0].get_speed()).is_equal(9).override_failure_message("fastest unit should act first")
+		sig.append(u.get_speed())
+	return sig
 
 func test_initiative_rebuilt_each_round() -> void:
 	var state = BattleState.new()
@@ -412,6 +471,46 @@ func test_cell_taken_avoids_occupied() -> void:
 	assert_bool(builder._cell_taken(0, 0, units)).is_true().override_failure_message("_cell_taken should report (0,0) as occupied")
 	assert_bool(builder._cell_taken(0, 1, units)).is_false().override_failure_message("_cell_taken should report (0,1) as free")
 	assert_bool(builder._cell_taken(1, 0, units)).is_false().override_failure_message("_cell_taken should report (1,0) as free")
+
+
+func test_deployment_rules_min_gap_and_bounds() -> void:
+	# 2.2: starting positions stay in bounds and keep >= 5 hex between the two deployment lines.
+	var state = BattleState.new()
+	var atk: Array[UnitStack] = []
+	var def: Array[UnitStack] = []
+	for k in 7:  # MAX_UNITS_PER_SIDE
+		atk.append(Units.make_fixed_stack("swordsmen", 5))
+		def.append(Units.make_fixed_stack("goblins", 5))
+	state.place_army(atk, def)
+
+	var attackers = state.get_units_by_side(BattleState.Side.ATTACKER)
+	var defenders = state.get_units_by_side(BattleState.Side.DEFENDER)
+	assert_int(attackers.size()).is_equal(7).override_failure_message("expected 7 attacker units")
+	assert_int(defenders.size()).is_equal(7).override_failure_message("expected 7 defender units")
+
+	var seen: Dictionary = {}
+	var atk_max_col := -1
+	var def_min_col := BattleState.BW
+	for u in attackers:
+		assert_int(u.cell.x).is_greater_equal(0).override_failure_message("attacker out of bounds %s" % u.cell)
+		assert_int(u.cell.x).is_less(BattleState.BW).override_failure_message("attacker out of bounds %s" % u.cell)
+		assert_int(u.cell.y).is_greater_equal(0).override_failure_message("attacker out of bounds %s" % u.cell)
+		assert_int(u.cell.y).is_less(BattleState.BH).override_failure_message("attacker out of bounds %s" % u.cell)
+		assert_bool(seen.has(u.cell)).is_false().override_failure_message("duplicate cell %s" % u.cell)
+		seen[u.cell] = true
+		atk_max_col = maxi(atk_max_col, u.cell.x)
+	for u in defenders:
+		assert_int(u.cell.x).is_greater_equal(0).override_failure_message("defender out of bounds %s" % u.cell)
+		assert_int(u.cell.x).is_less(BattleState.BW).override_failure_message("defender out of bounds %s" % u.cell)
+		assert_int(u.cell.y).is_greater_equal(0).override_failure_message("defender out of bounds %s" % u.cell)
+		assert_int(u.cell.y).is_less(BattleState.BH).override_failure_message("defender out of bounds %s" % u.cell)
+		assert_bool(seen.has(u.cell)).is_false().override_failure_message("duplicate cell %s" % u.cell)
+		seen[u.cell] = true
+		def_min_col = mini(def_min_col, u.cell.x)
+
+	# Distance between the two front lines is at least 5 hexes.
+	var gap := def_min_col - atk_max_col - 1
+	assert_int(gap).is_greater_equal(5).override_failure_message("deployment lines closer than 5 hexes: gap=%d" % gap)
 
 func test_reachable_reflects_move() -> void:
 	var state = BattleState.new()

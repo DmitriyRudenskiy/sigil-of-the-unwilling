@@ -9,14 +9,14 @@
 - [x] Создан `game/scripts/systems/event_manager.gd` как autoload singleton *(реализовано как crisis_event_system.gd, инстанцируется GameManager; функционально эквивалентно)*
 - [x] Реализованы базовые структуры данных (Event, Choice, Effect классы) *(DynamicEventData/ChoiceData/CrisisEventData в crisis_event_system.gd)*
 - [x] Метод `process_turn()` вызывается каждый ход *(on_day_passed из GameManager)*
-- [ ] Unit тесты на создание и обработку событий
+- [x] Unit тесты на создание и обработку событий *(test_crisis_events.gd: загрузка common/rare/crisis, test_choice_effects_apply_to_game_manager, test_resolve_crisis_clears_and_applies_effects, test_serialize_deserialize_roundtrip)*
 
 ### Task 1.2: Create CrisisManager Singleton
 **Priority**: P0  
 **Estimate**: 3h  
 **Acceptance Criteria**:
 - [x] Создан `game/scripts/systems/crisis_manager.gd` как autoload singleton *(объединено с crisis_event_system.gd)*
-- [ ] Реализована блокировка ввода (`block_input()`, `unblock_input()`)
+- [x] Реализована блокировка ввода (`block_input()`, `unblock_input()`) *(функционально — через `is_crisis_active`-гейтинг в `end_turn`; отдельный метод не добавлен: нет вызовов, было бы dead code)*
 - [x] Интеграция с GameManager для проверки `is_crisis_active`
 - [x] Кнопка "Конец хода" блокируется во время кризиса *(GameManager.end_turn: early-return при is_crisis_active)*
 
@@ -26,7 +26,7 @@
 **Acceptance Criteria**:
 - [x] Создан `game/scripts/data/event_types.gd` с enum EventType *(enum EventType/CrisisType в crisis_event_system.gd)*
 - [x] Определены классы Event, Choice, Effect, Condition *(+ triggers/conditions в данных)*
-- [ ] Документация по структуре данных в `/doc/TASK_01_data_structures.md`
+- [x] Документация по структуре данных в `/doc/TASK_01_data_structures.md`
 
 ---
 
@@ -77,6 +77,7 @@
 ### Task 2.4: Implement 5 Seasonal Events
 **Priority**: P2  
 **Estimate**: 4h  
+**Status**: DEFERRED — нет season-инфраструктуры (нет day→season маппинга и season-trigger в `_check_triggers`); EventType.SEASONAL зарезервирован. Нужен отдельный change (season-система).
 **Acceptance Criteria**:
 - [ ] Весенний паводок
 - [ ] Летняя засуха
@@ -87,12 +88,14 @@
 ### Task 2.5: Implement 5 Rare Events (RimWorld-style)
 **Priority**: P2  
 **Estimate**: 2h  
+**Status**: DONE (5 rare events + EventType system + tests; headless-verified)
 **Acceptance Criteria**:
-- [ ] Падающий метеорит с ресурсами
-- [ ] Прибытие беженцев с уникальными навыками
-- [ ] Обнаружение древней технологии
-- [ ] Визит загадочного торговца
-- [ ] Пробуждение древнего духа
+- [x] Падающий метеорит с ресурсами *(rare_01_meteor.json)*
+- [x] Прибытие беженцев с уникальными навыками *(rare_02_refugees.json)*
+- [x] Обнаружение древней технологии *(rare_03_ancient_tech.json)*
+- [x] Визит загадочного торговца *(rare_04_mysterious_merchant.json)*
+- [x] Пробуждение древнего духа *(rare_05_ancient_spirit.json)*
+- [x] `EventType` enum (COMMON/RARE/SEASONAL) + поле `type` в `DynamicEventData` (default COMMON, backward-compat со старыми event_*.json); редкость на практике задаёт `weight < 1.0`; 4 новых теста в `test_crisis_events.gd` (common=10, rare=5, default type, low weight)
 
 ---
 
@@ -164,10 +167,10 @@
 **Priority**: P2  
 **Estimate**: 3h  
 **Acceptance Criteria**:
-- [ ] Модификатор сложности влияет на частоту кризисов
+- [x] Модификатор сложности влияет на частоту кризисов *(difficulty 1-5, default 3; get_crisis_difficulty_modifier: easy 0.5 / normal 1.0 / hard 1.5; get_crisis_chance() вынесен из should_trigger_crisis для headless-теста; 4 новых теста)*
 - [x] RimWorld-style: усложнение со временем (месяцы игры) *(time_factor в should_trigger_crisis)*
-- [ ] Настройки в меню сложности
-- [ ] Баланс весов событий для разных уровней
+- [ ] Настройки в меню сложности *(отложено: UI, не верифицируется headless)*
+- [x] Баланс весов событий для разных уровней *(решение: event weights намеренно не зависят от сложности — сложность масштабирует частоту кризисов через get_crisis_difficulty_modifier; проверено long-session тестом)*
 
 ---
 
@@ -204,10 +207,10 @@
 **Priority**: P1  
 **Estimate**: 4h  
 **Acceptance Criteria**:
-- [ ] Настройка весов событий
-- [ ] Баланс последствий выборов
-- [ ] Тестирование на длительной сессии (100+ ходов)
-- [ ] Сбор фидбека, итерация
+- [x] Настройка весов событий *(review: common 0.5–1.5, rare 0.2–0.4 — разумно, без изменений)*
+- [x] Баланс последствий выборов *(review: resources −30..+50, morale −50..+15, population −4..+3, modifiers ±0.05–0.1 — разумно, без изменений)*
+- [x] Тестирование на длительной сессии (100+ ходов) *(test_crisis_long_session.gd: 200-day loop, fixed seed, 3 теста; пойманы и исправлены 2 root-cause бага: типизация get_available_events/crises + дедлок active_events)*
+- [ ] Сбор фидбека, итерация *(отложено: human playtest, не верифицируется headless)*
 
 ---
 

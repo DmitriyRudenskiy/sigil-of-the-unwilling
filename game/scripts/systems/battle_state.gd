@@ -2,6 +2,7 @@ class_name BattleState
 extends RefCounted
 
 const _StatusEffects = preload("res://scripts/data/status_effects.gd")
+const _BattleTerrain = preload("res://scripts/systems/BattleTerrain.gd")
 
 
 var attacker_units: Array[BattleUnit] = []
@@ -16,6 +17,7 @@ enum Side { NONE, ATTACKER, DEFENDER }
 
 var battle_winner: BattleState.Side = Side.NONE
 var hex_shift_right: bool = true
+var terrain_grid: Dictionary = {}
 var attacker_hero_bonus: Dictionary[StringName, int] = {
     &"attack": 0,
     &"defense": 0,
@@ -58,6 +60,9 @@ class BattleUnit extends RefCounted:
 	var distance_moved_this_turn: int = 0
 	var already_reborn: bool = false
 	var spell: StringName = ""
+	# Phase 6 (flanking): facing direction as hex neighbour bit (0=east..5=se).
+	# Set on placement (attacker→0 east, defender→3 west); used for flanking aspect.
+	var facing: int = 0
 	# Optional D&D 5e per-character stat block (null = pure stack-model unit).
 	var dnd_profile: DnDCombatantProfile = null
 
@@ -159,31 +164,53 @@ func place_army(
 	builder.set_attacker_artifact_mods(attacker_artifact_mods)
 	builder.set_defender_artifact_mods(defender_artifact_mods)
 	builder.build_into(self)
+	# Phase 6 (flanking): static facing. Attacker faces east (bit 0, toward the
+	# defender on the right edge); defender faces west (bit 3, toward the attacker
+	# on the left edge). Per-move facing update is deferred; static facing already
+	# yields a working front/flank/rear model.
+	for u in attacker_units:
+		u.facing = 0
+	for u in defender_units:
+		u.facing = 3
 	assert(not (attacker_units.is_empty() and defender_units.is_empty()), "place_army: battle has no units")
 
 func build_queue() -> void:
 	turn_queue.clear()
 
+	# Party-based turn order (tactical-combat spec, «Инициатива и ходы»):
+	# each round one side's whole party acts, then the other. The side with the
+	# higher top initiative (speed) acts first; within a party, units act by
+	# speed desc, then hp, then uid. (Replaces the old globally speed-sorted
+	# interleaved queue.)
+	var atk: Array = []
+	var def: Array = []
 	for u in attacker_units:
 		if u.is_alive():
-			turn_queue.append(u)
-
+			atk.append(u)
 	for u in defender_units:
 		if u.is_alive():
-			turn_queue.append(u)
+			def.append(u)
 
-	turn_queue.sort_custom(func(a: BattleUnit, b: BattleUnit) -> bool:
+	var first: Array
+	var second: Array
+	if _top_initiative(atk) >= _top_initiative(def):
+		first = atk
+		second = def
+	else:
+		first = def
+		second = atk
+	var party_cmp := func(a: BattleUnit, b: BattleUnit) -> bool:
 		if a.get_speed() != b.get_speed():
 			return a.get_speed() > b.get_speed()
-
 		if a.get_hp() != b.get_hp():
 			return a.get_hp() > b.get_hp()
-
-		if a.side != b.side:
-			return a.side == Side.ATTACKER
-
 		return a.uid < b.uid
-	)
+	first.sort_custom(party_cmp)
+	second.sort_custom(party_cmp)
+	for u in first:
+		turn_queue.append(u)
+	for u in second:
+		turn_queue.append(u)
 
 	# TASK_18 R9 invariants: queue holds exactly the alive units.
 	var _alive: int = 0
@@ -198,6 +225,12 @@ func build_queue() -> void:
 	assert(turn_queue.size() == _alive, "build_queue: queue size != alive units")
 
 	turn_idx = -1
+
+func _top_initiative(p: Array) -> int:
+	var top := 0
+	for u in p:
+		top = maxi(top, u.get_speed())
+	return top
 
 func advance_turn() -> void:
 	turn_idx += 1
@@ -305,9 +338,11 @@ func get_reachable_for_unit(unit: BattleUnit, blocked_fn: Callable) -> Dictionar
 
 		return result
 
+	# Phase 9: тактические проявления класса (Следопыт +движение в лесу).
+	var eff_speed: int = unit.get_speed() + HeroTactics.movement_bonus(unit, get_hex_terrain(unit.cell))
 	return get_reachable(
 		unit.cell,
-		unit.get_speed(),
+		eff_speed,
 		blocked_fn,
 		unit
 	)
@@ -380,7 +415,54 @@ func build_all_blocked(except_unit: BattleUnit, obstacles: Dictionary) -> Dictio
 		b.erase(except_unit.cell)
 	for o in obstacles:
 		b[o] = true
+	for c in terrain_grid:
+		if _BattleTerrain.is_blocking(int(terrain_grid[c])):
+			b[c] = true
 	return b
+
+
+func get_hex_terrain(cell: Vector2i) -> int:
+	return int(terrain_grid.get(cell, _BattleTerrain.TerrainType.PLAIN))
+
+func set_terrain(cell: Vector2i, t: int) -> void:
+	terrain_grid[cell] = t
+	invalidate_board_cache()
+
+func clear_terrain() -> void:
+	terrain_grid.clear()
+	invalidate_board_cache()
+
+
+func generate_terrain(rng: RandomNumberGenerator, density: float = 0.1) -> void:
+	terrain_grid = _BattleTerrain.generate(rng, BW, BH, density)
+	invalidate_board_cache()
+
+# --- Phase 6: flanking (фланг/тыл) -----------------------------------------
+
+## Neighbour bit (0..5) of `to` relative to `from`, or -1 if not adjacent.
+func _neighbor_bit(from: Vector2i, to: Vector2i) -> int:
+	for b in 6:
+		if HexUtils.get_neighbor(from, b, hex_shift_right) == to:
+			return b
+	return -1
+
+## Attack aspect of `attacker_cell` relative to `defender`'s facing:
+## 0=front, 1=flank (±60°), 2=rear (±120°..180°), -1 if not adjacent
+## (melee-only flanking; ranged/non-neighbour → no flanking).
+func attack_aspect(attacker_cell: Vector2i, defender: BattleUnit) -> int:
+	if defender == null:
+		return -1
+	var b := _neighbor_bit(defender.cell, attacker_cell)
+	if b < 0:
+		return -1
+	var diff := (b - defender.facing) % 6
+	if diff < 0:
+		diff += 6
+	if diff == 0:
+		return 0
+	if diff == 1 or diff == 5:
+		return 1
+	return 2
 
 func check_end() -> BattleState.Side:
 	if battle_over:
