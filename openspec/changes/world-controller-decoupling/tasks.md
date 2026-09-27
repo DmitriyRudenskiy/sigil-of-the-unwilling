@@ -14,7 +14,9 @@
 
 ## Phase 2 — R2: Socket/MCP декомпозиция (High) ⬜
 
-- [ ] 2.1 Инвентаризация состояния `mcp_interaction_server.gd` (205 строк): что относится к транспорту, что к командам
+> Уточнение путей (2026-09-27, по факту репозитория): сервер находится в `game/tools/mcp/`, не `game/scripts/mcp/`. Разделение команд уже частично выполнено: `mcp_commands_base.gd` (53), `_system.gd` (1788), `_render.gd` (1223), `_ui.gd` (646), `_input.gd` (434), `mcp_serialization.gd` (183). В `mcp_interaction_server.gd` (205 строк) `listen()` вызывается однократно (~стр. 52), явной обработки EADDRINUSE нет — задача 2.4 подтверждена как реальная. Python-тесты MCP живут в `game/tests/mcp/` (pytest), а не `game/tests/mcp/*.gd` — тесты из 2.5 писать на pytest.
+
+- [x] 2.1 Инвентаризация состояния `mcp_interaction_server.gd` (205 строк): транспорт + диспетч; командная логика уже вынесена в mcp_commands_* *(выполнено при аудите 2026-09-27)*
 - [ ] 2.2 Вынести остаточную командную логику в `mcp_commands_*` (base/system/input/render уже разделены)
 - [ ] 2.3 Устранить глобальное mutable state сервера (явный lifecycle start/stop)
 - [ ] 2.4 Обработка EADDRINUSE: идемпотентный `listen()`, понятная ошибка, без утечки peers
