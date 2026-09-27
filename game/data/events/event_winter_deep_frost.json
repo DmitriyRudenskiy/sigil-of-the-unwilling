@@ -1,0 +1,34 @@
+{
+  "id": "event_winter_deep_frost",
+  "title": "Морозы",
+  "description": "Наступила лютая стужа. Печи не справляются, люди болеют, а запасы топлива тают на глазах. Можно закупить дрова или жечь мебель.",
+  "icon_path": "res://assets/ui/events/crisis_winter.png",
+  "frequency": 2,
+  "min_day": 30,
+  "weight": 1.0,
+  "seasons": ["winter"],
+  "rarity": "common",
+  "triggers": {},
+  "choices": [
+    {
+      "text": "Закупить дрова (-25 золота, +10 морали)",
+      "tooltip": "Тёплые дома — здоровые люди",
+      "impact": 2,
+      "effects": {
+        "resource_change": {"gold": -25},
+        "morale_change": 10
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Рубить мебель (-10 материалов, +5 морали)",
+      "tooltip": "Старые лавки сгорят быстрее, чем замёрзнут люди",
+      "impact": 1,
+      "effects": {
+        "resource_change": {"materials": -10},
+        "morale_change": 5
+      },
+      "requirements": {}
+    }
+  ]
+}

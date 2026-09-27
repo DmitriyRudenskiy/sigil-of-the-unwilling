@@ -1,0 +1,33 @@
+{
+  "id": "event_rare_gold_vein",
+  "title": "✨ Золотая жила",
+  "description": "Горные работы вышли на жилу, но не обычную: в породе блестит чистое золото. Это может сделать поселение богатым, но добыча требует времени и труда.",
+  "icon_path": "res://assets/ui/events/tax_event.png",
+  "frequency": 3,
+  "min_day": 50,
+  "weight": 0.05,
+  "seasons": [],
+  "rarity": "rare",
+  "triggers": {},
+  "choices": [
+    {
+      "text": "Открыть шахту (+50 золота, -20 материалов)",
+      "tooltip": "Золото само себя не добытает, но окупит лопаты",
+      "impact": 3,
+      "effects": {
+        "resource_change": {"gold": 50, "materials": -20}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Скрыть находку (+25 золота, -5 морали)",
+      "tooltip": "Меньше знают — безопаснее. Но люди хотят долю",
+      "impact": 2,
+      "effects": {
+        "resource_change": {"gold": 25},
+        "morale_change": -5
+      },
+      "requirements": {}
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "id": "event_rare_dragon_sighting",
+  "title": "🐉 Драконий след",
+  "description": "Охотники принесли весть: в горах видели дракона. Огромная тень пролетала над ущельем, а на камнях остались следы когтей. Торговцы взвинтили цены, а наёмники требуют повышения платы.",
+  "icon_path": "res://assets/ui/events/wolf_event.png",
+  "frequency": 3,
+  "min_day": 50,
+  "weight": 0.05,
+  "seasons": [],
+  "rarity": "rare",
+  "triggers": {},
+  "choices": [
+    {
+      "text": "Укрепить стены (-30 материалов, +15 морали)",
+      "tooltip": "Лучше перестраховаться: драконы не любят крепкие стены",
+      "impact": 3,
+      "effects": {
+        "resource_change": {"materials": -30},
+        "morale_change": 15
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Отправить разведку (-10 золота, +5 морали)",
+      "tooltip": "Узнать, кто это на самом деле, прежде чем паниковать",
+      "impact": 2,
+      "effects": {
+        "resource_change": {"gold": -10},
+        "morale_change": 5
+      },
+      "requirements": {}
+    }
+  ]
+}

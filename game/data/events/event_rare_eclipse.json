@@ -1,0 +1,33 @@
+{
+  "id": "event_rare_eclipse",
+  "title": "🌑 Полное затмение",
+  "description": "Днём солнце погасло, и тень накрыла поселение. Люди замерли в страхе. Астроном говорит, что это обычное явление, но люди в это не верят.",
+  "icon_path": "res://assets/ui/events/magic_event.png",
+  "frequency": 3,
+  "min_day": 40,
+  "weight": 0.05,
+  "seasons": [],
+  "rarity": "rare",
+  "triggers": {},
+  "choices": [
+    {
+      "text": "Устроить световую процессию (-10 золота, +10 морали)",
+      "tooltip": "Факелы и смех сильнее страха",
+      "impact": 2,
+      "effects": {
+        "resource_change": {"gold": -10},
+        "morale_change": 10
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Ничего не делать (-10 морали)",
+      "tooltip": "Страх рассосётся сам, но не сразу",
+      "impact": 1,
+      "effects": {
+        "morale_change": -10
+      },
+      "requirements": {}
+    }
+  ]
+}

@@ -53,6 +53,13 @@ static func _as_dict(v) -> Dictionary:
 static func _as_array(v) -> Array:
 	return v if v is Array else []
 
+static func _as_string_array(v) -> Array[String]:
+	var out: Array[String] = []
+	if v is Array:
+		for item in v:
+			out.append(str(item))
+	return out
+
 # Данные выбора в событии
 class ChoiceData:
 	var text: String
@@ -79,6 +86,8 @@ class DynamicEventData:
 	var triggers: Dictionary = {}  # Условия активации
 	var choices: Array[ChoiceData] = []
 	var weight: float = 1.0
+	var seasons: Array[String] = []  # Пусто = любой сезон
+	var rarity: String = "common"  # common | rare
 
 	func _init(data: Dictionary = {}):
 		id = CrisisEventSystem._as_string(data.get("id", ""), "")
@@ -89,6 +98,8 @@ class DynamicEventData:
 		min_day = CrisisEventSystem._as_int(data.get("min_day"), 1)
 		triggers = CrisisEventSystem._as_dict(data.get("triggers"))
 		weight = CrisisEventSystem._as_float(data.get("weight"), 1.0)
+		seasons = CrisisEventSystem._as_string_array(data.get("seasons"))
+		rarity = CrisisEventSystem._as_string(data.get("rarity"), "common")
 		for c in CrisisEventSystem._as_array(data.get("choices")):
 			if c is Dictionary:
 				choices.append(ChoiceData.new(c))
@@ -107,6 +118,9 @@ class CrisisEventData:
 	var choices: Array[ChoiceData] = []
 	var ongoing_effects: Dictionary = {}  # Эффекты во время кризиса
 	var resolution_effects: Dictionary = {}  # Эффекты после разрешения
+	var weight: float = 1.0  # Вес в взвешенном выборе кризиса
+	var seasons: Array[String] = []  # Пусто = любой сезон
+	var rarity: String = "common"  # common | rare
 
 	func _init(data: Dictionary = {}):
 		id = CrisisEventSystem._as_string(data.get("id", ""), "")
@@ -118,6 +132,9 @@ class CrisisEventData:
 		icon_path = CrisisEventSystem._as_string(data.get("icon_path", ""), "")
 		min_day = CrisisEventSystem._as_int(data.get("min_day"), 1)
 		triggers = CrisisEventSystem._as_dict(data.get("triggers"))
+		weight = CrisisEventSystem._as_float(data.get("weight"), 1.0)
+		seasons = CrisisEventSystem._as_string_array(data.get("seasons"))
+		rarity = CrisisEventSystem._as_string(data.get("rarity"), "common")
 		ongoing_effects = CrisisEventSystem._as_dict(data.get("ongoing_effects"))
 		resolution_effects = CrisisEventSystem._as_dict(data.get("resolution_effects"))
 		for c in CrisisEventSystem._as_array(data.get("choices")):
@@ -132,6 +149,34 @@ var day_counter: int = 0
 var next_event_day: int = 5
 var crisis_cooldown_days: int = 20
 var last_crisis_day: int = -crisis_cooldown_days
+
+## Допустимые метеорологические сезоны (Season.ID); пусто в seasons = любой.
+const VALID_SEASONS: Array[String] = ["spring", "summer", "autumn", "winter"]
+
+## Инжектируемый RNG: детерминизм тестов по seed; по умолчанию randomize() в _ready.
+var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+
+## Провайдер текущего сезона: callable -> String ("spring"…"winter", "" = неизвестно).
+var season_provider: Callable
+
+func set_season_provider(provider: Callable) -> void:
+	season_provider = provider
+
+func get_current_season() -> String:
+	if not season_provider.is_valid():
+		return ""
+	return str(season_provider.call())
+
+## Сезонный фильтр: пустой seasons = любое время; неизвестный сезон не блокирует
+## (backward compat для путей без календаря, например legacy-GameManager).
+func _season_allows(seasons: Array) -> bool:
+	if seasons.is_empty():
+		return true
+	var s := get_current_season()
+	if s == "":
+		return true
+	return seasons.has(s)
+
 ## День начала текущего кризиса (O(1)-проверка duration в process_ongoing_crisis).
 ## var — а не const-выражение на месте использования, чтобы deserialize_state
 ## мог восстановить его из истории при загрузке сейва.
@@ -157,6 +202,7 @@ var game_manager: Node = null
 var ui_manager: Node = null
 
 func _ready():
+	rng.randomize()
 	load_event_templates()
 	load_crisis_templates()
 	update_next_event_day()
@@ -259,7 +305,7 @@ func load_event_templates():
 			if file_name.ends_with(".json") and not file_name.begins_with("crisis_") \
 					and not file_name.begins_with("events_database"):
 				var event_data = load_event_json("res://data/events/" + file_name)
-				if event_data:
+				if event_data and _validate_template(event_data):
 					event_templates.append(DynamicEventData.new(event_data))
 			file_name = dir.get_next()
 	GameLogger.info("Loaded %d event templates" % event_templates.size(), "CrisisEvents")
@@ -274,7 +320,7 @@ func load_crisis_templates():
 		while file_name != "":
 			if file_name.begins_with("crisis_") and file_name.ends_with(".json"):
 				var crisis_data = load_crisis_json("res://data/events/" + file_name)
-				if crisis_data:
+				if crisis_data and _validate_template(crisis_data):
 					crisis_templates.append(CrisisEventData.new(crisis_data))
 			file_name = dir.get_next()
 	GameLogger.info("Loaded %d crisis templates" % crisis_templates.size(), "CrisisEvents")
@@ -289,6 +335,25 @@ func load_event_json(path: String) -> Dictionary:
 		if error == OK:
 			return json.data
 	return {}
+
+## Валидация схемы шаблона: seasons ⊆ VALID_SEASONS, rarity ∈ {common, rare}.
+## Невалидный сезон → ошибка загрузки (файл пропускается); невалидная rarity →
+## warning + default "common" (backward compat для ручных правок).
+func _validate_template(data: Dictionary) -> bool:
+	var seasons = data.get("seasons")
+	if seasons != null:
+		if not seasons is Array:
+			push_error("CrisisEvents: 'seasons' должен быть массивом: %s" % str(data.get("id", "?")))
+			return false
+		for s in seasons:
+			if not VALID_SEASONS.has(str(s)):
+				push_error("CrisisEvents: невалидный сезон '%s' в %s (допустимы: %s)" % [str(s), str(data.get("id", "?")), ", ".join(VALID_SEASONS)])
+				return false
+	var rarity = data.get("rarity")
+	if rarity != null and str(rarity) != "common" and str(rarity) != "rare":
+		push_warning("CrisisEvents: невалидная rarity '%s' в %s — использую 'common'" % [str(rarity), str(data.get("id", "?"))])
+		data["rarity"] = "common"
+	return true
 
 ## Загрузка JSON кризиса
 func load_crisis_json(path: String) -> Dictionary:
@@ -320,7 +385,7 @@ func update_next_event_day():
 		frequency_modifier = 1.5  # Реже если уже есть активные события
 	
 	var base_interval = int(7.0 / base_event_chance * frequency_modifier)
-	var variability = randi() % 4 - 2  # -2 to +2 дня
+	var variability = rng.randi() % 4 - 2  # -2 to +2 дня
 	next_event_day = day_counter + max(3, base_interval + variability)
 
 ## Попытка触发事件
@@ -329,26 +394,36 @@ func try_trigger_event():
 	if available_events.is_empty():
 		return
 	
-	# Выбор взвешенного случайного события
-	var total_weight = 0.0
-	for event in available_events:
-		total_weight += event.weight
-	
-	var roll = randf() * total_weight
-	var cumulative = 0.0
-	for event in available_events:
-		cumulative += event.weight
+	# Выбор взвешенного случайного события (детерминизм по seed через self.rng)
+	var event = select_by_weight(available_events)
+	if event != null:
+		trigger_event(event)
+
+## Взвешенный выбор из списка объектов с полем `weight` (duck typing).
+## Детерминирован по self.rng (seed-тесты); пустой список → null.
+func select_by_weight(items: Array) -> Variant:
+	if items.is_empty():
+		return null
+	var total_weight := 0.0
+	for item in items:
+		total_weight += float(item.weight)
+	var roll := rng.randf() * total_weight
+	var cumulative := 0.0
+	for item in items:
+		cumulative += float(item.weight)
 		if roll <= cumulative:
-			trigger_event(event)
-			break
+			return item
+	return items[items.size() - 1]
 
 ## Получение доступных событий
 func get_available_events() -> Array[DynamicEventData]:
-	var available = []
+	var available: Array[DynamicEventData] = []
 	for event in event_templates:
 		if event.min_day > day_counter:
 			continue
 		if is_event_recently_occurred(event.id):
+			continue
+		if not _season_allows(event.seasons):
 			continue
 		if not check_event_triggers(event):
 			continue
@@ -426,15 +501,17 @@ func should_trigger_crisis() -> bool:
 	var base_chance = crisis_chance_multiplier
 	var time_factor = float(day_counter) / 100.0  # Увеличивается каждые 100 дней
 	var total_chance = base_chance + time_factor
-	return randf() < total_chance
+	return rng.randf() < total_chance
 
-## Trigger случайного кризиса
+## Trigger случайного кризиса (взвешенный выбор по weight, детерминизм по seed)
 func trigger_random_crisis():
 	var available_crises = get_available_crises()
 	if available_crises.is_empty():
 		return
 	
-	var crisis = available_crises[randi() % available_crises.size()]
+	var crisis: CrisisEventData = select_by_weight(available_crises)
+	if crisis == null:
+		return
 	current_crisis = crisis
 	last_crisis_day = day_counter
 	_crisis_start_day = day_counter
@@ -446,9 +523,11 @@ func trigger_random_crisis():
 
 ## Получение доступных кризисов
 func get_available_crises() -> Array[CrisisEventData]:
-	var available = []
+	var available: Array[CrisisEventData] = []
 	for crisis in crisis_templates:
 		if crisis.min_day > day_counter:
+			continue
+		if not _season_allows(crisis.seasons):
 			continue
 		if not check_crisis_triggers(crisis):
 			continue

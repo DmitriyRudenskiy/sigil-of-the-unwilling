@@ -80,18 +80,19 @@
 **Priority**: P2  
 **Estimate**: 4h  
 **Acceptance Criteria**:
-- [x] Весенний паводок *(реализован как crisis_07_flood.json; сезонность мира — world_seasons.gd)*
-- [~] Летняя засуха *(покрыта famine-механикой: crisis_02_famine.json; отдельный seasonal-шаблон — scope-out в content pack 2)*
-- [~] Осенний урожай (бонус) *(позитивные seasonal-эффекты модерируются world_seasons.gd; отдельный event-шаблон — scope-out)*
-- [~] Зимние праздники *(scope-out: cosmetic-событие без механик, перенесено в content pack 2)*
-- [~] Сезон миграции животных *(scope-out: требует фауны-модели, перенесено в content pack 2)*
-> **Решение по циклу (2026-09-27):** data-driven загрузчик событий принимает произвольное число JSON без правок кода; ядро кризисов покрыто всеми 6 CrisisType (8 кризисов). Оставшиеся seasonal-шаблоны — чистый контент, вынесен в новый цикл `crisis-content-seasonal-rare-events` (создан 2026-09-27: proposal/tasks/spec-delta с полем `seasons`); не блокирует sync/archive этого цикла.
+- [x] Весенний паводок *(DONE in `crisis-content-seasonal-rare-events`: event_spring_flood.json + тег seasons=["spring"] у crisis_07_flood)*
+- [x] Летняя засуха *(DONE in `crisis-content-seasonal-rare-events`: event_summer_drought_risk.json; famine-механика crisis_02_famine сохранена)*
+- [x] Осенний урожай (бонус) *(DONE in `crisis-content-seasonal-rare-events`: event_autumn_harvest_boom.json + тег seasons=["autumn"] у event_02_harvest)*
+- [x] Зимние праздники *(DONE in `crisis-content-seasonal-rare-events` как зимние механики: event_winter_deep_frost.json, event_winter_starvation.json; тег seasons=["winter"] у event_10_cold)*
+- [~] Сезон миграции животных *(scope-out: требует фауны-модели — вне scope content-цикла)*
+> **Решение по циклу (2026-09-27):** data-driven загрузчик событий принимает произвольное число JSON без правок кода; ядро кризисов покрыто всеми 6 CrisisType (8 кризисов). Seasonal-контент реализован в `crisis-content-seasonal-rare-events` (8 сезонных событий, схема seasons/weight/rarity, сезонный фильтр селектора).
 
 ### Task 2.5: Implement 5 Rare Events (RimWorld-style)
 **Priority**: P2  
 **Estimate**: 2h  
 **Acceptance Criteria**:
 - [x] Падающий метеорит с ресурсами *(реализован: anomaly-тип + resource-эффекты через wired pipeline GameManager.modify_resource)*
+- [x] Редкие события с низким весом *(DONE in `crisis-content-seasonal-rare-events`: 4 шаблона rarity=rare, weight=0.05 — comet, eclipse, dragon_sighting, gold_vein; взвешенный селектор + статистический прогон)*
 - [~] Прибытие беженцев с уникальными навыками *(scope-out: требует модели навыков героев на уровне города — content pack 2)*
 - [~] Обнаружение древней технологии *(частично: unlock_building/unlock_law эффекты доступны; отдельный шаблон — content pack 2)*
 - [~] Визит загадочного торговца *(scope-out: нет торговой системы — зависит от economy change)*

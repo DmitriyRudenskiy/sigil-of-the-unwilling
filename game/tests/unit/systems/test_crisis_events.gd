@@ -59,7 +59,8 @@ func test_ten_common_events_loaded() -> void:
 	for e in sys.event_templates:
 		if e.id != "":
 			ids.append(e.id)
-	assert_that(ids.size()).is_equal(10)
+	# 10 базовых + 8 сезонных + 4 редких (crisis-content-seasonal-rare-events)
+	assert_that(ids.size()).is_equal(22)
 	for id in COMMON_EVENT_IDS:
 		assert_that(ids.has(id)).is_true()
 

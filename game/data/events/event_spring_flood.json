@@ -1,0 +1,34 @@
+{
+  "id": "event_spring_flood",
+  "title": "Половодье",
+  "description": "Снег сошёл быстро, и река подошла к берегу. Нижние склады и огороды под угрозой. Соседи зовут объединиться, но это стоит материалов и труда.",
+  "icon_path": "res://assets/ui/events/crisis_winter.png",
+  "frequency": 2,
+  "min_day": 15,
+  "weight": 1.0,
+  "seasons": ["spring"],
+  "rarity": "common",
+  "triggers": {},
+  "choices": [
+    {
+      "text": "Сыгнать дамбу (-15 материалов, +5 морали)",
+      "tooltip": "Спешная дамба спасёт склады от весеннего паводка",
+      "impact": 2,
+      "effects": {
+        "resource_change": {"materials": -15},
+        "morale_change": 5
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Перенести запасы наверх (-5 еды, +10 морали)",
+      "tooltip": "Устали люди, но имущество целым останется",
+      "impact": 1,
+      "effects": {
+        "resource_change": {"food": -5},
+        "morale_change": 10
+      },
+      "requirements": {}
+    }
+  ]
+}
