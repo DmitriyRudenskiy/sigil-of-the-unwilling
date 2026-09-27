@@ -11,6 +11,11 @@ var _ui_manager: Node = null
 var _map_gen: Node = null
 var _camera: Node = null
 var _resource_node_manager: Node = null
+## save-load-coverage-expansion 3.4: источник legend-state (HeroLifecycleSystem).
+var _lifecycle: HeroLifecycleSystem = null
+
+func set_lifecycle(lifecycle: HeroLifecycleSystem) -> void:
+	_lifecycle = lifecycle
 
 func setup(tree: SceneTree, persistence, bootstrap_result, hero: Node, cities: Node,
 		world_delta, ui_manager: Node, resource_node_manager: Node,
@@ -27,6 +32,11 @@ func setup(tree: SceneTree, persistence, bootstrap_result, hero: Node, cities: N
 	_camera = camera
 
 func save_game() -> bool:
+	# save-load-coverage-expansion 3.4: legend + glory в world-state перед сейвом
+	if _cities is CityManager:
+		_world_delta.glory_state = (_cities as CityManager).glory.serialize()
+	if _lifecycle != null:
+		_persistence.legend_state = _lifecycle.get_legend_state()
 	_persistence.world_delta = _world_delta
 	var chars: Array = []
 	if _bootstrap_result != null and _bootstrap_result.character_registry != null:
@@ -50,6 +60,9 @@ func restart_game(seed_value: int) -> void:
 
 func apply_save(data: SaveData) -> void:
 	_persistence.apply_loaded_save(data, WorldBootstrap.build_load_context(_bootstrap_result))
+	# save-load-coverage-expansion 3.4: legend возвращается в lifecycle
+	if _lifecycle != null:
+		_lifecycle.restore_legend_state(_persistence.legend_state)
 
 func get_session() -> GameSession:
 	return _persistence.session

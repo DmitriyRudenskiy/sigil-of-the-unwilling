@@ -65,6 +65,14 @@ func _get_world() -> Node2D:
 		return null
 	return _world_ref.get_ref()
 
+## save-load-coverage-expansion 3.4: legend-state для save/load.
+func get_legend_state() -> Dictionary:
+	return _legend.serialize() if _legend != null else {}
+
+func restore_legend_state(data: Dictionary) -> void:
+	if _legend != null and data is Dictionary and not data.is_empty():
+		_legend.deserialize(data)
+
 func on_hero_died(cause: StringName) -> void:
 	var world := _get_world()
 	if world == null:

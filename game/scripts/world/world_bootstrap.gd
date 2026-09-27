@@ -138,6 +138,8 @@ static func finalize(parent: Node2D, R: BootstrapResult, visibility, persistence
 
 	if R.loaded_save != null:
 		persistence.apply_loaded_save(R.loaded_save, build_load_context(R))
+		# save-load-coverage-expansion 3.4: legend из сейва в lifecycle
+		lifecycle.restore_legend_state(persistence.legend_state)
 		if R.endgame != null:
 			R.endgame.restore()
 	elif R.map_gen.has_valid_tilemap():

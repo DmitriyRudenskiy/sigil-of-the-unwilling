@@ -12,6 +12,10 @@ var visibility = null
 
 var _last_save_dict: Dictionary = {}
 
+## save-load-coverage-expansion 3.4: состояние LegendTracker (HeroLifecycleSystem)
+## — записывается WorldSaveLoadService перед save_game().
+var legend_state: Dictionary = {}
+
 var _shards_memory: Dictionary = {}
 
 var next_seed: int = 0
@@ -57,6 +61,8 @@ func save_game(hero: HeroController, cities: Array = [], characters: Array = [])
 	save_data.hero = hero.serialize()
 	if visibility != null:
 		world_delta.set_fog_explored(visibility.serialize_explored())
+	# save-load-coverage-expansion 3.2: сезонный счётчик в world-state
+	world_delta.season_turns = WorldSeasons.get_turns()
 	save_data.world = world_delta.serialize()
 	var cities_arr: Array = []
 	for city in cities:
@@ -68,6 +74,8 @@ func save_game(hero: HeroController, cities: Array = [], characters: Array = [])
 	var _mgr := _ShardManager.instance()
 	var _active := _mgr.active_id
 	save_data.active_shard_id = _active
+	# save-load-coverage-expansion 3.4: legend (мёртвое поле v4 оживает)
+	save_data.legend = legend_state.duplicate(true)
 
 	var shards_data: Dictionary = _shards_memory.duplicate(true)
 	shards_data[_active] = {
@@ -156,6 +164,8 @@ func apply_loaded_save(data: SaveData, ctx) -> void:
 		ctx.world_delta = WorldStateDelta.new()
 
 	ctx.world_delta.deserialize(data.world)
+	# save-load-coverage-expansion 3.2: восстанавливаем WorldSeasons из сейва
+	WorldSeasons.set_turns(ctx.world_delta.season_turns)
 
 	if session != null:
 		session.deserialize(data.session)
@@ -214,6 +224,12 @@ func apply_loaded_save(data: SaveData, ctx) -> void:
 
 	_restore_cities(data, ctx)
 	_restore_characters(data, ctx)
+
+	# save-load-coverage-expansion 3.4: legend + glory из world-state
+	var legend_raw: Variant = data.legend
+	legend_state = legend_raw.duplicate(true) if legend_raw is Dictionary else {}
+	if ctx.cities is CityManager and not ctx.world_delta.glory_state.is_empty():
+		(ctx.cities as CityManager).glory.deserialize(ctx.world_delta.glory_state)
 
 	if not data.shards.is_empty():
 		_shards_memory = data.shards.duplicate(true)

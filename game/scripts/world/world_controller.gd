@@ -67,6 +67,8 @@ func _ready() -> void:
 	_save_svc = WorldSaveLoadServiceScript.new()
 	_save_svc.setup(get_tree(), _persistence, _bootstrap_result, _hero, _cities,
 		_world_delta, _ui_manager, resource_node_manager, _map_gen, _camera)
+	# save-load-coverage-expansion 3.4: legend-state для сейвов
+	_save_svc.set_lifecycle(_lifecycle())
 	_camera.set_map_rect(_bootstrap_result.map_rect)
 	_event_router = WorldBootstrapScript.finalize(self, _bootstrap_result, _visibility,
 		_persistence, _hero_mgr, _rng, _on_end_turn_from_router)
