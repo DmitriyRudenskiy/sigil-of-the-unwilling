@@ -62,3 +62,9 @@ static func attempt(
 ## A pushed creature that leaves a ledge takes falling damage
 ## (resolved by the height system, Phase 2).
 const PUSH_DISTANCE_FEET := 5
+
+## dnd-verticality-falling 3.1: a push of PUSH_DISTANCE_FEET feet that ends
+## on a cell more than 1 level below the source cell sends the target over
+## the ledge. Returns the fall distance in feet (0 when the push is safe).
+static func push_fall_feet(p_from_level: int, p_to_level: int) -> int:
+	return DNDFallingDamage.fall_feet(p_from_level, p_to_level)

@@ -135,26 +135,26 @@
 **File**: `game/scripts/battle/dnd/vertical_movement.gd`
 **Description**: Handle climbing, flying, and jumping mechanics.
 **Acceptance Criteria**:
-- [~] Climbing costs double movement *(scope-out 2026-09-27: TASK_11 вынесен в новое изменение `dnd-verticality-falling`; cell-level боевая модель пока не имеет per-cell movement cost pipeline)*
-- [~] Athletics check for difficult climbs (DC 10-15) *(scope-out → dnd-verticality-falling; строительный блок DNDAbilityCheck уже готов)*
-- [~] Flying ignores elevation penalties *(scope-out → dnd-verticality-falling)*
-- [~] Jump distance based on STR score *(scope-out → dnd-verticality-falling)*
-- [~] High jump formula: 3 + STR mod feet *(scope-out → dnd-verticality-falling)*
-- [~] Integration test with movement system *(scope-out → dnd-verticality-falling)*
-**Status**: TODO
+- [x] Climbing costs double movement *(DONE in `dnd-verticality-falling`: `DNDVerticalMovement.step_cost` ×2 за уровень)*
+- [x] Athletics check for difficult climbs (DC 10-15) *(DONE in `dnd-verticality-falling`: `climb_dc` 10–15, ≥2 уровня через `DNDAbilityCheck`)*
+- [x] Flying ignores elevation penalties *(DONE in `dnd-verticality-falling`: тег flying — cost 1, без проверок/падения)*
+- [x] Jump distance based on STR score *(DONE in `dnd-verticality-falling`: `jump_distance_feet` = 10 + STR mod)*
+- [x] High jump formula: 3 + STR mod feet *(DONE in `dnd-verticality-falling`: `jump_height_feet` = 3 + STR mod)*
+- [x] Integration test with movement system *(DONE in `dnd-verticality-falling`: `test_dnd_fall_integration.gd`)*
+**Status**: DONE (2026-09-27, `dnd-verticality-falling`)
 **Estimated Hours**: 8
 
 #### TASK_12: Implement Falling Damage
 **File**: `game/scripts/battle/dnd/falling_damage.gd`
 **Description**: Calculate and apply falling damage.
 **Acceptance Criteria**:
-- [~] 1d6 damage per 10 feet fallen *(scope-out 2026-09-27: TASK_12 вынесен в `dnd-verticality-falling`; DNDDamageCalculator готов принять плоский damage dice)*
-- [~] Maximum 20d6 damage *(scope-out → dnd-verticality-falling)*
-- [~] Landing causes prone condition *(scope-out → dnd-verticality-falling; PRONE уже поддержан DNDConditionManager)*
-- [~] Optional DEX save (DC 15) to avoid prone *(scope-out → dnd-verticality-falling; DNDSavingThrow готов)*
-- [~] Triggered when elevation decreases rapidly *(scope-out → dnd-verticality-falling)*
-- [~] Unit tests for all distances *(scope-out → dnd-verticality-falling)*
-**Status**: TODO
+- [x] 1d6 damage per 10 feet fallen *(DONE in `dnd-verticality-falling`: `DNDFallingDamage.roll_damage`)*
+- [x] Maximum 20d6 damage *(DONE in `dnd-verticality-falling`: `MAX_D6 = 20`)*
+- [x] Landing causes prone condition *(DONE in `dnd-verticality-falling`: PRONE через `DNDConditionManager`)*
+- [x] Optional DEX save (DC 15) to avoid prone *(DONE in `dnd-verticality-falling`: `DNDSavingThrow` DC 15, natural 20/1)*
+- [x] Triggered when elevation decreases rapidly *(DONE in `dnd-verticality-falling`: порог >1 уровня за шаг; push — `DNDShove.push_fall_feet`)*
+- [x] Unit tests for all distances *(DONE in `dnd-verticality-falling`: `test_dnd_verticality.gd` 0–250+ футов, границы кэпа)*
+**Status**: DONE (2026-09-27, `dnd-verticality-falling`)
 **Estimated Hours**: 4
 
 ### Phase 3: Action Economy (Priority: MEDIUM)
@@ -218,9 +218,9 @@
 - [x] Success: target knocked prone OR pushed 5 feet (`ShoveOutcome.PRONE`/`PUSHED`, `PUSH_DISTANCE_FEET`)
 - [x] Must have one hand free (`can_shove`)
 - [x] Target must be within reach (`can_shove`)
-- [x] Can push off edges (falling damage) — `PUSH_DISTANCE_FEET` constant; damage itself is TASK_12 (deferred, not in spec)
-- [~] Integration test with height system — deferred to Phase 6 (TASK_21)
-**Status**: DONE (integration test deferred to Phase 6)
+- [x] Can push off edges (falling damage) — `PUSH_DISTANCE_FEET` constant; damage DONE in `dnd-verticality-falling` (`DNDShove.push_fall_feet` → `DNDFallingDamage`)
+- [~] Integration test with height system — deferred to Phase 6 (TASK_21); push→fall→damage→prone covered in `dnd-verticality-falling` (`test_dnd_fall_integration.gd`)
+**Status**: DONE (height-system integration test deferred to Phase 6)
 **Estimated Hours**: 5
 
 #### TASK_18: Implement Conditions System

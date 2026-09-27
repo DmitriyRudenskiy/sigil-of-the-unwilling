@@ -53,3 +53,22 @@ static func build_initiative(profiles: Array, rng: RandomNumberGenerator) -> DND
 		var prof: DnDCombatantProfile = p
 		tracker.roll_initiative(prof.id, prof.name, prof.abilities.get_dex_mod(), rng)
 	return tracker
+
+
+## dnd-verticality-falling 3.2: single entry point for the battle framework
+## to resolve a fall (movement step or push off a ledge).
+## Resolution happens at the moment of the move/push — before the next turn —
+## so initiative order is never disturbed.
+## p_condition_mgr receives PRONE on a failed DEX save (optional).
+static func resolve_fall(
+	profile: DnDCombatantProfile,
+	p_from_level: int,
+	p_to_level: int,
+	rng: RandomNumberGenerator,
+	p_condition_mgr: DNDConditionManager = null,
+	p_proficient: bool = false
+) -> DNDFallingDamage.FallResult:
+	return DNDFallingDamage.resolve(
+		p_from_level, p_to_level, rng, profile.get_save_mod(DNDAbilityScores.Ability.DEX),
+		p_condition_mgr, p_proficient
+	)

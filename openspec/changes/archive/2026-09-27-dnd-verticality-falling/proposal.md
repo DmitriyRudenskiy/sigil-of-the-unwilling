@@ -1,6 +1,6 @@
 # Proposal: dnd-verticality-falling
 
-**Status:** Open (propose)
+**Status:** Done (2026-09-27, archived)
 **Scope-out from:** `dnd-battle-system` (TASK_11 Vertical Movement, TASK_12 Falling Damage — помечены `[~] scope-out 2026-09-27`)
 
 ## Why
@@ -31,9 +31,9 @@
 
 ## Acceptance Criteria
 
-- [ ] 1. Лазание ×2 и Athletics DC 10–15 работают, тесты зелёные
-- [ ] 2. Прыжок/высота прыжка по STR формуле, тесты границ
-- [ ] 3. Урон падения 1d6/10фт, кап 20d6, prone + DEX-save DC 15 — unit-тесты всех дистанций
-- [ ] 4. Push с обрыва наносит урон падения (интеграция shove → falling_damage)
-- [ ] 5. Полёт игнорирует elevation-штрафы
-- [ ] 6. Полный прогон зелёный; delta synced; cycle archived
+- [x] 1. Лазание ×2 и Athletics DC 10–15 работают, тесты зелёные
+- [x] 2. Прыжок/высота прыжка по STR формуле, тесты границ
+- [x] 3. Урон падения 1d6/10фт, кап 20d6, prone + DEX-save DC 15 — unit-тесты всех дистанций
+- [x] 4. Push с обрыва наносит урон падения (интеграция shove → falling_damage)
+- [x] 5. Полёт игнорирует elevation-штрафы
+- [x] 6. Полный прогон зелёный; delta synced; cycle archived
