@@ -335,6 +335,13 @@ func load_crisis_json(path: String) -> Dictionary:
 func on_day_passed(day: int):
 	day_counter = day
 	
+	# События мгновенные (без duration_days, в отличие от кризисов): показанное
+	# в предыдущий день событие уже разрешено игроком до смены дня. Без этой
+	# очистки active_events росло бы вечно, и гейт
+	# `active_events.size() < max_active_events` дедлокировал спавн событий
+	# после 3 событий в реальной сессии.
+	active_events.clear()
+	
 	# Проверка активного кризиса
 	if current_crisis != null:
 		process_ongoing_crisis()
@@ -381,7 +388,7 @@ func try_trigger_event():
 
 ## Получение доступных событий
 func get_available_events() -> Array[DynamicEventData]:
-	var available = []
+	var available: Array[DynamicEventData] = []
 	for event in event_templates:
 		if event.min_day > day_counter:
 			continue
@@ -493,7 +500,7 @@ func trigger_random_crisis():
 
 ## Получение доступных кризисов
 func get_available_crises() -> Array[CrisisEventData]:
-	var available = []
+	var available: Array[CrisisEventData] = []
 	for crisis in crisis_templates:
 		if crisis.min_day > day_counter:
 			continue

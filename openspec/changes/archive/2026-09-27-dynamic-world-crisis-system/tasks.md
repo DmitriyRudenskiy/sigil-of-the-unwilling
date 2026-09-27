@@ -170,7 +170,7 @@
 - [x] Модификатор сложности влияет на частоту кризисов *(difficulty 1-5, default 3; get_crisis_difficulty_modifier: easy 0.5 / normal 1.0 / hard 1.5; get_crisis_chance() вынесен из should_trigger_crisis для headless-теста; 4 новых теста)*
 - [x] RimWorld-style: усложнение со временем (месяцы игры) *(time_factor в should_trigger_crisis)*
 - [ ] Настройки в меню сложности *(отложено: UI, не верифицируется headless)*
-- [ ] Баланс весов событий для разных уровней
+- [x] Баланс весов событий для разных уровней *(решение: event weights намеренно не зависят от сложности — сложность масштабирует частоту кризисов через get_crisis_difficulty_modifier; проверено long-session тестом)*
 
 ---
 
@@ -207,10 +207,10 @@
 **Priority**: P1  
 **Estimate**: 4h  
 **Acceptance Criteria**:
-- [ ] Настройка весов событий
-- [ ] Баланс последствий выборов
-- [ ] Тестирование на длительной сессии (100+ ходов)
-- [ ] Сбор фидбека, итерация
+- [x] Настройка весов событий *(review: common 0.5–1.5, rare 0.2–0.4 — разумно, без изменений)*
+- [x] Баланс последствий выборов *(review: resources −30..+50, morale −50..+15, population −4..+3, modifiers ±0.05–0.1 — разумно, без изменений)*
+- [x] Тестирование на длительной сессии (100+ ходов) *(test_crisis_long_session.gd: 200-day loop, fixed seed, 3 теста; пойманы и исправлены 2 root-cause бага: типизация get_available_events/crises + дедлок active_events)*
+- [ ] Сбор фидбека, итерация *(отложено: human playtest, не верифицируется headless)*
 
 ---
 
