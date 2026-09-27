@@ -23,6 +23,16 @@ func _find_blocked_pattern(code: String) -> String:
 			return pattern
 	return ""
 
+## R2: сервер гоняет тики групп через базовый интерфейс.
+func tick() -> void:
+	tick_debug_draw()
+
+
+## R2: сервер вызывает shutdown() групп на stop().
+func shutdown() -> void:
+	_clear_debug_draw()
+
+
 func get_commands() -> Dictionary:
 	var commands := {
 		"get_scene_tree": _cmd_get_scene_tree,

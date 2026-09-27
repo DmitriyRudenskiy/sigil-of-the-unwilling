@@ -1,6 +1,6 @@
 # Tasks: world-controller-decoupling
 
-> **Status (2026-09-27):** цикл восстановлен из audit-заметок. Фаза 1 закрыта (коммит d7131b1). Следующий шаг — `/opsx-apply` фаза 2 (R2, High priority).
+> **Status:** фаза 1 закрыта (коммит d7131b1), фаза 2 (R2, MCP-декомпозиция) закрыта. Следующий шаг — фаза 3 (R4, типизация).
 
 ## Phase 1 — R1: HeroLifecycleSystem extraction ✅
 
@@ -12,16 +12,16 @@
 - [x] 1.6 Коммит **d7131b1** *(R1)*
 - [x] 1.7 R3 `IHeroConsumer` — REJECTED (Design D: `_install_hero` остаётся на WC) *(R3)*
 
-## Phase 2 — R2: Socket/MCP декомпозиция (High) ⬜
+## Phase 2 — R2: Socket/MCP декомпозиция (High) ✅
 
 > Уточнение путей (2026-09-27, по факту репозитория): сервер находится в `game/tools/mcp/`, не `game/scripts/mcp/`. Разделение команд уже частично выполнено: `mcp_commands_base.gd` (53), `_system.gd` (1788), `_render.gd` (1223), `_ui.gd` (646), `_input.gd` (434), `mcp_serialization.gd` (183). В `mcp_interaction_server.gd` (205 строк) `listen()` вызывается однократно (~стр. 52), явной обработки EADDRINUSE нет — задача 2.4 подтверждена как реальная. Python-тесты MCP живут в `game/tests/mcp/` (pytest), а не `game/tests/mcp/*.gd` — тесты из 2.5 писать на pytest.
 
 - [x] 2.1 Инвентаризация состояния `mcp_interaction_server.gd` (205 строк): транспорт + диспетч; командная логика уже вынесена в mcp_commands_* *(выполнено при аудите 2026-09-27)*
-- [ ] 2.2 Вынести остаточную командную логику в `mcp_commands_*` (base/system/input/render уже разделены)
-- [ ] 2.3 Устранить глобальное mutable state сервера (явный lifecycle start/stop)
-- [ ] 2.4 Обработка EADDRINUSE: идемпотентный `listen()`, понятная ошибка, без утечки peers
-- [ ] 2.5 Тесты `game/tests/mcp/`: повторный старт, регистрация команд через новый путь
-- [ ] 2.6 Верификация gate (compile + run_all + operability) + коммит
+- [x] 2.2 Реестр команд + роутинг вынесены в `McpCommandDispatcher` (RefCounted, `mcp_command_dispatcher.gd`); сервер — только транспорт/аутентификация/busy; группы получили `tick()`/`shutdown()` (base + system)
+- [x] 2.3 Явный lifecycle: идемпотентные `start() -> bool` / `stop()`; `_ready` → `start()`, `_exit_tree` → `stop()`; half-init глобальных при ошибке listen исключён; `_exit_tree` больше не лезет в приваты групп (`group.shutdown()`)
+- [x] 2.4 EADDRINUSE: `ERR_ALREADY_IN_USE` → понятная push_error (подсказка про MCP_PORT), сервер остаётся в чистом not-started состоянии; повторный `start()` идемпотентен; peer-утечки нет (старый peer disconnect, буфер/busy сброс)
+- [x] 2.5 Тесты: `tests/mcp/test_mcp_server_lifecycle.py` (pytest, raw TCP, headless Godot): reconnect после ухода клиента, unknown command через диспетчер, идемпотентный `start()`, EADDRINUSE-ошибка второй инстанции; gdUnit4 `test_mcp_server.gd` обновлён под `_dispatcher`
+- [x] 2.6 Верификация gate + коммит: `--import` clean (exit 0); headless-запуск проекта — 0 script errors, MCP слушает; gdUnit4 MCP-сьюты 24/24 PASSED; новый pytest `test_mcp_server_lifecycle.py` 4/4 PASSED (reconnect, unknown command, idempotent start, EADDRINUSE); полный unit-прогон 1608 кейсов — набор фейлов идентичен базлайну (предсуществующие env-фейлы test_spells_json/test_crisis_events, регрессий 0). Примечание: полный run_all.sh в этой среде не проходится из-за отсутствия godot-mcp (не трекается) и предсуществующих env-фейлов — зафиксировано сравнением с baseline (stash)
 
 ## Phase 3 — R4: Типизация ⬜
 

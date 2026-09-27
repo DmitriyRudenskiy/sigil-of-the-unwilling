@@ -4,7 +4,9 @@ const GameLogger := preload("res://scripts/core/game_logger.gd")
 # MCP Interaction Server - TCP server for game interaction
 # Runs as an autoload inside the Godot game, accepting JSON commands over TCP.
 # No class_name to avoid autoload conflict.
-# Command handlers live in mcp_commands_*.gd groups (see _handlers below).
+# R2 (world-controller-decoupling): this node is transport only (TCP, auth,
+# busy state, explicit start/stop lifecycle). The command registry/routing
+# lives in McpCommandDispatcher; command logic in mcp_commands_*.gd groups.
 
 var _server: TCPServer
 var _client: StreamPeerTCP
@@ -23,46 +25,85 @@ const BUSY_TIMEOUT: float = 120.0
 const AUTH_TOKEN_ENV := "MCP_AUTH_TOKEN"
 var _auth_token: String = ""
 
-var _grp_input: McpCommandsInput
-var _grp_ui: McpCommandsUI
-var _grp_system: McpCommandsSystem
-var _grp_render: McpCommandsRender
-var _handlers: Dictionary = {}
+var _dispatcher: McpCommandDispatcher
+var _groups: Array[McpCommandsBase] = []
+var _started: bool = false
 
 func _ready() -> void:
 	# SECURITY: MCP-сервер — инструмент разработки. В релизных сборках
 	# TCP-эндпоинт с полным доступом к игре должен быть полностью отключён.
+	# TASK_19 L1: McpCommandsNetwork (пустая заглушка) удалён.
+	_dispatcher = McpCommandDispatcher.new()
+	_groups = [
+		McpCommandsInput.new(self),
+		McpCommandsUI.new(self),
+		McpCommandsSystem.new(self),
+		McpCommandsRender.new(self),
+	]
+	start()
+
+
+## R2 explicit lifecycle: idempotent start. Returns false in release builds
+## or when the port is busy (EADDRINUSE) — the server stays in a clean
+## not-started state instead of half-initialised globals.
+func start() -> bool:
+	if _started:
+		return true
 	if not OS.is_debug_build():
+		push_warning("McpInteractionServer: dev tool, disabled in release builds")
 		set_process(false)
-		return
+		return false
 	# Ensure MCP server keeps processing even when game is paused
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_auth_token = OS.get_environment(AUTH_TOKEN_ENV)
-	_grp_input = McpCommandsInput.new(self)
-	_grp_ui = McpCommandsUI.new(self)
-	_grp_system = McpCommandsSystem.new(self)
-	_grp_render = McpCommandsRender.new(self)
-	# TASK_19 L1: McpCommandsNetwork (пустая заглушка) удалён.
-	for group in [_grp_input, _grp_ui, _grp_system, _grp_render]:
-		var cmds: Dictionary = group.get_commands()
-		for cmd in cmds:
-			_handlers[cmd] = cmds[cmd]
+	_dispatcher.clear()
+	for group in _groups:
+		_dispatcher.register(group)
 	_server = TCPServer.new()
 	var port_ := port()
 	var err: int = _server.listen(port_, "127.0.0.1")
+	if err == ERR_ALREADY_IN_USE:
+		# EADDRINUSE: понятная ошибка + чистое состояние (без утечки peers).
+		push_error(
+			"McpInteractionServer: port %d is already in use (EADDRINUSE). "
+			+ "Stop the other Godot/MCP instance or set MCP_PORT to a free port." % port_)
+		_server = null
+		return false
 	if err != OK:
 		push_error("McpInteractionServer: Failed to listen on port %d, error: %d" % [port_, err])
-		return
+		_server = null
+		return false
+	_started = true
 	GameLogger.info("Listening on 127.0.0.1:%d" % port_, "MCP")
+	return true
+
+
+## R2 explicit lifecycle: idempotent stop. Releases all transport state and
+## lets groups free their resources (debug meshes etc.) via shutdown().
+func stop() -> void:
+	if _client != null:
+		_client.disconnect_from_host()
+		_client = null
+	_buffer = ""
+	_busy = false
+	_busy_since = 0.0
+	_current_id = null
+	if _server != null:
+		_server.stop()
+		_server = null
+	_started = false
+	for group in _groups:
+		group.shutdown()
+	GameLogger.trace("Stopped", "MCP")
 
 
 func _process(_delta: float) -> void:
-	if _server == null:
+	if not _started or _server == null:
 		return
 
-	# TASK_20: тик debug-мешей — frames_left декрементируется, истёкшие освобождаются.
-	if _grp_system != null:
-		_grp_system.tick_debug_draw()
+	# TASK_20: тик групп (debug-меша и пр.) — frames_left декрементируется.
+	for group in _groups:
+		group.tick()
 
 	# Safety timeout: force-reset _busy if it's been stuck too long
 	if _busy and _busy_since > 0.0:
@@ -146,22 +187,18 @@ func _handle_command(json_str: String) -> void:
 	var command: String = data.get("command", "")
 	var params: Dictionary = data.get("params", {})
 
-	if not _handlers.has(command):
-		_send_response({"error": "Unknown command: %s" % command})
-		return
-	# TASK_19 M3: центральная проверка сцены (заменяет дубли в командах).
-	if not is_inside_tree():
-		_send_response({"error": "Server not in scene tree"})
-		return
-	var handler: Callable = _handlers[command]
-	# Awaiting a non-coroutine handler returns immediately, so one path covers sync and async.
-	await handler.call(params)
+	# R2: реестр команд и роутинг — в диспетчере, а не в транспорте.
+	var result: Variant = await _dispatcher.dispatch(command, params, is_inside_tree())
 
-	# TASK_20 safety-net: если хендлер завершился, не отправив ответ (ранний return в команде),
-	# сбрасываем _busy сразу, а не через 120-секундный таймаут.
+	# TASK_20 safety-net: если хендлер завершился, не отправив ответ (ранний
+	# return в команде), сбрасываем _busy сразу, а не через 120-секундный
+	# таймаут. Ошибки диспетчера (unknown command / no scene tree) — в ответ.
 	if _busy:
-		push_warning("McpInteractionServer: handler for '%s' did not send a response, force-clearing busy flag" % command)
-		_send_response({"error": "Handler did not send response"})
+		if result is Dictionary:
+			_send_response(result)
+		else:
+			push_warning("McpInteractionServer: handler for '%s' did not send a response, force-clearing busy flag" % command)
+			_send_response({"error": "Handler did not send response"})
 
 
 # Send response and clear busy flag
@@ -195,11 +232,4 @@ func _send_response_raw(data: Dictionary) -> void:
 
 
 func _exit_tree() -> void:
-	_grp_system._clear_debug_draw()
-	if _client != null:
-		_client.disconnect_from_host()
-		_client = null
-	if _server != null:
-		_server.stop()
-		_server = null
-	GameLogger.trace("Stopped", "MCP")
+	stop()

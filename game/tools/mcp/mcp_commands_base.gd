@@ -16,6 +16,18 @@ func get_commands() -> Dictionary:
 	return {}
 
 
+## Per-frame upkeep owned by the group (debug-mesh lifetimes etc.).
+## Driven by the server while it is started. Default: no-op.
+func tick() -> void:
+	pass
+
+
+## Releases resources held by the group (debug meshes etc.).
+## Called by the server on stop(). Default: no-op.
+func shutdown() -> void:
+	pass
+
+
 ## Rejects the request unless the server is in the scene tree. Returns false if rejected.
 func _require_scene_tree() -> bool:
 	if not server.is_inside_tree():

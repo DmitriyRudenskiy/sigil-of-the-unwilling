@@ -31,10 +31,11 @@ func after_test() -> void:
 
 
 func test_handlers_registered() -> void:
-	var handlers: Dictionary = _server._handlers
-	assert_that(handlers.size()).is_greater(90)  # 3D/network dead-weights removed (TASK_18 Phase 5)
-	assert_bool(handlers.has("os_info")).is_true()
-	assert_bool(handlers.has("eval")).is_true()
+	# R2: реестр команд живёт в McpCommandDispatcher, не в транспортном узле.
+	var names: Array = _server._dispatcher.command_names()
+	assert_that(names.size()).is_greater(90)  # 3D/network dead-weights removed (TASK_18 Phase 5)
+	assert_bool(_server._dispatcher.has("os_info")).is_true()
+	assert_bool(_server._dispatcher.has("eval")).is_true()
 
 
 func test_scene_path_whitelist() -> void:
@@ -164,10 +165,9 @@ func test_json_to_variant_with_type_hint() -> void:
 
 func test_eval_and_script_debug_only() -> void:
 	# TASK_19 H1: произвольный GDScript доступен только в debug-сборке.
-	var handlers: Dictionary = _server._handlers
 	if OS.is_debug_build():
-		assert_bool(handlers.has("eval")).is_true()
-		assert_bool(handlers.has("script")).is_true()
+		assert_bool(_server._dispatcher.has("eval")).is_true()
+		assert_bool(_server._dispatcher.has("script")).is_true()
 	else:
-		assert_bool(handlers.has("eval")).is_false()
-		assert_bool(handlers.has("script")).is_false()
+		assert_bool(_server._dispatcher.has("eval")).is_false()
+		assert_bool(_server._dispatcher.has("script")).is_false()

@@ -42,7 +42,7 @@ Senior-architect аудит по 5 измерениям выявил наруш�
 
 - [x] 1. WorldController ≤ 400 строк без тяжёлой игровой логики (факт: 141)
 - [x] 2. HeroLifecycleSystem покрыт тестами, death-flow работает как прежде
-- [ ] 3. Socket/MCP слой: транспорт отделён от команд, нет глобального mutable state (R2)
+- [x] 3. Socket/MCP слой: транспорт отделён от команд (McpCommandDispatcher), явный lifecycle start/stop, EADDRINUSE-обработка (R2)
 - [ ] 4. 0 untyped Variant-полей в WC-контуре (R4)
 - [ ] 5. Единый DI-путь, `ServiceContainer.current` удалён или обёрнут (R5)
 - [ ] 6. Полный прогон тестов зелёный + operability CLEAN после каждой фазы (R7)
