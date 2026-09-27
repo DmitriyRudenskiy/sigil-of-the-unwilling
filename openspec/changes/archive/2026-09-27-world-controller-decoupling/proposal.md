@@ -1,6 +1,6 @@
 # Proposal: world-controller-decoupling
 
-**Status:** In Progress (R1 done; R2–R7 open)
+**Status:** Complete (R1–R7 done; готово к архивации)
 **Created:** 2026-07-15 · **Restored:** 2026-09-27 (артефакты восстановлены из audit-заметок `.pi/todos/opsx-propose-audit.md`; оригинал потерян при graft истории)
 
 ## Why
@@ -43,6 +43,6 @@ Senior-architect аудит по 5 измерениям выявил наруш�
 - [x] 1. WorldController ≤ 400 строк без тяжёлой игровой логики (факт: 141)
 - [x] 2. HeroLifecycleSystem покрыт тестами, death-flow работает как прежде
 - [x] 3. Socket/MCP слой: транспорт отделён от команд (McpCommandDispatcher), явный lifecycle start/stop, EADDRINUSE-обработка (R2)
-- [ ] 4. 0 untyped Variant-полей в WC-контуре (R4)
-- [ ] 5. Единый DI-путь, `ServiceContainer.current` удалён или обёрнут (R5)
-- [ ] 6. Полный прогон тестов зелёный + operability CLEAN после каждой фазы (R7)
+- [x] 4. 0 untyped Variant-полей в WC-контуре (R4; факт: 21 поле + 14 сигнатур типизированы, commit 8e5dce2)
+- [x] 5. Единый DI-путь, `ServiceContainer.current` удалён или обёрнут (R5; факт: `ServiceContainer` в коде отсутствует — единый `Services`/`ServiceRegistry`, 0 call-sites `.current`)
+- [x] 6. Полный прогон тестов зелёный + operability CLEAN после каждой фазы (R7; факт: 1781 кейс = baseline 62+4, регрессий 0; MCP pytest 4/4; import clean)

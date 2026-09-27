@@ -75,9 +75,13 @@
 - [x] 5.3 Верификация gate + коммит
   - Аудит-only (без кодовых изменений); gate — тот же прогон, что по 3.3.
 
-## Phase 6 — R7: Final verification & sync ⬜
+## Phase 6 — R7: Final verification & sync ✅
 
-- [ ] 6.1 Полный прогон: compile, run_all.sh, operability CLEAN
-- [ ] 6.2 Обновить Acceptance Criteria в proposal.md
-- [ ] 6.3 `/opsx-sync`: создать main spec `openspec/specs/world-controller/spec.md`
-- [ ] 6.4 `/opsx-archive world-controller-decoupling`
+- [x] 6.1 Полный прогон: compile, run_all.sh, operability CLEAN
+  - `--import` exit 0; gdUnit 1781 кейс = baseline (62 errors + 4 failures —
+    пре-экзистинг, 0 регрессий); MCP pytest test_mcp_server_lifecycle 4/4;
+    структурные проверки (дубли tests/Test*.gd) — нет.
+- [x] 6.2 Обновить Acceptance Criteria в proposal.md (все 6 пунктов [x])
+- [x] 6.3 `/opsx-sync`: создан main spec `openspec/specs/world-controller/spec.md`
+- [x] 6.4 `/opsx-archive world-controller-decoupling` →
+  `openspec/changes/archive/2026-09-27-world-controller-decoupling/`
