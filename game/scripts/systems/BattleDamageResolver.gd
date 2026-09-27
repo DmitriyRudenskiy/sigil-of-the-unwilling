@@ -18,8 +18,12 @@ static func resolve(state: BattleState, atk: BattleState.BattleUnit, def: Battle
 	if _BattleTerrain.elevation(state.get_hex_terrain(atk.cell)) > _BattleTerrain.elevation(state.get_hex_terrain(def.cell)):
 		terrain_atk_mult = _BattleTerrain.DOWNHILL_ATTACK_MULT
 
+	# Phase 6 (flanking): melee attacker adjacent to defender → front/flank/rear
+	# aspect from the defender's facing; ranged/non-adjacent → -1 (no flanking).
+	var flank_aspect: int = state.attack_aspect(atk.cell, def)
 	var result: Dictionary = BattleRules.calculate_attack(
-		atk, def, is_melee, rng, atk_bonus, def_bonus, terrain_atk_mult, terrain_def_mult
+		atk, def, is_melee, rng, atk_bonus, def_bonus, terrain_atk_mult, terrain_def_mult,
+		flank_aspect
 	)
 	if result.is_empty():
 		return result

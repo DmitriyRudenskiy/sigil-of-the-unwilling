@@ -60,6 +60,9 @@ class BattleUnit extends RefCounted:
 	var distance_moved_this_turn: int = 0
 	var already_reborn: bool = false
 	var spell: StringName = ""
+	# Phase 6 (flanking): facing direction as hex neighbour bit (0=east..5=se).
+	# Set on placement (attacker→0 east, defender→3 west); used for flanking aspect.
+	var facing: int = 0
 	# Optional D&D 5e per-character stat block (null = pure stack-model unit).
 	var dnd_profile: DnDCombatantProfile = null
 
@@ -161,6 +164,14 @@ func place_army(
 	builder.set_attacker_artifact_mods(attacker_artifact_mods)
 	builder.set_defender_artifact_mods(defender_artifact_mods)
 	builder.build_into(self)
+	# Phase 6 (flanking): static facing. Attacker faces east (bit 0, toward the
+	# defender on the right edge); defender faces west (bit 3, toward the attacker
+	# on the left edge). Per-move facing update is deferred; static facing already
+	# yields a working front/flank/rear model.
+	for u in attacker_units:
+		u.facing = 0
+	for u in defender_units:
+		u.facing = 3
 	assert(not (attacker_units.is_empty() and defender_units.is_empty()), "place_army: battle has no units")
 
 func build_queue() -> void:
@@ -423,6 +434,33 @@ func clear_terrain() -> void:
 func generate_terrain(rng: RandomNumberGenerator, density: float = 0.1) -> void:
 	terrain_grid = _BattleTerrain.generate(rng, BW, BH, density)
 	invalidate_board_cache()
+
+# --- Phase 6: flanking (фланг/тыл) -----------------------------------------
+
+## Neighbour bit (0..5) of `to` relative to `from`, or -1 if not adjacent.
+func _neighbor_bit(from: Vector2i, to: Vector2i) -> int:
+	for b in 6:
+		if HexUtils.get_neighbor(from, b, hex_shift_right) == to:
+			return b
+	return -1
+
+## Attack aspect of `attacker_cell` relative to `defender`'s facing:
+## 0=front, 1=flank (±60°), 2=rear (±120°..180°), -1 if not adjacent
+## (melee-only flanking; ranged/non-neighbour → no flanking).
+func attack_aspect(attacker_cell: Vector2i, defender: BattleUnit) -> int:
+	if defender == null:
+		return -1
+	var b := _neighbor_bit(defender.cell, attacker_cell)
+	if b < 0:
+		return -1
+	var diff := (b - defender.facing) % 6
+	if diff < 0:
+		diff += 6
+	if diff == 0:
+		return 0
+	if diff == 1 or diff == 5:
+		return 1
+	return 2
 
 func check_end() -> BattleState.Side:
 	if battle_over:

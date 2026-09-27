@@ -142,6 +142,34 @@ retaliation-система (`BattleAttackSequence.can_retaliate`/`start_retaliat
 - Фланг: `crit_chance += 0.25`, `shield_bonus_ignored = true`
 - Тыл: `crit_chance += 0.50`, `enemy_defense *= 0.5`
 
+Реализация (Phase 6, `BattleState` + `BattleRules` + `BattleDamageResolver`):
+- `BattleUnit.facing` — бит соседства 0..5 (0=E, 1=NE, 2=NW, 3=W, 4=SW, 5=SE;
+  бит = угол/60° против часовой). Ставится в `place_army`: attacker→0 (east, к
+  противнику), defender→3 (west, к противнику). **Статическое** направление:
+  обновление при движении/атаке отложено — статика уже даёт рабочую модель
+  фронт/фланг/тыл.
+- `BattleState.attack_aspect(attacker_cell, defender) -> int`: находит бит
+  соседства атакующего относительно цели (`_neighbor_bit`), считает
+  `diff = (bit - facing) mod 6` (с нормализацией в 0..5) → 0=фронт, 1/5=фланг
+  (±60°), 2/3/4=тыл; -1 если атакующий не сосед.
+- **Разрешение расхождения спеки**: спека даёт фронт=3, фланг=2, тыл=3 (сумма 8
+  > 6 соседей). Реализация по работоспособным бонусам: фронт=1 (без бонуса),
+  фланг=2 (±60°), тыл=3 (±120°..180°) — совпадает по числу бонусных гексов.
+- Крит: в `BattleRules.calculate_attack` добавлен параметр `flank_aspect` (по
+  умолчанию -1). Фланг → `crit_chance=FLANK_CRIT_CHANCE_FLANK (0.25)`; тыл →
+  `crit_chance=FLANK_CRIT_CHANCE_REAR (0.50)` **и** `REAR_DEFENSE_MULT (0.5)`
+  складывается в `terrain_def_mult` (→ выше множитель урона). Крит-рос после
+  luck-рос: при `rng.randf() < crit_chance` урон ×`FLANK_CRIT_MULTIPLIER (2.0)`,
+  в результат добавляется `"crit": bool`.
+- Интеграция: `BattleDamageResolver.resolve` вычисляет `state.attack_aspect(...)`
+  и передаёт в `calculate_attack`. Фланк/тыл — только для **ближней** атаки по
+  соседнему гексу (позиционная модель); дальний фланк отложен.
+- «Игнор щита» — **N/A**: систем щитов в боевом ядре нет (grep пуст).
+- Константы в `GameNumbersBattle` (реэкспорт в `GameNumbers`):
+  `FLANK_CRIT_CHANCE_FLANK=0.25`, `FLANK_CRIT_CHANCE_REAR=0.50`,
+  `REAR_DEFENSE_MULT=0.5`, `FLANK_CRIT_MULTIPLIER=2.0`.
+- Тесты: `tests/unit/systems/test_battle_flanking.gd` (12).
+
 ### ИИ-доктрина
 
 Приоритет целей (score越高优先):
