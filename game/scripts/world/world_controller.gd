@@ -24,17 +24,17 @@ var _cities: CityManagerScript = null
 @onready var _ui_manager: WorldUIManagerScript = $WorldUI
 var _rng: RandomNumberGenerator = null
 var _world_delta: WorldStateDeltaScript = null
-var _persistence = null
+var _persistence: RefCounted = null
 var _visibility: _VisibilityMapScript = null
 var _resource_chain: ResourceChainServiceScript = null
 var _event_router: WorldEventRouter = null
 var _bootstrap_result: WorldBootstrap.BootstrapResult = null
-var _succession = null
-var _hero_lifecycle = null
+var _succession: SuccessionController = null
+var _hero_lifecycle: HeroLifecycleSystem = null
 var _hero_mgr: WorldHeroManager = null
 var _save_svc: WorldSaveLoadService = null
 
-func _lifecycle():
+func _lifecycle() -> HeroLifecycleSystem:
 	if _hero_mgr != null:
 		return _hero_mgr.get_lifecycle()
 	return _hero_lifecycle

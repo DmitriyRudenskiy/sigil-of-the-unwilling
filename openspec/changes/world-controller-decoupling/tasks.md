@@ -23,23 +23,57 @@
 - [x] 2.5 Тесты: `tests/mcp/test_mcp_server_lifecycle.py` (pytest, raw TCP, headless Godot): reconnect после ухода клиента, unknown command через диспетчер, идемпотентный `start()`, EADDRINUSE-ошибка второй инстанции; gdUnit4 `test_mcp_server.gd` обновлён под `_dispatcher`
 - [x] 2.6 Верификация gate + коммит: `--import` clean (exit 0); headless-запуск проекта — 0 script errors, MCP слушает; gdUnit4 MCP-сьюты 24/24 PASSED; новый pytest `test_mcp_server_lifecycle.py` 4/4 PASSED (reconnect, unknown command, idempotent start, EADDRINUSE); полный unit-прогон 1608 кейсов — набор фейлов идентичен базлайну (предсуществующие env-фейлы test_spells_json/test_crisis_events, регрессий 0). Примечание: полный run_all.sh в этой среде не проходится из-за отсутствия godot-mcp (не трекается) и предсуществующих env-фейлов — зафиксировано сравнением с baseline (stash)
 
-## Phase 3 — R4: Типизация ⬜
+## Phase 3 — R4: Типизация ✅
 
-- [ ] 3.1 Найти все untyped Variant-поля в WC-контуре (baseline: 7)
-- [ ] 3.2 Типизировать; статический анализ чистый
-- [ ] 3.3 Верификация gate + коммит
+- [x] 3.1 Найти все untyped Variant-поля в WC-контуре (baseline: 7)
+  - Фактически найдено 21 поле + 14 сигнатур: world_controller.gd (3),
+    hero_lifecycle_system.gd (11 + setup), world_hero_manager.gd (1 + 2 ф-ии),
+    world_bootstrap.gd: поля BootstrapResult (6: map_gen, camera, cities,
+    battle_coordinator, interaction_controller, persistence).
+- [x] 3.2 Типизировать; статический анализ чистый
+  - Конкретные типы: CityManager, MapGenerator, WorldEventRouter,
+    WorldBattleCoordinator, WorldInteractionController, SuccessionController,
+    WorldBootstrap.BootstrapResult, WorldCamera; `instantiate() as MapGenerator`.
+  - persistence: WorldPersistence в BootstrapResult, но RefCounted в
+    WC/HeroLifecycleSystem (тест-мок _MockPersistence не наследует
+    WorldPersistence — RefCounted общий знаменатель).
+  - `--import` clean (exit 0); WC-сьюты 49/49 PASSED.
+- [x] 3.3 Верификация gate + коммит
+  - `--import` clean; WC/hero-сьюты 49/49 + 42/42 PASSED, 0 orphan'ов (Node-моки
+    MockBattle/MockInteraction освобождаются в after_test); полный прогон
+    1781 кейс — 62 errors + 4 failures, идентично baseline (регрессий 0).
 
-## Phase 4 — R5: DI convergence ⬜
+## Phase 4 — R5: DI convergence ✅
 
-- [ ] 4.1 Подсчитать call-sites `ServiceContainer.current`
-- [ ] 4.2 Мигрировать потребителей на внедрение; `.current` удалить или оставить фасадом (решение по 4.1)
-- [ ] 4.3 Верификация gate + коммит
+- [x] 4.1 Подсчитать call-sites `ServiceContainer.current`
+  - **Аудит: 0 call-sites.** `ServiceContainer` в коде отсутствует
+    (scripts/tests/tools) — контейнер уже единый: autoload `Services`
+    (`scripts/autoload/services.gd`) → `ServiceRegistry`
+    (`scripts/core/service_registry.gd`); `Services.resolve` используется в
+    26 файлах. Глобального `.current` нет (grep `var current` — только
+    локальные переменные).
+- [x] 4.2 Мигрировать потребителей на внедрение; `.current` удалить или оставить фасадом (решение по 4.1)
+  - **N/A** — дрейф уже устранён в предшествующих циклах; мигрировать нечего.
+- [x] 4.3 Верификация gate + коммит
+  - Аудит-only (без кодовых изменений); gate — тот же прогон, что по 3.3.
 
-## Phase 5 — R6: Event routing ⬜
+## Phase 5 — R6: Event routing ✅
 
-- [ ] 5.1 Перенести разбросанные коннекты мир-событий в `world_event_router.gd`
-- [ ] 5.2 WC не содержит роутинга; регрессия событий покрыта тестами
-- [ ] 5.3 Верификация gate + коммит
+- [x] 5.1 Перенести разбросанные коннекты мир-событий в `world_event_router.gd`
+  - **Аудит: уже выполнено.** `world_event_router.gd` — центр роутинга
+    (52 `.connect`, все GameEventBus-подписки мира: battle_won, turn_ended,
+    resource_*, ...).
+- [x] 5.2 WC не содержит роутинга; регрессия событий покрыта тестами
+  - `world_controller.gd`: 0 коннектов GameEventBus (только
+    `renderer.fog_refreshed` — рендер-колбэк, не мир-событие).
+  - `hero_lifecycle_system.gd`: единственный `hero_died.connect` — осознанный
+    (R1: death-flow принадлежит lifecycle-системе).
+  - `world_bootstrap.gd`: one-shot composition-root wiring (city_proc →
+    GameEventBus) — не роутинг, а сборка графа.
+  - Регрессия: сьюты worldcontroller_succession_wiring, legend_chronicle,
+    hero_resurrection, hero_lifecycle, hero_survival, world_bootstrap — зелёные.
+- [x] 5.3 Верификация gate + коммит
+  - Аудит-only (без кодовых изменений); gate — тот же прогон, что по 3.3.
 
 ## Phase 6 — R7: Final verification & sync ⬜
 
