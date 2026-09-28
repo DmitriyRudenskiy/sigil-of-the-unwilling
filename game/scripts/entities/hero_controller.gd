@@ -344,12 +344,21 @@ func mark_combat_dead() -> void:
 func set_combat_hp(amount: int) -> void:
 	combat_comp.set_hp(amount)
 
+## Ранение после проигранного боя (tactical-combat фаза 7.2).
+func apply_wounded(turns: int, hp_loss: int) -> void:
+	combat_comp.apply_wounded(turns, hp_loss)
+
 func has_artifact_effect(effect: StringName) -> bool:
 	return inventory_comp.has_special_effect(effect)
 
 func get_battle_bonus() -> Dictionary:
 	var mods := inventory_comp.get_total_modifiers()
-	return stats_comp.get_battle_bonus(mods)
+	var bonus: Dictionary = stats_comp.get_battle_bonus(mods)
+	# Ранение (tactical-combat фаза 7.2): статы боя снижены на N ходов.
+	if combat_comp.is_wounded():
+		for key in ["attack", "defense", "spell_power", "knowledge"]:
+			bonus[key] = int(float(bonus.get(key, 0)) * (1.0 - GameNumbersHero.WOUNDED_STAT_PENALTY))
+	return bonus
 
 func get_hero_bonus() -> Dictionary:
 	return stats_comp.get_hero_bonus()
@@ -380,6 +389,8 @@ func end_turn() -> void:
 	movement_points_changed.emit(movement_comp.get_move_points(), get_daily_movement_points())
 	movement_comp.end_turn()
 	needs_comp.end_turn()
+	# Ранение после проигранного боя тикает (tactical-combat фаза 7.2).
+	combat_comp.end_turn()
 
 	if movement_comp != null:
 		movement_comp.auto_follow_at_turn_start()

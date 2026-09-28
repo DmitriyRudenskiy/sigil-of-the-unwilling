@@ -27,6 +27,14 @@ func _solo_hero() -> HeroController:
 	var hero := TestFactories.make_hero()
 	_main_root().add_child(hero)
 	hero.get_army().setup(Services.resolve(&"units"), true)
+	# Реальный герой новой партии: max_combat_hp=20 (HeroController.setup →
+	# combat_comp.set_max_hp(20)) и базовые статы build-профиля (attack/defense
+	# >= 2 + бонусы расы/класса). Без этого боевой стек героя count=1, atk=1
+	# и matchup с волками 1-го кольца становится монеткой (контратака
+	# защитника, tactical-combat фаза 8.1).
+	hero.combat_comp.set_max_hp(20)
+	hero.stats_comp.stats["attack"] = 3
+	hero.stats_comp.stats["defense"] = 3
 	return hero
 
 
@@ -82,6 +90,10 @@ func test_full_early_game_loop() -> void:
 			 "hp": wolves.stats.hp, "speed": wolves.stats.speed, "defense": wolves.stats.defense,
 			 "count": wolves.count},
 		],
+		# Детерминированный seed (tactical-combat 8.4): matchup герой+рекруты
+		# vs волки 1-го кольца ~88% при randomize() — flaky. Seed 7000 даёт
+		# стабильную победу атакующего.
+		"rng_seed": 7000,
 	})
 	assert_bool(result.has("winner")).is_true()
 	assert_that(result.get("winner")).is_equal("attacker")

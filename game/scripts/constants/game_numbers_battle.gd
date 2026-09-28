@@ -44,3 +44,14 @@ const DAMAGE_NUMBER_FADE_SEC := 0.5
 const RETALIATION_ARROW_FADE_SEC := 0.35
 const PULSE_ANIM_SEC         := 0.15
 const PULSE_SCALE            := 1.25
+const RANGED_MAX_RANGE := 4
+# Дальний бой (tactical-combat фаза 4): штраф 10%/гекс за первый, пол 0.5.
+const RANGED_PENALTY_PER_HEX := 0.10
+const RANGED_MIN_RANGE_FACTOR := 0.50
+# Фланги/тыл (tactical-combat фаза 5): бонус крита и игнор защиты.
+const FLANK_CRIT_BONUS := 0.25
+const REAR_CRIT_BONUS := 0.50
+const REAR_DEF_IGNORE := 0.50
+# ИИ-доктрина (tactical-combat фаза 6)
+const AI_WOUNDED_FRACTION := 0.30
+const AI_RETREAT_LOSS_FRACTION := 0.70

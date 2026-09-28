@@ -66,6 +66,9 @@ class BattleUnit extends RefCounted:
 	var spell: StringName = ""
 	# Optional D&D 5e per-character stat block (null = pure stack-model unit).
 	var dnd_profile: DnDCombatantProfile = null
+	# Направление (фасад) юнита для флангов/тыла (tactical-combat фаза 5).
+	# (-1,-1) = не инициализировано (тестовые юниты) → считается FRONT.
+	var facing: Vector2i = Vector2i(-1, -1)
 
 	## Initiative (tactical-combat spec): dexterity + class/race modifiers.
 	## DnD-profile units use 10 + DEX modifier (5e: no class-based initiative

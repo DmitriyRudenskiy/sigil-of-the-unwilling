@@ -249,6 +249,13 @@ func _apply_results(
 		if hero.has_method("set_combat_hp") and not fighter_alive:
 			hero.call("set_combat_hp", 1)
 
+	# Ранение (tactical-combat фаза 7.2): проигранный бой → сниженные статы
+	# на N ходов + HP-шрам от потерь личного бойца. Сериализуется в сейв.
+	if not hero_won and hero != null and hero.has_method("apply_wounded"):
+		var max_hp: int = int(hero.get("max_combat_hp")) if hero.get("max_combat_hp") != null else 1
+		var lost: int = max(0, max_hp - (fighter_hp if fighter_alive else 0))
+		hero.call("apply_wounded", GameNumbersHero.WOUNDED_TURNS, lost)
+
 	if hero_won:
 		if map_gen != null:
 			var stacks: Variant = map_gen.get("enemy_stacks")

@@ -29,6 +29,7 @@ static func apply_attack(
 		"rng": rng,
 		"atk_bonus": attacker_bonus,
 		"def_bonus": defender_bonus,
+		"range": HexUtils.hex_distance(atk.cell, def.cell, state.hex_shift_right),
 	}
 	var result: Dictionary = BattleDamageResolver.resolve(state, atk, def, ctx)
 	if result.is_empty():
@@ -154,11 +155,26 @@ static func apply_sacrifice(
 
 	return {"result": "success", "finished": target, "cost_type": cost_type}
 
+## Нормализованное направление хода: сосед старой клетки, ближайший к цели.
+static func _move_direction(from: Vector2i, to: Vector2i, shift_right: bool) -> Vector2i:
+	var best_dir := Vector2i(1, 0)
+	var best_dist := 999999
+	for nb in HexUtils.get_all_neighbors(from, shift_right):
+		var d := HexUtils.hex_distance(nb, to, shift_right)
+		if d < best_dist:
+			best_dist = d
+			best_dir = nb - from
+	return best_dir
+
+
 static func do_move(state: BattleState, unit: BattleState.BattleUnit, target: Vector2i) -> void:
 	var dist := HexUtils.hex_distance(unit.cell, target)
 	unit.distance_moved_this_turn += dist
 	var old_cell := unit.cell
 	unit.cell = target
+	# Направление — нормализованная гекс-ось последнего шага (фланги/тыл, фаза 5).
+	if dist > 0:
+		unit.facing = unit.cell + _move_direction(old_cell, target, state.hex_shift_right)
 	unit.has_moved = true
 	var side_grid: Dictionary = state._unit_grid.get(unit.side, {})
 	side_grid.erase(old_cell)

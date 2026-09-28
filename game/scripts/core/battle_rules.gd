@@ -76,7 +76,8 @@ static func calculate_attack(
     is_melee_attack: bool,
     rng: RandomNumberGenerator,
     attacker_bonus: int,
-    defender_bonus: int
+    defender_bonus: int,
+    luck_bonus: float = 0.0
 ) -> Dictionary:
     if attacker == null or defender == null:
         return {}
@@ -110,7 +111,9 @@ static func calculate_attack(
     damage = max(1, damage)
 
     var luck: bool = false
-    if can_luck(attacker) and rng.randf() < GameNumbers.LUCK_CHANCE:
+    # Фланг/тыл (tactical-combat фаза 5) добавляют к базовому шансу крита.
+    var luck_chance: float = minf(0.95, GameNumbers.LUCK_CHANCE + maxf(0.0, luck_bonus))
+    if can_luck(attacker) and rng.randf() < luck_chance:
         damage *= 2
         luck = true
 

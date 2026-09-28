@@ -1,6 +1,8 @@
 # Tasks: tactical-battle-system
 
-> **Status (2026-09-27): Cycle closed as documentation-only; implementation scope-out.** Все открытые пункты 3.x–9.x вынесены в новый цикл `tactical-combat-implementation` (proposal/tasks/spec-delta созданы 2026-09-27). Цикл готов к sync-review и архивации через `archive-completed-changes`. Легенда: `[x]` выполнено; `[~]` обоснованное отложение/scope-out/rejected; `[ ]` остаётся целевой реализацией (это осознанное состояние цикла: спека синхронизирована в `openspec/specs/tactical-combat/`, задачи 3.x–10.x остаются открытыми до их выполнения). Архивация изменения возможна только после закрытия или scope-out всех пунктов 3.x–10.x.
+> **Status (2026-09-28): DONE — scope-out пункты 3.x–9.x реализованы в цикле `tactical-combat-implementation` (закрыт и заархивирован 2026-09-28).** Инициатива (3.x), дальний бой с LOS (4.3), ожидание+контратака (4.4), местность (5.x), фланги/тыл (6.x), ИИ-доктрина (7.x), трофеи/ранения (8.x) — всё выполнено и протестировано; см. `openspec/changes/tactical-combat-implementation` (архив) и main spec `openspec/specs/tactical-combat/spec.md`. Остались только `[~]` UI-пункты (визуал) и класс/расовые бонусы (D&D-профили, отложены).
+>
+> **Status (2026-09-27): Cycle closed as documentation-only; implementation scope-out.** Все открытые пункты 3.x–9.x вынесены в новый цикл `tactical-combat-implementation` (proposal/tasks/spec-delta созданы 2026-09-27). Легенда: `[x]` выполнено; `[~]` обоснованное отложение/scope-out/rejected; `[ ]` остаётся целевой реализацией.
 
 ## 1. Спецификация тактического боя
 

@@ -189,11 +189,14 @@ func request_attack(atk: BattleState.BattleUnit, def: BattleState.BattleUnit) ->
 		return
 
 	var adjacent_enemy := _attack_seq.has_adjacent_enemy(atk)
+	var distance := HexUtils.hex_distance(atk.cell, def.cell, _battle_state.hex_shift_right)
 
 	if atk.is_ranged() and not adjacent_enemy:
-		pass
+		# LOS/дальность/листва (tactical-combat фаза 4).
+		if not BattleLineOfSight.can_target_ranged(_battle_state, atk.cell, def):
+			return
 	else:
-		if HexUtils.hex_distance(atk.cell, def.cell) != 1:
+		if distance != 1:
 			return
 
 	_morale_allowed = true
@@ -442,6 +445,13 @@ func _run_ai_turn() -> void:
 			_attack_seq.start_attack(_battle_state.active_unit, decision.attack_target)
 		BattleAI.Action.MOVE:
 			_execute_ai_move(decision)
+		BattleAI.Action.RETREAT:
+			# Доктрина (фаза 6): потери >70% — ИИ отступает, бой проигран,
+			# выжившие сохраняются.
+			var u := _battle_state.active_unit
+			var enemy_side := BattleState.Side.DEFENDER if u.side == BattleState.Side.ATTACKER else BattleState.Side.ATTACKER
+			BattleActionResolver.force_end(_battle_state, enemy_side)
+			_on_action_completed()
 		_:
 			_on_action_completed()
 

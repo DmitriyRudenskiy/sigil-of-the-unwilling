@@ -8,6 +8,7 @@ static func resolve(state: BattleState, atk: BattleState.BattleUnit, def: Battle
 	var rng: RandomNumberGenerator = ctx.get("rng")
 	var atk_bonus: int = ctx.get("atk_bonus", 0)
 	var def_bonus: int = ctx.get("def_bonus", 0)
+	var range: int = int(ctx.get("range", 1))
 
 	if atk == null or def == null or not atk.is_alive() or not def.is_alive():
 		return {}
@@ -20,9 +21,29 @@ static func resolve(state: BattleState, atk: BattleState.BattleUnit, def: Battle
 	if BattleTerrain.attack_bonus(atk_terr) > 0.0 and BattleTerrain.attack_bonus(def_terr) <= 0.0:
 		atk_bonus += int(round(float(atk.get_attack()) * BattleTerrain.attack_bonus(atk_terr)))
 
-	var result: Dictionary = BattleRules.calculate_attack(atk, def, is_melee, rng, atk_bonus, def_bonus)
+	# Фланги/тыл (tactical-combat фаза 5): +25%/+50% крита; тыл — −50% защиты.
+	var flank_pos: int = BattleFlanking.classify(state, atk, def)
+	var luck_bonus: float = BattleFlanking.luck_bonus(flank_pos)
+	var def_ignore: float = BattleFlanking.defense_ignore(flank_pos)
+	if def_ignore > 0.0:
+		def_bonus = int(round(float(def_bonus) * (1.0 - def_ignore))) \
+			- int(round(float(def.get_defense()) * def_ignore))
+
+	var result: Dictionary = BattleRules.calculate_attack(atk, def, is_melee, rng, atk_bonus, def_bonus, luck_bonus)
 	if result.is_empty():
 		return result
+
+	# Штраф дистанции (tactical-combat фаза 4): урон снижается на каждый
+	# гекс за первый (10%/гекс, пол от минимального множителя 0.5).
+	if not is_melee and range > 1:
+		var factor: float = maxf(
+			GameNumbersBattle.RANGED_MIN_RANGE_FACTOR,
+			1.0 - GameNumbersBattle.RANGED_PENALTY_PER_HEX * float(range - 1)
+		)
+		result["damage"] = maxi(1, int(round(float(result.get("damage", 0)) * factor)))
+	result["flank"] = flank_pos
+	if luck_bonus > 0.0:
+		result["luck_bonus"] = luck_bonus
 
 	_apply_status_procs(atk, def, rng, result)
 	_apply_hero_class_procs(atk, def, rng, result)

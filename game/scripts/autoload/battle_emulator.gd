@@ -114,14 +114,26 @@ func run_auto_battle(state: BattleState, rng: RandomNumberGenerator) -> Dictiona
 		if target == null:
 			break
 		var dist := HexUtils.hex_distance(u.cell, target.cell)
-		var melee := not u.is_ranged()
-		var adjacent := dist == 1
-		var ranged_shot := u.is_ranged() and dist > 1
-		if adjacent or ranged_shot:
+		var can_attack := _can_attack(u, target, state, dist)
+		# Как в игре (BattleAI/игрок): можно сдвинуться и атаковать в тот же ход.
+		# Старый эмулятор давал одно действие за ход — это создавало системное
+		# преимущество защитника в зеркальных боях (второй ходит первым в контакте).
+		if not can_attack:
+			advance_toward(state, u, target)
+			dist = HexUtils.hex_distance(u.cell, target.cell)
+			can_attack = _can_attack(u, target, state, dist)
+		if can_attack:
+			var melee := not u.is_ranged()
 			var res := BattleActionResolver.apply_attack(state, u, target, melee, rng, true)
 			events.append({"turn": turn, "unit": u.get_display_name(), "action": "attack", "result": res})
-		else:
-			advance_toward(state, u, target)
+			# Контратака (как в игровом потоке, BattleAttackSequence.can_retaliate):
+			# выживший мясной защитник контратакует один раз за бой.
+			if melee and target.is_alive() and u.is_alive() \
+					and not target.has_retaliated and not u.is_no_retaliation():
+				target.has_retaliated = true
+				var counter := BattleActionResolver.apply_attack(state, target, u, true, rng, false)
+				if not counter.is_empty():
+					events.append({"turn": turn, "unit": target.get_display_name(), "action": "retaliation", "result": counter})
 	return {
 		"winner": side_name(state.battle_winner),
 		"battle_over": state.battle_over,
@@ -130,6 +142,15 @@ func run_auto_battle(state: BattleState, rng: RandomNumberGenerator) -> Dictiona
 		"def_survivors": summarize(state.get_units_by_side(BattleState.Side.DEFENDER)),
 		"events": events,
 	}
+
+
+## Может ли `u` атаковать `target` с текущей позиции (соседство или
+## дальний выстрел: LOS + дальность + листва, tactical-combat фаза 4).
+func _can_attack(u: BattleState.BattleUnit, target: BattleState.BattleUnit, state: BattleState, dist: int) -> bool:
+	if dist == 1:
+		return true
+	return u.is_ranged() and dist > 1 \
+		and BattleLineOfSight.can_target_ranged(state, u.cell, target)
 
 func emulate_battle(req: Dictionary) -> Dictionary:
 	var atk_specs: Variant = req.get("attacker_army", [])
@@ -156,7 +177,12 @@ func emulate_battle(req: Dictionary) -> Dictionary:
 	state.set_hero_bonuses(atk_bonus, def_bonus)
 	state.place_army(atk_stacks, def_stacks)
 	var rng := RandomNumberGenerator.new()
-	rng.randomize()
+	# Опциональный seed для детерминированных тестов (tactical-combat 8.4):
+	# без seed — randomize(), как раньше.
+	if req.has("rng_seed"):
+		rng.seed = int(req["rng_seed"])
+	else:
+		rng.randomize()
 	var report := run_auto_battle(state, rng)
 	report["atk_loss"] = total_count(atk_specs)
 	report["def_loss"] = total_count(def_specs)
