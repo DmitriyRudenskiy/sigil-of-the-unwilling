@@ -11,6 +11,9 @@ var proficiency_bonus: int = 2
 var armor: DNDArmorClass
 var weapon: String = "longsword"
 var is_ranged: bool = false
+## dnd-live-battle-wiring: max HP of the character (hit-dice + CON in full D&D;
+## explicit here). BattleUnit tracks the current pool from this value.
+var max_hp: int = 10
 
 
 func _init(p_id: String = "", p_name: String = "") -> void:
@@ -46,6 +49,7 @@ func to_dict() -> Dictionary:
 		"armor": armor.to_dict(),
 		"weapon": weapon,
 		"is_ranged": is_ranged,
+		"max_hp": max_hp,
 	}
 
 
@@ -56,4 +60,5 @@ static func from_dict(data: Dictionary) -> DnDCombatantProfile:
 	p.armor = DNDArmorClass.from_dict(data.get("armor", {}))
 	p.weapon = str(data.get("weapon", "longsword"))
 	p.is_ranged = bool(data.get("is_ranged", false))
+	p.max_hp = int(data.get("max_hp", 10))
 	return p

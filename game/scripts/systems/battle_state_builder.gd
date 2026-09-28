@@ -110,6 +110,11 @@ func _build_units(state: BattleState, stacks: Array, is_atk: bool) -> Array[Batt
 		unit.max_count = stack.count
 		unit.uid = state._uid
 		state._uid += 1
+		# dnd-live-battle-wiring: a stack carrying a D&D profile is a single
+		# per-character combatant — transfer the profile and init its HP pool.
+		if stack.dnd_profile != null:
+			unit.dnd_profile = stack.dnd_profile
+			unit.init_dnd_hp()
 		units.append(unit)
 
 		current_row += 1

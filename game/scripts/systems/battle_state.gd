@@ -66,6 +66,9 @@ class BattleUnit extends RefCounted:
 	var spell: StringName = ""
 	# Optional D&D 5e per-character stat block (null = pure stack-model unit).
 	var dnd_profile: DnDCombatantProfile = null
+	# dnd-live-battle-wiring: current HP pool of a D&D character. -1 = not a
+	# D&D character (pure stack model, life tracked via stack.count).
+	var dnd_current_hp: int = -1
 	# Направление (фасад) юнита для флангов/тыла (tactical-combat фаза 5).
 	# (-1,-1) = не инициализировано (тестовые юниты) → считается FRONT.
 	var facing: Vector2i = Vector2i(-1, -1)
@@ -81,7 +84,18 @@ class BattleUnit extends RefCounted:
 	func _init(p_stack = null) -> void:
 		stack = p_stack
 
+	## dnd-live-battle-wiring: true if this unit is a per-character D&D combatant.
+	func is_dnd_character() -> bool:
+		return dnd_profile != null
+
+	## Initialize the D&D HP pool from the profile (called at battle setup).
+	func init_dnd_hp() -> void:
+		if dnd_profile != null:
+			dnd_current_hp = dnd_profile.max_hp
+
 	func is_alive() -> bool:
+		if is_dnd_character():
+			return alive and dnd_current_hp > 0
 		return alive and stack != null and stack.is_alive()
 
 	func get_key() -> String:
@@ -115,6 +129,8 @@ class BattleUnit extends RefCounted:
 		return stats.base_damage if stats != null else 0
 
 	func get_hp() -> int:
+		if is_dnd_character():
+			return maxi(1, dnd_current_hp)
 		return stats.hp if stats != null else 1
 
 	func get_defense() -> int:

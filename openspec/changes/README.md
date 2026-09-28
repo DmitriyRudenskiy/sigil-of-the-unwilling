@@ -1,15 +1,22 @@
 # Индекс активных циклов OpenSpec
 
-Обновлён: 2026-09-27 (после уборки archive-completed-changes).
+Обновлён: 2026-09-28.
 
-| Цикл | Статус | Следующий шаг |
-|---|---|---|
-| world-controller-decoupling | R1 ✅ закоммичена; R2–R7 открыты | `/opsx-apply`: фаза R2 (SocketController) |
-| tactical-combat-implementation | Открыт (реализация спека tactical-combat) | Инициатива по LEX → зоны контроля → местность |
-| scarce-crafting-system | Открыт (крафт отсутствует в коде) | Ядро CraftingSystem + ресурсы |
-| dnd-verticality-falling | Открыт (scope-out из dnd-battle-system) | vertical_movement.gd → falling_damage.gd |
-| crisis-content-seasonal-rare-events | Открыт (контент JSON) | Сезонные события winter/spring |
-| save-load-coverage-expansion | Открыт (аудит сериализации) | Аудит SaveManager против новых систем |
+**Активных циклов нет.** Все циклы завершены и заархивированы.
 
-Архив завершённых циклов: `openspec/changes/archive/` (22 записи на 2026-09-27).
+Последний завершённый цикл: **dnd-live-battle-wiring** (2026-09-28) — D&D-персонажи
+в живом цикле боя (пул HP, d20 vs AC через DnDBattleBridge, урон в пул HP).
+Закрывает TASK_21 dnd-battle-system («BattleController uses DnDMechanics»).
+
+Ранее завершены (2026-09-28): world-controller-decoupling, tactical-combat-implementation,
+scarce-crafting-system, dnd-verticality-falling, crisis-content-seasonal-rare-events,
+save-load-coverage-expansion.
+
+Архив завершённых циклов: `openspec/changes/archive/` (31 запись на 2026-09-28).
 Main specs (истина): `openspec/specs/` — 24 capability.
+
+**Тесты:** unit/battle 162/162 зелёный (включая 18 новых test_dnd_live_battle).
+⚠️ Полный прогон `-a res://tests` заблокирован pre-existing parse-ошибками
+City/CityData/Faction/make_node в functional- и части unit-тестов (desync API
+`recruit_military(CityData)` vs тесты, передающие `City`). Подтверждено на чистом
+дереве — не из dnd-live-battle-wiring. Отдельная задача на починку.
