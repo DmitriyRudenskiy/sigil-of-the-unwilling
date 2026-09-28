@@ -131,10 +131,16 @@ func test_resolve_crisis_clears_and_applies_effects() -> void:
 	var sys := _sys()
 	sys.current_crisis = sys.crisis_templates[0]
 	var food_before: int = gm.get_resource("food")
+	# Ожидаемая дельта еды из resource_change choice 0 (может быть + или −:
+	# порядок crisis_templates зависит от DirAccess, crisis_02_famine даёт +15).
+	var delta: float = 0.0
+	var eff: Dictionary = sys.current_crisis.choices[0].effects
+	if eff.has("resource_change") and eff["resource_change"].has("food"):
+		delta = float(eff["resource_change"]["food"])
 	sys.resolve_crisis(0)
 	assert_that(sys.current_crisis == null).is_true()
-	# choice 0 effects + resolution_effects must have been applied (food only drains)
-	assert_that(gm.get_resource("food")).is_less_equal(food_before)
+	# Эффект выбора применён к GameManager (resolve_crisis → apply_choice_effects)
+	assert_that(gm.get_resource("food")).is_equal(int(food_before + delta))
 
 
 func test_eight_crisis_templates_loaded() -> void:
