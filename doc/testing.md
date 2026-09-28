@@ -38,7 +38,27 @@ cd game
 git clone --depth 1 --branch v6.2.1 https://github.com/MikeSchulze/gdUnit4.git /tmp/gdunit4-install
 cp -r /tmp/gdunit4-install/addons/gdunit4 addons/gdunit4
 rm -rf /tmp/gdunit4-install
+
+# ОБЯЗАТЕЛЬНО: патч локальных конфликтов class_name (см. ниже)
+bash tests/patch_gdunit4.sh
 ```
+
+### Патч локальных конфликтов class_name (обязательно)
+
+Вендорный gdUnit4 v6.2.1 шлёт self-test-фикстуры с общими `class_name`, которые
+конфликтуют с классами проекта и ломают глобальный класс-кэш (`.godot`):
+
+- `addons/gdunit4/test/resources/core/City.gd` — `class_name City` конфликтует
+  с `City` (`scripts/world/city.gd`): глобальный `City` указывает на фикстуру,
+  `City extends CityData` не резолвится → ~150 parse-ошибок.
+- `.../scan_testsuite_inheritance/by_class_name/BaseTest.gd` — `class_name
+  BaseTest` конфликтует с `BaseTest` (`tests/helpers/base_test.gd`):
+  `extends BaseTest` неоднозначен, `make_node()` пропадает из тестов.
+
+`tests/patch_gdunit4.sh` переименовывает фикстуры вендора в уникальные имена
+(`GdUnitCityFixture`, `GdUnitTestSuiteBase`) и обновляет их ссылки. Скрипт
+идиампотентен и **автоматически вызывается `run_all.sh`** перед gdUnit4-секцией;
+после ручной установки/обновления аддона запустите его явно (см. команду выше).
 
 После этого включите плагин (в редакторе: Project → Project Settings → Plugins;
 в CLI-прогонах это делает сам `run_all.sh`) и проверьте установку:
@@ -47,8 +67,10 @@ rm -rf /tmp/gdunit4-install
 bash tests/run_all.sh   # секция gdUnit4 должна запуститься без ошибок загрузки аддона
 ```
 
-Обновление версии вендора — заменить тег в команде выше и синхронизировать
-базовую зелёную точку (количество сьютов/кейсов) в этом README.
+Обновление версии вендора — заменить тег в команде выше, **повторно применить
+`tests/patch_gdunit4.sh`** (паттерны могут потребовать корректировки под новую
+версию) и синхронизировать базовую зелёную точку (количество сьютов/кейсов)
+в этом README.
 
 ## Структура
 
@@ -67,7 +89,10 @@ bash tests/run_all.sh   # секция gdUnit4 должна запуститьс
 
 ## Базовая зелёная точка
 
-- gdUnit4: **135 сьютов / 1266 кейсов, 0 ошибок**
+- gdUnit4: **203 сьюта / 1920 кейсов, 0 ошибок, 0 фейлов**
+  (метрика «orphans» в итоговой строке — штатный счётчик GdUnit4, не ошибки;
+  выполняется 1920/1920). Зелёная точка восстановлена патчем `patch_gdunit4.sh`
+  (конфликты class_name City/BaseTest) + инициализацией D&D-пула HP.
 - MCP: **11 passed, 1 skipped**
 - Отчёты: `reports/report_*/results.xml` (gitignored, держится 20 последних)
 

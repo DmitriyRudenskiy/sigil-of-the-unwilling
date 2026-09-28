@@ -65,9 +65,17 @@ class BattleUnit extends RefCounted:
 	var already_reborn: bool = false
 	var spell: StringName = ""
 	# Optional D&D 5e per-character stat block (null = pure stack-model unit).
-	var dnd_profile: DnDCombatantProfile = null
-	# dnd-live-battle-wiring: current HP pool of a D&D character. -1 = not a
-	# D&D character (pure stack model, life tracked via stack.count).
+	# Assigning a profile initializes the HP pool to max_hp, so a D&D character
+	# is alive out of the box even when BattleStateBuilder.init_dnd_hp() is
+	# bypassed (e.g. tests that construct units directly). Re-assigning a
+	# profile never resets an already-initialized (damaged) pool.
+	var dnd_profile: DnDCombatantProfile:
+		set(value):
+			dnd_profile = value
+			if value != null and dnd_current_hp < 0:
+				dnd_current_hp = value.max_hp
+	# dnd-live-battle-wiring: current HP pool of a D&D character. -1 = not yet
+	# initialized (pure stack model, or a D&D unit not yet set up).
 	var dnd_current_hp: int = -1
 	# Направление (фасад) юнита для флангов/тыла (tactical-combat фаза 5).
 	# (-1,-1) = не инициализировано (тестовые юниты) → считается FRONT.
