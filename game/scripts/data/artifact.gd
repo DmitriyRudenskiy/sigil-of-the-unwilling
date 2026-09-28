@@ -46,7 +46,39 @@ static func from_dict(data: Dictionary) -> Artifact:
     a.combat = (data.get("combat", {}) as Dictionary).duplicate(true)
     a.armor = (data.get("armor", {}) as Dictionary).duplicate(true)
     a.ac_bonus_type = data.get("ac_bonus_type", AcBonusType.NONE)
+    a.tier = int(data.get("tier", 1))
     return a
+
+
+## true, если предмет есть в статическом реестре (лоут/каталог).
+## Крафтовые предметы (динамические id) сериализуются полностью (to_dict).
+static func is_registry_artifact(art: Artifact) -> bool:
+    if art == null:
+        return false
+    var art_reg: Node = Services.resolve(&"artifacts")
+    if art_reg == null:
+        return false
+    return art_reg.get_by_id(art.id) != null
+
+
+## Полная сериализация (для предметов вне статического реестра — крафт).
+func to_dict() -> Dictionary:
+    return {
+        "id": str(id),
+        "display_name": display_name,
+        "slot": slot,
+        "rarity": rarity,
+        "modifiers": modifiers.duplicate(true),
+        "special_effect": str(special_effect),
+        "is_two_handed": is_two_handed,
+        "value_gold": value_gold,
+        "description": description,
+        "weight": weight,
+        "combat": combat.duplicate(true),
+        "armor": armor.duplicate(true),
+        "ac_bonus_type": ac_bonus_type,
+        "tier": tier,
+    }
 
 func _init(
     p_id: StringName = &"",

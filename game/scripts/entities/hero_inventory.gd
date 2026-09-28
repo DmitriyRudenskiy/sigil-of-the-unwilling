@@ -208,10 +208,18 @@ func serialize() -> Dictionary:
 	var equipped_ids := {}
 	for slot in equipped:
 		var art: Artifact = equipped[slot]
-		equipped_ids[slot] = art.id if art != null else &""
+		if art == null:
+			equipped_ids[slot] = &""
+		elif Artifact.is_registry_artifact(art):
+			equipped_ids[slot] = art.id
+		else:
+			equipped_ids[slot] = art.to_dict()  # крафт: полный словарь
 	var backpack_ids: Array = []
 	for art in backpack:
-		backpack_ids.append(str(art.id))
+		if Artifact.is_registry_artifact(art):
+			backpack_ids.append(str(art.id))
+		else:
+			backpack_ids.append(art.to_dict())  # крафт: полный словарь
 	return {"equipped": equipped_ids, "backpack": backpack_ids}
 
 func deserialize(data: Dictionary) -> void:
@@ -225,15 +233,21 @@ func deserialize(data: Dictionary) -> void:
 			if not equipped.has(slot):
 				push_warning("HeroInventory: unknown slot %s" % slot_key)
 				continue
-			var id = data["equipped"][slot_key]
-			if id != "" and id != null:
-				var art: Artifact = art_reg.get_by_id(StringName(id))
+			var entry = data["equipped"][slot_key]
+			if entry is Dictionary:
+				# Крафтовый предмет: полный словарь (scarce-crafting-system).
+				equipped[slot] = Artifact.from_dict(entry)
+			elif entry != "" and entry != null:
+				var art: Artifact = art_reg.get_by_id(StringName(entry))
 				if art != null:
 					equipped[slot] = art
 	if data.has("backpack"):
-		for id in data["backpack"]:
-			if id != "" and id != null:
-				var art: Artifact = art_reg.get_by_id(StringName(id))
+		for entry in data["backpack"]:
+			if entry is Dictionary:
+				# Крафтовый предмет: полный словарь (scarce-crafting-system).
+				backpack.append(Artifact.from_dict(entry))
+			elif entry != "" and entry != null:
+				var art: Artifact = art_reg.get_by_id(StringName(entry))
 				if art != null:
 					backpack.append(art)
 	equipped_changed.emit()

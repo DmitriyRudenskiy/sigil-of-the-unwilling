@@ -311,6 +311,21 @@ func _on_battle_won(_enemy_cell: Vector2i) -> void:
 	if cities:
 		cities.add_glory(15.0, &"battle_won")
 		cities.apply_reputation(cities.capital, GameNumbers.REP_VICTORY)
+	_grant_battle_trophy()
+
+
+## scarce-crafting-system: победа → редкое стратегическое сырьё герою.
+func _grant_battle_trophy() -> void:
+	if hero == null or not hero.has_method("get_component"):
+		return
+	var comp: Node = hero.get_component("StrategicResources")
+	if comp == null or not comp.has_method("add"):
+		return
+	var trophy: Dictionary = BattleTrophyService.roll_trophy()
+	var res_id: StringName = trophy["resource"]
+	var amount: int = int(trophy["amount"])
+	comp.add(res_id, amount)
+	GameLogger.hero("Трофей боя: +%d %s" % [amount, str(res_id)])
 
 func _on_turn_ended_bus(_turn: int, month: int) -> void:
 	if cities:

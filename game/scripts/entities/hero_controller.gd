@@ -49,6 +49,7 @@ var strategic_comp: HeroStrategicResourcesComponent
 var followers_comp: HeroFollowersComponent
 var combat_comp: HeroCombatComponent
 var stats_comp: HeroStatsComponent
+var crafting_comp: HeroCraftingComponent
 
 # ═══════════════════════════════════════════
 #  ИНИЦИАЛИЗАЦИЯ
@@ -85,6 +86,7 @@ func _register_components() -> void:
 	followers_comp = _add_component("Followers", HeroFollowersComponent.new())
 	combat_comp = _add_component("Combat", HeroCombatComponent.new())
 	stats_comp = _add_component("Stats", HeroStatsComponent.new())
+	crafting_comp = _add_component("Crafting", HeroCraftingComponent.new())
 
 func _add_component(comp_name: String, comp: HeroComponent) -> HeroComponent:
 	comp.name = comp_name
@@ -131,7 +133,7 @@ func setup(map: MapGenerator) -> void:
 	_setup_done = true
 
 	# Инициализация компонентов в правильном порядке
-	for comp_name in ["Army", "Magic", "StrategicResources", "Inventory"]:
+	for comp_name in ["Army", "Magic", "StrategicResources", "Inventory", "Crafting"]:
 		if _components.has(comp_name):
 			_components[comp_name].initialize()
 
