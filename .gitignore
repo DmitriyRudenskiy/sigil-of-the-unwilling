@@ -18,3 +18,6 @@
 
 # Hindsight transient agent state (not for VCS)
 .pi/hindsight/
+
+# Hindsight per-repo config (tool-managed, client reads global ~/.hindsight/coding-agent.json)
+.pi/hindsight.json
