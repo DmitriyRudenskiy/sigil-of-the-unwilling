@@ -68,3 +68,17 @@
 - Работать на feature-ветках; `main` не трогать напрямую.
 - Сообщения коммитов — конкретные, по делу.
 - Пароли/токены не попадают в логи и коммиты.
+
+## Agent skills
+
+### Issue tracker
+
+GitHub — issues в `DmitriyRudenskiy/sigil-of-the-unwilling` GitHub Issues, операции через `gh` CLI. См. `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Дефолтная пятиролевая лексика (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). См. `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: один `CONTEXT.md` + `docs/adr/` в корне. См. `docs/agents/domain.md`.
