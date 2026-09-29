@@ -19,13 +19,16 @@ static func resolve_attack(
 	p_advantage: bool = false,
 	p_disadvantage: bool = false
 ) -> Dictionary:
-	var ac: int = def.get_ac()
+	# dnd-class-race-tactical-bonuses: AC includes the class/race defense bonus.
+	var ac: int = def.get_total_ac()
 	var roll := DNDAttackRoll.new()
+	# attack_bonus is folded into the roll's other_modifiers.
 	var total: int = roll.roll(
-		rng, atk.get_attack_ability_mod(), atk.proficiency_bonus, 0, p_advantage, p_disadvantage
+		rng, atk.get_attack_ability_mod(), atk.proficiency_bonus, atk.get_attack_bonus(), p_advantage, p_disadvantage
 	)
 	var hit: bool = total >= ac
-	var crit: bool = roll.is_crit_hit()
+	# Crit range extended by crit_bonus (0 = critical only on a natural 20).
+	var crit: bool = atk.crits_on(roll.get_natural_roll())
 	var result := {
 		"hit": hit,
 		"crit": crit,
@@ -41,7 +44,8 @@ static func resolve_attack(
 		var dmg: Dictionary = DNDDamageCalculator.new().calculate_damage(
 			rng, atk.weapon, atk.get_attack_ability_mod(), crit
 		)
-		result["damage"] = int(dmg.get("total", 0))
+		# dnd-class-race-tactical-bonuses: flat class/race damage bonus on top of dice.
+		result["damage"] = int(dmg.get("total", 0)) + atk.get_damage_bonus()
 		result["damage_breakdown"] = str(dmg.get("breakdown", ""))
 	return result
 

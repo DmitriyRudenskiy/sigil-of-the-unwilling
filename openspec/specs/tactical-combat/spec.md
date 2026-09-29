@@ -168,7 +168,39 @@
 - **WHEN** в бою только stack-юниты (без DnDCombatantProfile)
 - **THEN** бой резолвится в классической stack-модели (count × per-unit hp), без изменений
 
-## Implementation Status (synced 2026-09-28, deltas: tactical-combat-implementation + dnd-live-battle-wiring)
+### Requirement: Класс/расовые тактические бонусы
+D&D-персонаж (`DnDCombatantProfile`) MAY нести опциональные `class_id` и `race_id` (default `""`). По этим идентификаторам таблица `DnDTacticalBonuses` выдаёт четыре тактических бонуса, которые `DnDBattleBridge.resolve_attack` применяет к резолву атаки: **attack_bonus** (прибавка к d20-броску), **defense_bonus** (прибавка к эффективному AC, `get_total_ac()`), **crit_bonus** (расширение диапазона крита: крит при `d20 >= 20 - crit_bonus`; 0 = только натуральная 20), **damage_bonus** (плоский урон к кубикам оружия). Бонусы класса и расы суммируются. Персонаж без class/race (default `""`) и stack-юниты получают нулевые бонусы и резолвятся без изменений.
+
+#### Scenario: Боец получает бонус защиты
+- **WHEN** D&D-персонаж с `class_id = "fighter"` (defense_bonus +1) является целью
+- **THEN** эффективный AC цели = базовый AC + 1
+
+#### Scenario: Плут расширяет диапазон крита
+- **WHEN** D&D-персонаж с `class_id = "rogue"` (crit_bonus +1) бьёт и получает натуральный 19
+- **THEN** атака является критической (крит при d20 ≥ 19)
+- **AND** при натуральном 18 атака не является критической
+
+#### Scenario: Варвар добавляет урон ярости
+- **WHEN** D&D-персонаж с `class_id = "barbarian"` (damage_bonus +1) попадает
+- **THEN** итоговый урон = кубики оружия + модификатор + 1
+
+#### Scenario: Стрелок получает бонус атаки
+- **WHEN** D&D-персонаж с `class_id = "ranger"` (attack_bonus +1) бьёт
+- **THEN** d20-бросок атаки = d20 + модификатор + proficiency + 1
+
+#### Scenario: Бонусы класса и расы суммируются
+- **WHEN** D&D-персонаж с `class_id = "paladin"` (defense +1) и `race_id = "dwarf"` (defense +1)
+- **THEN** суммарный defense_bonus = +2 (эффективный AC = базовый + 2)
+
+#### Scenario: Неизвестный класс/раса
+- **WHEN** `class_id`/`race_id` не найдены в таблице
+- **THEN** соответствующие бонусы = 0 (персонаж дерётся без бонуса)
+
+#### Scenario: Backward-compatibility
+- **WHEN** D&D-персонаж без class/race (default `""`) или stack-юнит
+- **THEN** все четыре бонуса = 0; резолв атаки идентичен поведению до изменения
+
+## Implementation Status (synced 2026-09-29, deltas: tactical-combat-implementation + dnd-live-battle-wiring + dnd-class-race-tactical-bonuses)
 
 | Требование спеки | Статус реализации |
 |---|---|
@@ -182,8 +214,10 @@
 | Поведение ИИ в автобитвах | ✅ Реализовано (BattleAI: угрозы→раненые <30%→дальние→ближайший; укрытия (TACTICAL); отступление >70% (TACTICAL); агрессия: AGGRESSIVE/TACTICAL/STUBBORN) |
 | Условия победы и поражения | ✅ Реализовано (BattleFlow.winner, surviving_atk/def; ранения героя: HeroCombatComponent wounded_turns/hp_scar, −25% статов; трофеи: BattleTrophyService) |
 | D&D-персонажный бой (пул HP, d20 vs AC, урон в пул HP) | ✅ Реализовано (dnd-live-battle-wiring: DnDCombatantProfile.max_hp, UnitStack.dnd_profile, BattleUnit.dnd_current_hp/is_dnd_character, BattleStateBuilder init, BattleActionResolver._apply_dnd_attack через DnDBattleBridge; test_dnd_live_battle 18/18) |
-| Класс/расовые тактические бонусы | ⏳ Не реализовано (D&D-профили отложены; см. decision log) |
+| Класс/расовые тактические бонусы | ✅ Реализовано (dnd-class-race-tactical-bonuses: DnDCombatantProfile.class_id/race_id, таблица DnDTacticalBonuses, DnDBattleBridge применяет attack/defense/crit/damage-бонусы; test_dnd_tactical_bonuses 13/13) |
 
 **Примечание цикла:** данная спека является **normative target** для тактического боя. Изменение `tactical-combat-implementation` (фазы 1–8) закрыло все ⏳-пункты, кроме класс/расовых бонусов. Дельта `tactical-combat-implementation` синхронизирована (2026-09-28): инициатива — персонная очередь (не партии), добавлены требования «Ожидание даёт защиту и контратаку» и «Дальняя атака проверяет LOS и дистанцию», уточнены фланги/ИИ. Баланс: перекалиброванный baseline 0.995 (старый бой + эмулятор игрового поведения: move+attack и контратака), итог 0.755 — дельта −24% задокументирована как осознанный дизайн-сдвиг (ограниченная дальность убрала «бесплатную» чип-фазу лучников; зеркальный бой 75/25 вместо 99/1) — tasks 8.1.
 
 Дельта `dnd-live-battle-wiring` синхронизирована (2026-09-28): добавлено требование «D&D-персонажный бой» — персонная D&D-модель поверх stack-модели (пул HP персонажа, d20 vs AC через DnDBattleBridge, урон в пул HP, смерть при HP 0). Backward-compatible: чистые stack-бои не меняются. Это закрывает TASK_21 dnd-battle-system («BattleController uses DnDMechanics») — боевой цикл теперь использует D&D-механики для персонных персонажей.
+
+Дельта `dnd-class-race-tactical-bonuses` синхронизирована (2026-09-29): добавлено требование «Класс/расовые тактические бонусы» — D&D-персонаж несёт опциональные `class_id`/`race_id`; таблица `DnDTacticalBonuses` выдаёт 4 бонуса (attack/defense/crit/damage), которые `DnDBattleBridge.resolve_attack` применяет (attack → other_mods броска, defense → `get_total_ac()`, crit → диапазон `d20 >= 20 - crit_bonus`, damage → +плоский урон). Бонусы класса и расы суммируются. Backward-compatible: персонаж без class/race и stack-юниты получают 0 бонусов, резолв идентичен. Это закрывает последний ⏳-пункт тактической спеки (причина отложенности «D&D-профили отложены» устранена dnd-live-battle-wiring).
