@@ -88,6 +88,7 @@ static func approval(c: CityData) -> int:
 		a += borough.net_approval()
 	if c.starving:
 		a -= GameNumbers.STARVING_APPROVAL_PENALTY
+	a += RaceEconomy.district_conflict_penalty(c)
 	return a
 static func find_pop(c: CityData, p_uid: int) -> PopUnit:
 	for u in c.pop:

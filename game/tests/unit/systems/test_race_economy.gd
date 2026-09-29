@@ -215,3 +215,63 @@ func test_district_synergy_mult_takes_max_not_sum() -> void:
 	city.buildings.append(orc_b)
 	# max(1.10, 1.05) = 1.10, не 1.155
 	assert_that(RaceEconomy.district_synergy_mult(city, a)).is_equal(1.10)
+
+
+# --- Расовый конфликт квартала (conflict -> approval) ---
+
+func test_district_conflict_penalty_adjacent() -> void:
+	var city := City.new()
+	var a := _mk_building("barracks", 2)
+	a.cell = Vector2i.ZERO
+	a.worker_race = &"orc"
+	city.buildings.append(a)
+	var nb_cell: Vector2i = HexUtils.get_all_neighbors(Vector2i.ZERO)[0]
+	var b := _mk_building("school", 2)
+	b.cell = nb_cell
+	b.worker_race = &"elf"
+	city.buildings.append(b)
+	# orc-elf конфликт = -8 (пара один раз)
+	assert_that(RaceEconomy.district_conflict_penalty(city)).is_equal(-8)
+
+
+func test_district_conflict_penalty_no_conflict() -> void:
+	var city := City.new()
+	var a := _mk_building("farm", 2)
+	a.cell = Vector2i.ZERO
+	a.worker_race = &"human"
+	city.buildings.append(a)
+	var nb_cell: Vector2i = HexUtils.get_all_neighbors(Vector2i.ZERO)[0]
+	var b := _mk_building("mine", 2)
+	b.cell = nb_cell
+	b.worker_race = &"dwarf"
+	city.buildings.append(b)
+	# human-dwarf не конфликтуют
+	assert_that(RaceEconomy.district_conflict_penalty(city)).is_equal(0)
+
+
+func test_district_conflict_penalty_not_adjacent() -> void:
+	var city := City.new()
+	var a := _mk_building("barracks", 2)
+	a.cell = Vector2i.ZERO
+	a.worker_race = &"orc"
+	city.buildings.append(a)
+	var b := _mk_building("school", 2)
+	b.cell = Vector2i(10, 10)  # далеко, не сосед
+	b.worker_race = &"elf"
+	city.buildings.append(b)
+	assert_that(RaceEconomy.district_conflict_penalty(city)).is_equal(0)
+
+
+func test_approval_includes_conflict_penalty() -> void:
+	var city := City.new()
+	var a := _mk_building("barracks", 2)
+	a.cell = Vector2i.ZERO
+	a.worker_race = &"orc"
+	city.buildings.append(a)
+	var nb_cell: Vector2i = HexUtils.get_all_neighbors(Vector2i.ZERO)[0]
+	var b := _mk_building("school", 2)
+	b.cell = nb_cell
+	b.worker_race = &"elf"
+	city.buildings.append(b)
+	# approval = borough(0) + конфликт(-8) = -8
+	assert_that(CityService.approval(city)).is_equal(-8)

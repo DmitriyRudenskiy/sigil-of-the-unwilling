@@ -122,6 +122,36 @@ static func district_synergy_mult(city: City, building: UniqueBuilding) -> float
 	return best
 
 
+## Суммарный моральный штраф от конфликтующих соседних зданий (каждая пара
+## считается один раз). Возвращает сумму conflict_morale (отрицательная);
+## 0 = нет конфликтов. Входит в CityService.approval.
+static func district_conflict_penalty(city: CityData) -> int:
+	if city == null:
+		return 0
+	var total := 0
+	for i in range(city.buildings.size()):
+		var a := city.buildings[i]
+		if a == null or a.worker_race == &"":
+			continue
+		for nb in HexUtils.get_all_neighbors(a.cell):
+			var b := _find_building_at(city, nb)
+			if b == null or b.worker_race == &"":
+				continue
+			if city.buildings.find(b) <= i:
+				continue  # пара уже учтена (или то же здание)
+			total += maxi(conflict_morale(a.worker_race, b.worker_race),
+				conflict_morale(b.worker_race, a.worker_race))
+	return total
+
+
+# get_building_at есть только в City, а параметр CityData -> локальный скан.
+static func _find_building_at(city: CityData, cell: Vector2i) -> UniqueBuilding:
+	for bld in city.buildings:
+		if bld != null and bld.cell == cell:
+			return bld
+	return null
+
+
 static func _pair(race_id: StringName, key: String, other: StringName,
 		val_key: String, defv: float) -> float:
 	var list: Variant = profile(race_id).get(key, [])
