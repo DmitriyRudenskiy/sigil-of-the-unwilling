@@ -50,6 +50,10 @@ static func serialize(city: City) -> Dictionary:
 	for building in city.buildings:
 		blds_arr.append(building.serialize())
 	d["buildings"] = blds_arr
+	var race_pop_str: Dictionary = {}
+	for r in city.race_pop:
+		race_pop_str[String(r)] = int(city.race_pop[r])
+	d["race_pop"] = race_pop_str
 	return d
 
 static func deserialize(city: City, data: Dictionary) -> void:
@@ -110,6 +114,10 @@ static func deserialize(city: City, data: Dictionary) -> void:
 			GameLogger.warn("City.deserialize: неизвестное здание '%s' — пропущено" % bl.get("def_id", ""))
 			continue
 		city.buildings.append(UniqueBuilding.deserialize(bl, def))
+
+	city.race_pop.clear()
+	for rk in data.get("race_pop", {}):
+		city.race_pop[StringName(rk)] = int(data["race_pop"][rk])
 
 	_ArenaClusterSystem.invalidate(city.uid)
 

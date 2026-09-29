@@ -32,6 +32,9 @@ var upkeep_mult := 1.0
 var pop: Array[PopUnit] = []
 var boroughs: Array[Borough] = []
 var buildings: Array[UniqueBuilding] = []
+# race-economy (Phase 2, вариант A): расовая композиция города {race_id: count}.
+# {} = нет рас (backward-compat). Заполняется иммиграцией/основанием (дефер).
+var race_pop: Dictionary = {}
 var special_sites: Dictionary = {}
 var storage: Dictionary = {}
 var roads: Dictionary = {}
