@@ -162,3 +162,56 @@ func test_city_race_pop_serialization_roundtrip() -> void:
 	assert_that(city2.race_pop.size()).is_equal(2)
 	assert_that(int(city2.race_pop.get("dwarf", 0))).is_equal(3)
 	assert_that(int(city2.race_pop.get("human", 0))).is_equal(5)
+
+
+# --- Расовая синергия квартала (synergy -> логистика) ---
+
+func test_district_synergy_mult_adjacent() -> void:
+	var city := City.new()
+	var a := _mk_building("farm", 2)
+	a.cell = Vector2i.ZERO
+	a.worker_race = &"human"
+	city.buildings.append(a)
+	var nb_cell: Vector2i = HexUtils.get_all_neighbors(Vector2i.ZERO)[0]
+	var b := _mk_building("mine", 2)
+	b.cell = nb_cell
+	b.worker_race = &"dwarf"
+	city.buildings.append(b)
+	assert_that(RaceEconomy.district_synergy_mult(city, a)).is_equal(1.10)
+
+
+func test_district_synergy_mult_no_neighbor() -> void:
+	var city := City.new()
+	var a := _mk_building("farm", 2)
+	a.cell = Vector2i.ZERO
+	a.worker_race = &"human"
+	city.buildings.append(a)
+	assert_that(RaceEconomy.district_synergy_mult(city, a)).is_equal(1.0)
+
+
+func test_district_synergy_mult_empty_race() -> void:
+	var city := City.new()
+	var a := _mk_building("farm", 2)
+	a.cell = Vector2i.ZERO
+	city.buildings.append(a)
+	# пустой worker_race -> 1.0
+	assert_that(RaceEconomy.district_synergy_mult(city, a)).is_equal(1.0)
+
+
+func test_district_synergy_mult_takes_max_not_sum() -> void:
+	var city := City.new()
+	var a := _mk_building("farm", 2)
+	a.cell = Vector2i.ZERO
+	a.worker_race = &"orlan"  # orlan: elf 1.10, orc 1.05
+	city.buildings.append(a)
+	var nbs: Array = HexUtils.get_all_neighbors(Vector2i.ZERO)
+	var elf_b := _mk_building("school", 2)
+	elf_b.cell = nbs[0]
+	elf_b.worker_race = &"elf"
+	city.buildings.append(elf_b)
+	var orc_b := _mk_building("barracks", 2)
+	orc_b.cell = nbs[1]
+	orc_b.worker_race = &"orc"
+	city.buildings.append(orc_b)
+	# max(1.10, 1.05) = 1.10, не 1.155
+	assert_that(RaceEconomy.district_synergy_mult(city, a)).is_equal(1.10)

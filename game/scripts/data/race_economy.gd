@@ -104,6 +104,24 @@ static func conflict_morale(race_id: StringName, other: StringName) -> int:
 	return int(_pair(race_id, "conflict", other, "morale", 0))
 
 
+## Расовая синергия квартала: максимум synergy_logistics между расой здания
+## и расами соседей (анти-имба: не сумма). 1.0 = нет синергии.
+static func district_synergy_mult(city: City, building: UniqueBuilding) -> float:
+	if city == null or building == null:
+		return 1.0
+	var mine := building.worker_race
+	if mine == &"":
+		return 1.0
+	var best := 1.0
+	for nb in HexUtils.get_all_neighbors(building.cell):
+		var nb_b := city.get_building_at(nb)
+		if nb_b == null or nb_b.worker_race == &"":
+			continue
+		best = maxf(best, synergy_logistics(mine, nb_b.worker_race))
+		best = maxf(best, synergy_logistics(nb_b.worker_race, mine))
+	return best
+
+
 static func _pair(race_id: StringName, key: String, other: StringName,
 		val_key: String, defv: float) -> float:
 	var list: Variant = profile(race_id).get(key, [])

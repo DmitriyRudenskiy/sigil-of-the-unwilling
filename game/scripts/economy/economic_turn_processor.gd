@@ -63,7 +63,8 @@ func _process_city(city: City, _ctx: TurnContext) -> Dictionary:
 		var logistics: float = city.get_logistics_multiplier(building.cell) \
 			* building.zone_multiplier \
 			* AdjacencySystem.building_output_mult(city, building) \
-			* WorldSeasons.production_mult()
+			* WorldSeasons.production_mult() \
+			* RaceEconomy.district_synergy_mult(city, building)
 		var outputs: Dictionary = chain.execute(res, workers, logistics)
 		if outputs.is_empty():
 			continue
