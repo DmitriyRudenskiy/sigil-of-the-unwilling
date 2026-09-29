@@ -22,6 +22,11 @@ const LUCK_CHANCE               := 0.10
 const MORALE_CHANCE             := 0.08
 const DEFEND_DEFENSE_BONUS      := 1.2
 const RANGED_MELEE_PENALTY      := 0.5
+# Phase 6 (flanking): flank = side hex (±60°), rear = back hex (180°±60°).
+const FLANK_CRIT_CHANCE_FLANK   := 0.25
+const FLANK_CRIT_CHANCE_REAR    := 0.50
+const REAR_DEFENSE_MULT         := 0.5
+const FLANK_CRIT_MULTIPLIER     := 2.0
 const RETREAT_SURVIVAL_RATIO    := 0.5
 const RETREAT_STACK_LIMIT       := 2
 const MAX_UNITS_PER_SIDE        := 7

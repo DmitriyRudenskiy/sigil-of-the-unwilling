@@ -1,0 +1,40 @@
+{
+  "id": "rare_01_meteor",
+  "title": "Падающий метеорит",
+  "description": "Небо расколол огонь: метеорит рухнул за околицей, разбросав по полям блестящие осколки. Жители шепчутся, что это знак.",
+  "icon_path": "res://assets/ui/events/magic_event.png",
+  "type": "rare",
+  "frequency": 1,
+  "min_day": 40,
+  "weight": 0.3,
+  "triggers": {},
+  "choices": [
+    {
+      "text": "Собрать осколки (+40 материалов, +15 золота)",
+      "tooltip": "Рискованно, но добыча щедрой",
+      "impact": 1,
+      "effects": {
+        "resource_change": {"materials": 40, "gold": 15}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Взять безопасную долю (+15 материалов)",
+      "tooltip": "Меньше риска, меньше прибыли",
+      "impact": 1,
+      "effects": {
+        "resource_change": {"materials": 15}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Отойти подальше (-5 морали)",
+      "tooltip": "Жители сожалеют об упущенной удаче",
+      "impact": 3,
+      "effects": {
+        "morale_change": -5
+      },
+      "requirements": {}
+    }
+  ]
+}

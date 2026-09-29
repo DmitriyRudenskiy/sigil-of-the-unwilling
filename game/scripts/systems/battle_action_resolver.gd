@@ -204,7 +204,7 @@ static func do_move(state: BattleState, unit: BattleState.BattleUnit, target: Ve
 	unit.cell = target
 	# Направление — нормализованная гекс-ось последнего шага (фланги/тыл, фаза 5).
 	if dist > 0:
-		unit.facing = unit.cell + _move_direction(old_cell, target, state.hex_shift_right)
+		unit.facade = unit.cell + _move_direction(old_cell, target, state.hex_shift_right)
 	unit.has_moved = true
 	var side_grid: Dictionary = state._unit_grid.get(unit.side, {})
 	side_grid.erase(old_cell)

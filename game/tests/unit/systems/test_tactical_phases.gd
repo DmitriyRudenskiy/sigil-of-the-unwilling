@@ -115,7 +115,7 @@ func test_flanking_front() -> void:
 	var state := BattleState.new()
 	var defender := _make_unit("militia", 4, 40, 5, 3, BattleState.Side.DEFENDER)
 	defender.cell = Vector2i(8, 5)
-	defender.facing = Vector2i(7, 5)  # смотрит влево
+	defender.facade = Vector2i(7, 5)  # смотрит влево
 	var attacker := _make_unit("swordsmen", 5, 50, 5, 4, BattleState.Side.ATTACKER)
 	attacker.cell = Vector2i(7, 5)  # передняя клетка
 	state.attacker_units.append(attacker)
@@ -129,7 +129,7 @@ func test_flanking_rear() -> void:
 	var state := BattleState.new()
 	var defender := _make_unit("militia", 4, 40, 5, 3, BattleState.Side.DEFENDER)
 	defender.cell = Vector2i(8, 5)
-	defender.facing = Vector2i(7, 5)  # смотрит влево
+	defender.facade = Vector2i(7, 5)  # смотрит влево
 	var attacker := _make_unit("swordsmen", 5, 50, 5, 4, BattleState.Side.ATTACKER)
 	attacker.cell = Vector2i(9, 5)  # тыльная клетка
 	state.attacker_units.append(attacker)
@@ -143,7 +143,7 @@ func test_flanking_flank() -> void:
 	var state := BattleState.new()
 	var defender := _make_unit("militia", 4, 40, 5, 3, BattleState.Side.DEFENDER)
 	defender.cell = Vector2i(8, 5)
-	defender.facing = Vector2i(7, 5)  # смотрит влево
+	defender.facade = Vector2i(7, 5)  # смотрит влево
 	var attacker := _make_unit("swordsmen", 5, 50, 5, 4, BattleState.Side.ATTACKER)
 	attacker.cell = Vector2i(8, 4)  # боковая клетка
 	state.attacker_units.append(attacker)
@@ -186,7 +186,7 @@ func test_rear_attack_ignores_half_defense() -> void:
 	var state := BattleState.new()
 	var defender := _make_unit("militia", 4, 40, 5, 10, BattleState.Side.DEFENDER)
 	defender.cell = Vector2i(8, 5)
-	defender.facing = Vector2i(7, 5)
+	defender.facade = Vector2i(7, 5)
 	var attacker_front := _make_unit("swordsmen", 8, 50, 5, 4, BattleState.Side.ATTACKER)
 	attacker_front.cell = Vector2i(7, 5)
 	state.attacker_units = [attacker_front]
@@ -212,12 +212,12 @@ func test_facing_updated_on_move() -> void:
 	var state := BattleState.new()
 	var u := _make_unit("militia", 4, 40, 5, 3, BattleState.Side.ATTACKER)
 	u.cell = Vector2i(2, 5)
-	u.facing = Vector2i(3, 5)
+	u.facade = Vector2i(3, 5)
 	state.attacker_units.append(u)
 	state.invalidate_board_cache()
 
 	BattleActionResolver.do_move(state, u, Vector2i(4, 5))
-	assert_that(u.facing).is_equal(Vector2i(5, 5)) \
+	assert_that(u.facade).is_equal(Vector2i(5, 5)) \
 			.override_failure_message("do_move must update facing along the movement direction")
 
 # ═══════════════════════════════════════════

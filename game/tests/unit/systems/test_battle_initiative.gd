@@ -109,11 +109,12 @@ func test_queue_deterministic_same_seed() -> void:
 	for u in state.turn_queue:
 		order2.append(u.get_key() + str(u.side))
 	assert_that(order1).is_equal(order2).override_failure_message("queue order must be deterministic")
-	# Expected: rogue (14) > fighter (12) > archer (9) > heavy (4).
+	# Party-based (merged turn order): attacker party (top init 14 >= defender
+	# 12) acts first; within each party, initiative desc.
 	# Side enum: NONE=0, ATTACKER=1, DEFENDER=2.
 	assert_that(order1[0]).is_equal("rogue1")
-	assert_that(order1[1]).is_equal("fighter2")
-	assert_that(order1[2]).is_equal("archer1")
+	assert_that(order1[1]).is_equal("archer1")
+	assert_that(order1[2]).is_equal("fighter2")
 	assert_that(order1[3]).is_equal("heavy2")
 
 

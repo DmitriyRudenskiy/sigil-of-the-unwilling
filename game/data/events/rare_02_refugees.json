@@ -1,0 +1,42 @@
+{
+  "id": "rare_02_refugees",
+  "title": "Беженцы с навыками",
+  "description": "К воротам подошла измученная группа беженцев. Среди них — кузнец, врач и зельевар, которым некуда идти. Жители разделились во мнениях.",
+  "icon_path": "res://assets/ui/events/refugees_event.png",
+  "type": "rare",
+  "frequency": 1,
+  "min_day": 50,
+  "weight": 0.3,
+  "triggers": {},
+  "choices": [
+    {
+      "text": "Взять всех (+8 населения, -10 еды)",
+      "tooltip": "Новые руки и редкие навыки, но есть ещё один рот",
+      "impact": 1,
+      "effects": {
+        "population_change": 8,
+        "resource_change": {"food": -10}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Взять только сильных (+4 населения, +5 морали)",
+      "tooltip": "Лучшие кадры, без обузы",
+      "impact": 1,
+      "effects": {
+        "population_change": 4,
+        "morale_change": 5
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Отправить прочь (-10 морали)",
+      "tooltip": "Жители считают это жестокостью",
+      "impact": 3,
+      "effects": {
+        "morale_change": -10
+      },
+      "requirements": {}
+    }
+  ]
+}

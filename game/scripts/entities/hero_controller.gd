@@ -234,15 +234,26 @@ func get_hero_battle_stack() -> UnitStack:
 	var battle_stats: Dictionary = stats_comp.get_battle_bonus({})
 	var atk: int = max(1, int(battle_stats.get("attack", 3)))
 	var def: int = max(0, int(battle_stats.get("defense", 3)))
+	if is_wounded():
+		var w: Dictionary = BattleRewards.apply_wounded_penalty(atk, def)
+		atk = int(w.get("attack", atk))
+		def = int(w.get("defense", def))
 	var hp: int = combat_comp.combat_hp if combat_comp.combat_hp > 0 else 1
 	var speed: int = GameNumbersHero.HERO_PERSONAL_SPEED
 	if stats_comp.hero_class == "ranger":
 		speed += 1
+	# Phase 9: боец-герой несёт тег класса И расы — тактические проявления
+	# (HeroTactics) срабатывают по этим тегам в боевом резолвере.
+	var hero_tags: Array = [GameNumbersHero.HERO_BATTLE_KEY]
+	if stats_comp.hero_class != "":
+		hero_tags.append(stats_comp.hero_class)
+	if stats_comp.hero_race != "":
+		hero_tags.append(stats_comp.hero_race)
 	var unit_stats := UnitStats.new(
 		GameNumbersHero.HERO_BATTLE_KEY,
 		"Герой",
 		atk, atk, 1, speed, def,
-		[GameNumbersHero.HERO_BATTLE_KEY, stats_comp.hero_class]
+		hero_tags
 	)
 	return UnitStack.new(unit_stats, hp)
 
@@ -347,6 +358,22 @@ func set_combat_hp(amount: int) -> void:
 ## Ранение после проигранного боя (tactical-combat фаза 7.2).
 func apply_wounded(turns: int, hp_loss: int) -> void:
 	combat_comp.apply_wounded(turns, hp_loss)
+
+# Phase 8: трофеи (опыт) и ранение героя при поражении.
+var _xp := 0
+var _wounded_turns := 0
+
+func add_xp(amount: int) -> void:
+	_xp += max(0, amount)
+
+func get_xp() -> int:
+	return _xp
+
+func set_wounded(turns: int) -> void:
+	_wounded_turns = max(0, turns)
+
+func is_wounded() -> bool:
+	return _wounded_turns > 0
 
 func has_artifact_effect(effect: StringName) -> bool:
 	return inventory_comp.has_special_effect(effect)

@@ -257,10 +257,11 @@ func _apply_results(
 		hero.call("apply_wounded", GameNumbersHero.WOUNDED_TURNS, lost)
 
 	if hero_won:
+		var defeated_army: Array = []
 		if map_gen != null:
 			var stacks: Variant = map_gen.get("enemy_stacks")
 			if stacks is Dictionary:
-				var defeated_army: Array = stacks.get(_pending_enemy_cell, [])
+				defeated_army = stacks.get(_pending_enemy_cell, [])
 				stacks.erase(_pending_enemy_cell)
 				enemy_stack_defeated.emit(_pending_enemy_cell, defeated_army)
 		if spawner != null and spawner.has_method("remove_enemy_at"):
@@ -271,12 +272,14 @@ func _apply_results(
 			world_delta.call("add_defeated_enemy", _pending_enemy_cell)
 
 		_try_artifact_drop()
+		_apply_trophies(defeated_army)
 
 		if _on_ui_refresh.is_valid():
 			_on_ui_refresh.call()
 		elif ui_manager != null and ui_manager.has_method("refresh_ui"):
 			ui_manager.call("refresh_ui")
 	else:
+		_apply_defeat_wound()
 		_restore_hero_after_retreat()
 		GameLogger.battle("Battle lost / retreated")
 
@@ -349,6 +352,28 @@ func _try_artifact_drop() -> void:
 				GameLogger.world("Monster drop: %s" % drop.display_name)
 			else:
 				GameLogger.world("Backpack full, drop lost!")
+
+
+## Phase 8: трофеи за победу — опыт + ресурсы (предметы — в _try_artifact_drop).
+func _apply_trophies(defeated_army: Array) -> void:
+	if hero == null:
+		return
+	var trophies: Dictionary = BattleRewards.compute_trophies(defeated_army)
+	if hero.has_method("add_xp"):
+		hero.call("add_xp", int(trophies.get("xp", 0)))
+	var resources: Dictionary = trophies.get("resources", {})
+	for rid in resources:
+		if hero.has_method("add_strategic_resource"):
+			hero.call("add_strategic_resource", rid, int(resources[rid]))
+
+
+## Phase 8: ранение героя при поражении (выжил → ранен, не погибает).
+func _apply_defeat_wound() -> void:
+	if hero == null:
+		return
+	var hero_survived := not (hero.has_method("is_combat_dead") and bool(hero.call("is_combat_dead")))
+	if BattleRewards.hero_should_be_wounded(false, hero_survived) and hero.has_method("set_wounded"):
+		hero.call("set_wounded", BattleRewards.WOUNDED_TURNS)
 
 func get_pending_enemy_cell() -> Vector2i:
 	return _pending_enemy_cell

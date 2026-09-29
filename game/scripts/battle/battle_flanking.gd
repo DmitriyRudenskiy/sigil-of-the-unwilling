@@ -18,7 +18,7 @@ static func classify(
 ) -> int:
 	if defender == null or attacker == null:
 		return Position.FRONT
-	var facing: Vector2i = defender.facing
+	var facing: Vector2i = defender.facade
 	if facing == Vector2i(-1, -1):
 		return Position.FRONT
 	var dir: Vector2i = facing - defender.cell

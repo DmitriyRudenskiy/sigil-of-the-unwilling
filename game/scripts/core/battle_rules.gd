@@ -33,29 +33,31 @@ static func damage_multiplier(
     attacker,
     defender,
     attacker_bonus: int,
-    defender_bonus: int
+    defender_bonus: int,
+    terrain_atk_mult: float = 1.0,
+    terrain_def_mult: float = 1.0
 ) -> float:
     if attacker == null or defender == null:
         return 1.0
 
-    var effective_atk: int = attacker.get_attack() + attacker_bonus
+    var effective_atk: float = float(attacker.get_attack() + attacker_bonus) * terrain_atk_mult
 
-    var effective_def: int = defender.get_defense() + defender_bonus
+    var effective_def: float = float(defender.get_defense() + defender_bonus) * terrain_def_mult
     if defender.defending:
-        effective_def = int(float(effective_def) * GameNumbers.DEFEND_DEFENSE_BONUS)
+        effective_def = effective_def * GameNumbers.DEFEND_DEFENSE_BONUS
 
-    var diff: int = effective_atk - effective_def
+    var diff: float = effective_atk - effective_def
 
-    if diff > 0:
+    if diff > 0.0:
         return clampf(
-            1.0 + GameNumbers.ATK_ADVANTAGE_PER_POINT * float(diff),
+            1.0 + GameNumbers.ATK_ADVANTAGE_PER_POINT * diff,
             1.0,
             GameNumbers.MAX_DAMAGE_MULTIPLIER
         )
 
-    if diff < 0:
+    if diff < 0.0:
         return clampf(
-            1.0 - GameNumbers.DEF_ADVANTAGE_PER_POINT * float(absi(diff)),
+            1.0 - GameNumbers.DEF_ADVANTAGE_PER_POINT * absf(diff),
             GameNumbers.MIN_DAMAGE_MULTIPLIER,
             1.0
         )
@@ -77,6 +79,10 @@ static func calculate_attack(
     rng: RandomNumberGenerator,
     attacker_bonus: int,
     defender_bonus: int,
+    terrain_atk_mult: float = 1.0,
+    terrain_def_mult: float = 1.0,
+    flank_aspect: int = -1,
+    extra_crit_chance: float = 0.0,
     luck_bonus: float = 0.0
 ) -> Dictionary:
     if attacker == null or defender == null:
@@ -96,11 +102,25 @@ static func calculate_attack(
     var range_val := _damage_range(attacker)
     var base_total: int = rng.randi_range(range_val.x, range_val.y)
 
+    # Phase 6 (flanking): rear attacks halve the defender's effective defense
+    # (folded into the terrain def multiplier); flank/rear add a crit chance.
+    var crit_chance := 0.0
+    var eff_terrain_def_mult := terrain_def_mult
+    if flank_aspect == 1:
+        crit_chance = GameNumbers.FLANK_CRIT_CHANCE_FLANK
+    elif flank_aspect == 2:
+        crit_chance = GameNumbers.FLANK_CRIT_CHANCE_REAR
+        eff_terrain_def_mult *= GameNumbers.REAR_DEFENSE_MULT
+    # Phase 9: бонус к шансу крита (например, Эльф в лесу).
+    crit_chance += extra_crit_chance
+
     var multiplier: float = damage_multiplier(
         attacker,
         defender,
         attacker_bonus,
-        defender_bonus
+        defender_bonus,
+        terrain_atk_mult,
+        eff_terrain_def_mult
     )
 
     var damage: int = int(float(base_total) * multiplier)
@@ -117,6 +137,11 @@ static func calculate_attack(
         damage *= 2
         luck = true
 
+    var crit: bool = false
+    if crit_chance > 0.0 and rng.randf() < crit_chance:
+        damage = int(float(damage) * GameNumbers.FLANK_CRIT_MULTIPLIER)
+        crit = true
+
     var hp: int = max(1, defender.get_hp())
     var kills: int = max(1, int(damage / float(hp)))
     kills = min(kills, defender.get_count())
@@ -125,6 +150,7 @@ static func calculate_attack(
         "damage": damage,
         "kills": kills,
         "luck": luck,
+        "crit": crit,
         "is_retaliation": false,
     }
 
