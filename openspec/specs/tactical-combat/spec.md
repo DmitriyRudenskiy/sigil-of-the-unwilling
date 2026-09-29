@@ -200,7 +200,42 @@ D&D-персонаж (`DnDCombatantProfile`) MAY нести опциональн
 - **WHEN** D&D-персонаж без class/race (default `""`) или stack-юнит
 - **THEN** все четыре бонуса = 0; резолв атаки идентичен поведению до изменения
 
-## Implementation Status (synced 2026-09-29, deltas: tactical-combat-implementation + dnd-live-battle-wiring + dnd-class-race-tactical-bonuses)
+### Requirement: D&D-бой по определениям персонажей
+Игра предоставляет production-API (`DnDBattleFactory`) для построения и разрешения D&D-боя из явных определений персонажей. Определение (`DnDCharacterDef`) несёт id, name, class_id, race_id, weapon, is_ranged, max_hp, speed, abilities (scores), armor_type. Фабрика строит из определений `DnDCombatantProfile`, `UnitStack` с `dnd_profile` и полный `BattleState` (через `BattleStateBuilder`), и разрешает бой через `BattleEmulator`, возвращая результат (победитель + выжившие). Это переводит per-character D&D-модель из test-only в production-entry point, не затрагивая stack-модель и `WorldBattleCoordinator`.
+
+#### Scenario: Построение профиля из определения
+- **GIVEN** `DnDCharacterDef` (class_id="fighter", race_id="dwarf", abilities={str:16, dex:12}, max_hp=20)
+- **WHEN** `DnDBattleFactory.build_profile(def)`
+- **THEN** профиль с abilities (STR=16, DEX=12), class_id/race_id, max_hp=20
+- **AND** `get_ac()` = 10 + DEX-mod + armor (стандартный расчёт)
+- **AND** класс/расовые бонусы учитываются (по class_id/race_id)
+
+#### Scenario: Построение UnitStack с профилем
+- **GIVEN** `DnDCharacterDef` (id="p1", speed=5)
+- **WHEN** `DnDBattleFactory.build_stack(def)`
+- **THEN** `UnitStack` с `dnd_profile != null`, count=1, stats.speed=5
+- **AND** `duplicate_stack()` сохраняет dnd_profile
+
+#### Scenario: Построение полного D&D-боя
+- **GIVEN** два списка определений (ally_defs, enemy_defs)
+- **WHEN** `DnDBattleFactory.build_battle(ally_defs, enemy_defs)`
+- **THEN** `BattleState` с юнитами обеих сторон
+- **AND** каждый юнит `is_dnd_character()` и `dnd_current_hp == max_hp`
+- **AND** бой не завершён (winner = NONE)
+
+#### Scenario: Разрешение боя (simulate)
+- **GIVEN** ally_defs, enemy_defs, seed
+- **WHEN** `DnDBattleFactory.simulate(ally_defs, enemy_defs, seed)`
+- **THEN** результат `{winner, atk_survivors, def_survivors}`; winner ∈ {attacker, defender}
+- **AND** у проигравшей стороны 0 выживших
+- **AND** детерминизм: тот же seed → тот же winner
+
+#### Scenario: Backward-compatibility
+- **WHEN** `DnDCharacterDef` с пустым class/race
+- **THEN** бонусы = 0 (персонаж дерётся без класс/расовых бонусов)
+- **AND** stack-модель и существующий набор не меняются
+
+## Implementation Status (synced 2026-09-29, deltas: tactical-combat-implementation + dnd-live-battle-wiring + dnd-class-race-tactical-bonuses + dnd-battle-factory)
 
 | Требование спеки | Статус реализации |
 |---|---|
@@ -215,6 +250,7 @@ D&D-персонаж (`DnDCombatantProfile`) MAY нести опциональн
 | Условия победы и поражения | ✅ Реализовано (BattleFlow.winner, surviving_atk/def; ранения героя: HeroCombatComponent wounded_turns/hp_scar, −25% статов; трофеи: BattleTrophyService) |
 | D&D-персонажный бой (пул HP, d20 vs AC, урон в пул HP) | ✅ Реализовано (dnd-live-battle-wiring: DnDCombatantProfile.max_hp, UnitStack.dnd_profile, BattleUnit.dnd_current_hp/is_dnd_character, BattleStateBuilder init, BattleActionResolver._apply_dnd_attack через DnDBattleBridge; test_dnd_live_battle 18/18) |
 | Класс/расовые тактические бонусы | ✅ Реализовано (dnd-class-race-tactical-bonuses: DnDCombatantProfile.class_id/race_id, таблица DnDTacticalBonuses, DnDBattleBridge применяет attack/defense/crit/damage-бонусы; test_dnd_tactical_bonuses 13/13) |
+| D&D-бой по определениям персонажей | ✅ Реализовано (dnd-battle-factory: DnDBattleFactory + DnDCharacterDef — build_profile/build_stack/build_battle/simulate; production-API для D&D-боя, не трогает stack-модель/WorldBattleCoordinator; test_dnd_battle_factory 11/11) |
 
 **Примечание цикла:** данная спека является **normative target** для тактического боя. Изменение `tactical-combat-implementation` (фазы 1–8) закрыло все ⏳-пункты, кроме класс/расовых бонусов. Дельта `tactical-combat-implementation` синхронизирована (2026-09-28): инициатива — персонная очередь (не партии), добавлены требования «Ожидание даёт защиту и контратаку» и «Дальняя атака проверяет LOS и дистанцию», уточнены фланги/ИИ. Баланс: перекалиброванный baseline 0.995 (старый бой + эмулятор игрового поведения: move+attack и контратака), итог 0.755 — дельта −24% задокументирована как осознанный дизайн-сдвиг (ограниченная дальность убрала «бесплатную» чип-фазу лучников; зеркальный бой 75/25 вместо 99/1) — tasks 8.1.
 
