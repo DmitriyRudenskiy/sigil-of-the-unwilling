@@ -30,7 +30,7 @@
 Вместо гигантских `match need_id:` в `DemographicTurnProcessor` и `HeroNeeds`, мы инкапсулируем логику каждой потребности в отдельный класс. Это реализует **Open/Closed Principle** (добавление новой потребности не требует правки процессора).
 
 ```gdscript
-// res://scripts/data/needs/NeedStrategy.gd
+// res://scripts/data/needs/need_strategy.gd
 class_name NeedStrategy
 extends RefCounted
 
@@ -39,7 +39,7 @@ func _init(p_decay: float): decay_rate = p_decay
 func get_recovery(city: City, pop: PopUnit) -> float: return 0.0
 func get_death_cause() -> StringName: return &""
 
-// res://scripts/data/needs/RestStrategy.gd
+// res://scripts/data/needs/rest_strategy.gd
 class_name RestStrategy
 extends NeedStrategy
 func _init(): super._init(0.10)
@@ -89,7 +89,7 @@ func _update_visuals() -> void:
 # ЗАДАЧА: Глобальный рефакторинг Data-Layer и UI-Theme
 
 ## ЭТАП 1: Фундамент (Enum'ы и Стратегии)
-1. Создай `res://scripts/data/SchoolType.gd`, `NeedType.gd`, `ToolType.gd` (enum'ы + статические методы `to_name/from_name`).
+1. Создай `res://scripts/data/school_type.gd`, `NeedType.gd`, `ToolType.gd` (enum'ы + статические методы `to_name/from_name`).
 2. Реализуй паттерн **Стратегия** для потребностей:
    - Создай базовый класс `NeedStrategy` (`decay_rate`, `get_recovery()`, `get_death_cause()`).
    - Создай наследников: `RestStrategy`, `SocialStrategy`, `InspirationStrategy`.
@@ -161,7 +161,7 @@ func _update_visuals() -> void:
 
 ### 1.2. Паттерн "Стратегия" для потребностей (Needs)
 Вместо гигантских `match` в `DemographicTurnProcessor` и `HeroNeeds`, вынеси логику в стратегии:
-- Создай `res://scripts/data/needs/NeedStrategy.gd` (базовый класс с `decay_rate`, `get_recovery()`, `get_death_cause()`).
+- Создай `res://scripts/data/needs/need_strategy.gd` (базовый класс с `decay_rate`, `get_recovery()`, `get_death_cause()`).
 - Создай наследников: `RestStrategy`, `SocialStrategy`, `InspirationStrategy`.
 - В `NeedType.gd` добавь `const STRATEGIES: Dictionary`, который маппит `NeedType.ID` на экземпляры стратегий.
 
@@ -284,7 +284,7 @@ func _update_visuals() -> void:
 ## 1. [High] Новые enum-файлы
 
 ```gdscript
-// FILE: res://scripts/data/SchoolType.gd  (НОВЫЙ ФАЙЛ)
+// FILE: res://scripts/data/school_type.gd  (НОВЫЙ ФАЙЛ)
 class_name SchoolType
 extends RefCounted
 
@@ -324,7 +324,7 @@ static func all_ids() -> Array[int]:
 ```
 
 ```gdscript
-// FILE: res://scripts/data/NeedType.gd  (НОВЫЙ ФАЙЛ)
+// FILE: res://scripts/data/need_type.gd  (НОВЫЙ ФАЙЛ)
 class_name NeedType
 extends RefCounted
 
@@ -362,7 +362,7 @@ static func all_names() -> Array[StringName]:
 ```
 
 ```gdscript
-// FILE: res://scripts/data/ToolType.gd  (НОВЫЙ ФАЙЛ)
+// FILE: res://scripts/data/tool_type.gd  (НОВЫЙ ФАЙЛ)
 class_name ToolType
 extends RefCounted
 
@@ -406,7 +406,7 @@ static func all_names() -> Array[StringName]:
 ## 2. [High] Школы магии
 
 ```gdscript
-// FILE: res://scripts/entities/HeroMagic.gd  (ПОЛНАЯ ЗАМЕНА)
+// FILE: res://scripts/entities/hero_magic.gd  (ПОЛНАЯ ЗАМЕНА)
 class_name HeroMagic
 extends RefCounted
 
@@ -533,7 +533,7 @@ func deserialize_schools(data: Dictionary) -> void:
 ```
 
 ```gdscript
-// FILE: res://scripts/core/BattleFX.gd  (заменить show_spell_cast + константу цветов)
+// FILE: res://scripts/core/battle_fx.gd  (заменить show_spell_cast + константу цветов)
 const SCHOOL_COLORS: Array[Color] = [
 	Color(0.4, 0.7, 1.0),   # SchoolType.ID.AIR
 	Color(1.0, 0.4, 0.2),   # SchoolType.ID.FIRE
@@ -556,7 +556,7 @@ func show_spell_cast(cell: Vector2i, spell_id: StringName) -> void:
 ```
 
 ```gdscript
-// FILE: res://scripts/ui/ArtifactInventoryScreen.gd  (заменить _magic_school)
+// FILE: res://scripts/ui/artifact_inventory_screen.gd  (заменить _magic_school)
 func _magic_school() -> String:
 	var schools: Dictionary = _hero.magic_schools if _hero != null else {}
 	var active: Array[String] = []
@@ -567,7 +567,7 @@ func _magic_school() -> String:
 ```
 
 ```gdscript
-// FILE: res://scripts/entities/HeroController.gd  (замены в serialize/deserialize)
+// FILE: res://scripts/entities/hero_controller.gd  (замены в serialize/deserialize)
 # в serialize() заменить строку:
 #   "magic_schools": magic.schools.duplicate(),
 # на:
@@ -583,7 +583,7 @@ func _magic_school() -> String:
 ## 3. [Medium] Потребности (needs)
 
 ```gdscript
-// FILE: res://scripts/demographics/Character.gd  (ПОЛНАЯ ЗАМЕНА)
+// FILE: res://scripts/demographics/character.gd  (ПОЛНАЯ ЗАМЕНА)
 class_name Character
 extends RefCounted
 
@@ -675,7 +675,7 @@ static func deserialize(data: Dictionary) -> Character:
 ```
 
 ```gdscript
-// FILE: res://scripts/entities/HeroNeeds.gd  (ПОЛНАЯ ЗАМЕНА)
+// FILE: res://scripts/entities/hero_needs.gd  (ПОЛНАЯ ЗАМЕНА)
 class_name HeroNeeds
 extends RefCounted
 
@@ -760,7 +760,7 @@ func deserialize(d: Dictionary) -> void:
 ```
 
 ```gdscript
-// FILE: res://scripts/demographics/DemographicTurnProcessor.gd
+// FILE: res://scripts/demographics/demographic_turn_processor.gd
 # заменить константу DECAY:
 const DECAY: Dictionary = {
 	NeedType.ID.REST: 0.10,
@@ -868,7 +868,7 @@ func _death_cause(ch: Character) -> StringName:
 ```
 
 ```gdscript
-// FILE: res://scripts/ui/HeroStatusPanel.gd  (заменить _NEED_ICONS и _needs_text)
+// FILE: res://scripts/ui/hero_status_panel.gd  (заменить _NEED_ICONS и _needs_text)
 const _NEED_ICONS: Array[String] = ["😴", "", "💡"]
 
 func _needs_text(n: HeroNeeds) -> String:
@@ -884,7 +884,7 @@ func _needs_text(n: HeroNeeds) -> String:
 ## 4. [Low] Инструменты
 
 ```gdscript
-// FILE: res://scripts/entities/HeroTools.gd  (ПОЛНАЯ ЗАМЕНА)
+// FILE: res://scripts/entities/hero_tools.gd  (ПОЛНАЯ ЗАМЕНА)
 class_name HeroTools
 extends RefCounted
 
@@ -978,7 +978,7 @@ func deserialize(data: Array) -> void:
 ```
 
 ```gdscript
-// FILE: res://scripts/ui/ToolsPanel.gd  (ПОЛНАЯ ЗАМЕНА)
+// FILE: res://scripts/ui/tools_panel.gd  (ПОЛНАЯ ЗАМЕНА)
 class_name ToolsPanel
 extends PanelContainer
 
@@ -1021,7 +1021,7 @@ func update_tools(tools: Array[Dictionary]) -> void:
 ```
 
 ```gdscript
-// FILE: res://scripts/world/ResourceChainService.gd
+// FILE: res://scripts/world/resource_chain_service.gd
 # в build_extraction_keys() и _extraction_fingerprint() заменить:
 #   for tool_type in HeroTools.TOOL_TYPES:
 # на:
@@ -1033,7 +1033,7 @@ func update_tools(tools: Array[Dictionary]) -> void:
 ## 5. [High/Medium] Дожим ResourceType
 
 ```gdscript
-// FILE: res://scripts/ui/ResourceBar.gd  (ПОЛНАЯ ЗАМЕНА)
+// FILE: res://scripts/ui/resource_bar.gd  (ПОЛНАЯ ЗАМЕНА)
 class_name ResourceBar
 extends HBoxContainer
 
@@ -1058,11 +1058,11 @@ func update_resources(resources: Dictionary) -> void:
 ```
 
 ```gdscript
-// FILE: res://scripts/data/ResourceIcons.gd  (ПОЛНАЯ ЗАМЕНА)
+// FILE: res://scripts/data/resource_icons.gd  (ПОЛНАЯ ЗАМЕНА)
 class_name ResourceIcons
 extends RefCounted
 
-const _RT := preload("res://scripts/data/ResourceType.gd")
+const _RT := preload("res://scripts/data/resource_type.gd")
 
 const DATA: Dictionary = {
 	_RT.ID.WOOD:    {"texture": "", "name": "Дерево",    "color": Color(0.62, 0.44, 0.24)},
@@ -1124,12 +1124,12 @@ static func _hash_color(resource_id: StringName) -> Color:
 ```
 
 ```gdscript
-// FILE: res://scripts/data/TerrainResourceManager.gd  (ПОЛНАЯ ЗАМЕНА)
+// FILE: res://scripts/data/terrain_resource_manager.gd  (ПОЛНАЯ ЗАМЕНА)
 extends Node
 class_name TerrainResourceManager
 
-const HexUtils = preload("res://scripts/core/HexUtils.gd")
-const GameLogger = preload("res://scripts/core/GameLogger.gd")
+const HexUtils = preload("res://scripts/core/hex_utils.gd")
+const GameLogger = preload("res://scripts/core/game_logger.gd")
 
 ## Значения — ResourceType.ID (int), не строки.
 const TERRAIN_RESOURCE_MAP: Dictionary = {
@@ -1234,7 +1234,7 @@ func is_exhausted(cell: Vector2i) -> bool:
 Точечные замены:
 
 ```gdscript
-// FILE: res://scripts/entities/HeroController.gd  (заменить _apply_daily_resource_effects)
+// FILE: res://scripts/entities/hero_controller.gd  (заменить _apply_daily_resource_effects)
 func _apply_daily_resource_effects() -> void:
 	resources.apply_daily_effects()
 	strategic_resources._add_internal(
@@ -1245,7 +1245,7 @@ func _apply_daily_resource_effects() -> void:
 ```
 
 ```gdscript
-// FILE: res://scripts/economy/EconomicTurnProcessor.gd  (заменить блок auto в _process_city)
+// FILE: res://scripts/economy/economic_turn_processor.gd  (заменить блок auto в _process_city)
 	var auto: Dictionary = {}
 	var wood_id: StringName = ResourceType.to_name(ResourceType.ID.WOOD)
 	var stone_id: StringName = ResourceType.to_name(ResourceType.ID.STONE)
@@ -1257,7 +1257,7 @@ func _apply_daily_resource_effects() -> void:
 ```
 
 ```gdscript
-// FILE: res://scripts/autoload/ResourceRegistry.gd
+// FILE: res://scripts/autoload/resource_registry.gd
 # регистрации wood/stone в ensure_definitions() заменить на:
 	_add(ResourceType.to_name(ResourceType.ID.WOOD), "Дерево", ["grass", "forest"], Rarity.COMMON,
 		"", &"", &"worker", "", "", false,
@@ -1273,7 +1273,7 @@ func is_hidden_resource(id: StringName) -> bool:
 ```
 
 ```gdscript
-// FILE: res://scripts/autoload/WorldStateSerializer.gd
+// FILE: res://scripts/autoload/world_state_serializer.gd
 # в get_state() заменить:
 #   state.basic_resources = hero.resources.resources.duplicate()
 # на (int-ключи не должны уходить в JSON-телеметрию):
@@ -1646,7 +1646,7 @@ Palette/colors/cursor_move = Color(0.35, 1, 0.55, 0.98)
 
 ### `AdventureUI.gd`
 ```gdscript
-// FILE: res://scripts/ui/AdventureUI.gd  (заменить константы и функции)
+// FILE: res://scripts/ui/adventure_ui.gd  (заменить константы и функции)
 # УДАЛИТЬ: const C_BG / const C_BORDER
 
 func _ready() -> void:
@@ -1680,7 +1680,7 @@ func _update_mp_display(current: float, max_val: float) -> void:
 
 ### `ArmyPanel.gd` (полная замена)
 ```gdscript
-// FILE: res://scripts/ui/ArmyPanel.gd
+// FILE: res://scripts/ui/army_panel.gd
 class_name ArmyPanel
 extends PanelContainer
 
@@ -1719,7 +1719,7 @@ func update_army(army: Array[UnitStack]) -> void:
 
 ### `InfoPanel.gd`
 ```gdscript
-// FILE: res://scripts/ui/InfoPanel.gd  (заменить константы и функции)
+// FILE: res://scripts/ui/info_panel.gd  (заменить константы и функции)
 # УДАЛИТЬ: const THEME_PATH / const C_TEXT / const C_GOLD
 
 func _apply_theme() -> void:
@@ -1780,7 +1780,7 @@ func fill_hero_slot(idx: int, hero: HeroController) -> void:
 
 ### `ResourceBar.gd` (полная замена)
 ```gdscript
-// FILE: res://scripts/ui/ResourceBar.gd
+// FILE: res://scripts/ui/resource_bar.gd
 class_name ResourceBar
 extends HBoxContainer
 
@@ -1813,7 +1813,7 @@ func update_resources(resources: Dictionary) -> void:
 
 ### `SettingsScreen.gd`
 ```gdscript
-// FILE: res://scripts/ui/SettingsScreen.gd  (заменить константы и функции)
+// FILE: res://scripts/ui/settings_screen.gd  (заменить константы и функции)
 # УДАЛИТЬ: C_BG, C_BORDER, C_TEXT, C_TITLE, C_BTN_BG, C_BTN_HOVER, C_BTN_PRESS
 
 func _apply_style() -> void:
@@ -1832,7 +1832,7 @@ func _style_button(btn: Button) -> void:
 
 ### `MainMenu.gd`
 ```gdscript
-// FILE: res://scripts/ui/MainMenu.gd  (заменить _style_buttons)
+// FILE: res://scripts/ui/main_menu.gd  (заменить _style_buttons)
 func _style_buttons() -> void:
 	var buttons: Array[Button] = [
 		_new_game_btn, _load_game_btn, _arena_btn,
@@ -1869,7 +1869,7 @@ Palette/colors/btn_pressed = Color(0.1, 0.25, 0.6, 1)
 
 ### `BattleUI.gd`
 ```gdscript
-// FILE: res://scripts/ui/BattleUI.gd  (заменить цветовой блок в _connect_skeleton)
+// FILE: res://scripts/ui/battle_ui.gd  (заменить цветовой блок в _connect_skeleton)
 	if _status != null:
 		UITheme.tint(_status, &"text")
 	if _active_info != null:
@@ -1881,7 +1881,7 @@ Palette/colors/btn_pressed = Color(0.1, 0.25, 0.6, 1)
 
 ### `ArtifactInventoryScreen.gd`
 ```gdscript
-// FILE: res://scripts/ui/ArtifactInventoryScreen.gd  (заменить константы)
+// FILE: res://scripts/ui/artifact_inventory_screen.gd  (заменить константы)
 # УДАЛИТЬ: const TEXT_GOLD / const TEXT_LIGHT
 var TEXT_GOLD: Color = UITheme.color(&"gold_soft")
 var TEXT_LIGHT: Color = UITheme.color(&"gold_lighter")
@@ -1890,14 +1890,14 @@ var TEXT_LIGHT: Color = UITheme.color(&"gold_lighter")
 
 ### `BattleSpellbookPanel.gd`
 ```gdscript
-// FILE: res://scripts/ui/BattleSpellbookPanel.gd  (заменить в _refresh)
+// FILE: res://scripts/ui/battle_spellbook_panel.gd  (заменить в _refresh)
 		btn.add_theme_color_override("font_color", UITheme.color(&"gold_soft"))
 ```
 и `_apply_theme`: `var sb := UITheme.box(&"panel")`.
 
 ### `DeathSequence.gd` / `GameOverScreen.gd`
 ```gdscript
-// FILE: res://scripts/ui/DeathSequence.gd  (заменить цвета заголовка в show_death)
+// FILE: res://scripts/ui/death_sequence.gd  (заменить цвета заголовка в show_death)
 	if successor == null:
 		title.text = "%s — цикл оборвался" % deceased_name
 		UITheme.tint(title, &"danger_muted")
@@ -1905,7 +1905,7 @@ var TEXT_LIGHT: Color = UITheme.color(&"gold_lighter")
 		title.text = "%s — цикл продолжится" % deceased_name
 		UITheme.tint(title, &"victory_gold")
 
-// FILE: res://scripts/ui/GameOverScreen.gd  (заменить в show_result)
+// FILE: res://scripts/ui/game_over_screen.gd  (заменить в show_result)
 	UITheme.tint(title, &"victory_gold") if result == "VICTORY" else UITheme.tint(title, &"danger_muted")
 ```
 (тернарник с вызовами допустим; если стиль требует — развернуть в if/else.)
@@ -1913,17 +1913,17 @@ var TEXT_LIGHT: Color = UITheme.color(&"gold_lighter")
 ### Оверлеи мира (canvas-цвета из палитры)
 
 ```gdscript
-// FILE: res://scripts/ui/MarkerLayer.gd  (заменить константы)
+// FILE: res://scripts/ui/marker_layer.gd  (заменить константы)
 # УДАЛИТЬ: _COLOR_GREEN / _COLOR_YELLOW / _COLOR_RED
 # в _draw() использовать:
 	UITheme.color(&"marker_green") / (&"marker_yellow") / (&"marker_red")
 	UITheme.color(&"city_fill") / (&"city_line") / (&"city_name")
 	UITheme.color(&"terrain_glyph") / (&"terrain_exhausted")
 
-// FILE: res://scripts/ui/HighlightOverlay.gd  (заменить в _draw)
+// FILE: res://scripts/ui/highlight_overlay.gd  (заменить в _draw)
 	UITheme.color(&"hl_unreach") / (&"hl_move_fill") / (&"hl_move_line") / (&"hl_atk")
 
-// FILE: res://scripts/ui/CursorOverlay.gd  (заменить в _draw)
+// FILE: res://scripts/ui/cursor_overlay.gd  (заменить в _draw)
 	UITheme.color(&"cursor_default") / (&"cursor_attack") / (&"cursor_ranged") / (&"cursor_spell") / (&"cursor_move")
 ```
 
@@ -2098,7 +2098,7 @@ Palette/colors/threat = Color(0.95, 0.25, 0.2, 0.85)
 
 ### `AdventureUI.gd`
 ```gdscript
-// FILE: res://scripts/ui/AdventureUI.gd  (заменить константы C_BG/C_BORDER и функции)
+// FILE: res://scripts/ui/adventure_ui.gd  (заменить константы C_BG/C_BORDER и функции)
 func _ready() -> void:
 	layer = 10
 	UITheme.style_control(get_node("RightColumn") as Control, UITheme.BoxID.PANEL)
@@ -2130,7 +2130,7 @@ func _update_mp_display(current: float, max_val: float) -> void:
 
 ### `ArmyPanel.gd` (полная замена)
 ```gdscript
-// FILE: res://scripts/ui/ArmyPanel.gd
+// FILE: res://scripts/ui/army_panel.gd
 class_name ArmyPanel
 extends PanelContainer
 
@@ -2165,7 +2165,7 @@ func update_army(army: Array[UnitStack]) -> void:
 
 ### `ResourceBar.gd` (полная замена)
 ```gdscript
-// FILE: res://scripts/ui/ResourceBar.gd
+// FILE: res://scripts/ui/resource_bar.gd
 class_name ResourceBar
 extends HBoxContainer
 
@@ -2187,7 +2187,7 @@ func update_resources(resources: Dictionary) -> void:
 
 ### `InfoPanel.gd`
 ```gdscript
-// FILE: res://scripts/ui/InfoPanel.gd  (удалить C_TEXT/C_GOLD; заменить функции)
+// FILE: res://scripts/ui/info_panel.gd  (удалить C_TEXT/C_GOLD; заменить функции)
 func _apply_theme() -> void:
 	for slot in _get_slot_nodes():
 		UITheme.style_control(slot, UITheme.BoxID.SLOT)
@@ -2254,7 +2254,7 @@ func fill_hero_slot(idx: int, hero: HeroController) -> void:
 
 ### `SettingsScreen.gd`
 ```gdscript
-// FILE: res://scripts/ui/SettingsScreen.gd  (удалить все C_*; заменить функции)
+// FILE: res://scripts/ui/settings_screen.gd  (удалить все C_*; заменить функции)
 func _apply_style() -> void:
 	UITheme.style_control(get_node("Panel") as Control, UITheme.BoxID.PANEL_DARK)
 	var box := get_node("Panel/Box")
@@ -2271,7 +2271,7 @@ func _style_button(btn: Button) -> void:
 
 ### `MainMenu.gd`
 ```gdscript
-// FILE: res://scripts/ui/MainMenu.gd  (заменить _style_buttons)
+// FILE: res://scripts/ui/main_menu.gd  (заменить _style_buttons)
 func _style_buttons() -> void:
 	var buttons: Array[Button] = [
 		_new_game_btn, _load_game_btn, _arena_btn,
@@ -2300,7 +2300,7 @@ func _style_buttons() -> void:
 
 ### `BattleUI.gd`
 ```gdscript
-// FILE: res://scripts/ui/BattleUI.gd  (заменить _apply_theme и цветовой блок _connect_skeleton)
+// FILE: res://scripts/ui/battle_ui.gd  (заменить _apply_theme и цветовой блок _connect_skeleton)
 func _apply_theme() -> void:
 	UITheme.style_control(get_node_or_null("top_panel") as Control, UITheme.BoxID.PANEL)
 	UITheme.style_control(get_node_or_null("initiative_panel") as Control, UITheme.BoxID.PANEL)
@@ -2316,7 +2316,7 @@ func _apply_theme() -> void:
 
 ### `BattleSpellbookPanel.gd`
 ```gdscript
-// FILE: res://scripts/ui/BattleSpellbookPanel.gd  (заменить _apply_theme и строки _refresh)
+// FILE: res://scripts/ui/battle_spellbook_panel.gd  (заменить _apply_theme и строки _refresh)
 func _apply_theme() -> void:
 	UITheme.style_control(self, UITheme.BoxID.PANEL)
 
@@ -2329,7 +2329,7 @@ func _apply_theme() -> void:
 
 ### `ArtifactInventoryScreen.gd`
 ```gdscript
-// FILE: res://scripts/ui/ArtifactInventoryScreen.gd
+// FILE: res://scripts/ui/artifact_inventory_screen.gd
 # УДАЛИТЬ: const TEXT_GOLD / const TEXT_LIGHT — заменить на:
 var TEXT_GOLD: Color = UITheme.color(UITheme.ColorID.GOLD_SOFT)
 var TEXT_LIGHT: Color = UITheme.color(UITheme.ColorID.GOLD_LIGHTER)
@@ -2370,7 +2370,7 @@ func _set_style_slot(slot: Button, has: bool) -> void:
 
 ### `DeathSequence.gd` / `GameOverScreen.gd`
 ```gdscript
-// FILE: res://scripts/ui/DeathSequence.gd  (в show_death заменить цвета заголовка)
+// FILE: res://scripts/ui/death_sequence.gd  (в show_death заменить цвета заголовка)
 	if successor == null:
 		title.text = "%s — цикл оборвался" % deceased_name
 		UITheme.tint(title, UITheme.ColorID.DANGER_MUTED)
@@ -2378,13 +2378,13 @@ func _set_style_slot(slot: Button, has: bool) -> void:
 		title.text = "%s — цикл продолжится" % deceased_name
 		UITheme.tint(title, UITheme.ColorID.VICTORY_GOLD)
 
-// FILE: res://scripts/ui/GameOverScreen.gd  (в show_result)
+// FILE: res://scripts/ui/game_over_screen.gd  (в show_result)
 	UITheme.tint(title, UITheme.ColorID.VICTORY_GOLD if result == "VICTORY" else UITheme.ColorID.DANGER_MUTED)
 ```
 
 ### `MarkerLayer.gd`
 ```gdscript
-// FILE: res://scripts/ui/MarkerLayer.gd  (удалить _COLOR_*; заменить цвета в _draw)
+// FILE: res://scripts/ui/marker_layer.gd  (удалить _COLOR_*; заменить цвета в _draw)
 func _draw() -> void:
 	if not _map_gen or not _map_gen.has_valid_tilemap():
 		return
@@ -2419,7 +2419,7 @@ func _draw() -> void:
 
 ### `HighlightOverlay.gd` / `CursorOverlay.gd`
 ```gdscript
-// FILE: res://scripts/ui/HighlightOverlay.gd  (заменить _draw)
+// FILE: res://scripts/ui/highlight_overlay.gd  (заменить _draw)
 func _draw() -> void:
 	if tm == null:
 		return
@@ -2432,7 +2432,7 @@ func _draw() -> void:
 	for k in atk_cells:
 		_hex(tm.map_to_local(k), UITheme.color(UITheme.ColorID.HL_ATK))
 
-// FILE: res://scripts/ui/CursorOverlay.gd  (заменить _draw)
+// FILE: res://scripts/ui/cursor_overlay.gd  (заменить _draw)
 func _draw() -> void:
 	if not visible_flag:
 		return
@@ -2681,7 +2681,7 @@ static func face(i: int) -> String:
 
 ### `ResourceBar.gd` (полная замена)
 ```gdscript
-// FILE: res://scripts/ui/ResourceBar.gd
+// FILE: res://scripts/ui/resource_bar.gd
 class_name ResourceBar
 extends HBoxContainer
 
@@ -2702,7 +2702,7 @@ func update_resources(resources: Dictionary) -> void:
 
 ### `WorldSpawner.gd` (заменить функции)
 ```gdscript
-// FILE: res://scripts/world/WorldSpawner.gd
+// FILE: res://scripts/world/world_spawner.gd
 func _spawn_villages() -> void:
 	for cell in map.village_cells:
 		var v := Node2D.new()
@@ -2757,10 +2757,10 @@ func capture_village(cell: Vector2i) -> bool:
 
 ### `ResourcesPanel.gd` (полная замена)
 ```gdscript
-// FILE: res://scripts/ui/ResourcesPanel.gd
+// FILE: res://scripts/ui/resources_panel.gd
 extends PanelContainer
 class_name ResourcesPanel
-const ResourceDef = preload("res://scripts/data/ResourceDef.gd")
+const ResourceDef = preload("res://scripts/data/resource_def.gd")
 
 var _labels: Dictionary = {}
 var _resource_registry: Node = null
@@ -2806,7 +2806,7 @@ func update_resources(resources: Dictionary) -> void:
 
 ### `ToolsPanel.gd` (полная замена)
 ```gdscript
-// FILE: res://scripts/ui/ToolsPanel.gd
+// FILE: res://scripts/ui/tools_panel.gd
 extends PanelContainer
 class_name ToolsPanel
 
@@ -2841,7 +2841,7 @@ func update_tools(tools: Array[Dictionary]) -> void:
 
 ### `HeroStatusPanel.gd` (заменить константу и текстовые функции)
 ```gdscript
-// FILE: res://scripts/ui/HeroStatusPanel.gd
+// FILE: res://scripts/ui/hero_status_panel.gd
 # УДАЛИТЬ const _NEED_ICONS. Заменить:
 func _wire() -> void:
 	if _wired:
@@ -2916,7 +2916,7 @@ func _followers_text(h: HeroController) -> String:
 
 ### `InfoPanel.gd` (заменить функции)
 ```gdscript
-// FILE: res://scripts/ui/InfoPanel.gd
+// FILE: res://scripts/ui/info_panel.gd
 # УДАЛИТЬ локальные эмодзи. Добавить в _ready() после _connect_buttons():
 	_apply_action_icons()
 
@@ -2983,7 +2983,7 @@ func add_city(city_name: String) -> void:
 
 ### `CityScreen.gd` (заменить `_ready` кнопки и `refresh`)
 ```gdscript
-// FILE: res://scripts/ui/CityScreen.gd
+// FILE: res://scripts/ui/city_screen.gd
 # в _ready() после подключения сигналов:
 	ThemeIcons.apply(buttons.get_node("BuildFarm") as Button, ThemeIcons.IconID.FARM, "Построить ферму")
 	ThemeIcons.apply(buttons.get_node("BuildMine") as Button, ThemeIcons.IconID.PICKAXE, "Построить шахту")
@@ -3006,7 +3006,7 @@ func add_city(city_name: String) -> void:
 
 ### `CityArenaView.gd` + `ArenaHexCell.gd`
 ```gdscript
-// FILE: res://scripts/world/CityArenaView.gd
+// FILE: res://scripts/world/city_arena_view.gd
 # УДАЛИТЬ эмодзи из PALETTE и _building_emoji. Заменить:
 func _wire_palette() -> void:
 	var palette := _ui.get_node("Palette") as VBoxContainer
@@ -3064,7 +3064,7 @@ func _ring_yield_short(ring: int) -> String:
 ```
 
 ```gdscript
-// FILE: res://scripts/ui/ArenaHexCell.gd
+// FILE: res://scripts/ui/arena_hex_cell.gd
 func _mark_label_text() -> String:
 	if ring == 0:
 		return ThemeIcons.icon(ThemeIcons.IconID.CENTER)
@@ -3082,7 +3082,7 @@ func _ring_yield_short(ring: int) -> String:
 
 ### `AdventureUI.gd`, `ChronicleScreen.gd`, `DeathSequence.gd`, `MarkerLayer.gd`, `CharacterRegistry.gd`, `BattleController.gd`, `HeroMovementController.gd`, `BattleTurnExecutor.gd`, `ArtifactChestDialog.gd`, `SkillsPanel.gd`, `MainMenu.gd`, `BattleUI.gd`
 ```gdscript
-// FILE: res://scripts/ui/AdventureUI.gd
+// FILE: res://scripts/ui/adventure_ui.gd
 func refresh_glory() -> void:
 	...
 	_glory_label.text = "%s Слава: %d / %d" % [
@@ -3092,7 +3092,7 @@ func _update_mp_display(current: float, max_val: float) -> void:
 	var text := "%s %.1f / %.0f" % [ThemeIcons.icon(ThemeIcons.IconID.MOVEMENT), current, max_val]
 	...
 
-// FILE: res://scripts/ui/ChronicleScreen.gd
+// FILE: res://scripts/ui/chronicle_screen.gd
 func _entry_line(e: Dictionary) -> String:
 	var outcome := str(e.get("outcome", "?"))
 	var icon := ThemeIcons.icon(ThemeIcons.IconID.VICTORY) if outcome == "VICTORY" \
@@ -3100,49 +3100,49 @@ func _entry_line(e: Dictionary) -> String:
 		else ThemeIcons.icon(ThemeIcons.IconID.SUCCESSION)
 	...
 
-// FILE: res://scripts/ui/DeathSequence.gd
+// FILE: res://scripts/ui/death_sequence.gd
 	if res_city != null:
 		resurrection_btn.text = "Воскресить (%d%s + %d%s)" % [
 			res_cost, ThemeIcons.icon(ThemeIcons.IconID.COST_INDUSTRY),
 			res_gold, ThemeIcons.icon(ThemeIcons.IconID.COST_GOLD)]
 
-// FILE: res://scripts/ui/MarkerLayer.gd
+// FILE: res://scripts/ui/marker_layer.gd
 	var glyph: String = ThemeIcons.icon(ThemeIcons.IconID.MARK_EXHAUSTED) if m["exhausted"] \
 		else ThemeIcons.icon(ThemeIcons.IconID.MARK_PICK)
 
-// FILE: res://scripts/demographics/CharacterRegistry.gd
+// FILE: res://scripts/demographics/character_registry.gd
 # УДАЛИТЬ const _ICONS. Заменить:
 func _pick_icon(rng: RandomNumberGenerator) -> String:
 	return ThemeIcons.face(rng.randi_range(0, ThemeIcons.FACES.size() - 1))
 
-// FILE: res://scripts/systems/BattleController.gd
+// FILE: res://scripts/systems/battle_controller.gd
 	var emoji := ThemeIcons.icon(ThemeIcons.IconID.OBSTACLE_ROCK) if rng.randf() > 0.5 \
 		else ThemeIcons.icon(ThemeIcons.IconID.OBSTACLE_TREE)
 
-// FILE: res://scripts/entities/HeroMovementController.gd
+// FILE: res://scripts/entities/hero_movement_controller.gd
 		path_previewed.emit(ThemeIcons.label(ThemeIcons.IconID.ATTACK, "Контакт с врагом — начинается бой"))
 		path_previewed.emit("Нет очков движения — нажмите " + ThemeIcons.icon(ThemeIcons.IconID.END_TURN))
 
-// FILE: res://scripts/systems/BattleTurnExecutor.gd
+// FILE: res://scripts/systems/battle_turn_executor.gd
 	status_updated.emit(ThemeIcons.label(ThemeIcons.IconID.DEFENSE, "Защита: +20% DEF до конца раунда."))
 
-// FILE: res://scripts/ui/ArtifactChestDialog.gd
+// FILE: res://scripts/ui/artifact_chest_dialog.gd
 # в _connect_skeleton() после получения узлов:
 	ThemeIcons.apply(take, ThemeIcons.IconID.TAKE, "Artifact")
 	ThemeIcons.apply(gold, ThemeIcons.IconID.COST_GOLD, "Gold")
 
-// FILE: res://scripts/ui/SkillsPanel.gd
+// FILE: res://scripts/ui/skills_panel.gd
 # в _ready():
 	title.text = ThemeIcons.label(ThemeIcons.IconID.SKILLS, "Навыки")
 
-// FILE: res://scripts/ui/MainMenu.gd
+// FILE: res://scripts/ui/main_menu.gd
 # в _ready() после _style_buttons():
 	ThemeIcons.apply(_arena_btn, ThemeIcons.IconID.ARENA, "Арена города")
 	ThemeIcons.apply(_model_warrior_btn, ThemeIcons.IconID.MODEL_WARRIOR, "Модель: Рыцарь")
 	ThemeIcons.apply(_model_mage_btn, ThemeIcons.IconID.MODEL_MAGE, "Модель: Маг")
 	ThemeIcons.apply(_chronicle_btn, ThemeIcons.IconID.CHRONICLE, "Летопись")
 
-// FILE: res://scripts/ui/BattleUI.gd
+// FILE: res://scripts/ui/battle_ui.gd
 # в _connect_skeleton() после получения кнопок:
 	ThemeIcons.apply(get_node_or_null("bottom_bar/retreat_btn"), ThemeIcons.IconID.RETREAT)
 	ThemeIcons.apply(get_node_or_null("bottom_bar/wait_btn"), ThemeIcons.IconID.WAIT)

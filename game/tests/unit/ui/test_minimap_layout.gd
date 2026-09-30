@@ -3,7 +3,7 @@ extends BaseTest
 ## компас n/s ±2, w/e ±9, сайдбар clamp(300, 25vw, 430).
 
 func _make_panel() -> MinimapPanel:
-	var p: MinimapPanel = auto_free(load("res://scenes/ui/MinimapPanel.tscn").instantiate())
+	var p: MinimapPanel = auto_free(load("res://scenes/ui/minimap_panel.tscn").instantiate())
 	add_child(p)
 	return p
 

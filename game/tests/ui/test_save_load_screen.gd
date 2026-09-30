@@ -1,6 +1,6 @@
 extends BaseTest
 
-const _ScreenScene = preload("res://scenes/ui/SaveLoadScreen.tscn")
+const _ScreenScene = preload("res://scenes/ui/save_load_screen.tscn")
 
 
 var _sm: SaveManager

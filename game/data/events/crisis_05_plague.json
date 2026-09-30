@@ -1,0 +1,47 @@
+{
+  "id": "crisis_05_plague",
+  "title": "☣️ ЭПИДЕМИЯ!",
+  "description": "По поселению разносится лихорадка. Люди падают один за другим, а медики не могут остановить заразу. Карантин спасёт, но ударит по производству и морали.",
+  "crisis_type": 4,
+  "severity": 4,
+  "duration_days": 6,
+  "icon_path": "res://assets/ui/events/crisis_plague.png",
+  "ongoing_effects": {
+    "morale_penalty": -2,
+    "resource_drain": {"food": 2}
+  },
+  "resolution_effects": {},
+  "choices": [
+    {
+      "text": "Ввести карантин ( -10 еды, -5 мораль, спасает жизни)",
+      "tooltip": "Изолировать больных и закрыть поселение",
+      "impact": 3,
+      "effects": {
+        "resource_change": {"food": -10},
+        "morale_change": -5
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Пригласить целителя ( -30 золота, +10 мораль)",
+      "tooltip": "Странствующий лекарь знает травы",
+      "impact": 2,
+      "effects": {
+        "resource_change": {"gold": -30},
+        "morale_change": 10
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Сжечь заражённые кварталы ( -4 населения, +15 мораль, открывает ветку Survival)",
+      "tooltip": "Жестоко, но зараза будет остановлена. Учтите урок.",
+      "impact": 5,
+      "effects": {
+        "population_change": -4,
+        "morale_change": 15,
+        "unlock_law": "survival_granary"
+      },
+      "requirements": {}
+    }
+  ]
+}

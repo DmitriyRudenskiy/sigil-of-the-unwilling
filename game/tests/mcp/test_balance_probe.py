@@ -74,7 +74,7 @@ def _start_world_with_probe(mcp) -> None:
     mcp.run_scene("res://scenes/World.tscn")
     mcp.wait_ready()
     _wait_world(mcp)
-    mcp.instantiate_scene("res://scenes/probe/BalanceProbe.tscn", "/root")
+    mcp.instantiate_scene("res://scenes/probe/balance_probe.tscn", "/root")
 
 
 def test_balance_probe_runs_early_game(mcp):

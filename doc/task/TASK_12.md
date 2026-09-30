@@ -752,7 +752,7 @@ timeout=30000
 @pytest.fixture
 def full_game(mcp):
     """Полный игровой цикл: мир → бой → возврат."""
-    mcp.run_scene("res://scenes/World.tscn")
+    mcp.run_scene("res://scenes/world.tscn")
     mcp.wait_ready()
     yield mcp
     mcp.stop_running_scene()

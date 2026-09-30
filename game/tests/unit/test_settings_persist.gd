@@ -106,7 +106,7 @@ func test_settings_screen_cancel_restores_volume() -> void:
 	_ss_settings.sfx_volume = 30
 	_ss_settings.save()
 
-	_ss_screen = load("res://scenes/ui/SettingsScreen.tscn").instantiate()
+	_ss_screen = load("res://scenes/ui/settings_screen.tscn").instantiate()
 	_ss_screen.setup(_ss_settings)
 	var main_root: Window = Engine.get_main_loop().root
 	main_root.add_child(_ss_screen)

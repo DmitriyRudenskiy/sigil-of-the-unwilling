@@ -2,7 +2,7 @@
   "id": "event_02_harvest",
   "title": "Богатый урожай",
   "description": "В этом сезоне урожай превзошёл все ожидания! Фермеры сообщают о небывалом изобилии. Однако нужно решить, как распорядиться излишками.",
-  "icon_path": "res://assets/ui/events/harvest.png",
+  "icon_path": "res://assets/ui/events/harvest_event.png",
   "frequency": 2,
   "min_day": 10,
   "weight": 1.2,
@@ -41,12 +41,12 @@
       }
     },
     {
-      "text": "Отдать бедным районам ( +10 мораль, +5 лояльность)",
+      "text": "Отдать бедным районам ( +10 морали, -5 еды)",
       "tooltip": "Щедрость укрепит единство поселения",
       "impact": 1,
       "effects": {
         "morale_change": 10,
-        "loyalty_change": 5
+        "resource_change": {"food": -5}
       },
       "requirements": {}
     }

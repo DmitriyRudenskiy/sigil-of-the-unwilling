@@ -1,7 +1,7 @@
 class_name T07SpellDraw
 extends RefCounted
 
-const _Utils = preload("res://scripts/data/SpellUtils.gd")
+const _Utils = preload("res://scripts/data/spell_utils.gd")
 
 static func handle(
 	params: Dictionary, state: Variant,

@@ -3,7 +3,7 @@ extends RefCounted
 ## Стройка, hearth, производство, переселение (фаза 3). Д2: статик + state.
 
 const B = preload("res://scripts/data/settlement_buildings.gd")
-const HexUtils = preload("res://scripts/core/HexUtils.gd")
+const HexUtils = preload("res://scripts/core/hex_utils.gd")
 
 # 3.4 Стройка свободными поселенцами: материалы списываются сразу,
 # здание появляется через BUILD_CYCLES циклов.

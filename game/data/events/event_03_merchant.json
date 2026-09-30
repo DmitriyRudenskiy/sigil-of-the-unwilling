@@ -1,0 +1,48 @@
+{
+  "id": "event_03_merchant",
+  "title": "Странствующий торговец",
+  "description": "У ворот остановился обоз купца. Он предлагает обменять товары: зерно, материалы и инструменты. Но цены не из дешёвых.",
+  "icon_path": "res://assets/ui/events/merchant_event.png",
+  "frequency": 4,
+  "min_day": 5,
+  "weight": 1.0,
+  "triggers": {},
+  "choices": [
+    {
+      "text": "Купить припасы (-30 золота, +20 еды)",
+      "tooltip": "Запасы еды вырастут, но казна опустеет",
+      "impact": 1,
+      "effects": {
+        "resource_change": {"gold": -30, "food": 20}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Купить материалы (-40 золота, +15 материалов)",
+      "tooltip": "Материалы ускорят строительство",
+      "impact": 2,
+      "effects": {
+        "resource_change": {"gold": -40, "materials": 15}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Продать излишки древесины (+25 золота, -10 дерева)",
+      "tooltip": "Выгодная продажа, если есть что продать",
+      "impact": 1,
+      "effects": {
+        "resource_change": {"gold": 25, "wood": -10}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Отказать в торговле (-5 морали)",
+      "tooltip": "Купец уедет недовольным, жители заметят упущенную выгоду",
+      "impact": 3,
+      "effects": {
+        "morale_change": -5
+      },
+      "requirements": {}
+    }
+  ]
+}

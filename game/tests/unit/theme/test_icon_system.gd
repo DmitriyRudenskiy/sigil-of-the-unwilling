@@ -2,7 +2,7 @@ extends BaseTest
 ## Task 11: тесты иконок, курсоров, кэша, fallback
 
 const IR = preload("res://scripts/theme/IconRegistry.gd")
-const TC = preload("res://scripts/theme/ThemeConfig.gd")
+const TC = preload("res://scripts/theme/theme_config.gd")
 
 func test_resource_icons_load() -> void:
 	for id in ["wood", "mercury", "ore", "sulfur", "crystal", "gems", "gold"]:
@@ -35,11 +35,11 @@ func test_icon_cache() -> void:
 func test_fallback_icon() -> void:
 	var tex: Texture2D = IR.resource_texture("nonexistent_resource")
 	assert_that(tex).is_not_null()
-	assert_that(tex.resource_path).is_equal(TC.ICON_FALLBACK_PATH)
+	assert_that(tex.resource_path).is_equal(TC.ICON_FALLBACK)
 	var b: Texture2D = IR.building_texture("nonexistent_building")
-	assert_that(b.resource_path).is_equal(TC.ICON_FALLBACK_PATH)
+	assert_that(b.resource_path).is_equal(TC.ICON_FALLBACK)
 
 func test_building_defs_get_icon() -> void:
-	const BD = preload("res://scripts/data/BuildingDefs.gd")
+	const BD = preload("res://scripts/data/building_defs.gd")
 	var tex: Texture2D = BD.get_icon(&"farm")
 	assert_that(tex).is_not_null()

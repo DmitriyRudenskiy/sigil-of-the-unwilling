@@ -1,5 +1,5 @@
 extends BaseTest
-const _Scene := preload("res://scenes/MainMenu.tscn")
+const _Scene := preload("res://scenes/main_menu.tscn")
 
 var _menu: Node = null
 

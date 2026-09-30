@@ -51,11 +51,11 @@ static func clear_cache() -> void:
 
 #### 2. Исправление ResourceIcons (Кэширование реестра)
 ```gdscript
-// FILE: res://scripts/data/ResourceIcons.gd
+// FILE: res://scripts/data/resource_icons.gd
 class_name ResourceIcons
 extends RefCounted
 
-const _RT := preload("res://scripts/data/ResourceType.gd")
+const _RT := preload("res://scripts/data/resource_type.gd")
 
 const DATA: Dictionary = {
 	_RT.ID.WOOD:    {"texture": "", "name": "Дерево",    "color": Color(0.62, 0.44, 0.24)},
@@ -129,13 +129,13 @@ static func _hash_color(resource_id: StringName) -> Color:
 #### 3. Исправление BattleSpellBridge (Устранение аллокаций в горячем цикле)
 *Замените весь файл, чтобы добавить `const` массивы и обновить `_check_immunity`.*
 ```gdscript
-// FILE: res://scripts/data/BattleSpellBridge.gd
+// FILE: res://scripts/data/battle_spell_bridge.gd
 extends RefCounted
 class_name BattleSpellBridge
 
-const _Def = preload("res://scripts/data/SpellbookDef.gd")
-const _Enums = preload("res://scripts/data/SpellEnums.gd")
-const _SE = preload("res://scripts/data/StatusEffects.gd")
+const _Def = preload("res://scripts/data/spellbook_def.gd")
+const _Enums = preload("res://scripts/data/spell_enums.gd")
+const _SE = preload("res://scripts/data/status_effects.gd")
 
 static var KEYWORD_TO_EFFECT: Dictionary = {
 	"HASTE": _SE.Effect.HASTE,
@@ -308,7 +308,7 @@ static func _calc_resistance(unit: BattleState.BattleUnit, hero_bonus: Dictionar
 
 #### 4. Оптимизация HexUtils (Предотвращение реаллокаций)
 ```gdscript
-// FILE: res://scripts/core/HexUtils.gd
+// FILE: res://scripts/core/hex_utils.gd
 # Замените только функцию get_all_neighbors в существующем файле:
 
 static func get_all_neighbors(cell: Vector2i) -> Array[Vector2i]:
@@ -321,7 +321,7 @@ static func get_all_neighbors(cell: Vector2i) -> Array[Vector2i]:
 
 #### 5. Исправление ArenaClusterSystem (Очистка статического кэша)
 ```gdscript
-// FILE: res://scripts/city/ArenaClusterSystem.gd
+// FILE: res://scripts/city/arena_cluster_system.gd
 # Добавьте метод reset() в конец класса:
 
 static func reset() -> void:
@@ -334,10 +334,10 @@ static func reset() -> void:
 
 #### Шаг 1: Применение патчей
 1. Замените содержимое файла `res://scripts/core/ServiceLocator.gd` на код из блока **1**.
-2. Замените содержимое файла `res://scripts/data/ResourceIcons.gd` на код из блока **2**.
-3. Замените содержимое файла `res://scripts/data/BattleSpellBridge.gd` на код из блока **3**.
-4. В файле `res://scripts/core/HexUtils.gd` найдите функцию `get_all_neighbors` и замените её тело на код из блока **4**.
-5. В файл `res://scripts/city/ArenaClusterSystem.gd` добавьте статический метод `reset()` из блока **5**.
+2. Замените содержимое файла `res://scripts/data/resource_icons.gd` на код из блока **2**.
+3. Замените содержимое файла `res://scripts/data/battle_spell_bridge.gd` на код из блока **3**.
+4. В файле `res://scripts/core/hex_utils.gd` найдите функцию `get_all_neighbors` и замените её тело на код из блока **4**.
+5. В файл `res://scripts/city/arena_cluster_system.gd` добавьте статический метод `reset()` из блока **5**.
 
 #### Шаг 2: Интеграционные изменения (Очистка кэша при сбросе сессии)
 Чтобы статические кэши (`ServiceLocator` и `ArenaClusterSystem`) не вызывали утечек при выходе в главное меню и начале новой игры, добавьте их очистку в глобальный обработчик сброса.
@@ -412,7 +412,7 @@ func update_chronicle(entries: Array):
 
 **✅ Стало (использование `PackedScene`):**
 ```gdscript
-const ChronicleEntryScene = preload("res://scenes/ui/ChronicleEntry.tscn")
+const ChronicleEntryScene = preload("res://scenes/ui/chronicle_entry.tscn")
 
 func update_chronicle(entries: Array):
     var list_node = $VBox/Scroll/List
@@ -464,7 +464,7 @@ func show_resource(res_id: StringName, amount: int):
 
 В коде найдены следы кастомных серверов для взаимодействия с ИИ/тестами. Поскольку вы переходите на `tugcantopaloglu/godot-mcp` (который работает через API редактора Godot или официальный CLI), эти "костыли" больше не нужны.
 
-**Файл: `res://scripts/core/Platform.gd`**
+**Файл: `res://scripts/core/platform.gd`**
 Удаляем методы `is_test_server` и `is_socket_server`. MCP-плагин не требует внедрения сокет-серверов в рантайм игры.
 
 ```gdscript
@@ -584,10 +584,10 @@ func before_test() -> void:
 ```gdscript
 extends GdUnitTestSuite
 
-const BattleRules = preload("res://scripts/core/BattleRules.gd")
-const UnitStats = preload("res://scripts/entities/UnitStats.gd")
-const UnitStack = preload("res://scripts/entities/UnitStack.gd")
-const BattleState = preload("res://scripts/systems/BattleState.gd")
+const BattleRules = preload("res://scripts/core/battle_rules.gd")
+const UnitStats = preload("res://scripts/entities/unit_stats.gd")
+const UnitStack = preload("res://scripts/entities/unit_stack.gd")
+const BattleState = preload("res://scripts/systems/battle_state.gd")
 
 var _rng: RandomNumberGenerator
 var _attacker_unit: BattleState.BattleUnit
@@ -717,8 +717,8 @@ extends GdUnitTestSuite
 ##   После фикса: кэшированный вызов = поиск в словаре ≈ 0 мс.
 
 const ServiceLocatorScript = preload("res://scripts/core/ServiceLocator.gd")
-const BattleEmulatorScript = preload("res://scripts/autoload/BattleEmulator.gd")
-const _UnitRegistry = preload("res://scripts/autoload/UnitRegistry.gd")
+const BattleEmulatorScript = preload("res://scripts/autoload/battle_emulator.gd")
+const _UnitRegistry = preload("res://scripts/autoload/unit_registry.gd")
 
 ## Кэшированный вызов должен быть < 0.01 мс (поиск в словаре).
 ## Не-кэшированный (get_node_or_null) — 0.05…0.2 мс. Порог разделяет их
@@ -877,7 +877,7 @@ extends GdUnitTestSuite
 ##
 ## После фикса: _registry_cache хранит результат, повторные вызовы ≈ 0 мс.
 
-const ResourceIconsScript = preload("res://scripts/data/ResourceIcons.gd")
+const ResourceIconsScript = preload("res://scripts/data/resource_icons.gd")
 
 ## Кэшированный вызов должен быть < 0.01 мс.
 const MAX_CACHED_CALL_MS := 0.01
@@ -974,13 +974,13 @@ extends GdUnitTestSuite
 ##   3. Начинаем новую игру с тем же UID.
 ##   4. Проверяем отсутствие артефактов отрисовки из старой сессии.
 
-const ArenaClusterSystemScript = preload("res://scripts/city/ArenaClusterSystem.gd")
-const BuildingDefsScript = preload("res://scripts/data/BuildingDefs.gd")
-const ArenaTurnRunnerScript = preload("res://scripts/city/ArenaTurnRunner.gd")
+const ArenaClusterSystemScript = preload("res://scripts/city/arena_cluster_system.gd")
+const BuildingDefsScript = preload("res://scripts/data/building_defs.gd")
+const ArenaTurnRunnerScript = preload("res://scripts/city/arena_turn_runner.gd")
 const CityArenaModelScript = preload("res://scripts/city/CityArenaModel.gd")
-const _HexUtils = preload("res://scripts/core/HexUtils.gd")
-const _PopUnit = preload("res://scripts/world/PopUnit.gd")
-const _UniqueBuilding = preload("res://scripts/world/UniqueBuilding.gd")
+const _HexUtils = preload("res://scripts/core/hex_utils.gd")
+const _PopUnit = preload("res://scripts/world/pop_unit.gd")
+const _UniqueBuilding = preload("res://scripts/world/unique_building.gd")
 
 
 func before_test() -> void:
@@ -1240,13 +1240,13 @@ async def test_resource_icons_registry_cached(mcp: GodotMCPClient):
     """
     # Прогреваем
     await mcp.execute_code("""
-var ResourceIcons = load("res://scripts/data/ResourceIcons.gd")
+var ResourceIcons = load("res://scripts/data/resource_icons.gd")
 ResourceIcons._registry()
 """)
 
     # Замеряем
     result = await mcp.execute_code(f"""
-var ResourceIcons = load("res://scripts/data/ResourceIcons.gd")
+var ResourceIcons = load("res://scripts/data/resource_icons.gd")
 var t0 := Time.get_ticks_usec()
 for i in {WARM_CALLS}:
     ResourceIcons._registry()
@@ -1269,8 +1269,8 @@ async def test_battle_7v7_performance(mcp: GodotMCPClient):
     что общее время боя укладывается в лимит.
     """
     result = await mcp.execute_code("""
-var emu = load("res://scripts/autoload/BattleEmulator.gd").new()
-var units_reg = load("res://scripts/autoload/UnitRegistry.gd").new()
+var emu = load("res://scripts/autoload/battle_emulator.gd").new()
+var units_reg = load("res://scripts/autoload/unit_registry.gd").new()
 units_reg.ensure_definitions()
 
 var keys := ["swordsmen", "archers", "cavalry", "mages",
@@ -1382,7 +1382,7 @@ pytestmark = pytest.mark.asyncio
 async def test_reset_method_exists(mcp: GodotMCPClient):
     """Проверяем, что метод сброса добавлен в ArenaClusterSystem."""
     result = await mcp.execute_code("""
-var ArenaClusterSystem = load("res://scripts/city/ArenaClusterSystem.gd")
+var ArenaClusterSystem = load("res://scripts/city/arena_cluster_system.gd")
 return {"has_reset": ArenaClusterSystem.has_method("reset")}
 """)
     assert result.get("has_reset"), (
@@ -1399,11 +1399,11 @@ async def test_cluster_cache_populated_and_reset(mcp: GodotMCPClient):
     3. Строим новый город → данные свежие.
     """
     result = await mcp.execute_code("""
-var ArenaClusterSystem = load("res://scripts/city/ArenaClusterSystem.gd")
-var BuildingDefs = load("res://scripts/data/BuildingDefs.gd")
-var ArenaTurnRunner = load("res://scripts/city/ArenaTurnRunner.gd")
+var ArenaClusterSystem = load("res://scripts/city/arena_cluster_system.gd")
+var BuildingDefs = load("res://scripts/data/building_defs.gd")
+var ArenaTurnRunner = load("res://scripts/city/arena_turn_runner.gd")
 var CityArenaModel = load("res://scripts/city/CityArenaModel.gd")
-var HexUtils = load("res://scripts/core/HexUtils.gd")
+var HexUtils = load("res://scripts/core/hex_utils.gd")
 
 if not ArenaClusterSystem.has_method("reset"):
     return {"error": "ArenaClusterSystem.reset() не найден"}
@@ -1477,11 +1477,11 @@ async def test_no_cross_contamination_between_games(mcp: GodotMCPClient):
     при одинаковых UID городов.
     """
     result = await mcp.execute_code("""
-var ArenaClusterSystem = load("res://scripts/city/ArenaClusterSystem.gd")
-var BuildingDefs = load("res://scripts/data/BuildingDefs.gd")
-var ArenaTurnRunner = load("res://scripts/city/ArenaTurnRunner.gd")
+var ArenaClusterSystem = load("res://scripts/city/arena_cluster_system.gd")
+var BuildingDefs = load("res://scripts/data/building_defs.gd")
+var ArenaTurnRunner = load("res://scripts/city/arena_turn_runner.gd")
 var CityArenaModel = load("res://scripts/city/CityArenaModel.gd")
-var HexUtils = load("res://scripts/core/HexUtils.gd")
+var HexUtils = load("res://scripts/core/hex_utils.gd")
 
 if not ArenaClusterSystem.has_method("reset"):
     return {"error": "reset() не найден"}
@@ -1531,11 +1531,11 @@ async def test_full_session_lifecycle_three_games(mcp: GodotMCPClient):
     Проверяем, что каждая сессия получает свежие данные.
     """
     result = await mcp.execute_code("""
-var ArenaClusterSystem = load("res://scripts/city/ArenaClusterSystem.gd")
-var BuildingDefs = load("res://scripts/data/BuildingDefs.gd")
-var ArenaTurnRunner = load("res://scripts/city/ArenaTurnRunner.gd")
+var ArenaClusterSystem = load("res://scripts/city/arena_cluster_system.gd")
+var BuildingDefs = load("res://scripts/data/building_defs.gd")
+var ArenaTurnRunner = load("res://scripts/city/arena_turn_runner.gd")
 var CityArenaModel = load("res://scripts/city/CityArenaModel.gd")
-var HexUtils = load("res://scripts/core/HexUtils.gd")
+var HexUtils = load("res://scripts/core/hex_utils.gd")
 
 if not ArenaClusterSystem.has_method("reset"):
     return {"error": "reset() не найден"}
@@ -1587,11 +1587,11 @@ async def test_visual_no_artifacts_on_menu_transition(mcp: GodotMCPClient):
     """
     # Имитация: строим город, выходим, строим новый
     result = await mcp.execute_code("""
-var ArenaClusterSystem = load("res://scripts/city/ArenaClusterSystem.gd")
-var BuildingDefs = load("res://scripts/data/BuildingDefs.gd")
-var ArenaTurnRunner = load("res://scripts/city/ArenaTurnRunner.gd")
+var ArenaClusterSystem = load("res://scripts/city/arena_cluster_system.gd")
+var BuildingDefs = load("res://scripts/data/building_defs.gd")
+var ArenaTurnRunner = load("res://scripts/city/arena_turn_runner.gd")
 var CityArenaModel = load("res://scripts/city/CityArenaModel.gd")
-var HexUtils = load("res://scripts/core/HexUtils.gd")
+var HexUtils = load("res://scripts/core/hex_utils.gd")
 
 if not ArenaClusterSystem.has_method("reset"):
     return {"error": "reset() не найден"}

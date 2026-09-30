@@ -1,6 +1,6 @@
 extends BaseTest
 
-const _BattleUIScene := preload("res://scenes/ui/BattleUI.tscn")
+const _BattleUIScene := preload("res://scenes/ui/battle_ui.tscn")
 
 var _ui: Node = null
 

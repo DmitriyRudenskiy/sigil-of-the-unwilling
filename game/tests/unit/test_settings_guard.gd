@@ -9,7 +9,7 @@ func after_test() -> void:
 	_screen = null
 
 func test_settings_screen_closed_without_settings() -> void:
-	var screen = load("res://scenes/ui/SettingsScreen.tscn").instantiate()
+	var screen = load("res://scenes/ui/settings_screen.tscn").instantiate()
 	_screen = screen
 	var flags: Array = [false]
 	screen.closed.connect(func(): flags[0] = true)

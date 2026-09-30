@@ -1,0 +1,45 @@
+{
+  "id": "crisis_07_flood",
+  "title": "🌊 НАВОДНЕНИЕ!",
+  "description": "Река вышла из берегов после ливней. Вода затапливает нижние кварталы и склады. Если не отвести поток, поселение утонет.",
+  "crisis_type": 0,
+  "severity": 3,
+  "duration_days": 3,
+  "icon_path": "res://assets/ui/events/crisis_winter.png",
+  "ongoing_effects": {
+    "resource_drain": {"food": 1, "materials": 1}
+  },
+  "resolution_effects": {},
+  "choices": [
+    {
+      "text": "Построить дамбу ( -20 материалов, спасает склады)",
+      "tooltip": "Быстро отгородить нижний квартал",
+      "impact": 2,
+      "effects": {
+        "resource_change": {"materials": -20},
+        "morale_change": 5
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Эвакуировать жителей ( -5 мораль, -10 еды)",
+      "tooltip": "Перенести людей на высокие дома",
+      "impact": 3,
+      "effects": {
+        "morale_change": -5,
+        "resource_change": {"food": -10}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Построить дренажный канал ( -15 материалов, -3 дня, открывает ветку Order)",
+      "tooltip": "Долгосрочное решение — вода больше не будет угрозой",
+      "impact": 4,
+      "effects": {
+        "resource_change": {"materials": -15},
+        "unlock_law": "order_tax_code"
+      },
+      "requirements": {}
+    }
+  ]
+}

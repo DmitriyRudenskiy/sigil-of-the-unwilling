@@ -19,11 +19,11 @@
 **Решение:** Добавить явное отключение сигналов перед удалением героя и подключить сигналы нового героя.
 
 ```gdscript
-// FILE: res://scripts/world/HeroLifecycleSystem.gd
+// FILE: res://scripts/world/hero_lifecycle_system.gd
 // REPLACE ENTIRE FILE
 extends RefCounted
-const DeathSequenceScene = preload("res://scenes/ui/DeathSequence.tscn")
-const ChronicleScreenScene = preload("res://scenes/ui/ChronicleScreen.tscn")
+const DeathSequenceScene = preload("res://scenes/ui/death_sequence.tscn")
+const ChronicleScreenScene = preload("res://scenes/ui/chronicle_screen.tscn")
 var _world_ref: WeakRef = null
 var _persistence = null
 var _rng: RandomNumberGenerator = null
@@ -237,7 +237,7 @@ func _on_death_return_to_menu() -> void:
 	_free_deceased()
 	var world := _get_world()
 	if world != null:
-		world.get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
+		world.get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 
 func _run_summary() -> Dictionary:
 	var turns := 0
@@ -343,7 +343,7 @@ func _set_hero_ptr(hero: HeroController) -> void:
 **Решение:** Добавить метод `_disconnect_hero_signals` и использовать его в `HeroLifecycleSystem`.
 
 ```gdscript
-// FILE: res://scripts/world/WorldEventRouter.gd
+// FILE: res://scripts/world/world_event_router.gd
 // REPLACE METHOD: _connect_hero_signals and ADD _disconnect_hero_signals
 
 func _connect_hero_signals() -> void:
@@ -389,7 +389,7 @@ func _disconnect_hero_signals(old_hero: Node = null) -> void:
 **Решение:** Добавить вызов `invalidate_board_cache()` во всех методах, изменяющих состояние доски, и добавить версионирование кэша.
 
 ```gdscript
-// FILE: res://scripts/systems/BattleState.gd
+// FILE: res://scripts/systems/battle_state.gd
 // REPLACE METHODS: do_move, do_defend, do_wait, do_skip, build_all_blocked
 
 func do_move(unit: BattleUnit, target: Vector2i) -> void:
@@ -450,12 +450,12 @@ func build_all_blocked(except_unit: BattleUnit, obstacles: Dictionary) -> Dictio
 **Решение:** Вычислить Dijkstra от героя один раз за ход и кэшировать результат.
 
 ```gdscript
-// FILE: res://scripts/systems/EnemyTurnProcessor.gd
+// FILE: res://scripts/systems/enemy_turn_processor.gd
 // REPLACE ENTIRE FILE
 class_name EnemyTurnProcessor
 extends TurnPhaseProcessor
 const ServiceLocator = preload("res://scripts/core/ServiceLocator.gd")
-const _TerrainCostTable = preload("res://scripts/data/TerrainCostTable.gd")
+const _TerrainCostTable = preload("res://scripts/data/terrain_cost_table.gd")
 signal enemy_attack_requested(army: Array, enemy_cell: Vector2i)
 signal enemy_village_captured(city: City)
 signal enemy_turn_reported(report: Dictionary)
@@ -693,7 +693,7 @@ static func _cell_a_before_b(a: Vector2i, b: Vector2i) -> bool:
 **Решение:** Очищать шарды, которые не были активны последние N ходов, или ограничить количество хранимых шардов.
 
 ```gdscript
-// FILE: res://scripts/world/WorldPersistence.gd
+// FILE: res://scripts/world/world_persistence.gd
 // REPLACE METHOD: save_game
 
 func save_game(hero: HeroController, cities: Array = [], characters: Array = []) -> bool:
@@ -769,7 +769,7 @@ func _prune_old_shards(shards: Dictionary, current_turn: int) -> void:
 **Решение:** Добавить поле `version` в сериализованные данные и миграцию при загрузке.
 
 ```gdscript
-// FILE: res://scripts/world/City.gd
+// FILE: res://scripts/world/city.gd
 // REPLACE METHODS: serialize and deserialize
 
 const SERIALIZATION_VERSION := 2
@@ -907,12 +907,12 @@ func _migrate_city_data(data: Dictionary, from_version: int) -> Dictionary:
 
 ```bash
 # Резервное копирование оригинальных файлов
-cp res://scripts/world/HeroLifecycleSystem.gd res://scripts/world/HeroLifecycleSystem.gd.bak
-cp res://scripts/world/WorldEventRouter.gd res://scripts/world/WorldEventRouter.gd.bak
-cp res://scripts/systems/BattleState.gd res://scripts/systems/BattleState.gd.bak
-cp res://scripts/systems/EnemyTurnProcessor.gd res://scripts/systems/EnemyTurnProcessor.gd.bak
-cp res://scripts/world/WorldPersistence.gd res://scripts/world/WorldPersistence.gd.bak
-cp res://scripts/world/City.gd res://scripts/world/City.gd.bak
+cp res://scripts/world/hero_lifecycle_system.gd res://scripts/world/hero_lifecycle_system.gd.bak
+cp res://scripts/world/world_event_router.gd res://scripts/world/world_event_router.gd.bak
+cp res://scripts/systems/battle_state.gd res://scripts/systems/battle_state.gd.bak
+cp res://scripts/systems/enemy_turn_processor.gd res://scripts/systems/enemy_turn_processor.gd.bak
+cp res://scripts/world/world_persistence.gd res://scripts/world/world_persistence.gd.bak
+cp res://scripts/world/city.gd res://scripts/world/city.gd.bak
 
 # Применение фиксов (замена содержимого файлов)
 # Используйте редактор или IDE для замены кода согласно указаниям выше
@@ -985,12 +985,12 @@ godot --verbose 2>&1 | tee game.log
 
 | № | Файл (путь) | Суть изменения | Приоритет |
 |---|---|---|---|
-| 1 | `res://scripts/world/HeroLifecycleSystem.gd` | Явное отключение сигналов старого героя при succession, предотвращение утечек памяти и дублирования вызовов | High |
-| 2 | `res://scripts/world/WorldEventRouter.gd` | Добавление метода `_disconnect_hero_signals` для парного отключения сигналов | High |
-| 3 | `res://scripts/systems/BattleState.gd` | Инвалидация кэша pathfinding при `do_defend`, `do_wait`, `do_skip`, предотвращение stale данных | High |
-| 4 | `res://scripts/systems/EnemyTurnProcessor.gd` | Оптимизация Dijkstra: вычисление одного поля расстояний от героя вместо N отдельных вычислений (O(N²) → O(N)) | High |
-| 5 | `res://scripts/world/WorldPersistence.gd` | Очистка старых неактивных шардов из `_shards_memory`, предотвращение утечки памяти при долгой игре | Medium |
-| 6 | `res://scripts/world/City.gd` | Версионирование сериализации, миграция старых сейвов при изменении структуры данных | Medium |
+| 1 | `res://scripts/world/hero_lifecycle_system.gd` | Явное отключение сигналов старого героя при succession, предотвращение утечек памяти и дублирования вызовов | High |
+| 2 | `res://scripts/world/world_event_router.gd` | Добавление метода `_disconnect_hero_signals` для парного отключения сигналов | High |
+| 3 | `res://scripts/systems/battle_state.gd` | Инвалидация кэша pathfinding при `do_defend`, `do_wait`, `do_skip`, предотвращение stale данных | High |
+| 4 | `res://scripts/systems/enemy_turn_processor.gd` | Оптимизация Dijkstra: вычисление одного поля расстояний от героя вместо N отдельных вычислений (O(N²) → O(N)) | High |
+| 5 | `res://scripts/world/world_persistence.gd` | Очистка старых неактивных шардов из `_shards_memory`, предотвращение утечки памяти при долгой игре | Medium |
+| 6 | `res://scripts/world/city.gd` | Версионирование сериализации, миграция старых сейвов при изменении структуры данных | Medium |
 
 
 Для того чтобы полностью избавиться от программного создания элементов интерфейса (кнопок, лейблов, спрайтов и т.д.) через `.new()` в скриптах, мы вынесем их структуру в отдельные `.tscn` сцены. В скриптах останется только инстанцирование готовых сцен и получение ссылок на дочерние узлы через `get_node()` или `$`.
@@ -999,7 +999,7 @@ godot --verbose 2>&1 | tee game.log
 
 ### 1. Новые файлы сцен (Создайте их в указанных путях)
 
-**`res://scenes/entities/VillageEntity.tscn`**
+**`res://scenes/entities/village_entity.tscn`**
 ```tscn
 [gd_scene format=3]
 [node name="VillageEntity" type="Node2D"]
@@ -1014,7 +1014,7 @@ theme_override_font_sizes/font_size = 16
 text = "🚩"
 ```
 
-**`res://scenes/entities/ResourceEntity.tscn`**
+**`res://scenes/entities/resource_entity.tscn`**
 ```tscn
 [gd_scene format=3]
 [node name="ResourceEntity" type="Node2D"]
@@ -1028,7 +1028,7 @@ text = "?"
 z_index = 6
 ```
 
-**`res://scenes/entities/EnemyEntity.tscn`**
+**`res://scenes/entities/enemy_entity.tscn`**
 ```tscn
 [gd_scene format=3]
 [node name="EnemyEntity" type="Node2D"]
@@ -1036,7 +1036,7 @@ z_index = 6
 z_index = 6
 ```
 
-**`res://scenes/entities/ChestEntity.tscn`**
+**`res://scenes/entities/chest_entity.tscn`**
 ```tscn
 [gd_scene format=3]
 [node name="ChestEntity" type="Node2D"]
@@ -1044,7 +1044,7 @@ z_index = 7
 [node name="Sprite" type="Sprite2D" parent="."]
 ```
 
-**`res://scenes/entities/ScrollEntity.tscn`**
+**`res://scenes/entities/scroll_entity.tscn`**
 ```tscn
 [gd_scene format=3]
 [node name="ScrollEntity" type="Node2D"]
@@ -1052,10 +1052,10 @@ z_index = 6
 [node name="Sprite" type="Sprite2D" parent="."]
 ```
 
-**`res://scenes/entities/ResourceNode.tscn`**
+**`res://scenes/entities/resource_node.tscn`**
 ```tscn
 [gd_scene load_steps=2 format=3]
-[ext_resource type="Script" path="res://scripts/entities/ResourceNode.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/entities/resource_node.gd" id="1"]
 [node name="ResourceNode" type="Node2D"]
 script = ExtResource("1")
 [node name="Sprite" type="Sprite2D" parent="."]
@@ -1063,12 +1063,12 @@ script = ExtResource("1")
 z_index = 1
 ```
 
-**`res://scenes/entities/DestMarker.gd`** (Выносим внутренний класс в отдельный скрипт)
+**`res://scenes/entities/dest_marker.gd`** (Выносим внутренний класс в отдельный скрипт)
 ```gdscript
 extends Node2D
 class_name DestMarker
 
-const _HexDraw = preload("res://scripts/core/HexDraw.gd")
+const _HexDraw = preload("res://scripts/core/hex_draw.gd")
 
 var active := false
 var _t := 0.0
@@ -1095,7 +1095,7 @@ func _draw() -> void:
 	draw_polyline(pts, Color(1.0, 0.25, 0.2, 0.95), 3.0)
 ```
 
-**`res://scenes/entities/DestMarker.tscn`**
+**`res://scenes/entities/dest_marker.tscn`**
 ```tscn
 [gd_scene load_steps=2 format=3]
 [ext_resource type="Script" path="res://scripts/entities/DestMarker.gd" id="1"]
@@ -1103,7 +1103,7 @@ func _draw() -> void:
 script = ExtResource("1")
 ```
 
-**`res://scenes/entities/StatusOrb.gd`** (Выносим внутренний класс в отдельный скрипт)
+**`res://scenes/entities/status_orb.gd`** (Выносим внутренний класс в отдельный скрипт)
 ```gdscript
 extends Node2D
 class_name StatusOrb
@@ -1134,7 +1134,7 @@ func _draw() -> void:
 	draw_circle(Vector2.ZERO, r, color)
 ```
 
-**`res://scenes/entities/StatusOrb.tscn`**
+**`res://scenes/entities/status_orb.tscn`**
 ```tscn
 [gd_scene load_steps=2 format=3]
 [ext_resource type="Script" path="res://scripts/entities/StatusOrb.gd" id="1"]
@@ -1142,7 +1142,7 @@ func _draw() -> void:
 script = ExtResource("1")
 ```
 
-**`res://scenes/entities/HeroVisuals.tscn`**
+**`res://scenes/entities/hero_visuals.tscn`**
 ```tscn
 [gd_scene format=3]
 [node name="HeroVisuals" type="Node2D"]
@@ -1152,10 +1152,10 @@ z_index = 10
 z_index = 10
 ```
 
-**`res://scenes/world/MapGenerator.tscn`**
+**`res://scenes/world/map_generator.tscn`**
 ```tscn
 [gd_scene load_steps=2 format=3]
-[ext_resource type="Script" path="res://scripts/world/MapGenerator.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/world/map_generator.gd" id="1"]
 [node name="MapGenerator" type="Node2D"]
 script = ExtResource("1")
 [node name="TileMapTerrain" type="TileMapLayer" parent="."]
@@ -1167,7 +1167,7 @@ script = ExtResource("1")
 
 ### 2. Обновление существующих сцен и скриптов
 
-#### `res://scenes/ui/BattleUI.tscn`
+#### `res://scenes/ui/battle_ui.tscn`
 Замените `VBoxContainer` для списка инициативы на `ItemList`, чтобы не создавать `Label` динамически:
 ```tscn
 [node name="initiative_panel" type="PanelContainer" parent="."]
@@ -1182,7 +1182,7 @@ offset_bottom = -80.0
 theme_override_constants/v_separation = 4
 ```
 
-#### `res://scripts/ui/BattleUI.gd`
+#### `res://scripts/ui/battle_ui.gd`
 Обновите тип переменной и метод `update_initiative`:
 ```gdscript
 # ...
@@ -1207,15 +1207,15 @@ func update_initiative(units: Array[BattleState.BattleUnit], active_unit: Battle
 			_initiative_list.set_item_custom_fg_color(idx, Color(1.0, 0.75, 0.7))
 ```
 
-#### `res://scripts/world/WorldSpawner.gd`
+#### `res://scripts/world/world_spawner.gd`
 Добавьте константы сцен и замените методы спавна:
 ```gdscript
 # Добавьте в начало скрипта:
-const VillageEntityScene = preload("res://scenes/entities/VillageEntity.tscn")
-const ResourceEntityScene = preload("res://scenes/entities/ResourceEntity.tscn")
-const EnemyEntityScene = preload("res://scenes/entities/EnemyEntity.tscn")
-const ChestEntityScene = preload("res://scenes/entities/ChestEntity.tscn")
-const ScrollEntityScene = preload("res://scenes/entities/ScrollEntity.tscn")
+const VillageEntityScene = preload("res://scenes/entities/village_entity.tscn")
+const ResourceEntityScene = preload("res://scenes/entities/resource_entity.tscn")
+const EnemyEntityScene = preload("res://scenes/entities/enemy_entity.tscn")
+const ChestEntityScene = preload("res://scenes/entities/chest_entity.tscn")
+const ScrollEntityScene = preload("res://scenes/entities/scroll_entity.tscn")
 
 # ...
 
@@ -1348,7 +1348,7 @@ func capture_village(cell: Vector2i) -> bool:
 	return false
 ```
 
-#### `res://scripts/entities/ResourceNode.gd`
+#### `res://scripts/entities/resource_node.gd`
 Замените создание спрайтов на получение из сцены:
 ```gdscript
 func _setup_visual() -> void:
@@ -1357,12 +1357,12 @@ func _setup_visual() -> void:
 	_update_visual()
 ```
 
-#### `res://scripts/entities/HeroVisualController.gd`
+#### `res://scripts/entities/hero_visual_controller.gd`
 Удалите внутренние классы `DestMarker` и `StatusOrb` (они вынесены в отдельные файлы). Обновите логику:
 ```gdscript
-const HeroVisualsScene = preload("res://scenes/entities/HeroVisuals.tscn")
-const DestMarkerScene = preload("res://scenes/entities/DestMarker.tscn")
-const StatusOrbScene = preload("res://scenes/entities/StatusOrb.tscn")
+const HeroVisualsScene = preload("res://scenes/entities/hero_visuals.tscn")
+const DestMarkerScene = preload("res://scenes/entities/dest_marker.tscn")
+const StatusOrbScene = preload("res://scenes/entities/status_orb.tscn")
 
 var _visuals: Node2D = null
 
@@ -1399,7 +1399,7 @@ func setup_path_visual() -> void:
 		_parent.add_child(_status_orb)
 ```
 
-#### `res://scripts/world/MapGenerator.gd`
+#### `res://scripts/world/map_generator.gd`
 Упростите `_ensure_layers`, так как узлы уже есть в сцене:
 ```gdscript
 func _ensure_layers() -> void:
@@ -1415,11 +1415,11 @@ func _ensure_layers() -> void:
 		_decor_layer.tile_set = tileset
 ```
 
-#### `res://scripts/world/WorldBootstrap.gd`
+#### `res://scripts/world/world_bootstrap.gd`
 Замените создание `MapGenerator` через `.new()` на инстанцирование сцены:
 ```gdscript
 static func _create_map(parent: Node2D, R: BootstrapResult) -> void:
-	var map_scene = load("res://scenes/world/MapGenerator.tscn")
+	var map_scene = load("res://scenes/world/map_generator.tscn")
 	R.map_gen = map_scene.instantiate()
 	R.map_gen.name = "MapGenerator"
 	R.map_gen.seed_value = R.rng.randi() % 999999
@@ -1578,9 +1578,9 @@ extends GdUnitTestSuite
 
 func before() -> void:
     # Регистрируем необходимые автозагрузки для тестов
-    add_child_autoload("res://scripts/autoload/Settings.gd", "Settings")
-    add_child_autoload("res://scripts/autoload/UnitRegistry.gd", "Units")
-    add_child_autoload("res://scripts/autoload/ResourceRegistry.gd", "Resources")
+    add_child_autoload("res://scripts/autoload/settings.gd", "Settings")
+    add_child_autoload("res://scripts/autoload/unit_registry.gd", "Units")
+    add_child_autoload("res://scripts/autoload/resource_registry.gd", "Resources")
 
 func test_world_bootstrap_creates_hero_and_map() -> void:
     var dummy_parent := Node2D.new()
@@ -1620,7 +1620,7 @@ func get_state() -> Dictionary:
     var wc = get_node_or_null("/root/World")
     if wc and wc.has_method("get_state"):
         # Используем ваш WorldStateSerializer
-        var serializer = load("res://scripts/autoload/WorldStateSerializer.gd").new()
+        var serializer = load("res://scripts/autoload/world_state_serializer.gd").new()
         return serializer.get_state(wc, null)
     return {"error": "World not loaded"}
 

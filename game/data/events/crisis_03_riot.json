@@ -1,0 +1,48 @@
+{
+  "id": "crisis_03_riot",
+  "title": "⚔️ БУНТ ЖИТЕЛЕЙ!",
+  "description": "Несправедливые налоги и усталость от тяжёлой работы взорвали терпение жителей. Толпа собралась у дома правителя и требует перемен. Если не действовать сейчас — начнётся погром.",
+  "crisis_type": 2,
+  "severity": 3,
+  "duration_days": 3,
+  "icon_path": "res://assets/ui/events/refugees_event.png",
+  "ongoing_effects": {
+    "morale_penalty": -2,
+    "production_reduction": -0.1
+  },
+  "resolution_effects": {},
+  "choices": [
+    {
+      "text": "Уступить требованиям ( -20 золота, +15 мораль)",
+      "tooltip": "Вернуть часть налогов и пообещать реформы",
+      "impact": 2,
+      "effects": {
+        "resource_change": {"gold": -20},
+        "morale_change": 15
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Разогнать бунт силой ( -3 населения, +10 мораль, -10 репутация)",
+      "tooltip": "Стража применит оружие. Кто-то умрёт.",
+      "impact": 5,
+      "effects": {
+        "population_change": -3,
+        "morale_change": 10,
+        "reputation_change": -10,
+        "permanent_modifier": {"id": "iron_fist", "effect": "morale_decay += 0.05"}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Обещать закон о справедливости ( -5 мораль сейчас, открывает ветку Order)",
+      "tooltip": "Перевести требования в закон — долгий, но чистый путь",
+      "impact": 3,
+      "effects": {
+        "morale_change": -5,
+        "unlock_law": "order_tax_code"
+      },
+      "requirements": {}
+    }
+  ]
+}

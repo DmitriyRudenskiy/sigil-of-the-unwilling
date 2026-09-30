@@ -15,10 +15,10 @@
 
 ---
 
-## 1. `res://scripts/constants/GameNumbersBattle.gd` — заменить строку
+## 1. `res://scripts/constants/game_numbers_battle.gd` — заменить строку
 
 ```gdscript
-// FILE: res://scripts/constants/GameNumbersBattle.gd
+// FILE: res://scripts/constants/game_numbers_battle.gd
 # Было: const BATTLE_BOARD_W := 17
 # Прототип: COLS = max(19, …) — поле от края до края, минимум 19 колонок.
 const BATTLE_BOARD_W := 19
@@ -28,15 +28,15 @@ const BATTLE_BOARD_H := 11
 
 ---
 
-## 2. Замена: `res://scenes/ui/BattleUI.tscn`
+## 2. Замена: `res://scenes/ui/battle_ui.tscn`
 
 ```tscn
-// FILE: res://scenes/ui/BattleUI.tscn
+// FILE: res://scenes/ui/battle_ui.tscn
 [gd_scene load_steps=4 format=3 uid="uid://battleui01"]
 
-[ext_resource type="Script" path="res://scripts/ui/BattleUI.gd" id="1"]
-[ext_resource type="PackedScene" path="res://scenes/ui/BattleSpellbookPanel.tscn" id="2"]
-[ext_resource type="PackedScene" path="res://scenes/ui/SettingsScreen.tscn" id="3"]
+[ext_resource type="Script" path="res://scripts/ui/battle_ui.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/ui/battle_spellbook_panel.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/ui/settings_screen.tscn" id="3"]
 
 [node name="BattleUI" type="CanvasLayer"]
 script = ExtResource("1")
@@ -174,12 +174,12 @@ visible = false
 
 ---
 
-## 3. Замена: `res://scripts/ui/BattleUI.gd`
+## 3. Замена: `res://scripts/ui/battle_ui.gd`
 
 Полный файл. Публичный API контроллера сохранён (`set_status`, `update_active_unit`, `set_attack_enabled`, `update_initiative`, `_connect_skeleton`), добавлены: строка хода, история с прокруткой ▲▼ и разворотом полной истории кликом по строке.
 
 ```gdscript
-// FILE: res://scripts/ui/BattleUI.gd
+// FILE: res://scripts/ui/battle_ui.gd
 class_name BattleUI
 extends CanvasLayer
 ## Нижняя панель боя 1:1 с прототипом: 4 кнопки слева, лог-строка хода
@@ -379,12 +379,12 @@ func _compose() -> void:
 
 ---
 
-## 4. Патч `res://scripts/systems/BattleController.gd`
+## 4. Патч `res://scripts/systems/battle_controller.gd`
 
 Старые connect'ы кнопок нижней панели больше не существуют. Замени блок подключения UI к кнопкам на:
 
 ```gdscript
-// FILE: res://scripts/systems/BattleController.gd
+// FILE: res://scripts/systems/battle_controller.gd
 # ... в месте, где сейчас подключаются кнопки BattleUI (grep: `.pressed.connect` по файлу), заменить на: ...
 func _connect_ui_buttons() -> void:
 	if not _ui.wait_requested.is_connected(_on_wait):
@@ -402,10 +402,10 @@ func _connect_ui_buttons() -> void:
 
 ---
 
-## 5. Патч `res://scripts/systems/BattleView.gd` — поле от края до края
+## 5. Патч `res://scripts/systems/battle_view.gd` — поле от края до края
 
 ```gdscript
-// FILE: res://scripts/systems/BattleView.gd
+// FILE: res://scripts/systems/battle_view.gd
 # ... добавить метод и два вызова ...
 
 ## Прототип: сетка заполняет экран. Фитим доску 19x11 в viewport без полей.
@@ -432,7 +432,7 @@ func fit_camera_to_board() -> void:
 ```gdscript
 // FILE: res://tests/unit/ui/test_battle_ui_onready.gd
 extends BaseTest
-const _BattleUIScene := preload("res://scenes/ui/BattleUI.tscn")
+const _BattleUIScene := preload("res://scenes/ui/battle_ui.tscn")
 var _ui: Node = null
 
 func after_test() -> void:
@@ -500,17 +500,17 @@ pytest game/tests/mcp/test_battle_controller.py game/tests/mcp/test_battle_full_
 4. Критерии приёмки (1920×1080): доска 19×11 видна целиком по ширине без боковых полей; панель 60px: слева 4 кнопки 44×44, справа 3; по центру строка 44px с «Ход N · …»; ▲▼ листают записи (префикс `‹i/n›`), клик по строке открывает панель полной истории (3+ записи после трёх событий); ⏳/⚔/🏃///📖 вызывают свои сигналы (проверить логами контроллера); MCP-`screenshot`, наложенный на прототип, совпадает по контурам панели и групп кнопок ±1px.
 
 
-## `res://scenes/BattleView.tscn` — текущее содержимое
+## `res://scenes/battle_view.tscn` — текущее содержимое
 
 Файл не требует правок в контексте прошлой работы по приведению интерфейса боя к прототипу (размер доски 19×11 и фит камеры `fit_camera_to_board()` живут в `BattleView.gd` и `GameNumbersBattle`, а не в сцене).
 
 ```tscn
-// FILE: res://scenes/BattleView.tscn
+// FILE: res://scenes/battle_view.tscn
 [gd_scene load_steps=4 format=3]
 
-[ext_resource type="Script" path="res://scripts/systems/BattleView.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/ui/HighlightOverlay.gd" id="2"]
-[ext_resource type="Script" path="res://scripts/ui/CursorOverlay.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/systems/battle_view.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/ui/highlight_overlay.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/ui/cursor_overlay.gd" id="3"]
 
 [node name="BattleView" type="Node2D"]
 script = ExtResource("1")
@@ -540,7 +540,7 @@ script = ExtResource("3")
 ### Что добавилось в `BattleView.gd` в прошлом шаге (не в сцене)
 
 ```gdscript
-// FILE: res://scripts/systems/BattleView.gd
+// FILE: res://scripts/systems/battle_view.gd
 # ... в setup() после paint_field() и в конце класса: ...
 
 ## Прототип: сетка заполняет экран. Фитим доску 19x11 в viewport без полей.
@@ -572,12 +572,12 @@ func fit_camera_to_board() -> void:
 3. `BattleView` — корневой `Node2D`, а не `Node3D` (код использует `map_to_local` и `_tile_map.set_cell` — это 2D API).
 
 
-## `res://scripts/systems/BattleView.gd` — полный файл
+## `res://scripts/systems/battle_view.gd` — полный файл
 
 Все существующие методы сохранены, `fit_camera()` заменён на `fit_camera_to_board()` с подпиской на `size_changed` (поле 19×11 фитуется в экран от края до края, как в прототипе).
 
 ```gdscript
-// FILE: res://scripts/systems/BattleView.gd
+// FILE: res://scripts/systems/battle_view.gd
 class_name BattleView
 extends Node2D
 ## Визуальный слой боя: гексагональная сетка, спрайты юнитов, подсветки,
@@ -589,7 +589,7 @@ const _HeroFigure := preload("res://scenes/entities/HeroFigure.tscn")
 const UnitSprites := preload("res://scripts/data/UnitSprites.gd")
 const TileAtlas := preload("res://scripts/data/TileAtlas.gd")
 const HexGrid := preload("res://scripts/core/HexGrid.gd")
-const HexUtils := preload("res://scripts/core/HexUtils.gd")
+const HexUtils := preload("res://scripts/core/hex_utils.gd")
 
 const RING := 3
 const HEX_OUTLINE_RADIUS: float = GameNumbersBattle.BATTLE_HEX_OUTLINE_RADIUS
@@ -897,19 +897,19 @@ cp "/Users/user/Downloads/1788626748853-01a07274-c0c3-7af7-9d09-ae79c571f40c.png
 
 ---
 
-## 2. Замена: `res://scenes/MainMenu.tscn`
+## 2. Замена: `res://scenes/main_menu.tscn`
 
 Колонка из 5 кнопок в порядке прототипа; лишние кнопки и `Spacer` удалены; `VersionLabel` уведён в угол; `LockPanel` вынесен из колонки на корень.
 
 ```tscn
-// FILE: res://scenes/MainMenu.tscn
+// FILE: res://scenes/main_menu.tscn
 [gd_scene load_steps=6 format=3]
 
-[ext_resource type="Script" path="res://scripts/ui/MainMenu.gd" id="1"]
-[ext_resource type="PackedScene" path="res://scenes/ui/ChronicleScreen.tscn" id="2"]
-[ext_resource type="PackedScene" path="res://scenes/ui/SettingsScreen.tscn" id="3"]
-[ext_resource type="PackedScene" path="res://scenes/ui/ArtifactInventoryScreen.tscn" id="4"]
-[ext_resource type="PackedScene" path="res://scenes/ui/SaveLoadScreen.tscn" id="5"]
+[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/ui/chronicle_screen.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/ui/settings_screen.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/ui/artifact_inventory_screen.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/ui/save_load_screen.tscn" id="5"]
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -991,12 +991,12 @@ visible = false
 
 ---
 
-## 3. Блоки замены в `res://scripts/ui/MainMenu.gd`
+## 3. Блоки замены в `res://scripts/ui/main_menu.gd`
 
 **3a. Заменить блок `@onready`-ссылок на кнопки:**
 
 ```gdscript
-// FILE: res://scripts/ui/MainMenu.gd
+// FILE: res://scripts/ui/main_menu.gd
 @onready var _background: TextureRect = $Background
 @onready var _continue_btn: Button = $RightColumn/ContinueButton
 @onready var _new_game_btn: Button = $RightColumn/NewGameButton
@@ -1104,7 +1104,7 @@ func _refresh_continue() -> void:
 
 ## 4. Настройки: раздел «Дополнительно»
 
-**4a. Добить `res://scenes/ui/SettingsScreen.tscn`** — вставить узлы после `AutoSaveToggle`, перед `ButtonRow`:
+**4a. Добить `res://scenes/ui/settings_screen.tscn`** — вставить узлы после `AutoSaveToggle`, перед `ButtonRow`:
 
 ```tscn
 [node name="ExtrasHeader" type="Label" parent="Panel/Box"]
@@ -1133,10 +1133,10 @@ custom_minimum_size = Vector2(120, 36)
 layout_mode = 2
 ```
 
-**4b. Блоки в `res://scripts/ui/SettingsScreen.gd`:**
+**4b. Блоки в `res://scripts/ui/settings_screen.gd`:**
 
 ```gdscript
-// FILE: res://scripts/ui/SettingsScreen.gd
+// FILE: res://scripts/ui/settings_screen.gd
 # ... после `signal applied`: ...
 signal arena_requested
 signal model_warrior_requested
@@ -1168,7 +1168,7 @@ func _setup_extras() -> void:
 ```gdscript
 // FILE: res://tests/unit/ui/test_main_menu_layout.gd
 extends BaseTest
-const _MenuScene := preload("res://scenes/MainMenu.tscn")
+const _MenuScene := preload("res://scenes/main_menu.tscn")
 var _menu: Node = null
 
 func after_test() -> void:
@@ -1217,8 +1217,8 @@ func test_continue_disabled_without_saves() -> void:
 1. Скопировать фон (шаг 0), перезаписать `MainMenu.tscn`, применить блоки 3a–3e в `MainMenu.gd`, добить `SettingsScreen.tscn`/`.gd` (4a–4b), создать тест.
 2. Grep-чеклист старых ссылок (должно стать пусто):
 ```bash
-grep -rn "_arena_btn\|_model_warrior_btn\|_model_mage_btn\|_chronicle_btn" game/scripts/ui/MainMenu.gd
-grep -rn "ArenaButton\|ModelWarriorButton\|ChronicleButton" game/scenes/MainMenu.tscn
+grep -rn "_arena_btn\|_model_warrior_btn\|_model_mage_btn\|_chronicle_btn" game/scripts/ui/main_menu.gd
+grep -rn "ArenaButton\|ModelWarriorButton\|ChronicleButton" game/scenes/main_menu.tscn
 ```
 3. Прогон:
 ```bash
@@ -1239,13 +1239,13 @@ godot --headless --path ./game -s res://addons/gdunit4/bin/GdUnitCmdTool.gd --ad
 
 Ниже полные файлы для замены.
 
-## 1. Полная замена: `res://scenes/ui/ArtifactInventoryScreen.tscn`
+## 1. Полная замена: `res://scenes/ui/artifact_inventory_screen.tscn`
 
 ```tscn
-// FILE: res://scenes/ui/ArtifactInventoryScreen.tscn
+// FILE: res://scenes/ui/artifact_inventory_screen.tscn
 [gd_scene load_steps=4 format=3]
 
-[ext_resource type="Script" path="res://scripts/ui/ArtifactInventoryScreen.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/ui/artifact_inventory_screen.gd" id="1"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_window"]
 bg_color = Color(0.29, 0.204, 0.137, 1)
@@ -2076,14 +2076,14 @@ text = "⇄"
 
 ---
 
-## 2. Полная замена: `res://scripts/ui/ArtifactInventoryScreen.gd`
+## 2. Полная замена: `res://scripts/ui/artifact_inventory_screen.gd`
 
 ```gdscript
-// FILE: res://scripts/ui/ArtifactInventoryScreen.gd
+// FILE: res://scripts/ui/artifact_inventory_screen.gd
 extends Control
 class_name ArtifactInventoryScreen
 
-const SchoolType = preload("res://scripts/data/SchoolType.gd")
+const SchoolType = preload("res://scripts/data/school_type.gd")
 
 var _hero: HeroController = null
 var _theme: Theme = null
@@ -2327,7 +2327,7 @@ func _refresh_backpack() -> void:
 ```gdscript
 // FILE: res://tests/unit/ui/test_artifact_inventory_screen.gd
 extends BaseTest
-const _Scene := preload("res://scenes/ui/ArtifactInventoryScreen.tscn")
+const _Scene := preload("res://scenes/ui/artifact_inventory_screen.tscn")
 var _screen: Node = null
 
 func after_test() -> void:
@@ -2376,8 +2376,8 @@ func test_artifact_inventory_screen_inventory_pagination() -> void:
 
 ## Runbook
 
-1. Заменить `res://scenes/ui/ArtifactInventoryScreen.tscn` (полная перезапись).
-2. Заменить `res://scripts/ui/ArtifactInventoryScreen.gd` (полная перезапись).
+1. Заменить `res://scenes/ui/artifact_inventory_screen.tscn` (полная перезапись).
+2. Заменить `res://scripts/ui/artifact_inventory_screen.gd` (полная перезапись).
 3. Создать `res://tests/unit/ui/test_artifact_inventory_screen.gd`.
 4. Прогон тестов:
 ```bash

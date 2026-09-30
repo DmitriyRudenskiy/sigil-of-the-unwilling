@@ -950,7 +950,7 @@ tests/
 ```gdscript
 # test_legend_chronicle.gd
 func test_hero_status_panel_with_hero() -> void:
-    var panel := load("res://scenes/ui/HeroStatusPanel.tscn").instantiate()
+    var panel := load("res://scenes/ui/hero_status_panel.tscn").instantiate()
     add_child(panel)   # ← зависит от текущего дерева
     ...
     panel.free()

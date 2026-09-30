@@ -1,0 +1,53 @@
+{
+  "id": "event_05_hero",
+  "title": "Странствующий герой",
+  "description": "К поселению приходит опытный наёмник, прошедший не одну войну. Он предлагает свои услуги в обмен на приют и содержание.",
+  "icon_path": "res://assets/ui/events/refugees_event.png",
+  "frequency": 2,
+  "min_day": 12,
+  "weight": 0.7,
+  "triggers": {
+    "population_min": 5
+  },
+  "choices": [
+    {
+      "text": "Принять героя (+1 население, -5 еды)",
+      "tooltip": "Сильный защитник, но и рот кормить придётся",
+      "impact": 1,
+      "effects": {
+        "population_change": 1,
+        "resource_change": {"food": -5}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Нанять за золото (+1 населения, -30 золота)",
+      "tooltip": "Официальный контракт — надёжнее, но дороже",
+      "impact": 2,
+      "effects": {
+        "population_change": 1,
+        "resource_change": {"gold": -30}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Отказать (-5 морали)",
+      "tooltip": "Жители сожалеют: мог бы быть полезным защитником",
+      "impact": 3,
+      "effects": {
+        "morale_change": -5
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Поставить охранять ворота (-5 морали, постоянная защита)",
+      "tooltip": "Герой станет стражем, но жители опасаются чужака у ворот",
+      "impact": 2,
+      "effects": {
+        "morale_change": -5,
+        "permanent_modifier": {"id": "hero_guard", "effect": {"defense": 0.1}}
+      },
+      "requirements": {}
+    }
+  ]
+}

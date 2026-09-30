@@ -11,9 +11,9 @@ extends BaseTest
 
 
 
-const _DeathSequenceScene = preload("res://scenes/ui/DeathSequence.tscn")
+const _DeathSequenceScene = preload("res://scenes/ui/death_sequence.tscn")
 
-const _ChronicleScreenScene = preload("res://scenes/ui/ChronicleScreen.tscn")
+const _ChronicleScreenScene = preload("res://scenes/ui/chronicle_screen.tscn")
 
 var _bus_conns: Array = []
 
@@ -114,7 +114,7 @@ func test_hero_status_panel_with_hero() -> void:
 	h.combat_hp = 5
 	h.max_combat_hp = 10
 	h.followers = [_make_follower(1, "Nyx", &"archivist")]
-	var panel: HeroStatusPanel = load("res://scenes/ui/HeroStatusPanel.tscn").instantiate() as HeroStatusPanel
+	var panel: HeroStatusPanel = load("res://scenes/ui/hero_status_panel.tscn").instantiate() as HeroStatusPanel
 	add_child(panel)
 	panel.set_hero(h)
 	var title: String = str(panel.get_node("VBox/Title").text)
@@ -126,7 +126,7 @@ func test_hero_status_panel_with_hero() -> void:
 	panel.free()
 
 func test_hero_status_panel_without_hero() -> void:
-	var panel: HeroStatusPanel = load("res://scenes/ui/HeroStatusPanel.tscn").instantiate() as HeroStatusPanel
+	var panel: HeroStatusPanel = load("res://scenes/ui/hero_status_panel.tscn").instantiate() as HeroStatusPanel
 	add_child(panel)
 	var title: String = str(panel.get_node("VBox/Title").text)
 	assert_bool(title.find("Герой") != -1).is_true()

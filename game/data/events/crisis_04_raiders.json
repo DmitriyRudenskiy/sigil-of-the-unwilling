@@ -1,0 +1,46 @@
+{
+  "id": "crisis_04_raiders",
+  "title": "🐺 НАБЕГ РЕЙДЕРОВ!",
+  "description": "Отряд рейдеров вышел на ваше поселение. Они грабят окрестные деревни и теперь их цель — ваши запасы. У вас есть несколько дней, чтобы подготовиться к обороне.",
+  "crisis_type": 3,
+  "severity": 4,
+  "duration_days": 4,
+  "icon_path": "res://assets/ui/events/crisis_raid.png",
+  "ongoing_effects": {
+    "morale_penalty": -3
+  },
+  "resolution_effects": {},
+  "choices": [
+    {
+      "text": "Укрепить стены ( -15 материалов, отгоняет рейдеров)",
+      "tooltip": "Вал и рвы задержат нападающих",
+      "impact": 2,
+      "effects": {
+        "resource_change": {"materials": -15},
+        "reputation_change": 5
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Встретить их в открытом бою ( риск потери людей, +20 материалов при успехе)",
+      "tooltip": "Смелая атака может отбить награбленное у соседей",
+      "impact": 4,
+      "effects": {
+        "population_change": -2,
+        "resource_change": {"materials": 20},
+        "reputation_change": 10
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Дать дань ( -25 золота, рейдеры уйдут)",
+      "tooltip": "Купить мир ценой сокровищ",
+      "impact": 3,
+      "effects": {
+        "resource_change": {"gold": -25},
+        "morale_change": -5
+      },
+      "requirements": {}
+    }
+  ]
+}

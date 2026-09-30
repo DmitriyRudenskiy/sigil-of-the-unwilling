@@ -486,7 +486,7 @@ godot --headless -s addons/gdUnit4/bin/GdUnitCmdTool.gd --add tests/
 ## 1. `VisibilityMap.gd` — O(r²) → O(r)
 
 ```gdscript
-# res://scripts/core/VisibilityMap.gd
+# res://scripts/core/visibility_map.gd
 extends RefCounted
 class_name VisibilityMap
 
@@ -567,7 +567,7 @@ func load_explored(arr: Array) -> void:
 ## 2. `BattleState.gd` — чистый контейнер состояния
 
 ```gdscript
-# res://scripts/systems/BattleState.gd
+# res://scripts/systems/battle_state.gd
 class_name BattleState
 extends RefCounted
 
@@ -576,8 +576,8 @@ extends RefCounted
 ## Вся логика атаки/заклинаний — в BattleActionResolver.
 ## Вся логика урона — в BattleDamageResolver.
 
-const _StatusEffects = preload("res://scripts/data/StatusEffects.gd")
-const BattleActionResolver = preload("res://scripts/systems/BattleActionResolver.gd")
+const _StatusEffects = preload("res://scripts/data/status_effects.gd")
+const BattleActionResolver = preload("res://scripts/systems/battle_action_resolver.gd")
 
 var attacker_units: Array[BattleUnit] = []
 var defender_units: Array[BattleUnit] = []
@@ -1005,7 +1005,7 @@ func _normalize_hero_bonus(bonus: Dictionary) -> Dictionary[StringName, int]:
 ## 3. `WorldSaveLoadService.gd` — извлечение из WorldController
 
 ```gdscript
-# res://scripts/world/WorldSaveLoadService.gd
+# res://scripts/world/world_save_load_service.gd
 class_name WorldSaveLoadService
 extends RefCounted
 
@@ -1065,7 +1065,7 @@ func get_endgame_state() -> Dictionary:
 ## 4. `WorldController.gd` — тонкий оркестратор
 
 ```gdscript
-# res://scripts/world/WorldController.gd
+# res://scripts/world/world_controller.gd
 class_name WorldController
 extends Node2D
 
@@ -1076,7 +1076,7 @@ extends Node2D
 ## - HeroLifecycleSystem — смерть/сукцессия
 ## - EndgameController — победа/поражение
 
-const _Platform = preload("res://scripts/core/Platform.gd")
+const _Platform = preload("res://scripts/core/platform.gd")
 
 var battle_coordinator: Node = null
 var interaction_controller: Node = null
@@ -1389,7 +1389,7 @@ func localize(node: Node, text: String) -> void:
 ## 6. Пример использования `UIBinding` в `BattleUI.gd`
 
 ```gdscript
-# res://scripts/ui/BattleUI.gd (фрагмент _connect_skeleton с UIBinding)
+# res://scripts/ui/battle_ui.gd (фрагмент _connect_skeleton с UIBinding)
 class_name BattleUI
 extends CanvasLayer
 

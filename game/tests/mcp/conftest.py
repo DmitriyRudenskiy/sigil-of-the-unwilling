@@ -137,7 +137,7 @@ def _wait_for_scene(mcp, marker: str, timeout: float = 60.0) -> None:
 @pytest.fixture
 def full_cycle(mcp):
     """Полный цикл: меню → создание персонажа → мир с ботстлабом."""
-    mcp.run_scene("res://scenes/MainMenu.tscn")
+    mcp.run_scene("res://scenes/main_menu.tscn")
     mcp.wait_ready()
     mcp.execute_code(
         "get_tree().current_scene._on_new_game()\nreturn {\"ok\": true}"

@@ -302,10 +302,10 @@ static func reset_all() -> void:
 **Файлы:** `tests/helpers/test_factories.gd`, тесты с дублями; `CursorController.gd`/`CursorSprite.gd`; `HeroSlot.tscn`/`TownSlot.tscn`; `Artifact.gd`/`ArtifactRegistry.gd`; `SpellbookRegistry.gd`; `EquipmentManager.gd`; `WorldBootstrap.gd`.
 **Приёмка:** `grep -rn "func _make_hero" tests/` — только фабрика; нет ссылок на удалённые сцены; смоук всех четырёх сцен:
 ```bash
-godot --headless --quit-after 120 res://scenes/MainMenu.tscn
-godot --headless --quit-after 240 res://scenes/World.tscn
-godot --headless --quit-after 120 res://scenes/CityArena.tscn
-godot --headless --quit-after 120 res://scenes/Battle.tscn
+godot --headless --quit-after 120 res://scenes/main_menu.tscn
+godot --headless --quit-after 240 res://scenes/world.tscn
+godot --headless --quit-after 120 res://scenes/city_arena.tscn
+godot --headless --quit-after 120 res://scenes/battle.tscn
 ```
 
 ### Общие критерии приёмки всего плана
@@ -569,7 +569,7 @@ async def mcp() -> GodotMCPClient:
 @pytest_asyncio.fixture
 async def battle_scene(mcp: GodotMCPClient):
     await _wait_port_free()
-    await mcp.run_scene("res://scenes/Battle.tscn")
+    await mcp.run_scene("res://scenes/battle.tscn")
     await asyncio.sleep(10)
     await mcp.wait_ready(60)
     await mcp.wait_frames(30)
@@ -581,7 +581,7 @@ async def battle_scene(mcp: GodotMCPClient):
 @pytest_asyncio.fixture
 async def world_scene(mcp: GodotMCPClient):
     await _wait_port_free()
-    await mcp.run_scene("res://scenes/World.tscn")
+    await mcp.run_scene("res://scenes/world.tscn")
     await asyncio.sleep(10)
     await mcp.wait_ready(60)
     await mcp.wait_frames(60)
@@ -705,7 +705,7 @@ rng.seed = 42
 ### 5.5. `test_city_arena_view.gd` — инстанцирование тяжёлой сцены
 
 ```gdscript
-var packed := load("res://scenes/CityArena.tscn") as PackedScene
+var packed := load("res://scenes/city_arena.tscn") as PackedScene
 _view = packed.instantiate() as CityArenaView
 add_child(_view)
 await get_tree().process_frame

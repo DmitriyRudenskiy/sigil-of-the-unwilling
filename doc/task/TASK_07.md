@@ -10,7 +10,7 @@
 
 ## Фаза 1: Темизация (иконки, спрайты, цвета)
 
-### 1.1 Создать `res://scripts/theme/ThemeConfig.gd`
+### 1.1 Создать `res://scripts/theme/theme_config.gd`
 
 ```gdscript
 class_name ThemeConfig
@@ -247,7 +247,7 @@ Theme-ресурс Godot с палитрой. Используется как и
 
 ## Фаза 2: Вынос текстовых констант и магических чисел
 
-### 2.1 Создать `res://scripts/constants/GameText.gd`
+### 2.1 Создать `res://scripts/constants/game_text.gd`
 
 ```gdscript
 class_name GameText
@@ -481,7 +481,7 @@ static func load_failed() -> String: return tr("load.failed")
 static func no_save_found() -> String: return tr("load.no_save")
 ```
 
-### 2.2 Создать `res://scripts/constants/GameNumbers.gd`
+### 2.2 Создать `res://scripts/constants/game_numbers.gd`
 
 ```gdscript
 class_name GameNumbers

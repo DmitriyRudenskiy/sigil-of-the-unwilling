@@ -5,7 +5,7 @@ extends RefCounted
 ## cha 4–5 — мораль −1 (отток уже в ReputationSystem.process_migration);
 ## cha 1–3 — d20 vs 18 (~1 раз в 10 ходов): побег/дезертирство/отказ приказа.
 
-const GameNumbers = preload("res://scripts/constants/GameNumbers.gd")
+const GameNumbers = preload("res://scripts/constants/game_numbers.gd")
 
 static var _rng := RandomNumberGenerator.new()
 

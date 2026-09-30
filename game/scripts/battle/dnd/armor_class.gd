@@ -75,7 +75,10 @@ func calculate_ac() -> int:
 			
 			# Add DEX modifier (limited by armor type)
 			var max_dex = armor_info["max_dex"]
-			if max_dex < 99:
+			if max_dex == 0:
+				# Heavy armor: DEX ignored entirely (no negative penalty)
+				pass
+			elif max_dex < 99:
 				ac += min(dex_modifier, max_dex)
 			else:
 				ac += dex_modifier

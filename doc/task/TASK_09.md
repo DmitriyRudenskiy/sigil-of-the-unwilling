@@ -557,13 +557,13 @@ static func _resolve_autoload_fallback(key: StringName) -> Node:
 
 ## 4. Файлы с заменой `get_node("/root/...")` → `Services.resolve()`
 
-### `res://scripts/autoload/SoundManager.gd`
+### `res://scripts/autoload/sound_manager.gd`
 
 ```gdscript
 extends Node
 
-const _Platform = preload("res://scripts/core/Platform.gd")
-const AudioCues = preload("res://scripts/data/AudioCues.gd")
+const _Platform = preload("res://scripts/core/platform.gd")
+const AudioCues = preload("res://scripts/data/audio_cues.gd")
 
 const SFX_POOL := 8
 
@@ -659,13 +659,13 @@ func _cached_stream(path: String) -> AudioStream:
     return _stream_cache[path]
 ```
 
-### `res://scripts/data/ResourceIcons.gd`
+### `res://scripts/data/resource_icons.gd`
 
 ```gdscript
 class_name ResourceIcons
 extends RefCounted
 
-const _RT := preload("res://scripts/data/ResourceType.gd")
+const _RT := preload("res://scripts/data/resource_type.gd")
 
 const DATA: Dictionary = {
     _RT.ID.WOOD:    {"texture": ""},
@@ -722,7 +722,7 @@ static func _registry() -> Node:
     return _registry_cache
 ```
 
-### `res://scripts/core/Chronicle.gd`
+### `res://scripts/core/chronicle.gd`
 
 ```gdscript
 extends RefCounted
@@ -772,7 +772,7 @@ func _entry_text(e: Dictionary) -> String:
     ]
 ```
 
-### `res://scripts/ui/BattleUI.gd` (фрагмент `_on_settings`)
+### `res://scripts/ui/battle_ui.gd` (фрагмент `_on_settings`)
 
 ```gdscript
 func _on_settings() -> void:
@@ -789,7 +789,7 @@ func open_settings() -> void:
     _settings_screen.show()
 ```
 
-### `res://scripts/ui/BattleSpellbookPanel.gd` (фрагмент `setup`)
+### `res://scripts/ui/battle_spellbook_panel.gd` (фрагмент `setup`)
 
 ```gdscript
 func setup(hero: HeroController = null, magic: HeroMagic = null, registry: Node = null) -> void:
@@ -802,7 +802,7 @@ func setup(hero: HeroController = null, magic: HeroMagic = null, registry: Node 
         _magic.changed.connect(_refresh)
 ```
 
-### `res://scripts/systems/BattleController.gd` (фрагмент `_on_spell_chosen`)
+### `res://scripts/systems/battle_controller.gd` (фрагмент `_on_spell_chosen`)
 
 ```gdscript
 func _on_spell_chosen(spell_id: StringName) -> void:
@@ -821,7 +821,7 @@ func _on_spell_chosen(spell_id: StringName) -> void:
     _input.start_spell_targeting(spell_id, side, include_dead)
 ```
 
-### `res://scripts/systems/BattleController.gd` (фрагмент `_on_spell_cast_requested`)
+### `res://scripts/systems/battle_controller.gd` (фрагмент `_on_spell_cast_requested`)
 
 ```gdscript
 func _on_spell_cast_requested(spell_id: StringName, target: BattleState.BattleUnit) -> void:
@@ -838,12 +838,12 @@ func _on_spell_cast_requested(spell_id: StringName, target: BattleState.BattleUn
     _executor.on_spell_target_selected(spell_id, target)
 ```
 
-### `res://scripts/autoload/BattleEmulator.gd`
+### `res://scripts/autoload/battle_emulator.gd`
 
 ```gdscript
 extends RefCounted
 
-const BattleSpellBridge = preload("res://scripts/data/BattleSpellBridge.gd")
+const BattleSpellBridge = preload("res://scripts/data/battle_spell_bridge.gd")
 
 func get_spells() -> Dictionary:
     # ИСПРАВЛЕНИЕ: Services.resolve вместо ServiceLocator
@@ -1175,7 +1175,7 @@ func spell_registry() -> Dictionary:
     return {"count": spell_reg.get_count(), "template_count": spell_reg.get_template_count()}
 ```
 
-### `res://scripts/systems/SpellCaster.gd`
+### `res://scripts/systems/spell_caster.gd`
 
 ```gdscript
 extends RefCounted
@@ -1256,7 +1256,7 @@ static func _calc_resistance(unit: BattleState.BattleUnit, hero_bonus: Dictionar
     return clampf(base, 0.0, 0.9)
 ```
 
-### `res://scripts/systems/BattleActionResolver.gd` (фрагмент `apply_spell`)
+### `res://scripts/systems/battle_action_resolver.gd` (фрагмент `apply_spell`)
 
 ```gdscript
 static func apply_spell(
@@ -1302,7 +1302,7 @@ static func apply_spell(
     return result
 ```
 
-### `res://scripts/entities/HeroArmyController.gd`
+### `res://scripts/entities/hero_army_controller.gd`
 
 ```gdscript
 extends Node
@@ -1370,7 +1370,7 @@ func deserialize(data: Array) -> void:
             army.append(stack)
 ```
 
-### `res://scripts/entities/HeroInventory.gd` (фрагмент `deserialize`)
+### `res://scripts/entities/hero_inventory.gd` (фрагмент `deserialize`)
 
 ```gdscript
 func deserialize(data: Dictionary) -> void:
@@ -1401,7 +1401,7 @@ func deserialize(data: Dictionary) -> void:
     modifiers_changed.emit()
 ```
 
-### `res://scripts/entities/HeroStrategicResources.gd`
+### `res://scripts/entities/hero_strategic_resources.gd`
 
 ```gdscript
 class_name HeroStrategicResources
@@ -1459,7 +1459,7 @@ func emit_changed() -> void:
     strategic_resources_changed.emit(_resources)
 ```
 
-### `res://scripts/core/BattleFX.gd` (фрагмент `_resolve_spell`)
+### `res://scripts/core/battle_fx.gd` (фрагмент `_resolve_spell`)
 
 ```gdscript
 func _resolve_spell(spell_id: StringName) -> Dictionary:
@@ -1472,7 +1472,7 @@ func _resolve_spell(spell_id: StringName) -> Dictionary:
     return {}
 ```
 
-### `res://scripts/systems/EndgameController.gd` (фрагмент `_return_to_menu`)
+### `res://scripts/systems/endgame_controller.gd` (фрагмент `_return_to_menu`)
 
 ```gdscript
 func _return_to_menu() -> void:
@@ -1480,10 +1480,10 @@ func _return_to_menu() -> void:
     Services.clear_session()
     ArenaClusterSystem.reset()
     ResourceIcons.clear_cache()
-    get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
+    get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 ```
 
-### `res://scripts/ui/MainMenu.gd` (фрагмент `_clear_session_caches`)
+### `res://scripts/ui/main_menu.gd` (фрагмент `_clear_session_caches`)
 
 ```gdscript
 func _clear_session_caches() -> void:
@@ -1494,7 +1494,7 @@ func _clear_session_caches() -> void:
     TileAtlasCache.clear_cache()
 ```
 
-### `res://scripts/world/MapSpawner.gd` (фрагмент с `ServiceLocator`)
+### `res://scripts/world/map_spawner.gd` (фрагмент с `ServiceLocator`)
 
 ```gdscript
 func _spawn_enemies() -> void:
@@ -1533,7 +1533,7 @@ func get_enemy_defender_bonus() -> Dictionary:
     return {"defense": rng.randi_range(GameNumbers.MAP_ENEMY_DEF_BONUS_MIN, GameNumbers.MAP_ENEMY_DEF_BONUS_MAX)}
 ```
 
-### `res://scripts/systems/EnemyTurnProcessor.gd` (фрагмент `setup_world`)
+### `res://scripts/systems/enemy_turn_processor.gd` (фрагмент `setup_world`)
 
 ```gdscript
 func setup_world(
@@ -1556,7 +1556,7 @@ func setup_world(
         _faction_sets = units_reg.FACTION_SETS
 ```
 
-### `res://scripts/systems/EnemyGrowthSystem.gd` (фрагмент `setup_growth`)
+### `res://scripts/systems/enemy_growth_system.gd` (фрагмент `setup_growth`)
 
 ```gdscript
 func setup_growth(
@@ -1577,13 +1577,13 @@ func setup_growth(
         _faction_sets = units_reg.FACTION_SETS
 ```
 
-### `res://scripts/world/ResourceChainService.gd`
+### `res://scripts/world/resource_chain_service.gd`
 
 ```gdscript
 class_name ResourceChainService
 extends RefCounted
 
-const ToolType = preload("res://scripts/data/ToolType.gd")
+const ToolType = preload("res://scripts/data/tool_type.gd")
 
 var _extraction_cache: Dictionary = {}
 var _discovery_cache: Dictionary = {}
@@ -1680,7 +1680,7 @@ func try_extract(mgr: ResourceNodeManager, hero: HeroController, cell: Vector2i)
     return mgr.try_extract(cell, keys)
 ```
 
-### `res://scripts/world/ResourceNodeManager.gd` (фрагмент `_resolve_registry`)
+### `res://scripts/world/resource_node_manager.gd` (фрагмент `_resolve_registry`)
 
 ```gdscript
 func _resolve_registry() -> Node:
@@ -1919,9 +1919,9 @@ tests/
 extends GdUnitTestSuite
 ## R2: кэш доходности — инвалидация, пересчёт, отсутствие мутаций города.
 
-const _City := preload("res://scripts/world/City.gd")
-const _PopUnit := preload("res://scripts/world/PopUnit.gd")
-const _CityYieldCalculator := preload("res://scripts/world/CityYieldCalculator.gd")
+const _City := preload("res://scripts/world/city.gd")
+const _PopUnit := preload("res://scripts/world/pop_unit.gd")
+const _CityYieldCalculator := preload("res://scripts/world/city_yield_calculator.gd")
 
 func _make_city_with_workers() -> City:
     var c := _City.new()
@@ -1983,9 +1983,9 @@ func test_agrarian_specialization_multiplier() -> void:
 extends GdUnitTestSuite
 ## R3: рост города (еда, порог, цикл рождений).
 
-const _City := preload("res://scripts/world/City.gd")
-const _PopUnit := preload("res://scripts/world/PopUnit.gd")
-const _CityGrowthService := preload("res://scripts/world/CityGrowthService.gd")
+const _City := preload("res://scripts/world/city.gd")
+const _PopUnit := preload("res://scripts/world/pop_unit.gd")
+const _CityGrowthService := preload("res://scripts/world/city_growth_service.gd")
 
 func _make_fed_city() -> City:
     var c := _City.new()
@@ -2077,13 +2077,13 @@ func test_process_turn_no_birth_when_starving() -> void:
 extends GdUnitTestSuite
 ## R3: сериализация города — полный раундтрип.
 
-const _City := preload("res://scripts/world/City.gd")
-const _CitySerializer := preload("res://scripts/world/CitySerializer.gd")
-const _PopUnit := preload("res://scripts/world/PopUnit.gd")
-const _Borough := preload("res://scripts/world/Borough.gd")
-const _UniqueBuilding := preload("res://scripts/world/UniqueBuilding.gd")
-const _BuildingDefs := preload("res://scripts/data/BuildingDefs.gd")
-const _ProductionChain := preload("res://scripts/economy/ProductionChain.gd")
+const _City := preload("res://scripts/world/city.gd")
+const _CitySerializer := preload("res://scripts/world/city_serializer.gd")
+const _PopUnit := preload("res://scripts/world/pop_unit.gd")
+const _Borough := preload("res://scripts/world/borough.gd")
+const _UniqueBuilding := preload("res://scripts/world/unique_building.gd")
+const _BuildingDefs := preload("res://scripts/data/building_defs.gd")
+const _ProductionChain := preload("res://scripts/economy/production_chain.gd")
 
 func _rich_city() -> City:
     var c := _City.new()
@@ -2186,9 +2186,9 @@ func test_empty_deserialize() -> void:
 extends GdUnitTestSuite
 ## R3: строительство/апгрейд/перенос.
 
-const _City := preload("res://scripts/world/City.gd")
-const _CityBuildingService := preload("res://scripts/world/CityBuildingService.gd")
-const _BuildingDefs := preload("res://scripts/data/BuildingDefs.gd")
+const _City := preload("res://scripts/world/city.gd")
+const _CityBuildingService := preload("res://scripts/world/city_building_service.gd")
+const _BuildingDefs := preload("res://scripts/data/building_defs.gd")
 
 func _city() -> City:
     var c := _City.new()
@@ -2256,10 +2256,10 @@ func test_upgrade_max_level_fails() -> void:
 extends GdUnitTestSuite
 ## Тесты ввода боя: выделение, перемещение, атака, заклинания.
 
-const _BattleInput := preload("res://scripts/systems/BattleInput.gd")
-const _BattleState := preload("res://scripts/systems/BattleState.gd")
-const _MockBattleView := preload("res://tests/fakes/MockBattleView.gd")
-const _UnitRegistry := preload("res://scripts/autoload/UnitRegistry.gd")
+const _BattleInput := preload("res://scripts/systems/battle_input.gd")
+const _BattleState := preload("res://scripts/systems/battle_state.gd")
+const _MockBattleView := preload("res://tests/fakes/mock_battle_view.gd")
+const _UnitRegistry := preload("res://scripts/autoload/unit_registry.gd")
 
 var _input: BattleInput
 var _state: BattleState
@@ -2363,7 +2363,7 @@ func map_to_local(_cell: Vector2i) -> Vector2:
 extends GdUnitTestSuite
 ## Карта видимости: диск, источники, исследованные клетки.
 
-const _VisibilityMap := preload("res://scripts/core/VisibilityMap.gd")
+const _VisibilityMap := preload("res://scripts/core/visibility_map.gd")
 
 func test_visible_disk() -> void:
     var v := _VisibilityMap.new()
@@ -2407,9 +2407,9 @@ func test_is_in_bounds() -> void:
 extends GdUnitTestSuite
 ## Роутер событий мира: маршрутизация кликов, туман, навигация.
 
-const _WorldEventRouter := preload("res://scripts/world/WorldEventRouter.gd")
-const _MapGenerator := preload("res://scripts/world/MapGenerator.gd")
-const _CityManager := preload("res://scripts/world/CityManager.gd")
+const _WorldEventRouter := preload("res://scripts/world/world_event_router.gd")
+const _MapGenerator := preload("res://scripts/world/map_generator.gd")
+const _CityManager := preload("res://scripts/world/city_manager.gd")
 
 class MockHero extends Node:
     signal hero_moved(cell: Vector2i)
@@ -2450,7 +2450,7 @@ func test_router_creation() -> void:
     assert_bool(_router is Node).is_true()
 
 func test_hero_moved_updates_visibility() -> void:
-    var v := preload("res://scripts/core/VisibilityMap.gd").new()
+    var v := preload("res://scripts/core/visibility_map.gd").new()
     v.set_map_size(12, 12)
     _router.visibility = v
     _hero.current_cell = Vector2i(5, 5)
@@ -2458,7 +2458,7 @@ func test_hero_moved_updates_visibility() -> void:
     assert_bool(v.is_visible(Vector2i(5, 5))).is_true()
 
 func test_city_marker_click_navigates() -> void:
-    var city := preload("res://scripts/world/City.gd").new()
+    var city := preload("res://scripts/world/city.gd").new()
     city.display_name = "Тест"
     city.center = Vector2i(8, 8)
     _cities.cities.append(city)
@@ -2475,8 +2475,8 @@ func test_city_marker_click_navigates() -> void:
 extends GdUnitTestSuite
 ## BattleView: спрайты, твины, защита от утечек.
 
-const _BattleView := preload("res://scripts/systems/BattleView.gd")
-const _BattleState := preload("res://scripts/systems/BattleState.gd")
+const _BattleView := preload("res://scripts/systems/battle_view.gd")
+const _BattleState := preload("res://scripts/systems/battle_state.gd")
 
 func test_unit_sprite_lifecycle() -> void:
     var view := _BattleView.new()
@@ -2535,8 +2535,8 @@ func test_damage_number() -> void:
 extends GdUnitTestSuite
 ## Менеджер ресурсных узлов: обнаружение, добыча, истощение.
 
-const _ResourceNodeManager := preload("res://scripts/world/ResourceNodeManager.gd")
-const _ResourceNodeScene := preload("res://scenes/entities/ResourceNode.tscn")
+const _ResourceNodeManager := preload("res://scripts/world/resource_node_manager.gd")
+const _ResourceNodeScene := preload("res://scenes/entities/resource_node.tscn")
 
 var _mgr: ResourceNodeManager
 
@@ -2563,7 +2563,7 @@ func test_discover_already_discovered() -> void:
     var cell := Vector2i(5, 5)
     _mgr._spawn_node(cell, &"oak", 5)
     _mgr.try_discover(cell, {"nature_sense": 1})
-    var nm := load("res://scripts/world/ResourceNodeManager.gd")
+    var nm := load("res://scripts/world/resource_node_manager.gd")
     var r: Dictionary = _mgr.try_discover(cell, {"nature_sense": 1})
     assert_that(r.get("error")).is_equal(int(nm.NodeError.ALREADY_DISCOVERED))
 
@@ -2579,7 +2579,7 @@ func test_extract_discovered() -> void:
 func test_extract_undiscovered() -> void:
     var cell := Vector2i(5, 5)
     _mgr._spawn_node(cell, &"oak", 5)
-    var nm := load("res://scripts/world/ResourceNodeManager.gd")
+    var nm := load("res://scripts/world/resource_node_manager.gd")
     var r: Dictionary = _mgr.try_extract(cell, {"strong_strike": true})
     assert_that(r.get("error")).is_equal(int(nm.NodeError.NOT_DISCOVERED))
 
@@ -2587,7 +2587,7 @@ func test_extract_missing_key() -> void:
     var cell := Vector2i(5, 5)
     _mgr._spawn_node(cell, &"oak", 5)
     _mgr.try_discover(cell, {"nature_sense": 1})
-    var nm := load("res://scripts/world/ResourceNodeManager.gd")
+    var nm := load("res://scripts/world/resource_node_manager.gd")
     var r: Dictionary = _mgr.try_extract(cell, {})
     assert_that(r.get("error")).is_equal(int(nm.NodeError.EXTRACTION_KEY_MISSING))
 ```
@@ -2665,7 +2665,7 @@ async def mcp() -> GodotMCPClient:
 async def battle_scene(mcp: GodotMCPClient):
     """Запуск сцены боя через godot-mcp."""
     await _wait_port_free()
-    await mcp.run_scene("res://scenes/Battle.tscn")
+    await mcp.run_scene("res://scenes/battle.tscn")
     await asyncio.sleep(10)
     await mcp.wait_ready(60)
     await mcp.wait_frames(30)
@@ -2678,7 +2678,7 @@ async def battle_scene(mcp: GodotMCPClient):
 async def world_scene(mcp: GodotMCPClient):
     """Запуск мировой сцены через godot-mcp."""
     await _wait_port_free()
-    await mcp.run_scene("res://scenes/World.tscn")
+    await mcp.run_scene("res://scenes/world.tscn")
     await asyncio.sleep(10)
     await mcp.wait_ready(60)
     await mcp.wait_frames(60)
@@ -2862,7 +2862,7 @@ async def test_extraction_strict_and(world_scene):
         var cell = Vector2i(15, 15)
         var node = rnm._spawn_node(cell, &"saltpeter", 5)
         node.discover()
-        var nm = load("res://scripts/world/ResourceNodeManager.gd")
+        var nm = load("res://scripts/world/resource_node_manager.gd")
         return {
             "key_missing": int(nm.NodeError.EXTRACTION_KEY_MISSING),
             "cell": {"x": cell.x, "y": cell.y},

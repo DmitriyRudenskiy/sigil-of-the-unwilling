@@ -17,12 +17,12 @@
 
 ---
 
-## 1. Замена: `res://scripts/ui/UILayout.gd`
+## 1. Замена: `res://scripts/ui/ui_layout.gd`
 
 Полная перезапись файла из прошлого шага — теперь числа взяты из прототипа, угловые пресеты больше не нужны (панель живёт в контейнере сайдбара).
 
 ```gdscript
-// FILE: res://scripts/ui/UILayout.gd
+// FILE: res://scripts/ui/ui_layout.gd
 class_name UILayout
 extends RefCounted
 ## Геометрия adventure-экрана из prototype_map.html (CSS → константы).
@@ -69,16 +69,16 @@ static func minimap_panel_height(pw: float) -> float:
 
 ---
 
-## 2. Замена: `res://scenes/ui/MinimapPanel.tscn`
+## 2. Замена: `res://scenes/ui/minimap_panel.tscn`
 
 Корень — `Control` (не VBox): карта и компас позиционируются кодом по прототипу. Компас — четыре flat-кнопки-буквы вокруг карты.
 
 ```tscn
-// FILE: res://scenes/ui/MinimapPanel.tscn
+// FILE: res://scenes/ui/minimap_panel.tscn
 [gd_scene load_steps=4 format=3]
 
-[ext_resource type="Script" path="res://scripts/ui/MinimapPanel.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/ui/MinimapOverlay.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/ui/minimap_panel.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/ui/minimap_overlay.gd" id="2"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_frame"]
 bg_color = Color(0.290196, 0.0509804, 0.0509804, 1)
@@ -149,12 +149,12 @@ text = "E"
 
 ---
 
-## 3. Замена: `res://scripts/ui/MinimapPanel.gd`
+## 3. Замена: `res://scripts/ui/minimap_panel.gd`
 
 Полный файл: layout по прототипу + прежний API (сигналы, `setup`, `refresh`, построение изображения).
 
 ```gdscript
-// FILE: res://scripts/ui/MinimapPanel.gd
+// FILE: res://scripts/ui/minimap_panel.gd
 class_name MinimapPanel
 extends Control
 ## Панель миникарты. Геометрия 1:1 с prototype_map.html:
@@ -264,12 +264,12 @@ func refresh() -> void:
 
 ---
 
-## 4. Добивка в `res://scripts/ui/MinimapOverlay.gd`
+## 4. Добивка в `res://scripts/ui/minimap_overlay.gd`
 
 Рамка карты 2px `--gold-hi` (в прототипе `#minimap{border:2px}`) рисуется поверх текстуры — в конец `_draw()` после `_draw_hero_dot(size)`:
 
 ```gdscript
-// FILE: res://scripts/ui/MinimapOverlay.gd
+// FILE: res://scripts/ui/minimap_overlay.gd
 # ... (в шапке класса) ...
 const C_MAP_BORDER := Color("#f3d68c")
 
@@ -282,7 +282,7 @@ func _draw_map_border(size: Vector2) -> void:
 
 ---
 
-## 5. `res://scenes/ui/AdventureUI.tscn` + `res://scripts/ui/AdventureUI.gd`
+## 5. `res://scenes/ui/adventure_ui.tscn` + `res://scripts/ui/adventure_ui.gd`
 
 **5a. Порядок в `PanelsBox`** (прототип: дата → миникарта): переставь инстансы местами — было `MinimapPanel, InfoPanel, …`, стало:
 
@@ -297,7 +297,7 @@ layout_mode = 2
 **5b. Ширина/позиция сайдбара** (`#sidebar`: колонка 2, `grid-row 1/-1`, padding игры 14). В `AdventureUI.gd` добавить вызов первой строкой в `_ready()` и метод:
 
 ```gdscript
-// FILE: res://scripts/ui/AdventureUI.gd
+// FILE: res://scripts/ui/adventure_ui.gd
 # ... в _ready() первой строкой: ...
 	_apply_sidebar_layout()
 
@@ -325,7 +325,7 @@ extends BaseTest
 ## компас n/s ±2, w/e ±9, сайдбар clamp(300, 25vw, 430).
 
 func _make_panel() -> MinimapPanel:
-	var p: MinimapPanel = auto_free(load("res://scenes/ui/MinimapPanel.tscn").instantiate())
+	var p: MinimapPanel = auto_free(load("res://scenes/ui/minimap_panel.tscn").instantiate())
 	add_child(p)
 	return p
 

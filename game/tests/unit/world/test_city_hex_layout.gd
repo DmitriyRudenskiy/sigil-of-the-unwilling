@@ -2,7 +2,7 @@ extends BaseTest
 
 # city-hex-layout-prototype: ядро города (ромб 2×2), кольца 1–3, кэш тайл→город
 
-const MapRenderer = preload("res://scripts/world/MapRenderer.gd")
+const MapRenderer = preload("res://scripts/world/map_renderer.gd")
 
 func _city(center := Vector2i(10, 10)) -> City:
 	var c := CityFactory.create_village(center, "Test")

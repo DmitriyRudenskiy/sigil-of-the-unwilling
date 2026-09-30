@@ -7,7 +7,7 @@ func _initialize() -> void:
     call_deferred("_run")
 
 func _run() -> void:
-    var artifacts := preload("res://scripts/autoload/ArtifactRegistry.gd").new()
+    var artifacts := preload("res://scripts/autoload/artifact_registry.gd").new()
     var dir_path := "res://assets/artifacts"
     if not DirAccess.dir_exists_absolute(dir_path):
         DirAccess.make_dir_recursive_absolute(dir_path)

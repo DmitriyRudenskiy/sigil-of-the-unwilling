@@ -50,9 +50,22 @@
 
 4. **Запуск тестов**:
    ```bash
-   cd game
-   ./run_tests.sh
+   cd game && bash tests/run_all.sh   # полный прогон: gdUnit4 + MCP + структурные
    ```
+   Подробности (требования, правила, baseline) — в [doc/testing.md](doc/testing.md).
+
+5. **MCP-сервер (опционально, для AI-интеракции и MCP-тестов)**: вендорный
+   проект [tugcantopaloglu/godot-mcp](https://github.com/tugcantopaloglu/godot-mcp)
+   **не коммитится** (gitignored) и ставится локально один раз:
+   ```bash
+   cd game
+   git clone https://github.com/tugcantopaloglu/godot-mcp.git addons/godot-mcp
+   cd addons/godot-mcp && npm install && npm run build
+   ```
+   Точка входа: `game/addons/godot-mcp/build/index.js` (interaction-порт 9090).
+   Без него игра и gdUnit4-тесты работают; MCP-секция `run_all.sh` пропускается.
+   Сервер на время теста инжектит `game/mcp_interaction_server.gd` — транзиентный
+   артефакт (gitignored, чистится в конце прогона).
 
 ## 📁 Структура проекта
 
@@ -82,7 +95,7 @@ fission-ai/
 │   │   ├── ui/                # UI логика
 │   │   ├── economy/           # Экономика
 │   │   └── demographics/      # Демография
-│   ├── tests/                 # Тесты (GUT framework)
+│   ├── tests/                 # Тесты (gdUnit4 6.2.1, аддон ставится отдельно); прогон: tests/run_all.sh
 │   ├── tools/                 # Инструменты разработки
 │   ├── project.godot          # Конфигурация проекта
 │   └── run_tests.sh           # Скрипт запуска тестов
@@ -135,25 +148,48 @@ godot --path game --script tools/scenarios/<scenario>.gd
 
 ### Тестирование
 
-Проект использует фреймворк **GUT 9.7.1** для тестирования:
+Проект использует фреймворк **gdUnit4 6.2.1** для тестирования. Аддон
+`game/addons/gdunit4/` не трекается в git — перед прогоном установите его из
+репозитория вендора (полная инструкция: [doc/testing.md](doc/testing.md#установка-gdunit4)):
 
 ```bash
-# Запустить все тесты
-cd game && ./run_tests.sh
-
-# Запустить конкретный тест
-godot --path game --unit-testing --test-res res://tests/test_map_generation.gd
-
-# Запустить тесты с выводом логов
-godot --path game --unit-testing --gut-log-level=1
+cd game
+git clone --depth 1 --branch v6.2.1 https://github.com/MikeSchulze/gdUnit4.git /tmp/gdunit4-install
+cp -r /tmp/gdunit4-install/addons/gdunit4 addons/gdunit4
+rm -rf /tmp/gdunit4-install
 ```
+
+```bash
+# Полный прогон (gdUnit4 + MCP + структурные проверки) — единственная точка входа
+cd game && bash tests/run_all.sh
+
+# Только gdUnit4 (headless)
+cd game && godot --headless --path . -s addons/gdunit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -c -a res://tests
+```
+
+Подробное руководство (требования, структура, правила именования, baseline,
+известные skip) — в [doc/testing.md](doc/testing.md).
 
 ## 📚 Документация
 
-- [Игровая механика](doc/task/game_mechanics.md)
+Документация живёт в `doc/`:
+
+- [Тестирование](doc/testing.md) — требования, правила, baseline
+- [Задачи и требования](doc/task/) — `TASK_*.md`
 - [Система магии](game/assets/data/spells.json)
 - [Спецификации OpenSpec](openspec/specs/)
-- [API документация](doc/api/)
+
+### Формат задачи (`doc/task/TASK_*.md`)
+
+```markdown
+# TASK_XX: Название задачи
+
+## Описание
+## Требования
+## Критерии приёмки
+## Ресурсы
+## Статус          # Не начата / В работе / На проверке / Завершена
+```
 
 ## 🎨 Ассеты
 
@@ -173,6 +209,13 @@ godot --path game --unit-testing --gut-log-level=1
 - Прогресс-бары (здоровье, мана, опыт)
 - Слайдеры и чекбоксы
 - Декоративные элементы
+
+### Система загрузки иконок
+- Пути каталогов — константы `ICON_DIR_*` в `scripts/theme/ThemeConfig.gd`
+- `ThemeConfig.icon_texture(path)` — кэшированная загрузка, fallback на `fallback.png` при отсутствии файла
+- `ResourceRegistry.get_icon(id)` и `BuildingDefs.get_icon(id)` — текстура по id ресурса/здания
+- `game_theme.tres` использует 9-slice `StyleBoxTexture` для кнопок, панелей, слотов и прогресс-баров
+- Тесты: `tests/unit/theme/` (загрузка, курсоры, кэш, fallback)
 
 ## 🤝 Вклад в проект
 
@@ -198,7 +241,7 @@ godot --path game --unit-testing --gut-log-level=1
 
 - [Godot Engine](https://godotengine.org/)
 - [OpenSpec](https://github.com/Fission-AI/OpenSpec)
-- [GUT Testing Framework](https://github.com/bitbrain/gut)
+- [gdUnit4](https://github.com/MikeSchulze/gdUnit4)
 - [Документация Godot](https://docs.godotengine.org/)
 
 ## 📞 Контакты

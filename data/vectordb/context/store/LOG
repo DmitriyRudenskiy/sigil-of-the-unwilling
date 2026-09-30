@@ -1,5 +1,5 @@
-2026/09/22-19:51:40.266755 0x17b14b000 Recovering log #3
-2026/09/22-19:51:40.268175 0x17b14b000 Level-0 table #5: started
-2026/09/22-19:51:40.279962 0x17b14b000 Level-0 table #5: 75460 bytes OK
-2026/09/22-19:51:40.297099 0x17b14b000 Delete type=0 #3
-2026/09/22-19:51:40.297113 0x17b14b000 Delete type=3 #2
+2026/09/30-10:53:42.708626 0x17a14b000 Creating DB /Users/user/sigil-of-the-unwilling/data/vectordb/context/store since it was missing.
+2026/09/30-10:53:42.729677 0x17a14b000 Recovering log #8
+2026/09/30-10:53:42.738677 0x17a14b000 Delete type=3 #1
+2026/09/30-10:53:42.738685 0x17a14b000 Delete type=2 #5
+2026/09/30-10:53:42.738690 0x17a14b000 Delete type=0 #8

@@ -9,7 +9,7 @@
 Создайте базовый класс и наследников для инкапсуляции логики потребностей.
 
 ```gdscript
-// FILE: res://scripts/data/needs/NeedStrategy.gd
+// FILE: res://scripts/data/needs/need_strategy.gd
 class_name NeedStrategy
 extends RefCounted
 
@@ -29,7 +29,7 @@ func get_death_cause() -> StringName:
 ```
 
 ```gdscript
-// FILE: res://scripts/data/needs/RestStrategy.gd
+// FILE: res://scripts/data/needs/rest_strategy.gd
 class_name RestStrategy
 extends NeedStrategy
 
@@ -48,7 +48,7 @@ func get_death_cause() -> StringName:
 ```
 
 ```gdscript
-// FILE: res://scripts/data/needs/SocialStrategy.gd
+// FILE: res://scripts/data/needs/social_strategy.gd
 class_name SocialStrategy
 extends NeedStrategy
 
@@ -68,7 +68,7 @@ func get_death_cause() -> StringName:
 ```
 
 ```gdscript
-// FILE: res://scripts/data/needs/InspirationStrategy.gd
+// FILE: res://scripts/data/needs/inspiration_strategy.gd
 class_name InspirationStrategy
 extends NeedStrategy
 
@@ -88,7 +88,7 @@ func get_death_cause() -> StringName:
 Создайте Enum'ы. В `NeedType` регистрируем стратегии.
 
 ```gdscript
-// FILE: res://scripts/data/SchoolType.gd
+// FILE: res://scripts/data/school_type.gd
 class_name SchoolType
 extends RefCounted
 
@@ -120,7 +120,7 @@ static func all_ids() -> Array[int]: return [ID.AIR, ID.FIRE, ID.WATER, ID.EARTH
 ```
 
 ```gdscript
-// FILE: res://scripts/data/NeedType.gd
+// FILE: res://scripts/data/need_type.gd
 class_name NeedType
 extends RefCounted
 
@@ -157,7 +157,7 @@ static func all_names() -> Array[StringName]:
 ```
 
 ```gdscript
-// FILE: res://scripts/data/ToolType.gd
+// FILE: res://scripts/data/tool_type.gd
 class_name ToolType
 extends RefCounted
 
@@ -195,7 +195,7 @@ static func all_names() -> Array[StringName]:
 ## 📂 ЭТАП 2: Рефакторинг Бизнес-Логики (Int-ключи в Runtime)
 
 ```gdscript
-// FILE: res://scripts/entities/HeroMagic.gd
+// FILE: res://scripts/entities/hero_magic.gd
 class_name HeroMagic
 extends RefCounted
 
@@ -228,7 +228,7 @@ func deserialize_schools(data: Dictionary) -> void:
 ```
 
 ```gdscript
-// FILE: res://scripts/entities/HeroNeeds.gd
+// FILE: res://scripts/entities/hero_needs.gd
 class_name HeroNeeds
 extends RefCounted
 
@@ -275,7 +275,7 @@ func deserialize(d: Dictionary) -> void:
 ```
 
 ```gdscript
-// FILE: res://scripts/demographics/DemographicTurnProcessor.gd (Фрагмент замены)
+// FILE: res://scripts/demographics/demographic_turn_processor.gd (Фрагмент замены)
 func _process_city(city: City, ctx: TurnContext) -> Dictionary:
    # ... (предыдущий код)
    for ch in registry.alive_in_city(city.uid).duplicate():
@@ -432,7 +432,7 @@ static func need_icon(need_id: StringName) -> String:
 
 ### 1. Обновление UI-Панелей
 ```gdscript
-// FILE: res://scripts/ui/ResourceBar.gd
+// FILE: res://scripts/ui/resource_bar.gd
 class_name ResourceBar
 extends HBoxContainer
 
@@ -451,7 +451,7 @@ func update_resources(resources: Dictionary) -> void:
 ```
 
 ```gdscript
-// FILE: res://scripts/ui/HeroStatusPanel.gd (Фрагмент)
+// FILE: res://scripts/ui/hero_status_panel.gd (Фрагмент)
 func _needs_text(n: HeroNeeds) -> String:
    var parts: Array[String] = []
    for id in NeedType.all_ids():

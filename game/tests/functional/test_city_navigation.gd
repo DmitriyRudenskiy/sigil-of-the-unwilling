@@ -109,7 +109,7 @@ func test_exit_button_renamed_and_closes() -> void:
 	var hero = HeroController.new()
 	hero.name = "Hero"
 	holder.add_child(hero)
-	var screen = load("res://scenes/ui/CityScreen.tscn").instantiate() as CityScreen
+	var screen = load("res://scenes/ui/city_screen.tscn").instantiate() as CityScreen
 	holder.add_child(screen)
 	screen.setup(city, hero, Vector2i(10, 10), TestFactories.seeded(42))
 	var btn := screen.get_node("CityScreenBackground/CityScreenCenter/CityScreenPanel/CityScreenBox/CityScreenButtons/Close") as Button

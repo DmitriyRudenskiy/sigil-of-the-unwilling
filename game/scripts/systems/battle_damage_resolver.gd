@@ -1,0 +1,95 @@
+class_name BattleDamageResolver
+extends RefCounted
+
+const _StatusEffects = preload("res://scripts/data/status_effects.gd")
+
+static func resolve(state: BattleState, atk: BattleState.BattleUnit, def: BattleState.BattleUnit, ctx: Dictionary) -> Dictionary:
+	var is_melee: bool = ctx.get("is_melee", true)
+	var rng: RandomNumberGenerator = ctx.get("rng")
+	var atk_bonus: int = ctx.get("atk_bonus", 0)
+	var def_bonus: int = ctx.get("def_bonus", 0)
+
+	if atk == null or def == null or not atk.is_alive() or not def.is_alive():
+		return {}
+
+	var result: Dictionary = BattleRules.calculate_attack(atk, def, is_melee, rng, atk_bonus, def_bonus)
+	if result.is_empty():
+		return result
+
+	_apply_status_procs(atk, def, rng, result)
+	_apply_hero_class_procs(atk, def, rng, result)
+	_apply_vampiric(atk, result)
+	_apply_breath(state, atk, def, result, rng, state.hex_shift_right)
+	_apply_saltpeter(state, atk, def, rng, result, state.hex_shift_right)
+
+	return result
+
+static func _apply_status_procs(atk: BattleState.BattleUnit, def: BattleState.BattleUnit, rng: RandomNumberGenerator, result: Dictionary) -> void:
+	if atk.has_tag("petrify") and rng.randf() < GameNumbers.STATUS_PROC_CHANCE:
+		def.add_status(_StatusEffects.Effect.PETRIFIED, 1)
+		result["petrify"] = true
+	if atk.has_tag("blind") and rng.randf() < GameNumbers.STATUS_PROC_CHANCE:
+		def.add_status(_StatusEffects.Effect.BLIND, 1)
+		result["blind"] = true
+
+## Классовые эффекты бойца-героя (early-game-foundation): тег = ключ класса.
+static func _apply_hero_class_procs(
+	atk: BattleState.BattleUnit,
+	def: BattleState.BattleUnit,
+	rng: RandomNumberGenerator,
+	result: Dictionary
+) -> void:
+	if atk == null or def == null or result.is_empty():
+		return
+	if atk.has_tag("ranger") and GameNumbersHero.WILD_ANIMAL_KEYS.has(def.get_key()):
+		result["kills"] = int(result.get("kills", 0)) + GameNumbersHero.RANGER_ANIMAL_DAMAGE_BONUS
+		result["ranger_bonus"] = true
+	if atk.has_tag("rogue") and rng.randf() < GameNumbersHero.ROGUE_CRIT_CHANCE:
+		result["kills"] = int(result.get("kills", 0)) * GameNumbersHero.ROGUE_CRIT_MULTIPLIER
+		result["crit"] = true
+
+
+static func _apply_vampiric(atk: BattleState.BattleUnit, result: Dictionary) -> void:
+	if not atk.has_tag("vampiric") or int(result.get("kills", 0)) <= 0:
+		return
+	var healed: int = min(int(result.get("kills", 0)), atk.max_count - atk.get_count())
+	if healed > 0:
+		atk.set_count(atk.get_count() + healed)
+		result["vampiric"] = healed
+
+static func _apply_breath(state: BattleState, atk: BattleState.BattleUnit, def: BattleState.BattleUnit, result: Dictionary, _rng: RandomNumberGenerator, shift_right: bool) -> void:
+	if atk.has_tag("breath"):
+		result["breath_kills"] = _apply_area_damage(
+			state, atk, def.cell,
+			int(result.get("damage", 0) * GameNumbers.BREATH_DMG_RATIO),
+			result, &"breath_kills", shift_right
+		)
+
+const _SIDES := [BattleState.Side.ATTACKER, BattleState.Side.DEFENDER]
+
+static func _apply_area_damage(
+	state: BattleState, atk: BattleState.BattleUnit,
+	origin: Vector2i, dmg: int, result: Dictionary, key: StringName, shift_right: bool
+) -> int:
+	var total: int = 0
+	for nb in HexUtils.get_all_neighbors(origin, shift_right):
+		for side in _SIDES:
+			var v: BattleState.BattleUnit = state.get_unit_at(nb, side)
+			if v == null or not v.is_alive() or v == atk:
+				continue
+			var hp: int = max(1, v.get_hp())
+			var kills: int = min(v.get_count(), max(1, int(dmg / float(hp))))
+			v.set_count(v.get_count() - kills)
+			total += kills
+			if v.get_count() <= 0:
+				BattleActionResolver.kill_unit(state, v)
+	result[key] = total
+	return total
+
+static func _apply_saltpeter(state: BattleState, atk: BattleState.BattleUnit, def: BattleState.BattleUnit, _rng: RandomNumberGenerator, result: Dictionary, shift_right: bool) -> void:
+	if atk.has_tag("saltpeter"):
+		var explosion_dmg: int = int(atk.get_base_damage() * GameNumbers.SALTPETER_EXPLOSION_MULT)
+		_apply_area_damage(
+			state, atk, def.cell, explosion_dmg,
+			result, &"saltpeter_kills", shift_right
+		)

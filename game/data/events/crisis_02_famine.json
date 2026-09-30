@@ -5,7 +5,7 @@
   "crisis_type": 1,
   "severity": 4,
   "duration_days": 5,
-  "icon_path": "res://assets/ui/events/famine_crisis.png",
+  "icon_path": "res://assets/ui/events/crisis_famine.png",
   "ongoing_effects": {
     "morale_penalty": -3,
     "population_drain": 1

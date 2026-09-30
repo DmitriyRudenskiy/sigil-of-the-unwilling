@@ -46,7 +46,7 @@ func test_full_early_game_loop() -> void:
 
 	# 3. Город: выгрузка рюкзака в хранилище
 	var city := _city_with_barracks()
-	var screen: CityScreen = load("res://scenes/ui/CityScreen.tscn").instantiate() as CityScreen
+	var screen: CityScreen = load("res://scenes/ui/city_screen.tscn").instantiate() as CityScreen
 	_main_root().add_child(screen)
 	screen.setup(city, hero, Vector2i(10, 10), TestFactories.seeded(1))
 	var unload: CityCheck = screen.unload_pressed()

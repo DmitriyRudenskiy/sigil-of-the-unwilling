@@ -3,7 +3,7 @@ extends BaseTest
 var _view: CityArenaView = null
 
 func before_test() -> void:
-	var packed := load("res://scenes/CityArena.tscn") as PackedScene
+	var packed := load("res://scenes/city_arena.tscn") as PackedScene
 	assert_object(packed).is_not_null()
 	_view = packed.instantiate() as CityArenaView
 	add_child(_view)

@@ -2,7 +2,7 @@ extends BaseTest
 
 # social-stats-weapon-tech: LeadershipCheck (D3)
 
-const LeadershipCheck = preload("res://scripts/systems/LeadershipCheck.gd")
+const LeadershipCheck = preload("res://scripts/systems/leadership_check.gd")
 
 func _rng(seed: int) -> RandomNumberGenerator:
 	var r := RandomNumberGenerator.new()

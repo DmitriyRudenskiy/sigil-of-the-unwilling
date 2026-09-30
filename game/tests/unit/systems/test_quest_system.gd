@@ -1,8 +1,8 @@
 extends BaseTest
 
-const QuestSystem = preload("res://scripts/systems/QuestSystem.gd")
+const QuestSystem = preload("res://scripts/systems/quest_system.gd")
 const QuestTemplates = preload("res://scripts/data/quest_templates.gd")
-const FactionReputation = preload("res://scripts/systems/FactionReputation.gd")
+const FactionReputation = preload("res://scripts/systems/faction_reputation.gd")
 
 var rng: RandomNumberGenerator
 

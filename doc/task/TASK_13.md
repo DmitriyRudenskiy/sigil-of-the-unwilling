@@ -34,7 +34,7 @@
 | Проблема | Пример | Рекомендация |
 |---|---|---|
 | Создание `Node` в полях класса | `HeroController`: `var movement := HeroMovementController.new()` в теле класса | Создавать в `_ready()` или `_init()` явно. Поля-узлы, инициализируемые при загрузке скрипта, могут создаваться до дерева. |
-| `class_name` + `preload` | `const _HexUtils = preload("res://scripts/core/HexUtils.gd")` при наличии `class_name HexUtils` | Дублирование. Если есть `class_name`, использовать глобальное имя. Если `preload` — убрать `class_name` или наоборот. |
+| `class_name` + `preload` | `const _HexUtils = preload("res://scripts/core/hex_utils.gd")` при наличии `class_name HexUtils` | Дублирование. Если есть `class_name`, использовать глобальное имя. Если `preload` — убрать `class_name` или наоборот. |
 | Статический доступ к дереву сцены | `TileAtlas.build_hex_tileset()` → `Engine.get_main_loop() as SceneTree` → `tree.root.get_node_or_null("/root/TileAtlasCache")` | Статический метод не должен зависеть от дерева. Кэш должен быть инъектирован или вынесен в автозагрузку. |
 | Глобальная калибровка | `HexGrid.calibrate(tile_map)` меняет `HexGrid.shift_right` | Передавать ориентацию в `HexUtils` как параметр или хранить в `TileMapLayer`/`MapModel`. |
 | `queue_free()` в тестах | Многие тесты вызывают `.free()` напрямую | Для `RefCounted` ок, для `Node` в дереве — `queue_free()`. В тестах `GdUnit4` лучше использовать `auto_free()`. |
@@ -593,10 +593,10 @@ func test_raid_emits_signal() -> void:
 ```gdscript
 # tests/unit/systems/test_battle_rules.gd
 extends GdUnitTestSuite
-const _BattleRules := preload("res://scripts/core/BattleRules.gd")
-const _UnitStats := preload("res://scripts/entities/UnitStats.gd")
-const _UnitStack := preload("res://scripts/entities/UnitStack.gd")
-const _BattleUnit := preload("res://scripts/systems/BattleState.gd").BattleUnit
+const _BattleRules := preload("res://scripts/core/battle_rules.gd")
+const _UnitStats := preload("res://scripts/entities/unit_stats.gd")
+const _UnitStack := preload("res://scripts/entities/unit_stack.gd")
+const _BattleUnit := preload("res://scripts/systems/battle_state.gd").BattleUnit
 
 func _unit(atk: int, def: int, tags: Array = []) -> BattleState.BattleUnit:
     var stats := UnitStats.new("t", "T", atk, 5, 10, 3, def, tags)
@@ -634,10 +634,10 @@ func test_luck_immune_for_undead() -> void:
 ```gdscript
 # tests/integration/battle/test_battle_turn_flow.gd
 extends GdUnitTestSuite
-const _BattleState := preload("res://scripts/systems/BattleState.gd")
-const _Executor := preload("res://scripts/systems/BattleTurnExecutor.gd")
-const _AI := preload("res://scripts/systems/BattleAI.gd")
-const _Units := preload("res://scripts/autoload/UnitRegistry.gd")
+const _BattleState := preload("res://scripts/systems/battle_state.gd")
+const _Executor := preload("res://scripts/systems/battle_turn_executor.gd")
+const _AI := preload("res://scripts/systems/battle_ai.gd")
+const _Units := preload("res://scripts/autoload/unit_registry.gd")
 
 var _units: Node
 
@@ -682,7 +682,7 @@ func test_full_player_attack_cycle() -> void:
 from __future__ import annotations
 import time
 
-BATTLE_SCENE = "res://scenes/Battle.tscn"
+BATTLE_SCENE = "res://scenes/battle.tscn"
 
 def test_battle_starts_and_player_can_act(mcp):
     """Бой запускается, игрок может выбрать юнит и атаковать."""
@@ -801,7 +801,7 @@ MAX_ASTAR_MS = 200
 
 def test_map_generation_performance(mcp):
     """Генерация карты 80×80 не дольше 3 секунд."""
-    mcp.run_scene("res://scenes/World.tscn")
+    mcp.run_scene("res://scenes/world.tscn")
     mcp.wait_ready()
 
     result = mcp.execute_code("""
@@ -821,7 +821,7 @@ def test_map_generation_performance(mcp):
 
 def test_astar_performance(mcp):
     """A* на карте 80×80 не дольше 200 мс."""
-    mcp.run_scene("res://scenes/World.tscn")
+    mcp.run_scene("res://scenes/world.tscn")
     mcp.wait_ready()
 
     result = mcp.execute_code("""
@@ -886,7 +886,7 @@ static func make_battle_state(
 ) -> BattleState:
     var units := Services.resolve(&"units")
     if units == null:
-        units = load("res://scripts/autoload/UnitRegistry.gd").new()
+        units = load("res://scripts/autoload/unit_registry.gd").new()
     var state := BattleState.new()
     var atk := [units.make_fixed_stack(atk_key, atk_count)]
     var def := [units.make_fixed_stack(def_key, def_count)]

@@ -1,0 +1,49 @@
+{
+  "id": "event_04_storage",
+  "title": "Забытый погреб",
+  "description": "При раскопках рабочие наткнулись на заброшенный погреб. Внутри — старые запасы и инструменты, но часть кладовки завалена и требует усилий, чтобы вскрыть.",
+  "icon_path": "res://assets/ui/events/ruins_event.png",
+  "frequency": 2,
+  "min_day": 8,
+  "weight": 0.8,
+  "triggers": {},
+  "choices": [
+    {
+      "text": "Осмотреть и забрать всё (+15 дерева, +10 материалов)",
+      "tooltip": "Полный сбор находки, но это займёт время рабочих",
+      "impact": 1,
+      "effects": {
+        "resource_change": {"wood": 15, "materials": 10}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Забрать только ценности (+20 золота)",
+      "tooltip": "Быстро и безопасно, но основная часть останется",
+      "impact": 1,
+      "effects": {
+        "resource_change": {"gold": 20}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Запечатать погреб (+5 морали)",
+      "tooltip": "Честность и осторожность укрепят уважение жителей",
+      "impact": 2,
+      "effects": {
+        "morale_change": 5
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Организовать постоянный разряд (+5 материалов, постоянный прирост)",
+      "tooltip": "Превратить находку в источник ресурсов",
+      "impact": 2,
+      "effects": {
+        "resource_change": {"materials": 5},
+        "permanent_modifier": {"id": "old_storage", "effect": {"production": 0.05}}
+      },
+      "requirements": {}
+    }
+  ]
+}

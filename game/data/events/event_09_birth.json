@@ -1,0 +1,46 @@
+{
+  "id": "event_09_birth",
+  "title": "Рождение ребёнка",
+  "description": "В одной из семей родился ребёнок. Новое поколение — надежда поселения. Жители хотят отметить это событие.",
+  "icon_path": "res://assets/ui/events/harvest_event.png",
+  "frequency": 3,
+  "min_day": 8,
+  "weight": 0.9,
+  "triggers": {
+    "population_min": 6
+  },
+  "choices": [
+    {
+      "text": "Отпраздновать рождение (+1 населения, +10 морали, -10 еды)",
+      "tooltip": "Праздник объединит поселение",
+      "impact": 1,
+      "effects": {
+        "population_change": 1,
+        "morale_change": 10,
+        "resource_change": {"food": -10}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Благословение жреца (+1 населения, +5 морали)",
+      "tooltip": "Духовный обряд укрепит веру и единство",
+      "impact": 1,
+      "effects": {
+        "population_change": 1,
+        "morale_change": 5
+      },
+      "requirements": {
+        "building_required": "temple"
+      }
+    },
+    {
+      "text": "Просто записать в реестр (+1 населения)",
+      "tooltip": "Без празднеств, но ребёнок станет жителем",
+      "impact": 2,
+      "effects": {
+        "population_change": 1
+      },
+      "requirements": {}
+    }
+  ]
+}

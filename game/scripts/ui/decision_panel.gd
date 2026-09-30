@@ -19,6 +19,7 @@ signal decision_made(choice_index: int)
 var current_event_data = null
 var is_crisis: bool = false
 var days_remaining: int = 0
+var _pause_token: int = 0
 
 func _ready():
 	hide()
@@ -41,8 +42,10 @@ func show_event(event):
 	show_choices(event.choices)
 	show()
 	
-	# Блокируем игровой цикл пока игрок не сделает выбор
-	get_tree().paused = true
+	# Блокируем игровой цикл через PauseController (reference-counted),
+	# чтобы избежать «залипшей паузы» при смене сцены.
+	_release_pause()
+	_pause_token = PauseController.acquire(&"DecisionPanel.event")
 
 ## Показать кризис
 func show_crisis(crisis):
@@ -64,7 +67,14 @@ func show_crisis(crisis):
 	crisis_timer.text = "Дней осталось: %d" % days_remaining
 	
 	show()
-	get_tree().paused = true
+	_release_pause()
+	_pause_token = PauseController.acquire(&"DecisionPanel.crisis")
+
+func _release_pause() -> void:
+	if _pause_token != 0:
+		PauseController.release(_pause_token, &"DecisionPanel")
+		_pause_token = 0
+
 
 ## Показать варианты выбора
 func show_choices(choices: Array):
@@ -138,7 +148,7 @@ func update_severity_indicator(severity: int):
 ## Обработка выбора
 func _on_choice_selected(choice_index: int):
 	decision_made.emit(choice_index)
-	get_tree().paused = false
+	_release_pause()
 	hide()
 
 ## Обновление таймера кризиса (вызывается каждый день)
@@ -150,5 +160,5 @@ func update_crisis_timer(days_left: int):
 ## Закрыть панель без выбора (только для обычных событий)
 func close_without_choice():
 	if not is_crisis:
-		get_tree().paused = false
+		_release_pause()
 		hide()

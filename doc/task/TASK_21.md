@@ -6,12 +6,12 @@
 
 ---
 
-## 1. Новый файл: `res://scripts/core/KnightFramesBuilder.gd`
+## 1. Новый файл: `res://scripts/core/knight_frames_builder.gd`
 
 Нарезает лист 8×5, вырезает белый фон (с мягким краем), нормализует каждый кадр по alpha-bbox (центрирование по горизонтали + общая линия земли), собирает `SpriteFrames`.
 
 ```gdscript
-// FILE: res://scripts/core/KnightFramesBuilder.gd
+// FILE: res://scripts/core/knight_frames_builder.gd
 class_name KnightFramesBuilder
 extends RefCounted
 ## Строит SpriteFrames героя из листа рыцаря 8x5.
@@ -139,8 +139,8 @@ extends Node2D
 ## Визуал героя: анимация рыцаря из листа 8x5, маркер цели, превью пути,
 ## орб состояния. Жёлтая точка-заглушка — только если лист не найден.
 
-const DestMarkerScene := preload("res://scenes/entities/DestMarker.tscn")
-const StatusOrbScene := preload("res://scenes/entities/StatusOrb.tscn")
+const DestMarkerScene := preload("res://scenes/entities/dest_marker.tscn")
+const StatusOrbScene := preload("res://scenes/entities/status_orb.tscn")
 
 const HERO_SHEET_CANDIDATES := [
 	"res://assets/raw/hero_knight.png",
@@ -323,7 +323,7 @@ func test_missing_sheet_returns_null() -> void:
 ## Runbook
 
 **Шаг 1.** Сохрани загруженный лист как `res://assets/raw/hero_knight.png` (импорт не нужен — `Image.load_from_file` читает PNG напрямую).
-**Шаг 2.** Создай `res://scripts/core/KnightFramesBuilder.gd` и `res://tests/unit/entities/test_knight_frames_builder.gd`.
+**Шаг 2.** Создай `res://scripts/core/knight_frames_builder.gd` и `res://tests/unit/entities/test_knight_frames_builder.gd`.
 **Шаг 3.** Перезапиши `res://scenes/entities/HeroVisuals.gd` (сцена `HeroVisuals.tscn` не меняется: дети `Fallback`/`Anim` на месте).
 **Шаг 4.** Проверка:
 ```bash

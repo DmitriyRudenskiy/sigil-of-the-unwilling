@@ -39,9 +39,9 @@
   - `game/assets/ui/widgets/` для кнопок, панелей, слайдеров
   - `game/scripts/build/gen_resource_icons.gd`, `gen_building_icons.gd`, `gen_need_icons.gd`
 - **Изменённые файлы**: 
-  - `game/scripts/autoload/CursorController.gd` (заполнение MODE_ASSETS путями к спрайтам)
+  - `game/scripts/autoload/cursor_controller.gd` (заполнение MODE_ASSETS путями к спрайтам)
   - `game/assets/theme/game_theme.tres` (обновление стилей с новыми текстурами)
-  - `game/scripts/theme/ThemeConfig.gd` (добавление путей к иконкам)
+  - `game/scripts/theme/theme_config.gd` (добавление путей к иконкам)
   - UI сцены (`*.tscn`) для использования новых иконок и виджетов
 - **Тесты**: unit-тесты загрузки курсоров, отображения иконок, интеграционные тесты UI
 

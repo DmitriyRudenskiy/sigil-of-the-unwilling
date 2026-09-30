@@ -1,6 +1,6 @@
 extends BaseTest
 
-const _Scene := preload("res://scenes/BattleView.tscn")
+const _Scene := preload("res://scenes/battle_view.tscn")
 
 var _view: BattleView
 var _state: BattleState

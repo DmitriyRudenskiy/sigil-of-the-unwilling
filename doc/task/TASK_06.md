@@ -943,7 +943,7 @@ func _apply_artifact_effects(units: Array, mods: Dictionary) -> void:
 
 ---
 
-## Патч в `res://scripts/systems/BattleState.gd`
+## Патч в `res://scripts/systems/battle_state.gd`
 
 Замените текущий `place_army()` на этот:
 
@@ -998,7 +998,7 @@ func _init_state() -> void:
 
 # 3. Убираем хрупкий статический кэш `ArenaClusterSystem`
 
-## Файл: `res://scripts/city/ArenaClusterSystem.gd`
+## Файл: `res://scripts/city/arena_cluster_system.gd`
 
 Полная замена.
 
@@ -1015,10 +1015,10 @@ extends RefCounted
 ##   Это убирает глобальный статический словарь и пересечение кэшей между сессиями.
 
 const ArenaBalance := preload("res://scripts/city/ArenaBalance.gd")
-const HexUtils := preload("res://scripts/core/HexUtils.gd")
-const City := preload("res://scripts/world/City.gd")
-const PopUnit := preload("res://scripts/world/PopUnit.gd")
-const UniqueBuilding := preload("res://scripts/world/UniqueBuilding.gd")
+const HexUtils := preload("res://scripts/core/hex_utils.gd")
+const City := preload("res://scripts/world/city.gd")
+const PopUnit := preload("res://scripts/world/pop_unit.gd")
+const UniqueBuilding := preload("res://scripts/world/unique_building.gd")
 
 const CACHE_META := &"_arena_cluster_cache"
 
@@ -1419,7 +1419,7 @@ Services.inject(system)
 Заменить:
 
 - `res://scripts/core/service_locator.gd`
-- `res://scripts/city/ArenaClusterSystem.gd`
+- `res://scripts/city/arena_cluster_system.gd`
 
 Добавить:
 

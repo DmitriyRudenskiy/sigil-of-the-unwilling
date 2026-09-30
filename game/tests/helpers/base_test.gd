@@ -26,3 +26,13 @@ func free_all() -> void:
 		remove_child(child)
 		child.queue_free()
 	await get_tree().process_frame
+
+## Test isolation: a test that pauses the tree (BattleTurnExecutor / DecisionPanel
+## via PauseController) and doesn't resume would leave tree.paused=true, which
+## breaks frame-dependent tests and hangs final disposal. Reset the pause state
+## after every test so cases stay independent.
+func after_test() -> void:
+	get_tree().paused = false
+	var pc := get_node_or_null("/root/PauseController")
+	if pc != null and pc.has_method("force_release_all"):
+		pc.force_release_all()

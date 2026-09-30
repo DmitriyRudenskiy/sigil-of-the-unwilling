@@ -1,7 +1,7 @@
 extends BaseTest
 ## Регрессия: anchors_preset — только метаданные редактора.
 ## В рантайме важны свойства anchor_*: bottom_bar должен быть во всю ширину снизу.
-const _Scene := preload("res://scenes/ui/BattleUI.tscn")
+const _Scene := preload("res://scenes/ui/battle_ui.tscn")
 var _ui: Node = null
 
 func after_test() -> void:

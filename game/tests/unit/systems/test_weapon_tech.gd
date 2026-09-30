@@ -2,8 +2,8 @@ extends BaseTest
 
 # social-stats-weapon-tech: WeaponCatalog + WeaponTechService (D4)
 
-const WeaponTechService = preload("res://scripts/systems/WeaponTechService.gd")
-const WeaponCatalog = preload("res://scripts/systems/WeaponCatalog.gd")
+const WeaponTechService = preload("res://scripts/systems/weapon_tech_service.gd")
+const WeaponCatalog = preload("res://scripts/systems/weapon_catalog.gd")
 
 func _city(level: int, storage: Dictionary = {}) -> City:
 	var c := City.new()

@@ -1,6 +1,6 @@
 extends BaseTest
 
-const WORLD_SCENE := "res://scenes/World.tscn"
+const WORLD_SCENE := "res://scenes/world.tscn"
 
 const MAX_SECONDS := 6.0
 const POLL := 0.5

@@ -2,7 +2,7 @@
   "id": "event_01_strangers",
   "title": "Незнакомцы у ворот",
   "description": "Группа путников приблизилась к вашему поселению. Они просят убежища и пищи. Среди них есть ремесленники, но также и подозрительные личности.",
-  "icon_path": "res://assets/ui/events/strangers.png",
+  "icon_path": "res://assets/ui/events/refugees_event.png",
   "frequency": 3,
   "min_day": 3,
   "weight": 1.5,

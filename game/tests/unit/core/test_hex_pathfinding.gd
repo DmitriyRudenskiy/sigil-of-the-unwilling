@@ -135,6 +135,17 @@ func test_min_heap_ordering() -> void:
 	assert_that(heap.pop()[1]).is_equal("e")
 	assert_array(heap.pop()).is_empty()
 
+func test_min_heap_fifo_tie_break() -> void:
+	# При равных ключах извлечение должно идти в порядке вставки (FIFO) —
+	# детерминизм симуляций с фиксированным seed.
+	var heap = MinHeap.new()
+	heap.push([1, "first"])
+	heap.push([1, "second"])
+	heap.push([1, "third"])
+	assert_that(heap.pop()[1]).is_equal("first")
+	assert_that(heap.pop()[1]).is_equal("second")
+	assert_that(heap.pop()[1]).is_equal("third")
+
 func test_blocked_packed_byte_array_equivalent() -> void:
 	# TASK_19 M2: PackedByteArray даёт тот же результат, что Dictionary.
 	var wall := Vector2i(1, 0)
