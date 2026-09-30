@@ -1,0 +1,33 @@
+{
+  "id": "event_autumn_mud_season",
+  "title": "Распутица",
+  "description": "Дожди размывают дороги. Караваны застревают в грязи, а работникам труднее добираться до полей. Распутица задержится на несколько недель.",
+  "icon_path": "res://assets/ui/events/ruins_event.png",
+  "frequency": 2,
+  "min_day": 25,
+  "weight": 1.0,
+  "seasons": ["autumn"],
+  "rarity": "common",
+  "triggers": {},
+  "choices": [
+    {
+      "text": "Уложить гать (-15 материалов, +5 морали)",
+      "tooltip": "Деревянная гать спасёт дороги до весны",
+      "impact": 2,
+      "effects": {
+        "resource_change": {"materials": -15},
+        "morale_change": 5
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Запастись на время (-10 еды, -10 золота)",
+      "tooltip": "Перезимовать распутицу на своих запасах",
+      "impact": 1,
+      "effects": {
+        "resource_change": {"food": -10, "gold": -10}
+      },
+      "requirements": {}
+    }
+  ]
+}

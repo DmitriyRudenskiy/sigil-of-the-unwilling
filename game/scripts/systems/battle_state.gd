@@ -2,6 +2,7 @@ class_name BattleState
 extends RefCounted
 
 const _StatusEffects = preload("res://scripts/data/status_effects.gd")
+const _BattleTerrain = preload("res://scripts/systems/BattleTerrain.gd")
 
 
 var attacker_units: Array[BattleUnit] = []
@@ -11,11 +12,15 @@ var turn_queue: Array[BattleUnit] = []
 var turn_idx := 0
 var is_player_turn := true
 var battle_over := false
+## tactical-combat: per-unit initiative ordering in build_queue().
+## Compatibility flag: legacy speed-first ordering for old tests/replays.
+var initiative_order := true
 
 enum Side { NONE, ATTACKER, DEFENDER }
 
 var battle_winner: BattleState.Side = Side.NONE
 var hex_shift_right: bool = true
+var terrain_grid: Dictionary = {}
 var attacker_hero_bonus: Dictionary[StringName, int] = {
     &"attack": 0,
     &"defense": 0,
@@ -34,6 +39,9 @@ var _reachable_cache: Dictionary = {}
 var _board_version: int = 0
 var _cache_sig: String = ""
 var _uid := 0
+## tactical-combat: per-cell battle terrain (cell -> BattleTerrain type).
+## Empty = all plain (legacy behavior, BFS fast path).
+var battle_terrain: Dictionary = {}
 
 var _unit_grid: Dictionary = {}
 var _all_units_cells: Dictionary = {}
@@ -58,13 +66,51 @@ class BattleUnit extends RefCounted:
 	var distance_moved_this_turn: int = 0
 	var already_reborn: bool = false
 	var spell: StringName = ""
+	# Phase 6 (flanking): facing direction as hex neighbour bit (0=east..5=se).
+	# Set on placement (attacker→0 east, defender→3 west); used for flanking aspect.
+	var facing: int = 0
 	# Optional D&D 5e per-character stat block (null = pure stack-model unit).
-	var dnd_profile: DnDCombatantProfile = null
+	# Assigning a profile initializes the HP pool to max_hp, so a D&D character
+	# is alive out of the box even when BattleStateBuilder.init_dnd_hp() is
+	# bypassed (e.g. tests that construct units directly). Re-assigning a
+	# profile never resets an already-initialized (damaged) pool.
+	var dnd_profile: DnDCombatantProfile:
+		set(value):
+			dnd_profile = value
+			if value != null and dnd_current_hp < 0:
+				dnd_current_hp = value.max_hp
+	# dnd-live-battle-wiring: current HP pool of a D&D character. -1 = not yet
+	# initialized (pure stack model, or a D&D unit not yet set up).
+	var dnd_current_hp: int = -1
+	# Направление (фасад) юнита для флангов/тыла (tactical-combat фаза 5).
+	# (-1,-1) = не инициализировано (тестовые юниты) → считается FRONT.
+	# NOTE(merge): переименовано facing -> facade, т.к. remote-tactical-battle-system
+	# использует facing:int (hex-бит) для attack_aspect; оба фланг-механизма живут вместе.
+	var facade: Vector2i = Vector2i(-1, -1)
+
+	## Initiative (tactical-combat spec): dexterity + class/race modifiers.
+	## DnD-profile units use 10 + DEX modifier (5e: no class-based initiative
+	## bonus exists); pure stack-model units use speed as the agility proxy.
+	func get_initiative() -> int:
+		if dnd_profile != null:
+			return 10 + dnd_profile.abilities.get_dex_mod()
+		return get_speed()
 
 	func _init(p_stack = null) -> void:
 		stack = p_stack
 
+	## dnd-live-battle-wiring: true if this unit is a per-character D&D combatant.
+	func is_dnd_character() -> bool:
+		return dnd_profile != null
+
+	## Initialize the D&D HP pool from the profile (called at battle setup).
+	func init_dnd_hp() -> void:
+		if dnd_profile != null:
+			dnd_current_hp = dnd_profile.max_hp
+
 	func is_alive() -> bool:
+		if is_dnd_character():
+			return alive and dnd_current_hp > 0
 		return alive and stack != null and stack.is_alive()
 
 	func get_key() -> String:
@@ -98,6 +144,8 @@ class BattleUnit extends RefCounted:
 		return stats.base_damage if stats != null else 0
 
 	func get_hp() -> int:
+		if is_dnd_character():
+			return maxi(1, dnd_current_hp)
 		return stats.hp if stats != null else 1
 
 	func get_defense() -> int:
@@ -159,31 +207,63 @@ func place_army(
 	builder.set_attacker_artifact_mods(attacker_artifact_mods)
 	builder.set_defender_artifact_mods(defender_artifact_mods)
 	builder.build_into(self)
+	# Phase 6 (flanking): static facing. Attacker faces east (bit 0, toward the
+	# defender on the right edge); defender faces west (bit 3, toward the attacker
+	# on the left edge). Per-move facing update is deferred; static facing already
+	# yields a working front/flank/rear model.
+	for u in attacker_units:
+		u.facing = 0
+	for u in defender_units:
+		u.facing = 3
 	assert(not (attacker_units.is_empty() and defender_units.is_empty()), "place_army: battle has no units")
+	_resolve_blocked_placement()
 
 func build_queue() -> void:
 	turn_queue.clear()
 
+	# Party-based turn order (tactical-combat spec, «Инициатива и ходы»):
+	# each round one side's whole party acts, then the other. The side with the
+	# higher top initiative (speed) acts first; within a party, units act by
+	# speed desc, then hp, then uid. (Replaces the old globally speed-sorted
+	# interleaved queue.)
+	var atk: Array = []
+	var def: Array = []
 	for u in attacker_units:
 		if u.is_alive():
-			turn_queue.append(u)
-
+			atk.append(u)
 	for u in defender_units:
 		if u.is_alive():
-			turn_queue.append(u)
+			def.append(u)
 
-	turn_queue.sort_custom(func(a: BattleUnit, b: BattleUnit) -> bool:
-		if a.get_speed() != b.get_speed():
-			return a.get_speed() > b.get_speed()
-
+	# Unified turn order (merge of both battle systems): party-based structure
+	# (tactical-battle-system Phase 3) — each round one side's party acts, then
+	# the other; the side with the higher top initiative goes first. Within a
+	# party, units act by initiative (DEX + class/race for DnD profiles, speed
+	# proxy for stacks) when initiative_order, else speed; then hp, side, uid.
+	var first: Array
+	var second: Array
+	if _top_initiative(atk) >= _top_initiative(def):
+		first = atk
+		second = def
+	else:
+		first = def
+		second = atk
+	var party_cmp := func(a: BattleUnit, b: BattleUnit) -> bool:
+		var sa: int = a.get_initiative() if initiative_order else a.get_speed()
+		var sb: int = b.get_initiative() if initiative_order else b.get_speed()
+		if sa != sb:
+			return sa > sb
 		if a.get_hp() != b.get_hp():
 			return a.get_hp() > b.get_hp()
-
 		if a.side != b.side:
 			return a.side == Side.ATTACKER
-
 		return a.uid < b.uid
-	)
+	first.sort_custom(party_cmp)
+	second.sort_custom(party_cmp)
+	for u in first:
+		turn_queue.append(u)
+	for u in second:
+		turn_queue.append(u)
 
 	# TASK_18 R9 invariants: queue holds exactly the alive units.
 	var _alive: int = 0
@@ -198,6 +278,15 @@ func build_queue() -> void:
 	assert(turn_queue.size() == _alive, "build_queue: queue size != alive units")
 
 	turn_idx = -1
+
+func _top_initiative(p: Array) -> int:
+	# Unified (merge): top initiative uses get_initiative() (DEX + class/race
+	# for DnD profiles, speed proxy for stacks) when initiative_order, else speed.
+	var top := 0
+	for u in p:
+		var v: int = u.get_initiative() if initiative_order else u.get_speed()
+		top = maxi(top, v)
+	return top
 
 func advance_turn() -> void:
 	turn_idx += 1
@@ -281,9 +370,89 @@ func _rebuild_all_units_cells() -> void:
 func get_units_by_side(side: BattleState.Side) -> Array[BattleUnit]:
 	return attacker_units if side == Side.ATTACKER else defender_units
 
+## tactical-combat: set the battle terrain map (cell -> terrain type).
+func set_battle_terrain(map: Dictionary) -> void:
+	battle_terrain.clear()
+	for c in map:
+		battle_terrain[c] = str(map[c])
+	invalidate_board_cache()
+
+func get_terrain_at(cell: Vector2i) -> String:
+	return str(battle_terrain.get(cell, BattleTerrain.PLAIN))
+
+func is_cell_blocked(cell: Vector2i) -> bool:
+	return BattleTerrain.is_blocked(get_terrain_at(cell))
+
+## tactical-combat: blocked terrain (water) forbids placement — relocate the
+## affected unit to the nearest free in-bounds cell.
+func _resolve_blocked_placement() -> void:
+	if battle_terrain.is_empty():
+		return
+	for u in attacker_units:
+		_relocate_if_blocked(u)
+	for u in defender_units:
+		_relocate_if_blocked(u)
+
+func _relocate_if_blocked(u: BattleUnit) -> void:
+	if u == null or not u.is_alive() or not is_cell_blocked(u.cell):
+		return
+	var target := _find_nearest_free_cell(u.cell)
+	if target == Vector2i(-1, -1):
+		return
+	var side_grid: Dictionary = _unit_grid.get(u.side, {})
+	side_grid.erase(u.cell)
+	side_grid[target] = u
+	_all_units_cells.erase(u.cell)
+	_all_units_cells[target] = true
+	u.cell = target
+	invalidate_board_cache()
+
+func _find_nearest_free_cell(from: Vector2i) -> Vector2i:
+	var dist := HexPathfinding.dijkstra(
+		from, 1000.0,
+		func(_c: Vector2i) -> float: return 1.0,
+		BW, BH, hex_shift_right
+	)
+	var best := Vector2i(-1, -1)
+	var best_d := INF
+	for y in BH:
+		for x in BW:
+			var c := Vector2i(x, y)
+			if _all_units_cells.has(c) or is_cell_blocked(c):
+				continue
+			var d: float = dist[HexUtils.pos_to_idx(c, BW)]
+			if d < best_d:
+				best_d = d
+				best = c
+	return best
+
 func get_reachable_for_unit(unit: BattleUnit, blocked_fn: Callable) -> Dictionary:
 	if unit == null:
 		return {}
+
+	# tactical-combat: ground movement on a terrained board uses costed
+	# Dijkstra (forest/hill raise the cost, water blocks). Flying units
+	# ignore terrain (they fly over it).
+	if not unit.is_flying() and BattleTerrain.map_has_effects(battle_terrain):
+		var blocked_t: Dictionary = blocked_fn.call()
+		for c in battle_terrain:
+			if BattleTerrain.is_blocked(str(battle_terrain[c])):
+				blocked_t[c] = true
+		var dist := HexPathfinding.dijkstra(
+			unit.cell, float(unit.get_speed()),
+			func(c: Vector2i) -> float: return BattleTerrain.move_cost(get_terrain_at(c)),
+			BW, BH, hex_shift_right
+		)
+		var reachable: Dictionary = {}
+		for y in BH:
+			for x in BW:
+				var c := Vector2i(x, y)
+				if c == unit.cell:
+					continue
+				var d: float = dist[HexUtils.pos_to_idx(c, BW)]
+				if d < INF:
+					reachable[c] = d
+		return reachable
 
 	if unit.is_flying():
 		var blocked: Dictionary = blocked_fn.call()
@@ -305,9 +474,11 @@ func get_reachable_for_unit(unit: BattleUnit, blocked_fn: Callable) -> Dictionar
 
 		return result
 
+	# Phase 9: тактические проявления класса (Следопыт +движение в лесу).
+	var eff_speed: int = unit.get_speed() + HeroTactics.movement_bonus(unit, get_hex_terrain(unit.cell))
 	return get_reachable(
 		unit.cell,
-		unit.get_speed(),
+		eff_speed,
 		blocked_fn,
 		unit
 	)
@@ -380,7 +551,54 @@ func build_all_blocked(except_unit: BattleUnit, obstacles: Dictionary) -> Dictio
 		b.erase(except_unit.cell)
 	for o in obstacles:
 		b[o] = true
+	for c in terrain_grid:
+		if _BattleTerrain.is_blocking(int(terrain_grid[c])):
+			b[c] = true
 	return b
+
+
+func get_hex_terrain(cell: Vector2i) -> int:
+	return int(terrain_grid.get(cell, _BattleTerrain.TerrainType.PLAIN))
+
+func set_terrain(cell: Vector2i, t: int) -> void:
+	terrain_grid[cell] = t
+	invalidate_board_cache()
+
+func clear_terrain() -> void:
+	terrain_grid.clear()
+	invalidate_board_cache()
+
+
+func generate_terrain(rng: RandomNumberGenerator, density: float = 0.1) -> void:
+	terrain_grid = _BattleTerrain.generate(rng, BW, BH, density)
+	invalidate_board_cache()
+
+# --- Phase 6: flanking (фланг/тыл) -----------------------------------------
+
+## Neighbour bit (0..5) of `to` relative to `from`, or -1 if not adjacent.
+func _neighbor_bit(from: Vector2i, to: Vector2i) -> int:
+	for b in 6:
+		if HexUtils.get_neighbor(from, b, hex_shift_right) == to:
+			return b
+	return -1
+
+## Attack aspect of `attacker_cell` relative to `defender`'s facing:
+## 0=front, 1=flank (±60°), 2=rear (±120°..180°), -1 if not adjacent
+## (melee-only flanking; ranged/non-neighbour → no flanking).
+func attack_aspect(attacker_cell: Vector2i, defender: BattleUnit) -> int:
+	if defender == null:
+		return -1
+	var b := _neighbor_bit(defender.cell, attacker_cell)
+	if b < 0:
+		return -1
+	var diff := (b - defender.facing) % 6
+	if diff < 0:
+		diff += 6
+	if diff == 0:
+		return 0
+	if diff == 1 or diff == 5:
+		return 1
+	return 2
 
 func check_end() -> BattleState.Side:
 	if battle_over:

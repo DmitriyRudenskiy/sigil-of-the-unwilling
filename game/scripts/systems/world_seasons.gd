@@ -40,6 +40,15 @@ static func advance_turn() -> void:
 static func reset() -> void:
 	_turns_in_season = 0
 
+## save-load-coverage-expansion 3.2: static-счётчик персистится через
+## WorldStateDelta.season_turns (save → load), чтобы сезон/враждебность
+## не сбрасывались при перезагрузке.
+static func get_turns() -> int:
+	return _turns_in_season
+
+static func set_turns(turns: int) -> void:
+	_turns_in_season = maxi(0, turns)
+
 # Враждебность мира растёт со временем партии (early-game-foundation)
 const HOSTILITY_BASE := 1.0
 const HOSTILITY_GROWTH_PER_TURN := 0.02

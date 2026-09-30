@@ -46,6 +46,11 @@ const COMMON_EVENT_IDS: Array[String] = [
 	"event_07_artifact", "event_08_caravan", "event_09_birth", "event_10_cold",
 ]
 
+const RARE_EVENT_IDS: Array[String] = [
+	"rare_01_meteor", "rare_02_refugees", "rare_03_ancient_tech",
+	"rare_04_mysterious_merchant", "rare_05_ancient_spirit",
+]
+
 # Keys apply_choice_effects actually applies (the extras in KNOWN_EFFECT_KEYS are
 # recognized data keys but not yet wired to GameManager).
 const WIRED_EFFECT_KEYS: Array[String] = [
@@ -53,15 +58,41 @@ const WIRED_EFFECT_KEYS: Array[String] = [
 	"unlock_building", "permanent_modifier", "unlock_law",
 ]
 
-func test_ten_common_events_loaded() -> void:
+func test_common_events_loaded() -> void:
 	var sys := _sys()
 	var ids: Array[String] = []
 	for e in sys.event_templates:
-		if e.id != "":
+		if e.id != "" and e.type == CrisisEventSystem.EventType.COMMON:
 			ids.append(e.id)
-	assert_that(ids.size()).is_equal(10)
+	# 10 базовых + 8 сезонных + 4 редких (crisis-content-seasonal-rare-events)
+	assert_that(ids.size()).is_equal(22)
 	for id in COMMON_EVENT_IDS:
 		assert_that(ids.has(id)).is_true()
+
+func test_rare_events_loaded() -> void:
+	var sys := _sys()
+	var ids: Array[String] = []
+	for e in sys.event_templates:
+		if e.id != "" and e.type == CrisisEventSystem.EventType.RARE:
+			ids.append(e.id)
+	assert_that(ids.size()).is_equal(5)
+	for id in RARE_EVENT_IDS:
+		assert_that(ids.has(id)).is_true()
+
+func test_event_type_defaults_to_common() -> void:
+	# Старые event_*.json без поля type → COMMON (backward-compat).
+	var sys := _sys()
+	for e in sys.event_templates:
+		if e.id.begins_with("event_"):
+			assert_that(e.type).is_equal(CrisisEventSystem.EventType.COMMON)
+
+func test_rare_events_have_low_weight() -> void:
+	# Rare-события весят меньше типового common (weight 1.0), чтобы выбираться
+	# реже при weighted-random (try_trigger_event).
+	var sys := _sys()
+	for e in sys.event_templates:
+		if e.type == CrisisEventSystem.EventType.RARE:
+			assert_that(e.weight).is_less(1.0)
 
 func test_common_event_icons_exist() -> void:
 	var sys := _sys()
@@ -130,10 +161,16 @@ func test_resolve_crisis_clears_and_applies_effects() -> void:
 	var sys := _sys()
 	sys.current_crisis = sys.crisis_templates[0]
 	var food_before: int = gm.get_resource("food")
+	# Ожидаемая дельта еды из resource_change choice 0 (может быть + или −:
+	# порядок crisis_templates зависит от DirAccess, crisis_02_famine даёт +15).
+	var delta: float = 0.0
+	var eff: Dictionary = sys.current_crisis.choices[0].effects
+	if eff.has("resource_change") and eff["resource_change"].has("food"):
+		delta = float(eff["resource_change"]["food"])
 	sys.resolve_crisis(0)
 	assert_that(sys.current_crisis == null).is_true()
-	# choice 0 effects + resolution_effects must have been applied (food only drains)
-	assert_that(gm.get_resource("food")).is_less_equal(food_before)
+	# Эффект выбора применён к GameManager (resolve_crisis → apply_choice_effects)
+	assert_that(gm.get_resource("food")).is_equal(int(food_before + delta))
 
 
 func test_eight_crisis_templates_loaded() -> void:
@@ -240,3 +277,43 @@ func test_deserialize_unknown_ids_are_skipped() -> void:
 	sys2.deserialize_state(data)
 	assert_that(sys2.current_crisis == null).is_true()
 	assert_that(sys2.active_events.size()).is_equal(0)
+
+
+## --- Difficulty scaling (Task 4.4 core; menu UI out of scope) ---
+
+func test_difficulty_modifier_monotonic() -> void:
+	var sys := _sys()
+	sys.set_difficulty(1)
+	var easy: float = sys.get_crisis_difficulty_modifier()
+	sys.set_difficulty(3)
+	var normal: float = sys.get_crisis_difficulty_modifier()
+	sys.set_difficulty(5)
+	var hard: float = sys.get_crisis_difficulty_modifier()
+	assert_that(easy).is_less(normal)
+	assert_that(normal).is_less(hard)
+	assert_that(normal).is_equal(1.0)
+
+func test_set_difficulty_clamps() -> void:
+	var sys := _sys()
+	sys.set_difficulty(99)
+	assert_that(sys.difficulty).is_equal(5)
+	sys.set_difficulty(-3)
+	assert_that(sys.difficulty).is_equal(1)
+
+func test_crisis_chance_scales_with_difficulty() -> void:
+	var sys := _sys()
+	sys.day_counter = 0
+	sys.set_difficulty(1)
+	var easy: float = sys.get_crisis_chance()
+	sys.set_difficulty(5)
+	var hard: float = sys.get_crisis_chance()
+	assert_that(easy).is_less(hard)
+
+func test_crisis_chance_scales_with_time() -> void:
+	var sys := _sys()
+	sys.set_difficulty(3)
+	sys.day_counter = 0
+	var early: float = sys.get_crisis_chance()
+	sys.day_counter = 100
+	var late: float = sys.get_crisis_chance()
+	assert_that(early).is_less(late)

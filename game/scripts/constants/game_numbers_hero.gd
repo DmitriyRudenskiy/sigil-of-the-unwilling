@@ -16,6 +16,9 @@ const RANGER_ANIMAL_DAMAGE_BONUS := 3
 const ROGUE_CRIT_CHANCE         := 0.15
 const ROGUE_CRIT_MULTIPLIER     := 2
 const PRIEST_TURN_HEAL          := 2
+# Ранение после проигранного боя (tactical-combat фаза 7.2)
+const WOUNDED_TURNS             := 5
+const WOUNDED_STAT_PENALTY      := 0.25
 # Дикие животные 1-го кольца (Druid: убегают; Ranger: +урон)
 const WILD_ANIMAL_KEYS          := ["wolves", "gremlin"]
 # Рюкзак героя: общий лимит и расширение (early-game-foundation)

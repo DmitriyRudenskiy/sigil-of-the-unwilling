@@ -18,6 +18,14 @@ class MockConsumer extends RefCounted:
 	var hero: Node = null
 	var _hero: Node = null
 
+# Наследуют реальные классы: HeroLifecycleSystem.setup требует concrete типы
+# (R4 типизация WC-контура); мок-ам достаточно унаследованного поля .hero.
+class MockBattle extends WorldBattleCoordinator:
+	pass
+
+class MockInteraction extends WorldInteractionController:
+	pass
+
 class MockBootstrap extends RefCounted:
 	var enemy_proc = null
 	var input_controller = null
@@ -28,7 +36,7 @@ class MockBootstrap extends RefCounted:
 		shortcuts = MockConsumer.new()
 
 
-class MockSuccession extends RefCounted:
+class MockSuccession extends SuccessionController:
 	var last_created: HeroController = null
 	var resurrect_calls := 0
 	func default_resurrection_cost() -> Dictionary:
@@ -36,15 +44,24 @@ class MockSuccession extends RefCounted:
 	func resurrect_hero(city: City, cost: Dictionary = {}) -> bool:
 		resurrect_calls += 1
 		return true
-	func on_hero_died(deceased, rng, city_list, mgr) -> HeroController:
+	func on_hero_died(deceased: HeroController, rng: RandomNumberGenerator = null,
+		              source_cities: Array[City] = [], dest_manager: CityManager = null) -> HeroController:
 		last_created = HeroController.new()
 		return last_created
 
+var _mock_nodes: Array[Node] = []
+
 func _make_system(host: Node2D, mgr: CityManager, succ: MockSuccession) -> RefCounted:
 	var sys := HeroLifecycleSystem.new()
+	# Node-моки держим в _mock_nodes: после теста sys (RefCounted) умирает,
+	# а Node-моки нужно освободить явно (иначе orphan-отчёт).
+	var bc := MockBattle.new()
+	var ic := MockInteraction.new()
+	_mock_nodes.append(bc)
+	_mock_nodes.append(ic)
 	sys.setup(
 		host, null, TestFactories.seeded(7), mgr, null, null, null,
-		MockConsumer.new(), MockConsumer.new(), MockBootstrap.new(), succ, null
+		bc, ic, MockBootstrap.new(), succ, null
 	)
 	return sys
 
@@ -65,6 +82,10 @@ func after_test() -> void:
 	if _mgr != null and is_instance_valid(_mgr):
 		_mgr.free()
 	_mgr = null
+	for n in _mock_nodes:
+		if is_instance_valid(n):
+			n.free()
+	_mock_nodes.clear()
 
 func _free_tree(host: Node, mgr: Node) -> void:
 	host.free()  # каскадом: герой, death_seq

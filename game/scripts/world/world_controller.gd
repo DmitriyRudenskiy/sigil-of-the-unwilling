@@ -24,17 +24,17 @@ var _cities: CityManagerScript = null
 @onready var _ui_manager: WorldUIManagerScript = $WorldUI
 var _rng: RandomNumberGenerator = null
 var _world_delta: WorldStateDeltaScript = null
-var _persistence = null
+var _persistence: RefCounted = null
 var _visibility: _VisibilityMapScript = null
 var _resource_chain: ResourceChainServiceScript = null
 var _event_router: WorldEventRouter = null
 var _bootstrap_result: WorldBootstrap.BootstrapResult = null
-var _succession = null
-var _hero_lifecycle = null
+var _succession: SuccessionController = null
+var _hero_lifecycle: HeroLifecycleSystem = null
 var _hero_mgr: WorldHeroManager = null
 var _save_svc: WorldSaveLoadService = null
 
-func _lifecycle():
+func _lifecycle() -> HeroLifecycleSystem:
 	if _hero_mgr != null:
 		return _hero_mgr.get_lifecycle()
 	return _hero_lifecycle
@@ -67,6 +67,8 @@ func _ready() -> void:
 	_save_svc = WorldSaveLoadServiceScript.new()
 	_save_svc.setup(get_tree(), _persistence, _bootstrap_result, _hero, _cities,
 		_world_delta, _ui_manager, resource_node_manager, _map_gen, _camera)
+	# save-load-coverage-expansion 3.4: legend-state для сейвов
+	_save_svc.set_lifecycle(_lifecycle())
 	_camera.set_map_rect(_bootstrap_result.map_rect)
 	_event_router = WorldBootstrapScript.finalize(self, _bootstrap_result, _visibility,
 		_persistence, _hero_mgr, _rng, _on_end_turn_from_router)

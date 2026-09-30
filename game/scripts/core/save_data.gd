@@ -1,7 +1,7 @@
 extends RefCounted
 class_name SaveData
 
-const CURRENT_VERSION := 7
+const CURRENT_VERSION := 8
 const CURRENT_GENERATOR_VERSION := 1
 
 var version: int = CURRENT_VERSION
@@ -51,6 +51,8 @@ func from_dict(data: Dictionary) -> void:
 		_migrate_v4_to_v5(data)
 	if version < 6:
 		_migrate_v5_to_v6(data)
+	if version < 8:
+		_migrate_v7_to_v8(data)
 	version = CURRENT_VERSION
 
 	run_seed = int(data.get("run_seed", 0))
@@ -120,6 +122,15 @@ func _migrate_v5_to_v6(data: Dictionary) -> void:
 
 	if not data.has("shards") or not (data["shards"] is Dictionary):
 		data["shards"] = {}
+
+
+## v7 → v8 (scarce-crafting-system): hero.crafting — прогресс крафта.
+## Старый сейв без ключа: компонент читает default (пустой unlocked).
+func _migrate_v7_to_v8(data: Dictionary) -> void:
+	if not data.has("hero") or not (data["hero"] is Dictionary):
+		data["hero"] = {}
+	if not data["hero"].has("crafting"):
+		data["hero"]["crafting"] = {}
 
 func is_valid() -> bool:
 	if run_seed <= 0:

@@ -1,7 +1,9 @@
-# rivers Specification
+# Rivers Specification
 
 ## Purpose
-TBD - created by archiving change map-generation-improvement. Update Purpose after archive.
+
+Определяет генерацию рек: стоки, непрерывность русел, пересечение с дорогами через мосты и влияние на проходимость.
+
 ## Requirements
 ### Requirement: Выбор истоков рек
 Генератор рек SHALL выбирать истоки на клетках с высотой >= 0.75, не примыкающих к воде, с минимальным расстоянием между истоками 8 тайлов (SOURCE_SPACING).
@@ -30,4 +32,3 @@ TBD - created by archiving change map-generation-improvement. Update Purpose aft
 - **WHEN** трасса новой реки пересекает существующую в пределах 3 тайлов
 - **THEN** приток присоединяется к основному руслу
 - **AND** ширина основного русла увеличивается
-

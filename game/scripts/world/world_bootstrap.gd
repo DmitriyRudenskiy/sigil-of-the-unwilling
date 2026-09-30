@@ -12,19 +12,19 @@ const SuccessionControllerScript = preload("res://scripts/world/succession_contr
 const HeroLifecycleSystemScript = preload("res://scripts/world/hero_lifecycle_system.gd")
 
 class BootstrapResult:
-	var map_gen: Node = null
+	var map_gen: MapGenerator = null
 	var hero: Node = null
-	var camera: Node = null
+	var camera: WorldCamera = null
 	var input_controller: Node = null
 	var spawner: Node = null
-	var cities: Node = null
-	var battle_coordinator: Node = null
-	var interaction_controller: Node = null
+	var cities: CityManager = null
+	var battle_coordinator: WorldBattleCoordinator = null
+	var interaction_controller: WorldInteractionController = null
 	var resource_node_manager: Node = null
 	var terrain_resource_manager: Variant = null
 	var ui_manager: Node = null
 	var world_delta: Variant = null
-	var persistence: Variant = null
+	var persistence: WorldPersistence = null
 	var resource_chain: Variant = null
 	var turn_scheduler: TurnScheduler = null
 	var character_registry: CharacterRegistry = null
@@ -142,6 +142,8 @@ static func finalize(parent: Node2D, R: BootstrapResult, visibility, persistence
 
 	if R.loaded_save != null:
 		persistence.apply_loaded_save(R.loaded_save, build_load_context(R))
+		# save-load-coverage-expansion 3.4: legend из сейва в lifecycle
+		lifecycle.restore_legend_state(persistence.legend_state)
 		if R.endgame != null:
 			R.endgame.restore()
 	elif R.map_gen.has_valid_tilemap():
@@ -193,7 +195,7 @@ static func _resolve_session(R: BootstrapResult, shard_seed: int) -> SaveData:
 
 static func _create_map(parent: Node2D, R: BootstrapResult) -> void:
 	var map_scene: PackedScene = load("res://scenes/world/map_generator.tscn")
-	R.map_gen = map_scene.instantiate()
+	R.map_gen = map_scene.instantiate() as MapGenerator
 	R.map_gen.name = "MapGenerator"
 	R.map_gen.seed_value = R.rng.randi() % 999999
 	parent.add_child(R.map_gen)

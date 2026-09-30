@@ -16,6 +16,14 @@ class MockConsumer extends RefCounted:
 	var hero: Node = null
 	var _hero: Node = null
 
+# Наследуют реальные классы: HeroLifecycleSystem.setup требует concrete типы
+# (R4 типизация WC-контура); мок-ам достаточно унаследованного поля .hero.
+class MockBattle extends WorldBattleCoordinator:
+	pass
+
+class MockInteraction extends WorldInteractionController:
+	pass
+
 class MockBootstrap extends RefCounted:
 	var enemy_proc = null
 	var input_controller = null
@@ -27,12 +35,18 @@ class MockBootstrap extends RefCounted:
 
 var _host: Node = null
 
+var _mock_nodes: Array[Node] = []
+
 func after_test() -> void:
 	if _host != null and is_instance_valid(_host):
 		_host.free()
 	_host = null
+	for n in _mock_nodes:
+		if is_instance_valid(n):
+			n.free()
+	_mock_nodes.clear()
 
-func _make_sys(host: Node2D, bc: MockConsumer, ic: MockConsumer, boot: MockBootstrap) -> RefCounted:
+func _make_sys(host: Node2D, bc: WorldBattleCoordinator, ic: WorldInteractionController, boot: MockBootstrap) -> RefCounted:
 	var sys := HeroLifecycleSystem.new()
 	sys.setup(
 		host,
@@ -54,8 +68,11 @@ func test_install_hero_rewires_all_consumers() -> void:
 	var host := MockHost.new()
 	_host = host
 	add_child(host)
-	var bc := MockConsumer.new()
-	var ic := MockConsumer.new()
+	var bc := MockBattle.new()
+	var ic := MockInteraction.new()
+	# Node-моки — явная очистка в after_test (иначе orphan-отчёт).
+	_mock_nodes.append(bc)
+	_mock_nodes.append(ic)
 	var boot := MockBootstrap.new()
 	var sys := _make_sys(host, bc, ic, boot)
 

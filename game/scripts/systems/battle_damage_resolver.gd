@@ -2,19 +2,63 @@ class_name BattleDamageResolver
 extends RefCounted
 
 const _StatusEffects = preload("res://scripts/data/status_effects.gd")
+const _BattleTerrain = preload("res://scripts/systems/BattleTerrain.gd")
 
 static func resolve(state: BattleState, atk: BattleState.BattleUnit, def: BattleState.BattleUnit, ctx: Dictionary) -> Dictionary:
 	var is_melee: bool = ctx.get("is_melee", true)
 	var rng: RandomNumberGenerator = ctx.get("rng")
 	var atk_bonus: int = ctx.get("atk_bonus", 0)
 	var def_bonus: int = ctx.get("def_bonus", 0)
+	var range: int = int(ctx.get("range", 1))
 
 	if atk == null or def == null or not atk.is_alive() or not def.is_alive():
 		return {}
 
-	var result: Dictionary = BattleRules.calculate_attack(atk, def, is_melee, rng, atk_bonus, def_bonus)
+	# LOCAL (tactical-combat): String-terrain → bonus adjustments.
+	# (forest/hill/fort defense bonus, hill attack bonus when target not on hill).
+	var def_terr: String = state.get_terrain_at(def.cell)
+	def_bonus += int(round(float(def.get_defense()) * BattleTerrain.defense_bonus(def_terr)))
+	var atk_terr: String = state.get_terrain_at(atk.cell)
+	if BattleTerrain.attack_bonus(atk_terr) > 0.0 and BattleTerrain.attack_bonus(def_terr) <= 0.0:
+		atk_bonus += int(round(float(atk.get_attack()) * BattleTerrain.attack_bonus(atk_terr)))
+
+	# REMOTE (tactical-battle-system Phase 5/6/9): int-terrain multipliers,
+	# elevation, flanking aspect, hero class/race tactics.
+	var terrain_atk_mult: float = 1.0
+	var terrain_def_mult: float = _BattleTerrain.defense_multiplier(state.get_hex_terrain(def.cell))
+	if _BattleTerrain.elevation(state.get_hex_terrain(atk.cell)) > _BattleTerrain.elevation(state.get_hex_terrain(def.cell)):
+		terrain_atk_mult = _BattleTerrain.DOWNHILL_ATTACK_MULT
+	var flank_aspect: int = state.attack_aspect(atk.cell, def)
+	terrain_def_mult *= HeroTactics.hill_defense_mult(def, state.get_hex_terrain(def.cell))
+	atk_bonus += HeroTactics.front_attack_bonus(atk, flank_aspect)
+	var extra_crit: float = HeroTactics.forest_crit_bonus(atk, state.get_hex_terrain(atk.cell))
+
+	# LOCAL (tactical-combat Phase 5): flanking luck bonus + rear defense ignore.
+	var flank_pos: int = BattleFlanking.classify(state, atk, def)
+	var luck_bonus: float = BattleFlanking.luck_bonus(flank_pos)
+	var def_ignore: float = BattleFlanking.defense_ignore(flank_pos)
+	if def_ignore > 0.0:
+		def_bonus = int(round(float(def_bonus) * (1.0 - def_ignore))) \
+			- int(round(float(def.get_defense()) * def_ignore))
+
+	var result: Dictionary = BattleRules.calculate_attack(
+		atk, def, is_melee, rng, atk_bonus, def_bonus, terrain_atk_mult, terrain_def_mult,
+		flank_aspect, extra_crit, luck_bonus
+	)
 	if result.is_empty():
 		return result
+
+	# Штраф дистанции (tactical-combat фаза 4): урон снижается на каждый
+	# гекс за первый (10%/гекс, пол от минимального множителя 0.5).
+	if not is_melee and range > 1:
+		var factor: float = maxf(
+			GameNumbersBattle.RANGED_MIN_RANGE_FACTOR,
+			1.0 - GameNumbersBattle.RANGED_PENALTY_PER_HEX * float(range - 1)
+		)
+		result["damage"] = maxi(1, int(round(float(result.get("damage", 0)) * factor)))
+	result["flank"] = flank_pos
+	if luck_bonus > 0.0:
+		result["luck_bonus"] = luck_bonus
 
 	_apply_status_procs(atk, def, rng, result)
 	_apply_hero_class_procs(atk, def, rng, result)

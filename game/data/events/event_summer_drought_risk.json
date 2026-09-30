@@ -1,0 +1,33 @@
+{
+  "id": "event_summer_drought_risk",
+  "title": "Угроза засухи",
+  "description": "Небо чистое, дождей нет уже недели. Поля начинают желтеть. Можно копать колодец заранее или закупить воду у кочевых торговцев.",
+  "icon_path": "res://assets/ui/events/wood_event.png",
+  "frequency": 2,
+  "min_day": 20,
+  "weight": 1.0,
+  "seasons": ["summer"],
+  "rarity": "common",
+  "triggers": {},
+  "choices": [
+    {
+      "text": "Выкопать колодец (-20 материалов, +10 морали)",
+      "tooltip": "Своя вода — не зависеть от торговцев",
+      "impact": 2,
+      "effects": {
+        "resource_change": {"materials": -20},
+        "morale_change": 10
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Закупить воду (+15 еды, -15 золота)",
+      "tooltip": "Кочевники привезли целую караван-свод воды и консервов",
+      "impact": 1,
+      "effects": {
+        "resource_change": {"food": 15, "gold": -15}
+      },
+      "requirements": {}
+    }
+  ]
+}

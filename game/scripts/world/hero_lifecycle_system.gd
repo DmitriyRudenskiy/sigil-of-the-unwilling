@@ -7,21 +7,23 @@ const _LegendTracker = preload("res://scripts/world/legend_tracker.gd")
 
 var _world_ref: WeakRef = null
 
-var _persistence = null
+var _persistence: RefCounted = null
 var _rng: RandomNumberGenerator = null
-var _cities = null
-var _map_gen = null
-var _event_router = null
-var _ui_manager = null
-var battle_coordinator = null
-var interaction_controller = null
-var _bootstrap_result = null
-var _succession = null
+var _cities: CityManager = null
+var _map_gen: MapGenerator = null
+var _event_router: WorldEventRouter = null
+var _ui_manager: Node = null
+var battle_coordinator: WorldBattleCoordinator = null
+var interaction_controller: WorldInteractionController = null
+## RefCounted (не BootstrapResult): тесты передают лёгкий мок той же формы
+## (enemy_proc/input_controller/shortcuts) — duck-typing по .hero/._hero.
+var _bootstrap_result: RefCounted = null
+var _succession: SuccessionController = null
 var _legend: _LegendTracker = null
 var _camera: Node = null
 
-var _death_seq = null
-var _chronicle_screen = null
+var _death_seq: Node = null
+var _chronicle_screen: Node = null
 var _pending_successor: HeroController = null
 var _deceased_snapshot: Dictionary = {}
 var _deceased_hero: HeroController = null
@@ -30,17 +32,17 @@ var _connected_hero_signals: bool = false
 
 func setup(
 	p: Node2D,
-	persistence,
-	rng,
-	cities,
-	map_gen,
-	event_router,
-	ui_manager,
-	battle_coord,
-	interaction,
-	bootstrap_result,
-	succession,
-	camera
+	persistence: RefCounted,
+	rng: RandomNumberGenerator,
+	cities: CityManager,
+	map_gen: MapGenerator,
+	event_router: WorldEventRouter,
+	ui_manager: Node,
+	battle_coord: WorldBattleCoordinator,
+	interaction: WorldInteractionController,
+	bootstrap_result: RefCounted,
+	succession: SuccessionController,
+	camera: Node
 ) -> void:
 	_world_ref = weakref(p)
 	_persistence = persistence
@@ -62,6 +64,14 @@ func _get_world() -> Node2D:
 	if _world_ref == null:
 		return null
 	return _world_ref.get_ref()
+
+## save-load-coverage-expansion 3.4: legend-state для save/load.
+func get_legend_state() -> Dictionary:
+	return _legend.serialize() if _legend != null else {}
+
+func restore_legend_state(data: Dictionary) -> void:
+	if _legend != null and data is Dictionary and not data.is_empty():
+		_legend.deserialize(data)
 
 func on_hero_died(cause: StringName) -> void:
 	var world := _get_world()

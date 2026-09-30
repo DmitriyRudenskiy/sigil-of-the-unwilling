@@ -57,6 +57,14 @@ func start_attack(atk: BattleState.BattleUnit, def: BattleState.BattleUnit) -> v
 	var adjacent_enemy := has_adjacent_enemy(atk)
 
 	var is_ranged_shot := atk.is_ranged() and distance > 1 and not adjacent_enemy
+	# LOS/дальность/листва (tactical-combat фаза 4): недопустимый выстрел
+	# деградирует в ближнюю атаку (если соседство) или отменяется.
+	if is_ranged_shot and not BattleLineOfSight.can_target_ranged(_battle_state, atk.cell, def):
+		if distance == 1:
+			is_ranged_shot = false
+		else:
+			_executor._on_action_completed()
+			return
 	var is_melee_attack := not is_ranged_shot
 
 	_attack_attacker = atk

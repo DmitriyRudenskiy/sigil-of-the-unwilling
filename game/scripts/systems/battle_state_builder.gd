@@ -102,11 +102,19 @@ func _build_units(state: BattleState, stacks: Array, is_atk: bool) -> Array[Batt
 		var unit := BattleState.BattleUnit.new(stack)
 		unit.cell = Vector2i(current_col, current_row)
 		unit.side = BattleState.Side.ATTACKER if is_atk else BattleState.Side.DEFENDER
+		# Фасад к противнику (tactical-combat фаза 5): атакующий смотрит +x,
+		# защитник — −x (зоны расстановки на левом/правом краю).
+		unit.facade = unit.cell + (Vector2i(1, 0) if is_atk else Vector2i(-1, 0))
 		unit.alive = true
 		unit.has_moved = false
 		unit.max_count = stack.count
 		unit.uid = state._uid
 		state._uid += 1
+		# dnd-live-battle-wiring: a stack carrying a D&D profile is a single
+		# per-character combatant — transfer the profile and init its HP pool.
+		if stack.dnd_profile != null:
+			unit.dnd_profile = stack.dnd_profile
+			unit.init_dnd_hp()
 		units.append(unit)
 
 		current_row += 1

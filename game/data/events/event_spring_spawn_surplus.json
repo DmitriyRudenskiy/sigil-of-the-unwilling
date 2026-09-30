@@ -1,0 +1,33 @@
+{
+  "id": "event_spring_spawn_surplus",
+  "title": "Приплод",
+  "description": "Весна принесла рекордный приплод в стаде. Молодняк можно оставить для расширения стада или продать, пока цены высокие.",
+  "icon_path": "res://assets/ui/events/harvest_event.png",
+  "frequency": 2,
+  "min_day": 15,
+  "weight": 1.0,
+  "seasons": ["spring"],
+  "rarity": "common",
+  "triggers": {},
+  "choices": [
+    {
+      "text": "Оставить молодняк (+2 населения, -5 еды)",
+      "tooltip": "Стадо растёт, а с ним и поселение",
+      "impact": 2,
+      "effects": {
+        "population_change": 2,
+        "resource_change": {"food": -5}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Продать на ярмарке (+20 золота)",
+      "tooltip": "Весенние цены на молодняк — самые высокие в году",
+      "impact": 1,
+      "effects": {
+        "resource_change": {"gold": 20}
+      },
+      "requirements": {}
+    }
+  ]
+}

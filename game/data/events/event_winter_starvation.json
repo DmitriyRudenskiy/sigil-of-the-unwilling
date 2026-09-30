@@ -1,0 +1,33 @@
+{
+  "id": "event_winter_starvation",
+  "title": "Голодное время",
+  "description": "Зимние запасы на исходе, а до весны ещё далеко. Люди начинают экономить на себе, мораль падает. Нужен срочный источник пропитания.",
+  "icon_path": "res://assets/ui/events/crisis_famine.png",
+  "frequency": 2,
+  "min_day": 30,
+  "weight": 1.0,
+  "seasons": ["winter"],
+  "rarity": "common",
+  "triggers": {},
+  "choices": [
+    {
+      "text": "Отправить охотничью партию (+15 еды, -5 материалов)",
+      "tooltip": "Охотники вернутся с дичью, если повезёт",
+      "impact": 2,
+      "effects": {
+        "resource_change": {"food": 15, "materials": -5}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Сократить пайки (-5 морали, +10 еды)",
+      "tooltip": "Все доживут до весны, но будут злы",
+      "impact": 1,
+      "effects": {
+        "resource_change": {"food": 10},
+        "morale_change": -5
+      },
+      "requirements": {}
+    }
+  ]
+}

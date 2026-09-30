@@ -1,0 +1,32 @@
+{
+  "id": "event_summer_caravan_peak",
+  "title": "Караванный сезон",
+  "description": "Летние тропы открыты, и через поселение проходят сразу несколько караванов. Торговцы предлагают выгодные сделки, но время ограничено.",
+  "icon_path": "res://assets/ui/events/cart_event.png",
+  "frequency": 2,
+  "min_day": 20,
+  "weight": 1.2,
+  "seasons": ["summer"],
+  "rarity": "common",
+  "triggers": {},
+  "choices": [
+    {
+      "text": "Великая ярмарка (+25 золота, -10 материалов)",
+      "tooltip": "Продать излишки, пока покупатели есть",
+      "impact": 2,
+      "effects": {
+        "resource_change": {"gold": 25, "materials": -10}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Закупить запасы (+20 еды, -20 золота)",
+      "tooltip": "Летом дешевле всего запасаться на зиму",
+      "impact": 1,
+      "effects": {
+        "resource_change": {"food": 20, "gold": -20}
+      },
+      "requirements": {}
+    }
+  ]
+}

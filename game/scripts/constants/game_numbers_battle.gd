@@ -22,6 +22,11 @@ const LUCK_CHANCE               := 0.10
 const MORALE_CHANCE             := 0.08
 const DEFEND_DEFENSE_BONUS      := 1.2
 const RANGED_MELEE_PENALTY      := 0.5
+# Phase 6 (flanking): flank = side hex (±60°), rear = back hex (180°±60°).
+const FLANK_CRIT_CHANCE_FLANK   := 0.25
+const FLANK_CRIT_CHANCE_REAR    := 0.50
+const REAR_DEFENSE_MULT         := 0.5
+const FLANK_CRIT_MULTIPLIER     := 2.0
 const RETREAT_SURVIVAL_RATIO    := 0.5
 const RETREAT_STACK_LIMIT       := 2
 const MAX_UNITS_PER_SIDE        := 7
@@ -44,3 +49,14 @@ const DAMAGE_NUMBER_FADE_SEC := 0.5
 const RETALIATION_ARROW_FADE_SEC := 0.35
 const PULSE_ANIM_SEC         := 0.15
 const PULSE_SCALE            := 1.25
+const RANGED_MAX_RANGE := 4
+# Дальний бой (tactical-combat фаза 4): штраф 10%/гекс за первый, пол 0.5.
+const RANGED_PENALTY_PER_HEX := 0.10
+const RANGED_MIN_RANGE_FACTOR := 0.50
+# Фланги/тыл (tactical-combat фаза 5): бонус крита и игнор защиты.
+const FLANK_CRIT_BONUS := 0.25
+const REAR_CRIT_BONUS := 0.50
+const REAR_DEF_IGNORE := 0.50
+# ИИ-доктрина (tactical-combat фаза 6)
+const AI_WOUNDED_FRACTION := 0.30
+const AI_RETREAT_LOSS_FRACTION := 0.70

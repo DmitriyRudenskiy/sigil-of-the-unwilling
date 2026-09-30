@@ -2,15 +2,15 @@ class_name WorldHeroManager
 extends RefCounted
 
 var _hero: Node = null
-var _hero_lifecycle = null
+var _hero_lifecycle: HeroLifecycleSystem = null
 
 func setup(hero: Node) -> void:
 	_hero = hero
 
-func setup_lifecycle(lifecycle) -> void:
+func setup_lifecycle(lifecycle: HeroLifecycleSystem) -> void:
 	_hero_lifecycle = lifecycle
 
-func get_lifecycle():
+func get_lifecycle() -> HeroLifecycleSystem:
 	return _hero_lifecycle
 
 func finit_hero(loaded_save: SaveData, map_gen: Node) -> void:

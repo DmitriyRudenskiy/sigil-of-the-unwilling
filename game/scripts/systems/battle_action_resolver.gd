@@ -14,6 +14,11 @@ static func apply_attack(
 	if atk == null or def == null or not atk.is_alive() or not def.is_alive():
 		return {}
 
+	# dnd-live-battle-wiring: both sides are per-character D&D combatants ->
+	# d20 vs AC, dice damage to the target's HP pool (not the stack formula).
+	if atk.is_dnd_character() and def.is_dnd_character():
+		return _apply_dnd_attack(state, atk, def, rng, consume_action)
+
 	var bonuses := _get_hero_bonuses(state, atk, def)
 	var attacker_bonus: int = bonuses[0]
 	var defender_bonus: int = bonuses[1]
@@ -29,6 +34,7 @@ static func apply_attack(
 		"rng": rng,
 		"atk_bonus": attacker_bonus,
 		"def_bonus": defender_bonus,
+		"range": HexUtils.hex_distance(atk.cell, def.cell, state.hex_shift_right),
 	}
 	var result: Dictionary = BattleDamageResolver.resolve(state, atk, def, ctx)
 	if result.is_empty():
@@ -154,11 +160,51 @@ static func apply_sacrifice(
 
 	return {"result": "success", "finished": target, "cost_type": cost_type}
 
+## Нормализованное направление хода: сосед старой клетки, ближайший к цели.
+static func _move_direction(from: Vector2i, to: Vector2i, shift_right: bool) -> Vector2i:
+	var best_dir := Vector2i(1, 0)
+	var best_dist := 999999
+	for nb in HexUtils.get_all_neighbors(from, shift_right):
+		var d := HexUtils.hex_distance(nb, to, shift_right)
+		if d < best_dist:
+			best_dist = d
+			best_dir = nb - from
+	return best_dir
+
+
+## dnd-live-battle-wiring: resolve a per-character D&D attack through the
+## bridge (d20 + ability mod + proficiency vs AC; crit on natural 20; weapon
+## dice). Damage is applied to the target's HP pool; the character dies at HP 0.
+static func _apply_dnd_attack(
+	state: BattleState,
+	atk: BattleState.BattleUnit,
+	def: BattleState.BattleUnit,
+	rng: RandomNumberGenerator,
+	consume_action: bool
+) -> Dictionary:
+	var result: Dictionary = DnDBattleBridge.resolve_attack(
+		atk.dnd_profile, def.dnd_profile, rng
+	)
+	var dmg: int = int(result.get("damage", 0))
+	def.dnd_current_hp = maxi(0, def.dnd_current_hp - dmg)
+	result["damage_dealt"] = dmg
+	result["dnd"] = true
+	if consume_action:
+		atk.has_moved = true
+	if def.dnd_current_hp <= 0:
+		kill_unit(state, def)
+	state.invalidate_board_cache()
+	state.check_end()
+	return result
+
 static func do_move(state: BattleState, unit: BattleState.BattleUnit, target: Vector2i) -> void:
 	var dist := HexUtils.hex_distance(unit.cell, target)
 	unit.distance_moved_this_turn += dist
 	var old_cell := unit.cell
 	unit.cell = target
+	# Направление — нормализованная гекс-ось последнего шага (фланги/тыл, фаза 5).
+	if dist > 0:
+		unit.facade = unit.cell + _move_direction(old_cell, target, state.hex_shift_right)
 	unit.has_moved = true
 	var side_grid: Dictionary = state._unit_grid.get(unit.side, {})
 	side_grid.erase(old_cell)
@@ -212,6 +258,9 @@ static func revive_unit(state: BattleState, unit: BattleState.BattleUnit) -> voi
 		return
 	if not unit.alive:
 		unit.alive = true
+		# dnd-live-battle-wiring: a revived D&D character regains its full HP pool.
+		if unit.is_dnd_character():
+			unit.dnd_current_hp = unit.dnd_profile.max_hp
 		if unit.get_count() <= 0:
 			unit.set_count(unit.max_count)
 		if unit.side == BattleState.Side.ATTACKER:

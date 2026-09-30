@@ -50,6 +50,7 @@ var followers_comp: HeroFollowersComponent
 var combat_comp: HeroCombatComponent
 var stats_comp: HeroStatsComponent
 var relationships_comp: HeroRelationshipsComponent
+var crafting_comp: HeroCraftingComponent
 
 # ═══════════════════════════════════════════
 #  ИНИЦИАЛИЗАЦИЯ
@@ -87,6 +88,7 @@ func _register_components() -> void:
 	combat_comp = _add_component("Combat", HeroCombatComponent.new())
 	stats_comp = _add_component("Stats", HeroStatsComponent.new())
 	relationships_comp = _add_component("Relationships", HeroRelationshipsComponent.new())
+	crafting_comp = _add_component("Crafting", HeroCraftingComponent.new())
 
 func _add_component(comp_name: String, comp: HeroComponent) -> HeroComponent:
 	comp.name = comp_name
@@ -133,7 +135,7 @@ func setup(map: MapGenerator) -> void:
 	_setup_done = true
 
 	# Инициализация компонентов в правильном порядке
-	for comp_name in ["Army", "Magic", "StrategicResources", "Inventory"]:
+	for comp_name in ["Army", "Magic", "StrategicResources", "Inventory", "Crafting"]:
 		if _components.has(comp_name):
 			_components[comp_name].initialize()
 
@@ -245,15 +247,26 @@ func get_hero_battle_stack() -> UnitStack:
 	var morale := morale_bonus()
 	var atk: int = max(1, int(battle_stats.get("attack", 3))) + morale
 	var def: int = max(0, int(battle_stats.get("defense", 3))) + morale
+	if is_wounded():
+		var w: Dictionary = BattleRewards.apply_wounded_penalty(atk, def)
+		atk = int(w.get("attack", atk))
+		def = int(w.get("defense", def))
 	var hp: int = combat_comp.combat_hp if combat_comp.combat_hp > 0 else 1
 	var speed: int = GameNumbersHero.HERO_PERSONAL_SPEED
 	if stats_comp.hero_class == "ranger":
 		speed += 1
+	# Phase 9: боец-герой несёт тег класса И расы — тактические проявления
+	# (HeroTactics) срабатывают по этим тегам в боевом резолвере.
+	var hero_tags: Array = [GameNumbersHero.HERO_BATTLE_KEY]
+	if stats_comp.hero_class != "":
+		hero_tags.append(stats_comp.hero_class)
+	if stats_comp.hero_race != "":
+		hero_tags.append(stats_comp.hero_race)
 	var unit_stats := UnitStats.new(
 		GameNumbersHero.HERO_BATTLE_KEY,
 		"Герой",
 		atk, atk, 1, speed, def,
-		[GameNumbersHero.HERO_BATTLE_KEY, stats_comp.hero_class]
+		hero_tags
 	)
 	return UnitStack.new(unit_stats, hp)
 
@@ -355,12 +368,37 @@ func mark_combat_dead() -> void:
 func set_combat_hp(amount: int) -> void:
 	combat_comp.set_hp(amount)
 
+## Ранение после проигранного боя (tactical-combat фаза 7.2).
+func apply_wounded(turns: int, hp_loss: int) -> void:
+	combat_comp.apply_wounded(turns, hp_loss)
+
+# Phase 8: трофеи (опыт) и ранение героя при поражении.
+var _xp := 0
+var _wounded_turns := 0
+
+func add_xp(amount: int) -> void:
+	_xp += max(0, amount)
+
+func get_xp() -> int:
+	return _xp
+
+func set_wounded(turns: int) -> void:
+	_wounded_turns = max(0, turns)
+
+func is_wounded() -> bool:
+	return _wounded_turns > 0
+
 func has_artifact_effect(effect: StringName) -> bool:
 	return inventory_comp.has_special_effect(effect)
 
 func get_battle_bonus() -> Dictionary:
 	var mods := inventory_comp.get_total_modifiers()
-	return stats_comp.get_battle_bonus(mods)
+	var bonus: Dictionary = stats_comp.get_battle_bonus(mods)
+	# Ранение (tactical-combat фаза 7.2): статы боя снижены на N ходов.
+	if combat_comp.is_wounded():
+		for key in ["attack", "defense", "spell_power", "knowledge"]:
+			bonus[key] = int(float(bonus.get(key, 0)) * (1.0 - GameNumbersHero.WOUNDED_STAT_PENALTY))
+	return bonus
 
 func get_hero_bonus() -> Dictionary:
 	return stats_comp.get_hero_bonus()
@@ -393,6 +431,8 @@ func end_turn() -> void:
 	needs_comp.end_turn()
 	# team-romance-roleplay: тик отношений (пассивный рост, верность, ревность, конфликты)
 	relationships_comp.end_turn()
+	# Ранение после проигранного боя тикает (tactical-combat фаза 7.2).
+	combat_comp.end_turn()
 
 	if movement_comp != null:
 		movement_comp.auto_follow_at_turn_start()

@@ -1,7 +1,9 @@
-# terrain Specification
+# Terrain Specification
 
 ## Purpose
-TBD - created by archiving change map-generation-improvement. Update Purpose after archive.
+
+Определяет террейн-модель карты: типы местности, таблицу стоимости движения (TerrainCostTable) и инварианты связности.
+
 ## Requirements
 ### Requirement: Генерация горных хребтов
 Генератор SHALL создавать горные хребты вдоль разломов (FAULT_COUNT линий): подъём высоты (uplift) затухает с расстоянием от линии разлома, затем сглаживается эрозией.
@@ -30,4 +32,3 @@ TBD - created by archiving change map-generation-improvement. Update Purpose aft
 - **WHEN** клетка внутри ядра кластера
 - **THEN** terrain = DENSE_FOREST
 - **AND** клетки кромки кластера имеют пониженную плотность
-

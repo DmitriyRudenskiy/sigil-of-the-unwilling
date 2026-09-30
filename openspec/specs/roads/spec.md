@@ -1,7 +1,9 @@
-# roads Specification
+# Roads Specification
 
 ## Purpose
-TBD - created by archiving change map-generation-improvement. Update Purpose after archive.
+
+Определяет генерацию дорог: связность settlements, обход непроходимых клеток, стоимость движения по поверхностям.
+
 ## Requirements
 ### Requirement: Дорожная сеть между деревнями
 Генератор дорог SHALL строить минимальное остовное дерево (MST) между деревнями и прокладывать основные дороги (ROAD terrain) по кратчайшим путям между узлами MST.
@@ -30,4 +32,3 @@ TBD - created by archiving change map-generation-improvement. Update Purpose aft
 - **WHEN** путь дороги пересекает клетку RIVER и BRIDGE_ON_RIVER = true
 - **THEN** на клетке перехода размещается мост
 - **AND** мост рендерится отличной от обычной дороги текстурой
-

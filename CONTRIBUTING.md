@@ -157,6 +157,21 @@ func test_player_takes_damage() -> void:
     assert_int(player.health).is_equal(initial_health - 10)
 ```
 
+### Правило save/load (save-load-coverage-expansion)
+
+**Любое новое subsystem с изменяемым состоянием (mutable state) обязано иметь
+roundtrip-тест** `game/tests/functional/save_roundtrip_<subsystem>.gd`:
+
+1. Мутация состояния (добавить/изменить/удалить).
+2. `serialize()` → (JSON-цикл, если состояние ходит через SaveData).
+3. `deserialize()` в новый экземпляр.
+4. Ассерты: состояние идентично + legacy-формат (без нового поля) не падает.
+
+Строки матрицы покрываемости — в [doc/SAVE_MATRIX.md](doc/SAVE_MATRIX.md);
+при добавлении subsystem в матрицу добавляется и тест. Без roundtrip-теста
+subsystem считается не-персистентным (и так и должно быть задокументировано
+в матрице).
+
 ## 🧪 Запуск тестов
 
 Перед первым прогоном установите аддон gdUnit4 (см. ссылку выше):

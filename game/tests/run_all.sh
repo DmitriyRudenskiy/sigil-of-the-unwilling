@@ -11,6 +11,11 @@ GODOT="${GODOT_BIN:-/Applications/Godot.app/Contents/MacOS/Godot}"
 PY="${MCP_PY:-$PWD/addons/venv/bin/python}"
 mkdir -p reports
 
+# Патчим локальный аддон gdUnit4 (вендорные self-test-фикстуры City/BaseTest
+# конфликтуют с class_name проекта и ломают глобальный класс-кэш). Идиампотентно;
+# если аддон не установлен — скрипт мягко пропускается. См. doc/testing.md.
+bash tests/patch_gdunit4.sh
+
 echo "=== 1/3 gdUnit4 ==="
 # Отчёт gdUnit4 — нативный XML: reports/report_*/results.xml (junit-флаг в 4.x отсутствует)
 "$GODOT" --headless --path . -s addons/gdunit4/bin/GdUnitCmdTool.gd \

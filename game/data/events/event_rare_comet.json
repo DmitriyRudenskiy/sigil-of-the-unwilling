@@ -1,0 +1,33 @@
+{
+  "id": "event_rare_comet",
+  "title": "☄️ Кома над поселением",
+  "description": "Ночью над посёлком прошла огромная комета, окрасив небо в зеленоватый свет. Люди спорят: знамение беды или благословение? Хронист записал её в летопись.",
+  "icon_path": "res://assets/ui/events/magic_event.png",
+  "frequency": 3,
+  "min_day": 40,
+  "weight": 0.05,
+  "seasons": [],
+  "rarity": "rare",
+  "triggers": {},
+  "choices": [
+    {
+      "text": "Объявить праздник неба (+15 морали)",
+      "tooltip": "Даже знамение можно превратить в праздник",
+      "impact": 2,
+      "effects": {
+        "morale_change": 15
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Повелеть хронисту записать (+10 золота, -5 морали)",
+      "tooltip": "Звёзды — это наука, а не суеверие. Хотя люди недовольны",
+      "impact": 1,
+      "effects": {
+        "resource_change": {"gold": 10},
+        "morale_change": -5
+      },
+      "requirements": {}
+    }
+  ]
+}

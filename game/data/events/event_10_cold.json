@@ -15,9 +15,16 @@
       "tooltip": "Травник заварит отвары — болезнь отступит, жители будут здоровее",
       "impact": 1,
       "effects": {
-        "resource_change": {"food": -10},
+        "resource_change": {
+          "food": -10
+        },
         "morale_change": 5,
-        "permanent_modifier": {"id": "herbal_cure", "effect": {"health": 0.05}}
+        "permanent_modifier": {
+          "id": "herbal_cure",
+          "effect": {
+            "health": 0.05
+          }
+        }
       },
       "requirements": {}
     },
@@ -27,7 +34,9 @@
       "impact": 2,
       "effects": {
         "morale_change": -5,
-        "resource_change": {"food": -5}
+        "resource_change": {
+          "food": -5
+        }
       },
       "requirements": {}
     },
@@ -41,5 +50,9 @@
       },
       "requirements": {}
     }
-  ]
+  ],
+  "seasons": [
+    "winter"
+  ],
+  "rarity": "common"
 }

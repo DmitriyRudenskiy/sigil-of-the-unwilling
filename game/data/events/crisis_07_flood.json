@@ -7,7 +7,10 @@
   "duration_days": 3,
   "icon_path": "res://assets/ui/events/crisis_winter.png",
   "ongoing_effects": {
-    "resource_drain": {"food": 1, "materials": 1}
+    "resource_drain": {
+      "food": 1,
+      "materials": 1
+    }
   },
   "resolution_effects": {},
   "choices": [
@@ -16,7 +19,9 @@
       "tooltip": "Быстро отгородить нижний квартал",
       "impact": 2,
       "effects": {
-        "resource_change": {"materials": -20},
+        "resource_change": {
+          "materials": -20
+        },
         "morale_change": 5
       },
       "requirements": {}
@@ -27,7 +32,9 @@
       "impact": 3,
       "effects": {
         "morale_change": -5,
-        "resource_change": {"food": -10}
+        "resource_change": {
+          "food": -10
+        }
       },
       "requirements": {}
     },
@@ -36,10 +43,16 @@
       "tooltip": "Долгосрочное решение — вода больше не будет угрозой",
       "impact": 4,
       "effects": {
-        "resource_change": {"materials": -15},
+        "resource_change": {
+          "materials": -15
+        },
         "unlock_law": "order_tax_code"
       },
       "requirements": {}
     }
-  ]
+  ],
+  "seasons": [
+    "spring"
+  ],
+  "rarity": "common"
 }

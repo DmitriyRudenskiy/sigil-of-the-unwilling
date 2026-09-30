@@ -1,0 +1,32 @@
+{
+  "id": "event_autumn_harvest_boom",
+  "title": "Щедрая осень",
+  "description": "Урожай этого года бьёт все рекорды: поля отдают вдвое больше обычного. Амбары не справляются — нужно решать, что делать с излишками.",
+  "icon_path": "res://assets/ui/events/harvest_event.png",
+  "frequency": 2,
+  "min_day": 25,
+  "weight": 1.2,
+  "seasons": ["autumn"],
+  "rarity": "common",
+  "triggers": {},
+  "choices": [
+    {
+      "text": "Запасы в амбары (+30 еды)",
+      "tooltip": "Полные амбары — спокойная зима",
+      "impact": 2,
+      "effects": {
+        "resource_change": {"food": 30}
+      },
+      "requirements": {}
+    },
+    {
+      "text": "Продать излишки (+20 золота, -10 еды)",
+      "tooltip": "Осень — время продавать зерно",
+      "impact": 1,
+      "effects": {
+        "resource_change": {"gold": 20, "food": -10}
+      },
+      "requirements": {}
+    }
+  ]
+}

@@ -11,6 +11,11 @@ var exhausted_nodes: Array[Vector2i] = []
 var terrain_exhausted_cells: Array[Vector2i] = []
 var enemy_growth_state: Dictionary = {}
 var fog_explored: Array = []
+## save-load-coverage-expansion 3.2: глобальный сезонный счётчик
+## (WorldSeasons._turns_in_season) — персистится вместе с world-state.
+var season_turns: int = 0
+## save-load-coverage-expansion 3.4: GloryTracker (CityManager.glory).
+var glory_state: Dictionary = {}
 
 func serialize() -> Dictionary:
 	return {
@@ -24,6 +29,8 @@ func serialize() -> Dictionary:
 		"terrain_exhausted_cells": serialize_cells(terrain_exhausted_cells),
 		"enemy_growth_state": enemy_growth_state.duplicate(true),
 		"fog_explored": fog_explored.duplicate(true),
+		"season_turns": season_turns,
+		"glory_state": glory_state.duplicate(true),
 	}
 
 func set_fog_explored(arr: Array) -> void:
@@ -41,6 +48,9 @@ func deserialize(data: Dictionary) -> void:
 	var growth_raw: Variant = data.get("enemy_growth_state", {})
 	enemy_growth_state = growth_raw.duplicate(true) if growth_raw is Dictionary else {}
 	fog_explored = data.get("fog_explored", [])
+	season_turns = int(data.get("season_turns", 0))
+	var glory_raw: Variant = data.get("glory_state", {})
+	glory_state = glory_raw.duplicate(true) if glory_raw is Dictionary else {}
 
 func add_village(cell: Vector2i) -> void:
 	if not captured_villages.has(cell):
