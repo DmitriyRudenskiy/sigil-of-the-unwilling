@@ -1,4 +1,4 @@
-# AGENTS.md — Sigil of the Unwilling (Fission AI)
+# AGENTS.md — Sigil of the Unwilling
 
 Этот файл — project-specific инструкции для текущего проекта
 (`/home/user/sigil-of-the-unwilling`). Он **перекрывает** системный
@@ -25,7 +25,7 @@
 | Параметр | Значение |
 | --- | --- |
 | Репо | `sigil-of-the-unwilling` (Godot 4.7) |
-| Имя проекта (project.godot) | "Sigil of the Unwilling" (aka Fission AI) |
+| Имя проекта (project.godot) | "Sigil of the Unwilling" |
 | Стек | GDScript, Godot 4.7, GdUnit4 |
 | Корень игры | `game/` (project.godot лежит в `game/`) |
 | Godot-бинарь | `/home/user/.local/bin/godot` |
@@ -68,6 +68,16 @@
 - Работать на feature-ветках; `main` не трогать напрямую.
 - Сообщения коммитов — конкретные, по делу.
 - Пароли/токены не попадают в логи и коммиты.
+
+## Документация (docs/ — Obsidian-vault)
+
+- Имя игры: **Sigil of the Unwilling** («Знак Нежелающего») — подтверждено автором 2026-10-02; старые названия не использовать.
+- Имена файлов — только латиница, формат `NN-topic.md` (кириллические имена запрещены; редиректы для старых wikilinks — `10-worldbuilding`, `11-cards`, `GLOSSARY`).
+- Frontmatter обязателен: `title`, `tags`, `status`, `date`. Статусы (англ.): `canon`, `deepened`, `draft`, `redirect`, `reference`, `archived`. `date` = дата последнего содержательного изменения (синхронизируется с датами решений в тексте).
+- Wikilinks — без пути (`[[02-mechanics]]`, не `[[gdd/02-mechanics]]`).
+- Все новые TBD-хвосты регистрируются в реестре `docs/QUESTIONS.md` (§ «Реестр TBD»); в текстах документов TBD допускается только со ссылкой на пункт реестра (T1–T10).
+- Проверка связности перед пушем: `python3 scripts/check_docs_links.py` (битые wikilinks, кириллица в именах, неизвестные статусы; exit ≠ 0 — править).
+- Архивные логи (`STRUCTURE_AUDIT`, `RESTRUCTURING_LOG`) не редактируются; легаси-пути `gdd/…` в них — исторические цитаты.
 
 ## Agent skills
 
