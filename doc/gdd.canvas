@@ -1,0 +1,30 @@
+{
+  "nodes": [
+    {"id": "b000000000000001", "type": "text", "x": 0, "y": 0, "width": 340, "height": 140, "text": "# Легенда\n\n🔴 SPOF — упадёт система, сломается игра целиком\n🟡 риск — деградирует, но игра живёт\n🟢 не SPOF — декор/пассивный слой\n\nРёбра = зависимость (A → B: A использует B).", "color": "6"},
+    {"id": "b000000000000002", "type": "text", "x": 420, "y": 0, "width": 340, "height": 140, "text": "# 🔴 TurnSystem\n\nФазы: SETTLEMENT → PLAYER → THREATS (01)\n\n**SPOF:** всё в игре движется по ходам. Без него нет ни производства, ни рейдов, ни наёма.", "color": "1"},
+    {"id": "b000000000000003", "type": "text", "x": 0, "y": 260, "width": 340, "height": 140, "text": "# 🔴 MapSystem\n\nСетка 24×24, туман r=3, движение 6/день, 4 узла (02 §3.1)\n\n**SPOF:** весь глагол «двинул» и доступ к узлам/бою.", "color": "1"},
+    {"id": "b000000000000004", "type": "text", "x": 420, "y": 260, "width": 340, "height": 140, "text": "# 🔴 EconomySystem\n\n3 ресурса, production/consumption, SM дефицита (06)\n\n**SPOF:** наём, снабжение партии, цели рейдов, население — всё через потоки.", "color": "1"},
+    {"id": "b000000000000005", "type": "text", "x": 840, "y": 260, "width": 340, "height": 140, "text": "# 🔴 PartySystem\n\nПерсонажи: XP (1000/2500), HD, SM жизни/смерти, снабжение 10 еды (02 §3.2, R1/R7)\n\n**SPOF:** без партии нет боя, нет героя, нет кампании.", "color": "1"},
+    {"id": "b000000000000006", "type": "text", "x": 0, "y": 560, "width": 340, "height": 140, "text": "# 🟡 BuildingSystem\n\n5 зданий, SM GHOST→…→WORKING, биом, 1 правило соседства (02 §3.5)\n\nРиск: без зданий нет производства — но это данные + SM, логика в EconomySystem.", "color": "3"},
+    {"id": "b000000000000007", "type": "text", "x": 420, "y": 560, "width": 340, "height": 140, "text": "# 🔴 DnDBattleSystem\n\nd20-движок: инициатива, атака, death saves, prone, greedy AI, seed (02 §3.4)\n\n**SPOF:** бои, рейды с героем, узлы — всё через один движок.", "color": "1"},
+    {"id": "b000000000000008", "type": "text", "x": 840, "y": 560, "width": 340, "height": 140, "text": "# 🟡 RaidSystem\n\nГрафик 7/14/21, power 15/30/60, resolve (02 §3.8, R5/R6)\n\nРиск: без рейдов нет давления (loop не замыкается), но остальные системы живы.", "color": "3"},
+    {"id": "b000000000000009", "type": "text", "x": 1260, "y": 0, "width": 340, "height": 140, "text": "# 🔴 SaveSystem\n\n3 слота, атомарный write, v1 + миграции (08, M2)\n\n**SPOF:** потеря сейва = потеря кампании. Митигация: tmp+rename, бэкап, 3 слота.", "color": "1"},
+    {"id": "b00000000000000a", "type": "text", "x": 1260, "y": 260, "width": 340, "height": 140, "text": "# 🟢 SignSystem\n\nВыбор из 3, престиж, ранг → +население (02 §3.7)\n\nНе SPOF: пассивный бонус; без неё игра проигрываемая, но играбельна.", "color": "4"},
+    {"id": "b00000000000000b", "type": "text", "x": 1260, "y": 560, "width": 340, "height": 140, "text": "# 🟢 ChronicleSystem\n\nЛог событий 1 строка (04)\n\nНе SPOF: нарративный слой; информация дублируется в UI-числах (инвариант).", "color": "4"}
+  ],
+  "edges": [
+    {"id": "c000000000000001", "fromNode": "b000000000000002", "fromSide": "bottom", "toNode": "b000000000000003", "toSide": "top", "toEnd": "arrow", "label": "фаза игрока"},
+    {"id": "c000000000000002", "fromNode": "b000000000000002", "fromSide": "bottom", "toNode": "b000000000000004", "toSide": "top", "toEnd": "arrow", "label": "фаза поселения"},
+    {"id": "c000000000000003", "fromNode": "b000000000000002", "fromSide": "right", "toNode": "b000000000000008", "toSide": "top", "toEnd": "arrow", "label": "фаза угроз"},
+    {"id": "c000000000000004", "fromNode": "b000000000000003", "fromSide": "right", "toNode": "b000000000000005", "toSide": "left", "toEnd": "arrow", "label": "герой/узел → бой"},
+    {"id": "c000000000000005", "fromNode": "b000000000000004", "fromSide": "bottom", "toNode": "b000000000000006", "toSide": "top", "toEnd": "arrow", "label": "производство"},
+    {"id": "c000000000000006", "fromNode": "b000000000000004", "fromSide": "bottom", "toNode": "b000000000000005", "toSide": "bottom", "toEnd": "arrow", "label": "снабжение 10 еды"},
+    {"id": "c000000000000007", "fromNode": "b000000000000004", "fromSide": "right", "toNode": "b000000000000008", "toSide": "left", "toEnd": "arrow", "label": "цели рейдов"},
+    {"id": "c000000000000008", "fromNode": "b000000000000006", "fromSide": "right", "toNode": "b000000000000005", "toSide": "left", "toEnd": "arrow", "label": "наём (барраки)"},
+    {"id": "c000000000000009", "fromNode": "b000000000000005", "fromSide": "bottom", "toNode": "b000000000000007", "toSide": "top", "toEnd": "arrow", "label": "партия в бой"},
+    {"id": "c00000000000000a", "fromNode": "b000000000000007", "fromSide": "right", "toNode": "b000000000000008", "toSide": "left", "toEnd": "arrow", "label": "бой рейда (герой на месте)"},
+    {"id": "c00000000000000b", "fromNode": "b000000000000009", "fromSide": "bottom", "toNode": "b000000000000002", "toSide": "right", "toEnd": "arrow", "label": "снапшот всего состояния"},
+    {"id": "c00000000000000c", "fromNode": "b000000000000008", "fromSide": "bottom", "toNode": "b00000000000000b", "toSide": "top", "toEnd": "arrow", "label": "события"},
+    {"id": "c00000000000000d", "fromNode": "b00000000000000a", "fromSide": "bottom", "toNode": "b000000000000004", "toSide": "right", "toEnd": "arrow", "label": "последователи → население"}
+  ]
+}
