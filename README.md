@@ -1,4 +1,4 @@
-# Fission AI: Strategy Game Project
+# Sigil of the Unwilling: Strategy Game Project
 
 [![OpenSpec](https://img.shields.io/badge/OpenSpec-enabled-blue)](https://github.com/Fission-AI/OpenSpec)
 [![Godot Engine](https://img.shields.io/badge/Godot-4.7-blue.svg)](https://godotengine.org/)
@@ -6,7 +6,7 @@
 
 ## 📖 Описание проекта
 
-**Fission AI** — это стратегическая игра с элементами RPG, разработанная на движке Godot 4.7. Проект включает в себя систему управления городом, тактические сражения, исследование мира, магическую систему и экономику ресурсов.
+**Sigil of the Unwilling** — это стратегическая игра с элементами RPG, разработанная на движке Godot 4.7. Проект включает в себя систему управления городом, тактические сражения, исследование мира, магическую систему и экономику ресурсов.
 
 ### 🎮 Ключевые особенности
 
@@ -31,7 +31,7 @@
 1. **Клонируйте репозиторий**:
    ```bash
    git clone <repository-url>
-   cd fission-ai
+   cd sigil-of-the-unwilling
    ```
 
 2. **Установите Godot 4.7**:
@@ -52,7 +52,7 @@
    ```bash
    cd game && bash tests/run_all.sh   # полный прогон: gdUnit4 + MCP + структурные
    ```
-   Подробности (требования, правила, baseline) — в [doc/testing.md](doc/testing.md).
+   Подробности (требования, правила, baseline) — в руководстве в этом README (раздел «Тестирование»).
 
 5. **MCP-сервер (опционально, для AI-интеракции и MCP-тестов)**: вендорный
    проект [tugcantopaloglu/godot-mcp](https://github.com/tugcantopaloglu/godot-mcp)
@@ -70,7 +70,7 @@
 ## 📁 Структура проекта
 
 ```
-fission-ai/
+sigil-of-the-unwilling/
 ├── game/                      # Основной проект Godot
 │   ├── assets/                # Ресурсы игры
 │   │   ├── ui/                # UI элементы (иконки, курсоры, виджеты)
@@ -106,8 +106,7 @@ fission-ai/
 │   │   └── map-generation-enhancements/
 │   ├── specs/                 # Технические спецификации
 │   └── config.yaml            # Конфигурация OpenSpec
-├── doc/                       # Документация
-│   └── task/                  # Задачи и требования
+├── docs/                      # Дизайн-документация (GDD, Obsidian-vault)
 └── tmp/                       # Временные файлы
 ```
 
@@ -150,7 +149,7 @@ godot --path game --script tools/scenarios/<scenario>.gd
 
 Проект использует фреймворк **gdUnit4 6.2.1** для тестирования. Аддон
 `game/addons/gdunit4/` не трекается в git — перед прогоном установите его из
-репозитория вендора (полная инструкция: [doc/testing.md](doc/testing.md#установка-gdunit4)):
+репозитория вендора (полная инструкция: [инструкция ниже](#тестирование)):
 
 ```bash
 cd game
@@ -168,28 +167,36 @@ cd game && godot --headless --path . -s addons/gdunit4/bin/GdUnitCmdTool.gd --ig
 ```
 
 Подробное руководство (требования, структура, правила именования, baseline,
-известные skip) — в [doc/testing.md](doc/testing.md).
+известные skip) — в руководстве в этом README (раздел «Тестирование»).
 
 ## 📚 Документация
 
-Документация живёт в `doc/`:
+Дизайн-документация игры (GDD) живёт в [`docs/`](docs/) — это Obsidian-vault:
 
-- [Тестирование](doc/testing.md) — требования, правила, baseline
-- [Задачи и требования](doc/task/) — `TASK_*.md`
-- [Система магии](game/assets/data/spells.json)
-- [Спецификации OpenSpec](openspec/specs/)
+| Документ | Содержание |
+|---|---|
+| [00-overview](docs/00-overview.md) | High Concept / Elevator Pitch |
+| [00-glossary](docs/00-glossary.md) | Глоссарий — единая терминология |
+| [01-core-loop](docs/01-core-loop.md) | Core Loop |
+| [02-mechanics](docs/02-mechanics.md) | Механики и системы (+ 02b–02g: биномы, Знаки, классы, город, социум, hex) |
+| [03-progression](docs/03-progression.md) | Прогрессия и мета-цикл |
+| [04-narrative](docs/04-narrative.md) | Нарратив / Сеттинг / Тон |
+| [05-content](docs/05-content.md) | Контент-пайплайн |
+| [06-economy](docs/06-economy.md) | Экономика и баланс |
+| [07-ui-ux](docs/07-ui-ux.md) | UI/UX flow |
+| [08-tech](docs/08-tech.md) | Технический стек и платформы |
+| [09-risks](docs/09-risks.md) | Риски и открытые вопросы |
+| [MVP-scope](docs/MVP-scope.md) | MVP Scope |
+| [QUESTIONS](docs/QUESTIONS.md) | Открытые вопросы к дизайнеру |
+| [BANK](docs/BANK.md) | Банк контента |
+| [dev-tickets](docs/dev-tickets.md) | Dev Tickets — MVP |
 
-### Формат задачи (`doc/task/TASK_*.md`)
+Техническая документация разработки:
 
-```markdown
-# TASK_XX: Название задачи
-
-## Описание
-## Требования
-## Критерии приёмки
-## Ресурсы
-## Статус          # Не начата / В работе / На проверке / Завершена
-```
+- [CONTRIBUTING.md](CONTRIBUTING.md) — процесс вклада и стандарты
+- [AGENTS.md](AGENTS.md) — инструкции для AI-агентов
+- [Спецификации OpenSpec](openspec/specs/) — технические спецификации
+- [Система магии](game/assets/data/spells.json) — данные заклинаний
 
 ## 🎨 Ассеты
 
