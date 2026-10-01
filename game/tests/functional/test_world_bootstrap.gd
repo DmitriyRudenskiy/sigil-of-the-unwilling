@@ -55,7 +55,7 @@ func test_boot_hero_is_hero_controller() -> void:
 	var hero := wc.get_hero()
 	assert_that(hero).is_not_null()
 	assert_bool(hero is HeroController).is_true()
-	assert_int(hero._components.size()).is_equal(15)
+	assert_int(hero._components.size()).is_equal(16)
 
 func test_boot_endgame_wired() -> void:
 	var wc := await _boot_world()

@@ -41,6 +41,6 @@ static func school_texture(id: String) -> Texture2D:
 	return tex if tex != null else fallback()
 
 static func cursor_texture(mode: String) -> Texture2D:
-	var path := "%s%s.png" % [CURSOR_DIR, mode]
+	var path := "%scursor_%s.png" % [CURSOR_DIR, mode]
 	var tex: Texture2D = _load(path) if ResourceLoader.exists(path) else null
 	return tex if tex != null else fallback()
