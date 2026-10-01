@@ -78,7 +78,3 @@ GitHub — issues в `DmitriyRudenskiy/sigil-of-the-unwilling` GitHub Issues, о
 ### Triage labels
 
 Дефолтная пятиролевая лексика (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`).
-
-### Domain docs
-
-Single-context: один `CONTEXT.md` + `docs/adr/` в корне.
