@@ -73,12 +73,12 @@
 
 ### Issue tracker
 
-GitHub — issues в `DmitriyRudenskiy/sigil-of-the-unwilling` GitHub Issues, операции через `gh` CLI. См. `docs/agents/issue-tracker.md`.
+GitHub — issues в `DmitriyRudenskiy/sigil-of-the-unwilling` GitHub Issues, операции через `gh` CLI.
 
 ### Triage labels
 
-Дефолтная пятиролевая лексика (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). См. `docs/agents/triage-labels.md`.
+Дефолтная пятиролевая лексика (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`).
 
 ### Domain docs
 
-Single-context: один `CONTEXT.md` + `docs/adr/` в корне. См. `docs/agents/domain.md`.
+Single-context: один `CONTEXT.md` + `docs/adr/` в корне.
