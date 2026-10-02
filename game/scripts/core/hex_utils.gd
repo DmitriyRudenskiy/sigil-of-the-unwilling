@@ -78,6 +78,33 @@ static func hex_distance(a: Vector2i, b: Vector2i, shift_right: Variant = null) 
 	var bc := offset_to_cube(b, sr)
 	return max(max(absi(ac.x - bc.x), absi(ac.y - bc.y)), absi(ac.z - bc.z))
 
+# city-hex-layout (D6, 02g §2.1): ядро города = ромб из 4 клеток у center,
+# кольца 1–3 вокруг ядра → 4 + 10 + 16 + 22 = 52 клетки.
+const CORE_RHOMBUS_OFFSETS: Array[Vector2i] = [Vector2i(0, 0), Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1)]
+
+static func core_cells(center: Vector2i) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	for o in CORE_RHOMBUS_OFFSETS:
+		out.append(center + o)
+	return out
+
+static func core_distance(center: Vector2i, cell: Vector2i, shift_right: Variant = null) -> int:
+	var d := 99
+	for o in CORE_RHOMBUS_OFFSETS:
+		d = mini(d, hex_distance(center + o, cell, shift_right))
+	return d
+
+static func cells_in_core_ring(center: Vector2i, ring: int, shift_right: Variant = null) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	if ring < 1:
+		return out
+	for y in range(center.y - ring, center.y + ring + 2):
+		for x in range(center.x - ring, center.x + ring + 2):
+			var cell := Vector2i(x, y)
+			if core_distance(center, cell, shift_right) == ring:
+				out.append(cell)
+	return out
+
 static func ring(center: Vector2i, r: int, shift_right: Variant = null) -> Array[Vector2i]:
 	if r <= 0:
 		return [center]

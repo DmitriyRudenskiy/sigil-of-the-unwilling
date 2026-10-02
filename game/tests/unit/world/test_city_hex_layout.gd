@@ -57,9 +57,9 @@ func test_first_free_build_cell_skips_core() -> void:
 
 func test_first_free_build_cell_no_beyond_ring_3() -> void:
 	var c := _city()
-	# занять все клетки колец 1–3
+	# занять все клетки колец 1–3 (вокруг ядра, D6)
 	for r in range(1, 4):
-		for cell in HexUtils.ring(c.center, r):
+		for cell in HexUtils.cells_in_core_ring(c.center, r):
 			c.buildings.append(_building_at(cell))
 	var cell := CityBuildingService.first_free_build_cell(c, BuildingDefs.market())
 	assert_that(cell).is_equal(Vector2i(-1, -1))
@@ -69,10 +69,10 @@ func test_first_free_build_cell_finds_free_in_ring() -> void:
 	var c := City.new()
 	c.center = Vector2i(10, 10)
 	c.core_cells = CityFactory.core_cells_for(c.center)
-	# занять всё кроме одной клетки кольца 1
+	# занять всё кроме одной клетки кольца 1 (вокруг ядра, D6)
 	var free_cell: Vector2i = Vector2i(-1, -1)
 	for r in range(1, 4):
-		for cell in HexUtils.ring(c.center, r):
+		for cell in HexUtils.cells_in_core_ring(c.center, r):
 			if cell == c.center + Vector2i(0, -1):
 				free_cell = cell
 				continue
@@ -105,11 +105,11 @@ func test_rebuild_city_zones_cache() -> void:
 			ring1_count += 1
 	# (1,1) в аксиальных координатах — расстояние 2, в кольце 1 только (1,0) и (0,1)
 	assert_that(ring1_count).is_equal(4)
-	# кольцо 3 есть, кольцо 4 нет
-	var ring3 := HexUtils.ring(c.center, 3)
-	var ring4 := HexUtils.ring(c.center, 4)
-	assert_bool(renderer.city_zones.has(ring3[0]))
-	assert_bool(not renderer.city_zones.has(ring4[0]))
+	# D6: граница — кольцо 3 вокруг ядра; кольцо 4 (по ядру) вне зоны
+	var ring3c := HexUtils.cells_in_core_ring(c.center, 3)
+	var ring4c := HexUtils.cells_in_core_ring(c.center, 4)
+	assert_bool(renderer.city_zones.has(ring3c[0]))
+	assert_bool(not renderer.city_zones.has(ring4c[0]))
 
 func test_rebuild_city_zones_replaces() -> void:
 	var c1 := _city(Vector2i(10, 10))

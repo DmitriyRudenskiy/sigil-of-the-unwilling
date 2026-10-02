@@ -13,8 +13,9 @@ static func village_name(seed_val: int, cell: Vector2i) -> String:
 	return VILLAGE_NAMES[absi(h) % VILLAGE_NAMES.size()]
 
 ## city-hex-layout D2: ромб 2×2 — center, (1,0), (0,1), (1,1).
+## D6: источник ромба — HexUtils.core_cells (одно место для всей геометрии).
 static func core_cells_for(center: Vector2i) -> Array[Vector2i]:
-	return [center, center + Vector2i(1, 0), center + Vector2i(0, 1), center + Vector2i(1, 1)]
+	return HexUtils.core_cells(center)
 
 static func create_village(center: Vector2i, display_name: String, _seed: int = 0) -> City:
 	var city := City.new()

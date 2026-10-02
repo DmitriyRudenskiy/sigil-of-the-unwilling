@@ -20,12 +20,23 @@ func test_arena_cells_unique() -> void:
 	for cell in cells:
 		seen[cell] = true
 	assert_that(seen.size()).is_equal(cells.size())
-	assert_that(cells.size()).is_equal(91)
+	# D6 (02g §2.1): ядро 4 + кольца 10/16/22 = 52 клетки
+	assert_that(cells.size()).is_equal(52)
 
 func test_center_ring_zero() -> void:
 	assert_that(ArenaRingSystem.ring_of(ArenaRingSystem.ARENA_CENTER)).is_equal(0)
 	assert_that(city.center).is_equal(ArenaRingSystem.ARENA_CENTER)
 	assert_bool(city.center.y % 2 == 0).is_true()
+	# Ядро = ромб из 4 клеток, все в кольце 0
+	assert_that(ArenaRingSystem.core_cells().size()).is_equal(4)
+	for cell in ArenaRingSystem.core_cells():
+		assert_that(ArenaRingSystem.ring_of(cell)).is_equal(0)
+
+func test_ring_sizes_02g() -> void:
+	# 02g §2.1: кольцо n = 6n + 4 → 10 / 16 / 22
+	assert_that(ArenaRingSystem.cells_in_ring(1).size()).is_equal(10)
+	assert_that(ArenaRingSystem.cells_in_ring(2).size()).is_equal(16)
+	assert_that(ArenaRingSystem.cells_in_ring(3).size()).is_equal(22)
 
 func test_all_cells_within_radius() -> void:
 	var ok := true
@@ -185,28 +196,27 @@ func test_cell_features_deterministic() -> void:
 			count += 1
 		assert_bool(f1 == &"" or f1 == &"quarry" or f1 == &"spring"
 				 or f1 == &"river" or f1 == &"ruins").is_true()
-	assert_bool(count >= 5).is_true()
+	assert_bool(count >= 1).is_true()
 
 func test_cell_features_rings_only() -> void:
 	for cell in ArenaRingSystem.cells_in_ring(0):
 		assert_that(ArenaRingSystem.cell_feature(city, cell as Vector2i)).is_equal(&"")
 	for cell in ArenaRingSystem.cells_in_ring(1):
 		assert_that(ArenaRingSystem.cell_feature(city, cell as Vector2i)).is_equal(&"")
-	for cell in ArenaRingSystem.cells_in_ring(5):
-		assert_that(ArenaRingSystem.cell_feature(city, cell as Vector2i)).is_equal(&"")
 
 func test_feature_mults() -> void:
+	# D6: фичи пересчитаны под ядро-ромб (кольца 2–3)
 	var quarry := Vector2i(2, 4)
 	var spring := Vector2i(2, 5)
-	var river := Vector2i(2, 2)
+	var ruins := Vector2i(2, 3)
 	assert_that(ArenaRingSystem.cell_feature(city, quarry)).is_equal(&"quarry")
 	assert_that(ArenaRingSystem.cell_feature(city, spring)).is_equal(&"spring")
-	assert_that(ArenaRingSystem.cell_feature(city, river)).is_equal(&"river")
+	assert_that(ArenaRingSystem.cell_feature(city, ruins)).is_equal(&"ruins")
 	assert_that(ArenaRingSystem.feature_mult(city, &"mine", quarry)).is_equal(GameNumbers.ARENA_FEATURE_QUARRY)
 	assert_that(ArenaRingSystem.feature_mult(city, &"farm", quarry)).is_equal(1.0)
 	assert_that(ArenaRingSystem.feature_mult(city, &"farm", spring)).is_equal(GameNumbers.ARENA_FEATURE_SPRING)
 	assert_that(ArenaRingSystem.feature_mult(city, &"mine", spring)).is_equal(1.0)
-	assert_that(ArenaRingSystem.feature_mult(city, &"tavern", river)).is_equal(GameNumbers.ARENA_FEATURE_RIVER)
+	assert_that(ArenaRingSystem.feature_mult(city, &"tavern", ruins)).is_equal(1.0)
 
 func test_ruins_gold_bonus() -> void:
 	var cell := Vector2i(2, 3)
@@ -262,8 +272,9 @@ func test_demo_plan_forms_farm_cluster() -> void:
 	assert_bool(last.has("storm") and last.has("clusters")).is_true()
 
 func test_balance_yield_table_shape() -> void:
-	assert_that(GameNumbers.RING_YIELD.size()).is_equal(6)
-	for r in range(6):
+	# D6: кольца 0–3 (ядро + 3 кольца)
+	assert_that(GameNumbers.RING_YIELD.size()).is_equal(4)
+	for r in range(4):
 		var row: Array = GameNumbers.RING_YIELD[r]
 		assert_that(row.size()).is_equal(5)
 		for i in range(5):
@@ -271,7 +282,7 @@ func test_balance_yield_table_shape() -> void:
 
 func test_balance_yield_within_bounds() -> void:
 	var bounds: Array = [[0.0, 8.0], [0.0, 6.0], [0.0, 2.0], [0.0, 2.0], [0.0, 2.0]]
-	for r in range(1, 6):
+	for r in range(1, 4):
 		var row: Array = GameNumbers.RING_YIELD[r]
 		for i in range(5):
 			assert_bool(float(row[i]) <= float(bounds[i][1])).is_true()

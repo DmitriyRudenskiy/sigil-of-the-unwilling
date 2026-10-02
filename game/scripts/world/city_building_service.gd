@@ -35,7 +35,8 @@ static func assign_followers(city: City, bld: UniqueBuilding, n: int) -> void:
 	bld.assigned_followers += n - left
 
 static func within_build_distance(city: City, cell: Vector2i) -> bool:
-	if HexUtils.hex_distance(cell, city.center) <= city.building_max_distance():
+	# D6: якорь города = ядро (ромб 4 клетки), расстояние = кольцо
+	if CityService.ring_of(city, cell) <= city.building_max_distance():
 		return true
 	for borough in city.boroughs:
 		if HexUtils.hex_distance(cell, borough.cell) <= city.building_max_distance():
@@ -216,7 +217,7 @@ static func first_free_build_cell(city: City, def: UniqueBuilding.Def, bounds :=
 		return Vector2i(-1, -1)
 	var max_d := city.building_max_distance()
 	for r in range(1, max_d + 1):
-		for cell in HexUtils.ring(city.center, r):
+		for cell in HexUtils.cells_in_core_ring(city.center, r):
 			if bounds.x > 0 and bounds.y > 0:
 				if cell.x < 0 or cell.y < 0 or cell.x >= bounds.x or cell.y >= bounds.y:
 					continue
