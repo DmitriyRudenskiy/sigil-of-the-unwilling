@@ -6,6 +6,8 @@ status: deepened
 date: 2026-10-02
 ---
 
+> **FREEZE (2026-10-02):** `docs/` заморожен до MVP (Фаза 3 нормализации завершена, [[NORMALIZATION_REPORT]]). Изменения — только: решение владельца / багфикс / решение TBD (→ `07-balance`). Лог — `CHANGELOG.md`.
+
 ## High Concept / Elevator Pitch
 
 **Питч на 30 секунд (рабочий текст):**
