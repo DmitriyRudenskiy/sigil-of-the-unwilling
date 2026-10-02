@@ -33,15 +33,13 @@ func cast_spell(args: Dictionary) -> Dictionary:
 	unit.max_count = maxi(count, 10)
 	if unit.get_count() <= 0:
 		unit.set_count(count)
-	var rng := RandomNumberGenerator.new()
-	rng.randomize()
 
 	var reg: Object = Services.resolve(&"spells")
 	if reg != null and reg.get_all_spells().is_empty():
 		reg.ensure_definitions()
 	var caster_bonus := {"spell_power": 8, "attack": 6, "defense": 5, "knowledge": 5}
 	var target_bonus := {"knowledge": int(resistant), "defense": 5}
-	return SpellCaster.cast(StringName(spell_id), unit, caster_bonus, target_bonus, rng, reg)
+	return SpellCaster.cast(StringName(spell_id), unit, caster_bonus, target_bonus, reg)
 
 func army_stack(spec: Dictionary) -> UnitStack:
 	var tags: Array = []
@@ -93,7 +91,7 @@ func advance_toward(state: BattleState, u: BattleState.BattleUnit, target: Battl
 	if best != u.cell:
 		BattleActionResolver.do_move(state, u, best)
 
-func run_auto_battle(state: BattleState, rng: RandomNumberGenerator) -> Dictionary:
+func run_auto_battle(state: BattleState) -> Dictionary:
 	state.build_queue()
 	var events: Array = []
 	var turn := 0
@@ -124,14 +122,14 @@ func run_auto_battle(state: BattleState, rng: RandomNumberGenerator) -> Dictiona
 			can_attack = _can_attack(u, target, state, dist)
 		if can_attack:
 			var melee := not u.is_ranged()
-			var res := BattleActionResolver.apply_attack(state, u, target, melee, rng, true)
+			var res := BattleActionResolver.apply_attack(state, u, target, melee, true)
 			events.append({"turn": turn, "unit": u.get_display_name(), "action": "attack", "result": res})
 			# Контратака (как в игровом потоке, BattleAttackSequence.can_retaliate):
 			# выживший мясной защитник контратакует один раз за бой.
 			if melee and target.is_alive() and u.is_alive() \
 					and not target.has_retaliated and not u.is_no_retaliation():
 				target.has_retaliated = true
-				var counter := BattleActionResolver.apply_attack(state, target, u, true, rng, false)
+				var counter := BattleActionResolver.apply_attack(state, target, u, true, false)
 				if not counter.is_empty():
 					events.append({"turn": turn, "unit": target.get_display_name(), "action": "retaliation", "result": counter})
 	return {
@@ -176,14 +174,8 @@ func emulate_battle(req: Dictionary) -> Dictionary:
 	var state := BattleState.new()
 	state.set_hero_bonuses(atk_bonus, def_bonus)
 	state.place_army(atk_stacks, def_stacks)
-	var rng := RandomNumberGenerator.new()
-	# Опциональный seed для детерминированных тестов (tactical-combat 8.4):
-	# без seed — randomize(), как раньше.
-	if req.has("rng_seed"):
-		rng.seed = int(req["rng_seed"])
-	else:
-		rng.randomize()
-	var report := run_auto_battle(state, rng)
+	# T17/D2: разрешение детерминировано (лестница), seed не нужен.
+	var report := run_auto_battle(state)
 	report["atk_loss"] = total_count(atk_specs)
 	report["def_loss"] = total_count(def_specs)
 	return report
@@ -228,10 +220,8 @@ func cast_in_battle(args: Dictionary) -> Dictionary:
 	var target_unit: BattleState.BattleUnit = state.defender_units[0]
 	if spell_id == &"resurrection" or target_count <= 0:
 		target_unit.set_count(0)
-	var rng := RandomNumberGenerator.new()
-	rng.randomize()
 	return BattleActionResolver.apply_spell(
-		state, StringName(spell_id), caster_unit, target_unit, caster_bonus, target_bonus, rng)
+		state, StringName(spell_id), caster_unit, target_unit, caster_bonus, target_bonus)
 
 func sequence_battle(args: Dictionary) -> Dictionary:
 	var sequence: Variant = args.get("sequence", [])
@@ -267,8 +257,6 @@ func sequence_battle(args: Dictionary) -> Dictionary:
 	var target_unit: BattleState.BattleUnit = state.defender_units[0]
 	if caster_start_hp < caster_unit.get_hp():
 		caster_unit.stats.hp = caster_start_hp
-	var rng := RandomNumberGenerator.new()
-	rng.randomize()
 	var steps: Array = []
 	for cmd in sequence:
 		if not (cmd is Dictionary):
@@ -286,13 +274,13 @@ func sequence_battle(args: Dictionary) -> Dictionary:
 			if sid == "resurrection":
 				target_unit.set_count(0)
 			var r = BattleActionResolver.apply_spell(
-				state, StringName(sid), caster_unit, target_for, caster_bonus, target_bonus, rng)
+				state, StringName(sid), caster_unit, target_for, caster_bonus, target_bonus)
 			steps.append({"cmd": "cast", "spell": sid, "result": r})
 		elif kind == "attack":
-			var r = BattleActionResolver.apply_attack(state, caster_unit, target_unit, not caster_unit.is_ranged(), rng, true)
+			var r = BattleActionResolver.apply_attack(state, caster_unit, target_unit, not caster_unit.is_ranged(), true)
 			steps.append({"cmd": "attack", "result": r})
 		elif kind == "enemy":
-			var r = BattleActionResolver.apply_attack(state, target_unit, caster_unit, not target_unit.is_ranged(), rng, true)
+			var r = BattleActionResolver.apply_attack(state, target_unit, caster_unit, not target_unit.is_ranged(), true)
 			steps.append({"cmd": "enemy", "result": r})
 	return {
 		"steps": steps,
@@ -343,9 +331,10 @@ func battle_spell(args: Dictionary) -> Dictionary:
 		unit.set_count(0)
 	var caster_bonus := {"spell_power": 8, "attack": 6, "defense": 5, "knowledge": 5}
 	var target_bonus := {"knowledge": int(resistant), "defense": 5}
-	var rng := RandomNumberGenerator.new()
-	rng.randomize()
-	var apply_result = BattleSpellBridge.apply_spell(spell, unit, caster_bonus, target_bonus, rng)
+	# Legacy d20-мост (battle/dnd/): ГСЧ нужен только ему.
+	var legacy_rng := RandomNumberGenerator.new()
+	legacy_rng.randomize()
+	var apply_result = BattleSpellBridge.apply_spell(spell, unit, caster_bonus, target_bonus, legacy_rng)
 	return {"spell": spell.to_dict(), "apply": apply_result, "registered": registered}
 
 func spell_registry() -> Dictionary:

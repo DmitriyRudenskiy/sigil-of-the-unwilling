@@ -112,7 +112,6 @@ func test_apply_results_wounded_hero() -> void:
 	var h := _hero()
 	h.set_combat_hp(20)
 	var c := WorldBattleCoordinator.new()
-	c.rng = TestFactories.seeded(7966)
 	c.hero = h
 	c.battle_death_enabled = true
 	c._pending_enemy_cell = Vector2i(3, 4)
@@ -128,7 +127,6 @@ func test_apply_results_fighter_hp_maps_to_hero() -> void:
 	var h := _hero()
 	h.set_combat_hp(20)
 	var c := WorldBattleCoordinator.new()
-	c.rng = TestFactories.seeded(7966)
 	c.hero = h
 	c.battle_death_enabled = true
 	c._pending_enemy_cell = Vector2i(3, 4)

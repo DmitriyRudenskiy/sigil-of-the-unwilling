@@ -4,8 +4,10 @@ extends BaseTest
 ## Покрывает:
 ##   * модификаторы типов (защита/высота/блокировка/скорость) — BattleTerrain,
 ##   * детерминированную генерацию из seed + избегание колонок развёртки,
-##   * хранение в BattleState (get/set/clear/generate) + блокировка водой,
-##   * применение бонусов в уроне (damage_multiplier + BattleDamageResolver).
+##   * хранение в BattleState (get/set/clear/generate) + блокировка водой.
+##
+## T17/D2: местность больше не влияет на урон (лестница перевеса, 02d v1.2);
+## её роль — стоимость движения и блокировка (вода).
 
 const _BT := preload("res://scripts/systems/BattleTerrain.gd")
 const T := _BT.TerrainType
@@ -89,50 +91,3 @@ func test_water_blocks_movement() -> void:
 	var blocked = state.build_all_blocked(atk, {})
 	assert_bool(blocked.has(water_cell)).is_true().override_failure_message("water hex must block movement")
 
-# --- Применение бонусов в уроне ---
-
-func test_forest_defense_reduces_damage_multiplier() -> void:
-	var atk = TestFactories.make_battle_unit_raw("a", 10, BattleState.Side.ATTACKER)
-	var def = TestFactories.make_battle_unit_raw("d", 10, BattleState.Side.DEFENDER)
-	var plain: float = BattleRules.damage_multiplier(atk, def, 50, 0)
-	var forest: float = BattleRules.damage_multiplier(atk, def, 50, 0, 1.0, _BT.defense_multiplier(T.FOREST))
-	assert_float(plain).is_greater(1.0)
-	assert_float(forest).is_less(plain).override_failure_message("forest must reduce incoming damage")
-
-func test_fort_defense_stronger_than_forest() -> void:
-	var atk = TestFactories.make_battle_unit_raw("a", 10, BattleState.Side.ATTACKER)
-	var def = TestFactories.make_battle_unit_raw("d", 10, BattleState.Side.DEFENDER)
-	var forest: float = BattleRules.damage_multiplier(atk, def, 50, 0, 1.0, _BT.defense_multiplier(T.FOREST))
-	var fort: float = BattleRules.damage_multiplier(atk, def, 50, 0, 1.0, _BT.defense_multiplier(T.FORT))
-	assert_float(fort).is_less(forest).override_failure_message("fort must defend better than forest")
-
-func test_downhill_attack_increases_damage_multiplier() -> void:
-	var atk = TestFactories.make_battle_unit_raw("a", 10, BattleState.Side.ATTACKER)
-	var def = TestFactories.make_battle_unit_raw("d", 10, BattleState.Side.DEFENDER)
-	var flat: float = BattleRules.damage_multiplier(atk, def, 50, 0)
-	var downhill: float = BattleRules.damage_multiplier(atk, def, 50, 0, _BT.DOWNHILL_ATTACK_MULT, 1.0)
-	assert_float(downhill).is_greater(flat).override_failure_message("attacking downhill must deal more damage")
-
-func test_resolver_applies_terrain_end_to_end() -> void:
-	var s1 := _make_state("swordsmen", "goblins", 20, 5)
-	var a1 = s1.get_units_by_side(BattleState.Side.ATTACKER)[0]
-	var d1 = s1.get_units_by_side(BattleState.Side.DEFENDER)[0]
-	a1.cell = Vector2i(5, 5)
-	d1.cell = HexUtils.get_neighbor(a1.cell, 0)
-	var lost_plain: int = _run_attack(s1, a1, d1, 555)
-
-	var s2 := _make_state("swordsmen", "goblins", 20, 5)
-	var a2 = s2.get_units_by_side(BattleState.Side.ATTACKER)[0]
-	var d2 = s2.get_units_by_side(BattleState.Side.DEFENDER)[0]
-	a2.cell = Vector2i(5, 5)
-	d2.cell = HexUtils.get_neighbor(a2.cell, 0)
-	s2.set_terrain(d2.cell, T.FORT)
-	var lost_fort: int = _run_attack(s2, a2, d2, 555)
-
-	assert_int(lost_fort).is_less_equal(lost_plain).override_failure_message("fort terrain must not increase damage taken")
-
-func _run_attack(state: BattleState, atk: BattleState.BattleUnit, def: BattleState.BattleUnit, seed: int) -> int:
-	var before: int = def.get_count()
-	var rng := TestFactories.seeded(seed)
-	BattleDamageResolver.resolve(state, atk, def, {"is_melee": true, "rng": rng, "atk_bonus": 50, "def_bonus": 0})
-	return before - def.get_count()

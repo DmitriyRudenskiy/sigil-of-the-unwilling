@@ -136,7 +136,7 @@ func test_auto_battle_deterministic_by_seed() -> void:
 		state.place_army(atk_stacks, def_stacks)
 		var rng := RandomNumberGenerator.new()
 		rng.seed = 424242
-		var report: Dictionary = emu.run_auto_battle(state, rng)
+		var report: Dictionary = emu.run_auto_battle(state)
 		var seq: Array = []
 		for e in report.get("events", []):
 			seq.append("%d:%s:%s" % [e.get("turn"), e.get("unit"), e.get("action")])

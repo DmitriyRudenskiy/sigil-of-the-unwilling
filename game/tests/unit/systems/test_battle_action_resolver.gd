@@ -17,16 +17,13 @@ func test_apply_attack_returns_result() -> void:
 	var def := state.defender_units[0]
 	atk.cell = Vector2i(5, 5)
 	def.cell = HexUtils.get_neighbor(atk.cell, 0)
-	var rng := TestFactories.seeded(4634)
-	rng.seed = 42
-	var result := BattleActionResolver.apply_attack(state, atk, def, true, rng)
+	var result := BattleActionResolver.apply_attack(state, atk, def, true)
 	assert_bool(result.has("damage")).is_true()
 	assert_bool(int(result.get("damage", 0)) > 0).is_true()
 
 func test_apply_attack_null_units() -> void:
 	var state := BattleState.new()
-	var rng := TestFactories.seeded(4634)
-	var result := BattleActionResolver.apply_attack(state, null, null, true, rng)
+	var result := BattleActionResolver.apply_attack(state, null, null, true)
 	assert_bool(result.is_empty()).is_true()
 
 func test_apply_attack_dead_units() -> void:
@@ -37,8 +34,7 @@ func test_apply_attack_dead_units() -> void:
 	var atk := state.attacker_units[0]
 	var def := state.defender_units[0]
 	BattleActionResolver.kill_unit(state, def)
-	var rng := TestFactories.seeded(4634)
-	var result := BattleActionResolver.apply_attack(state, atk, def, true, rng)
+	var result := BattleActionResolver.apply_attack(state, atk, def, true)
 	assert_bool(result.is_empty()).is_true()
 
 func test_apply_attack_reduces_defender() -> void:
@@ -51,15 +47,12 @@ func test_apply_attack_reduces_defender() -> void:
 	atk.cell = Vector2i(5, 5)
 	def.cell = HexUtils.get_neighbor(atk.cell, 0)
 	var count_before := def.get_count()
-	var rng := TestFactories.seeded(4634)
-	rng.seed = 42
-	BattleActionResolver.apply_attack(state, atk, def, true, rng)
+	BattleActionResolver.apply_attack(state, atk, def, true)
 	assert_bool(def.get_count() < count_before).is_true()
 
 func test_apply_spell_null_target() -> void:
 	var state := BattleState.new()
-	var rng := TestFactories.seeded(4634)
-	var result := BattleActionResolver.apply_spell(state, &"magic_arrow", null, null, {}, {}, rng)
+	var result := BattleActionResolver.apply_spell(state, &"magic_arrow", null, null, {}, {})
 	assert_that(result.get("result")).is_equal("invalid_target")
 
 func test_apply_spell_success() -> void:
@@ -69,11 +62,9 @@ func test_apply_spell_success() -> void:
 	state.place_army([atk_stack], [def_stack])
 	var caster := state.attacker_units[0]
 	var target := state.defender_units[0]
-	var rng := TestFactories.seeded(4634)
-	rng.seed = 42
 	var result := BattleActionResolver.apply_spell(
 		state, &"magic_arrow", caster, target,
-		{"spell_power": 5}, {}, rng
+		{"spell_power": 5}, {}
 	)
 	assert_that(result.get("result")).is_equal("success")
 	assert_bool(int(result.get("damage", 0)) > 0).is_true()
@@ -88,9 +79,7 @@ func test_first_strike_triggers() -> void:
 	atk.cell = Vector2i(5, 5)
 	def.cell = HexUtils.get_neighbor(atk.cell, 0)
 	var atk_before := atk.get_count()
-	var rng := TestFactories.seeded(4634)
-	rng.seed = 42
-	var result := BattleActionResolver.apply_attack(state, atk, def, true, rng)
+	var result := BattleActionResolver.apply_attack(state, atk, def, true)
 	assert_bool(result.get("first_strike", false)).is_true()
 	assert_bool(atk.get_count() < atk_before).is_true()
 
@@ -103,11 +92,9 @@ func test_rebirth_triggers() -> void:
 	var def := state.defender_units[0]
 	atk.cell = Vector2i(5, 5)
 	def.cell = HexUtils.get_neighbor(atk.cell, 0)
-	var rng := TestFactories.seeded(4634)
-	rng.seed = 42
 	var guard := 0
 	while not state.battle_over and guard < 50:
-		BattleActionResolver.apply_attack(state, atk, def, true, rng)
+		BattleActionResolver.apply_attack(state, atk, def, true)
 		guard += 1
 	assert_bool(state.battle_over or not def.is_alive()).is_true()
 
@@ -121,10 +108,9 @@ func test_apply_sacrifice_finishes_off_rebirth_unit() -> void:
 	atk.cell = Vector2i(5, 5)
 	def.cell = HexUtils.get_neighbor(atk.cell, 0)
 	assert_bool(def.has_tag("rebirth")).is_true()
-	var rng := TestFactories.seeded(4634)
 	var sacrifice := {"type": &"resource", "resource": &"gold", "amount": 10}
 	var storage := {&"gold": 100}
-	var result := BattleActionResolver.apply_sacrifice(state, atk, sacrifice, def, storage, rng)
+	var result := BattleActionResolver.apply_sacrifice(state, atk, sacrifice, def, storage)
 	assert_that(result.get("result")).is_equal("success")
 	assert_bool(def.is_alive()).is_false()
 	assert_bool(def.already_reborn).is_false()
@@ -139,9 +125,8 @@ func test_apply_sacrifice_invalid_dead_target() -> void:
 	var atk := state.attacker_units[0]
 	var def := state.defender_units[0]
 	BattleActionResolver.kill_unit(state, def)
-	var rng := TestFactories.seeded(4634)
 	var result := BattleActionResolver.apply_sacrifice(
-		state, atk, {"type": &"resource", "resource": &"gold", "amount": 10}, def, {&"gold": 100}, rng)
+		state, atk, {"type": &"resource", "resource": &"gold", "amount": 10}, def, {&"gold": 100})
 	assert_that(result.get("result")).is_equal("invalid_target")
 	assert_bool(def.is_alive() == false).is_true()
 
@@ -153,9 +138,8 @@ func test_apply_sacrifice_invalid_dead_actor() -> void:
 	var atk := state.attacker_units[0]
 	var def := state.defender_units[0]
 	BattleActionResolver.kill_unit(state, atk)
-	var rng := TestFactories.seeded(4634)
 	var result := BattleActionResolver.apply_sacrifice(
-		state, atk, {"type": &"resource", "resource": &"gold", "amount": 10}, def, {&"gold": 100}, rng)
+		state, atk, {"type": &"resource", "resource": &"gold", "amount": 10}, def, {&"gold": 100})
 	assert_that(result.get("result")).is_equal("invalid_actor")
 
 func test_apply_sacrifice_rejects_insufficient_resource() -> void:
@@ -167,10 +151,9 @@ func test_apply_sacrifice_rejects_insufficient_resource() -> void:
 	var def := state.defender_units[0]
 	atk.cell = Vector2i(5, 5)
 	def.cell = HexUtils.get_neighbor(atk.cell, 0)
-	var rng := TestFactories.seeded(4634)
 	var storage := {&"gold": 20}
 	var result := BattleActionResolver.apply_sacrifice(
-		state, atk, {"type": &"resource", "resource": &"gold", "amount": 50}, def, storage, rng)
+		state, atk, {"type": &"resource", "resource": &"gold", "amount": 50}, def, storage)
 	assert_that(result.get("result")).is_equal("insufficient_cost")
 	assert_bool(def.is_alive()).is_true()
 	assert_that(int(storage.get(&"gold", 0))).is_equal(20)
@@ -184,10 +167,9 @@ func test_apply_sacrifice_consumes_resource_and_finishes() -> void:
 	var def := state.defender_units[0]
 	atk.cell = Vector2i(5, 5)
 	def.cell = HexUtils.get_neighbor(atk.cell, 0)
-	var rng := TestFactories.seeded(4634)
 	var storage := {&"gold": 100}
 	var result := BattleActionResolver.apply_sacrifice(
-		state, atk, {"type": &"resource", "resource": &"gold", "amount": 60}, def, storage, rng)
+		state, atk, {"type": &"resource", "resource": &"gold", "amount": 60}, def, storage)
 	assert_that(result.get("result")).is_equal("success")
 	assert_that(int(storage.get(&"gold", 0))).is_equal(40)
 	assert_bool(def.is_alive()).is_false()
@@ -204,9 +186,8 @@ func test_apply_sacrifice_consumes_follower() -> void:
 	var def := state.defender_units[0]
 	atk.cell = Vector2i(5, 5)
 	def.cell = HexUtils.get_neighbor(atk.cell, 0)
-	var rng := TestFactories.seeded(4634)
 	var sacrifice := {"type": &"follower", "unit": follower}
-	var result := BattleActionResolver.apply_sacrifice(state, atk, sacrifice, def, null, rng)
+	var result := BattleActionResolver.apply_sacrifice(state, atk, sacrifice, def, null)
 	assert_that(result.get("result")).is_equal("success")
 	assert_bool(follower.is_alive()).is_false()
 	assert_bool(def.is_alive()).is_false()
@@ -218,9 +199,8 @@ func test_apply_sacrifice_rejects_foreign_follower() -> void:
 	state.place_army([atk_stack], [def_stack])
 	var atk := state.attacker_units[0]
 	var follower := state.defender_units[0]
-	var rng := TestFactories.seeded(4634)
 	var result := BattleActionResolver.apply_sacrifice(
-		state, atk, {"type": &"follower", "unit": follower}, follower, null, rng)
+		state, atk, {"type": &"follower", "unit": follower}, follower, null)
 	assert_that(result.get("result")).is_equal("invalid_cost")
 	assert_bool(follower.is_alive()).is_true()
 
@@ -233,13 +213,12 @@ func test_apply_sacrifice_consumes_artifact() -> void:
 	var def := state.defender_units[0]
 	atk.cell = Vector2i(5, 5)
 	def.cell = HexUtils.get_neighbor(atk.cell, 0)
-	var rng := TestFactories.seeded(4634)
 	var inv := HeroInventory.new()
 	var slot := Artifact.Slot.HEAD
 	var art := Artifact.new(&"test_artifact", "", Artifact.Slot.HEAD)
 	inv.equipped[slot] = art
 	var sacrifice := {"type": &"artifact", "slot": slot}
-	var result := BattleActionResolver.apply_sacrifice(state, atk, sacrifice, def, inv, rng)
+	var result := BattleActionResolver.apply_sacrifice(state, atk, sacrifice, def, inv)
 	assert_that(result.get("result")).is_equal("success")
 	assert_that(inv.get_equipped(slot)).is_null()
 	assert_bool(def.is_alive()).is_false()
@@ -251,10 +230,9 @@ func test_apply_sacrifice_rejects_missing_artifact() -> void:
 	state.place_army([atk_stack], [def_stack])
 	var atk := state.attacker_units[0]
 	var def := state.defender_units[0]
-	var rng := TestFactories.seeded(4634)
 	var inv := HeroInventory.new()
 	var sacrifice := {"type": &"artifact", "slot": Artifact.Slot.HEAD}
-	var result := BattleActionResolver.apply_sacrifice(state, atk, sacrifice, def, inv, rng)
+	var result := BattleActionResolver.apply_sacrifice(state, atk, sacrifice, def, inv)
 	assert_that(result.get("result")).is_equal("invalid_cost")
 	assert_bool(def.is_alive()).is_true()
 
@@ -265,7 +243,6 @@ func test_apply_sacrifice_unknown_cost_type() -> void:
 	state.place_army([atk_stack], [def_stack])
 	var atk := state.attacker_units[0]
 	var def := state.defender_units[0]
-	var rng := TestFactories.seeded(4634)
-	var result := BattleActionResolver.apply_sacrifice(state, atk, {"type": &"nothing"}, def, null, rng)
+	var result := BattleActionResolver.apply_sacrifice(state, atk, {"type": &"nothing"}, def, null)
 	assert_that(result.get("result")).is_equal("invalid_cost")
 	assert_bool(def.is_alive()).is_true()

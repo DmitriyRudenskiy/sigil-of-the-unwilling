@@ -101,9 +101,6 @@ func test_battle_trophy_grants_strategic_resource() -> void:
 	var strategic: HeroStrategicResourcesComponent = hero.get_component("StrategicResources")
 	var before: Dictionary = strategic.get_all()
 
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 12345
-	BattleTrophyService.set_rng(rng)
 	var trophy: Dictionary = BattleTrophyService.roll_trophy()
 	strategic.add(trophy["resource"], int(trophy["amount"]))
 
@@ -113,14 +110,11 @@ func test_battle_trophy_grants_strategic_resource() -> void:
 	assert_that(BattleTrophyService.TROPHY_RESOURCES.has(res_id)).is_true()
 
 
-func test_battle_trophy_deterministic_by_seed() -> void:
-	var rng1 := RandomNumberGenerator.new()
-	rng1.seed = 999
-	var rng2 := RandomNumberGenerator.new()
-	rng2.seed = 999
-	BattleTrophyService.set_rng(rng1)
+## T17/D2: трофеи детерминированы (последовательность от счётчика).
+func test_battle_trophy_deterministic_sequence() -> void:
+	BattleTrophyService.reset_for_tests()
 	var t1: Dictionary = BattleTrophyService.roll_trophy()
-	BattleTrophyService.set_rng(rng2)
+	BattleTrophyService.reset_for_tests()
 	var t2: Dictionary = BattleTrophyService.roll_trophy()
 	assert_that(t1).is_equal(t2)
 

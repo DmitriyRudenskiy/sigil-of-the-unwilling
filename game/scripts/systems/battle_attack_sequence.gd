@@ -1,14 +1,17 @@
 class_name BattleAttackSequence
 extends RefCounted
 
-func setup(state: BattleState, rng: RandomNumberGenerator, executor: BattleTurnExecutor) -> void:
+func setup(state: BattleState, executor: BattleTurnExecutor) -> void:
 	_battle_state = state
-	_rng = rng
 	_executor = executor
 
 var _executor: BattleTurnExecutor
 var _battle_state: BattleState
-var _rng: RandomNumberGenerator
+
+## T17/D2: зона последнего удара — для детерминированной морали
+## (лишний ход за Триумф вместо 8%-го прока).
+var _last_strike_unit: BattleState.BattleUnit = null
+var _last_strike_zone: StringName = &""
 
 var _attack_attacker: BattleState.BattleUnit = null
 var _attack_defender: BattleState.BattleUnit = null
@@ -98,7 +101,6 @@ func next_strike() -> void:
 		_attack_attacker,
 		_attack_defender,
 		_attack_is_melee,
-		_rng,
 		not _retaliation_phase
 	)
 
@@ -109,7 +111,10 @@ func next_strike() -> void:
 	SoundManager.play_sfx_cue(&"battle_hit")
 	result["is_retaliation"] = _retaliation_phase
 
-	if result.get("luck", false):
+	_last_strike_unit = _attack_attacker
+	_last_strike_zone = result.get("zone", &"")
+
+	if _last_strike_zone == BattleRules.ZONE_TRIUMPH:
 		_executor.floating_text.emit(_attack_defender.cell, GameText.battle_luck(), ThemeConfig.C_BATTLE_LUCK)
 
 	_executor.execute_attack.emit(_attack_attacker, _attack_defender, result)
@@ -172,7 +177,9 @@ func try_morale_extra_turn() -> bool:
 	if not BattleRules.can_morale(unit):
 		return false
 
-	if _rng.randf() >= GameNumbers.MORALE_CHANCE:
+	# Детерминированная мораль (T17/D2): лишний ход, если последний
+	# удар юнита — Триумф (аналог 8%-го высокоморального прока).
+	if _last_strike_unit != unit or _last_strike_zone != BattleRules.ZONE_TRIUMPH:
 		return false
 
 	_executor.floating_text.emit(unit.cell, GameText.battle_high_morale(), ThemeConfig.C_BATTLE_MORALE)

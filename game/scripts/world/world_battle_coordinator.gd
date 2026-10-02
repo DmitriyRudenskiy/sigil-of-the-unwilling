@@ -13,7 +13,6 @@ var hero: Node = null
 var map_gen: Node = null
 var spawner: Node = null
 var battle_flow: BattleFlow = null
-var rng: RandomNumberGenerator = null
 var world_ctrl: Node = null
 var ui_manager: Node = null
 var camera: Node = null
@@ -29,6 +28,7 @@ var _pending_enemy_cell: Vector2i = Vector2i(-1, -1)
 var _roles_swapped := false
 
 var _pre_battle_cell: Vector2i = Vector2i(-1, -1)
+var _drop_counter := 0  # T17/D2: детерминированная последовательность дропов
 
 func setup(
 	h: Node,
@@ -44,7 +44,6 @@ func setup(
 	hero = h
 	map_gen = m
 	spawner = s
-	rng = r
 	world_ctrl = wc
 	ui_manager = ui
 	camera = cam
@@ -134,7 +133,7 @@ func _launch_battle(
 	if battle_flow == null or hero == null:
 		return
 	var handoff: BattleHandoff = _BattleHandoff.collect(
-		hero, enemy_army_raw, enemy_cell, spawner, rng, p_roles_swapped
+		hero, enemy_army_raw, enemy_cell, spawner, p_roles_swapped
 	)
 	if not handoff.is_valid:
 		GameLogger.warn(
@@ -343,11 +342,15 @@ func _try_artifact_drop() -> void:
 	var inv: Variant = hero.get("inventory")
 	if inv == null or not inv.has_method("add_to_backpack"):
 		return
-	if rng.randf() < GameNumbers.MONSTER_DROP_CHANCE:
+	# T17/D2: дроп артефактов детерминирован (без ГСЧ) — фиксированная
+	# последовательность от счётчика дропов сессии.
+	_drop_counter += 1
+	var roll: int = absi(hash(_drop_counter)) % 100
+	if roll < int(GameNumbers.MONSTER_DROP_CHANCE * 100.0):
 		var art_reg: Node = Services.resolve(&"artifacts")
 		var arts: Array[Artifact] = art_reg.get_by_rarity(Artifact.Rarity.MINOR)
 		if arts.size() > 0:
-			var drop: Artifact = arts[rng.randi() % arts.size()]
+			var drop: Artifact = arts[absi(hash(_drop_counter * 7)) % arts.size()]
 			if inv.call("add_to_backpack", drop):
 				GameLogger.world("Monster drop: %s" % drop.display_name)
 			else:

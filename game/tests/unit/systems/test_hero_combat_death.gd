@@ -25,7 +25,6 @@ func _combat_hero(path: StringName = &"rebel") -> HeroController:
 
 func _make_coord(enabled: bool = true) -> Object:
 	var c = auto_free( WorldBattleCoordinator.new())
-	c.rng = TestFactories.seeded(7966)
 	c.hero = _hero
 	c.battle_death_enabled = enabled
 	c._pending_enemy_cell = Vector2i(3, 4)

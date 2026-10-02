@@ -6,12 +6,9 @@ extends BaseTest
 
 
 var state: BattleState
-var rng: RandomNumberGenerator
 
 func before_test() -> void:
 	state = BattleState.new()
-	rng = TestFactories.seeded(4328)
-	rng.seed = 42
 
 func test_saltpeter_tag_exists() -> void:
 	var def := Resources.get_resource(&"saltpeter")
@@ -41,7 +38,7 @@ func test_saltpeter_adjacent_kills() -> void:
 
 	BattleActionResolver.do_move(state, adj_unit, HexUtils.get_neighbor(def_unit.cell, 0))
 
-	var result := BattleActionResolver.apply_attack(state, atk_unit, def_unit, true, rng)
+	var result := BattleActionResolver.apply_attack(state, atk_unit, def_unit, true)
 	assert_bool(result.has("saltpeter_kills")).is_true()
 	assert_bool(int(result.get("saltpeter_kills", 0)) > 0).is_true()
 
@@ -57,6 +54,6 @@ func test_saltpeter_no_adjacent() -> void:
 	var atk_unit := state.attacker_units[0]
 	var def_unit := state.defender_units[0]
 
-	var result := BattleActionResolver.apply_attack(state, atk_unit, def_unit, true, rng)
+	var result := BattleActionResolver.apply_attack(state, atk_unit, def_unit, true)
 	assert_bool(result.has("saltpeter_kills")).is_true()
 	assert_that(result["saltpeter_kills"]).is_equal(0)

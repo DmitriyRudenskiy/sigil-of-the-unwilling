@@ -36,7 +36,6 @@ var _battle_state: BattleState
 var _ai: BattleAI
 var _obstacles: Dictionary = {}
 var _ai_think_time := GameNumbers.BATTLE_AI_THINK_TIME
-var _rng := RandomNumberGenerator.new()
 var _end_emitted := false
 var _morale_allowed := false
 
@@ -44,22 +43,13 @@ var _attack_seq: BattleAttackSequence
 var _retreat_policy: BattleRetreatPolicy
 var _pending_attack: BattleState.BattleUnit = null
 
-## Deterministic RNG injection (testability): tests/replays seed the
-## executor's RNG instead of relying on randomize(). Production callers keep
-## using setup(...) without a seed — runtime behaviour is unchanged.
-func set_rng_seed(seed_value: int) -> void:
-	_rng.seed = seed_value
-
-func setup(bs: BattleState, ai: BattleAI, obstacles: Dictionary, rng_seed: int = -1) -> void:
+## T17/D2: ГСЧ в бою нет — разрешение детерминировано (лестница, 02d v1.2),
+## поэтому seed-инъекция больше не нужна.
+func setup(bs: BattleState, ai: BattleAI, obstacles: Dictionary) -> void:
 	_battle_state = bs
 	_ai = ai
 	_obstacles = obstacles
 	_state = State.IDLE
-
-	if rng_seed >= 0:
-		_rng.seed = rng_seed
-	else:
-		_rng.randomize()
 
 	_end_emitted = false
 	_morale_allowed = false
@@ -68,7 +58,7 @@ func setup(bs: BattleState, ai: BattleAI, obstacles: Dictionary, rng_seed: int =
 		_attack_seq = BattleAttackSequence.new()
 	if _retreat_policy == null:
 		_retreat_policy = BattleRetreatPolicy.new()
-	_attack_seq.setup(bs, _rng, self)
+	_attack_seq.setup(bs, self)
 	_retreat_policy.setup(bs, self)
 
 func get_current_state() -> State:
@@ -309,7 +299,7 @@ func on_spell_target_selected(spell_id: StringName, target: BattleState.BattleUn
 	var target_bonus := _battle_state.defender_hero_bonus if target.side == BattleState.Side.DEFENDER else _battle_state.attacker_hero_bonus
 
 	var result := BattleActionResolver.apply_spell(
-		_battle_state, spell_id, caster, target, caster_bonus, target_bonus, _rng
+		_battle_state, spell_id, caster, target, caster_bonus, target_bonus
 	)
 
 	if result.get("result") == "success":
@@ -336,7 +326,7 @@ func request_sacrifice(
 		return
 
 	var result := BattleActionResolver.apply_sacrifice(
-		_battle_state, acting, sacrifice, target, cost, _rng
+		_battle_state, acting, sacrifice, target, cost
 	)
 
 	if result.get("result") == "success":

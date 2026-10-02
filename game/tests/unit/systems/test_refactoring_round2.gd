@@ -30,7 +30,6 @@ func test_contact_triggers_battle() -> void:
 	var flow = _FakeFlow.new()
 	flow.name = "BF"
 	coordinator.battle_flow = flow
-	coordinator.rng = TestFactories.seeded(8875)
 	coordinator._pending_enemy_cell = Vector2i(-1, -1)
 	coordinator.check_enemy_contact(Vector2i(5, 5))
 	assert_that(coordinator._pending_enemy_cell).is_equal(Vector2i(5, 5))

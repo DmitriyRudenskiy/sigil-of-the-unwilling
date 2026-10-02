@@ -71,14 +71,15 @@ func test_forest_reduces_reach() -> void:
 	assert_bool(reachable.has(three_away)).is_false().override_failure_message("3 forest hexes (cost 3.75) must NOT be reachable at speed 3")
 
 
-func _damage_for(state: BattleState, atk: BattleState.BattleUnit, def: BattleState.BattleUnit, seed: int) -> int:
-	var rng := TestFactories.seeded(seed)
-	var res: Dictionary = BattleDamageResolver.resolve(state, atk, def, {"is_melee": true, "rng": rng})
-	return int(res.get("damage", 0))
+## T17/D2: местность влияет на бой через перевес (лестница), не через
+## множитель урона. def-бонус местности = +round(def × bonus) к защите.
+func _resolve(state: BattleState, atk: BattleState.BattleUnit, def: BattleState.BattleUnit) -> Dictionary:
+	return BattleDamageResolver.resolve(state, atk, def, {"is_melee": true})
 
 
-func test_defense_bonus_in_damage() -> void:
-	# Same armies, same seed: defender on fort takes strictly less damage.
+func test_defense_bonus_in_margin() -> void:
+	# militsia (atk 6) vs goblins (def 3): plain margin = 3; fort (+75%) →
+	# def +2 → margin 1; forest (+30%) → def +1 → margin 2.
 	var mk := func(terrain: String) -> Dictionary:
 		var state := BattleState.new()
 		var atk := _make_unit("militia", 6, 40, 5, 0, BattleState.Side.ATTACKER)
@@ -94,14 +95,17 @@ func test_defense_bonus_in_damage() -> void:
 	var plain: Dictionary = mk.call(BattleTerrain.PLAIN)
 	var fort: Dictionary = mk.call(BattleTerrain.FORT)
 	var forest: Dictionary = mk.call(BattleTerrain.FOREST)
-	var dmg_plain := _damage_for(plain["state"], plain["atk"], plain["def"], 99)
-	var dmg_fort := _damage_for(fort["state"], fort["atk"], fort["def"], 99)
-	var dmg_forest := _damage_for(forest["state"], forest["atk"], forest["def"], 99)
-	assert_int(dmg_fort).is_less(dmg_plain).override_failure_message("fort (+75% def) must reduce damage")
-	assert_int(dmg_forest).is_less(dmg_plain).override_failure_message("forest (+30% def) must reduce damage")
+	var m_plain: int = int(_resolve(plain["state"], plain["atk"], plain["def"]).get("margin", 0))
+	var m_fort: int = int(_resolve(fort["state"], fort["atk"], fort["def"]).get("margin", 0))
+	var m_forest: int = int(_resolve(forest["state"], forest["atk"], forest["def"]).get("margin", 0))
+	assert_int(m_plain).is_equal(3)
+	assert_int(m_fort).is_less(m_plain).override_failure_message("fort (+75% def) must lower the margin")
+	assert_int(m_forest).is_less(m_plain).override_failure_message("forest (+30% def) must lower the margin")
+	assert_int(m_fort).is_less(m_forest).override_failure_message("fort must defend better than forest")
 
 
 func test_hill_attack_bonus() -> void:
+	# Атакующий на холме (+20% atk): margin 3 → 4 (Триумф, урон ×2).
 	var mk := func(atk_terrain: String) -> Dictionary:
 		var state := BattleState.new()
 		var atk := _make_unit("militia", 6, 40, 5, 0, BattleState.Side.ATTACKER)
@@ -116,9 +120,12 @@ func test_hill_attack_bonus() -> void:
 
 	var plain: Dictionary = mk.call(BattleTerrain.PLAIN)
 	var hill: Dictionary = mk.call(BattleTerrain.HILL)
-	var dmg_plain := _damage_for(plain["state"], plain["atk"], plain["def"], 99)
-	var dmg_hill := _damage_for(hill["state"], hill["atk"], hill["def"], 99)
-	assert_int(dmg_hill).is_greater(dmg_plain).override_failure_message("attacker on hill (+20% atk) must deal more damage")
+	var r_plain: Dictionary = _resolve(plain["state"], plain["atk"], plain["def"])
+	var r_hill: Dictionary = _resolve(hill["state"], hill["atk"], hill["def"])
+	assert_int(int(r_hill.get("margin", 0))).is_greater(int(r_plain.get("margin", 0))) \
+		.override_failure_message("attacker on hill (+20% atk) must raise the margin")
+	assert_int(int(r_hill.get("damage", 0))).is_greater(int(r_plain.get("damage", 0))) \
+		.override_failure_message("hill attacker must deal more damage")
 
 
 func test_placement_avoids_water() -> void:

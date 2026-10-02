@@ -33,8 +33,7 @@ func test_attack() -> void:
 	defender.cell = HexUtils.get_neighbor(attacker.cell, 0)
 
 	var defender_count_before = defender.get_count()
-	var rng1 := TestFactories.seeded(2748)
-	BattleActionResolver.apply_attack(state, attacker, defender, true, rng1)
+	BattleActionResolver.apply_attack(state, attacker, defender, true)
 
 	assert_int(defender.get_count()).is_less(defender_count_before).override_failure_message("attack should reduce defender count")
 	assert_bool(attacker.has_moved).is_true().override_failure_message("attacker should have has_moved after attack")
@@ -52,10 +51,7 @@ func test_attack_with_rng() -> void:
 	attacker.cell = Vector2i(5, 5)
 	defender.cell = HexUtils.get_neighbor(attacker.cell, 0)
 
-	var rng := TestFactories.seeded(2748)
-	rng.seed = 12345
-
-	var result: Dictionary = BattleActionResolver.apply_attack(state, attacker, defender, true, rng)
+	var result: Dictionary = BattleActionResolver.apply_attack(state, attacker, defender, true)
 	assert_dict(result).contains_keys("damage").override_failure_message("apply_attack with rng should return result with damage")
 	assert_int(result.get("damage", 0)).is_greater(0).override_failure_message("damage should be > 0 for swordsmen vs goblins")
 
@@ -74,9 +70,8 @@ func test_battle_end() -> void:
 	defender.cell = HexUtils.get_neighbor(attacker.cell, 0)
 
 	var guard := 0
-	var rng2 := TestFactories.seeded(2748)
 	while defender.is_alive() and guard < 100:
-		BattleActionResolver.apply_attack(state, attacker, defender, true, rng2)
+		BattleActionResolver.apply_attack(state, attacker, defender, true)
 		guard += 1
 
 	assert_bool(defender.is_alive()).is_false().override_failure_message("defender should be dead after enough attacks")
@@ -135,8 +130,7 @@ func test_check_end_repeat_call() -> void:
 	attacker.cell = Vector2i(5, 5)
 	defender.cell = HexUtils.get_neighbor(attacker.cell, 0)
 
-	var rng3 := TestFactories.seeded(2748)
-	BattleActionResolver.apply_attack(state, attacker, defender, true, rng3)
+	BattleActionResolver.apply_attack(state, attacker, defender, true)
 
 	var winner1: BattleState.Side = state.check_end()
 	assert_int(winner1).is_equal(BattleState.Side.ATTACKER).override_failure_message("first check_end() should return 'attacker'")
@@ -393,8 +387,7 @@ func test_get_unit_at_after_kill() -> void:
 
 	var attacker = state.get_units_by_side(BattleState.Side.ATTACKER)[0]
 	attacker.cell = HexUtils.get_neighbor(def.cell, 0)
-	var rng := TestFactories.seeded(2748)
-	BattleActionResolver.apply_attack(state, attacker, def, true, rng)
+	BattleActionResolver.apply_attack(state, attacker, def, true)
 
 	if def.is_alive():
 		var found = state.get_unit_at(cell, BattleState.Side.DEFENDER)

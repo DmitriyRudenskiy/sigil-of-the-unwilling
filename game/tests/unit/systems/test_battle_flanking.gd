@@ -75,51 +75,43 @@ func test_aspect_full_arc_facing_west() -> void:
 	assert_int(st.attack_aspect(HexUtils.get_neighbor(d.cell, 1, _SR), d)).is_equal(2)  # NE
 	assert_int(st.attack_aspect(HexUtils.get_neighbor(d.cell, 5, _SR), d)).is_equal(2)  # SE
 
-# --- Бонус тыла: -50% защиты (детерминированно, через damage_multiplier) ---
+## T17/D2: лестница перевеса (02d v1.2). Фланг/тыл = преимущество (+2 к
+## перевесу); тыл дополнительно режет защиту ×0.5. Критов/ГСЧ нет —
+## Триумф (перевес ≥ 4) = удвоенный урон.
 
-func test_rear_halves_defense_raises_multiplier() -> void:
+func test_front_has_no_advantage_margin() -> void:
 	var atk = TestFactories.make_battle_unit_raw("a", 10, BattleState.Side.ATTACKER)
 	var def = TestFactories.make_battle_unit_raw("d", 10, BattleState.Side.DEFENDER)
-	var normal: float = BattleRules.damage_multiplier(atk, def, 0, 0, 1.0, 1.0)
-	var rear: float = BattleRules.damage_multiplier(atk, def, 0, 0, 1.0, GameNumbers.REAR_DEFENSE_MULT)
-	assert_float(rear).is_greater(normal).override_failure_message("rear (-50% def) must raise damage multiplier")
+	var base: int = BattleRules.margin_of(atk, def, 0, 0, 1.0, 1.0, 0)
+	assert_int(base).is_equal(atk.get_attack() - def.get_defense())
 
-# --- Крит фланга/тыла ---
-
-func test_front_never_crits() -> void:
+func test_flank_gives_advantage_margin() -> void:
 	var atk = TestFactories.make_battle_unit_raw("a", 10, BattleState.Side.ATTACKER)
 	var def = TestFactories.make_battle_unit_raw("d", 10, BattleState.Side.DEFENDER)
-	for seed in 20:
-		var res: Dictionary = BattleRules.calculate_attack(atk, def, true, TestFactories.seeded(seed), 0, 0, 1.0, 1.0, 0)
-		assert_bool(res.get("crit", false)).is_false().override_failure_message("front attack must never crit")
+	var base: int = BattleRules.margin_of(atk, def, 0, 0, 1.0, 1.0, 0)
+	var flank: int = BattleRules.margin_of(atk, def, 0, 0, 1.0, 1.0, 1)
+	assert_int(flank).is_equal(base + GameNumbersBattle.ADVANTAGE_MARGIN)
 
-func test_rear_produces_crits() -> void:
+func test_rear_halves_defense_and_gives_advantage() -> void:
 	var atk = TestFactories.make_battle_unit_raw("a", 10, BattleState.Side.ATTACKER)
 	var def = TestFactories.make_battle_unit_raw("d", 10, BattleState.Side.DEFENDER)
-	var crits: int = 0
-	for seed in 60:
-		var res: Dictionary = BattleRules.calculate_attack(atk, def, true, TestFactories.seeded(seed), 0, 0, 1.0, 1.0, 2)
-		if res.get("crit", false):
-			crits += 1
-	assert_int(crits).is_greater(0).override_failure_message("rear attacks must crit at least once in 60 seeds")
+	var base: int = BattleRules.margin_of(atk, def, 0, 0, 1.0, 1.0, 0)
+	var rear: int = BattleRules.margin_of(atk, def, 0, 0, 1.0, 1.0, 2)
+	var expected: int = int(round(float(atk.get_attack()) - float(def.get_defense()) * GameNumbers.REAR_DEFENSE_MULT)) \
+		+ GameNumbersBattle.ADVANTAGE_MARGIN
+	assert_int(rear).is_equal(expected)
+	assert_int(rear).is_greater(base)
 
-func test_crit_doubles_damage() -> void:
-	# Найдём seed, где тыловой крит срабатывает, и сверим урон с тем же seed без фланга.
+func test_triumph_doubles_damage() -> void:
 	var atk = TestFactories.make_battle_unit_raw("a", 10, BattleState.Side.ATTACKER)
 	var def = TestFactories.make_battle_unit_raw("d", 10, BattleState.Side.DEFENDER)
-	for seed in 60:
-		var rng_crit := TestFactories.seeded(seed)
-		var res: Dictionary = BattleRules.calculate_attack(atk, def, true, rng_crit, 0, 0, 1.0, 1.0, 2)
-		if res.get("crit", false):
-			# Урон с критом должен быть кратен удвоителю относительно не-критного расчёта:
-			# проверяем, что крит-урон >= урона того же расчёта без удвоения (т.е. >0 и "больше обычного").
-			assert_int(int(res["damage"])).is_greater(0)
-			# Повторный расчёт тем же seed с тылом: детерминированно тот же crit.
-			var res2: Dictionary = BattleRules.calculate_attack(atk, def, true, TestFactories.seeded(seed), 0, 0, 1.0, 1.0, 2)
-			assert_bool(res2.get("crit", false)).is_true()
-			return
-	# Если ни один seed не дал крит — тест выше (test_rear_produces_crits) уже упал.
-	fail("no rear crit found in 60 seeds")
+	# Фронт: перевес 5−3=2 → Успех (базовый урон).
+	var front: Dictionary = BattleRules.calculate_attack(atk, def, true, 0, 0, 1.0, 1.0, 0)
+	assert_that(front.get("zone")).is_equal(BattleRules.ZONE_SUCCESS)
+	# Фланг: перевес 4 → Триумф (урон ×2).
+	var flank: Dictionary = BattleRules.calculate_attack(atk, def, true, 0, 0, 1.0, 1.0, 1)
+	assert_that(flank.get("zone")).is_equal(BattleRules.ZONE_TRIUMPH)
+	assert_int(int(flank["damage"])).is_equal(int(front["damage"]) * 2)
 
 # --- Сквозная интеграция через resolver ---
 
@@ -130,17 +122,19 @@ func test_resolver_wires_rear_aspect() -> void:
 	d.cell = Vector2i(10, 5)
 	a.cell = HexUtils.get_neighbor(d.cell, 0, _SR)  # восток = тыл (defender смотрит на запад)
 	assert_int(s.attack_aspect(a.cell, d)).is_equal(2)
-	var rng := TestFactories.seeded(12345)
-	var res: Dictionary = BattleDamageResolver.resolve(s, a, d, {"is_melee": true, "rng": rng, "atk_bonus": 0, "def_bonus": 0})
-	assert_bool(res.has("crit")).is_true().override_failure_message("resolver result must carry the crit flag")
+	var res: Dictionary = BattleDamageResolver.resolve(s, a, d, {"is_melee": true, "atk_bonus": 0, "def_bonus": 0})
+	assert_bool(res.has("margin")).is_true().override_failure_message("resolver result must carry the ladder margin")
+	assert_int(int(res["margin"])).is_greater(0)
 
-func test_resolver_front_attack_no_crit() -> void:
+func test_resolver_front_attack_margin() -> void:
 	var s := _make_state("swordsmen", "goblins", 20, 5)
 	var a = s.get_units_by_side(BattleState.Side.ATTACKER)[0]
 	var d = s.get_units_by_side(BattleState.Side.DEFENDER)[0]
 	d.cell = Vector2i(10, 5)
+	d.facade = d.cell + Vector2i(-1, 0)  # фасад на запад (после переноса клетки)
 	a.cell = HexUtils.get_neighbor(d.cell, 3, _SR)  # запад = фронт (defender смотрит на запад)
-	assert_int(s.attack_aspect(a.cell, d)).is_equal(0)
-	var rng := TestFactories.seeded(12345)
-	var res: Dictionary = BattleDamageResolver.resolve(s, a, d, {"is_melee": true, "rng": rng, "atk_bonus": 0, "def_bonus": 0})
-	assert_bool(res.get("crit", false)).is_false().override_failure_message("front attack must not crit")
+	assert_int(BattleFlanking.classify(s, a, d)).is_equal(BattleFlanking.Position.FRONT)
+	var res: Dictionary = BattleDamageResolver.resolve(s, a, d, {"is_melee": true, "atk_bonus": 0, "def_bonus": 0})
+	# Фронт: без преимущества (+2) — перевес равен атаке минус защита.
+	assert_int(int(res["margin"])) \
+		.is_equal(int(a.get_attack()) - int(d.get_defense()))

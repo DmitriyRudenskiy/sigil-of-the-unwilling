@@ -12,6 +12,14 @@ var turn_queue: Array[BattleUnit] = []
 var turn_idx := 0
 var is_player_turn := true
 var battle_over := false
+
+# T12: ГСЧ d20-пути (D&D-персонажи). Основной флоу лестницы детерминирован
+# и его не использует; бой с dnd-юнитами детерминирован по seed_dnd().
+var dnd_rng := RandomNumberGenerator.new()
+
+
+func seed_dnd(p_seed: int) -> void:
+	dnd_rng.seed = p_seed
 ## tactical-combat: per-unit initiative ordering in build_queue().
 ## Compatibility flag: legacy speed-first ordering for old tests/replays.
 var initiative_order := true

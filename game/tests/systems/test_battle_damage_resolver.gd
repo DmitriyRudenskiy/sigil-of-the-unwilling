@@ -49,8 +49,8 @@ func test_resolve_basic_shape() -> void:
 	state.attacker_units.append(atk)
 	state.defender_units.append(def)
 	state._rebuild_unit_grid()
-	var r := BattleDamageResolver.resolve(state, atk, def, {"rng": _seeded_rng(42), "is_melee": true})
-	assert_dict(r).contains_keys(["damage", "kills", "luck"])
+	var r := BattleDamageResolver.resolve(state, atk, def, {"is_melee": true})
+	assert_dict(r).contains_keys(["damage", "kills", "zone", "margin"])
 	assert_int(r["damage"]).is_greater(0)
 	assert_int(r["kills"]).is_greater_equal(1)
 

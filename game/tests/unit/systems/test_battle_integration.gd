@@ -15,10 +15,8 @@ func test_attacker_wins() -> void:
 	defender.cell = HexUtils.get_neighbor(attacker.cell, 0)
 
 	var guard := 0
-	var rng1 := TestFactories.seeded(4479)
-	rng1.seed = 42
 	while not state.battle_over and guard < 100:
-		BattleActionResolver.apply_attack(state, attacker, defender, true, rng1)
+		BattleActionResolver.apply_attack(state, attacker, defender, true)
 		guard += 1
 
 	assert_bool(state.battle_over).is_true().override_failure_message("battle should end when defender is destroyed")
@@ -40,10 +38,8 @@ func test_defender_wins() -> void:
 	defender.cell = HexUtils.get_neighbor(attacker.cell, 0)
 
 	var guard := 0
-	var rng2 := TestFactories.seeded(4479)
-	rng2.seed = 42
 	while not state.battle_over and guard < 100:
-		BattleActionResolver.apply_attack(state, defender, attacker, true, rng2)
+		BattleActionResolver.apply_attack(state, defender, attacker, true)
 		guard += 1
 
 	assert_bool(state.battle_over).is_true().override_failure_message("battle should end when attacker is destroyed")
@@ -63,14 +59,10 @@ func test_battle_rules_damage() -> void:
 
 	var rules: BattleRules = BattleRules.new()
 
-	var test_rng := TestFactories.seeded(4479)
-	test_rng.seed = 42
-
 	var result: Dictionary = rules.calculate_attack(
 		atk_unit,
 		def_unit,
 		false,
-		test_rng,
 		0,
 		0
 	)
@@ -83,7 +75,6 @@ func test_battle_rules_damage() -> void:
 		def_unit,
 		atk_unit,
 		false,
-		test_rng,
 		0,
 		0
 	)
