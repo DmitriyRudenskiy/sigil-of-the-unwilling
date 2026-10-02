@@ -36,7 +36,7 @@ date: 2026-09-30
 production(r) = Σ_zдания output_z × clamp(эффективность, 0.2, 2.5) × race_affinity × season
 consumption(r) = k_pop(r) × population + army_size × unit_eat + Σ_upkeep(районы)
 B(r, t) = B(r, t−1) + production(r) − consumption(r)
-population = min(жильё, продовольствие/неделю)
+population = min(жильё, floor(продовольствие_в_неделю / 0.7))  # R3 (MVP-scope); 0.7 — ед. продовольствия на жителя/нед.
 ```
 - `k_pop(еда) = 0.1/день` [ПРЕДЛОЖЕНИЕ P-8: базовое значение, тюнинг на прототипе]; остальные ресурсы для населения = 0.
 - Продажа здания: возврат 50% стоимости (анти-эксплойт «продал-купил», 02-mechanics §3.3 EC2).
