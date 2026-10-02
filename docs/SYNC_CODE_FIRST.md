@@ -6,22 +6,21 @@ MVP-scope, 02e/02f). **Код не изменялся.** Факты ниже —
 `doc/sync-audit` (main `9c0e0ce`). Матрица решений — в [[SYNC_DECISIONS]] (блок
 «Sync audit 2026-10-02»).
 
-## 0. Архитектура кода: ДВА режима игры
+## 0. Архитектура кода: ОДНА игра — кампания, в городе — соты
 
-Код содержит два параллельных режима, и GDD описывает их по одному документу на
-каждый — но не говорит, какой режим является «игрой»:
+**D1 РЕШЕНО (автор, 2026-10-02): игра одна — кампания, город внутри неё —
+TerraScape-соты.** 02g = документ города кампании (не отдельный режим).
 
-| Режим | Код | GDD |
+| Слой | Код | GDD |
 |---|---|---|
-| **Кампания**: герой + партия + карта + город + бои + рейды | `world/` (city_*, map_*, bootstrap), `entities/hero/*`, `battle/`, `systems/battle_*`, `city/raid_system`, `ui/` (20+ экранов) | 01–08, MVP-scope (основной GDD) |
-| **TerraScape-арена**: компактная сота, виды, Штормы, очки | `settlement/` (Settlement, SettlementAdvanced, SmolderingCity, settlement_species), `city/arena_*` (ring/cluster/storm/turn_runner), `ui/arena_hex_cell` | 02g-city-hex («центральная система проекта», 2026-10-01) |
+| **Кампания**: герой + партия + карта + бои + рейды | `world/` (map_*, bootstrap, city_*), `entities/hero/*`, `battle/`, `systems/battle_*`, `city/raid_system`, `ui/` (20+ экранов) | 01–08, MVP-scope |
+| **Город = соты**: гекс-клетки, ряды, виды, Штормы, очки | `world/city.gd` + `city/arena_*` (ring/cluster/storm/turn_runner), `world/city_arena_view.gd`, `ui/arena_hex_cell` | 02g-city-hex («центральная система проекта», 2026-10-01) |
+| **Отключённый слой**: автономная колониальная симуляция | `settlement/` (Settlement, SettlementAdvanced, SmolderingCity, settlement_species) — в игре не инстансируется (прототип/legacy концепта «город = соты») | — |
 
-Главное меню (`ui/main_menu.gd`): Continue / New Game / **Arena** / Load / Chronicle.
+Главное меню (`ui/main_menu.gd`): Continue / New Game / **Arena** (песочница города)
+/ Load / Chronicle.
 
-**D1 РЕШЕНО (автор, 2026-10-02):** игра = кампания; TerraScape-соты — это город
-внутри кампании (02g = документ города кампании), а не отдельный режим.
-`settlement/*` — отключённый автономный слой (прототип/legacy, в игре не
-инстансируется). Подробности — [[SYNC_DECISIONS#D1. Архитектура: какой режим — игра? — РЕШЕНО (автор, 2026-10-02)]]
+Подробности — [[SYNC_DECISIONS#D1. Архитектура: какой режим — игра? — РЕШЕНО (автор, 2026-10-02)]]
 
 ## A. Противоречия (код ≠ GDD)
 
