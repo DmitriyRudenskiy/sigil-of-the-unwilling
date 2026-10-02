@@ -32,9 +32,8 @@ func test_setup_creates_battle_flow() -> void:
 	assert_bool(coordinator.battle_flow != null).is_true()
 
 func test_setup_stores_refs() -> void:
-	var rng := TestFactories.seeded(7251)
-	coordinator.setup(null, null, null, rng, null, null, null, null, null)
-	assert_that(coordinator.rng).is_not_null()
+	coordinator.setup(null, null, null, null, null, null, null, null, null)
+	assert_that(coordinator.hero).is_null()
 
 func test_get_pending_enemy_cell() -> void:
 	coordinator._pending_enemy_cell = Vector2i(3, 3)

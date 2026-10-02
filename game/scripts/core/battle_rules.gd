@@ -1,197 +1,164 @@
 class_name BattleRules
 extends RefCounted
 
+## Разрешение боя по лестнице перевеса (02d v1.2 §3.2, K2).
+## Кубиков нет: исход = перевес (эффективная атака − эффективная защита),
+## Удача (модификатор 7-й характеристики) сдвигает пороги зон.
+## Полностью детерминировано: те же входы → тот же результат, байт в байт.
+
+const ZONE_TRIUMPH := &"triumph"
+const ZONE_SUCCESS := &"success"
+const ZONE_PARTIAL := &"partial"
+const ZONE_FAILURE := &"failure"
+const ZONE_FUMBLE := &"fumble"
+
+## Зона исхода по перевесу. luck_mod = модификатор Удачи (02d v1.2 §3.2):
+## триумф при перевесе ≥ max(1, 4 − luck), частичная до −(3 + luck),
+## критпровал при ≤ −(8 + luck).
+static func ladder_zone(margin: int, luck_mod: int = 0) -> StringName:
+	if margin >= maxi(1, 4 - luck_mod):
+		return ZONE_TRIUMPH
+	if margin >= 0:
+		return ZONE_SUCCESS
+	if margin >= -(3 + luck_mod):
+		return ZONE_PARTIAL
+	if margin <= -(8 + luck_mod):
+		return ZONE_FUMBLE
+	return ZONE_FAILURE
+
+## Перевес: эффективная атака − эффективная защита.
+## Фланг/тыл = преимущество (+2 к перевесу, 02d v1.2 §3.3);
+## тыл дополнительно режет защиту ×0.5; защита юнита ×1.2.
+static func margin_of(
+	attacker,
+	defender,
+	attacker_bonus: int,
+	defender_bonus: int,
+	terrain_atk_mult: float = 1.0,
+	terrain_def_mult: float = 1.0,
+	flank_aspect: int = -1
+) -> int:
+	if attacker == null or defender == null:
+		return 0
+	var effective_atk: float = float(attacker.get_attack() + attacker_bonus) * terrain_atk_mult
+	var effective_def: float = float(defender.get_defense() + defender_bonus) * terrain_def_mult
+	if defender.defending:
+		effective_def = effective_def * GameNumbers.DEFEND_DEFENSE_BONUS
+	if flank_aspect == 2:
+		effective_def = effective_def * GameNumbers.REAR_DEFENSE_MULT
+	if flank_aspect == 1 or flank_aspect == 2:
+		effective_atk += GameNumbersBattle.ADVANTAGE_MARGIN
+	return int(round(effective_atk - effective_def))
+
 static func can_luck(unit) -> bool:
-    if unit == null or not unit.has_method("has_tag"):
-        return false
+	if unit == null or not unit.has_method("has_tag"):
+		return false
 
-    if unit.has_tag("undead"):
-        return false
-    if unit.has_tag("elemental"):
-        return false
-    if unit.has_tag("mind_immune"):
-        return false
+	if unit.has_tag("undead"):
+		return false
+	if unit.has_tag("elemental"):
+		return false
+	if unit.has_tag("mind_immune"):
+		return false
 
-    return true
+	return true
 
 static func can_morale(unit) -> bool:
-    if unit == null or not unit.has_method("has_tag"):
-        return false
+	if unit == null or not unit.has_method("has_tag"):
+		return false
 
-    if unit.has_tag("undead"):
-        return false
-    if unit.has_tag("elemental"):
-        return false
-    if unit.has_tag("mind_immune"):
-        return false
-    if unit.has_tag("dragon"):
-        return false
+	if unit.has_tag("undead"):
+		return false
+	if unit.has_tag("elemental"):
+		return false
+	if unit.has_tag("mind_immune"):
+		return false
+	if unit.has_tag("dragon"):
+		return false
 
-    return true
+	return true
 
-static func damage_multiplier(
-    attacker,
-    defender,
-    attacker_bonus: int,
-    defender_bonus: int,
-    terrain_atk_mult: float = 1.0,
-    terrain_def_mult: float = 1.0
-) -> float:
-    if attacker == null or defender == null:
-        return 1.0
-
-    var effective_atk: float = float(attacker.get_attack() + attacker_bonus) * terrain_atk_mult
-
-    var effective_def: float = float(defender.get_defense() + defender_bonus) * terrain_def_mult
-    if defender.defending:
-        effective_def = effective_def * GameNumbers.DEFEND_DEFENSE_BONUS
-
-    var diff: float = effective_atk - effective_def
-
-    if diff > 0.0:
-        return clampf(
-            1.0 + GameNumbers.ATK_ADVANTAGE_PER_POINT * diff,
-            1.0,
-            GameNumbers.MAX_DAMAGE_MULTIPLIER
-        )
-
-    if diff < 0.0:
-        return clampf(
-            1.0 - GameNumbers.DEF_ADVANTAGE_PER_POINT * absf(diff),
-            GameNumbers.MIN_DAMAGE_MULTIPLIER,
-            1.0
-        )
-
-    return 1.0
-
-static func _damage_range(attacker) -> Vector2i:
-    var stats: UnitStats = attacker.stack.stats
-    var count: int = attacker.get_count()
-    var min_base: int = stats.base_damage * count
-    var max_base: int = int(ceil(float(stats.base_damage) * 1.25)) * count
-    max_base = max(max_base, min_base)
-    return Vector2i(min_base, max_base)
-
+## Разрешение атаки по лестнице. Возвращает
+## {damage, kills, zone, fumble, is_retaliation} — детерминированно.
+## extra_margin — ситуативные поправки (например, эльф в лесу = +1).
 static func calculate_attack(
-    attacker,
-    defender,
-    is_melee_attack: bool,
-    rng: RandomNumberGenerator,
-    attacker_bonus: int,
-    defender_bonus: int,
-    terrain_atk_mult: float = 1.0,
-    terrain_def_mult: float = 1.0,
-    flank_aspect: int = -1,
-    extra_crit_chance: float = 0.0,
-    luck_bonus: float = 0.0
+	attacker,
+	defender,
+	is_melee_attack: bool,
+	attacker_bonus: int,
+	defender_bonus: int,
+	terrain_atk_mult: float = 1.0,
+	terrain_def_mult: float = 1.0,
+	flank_aspect: int = -1,
+	extra_margin: int = 0,
+	luck_mod: int = 0
 ) -> Dictionary:
-    if attacker == null or defender == null:
-        return {}
+	if attacker == null or defender == null:
+		return {}
 
-    if not attacker.is_alive() or not defender.is_alive():
-        return {}
+	if not attacker.is_alive() or not defender.is_alive():
+		return {}
 
-    var stats: UnitStats = attacker.stack.stats
-    if stats == null:
-        return {}
+	var stats: UnitStats = attacker.stack.stats
+	if stats == null:
+		return {}
 
-    var count: int = attacker.get_count()
-    if count <= 0:
-        return {}
+	var count: int = attacker.get_count()
+	if count <= 0:
+		return {}
 
-    var range_val := _damage_range(attacker)
-    var base_total: int = rng.randi_range(range_val.x, range_val.y)
+	var margin: int = margin_of(
+		attacker, defender, attacker_bonus, defender_bonus,
+		terrain_atk_mult, terrain_def_mult, flank_aspect
+	) + extra_margin
+	var zone: StringName = ladder_zone(margin, luck_mod)
 
-    # Phase 6 (flanking): rear attacks halve the defender's effective defense
-    # (folded into the terrain def multiplier); flank/rear add a crit chance.
-    var crit_chance := 0.0
-    var eff_terrain_def_mult := terrain_def_mult
-    if flank_aspect == 1:
-        crit_chance = GameNumbers.FLANK_CRIT_CHANCE_FLANK
-    elif flank_aspect == 2:
-        crit_chance = GameNumbers.FLANK_CRIT_CHANCE_REAR
-        eff_terrain_def_mult *= GameNumbers.REAR_DEFENSE_MULT
-    # Phase 9: бонус к шансу крита (например, Эльф в лесу).
-    crit_chance += extra_crit_chance
+	# Базовый урон детерминирован: base_damage × численность (без диапазона).
+	var base: int = stats.base_damage * count
+	var damage: int = 0
+	match zone:
+		ZONE_TRIUMPH:
+			damage = int(float(base) * GameNumbersBattle.FLANK_CRIT_MULTIPLIER)
+		ZONE_SUCCESS:
+			damage = base
+		ZONE_PARTIAL:
+			damage = maxi(1, base / 2) if base > 0 else 0
+		_:
+			damage = 0
 
-    var multiplier: float = damage_multiplier(
-        attacker,
-        defender,
-        attacker_bonus,
-        defender_bonus,
-        terrain_atk_mult,
-        eff_terrain_def_mult
-    )
+	if is_melee_attack and attacker.is_ranged():
+		damage = int(float(damage) * GameNumbers.RANGED_MELEE_PENALTY)
 
-    var damage: int = int(float(base_total) * multiplier)
+	var kills: int = 0
+	if damage > 0:
+		var hp: int = max(1, defender.get_hp())
+		kills = maxi(1, int(damage / float(hp)))
+		kills = min(kills, defender.get_count())
 
-    if is_melee_attack and attacker.is_ranged():
-        damage = int(float(damage) * GameNumbers.RANGED_MELEE_PENALTY)
-
-    damage = max(1, damage)
-
-    var luck: bool = false
-    # Фланг/тыл (tactical-combat фаза 5) добавляют к базовому шансу крита.
-    var luck_chance: float = minf(0.95, GameNumbers.LUCK_CHANCE + maxf(0.0, luck_bonus))
-    if can_luck(attacker) and rng.randf() < luck_chance:
-        damage *= 2
-        luck = true
-
-    var crit: bool = false
-    if crit_chance > 0.0 and rng.randf() < crit_chance:
-        damage = int(float(damage) * GameNumbers.FLANK_CRIT_MULTIPLIER)
-        crit = true
-
-    var hp: int = max(1, defender.get_hp())
-    var kills: int = max(1, int(damage / float(hp)))
-    kills = min(kills, defender.get_count())
-
-    return {
-        "damage": damage,
-        "kills": kills,
-        "luck": luck,
-        "crit": crit,
-        "is_retaliation": false,
-    }
+	return {
+		"damage": damage,
+		"kills": kills,
+		"zone": zone,
+		"fumble": zone == ZONE_FUMBLE,
+		"margin": margin,
+		"is_retaliation": false,
+	}
 
 static func preview_text(
-    attacker,
-    defender,
-    attacker_bonus: int,
-    defender_bonus: int
+	attacker,
+	defender,
+	attacker_bonus: int,
+	defender_bonus: int
 ) -> String:
-    if attacker == null or defender == null:
-        return ""
+	if attacker == null or defender == null:
+		return ""
 
-    var stats: UnitStats = attacker.stack.stats
-    if stats == null:
-        return ""
+	var stats: UnitStats = attacker.stack.stats
+	if stats == null:
+		return ""
 
-    var range_val := _damage_range(attacker)
+	var result := calculate_attack(attacker, defender, true, attacker_bonus, defender_bonus)
+	var damage: int = int(result.get("damage", 0))
+	var kills: int = int(result.get("kills", 0))
 
-    var multiplier: float = damage_multiplier(
-        attacker,
-        defender,
-        attacker_bonus,
-        defender_bonus
-    )
-
-    var min_damage: int = int(float(range_val.x) * multiplier)
-    var max_damage: int = int(float(range_val.y) * multiplier)
-
-    var distance: int = HexUtils.hex_distance(attacker.cell, defender.cell)
-    if attacker.is_ranged() and distance == 1:
-        min_damage = int(float(min_damage) * GameNumbers.RANGED_MELEE_PENALTY)
-        max_damage = int(float(max_damage) * GameNumbers.RANGED_MELEE_PENALTY)
-
-    min_damage = max(1, min_damage)
-    max_damage = max(1, max_damage)
-
-    var hp: int = max(1, defender.get_hp())
-    var min_kills: int = max(1, int(min_damage / float(hp)))
-    var max_kills: int = max(1, int(max_damage / float(hp)))
-
-    min_kills = min(min_kills, defender.get_count())
-    max_kills = min(max_kills, defender.get_count())
-
-    return GameText.battle_damage_preview(min_damage, max_damage, min_kills, max_kills)
+	return GameText.battle_damage_preview(damage, damage, kills, kills)

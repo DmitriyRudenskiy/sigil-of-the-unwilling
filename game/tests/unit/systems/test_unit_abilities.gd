@@ -2,7 +2,6 @@ extends BaseTest
 
 
 
-var _rng := TestFactories.seeded(8212)
 
 func test_vampiric_heal() -> void:
 	var stack := Units.make_fixed_stack("vampire", 5)
@@ -20,7 +19,6 @@ func test_charge_multiplier() -> void:
 	assert_bool(unit.has_tag("charge")).is_true().override_failure_message("Champion should have charge tag")
 
 func test_first_strike() -> void:
-	_rng.seed = 42
 	var bs := BattleState.new()
 	var atk_stack := Units.make_fixed_stack("swordsmen", 10)
 	var def_stack := Units.make_fixed_stack("royal_griffin", 5)
@@ -32,7 +30,7 @@ func test_first_strike() -> void:
 	var def := bs.defender_units[0]
 	var atk_before := atk.get_count()
 
-	var result := BattleActionResolver.apply_attack(bs, atk, def, true, _rng)
+	var result := BattleActionResolver.apply_attack(bs, atk, def, true)
 	assert_bool(result.get("first_strike", false)).is_true().override_failure_message("First strike should trigger")
 	assert_int(atk.get_count()).is_less(atk_before).override_failure_message("First strike should damage attacker")
 

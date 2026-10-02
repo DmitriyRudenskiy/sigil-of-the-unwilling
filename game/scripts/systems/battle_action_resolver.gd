@@ -3,35 +3,30 @@ extends RefCounted
 
 
 
+## T17/D2: атака разрешается по лестнице перевеса (02d v1.2) — детерминированно,
+## без ГСЧ. d20-путь (battle/dnd/) — legacy, из основного флоу выключен.
 static func apply_attack(
 	state: BattleState,
 	atk: BattleState.BattleUnit,
 	def: BattleState.BattleUnit,
 	is_melee_attack: bool,
-	rng: RandomNumberGenerator,
 	consume_action: bool = true
 ) -> Dictionary:
 	if atk == null or def == null or not atk.is_alive() or not def.is_alive():
 		return {}
-
-	# dnd-live-battle-wiring: both sides are per-character D&D combatants ->
-	# d20 vs AC, dice damage to the target's HP pool (not the stack formula).
-	if atk.is_dnd_character() and def.is_dnd_character():
-		return _apply_dnd_attack(state, atk, def, rng, consume_action)
 
 	var bonuses := _get_hero_bonuses(state, atk, def)
 	var attacker_bonus: int = bonuses[0]
 	var defender_bonus: int = bonuses[1]
 
 	var first_strike_triggered := _apply_first_strike(
-		state, atk, def, is_melee_attack, rng, attacker_bonus, defender_bonus
+		state, atk, def, is_melee_attack, attacker_bonus, defender_bonus
 	)
 
 	var charge_mult := _get_charge_multiplier(atk)
 
 	var ctx := {
 		"is_melee": is_melee_attack,
-		"rng": rng,
 		"atk_bonus": attacker_bonus,
 		"def_bonus": defender_bonus,
 		"range": HexUtils.hex_distance(atk.cell, def.cell, state.hex_shift_right),
@@ -49,7 +44,7 @@ static func apply_attack(
 		atk.has_moved = true
 
 	if def.get_count() <= 0:
-		if not _try_rebirth(state, def, rng, result):
+		if not _try_rebirth(state, def, result):
 			kill_unit(state, def)
 
 	state.invalidate_board_cache()
@@ -63,7 +58,6 @@ static func apply_spell(
 	target: BattleState.BattleUnit,
 	caster_hero_bonus: Dictionary,
 	target_hero_bonus: Dictionary,
-	rng: RandomNumberGenerator,
 	registry: Node = null
 ) -> Dictionary:
 	var is_res := spell_id == &"resurrection"
@@ -77,7 +71,7 @@ static func apply_spell(
 	var spell_registry: Node = registry if registry != null else Services.resolve(&"spells")
 
 	var result := SpellCaster.cast(
-		spell_id, target, caster_hero_bonus, target_hero_bonus, rng, spell_registry
+		spell_id, target, caster_hero_bonus, target_hero_bonus, spell_registry
 	)
 
 	if result.get("result") == "success":
@@ -106,8 +100,7 @@ static func apply_sacrifice(
 	acting: BattleState.BattleUnit,
 	sacrifice: Dictionary,
 	target: BattleState.BattleUnit,
-	cost: Variant,
-	_rng: RandomNumberGenerator
+	cost: Variant
 ) -> Dictionary:
 	if acting == null or not acting.is_alive():
 		return {"result": "invalid_actor"}
@@ -171,31 +164,6 @@ static func _move_direction(from: Vector2i, to: Vector2i, shift_right: bool) -> 
 			best_dir = nb - from
 	return best_dir
 
-
-## dnd-live-battle-wiring: resolve a per-character D&D attack through the
-## bridge (d20 + ability mod + proficiency vs AC; crit on natural 20; weapon
-## dice). Damage is applied to the target's HP pool; the character dies at HP 0.
-static func _apply_dnd_attack(
-	state: BattleState,
-	atk: BattleState.BattleUnit,
-	def: BattleState.BattleUnit,
-	rng: RandomNumberGenerator,
-	consume_action: bool
-) -> Dictionary:
-	var result: Dictionary = DnDBattleBridge.resolve_attack(
-		atk.dnd_profile, def.dnd_profile, rng
-	)
-	var dmg: int = int(result.get("damage", 0))
-	def.dnd_current_hp = maxi(0, def.dnd_current_hp - dmg)
-	result["damage_dealt"] = dmg
-	result["dnd"] = true
-	if consume_action:
-		atk.has_moved = true
-	if def.dnd_current_hp <= 0:
-		kill_unit(state, def)
-	state.invalidate_board_cache()
-	state.check_end()
-	return result
 
 static func do_move(state: BattleState, unit: BattleState.BattleUnit, target: Vector2i) -> void:
 	var dist := HexUtils.hex_distance(unit.cell, target)
@@ -309,14 +277,13 @@ static func _apply_first_strike(
 	atk: BattleState.BattleUnit,
 	def: BattleState.BattleUnit,
 	is_melee: bool,
-	rng: RandomNumberGenerator,
 	atk_bonus: int,
 	def_bonus: int
 ) -> bool:
 	if not (is_melee and def.has_tag("first_strike") and not def.has_retaliated):
 		return false
 	def.has_retaliated = true
-	var fs_result = BattleRules.calculate_attack(def, atk, true, rng, def_bonus, atk_bonus)
+	var fs_result = BattleRules.calculate_attack(def, atk, true, def_bonus, atk_bonus)
 	if not fs_result.is_empty():
 		atk.set_count(atk.get_count() - int(fs_result.get("kills", 0)))
 		if atk.get_count() <= 0:
@@ -338,20 +305,20 @@ static func _apply_charge(
 		return result
 	result["damage"] = int(result["damage"] * charge_mult)
 	var hp: int = max(1, def.get_hp())
-	result["kills"] = max(1, result["damage"] / hp)
-	result["kills"] = min(result["kills"], def.get_count())
+	# Провал остаётся промахом: рывок без урона никого не убивает.
+	result["kills"] = 0 if result["damage"] <= 0 \
+		else mini(def.get_count(), maxi(1, int(result["damage"] / float(hp))))
 	result["charge"] = true
 	return result
 
+## Ребёрт детерминирован (T17/D2): срабатывает при первом уничтожении
+## (ранее — 20%-й прок; ГСЧ в бою запрещены).
 static func _try_rebirth(
 	state: BattleState,
 	def: BattleState.BattleUnit,
-	rng: RandomNumberGenerator,
 	result: Dictionary
 ) -> bool:
 	if def == null or not def.has_tag("rebirth") or def.already_reborn:
-		return false
-	if rng.randf() >= GameNumbers.REBIRTH_CHANCE:
 		return false
 	def.already_reborn = true
 	def.set_count(max(1, int(def.max_count * 0.5)))

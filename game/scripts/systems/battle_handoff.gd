@@ -21,12 +21,13 @@ var validation_errors: Array[String] = []
 
 ## Фабрика: собирает все данные для боя.
 ## roles_swapped = true когда враг атакует героя (роли меняются).
+## T17/D2: obstacle_seed выводится из состава армий и клетки врага —
+## одинаковый бой даёт одинаковые препятствия (детерминизм байт в байт).
 static func collect(
 	hero: Node,
 	enemy_army_raw: Variant,
 	p_enemy_cell: Vector2i,
 	spawner: Node,
-	rng: RandomNumberGenerator,
 	p_roles_swapped: bool = false
 ) -> BattleHandoff:
 	var h := BattleHandoff.new()
@@ -34,8 +35,22 @@ static func collect(
 	h.roles_swapped = p_roles_swapped
 	h._collect_hero_data(hero)
 	h._collect_enemy_data(enemy_army_raw, spawner)
-	h.obstacle_seed = rng.randi() if rng != null else randi()
+	h.obstacle_seed = _army_seed(h.hero_army) * 73856093 \
+		^ _army_seed(h.enemy_army) * 19349663 ^ hash(p_enemy_cell)
 	h._validate()
+	return h
+
+
+## Детерминированный хэш состава армии (ключи + численность стеков).
+static func _army_seed(army: Array) -> int:
+	var h: int = 0
+	for stack in army:
+		if stack == null:
+			continue
+		var stats: UnitStats = stack.stats
+		if stats != null:
+			h = h * 31 + hash(stats.key)
+		h = h * 31 + stack.count
 	return h
 
 

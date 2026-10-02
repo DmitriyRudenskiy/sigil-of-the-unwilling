@@ -66,7 +66,7 @@ func test_resurrection_restores_state() -> void:
 	assert_bool(dead_unit.is_alive()).is_false()
 	assert_that(bs.get_unit_at(cell, BattleState.Side.DEFENDER)).is_null()
 	var alive_before = bs._defender_alive_count
-	var result = BattleActionResolver.apply_spell(bs, &"resurrection", bs.attacker_units[0], dead_unit, {}, {}, TestFactories.seeded(9464))
+	var result = BattleActionResolver.apply_spell(bs, &"resurrection", bs.attacker_units[0], dead_unit, {}, {})
 	assert_bool(result.get("revived", false)).is_true()
 	assert_bool(dead_unit.is_alive()).is_true()
 	var found = bs.get_unit_at(cell, BattleState.Side.DEFENDER)
@@ -79,7 +79,7 @@ func test_resurrection_rejects_alive() -> void:
 	var atk_stack = _units.make_fixed_stack("swordsmen", 20)
 	var def_stack = _units.make_fixed_stack("goblins", 5)
 	bs.place_army([atk_stack], [def_stack])
-	var result = BattleActionResolver.apply_spell(bs, &"resurrection", bs.attacker_units[0], bs.defender_units[0], {}, {}, TestFactories.seeded(9464))
+	var result = BattleActionResolver.apply_spell(bs, &"resurrection", bs.attacker_units[0], bs.defender_units[0], {}, {})
 	assert_that(result.get("result")).is_equal("invalid_target")
 
 func test_spellcaster_no_mutation() -> void:
@@ -89,7 +89,7 @@ func test_spellcaster_no_mutation() -> void:
 	bs.place_army([atk_stack], [def_stack])
 	var dead_unit = bs.defender_units[0]
 	BattleActionResolver.kill_unit(bs, dead_unit)
-	var result = SpellCaster.cast(&"resurrection", dead_unit, {"spell_power": 10}, {}, TestFactories.seeded(9464))
+	var result = SpellCaster.cast(&"resurrection", dead_unit, {"spell_power": 10}, {})
 	assert_bool(result.has("revive_count")).is_true()
 	assert_bool(dead_unit.alive).is_false()
 	assert_bool(dead_unit.get_count() <= 0).is_true()

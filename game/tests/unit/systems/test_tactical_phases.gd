@@ -381,7 +381,7 @@ func test_emulator_retaliation_once_per_battle() -> void:
 	state.place_army(atk, def)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 12345
-	var report: Dictionary = emu.run_auto_battle(state, rng)
+	var report: Dictionary = emu.run_auto_battle(state)
 	var retaliations := 0
 	for e in report.get("events", []):
 		if str(e.get("action", "")) == "retaliation":

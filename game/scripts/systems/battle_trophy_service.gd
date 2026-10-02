@@ -10,14 +10,19 @@ const TROPHY_RESOURCES: Array[StringName] = [
 const MIN_UNITS := 1
 const MAX_UNITS := 3
 
-static var _rng := RandomNumberGenerator.new()
-
-static func set_rng(rng: RandomNumberGenerator) -> void:
-	_rng = rng
+static var _roll_counter := 0
 
 
-## Выбор трофея: {resource: StringName, amount: int}. Детерминированно по seed.
+## Сброс последовательности (только для тестов).
+static func reset_for_tests() -> void:
+	_roll_counter = 0
+
+
+## Выбор трофея: {resource: StringName, amount: int}.
+## T17/D2: детерминированно (без ГСЧ) — фиксированная последовательность
+## от счётчика бросков сессии.
 static func roll_trophy() -> Dictionary:
-	var res: StringName = TROPHY_RESOURCES[_rng.randi_range(0, TROPHY_RESOURCES.size() - 1)]
-	var amount: int = _rng.randi_range(MIN_UNITS, MAX_UNITS)
+	_roll_counter += 1
+	var res: StringName = TROPHY_RESOURCES[absi(hash(_roll_counter)) % TROPHY_RESOURCES.size()]
+	var amount: int = MIN_UNITS + absi(hash(_roll_counter * 3)) % (MAX_UNITS - MIN_UNITS + 1)
 	return {"resource": res, "amount": amount}

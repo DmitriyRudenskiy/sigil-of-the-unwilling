@@ -85,10 +85,9 @@ static func build_battle(ally_defs: Array, enemy_defs: Array) -> BattleState:
 ## {winner, atk_survivors, def_survivors, ...}.
 static func simulate(ally_defs: Array, enemy_defs: Array, seed: int) -> Dictionary:
 	var state := build_battle(ally_defs, enemy_defs)
-	var rng := RandomNumberGenerator.new()
-	rng.seed = seed
+	state.seed_dnd(seed)  # T12: d20-путь dnd-юнитов детерминирован по seed
 	var emu := BattleEmulator.new()
-	return emu.run_auto_battle(state, rng)
+	return emu.run_auto_battle(state)
 
 
 static func _defs_to_stacks(defs: Array) -> Array:

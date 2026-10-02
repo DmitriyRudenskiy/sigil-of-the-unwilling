@@ -58,15 +58,15 @@ func ensure_definitions() -> void:
 	_reg(&"slow_mass", "Slow (Mass)", School.EARTH, 3, 12, TargetType.ALL_ENEMIES, "Slow all", "+Duration", [], -1, StatusEffects.Effect.SLOW)
 	_reg(&"resurrection", "Resurrection", School.EARTH, 4, 20, TargetType.SINGLE_ALLY, "Revive 20x SP HP", "Permanent", [], -1)
 
-	_spells[&"cure"].custom_handler = func(unit, sp, _rng, result):
+	_spells[&"cure"].custom_handler = func(unit, sp, result):
 		unit.clear_debuffs()
 		result["heal"] = int(sp) * 10
 		return result
-	_spells[&"slow_mass"].custom_handler = func(unit, _sp, _rng, result):
+	_spells[&"slow_mass"].custom_handler = func(unit, _sp, result):
 		unit.add_status(StatusEffects.Effect.SLOW, 4)
 		result["status"] = StatusEffects.Effect.SLOW
 		return result
-	_spells[&"resurrection"].custom_handler = func(unit, sp, _rng, result):
+	_spells[&"resurrection"].custom_handler = func(unit, sp, result):
 		if unit.get_count() <= 0:
 			var hp: int = max(1, int(unit.get_hp()))
 			var revived: int = int(int(sp) * 20 / float(hp))

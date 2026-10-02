@@ -29,7 +29,7 @@ func test_cure_heals_wounded() -> void:
 	var original_count = target.get_count()
 	target.set_count(max(1, original_count - 2))
 	assert_bool(target.get_count() < original_count).is_true()
-	var result = BattleActionResolver.apply_spell(bs, &"cure", bs.attacker_units[0], target, {}, {}, TestFactories.seeded(9631))
+	var result = BattleActionResolver.apply_spell(bs, &"cure", bs.attacker_units[0], target, {}, {})
 	if int(result.get("healed", 0)) > 0:
 		assert_bool(target.get_count() > max(1, original_count - 2)).is_true()
 	else:
@@ -42,7 +42,7 @@ func test_cure_full_stack_no_overheal() -> void:
 	bs.place_army([atk_stack], [def_stack])
 	var target = bs.defender_units[0]
 	target.set_count(target.max_count)
-	var result = BattleActionResolver.apply_spell(bs, &"cure", bs.attacker_units[0], target, {}, {}, TestFactories.seeded(9631))
+	var result = BattleActionResolver.apply_spell(bs, &"cure", bs.attacker_units[0], target, {}, {})
 	assert_that(int(result.get("healed", 0))).is_equal(0)
 	assert_bool(target.get_count() <= target.max_count).is_true()
 

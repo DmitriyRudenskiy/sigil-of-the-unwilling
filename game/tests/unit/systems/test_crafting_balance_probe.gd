@@ -29,10 +29,6 @@ func test_crafting_sink_never_negative_over_300_days() -> void:
 	ctx.tech_tier = 5
 	ctx.has_workshop = true
 
-	var rng := RandomNumberGenerator.new()
-	rng.seed = SEED
-	BattleTrophyService.set_rng(rng)
-
 	var crafted := 0
 	for day in range(1, SIM_DAYS + 1):
 		# Добыча: узлы дают базовые ресурсы (оak — для щита).
@@ -72,9 +68,7 @@ func test_crafting_sink_never_negative_over_300_days() -> void:
 func test_trophy_income_bounded() -> void:
 	# Трофеи — единственный не-узел источник редких ресурсов: 1–3 единицы
 	# за победу. За 100 побед максимум 300 единиц суммарно.
-	var rng := RandomNumberGenerator.new()
-	rng.seed = SEED
-	BattleTrophyService.set_rng(rng)
+	BattleTrophyService.reset_for_tests()
 	var total := 0
 	for i in 100:
 		var t: Dictionary = BattleTrophyService.roll_trophy()

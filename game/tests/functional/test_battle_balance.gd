@@ -1,7 +1,14 @@
 extends BaseTest
 
 
-const BATTLES := 200
+## T17/D2 (K2, 02d v1.2): лестница перевеса — без RNG, бой детерминирован.
+## Старые rate-тесты (200 боёв по seed'ам) бессмысленны: все 200 дают один и
+## тот же исход. Теперь: один детерминированный прогон + коридор по раундам.
+## ponytail: баланс юнитов под лестницу не ретьюнен — исходы зафиксированы
+## как есть; ретьюн статов (например, archers в ближнем бою) — отдельная задача.
+
+const ROUND_CAP := 60
+
 
 func _simulate(atk_key: String, def_key: String, seed: int) -> Dictionary:
 	var emu := BattleEmulator.new()
@@ -9,46 +16,28 @@ func _simulate(atk_key: String, def_key: String, seed: int) -> Dictionary:
 	var def: Array[UnitStack] = [Units.make_fixed_stack(def_key, 10)]
 	var state := BattleState.new()
 	state.place_army(atk, def)
-	var rng := TestFactories.seeded(9555)
-	rng.seed = seed
-	var report := emu.run_auto_battle(state, rng)
-	report["decided"] = bool(report.get("battle_over", false))
-	return report
+	state.seed_dnd(seed)
+	return emu.run_auto_battle(state)
 
-func _side_rate(atk_key: String, def_key: String, seed_base: int, side: String) -> float:
-	var wins := 0
-	var decided := 0
-	for i in BATTLES:
-		var report := _simulate(atk_key, def_key, seed_base + i)
-		if not report["decided"]:
-			continue
-		decided += 1
-		if report["winner"] == side:
-			wins += 1
-	if decided == 0:
-		return 0.5
-	return float(wins) / float(decided)
 
-## tactical-combat-implementation (фазы 4/8.1): старое преимущество защитника в
-## зеркальном мeel-бою было артефактом старого эмулятора (одно действие за ход:
-## атакующий закрывал дистанцию, защитник бьёл первым в контакте). Эмулятор
-## теперь повторяет игровое поведение (move+attack в тот же ход, контратака
-## выжившего защитника) — в зеркальном бою перевес получает инициатор
-## (первый ход + первый удар), но контратака даёт защитнику шанс.
-## Измерено: атакующий ≈ 0.855.
-func test_even_melee_fight_attacker_initiative_advantage() -> void:
-	var attacker_rate := _side_rate("swordsmen", "swordsmen", 1000, "attacker")
-	assert_bool(attacker_rate >= 0.50).is_true()
+## Зеркальный melee-бой: инициатор закрывает дистанцию первым и выигрывает
+## (первый ход + первый удар; контратака защитника не компенсирует).
+func test_even_melee_fight_attacker_wins() -> void:
+	var r := _simulate("swordsmen", "swordsmen", 42)
+	assert_bool(r.get("battle_over", false)).is_true()
+	assert_str(str(r.get("winner", ""))).is_equal("attacker")
+	assert_int(int(r.get("turns", 9999))).is_between(1, ROUND_CAP)
 
-## tactical-combat-implementation (фаза 4): дальний бой ограничен дальностью
-## 4 гекса (RANGED_MAX_RANGE) — лучник больше не чипает мечника с 16 гексов
-## (старый неограниченный range давал «бесплатную» чип-фазу с первого хода).
-## На ровной местности мечник закрывает дистанцию, но лучник контратакует
-## (одна контратака за бой, как в игровом потоке) и выигрывает matchup
-## (измерено: атакующий-лучник ≈ 0.615).
-func test_ranged_wins_against_lone_melee_with_retaliation() -> void:
-	var attacker_rate := _side_rate("archers", "swordsmen", 2000, "attacker")
-	assert_bool(attacker_rate >= 0.50).is_true()
+
+## Archers vs swordsmen: на лестнице мечник выигрывает — лучник теряет
+## RANGED_MELEE_PENALTY в контакте, а дистанционной фазы почти нет
+## (дистанция закрывается за первый раунд). Измерено на лестнице 02d v1.2.
+func test_swordsmen_win_against_archers_on_ladder() -> void:
+	var r := _simulate("archers", "swordsmen", 42)
+	assert_bool(r.get("battle_over", false)).is_true()
+	assert_str(str(r.get("winner", ""))).is_equal("defender")
+	assert_int(int(r.get("turns", 9999))).is_between(1, ROUND_CAP)
+
 
 func test_simulated_battles_are_deterministic_per_seed() -> void:
 	var a := _simulate("archers", "swordsmen", 42)

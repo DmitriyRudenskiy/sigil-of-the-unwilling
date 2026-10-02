@@ -18,8 +18,9 @@ func start_battle(
 	obstacle_seed: int = -1,
 	hero_magic: Variant = null
 ) -> void:
+	# T17/D2: без ГСЧ — отсутствие seed означает пустое поле препятствий.
 	if obstacle_seed < 0:
-		obstacle_seed = randi()
+		obstacle_seed = 0
 	if _active_battle != null and is_instance_valid(_active_battle):
 		return
 	SoundManager.play_music_cue(&"music_battle")

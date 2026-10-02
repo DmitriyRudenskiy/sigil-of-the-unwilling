@@ -19,12 +19,12 @@ const DEF_ADVANTAGE_PER_POINT   := 0.025
 const MAX_DAMAGE_MULTIPLIER     := 5.0
 const MIN_DAMAGE_MULTIPLIER     := 0.3
 const LUCK_CHANCE               := 0.10
-const MORALE_CHANCE             := 0.08
+## Лестница перевеса (T17/D2, 02d v1.2 §3.2): преимущество/помеха = ±2
+## к перевесу. ГСЧ в бою нет.
+const ADVANTAGE_MARGIN          := 2
 const DEFEND_DEFENSE_BONUS      := 1.2
 const RANGED_MELEE_PENALTY      := 0.5
-# Phase 6 (flanking): flank = side hex (±60°), rear = back hex (180°±60°).
-const FLANK_CRIT_CHANCE_FLANK   := 0.25
-const FLANK_CRIT_CHANCE_REAR    := 0.50
+## Sтороной/спиной (T17/D2: фланг = +2 перевеса, спина = защита ×0.5).
 const REAR_DEFENSE_MULT         := 0.5
 const FLANK_CRIT_MULTIPLIER     := 2.0
 const RETREAT_SURVIVAL_RATIO    := 0.5
@@ -33,7 +33,6 @@ const MAX_UNITS_PER_SIDE        := 7
 const CHARGE_MULT               := 1.5
 const BREATH_DMG_RATIO          := 0.5
 const STATUS_PROC_CHANCE        := 0.20
-const REBIRTH_CHANCE            := 0.20
 const BATTLE_RETREAT_LOSS_FRACTION := 0.5
 const BATTLE_DEFEND_BONUS_DEFENSE  := 0.20
 const ASTAR_HEURISTIC_WEIGHT       := 1.0
