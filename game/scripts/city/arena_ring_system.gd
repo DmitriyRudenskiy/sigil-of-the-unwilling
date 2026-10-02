@@ -9,6 +9,9 @@ const UniqueBuilding := preload("res://scripts/world/unique_building.gd")
 
 const ARENA_CENTER := Vector2i(5, 4)
 
+# D6 (02g §2.1, 2026-10-02): ядро = ромб из 4 клеток у ARENA_CENTER,
+# кольца 1–3 → 52 клетки (раньше: 1 центр + кольца 1–5 = 91).
+
 const YIELD_KEYS: Array = [&"food", &"industry", &"dust", &"science", &"influence"]
 
 const RING_COLORS: Array = [
@@ -19,29 +22,23 @@ const RING_COLORS: Array = [
 static func center() -> Vector2i:
 	return ARENA_CENTER
 
+static func core_cells() -> Array[Vector2i]:
+	return HexUtils.core_cells(ARENA_CENTER)
+
 static func ring_of(cell: Vector2i) -> int:
-	return HexUtils.hex_distance(cell, center())
+	return HexUtils.core_distance(ARENA_CENTER, cell)
 
 static func is_in_arena(cell: Vector2i) -> bool:
 	return ring_of(cell) <= GameNumbers.ARENA_RADIUS
 
 static func cells_in_arena() -> Array[Vector2i]:
-	var out: Array[Vector2i] = [center()]
+	var out: Array[Vector2i] = core_cells()
 	for ring in range(1, GameNumbers.ARENA_RADIUS + 1):
 		out.append_array(cells_in_ring(ring))
 	return out
 
 static func cells_in_ring(ring: int) -> Array[Vector2i]:
-	var out: Array[Vector2i] = []
-	if ring < 1:
-		return out
-	var c: Vector2i = center()
-	for y in range(-ring - 1, ring + 2):
-		for x in range(-ring - 1, ring + 2):
-			var cell := c + Vector2i(x, y)
-			if HexUtils.hex_distance(cell, c) == ring:
-				out.append(cell)
-	return out
+	return HexUtils.cells_in_core_ring(ARENA_CENTER, ring)
 
 static func ring_color(ring: int) -> Color:
 	var i := clampi(ring, 0, GameNumbers.ARENA_RADIUS)
@@ -96,7 +93,7 @@ static func apply_ring_multipliers(city: City, overrides: Dictionary = {},
 
 static func cell_feature(city: City, cell: Vector2i) -> StringName:
 	var ring := ring_of(cell)
-	if ring < 2 or ring > 4:
+	if ring < 2 or ring > GameNumbers.ARENA_RADIUS:
 		return &""
 	var h: int = hash("%d:%d:%d" % [city.uid, cell.x, cell.y])
 	var v: int = absi(h)

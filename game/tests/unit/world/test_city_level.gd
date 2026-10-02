@@ -13,7 +13,8 @@ func _city() -> Variant:
 	return c
 
 func _ring_cell(r: int) -> Vector2i:
-	var cell := center
+	# D6: ядро = ромб 4 клетки — идём на восток от восточного края ядра
+	var cell := center + Vector2i(1, 0)
 	for _i in r:
 		cell = HexUtils.get_all_neighbors(cell)[0]
 	return cell
@@ -117,7 +118,8 @@ func test_build_radius_by_level() -> void:
 	var c: Variant = _city()
 	for lvl in [1, 2, 3, 4, 5]:
 		c.level = lvl
-		var expected: int = [3, 4, 5, 5, 5][lvl - 1]
+		# D6: радиус зафиксирован на 3 (кольца 1–3 вокруг ядра, 02g §2.1)
+		var expected: int = [3, 3, 3, 3, 3][lvl - 1]
 		assert_that(ProsperitySystem.build_radius_for_level(lvl)).is_equal(expected)
 	# city-hex-layout: building_max_distance — фикс 3 (кольца 1–3 вокруг ядра)
 	c.level = 1

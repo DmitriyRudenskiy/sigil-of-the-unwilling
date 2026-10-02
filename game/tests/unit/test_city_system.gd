@@ -117,9 +117,8 @@ func test_building_upgrade_requires_hero_and_followers() -> void:
 func test_free_building_placement_distance() -> void:
 	var c := _city()
 	c.storage[&"industry"] = 1000.0
-	var far := c.center
-	for i in GameNumbers.BUILDING_MAX_DIST_BASE + 1:
-		far = HexUtils.get_all_neighbors(far)[0]
+	# D6: граница — кольцо 3 вокруг ядра; center+5 на восток = кольцо 4 по ядру
+	var far: Vector2i = c.center + Vector2i(5, 0)
 	assert_bool(c.can_build_building(BuildingDefs.market(), far).ok).is_false()
 	var near: Vector2i = HexUtils.get_all_neighbors(c.center)[0]
 	assert_bool(c.can_build_building(BuildingDefs.market(), near).ok).is_true()

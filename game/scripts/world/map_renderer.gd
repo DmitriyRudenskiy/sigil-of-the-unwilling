@@ -35,8 +35,9 @@ func rebuild_city_zones(cities: Array) -> void:
 			continue
 		for cc in city.core_cells:
 			city_zones[cc] = {"city": city, "ring": 0}
+		# D6: кольца вокруг ядра (ромб 2×2), не вокруг одной center
 		for r in range(1, GameNumbers.CITY_RING_MAX + 1):
-			for cell in HexUtils.ring(city.center, r):
+			for cell in HexUtils.cells_in_core_ring(city.center, r):
 				if not city_zones.has(cell):
 					city_zones[cell] = {"city": city, "ring": r}
 

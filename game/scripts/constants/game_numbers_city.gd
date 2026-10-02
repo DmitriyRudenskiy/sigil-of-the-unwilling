@@ -62,7 +62,7 @@ const PROSPERITY_LEVEL_REQS     := [55.0, 58.0, 62.0, 66.0, 70.0, 74.0, 78.0, 82
 const PROSPERITY_LEVEL_POP_BASE := 8
 const PROSPERITY_LEVEL_POP_STEP := 4
 const PROSPERITY_LEVEL_BLD_PER  := 1
-const PROSPERITY_MAX_RADIUS     := 5
+const PROSPERITY_MAX_RADIUS     := 3  # D6: кольца 1–3 вокруг ядра (02g §2.1)
 # Ранняя игра: дымовая города 1..11 и военная рекрутка (early-game-foundation)
 const CITY_LEVEL_MAX            := 11
 const RECRUIT_BATCH_SIZE        := 20
@@ -109,7 +109,7 @@ const DEMO_CRITICAL_THRESHOLD   := 0.2
 const DEMO_DEATH_STREAK         := 3
 const DEMO_OUTBREAK_COOLDOWN    := 5
 const DEMO_MAX_TRAITS           := 3
-const ARENA_RADIUS              := 5
+const ARENA_RADIUS              := 3  # D6: ядро 4 + кольца 1–3 = 52 клетки (02g §2.1)
 const ARENA_CLUSTER_MIN         := 4
 const ARENA_CLUSTER_MULT        := 1.5
 const ARENA_CLUSTER_HOUSING     := 2
@@ -123,26 +123,25 @@ const ARENA_STORM_PROD_MULT     := 0.75
 const ARENA_STORM_MITIG_MULT    := 0.875
 const ARENA_STORM_FOOD          := 2.0
 const ARENA_STORM_MITIG_FOOD    := 1.0
+# D6: кольца 0–3 (ядро + 3 кольца вокруг ромба, 02g §2.1)
 const RING_YIELD: Array = [
 	[0.00, 0.00, 0.00, 0.00, 0.00],
 	[3.00, 6.00, 0.00, 0.00, 0.00],
 	[3.50, 6.00, 0.00, 0.00, 0.50],
 	[4.00, 6.00, 0.50, 1.00, 1.00],
-	[6.00, 6.00, 1.00, 0.50, 1.00],
-	[2.00, 1.00, 1.50, 1.00, 1.50],
 ]
 const RING_BONUS: Dictionary = {
-	&"farm": { 1: 0.00, 2: 0.00, 3: 0.00, 4: 0.00, 5: 0.00 },
-	&"mill": { 1: 0.15, 2: 0.00, 3: 0.00, 4: 0.00, 5: 0.00 },
-	&"bakery": { 1: 0.00, 2: 0.10, 3: 0.00, 4: 0.00, 5: 0.00 },
-	&"mine": { 1: 0.00, 2: 0.15, 3: 0.20, 4: 0.00, 5: 0.00 },
-	&"smithy": { 1: 0.00, 2: 0.20, 3: 0.25, 4: 0.00, 5: 0.00 },
-	&"tavern": { 1: 0.00, 2: 0.10, 3: 0.15, 4: 0.00, 5: 0.00 },
-	&"trade_post": { 1: 0.00, 2: 0.15, 3: 0.20, 4: 0.00, 5: 0.00 },
-	&"school": { 1: 0.10, 2: 0.00, 3: 0.00, 4: 0.00, 5: 0.00 },
-	&"market": { 1: 0.00, 2: 0.20, 3: 0.10, 4: 0.00, 5: 0.00 },
-	&"shack": { 1: 0.00, 2: 0.10, 3: 0.00, 4: 0.00, 5: 0.00 },
-	&"walls": { 1: 0.00, 2: 0.00, 3: 0.10, 4: 0.25, 5: 0.00 },
+	&"farm": { 1: 0.00, 2: 0.00, 3: 0.00 },
+	&"mill": { 1: 0.15, 2: 0.00, 3: 0.00 },
+	&"bakery": { 1: 0.00, 2: 0.10, 3: 0.00 },
+	&"mine": { 1: 0.00, 2: 0.15, 3: 0.20 },
+	&"smithy": { 1: 0.00, 2: 0.20, 3: 0.25 },
+	&"tavern": { 1: 0.00, 2: 0.10, 3: 0.15 },
+	&"trade_post": { 1: 0.00, 2: 0.15, 3: 0.20 },
+	&"school": { 1: 0.10, 2: 0.00, 3: 0.00 },
+	&"market": { 1: 0.00, 2: 0.20, 3: 0.10 },
+	&"shack": { 1: 0.00, 2: 0.10, 3: 0.00 },
+	&"walls": { 1: 0.00, 2: 0.00, 3: 0.10 },
 }
 
 static func ring_yield(ring: int, table: Array = RING_YIELD) -> Dictionary:

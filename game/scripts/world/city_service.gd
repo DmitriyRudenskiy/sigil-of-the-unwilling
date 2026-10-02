@@ -115,7 +115,7 @@ static func cell_is_built(c: CityData, cell: Vector2i) -> bool:
 	return false
 static func has_road(c: CityData, cell: Vector2i) -> bool:
 	return c.roads.has(cell)
-## city-hex-layout: фикс 3 (кольца 1–3 вокруг ядра)
+## city-hex-layout (D6, 02g §2.1): кольца 1–3 вокруг ядра (ромб 4 клетки)
 static func building_max_distance(_c: CityData) -> int:
 	return GameNumbers.CITY_RING_MAX
 
@@ -127,8 +127,9 @@ static func weapon_tier_for_city(level: int) -> int:
 	if level >= 5:
 		return 3
 	return 1
+## D6: кольцо = расстояние до ядра (ромб 4 клетки у center)
 static func ring_of(c: CityData, cell: Vector2i) -> int:
-	return HexUtils.hex_distance(cell, c.center)
+	return HexUtils.core_distance(c.center, cell)
 static func get_great_temple_level(c: CityData) -> int:
 	for building in c.buildings:
 		if building.def != null and building.def.id == &"great_temple":
