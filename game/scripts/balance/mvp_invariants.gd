@@ -1,4 +1,4 @@
-## MVP-инварианты (T-112) — статические проверки баланс-конфигов против K-M4/K-M9/K-M13.
+## MVP-инварианты (T-112) — статические проверки баланс-конфигов против K-M4/K-M9/K-M13 + Ф4 (Престиж).
 ## Не Monte-Carlo (это AutoBalancer): утверждения о числах в res://data/config/balance/.
 ## Каждый check_* возвращает Array[String] нарушений; пусто = инвариант держится.
 class_name MvpInvariants
@@ -26,6 +26,28 @@ static func check_all() -> Array[String]:
 	out.append_array(check_pacing(xp, raids, movement.get("mvp_mask", {})))
 	out.append_array(check_reachability(movement, campaign))
 	out.append_array(check_beats(campaign, raids))
+	out.append_array(check_prestige(load_config("prestige")))
+	return out
+
+## Ф4 (2026-10-03): источники Престижа — закрытый список 02-mechanics §2 verbatim (4);
+## «район» — не источник (K-M16); шкала рангов — Ф4 (волна 1). Числа — в конфиге, проверка — здесь.
+static func check_prestige(prestige: Dictionary) -> Array[String]:
+	var out: Array[String] = []
+	if prestige.is_empty():
+		return ["prestige: prestige.json не загрузился"]
+	var sources: Dictionary = prestige.get("sources", {})
+	var expected := ["battle_victory", "sign_trials", "council", "monument"]
+	for key in sources.keys():
+		if not expected.has(str(key)):
+			out.append(
+				"prestige: источник вне закрытого списка Ф4: %s (район — не источник, K-M16)" % str(key)
+			)
+	for key in expected:
+		if not sources.has(key):
+			out.append("prestige: отсутствует источник закрытого списка Ф4: %s" % key)
+	var ranks: Array = prestige.get("ranks", [])
+	if ranks != [0, 200, 500, 1000, 2000]:
+		out.append("prestige: ранги не совпадают с Ф4-шкалой 0/200/500/1000/2000: %s" % str(ranks))
 	return out
 
 ## K-M13: гарантированный XP-бюджет (min-значения, только floor-гарантированные источники)

@@ -1,14 +1,91 @@
 {
-  "version": "1.0",
-  "source": "docs/07-balance.md §7 (02c финальная редакция, K-M1 2026-10-02)",
-  "ranks": [0, 500, 1500, 3500, 7000, 12000],
-  "rank_names_source": "02c §2 (данные)",
+  "version": "2.0",
+  "source": "docs/07-balance.md §7 — Ф4-спецификация (владелец, 2026-10-03); K-M16; Q-M16 погашен",
+  "ranks": [
+    0,
+    200,
+    500,
+    1000,
+    2000
+  ],
+  "ranks_note": "Ф4: шкала волны 1 (5 рангов). Имя: 500 = «Почитаемый» (Ф4); остальные имена — контент владельца (TBD). 02-mechanics:238 (6 рангов, финальная редакция) — противоречие флагировано владельцу (supersede-одобрение).",
+  "rank_names": {
+    "500": "Почитаемый"
+  },
   "faction_actions_max": 12,
   "sources": {
-    "district_created": 500
+    "battle_victory": {
+      "base": 10,
+      "modifiers": {
+        "no_losses": 5,
+        "parity_le_0.8": 10,
+        "camp_tier_ge_2": 10,
+        "boss_once_per_campaign": 50
+      }
+    },
+    "sign_trials": {
+      "stages": [
+        40,
+        50,
+        60
+      ],
+      "completion": 50,
+      "full_chain": 200,
+      "income_share_corridor": [
+        0.25,
+        0.35
+      ]
+    },
+    "council": {
+      "sessions_mvp": [
+        12
+      ],
+      "sessions_1_0": [
+        12,
+        24
+      ],
+      "base": 0,
+      "chair_per_session": 30,
+      "resolution_supported": 10
+    },
+    "monument": {
+      "completion": 100,
+      "once_per_monument": true,
+      "count_mvp": 0,
+      "count_1_0": [
+        4,
+        8
+      ]
+    }
+  },
+  "ledger": {
+    "fields": [
+      "turn",
+      "source_type",
+      "id",
+      "amount"
+    ],
+    "balance": "sum(ledger) — производная, в сейве не хранится (T-110)"
   },
   "anchor_turn_21": {
-    "canon": "1000–1300 → ранг 2 гарантирован, ранг 3 — цель [ПРЕДЛОЖЕНИЕ]",
-    "note": "после K-M1 (7 районов × 500 = 3500) якорь устарел — Q-M16 (решение владельца)"
+    "rank": "4±1",
+    "corridor": "500–999 или достижение 1000 — верхняя граница коридора"
+  },
+  "invariants": {
+    "median_respected": {
+      "rank_value": 500,
+      "no_earlier_turn": 14,
+      "no_later_turn": 24,
+      "note": "K-M1: полное присутствие групп к 14; темпы — бит-таблица"
+    },
+    "share_rank_ge_4_by_turn_21": [
+      0.4,
+      0.6
+    ],
+    "red_flag": "ранг 5 у медианы к ходу 21 → корректируются числа источников, не ранги и не якорь"
+  },
+  "dod": {
+    "ci_gate": "score в транзакционных путях запрещён — Престиж = ledger, не переменная транзакции; тест «prestige не участвует в транзакциях ресурсов» (с T-060s)",
+    "i1": "ledger детерминирован: входы и исходы детерминированы → сальдо и ранги воспроизводимы"
   }
 }

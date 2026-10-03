@@ -4,7 +4,7 @@ extends BaseTest
 
 const Invariants = preload("res://scripts/balance/mvp_invariants.gd")
 
-const CONFIGS := ["campaign", "movement", "xp", "population", "raids", "prestige"]
+const CONFIGS := ["campaign", "movement", "xp", "population", "raids", "prestige", "races"]
 
 ## Все 6 конфигов загружаются и имеют version
 func test_configs_load() -> void:
@@ -66,6 +66,24 @@ func test_beat_anchor_invariant() -> void:
 	var raids: Dictionary = Invariants.load_config("raids")
 	var violations: Array = Invariants.check_beats(campaign, raids)
 	assert_that(violations.is_empty()).override_failure_message(str(violations))
+
+## Ф4: источники Престижа — закрытый список; «район» отклоняется (K-M16)
+func test_prestige_sources_closed_list() -> void:
+	var prestige: Dictionary = Invariants.load_config("prestige")
+	assert_that(Invariants.check_prestige(prestige).is_empty()).override_failure_message(str(Invariants.check_prestige(prestige)))
+	var bad: Dictionary = JSON.parse_string(JSON.stringify(prestige))
+	(bad["sources"] as Dictionary)["district_created"] = 500
+	var violations: Array = Invariants.check_prestige(bad)
+	assert_that(violations.size() == 1 and violations[0].contains("district_created")) \
+		.override_failure_message("район должен отклоняться закрытым списком Ф4: %s" % str(violations))
+
+## Ф4: шкала рангов 0/200/500/1000/2000 (волна 1); якорь ранг 4±1
+func test_prestige_ranks_f4() -> void:
+	var prestige: Dictionary = Invariants.load_config("prestige")
+	assert_that(prestige["ranks"] == [0, 200, 500, 1000, 2000]) \
+		.override_failure_message("Ф4-шкала рангов: %s" % str(prestige["ranks"]))
+	assert_that(prestige["anchor_turn_21"]["rank"] == "4±1") \
+		.override_failure_message("якорь хода 21: %s" % str(prestige["anchor_turn_21"]))
 
 ## Сводная проверка: все инварианты держатся
 func test_check_all_clean() -> void:
