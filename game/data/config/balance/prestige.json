@@ -37,16 +37,15 @@
       ]
     },
     "council": {
-      "sessions_mvp": [
-        12
-      ],
       "sessions_1_0": [
         12,
         24
       ],
       "base": 0,
       "chair_per_session": 30,
-      "resolution_supported": 10
+      "resolution_supported": 10,
+      "session_mvp": 12,
+      "note": "MVP: одна сессия, ход 12; окно 12/24 — атрибут 1.0 (ревью владельца 2026-10-03: 2-я сессия вне MVP-окна 21 хода; якорь хода 21 не опирается на несостоявшуюся сессию)"
     },
     "monument": {
       "completion": 100,
