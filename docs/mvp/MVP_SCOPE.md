@@ -1,6 +1,15 @@
+---
+title: MVP-скоуп — итог Фазы 4
+tags:
+  - gdd
+  - mvp
+status: reference
+date: 2026-10-03
+---
+
 # MVP_SCOPE.md — Фаза 4 (MVP и тикеты)
 
-> Создан 2026-10-02. Источники: замороженные доки (Фаза 3) + резолюции K-M1…K-M13 ([[DECISIONS]]) + [[TICKETS]] + [[../QUESTIONS]]. Термины — [[../00-glossary]] дословно; числа — [[../07-balance]].
+> Создан 2026-10-02. Источники: замороженные доки (Фаза 3) + резолюции K-M1…K-M13 ([[DECISIONS]]) + [[TICKETS]] + [[QUESTIONS]]. Термины — [[00-glossary]] дословно; числа — [[07-balance]].
 
 ## 1. MVP-cut
 
@@ -35,7 +44,7 @@ NEW GAME → [1. ПРЕДЫГРА] (класс → раса (9) → внешно
 
 - **Сцены (8 + оверлей, K-M8):** предыгра (`scenes/main/pregame.tscn` — новая), меню (`main_menu.tscn` — есть), карта (`adventure_ui`/`world` — адаптировать), город (`scenes/city/city.tscn` + `HexGrid` — новая), бой (`battle_*` — адаптировать: 17×11, лестница, ОУ, высота), партия (`army_panel.tscn` — адаптировать), хроника (`chronicle_screen.tscn` — есть), настройки (`Settings` — есть), туториал (`tutorial_overlay.tscn` — новая, оверлей).
 - **Autoload'ы:** новые — 0 (`GameEventBus` — event bus, `HexGrid` — 02g; пре-пивотные `Artifacts`/`TileAtlasCache`/`McpInteractionServer` — в маске не используются).
-- **Числа:** `data/config/balance/` — campaign/movement/xp/population/raids/prestige.json (зеркало [[../07-balance]]); `assets/data/` — buildings/races_classes/spells.json; маски — аннотации в JSON (K-R2).
+- **Числа:** `data/config/balance/` — campaign/movement/xp/population/raids/prestige.json (зеркало [[07-balance]]); `assets/data/` — buildings/races_classes/spells.json; маски — аннотации в JSON (K-R2).
 - **Новое дерево:** `scripts/campaign/` (цикл хода, функция давления, биты); инварианты — `scripts/balance/auto_balancer.gd` (доходимость 7/14/21, бит×якорь, пейсинг ±1 ход).
 
 ## 4. Матрица трассируемости (секция дока → тикеты)
@@ -76,10 +85,10 @@ NEW GAME → [1. ПРЕДЫГРА] (класс → раса (9) → внешно
 ## 5. Верификация (шаг 6)
 
 - ✓ каждая механика MVP покрыта тикетом (24 тикета; сверка с cut-таблицей §1 — построчно)
-- ✓ каждый тикет имеет ссылку на секцию дока (AC: [[…]] + K-записи)
+- ✓ каждый тикет имеет ссылку на секцию дока (AC: `[[…]]` + K-записи)
 - ✓ термины тикетов = термины глоссария (регион, узел, партия, герой, Носитель, знак, Престиж, район, бином, лестница, Триумф, ОУ, Долг судьбы, сдвиг ±2, высотный статус, prone, утрата, функция давления, рейд, тир, defense, хроника, бит, туман, ход, тик, ополченец, мечник, первый эшелон, MVP-маска, баланс-конфиг)
 - ✓ vertical slice собирается (§2)
-- ✓ дыры Шагов 1–2 в [[../QUESTIONS]]: Q-M1…M13 — закрыты (K-M1…M13), **Q-M14 — открыта** (мораль-шкала в SM боя vs K-M11; блокирует условие RETREAT в T-054/T-052)
+- ✓ дыры Шагов 1–2 в [[QUESTIONS]]: Q-M1…M13 — закрыты (K-M1…M13), **Q-M14 — открыта** (мораль-шкала в SM боя vs K-M11; блокирует условие RETREAT в T-054/T-052)
 
 ## 6. Открытое
 

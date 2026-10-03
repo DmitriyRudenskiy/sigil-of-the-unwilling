@@ -8,7 +8,7 @@ date: 2026-09-30
 
 ## Технический стек и платформы
 
-- **Движок: Godot 4** [ПРЕДЛОЖЕНИЕ, Q10]: data-driven через Godot resources; критерий — где дешевле держать карточки контента. Альтернатива Unity 2022 LTS остаётся до конца фазы 0.
+- **Движок: Godot 4.7** (Q10 решён, 2026-10-02): data-driven через Godot resources.
 - **Платформа:** PC (Steam), мышь + клавиатура (1.5); целевой FPS 60, минимальные требования — обычное офисное железо (стратегия, не экшен) [ПРЕДЛОЖЕНИЕ].
 - **Детерминизм (K2 решено, 02d v1.2):** RNG в разрешении **нет** — исход определяется вводными (лестница исходов + Удача); реплей/авто-режим/CI: 100 прогонов → байт-в-байт один результат (02d §8.3 #14). PCG32/seed из боя исключены (были нужны только d20).
 
@@ -19,12 +19,16 @@ date: 2026-09-30
 | DnDBattleSystem | `Battle.new(grid, units) → Battle`; `battle.attack(att, tgt) → {hit, zone, dmg}`; `battle.simulate(ai) → Outcome`; `battle.round() → events[]`; `ladder(margin, luck) → zone` (02d v1.2 §3.2) | НОВОЕ (заменяет BattleSystem) |
 | TurnSystem | `turn.advance() → PhaseEvents[]`; `phase ∈ {SETTLEMENT, PLAYER, THREATS}` (01-core-loop) | НОВОЕ |
 | MapSystem | `map.move(hero, path) → cost`; `map.fog.reveal(pos, r)`; `map.node_at(cell) → Node?` | НОВОЕ (расширение GridSystem) |
-| PartySystem | `party.add(character)`; `character.damage(n)`; `character.rest(days) → healed_hd`; `party.morale() → float` | НОВОЕ (HeroSystem влит) |
+| PartySystem | `party.add(character)`; `character.damage(n)`; `character.rest(days) → healed_hd`; `party.loss_stage() → int` (утрата = ступень −2 на спасброски до конца боя; `party.morale() → float` удалён — шкалы морали нет, K-M11) | НОВОЕ (HeroSystem влит) |
 | EconomySystem | `economy.tick(city) → Flows{per resource}`; `economy.state(r) → OK/WARN/DEFICIT/COLLAPSE` (06-economy) | расширение ProductionSystem |
-| RaidSystem | `raid.schedule() → [7,10,14,17,21]` (пре-D4; график — T5, TBD); `raid.resolve(raid, city, hero) → Consequences` (02-mechanics §3.8) | расширение канона |
+| RaidSystem | `pressure.tick() → Wave?` (функция давления, 02e4 §13.2, K-T5; календарь 7/10/14/17/21 — аннулирован); `pressure.directive(d) → {floor, ceiling, window}` (словарь директив, K-R3); `wave.composition` (K-R3); `raid.resolve(raid, city, hero) → Consequences` (02-mechanics §3.8) | расширение канона |
 | SignSystem | `sign.prestige += delta` (MVP — только престиж, S2); `sign.weekly_trial() → Quest`; `sign.followers() → pop_inflow/week` (Post-MVP, S2) | НОВОЕ (из Части 11) |
 | ChronicleSystem | `chronicle.append(event, cause)`; `rumor.tick()` (04-narrative) | НОВОЕ (срез Части 10) |
 | GridSystem, BuildingSystem, WorkerSystem, AdjacencySystem, RoadSystem, NetworkSystem, DistrictSystem, SaveSystem | (BuildingSystem получает SM здания, 02-mechanics §3.5) | ПЕРЕНОС |
+
+## Состояние кода
+
+- **Пре-пивотный слой** (`game/`: world/city_arena/battle, 359 скриптов, 230 тест-файлов; системы: кризис-события, законы, фракции, крафт, артефакты, квесты) — **запланирован к замене Ф-планом** (GDD 0.2.1 владельца); текущее состояние и история циклов — корневой `CHANGELOG.md` (OpenSpec), в `docs/` не дублируется. Числа legacy-слоя вне баланс-листа — scope-строка [[07-balance]] (D-103).
 
 ## Data-driven и валидация
 

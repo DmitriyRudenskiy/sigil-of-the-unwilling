@@ -4,8 +4,8 @@ tags:
   - gdd
   - map
   - campaign
-status: active (draft v1 — на ревью владельца)
-date: 2026-10-02
+status: draft
+date: 2026-10-03
 ---
 
 # Базовая карта v1 — граф регионов [MAP-1]
