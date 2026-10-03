@@ -5,7 +5,18 @@
 # 100 и прочие = реальные падения.
 set -u
 cd "$(dirname "$0")"
-GODOT="${GODOT:-/Applications/Godot.app/Contents/MacOS/Godot}"
+# Порядок разрешения Godot (2026-10-04, флаг 8): $GODOT_BIN → $GODOT (legacy) →
+# command -v godot → дефолты ОС (путь бинаря задокументирован в AGENTS.md)
+GODOT="${GODOT_BIN:-${GODOT:-}}"
+if [ -z "$GODOT" ]; then
+	GODOT="$(command -v godot || true)"
+fi
+if [ -z "$GODOT" ]; then
+	case "$(uname -s)" in
+		Darwin) GODOT="/Applications/Godot.app/Contents/MacOS/Godot" ;;
+		*) GODOT="$HOME/.local/bin/godot" ;;
+	esac
+fi
 
 echo "=== gdUnit4: unit + integration + functional ==="
 # --import: обновить кэш глобальных классов (иначе новые class_name дают parse errors)
@@ -13,6 +24,8 @@ echo "=== gdUnit4: unit + integration + functional ==="
 
 "$GODOT" --headless --path . -s addons/gdunit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -c -a res://tests
 RC=$?
+# Политика orphan (CI-2, T-114): 0 = pass; 101 = только orphan-предупреждения
+# (гигиена, не падение); любой другой код = red. Политика закодирована в гейте.
 if [ "$RC" -ne 0 ] && [ "$RC" -ne 101 ]; then
 	exit "$RC"
 fi
