@@ -3,9 +3,8 @@ __pycache__/
 tmp/
 .godot/
 reports/
-# Godot-генерация (per-machine, репорт не трекает .import)
-*.import
-*.gd.uid
+# Godot-генерация: .import и *.uid версионируются (гейт CI-1: untracked .uid — красный);
+# кэш .godot/ не версионируется (выше)
 # Вендорный MCP-сервер (устанавливается локально: git clone + npm install + npm run build)
 addons/godot-mcp/
 # Артефакт сборки godot-mcp (npm run build копирует скрипты сюда)
