@@ -1,357 +1,44 @@
 {
   "_meta": {
-    "source": "02d-classes-skills.md §2/§4.2 (классы), 02e3-races.md §9.2/§9.4 (расы/группы)",
+    "source": "02d-classes-skills.md §2/§4.2 (классы), 02e3-races.md §9.4 (группы), K-M5-правка (первый эшелон, владелец, 2026-10-02)",
     "date": "2026-10-02",
     "notes": [
       "K1 (02d): канон = 11 классов без Колдуна; «mage» = Волшебник (wizard). MVP наём = 6 (hireable: true).",
-      "K-M5: конструктор предлагает 9 рас первого эшелона; 02e3 §9.2 определяет 3 (люди/орки/эльфы); оставшиеся 6 — Q-M17 (список не определён в каноне).",
-      "K-A6: расы = данные, не механики. special — модификаторы зданий (9.2), не боевые механики.",
-      "Каталог пре-пивота races_classes.json (Pathfinder) НЕ трогаем — потребляет pre-pivot RaceClassRegistry/follower_system; миграция — на пивот-тикетах.",
-      "special[].building — канонические имена 02e3 §9.2; маппинг на id зданий 02g — на T-030. militia cost_discount: value null (числа нет — Q-M15)."
+      "K-M5-правка (2026-10-02, закрытие ратифицированного, без новой D-записи): первый эшелон = 7 рас (одна на группу); формула: первый эшелон = 7 (по одной на группу), горизонт = 54 (каталог), дубли аннулируются. Дубли (драконорождённые, полуэльфы) — миграционный горизонт каталога 54, не стартовый пул; вхождение — K-A6 (расовый флаг), контентный слой (Q-M18).",
+      "«Орки» — ошибка словаря (в базовой системе D&D расы полуорки, орков как расы нет) → half_orcs.",
+      "modifiers — SRD-таблица базовой системы (не локальная традиция, не 02e3 §9.2 — пре-пивотные данные, аннулированы). Удача (7-я характеристика, K-A6) — в каталоге 0 для всех; Удача гномов +2 — ратифицируется отдельным балансом в 07-balance, не хардкодится в коде.",
+      "races_classes.json (Pathfinder) — легаси-слой пре-пивота: не тронут и не мигрирован до Ф-R (легаси-слои сносятся по Ф-плану, не по тикету каталога); живой потребитель — RaceClassRegistry/follower_system."
     ]
   },
   "classes": [
-    {
-      "id": "barbarian",
-      "name": "Варвар",
-      "key_feature": "Ярость",
-      "source": "инстинкт, тело",
-      "gate": {
-        "mode": "all",
-        "reqs": [
-          [
-            "STR",
-            13
-          ]
-        ]
-      },
-      "hireable": false
-    },
-    {
-      "id": "bard",
-      "name": "Бард",
-      "key_feature": "Вдохновение",
-      "source": "искусство",
-      "gate": {
-        "mode": "all",
-        "reqs": [
-          [
-            "CHA",
-            13
-          ]
-        ]
-      },
-      "hireable": false
-    },
-    {
-      "id": "cleric",
-      "name": "Жрец",
-      "key_feature": "Божественный канал",
-      "source": "вера, служение",
-      "gate": {
-        "mode": "all",
-        "reqs": [
-          [
-            "WIS",
-            13
-          ]
-        ]
-      },
-      "hireable": true
-    },
-    {
-      "id": "druid",
-      "name": "Друид",
-      "key_feature": "Облик зверя",
-      "source": "Круг, равновесие",
-      "gate": {
-        "mode": "all",
-        "reqs": [
-          [
-            "WIS",
-            13
-          ]
-        ]
-      },
-      "hireable": false
-    },
-    {
-      "id": "fighter",
-      "name": "Воин",
-      "key_feature": "Чистая техника",
-      "source": "тренировка",
-      "gate": {
-        "mode": "any",
-        "reqs": [
-          [
-            "STR",
-            13
-          ],
-          [
-            "DEX",
-            13
-          ]
-        ]
-      },
-      "hireable": true
-    },
-    {
-      "id": "monk",
-      "name": "Монах",
-      "key_feature": "Ци",
-      "source": "дух, контроль",
-      "gate": {
-        "mode": "all",
-        "reqs": [
-          [
-            "DEX",
-            13
-          ],
-          [
-            "WIS",
-            13
-          ]
-        ]
-      },
-      "hireable": false
-    },
-    {
-      "id": "paladin",
-      "name": "Паладин",
-      "key_feature": "Клятва + Кара",
-      "source": "верность клятве",
-      "gate": {
-        "mode": "all",
-        "reqs": [
-          [
-            "STR",
-            13
-          ],
-          [
-            "CHA",
-            13
-          ]
-        ]
-      },
-      "hireable": true
-    },
-    {
-      "id": "ranger",
-      "name": "Следопыт",
-      "key_feature": "Избранный враг",
-      "source": "наблюдение, опыт",
-      "gate": {
-        "mode": "all",
-        "reqs": [
-          [
-            "DEX",
-            13
-          ],
-          [
-            "WIS",
-            13
-          ]
-        ]
-      },
-      "hireable": true
-    },
-    {
-      "id": "rogue",
-      "name": "Плут",
-      "key_feature": "Скрытая атака",
-      "source": "незаметность",
-      "gate": {
-        "mode": "all",
-        "reqs": [
-          [
-            "DEX",
-            13
-          ]
-        ]
-      },
-      "hireable": true
-    },
-    {
-      "id": "sorcerer",
-      "name": "Чародей",
-      "key_feature": "Метамагия",
-      "source": "кровь (родословная)",
-      "gate": {
-        "mode": "all",
-        "reqs": [
-          [
-            "CHA",
-            13
-          ]
-        ]
-      },
-      "hireable": false
-    },
-    {
-      "id": "wizard",
-      "name": "Волшебник",
-      "key_feature": "Книга заклинаний",
-      "source": "изучение",
-      "gate": {
-        "mode": "all",
-        "reqs": [
-          [
-            "INT",
-            13
-          ]
-        ]
-      },
-      "hireable": true
-    }
+    {"id": "barbarian", "name": "Варвар", "key_feature": "Ярость", "source": "инстинкт, тело", "gate": {"mode": "all", "reqs": [["STR", 13]]}, "hireable": false},
+    {"id": "bard", "name": "Бард", "key_feature": "Вдохновение", "source": "искусство", "gate": {"mode": "all", "reqs": [["CHA", 13]]}, "hireable": false},
+    {"id": "cleric", "name": "Жрец", "key_feature": "Божественный канал", "source": "вера, служение", "gate": {"mode": "all", "reqs": [["WIS", 13]]}, "hireable": true},
+    {"id": "druid", "name": "Друид", "key_feature": "Облик зверя", "source": "Круг, равновесие", "gate": {"mode": "all", "reqs": [["WIS", 13]]}, "hireable": false},
+    {"id": "fighter", "name": "Воин", "key_feature": "Чистая техника", "source": "тренировка", "gate": {"mode": "any", "reqs": [["STR", 13], ["DEX", 13]]}, "hireable": true},
+    {"id": "monk", "name": "Монах", "key_feature": "Ци", "source": "дух, контроль", "gate": {"mode": "all", "reqs": [["DEX", 13], ["WIS", 13]]}, "hireable": false},
+    {"id": "paladin", "name": "Паладин", "key_feature": "Клятва + Кара", "source": "верность клятве", "gate": {"mode": "all", "reqs": [["STR", 13], ["CHA", 13]]}, "hireable": true},
+    {"id": "ranger", "name": "Следопыт", "key_feature": "Избранный враг", "source": "наблюдение, опыт", "gate": {"mode": "all", "reqs": [["DEX", 13], ["WIS", 13]]}, "hireable": true},
+    {"id": "rogue", "name": "Плут", "key_feature": "Скрытая атака", "source": "незаметность", "gate": {"mode": "all", "reqs": [["DEX", 13]]}, "hireable": true},
+    {"id": "sorcerer", "name": "Чародей", "key_feature": "Метамагия", "source": "кровь (родословная)", "gate": {"mode": "all", "reqs": [["CHA", 13]]}, "hireable": false},
+    {"id": "wizard", "name": "Волшебник", "key_feature": "Книга заклинаний", "source": "изучение", "gate": {"mode": "all", "reqs": [["INT", 13]]}, "hireable": true}
   ],
   "races": [
-    {
-      "id": "humans",
-      "name": "Люди",
-      "group": "farmers_brewers",
-      "tags": [
-        "logistics",
-        "command",
-        "settlement",
-        "versatile"
-      ],
-      "special": [
-        {
-          "building": "склад",
-          "effect": "supply_limit",
-          "value": 0.1
-        },
-        {
-          "building": "командный_шатёр",
-          "effect": "army_limit",
-          "value": 1
-        },
-        {
-          "building": "таверна",
-          "effect": "repair_speed",
-          "value": 0.05
-        },
-        {
-          "unit": "militia",
-          "effect": "cost_discount",
-          "value": null
-        }
-      ],
-      "style": "Построй прочную сеть и управляй ресурсами",
-      "first_tier": true
-    },
-    {
-      "id": "orcs",
-      "name": "Орки",
-      "group": "metallurgists_technicians",
-      "tags": [
-        "heavy",
-        "forge",
-        "warrior",
-        "ramp"
-      ],
-      "special": [
-        {
-          "building": "кузница",
-          "effect": "weapon_speed",
-          "value": 0.1
-        },
-        {
-          "building": "шахта",
-          "effect": "ore_vein_chance",
-          "value": 0.05
-        },
-        {
-          "building": "плац",
-          "effect": "training_speed",
-          "value": 0.1
-        },
-        {
-          "building": "плац",
-          "effect": "combat_exp_chance",
-          "value": 0.05
-        },
-        {
-          "unit": "swordsman",
-          "effect": "attack",
-          "value": 0.05
-        }
-      ],
-      "style": "Преврати ресурсы в военную мощь",
-      "first_tier": true
-    },
-    {
-      "id": "elves",
-      "name": "Эльфы",
-      "group": "weavers_crafters",
-      "tags": [
-        "forest",
-        "ranged",
-        "ranger",
-        "defense"
-      ],
-      "special": [
-        {
-          "building": "лесопилка",
-          "effect": "wood_output",
-          "value": 0.1
-        },
-        {
-          "building": "башня",
-          "effect": "recon",
-          "value": 0.1
-        },
-        {
-          "building": "стрельбище",
-          "effect": "archer_training",
-          "value": 0.15
-        }
-      ],
-      "style": "Создай сеть разведки и обороны",
-      "first_tier": true
-    }
+    {"id": "gnomes", "name": "Гномы", "group": "engineers_builders", "modifiers": {"STR": 0, "DEX": 0, "CON": 0, "INT": 2, "WIS": 0, "CHA": 0}, "luck": 0, "first_tier": true},
+    {"id": "halflings", "name": "Полурослики", "group": "farmers_brewers", "modifiers": {"STR": 0, "DEX": 2, "CON": 0, "INT": 0, "WIS": 0, "CHA": 0}, "luck": 0, "first_tier": true},
+    {"id": "tieflings", "name": "Тифлинги", "group": "alchemists_flame", "modifiers": {"STR": 0, "DEX": 0, "CON": 0, "INT": 1, "WIS": 0, "CHA": 2}, "luck": 0, "first_tier": true},
+    {"id": "elves", "name": "Эльфы", "group": "weavers_crafters", "modifiers": {"STR": 0, "DEX": 2, "CON": 0, "INT": 0, "WIS": 0, "CHA": 0}, "luck": 0, "first_tier": true},
+    {"id": "humans", "name": "Люди", "group": "merchants_diplomats", "modifiers": {"STR": 0, "DEX": 0, "CON": 0, "INT": 0, "WIS": 0, "CHA": 0}, "luck": 0, "first_tier": true},
+    {"id": "dwarves", "name": "Дворфы", "group": "metallurgists_technicians", "modifiers": {"STR": 0, "DEX": 0, "CON": 2, "INT": 0, "WIS": 0, "CHA": 0}, "luck": 0, "first_tier": true},
+    {"id": "half_orcs", "name": "Полуорки", "group": "hunters_trackers", "modifiers": {"STR": 2, "DEX": 0, "CON": 1, "INT": 0, "WIS": 0, "CHA": 0}, "luck": 0, "first_tier": true}
   ],
-  "races_first_tier_tbd": {
-    "expected": 9,
-    "defined": 3,
-    "missing": 6,
-    "question": "Q-M17 — список 9 рас первого эшелона не определён в каноне (02e3 §9.2 даёт 3 культуры; 7 групп §9.4 — кандидаты); решение — автор"
-  },
   "groups": [
-    {
-      "id": "engineers_builders",
-      "name": "Инженеры & Строители",
-      "spec": "деревообработка, инженерия, строительство"
-    },
-    {
-      "id": "farmers_brewers",
-      "name": "Земледельцы & Пивовары",
-      "spec": "фермерство, пивоварение, еда"
-    },
-    {
-      "id": "alchemists_flame",
-      "name": "Алхимики & Хранители Пламени",
-      "spec": "алхимия, обработка материалов"
-    },
-    {
-      "id": "weavers_crafters",
-      "name": "Ткачи & Ремесленники",
-      "spec": "ремёсла, ткачество, духи"
-    },
-    {
-      "id": "merchants_diplomats",
-      "name": "Торговцы & Дипломаты",
-      "spec": "торговля, дипломатия, небо"
-    },
-    {
-      "id": "hunters_trackers",
-      "name": "Охотники & Следопыты",
-      "spec": "охота, следопытство"
-    },
-    {
-      "id": "metallurgists_technicians",
-      "name": "Металлурги & Техники",
-      "spec": "металлургия, война, тяжёлая промышленность"
-    }
+    {"id": "engineers_builders", "name": "Инженеры & Строители", "spec": "деревообработка, инженерия, строительство"},
+    {"id": "farmers_brewers", "name": "Земледельцы & Пивовары", "spec": "фермерство, пивоварение, еда"},
+    {"id": "alchemists_flame", "name": "Алхимики & Хранители Пламени", "spec": "алхимия, обработка материалов"},
+    {"id": "weavers_crafters", "name": "Ткачи & Ремесленники", "spec": "ремёсла, ткачество, духи"},
+    {"id": "merchants_diplomats", "name": "Торговцы & Дипломаты", "spec": "торговля, дипломатия, небо"},
+    {"id": "hunters_trackers", "name": "Охотники & Следопыты", "spec": "охота, следопытство"},
+    {"id": "metallurgists_technicians", "name": "Металлурги & Техники", "spec": "металлургия, война, тяжёлая промышленность"}
   ]
 }

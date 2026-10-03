@@ -44,8 +44,8 @@ func test_gates_match_02d() -> void:
 	var by_id := {}
 	for c in catalog.get("classes", []):
 		by_id[c.id] = c
-	assert_that(_gate_reqs(by_id["monk"]) == [["DEX", 13], ["WIS", 13]]).override_failure_message("монх: не ЛОВ13 и МДР13")
-	assert_that(by_id["monk"].gate.mode == "all").override_failure_message("монх: режим гейта не all")
+	assert_that(_gate_reqs(by_id["monk"]) == [["DEX", 13], ["WIS", 13]]).override_failure_message("монах: не ЛОВ13 и МДР13")
+	assert_that(by_id["monk"].gate.mode == "all").override_failure_message("монах: режим гейта не all")
 	assert_that(by_id["fighter"].gate.mode == "any").override_failure_message("воин: режим гейта не any (СИЛ или ЛОВ)")
 	assert_that(_gate_reqs(by_id["paladin"]) == [["STR", 13], ["CHA", 13]]).override_failure_message("паладин: не СИЛ13 и ХАР13")
 	assert_that(_gate_reqs(by_id["wizard"]) == [["INT", 13]]).override_failure_message("волшебник: не ИНТ13")
@@ -65,16 +65,46 @@ func test_seven_groups() -> void:
 		assert_that(not ids.has(g.id)).override_failure_message("дубликат группы: %s" % g.id)
 		ids[g.id] = true
 
-func test_first_tier_races() -> void:
-	var defined: Array = []
-	var group_ids := {}
-	for g in catalog.get("groups", []):
-		group_ids[g.id] = true
+func test_first_tier_seven_races_one_per_group() -> void:
+	# K-M5-правка (2026-10-02): первый эшелон = 7 рас, одна на группу; дубли — горизонт каталога 54
+	var groups: Array = catalog.get("groups", [])
+	var races: Array = catalog.get("races", [])
+	assert_that(races.size() == 7).override_failure_message("первый эшелон: ожидалось 7 рас, получено %d" % races.size())
+	var covered := {}
+	for r in races:
+		assert_that(r.first_tier).override_failure_message("раса %s не первого эшелона" % r.id)
+		assert_that(not covered.has(r.group)).override_failure_message("группа %s: две расы первого эшелона (дубли аннулированы)" % r.group)
+		covered[r.group] = r.id
+	for g in groups:
+		assert_that(covered.has(g.id)).override_failure_message("группа %s без населения первого эшелона (K-M5: каждая группа получает население)" % g.id)
+
+func test_no_orcs_term() -> void:
+	# «Орки» — ошибка словаря: в базовой системе D&D раса — полуорки
+	var has_half_orcs := false
 	for r in catalog.get("races", []):
-		if r.first_tier:
-			defined.append(r.id)
-			assert_that(group_ids.has(r.group)).override_failure_message("раса %s: неизвестная группа %s" % [r.id, r.group])
-	assert_that(defined.size() == 3).override_failure_message("определено %d рас первого эшелона, ожидалось 3 (02e3 §9.2)" % defined.size())
-	var tbd: Dictionary = catalog.get("races_first_tier_tbd", {})
-	assert_that(tbd.get("expected", 0) == 9).override_failure_message("первый эшелон: expected != 9")
-	assert_that(tbd.get("defined", 0) == defined.size()).override_failure_message("races_first_tier_tbd.defined не совпадает с фактическим числом")
+		assert_that(r.id != "orcs" and r.name != "Орки").override_failure_message("термин «орки» в каталоге — незаконный (основание: базовая система D&D)")
+		if r.id == "half_orcs":
+			has_half_orcs = true
+	assert_that(has_half_orcs).override_failure_message("полуорки (half_orcs) отсутствуют в каталоге")
+
+func test_srd_modifiers() -> void:
+	# Модификаторы — SRD-таблица базовой системы; Удача в каталоге 0 (Удача гномов +2 — 07-balance, не код)
+	var by_id := {}
+	for r in catalog.get("races", []):
+		by_id[r.id] = r
+	assert_that(_mods(by_id["gnomes"]) == {"INT": 2}).override_failure_message("гномы: SRD = ИНТ +2")
+	assert_that(_mods(by_id["halflings"]) == {"DEX": 2}).override_failure_message("полурослики: SRD = ЛОВ +2")
+	assert_that(_mods(by_id["tieflings"]) == {"INT": 1, "CHA": 2}).override_failure_message("тифлинги: SRD = ИНТ +1, ХАР +2")
+	assert_that(_mods(by_id["elves"]) == {"DEX": 2}).override_failure_message("эльфы: SRD = ЛОВ +2")
+	assert_that(_mods(by_id["humans"]) == {}).override_failure_message("люди: SRD без модификаторов")
+	assert_that(_mods(by_id["dwarves"]) == {"CON": 2}).override_failure_message("дворфы: SRD = ТЕЛ +2")
+	assert_that(_mods(by_id["half_orcs"]) == {"STR": 2, "CON": 1}).override_failure_message("полуорки: SRD = СИЛ +2, ТЕЛ +1")
+	for r in catalog.get("races", []):
+		assert_that(r.luck == 0).override_failure_message("раса %s: Удача в каталоге = 0 (ратификация — 07-balance, не код)" % r.id)
+
+func _mods(r: Dictionary) -> Dictionary:
+	var m := {}
+	for k in r.modifiers:
+		if r.modifiers[k] != 0:
+			m[k] = r.modifiers[k]
+	return m
