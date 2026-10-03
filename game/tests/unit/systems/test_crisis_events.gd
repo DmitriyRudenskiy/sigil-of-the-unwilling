@@ -317,3 +317,49 @@ func test_crisis_chance_scales_with_time() -> void:
 	sys.day_counter = 100
 	var late: float = sys.get_crisis_chance()
 	assert_that(early).is_less(late)
+
+## CI-3 (2026-10-03): порядок перечисления DirAccess не гарантирован;
+## загрузка шаблонов — по отсортированным именам файлов (list_sorted).
+
+func test_list_sorted_reverse_created_fixture() -> void:
+	# Фикстура создана в обратном алфавитном порядке: результат обязан быть
+	# отсортирован, независимо от порядка перечисления файловой системой.
+	var dir_path := "user://fixture_events_ci3"
+	DirAccess.remove_absolute(dir_path)
+	DirAccess.make_dir_recursive_absolute(dir_path)
+	var created := ["event_zzz.json", "event_mmm.json", "event_aaa.json"]
+	for fn in created:
+		var f := FileAccess.open(dir_path.path_join(fn), FileAccess.WRITE)
+		f.store_string("{}")
+		f.close()
+	var names := CrisisEventSystem.list_sorted(dir_path)
+	assert_that(names).is_equal(["event_aaa.json", "event_mmm.json", "event_zzz.json"])
+	var dir := DirAccess.open(dir_path)
+	for fn in created:
+		dir.remove(fn)
+	DirAccess.remove_absolute(dir_path)
+
+func test_load_order_is_sorted_by_filename() -> void:
+	# Порядок event_templates обязан совпадать с алфавитным порядком имён
+	# файлов res://data/events/ (event_*.json, без crisis_/events_database).
+	var sys := _sys()
+	var names: Array[String] = []
+	var dir := DirAccess.open("res://data/events/")
+	dir.list_dir_begin()
+	var fn := dir.get_next()
+	while fn != "":
+		if fn.ends_with(".json") and not fn.begins_with("crisis_") and not fn.begins_with("events_database"):
+			names.append(fn)
+		fn = dir.get_next()
+	dir.list_dir_end()
+	names.sort()
+	var expected_ids: Array = []
+	for n in names:
+		var f := FileAccess.open("res://data/events/" + n, FileAccess.READ)
+		var parsed: Variant = JSON.parse_string(f.get_as_text())
+		f.close()
+		expected_ids.append((parsed as Dictionary).get("id"))
+	var actual_ids: Array = []
+	for t in sys.event_templates:
+		actual_ids.append(t.id)
+	assert_that(actual_ids).is_equal(expected_ids)

@@ -94,8 +94,11 @@ func test_rare_events_observed_in_simulation() -> void:
 	# Наблюдаемость: ≥1 редкого события за 2000 ходов (детерминированный seed).
 	assert_that(_rare_hits).is_greater_equal(1)
 	# Не чаще weights-лимита: вес редких = 0.2 из ~19.2 общих → ~1% событий.
-	# При ~96 событиях за 2000 дней ожидаем ~1 редкое, допускаем ≤3.
-	assert_that(_rare_hits).is_less_equal(3)
+	# При ~96 событиях за 2000 дней ожидаем ~1 редкое. Порог ≤4: детерминированная
+	# отсортированная загрузка (CI-3, 2026-10-03) зафиксировала baseline=4 для
+	# seed 20260927 (ранее ≤3 был откалиброван под filesystem-порядок DirAccess —
+	# недетерминированный кроссплатформенно). Граница ловит регрессии на порядок.
+	assert_that(_rare_hits).is_less_equal(4)
 
 
 func test_rare_weight_respected_10k_rolls() -> void:

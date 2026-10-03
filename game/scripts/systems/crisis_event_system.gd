@@ -321,38 +321,46 @@ func _find_event_template(id: String) -> DynamicEventData:
 			return e
 	return null
 
+## Выписка каталога с явной сортировкой: порядок перечисления DirAccess
+## не гарантирован (зависит от файловой системы); порядок загрузки должен
+## быть детерминированным (I1, CI-3, 2026-10-03).
+static func list_sorted(dir_path: String) -> Array[String]:
+	var names: Array[String] = []
+	var dir := DirAccess.open(dir_path)
+	if dir:
+		dir.list_dir_begin()
+		var file_name := dir.get_next()
+		while file_name != "":
+			if not dir.current_is_dir():
+				names.append(file_name)
+			file_name = dir.get_next()
+		dir.list_dir_end()
+	names.sort()
+	return names
+
 ## Загрузка шаблонов событий из JSON.
 ## Формат: один файл = одно событие (event_*.json). events_database.json —
 ## легаси-сборник другого формата, загрузчиком игнорируется (см. комментарий).
+## Порядок — по отсортированным именам файлов (list_sorted, CI-3).
 func load_event_templates():
 	event_templates.clear()
-	var dir = DirAccess.open("res://data/events/")
-	if dir:
-		dir.list_dir_begin()
-		var file_name = dir.get_next()
-		while file_name != "":
-			# "crisis_" — кризисы; "events_database" — легаси-формат без поля id.
-			if file_name.ends_with(".json") and not file_name.begins_with("crisis_") \
-					and not file_name.begins_with("events_database"):
-				var event_data = load_event_json("res://data/events/" + file_name)
-				if event_data and _validate_template(event_data):
-					event_templates.append(DynamicEventData.new(event_data))
-			file_name = dir.get_next()
+	for file_name in list_sorted("res://data/events/"):
+		# "crisis_" — кризисы; "events_database" — легаси-формат без поля id.
+		if file_name.ends_with(".json") and not file_name.begins_with("crisis_") \
+				and not file_name.begins_with("events_database"):
+			var event_data = load_event_json("res://data/events/" + file_name)
+			if event_data and _validate_template(event_data):
+				event_templates.append(DynamicEventData.new(event_data))
 	GameLogger.info("Loaded %d event templates" % event_templates.size(), "CrisisEvents")
 
-## Загрузка шаблонов кризисов
+## Загрузка шаблонов кризисов (порядок — list_sorted, CI-3)
 func load_crisis_templates():
 	crisis_templates.clear()
-	var dir = DirAccess.open("res://data/events/")
-	if dir:
-		dir.list_dir_begin()
-		var file_name = dir.get_next()
-		while file_name != "":
-			if file_name.begins_with("crisis_") and file_name.ends_with(".json"):
-				var crisis_data = load_crisis_json("res://data/events/" + file_name)
-				if crisis_data and _validate_template(crisis_data):
-					crisis_templates.append(CrisisEventData.new(crisis_data))
-			file_name = dir.get_next()
+	for file_name in list_sorted("res://data/events/"):
+		if file_name.begins_with("crisis_") and file_name.ends_with(".json"):
+			var crisis_data = load_crisis_json("res://data/events/" + file_name)
+			if crisis_data and _validate_template(crisis_data):
+				crisis_templates.append(CrisisEventData.new(crisis_data))
 	GameLogger.info("Loaded %d crisis templates" % crisis_templates.size(), "CrisisEvents")
 
 ## Загрузка JSON события
