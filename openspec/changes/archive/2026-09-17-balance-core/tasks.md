@@ -21,10 +21,5 @@
 - [x] 4.4 Проверка: полный gdUnit-прогон зелёный после правок чисел
 
 ## 5. Закрытие
-<<<<<<<< HEAD:openspec/changes/archive/2026-09-17-balance-core/tasks.md
-- [x] 5.1 Отчёт калибровки (до/после + исключения с обоснованием) — артефакт в openspec/changes/balance-core/
-- [x] 5.2 openspec validate + commit + push
-========
 - [x] 5.1 Отчёт калибровки (до/после + исключения с обоснованием) — артефакт в openspec/changes/balance-core/ (calibration-report.md)
 - [x] 5.2 openspec validate + commit + push (validate valid, 2026-09-25)
->>>>>>>> origin/main:openspec/changes/archive/2026-09-25-balance-core/tasks.md
