@@ -7,13 +7,27 @@
     "weight_penalty": "floor(вес / 10), вес = инвентарь + экипировка (K-M4)"
   },
   "entry_cost_days": {
-    "plains": 1, "forest": 2, "mountains": 3, "swamp": 3, "river": 2,
-    "ruins": 2, "sacred_grove": 2, "scorched": 2, "ford": 2
+    "plains": 1,
+    "forest": 2,
+    "mountains": 3,
+    "swamp": 3,
+    "river": 2,
+    "ruins": 2,
+    "sacred_grove": 2,
+    "scorched": 2,
+    "ford": 2
   },
   "entry_cost_note": "калибровка 2026-10-02 (K-M4, инвариант доходимости): черновые якоря 02e1-base-map-v1 §2 (равнины 2 дня) не проходят туториал-бит «руины к дню 3» (R03 = 2 ребра равнин) → равнины 1 день. Финальные числа — TBD-реестр (Ф3).",
   "base_steps_per_day": {
-    "plains": 6, "forest": 4, "mountains": 3, "swamp": 3, "river": 4,
-    "ruins": 5, "sacred_grove": 5, "scorched": 4, "ford": 3
+    "plains": 6,
+    "forest": 4,
+    "mountains": 3,
+    "swamp": 3,
+    "river": 4,
+    "ruins": 5,
+    "sacred_grove": 5,
+    "scorched": 4,
+    "ford": 3
   },
   "fog_radius": null,
   "fog_note": "TBD (07-balance §10, Ф3)",
@@ -21,9 +35,52 @@
   "mvp_mask": {
     "id": "S1",
     "start": "R01",
-    "regions": ["R01", "R02", "R03", "R04", "R05"],
-    "biomes": { "R01": "plains", "R02": "plains", "R03": "plains", "R04": "mountains", "R05": "plains" },
-    "edges": [["R01", "R02"], ["R02", "R03"], ["R03", "R04"], ["R04", "R05"]],
-    "nodes": { "R02": "camp", "R03": "ruin", "R04": "ore", "R05": ["camp", "ruin"] }
+    "regions": [
+      "R01",
+      "R02",
+      "R03",
+      "R04",
+      "R05"
+    ],
+    "biomes": {
+      "R01": "plains",
+      "R02": "plains",
+      "R03": "plains",
+      "R04": "mountains",
+      "R05": "plains"
+    },
+    "edges": [
+      [
+        "R01",
+        "R02"
+      ],
+      [
+        "R02",
+        "R03"
+      ],
+      [
+        "R03",
+        "R04"
+      ],
+      [
+        "R04",
+        "R05"
+      ]
+    ],
+    "nodes": {
+      "R02": "camp",
+      "R03": "ruin",
+      "R04": "ore",
+      "R05": [
+        "camp",
+        "ruin"
+      ]
+    }
+  },
+  "intra_region_steps": {
+    "_note": "T-112-райдер (владелец, 2026-10-02): граница между районами внутри региона — в этом же конфиге; иначе карта обещает доходимость, которую не обеспечивает город. Числа — Q-M19 (баланс, владелец); null до ратификации.",
+    "to_deposit": null,
+    "to_dungeon": null,
+    "to_city_center": null
   }
 }
