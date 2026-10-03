@@ -79,6 +79,25 @@ func test_rare_events_loaded() -> void:
 	for id in RARE_EVENT_IDS:
 		assert_that(ids.has(id)).is_true()
 
+
+## CI-3 (корректность, не гигиена): порядок DirAccess не гарантирован
+## кроссплатформенно (зависит от ОС/файловой системы) — порядок загрузки
+## должен быть детерминирован явной сортировкой. Инвариант: id шаблона =
+## имя файла без .json, поэтому «загружено по алфавиту имён файлов» =
+## «список id отсортирован». Без сортировки в лоадере падает на любой
+## платформе, где readdir != алфавитный порядок (ext4/APFS — hash-порядок).
+func test_templates_loaded_in_deterministic_sorted_order() -> void:
+	var sys := _sys()
+	for list in [sys.event_templates, sys.crisis_templates]:
+		var ids: Array[String] = []
+		for e in list:
+			if e.id != "":
+				ids.append(e.id)
+		assert_that(ids.size()).is_greater(0)
+		var sorted_ids: Array[String] = ids.duplicate()
+		sorted_ids.sort()
+		assert_that(ids).is_equal(sorted_ids)
+
 func test_event_type_defaults_to_common() -> void:
 	# Старые event_*.json без поля type → COMMON (backward-compat).
 	var sys := _sys()
