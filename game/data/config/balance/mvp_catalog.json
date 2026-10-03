@@ -1,0 +1,15 @@
+{
+  "version": "1.0",
+  "note": "Повторное исполнение утраченного d6fe1c0 в составе A6-R (D-135/D-136, 2026-10-03); состав групп — 02e3 §9.4 (единый источник); K-M5: «9 рас» заменено первым эшелоном 7",
+  "first_echelon": [
+    { "id": "gnomes", "name": "гномы", "group": "Инженеры и Строители", "srd_modifiers": { "int": 2 }, "luck": 0 },
+    { "id": "halflings", "name": "полурослики", "group": "Земледельцы и Пивовары", "srd_modifiers": { "dex": 2 }, "luck": 0 },
+    { "id": "tieflings", "name": "тифлинги", "group": "Алхимики и Хранители Пламени", "srd_modifiers": { "cha": 2, "int": 1 }, "luck": 0 },
+    { "id": "elves", "name": "эльфы", "group": "Ткачи и Ремесленники", "srd_modifiers": { "dex": 2 }, "luck": 0 },
+    { "id": "humans", "name": "люди", "group": "Торговцы и Дипломаты", "srd_modifiers": {}, "luck": 0 },
+    { "id": "half_orcs", "name": "полуорки", "group": "Охотники и Следопыты", "srd_modifiers": { "str": 2, "con": 1 }, "luck": 0 },
+    { "id": "dwarves", "name": "дворфы", "group": "Металлурги и Техники", "srd_modifiers": { "con": 2 }, "luck": 0 }
+  ],
+  "luck_note": "гномы +2 Удача — оверрайд в 07-balance §3 / races.json (в этом файле luck: 0)",
+  "srd_note": "srd_modifiers — стандартные расовые модификаторы SRD; humans — без расовых модификаторов"
+}

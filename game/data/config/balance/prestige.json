@@ -1,0 +1,37 @@
+{
+  "version": "2.0",
+  "note": "Ф4-восстановление (D-135, 2026-10-03); зеркало 07-balance §7; K-M16",
+  "ranks": [0, 200, 500, 1000, 2000],
+  "rank_names": "02c §2",
+  "anchor": {
+    "turn": 21,
+    "rank": 4,
+    "tolerance": 1,
+    "note": "допуск по рангам, не по очкам (K-M16)"
+  },
+  "metric": [0.4, 0.6],
+  "red_flag": "ранг 5 у медианы к ходу 21",
+  "actions": {
+    "factional_max": 12,
+    "victory": 10,
+    "victory_no_losses_bonus": 5,
+    "victory_superior_bonus": 10,
+    "victory_superior_parity_max": 0.8,
+    "victory_camp_tier2_bonus": 10,
+    "boss": { "value": 50, "once": true },
+    "trials": [40, 50, 60],
+    "trials_bonus": 50,
+    "chain": 200,
+    "corridor": [0.25, 0.35],
+    "council": {
+      "mvp": { "sessions": 1, "turn": 12 },
+      "v1": { "interval": 12, "chair_bonus": 30, "resolution_bonus": 10 }
+    },
+    "monument": { "value": 100, "mvp_count": 0, "v1_count": [4, 8] }
+  },
+  "invalidated": {
+    "district_created": "K-M16: число без источника, аннулировано",
+    "anchor_1000_1300": "K-M16: якорь [ПРЕДЛОЖЕНИЕ] — числа без источника",
+    "ranks_6": "K-M16: 0/500/1500/3500/7000/12000 заменено 5-ранговой шкалой"
+  }
+}

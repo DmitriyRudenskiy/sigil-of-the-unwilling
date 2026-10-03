@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "note": "Ф4-восстановление (D-135, 2026-10-03); зеркало 07-balance §2; формула движения — D4/K-M4 (ратифицирована); Q-M19 (intra_region_steps)",
+  "step_formula": "шаги/день = f(биом, ловкость, вес) — формула ратифицирована (D4/K-M4); числа биома — этот файл",
+  "biome_cost": {
+    "plains": 2,
+    "forest": 3,
+    "marsh": 4,
+    "mountains": 4,
+    "hills": null,
+    "fault": null,
+    "caps": null
+  },
+  "biome_cost_note": "plains/forest — MVP-регулярные (K-M2; 07-balance §2); marsh/mountains — грубые якоря 07-balance §2; hills/fault/caps — TBD F3 (null = заготовка; fault — спецконтент вне регулярного счёта, K-M2)",
+  "crossing_weight": 2,
+  "intra_region_steps": {
+    "mine": 0.5,
+    "dungeon": 1.0,
+    "city_center": 0.25
+  },
+  "intra_region_steps_note": "в днях; время движения до узлов внутри региона (Q-M19, D-135)"
+}

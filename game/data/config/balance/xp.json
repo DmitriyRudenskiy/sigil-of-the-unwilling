@@ -1,0 +1,17 @@
+{
+  "version": "1.0",
+  "note": "Ф4-восстановление (D-135, 2026-10-03); зеркало 07-balance §3; R4 (XP партии, SRD-пороги); K-M16 (источники)",
+  "level_thresholds_srd": [2700, 6500, 15000, 38000],
+  "level_cap_mvp": 5,
+  "level_cap_note": "K-M13: капы уровней MVP — 1–5",
+  "sources": {
+    "battle": "100 * CR * (1 + 0.1*n)",
+    "node": [200, 800],
+    "raid_survived": 300,
+    "basic_soldiers": "источник XP за наём базовых бойцов (renamed: recruit → basic_soldiers, K-M15)"
+  },
+  "removed": {
+    "district_created": "K-M16: «район создан +500» аннулирован (число без источника; район — событие города, не XP партии)"
+  },
+  "separation": "Престиж — не XP: источники Престижа — деяния (02c §2, prestige.json); XP — отдельный канал партии (K-M16)"
+}
