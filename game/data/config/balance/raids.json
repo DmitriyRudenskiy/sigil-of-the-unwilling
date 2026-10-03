@@ -1,0 +1,25 @@
+{
+  "version": "1.0",
+  "source": "docs/07-balance.md §5 (K-T5, R6, R5, K-R3, MAP-1); лагеря MVP — 02e1-base-map-v1 §8/§9",
+  "pressure_formula": "pressure = Base * Wealth * Anomalies * RegionHistory * GlobalPhase",
+  "raid_power": { "light": 15, "medium": 30, "large": 60 },
+  "defense": { "barracks": 0.2, "none": 0.0, "walls": "Post-MVP" },
+  "loss_formula": "loss = power * (1 - defense)",
+  "loss_cap_per_day": 0.30,
+  "target_weights": { "food": 0.5, "wood": 0.3, "iron": 0.2 },
+  "visibility_formula": "1 + 0.5 * (баз - 1) + 0.2 * уровень_района",
+  "target_score": { "visibility": 0.5, "vulnerability": 0.3, "tiebreak": "меньший id" },
+  "source_bases": { "C1": 1, "C8": 1, "C2": 2, "C3": 2, "C4": 2, "C5": 2, "C6": 2, "C7": 2, "H5_boss": 4 },
+  "directives": {
+    "first_raid": { "turn": 7, "type": "floor", "tier": "light", "cr": 1, "enemies": 3 },
+    "final_raid": { "turn": 21, "type": "floor", "tier": "large", "cr": [6, 8], "enemies": 5, "boss": true }
+  },
+  "camps_mvp": [
+    { "id": "C1", "region": "R02", "cr": 1, "enemies": 3 },
+    { "id": "C2", "region": "R05", "cr": 2, "enemies": 4 }
+  ],
+  "boss": { "turn": 21, "cr": [6, 8], "note": "R5, K-R3: приходит в город финальным рейдом (H5 — лагерь-источник, не цель похода)" },
+  "pool_limit": "10 + командование*3 + районы*2 (MVP: пул = партия)",
+  "army_morale": { "over_50pct": 0.05, "under_25pct": -0.05 },
+  "warning_days": 1
+}
