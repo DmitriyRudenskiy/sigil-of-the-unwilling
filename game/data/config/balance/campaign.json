@@ -1,0 +1,41 @@
+{
+  "version": "1.0",
+  "source": "docs/07-balance.md §1, §3 (R2), §5 (P-2) — канон числа; биты — 04-narrative (K-M9); туториал — MVP-scope (M3)",
+  "campaign": {
+    "turns": 21,
+    "turn_length_days": 1,
+    "ticks_per_day": 4,
+    "party_max": 5,
+    "party_start": ["fighter", "ranger"],
+    "party_start_level": 1
+  },
+  "start_state": {
+    "population": 20,
+    "housing": 20,
+    "resources": { "food": 30, "wood": 20, "iron": 10 }
+  },
+  "supply": {
+    "food_per_unit_per_day": 1,
+    "hero_capacity_food": 10,
+    "starvation_attack_penalty": -2
+  },
+  "cr_anchors": {
+    "phase_1": { "turns": [1, 6], "cr": [0.25, 1] },
+    "phase_2": { "turns": [7, 13], "cr": [1, 2] },
+    "phase_3": { "turns": [14, 20], "cr": [2, 4] },
+    "final": { "turns": [21, 21], "cr": [6, 8] }
+  },
+  "beats": {
+    "1": "sign",
+    "3": "rumor (Post-MVP-строка, K-M9)",
+    "7": "raid (floor-директива)",
+    "14": "district (календарный триггер, K-M1)",
+    "17": "strong_raid (window-директива)",
+    "21": "final (floor-директива, босс)"
+  },
+  "tutorial": {
+    "day_1": "построй ферму и барраки",
+    "day_2": "найми ополченца",
+    "day_3": "сходи в руины"
+  }
+}

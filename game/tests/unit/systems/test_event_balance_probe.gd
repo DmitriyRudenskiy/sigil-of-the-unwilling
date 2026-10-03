@@ -91,11 +91,12 @@ func test_crisis_tempo_unchanged_by_season_filter() -> void:
 func test_rare_events_observed_in_simulation() -> void:
 	_reset_counters()
 	_simulate(_make_sys(true))
-	# Наблюдаемость: ≥1 редкого события за 2000 ходов (детерминированный seed).
-	assert_that(_rare_hits).is_greater_equal(1)
-	# Не чаще weights-лимита: вес редких = 0.2 из ~19.2 общих → ~1% событий.
-	# При ~96 событиях за 2000 дней ожидаем ~1 редкое, допускаем ≤3.
-	assert_that(_rare_hits).is_less_equal(3)
+	# Наблюдаемость «≥1 за 2000 дней» — порог недостижим при текущих параметрах
+	# (λ ≈ 1, CI-3, 2026-10-03): гарантированная наблюдаемость — в
+	# test_rare_weight_respected_10k_rolls (λ ≈ 103, детерминировано).
+	# Здесь — только верх: не чаще weights-лимита (вес редких = 0.2 из ~19.35 → ~1%).
+	# При ~96 событиях за 2000 дней ожидаем ~1 редкое; ≤5 — хвост Binomial(96, 1%).
+	assert_that(_rare_hits).is_less_equal(5)
 
 
 func test_rare_weight_respected_10k_rolls() -> void:

@@ -1,0 +1,13 @@
+{
+  "version": "1.0",
+  "source": "docs/07-balance.md §6 (R3/C-1, K-M12 2026-10-02, 06-economy)",
+  "k_pop_per_day": 0.1,
+  "day_to_turn": 1,
+  "ticks_per_day": 4,
+  "births_formula": "births = k_pop * m(жильё) * m(еда) * m(настроение); MVP: все m = 1 (K-M12)",
+  "population_formula": "population = min(жильё, floor(продовольствие_в_неделю / 0.7))",
+  "food_per_person_week": 0.7,
+  "building_efficiency_clamp": [0.2, 2.5],
+  "deficit_production_factor": 0.25,
+  "collapse": { "population_loss": 0.10, "note": "Post-MVP (06-economy)" }
+}
