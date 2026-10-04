@@ -32,6 +32,7 @@
 | Тесты | `game/run_tests.sh` (GdUnit4 headless + MCP e2e) |
 | MCP e2e venv | `/home/user/.venv/godot-mcp-tests` (pytest 9.1.1 + pytest-timeout + mcp + anyio) |
 | MCP node_modules | `game/addons/godot-mcp/node_modules` (gitignored; `npm ci` из package-lock) |
+
 | OpenSpec | `openspec/changes/<name>/`, CLI: `/usr/bin/openspec` |
 
 ## Режим работы
@@ -83,6 +84,26 @@ DISPLAY используется он. Godot для MCP — через `GODOT_PA
 молчать: при отсутствии сервера/venv — явная строка `PYTEST: SKIPPED
 (причина)`. Сцены и скрипты в MCP-тестах — **нижний регистр** (Linux
 case-sensitive: `world.tscn`, `battle.tscn`, `main_menu.tscn`).
+
+## MCP e2e (4-й уровень верификации)
+
+- Тесты: `game/tests/mcp/` (pytest, 39 тестов) — MCP-секция `game/run_tests.sh`.
+- venv: `/home/user/.venv/godot-mcp-tests` (pytest, pytest-timeout, mcp, anyio);
+  нет venv → секция skip (жёлтый — уровень молчит, зафиксировать в отчёте).
+- node_modules: `game/addons/godot-mcp/node_modules` (gitignored; `npm ci`
+  в каталоге аддона).
+- X-дисплей: MCP e2e запускает живой Godot (не headless) — нужен X. run_tests.sh
+  сам поднимает `Xvfb :97`, если DISPLAY не задан. **Машина шарящаяся:** :98/:99
+  могут быть заняты другими сессиями (один из них — с auth, не подойдёт);
+  чужой Xvfb не убивать, выбирать свободный номер.
+- Env: `GODOT_PATH` (бинарь Godot), `GODOT_MCP_SERVER` (путь к build/index.js).
+  mcp SDK не наследует DISPLAY — conftest передаёт его явно в SERVER_ENV.
+- Пути сцен в тестах — нижний регистр (Linux case-sensitive: `scenes/world.tscn`,
+  `scenes/battle.tscn`, `scenes/main_menu.tscn`).
+- Таймаут: 900 c на тест (`--timeout=900`); без X-дисплея тесты таймаутят
+  по одному (симптом: «No active Godot process» в цикле).
+- Вендорный MCP-сервер инжектит `mcp_interaction_server.gd` + autoload в
+  project.godot; гейт чистит после прогона (rm + git checkout).
 
 ## Данные событий (crisis/event system)
 
