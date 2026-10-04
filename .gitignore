@@ -1,2 +1,6 @@
 *.DS_Store
 /data/
+
+# Локальное состояние агента (hindsight-память) — не коммитить
+.pi/hindsight
+.pi/hindsight.json
