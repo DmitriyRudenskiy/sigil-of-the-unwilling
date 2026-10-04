@@ -56,9 +56,12 @@
 `/home/user/.venv/godot-mcp-tests` (путь фиксирован здесь, run_tests.sh берёт
 его первым); `node_modules` ставится `npm ci` в `game/addons/godot-mcp/`.
 MCP-сервер (node) запускает **живой Godot без `--headless`** → нужен
-X-дисплей: run_tests.sh сам поднимает `Xvfb :97` (если DISPLAY не задан; :98/:99 могут быть заняты) и
-пробрасывает DISPLAY в сервер (mcp-SDK не наследует DISPLAY). Таймаут
-readiness = 900 c (`--timeout=900` в pytest). MCP-секция не имеет права
+X-дисплей: run_tests.sh сам поднимает `Xvfb` на **свободном** дисплее (если DISPLAY не задан:
+скан :97 → :91–:98; :99 исключён — чужой auth) и пробрасывает DISPLAY в сервер
+(mcp-SDK не наследует DISPLAY). **Машина шарится:** чужие Xvfb-инстансы (в т.ч. с auth)
+могут работать — не убивать чужие процессы, только свободный дисплей; при заданном
+DISPLAY используется он. Godot для MCP — через `GODOT_PATH` (conftest.py читает
+`GODOT_PATH`, не `GODOT_BIN`). Таймаут readiness = 900 c (`--timeout=900` в pytest). MCP-секция не имеет права
 молчать: при отсутствии сервера/venv — явная строка `PYTEST: SKIPPED
 (причина)`. Сцены и скрипты в MCP-тестах — **нижний регистр** (Linux
 case-sensitive: `world.tscn`, `battle.tscn`, `main_menu.tscn`).
