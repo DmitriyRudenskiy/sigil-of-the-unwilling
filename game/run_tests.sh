@@ -45,20 +45,37 @@ if [ ! -f "$MCP_SERVER" ]; then
   echo "PYTEST: SKIPPED (no MCP server: $MCP_SERVER)"
   exit 0
 fi
-if ! python3 -m pytest --version >/dev/null 2>&1; then
-  echo "PYTEST: SKIPPED (no module 'pytest'; install: python3 -m pip install pytest — долг Q-M23)"
+# MCP e2e-тесты запускают живой Godot (не headless) — нужен X-дисплей.
+# Если DISPLAY не задан, а Xvfb доступен — поднимаем виртуальный (CI-2, 2026-10-03).
+XVFB_PID=""
+if [ -z "${DISPLAY:-}" ] && command -v Xvfb >/dev/null 2>&1; then
+  Xvfb :99 -screen 0 1024x768x24 >/dev/null 2>&1 &
+  XVFB_PID=$!
+  sleep 2
+  export DISPLAY=:99
+fi
+
+# venv MCP-тестов (CI-2, 2026-10-03): путь зафиксирован в AGENTS.md.
+PYTEST_PY="${MCP_PYTEST_PY:-/home/user/.venv/godot-mcp-tests/bin/python}"
+if [ ! -x "$PYTEST_PY" ]; then
+  echo "PYTEST: SKIPPED (no venv: $PYTEST_PY; create: python3 -m venv /home/user/.venv/godot-mcp-tests && $PYTEST_PY -m pip install pytest pytest-timeout mcp anyio)"
   exit 0
 fi
 if [ ! -f mcp_interaction_server.gd ]; then
   echo "MCP: no mcp_interaction_server.gd, skipping"
   exit 0
 fi
+# conftest.py читает GODOT_PATH (не GODOT_BIN) — баг старого скрипта исправлен.
+# --timeout=900: READY_TIMEOUT в godot_mcp.py = 900 с; старое --timeout=120 резало
+# e2e раньше собственного дедлайна (найдено, 2026-10-03).
 GODOT_MCP_SERVER="$MCP_SERVER" \
+GODOT_PATH="$GODOT" \
 GODOT_BIN="$GODOT" \
 GODOT_PROJECT="$PWD" \
-  python3 -m pytest tests/mcp/ -v --timeout=120
+  "$PYTEST_PY" -m pytest tests/mcp/ -v --timeout=900
 MCP_RC=$?
 # restore
+[ -n "$XVFB_PID" ] && kill "$XVFB_PID" 2>/dev/null || true
 rm -f mcp_interaction_server.gd
 git checkout -- project.godot 2>/dev/null || true
 exit "$MCP_RC"

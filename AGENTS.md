@@ -29,7 +29,9 @@
 | Стек | GDScript, Godot 4.7, GdUnit4 |
 | Корень игры | `game/` (project.godot лежит в `game/`) |
 | Godot-бинарь | `/home/user/.local/bin/godot` |
-| Тесты | `game/run_tests.sh` (GdUnit4, headless) |
+| Тесты | `game/run_tests.sh` (GdUnit4 headless + MCP e2e) |
+| MCP e2e venv | `/home/user/.venv/godot-mcp-tests` (pytest 9.1.1 + pytest-timeout + mcp + anyio) |
+| MCP node_modules | `game/addons/godot-mcp/node_modules` (gitignored; `npm ci` из package-lock) |
 | OpenSpec | `openspec/changes/<name>/`, CLI: `/usr/bin/openspec` |
 
 ## Режим работы
@@ -44,11 +46,29 @@
 | Метод | Назначение |
 | --- | --- |
 | `godot --headless --path game --import` | Обновить кэш глобальных классов (после правки `class_name`) |
-| `game/run_tests.sh` | Полный GdUnit4-свит (headless) |
+| `game/run_tests.sh` | Полный гейт: (1) GdUnit4 unit/integration/functional (headless); (2) MCP e2e (pytest + godot-mcp) |
 | `godot ... GdUnitCmdTool.gd -a res://tests/<файл>.gd` | Запуск одного тест-файла |
 
 Код GdUnit4: `0` = pass, `101` = только orphan-предупреждения (гигиена, не
-падение), `100` и прочие = реальные падения.
+падение), `100` и прочие = реальные падения. **Политика гейта (CI-2, 2026-10-03):**
+GdUnit4 `0`/`101` → GATE=0 (orphan = **warning**, не влияет на exit; красный =
+только падения/регрессии); маппинг прописан явно в run_tests.sh.
+
+**MCP e2e (четвёртый уровень):** venv `/home/user/.venv/godot-mcp-tests`
+(путь фиксирован здесь, run_tests.sh берёт его первым); `node_modules` ставится
+`npm ci` в `game/addons/godot-mcp/`. MCP-сервер (node) запускает **живой Godot
+без `--headless`** → нужен X-дисплей: run_tests.sh сам поднимает `Xvfb :98`
+(если DISPLAY не задан) и пробрасывает DISPLAY в сервер (mcp-SDK не наследует
+DISPLAY). Таймаут readiness = 900 c (`--timeout=900` в pytest). MCP-секция не
+имеет права молчать: при отсутствии venv/node_modules — явная строка
+`PYTEST: SKIPPED (причина)`. Сцены и скрипты в тестах — **нижний регистр**
+(Linux case-sensitive: `world.tscn`, `battle.tscn`, `main_menu.tscn`).
+
+**Тестовый леджер** — в каждом отчёте о работе с кодом: `+добавлено / −удалено /
+quarantine / нетто, было X → стало Y, причина` (сверка — D-132/D-133).
+
+**Godot-разрешение** (run_tests.sh): `$GODOT_BIN` → путь из этой таблицы →
+`command -v godot` → дефолты ОС.
 
 ## Данные событий (crisis/event system)
 
@@ -66,6 +86,9 @@
 ## Git-конвенции
 
 - Работать на feature-ветках; `main` не трогать напрямую.
+- **Push-протокол (2026-10-03):** feature-ветки пушатся сразу (пре-одобрено);
+  `main` — только через merge-ветку после зелёного гейта; прямые коммиты на
+  `main` запрещены. Отчёт без пуша помечается «локально, не запушено» (D-133).
 - Сообщения коммитов — конкретные, по делу.
 - Пароли/токены не попадают в логи и коммиты.
 

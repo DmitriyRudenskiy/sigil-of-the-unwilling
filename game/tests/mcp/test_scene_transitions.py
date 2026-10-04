@@ -55,7 +55,7 @@ def test_world_battle_world_transitions(full_game):
     assert mcp.execute_code(WORLD_OK)["ready"]
 
     # 2) Переход в бой
-    mcp.execute_code('get_tree().change_scene_to_file("res://scenes/Battle.tscn")')
+    mcp.execute_code('get_tree().change_scene_to_file("res://scenes/battle.tscn")')
     mcp.wait_ready()
     mcp.wait_frames(20)
 
@@ -69,6 +69,6 @@ def test_world_battle_world_transitions(full_game):
     assert state["turn"] is True, f"Игровой ход не начался: {state}"
 
     # 3) Возврат в мир
-    _change_scene(mcp, "res://scenes/World.tscn")
+    _change_scene(mcp, "res://scenes/world.tscn")
     r = mcp.execute_code(WORLD_OK)
     assert r["hero"] is True, f"Героя нет после возврата: {r}"

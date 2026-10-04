@@ -22,12 +22,16 @@ from godot_mcp import GodotMCPClient, MCPError
 NODE_BIN = os.environ.get("NODE_BIN", "node")
 GODOT_BIN = os.environ.get("GODOT_PATH", "/Applications/Godot.app/Contents/MacOS/Godot")
 
-WORLD_SCENE = "res://scenes/World.tscn"
-BATTLE_SCENE = "res://scenes/Battle.tscn"
+WORLD_SCENE = "res://scenes/world.tscn"
+BATTLE_SCENE = "res://scenes/battle.tscn"
 
 PROJECT_GODOT = GAME_DIR / "project.godot"
 
+# mcp SDK наследует только DEFAULT_INHERITED_ENV_VARS (без DISPLAY) — передаём явно,
+# иначе Godot без дисплея умирает сразу после spawn (найдено бисекцией, 2026-10-03).
 SERVER_ENV = {"GODOT_PATH": GODOT_BIN}
+if os.environ.get("DISPLAY"):
+    SERVER_ENV["DISPLAY"] = os.environ["DISPLAY"]
 
 _PRISTINE_PROJECT_GODOT = PROJECT_GODOT.read_text()
 
@@ -142,7 +146,7 @@ def full_cycle(mcp):
     mcp.execute_code(
         "get_tree().current_scene._on_new_game()\nreturn {\"ok\": true}"
     )
-    _wait_for_scene(mcp, "CharacterCreation")
+    _wait_for_scene(mcp, "character_creation")
     mcp.execute_code(
         "var cc = get_tree().current_scene\n"
         'cc._profile.name = "McpCycleHero"\n'
@@ -153,7 +157,7 @@ def full_cycle(mcp):
         "cc._on_create()\n"
         'return {"ok": true}'
     )
-    _wait_for_scene(mcp, "WorldController")
+    _wait_for_scene(mcp, "world_controller")
     deadline = time.time() + 120
     r = {}
     while time.time() < deadline:
