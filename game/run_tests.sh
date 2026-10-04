@@ -42,25 +42,37 @@ if [ ! -f "$MCP_SERVER" ]; then
 	exit 0
 fi
 # MCP e2e-тесты запускают живой Godot (не headless) — нужен X-дисплей.
-# Если DISPLAY не задан, а Xvfb доступен — поднимаем виртуальный на :97
-# (:98/:99 могут быть заняты другими сессиями; :99 с auth не подойдёт).
+# Машина шарится: чужие Xvfb (в т.ч. с auth) могут работать — чужие процессы не
+# убиваем, только свободный дисплей: скан :97 → :91–:98 (:99 исключён — auth).
+# При заданном DISPLAY используется он.
 XVFB_PID=""
 if [ -z "${DISPLAY:-}" ] && command -v Xvfb >/dev/null 2>&1; then
-	Xvfb :97 -screen 0 1024x768x24 >/dev/null 2>&1 &
-	XVFB_PID=$!
-	sleep 2
-	if ! kill -0 "$XVFB_PID" 2>/dev/null; then
-		echo "PYTEST: SKIPPED (Xvfb :97 не стартовал — дисплей занят? укажите DISPLAY)"
+	for d in 97 91 92 93 94 95 96 98; do
+		Xvfb :$d -screen 0 1024x768x24 >/dev/null 2>&1 &
+		XVFB_PID=$!
+		sleep 1
+		if kill -0 "$XVFB_PID" 2>/dev/null; then
+			export DISPLAY=:$d
+			break
+		fi
+		XVFB_PID=""
+	done
+	if [ -z "$XVFB_PID" ]; then
+		echo "PYTEST: SKIPPED (свободного Xvfb-дисплея :91–:98 нет — машина шарится? укажите DISPLAY)"
 		exit 0
 	fi
-	export DISPLAY=:97
 fi
-# venv MCP-тестов: путь зафиксирован в AGENTS.md.
+# venv MCP-тестов: путь зафиксирован в AGENTS.md (Linux). На машинах без этого
+# venv (macOS, 2026-10-04) — системный python3 с mcp+anyio (проверено: 38/1).
 PYTEST_PY="${MCP_PYTEST_PY:-/home/user/.venv/godot-mcp-tests/bin/python}"
 if [ ! -x "$PYTEST_PY" ]; then
-	echo "PYTEST: SKIPPED (no venv: $PYTEST_PY; create: python3 -m venv /home/user/.venv/godot-mcp-tests && $PYTEST_PY -m pip install pytest pytest-timeout mcp anyio)"
-	[ -n "$XVFB_PID" ] && kill "$XVFB_PID" 2>/dev/null || true
-	exit 0
+	if command -v python3 >/dev/null 2>&1 && python3 -c 'import mcp, anyio' 2>/dev/null; then
+		PYTEST_PY="$(command -v python3)"
+	else
+		echo "PYTEST: SKIPPED (no venv: $PYTEST_PY и нет python3 с mcp+anyio; create: python3 -m venv /home/user/.venv/godot-mcp-tests && $PYTEST_PY -m pip install pytest pytest-timeout mcp anyio)"
+		[ -n "$XVFB_PID" ] && kill "$XVFB_PID" 2>/dev/null || true
+		exit 0
+	fi
 fi
 export GODOT_MCP_SERVER="$MCP_SERVER"
 export GODOT_PROJECT_PATH="${GODOT_PROJECT_PATH:-$PWD}"

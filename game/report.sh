@@ -20,11 +20,15 @@ while IFS= read -r f; do
 done < <(find game/tests -name '*.gd' | sort)
 echo "TOTAL: $total"
 echo
-echo "## RUN_TESTS (exit)"
+echo "## RUN_TESTS (exit; GdUnit4 + MCP)"
 bash game/run_tests.sh > /tmp/report_run_tests.log 2>&1
 echo "exit run_tests.sh = $?"
 tail -3 /tmp/report_run_tests.log
 echo
+echo "## MCP-ЛЕДЖЕР (pytest summary: passed/failed/skipped, время, exit)"
+mcp_line=$(grep -E '[0-9]+ (passed|failed)[^)]*in [0-9.]+s' /tmp/report_run_tests.log | tail -1)
+echo "${mcp_line:-PYTEST: summary нет (SKIPPED — причина в логе run_tests.sh)}"
+echo "Леджер двухстрочный: GdUnit4 (TOTAL выше) + MCP (строка выше)"
 echo "## DOCS-LINKS (check_docs_links.py)"
 python3 scripts/check_docs_links.py
 echo "exit check_docs_links = $?"
