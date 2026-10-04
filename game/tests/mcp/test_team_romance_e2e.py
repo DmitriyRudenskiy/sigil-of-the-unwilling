@@ -277,9 +277,14 @@ def test_jealousy_and_betrayal(full_cycle):
     assert r["t301"] == 35, r
     assert r["types"].count("jealousy") == 1, r
 
-    # Ход 2: trust 0 у 300 → гарантированное предательство (roll 1..20 > 0)
+    # Ход 2: trust 0 у 300 → гарантированное предательство (roll 1..20 > 0).
+    # T-119: pending-сцены очищаем — в начале end_turn они авто-разрешаются
+    # дефолтным выбором (jealousy → "soothe": trust +5), и trust 0 станет 5
+    # ПЕРЕД проверкой верности (шанс 75%, не 100%). Механика предательства
+    # тестируется изолированно от разрешения сцен.
     mcp.execute_code(
         "var hero = %s\n"
+        "hero.relationships.pending_scenes.clear()\n"
         "hero.relationships.pair(300)['trust'] = 0\n"
         "return {'ok': true}\n" % HERO
     )
