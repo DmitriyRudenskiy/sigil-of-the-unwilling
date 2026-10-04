@@ -135,7 +135,22 @@ date: 2026-10-03
 
 **Рабочие документы:**
 - [[DECISIONS]] — реестр решений: K-записи (канон, с датами аннулирований), D-записи (Фаза 5), Q/P/R-вопросы, лог Q1–Q14, реестр TBD (T), тикеты
-- [[QUESTIONS]] — реестр открытых вопросов Фазы 4 (Q-M14 открыта; Q-M1…M13 закрыты → K-M1…M13 в [[DECISIONS]])
+- [[QUESTIONS]] — реестр вопросов Фазы 4: Q-M1…M13 закрыты → K-M1…M13 в [[DECISIONS]]; Q-M14 → D-124 (final), Q-M20 → D-128, Q-M18 → D-136, Q-M19 → D-135 — закрыты; открытых нет (Q-M16 — реестр владельца, в репо не зарегистрирован, флаг)
 - [[MVP_SCOPE]] — итог Фазы 4 (docs/mvp/): cut-таблица, vertical slice, Godot-скелет, трассируемость, верификация; тикеты — [[TICKETS]]
 - [[CHANGELOG]] — журнал изменений docs/
 - dev-tickets (T00–T16 + gdd.canvas), SYNC_DECISIONS — удалены (2026-10-02); архивные логи (STRUCTURE_AUDIT, CONFLICTS_REPORT, UNIFICATION_CHANGES, NORMALIZATION_REPORT) — вне wikilink-графа, не редактируются (AGENTS.md, D-106)
+
+## Маппинг нумерации GDD → репо (D-141)
+
+Ссылки владельца «§N» — нумерация GDD «Знаки»; репо-слой — 02-серия. Маппинг (D-134, 2026-10-03):
+
+| GDD | Репо |
+|---|---|
+| §1 Обзор/Core Loop | [[01-core-loop]], этот файл |
+| §2 Знаки/этика/репутация | [[02c-signs]], Э1 ([[DECISIONS]]), [[04-narrative]] |
+| §3 Город | [[02g-city-hex]], [[02e3-races]] |
+| §4 Экономика | [[06-economy]], [[07-balance]] |
+| §5 Бой | [[02-mechanics]] §3.x, [[02d-luck-professions]] (лестница) |
+| §6 Мир/дипломатия/угрозы | [[02e1-base-map]], [[02e4-military]], [[05-content]] |
+| §7 Соц-система/наследие | [[02d-classes-skills]], chronicle, [[07-ui-ux]] |
+| §8 Мета/dev | [[08-tech]], CI, [[DECISIONS]] |

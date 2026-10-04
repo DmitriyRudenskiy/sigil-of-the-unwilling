@@ -82,6 +82,54 @@ def check_filenames(files):
     return [os.path.relpath(p, DOCS) for p in files if re.search(r"[А-Яа-яЁё]", os.path.basename(p))]
 
 
+def check_races_table():
+    """Инварианты каталога 54 (02e3 §9.4, A6-R/D-136):
+    Σ групп = 54; каждая раса ровно в одной группе; первый эшелон (★) = 7 и покрывает 7 групп;
+    нежить-трио (дампиры, перерождённые, одержимые гексом) отсутствует в каталоге."""
+    path = os.path.join(DOCS, "02e3-races.md")
+    if not os.path.exists(path):
+        return []
+    text = open(path, encoding="utf-8").read()
+    m = re.search(r"^## 9\.4\..*?(?=^## )", text, re.S | re.M)
+    if not m:
+        return [("02e3-races.md", "секция 9.4 не найдена")]
+    section = m.group(0)
+    races, stars, errors = {}, [], []
+    declared_total = 0
+    for line in section.splitlines():
+        if not line.startswith("|") or line.startswith("|---") or "Группа" in line and "Состав" in line:
+            continue
+        cells = [c.strip() for c in line.strip("|").split("|")]
+        if len(cells) < 3:
+            continue
+        gm = re.search(r"\((\d+)\)", cells[0])
+        if not gm:
+            continue  # не строка группы
+        declared_total += int(gm.group(1))
+        group = cells[0]
+        for token in cells[1].split(","):
+            token = token.strip()
+            if not token:
+                continue
+            is_star = token.endswith("★")
+            name = token.replace("★", "").strip()
+            if name in races:
+                errors.append(("02e3-races.md", f"раса в двух группах: {name} ({races[name]} / {group})"))
+            races[name] = group
+            if is_star:
+                stars.append((name, group))
+    if len(races) != 54:
+        errors.append(("02e3-races.md", f"Σ каталога = {len(races)}, ожидалось 54"))
+    if declared_total != 54:
+        errors.append(("02e3-races.md", f"сумма заявленных (N) = {declared_total}, ожидалось 54"))
+    if len(stars) != 7 or len({g for _, g in stars}) != 7:
+        errors.append(("02e3-races.md", f"первый эшелон: {len(stars)} ★ в {len({g for _, g in stars})} группах, ожидалось 7×7"))
+    for undead in ("дампиры", "перерождённые", "одержимые гексом"):
+        if undead in races:
+            errors.append(("02e3-races.md", f"нежить в каталоге живого города: {undead} (принцип 3, A6-R)"))
+    return errors
+
+
 def check_statuses(files):
     bad = []
     for path in files:
@@ -124,6 +172,13 @@ def main():
         print("UNKNOWN FRONTMATTER STATUS:")
         for f, s in statuses:
             print(f"  {f}: status: {s} (allowed: {', '.join(sorted(ALLOWED_STATUSES))})")
+
+    races = check_races_table()
+    if races:
+        failed = True
+        print("RACES TABLE INVARIANTS (02e3 §9.4, A6-R):")
+        for f, msg in races:
+            print(f"  {f}: {msg}")
 
     if failed:
         sys.exit(1)
