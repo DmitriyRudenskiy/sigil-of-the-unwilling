@@ -6,6 +6,8 @@ _on_wait — тот же путь, что и из UI.
 """
 from __future__ import annotations
 
+import time
+
 INIT_CODE = """
 var battle = get_tree().current_scene
 if battle == null or not battle.has_method("start_battle"):
@@ -102,10 +104,19 @@ def test_battle_via_controller_reaches_winner(battle_scene):
         raise AssertionError(f"Бой не завершился за 150 итераций; last={last_action}")
 
     # Несимметричный бой: победитель — атакующие (Side.ATTACKER == 1)
-    mcp.wait_frames(30)
     assert state["winner"] == 1, f"Неожиданный победитель: {state}"
 
-    finished = mcp.execute_code(
-        'return get_tree().current_scene.get_node("BattleTurnExecutor")._end_emitted'
-    )
-    assert finished is True, "end_battle (через controller) не сработал"
+    # T-118 (аддендум): сигнал end_battle эмитится ПОСЛЕ анимации атаки (0.3 c,
+    # BattleFX.play_attack_sequence → SceneTreeTimer → on_attack_completed).
+    # Ожидание — по реальному времени: кадры в headless/Xvfb-окружении не
+    # являются единицей времени (30 кадров могут быть < 300 мс → флейк).
+    deadline = time.time() + 10.0
+    finished = False
+    while time.time() < deadline:
+        finished = mcp.execute_code(
+            'return get_tree().current_scene.get_node("BattleTurnExecutor")._end_emitted'
+        )
+        if finished is True:
+            break
+        mcp.wait_frames(5)
+    assert finished is True, "end_battle (через controller) не сработал за 10 c"

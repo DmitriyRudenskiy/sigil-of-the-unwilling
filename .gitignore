@@ -3,4 +3,5 @@
 
 # Pi agent state (local only)
 .pi/hindsight/
+
 .pi/hindsight.json
