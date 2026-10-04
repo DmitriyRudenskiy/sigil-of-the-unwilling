@@ -90,6 +90,9 @@ case-sensitive: `world.tscn`, `battle.tscn`, `main_menu.tscn`).
 - Тесты: `game/tests/mcp/` (pytest, 39 тестов) — MCP-секция `game/run_tests.sh`.
 - venv: `/home/user/.venv/godot-mcp-tests` (pytest, pytest-timeout, mcp, anyio);
   нет venv → секция skip (жёлтый — уровень молчит, зафиксировать в отчёте).
+  **venv-fallback (поддерживаемая конфигурация, 2026-10-04):** на машинах без этого venv
+  (macOS; проверено: 38 passed / 1 skipped) — системный `python3` с `mcp`+`anyio`
+  (override: `MCP_PYTEST_PY`); ни venv, ни fallback → явная `PYTEST: SKIPPED (причина)`,
 - node_modules: `game/addons/godot-mcp/node_modules` (gitignored; `npm ci`
   в каталоге аддона).
 - X-дисплей: MCP e2e запускает живой Godot (не headless) — нужен X. run_tests.sh
@@ -145,7 +148,7 @@ case-sensitive: `world.tscn`, `battle.tscn`, `main_menu.tscn`).
 
 ### Issue tracker
 
-GitHub — issues в `DmitriyRudenskiy/sigil-of-the-unwilling` GitHub Issues, операции через `gh` CLI.
+**Реестр тикетов — `docs/mvp/TICKETS.md`** (append-only, D-139); внешние трекеры (GitHub Issues `DmitriyRudenskiy/sigil-of-the-unwilling`) — **зеркало, не источник истины**; при появлении `gh` CLI/токена — зеркалирование **в одну сторону** (репо → хост). Операции через `gh` CLI.
 
 ### Triage labels
 

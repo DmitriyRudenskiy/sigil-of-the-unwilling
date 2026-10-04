@@ -107,9 +107,11 @@ def test_battle_via_controller_reaches_winner(battle_scene):
     assert state["winner"] == 1, f"Неожиданный победитель: {state}"
 
     # T-118 (аддендум): сигнал end_battle эмитится ПОСЛЕ анимации атаки (0.3 c,
-    # BattleFX.play_attack_sequence → SceneTreeTimer → on_attack_completed).
-    # Ожидание — по реальному времени: кадры в headless/Xvfb-окружении не
-    # являются единицей времени (30 кадров могут быть < 300 мс → флейк).
+    # BattleFX.play_attack_sequence → SceneTreeTimer → on_attack_completed;
+    # замер: emit на dt≈297 мс после battle_over).
+    # Гейт (ревью 2026-10-04): поллинг флага (_end_emitted), не таймер —
+    # реальное время — только safety net (deadline 10 c); кадры в Xvfb
+    # не являются единицей времени (30 кадров могут быть < 300 мс → флейк).
     deadline = time.time() + 10.0
     finished = False
     while time.time() < deadline:

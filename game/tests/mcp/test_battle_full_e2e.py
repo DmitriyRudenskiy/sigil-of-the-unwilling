@@ -106,8 +106,10 @@ def test_full_battle_runs_to_winner(battle_scene):
     # Победитель — атакующие (Side.ATTACKER == 1)
     assert state["winner"] == 1, f"Неожиданный победитель: {state}"
 
-    # T-118 (аддендум): end_battle эмитится ПОСЛЕ анимации атаки (0.3 c) —
-    # ожидание по реальному времени, не по кадрам (Xvfb: кадр ≠ единица времени).
+    # T-118 (аддендум): end_battle эмитится ПОСЛЕ анимации атаки (0.3 c;
+    # замер: emit на dt≈297 мс после battle_over).
+    # Гейт (ревью 2026-10-04): поллинг флага (_end_emitted), не таймер —
+    # реальное время — только safety net (deadline 10 c); Xvfb: кадр ≠ единица времени.
     deadline = time.time() + 10.0
     end_emitted = False
     while time.time() < deadline:
