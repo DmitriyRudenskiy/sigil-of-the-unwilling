@@ -82,7 +82,7 @@ X-дисплей: run_tests.sh сам поднимает `Xvfb` на **своб�
 DISPLAY используется он. Godot для MCP — через `GODOT_PATH` (conftest.py читает
 `GODOT_PATH`, не `GODOT_BIN`). Таймаут readiness = 900 c (`--timeout=900` в pytest). MCP-секция не имеет права
 молчать: при отсутствии сервера/venv — явная строка `PYTEST: SKIPPED
-(причина)`. Сцены и скрипты в MCP-тестах — **нижний регистр** (Linux
+(причина)`. **venv-fallback (macOS, системный python3) — поддерживаемая конфигурация** (владелец, 2026-10-04): при отсутствии venv — системный python3 (mcp+anyio установлены) — MCP-секция исполняется, не пропускается. Сцены и скрипты в MCP-тестах — **нижний регистр** (Linux
 case-sensitive: `world.tscn`, `battle.tscn`, `main_menu.tscn`).
 
 ## MCP e2e (4-й уровень верификации)
