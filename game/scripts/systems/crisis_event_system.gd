@@ -347,7 +347,6 @@ func load_event_templates():
 	for file_name in _list_event_json_files():
 		# "crisis_" — кризисы; "events_database" — легаси-формат без поля id.
 		if not file_name.begins_with("crisis_") and not file_name.begins_with("events_database"):
-
 			var event_data = load_event_json("res://data/events/" + file_name)
 			if event_data and _validate_template(event_data):
 				event_templates.append(DynamicEventData.new(event_data))
@@ -358,25 +357,13 @@ func load_crisis_templates():
 	crisis_templates.clear()
 	for file_name in _list_event_json_files():
 		if file_name.begins_with("crisis_"):
-
 			var crisis_data = load_crisis_json("res://data/events/" + file_name)
 			if crisis_data and _validate_template(crisis_data):
 				crisis_templates.append(CrisisEventData.new(crisis_data))
 	GameLogger.info("Loaded %d crisis templates" % crisis_templates.size(), "CrisisEvents")
-## JSON-шаблоны событий в алфавитном порядке (CI-3, корректность: порядок DirAccess
-## не гарантирован кроссплатформенно — зависит от ОС/файловой системы; явная сортировка).
+## JSON-шаблоны событий в алфавитном порядке (CI-3) — делегирует list_sorted.
 func _list_event_json_files() -> Array[String]:
-	var names: Array[String] = []
-	var dir = DirAccess.open("res://data/events/")
-	if dir:
-		dir.list_dir_begin()
-		var file_name = dir.get_next()
-		while file_name != "":
-			if file_name.ends_with(".json"):
-				names.append(file_name)
-			file_name = dir.get_next()
-	names.sort()
-	return names
+	return list_sorted("res://data/events/").filter(func(n): return n.ends_with(".json"))
 
 
 ## Загрузка JSON события
