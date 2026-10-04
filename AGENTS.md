@@ -29,7 +29,9 @@
 | Стек | GDScript, Godot 4.7, GdUnit4 |
 | Корень игры | `game/` (project.godot лежит в `game/`) |
 | Godot-бинарь | `/home/user/.local/bin/godot` |
-| Тесты | `game/run_tests.sh` (GdUnit4, headless) |
+| Тесты | `game/run_tests.sh` (GdUnit4 headless + MCP e2e) |
+| MCP e2e venv | `/home/user/.venv/godot-mcp-tests` (pytest 9.1.1 + pytest-timeout + mcp + anyio) |
+| MCP node_modules | `game/addons/godot-mcp/node_modules` (gitignored; `npm ci` из package-lock) |
 | OpenSpec | `openspec/changes/<name>/`, CLI: `/usr/bin/openspec` |
 
 ## Режим работы
@@ -49,6 +51,17 @@
 
 Код GdUnit4: `0` = pass, `101` = только orphan-предупреждения (гигиена, не
 падение), `100` и прочие = реальные падения.
+
+**MCP e2e (feat/mcp-e2e-activation, 2026-10-04):** venv
+`/home/user/.venv/godot-mcp-tests` (путь фиксирован здесь, run_tests.sh берёт
+его первым); `node_modules` ставится `npm ci` в `game/addons/godot-mcp/`.
+MCP-сервер (node) запускает **живой Godot без `--headless`** → нужен
+X-дисплей: run_tests.sh сам поднимает `Xvfb :97` (если DISPLAY не задан; :98/:99 могут быть заняты) и
+пробрасывает DISPLAY в сервер (mcp-SDK не наследует DISPLAY). Таймаут
+readiness = 900 c (`--timeout=900` в pytest). MCP-секция не имеет права
+молчать: при отсутствии сервера/venv — явная строка `PYTEST: SKIPPED
+(причина)`. Сцены и скрипты в MCP-тестах — **нижний регистр** (Linux
+case-sensitive: `world.tscn`, `battle.tscn`, `main_menu.tscn`).
 
 ## Данные событий (crisis/event system)
 

@@ -277,6 +277,16 @@ def test_jealousy_and_betrayal(full_cycle):
     assert r["t301"] == 35, r
     assert r["types"].count("jealousy") == 1, r
 
+    # Сцена ревности разрешена ЯВНО: иначе _auto_resolve_stale_scenes() в следующем
+    # end_turn() применит дефолт "soothe" → trust +5 ДО проверки верности, и
+    # «trust 0 → гарантированное предательство» перестаёт быть детерминированным
+    # (roll 1..20 > 5 = 75%, баг-тикет T-119, 2026-10-04).
+    mcp.execute_code(
+        "var hero = %s\n"
+        "hero.relationships.resolve_pending(0, 'soothe')\n"
+        "return {'ok': true}\n" % HERO
+    )
+
     # Ход 2: trust 0 у 300 → гарантированное предательство (roll 1..20 > 0)
     mcp.execute_code(
         "var hero = %s\n"

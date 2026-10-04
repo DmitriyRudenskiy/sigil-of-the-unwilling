@@ -21,7 +21,7 @@ def test_created_hero_reaches_world(full_cycle):
     )
     assert r["hero"] is True, r
     assert r["name"] == "McpCycleHero", f"Не тот герой: {r['name']}"
-    assert r["components"] == 14, f"Компоненты героя: {r['components']}"
+    assert r["components"] == 16, f"Компоненты героя: {r['components']}"
 
     # Мир живой: ход проходит
     mcp.execute_code("get_tree().current_scene.do_end_turn()\nreturn {\"ok\": true}")

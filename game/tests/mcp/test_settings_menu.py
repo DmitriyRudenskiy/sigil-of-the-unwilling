@@ -11,7 +11,7 @@ from conftest import _wait_for_scene
 def _boot_menu(mcp):
     mcp.run_scene("res://scenes/main_menu.tscn")
     mcp.wait_ready()
-    _wait_for_scene(mcp, "MainMenu")
+    _wait_for_scene(mcp, "main_menu")
     mcp.wait_frames(10)
 
 

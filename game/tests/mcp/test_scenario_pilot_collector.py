@@ -81,7 +81,7 @@ def _start_world_with_pilot(mcp) -> None:
         mcp.stop_running_scene()
     except MCPError:
         pass
-    mcp.run_scene("res://scenes/World.tscn")
+    mcp.run_scene("res://scenes/world.tscn")
     mcp.wait_ready()
     _wait_world(mcp)
 
