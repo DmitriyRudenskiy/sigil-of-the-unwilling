@@ -6,6 +6,8 @@
 """
 from __future__ import annotations
 
+import time
+
 INIT_CODE = """
 var battle = get_tree().current_scene
 if battle == null or not battle.has_method("start_battle"):
@@ -102,10 +104,17 @@ def test_full_battle_runs_to_winner(battle_scene):
         raise AssertionError(f"Бой не завершился за 150 итераций; last={last_action}")
 
     # Победитель — атакующие (Side.ATTACKER == 1)
-    mcp.wait_frames(30)
     assert state["winner"] == 1, f"Неожиданный победитель: {state}"
 
-    end_emitted = mcp.execute_code(
-        'return get_tree().current_scene.get_node("BattleTurnExecutor")._end_emitted'
-    )
-    assert end_emitted is True, f"end_battle не сработал: {end_emitted}"
+    # T-118 (аддендум): end_battle эмитится ПОСЛЕ анимации атаки (0.3 c) —
+    # ожидание по реальному времени, не по кадрам (Xvfb: кадр ≠ единица времени).
+    deadline = time.time() + 10.0
+    end_emitted = False
+    while time.time() < deadline:
+        end_emitted = mcp.execute_code(
+            'return get_tree().current_scene.get_node("BattleTurnExecutor")._end_emitted'
+        )
+        if end_emitted is True:
+            break
+        mcp.wait_frames(5)
+    assert end_emitted is True, f"end_battle не сработал за 10 c: {end_emitted}"
