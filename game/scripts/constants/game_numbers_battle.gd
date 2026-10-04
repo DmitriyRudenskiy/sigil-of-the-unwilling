@@ -19,7 +19,7 @@ const DEF_ADVANTAGE_PER_POINT   := 0.025
 const MAX_DAMAGE_MULTIPLIER     := 5.0
 const MIN_DAMAGE_MULTIPLIER     := 0.3
 const LUCK_CHANCE               := 0.10
-## Лестница перевеса (T17/D2, 02d v1.2 §3.2): преимущество/помеха = ±2
+## Лестница перевеса (T17/D2, 02d v1.2 §3.2): сдвиг ±2 (вверх/вниз, K-M6)
 ## к перевесу. ГСЧ в бою нет.
 const ADVANTAGE_MARGIN          := 2
 const DEFEND_DEFENSE_BONUS      := 1.2
