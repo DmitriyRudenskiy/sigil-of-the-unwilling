@@ -99,6 +99,7 @@ func test_rare_events_observed_in_simulation() -> void:
 	assert_that(_rare_hits).is_less_equal(5)
 
 
+
 func test_rare_weight_respected_10k_rolls() -> void:
 	var sys := _make_sys(true)
 	# Полный пул шаблонов (без сезонного фильтра: считаем общий вес).

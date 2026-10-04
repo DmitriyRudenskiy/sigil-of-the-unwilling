@@ -19,23 +19,24 @@ if [ -z "$GODOT" ]; then
 		Darwin) GODOT="/Applications/Godot.app/Contents/MacOS/Godot" ;;
 		*) GODOT="$HOME/.local/bin/godot" ;;
 	esac
+
 fi
 echo "GODOT: $GODOT"
 
 echo "=== gdUnit4: unit + integration + functional ==="
-# --import: обновить кэш глобальных классов (иначе новые class_name дают parse errors)
+# Pre-import to refresh the global class cache (class_name).
 "$GODOT" --headless --path . --import >/dev/null 2>&1
-
 "$GODOT" --headless --path . -s addons/gdunit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -c -a res://tests
 RC=$?
 # Политика orphan (CI-2, T-114): 0 = pass; 101 = только orphan-предупреждения
 # (гигиена, не падение); любой другой код = red. Политика закодирована в гейте.
 if [ "$RC" -ne 0 ] && [ "$RC" -ne 101 ]; then
 	exit "$RC"
+
 fi
 
 echo ""
-echo "=== MCP-тесты (tugcantopaloglu/godot-mcp) ==="
+echo "=== MCP tests (tugcantopaloglu/godot-mcp) ==="
 MCP_SERVER="${GODOT_MCP_SERVER:-$PWD/addons/godot-mcp/build/index.js}"
 if [ ! -f "$MCP_SERVER" ]; then
 	echo "PYTEST: SKIPPED (no MCP server: $MCP_SERVER; build: cd addons/godot-mcp && npm ci && npm run build)"
@@ -88,5 +89,6 @@ MCP_RC=$?
 # и при выгрузке оставляет пустые строки — возвращаем чистое дерево.
 [ -n "$XVFB_PID" ] && kill "$XVFB_PID" 2>/dev/null || true
 rm -f mcp_interaction_server.gd mcp_interaction_server.gd.uid
+
 git checkout -- project.godot 2>/dev/null || true
 exit "$MCP_RC"
