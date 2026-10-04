@@ -82,17 +82,17 @@ X-дисплей: run_tests.sh сам поднимает `Xvfb` на **своб�
 DISPLAY используется он. Godot для MCP — через `GODOT_PATH` (conftest.py читает
 `GODOT_PATH`, не `GODOT_BIN`). Таймаут readiness = 900 c (`--timeout=900` в pytest). MCP-секция не имеет права
 молчать: при отсутствии сервера/venv — явная строка `PYTEST: SKIPPED
-(причина)`. Сцены и скрипты в MCP-тестах — **нижний регистр** (Linux
+(причина)`. **venv-fallback (macOS, системный python3) — поддерживаемая конфигурация** (владелец, 2026-10-04): при отсутствии venv — системный python3 (mcp+anyio установлены) — MCP-секция исполняется, не пропускается. **Зеркало тикетов:** `docs/mvp/TICKETS.md` — живое зеркало GitHub Issues: новый тикет = запись в TICKETS.md + issue в репо (обратное — при создании issue). Сцены и скрипты в MCP-тестах — **нижний регистр** (Linux
 case-sensitive: `world.tscn`, `battle.tscn`, `main_menu.tscn`).
 
 ## MCP e2e (4-й уровень верификации)
 
 - Тесты: `game/tests/mcp/` (pytest, 39 тестов) — MCP-секция `game/run_tests.sh`.
 - venv: `/home/user/.venv/godot-mcp-tests` (pytest, pytest-timeout, mcp, anyio);
-  нет venv → секция skip (жёлтый — уровень молчит, зафиксировать в отчёте).
-  **venv-fallback (поддерживаемая конфигурация, 2026-10-04):** на машинах без этого venv
-  (macOS; проверено: 38 passed / 1 skipped) — системный `python3` с `mcp`+`anyio`
-  (override: `MCP_PYTEST_PY`); ни venv, ни fallback → явная `PYTEST: SKIPPED (причина)`,
+  нет venv → venv-fallback: системный `python3` с `mcp`+`anyio` (override:
+  `MCP_PYTEST_PY`; поддерживаемая конфигурация, владелец 2026-10-04);
+  ни venv, ни fallback → явная `PYTEST: SKIPPED (причина)` (жёлтый — уровень молчит,
+  зафиксировать в отчёте).
 - node_modules: `game/addons/godot-mcp/node_modules` (gitignored; `npm ci`
   в каталоге аддона).
 - X-дисплей: MCP e2e запускает живой Godot (не headless) — нужен X. run_tests.sh

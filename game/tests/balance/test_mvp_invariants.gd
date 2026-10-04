@@ -77,13 +77,15 @@ func test_prestige_sources_closed_list() -> void:
 	assert_that(violations.size() == 1 and violations[0].contains("district_created")) \
 		.override_failure_message("район должен отклоняться закрытым списком Ф4: %s" % str(violations))
 
-## Ф4: шкала рангов 0/200/500/1000/2000 (волна 1); якорь ранг 4±1
+## Ф4: шкала рангов 0/200/500/1000/2000 (волна 1); якорь «Почитаемый» (500–999); титулы — канонизация 2026-10-04
 func test_prestige_ranks_f4() -> void:
 	var prestige: Dictionary = Invariants.load_config("prestige")
 	assert_that(prestige["ranks"] == [0, 200, 500, 1000, 2000]) \
 		.override_failure_message("Ф4-шкала рангов: %s" % str(prestige["ranks"]))
-	assert_that(prestige["anchor_turn_21"]["rank"] == "4±1") \
+	assert_that(prestige["anchor_turn_21"]["title"] == "Почитаемый") \
 		.override_failure_message("якорь хода 21: %s" % str(prestige["anchor_turn_21"]))
+	assert_that(prestige["rank_names"]["0"] == "Безымянный" and prestige["rank_names"]["200"] == "Знаемый" and prestige["rank_names"]["500"] == "Почитаемый" and prestige["rank_names"]["1000"] == "Славный" and prestige["rank_names"]["2000"] == "Легендарный") \
+		.override_failure_message("титулы рангов: %s" % str(prestige["rank_names"]))
 
 ## Сводная проверка: все инварианты держатся
 func test_check_all_clean() -> void:
