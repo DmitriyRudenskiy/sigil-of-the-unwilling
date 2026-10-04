@@ -21,7 +21,7 @@ var w = get_tree().current_scene
 if w == null or w.get_hero() == null:
     return {"error": "world not ready"}
 var probe = get_node_or_null("/root/BalanceProbe")
-if probe == null or probe.get_script() == null or not str(probe.get_script().resource_path).contains("BalanceProbe"):
+if probe == null or probe.get_script() == null or not str(probe.get_script().resource_path).contains("balance_probe"):
     return {"error": "probe node not found — instantiate_scene не запущен"}
 w.set_meta("balance_probe", probe)
 var r = probe.start_probe(w, __SEED__)
@@ -71,7 +71,7 @@ def _start_world_with_probe(mcp) -> None:
         mcp.stop_running_scene()
     except MCPError:
         pass
-    mcp.run_scene("res://scenes/World.tscn")
+    mcp.run_scene("res://scenes/world.tscn")
     mcp.wait_ready()
     _wait_world(mcp)
     mcp.instantiate_scene("res://scenes/probe/balance_probe.tscn", "/root")

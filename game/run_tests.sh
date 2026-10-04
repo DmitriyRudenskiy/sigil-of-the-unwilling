@@ -3,6 +3,9 @@
 # GUT удалён из проекта (addons/gut отсутствует) — секции GUT нет.
 # Exit code GdUnit4: 0 = pass, 101 = только orphan-предупреждения (гигиена тестов),
 # 100 и прочие = реальные падения.
+#
+# MCP e2e (feat/mcp-e2e-activation, 2026-10-04): venv + Xvfb + GODOT_PATH +
+# --timeout=900; MCP-секция не имеет права молчать (явные PYTEST: SKIPPED).
 set -u
 cd "$(dirname "$0")"
 # Порядок разрешения Godot (2026-10-04, флаг 8): $GODOT_BIN → $GODOT (legacy) →
@@ -17,6 +20,7 @@ if [ -z "$GODOT" ]; then
 		*) GODOT="$HOME/.local/bin/godot" ;;
 	esac
 fi
+echo "GODOT: $GODOT"
 
 echo "=== gdUnit4: unit + integration + functional ==="
 # --import: обновить кэш глобальных классов (иначе новые class_name дают parse errors)
@@ -34,24 +38,43 @@ echo ""
 echo "=== MCP-тесты (tugcantopaloglu/godot-mcp) ==="
 MCP_SERVER="${GODOT_MCP_SERVER:-$PWD/addons/godot-mcp/build/index.js}"
 if [ ! -f "$MCP_SERVER" ]; then
-	echo "Skipped: godot-mcp сервер не найден ($MCP_SERVER)"
-	echo "Укажите GODOT_MCP_SERVER, чтобы запустить MCP-тесты."
+	echo "PYTEST: SKIPPED (no MCP server: $MCP_SERVER; build: cd addons/godot-mcp && npm ci && npm run build)"
+	exit 0
+fi
+# MCP e2e-тесты запускают живой Godot (не headless) — нужен X-дисплей.
+# Если DISPLAY не задан, а Xvfb доступен — поднимаем виртуальный на :97
+# (:98/:99 могут быть заняты другими сессиями; :99 с auth не подойдёт).
+XVFB_PID=""
+if [ -z "${DISPLAY:-}" ] && command -v Xvfb >/dev/null 2>&1; then
+	Xvfb :97 -screen 0 1024x768x24 >/dev/null 2>&1 &
+	XVFB_PID=$!
+	sleep 2
+	if ! kill -0 "$XVFB_PID" 2>/dev/null; then
+		echo "PYTEST: SKIPPED (Xvfb :97 не стартовал — дисплей занят? укажите DISPLAY)"
+		exit 0
+	fi
+	export DISPLAY=:97
+fi
+# venv MCP-тестов: путь зафиксирован в AGENTS.md.
+PYTEST_PY="${MCP_PYTEST_PY:-/home/user/.venv/godot-mcp-tests/bin/python}"
+if [ ! -x "$PYTEST_PY" ]; then
+	echo "PYTEST: SKIPPED (no venv: $PYTEST_PY; create: python3 -m venv /home/user/.venv/godot-mcp-tests && $PYTEST_PY -m pip install pytest pytest-timeout mcp anyio)"
+	[ -n "$XVFB_PID" ] && kill "$XVFB_PID" 2>/dev/null || true
 	exit 0
 fi
 export GODOT_MCP_SERVER="$MCP_SERVER"
 export GODOT_PROJECT_PATH="${GODOT_PROJECT_PATH:-$PWD}"
-cd tests/mcp
-python3 -m pytest -xvs --timeout=300 --tb=short \
-  test_battle_tween.py \
-  test_resource_and.py \
-  test_hexutils_perf.py \
-  test_session_reset.py \
-  test_shard_pruning.py \
-  test_battle_profiling.py
+# conftest.py читает GODOT_PATH (не GODOT_BIN) — баг старого скрипта исправлен.
+# --timeout=900: READY_TIMEOUT в godot_mcp.py = 900 c; старое --timeout=300 резало
+# e2e раньше собственного дедлайна.
+# Полный свит tests/mcp/ (39 тестов), не выборка из 6 файлов.
+GODOT_PATH="$GODOT" \
+GODOT_BIN="$GODOT" \
+"$PYTEST_PY" -m pytest tests/mcp/ -v --timeout=900 --tb=short
 MCP_RC=$?
-cd "$(dirname "$0")"
 # Вендорный MCP-сервер инжектит mcp_interaction_server.gd + autoload в project.godot
 # и при выгрузке оставляет пустые строки — возвращаем чистое дерево.
+[ -n "$XVFB_PID" ] && kill "$XVFB_PID" 2>/dev/null || true
 rm -f mcp_interaction_server.gd mcp_interaction_server.gd.uid
 git checkout -- project.godot 2>/dev/null || true
 exit "$MCP_RC"
