@@ -8,6 +8,35 @@
 # --timeout=900; MCP-секция не имеет права молчать (явные PYTEST: SKIPPED).
 set -u
 cd "$(dirname "$0")"
+# CI-1-семья (владелец 2026-10-05, раунд 5 вердикт §1.1; тикет T-120):
+# cleanup MCP-процессов (node-сервер + его godot-дети), запущенных этим прогоном.
+# Причина: убийство pytest (timeout/SIGKILL) оставляет node-сервер и godot
+# сиротами; godot удерживает порт 9090 (MCP_INTERACTION_PORT) → в следующем
+# прогоне wait_port_free() молчаливо блокирует ~120 c/тест (диагностика
+# 2026-10-05: свит 30/39 за 890 c вместо 169 c). Машина шарится: убиваем
+# только PIDs, отсутствовавшие на старте (снимок).
+MCP_NODE_SNAPSHOT="$(mktemp)"
+pgrep -f "build/index\.js" > "$MCP_NODE_SNAPSHOT" 2>/dev/null || true
+MCP_GODOT_SNAPSHOT="$(mktemp)"
+pgrep -f -- "--path $PWD" > "$MCP_GODOT_SNAPSHOT" 2>/dev/null || true
+cleanup_mcp() {
+	local p
+	for p in $(pgrep -f "build/index\.js" 2>/dev/null); do
+		grep -qx "$p" "$MCP_NODE_SNAPSHOT" || kill "$p" 2>/dev/null || true
+	done
+	for p in $(pgrep -f -- "--path $PWD" 2>/dev/null); do
+		grep -qx "$p" "$MCP_GODOT_SNAPSHOT" || kill "$p" 2>/dev/null || true
+	done
+	rm -f "$MCP_NODE_SNAPSHOT" "$MCP_GODOT_SNAPSHOT"
+	[ -n "${XVFB_PID:-}" ] && kill "$XVFB_PID" 2>/dev/null || true
+	# Вендорный MCP-сервер инжектит mcp_interaction_server.gd + autoload в
+	# project.godot и при выгрузке оставляет пустые строки — чистое дерево.
+	rm -f mcp_interaction_server.gd mcp_interaction_server.gd.uid
+	git checkout -- project.godot 2>/dev/null || true
+}
+trap cleanup_mcp EXIT
+trap 'exit 130' INT
+trap 'exit 131' TERM
 # Порядок разрешения Godot (2026-10-04, флаг 8): $GODOT_BIN → $GODOT (legacy) →
 # command -v godot → дефолты ОС (путь бинаря задокументирован в AGENTS.md)
 GODOT="${GODOT_BIN:-${GODOT:-}}"
@@ -85,10 +114,5 @@ GODOT_PATH="$GODOT" \
 GODOT_BIN="$GODOT" \
 "$PYTEST_PY" -m pytest tests/mcp/ -v --timeout=900 --tb=short
 MCP_RC=$?
-# Вендорный MCP-сервер инжектит mcp_interaction_server.gd + autoload в project.godot
-# и при выгрузке оставляет пустые строки — возвращаем чистое дерево.
-[ -n "$XVFB_PID" ] && kill "$XVFB_PID" 2>/dev/null || true
-rm -f mcp_interaction_server.gd mcp_interaction_server.gd.uid
-
-git checkout -- project.godot 2>/dev/null || true
+# Очистка (Xvfb, инжект-артефакты, node/godot MCP-процессы) — в trap cleanup_mcp (EXIT).
 exit "$MCP_RC"

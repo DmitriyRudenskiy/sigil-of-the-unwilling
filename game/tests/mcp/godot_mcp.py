@@ -32,22 +32,42 @@ except Exception:
 def _timeout_for(seconds: float) -> Any:
     return timedelta(seconds=seconds) if _SDK_WANTS_TIMEDI else seconds
 
+def _port_free(port: int) -> bool:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.settimeout(0.25)
+        try:
+            s.connect(("127.0.0.1", port))
+        except (ConnectionRefusedError, socket.timeout, OSError):
+            return True
+    return False
+
+
 async def wait_port_free(
     port: int = MCP_INTERACTION_PORT,
     timeout: float = PORT_FREE_TIMEOUT,
     interval: float = 0.25,
+    immediate: bool = False,
 ) -> None:
+    """Ожидание освобождения MCP-порта.
+
+    immediate=True (setup, перед run_project): порт обязан быть свободен;
+    занятость = сиротский godot/node из убитого прогона → немедленный
+    диагностический fail, не молчаливая блокировка (CI-1-семья, владелец
+    2026-10-05 §1.1, T-120: ~120 c/тест на сиротском порту 9090).
+    """
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.settimeout(0.25)
-            try:
-                s.connect(("127.0.0.1", port))
-            except (ConnectionRefusedError, socket.timeout, OSError):
-                return
+        if _port_free(port):
+            return
+        if immediate:
+            raise MCPError(
+                f"порт {port} занят до run_project — сиротский godot/godot-mcp "
+                "из убитого прогона (CI-1-семья, T-120). Чистка: "
+                "pkill -f 'build/index.js'; pkill -f -- '--path <каталог проекта>'"
+            )
         await anyio.sleep(interval)
     raise MCPError(
-        f"порт {port} занят {timeout:.0f} с — предыдущий Godot/godot-mcp не остановился"
+        f"порт {port} не освободился за {timeout:.0f} с — предыдущий Godot/godot-mcp не остановился"
     )
 
 class GodotMCPClient:
@@ -99,7 +119,8 @@ class GodotMCPClient:
         await self._call("game_wait", {"frames": frames, "frameType": frame_type}, timeout)
 
     async def _run_scene(self, scene_path: str, timeout: float) -> None:
-        await wait_port_free()
+        # setup-only: занятый порт = сироты из убитого прогона → немедленный fail (T-120)
+        await wait_port_free(immediate=True)
         await self._call(
             "run_project",
             {"projectPath": self._project_path, "scene": scene_path},
