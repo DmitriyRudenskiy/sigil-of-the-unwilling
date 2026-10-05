@@ -48,14 +48,15 @@ func test_spawned_enemies_respect_rings() -> void:
 
 
 func test_season_cycle_and_mults() -> void:
+	# Q-M26 (владелец 2026-10-05): 1 ход = 1 сезон — сезон меняется каждый ход.
 	assert_that(WorldSeasons.season_name()).is_equal("Ясный сезон")
 	assert_float(WorldSeasons.production_mult()).is_equal(1.0)
-	for i in WorldSeasons.TURN_LENGTH:
-		WorldSeasons.advance_turn()
+	WorldSeasons.advance_turn()  # ход 1 = Ясный
+	assert_that(WorldSeasons.season_name()).is_equal("Ясный сезон")
+	WorldSeasons.advance_turn()  # ход 2 = Морось
 	assert_that(WorldSeasons.season_name()).is_equal("Морось")
 	assert_float(WorldSeasons.production_mult()).is_equal(1.2)
-	for i in WorldSeasons.TURN_LENGTH:
-		WorldSeasons.advance_turn()
+	WorldSeasons.advance_turn()  # ход 3 = Буря
 	assert_that(WorldSeasons.season_name()).is_equal("Буря")
 	assert_float(WorldSeasons.production_mult()).is_equal(0.4)
 	assert_float(WorldSeasons.enemy_mult()).is_greater(1.0)
@@ -82,7 +83,7 @@ func test_make_stack_size_mult() -> void:
 
 func test_storm_boosts_spawns() -> void:
 	WorldSeasons.reset()
-	for i in WorldSeasons.TURN_LENGTH * 2:
+	for i in 3:  # ход 3 = Буря (Q-M26: 1 ход = 1 сезон)
 		WorldSeasons.advance_turn()
 	assert_that(WorldSeasons.season_name()).is_equal("Буря")
 	var reg: Node = Services.resolve(&"units")
@@ -92,7 +93,7 @@ func test_storm_boosts_spawns() -> void:
 	var stormy: UnitStack = null
 	WorldSeasons.reset()
 	calm = reg.make_stack("wolves", rng, WorldSeasons.hostility_mult() * WorldSeasons.enemy_mult())
-	for i in WorldSeasons.TURN_LENGTH * 2:
+	for i in 3:  # ход 3 = Буря
 		WorldSeasons.advance_turn()
 	stormy = reg.make_stack("wolves", rng, WorldSeasons.hostility_mult() * WorldSeasons.enemy_mult())
 	assert_bool(stormy.count >= calm.count).is_true()
