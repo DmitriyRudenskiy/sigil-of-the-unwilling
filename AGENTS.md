@@ -28,7 +28,7 @@
 | Имя проекта (project.godot) | "Sigil of the Unwilling" |
 | Стек | GDScript, Godot 4.7, GdUnit4 |
 | Корень игры | `game/` (project.godot лежит в `game/`) |
-| Godot-бинарь | `/home/user/.local/bin/godot` |
+| Godot-бинарь | `/Applications/Godot.app/Contents/MacOS/Godot` (4.7.2.stable) — **пути — по машине; эталон — CI-2-раннер** (не хардкодить macOS-путь как универсальный) |
 | Тесты | `game/run_tests.sh` (GdUnit4 headless + MCP e2e) |
 | MCP e2e venv | `/home/user/.venv/godot-mcp-tests` (pytest 9.1.1 + pytest-timeout + mcp + anyio) |
 | MCP node_modules | `game/addons/godot-mcp/node_modules` (gitignored; `npm ci` из package-lock) |
