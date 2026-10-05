@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://infopanel01"]
 
-[ext_resource type="Script" uid="uid://dixjikuwjlo4w" path="res://scripts/ui/info_panel.gd" id="1"]
+[ext_resource type="Script" uid="uid://cyfxyhme3ipdr" path="res://scripts/ui/info_panel.gd" id="1"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_action"]
 content_margin_left = 6.0

@@ -112,7 +112,9 @@ export GODOT_PROJECT_PATH="${GODOT_PROJECT_PATH:-$PWD}"
 # Полный свит tests/mcp/ (39 тестов), не выборка из 6 файлов.
 GODOT_PATH="$GODOT" \
 GODOT_BIN="$GODOT" \
-"$PYTEST_PY" -m pytest tests/mcp/ -v --timeout=900 --tb=short
+# --durations=25: per-test timing в хвосте прогона — диагноз «гонка соседних сессий
+# на порту» (ступень на setup каждого теста vs равномерное замедление, CI-1(9), раунд 7)
+"$PYTEST_PY" -m pytest tests/mcp/ -v --timeout=900 --tb=short --durations=25
 MCP_RC=$?
 # Очистка (Xvfb, инжект-артефакты, node/godot MCP-процессы) — в trap cleanup_mcp (EXIT).
 exit "$MCP_RC"

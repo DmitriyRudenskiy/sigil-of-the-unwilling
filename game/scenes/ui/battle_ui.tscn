@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://battleui01"]
 
-[ext_resource type="Script" uid="uid://dboi00xiouy84" path="res://scripts/ui/battle_ui.gd" id="1"]
+[ext_resource type="Script" uid="uid://cs1lav0566l80" path="res://scripts/ui/battle_ui.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://df2h40vir4ujo" path="res://scenes/ui/battle_spellbook_panel.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/settings_screen.tscn" id="3"]
 
