@@ -1,5 +1,7 @@
 extends BaseTest
 const TestFactories := preload("res://tests/helpers/factories.gd")
+const ArenaRingSystem := preload("res://scripts/city/arena_ring_system.gd")
+const HexUtils := preload("res://scripts/core/hex_utils.gd")
 
 func _add_worker(city: City, tile: Vector2i = Vector2i(6, 5)) -> PopUnit:
 	var u := PopUnit.new()
@@ -112,6 +114,8 @@ func test_upkeep_paid() -> void:
 	assert_that(int(report.get("upkeep_ok", -1))).is_equal(1)
 	assert_that(int(report.get("upkeep_failed", -1))).is_equal(0)
 	assert_that(city.resource_ctx.amount(&"stone")).is_equal(1.0)
+	var ledger: Array = report.get("ledger", [])
+	assert_bool(ledger.any(func(flow): return flow.source == "building:1/upkeep")).is_true()
 
 func test_upkeep_failed_emits_signal() -> void:
 	var city := TestFactories.make_city()
@@ -140,6 +144,136 @@ func test_report_cities_entries() -> void:
 	assert_that(cities.size()).is_equal(2)
 	assert_that(int((cities[0] as Dictionary).get("uid", -1))).is_equal(1)
 	assert_that(int((cities[1] as Dictionary).get("uid", -1))).is_equal(2)
+
+func test_campaign_building_uses_same_ledger_for_recipe_and_upkeep() -> void:
+	var city := TestFactories.make_city()
+	city.campaign_buildings.append({
+		"uid": 41, "id": "market_garden", "state": "active", "assigned_workers": 2,
+		"recipes": [{"id": "grow_food", "workers": 2,
+			"inputs": {"wood": 1.0}, "outputs": {"food": 3.0}}],
+		"upkeep": {"food": 1.0},
+	})
+	var ctx := TurnContext.new()
+	ctx.cities.append(city)
+	var report: Dictionary = EconomicTurnProcessor.new().process(ctx)
+	assert_that(int(report.chains_executed)).is_equal(1)
+	assert_that(int(report.upkeep_ok)).is_equal(1)
+	assert_that(city.resource_ctx.amount(&"wood")).is_equal(1.0)
+	assert_that(city.resource_ctx.amount(&"food")).is_equal(2.0)
+	var sources: Array[String] = []
+	for flow in report.ledger:
+		sources.append(String(flow.source))
+	assert_bool(sources.has("campaign-building:market_garden/recipe:grow_food")).is_true()
+	assert_bool(sources.has("campaign-building:market_garden/upkeep")).is_true()
+
+func test_campaign_adjacency_bonus_applies_deterministically_to_production() -> void:
+	var city := TestFactories.make_city()
+	city.food_demand_this_turn = 0.0
+	var center := ArenaRingSystem.center()
+	var near := HexUtils.get_neighbor(center, 0, true)
+	city.campaign_buildings = [
+		{"uid": 1, "id": "campaign_farm", "state": "active", "cell": center,
+			"footprint": [[0, 0]], "roles": ["food_production"], "jobs": 2,
+			"assigned_workers": 2, "recipes": [{"id": "farm_food", "workers": 2,
+				"inputs": {}, "outputs": {"food": 2}}]},
+		{"uid": 2, "id": "campaign_sawmill", "state": "active", "cell": near,
+			"footprint": [[0, 0]], "roles": ["wood_production"], "jobs": 2,
+			"assigned_workers": 0, "adjacency": [{"id": "forest_edge_farm",
+				"target_role": "food_production", "radius": 1,
+				"effect": "output_bp", "value": 1500}]},
+	]
+	var ctx := TurnContext.new()
+	ctx.cities.append(city)
+	var processor := EconomicTurnProcessor.new()
+	for _turn in range(4):
+		processor.process(ctx)
+	assert_that(city.resource_ctx.amount(&"food")).is_equal(9.0)
+
+func test_campaign_building_skips_inactive_and_unregistered_resources() -> void:
+	var city := TestFactories.make_city()
+	city.campaign_buildings = [
+		{"id": "inactive_farm", "state": "inactive", "assigned_workers": 2,
+			"recipes": [{"id": "food", "workers": 2, "inputs": {}, "outputs": {"food": 3.0}}]},
+		{"id": "amber_store", "state": "active", "assigned_workers": 2,
+			"recipes": [{"id": "amber", "workers": 2, "inputs": {}, "outputs": {"amber": 3.0}}]},
+	]
+	var ctx := TurnContext.new()
+	ctx.cities.append(city)
+	var report: Dictionary = EconomicTurnProcessor.new().process(ctx)
+	assert_that(int(report.chains_executed)).is_zero()
+	assert_that(city.resource_ctx.amount(&"food")).is_zero()
+	assert_that(city.resource_ctx.amount(&"amber")).is_zero()
+
+func test_campaign_building_needs_relations_and_fixed_point_specialization() -> void:
+	var city := TestFactories.make_city()
+	city.food_demand_this_turn = 0.0
+	var builder := PopUnit.new()
+	builder.state = PopUnit.State.WORKER
+	builder.ancestry_id = "gnomes"
+	builder.assigned_to = 41
+	city.pop.append(builder)
+	var crafter := PopUnit.new()
+	crafter.state = PopUnit.State.WORKER
+	crafter.ancestry_id = "elves"
+	crafter.assigned_to = 41
+	city.pop.append(crafter)
+	city.campaign_buildings.append({
+		"uid": 41, "id": "workshop", "state": "active", "assigned_workers": 2,
+		"jobs": 2, "roles": ["woodworking"],
+		"services": {"education": 1, "treatment": 1, "community_mediation": 1},
+		"recipes": [{"id": "half_output", "workers": 2,
+			"inputs": {}, "outputs": {"food": 0.5}}],
+	})
+	var ctx := TurnContext.new()
+	ctx.cities.append(city)
+	var processor := EconomicTurnProcessor.new()
+	var first: Dictionary = processor.process(ctx)
+	var first_groups: Dictionary = first.cities[0].campaign_population.groups
+	assert_that(int(first_groups.engineers_builders.coverage_percent)).is_equal(100)
+	assert_that(int(first_groups.weavers_crafters.coverage_percent)).is_equal(100)
+	assert_that(int(first_groups.engineers_builders.satisfaction)).is_equal(50)
+	assert_that(int(first_groups.weavers_crafters.satisfaction)).is_equal(50)
+	var pairs: Array = first.cities[0].campaign_population.workplace_pairs
+	assert_that(pairs.size()).is_equal(1)
+	assert_bool(bool(pairs[0].mitigated)).is_true()
+	assert_that(float(city.resource_ctx.amount(&"food"))).is_zero()
+	assert_that(float(city.campaign_buildings[0].production_remainders["half_output/food"])) \
+		.is_equal_approx(5500.0, 0.001)
+	var second: Dictionary = processor.process(ctx)
+	assert_that(int(second.chains_executed)).is_equal(1)
+	assert_that(float(city.resource_ctx.amount(&"food"))).is_equal(1.0)
+	assert_that(float(city.campaign_buildings[0].production_remainders["half_output/food"])) \
+		.is_equal_approx(1000.0, 0.001)
+
+func test_scheduler_ledger_includes_growth_campaign_production_and_upkeep() -> void:
+	var city := TestFactories.make_city()
+	_add_worker(city)
+	city.food_stockpile = 10.0
+	city.ensure_resource_ctx().clear_ledger()
+	CityGrowthService.process_turn(city, 1)
+	var food_after_growth := city.food_stockpile
+	city.campaign_buildings.append({
+		"uid": 41, "id": "market_garden", "state": "active", "assigned_workers": 2,
+		"recipes": [{"id": "grow_food", "workers": 2,
+			"inputs": {"wood": 1.0}, "outputs": {"food": 3.0}}],
+		"upkeep": {"food": 1.0},
+	})
+	var scheduler := TurnScheduler.new()
+	scheduler.register_processor(EconomicTurnProcessor.new())
+	var ctx := TurnContext.new()
+	ctx.cities.append(city)
+	var report: Dictionary = scheduler.execute_turn(ctx)
+	var ledgers: Array = report.ledger
+	assert_that(ledgers.size()).is_equal(1)
+	var flows: Array = ledgers[0].flows
+	var sources: Array[String] = []
+	for flow in flows:
+		sources.append(String(flow.source))
+	assert_bool(sources.has("city:population_food")).is_true()
+	assert_bool(sources.has("automatic_wood_yield")).is_true()
+	assert_bool(sources.has("campaign-building:market_garden/recipe:grow_food")).is_true()
+	assert_bool(sources.has("campaign-building:market_garden/upkeep")).is_true()
+	assert_float(city.food_stockpile).is_equal_approx(food_after_growth + 2.0, 0.0001)
 
 func test_integration_with_scheduler() -> void:
 	var sched := TurnScheduler.new()

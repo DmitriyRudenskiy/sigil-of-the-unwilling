@@ -22,13 +22,25 @@ static func process_turn(city: City, turn: int) -> Dictionary:
 
 	city._invalidate_exploited()
 
-	var nf := net_food(city)
-	city.food_stockpile = maxf(0.0, city.food_stockpile + nf)
+	var resources := city.ensure_resource_ctx()
+	var food_id: StringName = &"food"
+	var food_yield := maxf(float(city.get_yield().get(&"food", 0.0)), 0.0)
+	var demand := food_consumption(city)
+	resources.add(food_id, food_yield, "city:food_production")
+	var available := resources.amount(food_id)
+	city.food_supply_this_turn = available
+	city.food_demand_this_turn = demand
+	var consumed := minf(demand, available)
+	if consumed > 0.0:
+		resources.spend({food_id: consumed}, "city:population_food")
+	var nf := food_yield - demand
 	city.starving = nf < 0.0
 
 	var births := 0
-	while city.pop_capped() < city.pop_cap() and city.food_stockpile >= growth_threshold(city):
-		city.food_stockpile -= growth_threshold(city)
+	while city.pop_capped() < city.pop_cap() and resources.amount(food_id) >= growth_threshold(city):
+		var growth_cost := growth_threshold(city)
+		if not resources.spend({food_id: growth_cost}, "city:population_growth"):
+			break
 		city._add_pop(PopUnit.State.FOLLOWER, turn)
 		births += 1
 
@@ -41,4 +53,7 @@ static func process_turn(city: City, turn: int) -> Dictionary:
 	return {
 		"births": births, "level_ups": level_ups,
 		"starving": city.starving, "net_food": nf, "switched": switched,
+		"food_supply": available, "food_demand": demand,
+		"food_consumed": consumed, "food_coverage_percent": ArchetypeResolver.need_coverage_percent(
+			int(round(available * 1000.0)), int(round(demand * 1000.0))),
 	}

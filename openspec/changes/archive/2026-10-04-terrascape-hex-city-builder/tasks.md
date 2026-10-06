@@ -1,5 +1,7 @@
 # Tasks: TerraScape hex city-builder
 
+> **Статус: SUPERSEDED (2026-10-04).** Отмеченные ниже незавершённые пункты не являются активным бэклогом и не должны применяться или синхронизироваться как спецификация отдельного режима. Только подходящие данные/идеи по зданиям, соседству и слияниям могут быть повторно проработаны в `campaign-city-building-economy`.
+
 ## 1. Каркас и данные
 
 - [ ] 1.1 Создать `game/data/terrascape/buildings.json` — 27 базовых (включая 4 здания обряда §0.5) + 7 объединённых зданий со статами GDD §3.2/§4.1/§0.5 (base, radius, biome, adj, feat, jobs, perWorker, jobName, housing, prov, spec, merges, merged)

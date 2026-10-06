@@ -138,6 +138,13 @@ func test_orphans_released_on_rebalance() -> void:
 			orphan += 1
 	assert_that(orphan).is_equal(0)
 
+func test_rebalance_preserves_campaign_building_workers() -> void:
+	var worker: PopUnit = city.add_migrant(PopUnit.State.WORKER)
+	worker.assigned_to = 77
+	city.campaign_buildings.append({"uid": 77, "id": "bakery", "state": "active"})
+	assert_that(WorkerAssignment.rebalance(city)).is_equal(0)
+	assert_that(worker.assigned_to).is_equal(77)
+
 func test_building_def_applies_chain_upkeep_zone() -> void:
 	var d: Variant = _chain_def(&"smithy_a", 2)
 	d.default_upkeep[&"wood"] = 2.0

@@ -66,6 +66,21 @@ func test_execute_atomic_on_shortage() -> void:
 	assert_bool(out.is_empty()).is_true()
 	assert_that(rc.amount(&"wood")).is_equal(1.0)
 
+func test_execute_does_not_spend_inputs_when_outputs_do_not_fit() -> void:
+	var rc := ResourceContext.new()
+	var wood := ResourceDef.new()
+	wood.id = &"wood"
+	var planks := ResourceDef.new()
+	planks.id = &"planks"
+	planks.capacity = 2.0
+	rc.setup([wood, planks], true)
+	rc.add(&"wood", 10.0)
+	var result := _make_chain().execute_transaction(rc, 2, 1.0)
+	assert_bool(result.ok).is_false()
+	assert_that(result.reason).is_equal("insufficient_capacity")
+	assert_that(rc.amount(&"wood")).is_equal(10.0)
+	assert_that(rc.amount(&"planks")).is_equal(0.0)
+
 func test_execute_multiple_outputs() -> void:
 	var rc := ResourceContext.new()
 	rc.add(&"wood", 10.0)

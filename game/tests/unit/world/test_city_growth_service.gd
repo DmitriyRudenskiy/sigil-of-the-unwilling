@@ -67,6 +67,22 @@ func test_process_turn_birth_with_surplus() -> void:
 	assert_that(int(report.get("births", 0)) >= 1).is_true()
 	assert_that(c.pop.size() > pop_before).is_true()
 
+func test_food_stock_and_population_flow_share_resource_ledger() -> void:
+	var worker := c.add_migrant(PopUnit.State.WORKER, 0)
+	worker.tile = HexUtils.get_all_neighbors(c.center)[0]
+	c.food_stockpile = 1.0
+	var report := CityGrowthService.process_turn(c, 1)
+	assert_float(c.food_stockpile).is_equal_approx(1.0 - GameNumbers.FOOD_PER_WORKER, 0.0001)
+	assert_float(float(report.food_supply)).is_equal_approx(1.0, 0.0001)
+	assert_float(float(report.food_demand)).is_equal_approx(GameNumbers.FOOD_PER_WORKER, 0.0001)
+	var ledger := c.resource_ctx.get_ledger()
+	var has_food_transaction := false
+	for flow in ledger:
+		if String(flow.get("source", "")) == "city:population_food" and \
+			absf(float(flow.get("inputs", {}).get("food", 0.0)) - GameNumbers.FOOD_PER_WORKER) < 0.0001:
+			has_food_transaction = true
+	assert_bool(has_food_transaction).is_true()
+
 func test_starvation_flag() -> void:
 	c.tile_yield_fn = func(_cell: Vector2i) -> Dictionary:
 		return {&"food": 0.0}

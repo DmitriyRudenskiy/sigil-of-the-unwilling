@@ -1,0 +1,3128 @@
+{
+  "metadata": {
+    "game": "TerraScape",
+    "target_version": "2.2.0.5 + Ancient Egypt",
+    "retrieved_on": "2026-10-06",
+    "scope": "Base game through 2.2.0.5 and released Ancient Egypt DLC",
+    "confidence_legend": {
+      "confirmed": "direct public source explicitly supports the fact for a released update or visible UI",
+      "candidate": "public evidence exists but exact version, identity, or role is not fully reconciled",
+      "unknown": "no reliable evidence for the field; null must not be inferred"
+    },
+    "coverage_status": "partial_public_source_census",
+    "notes": [
+      "The Miraheze wiki currently exposes 19 Deck-category pages, six Ancient Egypt deck pages (24 listed cards), 47 Building-category pages, and 138 mainspace pages. No Ra deck page/card list is present in the current API census.",
+      "The Steam Egypt scenario checklist and gameplay video confirm Ra is used in a scenario and identify leads, but do not establish Ra card membership or a full deck roster.",
+      "The 30-recipe Steam guide is community-authored and its exact game version is not pinned. Its inputs are retained as candidate references, not canonical recipes.",
+      "No Amun-Ra entry is supported by the examined sources. Temple of Luxor remains a monument candidate only."
+    ],
+    "steam_guide_3292704537": {
+      "title": "All Merged Buildings in release version / Все объединенные здания в релизной версии [ENG/RU]",
+      "created_utc": "2024-07-19T21:48:32Z",
+      "updated_utc": "2026-08-12T11:34:51Z",
+      "api_source": "https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/",
+      "game_version_declared": null,
+      "confidence": "candidate"
+    }
+  },
+  "cards": [
+    {
+      "card_id": "TS-B-001",
+      "card_name": "Gatherer Hut",
+      "deck": "Basic Food",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Gatherer_Hut",
+        "https://terrascape.fandom.com/wiki/Deck#Basic_Food"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-002",
+      "card_name": "Hunting Cabin",
+      "deck": "Basic Food",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Hunting_Cabin",
+        "https://terrascape.fandom.com/wiki/Deck#Basic_Food"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-003",
+      "card_name": "Wheat Field",
+      "deck": "Basic Food",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Wheat_Field",
+        "https://terrascape.fandom.com/wiki/Deck#Basic_Food"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-004",
+      "card_name": "Cattle Pasture",
+      "deck": "Basic Food",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Cattle_Pasture",
+        "https://terrascape.fandom.com/wiki/Deck#Basic_Food"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-005",
+      "card_name": "Cottages",
+      "deck": "Settlement",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Cottages",
+        "https://terrascape.fandom.com/wiki/Deck#Settlement"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-006",
+      "card_name": "Well",
+      "deck": "Settlement",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Well",
+        "https://terrascape.fandom.com/wiki/Deck#Settlement"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-007",
+      "card_name": "Houses",
+      "deck": "Settlement",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Houses",
+        "https://terrascape.fandom.com/wiki/Deck#Settlement"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-008",
+      "card_name": "Market",
+      "deck": "Settlement",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Market",
+        "https://terrascape.fandom.com/wiki/Deck#Settlement"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-009",
+      "card_name": "Herbalist",
+      "deck": "Wetlands",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Herbalist",
+        "https://terrascape.fandom.com/wiki/Deck#Wetlands",
+        "https://steamcommunity.com/games/2290000/announcements/detail/1784506359022523"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-010",
+      "card_name": "Reed Cutter",
+      "deck": "Wetlands",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Reed_Cutter",
+        "https://terrascape.fandom.com/wiki/Deck#Wetlands",
+        "https://steamcommunity.com/games/2290000/announcements/detail/1784506359022523"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-011",
+      "card_name": "Peat Digger",
+      "deck": "Wetlands",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Peat_Digger",
+        "https://terrascape.fandom.com/wiki/Deck#Wetlands",
+        "https://steamcommunity.com/games/2290000/announcements/detail/1784506359022523"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-012",
+      "card_name": "Rush Weaver",
+      "deck": "Wetlands",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Rush_Weaver",
+        "https://terrascape.fandom.com/wiki/Deck#Wetlands",
+        "https://steamcommunity.com/games/2290000/announcements/detail/1784506359022523"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-013",
+      "card_name": "Lumberjack",
+      "deck": "Forestry",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Lumberjack",
+        "https://terrascape.fandom.com/wiki/Deck#Forestry"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-014",
+      "card_name": "Forester",
+      "deck": "Forestry",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Forester",
+        "https://terrascape.fandom.com/wiki/Deck#Forestry"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-015",
+      "card_name": "Saw Mill",
+      "deck": "Forestry",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Saw_Mill",
+        "https://terrascape.fandom.com/wiki/Deck#Forestry"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-016",
+      "card_name": "Charcoal Burner",
+      "deck": "Forestry",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Charcoal_Burner",
+        "https://terrascape.fandom.com/wiki/Deck#Forestry"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-017",
+      "card_name": "Wind Mill",
+      "deck": "Foodstuff",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Wind_Mill",
+        "https://terrascape.fandom.com/wiki/Deck#Foodstuff"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-018",
+      "card_name": "Brewery",
+      "deck": "Foodstuff",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Brewery",
+        "https://terrascape.fandom.com/wiki/Deck#Foodstuff"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-019",
+      "card_name": "Butcher",
+      "deck": "Foodstuff",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Butcher",
+        "https://terrascape.fandom.com/wiki/Deck#Foodstuff"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-020",
+      "card_name": "Bakery",
+      "deck": "Foodstuff",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Bakery",
+        "https://terrascape.fandom.com/wiki/Deck#Foodstuff"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-021",
+      "card_name": "Flax Field",
+      "deck": "Textiles",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Flax_Field",
+        "https://terrascape.fandom.com/wiki/Deck#Textiles"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-022",
+      "card_name": "Tanner",
+      "deck": "Textiles",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Tanner",
+        "https://terrascape.fandom.com/wiki/Deck#Textiles"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-023",
+      "card_name": "Sheep Pasture",
+      "deck": "Textiles",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Sheep_Pasture",
+        "https://terrascape.fandom.com/wiki/Deck#Textiles"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-024",
+      "card_name": "Tailor",
+      "deck": "Textiles",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Tailor",
+        "https://terrascape.fandom.com/wiki/Deck#Textiles"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-025",
+      "card_name": "Fish Trap",
+      "deck": "Fishing",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Fish_Trap",
+        "https://terrascape.fandom.com/wiki/Deck#Fishing"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-026",
+      "card_name": "Fishing Boat",
+      "deck": "Fishing",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Fishing_Boat",
+        "https://terrascape.fandom.com/wiki/Deck#Fishing"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-027",
+      "card_name": "Shell Farm",
+      "deck": "Fishing",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Shell_Farm",
+        "https://terrascape.fandom.com/wiki/Deck#Fishing"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-028",
+      "card_name": "Fishery",
+      "deck": "Fishing",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Fishery",
+        "https://terrascape.fandom.com/wiki/Deck#Fishing"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-029",
+      "card_name": "Quarry",
+      "deck": "Mining",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Quarry",
+        "https://terrascape.fandom.com/wiki/Deck#Mining"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-030",
+      "card_name": "Iron Mine",
+      "deck": "Mining",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Iron_Mine",
+        "https://terrascape.fandom.com/wiki/Deck#Mining"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-031",
+      "card_name": "Stonemason",
+      "deck": "Mining",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Stonemason",
+        "https://terrascape.fandom.com/wiki/Deck#Mining"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-032",
+      "card_name": "Iron Smelter",
+      "deck": "Mining",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Iron_Smelter",
+        "https://terrascape.fandom.com/wiki/Deck#Mining"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-033",
+      "card_name": "Tavern",
+      "deck": "Community",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Tavern",
+        "https://terrascape.fandom.com/wiki/Deck#Community"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-034",
+      "card_name": "Bath House",
+      "deck": "Community",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Bath_House",
+        "https://terrascape.fandom.com/wiki/Deck#Community"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-035",
+      "card_name": "Temple",
+      "deck": "Community",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Temple",
+        "https://terrascape.fandom.com/wiki/Deck#Community"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-036",
+      "card_name": "Surgeon",
+      "deck": "Community",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Surgeon",
+        "https://terrascape.fandom.com/wiki/Deck#Community"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-037",
+      "card_name": "Haulier",
+      "deck": "Trade",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Haulier",
+        "https://terrascape.fandom.com/wiki/Deck#Trade"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-038",
+      "card_name": "Storehouse",
+      "deck": "Trade",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Storehouse",
+        "https://terrascape.fandom.com/wiki/Deck#Trade"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-039",
+      "card_name": "Lighthouse",
+      "deck": "Trade",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Lighthouse",
+        "https://terrascape.fandom.com/wiki/Deck#Trade"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-040",
+      "card_name": "Trading Post",
+      "deck": "Trade",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Trading_Post",
+        "https://terrascape.fandom.com/wiki/Deck#Trade"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-041",
+      "card_name": "Carpenter",
+      "deck": "Workmanship",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Carpenter",
+        "https://terrascape.fandom.com/wiki/Deck#Workmanship"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-042",
+      "card_name": "Pottery",
+      "deck": "Workmanship",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Pottery",
+        "https://terrascape.fandom.com/wiki/Deck#Workmanship"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-043",
+      "card_name": "Builders Guild",
+      "deck": "Workmanship",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Builders_Guild",
+        "https://terrascape.fandom.com/wiki/Deck#Workmanship"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-044",
+      "card_name": "Blacksmith",
+      "deck": "Workmanship",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Blacksmith",
+        "https://terrascape.fandom.com/wiki/Deck#Workmanship"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-045",
+      "card_name": "Park",
+      "deck": "Culture",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Park",
+        "https://terrascape.fandom.com/wiki/Deck#Culture"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-046",
+      "card_name": "Town Hall",
+      "deck": "Culture",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Town_Hall",
+        "https://terrascape.fandom.com/wiki/Deck#Culture"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-047",
+      "card_name": "Theater",
+      "deck": "Culture",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Theater",
+        "https://terrascape.fandom.com/wiki/Deck#Culture"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-048",
+      "card_name": "Treasury",
+      "deck": "Culture",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Treasury",
+        "https://terrascape.fandom.com/wiki/Deck#Culture"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-049",
+      "card_name": "School",
+      "deck": "Knowledge",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/School",
+        "https://terrascape.fandom.com/wiki/Deck#Knowledge"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-050",
+      "card_name": "Alchemist",
+      "deck": "Knowledge",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Alchemist",
+        "https://terrascape.fandom.com/wiki/Deck#Knowledge"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-051",
+      "card_name": "Library",
+      "deck": "Knowledge",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Library",
+        "https://terrascape.fandom.com/wiki/Deck#Knowledge"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-052",
+      "card_name": "Engineer",
+      "deck": "Knowledge",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Engineer",
+        "https://terrascape.fandom.com/wiki/Deck#Knowledge"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-053",
+      "card_name": "Chapel",
+      "deck": "Community (Steam deck posters) / Special card (current Wiki)",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292908489",
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3392870386",
+        "https://terrascape.fandom.com/wiki/Deck#Special_Card"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-054",
+      "card_name": "Granary",
+      "deck": "Special card (current Wiki and Steam 1.1.1.2 poster)",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.fandom.com/wiki/Granary",
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3392870386",
+        "https://terrascape.fandom.com/wiki/Deck#Special_Card"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-055",
+      "card_name": "Hospital",
+      "deck": "Community (Steam 1.0.0.4 / 1.1.1.2 posters)",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292908489",
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3392870386"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-056",
+      "card_name": "Harbor",
+      "deck": "Trade (Steam 1.0.0.4 / 1.1.1.2 posters)",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292908489",
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3392870386"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-057",
+      "card_name": "Hop Field",
+      "deck": "Special/extra card (Steam 1.1.1.2 poster)",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3392870386"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-058",
+      "card_name": "Beekeeper",
+      "deck": "Special/extra card (Steam 1.1.1.2 poster)",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3392870386"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-059",
+      "card_name": "Church",
+      "deck": "Special/extra card (Steam 1.1.1.2 poster)",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3392870386"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-060",
+      "card_name": "Monastery",
+      "deck": "Special/extra card (Steam 1.1.1.2 poster)",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3392870386"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-061",
+      "card_name": "Boat Builder",
+      "deck": "Special/extra card (Steam 1.1.1.2 poster)",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3392870386"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-B-062",
+      "card_name": "Weaver",
+      "deck": "Deck/category not established (official 1.0 release changelog only)",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/5969041959961134618"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-E-C-001",
+      "card_name": "Pharaoh",
+      "deck": "Shadoof",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.miraheze.org/w/index.php?title=Pharaoh&oldid=462"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-E-C-002",
+      "card_name": "Pharaoh",
+      "deck": "Worker Camp",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.miraheze.org/w/index.php?title=Pharaoh&oldid=462"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-E-C-003",
+      "card_name": "Pharaoh",
+      "deck": "Scout",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.miraheze.org/w/index.php?title=Pharaoh&oldid=462"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-E-C-004",
+      "card_name": "Pharaoh",
+      "deck": "Geologist",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.miraheze.org/w/index.php?title=Pharaoh&oldid=462"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-E-C-005",
+      "card_name": "Bastet",
+      "deck": "Housing",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.miraheze.org/w/index.php?title=Bastet&oldid=465"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-E-C-006",
+      "card_name": "Bastet",
+      "deck": "Well",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": "Well",
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.miraheze.org/w/index.php?title=Bastet&oldid=465"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-E-C-007",
+      "card_name": "Bastet",
+      "deck": "Bazaar",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.miraheze.org/w/index.php?title=Bastet&oldid=465"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-E-C-008",
+      "card_name": "Bastet",
+      "deck": "Shrine",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.miraheze.org/w/index.php?title=Bastet&oldid=465"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-E-C-009",
+      "card_name": "Geb",
+      "deck": "Field",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.miraheze.org/w/index.php?title=Geb&oldid=463"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-E-C-010",
+      "card_name": "Geb",
+      "deck": "Farmhand Camp",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.miraheze.org/w/index.php?title=Geb&oldid=463"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-E-C-011",
+      "card_name": "Geb",
+      "deck": "Noria",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.miraheze.org/w/index.php?title=Geb&oldid=463"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-E-C-012",
+      "card_name": "Geb",
+      "deck": "Stable",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.miraheze.org/w/index.php?title=Geb&oldid=463"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-E-C-013",
+      "card_name": "Isis",
+      "deck": "Scribe",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.miraheze.org/w/index.php?title=Isis&oldid=467"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-E-C-014",
+      "card_name": "Isis",
+      "deck": "Per Ankh",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.miraheze.org/w/index.php?title=Isis&oldid=467"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-E-C-015",
+      "card_name": "Isis",
+      "deck": "Granary",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": "Granary",
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.miraheze.org/w/index.php?title=Isis&oldid=467"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-E-C-016",
+      "card_name": "Isis",
+      "deck": "Seed House",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.miraheze.org/w/index.php?title=Isis&oldid=467"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-E-C-017",
+      "card_name": "Osiris",
+      "deck": "Fishing Boat",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.miraheze.org/w/index.php?title=Osiris&oldid=464"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-E-C-018",
+      "card_name": "Osiris",
+      "deck": "Alluvial Field",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.miraheze.org/w/index.php?title=Osiris&oldid=464"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-E-C-019",
+      "card_name": "Osiris",
+      "deck": "Clay Hut",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.miraheze.org/w/index.php?title=Osiris&oldid=464"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-E-C-020",
+      "card_name": "Osiris",
+      "deck": "Nile Workshop",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.miraheze.org/w/index.php?title=Osiris&oldid=464"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-E-C-021",
+      "card_name": "Ptah",
+      "deck": "Stone Mason",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.miraheze.org/w/index.php?title=Ptah&oldid=466"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-E-C-022",
+      "card_name": "Ptah",
+      "deck": "Woodshop",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.miraheze.org/w/index.php?title=Ptah&oldid=466"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-E-C-023",
+      "card_name": "Ptah",
+      "deck": "Overseer",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.miraheze.org/w/index.php?title=Ptah&oldid=466"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": "TS-E-C-024",
+      "card_name": "Ptah",
+      "deck": "Architect",
+      "is_ra_card": false,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://terrascape.miraheze.org/w/index.php?title=Ptah&oldid=466"
+      ],
+      "confidence": "candidate",
+      "notes": "Listed as a card in a public deck snapshot; exact 2.2.0.5 retention/building-role not independently confirmed.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    }
+  ],
+  "additional_building_card_candidates": [
+    {
+      "card_id": null,
+      "candidate_id": "TS-E-B-001",
+      "card_name": "Nile Workshop",
+      "deck": null,
+      "is_ra_card": null,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1826992588592964"
+      ],
+      "confidence": "candidate",
+      "notes": "Scenario/patch building lead; deck membership is unknown.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": null,
+      "candidate_id": "TS-E-B-002",
+      "card_name": "Clay Hut",
+      "deck": null,
+      "is_ra_card": null,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1826992588592964"
+      ],
+      "confidence": "candidate",
+      "notes": "Scenario/patch building lead; deck membership is unknown.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": null,
+      "candidate_id": "TS-E-B-003",
+      "card_name": "Scout",
+      "deck": null,
+      "is_ra_card": null,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1826992588592964"
+      ],
+      "confidence": "candidate",
+      "notes": "Scenario/patch building lead; deck membership is unknown.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": null,
+      "candidate_id": "TS-E-B-004",
+      "card_name": "Sandstone Quarry",
+      "deck": null,
+      "is_ra_card": null,
+      "is_building": true,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1826992588592964"
+      ],
+      "confidence": "candidate",
+      "notes": "Scenario/patch building lead; deck membership is unknown.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": null,
+      "candidate_id": "TS-E-B-005",
+      "card_name": "Bazaar",
+      "deck": null,
+      "is_ra_card": null,
+      "is_building": true,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1839676055885543"
+      ],
+      "confidence": "candidate",
+      "notes": "Scenario/patch building lead; deck membership is unknown.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": null,
+      "candidate_id": "TS-E-B-006",
+      "card_name": "Farmhand Camp",
+      "deck": null,
+      "is_ra_card": null,
+      "is_building": true,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1839676055885543"
+      ],
+      "confidence": "candidate",
+      "notes": "Scenario/patch building lead; deck membership is unknown.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": null,
+      "candidate_id": "TS-E-B-007",
+      "card_name": "Shrine",
+      "deck": null,
+      "is_ra_card": null,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1839676055885543"
+      ],
+      "confidence": "candidate",
+      "notes": "Scenario/patch building lead; deck membership is unknown.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": null,
+      "candidate_id": "TS-E-B-008",
+      "card_name": "Plaza",
+      "deck": null,
+      "is_ra_card": null,
+      "is_building": null,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1839676055885543"
+      ],
+      "confidence": "candidate",
+      "notes": "Scenario/patch building lead; deck membership is unknown.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": null,
+      "candidate_id": "TS-E-B-009",
+      "card_name": "Treasurer",
+      "deck": null,
+      "is_ra_card": null,
+      "is_building": true,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3718691158"
+      ],
+      "confidence": "candidate",
+      "notes": "Scenario/patch building lead; deck membership is unknown.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": null,
+      "candidate_id": "TS-E-B-010",
+      "card_name": "Template",
+      "deck": null,
+      "is_ra_card": null,
+      "is_building": true,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3718691158"
+      ],
+      "confidence": "candidate",
+      "notes": "Scenario/patch building lead; deck membership is unknown.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": null,
+      "candidate_id": "TS-E-B-011",
+      "card_name": "Embalmer",
+      "deck": null,
+      "is_ra_card": null,
+      "is_building": true,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3718691158"
+      ],
+      "confidence": "candidate",
+      "notes": "Scenario/patch building lead; deck membership is unknown.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    },
+    {
+      "card_id": null,
+      "candidate_id": "TS-E-V-001",
+      "card_name": "Temple (Ra)",
+      "deck": null,
+      "is_ra_card": null,
+      "is_building": true,
+      "is_merge_result": false,
+      "is_monument": false,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://www.youtube.com/watch?v=YmYqInSd4Zc&t=1150s"
+      ],
+      "confidence": "candidate",
+      "notes": "German in-game objective shows Tempel (Ra); conflicts with Steam guide label Template. Deck/card identity unresolved.",
+      "disposition": "candidate_reference_not_admitted_to_campaign_catalog"
+    }
+  ],
+  "merge_results": [
+    {
+      "merge_id": "TS-M-001",
+      "inputs": [
+        {
+          "count": 3,
+          "name": "gatherer huts"
+        }
+      ],
+      "output_id": "TS-M-001",
+      "output_name": "Fruit Farm",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "confirmed",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "confirmed_source_result_not_campaign_adaptation"
+    },
+    {
+      "merge_id": "TS-M-002",
+      "inputs": [
+        {
+          "count": 3,
+          "name": "wheat fields"
+        },
+        {
+          "count": 1,
+          "name": "hut"
+        }
+      ],
+      "output_id": "TS-M-002",
+      "output_name": "Farmstead",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "candidate",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-003",
+      "inputs": [
+        {
+          "count": 3,
+          "name": "gatherer huts"
+        },
+        {
+          "count": 1,
+          "name": "brewery"
+        }
+      ],
+      "output_id": "TS-M-003",
+      "output_name": "Vineyard",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "candidate",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-004",
+      "inputs": [
+        {
+          "count": 1,
+          "name": "wheat field"
+        },
+        {
+          "count": 1,
+          "name": "cattle pasture"
+        },
+        {
+          "count": 1,
+          "name": "mill"
+        }
+      ],
+      "output_id": "TS-M-004",
+      "output_name": "Ox Mill",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "confirmed",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "confirmed_source_result_not_campaign_adaptation"
+    },
+    {
+      "merge_id": "TS-M-005",
+      "inputs": [
+        {
+          "count": 2,
+          "name": "houses"
+        },
+        {
+          "count": 4,
+          "name": "wheat fields"
+        },
+        {
+          "count": 1,
+          "name": "well"
+        }
+      ],
+      "output_id": "TS-M-005",
+      "output_name": "Manor Farm",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "candidate",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-006",
+      "inputs": [
+        {
+          "count": 1,
+          "name": "wheat field"
+        },
+        {
+          "count": 1,
+          "name": "mill"
+        },
+        {
+          "count": 1,
+          "name": "bakery"
+        }
+      ],
+      "output_id": "TS-M-006",
+      "output_name": "Smock Mill",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "candidate",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-007",
+      "inputs": [
+        {
+          "count": 3,
+          "name": "sheep pastures"
+        }
+      ],
+      "output_id": "TS-M-007",
+      "output_name": "Shieling",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "confirmed",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "confirmed_source_result_not_campaign_adaptation"
+    },
+    {
+      "merge_id": "TS-M-008",
+      "inputs": [
+        {
+          "count": 3,
+          "name": "huts"
+        },
+        {
+          "count": 1,
+          "name": "lumberjack house"
+        },
+        {
+          "count": 2,
+          "name": "foresters"
+        },
+        {
+          "count": 1,
+          "name": "well"
+        }
+      ],
+      "output_id": "TS-M-008",
+      "output_name": "Forest Settlement",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "candidate",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-009",
+      "inputs": [
+        {
+          "count": 4,
+          "name": "foresters"
+        }
+      ],
+      "output_id": "TS-M-009",
+      "output_name": "Royal Forest",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "candidate",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-010",
+      "inputs": [
+        {
+          "count": 1,
+          "name": "fishing boat"
+        },
+        {
+          "count": 1,
+          "name": "clam farm"
+        },
+        {
+          "count": 1,
+          "name": "fish trap"
+        }
+      ],
+      "output_id": "TS-M-010",
+      "output_name": "Fishing Outpost",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "candidate",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-011",
+      "inputs": [
+        {
+          "count": 1,
+          "name": "fishing boat"
+        },
+        {
+          "count": 2,
+          "name": "fish traps"
+        },
+        {
+          "count": 1,
+          "name": "fisherman's house"
+        }
+      ],
+      "output_id": "TS-M-011",
+      "output_name": "Fish Farm",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "candidate",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-012",
+      "inputs": [
+        {
+          "count": 2,
+          "name": "huts"
+        },
+        {
+          "count": 2,
+          "name": "quarries"
+        },
+        {
+          "count": 1,
+          "name": "mason's house"
+        }
+      ],
+      "output_id": "TS-M-012",
+      "output_name": "Mining Enclave",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "candidate",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-013",
+      "inputs": [
+        {
+          "count": 2,
+          "name": "iron mines"
+        },
+        {
+          "count": 1,
+          "name": "smelter"
+        },
+        {
+          "count": 1,
+          "name": "mountain"
+        }
+      ],
+      "output_id": "TS-M-013",
+      "output_name": "Iron Mining Camp",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "candidate",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-014",
+      "inputs": [
+        {
+          "count": 1,
+          "name": "herbalist"
+        },
+        {
+          "count": 2,
+          "name": "breweries"
+        },
+        {
+          "count": 1,
+          "name": "gathering hut"
+        }
+      ],
+      "output_id": "TS-M-014",
+      "output_name": "Liquor Distillery",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "candidate",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-015",
+      "inputs": [
+        {
+          "count": 2,
+          "name": "lumberjack houses"
+        },
+        {
+          "count": 1,
+          "name": "sawmill"
+        },
+        {
+          "count": 1,
+          "name": "forge"
+        }
+      ],
+      "output_id": "TS-M-015",
+      "output_name": "Construction Yard",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "candidate",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-016",
+      "inputs": [
+        {
+          "count": 4,
+          "name": "huts"
+        }
+      ],
+      "output_id": "TS-M-016",
+      "output_name": "Longhouse",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "candidate",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-017",
+      "inputs": [
+        {
+          "count": 4,
+          "name": "houses"
+        }
+      ],
+      "output_id": "TS-M-017",
+      "output_name": "City District",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "candidate",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-018",
+      "inputs": [
+        {
+          "count": 2,
+          "name": "houses"
+        },
+        {
+          "count": 1,
+          "name": "market"
+        },
+        {
+          "count": 1,
+          "name": "storage"
+        },
+        {
+          "count": 1,
+          "name": "carrier"
+        }
+      ],
+      "output_id": "TS-M-018",
+      "output_name": "Trade District",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "candidate",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-019",
+      "inputs": [
+        {
+          "count": 1,
+          "name": "treasury"
+        },
+        {
+          "count": 2,
+          "name": "parks"
+        },
+        {
+          "count": 2,
+          "name": "chapels"
+        }
+      ],
+      "output_id": "TS-M-019",
+      "output_name": "Cathedral",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "candidate",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-020",
+      "inputs": [
+        {
+          "count": 3,
+          "name": "parks"
+        },
+        {
+          "count": 1,
+          "name": "school"
+        },
+        {
+          "count": 1,
+          "name": "tavern"
+        },
+        {
+          "count": 1,
+          "name": "library"
+        }
+      ],
+      "output_id": "TS-M-020",
+      "output_name": "Citadel of Wisdom",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "candidate",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-021",
+      "inputs": [
+        {
+          "count": 1,
+          "name": "well"
+        },
+        {
+          "count": 1,
+          "name": "hut"
+        },
+        {
+          "count": 1,
+          "name": "megalith"
+        }
+      ],
+      "output_id": "TS-M-021",
+      "output_name": "Sanctuary",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1784506359022523",
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "confirmed",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "confirmed_source_result_not_campaign_adaptation"
+    },
+    {
+      "merge_id": "TS-M-022",
+      "inputs": [
+        {
+          "count": 3,
+          "name": "herbalists"
+        }
+      ],
+      "output_id": "TS-M-022",
+      "output_name": "Herb Garden",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1800991756324446",
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "confirmed",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "confirmed_source_result_not_campaign_adaptation"
+    },
+    {
+      "merge_id": "TS-M-023",
+      "inputs": [
+        {
+          "count": 1,
+          "name": "Pond"
+        },
+        {
+          "count": 1,
+          "name": "herbalist"
+        },
+        {
+          "count": 1,
+          "name": "reed gatherer"
+        },
+        {
+          "count": 1,
+          "name": "weaver"
+        }
+      ],
+      "output_id": "TS-M-023",
+      "output_name": "Pond Farm",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1784506359022523",
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "confirmed",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "confirmed_source_result_not_campaign_adaptation"
+    },
+    {
+      "merge_id": "TS-M-024",
+      "inputs": [
+        {
+          "count": 1,
+          "name": "tailor"
+        },
+        {
+          "count": 2,
+          "name": "linen field"
+        },
+        {
+          "count": 1,
+          "name": "weaver"
+        }
+      ],
+      "output_id": "TS-M-024",
+      "output_name": "Ropery",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1784506359022523",
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "confirmed",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "confirmed_source_result_not_campaign_adaptation"
+    },
+    {
+      "merge_id": "TS-M-025",
+      "inputs": [
+        {
+          "count": 1,
+          "name": "temple"
+        },
+        {
+          "count": 6,
+          "name": "megaliths"
+        }
+      ],
+      "output_id": "TS-M-025",
+      "output_name": "Henge",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1784506359022523",
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "confirmed",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "confirmed_source_result_not_campaign_adaptation"
+    },
+    {
+      "merge_id": "TS-M-026",
+      "inputs": [
+        {
+          "count": 3,
+          "name": "parks"
+        }
+      ],
+      "output_id": "TS-M-026",
+      "output_name": "City Park",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1784506359022523",
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "confirmed",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "confirmed_source_result_not_campaign_adaptation"
+    },
+    {
+      "merge_id": "TS-M-038",
+      "inputs": null,
+      "output_id": "TS-M-038",
+      "output_name": "Greater Mill",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/5969041959961134618"
+      ],
+      "confidence": "confirmed",
+      "source_version": "official patch note in cited source",
+      "input_confidence": "unknown",
+      "disposition": "confirmed_source_result_not_campaign_adaptation"
+    },
+    {
+      "merge_id": "TS-M-027",
+      "inputs": null,
+      "output_id": "TS-M-027",
+      "output_name": "Lotus Basin",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1838407329269686"
+      ],
+      "confidence": "confirmed",
+      "source_version": "official patch note in cited source",
+      "input_confidence": "unknown",
+      "disposition": "confirmed_source_result_not_campaign_adaptation"
+    },
+    {
+      "merge_id": "TS-M-028",
+      "inputs": null,
+      "output_id": "TS-M-028",
+      "output_name": "Nun Cistern",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1838407329269686"
+      ],
+      "confidence": "confirmed",
+      "source_version": "official patch note in cited source",
+      "input_confidence": "unknown",
+      "disposition": "confirmed_source_result_not_campaign_adaptation"
+    },
+    {
+      "merge_id": "TS-M-029",
+      "inputs": null,
+      "output_id": "TS-M-029",
+      "output_name": "Kenbet",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1838407329269686"
+      ],
+      "confidence": "confirmed",
+      "source_version": "official patch note in cited source",
+      "input_confidence": "unknown",
+      "disposition": "confirmed_source_result_not_campaign_adaptation"
+    },
+    {
+      "merge_id": "TS-M-030",
+      "inputs": null,
+      "output_id": "TS-M-030",
+      "output_name": "Caravansary",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1838407329269686"
+      ],
+      "confidence": "confirmed",
+      "source_version": "official patch note in cited source",
+      "input_confidence": "unknown",
+      "disposition": "confirmed_source_result_not_campaign_adaptation"
+    },
+    {
+      "merge_id": "TS-M-031",
+      "inputs": null,
+      "output_id": "TS-M-031",
+      "output_name": "Great Plaza",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1838407329269686"
+      ],
+      "confidence": "confirmed",
+      "source_version": "official patch note in cited source",
+      "input_confidence": "unknown",
+      "disposition": "confirmed_source_result_not_campaign_adaptation"
+    },
+    {
+      "merge_id": "TS-M-039",
+      "inputs": null,
+      "output_id": "TS-M-039",
+      "output_name": "Limestone Quarry",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1838407329269686",
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3718691158"
+      ],
+      "confidence": "candidate",
+      "source_version": "community/source ledger snapshot; exact game version not pinned",
+      "input_confidence": "unknown",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-040",
+      "inputs": null,
+      "output_id": "TS-M-040",
+      "output_name": "Gods Plaza",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1839676055885543",
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3718691158"
+      ],
+      "confidence": "candidate",
+      "source_version": "community/source ledger snapshot; exact game version not pinned",
+      "input_confidence": "unknown",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-041",
+      "inputs": null,
+      "output_id": "TS-M-041",
+      "output_name": "Clay Pit",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1839676055885543",
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3718691158"
+      ],
+      "confidence": "candidate",
+      "source_version": "community/source ledger snapshot; exact game version not pinned",
+      "input_confidence": "unknown",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-042",
+      "inputs": null,
+      "output_id": "TS-M-042",
+      "output_name": "Dromos",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1839676055885543",
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3718691158"
+      ],
+      "confidence": "candidate",
+      "source_version": "community/source ledger snapshot; exact game version not pinned",
+      "input_confidence": "unknown",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-043",
+      "inputs": null,
+      "output_id": "TS-M-043",
+      "output_name": "Indigo Farm",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1833334318569149",
+        "https://terrascape.miraheze.org/w/index.php?title=Version_History&oldid=476"
+      ],
+      "confidence": "candidate",
+      "source_version": "community/source ledger snapshot; exact game version not pinned",
+      "input_confidence": "unknown",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-044",
+      "inputs": null,
+      "output_id": "TS-M-044",
+      "output_name": "Greater Noria",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3718691158"
+      ],
+      "confidence": "candidate",
+      "source_version": "community/source ledger snapshot; exact game version not pinned",
+      "input_confidence": "unknown",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-045",
+      "inputs": null,
+      "output_id": "TS-M-045",
+      "output_name": "Gold Mine",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3718691158"
+      ],
+      "confidence": "candidate",
+      "source_version": "community/source ledger snapshot; exact game version not pinned",
+      "input_confidence": "unknown",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-046",
+      "inputs": null,
+      "output_id": "TS-M-046",
+      "output_name": "Basalt Quarry",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3718691158"
+      ],
+      "confidence": "candidate",
+      "source_version": "community/source ledger snapshot; exact game version not pinned",
+      "input_confidence": "unknown",
+      "disposition": "candidate_merge_not_admitted_to_campaign_catalog"
+    },
+    {
+      "merge_id": "TS-M-032",
+      "inputs": [
+        {
+          "count": 1,
+          "name": "surgeon"
+        },
+        {
+          "count": 1,
+          "name": "bathhouse"
+        },
+        {
+          "count": 1,
+          "name": "chapel"
+        }
+      ],
+      "output_id": "TS-M-032",
+      "output_name": "Hospital",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1800991756324446",
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "confirmed",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "confirmed_source_result_not_campaign_adaptation"
+    },
+    {
+      "merge_id": "TS-M-033",
+      "inputs": [
+        {
+          "count": 2,
+          "name": "schools"
+        },
+        {
+          "count": 1,
+          "name": "library"
+        },
+        {
+          "count": 1,
+          "name": "alchemist"
+        }
+      ],
+      "output_id": "TS-M-033",
+      "output_name": "University",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1800991756324446",
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "confirmed",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "confirmed_source_result_not_campaign_adaptation"
+    },
+    {
+      "merge_id": "TS-M-034",
+      "inputs": [
+        {
+          "count": 3,
+          "name": "traders"
+        },
+        {
+          "count": 1,
+          "name": "carrier"
+        },
+        {
+          "count": 1,
+          "name": "lighthouse"
+        },
+        {
+          "count": 1,
+          "name": "warehouse"
+        }
+      ],
+      "output_id": "TS-M-034",
+      "output_name": "Harbor (guide label: Port)",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1800991756324446",
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "confirmed",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "confirmed_source_result_not_campaign_adaptation"
+    },
+    {
+      "merge_id": "TS-M-035",
+      "inputs": [
+        {
+          "count": 1,
+          "name": "sawmill"
+        },
+        {
+          "count": 1,
+          "name": "carpenter"
+        },
+        {
+          "count": 2,
+          "name": "rivers"
+        }
+      ],
+      "output_id": "TS-M-035",
+      "output_name": "Timber Mill (guide label: Lumber-mill)",
+      "output_type": "merge_result",
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1800991756324446",
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3292704537"
+      ],
+      "confidence": "confirmed",
+      "source_version": "Steam guide updated 2026-08-12; exact game patch not declared",
+      "input_confidence": "candidate",
+      "disposition": "confirmed_source_result_not_campaign_adaptation"
+    },
+    {
+      "merge_id": "TS-M-036",
+      "inputs": null,
+      "output_id": "TS-M-036",
+      "output_name": "Royal Forest Variant",
+      "output_type": "variant",
+      "monument_stage": null,
+      "variant_of": "Royal Forest",
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1800991756324446"
+      ],
+      "confidence": "confirmed",
+      "source_version": "official patch note in cited source",
+      "input_confidence": "unknown",
+      "disposition": "confirmed_source_result_not_campaign_adaptation"
+    },
+    {
+      "merge_id": "TS-M-037",
+      "inputs": null,
+      "output_id": "TS-M-037",
+      "output_name": "CityDistrict Variant",
+      "output_type": "variant",
+      "monument_stage": null,
+      "variant_of": "City District",
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1800991756324446"
+      ],
+      "confidence": "confirmed",
+      "source_version": "official patch note in cited source",
+      "input_confidence": "unknown",
+      "disposition": "confirmed_source_result_not_campaign_adaptation"
+    }
+  ],
+  "monuments": [
+    {
+      "monument_id": "TS-MON-001",
+      "name": "Aswan Obelisk",
+      "is_monument": true,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1838407329269686"
+      ],
+      "confidence": "confirmed",
+      "notes": "Named as an Ancient Egypt monument in official RISE 2.1.0.0 notes; later stage/variant structure remains unknown.",
+      "disposition": "candidate_monument_not_admitted_as_building_or_card"
+    },
+    {
+      "monument_id": "TS-MON-002",
+      "name": "Step Pyramid",
+      "is_monument": true,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1838407329269686"
+      ],
+      "confidence": "confirmed",
+      "notes": "Named as an Ancient Egypt monument in official RISE 2.1.0.0 notes; later stage/variant structure remains unknown.",
+      "disposition": "candidate_monument_not_admitted_as_building_or_card"
+    },
+    {
+      "monument_id": "TS-MON-003",
+      "name": "Temple of Luxor",
+      "is_monument": true,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1838407329269686"
+      ],
+      "confidence": "candidate",
+      "notes": "Keep as a candidate monument in this project inventory; do not treat as a building card or Ra card.",
+      "disposition": "candidate_monument_not_admitted_as_building_or_card"
+    },
+    {
+      "monument_id": "TS-MON-004",
+      "name": "Pyramid",
+      "is_monument": true,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1826992588592964",
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3718691158"
+      ],
+      "confidence": "candidate",
+      "notes": "Pyramid identity appears in official construction-visual notes and a scenario reward; complete stage identity/crosswalk remains unknown.",
+      "disposition": "candidate_monument_not_admitted_as_building_or_card"
+    },
+    {
+      "monument_id": "TS-MON-005",
+      "name": "Bent Pyramid",
+      "is_monument": true,
+      "monument_stage": null,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1826992588592964"
+      ],
+      "confidence": "candidate",
+      "notes": "Monument identity is named; complete stage chain/variant mapping is not established.",
+      "disposition": "candidate_monument_not_admitted_as_building_or_card"
+    },
+    {
+      "monument_id": "TS-MON-006",
+      "name": "Sphinx",
+      "is_monument": true,
+      "monument_stage": 4,
+      "variant_of": null,
+      "version": "2.2.0.5 + Ancient Egypt",
+      "source": [
+        "https://steamcommunity.com/games/2290000/announcements/detail/1826992588592964",
+        "https://steamcommunity.com/sharedfiles/filedetails/?id=3718691158"
+      ],
+      "confidence": "candidate",
+      "notes": "Monument identity is named; complete stage chain/variant mapping is not established.",
+      "disposition": "candidate_monument_not_admitted_as_building_or_card"
+    }
+  ],
+  "coverage_gaps": [
+    {
+      "id": "TS-GAP-RA-001",
+      "subject": "Complete Ra deck card roster",
+      "status": "unknown",
+      "observed_leads": [
+        "Template",
+        "Temple (Ra)",
+        "Treasurer",
+        "Embalmer"
+      ],
+      "details": "Template vs Temple (Ra) is unresolved; Treasurer/Embalmer are scenario building objectives but deck membership is unconfirmed. The number and names of all Ra cards cannot be established from current public references.",
+      "do_not_infer": true
+    },
+    {
+      "id": "TS-GAP-MERGE-001",
+      "subject": "Complete 2.2.0.5 + Ancient Egypt merge graph and recipes",
+      "status": "unknown",
+      "details": "Thirty medieval merge recipes are visible in an unpinned community guide; named official/secondary Egyptian results are present but their complete recipes and full roster are not published in the sources checked.",
+      "do_not_infer": true
+    },
+    {
+      "id": "TS-GAP-CARD-001",
+      "subject": "Complete current card roster and replacement/variant crosswalk",
+      "status": "unknown",
+      "details": "The indexed six Egyptian decks do not include Ra; historical deck posters and current Wiki disagree on several base-card labels. No complete 2.2.0.5 deck manifest found.",
+      "do_not_infer": true
+    }
+  ]
+}

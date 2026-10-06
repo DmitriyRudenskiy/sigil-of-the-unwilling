@@ -4,6 +4,7 @@ extends BaseTest
 
 const MvpSaveManager = preload("res://scripts/campaign/save/mvp_save_manager.gd")
 const MvpSaveSchema = preload("res://scripts/campaign/save/mvp_save_schema.gd")
+const CampaignTrainingService = preload("res://scripts/campaign/campaign_training_service.gd")
 
 
 func before_test() -> void:
@@ -52,6 +53,55 @@ func test_round_trip_i1() -> void:
 	assert_that(loaded["state"] == state) \
 		.override_failure_message("I1: round-trip должен вернуть идентичное состояние")
 
+
+func test_campaign_city_and_trained_party_state_round_trip() -> void:
+	var state := _sample_state()
+	state["city"]["campaign_buildings"] = [
+		{"uid": 8, "id": "barracks", "state": "active", "cell": {"x": 3, "y": -1}},
+	]
+	state["city"]["population"] = [
+		{"uid": 4, "ancestry_id": "gnome", "archetype_id": "engineers_builders"},
+	]
+	state["party"].append({
+		"id": "trained_1", "class": "fighter", "race": "human", "level": 1,
+		"xp": 0, "stats": {"str": 13}, "luck": 0,
+	})
+	var saved := MvpSaveManager.save_slot(1, state)
+	assert_that(saved["ok"]).override_failure_message(str(saved["message"]))
+	var loaded := MvpSaveManager.load_slot(1)
+	assert_that(loaded["ok"]).override_failure_message(str(loaded["message"]))
+	var saved_city: Dictionary = loaded["state"].city
+	assert_that(saved_city.campaign_buildings[0].id).is_equal("barracks")
+	assert_that(int(saved_city.campaign_buildings[0].uid)).is_equal(8)
+	assert_float(float(saved_city.campaign_buildings[0].cell.x)).is_equal_approx(3.0, 0.0001)
+	assert_that(saved_city.population[0].ancestry_id).is_equal("gnome")
+	assert_that(saved_city.population[0].archetype_id).is_equal("engineers_builders")
+	var trained: Dictionary = loaded["state"].party[-1]
+	assert_that(trained.id).is_equal("trained_1")
+	assert_that(trained["class"]).is_equal("fighter")
+	assert_that(trained.race).is_equal("human")
+
+func test_training_result_is_saved_with_party_and_resource_costs() -> void:
+	var state := _sample_state()
+	state.city.campaign_buildings = [{"uid": 8, "id": "barracks", "state": "active"}]
+	var catalog := {"schema_version": 1, "buildings": [{
+		"id": "barracks", "training": [{"class_id": "fighter",
+			"costs": {"food": 2.0, "iron": 1.0}}],
+		"prerequisites": {"buildings": [], "scenario_flags": [], "admin_capacity": 0},
+	}]}
+	var trained := CampaignTrainingService.train(state, catalog, 8, "fighter", {
+		"id": "new_guard", "name": "Guard", "race": "humans",
+		"stats": {"str": 13, "dex": 10, "con": 10, "int": 10, "wis": 10, "cha": 10},
+	})
+	assert_bool(trained.ok).is_true()
+	var saved := MvpSaveManager.save_slot(1, state)
+	assert_bool(saved.ok).is_true()
+	var loaded := MvpSaveManager.load_slot(1)
+	assert_bool(loaded.ok).is_true()
+	assert_that(loaded.state.party[-1].id).is_equal("new_guard")
+	assert_that(loaded.state.party[-1]["class"]).is_equal("fighter")
+	assert_float(float(loaded.state.resources.food)).is_equal_approx(28.0, 0.0001)
+	assert_float(float(loaded.state.resources.iron)).is_equal_approx(9.0, 0.0001)
 
 func test_byte_determinism() -> void:
 	var state := _sample_state()

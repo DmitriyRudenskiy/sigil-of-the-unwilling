@@ -1,13 +1,15 @@
 {
   "_meta": {
     "source": "02d-classes-skills.md §2/§4.2 (классы), 02e3-races.md §9.4 (группы), K-M5-правка (первый эшелон, владелец, 2026-10-02)",
-    "date": "2026-10-02",
+    "date": "2026-10-04",
     "notes": [
       "K1 (02d): канон = 11 классов без Колдуна; «mage» = Волшебник (wizard). MVP наём = 6 (hireable: true).",
       "K-M5-правка (2026-10-02, закрытие ратифицированного, без новой D-записи): первый эшелон = 7 рас (одна на группу); формула: первый эшелон = 7 (по одной на группу), горизонт = 54 (каталог), дубли аннулируются. Дубли (драконорождённые, полуэльфы) — миграционный горизонт каталога 54, не стартовый пул; вхождение — K-A6 (расовый флаг), контентный слой (Q-M18).",
       "«Орки» — ошибка словаря (в базовой системе D&D расы полуорки, орков как расы нет) → half_orcs.",
       "modifiers — SRD-таблица базовой системы (не локальная традиция, не 02e3 §9.2 — пре-пивотные данные, аннулированы). Удача (7-я характеристика, K-A6) — в каталоге 0 для всех; Удача гномов +2 — ратифицируется отдельным балансом в 07-balance, не хардкодится в коде.",
-      "races_classes.json (Pathfinder) — легаси-слой пре-пивота: не тронут и не мигрирован до Ф-R (легаси-слои сносятся по Ф-плану, не по тикету каталога); живой потребитель — RaceClassRegistry/follower_system."
+      "races_classes.json (Pathfinder) — легаси-слой пре-пивота: не тронут и не мигрирован до Ф-R (легаси-слои сносятся по Ф-плану, не по тикету каталога); живой потребитель — RaceClassRegistry/follower_system.",
+      "Population fields in groups are campaign adaptations from OpenSpec change campaign-city-building-economy/archetype-profiles.md; Against the Storm source pattern is pinned Species.csv at FrankRuis/ats_cheatsheet@cea861b4a6a3668685f1b727def6d7d66565a5f8; source Resolve/goods/thresholds are not imported.",
+      "group_relations and archetype_rules are the bounded campaign rules in campaign-city-building-economy/archetype-relations.md; no source-game affinity values or hard ancestry/job locks are copied."
     ]
   },
   "classes": [
@@ -32,13 +34,48 @@
     {"id": "dwarves", "name": "Дворфы", "group": "metallurgists_technicians", "modifiers": {"STR": 0, "DEX": 0, "CON": 2, "INT": 0, "WIS": 0, "CHA": 0}, "luck": 0, "first_tier": true},
     {"id": "half_orcs", "name": "Полуорки", "group": "hunters_trackers", "modifiers": {"STR": 2, "DEX": 0, "CON": 1, "INT": 0, "WIS": 0, "CHA": 0}, "luck": 0, "first_tier": true}
   ],
+  "archetype_rules": {
+    "initial_satisfaction": 50,
+    "satisfied_need_delta": 1,
+    "unmet_need_delta": 1,
+    "satisfaction_min": 0,
+    "satisfaction_max": 100,
+    "specialization_bonus_per_worker_bp": 1000,
+    "specialization_bonus_cap_bp": 10000,
+    "relation_delta_min": -2,
+    "relation_delta_max": 2,
+    "relation_mediation_service_id": "community_mediation"
+  },
+  "group_relations": [
+    {"a": "engineers_builders", "b": "farmers_brewers", "value": 1},
+    {"a": "engineers_builders", "b": "alchemists_flame", "value": 0},
+    {"a": "engineers_builders", "b": "weavers_crafters", "value": -2},
+    {"a": "engineers_builders", "b": "merchants_diplomats", "value": 2},
+    {"a": "engineers_builders", "b": "hunters_trackers", "value": -1},
+    {"a": "engineers_builders", "b": "metallurgists_technicians", "value": 0},
+    {"a": "farmers_brewers", "b": "alchemists_flame", "value": -1},
+    {"a": "farmers_brewers", "b": "weavers_crafters", "value": 0},
+    {"a": "farmers_brewers", "b": "merchants_diplomats", "value": 1},
+    {"a": "farmers_brewers", "b": "hunters_trackers", "value": 0},
+    {"a": "farmers_brewers", "b": "metallurgists_technicians", "value": 0},
+    {"a": "alchemists_flame", "b": "weavers_crafters", "value": -2},
+    {"a": "alchemists_flame", "b": "merchants_diplomats", "value": -2},
+    {"a": "alchemists_flame", "b": "hunters_trackers", "value": 1},
+    {"a": "alchemists_flame", "b": "metallurgists_technicians", "value": 2},
+    {"a": "weavers_crafters", "b": "merchants_diplomats", "value": 0},
+    {"a": "weavers_crafters", "b": "hunters_trackers", "value": 2},
+    {"a": "weavers_crafters", "b": "metallurgists_technicians", "value": -1},
+    {"a": "merchants_diplomats", "b": "hunters_trackers", "value": -2},
+    {"a": "merchants_diplomats", "b": "metallurgists_technicians", "value": 0},
+    {"a": "hunters_trackers", "b": "metallurgists_technicians", "value": 2}
+  ],
   "groups": [
-    {"id": "engineers_builders", "name": "Инженеры & Строители", "spec": "деревообработка, инженерия, строительство"},
-    {"id": "farmers_brewers", "name": "Земледельцы & Пивовары", "spec": "фермерство, пивоварение, еда"},
-    {"id": "alchemists_flame", "name": "Алхимики & Хранители Пламени", "spec": "алхимия, обработка материалов"},
-    {"id": "weavers_crafters", "name": "Ткачи & Ремесленники", "spec": "ремёсла, ткачество, духи"},
-    {"id": "merchants_diplomats", "name": "Торговцы & Дипломаты", "spec": "торговля, дипломатия, небо"},
-    {"id": "hunters_trackers", "name": "Охотники & Следопыты", "spec": "охота, следопытство"},
-    {"id": "metallurgists_technicians", "name": "Металлурги & Техники", "spec": "металлургия, война, тяжёлая промышленность"}
+    {"id": "engineers_builders", "name": "Инженеры & Строители", "spec": "деревообработка, инженерия, строительство", "signature_need": "education", "preferred_roles": ["engineering", "construction", "woodworking"], "response_tier": "low", "unmet_response_period_turns": 1},
+    {"id": "farmers_brewers", "name": "Земледельцы & Пивовары", "spec": "фермерство, пивоварение, еда", "signature_need": "food", "preferred_roles": ["agriculture", "food_production", "brewing"], "response_tier": "low", "unmet_response_period_turns": 1},
+    {"id": "alchemists_flame", "name": "Алхимики & Хранители Пламени", "spec": "алхимия, обработка материалов", "signature_need": "brawling", "preferred_roles": ["alchemy", "material_processing", "animal_handling"], "response_tier": "high", "unmet_response_period_turns": 3},
+    {"id": "weavers_crafters", "name": "Ткачи & Ремесленники", "spec": "ремёсла, ткачество, духи", "signature_need": "treatment", "preferred_roles": ["textile", "crafting", "alchemy"], "response_tier": "low", "unmet_response_period_turns": 1},
+    {"id": "merchants_diplomats", "name": "Торговцы & Дипломаты", "spec": "торговля, дипломатия, небо", "signature_need": "market_access", "preferred_roles": ["trade", "logistics", "diplomacy"], "response_tier": "medium", "unmet_response_period_turns": 2},
+    {"id": "hunters_trackers", "name": "Охотники & Следопыты", "spec": "охота, следопытство", "signature_need": "religion", "preferred_roles": ["scouting", "gathering", "hunting"], "response_tier": "low", "unmet_response_period_turns": 1},
+    {"id": "metallurgists_technicians", "name": "Металлурги & Техники", "spec": "металлургия, война, тяжёлая промышленность", "signature_need": "education", "preferred_roles": ["metalworking", "technology", "defense"], "response_tier": "high", "unmet_response_period_turns": 3}
   ]
 }

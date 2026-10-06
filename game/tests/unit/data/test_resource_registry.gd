@@ -1,5 +1,13 @@
 extends BaseTest
 
+func test_campaign_resource_registry() -> void:
+	assert_that(Resources.CAMPAIGN_LAYER_1_IDS.size()).is_equal(6)
+	assert_that(Resources.CAMPAIGN_LAYER_2_IDS.size()).is_equal(5)
+	assert_that(Resources.CAMPAIGN_MVP_IDS).contains_exactly([&"food", &"wood", &"iron"])
+	assert_that(Resources.get_campaign_resource_defs(true).size()).is_equal(3)
+	assert_bool(Resources.is_mvp_campaign_resource(&"iron")).is_true()
+	assert_bool(Resources.is_mvp_campaign_resource(&"amber")).is_false()
+
 func test_wood_definition() -> void:
 	var def := Resources.get_resource(&"wood")
 	assert_that(def).is_not_null()
