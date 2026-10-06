@@ -12,11 +12,11 @@ const START_BUILDINGS: Array = [
 
 func _start_state() -> SettlementProcessor:
 	# Стартовые числа баланса: T-001 (население 20, еда 30/дерево 20/железо 10, партия 2),
-	# T-030 (5 зданий; жильё 10).
+	# T-030 (5 зданий; жильё 20 — Q-M28, закрыто, 11-я итерация §1.2: старт-кап = старт-популяции).
 	var p := SettlementProcessor.new()
 	p.stocks = {"food": 30.0, "wood": 20.0, "iron": 10.0}
 	p.population = 20
-	p.housing = 10
+	p.housing = 20
 	p.party_size = 2
 	p.buildings = START_BUILDINGS.duplicate(true)
 	return p
@@ -35,9 +35,9 @@ func test_start_state_one_turn() -> void:
 	assert_that(p.sm["food"]["state"]).is_equal("DEFICIT")
 	assert_that(p.sm["wood"]["state"]).is_equal("OK")
 	assert_that(p.sm["iron"]["state"]).is_equal("OK")
-	# R3-кап: min(жильё 10, floor(14/0.7)=20) = 10; рождения int(0.1×20)=2; pop = clamp(22, 0, 10) = 10.
-	assert_int(r["population_cap"]).is_equal(10)
-	assert_int(p.population).is_equal(10)
+	# R3-кап: min(жильё 20, floor(14/0.7)=20) = 20; рождения int(0.1×20)=2; pop = clamp(22, 0, 20) = 20.
+	assert_int(r["population_cap"]).is_equal(20)
+	assert_int(p.population).is_equal(20)
 	# Отчёт: 20 дней, production еда = 15×2 + 5×0.5 = 32.5.
 	assert_int(r["days"]).is_equal(20)
 	assert_float(r["production"]["food"]).is_equal_approx(32.5, 1e-6)
@@ -103,7 +103,7 @@ func test_efficiency_clamp() -> void:
 
 
 func test_season_mult_applied() -> void:
-	# Буря: production ×0.4 (Q-M26: season = turn; mult — инжкт из WorldSeasons).
+	# Зима: production ×0.4 (Q-M27: season = turn, цикл 4; mult — инжкт из WorldSeasons).
 	var p := _start_state()
 	var r: Dictionary = p.process_turn(0.4)
 	assert_float(r["production"]["wood"]).is_equal_approx(2.0 * 0.4 * 20.0, 1e-6)
@@ -139,7 +139,7 @@ func test_driver_integration() -> void:
 		driver.end_player_phase()    # player → threats
 		driver.advance_auto_phase()  # threats → finish (следующий settlement)
 	assert_int(driver.current_turn).is_equal(4)
-	assert_int(p.population).is_equal(10)  # R3-кап 10 держится
+	assert_int(p.population).is_equal(20)  # R3-кап 20 держится (Q-M28)
 	assert_float(p.stocks["food"]).is_less(0.0)  # дефицит еды (якорь «выживание», 06-economy)
 	assert_float(p.stocks["wood"]).is_greater(0.0)
 	# Сериализация пары driver+processor.
@@ -148,4 +148,4 @@ func test_driver_integration() -> void:
 	var driver2 := TurnDriver.from_dict(d_data)
 	var p2 := SettlementProcessor.from_dict(p_data)
 	assert_int(driver2.current_turn).is_equal(4)
-	assert_int(p2.population).is_equal(10)
+	assert_int(p2.population).is_equal(20)

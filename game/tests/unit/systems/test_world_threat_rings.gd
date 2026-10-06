@@ -48,18 +48,26 @@ func test_spawned_enemies_respect_rings() -> void:
 
 
 func test_season_cycle_and_mults() -> void:
-	# Q-M26 (владелец 2026-10-05): 1 ход = 1 сезон — сезон меняется каждый ход.
-	assert_that(WorldSeasons.season_name()).is_equal("Ясный сезон")
+	# Q-M27 (закрыто, 11-я итерация §1.1): сезон = ход, цикл 4 (Весна/Лето/Осень/Зима),
+	# ход 1 = Весна; множители — 07-balance §6 (сезонная таблица).
+	assert_that(WorldSeasons.season_name()).is_equal("Весна")  # ход 0 = Весна
 	assert_float(WorldSeasons.production_mult()).is_equal(1.0)
-	WorldSeasons.advance_turn()  # ход 1 = Ясный
-	assert_that(WorldSeasons.season_name()).is_equal("Ясный сезон")
-	WorldSeasons.advance_turn()  # ход 2 = Морось
-	assert_that(WorldSeasons.season_name()).is_equal("Морось")
+	WorldSeasons.advance_turn()  # ход 1 = Весна
+	assert_that(WorldSeasons.season_name()).is_equal("Весна")
+	WorldSeasons.advance_turn()  # ход 2 = Лето
+	assert_that(WorldSeasons.season_name()).is_equal("Лето")
 	assert_float(WorldSeasons.production_mult()).is_equal(1.2)
-	WorldSeasons.advance_turn()  # ход 3 = Буря
-	assert_that(WorldSeasons.season_name()).is_equal("Буря")
+	WorldSeasons.advance_turn()  # ход 3 = Осень
+	assert_that(WorldSeasons.season_name()).is_equal("Осень")
+	assert_float(WorldSeasons.production_mult()).is_equal(1.0)
+	WorldSeasons.advance_turn()  # ход 4 = Зима
+	assert_that(WorldSeasons.season_name()).is_equal("Зима")
 	assert_float(WorldSeasons.production_mult()).is_equal(0.4)
 	assert_float(WorldSeasons.enemy_mult()).is_greater(1.0)
+	# Ход 21 = Весна по формуле (20 % 4 = 0) — Q-M29 (решение Q-M27: «зима» —
+	# противоречие, вердикт владельцу).
+	WorldSeasons.set_turns(21)
+	assert_that(WorldSeasons.season_name()).is_equal("Весна")
 
 
 func test_hostility_grows_over_time() -> void:
@@ -81,22 +89,22 @@ func test_make_stack_size_mult() -> void:
 	assert_int(big.count).is_greater(small.count)
 
 
-func test_storm_boosts_spawns() -> void:
+func test_winter_boosts_spawns() -> void:
 	WorldSeasons.reset()
-	for i in 3:  # ход 3 = Буря (Q-M26: 1 ход = 1 сезон)
+	for i in 4:  # ход 4 = Зима (Q-M27: цикл 4, 1 ход = 1 сезон)
 		WorldSeasons.advance_turn()
-	assert_that(WorldSeasons.season_name()).is_equal("Буря")
+	assert_that(WorldSeasons.season_name()).is_equal("Зима")
 	var reg: Node = Services.resolve(&"units")
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 11
 	var calm: UnitStack = null
-	var stormy: UnitStack = null
+	var wintery: UnitStack = null
 	WorldSeasons.reset()
 	calm = reg.make_stack("wolves", rng, WorldSeasons.hostility_mult() * WorldSeasons.enemy_mult())
-	for i in 3:  # ход 3 = Буря
+	for i in 4:  # ход 4 = Зима
 		WorldSeasons.advance_turn()
-	stormy = reg.make_stack("wolves", rng, WorldSeasons.hostility_mult() * WorldSeasons.enemy_mult())
-	assert_bool(stormy.count >= calm.count).is_true()
+	wintery = reg.make_stack("wolves", rng, WorldSeasons.hostility_mult() * WorldSeasons.enemy_mult())
+	assert_bool(wintery.count >= calm.count).is_true()
 
 
 func test_no_enemy_spawn_near_cities() -> void:
