@@ -39,6 +39,37 @@ func test_defense_strength_militia_and_walls() -> void:
 		building.level = 3
 	assert_that(c.defense_strength()).is_equal(21)
 
+func test_campaign_defense_states_feed_defense_only_as_declared() -> void:
+	var building := {
+		"uid": 9, "id": "watchtower", "roles": ["static_defense"],
+		"state": "active", "defense": {"active": 8, "inactive": 0, "ruined": 0},
+	}
+	var c: City = _city()
+	c.campaign_buildings.append(building)
+	assert_that(c.defense_strength()).is_equal(8)
+	c.campaign_buildings[0].state = "inactive"
+	assert_that(c.defense_strength()).is_equal(0)
+	c.campaign_buildings[0].state = "ruined"
+	assert_that(c.defense_strength()).is_equal(0)
+	c.campaign_buildings[0].roles = ["food_production"]
+	c.campaign_buildings[0].state = "active"
+	assert_that(c.defense_strength()).is_zero()
+
+func test_campaign_defense_changes_deterministic_raid_and_is_explained() -> void:
+	var exposed: City = _city(99)
+	var exposed_result := RaidSystem.resolve(exposed, 12)
+	assert_bool(bool(exposed_result.occurred)).is_true()
+	assert_bool(bool(exposed_result.repelled)).is_false()
+	var defended: City = _city(99)
+	defended.campaign_buildings.append({
+		"uid": 10, "id": "watchtower", "roles": ["static_defense"], "state": "active",
+		"defense": {"active": 20, "inactive": 0, "ruined": 0},
+	})
+	var defended_result := RaidSystem.resolve(defended, 12)
+	assert_bool(bool(defended_result.repelled)).is_true()
+	assert_that(defended_result.campaign_defense.strength).is_equal(20)
+	assert_that(defended_result.campaign_defense.contributions[0].building_id).is_equal("watchtower")
+
 func test_market_trade_ok() -> void:
 	var c: Variant = _city()
 	_add_building(c, BuildingDefs.market())

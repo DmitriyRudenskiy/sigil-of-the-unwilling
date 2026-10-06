@@ -41,6 +41,11 @@ func execute_turn(ctx: TurnContext) -> Dictionary:
 		(report["phases"] as Dictionary)[phase_id] = result
 		phase_completed.emit(phase_id, result)
 
+	var ledgers: Array[Dictionary] = []
+	for city in ctx.cities:
+		if city != null and city.resource_ctx != null:
+			ledgers.append({"city_uid": city.uid, "flows": city.resource_ctx.get_ledger()})
+	report["ledger"] = ledgers
 	turn_completed.emit(_turn, report)
 	return report
 

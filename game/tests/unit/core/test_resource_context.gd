@@ -111,3 +111,44 @@ func test_set_capacity_trims() -> void:
 	rc.add(&"wood", 50.0)
 	rc.set_capacity(&"wood", 30.0)
 	assert_that(rc.amount(&"wood")).is_equal(30.0)
+
+func test_transaction_is_atomic_and_ledger_conserves_stock() -> void:
+	var rc := ResourceContext.new()
+	rc.setup([_make_def(&"wood"), _make_def(&"planks")], true)
+	rc.add(&"wood", 5.0)
+	var before := rc.get_all()
+	var result := rc.transact({&"wood": 2.0}, {&"planks": 3.0}, "lumbermill")
+	assert_bool(result.ok).is_true()
+	assert_that(rc.amount(&"wood")).is_equal(3.0)
+	assert_that(rc.amount(&"planks")).is_equal(3.0)
+	var net := {"wood": 0.0, "planks": 0.0}
+	for flow in rc.get_ledger():
+		for resource in net:
+			net[resource] += float(flow.outputs.get(resource, 0.0)) - float(flow.inputs.get(resource, 0.0))
+	for resource in net:
+		assert_that(rc.amount(StringName(resource))).is_equal(float(before.get(StringName(resource), 0.0)) + net[resource])
+
+func test_transaction_shortage_and_capacity_fail_without_mutation() -> void:
+	var rc := ResourceContext.new()
+	rc.setup([_make_def(&"wood"), _make_def(&"planks", 4.0)], true)
+	rc.add(&"wood", 1.0)
+	var shortage := rc.transact({&"wood": 2.0}, {&"planks": 1.0}, "lumbermill")
+	assert_bool(shortage.ok).is_false()
+	assert_that(shortage.reason).is_equal("insufficient_stock")
+	assert_that(rc.amount(&"wood")).is_equal(1.0)
+	assert_that(rc.amount(&"planks")).is_equal(0.0)
+	rc.add(&"wood", 4.0)
+	rc.add(&"planks", 3.0)
+	var overflow := rc.transact({&"wood": 1.0}, {&"planks": 2.0}, "lumbermill")
+	assert_bool(overflow.ok).is_false()
+	assert_that(overflow.reason).is_equal("insufficient_capacity")
+	assert_that(rc.amount(&"wood")).is_equal(5.0)
+	assert_that(rc.amount(&"planks")).is_equal(3.0)
+
+func test_strict_registry_rejects_unknown_transaction_items() -> void:
+	var rc := ResourceContext.new()
+	rc.setup(Resources.get_campaign_resource_defs(true), true)
+	assert_that(rc.add(&"amber", 2.0)).is_equal(0.0)
+	var result := rc.transact({}, {&"sulfur": 1.0}, "unsupported_recipe")
+	assert_bool(result.ok).is_false()
+	assert_that(result.reason).is_equal("unregistered_resource")

@@ -442,6 +442,7 @@ static func _register_economy(R: BootstrapResult) -> void:
 	var resources_reg: Node = Services.resolve(&"resources")
 	if resources_reg != null:
 		defs = resources_reg.get_all()
+		defs.append_array(resources_reg.get_campaign_resource_defs())
 	for city in R.cities.cities:
 		city.ensure_resource_ctx(defs)
 

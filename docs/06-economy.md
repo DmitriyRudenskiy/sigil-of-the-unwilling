@@ -4,7 +4,7 @@ tags:
   - gdd
   - economy
 status: deepened
-date: 2026-09-30
+date: 2026-10-06
 ---
 
 ## Экономика и баланс
@@ -12,6 +12,16 @@ date: 2026-09-30
 **Потоки:** город производит ресурсы реестра (K-R2, 2026-10-02: **Layer-1 = 6 товаров** — дерево, железо, еда, ртуть, сера, кристаллы; **Layer-2 = товары** — инструменты, ткань, зелья, провизия, оружие) → тратит на: обслуживание районов (8.3), наём (02-mechanics §3.3), снабжение партии (1 еда/день/юнит, 12.5). Небесные метрики (5.2) не складываются — исключение из замкнутости, декларировано. Старый реестр 5 ресурсов (еда/дерево/камень/железо/оружие) аннулирован в части реестра (K-R2): модель потоков действует; **камень вне реестра** (банк до каменной цепи), **оружие = товар Layer-2** (не ресурс).
 
 > [!note] Пост-пивотный MVP ([[MVP-scope]]): **MVP-подмножество реестра {еда, дерево, железо}** (K-R2: одна схема, 3 товара); ртуть/сера/кристаллы + Layer-2, районы и их upkeep — Post-MVP/1.0.
+
+## Реализация campaign-building economy (status 2026-10-06)
+
+> [!warning] Эта запись описывает feature-ветку `campaign-city-building-economy`, а не ратифицирует баланс основной ветки. Её боевой каталог находится в `game/assets/data/campaign_building_catalog.json`; числовые значения и custom merges разработаны для правил проекта. Source references establish identity only. Candidate/unknown rows не входят в билд; полнота AtS/TerraScape roster не заявляется.
+
+- Кампанийные здания используют существующий объект города и `ResourceContext`; запас еды в `CityData` — совместимый фасад над тем же food stock, не второй счёт.
+- Turn ledger собирает потребление населения, рейдовые потери, кампанийные рецепты/upkeep и обучение персонажа. Обучение может выполнять атомарный transaction через тот же контекст; party сохраняется существующим MVP-save.
+- Runtime сохраняет ancestry/archetype и состояние кампанийных зданий; миграция старого food stock выполняется при переходе city save к версии 5.
+- Допустимые campaign-building и training transactions ограничены MVP-маской `{еда, дерево, железо}`. Это не меняет канонический реестр K-R2, не добавляет отдельный city/world или победный score-mode и не утверждает source-game значения. См. change-scoped контракты в `openspec/changes/campaign-city-building-economy/specs/`.
+- Placement, adjacency, merge, group needs/relations, production/upkeep and static defense имеют детерминированные сервисы и тесты. Runtime catalog admits only confirmed public rows or campaign-canon baseline rows; `audit_campaign_catalog.py` verifies every confirmed external row is admitted or reason-excluded, with zero candidate/unknown rows and nulls. Публичный census остаётся неполным для AtS/TerraScape; UI/playtest не покрыты headless-тестами.
 
 ## Таблица источников/стоков (sources & sinks)
 

@@ -38,6 +38,9 @@ static func release_orphans(city: City) -> int:
 	for bld in city.buildings:
 		if bld != null:
 			valid[bld.uid] = true
+	for building in city.campaign_buildings:
+		if building is Dictionary:
+			valid[int(building.get("uid", -1))] = true
 	var freed := 0
 	for u in city.pop:
 		if u.assigned_to != -1 and not valid.has(u.assigned_to):

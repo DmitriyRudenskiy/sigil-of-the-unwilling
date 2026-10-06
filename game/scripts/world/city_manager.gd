@@ -82,6 +82,7 @@ func on_turn_ended(month: int) -> Dictionary:
 		"turn": current_turn, "cities": [], "arrivals": 0, "cycle": false,
 	}
 	for city in cities:
+		city.ensure_resource_ctx().clear_ledger()
 		var r := city.process_turn(current_turn)
 		(report["cities"] as Array).append({
 			"city": city.display_name, "births": r.births, "level_ups": r.level_ups,

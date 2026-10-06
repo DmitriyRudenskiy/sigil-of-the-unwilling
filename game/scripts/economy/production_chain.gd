@@ -23,11 +23,19 @@ func can_produce(ctx: ResourceContext, workers: int) -> bool:
 	return ctx.can_afford(inputs)
 
 func execute(ctx: ResourceContext, workers: int, logistics: float = 1.0) -> Dictionary:
-	if not can_produce(ctx, workers):
-		return {}
-	for in_id in inputs:
-		ctx.remove(in_id, float(inputs[in_id]))
-	return calculate_output(workers, logistics)
+	var report := execute_transaction(ctx, workers, logistics, String(id))
+	return report.get("outputs", {}) if bool(report.get("ok", false)) else {}
+
+func execute_transaction(ctx: ResourceContext, workers: int, logistics: float = 1.0,
+		source: String = "") -> Dictionary:
+	if ctx == null or workers <= 0:
+		return {"ok": false, "reason": "no_workers"}
+	var result := calculate_output(workers, logistics)
+	if result.is_empty():
+		return {"ok": false, "reason": "empty_output"}
+	var transaction := ctx.transact(inputs, result, source if not source.is_empty() else String(id))
+	transaction["outputs"] = result if bool(transaction.get("ok", false)) else {}
+	return transaction
 
 func to_dict() -> Dictionary:
 	return {
