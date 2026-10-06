@@ -14,7 +14,7 @@ func after_test() -> void:
 
 
 func test_season_turns_roundtrip_through_delta() -> void:
-	# 47 ходов → season_index = (47-1) % 3 = 1 (Морось; Q-M26: 1 ход = 1 сезон)
+	# 47 ходов → season_index = (47-1) % 4 = 2 (Осень; Q-M27: цикл 4, 1 ход = 1 сезон)
 	for i in 47:
 		WorldSeasons.advance_turn()
 	var idx_before := WorldSeasons.season_index()
@@ -61,7 +61,7 @@ func test_set_turns_clamps_negative() -> void:
 
 
 func test_season_mult_preserved_across_roundtrip() -> void:
-	# Морось (индекс 1): множитель продуктивности 1.2; 26 ходов → (26-1) % 3 = 1 (Q-M26)
+	# Лето (индекс 1): множитель продуктивности 1.2; 26 ходов → (26-1) % 4 = 1 (Q-M27)
 	for i in 26:
 		WorldSeasons.advance_turn()
 	var mult_before := WorldSeasons.production_mult()
