@@ -3,6 +3,7 @@ extends RefCounted
 
 const CampaignBuildingCatalog := preload("res://scripts/data/campaign_building_catalog.gd")
 const CampaignBuildingPlacement := preload("res://scripts/city/campaign_building_placement.gd")
+const CampaignCityProgression := preload("res://scripts/city/campaign_city_progression.gd")
 
 static func request(
 	city: City,
@@ -91,6 +92,11 @@ static func explain_request(
 	if not placement.ok:
 		return {"ok": false, "reason": "placement_blocked", "issues": placement.issues,
 			"placement": placement}
+
+	var capacity := CampaignCityProgression.construction_check(city, placement.cells)
+	if not bool(capacity.get("ok", false)):
+		capacity["placement"] = placement
+		return capacity
 
 	var missing := {}
 	for resource_id in costs:

@@ -18,6 +18,7 @@ const MAX_ACTION_RETRIES := 3
 ## Любая потребность ниже порога → герой идёт на центр города и ждёт там
 ## реквери (в городе REST +0.26/ход, SOCIAL +0.22/ход — ~5 ходов до 0.5).
 const NEED_RETURN_THRESHOLD := 0.5
+const CampaignCityBalanceScenario := preload("res://scripts/balance/campaign_city_balance_scenario.gd")
 ## Враг в этом радиусе от центра города — угроза: герой перехватывает его
 ## до сбора/боев с другими. Без этого EnemyTurnProcessor захватывает город
 ## (total_collapse → DEFEAT), пока герой отвлёкся (headless: wizard, ход 15).
@@ -38,6 +39,7 @@ var losses := 0
 var battles_fought := 0
 var snapshots: Array = []
 var warnings: Array = []
+var campaign_city_report: Dictionary = {}
 var _action_fails := 0
 var _city_screen: Node = null
 var _player_city: Variant = null  # City — RefCounted, не Node
@@ -57,6 +59,7 @@ func start_probe(world: Node, p_seed: int) -> Dictionary:
 	battles_fought = 0
 	snapshots = []
 	warnings = []
+	campaign_city_report = {}
 	error_msg = ""
 	done = false
 	_world = world
@@ -91,6 +94,8 @@ func _process(_delta: float) -> void:
 	_step()
 
 func report() -> Dictionary:
+	if campaign_city_report.is_empty():
+		campaign_city_report = CampaignCityBalanceScenario.run()
 	var rep := {
 		"seed": seed_value,
 		"turns": turn,
@@ -105,6 +110,7 @@ func report() -> Dictionary:
 		"stuck_max": stuck_max_seen,
 		"thresholds": THRESHOLDS,
 		"warnings": warnings,
+		"campaign_city": campaign_city_report,
 		"season": WorldSeasons.season_name(),
 		"endgame": _world.get_endgame_state() if _world != null else {},
 		"snapshots": snapshots,

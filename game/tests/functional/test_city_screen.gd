@@ -125,6 +125,28 @@ func test_campaign_hud_marks_missing_resource_context_unavailable() -> void:
 	assert_bool(food_button.text.contains("Еда  —  Δ —")).is_true()
 	assert_bool(food_button.text.contains("Еда  0")).is_false()
 
+func test_campaign_city_level_hud_reports_capacity_and_advances_only_when_filled() -> void:
+	var cells := CampaignBuildingPlacement.city_cells(city.center)
+	city.campaign_buildings.append({"id": "starter", "cell": cells[4], "footprint": [[0, 0]]})
+	screen.refresh()
+	assert_that(screen._city_level_button.text).is_equal("Город 1 · 2/4")
+	assert_bool(screen._city_level_button.visible).is_true()
+	assert_bool(screen._city_level_button.disabled).is_false()
+	var blocked: CityCheck = screen.level_up_pressed()
+	assert_bool(blocked.ok).is_false()
+	assert_bool(blocked.reason.contains("ещё 2 клетки")).is_true()
+	assert_that(city.level).is_equal(1)
+	city.campaign_buildings.append_array([
+		{"id": "starter_b", "cell": cells[5], "footprint": [[0, 0]]},
+		{"id": "starter_c", "cell": cells[6], "footprint": [[0, 0]]},
+	])
+	screen.refresh()
+	assert_that(screen._city_level_button.text).is_equal("Город 1 · 4/4")
+	assert_bool(screen._city_level_button.disabled).is_false()
+	screen._city_level_button.pressed.emit()
+	assert_that(city.level).is_equal(2)
+	assert_that(screen._city_level_button.text).is_equal("Город 2 · 4/9")
+
 func test_catalog_cards_filter_and_explain_selected_city_affordability_prerequisites_and_duration() -> void:
 	assert_that(screen._campaign_catalog.get("buildings", []).size()).is_equal(98)
 	assert_that(screen._catalog_error).is_empty()
@@ -294,6 +316,27 @@ func test_placement_preview_shows_validity_and_exact_reason_then_escape_cancels_
 	assert_that(screen._board.preview_anchor).is_equal(Vector2i(-1, -1))
 	assert_that(city.campaign_buildings).is_equal(buildings_before)
 	assert_that(resources.amount(&"wood")).is_equal(amount_before)
+	assert_that(resources.get_ledger()).is_equal(ledger_before)
+
+func test_capacity_limit_is_shown_in_preview_and_confirmation_is_blocked_without_writes() -> void:
+	var cells := CampaignBuildingPlacement.city_cells(city.center)
+	for index in range(4, 7):
+		city.campaign_buildings.append({"id": "occupied_%d" % index,
+			"cell": cells[index], "footprint": [[0, 0]]})
+	var resources: ResourceContext = city.ensure_resource_ctx(Resources.get_campaign_resource_defs(true))
+	resources.setup(Resources.get_campaign_resource_defs(true), true)
+	resources.deserialize({"food": 0.0, "wood": 20.0, "iron": 0.0})
+	var city_before: Array = city.campaign_buildings.duplicate(true)
+	var ledger_before: Array = resources.get_ledger().duplicate(true)
+	screen._on_building_card_pressed("campaign_farm")
+	screen._on_board_cell_selected(cells[7])
+	assert_bool(screen._preview_result.ok).is_false()
+	assert_that(screen._preview_result.reason).is_equal("city_capacity")
+	assert_bool(screen._inspector_text.text.contains("4/4 клеток на уровне 1")).is_true()
+	assert_bool(screen._confirm_build_button.disabled).is_true()
+	screen._confirm_campaign_building()
+	assert_that(city.campaign_buildings).is_equal(city_before)
+	assert_float(resources.amount(&"wood")).is_equal_approx(20.0, 0.0001)
 	assert_that(resources.get_ledger()).is_equal(ledger_before)
 
 func test_confirmation_routes_through_service_and_charges_exactly_once() -> void:

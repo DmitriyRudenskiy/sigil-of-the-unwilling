@@ -8,6 +8,7 @@ const LeadershipCheck = preload("res://scripts/systems/leadership_check.gd")
 const ArchetypeResolver = preload("res://scripts/demographics/archetype_resolver.gd")
 const CampaignBuildingCatalog := preload("res://scripts/data/campaign_building_catalog.gd")
 const CampaignBuildingConstructionService := preload("res://scripts/city/campaign_building_construction_service.gd")
+const CampaignCityProgression := preload("res://scripts/city/campaign_city_progression.gd")
 const CampaignBuildingPlacement := preload("res://scripts/city/campaign_building_placement.gd")
 const CampaignDefenseResolver := preload("res://scripts/city/campaign_defense_resolver.gd")
 
@@ -68,6 +69,7 @@ var _close_button: Button
 var _resource_buttons: Dictionary = {}
 var _population_metric: Label
 var _housing_metric: Label
+var _city_level_button: Button
 var _inspector_panel: PanelContainer
 var _inspector_title: Label
 var _inspector_text: Label
@@ -248,6 +250,13 @@ func _build_shell() -> void:
 	_apply_keyboard_focus(_housing_metric)
 	_housing_metric.add_theme_color_override("font_color", Color("#e7d5aa"))
 	header_row.add_child(_housing_metric)
+	_city_level_button = Button.new()
+	_city_level_button.name = "CityLevelProgression"
+	_city_level_button.focus_mode = Control.FOCUS_ALL
+	_city_level_button.tooltip_text = "Уровень и занятые клетки города"
+	_apply_keyboard_focus(_city_level_button)
+	_city_level_button.pressed.connect(level_up_pressed)
+	header_row.add_child(_city_level_button)
 	_close_button = Button.new()
 	_close_button.name = "Close"
 	_close_button.focus_mode = Control.FOCUS_ALL
@@ -527,6 +536,10 @@ func _placement_reasons(result: Dictionary) -> Array[String]:
 			for resource_id in result.get("missing", {}):
 				reasons.append("Не хватает %s %s" % [
 					_resource_label(StringName(resource_id)), _format_amount(float(result.missing[resource_id]))])
+		"city_capacity":
+			reasons.append("Занято %d/%d клеток на уровне %d; свободно %d" % [
+				int(result.get("used", 0)), int(result.get("limit", 0)),
+				int(result.get("level", 1)), int(result.get("remaining", 0))])
 		"prerequisite_missing":
 			for issue in result.get("missing", []):
 				reasons.append("Не выполнено: " + String(issue).replace("building:", "здание "))
@@ -579,6 +592,26 @@ func _update_campaign_hud() -> void:
 		button.text = "%s  %s  %s" % [_resource_label(resource_id), balance, net]
 	_population_metric.text = "Жители %d / %d" % [city.pop_total(), city.pop_cap()]
 	_housing_metric.text = "Жильё %d" % city.housing_total()
+	_city_level_button.visible = _is_campaign_city()
+	if _city_level_button.visible:
+		var used := CampaignCityProgression.occupied_cells(city).size()
+		var limit := CampaignCityProgression.cell_limit(city.level)
+		var progress := CampaignCityProgression.level_up_check(city)
+		_city_level_button.text = "Город %d · %d/%d" % [city.level, used, limit]
+		_city_level_button.disabled = city.level >= CampaignCityProgression.MAX_LEVEL
+		if bool(progress.ok):
+			_city_level_button.tooltip_text = "Повысить уровень города до %d" % (city.level + 1)
+		elif String(progress.get("reason", "")) == "maximum_level":
+			_city_level_button.tooltip_text = "Достигнут максимальный уровень города"
+		else:
+			_city_level_button.tooltip_text = "До повышения не хватает %d занятых клеток" % int(progress.get("missing", 0))
+
+func _is_campaign_city() -> bool:
+	if city == null:
+		return false
+	if hero != null and hero.city_manager != null and hero.city_manager.is_campaign:
+		return true
+	return not city.campaign_buildings.is_empty()
 
 func _resource_net(resource_id: StringName) -> String:
 	if city.resource_ctx == null:
@@ -1291,6 +1324,20 @@ func build_pressed(def_id: StringName) -> CityCheck:
 func level_up_pressed() -> CityCheck:
 	if city == null:
 		return _fail(GameText.city_not_bound())
+	if _is_campaign_city():
+		var level_check := CampaignCityProgression.try_level_up(city)
+		if not bool(level_check.get("ok", false)):
+			var reason := String(level_check.get("reason", ""))
+			if reason == "maximum_level":
+				return _fail("Достигнут максимальный уровень города")
+			return _fail("Для повышения уровня нужно занять ещё %d клетки (%d/%d)" % [
+				int(level_check.get("missing", 0)), int(level_check.get("used", 0)),
+				int(level_check.get("limit", 0))])
+		_set_message("Уровень города повышен до %d · лимит %d клеток" % [
+			int(level_check.level), int(level_check.limit)])
+		refresh()
+		return CityCheck.success({"level": city.level, "occupied_cells": int(level_check.used),
+			"cell_limit": int(level_check.limit)})
 	if city.level >= GameNumbers.CITY_LEVEL_MAX:
 		return _fail(GameText.city_max_level())
 	var check: Dictionary = ProsperitySystem.can_level_up(city)

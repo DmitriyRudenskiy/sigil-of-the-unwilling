@@ -141,7 +141,10 @@ func test_orphans_released_on_rebalance() -> void:
 func test_rebalance_preserves_campaign_building_workers() -> void:
 	var worker: PopUnit = city.add_migrant(PopUnit.State.WORKER)
 	worker.assigned_to = 77
-	city.campaign_buildings.append({"uid": 77, "id": "bakery", "state": "active"})
+	city.campaign_buildings.append({
+		"uid": 77, "id": "bakery", "state": "active", "jobs": 1,
+		"recipes": [{"id": "food", "workers": 1, "outputs": {"food": 1}}],
+	})
 	assert_that(WorkerAssignment.rebalance(city)).is_equal(0)
 	assert_that(worker.assigned_to).is_equal(77)
 

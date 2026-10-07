@@ -2,6 +2,7 @@ extends BaseTest
 const TestFactories := preload("res://tests/helpers/factories.gd")
 const ArenaRingSystem := preload("res://scripts/city/arena_ring_system.gd")
 const HexUtils := preload("res://scripts/core/hex_utils.gd")
+const ArchetypeResolver := preload("res://scripts/demographics/archetype_resolver.gd")
 
 func _add_worker(city: City, tile: Vector2i = Vector2i(6, 5)) -> PopUnit:
 	var u := PopUnit.new()
@@ -274,6 +275,37 @@ func test_scheduler_ledger_includes_growth_campaign_production_and_upkeep() -> v
 	assert_bool(sources.has("campaign-building:market_garden/recipe:grow_food")).is_true()
 	assert_bool(sources.has("campaign-building:market_garden/upkeep")).is_true()
 	assert_float(city.food_stockpile).is_equal_approx(food_after_growth + 2.0, 0.0001)
+
+func test_service_capacity_uses_same_milli_unit_scale_as_group_demand() -> void:
+	var city := TestFactories.make_city()
+	for _i in range(3):
+		var builder := PopUnit.new()
+		builder.ancestry_id = "gnomes"
+		builder.archetype_id = "engineers_builders"
+		city.pop.append(builder)
+	for _i in range(2):
+		var metallurgist := PopUnit.new()
+		metallurgist.ancestry_id = "dwarves"
+		metallurgist.archetype_id = "metallurgists_technicians"
+		city.pop.append(metallurgist)
+	city.campaign_buildings.append({
+		"uid": 71, "id": "education_one", "state": "active", "services": {"education": 2},
+	})
+	city.campaign_buildings.append({
+		"uid": 72, "id": "education_two", "state": "active", "services": {"education": 2},
+	})
+	var processor := EconomicTurnProcessor.new()
+	var catalog := ArchetypeResolver.load_catalog()
+	var partial := processor._process_campaign_population(city, catalog)
+	assert_that(int(partial.groups.engineers_builders.coverage_percent)).is_equal(80)
+	assert_that(int(partial.groups.metallurgists_technicians.coverage_percent)).is_equal(80)
+
+	city.campaign_buildings.append({
+		"uid": 73, "id": "education_three", "state": "active", "services": {"education": 1},
+	})
+	var complete := processor._process_campaign_population(city, catalog)
+	assert_that(int(complete.groups.engineers_builders.coverage_percent)).is_equal(100)
+	assert_that(int(complete.groups.metallurgists_technicians.coverage_percent)).is_equal(100)
 
 func test_in_progress_building_cannot_produce_pay_upkeep_or_supply_services() -> void:
 	var city := TestFactories.make_city()

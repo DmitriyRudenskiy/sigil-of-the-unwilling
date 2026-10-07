@@ -8,6 +8,7 @@ const TestFactories := preload("res://tests/helpers/factories.gd")
 func _city() -> City:
 	var city := TestFactories.make_city()
 	city.center = Vector2i(20, 20)
+	city.level = 11
 	city.core_cells = HexUtils.core_cells(city.center)
 	city.resource_ctx = ResourceContext.new()
 	city.resource_ctx.setup(Resources.get_campaign_resource_defs(true), true)
@@ -88,6 +89,28 @@ func test_zero_turn_request_is_active_immediately() -> void:
 	assert_bool(result.ok).is_true()
 	assert_that(result.instance.state).is_equal("active")
 	assert_that(result.instance.construction_turns_remaining).is_zero()
+
+func test_level_one_capacity_rejects_before_resource_transaction() -> void:
+	var city := _city()
+	city.level = 1
+	city.core_cells.clear()
+	var catalog := CampaignBuildingCatalog.load_catalog()
+	var sites := HexUtils.cells_in_core_ring(city.center, 1)
+	for index in range(3):
+		var result := ConstructionService.request(city, catalog, "campaign_farm", sites[index])
+		assert_bool(result.ok).is_true()
+	var ledger_before: Array = city.resource_ctx.get_ledger().duplicate(true)
+	var buildings_before := city.campaign_buildings.size()
+	var stock_before := city.resource_ctx.amount(&"wood")
+	var blocked := ConstructionService.request(city, catalog, "campaign_farm", sites[3])
+	assert_bool(blocked.ok).is_false()
+	assert_that(blocked.reason).is_equal("city_capacity")
+	assert_that(blocked.level).is_equal(1)
+	assert_that(blocked.used).is_equal(4)
+	assert_that(blocked.limit).is_equal(4)
+	assert_that(city.campaign_buildings.size()).is_equal(buildings_before)
+	assert_float(city.resource_ctx.amount(&"wood")).is_equal_approx(stock_before, 0.0001)
+	assert_that(city.resource_ctx.get_ledger()).is_equal(ledger_before)
 
 func _find_building(catalog: Dictionary, building_id: String) -> Dictionary:
 	for building in catalog.get("buildings", []):
