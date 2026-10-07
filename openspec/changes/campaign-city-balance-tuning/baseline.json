@@ -1,0 +1,5285 @@
+{
+  "assumptions": {
+    "carried_food": 0,
+    "group_split": {
+      "alchemists_flame": 3,
+      "engineers_builders": 3,
+      "farmers_brewers": 3,
+      "hunters_trackers": 3,
+      "merchants_diplomats": 3,
+      "metallurgists_technicians": 2,
+      "weavers_crafters": 3
+    },
+    "party_classes": [
+      "fighter",
+      "ranger"
+    ],
+    "party_members": 2,
+    "party_starts_in_city": true,
+    "provision_capacity": 10,
+    "resident_count": 20,
+    "resident_states": "all 20 residents start as available workers",
+    "starting_housing": "two free canonical campaign_housing instances"
+  },
+  "balance_pass": false,
+  "catalog_cost_snapshot": [
+    {
+      "costs": {
+        "wood": 4.0
+      },
+      "id": "campaign_farm"
+    },
+    {
+      "costs": {
+        "wood": 5.0
+      },
+      "id": "campaign_sawmill"
+    },
+    {
+      "costs": {
+        "wood": 6.0
+      },
+      "id": "campaign_iron_mine"
+    },
+    {
+      "costs": {
+        "wood": 6.0
+      },
+      "id": "campaign_housing"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "campaign_barracks"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_barracks"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_stable"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_varangian_stronghold"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_varangian_warcamp"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_military_school"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_archery_range"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_mercenary_house"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_machine_workshop"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_war_stable"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_hojo_clan_daimyo_estate"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_oda_clan_daimyo_estate"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_takeda_clan_daimyo_estate"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_siege_workshop"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_palisade"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_palisade_gate"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_fortified_palisade_gate"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_fortified_palisade_wall"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_stone_wall"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_stone_wall_gate"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_outpost"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_fortified_outpost"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_toll_outpost"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_wooden_fortress"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_stone_wall_tower"
+    },
+    {
+      "costs": {
+        "iron": 3.0,
+        "wood": 10.0
+      },
+      "id": "aoe4_tughlaqabad_fort"
+    },
+    {
+      "costs": {
+        "iron": 3.0,
+        "wood": 10.0
+      },
+      "id": "aoe4_keep"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_castle"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_imperial_hippodrome"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_school_of_cavalry"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_koka_township"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_council_hall"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_lancaster_castle"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_great_pasture"
+    },
+    {
+      "costs": {
+        "iron": 3.0,
+        "wood": 10.0
+      },
+      "id": "aoe4_golden_horn_tower_by"
+    },
+    {
+      "costs": {
+        "iron": 3.0,
+        "wood": 10.0
+      },
+      "id": "aoe4_golden_horn_tower_mac"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_burgrave_palace"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_farimba_garrison"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_palatine_school"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_palace_of_the_sultan"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_tanegashima_gunsmith"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_khaganate_palace"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_great_wall_bastion"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_barbican_of_the_sun"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_saharan_trade_network"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_kremlin"
+    },
+    {
+      "costs": {
+        "iron": 3.0,
+        "wood": 10.0
+      },
+      "id": "aoe4_the_white_tower"
+    },
+    {
+      "costs": {
+        "iron": 3.0,
+        "wood": 10.0
+      },
+      "id": "aoe4_berkshire_palace"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_red_palace"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_elzbach_palace"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_castle_of_the_crow"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_great_wall_gatehouse"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_fort_of_the_huntress"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_sea_gate_castle"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_spasskaya_tower"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "aoe4_fortress"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_abbey_of_kings"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_abbey_of_the_trinity"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_buddhist_temple"
+    },
+    {
+      "costs": {
+        "iron": 3.0,
+        "wood": 10.0
+      },
+      "id": "aoe4_capital_town_center"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_dome_of_the_faith"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_golden_tent"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_grand_winery"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_hunting_cabin"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_king_s_palace"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_monastery"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_mosque"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_mountain_hall"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_pagoda"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_palace_of_swabia"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_prayer_tent"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_regnitz_cathedral"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_shaolin_monastery"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_shinto_shrine"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "aoe4_temple_of_equality"
+    },
+    {
+      "costs": {
+        "iron": 3.0,
+        "wood": 10.0
+      },
+      "id": "aoe4_town_center"
+    },
+    {
+      "costs": {
+        "wood": 8.0
+      },
+      "id": "terrascape_fruit_farm"
+    },
+    {
+      "costs": {
+        "iron": 1.0,
+        "wood": 8.0
+      },
+      "id": "terrascape_ox_mill"
+    },
+    {
+      "costs": {
+        "iron": 1.0,
+        "wood": 8.0
+      },
+      "id": "terrascape_shieling"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "terrascape_sanctuary"
+    },
+    {
+      "costs": {
+        "iron": 1.0,
+        "wood": 5.0
+      },
+      "id": "terrascape_herb_garden"
+    },
+    {
+      "costs": {
+        "iron": 1.0,
+        "wood": 8.0
+      },
+      "id": "terrascape_pond_farm"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "terrascape_henge"
+    },
+    {
+      "costs": {
+        "wood": 5.0
+      },
+      "id": "terrascape_city_park"
+    },
+    {
+      "costs": {
+        "iron": 3.0,
+        "wood": 10.0
+      },
+      "id": "terrascape_greater_mill"
+    },
+    {
+      "costs": {
+        "iron": 1.0,
+        "wood": 6.0
+      },
+      "id": "terrascape_lotus_basin"
+    },
+    {
+      "costs": {
+        "iron": 1.0,
+        "wood": 6.0
+      },
+      "id": "terrascape_nun_cistern"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 6.0
+      },
+      "id": "terrascape_kenbet"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 8.0
+      },
+      "id": "terrascape_great_plaza"
+    },
+    {
+      "costs": {
+        "iron": 2.0,
+        "wood": 10.0
+      },
+      "id": "terrascape_hospital"
+    },
+    {
+      "costs": {
+        "iron": 3.0,
+        "wood": 12.0
+      },
+      "id": "terrascape_university"
+    },
+    {
+      "costs": {
+        "iron": 1.0,
+        "wood": 8.0
+      },
+      "id": "terrascape_timber_mill"
+    },
+    {
+      "costs": {
+        "wood": 6.0
+      },
+      "id": "terrascape_royal_forest_variant"
+    },
+    {
+      "costs": {
+        "iron": 1.0,
+        "wood": 8.0
+      },
+      "id": "terrascape_citydistrict_variant"
+    }
+  ],
+  "construction_itinerary": [
+    {
+      "day": 1,
+      "id": "campaign_farm"
+    },
+    {
+      "day": 1,
+      "id": "campaign_barracks"
+    },
+    {
+      "day": 2,
+      "id": "campaign_sawmill"
+    },
+    {
+      "day": 4,
+      "id": "campaign_iron_mine"
+    },
+    {
+      "day": 6,
+      "id": "campaign_farm"
+    },
+    {
+      "day": 9,
+      "id": "aoe4_palisade"
+    }
+  ],
+  "construction_summary": {
+    "affordability": {
+      "affordable": 6,
+      "attempted": 6,
+      "failed": []
+    },
+    "building_counts": {
+      "aoe4_palisade": 1,
+      "campaign_barracks": 1,
+      "campaign_farm": 2,
+      "campaign_housing": 2,
+      "campaign_iron_mine": 1,
+      "campaign_sawmill": 1
+    },
+    "construction_build_days": {
+      "aoe4_palisade": [
+        9
+      ],
+      "campaign_barracks": [
+        1
+      ],
+      "campaign_farm": [
+        1,
+        6
+      ],
+      "campaign_iron_mine": [
+        4
+      ],
+      "campaign_sawmill": [
+        2
+      ]
+    },
+    "cumulative_costs": {
+      "food": 0.0,
+      "iron": 4.0,
+      "wood": 33.0
+    },
+    "footprint_cells_used": 8,
+    "selected_plan": [
+      {
+        "build_days": [
+          1,
+          6
+        ],
+        "count": 2,
+        "cumulative_costs": {
+          "food": 0.0,
+          "iron": 0.0,
+          "wood": 8.0
+        },
+        "id": "campaign_farm",
+        "recipes": [
+          {
+            "id": "farm_food",
+            "inputs": {},
+            "outputs": {
+              "food": 2.0
+            },
+            "workers": 2.0
+          }
+        ],
+        "roles": [
+          "food_production",
+          "agriculture"
+        ],
+        "services": {},
+        "unit_costs": {
+          "wood": 4.0
+        },
+        "worker_slots_per_instance": 2
+      },
+      {
+        "build_days": [
+          1
+        ],
+        "count": 1,
+        "cumulative_costs": {
+          "food": 0.0,
+          "iron": 2.0,
+          "wood": 8.0
+        },
+        "id": "campaign_barracks",
+        "recipes": [],
+        "roles": [
+          "military_training",
+          "static_defense"
+        ],
+        "services": {},
+        "unit_costs": {
+          "iron": 2.0,
+          "wood": 8.0
+        },
+        "worker_slots_per_instance": 0
+      },
+      {
+        "build_days": [
+          2
+        ],
+        "count": 1,
+        "cumulative_costs": {
+          "food": 0.0,
+          "iron": 0.0,
+          "wood": 5.0
+        },
+        "id": "campaign_sawmill",
+        "recipes": [
+          {
+            "id": "sawmill_wood",
+            "inputs": {},
+            "outputs": {
+              "wood": 2.0
+            },
+            "workers": 2.0
+          }
+        ],
+        "roles": [
+          "wood_production",
+          "woodworking"
+        ],
+        "services": {},
+        "unit_costs": {
+          "wood": 5.0
+        },
+        "worker_slots_per_instance": 2
+      },
+      {
+        "build_days": [
+          4
+        ],
+        "count": 1,
+        "cumulative_costs": {
+          "food": 0.0,
+          "iron": 0.0,
+          "wood": 6.0
+        },
+        "id": "campaign_iron_mine",
+        "recipes": [
+          {
+            "id": "mine_iron",
+            "inputs": {},
+            "outputs": {
+              "iron": 1.0
+            },
+            "workers": 2.0
+          }
+        ],
+        "roles": [
+          "metalworking",
+          "iron_production"
+        ],
+        "services": {},
+        "unit_costs": {
+          "wood": 6.0
+        },
+        "worker_slots_per_instance": 2
+      },
+      {
+        "build_days": [
+          9
+        ],
+        "count": 1,
+        "cumulative_costs": {
+          "food": 0.0,
+          "iron": 2.0,
+          "wood": 6.0
+        },
+        "id": "aoe4_palisade",
+        "recipes": [],
+        "roles": [
+          "static_defense"
+        ],
+        "services": {},
+        "unit_costs": {
+          "iron": 2.0,
+          "wood": 6.0
+        },
+        "worker_slots_per_instance": 0
+      }
+    ]
+  },
+  "days": 21,
+  "days_report": [
+    {
+      "buildings": [
+        {
+          "cell": [
+            4,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 20
+        },
+        {
+          "cell": [
+            5,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 21
+        },
+        {
+          "cell": [
+            6,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 22
+        },
+        {
+          "cell": [
+            4,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_barracks",
+          "state": "active",
+          "uid": 23
+        }
+      ],
+      "construction": [
+        {
+          "cell": [
+            6,
+            3
+          ],
+          "costs": {
+            "wood": 4.0
+          },
+          "day": 1,
+          "id": "campaign_farm",
+          "ok": true,
+          "reason": "",
+          "uid": 22
+        },
+        {
+          "cell": [
+            4,
+            4
+          ],
+          "costs": {
+            "iron": 2.0,
+            "wood": 8.0
+          },
+          "day": 1,
+          "id": "campaign_barracks",
+          "ok": true,
+          "reason": "",
+          "uid": 23
+        }
+      ],
+      "day": 1,
+      "food": {
+        "party": {
+          "capacity": 10,
+          "carried_after": 8,
+          "carried_before_ration": 10,
+          "city_uid": 0,
+          "consumed": 2,
+          "members": 2,
+          "resupplied": 10,
+          "shortage": 0
+        },
+        "resident_consumed": 2.0,
+        "resident_demand": 2.0,
+        "resident_shortage": 0.0
+      },
+      "ledger": [
+        {
+          "inputs": {
+            "wood": 4.0
+          },
+          "outputs": {},
+          "source": "construction:campaign_farm"
+        },
+        {
+          "inputs": {
+            "iron": 2.0,
+            "wood": 8.0
+          },
+          "outputs": {},
+          "source": "construction:campaign_barracks"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {
+            "food": 10.0
+          },
+          "outputs": {},
+          "source": "campaign:party_resupply"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:resident_food"
+        }
+      ],
+      "raid": [],
+      "staffing": [
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 20,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 21,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 22,
+          "worker_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_barracks",
+          "building_uid": 23,
+          "worker_ids": []
+        }
+      ],
+      "stocks": {
+        "food": 20.0,
+        "iron": 8.0,
+        "wood": 8.0
+      }
+    },
+    {
+      "buildings": [
+        {
+          "cell": [
+            4,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 20
+        },
+        {
+          "cell": [
+            5,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 21
+        },
+        {
+          "cell": [
+            6,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 22
+        },
+        {
+          "cell": [
+            4,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_barracks",
+          "state": "active",
+          "uid": 23
+        },
+        {
+          "cell": [
+            7,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_sawmill",
+          "state": "active",
+          "uid": 24
+        }
+      ],
+      "construction": [
+        {
+          "cell": [
+            7,
+            4
+          ],
+          "costs": {
+            "wood": 5.0
+          },
+          "day": 2,
+          "id": "campaign_sawmill",
+          "ok": true,
+          "reason": "",
+          "uid": 24
+        }
+      ],
+      "day": 2,
+      "food": {
+        "party": {
+          "capacity": 10,
+          "carried_after": 8,
+          "carried_before_ration": 10,
+          "city_uid": 0,
+          "consumed": 2,
+          "members": 2,
+          "resupplied": 2,
+          "shortage": 0
+        },
+        "resident_consumed": 2.0,
+        "resident_demand": 2.0,
+        "resident_shortage": 0.0
+      },
+      "ledger": [
+        {
+          "inputs": {
+            "wood": 5.0
+          },
+          "outputs": {},
+          "source": "construction:campaign_sawmill"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "wood": 2.0
+          },
+          "source": "campaign-building:campaign_sawmill/recipe:sawmill_wood"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:party_resupply"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:resident_food"
+        }
+      ],
+      "raid": [],
+      "staffing": [
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 20,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 21,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 22,
+          "worker_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_barracks",
+          "building_uid": 23,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_sawmill",
+          "building_uid": 24,
+          "worker_ids": [
+            2,
+            3
+          ]
+        }
+      ],
+      "stocks": {
+        "food": 18.0,
+        "iron": 8.0,
+        "wood": 5.0
+      }
+    },
+    {
+      "buildings": [
+        {
+          "cell": [
+            4,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 20
+        },
+        {
+          "cell": [
+            5,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 21
+        },
+        {
+          "cell": [
+            6,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 22
+        },
+        {
+          "cell": [
+            4,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_barracks",
+          "state": "active",
+          "uid": 23
+        },
+        {
+          "cell": [
+            7,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_sawmill",
+          "state": "active",
+          "uid": 24
+        }
+      ],
+      "construction": [],
+      "day": 3,
+      "food": {
+        "party": {
+          "capacity": 10,
+          "carried_after": 8,
+          "carried_before_ration": 10,
+          "city_uid": 0,
+          "consumed": 2,
+          "members": 2,
+          "resupplied": 2,
+          "shortage": 0
+        },
+        "resident_consumed": 2.0,
+        "resident_demand": 2.0,
+        "resident_shortage": 0.0
+      },
+      "ledger": [
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "wood": 2.0
+          },
+          "source": "campaign-building:campaign_sawmill/recipe:sawmill_wood"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:party_resupply"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:resident_food"
+        }
+      ],
+      "raid": [],
+      "staffing": [
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 20,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 21,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 22,
+          "worker_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_barracks",
+          "building_uid": 23,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_sawmill",
+          "building_uid": 24,
+          "worker_ids": [
+            2,
+            3
+          ]
+        }
+      ],
+      "stocks": {
+        "food": 16.0,
+        "iron": 8.0,
+        "wood": 7.0
+      }
+    },
+    {
+      "buildings": [
+        {
+          "cell": [
+            4,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 20
+        },
+        {
+          "cell": [
+            5,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 21
+        },
+        {
+          "cell": [
+            6,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 22
+        },
+        {
+          "cell": [
+            4,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_barracks",
+          "state": "active",
+          "uid": 23
+        },
+        {
+          "cell": [
+            7,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_sawmill",
+          "state": "active",
+          "uid": 24
+        },
+        {
+          "cell": [
+            4,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_iron_mine",
+          "state": "active",
+          "uid": 25
+        }
+      ],
+      "construction": [
+        {
+          "cell": [
+            4,
+            5
+          ],
+          "costs": {
+            "wood": 6.0
+          },
+          "day": 4,
+          "id": "campaign_iron_mine",
+          "ok": true,
+          "reason": "",
+          "uid": 25
+        }
+      ],
+      "day": 4,
+      "food": {
+        "party": {
+          "capacity": 10,
+          "carried_after": 8,
+          "carried_before_ration": 10,
+          "city_uid": 0,
+          "consumed": 2,
+          "members": 2,
+          "resupplied": 2,
+          "shortage": 0
+        },
+        "resident_consumed": 2.0,
+        "resident_demand": 2.0,
+        "resident_shortage": 0.0
+      },
+      "ledger": [
+        {
+          "inputs": {
+            "wood": 6.0
+          },
+          "outputs": {},
+          "source": "construction:campaign_iron_mine"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "wood": 2.0
+          },
+          "source": "campaign-building:campaign_sawmill/recipe:sawmill_wood"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "iron": 1.0
+          },
+          "source": "campaign-building:campaign_iron_mine/recipe:mine_iron"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:party_resupply"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:resident_food"
+        }
+      ],
+      "raid": [],
+      "staffing": [
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 20,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 21,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 22,
+          "worker_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_barracks",
+          "building_uid": 23,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_sawmill",
+          "building_uid": 24,
+          "worker_ids": [
+            2,
+            3
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_iron_mine",
+          "building_uid": 25,
+          "worker_ids": [
+            4,
+            5
+          ]
+        }
+      ],
+      "stocks": {
+        "food": 14.0,
+        "iron": 9.0,
+        "wood": 3.0
+      }
+    },
+    {
+      "buildings": [
+        {
+          "cell": [
+            4,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 20
+        },
+        {
+          "cell": [
+            5,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 21
+        },
+        {
+          "cell": [
+            6,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 22
+        },
+        {
+          "cell": [
+            4,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_barracks",
+          "state": "active",
+          "uid": 23
+        },
+        {
+          "cell": [
+            7,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_sawmill",
+          "state": "active",
+          "uid": 24
+        },
+        {
+          "cell": [
+            4,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_iron_mine",
+          "state": "active",
+          "uid": 25
+        }
+      ],
+      "construction": [],
+      "day": 5,
+      "food": {
+        "party": {
+          "capacity": 10,
+          "carried_after": 8,
+          "carried_before_ration": 10,
+          "city_uid": 0,
+          "consumed": 2,
+          "members": 2,
+          "resupplied": 2,
+          "shortage": 0
+        },
+        "resident_consumed": 2.0,
+        "resident_demand": 2.0,
+        "resident_shortage": 0.0
+      },
+      "ledger": [
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 3.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "wood": 2.0
+          },
+          "source": "campaign-building:campaign_sawmill/recipe:sawmill_wood"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "iron": 1.0
+          },
+          "source": "campaign-building:campaign_iron_mine/recipe:mine_iron"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:party_resupply"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:resident_food"
+        }
+      ],
+      "raid": [],
+      "staffing": [
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 20,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 21,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 22,
+          "worker_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_barracks",
+          "building_uid": 23,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_sawmill",
+          "building_uid": 24,
+          "worker_ids": [
+            2,
+            3
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_iron_mine",
+          "building_uid": 25,
+          "worker_ids": [
+            4,
+            5
+          ]
+        }
+      ],
+      "stocks": {
+        "food": 13.0,
+        "iron": 10.0,
+        "wood": 5.0
+      }
+    },
+    {
+      "buildings": [
+        {
+          "cell": [
+            4,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 20
+        },
+        {
+          "cell": [
+            5,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 21
+        },
+        {
+          "cell": [
+            6,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 22
+        },
+        {
+          "cell": [
+            4,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_barracks",
+          "state": "active",
+          "uid": 23
+        },
+        {
+          "cell": [
+            7,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_sawmill",
+          "state": "active",
+          "uid": 24
+        },
+        {
+          "cell": [
+            4,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_iron_mine",
+          "state": "active",
+          "uid": 25
+        },
+        {
+          "cell": [
+            7,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 26
+        }
+      ],
+      "construction": [
+        {
+          "cell": [
+            7,
+            5
+          ],
+          "costs": {
+            "wood": 4.0
+          },
+          "day": 6,
+          "id": "campaign_farm",
+          "ok": true,
+          "reason": "",
+          "uid": 26
+        }
+      ],
+      "day": 6,
+      "food": {
+        "party": {
+          "capacity": 10,
+          "carried_after": 8,
+          "carried_before_ration": 10,
+          "city_uid": 0,
+          "consumed": 2,
+          "members": 2,
+          "resupplied": 2,
+          "shortage": 0
+        },
+        "resident_consumed": 2.0,
+        "resident_demand": 2.0,
+        "resident_shortage": 0.0
+      },
+      "ledger": [
+        {
+          "inputs": {
+            "wood": 4.0
+          },
+          "outputs": {},
+          "source": "construction:campaign_farm"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "wood": 3.0
+          },
+          "source": "campaign-building:campaign_sawmill/recipe:sawmill_wood"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "iron": 1.0
+          },
+          "source": "campaign-building:campaign_iron_mine/recipe:mine_iron"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:party_resupply"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:resident_food"
+        }
+      ],
+      "raid": [],
+      "staffing": [
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 20,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 21,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 22,
+          "worker_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_barracks",
+          "building_uid": 23,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_sawmill",
+          "building_uid": 24,
+          "worker_ids": [
+            2,
+            3
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_iron_mine",
+          "building_uid": 25,
+          "worker_ids": [
+            4,
+            5
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 26,
+          "worker_ids": [
+            6,
+            7
+          ]
+        }
+      ],
+      "stocks": {
+        "food": 13.0,
+        "iron": 11.0,
+        "wood": 4.0
+      }
+    },
+    {
+      "buildings": [
+        {
+          "cell": [
+            4,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 20
+        },
+        {
+          "cell": [
+            5,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 21
+        },
+        {
+          "cell": [
+            6,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 22
+        },
+        {
+          "cell": [
+            4,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_barracks",
+          "state": "active",
+          "uid": 23
+        },
+        {
+          "cell": [
+            7,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_sawmill",
+          "state": "active",
+          "uid": 24
+        },
+        {
+          "cell": [
+            4,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_iron_mine",
+          "state": "active",
+          "uid": 25
+        },
+        {
+          "cell": [
+            7,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 26
+        }
+      ],
+      "construction": [],
+      "day": 7,
+      "food": {
+        "party": {
+          "capacity": 10,
+          "carried_after": 8,
+          "carried_before_ration": 10,
+          "city_uid": 0,
+          "consumed": 2,
+          "members": 2,
+          "resupplied": 2,
+          "shortage": 0
+        },
+        "resident_consumed": 2.0,
+        "resident_demand": 2.0,
+        "resident_shortage": 0.0
+      },
+      "ledger": [
+        {
+          "inputs": {
+            "food": 3.9
+          },
+          "outputs": {},
+          "source": "campaign:balance_raid:pillage"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "wood": 2.0
+          },
+          "source": "campaign-building:campaign_sawmill/recipe:sawmill_wood"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "iron": 1.0
+          },
+          "source": "campaign-building:campaign_iron_mine/recipe:mine_iron"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:party_resupply"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:resident_food"
+        }
+      ],
+      "raid": [
+        {
+          "day": 7,
+          "defense": 1,
+          "food_after": 9.1,
+          "food_before": 13.0,
+          "food_lost": 3.9,
+          "repelled": false,
+          "strength": 6
+        }
+      ],
+      "staffing": [
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 20,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 21,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 22,
+          "worker_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_barracks",
+          "building_uid": 23,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_sawmill",
+          "building_uid": 24,
+          "worker_ids": [
+            2,
+            3
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_iron_mine",
+          "building_uid": 25,
+          "worker_ids": [
+            4,
+            5
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 26,
+          "worker_ids": [
+            6,
+            7
+          ]
+        }
+      ],
+      "stocks": {
+        "food": 9.1,
+        "iron": 12.0,
+        "wood": 6.0
+      }
+    },
+    {
+      "buildings": [
+        {
+          "cell": [
+            4,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 20
+        },
+        {
+          "cell": [
+            5,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 21
+        },
+        {
+          "cell": [
+            6,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 22
+        },
+        {
+          "cell": [
+            4,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_barracks",
+          "state": "active",
+          "uid": 23
+        },
+        {
+          "cell": [
+            7,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_sawmill",
+          "state": "active",
+          "uid": 24
+        },
+        {
+          "cell": [
+            4,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_iron_mine",
+          "state": "active",
+          "uid": 25
+        },
+        {
+          "cell": [
+            7,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 26
+        }
+      ],
+      "construction": [],
+      "day": 8,
+      "food": {
+        "party": {
+          "capacity": 10,
+          "carried_after": 8,
+          "carried_before_ration": 10,
+          "city_uid": 0,
+          "consumed": 2,
+          "members": 2,
+          "resupplied": 2,
+          "shortage": 0
+        },
+        "resident_consumed": 2.0,
+        "resident_demand": 2.0,
+        "resident_shortage": 0.0
+      },
+      "ledger": [
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 3.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "wood": 2.0
+          },
+          "source": "campaign-building:campaign_sawmill/recipe:sawmill_wood"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "iron": 1.0
+          },
+          "source": "campaign-building:campaign_iron_mine/recipe:mine_iron"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:party_resupply"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:resident_food"
+        }
+      ],
+      "raid": [],
+      "staffing": [
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 20,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 21,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 22,
+          "worker_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_barracks",
+          "building_uid": 23,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_sawmill",
+          "building_uid": 24,
+          "worker_ids": [
+            2,
+            3
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_iron_mine",
+          "building_uid": 25,
+          "worker_ids": [
+            4,
+            5
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 26,
+          "worker_ids": [
+            6,
+            7
+          ]
+        }
+      ],
+      "stocks": {
+        "food": 10.1,
+        "iron": 13.0,
+        "wood": 8.0
+      }
+    },
+    {
+      "buildings": [
+        {
+          "cell": [
+            4,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 20
+        },
+        {
+          "cell": [
+            5,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 21
+        },
+        {
+          "cell": [
+            6,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 22
+        },
+        {
+          "cell": [
+            4,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_barracks",
+          "state": "active",
+          "uid": 23
+        },
+        {
+          "cell": [
+            7,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_sawmill",
+          "state": "active",
+          "uid": 24
+        },
+        {
+          "cell": [
+            4,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_iron_mine",
+          "state": "active",
+          "uid": 25
+        },
+        {
+          "cell": [
+            7,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 26
+        },
+        {
+          "cell": [
+            5,
+            6
+          ],
+          "construction_turns_remaining": 0,
+          "id": "aoe4_palisade",
+          "state": "active",
+          "uid": 27
+        }
+      ],
+      "construction": [
+        {
+          "cell": [
+            5,
+            6
+          ],
+          "costs": {
+            "iron": 2.0,
+            "wood": 6.0
+          },
+          "day": 9,
+          "id": "aoe4_palisade",
+          "ok": true,
+          "reason": "",
+          "uid": 27
+        }
+      ],
+      "day": 9,
+      "food": {
+        "party": {
+          "capacity": 10,
+          "carried_after": 8,
+          "carried_before_ration": 10,
+          "city_uid": 0,
+          "consumed": 2,
+          "members": 2,
+          "resupplied": 2,
+          "shortage": 0
+        },
+        "resident_consumed": 2.0,
+        "resident_demand": 2.0,
+        "resident_shortage": 0.0
+      },
+      "ledger": [
+        {
+          "inputs": {
+            "iron": 2.0,
+            "wood": 6.0
+          },
+          "outputs": {},
+          "source": "construction:aoe4_palisade"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "wood": 2.0
+          },
+          "source": "campaign-building:campaign_sawmill/recipe:sawmill_wood"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "iron": 1.0
+          },
+          "source": "campaign-building:campaign_iron_mine/recipe:mine_iron"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 3.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:party_resupply"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:resident_food"
+        }
+      ],
+      "raid": [],
+      "staffing": [
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 20,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 21,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 22,
+          "worker_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_barracks",
+          "building_uid": 23,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_sawmill",
+          "building_uid": 24,
+          "worker_ids": [
+            2,
+            3
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_iron_mine",
+          "building_uid": 25,
+          "worker_ids": [
+            4,
+            5
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 26,
+          "worker_ids": [
+            6,
+            7
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "aoe4_palisade",
+          "building_uid": 27,
+          "worker_ids": []
+        }
+      ],
+      "stocks": {
+        "food": 11.1,
+        "iron": 12.0,
+        "wood": 4.0
+      }
+    },
+    {
+      "buildings": [
+        {
+          "cell": [
+            4,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 20
+        },
+        {
+          "cell": [
+            5,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 21
+        },
+        {
+          "cell": [
+            6,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 22
+        },
+        {
+          "cell": [
+            4,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_barracks",
+          "state": "active",
+          "uid": 23
+        },
+        {
+          "cell": [
+            7,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_sawmill",
+          "state": "active",
+          "uid": 24
+        },
+        {
+          "cell": [
+            4,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_iron_mine",
+          "state": "active",
+          "uid": 25
+        },
+        {
+          "cell": [
+            7,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 26
+        },
+        {
+          "cell": [
+            5,
+            6
+          ],
+          "construction_turns_remaining": 0,
+          "id": "aoe4_palisade",
+          "state": "active",
+          "uid": 27
+        }
+      ],
+      "construction": [],
+      "day": 10,
+      "food": {
+        "party": {
+          "capacity": 10,
+          "carried_after": 8,
+          "carried_before_ration": 10,
+          "city_uid": 0,
+          "consumed": 2,
+          "members": 2,
+          "resupplied": 2,
+          "shortage": 0
+        },
+        "resident_consumed": 2.0,
+        "resident_demand": 2.0,
+        "resident_shortage": 0.0
+      },
+      "ledger": [
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "wood": 2.0
+          },
+          "source": "campaign-building:campaign_sawmill/recipe:sawmill_wood"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "iron": 1.0
+          },
+          "source": "campaign-building:campaign_iron_mine/recipe:mine_iron"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:party_resupply"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:resident_food"
+        }
+      ],
+      "raid": [],
+      "staffing": [
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 20,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 21,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 22,
+          "worker_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_barracks",
+          "building_uid": 23,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_sawmill",
+          "building_uid": 24,
+          "worker_ids": [
+            2,
+            3
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_iron_mine",
+          "building_uid": 25,
+          "worker_ids": [
+            4,
+            5
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 26,
+          "worker_ids": [
+            6,
+            7
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "aoe4_palisade",
+          "building_uid": 27,
+          "worker_ids": []
+        }
+      ],
+      "stocks": {
+        "food": 11.1,
+        "iron": 13.0,
+        "wood": 6.0
+      }
+    },
+    {
+      "buildings": [
+        {
+          "cell": [
+            4,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 20
+        },
+        {
+          "cell": [
+            5,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 21
+        },
+        {
+          "cell": [
+            6,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 22
+        },
+        {
+          "cell": [
+            4,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_barracks",
+          "state": "active",
+          "uid": 23
+        },
+        {
+          "cell": [
+            7,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_sawmill",
+          "state": "active",
+          "uid": 24
+        },
+        {
+          "cell": [
+            4,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_iron_mine",
+          "state": "active",
+          "uid": 25
+        },
+        {
+          "cell": [
+            7,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 26
+        },
+        {
+          "cell": [
+            5,
+            6
+          ],
+          "construction_turns_remaining": 0,
+          "id": "aoe4_palisade",
+          "state": "active",
+          "uid": 27
+        }
+      ],
+      "construction": [],
+      "day": 11,
+      "food": {
+        "party": {
+          "capacity": 10,
+          "carried_after": 8,
+          "carried_before_ration": 10,
+          "city_uid": 0,
+          "consumed": 2,
+          "members": 2,
+          "resupplied": 2,
+          "shortage": 0
+        },
+        "resident_consumed": 2.0,
+        "resident_demand": 2.0,
+        "resident_shortage": 0.0
+      },
+      "ledger": [
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 3.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "wood": 3.0
+          },
+          "source": "campaign-building:campaign_sawmill/recipe:sawmill_wood"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "iron": 1.0
+          },
+          "source": "campaign-building:campaign_iron_mine/recipe:mine_iron"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:party_resupply"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:resident_food"
+        }
+      ],
+      "raid": [],
+      "staffing": [
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 20,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 21,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 22,
+          "worker_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_barracks",
+          "building_uid": 23,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_sawmill",
+          "building_uid": 24,
+          "worker_ids": [
+            2,
+            3
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_iron_mine",
+          "building_uid": 25,
+          "worker_ids": [
+            4,
+            5
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 26,
+          "worker_ids": [
+            6,
+            7
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "aoe4_palisade",
+          "building_uid": 27,
+          "worker_ids": []
+        }
+      ],
+      "stocks": {
+        "food": 12.1,
+        "iron": 14.0,
+        "wood": 9.0
+      }
+    },
+    {
+      "buildings": [
+        {
+          "cell": [
+            4,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 20
+        },
+        {
+          "cell": [
+            5,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 21
+        },
+        {
+          "cell": [
+            6,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 22
+        },
+        {
+          "cell": [
+            4,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_barracks",
+          "state": "active",
+          "uid": 23
+        },
+        {
+          "cell": [
+            7,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_sawmill",
+          "state": "active",
+          "uid": 24
+        },
+        {
+          "cell": [
+            4,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_iron_mine",
+          "state": "active",
+          "uid": 25
+        },
+        {
+          "cell": [
+            7,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 26
+        },
+        {
+          "cell": [
+            5,
+            6
+          ],
+          "construction_turns_remaining": 0,
+          "id": "aoe4_palisade",
+          "state": "active",
+          "uid": 27
+        }
+      ],
+      "construction": [],
+      "day": 12,
+      "food": {
+        "party": {
+          "capacity": 10,
+          "carried_after": 8,
+          "carried_before_ration": 10,
+          "city_uid": 0,
+          "consumed": 2,
+          "members": 2,
+          "resupplied": 2,
+          "shortage": 0
+        },
+        "resident_consumed": 2.0,
+        "resident_demand": 2.0,
+        "resident_shortage": 0.0
+      },
+      "ledger": [
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "wood": 2.0
+          },
+          "source": "campaign-building:campaign_sawmill/recipe:sawmill_wood"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "iron": 1.0
+          },
+          "source": "campaign-building:campaign_iron_mine/recipe:mine_iron"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 3.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:party_resupply"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:resident_food"
+        }
+      ],
+      "raid": [],
+      "staffing": [
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 20,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 21,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 22,
+          "worker_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_barracks",
+          "building_uid": 23,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_sawmill",
+          "building_uid": 24,
+          "worker_ids": [
+            2,
+            3
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_iron_mine",
+          "building_uid": 25,
+          "worker_ids": [
+            4,
+            5
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 26,
+          "worker_ids": [
+            6,
+            7
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "aoe4_palisade",
+          "building_uid": 27,
+          "worker_ids": []
+        }
+      ],
+      "stocks": {
+        "food": 13.1,
+        "iron": 15.0,
+        "wood": 11.0
+      }
+    },
+    {
+      "buildings": [
+        {
+          "cell": [
+            4,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 20
+        },
+        {
+          "cell": [
+            5,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 21
+        },
+        {
+          "cell": [
+            6,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 22
+        },
+        {
+          "cell": [
+            4,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_barracks",
+          "state": "active",
+          "uid": 23
+        },
+        {
+          "cell": [
+            7,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_sawmill",
+          "state": "active",
+          "uid": 24
+        },
+        {
+          "cell": [
+            4,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_iron_mine",
+          "state": "active",
+          "uid": 25
+        },
+        {
+          "cell": [
+            7,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 26
+        },
+        {
+          "cell": [
+            5,
+            6
+          ],
+          "construction_turns_remaining": 0,
+          "id": "aoe4_palisade",
+          "state": "active",
+          "uid": 27
+        }
+      ],
+      "construction": [],
+      "day": 13,
+      "food": {
+        "party": {
+          "capacity": 10,
+          "carried_after": 8,
+          "carried_before_ration": 10,
+          "city_uid": 0,
+          "consumed": 2,
+          "members": 2,
+          "resupplied": 2,
+          "shortage": 0
+        },
+        "resident_consumed": 2.0,
+        "resident_demand": 2.0,
+        "resident_shortage": 0.0
+      },
+      "ledger": [
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "wood": 2.0
+          },
+          "source": "campaign-building:campaign_sawmill/recipe:sawmill_wood"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "iron": 1.0
+          },
+          "source": "campaign-building:campaign_iron_mine/recipe:mine_iron"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:party_resupply"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:resident_food"
+        }
+      ],
+      "raid": [],
+      "staffing": [
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 20,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 21,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 22,
+          "worker_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_barracks",
+          "building_uid": 23,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_sawmill",
+          "building_uid": 24,
+          "worker_ids": [
+            2,
+            3
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_iron_mine",
+          "building_uid": 25,
+          "worker_ids": [
+            4,
+            5
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 26,
+          "worker_ids": [
+            6,
+            7
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "aoe4_palisade",
+          "building_uid": 27,
+          "worker_ids": []
+        }
+      ],
+      "stocks": {
+        "food": 13.1,
+        "iron": 16.0,
+        "wood": 13.0
+      }
+    },
+    {
+      "buildings": [
+        {
+          "cell": [
+            4,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 20
+        },
+        {
+          "cell": [
+            5,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 21
+        },
+        {
+          "cell": [
+            6,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 22
+        },
+        {
+          "cell": [
+            4,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_barracks",
+          "state": "active",
+          "uid": 23
+        },
+        {
+          "cell": [
+            7,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_sawmill",
+          "state": "active",
+          "uid": 24
+        },
+        {
+          "cell": [
+            4,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_iron_mine",
+          "state": "active",
+          "uid": 25
+        },
+        {
+          "cell": [
+            7,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 26
+        },
+        {
+          "cell": [
+            5,
+            6
+          ],
+          "construction_turns_remaining": 0,
+          "id": "aoe4_palisade",
+          "state": "active",
+          "uid": 27
+        }
+      ],
+      "construction": [],
+      "day": 14,
+      "food": {
+        "party": {
+          "capacity": 10,
+          "carried_after": 8,
+          "carried_before_ration": 10,
+          "city_uid": 0,
+          "consumed": 2,
+          "members": 2,
+          "resupplied": 2,
+          "shortage": 0
+        },
+        "resident_consumed": 2.0,
+        "resident_demand": 2.0,
+        "resident_shortage": 0.0
+      },
+      "ledger": [
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "wood": 2.0
+          },
+          "source": "campaign-building:campaign_sawmill/recipe:sawmill_wood"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "iron": 1.0
+          },
+          "source": "campaign-building:campaign_iron_mine/recipe:mine_iron"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:party_resupply"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:resident_food"
+        }
+      ],
+      "raid": [],
+      "staffing": [
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 20,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 21,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 22,
+          "worker_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_barracks",
+          "building_uid": 23,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_sawmill",
+          "building_uid": 24,
+          "worker_ids": [
+            2,
+            3
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_iron_mine",
+          "building_uid": 25,
+          "worker_ids": [
+            4,
+            5
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 26,
+          "worker_ids": [
+            6,
+            7
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "aoe4_palisade",
+          "building_uid": 27,
+          "worker_ids": []
+        }
+      ],
+      "stocks": {
+        "food": 13.1,
+        "iron": 17.0,
+        "wood": 15.0
+      }
+    },
+    {
+      "buildings": [
+        {
+          "cell": [
+            4,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 20
+        },
+        {
+          "cell": [
+            5,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 21
+        },
+        {
+          "cell": [
+            6,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 22
+        },
+        {
+          "cell": [
+            4,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_barracks",
+          "state": "active",
+          "uid": 23
+        },
+        {
+          "cell": [
+            7,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_sawmill",
+          "state": "active",
+          "uid": 24
+        },
+        {
+          "cell": [
+            4,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_iron_mine",
+          "state": "active",
+          "uid": 25
+        },
+        {
+          "cell": [
+            7,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 26
+        },
+        {
+          "cell": [
+            5,
+            6
+          ],
+          "construction_turns_remaining": 0,
+          "id": "aoe4_palisade",
+          "state": "active",
+          "uid": 27
+        }
+      ],
+      "construction": [],
+      "day": 15,
+      "food": {
+        "party": {
+          "capacity": 10,
+          "carried_after": 8,
+          "carried_before_ration": 10,
+          "city_uid": 0,
+          "consumed": 2,
+          "members": 2,
+          "resupplied": 2,
+          "shortage": 0
+        },
+        "resident_consumed": 2.0,
+        "resident_demand": 2.0,
+        "resident_shortage": 0.0
+      },
+      "ledger": [
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 3.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "wood": 2.0
+          },
+          "source": "campaign-building:campaign_sawmill/recipe:sawmill_wood"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "iron": 1.0
+          },
+          "source": "campaign-building:campaign_iron_mine/recipe:mine_iron"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 3.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:party_resupply"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:resident_food"
+        }
+      ],
+      "raid": [],
+      "staffing": [
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 20,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 21,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 22,
+          "worker_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_barracks",
+          "building_uid": 23,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_sawmill",
+          "building_uid": 24,
+          "worker_ids": [
+            2,
+            3
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_iron_mine",
+          "building_uid": 25,
+          "worker_ids": [
+            4,
+            5
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 26,
+          "worker_ids": [
+            6,
+            7
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "aoe4_palisade",
+          "building_uid": 27,
+          "worker_ids": []
+        }
+      ],
+      "stocks": {
+        "food": 15.1,
+        "iron": 18.0,
+        "wood": 17.0
+      }
+    },
+    {
+      "buildings": [
+        {
+          "cell": [
+            4,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 20
+        },
+        {
+          "cell": [
+            5,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 21
+        },
+        {
+          "cell": [
+            6,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 22
+        },
+        {
+          "cell": [
+            4,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_barracks",
+          "state": "active",
+          "uid": 23
+        },
+        {
+          "cell": [
+            7,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_sawmill",
+          "state": "active",
+          "uid": 24
+        },
+        {
+          "cell": [
+            4,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_iron_mine",
+          "state": "active",
+          "uid": 25
+        },
+        {
+          "cell": [
+            7,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 26
+        },
+        {
+          "cell": [
+            5,
+            6
+          ],
+          "construction_turns_remaining": 0,
+          "id": "aoe4_palisade",
+          "state": "active",
+          "uid": 27
+        }
+      ],
+      "construction": [],
+      "day": 16,
+      "food": {
+        "party": {
+          "capacity": 10,
+          "carried_after": 8,
+          "carried_before_ration": 10,
+          "city_uid": 0,
+          "consumed": 2,
+          "members": 2,
+          "resupplied": 2,
+          "shortage": 0
+        },
+        "resident_consumed": 2.0,
+        "resident_demand": 2.0,
+        "resident_shortage": 0.0
+      },
+      "ledger": [
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "wood": 3.0
+          },
+          "source": "campaign-building:campaign_sawmill/recipe:sawmill_wood"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "iron": 1.0
+          },
+          "source": "campaign-building:campaign_iron_mine/recipe:mine_iron"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:party_resupply"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:resident_food"
+        }
+      ],
+      "raid": [],
+      "staffing": [
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 20,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 21,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 22,
+          "worker_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_barracks",
+          "building_uid": 23,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_sawmill",
+          "building_uid": 24,
+          "worker_ids": [
+            2,
+            3
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_iron_mine",
+          "building_uid": 25,
+          "worker_ids": [
+            4,
+            5
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 26,
+          "worker_ids": [
+            6,
+            7
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "aoe4_palisade",
+          "building_uid": 27,
+          "worker_ids": []
+        }
+      ],
+      "stocks": {
+        "food": 15.1,
+        "iron": 19.0,
+        "wood": 20.0
+      }
+    },
+    {
+      "buildings": [
+        {
+          "cell": [
+            4,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 20
+        },
+        {
+          "cell": [
+            5,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 21
+        },
+        {
+          "cell": [
+            6,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 22
+        },
+        {
+          "cell": [
+            4,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_barracks",
+          "state": "active",
+          "uid": 23
+        },
+        {
+          "cell": [
+            7,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_sawmill",
+          "state": "active",
+          "uid": 24
+        },
+        {
+          "cell": [
+            4,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_iron_mine",
+          "state": "active",
+          "uid": 25
+        },
+        {
+          "cell": [
+            7,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 26
+        },
+        {
+          "cell": [
+            5,
+            6
+          ],
+          "construction_turns_remaining": 0,
+          "id": "aoe4_palisade",
+          "state": "active",
+          "uid": 27
+        }
+      ],
+      "construction": [],
+      "day": 17,
+      "food": {
+        "party": {
+          "capacity": 10,
+          "carried_after": 8,
+          "carried_before_ration": 10,
+          "city_uid": 0,
+          "consumed": 2,
+          "members": 2,
+          "resupplied": 2,
+          "shortage": 0
+        },
+        "resident_consumed": 2.0,
+        "resident_demand": 2.0,
+        "resident_shortage": 0.0
+      },
+      "ledger": [
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "wood": 2.0
+          },
+          "source": "campaign-building:campaign_sawmill/recipe:sawmill_wood"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "iron": 1.0
+          },
+          "source": "campaign-building:campaign_iron_mine/recipe:mine_iron"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:party_resupply"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:resident_food"
+        }
+      ],
+      "raid": [],
+      "staffing": [
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 20,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 21,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 22,
+          "worker_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_barracks",
+          "building_uid": 23,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_sawmill",
+          "building_uid": 24,
+          "worker_ids": [
+            2,
+            3
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_iron_mine",
+          "building_uid": 25,
+          "worker_ids": [
+            4,
+            5
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 26,
+          "worker_ids": [
+            6,
+            7
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "aoe4_palisade",
+          "building_uid": 27,
+          "worker_ids": []
+        }
+      ],
+      "stocks": {
+        "food": 15.1,
+        "iron": 20.0,
+        "wood": 22.0
+      }
+    },
+    {
+      "buildings": [
+        {
+          "cell": [
+            4,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 20
+        },
+        {
+          "cell": [
+            5,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 21
+        },
+        {
+          "cell": [
+            6,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 22
+        },
+        {
+          "cell": [
+            4,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_barracks",
+          "state": "active",
+          "uid": 23
+        },
+        {
+          "cell": [
+            7,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_sawmill",
+          "state": "active",
+          "uid": 24
+        },
+        {
+          "cell": [
+            4,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_iron_mine",
+          "state": "active",
+          "uid": 25
+        },
+        {
+          "cell": [
+            7,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 26
+        },
+        {
+          "cell": [
+            5,
+            6
+          ],
+          "construction_turns_remaining": 0,
+          "id": "aoe4_palisade",
+          "state": "active",
+          "uid": 27
+        }
+      ],
+      "construction": [],
+      "day": 18,
+      "food": {
+        "party": {
+          "capacity": 10,
+          "carried_after": 8,
+          "carried_before_ration": 10,
+          "city_uid": 0,
+          "consumed": 2,
+          "members": 2,
+          "resupplied": 2,
+          "shortage": 0
+        },
+        "resident_consumed": 2.0,
+        "resident_demand": 2.0,
+        "resident_shortage": 0.0
+      },
+      "ledger": [
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 3.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "wood": 2.0
+          },
+          "source": "campaign-building:campaign_sawmill/recipe:sawmill_wood"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "iron": 1.0
+          },
+          "source": "campaign-building:campaign_iron_mine/recipe:mine_iron"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:party_resupply"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:resident_food"
+        }
+      ],
+      "raid": [],
+      "staffing": [
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 20,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 21,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 22,
+          "worker_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_barracks",
+          "building_uid": 23,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_sawmill",
+          "building_uid": 24,
+          "worker_ids": [
+            2,
+            3
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_iron_mine",
+          "building_uid": 25,
+          "worker_ids": [
+            4,
+            5
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 26,
+          "worker_ids": [
+            6,
+            7
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "aoe4_palisade",
+          "building_uid": 27,
+          "worker_ids": []
+        }
+      ],
+      "stocks": {
+        "food": 16.1,
+        "iron": 21.0,
+        "wood": 24.0
+      }
+    },
+    {
+      "buildings": [
+        {
+          "cell": [
+            4,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 20
+        },
+        {
+          "cell": [
+            5,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 21
+        },
+        {
+          "cell": [
+            6,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 22
+        },
+        {
+          "cell": [
+            4,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_barracks",
+          "state": "active",
+          "uid": 23
+        },
+        {
+          "cell": [
+            7,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_sawmill",
+          "state": "active",
+          "uid": 24
+        },
+        {
+          "cell": [
+            4,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_iron_mine",
+          "state": "active",
+          "uid": 25
+        },
+        {
+          "cell": [
+            7,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 26
+        },
+        {
+          "cell": [
+            5,
+            6
+          ],
+          "construction_turns_remaining": 0,
+          "id": "aoe4_palisade",
+          "state": "active",
+          "uid": 27
+        }
+      ],
+      "construction": [],
+      "day": 19,
+      "food": {
+        "party": {
+          "capacity": 10,
+          "carried_after": 8,
+          "carried_before_ration": 10,
+          "city_uid": 0,
+          "consumed": 2,
+          "members": 2,
+          "resupplied": 2,
+          "shortage": 0
+        },
+        "resident_consumed": 2.0,
+        "resident_demand": 2.0,
+        "resident_shortage": 0.0
+      },
+      "ledger": [
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "wood": 2.0
+          },
+          "source": "campaign-building:campaign_sawmill/recipe:sawmill_wood"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "iron": 1.0
+          },
+          "source": "campaign-building:campaign_iron_mine/recipe:mine_iron"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 3.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:party_resupply"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:resident_food"
+        }
+      ],
+      "raid": [],
+      "staffing": [
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 20,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 21,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 22,
+          "worker_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_barracks",
+          "building_uid": 23,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_sawmill",
+          "building_uid": 24,
+          "worker_ids": [
+            2,
+            3
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_iron_mine",
+          "building_uid": 25,
+          "worker_ids": [
+            4,
+            5
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 26,
+          "worker_ids": [
+            6,
+            7
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "aoe4_palisade",
+          "building_uid": 27,
+          "worker_ids": []
+        }
+      ],
+      "stocks": {
+        "food": 17.1,
+        "iron": 22.0,
+        "wood": 26.0
+      }
+    },
+    {
+      "buildings": [
+        {
+          "cell": [
+            4,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 20
+        },
+        {
+          "cell": [
+            5,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 21
+        },
+        {
+          "cell": [
+            6,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 22
+        },
+        {
+          "cell": [
+            4,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_barracks",
+          "state": "active",
+          "uid": 23
+        },
+        {
+          "cell": [
+            7,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_sawmill",
+          "state": "active",
+          "uid": 24
+        },
+        {
+          "cell": [
+            4,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_iron_mine",
+          "state": "active",
+          "uid": 25
+        },
+        {
+          "cell": [
+            7,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 26
+        },
+        {
+          "cell": [
+            5,
+            6
+          ],
+          "construction_turns_remaining": 0,
+          "id": "aoe4_palisade",
+          "state": "active",
+          "uid": 27
+        }
+      ],
+      "construction": [],
+      "day": 20,
+      "food": {
+        "party": {
+          "capacity": 10,
+          "carried_after": 8,
+          "carried_before_ration": 10,
+          "city_uid": 0,
+          "consumed": 2,
+          "members": 2,
+          "resupplied": 2,
+          "shortage": 0
+        },
+        "resident_consumed": 2.0,
+        "resident_demand": 2.0,
+        "resident_shortage": 0.0
+      },
+      "ledger": [
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "wood": 2.0
+          },
+          "source": "campaign-building:campaign_sawmill/recipe:sawmill_wood"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "iron": 1.0
+          },
+          "source": "campaign-building:campaign_iron_mine/recipe:mine_iron"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:party_resupply"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:resident_food"
+        }
+      ],
+      "raid": [],
+      "staffing": [
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 20,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 21,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 22,
+          "worker_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_barracks",
+          "building_uid": 23,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_sawmill",
+          "building_uid": 24,
+          "worker_ids": [
+            2,
+            3
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_iron_mine",
+          "building_uid": 25,
+          "worker_ids": [
+            4,
+            5
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 26,
+          "worker_ids": [
+            6,
+            7
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "aoe4_palisade",
+          "building_uid": 27,
+          "worker_ids": []
+        }
+      ],
+      "stocks": {
+        "food": 17.1,
+        "iron": 23.0,
+        "wood": 28.0
+      }
+    },
+    {
+      "buildings": [
+        {
+          "cell": [
+            4,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 20
+        },
+        {
+          "cell": [
+            5,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_housing",
+          "state": "active",
+          "uid": 21
+        },
+        {
+          "cell": [
+            6,
+            3
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 22
+        },
+        {
+          "cell": [
+            4,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_barracks",
+          "state": "active",
+          "uid": 23
+        },
+        {
+          "cell": [
+            7,
+            4
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_sawmill",
+          "state": "active",
+          "uid": 24
+        },
+        {
+          "cell": [
+            4,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_iron_mine",
+          "state": "active",
+          "uid": 25
+        },
+        {
+          "cell": [
+            7,
+            5
+          ],
+          "construction_turns_remaining": 0,
+          "id": "campaign_farm",
+          "state": "active",
+          "uid": 26
+        },
+        {
+          "cell": [
+            5,
+            6
+          ],
+          "construction_turns_remaining": 0,
+          "id": "aoe4_palisade",
+          "state": "active",
+          "uid": 27
+        }
+      ],
+      "construction": [],
+      "day": 21,
+      "food": {
+        "party": {
+          "capacity": 10,
+          "carried_after": 8,
+          "carried_before_ration": 10,
+          "city_uid": 0,
+          "consumed": 2,
+          "members": 2,
+          "resupplied": 2,
+          "shortage": 0
+        },
+        "resident_consumed": 2.0,
+        "resident_demand": 2.0,
+        "resident_shortage": 0.0
+      },
+      "ledger": [
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 3.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "wood": 3.0
+          },
+          "source": "campaign-building:campaign_sawmill/recipe:sawmill_wood"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "iron": 1.0
+          },
+          "source": "campaign-building:campaign_iron_mine/recipe:mine_iron"
+        },
+        {
+          "inputs": {},
+          "outputs": {
+            "food": 2.0
+          },
+          "source": "campaign-building:campaign_farm/recipe:farm_food"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:party_resupply"
+        },
+        {
+          "inputs": {
+            "food": 2.0
+          },
+          "outputs": {},
+          "source": "campaign:resident_food"
+        }
+      ],
+      "raid": [],
+      "staffing": [
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 20,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_housing",
+          "building_uid": 21,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 22,
+          "worker_ids": [
+            0,
+            1
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "campaign_barracks",
+          "building_uid": 23,
+          "worker_ids": []
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_sawmill",
+          "building_uid": 24,
+          "worker_ids": [
+            2,
+            3
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_iron_mine",
+          "building_uid": 25,
+          "worker_ids": [
+            4,
+            5
+          ]
+        },
+        {
+          "assigned_workers": 2,
+          "building_id": "campaign_farm",
+          "building_uid": 26,
+          "worker_ids": [
+            6,
+            7
+          ]
+        },
+        {
+          "assigned_workers": 0,
+          "building_id": "aoe4_palisade",
+          "building_uid": 27,
+          "worker_ids": []
+        }
+      ],
+      "stocks": {
+        "food": 18.1,
+        "iron": 24.0,
+        "wood": 31.0
+      }
+    }
+  ],
+  "milestones": [
+    {
+      "achieved": true,
+      "actual": 1,
+      "code": "first_farm_day",
+      "expected": {
+        "day": 1
+      }
+    },
+    {
+      "achieved": true,
+      "actual": 1,
+      "code": "first_barracks_day",
+      "expected": {
+        "day": 1
+      }
+    },
+    {
+      "achieved": true,
+      "actual": 7,
+      "code": "first_raid_day",
+      "expected": {
+        "day": 7
+      }
+    },
+    {
+      "achieved": true,
+      "actual": 9.1,
+      "code": "food_after_first_raid",
+      "expected": {
+        "max": 15.0
+      }
+    },
+    {
+      "achieved": false,
+      "actual": 18.1,
+      "code": "day21_food",
+      "expected": {
+        "forecast_daily_demand": 4.0,
+        "max": 8.0,
+        "min": 0.0
+      }
+    },
+    {
+      "achieved": true,
+      "actual": 4,
+      "code": "day21_defense",
+      "expected": {
+        "min": 4
+      }
+    }
+  ],
+  "mode": "campaign",
+  "ok": true,
+  "party_roster": [
+    {
+      "class": "fighter",
+      "id": "mvp_fighter",
+      "level": 1
+    },
+    {
+      "class": "ranger",
+      "id": "mvp_ranger",
+      "level": 1
+    }
+  ],
+  "raid_input": {
+    "day": 7,
+    "food_pillage_fraction": 0.3,
+    "stochastic_raid_rolls": "omitted; one fixed unrepelled input is injected",
+    "strength": 6
+  },
+  "scenario": "canonical_mvp_campaign_city_21_day",
+  "summary": {
+    "building_counts": {
+      "aoe4_palisade": 1,
+      "campaign_barracks": 1,
+      "campaign_farm": 2,
+      "campaign_housing": 2,
+      "campaign_iron_mine": 1,
+      "campaign_sawmill": 1
+    },
+    "day21_defense": 4,
+    "day21_stocks": {
+      "food": 18.1,
+      "iron": 24.0,
+      "wood": 31.0
+    },
+    "first_barracks_day": 1,
+    "first_farm_day": 1,
+    "first_raid_day": 7,
+    "food_after_first_raid": 9.1,
+    "footprint_cells_used": 8,
+    "text": "First farm d1, barracks d1; first raid d7 (food 9.1 after raid). Day 21 stocks: food 18.1, wood 31.0, iron 24.0; defense 4; footprint 8/52; has 1 balance warning(s)."
+  },
+  "technical_errors": [],
+  "warnings": [
+    {
+      "actual": 18.1,
+      "code": "day21_food",
+      "expected": {
+        "forecast_daily_demand": 4.0,
+        "max": 8.0,
+        "min": 0.0
+      }
+    }
+  ]
+}

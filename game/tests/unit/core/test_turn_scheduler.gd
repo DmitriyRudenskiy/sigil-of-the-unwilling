@@ -130,6 +130,15 @@ func test_empty_scheduler_ok() -> void:
 	assert_dict(report["phases"]).is_empty()
 	assert_int(ctx.turn_number).is_equal(1)
 
+func test_campaign_mode_is_reported_by_scheduler() -> void:
+	var scheduler := TurnScheduler.new()
+	var context := TurnContext.new()
+	context.is_campaign = true
+
+	var report := scheduler.execute_turn(context)
+
+	assert_that(String(report.economy_mode)).is_equal("campaign")
+
 func test_execute_turn_runs_phases_and_reports() -> void:
 	var sched := TurnScheduler.new()
 	var started: Array = []

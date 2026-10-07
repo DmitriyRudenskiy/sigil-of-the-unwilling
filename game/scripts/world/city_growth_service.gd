@@ -1,6 +1,14 @@
 class_name CityGrowthService
 extends RefCounted
 
+static func apply_pending(city: City) -> int:
+	var switched := 0
+	for unit in city.pop:
+		if unit.apply_pending():
+			switched += 1
+	city._invalidate_exploited()
+	return switched
+
 static func food_consumption(city: City) -> float:
 	return city.count_state(PopUnit.State.WORKER) * GameNumbers.FOOD_PER_WORKER \
 		+ city.count_state(PopUnit.State.MILITIA) * GameNumbers.FOOD_PER_MILITIA \
@@ -15,12 +23,7 @@ static func growth_threshold(city: City) -> float:
 		* pow(float(maxi(1, city.pop_capped())), GameNumbers.GROWTH_THRESHOLD_EXP)
 
 static func process_turn(city: City, turn: int) -> Dictionary:
-	var switched := 0
-	for u in city.pop:
-		if u.apply_pending():
-			switched += 1
-
-	city._invalidate_exploited()
+	var switched := apply_pending(city)
 
 	var resources := city.ensure_resource_ctx()
 	var food_id: StringName = &"food"

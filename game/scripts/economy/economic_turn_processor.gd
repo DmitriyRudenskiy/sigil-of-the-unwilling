@@ -8,6 +8,10 @@ signal resource_depleted(city_uid: int, resource_id: StringName)
 
 const ArchetypeResolver := preload("res://scripts/demographics/archetype_resolver.gd")
 const CampaignBuildingPlacement := preload("res://scripts/city/campaign_building_placement.gd")
+const CAMPAIGN_RESIDENT_FOOD_PER_PERSON := 0.1
+const MVP_PARTY_MEMBERS := 2
+const PARTY_FOOD_PER_MEMBER := 1
+const PROVISION_CAPACITY := 10
 
 func get_phase_id() -> StringName:
 	return &"economy"
@@ -27,8 +31,13 @@ func process(ctx: TurnContext) -> Dictionary:
 	if ctx == null:
 		return report
 
+	var party_state: Dictionary = _campaign_party_state(ctx) if ctx.is_campaign else {}
 	for city in ctx.cities:
-		var city_report: Dictionary = _process_city(city, ctx)
+		if city == null:
+			continue
+		if ctx.is_campaign:
+			WorkerAssignment.rebalance(city)
+		var city_report: Dictionary = _process_city(city, ctx, party_state)
 		report["chains_executed"] += int(city_report.get("chains", 0))
 		report["upkeep_ok"] += int(city_report.get("upkeep_ok", 0))
 		report["upkeep_failed"] += int(city_report.get("upkeep_failed", 0))
@@ -37,22 +46,30 @@ func process(ctx: TurnContext) -> Dictionary:
 		var auto: Dictionary = city_report.get("auto", {})
 		for rid in auto:
 			report["auto_yield"][rid] = float(report["auto_yield"].get(rid, 0.0)) + float(auto[rid])
+	if ctx.is_campaign and not party_state.is_empty() and not bool(party_state.get("processed", false)):
+		party_state["report"] = _consume_party_rations(party_state, null, null)
+		party_state["processed"] = true
+	report["party"] = party_state.get("report", {})
 	return report
 
-func _process_city(city: City, _ctx: TurnContext) -> Dictionary:
+func _process_city(city: City, ctx: TurnContext, party_state: Dictionary) -> Dictionary:
 	var res := city.ensure_resource_ctx()
 	var ledger_start := res.get_ledger().size()
 	var report := {"uid": city.uid, "chains": 0, "upkeep_ok": 0, "upkeep_failed": 0, "auto": {}}
 	var catalog := ArchetypeResolver.load_catalog()
+	if ctx.is_campaign:
+		city.food_supply_this_turn = 0.0
+		city.food_demand_this_turn = 0.0
 
 	var auto: Dictionary = {}
-	var wood_id: StringName = ResourceType.to_name(ResourceType.ID.WOOD)
-	var stone_id: StringName = ResourceType.to_name(ResourceType.ID.STONE)
-	auto[wood_id] = res.add(
-		wood_id, float(GameNumbers.RESOURCE_AUTO_WOOD) * city.auto_resource_mult, "automatic_wood_yield")
-	auto[stone_id] = res.add(
-		stone_id, float(GameNumbers.RESOURCE_AUTO_STONE) * city.auto_resource_mult, "automatic_stone_yield")
-	report["auto"] = auto
+	if not ctx.is_campaign:
+		var wood_id: StringName = ResourceType.to_name(ResourceType.ID.WOOD)
+		var stone_id: StringName = ResourceType.to_name(ResourceType.ID.STONE)
+		auto[wood_id] = res.add(
+			wood_id, float(GameNumbers.RESOURCE_AUTO_WOOD) * city.auto_resource_mult, "automatic_wood_yield")
+		auto[stone_id] = res.add(
+			stone_id, float(GameNumbers.RESOURCE_AUTO_STONE) * city.auto_resource_mult, "automatic_stone_yield")
+		report["auto"] = auto
 	_process_campaign_buildings(city, res, report, catalog)
 
 	for building in city.buildings:
@@ -97,10 +114,78 @@ func _process_city(city: City, _ctx: TurnContext) -> Dictionary:
 			if res.amount(rid) < float(effective[rid]):
 				upkeep_failed.emit(building.uid, rid)
 
+	var party_food_report: Dictionary = {}
+	if ctx.is_campaign:
+		party_food_report = _process_campaign_food(city, res, party_state)
+		report["campaign_food"] = party_food_report
 	report["campaign_population"] = _process_campaign_population(city, catalog)
 	var ledger := res.get_ledger()
 	report["ledger"] = ledger.slice(ledger_start)
 	return report
+
+func _campaign_party_state(ctx: TurnContext) -> Dictionary:
+	if ctx.heroes.is_empty() or not (ctx.heroes[0] is HeroController):
+		return {}
+	var hero: HeroController = ctx.heroes[0]
+	var city_uid := -1
+	for city in ctx.cities:
+		if city != null and CampaignBuildingPlacement.city_cells(city.center).has(hero.current_cell):
+			city_uid = city.uid
+			break
+	return {"hero": hero, "city_uid": city_uid, "processed": false}
+
+func _process_campaign_food(
+	city: City, resources: ResourceContext, party_state: Dictionary
+) -> Dictionary:
+	var party_report := {}
+	if not party_state.is_empty() and not bool(party_state.get("processed", false)) \
+			and int(party_state.get("city_uid", -1)) == city.uid:
+		party_report = _consume_party_rations(party_state, city, resources)
+		party_state["report"] = party_report
+		party_state["processed"] = true
+
+	var demand := float(city.pop.size()) * CAMPAIGN_RESIDENT_FOOD_PER_PERSON
+	var consumed := minf(demand, resources.amount(&"food"))
+	if consumed > 0.0:
+		resources.remove(&"food", consumed, "campaign:resident_food")
+	city.food_demand_this_turn = demand
+	city.food_supply_this_turn = consumed
+	return {
+		"resident_demand": demand,
+		"resident_consumed": consumed,
+		"resident_shortage": demand - consumed,
+		"party": party_report,
+	}
+
+func _consume_party_rations(
+	party_state: Dictionary, city: City, resources: ResourceContext
+) -> Dictionary:
+	var hero: HeroController = party_state.hero
+	var strategic: HeroStrategicResources = hero.strategic_resources
+	var before := int(strategic.get_all().get(&"food", 0))
+	var resupplied := 0
+	if city != null and resources != null:
+		var provision_room := maxi(PROVISION_CAPACITY - before, 0)
+		var carry_room := strategic.remaining_units(&"food")
+		var city_stock := int(floor(resources.amount(&"food")))
+		var transfer := mini(provision_room, mini(carry_room, city_stock))
+		if transfer > 0 and resources.spend({&"food": float(transfer)}, "campaign:party_resupply"):
+			resupplied = hero.add_strategic_resource(&"food", transfer)
+			if resupplied < transfer:
+				resources.add(&"food", float(transfer - resupplied), "campaign:party_resupply_refund")
+	var carried_before_ration := int(strategic.get_all().get(&"food", 0))
+	var ration_due := MVP_PARTY_MEMBERS * PARTY_FOOD_PER_MEMBER
+	var consumed := hero.remove_strategic_resource(&"food", ration_due)
+	return {
+		"members": MVP_PARTY_MEMBERS,
+		"capacity": PROVISION_CAPACITY,
+		"resupplied": resupplied,
+		"carried_before_ration": carried_before_ration,
+		"consumed": consumed,
+		"shortage": ration_due - consumed,
+		"carried_after": int(strategic.get_all().get(&"food", 0)),
+		"city_uid": city.uid if city != null else -1,
+	}
 
 func _process_campaign_buildings(
 	city: City, resources: ResourceContext, report: Dictionary, catalog: Dictionary
@@ -114,7 +199,8 @@ func _process_campaign_buildings(
 			var key := _campaign_building_key(String(result.get("building_id", "")), cell)
 			adjacency_bonus_by_building[key] = int(effects["output_bp"])
 	for building in city.campaign_buildings:
-		if String(building.get("state", "active")) != "active":
+		if String(building.get("state", "active")) != "active" \
+				or int(building.get("construction_turns_remaining", 0)) > 0:
 			continue
 		var assigned_workers := maxi(0, int(building.get("assigned_workers", 0)))
 		var workers_by_group := _assigned_workers_by_group(city, building, catalog)
@@ -125,13 +211,17 @@ func _process_campaign_buildings(
 		var adjacency_bp := int(adjacency_bonus_by_building.get(
 			_campaign_building_key(String(building.get("id", "")), cell), 0))
 		var output_bonus_bp := clampi(specialization_bp + adjacency_bp, -10000, 10000)
-		for recipe in building.get("recipes", []):
-			if not (recipe is Dictionary):
-				continue
+		var ordered_recipes := WorkerAssignment.sort_campaign_recipes(building.get("recipes", []))
+		var remaining_workers := assigned_workers
+		for recipe in ordered_recipes:
 			var required_workers := int(recipe.get("workers", 0))
-			if required_workers <= 0 or assigned_workers <= 0:
+			if required_workers <= 0:
 				continue
-			var ratio := minf(float(assigned_workers), float(required_workers)) / float(required_workers)
+			var recipe_workers := mini(remaining_workers, required_workers)
+			remaining_workers -= recipe_workers
+			if recipe_workers <= 0:
+				continue
+			var ratio := float(recipe_workers) / float(required_workers)
 			var inputs := _scaled_campaign_resources(recipe.get("inputs", {}), ratio)
 			var base_outputs := _scaled_campaign_resources(recipe.get("outputs", {}), ratio)
 			if not _campaign_resources_allowed(inputs) or not _campaign_resources_allowed(base_outputs):
@@ -218,7 +308,8 @@ func _process_campaign_population(city: City, catalog: Dictionary) -> Dictionary
 	var workplace_pairs: Array[Dictionary] = []
 	var workers_by_group_total := {}
 	for building in city.campaign_buildings:
-		if String(building.get("state", "active")) != "active":
+		if String(building.get("state", "active")) != "active" \
+				or int(building.get("construction_turns_remaining", 0)) > 0:
 			continue
 		var services: Dictionary = building.get("services", {})
 		for need_id in services:
@@ -269,7 +360,7 @@ func _process_campaign_population(city: City, catalog: Dictionary) -> Dictionary
 			demand = int(round(city.food_demand_this_turn * 1000.0))
 			supplied = int(round(maxf(city.food_supply_this_turn, 0.0) * 1000.0))
 		else:
-			demand = int(demand_by_need.get(need_id, 0))
+			demand = int(demand_by_need.get(need_id, 0)) * 1000
 			supplied = int(floor(float(service_capacity.get(need_id, 0.0)) * 1000.0))
 		var coverage := ArchetypeResolver.need_coverage_percent(demand, supplied)
 		var state: Dictionary = states.get(group_id, {})

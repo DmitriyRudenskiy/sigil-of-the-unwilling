@@ -305,7 +305,9 @@
       "resident_capacity": 0,
       "construction_turns": 1,
       "recipes": [],
-      "services": {},
+      "services": {
+        "brawling": 3
+      },
       "group_affinities": {},
       "adjacency": [],
       "merge": {},
@@ -2395,8 +2397,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
-        "iron": 2
+        "wood": 3,
+        "iron": 1
       },
       "upkeep": {},
       "jobs": 0,
@@ -2641,8 +2643,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
-        "iron": 2
+        "wood": 3,
+        "iron": 1
       },
       "upkeep": {},
       "jobs": 0,
@@ -2707,8 +2709,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
-        "iron": 2
+        "wood": 3,
+        "iron": 1
       },
       "upkeep": {},
       "jobs": 0,
@@ -2773,8 +2775,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
-        "iron": 2
+        "wood": 3,
+        "iron": 1
       },
       "upkeep": {},
       "jobs": 0,
@@ -3019,8 +3021,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
-        "iron": 2
+        "wood": 3,
+        "iron": 1
       },
       "upkeep": {},
       "jobs": 0,
@@ -3265,8 +3267,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
-        "iron": 2
+        "wood": 4,
+        "iron": 1
       },
       "upkeep": {},
       "jobs": 0,
@@ -3502,8 +3504,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
-        "iron": 2
+        "wood": 4,
+        "iron": 1
       },
       "upkeep": {},
       "jobs": 0,
@@ -3568,8 +3570,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
-        "iron": 2
+        "wood": 4,
+        "iron": 1
       },
       "upkeep": {},
       "jobs": 0,
@@ -3634,8 +3636,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
-        "iron": 2
+        "wood": 4,
+        "iron": 1
       },
       "upkeep": {},
       "jobs": 0,
@@ -3700,8 +3702,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
-        "iron": 2
+        "wood": 3,
+        "iron": 1
       },
       "upkeep": {},
       "jobs": 0,
@@ -4247,8 +4249,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
-        "iron": 2
+        "wood": 7,
+        "iron": 3
       },
       "upkeep": {},
       "jobs": 0,
@@ -4322,8 +4324,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 8,
-        "iron": 2
+        "wood": 9,
+        "iron": 3
       },
       "upkeep": {},
       "jobs": 0,
@@ -4412,8 +4414,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 8,
-        "iron": 2
+        "wood": 9,
+        "iron": 3
       },
       "upkeep": {},
       "jobs": 0,
@@ -4502,8 +4504,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 8,
-        "iron": 2
+        "wood": 9,
+        "iron": 3
       },
       "upkeep": {},
       "jobs": 0,
@@ -4585,8 +4587,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 8,
-        "iron": 2
+        "wood": 9,
+        "iron": 3
       },
       "upkeep": {},
       "jobs": 0,
@@ -4659,8 +4661,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
-        "iron": 2
+        "wood": 7,
+        "iron": 3
       },
       "upkeep": {},
       "jobs": 0,
@@ -4725,8 +4727,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 8,
-        "iron": 2
+        "wood": 9,
+        "iron": 3
       },
       "upkeep": {},
       "jobs": 0,
@@ -4806,7 +4808,7 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 10,
+        "wood": 9,
         "iron": 3
       },
       "upkeep": {},
@@ -4889,8 +4891,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 10,
-        "iron": 3
+        "wood": 11,
+        "iron": 4
       },
       "upkeep": {},
       "jobs": 0,
@@ -4964,8 +4966,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 8,
-        "iron": 2
+        "wood": 9,
+        "iron": 3
       },
       "upkeep": {},
       "jobs": 0,
@@ -5047,8 +5049,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 8,
-        "iron": 2
+        "wood": 9,
+        "iron": 3
       },
       "upkeep": {},
       "jobs": 0,
@@ -5128,8 +5130,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 8,
-        "iron": 2
+        "wood": 9,
+        "iron": 3
       },
       "upkeep": {},
       "jobs": 0,
@@ -5211,8 +5213,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 8,
-        "iron": 2
+        "wood": 9,
+        "iron": 3
       },
       "upkeep": {},
       "jobs": 0,
@@ -5294,8 +5296,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 8,
-        "iron": 2
+        "wood": 9,
+        "iron": 3
       },
       "upkeep": {},
       "jobs": 0,
@@ -5368,8 +5370,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 8,
-        "iron": 2
+        "wood": 9,
+        "iron": 3
       },
       "upkeep": {},
       "jobs": 0,
@@ -5457,7 +5459,7 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
+        "wood": 4,
         "iron": 2
       },
       "upkeep": {},
@@ -5523,8 +5525,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
-        "iron": 2
+        "wood": 7,
+        "iron": 3
       },
       "upkeep": {},
       "jobs": 0,
@@ -5589,8 +5591,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
-        "iron": 2
+        "wood": 7,
+        "iron": 3
       },
       "upkeep": {},
       "jobs": 0,
@@ -5655,8 +5657,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
-        "iron": 2
+        "wood": 7,
+        "iron": 3
       },
       "upkeep": {},
       "jobs": 0,
@@ -5722,8 +5724,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 10,
-        "iron": 3
+        "wood": 11,
+        "iron": 4
       },
       "upkeep": {},
       "jobs": 0,
@@ -5813,8 +5815,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 10,
-        "iron": 3
+        "wood": 11,
+        "iron": 4
       },
       "upkeep": {},
       "jobs": 0,
@@ -5903,8 +5905,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
-        "iron": 2
+        "wood": 7,
+        "iron": 3
       },
       "upkeep": {},
       "jobs": 0,
@@ -5978,8 +5980,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
-        "iron": 2
+        "wood": 7,
+        "iron": 3
       },
       "upkeep": {},
       "jobs": 0,
@@ -6053,8 +6055,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
-        "iron": 2
+        "wood": 7,
+        "iron": 3
       },
       "upkeep": {},
       "jobs": 0,
@@ -6128,7 +6130,7 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
+        "wood": 4,
         "iron": 2
       },
       "upkeep": {},
@@ -6194,8 +6196,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
-        "iron": 2
+        "wood": 7,
+        "iron": 3
       },
       "upkeep": {},
       "jobs": 0,
@@ -6260,7 +6262,7 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
+        "wood": 4,
         "iron": 2
       },
       "upkeep": {},
@@ -6326,7 +6328,7 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
+        "wood": 5,
         "iron": 2
       },
       "upkeep": {},
@@ -6392,7 +6394,7 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
+        "wood": 5,
         "iron": 2
       },
       "upkeep": {},
@@ -7320,8 +7322,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 8,
-        "iron": 2
+        "wood": 9,
+        "iron": 3
       },
       "upkeep": {},
       "jobs": 0,
@@ -7856,8 +7858,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 8,
-        "iron": 2
+        "wood": 9,
+        "iron": 3
       },
       "upkeep": {},
       "jobs": 0,
@@ -8631,7 +8633,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 8
+        "wood": 7,
+        "iron": 1
       },
       "upkeep": {},
       "jobs": 4,
@@ -8701,8 +8704,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 8,
-        "iron": 1
+        "wood": 9,
+        "iron": 2
       },
       "upkeep": {},
       "jobs": 4,
@@ -8780,8 +8783,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 8,
-        "iron": 1
+        "wood": 9,
+        "iron": 2
       },
       "upkeep": {},
       "jobs": 2,
@@ -8857,7 +8860,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 8,
+        "food": 2,
+        "wood": 3,
         "iron": 2
       },
       "upkeep": {},
@@ -8928,8 +8932,9 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 5,
-        "iron": 1
+        "food": 2,
+        "wood": 3,
+        "iron": 2
       },
       "upkeep": {},
       "jobs": 0,
@@ -8993,7 +8998,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 8,
+        "wood": 6,
+        "food": 1,
         "iron": 1
       },
       "upkeep": {},
@@ -9072,8 +9078,9 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
-        "iron": 2
+        "food": 1,
+        "wood": 2,
+        "iron": 1
       },
       "upkeep": {},
       "jobs": 0,
@@ -9136,7 +9143,9 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 5
+        "food": 1,
+        "wood": 2,
+        "iron": 1
       },
       "upkeep": {},
       "jobs": 0,
@@ -9193,8 +9202,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 10,
-        "iron": 3
+        "wood": 13,
+        "iron": 2
       },
       "upkeep": {},
       "jobs": 8,
@@ -9271,7 +9280,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
+        "food": 1,
+        "wood": 2,
         "iron": 1
       },
       "upkeep": {},
@@ -9328,7 +9338,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
+        "food": 1,
+        "wood": 2,
         "iron": 1
       },
       "upkeep": {},
@@ -9386,7 +9397,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6,
+        "food": 2,
+        "wood": 3,
         "iron": 2
       },
       "upkeep": {},
@@ -9444,7 +9456,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 8,
+        "food": 3,
+        "wood": 4,
         "iron": 2
       },
       "upkeep": {},
@@ -9515,7 +9528,8 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 10,
+        "food": 2,
+        "wood": 3,
         "iron": 2
       },
       "upkeep": {},
@@ -9585,8 +9599,9 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 12,
-        "iron": 3
+        "food": 2,
+        "wood": 3,
+        "iron": 2
       },
       "upkeep": {},
       "jobs": 0,
@@ -9656,7 +9671,7 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 8,
+        "wood": 7,
         "iron": 1
       },
       "upkeep": {},
@@ -9727,7 +9742,7 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 6
+        "wood": 4
       },
       "upkeep": {},
       "jobs": 2,
@@ -9793,8 +9808,9 @@
         "requires_special_site": false
       },
       "costs": {
-        "wood": 8,
-        "iron": 1
+        "wood": 9,
+        "iron": 1,
+        "food": 1
       },
       "upkeep": {},
       "jobs": 0,

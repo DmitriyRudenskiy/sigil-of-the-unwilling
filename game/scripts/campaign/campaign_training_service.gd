@@ -17,10 +17,13 @@ static func available_training_actions(
 	var catalog := _load_catalog()
 	var built_ids: Array[String] = []
 	for instance in state.city.get("campaign_buildings", []):
-		if instance is Dictionary:
-			built_ids.append(String(instance.get("id", "")))
+		if not (instance is Dictionary) or int(instance.get("construction_turns_remaining", 0)) > 0 \
+				or String(instance.get("state", "active")) == "ruined":
+			continue
+		built_ids.append(String(instance.get("id", "")))
 	for instance in state.city.get("campaign_buildings", []):
-		if not (instance is Dictionary) or String(instance.get("state", "active")) != "active":
+		if not (instance is Dictionary) or String(instance.get("state", "active")) != "active" \
+				or int(instance.get("construction_turns_remaining", 0)) > 0:
 			continue
 		var definition := _find_building(building_catalog, String(instance.get("id", "")))
 		if definition.is_empty():
@@ -92,7 +95,8 @@ static func train(
 		if candidate is Dictionary and int(candidate.get("uid", -1)) == building_uid:
 			instance = candidate
 			break
-	if instance.is_empty() or String(instance.get("state", "active")) != "active":
+	if instance.is_empty() or String(instance.get("state", "active")) != "active" \
+			or int(instance.get("construction_turns_remaining", 0)) > 0:
 		return _failure("training_building_unavailable")
 	var definition := _find_building(building_catalog, String(instance.get("id", "")))
 	if definition.is_empty():
@@ -102,8 +106,10 @@ static func train(
 		return _failure("class_not_trained_here:%s" % class_id)
 	var built_ids: Array[String] = []
 	for built in instances:
-		if built is Dictionary:
-			built_ids.append(String(built.get("id", "")))
+		if not (built is Dictionary) or int(built.get("construction_turns_remaining", 0)) > 0 \
+				or String(built.get("state", "active")) == "ruined":
+			continue
+		built_ids.append(String(built.get("id", "")))
 	var prerequisite_check := CampaignBuildingCatalog.check_prerequisites(
 		definition, built_ids, scenario_flags, admin_capacity)
 	if not prerequisite_check.ok:

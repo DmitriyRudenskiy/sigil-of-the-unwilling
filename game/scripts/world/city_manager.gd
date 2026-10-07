@@ -14,6 +14,7 @@ var cities: Array[City] = []
 var capital: City = null
 var glory := GloryTracker.new()
 var current_turn := 0
+var is_campaign := false
 var _tile_yield_provider: Callable = Callable()
 
 var _buildable_provider: Callable = Callable()
@@ -83,14 +84,21 @@ func on_turn_ended(month: int) -> Dictionary:
 	}
 	for city in cities:
 		city.ensure_resource_ctx().clear_ledger()
-		var r := city.process_turn(current_turn)
+		var r: Dictionary
+		if is_campaign:
+			var switched := CityGrowthService.apply_pending(city)
+			if switched > 0:
+				city.population_changed.emit()
+			r = {"births": 0, "level_ups": 0, "switched": switched}
+		else:
+			r = city.process_turn(current_turn)
 		(report["cities"] as Array).append({
 			"city": city.display_name, "births": r.births, "level_ups": r.level_ups,
 		})
 		city_updated.emit(city)
 	glory.prune(current_turn)
 
-	if current_turn % GameNumbers.CITY_CYCLE_TURNS == 0:
+	if not is_campaign and current_turn % GameNumbers.CITY_CYCLE_TURNS == 0:
 		var arrivals := capital_inflow(month)
 		report["cycle"] = true
 		report["arrivals"] = arrivals

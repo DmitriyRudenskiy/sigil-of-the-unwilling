@@ -5,7 +5,7 @@ static func explain(buildings: Array) -> Dictionary:
 	var contributions: Array[Dictionary] = []
 	var total := 0
 	for building in buildings:
-		if not (building is Dictionary):
+		if not (building is Dictionary) or int(building.get("construction_turns_remaining", 0)) > 0:
 			continue
 		var roles: Variant = building.get("roles", [])
 		if not (roles is Array) or not (roles.has("static_defense") or roles.has("city_defense")):
