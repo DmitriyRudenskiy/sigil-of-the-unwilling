@@ -126,13 +126,17 @@ func _process_campaign_buildings(
 		var adjacency_bp := int(adjacency_bonus_by_building.get(
 			_campaign_building_key(String(building.get("id", "")), cell), 0))
 		var output_bonus_bp := clampi(specialization_bp + adjacency_bp, -10000, 10000)
-		for recipe in building.get("recipes", []):
-			if not (recipe is Dictionary):
-				continue
+		var ordered_recipes := WorkerAssignment.sort_campaign_recipes(building.get("recipes", []))
+		var remaining_workers := assigned_workers
+		for recipe in ordered_recipes:
 			var required_workers := int(recipe.get("workers", 0))
-			if required_workers <= 0 or assigned_workers <= 0:
+			if required_workers <= 0:
 				continue
-			var ratio := minf(float(assigned_workers), float(required_workers)) / float(required_workers)
+			var recipe_workers := mini(remaining_workers, required_workers)
+			remaining_workers -= recipe_workers
+			if recipe_workers <= 0:
+				continue
+			var ratio := float(recipe_workers) / float(required_workers)
 			var inputs := _scaled_campaign_resources(recipe.get("inputs", {}), ratio)
 			var base_outputs := _scaled_campaign_resources(recipe.get("outputs", {}), ratio)
 			if not _campaign_resources_allowed(inputs) or not _campaign_resources_allowed(base_outputs):
