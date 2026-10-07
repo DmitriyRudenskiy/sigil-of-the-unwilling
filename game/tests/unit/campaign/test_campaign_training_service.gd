@@ -93,6 +93,17 @@ func test_training_rejects_missing_class_gate_or_building_prerequisite() -> void
 	assert_that(prereq_result.reason).is_equal("prerequisite_missing")
 	assert_that(missing_admin.resources.food).is_equal(10.0)
 
+func test_in_progress_building_cannot_train() -> void:
+	var state := _state()
+	state.city.campaign_buildings[0]["construction_turns_remaining"] = 1
+	var catalog := _building_catalog()
+	assert_bool(TrainingService.available_training_actions(state, catalog).is_empty()).is_true()
+	var result := TrainingService.train(state, catalog, 10, "fighter", _trainee())
+	assert_bool(result.ok).is_false()
+	assert_that(result.reason).is_equal("training_building_unavailable")
+	assert_that(state.resources.food).is_equal(10.0)
+	assert_that(state.party).is_empty()
+
 func test_training_rejects_full_party_and_unapproved_generic_unit() -> void:
 	var full := _state(5)
 	var capacity_result := TrainingService.train(full, _building_catalog(), 10, "fighter", _trainee())

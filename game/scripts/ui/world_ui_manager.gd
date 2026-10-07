@@ -77,7 +77,8 @@ func open_city_screen(city: City, hero_cell: Vector2i) -> void:
 	if _map_gen != null:
 		bounds = Vector2i(_map_gen.map_width, _map_gen.map_height)
 	if city_screen.city != city:
-		city_screen.setup(city, _hero, hero_cell, _rng, bounds)
+		var terrain_fn := Callable(_map_gen, "get_terrain_id") if _map_gen != null else Callable()
+		city_screen.setup(city, _hero, hero_cell, _rng, bounds, terrain_fn)
 	else:
 		city_screen.hero_cell = hero_cell
 	city_screen.open()

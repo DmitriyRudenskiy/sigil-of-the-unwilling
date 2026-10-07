@@ -2,6 +2,7 @@ class_name CampaignBuildingMerger
 extends RefCounted
 
 const CampaignBuildingPlacement := preload("res://scripts/city/campaign_building_placement.gd")
+const ArenaRingSystem := preload("res://scripts/city/arena_ring_system.gd")
 const HexUtils := preload("res://scripts/core/hex_utils.gd")
 
 static func merge(
@@ -95,10 +96,11 @@ static func merge(
 			building.get("cell", Vector2i.ZERO), building.get("footprint", [[0, 0]]))
 		for cell in cells:
 			occupied[cell] = true
+	var city_center: Vector2i = environment.get("city_center", ArenaRingSystem.ARENA_CENTER)
 	var placement := CampaignBuildingPlacement.explain_placement(
 		result_definition, anchor,
 		environment.get("terrain_by_cell", {}), occupied,
-		environment.get("special_sites", {}))
+		environment.get("special_sites", {}), city_center)
 	if not placement.ok:
 		return _failure("result placement blocked: %s" % "; ".join(placement.issues))
 

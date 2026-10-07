@@ -275,6 +275,25 @@ func test_scheduler_ledger_includes_growth_campaign_production_and_upkeep() -> v
 	assert_bool(sources.has("campaign-building:market_garden/upkeep")).is_true()
 	assert_float(city.food_stockpile).is_equal_approx(food_after_growth + 2.0, 0.0001)
 
+func test_in_progress_building_cannot_produce_pay_upkeep_or_supply_services() -> void:
+	var city := TestFactories.make_city()
+	city.campaign_buildings.append({
+		"uid": 71, "id": "unfinished_farm", "state": "active",
+		"construction_turns_remaining": 1, "assigned_workers": 2,
+		"recipes": [{"id": "food", "workers": 2, "inputs": {}, "outputs": {"food": 3.0}}],
+		"upkeep": {"wood": 1.0}, "services": {"education": 2},
+	})
+	var ctx := TurnContext.new()
+	ctx.cities.append(city)
+	var report: Dictionary = EconomicTurnProcessor.new().process(ctx)
+	var city_report: Dictionary = report.cities[0]
+	assert_that(int(report.chains_executed)).is_zero()
+	assert_that(int(report.upkeep_ok)).is_zero()
+	assert_float(city.resource_ctx.amount(&"food")).is_zero()
+	assert_bool(city_report.campaign_population.service_capacity.is_empty()).is_true()
+	for flow in city_report.ledger:
+		assert_bool(String(flow.source).begins_with("campaign-building:")).is_false()
+
 func test_integration_with_scheduler() -> void:
 	var sched := TurnScheduler.new()
 	sched.register_processor(EconomicTurnProcessor.new())

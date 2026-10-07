@@ -114,7 +114,8 @@ func _process_campaign_buildings(
 			var key := _campaign_building_key(String(result.get("building_id", "")), cell)
 			adjacency_bonus_by_building[key] = int(effects["output_bp"])
 	for building in city.campaign_buildings:
-		if String(building.get("state", "active")) != "active":
+		if String(building.get("state", "active")) != "active" \
+				or int(building.get("construction_turns_remaining", 0)) > 0:
 			continue
 		var assigned_workers := maxi(0, int(building.get("assigned_workers", 0)))
 		var workers_by_group := _assigned_workers_by_group(city, building, catalog)
@@ -218,7 +219,8 @@ func _process_campaign_population(city: City, catalog: Dictionary) -> Dictionary
 	var workplace_pairs: Array[Dictionary] = []
 	var workers_by_group_total := {}
 	for building in city.campaign_buildings:
-		if String(building.get("state", "active")) != "active":
+		if String(building.get("state", "active")) != "active" \
+				or int(building.get("construction_turns_remaining", 0)) > 0:
 			continue
 		var services: Dictionary = building.get("services", {})
 		for need_id in services:

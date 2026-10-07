@@ -2,7 +2,7 @@
 
 ## Context
 
-See `proposal.md` and `specs/campaign-city-construction/spec.md`. The current runtime already shares `CityData.campaign_buildings`, `CampaignBuildingPlacement`, `ResourceContext`, `CitySerializer`, and a priority-sorted `TurnScheduler`; construction duration exists in the catalog contract but has no live owner.
+See `proposal.md` and `specs/campaign-city-construction/spec.md`. The current runtime already shares `CityData.campaign_buildings`, `CampaignBuildingPlacement`, `ResourceContext`, `CitySerializer`, and a priority-sorted `TurnScheduler`; construction duration exists in the catalog contract but has no live owner. One geometry mismatch must be corrected before construction: `CampaignBuildingPlacement` currently anchors its 52-cell set to the arena's fixed center, while campaign cities have their own `CityData.center`.
 
 ## Goals / Non-Goals
 
@@ -12,6 +12,7 @@ See `proposal.md` and `specs/campaign-city-construction/spec.md`. The current ru
 
 ## Decisions
 
+- **Use the actual city's 52-cell center.** `CampaignBuildingPlacement` accepts an explicit `city_center` and derives its four-cell core plus rings I–III from that center. Keep the arena center as the compatibility default for arena callers, but campaign construction, merge, and UI preview pass `CityData.center` explicitly; a world-map city must never be validated against the unrelated arena origin.
 - **Store progress on each building instance.** Add a non-negative `construction_turns_remaining` field. Existing buildings without it are treated as completed; this avoids another queue/save subsystem and makes simultaneous sites deterministic.
 - **Spend costs once at accepted start.** Validate the catalog record, prerequisites, placement footprint/terrain, occupied cells, and resource availability first; commit costs in one `ResourceContext.transact`, then append one instance. Failed validation or payment changes neither buildings nor stock. Cancellation/refunds are not part of this smallest contract.
 - **Reuse the existing `inactive` state during construction.** A positive remaining count suppresses production, upkeep, training, and defense even if an inactive-state definition has effects. When progress reaches zero, set the instance active once. Zero-turn buildings are active at creation. No catalog state enum or balance values need to change.

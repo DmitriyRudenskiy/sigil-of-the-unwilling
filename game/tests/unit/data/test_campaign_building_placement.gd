@@ -25,6 +25,23 @@ func test_city_layout_is_52_cells_and_placement_respects_terrain_and_occupancy()
 	assert_bool(occupied.ok).is_false()
 	assert_that(occupied.issues[0]).contains("occupied")
 
+func test_campaign_city_geometry_uses_explicit_center_not_arena_origin() -> void:
+	var center := Vector2i(20, 17)
+	var cells := CampaignBuildingPlacement.city_cells(center)
+	assert_that(cells.size()).is_equal(52)
+	assert_bool(cells.has(center)).is_true()
+	var building := {
+		"footprint": [[0, 0]],
+		"placement": {"terrain_tags": [], "requires_special_site": false},
+	}
+	var edge := HexUtils.cells_in_core_ring(center, 3)[0]
+	assert_bool(CampaignBuildingPlacement.explain_placement(
+		building, edge, {}, {}, {}, center).ok).is_true()
+	var outside := CampaignBuildingPlacement.explain_placement(
+		building, center + Vector2i(10, 10), {}, {}, {}, center)
+	assert_bool(outside.ok).is_false()
+	assert_bool(_has_issue(outside.issues, "outside the 52-cell city")).is_true()
+
 func test_multicell_footprint_and_special_site_constraints() -> void:
 	var anchor := ArenaRingSystem.center()
 	var building := {
@@ -107,6 +124,14 @@ func test_inactive_or_ruined_buildings_do_not_supply_adjacency_effects() -> void
 	var no_active_source := CampaignBuildingPlacement.explain_adjacency(target, center, [source])
 	assert_bool(no_active_source.effects.is_empty()).is_true()
 	source["state"] = "active"
+	source["construction_turns_remaining"] = 1
+	var no_in_progress_source := CampaignBuildingPlacement.explain_adjacency(target, center, [source])
+	assert_bool(no_in_progress_source.effects.is_empty()).is_true()
+	source["construction_turns_remaining"] = 0
+	target["construction_turns_remaining"] = 1
+	var no_in_progress_target := CampaignBuildingPlacement.explain_adjacency(target, center, [source])
+	assert_bool(no_in_progress_target.effects.is_empty()).is_true()
+	target["construction_turns_remaining"] = 0
 	target["state"] = "ruined"
 	var no_active_target := CampaignBuildingPlacement.explain_adjacency(target, center, [source])
 	assert_bool(no_active_target.effects.is_empty()).is_true()

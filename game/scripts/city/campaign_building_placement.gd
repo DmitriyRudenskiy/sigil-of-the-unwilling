@@ -5,8 +5,11 @@ const ArenaRingSystem := preload("res://scripts/city/arena_ring_system.gd")
 const HexUtils := preload("res://scripts/core/hex_utils.gd")
 const MAX_ADJACENCY_MODIFIER_BP := 10000.0
 
-static func city_cells() -> Array[Vector2i]:
-	return ArenaRingSystem.cells_in_arena()
+static func city_cells(city_center: Vector2i = ArenaRingSystem.ARENA_CENTER) -> Array[Vector2i]:
+	var cells := HexUtils.core_cells(city_center)
+	for ring in range(1, GameNumbers.CITY_RING_MAX + 1):
+		cells.append_array(HexUtils.cells_in_core_ring(city_center, ring))
+	return cells
 
 static func footprint_cells(anchor: Vector2i, footprint: Array) -> Array[Vector2i]:
 	var cells: Array[Vector2i] = []
@@ -24,14 +27,15 @@ static func explain_placement(
 	anchor: Vector2i,
 	terrain_by_cell: Dictionary,
 	occupied: Dictionary,
-	special_sites: Dictionary = {}
+	special_sites: Dictionary = {},
+	city_center: Vector2i = ArenaRingSystem.ARENA_CENTER
 ) -> Dictionary:
 	var cells := footprint_cells(anchor, building.get("footprint", []))
 	var issues: Array[String] = []
 	if cells.is_empty():
 		issues.append("invalid footprint")
 	var city_cells_set := {}
-	for cell in city_cells():
+	for cell in city_cells(city_center):
 		city_cells_set[cell] = true
 	var placement: Dictionary = building.get("placement", {})
 	var allowed_terrain: Array = placement.get("terrain_tags", [])
@@ -75,13 +79,15 @@ static func recompute_adjacency(buildings: Array) -> Array[Dictionary]:
 	return results
 
 static func _evaluate_one(target: Dictionary, instances: Array[Dictionary]) -> Dictionary:
-	if String(target.get("state", "active")) != "active":
+	if String(target.get("state", "active")) != "active" \
+			or int(target.get("construction_turns_remaining", 0)) > 0:
 		return {"effects": {}, "causes": []}
 	var effects := {}
 	var causes: Array[Dictionary] = []
 	var target_roles := _role_set(target.get("roles", []))
 	for source in instances:
-		if String(source.get("state", "active")) != "active":
+		if String(source.get("state", "active")) != "active" \
+				or int(source.get("construction_turns_remaining", 0)) > 0:
 			continue
 		if source.get("cell", Vector2i.ZERO) == target.get("cell", Vector2i.ZERO) and source.get("id", "") == target.get("id", ""):
 			continue

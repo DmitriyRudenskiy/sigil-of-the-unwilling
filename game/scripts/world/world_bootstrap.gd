@@ -10,6 +10,7 @@ const _TerrainResourceManager = preload("res://scripts/data/terrain_resource_man
 const WorldEventRouterScript = preload("res://scripts/world/world_event_router.gd")
 const SuccessionControllerScript = preload("res://scripts/world/succession_controller.gd")
 const HeroLifecycleSystemScript = preload("res://scripts/world/hero_lifecycle_system.gd")
+const CampaignConstructionProcessorScript = preload("res://scripts/city/processors/campaign_construction_processor.gd")
 
 class BootstrapResult:
 	var map_gen: MapGenerator = null
@@ -446,6 +447,8 @@ static func _register_economy(R: BootstrapResult) -> void:
 	for city in R.cities.cities:
 		city.ensure_resource_ctx(defs)
 
+	var construction := CampaignConstructionProcessorScript.new()
+	R.turn_scheduler.register_processor(construction)
 	var econ := EconomicTurnProcessor.new()
 	R.turn_scheduler.register_processor(econ)
 

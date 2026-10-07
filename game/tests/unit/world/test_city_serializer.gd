@@ -74,6 +74,39 @@ func test_roundtrip_campaign_buildings() -> void:
 	assert_that(restored.campaign_buildings[0].state).is_equal("inactive")
 	assert_that(restored.add_migrant(PopUnit.State.FOLLOWER, 0).uid).is_equal(13)
 
+func test_roundtrip_in_progress_campaign_construction() -> void:
+	city.campaign_buildings = [{
+		"uid": 21, "id": "campaign_farm", "cell": Vector2i(12, 6),
+		"state": "inactive", "construction_turns_remaining": 2,
+		"paid_costs": {"wood": 4.0},
+	}]
+	var saved := CitySerializer.serialize(city)
+	var restored := City.new()
+	CitySerializer.deserialize(restored, saved)
+	assert_that(restored.campaign_buildings.size()).is_equal(1)
+	assert_that(restored.campaign_buildings[0].uid).is_equal(21)
+	assert_that(restored.campaign_buildings[0].cell).is_equal(Vector2i(12, 6))
+	assert_that(restored.campaign_buildings[0].construction_turns_remaining).is_equal(2)
+	assert_that(restored.campaign_buildings[0].paid_costs).is_equal({"wood": 4.0})
+	assert_that(restored.resource_ctx.get_ledger()).is_empty()
+
+func test_v4_migration_does_not_invent_construction_or_charge_legacy_buildings() -> void:
+	var old_save := {
+		"version": 4, "center": {"x": 10, "y": 5},
+		"food_stockpile": 3.0, "resource_ctx": {"food": 2.0, "wood": 9.0},
+		"campaign_buildings": [{"uid": 4, "id": "campaign_farm", "cell": {"x": 11, "y": 5}, "state": "active"}],
+	}
+	var migrated := CitySerializer._migrate_city_data(old_save, 4)
+	assert_that(CitySerializer._migrate_city_data(migrated, 4)).is_equal(migrated)
+	var restored := City.new()
+	CitySerializer.deserialize(restored, old_save)
+	assert_that(restored.campaign_buildings.size()).is_equal(1)
+	assert_bool(restored.campaign_buildings[0].has("construction_turns_remaining")).is_false()
+	assert_bool(restored.campaign_buildings[0].has("paid_costs")).is_false()
+	assert_float(restored.resource_ctx.amount(&"food")).is_equal_approx(5.0, 0.0001)
+	assert_float(restored.resource_ctx.amount(&"wood")).is_equal_approx(9.0, 0.0001)
+	assert_that(restored.resource_ctx.get_ledger()).is_empty()
+
 func test_roundtrip_campaign_group_state_and_food_ledger() -> void:
 	city.food_stockpile = 12.5
 	city.campaign_group_state = {"engineers_builders": {"satisfaction": 42, "unmet_turns": 2}}

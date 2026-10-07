@@ -125,10 +125,12 @@ static func _validate_building(
 	else:
 		for i in range(footprint.size()):
 			var cell: Variant = footprint[i]
-			if not (cell is Array) or cell.size() != 2 or typeof(cell[0]) != TYPE_INT or typeof(cell[1]) != TYPE_INT:
+			if not (cell is Array) or cell.size() != 2 or not _is_integer_number(cell[0]) or not _is_integer_number(cell[1]):
 				errors.append("%s.footprint[%d] must be an integer [q, r] pair" % [path, i])
 				continue
-			var key := "%d,%d" % [cell[0], cell[1]]
+			var q := int(cell[0])
+			var r := int(cell[1])
+			var key := "%d,%d" % [q, r]
 			if footprint_cells.has(key):
 				errors.append("%s.footprint contains duplicate cell %s" % [path, key])
 			footprint_cells[key] = true
@@ -151,11 +153,11 @@ static func _validate_building(
 
 	_validate_resource_map(b.get("costs", null), "%s.costs" % path, resources, errors)
 	_validate_resource_map(b.get("upkeep", null), "%s.upkeep" % path, resources, errors)
-	if typeof(b.get("jobs")) != TYPE_INT or int(b.get("jobs", -1)) < 0:
+	if not _is_integer_number(b.get("jobs", -1)) or int(b.get("jobs", -1)) < 0:
 		errors.append("%s.jobs must be a non-negative integer" % path)
-	if typeof(b.get("resident_capacity")) != TYPE_INT or int(b.get("resident_capacity", -1)) < 0:
+	if not _is_integer_number(b.get("resident_capacity", -1)) or int(b.get("resident_capacity", -1)) < 0:
 		errors.append("%s.resident_capacity must be a non-negative integer" % path)
-	if typeof(b.get("construction_turns")) != TYPE_INT or int(b.get("construction_turns", -1)) < 0:
+	if not _is_integer_number(b.get("construction_turns", -1)) or int(b.get("construction_turns", -1)) < 0:
 		errors.append("%s.construction_turns must be a non-negative integer" % path)
 
 	var recipes: Variant = b.get("recipes")
@@ -174,7 +176,7 @@ static func _validate_building(
 				errors.append("%s.id must be a unique identifier" % recipe_path)
 			recipe_ids[recipe_id] = true
 			var workers: Variant = recipe.get("workers")
-			if typeof(workers) != TYPE_INT or int(workers) < 0 or int(workers) > int(b.get("jobs", 0)):
+			if not _is_integer_number(workers) or int(workers) < 0 or int(workers) > int(b.get("jobs", 0)):
 				errors.append("%s.workers must be between 0 and building jobs" % recipe_path)
 			var inputs := _validate_resource_map(recipe.get("inputs", null), "%s.inputs" % recipe_path, resources, errors)
 			var outputs := _validate_resource_map(recipe.get("outputs", null), "%s.outputs" % recipe_path, resources, errors)
@@ -203,7 +205,7 @@ static func _validate_building(
 			seen_adjacency_ids[rule_id] = true
 			if not roles.has(String(rule.get("target_role", ""))):
 				errors.append("%s references unknown target role '%s'" % [rule_path, rule.get("target_role", "")])
-			if typeof(rule.get("radius")) != TYPE_INT or int(rule.get("radius", 0)) < 1:
+			if not _is_integer_number(rule.get("radius")) or int(rule.get("radius", 0)) < 1:
 				errors.append("%s.radius must be a positive integer" % rule_path)
 			if not _is_number(rule.get("value")):
 				errors.append("%s.value must be numeric" % rule_path)
@@ -216,14 +218,14 @@ static func _validate_building(
 	else:
 		if not merge.is_empty():
 			_validate_merge_components(merge.get("components", null), "%s.merge.components" % path, id, building_ids, errors)
-			if typeof(merge.get("max_distance")) != TYPE_INT or int(merge.get("max_distance", 0)) < 1:
+			if not _is_integer_number(merge.get("max_distance")) or int(merge.get("max_distance", 0)) < 1:
 				errors.append("%s.merge.max_distance must be a positive integer" % path)
 	var prerequisites: Variant = b.get("prerequisites")
 	if not (prerequisites is Dictionary):
 		errors.append("%s.prerequisites must be an object" % path)
 	else:
 		_validate_building_refs(prerequisites.get("buildings", []), "%s.prerequisites.buildings" % path, "", building_ids, 0, errors)
-		if typeof(prerequisites.get("admin_capacity", 0)) != TYPE_INT or int(prerequisites.get("admin_capacity", 0)) < 0:
+		if not _is_integer_number(prerequisites.get("admin_capacity", 0)) or int(prerequisites.get("admin_capacity", 0)) < 0:
 			errors.append("%s.prerequisites.admin_capacity must be a non-negative integer" % path)
 		var flags: Variant = prerequisites.get("scenario_flags", [])
 		_validate_string_array(flags, "%s.prerequisites.scenario_flags" % path, false, errors)
@@ -269,7 +271,7 @@ static func _validate_capacity_map(value: Variant, path: String, allowed: Dictio
 	for key in value:
 		if not allowed.has(String(key)):
 			errors.append("%s references unknown service '%s'" % [path, key])
-		if typeof(value[key]) != TYPE_INT or int(value[key]) < 0:
+		if not _is_integer_number(value[key]) or int(value[key]) < 0:
 			errors.append("%s.%s must be a non-negative integer" % [path, key])
 
 static func _validate_numeric_map(value: Variant, path: String, allowed: Dictionary, errors: Array[String]) -> void:
@@ -388,6 +390,9 @@ static func _to_set(values: Variant) -> Dictionary:
 	elif values is Dictionary:
 		out = values
 	return out
+
+static func _is_integer_number(value: Variant) -> bool:
+	return _is_number(value) and is_finite(float(value)) and floor(float(value)) == float(value)
 
 static func _is_number(value: Variant) -> bool:
 	return typeof(value) == TYPE_INT or typeof(value) == TYPE_FLOAT

@@ -1,6 +1,9 @@
 extends BaseTest
 
 const CityTurnProcessor := preload("res://scripts/city/city_turn_processor.gd")
+const CampaignBuildingCatalog := preload("res://scripts/data/campaign_building_catalog.gd")
+const CampaignBuildingConstructionService := preload("res://scripts/city/campaign_building_construction_service.gd")
+const CampaignConstructionProcessor := preload("res://scripts/city/processors/campaign_construction_processor.gd")
 const CampaignBuildingMerger := preload("res://scripts/city/campaign_building_merger.gd")
 const CampaignBuildingPlacement := preload("res://scripts/city/campaign_building_placement.gd")
 const CampaignTrainingService := preload("res://scripts/campaign/campaign_training_service.gd")
@@ -117,6 +120,77 @@ func _run_scenario() -> Dictionary:
 		"food": city.food_stockpile,
 		"ledger": turn_report.ledger[0].flows,
 	}
+
+func _run_construction_scenario() -> Dictionary:
+	var city := TestFactories.make_city(30)
+	city.center = Vector2i(10, 10)
+	var resource_defs := Resources.get_campaign_resource_defs(true)
+	city.ensure_resource_ctx(resource_defs).setup(resource_defs, true)
+	city.resource_ctx.deserialize({"food": 0.0, "wood": 10.0, "iron": 0.0})
+	city.resource_ctx.clear_ledger()
+	var catalog := CampaignBuildingCatalog.load_catalog()
+	var anchor := Vector2i.ZERO
+	for cell in CampaignBuildingPlacement.city_cells(city.center):
+		if CampaignBuildingConstructionService.explain_request(
+				city, catalog, "campaign_farm", cell).ok:
+			anchor = cell
+			break
+	assert_bool(anchor != Vector2i.ZERO).is_true()
+	var request := CampaignBuildingConstructionService.request(
+		city, catalog, "campaign_farm", anchor)
+	assert_bool(request.ok).override_failure_message(str(request)).is_true()
+	if not request.ok:
+		return {}
+	var uid := int(request.instance.uid)
+	var building: Dictionary = city.campaign_buildings[0]
+	building["assigned_workers"] = 2
+	city.campaign_buildings[0] = building
+	for index in range(2):
+		var worker := city.add_migrant(PopUnit.State.WORKER, 0)
+		worker.ancestry_id = "halflings"
+		worker.archetype_id = "farmers_brewers"
+		worker.assigned_to = uid
+	var before_turn := {
+		"state": String(city.campaign_buildings[0].state),
+		"remaining": int(city.campaign_buildings[0].construction_turns_remaining),
+		"wood": city.resource_ctx.amount(&"wood"),
+		"food": city.resource_ctx.amount(&"food"),
+	}
+	var scheduler := TurnScheduler.new()
+	scheduler.register_processor(CampaignConstructionProcessor.new())
+	scheduler.register_processor(EconomicTurnProcessor.new())
+	var context := TurnContext.new()
+	context.cities.append(city)
+	var report: Dictionary = scheduler.execute_turn(context)
+	var flows: Array = report.ledger[0].flows
+	var sources: Array[String] = []
+	for flow in flows:
+		sources.append(String(flow.source))
+	return {
+		"before_turn": before_turn,
+		"state": String(city.campaign_buildings[0].state),
+		"remaining": int(city.campaign_buildings[0].construction_turns_remaining),
+		"wood": city.resource_ctx.amount(&"wood"),
+		"food": city.resource_ctx.amount(&"food"),
+		"sources": sources,
+		"completed": report.phases.campaign_construction.completed,
+	}
+
+func test_catalog_construction_completes_into_shared_ledger_production_reproducibly() -> void:
+	var first := _run_construction_scenario()
+	var second := _run_construction_scenario()
+	assert_that(first).is_equal(second)
+	assert_that(first.before_turn.state).is_equal("inactive")
+	assert_that(first.before_turn.remaining).is_equal(1)
+	assert_float(float(first.before_turn.wood)).is_equal_approx(6.0, 0.0001)
+	assert_float(float(first.before_turn.food)).is_zero()
+	assert_that(first.state).is_equal("active")
+	assert_that(first.remaining).is_zero()
+	assert_float(float(first.wood)).is_equal_approx(8.0, 0.0001)
+	assert_float(float(first.food)).is_equal_approx(2.0, 0.0001)
+	assert_that(first.completed).is_equal([0])
+	assert_bool(first.sources.has("construction:campaign_farm")).is_true()
+	assert_bool(first.sources.has("campaign-building:campaign_farm/recipe:farm_food")).is_true()
 
 func test_campaign_turn_with_merge_training_and_pressure_raid_is_reproducible() -> void:
 	var first := _run_scenario()

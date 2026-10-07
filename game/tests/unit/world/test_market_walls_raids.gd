@@ -55,6 +55,17 @@ func test_campaign_defense_states_feed_defense_only_as_declared() -> void:
 	c.campaign_buildings[0].state = "active"
 	assert_that(c.defense_strength()).is_zero()
 
+func test_campaign_construction_progress_suppresses_declared_defense() -> void:
+	var city: City = _city()
+	city.campaign_buildings.append({
+		"uid": 11, "id": "unfinished_watchtower", "roles": ["static_defense"],
+		"state": "active", "construction_turns_remaining": 1,
+		"defense": {"active": 20, "inactive": 0, "ruined": 0},
+	})
+	assert_that(city.defense_strength()).is_zero()
+	city.campaign_buildings[0].construction_turns_remaining = 0
+	assert_that(city.defense_strength()).is_equal(20)
+
 func test_campaign_defense_changes_deterministic_raid_and_is_explained() -> void:
 	var exposed: City = _city(99)
 	var exposed_result := RaidSystem.resolve(exposed, 12)

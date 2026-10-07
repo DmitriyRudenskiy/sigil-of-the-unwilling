@@ -38,7 +38,7 @@ func test_shipped_campaign_building_catalog_loads_and_validates() -> void:
 	assert_bool(catalog.is_empty()).is_false()
 	assert_that(catalog.get("buildings", []).size()).is_equal(98)
 	var errors := CampaignBuildingCatalog.validate_catalog(catalog, _references())
-	assert_that(errors.is_empty()).override_failure_message("shipped catalog invalid: %s" % [errors])
+	assert_that(errors).is_empty().override_failure_message("shipped catalog invalid: %s" % [errors])
 	assert_bool(_contains_null(catalog)).is_false()
 
 func test_runtime_records_have_only_resolved_sources_and_custom_merge_inputs() -> void:
