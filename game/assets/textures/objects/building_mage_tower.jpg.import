@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cb6pfct40dui2"
-path="res://.godot/imported/db4d3731354a0e2139868d6b9ab16be5.jpg-3043eab358c4ea8b1a0969efb05cdaa8.ctex"
+uid="uid://ibrpjv6wvd6n"
+path="res://.godot/imported/building_mage_tower.jpg-356209f47ad660131444eb42e3649ed9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/objects/db4d3731354a0e2139868d6b9ab16be5.jpg"
-dest_files=["res://.godot/imported/db4d3731354a0e2139868d6b9ab16be5.jpg-3043eab358c4ea8b1a0969efb05cdaa8.ctex"]
+source_file="res://assets/textures/objects/building_mage_tower.jpg"
+dest_files=["res://.godot/imported/building_mage_tower.jpg-356209f47ad660131444eb42e3649ed9.ctex"]
 
 [params]
 

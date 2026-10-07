@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://csj58ywvi0xir"
-path="res://.godot/imported/a2bceaa4001856c93d5ad71278fce9a7.jpg-f83c272b2f62c94e561e0e85995b4062.ctex"
+uid="uid://ce3fdly5l6f6e"
+path="res://.godot/imported/portrait_lizardfolk.jpg-454232a0d0f7f974be0f116390f8e777.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/objects/a2bceaa4001856c93d5ad71278fce9a7.jpg"
-dest_files=["res://.godot/imported/a2bceaa4001856c93d5ad71278fce9a7.jpg-f83c272b2f62c94e561e0e85995b4062.ctex"]
+source_file="res://assets/textures/objects/portrait_lizardfolk.jpg"
+dest_files=["res://.godot/imported/portrait_lizardfolk.jpg-454232a0d0f7f974be0f116390f8e777.ctex"]
 
 [params]
 

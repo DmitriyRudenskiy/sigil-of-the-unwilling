@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b02biifbikcgm"
-path="res://.godot/imported/d2f2e782b81c7032abf8082c1ff354a1.jpg-41521e0eb9c454886c19ab90af80ffea.ctex"
+uid="uid://ckfodwvdpat17"
+path="res://.godot/imported/building_archery_range.jpg-40e0cdff9678a9bffde2ea86d7cd6547.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/objects/d2f2e782b81c7032abf8082c1ff354a1.jpg"
-dest_files=["res://.godot/imported/d2f2e782b81c7032abf8082c1ff354a1.jpg-41521e0eb9c454886c19ab90af80ffea.ctex"]
+source_file="res://assets/textures/objects/building_archery_range.jpg"
+dest_files=["res://.godot/imported/building_archery_range.jpg-40e0cdff9678a9bffde2ea86d7cd6547.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c8a8ry8xfsgl4"
-path="res://.godot/imported/16b83e69af8a540c1ec6d7edf7d79df9.jpg-37041e3c13732793b16a93747e54a811.ctex"
+uid="uid://bhctp2tfo22k3"
+path="res://.godot/imported/portrait_harpy.jpg-eb321e19ec69fe0a757eb55d02f016a8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/objects/16b83e69af8a540c1ec6d7edf7d79df9.jpg"
-dest_files=["res://.godot/imported/16b83e69af8a540c1ec6d7edf7d79df9.jpg-37041e3c13732793b16a93747e54a811.ctex"]
+source_file="res://assets/textures/objects/portrait_harpy.jpg"
+dest_files=["res://.godot/imported/portrait_harpy.jpg-eb321e19ec69fe0a757eb55d02f016a8.ctex"]
 
 [params]
 

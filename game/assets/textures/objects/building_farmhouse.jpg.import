@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c74res3gkjwul"
-path="res://.godot/imported/8cc9d86241c96e7b496b9b9985c278e7.jpg-a5827fcd68a252e934fe7282279c971f.ctex"
+uid="uid://bchel2uynavcj"
+path="res://.godot/imported/building_farmhouse.jpg-f9a8a17ca9fdb28a3a633d2fdbe5f16b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/objects/8cc9d86241c96e7b496b9b9985c278e7.jpg"
-dest_files=["res://.godot/imported/8cc9d86241c96e7b496b9b9985c278e7.jpg-a5827fcd68a252e934fe7282279c971f.ctex"]
+source_file="res://assets/textures/objects/building_farmhouse.jpg"
+dest_files=["res://.godot/imported/building_farmhouse.jpg-f9a8a17ca9fdb28a3a633d2fdbe5f16b.ctex"]
 
 [params]
 

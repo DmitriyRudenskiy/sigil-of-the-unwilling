@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b12x38lkj5fd7"
-path="res://.godot/imported/014cb79e9015bd3d1a155ba5ea1cca76.jpg-ddb2106cd3b89d70b7a4930002ca903b.ctex"
+uid="uid://dgvqpmmhlvlb"
+path="res://.godot/imported/building_town_hall.jpg-e5c343da108dca635528fd999d48f759.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/objects/014cb79e9015bd3d1a155ba5ea1cca76.jpg"
-dest_files=["res://.godot/imported/014cb79e9015bd3d1a155ba5ea1cca76.jpg-ddb2106cd3b89d70b7a4930002ca903b.ctex"]
+source_file="res://assets/textures/objects/building_town_hall.jpg"
+dest_files=["res://.godot/imported/building_town_hall.jpg-e5c343da108dca635528fd999d48f759.ctex"]
 
 [params]
 

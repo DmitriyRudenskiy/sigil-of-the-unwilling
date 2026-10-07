@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://deeh33estlv7i"
-path="res://.godot/imported/40b2116bed2676d365849a1ebf646aed.jpg-811a8ccd20208b60028de342116d1ce8.ctex"
+uid="uid://bml1awwrbc7gg"
+path="res://.godot/imported/portrait_human_boy.jpg-cea8aeb7f1bad159f927c2f23f0771d8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/objects/40b2116bed2676d365849a1ebf646aed.jpg"
-dest_files=["res://.godot/imported/40b2116bed2676d365849a1ebf646aed.jpg-811a8ccd20208b60028de342116d1ce8.ctex"]
+source_file="res://assets/textures/objects/portrait_human_boy.jpg"
+dest_files=["res://.godot/imported/portrait_human_boy.jpg-cea8aeb7f1bad159f927c2f23f0771d8.ctex"]
 
 [params]
 

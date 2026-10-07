@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ble4rb2l2dprc"
-path="res://.godot/imported/47052638236b3d14bc2caf5e3c18871b.jpg-1d67eef7c8a5607fe5616a5add6568f3.ctex"
+uid="uid://cg4kg2eh2jxm"
+path="res://.godot/imported/building_academy.jpg-2f155ff4f68100ddaf2d4fe46600f735.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/objects/47052638236b3d14bc2caf5e3c18871b.jpg"
-dest_files=["res://.godot/imported/47052638236b3d14bc2caf5e3c18871b.jpg-1d67eef7c8a5607fe5616a5add6568f3.ctex"]
+source_file="res://assets/textures/objects/building_academy.jpg"
+dest_files=["res://.godot/imported/building_academy.jpg-2f155ff4f68100ddaf2d4fe46600f735.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cbtmk3jewftfx"
-path="res://.godot/imported/7d6ce422aaa110f8269df64a075b872b.jpg-aa1950cbffd7d219747b9139e560ce98.ctex"
+uid="uid://dahcs10uhtste"
+path="res://.godot/imported/building_greenhouse.jpg-c23cbcb79a5db5cd0e5ae20454a72eaa.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/objects/7d6ce422aaa110f8269df64a075b872b.jpg"
-dest_files=["res://.godot/imported/7d6ce422aaa110f8269df64a075b872b.jpg-aa1950cbffd7d219747b9139e560ce98.ctex"]
+source_file="res://assets/textures/objects/building_greenhouse.jpg"
+dest_files=["res://.godot/imported/building_greenhouse.jpg-c23cbcb79a5db5cd0e5ae20454a72eaa.ctex"]
 
 [params]
 

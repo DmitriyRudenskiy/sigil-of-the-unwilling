@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bfle1l0woxdve"
-path="res://.godot/imported/1d3dfcb4a0a2c95d41ce854bfe5bcc95.jpg-4fbd009dcf2a20fd8595862e566ee819.ctex"
+uid="uid://d080ftaqxr1qc"
+path="res://.godot/imported/portrait_silhouette_hat.jpg-885dceadd11d6e5cd17c1a9c7059aa3e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/objects/1d3dfcb4a0a2c95d41ce854bfe5bcc95.jpg"
-dest_files=["res://.godot/imported/1d3dfcb4a0a2c95d41ce854bfe5bcc95.jpg-4fbd009dcf2a20fd8595862e566ee819.ctex"]
+source_file="res://assets/textures/objects/portrait_silhouette_hat.jpg"
+dest_files=["res://.godot/imported/portrait_silhouette_hat.jpg-885dceadd11d6e5cd17c1a9c7059aa3e.ctex"]
 
 [params]
 

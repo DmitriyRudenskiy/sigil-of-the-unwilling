@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cgdpvgbncdue1"
-path="res://.godot/imported/292217cb56b00bcde2e34450459ae18a.jpg-722cb5dad5abef3404766e308e99f37b.ctex"
+uid="uid://xxfgyi2blbab"
+path="res://.godot/imported/portrait_felid.jpg-a5f06377b75fcff5bf261027006fa8dd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/objects/292217cb56b00bcde2e34450459ae18a.jpg"
-dest_files=["res://.godot/imported/292217cb56b00bcde2e34450459ae18a.jpg-722cb5dad5abef3404766e308e99f37b.ctex"]
+source_file="res://assets/textures/objects/portrait_felid.jpg"
+dest_files=["res://.godot/imported/portrait_felid.jpg-a5f06377b75fcff5bf261027006fa8dd.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://qt7wj27xy3bt"
-path="res://.godot/imported/266b69eff4e5a4057250073a18311cfb.jpg-d67f101692439cda3df07cebe5a8c5ba.ctex"
+uid="uid://bwib2jirlkchw"
+path="res://.godot/imported/building_barracks.jpg-dc35c547d3a8ac8cb3e6597c296f3f1f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/objects/266b69eff4e5a4057250073a18311cfb.jpg"
-dest_files=["res://.godot/imported/266b69eff4e5a4057250073a18311cfb.jpg-d67f101692439cda3df07cebe5a8c5ba.ctex"]
+source_file="res://assets/textures/objects/building_barracks.jpg"
+dest_files=["res://.godot/imported/building_barracks.jpg-dc35c547d3a8ac8cb3e6597c296f3f1f.ctex"]
 
 [params]
 

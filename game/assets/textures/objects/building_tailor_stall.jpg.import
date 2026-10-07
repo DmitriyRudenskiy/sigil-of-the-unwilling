@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://68ah6mjjlxbs"
-path="res://.godot/imported/5ca95d6dd7f8f04c938df0d802ba0c67.jpg-5601f808b6e70627960384f99306bba5.ctex"
+uid="uid://81324tk85wqb"
+path="res://.godot/imported/building_tailor_stall.jpg-6a62b7b1e792fb176189ba1e7a47d3a4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/objects/5ca95d6dd7f8f04c938df0d802ba0c67.jpg"
-dest_files=["res://.godot/imported/5ca95d6dd7f8f04c938df0d802ba0c67.jpg-5601f808b6e70627960384f99306bba5.ctex"]
+source_file="res://assets/textures/objects/building_tailor_stall.jpg"
+dest_files=["res://.godot/imported/building_tailor_stall.jpg-6a62b7b1e792fb176189ba1e7a47d3a4.ctex"]
 
 [params]
 

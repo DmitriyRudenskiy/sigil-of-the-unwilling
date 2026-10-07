@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cwm30g5b7871w"
-path="res://.godot/imported/6296ae0f7a6d86e721c0dbd998932976.jpg-b0640b282de345bea6f23949c0daa9b0.ctex"
+uid="uid://otuuvrmoahd6"
+path="res://.godot/imported/portrait_fox.jpg-e1bcbfd9fd48be3068bfe1be94f2cf23.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/textures/objects/6296ae0f7a6d86e721c0dbd998932976.jpg"
-dest_files=["res://.godot/imported/6296ae0f7a6d86e721c0dbd998932976.jpg-b0640b282de345bea6f23949c0daa9b0.ctex"]
+source_file="res://assets/textures/objects/portrait_fox.jpg"
+dest_files=["res://.godot/imported/portrait_fox.jpg-e1bcbfd9fd48be3068bfe1be94f2cf23.ctex"]
 
 [params]
 
