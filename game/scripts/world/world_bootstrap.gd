@@ -83,6 +83,7 @@ static func _create_world(parent: Node2D, R: BootstrapResult) -> void:
 
 static func _create_city_layer(parent: Node2D, platform: Variant, R: BootstrapResult) -> void:
 	_create_cities(parent, R)
+	R.hero.city_manager = R.cities
 	_create_ui(parent, platform, R)
 	_create_resource_nodes(parent, R)
 
@@ -239,7 +240,6 @@ static func _init_hero(R: BootstrapResult) -> void:
 	if R.loaded_save == null:
 		R.hero.solo_start = true
 	R.hero.setup(R.map_gen)
-	R.hero.city_manager = R.cities
 	if R.loaded_save != null:
 		R.hero.deserialize(R.loaded_save.hero)
 		if R.map_gen.has_valid_tilemap():

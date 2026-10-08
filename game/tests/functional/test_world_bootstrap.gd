@@ -50,6 +50,17 @@ func test_boot_finalized_with_event_router() -> void:
 	assert_that(wc._hero_mgr).is_not_null()
 	assert_that(wc._save_svc).is_not_null()
 
+func test_boot_hero_has_city_manager_for_need_recovery() -> void:
+	var wc := await _boot_world()
+	var hero := wc.get_hero()
+	var cities: CityManager = wc._bootstrap_result.cities
+	assert_bool(hero.city_manager == cities).is_true()
+	assert_bool(cities.city_at(cities.capital.center) == cities.capital).is_true()
+	hero.movement_comp.set_current_cell(cities.capital.center)
+	hero.needs_comp.needs.needs[NeedType.ID.REST] = 0.5
+	hero.needs_comp.end_turn()
+	assert_that(hero.needs_comp.get_need(NeedType.ID.REST)).is_greater(0.5)
+
 func test_boot_hero_is_hero_controller() -> void:
 	var wc := await _boot_world()
 	var hero := wc.get_hero()
