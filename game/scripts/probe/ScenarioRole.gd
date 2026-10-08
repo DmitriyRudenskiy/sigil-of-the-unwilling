@@ -29,8 +29,11 @@ func collect_target(_pilot: Node):
 func enemy_target(_pilot: Node):
 	return null
 
-## Победа в бою (герой — атакующий).
+## Победа/поражение в бою героя (авторитетный WorldBattleCoordinator event).
 func on_battle_won(_pilot: Node, _cell: Vector2i) -> void:
+	pass
+
+func on_battle_lost(_pilot: Node, _cell: Vector2i) -> void:
 	pass
 
 ## Герой жив и нет DEFEAT в конце мира.

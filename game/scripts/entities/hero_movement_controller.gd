@@ -48,6 +48,8 @@ func setup(map: MapGenerator) -> void:
 	move_points = get_daily_movement_points()
 
 func _place_hero_on_map() -> void:
+	if _map_gen == null or _map_gen.model == null:
+		return
 	var cell: Vector2i = _map_gen.model.find_spawn_cell(_map_gen.hex_shift_right)
 	if cell.x >= 0:
 		current_cell = cell

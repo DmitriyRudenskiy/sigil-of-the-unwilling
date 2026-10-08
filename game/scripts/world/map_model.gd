@@ -110,18 +110,25 @@ func get_terrain_id(cell: Vector2i) -> int:
 	return terrain_grid.get(cell, HexUtils.Terrain.GRASS)
 
 func find_spawn_cell(shift_right: bool = true) -> Vector2i:
-	var first_walkable := Vector2i(-1, -1)
+	var visited: Dictionary = {}
+	var largest_component: Array[Vector2i] = []
 	for y in map_height:
 		for x in map_width:
 			var cell := Vector2i(x, y)
-			if not is_walkable(cell):
+			if visited.has(cell) or not is_walkable(cell):
 				continue
-			if first_walkable == Vector2i(-1, -1):
-				first_walkable = cell
-			for neighbor in HexUtils.get_all_neighbors(cell, shift_right):
-				if is_walkable(neighbor):
-					return cell
-	return first_walkable
+			var component: Array[Vector2i] = [cell]
+			visited[cell] = true
+			var index := 0
+			while index < component.size():
+				for neighbor in HexUtils.get_all_neighbors(component[index], shift_right):
+					if not visited.has(neighbor) and is_walkable(neighbor):
+						visited[neighbor] = true
+						component.append(neighbor)
+				index += 1
+			if component.size() > largest_component.size():
+				largest_component = component
+	return largest_component[0] if not largest_component.is_empty() else Vector2i(-1, -1)
 
 func get_blocked_cells() -> Dictionary:
 	if _blocked_cache_dirty:

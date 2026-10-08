@@ -123,7 +123,7 @@ func place_enemies(reachable = null) -> void:
 
 	if reachable == null:
 		reachable = _get_reachable_cells()
-	var start_cell := _start_cell()
+	var threat_origin := _threat_origin()
 
 	var candidates: Array[Vector2i] = []
 	for cell in reachable:
@@ -152,7 +152,7 @@ func place_enemies(reachable = null) -> void:
 			break
 
 		# Ранняя игра: тир по дистанции от старта, случайный выбор из общего пула запрещён
-		var dist: int = HexUtils.hex_distance(cell, start_cell) if start_cell.x >= 0 else THREAT_RING3_RADIUS
+		var dist: int = HexUtils.hex_distance(cell, threat_origin) if threat_origin.x >= 0 else THREAT_RING3_RADIUS
 		var pool: Array = _threat_pool(dist)
 		var army: Array[UnitStack] = []
 
@@ -169,8 +169,10 @@ func place_enemies(reachable = null) -> void:
 			model.enemy_stacks[cell] = army
 			placed += 1
 
-func _start_cell() -> Vector2i:
-	# Стартовая клетка героя (та же, что и в _get_reachable_cells)
+func _threat_origin() -> Vector2i:
+	for city in known_cities:
+		if city != null and city.owner == &"player" and city.center is Vector2i:
+			return city.center
 	return model.find_spawn_cell()
 
 func _city_cells() -> Dictionary:

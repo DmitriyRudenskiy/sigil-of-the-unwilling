@@ -9,6 +9,19 @@ func _make_grass_model(w: int, h: int) -> MapModel:
 			model.terrain_grid[Vector2i(x, y)] = HexUtils.Terrain.GRASS
 	return model
 
+func test_threat_origin_uses_the_player_city_when_available() -> void:
+	var model := _make_grass_model(24, 24)
+	var spawner := MapSpawner.new(model)
+	var capital := City.new()
+	capital.center = Vector2i(12, 12)
+	capital.owner = &"player"
+	var village := City.new()
+	village.center = Vector2i(2, 2)
+	village.owner = &"neutral"
+	spawner.set_known_cities([capital, village])
+
+	assert_that(spawner._threat_origin()).is_equal(capital.center)
+
 func test_place_villages_respects_count() -> void:
 	var model := _make_grass_model(24, 24)
 	model.village_count = 4

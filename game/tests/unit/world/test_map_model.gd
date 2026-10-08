@@ -47,6 +47,20 @@ func test_spawn_cell_skips_an_isolated_walkable_tile() -> void:
 
 	assert_that(model.find_spawn_cell()).is_equal(Vector2i(2, 0))
 
+func test_spawn_cell_uses_the_largest_walkable_component() -> void:
+	var model := MapModel.new()
+	model.map_width = 8
+	model.map_height = 4
+	for y in model.map_height:
+		for x in model.map_width:
+			model.set_terrain(Vector2i(x, y), HexUtils.Terrain.WATER)
+	for cell in [Vector2i(0, 0), Vector2i(1, 0)]:
+		model.set_terrain(cell, HexUtils.Terrain.GRASS)
+	for cell in [Vector2i(4, 2), Vector2i(5, 2), Vector2i(6, 2), Vector2i(4, 3), Vector2i(5, 3)]:
+		model.set_terrain(cell, HexUtils.Terrain.GRASS)
+
+	assert_int(model.find_spawn_cell().x).is_greater_equal(4)
+
 func test_biome_logic() -> void:
 	var model: RefCounted = MapModel.new()
 
