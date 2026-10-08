@@ -53,6 +53,9 @@ static func run(
 	_init_services(parent, R)
 	_assert_core_services()
 	R.loaded_save = _resolve_session(R, shard_seed)
+	# Static season state survives scene reloads; saved games restore it in apply_loaded_save().
+	if R.loaded_save == null:
+		WorldSeasons.reset()
 	rng.seed = R.session.run_seed
 	# team-romance-roleplay D10: роллы верности/ревности/конфликтов — из session RNG
 	RelationshipSystem.set_rng(rng)
