@@ -56,5 +56,5 @@ static func seed_for(class_id: String, role_id: String) -> int:
 	var key := "%s|%s" % [class_id, role_id]
 	var h := 1469598103
 	for i in key.length():
-		h = (h ^ key.unicode_at(i)) * 1099511628211 % 2147483647
+		h = (h ^ key.unicode_at(i)) * 947 % 2147483647
 	return int(h) + 1000000

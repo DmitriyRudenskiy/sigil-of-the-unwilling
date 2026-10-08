@@ -138,12 +138,15 @@ class _FakeSpawner extends Node:
 class _FakeMap:
 	var resource_cells: Dictionary = {}
 	var enemy_stacks: Dictionary = {}
+	var hex_shift_right := true
 	func get_terrain_id(_cell: Vector2i) -> int: return 0
 	func is_walkable(_cell: Vector2i) -> bool: return true
 
 class _FakeHero extends Node:
 	var cell: Vector2i = Vector2i.ZERO
 	var combat_hp := 10
+	func get_hero_battle_stack() -> UnitStack:
+		return UnitStack.new(UnitStats.new("hero", "Hero", 0, 5, 10), 1)
 	func get_component(_id: StringName) -> Node: return null
 
 class _FakeCity:
