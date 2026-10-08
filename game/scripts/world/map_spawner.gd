@@ -171,12 +171,7 @@ func place_enemies(reachable = null) -> void:
 
 func _start_cell() -> Vector2i:
 	# Стартовая клетка героя (та же, что и в _get_reachable_cells)
-	for y in model.map_height:
-		for x in model.map_width:
-			var cell := Vector2i(x, y)
-			if model.is_walkable(cell):
-				return cell
-	return Vector2i(-1, -1)
+	return model.find_spawn_cell()
 
 func _city_cells() -> Dictionary:
 	# Клетки городов: столицы/вилладжи (known_cities, появляются после
@@ -213,14 +208,7 @@ static func _threat_pool(dist: int) -> Array:
 	return THREAT_RING3
 
 func _get_reachable_cells() -> Dictionary:
-	var start_cell := Vector2i(-1, -1)
-	for y in model.map_height:
-		for x in model.map_width:
-			var cell := Vector2i(x, y)
-			if model.is_walkable(cell):
-				start_cell = cell
-				break
-		if start_cell.x >= 0: break
+	var start_cell: Vector2i = model.find_spawn_cell()
 	if start_cell.x < 0:
 		return {}
 	return HexPathfinding.bfs_reachable(start_cell, model.map_width + model.map_height,

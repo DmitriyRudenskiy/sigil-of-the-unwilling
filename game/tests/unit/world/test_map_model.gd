@@ -34,6 +34,19 @@ func test_determinism() -> void:
 
 	assert_bool(a.terrain_grid == c.terrain_grid).is_false().override_failure_message("different seeds should usually produce different terrain")
 
+func test_spawn_cell_skips_an_isolated_walkable_tile() -> void:
+	var model := MapModel.new()
+	model.map_width = 4
+	model.map_height = 2
+	for y in model.map_height:
+		for x in model.map_width:
+			model.set_terrain(Vector2i(x, y), HexUtils.Terrain.WATER)
+	model.set_terrain(Vector2i(0, 0), HexUtils.Terrain.GRASS)
+	model.set_terrain(Vector2i(2, 0), HexUtils.Terrain.GRASS)
+	model.set_terrain(Vector2i(3, 0), HexUtils.Terrain.GRASS)
+
+	assert_that(model.find_spawn_cell()).is_equal(Vector2i(2, 0))
+
 func test_biome_logic() -> void:
 	var model: RefCounted = MapModel.new()
 

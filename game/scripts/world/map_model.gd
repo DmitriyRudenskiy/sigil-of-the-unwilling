@@ -109,6 +109,20 @@ func get_terrain_name(cell: Vector2i) -> String:
 func get_terrain_id(cell: Vector2i) -> int:
 	return terrain_grid.get(cell, HexUtils.Terrain.GRASS)
 
+func find_spawn_cell(shift_right: bool = true) -> Vector2i:
+	var first_walkable := Vector2i(-1, -1)
+	for y in map_height:
+		for x in map_width:
+			var cell := Vector2i(x, y)
+			if not is_walkable(cell):
+				continue
+			if first_walkable == Vector2i(-1, -1):
+				first_walkable = cell
+			for neighbor in HexUtils.get_all_neighbors(cell, shift_right):
+				if is_walkable(neighbor):
+					return cell
+	return first_walkable
+
 func get_blocked_cells() -> Dictionary:
 	if _blocked_cache_dirty:
 		_rebuild_blocked_cache()

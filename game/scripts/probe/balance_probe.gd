@@ -418,10 +418,11 @@ func _explore_target(toward: Vector2i) -> Vector2i:
 	if vis == null or toward == Vector2i(-1, -1):
 		return Vector2i(-1, -1)
 	var ctrl: Node = _hero.get_component("Movement").get_controller()
+	var current: Vector2i = _hero.get_component("Movement").get_current_cell()
 	var best := Vector2i(-1, -1)
 	var best_d := INF
 	for c in _map().terrain_grid:
-		if not vis.is_explored(c) or not _map().is_walkable(c):
+		if c == current or not vis.is_explored(c) or not _map().is_walkable(c):
 			continue
 		var at_edge := false
 		for nb in HexUtils.get_all_neighbors(c, _map().hex_shift_right):
@@ -574,9 +575,4 @@ func _city_center() -> Vector2i:
 	return _player_city.center if _player_city != null else Vector2i(-1000, -1000)
 
 func _start_cell() -> Vector2i:
-	for y in int(_map().map_height):
-		for x in int(_map().map_width):
-			var cell := Vector2i(x, y)
-			if _map().is_walkable(cell):
-				return cell
-	return _hero_cell()
+	return _map().model.find_spawn_cell(_map().hex_shift_right)

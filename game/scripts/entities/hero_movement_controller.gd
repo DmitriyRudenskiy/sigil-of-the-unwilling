@@ -48,14 +48,11 @@ func setup(map: MapGenerator) -> void:
 	move_points = get_daily_movement_points()
 
 func _place_hero_on_map() -> void:
-	for y in _map_gen.map_height:
-		for x in _map_gen.map_width:
-			var cell := Vector2i(x, y)
-			if _map_gen.is_walkable(cell):
-				current_cell = cell
-				previous_cell = cell
-				_emit_position_update()
-				return
+	var cell: Vector2i = _map_gen.model.find_spawn_cell(_map_gen.hex_shift_right)
+	if cell.x >= 0:
+		current_cell = cell
+		previous_cell = cell
+		_emit_position_update()
 
 func _terrain_cost(cell: Vector2i, levitation: bool = false) -> float:
 	if cell.x < 0 or cell.x >= _map_gen.map_width or cell.y < 0 or cell.y >= _map_gen.map_height:
