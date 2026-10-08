@@ -119,7 +119,8 @@ func test_builder_metrics_shape() -> void:
 func test_trader_metrics_shape() -> void:
 	var role: ScenarioRole = ScenarioPilot.make_role("trader", ScenarioTargets.role("trader"))
 	var pilot := _FakePilot.new()
-	pilot.city.storage[&"industry"] = 1500.0
+	pilot._player_city = City.new()
+	pilot._player_city.storage[&"industry"] = 1500.0
 	var m: Dictionary = role.metrics(pilot)
 	assert_that(int(m.get("gold", 0)) == 1500)
 	assert_that(int(m.get("gold_goal", 0)) == 1000)
