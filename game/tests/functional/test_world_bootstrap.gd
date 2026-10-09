@@ -75,9 +75,13 @@ func test_new_world_resets_scenario_counters_after_previous_scenario() -> void:
 	assert_that(BattleTrophyService.roll_trophy()).is_equal(first_trophy)
 	BattleTrophyService.reset_for_session()
 
-func test_boot_seeds_city_charisma_events_from_session_rng() -> void:
+func test_boot_seeds_city_random_systems_from_session_rng() -> void:
 	var wc := await _boot_world()
-	assert_bool(CharismaEvents._rng == wc._bootstrap_result.rng).is_true()
+	var session_rng: RandomNumberGenerator = wc._bootstrap_result.rng
+	assert_bool(CharismaEvents._rng == session_rng).is_true()
+	assert_bool(ReputationSystem._rng == session_rng).is_true()
+	assert_bool(CityService._rng_override == session_rng).is_true()
+	assert_bool(WeaponTechService._rng == session_rng).is_true()
 
 func test_boot_hero_is_hero_controller() -> void:
 	var wc := await _boot_world()
