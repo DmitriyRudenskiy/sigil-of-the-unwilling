@@ -58,6 +58,8 @@ static func run(
 		WorldSeasons.reset()
 		BattleTrophyService.reset_for_session()
 	rng.seed = R.session.run_seed
+	# City migration/charisma events share the session RNG for fixed-seed probes.
+	MigrationProcessor.set_cha_rng(rng)
 	# team-romance-roleplay D10: роллы верности/ревности/конфликтов — из session RNG
 	RelationshipSystem.set_rng(rng)
 	# team-romance-roleplay D6: JSON-сцены диалогов — один раз на загрузку мира
