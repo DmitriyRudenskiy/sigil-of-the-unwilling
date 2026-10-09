@@ -390,11 +390,14 @@ func _walk_to(cell: Vector2i) -> bool:
 			continue  # путь на остаток MP начат; дойдём в следующих кадрах
 		# MP кончились — дожить ход (MP восстановится) и пробовать снова
 		var was_cell: Vector2i = mv.get_current_cell()
+		var move_points_before: float = mv.get_move_points()
 		_end_turn()
 		if done:
 			return false
 		if mv.get_current_cell() == was_cell:
-			return false  # не сдвинулся даже за полный ход — маршрут мёртв
+			if mv.get_move_points() > move_points_before:
+				continue  # ход восстановил MP; повторить цель до ухода в обходной цикл
+			return false  # не сдвинулся и MP не восстановились — маршрут мёртв
 	return mv.get_current_cell() == cell
 
 ## Вражеский отряд в CITY_DEFEND_RADIUS от центра города (ближайший к городу).
