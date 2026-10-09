@@ -58,6 +58,7 @@ func test_world_role_trader_completes_a_sale_headlessly() -> void:
 	assert_bool(int(metrics.gold_goal) == 1000).is_true()
 	assert_bool(metrics.transactions.size() >= 3).is_true()
 	assert_bool(bool(metrics.market_available)).is_true()
+	assert_bool(pilot.first_building_turn >= 0).is_true()
 	assert_bool(metrics.transactions.size() > 0).is_true()
 	for transaction in metrics.transactions:
 		assert_bool(float(transaction.stock_after) < float(transaction.stock_before)).is_true()
@@ -87,6 +88,7 @@ func test_fighter_trader_returns_to_market_with_real_cargo() -> void:
 	var metrics: Dictionary = pilot.role.metrics(pilot)
 	assert_bool(pilot.role._deals > 0).is_true()
 	assert_bool(bool(metrics.market_available)).is_true()
+	assert_bool(pilot.first_building_turn >= 0).is_true()
 	assert_bool(metrics.transactions.size() > 0).is_true()
 	for transaction in metrics.transactions:
 		assert_bool(String(transaction.resource) != "food").is_true()

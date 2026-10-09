@@ -20,7 +20,7 @@ const ROLES := {
 		"name": "Торговец",
 		"max_turns": 90,
 		"gold_goal": 1000,
-		"gold_start": 100,
+		"gold_start": 30,
 	},
 	"adventurer": {
 		"name": "Приключенец",

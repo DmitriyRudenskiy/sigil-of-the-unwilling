@@ -43,6 +43,8 @@ func act(pilot: Node) -> bool:
 			var build: CityCheck = pilot._city_screen.build_pressed(&"market")
 			if build.ok:
 				_market_build_block_reason = ""
+				if pilot.first_building_turn < 0:
+					pilot.first_building_turn = pilot.turn
 				pilot._commit(true)
 				return true
 			_market_build_block_reason = build.reason

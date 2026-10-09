@@ -7,6 +7,7 @@ func test_role_targets_table() -> void:
 	assert_bool(ScenarioTargets.role("collector").has("rare_goal"))
 	assert_bool(ScenarioTargets.role("traveler").has("distance_goal"))
 	assert_bool(ScenarioTargets.role("trader").has("gold_goal"))
+	assert_that(int(ScenarioTargets.role("trader").gold_start)).is_equal(30)
 	assert_bool(ScenarioTargets.role("adventurer").has("kill_goal"))
 	assert_bool(ScenarioTargets.role("builder").has("population_goal"))
 	assert_bool(ScenarioTargets.role("unknown").is_empty())
@@ -43,6 +44,49 @@ func test_pilot_extends_balance_probe() -> void:
 	var pilot := ScenarioPilot.new()
 	assert_bool(pilot is BalanceProbe)
 	pilot.free()
+
+func test_trader_build_queue_only_builds_eligible_defense_walls() -> void:
+	var pilot := ScenarioPilot.new()
+	var trader := TraderRole.new()
+	trader.id = "trader"
+	pilot.role = trader
+	var city := City.new()
+	city.level = 4
+	pilot._player_city = city
+	var screen := _FakeCityScreen.new()
+	pilot._city_screen = screen
+
+	assert_bool(pilot._try_build()).is_false()
+	assert_that(screen.attempted).is_empty()
+	city.level = 5
+	assert_bool(pilot._try_build()).is_true()
+	assert_that(screen.attempted).is_equal([&"walls"])
+
+	screen.attempted.clear()
+	for _i in 3:
+		var wall := UniqueBuilding.new()
+		wall.def = BuildingDefs.def_by_id(&"walls")
+		wall.level = 1
+		city.buildings.append(wall)
+	assert_that(CityService.defense_strength(city)).is_equal(15)
+	assert_bool(pilot._try_build()).is_false()
+	assert_that(screen.attempted).is_empty()
+	pilot.free()
+	screen.free()
+
+func test_nontrader_keeps_shared_build_queue() -> void:
+	var pilot := ScenarioPilot.new()
+	var builder := BuilderRole.new()
+	builder.id = "builder"
+	pilot.role = builder
+	pilot._player_city = City.new()
+	var screen := _FakeCityScreen.new()
+	pilot._city_screen = screen
+
+	assert_bool(pilot._try_build()).is_true()
+	assert_that(screen.attempted).is_equal([&"barracks"])
+	pilot.free()
+	screen.free()
 
 func test_collector_metrics_shape() -> void:
 	var role: ScenarioRole = ScenarioPilot.make_role("collector", ScenarioTargets.role("collector"))
@@ -124,12 +168,21 @@ func test_trader_metrics_shape() -> void:
 	var m: Dictionary = role.metrics(pilot)
 	assert_that(int(m.get("gold", 0)) == 1500)
 	assert_that(int(m.get("gold_goal", 0)) == 1000)
+	assert_that(int(m.get("margin", 0)) == 1470)
 	assert_bool(m.has("deals"))
 	assert_bool(m.has("margin"))
 	assert_bool(role.goal_met(pilot))
 	pilot.free()
 
+class _FakeCityScreen extends Node:
+	var attempted: Array[StringName] = []
+
+	func build_pressed(def_id: StringName) -> CityCheck:
+		attempted.append(def_id)
+		return CityCheck.success()
+
 # ── Фейки: утка под интерфейс BalanceProbe для политик ролей ───────────────
+
 
 class _FakeSpawner extends Node:
 	var _res: Dictionary = {}

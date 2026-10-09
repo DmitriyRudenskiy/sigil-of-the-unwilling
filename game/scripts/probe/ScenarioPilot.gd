@@ -75,6 +75,25 @@ static func make_role(role_id: String, target: Dictionary) -> ScenarioRole:
 			return r
 	return null
 
+func _try_build() -> bool:
+	# Trader spending is defense-targeted; the role already builds its market.
+	if role != null and role.id == "trader":
+		if _city_screen == null or _player_city == null:
+			return false
+		var walls = BuildingDefs.def_by_id(&"walls")
+		if walls == null or int(_player_city.level) < int(walls.min_city_level):
+			return false
+		var max_raid_strength := GameNumbers.RAID_STRENGTH_MIN + GameNumbers.RAID_STRENGTH_SPAN - 1
+		if CityService.defense_strength(_player_city) >= max_raid_strength:
+			return false
+		var check: CityCheck = _city_screen.build_pressed(&"walls")
+		if check.ok:
+			if first_building_turn < 0:
+				first_building_turn = turn
+			return true
+		return false
+	return super._try_build()
+
 func rare_count() -> int:
 	return _rare_count
 
