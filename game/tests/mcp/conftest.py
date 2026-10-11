@@ -140,7 +140,14 @@ def _wait_for_scene(mcp, marker: str, timeout: float = 60.0) -> None:
 
 @pytest.fixture
 def full_cycle(mcp):
-    """Полный цикл: меню → создание персонажа → мир с ботстлабом."""
+    """Полный цикл (пост-cutover, D-157 раунд 10 §1): меню → создание
+    персонажа → архивный мир с ботстлабом.
+
+    Пост-cutover создание переходит в main.tscn (кампания, K-канон);
+    world-слой заморожен (Q-M31) — фикстура доставляет профиль через
+    pending_new_game и грузит архивную сцену напрямую (world-тесты
+    следуют за архивом, а не за навигацией).
+    """
     mcp.run_scene("res://scenes/main_menu.tscn")
     mcp.wait_ready()
     mcp.execute_code(
@@ -154,7 +161,9 @@ def full_cycle(mcp):
         "cc._profile.character_class = cc._class_keys[0]\n"
         "cc._profile.culture = cc._culture_keys[0]\n"
         "cc._profile.background = cc._background_keys[0]\n"
-        "cc._on_create()\n"
+        'var persistence = Services.resolve(&"persistence")\n'
+        "persistence.pending_new_game = cc._profile\n"
+        'get_tree().change_scene_to_file("res://scenes/legacy/world.tscn")\n'
         'return {"ok": true}'
     )
     _wait_for_scene(mcp, "world_controller")
