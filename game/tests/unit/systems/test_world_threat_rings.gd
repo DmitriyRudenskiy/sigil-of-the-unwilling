@@ -64,8 +64,8 @@ func test_season_cycle_and_mults() -> void:
 	assert_that(WorldSeasons.season_name()).is_equal("Зима")
 	assert_float(WorldSeasons.production_mult()).is_equal(0.4)
 	assert_float(WorldSeasons.enemy_mult()).is_greater(1.0)
-	# Ход 21 = Весна по формуле (20 % 4 = 0) — Q-M29 (решение Q-M27: «зима» —
-	# противоречие, вердикт владельцу).
+	# Ход 21 = Весна — канон (Q-M29, закрыто, 12-я итерация §1: формула — канон,
+	# «зима» — описка; финальный рейд — без сезонного бонуса, сложность тиром волны).
 	WorldSeasons.set_turns(21)
 	assert_that(WorldSeasons.season_name()).is_equal("Весна")
 
