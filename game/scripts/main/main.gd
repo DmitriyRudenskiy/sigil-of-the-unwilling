@@ -12,8 +12,8 @@ const CAMPAIGN_SEED: int = 12345  # I1: seed = seed кампании
 var campaign: TurnDriver
 var settlement: SettlementProcessor
 var threats: ThreatSystem
+var population_system: PopulationSystem  # T-116: реестр жителей — эмитент uid
 var last_battle_report: Dictionary = {}
-var _recruit_uid_counter: int = 1  # реестр жителей — счётчик (T-116 остеклит)
 var _day_timer: float = 0.0
 var _is_day_cycle_active: bool = true
 
@@ -47,8 +47,19 @@ func _init_campaign() -> void:
 			"output_day": {"iron": 0.25}, "efficiency": 1.0},
 	]
 	threats = ThreatSystem.new(CAMPAIGN_SEED)
+	# T-116: реестр жителей — источник истины населения (R2: старт 20).
+	population_system = PopulationSystem.new()
+	population_system.seed_population(settlement.population)
 	campaign.settlement_hook = func() -> Dictionary:
-		return settlement.process_turn(WorldSeasons.production_mult())
+		var rep_report: Dictionary = settlement.process_turn(WorldSeasons.production_mult())
+		# Ростерь — источник истины: возраста/смерти/рождения/миграция (F-3;
+		# Репутация MVP — 0, источник-производная Резонанса — слой за тикетом).
+		var pop_report: Dictionary = population_system.process_turn(
+			WorldSeasons.DAYS_PER_SEASON, 0.0,
+			int(rep_report.get("population_cap", -1)))
+		settlement.population = population_system.size()
+		rep_report["population"] = pop_report
+		return rep_report
 	campaign.threats_hook = func() -> Dictionary:
 		return threats.process_turn(campaign.current_turn, _threat_context())
 
@@ -75,7 +86,7 @@ func _request_battle(context: Dictionary) -> void:
 		return  # статблоков нет (баланс-конфиг) — бой не разрешается
 	var tier: int = int(context.get("tier", 1))
 	var hero := CampaignBattle.make_recruit(
-		blocks.get("warrior", {}), _recruit_uid_counter)
+		blocks.get("warrior", {}), population_system.conscript())
 	var raider := CampaignBattle.make_combatant(
 		blocks.get("raider_tier_%d" % tier, blocks.get("raider_final", {})))
 	raider["id"] = "raider_t%d" % tier
@@ -87,13 +98,14 @@ func _request_battle(context: Dictionary) -> void:
 			str(last_battle_report.get("losses", []))], "Main")
 
 
-## Хук населения (§2.2): потери боя — убыль населения (вакансии в
-## производстве — слой T-116). Эмит с дня первого боя, даже пустой.
+## Хук населения (§2.2): потребитель шва T-050 — потери боя списывают
+## конкретных жителей по character_uid (раненые — не потери); скаляр
+## settlement синхронизируется с ростерью (источник истины — T-116).
 func _on_battle_losses(losses: Array, _report: Dictionary) -> void:
 	if losses.is_empty():
 		return
-	_recruit_uid_counter += losses.size()
-	settlement.population = maxi(0, settlement.population - losses.size())
+	population_system.apply_battle_losses(losses)
+	settlement.population = population_system.size()
 
 
 func _load_statblocks() -> Dictionary:
