@@ -1,5 +1,9 @@
 extends BaseTest
 
+func before_test() -> void:
+	# T-010: счётчик хода — статический WorldClock; изоляция между тестами.
+	WorldClock.reset()
+
 class _Proc extends TurnPhaseProcessor:
 	var id: StringName
 	var prio: int
@@ -92,16 +96,16 @@ func test_phases_run_in_priority_order() -> void:
 	sched.execute_turn(TurnContext.new())
 	assert_array(log).contains_exactly([&"early", &"mid", &"late"])
 
-func test_season_derived_from_month() -> void:
+func test_season_from_world_clock() -> void:
+	# T-010: ctx.season — из WorldClock (ход = сезон), не из месяца (legacy).
 	var sched := TurnScheduler.new()
 	var probe := _ProbePhase.new()
 	sched.register_processor(probe)
 	var ctx := TurnContext.new()
-	ctx.month = 8
-	sched.execute_turn(ctx)
-	assert_int(int(probe.captured.get("season", -1))).is_equal(Season.ID.SUMMER)
-	ctx.month = 1
-	sched.execute_turn(ctx)
+	sched.execute_turn(ctx)  # ход 1 = SPRING
+	assert_int(int(probe.captured.get("season", -1))).is_equal(Season.ID.SPRING)
+	for i in 3:
+		sched.execute_turn(ctx)  # ходы 2..4
 	assert_int(int(probe.captured.get("season", -1))).is_equal(Season.ID.WINTER)
 
 func test_null_weather_normalized() -> void:

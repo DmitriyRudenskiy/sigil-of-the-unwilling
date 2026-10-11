@@ -353,6 +353,8 @@ static func _create_subsystems(parent: Node2D, R: BootstrapResult) -> void:
 
 	_register_demographics(R)
 
+	_register_skeleton_phases(R)
+
 	_create_battle(parent, R)
 
 	_register_enemy_ai(R)
@@ -484,6 +486,15 @@ static func _register_demographics(R: BootstrapResult) -> void:
 	demo.disease_outbreak.connect(
 		func(city_uid: int, character_uid: int):
 			GameEventBus.disease_outbreak.emit(city_uid, character_uid))
+
+
+## T-010: фазы-каркас (MVP-маска): присутствуют в конвейере (порядок фиксирован),
+## состояние не изменяют. Post-MVP: караваны (F3), дипломатия/Совет.
+static func _register_skeleton_phases(R: BootstrapResult) -> void:
+	if R.turn_scheduler == null:
+		return
+	R.turn_scheduler.register_processor(CaravansTradePhase.new())
+	R.turn_scheduler.register_processor(DiplomacyCouncilPhase.new())
 
 static func _create_resource_nodes(parent: Node2D, R: BootstrapResult) -> void:
 	R.resource_node_manager = ResourceNodeManager.new()

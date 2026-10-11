@@ -14,6 +14,8 @@ var crit: Array = []
 var outbreak: Array = []
 
 func before_test() -> void:
+	# T-010: счётчик хода — статический WorldClock; изоляция между тестами.
+	WorldClock.reset()
 	city = City.new()
 	city.center = Vector2i(5, 5)
 	city.uid = 100

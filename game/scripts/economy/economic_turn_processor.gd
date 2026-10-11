@@ -9,6 +9,10 @@ signal resource_depleted(city_uid: int, resource_id: StringName)
 func get_phase_id() -> StringName:
 	return &"economy"
 
+## T-010: каноническая фаза — расчёт производства (порядок 6/6, последняя).
+func get_phase() -> StringName:
+	return TurnPhase.phase_name(TurnPhase.ID.PRODUCTION)
+
 func get_priority() -> int:
 	return 10
 

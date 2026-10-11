@@ -11,6 +11,16 @@ date: 2026-10-03
 
 Журнал структурных и содержательных изменений документов. Формат: дата — что — почему — коммит.
 
+## 2026-10-05 (раунд 7: T-010 increment 1 (WorldClock/TurnPhase/phase-based конвейер) + D-153 erratum + CI-1(9) + .uid-sweep + D-154/D-155, ветка feat/round7-t010-increment1)
+
+- **T-010 increment 1 (D-154):** `WorldClock` (единственный источник числа хода; ход = сезон, 4 хода = год — 02g K-M3 + спецификация round 7), `TurnPhase` (канонический реестр 6 фаз + MVP-маска), TurnScheduler — phase-based порядок (драйвер: 1 ход = 1 итерация конвейера), WorldSeasons делегирует счётчик в WorldClock, каркасы CaravansTrade/DiplomacyCouncil в конвейере, 6 процессоров с явными фазами; `test_turn_loop.gd` (10 тестов). Поведенческое изменение: порядок фаз — по канону (production последняя). **Флаг:** AC «1 ход = 1 день» vs «ход = сезон» — **Q-M26** (к владельцу; код — по спецификации round 7).
+- **D-153 (erratum к D-149):** «лоходоны» → «локсодоны» (3-точечный sweep; ложное обоснование в CHANGELOG:46 исправлено в самой erratum-строке — append-only).
+- **CI-1(9) (D-126-реестр):** порт занят ДО run_project = красный (сироты из убитого прогона); retry-политика (1 retry под нагрузкой). Связь: T-120 (исполнен, закрыт), D-155.
+- **run_tests.sh:** `--durations=25` (per-test timing — диагноз «гонка на порту»); **баг env-префикса (D-155):** комментарий между строками `VAR=value \` рвал экспорт GODOT_PATH/GODOT_BIN в pytest — 4 lifecycle-теста skip «Godot не найден», node-сервер маскировал баг auto-detection (34 pass). Фикс: комментарии выше блока; после фикса — 38/1 (совпадает с раундом 6).
+- **.uid-sweep (CI-1):** 488 .uid-сирот удалено, 2 stale uid-ссылки в .tscn исправлены (прецеденты: mcp_interaction_server.gd.uid, T-120-инжект).
+- **TICKETS:** T-120 → закрыт; T-115 → «ждёт T-010/T-040» (T-010 increment 1 доставлен, increment 2 — hero_movement + full-stack I1 + T-110-миграция); T-010 — статус «в работе, increment 1».
+- **Geyt (4 уровня, D-147):** GdUnit4 2182/0/0 (169 orphans, exit 101 → GATE=0); MCP 38 passed / 1 skipped / 0 failed (168.88s); DOCS-LINKS OK (42 notes); run_tests.sh exit 0.
+
 ## 2026-10-05 (раунд 6: мерж b8de631 + T-120 node-cleanup (CI-1-семья) + CI-1 двусторонняя парность + D-151, ветка merge/round6-node-cleanup)
 
 - **Мерж b8de631** (раунд 5) — по D-144 через merge-ветку, гейт зелёный на базисе 09eac8c (одобрение владельца §1.3).

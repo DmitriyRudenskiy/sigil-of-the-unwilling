@@ -1,6 +1,10 @@
 extends BaseTest
 const TestFactories := preload("res://tests/helpers/factories.gd")
 
+func before_test() -> void:
+	# T-010: счётчик хода — статический WorldClock; изоляция между тестами.
+	WorldClock.reset()
+
 func _add_worker(city: City, tile: Vector2i = Vector2i(6, 5)) -> PopUnit:
 	var u := PopUnit.new()
 	u.state = PopUnit.State.WORKER

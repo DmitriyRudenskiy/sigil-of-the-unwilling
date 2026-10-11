@@ -16,6 +16,10 @@ func setup(r: CharacterRegistry) -> void:
 func get_phase_id() -> StringName:
 	return &"demographics"
 
+## T-010: каноническая фаза — городские и популяционные события (порядок 1/6).
+func get_phase() -> StringName:
+	return TurnPhase.phase_name(TurnPhase.ID.CITY_POPULATION)
+
 func get_priority() -> int:
 	return 20
 

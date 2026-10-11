@@ -286,10 +286,10 @@ func _run_turn_scheduler(month: int) -> void:
 		ctx.cities.append(city)
 	if hero != null:
 		ctx.heroes.append(hero)
+	# T-010: драйвер хода — TurnScheduler.execute_turn() (1 ход = 1 итерация конвейера;
+	# WorldClock продвигает час, WorldSeasons делегирует туда же — двойного advance нет).
 	var report: Dictionary = turn_scheduler.execute_turn(ctx)
 	_grant_city_income(report)
-	# Ранняя игра: глобальный сезонный цикл (early-game-foundation)
-	WorldSeasons.advance_turn()
 
 func _grant_city_income(report: Dictionary) -> void:
 	var phases: Dictionary = report.get("phases", {})

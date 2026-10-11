@@ -12,6 +12,10 @@ var _last_season: int = -1
 func get_phase_id() -> StringName:
 	return &"enemy_growth"
 
+## T-010: каноническая фаза — разрешение боёв и рейдов (порядок 5/6).
+func get_phase() -> StringName:
+	return TurnPhase.phase_name(TurnPhase.ID.BATTLE_RAID_RESOLUTION)
+
 func get_priority() -> int:
 	return 30
 

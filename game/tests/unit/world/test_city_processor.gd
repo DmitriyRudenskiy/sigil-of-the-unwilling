@@ -1,6 +1,10 @@
 extends BaseTest
 const TestFactories := preload("res://tests/helpers/factories.gd")
 
+func before_test() -> void:
+	# T-010: счётчик хода — статический WorldClock; изоляция между тестами.
+	WorldClock.reset()
+
 func _cell_at_distance(city: City, d: int) -> Vector2i:
 	if d <= 0:
 		return city.center

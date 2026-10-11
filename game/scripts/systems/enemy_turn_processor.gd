@@ -23,6 +23,11 @@ var _hero_dist_field_valid: bool = false
 func get_phase_id() -> StringName:
 	return &"enemy_turn"
 
+## T-010: каноническая фаза — разрешение боёв и рейдов (порядок 5/6).
+## Боевая система (T-050) вне T-010: процессор даёт каркас вызова (атака по сигналу).
+func get_phase() -> StringName:
+	return TurnPhase.phase_name(TurnPhase.ID.BATTLE_RAID_RESOLUTION)
+
 func get_priority() -> int:
 	return 25
 

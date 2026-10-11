@@ -4,6 +4,10 @@ extends TurnPhaseProcessor
 func get_phase_id() -> StringName:
 	return &"city_income"
 
+## T-010: каноническая фаза — расчёт производства (порядок 6/6, последняя).
+func get_phase() -> StringName:
+	return TurnPhase.phase_name(TurnPhase.ID.PRODUCTION)
+
 func get_priority() -> int:
 	return 15
 
