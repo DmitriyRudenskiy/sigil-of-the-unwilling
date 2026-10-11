@@ -137,7 +137,10 @@ func perform_load(slot: int) -> void:
 	var persistence: WorldPersistence = Services.resolve(&"persistence")
 	if persistence != null:
 		persistence.pending_save = data
-	get_tree().change_scene_to_file("res://scenes/world.tscn")
+	# Cutover-акт (D-157, раунд 10 §1.1): Continue/Load → campaign-сцена
+	# (world.tscn — архив, не рантайм). Пост-cutover-остаток: загрузка
+	# кампанийного сейва в composition (load_save_state) — за тикетом (T-110).
+	get_tree().change_scene_to_file("res://scenes/main/main.tscn")
 
 
 func perform_delete(slot: int) -> void:
