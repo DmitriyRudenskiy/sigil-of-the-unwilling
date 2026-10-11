@@ -52,6 +52,21 @@ jobs:
       - name: Checkers (uid pairs, case dups, conflict markers, asset+.import)
         run: bash scripts/ci2_checkers.sh
 
+      - name: Lint (gdtoolkit: gdparse — gate; gdlint — report-only)
+        # Раунд 10 §3.4: lint — отдельный шаг (не в первом прогоне). gdparse
+        # (синтаксис) гейтит с первого дня; gdlint (стиль) — report-only до
+        # утверждения владельцем конфига/политики (не гейтит: не красим гейт
+        # на первом же прогоне, D-144 — main только через зелёный гейт).
+        run: |
+          python3 -m venv /tmp/ci2-lint-venv
+          /tmp/ci2-lint-venv/bin/pip install -q gdtoolkit==4.12.0
+          cd game
+          find scripts tests -name "*.gd" -print0 \
+            | xargs -0 -n50 /tmp/ci2-lint-venv/bin/gdparse
+          find scripts tests -name "*.gd" -print0 \
+            | xargs -0 -n50 /tmp/ci2-lint-venv/bin/gdlint \
+            || echo "GDLINT: report-only (violations logged, not gating)"
+
       - name: Gate (GdUnit4 + MCP e2e)
         env:
           GODOT_BIN: /tmp/godot/Godot_v4.7-stable_linux.x86_64
