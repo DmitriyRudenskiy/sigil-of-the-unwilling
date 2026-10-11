@@ -1,0 +1,73 @@
+# CI-2 (тикет CI-2, TICKETS.md): GitHub Actions — гейт 4 уровня + чекеры + artifact-логи.
+# Гейт = GdUnit4 + MCP e2e (run_tests.sh, таблица exit-кодов закодирована в скрипте:
+# GdUnit 0/101 → зелёный, 100/105 → красный; pytest 0 → зелёный, 1/2/3/5 → красный)
+# + DOCS-LINKS (check_docs_links.py, битая ссылка → красный) + чекеры (ci2_checkers.sh:
+# пары .gd/.uid и ассет/.import, case-дубли, маркеры конфликтов).
+# Райдер парности (13-я итерация §0): чекеры — на PR, не только на main.
+name: CI-2
+
+on:
+  push: # AC тикета CI-2: «на каждый push/PR»
+    branches: ['**']
+  pull_request:
+
+concurrency:
+  group: ci2-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: Gate (GdUnit4 + MCP e2e + DOCS-LINKS + checkers)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: System deps (Xvfb — MCP e2e запускает живой Godot, не headless; Godot runtime-libs)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb libfontconfig1 libxcursor1 libxinerama1 \
+            libxrandr1 libxi1 libgl1 libasound2t64 libpulse0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Python venv (pytest + pytest-timeout + mcp + anyio)
+        run: |
+          python3 -m venv /tmp/ci2-mcp-venv
+          /tmp/ci2-mcp-venv/bin/pip install -q pytest pytest-timeout mcp anyio
+
+      - name: Godot 4.7-stable (linux x86_64)
+        run: |
+          curl -sfL https://github.com/godotengine/godot/releases/download/4.7-stable/Godot_v4.7-stable_linux.x86_64.zip -o /tmp/godot.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x /tmp/godot/Godot_v4.7-stable_linux.x86_64
+          /tmp/godot/Godot_v4.7-stable_linux.x86_64 --version
+
+      - name: MCP server (npm ci + build)
+        working-directory: game/addons/godot-mcp
+        run: npm ci && npm run build
+
+      - name: Checkers (uid pairs, case dups, conflict markers, asset+.import)
+        run: bash scripts/ci2_checkers.sh
+
+      - name: Gate (GdUnit4 + MCP e2e)
+        env:
+          GODOT_BIN: /tmp/godot/Godot_v4.7-stable_linux.x86_64
+          MCP_PYTEST_PY: /tmp/ci2-mcp-venv/bin/python
+        run: |
+          set -o pipefail
+          bash game/run_tests.sh 2>&1 | tee /tmp/ci2-gate.log
+
+      - name: DOCS-LINKS (check_docs_links.py)
+        run: |
+          set -o pipefail
+          python3 scripts/check_docs_links.py 2>&1 | tee -a /tmp/ci2-gate.log
+
+      - name: Artifact (gate logs)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci2-gate-logs
+          path: /tmp/ci2-gate.log

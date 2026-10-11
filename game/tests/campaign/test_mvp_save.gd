@@ -175,3 +175,18 @@ func test_unknown_and_missing_sections() -> void:
 	var saved2 := MvpSaveManager.save_slot(1, state)
 	assert_that(not saved2["ok"] and saved2["error"] == MvpSaveManager.SaveError.INVALID_DATA) \
 		.override_failure_message("отсутствующая секция должна отклоняться: %s" % str(saved2["message"]))
+
+
+## Catch акта композита (14-я итерация, раунд 4, §3): обязательные секции —
+## тест падает при отсутствии ЛЮБОЙ: каждая из SECTIONS по отдельности.
+func test_every_missing_section_rejected() -> void:
+	for section in MvpSaveSchema.SECTIONS.keys():
+		var state := _sample_state()
+		state.erase(section)
+		var err := MvpSaveSchema.validate(state)
+		assert_str(err).is_not_empty() \
+			.override_failure_message("отсутствующая секция «%s» должна отклоняться" % section)
+		assert_str(err).contains(section) \
+			.override_failure_message("ошибка должна называть отсутствующую секцию: %s" % err)
+	# Полный состав — валиден (контроль: тест не падает из-за лишнего).
+	assert_str(MvpSaveSchema.validate(_sample_state())).is_equal("")
