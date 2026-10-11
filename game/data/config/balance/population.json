@@ -9,5 +9,27 @@
   "food_per_person_week": 0.7,
   "building_efficiency_clamp": [0.2, 2.5],
   "deficit_production_factor": 0.25,
-  "collapse": { "population_loss": 0.10, "note": "Post-MVP (06-economy)" }
+  "collapse": { "population_loss": 0.10, "note": "Post-MVP (06-economy)" },
+  "age_model": {
+    "note": "T-116 (GDD §3, маппинг D-133): трудоспособные 16–60, наставники 60+, lifespan = 60 + Удача (лет)",
+    "working_min_years": 16,
+    "working_max_years": 60,
+    "mentor_min_years": 60,
+    "lifespan_base_years": 60,
+    "lifespan_luck_years_per_point": 1,
+    "days_per_year": 365.25
+  },
+  "birth_multipliers": {
+    "note": "K-M12: births = k_pop × m(жильё) × m(еда) × m(настроение); MVP — все m = 1",
+    "housing": 1.0,
+    "food": 1.0,
+    "mood": 1.0
+  },
+  "migration": {
+    "note": "F-3 (T-116): вход — только Репутация (производная Резонанса); Престиж — никогда (Э1-3). net_за_ход = k_mig_per_turn × (reputation − rep_neutral), аккумулятор с переносом (без ГСЧ, I1)",
+    "k_mig_per_turn": 0.25,
+    "rep_neutral": 0.0,
+    "immigrant_age_min_years": 16,
+    "immigrant_age_span_years": 24
+  }
 }
