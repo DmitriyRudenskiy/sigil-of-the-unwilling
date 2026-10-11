@@ -282,6 +282,7 @@ func _run_turn_scheduler(month: int) -> void:
 	ctx.month = int(date.get("month", 1))
 	ctx.week = int(date.get("week", 1))
 	ctx.day = int(date.get("day", 1))
+	ctx.is_campaign = bool(cities.get("is_campaign"))
 	for city in cities.cities:
 		ctx.cities.append(city)
 	if hero != null:

@@ -57,6 +57,26 @@ func test_city_marker_clicked_selects_target() -> void:
 	_router._on_city_marker_clicked(c)
 	assert_that(_hero.clicked).is_equal(Vector2i(4, 4))
 
+func test_campaign_mode_is_passed_to_scheduler_from_city_manager() -> void:
+	var city := City.new()
+	city.center = Vector2i(5, 5)
+	city.ensure_resource_ctx()
+	city.food_stockpile = 10.0
+	city.resource_ctx.clear_ledger()
+	var resident := PopUnit.new()
+	resident.state = PopUnit.State.WORKER
+	city.pop.append(resident)
+	_cities.cities.append(city)
+	_cities.is_campaign = true
+	var scheduler := TurnScheduler.new()
+	scheduler.register_processor(EconomicTurnProcessor.new())
+	_router.turn_scheduler = scheduler
+
+	_router._run_turn_scheduler(1)
+
+	assert_float(city.food_stockpile).is_equal_approx(9.9, 0.0001)
+	assert_that(String(city.resource_ctx.get_ledger()[0].source)).is_equal("campaign:resident_food")
+
 func after_test() -> void:
 	_router.queue_free()
 	_hero.free()

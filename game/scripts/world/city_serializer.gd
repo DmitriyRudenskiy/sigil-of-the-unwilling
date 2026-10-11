@@ -4,6 +4,7 @@ extends RefCounted
 const _ArenaClusterSystem = preload("res://scripts/city/arena_cluster_system.gd")
 
 static func serialize(city: City) -> Dictionary:
+	city.ensure_resource_ctx()
 	var d := {
 		"version": City.SERIALIZATION_VERSION,
 		"uid": city.uid,
@@ -18,7 +19,6 @@ static func serialize(city: City) -> Dictionary:
 		"stronghold_level": city.stronghold_level,
 		"is_capital": city.is_capital,
 		"owner": String(city.owner),
-		"food_stockpile": city.food_stockpile,
 		"starving": city.starving,
 		"scale_tier": city.scale_tier,
 		"auto_resource_mult": city.auto_resource_mult,
@@ -38,8 +38,7 @@ static func serialize(city: City) -> Dictionary:
 	for cell in city.roads:
 		roads_arr.append(SerializationUtils.vec2i_to_dict(cell))
 	d["roads"] = roads_arr
-	if city.resource_ctx != null:
-		d["resource_ctx"] = city.resource_ctx.serialize()
+	d["resource_ctx"] = city.resource_ctx.serialize()
 	var pops_arr: Array = []
 	for u in city.pop:
 		pops_arr.append(u.serialize())
@@ -52,6 +51,8 @@ static func serialize(city: City) -> Dictionary:
 	for building in city.buildings:
 		blds_arr.append(building.serialize())
 	d["buildings"] = blds_arr
+	d["campaign_buildings"] = _campaign_buildings_to_list(city.campaign_buildings)
+	d["campaign_group_state"] = city.campaign_group_state.duplicate(true)
 	return d
 
 static func deserialize(city: City, data: Dictionary) -> void:
@@ -120,6 +121,16 @@ static func deserialize(city: City, data: Dictionary) -> void:
 			continue
 		city.buildings.append(UniqueBuilding.deserialize(bl, def))
 
+	city.campaign_buildings.clear()
+	for building in data.get("campaign_buildings", []):
+		if building is Dictionary:
+			var instance: Dictionary = building.duplicate(true)
+			if instance.get("cell") is Dictionary:
+				instance["cell"] = SerializationUtils.vec2i_from_dict(instance["cell"])
+			city.campaign_buildings.append(instance)
+	var group_state: Variant = data.get("campaign_group_state", {})
+	city.campaign_group_state = group_state.duplicate(true) if group_state is Dictionary else {}
+
 	_ArenaClusterSystem.invalidate(city.uid)
 
 	var max_uid := int(data.get("uid_seq", 0))
@@ -129,6 +140,8 @@ static func deserialize(city: City, data: Dictionary) -> void:
 		max_uid = maxi(max_uid, borough.uid + 1)
 	for building in city.buildings:
 		max_uid = maxi(max_uid, building.uid + 1)
+	for building in city.campaign_buildings:
+		max_uid = maxi(max_uid, int(building.get("uid", 0)) + 1)
 	city._uid_seq = max_uid
 	city._invalidate_exploited()
 
@@ -141,7 +154,35 @@ static func _migrate_city_data(data: Dictionary, from_version: int) -> Dictionar
 			migrated["auto_resource_mult"] = 1.0
 		if not migrated.has("upkeep_mult"):
 			migrated["upkeep_mult"] = 1.0
+	if from_version < 3 and not migrated.has("campaign_buildings"):
+		migrated["campaign_buildings"] = []
+	if from_version < 4:
+		for pop_data in migrated.get("pop", []):
+			if pop_data is Dictionary:
+				if not pop_data.has("ancestry_id"):
+					pop_data["ancestry_id"] = ""
+				if not pop_data.has("archetype_id"):
+					pop_data["archetype_id"] = ""
+	if from_version < 5:
+		var raw_resources: Variant = migrated.get("resource_ctx", {})
+		var resources: Dictionary = raw_resources.duplicate(true) if raw_resources is Dictionary else {}
+		resources["food"] = float(resources.get("food", 0.0)) + float(migrated.get("food_stockpile", 0.0))
+		migrated["resource_ctx"] = resources
+		migrated.erase("food_stockpile")
+		var group_state: Variant = migrated.get("campaign_group_state", {})
+		if not migrated.has("campaign_group_state") or not (group_state is Dictionary):
+			migrated["campaign_group_state"] = {}
+	migrated["version"] = City.SERIALIZATION_VERSION
 	return migrated
+
+static func _campaign_buildings_to_list(buildings: Array[Dictionary]) -> Array:
+	var out: Array = []
+	for building in buildings:
+		var serialized := building.duplicate(true)
+		if serialized.get("cell") is Vector2i:
+			serialized["cell"] = SerializationUtils.vec2i_to_dict(serialized["cell"])
+		out.append(serialized)
+	return out
 
 static func _core_cells_to_list(cells: Array[Vector2i]) -> Array:
 	var out: Array = []

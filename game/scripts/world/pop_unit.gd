@@ -12,6 +12,8 @@ var pending_tile := Vector2i(-1, -1)
 var assigned_to := -1
 var born_turn := -1
 var character_uid: int = -1
+var ancestry_id := ""
+var archetype_id := ""
 var path_id: StringName = &""
 
 func is_available() -> bool:
@@ -50,6 +52,8 @@ func serialize() -> Dictionary:
 		"assigned_to": assigned_to,
 		"born_turn": born_turn,
 		"character_uid": character_uid,
+		"ancestry_id": ancestry_id,
+		"archetype_id": archetype_id,
 		"path_id": String(path_id),
 	}
 
@@ -64,5 +68,7 @@ static func deserialize(data: Dictionary) -> PopUnit:
 	u.assigned_to = int(data.get("assigned_to", -1))
 	u.born_turn = int(data.get("born_turn", -1))
 	u.character_uid = int(data.get("character_uid", -1))
+	u.ancestry_id = String(data.get("ancestry_id", ""))
+	u.archetype_id = String(data.get("archetype_id", ""))
 	u.path_id = StringName(str(data.get("path_id", &"")))
 	return u

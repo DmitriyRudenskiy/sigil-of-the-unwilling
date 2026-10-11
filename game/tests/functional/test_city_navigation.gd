@@ -112,7 +112,7 @@ func test_exit_button_renamed_and_closes() -> void:
 	var screen = load("res://scenes/ui/city_screen.tscn").instantiate() as CityScreen
 	holder.add_child(screen)
 	screen.setup(city, hero, Vector2i(10, 10), TestFactories.seeded(42))
-	var btn := screen.get_node("CityScreenBackground/CityScreenCenter/CityScreenPanel/CityScreenBox/CityScreenButtons/Close") as Button
+	var btn := screen.get_node("ScreenMargin/ScreenLayout/ScreenHeader/HeaderRow/Close") as Button
 	assert_that(btn).is_not_null()
 	assert_bool(btn.text.contains("Выход из города")).is_true()
 	var closed: Array = [false]

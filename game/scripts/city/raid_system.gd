@@ -1,6 +1,8 @@
 class_name RaidSystem
 extends RefCounted
 
+const CampaignDefenseResolver := preload("res://scripts/city/campaign_defense_resolver.gd")
+
 const PILLAGED_RESOURCES: Array[StringName] = [&"grain", &"flour", &"bread",
 	&"ore", &"tools", &"dust", &"science", &"influence"]
 
@@ -25,22 +27,25 @@ static func resolve(city: City, turn: int) -> Dictionary:
 			"repelled": false, "pillaged_food": 0.0, "pillaged_gold": 0.0}
 
 	var strength := raid_strength(city, turn)
+	var campaign_defense := CampaignDefenseResolver.explain(city.campaign_buildings)
 	var defense := city.defense_strength()
 	var repelled := defense >= strength
 
 	if repelled:
 		ReputationSystem.apply(city, float(GameNumbers.RAID_REP_RELIEF))
 		return {"occurred": true, "strength": strength, "defense": defense,
-			"repelled": true, "pillaged_food": 0.0, "pillaged_gold": 0.0}
+			"repelled": true, "pillaged_food": 0.0, "pillaged_gold": 0.0,
+			"campaign_defense": campaign_defense}
 
-	var food := city.food_stockpile * GameNumbers.RAID_PILLAGE_FRACTION
-	city.food_stockpile -= food
+	var res := city.ensure_resource_ctx()
+	var food := res.amount(&"food") * GameNumbers.RAID_PILLAGE_FRACTION
+	res.remove(&"food", food, "raid:pillage")
 	var gold := float(city.storage.get(&"industry", 0.0)) * GameNumbers.RAID_PILLAGE_FRACTION
 	city.storage[&"industry"] = float(city.storage.get(&"industry", 0.0)) - gold
-	var res := city.ensure_resource_ctx()
 	for rid in PILLAGED_RESOURCES:
 		if res.has(rid):
-			res.remove(rid, float(res.amount(rid)) * GameNumbers.RAID_PILLAGE_FRACTION)
+			res.remove(rid, float(res.amount(rid)) * GameNumbers.RAID_PILLAGE_FRACTION, "raid:pillage")
 	ReputationSystem.apply(city, float(GameNumbers.RAID_REP_LOSS))
 	return {"occurred": true, "strength": strength, "defense": defense,
-		"repelled": false, "pillaged_food": food, "pillaged_gold": gold}
+		"repelled": false, "pillaged_food": food, "pillaged_gold": gold,
+		"campaign_defense": campaign_defense}

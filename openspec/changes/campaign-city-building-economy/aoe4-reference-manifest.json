@@ -1,0 +1,7109 @@
+{
+  "metadata": {
+    "game": "Age of Empires IV",
+    "target_scope": "released building content through 2026-10-04; excludes naval content, units, and Raiders of the North announced after boundary",
+    "retrieved_on": "2026-10-06",
+    "source_pin": "AOE4-DATA@b2cd38222deae40ba2db18171edf494f81410c69",
+    "buildings_record_count": 665,
+    "civilization_count": 23,
+    "candidate_source_signal_count": 95,
+    "coverage_status": "95_of_95_discovered_source_signal_rows_verified_and_dispositioned; not a claim that only 95 source buildings exist",
+    "confidence_legend": {
+      "confirmed": "entry and source variants exist in pinned public data; news/release boundary cross-check did not find later released building identity",
+      "candidate": "public lead, but entry or target-version membership not independently confirmed",
+      "unknown": "insufficient source evidence"
+    },
+    "notes": [
+      "No AoE unit data, costs, combat stats, asset paths, or raw game files are included. The manifest retains only public source IDs/names/civilization variants and role dispositions.",
+      "The source page warns that some DLC civilizations may be incomplete; the current data file matched the 2026-05 pin, and official post-pin news was reviewed through the declared boundary.",
+      "Support-only and excluded rows remain in the ledger for auditability but are not admitted as campaign catalog entries."
+    ]
+  },
+  "entries": [
+    {
+      "id": "AOE-C-001",
+      "name": "Barracks",
+      "type_category": "Military Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "fighter",
+        "cleric+fighter"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "barracks-1",
+          "civ_ids": [
+            "ab"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "barracks-1",
+          "civ_ids": [
+            "ay"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "barracks-1",
+          "civ_ids": [
+            "by"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "barracks-1",
+          "civ_ids": [
+            "ch"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "barracks-1",
+          "civ_ids": [
+            "de"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "barracks-1",
+          "civ_ids": [
+            "en"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "barracks-1",
+          "civ_ids": [
+            "fr"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "barracks-1",
+          "civ_ids": [
+            "gol"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "barracks-1",
+          "civ_ids": [
+            "hr"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "barracks-1",
+          "civ_ids": [
+            "hl"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "barracks-1",
+          "civ_ids": [
+            "ja"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "barracks-1",
+          "civ_ids": [
+            "je"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "barracks-1",
+          "civ_ids": [
+            "jin"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "barracks-1",
+          "civ_ids": [
+            "kt"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "barracks-1",
+          "civ_ids": [
+            "ma"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "barracks-1",
+          "civ_ids": [
+            "mo"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "barracks-1",
+          "civ_ids": [
+            "od"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "barracks-1",
+          "civ_ids": [
+            "ot"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "barracks-1",
+          "civ_ids": [
+            "ru"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "barracks-1",
+          "civ_ids": [
+            "sen"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "barracks-1",
+          "civ_ids": [
+            "tug"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "barracks-1",
+          "civ_ids": [
+            "zx"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-002",
+      "name": "Stable",
+      "type_category": "Military Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "fighter+ranger"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "stable-2",
+          "civ_ids": [
+            "ab"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "stable-2",
+          "civ_ids": [
+            "ay"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "stable-2",
+          "civ_ids": [
+            "by"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "stable-2",
+          "civ_ids": [
+            "ch"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "stable-2",
+          "civ_ids": [
+            "de"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "stable-2",
+          "civ_ids": [
+            "en"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "stable-2",
+          "civ_ids": [
+            "fr"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "stable-1",
+          "civ_ids": [
+            "gol"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "stable-2",
+          "civ_ids": [
+            "hr"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "stable-2",
+          "civ_ids": [
+            "hl"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "stable-2",
+          "civ_ids": [
+            "ja"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "stable-2",
+          "civ_ids": [
+            "je"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "stable-2",
+          "civ_ids": [
+            "kt"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "stable-2",
+          "civ_ids": [
+            "mac"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "stable-2",
+          "civ_ids": [
+            "ma"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "stable-1",
+          "civ_ids": [
+            "mo"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "stable-2",
+          "civ_ids": [
+            "od"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "stable-2",
+          "civ_ids": [
+            "ot"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "stable-2",
+          "civ_ids": [
+            "ru"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "stable-2",
+          "civ_ids": [
+            "sen"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "stable-2",
+          "civ_ids": [
+            "tug"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "stable-2",
+          "civ_ids": [
+            "zx"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-003",
+      "name": "Varangian Stronghold",
+      "type_category": "Military Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "fighter+ranger"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "varangian-stronghold-1",
+          "civ_ids": [
+            "mac"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-004",
+      "name": "Varangian Warcamp",
+      "type_category": "Military Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "fighter+ranger"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "varangian-warcamp-1",
+          "civ_ids": [
+            "mac"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-005",
+      "name": "Military School",
+      "type_category": "Military Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "fighter+ranger"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "military-school-1",
+          "civ_ids": [
+            "ot"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-006",
+      "name": "Archery Range",
+      "type_category": "Military Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "ranger",
+        "fighter+ranger"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "archery-range-2",
+          "civ_ids": [
+            "ab"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "archery-range-2",
+          "civ_ids": [
+            "ay"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "archery-range-2",
+          "civ_ids": [
+            "by"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "archery-range-2",
+          "civ_ids": [
+            "ch"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "archery-range-2",
+          "civ_ids": [
+            "de"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "archery-range-2",
+          "civ_ids": [
+            "en"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "archery-range-2",
+          "civ_ids": [
+            "fr"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "archery-range-2",
+          "civ_ids": [
+            "gol"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "archery-range-2",
+          "civ_ids": [
+            "hr"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "archery-range-2",
+          "civ_ids": [
+            "hl"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "archery-range-2",
+          "civ_ids": [
+            "ja"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "archery-range-2",
+          "civ_ids": [
+            "je"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "archery-range-2",
+          "civ_ids": [
+            "kt"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "archery-range-2",
+          "civ_ids": [
+            "mac"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "archery-range-2",
+          "civ_ids": [
+            "ma"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "archery-range-2",
+          "civ_ids": [
+            "mo"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "archery-range-2",
+          "civ_ids": [
+            "od"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "archery-range-2",
+          "civ_ids": [
+            "ot"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "archery-range-2",
+          "civ_ids": [
+            "ru"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "archery-range-2",
+          "civ_ids": [
+            "sen"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "archery-range-2",
+          "civ_ids": [
+            "tug"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "archery-range-2",
+          "civ_ids": [
+            "zx"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-007",
+      "name": "Mercenary House",
+      "type_category": "Military Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "fighter+ranger"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "mercenary-house-2",
+          "civ_ids": [
+            "by"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-008",
+      "name": "Grassland",
+      "type_category": "Military Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": true,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "excluded_from_catalog_scope"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "grassland-2",
+          "civ_ids": [
+            "jin"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        }
+      ],
+      "training_support_or_exclusion": "Exclude from character training: spawns horses/resource effects used by cavalry production, not a human land character.",
+      "disposition": "excluded_from_core_training_and_static_defense_scope"
+    },
+    {
+      "id": "AOE-C-009",
+      "name": "Machine Workshop",
+      "type_category": "Military Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "ranger"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "machine-workshop-2",
+          "civ_ids": [
+            "jin"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-010",
+      "name": "War Stable",
+      "type_category": "Military Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "fighter+ranger"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "war-stable-2",
+          "civ_ids": [
+            "jin"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-011",
+      "name": "Hojo Clan Daimyo Estate",
+      "type_category": "Military Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "fighter"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "hojo-clan-daimyo-estate-2",
+          "civ_ids": [
+            "sen"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-012",
+      "name": "Oda Clan Daimyo Estate",
+      "type_category": "Military Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "fighter+ranger"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "oda-clan-daimyo-estate-2",
+          "civ_ids": [
+            "sen"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-013",
+      "name": "Takeda Clan Daimyo Estate",
+      "type_category": "Military Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "fighter"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "takeda-clan-daimyo-estate-2",
+          "civ_ids": [
+            "sen"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-014",
+      "name": "Siege Workshop",
+      "type_category": "Military Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "fighter"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "siege-workshop-3",
+          "civ_ids": [
+            "ab"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "siege-workshop-3",
+          "civ_ids": [
+            "ay"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "siege-workshop-3",
+          "civ_ids": [
+            "by"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "siege-workshop-3",
+          "civ_ids": [
+            "ch"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "siege-workshop-3",
+          "civ_ids": [
+            "de"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "siege-workshop-3",
+          "civ_ids": [
+            "en"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "siege-workshop-3",
+          "civ_ids": [
+            "fr"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "siege-workshop-3",
+          "civ_ids": [
+            "gol"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "siege-workshop-3",
+          "civ_ids": [
+            "hr"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "siege-workshop-3",
+          "civ_ids": [
+            "hl"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "siege-workshop-3",
+          "civ_ids": [
+            "ja"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "siege-workshop-3",
+          "civ_ids": [
+            "je"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "siege-workshop-3",
+          "civ_ids": [
+            "kt"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "siege-workshop-3",
+          "civ_ids": [
+            "mac"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "siege-workshop-3",
+          "civ_ids": [
+            "ma"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "siege-workshop-3",
+          "civ_ids": [
+            "mo"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "siege-workshop-3",
+          "civ_ids": [
+            "od"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "siege-workshop-3",
+          "civ_ids": [
+            "ot"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "siege-workshop-3",
+          "civ_ids": [
+            "ru"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "siege-workshop-3",
+          "civ_ids": [
+            "sen"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "siege-workshop-3",
+          "civ_ids": [
+            "tug"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        },
+        {
+          "id": "siege-workshop-3",
+          "civ_ids": [
+            "zx"
+          ],
+          "display_classes": [
+            "Military Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-015",
+      "name": "Palisade",
+      "type_category": "Defensive Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`",
+      "source_variants": [
+        {
+          "id": "palisade-1",
+          "civ_ids": [
+            "ab"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-1",
+          "civ_ids": [
+            "ay"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-1",
+          "civ_ids": [
+            "by"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-1",
+          "civ_ids": [
+            "ch"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-1",
+          "civ_ids": [
+            "de"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-1",
+          "civ_ids": [
+            "en"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-1",
+          "civ_ids": [
+            "fr"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-1",
+          "civ_ids": [
+            "gol"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-1",
+          "civ_ids": [
+            "hr"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-1",
+          "civ_ids": [
+            "hl"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-1",
+          "civ_ids": [
+            "ja"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-1",
+          "civ_ids": [
+            "je"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-1",
+          "civ_ids": [
+            "jin"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-1",
+          "civ_ids": [
+            "kt"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-1",
+          "civ_ids": [
+            "mac"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-1",
+          "civ_ids": [
+            "ma"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-1",
+          "civ_ids": [
+            "od"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-1",
+          "civ_ids": [
+            "ot"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-1",
+          "civ_ids": [
+            "sen"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-1",
+          "civ_ids": [
+            "tug"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-1",
+          "civ_ids": [
+            "zx"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-016",
+      "name": "Palisade Gate",
+      "type_category": "Defensive Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`",
+      "source_variants": [
+        {
+          "id": "palisade-gate-1",
+          "civ_ids": [
+            "ab"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-gate-1",
+          "civ_ids": [
+            "ay"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-gate-1",
+          "civ_ids": [
+            "by"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-gate-1",
+          "civ_ids": [
+            "ch"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-gate-1",
+          "civ_ids": [
+            "de"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-gate-1",
+          "civ_ids": [
+            "en"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-gate-1",
+          "civ_ids": [
+            "fr"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-gate-1",
+          "civ_ids": [
+            "gol"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-gate-1",
+          "civ_ids": [
+            "hr"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-gate-1",
+          "civ_ids": [
+            "hl"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-gate-1",
+          "civ_ids": [
+            "ja"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-gate-1",
+          "civ_ids": [
+            "je"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-gate-1",
+          "civ_ids": [
+            "jin"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-gate-1",
+          "civ_ids": [
+            "kt"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-gate-1",
+          "civ_ids": [
+            "mac"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-gate-1",
+          "civ_ids": [
+            "ma"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-gate-1",
+          "civ_ids": [
+            "od"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-gate-1",
+          "civ_ids": [
+            "ot"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-gate-1",
+          "civ_ids": [
+            "sen"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-gate-1",
+          "civ_ids": [
+            "tug"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "palisade-gate-1",
+          "civ_ids": [
+            "zx"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-017",
+      "name": "Aqueduct",
+      "type_category": "Defensive Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": true,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "excluded_from_catalog_scope"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "not_defense`",
+      "source_variants": [
+        {
+          "id": "aqueduct-1",
+          "civ_ids": [
+            "by"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        }
+      ],
+      "disposition": "excluded_from_core_training_and_static_defense_scope"
+    },
+    {
+      "id": "AOE-C-018",
+      "name": "Fortified Palisade Gate",
+      "type_category": "Defensive Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`.",
+      "source_variants": [
+        {
+          "id": "fortified-palisade-gate-1",
+          "civ_ids": [
+            "ru"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-019",
+      "name": "Fortified Palisade Wall",
+      "type_category": "Defensive Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`.",
+      "source_variants": [
+        {
+          "id": "fortified-palisade-wall-1",
+          "civ_ids": [
+            "ru"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-020",
+      "name": "Stone Wall",
+      "type_category": "Defensive Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`.",
+      "source_variants": [
+        {
+          "id": "stone-wall-2",
+          "civ_ids": [
+            "ab"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-2",
+          "civ_ids": [
+            "ay"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-2",
+          "civ_ids": [
+            "by"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-2",
+          "civ_ids": [
+            "ch"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-2",
+          "civ_ids": [
+            "de"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-2",
+          "civ_ids": [
+            "en"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-2",
+          "civ_ids": [
+            "fr"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-2",
+          "civ_ids": [
+            "hr"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-2",
+          "civ_ids": [
+            "hl"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-2",
+          "civ_ids": [
+            "ja"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-2",
+          "civ_ids": [
+            "je"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-2",
+          "civ_ids": [
+            "jin"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-2",
+          "civ_ids": [
+            "kt"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-2",
+          "civ_ids": [
+            "mac"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-2",
+          "civ_ids": [
+            "ma"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-2",
+          "civ_ids": [
+            "od"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-2",
+          "civ_ids": [
+            "ot"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-4",
+          "civ_ids": [
+            "ru"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-2",
+          "civ_ids": [
+            "sen"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-2",
+          "civ_ids": [
+            "tug"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-2",
+          "civ_ids": [
+            "zx"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-021",
+      "name": "Stone Wall Gate",
+      "type_category": "Defensive Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`",
+      "source_variants": [
+        {
+          "id": "stone-wall-gate-2",
+          "civ_ids": [
+            "ab"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-gate-2",
+          "civ_ids": [
+            "ay"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-gate-2",
+          "civ_ids": [
+            "by"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-gate-2",
+          "civ_ids": [
+            "ch"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-gate-2",
+          "civ_ids": [
+            "de"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-gate-2",
+          "civ_ids": [
+            "en"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-gate-2",
+          "civ_ids": [
+            "fr"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-gate-2",
+          "civ_ids": [
+            "hr"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-gate-2",
+          "civ_ids": [
+            "hl"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-gate-2",
+          "civ_ids": [
+            "ja"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-gate-2",
+          "civ_ids": [
+            "je"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-gate-2",
+          "civ_ids": [
+            "jin"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-gate-2",
+          "civ_ids": [
+            "kt"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-gate-2",
+          "civ_ids": [
+            "mac"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-gate-2",
+          "civ_ids": [
+            "ma"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-gate-2",
+          "civ_ids": [
+            "od"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-gate-2",
+          "civ_ids": [
+            "ot"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-gate-4",
+          "civ_ids": [
+            "ru"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-gate-2",
+          "civ_ids": [
+            "sen"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-gate-2",
+          "civ_ids": [
+            "tug"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-gate-2",
+          "civ_ids": [
+            "zx"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-022",
+      "name": "Outpost",
+      "type_category": "Defensive Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`",
+      "source_variants": [
+        {
+          "id": "outpost-1",
+          "civ_ids": [
+            "ab"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "outpost-1",
+          "civ_ids": [
+            "ay"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "outpost-1",
+          "civ_ids": [
+            "by"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "outpost-1",
+          "civ_ids": [
+            "ch"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "outpost-1",
+          "civ_ids": [
+            "de"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "outpost-1",
+          "civ_ids": [
+            "en"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "outpost-1",
+          "civ_ids": [
+            "fr"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "outpost-1",
+          "civ_ids": [
+            "hr"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "outpost-1",
+          "civ_ids": [
+            "hl"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "outpost-1",
+          "civ_ids": [
+            "ja"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "outpost-1",
+          "civ_ids": [
+            "je"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "outpost-1",
+          "civ_ids": [
+            "jin"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "outpost-1",
+          "civ_ids": [
+            "kt"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "outpost-1",
+          "civ_ids": [
+            "mac"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "outpost-1",
+          "civ_ids": [
+            "mo"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "outpost-1",
+          "civ_ids": [
+            "od"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "outpost-1",
+          "civ_ids": [
+            "ot"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "outpost-1",
+          "civ_ids": [
+            "sen"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "outpost-1",
+          "civ_ids": [
+            "tug"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "outpost-1",
+          "civ_ids": [
+            "zx"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-023",
+      "name": "Fortified Outpost",
+      "type_category": "Defensive Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`.",
+      "source_variants": [
+        {
+          "id": "fortified-outpost-1",
+          "civ_ids": [
+            "gol"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-024",
+      "name": "Toll Outpost",
+      "type_category": "Defensive Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`",
+      "source_variants": [
+        {
+          "id": "toll-outpost-1",
+          "civ_ids": [
+            "ma"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-025",
+      "name": "Wooden Fortress",
+      "type_category": "Defensive Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`.",
+      "source_variants": [
+        {
+          "id": "wooden-fortress-1",
+          "civ_ids": [
+            "ru"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-026",
+      "name": "Stone Wall Tower",
+      "type_category": "Defensive Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`.",
+      "source_variants": [
+        {
+          "id": "stone-wall-tower-2",
+          "civ_ids": [
+            "ab"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-tower-2",
+          "civ_ids": [
+            "ay"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-tower-2",
+          "civ_ids": [
+            "by"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-tower-2",
+          "civ_ids": [
+            "ch"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-tower-2",
+          "civ_ids": [
+            "de"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-tower-2",
+          "civ_ids": [
+            "en"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-tower-2",
+          "civ_ids": [
+            "fr"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-tower-2",
+          "civ_ids": [
+            "hr"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-tower-2",
+          "civ_ids": [
+            "hl"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-tower-2",
+          "civ_ids": [
+            "ja"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-tower-2",
+          "civ_ids": [
+            "je"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-tower-2",
+          "civ_ids": [
+            "jin"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-tower-2",
+          "civ_ids": [
+            "kt"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-tower-2",
+          "civ_ids": [
+            "mac"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-tower-2",
+          "civ_ids": [
+            "ma"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-tower-2",
+          "civ_ids": [
+            "od"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-tower-2",
+          "civ_ids": [
+            "ot"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-tower-4",
+          "civ_ids": [
+            "ru"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-tower-2",
+          "civ_ids": [
+            "sen"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-tower-2",
+          "civ_ids": [
+            "tug"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "stone-wall-tower-2",
+          "civ_ids": [
+            "zx"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-027",
+      "name": "Tughlaqabad Fort",
+      "type_category": "Defensive Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training",
+        "static_defense"
+      ],
+      "training_class_roles": [
+        "fighter"
+      ],
+      "defense_disposition": "static_defense`",
+      "source_variants": [
+        {
+          "id": "tughlaqabad-fort-2",
+          "civ_ids": [
+            "tug"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-028",
+      "name": "Keep",
+      "type_category": "Defensive Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training",
+        "static_defense"
+      ],
+      "training_class_roles": [
+        "ranger",
+        "fighter+ranger"
+      ],
+      "defense_disposition": "static_defense`",
+      "source_variants": [
+        {
+          "id": "keep-3",
+          "civ_ids": [
+            "ab"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "keep-3",
+          "civ_ids": [
+            "ay"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "keep-3",
+          "civ_ids": [
+            "by"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "keep-3",
+          "civ_ids": [
+            "ch"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "keep-3",
+          "civ_ids": [
+            "de"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "keep-3",
+          "civ_ids": [
+            "en"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "keep-3",
+          "civ_ids": [
+            "fr"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "keep-3",
+          "civ_ids": [
+            "hr"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "keep-3",
+          "civ_ids": [
+            "hl"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "keep-3",
+          "civ_ids": [
+            "je"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "keep-3",
+          "civ_ids": [
+            "jin"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "keep-3",
+          "civ_ids": [
+            "mac"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "keep-3",
+          "civ_ids": [
+            "ma"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "keep-3",
+          "civ_ids": [
+            "od"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "keep-3",
+          "civ_ids": [
+            "ot"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "keep-3",
+          "civ_ids": [
+            "ru"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "keep-3",
+          "civ_ids": [
+            "zx"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-029",
+      "name": "Castle",
+      "type_category": "Defensive Building",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`",
+      "source_variants": [
+        {
+          "id": "castle-4",
+          "civ_ids": [
+            "ja"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        },
+        {
+          "id": "castle-4",
+          "civ_ids": [
+            "sen"
+          ],
+          "display_classes": [
+            "Defensive Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-030",
+      "name": "Imperial Hippodrome",
+      "type_category": "Age II Military Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "fighter+ranger"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "imperial-hippodrome-1",
+          "civ_ids": [
+            "by"
+          ],
+          "display_classes": [
+            "Age II - Military Landmark"
+          ]
+        },
+        {
+          "id": "imperial-hippodrome-1",
+          "civ_ids": [
+            "mac"
+          ],
+          "display_classes": [
+            "Age II - Military Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-031",
+      "name": "Tower of Victory",
+      "type_category": "Age II Military Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "support_only"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "tower-of-victory-1",
+          "civ_ids": [
+            "de"
+          ],
+          "display_classes": [
+            "Age II - Military Landmark"
+          ]
+        },
+        {
+          "id": "tower-of-victory-1",
+          "civ_ids": [
+            "tug"
+          ],
+          "display_classes": [
+            "Age II - Military Landmark"
+          ]
+        }
+      ],
+      "training_support_or_exclusion": "training_support` only: source unit-production aura; no direct training and no static defense. The source attack-speed value is not imported.",
+      "disposition": "support_only_no_direct_training_or_static_defense"
+    },
+    {
+      "id": "AOE-C-032",
+      "name": "School of Cavalry",
+      "type_category": "Age II Military Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "fighter+ranger"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "school-of-cavalry-1",
+          "civ_ids": [
+            "fr"
+          ],
+          "display_classes": [
+            "Age II - Military Landmark"
+          ]
+        },
+        {
+          "id": "school-of-cavalry-1",
+          "civ_ids": [
+            "je"
+          ],
+          "display_classes": [
+            "Age II - Military Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-033",
+      "name": "Koka Township",
+      "type_category": "Age II Military Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "fighter"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "koka-township-1",
+          "civ_ids": [
+            "ja"
+          ],
+          "display_classes": [
+            "Age II - Military Landmark"
+          ]
+        },
+        {
+          "id": "koka-township-1",
+          "civ_ids": [
+            "sen"
+          ],
+          "display_classes": [
+            "Age II - Military Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-034",
+      "name": "Council Hall",
+      "type_category": "Age II Military Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "ranger"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "council-hall-1",
+          "civ_ids": [
+            "en"
+          ],
+          "display_classes": [
+            "Age II - Military Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-035",
+      "name": "Lancaster Castle",
+      "type_category": "Age II Military Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`",
+      "source_variants": [
+        {
+          "id": "lancaster-castle-1",
+          "civ_ids": [
+            "hl"
+          ],
+          "display_classes": [
+            "Age II - Military Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-036",
+      "name": "Great Pasture",
+      "type_category": "Age II Military Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "fighter+ranger"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "great-pasture-1",
+          "civ_ids": [
+            "jin"
+          ],
+          "display_classes": [
+            "Age II - Military Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-037",
+      "name": "Jiangnan Tower",
+      "type_category": "Age II Military Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": true,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "excluded_from_catalog_scope"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "jiangnan-tower-1",
+          "civ_ids": [
+            "zx"
+          ],
+          "display_classes": [
+            "Age II - Military Landmark"
+          ]
+        }
+      ],
+      "training_support_or_exclusion": "Exclude: source free-army progression generates mixed unit templates rather than approved individual campaign characters.",
+      "disposition": "excluded_from_core_training_and_static_defense_scope"
+    },
+    {
+      "id": "AOE-C-038",
+      "name": "Golden Horn Tower",
+      "type_category": "Age III Military Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training",
+        "static_defense"
+      ],
+      "training_class_roles": [
+        "ranger",
+        "fighter+ranger"
+      ],
+      "defense_disposition": "Split: `mac` → `static_defense`",
+      "source_variants": [
+        {
+          "id": "golden-horn-tower-2",
+          "civ_ids": [
+            "by"
+          ],
+          "display_classes": [
+            "Age III - Military Landmark"
+          ]
+        },
+        {
+          "id": "golden-horn-tower-2",
+          "civ_ids": [
+            "mac"
+          ],
+          "display_classes": [
+            "Age III - Military Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-039",
+      "name": "Burgrave Palace",
+      "type_category": "Age III Military Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "fighter"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "burgrave-palace-2",
+          "civ_ids": [
+            "hr"
+          ],
+          "display_classes": [
+            "Age III - Military Landmark"
+          ]
+        },
+        {
+          "id": "burgrave-palace-2",
+          "civ_ids": [
+            "od"
+          ],
+          "display_classes": [
+            "Age III - Military Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-040",
+      "name": "Astronomical Clocktower",
+      "type_category": "Age III Military Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": true,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "excluded_from_catalog_scope"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "astronomical-clocktower-2",
+          "civ_ids": [
+            "ch"
+          ],
+          "display_classes": [
+            "Age III - Military Landmark"
+          ]
+        }
+      ],
+      "training_support_or_exclusion": "Exclude: siege-only production; no approved campaign class target.",
+      "disposition": "excluded_from_core_training_and_static_defense_scope"
+    },
+    {
+      "id": "AOE-C-041",
+      "name": "Farimba Garrison",
+      "type_category": "Age III Military Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "fighter+ranger"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "farimba-garrison-2",
+          "civ_ids": [
+            "ma"
+          ],
+          "display_classes": [
+            "Age III - Military Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-042",
+      "name": "Kurultai",
+      "type_category": "Age III Military Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "support_only"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "kurultai-2",
+          "civ_ids": [
+            "mo"
+          ],
+          "display_classes": [
+            "Age III - Military Landmark"
+          ]
+        }
+      ],
+      "training_support_or_exclusion": "training_support` only: heals/buffs nearby units; no class training or static defense. Numeric aura values are not imported.",
+      "disposition": "support_only_no_direct_training_or_static_defense"
+    },
+    {
+      "id": "AOE-C-043",
+      "name": "Istanbul Imperial Palace",
+      "type_category": "Age III Military Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": true,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "excluded_from_catalog_scope"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "istanbul-imperial-palace-2",
+          "civ_ids": [
+            "ot"
+          ],
+          "display_classes": [
+            "Age III - Military Landmark"
+          ]
+        }
+      ],
+      "training_support_or_exclusion": "Exclude: Imperial Council/Vizier progression, not eligible unit training or static defense.",
+      "disposition": "excluded_from_core_training_and_static_defense_scope"
+    },
+    {
+      "id": "AOE-C-044",
+      "name": "Mehmed Imperial Armory",
+      "type_category": "Age III Military Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": true,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "excluded_from_catalog_scope"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "mehmed-imperial-armory-2",
+          "civ_ids": [
+            "ot"
+          ],
+          "display_classes": [
+            "Age III - Military Landmark"
+          ]
+        }
+      ],
+      "training_support_or_exclusion": "Exclude: siege-only production.",
+      "disposition": "excluded_from_core_training_and_static_defense_scope"
+    },
+    {
+      "id": "AOE-C-045",
+      "name": "Foreign Engineering Company",
+      "type_category": "Age IV Military Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": true,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "excluded_from_catalog_scope"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "foreign-engineering-company-3",
+          "civ_ids": [
+            "by"
+          ],
+          "display_classes": [
+            "Age IV - Military Landmark"
+          ]
+        },
+        {
+          "id": "foreign-engineering-company-3",
+          "civ_ids": [
+            "mac"
+          ],
+          "display_classes": [
+            "Age IV - Military Landmark"
+          ]
+        }
+      ],
+      "training_support_or_exclusion": "Exclude: siege-only production and source currencies; no eligible class target.",
+      "disposition": "excluded_from_core_training_and_static_defense_scope"
+    },
+    {
+      "id": "AOE-C-046",
+      "name": "Palatine School",
+      "type_category": "Age IV Military Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "fighter"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "palatine-school-3",
+          "civ_ids": [
+            "by"
+          ],
+          "display_classes": [
+            "Age IV - Military Landmark"
+          ]
+        },
+        {
+          "id": "palatine-school-3",
+          "civ_ids": [
+            "mac"
+          ],
+          "display_classes": [
+            "Age IV - Military Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-047",
+      "name": "Palace of the Sultan",
+      "type_category": "Age IV Military Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "fighter"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "palace-of-the-sultan-3",
+          "civ_ids": [
+            "de"
+          ],
+          "display_classes": [
+            "Age IV - Military Landmark"
+          ]
+        },
+        {
+          "id": "palace-of-the-sultan-3",
+          "civ_ids": [
+            "tug"
+          ],
+          "display_classes": [
+            "Age IV - Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-048",
+      "name": "Wynguard Palace",
+      "type_category": "Age IV Military Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": true,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "excluded_from_catalog_scope"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "wynguard-palace-3",
+          "civ_ids": [
+            "en"
+          ],
+          "display_classes": [
+            "Age IV - Military Landmark"
+          ]
+        },
+        {
+          "id": "wynguard-palace-3",
+          "civ_ids": [
+            "hl"
+          ],
+          "display_classes": [
+            "Age IV - Military Landmark"
+          ]
+        }
+      ],
+      "training_support_or_exclusion": "Exclude: produces bundled battalion templates, not individual human-class characters; source battalions are not imported.",
+      "disposition": "excluded_from_core_training_and_static_defense_scope"
+    },
+    {
+      "id": "AOE-C-049",
+      "name": "College of Artillery",
+      "type_category": "Age IV Military Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": true,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "excluded_from_catalog_scope"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "college-of-artillery-3",
+          "civ_ids": [
+            "fr"
+          ],
+          "display_classes": [
+            "Age IV - Military Landmark"
+          ]
+        },
+        {
+          "id": "college-of-artillery-3",
+          "civ_ids": [
+            "je"
+          ],
+          "display_classes": [
+            "Age IV - Military Landmark"
+          ]
+        }
+      ],
+      "training_support_or_exclusion": "Exclude: artillery/siege production and technology; no approved campaign class target.",
+      "disposition": "excluded_from_core_training_and_static_defense_scope"
+    },
+    {
+      "id": "AOE-C-050",
+      "name": "Tanegashima Gunsmith",
+      "type_category": "Age IV Military Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "ranger"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "tanegashima-gunsmith-3",
+          "civ_ids": [
+            "ja"
+          ],
+          "display_classes": [
+            "Age IV - Military Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-051",
+      "name": "Khaganate Palace",
+      "type_category": "Age IV Military Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "cleric+fighter+ranger"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "khaganate-palace-3",
+          "civ_ids": [
+            "mo"
+          ],
+          "display_classes": [
+            "Age IV - Military Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-052",
+      "name": "Sword Hunt Statue",
+      "type_category": "Age IV Military Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": true,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "excluded_from_catalog_scope"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "sword-hunt-statue-3",
+          "civ_ids": [
+            "sen"
+          ],
+          "display_classes": [
+            "Age IV - Military Landmark"
+          ]
+        }
+      ],
+      "training_support_or_exclusion": "Exclude from training: source Daimyo/levy discounts and buffs do not map to an approved class action.",
+      "disposition": "excluded_from_core_training_and_static_defense_scope"
+    },
+    {
+      "id": "AOE-C-053",
+      "name": "Spirit Way",
+      "type_category": "Age IV Military & Technology Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": true,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "excluded_from_catalog_scope"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "spirit-way-3",
+          "civ_ids": [
+            "ch"
+          ],
+          "display_classes": [
+            "Age IV - Military & Technology Landmark"
+          ]
+        }
+      ],
+      "training_support_or_exclusion": "Exclude: technology and triggered source-combat effects, not eligible training or static defense.",
+      "disposition": "excluded_from_core_training_and_static_defense_scope"
+    },
+    {
+      "id": "AOE-C-054",
+      "name": "Great Wall Bastion",
+      "type_category": "Age IV Military & Technology Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`",
+      "source_variants": [
+        {
+          "id": "great-wall-bastion-3",
+          "civ_ids": [
+            "jin"
+          ],
+          "display_classes": [
+            "Age IV - Military & Technology Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-055",
+      "name": "Zhu Xi's Library",
+      "type_category": "Age IV Military & Technology Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": true,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "excluded_from_catalog_scope"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "zhu-xis-library-3",
+          "civ_ids": [
+            "zx"
+          ],
+          "display_classes": [
+            "Age IV - Military & Technology Landmark"
+          ]
+        }
+      ],
+      "training_support_or_exclusion": "Exclude: source technology unlocks are not direct campaign class training.",
+      "disposition": "excluded_from_core_training_and_static_defense_scope"
+    },
+    {
+      "id": "AOE-C-056",
+      "name": "Barbican of the Sun",
+      "type_category": "Age II Defensive Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`",
+      "source_variants": [
+        {
+          "id": "barbican-of-the-sun-1",
+          "civ_ids": [
+            "ch"
+          ],
+          "display_classes": [
+            "Age II - Defensive Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-057",
+      "name": "Saharan Trade Network",
+      "type_category": "Age II Defensive Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`",
+      "source_variants": [
+        {
+          "id": "saharan-trade-network-1",
+          "civ_ids": [
+            "ma"
+          ],
+          "display_classes": [
+            "Age II - Defensive Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-058",
+      "name": "Kremlin",
+      "type_category": "Age II Defensive Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`.",
+      "source_variants": [
+        {
+          "id": "kremlin-1",
+          "civ_ids": [
+            "ru"
+          ],
+          "display_classes": [
+            "Age II - Defensive Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-059",
+      "name": "Compound of the Defender",
+      "type_category": "Age III Defensive Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "support_only"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "defense_support`",
+      "source_variants": [
+        {
+          "id": "compound-of-the-defender-2",
+          "civ_ids": [
+            "de"
+          ],
+          "display_classes": [
+            "Age III - Defensive Landmark"
+          ]
+        },
+        {
+          "id": "compound-of-the-defender-2",
+          "civ_ids": [
+            "tug"
+          ],
+          "display_classes": [
+            "Age III - Defensive Landmark"
+          ]
+        }
+      ],
+      "disposition": "support_only_no_direct_training_or_static_defense"
+    },
+    {
+      "id": "AOE-C-060",
+      "name": "The White Tower",
+      "type_category": "Age III Defensive Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training",
+        "static_defense"
+      ],
+      "training_class_roles": [
+        "fighter+ranger"
+      ],
+      "defense_disposition": "static_defense` for the defensive building behavior",
+      "source_variants": [
+        {
+          "id": "the-white-tower-2",
+          "civ_ids": [
+            "en"
+          ],
+          "display_classes": [
+            "Age III - Defensive Landmark"
+          ]
+        },
+        {
+          "id": "the-white-tower-2",
+          "civ_ids": [
+            "hl"
+          ],
+          "display_classes": [
+            "Age III - Defensive Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-061",
+      "name": "Berkshire Palace",
+      "type_category": "Age IV Defensive Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training",
+        "static_defense"
+      ],
+      "training_class_roles": [
+        "fighter+ranger"
+      ],
+      "defense_disposition": "static_defense`",
+      "source_variants": [
+        {
+          "id": "berkshire-palace-3",
+          "civ_ids": [
+            "en"
+          ],
+          "display_classes": [
+            "Age IV - Defensive Landmark"
+          ]
+        },
+        {
+          "id": "berkshire-palace-3",
+          "civ_ids": [
+            "hl"
+          ],
+          "display_classes": [
+            "Age IV - Defensive Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-062",
+      "name": "Red Palace",
+      "type_category": "Age IV Defensive Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`",
+      "source_variants": [
+        {
+          "id": "red-palace-3",
+          "civ_ids": [
+            "fr"
+          ],
+          "display_classes": [
+            "Age IV - Defensive Landmark"
+          ]
+        },
+        {
+          "id": "red-palace-3",
+          "civ_ids": [
+            "je"
+          ],
+          "display_classes": [
+            "Age IV - Defensive Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-063",
+      "name": "Elzbach Palace",
+      "type_category": "Age IV Defensive Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`",
+      "source_variants": [
+        {
+          "id": "elzbach-palace-3",
+          "civ_ids": [
+            "hr"
+          ],
+          "display_classes": [
+            "Age IV - Defensive Landmark"
+          ]
+        },
+        {
+          "id": "elzbach-palace-3",
+          "civ_ids": [
+            "od"
+          ],
+          "display_classes": [
+            "Age IV - Defensive Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-064",
+      "name": "Castle of the Crow",
+      "type_category": "Age IV Defensive Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`",
+      "source_variants": [
+        {
+          "id": "castle-of-the-crow-3",
+          "civ_ids": [
+            "ja"
+          ],
+          "display_classes": [
+            "Age IV - Defensive Landmark"
+          ]
+        },
+        {
+          "id": "castle-of-the-crow-3",
+          "civ_ids": [
+            "sen"
+          ],
+          "display_classes": [
+            "Age IV - Defensive Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-065",
+      "name": "Great Wall Gatehouse",
+      "type_category": "Age IV Defensive Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`",
+      "source_variants": [
+        {
+          "id": "great-wall-gatehouse-3",
+          "civ_ids": [
+            "ch"
+          ],
+          "display_classes": [
+            "Age IV - Defensive Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-066",
+      "name": "Fort of the Huntress",
+      "type_category": "Age IV Defensive Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`",
+      "source_variants": [
+        {
+          "id": "fort-of-the-huntress-3",
+          "civ_ids": [
+            "ma"
+          ],
+          "display_classes": [
+            "Age IV - Defensive Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-067",
+      "name": "Sea Gate Castle",
+      "type_category": "Age IV Defensive Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`.",
+      "source_variants": [
+        {
+          "id": "sea-gate-castle-3",
+          "civ_ids": [
+            "ot"
+          ],
+          "display_classes": [
+            "Age IV - Defensive Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-068",
+      "name": "Spasskaya Tower",
+      "type_category": "Age IV Defensive Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`.",
+      "source_variants": [
+        {
+          "id": "spasskaya-tower-3",
+          "civ_ids": [
+            "ru"
+          ],
+          "display_classes": [
+            "Age IV - Defensive Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-069",
+      "name": "Fortress",
+      "type_category": "Defensive Landmark",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "static_defense"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "static_defense`",
+      "source_variants": [
+        {
+          "id": "fortress-2",
+          "civ_ids": [
+            "kt"
+          ],
+          "display_classes": [
+            "Defensive Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-070",
+      "name": "Abbey of Kings",
+      "type_category": "2",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "fighter"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "abbey-of-kings-1",
+          "civ_ids": [
+            "en"
+          ],
+          "display_classes": [
+            "Age II - Religious Landmark"
+          ]
+        },
+        {
+          "id": "abbey-of-kings-1",
+          "civ_ids": [
+            "hl"
+          ],
+          "display_classes": [
+            "Age II - Religious Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-071",
+      "name": "Abbey of the Trinity",
+      "type_category": "1",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "cleric"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "abbey-of-the-trinity-2",
+          "civ_ids": [
+            "ru"
+          ],
+          "display_classes": [
+            "Age III - Religious Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-072",
+      "name": "Buddhist Temple",
+      "type_category": "2",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "cleric"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "buddhist-temple-3",
+          "civ_ids": [
+            "ja"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        },
+        {
+          "id": "buddhist-temple-3",
+          "civ_ids": [
+            "sen"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-073",
+      "name": "Capital Town Center",
+      "type_category": "23",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training",
+        "static_defense"
+      ],
+      "training_class_roles": [
+        "ranger",
+        "cleric+ranger"
+      ],
+      "defense_disposition": "defense_support`",
+      "source_variants": [
+        {
+          "id": "capital-town-center-1",
+          "civ_ids": [
+            "ab"
+          ],
+          "display_classes": [
+            "Economy & Population Building",
+            "Landmark"
+          ]
+        },
+        {
+          "id": "capital-town-center-1",
+          "civ_ids": [
+            "ay"
+          ],
+          "display_classes": [
+            "Economy & Population Building",
+            "Landmark"
+          ]
+        },
+        {
+          "id": "capital-town-center-1",
+          "civ_ids": [
+            "by"
+          ],
+          "display_classes": [
+            "Economy & Population Building",
+            "Landmark"
+          ]
+        },
+        {
+          "id": "capital-town-center-1",
+          "civ_ids": [
+            "ch"
+          ],
+          "display_classes": [
+            "Economy & Population Building",
+            "Landmark"
+          ]
+        },
+        {
+          "id": "capital-town-center-1",
+          "civ_ids": [
+            "de"
+          ],
+          "display_classes": [
+            "Economy & Population Building",
+            "Landmark"
+          ]
+        },
+        {
+          "id": "capital-town-center-1",
+          "civ_ids": [
+            "en"
+          ],
+          "display_classes": [
+            "Economy & Population Building",
+            "Landmark"
+          ]
+        },
+        {
+          "id": "capital-town-center-1",
+          "civ_ids": [
+            "fr"
+          ],
+          "display_classes": [
+            "Economy & Population Building",
+            "Landmark"
+          ]
+        },
+        {
+          "id": "capital-town-center-1",
+          "civ_ids": [
+            "gol"
+          ],
+          "display_classes": [
+            "Economy & Population Building",
+            "Landmark"
+          ]
+        },
+        {
+          "id": "capital-town-center-1",
+          "civ_ids": [
+            "hr"
+          ],
+          "display_classes": [
+            "Economy & Population Building",
+            "Landmark"
+          ]
+        },
+        {
+          "id": "capital-town-center-1",
+          "civ_ids": [
+            "hl"
+          ],
+          "display_classes": [
+            "Economy & Population Building",
+            "Landmark"
+          ]
+        },
+        {
+          "id": "capital-town-center-1",
+          "civ_ids": [
+            "ja"
+          ],
+          "display_classes": [
+            "Economy & Population Building",
+            "Landmark"
+          ]
+        },
+        {
+          "id": "capital-town-center-1",
+          "civ_ids": [
+            "je"
+          ],
+          "display_classes": [
+            "Economy & Population Building",
+            "Landmark"
+          ]
+        },
+        {
+          "id": "capital-town-center-1",
+          "civ_ids": [
+            "jin"
+          ],
+          "display_classes": [
+            "Economy & Population Building",
+            "Landmark"
+          ]
+        },
+        {
+          "id": "capital-town-center-1",
+          "civ_ids": [
+            "kt"
+          ],
+          "display_classes": [
+            "Economy & Population Building",
+            "Landmark"
+          ]
+        },
+        {
+          "id": "capital-town-center-1",
+          "civ_ids": [
+            "mac"
+          ],
+          "display_classes": [
+            "Economy & Population Building",
+            "Landmark"
+          ]
+        },
+        {
+          "id": "capital-town-center-1",
+          "civ_ids": [
+            "ma"
+          ],
+          "display_classes": [
+            "Economy & Population Building",
+            "Landmark"
+          ]
+        },
+        {
+          "id": "capital-town-center-1",
+          "civ_ids": [
+            "mo"
+          ],
+          "display_classes": [
+            "Economy & Population Building",
+            "Landmark"
+          ]
+        },
+        {
+          "id": "capital-town-center-1",
+          "civ_ids": [
+            "od"
+          ],
+          "display_classes": [
+            "Economy & Population Building",
+            "Landmark"
+          ]
+        },
+        {
+          "id": "capital-town-center-1",
+          "civ_ids": [
+            "ot"
+          ],
+          "display_classes": [
+            "Economy & Population Building",
+            "Landmark"
+          ]
+        },
+        {
+          "id": "capital-town-center-1",
+          "civ_ids": [
+            "ru"
+          ],
+          "display_classes": [
+            "Economy & Population Building",
+            "Landmark"
+          ]
+        },
+        {
+          "id": "capital-town-center-1",
+          "civ_ids": [
+            "sen"
+          ],
+          "display_classes": [
+            "Economy & Population Building",
+            "Landmark"
+          ]
+        },
+        {
+          "id": "capital-town-center-1",
+          "civ_ids": [
+            "tug"
+          ],
+          "display_classes": [
+            "Economy & Population Building",
+            "Landmark"
+          ]
+        },
+        {
+          "id": "capital-town-center-1",
+          "civ_ids": [
+            "zx"
+          ],
+          "display_classes": [
+            "Economy & Population Building",
+            "Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-074",
+      "name": "Dome of the Faith",
+      "type_category": "2",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "cleric"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "dome-of-the-faith-1",
+          "civ_ids": [
+            "de"
+          ],
+          "display_classes": [
+            "Age II - Religious Landmark"
+          ]
+        },
+        {
+          "id": "dome-of-the-faith-1",
+          "civ_ids": [
+            "tug"
+          ],
+          "display_classes": [
+            "Age II - Religious Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-075",
+      "name": "Golden Tent",
+      "type_category": "1",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "fighter"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "golden-tent-1",
+          "civ_ids": [
+            "gol"
+          ],
+          "display_classes": [
+            "Age II - Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-076",
+      "name": "Grand Winery",
+      "type_category": "2",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "cleric"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "grand-winery-1",
+          "civ_ids": [
+            "by"
+          ],
+          "display_classes": [
+            "Age II - Economic & Religious Landmark"
+          ]
+        },
+        {
+          "id": "grand-winery-1",
+          "civ_ids": [
+            "mac"
+          ],
+          "display_classes": [
+            "Age II - Economic & Religious Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-077",
+      "name": "Harbor",
+      "type_category": "1",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": true,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "excluded_from_catalog_scope"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "Explicit naval exclusion",
+      "source_variants": [
+        {
+          "id": "harbor-1",
+          "civ_ids": [
+            "kt"
+          ],
+          "display_classes": [
+            "Military & Economy Building",
+            "Trade Site"
+          ]
+        }
+      ],
+      "training_support_or_exclusion": "Explicit naval exclusion; ships/naval weapons do not enter city training or defense.",
+      "disposition": "excluded_from_core_training_and_static_defense_scope"
+    },
+    {
+      "id": "AOE-C-078",
+      "name": "House",
+      "type_category": "19",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "support_only"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "defense_support`",
+      "source_variants": [
+        {
+          "id": "house-1",
+          "civ_ids": [
+            "ab"
+          ],
+          "display_classes": [
+            "Population Building"
+          ]
+        },
+        {
+          "id": "house-1",
+          "civ_ids": [
+            "ay"
+          ],
+          "display_classes": [
+            "Population Building"
+          ]
+        },
+        {
+          "id": "house-1",
+          "civ_ids": [
+            "by"
+          ],
+          "display_classes": [
+            "Population Building"
+          ]
+        },
+        {
+          "id": "house-1",
+          "civ_ids": [
+            "ch"
+          ],
+          "display_classes": [
+            "Population Building"
+          ]
+        },
+        {
+          "id": "house-1",
+          "civ_ids": [
+            "de"
+          ],
+          "display_classes": [
+            "Population Building"
+          ]
+        },
+        {
+          "id": "house-1",
+          "civ_ids": [
+            "en"
+          ],
+          "display_classes": [
+            "Population Building"
+          ]
+        },
+        {
+          "id": "house-1",
+          "civ_ids": [
+            "fr"
+          ],
+          "display_classes": [
+            "Population Building"
+          ]
+        },
+        {
+          "id": "house-1",
+          "civ_ids": [
+            "hr"
+          ],
+          "display_classes": [
+            "Population Building"
+          ]
+        },
+        {
+          "id": "house-1",
+          "civ_ids": [
+            "hl"
+          ],
+          "display_classes": [
+            "Population Building"
+          ]
+        },
+        {
+          "id": "house-1",
+          "civ_ids": [
+            "je"
+          ],
+          "display_classes": [
+            "Population Building"
+          ]
+        },
+        {
+          "id": "house-1",
+          "civ_ids": [
+            "jin"
+          ],
+          "display_classes": [
+            "Population Building"
+          ]
+        },
+        {
+          "id": "house-1",
+          "civ_ids": [
+            "kt"
+          ],
+          "display_classes": [
+            "Population Building"
+          ]
+        },
+        {
+          "id": "house-1",
+          "civ_ids": [
+            "mac"
+          ],
+          "display_classes": [
+            "Population Building"
+          ]
+        },
+        {
+          "id": "house-1",
+          "civ_ids": [
+            "ma"
+          ],
+          "display_classes": [
+            "Population Building"
+          ]
+        },
+        {
+          "id": "house-1",
+          "civ_ids": [
+            "od"
+          ],
+          "display_classes": [
+            "Population Building"
+          ]
+        },
+        {
+          "id": "house-1",
+          "civ_ids": [
+            "ot"
+          ],
+          "display_classes": [
+            "Population Building"
+          ]
+        },
+        {
+          "id": "house-1",
+          "civ_ids": [
+            "ru"
+          ],
+          "display_classes": [
+            "Population Building"
+          ]
+        },
+        {
+          "id": "house-1",
+          "civ_ids": [
+            "tug"
+          ],
+          "display_classes": [
+            "Population Building"
+          ]
+        },
+        {
+          "id": "house-1",
+          "civ_ids": [
+            "zx"
+          ],
+          "display_classes": [
+            "Population Building"
+          ]
+        }
+      ],
+      "training_support_or_exclusion": "defense_support` only: garrison-dependent source weapon profile; not a standalone defensive structure.",
+      "disposition": "support_only_no_direct_training_or_static_defense"
+    },
+    {
+      "id": "AOE-C-079",
+      "name": "Hunting Cabin",
+      "type_category": "1",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "ranger"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "hunting-cabin-1",
+          "civ_ids": [
+            "ru"
+          ],
+          "display_classes": [
+            "Economy Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-080",
+      "name": "King's Palace",
+      "type_category": "1",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "ranger"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "kings-palace-2",
+          "civ_ids": [
+            "en"
+          ],
+          "display_classes": [
+            "Age III - Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-081",
+      "name": "Manor",
+      "type_category": "1",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "support_only"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "defense_support`",
+      "source_variants": [
+        {
+          "id": "manor-2",
+          "civ_ids": [
+            "hl"
+          ],
+          "display_classes": [
+            "Population Building"
+          ]
+        }
+      ],
+      "training_support_or_exclusion": "defense_support` only: garrison-dependent source weapon profile; not a standalone defensive structure.",
+      "disposition": "support_only_no_direct_training_or_static_defense"
+    },
+    {
+      "id": "AOE-C-082",
+      "name": "Monastery",
+      "type_category": "13",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "cleric"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "monastery-3",
+          "civ_ids": [
+            "by"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        },
+        {
+          "id": "monastery-3",
+          "civ_ids": [
+            "ch"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        },
+        {
+          "id": "monastery-3",
+          "civ_ids": [
+            "en"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        },
+        {
+          "id": "monastery-3",
+          "civ_ids": [
+            "fr"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        },
+        {
+          "id": "monastery-3",
+          "civ_ids": [
+            "hr"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        },
+        {
+          "id": "monastery-3",
+          "civ_ids": [
+            "hl"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        },
+        {
+          "id": "monastery-3",
+          "civ_ids": [
+            "je"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        },
+        {
+          "id": "monastery-3",
+          "civ_ids": [
+            "jin"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        },
+        {
+          "id": "monastery-3",
+          "civ_ids": [
+            "kt"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        },
+        {
+          "id": "monastery-3",
+          "civ_ids": [
+            "mac"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        },
+        {
+          "id": "monastery-3",
+          "civ_ids": [
+            "od"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        },
+        {
+          "id": "monastery-3",
+          "civ_ids": [
+            "ru"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        },
+        {
+          "id": "monastery-3",
+          "civ_ids": [
+            "zx"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-083",
+      "name": "Mosque",
+      "type_category": "6",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "cleric"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "mosque-3",
+          "civ_ids": [
+            "ab"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        },
+        {
+          "id": "mosque-3",
+          "civ_ids": [
+            "ay"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        },
+        {
+          "id": "mosque-1",
+          "civ_ids": [
+            "de"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        },
+        {
+          "id": "mosque-3",
+          "civ_ids": [
+            "ma"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        },
+        {
+          "id": "mosque-3",
+          "civ_ids": [
+            "ot"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        },
+        {
+          "id": "mosque-3",
+          "civ_ids": [
+            "tug"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-084",
+      "name": "Mountain Hall",
+      "type_category": "1",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "cleric"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "mountain-hall-2",
+          "civ_ids": [
+            "jin"
+          ],
+          "display_classes": [
+            "Age III - Religious Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-085",
+      "name": "Pagoda",
+      "type_category": "2",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "cleric"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "pagoda-1",
+          "civ_ids": [
+            "ch"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        },
+        {
+          "id": "pagoda-1",
+          "civ_ids": [
+            "zx"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-086",
+      "name": "Palace of Swabia",
+      "type_category": "2",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "cleric+ranger"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "palace-of-swabia-3",
+          "civ_ids": [
+            "hr"
+          ],
+          "display_classes": [
+            "Age IV - Landmark"
+          ]
+        },
+        {
+          "id": "palace-of-swabia-3",
+          "civ_ids": [
+            "od"
+          ],
+          "display_classes": [
+            "Age IV - Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-087",
+      "name": "Prayer Tent",
+      "type_category": "2",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "cleric"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "prayer-tent-3",
+          "civ_ids": [
+            "gol"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        },
+        {
+          "id": "prayer-tent-3",
+          "civ_ids": [
+            "mo"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-088",
+      "name": "Regnitz Cathedral",
+      "type_category": "2",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "cleric"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "regnitz-cathedral-2",
+          "civ_ids": [
+            "hr"
+          ],
+          "display_classes": [
+            "Age III - Religious Landmark"
+          ]
+        },
+        {
+          "id": "regnitz-cathedral-2",
+          "civ_ids": [
+            "od"
+          ],
+          "display_classes": [
+            "Age III - Religious Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-089",
+      "name": "Shaolin Monastery",
+      "type_category": "1",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "cleric"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "shaolin-monastery-2",
+          "civ_ids": [
+            "zx"
+          ],
+          "display_classes": [
+            "Age III - Religious Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-090",
+      "name": "Shinto Shrine",
+      "type_category": "1",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "cleric"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "shinto-shrine-3",
+          "civ_ids": [
+            "ja"
+          ],
+          "display_classes": [
+            "Religious Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-091",
+      "name": "Temple of Equality",
+      "type_category": "2",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training"
+      ],
+      "training_class_roles": [
+        "cleric"
+      ],
+      "defense_disposition": null,
+      "source_variants": [
+        {
+          "id": "temple-of-equality-2",
+          "civ_ids": [
+            "ja"
+          ],
+          "display_classes": [
+            "Age III - Religious Landmark"
+          ]
+        },
+        {
+          "id": "temple-of-equality-2",
+          "civ_ids": [
+            "sen"
+          ],
+          "display_classes": [
+            "Age III - Religious Landmark"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-092",
+      "name": "Town Center",
+      "type_category": "23",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "class_training",
+        "static_defense"
+      ],
+      "training_class_roles": [
+        "ranger",
+        "cleric+ranger"
+      ],
+      "defense_disposition": "defense_support`",
+      "source_variants": [
+        {
+          "id": "town-center-1",
+          "civ_ids": [
+            "ab"
+          ],
+          "display_classes": [
+            "Economy & Population Building"
+          ]
+        },
+        {
+          "id": "town-center-1",
+          "civ_ids": [
+            "ay"
+          ],
+          "display_classes": [
+            "Economy & Population Building"
+          ]
+        },
+        {
+          "id": "town-center-1",
+          "civ_ids": [
+            "by"
+          ],
+          "display_classes": [
+            "Economy & Population Building"
+          ]
+        },
+        {
+          "id": "town-center-1",
+          "civ_ids": [
+            "ch"
+          ],
+          "display_classes": [
+            "Economy & Population Building"
+          ]
+        },
+        {
+          "id": "town-center-1",
+          "civ_ids": [
+            "de"
+          ],
+          "display_classes": [
+            "Economy & Population Building"
+          ]
+        },
+        {
+          "id": "town-center-1",
+          "civ_ids": [
+            "en"
+          ],
+          "display_classes": [
+            "Economy & Population Building"
+          ]
+        },
+        {
+          "id": "town-center-1",
+          "civ_ids": [
+            "fr"
+          ],
+          "display_classes": [
+            "Economy & Population Building"
+          ]
+        },
+        {
+          "id": "town-center-1",
+          "civ_ids": [
+            "gol"
+          ],
+          "display_classes": [
+            "Economy & Population Building"
+          ]
+        },
+        {
+          "id": "town-center-1",
+          "civ_ids": [
+            "hr"
+          ],
+          "display_classes": [
+            "Economy & Population Building"
+          ]
+        },
+        {
+          "id": "town-center-1",
+          "civ_ids": [
+            "hl"
+          ],
+          "display_classes": [
+            "Economy & Population Building"
+          ]
+        },
+        {
+          "id": "town-center-1",
+          "civ_ids": [
+            "ja"
+          ],
+          "display_classes": [
+            "Economy & Population Building"
+          ]
+        },
+        {
+          "id": "town-center-1",
+          "civ_ids": [
+            "je"
+          ],
+          "display_classes": [
+            "Economy & Population Building"
+          ]
+        },
+        {
+          "id": "town-center-2",
+          "civ_ids": [
+            "jin"
+          ],
+          "display_classes": [
+            "Economy & Population Building"
+          ]
+        },
+        {
+          "id": "town-center-1",
+          "civ_ids": [
+            "kt"
+          ],
+          "display_classes": [
+            "Economy & Population Building"
+          ]
+        },
+        {
+          "id": "town-center-1",
+          "civ_ids": [
+            "mac"
+          ],
+          "display_classes": [
+            "Economy & Population Building"
+          ]
+        },
+        {
+          "id": "town-center-1",
+          "civ_ids": [
+            "ma"
+          ],
+          "display_classes": [
+            "Economy & Population Building"
+          ]
+        },
+        {
+          "id": "town-center-1",
+          "civ_ids": [
+            "mo"
+          ],
+          "display_classes": [
+            "Economy & Population Building"
+          ]
+        },
+        {
+          "id": "town-center-1",
+          "civ_ids": [
+            "od"
+          ],
+          "display_classes": [
+            "Economy & Population Building"
+          ]
+        },
+        {
+          "id": "town-center-1",
+          "civ_ids": [
+            "ot"
+          ],
+          "display_classes": [
+            "Economy & Population Building"
+          ]
+        },
+        {
+          "id": "town-center-1",
+          "civ_ids": [
+            "ru"
+          ],
+          "display_classes": [
+            "Economy & Population Building"
+          ]
+        },
+        {
+          "id": "town-center-1",
+          "civ_ids": [
+            "sen"
+          ],
+          "display_classes": [
+            "Economy & Population Building"
+          ]
+        },
+        {
+          "id": "town-center-1",
+          "civ_ids": [
+            "tug"
+          ],
+          "display_classes": [
+            "Economy & Population Building"
+          ]
+        },
+        {
+          "id": "town-center-1",
+          "civ_ids": [
+            "zx"
+          ],
+          "display_classes": [
+            "Economy & Population Building"
+          ]
+        }
+      ],
+      "disposition": "source_role_mapped_campaign_adaptation_not_yet_catalogued"
+    },
+    {
+      "id": "AOE-C-093",
+      "name": "Village",
+      "type_category": "2",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": true,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "support_only"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "defense_support`",
+      "source_variants": [
+        {
+          "id": "village-1",
+          "civ_ids": [
+            "ch"
+          ],
+          "display_classes": [
+            "Population Building"
+          ]
+        },
+        {
+          "id": "village-1",
+          "civ_ids": [
+            "zx"
+          ],
+          "display_classes": [
+            "Population Building"
+          ]
+        }
+      ],
+      "training_support_or_exclusion": "defense_support` only: garrison-dependent source weapon profile; not a standalone defensive structure.",
+      "disposition": "support_only_no_direct_training_or_static_defense"
+    },
+    {
+      "id": "AOE-C-094",
+      "name": "Pagoda Forest",
+      "type_category": "1",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": false,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "support_only"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "defense_support` for area-control only",
+      "source_variants": [
+        {
+          "id": "pagoda-forest-3",
+          "civ_ids": [
+            "jin"
+          ],
+          "display_classes": [
+            "Age IV - Economic Landmark"
+          ]
+        }
+      ],
+      "disposition": "support_only_no_direct_training_or_static_defense"
+    },
+    {
+      "id": "AOE-C-095",
+      "name": "Temple of the Sun",
+      "type_category": "1",
+      "is_building": true,
+      "is_decoration": false,
+      "is_event_object": false,
+      "is_excluded": true,
+      "has_variants": false,
+      "variant_of": null,
+      "version": "released scope through 2026-10-04",
+      "source_version": "AOE4 World data commit b2cd38222deae40ba2db18171edf494f81410c69 (2026-05-04); unchanged live SHA checked 2026-10-05",
+      "confidence": "confirmed",
+      "source": [
+        {
+          "id": "AOE4-WORLD-EXPLORER",
+          "url": "https://aoe4world.com/explorer/buildings",
+          "retrieved": "2026-10-04"
+        },
+        {
+          "id": "AOE4-DATA-PIN",
+          "url": "https://github.com/aoe4world/data/blob/b2cd38222deae40ba2db18171edf494f81410c69/buildings/all.json"
+        }
+      ],
+      "campaign_disposition": [
+        "excluded_from_catalog_scope"
+      ],
+      "training_class_roles": [],
+      "defense_disposition": "not_defense`",
+      "source_variants": [
+        {
+          "id": "temple-of-the-sun-3",
+          "civ_ids": [
+            "zx"
+          ],
+          "display_classes": [
+            "Age IV - Active Landmark"
+          ]
+        }
+      ],
+      "disposition": "excluded_from_core_training_and_static_defense_scope"
+    }
+  ],
+  "coverage_gaps": [
+    {
+      "id": "AOE-GAP-001",
+      "subject": "Undiscovered or omitted public Explorer/data rows in released DLC",
+      "status": "unknown",
+      "details": "All 95 discovered producer/defense signals are dispositioned; this is not an exhaustive manifest of every AoE IV building, only the task-defined source signals and candidate scope.",
+      "do_not_infer": true
+    }
+  ]
+}
