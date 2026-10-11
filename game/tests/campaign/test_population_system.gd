@@ -50,7 +50,7 @@ func test_lifespan_60_plus_luck() -> void:
 	var extra := 2.0 * p.lifespan_luck_years_per_point
 	p.residents = [
 		_resident(1, p.lifespan_base_years + 0.4, 0),  # lifespan = base → смерть
-		_resident(2, p.lifespan_base_years + extra - 0.1, 2),  # lifespan = base+2·luck → жив
+		_resident(2, p.lifespan_base_years + extra - 0.5, 2),  # lifespan = base+2·luck → жив (запас > старения 0.25/ход)
 	]
 	p.next_uid = 100
 	var rep := p.process_turn(20, 0.0, -1)
@@ -189,7 +189,7 @@ func test_age_and_migration_numbers_live_in_config() -> void:
 	var cfg: Dictionary = JSON.parse_string(f.get_as_text())
 	var age: Dictionary = cfg.get("age_model", {})
 	for key in ["working_min_years", "working_max_years", "mentor_min_years",
-		"lifespan_base_years", "lifespan_luck_years_per_point", "days_per_year"]:
+		"lifespan_base_years", "lifespan_luck_years_per_point"]:
 		assert_bool(age.has(key)).is_true()
 	var mig: Dictionary = cfg.get("migration", {})
 	for key in ["k_mig_per_turn", "rep_neutral"]:
@@ -203,6 +203,17 @@ func test_age_and_migration_numbers_live_in_config() -> void:
 	assert_float(p.lifespan_luck_years_per_point) \
 		.is_equal(float(age["lifespan_luck_years_per_point"]))
 	assert_float(p.k_mig_per_turn).is_equal(float(mig["k_mig_per_turn"]))
+
+
+func test_days_per_year_derived_q_m26() -> void:
+	# Q-M26 (Catch 14-й, раунд 4 §1): дней в году — НЕ независимая константа:
+	# год = 4 хода = 4 × DAYS_PER_SEASON; в конфиге ключа быть не должно.
+	var p := _p()
+	assert_float(p.days_per_year).is_equal(4.0 * float(WorldSeasons.DAYS_PER_SEASON))
+	var f := FileAccess.open(PopulationSystemScript.POPULATION_CONFIG_PATH, FileAccess.READ)
+	var cfg: Dictionary = JSON.parse_string(f.get_as_text())
+	var age: Dictionary = cfg.get("age_model", {})
+	assert_bool(not age.has("days_per_year")).is_true()
 
 
 ## — Сериализация (секция "population" схемы T-110) + детерминизм —

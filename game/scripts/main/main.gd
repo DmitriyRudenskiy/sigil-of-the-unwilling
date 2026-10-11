@@ -2,18 +2,15 @@ extends Node
 const GameLogger := preload("res://scripts/core/game_logger.gd")
 
 ## Главная сцена игры - координирует менеджеры и игровой цикл.
-## T-010 пост-условие (12-я итерация): campaign-слой (TurnDriver +
-## SettlementProcessor + ThreatSystem) — composition root; каждый тик дня =
-## 1 ход кампании. I1: seed = seed кампании (CAMPAIGN_SEED).
+## T-010 пост-условие (12-я итерация): campaign-слой — composition root
+## (CampaignComposition, 14-я раунд 4: та же проводка у main.gd и у
+## cutover-композита D-157); каждый тик дня = 1 ход кампании.
+## I1: seed = seed кампании (CAMPAIGN_SEED).
 
 @export var day_duration: float = 3.0
 
 const CAMPAIGN_SEED: int = 12345  # I1: seed = seed кампании
-var campaign: TurnDriver
-var settlement: SettlementProcessor
-var threats: ThreatSystem
-var population_system: PopulationSystem  # T-116: реестр жителей — эмитент uid
-var last_battle_report: Dictionary = {}
+var composition: CampaignComposition
 var _day_timer: float = 0.0
 var _is_day_cycle_active: bool = true
 
@@ -28,105 +25,11 @@ func _ready():
 	GameLogger.info("Игра запущена. День: %d" % game_manager.get_current_day(), "Main")
 
 
-## T-010 пост-условие: campaign-слой. Т001: старт (еда 30, дерево 20, железо 10,
-## население 20); housing 20 (T-030, Q-M28); здания — 7 групп (02e3 §9.4).
+## T-010 пост-условие: campaign-слой. Проводка систем, шов T-050, ledger
+## Престижа, сборка сейва T-110 и победная оценка — в CampaignComposition
+## (единый корень: раннер D-157 проверяет ту же игру, что видит игрок).
 func _init_campaign() -> void:
-	WorldSeasons.reset()
-	campaign = TurnDriver.new()
-	campaign.seed = CAMPAIGN_SEED
-	settlement = SettlementProcessor.new()
-	# T-117: стартовое состояние — сценарий campaign.json (R2), не хардкод.
-	var scenario := _load_campaign_json()
-	var start: Dictionary = scenario.get("start_state", {})
-	var res: Dictionary = start.get("resources", {})
-	settlement.stocks = {
-		"food": float(res.get("food", 30)),
-		"wood": float(res.get("wood", 20)),
-		"iron": float(res.get("iron", 10)),
-	}
-	settlement.population = int(start.get("population", 20))
-	settlement.housing = int(start.get("housing", 20))
-	settlement.buildings = [
-		{"id": "farm", "group": "Земледельцы и Пивовары",
-			"output_day": {"food": 1.0}, "efficiency": 1.0},
-		{"id": "sawmill", "group": "Инженеры и Строители",
-			"output_day": {"wood": 0.5}, "efficiency": 1.0},
-		{"id": "mine", "group": "Металлурги и Техники",
-			"output_day": {"iron": 0.25}, "efficiency": 1.0},
-	]
-	threats = ThreatSystem.new(CAMPAIGN_SEED)
-	# T-116: реестр жителей — источник истины населения (R2: старт 20).
-	population_system = PopulationSystem.new()
-	population_system.seed_population(settlement.population)
-	campaign.settlement_hook = func() -> Dictionary:
-		var rep_report: Dictionary = settlement.process_turn(WorldSeasons.production_mult())
-		# Ростерь — источник истины: возраста/смерти/рождения/миграция (F-3;
-		# Репутация MVP — 0, источник-производная Резонанса — слой за тикетом).
-		var pop_report: Dictionary = population_system.process_turn(
-			WorldSeasons.DAYS_PER_SEASON, 0.0,
-			int(rep_report.get("population_cap", -1)))
-		settlement.population = population_system.size()
-		rep_report["population"] = pop_report
-		return rep_report
-	campaign.threats_hook = func() -> Dictionary:
-		return threats.process_turn(campaign.current_turn, _threat_context())
-
-
-func _threat_context() -> Dictionary:
-	return {
-		"stocks": settlement.stocks,  # ссылка: урон рейда — в стопки поселения
-		"has_barracks": false,  # MVP: казармы нет (T-030-слой)
-		"hero_in_city": true,  # фаза игрока решает (MVP: герой в городе)
-		"battle_handler": _request_battle,
-	}
-
-
-## Шов T-050 (акт 12-й итерации §2.2): бой K-канона — единичные комбатанты,
-## лестница 02d, без RNG. Статблоки — баланс-конфиг (K-M15, числа — T-041).
-## battle_report обязателен к {losses: [character_uid]} и эмитится в хук
-## населения с дня первого боя (потребитель зреет до T-116).
-func _request_battle(context: Dictionary) -> void:
-	if campaign == null or campaign.is_done():
-		return
-	campaign.request_battle(context)
-	var blocks := _load_statblocks()
-	if blocks.is_empty():
-		return  # статблоков нет (баланс-конфиг) — бой не разрешается
-	var tier: int = int(context.get("tier", 1))
-	var hero := CampaignBattle.make_recruit(
-		blocks.get("warrior", {}), population_system.conscript())
-	var raider := CampaignBattle.make_combatant(
-		blocks.get("raider_tier_%d" % tier, blocks.get("raider_final", {})))
-	raider["id"] = "raider_t%d" % tier
-	raider["character_uid"] = -1  # рейдер — не житель (потерь населению нет)
-	last_battle_report = CampaignBattle.resolve(hero, raider, _on_battle_losses)
-	GameLogger.info("бой: %s за %d раунд(ов), потери %s"
-		% [last_battle_report.get("outcome", "?"),
-			last_battle_report.get("rounds", 0),
-			str(last_battle_report.get("losses", []))], "Main")
-
-
-## Хук населения (§2.2): потребитель шва T-050 — потери боя списывают
-## конкретных жителей по character_uid (раненые — не потери); скаляр
-## settlement синхронизируется с ростерью (источник истины — T-116).
-func _on_battle_losses(losses: Array, _report: Dictionary) -> void:
-	if losses.is_empty():
-		return
-	population_system.apply_battle_losses(losses)
-	settlement.population = population_system.size()
-
-
-func _load_statblocks() -> Dictionary:
-	return _load_campaign_json().get("unit_statblocks", {})
-
-
-## T-117: campaign.json — сценарий 21 хода (start_state/beats/scenario).
-func _load_campaign_json() -> Dictionary:
-	var f := FileAccess.open("res://data/config/balance/campaign.json", FileAccess.READ)
-	if f == null:
-		return {}
-	var data: Variant = JSON.parse_string(f.get_as_text())
-	return data if typeof(data) == TYPE_DICTIONARY else {}
+	composition = CampaignComposition.from_campaign_config(CAMPAIGN_SEED)
 
 
 func _connect_ui():
@@ -147,12 +50,9 @@ func _process(delta: float):
 
 func _advance_day():
 	# Ход кампании (T-010): settlement (авто) → player → threats (авто).
-	# I1: сезон синхронизирован с ходом драйвера — до settlement-хука.
-	if campaign != null and not campaign.is_done():
-		WorldSeasons.set_turns(campaign.current_turn)
-		campaign.advance_auto_phase()  # settlement (авто) → player
-		campaign.end_player_phase()    # player → threats (MVP: авто)
-		campaign.advance_auto_phase()  # threats (авто) → finish
+	# I1: сезон синхронизирован с ходом драйвера — внутри advance_turn().
+	if composition != null:
+		composition.advance_turn()
 	if game_manager:
 		game_manager.on_day_passed()
 	if day_label:
