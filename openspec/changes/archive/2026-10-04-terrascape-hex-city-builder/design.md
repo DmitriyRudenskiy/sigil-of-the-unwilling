@@ -1,5 +1,7 @@
 # Design: TerraScape hex city-builder
 
+> **Статус: SUPERSEDED (2026-10-04).** Этот дизайн отдельного режима не реализуется; актуальная граница интеграции — `campaign-city-building-economy`.
+
 ## Context
 
 Godot 4.7 проект «Sigil of the Unwilling». Режим TerraScape — новая

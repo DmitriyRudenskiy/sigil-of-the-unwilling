@@ -3,6 +3,7 @@ extends RefCounted
 
 const LeadershipCheck = preload("res://scripts/systems/leadership_check.gd")
 const WeaponTechService = preload("res://scripts/systems/weapon_tech_service.gd")
+const CampaignDefenseResolver = preload("res://scripts/city/campaign_defense_resolver.gd")
 
 # social-stats-weapon-tech: управляемый rng для проверок найма
 static var _rng := RandomNumberGenerator.new()
@@ -266,7 +267,7 @@ static func defense_strength(city: City) -> int:
 		if building != null and building.def != null and building.def.id == &"walls":
 			d += building.level * GameNumbers.RAID_DEF_PER_WALL
 	d += SpecializationSystem.defense_bonus(city)
-	return d
+	return d + CampaignDefenseResolver.strength(city.campaign_buildings)
 
 static func request_switch(
 	city: City,

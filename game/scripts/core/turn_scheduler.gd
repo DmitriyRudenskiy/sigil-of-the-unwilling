@@ -34,13 +34,18 @@ func execute_turn(ctx: TurnContext) -> Dictionary:
 	GameLogger.world("[Turn %d] %s: старт (%d фаз)" % [_turn, ctx.get_date_label(), _processors.size()])
 	turn_started.emit(_turn)
 
-	var report := {"turn": _turn, "phases": {}}
+	var report := {"turn": _turn, "economy_mode": "campaign" if ctx.is_campaign else "legacy", "phases": {}}
 	for proc in _processors:
 		var phase_id: StringName = proc.get_phase_id()
 		var result: Dictionary = proc.process(ctx)
 		(report["phases"] as Dictionary)[phase_id] = result
 		phase_completed.emit(phase_id, result)
 
+	var ledgers: Array[Dictionary] = []
+	for city in ctx.cities:
+		if city != null and city.resource_ctx != null:
+			ledgers.append({"city_uid": city.uid, "flows": city.resource_ctx.get_ledger()})
+	report["ledger"] = ledgers
 	turn_completed.emit(_turn, report)
 	return report
 

@@ -17,6 +17,20 @@ func reset() -> void:
 func get_icon(id: StringName) -> Texture2D:
 	return ThemeConfig.icon_texture(ThemeConfig.ICON_DIR_RESOURCES + str(id) + ".png")
 
+const CAMPAIGN_LAYER_1_IDS: Array[StringName] = [
+	&"wood", &"iron", &"food", &"mercury", &"sulfur", &"crystals",
+]
+const CAMPAIGN_LAYER_2_IDS: Array[StringName] = [
+	&"tools", &"fabrics", &"potions", &"provisions", &"weapons",
+]
+const CAMPAIGN_MVP_IDS: Array[StringName] = [&"food", &"wood", &"iron"]
+const _CAMPAIGN_DISPLAY_NAMES := {
+	&"wood": "Дерево", &"iron": "Железо", &"food": "Еда",
+	&"mercury": "Ртуть", &"sulfur": "Сера", &"crystals": "Кристаллы",
+	&"tools": "Инструменты", &"fabrics": "Ткани", &"potions": "Зелья",
+	&"provisions": "Провиант", &"weapons": "Оружие",
+}
+
 const CITY_RESOURCE_CAPACITIES: Dictionary = {
 	&"grain": 20.0,
 	&"flour": 20.0,
@@ -139,6 +153,22 @@ func _add(id: StringName, name_: String, biomes: Array[String], rarity: int,
 	def.weight_per_unit = weight
 	def.icon = icon
 	_resources[id] = def
+
+func get_campaign_resource_defs(mvp_only: bool = false) -> Array[ResourceDef]:
+	var ids: Array[StringName] = CAMPAIGN_MVP_IDS if mvp_only else CAMPAIGN_LAYER_1_IDS + CAMPAIGN_LAYER_2_IDS
+	var defs: Array[ResourceDef] = []
+	for id in ids:
+		var def := ResourceDef.new()
+		def.id = id
+		def.display_name = String(_CAMPAIGN_DISPLAY_NAMES[id])
+		defs.append(def)
+	return defs
+
+func is_campaign_resource(id: StringName) -> bool:
+	return CAMPAIGN_LAYER_1_IDS.has(id) or CAMPAIGN_LAYER_2_IDS.has(id)
+
+func is_mvp_campaign_resource(id: StringName) -> bool:
+	return CAMPAIGN_MVP_IDS.has(id)
 
 func get_resource(id: StringName) -> ResourceDef:
 	ensure_definitions()

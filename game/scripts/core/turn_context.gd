@@ -7,6 +7,7 @@ var week: int = 1
 var day: int = 1
 var season: int = Season.ID.SPRING
 var weather: int = GameNumbers.WEATHER_CLEAR
+var is_campaign := false
 
 var cities: Array[City] = []
 var heroes: Array = []
