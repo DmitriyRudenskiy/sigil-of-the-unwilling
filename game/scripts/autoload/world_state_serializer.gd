@@ -127,7 +127,7 @@ func end_turn(world_ctrl) -> Dictionary:
 func start_game() -> Dictionary:
 	if _root.get_node_or_null("/root/World"):
 		return {"status": "already_started"}
-	var world_scene = load("res://scenes/world.tscn")
+	var world_scene = load("res://scenes/legacy/world.tscn")
 	var world = world_scene.instantiate()
 	_root.get_tree().root.add_child(world)
 	return {"status": "game_started"}

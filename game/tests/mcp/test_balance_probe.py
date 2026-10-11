@@ -71,7 +71,7 @@ def _start_world_with_probe(mcp) -> None:
         mcp.stop_running_scene()
     except MCPError:
         pass
-    mcp.run_scene("res://scenes/world.tscn")
+    mcp.run_scene("res://scenes/legacy/world.tscn")
     mcp.wait_ready()
     _wait_world(mcp)
     mcp.instantiate_scene("res://scenes/probe/balance_probe.tscn", "/root")

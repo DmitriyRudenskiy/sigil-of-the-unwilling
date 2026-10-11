@@ -1,6 +1,6 @@
 extends BaseTest
 
-const WORLD_SCENE: String = "res://scenes/world.tscn"
+const WORLD_SCENE: String = "res://scenes/legacy/world.tscn"
 const MAIN_MENU_SCENE: String = "res://scenes/main_menu.tscn"
 const MAX_SECONDS: float = 4.0
 

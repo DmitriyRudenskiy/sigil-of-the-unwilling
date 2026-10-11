@@ -39,7 +39,7 @@ func test_handlers_registered() -> void:
 
 
 func test_scene_path_whitelist() -> void:
-	assert_bool(McpCommandsSystem._is_allowed_scene_path("res://scenes/world.tscn")).is_true()
+	assert_bool(McpCommandsSystem._is_allowed_scene_path("res://scenes/legacy/world.tscn")).is_true()
 	assert_bool(McpCommandsSystem._is_allowed_scene_path("res://scenes/ui/game_over_screen.tscn")).is_true()
 	assert_bool(McpCommandsSystem._is_allowed_scene_path("res://icon.svg")).is_false()
 	assert_bool(McpCommandsSystem._is_allowed_scene_path("res://evil.gd")).is_false()
