@@ -37,7 +37,10 @@ var working_max_years: float = 60.0
 var mentor_min_years: float = 60.0
 var lifespan_base_years: float = 60.0
 var lifespan_luck_years_per_point: float = 1.0
-var days_per_year: float = 365.25
+## Q-M26 (Catch 14-й, раунд 4 §1): дней в году — НЕ независимая константа.
+## Игровой календарь: год = 4 хода = 4 × DAYS_PER_SEASON = 80 дней;
+## вычисляется из WorldSeasons — единственного источника день-единиц.
+var days_per_year: float = 4.0 * float(WorldSeasons.DAYS_PER_SEASON)
 var m_housing: float = 1.0  # K-M12: MVP — все m = 1
 var m_food: float = 1.0
 var m_mood: float = 1.0
@@ -64,7 +67,7 @@ func _init() -> void:
 	lifespan_base_years = float(age.get("lifespan_base_years", lifespan_base_years))
 	lifespan_luck_years_per_point = float(
 		age.get("lifespan_luck_years_per_point", lifespan_luck_years_per_point))
-	days_per_year = float(age.get("days_per_year", days_per_year))
+	# days_per_year из конфига НЕ читается — Q-M26 (производность от DAYS_PER_SEASON).
 	var bm: Dictionary = cfg.get("birth_multipliers", {})
 	m_housing = float(bm.get("housing", m_housing))
 	m_food = float(bm.get("food", m_food))
