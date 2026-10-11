@@ -1,6 +1,6 @@
 {
-  "version": "1.1",
-  "source": "docs/07-balance.md §6 (R3/C-1, K-M12 2026-10-02, 06-economy); v1.1 (T-116, 2026-10-11): + migration — Репутация (F-3: «appeal» удалён из живого слоя, Д1 §4.2 аннулировано; Э1-3: Престиж никогда не влияет на миграцию); конверсия день↔ход — world_seasons.gd DAYS_PER_SEASON (Q-M26: единственная конверсия)",
+  "version": "1.0",
+  "source": "docs/07-balance.md §6 (R3/C-1, K-M12 2026-10-02, 06-economy)",
   "k_pop_per_day": 0.1,
   "day_to_turn": 1,
   "ticks_per_day": 4,
@@ -10,10 +10,25 @@
   "building_efficiency_clamp": [0.2, 2.5],
   "deficit_production_factor": 0.25,
   "collapse": { "population_loss": 0.10, "note": "Post-MVP (06-economy)" },
+  "age_model": {
+    "note": "T-116 (GDD §3, маппинг D-133): трудоспособные 16–60, наставники 60+, lifespan = 60 + Удача (лет). Дней в году — НЕ конфиг: Q-M26, год = 4 хода = 4 × DAYS_PER_SEASON = 80 дней, вычисляется из WorldSeasons (независимые день-константы запрещены)",
+    "working_min_years": 16,
+    "working_max_years": 60,
+    "mentor_min_years": 60,
+    "lifespan_base_years": 60,
+    "lifespan_luck_years_per_point": 1
+  },
+  "birth_multipliers": {
+    "note": "K-M12: births = k_pop × m(жильё) × m(еда) × m(настроение); MVP — все m = 1",
+    "housing": 1.0,
+    "food": 1.0,
+    "mood": 1.0
+  },
   "migration": {
-    "input": "reputation",
-    "e1_3": "Престиж никогда не влияет на миграцию (Э1-3); «appeal→prestige» как вход миграционной формулы — контрабанда Э1-3, аннулировано (F-3)",
-    "formula": "Q-M32 (TBD, к владельцу): формула MVP-миграции; предложение исполнителя — пороговая: net-мигранты/ход = +1 при Репутации ≥ R_hi, −1 при ≤ R_lo, иначе 0; R_hi/R_lo — в 07-balance (новая строка)",
-    "mvp": "no-op (seam: репутация-вход заведён, Э1-3 — тестом; числа — Q-M32)"
+    "note": "F-3 (T-116): вход — только Репутация (производная Резонанса); Престиж — никогда (Э1-3). net_за_ход = k_mig_per_turn × (reputation − rep_neutral), аккумулятор с переносом (без ГСЧ, I1)",
+    "k_mig_per_turn": 0.25,
+    "rep_neutral": 0.0,
+    "immigrant_age_min_years": 16,
+    "immigrant_age_span_years": 24
   }
 }

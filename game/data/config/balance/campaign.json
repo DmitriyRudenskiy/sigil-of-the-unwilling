@@ -26,12 +26,30 @@
     "final": { "turns": [21, 21], "cr": [6, 8] }
   },
   "beats": {
-    "1": "sign",
-    "3": "rumor (Post-MVP-строка, K-M9)",
-    "7": "raid (floor-директива)",
-    "14": "district (календарный триггер, K-M1)",
-    "17": "strong_raid (window-директива)",
-    "21": "final (floor-директива, босс)"
+    "1": { "chronicle": "Знак выбрал тебя", "carrier": "обучение (07-ui-ux)" },
+    "3": { "chronicle": "первый слух о рейде", "carrier": "слуховой движок", "status": "Post-MVP (K-M9)" },
+    "7": { "directive": "raids.json#directives.first_raid" },
+    "10": { "chronicle": "смерть персонажа (если была)", "carrier": "death saves (02-mechanics §3.2)", "status": "условный (K-M9: вне MVP-каркаса)" },
+    "14": { "directive": "raids.json#directives.district" },
+    "17": { "directive": "raids.json#directives.strong_raid" },
+    "21": { "directive": "raids.json#directives.final_raid" }
+  },
+  "scenario": {
+    "_note": "T-117: сценарий 21 хода (остаток T-112); бит-таблица 04-narrative (каркас K-M9 1/7/14/17/21); биты-угрозы в beats — ссылки на директивы raids.json, числа не дублируются (K-R3; анти-три-источника, T-121). Стартовое состояние — start_state (R2)",
+    "population_composition": {
+      "rule": "первый эшелон 7 рас, по одной на группу (K-M5-правка, T-001); ids — mvp_catalog.json races (first_tier: true) — ссылка, не копия",
+      "first_tier_races": 7,
+      "source": "assets/data/mvp_catalog.json"
+    },
+    "victory": {
+      "anchor": "ход 21 = финальный рейд отражён (raids.json#directives.final_raid, босс K-R3)",
+      "defeat": "финальный рейд хода 21 не отражён",
+      "prestige_anchor": "ход 21 = «Почитаемый» (500–999), верхняя граница — касание «Славного» (1000); шкала — prestige.json ranks (ссылка, T-112 AC)"
+    },
+    "seed_policy": {
+      "rule": "seed = CAMPAIGN_SEED (I1); пути резолюции — без ГСЧ (T-050 AC, CI-1(1))",
+      "carrier": "scripts/main/main.gd::CAMPAIGN_SEED"
+    }
   },
   "unit_statblocks": {
     "_note": "K-M15 (2026-10-02): базовые бойцы {Хиты, КБ, урон, Удача} — SRD-происхождение, provisional: точные числа — T-041 (первый баланс-прогон). attack = итоговая атака (10+бонус) против ac (перевес лестницы 02d). Профишенси = бонус мастерства (порог Долга судьбы, Б.4). Рейдеры — по cr_anchors (ярусы CR).",
