@@ -129,10 +129,10 @@ func test_raid_resolution_power_defense_cap() -> void:
 		{"stocks": stocks3, "has_barracks": false, "hero_in_city": false})
 	assert_float(r3["raid"]["loss"]).is_equal_approx(3.0, 1e-6)
 	assert_that(bool(r3["raid"]["cap_applied"])).is_equal(true)
-	# Power тиров: 15/30/60 (R6).
-	assert_float(ThreatSystem.TIER_POWER[1]).is_equal_approx(15.0, 1e-6)
-	assert_float(ThreatSystem.TIER_POWER[2]).is_equal_approx(30.0, 1e-6)
-	assert_float(ThreatSystem.TIER_POWER[3]).is_equal_approx(60.0, 1e-6)
+	# Power тиров: 15/30/60 (R6; raids.json — источник чисел, T-115).
+	assert_float(ts.tier_power[1]).is_equal_approx(15.0, 1e-6)
+	assert_float(ts.tier_power[2]).is_equal_approx(30.0, 1e-6)
+	assert_float(ts.tier_power[3]).is_equal_approx(60.0, 1e-6)
 
 
 func test_target_argmin() -> void:
@@ -203,7 +203,7 @@ func test_cooldown_after_raid() -> void:
 	var rep: Dictionary = {"events": [] as Array}
 	assert_that(ts.destroy_camp(camp_id, rep)).is_equal(true)
 	assert_that(ts.camps.is_empty()).is_equal(true)
-	assert_int(ts.region_cooldown).is_equal(ThreatSystem.COOLDOWN_TURNS)
+	assert_int(ts.region_cooldown).is_equal(ts.cooldown_turns)
 	assert_that(ts.destroy_camp("camp_nonexistent", rep)).is_equal(false)
 
 
@@ -267,3 +267,117 @@ func test_serialization_roundtrip() -> void:
 	var r2: Dictionary = ts2.process_turn(11, {"stocks": START_STOCKS.duplicate()})
 	var r3: Dictionary = ts3.process_turn(11, {"stocks": START_STOCKS.duplicate()})
 	assert_that(JSON.stringify(r2)).is_equal(JSON.stringify(r3))
+
+
+func test_serialization_v1_migration() -> void:
+	# Миграция v1→v2 (райдер T-110): v1 payload (rng_state, без campaign_seed)
+	# загружается; rng_state игнорируется (в v2 нет ГСЧ), campaign_seed → 1.
+	var v1: Dictionary = {
+		"schema_version": 1,
+		"accumulator": 12.5,
+		"region_cooldown": 2,
+		"turns_since_last_raid": 6,
+		"wave": {},
+		"camps": [{"id": "camp_0", "node": "city", "tier": 1}],
+		"raids_count": 1,
+		"max_tier_raided": 1,
+		"raid_state": ThreatSystem.SM_COOLDOWN,
+		"city_node": "city",
+		"rng_state": 987654321,
+	}
+	var ts := ThreatSystem.from_dict(v1)
+	assert_float(ts.accumulator).is_equal_approx(12.5, 1e-6)
+	assert_int(ts.raids_count).is_equal(1)
+	assert_int(ts.max_tier_raided).is_equal(1)
+	assert_that(ts.raid_state).is_equal(ThreatSystem.SM_COOLDOWN)
+	assert_int(ts.campaign_seed).is_equal(1)
+	# Детерминированное продолжение после миграции (I1).
+	var a := ThreatSystem.from_dict(v1)
+	var b := ThreatSystem.from_dict(v1)
+	assert_that(JSON.stringify(a.process_turn(7, {"stocks": START_STOCKS.duplicate()}))) \
+		.is_equal(JSON.stringify(b.process_turn(7, {"stocks": START_STOCKS.duplicate()})))
+
+
+func test_config_driven_numbers_t115() -> void:
+	# T-115: числа угрозы читаются из raids.json (07-balance §5/§6 зеркало),
+	# не хардкод (K-M15).
+	var ts := _new_ts()
+	assert_float(ts.pressure_base).is_equal_approx(4.0, 1e-6)
+	assert_float(ts.tier_thresholds[1]).is_equal_approx(30.0, 1e-6)
+	assert_float(ts.tier_thresholds[2]).is_equal_approx(100.0, 1e-6)
+	assert_float(ts.tier_thresholds[3]).is_equal_approx(250.0, 1e-6)
+	assert_float(ts.defense_barracks).is_equal_approx(0.2, 1e-6)
+	assert_float(ts.loss_cap_fraction).is_equal_approx(0.3, 1e-6)
+	assert_int(ts.cooldown_turns).is_equal(3)
+	assert_int(ts.camp_k_p).is_equal(2)
+	assert_float(ts.enemy_mult_winter).is_equal_approx(1.25, 1e-6)
+	# Директивы битов 1:1 (бит-таблица 07-balance §6): 7/14/17/21.
+	var turns: Array = []
+	for k in ts.directives:
+		turns.append(int(ts.directives[k]["turn"]))
+	turns.sort()
+	assert_array(turns).is_equal([7, 14, 17, 21])
+
+
+func test_winter_enemy_mult_t115() -> void:
+	# Q-M29: зима (каждый 4-й ход) — enemy_mult 1.25 к силе волны; финал — без бонуса.
+	var ts := _new_ts()
+	# Ход 4 — зима ((4−1) mod 4 = 3): тир 1 → 15 × 1.25 = 18.75.
+	ts._spawn_wave(4, 1, false, {"events": [] as Array}, 1, {"food": 10.0})
+	assert_float(float(ts.wave["power"])).is_equal_approx(18.75, 1e-6)
+	# Ход 7 — осень ((7−1) mod 4 = 2): без бонуса.
+	ts.wave = {}
+	ts._spawn_wave(7, 1, false, {"events": [] as Array}, 1, {"food": 10.0})
+	assert_float(float(ts.wave["power"])).is_equal_approx(15.0, 1e-6)
+	# Финальный ход 21 — без бонуса (сложность финала — тир волны, K-T5).
+	ts.wave = {}
+	ts._spawn_wave(21, 3, true, {"events": [] as Array}, 0, {"food": 10.0})
+	assert_float(float(ts.wave["power"])).is_equal_approx(60.0, 1e-6)
+
+
+func test_window_strong_raid_turn17_t115() -> void:
+	# K-R3 window (бит 17): сильный рейд (тир ≥ 2) гарантирован в окне бита
+	# [14..20] — сильнее cooldown и повышает естественную волну в пути.
+	var ts := _new_ts()
+	var reports: Array = _run(20, ts)  # пустые стопки: худший для гарантии вход
+	var strong_in_window := false
+	for i in range(13, 20):  # ходы 14..20
+		var raid: Dictionary = reports[i]["raid"]
+		if not raid.is_empty() and int(raid["tier"]) >= 2:
+			strong_in_window = true
+			assert_that(bool(raid["battle_requested"])).is_equal(true)  # шов T-050
+	assert_that(strong_in_window).is_equal(true)
+	assert_int(ts.max_tier_raided).is_equal(2)
+
+
+func test_wave_composition_t115() -> void:
+	# K-R3 директива composition (словарь): естественная волна — weakest_stock;
+	# директивы несут composition бита (tutorial/strong_raid/boss).
+	var ts := _new_ts()
+	var rep: Dictionary = {"events": [] as Array}
+	ts._spawn_wave(5, 1, false, rep, 1, {"food": 10.0})
+	assert_that(str(ts.wave["composition"])).is_equal("weakest_stock")
+	ts.wave = {}
+	ts._spawn_wave(7, 1, true, rep, 1, {"food": 10.0}, "tutorial")
+	assert_that(str(ts.wave["composition"])).is_equal("tutorial")
+
+
+func test_anchor_reachability_t115() -> void:
+	# Инвариант достижимости якорей 7/14/21 (бит-таблица, 07-balance §6):
+	# floor-рейд к ходу 8 (7+прибытие), window тир 2 к ходу 18 (17+прибытие),
+	# финал тир 3 на ходу 21 — при худшем для гарантий входе (пустые стопки).
+	var ts := _new_ts()
+	var reports: Array = _run(21, ts)
+	var first_raid_turn := -1
+	for r in reports:
+		if not (r as Dictionary)["raid"].is_empty():
+			first_raid_turn = int((r as Dictionary)["turn"])
+			break
+	assert_that(first_raid_turn > 0 and first_raid_turn <= 8).is_equal(true)
+	var strong_in_window := false
+	for i in range(13, 20):  # окно бита 17: ходы 14..20
+		var raid: Dictionary = reports[i]["raid"]
+		if not raid.is_empty() and int(raid["tier"]) >= 2:
+			strong_in_window = true
+	assert_that(strong_in_window).is_equal(true)
+	assert_int(int(reports[20]["raid"]["tier"])).is_equal(3)

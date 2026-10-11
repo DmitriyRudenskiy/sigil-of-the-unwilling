@@ -1,6 +1,14 @@
 class_name RaidSystem
 extends RefCounted
 
+# ЛЕГАСИ city-arena (T-121 акт 1.1, владелец, 13-я итерация §1.1).
+# 🚫 Запрещён в кампанийном цикле K-канона: шансовая модель (chance/roll)
+# аннулированного класса — K-T5 («давление — ответ на действия, не метроном»);
+# источник нулевой ценности, никогда не референс.
+# Питает единственный меню-достижимый прототип (city-arena) — не удалять
+# до среза; смерть — в момент среза (T-121 §1.3, реестр D-157).
+# До среза: только фиксы загрузочности (краши, гигиена), новых фич запрет.
+
 const CampaignDefenseResolver := preload("res://scripts/city/campaign_defense_resolver.gd")
 
 const PILLAGED_RESOURCES: Array[StringName] = [&"grain", &"flour", &"bread",

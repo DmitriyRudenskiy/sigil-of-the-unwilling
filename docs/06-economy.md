@@ -4,7 +4,7 @@ tags:
   - gdd
   - economy
 status: deepened
-date: 2026-10-06
+date: 2026-10-11
 ---
 
 ## Экономика и баланс
@@ -13,15 +13,9 @@ date: 2026-10-06
 
 > [!note] Пост-пивотный MVP ([[MVP-scope]]): **MVP-подмножество реестра {еда, дерево, железо}** (K-R2: одна схема, 3 товара); ртуть/сера/кристаллы + Layer-2, районы и их upkeep — Post-MVP/1.0.
 
-## Реализация campaign-building economy (status 2026-10-06)
+## Легаси city-economy (не канон)
 
-> [!warning] Эта запись описывает feature-ветку `campaign-city-building-economy`, а не ратифицирует баланс основной ветки. Её боевой каталог находится в `game/assets/data/campaign_building_catalog.json`; числовые значения и custom merges разработаны для правил проекта. Source references establish identity only. Candidate/unknown rows не входят в билд; полнота AtS/TerraScape roster не заявляется.
-
-- Кампанийные здания используют существующий объект города и `ResourceContext`; запас еды в `CityData` — совместимый фасад над тем же food stock, не второй счёт.
-- Turn ledger собирает потребление населения, рейдовые потери, кампанийные рецепты/upkeep и обучение персонажа. Обучение может выполнять атомарный transaction через тот же контекст; party сохраняется существующим MVP-save.
-- Runtime сохраняет ancestry/archetype и состояние кампанийных зданий; миграция старого food stock выполняется при переходе city save к версии 5.
-- Допустимые campaign-building и training transactions ограничены MVP-маской `{еда, дерево, железо}`. Это не меняет канонический реестр K-R2, не добавляет отдельный city/world или победный score-mode и не утверждает source-game значения. См. change-scoped контракты в `openspec/changes/campaign-city-building-economy/specs/`.
-- Placement, adjacency, merge, group needs/relations, production/upkeep and static defense имеют детерминированные сервисы и тесты. Runtime catalog admits only confirmed public rows or campaign-canon baseline rows; `audit_campaign_catalog.py` verifies every confirmed external row is admitted or reason-excluded, with zero candidate/unknown rows and nulls. Публичный census остаётся неполным для AtS/TerraScape; UI/playtest не покрыты headless-тестами.
+> [!warning] Легаси city-economy (campaign-building economy) — см. `openspec/changes/campaign-city-building-economy/legacy-city-economy.md`; к замене, не канон (T-121 акт 1.2, владелец, 13-я итерация §1.2; срез — D-157).
 
 ## Таблица источников/стоков (sources & sinks)
 
