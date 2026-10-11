@@ -36,6 +36,12 @@ func _init_campaign() -> void:
 	campaign.seed = CAMPAIGN_SEED
 	settlement = SettlementProcessor.new()
 	settlement.stocks = {"food": 30.0, "wood": 20.0, "iron": 10.0}
+	# T-116: модель населения (источник истины population); k_pop — population.json
+	# (K-M12: 0.1/день; D-161: конфиг прочитан, версия — 1.0).
+	var pop_config: Dictionary = CitizenRegistry.load_config()
+	settlement.k_pop_per_day = float(pop_config.get("k_pop_per_day", 0.1))
+	settlement.registry = CitizenRegistry.new()
+	settlement.registry.create_initial(20)  # T-001: население 20
 	settlement.population = 20
 	settlement.housing = 20
 	settlement.buildings = [
@@ -55,6 +61,10 @@ func _init_campaign() -> void:
 		return threats.process_turn(campaign.current_turn, _threat_context())
 	campaign.production_hook = func() -> Dictionary:
 		return settlement.process_production(WorldSeasons.production_mult())
+	# F-3 (T-116): миграция — Репутация (единственный вход, Э1-3); MVP — no-op
+	# (Q-M32: формула TBD). Хук процессора → registry-сеам.
+	settlement.migration_hook = func(ctx: Dictionary) -> void:
+		settlement.registry.apply_migration(float(ctx.get("reputation", 0)))
 
 
 func _threat_context() -> Dictionary:
@@ -91,13 +101,17 @@ func _request_battle(context: Dictionary) -> void:
 			str(last_battle_report.get("losses", []))], "Main")
 
 
-## Хук населения (§2.2): потери боя — убыль населения (вакансии в
-## производстве — слой T-116). Эмит с дня первого боя, даже пустой.
+## Хук населения (§2.2, T-116): потери боя — вычитание жителей по
+## character_uid (T-050 шов); раненые — не потери (CampaignBattle: losses —
+## только dead; стабилизированный — ранен, в losses не попадает).
+## Эмит с дня первого боя, даже пустой.
 func _on_battle_losses(losses: Array, _report: Dictionary) -> void:
 	if losses.is_empty():
 		return
+	var removed: int = settlement.registry.apply_losses(losses)
+	settlement.population = settlement.registry.count()  # зеркало (источник — registry)
 	_recruit_uid_counter += losses.size()
-	settlement.population = maxi(0, settlement.population - losses.size())
+	GameLogger.info("население: потери %s (вычтено %d)" % [str(losses), removed], "Main")
 
 
 func _load_statblocks() -> Dictionary:

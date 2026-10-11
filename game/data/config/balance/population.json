@@ -1,6 +1,6 @@
 {
-  "version": "1.0",
-  "source": "docs/07-balance.md §6 (R3/C-1, K-M12 2026-10-02, 06-economy)",
+  "version": "1.1",
+  "source": "docs/07-balance.md §6 (R3/C-1, K-M12 2026-10-02, 06-economy); v1.1 (T-116, 2026-10-11): + migration — Репутация (F-3: «appeal» удалён из живого слоя, Д1 §4.2 аннулировано; Э1-3: Престиж никогда не влияет на миграцию); конверсия день↔ход — world_seasons.gd DAYS_PER_SEASON (Q-M26: единственная конверсия)",
   "k_pop_per_day": 0.1,
   "day_to_turn": 1,
   "ticks_per_day": 4,
@@ -9,5 +9,11 @@
   "food_per_person_week": 0.7,
   "building_efficiency_clamp": [0.2, 2.5],
   "deficit_production_factor": 0.25,
-  "collapse": { "population_loss": 0.10, "note": "Post-MVP (06-economy)" }
+  "collapse": { "population_loss": 0.10, "note": "Post-MVP (06-economy)" },
+  "migration": {
+    "input": "reputation",
+    "e1_3": "Престиж никогда не влияет на миграцию (Э1-3); «appeal→prestige» как вход миграционной формулы — контрабанда Э1-3, аннулировано (F-3)",
+    "formula": "Q-M32 (TBD, к владельцу): формула MVP-миграции; предложение исполнителя — пороговая: net-мигранты/ход = +1 при Репутации ≥ R_hi, −1 при ≤ R_lo, иначе 0; R_hi/R_lo — в 07-balance (новая строка)",
+    "mvp": "no-op (seam: репутация-вход заведён, Э1-3 — тестом; числа — Q-M32)"
+  }
 }

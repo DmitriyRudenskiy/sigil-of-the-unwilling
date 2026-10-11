@@ -30,7 +30,7 @@ const GROUPS: Array = [
 	"Металлурги и Техники",
 ]
 const UNGROUPED: String = "Без группы"  # I1: стабильный, последняя
-const K_POP: float = 0.1  # еда/житель/день (06-economy, K-M12)
+const K_POP: float = 0.1  # еда/житель/день (06-economy, K-M12; дефолт — канон)
 const UNIT_EAT: float = 1.0  # еда/юнит/день (06-economy: партия 1/день/юнит)
 const FOOD_PER_RESIDENT_WEEK: float = 0.7  # R3: ед. продовольствия на жителя/нед.
 const DAYS_PER_WEEK: int = 7
@@ -39,7 +39,7 @@ const EFFICIENCY_MAX: float = 2.5
 const WARN_DAYS: float = 7.0  # SM: WARN при B < 7 дней потребления
 const DEFICIT_PROD_MULT: float = 0.25  # DEFICIT: производство 25% (12.2)
 const DEFICIT_RECOVER_DAYS: int = 3  # DEFICIT→OK: B > 0 три дня подряд
-const SCHEMA_VERSION: int = 1
+const SCHEMA_VERSION: int = 2  # v2 (T-116): + registry (модель населения)
 
 ## Состояние (K-D5: state = stocks vector + производные).
 var stocks: Dictionary = {"food": 0.0, "wood": 0.0, "iron": 0.0}
@@ -52,6 +52,11 @@ var buildings: Array = []
 var sm: Dictionary = {}
 ## F-3 (T-116): миграционная формула — Репутация; MVP — no-op (хук для T-116).
 var migration_hook: Callable
+## T-116: модель населения (жители, возраст, семьи) — источник истины
+## population; потери T-050 — по character_uid (registry.apply_losses).
+var registry: CitizenRegistry
+## k_pop (K-M12) — из population.json (инжект composition root; дефолт — канон).
+var k_pop_per_day: float = K_POP
 var _event_log: Array[String] = []
 
 
@@ -61,12 +66,20 @@ var _event_log: Array[String] = []
 func process_settlement() -> Dictionary:
 	var report := {"events": [] as Array}
 	var cap: int = _population_cap()
-	var births: int = int(K_POP * float(WorldSeasons.DAYS_PER_SEASON))
+	# T-116: население — через модель (registry): возраст → рождения → R3-кап.
+	if registry == null:
+		registry = CitizenRegistry.new()
+		registry.create_initial(population)  # legacy (v1-save/тесты): int → модель
+	var days: int = WorldSeasons.DAYS_PER_SEASON
+	registry.age_turn(days)
+	var births: int = registry.births(k_pop_per_day, days)
+	registry.clamp_to(cap)
 	var prev_pop: int = population
-	population = clampi(population + births, 0, cap)
+	population = registry.count()  # зеркало (источник истины — registry)
 	if population != prev_pop:
 		_log("settlement: population %d → %d (births %d, cap %d)" % [prev_pop, population, births, cap], report)
-	# Миграция (F-3: формула — Репутация, T-116): MVP — no-op хук.
+	# Миграция (F-3: формула — Репутация, T-116): MVP — no-op хук (registry.
+	# apply_migration — seam; Q-M32: числа TBD).
 	if migration_hook.is_valid():
 		migration_hook.call({"reputation": 0, "context": "settlement", "population": population})
 	report["population"] = population
@@ -194,6 +207,8 @@ func to_dict() -> Dictionary:
 		"party_size": party_size,
 		"buildings": buildings.duplicate(true),
 		"sm": sm.duplicate(true),
+		"k_pop_per_day": k_pop_per_day,
+		"registry": registry.to_dict() if registry != null else {},
 	}
 
 
@@ -210,4 +225,12 @@ static func from_dict(data: Dictionary) -> SettlementProcessor:
 	for r in RESOURCES:
 		if not p.sm.has(r):
 			p.sm[r] = {"state": "OK", "days_positive": 0, "days_negative": 0}
+	p.k_pop_per_day = float(data.get("k_pop_per_day", K_POP))
+	# T-116: registry (v2); v1-save (без registry) — legacy-миграция int → модель.
+	var reg_data: Dictionary = data.get("registry", {})
+	if not reg_data.is_empty():
+		p.registry = CitizenRegistry.from_dict(reg_data)
+	else:
+		p.registry = CitizenRegistry.new()
+		p.registry.create_initial(p.population)
 	return p
