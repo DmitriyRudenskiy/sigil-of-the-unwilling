@@ -3,10 +3,11 @@ extends BaseTest
 ## R3-кап, рождения (K-M12), clamp эффективности (07-balance §6), I1-детерминизм.
 ## 1 ход = DAYS_PER_SEASON = 20 дней (Q-M26).
 
+## Здания с группами (T-040-остаток, 12-я итерация: Σ по 7 группам, 02e3 §9.4).
 const START_BUILDINGS: Array = [
-	{"id": "farm", "output_day": {"food": 2.0}},
-	{"id": "sawmill", "output_day": {"wood": 2.0}},
-	{"id": "mine", "output_day": {"iron": 1.0}},
+	{"id": "farm", "group": "Земледельцы и Пивовары", "output_day": {"food": 2.0}},
+	{"id": "sawmill", "group": "Инженеры и Строители", "output_day": {"wood": 2.0}},
+	{"id": "mine", "group": "Металлурги и Техники", "output_day": {"iron": 1.0}},
 ]
 
 
@@ -107,6 +108,25 @@ func test_season_mult_applied() -> void:
 	var p := _start_state()
 	var r: Dictionary = p.process_turn(0.4)
 	assert_float(r["production"]["wood"]).is_equal_approx(2.0 * 0.4 * 20.0, 1e-6)
+
+
+func test_production_by_group() -> void:
+	# T-040-остаток (12-я итерация): production(r) = Σ_группы Σ_здания output ×
+	# clamp(эфф.) × season; отчёт — production_by_group (traceability, K-D5).
+	var p := _start_state()
+	var r: Dictionary = p.process_turn(1.0)
+	# farm → «Земледельцы и Пивовары»: 15×2 + 5×0.5 = 32.5 (DEFICIT ×0.25 с d16).
+	assert_float(r["production_by_group"]["Земледельцы и Пивовары"]["food"]).is_equal_approx(32.5, 1e-6)
+	# sawmill → «Инженеры и Строители»: 2×20 = 40. mine → «Металлурги и Техники»: 1×20 = 20.
+	assert_float(r["production_by_group"]["Инженеры и Строители"]["wood"]).is_equal_approx(40.0, 1e-6)
+	assert_float(r["production_by_group"]["Металлурги и Техники"]["iron"]).is_equal_approx(20.0, 1e-6)
+	# Σ по группам = суммарное производство (K-D5).
+	var sum_food: float = 0.0
+	for g in r["production_by_group"]:
+		sum_food += float(r["production_by_group"][g]["food"])
+	assert_float(sum_food).is_equal_approx(r["production"]["food"], 1e-6)
+	# Все 7 канон-групп + «Без группы» в отчёте (стабильный порядок, I1).
+	assert_int(r["production_by_group"].size()).is_equal(8)
 
 
 func test_i1_determinism() -> void:

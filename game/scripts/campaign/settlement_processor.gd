@@ -2,7 +2,10 @@ class_name SettlementProcessor
 extends RefCounted
 ## T-040 — settlement-фаза кампании: stock/flow-экономика (K-D5), 3 ресурса (K-R2).
 ## Формулы — 06-economy (без изменений):
-##   production(r) = Σ_zдания output_day × clamp(эффективность, 0.2, 2.5) × season_mult
+##   production(r) = Σ_группы Σ_здания_в_группе output_day × clamp(эфф., 0.2, 2.5)
+##                   × season_mult — 7 канонических экономических групп (02e3 §9.4;
+##                   T-040-остаток, 12-я итерация: производственная часть Σ по группам,
+##                   отчёт — production_by_group, traceability K-D5)
 ##   consumption(еда) = k_pop × population + party_size × 1/день; дерево/железо — 0 (MVP)
 ##   B(r, t) = B(r, t−1) + production − consumption
 ##   population-кап (R3) = min(жильё, floor(продовольствие_в_неделю / 0.7))
@@ -15,6 +18,13 @@ extends RefCounted
 ## I1: детерминизм — без ГСЧ, стабильный порядок, лог событий.
 
 const RESOURCES: Array = ["food", "wood", "iron"]
+## 7 канонических экономических групп (02e3 §9.4, канон-имена, стабильный порядок — I1).
+const GROUPS: Array = [
+	"Инженеры и Строители", "Земледельцы и Пивовары", "Алхимики и Хранители Пламени",
+	"Ткачи и Ремесленники", "Торговцы и Дипломаты", "Охотники и Следопыты",
+	"Металлурги и Техники",
+]
+const UNGROUPED: String = "Без группы"  # I1: стабильный, последняя
 const K_POP: float = 0.1  # еда/житель/день (06-economy, K-M12)
 const UNIT_EAT: float = 1.0  # еда/юнит/день (06-economy: партия 1/день/юнит)
 const FOOD_PER_RESIDENT_WEEK: float = 0.7  # R3: ед. продовольствия на жителя/нед.
@@ -44,9 +54,13 @@ var _event_log: Array[String] = []
 ## (инжект, не глобальное чтение — I1/детерминизм). Возвращает детерминированный отчёт.
 func process_turn(season_mult: float = 1.0) -> Dictionary:
 	var days: int = WorldSeasons.DAYS_PER_SEASON
+	var by_group := {}
+	for g in GROUPS + [UNGROUPED]:
+		by_group[g] = {"food": 0.0, "wood": 0.0, "iron": 0.0}
 	var report := {
 		"days": days,
 		"production": {"food": 0.0, "wood": 0.0, "iron": 0.0},
+		"production_by_group": by_group,
 		"consumption": {"food": 0.0, "wood": 0.0, "iron": 0.0},
 		"events": [] as Array,
 	}
@@ -68,9 +82,11 @@ func _process_day(day: int, season_mult: float, report: Dictionary) -> void:
 			if out <= 0.0:
 				continue
 			var eff: float = clampf(float(b.get("efficiency", 1.0)), EFFICIENCY_MIN, EFFICIENCY_MAX)
-			prod += out * eff * season_mult
-		if _sm_state(r) == "DEFICIT":
-			prod *= DEFICIT_PROD_MULT
+			var contribution: float = out * eff * season_mult
+			if _sm_state(r) == "DEFICIT":
+				contribution *= DEFICIT_PROD_MULT  # DEFICIT: производство 25% (12.2)
+			prod += contribution
+			report["production_by_group"][str(b.get("group", UNGROUPED))][r] += contribution
 		var cons: float = 0.0
 		if r == "food":
 			cons = K_POP * population + party_size * UNIT_EAT
