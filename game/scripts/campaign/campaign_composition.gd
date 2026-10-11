@@ -67,7 +67,9 @@ func _build(campaign_seed: int) -> void:
 	population_system = PopulationSystem.new()
 	population_system.seed_population(settlement.population)
 	campaign.settlement_hook = func() -> Dictionary:
-		var rep_report: Dictionary = settlement.process_turn(WorldSeasons.production_mult())
+		# T-122 (Q-M31): settlement-фаза — население/события/настроение (позиция 1);
+		# production-расчёт — вынесен в production-фазу (позиция 6, post-threats).
+		var rep_report: Dictionary = settlement.process_settlement()
 		# Ростерь — источник истины: возраста/смерти/рождения/миграция (F-3;
 		# Репутация MVP — 0, источник-производная Резонанса — слой за тикетом).
 		var pop_report: Dictionary = population_system.process_turn(
@@ -78,17 +80,27 @@ func _build(campaign_seed: int) -> void:
 		return rep_report
 	campaign.threats_hook = func() -> Dictionary:
 		return threats.process_turn(campaign.current_turn, _threat_context())
+	# T-122 (Q-M31): production — позиция 6 (post-threats): рейды бьют
+	# pre-production запасы. season_mult — из WorldSeasons (I1: инжест).
+	campaign.production_hook = func() -> Dictionary:
+		return settlement.process_production(WorldSeasons.production_mult())
 
 
-## Один ход кампании (T-010): settlement (авто) → player → threats (авто).
-## I1: сезон синхронизирован с ходом драйвера — до settlement-хука.
+## Один ход кампании (T-010, T-122): фиксированный 6-фазный порядок
+## (GDD-мандат §1, Q-M31): settlement (авто) → player → caravans (no-op) →
+## diplomacy (no-op) → threats (авто) → production (авто). post-MVP-фазы —
+## каркас-слоты (T-010-состав). I1: сезон синхронизирован с ходом драйвера
+## — до settlement-хука.
 func advance_turn() -> void:
 	if campaign.is_done():
 		return
 	WorldSeasons.set_turns(campaign.current_turn)
 	campaign.advance_auto_phase()  # settlement (авто) → player
-	campaign.end_player_phase()    # player → threats (MVP: авто)
-	campaign.advance_auto_phase()  # threats (авто) → finish
+	campaign.end_player_phase()    # player → caravans (MVP: авто, no-op)
+	campaign.advance_auto_phase()  # caravans (no-op) → diplomacy (no-op)
+	campaign.advance_auto_phase()  # diplomacy (no-op) → threats
+	campaign.advance_auto_phase()  # threats (авто) → production
+	campaign.advance_auto_phase()  # production (авто) → finish
 
 
 func _threat_context() -> Dictionary:
