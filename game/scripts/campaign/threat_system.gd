@@ -30,23 +30,33 @@ extends RefCounted
 ## гарантирован); window — финальный тир гарантирован к ход 21.
 
 const RESOURCES: Array = ["food", "wood", "iron"]  # K-R2
-const BASE_PRESSURE: float = 4.0  # Base(city) — 07-balance §5
-const WEALTH_PER_STOCK: float = 0.005  # Wealth = clamp(1 + 0.005 × стопки, 0.5, 2.0)
-const WEALTH_MIN: float = 0.5
-const WEALTH_MAX: float = 2.0
-const ANOMALIES_MULT: float = 1.0  # MVP: системы аномалий нет (хук)
-const REGION_HISTORY_GROWTH: float = 0.05  # после cooldown: 1 + 0.05 × ходов
-const GLOBAL_PHASE_MULT: Dictionary = {1: 1.0, 2: 1.25, 3: 1.5, 21: 2.0}
-const TIER_THRESHOLDS: Dictionary = {1: 30.0, 2: 100.0, 3: 250.0}  # K-T5 (§5)
-const TIER_POWER: Dictionary = {1: 15.0, 2: 30.0, 3: 60.0}  # R6
-const DEFENSE_BARRACKS: float = 0.2  # R6
-const LOSS_CAP_FRACTION: float = 0.3  # cap ≤30%/день
-const COOLDOWN_TURNS: int = 3  # K-T5
-const ARRIVAL_TURNS: int = 1  # прибытие в следующую threats-фазу
-const FIRST_RAID_FLOOR_TURN: int = 7  # floor (K-R3)
-const FINAL_RAID_TURN: int = 21  # window (K-R3)
-const CAMP_K_P: int = 2  # D-130
-const SCHEMA_VERSION: int = 2  # v2: rng_state → campaign_seed (Q-M30 (б): цель — argmin, ГСЧ выведен)
+# Числа угрозы — raids.json (07-balance §5/§6 зеркало, T-115; K-M15 — не
+# хардкод). Имена — snake_case-соответствие ключам конфига.
+const RAIDS_CONFIG_PATH := "res://data/config/balance/raids.json"
+var pressure_base: float = 4.0  # Base(city) — 07-balance §5
+var wealth_per_stock: float = 0.005  # Wealth = clamp(1 + 0.005 × стопки, 0.5, 2.0)
+var wealth_min: float = 0.5
+var wealth_max: float = 2.0
+var anomalies_mult: float = 1.0  # MVP: системы аномалий нет (хук)
+var region_history_growth: float = 0.05  # после cooldown: 1 + 0.05 × ходов
+var global_phase_mult: Dictionary = {1: 1.0, 2: 1.25, 3: 1.5, 21: 2.0}
+var tier_thresholds: Dictionary = {1: 30.0, 2: 100.0, 3: 250.0}  # K-T5 (§5)
+var tier_power: Dictionary = {1: 15.0, 2: 30.0, 3: 60.0}  # R6
+var defense_barracks: float = 0.2  # R6
+var loss_cap_fraction: float = 0.3  # cap ≤30%/день
+var cooldown_turns: int = 3  # K-T5
+var arrival_turns: int = 1  # прибытие в следующую threats-фазу
+var camp_k_p: int = 2  # D-130
+# Сезон (Q-M29): зима — каждый 4-й ход, enemy_mult 1.25; финал — без бонуса.
+var season_length: int = 4
+var winter_index: int = 3  # (turn − 1) mod 4 == 3
+var enemy_mult_winter: float = 1.25
+var final_turn_no_bonus: int = 21
+# Сценарные директивы (raids.json, биты 1:1): first_raid/floor, strong_raid/
+# window, district, final_raid (boss). Словарь {id: {turn, type, tier_num, ...}}.
+var directives: Dictionary = {}
+const SCHEMA_VERSION: int = 2  # v2 — текущая: rng_state → campaign_seed (Q-M30 (б): цель — argmin, ГСЧ выведен);
+# v1 — только загрузка: rng_state игнорируется (в v2 нет ГСЧ), campaign_seed по умолчанию 1.
 
 const SM_IDLE := "IDLE"
 const SM_CHARGING := "CHARGING"
@@ -76,6 +86,7 @@ var _event_log: Array[String] = []
 
 func _init(seed: int = 12345) -> void:
 	campaign_seed = seed  # I1
+	_load_raids_config()
 
 
 func process_turn(turn: int, context: Dictionary = {}) -> Dictionary:
@@ -93,18 +104,21 @@ func process_turn(turn: int, context: Dictionary = {}) -> Dictionary:
 		"events": [] as Array,
 	}
 
-	# 0. window (K-R3): финальный тир гарантирован к ход 21 (финальный рейд —
-	# floor, тир 3). Финал переопределяет всё: активная волна и cooldown не
-	# блокируют (иначе рейд на 20-м ходу заблокировал бы финал).
-	if turn == FINAL_RAID_TURN and max_tier_raided < 3:
-		wave = {}
-		region_cooldown = 0
-		accumulator = 0.0
-		_spawn_wave(turn, 3, true, report, 0, stocks)
-		report["raid"] = _strike_wave(turn, stocks, barracks, hero, battle_handler, report)
-		report["wave"] = wave.duplicate()
-		report["accumulator"] = 0.0
-		return report
+	# 0. Финальный floor (K-R3, директива final:true в raids.json) переопределяет
+	# всё: активная волна и cooldown не блокируют (иначе рейд на 20-м ходу
+	# заблокировал бы финал).
+	for d in _directives_for(turn):
+		if str(d.get("type", "")) == "floor" and bool(d.get("boss", d.get("final", false))) \
+				and max_tier_raided < int(d.get("tier_num", 3)):
+			wave = {}
+			region_cooldown = 0
+			accumulator = 0.0
+			_spawn_wave(turn, int(d.get("tier_num", 3)), true, report, 0, stocks,
+					str(d.get("composition", "boss")))
+			report["raid"] = _strike_wave(turn, stocks, barracks, hero, battle_handler, report)
+			report["wave"] = wave.duplicate()
+			report["accumulator"] = 0.0
+			return report
 
 	# 1. Тики времени + cooldown (K-T5; SM: COOLDOWN → IDLE).
 	if turns_since_last_raid >= 0:
@@ -114,8 +128,10 @@ func process_turn(turn: int, context: Dictionary = {}) -> Dictionary:
 		if region_cooldown == 0 and raid_state == SM_COOLDOWN:
 			_set_state(SM_IDLE, turn, report)
 
-	# 2. Активная волна: движение / удар.
+	# 2. Активная волна: движение / удар. Директивы — до удара: естественная
+	# волна, прибывающая в ход директивы, повышается (бит 17 не съедается).
 	if not wave.is_empty():
+		_apply_bit_directives(turn, report, stocks, false)
 		_set_state(SM_INBOUND, turn, report)
 		wave["turns_to_arrival"] = int(wave["turns_to_arrival"]) - 1
 		if int(wave["turns_to_arrival"]) <= 0:
@@ -131,14 +147,15 @@ func process_turn(turn: int, context: Dictionary = {}) -> Dictionary:
 		accumulator += pressure
 		_set_state(SM_CHARGING, turn, report)
 		for tier in [3, 2, 1]:
-			if accumulator >= float(TIER_THRESHOLDS[tier]):
-				_spawn_wave(turn, tier, false, report, ARRIVAL_TURNS, stocks)
+			if accumulator >= float(tier_thresholds[tier]):
+				_spawn_wave(turn, tier, false, report, arrival_turns, stocks)
 				break
 
-	# 4. floor (K-R3): первый рейд ≈ ход 7 (tutorial-тир, гарантирован).
-	if turn == FIRST_RAID_FLOOR_TURN and raids_count == 0 and wave.is_empty() \
-			and region_cooldown == 0:
-		_spawn_wave(turn, 1, true, report, ARRIVAL_TURNS, stocks)
+	# 4. Сценарные директивы (raids.json — биты 1:1, K-R3): floor — первый рейд
+	# гарантирован (tutorial ≈ ход 7); window — тир директивы гарантирован к
+	# ходу (strong_raid — ход 17). district — не рейд (календарный триггер
+	# K-M1, city-слой).
+	_apply_bit_directives(turn, report, stocks, true)
 
 	report["accumulator"] = accumulator
 	report["wave"] = wave.duplicate()
@@ -152,7 +169,7 @@ func _strike_wave(turn: int, stocks: Dictionary, barracks: bool, hero: bool,
 	var raid := _resolve_raid(turn, stocks, barracks, hero, battle_handler, report)
 	_set_state(SM_RESOLVED, turn, report)
 	accumulator = 0.0  # K-T5: после рейда аккумулятор → 0
-	region_cooldown = COOLDOWN_TURNS
+	region_cooldown = cooldown_turns
 	turns_since_last_raid = 0
 	_set_state(SM_COOLDOWN, turn, report)
 	report["wave"] = {}
@@ -164,8 +181,8 @@ func compute_pressure(turn: int, stocks: Dictionary) -> float:
 	var total_stocks: float = 0.0
 	for r in RESOURCES:
 		total_stocks += float(stocks.get(r, 0.0))
-	var wealth: float = clampf(1.0 + WEALTH_PER_STOCK * total_stocks, WEALTH_MIN, WEALTH_MAX)
-	return BASE_PRESSURE * wealth * ANOMALIES_MULT * _region_history() * _global_phase(turn)
+	var wealth: float = clampf(1.0 + wealth_per_stock * total_stocks, wealth_min, wealth_max)
+	return pressure_base * wealth * anomalies_mult * _region_history() * _global_phase(turn)
 
 
 func _region_history() -> float:
@@ -173,18 +190,18 @@ func _region_history() -> float:
 		return 0.0
 	if turns_since_last_raid < 0:
 		return 1.0
-	var after_cooldown: int = maxi(0, turns_since_last_raid - COOLDOWN_TURNS)
-	return 1.0 + REGION_HISTORY_GROWTH * float(after_cooldown)
+	var after_cooldown: int = maxi(0, turns_since_last_raid - cooldown_turns)
+	return 1.0 + region_history_growth * float(after_cooldown)
 
 
 func _global_phase(turn: int) -> float:
 	if turn >= 21:
-		return float(GLOBAL_PHASE_MULT[21])
+		return float(global_phase_mult[21])
 	if turn >= 14:
-		return float(GLOBAL_PHASE_MULT[3])
+		return float(global_phase_mult[3])
 	if turn >= 7:
-		return float(GLOBAL_PHASE_MULT[2])
-	return float(GLOBAL_PHASE_MULT[1])
+		return float(global_phase_mult[2])
+	return float(global_phase_mult[1])
 
 
 ## CR-диапазон по фазам (07-balance §5): 1 (1–6): ¼–1; 2 (7–13): 1–2;
@@ -200,16 +217,19 @@ func cr_range(turn: int) -> Array:
 
 
 func _spawn_wave(turn: int, tier: int, forced: bool, report: Dictionary,
-		arrival: int = ARRIVAL_TURNS, stocks: Dictionary = {}) -> void:
+		arrival: int, stocks: Dictionary = {}, composition: String = "") -> void:
 	var target: String = _pick_target(stocks)
 	var camp_id: String = _place_camp(tier, report)
 	wave = {
 		"tier": tier,
-		"power": float(TIER_POWER[tier]),
+		# Q-M29: зимний enemy_mult к силе волны (финальный ход — без бонуса).
+		"power": float(tier_power[tier]) * _enemy_mult(turn),
 		"target": target,
 		"camp_id": camp_id,
 		"turns_to_arrival": arrival,
 		"forced": forced,
+		# K-R3 директива composition (словарь): цель — слабейший сток.
+		"composition": composition if composition != "" else "weakest_stock",
 	}
 	_set_state(SM_INBOUND, turn, report)
 	var cause: String = "floor (K-R3)" if forced else "порог тира %d (K-T5)" % tier
@@ -244,7 +264,7 @@ func _place_camp(tier: int, report: Dictionary) -> String:
 	var best: String = ""
 	var visited: Dictionary = {city_node: true}
 	var frontier: Array = [city_node]
-	for _depth in range(CAMP_K_P):
+	for _depth in range(camp_k_p):
 		var next_frontier: Array = []
 		var candidates: Array = []
 		for node in frontier:
@@ -267,7 +287,7 @@ func _place_camp(tier: int, report: Dictionary) -> String:
 	var camp_id: String = "camp_%s" % best
 	camps.append({"id": camp_id, "tier": tier, "node": best})
 	_log("лагерь %s (тир %d) на узле %s (k_p=%d, D-130)"
-			% [camp_id, tier, best, CAMP_K_P], report)
+			% [camp_id, tier, best, camp_k_p], report)
 	return camp_id
 
 
@@ -276,10 +296,10 @@ func _resolve_raid(turn: int, stocks: Dictionary, barracks: bool, hero: bool,
 	var tier: int = int(wave["tier"])
 	var power: float = float(wave["power"])
 	var target: String = str(wave["target"])
-	var defense: float = DEFENSE_BARRACKS if barracks else 0.0
+	var defense: float = defense_barracks if barracks else 0.0
 	var loss: float = power * (1.0 - defense)
 	var before: float = float(stocks.get(target, 0.0))
-	loss = minf(loss, LOSS_CAP_FRACTION * before)  # cap ≤30%/день
+	loss = minf(loss, loss_cap_fraction * before)  # cap ≤30%/день
 	stocks[target] = before - loss
 	raids_count += 1
 	max_tier_raided = maxi(max_tier_raided, tier)
@@ -314,11 +334,11 @@ func destroy_camp(camp_id: String, report: Dictionary = {"events": []}) -> bool:
 	for i in camps.size():
 		if str(camps[i]["id"]) == camp_id:
 			camps.remove_at(i)
-			region_cooldown = COOLDOWN_TURNS
+			region_cooldown = cooldown_turns
 			if raid_state != SM_COOLDOWN:
 				_set_state(SM_COOLDOWN, 0, report)
 			_log("лагерь %s уничтожен — региональный cooldown %d ход(ов) (D-130)"
-					% [camp_id, COOLDOWN_TURNS], report)
+					% [camp_id, cooldown_turns], report)
 			return true
 	return false
 
@@ -333,6 +353,103 @@ func _set_state(next: String, turn: int, report: Dictionary) -> void:
 func _log(msg: String, report: Dictionary) -> void:
 	_event_log.append(msg)
 	report["events"].append(msg)
+
+
+## Зимний enemy_mult (Q-M29): сезон = 4 хода, зима — индекс 3 ((turn−1) mod 4);
+## финальный ход — без бонуса (сложность финала — тир волны, K-T5).
+func _enemy_mult(turn: int) -> float:
+	if turn == final_turn_no_bonus:
+		return 1.0
+	if (turn - 1) % season_length == winter_index:
+		return enemy_mult_winter
+	return 1.0
+
+
+## Сценарные директивы хода (raids.json; 0/несколько на ход).
+func _directives_for(turn: int) -> Array:
+	var out: Array = []
+	for k in directives:
+		var d: Dictionary = directives[k]
+		if int(d.get("turn", -1)) == turn:
+			out.append(d)
+	return out
+
+
+## Сценарные директивы битов (K-R3): floor — первый рейд гарантирован;
+## window — тир директивы гарантирован к биту. Недостаточная волна в пути
+## повышается (лагерь сохраняется); спавн — только при allow_spawn и пустой
+## волне. Гарантии сильнее cooldown: cooldown дозирует естественные волны,
+## а не сценарные директивы (бит 17 не «съедается» рейдом на 15-м).
+func _apply_bit_directives(turn: int, report: Dictionary, stocks: Dictionary,
+		allow_spawn: bool) -> void:
+	for d in _directives_for(turn):
+		var kind: String = str(d.get("type", ""))
+		if kind == "district" or bool(d.get("boss", d.get("final", false))):
+			continue
+		var d_tier: int = int(d.get("tier_num", 1))
+		var satisfied: bool = (raids_count > 0) if kind == "floor" \
+				else (max_tier_raided >= d_tier)
+		if satisfied:
+			continue
+		var comp: String = str(d.get("composition", ""))
+		if not wave.is_empty():
+			if int(wave.get("tier", 0)) >= d_tier:
+				continue
+			wave["tier"] = d_tier
+			wave["power"] = float(tier_power[d_tier]) * _enemy_mult(turn)
+			wave["forced"] = true
+			if comp != "":
+				wave["composition"] = comp
+			report["wave"] = wave.duplicate()
+			continue
+		if not allow_spawn:
+			continue
+		region_cooldown = 0
+		_spawn_wave(turn, d_tier, true, report, arrival_turns, stocks, comp)
+
+
+static func _num_keys(src: Dictionary) -> Dictionary:
+	var out := {}
+	for k in src:
+		out[int(str(k))] = float(src[k])
+	return out
+
+
+## T-115: числа угрозы — raids.json (07-balance §5/§6 зеркало). Конфиг —
+## источник; значения по умолчанию выше — только fallback при отсутствии файла.
+func _load_raids_config() -> void:
+	if not FileAccess.file_exists(RAIDS_CONFIG_PATH):
+		return
+	var f := FileAccess.open(RAIDS_CONFIG_PATH, FileAccess.READ)
+	if f == null:
+		return
+	var cfg: Variant = JSON.parse_string(f.get_as_text())
+	f.close()
+	if typeof(cfg) != TYPE_DICTIONARY:
+		return
+	var pr: Dictionary = cfg.get("pressure", {})
+	pressure_base = float(pr.get("base", pressure_base))
+	wealth_per_stock = float(pr.get("wealth_per_stock", wealth_per_stock))
+	wealth_min = float(pr.get("wealth_min", wealth_min))
+	wealth_max = float(pr.get("wealth_max", wealth_max))
+	anomalies_mult = float(pr.get("anomalies_mult", anomalies_mult))
+	region_history_growth = float(pr.get("region_history_growth", region_history_growth))
+	if pr.get("global_phase", {}) != {}:
+		global_phase_mult = _num_keys(pr.get("global_phase", {}))
+	var tiers: Dictionary = cfg.get("tiers", {})
+	tier_thresholds = _num_keys(tiers.get("thresholds", tier_thresholds))
+	tier_power = _num_keys(tiers.get("power", tier_power))
+	defense_barracks = float(cfg.get("defense_barracks", defense_barracks))
+	loss_cap_fraction = float(cfg.get("loss_cap_fraction", loss_cap_fraction))
+	cooldown_turns = int(cfg.get("cooldown_turns", cooldown_turns))
+	arrival_turns = int(cfg.get("arrival_turns", arrival_turns))
+	camp_k_p = int(cfg.get("camp_k_p", camp_k_p))
+	var season: Dictionary = cfg.get("season", {})
+	season_length = int(season.get("length", season_length))
+	winter_index = int(season.get("winter_index", winter_index))
+	enemy_mult_winter = float(season.get("enemy_mult_winter", enemy_mult_winter))
+	final_turn_no_bonus = int(season.get("final_turn_no_bonus", final_turn_no_bonus))
+	directives = cfg.get("directives", directives)
 
 
 func event_log() -> Array[String]:
