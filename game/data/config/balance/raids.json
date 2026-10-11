@@ -1,25 +1,137 @@
 {
-  "version": "1.0",
-  "source": "docs/07-balance.md §5 (K-T5, R6, R5, K-R3, MAP-1); лагеря MVP — 02e1-base-map-v1 §8/§9",
+  "version": "1.1",
+  "source": "docs/07-balance.md §5 (K-T5, R6, R5, K-R3, MAP-1); лагеря MVP — 02e1-base-map-v1 §8/§9; T-115: давление/тиры/сезон/директивы битов — зеркало 07-balance §5/§6 (K-M15)",
   "pressure_formula": "pressure = Base * Wealth * Anomalies * RegionHistory * GlobalPhase",
-  "raid_power": { "light": 15, "medium": 30, "large": 60 },
-  "defense": { "barracks": 0.2, "none": 0.0, "walls": "Post-MVP" },
+  "raid_power": {
+    "light": 15,
+    "medium": 30,
+    "large": 60
+  },
+  "defense": {
+    "barracks": 0.2,
+    "none": 0.0,
+    "walls": "Post-MVP"
+  },
   "loss_formula": "loss = power * (1 - defense)",
-  "loss_cap_per_day": 0.30,
-  "target_weights": { "food": 0.5, "wood": 0.3, "iron": 0.2 },
+  "loss_cap_per_day": 0.3,
+  "target_weights": {
+    "food": 0.5,
+    "wood": 0.3,
+    "iron": 0.2
+  },
   "visibility_formula": "1 + 0.5 * (баз - 1) + 0.2 * уровень_района",
-  "target_score": { "visibility": 0.5, "vulnerability": 0.3, "tiebreak": "меньший id" },
-  "source_bases": { "C1": 1, "C8": 1, "C2": 2, "C3": 2, "C4": 2, "C5": 2, "C6": 2, "C7": 2, "H5_boss": 4 },
+  "target_score": {
+    "visibility": 0.5,
+    "vulnerability": 0.3,
+    "tiebreak": "меньший id"
+  },
+  "source_bases": {
+    "C1": 1,
+    "C8": 1,
+    "C2": 2,
+    "C3": 2,
+    "C4": 2,
+    "C5": 2,
+    "C6": 2,
+    "C7": 2,
+    "H5_boss": 4
+  },
   "directives": {
-    "first_raid": { "turn": 7, "type": "floor", "tier": "light", "cr": 1, "enemies": 3 },
-    "final_raid": { "turn": 21, "type": "floor", "tier": "large", "cr": [6, 8], "enemies": 5, "boss": true }
+    "first_raid": {
+      "turn": 7,
+      "type": "floor",
+      "tier": "light",
+      "cr": 1,
+      "enemies": 3,
+      "tier_num": 1,
+      "composition": "tutorial"
+    },
+    "final_raid": {
+      "turn": 21,
+      "type": "floor",
+      "tier": "large",
+      "cr": [
+        6,
+        8
+      ],
+      "enemies": 5,
+      "boss": true,
+      "tier_num": 3,
+      "composition": "boss"
+    },
+    "district": {
+      "turn": 14,
+      "type": "district",
+      "raid": false
+    },
+    "strong_raid": {
+      "turn": 17,
+      "type": "window",
+      "tier_num": 2,
+      "composition": "strong_raid"
+    }
   },
   "camps_mvp": [
-    { "id": "C1", "region": "R02", "cr": 1, "enemies": 3 },
-    { "id": "C2", "region": "R05", "cr": 2, "enemies": 4 }
+    {
+      "id": "C1",
+      "region": "R02",
+      "cr": 1,
+      "enemies": 3
+    },
+    {
+      "id": "C2",
+      "region": "R05",
+      "cr": 2,
+      "enemies": 4
+    }
   ],
-  "boss": { "turn": 21, "cr": [6, 8], "note": "R5, K-R3: приходит в город финальным рейдом (H5 — лагерь-источник, не цель похода)" },
+  "boss": {
+    "turn": 21,
+    "cr": [
+      6,
+      8
+    ],
+    "note": "R5, K-R3: приходит в город финальным рейдом (H5 — лагерь-источник, не цель похода)"
+  },
   "pool_limit": "10 + командование*3 + районы*2 (MVP: пул = партия)",
-  "army_morale": { "over_50pct": 0.05, "under_25pct": -0.05 },
-  "warning_days": 1
+  "army_morale": {
+    "over_50pct": 0.05,
+    "under_25pct": -0.05
+  },
+  "warning_days": 1,
+  "pressure": {
+    "base": 4.0,
+    "wealth_per_stock": 0.005,
+    "wealth_min": 0.5,
+    "wealth_max": 2.0,
+    "anomalies_mult": 1.0,
+    "region_history_growth": 0.05,
+    "global_phase": {
+      "1": 1.0,
+      "2": 1.25,
+      "3": 1.5,
+      "21": 2.0
+    }
+  },
+  "tiers": {
+    "thresholds": {
+      "1": 30.0,
+      "2": 100.0,
+      "3": 250.0
+    },
+    "power": {
+      "1": 15.0,
+      "2": 30.0,
+      "3": 60.0
+    }
+  },
+  "cooldown_turns": 3,
+  "arrival_turns": 1,
+  "camp_k_p": 2,
+  "season": {
+    "length": 4,
+    "winter_index": 3,
+    "enemy_mult_winter": 1.25,
+    "final_turn_no_bonus": 21
+  }
 }
