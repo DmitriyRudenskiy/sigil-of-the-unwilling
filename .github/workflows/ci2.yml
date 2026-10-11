@@ -7,9 +7,13 @@
 name: CI-2
 
 on:
-  push:
-    branches: [main]
+  push: # AC тикета CI-2: «на каждый push/PR»
+    branches: ['**']
   pull_request:
+
+concurrency:
+  group: ci2-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   gate:
@@ -19,8 +23,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: System deps (Xvfb — MCP e2e запускает живой Godot, не headless)
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq xvfb
+      - name: System deps (Xvfb — MCP e2e запускает живой Godot, не headless; Godot runtime-libs)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb libfontconfig1 libxcursor1 libxinerama1 \
+            libxrandr1 libxi1 libgl1 libasound2t64 libpulse0
 
       - uses: actions/setup-node@v4
         with:
