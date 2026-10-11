@@ -12,6 +12,8 @@ const CAMPAIGN_SEED: int = 12345  # I1: seed = seed кампании
 var campaign: TurnDriver
 var settlement: SettlementProcessor
 var threats: ThreatSystem
+var last_battle_report: Dictionary = {}
+var _recruit_uid_counter: int = 1  # реестр жителей — счётчик (T-116 остеклит)
 var _day_timer: float = 0.0
 var _is_day_cycle_active: bool = true
 
@@ -60,10 +62,48 @@ func _threat_context() -> Dictionary:
 	}
 
 
+## Шов T-050 (акт 12-й итерации §2.2): бой K-канона — единичные комбатанты,
+## лестница 02d, без RNG. Статблоки — баланс-конфиг (K-M15, числа — T-041).
+## battle_report обязателен к {losses: [character_uid]} и эмитится в хук
+## населения с дня первого боя (потребитель зреет до T-116).
 func _request_battle(context: Dictionary) -> void:
-	# Шов к T-050 (бой-слой): TurnDriver.request_battle.
-	if campaign != null and not campaign.is_done():
-		campaign.request_battle(context)
+	if campaign == null or campaign.is_done():
+		return
+	campaign.request_battle(context)
+	var blocks := _load_statblocks()
+	if blocks.is_empty():
+		return  # статблоков нет (баланс-конфиг) — бой не разрешается
+	var tier: int = int(context.get("tier", 1))
+	var hero := CampaignBattle.make_recruit(
+		blocks.get("warrior", {}), _recruit_uid_counter)
+	var raider := CampaignBattle.make_combatant(
+		blocks.get("raider_tier_%d" % tier, blocks.get("raider_final", {})))
+	raider["id"] = "raider_t%d" % tier
+	raider["character_uid"] = -1  # рейдер — не житель (потерь населению нет)
+	last_battle_report = CampaignBattle.resolve(hero, raider, _on_battle_losses)
+	GameLogger.info("бой: %s за %d раунд(ов), потери %s"
+		% [last_battle_report.get("outcome", "?"),
+			last_battle_report.get("rounds", 0),
+			str(last_battle_report.get("losses", []))], "Main")
+
+
+## Хук населения (§2.2): потери боя — убыль населения (вакансии в
+## производстве — слой T-116). Эмит с дня первого боя, даже пустой.
+func _on_battle_losses(losses: Array, _report: Dictionary) -> void:
+	if losses.is_empty():
+		return
+	_recruit_uid_counter += losses.size()
+	settlement.population = maxi(0, settlement.population - losses.size())
+
+
+func _load_statblocks() -> Dictionary:
+	var f := FileAccess.open("res://data/config/balance/campaign.json", FileAccess.READ)
+	if f == null:
+		return {}
+	var data: Variant = JSON.parse_string(f.get_as_text())
+	if typeof(data) != TYPE_DICTIONARY:
+		return {}
+	return data.get("unit_statblocks", {})
 
 
 func _connect_ui():

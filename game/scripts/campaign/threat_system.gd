@@ -13,8 +13,9 @@ extends RefCounted
 ## тира (1–3) → генерация волны. Cooldown: после рейда аккумулятор → 0.
 ##
 ## Волна (T-070 AC): power = 15/30/60 (тиры 1/2/3, R6); loss = power × (1 − defense);
-##   defense = 0.2 при казарме, иначе 0 (R6); target: случайный из 3 ресурсов
-##   (веса 0.5/0.3/0.2 — T-070 AC; Q-M30: K-R3 composition «слабейший склад»);
+##   defense = 0.2 при казарме, иначе 0 (R6); target: слабейший запас —
+##   argmin(stocks) по реестру K-R2, тай-брейк лексикографический (Q-M30 (б),
+##   K-R3; веса 0.5/0.3/0.2 аннулированы в AC T-070 — 13-я итерация);
 ##   cap ≤30%/день на ресурс; герой в городе → бой (CR 1/2/6, шов T-050);
 ##   предупреждение — в хронике в ход генерации (day-1 на гранулярности хода).
 ##
@@ -28,7 +29,7 @@ extends RefCounted
 ## Директивы (K-R3, не календарь): floor — первый рейд ≈ ход 7 (tutorial-тир,
 ## гарантирован); window — финальный тир гарантирован к ход 21.
 
-const RESOURCES: Array = ["food", "wood", "iron"]  # K-R2 (порядок = веса)
+const RESOURCES: Array = ["food", "wood", "iron"]  # K-R2
 const BASE_PRESSURE: float = 4.0  # Base(city) — 07-balance §5
 const WEALTH_PER_STOCK: float = 0.005  # Wealth = clamp(1 + 0.005 × стопки, 0.5, 2.0)
 const WEALTH_MIN: float = 0.5
@@ -40,13 +41,12 @@ const TIER_THRESHOLDS: Dictionary = {1: 30.0, 2: 100.0, 3: 250.0}  # K-T5 (§5)
 const TIER_POWER: Dictionary = {1: 15.0, 2: 30.0, 3: 60.0}  # R6
 const DEFENSE_BARRACKS: float = 0.2  # R6
 const LOSS_CAP_FRACTION: float = 0.3  # cap ≤30%/день
-const TARGET_WEIGHTS: Dictionary = {"food": 0.5, "wood": 0.3, "iron": 0.2}
 const COOLDOWN_TURNS: int = 3  # K-T5
 const ARRIVAL_TURNS: int = 1  # прибытие в следующую threats-фазу
 const FIRST_RAID_FLOOR_TURN: int = 7  # floor (K-R3)
 const FINAL_RAID_TURN: int = 21  # window (K-R3)
 const CAMP_K_P: int = 2  # D-130
-const SCHEMA_VERSION: int = 1
+const SCHEMA_VERSION: int = 2  # v2: rng_state → campaign_seed (Q-M30 (б): цель — argmin, ГСЧ выведен)
 
 const SM_IDLE := "IDLE"
 const SM_CHARGING := "CHARGING"
@@ -70,13 +70,12 @@ var occupied_nodes: Array[String] = []
 var hero_in_city: bool = true
 var has_barracks: bool = false
 
-var rng: RandomNumberGenerator
+var campaign_seed: int  # I1 (seed кампании; бой наследует — T-050)
 var _event_log: Array[String] = []
 
 
 func _init(seed: int = 12345) -> void:
-	rng = RandomNumberGenerator.new()
-	rng.seed = seed  # I1
+	campaign_seed = seed  # I1
 
 
 func process_turn(turn: int, context: Dictionary = {}) -> Dictionary:
@@ -101,7 +100,7 @@ func process_turn(turn: int, context: Dictionary = {}) -> Dictionary:
 		wave = {}
 		region_cooldown = 0
 		accumulator = 0.0
-		_spawn_wave(turn, 3, true, report, 0)
+		_spawn_wave(turn, 3, true, report, 0, stocks)
 		report["raid"] = _strike_wave(turn, stocks, barracks, hero, battle_handler, report)
 		report["wave"] = wave.duplicate()
 		report["accumulator"] = 0.0
@@ -133,13 +132,13 @@ func process_turn(turn: int, context: Dictionary = {}) -> Dictionary:
 		_set_state(SM_CHARGING, turn, report)
 		for tier in [3, 2, 1]:
 			if accumulator >= float(TIER_THRESHOLDS[tier]):
-				_spawn_wave(turn, tier, false, report)
+				_spawn_wave(turn, tier, false, report, ARRIVAL_TURNS, stocks)
 				break
 
 	# 4. floor (K-R3): первый рейд ≈ ход 7 (tutorial-тир, гарантирован).
 	if turn == FIRST_RAID_FLOOR_TURN and raids_count == 0 and wave.is_empty() \
 			and region_cooldown == 0:
-		_spawn_wave(turn, 1, true, report)
+		_spawn_wave(turn, 1, true, report, ARRIVAL_TURNS, stocks)
 
 	report["accumulator"] = accumulator
 	report["wave"] = wave.duplicate()
@@ -201,8 +200,8 @@ func cr_range(turn: int) -> Array:
 
 
 func _spawn_wave(turn: int, tier: int, forced: bool, report: Dictionary,
-		arrival: int = ARRIVAL_TURNS) -> void:
-	var target: String = _pick_target()
+		arrival: int = ARRIVAL_TURNS, stocks: Dictionary = {}) -> void:
+	var target: String = _pick_target(stocks)
 	var camp_id: String = _place_camp(tier, report)
 	wave = {
 		"tier": tier,
@@ -218,16 +217,18 @@ func _spawn_wave(turn: int, tier: int, forced: bool, report: Dictionary,
 			% [turn, tier, arrival, cause], report)
 
 
-func _pick_target() -> String:
-	var total: float = 0.0
+## Цель рейда (Q-M30 (б), K-R3): слабейший запас = argmin(stocks) по реестру
+## K-R2; при равенстве минимумов — лексикографический порядок ресурсов
+## (I1-тай-брейк, прецедент лагерей). Чистая функция состояния: ГСЧ не нужен.
+func _pick_target(stocks: Dictionary) -> String:
+	var best: String = str(RESOURCES[0])
+	var best_val: float = float(stocks.get(best, 0.0))
 	for r in RESOURCES:
-		total += float(TARGET_WEIGHTS[r])
-	var roll: float = rng.randf() * total
-	for r in RESOURCES:
-		roll -= float(TARGET_WEIGHTS[r])
-		if roll <= 0.0:
-			return r
-	return str(RESOURCES.back())
+		var v: float = float(stocks.get(r, 0.0))
+		if v < best_val or (is_equal_approx(v, best_val) and str(r) < best):
+			best = str(r)
+			best_val = v
+	return best
 
 
 ## Размещение лагеря (D-130): BFS от города до глубины k_p = 2; сухие узлы
@@ -350,7 +351,7 @@ func to_dict() -> Dictionary:
 		"max_tier_raided": max_tier_raided,
 		"raid_state": raid_state,
 		"city_node": city_node,
-		"rng_state": rng.state,
+		"campaign_seed": campaign_seed,
 	}
 
 
@@ -365,6 +366,5 @@ static func from_dict(data: Dictionary) -> ThreatSystem:
 	t.max_tier_raided = int(data.get("max_tier_raided", 0))
 	t.raid_state = str(data.get("raid_state", SM_IDLE))
 	t.city_node = str(data.get("city_node", "city"))
-	if data.has("rng_state"):
-		t.rng.state = data["rng_state"]
+	t.campaign_seed = int(data.get("campaign_seed", 1))
 	return t
