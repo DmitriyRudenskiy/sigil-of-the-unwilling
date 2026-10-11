@@ -47,10 +47,14 @@ func _init_campaign() -> void:
 			"output_day": {"iron": 0.25}, "efficiency": 1.0},
 	]
 	threats = ThreatSystem.new(CAMPAIGN_SEED)
+	# T-122 (Q-M31): settlement — население/события (без production);
+	# production-расчёт — отдельный хук ПОСЛЕ threats (GDD-мандат §1).
 	campaign.settlement_hook = func() -> Dictionary:
-		return settlement.process_turn(WorldSeasons.production_mult())
+		return settlement.process_settlement()
 	campaign.threats_hook = func() -> Dictionary:
 		return threats.process_turn(campaign.current_turn, _threat_context())
+	campaign.production_hook = func() -> Dictionary:
+		return settlement.process_production(WorldSeasons.production_mult())
 
 
 func _threat_context() -> Dictionary:
@@ -123,13 +127,18 @@ func _process(delta: float):
 
 
 func _advance_day():
-	# Ход кампании (T-010): settlement (авто) → player → threats (авто).
+	# Ход кампании (T-010, T-122): 6 фаз GDD-мандата §1 (Q-M31):
+	# settlement (население/события) → player (движение) → caravans (no-op)
+	# → diplomacy (no-op) → threats (бой/рейды) → production (расчёт).
 	# I1: сезон синхронизирован с ходом драйвера — до settlement-хука.
 	if campaign != null and not campaign.is_done():
 		WorldSeasons.set_turns(campaign.current_turn)
 		campaign.advance_auto_phase()  # settlement (авто) → player
-		campaign.end_player_phase()    # player → threats (MVP: авто)
-		campaign.advance_auto_phase()  # threats (авто) → finish
+		campaign.end_player_phase()    # player → caravans (MVP: авто)
+		campaign.advance_auto_phase()  # caravans (no-op) → diplomacy
+		campaign.advance_auto_phase()  # diplomacy (no-op) → threats
+		campaign.advance_auto_phase()  # threats (авто) → production
+		campaign.advance_auto_phase()  # production (авто) → finish
 	if game_manager:
 		game_manager.on_day_passed()
 	if day_label:

@@ -1,6 +1,8 @@
 extends BaseTest
-## T-040 — settlement-фаза: stock/flow (K-D5), 3 ресурса (K-R2), SM дефицита,
+## T-040 — экономика кампании: stock/flow (K-D5), 3 ресурса (K-R2), SM дефицита,
 ## R3-кап, рождения (K-M12), clamp эффективности (07-balance §6), I1-детерминизм.
+## T-122 (Q-M31, раунд 8): расщепление на settlement (население/события,
+## позиция 1) + production (stock/flow-цикл, позиция 6, post-threats).
 ## 1 ход = DAYS_PER_SEASON = 20 дней (Q-M26).
 
 ## Здания с группами (T-040-остаток, 12-я итерация: Σ по 7 группам, 02e3 §9.4).
@@ -23,9 +25,15 @@ func _start_state() -> SettlementProcessor:
 	return p
 
 
+## T-122: полный ход = settlement (позиция 1) + production (позиция 6).
+func _full_turn(p: SettlementProcessor, season_mult: float = 1.0) -> Dictionary:
+	p.process_settlement()
+	return p.process_production(season_mult)
+
+
 func test_start_state_one_turn() -> void:
 	var p := _start_state()
-	var r: Dictionary = p.process_turn(1.0)
+	var r: Dictionary = _full_turn(p, 1.0)
 	# Еда: prod 2/день, cons 0.1×20 + 2×1 = 4/день → net −2/день; d15: B=0 → DEFICIT;
 	# d16–d20: prod ×0.25 = 0.5 → net −3.5 → B(20) = −17.5.
 	assert_float(p.stocks["food"]).is_equal_approx(-17.5, 1e-6)
@@ -50,7 +58,7 @@ func test_no_consumption_stays_ok() -> void:
 	p.stocks = {"food": 100.0, "wood": 0.0, "iron": 0.0}
 	p.population = 0
 	p.party_size = 0
-	var r: Dictionary = p.process_turn(1.0)
+	var r: Dictionary = _full_turn(p, 1.0)
 	assert_that(p.sm["food"]["state"]).is_equal("OK")
 	assert_float(p.stocks["food"]).is_equal(100.0)
 	# Нет производства еды → R3-кап 0 → население 0.
@@ -63,7 +71,7 @@ func test_sm_warn_transition() -> void:
 	var p := SettlementProcessor.new()
 	p.stocks = {"food": 26.0, "wood": 0.0, "iron": 0.0}
 	p.party_size = 1
-	p.process_turn(1.0)
+	_full_turn(p, 1.0)
 	assert_that(p.sm["food"]["state"]).is_equal("WARN")
 
 
@@ -72,7 +80,7 @@ func test_sm_deficit_recovery_three_days() -> void:
 	var p := SettlementProcessor.new()
 	p.stocks = {"food": 1.0, "wood": 0.0, "iron": 0.0}
 	p.sm = {"food": {"state": "DEFICIT", "days_positive": 0, "days_negative": 5}}
-	p.process_turn(1.0)
+	_full_turn(p, 1.0)
 	assert_that(p.sm["food"]["state"]).is_equal("OK")
 	var recovery_day: int = -1
 	for e in p.event_log():
@@ -87,7 +95,7 @@ func test_sm_warn_to_ok_recovery() -> void:
 	p.stocks = {"food": 5.0, "wood": 0.0, "iron": 0.0}
 	p.population = 1
 	p.sm = {"food": {"state": "WARN", "days_positive": 0, "days_negative": 0}}
-	p.process_turn(1.0)
+	_full_turn(p, 1.0)
 	assert_that(p.sm["food"]["state"]).is_equal("OK")
 
 
@@ -95,18 +103,18 @@ func test_efficiency_clamp() -> void:
 	# clamp [0.2; 2.5] (07-balance §6): eff 5.0 → 2.5; eff 0.1 → 0.2.
 	var p := SettlementProcessor.new()
 	p.buildings = [{"id": "farm_hi", "output_day": {"food": 1.0}, "efficiency": 5.0}]
-	var r: Dictionary = p.process_turn(1.0)
+	var r: Dictionary = _full_turn(p, 1.0)
 	assert_float(r["production"]["food"]).is_equal_approx(2.5 * 20.0, 1e-6)
 	p = SettlementProcessor.new()
 	p.buildings = [{"id": "farm_lo", "output_day": {"food": 1.0}, "efficiency": 0.1}]
-	r = p.process_turn(1.0)
+	r = _full_turn(p, 1.0)
 	assert_float(r["production"]["food"]).is_equal_approx(0.2 * 20.0, 1e-6)
 
 
 func test_season_mult_applied() -> void:
 	# Зима: production ×0.4 (Q-M27: season = turn, цикл 4; mult — инжкт из WorldSeasons).
 	var p := _start_state()
-	var r: Dictionary = p.process_turn(0.4)
+	var r: Dictionary = _full_turn(p, 0.4)
 	assert_float(r["production"]["wood"]).is_equal_approx(2.0 * 0.4 * 20.0, 1e-6)
 
 
@@ -114,7 +122,7 @@ func test_production_by_group() -> void:
 	# T-040-остаток (12-я итерация): production(r) = Σ_группы Σ_здания output ×
 	# clamp(эфф.) × season; отчёт — production_by_group (traceability, K-D5).
 	var p := _start_state()
-	var r: Dictionary = p.process_turn(1.0)
+	var r: Dictionary = _full_turn(p, 1.0)
 	# farm → «Земледельцы и Пивовары»: 15×2 + 5×0.5 = 32.5 (DEFICIT ×0.25 с d16).
 	assert_float(r["production_by_group"]["Земледельцы и Пивовары"]["food"]).is_equal_approx(32.5, 1e-6)
 	# sawmill → «Инженеры и Строители»: 2×20 = 40. mine → «Металлурги и Техники»: 1×20 = 20.
@@ -132,32 +140,37 @@ func test_production_by_group() -> void:
 func test_i1_determinism() -> void:
 	var a := _start_state()
 	var b := _start_state()
-	var ra: Dictionary = a.process_turn(1.0)
-	var rb: Dictionary = b.process_turn(1.0)
+	var ra: Dictionary = _full_turn(a, 1.0)
+	var rb: Dictionary = _full_turn(b, 1.0)
 	assert_that(JSON.stringify(ra)).is_equal(JSON.stringify(rb))
 	assert_that(JSON.stringify(a.to_dict())).is_equal(JSON.stringify(b.to_dict()))
 
 
 func test_serialization_roundtrip() -> void:
 	var p := _start_state()
-	p.process_turn(1.0)
+	_full_turn(p, 1.0)
 	var data: Dictionary = p.to_dict()
 	var p2 := SettlementProcessor.from_dict(data)
-	var r1: Dictionary = p.process_turn(1.0)
-	var r2: Dictionary = p2.process_turn(1.0)
+	var r1: Dictionary = _full_turn(p, 1.0)
+	var r2: Dictionary = _full_turn(p2, 1.0)
 	assert_that(JSON.stringify(r1)).is_equal(JSON.stringify(r2))
 	assert_that(JSON.stringify(p.to_dict())).is_equal(JSON.stringify(p2.to_dict()))
 
 
 func test_driver_integration() -> void:
-	# Драйвер (T-010) + процессор: settlement_hook = process_turn.bind(season_mult).
+	# Драйвер (T-010, T-122: 6 фаз) + процессор: settlement_hook =
+	# process_settlement, production_hook = process_production.bind(season_mult).
 	var driver := TurnDriver.new()
 	var p := _start_state()
-	driver.settlement_hook = p.process_turn.bind(1.0)
+	driver.settlement_hook = p.process_settlement.bind()
+	driver.production_hook = p.process_production.bind(1.0)
 	for i in 3:
 		driver.advance_auto_phase()  # settlement → player
-		driver.end_player_phase()    # player → threats
-		driver.advance_auto_phase()  # threats → finish (следующий settlement)
+		driver.end_player_phase()    # player → caravans
+		driver.advance_auto_phase()  # caravans → diplomacy
+		driver.advance_auto_phase()  # diplomacy → threats
+		driver.advance_auto_phase()  # threats → production
+		driver.advance_auto_phase()  # production → finish (следующий settlement)
 	assert_int(driver.current_turn).is_equal(4)
 	assert_int(p.population).is_equal(20)  # R3-кап 20 держится (Q-M28)
 	assert_float(p.stocks["food"]).is_less(0.0)  # дефицит еды (якорь «выживание», 06-economy)
@@ -169,3 +182,48 @@ func test_driver_integration() -> void:
 	var p2 := SettlementProcessor.from_dict(p_data)
 	assert_int(driver2.current_turn).is_equal(4)
 	assert_int(p2.population).is_equal(20)
+
+
+## T-122: материальность порядка — рейд (threats, позиция 5) бьёт
+## PRE-PRODUCTION запасы: production (позиция 6) идёт после урона.
+## Старые запасы 30/20/10; рейд сжигает всё (stocks → 0); production
+## добавляет 20 дней производства — итог = production, не production + старые.
+func test_t122_raid_hits_pre_production_stocks() -> void:
+	var p := _start_state()
+	var raid_hook := func() -> void:
+		p.stocks["food"] = 0.0
+		p.stocks["wood"] = 0.0
+		p.stocks["iron"] = 0.0
+	var driver := TurnDriver.new()
+	driver.settlement_hook = p.process_settlement.bind()
+	driver.threats_hook = raid_hook
+	driver.production_hook = p.process_production.bind(1.0)
+	driver.advance_auto_phase()  # settlement → player
+	driver.end_player_phase()    # player → caravans
+	driver.advance_auto_phase()  # caravans → diplomacy
+	driver.advance_auto_phase()  # diplomacy → threats (рейд ещё не бьёт)
+	assert_float(p.stocks["food"]).is_equal(30.0) \
+		.override_failure_message("до threats-хука запасы нетронуты")
+	driver.advance_auto_phase()  # threats (рейд: stocks → 0) → production
+	assert_float(p.stocks["food"]).is_equal(0.0) \
+		.override_failure_message("рейд (threats) должен бить запасы ДО production-расчёта")
+	driver.advance_auto_phase()  # production → finish
+	# Production с нуля: еда — d1–d2 prod 2 (OK/WARN), d3: B≤0 → DEFICIT,
+	# d3–d20 prod 0.5 → 13 − 80 = −67; дерево 40 − 0 = 40; железо 20 − 0 = 20.
+	assert_float(p.stocks["wood"]).is_equal_approx(40.0, 1e-6) \
+		.override_failure_message("production идёт после рейда: итог = production с pre-raid базой (0)")
+	assert_float(p.stocks["iron"]).is_equal_approx(20.0, 1e-6)
+
+
+## T-122: сезонность без изменений — зимний ход: рейд ×1.25 (threats) и
+## production ×0.4 (production) — в одном ходе, согласованно (WorldSeasons:
+## ход 4 = зима: enemy_mult 1.25, prod_mult 0.4).
+func test_t122_winter_turn_consistent() -> void:
+	WorldSeasons.set_turns(4)
+	assert_float(WorldSeasons.production_mult()).is_equal_approx(0.4, 1e-6)
+	assert_float(WorldSeasons.enemy_mult()).is_equal_approx(1.25, 1e-6)
+	var p := _start_state()
+	var prod_report: Dictionary = p.process_production(WorldSeasons.production_mult())
+	# Дерево: 2.0 × 0.4 × 20 = 16.0 (зиму production-фаза видит в том же ходе, где рейды ×1.25).
+	assert_float(prod_report["production"]["wood"]).is_equal_approx(16.0, 1e-6)
+	WorldSeasons.reset()  # не загрязнять статичный счётчик других тестов

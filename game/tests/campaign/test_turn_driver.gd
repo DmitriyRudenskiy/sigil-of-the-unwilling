@@ -1,7 +1,7 @@
 extends BaseTest
-## T-010: Цикл хода — машина фаз (settlement→player→threats), 21 ход,
-## ход = сезон, K-M9 бит-каркас (ходы 1/7/14/17/21), I1-детерминизм,
-## сериализуемое состояние + миграция по версиям (пост-условие T-110),
+## T-010: Цикл хода — машина фаз (T-122: 6 фаз, GDD-мандат §1, Q-M31),
+## 21 ход, ход = сезон, K-M9 бит-каркас (ходы 1/7/14/17/21), I1-детерминизм,
+## сериализуемое состояние + миграция по версиям (пост-условие T-110, v0→v1→v2),
 ## каркас вызова боёв. Логика фаз — T-040/T-070 (тут только каркас).
 
 const TurnDriver = preload("res://scripts/campaign/turn_driver.gd")
@@ -32,25 +32,39 @@ func test_initial_state() -> void:
 	assert_that(driver.is_done()).is_equal(false)
 
 
-func test_phase_order_settlement_player_threats() -> void:
+## T-122: порядок фаз — GDD-мандат §1 (дословно): «городские и популяционные
+## события → движение героя и армии → караваны и торговля → дипломатия
+## и совет → разрешение боёв и рейдов → расчёт производства».
+## MVP-срез (Q-M31 §1.3): settlement → player → caravans (no-op) →
+## diplomacy (no-op) → threats → production → settlement (следующий ход).
+func test_phase_order_mandate() -> void:
 	var driver := _new_driver()
 	driver.advance_auto_phase()
 	assert_that(driver.phase_name()).is_equal("player") \
 		.override_failure_message("settlement (авто) должна вести в player")
 	driver.end_player_phase()
+	assert_that(driver.phase_name()).is_equal("caravans") \
+		.override_failure_message("end_player_phase должна вести в caravans")
+	driver.advance_auto_phase()
+	assert_that(driver.phase_name()).is_equal("diplomacy") \
+		.override_failure_message("caravans (авто) должна вести в diplomacy")
+	driver.advance_auto_phase()
 	assert_that(driver.phase_name()).is_equal("threats") \
-		.override_failure_message("end_player_phase должна вести в threats")
+		.override_failure_message("diplomacy (авто) должна вести в threats")
+	driver.advance_auto_phase()
+	assert_that(driver.phase_name()).is_equal("production") \
+		.override_failure_message("threats (авто) должна вести в production (T-122: production ПОСЛЕ threats)")
 	driver.advance_auto_phase()
 	assert_that(driver.current_turn).is_equal(2)
 	assert_that(driver.phase_name()).is_equal("settlement") \
-		.override_failure_message("threats (авто) должна вести в settlement следующего хода")
+		.override_failure_message("production (авто) должна вести в settlement следующего хода")
 
 
 func test_campaign_ends_at_turn_21() -> void:
 	var driver := _new_driver()
 	while not driver.is_done():
 		match driver.phase_name():
-			"settlement", "threats":
+			"settlement", "caravans", "diplomacy", "threats", "production":
 				driver.advance_auto_phase()
 			"player":
 				driver.end_player_phase()
@@ -96,6 +110,25 @@ func test_migration_v0_to_v1() -> void:
 	assert_that(driver.phase_name()).is_equal("player")
 
 
+## T-122: v1-сохранение (3 фазы) → v2 (6 фаз): имена v1 сохраняются,
+## версия поднимается, состояние не теряется.
+func test_migration_v1_to_v2() -> void:
+	var v1 := {"turn": 9, "seed": 7, "phase": "threats", "schema_version": 1}
+	var migrated := TurnDriver.migrate(v1)
+	assert_that(migrated["schema_version"]).is_equal(TurnDriver.SCHEMA_VERSION)
+	assert_that(migrated["phase"]).is_equal("threats") \
+		.override_failure_message("v1-фаза threats сохраняется в v2")
+	var driver := TurnDriver.from_dict(v1)
+	assert_that(driver.current_turn).is_equal(9)
+	assert_that(driver.phase_name()).is_equal("threats")
+	# Новые v2-фазы валидны при сериализации.
+	driver.phase = TurnDriver.Phase.PRODUCTION
+	var data := driver.to_dict()
+	assert_that(data["phase"]).is_equal("production")
+	var restored := TurnDriver.from_dict(data)
+	assert_that(restored.phase_name()).is_equal("production")
+
+
 func test_campaign_section_passes_save_schema() -> void:
 	# Состояние драйвера в секции "campaign" проходит валидацию схемы T-110.
 	var driver := _new_driver()
@@ -126,9 +159,12 @@ func _run_sequence(seed: int) -> TurnDriver:
 	for i in 3:
 		if driver.is_done():
 			break
-		driver.advance_auto_phase()
-		driver.end_player_phase()
-		driver.advance_auto_phase()
+		driver.advance_auto_phase()  # settlement → player
+		driver.end_player_phase()    # player → caravans
+		driver.advance_auto_phase()  # caravans → diplomacy
+		driver.advance_auto_phase()  # diplomacy → threats
+		driver.advance_auto_phase()  # threats → production
+		driver.advance_auto_phase()  # production → finish (следующий settlement)
 	driver.request_battle({"cause": "raid"})
 	return driver
 
@@ -149,10 +185,31 @@ func test_phase_hooks_called() -> void:
 	var calls: Array = []
 	driver.settlement_hook = func() -> void:
 		calls.append("settlement")
+	driver.caravans_hook = func() -> void:
+		calls.append("caravans")
+	driver.diplomacy_hook = func() -> void:
+		calls.append("diplomacy")
 	driver.threats_hook = func() -> void:
 		calls.append("threats")
+	driver.production_hook = func() -> void:
+		calls.append("production")
 	driver.advance_auto_phase()
 	driver.end_player_phase()
 	driver.advance_auto_phase()
-	assert_that(calls).is_equal(["settlement", "threats"]) \
-		.override_failure_message("хуки фаз должны вызываться в автофазах")
+	driver.advance_auto_phase()
+	driver.advance_auto_phase()
+	driver.advance_auto_phase()
+	assert_that(calls).is_equal(["settlement", "caravans", "diplomacy", "threats", "production"]) \
+		.override_failure_message("хуки фаз должны вызываться в фиксированном порядке мандата (T-122)")
+
+
+## T-122: post-MVP-слоты (caravans/diplomacy) — no-op в MVP: без хуков
+## фазы проходят, порядок не ломается (Q-M31 §1.3: каркас существует).
+func test_post_mvp_slots_noop() -> void:
+	var driver := _new_driver()
+	driver.advance_auto_phase()
+	driver.end_player_phase()
+	driver.advance_auto_phase()  # caravans — хук не задан
+	driver.advance_auto_phase()  # diplomacy — хук не задан
+	assert_that(driver.phase_name()).is_equal("threats") \
+		.override_failure_message("no-op-слоты caravans/diplomacy должны вести в threats")

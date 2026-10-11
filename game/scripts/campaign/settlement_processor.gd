@@ -1,6 +1,11 @@
 class_name SettlementProcessor
 extends RefCounted
-## T-040 — settlement-фаза кампании: stock/flow-экономика (K-D5), 3 ресурса (K-R2).
+## T-040 — экономика кампании: stock/flow (K-D5), 3 ресурса (K-R2).
+## T-122 (Q-M31, раунд 8): расщепление на две фазы по GDD-мандату §1:
+##   settlement (позиция 1): население/события/настроение — process_settlement();
+##   production (позиция 6, ПОСЛЕ threats): stock/flow-цикл — process_production().
+## Рейды (threats, позиция 5) бьют pre-production запасы; сезонность без
+## изменений (зимний ход: рейд ×1.25 и production ×0.4 — в одном ходе).
 ## Формулы — 06-economy (без изменений):
 ##   production(r) = Σ_группы Σ_здания_в_группе output_day × clamp(эфф., 0.2, 2.5)
 ##                   × season_mult — 7 канонических экономических групп (02e3 §9.4;
@@ -50,9 +55,30 @@ var migration_hook: Callable
 var _event_log: Array[String] = []
 
 
-## Один ход settlement-фазы: DAYS_PER_SEASON дней. season_mult — из WorldSeasons
-## (инжект, не глобальное чтение — I1/детерминизм). Возвращает детерминированный отчёт.
-func process_turn(season_mult: float = 1.0) -> Dictionary:
+## Settlement-фаза (позиция 1, T-122): население/события/настроение.
+## R3-кап + рождения (K-M12) + миграция (F-3). БЕЗ production —
+## production-расчёт — в process_production() (позиция 6, post-threats).
+func process_settlement() -> Dictionary:
+	var report := {"events": [] as Array}
+	var cap: int = _population_cap()
+	var births: int = int(K_POP * float(WorldSeasons.DAYS_PER_SEASON))
+	var prev_pop: int = population
+	population = clampi(population + births, 0, cap)
+	if population != prev_pop:
+		_log("settlement: population %d → %d (births %d, cap %d)" % [prev_pop, population, births, cap], report)
+	# Миграция (F-3: формула — Репутация, T-116): MVP — no-op хук.
+	if migration_hook.is_valid():
+		migration_hook.call({"reputation": 0, "context": "settlement", "population": population})
+	report["population"] = population
+	report["population_cap"] = cap
+	return report
+
+
+## Production-фаза (позиция 6, T-122): stock/flow-цикл DAYS_PER_SEASON дней.
+## Идёт ПОСЛЕ threats (бой/рейды) — GDD-мандат §1 (Q-M31): рейды бьют
+## pre-production запасы. season_mult — из WorldSeasons (инжект, не
+## глобальное чтение — I1/детерминизм). Возвращает детерминированный отчёт.
+func process_production(season_mult: float = 1.0) -> Dictionary:
 	var days: int = WorldSeasons.DAYS_PER_SEASON
 	var by_group := {}
 	for g in GROUPS + [UNGROUPED]:
@@ -66,7 +92,6 @@ func process_turn(season_mult: float = 1.0) -> Dictionary:
 	}
 	for i in days:
 		_process_day(i + 1, season_mult, report)  # дни 1..DAYS_PER_SEASON (1-based, лог/отчёт)
-	_end_of_turn(report)
 	report["stocks"] = stocks.duplicate()
 	report["population"] = population
 	report["population_cap"] = _population_cap()
@@ -94,19 +119,6 @@ func _process_day(day: int, season_mult: float, report: Dictionary) -> void:
 		report["consumption"][r] += cons
 		stocks[r] = float(stocks[r]) + prod - cons
 		_update_sm(r, cons, day, report)
-
-
-func _end_of_turn(report: Dictionary) -> void:
-	# R3-кап + рождения (K-M12, MVP: все m = 1).
-	var cap: int = _population_cap()
-	var births: int = int(K_POP * float(WorldSeasons.DAYS_PER_SEASON))
-	var prev_pop: int = population
-	population = clampi(population + births, 0, cap)
-	if population != prev_pop:
-		_log("end_of_turn: population %d → %d (births %d, cap %d)" % [prev_pop, population, births, cap], report)
-	# Миграция (F-3: формула — Репутация, T-116): MVP — no-op хук.
-	if migration_hook.is_valid():
-		migration_hook.call({"reputation": 0, "context": "end_of_turn", "population": population})
 
 
 ## R3: min(жильё, floor(продовольствие_в_неделю / 0.7)).

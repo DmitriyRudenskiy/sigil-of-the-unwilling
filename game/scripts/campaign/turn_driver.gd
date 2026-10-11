@@ -1,76 +1,65 @@
 class_name TurnDriver
 extends RefCounted
-## T-010: Цикл хода — 21 ход, ход = сезон (T-032; авторский состав, раунд 6 §2.2).
-## Структура хода (01-core-loop «Структура хода»):
-##   1. SETTLEMENT — авто: производство, население, содержание районов,
-##      SM дефицита, 4 тика (логика — T-040);
-##   2. PLAYER — действия игрока (перемещения, бои, строительство, найм);
-##   3. THREATS — авто: функция давления, экологические давления, события (T-070).
-## Сериализуемое состояние (пост-условие T-110: миграция по версиям покрыта тестом).
-## Инварианты: I1 (одинаковые вводные → одинаковая последовательность событий),
-## K-M9 (бит-каркас: ходы 1/7/14/17/21).
-## Каркас вызова боёв: request_battle(context) + battle_request_handler (шов к T-050).
+## T-010: Цикл хода кампании — машина фаз (T-122: 6 фаз, GDD-мандат §1),
+## 21 ход, ход = сезон (WorldSeasons), K-M9 бит-каркас (ходы 1/7/14/17/21),
+## I1-детерминизм, сериализуемое состояние + миграция по версиям
+## (пост-условие T-110), каркас вызова боёв.
+##
+## Порядок фаз — GDD-мандат §1 (дословно): «городские и популяционные
+## события → движение героя и армии → караваны и торговля → дипломатия
+## и совет → разрешение боёв и рейдов → расчёт производства» (Q-M31,
+## закрыто, раунд 8: TurnDriver — единственный носитель; 6-фазный
+## порядок — канон; TurnDriver расширяется, а не заменяется).
+##
+## MVP-срез (Q-M31 §1.3): settlement_events (население/события) →
+## player (движение) → [caravans, diplomacy — post-MVP-слоты, no-op
+## в MVP, фазы существуют как каркас] → threats (бой/рейды) →
+## production (расчёт производства). Production — ПОСЛЕ threats
+## (T-122: рейды бьют pre-production запасы).
+##
+## Логика фаз — T-040 (settlement/production), T-070 (threats); тут —
+## каркас + порядок + хуки.
 
-const CAMPAIGN_TURNS := 21
-const SCHEMA_VERSION := 1
-## K-M9: бит-каркас (ходы 1/7/14/17/21) — MVP.
-const BIT_TURNS: Array[int] = [1, 7, 14, 17, 21]
+const SCHEMA_VERSION := 2  # v2 (T-122, раунд 8): набор фаз расширен
+## (caravans/diplomacy/production); v1-имена сохранены (без пере-маппинга).
+const TOTAL_TURNS := 21
+const BIT_TURNS := [1, 7, 14, 17, 21]  # K-M9: бит-каркас (07-balance §6)
 
-enum Phase { SETTLEMENT, PLAYER, THREATS, DONE }
+enum Phase { SETTLEMENT, PLAYER, CARAVANS, DIPLOMACY, THREATS, PRODUCTION, DONE }
 
 const PHASE_NAMES := {
 	Phase.SETTLEMENT: "settlement",
 	Phase.PLAYER: "player",
+	Phase.CARAVANS: "caravans",
+	Phase.DIPLOMACY: "diplomacy",
 	Phase.THREATS: "threats",
+	Phase.PRODUCTION: "production",
 	Phase.DONE: "done",
 }
 
 var current_turn: int = 1
 var phase: int = Phase.SETTLEMENT
-var seed: int = 0
+var seed: int = 12345  # campaign seed (I1: детерминизм; K-M9: бит-каркас)
 
-## Хуки фаз (логика — T-040/T-070; по умолчанию — no-op).
+## Хуки фаз (T-040/T-070 вешают свою логику; каркас — no-op).
+## settlement: население/события/настроение (T-040, без production — T-122).
 var settlement_hook: Callable
+## caravans/diplomacy: post-MVP-слоты (Q-M31 §1.3) — no-op в MVP.
+var caravans_hook: Callable
+var diplomacy_hook: Callable
+## threats: бой/рейды (T-070).
 var threats_hook: Callable
-## Каркас вызова боёв (T-050): handler(context: Dictionary) -> void.
+## production: расчёт производства (T-040) — ПОСЛЕ threats (T-122).
+var production_hook: Callable
+
+## Шов T-050: обработчик вызова боя (context: {cause, turn, ...}).
 var battle_request_handler: Callable
 
-var _event_log: Array[String] = []
+var _events: Array = []  # I1: детерминированный журнал (сериализуется)
 
 
-## K-M9: бит-ход?
 static func is_bit_turn(turn: int) -> bool:
 	return BIT_TURNS.has(turn)
-
-
-## Автофаза (settlement/threats) → следующая. Вызывает игровой слой.
-func advance_auto_phase() -> void:
-	match phase:
-		Phase.SETTLEMENT:
-			if settlement_hook.is_valid():
-				settlement_hook.call()
-			_enter_player_phase()
-		Phase.THREATS:
-			if threats_hook.is_valid():
-				threats_hook.call()
-			_finish_turn()
-		_:
-			push_warning("TurnDriver: advance_auto_phase() в фазе %s — игнор" % phase_name())
-
-
-## Игрок завершил действия → фаза угроз.
-func end_player_phase() -> void:
-	if phase != Phase.PLAYER:
-		push_warning("TurnDriver: end_player_phase() в фазе %s — игнор" % phase_name())
-		return
-	_enter_threats_phase()
-
-
-## Каркас вызова боя (T-050): фиксирует событие, передаёт контекст обработчику.
-func request_battle(context: Dictionary) -> void:
-	_log("battle_request:turn=%d" % current_turn)
-	if battle_request_handler.is_valid():
-		battle_request_handler.call(context)
 
 
 func phase_name() -> String:
@@ -81,9 +70,81 @@ func is_done() -> bool:
 	return phase == Phase.DONE
 
 
-## ---- Сериализуемое состояние (T-110) ----
-## Ключи совпадают с секцией "campaign" схемы MvpSaveSchema ({turn, seed, phase})
-## + schema_version (миграция по версиям).
+## Автофаза: одна авто-фаза за вызов (MVP: player — единственный
+## ручной; caravans/diplomacy — авто no-op-слоты).
+func advance_auto_phase() -> void:
+	match phase:
+		Phase.SETTLEMENT:
+			_log("settlement:turn=%d" % current_turn)
+			if settlement_hook.is_valid():
+				settlement_hook.call()
+			_enter_player_phase()
+		Phase.CARAVANS:
+			_log("caravans:turn=%d" % current_turn)
+			if caravans_hook.is_valid():
+				caravans_hook.call()
+			phase = Phase.DIPLOMACY
+		Phase.DIPLOMACY:
+			_log("diplomacy:turn=%d" % current_turn)
+			if diplomacy_hook.is_valid():
+				diplomacy_hook.call()
+			phase = Phase.THREATS
+		Phase.THREATS:
+			_log("threats:turn=%d" % current_turn)
+			if threats_hook.is_valid():
+				threats_hook.call()
+			phase = Phase.PRODUCTION
+		Phase.PRODUCTION:
+			_log("production:turn=%d" % current_turn)
+			if production_hook.is_valid():
+				production_hook.call()
+			_finish_turn()
+		Phase.PLAYER:
+			push_warning("TurnDriver: advance_auto_phase в player-фазе — ожидается end_player_phase")
+		Phase.DONE:
+			push_warning("TurnDriver: advance_auto_phase после DONE")
+
+
+## Игрок завершил player-фазу (движение) → caravans (Q-M31 §1.3).
+func end_player_phase() -> void:
+	if phase != Phase.PLAYER:
+		push_warning("TurnDriver: end_player_phase вне player-фазы (текущая: %s)" \
+			% phase_name())
+		return
+	_log("player_end:turn=%d" % current_turn)
+	phase = Phase.CARAVANS
+
+
+func _enter_player_phase() -> void:
+	phase = Phase.PLAYER
+	_log("player:turn=%d" % current_turn)
+
+
+func _finish_turn() -> void:
+	if current_turn >= TOTAL_TURNS:
+		phase = Phase.DONE
+		_log("campaign_done:turn=%d" % current_turn)
+		return
+	current_turn += 1
+	phase = Phase.SETTLEMENT
+
+
+## Шов T-050: запросить бой (context сериализуемый; I1).
+func request_battle(context: Dictionary) -> void:
+	_log("battle_request:turn=%d" % int(context.get("turn", current_turn)))
+	if battle_request_handler.is_valid():
+		battle_request_handler.call(context)
+
+
+func event_log() -> Array:
+	return _events.duplicate()
+
+
+func _log(msg: String) -> void:
+	_events.append(msg)
+
+
+## --- Сериализация (T-110: схема с версиями + миграция) ---
 
 func to_dict() -> Dictionary:
 	return {
@@ -91,63 +152,39 @@ func to_dict() -> Dictionary:
 		"seed": seed,
 		"phase": phase_name(),
 		"schema_version": SCHEMA_VERSION,
+		"events": _events.duplicate(),
 	}
 
 
 static func from_dict(data: Dictionary) -> TurnDriver:
-	var migrated := migrate(data)
+	var d := migrate(data)
 	var driver := TurnDriver.new()
-	driver.current_turn = maxi(1, int(migrated.get("turn", 1)))
-	driver.seed = int(migrated.get("seed", 0))
-	driver.phase = _phase_from_name(String(migrated.get("phase", "player")))
+	driver.current_turn = int(d.get("turn", 1))
+	driver.seed = int(d.get("seed", 12345))
+	driver.phase = _phase_from_name(str(d.get("phase", "player")))
+	driver._events = (d.get("events", []) as Array).duplicate()
 	return driver
 
 
-## Миграция по версиям (пост-условие T-110): v0 (без phase/schema_version) → v1.
-## Исходный словарь не изменяется.
+## Миграция по версиям (T-110-пост-условие; chain: v0 → v1 → v2).
 static func migrate(data: Dictionary) -> Dictionary:
 	var d := data.duplicate()
 	var version := int(d.get("schema_version", 0))
 	if version <= 0:
+		# v0 (до T-110): {turn, seed} без фазы → v1: дефолт player.
 		if not d.has("phase"):
-			# v0: ход без фазы — середина хода, дефолт = фаза игрока.
 			d["phase"] = "player"
-		d["schema_version"] = SCHEMA_VERSION
-	# Будущее: цепочка 1 → 2 → …
+		d["schema_version"] = 1
+	if version <= 1:
+		# v1 → v2 (T-122): набор фаз расширен (caravans/diplomacy/
+		# production); v1-имена (settlement/player/threats/done)
+		# сохраняются — пере-маппинг не нужен, только маркер версии.
+		d["schema_version"] = 2
 	return d
 
 
-## I1: детерминированная последовательность событий (копия).
-func event_log() -> Array[String]:
-	return _event_log.duplicate()
-
-
-func _log(event: String) -> void:
-	_event_log.append(event)
-
-
-func _enter_player_phase() -> void:
-	phase = Phase.PLAYER
-	_log("turn=%d:phase=player" % current_turn)
-
-
-func _enter_threats_phase() -> void:
-	phase = Phase.THREATS
-	_log("turn=%d:phase=threats" % current_turn)
-
-
-func _finish_turn() -> void:
-	if current_turn >= CAMPAIGN_TURNS:
-		phase = Phase.DONE
-		_log("turn=%d:campaign_done" % current_turn)
-		return
-	current_turn += 1
-	phase = Phase.SETTLEMENT
-	_log("turn=%d:phase=settlement" % current_turn)
-
-
 static func _phase_from_name(name: String) -> int:
-	for p in Phase.values():
+	for p in PHASE_NAMES:
 		if PHASE_NAMES[p] == name:
 			return p
-	return Phase.PLAYER
+	return Phase.PLAYER  # неизвестное имя → безопасный дефолт (T-110)
