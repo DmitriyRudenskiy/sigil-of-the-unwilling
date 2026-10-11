@@ -31,23 +31,26 @@ func test_seed_population_20() -> void:
 
 
 func test_age_bands_working_and_mentors() -> void:
+	# Catch §1.1 (14-я, раунд 3): пороги — из конфига, тест параметризован.
 	var p := _p()
 	p.residents = [
-		_resident(1, 10.0),   # ребёнок
-		_resident(2, 16.0),   # нижняя граница трудоспособных (включена)
-		_resident(3, 59.9),   # верхняя (исключена граница 60)
-		_resident(4, 60.0),   # наставник (60+ включён)
-		_resident(5, 74.0),   # наставник
+		_resident(1, p.working_min_years - 6.0),   # ребёнок
+		_resident(2, p.working_min_years),          # нижняя граница (включена)
+		_resident(3, p.working_max_years - 0.1),    # верхняя (граница исключена)
+		_resident(4, p.mentor_min_years),           # наставник (включён)
+		_resident(5, p.mentor_min_years + 14.0),    # наставник
 	]
 	assert_int(p.working_count()).is_equal(2)
 	assert_int(p.mentor_count()).is_equal(2)
 
 
 func test_lifespan_60_plus_luck() -> void:
+	# Формула жизни «60 + Удача» — числа из конфига (age_model), тест параметризован.
 	var p := _p()
+	var extra := 2.0 * p.lifespan_luck_years_per_point
 	p.residents = [
-		_resident(1, 60.4, 0),   # lifespan 60 → смерть после старения
-		_resident(2, 60.9, 2),   # lifespan 62 → живёт
+		_resident(1, p.lifespan_base_years + 0.4, 0),  # lifespan = base → смерть
+		_resident(2, p.lifespan_base_years + extra - 0.1, 2),  # lifespan = base+2·luck → жив
 	]
 	p.next_uid = 100
 	var rep := p.process_turn(20, 0.0, -1)
@@ -176,6 +179,30 @@ func test_immigrants_respect_cap() -> void:
 	p.seed_population(5)
 	p.process_turn(20, 100.0, 5)
 	assert_int(p.size()).is_equal(5)
+
+
+## — K-M15: числа возраста/миграции — в конфиге, не в коде (Catch §1.1/§1.2) —
+
+func test_age_and_migration_numbers_live_in_config() -> void:
+	var f := FileAccess.open(PopulationSystemScript.POPULATION_CONFIG_PATH, FileAccess.READ)
+	assert_bool(f != null).is_true()
+	var cfg: Dictionary = JSON.parse_string(f.get_as_text())
+	var age: Dictionary = cfg.get("age_model", {})
+	for key in ["working_min_years", "working_max_years", "mentor_min_years",
+		"lifespan_base_years", "lifespan_luck_years_per_point", "days_per_year"]:
+		assert_bool(age.has(key)).is_true()
+	var mig: Dictionary = cfg.get("migration", {})
+	for key in ["k_mig_per_turn", "rep_neutral"]:
+		assert_bool(mig.has(key)).is_true()
+	# Значения системы = значения конфига (источник истины — конфиг).
+	var p := _p()
+	assert_float(p.working_min_years).is_equal(float(age["working_min_years"]))
+	assert_float(p.working_max_years).is_equal(float(age["working_max_years"]))
+	assert_float(p.mentor_min_years).is_equal(float(age["mentor_min_years"]))
+	assert_float(p.lifespan_base_years).is_equal(float(age["lifespan_base_years"]))
+	assert_float(p.lifespan_luck_years_per_point) \
+		.is_equal(float(age["lifespan_luck_years_per_point"]))
+	assert_float(p.k_mig_per_turn).is_equal(float(mig["k_mig_per_turn"]))
 
 
 ## — Сериализация (секция "population" схемы T-110) + детерминизм —
