@@ -35,9 +35,17 @@ func _init_campaign() -> void:
 	campaign = TurnDriver.new()
 	campaign.seed = CAMPAIGN_SEED
 	settlement = SettlementProcessor.new()
-	settlement.stocks = {"food": 30.0, "wood": 20.0, "iron": 10.0}
-	settlement.population = 20
-	settlement.housing = 20
+	# T-117: стартовое состояние — сценарий campaign.json (R2), не хардкод.
+	var scenario := _load_campaign_json()
+	var start: Dictionary = scenario.get("start_state", {})
+	var res: Dictionary = start.get("resources", {})
+	settlement.stocks = {
+		"food": float(res.get("food", 30)),
+		"wood": float(res.get("wood", 20)),
+		"iron": float(res.get("iron", 10)),
+	}
+	settlement.population = int(start.get("population", 20))
+	settlement.housing = int(start.get("housing", 20))
 	settlement.buildings = [
 		{"id": "farm", "group": "Земледельцы и Пивовары",
 			"output_day": {"food": 1.0}, "efficiency": 1.0},
@@ -109,13 +117,16 @@ func _on_battle_losses(losses: Array, _report: Dictionary) -> void:
 
 
 func _load_statblocks() -> Dictionary:
+	return _load_campaign_json().get("unit_statblocks", {})
+
+
+## T-117: campaign.json — сценарий 21 хода (start_state/beats/scenario).
+func _load_campaign_json() -> Dictionary:
 	var f := FileAccess.open("res://data/config/balance/campaign.json", FileAccess.READ)
 	if f == null:
 		return {}
 	var data: Variant = JSON.parse_string(f.get_as_text())
-	if typeof(data) != TYPE_DICTIONARY:
-		return {}
-	return data.get("unit_statblocks", {})
+	return data if typeof(data) == TYPE_DICTIONARY else {}
 
 
 func _connect_ui():
