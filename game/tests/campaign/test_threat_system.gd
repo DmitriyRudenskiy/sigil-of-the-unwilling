@@ -135,21 +135,28 @@ func test_raid_resolution_power_defense_cap() -> void:
 	assert_float(ThreatSystem.TIER_POWER[3]).is_equal_approx(60.0, 1e-6)
 
 
-func test_target_weights_deterministic() -> void:
-	# Target: случайный из 3 ресурсов (веса 0.5/0.3/0.2, T-070 AC; Q-M30 — флаг).
-	# I1: один seed → одна последовательность; разные seeds → все 3 ресурса.
-	var ts_a := ThreatSystem.new(42)
-	var ts_b := ThreatSystem.new(42)
-	_run(7, ts_a)
-	_run(7, ts_b)
-	assert_that(str(ts_a.wave["target"])).is_equal(str(ts_b.wave["target"]))
-	assert_that(ThreatSystem.RESOURCES.has(ts_a.wave["target"])).is_equal(true)
-	var seen: Dictionary = {}
-	for seed in range(20):
-		var ts := ThreatSystem.new(seed)
-		_run(7, ts)
-		seen[str(ts.wave["target"])] = true
-	assert_int(seen.size()).is_equal(3)
+func test_target_argmin() -> void:
+	# Цель (Q-M30 (б), K-R3): слабейший запас = argmin(stocks); равенство
+	# минимумов → лексикографика (I1); финальный рейд — то же правило.
+	var ts := ThreatSystem.new(42)
+	assert_that(ts._pick_target({"food": 50.0, "wood": 10.0, "iron": 40.0})) \
+		.is_equal("wood")
+	# Равенство минимумов food = iron (5 < 50) → "food" (food < iron, лексикографика).
+	assert_that(ts._pick_target({"food": 5.0, "wood": 50.0, "iron": 5.0})) \
+		.is_equal("food")
+	# Ресурс отсутствует в стопках = 0 → слабейший.
+	assert_that(ts._pick_target({"food": 5.0, "wood": 50.0})).is_equal("iron")
+	# Сквозной: рейд бьёт по слабейшему запасу (стопки 50/10/40 → Wealth 1.5,
+	# пересечение тира 1 на ход 5, удар на ход 6 — цель wood).
+	var ts2 := ThreatSystem.new(42)
+	var stocks: Dictionary = {"food": 50.0, "wood": 10.0, "iron": 40.0}
+	var reports: Array = _run(6, ts2, stocks)
+	assert_that(str(reports[5]["raid"]["target"])).is_equal("wood")
+	# Финальный рейд (ход 21) — то же правило, без исключений.
+	var ts3 := ThreatSystem.new(42)
+	var stocks3: Dictionary = {"food": 100.0, "wood": 200.0, "iron": 50.0}
+	var reports3: Array = _run(21, ts3, stocks3)
+	assert_that(str(reports3[20]["raid"]["target"])).is_equal("iron")
 
 
 func test_sm_states_sequence() -> void:
@@ -244,7 +251,7 @@ func test_i1_determinism_full_campaign() -> void:
 
 func test_serialization_roundtrip() -> void:
 	# Сериализация (схема T-110): состояние mid-campaign восстанавливается;
-	# rng-состояние — I1 (продолжение детерминировано).
+	# campaign_seed — I1 (продолжение детерминировано; v2: rng выведен, Q-M30 (б)).
 	var ts := _new_ts(999)
 	_run(10, ts, START_STOCKS)
 	var data: Dictionary = ts.to_dict()
@@ -254,7 +261,7 @@ func test_serialization_roundtrip() -> void:
 	assert_int(ts2.max_tier_raided).is_equal(ts.max_tier_raided)
 	assert_that(ts2.raid_state).is_equal(ts.raid_state)
 	assert_that(JSON.stringify(ts2.camps)).is_equal(JSON.stringify(ts.camps))
-	assert_int(ts2.rng.state).is_equal(ts.rng.state)
+	assert_int(ts2.campaign_seed).is_equal(ts.campaign_seed)
 	# Продолжение: два восстановленных экземпляра сходятся.
 	var ts3 := ThreatSystem.from_dict(data)
 	var r2: Dictionary = ts2.process_turn(11, {"stocks": START_STOCKS.duplicate()})
