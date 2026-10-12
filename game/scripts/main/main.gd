@@ -30,6 +30,20 @@ func _ready():
 ## (единый корень: раннер D-157 проверяет ту же игру, что видит игрок).
 func _init_campaign() -> void:
 	composition = CampaignComposition.from_campaign_config(CAMPAIGN_SEED)
+	var persistence: WorldPersistence = Services.resolve(&"persistence")
+	if persistence == null:
+		return
+	# Проводка T-110 (cutover, раунд 6): профиль из создания доходит до
+	# кампании (hero_name — в сейв-секцию campaign); sign-слой (T-020) — за срезом.
+	if persistence.pending_new_game != null:
+		composition.hero_name = persistence.pending_new_game.name
+		persistence.pending_new_game = null
+	# Continue: кампанийный MVP-слот → load_save_state (схема T-110).
+	if persistence.pending_campaign_slot >= 0:
+		var result: Dictionary = MvpSaveManager.load_slot(persistence.pending_campaign_slot)
+		persistence.pending_campaign_slot = -1
+		if result.get("ok", false):
+			composition.load_save_state(result.get("state", {}))
 
 
 func _connect_ui():

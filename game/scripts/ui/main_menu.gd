@@ -119,12 +119,18 @@ func _loc() -> String:
     return TranslationServer.get_locale()
 
 func _refresh_continue_button() -> void:
-    _continue_btn.disabled = not SaveManager.has_save_in_slot(1)
+    # Cutover-проводка (раунд 6, T-110): Continue — кампанийный MVP-слот 1
+    # (MvpSaveManager), не легаси-сейв мира.
+    _continue_btn.disabled = not MvpSaveManager.has_save_in_slot(1)
 
 func _on_continue() -> void:
-    if not SaveManager.has_save_in_slot(1):
+    if not MvpSaveManager.has_save_in_slot(1):
         return
-    _save_load_screen.perform_load(1)
+    # Проводка T-110: Continue → main.tscn → load_save_state (слот 1).
+    var persistence: WorldPersistence = Services.resolve(&"persistence")
+    if persistence != null:
+        persistence.pending_campaign_slot = 1
+    get_tree().change_scene_to_file("res://scenes/main/main.tscn")
 
 func _on_new_game() -> void:
     _clear_session_caches()

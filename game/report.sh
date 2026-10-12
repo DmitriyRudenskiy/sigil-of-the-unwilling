@@ -28,7 +28,24 @@ echo
 echo "## MCP-ЛЕДЖЕР (pytest summary: passed/failed/skipped, время, exit)"
 mcp_line=$(grep -E '[0-9]+ (passed|failed)[^)]*in [0-9.]+s' /tmp/report_run_tests.log | tail -1)
 echo "${mcp_line:-PYTEST: summary нет (SKIPPED — причина в логе run_tests.sh)}"
+grep 'PYTEST LEDGER' /tmp/report_run_tests.log | tail -1 || true
 echo "Леджер двухстрочный: GdUnit4 (TOTAL выше) + MCP (строка выше)"
+echo "## CI-2 (GitHub Actions; api.github.com без токена — раунд 6 §3.3)"
+SLUG=$(git remote get-url origin 2>/dev/null | sed -E 's#.*github\.com[:/]##; s#\.git$##')
+CI2_HTTP=$(curl -s -o /tmp/ci2_api.json -w '%{http_code}' --max-time 20 "https://api.github.com/repos/$SLUG/actions/runs?per_page=3" 2>/dev/null || echo 000)
+if [ "$CI2_HTTP" = "200" ]; then
+	python3 - <<'PY'
+import json
+d = json.load(open("/tmp/ci2_api.json"))
+if not d.get("workflow_runs"):
+    print("CI-2: прогонов ещё нет")
+for r in d["workflow_runs"]:
+    print("CI-2: %s | %s | %s | %s | %s" % (r["name"], r["head_sha"][:8], r["status"], r["conclusion"], r["created_at"]))
+PY
+else
+	echo "CI-2: api.github.com HTTP $CI2_HTTP — репозиторий приватен или сеть недоступна. ВЛАДЕЛЬЦУ: статус только через залогиненный gh/токен (вне реестра)"
+fi
+echo "exit CI-2-статус-блока = 0 (блок информационный, не гейтит)"
 echo "## DOCS-LINKS (check_docs_links.py)"
 python3 scripts/check_docs_links.py
 echo "exit check_docs_links = $?"

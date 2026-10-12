@@ -27,7 +27,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq xvfb libfontconfig1 libxcursor1 libxinerama1 \
-            libxrandr1 libxi1 libgl1 libasound2t64 libpulse0
+            libxrandr2 libxi6 libgl1 libasound2t64 libpulse0
 
       - uses: actions/setup-node@v4
         with:
@@ -51,6 +51,21 @@ jobs:
 
       - name: Checkers (uid pairs, case dups, conflict markers, asset+.import)
         run: bash scripts/ci2_checkers.sh
+
+      - name: Lint (gdtoolkit: gdparse — gate; gdlint — report-only)
+        # Раунд 10 §3.4: lint — отдельный шаг (не в первом прогоне). gdparse
+        # (синтаксис) гейтит с первого дня; gdlint (стиль) — report-only до
+        # утверждения владельцем конфига/политики (не гейтит: не красим гейт
+        # на первом же прогоне, D-144 — main только через зелёный гейт).
+        run: |
+          python3 -m venv /tmp/ci2-lint-venv
+          /tmp/ci2-lint-venv/bin/pip install -q gdtoolkit==4.12.0
+          cd game
+          find scripts tests -name "*.gd" -print0 \
+            | xargs -0 -n50 /tmp/ci2-lint-venv/bin/gdparse
+          find scripts tests -name "*.gd" -print0 \
+            | xargs -0 -n50 /tmp/ci2-lint-venv/bin/gdlint \
+            || echo "GDLINT: report-only (violations logged, not gating)"
 
       - name: Gate (GdUnit4 + MCP e2e)
         env:

@@ -4,12 +4,28 @@ tags:
   - gdd
   - process
 status: reference
-date: 2026-10-11
+date: 2026-10-12
 ---
 
 # CHANGELOG — docs/
 
 Журнал структурных и содержательных изменений документов. Формат: дата — что — почему — коммит.
+
+## 2026-10-12 (раунд 6: **сведение двойного cutover (D-164)** — канон `scenes/archive/`, единый smoke `test_full_cycle`; **проводка T-110** (Continue → load_save_state, pending_new_game → hero_name); **CI-2: первый раннер-прогон — красный, загрузочный фикс** (apt: libxrandr1/libxi1 → libxrandr2/libxi6); **pytest.ini: −x, леджер-равенство** (D-165); D-164/D-165)
+
+- **Сведение двойного cutover (D-164, приказ раунда 6 §1):** параллельные исполнения акта D-157 (раунд 5 — этот агент, `scenes/archive/`; раунд 10 — основная сессия, `scenes/legacy/`) сведены в одну линию: канон архива — `scenes/archive/world.tscn` (раньше в main; `legacy/` снят), единый smoke-контракт — `test_full_cycle.py` (навигация меню→создание→main.tscn + ход 1→2 + hero-проводка; дубли `test_cutover_smoke.py` и `test_character_creation.py` удалены), фикстура `full_cycle` — по реальной навигации в кампанию, world-слой-тесты (romance ×3) — на `full_game` (архивный путь). Регистры раунда 10 (D-163, CI-2 lint, CI-4 orphan-классификация) сохранены, D-163 дополнен сведением.
+- **Проводка T-110 (приказ §3.2):** Continue читает кампанийный MVP-слот (`MvpSaveManager` → `pending_campaign_slot` → `load_save_state`); профиль создания (`pending_new_game`) доходит до кампании (`composition.hero_name` → секция campaign). Тесты: e2e `test_campaign_continue.py`, smoke-assert в `test_full_cycle`, юнит `test_campaign_wiring.gd` 2/2.
+- **CI-2: первый раннер-прогон исполнен — verbatim статус (приказ §3.3):** api.github.com (без токена, репозиторий публичен — `private: false`): `CI-2 | 3ddb3cf9 | push | completed | failure` (и все 6 прогонов красные). Диагноз по шагам jobs-API: падение — шаг 3 «System deps» (остальные skipped); лог тела — 403 «Must have admin rights» (вне токена). Причина по тексту workflow: `apt-get install libxrandr1 libxi1` — несуществующие в Ubuntu имена (канон: `libxrandr2`, `libxi6`). **Загрузочный фикс применён** (мелкий, без редизайна). Статус-блок CI-2 добавлен в `report.sh` (tokenless, фолбэк — флаг владельцу).
+- **pytest.ini / леджер-равенство (приказ §2, D-165):** `-x` убран из `addopts` (fixed-green-семья CI-4: прерванный прогон выглядел почти зелёным — «11 passed» при collected 39); `run_tests.sh` печатает `PYTEST LEDGER: passed/skipped/failed/errors/collected` и красит при `сумма != collected`; отчёт — «passed N / collected M», N==M (CI-1(14)).
+- **D-164 (протокол):** параллельное исполнение одного директива двумя сессиями легитимно; расхождения разрешает convergence-аудит (прецедент — двойной cutover).
+- **Гейт (4 уровня, D-147):** см. ниже в отчёте (вставляется из вывода, D-138).
+
+## 2026-10-11 (раунд 10: **cutover-акт (D-157) исполнен — milestone**: навигация → main.tscn, world.tscn → архив, MCP e2e на новых путях (smoke + world-фикстура); CI-2: lint-шаг (gdtoolkit); CI-4: orphan-классификация 169; D-163)
+
+- **CUTOVER-АКТ (D-157) — ИСПОЛНЕН (milestone; D-163, приказ раунда 10 §1.1 — исполнитель текущая сессия, назначение явное).** (1) Навигация: New Game → создание → `main.tscn` (K-канон: TurnDriver composition root); Continue/Load → `main.tscn` (остаток T-110: кампанийный save-load-вайринг). (2) `world.tscn` → `scenes/legacy/world.tscn` (архив, недостижим из навигации; 11 ссылок следуют за сценой — GdUnit world-свиты ×6, MCP ×4, world_state_serializer; замороженный слой Q-M31 сохраняет свои тесты). (3) MCP e2e: новый smoke `test_cutover_smoke.py` (меню → New Game → создание → main.tscn → ход 1→2, не done) + фикстура `full_cycle` (6 world-тестов) доставляет профиль через pending_new_game в архивный мир. **Отклонение (класс D-156, флаг):** механический «×4 → main.tscn» не исполним — ссылки кормят ~20 world-тестов (заморожены, Q-M31); интент (MCP зелёный на новых путях) сохранён. Гейт: GdUnit 2380/0/0 (169 orphans), MCP 39/1 (172.68s), exit 0.
+- **CI-2: lint-шаг (gdtoolkit) — отдельный шаг (приказ раунда 10 §3.4, «не в первом прогоне»).** `gdparse` (синтаксис) — гейт с первого дня; `gdlint` (стиль) — report-only до утверждения владельцем конфига/политики (D-144: не красим гейт на первом же прогоне).
+- **CI-4: orphan-классификация 169 (приказ раунда 10 §2.2).** 128/169 (76%) — `test_hero_identity_battle.gd` (1 файл); далее test_scenario_pilot 17, test_relationships_component 8, test_hero_serialize 7, test_load_calculator 4, test_hero_backpack 2, theme/data ×1×3. Классификация — в тикете CI-4 (реальные сироты / ограничения GdUnit API / гигиена); механизм карантина — TBD (держатель: CI/владелец).
+- **D-163 (акт):** cutover-акт исполнен (состав, отклонение, остаток T-110, гейт). Коллизия №12 (D-139(4)): origin/main 239f342 → aa4da8f (владелец смержил раунд 9, PR #26) — мерж чистый (без перекрытий: 6 файлов раунда 9 дисджойнтны от cutover-изменений).
 
 ## 2026-10-11 (раунд 9: CI-2 запущен (workflow + чекеры); сейв-схема — Catch акта композита §3 (тест на каждую обязательную секцию); D-162 (JSON fixed-point-норма); статус cutover — в отчёте первым пунктом)
 
