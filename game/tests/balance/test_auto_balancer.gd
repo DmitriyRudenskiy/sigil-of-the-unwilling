@@ -12,17 +12,17 @@ func before_test() -> void:
 
 ## Initial configuration loads correctly
 func test_initial_config() -> void:
-	assert_that(balancer.target_survival_rate == 0.85).override_failure_message("Target survival rate should be 85%")
-	assert_that(balancer.target_resource_buffer == 3).override_failure_message("Target buffer should be 3 days")
-	assert_that(balancer.simulation_days == 100).override_failure_message("Simulation should run 100 days")
-	assert_that(balancer.num_simulations == 50).override_failure_message("Should run 50 simulations")
+	assert_bool(bool(balancer.target_survival_rate == 0.85)).override_failure_message("Target survival rate should be 85%").is_true()
+	assert_bool(bool(balancer.target_resource_buffer == 3)).override_failure_message("Target buffer should be 3 days").is_true()
+	assert_bool(bool(balancer.simulation_days == 100)).override_failure_message("Simulation should run 100 days").is_true()
+	assert_bool(bool(balancer.num_simulations == 50)).override_failure_message("Should run 50 simulations").is_true()
 
 
 ## Resource production values are loaded
 func test_resource_production_loaded() -> void:
 	assert_bool(balancer._resource_production.has("wood")).override_failure_message("Wood production should exist")
 	assert_bool(balancer._resource_production.has("food")).override_failure_message("Food production should exist")
-	assert_that(balancer._resource_production["wood"] == 10.0).override_failure_message("Wood production should be 10/day")
+	assert_bool(bool(balancer._resource_production["wood"] == 10.0)).override_failure_message("Wood production should be 10/day").is_true()
 
 
 ## Single simulation returns valid structure
@@ -72,8 +72,8 @@ func test_event_application() -> void:
 	var resources = {"food": 20, "wood": 30}
 	var event = {"type": "windfall", "effect": {"wood": 15}}
 	balancer._apply_event(resources, event)
-	assert_that(resources["wood"] == 45).override_failure_message("Wood should increase by 15")
-	assert_that(resources["food"] == 20).override_failure_message("Food should remain unchanged")
+	assert_bool(bool(resources["wood"] == 45)).override_failure_message("Wood should increase by 15").is_true()
+	assert_bool(bool(resources["food"] == 20)).override_failure_message("Food should remain unchanged").is_true()
 
 
 ## Negative event doesn't create negative resources
@@ -81,7 +81,7 @@ func test_negative_event_floor() -> void:
 	var resources = {"food": 3}
 	var event = {"type": "drought", "effect": {"food": -10}}
 	balancer._apply_event(resources, event)
-	assert_that(resources["food"] == 0).override_failure_message("Food should floor at 0, not go negative")
+	assert_bool(bool(resources["food"] == 0)).override_failure_message("Food should floor at 0, not go negative").is_true()
 
 
 ## Adjustment calculation for low survival
@@ -104,7 +104,7 @@ func test_no_adjustments_balanced() -> void:
 		"bottlenecks": []
 	}
 	var adjustments = balancer._calculate_adjustments(mock_results)
-	assert_that(adjustments.size() == 0).override_failure_message("No adjustments needed for balanced game")
+	assert_bool(bool(adjustments.size() == 0)).override_failure_message("No adjustments needed for balanced game").is_true()
 
 
 ## Full simulation suite runs without errors
@@ -121,5 +121,5 @@ func test_full_simulation_suite() -> void:
 ## Balance entry point executes successfully
 func test_balance_early_game_entry() -> void:
 	var results = balancer.balance_early_game()
-	assert_that(results != null).override_failure_message("Should return results object")
+	assert_bool(bool(results != null)).override_failure_message("Should return results object").is_true()
 	assert_bool(results.survival_rate >= 0.0).override_failure_message("Valid survival rate calculated")
