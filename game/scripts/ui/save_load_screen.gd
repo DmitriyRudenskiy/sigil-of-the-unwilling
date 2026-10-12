@@ -113,7 +113,7 @@ func _format_slot_info(state: Dictionary) -> String:
 
 func _on_load_pressed(slot_index: int) -> void:
 	var slot := slot_index + 1
-	if not SaveManager.has_save_in_slot(slot):
+	if not MvpSaveManager.has_save_in_slot(slot):
 		_error_label.text = GameText.no_save_found()
 		return
 	load_requested.emit(slot)

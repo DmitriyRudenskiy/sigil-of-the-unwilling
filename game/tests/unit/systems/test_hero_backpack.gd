@@ -32,16 +32,19 @@ func test_cart_bonus_expands_cap() -> void:
 
 
 func test_component_serializes_bonus() -> void:
+	# Орфаны (CI-4, раунд 11 §4): компоненты — Node, без free() = 2 сироты.
 	var comp := HeroStrategicResourcesComponent.new()
 	comp.strategic.capacity_bonus = 6
 	var data: Dictionary = comp.serialize()
 	assert_int(int(data.get("backpack_bonus", 0))).is_equal(6)
+	comp.free()
 	var comp2 := HeroStrategicResourcesComponent.new()
 	comp2.deserialize(data)
 	assert_int(comp2.strategic.total_cap()).is_equal(18)
 	# Старый сейв без бонуса
 	comp2.deserialize({})
 	assert_int(comp2.strategic.total_cap()).is_equal(GameNumbersHero.BACKPACK_TOTAL_CAP)
+	comp2.free()
 
 
 func test_city_unload_moves_backpack_to_storage() -> void:

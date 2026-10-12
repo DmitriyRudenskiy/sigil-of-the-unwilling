@@ -197,3 +197,4 @@ func test_battle_bonus_excludes_social_stats() -> void:
 	assert_that(b["attack"]).is_equal(3)
 	assert_that(b["defense"]).is_equal(1)
 	assert_bool(not b.has("int") and not b.has("cha"))
+	comp.free()  # CI-4 (раунд 11 §4): HeroStatsComponent — Node

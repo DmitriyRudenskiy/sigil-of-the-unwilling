@@ -19,6 +19,7 @@ func test_registry_unknown_id_falls_back() -> void:
 	var tex := reg.get_icon(&"no_such_resource_xyz")
 	assert_that(tex).is_not_null()
 	assert_bool(tex == load(ThemeConfig.ICON_FALLBACK)).is_true()
+	reg.free()  # CI-4 (раунд 11 §4): ResourceRegistry — Node
 
 func test_building_unknown_id_falls_back() -> void:
 	var tex := BuildingDefs.get_icon(&"no_such_building_xyz")
