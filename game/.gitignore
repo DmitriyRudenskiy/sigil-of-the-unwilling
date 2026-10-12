@@ -10,6 +10,6 @@ addons/godot-mcp/
 # Артефакт сборки godot-mcp (npm run build копирует скрипты сюда)
 addons/godot-mcp-build/
 # Тестовый фреймворк gdUnit4 (устанавливается локально из репозитория вендора, см. game/tests/README.md)
-addons/gdunit4/
+# addons/gdunit4/ — ВЕНДОРИТСЯ в репо (CI-2 раннеру нужен GdUnitCmdTool; урок 2026-10-12: ignore → раннер не мог запустить GdUnit вообще)
 # Артефакт инъекции godot-mcp
 mcp_interaction_server.gd

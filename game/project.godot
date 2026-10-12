@@ -107,6 +107,7 @@ mute={
 
 locale/translations=PackedStringArray("res://locale/ru.po", "res://locale/en.po")
 locale/fallback="ru"
+locale/test="ru"
 
 [rendering]
 

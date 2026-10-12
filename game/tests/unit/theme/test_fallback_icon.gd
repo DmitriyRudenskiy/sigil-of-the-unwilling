@@ -14,7 +14,7 @@ func test_fallback_file_exists_and_loads() -> void:
 	assert_bool(load(ThemeConfig.ICON_FALLBACK) is Texture2D).is_true()
 
 func test_registry_unknown_id_falls_back() -> void:
-	var reg := ResourceRegistry.new()
+	var reg: ResourceRegistry = auto_free(ResourceRegistry.new())
 	reg.ensure_definitions()
 	var tex := reg.get_icon(&"no_such_resource_xyz")
 	assert_that(tex).is_not_null()

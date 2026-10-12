@@ -52,6 +52,9 @@ if [ -z "$GODOT" ]; then
 fi
 echo "GODOT: $GODOT"
 
+# SKIP_GDUNIT=1 — MCP-only прогон (CI-2 эшелонирование, раунд 7 §1.3: GdUnit —
+# отдельный шаг, MCP-шаг не прогоняет GdUnit повторно).
+if [ "${SKIP_GDUNIT:-0}" != "1" ]; then
 echo "=== gdUnit4: unit + integration + functional ==="
 # Pre-import to refresh the global class cache (class_name).
 "$GODOT" --headless --path . --import >/dev/null 2>&1
@@ -64,6 +67,7 @@ if [ "$RC" -ne 0 ] && [ "$RC" -ne 101 ]; then
 
 fi
 
+fi
 echo ""
 echo "=== MCP tests (tugcantopaloglu/godot-mcp) ==="
 MCP_SERVER="${GODOT_MCP_SERVER:-$PWD/addons/godot-mcp/build/index.js}"

@@ -29,7 +29,7 @@ func test_need_and_school_icons_load() -> void:
 		assert_bool(load(path) is Texture2D).is_true()
 
 func test_resource_registry_get_icon() -> void:
-	var reg := ResourceRegistry.new()
+	var reg: ResourceRegistry = auto_free(ResourceRegistry.new())
 	reg.ensure_definitions()
 	var tex := reg.get_icon(&"wood")
 	assert_that(tex).is_not_null()

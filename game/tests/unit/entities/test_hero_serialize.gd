@@ -4,7 +4,7 @@ extends BaseTest
 
 func test_stats_sex_roundtrip_and_old_save() -> void:
 	# team-romance-roleplay: пол героя сохраняется в сейв, старый сейв → male
-	var comp := HeroStatsComponent.new()
+	var comp: HeroStatsComponent = auto_free(HeroStatsComponent.new())
 	var profile := HeroBuildProfile.new()
 	profile.name = "Тест"
 	profile.sex = "female"
@@ -16,12 +16,12 @@ func test_stats_sex_roundtrip_and_old_save() -> void:
 	assert_that(comp.sex).is_equal("female")
 	var data: Dictionary = comp.serialize()
 	assert_that(data.get("sex")).is_equal("female")
-	var comp2 := HeroStatsComponent.new()
+	var comp2: HeroStatsComponent = auto_free(HeroStatsComponent.new())
 	comp2.deserialize(data)
 	assert_that(comp2.sex).is_equal("female")
 	# старый сейв без поля sex
 	data.erase("sex")
-	var comp3 := HeroStatsComponent.new()
+	var comp3: HeroStatsComponent = auto_free(HeroStatsComponent.new())
 	comp3.deserialize(data)
 	assert_that(comp3.sex).is_equal("male")
 
@@ -98,7 +98,7 @@ func test_default_army_cap() -> void:
 # --- social-stats-weapon-tech: миграция старого сейва (4 стата -> 8) ---
 
 func test_stats_migration_old_save_gets_social_stats() -> void:
-	var comp := HeroStatsComponent.new()
+	var comp: HeroStatsComponent = auto_free(HeroStatsComponent.new())
 	comp.hero_race = "elf"
 	comp.hero_class = "wizard"
 	# старый формат: только 4 боевых стата
@@ -117,7 +117,7 @@ func test_stats_migration_old_save_gets_social_stats() -> void:
 	assert_int(comp.stats["luk"]).is_equal(2)
 
 func test_stats_migration_new_save_untouched() -> void:
-	var comp := HeroStatsComponent.new()
+	var comp: HeroStatsComponent = auto_free(HeroStatsComponent.new())
 	var data := {
 		"hero_name": "New",
 		"stats": {"attack": 5, "defense": 2, "spell_power": 8, "knowledge": 4,
@@ -132,7 +132,7 @@ func test_stats_migration_new_save_untouched() -> void:
 	assert_int(comp.stats["luk"]).is_equal(6)
 
 func test_stats_roundtrip_8_stats() -> void:
-	var comp := HeroStatsComponent.new()
+	var comp: HeroStatsComponent = auto_free(HeroStatsComponent.new())
 	comp.apply_build((func() -> HeroBuildProfile:
 		var p := HeroBuildProfile.new()
 		p.name = "X"; p.race = "dwarf"; p.character_class = "barbarian"
@@ -140,6 +140,6 @@ func test_stats_roundtrip_8_stats() -> void:
 		return p
 	).call())
 	var data := comp.serialize()
-	var comp2 := HeroStatsComponent.new()
+	var comp2: HeroStatsComponent = auto_free(HeroStatsComponent.new())
 	comp2.deserialize(data)
 	assert_dict(comp2.stats).is_equal(comp.stats)

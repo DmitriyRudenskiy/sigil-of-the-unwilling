@@ -46,7 +46,7 @@ func test_pilot_extends_balance_probe() -> void:
 
 func test_collector_metrics_shape() -> void:
 	var role: ScenarioRole = ScenarioPilot.make_role("collector", ScenarioTargets.role("collector"))
-	var pilot := _FakePilot.new()
+	var pilot: _FakePilot = auto_free(_FakePilot.new())
 	var m: Dictionary = role.metrics(pilot)
 	assert_bool(m.has("rare_extracted"))
 	assert_that(int(m.get("rare_goal", 0)) == 20)
@@ -56,7 +56,7 @@ func test_collector_metrics_shape() -> void:
 func test_collector_collect_target_prefers_rare() -> void:
 	# Редкий узел дальше, обычный ближе — политика должна выбрать редкий.
 	var role: ScenarioRole = ScenarioPilot.make_role("collector", ScenarioTargets.role("collector"))
-	var pilot := _FakePilot.new()
+	var pilot: _FakePilot = auto_free(_FakePilot.new())
 	pilot.sp.set_res(Vector2i(1, 0), 0)  # обычный (wood) — рядом
 	pilot.sp.set_res(Vector2i(5, 0), 4)  # редкий (crystal) — дальше
 	pilot.map_f.resource_cells = {Vector2i(1, 0): true, Vector2i(5, 0): true}
@@ -67,7 +67,7 @@ func test_collector_collect_target_prefers_rare() -> void:
 
 func test_collector_collect_target_none_when_no_rare() -> void:
 	var role: ScenarioRole = ScenarioPilot.make_role("collector", ScenarioTargets.role("collector"))
-	var pilot := _FakePilot.new()
+	var pilot: _FakePilot = auto_free(_FakePilot.new())
 	pilot.sp.set_res(Vector2i(1, 0), 0)
 	pilot.map_f.resource_cells = {Vector2i(1, 0): true}
 	var t = role.collect_target(pilot)
@@ -76,7 +76,7 @@ func test_collector_collect_target_none_when_no_rare() -> void:
 
 func test_traveler_metrics_shape() -> void:
 	var role: ScenarioRole = ScenarioPilot.make_role("traveler", ScenarioTargets.role("traveler"))
-	var pilot := _FakePilot.new()
+	var pilot: _FakePilot = auto_free(_FakePilot.new())
 	var m: Dictionary = role.metrics(pilot)
 	pilot.free()
 	assert_bool(m.has("arrived"))
@@ -86,7 +86,7 @@ func test_traveler_metrics_shape() -> void:
 
 func test_adventurer_metrics_and_ring2_only() -> void:
 	var role: ScenarioRole = ScenarioPilot.make_role("adventurer", ScenarioTargets.role("adventurer"))
-	var pilot := _FakePilot.new()
+	var pilot: _FakePilot = auto_free(_FakePilot.new())
 	# Кольцо 2: 12..24 от старта (центр города = 0,0). (15,0) — в кольце, (5,0) — нет.
 	pilot.map_f.enemy_stacks = {Vector2i(15, 0): true, Vector2i(5, 0): true}
 	var t: Vector2i = role.enemy_target(pilot)
@@ -95,7 +95,7 @@ func test_adventurer_metrics_and_ring2_only() -> void:
 
 func test_adventurer_metrics_shape() -> void:
 	var role: ScenarioRole = ScenarioPilot.make_role("adventurer", ScenarioTargets.role("adventurer"))
-	var pilot := _FakePilot.new()
+	var pilot: _FakePilot = auto_free(_FakePilot.new())
 	var m: Dictionary = role.metrics(pilot)
 	pilot.free()
 	assert_that(int(m.get("kills", -1)) == 0)
@@ -104,7 +104,7 @@ func test_adventurer_metrics_shape() -> void:
 
 func test_builder_metrics_shape() -> void:
 	var role: ScenarioRole = ScenarioPilot.make_role("builder", ScenarioTargets.role("builder"))
-	var pilot := _FakePilot.new()
+	var pilot: _FakePilot = auto_free(_FakePilot.new())
 	pilot.city.level = 2
 	pilot.city.buildings = [1, 2, 3, 4]
 	var m: Dictionary = role.metrics(pilot)
@@ -118,7 +118,7 @@ func test_builder_metrics_shape() -> void:
 
 func test_trader_metrics_shape() -> void:
 	var role: ScenarioRole = ScenarioPilot.make_role("trader", ScenarioTargets.role("trader"))
-	var pilot := _FakePilot.new()
+	var pilot: _FakePilot = auto_free(_FakePilot.new())
 	pilot.city.storage[&"industry"] = 1500.0
 	var m: Dictionary = role.metrics(pilot)
 	assert_that(int(m.get("gold", 0)) == 1500)
@@ -155,9 +155,17 @@ class _FakeCity:
 	func pop_total() -> int: return pop.size()
 
 class _FakePilot extends Node:
-	var sp := _FakeSpawner.new()
-	var map_f := _FakeMap.new()
-	var hero := _FakeHero.new()
+	var sp: _FakeSpawner = _FakeSpawner.new()
+	var map_f: _FakeMap = _FakeMap.new()
+	var hero: _FakeHero = _FakeHero.new()
+
+	func _notification(what: int) -> void:
+		# CI-4 гигиена: владелец пилота free'ится — его Node-поля за ним.
+		if what == NOTIFICATION_PREDELETE:
+			if sp != null and is_instance_valid(sp):
+				sp.free()
+			if hero != null and is_instance_valid(hero):
+				hero.free()
 	var city := _FakeCity.new()
 	var _spawner: Node = null
 	var _hero: Node = null

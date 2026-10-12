@@ -32,11 +32,11 @@ func test_cart_bonus_expands_cap() -> void:
 
 
 func test_component_serializes_bonus() -> void:
-	var comp := HeroStrategicResourcesComponent.new()
+	var comp: HeroStrategicResourcesComponent = auto_free(HeroStrategicResourcesComponent.new())
 	comp.strategic.capacity_bonus = 6
 	var data: Dictionary = comp.serialize()
 	assert_int(int(data.get("backpack_bonus", 0))).is_equal(6)
-	var comp2 := HeroStrategicResourcesComponent.new()
+	var comp2: HeroStrategicResourcesComponent = auto_free(HeroStrategicResourcesComponent.new())
 	comp2.deserialize(data)
 	assert_int(comp2.strategic.total_cap()).is_equal(18)
 	# Старый сейв без бонуса

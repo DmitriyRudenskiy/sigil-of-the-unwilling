@@ -34,13 +34,20 @@ echo "## CI-2 (GitHub Actions; api.github.com без токена — раунд
 SLUG=$(git remote get-url origin 2>/dev/null | sed -E 's#.*github\.com[:/]##; s#\.git$##')
 CI2_HTTP=$(curl -s -o /tmp/ci2_api.json -w '%{http_code}' --max-time 20 "https://api.github.com/repos/$SLUG/actions/runs?per_page=3" 2>/dev/null || echo 000)
 if [ "$CI2_HTTP" = "200" ]; then
-	python3 - <<'PY'
-import json
+	HEAD_SHA=$(git rev-parse HEAD)
+	REQ_TS=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+	python3 - "$HEAD_SHA" "$REQ_TS" <<'PY'
+import json, sys
+head, ts = sys.argv[1], sys.argv[2]
 d = json.load(open("/tmp/ci2_api.json"))
-if not d.get("workflow_runs"):
-    print("CI-2: прогонов ещё нет")
-for r in d["workflow_runs"]:
-    print("CI-2: %s | %s | %s | %s | %s" % (r["name"], r["head_sha"][:8], r["status"], r["conclusion"], r["created_at"]))
+runs = d.get("workflow_runs", [])
+print("CI-2: запрос %s, HEAD %s" % (ts, head[:8]))
+mine = [r for r in runs if r["head_sha"] == head]
+if not mine:
+    print("CI-2: для HEAD ещё бежит/не зарегистрирован (легитимная строка, раунд 7 §3.1; ниже — последние прогоны)")
+for r in runs[:6]:
+    mark = " <== HEAD" if r["head_sha"] == head else ""
+    print("CI-2: %s | %s | %s | %s | %s%s" % (r["name"], r["head_sha"][:8], r["status"], r["conclusion"], r["created_at"], mark))
 PY
 else
 	echo "CI-2: api.github.com HTTP $CI2_HTTP — репозиторий приватен или сеть недоступна. ВЛАДЕЛЬЦУ: статус только через залогиненный gh/токен (вне реестра)"

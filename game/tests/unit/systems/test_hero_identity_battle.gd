@@ -3,7 +3,9 @@ extends BaseTest
 # Ранняя игра: идентичность героя, личный боец, классовые эффекты (early-game-foundation).
 
 func _hero() -> HeroController:
-	var h := TestFactories.make_hero(&"rebel")
+	# CI-4 фикс 128-паттерна: HeroController — Node2D, GdUnit не отслеживает
+	# объекты вне add_child-трекинга — регистрируем в auto_free свиты.
+	var h: HeroController = auto_free(TestFactories.make_hero(&"rebel"))
 	h.max_combat_hp = 20
 	h.set_combat_hp(20)
 	return h
@@ -18,14 +20,14 @@ func _unit(stats: UnitStats, count := 5) -> BattleState.BattleUnit:
 func test_solo_start_empty_army() -> void:
 	var h := _hero()
 	h.solo_start = true
-	h.army = HeroArmyController.new()
+	h.army = auto_free(HeroArmyController.new())
 	h.army.setup(null, true)
 	assert_that(h.get_army().army.size()).is_equal(0)
 
 
 func test_non_solo_start_default_army() -> void:
 	var h := _hero()
-	h.army = HeroArmyController.new()
+	h.army = auto_free(HeroArmyController.new())
 	h.army.setup(null, false)
 	assert_that(h.get_army().army.size()).is_greater(0)
 
