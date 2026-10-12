@@ -27,7 +27,7 @@ func _has_num(arr: Array, v: float) -> bool:
 	for e in arr:
 		if float(e) == v:
 			return true
-		
+
 	return false
 
 

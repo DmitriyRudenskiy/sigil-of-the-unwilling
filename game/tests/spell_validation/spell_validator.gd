@@ -301,7 +301,7 @@ func _validate_condition(condition: Dictionary, spell_id: String) -> void:
 			continue
 		var val = condition[key]
 		if key in ["target_hp_max", "target_cost_max", "hand_size_max",
-				   "spell_cost_max", "discard_cost", "min_ally_count"]:
+				"spell_cost_max", "discard_cost", "min_ally_count"]:
 			if not (val is int or val is float):
 				report.error("E210", "condition '%s' must be a number" % key, spell_id)
 			elif int(val) < 0:

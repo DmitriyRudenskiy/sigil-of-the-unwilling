@@ -124,7 +124,7 @@ func _evaluate(yield_table: Array, bonus_table: Dictionary, turns: int) -> float
 	return float(rep.get("score", 0.0))
 
 func _mutate(rng: RandomNumberGenerator, yield_cur: Array, bonus_cur: Dictionary,
-			 k: int, strength: float) -> Array:
+			k: int, strength: float) -> Array:
 	var changes: Array = []
 	var n_params := 25 + TUNED_BUILDINGS.size() * 5
 	for _j in k:

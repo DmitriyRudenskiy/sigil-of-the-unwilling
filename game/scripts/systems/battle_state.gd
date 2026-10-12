@@ -495,10 +495,10 @@ func get_reachable(cell: Vector2i, speed: int, blocked_fn: Callable, _unit: Batt
 	var blocked: Dictionary = blocked_fn.call()
 
 	var sig := _cache_signature(blocked, _unit)
-	
+
 	if not _reachable_cache.has(sig):
 		_reachable_cache[sig] = {}
-	
+
 	var sig_cache: Dictionary = _reachable_cache[sig]
 	if sig_cache.has(cell):
 		var speed_cache: Dictionary = sig_cache[cell]
@@ -515,7 +515,7 @@ func get_reachable(cell: Vector2i, speed: int, blocked_fn: Callable, _unit: Batt
 func _cache_signature(blocked: Dictionary, unit: BattleUnit = null) -> String:
 	if unit != null:
 		return str(_board_version) + "|" + str(unit.uid)
-	
+
 	var cells: Array = blocked.keys()
 	cells.sort()
 	var s := ""

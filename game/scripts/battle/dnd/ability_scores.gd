@@ -31,7 +31,7 @@ var charisma: int = 10
 
 
 func _init(p_strength: int = 10, p_dexterity: int = 10, p_constitution: int = 10,
-		   p_intelligence: int = 10, p_wisdom: int = 10, p_charisma: int = 10):
+		p_intelligence: int = 10, p_wisdom: int = 10, p_charisma: int = 10):
 	strength = clamp(p_strength, 1, 30)
 	dexterity = clamp(p_dexterity, 1, 30)
 	constitution = clamp(p_constitution, 1, 30)
@@ -152,7 +152,7 @@ static func generate_standard_array() -> DNDAbilityScores:
 static func roll_stats(rng: RandomNumberGenerator = null) -> DNDAbilityScores:
 	if rng == null:
 		rng = RandomNumberGenerator.new()
-	
+
 	var scores = DNDAbilityScores.new()
 	scores.strength = _roll_4d6_drop_lowest(rng)
 	scores.dexterity = _roll_4d6_drop_lowest(rng)

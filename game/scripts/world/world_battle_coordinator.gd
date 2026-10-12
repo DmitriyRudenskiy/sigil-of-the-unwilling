@@ -227,7 +227,7 @@ func _apply_results(
 			fighter_alive = hero_survivors[i].is_alive()
 			fighter_hp = hero_survivors[i].count
 			hero_survivors.remove_at(i)
-	
+
 	if hero.has_method("apply_battle_results"):
 		hero.call("apply_battle_results", hero_survivors)
 	if fighter_alive and hero.has_method("set_combat_hp"):

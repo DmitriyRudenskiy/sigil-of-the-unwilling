@@ -195,7 +195,7 @@ func test_cell_features_deterministic() -> void:
 		if f1 != &"":
 			count += 1
 		assert_bool(f1 == &"" or f1 == &"quarry" or f1 == &"spring"
-				 or f1 == &"river" or f1 == &"ruins").is_true()
+				or f1 == &"river" or f1 == &"ruins").is_true()
 	assert_bool(count >= 1).is_true()
 
 func test_cell_features_rings_only() -> void:

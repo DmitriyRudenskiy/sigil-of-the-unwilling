@@ -9,10 +9,10 @@ func _initialize() -> void:
 func _run() -> void:
     var dir_small := "res://assets/ui/icons/resources"
     var dir_large := "res://assets/ui/icons/resources"
-    
+
     if not DirAccess.dir_exists_absolute(dir_small):
         DirAccess.make_dir_recursive_absolute(dir_small)
-    
+
     # Ресурсы из ThemeConfig
     var resources := [
         {"id": "wood", "color": Color(0.62, 0.44, 0.24), "name": "Дерево"},
@@ -26,14 +26,14 @@ func _run() -> void:
         {"id": "quartz", "color": Color(0.95, 0.95, 0.95), "name": "Кварц"},
         {"id": "coal", "color": Color(0.2, 0.2, 0.2), "name": "Уголь"},
     ]
-    
+
     for res in resources:
         var img_small := _build_icon(res, SIZE_SMALL)
         var img_large := _build_icon(res, SIZE_LARGE)
         img_small.save_png("%s/%s.png" % [dir_small, res.id])
         # Для больших можно сохранить с суффиксом или в отдельную папку
         print("[ResourceIconGenerator] Generated icon for %s" % res.name)
-    
+
     print("[ResourceIconGenerator] Generated %d resource icons in %s" % [resources.size(), dir_small])
     quit(0)
 
@@ -43,7 +43,7 @@ func _build_icon(res: Dictionary, size: int) -> Image:
     var hi := base_color.lightened(0.3)
     var sh := base_color.darkened(0.4)
     var outline := Color(0.15, 0.12, 0.08, 1.0)
-    
+
     match res.id:
         &"wood":
             _draw_tree(img, base_color, hi, sh, outline, size)
@@ -67,7 +67,7 @@ func _build_icon(res: Dictionary, size: int) -> Image:
             _draw_coal_lump(img, base_color, hi, sh, outline, size)
         _:
             _draw_placeholder(img, base_color, size)
-    
+
     return img
 
 func _sp(img: Image, x: int, y: int, c: Color) -> void:
@@ -108,12 +108,12 @@ func _line(img: Image, x1: int, y1: int, x2: int, y2: int, c: Color) -> void:
 func _draw_tree(img: Image, base: Color, hi: Color, sh: Color, outline: Color, size: int) -> void:
     var center := size / 2
     var scale := float(size) / 64.0
-    
+
     # Ствол
     var trunk_w := int(6 * scale)
     var trunk_h := int(16 * scale)
     _rect(img, center - trunk_w, size - trunk_h - 4, center + trunk_w, size - 4, base.darkened(0.3))
-    
+
     # Крона (треугольник)
     var base_y := size - trunk_h - 4
     for level in 3:
@@ -123,7 +123,7 @@ func _draw_tree(img: Image, base: Color, hi: Color, sh: Color, outline: Color, s
             var progress := float(y - level_y) / float(10 * scale)
             var w := int(width * (1 - progress * 0.5))
             _rect(img, center - w, y, center + w, y, base.lerp(hi, float(level) / 3))
-    
+
     # Контур
     _draw_outline(img, outline, 1)
 
@@ -132,19 +132,19 @@ func _draw_flask(img: Image, base: Color, hi: Color, sh: Color, outline: Color, 
     var bottom_y := size - 8
     var top_y := 8
     var neck_y := int(size * 0.35)
-    
+
     # Колба (овал снизу)
     _ellipse(img, center, bottom_y - 10, int(size * 0.25), int(size * 0.25), base)
     _ellipse(img, center, bottom_y - 10, int(size * 0.2) - 2, int(size * 0.2) - 2, hi)
-    
+
     # Горлышко
     var neck_w := int(size * 0.08)
     _rect(img, center - neck_w, top_y, center + neck_w, neck_y, base)
-    
+
     # Жидкость внутри
     var liquid_y := bottom_y - 12
     _ellipse(img, center, liquid_y, int(size * 0.18), int(size * 0.15), base.lightened(0.2))
-    
+
     _draw_outline(img, outline, 1)
 
 func _draw_rock(img: Image, base: Color, hi: Color, sh: Color, outline: Color, size: int) -> void:
@@ -159,7 +159,7 @@ func _draw_rock(img: Image, base: Color, hi: Color, sh: Color, outline: Color, s
         Vector2(center + 6, size - 6),
         Vector2(center - 6, size - 6),
     ]
-    
+
     # Заполнение многоугольника
     for y in range(size):
         var intersections := []
@@ -170,11 +170,11 @@ func _draw_rock(img: Image, base: Color, hi: Color, sh: Color, outline: Color, s
                 var t := float(y - p1.y) / float(p2.y - p1.y)
                 var x: float = p1.x + t * (p2.x - p1.x)
                 intersections.append(x)
-        
+
         intersections.sort()
         for i in range(0, intersections.size() - 1, 2):
             _rect(img, int(intersections[i]), y, int(intersections[i + 1]), y, base)
-    
+
     # Блик
     _ellipse(img, center - 4, size - 16, 4, 4, hi)
     _draw_outline(img, outline, 1)
@@ -197,34 +197,34 @@ func _draw_crystals(img: Image, base: Color, hi: Color, sh: Color, outline: Colo
 func _draw_gem_octahedron(img: Image, base: Color, hi: Color, sh: Color, outline: Color, size: int) -> void:
     var center := size / 2
     var radius := int(size * 0.25)
-    
+
     # Верхняя пирамида
     for y in range(center - radius, center):
         var progress := float(y - (center - radius)) / float(radius)
         var w := int(radius * progress)
         _rect(img, center - w, y, center + w, y, base.lerp(hi, progress))
-    
+
     # Нижняя пирамида
     for y in range(center, center + radius):
         var progress := float(y - center) / float(radius)
         var w := int(radius * (1 - progress))
         _rect(img, center - w, y, center + w, y, base.lerp(sh, progress))
-    
+
     _draw_outline(img, outline, 1)
 
 func _draw_cut_gem(img: Image, base: Color, hi: Color, sh: Color, outline: Color, size: int) -> void:
     var center := size / 2
     var outer := int(size * 0.28)
     var inner := int(size * 0.15)
-    
+
     # Внешний восьмиугольник (упрощённо - квадрат с обрезанными углами)
     _rect(img, center - outer, center - inner, center + outer, center + inner, base)
     _rect(img, center - inner, center - outer, center + inner, center + outer, base)
-    
+
     # Грани
     _rect(img, center - 2, center - inner, center + 2, center + inner, hi)
     _rect(img, center - inner, center - 2, center + inner, center + 2, hi)
-    
+
     _draw_outline(img, outline, 1)
 
 func _draw_coins(img: Image, base: Color, hi: Color, sh: Color, outline: Color, size: int) -> void:
@@ -245,12 +245,12 @@ func _draw_ingot(img: Image, base: Color, hi: Color, sh: Color, outline: Color, 
     var height := int(size * 0.3)
     var top_y := int(size * 0.3)
     var bottom_y := top_y + height
-    
+
     for y in range(top_y, bottom_y):
         var progress := float(y - top_y) / float(height)
         var w := int(top_w + (bottom_w - top_w) * progress)
         _rect(img, center - w, y, center + w, y, base.lerp(sh, progress))
-    
+
     _rect(img, center - top_w, top_y, center + top_w, top_y + 4, hi)
     _draw_outline(img, outline, 1)
 
@@ -280,7 +280,7 @@ func _draw_coal_lump(img: Image, base: Color, hi: Color, sh: Color, outline: Col
         Vector2(center + 8, size - 8),
         Vector2(center - 4, size - 6),
     ]
-    
+
     for y in range(size):
         var intersections := []
         for i in range(points.size()):
@@ -290,11 +290,11 @@ func _draw_coal_lump(img: Image, base: Color, hi: Color, sh: Color, outline: Col
                 var t := float(y - p1.y) / float(p2.y - p1.y)
                 var x: float = p1.x + t * (p2.x - p1.x)
                 intersections.append(x)
-        
+
         intersections.sort()
         for i in range(0, intersections.size() - 1, 2):
             _rect(img, int(intersections[i]), y, int(intersections[i + 1]), y, base)
-    
+
     # Блеск
     _sp(img, center - 4, size - 18, hi)
     _sp(img, center + 2, size - 14, hi.lightened(0.2))

@@ -39,12 +39,12 @@ func _init(p_model: _MapModel) -> void:
 func generate() -> void:
 	rng = RandomNumberGenerator.new()
 	rng.seed = model.seed_value + 400
-	
+
 	model.road_grid.clear()
-	
+
 	if model.village_cells.size() > 0:
 		_connect_villages()
-	
+
 	if model.resource_cells.size() > 0:
 		_connect_resources()
 
@@ -52,9 +52,9 @@ func _connect_villages() -> void:
 	var villages = model.village_cells.duplicate()
 	if villages.size() < 2:
 		return
-	
+
 	var mst = _build_minimum_spanning_tree(villages)
-	
+
 	for edge in mst:
 		var path = _find_path(edge[0], edge[1])
 		if path.size() > 0:
@@ -71,14 +71,14 @@ func _build_minimum_spanning_tree(villages: Array[Vector2i]) -> Array:
 	var mst: Array = []
 	var connected: Dictionary = {villages[0]: true}
 	var unconnected: Array[Vector2i] = []
-	
+
 	for i in range(1, villages.size()):
 		unconnected.append(villages[i])
-	
+
 	while unconnected.size() > 0:
 		var best_edge: Array = []
 		var best_dist = INF
-		
+
 		for connected_cell in connected:
 			for i in range(unconnected.size()):
 				var unconnected_cell = unconnected[i]
@@ -86,14 +86,14 @@ func _build_minimum_spanning_tree(villages: Array[Vector2i]) -> Array:
 				if dist < best_dist:
 					best_dist = dist
 					best_edge = [connected_cell, unconnected_cell]
-		
+
 		if best_edge.size() > 0:
 			mst.append(best_edge)
 			connected[best_edge[1]] = true
 			unconnected.remove_at(unconnected.find(best_edge[1]))
 		else:
 			break
-	
+
 	return mst
 
 func _connect_resources() -> void:
@@ -114,31 +114,31 @@ func _connect_resources() -> void:
 func _find_nearest_village(cell: Vector2i) -> Vector2i:
 	var nearest: Vector2i = Vector2i(-1, -1)
 	var best_dist = INF
-	
+
 	for village in model.village_cells:
 		var dist = _HexUtils.hex_distance(cell, village)
 		if dist < best_dist:
 			best_dist = dist
 			nearest = village
-	
+
 	return nearest if nearest.x >= 0 else null
 
 func _find_path(start: Vector2i, end: Vector2i) -> Array[Vector2i]:
 	var blocked = model.get_blocked_cells()
-	
+
 	var cost_func = func(cell: Vector2i) -> float:
 		var terrain = model.terrain_grid.get(cell, _HexUtils.Terrain.GRASS)
 		var cost = TERRAIN_COSTS.get(terrain, 1.0)
 		if AVOID_SWAMP and terrain == _HexUtils.Terrain.SWAMP:
 			cost *= 2.0
 		return cost
-	
+
 	var path = _HexPathfinding.astar(start, end, blocked, cost_func, model.map_width, model.map_height)
 	return path if path != null else []
 
 func _detect_bridges(segment: RoadSegment) -> void:
 	segment.bridges.clear()
-	
+
 	for cell in segment.path:
 		if model.river_grid.has(cell):
 			segment.bridges.append(cell)
@@ -153,11 +153,11 @@ func _persist_bridges(segment: RoadSegment) -> void:
 func _paint_road(segment: RoadSegment) -> void:
 	for cell in segment.path:
 		model.road_grid[cell] = segment.type
-		
+
 		var current_terrain = model.terrain_grid.get(cell, -1)
 		if current_terrain != _HexUtils.Terrain.RIVER and current_terrain != _HexUtils.Terrain.WATER:
 			if current_terrain == _HexUtils.Terrain.MOUNTAIN or current_terrain == _HexUtils.Terrain.SNOW:
 				continue
 			model.terrain_grid[cell] = _HexUtils.Terrain.ROAD
-	
+
 	model.invalidate_blocked_cache()

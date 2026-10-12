@@ -8,10 +8,10 @@ func _initialize() -> void:
 
 func _run() -> void:
     var dir_path := "res://assets/ui/icons/buildings"
-    
+
     if not DirAccess.dir_exists_absolute(dir_path):
         DirAccess.make_dir_recursive_absolute(dir_path)
-    
+
     # Здания города
     var buildings := [
         {"id": "farm", "color": Color(0.8, 0.7, 0.4), "name": "Ферма"},
@@ -27,12 +27,12 @@ func _run() -> void:
         {"id": "walls", "color": Color(0.6, 0.55, 0.5), "name": "Стены"},
         {"id": "barracks", "color": Color(0.5, 0.45, 0.5), "name": "Казармы"},
     ]
-    
+
     for bld in buildings:
         var img_small := _build_icon(bld, SIZE_SMALL)
         img_small.save_png("%s/%s.png" % [dir_path, bld.id])
         print("[BuildingIconGenerator] Generated icon for %s" % bld.name)
-    
+
     print("[BuildingIconGenerator] Generated %d building icons in %s" % [buildings.size(), dir_path])
     quit(0)
 
@@ -42,7 +42,7 @@ func _build_icon(bld: Dictionary, size: int) -> Image:
     var hi := base_color.lightened(0.25)
     var sh := base_color.darkened(0.35)
     var outline := Color(0.15, 0.12, 0.08, 1.0)
-    
+
     match bld.id:
         &"farm":
             _draw_farm(img, base_color, hi, sh, outline, size)
@@ -70,7 +70,7 @@ func _build_icon(bld: Dictionary, size: int) -> Image:
             _draw_barracks(img, base_color, hi, sh, outline, size)
         _:
             _draw_placeholder(img, base_color, size)
-    
+
     return img
 
 func _sp(img: Image, x: int, y: int, c: Color) -> void:
@@ -128,146 +128,146 @@ func _draw_placeholder(img: Image, base: Color, size: int) -> void:
 func _draw_farm(img: Image, base: Color, hi: Color, sh: Color, outline: Color, size: int) -> void:
     var center := size / 2
     var bottom_y := size - 6
-    
+
     # Три колоса
     for i in 3:
         var cx := center - 8 + i * 8
         var stem_h := 16 + (i % 2) * 4
-        
+
         # Стебель
         _line(img, cx, bottom_y, cx, bottom_y - stem_h, base.darkened(0.3))
-        
+
         # Колос (овалы вдоль стебля)
         for j in 3:
             var grain_y := bottom_y - stem_h + j * 4 + 2
             _ellipse(img, cx, grain_y, 3, 2, base.lerp(hi, float(j) / 3))
-    
+
     # Земля внизу
     _rect(img, 4, bottom_y, size - 4, bottom_y + 4, Color(0.4, 0.3, 0.2))
-    
+
     _draw_outline(img, outline, 1)
 
 # Мельница: здание с крыльями
 func _draw_mill(img: Image, base: Color, hi: Color, sh: Color, outline: Color, size: int) -> void:
     var center := size / 2
     var bottom_y := size - 6
-    
+
     # Здание (трапеция)
     var top_w := int(size * 0.2)
     var bottom_w := int(size * 0.3)
     var height := int(size * 0.4)
     var top_y := bottom_y - height
-    
+
     for y in range(top_y, bottom_y):
         var progress := float(y - top_y) / float(height)
         var w := int(top_w + (bottom_w - top_w) * progress)
         _rect(img, center - w, y, center + w, y, base)
-    
+
     # Крыша
     _rect(img, center - top_w - 2, top_y - 6, center + top_w + 2, top_y, sh)
-    
+
     # Крылья мельницы (крест)
     _rect(img, center - 2, top_y - 12, center + 2, top_y + 8, base.darkened(0.2))
     _rect(img, center - 10, top_y - 4, center + 10, top_y + 4, base.darkened(0.2))
-    
+
     _draw_outline(img, outline, 1)
 
 # Пекарня: хлеб/буханка
 func _draw_bakery(img: Image, base: Color, hi: Color, sh: Color, outline: Color, size: int) -> void:
     var center := size / 2
     var bottom_y := size - 6
-    
+
     # Буханка хлеба (овал)
     _ellipse(img, center, bottom_y - 10, 12, 8, base)
     _ellipse(img, center, bottom_y - 10, 8, 5, hi)
-    
+
     # Нарезка (линии на хлебе)
     for i in 4:
         var x := center - 6 + i * 4
         _line(img, x, bottom_y - 14, x + 2, bottom_y - 8, sh)
-    
+
     # Стол/прилавок
     _rect(img, 6, bottom_y, size - 6, bottom_y + 4, Color(0.5, 0.35, 0.25))
-    
+
     _draw_outline(img, outline, 1)
 
 # Шахта: кирка + вход в шахту
 func _draw_mine(img: Image, base: Color, hi: Color, sh: Color, outline: Color, size: int) -> void:
     var center := size / 2
     var bottom_y := size - 6
-    
+
     # Вход в шахту (арка)
     _rect(img, center - 10, bottom_y - 14, center + 10, bottom_y, base.darkened(0.3))
     _ellipse(img, center, bottom_y - 14, 10, 6, base.darkened(0.2))
-    
+
     # Кирка (крестом)
     var pick_x := center + 8
     var pick_y := bottom_y - 20
-    
+
     # Рукоять
     _line(img, pick_x - 6, pick_y + 6, pick_x + 6, pick_y - 6, Color(0.5, 0.35, 0.2))
-    
+
     # Лезвия
     _line(img, pick_x - 8, pick_y - 4, pick_x + 4, pick_y + 4, base)
     _line(img, pick_x - 4, pick_y - 8, pick_x + 8, pick_y, base)
-    
+
     _draw_outline(img, outline, 1)
 
 # Кузница: молот + наковальня
 func _draw_smithy(img: Image, base: Color, hi: Color, sh: Color, outline: Color, size: int) -> void:
     var center := size / 2
     var bottom_y := size - 6
-    
+
     # Наковальня
     _rect(img, center - 10, bottom_y - 8, center + 10, bottom_y, base.darkened(0.2))
     _rect(img, center - 6, bottom_y - 12, center + 6, bottom_y - 8, base)
-    
+
     # Молот над наковальней
     var hammer_y := bottom_y - 20
     _rect(img, center + 4, hammer_y, center + 8, hammer_y + 10, Color(0.4, 0.3, 0.2))  # рукоять
     _rect(img, center, hammer_y - 4, center + 12, hammer_y + 2, base.darkened(0.4))  # головка
-    
+
     # Искры
     _sp(img, center - 4, hammer_y - 6, Color.YELLOW)
     _sp(img, center - 8, hammer_y - 4, Color.ORANGE)
-    
+
     _draw_outline(img, outline, 1)
 
 # Таверна: кружка пива
 func _draw_tavern(img: Image, base: Color, hi: Color, sh: Color, outline: Color, size: int) -> void:
     var center := size / 2
     var bottom_y := size - 6
-    
+
     # Кружка (цилиндр)
     var mug_w := 10
     var mug_h := 16
     var mug_top := bottom_y - mug_h
-    
+
     _rect(img, center - mug_w, mug_top, center + mug_w, bottom_y, base)
     _rect(img, center - mug_w, mug_top, center + mug_w, mug_top + 4, hi)  # пенка сверху
-    
+
     # Ручка кружки
     _line(img, center + mug_w, mug_top + 4, center + mug_w + 6, mug_top + 4, base.darkened(0.2))
     _line(img, center + mug_w + 6, mug_top + 4, center + mug_w + 6, mug_top + 10, base.darkened(0.2))
     _line(img, center + mug_w + 6, mug_top + 10, center + mug_w, mug_top + 10, base.darkened(0.2))
-    
+
     # Пена
     _rect(img, center - mug_w + 2, mug_top + 2, center + mug_w - 2, mug_top + 6, Color(0.95, 0.9, 0.7))
-    
+
     _draw_outline(img, outline, 1)
 
 # Школа магии: книга со звездой
 func _draw_school(img: Image, base: Color, hi: Color, sh: Color, outline: Color, size: int) -> void:
     var center := size / 2
     var bottom_y := size - 6
-    
+
     # Книга (раскрытая)
     _rect(img, center - 12, bottom_y - 14, center - 2, bottom_y, base)
     _rect(img, center + 2, bottom_y - 14, center + 12, bottom_y, base.lightened(0.1))
-    
+
     # Корешок книги
     _rect(img, center - 2, bottom_y - 14, center + 2, bottom_y, sh)
-    
+
     # Магическая звезда над книгой
     var star_y := bottom_y - 22
     for i in 5:
@@ -276,104 +276,104 @@ func _draw_school(img: Image, base: Color, hi: Color, sh: Color, outline: Color,
         var sy := star_y + sin(angle) * 8
         _sp(img, int(sx), int(sy), hi)
         _line(img, center, star_y, int(sx), int(sy), base)
-    
+
     _draw_outline(img, outline, 1)
 
 # Торговый пост: весы
 func _draw_trade_post(img: Image, base: Color, hi: Color, sh: Color, outline: Color, size: int) -> void:
     var center := size / 2
     var bottom_y := size - 6
-    
+
     # Стойка весов
     _rect(img, center - 2, bottom_y - 16, center + 2, bottom_y, base.darkened(0.3))
-    
+
     # Балка весов
     _rect(img, center - 12, bottom_y - 16, center + 12, bottom_y - 14, base)
-    
+
     # Чашки весов
     _ellipse(img, center - 10, bottom_y - 8, 6, 4, base)
     _ellipse(img, center + 10, bottom_y - 8, 6, 4, base)
-    
+
     # Верёвки
     _line(img, center - 12, bottom_y - 16, center - 10, bottom_y - 12, sh)
     _line(img, center + 12, bottom_y - 16, center + 10, bottom_y - 12, sh)
-    
+
     _draw_outline(img, outline, 1)
 
 # Рынок: прилавок с товарами
 func _draw_market(img: Image, base: Color, hi: Color, sh: Color, outline: Color, size: int) -> void:
     var center := size / 2
     var bottom_y := size - 6
-    
+
     # Прилавок
     _rect(img, center - 12, bottom_y - 10, center + 12, bottom_y, base)
-    
+
     # Тент над прилавком
     _rect(img, center - 14, bottom_y - 18, center + 14, bottom_y - 14, Color(0.8, 0.4, 0.3))
-    
+
     # Товары на прилавке (круги)
     for i in 5:
         var x := center - 10 + i * 5
         var item_color: Color = [Color.RED, Color.GREEN, Color.YELLOW, Color.ORANGE, Color.PURPLE][i]
         _ellipse(img, x, bottom_y - 12, 3, 3, item_color)
-    
+
     _draw_outline(img, outline, 1)
 
 # Лачуга: простой домик
 func _draw_shack(img: Image, base: Color, hi: Color, sh: Color, outline: Color, size: int) -> void:
     var center := size / 2
     var bottom_y := size - 6
-    
+
     # Стены
     _rect(img, center - 10, bottom_y - 14, center + 10, bottom_y, base)
-    
+
     # Крыша (треугольник)
     for y in range(bottom_y - 20, bottom_y - 14):
         var progress := float(bottom_y - 14 - y) / 6
         var w := int(10 + progress * 4)
         _rect(img, center - w, y, center + w, y, sh)
-    
+
     # Дверь
     _rect(img, center - 4, bottom_y - 10, center + 4, bottom_y, base.darkened(0.4))
-    
+
     # Окно
     _rect(img, center - 8, bottom_y - 12, center - 5, bottom_y - 8, Color(0.6, 0.7, 0.8))
-    
+
     _draw_outline(img, outline, 1)
 
 # Стены: зубчатая стена
 func _draw_walls(img: Image, base: Color, hi: Color, sh: Color, outline: Color, size: int) -> void:
     var bottom_y := size - 6
-    
+
     # Основная стена
     _rect(img, 6, bottom_y - 12, size - 6, bottom_y, base)
-    
+
     # Зубцы
     for x in range(8, size - 8, 8):
         _rect(img, x, bottom_y - 18, x + 4, bottom_y - 12, base)
-    
+
     # Ворота
     _rect(img, size/2 - 6, bottom_y - 10, size/2 + 6, bottom_y, base.darkened(0.3))
-    
+
     _draw_outline(img, outline, 1)
 
 # Казармы: шлем + мечи крестом
 func _draw_barracks(img: Image, base: Color, hi: Color, sh: Color, outline: Color, size: int) -> void:
     var center := size / 2
     var bottom_y := size - 6
-    
+
     # Здание казарм
     _rect(img, center - 12, bottom_y - 12, center + 12, bottom_y, base)
-    
+
     # Крыша
     _rect(img, center - 14, bottom_y - 16, center + 14, bottom_y - 12, sh)
-    
+
     # Шлем спереди
     _ellipse(img, center, bottom_y - 18, 6, 5, base.darkened(0.2))
     _rect(img, center - 4, bottom_y - 16, center + 4, bottom_y - 14, hi)
-    
+
     # Мечи крестом за шлемом
     _line(img, center - 8, bottom_y - 22, center + 8, bottom_y - 14, Color(0.7, 0.7, 0.75))
     _line(img, center + 8, bottom_y - 22, center - 8, bottom_y - 14, Color(0.7, 0.7, 0.75))
-    
+
     _draw_outline(img, outline, 1)

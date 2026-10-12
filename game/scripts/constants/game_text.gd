@@ -323,7 +323,7 @@ static func chronicle_close() -> String: return TranslationServer.translate("chr
 static func chronicle_entry(icon: String, gen: int, name: String, path: String, outcome: String, turns: int, glory: int, w: int, l: int) -> String:
 	return TranslationServer.translate("chronicle.entry").format(
 		{"icon": icon, "gen": gen, "name": name, "path": path, "outcome": outcome,
-		 "turns": turns, "glory": glory, "w": w, "l": l})
+		"turns": turns, "glory": glory, "w": w, "l": l})
 
 static func settings_title() -> String: return TranslationServer.translate("settings.title")
 static func settings_graphics() -> String: return TranslationServer.translate("settings.graphics")

@@ -31,19 +31,19 @@ func _init():
 
 ## Make an attack roll
 ## Returns the total and sets internal state
-func roll(rng: RandomNumberGenerator, p_ability_mod: int, p_proficiency: int = 0, 
-		  p_other_mods: int = 0, p_advantage: bool = false, p_disadvantage: bool = false) -> int:
-	
+func roll(rng: RandomNumberGenerator, p_ability_mod: int, p_proficiency: int = 0,
+		p_other_mods: int = 0, p_advantage: bool = false, p_disadvantage: bool = false) -> int:
+
 	ability_modifier = p_ability_mod
 	proficiency_bonus = p_proficiency
 	other_modifiers = p_other_mods
-	
+
 	has_advantage = p_advantage and not p_disadvantage
 	has_disadvantage = p_disadvantage and not p_advantage
-	
+
 	# Roll d20(s)
 	d20_result = rng.randi_range(1, 20)
-	
+
 	if has_advantage:
 		second_d20 = rng.randi_range(1, 20)
 		d20_result = max(d20_result, second_d20)
@@ -52,14 +52,14 @@ func roll(rng: RandomNumberGenerator, p_ability_mod: int, p_proficiency: int = 0
 		d20_result = min(d20_result, second_d20)
 	else:
 		second_d20 = 0
-	
+
 	# Check for critical hit/miss
 	is_critical_hit = (d20_result == NATURAL_20)
 	is_critical_miss = (d20_result == NATURAL_1)
-	
+
 	# Calculate total
 	total = d20_result + ability_modifier + proficiency_bonus + other_modifiers
-	
+
 	return total
 
 
@@ -81,7 +81,7 @@ func is_crit_miss() -> bool:
 ## Get breakdown of the roll as string
 func get_breakdown() -> String:
 	var parts: Array[String] = []
-	
+
 	if second_d20 > 0:
 		if has_advantage:
 			parts.append("Advantage: [%d, %d] → %d" % [d20_result, second_d20, max(d20_result, second_d20)])
@@ -89,23 +89,23 @@ func get_breakdown() -> String:
 			parts.append("Disadvantage: [%d, %d] → %d" % [d20_result, second_d20, min(d20_result, second_d20)])
 	else:
 		parts.append("d20: %d" % d20_result)
-	
+
 	if ability_modifier != 0:
 		parts.append("Ability: %+d" % ability_modifier)
-	
+
 	if proficiency_bonus != 0:
 		parts.append("Proficiency: +%d" % proficiency_bonus)
-	
+
 	if other_modifiers != 0:
 		parts.append("Other: %+d" % other_modifiers)
-	
+
 	parts.append("Total: %d" % total)
-	
+
 	if is_critical_hit:
 		parts.append("CRITICAL HIT!")
 	elif is_critical_miss:
 		parts.append("CRITICAL MISS!")
-	
+
 	return ", ".join(parts)
 
 

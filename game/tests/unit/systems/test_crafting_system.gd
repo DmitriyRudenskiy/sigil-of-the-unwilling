@@ -64,9 +64,9 @@ func test_invalid_resource_skipped_with_error() -> void:
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	f.store_string(JSON.stringify({"recipes": [
 		{"id": "good", "display_name": "OK", "slot": "MISC_A", "weight": 1.0,
-		 "resources": {"wood": 1}},
+		"resources": {"wood": 1}},
 		{"id": "bad", "display_name": "Bad", "slot": "MISC_A", "weight": 1.0,
-		 "resources": {"unobtainium": 1}},
+		"resources": {"unobtainium": 1}},
 	]}))
 	f.close()
 	var n := _sys.load_recipes(path)
@@ -82,9 +82,9 @@ func test_duplicate_id_skipped() -> void:
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	f.store_string(JSON.stringify({"recipes": [
 		{"id": "x", "display_name": "A", "slot": "MISC_A", "weight": 1.0,
-		 "resources": {"wood": 1}},
+		"resources": {"wood": 1}},
 		{"id": "x", "display_name": "B", "slot": "MISC_A", "weight": 1.0,
-		 "resources": {"stone": 1}},
+		"resources": {"stone": 1}},
 	]}))
 	f.close()
 	var n := _sys.load_recipes(path)
@@ -98,9 +98,9 @@ func test_bad_slot_and_weight_rejected() -> void:
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	f.store_string(JSON.stringify({"recipes": [
 		{"id": "s", "display_name": "S", "slot": "GARGARATH", "weight": 1.0,
-		 "resources": {"wood": 1}},
+		"resources": {"wood": 1}},
 		{"id": "w", "display_name": "W", "slot": "MISC_A", "weight": 0.0,
-		 "resources": {"wood": 1}},
+		"resources": {"wood": 1}},
 	]}))
 	f.close()
 	var n := _sys.load_recipes(path)

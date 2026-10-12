@@ -54,17 +54,17 @@ func load_catalog(entries: Array) -> void:
 func load_default_catalog() -> void:
 	load_catalog([
 		{"id": "order_tax_code", "name": "Tax Code", "branch": Branch.ORDER, "tier": 1, "requires": "",
-		 "passive_effects": {"production": 0.1, "happiness": -5}},
+		"passive_effects": {"production": 0.1, "happiness": -5}},
 		{"id": "order_standing_guard", "name": "Standing Guard", "branch": Branch.ORDER, "tier": 2, "requires": "order_tax_code",
-		 "passive_effects": {"defense": 10, "food": -3}},
+		"passive_effects": {"defense": 10, "food": -3}},
 		{"id": "faith_temple", "name": "Temple", "branch": Branch.FAITH, "tier": 1, "requires": "",
-		 "passive_effects": {"morale": 8, "production": -0.05}},
+		"passive_effects": {"morale": 8, "production": -0.05}},
 		{"id": "faith_relic_pilgrimage", "name": "Relic Pilgrimage", "branch": Branch.FAITH, "tier": 2, "requires": "faith_temple",
-		 "passive_effects": {"happiness": 10, "morale": 5}},
+		"passive_effects": {"happiness": 10, "morale": 5}},
 		{"id": "survival_granary", "name": "Granary", "branch": Branch.SURVIVAL, "tier": 1, "requires": "",
-		 "passive_effects": {"food": 10, "production": -0.05}},
+		"passive_effects": {"food": 10, "production": -0.05}},
 		{"id": "survival_field_hospital", "name": "Field Hospital", "branch": Branch.SURVIVAL, "tier": 2, "requires": "survival_granary",
-		 "passive_effects": {"healing": 0.2, "food": -5}},
+		"passive_effects": {"healing": 0.2, "food": -5}},
 	])
 
 ## Unlock a law. Returns true if newly unlocked, false if invalid or already active.
