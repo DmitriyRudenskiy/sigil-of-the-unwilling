@@ -52,7 +52,7 @@ jobs:
       - name: Checkers (uid pairs, case dups, conflict markers, asset+.import)
         run: bash scripts/ci2_checkers.sh
 
-      - name: Lint (gdtoolkit: gdparse — gate; gdlint — report-only)
+      - name: "Lint (gdtoolkit: gdparse — gate; gdlint — report-only)"
         # Раунд 10 §3.4: lint — отдельный шаг (не в первом прогоне). gdparse
         # (синтаксис) гейтит с первого дня; gdlint (стиль) — report-only до
         # утверждения владельцем конфига/политики (не гейтит: не красим гейт
