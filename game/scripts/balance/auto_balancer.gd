@@ -101,9 +101,13 @@ func _run_single_simulation() -> Dictionary:
 			resources[res] = resources.get(res, 0) - daily_consumption[res]
 			if resources[res] < 0:
 				resources[res] = 0
-				if day < 10:  # Early game failure
-					survived = false
-					break
+				# T-123: любой дефицит = не выжил (раньше считался только день<10 —
+				# город, голодающий с дня 11, «выживал»; вердикт: баг кода, тест — спека).
+				# Боттлнек фиксируется до выхода.
+				if res not in bottlenecks:
+					bottlenecks.append(res)
+				survived = false
+				break
 			
 			# Track buffer
 			if daily_consumption[res] > 0:
