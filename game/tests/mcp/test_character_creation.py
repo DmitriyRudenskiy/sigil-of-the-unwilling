@@ -1,45 +1,43 @@
-"""TASK_18 B3.1: создание персонажа через меню — герой с профилем попадает в мир.
+"""Cutover D-157 (акт 14-й итерации, раунд 5 §1): навигационная поверхность
+main_menu → character_creation → main.tscn.
 
-full_cycle фикстура: меню → _on_new_game → CharacterCreation → _on_create → World.
-Проверяем, что профиль персонажа дошёл до живого героя и мир ходит.
+Smoke AC §1.4(б): профиль проходит создание, кампанийная линия (K-канон)
+стартует, ход идёт. Герой-профиль в main.tscn не потребляется (MVP-срез;
+sign-слой — T-020), поэтому проверяется композиция, а не герой.
 """
 from __future__ import annotations
 
 
-def test_created_hero_reaches_world(full_cycle):
+def test_creation_lands_on_campaign_line(full_cycle):
     mcp = full_cycle
 
     r = mcp.execute_code(
-        "var w = get_tree().current_scene\n"
-        "var h = w.get_hero()\n"
+        "var s = get_tree().current_scene\n"
+        'var c = s.get("composition")\n'
         "return {\n"
-        '    "hero": h != null,\n'
-        '    "name": h.hero_name if h != null else "",\n'
-        '    "components": h._components.size() if h != null else 0,\n'
-        '    "turn": w.get_cities().current_turn\n'
+        '    "script": s.get_script().resource_path,\n'
+        '    "turn": c.campaign.current_turn,\n'
+        '    "seed": c.campaign.seed,\n'
+        '    "roster": c.population_system.size()\n'
         "}"
     )
-    assert r["hero"] is True, r
-    assert r["name"] == "McpCycleHero", f"Не тот герой: {r['name']}"
-    assert r["components"] == 16, f"Компоненты героя: {r['components']}"
-
-    # Мир живой: ход проходит
-    mcp.execute_code("get_tree().current_scene.do_end_turn()\nreturn {\"ok\": true}")
-    after = mcp.execute_code("return get_tree().current_scene.get_cities().current_turn")
-    assert after == r["turn"] + 1, (r["turn"], after)
+    assert r["script"].endswith("scripts/main/main.gd"), f"Не main.tscn: {r}"
+    assert r["turn"] == 1, f"Кампания не на ходе 1: {r}"
+    assert r["seed"] == 12345, f"CAMPAIGN_SEED не дошёл: {r}"
+    assert r["roster"] == 20, f"Стартовое население не из config: {r}"
 
 
-def test_created_hero_has_needs_and_army(full_cycle):
+def test_campaign_turn_advances(full_cycle):
     mcp = full_cycle
 
-    r = mcp.execute_code(
-        "var h = get_tree().current_scene.get_hero()\n"
-        "var army = h.get_army()\n"
-        "var needs = h.needs\n"
-        "return {\n"
-        '    "army": army.army.size() if army != null else -1,\n'
-        '    "needs": needs.needs.size() if needs != null else -1,\n'
-        "}"
+    before = mcp.execute_code(
+        'return get_tree().current_scene.get("composition").campaign.current_turn'
     )
-    assert r["army"] >= 0, r
-    assert r["needs"] > 0, f"Потребности не инициализированы: {r}"
+    mcp.execute_code(
+        'get_tree().current_scene.get("composition").advance_turn()\n'
+        'return {"ok": true}'
+    )
+    after = mcp.execute_code(
+        'return get_tree().current_scene.get("composition").campaign.current_turn'
+    )
+    assert after == before + 1, f"Ход не прошёл: {before} -> {after}"

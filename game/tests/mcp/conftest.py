@@ -22,7 +22,7 @@ from godot_mcp import GodotMCPClient, MCPError
 NODE_BIN = os.environ.get("NODE_BIN", "node")
 GODOT_BIN = os.environ.get("GODOT_PATH", "/Applications/Godot.app/Contents/MacOS/Godot")
 
-WORLD_SCENE = "res://scenes/world.tscn"
+WORLD_SCENE = "res://scenes/archive/world.tscn"
 BATTLE_SCENE = "res://scenes/battle.tscn"
 
 PROJECT_GODOT = GAME_DIR / "project.godot"
@@ -140,7 +140,9 @@ def _wait_for_scene(mcp, marker: str, timeout: float = 60.0) -> None:
 
 @pytest.fixture
 def full_cycle(mcp):
-    """Полный цикл: меню → создание персонажа → мир с ботстлабом."""
+    """Полный цикл (cutover D-157): меню → создание персонажа → main.tscn
+    (K-канон-линия). Профиль персистится в persistence; потребление профиля
+    кампанией — слой за репойнтом (MVP-срез)."""
     mcp.run_scene("res://scenes/main_menu.tscn")
     mcp.wait_ready()
     mcp.execute_code(
@@ -157,24 +159,26 @@ def full_cycle(mcp):
         "cc._on_create()\n"
         'return {"ok": true}'
     )
-    _wait_for_scene(mcp, "world_controller")
+    _wait_for_scene(mcp, "scripts/main/main")
     deadline = time.time() + 120
-    r = {}
     while time.time() < deadline:
         try:
             r = mcp.execute_code(
-                "var w = get_tree().current_scene\n"
-                "var h = w.get_hero() if w != null else null\n"
-                'return {"hero": h != null, "name": h.hero_name if h != null else ""}',
+                "var s = get_tree().current_scene\n"
+                'var c = s.get("composition") if s != null else null\n'
+                'return {"alive": c != null and c.campaign != null}',
                 timeout=15.0,
             )
-        except Exception as e:  # noqa: BLE001 — bootstrap может блокировать main loop
-            time.sleep(1.0)
-            continue
-        if r.get("hero"):
-            break
+            if r.get("alive"):
+                # Таймер дня не должен конкурировать с ручными ходами тестов.
+                mcp.execute_code(
+                    "get_tree().current_scene._is_day_cycle_active = false\n"
+                    'return {"ok": true}'
+                )
+                break
+        except Exception:  # noqa: BLE001 — загрузка сцены может блокировать main loop
+            pass
         time.sleep(1.0)
     else:
-        raise MCPError("World не завершил ботст랩 за 120 с")
-    assert r.get("name") == "McpCycleHero", f"Не тот герой: {r.get('name')}"
+        raise MCPError("CampaignComposition в main.tscn не стартовал за 120 с")
     yield mcp
