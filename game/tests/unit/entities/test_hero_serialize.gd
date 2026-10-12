@@ -24,6 +24,10 @@ func test_stats_sex_roundtrip_and_old_save() -> void:
 	var comp3 := HeroStatsComponent.new()
 	comp3.deserialize(data)
 	assert_that(comp3.sex).is_equal("male")
+	# Орфаны (CI-4, раунд 11 §4): компоненты — Node
+	comp.free()
+	comp2.free()
+	comp3.free()
 
 
 func test_army_serialize() -> void:
@@ -115,6 +119,7 @@ func test_stats_migration_old_save_gets_social_stats() -> void:
 	assert_int(comp.stats["int"]).is_equal(4)
 	assert_int(comp.stats["cha"]).is_equal(3)
 	assert_int(comp.stats["luk"]).is_equal(2)
+	comp.free()
 
 func test_stats_migration_new_save_untouched() -> void:
 	var comp := HeroStatsComponent.new()
@@ -130,6 +135,7 @@ func test_stats_migration_new_save_untouched() -> void:
 	assert_int(comp.stats["wis"]).is_equal(9)
 	assert_int(comp.stats["cha"]).is_equal(3)
 	assert_int(comp.stats["luk"]).is_equal(6)
+	comp.free()
 
 func test_stats_roundtrip_8_stats() -> void:
 	var comp := HeroStatsComponent.new()
@@ -143,3 +149,5 @@ func test_stats_roundtrip_8_stats() -> void:
 	var comp2 := HeroStatsComponent.new()
 	comp2.deserialize(data)
 	assert_dict(comp2.stats).is_equal(comp.stats)
+	comp.free()
+	comp2.free()

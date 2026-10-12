@@ -52,6 +52,10 @@ func test_collector_metrics_shape() -> void:
 	assert_that(int(m.get("rare_goal", 0)) == 20)
 	assert_bool(m.has("resources_per_day"))
 	assert_bool(m.has("survived"))
+	# Орфаны (CI-4, раунд 11 §4): _FakePilot = 3 Node (sp/hero не children)
+	pilot.sp.free()
+	pilot.hero.free()
+	pilot.free()
 
 func test_collector_collect_target_prefers_rare() -> void:
 	# Редкий узел дальше, обычный ближе — политика должна выбрать редкий.
@@ -62,6 +66,8 @@ func test_collector_collect_target_prefers_rare() -> void:
 	pilot.map_f.resource_cells = {Vector2i(1, 0): true, Vector2i(5, 0): true}
 	pilot.hero.cell = Vector2i(0, 0)
 	var t: Vector2i = role.collect_target(pilot)
+	pilot.sp.free()
+	pilot.hero.free()
 	pilot.free()
 	assert_that(t == Vector2i(5, 0))
 
@@ -71,6 +77,8 @@ func test_collector_collect_target_none_when_no_rare() -> void:
 	pilot.sp.set_res(Vector2i(1, 0), 0)
 	pilot.map_f.resource_cells = {Vector2i(1, 0): true}
 	var t = role.collect_target(pilot)
+	pilot.sp.free()
+	pilot.hero.free()
 	pilot.free()
 	assert_that(t == null)
 
@@ -78,6 +86,8 @@ func test_traveler_metrics_shape() -> void:
 	var role: ScenarioRole = ScenarioPilot.make_role("traveler", ScenarioTargets.role("traveler"))
 	var pilot := _FakePilot.new()
 	var m: Dictionary = role.metrics(pilot)
+	pilot.sp.free()
+	pilot.hero.free()
 	pilot.free()
 	assert_bool(m.has("arrived"))
 	assert_bool(m.has("biomes"))
@@ -90,6 +100,8 @@ func test_adventurer_metrics_and_ring2_only() -> void:
 	# Кольцо 2: 12..24 от старта (центр города = 0,0). (15,0) — в кольце, (5,0) — нет.
 	pilot.map_f.enemy_stacks = {Vector2i(15, 0): true, Vector2i(5, 0): true}
 	var t: Vector2i = role.enemy_target(pilot)
+	pilot.sp.free()
+	pilot.hero.free()
 	pilot.free()
 	assert_that(t == Vector2i(15, 0))
 
@@ -97,6 +109,8 @@ func test_adventurer_metrics_shape() -> void:
 	var role: ScenarioRole = ScenarioPilot.make_role("adventurer", ScenarioTargets.role("adventurer"))
 	var pilot := _FakePilot.new()
 	var m: Dictionary = role.metrics(pilot)
+	pilot.sp.free()
+	pilot.hero.free()
 	pilot.free()
 	assert_that(int(m.get("kills", -1)) == 0)
 	assert_that(int(m.get("kill_goal", 0)) == 5)
@@ -110,6 +124,8 @@ func test_builder_metrics_shape() -> void:
 	var m: Dictionary = role.metrics(pilot)
 	# Цель: уровень 2 + 4 здания — достигнута
 	assert_bool(role.goal_met(pilot))
+	pilot.sp.free()
+	pilot.hero.free()
 	pilot.free()
 	assert_bool(m.has("population"))
 	assert_that(int(m.get("city_level", 0)) == 2)
@@ -126,6 +142,8 @@ func test_trader_metrics_shape() -> void:
 	assert_bool(m.has("deals"))
 	assert_bool(m.has("margin"))
 	assert_bool(role.goal_met(pilot))
+	pilot.sp.free()
+	pilot.hero.free()
 	pilot.free()
 
 # ── Фейки: утка под интерфейс BalanceProbe для политик ролей ───────────────

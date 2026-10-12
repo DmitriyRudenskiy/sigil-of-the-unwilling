@@ -35,12 +35,23 @@ SLUG=$(git remote get-url origin 2>/dev/null | sed -E 's#.*github\.com[:/]##; s#
 CI2_HTTP=$(curl -s -o /tmp/ci2_api.json -w '%{http_code}' --max-time 20 "https://api.github.com/repos/$SLUG/actions/runs?per_page=3" 2>/dev/null || echo 000)
 if [ "$CI2_HTTP" = "200" ]; then
 	python3 - <<'PY'
-import json
+import json, urllib.request
 d = json.load(open("/tmp/ci2_api.json"))
 if not d.get("workflow_runs"):
     print("CI-2: прогонов ещё нет")
 for r in d["workflow_runs"]:
-    print("CI-2: %s | %s | %s | %s | %s" % (r["name"], r["head_sha"][:8], r["status"], r["conclusion"], r["created_at"]))
+    line = "CI-2: %s | %s | %s | %s | %s" % (r["name"], r["head_sha"][:8], r["status"], r["conclusion"], r["created_at"])
+    # JOBS=0-маркер (раунд 11 §2, D-166): ран с 0 jobs = workflow не собрал
+    # jobs (YAML-ошибка/parse-fail) — completed/failure БЕЗ логов; детект
+    # только через jobs-endpoint. Симптом af245eb (ран 38177047770).
+    try:
+        with urllib.request.urlopen("%s/jobs?per_page=1" % r["jobs_url"], timeout=20) as resp:
+            jobs = json.load(resp).get("total_count", -1)
+        if r["status"] == "completed" and jobs == 0:
+            line += " | JOBS=0 (workflow не собрал jobs — проверьте YAML, чекер 5)"
+    except Exception:
+        pass
+    print(line)
 PY
 else
 	echo "CI-2: api.github.com HTTP $CI2_HTTP — репозиторий приватен или сеть недоступна. ВЛАДЕЛЬЦУ: статус только через залогиненный gh/токен (вне реестра)"

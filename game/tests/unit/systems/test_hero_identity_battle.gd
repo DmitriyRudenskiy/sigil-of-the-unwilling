@@ -15,12 +15,19 @@ func _unit(stats: UnitStats, count := 5) -> BattleState.BattleUnit:
 	return u
 
 
+# Орфаны (CI-4, раунд 11 §4): HeroController — Node2D с ~15 child-компонентами
+# (создаются в _init, add_child) — без free() каждый герой = ~22 сироты/тест
+# (128/169 всего, 76%). free() героя освобождает и child-компоненты; h.army —
+# отдельный Node (не child) — free отдельно. free() — последняя строка теста.
+
 func test_solo_start_empty_army() -> void:
 	var h := _hero()
 	h.solo_start = true
 	h.army = HeroArmyController.new()
 	h.army.setup(null, true)
 	assert_that(h.get_army().army.size()).is_equal(0)
+	h.army.free()
+	h.free()
 
 
 func test_non_solo_start_default_army() -> void:
@@ -28,6 +35,8 @@ func test_non_solo_start_default_army() -> void:
 	h.army = HeroArmyController.new()
 	h.army.setup(null, false)
 	assert_that(h.get_army().army.size()).is_greater(0)
+	h.army.free()
+	h.free()
 
 
 func test_hero_battle_stack_key_and_hp() -> void:
@@ -39,6 +48,7 @@ func test_hero_battle_stack_key_and_hp() -> void:
 	assert_int(stack.count).is_equal(7)
 	assert_bool(stack.stats.has_tag("hero")).is_true()
 	assert_bool(stack.stats.has_tag("fighter")).is_true()
+	h.free()
 
 
 func test_hero_battle_stack_min_hp() -> void:
@@ -46,6 +56,7 @@ func test_hero_battle_stack_min_hp() -> void:
 	h.set_combat_hp(0)
 	var stack: UnitStack = h.get_hero_battle_stack()
 	assert_int(stack.count).is_equal(1)
+	h.free()
 
 
 func test_ranger_bonus_vs_wild_animals() -> void:
@@ -121,6 +132,7 @@ func test_apply_results_wounded_hero() -> void:
 	assert_bool(h.is_combat_dead() == false).is_true()
 	assert_that(h.get("combat_hp")).is_equal(1)
 	c.free()
+	h.free()
 
 
 func test_apply_results_fighter_hp_maps_to_hero() -> void:
@@ -140,6 +152,7 @@ func test_apply_results_fighter_hp_maps_to_hero() -> void:
 	# Боец не должен попасть в армию героя
 	assert_bool(h.get_army().army.any(func(s: UnitStack) -> bool: return s != null and s.get_key() == GameNumbersHero.HERO_BATTLE_KEY)).is_false()
 	c.free()
+	h.free()
 
 
 func empty_survivors() -> Array[UnitStack]:

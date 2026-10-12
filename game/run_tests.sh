@@ -55,13 +55,53 @@ echo "GODOT: $GODOT"
 echo "=== gdUnit4: unit + integration + functional ==="
 # Pre-import to refresh the global class cache (class_name).
 "$GODOT" --headless --path . --import >/dev/null 2>&1
-"$GODOT" --headless --path . -s addons/gdunit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -c -a res://tests
-RC=$?
+# CI-4 (раунд 11 §4, D-166): лог в файл — файл-level orphan-гейт (allowlist)
+# парсит per-suite «Statistics: … N orphans» после «Run Test Suite: <path>».
+GDUNIT_LOG="$(mktemp)"
+set -o pipefail
+"$GODOT" --headless --path . -s addons/gdunit4/bin/GdUnitCmdTool.gd --ignoreHeadlessMode -c -a res://tests 2>&1 | tee "$GDUNIT_LOG"
+RC=${PIPESTATUS[0]}
+set +o pipefail
 # Политика orphan (CI-2, T-114): 0 = pass; 101 = только orphan-предупреждения
 # (гигиена, не падение); любой другой код = red. Политика закодирована в гейте.
 if [ "$RC" -ne 0 ] && [ "$RC" -ne 101 ]; then
 	exit "$RC"
 
+fi
+# CI-4 (раунд 11 §4, D-166): файл-level карантин — инвариант «сирот вне
+# allowlist = 0». Allowlist: game/tests/orphan_allowlist.txt, формат
+# «<res-путь> <лимит> — причина»; выемка строки — только вместе с фиксом.
+ORPHAN_ALLOWLIST="$PWD/tests/orphan_allowlist.txt"
+ORPHAN_RED=0
+if [ -f "$ORPHAN_ALLOWLIST" ]; then
+	# per-file фактические сироты (ANSI-коды сняты; suite → Statistics-пара)
+	ORPHANS_ACTUAL="$(sed 's/\x1b\[[0-9;]*m//g' "$GDUNIT_LOG" | awk '
+		/^Run Test Suite: / { suite = $4 }
+		/^ *Statistics: / { for (i = 1; i <= NF; i++) if ($i == "orphans") { print suite, $(i-1); break } }
+	')"
+	while read -r f n; do
+		[ -z "$f" ] && continue
+		[ "$n" -eq 0 ] && continue  # 0 сирот — инвариант выполнен, allowlist не нужен
+		if ! grep -q "^${f} " "$ORPHAN_ALLOWLIST"; then
+			echo "ORPHAN-RED: $f — $n сирот(ы), файла нет в allowlist ($ORPHAN_ALLOWLIST)"; ORPHAN_RED=1
+		else
+			LIMIT="$(grep "^${f} " "$ORPHAN_ALLOWLIST" | head -1 | awk '{print $2}')"
+			if [ "$n" -gt "$LIMIT" ]; then
+				echo "ORPHAN-RED: $f — $n сирот(ы) > лимит $LIMIT (allowlist)"; ORPHAN_RED=1
+			fi
+		fi
+	done <<< "$ORPHANS_ACTUAL"
+	if [ "$ORPHAN_RED" -eq 0 ]; then
+		TOTAL_ORPHANS="$(sed 's/\x1b\[[0-9;]*m//g' "$GDUNIT_LOG" | grep -E "^ *Overall Summary:" | tail -1 | sed -E 's/.* ([0-9]+) orphans.*/\1/')"
+		ALLOW_N="$(grep -c '^res://' "$ORPHAN_ALLOWLIST" 2>/dev/null)"
+		echo "ORPHAN-GATE: OK (сирот всего: ${TOTAL_ORPHANS:-0}; allowlist: ${ALLOW_N:-0} файл(а))"
+	fi
+else
+	echo "ORPHAN-GATE: SKIPPED (нет $ORPHAN_ALLOWLIST — создайте хотя бы заголовок)"
+fi
+rm -f "$GDUNIT_LOG"
+if [ "$ORPHAN_RED" -ne 0 ]; then
+	exit 1
 fi
 
 echo ""

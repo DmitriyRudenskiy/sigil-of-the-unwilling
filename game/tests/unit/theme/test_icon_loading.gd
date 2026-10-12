@@ -34,6 +34,7 @@ func test_resource_registry_get_icon() -> void:
 	var tex := reg.get_icon(&"wood")
 	assert_that(tex).is_not_null()
 	assert_bool(tex is Texture2D).is_true()
+	reg.free()  # CI-4 (раунд 11 §4): ResourceRegistry — Node
 
 func test_building_defs_get_icon() -> void:
 	var tex := BuildingDefs.get_icon(&"farm")

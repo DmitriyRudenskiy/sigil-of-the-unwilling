@@ -11,6 +11,7 @@ func test_pair_defaults() -> void:
 	assert_that(int(p["romance"])).is_equal(0)
 	assert_bool(bool(p["spouse"])).is_false()
 	assert_bool(comp.has_pair(1)).is_true()
+	comp.free()  # CI-4 (раунд 11 §4): компонент — Node
 
 func test_duo_key_order_independent() -> void:
 	assert_that(HeroRelationshipsComponent.duo_key(3, 1)).is_equal(HeroRelationshipsComponent.duo_key(1, 3))
@@ -27,6 +28,7 @@ func test_duo_defaults_and_remove() -> void:
 	comp.remove_follower(1)
 	assert_bool(comp.has_pair(1)).is_false()
 	assert_bool(comp.duos.is_empty()).is_true()
+	comp.free()
 
 func test_average_bond() -> void:
 	var comp := HeroRelationshipsComponent.new()
@@ -34,6 +36,7 @@ func test_average_bond() -> void:
 	comp.pair(1)["bond"] = 40
 	comp.pair(2)["bond"] = 80
 	assert_that(comp.average_bond()).is_equal(60.0)
+	comp.free()
 
 func test_serialize_roundtrip() -> void:
 	var comp := HeroRelationshipsComponent.new()
@@ -64,6 +67,8 @@ func test_serialize_roundtrip() -> void:
 	assert_that(int(d2["bond"])).is_equal(-10)
 	assert_that(int(d2["jealousy_to"])).is_equal(7)
 	assert_bool(bool(d2["jealousy_fired"])).is_true()
+	comp.free()
+	comp2.free()
 
 func test_deserialize_old_save_defaults() -> void:
 	# старый сейв без блока relationships → пустые связи
@@ -78,6 +83,8 @@ func test_deserialize_old_save_defaults() -> void:
 	assert_that(int(p["bond"])).is_equal(30)
 	assert_that(int(p["trust"])).is_equal(50)
 	assert_that(int(p["romance"])).is_equal(0)
+	comp.free()
+	comp2.free()
 
 func test_hero_controller_wiring() -> void:
 	# компонент зарегистрирован в HeroController и сериализуется вместе с героем
@@ -202,3 +209,4 @@ func test_betrayal_returns_to_city() -> void:
 	assert_that(hero.followers.size()).is_equal(0)
 	assert_that(city.pop.size()).is_equal(1)
 	assert_that(int(city.pop[0].state)).is_equal(int(PopUnit.State.FOLLOWER))
+	hero.city_manager.free()  # CI-4 (раунд 11 §4): CityManager — Node, не child героя

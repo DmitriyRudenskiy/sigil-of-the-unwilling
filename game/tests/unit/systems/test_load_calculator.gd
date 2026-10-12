@@ -40,15 +40,19 @@ func test_overload_rest_penalty_positive() -> void:
 	assert_bool(LoadCalculator.overload_rest_penalty(0.5) > 0.0).is_true()
 
 
+# Орфаны (CI-4, раунд 11 §4): _MiniRegistry — Node, без free() = 1 сирота/тест.
+
 func test_resources_weight_empty() -> void:
 	var reg := _make_registry()
 	assert_that(LoadCalculator.resources_weight({}, reg)).is_equal(0.0)
+	reg.free()
 
 
 func test_resources_weight_with_items() -> void:
 	var reg := _make_registry()
 	var res := {&"coal": 5, &"wood": 3}  # coal 1.0, wood 0.0
 	assert_that(LoadCalculator.resources_weight(res, reg)).is_equal_approx(5.0, 0.01)
+	reg.free()
 
 
 func test_fit_units_limited_by_weight() -> void:
@@ -56,12 +60,14 @@ func test_fit_units_limited_by_weight() -> void:
 	var def: ResourceDef = reg.get_resource(&"coal")  # 1.0
 	assert_that(LoadCalculator.fit_units(def, 8.0, 10.0)).is_equal(2)
 	assert_that(LoadCalculator.fit_units(def, 12.0, 10.0)).is_equal(0)
+	reg.free()
 
 
 func test_fit_units_zero_weight_resource() -> void:
 	var reg := _make_registry()
 	var def: ResourceDef = reg.get_resource(&"wood")  # 0.0
 	assert_that(LoadCalculator.fit_units(def, 0.0, 10.0)).is_equal(0)
+	reg.free()
 
 
 func _make_inventory(weight: float) -> HeroInventory:
