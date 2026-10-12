@@ -38,6 +38,11 @@ func _init_campaign() -> void:
 	if persistence.pending_new_game != null:
 		composition.hero_name = persistence.pending_new_game.name
 		persistence.pending_new_game = null
+	# T-002 «Выбор знака»: Знак новой кампании (SignChoiceUI); "" — вне UI-пути
+	# (раннер D-157, тесты) — знак-механики в MVP нет, кампания работает без него.
+	if persistence.pending_sign_id != "":
+		composition.sign_id = persistence.pending_sign_id
+		persistence.pending_sign_id = ""
 	# Continue: кампанийный MVP-слот → load_save_state (схема T-110).
 	if persistence.pending_campaign_slot >= 0:
 		var result: Dictionary = MvpSaveManager.load_slot(persistence.pending_campaign_slot)

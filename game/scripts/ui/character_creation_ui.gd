@@ -5,7 +5,7 @@ const _Races = preload("res://scripts/data/hero_races.gd")
 const _Classes = preload("res://scripts/data/hero_classes.gd")
 const _Cultures = preload("res://scripts/data/hero_cultures.gd")
 const _Profile = preload("res://scripts/data/hero_build_profile.gd")
-const _CAMPAIGN_SCENE := "res://scenes/main/main.tscn"  # Cutover D-157: K-канон-линия
+const _CAMPAIGN_SCENE := "res://scenes/ui/sign_choice.tscn"  # T-002: после героя — выбор Знака, затем кампания
 const _MENU_SCENE := "res://scenes/main_menu.tscn"
 static func _sexes() -> Array:
     return [{"id": "male", "name": GameText.creation_sex_male()},

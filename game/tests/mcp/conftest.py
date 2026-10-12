@@ -159,6 +159,13 @@ def full_cycle(mcp):
         "cc._on_create()\n"
         'return {"ok": true}'
     )
+    # T-002: после создания — экран выбора Знака (выбор 1 из 8 на всю игру).
+    _wait_for_scene(mcp, "sign_choice")
+    mcp.execute_code(
+        "var sc = get_tree().current_scene\n"
+        'sc._on_sign_pressed("harmony")\n'
+        'return {"ok": true}'
+    )
     _wait_for_scene(mcp, "scripts/main/main")
     deadline = time.time() + 120
     while time.time() < deadline:

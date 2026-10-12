@@ -24,6 +24,9 @@ var pending_new_game: _HeroProfile = null
 ## T-110 проводка (cutover, раунд 6): Continue → main.tscn грузит MVP-слот
 ## (MvpSaveManager → CampaignComposition.load_save_state); -1 — новой кампании.
 var pending_campaign_slot: int = -1
+## T-002 «Выбор знака»: Знак, выбранный на экране создания кампании
+## (SignChoiceUI); "" — не выбран (раннер/тесты идут мимо UI). Consumed в main.gd.
+var pending_sign_id: String = ""
 
 func _init(save_manager: SaveManager = null) -> void:
 	_save_manager = save_manager
@@ -35,6 +38,7 @@ func reset_session_state() -> void:
 	pending_save = null
 	pending_new_game = null
 	pending_campaign_slot = -1
+	pending_sign_id = ""
 	next_seed = 0
 
 func get_run_seed() -> int:

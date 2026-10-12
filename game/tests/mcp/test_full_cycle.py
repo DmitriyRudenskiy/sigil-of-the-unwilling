@@ -22,7 +22,8 @@ def test_full_cycle_from_menu(full_cycle):
         '    "turn": c.campaign.current_turn,\n'
         '    "seed": c.campaign.seed,\n'
         '    "roster": c.population_system.size(),\n'
-        '    "hero": c.hero_name\n'
+        '    "hero": c.hero_name,\n'
+        '    "sign": c.sign_id\n'
         "}"
     )
     assert r["script"].endswith("scripts/main/main.gd"), f"Не main.tscn: {r}"
@@ -32,6 +33,9 @@ def test_full_cycle_from_menu(full_cycle):
 
     # 2) Проводка T-110: профиль создания дошёл до кампании.
     assert r["hero"] == "McpCycleHero", f"pending_new_game не потреблён: {r}"
+
+    # 2b) Проводка T-002: выбор Знака дошёл до кампании (SignChoiceUI → main).
+    assert r["sign"] == "harmony", f"pending_sign_id не потреблён: {r}"
 
     # 3) Первый ход (минимум smoke: 1→2).
     mcp.execute_code(
