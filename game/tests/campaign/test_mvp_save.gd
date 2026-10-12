@@ -175,3 +175,18 @@ func test_unknown_and_missing_sections() -> void:
 	var saved2 := MvpSaveManager.save_slot(1, state)
 	assert_that(not saved2["ok"] and saved2["error"] == MvpSaveManager.SaveError.INVALID_DATA) \
 		.override_failure_message("отсутствующая секция должна отклоняться: %s" % str(saved2["message"]))
+
+
+func test_every_required_section_is_mandatory() -> void:
+	# Страж против «пустозелёной» схемы (уловитель владельца, 14-я итерация §2):
+	# КАЖДАЯ обязательная секция в отсутствии должна давать ошибку — не только
+	# та одна, которую проверял исходный тест.
+	var complete := _sample_state()
+	assert_str(MvpSaveSchema.validate(complete)).is_equal("")
+	for section in MvpSaveSchema.SECTIONS.keys():
+		var state: Dictionary = complete.duplicate(true)
+		state.erase(section)
+		assert_str(MvpSaveSchema.validate(state)) \
+			.override_failure_message(
+				"пропущенная секция '%s' прошла валидацию — схема пустозелёная" % section
+			).is_not_equal("")

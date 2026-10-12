@@ -137,7 +137,9 @@ func perform_load(slot: int) -> void:
 	var persistence: WorldPersistence = Services.resolve(&"persistence")
 	if persistence != null:
 		persistence.pending_save = data
-	get_tree().change_scene_to_file("res://scenes/world.tscn")
+	# Cutover D-157: навигация — на K-канон-линию; продолжить-MVP (чтение
+	# mvp_save_manager секций) — слой UI-проводки T-110, вне репойнта.
+	get_tree().change_scene_to_file("res://scenes/main/main.tscn")
 
 
 func perform_delete(slot: int) -> void:

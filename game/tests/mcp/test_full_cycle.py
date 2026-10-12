@@ -1,7 +1,6 @@
-"""TASK_17 §6.3.4: фикстура полного цикла (меню → персонаж → мир).
-
-Проверяем, что игра, запущенная через меню со созданием персонажа,
-доходит до живого мира и может ходить.
+"""TASK_17 §6.3.4 (переписано на cutover D-157): фикстура полного цикла
+(меню → персонаж → main.tscn). Игра, запущенная через меню со созданием
+персонажа, доходит до кампании K-канона и может ходить.
 """
 from __future__ import annotations
 
@@ -10,14 +9,19 @@ def test_full_cycle_from_menu(full_cycle):
     mcp = full_cycle
 
     r = mcp.execute_code(
-        "var w = get_tree().current_scene\n"
-        "return {\"hero\": w.get_hero() != null, "
-        "\"name\": w.get_hero().hero_name if w.get_hero() != null else \"\"}"
+        "var c = get_tree().current_scene.get(\"composition\")\n"
+        "return {\"campaign\": c != null and c.campaign != null, "
+        "\"turn\": c.campaign.current_turn if c != null else -1}"
     )
-    assert r["hero"] is True, r
-    assert r["name"] == "McpCycleHero", r
+    assert r["campaign"] is True, r
+    assert r["turn"] == 1, r
 
-    turn = mcp.execute_code("return get_tree().current_scene.get_cities().current_turn")
-    mcp.execute_code("get_tree().current_scene.do_end_turn()\nreturn {\"ok\": true}")
-    after = mcp.execute_code("return get_tree().current_scene.get_cities().current_turn")
-    assert after == turn + 1, (turn, after)
+    for _ in range(3):
+        mcp.execute_code(
+            'get_tree().current_scene.get("composition").advance_turn()\n'
+            'return {"ok": true}'
+        )
+    after = mcp.execute_code(
+        'return get_tree().current_scene.get("composition").campaign.current_turn'
+    )
+    assert after == 4, f"Три хода не прошли: {after}"

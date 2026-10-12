@@ -69,6 +69,6 @@ def test_world_battle_world_transitions(full_game):
     assert state["turn"] is True, f"Игровой ход не начался: {state}"
 
     # 3) Возврат в мир
-    _change_scene(mcp, "res://scenes/world.tscn")
+    _change_scene(mcp, "res://scenes/archive/world.tscn")
     r = mcp.execute_code(WORLD_OK)
     assert r["hero"] is True, f"Героя нет после возврата: {r}"

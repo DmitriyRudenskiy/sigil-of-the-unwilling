@@ -1,6 +1,7 @@
 """team-romance-roleplay 6.2–6.4: MCP e2e — романская линия, adult-гейт, ревность/предательство.
 
-Запускается поверх full_cycle (меню → создание персонажа → мир). UI-диалоги
+Запускается поверх full_game (мир с ботстлабом; cutover D-157: full_cycle
+ведёт на main.tscn, романская линия — легаси-world-пайплайн). UI-диалоги
 автоматически отключены (TeamDialogScreen.ui_enabled = false) — проверяется
 логика интеграции, а не рендер.
 """
@@ -61,9 +62,9 @@ def _add_follower(mcp: object, uid: int, romance: int = 0, trust: int = 50) -> N
     )
 
 
-def test_romance_line_to_marriage(full_cycle):
+def test_romance_line_to_marriage(full_game):
     """6.2: рекрут → диалог (bond↑) → друг → роман → помолвка → брак → супруг в наследовании."""
-    mcp = full_cycle
+    mcp = full_game
     _disable_auto_dialogs(mcp)
 
     # 1) Следователь совместимой ориентации (определённая настройка;
@@ -201,9 +202,9 @@ def test_romance_line_to_marriage(full_cycle):
     assert r["chosen_uid"] == 100, r
 
 
-def test_adult_gate(full_cycle):
+def test_adult_gate(full_game):
     """6.3: content_adult off → adult-вариант скрыт (pg_fallback), on → виден."""
-    mcp = full_cycle
+    mcp = full_game
     _disable_auto_dialogs(mcp)
     _add_follower(mcp, 200, romance=30)
 
@@ -256,9 +257,9 @@ def test_adult_gate(full_cycle):
     mcp.execute_code("Settings.content_adult = false\nreturn {'ok': true}")
 
 
-def test_jealousy_and_betrayal(full_cycle):
+def test_jealousy_and_betrayal(full_game):
     """6.4: ревность дьюо (оба romance ≥ 50, trust −15, одна сцена) и предательство (trust < 20)."""
-    mcp = full_cycle
+    mcp = full_game
     _disable_auto_dialogs(mcp)
     _add_follower(mcp, 300, romance=55)
     _add_follower(mcp, 301, romance=55)

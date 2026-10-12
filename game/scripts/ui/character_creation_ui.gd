@@ -5,7 +5,7 @@ const _Races = preload("res://scripts/data/hero_races.gd")
 const _Classes = preload("res://scripts/data/hero_classes.gd")
 const _Cultures = preload("res://scripts/data/hero_cultures.gd")
 const _Profile = preload("res://scripts/data/hero_build_profile.gd")
-const _WORLD_SCENE := "res://scenes/world.tscn"
+const _CAMPAIGN_SCENE := "res://scenes/main/main.tscn"  # Cutover D-157: K-канон-линия
 const _MENU_SCENE := "res://scenes/main_menu.tscn"
 static func _sexes() -> Array:
     return [{"id": "male", "name": GameText.creation_sex_male()},
@@ -125,7 +125,7 @@ func _on_create() -> void:
         return
     var persistence: WorldPersistence = Services.resolve(&"persistence")
     persistence.pending_new_game = _profile
-    get_tree().change_scene_to_file(_WORLD_SCENE)
+    get_tree().change_scene_to_file(_CAMPAIGN_SCENE)
 
 func _on_back() -> void:
     get_tree().change_scene_to_file(_MENU_SCENE)

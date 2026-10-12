@@ -3,7 +3,7 @@ extends BaseTest
 const _SCENES := [
 	"res://scenes/main_menu.tscn",
 	"res://scenes/city_arena.tscn",
-	"res://scenes/world.tscn",
+	"res://scenes/archive/world.tscn",
 	"res://scenes/battle.tscn",
 ]
 
