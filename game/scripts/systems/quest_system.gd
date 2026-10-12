@@ -103,7 +103,7 @@ static func check_deadlines(state: Dictionary, current_day: int) -> Array:
 		var q: Dictionary = state["active"][quest_id]
 		var deadline: int = int(q.get("deadline", 0))
 		var starts: int = int(q.get("starts_day", 0))
-		if deadline > 0 and current_day - starts > deadline:
+		if deadline > 0 and current_day - starts >= deadline:
 			fail_quest(state, str(quest_id), "timeout")
 			failed.append(quest_id)
 	return failed
