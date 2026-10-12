@@ -63,6 +63,25 @@ if [ -z "$ASSETS_NO_IMP" ] && [ -z "$IMP_NO_ASSET" ]; then
 	echo "OK: пары ассет+.import целы"
 fi
 
+echo "=== checker 5: workflow YAML (anti zero-job, раунд 11 §2) ==="
+# Урок af245eb (раунд 10): незакавыченный «name: Lint (gdtoolkit: ...)» —
+# YAML-ошибка → ран с 0 jobs и conclusion=failure БЕЗ логов (недиагностируемо).
+# Локальный валидатор ловит класс до пуша.
+if python3 -c 'import yaml' 2>/dev/null; then
+	YAML_BAD=""
+	for wf in .github/workflows/*.yml; do
+		[ -f "$wf" ] || continue
+		python3 -c "import yaml,sys; yaml.safe_load(open(sys.argv[1]))" "$wf" 2>/dev/null || YAML_BAD="$YAML_BAD $wf"
+	done
+	if [ -n "$YAML_BAD" ]; then
+		echo "RED: workflow не парсится YAML:$YAML_BAD"; FAIL=1
+	else
+		echo "OK: workflow-файлы парсятся YAML"
+	fi
+else
+	echo "SKIPPED: нет PyYAML в python3 (не красим: неизвестный раннер)"
+fi
+
 echo ""
 if [ "$FAIL" -ne 0 ]; then
 	echo "CHECKERS: RED"
