@@ -1,0 +1,29 @@
+[gd_scene load_steps=2 format=3 uid="uid://bcsignchoice1"]
+[ext_resource type="Script" path="res://scripts/ui/sign_choice_ui.gd" id="1"]
+[node name="SignChoice" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+disable_set_ownership = true
+script = ExtResource("1")
+[node name="Overlay" type="PanelContainer" parent="."]
+layout_mode = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+disable_set_ownership = true
+[node name="Scroll" type="ScrollContainer" parent="Overlay"]
+layout_mode = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+disable_set_ownership = true
+horizontal_scroll_mode = 0
+[node name="Root" type="VBoxContainer" parent="Overlay/Scroll"]
+layout_mode = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+disable_set_ownership = true
+theme_override_constants/separation = 12

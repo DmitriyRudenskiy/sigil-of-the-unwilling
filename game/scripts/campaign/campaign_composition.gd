@@ -25,6 +25,9 @@ var final_raid_repelled: bool = false
 ## Проводка T-110 (cutover, раунд 6): имя героя из создания (pending_new_game);
 ## sign-слой (что несёт Знак) — за MVP-срезом (T-020).
 var hero_name: String = ""
+## T-002 «Выбор знака»: id Знака кампании (Signs: spark/time/balance/primal/
+## shadow/harmony/cycle/basis); "" — не выбран (вне UI-пути). Сейв-секция "sign".
+var sign_id: String = ""
 var _boss_prestige_given: bool = false
 var _statblocks: Dictionary = {}
 var _victory_sources: Dictionary = {}
@@ -204,7 +207,7 @@ func build_save_state() -> Dictionary:
 		},
 		"map": {"threats": threats.to_dict()},
 		"prestige": {"ledger": prestige_ledger.duplicate(true)},
-		"sign": {},  # состояние Знака (R1) — слой T-020
+		"sign": {"id": sign_id},  # T-002: состояние Знака (R1) — выбор 1 из 8 на всю игру
 	}
 	# Нормализация int→float: JSON round-trip теряет тип int (числа → float);
 	# нормализуем при сборке — сейв байтово равен roundtrip-у (контракт T-110).
@@ -230,6 +233,7 @@ static func _to_json_types(value: Variant) -> Variant:
 func load_save_state(state: Dictionary) -> void:
 	campaign = TurnDriver.from_dict(state.get("campaign", {}))
 	hero_name = str(state.get("campaign", {}).get("hero_name", ""))
+	sign_id = str((state.get("sign", {}) as Dictionary).get("id", ""))  # T-002
 	final_battle_seen = bool(state.get("campaign", {}).get("final_battle_seen", false))
 	final_raid_repelled = bool(state.get("campaign", {}).get("final_raid_repelled", false))
 	population_system = PopulationSystem.from_dict(state.get("population", {}))
