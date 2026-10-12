@@ -42,6 +42,10 @@ def _restore_project_godot_if_dirty() -> None:
             print("[mcp] project.godot восстановлен (node ушёл без rollback)", file=sys.stderr)
     except OSError as e:
         print(f"[mcp] не удалось проверить project.godot: {e}", file=sys.stderr)
+    # Артефакты инжекта MCP-сервера (тот же состав, что чистит run_tests.sh):
+    # осиротевший .uid без скрипта красит checker 1 (CI-2, инцидент 4c77f72e).
+    for artifact in ("mcp_interaction_server.gd", "mcp_interaction_server.gd.uid"):
+        (GAME_DIR / artifact).unlink(missing_ok=True)
 
 def _server_params(extra_env: dict | None = None) -> StdioServerParameters:
     env = dict(SERVER_ENV)
