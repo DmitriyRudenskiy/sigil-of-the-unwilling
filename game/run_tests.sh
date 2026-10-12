@@ -116,9 +116,25 @@ export GODOT_PROJECT_PATH="${GODOT_PROJECT_PATH:-$PWD}"
 # (bash: присваивания без команды не экспортируются в команду) — GODOT_PATH/GODOT_BIN
 # не доходили до pytest; lifecycle-тесты skip'ались «Godot не найден», node-сервер
 # маскировал баг auto-detection. Комментарии — только ВЫШЕ блока присваиваний.
+MCP_LOG="$(mktemp)"
 GODOT_PATH="$GODOT" \
 GODOT_BIN="$GODOT" \
-"$PYTEST_PY" -m pytest tests/mcp/ -v --timeout=900 --tb=short --durations=25
-MCP_RC=$?
+"$PYTEST_PY" -m pytest tests/mcp/ -v --timeout=900 --tb=short --durations=25 2>&1 | tee "$MCP_LOG"
+MCP_RC=${PIPESTATUS[0]}
+# Леджер-равенство (fixed-green-семья CI-4, раунд 6 §2): свит обязан отработать
+# всё собранное; прерванный прогон (таймаут сессии, -x в dev-режиме) — красный.
+COLLECTED=$(grep -oE 'collected [0-9]+ items' "$MCP_LOG" | head -1 | grep -oE '[0-9]+' || true)
+SUMMARY=$(grep -E '=+ .*in [0-9.]+s' "$MCP_LOG" | tail -1)
+P=$(echo "$SUMMARY" | grep -oE '[0-9]+ passed' | grep -oE '[0-9]+' || true)
+S=$(echo "$SUMMARY" | grep -oE '[0-9]+ skipped' | grep -oE '[0-9]+' || true)
+F=$(echo "$SUMMARY" | grep -oE '[0-9]+ failed' | grep -oE '[0-9]+' || true)
+E=$(echo "$SUMMARY" | grep -oE '[0-9]+ error' | grep -oE '[0-9]+' || true)
+P=${P:-0}; S=${S:-0}; F=${F:-0}; E=${E:-0}; COLLECTED=${COLLECTED:-0}
+SUM=$((P + S + F + E))
+echo "PYTEST LEDGER: passed=$P skipped=$S failed=$F errors=$E collected=$COLLECTED"
+if [ "$MCP_RC" -eq 0 ] && [ "$SUM" -ne "$COLLECTED" ]; then
+	echo "PYTEST: RED (неполный прогон: сумма $SUM != collected $COLLECTED — свит встал/прервался)"
+	MCP_RC=1
+fi
 # Очистка (Xvfb, инжект-артефакты, node/godot MCP-процессы) — в trap cleanup_mcp (EXIT).
 exit "$MCP_RC"

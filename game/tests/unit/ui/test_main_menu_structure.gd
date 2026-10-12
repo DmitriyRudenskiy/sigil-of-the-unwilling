@@ -49,8 +49,8 @@ func test_main_menu_signals_and_locale() -> void:
 func test_main_menu_continue_button_state() -> void:
 	var ui := await _spawn()
 	assert_bool(ui._continue_btn != null).is_true()
-	# Без сохранения в слоте 1 кнопка заблокирована
-	assert_bool(ui._continue_btn.disabled).is_equal(not SaveManager.has_save_in_slot(1))
+	# Cutover-проводка (раунд 6, T-110): Continue — кампанийный MVP-слот 1.
+	assert_bool(ui._continue_btn.disabled).is_equal(not MvpSaveManager.has_save_in_slot(1))
 
 func test_game_text_new_keys_localized() -> void:
 	assert_str(GameText.menu_continue()).is_not_empty()

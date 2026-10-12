@@ -22,6 +22,9 @@ var last_battle_report: Dictionary = {}
 ## Победная оценка (T-117 якорь: ход 21 = финальный рейд отражён/нет).
 var final_battle_seen: bool = false
 var final_raid_repelled: bool = false
+## Проводка T-110 (cutover, раунд 6): имя героя из создания (pending_new_game);
+## sign-слой (что несёт Знак) — за MVP-срезом (T-020).
+var hero_name: String = ""
 var _boss_prestige_given: bool = false
 var _statblocks: Dictionary = {}
 var _victory_sources: Dictionary = {}
@@ -180,6 +183,7 @@ func build_save_state() -> Dictionary:
 	var campaign_section: Dictionary = campaign.to_dict()
 	campaign_section["final_battle_seen"] = final_battle_seen
 	campaign_section["final_raid_repelled"] = final_raid_repelled
+	campaign_section["hero_name"] = hero_name
 	var state := {
 		"campaign": campaign_section,
 		"resources": settlement.stocks.duplicate(),
@@ -218,6 +222,7 @@ static func _to_json_types(value: Variant) -> Variant:
 
 func load_save_state(state: Dictionary) -> void:
 	campaign = TurnDriver.from_dict(state.get("campaign", {}))
+	hero_name = str(state.get("campaign", {}).get("hero_name", ""))
 	final_battle_seen = bool(state.get("campaign", {}).get("final_battle_seen", false))
 	final_raid_repelled = bool(state.get("campaign", {}).get("final_raid_repelled", false))
 	population_system = PopulationSystem.from_dict(state.get("population", {}))

@@ -21,6 +21,9 @@ var _shards_memory: Dictionary = {}
 var next_seed: int = 0
 var pending_save: SaveData = null
 var pending_new_game: _HeroProfile = null
+## T-110 проводка (cutover, раунд 6): Continue → main.tscn грузит MVP-слот
+## (MvpSaveManager → CampaignComposition.load_save_state); -1 — новой кампании.
+var pending_campaign_slot: int = -1
 
 func _init(save_manager: SaveManager = null) -> void:
 	_save_manager = save_manager
@@ -31,6 +34,7 @@ func set_save_manager(save_manager: SaveManager) -> void:
 func reset_session_state() -> void:
 	pending_save = null
 	pending_new_game = null
+	pending_campaign_slot = -1
 	next_seed = 0
 
 func get_run_seed() -> int:
