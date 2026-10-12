@@ -54,7 +54,7 @@ func _catalog() -> Dictionary:
 
 func test_valid_catalog_resolves_all_declared_references() -> void:
 	var errors := CampaignBuildingCatalog.validate_catalog(_catalog(), _references())
-	assert_that(errors.is_empty()).override_failure_message("валидный каталог отклонён: %s" % [errors])
+	assert_bool(bool(errors.is_empty())).override_failure_message("валидный каталог отклонён: %s" % [errors]).is_true()
 
 func test_invalid_references_are_reported() -> void:
 	var catalog := _catalog()

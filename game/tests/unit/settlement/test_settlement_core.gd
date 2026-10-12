@@ -35,14 +35,14 @@ func test_caravan_three_species() -> void:
 
 func test_caravan_four_species_rejected() -> void:
 	var c: Variant = Settlement.form_caravan({"human": 1, "lizard": 1, "fox": 1, "harpy": 1})
-	assert_that(c == null)
+	assert_bool(bool(c == null)).is_true()
 
 func test_frog_dlc_gate() -> void:
 	assert_bool(not Species.is_available("frog")).override_failure_message("frog без DLC доступен")
 	assert_bool(Species.is_available("frog", {"keepers_of_the_stone": true}))
 	assert_bool(Species.is_available("human"))
 	var c: Variant = Settlement.form_caravan({"frog": 1})
-	assert_that(c == null)
+	assert_bool(bool(c == null)).is_true()
 	var c2: Variant = Settlement.form_caravan({"frog": 1}, {"keepers_of_the_stone": true})
 	assert_bool(c2 != null)
 
