@@ -191,7 +191,7 @@ func _social(class_id: String) -> Dictionary:
 	return p.get_stats()
 
 func test_battle_bonus_excludes_social_stats() -> void:
-	var comp := HeroStatsComponent.new()
+	var comp: HeroStatsComponent = auto_free(HeroStatsComponent.new())
 	comp.stats = {"attack": 3, "defense": 1, "spell_power": 2, "knowledge": 1, "int": 10, "wis": 10, "cha": 10, "luk": 10}
 	var b := comp.get_battle_bonus({})
 	assert_that(b["attack"]).is_equal(3)
