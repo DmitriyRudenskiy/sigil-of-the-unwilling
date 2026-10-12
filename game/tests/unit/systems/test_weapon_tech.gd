@@ -67,7 +67,7 @@ func test_hired_smithy_at_level_5() -> void:
 	WeaponTechService.set_rng(_rng(1))
 	var c := _city(5, {"bog_iron": 1.0, "coal": 1.0})
 	var hi: int = WeaponTechService.city_weapon_tier(c, 20)
-	assert_bool(hi >= 3)
+	assert_bool(bool(hi >= 3)).is_true()
 	# cha 2, rep -20: отказ -> fallback
 	WeaponTechService.set_rng(_rng(1))
 	var c2 := _city(5, {"bog_iron": 1.0, "coal": 1.0})
@@ -96,7 +96,7 @@ func test_best_item_per_tier() -> void:
 	assert_that(WeaponCatalog.best_item(2)).is_equal("stone_axe")
 	assert_that(WeaponCatalog.best_item(3)).is_equal("iron_sword")
 	var best5: String = WeaponCatalog.best_item(5)
-	assert_bool(best5 == "runic_blade" or best5 == "rune_sword" or best5 == "unique_artifact")
+	assert_bool(bool(best5 == "runic_blade" or best5 == "rune_sword" or best5 == "unique_artifact")).is_true()
 
 # --- social-systems-delta: каталог по этапам ---
 
@@ -106,56 +106,56 @@ func test_catalog_at_least_6_per_stage() -> void:
 		for id in WeaponCatalog.ITEMS:
 			if int(WeaponCatalog.ITEMS[id]["tier"]) == tier:
 				count += 1
-		assert_bool(count >= 6).override_failure_message("этап %d: %d изделий" % [tier, count])
+		assert_bool(bool(count >= 6)).override_failure_message("этап %d: %d изделий" % [tier, count]).is_true()
 
 func test_catalog_items_have_type_and_purpose() -> void:
 	var valid_types := ["bludgeoning", "piercing", "slashing", "throwing", "ranged", "defense"]
 	for id in WeaponCatalog.ITEMS:
 		var it: Dictionary = WeaponCatalog.ITEMS[id]
-		assert_bool(valid_types.has(str(it.get("type", "")))).override_failure_message("type: " + str(id))
-		assert_bool(str(it.get("purpose", "")).length() > 0).override_failure_message("purpose: " + str(id))
+		assert_bool(bool(valid_types.has(str(it.get("type", ""))))).override_failure_message("type: " + str(id)).is_true()
+		assert_bool(bool(str(it.get("purpose", "")).length() > 0)).override_failure_message("purpose: " + str(id)).is_true()
 
 func test_stage_1_has_no_stone() -> void:
 	# ТЗ: этап 1 — только дерево, каменное оружие недоступно
 	for id in WeaponCatalog.ITEMS:
 		var it: Dictionary = WeaponCatalog.ITEMS[id]
 		if str(id).begins_with("stone_") or str(id) == "flint_arrows" or str(id) == "sling":
-			assert_bool(int(it["tier"]) >= 2).override_failure_message("камень на этапе 1: " + str(id))
+			assert_bool(bool(int(it["tier"]) >= 2)).override_failure_message("камень на этапе 1: " + str(id)).is_true()
 
 # --- social-systems-delta: требования переходов этапов ---
 
 func test_stage_1_always_met() -> void:
-	assert_bool(WeaponTechService.stage_requirements_met(_city(1), 1))
+	assert_bool(bool(WeaponTechService.stage_requirements_met(_city(1), 1))).is_true()
 
 func test_stage_2_stone_and_wood() -> void:
 	var c := _city(1)
-	assert_bool(not WeaponTechService.stage_requirements_met(c, 2))
+	assert_bool(bool(not WeaponTechService.stage_requirements_met(c, 2))).is_true()
 	c.storage["stone"] = 1.0
-	assert_bool(not WeaponTechService.stage_requirements_met(c, 2))
+	assert_bool(bool(not WeaponTechService.stage_requirements_met(c, 2))).is_true()
 	c.storage["wood"] = 1.0
-	assert_bool(WeaponTechService.stage_requirements_met(c, 2))
+	assert_bool(bool(WeaponTechService.stage_requirements_met(c, 2))).is_true()
 
 func test_stage_3_smithy_coal_iron_smith() -> void:
 	var c := _city(1, {"coal": 1.0, "bog_iron": 1.0})
 	_with_smithy(c)
-	assert_bool(not WeaponTechService.stage_requirements_met(c, 3))
+	assert_bool(bool(not WeaponTechService.stage_requirements_met(c, 3))).is_true()
 	c.smith_hired = true
-	assert_bool(WeaponTechService.stage_requirements_met(c, 3))
+	assert_bool(bool(WeaponTechService.stage_requirements_met(c, 3))).is_true()
 
 func test_stage_4_smithy_2() -> void:
 	var c := _city(1)
 	_with_smithy(c)
-	assert_bool(not WeaponTechService.stage_requirements_met(c, 4))
+	assert_bool(bool(not WeaponTechService.stage_requirements_met(c, 4))).is_true()
 	_with_smithy(c, 2)
-	assert_bool(WeaponTechService.stage_requirements_met(c, 4))
+	assert_bool(bool(WeaponTechService.stage_requirements_met(c, 4))).is_true()
 
 func test_stage_5_quartz() -> void:
 	var c := _city(1, {"quartz": 1.0})
 	_with_smithy(c, 2)
-	assert_bool(WeaponTechService.stage_requirements_met(c, 5))
+	assert_bool(bool(WeaponTechService.stage_requirements_met(c, 5))).is_true()
 	var c2 := _city(1)
 	_with_smithy(c2, 2)
-	assert_bool(not WeaponTechService.stage_requirements_met(c2, 5))
+	assert_bool(bool(not WeaponTechService.stage_requirements_met(c2, 5))).is_true()
 
 func test_try_hire_smith_sets_flag() -> void:
 	# cha 20: d20 + 10 vs DC 14 — успех почти всегда; 20 сидов гарантируют попадание
@@ -164,26 +164,26 @@ func test_try_hire_smith_sets_flag() -> void:
 		var c := _city(5)
 		if WeaponTechService.try_hire_smith(c, 20, _rng(seed)):
 			hired = true
-			assert_bool(c.smith_hired)
+			assert_bool(bool(c.smith_hired)).is_true()
 			# повторный вызов — сразу true, без броска
-			assert_bool(WeaponTechService.try_hire_smith(c, 2, _rng(99)))
+			assert_bool(bool(WeaponTechService.try_hire_smith(c, 2, _rng(99)))).is_true()
 			break
-	assert_bool(hired).override_failure_message("ни один из 20 сидов не нанял кузнеца")
+	assert_bool(bool(hired)).override_failure_message("ни один из 20 сидов не нанял кузнеца").is_true()
 
 # --- forge ---
 
 func test_forge_unknown_item() -> void:
 	var out := WeaponTechService.forge("nonexistent", {})
-	assert_bool(bool(out.get("ok", false)) == false)
+	assert_bool(bool(bool(out.get("ok", false)) == false)).is_true()
 
 func test_forge_produces_artifact_with_tier_and_weight() -> void:
 	WeaponTechService.set_rng(_rng(7))
 	var out := WeaponTechService.forge("iron_sword", {"int": 10, "wis": 10, "cha": 10, "luk": 10})
-	assert_bool(bool(out.get("ok", true)))
+	assert_bool(bool(bool(out.get("ok", true)))).is_true()
 	var art: Artifact = out["artifact"]
 	assert_int(art.tier).is_equal(3)
-	assert_bool(art.weight >= 1.0)
-	assert_bool(art.weight <= 3.0)
+	assert_bool(bool(art.weight >= 1.0)).is_true()
+	assert_bool(bool(art.weight <= 3.0)).is_true()
 	assert_that(art.display_name).is_equal("Железный меч")
 
 func test_forge_wis_guarantees_quality() -> void:
@@ -193,7 +193,7 @@ func test_forge_wis_guarantees_quality() -> void:
 		WeaponTechService.set_rng(_rng(seed))
 		var out := WeaponTechService.forge("club", {"int": 2, "wis": 20, "cha": 2, "luk": 2})
 		min_q_wis = minf(min_q_wis, float(out["quality"]))
-	assert_bool(min_q_wis >= 0.8)
+	assert_bool(bool(min_q_wis >= 0.8)).is_true()
 
 func test_forge_luk_boosts_quality() -> void:
 	var boosted: int = 0
@@ -202,7 +202,7 @@ func test_forge_luk_boosts_quality() -> void:
 		var out := WeaponTechService.forge("club", {"int": 10, "wis": 2, "cha": 2, "luk": 20})
 		if float(out["quality"]) > 1.2:
 			boosted += 1
-	assert_bool(boosted >= 1)
+	assert_bool(bool(boosted >= 1)).is_true()
 
 func test_forge_cha_discount() -> void:
 	WeaponTechService.set_rng(_rng(3))
@@ -217,4 +217,4 @@ func test_forge_determinism() -> void:
 	WeaponTechService.set_rng(_rng(42))
 	var b := WeaponTechService.forge("runic_blade", {"int": 12, "wis": 14, "cha": 16, "luk": 10})
 	assert_float(float(a["quality"])).is_equal(float(b["quality"]))
-	assert_bool(a["notes"].size() == b["notes"].size())
+	assert_bool(bool(a["notes"].size() == b["notes"].size())).is_true()
