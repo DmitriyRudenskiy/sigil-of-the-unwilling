@@ -97,6 +97,24 @@ else
 	echo "WARN: python3 не найден — checker 5 пропущен"
 fi
 
+# (6) T-123: полупустые assert-* (без check-метода) — GdUnit4 не проверяет
+#     НИЧЕГО в assert_that(x)/assert_bool(x) без is_true() и т.п. Класс
+#     «вечно-зелёных» тестов. Сканер — scripts/ci2_vacuous_asserts.py;
+#     ложные срабатывания — в scripts/ci2_vacuous_allowlist.txt (пусто = строго).
+if command -v python3 >/dev/null 2>&1; then
+	VACUOUS="$(python3 scripts/ci2_vacuous_asserts.py)"
+	VAC_RC=$?
+	if [ "$VAC_RC" -ne 0 ] || [ -n "$VACUOUS" ]; then
+		echo "RED: полупустые assert-* без check-метода (T-123; GdUnit4 не проверяет ничего):"
+		echo "$VACUOUS"
+		FAIL=1
+	else
+		echo "OK: полупустых assert-* нет (T-123)"
+	fi
+else
+	echo "WARN: python3 не найден — checker 6 пропущен"
+fi
+
 echo ""
 if [ "$FAIL" -ne 0 ]; then
 	echo "CHECKERS: RED"
