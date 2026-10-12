@@ -4,15 +4,22 @@ tags:
   - ci
   - process
   - gdlint
-status: draft
+status: reference
 date: 2026-10-12
 ---
 
 # gdlint-конфиг — предложение владельцу (раунд 12 §3)
 
-**Статус: report-only до утверждения** (приказ раунда 12 §2-2: «конфиг стиля —
-решение владельца; до утверждения — report-only верен»). Утверждение = новый
-реестровый акт; до него CI-2-шаг Lint не гейтит gdlint (только gdparse).
+**Статус: УТВЕРЖДЁН владельцем, этап 1** (раунд 9 §3, 2026-10-13). Этап 1
+исполнен: авто-фикс гигиены 431 (trailing-whitespace 379 + mixed-tabs-and-spaces
+47 + unnecessary-pass 1 реальный; 4 false-positive class-body — inline
+`# gdlint: ignore=unnecessary-pass`), `comparison-with-itself` ×2 → `is_finite()`
+(строже: отсекает и inf), `.gdlintrc` вербатим в `game/.gdlintrc`, CI-2-шаг
+Lint — **дельта-гейт**: baseline 335 (max-line-length 328 + duplicated-load 7),
+рост над baseline = красный; понижение baseline — только вниз списанием.
+`unnecessary-pass` в конфиге не отключён (уточнение к таблице: 4 из 5 были
+ложными — class-body pass обязателен, подавлены inline).
+(Дефолт до конфига: 2444 → с конфигом было 768 → после этапа 1: 335.)
 
 ## Измерения (gdtoolkit 4.5.0, `game/scripts` + `game/tests`, 2026-10-12)
 
