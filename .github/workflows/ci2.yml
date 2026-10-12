@@ -126,10 +126,10 @@ jobs:
           emit() { sed "s/\r//g" "$1" 2>/dev/null | grep -aE "$2" | grep -avE 'Statistics|PASSED|Node.js 20' | tail -14 | while IFS= read -r l; do echo "::error::${l:0:180}"; done; }
           echo "::error::=== DIAG gdunit (итог/падения) ==="
           sed "s/\r//g" /tmp/ci2-gdunit.log 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | grep -aE 'Overall Summary|FAILED|Parse Error|Can.t load' | tail -12 | while IFS= read -r l; do echo "::error::G1 ${l:0:170}"; done
-          echo "::error::=== DIAG mcp (tail каждого прогона) ==="
+          echo "::error::=== DIAG mcp (FAILED/summary каждого прогона) ==="
           for f in /tmp/ci2-mcp-1.log /tmp/ci2-mcp-2.log /tmp/ci2-mcp-3.log; do
             echo "::error::MCP --- ${f} ---"
-            sed "s/\r//g" "$f" 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | tail -10 | while IFS= read -r l; do echo "::error::M ${l:0:170}"; done
+            sed "s/\r//g" "$f" 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | grep -aE 'FAILED|ERROR |short test summary|passed|failed|LEDGER|PYTEST' | tail -12 | while IFS= read -r l; do echo "::error::M ${l:0:170}"; done
           done
 
       - name: Artifact (gate logs)
