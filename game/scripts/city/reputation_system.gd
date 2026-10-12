@@ -50,6 +50,9 @@ static func process_turn(city: City) -> int:
 
 ## cha — харизма героя, находящегося в городе (-1 = героя нет)
 static var _rng := RandomNumberGenerator.new()
+static func set_rng(rng: RandomNumberGenerator) -> void:
+	_rng = rng
+
 static func process_migration(city: City, cha: int = -1) -> Dictionary:
 	var immigrants := 0
 	var emigrants := 0

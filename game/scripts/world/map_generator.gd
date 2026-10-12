@@ -108,15 +108,7 @@ func generate() -> void:
 	renderer.paint(_tile_map)
 
 func _compute_reachable_cells() -> Dictionary:
-	var start_cell := Vector2i(-1, -1)
-	for y in model.map_height:
-		for x in model.map_width:
-			var cell := Vector2i(x, y)
-			if model.is_walkable(cell):
-				start_cell = cell
-				break
-		if start_cell.x >= 0:
-			break
+	var start_cell: Vector2i = model.find_spawn_cell(hex_shift_right)
 	if start_cell.x < 0:
 		return {}
 	return HexPathfinding.bfs_reachable(

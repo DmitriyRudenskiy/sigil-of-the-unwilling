@@ -8,13 +8,13 @@ const ROLES := {
 		"name": "Собиратель",
 		"max_turns": 60,
 		"rare_ids": [4, 5, 6],  # crystal, gems, gold
-		"rare_goal": 20,
+		"rare_goal": 10,
 	},
 	"traveler": {
 		"name": "Путешественник",
 		"max_turns": 90,
 		"distance_goal": 25,
-		"biome_goal": 3,
+		"biome_goal": 2,
 	},
 	"trader": {
 		"name": "Торговец",
@@ -31,9 +31,9 @@ const ROLES := {
 	"builder": {
 		"name": "Городостроитель",
 		"max_turns": 90,
-		"population_goal": 30,
+		"population_goal": 8,
 		"city_level_goal": 2,
-		"buildings_goal": 4,
+		"buildings_goal": 2,
 	},
 }
 
@@ -56,5 +56,5 @@ static func seed_for(class_id: String, role_id: String) -> int:
 	var key := "%s|%s" % [class_id, role_id]
 	var h := 1469598103
 	for i in key.length():
-		h = (h ^ key.unicode_at(i)) * 1099511628211 % 2147483647
+		h = (h ^ key.unicode_at(i)) * 947 % 2147483647
 	return int(h) + 1000000

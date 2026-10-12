@@ -50,6 +50,39 @@ func test_boot_finalized_with_event_router() -> void:
 	assert_that(wc._hero_mgr).is_not_null()
 	assert_that(wc._save_svc).is_not_null()
 
+func test_boot_hero_has_city_manager_for_need_recovery() -> void:
+	var wc := await _boot_world()
+	var hero := wc.get_hero()
+	var cities: CityManager = wc._bootstrap_result.cities
+	assert_bool(hero.city_manager == cities).is_true()
+	assert_bool(cities.city_at(cities.capital.center) == cities.capital).is_true()
+	hero.movement_comp.set_current_cell(cities.capital.center)
+	hero.needs_comp.needs.needs[NeedType.ID.REST] = 0.5
+	hero.needs_comp.end_turn()
+	assert_that(hero.needs_comp.get_need(NeedType.ID.REST)).is_greater(0.5)
+
+func test_new_world_resets_scenario_counters_after_previous_scenario() -> void:
+	var persistence = Services.resolve(&"persistence")
+	if persistence != null:
+		persistence.pending_save = null
+	BattleTrophyService.reset_for_session()
+	var first_trophy: Dictionary = BattleTrophyService.roll_trophy()
+	BattleTrophyService.roll_trophy()
+	WorldSeasons.set_turns(90)
+	var wc := await _boot_world()
+	assert_that(wc._bootstrap_result.loaded_save).is_null()
+	assert_that(WorldSeasons.get_turns()).is_equal(0)
+	assert_that(BattleTrophyService.roll_trophy()).is_equal(first_trophy)
+	BattleTrophyService.reset_for_session()
+
+func test_boot_seeds_city_random_systems_from_session_rng() -> void:
+	var wc := await _boot_world()
+	var session_rng: RandomNumberGenerator = wc._bootstrap_result.rng
+	assert_bool(CharismaEvents._rng == session_rng).is_true()
+	assert_bool(ReputationSystem._rng == session_rng).is_true()
+	assert_bool(CityService._rng_override == session_rng).is_true()
+	assert_bool(WeaponTechService._rng == session_rng).is_true()
+
 func test_boot_hero_is_hero_controller() -> void:
 	var wc := await _boot_world()
 	var hero := wc.get_hero()

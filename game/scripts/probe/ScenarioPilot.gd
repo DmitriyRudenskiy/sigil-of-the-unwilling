@@ -14,6 +14,10 @@ var _rare_count := 0
 
 func _ready() -> void:
 	GameEventBus.resource_extracted.connect(_on_resource_extracted)
+	if not GameEventBus.battle_won.is_connected(_on_role_battle_won):
+		GameEventBus.battle_won.connect(_on_role_battle_won)
+	if not GameEventBus.battle_lost.is_connected(_on_role_battle_lost):
+		GameEventBus.battle_lost.connect(_on_role_battle_lost)
 
 ## Запуск сценарного прогона: seed = f(класс, роль), роль задаёт max_turns.
 ## Класс героя задаётся ПЕРЕД ботстлабом через prepare_world.
@@ -108,9 +112,12 @@ func _nearest_enemy() -> Vector2i:
 			return t
 	return super._nearest_enemy()
 
-func _on_battle_completed(winner: BattleState.Side, cell: Vector2i) -> void:
-	super._on_battle_completed(winner, cell)
-	if role != null and winner == BattleState.Side.ATTACKER:
+func _on_role_battle_lost(cell: Vector2i) -> void:
+	if role != null:
+		role.on_battle_lost(self, cell)
+
+func _on_role_battle_won(cell: Vector2i) -> void:
+	if role != null:
 		role.on_battle_won(self, cell)
 
 ## autopilot-scenario-matrix: сбор — через игровую цепочку (WorldSpawner +
@@ -131,6 +138,10 @@ func _try_collect_at(cell: Vector2i) -> bool:
 	return removed
 
 func _finish() -> void:
+	if GameEventBus.battle_won.is_connected(_on_role_battle_won):
+		GameEventBus.battle_won.disconnect(_on_role_battle_won)
+	if GameEventBus.battle_lost.is_connected(_on_role_battle_lost):
+		GameEventBus.battle_lost.disconnect(_on_role_battle_lost)
 	super._finish()
 
 func report() -> Dictionary:

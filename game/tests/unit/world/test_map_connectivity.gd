@@ -19,11 +19,7 @@ func _gen(seed: int) -> void:
 	_mg.generate()
 
 func _hero_spawn(model) -> Vector2i:
-	for y in model.map_height:
-		for x in model.map_width:
-			if model.is_walkable(Vector2i(x, y)):
-				return Vector2i(x, y)
-	return Vector2i(-1, -1)
+	return model.find_spawn_cell(_mg.hex_shift_right)
 
 func _plain_candidate(model, start: Vector2i) -> Vector2i:
 	if model.is_walkable(start):

@@ -13,9 +13,13 @@ const MAX_UNITS := 3
 static var _roll_counter := 0
 
 
-## Сброс последовательности (только для тестов).
-static func reset_for_tests() -> void:
+## Сброс последовательности при старте новой сессии.
+static func reset_for_session() -> void:
 	_roll_counter = 0
+
+## Совместимость со старым тестовым API.
+static func reset_for_tests() -> void:
+	reset_for_session()
 
 
 ## Выбор трофея: {resource: StringName, amount: int}.

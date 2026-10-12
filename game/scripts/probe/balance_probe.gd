@@ -37,6 +37,7 @@ var first_collision_turn := -1
 var first_win_turn := -1
 var losses := 0
 var battles_fought := 0
+var _lost_enemy_cells: Dictionary = {}
 var snapshots: Array = []
 var warnings: Array = []
 var campaign_city_report: Dictionary = {}
@@ -57,6 +58,7 @@ func start_probe(world: Node, p_seed: int) -> Dictionary:
 	first_win_turn = -1
 	losses = 0
 	battles_fought = 0
+	_lost_enemy_cells.clear()
 	snapshots = []
 	warnings = []
 	campaign_city_report = {}
@@ -74,8 +76,10 @@ func start_probe(world: Node, p_seed: int) -> Dictionary:
 	_city_screen.visible = false
 	add_child(_city_screen)
 	_city_screen.setup(_player_city, _hero, Vector2i.ZERO)
-	if not GameEventBus.battle_completed.is_connected(_on_battle_completed):
-		GameEventBus.battle_completed.connect(_on_battle_completed)
+	if not GameEventBus.battle_won.is_connected(_on_battle_won):
+		GameEventBus.battle_won.connect(_on_battle_won)
+	if not GameEventBus.battle_lost.is_connected(_on_battle_lost):
+		GameEventBus.battle_lost.connect(_on_battle_lost)
 	set_process(true)
 	return {"status": "probe_started", "turn": 0}
 
@@ -85,7 +89,10 @@ var _spawner: Node = null
 var _res_chain: Variant = null  # ResourceChainService — RefCounted
 
 func _process(_delta: float) -> void:
-	if done or _world == null or _hero == null:
+	if done or _world == null:
+		return
+	if _hero == null or not is_instance_valid(_hero):
+		_finish()
 		return
 	if _handle_battle():
 		return
@@ -178,8 +185,8 @@ func _handle_battle() -> bool:
 
 # ── Мир: одно действие за кадр ──────────────────────────────────────────────
 func _step() -> void:
-	if _hero.is_alive == false:
-		_fail("герой погиб на ходу %d" % turn)
+	if not is_instance_valid(_hero) or _hero.is_alive == false:
+		_finish()
 		return
 	var progress := false
 
@@ -279,6 +286,12 @@ func _step() -> void:
 			_commit(true)
 			return
 		if mv2 != null:
+			if mv2.get_controller().reach_problem(enemy_cell) == "unreachable":
+				var enemy_frontier: Vector2i = _explore_target(enemy_cell)
+				if enemy_frontier != Vector2i(-1, -1) and _walk_to(enemy_frontier):
+					_action_fails = 0
+					_commit(true)
+					return
 			_action_fails += 1
 			if _action_fails >= MAX_ACTION_RETRIES:
 				_action_fails = 0
@@ -377,11 +390,14 @@ func _walk_to(cell: Vector2i) -> bool:
 			continue  # путь на остаток MP начат; дойдём в следующих кадрах
 		# MP кончились — дожить ход (MP восстановится) и пробовать снова
 		var was_cell: Vector2i = mv.get_current_cell()
+		var move_points_before: float = mv.get_move_points()
 		_end_turn()
 		if done:
 			return false
 		if mv.get_current_cell() == was_cell:
-			return false  # не сдвинулся даже за полный ход — маршрут мёртв
+			if mv.get_move_points() > move_points_before:
+				continue  # ход восстановил MP; повторить цель до ухода в обходной цикл
+			return false  # не сдвинулся и MP не восстановились — маршрут мёртв
 	return mv.get_current_cell() == cell
 
 ## Вражеский отряд в CITY_DEFEND_RADIUS от центра города (ближайший к городу).
@@ -392,6 +408,8 @@ func _nearest_city_threat() -> Vector2i:
 	var best := Vector2i(-1, -1)
 	var best_d := INF
 	for c in _map().enemy_stacks.keys():
+		if _lost_enemy_cells.has(c):
+			continue
 		var dc: int = HexUtils.hex_distance(c, city_c)
 		if dc <= CITY_DEFEND_RADIUS and dc < best_d:
 			best_d = dc
@@ -418,10 +436,11 @@ func _explore_target(toward: Vector2i) -> Vector2i:
 	if vis == null or toward == Vector2i(-1, -1):
 		return Vector2i(-1, -1)
 	var ctrl: Node = _hero.get_component("Movement").get_controller()
+	var current: Vector2i = _hero.get_component("Movement").get_current_cell()
 	var best := Vector2i(-1, -1)
 	var best_d := INF
 	for c in _map().terrain_grid:
-		if not vis.is_explored(c) or not _map().is_walkable(c):
+		if c == current or not vis.is_explored(c) or not _map().is_walkable(c):
 			continue
 		var at_edge := false
 		for nb in HexUtils.get_all_neighbors(c, _map().hex_shift_right):
@@ -444,6 +463,8 @@ func _nearest_enemy() -> Vector2i:
 	# Только 1-е кольцо: ранняя прогонка не лезет к монстрам
 	var out: Array = []
 	for c in cells:
+		if _lost_enemy_cells.has(c):
+			continue
 		if HexUtils.hex_distance(c, _start_cell()) < MapSpawner.THREAT_RING2_RADIUS:
 			out.append(c)
 	return _nearest_cell(out)
@@ -496,32 +517,40 @@ func _snapshot() -> void:
 		snap["endgame"] = _world.get_endgame_state()
 	snapshots.append(snap)
 
-## Итог боя (WorldBattleCoordinator → GameEventBus). Пробе-герой всегда
-## атакующий (сам идёт к врагу): ATTACKER — победа, иначе поражение.
-func _on_battle_completed(winner: BattleState.Side, _cell: Vector2i) -> void:
+## Итоги боя учитываются по авторитетным событиям игрока, а не стороне ATTACKER:
+## при вражеской атаке ATTACKER — противник.
+func _on_battle_won(_cell: Vector2i) -> void:
 	if done:
 		return
-	if winner == BattleState.Side.ATTACKER:
-		if first_win_turn < 0:
-			first_win_turn = turn
-	else:
-		losses += 1
+	_lost_enemy_cells.erase(_cell)
+	if first_win_turn < 0:
+		first_win_turn = turn
+
+func _on_battle_lost(cell: Vector2i) -> void:
+	if done:
+		return
+	_lost_enemy_cells[cell] = true
+	losses += 1
 
 func _fail(msg: String) -> void:
 	error_msg = msg
 	done = true
 	set_process(false)
 	ProbeFastMode.enabled = false
-	if GameEventBus.battle_completed.is_connected(_on_battle_completed):
-		GameEventBus.battle_completed.disconnect(_on_battle_completed)
+	if GameEventBus.battle_won.is_connected(_on_battle_won):
+		GameEventBus.battle_won.disconnect(_on_battle_won)
+	if GameEventBus.battle_lost.is_connected(_on_battle_lost):
+		GameEventBus.battle_lost.disconnect(_on_battle_lost)
 	GameLogger.error("BalanceProbe: %s" % msg, "BalanceProbe")
 
 func _finish() -> void:
 	done = true
 	set_process(false)
 	ProbeFastMode.enabled = false
-	if GameEventBus.battle_completed.is_connected(_on_battle_completed):
-		GameEventBus.battle_completed.disconnect(_on_battle_completed)
+	if GameEventBus.battle_won.is_connected(_on_battle_won):
+		GameEventBus.battle_won.disconnect(_on_battle_won)
+	if GameEventBus.battle_lost.is_connected(_on_battle_lost):
+		GameEventBus.battle_lost.disconnect(_on_battle_lost)
 	_check_thresholds()
 	_save_report()
 
@@ -574,9 +603,4 @@ func _city_center() -> Vector2i:
 	return _player_city.center if _player_city != null else Vector2i(-1000, -1000)
 
 func _start_cell() -> Vector2i:
-	for y in int(_map().map_height):
-		for x in int(_map().map_width):
-			var cell := Vector2i(x, y)
-			if _map().is_walkable(cell):
-				return cell
-	return _hero_cell()
+	return _map().model.find_spawn_cell(_map().hex_shift_right)

@@ -53,7 +53,16 @@ static func run(
 	_init_services(parent, R)
 	_assert_core_services()
 	R.loaded_save = _resolve_session(R, shard_seed)
+	# Reset session-scoped statics for a new game; saves restore season turns in apply_loaded_save().
+	if R.loaded_save == null:
+		WorldSeasons.reset()
+		BattleTrophyService.reset_for_session()
 	rng.seed = R.session.run_seed
+	# City migration/charisma and service RNGs share the session stream for fixed-seed probes.
+	MigrationProcessor.set_cha_rng(rng)
+	ReputationSystem.set_rng(rng)
+	CityService.set_rng(rng)
+	WeaponTechService.set_rng(rng)
 	# team-romance-roleplay D10: роллы верности/ревности/конфликтов — из session RNG
 	RelationshipSystem.set_rng(rng)
 	# team-romance-roleplay D6: JSON-сцены диалогов — один раз на загрузку мира
@@ -83,6 +92,7 @@ static func _create_world(parent: Node2D, R: BootstrapResult) -> void:
 
 static func _create_city_layer(parent: Node2D, platform: Variant, R: BootstrapResult) -> void:
 	_create_cities(parent, R)
+	R.hero.city_manager = R.cities
 	_create_ui(parent, platform, R)
 	_create_resource_nodes(parent, R)
 
@@ -239,7 +249,6 @@ static func _init_hero(R: BootstrapResult) -> void:
 	if R.loaded_save == null:
 		R.hero.solo_start = true
 	R.hero.setup(R.map_gen)
-	R.hero.city_manager = R.cities
 	if R.loaded_save != null:
 		R.hero.deserialize(R.loaded_save.hero)
 		if R.map_gen.has_valid_tilemap():

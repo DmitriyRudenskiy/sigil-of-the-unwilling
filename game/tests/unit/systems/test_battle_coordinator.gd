@@ -91,6 +91,37 @@ func test_battle_started_emitted() -> void:
 
 	assert_bool(data.get("started", false)).is_true()
 
+func test_defender_victory_emits_hero_win_after_enemy_removal() -> void:
+	var hero := _FakeHero.new()
+	var map := _FakeMap.new()
+	var cell := Vector2i(8, 8)
+	map.enemy_stacks[cell] = [UnitStack.new(null, 1)]
+	coordinator.setup(hero, map, null, null, null, null, null, null, null)
+	var won_cells: Array[Vector2i] = []
+	var lost_cells: Array[Vector2i] = []
+	var on_won := func(c: Vector2i) -> void: won_cells.append(c)
+	var on_lost := func(c: Vector2i) -> void: lost_cells.append(c)
+	GameEventBus.battle_won.connect(on_won)
+	GameEventBus.battle_lost.connect(on_lost)
+	var survivors: Array[UnitStack] = []
+
+	coordinator._pending_enemy_cell = cell
+	coordinator._roles_swapped = true
+	coordinator._on_battle_completed(BattleState.Side.ATTACKER, survivors, survivors)
+	assert_that(lost_cells).is_equal([cell])
+	assert_bool(map.enemy_stacks.has(cell)).is_true()
+
+	coordinator._pending_enemy_cell = cell
+	coordinator._roles_swapped = true
+	coordinator._on_battle_completed(BattleState.Side.DEFENDER, survivors, survivors)
+	assert_that(won_cells).is_equal([cell])
+	assert_bool(map.enemy_stacks.has(cell)).is_false()
+
+	GameEventBus.battle_won.disconnect(on_won)
+	GameEventBus.battle_lost.disconnect(on_lost)
+	map.free()
+	hero.free()
+
 func test_battle_completed_emitted() -> void:
 	coordinator.setup(null, null, null, null, null, null, null, null, null)
 

@@ -123,7 +123,7 @@ func place_enemies(reachable = null) -> void:
 
 	if reachable == null:
 		reachable = _get_reachable_cells()
-	var start_cell := _start_cell()
+	var threat_origin := _threat_origin()
 
 	var candidates: Array[Vector2i] = []
 	for cell in reachable:
@@ -152,7 +152,7 @@ func place_enemies(reachable = null) -> void:
 			break
 
 		# Ранняя игра: тир по дистанции от старта, случайный выбор из общего пула запрещён
-		var dist: int = HexUtils.hex_distance(cell, start_cell) if start_cell.x >= 0 else THREAT_RING3_RADIUS
+		var dist: int = HexUtils.hex_distance(cell, threat_origin) if threat_origin.x >= 0 else THREAT_RING3_RADIUS
 		var pool: Array = _threat_pool(dist)
 		var army: Array[UnitStack] = []
 
@@ -169,14 +169,11 @@ func place_enemies(reachable = null) -> void:
 			model.enemy_stacks[cell] = army
 			placed += 1
 
-func _start_cell() -> Vector2i:
-	# Стартовая клетка героя (та же, что и в _get_reachable_cells)
-	for y in model.map_height:
-		for x in model.map_width:
-			var cell := Vector2i(x, y)
-			if model.is_walkable(cell):
-				return cell
-	return Vector2i(-1, -1)
+func _threat_origin() -> Vector2i:
+	for city in known_cities:
+		if city != null and city.owner == &"player" and city.center is Vector2i:
+			return city.center
+	return model.find_spawn_cell()
 
 func _city_cells() -> Dictionary:
 	# Клетки городов: столицы/вилладжи (known_cities, появляются после
@@ -213,14 +210,7 @@ static func _threat_pool(dist: int) -> Array:
 	return THREAT_RING3
 
 func _get_reachable_cells() -> Dictionary:
-	var start_cell := Vector2i(-1, -1)
-	for y in model.map_height:
-		for x in model.map_width:
-			var cell := Vector2i(x, y)
-			if model.is_walkable(cell):
-				start_cell = cell
-				break
-		if start_cell.x >= 0: break
+	var start_cell: Vector2i = model.find_spawn_cell()
 	if start_cell.x < 0:
 		return {}
 	return HexPathfinding.bfs_reachable(start_cell, model.map_width + model.map_height,
