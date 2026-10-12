@@ -123,9 +123,9 @@ jobs:
           # Канал без токена: ::error::-аннотации публичны через
           # GET /repos/{o}/{r}/check-runs/{id}/annotations (проверено 2026-10-12).
           # Исполнитель читает диагноз без доступа к телу лога (раунд 7 §1.3).
-          emit() { sed "s/\r//g" "$1" 2>/dev/null | grep -aE "$2" | tail -14 | while IFS= read -r l; do echo "::error::${l:0:180}"; done; }
+          emit() { sed "s/\r//g" "$1" 2>/dev/null | grep -aE "$2" | grep -avE 'Statistics|PASSED|Node.js 20' | tail -14 | while IFS= read -r l; do echo "::error::${l:0:180}"; done; }
           echo "::error::=== DIAG gdunit (FAILED/Parse/Statistics/SCRIPT) ==="
-          emit /tmp/ci2-gdunit.log 'FAILED|Parse Error|SCRIPT ERROR|Statistics|Exit code|ERROR: '
+          emit /tmp/ci2-gdunit.log 'FAILED|Parse Error|SCRIPT ERROR|ERROR: |Can.t load|Orphan|Exit code'
           echo "::error::=== DIAG mcp (failed/error/LEDGER) ==="
           for f in /tmp/ci2-mcp-1.log /tmp/ci2-mcp-2.log /tmp/ci2-mcp-3.log; do emit "$f" 'FAILED|ERROR|LEDGER|passed|Error'; done
 
