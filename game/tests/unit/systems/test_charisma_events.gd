@@ -27,16 +27,16 @@ func _rng(seed: int) -> RandomNumberGenerator:
 func test_no_leader_no_events() -> void:
 	var out := CharismaEvents.process(_city_with_pop(), -1)
 	assert_that(str(out.event)).is_equal("")
-	assert_bool(not bool(out.needs_incentives))
+	assert_bool(bool(not bool(out.needs_incentives))).is_true()
 
 func test_cha_7_needs_incentives() -> void:
 	var out := CharismaEvents.process(_city_with_pop(), 7)
-	assert_bool(bool(out.needs_incentives))
+	assert_bool(bool(bool(out.needs_incentives))).is_true()
 	assert_that(str(out.event)).is_equal("")
 
 func test_cha_6_needs_incentives() -> void:
 	var out := CharismaEvents.process(_city_with_pop(), 6)
-	assert_bool(bool(out.needs_incentives))
+	assert_bool(bool(bool(out.needs_incentives))).is_true()
 
 func test_cha_5_morale_penalty() -> void:
 	var out := CharismaEvents.process(_city_with_pop(), 5)
@@ -69,7 +69,7 @@ func test_cha_2_event_reduces_pop() -> void:
 		if str(out.event) != "" and c.pop.size() < before:
 			reduced = true
 			break
-	assert_bool(reduced).override_failure_message("ни один из 20 сидов не дал событие")
+	assert_bool(bool(reduced)).override_failure_message("ни один из 20 сидов не дал событие").is_true()
 
 func test_desertion_removes_militia() -> void:
 	# найти сид с desertion
@@ -83,7 +83,7 @@ func test_desertion_removes_militia() -> void:
 			assert_int(c.count_state(PopUnit.State.MILITIA)).is_equal(0)
 			assert_int(c.count_state(PopUnit.State.WORKER)).is_equal(2)
 			break
-	assert_bool(found).override_failure_message("desertion не случился за 30 сидов")
+	assert_bool(bool(found)).override_failure_message("desertion не случился за 30 сидов").is_true()
 
 func test_flight_removes_worker() -> void:
 	var found: bool = false
@@ -95,4 +95,4 @@ func test_flight_removes_worker() -> void:
 			found = true
 			assert_int(c.pop.size()).is_equal(2)
 			break
-	assert_bool(found).override_failure_message("flight не случился за 30 сидов")
+	assert_bool(bool(found)).override_failure_message("flight не случился за 30 сидов").is_true()

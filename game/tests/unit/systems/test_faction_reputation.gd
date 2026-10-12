@@ -31,10 +31,10 @@ func test_price_multipliers() -> void:
 	assert_bool(bool(is_equal_approx(FactionReputation.price_multiplier(-50), 1.5))).is_true()
 
 func test_can_hire() -> void:
-	assert_bool(FactionReputation.can_hire(10))
-	assert_bool(FactionReputation.can_hire(100))
-	assert_bool(FactionReputation.can_hire(9) == false)
-	assert_bool(FactionReputation.can_hire(-100) == false)
+	assert_bool(bool(FactionReputation.can_hire(10))).is_true()
+	assert_bool(bool(FactionReputation.can_hire(100))).is_true()
+	assert_bool(bool(FactionReputation.can_hire(9) == false)).is_true()
+	assert_bool(bool(FactionReputation.can_hire(-100) == false)).is_true()
 
 func test_initial_state_race_bonus() -> void:
 	var s: Dictionary = FactionReputation.initial_state("elf", "fighter")

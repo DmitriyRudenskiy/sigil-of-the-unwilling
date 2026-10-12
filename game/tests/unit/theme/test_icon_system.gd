@@ -8,17 +8,17 @@ func test_resource_icons_load() -> void:
 	for id in ["wood", "mercury", "ore", "sulfur", "crystal", "gems", "gold"]:
 		var tex: Texture2D = IR.resource_texture(id)
 		assert_that(tex).is_not_null()
-		assert_that(tex.resource_path).ends_with("%s.png" % id)
+		assert_str(tex.resource_path).ends_with("%s.png" % id)
 
 func test_building_icons_load() -> void:
 	for id in ["farm", "mine", "barracks"]:
 		var tex: Texture2D = IR.building_texture(id)
 		assert_that(tex).is_not_null()
-		assert_that(tex.resource_path).ends_with("%s.png" % id)
+		assert_str(tex.resource_path).ends_with("%s.png" % id)
 
 func test_need_and_school_icons() -> void:
-	assert_that(IR.need_texture("rest").resource_path).ends_with("rest.png")
-	assert_that(IR.school_texture("fire").resource_path).ends_with("fire.png")
+	assert_str(IR.need_texture("rest").resource_path).ends_with("rest.png")
+	assert_str(IR.school_texture("fire").resource_path).ends_with("fire.png")
 
 func test_cursor_sprites_load() -> void:
 	for mode in ["default", "walk", "collect", "attack", "spell", "talk"]:
@@ -29,7 +29,7 @@ func test_cursor_sprites_load() -> void:
 func test_icon_cache() -> void:
 	var a: Texture2D = IR.resource_texture("wood")
 	var b: Texture2D = IR.resource_texture("wood")
-	assert_bool(a == b).override_failure_message("кэш не срабатывает")
+	assert_bool(bool(a == b)).override_failure_message("кэш не срабатывает").is_true()
 	assert_that(IR._cache.size()).is_greater(0)
 
 func test_fallback_icon() -> void:

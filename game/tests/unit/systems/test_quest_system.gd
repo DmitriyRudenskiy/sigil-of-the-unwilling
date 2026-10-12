@@ -13,22 +13,22 @@ func before_test() -> void:
 func test_generate_respects_count_and_no_duplicates() -> void:
 	var state: Dictionary = QuestSystem.new_state()
 	var quests: Array = QuestSystem.generate_quests(state, "human", 1, rng, 3)
-	assert_that(quests.size() <= 3)
-	assert_that(quests.size() > 0)
-	assert_that(int(state["active"].size()) == quests.size())
+	assert_bool(bool(quests.size() <= 3)).is_true()
+	assert_bool(bool(quests.size() > 0)).is_true()
+	assert_bool(bool(int(state["active"].size()) == quests.size())).is_true()
 	# Нет дублей type+target
 	var seen := {}
 	for q in quests:
 		var key: String = str(q["type"]) + ":" + str(q["target"])
-		assert_bool(not seen.has(key)).override_failure_message("duplicate: " + key)
+		assert_bool(bool(not seen.has(key))).override_failure_message("duplicate: " + key).is_true()
 		seen[key] = true
 
 func test_generate_ring_limits() -> void:
 	var state: Dictionary = QuestSystem.new_state()
 	var quests: Array = QuestSystem.generate_quests(state, "elf", 3, rng, 1)
-	assert_that(quests.size() == 1)
-	assert_that(int(quests[0]["ring"]) == 3)
-	assert_that(int(quests[0]["reward"]["reputation"]) == 30)
+	assert_bool(bool(quests.size() == 1)).is_true()
+	assert_bool(bool(int(quests[0]["ring"]) == 3)).is_true()
+	assert_bool(bool(int(quests[0]["reward"]["reputation"]) == 30)).is_true()
 
 func test_kill_progress_and_complete() -> void:
 	var state: Dictionary = QuestSystem.new_state()
@@ -40,19 +40,19 @@ func test_kill_progress_and_complete() -> void:
 	q["progress"] = 0
 	q["starts_day"] = 1
 	state["active"]["q1"] = q
-	assert_bool(QuestSystem.add_progress(state, "q1", 1) == false)
-	assert_bool(QuestSystem.add_progress(state, "q1", 1) == false)
-	assert_bool(QuestSystem.add_progress(state, "q1", 1) == true)
-	assert_that(int(state["active"]["q1"]["progress"]) == 3)
+	assert_bool(bool(QuestSystem.add_progress(state, "q1", 1) == false)).is_true()
+	assert_bool(bool(QuestSystem.add_progress(state, "q1", 1) == false)).is_true()
+	assert_bool(bool(QuestSystem.add_progress(state, "q1", 1) == true)).is_true()
+	assert_bool(bool(int(state["active"]["q1"]["progress"]) == 3)).is_true()
 	# Сдача
 	var rep := FactionReputation.initial_state("human", "fighter")
 	var res: Dictionary = QuestSystem.complete_quest(state, "q1", rep, "human")
-	assert_bool(not res.is_empty())
-	assert_that(int(res["reward"]["gold"]) >= 15)
-	assert_bool(not state["active"].has("q1"))
-	assert_bool(state["completed"].has("q1"))
+	assert_bool(bool(not res.is_empty())).is_true()
+	assert_bool(bool(int(res["reward"]["gold"]) >= 15)).is_true()
+	assert_bool(bool(not state["active"].has("q1"))).is_true()
+	assert_bool(bool(state["completed"].has("q1"))).is_true()
 	# Репутация выросла
-	assert_that(int(rep["human"]) > 0)
+	assert_bool(bool(int(rep["human"]) > 0)).is_true()
 
 func test_complete_requires_progress() -> void:
 	var state: Dictionary = QuestSystem.new_state()
@@ -61,8 +61,8 @@ func test_complete_requires_progress() -> void:
 	q["progress"] = 2
 	state["active"]["q1"] = q
 	var res: Dictionary = QuestSystem.complete_quest(state, "q1")
-	assert_bool(res.is_empty())
-	assert_bool(state["active"].has("q1"))
+	assert_bool(bool(res.is_empty())).is_true()
+	assert_bool(bool(state["active"].has("q1"))).is_true()
 
 func test_gather_progress_capped_at_target() -> void:
 	var state: Dictionary = QuestSystem.new_state()
@@ -73,7 +73,7 @@ func test_gather_progress_capped_at_target() -> void:
 	q["progress"] = 0
 	state["active"]["q1"] = q
 	QuestSystem.add_progress(state, "q1", 10)
-	assert_that(int(state["active"]["q1"]["progress"]) == 2)
+	assert_bool(bool(int(state["active"]["q1"]["progress"]) == 2)).is_true()
 
 func test_fail_timeout_penalty() -> void:
 	var state: Dictionary = QuestSystem.new_state()
@@ -83,9 +83,9 @@ func test_fail_timeout_penalty() -> void:
 	state["active"]["q1"] = q
 	var rep := FactionReputation.initial_state("dwarf", "fighter")
 	var res: Dictionary = QuestSystem.fail_quest(state, "q1", "timeout", rep, "dwarf")
-	assert_that(int(res["penalty"]) == -10)
-	assert_bool(state["failed"].has("q1"))
-	assert_that(int(rep["dwarf"]) < 10)
+	assert_bool(bool(int(res["penalty"]) == -10)).is_true()
+	assert_bool(bool(state["failed"].has("q1"))).is_true()
+	assert_bool(bool(int(rep["dwarf"]) < 10)).is_true()
 
 func test_fail_escort_dead_penalty() -> void:
 	var state: Dictionary = QuestSystem.new_state()
@@ -95,7 +95,7 @@ func test_fail_escort_dead_penalty() -> void:
 	state["active"]["q1"] = q
 	var rep := FactionReputation.initial_state("aumaua", "fighter")
 	var res: Dictionary = QuestSystem.fail_quest(state, "q1", "escort_dead", rep, "aumaua")
-	assert_that(int(res["penalty"]) == -20)
+	assert_bool(bool(int(res["penalty"]) == -20)).is_true()
 
 func test_check_deadlines() -> void:
 	var state: Dictionary = QuestSystem.new_state()
@@ -111,9 +111,9 @@ func test_check_deadlines() -> void:
 	state["active"]["q2"] = q2
 	# День 6: оба должны провалиться
 	var failed: Array = QuestSystem.check_deadlines(state, 6)
-	assert_that(failed.size() == 2)
-	assert_bool(state["active"].is_empty())
-	assert_that(state["failed"].size() == 2)
+	assert_bool(bool(failed.size() == 2)).is_true()
+	assert_bool(state["active"].is_empty()).is_true()
+	assert_bool(bool(state["failed"].size() == 2)).is_true()
 	# День 3: не проваливаются
 	var state2: Dictionary = QuestSystem.new_state()
 	var q3: Dictionary = QuestTemplates.generate("q1", "human", 1, rng)
@@ -121,7 +121,7 @@ func test_check_deadlines() -> void:
 	q3["starts_day"] = 1
 	state2["active"]["q1"] = q3
 	var failed2: Array = QuestSystem.check_deadlines(state2, 3)
-	assert_that(failed2.size() == 0)
+	assert_bool(bool(failed2.size() == 0)).is_true()
 
 func test_chain_link_and_complete_opens_next() -> void:
 	var state: Dictionary = QuestSystem.new_state()
@@ -136,10 +136,10 @@ func test_chain_link_and_complete_opens_next() -> void:
 	qb["progress"] = 0
 	state["active"]["q2"] = qb
 	QuestSystem.link_chain(state, "q1", "q2")
-	assert_that(str(state["active"]["q1"]["next_quest_id"]) == "q2")
+	assert_bool(bool(str(state["active"]["q1"]["next_quest_id"]) == "q2")).is_true()
 	QuestSystem.add_progress(state, "q1", 1)
 	var res: Dictionary = QuestSystem.complete_quest(state, "q1")
-	assert_that(str(res["next_quest_id"]) == "q2")
+	assert_bool(bool(str(res["next_quest_id"]) == "q2")).is_true()
 
 func test_journal_format() -> void:
 	var state: Dictionary = QuestSystem.new_state()
@@ -148,15 +148,15 @@ func test_journal_format() -> void:
 	q["starts_day"] = 1
 	state["active"]["q1"] = q
 	var j: Array = QuestSystem.journal(state)
-	assert_that(j.size() == 1)
-	assert_that(int(j[0]["progress"]) == 2)
-	assert_that(str(j[0]["faction"]) == "human")
-	assert_that(int(j[0]["target"]) >= 1)
+	assert_bool(bool(j.size() == 1)).is_true()
+	assert_bool(bool(int(j[0]["progress"]) == 2)).is_true()
+	assert_bool(bool(str(j[0]["faction"]) == "human")).is_true()
+	assert_bool(bool(int(j[0]["target"]) >= 1)).is_true()
 
 func test_serialization_roundtrip() -> void:
 	var state: Dictionary = QuestSystem.new_state()
 	QuestSystem.generate_quests(state, "dwarf", 1, rng, 2)
 	var saved: String = JSON.stringify(state)
 	var loaded: Variant = JSON.parse_string(saved)
-	assert_that(loaded is Dictionary)
-	assert_that(int((loaded as Dictionary)["active"].size()) == int(state["active"].size()))
+	assert_bool(bool(loaded is Dictionary)).is_true()
+	assert_bool(bool(int((loaded as Dictionary)["active"].size()) == int(state["active"].size()))).is_true()
