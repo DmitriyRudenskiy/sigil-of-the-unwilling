@@ -46,7 +46,13 @@ static func check_prestige(prestige: Dictionary) -> Array[String]:
 		if not sources.has(key):
 			out.append("prestige: отсутствует источник закрытого списка Ф4: %s" % key)
 	var ranks: Array = prestige.get("ranks", [])
-	if ranks != [0, 200, 500, 1000, 2000]:
+	# JSON-числа приходят float — сравниваем численно (латентный баг:
+	# [0.0,...] != [0,...] при строгом сравнении; скрыт полупустым тестом).
+	var ranks_ok := ranks.size() == 5
+	if ranks_ok:
+		for i in 5:
+			ranks_ok = ranks_ok and absf(float(ranks[i]) - float([0, 200, 500, 1000, 2000][i])) < 0.0001
+	if not ranks_ok:
 		out.append("prestige: ранги не совпадают с Ф4-шкалой 0/200/500/1000/2000: %s" % str(ranks))
 	return out
 
@@ -97,7 +103,14 @@ static func check_reachability(movement: Dictionary, campaign: Dictionary) -> Ar
 	for r in dist.keys():
 		if int(dist[r]) > turns:
 			out.append("reachability: %s (%d дней) > длительность кампании (%d)" % [r, int(dist[r]), turns])
-	var tutorial_day := int(campaign.get("tutorial", {}).get("day_3", 3))
+	# tutorial.day_N — строка-директива («сходи в руины»), не число; день —
+	# в имени ключа (латентный баг: int("сходи в руины") = 0, скрыт
+	# полупустым тестом — TICKETS T-123).
+	var tutorial_day := 3
+	for key in campaign.get("tutorial", {}).keys():
+		var k := str(key)
+		if k.begins_with("day_") and str(campaign.tutorial[key]).contains("руин"):
+			tutorial_day = int(k.substr(4))
 	var ruin_dist := _min_dist_to_node(dist, mask, "ruin")
 	if ruin_dist > tutorial_day:
 		out.append("reachability: ближайшая руина (%d дней) > туториал «руины» (день %d)" % [ruin_dist, tutorial_day])

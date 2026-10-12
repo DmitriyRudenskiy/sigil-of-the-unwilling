@@ -126,15 +126,21 @@ func _request_battle(context: Dictionary) -> void:
 	var tier: int = int(context.get("tier", 1))
 	var hero := CampaignBattle.make_recruit(
 		_statblocks.get("warrior", {}), population_system.conscript())
-	var raider := CampaignBattle.make_combatant(
-		_statblocks.get("raider_tier_%d" % tier, _statblocks.get("raider_final", {})))
+	var raider_spec: Dictionary = _statblocks.get(
+		"raider_tier_%d" % tier, _statblocks.get("raider_final", {}))
+	var raider := CampaignBattle.make_combatant(raider_spec)
 	raider["id"] = "raider_t%d" % tier
 	raider["character_uid"] = -1  # рейдер — не житель (потерь населению нет)
+	# parity_le_0.8 (T-041, разморозка): бой «против превосходящих» —
+	# CR героя ≤ 0.8 × CR рейдера (cr — в статблоках, K-M15/cr_anchors;
+	# make_combatant cr не несёт — читается из спека).
+	var parity: bool = float(_statblocks.get("warrior", {}).get("cr", 0)) \
+		<= 0.8 * float(raider_spec.get("cr", 0))
 	last_battle_report = CampaignBattle.resolve(hero, raider, _on_battle_losses)
 	if tier >= 3:  # финальный рейд (raids.json final_raid: tier 3, босс K-R3)
 		final_battle_seen = true
 		final_raid_repelled = str(last_battle_report.get("outcome", "")) == "win"
-	_record_battle_prestige(context, last_battle_report)
+	_record_battle_prestige(context, last_battle_report, parity)
 
 
 ## Хук населения (§2.2): потери боя списывают конкретных жителей по
@@ -148,9 +154,8 @@ func _on_battle_losses(losses: Array, _report: Dictionary) -> void:
 
 
 ## Престиж-ledger (K-M16, prestige.json sources.battle_victory; числа — из
-## конфига, K-M15). ponytail: parity_le_0.8 не начисляется — parity требует CR
-## в статблоках (T-041), не молча: пропуск зафиксирован тестом состава ledger.
-func _record_battle_prestige(context: Dictionary, report: Dictionary) -> void:
+## конфига, K-M15). parity_le_0.8 — разморожен T-041 (CR в статблоках).
+func _record_battle_prestige(context: Dictionary, report: Dictionary, parity: bool = false) -> void:
 	if str(report.get("outcome", "")) != "win":
 		return
 	var turn := int(context.get("turn", campaign.current_turn))
@@ -161,6 +166,8 @@ func _record_battle_prestige(context: Dictionary, report: Dictionary) -> void:
 		_add_ledger(turn, "no_losses_t%d" % tier, float(mods.get("no_losses", 0)))
 	if tier >= 2:
 		_add_ledger(turn, "camp_tier_ge_2_t%d" % tier, float(mods.get("camp_tier_ge_2", 0)))
+	if parity:
+		_add_ledger(turn, "parity_t%d" % tier, float(mods.get("parity_le_0.8", 0)))
 	if tier >= 3 and not _boss_prestige_given:
 		_boss_prestige_given = true
 		_add_ledger(turn, "boss_final", float(mods.get("boss_once_per_campaign", 0)))

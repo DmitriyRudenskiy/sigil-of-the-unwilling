@@ -108,6 +108,27 @@ jobs:
           set -o pipefail
           python3 scripts/check_docs_links.py 2>&1 | tee -a /tmp/ci2-gate.log
 
+      - name: "Balance metrics (T-041: трассы композита → artifact, не гейт)"
+        # Гейт якорей — тесты test_t041_anchors (Gate 1); шаг пишет трассы
+        # баланс-прогона (кривые запасов, WARN/DEFICIT, Престиж-сальдо,
+        # потери) в артефакт — baseline-точка регрессии чисел.
+        env:
+          GODOT_BIN: /tmp/godot/Godot_v4.7-stable_linux.x86_64
+        run: |
+          cd game
+          "$GODOT_BIN" --headless --path . --script res://scripts/balance/balance_metrics.gd \
+            2>&1 | tee /tmp/ci2-balance.log | grep -a ANCHOR || true
+        continue-on-error: true
+
+      - name: "Artifact (balance report)"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: balance-report
+          path: |
+            game/balance_report.json
+            /tmp/ci2-balance.log
+
       - name: "Diagnostics (if: failure — раунд 7 §1.3 п.1: диагноз в видимый лог)"
         if: failure()
         env:

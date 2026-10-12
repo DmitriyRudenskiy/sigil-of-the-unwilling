@@ -82,7 +82,9 @@ func test_start_state_r2_from_config() -> void:
 	assert_int(int(start.get("population", 0))).is_equal(20)
 	assert_int(int(start.get("housing", 0))).is_equal(20)
 	var res: Dictionary = start.get("resources", {})
-	assert_int(int(res.get("food", 0))).is_equal(30)
+	# Еда 130 — T-041 food-chain якорь (было 30, R2): без стройки DEFICIT
+	# не ранее хода 7 (нетто −1/день × 120 дней). Атрибуция — TICKETS T-041.
+	assert_int(int(res.get("food", 0))).is_equal(130)
 	assert_int(int(res.get("wood", 0))).is_equal(20)
 	assert_int(int(res.get("iron", 0))).is_equal(10)
 
