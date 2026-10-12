@@ -3,7 +3,7 @@ extends BaseTest
 
 
 func test_pair_defaults() -> void:
-	var comp := HeroRelationshipsComponent.new()
+	var comp: HeroRelationshipsComponent = auto_free(HeroRelationshipsComponent.new())
 	assert_bool(comp.has_pair(1)).is_false()
 	var p: Dictionary = comp.pair(1)
 	assert_that(int(p["bond"])).is_equal(0)
@@ -17,7 +17,7 @@ func test_duo_key_order_independent() -> void:
 	assert_that(HeroRelationshipsComponent.duo_key(3, 1)).is_equal("1:3")
 
 func test_duo_defaults_and_remove() -> void:
-	var comp := HeroRelationshipsComponent.new()
+	var comp: HeroRelationshipsComponent = auto_free(HeroRelationshipsComponent.new())
 	var d: Dictionary = comp.duo(2, 1)
 	assert_that(int(d["trust"])).is_equal(50)
 	assert_that(int(d["jealousy_to"])).is_equal(-1)
@@ -29,14 +29,14 @@ func test_duo_defaults_and_remove() -> void:
 	assert_bool(comp.duos.is_empty()).is_true()
 
 func test_average_bond() -> void:
-	var comp := HeroRelationshipsComponent.new()
+	var comp: HeroRelationshipsComponent = auto_free(HeroRelationshipsComponent.new())
 	assert_that(comp.average_bond()).is_equal(0.0)
 	comp.pair(1)["bond"] = 40
 	comp.pair(2)["bond"] = 80
 	assert_that(comp.average_bond()).is_equal(60.0)
 
 func test_serialize_roundtrip() -> void:
-	var comp := HeroRelationshipsComponent.new()
+	var comp: HeroRelationshipsComponent = auto_free(HeroRelationshipsComponent.new())
 	var p: Dictionary = comp.pair(7)
 	p["bond"] = 65
 	p["trust"] = 80
@@ -50,7 +50,7 @@ func test_serialize_roundtrip() -> void:
 	d["jealousy_fired"] = true
 
 	var data: Dictionary = comp.serialize()
-	var comp2 := HeroRelationshipsComponent.new()
+	var comp2: HeroRelationshipsComponent = auto_free(HeroRelationshipsComponent.new())
 	comp2.deserialize(data)
 
 	var p2: Dictionary = comp2.pair(7)
@@ -67,12 +67,12 @@ func test_serialize_roundtrip() -> void:
 
 func test_deserialize_old_save_defaults() -> void:
 	# старый сейв без блока relationships → пустые связи
-	var comp := HeroRelationshipsComponent.new()
+	var comp: HeroRelationshipsComponent = auto_free(HeroRelationshipsComponent.new())
 	comp.deserialize({})
 	assert_bool(comp.pairs.is_empty()).is_true()
 	assert_bool(comp.duos.is_empty()).is_true()
 	# частичный pair (старый формат) → недостающие поля дефолтные
-	var comp2 := HeroRelationshipsComponent.new()
+	var comp2: HeroRelationshipsComponent = auto_free(HeroRelationshipsComponent.new())
 	comp2.deserialize({"relationships": {"pairs": {"hero-1": {"bond": 30}}, "duos": {}}})
 	var p: Dictionary = comp2.pair(1)
 	assert_that(int(p["bond"])).is_equal(30)
@@ -189,7 +189,7 @@ func test_morale_in_battle_stack() -> void:
 func test_betrayal_returns_to_city() -> void:
 	# team-romance-roleplay 3.3: герой на центре города → предатель в население
 	var hero := _make_hero_with_follower()
-	hero.city_manager = CityManager.new()
+	hero.city_manager = auto_free(CityManager.new())
 	var city := City.new()
 	city.uid = 1
 	city.display_name = "Город"

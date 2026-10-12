@@ -73,7 +73,7 @@ func _make_inventory(weight: float) -> HeroInventory:
 
 
 func _make_registry() -> Node:
-	var reg := _MiniRegistry.new()
+	var reg: Node = auto_free(_MiniRegistry.new())
 	reg.add_def(&"coal", "Coal", 1.0)
 	reg.add_def(&"wood", "Wood", 0.0)
 	return reg
