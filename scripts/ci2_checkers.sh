@@ -63,6 +63,40 @@ if [ -z "$ASSETS_NO_IMP" ] && [ -z "$IMP_NO_ASSET" ]; then
 	echo "OK: пары ассет+.import целы"
 fi
 
+echo "=== checker 5: workflow YAML-валидация (.github/workflows/*.yml) ==="
+# CI-2 root-cause (раунд 11 §2, D-168): незакавыченный «: » в name: = YAML-
+# ошибка → ран с 0 jobs (completed/failure без логов; детект только через API).
+# Локальный чекер ловит это ДО пуша.
+if command -v python3 >/dev/null 2>&1; then
+	WF_BAD="$(python3 - <<'PY'
+import glob, sys
+try:
+    import yaml
+except ImportError:
+    sys.exit(2)
+bad = []
+for f in sorted(glob.glob(".github/workflows/*.yml")) + sorted(glob.glob(".github/workflows/*.yaml")):
+    try:
+        with open(f) as fh:
+            yaml.safe_load(fh)
+    except Exception as e:
+        bad.append(f"{f}: {e}")
+print("\n".join(bad))
+sys.exit(1 if bad else 0)
+PY
+)"
+	WF_RC=$?
+	if [ "$WF_RC" -eq 2 ]; then
+		echo "WARN: PyYAML не установлен — checker 5 пропущен (pip install pyyaml)"
+	elif [ "$WF_RC" -ne 0 ]; then
+		echo "RED: невалидный workflow YAML:"; echo "$WF_BAD"; FAIL=1
+	else
+		echo "OK: все workflow-файлы валидный YAML"
+	fi
+else
+	echo "WARN: python3 не найден — checker 5 пропущен"
+fi
+
 echo ""
 if [ "$FAIL" -ne 0 ]; then
 	echo "CHECKERS: RED"
