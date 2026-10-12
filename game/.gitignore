@@ -11,5 +11,7 @@ addons/godot-mcp/
 addons/godot-mcp-build/
 # Тестовый фреймворк gdUnit4 (устанавливается локально из репозитория вендора, см. game/tests/README.md)
 # addons/gdunit4/ — ВЕНДОРИТСЯ в репо (CI-2 раннеру нужен GdUnitCmdTool; урок 2026-10-12: ignore → раннер не мог запустить GdUnit вообще)
-# Артефакт инъекции godot-mcp
+# Артефакт инъекции godot-mcp (.uid — осколок, подхваченный add -A; checker 1: .uid без скрипта,
+# инцидент 2fd7e1df / feat/round13-convergence 1759dc97)
 mcp_interaction_server.gd
+mcp_interaction_server.gd.uid

@@ -1,0 +1,438 @@
+{
+	"anchors": [
+		{
+			"actual": "рейдов: 3, нарушений: 0",
+			"expected": "тир каждого рейда <= максимум фазы (1-6: 1; 7-13: 2; 14-20: 3; 21: 3)",
+			"id": "A1",
+			"name": "cr_phases",
+			"source": "campaign.json cr_anchors; 07-balance §5; ThreatSystem.cr_range",
+			"verdict": "pass",
+			"violations": []
+		},
+		{
+			"actual": "final_raid_repelled == false",
+			"expected": "final_raid_repelled == true",
+			"id": "A2",
+			"name": "victory",
+			"source": "campaign.json scenario.victory.anchor; raids.json directives.final_raid",
+			"verdict": "fail"
+		},
+		{
+			"actual": "prestige(hод 21) = 15.0",
+			"expected": "500 <= prestige(hод 21) < 1000",
+			"id": "A3",
+			"name": "prestige_anchor",
+			"source": "campaign.json scenario.victory.prestige_anchor; prestige.json anchor_turn_21",
+			"verdict": "fail"
+		},
+		{
+			"actual": "min food = -479.51 (ход 17)",
+			"expected": "food >= 0 во всех 21 ходе",
+			"id": "A4",
+			"name": "food_chain",
+			"source": "campaign.json supply; 06-economy SM DEFICIT (B <= 0); 07-balance §4",
+			"verdict": "fail"
+		},
+		{
+			"actual": "рейдов тир 1: 1, не отражено: 0",
+			"expected": "все рейды тир 1: battle outcome == win",
+			"id": "A5",
+			"name": "statblocks_tier1",
+			"source": "campaign.json unit_statblocks (точные числа — T-041); raids.json first_raid (cr: 1); Q-M15",
+			"verdict": "pass",
+			"violations": []
+		}
+	],
+	"inputs": {
+		"campaign.json": "1.0",
+		"prestige.json": "2.0",
+		"raids.json": "1.1"
+	},
+	"run_id": "b-274f56c5887e",
+	"seed": 12345,
+	"summary": {
+		"battles": {
+			"draws": 0,
+			"losses": 2,
+			"wins": 1
+		},
+		"campaign_done": true,
+		"final_prestige": 15.0,
+		"final_prestige_rank": "Безымянный",
+		"final_raid_repelled": false,
+		"population_final": 18,
+		"raids_count": 3,
+		"turns_played": 21,
+		"victory": false
+	},
+	"ticket": "T-041",
+	"turns": [
+		{
+			"battle": {},
+			"food": 10.0,
+			"iron": 15.0,
+			"population": 20,
+			"prestige_balance": 0.0,
+			"raid": {},
+			"sm": {
+				"food": "WARN",
+				"iron": "OK",
+				"wood": "OK"
+			},
+			"turn": 1,
+			"wood": 30.0
+		},
+		{
+			"battle": {},
+			"food": -12.3,
+			"iron": 21.0,
+			"population": 20,
+			"prestige_balance": 0.0,
+			"raid": {},
+			"sm": {
+				"food": "DEFICIT",
+				"iron": "OK",
+				"wood": "OK"
+			},
+			"turn": 2,
+			"wood": 42.0
+		},
+		{
+			"battle": {},
+			"food": -47.3,
+			"iron": 26.0,
+			"population": 20,
+			"prestige_balance": 0.0,
+			"raid": {},
+			"sm": {
+				"food": "DEFICIT",
+				"iron": "OK",
+				"wood": "OK"
+			},
+			"turn": 3,
+			"wood": 52.0
+		},
+		{
+			"battle": {},
+			"food": -85.3,
+			"iron": 28.0,
+			"population": 20,
+			"prestige_balance": 0.0,
+			"raid": {},
+			"sm": {
+				"food": "DEFICIT",
+				"iron": "OK",
+				"wood": "OK"
+			},
+			"turn": 4,
+			"wood": 56.0000000000001
+		},
+		{
+			"battle": {},
+			"food": -120.3,
+			"iron": 33.0,
+			"population": 20,
+			"prestige_balance": 0.0,
+			"raid": {},
+			"sm": {
+				"food": "DEFICIT",
+				"iron": "OK",
+				"wood": "OK"
+			},
+			"turn": 5,
+			"wood": 66.0000000000001
+		},
+		{
+			"battle": {},
+			"food": -154.3,
+			"iron": 39.0,
+			"population": 20,
+			"prestige_balance": 0.0,
+			"raid": {},
+			"sm": {
+				"food": "DEFICIT",
+				"iron": "OK",
+				"wood": "OK"
+			},
+			"turn": 6,
+			"wood": 78.0
+		},
+		{
+			"battle": {},
+			"food": -189.3,
+			"iron": 44.0,
+			"population": 20,
+			"prestige_balance": 0.0,
+			"raid": {},
+			"sm": {
+				"food": "DEFICIT",
+				"iron": "OK",
+				"wood": "OK"
+			},
+			"turn": 7,
+			"wood": 88.0
+		},
+		{
+			"battle": {
+				"losses": [],
+				"outcome": "win",
+				"rounds": 2
+			},
+			"food": -170.51,
+			"iron": 46.0,
+			"population": 20,
+			"prestige_balance": 15.0,
+			"raid": {
+				"battle_requested": true,
+				"cap_applied": true,
+				"cr_range": [
+					1,
+					2
+				],
+				"defense": 0.0,
+				"loss": -56.79,
+				"power": 15.0,
+				"target": "food",
+				"tier": 1,
+				"turn": 8
+			},
+			"sm": {
+				"food": "DEFICIT",
+				"iron": "OK",
+				"wood": "OK"
+			},
+			"turn": 8,
+			"wood": 92.0
+		},
+		{
+			"battle": {},
+			"food": -205.51,
+			"iron": 51.0,
+			"population": 20,
+			"prestige_balance": 15.0,
+			"raid": {},
+			"sm": {
+				"food": "DEFICIT",
+				"iron": "OK",
+				"wood": "OK"
+			},
+			"turn": 9,
+			"wood": 102.0
+		},
+		{
+			"battle": {},
+			"food": -239.51,
+			"iron": 57.0,
+			"population": 20,
+			"prestige_balance": 15.0,
+			"raid": {},
+			"sm": {
+				"food": "DEFICIT",
+				"iron": "OK",
+				"wood": "OK"
+			},
+			"turn": 10,
+			"wood": 114.0
+		},
+		{
+			"battle": {},
+			"food": -274.51,
+			"iron": 62.0,
+			"population": 20,
+			"prestige_balance": 15.0,
+			"raid": {},
+			"sm": {
+				"food": "DEFICIT",
+				"iron": "OK",
+				"wood": "OK"
+			},
+			"turn": 11,
+			"wood": 124.0
+		},
+		{
+			"battle": {},
+			"food": -312.509999999999,
+			"iron": 64.0,
+			"population": 20,
+			"prestige_balance": 15.0,
+			"raid": {},
+			"sm": {
+				"food": "DEFICIT",
+				"iron": "OK",
+				"wood": "OK"
+			},
+			"turn": 12,
+			"wood": 128.0
+		},
+		{
+			"battle": {},
+			"food": -345.509999999999,
+			"iron": 69.0,
+			"population": 19,
+			"prestige_balance": 15.0,
+			"raid": {},
+			"sm": {
+				"food": "DEFICIT",
+				"iron": "OK",
+				"wood": "OK"
+			},
+			"turn": 13,
+			"wood": 138.0
+		},
+		{
+			"battle": {},
+			"food": -377.509999999998,
+			"iron": 74.9999999999999,
+			"population": 19,
+			"prestige_balance": 15.0,
+			"raid": {},
+			"sm": {
+				"food": "DEFICIT",
+				"iron": "OK",
+				"wood": "OK"
+			},
+			"turn": 14,
+			"wood": 150.0
+		},
+		{
+			"battle": {},
+			"food": -410.509999999998,
+			"iron": 79.9999999999999,
+			"population": 19,
+			"prestige_balance": 15.0,
+			"raid": {},
+			"sm": {
+				"food": "DEFICIT",
+				"iron": "OK",
+				"wood": "OK"
+			},
+			"turn": 15,
+			"wood": 160.0
+		},
+		{
+			"battle": {},
+			"food": -446.509999999997,
+			"iron": 81.9999999999998,
+			"population": 19,
+			"prestige_balance": 15.0,
+			"raid": {},
+			"sm": {
+				"food": "DEFICIT",
+				"iron": "OK",
+				"wood": "OK"
+			},
+			"turn": 16,
+			"wood": 164.0
+		},
+		{
+			"battle": {},
+			"food": -479.509999999996,
+			"iron": 86.9999999999998,
+			"population": 19,
+			"prestige_balance": 15.0,
+			"raid": {},
+			"sm": {
+				"food": "DEFICIT",
+				"iron": "OK",
+				"wood": "OK"
+			},
+			"turn": 17,
+			"wood": 174.0
+		},
+		{
+			"battle": {
+				"losses": [],
+				"outcome": "lose",
+				"rounds": 2
+			},
+			"food": -367.656999999997,
+			"iron": 92.9999999999998,
+			"population": 19,
+			"prestige_balance": 15.0,
+			"raid": {
+				"battle_requested": true,
+				"cap_applied": true,
+				"cr_range": [
+					2,
+					4
+				],
+				"defense": 0.0,
+				"loss": -143.852999999999,
+				"power": 30.0,
+				"target": "food",
+				"tier": 2,
+				"turn": 18
+			},
+			"sm": {
+				"food": "DEFICIT",
+				"iron": "OK",
+				"wood": "OK"
+			},
+			"turn": 18,
+			"wood": 186.0
+		},
+		{
+			"battle": {},
+			"food": -400.656999999996,
+			"iron": 97.9999999999998,
+			"population": 19,
+			"prestige_balance": 15.0,
+			"raid": {},
+			"sm": {
+				"food": "DEFICIT",
+				"iron": "OK",
+				"wood": "OK"
+			},
+			"turn": 19,
+			"wood": 196.0
+		},
+		{
+			"battle": {},
+			"food": -436.656999999995,
+			"iron": 99.9999999999996,
+			"population": 19,
+			"prestige_balance": 15.0,
+			"raid": {},
+			"sm": {
+				"food": "DEFICIT",
+				"iron": "OK",
+				"wood": "OK"
+			},
+			"turn": 20,
+			"wood": 199.999999999999
+		},
+		{
+			"battle": {
+				"losses": [],
+				"outcome": "lose",
+				"rounds": 1
+			},
+			"food": -336.659899999997,
+			"iron": 105.0,
+			"population": 18,
+			"prestige_balance": 15.0,
+			"raid": {
+				"battle_requested": true,
+				"cap_applied": true,
+				"cr_range": [
+					6,
+					8
+				],
+				"defense": 0.0,
+				"loss": -130.997099999999,
+				"power": 60.0,
+				"target": "food",
+				"tier": 3,
+				"turn": 21
+			},
+			"sm": {
+				"food": "DEFICIT",
+				"iron": "OK",
+				"wood": "OK"
+			},
+			"turn": 21,
+			"wood": 209.999999999999
+		}
+	],
+	"type": "baseline"
+}
