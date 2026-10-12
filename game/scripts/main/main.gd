@@ -30,6 +30,24 @@ func _ready():
 ## (единый корень: раннер D-157 проверяет ту же игру, что видит игрок).
 func _init_campaign() -> void:
 	composition = CampaignComposition.from_campaign_config(CAMPAIGN_SEED)
+	_consume_pending()
+
+
+## Т-110-проводка (раунд 11 §1.2): (б) кампанийный сейв из Continue/Load →
+## load_save_state (состояние систем восстанавливается); (а) профиль
+## конструктора → партийный слот (K-M5/§7). Сейв приоритетнее: загрузка
+## существующей кампании — профиль устаревший, очищаем.
+func _consume_pending() -> void:
+	var persistence: WorldPersistence = Services.resolve(&"persistence")
+	if persistence == null:
+		return
+	if not persistence.pending_campaign_save.is_empty():
+		composition.load_save_state(persistence.pending_campaign_save)
+		persistence.pending_campaign_save = {}
+		persistence.pending_new_game = null
+	elif persistence.pending_new_game != null:
+		composition.set_hero_identity(persistence.pending_new_game.to_identity())
+		persistence.pending_new_game = null
 
 
 func _connect_ui():

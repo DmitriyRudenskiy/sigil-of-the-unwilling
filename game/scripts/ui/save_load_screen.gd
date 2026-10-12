@@ -5,7 +5,10 @@ signal load_requested(slot: int)
 signal delete_requested(slot: int)
 signal closed
 
-const SLOT_COUNT := 5
+## Т-110-проводка (раунд 11 §1.2): бэкенд — MvpSaveManager (кампанийные сейвы,
+## 3 слота, MvpSaveSchema). Legacy SaveManager (SaveData, 5 слотов) — контракт
+## замороженного world-слоя; меню пост-cutover ведёт кампанию, не мир.
+const SLOT_COUNT := MvpSaveManager.SLOT_COUNT
 
 var _mode: String = "load"
 var _wired := false
@@ -33,6 +36,11 @@ func _wire() -> void:
 			load_btn.pressed.connect(_on_load_pressed.bind(i))
 		if delete_btn != null:
 			delete_btn.pressed.connect(_on_delete_pressed.bind(i))
+	# Сцена рисует 5 слотов (legacy); кампанийных — 3: лишние прячем (не правим сцену).
+	for i in range(SLOT_COUNT, 5):
+		var extra: Control = _slot_list.get_node_or_null("Slot%d" % i)
+		if extra != null:
+			extra.visible = false
 
 
 func _get_slot_node(i: int, rel_path: String) -> Control:
@@ -64,8 +72,8 @@ func _refresh_slots() -> void:
 		var info_label: Label = _get_slot_node(i, "HBox/Info")
 		var load_btn: Button = _get_slot_node(i, "HBox/Buttons/LoadButton")
 		var delete_btn: Button = _get_slot_node(i, "HBox/Buttons/DeleteButton")
-		var data: SaveData = _read_slot(slot)
-		if data == null:
+		var data: Dictionary = _read_slot(slot)
+		if data.is_empty():
 			if info_label != null:
 				info_label.text = GameText.no_save_found()
 			if load_btn != null:
@@ -81,25 +89,23 @@ func _refresh_slots() -> void:
 				delete_btn.disabled = false
 
 
-func _read_slot(slot: int) -> SaveData:
-	var result: Dictionary = SaveManager.load_slot(slot)
-	if int(result.get("error", -1)) != SaveManager.SaveError.OK:
-		return null
-	return result.get("data") as SaveData
+func _read_slot(slot: int) -> Dictionary:
+	var result: Dictionary = MvpSaveManager.load_slot(slot)
+	if not bool(result.get("ok", false)):
+		return {}
+	return result.get("state", {}) as Dictionary
 
 
-func _format_slot_info(data: SaveData) -> String:
+func _format_slot_info(state: Dictionary) -> String:
 	var parts: Array[String] = []
-	var hero_name: String = str(data.hero.get("hero_name", ""))
-	if not hero_name.is_empty():
-		parts.append("🧙 %s" % hero_name)
-	var d: Dictionary = data.date
-	parts.append(GameText.endgame_date(
-		int(d.get("month", 1)), int(d.get("week", 1)), int(d.get("day", 1))))
-	if data.run_seed > 0:
-		parts.append("🎲 %d" % data.run_seed)
-	if data.cities.size() > 0:
-		parts.append("🏰 %d" % data.cities.size())
+	var party: Array = state.get("party", [])
+	if party.size() > 0 and party[0] is Dictionary:
+		var hero_name: String = str((party[0] as Dictionary).get("hero_name", ""))
+		if not hero_name.is_empty():
+			parts.append("🧙 %s" % hero_name)
+	var turn: int = int((state.get("campaign", {}) as Dictionary).get("turn", 0))
+	if turn > 0:
+		parts.append("📅 ход %d" % turn)
 	if parts.is_empty():
 		return GameText.no_save_found()
 	return "  ·  ".join(parts)
@@ -124,26 +130,21 @@ func _on_back_pressed() -> void:
 
 
 func perform_load(slot: int) -> void:
-	var result: Dictionary = SaveManager.load_slot(slot)
-	var err: int = int(result.get("error", -1))
-	if err != SaveManager.SaveError.OK:
+	var result: Dictionary = MvpSaveManager.load_slot(slot)
+	if not bool(result.get("ok", false)):
 		_error_label.text = GameText.load_failed()
-		GameLogger.warn("SaveLoadScreen: load error %d" % err, "SaveLoad")
+		GameLogger.warn("SaveLoadScreen: load error %s" % str(result.get("message", "")), "SaveLoad")
 		return
-	var data: SaveData = result.get("data")
-	if data == null:
-		_error_label.text = GameText.load_failed()
-		return
+	var state: Dictionary = result.get("state", {}) as Dictionary
 	var persistence: WorldPersistence = Services.resolve(&"persistence")
 	if persistence != null:
-		persistence.pending_save = data
-	# Cutover-акт (D-157, раунд 10 §1.1): Continue/Load → campaign-сцена
-	# (world.tscn — архив, не рантайм). Пост-cutover-остаток: загрузка
-	# кампанийного сейва в composition (load_save_state) — за тикетом (T-110).
+		# Т-110-проводка (раунд 11 §1.2): main.gd → load_save_state.
+		persistence.pending_campaign_save = state
+	# Cutover-акт (D-157, раунд 10 §1.1): Continue/Load → campaign-сцена.
 	get_tree().change_scene_to_file("res://scenes/main/main.tscn")
 
 
 func perform_delete(slot: int) -> void:
-	if SaveManager.delete_slot(slot):
+	if MvpSaveManager.delete_slot(slot):
 		GameLogger.info("SaveLoadScreen: deleted slot %d" % slot, "SaveLoad")
 	_refresh_slots()

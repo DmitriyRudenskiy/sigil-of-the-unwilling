@@ -21,6 +21,10 @@ var _shards_memory: Dictionary = {}
 var next_seed: int = 0
 var pending_save: SaveData = null
 var pending_new_game: _HeroProfile = null
+## T-110-проводка (раунд 11 §1.2): состояние кампанийного сейва (MvpSaveSchema)
+## → main.gd (load_save_state). Отдельное поле: legacy pending_save (SaveData)
+## — контракт замороженного world-слоя, не трогаем.
+var pending_campaign_save: Dictionary = {}
 
 func _init(save_manager: SaveManager = null) -> void:
 	_save_manager = save_manager
@@ -31,6 +35,7 @@ func set_save_manager(save_manager: SaveManager) -> void:
 func reset_session_state() -> void:
 	pending_save = null
 	pending_new_game = null
+	pending_campaign_save = {}
 	next_seed = 0
 
 func get_run_seed() -> int:

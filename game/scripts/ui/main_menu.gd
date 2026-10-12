@@ -119,10 +119,12 @@ func _loc() -> String:
     return TranslationServer.get_locale()
 
 func _refresh_continue_button() -> void:
-    _continue_btn.disabled = not SaveManager.has_save_in_slot(1)
+    # Т-110-проводка (раунд 11 §1.2): Continue = кампанийный слот 1 (MvpSaveManager),
+    # не legacy SaveManager (контракт замороженного world-слоя).
+    _continue_btn.disabled = not MvpSaveManager.has_save_in_slot(1)
 
 func _on_continue() -> void:
-    if not SaveManager.has_save_in_slot(1):
+    if not MvpSaveManager.has_save_in_slot(1):
         return
     _save_load_screen.perform_load(1)
 

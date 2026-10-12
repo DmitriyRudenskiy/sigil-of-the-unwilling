@@ -26,6 +26,9 @@ var _boss_prestige_given: bool = false
 var _statblocks: Dictionary = {}
 var _victory_sources: Dictionary = {}
 var _ranks: Array = []
+## Т-110-проводка (раунд 11 §1.2): профиль конструктора → партийный слот (K-M5/§7).
+## R1: 1 герой, не 5 — партия = одноэлементный массив в сейве (секция "party").
+var hero_identity: Dictionary = {}
 
 
 static func from_campaign_config(campaign_seed: int) -> CampaignComposition:
@@ -176,6 +179,12 @@ func _add_ledger(turn: int, id: String, amount: float) -> void:
 ## не храним — пересчёт при загрузке. Угрозы — секция "map" (регион/узлы:
 ## лагеря, волна, состояние рейдов).
 
+## Т-110-проводка (раунд 11 §1.2): профиль конструктора (HeroBuildProfile.
+## to_identity: имя, раса/класс/культура/бэкграунд, статы) → партийный слот.
+func set_hero_identity(identity: Dictionary) -> void:
+	hero_identity = identity.duplicate(true)
+
+
 func build_save_state() -> Dictionary:
 	var campaign_section: Dictionary = campaign.to_dict()
 	campaign_section["final_battle_seen"] = final_battle_seen
@@ -184,7 +193,9 @@ func build_save_state() -> Dictionary:
 		"campaign": campaign_section,
 		"resources": settlement.stocks.duplicate(),
 		"population": population_system.to_dict(),
-		"party": [],  # партия героя — вне MVP-среза (R1: 1 герой, не 5)
+		# Т-110-проводка: партия = [профиль] (R1: 1 герой, не 5); пусто — пока
+		# профиль не задан (прямая загрузка main.tscn без конструктора/сейва).
+		"party": [hero_identity.duplicate(true)] if not hero_identity.is_empty() else [],
 		"city": {
 			"housing": settlement.housing,
 			"buildings": settlement.buildings.duplicate(true),
@@ -217,6 +228,11 @@ static func _to_json_types(value: Variant) -> Variant:
 
 
 func load_save_state(state: Dictionary) -> void:
+	var party: Array = state.get("party", [])
+	hero_identity = (
+		(party[0] as Dictionary).duplicate(true)
+		if party.size() > 0 and party[0] is Dictionary else {}
+	)
 	campaign = TurnDriver.from_dict(state.get("campaign", {}))
 	final_battle_seen = bool(state.get("campaign", {}).get("final_battle_seen", false))
 	final_raid_repelled = bool(state.get("campaign", {}).get("final_raid_repelled", false))
