@@ -6,13 +6,21 @@
     "turn_length_days": 1,
     "ticks_per_day": 4,
     "party_max": 5,
-    "party_start": ["fighter", "ranger"],
+    "party_start": [
+      "fighter",
+      "ranger"
+    ],
     "party_start_level": 1
   },
   "start_state": {
     "population": 20,
     "housing": 20,
-    "resources": { "food": 30, "wood": 20, "iron": 10 }
+    "resources": {
+      "food": 130,
+      "wood": 20,
+      "iron": 10
+    },
+    "_note": " Еда 30→130 — T-041 food-chain якорь (cutover-акт §2): без стройки DEFICIT не ранее хода 7 (нетто −1/день, 130 ≥ 120 дней)."
   },
   "supply": {
     "food_per_unit_per_day": 1,
@@ -20,19 +28,74 @@
     "starvation_attack_penalty": -2
   },
   "cr_anchors": {
-    "phase_1": { "turns": [1, 6], "cr": [0.25, 1] },
-    "phase_2": { "turns": [7, 13], "cr": [1, 2] },
-    "phase_3": { "turns": [14, 20], "cr": [2, 4] },
-    "final": { "turns": [21, 21], "cr": [6, 8] }
+    "phase_1": {
+      "turns": [
+        1,
+        6
+      ],
+      "cr": [
+        0.25,
+        1
+      ]
+    },
+    "phase_2": {
+      "turns": [
+        7,
+        13
+      ],
+      "cr": [
+        1,
+        2
+      ]
+    },
+    "phase_3": {
+      "turns": [
+        14,
+        20
+      ],
+      "cr": [
+        2,
+        4
+      ]
+    },
+    "final": {
+      "turns": [
+        21,
+        21
+      ],
+      "cr": [
+        6,
+        8
+      ]
+    }
   },
   "beats": {
-    "1": { "chronicle": "Знак выбрал тебя", "carrier": "обучение (07-ui-ux)" },
-    "3": { "chronicle": "первый слух о рейде", "carrier": "слуховой движок", "status": "Post-MVP (K-M9)" },
-    "7": { "directive": "raids.json#directives.first_raid" },
-    "10": { "chronicle": "смерть персонажа (если была)", "carrier": "death saves (02-mechanics §3.2)", "status": "условный (K-M9: вне MVP-каркаса)" },
-    "14": { "directive": "raids.json#directives.district" },
-    "17": { "directive": "raids.json#directives.strong_raid" },
-    "21": { "directive": "raids.json#directives.final_raid" }
+    "1": {
+      "chronicle": "Знак выбрал тебя",
+      "carrier": "обучение (07-ui-ux)"
+    },
+    "3": {
+      "chronicle": "первый слух о рейде",
+      "carrier": "слуховой движок",
+      "status": "Post-MVP (K-M9)"
+    },
+    "7": {
+      "directive": "raids.json#directives.first_raid"
+    },
+    "10": {
+      "chronicle": "смерть персонажа (если была)",
+      "carrier": "death saves (02-mechanics §3.2)",
+      "status": "условный (K-M9: вне MVP-каркаса)"
+    },
+    "14": {
+      "directive": "raids.json#directives.district"
+    },
+    "17": {
+      "directive": "raids.json#directives.strong_raid"
+    },
+    "21": {
+      "directive": "raids.json#directives.final_raid"
+    }
   },
   "scenario": {
     "_note": "T-117: сценарий 21 хода (остаток T-112); бит-таблица 04-narrative (каркас K-M9 1/7/14/17/21); биты-угрозы в beats — ссылки на директивы raids.json, числа не дублируются (K-R3; анти-три-источника, T-121). Стартовое состояние — start_state (R2)",
@@ -52,14 +115,84 @@
     }
   },
   "unit_statblocks": {
-    "_note": "K-M15 (2026-10-02): базовые бойцы {Хиты, КБ, урон, Удача} — SRD-происхождение, provisional: точные числа — T-041 (первый баланс-прогон). attack = итоговая атака (10+бонус) против ac (перевес лестницы 02d). Профишенси = бонус мастерства (порог Долга судьбы, Б.4). Рейдеры — по cr_anchors (ярусы CR).",
-    "warrior": { "hp": 11, "ac": 12, "attack": 13, "damage": 5, "luck": 0, "dex": 12, "con": 1, "proficiency": 2 },
-    "ranger": { "hp": 10, "ac": 12, "attack": 14, "damage": 5, "luck": 0, "dex": 14, "con": 1, "proficiency": 2 },
-    "mage": { "hp": 8, "ac": 12, "attack": 12, "damage": 5, "luck": 1, "dex": 13, "con": 0, "proficiency": 2 },
-    "raider_tier_1": { "hp": 7, "ac": 11, "attack": 12, "damage": 5, "luck": 0, "dex": 12, "con": 1, "proficiency": 1 },
-    "raider_tier_2": { "hp": 16, "ac": 13, "attack": 15, "damage": 8, "luck": 0, "dex": 12, "con": 1, "proficiency": 2 },
-    "raider_tier_3": { "hp": 30, "ac": 14, "attack": 18, "damage": 11, "luck": 0, "dex": 13, "con": 2, "proficiency": 2 },
-    "raider_final": { "hp": 55, "ac": 15, "attack": 21, "damage": 16, "luck": 1, "dex": 14, "con": 3, "proficiency": 3 }
+    "_note": "K-M15 (2026-10-02): базовые бойцы {Хиты, КБ, урон, Удача} — SRD-происхождение. Калибровка T-041 (баланс-прогон, раунд 8): бойцы = якорь ур.5 (E4, Q-M13: герой к ходу 21 — 5-го уровня; состав MVP не ведёт уровни — блок = ур.5 с хода 1, ponytail-коммент в composition). cr — из cr_anchors (raids.json): tier_1=1 (directive first_raid), tier_2=3 (середина phase_3 [2,4]), tier_3=7 (середина final [6,8]; босс = якорь ур.5), final=8 (верх). Взаимная сбалансированность троих против босса — тест test_t041_anchors (K-M15-инвариант). attack = итоговая атака (10+бонус) против ac (лестница 02d). Профишенси = бонус мастерства (Б.4).",
+    "warrior": {
+      "hp": 45,
+      "ac": 15,
+      "attack": 19,
+      "damage": 9,
+      "luck": 0,
+      "dex": 12,
+      "con": 3,
+      "proficiency": 3,
+      "cr": 5
+    },
+    "ranger": {
+      "hp": 40,
+      "ac": 14,
+      "attack": 19,
+      "damage": 8,
+      "luck": 0,
+      "dex": 16,
+      "con": 2,
+      "proficiency": 3,
+      "cr": 5
+    },
+    "mage": {
+      "hp": 24,
+      "ac": 13,
+      "attack": 18,
+      "damage": 10,
+      "luck": 1,
+      "dex": 13,
+      "con": 2,
+      "proficiency": 3,
+      "cr": 5
+    },
+    "raider_tier_1": {
+      "hp": 7,
+      "ac": 11,
+      "attack": 12,
+      "damage": 5,
+      "luck": 0,
+      "dex": 12,
+      "con": 1,
+      "proficiency": 1,
+      "cr": 1
+    },
+    "raider_tier_2": {
+      "hp": 16,
+      "ac": 13,
+      "attack": 15,
+      "damage": 8,
+      "luck": 0,
+      "dex": 12,
+      "con": 1,
+      "proficiency": 2,
+      "cr": 3
+    },
+    "raider_tier_3": {
+      "hp": 55,
+      "ac": 15,
+      "attack": 16,
+      "damage": 11,
+      "luck": 0,
+      "dex": 12,
+      "con": 3,
+      "proficiency": 3,
+      "cr": 7
+    },
+    "raider_final": {
+      "hp": 55,
+      "ac": 15,
+      "attack": 16,
+      "damage": 11,
+      "luck": 0,
+      "dex": 12,
+      "con": 3,
+      "proficiency": 3,
+      "cr": 8
+    }
   },
   "tutorial": {
     "day_1": "построй ферму и барраки",

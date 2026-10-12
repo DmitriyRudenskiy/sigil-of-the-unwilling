@@ -19,13 +19,14 @@
   "faction_actions_max": 12,
   "sources": {
     "battle_victory": {
-      "base": 10,
+      "base": 50,
       "modifiers": {
-        "no_losses": 5,
-        "parity_le_0.8": 10,
-        "camp_tier_ge_2": 10,
-        "boss_once_per_campaign": 50
-      }
+        "no_losses": 25,
+        "parity_le_0.8": 50,
+        "camp_tier_ge_2": 50,
+        "boss_once_per_campaign": 250
+      },
+      "_t041": "T-041 баланс-прогон (раунд 8): ×5 чисел Ф4-спецификации (10/5/10/10/50 → 50/25/50/50/250) — якорь хода 21 «Почитаемый» (500–999); red_flag prestige.json: корректируются числа источников, не ранги и не якорь. Атрибуция: docs/07-balance.md §7 + baseline-run_id в docs/mvp/TICKETS.md (T-041)."
     },
     "sign_trials": {
       "stages": [
