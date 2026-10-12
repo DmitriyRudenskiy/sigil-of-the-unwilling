@@ -65,5 +65,5 @@ func test_memory_profile_deltas_finite_and_nonnegative() -> void:
 	for entry in _deltas:
 		var name: String = entry[0]
 		var delta: float = entry[1]
-		assert_bool(delta == delta).is_true()
+		assert_bool(is_finite(delta)).is_true()  # T-123/gdlint: NaN-чек (строже — отсекает и inf)
 		assert_bool(delta >= 0.0).is_true()

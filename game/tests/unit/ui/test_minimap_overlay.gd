@@ -34,7 +34,7 @@ func test_hero_dot_reaches_draw_when_cell_property_exists() -> void:
 			break
 		overlay.queue_redraw()
 		await get_tree().process_frame
-	assert_bool(ok)
+	assert_bool(bool(ok)).is_true()
 	hero.free()
 	overlay.free()
 

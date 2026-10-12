@@ -63,7 +63,7 @@ func _init(p_armor_type: ArmorType = ArmorType.NONE, p_dex_mod: int = 0):
 ## Calculate total Armor Class
 func calculate_ac() -> int:
 	var ac: int = 0
-	
+
 	if use_natural_armor:
 		# Natural armor: base + CON mod (typically)
 		ac = natural_armor_base + dex_modifier
@@ -72,7 +72,7 @@ func calculate_ac() -> int:
 		if armor_type in ARMOR_DATA:
 			var armor_info = ARMOR_DATA[armor_type]
 			ac = armor_info["ac"]
-			
+
 			# Add DEX modifier (limited by armor type)
 			var max_dex = armor_info["max_dex"]
 			if max_dex == 0:
@@ -85,14 +85,14 @@ func calculate_ac() -> int:
 		else:
 			# No armor: 10 + DEX
 			ac = 10 + dex_modifier
-	
+
 	# Add magical bonuses
 	ac += armor_bonus
-	
+
 	# Add shield bonus if proficient
 	if has_shield and shield_proficient:
 		ac += SHIELD_BONUS + shield_bonus
-	
+
 	return ac
 
 
@@ -134,13 +134,13 @@ func set_shield_bonus(bonus: int):
 ## Get AC breakdown as string (for tooltips)
 func get_ac_breakdown() -> String:
 	var breakdown: Array[String] = []
-	
+
 	if use_natural_armor:
 		breakdown.append("Natural: %d" % natural_armor_base)
 	elif armor_type in ARMOR_DATA:
 		var armor_info = ARMOR_DATA[armor_type]
 		breakdown.append("Armor: %d" % armor_info["ac"])
-		
+
 		var max_dex = armor_info["max_dex"]
 		if max_dex < 99:
 			breakdown.append("DEX: +%d (max %d)" % [min(dex_modifier, max_dex), max_dex])
@@ -149,17 +149,17 @@ func get_ac_breakdown() -> String:
 	else:
 		breakdown.append("Unarmored: 10")
 		breakdown.append("DEX: +%d" % dex_modifier)
-	
+
 	if armor_bonus > 0:
 		breakdown.append("Magic Armor: +%d" % armor_bonus)
-	
+
 	if has_shield and shield_proficient:
 		var total_shield = SHIELD_BONUS + shield_bonus
 		breakdown.append("Shield: +%d" % total_shield)
-	
+
 	var total = calculate_ac()
 	breakdown.append("Total: %d" % total)
-	
+
 	return ", ".join(breakdown)
 
 

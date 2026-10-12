@@ -51,12 +51,12 @@ static func _process_settler(settle, s: Dictionary, rng: RandomNumberGenerator, 
 	var taverns: Array = settle.buildings_of("tavern")
 	if not taverns.is_empty() and settle.take_resource("ale", 1.0):
 		s["resolve"] = float(s["resolve"]) + BONUS_SERVICE
-	# перерыв
+	# перерыв (T-123: off-by-one — при break_interval=1 перерыв был каждый
+	# второй ход вместо каждого; спека — комментарий теста «каждый ход»)
+	s["break_in"] = int(s["break_in"]) - 1
 	if int(s["break_in"]) <= 0:
 		s["resolve"] = float(s["resolve"]) + BREAK_RESOLVE_GAIN
 		s["break_in"] = int(sp.get("break_interval", 1))
-	else:
-		s["break_in"] = int(s["break_in"]) - 1
 
 static func _housing_bonus(settle, s: Dictionary) -> float:
 	var home_id: String = s.get("home", "")

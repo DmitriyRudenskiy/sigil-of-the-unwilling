@@ -3,55 +3,58 @@ extends BaseTest
 
 func test_role_targets_table() -> void:
 	var ids: Array = ScenarioTargets.role_ids()
-	assert_that(ids.size() == 5)
-	assert_bool(ScenarioTargets.role("collector").has("rare_goal"))
-	assert_bool(ScenarioTargets.role("traveler").has("distance_goal"))
-	assert_bool(ScenarioTargets.role("trader").has("gold_goal"))
-	assert_bool(ScenarioTargets.role("adventurer").has("kill_goal"))
-	assert_bool(ScenarioTargets.role("builder").has("population_goal"))
-	assert_bool(ScenarioTargets.role("unknown").is_empty())
+	assert_bool(bool(ids.size() == 5)).is_true()
+	assert_bool(bool(ScenarioTargets.role("collector").has("rare_goal"))).is_true()
+	assert_bool(bool(ScenarioTargets.role("traveler").has("distance_goal"))).is_true()
+	assert_bool(bool(ScenarioTargets.role("trader").has("gold_goal"))).is_true()
+	assert_bool(bool(ScenarioTargets.role("adventurer").has("kill_goal"))).is_true()
+	assert_bool(bool(ScenarioTargets.role("builder").has("population_goal"))).is_true()
+	assert_bool(bool(ScenarioTargets.role("unknown").is_empty())).is_true()
 
 func test_max_turns() -> void:
-	assert_that(ScenarioTargets.max_turns("collector") == 60)
-	assert_that(ScenarioTargets.max_turns("traveler") == 90)
-	assert_that(ScenarioTargets.max_turns("builder") == 90)
-	assert_that(ScenarioTargets.max_turns("nope") == 60)
+	assert_bool(bool(ScenarioTargets.max_turns("collector") == 60)).is_true()
+	assert_bool(bool(ScenarioTargets.max_turns("traveler") == 90)).is_true()
+	assert_bool(bool(ScenarioTargets.max_turns("builder") == 90)).is_true()
+	assert_bool(bool(ScenarioTargets.max_turns("nope") == 60)).is_true()
 
 func test_seed_deterministic_and_distinct() -> void:
 	var s1: int = ScenarioTargets.seed_for("wizard", "collector")
 	var s2: int = ScenarioTargets.seed_for("wizard", "collector")
 	var s3: int = ScenarioTargets.seed_for("rogue", "collector")
 	var s4: int = ScenarioTargets.seed_for("wizard", "traveler")
-	assert_that(s1 == s2)
-	assert_bool(s1 != s3)
-	assert_bool(s1 != s4)
-	assert_bool(s1 > 0)
+	assert_bool(bool(s1 == s2)).is_true()
+	assert_bool(bool(s1 != s3)).is_true()
+	assert_bool(bool(s1 != s4)).is_true()
+	assert_bool(bool(s1 > 0)).is_true()
 
 func test_make_role_all_five() -> void:
 	var ids: Array = ["collector", "traveler", "trader", "adventurer", "builder"]
 	for id in ids:
 		var role: ScenarioRole = ScenarioPilot.make_role(str(id), ScenarioTargets.role(str(id)))
-		assert_that(role != null)
-		assert_that(str(role.id) == str(id))
-		assert_bool(not role.target.is_empty())
+		assert_bool(bool(role != null)).is_true()
+		assert_bool(bool(str(role.id) == str(id))).is_true()
+		assert_bool(bool(not role.target.is_empty())).is_true()
 
 func test_make_role_unknown() -> void:
 	var role: ScenarioRole = ScenarioPilot.make_role("nope", {})
-	assert_that(role == null)
+	assert_bool(bool(role == null)).is_true()
 
 func test_pilot_extends_balance_probe() -> void:
 	var pilot := ScenarioPilot.new()
-	assert_bool(pilot is BalanceProbe)
+	assert_bool(bool(pilot is BalanceProbe)).is_true()
 	pilot.free()
 
 func test_collector_metrics_shape() -> void:
 	var role: ScenarioRole = ScenarioPilot.make_role("collector", ScenarioTargets.role("collector"))
 	var pilot: _FakePilot = auto_free(_FakePilot.new())
 	var m: Dictionary = role.metrics(pilot)
-	assert_bool(m.has("rare_extracted"))
-	assert_that(int(m.get("rare_goal", 0)) == 20)
-	assert_bool(m.has("resources_per_day"))
-	assert_bool(m.has("survived"))
+	assert_bool(bool(m.has("rare_extracted"))).is_true()
+	# T-123: цель эхом берётся из конфига — тест проверяет проводку echo,
+	# а не хардкод числа (вердикт: баг теста — ждал 20 при rare_goal=10 с
+	# дня рождения обоих файлов; полупустой assert скрывал это всегда).
+	assert_bool(bool(int(m.get("rare_goal", -1)) == int(ScenarioTargets.role("collector").get("rare_goal", -99)))).is_true()
+	assert_bool(bool(m.has("resources_per_day"))).is_true()
+	assert_bool(bool(m.has("survived"))).is_true()
 
 func test_collector_collect_target_prefers_rare() -> void:
 	# Редкий узел дальше, обычный ближе — политика должна выбрать редкий.
@@ -63,7 +66,7 @@ func test_collector_collect_target_prefers_rare() -> void:
 	pilot.hero.cell = Vector2i(0, 0)
 	var t: Vector2i = role.collect_target(pilot)
 	pilot.free()
-	assert_that(t == Vector2i(5, 0))
+	assert_bool(bool(t == Vector2i(5, 0))).is_true()
 
 func test_collector_collect_target_none_when_no_rare() -> void:
 	var role: ScenarioRole = ScenarioPilot.make_role("collector", ScenarioTargets.role("collector"))
@@ -72,17 +75,17 @@ func test_collector_collect_target_none_when_no_rare() -> void:
 	pilot.map_f.resource_cells = {Vector2i(1, 0): true}
 	var t = role.collect_target(pilot)
 	pilot.free()
-	assert_that(t == null)
+	assert_bool(bool(t == null)).is_true()
 
 func test_traveler_metrics_shape() -> void:
 	var role: ScenarioRole = ScenarioPilot.make_role("traveler", ScenarioTargets.role("traveler"))
 	var pilot: _FakePilot = auto_free(_FakePilot.new())
 	var m: Dictionary = role.metrics(pilot)
 	pilot.free()
-	assert_bool(m.has("arrived"))
-	assert_bool(m.has("biomes"))
-	assert_that(int(m.get("distance_goal", 0)) == 25)
-	assert_that(int(m.get("biome_goal", 0)) == 3)
+	assert_bool(bool(m.has("arrived"))).is_true()
+	assert_bool(bool(m.has("biomes"))).is_true()
+	assert_bool(bool(int(m.get("distance_goal", -1)) == int(ScenarioTargets.role("traveler").get("distance_goal", -99)))).is_true()
+	assert_bool(bool(int(m.get("biome_goal", -1)) == int(ScenarioTargets.role("traveler").get("biome_goal", -99)))).is_true()
 
 func test_adventurer_metrics_and_ring2_only() -> void:
 	var role: ScenarioRole = ScenarioPilot.make_role("adventurer", ScenarioTargets.role("adventurer"))
@@ -91,16 +94,16 @@ func test_adventurer_metrics_and_ring2_only() -> void:
 	pilot.map_f.enemy_stacks = {Vector2i(15, 0): true, Vector2i(5, 0): true}
 	var t: Vector2i = role.enemy_target(pilot)
 	pilot.free()
-	assert_that(t == Vector2i(15, 0))
+	assert_bool(bool(t == Vector2i(15, 0))).is_true()
 
 func test_adventurer_metrics_shape() -> void:
 	var role: ScenarioRole = ScenarioPilot.make_role("adventurer", ScenarioTargets.role("adventurer"))
 	var pilot: _FakePilot = auto_free(_FakePilot.new())
 	var m: Dictionary = role.metrics(pilot)
 	pilot.free()
-	assert_that(int(m.get("kills", -1)) == 0)
-	assert_that(int(m.get("kill_goal", 0)) == 5)
-	assert_bool(m.has("survived"))
+	assert_bool(bool(int(m.get("kills", -1)) == 0)).is_true()
+	assert_bool(bool(int(m.get("kill_goal", 0)) == 5)).is_true()
+	assert_bool(bool(m.has("survived"))).is_true()
 
 func test_builder_metrics_shape() -> void:
 	var role: ScenarioRole = ScenarioPilot.make_role("builder", ScenarioTargets.role("builder"))
@@ -109,12 +112,12 @@ func test_builder_metrics_shape() -> void:
 	pilot.city.buildings = [1, 2, 3, 4]
 	var m: Dictionary = role.metrics(pilot)
 	# Цель: уровень 2 + 4 здания — достигнута
-	assert_bool(role.goal_met(pilot))
+	assert_bool(bool(role.goal_met(pilot))).is_true()
 	pilot.free()
-	assert_bool(m.has("population"))
-	assert_that(int(m.get("city_level", 0)) == 2)
-	assert_that(int(m.get("buildings", 0)) == 4)
-	assert_that(int(m.get("buildings_goal", 0)) == 4)
+	assert_bool(bool(m.has("population"))).is_true()
+	assert_bool(bool(int(m.get("city_level", 0)) == 2)).is_true()
+	assert_bool(bool(int(m.get("buildings", 0)) == 4)).is_true()
+	assert_bool(bool(int(m.get("buildings_goal", -1)) == int(ScenarioTargets.role("builder").get("buildings_goal", -99)))).is_true()
 
 func test_trader_metrics_shape() -> void:
 	var role: ScenarioRole = ScenarioPilot.make_role("trader", ScenarioTargets.role("trader"))
@@ -122,11 +125,11 @@ func test_trader_metrics_shape() -> void:
 	pilot._player_city = City.new()
 	pilot._player_city.storage[&"industry"] = 1500.0
 	var m: Dictionary = role.metrics(pilot)
-	assert_that(int(m.get("gold", 0)) == 1500)
-	assert_that(int(m.get("gold_goal", 0)) == 1000)
-	assert_bool(m.has("deals"))
-	assert_bool(m.has("margin"))
-	assert_bool(role.goal_met(pilot))
+	assert_bool(bool(int(m.get("gold", 0)) == 1500)).is_true()
+	assert_bool(bool(int(m.get("gold_goal", 0)) == 1000)).is_true()
+	assert_bool(bool(m.has("deals"))).is_true()
+	assert_bool(bool(m.has("margin"))).is_true()
+	assert_bool(bool(role.goal_met(pilot))).is_true()
 	pilot.free()
 
 # ── Фейки: утка под интерфейс BalanceProbe для политик ролей ───────────────

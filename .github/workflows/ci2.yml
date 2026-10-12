@@ -52,11 +52,13 @@ jobs:
       - name: Checkers (uid pairs, case dups, conflict markers, asset+.import)
         run: bash scripts/ci2_checkers.sh
 
-      - name: "Lint (gdtoolkit: gdparse — gate; gdlint — report-only)"
-        # Раунд 10 §3.4: lint — отдельный шаг (не в первом прогоне). gdparse
-        # (синтаксис) гейтит с первого дня; gdlint (стиль) — report-only до
-        # утверждения владельцем конфига/политики (не гейтит: не красим гейт
-        # на первом же прогоне, D-144 — main только через зелёный гейт).
+      - name: "Lint (gdtoolkit: gdparse — gate; gdlint — delta-гейт этапа 1, D-172)"
+        # Раунд 10 §3.4: lint — отдельный шаг. gdparse (синтаксис) гейтит.
+        # Раунд 9 §3 (gdlint этап 1, GDLINT-PROPOSAL «утверждён»): гигиена
+        # (trailing-whitespace/mixed-tabs/unnecessary-pass/is_finite) вычищена
+        # (431+2); гейт — ДЕЛЬТА: число нарушений > baseline = красный,
+        # ≤ baseline = report-only. Понижать baseline можно только вниз
+        # (списанием max-line-length/duplicated-load), raising = красный CI.
         run: |
           python3 -m venv /tmp/ci2-lint-venv
           /tmp/ci2-lint-venv/bin/pip install -q gdtoolkit==4.5.0
@@ -64,8 +66,15 @@ jobs:
           find scripts tests -name "*.gd" -print0 \
             | xargs -0 -n50 /tmp/ci2-lint-venv/bin/gdparse
           find scripts tests -name "*.gd" -print0 \
-            | xargs -0 -n50 /tmp/ci2-lint-venv/bin/gdlint \
-            || echo "GDLINT: report-only (violations logged, not gating)"
+            | xargs -0 -n50 /tmp/ci2-lint-venv/bin/gdlint 2>/tmp/ci2-gdlint.txt >/dev/null || true
+          N=$(grep -cE '\.gd:[0-9]+: Error' /tmp/ci2-gdlint.txt || true)
+          BASELINE=335
+          echo "GDLINT: violations=$N baseline=$BASELINE (дельта-гейт этапа 1)"
+          if [ "$N" -gt "$BASELINE" ]; then
+            echo "RED: gdlint вырос над baseline (+$((N-BASELINE))) — новые нарушения стиля не принимаются"
+            grep -E '\.gd:[0-9]+: Error' /tmp/ci2-gdlint.txt | head -50
+            exit 1
+          fi
 
       - name: "Gate 1/3: GdUnit4 (эшелонирование, раунд 7 §1.3)"
         env:

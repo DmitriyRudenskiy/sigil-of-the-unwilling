@@ -98,7 +98,7 @@ func test_validator_catches_missing_field() -> void:
 	var v = _Validator.new()
 	var bad_json := JSON.stringify([
 		{"id": "test", "name": "Test", "template": "DIRECT_DAMAGE",
-		 "speed": "fast", "color": "fire"}
+		"speed": "fast", "color": "fire"}
 	])
 	_write("user://test_missing_field.json", bad_json)
 	v.validate_file("user://test_missing_field.json")
@@ -112,7 +112,7 @@ func test_validator_catches_bad_template() -> void:
 	var v = _Validator.new()
 	var bad_json := JSON.stringify([
 		{"id": "test", "name": "Test", "template": "NONEXISTENT",
-		 "speed": "fast", "cost": 1, "color": "fire"}
+		"speed": "fast", "cost": 1, "color": "fire"}
 	])
 	_write("user://test_bad_template.json", bad_json)
 	v.validate_file("user://test_bad_template.json")
@@ -126,8 +126,8 @@ func test_validator_catches_bad_cost() -> void:
 	var v = _Validator.new()
 	var bad_json := JSON.stringify([
 		{"id": "test", "name": "Test", "template": "DIRECT_DAMAGE",
-		 "speed": "fast", "cost": 99, "color": "fire",
-		 "params": {"amount": 2, "target": "ENEMY_UNIT"}}
+		"speed": "fast", "cost": 99, "color": "fire",
+		"params": {"amount": 2, "target": "ENEMY_UNIT"}}
 	])
 	_write("user://test_bad_cost.json", bad_json)
 	v.validate_file("user://test_bad_cost.json")
@@ -141,9 +141,9 @@ func test_validator_catches_duplicate_id() -> void:
 	var v = _Validator.new()
 	var dup_json := JSON.stringify([
 		{"id": "same", "name": "A", "template": "BOUNCE", "speed": "fast",
-		 "cost": 1, "color": "fire", "params": {"target": "ALLY_UNIT"}},
+		"cost": 1, "color": "fire", "params": {"target": "ALLY_UNIT"}},
 		{"id": "same", "name": "B", "template": "BOUNCE", "speed": "fast",
-		 "cost": 2, "color": "fire", "params": {"target": "ALLY_UNIT"}}
+		"cost": 2, "color": "fire", "params": {"target": "ALLY_UNIT"}}
 	])
 	_write("user://test_dup_id.json", dup_json)
 	v.validate_file("user://test_dup_id.json")
@@ -157,8 +157,8 @@ func test_validator_catches_missing_template_param() -> void:
 	var v = _Validator.new()
 	var bad_json := JSON.stringify([
 		{"id": "dmg", "name": "Dmg", "template": "DIRECT_DAMAGE",
-		 "speed": "fast", "cost": 2, "color": "fire",
-		 "params": {"target": "ENEMY_UNIT"}}
+		"speed": "fast", "cost": 2, "color": "fire",
+		"params": {"target": "ENEMY_UNIT"}}
 	])
 	_write("user://test_missing_param.json", bad_json)
 	v.validate_file("user://test_missing_param.json")
@@ -172,8 +172,8 @@ func test_validator_catches_bad_keyword() -> void:
 	var v = _Validator.new()
 	var bad_json := JSON.stringify([
 		{"id": "kw", "name": "Kw", "template": "KEYWORD_BUFF",
-		 "speed": "fast", "cost": 2, "color": "fire",
-		 "params": {"keyword": "INVALID_KEYWORD"}}
+		"speed": "fast", "cost": 2, "color": "fire",
+		"params": {"keyword": "INVALID_KEYWORD"}}
 	])
 	_write("user://test_bad_keyword.json", bad_json)
 	v.validate_file("user://test_bad_keyword.json")
@@ -231,8 +231,8 @@ func test_unconditional_suppresses_w910() -> void:
 	var v = _Validator.new()
 	_write("user://test_hr_uncond.json", JSON.stringify([
 		{"id": "hr1", "name": "HR1", "template": "HARD_REMOVAL", "speed": "fast",
-		 "cost": 4, "color": "shadow", "params": {"unconditional": true},
-		 "description": "x"}
+		"cost": 4, "color": "shadow", "params": {"unconditional": true},
+		"description": "x"}
 	]))
 	v.validate_file("user://test_hr_uncond.json")
 	var w910 := 0
@@ -243,8 +243,8 @@ func test_unconditional_suppresses_w910() -> void:
 
 	_write("user://test_hr_plain.json", JSON.stringify([
 		{"id": "hr2", "name": "HR2", "template": "HARD_REMOVAL", "speed": "fast",
-		 "cost": 4, "color": "shadow", "params": {},
-		 "description": "x"}
+		"cost": 4, "color": "shadow", "params": {},
+		"description": "x"}
 	]))
 	v.validate_file("user://test_hr_plain.json")
 	var w910b := 0
@@ -257,9 +257,9 @@ func test_duplicate_display_name_warns() -> void:
 	var v = _Validator.new()
 	_write("user://test_dup_name.json", JSON.stringify([
 		{"id": "a1", "name": "Dismantle", "template": "DIRECT_DAMAGE", "speed": "fast",
-		 "cost": 2, "color": "fire", "params": {"amount": 1, "target": "ENEMY_UNIT"}, "description": "x"},
+		"cost": 2, "color": "fire", "params": {"amount": 1, "target": "ENEMY_UNIT"}, "description": "x"},
 		{"id": "b1", "name": "Dismantle", "template": "DIRECT_DAMAGE", "speed": "fast",
-		 "cost": 3, "color": "fire", "params": {"amount": 2, "target": "ENEMY_UNIT"}, "description": "x"}
+		"cost": 3, "color": "fire", "params": {"amount": 2, "target": "ENEMY_UNIT"}, "description": "x"}
 	]))
 	v.validate_file("user://test_dup_name.json")
 	var found := false
@@ -281,7 +281,7 @@ func test_strict_mode_fails_on_any_warning() -> void:
 	_write("user://test_strict_warn.json",
 		JSON.stringify([
 			{"id": "w1", "name": "WarnMe", "template": "HARD_REMOVAL", "speed": "fast",
-			 "cost": 4, "color": "shadow", "params": {}, "description": "x"}
+			"cost": 4, "color": "shadow", "params": {}, "description": "x"}
 		]))
 	v.validate_file("user://test_strict_warn.json")
 	var warnings := 0

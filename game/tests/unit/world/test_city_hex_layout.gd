@@ -12,15 +12,15 @@ func test_core_cells_diamond() -> void:
 	var center := Vector2i(10, 10)
 	var cells: Array[Vector2i] = CityFactory.core_cells_for(center)
 	assert_that(cells.size()).is_equal(4)
-	assert_bool(cells.has(center))
-	assert_bool(cells.has(center + Vector2i(1, 0)))
-	assert_bool(cells.has(center + Vector2i(0, 1)))
-	assert_bool(cells.has(center + Vector2i(1, 1)))
+	assert_bool(bool(cells.has(center))).is_true()
+	assert_bool(bool(cells.has(center + Vector2i(1, 0)))).is_true()
+	assert_bool(bool(cells.has(center + Vector2i(0, 1)))).is_true()
+	assert_bool(bool(cells.has(center + Vector2i(1, 1)))).is_true()
 
 func test_create_village_fills_core_cells() -> void:
 	var c := _city()
 	assert_that(c.core_cells.size()).is_equal(4)
-	assert_bool(c.core_cells.has(c.center))
+	assert_bool(bool(c.core_cells.has(c.center))).is_true()
 
 func test_building_max_distance_fixed_3() -> void:
 	var c := _city()
@@ -32,7 +32,7 @@ func test_building_max_distance_fixed_3() -> void:
 func test_core_cells_block_building() -> void:
 	var c := _city()
 	for cc in c.core_cells:
-		assert_bool(c.cell_is_built(cc)).override_failure_message(str(cc))
+		assert_bool(bool(c.cell_is_built(cc))).override_failure_message(str(cc)).is_true()
 
 func test_serializer_migration_without_core_cells() -> void:
 	var c := _city()
@@ -52,8 +52,8 @@ func test_serializer_roundtrip_core_cells() -> void:
 func test_first_free_build_cell_skips_core() -> void:
 	var c := _city()
 	var cell := CityBuildingService.first_free_build_cell(c, BuildingDefs.market())
-	assert_bool(cell != Vector2i(-1, -1))
-	assert_bool(not c.core_cells.has(cell)).override_failure_message("предложено ядро: " + str(cell))
+	assert_bool(bool(cell != Vector2i(-1, -1))).is_true()
+	assert_bool(bool(not c.core_cells.has(cell))).override_failure_message("предложено ядро: " + str(cell)).is_true()
 
 func test_first_free_build_cell_no_beyond_ring_3() -> void:
 	var c := _city()
@@ -93,14 +93,14 @@ func test_rebuild_city_zones_cache() -> void:
 	renderer.rebuild_city_zones([c])
 	# ядро — ring 0
 	for cc in c.core_cells:
-		assert_bool(renderer.city_zones.has(cc)).override_failure_message(str(cc))
+		assert_bool(bool(renderer.city_zones.has(cc))).override_failure_message(str(cc)).is_true()
 		assert_int(int(renderer.city_zones[cc].ring)).is_equal(0)
 	# кольцо 1 — ring 1 (кроме занятых ядром)
 	var ring1 := HexUtils.ring(c.center, 1)
 	var ring1_count := 0
 	for cell in ring1:
 		if not c.core_cells.has(cell):
-			assert_bool(renderer.city_zones.has(cell))
+			assert_bool(bool(renderer.city_zones.has(cell))).is_true()
 			assert_int(int(renderer.city_zones[cell].ring)).is_equal(1)
 			ring1_count += 1
 	# (1,1) в аксиальных координатах — расстояние 2, в кольце 1 только (1,0) и (0,1)
@@ -108,16 +108,16 @@ func test_rebuild_city_zones_cache() -> void:
 	# D6: граница — кольцо 3 вокруг ядра; кольцо 4 (по ядру) вне зоны
 	var ring3c := HexUtils.cells_in_core_ring(c.center, 3)
 	var ring4c := HexUtils.cells_in_core_ring(c.center, 4)
-	assert_bool(renderer.city_zones.has(ring3c[0]))
-	assert_bool(not renderer.city_zones.has(ring4c[0]))
+	assert_bool(bool(renderer.city_zones.has(ring3c[0]))).is_true()
+	assert_bool(bool(not renderer.city_zones.has(ring4c[0]))).is_true()
 
 func test_rebuild_city_zones_replaces() -> void:
 	var c1 := _city(Vector2i(10, 10))
 	var c2 := _city(Vector2i(30, 30))
 	var renderer := MapRenderer.new(null)
 	renderer.rebuild_city_zones([c1, c2])
-	assert_bool(renderer.city_zones.has(c1.center))
-	assert_bool(renderer.city_zones.has(c2.center))
+	assert_bool(bool(renderer.city_zones.has(c1.center))).is_true()
+	assert_bool(bool(renderer.city_zones.has(c2.center))).is_true()
 	renderer.rebuild_city_zones([c2])
-	assert_bool(not renderer.city_zones.has(c1.center))
-	assert_bool(renderer.city_zones.has(c2.center))
+	assert_bool(bool(not renderer.city_zones.has(c1.center))).is_true()
+	assert_bool(bool(renderer.city_zones.has(c2.center))).is_true()

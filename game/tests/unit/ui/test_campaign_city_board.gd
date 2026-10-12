@@ -28,8 +28,8 @@ func after_test() -> void:
 func test_board_uses_exact_52_cell_city_geometry_and_canonical_occupants() -> void:
 	await get_tree().process_frame
 	assert_that(board._atlas.resource_path).is_equal("res://assets/textures/hex_sheet_0.png")
-	assert_that(CampaignCityBoard.building_art_path("campaign_farm")).ends_with("building_farmhouse.webp")
-	assert_that(CampaignCityBoard.building_art_path("campaign_sawmill")).ends_with("building_sawmill.webp")
+	assert_str(CampaignCityBoard.building_art_path("campaign_farm")).ends_with("building_farmhouse.webp")
+	assert_str(CampaignCityBoard.building_art_path("campaign_sawmill")).ends_with("building_sawmill.webp")
 	assert_that(CampaignCityBoard.building_art_path("campaign_iron_mine")).is_empty()
 	var cells := board.get_rendered_cells()
 	assert_that(cells.size()).is_equal(52)

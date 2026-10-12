@@ -19,9 +19,11 @@ class MockConsumer extends RefCounted:
 # Наследуют реальные классы: HeroLifecycleSystem.setup требует concrete типы
 # (R4 типизация WC-контура); мок-ам достаточно унаследованного поля .hero.
 class MockBattle extends WorldBattleCoordinator:
+	# gdlint: ignore=unnecessary-pass
 	pass
 
 class MockInteraction extends WorldInteractionController:
+	# gdlint: ignore=unnecessary-pass
 	pass
 
 class MockBootstrap extends RefCounted:

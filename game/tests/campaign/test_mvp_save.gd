@@ -35,23 +35,46 @@ func test_three_slots_and_bounds() -> void:
 	var state := _sample_state()
 	for slot in [1, 2, 3]:
 		var result := MvpSaveManager.save_slot(slot, state)
-		assert_that(result["ok"]).override_failure_message("slot %d: %s" % [slot, result["message"]])
+		assert_bool(bool(result["ok"])).override_failure_message("slot %d: %s" % [slot, result["message"]]).is_true()
 	var bad := MvpSaveManager.save_slot(4, state)
-	assert_that(not bad["ok"] and bad["error"] == MvpSaveManager.SaveError.INVALID_SLOT) \
-		.override_failure_message("slot 4 должен отклоняться: %s" % str(bad["message"]))
+	assert_bool(bool(not bad["ok"] and bad["error"] == MvpSaveManager.SaveError.INVALID_SLOT)) \
+		.override_failure_message("slot 4 должен отклоняться: %s" % str(bad["message"])).is_true()
 	var bad_load := MvpSaveManager.load_slot(0)
-	assert_that(not bad_load["ok"] and bad_load["error"] == MvpSaveManager.SaveError.INVALID_SLOT) \
-		.override_failure_message("slot 0 при загрузке должен отклоняться")
+	assert_bool(bool(not bad_load["ok"] and bad_load["error"] == MvpSaveManager.SaveError.INVALID_SLOT)) \
+		.override_failure_message("slot 0 при загрузке должен отклоняться").is_true()
 
 
 func test_round_trip_i1() -> void:
 	var state := _sample_state()
 	var saved := MvpSaveManager.save_slot(1, state)
-	assert_that(saved["ok"]).override_failure_message(str(saved["message"]))
+	assert_bool(bool(saved["ok"])).override_failure_message(str(saved["message"])).is_true()
 	var loaded := MvpSaveManager.load_slot(1)
-	assert_that(loaded["ok"]).override_failure_message(str(loaded["message"]))
-	assert_that(loaded["state"] == state) \
-		.override_failure_message("I1: round-trip должен вернуть идентичное состояние")
+	assert_bool(bool(loaded["ok"])).override_failure_message(str(loaded["message"])).is_true()
+	# T-123: JSON round-trip конвертирует int→float — глубокое == с исходным
+	# словарём false на всех числовых листьях (вердикт: баг теста, данные
+	# численно идентичны); сравнение — числовое глубокое.
+	assert_bool(_num_equal(loaded["state"], state)) \
+		.override_failure_message("I1: round-trip должен вернуть идентичное состояние").is_true()
+
+
+func _num_equal(a, b) -> bool:
+	if a is Dictionary and b is Dictionary:
+		if a.size() != b.size():
+			return false
+		for k in a.keys():
+			if not b.has(k) or not _num_equal(a[k], b[k]):
+				return false
+		return true
+	if a is Array and b is Array:
+		if a.size() != b.size():
+			return false
+		for i in a.size():
+			if not _num_equal(a[i], b[i]):
+				return false
+		return true
+	if (a is int or a is float) and (b is int or b is float):
+		return float(a) == float(b)
+	return typeof(a) == typeof(b) and a == b
 
 
 func test_campaign_city_and_trained_party_state_round_trip() -> void:
@@ -67,9 +90,9 @@ func test_campaign_city_and_trained_party_state_round_trip() -> void:
 		"xp": 0, "stats": {"str": 13}, "luck": 0,
 	})
 	var saved := MvpSaveManager.save_slot(1, state)
-	assert_that(saved["ok"]).override_failure_message(str(saved["message"]))
+	assert_bool(bool(saved["ok"])).override_failure_message(str(saved["message"])).is_true()
 	var loaded := MvpSaveManager.load_slot(1)
-	assert_that(loaded["ok"]).override_failure_message(str(loaded["message"]))
+	assert_bool(bool(loaded["ok"])).override_failure_message(str(loaded["message"])).is_true()
 	var saved_city: Dictionary = loaded["state"].city
 	assert_that(saved_city.campaign_buildings[0].id).is_equal("barracks")
 	assert_that(int(saved_city.campaign_buildings[0].uid)).is_equal(8)
@@ -113,17 +136,17 @@ func test_byte_determinism() -> void:
 	file = FileAccess.open(MvpSaveManager.get_slot_path(2), FileAccess.READ)
 	var bytes_b := file.get_buffer(file.get_length())
 	file.close()
-	assert_that(bytes_a == bytes_b) \
-		.override_failure_message("I1: одинаковые вводные → байт-в-байт одинаковый сейв")
+	assert_bool(bool(bytes_a == bytes_b)) \
+		.override_failure_message("I1: одинаковые вводные → байт-в-байт одинаковый сейв").is_true()
 
 
 func test_atomic_no_tmp_left() -> void:
 	var state := _sample_state()
 	var saved := MvpSaveManager.save_slot(1, state)
-	assert_that(saved["ok"]).override_failure_message(str(saved["message"]))
+	assert_bool(bool(saved["ok"])).override_failure_message(str(saved["message"])).is_true()
 	var tmp := MvpSaveManager.get_slot_path(1) + ".tmp"
-	assert_that(not FileAccess.file_exists(tmp)) \
-		.override_failure_message("после атомарного сейва tmp-файл не должен оставаться")
+	assert_bool(bool(not FileAccess.file_exists(tmp))) \
+		.override_failure_message("после атомарного сейва tmp-файл не должен оставаться").is_true()
 
 
 func test_version_minor_compatible() -> void:
@@ -133,7 +156,7 @@ func test_version_minor_compatible() -> void:
 	file.store_string(MvpSaveManager.serialize(payload))
 	file.close()
 	var loaded := MvpSaveManager.load_slot(1)
-	assert_that(loaded["ok"]).override_failure_message("minor 5 должен быть совместим: %s" % str(loaded["message"]))
+	assert_bool(bool(loaded["ok"])).override_failure_message("minor 5 должен быть совместим: %s" % str(loaded["message"])).is_true()
 
 
 func test_version_major_incompatible() -> void:
@@ -144,8 +167,8 @@ func test_version_major_incompatible() -> void:
 		file.store_string(MvpSaveManager.serialize(payload))
 		file.close()
 		var loaded := MvpSaveManager.load_slot(2)
-		assert_that(not loaded["ok"] and loaded["error"] == MvpSaveManager.SaveError.INCOMPATIBLE_VERSION) \
-			.override_failure_message("major %d должен отклоняться: %s" % [major, str(loaded["message"])])
+		assert_bool(bool(not loaded["ok"] and loaded["error"] == MvpSaveManager.SaveError.INCOMPATIBLE_VERSION)) \
+			.override_failure_message("major %d должен отклоняться: %s" % [major, str(loaded["message"])]).is_true()
 		MvpSaveManager.delete_slot(2)
 
 
@@ -153,28 +176,28 @@ func test_derived_keys_rejected() -> void:
 	var state := _sample_state()
 	state["party"][0]["ladder"] = {"attack": {"margin": 3}}
 	var found := MvpSaveSchema.find_derived_keys(state)
-	assert_that(found.size() == 1 and found[0] == "root.party[0].ladder") \
-		.override_failure_message("лестница — производная: %s" % str(found))
+	assert_bool(bool(found.size() == 1 and found[0] == "root.party[0].ladder")) \
+		.override_failure_message("лестница — производная: %s" % str(found)).is_true()
 	var saved := MvpSaveManager.save_slot(1, state)
-	assert_that(not saved["ok"] and saved["error"] == MvpSaveManager.SaveError.INVALID_DATA) \
-		.override_failure_message("сейв с лестницей должен отклоняться")
+	assert_bool(bool(not saved["ok"] and saved["error"] == MvpSaveManager.SaveError.INVALID_DATA)) \
+		.override_failure_message("сейв с лестницей должен отклоняться").is_true()
 	var state2 := _sample_state()
 	state2["prestige"]["prestige_balance"] = 1200
 	var saved2 := MvpSaveManager.save_slot(1, state2)
-	assert_that(not saved2["ok"] and saved2["error"] == MvpSaveManager.SaveError.INVALID_DATA) \
-		.override_failure_message("баланс Престижа — производная от ledger, сейв должен отклоняться")
+	assert_bool(bool(not saved2["ok"] and saved2["error"] == MvpSaveManager.SaveError.INVALID_DATA)) \
+		.override_failure_message("баланс Престижа — производная от ledger, сейв должен отклоняться").is_true()
 
 
 func test_unknown_and_missing_sections() -> void:
 	var state := _sample_state()
 	state["shards"] = {}
 	var saved := MvpSaveManager.save_slot(1, state)
-	assert_that(not saved["ok"] and saved["error"] == MvpSaveManager.SaveError.INVALID_DATA) \
-		.override_failure_message("неизвестная секция должна отклоняться: %s" % str(saved["message"]))
+	assert_bool(bool(not saved["ok"] and saved["error"] == MvpSaveManager.SaveError.INVALID_DATA)) \
+		.override_failure_message("неизвестная секция должна отклоняться: %s" % str(saved["message"])).is_true()
 	state.erase("sign")
 	var saved2 := MvpSaveManager.save_slot(1, state)
-	assert_that(not saved2["ok"] and saved2["error"] == MvpSaveManager.SaveError.INVALID_DATA) \
-		.override_failure_message("отсутствующая секция должна отклоняться: %s" % str(saved2["message"]))
+	assert_bool(bool(not saved2["ok"] and saved2["error"] == MvpSaveManager.SaveError.INVALID_DATA)) \
+		.override_failure_message("отсутствующая секция должна отклоняться: %s" % str(saved2["message"])).is_true()
 
 
 ## Catch акта композита (14-я итерация, раунд 4, §3): обязательные секции —

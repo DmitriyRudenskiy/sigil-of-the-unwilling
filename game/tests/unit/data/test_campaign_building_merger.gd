@@ -39,7 +39,7 @@ func test_valid_merge_transfers_state_without_copying_capacity_or_stock() -> voi
 	assert_that(float(result.stock.iron)).is_equal(1.0)
 	assert_that(float(result.production_remainders["r/food"])).is_equal(11000.0)
 	assert_that(before[0].resident_capacity + before[1].resident_capacity).is_equal(4)
-	assert_that(result.resident_capacity).is_not_equal(4)
+	assert_bool(bool(result.resident_capacity)).is_not_equal(4).is_true()
 
 func test_invalid_merge_is_atomic_for_missing_components_and_distance() -> void:
 	var before := _components()

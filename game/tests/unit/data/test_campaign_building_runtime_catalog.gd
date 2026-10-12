@@ -46,12 +46,12 @@ func test_shipped_catalog_has_explicit_mvp_construction_costs_for_all_entries() 
 	var allowed := {"food": true, "wood": true, "iron": true}
 	for building in catalog.get("buildings", []):
 		var costs: Dictionary = building.get("costs", {})
-		assert_bool(not costs.is_empty()).override_failure_message(String(building.get("id", "")))
+		assert_bool(bool(not costs.is_empty())).override_failure_message(String(building.get("id", ""))).is_true()
 		for resource_id in costs:
-			assert_bool(allowed.has(String(resource_id))).override_failure_message(
-				"%s uses out-of-mask cost %s" % [building.id, resource_id])
-			assert_bool(float(costs[resource_id]) > 0.0).override_failure_message(
-				"%s has non-positive %s cost" % [building.id, resource_id])
+			assert_bool(bool(allowed.has(String(resource_id)))).override_failure_message(
+				"%s uses out-of-mask cost %s" % [building.id, resource_id]).is_true()
+			assert_bool(bool(float(costs[resource_id]) > 0.0)).override_failure_message(
+				"%s has non-positive %s cost" % [building.id, resource_id]).is_true()
 
 func test_runtime_records_have_only_resolved_sources_and_custom_merge_inputs() -> void:
 	var catalog := CampaignBuildingCatalog.load_catalog()

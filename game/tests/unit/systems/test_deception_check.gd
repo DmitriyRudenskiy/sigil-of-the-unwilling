@@ -35,7 +35,7 @@ func test_no_deception_when_roll_above_chance() -> void:
 		var out: Dictionary = DeceptionCheck.roll(r, 20, 20, 2, 2, 10, 10)
 		if bool(out["deceived"]):
 			deceived += 1
-	assert_bool(deceived <= 3)
+	assert_bool(bool(deceived <= 3)).is_true()
 
 func test_deception_happens_with_low_int() -> void:
 	# int 2, luk 2, wis 2: шанс 42 -> часть бросков обман
@@ -45,7 +45,7 @@ func test_deception_happens_with_low_int() -> void:
 		var out: Dictionary = DeceptionCheck.roll(r, 2, 2, 2, 2, 35, 10)
 		if bool(out["deceived"]):
 			deceived += 1
-	assert_bool(deceived > 5)
+	assert_bool(bool(deceived > 5)).is_true()
 
 func test_severity_range_on_deception() -> void:
 	# d20-слой, trap_dc 20, int 2: при обмане severity в пределах 1..4
@@ -55,9 +55,9 @@ func test_severity_range_on_deception() -> void:
 		var out: Dictionary = DeceptionCheck.roll(r, 2, 2, 2, 2, 85, 20)
 		if bool(out["deceived"]):
 			saw_deception = true
-			assert_bool(int(out["severity"]) >= 1)
-			assert_bool(int(out["severity"]) <= 4)
-	assert_bool(saw_deception).override_failure_message("no deception in 60 seeds")
+			assert_bool(bool(int(out["severity"]) >= 1)).is_true()
+			assert_bool(bool(int(out["severity"]) <= 4)).is_true()
+	assert_bool(bool(saw_deception)).override_failure_message("no deception in 60 seeds").is_true()
 
 func test_critical_margin_gives_severe_or_worse() -> void:
 	# d20=1, int 2, wis 2, luk 2, trap_dc 20: margin = 1 - 8 - 20 = -27 -> critical (4)
@@ -76,7 +76,7 @@ func test_wis_notice_reduces_severity() -> void:
 		if bool(out["deceived"]):
 			if int(out["severity"]) == 1:
 				seen_soft += 1
-	assert_bool(seen_soft >= 1)
+	assert_bool(bool(seen_soft >= 1)).is_true()
 
 func test_luk_saves_or_reveals() -> void:
 	# luk 20: 50% спас -> revealed
@@ -86,11 +86,11 @@ func test_luk_saves_or_reveals() -> void:
 		var out: Dictionary = DeceptionCheck.roll(r, 2, 2, 2, 20, 85, 20)
 		if bool(out["revealed"]):
 			revealed += 1
-	assert_bool(revealed >= 1)
+	assert_bool(bool(revealed >= 1)).is_true()
 
 func test_cha_discount() -> void:
 	var out: Dictionary = DeceptionCheck.roll(_rng(7), 10, 10, 16, 2, 10, 10)
-	assert_bool(float(out["discount"]) > 0.0)
+	assert_bool(bool(float(out["discount"]) > 0.0)).is_true()
 	var out2: Dictionary = DeceptionCheck.roll(_rng(7), 10, 10, 10, 2, 10, 10)
 	assert_int(int(float(out2["discount"]) * 100)).is_equal(0)
 

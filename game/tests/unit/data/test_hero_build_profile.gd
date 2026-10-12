@@ -161,7 +161,7 @@ func test_every_race_class_has_all_8_stats() -> void:
 			p.background = "soldier"
 			var s := p.get_stats()
 			for key in ["attack", "defense", "spell_power", "knowledge"] + SOCIAL_KEYS:
-				assert_bool(s.has(key)).override_failure_message("race=%s class=%s stat=%s" % [race, cls, key])
+				assert_bool(bool(s.has(key))).override_failure_message("race=%s class=%s stat=%s" % [race, cls, key]).is_true()
 
 func test_battle_stats_unchanged_by_social() -> void:
 	var p := _full_profile()
@@ -175,11 +175,11 @@ func test_battle_stats_unchanged_by_social() -> void:
 func test_social_bonuses_meaningful() -> void:
 	# маг: +wis +int; плут: +luk; варвар: +cha
 	var wizard := _social("wizard")
-	assert_bool(wizard["wis"] > 2 and wizard["int"] > 2)
+	assert_bool(bool(wizard["wis"] > 2 and wizard["int"] > 2)).is_true()
 	var rogue := _social("rogue")
-	assert_bool(rogue["luk"] > 2)
+	assert_bool(bool(rogue["luk"] > 2)).is_true()
 	var barbarian := _social("barbarian")
-	assert_bool(barbarian["cha"] > 2)
+	assert_bool(bool(barbarian["cha"] > 2)).is_true()
 
 func _social(class_id: String) -> Dictionary:
 	var p := HeroBuildProfile.new()
@@ -196,4 +196,4 @@ func test_battle_bonus_excludes_social_stats() -> void:
 	var b := comp.get_battle_bonus({})
 	assert_that(b["attack"]).is_equal(3)
 	assert_that(b["defense"]).is_equal(1)
-	assert_bool(not b.has("int") and not b.has("cha"))
+	assert_bool(bool(not b.has("int") and not b.has("cha"))).is_true()

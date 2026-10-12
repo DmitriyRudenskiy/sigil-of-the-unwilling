@@ -149,5 +149,5 @@ func test_benchmarks_run_and_report_finite_times() -> void:
 	assert_bool(_results.size() == 5).is_true()
 	for r in _results:
 		var avg: float = r["avg_ms"]
-		assert_bool(avg == avg).is_true()
+		assert_bool(is_finite(avg)).is_true()  # T-123/gdlint: NaN-чек (строже — отсекает и inf)
 		assert_bool(avg >= 0.0).is_true()

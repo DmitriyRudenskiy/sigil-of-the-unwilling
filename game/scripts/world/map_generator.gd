@@ -81,16 +81,16 @@ func generate() -> void:
 	# Generate enhanced terrain with mountains, rivers, forests
 	model.generate_noise()
 	model.smooth_invalid_adjacencies()
-	
+
 	var mountain_gen = MapMountainGenerator.new(model)
 	mountain_gen.generate()
-	
+
 	var river_gen = MapRiverGenerator.new(model)
 	river_gen.generate()
-	
+
 	var forest_gen = MapForestGenerator.new(model)
 	forest_gen.generate()
-	
+
 	renderer.paint(_tile_map)
 	renderer.paint_decor(_decor_layer)
 
@@ -99,11 +99,11 @@ func generate() -> void:
 	spawner.place_resources(reachable_cells)
 	spawner.place_decor()
 	spawner.place_enemies(reachable_cells)
-	
+
 	# Generate roads after villages and resources are placed
 	var road_gen = MapRoadGenerator.new(model)
 	road_gen.generate()
-	
+
 	# Re-render to include roads
 	renderer.paint(_tile_map)
 

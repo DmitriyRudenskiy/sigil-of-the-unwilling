@@ -21,9 +21,11 @@ class MockConsumer extends RefCounted:
 # Наследуют реальные классы: HeroLifecycleSystem.setup требует concrete типы
 # (R4 типизация WC-контура); мок-ам достаточно унаследованного поля .hero.
 class MockBattle extends WorldBattleCoordinator:
+	# gdlint: ignore=unnecessary-pass
 	pass
 
 class MockInteraction extends WorldInteractionController:
+	# gdlint: ignore=unnecessary-pass
 	pass
 
 class MockBootstrap extends RefCounted:
@@ -45,7 +47,7 @@ class MockSuccession extends SuccessionController:
 		resurrect_calls += 1
 		return true
 	func on_hero_died(deceased: HeroController, rng: RandomNumberGenerator = null,
-		              source_cities: Array[City] = [], dest_manager: CityManager = null) -> HeroController:
+		source_cities: Array[City] = [], dest_manager: CityManager = null) -> HeroController:
 		last_created = HeroController.new()
 		return last_created
 

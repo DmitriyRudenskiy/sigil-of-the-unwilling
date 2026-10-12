@@ -57,7 +57,7 @@ func test_recruit_check_refused_low_cha_hard_dc() -> void:
 		var out := LeadershipCheck.recruit_check(_rng(seed), 2, -20, 1, "champion")
 		if str(out["outcome"]) == "refused":
 			refused += 1
-	assert_bool(refused > 30)
+	assert_bool(bool(refused > 30)).is_true()
 
 func test_recruit_check_rumor_near_dc() -> void:
 	# total чуть ниже DC -> rumor с rep_delta -5
@@ -67,7 +67,7 @@ func test_recruit_check_rumor_near_dc() -> void:
 		if str(out["outcome"]) == "rumor":
 			saw_rumor = true
 			assert_int(int(out["rep_delta"])).is_equal(-5)
-	assert_bool(saw_rumor)
+	assert_bool(bool(saw_rumor)).is_true()
 
 func test_recruit_check_critical_natural_1() -> void:
 	# d20=1 -> critical, rep -10
@@ -78,7 +78,7 @@ func test_recruit_check_critical_natural_1() -> void:
 			saw_critical = true
 			assert_that(out["outcome"]).is_equal("critical")
 			assert_int(int(out["rep_delta"])).is_equal(-10)
-	assert_bool(saw_critical)
+	assert_bool(bool(saw_critical)).is_true()
 
 func test_recruit_check_rep_bonus_bounds() -> void:
 	# rep 100 -> +3, rep -100 -> -3 (кламп)
@@ -130,4 +130,4 @@ func test_recruit_mods_cannot_override_critical() -> void:
 		if int(out["d20"]) == 1:
 			saw = true
 			assert_that(out["outcome"]).is_equal("critical")
-	assert_bool(saw)
+	assert_bool(bool(saw)).is_true()

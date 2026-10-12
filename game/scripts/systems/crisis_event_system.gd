@@ -403,24 +403,24 @@ func load_crisis_json(path: String) -> Dictionary:
 ## Вызов каждый игровой день
 func on_day_passed(day: int):
 	day_counter = day
-	
+
 	# События мгновенные (без duration_days, в отличие от кризисов): показанное
 	# в предыдущий день событие уже разрешено игроком до смены дня. Без этой
 	# очистки active_events росло бы вечно, и гейт
 	# `active_events.size() < max_active_events` дедлокировал спавн событий
 	# после 3 событий в реальной сессии.
 	active_events.clear()
-	
+
 	# Проверка активного кризиса
 	if current_crisis != null:
 		process_ongoing_crisis()
 		return  # Во время кризиса обычные события не触发
-	
+
 	# Проверка шанса кризиса
 	if can_trigger_crisis() and should_trigger_crisis():
 		trigger_random_crisis()
 		return
-	
+
 	# Проверка обычных событий
 	if day >= next_event_day and active_events.size() < max_active_events:
 		try_trigger_event()
@@ -431,7 +431,7 @@ func update_next_event_day():
 	var frequency_modifier = 1.0
 	if not active_events.is_empty():
 		frequency_modifier = 1.5  # Реже если уже есть активные события
-	
+
 	var base_interval = int(7.0 / base_event_chance * frequency_modifier)
 	var variability = rng.randi() % 4 - 2  # -2 to +2 дня
 	next_event_day = day_counter + max(3, base_interval + variability)
@@ -441,7 +441,7 @@ func try_trigger_event():
 	var available_events = get_available_events()
 	if available_events.is_empty():
 		return
-	
+
 	# Выбор взвешенного случайного события (детерминизм по seed через self.rng)
 	var event = select_by_weight(available_events)
 	if event != null:
@@ -566,7 +566,7 @@ func trigger_random_crisis():
 	var available_crises = get_available_crises()
 	if available_crises.is_empty():
 		return
-	
+
 	var crisis: CrisisEventData = select_by_weight(available_crises)
 	if crisis == null:
 		return
@@ -626,7 +626,7 @@ func apply_crisis_effects(effects: Dictionary):
 	var game_manager := _gm()
 	if not game_manager:
 		return
-	
+
 	for effect_type in effects:
 		var value = effects[effect_type]
 		if effect_type == "resource_drain":
@@ -641,24 +641,24 @@ func apply_crisis_effects(effects: Dictionary):
 func resolve_crisis(choice_index: int):
 	if current_crisis == null:
 		return
-	
+
 	var choice = null
 	if choice_index >= 0 and choice_index < current_crisis.choices.size():
 		choice = current_crisis.choices[choice_index]
 		apply_choice_effects(choice.effects)
-	
+
 	# Применение resolution эффектов
 	apply_crisis_effects(current_crisis.resolution_effects)
-	
+
 	crisis_resolved.emit(current_crisis, choice_index)
-	
+
 	# Обновление истории
 	for i in range(event_history.size() - 1, -1, -1):
 		if event_history[i]["type"] == "crisis" and event_history[i]["id"] == current_crisis.id:
 			event_history[i]["resolved"] = true
 			event_history[i]["choice"] = choice_index
 			break
-	
+
 	current_crisis = null
 	hide_crisis_panel()
 
@@ -667,7 +667,7 @@ func apply_choice_effects(effects: Dictionary):
 	var game_manager := _gm()
 	if not game_manager:
 		return
-	
+
 	for effect_type in effects:
 		var value = effects[effect_type]
 		if effect_type == "resource_change":

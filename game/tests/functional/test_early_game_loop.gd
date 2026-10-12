@@ -79,16 +79,16 @@ func test_full_early_game_loop() -> void:
 	var result: Dictionary = BattleEmulator.new().emulate_battle({
 		"attacker_army": [
 			{"id": "hero", "attack": fighter.stats.attack, "base_damage": fighter.stats.base_damage,
-			 "hp": fighter.stats.hp, "speed": fighter.stats.speed, "defense": fighter.stats.defense,
-			 "count": fighter.count},
+			"hp": fighter.stats.hp, "speed": fighter.stats.speed, "defense": fighter.stats.defense,
+			"count": fighter.count},
 			{"id": sword.get_key(), "attack": sword.stats.attack, "base_damage": sword.stats.base_damage,
-			 "hp": sword.stats.hp, "speed": sword.stats.speed, "defense": sword.stats.defense,
-			 "count": sword.count},
+			"hp": sword.stats.hp, "speed": sword.stats.speed, "defense": sword.stats.defense,
+			"count": sword.count},
 		],
 		"defender_army": [
 			{"id": "wolves", "attack": wolves.stats.attack, "base_damage": wolves.stats.base_damage,
-			 "hp": wolves.stats.hp, "speed": wolves.stats.speed, "defense": wolves.stats.defense,
-			 "count": wolves.count},
+			"hp": wolves.stats.hp, "speed": wolves.stats.speed, "defense": wolves.stats.defense,
+			"count": wolves.count},
 		],
 		# Детерминированный seed (tactical-combat 8.4): matchup герой+рекруты
 		# vs волки 1-го кольца ~88% при randomize() — flaky. Seed 7000 даёт

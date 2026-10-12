@@ -19,13 +19,13 @@ func test_starting_buildings_present() -> void:
 
 func test_build_requires_materials() -> void:
 	var s: Variant = _settle_with({"wood": 1})
-	assert_bool(not Buildings.can_build(s, "shelter")).override_failure_message("стройка без материалов")
+	assert_bool(bool(not Buildings.can_build(s, "shelter"))).override_failure_message("стройка без материалов").is_true()
 	s.add_resource("wood", 5)
-	assert_bool(Buildings.can_build(s, "shelter"))
+	assert_bool(bool(Buildings.can_build(s, "shelter"))).is_true()
 
 func test_build_takes_cycles() -> void:
 	var s: Variant = _settle_with({"wood": 10})
-	assert_bool(Buildings.start_build(s, "shelter", Vector2i(2, 0)))
+	assert_bool(bool(Buildings.start_build(s, "shelter", Vector2i(2, 0)))).is_true()
 	var shelter: Array = s.buildings_of("shelter")
 	assert_that(int(shelter[0]["data"]["build_left"])).is_equal(Buildings.BUILD_CYCLES)
 	Buildings.on_day_passed(s, _rng(1))
@@ -35,8 +35,8 @@ func test_build_takes_cycles() -> void:
 
 func test_cell_occupied_blocks_second_build() -> void:
 	var s: Variant = _settle_with({"wood": 20})
-	assert_bool(Buildings.start_build(s, "shelter", Vector2i(2, 0)))
-	assert_bool(not Buildings.start_build(s, "shelter", Vector2i(2, 0)))
+	assert_bool(bool(Buildings.start_build(s, "shelter", Vector2i(2, 0)))).is_true()
+	assert_bool(bool(not Buildings.start_build(s, "shelter", Vector2i(2, 0)))).is_true()
 
 func test_lumber_mill_recipe() -> void:
 	var s: Variant = _settle_with({"wood": 10})
@@ -81,9 +81,9 @@ func test_frog_not_rehomed_to_shelter() -> void:
 
 func test_small_camp_small_node_flag() -> void:
 	var b: Dictionary = B.by_id("small_foragers_camp")
-	assert_bool(bool(b.get("small", false)))
+	assert_bool(bool(bool(b.get("small", false)))).is_true()
 	var w: Dictionary = B.by_id("woodcutters_camp")
-	assert_bool(not bool(w.get("small", false)))
+	assert_bool(bool(not bool(w.get("small", false)))).is_true()
 
 func _rng(seed: int) -> RandomNumberGenerator:
 	var r := RandomNumberGenerator.new()

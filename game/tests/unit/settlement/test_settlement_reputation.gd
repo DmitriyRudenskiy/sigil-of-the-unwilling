@@ -73,7 +73,7 @@ func test_defeat_instability() -> void:
 func test_victory_at_goal() -> void:
 	var s: Variant = _settle()
 	s.state["reputation"] = {"human": {"points": Num.REPUTATION_GOAL, "demand_threshold": 0, "decadence_spent": 0}}
-	assert_bool(Rep.victory_reached(s))
+	assert_bool(bool(Rep.victory_reached(s))).is_true()
 
 func _rng(seed: int) -> RandomNumberGenerator:
 	var r := RandomNumberGenerator.new()

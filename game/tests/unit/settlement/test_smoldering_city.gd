@@ -35,27 +35,27 @@ func test_on_settlement_ended_victory_raises_level() -> void:
 
 func test_frog_unlock_at_level_9() -> void:
 	var m := _meta(0, 8)
-	assert_bool(not bool(m["purchased"].get("frog_species", false)))
+	assert_bool(bool(not bool(m["purchased"].get("frog_species", false)))).is_true()
 	m["level"] = 9
 	SC.on_settlement_ended(m, _settle_won())
-	assert_bool(bool(m["purchased"].get("frog_species", false)))
+	assert_bool(bool(bool(m["purchased"].get("frog_species", false)))).is_true()
 
 func test_buy_requires_level_and_dlc() -> void:
 	var m := _meta(100, 5)
 	# bat: level 11 + DLC
-	assert_bool(not SC.can_buy(m, "bat_species"))
+	assert_bool(bool(not SC.can_buy(m, "bat_species"))).is_true()
 	m["level"] = 11
-	assert_bool(not SC.can_buy(m, "bat_species"))  # нет DLC
+	assert_bool(bool(not SC.can_buy(m, "bat_species"))).is_true()  # нет DLC
 	m["dlc"]["nightwatchers"] = true
-	assert_bool(SC.can_buy(m, "bat_species"))
-	assert_bool(SC.buy(m, "bat_species"))
+	assert_bool(bool(SC.can_buy(m, "bat_species"))).is_true()
+	assert_bool(bool(SC.buy(m, "bat_species"))).is_true()
 	assert_that(int(m["tablets"])).is_equal(80)
-	assert_bool(not SC.can_buy(m, "bat_species"))  # уже куплено
+	assert_bool(bool(not SC.can_buy(m, "bat_species"))).is_true()  # уже куплено
 
 func test_buy_insufficient_tablets() -> void:
 	var m := _meta(3, 1)
-	assert_bool(not SC.can_buy(m, "vanguard_spire"))  # стоит 5
-	assert_bool(not SC.buy(m, "vanguard_spire"))
+	assert_bool(bool(not SC.can_buy(m, "vanguard_spire"))).is_true()  # стоит 5
+	assert_bool(bool(not SC.buy(m, "vanguard_spire"))).is_true()
 	assert_that(int(m["tablets"])).is_equal(3)
 
 func test_meta_for_buildings_vanguard() -> void:
@@ -72,7 +72,7 @@ func test_meta_save_load_roundtrip() -> void:
 	var loaded: Dictionary = SC.load()
 	assert_that(int(loaded["tablets"])).is_equal(42)
 	assert_that(int(loaded["level"])).is_equal(7)
-	assert_bool(bool(loaded["purchased"].get("vanguard_spire", false)))
+	assert_bool(bool(bool(loaded["purchased"].get("vanguard_spire", false)))).is_true()
 	# очистка после теста
 	DirAccess.remove_absolute(SC.SAVE_PATH)
 

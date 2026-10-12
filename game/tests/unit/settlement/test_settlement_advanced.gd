@@ -8,7 +8,7 @@ const Num = preload("res://scripts/constants/GameNumbersSettlement.gd")
 
 func test_prestige_table_all_levels() -> void:
 	for lvl in [1, 2, 5, 6, 7, 8, 9, 10]:
-		assert_bool(Adv.prestige_modifiers(lvl).size() > 0).override_failure_message("prestige %d пуст" % lvl)
+		assert_bool(bool(Adv.prestige_modifiers(lvl).size() > 0)).override_failure_message("prestige %d пуст" % lvl).is_true()
 	assert_that(Adv.prestige_modifiers(3).size()).is_equal(0)
 
 func test_prestige1_reputation_goal() -> void:
@@ -28,7 +28,7 @@ func test_house_upgrade_choices() -> void:
 
 func test_unified_bonus_smaller_than_service() -> void:
 	const Resolve = preload("res://scripts/settlement/SettlementResolve.gd")
-	assert_bool(Adv.UNIFIED_SERVICE_BONUS < Resolve.BONUS_SERVICE)
+	assert_bool(bool(Adv.UNIFIED_SERVICE_BONUS < Resolve.BONUS_SERVICE)).is_true()
 
 func test_trade_post_sells_for_amber() -> void:
 	var s: Variant = Settlement.new()
@@ -59,6 +59,6 @@ func test_rainpunk_bonus() -> void:
 
 func test_small_warehouse_flag() -> void:
 	var s: Variant = Settlement.new()
-	assert_bool(not Adv.has_small_warehouse(s, Vector2i(2, 2)))
+	assert_bool(bool(not Adv.has_small_warehouse(s, Vector2i(2, 2)))).is_true()
 	s.add_building("small_warehouse", Vector2i(2, 2))
-	assert_bool(Adv.has_small_warehouse(s, Vector2i(2, 2)))
+	assert_bool(bool(Adv.has_small_warehouse(s, Vector2i(2, 2)))).is_true()

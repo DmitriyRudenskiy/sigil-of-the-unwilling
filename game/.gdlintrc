@@ -1,0 +1,18 @@
+# .gdlintrc — минимальный набор под gdparse-зелёное дерево (раунд 12 §3).
+# Шум дефолта: 2444 → остаток 738 (см. docs/mvp/GDLINT-PROPOSAL.md).
+# До утверждения владельцем — report-only (не гейтит).
+disable:
+  - class-definitions-order
+  - load-constant-name
+  - function-argument-name
+  - class-variable-name
+  - function-variable-name
+  - max-public-methods
+  - max-returns
+  - function-arguments-number
+  - max-file-lines
+  - constant-name
+  - unused-argument
+  - no-elif-return
+  - no-else-return
+max-line-length: 120
