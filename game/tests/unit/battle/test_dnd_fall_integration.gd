@@ -33,7 +33,7 @@ func test_push_off_ledge_causes_fall() -> void:
 	assert_bool(r.damage >= 1 and r.damage <= 6).is_true()
 	# prone ⇔ провал save (DC 15, DEX mod 0)
 	assert_bool(r.prone == cond.has(DNDConditionManager.Condition.PRONE)).is_true()
-	assert_bool(r.prone == not DNDSavingThrow.succeeded(r.save)).is_true()
+	assert_bool(r.prone != DNDSavingThrow.succeeded(r.save)).is_true()
 
 
 func test_push_to_same_level_is_safe() -> void:
