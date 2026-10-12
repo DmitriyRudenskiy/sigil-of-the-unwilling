@@ -26,7 +26,7 @@ func test_species_table_seven() -> void:
 
 func test_caravan_three_species() -> void:
 	var c: Variant = Settlement.form_caravan({"human": 2, "lizard": 1, "fox": 1})
-	assert_bool(c != null).override_failure_message("караван 3 видов не сформирован")
+	assert_bool(bool(c != null)).override_failure_message("караван 3 видов не сформирован").is_true()
 	assert_that(c.species_in_caravan().size()).is_equal(3)
 	assert_that(c.state["settlers"].size()).is_equal(4)
 	# стартовые здания
@@ -38,13 +38,13 @@ func test_caravan_four_species_rejected() -> void:
 	assert_bool(bool(c == null)).is_true()
 
 func test_frog_dlc_gate() -> void:
-	assert_bool(not Species.is_available("frog")).override_failure_message("frog без DLC доступен")
-	assert_bool(Species.is_available("frog", {"keepers_of_the_stone": true}))
-	assert_bool(Species.is_available("human"))
+	assert_bool(bool(not Species.is_available("frog"))).override_failure_message("frog без DLC доступен").is_true()
+	assert_bool(bool(Species.is_available("frog", {"keepers_of_the_stone": true}))).is_true()
+	assert_bool(bool(Species.is_available("human"))).is_true()
 	var c: Variant = Settlement.form_caravan({"frog": 1})
 	assert_bool(bool(c == null)).is_true()
 	var c2: Variant = Settlement.form_caravan({"frog": 1}, {"keepers_of_the_stone": true})
-	assert_bool(c2 != null)
+	assert_bool(bool(c2 != null)).is_true()
 
 func test_hunger_lizard_survives_longer() -> void:
 	# lizard (tolerance 12) не теряет Resolve 12 ходов без еды;
@@ -57,17 +57,24 @@ func test_hunger_lizard_survives_longer() -> void:
 		Resolve.on_day_passed(l, _rng(1))
 	for i in 6:
 		Resolve.on_day_passed(h, _rng(1))
+	# контроль: сытая harpy — те же 6 ходов, но с едой (T-123: вердикт — баг
+	# теста: прежнее сравнение с константой игнорировало бонус перерыва +1/ход)
+	var h2 := Settlement.new()
+	var hfs := h2.add_settler("harpy")
+	for i in 6:
+		h2.add_resource("food", 1.0)
+		Resolve.on_day_passed(h2, _rng(1))
 	# lizard (tolerance 12): 12 ходов без еды — без урона от голода
-	assert_bool(float(ls["resolve"]) >= 5.0).override_failure_message("lizard пострадал от голода раньше tolerance")
-	# harpy (tolerance 4): с 5-го хода -1/ход
-	assert_bool(float(hs["resolve"]) < 5.0 + 2.0).override_failure_message("harpy не пострадал от голода")
+	assert_bool(bool(float(ls["resolve"]) >= 5.0)).override_failure_message("lizard пострадал от голода раньше tolerance").is_true()
+	# harpy (tolerance 4): с 5-го хода -1/ход — голодная отстаёт от сытой
+	assert_bool(bool(float(hs["resolve"]) < float(hfs["resolve"]))).override_failure_message("harpy не пострадал от голода").is_true()
 
 func test_break_interval() -> void:
 	var s := Settlement.new()
 	var st := s.add_settler("lizard")  # break_interval 1: перерыв каждый ход
 	var r0: float = float(st["resolve"])
 	Resolve.on_day_passed(s, _rng(3))
-	assert_bool(float(st["resolve"]) > r0).override_failure_message("перерыв не даёт Resolve")
+	assert_bool(bool(float(st["resolve"]) > r0)).override_failure_message("перерыв не даёт Resolve").is_true()
 
 func test_firekeeper_lizard_boosts_all() -> void:
 	var s := Settlement.new()
@@ -98,4 +105,4 @@ func test_frog_refuses_shelter() -> void:
 	Resolve.on_day_passed(s, _rng(7))
 	# frog не получил бонус жилья (но мог потерять от голода)
 	var expected_max: float = before + 1.0  # только перерыв максимум
-	assert_bool(float(frog["resolve"]) <= expected_max)
+	assert_bool(bool(float(frog["resolve"]) <= expected_max)).is_true()
