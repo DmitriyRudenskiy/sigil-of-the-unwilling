@@ -30,6 +30,11 @@ mcp_line=$(grep -E '[0-9]+ (passed|failed)[^)]*in [0-9.]+s' /tmp/report_run_test
 echo "${mcp_line:-PYTEST: summary нет (SKIPPED — причина в логе run_tests.sh)}"
 grep 'PYTEST LEDGER' /tmp/report_run_tests.log | tail -1 || true
 echo "Леджер двухстрочный: GdUnit4 (TOTAL выше) + MCP (строка выше)"
+# CI-2-поллинг ОТКЛЮЧЁН директивой владельца (2026-10-13): агент не ждёт CI,
+# не спит и не принимает решений о merge по статусам ранов. Включить обратно:
+# ENABLE_CI_WAIT=true bash game/report.sh
+ENABLE_CI_WAIT="${ENABLE_CI_WAIT:-false}"
+if [ "$ENABLE_CI_WAIT" = "true" ]; then
 echo "## CI-2 (GitHub Actions; api.github.com без токена — раунд 6 §3.3)"
 SLUG=$(git remote get-url origin 2>/dev/null | sed -E 's#.*github\.com[:/]##; s#\.git$##')
 CI2_HTTP=$(curl -s -o /tmp/ci2_api.json -w '%{http_code}' --max-time 20 "https://api.github.com/repos/$SLUG/actions/runs?per_page=6" 2>/dev/null || echo 000)
@@ -64,6 +69,9 @@ else
 	echo "CI-2: api.github.com HTTP $CI2_HTTP — репозиторий приватен или сеть недоступна. ВЛАДЕЛЬЦУ: статус только через залогиненный gh/токен (вне реестра)"
 fi
 echo "exit CI-2-статус-блока = 0 (блок информационный, не гейтит)"
+else
+echo "CI-2: пропущен (ENABLE_CI_WAIT=false — директива 2026-10-13: агент не опрашивает CI и не ждёт ранов)"
+fi
 echo "## DOCS-LINKS (check_docs_links.py)"
 python3 scripts/check_docs_links.py
 echo "exit check_docs_links = $?"
