@@ -17,7 +17,10 @@ except ImportError:  #新版 mcp SDK: McpError
 
 MCP_INTERACTION_PORT = 9090
 DEFAULT_TIMEOUT = 120.0
-READY_TIMEOUT = 900.0
+# CI-4 (2026-10-13): readiness != время теста. Здоровый старт Godot ~10 c (замер:
+# 4 теста за 9.7 c); зависший старт при 900 c съедал весь бюджет (setup-таймаут
+# 900 c, инцидент раунда 9) и 3 ретрая CI-2. Потолок готовности — 180 c.
+READY_TIMEOUT = 180.0
 PORT_FREE_TIMEOUT = 60.0
 
 class MCPError(RuntimeError):
