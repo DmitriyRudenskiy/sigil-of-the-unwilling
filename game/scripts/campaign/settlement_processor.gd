@@ -53,7 +53,9 @@ var sm: Dictionary = {}
 ## F-3 (T-116): миграционная формула — Репутация; MVP — no-op (хук для T-116).
 ## Ростер жителей (источник истины) — population_system (composition root);
 ## скаляр settlement.population — зеркало, синхронизируется после settlement-хука.
+## T-124: reputation — вход миграции (производная EthicsSystem, не храним — T-110).
 var migration_hook: Callable
+var reputation: int = 0
 var _event_log: Array[String] = []
 
 
@@ -71,7 +73,7 @@ func process_settlement() -> Dictionary:
 		_log("settlement: population %d → %d (births %d, cap %d)" % [prev_pop, population, births, cap], report)
 	# Миграция (F-3: формула — Репутация, T-116): MVP — no-op хук.
 	if migration_hook.is_valid():
-		migration_hook.call({"reputation": 0, "context": "settlement", "population": population})
+		migration_hook.call({"reputation": reputation, "context": "settlement", "population": population})
 	report["population"] = population
 	report["population_cap"] = cap
 	return report

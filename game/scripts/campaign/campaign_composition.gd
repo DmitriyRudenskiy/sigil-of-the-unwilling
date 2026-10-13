@@ -11,6 +11,8 @@ extends RefCounted
 const CAMPAIGN_JSON := "res://data/config/balance/campaign.json"
 const PRESTIGE_JSON := "res://data/config/balance/prestige.json"
 const DISTRICTS_JSON := "res://data/config/balance/districts.json"
+const ETHICS_JSON := "res://data/config/balance/ethics.json"
+const SIGNS_JSON := "res://data/signs.json"
 
 var campaign: TurnDriver
 var settlement: SettlementProcessor
@@ -20,6 +22,10 @@ var population_system: PopulationSystem
 var districts: DistrictSystem
 var district_config: Dictionary = {}
 var district_jobs_by_id: Dictionary = {}
+## T-124 Ф4-MVP «этический минимум»: журнал, сверка (ходы 10/20), Репутация.
+var ethics: EthicsSystem
+var ethics_config: Dictionary = {}
+var sign_vectors: Dictionary = {}
 ## Престиж = ledger (K-M16): записи {turn, source_type, id, amount};
 ## сальдо — производная, в сейве не хранится (T-110).
 var prestige_ledger: Array = []
@@ -78,17 +84,30 @@ func _build(campaign_seed: int) -> void:
 	district_config = _json(DISTRICTS_JSON)
 	district_jobs_by_id = _district_jobs()
 	districts = DistrictSystem.new(district_config, district_jobs_by_id)
+	# T-124: этический слой — журнал/сверка/Репутация (числа — ethics.json, K-M15).
+	ethics_config = _json(ETHICS_JSON)
+	sign_vectors = EthicsSystem.load_sign_vectors(_json(SIGNS_JSON))
+	ethics = EthicsSystem.new_for_sign(sign_id, ethics_config)
 	# T-116: реестр жителей — источник истины населения (R2: старт 20).
 	population_system = PopulationSystem.new()
 	population_system.seed_population(settlement.population)
 	campaign.settlement_hook = func() -> Dictionary:
 		# T-122 (Q-M31): settlement-фаза — население/события/настроение (позиция 1);
 		# production-расчёт — вынесен в production-фазу (позиция 6, post-threats).
+		# T-124: сверка на ходах 10/20 (в начале settlement-фазы — покрывает события
+		# от последней сверки; бои текущего хода уходят в следующий интервал).
+		# F-3/T-124: миграция — единственный вход Репутация (Э1-3: Престиж — никогда).
+		var ethics_rep: Dictionary = {}
+		if ethics.needs_reconcile(campaign.current_turn):
+			ethics_rep = ethics.reconcile(campaign.current_turn, sign_vectors)
+		settlement.reputation = ethics.reputation
 		var rep_report: Dictionary = settlement.process_settlement()
+		if not ethics_rep.is_empty():
+			rep_report["ethics_reconcile"] = ethics_rep
 		# Ростерь — источник истины: возраста/смерти/рождения/миграция (F-3;
-		# Репутация MVP — 0, источник-производная Резонанса — слой за тикетом).
+		# T-124: Репутация — источник миграции (была константа 0)).
 		var pop_report: Dictionary = population_system.process_turn(
-			WorldSeasons.DAYS_PER_SEASON, 0.0,
+			WorldSeasons.DAYS_PER_SEASON, float(ethics.reputation),
 			int(rep_report.get("population_cap", -1)))
 		settlement.population = population_system.size()
 		# T-030: районный проход (рабочие/вакансии, нужды, настроение, дезертирство).
@@ -160,7 +179,20 @@ func _request_battle(context: Dictionary) -> void:
 		final_raid_repelled = str(last_battle_report.get("outcome", "")) == "win"
 		if final_raid_repelled:
 			districts.apply_event_to_all("raid_repelled")  # +5/район (02g §5)
+	# T-124: бои MVP — оборона поселения; победа → Резонанс, победа с Долгом
+	# судьбы (trace.debt > 0 у героя) → метка «свобода/риск» (ось Свобода).
+	if str(last_battle_report.get("outcome", "")) == "win":
+		ethics.record_defense_win(campaign.current_turn)
+		if _report_has_fate_debt(last_battle_report, str(hero.get("id", ""))):
+			ethics.record_fate_debt_win(campaign.current_turn)
 	_record_battle_prestige(context, last_battle_report, parity)
+
+
+static func _report_has_fate_debt(report: Dictionary, hero_id: String) -> bool:
+	for t in report.get("trace", []):
+		if int(t.get("debt", 0)) > 0 and str(t.get("actor", "")) == hero_id:
+			return true
+	return false
 
 
 ## Хук населения (§2.2): потери боя списывают конкретных жителей по
@@ -169,6 +201,8 @@ func _request_battle(context: Dictionary) -> void:
 func _on_battle_losses(losses: Array, _report: Dictionary) -> void:
 	if losses.is_empty():
 		return
+	# T-124: потери защитника → метка Диссонанса (журнал этики, отдельная секция).
+	ethics.record_losses(campaign.current_turn)
 	population_system.apply_battle_losses(losses)
 	settlement.population = population_system.size()
 
@@ -211,6 +245,9 @@ func build_save_state() -> Dictionary:
 	campaign_section["final_battle_seen"] = final_battle_seen
 	campaign_section["final_raid_repelled"] = final_raid_repelled
 	campaign_section["hero_name"] = hero_name
+	# T-124: журнал/аккумуляторы/Репутация — состояние (события не пересчитываются
+	# при загрузке, I1); секция словарная — schema_version не тронут (T-110).
+	campaign_section["ethics"] = ethics.to_dict()
 	var state := {
 		"campaign": campaign_section,
 		"resources": settlement.stocks.duplicate(),
@@ -277,6 +314,13 @@ func load_save_state(state: Dictionary) -> void:
 	for e in prestige_ledger:
 		if str(e.get("id", "")) == "boss_final":
 			_boss_prestige_given = true
+	# T-124: этический слой — нет секции (старый сейв) → дефолты (Репутация 0).
+	ethics_config = _json(ETHICS_JSON)
+	sign_vectors = EthicsSystem.load_sign_vectors(_json(SIGNS_JSON))
+	ethics = EthicsSystem.from_dict(
+		(state.get("campaign", {}) as Dictionary).get("ethics", {}), ethics_config)
+	ethics.sign_id = sign_id
+	settlement.reputation = ethics.reputation
 
 
 ## Победная оценка MVP-среза (campaign.json scenario.victory): якорь «ход 21 =
@@ -309,6 +353,13 @@ func _district_jobs() -> Dictionary:
 	for k in (district_config.get("jobs_fallback", {}) as Dictionary).keys():
 		jobs[str(k)] = int(district_config["jobs_fallback"][k])
 	return jobs
+
+
+## T-002/T-124: выбор Знака — одна точка входа (знак несёт и этический референс).
+func set_sign(id: String) -> void:
+	sign_id = id
+	if ethics != null:
+		ethics.sign_id = id
 
 
 func _has_barracks() -> bool:
