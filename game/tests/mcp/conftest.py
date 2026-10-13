@@ -33,6 +33,49 @@ SERVER_ENV = {"GODOT_PATH": GODOT_BIN}
 if os.environ.get("DISPLAY"):
     SERVER_ENV["DISPLAY"] = os.environ["DISPLAY"]
 
+# CI-4: карантин флейков — файл quarantine.txt, по записи на тест:
+#   <nodeid подстрока>	<ГГГГ-ММ-ДД>	<причина>
+# Запись с истёкшим сроком НЕ молчит: тест возвращается в свит, а просроченная
+# строка валит прогон (карантин без ревизии = невидимый долг, D-135).
+QUARANTINE_FILE = Path(__file__).resolve().parent / "quarantine.txt"
+
+
+def _quarantine_entries() -> list[tuple[str, str, str]]:
+    if not QUARANTINE_FILE.exists():
+        return []
+    rows = []
+    for line in QUARANTINE_FILE.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        parts = line.split("\t")
+        if len(parts) == 3:
+            rows.append((parts[0], parts[1], parts[2]))
+        else:
+            raise ValueError(f"quarantine.txt: строка не «nodeid\tсрок\tпричина»: {line!r}")
+    return rows
+
+
+def _quarantine_expired(today: str) -> list[str]:
+    return [f"{n} (срок {d}: {r})" for n, d, r in _quarantine_entries() if d < today]
+
+
+def pytest_collection_modifyitems(config, items):
+    today = time.strftime("%Y-%m-%d")
+    expired = _quarantine_expired(today)
+    if expired:
+        raise pytest.UsageError(
+            "quarantine.txt просрочен (пересобрать/вернуть в свит, молчать нельзя):\n  "
+            + "\n  ".join(expired)
+        )
+    active = [(n, d, r) for n, d, r in _quarantine_entries() if d >= today]
+    for item in items:
+        for needle, until, reason in active:
+            if needle in item.nodeid:
+                item.add_marker(pytest.mark.skip(reason=f"CI-4 карантин (срок до {until}): {reason}"))
+                break
+
+
 _PRISTINE_PROJECT_GODOT = PROJECT_GODOT.read_text()
 
 def _restore_project_godot_if_dirty() -> None:
