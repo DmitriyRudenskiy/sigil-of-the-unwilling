@@ -1,9 +1,10 @@
 extends BaseTest
 
-const SHEET_PATH := "res://assets/tiles/world_tiles.jpeg"
+# Путь берём из TileAtlas — единственный источник (константа теста дублировала
+# путь и молча протухла при миграции jpeg→webp, docs/13 §8.4).
 
 func test_tileset_integrity() -> void:
-	var tex := load(SHEET_PATH)
+	var tex := load(TileAtlas.SHEET_PATH)
 	assert_bool(tex is Texture2D).is_true()
 
 	var ts := TileAtlas.build_hex_tileset()

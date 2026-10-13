@@ -43,12 +43,12 @@ func _load_background() -> void:
         _background.texture = _placeholder()
 
 func _find_bg() -> Texture2D:
-    # Пути только живые (docs/12-asset-audit.md, Missing): мёртвые ветки
-    # raw/throne|menu_bg и backgrounds/throne|menu.png убраны; jpeg — живой
-    # полноэкранный вариант 1920×1080 того же фона.
+    # Пути только живые (docs/12-asset-audit.md, Missing): webp — канон фона
+    # (docs/13 §8.4, 1920×1080 q85 из jpeg-канона); png — до приёмки webp;
+    # jpeg остаётся source-of-truth генерации, из цепочки загрузки выведен.
     var candidates := [
+        "res://assets/ui/main_menu_bg.webp",
         "res://assets/ui/main_menu_bg.png",
-        "res://assets/ui/main_menu_bg.jpeg",
         "res://assets/ui/throne.png",
     ]
     for path in candidates:
