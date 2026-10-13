@@ -8,6 +8,10 @@
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/progress_bars/bar_bg.png" id="6_bar_bg"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/progress_bars/fill_health.png" id="7_fill_health"]
 
+[ext_resource type="FontFile" path="res://assets/fonts/PT_Serif-Regular.ttf" id="8_serif"]
+[ext_resource type="FontFile" path="res://assets/fonts/PT_Serif-Bold.ttf" id="9_serif_bold"]
+[ext_resource type="FontFile" path="res://assets/fonts/PT_Mono-Regular.ttf" id="10_mono"]
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_window"]
 corner_radius_top_left = 4
 corner_radius_top_right = 4
@@ -219,6 +223,86 @@ bg_color = Color(0.541176, 0.0705882, 0.0627451, 1)
 shadow_size = 8
 shadow_color = Color(0.101961, 0.054902, 0.0156863, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ctl_normal"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_left = 2
+corner_radius_bottom_right = 2
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.5412, 0.4157, 0.2275, 1)
+bg_color = Color(0.2275, 0.1412, 0.0824, 1)
+draw_center = true
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ctl_hover"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_left = 2
+corner_radius_bottom_right = 2
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6196, 0.4667, 0.2196, 1)
+bg_color = Color(0.345, 0.229, 0.125, 1)
+draw_center = true
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ctl_pressed"]
+content_margin_left = 8.0
+content_margin_top = 9.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_left = 2
+corner_radius_bottom_right = 2
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.5412, 0.4157, 0.2275, 1)
+bg_color = Color(0.11, 0.073, 0.04, 1)
+draw_center = true
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ctl_disabled"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_left = 2
+corner_radius_bottom_right = 2
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.271, 0.212, 0.126, 1)
+bg_color = Color(0.169, 0.13, 0.098, 1)
+draw_center = true
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ctl_focus"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_left = 2
+corner_radius_bottom_right = 2
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.7882, 0.6353, 0.1529, 1)
+bg_color = Color(0, 0, 0, 0)
+draw_center = false
 [resource]
 Panel/styles/panel = SubResource("StyleBoxTexture_panel")
 Panel/styles/window = SubResource("StyleBoxFlat_window")
@@ -250,3 +334,57 @@ constants/slot_margin = 6
 constants/button_gap = 8
 constants/column_gap = 10
 constants/row_gap = 6
+
+LabelSecondary/base_type = "Label"
+LabelSecondary/fonts/font = ExtResource("8_serif")
+LabelSecondary/font_sizes/font_size = 16
+LabelSecondary/colors/font_color = Color(0.851, 0.7686, 0.5608, 1)
+LabelStrong/base_type = "Label"
+LabelStrong/fonts/font = ExtResource("8_serif")
+LabelStrong/font_sizes/font_size = 24
+LabelStrong/colors/font_color = Color(0.9098, 0.8353, 0.6588, 1)
+LabelHeading/base_type = "Label"
+LabelHeading/fonts/font = ExtResource("9_serif_bold")
+LabelHeading/font_sizes/font_size = 32
+LabelHeading/colors/font_color = Color(0.9608, 0.9373, 0.8784, 1)
+LabelTitle/base_type = "Label"
+LabelTitle/fonts/font = ExtResource("9_serif_bold")
+LabelTitle/font_sizes/font_size = 48
+LabelTitle/colors/font_color = Color(0.9608, 0.9373, 0.8784, 1)
+LabelSuccess/base_type = "Label"
+LabelSuccess/fonts/font = ExtResource("8_serif")
+LabelSuccess/font_sizes/font_size = 20
+LabelSuccess/colors/font_color = Color(0.4784, 0.6588, 0.3529, 1)
+LabelError/base_type = "Label"
+LabelError/fonts/font = ExtResource("8_serif")
+LabelError/font_sizes/font_size = 20
+LabelError/colors/font_color = Color(0.8784, 0.3529, 0.2902, 1)
+LabelInfo/base_type = "Label"
+LabelInfo/fonts/font = ExtResource("8_serif")
+LabelInfo/font_sizes/font_size = 20
+LabelInfo/colors/font_color = Color(0.4784, 0.6902, 0.8157, 1)
+LabelNumber/base_type = "Label"
+LabelNumber/fonts/font = ExtResource("10_mono")
+LabelNumber/font_sizes/font_size = 20
+LabelNumber/colors/font_color = Color(0.9098, 0.8353, 0.6588, 1)
+LabelNumberLg/base_type = "Label"
+LabelNumberLg/fonts/font = ExtResource("10_mono")
+LabelNumberLg/font_sizes/font_size = 24
+LabelNumberLg/colors/font_color = Color(0.9098, 0.8353, 0.6588, 1)
+LabelBody/base_type = "Label"
+LabelBody/fonts/font = ExtResource("8_serif")
+LabelBody/font_sizes/font_size = 20
+LabelBody/colors/font_color = Color(0.9098, 0.8353, 0.6588, 1)
+BibleButton/base_type = "Button"
+BibleButton/fonts/font = ExtResource("8_serif")
+BibleButton/font_sizes/font_size = 20
+BibleButton/colors/font_color = Color(0.9098, 0.8353, 0.6588, 1)
+BibleButton/colors/font_hover_color = Color(0.9608, 0.9373, 0.8784, 1)
+BibleButton/colors/font_pressed_color = Color(0.9098, 0.8353, 0.6588, 1)
+BibleButton/colors/font_disabled_color = Color(0.851, 0.7686, 0.5608, 0.6)
+BibleButton/colors/font_focus_color = Color(0.9608, 0.9373, 0.8784, 1)
+BibleButton/styles/normal = SubResource("StyleBoxFlat_ctl_normal")
+BibleButton/styles/hover = SubResource("StyleBoxFlat_ctl_hover")
+BibleButton/styles/pressed = SubResource("StyleBoxFlat_ctl_pressed")
+BibleButton/styles/disabled = SubResource("StyleBoxFlat_ctl_disabled")
+BibleButton/styles/focus = SubResource("StyleBoxFlat_ctl_focus")
