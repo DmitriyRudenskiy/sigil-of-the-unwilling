@@ -44,16 +44,29 @@ decoupling, adf523c0) — autoload в project.godot указывает на не
   индекс `PYTEST_XDIST_WORKER` (gwN → 9090+N) → 9090;
   `SERVER_ENV["MCP_PORT"] = str(_worker_port())` (mcp-SDK не
   наследует shell-env — env передаётся явно, stdio.py:129)
-- [ ] 2.2 `run_tests.sh`: `MCP_WORKERS` (дефолт 1); при >1:
+- [x] 2.2 `run_tests.sh`: `MCP_WORKERS` (дефолт 1); при >1:
   `-n $MCP_WORKERS`; при отсутствии pytest-xdist в venv — явная
-  строка (уровень не молчит)
-- [ ] 2.3 venv CI (ci2.yml) + инструкция в AGENTS.md: +pytest-xdist
-  в состав MCP-venv
-- [ ] 2.4 Локально: `MCP_WORKERS=3 bash run_tests.sh` — 38 тестов
-  зелёные, порты 9090/9091/9092 в логах, леджер-равенство
-  (collected == executed) удерживается под xdist
-- [ ] 2.5 Локально: `bash run_tests.sh` без env — поведение как до
-  (1 воркер, 9090)
+  строка + фолбэк на 1 воркер (уровень не молчит, гейт не
+  ослабевает). **Леджер-парсинг под xdist:** нет строки «collected
+  N items» — хедер «N workers [M items]» (добавлен фолбэк-парсинг)
+- [x] 2.3 venv: локально `pip install pytest-xdist` (3.8.0);
+  состав venv + MCP_WORKERS-документация в AGENTS.md (2 строки);
+  CI-венв — фаза 3 (3.3)
+- [x] 2.4 Локально: `MCP_WORKERS=3 bash run_tests.sh` —
+  **35 passed / 1 skipped / 2 failed** (из 38): оба падения =
+  balance_probe — **пре-экзистинг (T-125):** на этой машине
+  красный и в serial, и на чистом main-база (db5588da, worktree:
+  180.18с world-bootstrap timeout); CI-2 baseline 38443410901
+  зелёный. D-166-класс: канон — CI-2. Порты 9090/9091/9092 в
+  логах, леджер-равенство работает (collected=38).
+  **Баг, найденный прогоном и исправленный:** preflight
+  `wait_port_free` в godot_mcp.py хардкодил 9090 → 22/24 ложных
+  «порт 9090 занят» на соседних воркерах (первый 3-worker прогон);
+  клиент теперь получает порт воркера (conftest → GodotMCPClient)
+- [x] 2.5 Локально: `bash run_tests.sh` без env — поведение как до
+  (1 воркер, 9090): проверено фаза 1 (1.4) + serial-прогоны проба
+  (T-125-диагностика); GdUnit-часть не затронута (MCP_WORKERS не
+  влияет)
 
 ## Фаза 3: Пересборка ci2.yml (4 job'а + кэши)
 

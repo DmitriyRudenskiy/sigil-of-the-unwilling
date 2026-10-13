@@ -75,10 +75,12 @@ async def wait_port_free(
 
 class GodotMCPClient:
 
-    def __init__(self, portal, session: ClientSession, project_path: str) -> None:
+    def __init__(self, portal, session: ClientSession, project_path: str,
+                 port: int = MCP_INTERACTION_PORT) -> None:
         self._portal = portal
         self._session = session
         self._project_path = project_path
+        self._port = port  # ci-speedup: порт воркера (gwN → 9090+N)
         self._running = False
 
     def execute_code(self, code: str, timeout: float = DEFAULT_TIMEOUT) -> Any:
@@ -113,7 +115,7 @@ class GodotMCPClient:
             await self._call("stop_project", {}, timeout)
         except MCPError as e:
             print(f"[mcp] stop_project: {e}", flush=True)
-        await wait_port_free()
+        await wait_port_free(port=self._port)
 
     async def _execute_code(self, code: str, timeout: float) -> Any:
         return await self._call("game_eval", {"code": code}, timeout)
@@ -122,8 +124,10 @@ class GodotMCPClient:
         await self._call("game_wait", {"frames": frames, "frameType": frame_type}, timeout)
 
     async def _run_scene(self, scene_path: str, timeout: float) -> None:
-        # setup-only: занятый порт = сироты из убитого прогона → немедленный fail (T-120)
-        await wait_port_free(immediate=True)
+        # setup-only: занятый СВОЙ порт = сироты из убитого прогона → немедленный
+        # fail (T-120). ci-speedup: проверяется порт воркера, не дефолт 9090
+        # (в параллельном режиме 9090 может легитимно держать соседний воркер).
+        await wait_port_free(port=self._port, immediate=True)
         await self._call(
             "run_project",
             {"projectPath": self._project_path, "scene": scene_path},

@@ -30,7 +30,7 @@
 | Корень игры | `game/` (project.godot лежит в `game/`) |
 | Godot-бинарь | `/Applications/Godot.app/Contents/MacOS/Godot` (4.7.2.stable) — **пути — по машине; эталон — CI-2-раннер** (не хардкодить macOS-путь как универсальный) |
 | Тесты | `game/run_tests.sh` (GdUnit4 headless + MCP e2e) |
-| MCP e2e venv | `/home/user/.venv/godot-mcp-tests` (pytest 9.1.1 + pytest-timeout + mcp + anyio) |
+| MCP e2e venv | `/home/user/.venv/godot-mcp-tests` (pytest 9.1.1 + pytest-timeout + pytest-xdist + mcp + anyio) |
 | MCP node_modules | `game/addons/godot-mcp/node_modules` (gitignored; `npm ci` из package-lock) |
 
 | OpenSpec | `openspec/changes/<name>/`, CLI: `/usr/bin/openspec` |
@@ -109,7 +109,10 @@ case-sensitive: `world.tscn`, `battle.tscn`, `main_menu.tscn`).
 ## MCP e2e (4-й уровень верификации)
 
 - Тесты: `game/tests/mcp/` (pytest, 39 тестов) — MCP-секция `game/run_tests.sh`.
-- venv: `/home/user/.venv/godot-mcp-tests` (pytest, pytest-timeout, mcp, anyio);
+- venv: `/home/user/.venv/godot-mcp-tests` (pytest, pytest-timeout, pytest-xdist, mcp, anyio);
+  **Параллельные MCP-воркеры (ci-speedup):** `MCP_WORKERS=N` (дефолт 1) →
+  pytest-xdist (`-n N`, dist=loadfile); порт воркера gwN = 9090+N (env
+  `MCP_PORT`, читает и Godot-сторона `tools/mcp/`). CI: 3 воркера.
   нет venv → venv-fallback: системный `python3` с `mcp`+`anyio` (override:
   `MCP_PYTEST_PY`; поддерживаемая конфигурация, владелец 2026-10-04);
   ни venv, ни fallback → явная `PYTEST: SKIPPED (причина)` (жёлтый — уровень молчит,

@@ -133,7 +133,9 @@ def mcp(_server_env: dict = None):
             async with stdio_client(_server_params(_server_env)) as (read, write):
                 async with ClientSession(read, write) as session:
                     await session.initialize()
-                    box["client"] = GodotMCPClient(portal, session, str(GAME_DIR))
+                    box["client"] = GodotMCPClient(
+                        portal, session, str(GAME_DIR), port=_worker_port()
+                    )
                     stop_evt = anyio.Event()
                     box["stop"] = stop_evt
                     ready.set()

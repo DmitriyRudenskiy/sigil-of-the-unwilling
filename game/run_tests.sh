@@ -160,14 +160,37 @@ export GODOT_PROJECT_PATH="${GODOT_PROJECT_PATH:-$PWD}"
 # (bash: присваивания без команды не экспортируются в команду) — GODOT_PATH/GODOT_BIN
 # не доходили до pytest; lifecycle-тесты skip'ались «Godot не найден», node-сервер
 # маскировал баг auto-detection. Комментарии — только ВЫШЕ блока присваиваний.
+# ci-speedup: параллельные MCP-воркеры (pytest-xdist, dist=loadfile).
+# MCP_WORKERS: дефолт 1 (локальный прогон — поведение не меняется); CI: 3
+# (4-ядерный раннер, 1 ядро — запас под флейки, D-166-класс). Порт воркера —
+# conftest _worker_port(): gwN → 9090+N (env MCP_PORT; Godot-сторона tools/mcp/
+# читает то же). Без xdist — явная строка + фолбэк на 1 воркер (уровень не
+# молчит, гейт не ослабевает).
+MCP_WORKERS="${MCP_WORKERS:-1}"
+PYTEST_WORKER_ARGS=()
+if [ "$MCP_WORKERS" -gt 1 ]; then
+	if "$PYTEST_PY" -c 'import xdist' 2>/dev/null; then
+		PYTEST_WORKER_ARGS=(-n "$MCP_WORKERS")
+		echo "MCP: параллельные воркеры = $MCP_WORKERS (xdist; порты 9090..$((9089 + MCP_WORKERS)))"
+	else
+		echo "MCP: запрошено MCP_WORKERS=$MCP_WORKERS, но pytest-xdist отсутствует в $PYTEST_PY — прогон с 1 воркером (pip install pytest-xdist)"
+		MCP_WORKERS=1
+	fi
+fi
 MCP_LOG="$(mktemp)"
 GODOT_PATH="$GODOT" \
 GODOT_BIN="$GODOT" \
-"$PYTEST_PY" -m pytest tests/mcp/ -v --timeout=900 --tb=short --durations=25 2>&1 | tee "$MCP_LOG"
+"$PYTEST_PY" -m pytest tests/mcp/ -v --timeout=900 --tb=short --durations=25 \
+	${PYTEST_WORKER_ARGS[@]+"${PYTEST_WORKER_ARGS[@]}"} 2>&1 | tee "$MCP_LOG"
 MCP_RC=${PIPESTATUS[0]}
 # Леджер-равенство (fixed-green-семья CI-4, раунд 6 §2): свит обязан отработать
 # всё собранное; прерванный прогон (таймаут сессии, -x в dev-режиме) — красный.
 COLLECTED=$(grep -oE 'collected [0-9]+ items' "$MCP_LOG" | head -1 | grep -oE '[0-9]+' || true)
+if [ -z "$COLLECTED" ]; then
+	# ci-speedup: под pytest-xdist нет строки «collected N items» — хедер
+	# «N workers [M items]» (master собирает и распределяет).
+	COLLECTED=$(grep -oE '[0-9]+ workers \[[0-9]+ items\]' "$MCP_LOG" | head -1 | grep -oE '\[[0-9]+' | grep -oE '[0-9]+' || true)
+fi
 SUMMARY=$(grep -E '=+ .*in [0-9.]+s' "$MCP_LOG" | tail -1)
 P=$(echo "$SUMMARY" | grep -oE '[0-9]+ passed' | grep -oE '[0-9]+' || true)
 S=$(echo "$SUMMARY" | grep -oE '[0-9]+ skipped' | grep -oE '[0-9]+' || true)
