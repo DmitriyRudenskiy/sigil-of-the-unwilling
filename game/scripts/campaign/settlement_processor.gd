@@ -109,8 +109,12 @@ func _process_day(day: int, season_mult: float, report: Dictionary) -> void:
 			var out: float = float(b.get("output_day", {}).get(r, 0.0))
 			if out <= 0.0:
 				continue
+			# T-030 (02g §3): вакансия останавливает здание; настроение района —
+			# множитель производства (<40 ×0.85 / ≥80 ×1.10, districts.json).
+			if int(b.get("jobs", 0)) > 0 and int(b.get("workers", 0)) < int(b.get("jobs", 0)):
+				continue
 			var eff: float = clampf(float(b.get("efficiency", 1.0)), EFFICIENCY_MIN, EFFICIENCY_MAX)
-			var contribution: float = out * eff * season_mult
+			var contribution: float = out * eff * season_mult * float(b.get("mood_mult", 1.0))
 			if _sm_state(r) == "DEFICIT":
 				contribution *= DEFICIT_PROD_MULT  # DEFICIT: производство 25% (12.2)
 			prod += contribution

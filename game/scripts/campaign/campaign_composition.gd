@@ -10,11 +10,16 @@ extends RefCounted
 
 const CAMPAIGN_JSON := "res://data/config/balance/campaign.json"
 const PRESTIGE_JSON := "res://data/config/balance/prestige.json"
+const DISTRICTS_JSON := "res://data/config/balance/districts.json"
 
 var campaign: TurnDriver
 var settlement: SettlementProcessor
 var threats: ThreatSystem
 var population_system: PopulationSystem
+## T-030: районный слой (7 групп, настроение, рабочие, нужды).
+var districts: DistrictSystem
+var district_config: Dictionary = {}
+var district_jobs_by_id: Dictionary = {}
 ## Престиж = ledger (K-M16): записи {turn, source_type, id, amount};
 ## сальдо — производная, в сейве не хранится (T-110).
 var prestige_ledger: Array = []
@@ -69,6 +74,10 @@ func _build(campaign_seed: int) -> void:
 			"output_day": {"iron": 0.25}, "efficiency": 1.0},
 	]
 	threats = ThreatSystem.new(campaign_seed)
+	# T-030: районный слой — конфиг districts.json (K-M15) + jobs из каталога зданий.
+	district_config = _json(DISTRICTS_JSON)
+	district_jobs_by_id = _district_jobs()
+	districts = DistrictSystem.new(district_config, district_jobs_by_id)
 	# T-116: реестр жителей — источник истины населения (R2: старт 20).
 	population_system = PopulationSystem.new()
 	population_system.seed_population(settlement.population)
@@ -82,6 +91,12 @@ func _build(campaign_seed: int) -> void:
 			WorldSeasons.DAYS_PER_SEASON, 0.0,
 			int(rep_report.get("population_cap", -1)))
 		settlement.population = population_system.size()
+		# T-030: районный проход (рабочие/вакансии, нужды, настроение, дезертирство).
+		# Дезертирство — счёт в отчёт (канал миграции F-3/T-116: MVP no-op хук,
+		# ростерь в MVP не трогает); настроение множит производство (×0.85/×1.10).
+		rep_report["districts"] = districts.process_turn(
+			settlement.buildings, settlement.population, settlement.party_size,
+			str((settlement.sm.get("food", {}) as Dictionary).get("state", "OK")))
 		rep_report["population"] = pop_report
 		return rep_report
 	campaign.threats_hook = func() -> Dictionary:
@@ -112,7 +127,7 @@ func advance_turn() -> void:
 func _threat_context() -> Dictionary:
 	return {
 		"stocks": settlement.stocks,  # ссылка: урон рейда — в стопки поселения
-		"has_barracks": false,  # MVP: казармы нет (T-030-слой)
+		"has_barracks": _has_barracks(),  # T-030: казарма из зданий поселения
 		"hero_in_city": true,  # фаза игрока решает (MVP: герой в городе)
 		"battle_handler": _request_battle,
 	}
@@ -143,6 +158,8 @@ func _request_battle(context: Dictionary) -> void:
 	if tier >= 3:  # финальный рейд (raids.json final_raid: tier 3, босс K-R3)
 		final_battle_seen = true
 		final_raid_repelled = str(last_battle_report.get("outcome", "")) == "win"
+		if final_raid_repelled:
+			districts.apply_event_to_all("raid_repelled")  # +5/район (02g §5)
 	_record_battle_prestige(context, last_battle_report, parity)
 
 
@@ -204,6 +221,8 @@ func build_save_state() -> Dictionary:
 			"buildings": settlement.buildings.duplicate(true),
 			"sm": settlement.sm.duplicate(true),
 			"party_size": settlement.party_size,
+			# T-030: настроение районов — состояние (не производная), в сейве.
+			"districts": districts.to_dict(),
 		},
 		"map": {"threats": threats.to_dict()},
 		"prestige": {"ledger": prestige_ledger.duplicate(true)},
@@ -248,6 +267,11 @@ func load_save_state(state: Dictionary) -> void:
 		"population": population_system.size(),
 	})
 	threats = ThreatSystem.from_dict(state.get("map", {}).get("threats", {}))
+	# T-030: районный слой — конфиг/каталог те же (сейв хранит только настроение).
+	district_config = _json(DISTRICTS_JSON)
+	district_jobs_by_id = _district_jobs()
+	districts = DistrictSystem.from_dict(
+		city.get("districts", {}), district_config, district_jobs_by_id)
 	prestige_ledger = (state.get("prestige", {}) as Dictionary).get("ledger", []).duplicate(true)
 	_boss_prestige_given = false
 	for e in prestige_ledger:
@@ -273,6 +297,25 @@ func victory_assessment() -> Dictionary:
 		"prestige_anchor_met": balance >= lo and balance < hi,
 		"victory": final_raid_repelled,
 	}
+
+
+## T-030: jobs здания → слоты рабочих. Источник — каталог campaign_building_catalog;
+## стартовые id (farm/sawmill/mine) вне каталога — jobs_fallback из districts.json.
+func _district_jobs() -> Dictionary:
+	var jobs := {}
+	for b in CampaignBuildingCatalog.load_catalog().get("buildings", []):
+		if int(b.get("jobs", 0)) > 0:
+			jobs[str(b.get("id", ""))] = int(b["jobs"])
+	for k in (district_config.get("jobs_fallback", {}) as Dictionary).keys():
+		jobs[str(k)] = int(district_config["jobs_fallback"][k])
+	return jobs
+
+
+func _has_barracks() -> bool:
+	for b in settlement.buildings:
+		if str(b.get("id", "")).contains("barracks"):
+			return true
+	return false
 
 
 func _json(path: String) -> Dictionary:

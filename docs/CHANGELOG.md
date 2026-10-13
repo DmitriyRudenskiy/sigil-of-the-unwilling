@@ -4,10 +4,22 @@ tags:
   - gdd
   - process
 status: reference
-date: 2026-10-12
+date: 2026-10-13
 ---
 
 # CHANGELOG — docs/
+
+## [2026-10-13] — T-030: районный слой города (7 групп, рабочие, настроение, нужды)
+
+- **DistrictSystem** (`scripts/campaign/district_system.gd`): 7 районов = 7 групп (привязка зданий
+  через `group` — остаток T-040 закрыт), авто-назначение рабочих, **вакансия останавливает здание**
+  (02g §3), настроение 0–100/старт 70/пороги <40 ×0.85 / ≥80 ×1.10 (дельты 02g §5), нужды MVP-вырезка
+  (Еда: кап 6 ≥ 1×работники), «три в одном» (`merge_three` по recipe каталога), дезертирство <40 —
+  счёт в отчёт (канал миграции T-116). Числа — `data/config/balance/districts.json` (K-M15).
+- Проводка: settlement-фаза composition, `mood_mult`/`workers` в production-цикл SettlementProcessor,
+  настроение в сейв (секция city, T-110), `has_barracks` из зданий. Адаптации петли — D-179.
+- Тесты: +7 (`tests/campaign/test_district_system.gd`), нетто 2413 → 2420, гейт local: GdUnit 0,
+  MCP 37/1skipped/0.
 
 Журнал структурных и содержательных изменений документов. Формат: дата — что — почему — коммит.
 
