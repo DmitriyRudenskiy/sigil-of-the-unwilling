@@ -44,11 +44,10 @@ func _load_background() -> void:
 
 func _find_bg() -> Texture2D:
     # Пути только живые (docs/12-asset-audit.md, Missing): webp — канон фона
-    # (docs/13 §8.4, 1920×1080 q85 из jpeg-канона); png — до приёмки webp;
-    # jpeg остаётся source-of-truth генерации, из цепочки загрузки выведен.
+    # (docs/13 §8.4, 1920×1080 q85); jpeg/png-предки удалены после приёмки
+    # webp (smoke-скрин меню, 2026-10-13); throne.png — последний fallback.
     var candidates := [
         "res://assets/ui/main_menu_bg.webp",
-        "res://assets/ui/main_menu_bg.png",
         "res://assets/ui/throne.png",
     ]
     for path in candidates:
