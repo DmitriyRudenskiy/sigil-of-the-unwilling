@@ -33,6 +33,27 @@ SERVER_ENV = {"GODOT_PATH": GODOT_BIN}
 if os.environ.get("DISPLAY"):
     SERVER_ENV["DISPLAY"] = os.environ["DISPLAY"]
 
+
+def _worker_port() -> int:
+    """ci-speedup: интеракционный порт MCP (дефолт 9090 — backward-compat).
+
+    Конвенция: MCP_PORT (домашняя Godot-сторона tools/mcp/
+    mcp_interaction_server.gd читает то же env; vendor node-сервер —
+    тоже, ci-speedup). Приоритет: явный MCP_PORT (ручная проверка/
+    одиночный воркер) → индекс pytest-xdist-воркера (gwN → 9090+N;
+    параллельные воркеры не должны конфликтовать на порту) → 9090.
+    """
+    explicit = os.environ.get("MCP_PORT")
+    if explicit and explicit.isdigit():
+        return int(explicit)
+    worker = os.environ.get("PYTEST_XDIST_WORKER", "")
+    if worker.startswith("gw") and worker[2:].isdigit():
+        return 9090 + int(worker[2:])
+    return 9090
+
+
+SERVER_ENV["MCP_PORT"] = str(_worker_port())
+
 # CI-4: карантин флейков — файл quarantine.txt, по записи на тест:
 #   <nodeid подстрока>	<ГГГГ-ММ-ДД>	<причина>
 # Запись с истёкшим сроком НЕ молчит: тест возвращается в свит, а просроченная
