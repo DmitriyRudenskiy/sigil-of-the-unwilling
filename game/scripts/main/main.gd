@@ -41,7 +41,7 @@ func _init_campaign() -> void:
 	# T-002 «Выбор знака»: Знак новой кампании (SignChoiceUI); "" — вне UI-пути
 	# (раннер D-157, тесты) — знак-механики в MVP нет, кампания работает без него.
 	if persistence.pending_sign_id != "":
-		composition.sign_id = persistence.pending_sign_id
+		composition.set_sign(persistence.pending_sign_id)  # T-124: знак = и этический референс
 		persistence.pending_sign_id = ""
 	# Continue: кампанийный MVP-слот → load_save_state (схема T-110).
 	if persistence.pending_campaign_slot >= 0:

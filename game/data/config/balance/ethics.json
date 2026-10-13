@@ -1,0 +1,15 @@
+{
+  "version": "1.0",
+  "source": "T-124 Ф4-MVP «этический минимум» (приказ раунда 14 §4); формула сверки — приказ раунда 15 §3 (w_r=1, w_d=2, якоря [−3,+3]/[+2,+6]); конвенция осей — TICKETS T-124 (− = Порядок/Аскеза/Открытость, + = Свобода/Роскошь/Изоляция); векторы знаков — signs.json (ратифицировано владельцем, Гармония 0/+1/−1)",
+  "axes": ["order_freedom", "ascetic_luxury", "openness_isolation"],
+  "reconcile_turns": [10, 20],
+  "weights": { "resonance": 1, "dissonance": 2 },
+  "delta_anchor": [-3, 3],
+  "reputation_anchor": [2, 6],
+  "reputation_anchor_note": "калибровочный якорь (не кламп): Репутация к ходу 20 при знаково-согласованной игре; сверка — перегон автопилота (T-041-семья)",
+  "events": {
+    "defense_win": { "resonance": 1 },
+    "defender_losses": { "dissonance": 1 },
+    "fate_debt_win": { "axis": "order_freedom", "amount": 1 }
+  }
+}

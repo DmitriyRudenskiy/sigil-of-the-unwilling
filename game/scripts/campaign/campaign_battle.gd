@@ -85,6 +85,7 @@ static func _state_margin(atk: Dictionary, def_: Dictionary) -> int:
 static func _strike(atk: Dictionary, def_: Dictionary) -> Dictionary:
 	var margin: int = int(atk["attack"]) - int(def_["ac"]) + _state_margin(atk, def_)
 	var reckoning := false
+	var debt_before: int = int(atk["fate_debt"])  # T-124: долг в trace (журнал этики)
 	var threshold: int = int(atk["proficiency"])  # порог = бонус мастерства (K-R1, Б.4)
 	if int(atk["fate_debt"]) >= threshold and int(atk["fate_debt"]) > 0:
 		reckoning = true  # Расплата: исход принудительно на ступень ниже
@@ -105,7 +106,8 @@ static func _strike(atk: Dictionary, def_: Dictionary) -> Dictionary:
 			damage = maxi(1, base / 2) if base > 0 else 0  # Частичный = ½
 		_:
 			damage = 0  # Провал / Критпровал (фамбл) — 0
-	return {"zone": zone, "damage": damage, "margin": margin, "reckoning": reckoning}
+	return {"zone": zone, "damage": damage, "margin": margin,
+		"reckoning": reckoning, "debt": debt_before}
 
 
 ## Ступень вниз по лестнице (Расплата): Триумф→Успех→Частичный→Провал; на
@@ -167,6 +169,7 @@ static func resolve(a: Dictionary, b: Dictionary,
 				"margin": int(hit["margin"]),
 				"damage": int(hit["damage"]),
 				"reckoning": bool(hit["reckoning"]),
+				"debt": int(hit["debt"]),  # T-124: Долг судьбы у атакующего (победа с долгом)
 			})
 			if int(def_["hp"]) <= 0:
 				var dead := _death_saves(def_)
