@@ -55,7 +55,7 @@ live/no-op/absent (docs/14 §3): no-op — скрыт (`_tc_count_row`, `_tc_atk
 GdUnit полный прогон ветки: exit=0 (см. сводку смены). Harness — только
 рендер-скрипт, логику не меняет.
 
-## Итог фикс-раунда UI-3b (2026-10-13, after-скриншоты /tmp/ux-shots/)
+## Итог фикс-раунда UI-3b (2026-10-13, after-скриншоты `docs/img/`)
 
 | Находка | Действие | Статус |
 | --- | --- | --- |
@@ -69,5 +69,9 @@ GdUnit полный прогон ветки: exit=0 (см. сводку смен
 | M3-2 HP 1.2M у рамки | карточка 360 px, HP-строка с отступом, перенос имени | ✅ |
 | M3-3 нет теста «Продолжить→карта» | `tests/functional/test_battle_result_to_map.gd` | ✅ |
 
-**AC docs/14 §6: 7/7 PASS** (кадры 01–09, harness `tools/ux_shots.gd`).
+**AC docs/14 §6: 7/7 PASS** (кадры 01–09 в `docs/img/`, harness `tools/ux_shots.gd`).
+
+Smoke меню после webp-конверсии (chore/drop-converted-jpegs): `docs/img/10_menu_smoke.png`
+— фон на webp, левый «шов» = контент изображения (симметричен правому краю),
+приём: png-fallback удалён.
 GdUnit: 2482/2484 (2 skipped), exit=0.
