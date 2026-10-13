@@ -85,7 +85,7 @@ func test_zone_f_result_overlay_single_exit() -> void:
 	ui.show_result(BattleState.Side.ATTACKER, 3, 0)
 	assert_bool(ui._end_overlay.visible).is_true()
 	assert_str(ui._end_title.text).is_equal("Победа")
-	assert_str(ui._end_info.text).is_equal("Остаток: 3 / 0")
+	assert_str(ui._end_numbers.text).is_equal("3 / 0")
 
 	ui._continue_btn.emit_signal("pressed")
 	assert_bool(accepted[0]).is_true() \

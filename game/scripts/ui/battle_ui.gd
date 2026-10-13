@@ -29,7 +29,7 @@ signal result_accepted
 @onready var _spellbook_btn: Button = $"bottom_bar/bar_box/right_box/spellbook_btn"
 @onready var _history_panel: PanelContainer = $history_panel
 @onready var _history_list: ItemList = $"history_panel/history_list"
-@onready var _init_box: HBoxContainer = $initiative_bar/init_scroll/init_box
+@onready var _init_box: HBoxContainer = $initiative_bar/init_col/init_box
 @onready var _target_card: PanelContainer = $target_card
 @onready var _tc_name: Label = $"target_card/tc_box/tc_name"
 @onready var _tc_count: Label = $"target_card/tc_box/tc_count_row/tc_count"
@@ -39,9 +39,10 @@ signal result_accepted
 @onready var _tc_atk_row: HBoxContainer = $"target_card/tc_box/tc_atk_row"
 @onready var _tc_atk: Label = $"target_card/tc_box/tc_atk_row/tc_atk"
 @onready var _tc_preview: Label = $"target_card/tc_box/tc_preview"
+@onready var _tc_abilities: Label = $"target_card/tc_box/tc_abilities"
 @onready var _end_overlay: PanelContainer = $end_overlay
 @onready var _end_title: Label = $"end_overlay/end_center/end_box/end_title"
-@onready var _end_info: Label = $"end_overlay/end_center/end_box/end_info"
+@onready var _end_numbers: Label = $"end_overlay/end_center/end_box/end_info_row/end_numbers"
 @onready var _continue_btn: Button = $"end_overlay/end_center/end_box/continue_btn"
 var _action_buttons: Array[Button] = []
 @onready var _settings_screen: SettingsScreen = $SettingsScreen
@@ -69,10 +70,54 @@ func _ready() -> void:
 	_continue_btn.pressed.connect(func() -> void: result_accepted.emit())
 
 func _unhandled_input(event: InputEvent) -> void:
-	# F: единственный выход — «Продолжить»; Enter/Space подтверждают его же
-	if _end_overlay.visible and event.is_action_pressed("ui_accept"):
-		_continue_btn.emit_signal("pressed")
+	# F: единственный выход — «Продолжить»; Enter/Space/F подтверждают его же
+	if _end_overlay.visible:
+		if event.is_action_pressed("ui_accept") or _key(event, KEY_F):
+			_continue_btn.emit_signal("pressed")
+			get_viewport().set_input_as_handled()
+		return
+	if not (event is InputEventKey) or not event.pressed or event.echo:
+		return
+	# §5: Esc — приоритет: открытая панель → закрыть, иначе настройки
+	if event.keycode == KEY_ESCAPE:
+		if _spellbook_panel.visible:
+			_spellbook_panel.visible = false
+		elif _history_panel.visible:
+			_history_panel.visible = false
+		elif _settings_screen.visible:
+			_settings_screen.visible = false
+		else:
+			_on_settings()
 		get_viewport().set_input_as_handled()
+		return
+	if _settings_screen.visible:
+		return
+	# §5: хоткеи — спека, не опция. Q (Авто) — absent: кнопки авто нет,
+	# AI-автобой вне скоупа (docs/14 §7) — тикет в TICKETS.md, не изобретаем.
+	match event.keycode:
+		KEY_A:
+			_on_attack_mode()
+		KEY_D:
+			_on_defend()
+		KEY_W:
+			_on_wait()
+		KEY_S:
+			_on_skip()
+		KEY_K:
+			_on_spellbook()
+		KEY_H:
+			_on_history_toggle()
+		KEY_UP:
+			_on_history_up()
+		KEY_DOWN:
+			_on_history_down()
+		_:
+			return
+	get_viewport().set_input_as_handled()
+
+
+static func _key(event: InputEvent, keycode: Key) -> bool:
+	return event is InputEventKey and event.pressed and not event.echo and event.keycode == keycode
 
 func _apply_theme() -> void:
 	if _theme == null:
@@ -131,6 +176,16 @@ func show_target_card(unit: BattleState.BattleUnit) -> void:
 	var atk: int = unit.dnd_profile.get_attack_bonus() if unit.dnd_profile != null else 0
 	_tc_atk_row.visible = unit.dnd_profile != null
 	_tc_atk.text = "+%d" % atk
+	# способности — строго по data-source: dnd-профиль (live) → шесть очков
+	# способностей; иконок 32 px нет (absent) → моно-строка, тикет на иконки.
+	var ab: DNDAbilityScores = unit.dnd_profile.abilities if unit.dnd_profile != null else null
+	_tc_abilities.visible = ab != null
+	if ab != null:
+		var A := DNDAbilityScores.Ability
+		_tc_abilities.text = "СИЛ %d · ЛОВ %d · ТЕЛ %d ·\nИНТ %d · МДР %d · ХАР %d" % [
+			ab.get_score(A.STR), ab.get_score(A.DEX), ab.get_score(A.CON),
+			ab.get_score(A.INT), ab.get_score(A.WIS), ab.get_score(A.CHA),
+		]
 	_target_card.visible = true
 
 func hide_target_card() -> void:
@@ -141,7 +196,8 @@ func update_active_unit(unit: BattleState.BattleUnit) -> void:
 	_refresh_initiative_highlight(unit)
 
 # A: очередь инициативы — live из BattleState.turn_queue; активный — PanelActive
-# (золотая рамка, docs/14 §4.A), мёртвый — PanelDead + LabelDead (десат формой).
+# (золотая рамка, docs/14 §4.A), мёртвый — PanelDead + десат + штриховка
+# (различимы формой, не тоном — M3-1).
 func update_initiative(
 	units: Array[BattleState.BattleUnit],
 	active_unit: BattleState.BattleUnit
@@ -156,12 +212,20 @@ func update_initiative(
 
 func _make_initiative_cell(unit: BattleState.BattleUnit) -> PanelContainer:
 	var cell := PanelContainer.new()
-	cell.theme_type_variation = "PanelDead" if not unit.is_alive() else "PanelCard"
+	var dead: bool = not unit.is_alive()
+	cell.theme_type_variation = "PanelDead" if dead else "PanelCard"
 	cell.name = "cell_%d" % unit.uid
+	if dead:
+		var hatch := TextureRect.new()
+		hatch.texture = _hatch_texture()
+		hatch.texture_repeat = 1  # TextureRect.RepeatMode.REPEAT_ENABLED (Godot 4.7)
+		hatch.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		hatch.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		cell.add_child(hatch)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 0)
 	var name_label := Label.new()
-	name_label.theme_type_variation = "LabelDead" if not unit.is_alive() else "LabelCell"
+	name_label.theme_type_variation = "LabelDead" if dead else "LabelCell"
 	name_label.text = unit.get_display_name()
 	var hp_label := Label.new()
 	hp_label.theme_type_variation = "LabelNumber"
@@ -172,6 +236,22 @@ func _make_initiative_cell(unit: BattleState.BattleUnit) -> PanelContainer:
 	cell.add_child(box)
 	return cell
 
+static var _hatch_tex: ImageTexture = null
+
+
+## М3-1: диагональная штриховка мёртвой ячейки — различимость формой.
+static func _hatch_texture() -> ImageTexture:
+	if _hatch_tex == null:
+		var img := Image.create(8, 8, false, Image.FORMAT_RGBA8)
+		img.fill(Color(0, 0, 0, 0))
+		var c := Color(0.02, 0.01, 0.01, 0.55)
+		for i in 8:
+			img.set_pixel(i, i, c)
+			img.set_pixel((i + 1) % 8, i, c)
+		_hatch_tex = ImageTexture.create_from_image(img)
+	return _hatch_tex
+
+
 func _refresh_initiative_highlight(active_unit: BattleState.BattleUnit) -> void:
 	for child in _init_box.get_children():
 		if child is PanelContainer and child.name.begins_with("cell_"):
@@ -181,10 +261,11 @@ func _refresh_initiative_highlight(active_unit: BattleState.BattleUnit) -> void:
 			var is_active: bool = active_unit != null and uid == active_unit.uid
 			child.theme_type_variation = "PanelActive" if is_active else "PanelCard"
 
-# F: финал боя — единственный выход «Продолжить» (docs/14 §4.F); потери — моно.
+# F: финал боя — единственный выход «Продолжить» (docs/14 §4.F); потери — моно
+# (числа отделены от подписи: end_info serif + end_numbers LabelNumber).
 func show_result(winner: int, surviving_atk: int, surviving_def: int) -> void:
 	_end_title.text = "Победа" if winner == BattleState.Side.ATTACKER else "Поражение"
-	_end_info.text = "Остаток: %d / %d" % [surviving_atk, surviving_def]
+	_end_numbers.text = "%d / %d" % [surviving_atk, surviving_def]
 	_end_overlay.visible = true
 	_continue_btn.grab_focus()
 
