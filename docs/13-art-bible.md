@@ -4,7 +4,7 @@ tags:
   - art
   - assets
   - ui
-status: draft
+status: deepened
 date: 2026-10-13
 ---
 
