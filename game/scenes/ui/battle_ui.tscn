@@ -13,7 +13,7 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_top = -64.0
-grow_vertical = 2
+grow_vertical = 0
 
 [node name="bar_box" type="HBoxContainer" parent="bottom_bar" unique_id=649631543]
 layout_mode = 2
@@ -27,28 +27,28 @@ theme_override_constants/separation = 6
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
 mouse_filter = 2
-theme_override_font_sizes/font_size = 18
+theme_type_variation = &"BibleButton"
 text = "⚙️"
 
 [node name="retreat_btn" type="Button" parent="bottom_bar/bar_box/left_box" unique_id=1675398027]
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
 mouse_filter = 2
-theme_override_font_sizes/font_size = 18
+theme_type_variation = &"BibleButton"
 text = "🏕️"
 
 [node name="wait_btn" type="Button" parent="bottom_bar/bar_box/left_box" unique_id=868382487]
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
 mouse_filter = 2
-theme_override_font_sizes/font_size = 18
+theme_type_variation = &"BibleButton"
 text = "🏃"
 
 [node name="attack_btn" type="Button" parent="bottom_bar/bar_box/left_box" unique_id=1049647265]
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
 mouse_filter = 2
-theme_override_font_sizes/font_size = 18
+theme_type_variation = &"BibleButton"
 text = "⚔️"
 
 [node name="center_box" type="VBoxContainer" parent="bottom_bar/bar_box" unique_id=272864844]
@@ -58,7 +58,7 @@ theme_override_constants/separation = 0
 
 [node name="turn_line" type="Label" parent="bottom_bar/bar_box/center_box" unique_id=1435724026]
 layout_mode = 2
-theme_override_font_sizes/font_size = 12
+theme_type_variation = &"LabelSecondary"
 horizontal_alignment = 1
 
 [node name="log_row" type="HBoxContainer" parent="bottom_bar/bar_box/center_box" unique_id=1128916303]
@@ -68,7 +68,7 @@ theme_override_constants/separation = 4
 [node name="log_line" type="Label" parent="bottom_bar/bar_box/center_box/log_row" unique_id=1677388078]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 13
+theme_type_variation = &"LabelSecondary"
 horizontal_alignment = 1
 
 [node name="history_nav" type="VBoxContainer" parent="bottom_bar/bar_box/center_box/log_row" unique_id=1504756874]
@@ -78,19 +78,19 @@ theme_override_constants/separation = 0
 [node name="history_up" type="Button" parent="bottom_bar/bar_box/center_box/log_row/history_nav" unique_id=1050830087]
 custom_minimum_size = Vector2(24, 16)
 layout_mode = 2
-theme_override_font_sizes/font_size = 10
+theme_type_variation = &"BibleButton"
 text = "▲"
 
 [node name="history_down" type="Button" parent="bottom_bar/bar_box/center_box/log_row/history_nav" unique_id=1287344208]
 custom_minimum_size = Vector2(24, 16)
 layout_mode = 2
-theme_override_font_sizes/font_size = 10
+theme_type_variation = &"BibleButton"
 text = "▼"
 
 [node name="history_btn" type="Button" parent="bottom_bar/bar_box/center_box/log_row" unique_id=1494162177]
 custom_minimum_size = Vector2(24, 32)
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_type_variation = &"BibleButton"
 text = "☰"
 
 [node name="right_box" type="HBoxContainer" parent="bottom_bar/bar_box" unique_id=1793962726]
@@ -101,21 +101,21 @@ theme_override_constants/separation = 6
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
 mouse_filter = 2
-theme_override_font_sizes/font_size = 18
+theme_type_variation = &"BibleButton"
 text = "🛡️"
 
 [node name="skip_btn" type="Button" parent="bottom_bar/bar_box/right_box" unique_id=515267544]
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
 mouse_filter = 2
-theme_override_font_sizes/font_size = 18
+theme_type_variation = &"BibleButton"
 text = "⏳"
 
 [node name="spellbook_btn" type="Button" parent="bottom_bar/bar_box/right_box" unique_id=152440698]
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
 mouse_filter = 2
-theme_override_font_sizes/font_size = 18
+theme_type_variation = &"BibleButton"
 text = "📖"
 
 [node name="history_panel" type="PanelContainer" parent="." unique_id=1195533949]
@@ -165,12 +165,16 @@ offset_bottom = 76.0
 grow_horizontal = 2
 theme_type_variation = &"PanelCard"
 
-[node name="init_scroll" type="ScrollContainer" parent="initiative_bar" unique_id=732893138]
+[node name="init_col" type="VBoxContainer" parent="initiative_bar"]
 layout_mode = 2
-horizontal_scroll_mode = 0
-vertical_scroll_mode = 1
+theme_override_constants/separation = 0
 
-[node name="init_box" type="HBoxContainer" parent="initiative_bar/init_scroll" unique_id=732893139]
+[node name="init_caption" type="Label" parent="initiative_bar/init_col"]
+layout_mode = 2
+theme_type_variation = &"LabelSecondary"
+text = "Очередь"
+
+[node name="init_box" type="HBoxContainer" parent="initiative_bar/init_col"]
 layout_mode = 2
 theme_override_constants/separation = 6
 
@@ -181,10 +185,10 @@ anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = -324.0
-offset_top = -140.0
+offset_left = -374.0
+offset_top = -170.0
 offset_right = -14.0
-offset_bottom = 140.0
+offset_bottom = 170.0
 grow_horizontal = 0
 grow_vertical = 2
 theme_type_variation = &"PanelCard"
@@ -192,6 +196,11 @@ theme_type_variation = &"PanelCard"
 [node name="tc_box" type="VBoxContainer" parent="target_card" unique_id=732893141]
 layout_mode = 2
 theme_override_constants/separation = 6
+
+[node name="tc_caption" type="Label" parent="target_card/tc_box"]
+layout_mode = 2
+theme_type_variation = &"LabelSecondary"
+text = "Цель"
 
 [node name="tc_name" type="Label" parent="target_card/tc_box" unique_id=732893142]
 layout_mode = 2
@@ -246,6 +255,10 @@ text = "Атака: "
 layout_mode = 2
 theme_type_variation = &"LabelNumber"
 
+[node name="tc_abilities" type="Label" parent="target_card/tc_box"]
+layout_mode = 2
+theme_type_variation = &"LabelNumber"
+
 [node name="tc_preview" type="Label" parent="target_card/tc_box" unique_id=732893155]
 layout_mode = 2
 theme_type_variation = &"ChipError"
@@ -272,11 +285,21 @@ layout_mode = 2
 theme_type_variation = &"LabelTitle"
 horizontal_alignment = 1
 
-[node name="end_info" type="Label" parent="end_overlay/end_center/end_box" unique_id=732893160]
+[node name="end_info_row" type="HBoxContainer" parent="end_overlay/end_center/end_box"]
+layout_mode = 2
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="end_info" type="Label" parent="end_overlay/end_center/end_box/end_info_row" unique_id=732893160]
 layout_mode = 2
 theme_type_variation = &"LabelBody"
-horizontal_alignment = 1
+text = "Остаток: "
+
+[node name="end_numbers" type="Label" parent="end_overlay/end_center/end_box/end_info_row"]
+layout_mode = 2
+theme_type_variation = &"LabelNumber"
 
 [node name="continue_btn" type="Button" parent="end_overlay/end_center/end_box" unique_id=732893161]
 layout_mode = 2
+theme_type_variation = &"BibleButton"
 text = "Продолжить"

@@ -54,3 +54,20 @@ live/no-op/absent (docs/14 §3): no-op — скрыт (`_tc_count_row`, `_tc_atk
 
 GdUnit полный прогон ветки: exit=0 (см. сводку смены). Harness — только
 рендер-скрипт, логику не меняет.
+
+## Итог фикс-раунда UI-3b (2026-10-13, after-скриншоты /tmp/ux-shots/)
+
+| Находка | Действие | Статус |
+| --- | --- | --- |
+| M1-1 синие кнопки | все 10 кнопок `battle_ui.tscn` → `BibleButton` (5 стейтов StyleBoxFlat, 20 px serif); текстура `button_normal.png` из HUD убрана | ✅ |
+| M1-2 шрифты <16 px | `turn_line`/`log_line` → `LabelSecondary` (16); history-кнопки/стрелки → именованные стили, 16 | ✅ |
+| M2-1 подписи зон | A — «Очередь» (`init_caption`), B — «Цель» (`tc_caption`); C вне скоупа | ✅ |
+| M2-2 хоткеи §5 | `_unhandled_input`: A/D/W/S/K/H/↑↓/Esc/F; Esc: панель→закрыть, иначе настройки; **Q (Авто) — механики нет, тикет** | ✅ (Q — тикет) |
+| M2-3 способности в карточке | строка 6 очков dnd-профиля (моно, 2 строки); иконок 32 px нет — тикет | ✅ (иконки — тикет) |
+| M2-4 «Остаток» не моно | `end_info_row`: подпись `LabelBody` + числа `LabelNumber` (моно) | ✅ |
+| M3-1 мёртвая ячейка тоном | diagonal-hatch TextureRect поверх `PanelDead` (форма, не тон) | ✅ |
+| M3-2 HP 1.2M у рамки | карточка 360 px, HP-строка с отступом, перенос имени | ✅ |
+| M3-3 нет теста «Продолжить→карта» | `tests/functional/test_battle_result_to_map.gd` | ✅ |
+
+**AC docs/14 §6: 7/7 PASS** (кадры 01–09, harness `tools/ux_shots.gd`).
+GdUnit: 2482/2484 (2 skipped), exit=0.
