@@ -71,6 +71,10 @@ timeout=300
 
 settings/test/test_lookup_folder="tests"
 
+[gui]
+
+theme/custom="res://assets/theme/game_theme.tres"
+
 [input]
 
 camera_up={
