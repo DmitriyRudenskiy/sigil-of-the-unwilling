@@ -684,3 +684,14 @@ sword_hellstorm. **Самоликвидация:** генерация сета 2
    моно-строку очков; иконки — image-очередь, не изобретать в коде.
 2. **Q (Авто)** (docs/14 §5): кнопки «Авто» в HUD нет, AI-автобой вне скоупа
    (docs/14 §7) → хоткей не реализован (absent). Реализовать вместе с автобоем.
+
+### Резолв UI-4 «hero sheet canon» (2026-10-13, feat/hero-sheet-canon)
+
+Канон: `res://assets/characters/hero_knight.png` (новая категория `characters/`,
+лист анимаций — не портрет `units/`). Эвристика `_find_sheet()` (кандидаты +
+скан `raw/`) и jpg-ветка `_build_anim_from_sheet` удалены — единственный путь
+поиска константа `HERO_SHEET_PATH`, оверрайд = правка константы. Лог строит
+фактический путь (п.2). Smoke: `test_knight_frames_builder.gd` на каноническом
+пути + полный GdUnit 2482/2484 exit=0 (п.3). `hero_knight.jpg` + `.import`
+удалены, `assets/raw/` пуста и исключена; **в репо ноль JPG** (п.4).
+`SPRITE_HERO_KNIGHT` (theme_config) переведён на канон.
