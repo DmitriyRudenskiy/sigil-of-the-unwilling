@@ -93,6 +93,10 @@ func update_initiative(_units: Array[BattleState.BattleUnit], _active_unit: Batt
 
 func set_controls_enabled(enabled: bool) -> void:
 	for btn in _action_buttons:
+		# инвариант 07-ui-ux:53 — «Пропустить» доступен всегда; request_skip()
+		# уже защищён фазой WAITING_INPUT (battle_turn_executor.gd:279)
+		if btn == _skip_btn:
+			continue
 		btn.disabled = not enabled
 
 	if _attack_button != null and not enabled:
