@@ -31,6 +31,9 @@ var zone_type: int = 0
 var production_chain: ProductionChain = null
 var upkeep: Dictionary = {}
 var zone_multiplier: float = 1.0
+# race-economy (Phase 2, вариант A): доминирующая раса работников. &"" = нет
+# (backward-compat со старыми сейвами). Не заменяет assigned_workers, дополняет.
+var worker_race: StringName = &""
 
 func get_zone_type() -> int:
 	return zone_type
@@ -59,6 +62,7 @@ func serialize() -> Dictionary:
 		"zone_type": zone_type,
 		"upkeep": {},
 		"zone_multiplier": zone_multiplier,
+		"worker_race": String(worker_race),
 	}
 	var upkeep_str: Dictionary = {}
 	for k in upkeep:
@@ -79,6 +83,7 @@ static func deserialize(data: Dictionary, def_: UniqueBuilding.Def) -> UniqueBui
 	b.assigned_workers = int(data.get("assigned_workers", 0))
 	b.zone_type = int(data.get("zone_type", 0))
 	b.zone_multiplier = float(data.get("zone_multiplier", 1.0))
+	b.worker_race = StringName(data.get("worker_race", ""))
 	var raw_upkeep: Dictionary = data.get("upkeep", {})
 	for k in raw_upkeep:
 		b.upkeep[StringName(k)] = float(raw_upkeep[k])

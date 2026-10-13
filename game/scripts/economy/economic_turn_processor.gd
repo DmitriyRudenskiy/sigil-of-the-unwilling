@@ -70,6 +70,8 @@ func _process_city(city: City, ctx: TurnContext, party_state: Dictionary) -> Dic
 		auto[stone_id] = res.add(
 			stone_id, float(GameNumbers.RESOURCE_AUTO_STONE) * city.auto_resource_mult, "automatic_stone_yield")
 		report["auto"] = auto
+		# race-economy (Phase 2): назначить доминирующую расу зданиям по city.race_pop
+		RaceEconomy.assign_building_races(city)
 	_process_campaign_buildings(city, res, report, catalog)
 
 	for building in city.buildings:
@@ -79,11 +81,15 @@ func _process_city(city: City, ctx: TurnContext, party_state: Dictionary) -> Dic
 		if chain == null:
 			continue
 		var workers: int = building.assigned_workers
+		# race-economy (Phase 2): расовая специализация -> building_eff (max, не сумма)
+		if building.def != null:
+			chain.building_eff = RaceEconomy.production_mult(building.worker_race, building.def.id)
 		# Ранняя игра: сезонный цикл масштабирует производство (early-game-foundation)
 		var logistics: float = city.get_logistics_multiplier(building.cell) \
 			* building.zone_multiplier \
 			* AdjacencySystem.building_output_mult(city, building) \
-			* WorldSeasons.production_mult()
+			* WorldSeasons.production_mult() \
+			* RaceEconomy.district_synergy_mult(city, building)
 		var execution := chain.execute_transaction(res, workers, logistics, "building:%d/recipe:%s" % [building.uid, chain.id])
 		var outputs: Dictionary = execution.get("outputs", {})
 		if outputs.is_empty():

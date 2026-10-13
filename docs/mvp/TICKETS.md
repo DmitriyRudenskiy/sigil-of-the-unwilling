@@ -659,3 +659,10 @@ date: 2026-10-13
 4. Удалить `hero_knight.jpg` (+ `.import`) только после п.1–3.
 
 До тикета файлы не трогать (png ≠ jpg по md5 — содержимое разное).
+
+### Тикет DATA-AUDIT «имена runic_blade / rune_sword» (2026-10-13, из гейта ①)
+
+Артефакты разные (2d8/MAJOR/90g против 3d8/RELIC/160g, у rune_sword рецепт
+`rune_sword_crafted`), но display_name «Рунный клинок»/«Рун. меч» неразличимы
+игроком. Переименовать display_name (оба: registry + WeaponCatalog), идефикаторы
+и иконки не трогать. Не блокёр UI-4.

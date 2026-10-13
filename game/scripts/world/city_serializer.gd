@@ -53,6 +53,10 @@ static func serialize(city: City) -> Dictionary:
 	d["buildings"] = blds_arr
 	d["campaign_buildings"] = _campaign_buildings_to_list(city.campaign_buildings)
 	d["campaign_group_state"] = city.campaign_group_state.duplicate(true)
+	var race_pop_str: Dictionary = {}
+	for r in city.race_pop:
+		race_pop_str[String(r)] = int(city.race_pop[r])
+	d["race_pop"] = race_pop_str
 	return d
 
 static func deserialize(city: City, data: Dictionary) -> void:
@@ -130,6 +134,9 @@ static func deserialize(city: City, data: Dictionary) -> void:
 			city.campaign_buildings.append(instance)
 	var group_state: Variant = data.get("campaign_group_state", {})
 	city.campaign_group_state = group_state.duplicate(true) if group_state is Dictionary else {}
+	city.race_pop.clear()
+	for rk in data.get("race_pop", {}):
+		city.race_pop[StringName(rk)] = int(data["race_pop"][rk])
 
 	_ArenaClusterSystem.invalidate(city.uid)
 
