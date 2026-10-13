@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<!--
+  UI-3 шаг 1 — мокап battle HUD (docs/14-ux-battle-hud.md), 3 варианта компоновки.
+  Только легальные пары §4.2 библии; шкала 16/20/24/32/48; числа — PT Mono;
+  «Авто» и лестница исходов — absent, НЕ рисуемся (no-op скрыт, absent не выдумываем).
+  Открыть в браузере; переключатели вариантов/edge-кейсов сверху.
+-->
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>battle HUD — мокап UI-3 шаг 1</title>
+<style>
+  :root{
+    --bg:#281c0f; --panel:#4a3423; --panel2:#3a2415; --edge:#16100a;
+    --parch:#e8d5a8; --parch2:#d9c48f; --paper:#f5efe0;
+    --gold:#8a6a3a; --gold2:#9e7738; --crimson:#7a100c; --focus:#c9a227;
+    --ok:#7aa85a; --err:#e05a4a; --info:#7ab0d0;
+    --serif:"PT Serif",Georgia,serif; --mono:"PT Mono","PT Mono",ui-monospace,monospace;
+  }
+  body{margin:0;background:#090b0e;color:var(--parch);font-family:var(--serif);font-size:16px}
+  .bar{display:flex;gap:8px;align-items:center;padding:8px 14px;background:var(--panel2);border-bottom:2px solid var(--edge);flex-wrap:wrap}
+  .bar b{font-size:20px}
+  .chip{border:2px solid var(--gold);background:var(--panel);color:var(--parch);
+        font-family:var(--serif);font-size:16px;padding:4px 12px;cursor:pointer}
+  .chip[aria-pressed="true"]{background:var(--crimson);color:var(--parch)} /* 7.61:1 ✓ */
+  .chip:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+  .frame{width:1280px;height:720px;margin:14px auto;position:relative;overflow:hidden;
+         background:var(--bg);border:2px solid var(--edge);box-shadow:0 0 40px #000}
+  .hidden{display:none !important}
+  /* зона A — инициатива */
+  .zoneA{position:absolute;top:0;left:0;right:0;height:76px;display:flex;gap:6px;align-items:center;
+         padding:6px 10px;background:linear-gradient(var(--panel2),var(--bg));border-bottom:2px solid var(--edge)}
+  .unit{width:56px;height:56px;border:2px solid var(--gold);background:var(--panel);
+        display:grid;place-items:center;font-family:var(--mono);font-size:16px;color:var(--parch2)}
+  .unit.dead{filter:grayscale(1) brightness(.6)}
+  .unit.active{border-color:var(--focus);box-shadow:0 0 0 2px var(--focus);color:var(--paper)}
+  .unit .hp{position:absolute;transform:translate(18px,34px);font-family:var(--mono);font-size:16px;color:var(--parch)}
+  /* зона B — карточка цели */
+  .card{background:var(--panel);border:2px solid var(--gold2);padding:10px 12px;width:300px}
+  .card h3{margin:0 0 4px;font-size:24px;color:var(--paper)}
+  .card .row{display:flex;justify-content:space-between;font-size:16px;color:var(--parch)}
+  .card .row .v{font-family:var(--mono);color:var(--parch)}
+  .card .dmg{color:var(--err);background:var(--bg);padding:0 6px} /* #e05a4a легален только на #281c0f (4.54) и темнее; на panel 3.17 ✗ */
+  .card .hit.ok{color:var(--ok)}
+  .card .hit.miss{color:var(--err);background:var(--bg);padding:0 6px}
+  .card .sub{font-size:16px;color:var(--parch2)}
+  /* зона D — нижняя панель */
+  .zoneD{position:absolute;bottom:0;left:0;right:0;height:96px;display:flex;gap:10px;align-items:center;
+         padding:0 14px;background:linear-gradient(var(--bg),var(--panel2));border-top:2px solid var(--edge)}
+  .btn{font-family:var(--serif);font-size:20px;padding:10px 18px;color:var(--parch);
+       background:var(--panel);border:2px solid var(--gold);cursor:pointer;position:relative}
+  .btn:hover{background:var(--panel2);border-color:var(--gold2);color:var(--paper)}
+  .btn:active{transform:translateY(1px)}
+  .btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+  .btn.skip{border-style:dashed}
+  .btn.disabled{color:var(--parch2);border-color:var(--gold);filter:saturate(.45) brightness(.85)}
+  .btn.disabled::after{content:"";position:absolute;inset:0;
+       background:repeating-linear-gradient(45deg,transparent 0 5px,rgba(22,16,10,.35) 5px 10px)}
+  .turn{margin-left:auto;font-family:var(--mono);font-size:24px;color:var(--parch)}
+  .hint{font-size:16px;color:var(--parch2)}
+  /* артефакт-ячейки (правая колонка инвентаря героя) на тайле #281c0f */
+  .cells{display:flex;gap:6px}
+  .cell{width:64px;height:64px;background:var(--bg);display:grid;place-items:center;
+        font-family:var(--mono);font-size:16px;color:var(--parch2)}
+  .cell.minor{border:2px solid var(--gold)}
+  .cell.major{border:2px solid var(--focus)}
+  .cell.relic{border:2px solid var(--crimson);outline:1px solid var(--focus);outline-offset:-4px}
+  .notes{width:1280px;margin:0 auto 30px;font-size:16px;color:var(--parch2);line-height:1.5}
+  .notes code{font-family:var(--mono);color:var(--parch)}
+  .battlefield{position:absolute;inset:76px 0 96px 0;display:grid;place-items:center;color:var(--gold);font-size:20px}
+  .vlabel{position:absolute;top:84px;left:12px;font-family:var(--mono);font-size:16px;color:var(--info)}
+</style>
+</head>
+<body>
+<div class="bar">
+  <b>battle HUD</b>
+  <button class="chip" id="v1" aria-pressed="true" onclick="setV(1)">V1 HoMM-классика</button>
+  <button class="chip" id="v2" aria-pressed="false" onclick="setV(2)">V2 центр-оверлей</button>
+  <button class="chip" id="v3" aria-pressed="false" onclick="setV(3)">V3 левый Док</button>
+  <span style="width:14px"></span>
+  <button class="chip" id="long" aria-pressed="false" onclick="tog('long')">длинные строки</button>
+  <button class="chip" id="big" aria-pressed="false" onclick="tog('big')">числа 1.2M</button>
+  <button class="chip" id="cool" aria-pressed="true" onclick="tog('cool')">cooldown-кнопка</button>
+</div>
+
+<div class="frame" id="frame">
+  <!-- A: инициатива (live: BattleState) -->
+  <div class="zoneA">
+    <div class="unit active">1<span class="hp">12</span></div>
+    <div class="unit">2<span class="hp">8</span></div>
+    <div class="unit dead">3<span class="hp">0</span></div>
+    <div class="unit">4<span class="hp">15</span></div>
+    <div class="unit">…</div>
+  </div>
+  <div class="battlefield">поле боя (hex) — вне мокапа</div>
+  <div class="vlabel" id="vlabel">V1 — HoMM-классика: B справа, лестница absent</div>
+
+  <!-- V1: B справа -->
+  <div id="b1" class="card" style="position:absolute;top:96px;right:14px">
+    <h3 id="tname">Скелет-стражник</h3>
+    <div class="row"><span>Атака / Защита</span><span class="v"><span id="tat">7</span> / <span id="tdef">5</span></span></div>
+    <div class="row"><span>Здоровье</span><span class="v"><span id="thp">24</span> / 30</span></div>
+    <div class="row"><span class="sub">Скорость · Инициатива</span><span class="v">4 · 6</span></div>
+    <div class="row"><span>Попадание</span><span class="v hit ok">78%</span></div>
+    <div class="row"><span>Урон (ожидаемый)</span><span class="v dmg" id="tdmg">5–9</span></div>
+    <div class="sub" style="margin-top:6px">Цель: клик по юниту · <span style="font-family:var(--mono)">Tab</span></div>
+  </div>
+
+  <!-- V2: B центр-оверлей над D -->
+  <div id="b2" class="card hidden" style="position:absolute;bottom:110px;left:50%;transform:translateX(-50%)">
+    <h3>Скелет-стражник</h3>
+    <div class="row"><span>Атака / Защита</span><span class="v">7 / 5</span></div>
+    <div class="row"><span>Здоровье</span><span class="v">24 / 30</span></div>
+    <div class="row"><span>Попадание</span><span class="v hit ok">78%</span></div>
+    <div class="row"><span>Урон (ожидаемый)</span><span class="v dmg">5–9</span></div>
+  </div>
+
+  <!-- V3: B в левом доке + ячейки артефактов -->
+  <div id="b3" class="hidden" style="position:absolute;top:96px;left:14px;width:320px;display:flex;flex-direction:column;gap:10px">
+    <div class="card">
+      <h3>Скелет-стражник</h3>
+      <div class="row"><span>Атака / Защита</span><span class="v">7 / 5</span></div>
+      <div class="row"><span>Здоровье</span><span class="v">24 / 30</span></div>
+      <div class="row"><span>Попадание</span><span class="v hit ok">78%</span></div>
+      <div class="row"><span>Урон (ожидаемый)</span><span class="v dmg">5–9</span></div>
+    </div>
+    <div class="card">
+      <h3 style="font-size:20px">Снаряжение героя</h3>
+      <div class="cells">
+        <div class="cell minor">mnr</div>
+        <div class="cell major">maj</div>
+        <div class="cell relic">rel</div>
+      </div>
+      <div class="sub" style="margin-top:6px">тайл <span style="font-family:var(--mono)">#281c0f</span>, RELIC = двойная рамка (§4.5)</div>
+    </div>
+  </div>
+
+  <!-- D: нижняя панель. «Авто» — absent (нет логики) → не рисуется.
+       Лестница исходов C — absent (нет формулы) → не рисуется. -->
+  <div class="zoneD">
+    <button class="btn">Атака</button>
+    <button class="btn">Заклинание</button>
+    <button class="btn">Оборона</button>
+    <button class="btn skip">Пропустить</button>
+    <button class="btn disabled" id="coolbtn">Контратака</button>
+    <span class="hint">cooldown: десат + штриховка; disabled ≠ hidden</span>
+    <span class="turn" id="turn">Ход 12 · 0:47</span>
+  </div>
+</div>
+
+<div class="notes">
+  <b>Зоны docs/14:</b> A — инициатива (live из BattleState); B — карточка цели (M1);
+  C — лестница исходов: <b>absent, не рисуется</b> (нет формулы — тикет вне UI-3);
+  D — нижняя панель; «Авто»: <b>absent, не рисуется</b> (нет автобоя).<br>
+  <b>Легальные пары §4.2:</b> текст <code>#e8d5a8</code> на <code>#4a3423/#3a2415/#281c0f</code>;
+  error-текст <code>#e05a4a</code> — только на подложке <code>#3a2415</code> и темнее (3.97 ✓);
+  selected-подложка crimson + <code>#e8d5a8</code> (7.61 ✓).<br>
+  <b>Edge-кейсы (кнопки сверху):</b> длинные ru/en строки (перенос в карточке, без обрезки),
+  числа <code>1.2M</code> (моно, формат docs/14), cooldown = десат+штриховка (не hidden).<br>
+  <b>Рамка кадра = 1280×720 (720p).</b> «Пропустить» — никогда не disabled (инвариант 07-ui-ux:53).
+</div>
+
+<script>
+const V={1:"V1 — HoMM-классика: B справа, лестница absent",
+         2:"V2 — центр-оверлей: B над D, поле максимально открыто",
+         3:"V3 — левый Док: B+экипировка слева, D снизу"};
+let v=1;
+function setV(n){v=n;for(const i of[1,2,3]){document.getElementById("v"+i).setAttribute("aria-pressed",i===n);document.getElementById("b"+i).classList.toggle("hidden",i!==n)}
+  document.getElementById("vlabel").textContent=V[n]}
+function tog(k){const b=document.getElementById(k);const on=b.getAttribute("aria-pressed")!=="true";b.setAttribute("aria-pressed",on);
+  if(k==="long"){document.getElementById("tname").textContent=on?"Пелерина Странствующего Астронома (закалённая, +2 к инициативе отряда)":"Скелет-стражник";document.getElementById("tname").style.whiteSpace=on?"normal":"nowrap"}
+  if(k==="big"){document.getElementById("thp").textContent=on?"1 240 000 / 1.2M":"24";document.getElementById("tdmg").textContent=on?"1.2M–1.9M":"5–9"}
+  if(k==="cool"){document.getElementById("coolbtn").classList.toggle("disabled",!on);document.getElementById("coolbtn").textContent=on?"Контратака":"Контратака"}}
+</script>
+</body>
+</html>
