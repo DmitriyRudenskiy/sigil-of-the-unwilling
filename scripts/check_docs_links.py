@@ -23,7 +23,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DOCS = os.path.join(ROOT, "docs")
 
-ALLOWED_STATUSES = {"canon", "deepened", "draft", "redirect", "reference", "archived"}
+ALLOWED_STATUSES = {"canon", "deepened", "draft", "redirect", "reference", "archived", "snapshot"}
 
 # Архивные логи: не редактируются, вне графа как источники (ссылки на них из живых
 # доков остаются валидными), освобождены от frontmatter (AGENTS.md, D-106/D-109).
