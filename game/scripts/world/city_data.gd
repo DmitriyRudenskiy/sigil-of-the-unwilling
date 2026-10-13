@@ -53,6 +53,9 @@ var boroughs: Array[Borough] = []
 var buildings: Array[UniqueBuilding] = []
 var campaign_buildings: Array[Dictionary] = []
 var campaign_group_state: Dictionary = {}
+# race-economy (Phase 2, вариант A): расовая композиция города {race_id: count}.
+# {} = нет рас (backward-compat). Заполняется иммиграцией/основанием (дефер).
+var race_pop: Dictionary = {}
 var special_sites: Dictionary = {}
 var storage: Dictionary = {}
 var roads: Dictionary = {}
