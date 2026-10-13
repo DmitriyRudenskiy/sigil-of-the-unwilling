@@ -1,0 +1,36 @@
+{
+	"_source": "T-030 (K-M1, MVP-scope строка 55; 02g-city-hex §5 Настроение — ВХОД T-030 владелец 2026-10-04; 07-balance §5 строки 110–112). K-M15: числа здесь.",
+	"mood_start": 70.0,
+	"mood_min": 0.0,
+	"mood_max": 100.0,
+	"threshold_low": 40.0,
+	"threshold_high": 80.0,
+	"prod_mult_low": 0.85,
+	"prod_mult_high": 1.1,
+	"deltas_per_day": {
+		"food_surplus": 1.0,
+		"_food_surplus_min_net_note": "02g: профицит ≥+5/день — масштаб hex-города (Ферма 6); кампейн-эконом 10x мельше (Ферма +1/день) → порог 0.5 = сытости хватает (адаптация при приёмке T-030)",
+		"food_surplus_min_net": 0.5,
+		"food_deficit": -10.0,
+		"tavern": 2.0,
+		"tavern_cap": 4.0,
+		"worker_death": -2.0,
+		"building_destroyed": -5.0,
+		"raid_repelled": 5.0,
+		"catastrophe": -20.0
+	},
+	"desertion_per_two_days_low": 1,
+	"jobs_fallback": {"_note": "стартовые id вне каталога (farm/sawmill/mine); jobs = 2 — как campaign_farm в каталоге", "farm": 2, "sawmill": 2, "mine": 2},
+	"need": {
+		"_note": "MVP-вырезка нужд: 1 на группу (02g §5.4: Еда — спрос 1×житель). Кап провайдера — из таблицы 02g §5.4 (Ферма 6); dem = 1×работники района; не покрыта → дельта за сезон (адаптация при приёмке: 02g-дельты Resolve не перенесены, настроение — шкала 02g).",
+		"name": "Еда",
+		"demand_per_worker_per_day": 1.0,
+		"unmet_per_season": -1.0,
+		"supply_cap_by_id": {
+			"farm": 6.0,
+			"campaign_farm": 6.0,
+			"campaign_hunt_camp": 4.0
+		},
+		"tavern_ids": ["campaign_tavern"]
+	}
+}
