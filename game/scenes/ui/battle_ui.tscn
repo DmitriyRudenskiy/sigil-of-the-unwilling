@@ -157,3 +157,126 @@ grow_horizontal = 2
 grow_vertical = 2
 persistent = true
 show_additional = false
+
+[node name="initiative_bar" type="PanelContainer" parent="." unique_id=732893137]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 76.0
+grow_horizontal = 2
+theme_type_variation = &"PanelCard"
+
+[node name="init_scroll" type="ScrollContainer" parent="initiative_bar" unique_id=732893138]
+layout_mode = 2
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 1
+
+[node name="init_box" type="HBoxContainer" parent="initiative_bar/init_scroll" unique_id=732893139]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="target_card" type="PanelContainer" parent="." unique_id=732893140]
+visible = false
+anchors_preset = 9
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -324.0
+offset_top = -140.0
+offset_right = -14.0
+offset_bottom = 140.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_type_variation = &"PanelCard"
+
+[node name="tc_box" type="VBoxContainer" parent="target_card" unique_id=732893141]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="tc_name" type="Label" parent="target_card/tc_box" unique_id=732893142]
+layout_mode = 2
+theme_type_variation = &"LabelHeading"
+autowrap_mode = 3
+
+[node name="tc_count_row" type="HBoxContainer" parent="target_card/tc_box" unique_id=732893143]
+layout_mode = 2
+
+[node name="tc_count_key" type="Label" parent="target_card/tc_box/tc_count_row" unique_id=732893144]
+layout_mode = 2
+theme_type_variation = &"LabelBody"
+text = "Кол-во: "
+
+[node name="tc_count" type="Label" parent="target_card/tc_box/tc_count_row" unique_id=732893145]
+layout_mode = 2
+theme_type_variation = &"LabelNumber"
+
+[node name="tc_hp_row" type="HBoxContainer" parent="target_card/tc_box" unique_id=732893146]
+layout_mode = 2
+
+[node name="tc_hp_key" type="Label" parent="target_card/tc_box/tc_hp_row" unique_id=732893147]
+layout_mode = 2
+theme_type_variation = &"LabelBody"
+text = "Здоровье: "
+
+[node name="tc_hp" type="Label" parent="target_card/tc_box/tc_hp_row" unique_id=732893148]
+layout_mode = 2
+theme_type_variation = &"LabelNumber"
+
+[node name="tc_def_row" type="HBoxContainer" parent="target_card/tc_box" unique_id=732893149]
+layout_mode = 2
+
+[node name="tc_def_key" type="Label" parent="target_card/tc_box/tc_def_row" unique_id=732893150]
+layout_mode = 2
+theme_type_variation = &"LabelBody"
+text = "Защита: "
+
+[node name="tc_def" type="Label" parent="target_card/tc_box/tc_def_row" unique_id=732893151]
+layout_mode = 2
+theme_type_variation = &"LabelNumber"
+
+[node name="tc_atk_row" type="HBoxContainer" parent="target_card/tc_box" unique_id=732893152]
+layout_mode = 2
+
+[node name="tc_atk_key" type="Label" parent="target_card/tc_box/tc_atk_row" unique_id=732893153]
+layout_mode = 2
+theme_type_variation = &"LabelBody"
+text = "Атака: "
+
+[node name="tc_atk" type="Label" parent="target_card/tc_box/tc_atk_row" unique_id=732893154]
+layout_mode = 2
+theme_type_variation = &"LabelNumber"
+
+[node name="tc_preview" type="Label" parent="target_card/tc_box" unique_id=732893155]
+layout_mode = 2
+theme_type_variation = &"ChipError"
+autowrap_mode = 3
+
+[node name="end_overlay" type="PanelContainer" parent="." unique_id=732893156]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_type_variation = &"PanelOverlay"
+
+[node name="end_center" type="CenterContainer" parent="end_overlay" unique_id=732893157]
+layout_mode = 2
+
+[node name="end_box" type="VBoxContainer" parent="end_overlay/end_center" unique_id=732893158]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="end_title" type="Label" parent="end_overlay/end_center/end_box" unique_id=732893159]
+layout_mode = 2
+theme_type_variation = &"LabelTitle"
+horizontal_alignment = 1
+
+[node name="end_info" type="Label" parent="end_overlay/end_center/end_box" unique_id=732893160]
+layout_mode = 2
+theme_type_variation = &"LabelBody"
+horizontal_alignment = 1
+
+[node name="continue_btn" type="Button" parent="end_overlay/end_center/end_box" unique_id=732893161]
+layout_mode = 2
+text = "Продолжить"

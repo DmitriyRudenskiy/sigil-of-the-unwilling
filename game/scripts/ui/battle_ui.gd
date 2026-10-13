@@ -12,6 +12,7 @@ signal spellbook_requested
 signal spell_chosen(spell_id: StringName)
 signal settings_requested
 signal settings_closed
+signal result_accepted
 
 @onready var _bottom_bar: PanelContainer = $bottom_bar
 @onready var _settings_btn: Button = $"bottom_bar/bar_box/left_box/settings_btn"
@@ -28,6 +29,20 @@ signal settings_closed
 @onready var _spellbook_btn: Button = $"bottom_bar/bar_box/right_box/spellbook_btn"
 @onready var _history_panel: PanelContainer = $history_panel
 @onready var _history_list: ItemList = $"history_panel/history_list"
+@onready var _init_box: HBoxContainer = $initiative_bar/init_scroll/init_box
+@onready var _target_card: PanelContainer = $target_card
+@onready var _tc_name: Label = $"target_card/tc_box/tc_name"
+@onready var _tc_count: Label = $"target_card/tc_box/tc_count_row/tc_count"
+@onready var _tc_count_row: HBoxContainer = $"target_card/tc_box/tc_count_row"
+@onready var _tc_hp: Label = $"target_card/tc_box/tc_hp_row/tc_hp"
+@onready var _tc_def: Label = $"target_card/tc_box/tc_def_row/tc_def"
+@onready var _tc_atk_row: HBoxContainer = $"target_card/tc_box/tc_atk_row"
+@onready var _tc_atk: Label = $"target_card/tc_box/tc_atk_row/tc_atk"
+@onready var _tc_preview: Label = $"target_card/tc_box/tc_preview"
+@onready var _end_overlay: PanelContainer = $end_overlay
+@onready var _end_title: Label = $"end_overlay/end_center/end_box/end_title"
+@onready var _end_info: Label = $"end_overlay/end_center/end_box/end_info"
+@onready var _continue_btn: Button = $"end_overlay/end_center/end_box/continue_btn"
 var _action_buttons: Array[Button] = []
 @onready var _settings_screen: SettingsScreen = $SettingsScreen
 @onready var _spellbook_panel: BattleSpellbookPanel = $BattleSpellbookPanel
@@ -35,6 +50,7 @@ var _action_buttons: Array[Button] = []
 var _theme: Theme = null
 var _history: Array[String] = []
 var _history_pos := 0
+var _initiative_units: Array[BattleState.BattleUnit] = []
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -50,10 +66,23 @@ func _ready() -> void:
 		_history_btn.pressed.connect(_on_history_toggle)
 	if not _spellbook_panel.spell_chosen.is_connected(_on_spellbook_chosen):
 		_spellbook_panel.spell_chosen.connect(_on_spellbook_chosen)
+	_continue_btn.pressed.connect(func() -> void: result_accepted.emit())
+
+func _unhandled_input(event: InputEvent) -> void:
+	# F: единственный выход — «Продолжить»; Enter/Space подтверждают его же
+	if _end_overlay.visible and event.is_action_pressed("ui_accept"):
+		_continue_btn.emit_signal("pressed")
+		get_viewport().set_input_as_handled()
 
 func _apply_theme() -> void:
 	if _theme == null:
 		return
+	theme_root_theme(_theme)
+
+## CanvasLayer не Control — тему вешаем на корневые контролы слоя.
+func theme_root_theme(t: Theme) -> void:
+	for c in ["bottom_bar", "initiative_bar", "target_card", "end_overlay", "history_panel"]:
+		get_node(NodePath(c)).theme = t
 	var sb := _theme.get_stylebox("panel", "Panel")
 	if sb == null:
 		return
@@ -78,18 +107,86 @@ func set_status(text: String) -> void:
 	_history_pos = _history.size() - 1
 	_log_line.text = text
 
-# ponytail: top_panel (status/active_info/preview) удалён из сцены — методы оставлены
-# no-op, чтобы не трогать подключения в BattleController. Вернуть UI — добавить узлы обратно.
-func set_attack_preview(_text: String) -> void:
-	pass
+func set_attack_preview(text: String) -> void:
+	# B: предпросмотр урона — error-chip (лёгальная подложка #281c0f, docs/14 §2)
+	_tc_preview.text = text
+	_tc_preview.visible = text != ""
 
-func update_active_unit(_unit: BattleState.BattleUnit) -> void:
-	pass
+func show_target_card(unit: BattleState.BattleUnit) -> void:
+	# B (M1): только live-поля; строка без источника — скрыта, фейковых чисел нет
+	if unit == null:
+		hide_target_card()
+		return
+	_tc_name.text = unit.get_display_name()
+	var count: int = unit.get_count()
+	_tc_count_row.visible = count > 1
+	_tc_count.text = str(count)
+	if unit.is_dnd_character() and unit.dnd_profile != null:
+		_tc_hp.text = "%d / %d" % [unit.get_hp(), unit.dnd_profile.max_hp]
+	else:
+		_tc_hp.text = str(unit.get_hp())
+	var defense: int = unit.get_defense()
+	_tc_def.text = str(defense)
+	_tc_def.visible = defense > 0
+	var atk: int = unit.dnd_profile.get_attack_bonus() if unit.dnd_profile != null else 0
+	_tc_atk_row.visible = unit.dnd_profile != null
+	_tc_atk.text = "+%d" % atk
+	_target_card.visible = true
 
-# ponytail: initiative_panel удалён из сцены — метод оставлен no-op
-# (BattleController:298), turn_line больше не получает счётчик ходов.
-func update_initiative(_units: Array[BattleState.BattleUnit], _active_unit: BattleState.BattleUnit) -> void:
-	pass
+func hide_target_card() -> void:
+	_target_card.visible = false
+
+func update_active_unit(unit: BattleState.BattleUnit) -> void:
+	# A: переподсветка активного в очереди инициативы
+	_refresh_initiative_highlight(unit)
+
+# A: очередь инициативы — live из BattleState.turn_queue; активный — PanelActive
+# (золотая рамка, docs/14 §4.A), мёртвый — PanelDead + LabelDead (десат формой).
+func update_initiative(
+	units: Array[BattleState.BattleUnit],
+	active_unit: BattleState.BattleUnit
+) -> void:
+	_initiative_units = units
+	for child in _init_box.get_children():
+		_init_box.remove_child(child)
+		child.queue_free()
+	for unit in units:
+		_init_box.add_child(_make_initiative_cell(unit))
+	_refresh_initiative_highlight(active_unit)
+
+func _make_initiative_cell(unit: BattleState.BattleUnit) -> PanelContainer:
+	var cell := PanelContainer.new()
+	cell.theme_type_variation = "PanelDead" if not unit.is_alive() else "PanelCard"
+	cell.name = "cell_%d" % unit.uid
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 0)
+	var name_label := Label.new()
+	name_label.theme_type_variation = "LabelDead" if not unit.is_alive() else "LabelCell"
+	name_label.text = unit.get_display_name()
+	var hp_label := Label.new()
+	hp_label.theme_type_variation = "LabelNumber"
+	hp_label.text = str(unit.get_hp())
+	hp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(name_label)
+	box.add_child(hp_label)
+	cell.add_child(box)
+	return cell
+
+func _refresh_initiative_highlight(active_unit: BattleState.BattleUnit) -> void:
+	for child in _init_box.get_children():
+		if child is PanelContainer and child.name.begins_with("cell_"):
+			var uid: int = int(child.name.get_slice("_", 1))
+			if child.theme_type_variation == "PanelDead":
+				continue
+			var is_active: bool = active_unit != null and uid == active_unit.uid
+			child.theme_type_variation = "PanelActive" if is_active else "PanelCard"
+
+# F: финал боя — единственный выход «Продолжить» (docs/14 §4.F); потери — моно.
+func show_result(winner: int, surviving_atk: int, surviving_def: int) -> void:
+	_end_title.text = "Победа" if winner == BattleState.Side.ATTACKER else "Поражение"
+	_end_info.text = "Остаток: %d / %d" % [surviving_atk, surviving_def]
+	_end_overlay.visible = true
+	_continue_btn.grab_focus()
 
 func set_controls_enabled(enabled: bool) -> void:
 	for btn in _action_buttons:

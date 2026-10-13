@@ -46,7 +46,22 @@ func start_battle(
 
 func _on_battle_finished(winner: BattleState.Side, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack], battle: Node) -> void:
 	_active_battle = null
-	battle.queue_free()
+	# UI-3 F: сцена держится до подтверждения финального оверлея (единственный выход)
+	if is_instance_valid(battle) and battle.has_method("show_result_overlay"):
+		battle.show_result_overlay(winner, surviving_atk, surviving_def)
+		battle.result_accepted.connect(
+			_finish_battle.bind(winner, surviving_atk, surviving_def, battle), CONNECT_ONE_SHOT)
+		return
+	_finish_battle(winner, surviving_atk, surviving_def, battle)
+
+func _finish_battle(
+	winner: BattleState.Side,
+	surviving_atk: Array[UnitStack],
+	surviving_def: Array[UnitStack],
+	battle: Node
+) -> void:
+	if is_instance_valid(battle):
+		battle.queue_free()
 	RenderingServer.set_default_clear_color(ThemeConfig.C_BATTLE_BG_FLOW)
 	if winner == BattleState.Side.ATTACKER:
 		SoundManager.play_sfx_cue(&"battle_victory")
