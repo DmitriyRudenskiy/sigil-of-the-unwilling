@@ -8,6 +8,8 @@ signal unit_attack_requested(unit: BattleState.BattleUnit, target: BattleState.B
 signal spell_cast_requested(spell_id: StringName, target: BattleState.BattleUnit)
 signal cancel_requested
 signal attack_preview_updated(text: String)
+# UI-3 B: карточка цели — юнит под превью (null — убрать карточку)
+signal attack_target_updated(target: BattleState.BattleUnit)
 
 var _view: BattleView
 var _state: BattleState
@@ -158,6 +160,7 @@ func _select(u: BattleState.BattleUnit) -> void:
 func _update_attack_preview() -> void:
 	if _state.active_unit == null:
 		attack_preview_updated.emit("")
+		attack_target_updated.emit(null)
 		return
 
 	var global_pos := _view.get_global_mouse_position()
@@ -176,9 +179,11 @@ func _update_attack_preview() -> void:
 				def_bon
 			)
 			attack_preview_updated.emit(preview)
+			attack_target_updated.emit(target)
 			return
 
 	attack_preview_updated.emit("")
+	attack_target_updated.emit(null)
 
 func clear_highlights() -> void:
 	_clear_highlights()

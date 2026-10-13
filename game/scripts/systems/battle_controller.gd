@@ -2,6 +2,8 @@ extends Node2D
 class_name BattleController
 
 signal battle_finished(winner: BattleState.Side, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack])
+# UI-3 F: игрок подтвердил финальный оверлей — flow может освобождать бой
+signal result_accepted
 
 var _state: BattleState
 var _ai: BattleAI
@@ -81,6 +83,18 @@ func _wire_signals() -> void:
 	_executor.active_unit_changed.connect(_ui.update_active_unit)
 	_executor.floating_text.connect(_view.show_floating_text)
 	_input.attack_preview_updated.connect(_ui.set_attack_preview)
+	_input.attack_target_updated.connect(_on_attack_target_updated)
+	_ui.result_accepted.connect(func() -> void: result_accepted.emit())
+
+func _on_attack_target_updated(target: BattleState.BattleUnit) -> void:
+	if target == null:
+		_ui.hide_target_card()
+	else:
+		_ui.show_target_card(target)
+
+## UI-3 F: показать финальный оверлей (flow держит сцену до result_accepted).
+func show_result_overlay(winner: BattleState.Side, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack]) -> void:
+	_ui.show_result(winner, surviving_atk.size(), surviving_def.size())
 
 func _generate_terrain() -> void:
 	var rng := RandomNumberGenerator.new()

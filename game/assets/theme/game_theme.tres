@@ -303,6 +303,60 @@ border_width_bottom = 2
 border_color = Color(0.7882, 0.6353, 0.1529, 1)
 bg_color = Color(0, 0, 0, 0)
 draw_center = false
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+bg_color = Color(0.2902, 0.2039, 0.1373, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6196, 0.4667, 0.2196, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_active"]
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+bg_color = Color(0.2902, 0.2039, 0.1373, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.7882, 0.6353, 0.1529, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dead"]
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+bg_color = Color(0.2275, 0.1412, 0.0824, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.0863, 0.0627, 0.0392, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_overlay"]
+bg_color = Color(0.0353, 0.0431, 0.0549, 0.78)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_chip"]
+content_margin_left = 6.0
+content_margin_top = 2.0
+content_margin_right = 6.0
+content_margin_bottom = 2.0
+bg_color = Color(0.1569, 0.1098, 0.0588, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
 [resource]
 Panel/styles/panel = SubResource("StyleBoxTexture_panel")
 Panel/styles/window = SubResource("StyleBoxFlat_window")
@@ -388,3 +442,24 @@ BibleButton/styles/hover = SubResource("StyleBoxFlat_ctl_hover")
 BibleButton/styles/pressed = SubResource("StyleBoxFlat_ctl_pressed")
 BibleButton/styles/disabled = SubResource("StyleBoxFlat_ctl_disabled")
 BibleButton/styles/focus = SubResource("StyleBoxFlat_ctl_focus")
+PanelCard/base_type = "PanelContainer"
+PanelCard/styles/panel = SubResource("StyleBoxFlat_card")
+PanelActive/base_type = "PanelContainer"
+PanelActive/styles/panel = SubResource("StyleBoxFlat_active")
+PanelDead/base_type = "PanelContainer"
+PanelDead/styles/panel = SubResource("StyleBoxFlat_dead")
+PanelOverlay/base_type = "PanelContainer"
+PanelOverlay/styles/panel = SubResource("StyleBoxFlat_overlay")
+LabelDead/base_type = "Label"
+LabelDead/fonts/font = ExtResource("8_serif")
+LabelDead/font_sizes/font_size = 16
+LabelDead/colors/font_color = Color(0.851, 0.7686, 0.5608, 1)
+ChipError/base_type = "Label"
+ChipError/fonts/font = ExtResource("10_mono")
+ChipError/font_sizes/font_size = 16
+ChipError/colors/font_color = Color(0.8784, 0.3529, 0.2902, 1)
+ChipError/styles/normal = SubResource("StyleBoxFlat_chip")
+LabelCell/base_type = "Label"
+LabelCell/fonts/font = ExtResource("8_serif")
+LabelCell/font_sizes/font_size = 16
+LabelCell/colors/font_color = Color(0.9098, 0.8353, 0.6588, 1)
