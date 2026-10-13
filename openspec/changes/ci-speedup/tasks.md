@@ -70,22 +70,36 @@ decoupling, adf523c0) — autoload в project.godot указывает на не
 
 ## Фаза 3: Пересборка ci2.yml (4 job'а + кэши)
 
-- [ ] 3.1 `static` job: checkers + lint (gdtoolkit venv → кэш) +
-  DOCS-LINKS
-- [ ] 3.2 `gdunit` job: Godot (кэш бинаря) + --import + GdUnit4
-  (полный `-a res://tests`), exit-код политика 0/101
-- [ ] 3.3 `mcp` job: apt (xvfb+libs), node, pip-venv (кэш), Godot
-  (кэш), npm ci (кэш node_modules), Xvfb-скан, `MCP_WORKERS=3`,
-  ретраи ×3 (CI-1(12)), артефакт логов (все попытки)
-- [ ] 3.4 `verdict` job: `needs: [static, gdunit, mcp]`,
-  `if: always()` — CI-2 Stability (D-174, код без изменений) +
-  4-уровневая строка (D-147): GdUnit/MCP/DOCS-LINKS/CHECKERS
-- [ ] 3.5 Concurrency-группа и `on:` (push '**' + PR) — без
-  изменений; timeout-minutes: 45 → 20
-- [ ] 3.6 Balance metrics + balance-report артефакт: перенос в
+- [x] 3.1 `static` job: checkers + lint (gdtoolkit venv → кэш
+  `ci2-lint-venv-gdtoolkit-4.5.0`) + DOCS-LINKS; level-строки
+  (CHECKERS/LINT/DOCS-LINKS) → артефакт `ci2-static-logs`
+- [x] 3.2 `gdunit` job: Godot (кэш `godot-4.7-stable-linux-x86_64`)
+  + --import + GdUnit4 (полный `-a res://tests`), exit-код
+  политика 0/101; level-строка (RC + Overall Summary) → артефакт
+  `ci2-gdunit-logs`; Diagnostics `if: failure()` (::error::-аннотации,
+  D-167)
+- [x] 3.3 `mcp` job: apt (xvfb+libs), node, pip-venv (кэш
+  `ci2-mcp-venv-v1`, +pytest-xdist, импорт-проверка = валидация
+  кэша), Godot (кэш), npm ci (кэш по package-lock hash),
+  `MCP_WORKERS=3`, ретраи ×3 (CI-1(12)), артефакт `ci2-mcp-logs`
+  (все попытки + level-строки); Diagnostics `if: failure()`
+- [x] 3.4 `verdict` job: `needs: [static, gdunit, mcp]`,
+  `if: always()` — 4-уровневая строка (D-147: GdUnit4/MCP/
+  DOCS-LINKS/exit-code) через `needs.*.result` + `::notice::`
+  (публичный канал без токена, D-167-семья) + CI-2 Stability
+  (D-174, код без изменений). Репортёр, не гейт: workflow-красный
+  идёт от gate-job'ов
+- [x] 3.5 Concurrency-группа и `on:` (push '**' + PR) — без
+  изменений; timeout-minutes: 45 → per-job (static 10, gdunit 15,
+  mcp 20, verdict 5)
+- [x] 3.6 Balance metrics + balance-report артефакт: перенос в
   `gdunit` job (нужен только Godot)
-- [ ] 3.7 YAML-валидация (checker 5) + локальный dry-run логики
-  (bash -n, python yaml.safe_load)
+- [x] 3.7 YAML-валидация (checker 5) + локальный dry-run логики
+  (bash -n по всем run-блокам, python yaml.safe_load) — OK.
+  **Найден и исправлен гейт-баг:** GitHub-шаги идут с `-eo pipefail` —
+  при падении пайплайна шаг умирал до снятия RC (level-строки
+  терялись; DOCS-LINKS/lint могли выйти 0). Явные `set +o pipefail` +
+  `RC=${PIPESTATUS[0]}` + гейт-команда в конце шага
 
 ## Фаза 4: Приёмка (design §Measurement)
 
