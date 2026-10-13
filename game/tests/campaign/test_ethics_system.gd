@@ -183,3 +183,74 @@ func test_integration_city_loop_full_campaign() -> void:
 		assert_bool(b.has("workers")) \
 			.override_failure_message("районный слой не проведён: " + str(b.get("id", ""))).is_true()
 	assert_bool(c.districts.mood.size() == 8).is_true()
+
+
+func test_guard_dissonant_loop_losses_to_emigration() -> void:
+	# Страж §2.1 (акт раунда 16): диссонирующая ветвь замкнутого цикла §1 —
+	# потери защитников → Диссонанс → Репутация < 0 → отрицательная миграция.
+	var c: CampaignComposition = CampaignComposition.from_campaign_config(12345)
+	c.set_sign("spark")
+	var uids: Array = []
+	for r in c.population_system.residents.slice(0, 3):
+		uids.append(int(r["uid"]))
+	c._on_battle_losses(uids, {})  # шов боя: Гибель трёх защитников
+	assert_str(str(c.ethics.journal.back().get("kind", ""))) \
+		.override_failure_message("потеря не попала в журнал этики").is_equal("defender_losses")
+	# Метка Диссонанса — за бой (T-124 «потери защитника → метка»), не за солдата:
+	# один бой с тремя потерями → d=1 → Δ=−2 (w_d=2); второй бой → d=2 → raw −4 → кламп −3.
+	var rep: Dictionary = c.ethics.reconcile(10, _sign_vectors())
+	assert_int(int(rep.get("d", 0))).is_equal(1)
+	assert_int(int(rep.get("delta", 0))).override_failure_message(
+		"бой с потерями: Δ ≠ −w_d").is_equal(-2)
+	c.ethics.record_losses(11)
+	c.ethics.record_losses(12)
+	c.ethics.reconcile(20, _sign_vectors())
+	assert_int(c.ethics.reputation).override_failure_message(
+		"два диссонирующих интервала ≠ кламп −3 на сверку (сумма −5)").is_equal(-5)
+	# Отток: k_mig 0.25 × 3 = 0.75/ход → emigrant на втором ходе.
+	var emigrated := 0
+	for i in 4:
+		var r: Dictionary = c.population_system.process_turn(20, float(c.ethics.reputation), 100)
+		emigrated += (r.get("emigrants", []) as Array).size()
+	assert_bool(emigrated >= 1).override_failure_message(
+		"Репутация −5 не дала оттока за 4 хода").is_true()
+
+
+func test_guard_reconcile_only_on_turns_10_20() -> void:
+	# Страж §2.3 (акт раунда 16): сверка — только ходы 10/20, ровно дважды за кампанию.
+	var e := _ethics("spark")
+	var fired: Array = []
+	for t in range(1, 22):
+		if e.needs_reconcile(t):
+			fired.append(t)
+	assert_str(str(fired)).override_failure_message(
+		"окна сверки не {10, 20}").is_equal("[10, 20]")
+	# Кампания: ровно две записи reconcile в журнале, на 10 и 20.
+	var c: CampaignComposition = CampaignComposition.from_campaign_config(12345)
+	c.set_sign("spark")
+	for i in 21:
+		c.advance_turn()
+	var turns: Array = []
+	for ent in c.ethics.journal:
+		if str(ent.get("kind", "")) == "reconcile":
+			turns.append(int(ent.get("turn", 0)))
+	assert_str(str(turns)).override_failure_message("сверки не на {10, 20}").is_equal("[10, 20]")
+
+
+func test_guard_ethics_never_writes_prestige_ledger() -> void:
+	# Страж §2.2 (акт раунда 16, симметрия): журнал этики не пишет в престиж-леджер.
+	var c: CampaignComposition = CampaignComposition.from_campaign_config(12345)
+	c.set_sign("spark")
+	var before := c.prestige_ledger.duplicate(true)
+	c.ethics.record_losses(1)
+	c.ethics.record_defense_win(1)
+	c.ethics.record_fate_debt_win(1)
+	c.ethics.reconcile(10, _sign_vectors())
+	assert_int(c.prestige_ledger.size()).override_failure_message(
+		"этика изменила престиж-леджер").is_equal(before.size())
+	# И на полном прогоне: источник ethics не появляется.
+	for i in 21:
+		c.advance_turn()
+	for entry in c.prestige_ledger:
+		assert_bool(str(entry.get("source_type", "")) != "ethics") \
+			.override_failure_message("ethics-запись в престиж-леджере").is_true()
