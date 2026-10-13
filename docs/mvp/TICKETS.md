@@ -666,3 +666,13 @@ date: 2026-10-13
 `rune_sword_crafted`), но display_name «Рунный клинок»/«Рун. меч» неразличимы
 игроком. Переименовать display_name (оба: registry + WeaponCatalog), идефикаторы
 и иконки не трогать. Не блокёр UI-4.
+
+### Тикет HOTFIX «временные алиасы 6 forgeable-иконок» (2026-10-13, feat/forgeable-icons-hotfix)
+
+`club`, `stone_axe`, `iron_sword`, `steel_longsword`, `runic_blade`, `rune_sword`
+куются (`WeaponTechService.forge()`), но файлов иконок не имели → пустая текстура
+в инвентаре. Временные md5-алиасы: club/iron_sword ← wooden_sword,
+stone_axe/steel_longsword ← greatsword_might, runic_blade/rune_sword ←
+sword_hellstorm. **Самоликвидация:** генерация сета 29 (docs/15 §5) перезаписывает
+все 6 уникальными — алиас больше не существует. В чистильные прогоны md5-дублей
+не попадает (реестр аудита регенерируется после сета 29).
