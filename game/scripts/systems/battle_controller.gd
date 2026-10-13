@@ -93,7 +93,11 @@ func _on_attack_target_updated(target: BattleState.BattleUnit) -> void:
 		_ui.show_target_card(target)
 
 ## UI-3 F: показать финальный оверлей (flow держит сцену до result_accepted).
-func show_result_overlay(winner: BattleState.Side, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack]) -> void:
+func show_result_overlay(
+	winner: BattleState.Side,
+	surviving_atk: Array[UnitStack],
+	surviving_def: Array[UnitStack]
+) -> void:
 	_ui.show_result(winner, surviving_atk.size(), surviving_def.size())
 
 func _generate_terrain() -> void:

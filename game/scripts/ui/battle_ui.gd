@@ -142,7 +142,10 @@ func update_active_unit(unit: BattleState.BattleUnit) -> void:
 
 # A: очередь инициативы — live из BattleState.turn_queue; активный — PanelActive
 # (золотая рамка, docs/14 §4.A), мёртвый — PanelDead + LabelDead (десат формой).
-func update_initiative(units: Array[BattleState.BattleUnit], active_unit: BattleState.BattleUnit) -> void:
+func update_initiative(
+	units: Array[BattleState.BattleUnit],
+	active_unit: BattleState.BattleUnit
+) -> void:
 	_initiative_units = units
 	for child in _init_box.get_children():
 		_init_box.remove_child(child)
@@ -175,7 +178,8 @@ func _refresh_initiative_highlight(active_unit: BattleState.BattleUnit) -> void:
 			var uid: int = int(child.name.get_slice("_", 1))
 			if child.theme_type_variation == "PanelDead":
 				continue
-			child.theme_type_variation = "PanelActive" if active_unit != null and uid == active_unit.uid else "PanelCard"
+			var is_active: bool = active_unit != null and uid == active_unit.uid
+			child.theme_type_variation = "PanelActive" if is_active else "PanelCard"
 
 # F: финал боя — единственный выход «Продолжить» (docs/14 §4.F); потери — моно.
 func show_result(winner: int, surviving_atk: int, surviving_def: int) -> void:

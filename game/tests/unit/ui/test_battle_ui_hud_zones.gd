@@ -2,7 +2,7 @@ extends BaseTest
 
 # UI-3 шаг 2: зоны A (инициатива), B (карточка цели), F (финал) — презентационный слой.
 
-const _BattleUIScene := preload("res://scenes/ui/battle_ui.tscn")
+const _BATTLE_UI_SCENE := preload("res://scenes/ui/battle_ui.tscn")
 
 var _ui: Node = null
 
@@ -18,7 +18,7 @@ func _mk_unit(p_name: String, count: int, hp: int = 5) -> BattleState.BattleUnit
 	return u
 
 func _mk_ui() -> BattleUI:
-	var ui: BattleUI = _BattleUIScene.instantiate()
+	var ui: BattleUI = _BATTLE_UI_SCENE.instantiate()
 	_ui = ui
 	get_tree().root.add_child(ui)
 	return ui
@@ -46,7 +46,8 @@ func test_zone_a_initiative_cells_and_active() -> void:
 
 func test_zone_b_target_card_live_fields() -> void:
 	var ui: BattleUI = _mk_ui()
-	assert_bool(ui._target_card.visible).is_false().override_failure_message("карточка скрыта по умолчанию (no-op не светится)")
+	assert_bool(ui._target_card.visible).is_false() \
+		.override_failure_message("карточка скрыта по умолчанию")
 
 	var u := _mk_unit("Гаргулья", 7)
 	ui.show_target_card(u)
@@ -60,7 +61,8 @@ func test_zone_b_target_card_live_fields() -> void:
 	assert_bool(ui._tc_preview.visible).is_true()
 
 	ui.set_attack_preview("")
-	assert_bool(ui._tc_preview.visible).is_false().override_failure_message("пустое превью не рисуется (no fake numbers)")
+	assert_bool(ui._tc_preview.visible).is_false() \
+		.override_failure_message("пустое превью не рисуется")
 
 	ui.hide_target_card()
 	assert_bool(ui._target_card.visible).is_false()
@@ -70,7 +72,8 @@ func test_zone_b_zero_defense_row_hidden() -> void:
 	var u := _mk_unit("Тень", 1)
 	u.stack.stats.defense = 0
 	ui.show_target_card(u)
-	assert_bool(ui._tc_def.visible).is_false().override_failure_message("нет источника — строка скрыта, ноль не фейк")
+	assert_bool(ui._tc_def.visible).is_false() \
+		.override_failure_message("нет источника — строка скрыта")
 
 func test_zone_f_result_overlay_single_exit() -> void:
 	var ui: BattleUI = _mk_ui()
@@ -85,4 +88,5 @@ func test_zone_f_result_overlay_single_exit() -> void:
 	assert_str(ui._end_info.text).is_equal("Остаток: 3 / 0")
 
 	ui._continue_btn.emit_signal("pressed")
-	assert_bool(accepted[0]).is_true().override_failure_message("«Продолжить» — единственный выход, сигнал обязан идти в flow")
+	assert_bool(accepted[0]).is_true() \
+		.override_failure_message("«Продолжить» → сигнал в flow")

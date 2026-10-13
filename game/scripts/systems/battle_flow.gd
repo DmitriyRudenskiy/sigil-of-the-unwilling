@@ -54,7 +54,12 @@ func _on_battle_finished(winner: BattleState.Side, surviving_atk: Array[UnitStac
 		return
 	_finish_battle(winner, surviving_atk, surviving_def, battle)
 
-func _finish_battle(winner: BattleState.Side, surviving_atk: Array[UnitStack], surviving_def: Array[UnitStack], battle: Node) -> void:
+func _finish_battle(
+	winner: BattleState.Side,
+	surviving_atk: Array[UnitStack],
+	surviving_def: Array[UnitStack],
+	battle: Node
+) -> void:
 	if is_instance_valid(battle):
 		battle.queue_free()
 	RenderingServer.set_default_clear_color(ThemeConfig.C_BATTLE_BG_FLOW)
