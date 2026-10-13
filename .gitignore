@@ -7,3 +7,8 @@
 
 .pi/hindsight.json
 game/balance_report.json
+
+# Локальные референсы стиля (чужие/сгенерированные пиксели, прав не зафиксировано).
+# В git — только карта reference/INDEX.md и тексты docs/13, docs/17. См. INDEX.md «Почему не в git».
+reference/*
+!reference/INDEX.md
