@@ -43,13 +43,13 @@ func _load_background() -> void:
         _background.texture = _placeholder()
 
 func _find_bg() -> Texture2D:
+    # Пути только живые (docs/12-asset-audit.md, Missing): мёртвые ветки
+    # raw/throne|menu_bg и backgrounds/throne|menu.png убраны; jpeg — живой
+    # полноэкранный вариант 1920×1080 того же фона.
     var candidates := [
         "res://assets/ui/main_menu_bg.png",
+        "res://assets/ui/main_menu_bg.jpeg",
         "res://assets/ui/throne.png",
-        "res://assets/raw/throne.png",
-        "res://assets/raw/menu_bg.png",
-        "res://assets/backgrounds/throne.png",
-        "res://assets/backgrounds/menu.png",
     ]
     for path in candidates:
         if ResourceLoader.exists(path):
