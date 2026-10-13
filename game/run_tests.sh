@@ -160,7 +160,7 @@ export GODOT_PROJECT_PATH="${GODOT_PROJECT_PATH:-$PWD}"
 # (bash: присваивания без команды не экспортируются в команду) — GODOT_PATH/GODOT_BIN
 # не доходили до pytest; lifecycle-тесты skip'ались «Godot не найден», node-сервер
 # маскировал баг auto-detection. Комментарии — только ВЫШЕ блока присваиваний.
-# ci-speedup: параллельные MCP-воркеры (pytest-xdist, dist=loadfile).
+# ci-speedup: параллельные MCP-воркеры (pytest-xdist, dist=load — дефолт).
 # MCP_WORKERS: дефолт 1 (локальный прогон — поведение не меняется); CI: 3
 # (4-ядерный раннер, 1 ядро — запас под флейки, D-166-класс). Порт воркера —
 # conftest _worker_port(): gwN → 9090+N (env MCP_PORT; Godot-сторона tools/mcp/
