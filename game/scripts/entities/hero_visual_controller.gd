@@ -6,16 +6,17 @@ const HeroVisualsScene = preload("res://scenes/entities/hero_visuals.tscn")
 const DestMarkerScene = preload("res://scenes/entities/dest_marker.tscn")
 const StatusOrbScene = preload("res://scenes/entities/status_orb.tscn")
 
-const HERO_SHEET_PATH := "res://assets/raw/hero_knight.jpg"
+# Канонический путь листа (UI-4, 2026-10-13): единственный путь поиска — эта
+# константа. Эвристика _find_sheet() (кандидаты + скан assets/raw) удалена
+# вместе с raw/; оверрайд листа — правка константы, не имя файла в raw/.
+const HERO_SHEET_PATH := "res://assets/characters/hero_knight.png"
 
-# Ориентация «бокового» кадра: новый PNG (8x5) смотрит вправо, старый JPG (1024) — влево.
-# Управляет знаком flip_h в set_facing. Если рыцарь «идёт задом» при движении вправо —
-# инвертировать значение в соответствующей ветке build_visual.
+# Ориентация «бокового» кадра канонического PNG-листа (8x5) — вправо.
+# Управляет знаком flip_h в set_facing.
 var _side_faces_right := true
 
 var _visuals: Node2D = null
 var _anim: AnimatedSprite2D
-var _sheet_path_cache: String = ""
 var _fallback: Sprite2D
 var _avatar_tex: Texture2D
 var _marker: DestMarker
@@ -42,24 +43,17 @@ func build_visual() -> void:
 	_parent.add_child(_visuals)
 	_fallback = _visuals.get_node("Fallback")
 	_anim = _visuals.get_node("Anim")
-	var sheet_path := _find_sheet()
+	var sheet_path := HERO_SHEET_PATH if FileAccess.file_exists(HERO_SHEET_PATH) else ""
 	if sheet_path != "":
-		if sheet_path.ends_with(".png"):
-			# TASK_21: новый лист 8x5 — нормализация по alpha-bbox (иначе анимация дрожит).
-			var sf_new := KnightFramesBuilder.build_from_file(sheet_path)
-			if sf_new != null and not sf_new.get_animation_names().is_empty():
-				_avatar_tex = sf_new.get_frame_texture(&"side", 0)
-				_anim.sprite_frames = sf_new
-				_anim.scale = Vector2(0.62, 0.62)
-				_anim.stop()
-				_anim.frame = 0
-				_side_faces_right = true
-				GameLogger.hero("Knight animation built from %s" % sheet_path)
-		else:
-			_side_faces_right = false
-			var sheet_res := load(sheet_path)
-			if sheet_res is ImageTexture:
-				_build_anim_from_sheet((sheet_res as ImageTexture).get_image())
+		# Лист 8x5 — нормализация по alpha-bbox (иначе анимация дрожит).
+		var sf_new := KnightFramesBuilder.build_from_file(sheet_path)
+		if sf_new != null and not sf_new.get_animation_names().is_empty():
+			_avatar_tex = sf_new.get_frame_texture(&"side", 0)
+			_anim.sprite_frames = sf_new
+			_anim.scale = Vector2(0.62, 0.62)
+			_anim.stop()
+			_anim.frame = 0
+			GameLogger.hero("Knight animation built from %s" % sheet_path)
 	if _anim.sprite_frames == null or _anim.sprite_frames.get_animation_names().is_empty():
 		_fallback.texture = PlaceholderTexture.circle(20, Color(0.9, 0.7, 0.1), Color(0.3, 0.2, 0.0))
 		_fallback.visible = true
@@ -67,69 +61,6 @@ func build_visual() -> void:
 	else:
 		_fallback.visible = false
 		_anim.visible = true
-
-func _find_sheet() -> String:
-	if _sheet_path_cache != "":
-		return _sheet_path_cache
-	for c in ["hero_knight.png", "knight.png", "hero.png", "knight.jpeg", "hero.jpeg", "hero_knight.jpg"]:
-		var path: String = "res://assets/raw/" + str(c)
-		if FileAccess.file_exists(path):
-			_sheet_path_cache = path
-			return path
-	var dir := DirAccess.open("res://assets/raw")
-	if dir == null:
-		return ""
-	var best := ""
-	var best_w := 0
-	dir.list_dir_begin()
-	var f := dir.get_next()
-	while f != "":
-		var low := f.to_lower()
-		if low.ends_with(".png") or low.ends_with(".jpeg") or low.ends_with(".jpg"):
-			var res := load("res://assets/raw/" + f)
-			var img: Image = (res as ImageTexture).get_image() if res is ImageTexture else null
-			if img != null and img.get_width() >= 800 and absi(img.get_width() - img.get_height()) < 8:
-				if img.get_width() > best_w:
-					best_w = img.get_width()
-					best = "res://assets/raw/" + f
-		f = dir.get_next()
-	dir.list_dir_end()
-	_sheet_path_cache = best
-	if best != "":
-		GameLogger.hero("sheet auto-detected: %s" % best)
-	return best
-
-func _build_anim_from_sheet(sheet: Image) -> void:
-	if sheet.get_format() != Image.FORMAT_RGBA8:
-		sheet.convert(Image.FORMAT_RGBA8)
-	sheet.resize(512, 512, Image.INTERPOLATE_LANCZOS)
-	for y in 512:
-		for x in 512:
-			var px := sheet.get_pixel(x, y)
-			if px.r < 0.12 and px.g < 0.12 and px.b < 0.12:
-				sheet.set_pixel(x, y, Color(0, 0, 0, 0))
-	var fs := 128
-	var sf := SpriteFrames.new()
-	if sf.has_animation("default"):
-		sf.remove_animation("default")
-	sf.add_animation("side")
-	sf.add_animation("away")
-	for an in ["side", "away"]:
-		sf.set_animation_loop(an, true)
-		sf.set_animation_speed(an, 8.0)
-	for c in 4:
-		var f_side := Image.create(fs, fs, false, Image.FORMAT_RGBA8)
-		f_side.blit_rect(sheet, Rect2i(c * fs, 0, fs, fs), Vector2i(0, 0))
-		sf.add_frame("side", ImageTexture.create_from_image(f_side))
-		var f_away := Image.create(fs, fs, false, Image.FORMAT_RGBA8)
-		f_away.blit_rect(sheet, Rect2i(c * fs, 3 * fs, fs, fs), Vector2i(0, 0))
-		sf.add_frame("away", ImageTexture.create_from_image(f_away))
-	_avatar_tex = sf.get_frame_texture("side", 0)
-	_anim.sprite_frames = sf
-	_anim.scale = Vector2(0.62, 0.62)
-	_anim.stop()
-	_anim.frame = 0
-	GameLogger.hero("Knight animation built from %s" % HERO_SHEET_PATH)
 
 func idle_animation() -> void:
 	if _anim != null:

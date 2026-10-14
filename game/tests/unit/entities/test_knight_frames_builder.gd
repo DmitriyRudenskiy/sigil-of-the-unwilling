@@ -2,7 +2,7 @@ extends BaseTest
 ## TASK_21: KnightFramesBuilder — лист 8x5 (574x574), анимации side/run/away,
 ## нормализация кадров по alpha-bbox (центрирование + общая линия земли).
 
-const SHEET_PATH := "res://assets/raw/hero_knight.png"
+const SHEET_PATH := "res://assets/characters/hero_knight.png"
 
 
 func test_build_creates_expected_animations() -> void:
