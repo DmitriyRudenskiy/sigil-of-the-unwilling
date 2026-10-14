@@ -28,8 +28,12 @@ reproducible pipeline behind instead of a one-off prompt session.
   `192.168.0.230`: deterministic per-subject seed, skip-existing resume, retry with a reseeded attempt,
   WEBP q82 export, per-run manifest (prompt / seed / model / timings / server filename), and review-board
   modes that always place a category's reference next to its frames.
+- Keep the model a property of the run, never of the category (owner rule, 2026-10-15): every prompt is
+  tested through both Krea-2 and Qwen 2.1, each model writes under its own directory, each model gets its
+  own style board, and the full run happens in the single model the boards pick. Characters are not drawn
+  by one model while the interface is drawn by another.
 - Produce **385 concept images** (5 × 77) at 1024×1024 (isolated assets, near-white background) and
-  1280×720 (UI screens) under `concept_art/<variant>/<category>/<id>.webp`.
+  1280×720 (UI screens) under `concept_art/<model>/<variant>/<category>/<id>.webp`.
 - Add `docs/18-concept-art-variants.md`: the five variants as style candidates — which reference image each
   category repeats, what each variant moves in rendering technique relative to it, what it deliberately
   drops, and the pick/mix decision record.

@@ -59,9 +59,15 @@ def load_spec(path: Path = SPEC_PATH) -> dict:
         if len(set(ids)) != n:
             raise SystemExit(f"spec: категория {cat}: дублируются id")
     for v in spec["variants"]:
-        for key in ("id", "style", "model", "ui_model"):
+        for key in ("id", "style"):
             if key not in v:
                 raise SystemExit(f"spec: в варианте {v.get('id', '?')} нет поля {key}")
+    for key in ("model", "probe_models"):
+        if not spec.get(key):
+            raise SystemExit(f"spec: нет поля {key} — модель выбирается прогоном, не категорией")
+    for m in [spec["model"], *spec["probe_models"]]:
+        if m not in spec["models"]:
+            raise SystemExit(f"spec: модели {m} нет в реестре models")
     return spec
 
 
@@ -82,7 +88,9 @@ def build_prompt(variant: dict, cat: dict, item: dict, negative_param: bool) -> 
     return prompt, neg
 
 
-def artifacts(spec: dict, variants=None, categories=None, only=None) -> list[dict]:
+def artifacts(spec: dict, variants=None, categories=None, only=None, model: str = "") -> list[dict]:
+    """Артефакты одного прогона. Модель — уровень прогона, а не категории: один и тот же промпт
+    обязан прогоняться и в Krea-2, и в Qwen 2.1, поэтому модель сидит в пути вывода."""
     out = []
     for v in spec["variants"]:
         if variants and v["id"] not in variants:
@@ -93,12 +101,11 @@ def artifacts(spec: dict, variants=None, categories=None, only=None) -> list[dic
             for item in c["items"]:
                 if only and item["id"] not in only:
                     continue
-                model_key = c.get("model") or (v["ui_model"] if cname == "ui" else v["model"])
                 out.append({
                     "variant": v["id"], "category": cname, "id": item["id"],
-                    "subject": item["subject"], "model_key": model_key,
+                    "subject": item["subject"], "model_key": model,
                     "size": tuple(c["size"]),
-                    "path": Path(spec["out_dir"]) / v["id"] / cname / f"{item['id']}.webp",
+                    "path": Path(spec["out_dir"]) / model / v["id"] / cname / f"{item['id']}.webp",
                 })
     return out
 
@@ -266,9 +273,10 @@ def _cell(path: Path, box: int, caption: str) -> Image.Image:
     return c
 
 
-def contact_sheets(spec: dict, out_root: Path) -> list[Path]:
+def contact_sheets(spec: dict, out_root: Path, model: str) -> list[Path]:
     """Матрица «вариант × категория» и по листу на вариант со всеми сюжетами."""
     made = []
+    out_root.mkdir(parents=True, exist_ok=True)
     cats = list(spec["categories"])
     box = 220
     m = Image.new("RGB", (box * (len(cats) + 1), box * len(spec["variants"]) + 18), (255, 255, 255))
@@ -279,14 +287,14 @@ def contact_sheets(spec: dict, out_root: Path) -> list[Path]:
         d.text((3, box * (i + 1) + 2), v["id"], fill=(0, 0, 0))
         for j, cname in enumerate(cats):
             items = spec["categories"][cname]["items"]
-            p = out_root / v["id"] / cname / f"{items[0]['id']}.webp"
+            p = out_root / model / v["id"] / cname / f"{items[0]['id']}.webp"
             m.paste(_cell(p, box, ""), (box * (j + 1), box * (i + 1)))
     p = out_root / "sheet_matrix.webp"
     m.save(p, "WEBP", quality=88)
     made.append(p)
 
     for v in spec["variants"]:
-        cells = [(out_root / v["id"] / cname / f"{it['id']}.webp", f"{cname}/{it['id']}")
+        cells = [(out_root / model / v["id"] / cname / f"{it['id']}.webp", f"{cname}/{it['id']}")
                  for cname, c in spec["categories"].items() for it in c["items"]]
         cols = 8
         rows = -(-len(cells) // cols)
@@ -299,7 +307,7 @@ def contact_sheets(spec: dict, out_root: Path) -> list[Path]:
     return made
 
 
-def style_board(spec: dict, out_root: Path) -> Path:
+def style_board(spec: dict, out_root: Path, model: str) -> Path:
     """Борд стиля: строка = категория, первая ячейка — эталон категории, дальше все варианты.
 
     Нужен ровно для одного вопроса: повторяет ли кадр стиль своего эталона. Сравнение
@@ -314,9 +322,9 @@ def style_board(spec: dict, out_root: Path) -> Path:
                 (0, (box + 18) * i))
         for j, v in enumerate(spec["variants"], 1):
             it = c["items"][0]
-            b.paste(_cell(out_root / v["id"] / cname / f"{it['id']}.webp", box, v["id"]),
+            b.paste(_cell(out_root / model / v["id"] / cname / f"{it['id']}.webp", box, v["id"]),
                     (box * j, (box + 18) * i))
-    p = out_root / "board_style.webp"
+    p = out_root / f"board_style_{model}.webp"
     b.save(p, "WEBP", quality=90)
     return p
 
@@ -333,7 +341,9 @@ def main() -> int:
     ap.add_argument("--dry-run", action="store_true", help="только перечислить артефакты")
     ap.add_argument("--sheet", action="store_true", help="собрать контактные листы и выйти")
     ap.add_argument("--probe", action="store_true",
-                    help="стилевой борд: по одному сюжету каждой категории во всех вариантах + борд с эталонами")
+                    help="стилевой борд: по одному сюжету каждой категории во всех вариантах и во всех "
+                         "моделях из probe_models + борд с эталонами на каждую модель")
+    ap.add_argument("--model", help="модель прогона (krea2 | qwen21); по умолчанию spec.model")
     ap.add_argument("--limit", type=int, help="не больше N артефактов за прогон")
     ap.add_argument("--timeout", type=int, default=900, help="ожидание одного сюжета, c (900)")
     a = ap.parse_args()
@@ -343,23 +353,24 @@ def main() -> int:
     if not out_root.is_absolute():
         out_root = Path(__file__).resolve().parents[2] / out_root
     lst = lambda s: s.split(",") if s else None              # noqa: E731
-    arts = artifacts(spec, lst(a.variant), lst(a.category), lst(a.only))
+    models = spec["probe_models"] if a.probe else [a.model or spec["model"]]
+    arts = [x for m in models for x in artifacts(spec, lst(a.variant), lst(a.category), lst(a.only), m)]
     for art in arts:                       # путь из каталога относительный — делаем абсолютным
-        art["path"] = out_root / art["variant"] / art["category"] / f"{art['id']}.webp"
+        art["path"] = out_root / art["model_key"] / art["variant"] / art["category"] / f"{art['id']}.webp"
     if a.probe:                            # первый сюжет каждой категории, все варианты
         first = {cname: c["items"][0]["id"] for cname, c in spec["categories"].items()}
         arts = [x for x in arts if x["id"] == first[x["category"]]]
 
     if a.dry_run:
         for art in arts:
-            print(f"{art['variant']}/{art['category']}/{art['id']} "
+            print(f"{art['model_key']}/{art['variant']}/{art['category']}/{art['id']} "
                   f"{art['size'][0]}x{art['size'][1]} seed={seed_for(art['variant'], art['category'], art['id'])}")
         print(f"итого: {len(arts)} артефактов, {len(spec['variants'])} вариантов, "
               f"{len({x['id'] for x in arts})} уникальных id сюжетов")
         return 0
 
     if a.sheet:
-        for p in contact_sheets(spec, out_root):
+        for p in contact_sheets(spec, out_root, a.model or spec["model"]):
             print(p)
         return 0
     if a.limit:
@@ -377,7 +388,7 @@ def main() -> int:
 
     todo = []
     for art in arts:
-        key = f"{art['variant']}/{art['category']}/{art['id']}"
+        key = f"{art['model_key']}/{art['variant']}/{art['category']}/{art['id']}"
         if art["path"].exists() and not a.force:
             tally["skip"] += 1
             continue
@@ -406,7 +417,8 @@ def main() -> int:
                     tally[verdict] += 1
                     if verdict != "ok":
                         failed.append(key)
-                        reject = out_root / "_reject" / f"{art['variant']}__{art['category']}__{art['id']}.webp"
+                        reject = out_root / "_reject" / (f"{art['model_key']}__{art['variant']}"
+                                                          f"__{art['category']}__{art['id']}.webp")
                         reject.parent.mkdir(parents=True, exist_ok=True)
                         art["path"].rename(reject) if art["path"].exists() else None
                     entry["verdict"] = verdict
@@ -421,7 +433,9 @@ def main() -> int:
     for k in failed:
         print(f"  fail: {k}")
     if a.probe:
-        print(f"борд стиля (в каждой строке первым — эталон категории): {style_board(spec, out_root)}")
+        for m in models:
+            print(f"борд стиля {m} (в каждой строке первым — эталон категории): "
+                  f"{style_board(spec, out_root, m)}")
     return 1 if tally["fail"] else 0
 
 

@@ -52,7 +52,7 @@ with tempfile.TemporaryDirectory() as tmp:
     ok(len(SPEC["variants"]) == 5, "вариантов != 5")
 
     # --- перечисление: 385 артефактов, по одному на пару (вариант, сюжет), фильтры
-    arts = g.artifacts(SPEC)
+    arts = g.artifacts(SPEC, model="krea2")
     ok(len(arts) == 385, f"артефактов {len(arts)} != 385")
     ok(len({(x["variant"], x["id"]) for x in arts}) == 385, "есть пара (вариант, сюжет) без повтора")
     ok(len(g.artifacts(SPEC, variants=[SPEC["variants"][0]["id"]])) == 77, "фильтр по варианту")
@@ -133,12 +133,21 @@ with tempfile.TemporaryDirectory() as tmp:
 
     # --- листы: матрица и лист варианта существуют и не пустые
     root = Path(tmp) / "concept_art"
-    for art in g.artifacts(SPEC, categories=["cursors"]):
-        (root / art["variant"] / art["category"]).mkdir(parents=True, exist_ok=True)
-        Image.new("RGB", (32, 32), (255, 255, 255)).save(root / art["variant"] / art["category"] / f"{art['id']}.webp")
-    sheets = g.contact_sheets(SPEC, root)
+    for art in g.artifacts(SPEC, categories=["cursors"], model="krea2"):
+        art["path"].parent.mkdir(parents=True, exist_ok=True)
+        Image.new("RGB", (32, 32), (255, 255, 255)).save(art["path"])
+    sheets = g.contact_sheets(SPEC, root, "krea2")
     ok(len(sheets) == 1 + len(SPEC["variants"]), f"листов {len(sheets)} != 6")
     ok(Image.open(sheets[0]).size[0] >= 1000, "матрица уже 1000 px по ширине")
     ok(all(s.exists() and s.stat().st_size > 1000 for s in sheets), "есть пустой лист")
+
+    # --- борд стиля: в каждой строке первым стоит эталон категории
+    for v in SPEC["variants"]:
+        d = root / "krea2" / v["id"] / "cursors"
+        d.mkdir(parents=True, exist_ok=True)
+        Image.new("RGB", (32, 32), (255, 0, 0)).save(d / "c_arrow.webp")
+    board = g.style_board(SPEC, root, "krea2")
+    ok(board.exists() and Image.open(board).size[0] > 1000, "борд стиля не собран")
+    ok(board.name == "board_style_krea2.webp", f"борд не привязан к модели: {board.name}")
 
 print(f"OK: проверок {checks}")

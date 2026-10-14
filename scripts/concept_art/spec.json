@@ -28,40 +28,30 @@
   {
    "id": "t1_bold_ink",
    "name": "t1_bold_ink",
-   "model": "krea2",
-   "ui_model": "qwen21",
    "style": "bold black ink outlines, flat cel fill, hard-edged single shadow, high-contrast graphic-novel finish",
    "negative": "photorealism, photograph, gritty realism, dark muddy palette, desaturated, sketch, scribble, text, letters, watermark, extra limbs, cropped figure, scenery, background landscape"
   },
   {
    "id": "t2_soft_render",
    "name": "t2_soft_render",
-   "model": "krea2",
-   "ui_model": "qwen21",
    "style": "smooth airbrushed rendering, soft gradients, no visible line, glossy polished surfaces, warm rim light",
    "negative": "photorealism, photograph, gritty realism, dark muddy palette, desaturated, sketch, scribble, text, letters, watermark, extra limbs, cropped figure, scenery, background landscape"
   },
   {
    "id": "t3_flat_line",
    "name": "t3_flat_line",
-   "model": "krea2",
-   "ui_model": "qwen21",
    "style": "uniform thin ink line, flat colours, single shadow tone, minimal surface texture, crisp silhouette",
    "negative": "photorealism, photograph, gritty realism, dark muddy palette, desaturated, sketch, scribble, text, letters, watermark, extra limbs, cropped figure, scenery, background landscape"
   },
   {
    "id": "t4_painterly",
    "name": "t4_painterly",
-   "model": "krea2",
-   "ui_model": "qwen21",
    "style": "loose hand-painted rendering with visible brush texture, rich mid-tones, soft edges, no hard outlines",
    "negative": "photorealism, photograph, gritty realism, dark muddy palette, desaturated, sketch, scribble, text, letters, watermark, extra limbs, cropped figure, scenery, background landscape"
   },
   {
    "id": "t5_glossy_toon",
    "name": "t5_glossy_toon",
-   "model": "krea2",
-   "ui_model": "qwen21",
    "style": "glossy toon rendering, thick bright rim light, simplified bold shapes, high saturation, playful specular highlights",
    "negative": "photorealism, photograph, gritty realism, dark muddy palette, desaturated, sketch, scribble, text, letters, watermark, extra limbs, cropped figure, scenery, background landscape"
   }
@@ -421,7 +411,6 @@
     720
    ],
    "count": 5,
-   "model": "qwen21",
    "frame": "complete game user interface screen, 16:9 widescreen layout, readable panel hierarchy, top resource bar, no photographic background, no watermark",
    "items": [
     {
@@ -449,5 +438,10 @@
    "style": "dark cinematic fantasy game interface, carved stone and dark wood panels with thin gold filigree, parchment fields, glowing blue sigil accents, moody low-key lighting with one warm light source, engraved serif titling"
   }
  },
- "references_dir": "/Users/user/Downloads/Новая папка с объектами 40"
+ "references_dir": "/Users/user/Downloads/Новая папка с объектами 40",
+ "model": "krea2",
+ "probe_models": [
+  "krea2",
+  "qwen21"
+ ]
 }
