@@ -21,8 +21,7 @@ static func fallback() -> Texture2D:
 	return _fallback
 
 static func resource_texture(id: String) -> Texture2D:
-	var path := "%s%s.png" % [TC.ICON_DIR_RESOURCES, id]
-	var tex: Texture2D = _load(path) if ResourceLoader.exists(path) else null
+	var tex: Texture2D = ResourceAtlas.texture_for_id(StringName(id))
 	return tex if tex != null else fallback()
 
 static func building_texture(id: String) -> Texture2D:

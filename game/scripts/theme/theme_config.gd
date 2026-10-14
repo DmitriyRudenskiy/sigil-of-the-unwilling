@@ -135,14 +135,12 @@ const C_GRAY_DIM_40  := Color(0.5, 0.5, 0.5, 0.4)
 const SPRITE_SHEET_WORLD    := "res://assets/tiles/world_tiles.webp"
 const SPRITE_SHEET_HEX0     := "res://assets/textures/hex_sheet_0.png"
 const SPRITE_SHEET_HEX1     := "res://assets/textures/hex_sheet_1.png"
-const SPRITE_SHEET_RESOURCE := "res://assets/textures/resources.png"
 const SPRITE_HERO_KNIGHT    := "res://assets/raw/hero_knight.jpg"
 const SPRITE_UNITS_DIR      := "res://assets/units/"
 
 const THEME_PATH := "res://assets/theme/game_theme.tres"
 
 const ICON_DIR := "res://assets/ui/icons/"
-const ICON_DIR_RESOURCES := ICON_DIR + "resources/"
 const ICON_DIR_BUILDINGS := ICON_DIR + "buildings/"
 const ICON_DIR_NEEDS := ICON_DIR + "needs/"
 const ICON_DIR_SCHOOLS := ICON_DIR + "schools/"

@@ -13,6 +13,6 @@ game/balance_report.json
 reference/*
 !reference/INDEX.md
 
-# Python-кэш (gen_docs_index.py импортирует check_docs_links)
+# Python-кэш (gen_docs_index.py импортирует check_docs_links; инструменты генерации ассетов game/tools, scripts/)
 __pycache__/
 *.pyc

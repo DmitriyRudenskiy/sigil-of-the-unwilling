@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://n4vhcgfb0850"
-path="res://.godot/imported/sulfur.png-cbc781740dc787382d44c85b5e92365f.ctex"
+uid="uid://b3eekc4d7i105"
+path="res://.godot/imported/icon_resource_ore.png-f262fa490b673ad2479331b93f261ba7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/icons/resources/sulfur.png"
-dest_files=["res://.godot/imported/sulfur.png-cbc781740dc787382d44c85b5e92365f.ctex"]
+source_file="res://assets/ui/icons/resources/icon_resource_ore.png"
+dest_files=["res://.godot/imported/icon_resource_ore.png-f262fa490b673ad2479331b93f261ba7.ctex"]
 
 [params]
 

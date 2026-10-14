@@ -15,7 +15,7 @@ func reset() -> void:
 
 # ui-icons: текстура иконки ресурса (assets/ui/icons/resources/), fallback при отсутствии.
 func get_icon(id: StringName) -> Texture2D:
-	return ThemeConfig.icon_texture(ThemeConfig.ICON_DIR_RESOURCES + str(id) + ".png")
+	return IconRegistry.resource_texture(str(id))
 
 const CAMPAIGN_LAYER_1_IDS: Array[StringName] = [
 	&"wood", &"iron", &"food", &"mercury", &"sulfur", &"crystals",

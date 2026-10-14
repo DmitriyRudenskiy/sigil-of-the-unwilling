@@ -3,7 +3,7 @@ extends BaseTest
 ## ui-icons: ThemeConfig.icon_texture() кэширует загруженные текстуры
 ## (повторный вызов — тот же экземпляр, повторная загрузка с диска не происходит).
 
-const PATH := "res://assets/ui/icons/resources/wood.png"
+const PATH := "res://assets/ui/icons/resources/icon_resource_wood.png"
 
 func test_second_call_returns_same_instance() -> void:
 	var a := ThemeConfig.icon_texture(PATH)
@@ -14,7 +14,7 @@ func test_second_call_returns_same_instance() -> void:
 func test_cache_grows() -> void:
 	var before := ThemeConfig._icon_cache.size()
 	ThemeConfig.icon_texture(PATH)
-	ThemeConfig.icon_texture(ThemeConfig.ICON_DIR_RESOURCES + "gems.png")
+	ThemeConfig.icon_texture(ResourceAtlas.icon_path(&"gems"))
 	assert_int(ThemeConfig._icon_cache.size()).is_greater_equal(before)
 
 func test_cache_hits_do_not_reload() -> void:

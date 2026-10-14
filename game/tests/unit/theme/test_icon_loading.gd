@@ -10,7 +10,7 @@ const SCHOOL_ICONS := ["air", "fire", "water", "earth"]
 
 func test_resource_icons_load() -> void:
 	for id in RESOURCE_ICONS:
-		var path: String = ThemeConfig.ICON_DIR_RESOURCES + id + ".png"
+		var path: String = ResourceAtlas.icon_path(StringName(id))
 		assert_bool(ResourceLoader.exists(path)).is_true()
 		assert_bool(load(path) is Texture2D).is_true()
 
