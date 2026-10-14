@@ -6,11 +6,18 @@ extends BaseTest
 # game/tools/gen_resource_icons.py; воспроизводимость проверяет он же:
 # `python3 game/tools/gen_resource_icons.py --check` (вне headless-гейта).
 #
-# Здесь: A-1 канвас/вес/имя · A-2 поле содержимого · A-3 заполнение ·
-# A-4 проработка светом (направление 45° — глазами, группа B приёмки) ·
-# A-5 обводка · A-6 палитра · A-8 комплект · A-9 анти-рекол (dHash против ячеек
-# удалённого атласа) · A-11 удаление носителя · A-12 провенанс · A-13 потребители ·
-# A-14 контраст на носителе.
+# Здесь: A-1 канвас/вес/имя · A-2 поле содержимого · A-4 проработка светом
+# (полоса оттенков есть; направление 45° и ΔL* +8…+20 — глазами, группа B:
+# по пикселям полоса не отличима от светлой массы, см. ниже) · A-5 обводка ·
+# A-6 палитра (в т.ч. «ни одного R=G=B») · A-8 комплект · A-9 анти-рекол
+# (dHash против ячеек удалённого атласа) · A-11 удаление носителя ·
+# A-12 строка провенанса на файл · сверка контраста на носителе (§4.3, номера
+# критерия нет) · потребители (AC-поток, номера критерия нет) ·
+# заполнение поля (смысл A-3 машиной не проверяется: dHash в 16 px и
+# 60%-десатуре вырожден — 190 пар из 190 красных, минимум 0; §12.1).
+#
+# Числовые пороги живут только здесь и в генераторе; [[13-art-bible]] §12.1
+# ссылается на них по имени (PAIR_MIN, DHASH_MIN, BORDER_MIN, …), а не дублирует.
 
 const IDS: Array[String] = [
 	"bog_iron", "cinnabar", "coal", "coal_swamp", "crystal", "food", "gems",
@@ -25,10 +32,12 @@ const FIELD := 8            # §7.1 шаг 2: поле = канвас − 8 px �
 const SIZE_LIMIT := 6144    # §8.2
 const CARRIER := Color8(0x28, 0x1C, 0x0F)  # §4.1 тёмное дерево поля карты
 const SOOT := Color8(0x16, 0x10, 0x0A)      # §7.1 шаг 5: цвет обводки
-const L_MIN := 0.20         # A-14: яркость массы
-const L_DELTA_MIN := 0.08   # A-14: и контраст против носителя
+const L_MIN := 0.20         # §4.3: яркость массы (без обводки) на носителе
+const L_DELTA_MIN := 0.08   # §4.3: и контраст против дерева поля
+const SOOT_E := 12.0        # A-5: «это сажа» — допуск ΔE76 против #16100a
+const BORDER_MIN := 0.60    # A-5: ≥ 60 % границы силуэта должно быть обводкой
 const DHASH_MIN := 12       # §12.1: медиана несвязанной пары 18, подозрительная ≤ 10
-const PAIR_MIN := 12         # красная любая пара форм по полю содержимого (минимум 15)
+const PAIR_MIN := 12         # красная любая пара форм по полю содержимого
 const _HEX_DIGITS := "0123456789abcdef"
 
 # §4.6 полоса (замер живых артефактов) — те же токены, что у генератора.
@@ -76,6 +85,24 @@ static func _lum(c: Color) -> float:
 	return 0.2126 * (c.r * a + CARRIER.r * (1.0 - a)) \
 		+ 0.7152 * (c.g * a + CARRIER.g * (1.0 - a)) \
 		+ 0.0722 * (c.b * a + CARRIER.b * (1.0 - a))
+
+
+# Lab (D65) — нужно ровно для ΔE76 в A-5: «пограничный пиксель — сажа».
+static func _lab(c: Color) -> Vector3:
+	var gamma := func(v: float) -> float:
+		return v / 12.92 if v <= 0.04045 else pow((v + 0.055) / 1.055, 2.4)
+	var r: float = gamma.call(c.r)
+	var g: float = gamma.call(c.g)
+	var b: float = gamma.call(c.b)
+	var x: float = (0.4124 * r + 0.3576 * g + 0.1805 * b) / 0.95047
+	var y: float = 0.2126 * r + 0.7152 * g + 0.0722 * b
+	var z: float = (0.0193 * r + 0.1192 * g + 0.9505 * b) / 1.08883
+	var cube := func(t: float) -> float:
+		return pow(t, 1.0 / 3.0) if t > 0.008856 else 7.787 * t + 16.0 / 116.0
+	var fx: float = cube.call(x)
+	var fy: float = cube.call(y)
+	var fz: float = cube.call(z)
+	return Vector3(116.0 * fy - 16.0, 500.0 * (fx - fy), 200.0 * (fy - fz))
 
 
 static func _hex64(hex: String) -> int:
@@ -166,7 +193,12 @@ func test_content_stays_in_field() -> void:
 					).is_true()
 
 
-# --- A-3: заполнение поля (не пустое, не заливка) ----------------------------
+# --- заполнение поля (не пустое, не заливка) ---------------------------------
+# Это НЕ A-3: критерий A-3 («силуэт опознаётся в 16 px и 60%-десатуре, dHash
+# пар ≥ 12») машиной не проверяется — на таком входе хэш вырожден целиком
+# (замер 2026-10-15: минимум 0, красных 190 пар из 190). A-3 — группа B, глаза.
+# Здесь — только разумная полоса заполнения, чтобы иконка не была точкой или
+# плашкой.
 
 func test_silhouette_fill_ratio() -> void:
 	for id in IDS:
@@ -183,7 +215,10 @@ func test_silhouette_fill_ratio() -> void:
 		assert_int(opaque).is_less_equal(220)
 
 
-# --- A-6: палитра §4.6 (тело иконки; края — анти-алиасинг) -------------------
+# --- A-6: палитра §4.6 + «ни одного R=G=B» -----------------------------------
+# Член «не более одного акцентного семейства, ≤ 8 % площади» здесь не проверяется:
+# роль пикселя из PNG не восстанавливается, акцент неотличим от светлой массы.
+# Держит генератор (ACCENT_MAX), глаз — группа B.
 
 func test_body_uses_documented_palette() -> void:
 	var allowed := {}
@@ -198,6 +233,12 @@ func test_body_uses_documented_palette() -> void:
 				var c := img.get_pixel(x, y)
 				if c.a < 1.0:
 					continue
+				# A-6 «чистого серого нет» (§4.3) — по всем видимым пикселям,
+				# не только по «телу»: край AA смешивается с носителем и тоже
+				# может свернуться в серый.
+				assert_bool(c.r8 != c.g8 or c.g8 != c.b8).override_failure_message(
+					"%s: чистый серый R=G=B=%d в (%d,%d) — §4.3" % [id, c.r8, x, y]
+				).is_true()
 				var surrounded := true
 				for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 					if img.get_pixelv(Vector2i(x, y) + d).a < 1.0:
@@ -218,10 +259,12 @@ func test_shading_and_outline_present() -> void:
 		if img == null:
 			continue
 		var opaque := 0
-		var soot := 0
+		var edge := 0
+		var edge_soot := 0
 		var lo := 1.0
 		var hi := 0.0
 		var tones := {}
+		var lab_soot := _lab(SOOT)
 		for y in range(32):
 			for x in range(32):
 				var c := img.get_pixel(x, y)
@@ -232,21 +275,33 @@ func test_shading_and_outline_present() -> void:
 				lo = minf(lo, l)
 				hi = maxf(hi, l)
 				tones[c.to_html(false)] = true
-				if c.to_html(false) == SOOT.to_html(false):
-					soot += 1
+				var on_edge := false
+				for d: Vector2i in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+					var p := Vector2i(x + d.x, y + d.y)
+					if p.x < 0 or p.y < 0 or p.x > 31 or p.y > 31 or img.get_pixelv(p).a <= 0.5:
+						on_edge = true
+				if on_edge:
+					edge += 1
+					if _lab(c).distance_to(lab_soot) <= SOOT_E:
+						edge_soot += 1
 		assert_int(tones.size()).override_failure_message(
 			"%s: плоская заливка без света — оттенков %d" % [id, tones.size()]
 		).is_greater_equal(3)
 		assert_float(hi - lo).override_failure_message(
 			"%s: разброс яркости %.2f — проработки нет" % [id, hi - lo]
 		).is_greater(0.25)
-		assert_int(soot).override_failure_message(
-			"%s: обводки §7.1 шагом 5 (#16100a) нет" % id
-		).is_greater_equal(1)
-		assert_int(soot).is_less_equal(int(opaque * 0.45))
+		# A-5: обводка §7.1 шагом 5 обязана одевать силуэт, а не торчать пятнами.
+		# Направление света (шаг 4) и ΔL* +8…+20 отсюда не проверяемы: светлый
+		# тон полосы — тот же палитровый токен, что и светлая масса, а «самый
+		# светлый цвет иконки» часто акцент (замер: turquoise — 0 % светлого тона
+		# на верхних гранях при корректной нормали). Группа B приёмки — глазами.
+		assert_float(float(edge_soot) / edge).override_failure_message(
+			"%s: границы обведено сажей %.0f %% < %.0f %% (A-5)"
+			% [id, 100.0 * float(edge_soot) / edge, 100.0 * BORDER_MIN]
+		).is_greater_equal(BORDER_MIN)
 
 
-# --- A-14: силуэт читается на носителе ---------------------------------------
+# --- сверка контраста на носителе (§4.3; номера критерия нет) ----------------
 
 func test_contrast_against_carrier() -> void:
 	var carrier_l := _lum(CARRIER)
@@ -259,7 +314,9 @@ func test_contrast_against_carrier() -> void:
 		for y in range(32):
 			for x in range(32):
 				var c := img.get_pixel(x, y)
-				if c.a > 0.5:
+				# сажа исключается: обводка по определению темнее носителя (§7.1
+				# шаг 5), считать её в «яркости массы» — столкнуть A-14 с A-5
+				if c.a > 0.5 and c.to_html(false) != SOOT.to_html(false):
 					sum += _lum(c)
 					n += 1
 		if n == 0:
@@ -292,12 +349,26 @@ func test_icons_are_not_recolored_homm_cells() -> void:
 		).is_greater_equal(DHASH_MIN)
 	# формы различаются между собой (гард против вырожденного хэша и близнецов)
 	var ids := forms.keys()
+	var pairs: Array = []
 	for i in range(ids.size()):
 		for j in range(i + 1, ids.size()):
 			var d := _hamming(forms[ids[i]], forms[ids[j]])
+			pairs.append([d, ids[i], ids[j]])
 			assert_int(d).override_failure_message(
 				"формы %s и %s неразличимы в 8×8 (dHash %d)" % [ids[i], ids[j], d]
 			).is_greater_equal(PAIR_MIN)
+	# DHASH_MATRIX=1 — матрица той же мерой, которой её режет гейт. Python-зеркало
+	# здесь неавторитетно: PIL-ресайз 16×16→9×8 расходится с Godot на 2–12 бит
+	# на пару (ore↔silver: Godot 11, PIL 13/16/23 для BOX/HAMMING/LANCZOS).
+	if OS.get_environment("DHASH_MATRIX") != "":
+		pairs.sort_custom(func(a, b):
+			return a[0] < b[0] if a[0] != b[0] else str(a[1]) < str(b[1]))
+		var red := 0
+		for p in pairs:
+			if p[0] < PAIR_MIN:
+				red += 1
+		print("DHASH MATRIX (мера гейта, порог %d): пар %d, красных %d" % [PAIR_MIN, pairs.size(), red])
+		print("худшие 12: ", pairs.slice(0, 12))
 
 
 # --- A-11: чужой носитель удалён ---------------------------------------------
@@ -324,7 +395,7 @@ func test_provenance_row_per_icon() -> void:
 		).is_true()
 
 
-# --- A-13: потребители отдают иконку -----------------------------------------
+# --- потребители отдают иконку (AC-поток; номера критерия нет) --------------
 
 func test_consumers_resolve_icons() -> void:
 	for id in IDS:

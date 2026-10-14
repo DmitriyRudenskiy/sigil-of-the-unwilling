@@ -233,18 +233,16 @@ def draw_gold(s):
 
 
 def draw_silver(s):
-    """Серебро — штабика: два бруска стопкой, плоские параллельные грани.
-    Прямоугольная форма в наборе одна такая, поэтому слиток не спорит ни с
-    осыпью руды (gold_ore был 11), ни с пластом киновари; самородок убран —
-    висящий в углу чип читался как отдельная иконка."""
+    """Серебро — штабика: нижний брусок + верхний со свесом влево. Асимметрия
+    обязательна: ровная стопка при обводке 1.5 px сворачивалась в тот же профиль
+    строк, что купол руды (dHash 11 при пороге 12)."""
     s.rbox(1.0, 11.6, 14.8, 15.4, 0.9, MASS)                    # нижний брусок
     s.line([(1.4, 12.4), (14.4, 12.4)], 0.6, LIT)               # верхняя грань
-    s.rbox(3.6, 6.2, 11.4, 11.4, 0.9, MASS)                     # верхний брусок
-    s.line([(4.0, 7.0), (11.0, 7.0)], 0.6, LIT)
-    s.line([(3.6, 10.6), (11.4, 10.6)], 0.6, DARK)
-    s.line([(5.6, 8.4), (9.4, 8.4)], 0.6, ACCENT)               # клеймо пробы
-    s.line([(11.4, 6.6), (13.6, 6.6)], 0.6, DARK)               # рубец на грани
-
+    s.rbox(0.6, 6.2, 8.4, 11.4, 0.9, MASS)                      # верхний, со свесом
+    s.line([(1.0, 7.0), (8.0, 7.0)], 0.6, LIT)
+    s.line([(0.6, 10.6), (8.4, 10.6)], 0.6, DARK)
+    s.line([(2.4, 8.4), (6.2, 8.4)], 0.6, ACCENT)               # клеймо пробы
+    s.line([(9.8, 13.6), (13.6, 13.6)], 0.6, DARK)              # рубец на нижнем
 
 def draw_mercury(s):
     """Толстая капля над широкой лужицей с зазором + спутник."""
@@ -381,43 +379,57 @@ def clip_to_field(s):
                 px[x, y] = EMPTY
 
 
-def shade(s):
-    """Один тёплый свет ~45° сверху-слева (шаг 4): первый ряд внутри обводки,
-    повёрнутый к свету, берёт светлый токен полосы, противоположный — тёмный;
-    середина остаётся массой. Плоская заливка без градиента (§13: flat shading),
-    детали фигур (жилки, сколы, вкрапления) светом не перекрашиваются."""
+def _inner_rings(s):
+    """Для каждого сплошного SS-пикселя — расстояние до пустоты и ближайшую точку
+    края (в SS-пикселях). Нужно и обводке (толщина), и свету (нормаль грани)."""
     px = s.roles.load()
-    solid = [(x, y) for y in range(SS) for x in range(SS) if px[x, y]]
-    if not solid:
-        return
-    cx = sum(x for x, _ in solid) / len(solid)
-    cy = sum(y for _, y in solid) / len(solid)                       # центр масс
     n4 = lambda x, y: [(a, b) for a, b in ((x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1))
                        if 0 <= a < SS and 0 <= b < SS]
-    for x, y in solid:
-        if px[x, y] != MASS:
-            continue
-        if not any(not px[a, b] for a, b in n4(x, y)):
-            continue                                                 # не край — не трогаем
-        px[x, y] = LIT if (x - cx) + (y - cy) < 0 else DARK
-    
+    solid = {(x, y) for y in range(SS) for x in range(SS) if px[x, y]}
+    dist = {(x, y): 0 for x, y in solid if not all(n in solid for n in n4(x, y))}
+    seed = {p: p for p in dist}                       # край освещается по своей нормали
+    frontier, d = list(dist), 0
+    while frontier:
+        d += 1
+        nxt = []
+        for x, y in frontier:
+            for a, b in n4(x, y):
+                if (a, b) in solid and (a, b) not in dist:
+                    dist[(a, b)] = d
+                    seed[(a, b)] = seed[(x, y)]
+                    nxt.append((a, b))
+        frontier = nxt
+    return px, dist, seed
+
+
+OUTLINE = SCALE + SCALE // 2       # обводка §7.1 шаг 5: 1.5 px сажи
+BAND = SCALE                       # свет §7.1 шаг 4: полоса 1 px внутри обводки
 
 
 def outline(s):
-    """Гравюрная обводка 1.5 px сажей внутри канваса: кольцо 1 px + полутоновое
-    кольцо внутрь. Цветная обводка и «шнур» — анти-паттерн §11 п.7."""
-    px = s.roles.load()
-    n4 = lambda x, y: [(a, b) for a, b in ((x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1))
-                       if 0 <= a < SS and 0 <= b < SS]
-    ring = [(x, y) for y in range(SS) for x in range(SS)
-            if px[x, y] and any(not px[a, b] for a, b in n4(x, y))]
-    for x, y in ring:
-        px[x, y] = 9                                                 # кольцо сажи 1 px
-    for x, y in [(a, b) for b in range(SS) for a in range(SS)
-                 if px[a, b] in (DARK, MASS, LIT, ACCENT)]:
-        if any(px[a, b] == 9 for a, b in n4(x, y)):
-            px[x, y] = 10                                            # +0.5 px внутрь
-    
+    """Гравюрная обводка 1.5 px сажей внутри канваса (шаг 5). Полутона нет:
+    mix(масса, сажа) — цвет вне палитры §4.6. Ширина в канвас-пикселях: кольцо
+    в 1 SS-пиксель (0.25 px) съедало квантование, и ни толщину, ни покрытие
+    сажей (A-5: ≥ 60 % границы) проверить было нельзя."""
+    px, dist, _ = _inner_rings(s)
+    for (x, y), d in dist.items():
+        if d < OUTLINE:
+            px[x, y] = 9
+
+
+def shade(s):
+    """Один тёплый свет ~45° сверху-слева (шаг 4): полоса 1 px сразу внутри
+    обводки; грань, повёрнутая к свету, берёт светлый токен, отвёрнутая — тёмный,
+    середина остаётся массой. Направление — по нормали грани (вектор к ближайшей
+    точке края), а не по положению относительно центра: у наклонных и составных
+    форм разрез по диагонали ставит блик не туда (замер: у кварца свет уходил
+    вниз-вправо, r(яркость, x+y) = +0.17 при медиане −0.40)."""
+    px, dist, seed = _inner_rings(s)
+    for (x, y), d in dist.items():
+        if not OUTLINE <= d < OUTLINE + BAND or px[x, y] not in (DARK, MASS, LIT):
+            continue
+        sx, sy = seed[(x, y)]
+        px[x, y] = LIT if (sx - x) + (sy - y) < 0 else DARK
 
 
 def render(sid):
@@ -426,8 +438,8 @@ def render(sid):
     SHAPES[sid](s)
     clip_to_field(s)
     dark_t, mass_t, lit_t, accent_t = MATERIALS[sid]
-    shade(s)
     outline(s)
+    shade(s)
     roles = s.roles.load()
     img = Image.new("RGBA", (CANVAS, CANVAS), (0, 0, 0, 0))
     acc = tot = 0
@@ -482,8 +494,10 @@ def check(sid, img, acc, tot):
     if tot and acc / tot > ACCENT_MAX:
         bad.append("акцент %.1f %% > 8 %%" % (100 * acc / tot))
     lum = lambda c: (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255.0
+    # яркость меряется по массе: обводка сажей (§7.1 шаг 5) по определению темнее
+    # носителя, включать её в среднюю —means A-1 и A-5 противоречат друг другу
     body = [img.getpixel((x, y)) for y in range(CANVAS) for x in range(CANVAS)
-            if img.getpixel((x, y))[3] > 128]
+            if img.getpixel((x, y))[3] > 128 and img.getpixel((x, y))[:3] != SOOT]
     mean = sum(lum(p) for p in body) / len(body)
     if mean < L_MIN:
         bad.append("масса слишком тёмная: средняя яркость %.3f < %.2f" % (mean, L_MIN))
