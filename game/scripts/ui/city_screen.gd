@@ -150,9 +150,10 @@ static func _relative_luminance(color: Color) -> float:
 
 func _resource_icon(resource_id: StringName) -> Texture2D:
 	match resource_id:
-		&"food": return BuildingDefs.get_icon(&"farm")
-		&"wood": return ThemeConfig.icon_texture(ThemeConfig.ICON_DIR_RESOURCES + "wood.png")
-		&"iron": return ThemeConfig.icon_texture(ThemeConfig.ICON_DIR_RESOURCES + "ore.png")
+		&"food": return ResourceAtlas.texture_for_id(&"food")
+		&"wood": return ResourceAtlas.texture_for_id(&"wood")
+		# iron своей иконки не имеет (вне ASSET-1) — рисуется рудой, как и раньше.
+		&"iron": return ResourceAtlas.texture_for_id(&"ore")
 	return null
 
 func _resource_metric_style(background: Color, border: Color) -> StyleBoxFlat:

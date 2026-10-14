@@ -41,8 +41,8 @@ func _ready() -> void:
             continue
         var icon := row.get_node_or_null("Icon") as TextureRect
         if icon != null:
-            # ui-icons: текстура из assets/ui/icons/resources/, fallback при отсутствии
-            icon.texture = ThemeConfig.icon_texture(ThemeConfig.ICON_DIR_RESOURCES + str(def.id) + ".png")
+            # ui-icons: иконка ресурса (ASSET-1) — кэш ResourceAtlas
+            icon.texture = ResourceAtlas.texture_for_id(def.id)
         label.text = "%d/%d" % [0, GameNumbers.RESOURCE_CAPACITY]
         label.tooltip_text = def.display_name
         label.add_theme_font_size_override("font_size", 12)

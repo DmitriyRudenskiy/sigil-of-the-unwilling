@@ -12,3 +12,7 @@ game/balance_report.json
 # В git — только карта reference/INDEX.md и тексты docs/13, docs/17. См. INDEX.md «Почему не в git».
 reference/*
 !reference/INDEX.md
+
+# Python-кэш инструментов генерации ассетов (game/tools, scripts/).
+__pycache__/
+*.pyc

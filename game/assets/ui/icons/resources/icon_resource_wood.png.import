@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dpnf7c7jpg4a2"
-path="res://.godot/imported/mercury.png-dac849375c646b4622368422b44e9c7f.ctex"
+uid="uid://djhwty6km23ew"
+path="res://.godot/imported/icon_resource_wood.png-e5d0edb0bc1501265184464dc0c84054.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/icons/resources/mercury.png"
-dest_files=["res://.godot/imported/mercury.png-dac849375c646b4622368422b44e9c7f.ctex"]
+source_file="res://assets/ui/icons/resources/icon_resource_wood.png"
+dest_files=["res://.godot/imported/icon_resource_wood.png-e5d0edb0bc1501265184464dc0c84054.ctex"]
 
 [params]
 

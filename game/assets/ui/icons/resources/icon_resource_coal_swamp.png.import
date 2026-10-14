@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://df8787k62pnss"
-path="res://.godot/imported/gold.png-c04462ec8eec1293af2975f34064d46f.ctex"
+uid="uid://ksgwki4lgohq"
+path="res://.godot/imported/icon_resource_coal_swamp.png-acac39bfceecc13e2e85c9f527082d27.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/icons/resources/gold.png"
-dest_files=["res://.godot/imported/gold.png-c04462ec8eec1293af2975f34064d46f.ctex"]
+source_file="res://assets/ui/icons/resources/icon_resource_coal_swamp.png"
+dest_files=["res://.godot/imported/icon_resource_coal_swamp.png-acac39bfceecc13e2e85c9f527082d27.ctex"]
 
 [params]
 

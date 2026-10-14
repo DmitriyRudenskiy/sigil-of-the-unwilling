@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bev7hndhy102w"
-path="res://.godot/imported/gems.png-cbfea745c78679b9a3fe0be3f44049ae.ctex"
+uid="uid://d147oawryyltj"
+path="res://.godot/imported/icon_resource_food.png-3dcaab01ce7ee07b0110bcabeac81ac4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/icons/resources/gems.png"
-dest_files=["res://.godot/imported/gems.png-cbfea745c78679b9a3fe0be3f44049ae.ctex"]
+source_file="res://assets/ui/icons/resources/icon_resource_food.png"
+dest_files=["res://.godot/imported/icon_resource_food.png-3dcaab01ce7ee07b0110bcabeac81ac4.ctex"]
 
 [params]
 

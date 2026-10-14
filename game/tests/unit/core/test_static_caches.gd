@@ -16,12 +16,11 @@ func test_reset_all_clears_caches() -> void:
 	var tex := PlaceholderTexture.circle(4, Color.WHITE, Color.BLACK)
 	assert_bool(tex != null).is_true()
 	assert_bool(bool(PlaceholderTexture._cache.size() > 0)).is_true()
-	assert_bool(bool(ResourceAtlas._ensure_map().size() > 0)).is_true()
+	assert_bool(ResourceAtlas.texture_for_id(&"wood") != null).is_true()
 
 	StaticCaches.reset_all()
 
 	assert_bool(HexGrid.shift_right).is_true()
 	assert_bool(bool(PlaceholderTexture._cache.is_empty())).is_true()
 	assert_bool(bool(ResourceAtlas._cache.is_empty())).is_true()
-	assert_bool(bool(ResourceAtlas._map.is_empty())).is_true()
 	assert_bool(bool(UnitSprites._portrait_cache.is_empty())).is_true()
