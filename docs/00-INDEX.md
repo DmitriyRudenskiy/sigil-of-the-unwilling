@@ -26,7 +26,7 @@ date: 2026-10-14
 | [[GAP-LIST]] | Gap-лист GDD ↔ код (корзины A/B/C) | draft | 2026-10-15 |
 | [[GDLINT-PROPOSAL]] | gdlint-конфиг — предложение (раунд 12 §3) | reference | 2026-10-12 |
 | [[GDUNIT4-VACUOUS-ASSERT-ISSUE]] | Draft: upstream issue gdUnit4 — silent no-op assert without check method | draft | 2026-10-13 |
-| [[MVP_SCOPE]] | MVP-скоуп — итог Фазы 4 | reference | 2026-10-13 |
+| [[MVP_SCOPE]] | MVP-скоуп — итог Фазы 4 | reference | 2026-10-15 |
 | [[PR-ASSET-1]] | Тело PR ASSET-1 (feat/asset-1-resources) | draft | 2026-10-15 |
 | [[PR-DOCS-ARTBIBLE]] | Тело PR docs (feat/art-bible-rev2) | archived | 2026-10-14 |
 | [[PR-UI-PHASE5]] | Тело PR фазы 5 (feat/ui-phase5) | archived | 2026-10-14 |
