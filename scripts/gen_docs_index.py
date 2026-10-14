@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Индекс документации: docs/INDEX.md генерируется из frontmatter живых заметок.
+"""Индекс документации: docs/00-INDEX.md генерируется из frontmatter живых заметок.
 
 Рот индекса дороже его отсутствия, поэтому индекс — генератор, а не ручной список:
 
-    python3 scripts/gen_docs_index.py           # перегенерировать docs/INDEX.md
-    python3 scripts/gen_docs_index.py --check   # выход ≠ 0, если INDEX.md устарел
+    python3 scripts/gen_docs_index.py           # перегенерировать docs/00-INDEX.md
+    python3 scripts/gen_docs_index.py --check   # выход ≠ 0, если 00-INDEX.md устарел
 
 Зона та же, что у check_docs_links: банковская зона docs/bank/ вне индекса (D-102),
 архивные логи показываются с пометкой (у них нет frontmatter — AGENTS.md).
@@ -19,10 +19,10 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import check_docs_links as ck  # noqa: E402  (та же зона сканирования)
 
-OUT = os.path.join(ck.DOCS, "INDEX.md")
-SELF = "INDEX.md"
+OUT = os.path.join(ck.DOCS, "00-INDEX.md")
+SELF = "00-INDEX.md"  # индекс — в нумерованной последовательности docs/ (AGENTS.md: NN-topic.md)
 
-REGISTRIES = {"CHANGELOG.md", "DECISIONS.md", "QUESTIONS.md", "BANK.md", "INDEX.md"}
+REGISTRIES = {"CHANGELOG.md", "DECISIONS.md", "QUESTIONS.md", "BANK.md", "00-INDEX.md"}
 
 FM_RE = re.compile(r"^---\n(.*?)\n---\n", re.S)
 FIELD_RE = re.compile(r"^(title|status|date):\s*(.*)$", re.M)
@@ -95,13 +95,13 @@ def main():
     have = open(OUT, encoding="utf-8").read() if os.path.exists(OUT) else ""
     if check:
         if want != have:
-            print("INDEX.md устарел: python3 scripts/gen_docs_index.py")
+            print("00-INDEX.md устарел: python3 scripts/gen_docs_index.py")
             sys.exit(1)
-        print(f"OK: INDEX.md актуален ({len(rows())} заметок)")
+        print(f"OK: 00-INDEX.md актуален ({len(rows())} заметок)")
         return
     with open(OUT, "w", encoding="utf-8") as fh:
         fh.write(want)
-    print(f"docs/INDEX.md: {len(rows())} заметок")
+    print(f"docs/00-INDEX.md: {len(rows())} заметок")
 
 
 if __name__ == "__main__":

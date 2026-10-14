@@ -26,8 +26,8 @@ date: 2026-10-14
 | [[GDLINT-PROPOSAL]] | gdlint-конфиг — предложение (раунд 12 §3) | reference | 2026-10-12 |
 | [[GDUNIT4-VACUOUS-ASSERT-ISSUE]] | Draft: upstream issue gdUnit4 — silent no-op assert without check method | draft | 2026-10-13 |
 | [[MVP_SCOPE]] | MVP-скоуп — итог Фазы 4 | reference | 2026-10-13 |
-| [[PR-DOCS-ARTBIBLE]] | Тело PR docs (feat/art-bible-rev2) | draft | 2026-10-14 |
-| [[PR-UI-PHASE5]] | Тело PR фазы 5 (feat/ui-phase5) | draft | 2026-10-14 |
+| [[PR-DOCS-ARTBIBLE]] | Тело PR docs (feat/art-bible-rev2) | archived | 2026-10-14 |
+| [[PR-UI-PHASE5]] | Тело PR фазы 5 (feat/ui-phase5) | archived | 2026-10-14 |
 | [[TICKETS]] | Тикеты MVP (T-001…T-113) | reference | 2026-10-14 |
 | [[f-plan]] | F-план — приёмка Д1/Д2 и сведение расхождений | draft | 2026-10-04 |
 

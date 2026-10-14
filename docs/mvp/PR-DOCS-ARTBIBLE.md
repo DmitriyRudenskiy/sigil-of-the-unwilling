@@ -3,9 +3,12 @@ title: Тело PR docs (feat/art-bible-rev2)
 tags:
   - process
   - ui
-status: draft
+status: archived
 date: 2026-10-14
 ---
+
+> **PR влит в main `2b36f1c0` (2026-10-14), ветка удалена.** Файл — историческое
+> тело PR, актуальности не несёт.
 
 > Служебный файл: текст для вставки в PR `feat/art-bible-rev2` → `main` (в репо нет
 > `gh` CLI, PR создаёт владелец). Восстановлен из `/tmp/pr_body.md` в реестр git —
