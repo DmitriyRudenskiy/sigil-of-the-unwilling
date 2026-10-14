@@ -252,6 +252,16 @@ jobs:
           fi
           npm run build
 
+      # .godot-кэш тёплый ДО тестов (урок рана 38494830653, 2026-10-14): в базовом
+      # single-job CI GdUnit делал --import перед MCP; в отдельном MCP-джобе .godot
+      # холодный — параллельные холодные импорты под contention (2 воркера на 4
+      # ядра) сдвигают старт Godota за wait_ready-бюджет → цепочка
+      # stop/wait_ready-висов >480с → 30m timeout. --import до xdist = как в baseline.
+      - name: "Godot import (тёплый .godot до MCP-старта)"
+        run: |
+          /tmp/godot/Godot_v4.7-stable_linux.x86_64 --headless --path "$GITHUB_WORKSPACE/game" --import > /tmp/godot-import.log 2>&1 || true
+          tail -3 /tmp/godot-import.log
+
       - name: "MCP e2e (MCP_WORKERS=2; ретраи CI-1(12) на раннер-окружение)"
         env:
           GODOT_BIN: /tmp/godot/Godot_v4.7-stable_linux.x86_64
@@ -275,7 +285,7 @@ jobs:
           cat /tmp/ci2-mcp-$attempt.log
           cp /tmp/ci2-mcp-$attempt.log /tmp/ci2-gate-mcp.log
           {
-            echo "MCP: rc=$RC attempt=$attempt (3 workers)"
+            echo "MCP: rc=$RC attempt=$attempt (2 workers)"
             grep -aE "PYTEST LEDGER|workers \[" /tmp/ci2-gate-mcp.log | tail -3
           } >> /tmp/ci2-levels.txt
           exit "$RC"
