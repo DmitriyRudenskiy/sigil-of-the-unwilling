@@ -162,7 +162,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: "Diagnostics (if: failure — раунд 7 §1.3 п.1: диагноз в видимый лог)"
-        if: failure()
+        if: failure() || cancelled()  # timeout-cancelled = job "cancelled", не "failure" (урок 38499393550)
         env:
           GODOT_BIN: /tmp/godot/Godot_v4.7-stable_linux.x86_64
         run: |
@@ -191,7 +191,7 @@ jobs:
     # T-125-класс). MCP_WORKERS=2 (не 3): 3 воркера на 4 ядра = contention →
     # T-125-стоп пробов на раннере (ран 38485389297: 20m timeout, 3 попытки).
     # 3 воркера — после фикса T-125 (см. tasks.md 4.x).
-    timeout-minutes: 30
+    timeout-minutes: 15  # диагностический ран 2026-10-14 (T-125): попытка 1 ~11м; после фикса T-125 вернуть 30
     steps:
       - uses: actions/checkout@v4
 
@@ -291,7 +291,7 @@ jobs:
           exit "$RC"
 
       - name: "Diagnostics (if: failure — раунд 7 §1.3 п.1: диагноз в видимый лог)"
-        if: failure()
+        if: failure() || cancelled()  # timeout-cancelled = job "cancelled", не "failure" (урок 38499393550)
         env:
           GODOT_BIN: /tmp/godot/Godot_v4.7-stable_linux.x86_64
         run: |
@@ -310,6 +310,15 @@ jobs:
             echo "::error::MCP --- ${f} ---"
             sed "s/\r//g" "$f" 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | grep -aE 'FAILED|ERROR |short test summary|passed|failed|LEDGER|PYTEST' | tail -12 | while IFS= read -r l; do echo "::error::M ${l:0:170}"; done
           done
+          # Хэнг-диагностика (ран 38499393550, 2026-10-14): при job-timeout тесты не
+          # «FAILED» — они в полёте. Хвост лога последней попытки = что было в полёте
+          # (xdist -v печатает PASSED/FAILED по завершении; последний незакрытый тест —
+          # виновник хэнга). attempt-переменная не переживает шаг → берём последний файл.
+          LASTLOG=$(ls -t /tmp/ci2-mcp-*.log 2>/dev/null | head -1)
+          if [ -n "${LASTLOG:-}" ]; then
+            echo "::error::=== DIAG mcp: хвост последней попытки (${LASTLOG}) — тесты в полёте при kill ==="
+            sed "s/\r//g" "$LASTLOG" | sed 's/\x1b\[[0-9;]*m//g' | grep -avE '^\s*$' | tail -18 | while IFS= read -r l; do echo "::error::TAIL ${l:0:170}"; done
+          fi
 
       - name: "Artifact (mcp: логи всех попыток + level-строки)"
         if: always()
