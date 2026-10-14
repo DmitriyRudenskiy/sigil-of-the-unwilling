@@ -110,10 +110,31 @@ RED: static ✓, gdunit ✓, mcp ✗ (20m job-timeout: 3 ретрая × T-125-�
 на Godot + 2 запаса; serial на раннере зелёный — стоп speed-зависимый);
 job timeout 20→30. 3 воркера — после фикса T-125.
 
-- [ ] 4.1 Локальный полный гейт (run_tests.sh, без env) — зелёный,
-  счётчики 2474/38 не изменились
-- [ ] 4.2 Пуш ветки → CI-2: wall time мcp-жоба (цель ≤ ~130с
-  включая setup), общий wall ≤ 3 мин
+- [x] 4.1 Локальный гейт (частично): GdUnit headless — **зелёный**
+  (2484 | 0 err | 0 fail | 2 skip | 0 orphans, exit 0; +10 от UI-3b-тестов
+  мержа origin/main); DOCS-LINKS — OK (52 notes). MCP-свит локально —
+  **красный (T-125, пре-экзистинг)**: balance_probe стоп на этой машине
+  (D-166-класс; контроль: чистый main db5588da — тот же красный).
+  xdist локально проверен (3 воркера: 35 passed / 1 skipped / 2 failed =
+  T-125-пробы; порты 9090/9091/9092; ledger=38).
+- [x] 4.2 CI-2 (ветка, итерации):
+  - ран 38485389297 (MCP_WORKERS=3): static ✓, gdunit ✓, mcp ✗ (20m timeout)
+  - ран 38492984442 (merge origin/main + assert-fix): static ✓ (после фикса
+    2 полупустых assert_bool в test_forgeable_icons.gd — T-123/checker 6,
+    main-красный 38462217924 был блокёром), gdunit ✓, mcp ✗ (cancel)
+  - ран 38494830653 (MCP_WORKERS=2): mcp ✗ (30m timeout)
+  - ран 38499393550 (MCP_WORKERS=2 + Godot --import до xdist): mcp ✗ (30m
+    timeout) — тёплый кэш не помог
+  - ран 38502715080 (MCP_WORKERS=2, диагностический, timeout 15м): mcp ✗
+    (15m timeout) — **TAIL-аннотации (D-167): попытка 1 = 625с, 34/38 passed,
+    3 contention-сбоя** (probe 420с-стоп; world bootstrap 180с;
+    hexutils_perf 913мс > 800мс лимит) — все contention-класса, в serial
+    те же тесты зелёные (baseline 38443410901)
+  - **Решение:** MCP на CI = **serial (MCP_WORKERS=1)** до фикса T-125 +
+    contention-маржи perf-порогов. xdist-инфраструктура на месте
+    (conftest `_worker_port`, run_tests.sh `MCP_WORKERS`) — включение после T-125.
+  - Ожидаемый wall (serial): max(static ~1м, gdunit ~2м, mcp ~5.5м) ≈ 6м
+    vs baseline 6м41с (~20%); крупный прирост (mcp 259с → ~130с) — после T-125.
 - [ ] 4.3 Три зелёных рана main после мержа: wall time каждого в
   отчёт (D-148: было 6м41с → стало X)
 - [ ] 4.4 Красный-ран проверка: тест-ветка с падающим MCP-тестом →
