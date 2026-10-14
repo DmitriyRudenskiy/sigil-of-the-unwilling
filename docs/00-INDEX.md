@@ -14,7 +14,7 @@ date: 2026-10-14
 > Статусы: `canon` / `deepened` / `draft` / `reference` / `redirect` /
 > `snapshot` / `archived`. `redirect` — файл-перенаправление, читать цель.
 
-## Реестры и процессы (14)
+## Реестры и процессы (15)
 
 | Заметка | Название | Статус | Дата |
 | --- | --- | --- | --- |
@@ -23,6 +23,7 @@ date: 2026-10-14
 | [[DECISIONS]] | Реестр решений и открытых вопросов | canon | 2026-10-14 |
 | [[QUESTIONS]] | Открытые вопросы — Фаза 4 (MVP и тикеты) | reference | 2026-10-15 |
 | [[ACTOR-ARMY]] | Актёрная модель армии (K-канон) | canon | 2026-10-11 |
+| [[EPICS]] | Эпики MVP + вертикальный срез (этап 3 цепочки) | draft | 2026-10-15 |
 | [[GAP-LIST]] | Gap-лист GDD ↔ код (корзины A/B/C) | draft | 2026-10-15 |
 | [[GDLINT-PROPOSAL]] | gdlint-конфиг — предложение (раунд 12 §3) | reference | 2026-10-12 |
 | [[GDUNIT4-VACUOUS-ASSERT-ISSUE]] | Draft: upstream issue gdUnit4 — silent no-op assert without check method | draft | 2026-10-13 |
