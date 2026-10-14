@@ -8,6 +8,15 @@ extends SceneTree
 # и «после» одного кода и сравниваются файлы. Экраны-под-окна (settings_screen и
 # др.) без игрового состояния сами себя освобождают — это фиксируется в логе,
 # прогон не падает.
+#
+# ОГРАНИЧЕНИЕ ПОКРЫТИЯ (фиксируем явно, владелец 2026-10-14): дым-проверка
+# сравнивает только живые экраны, а они молчат про половину темы. В прогоне
+# 2026-10-14 четыре строки реестра §9 дали 0% дельты — не потому что тема не
+# поменялась, а потому что проверяемые контролы на этих экранах не рисуются:
+#   К-3 Slider · К-6 LineEdit · К-6 CheckBox · К-6 вкладки/тултип → 0.00%
+# Единственное визуальное доказательство для них — scenes/ui/kitchen_sink.tscn
+# (собрана в фазе 5, добавлена в SCENES ниже): все компоненты во всех состояниях
+# на одном кадре. 0% на живом экране = «не видно», а не «не тронуто».
 
 const OUT_DIR := "/tmp/theme-smoke/"
 const SIZE := Vector2i(1280, 720)
@@ -24,9 +33,12 @@ const SCENES: Array[String] = [
 	"res://scenes/ui/battle_spellbook_panel.tscn",
 	"res://scenes/ui/city_screen.tscn",
 	"res://scenes/ui/world_ui.tscn",
+	# Компоненты К-3/К-6 не живут ни на одном экране — см. «ОГРАНИЧЕНИЕ ПОКРЫТИЯ».
+	"res://scenes/ui/kitchen_sink.tscn",
 ]
 
 var _out: String
+var _only := ""
 var _shots := 0
 
 
@@ -37,12 +49,16 @@ func _initialize() -> void:
 	_out = OUT_DIR + tag + "/"
 	DirAccess.make_dir_recursive_absolute(_out)
 	root.size = SIZE
+	# SMOKE_ONLY=подстрока — отобрать один экран (быстрая итерация по одной сцене).
+	_only = OS.get_environment("SMOKE_ONLY")
 	_run()
 
 
 func _run() -> void:
 	for path in SCENES:
 		var name := path.get_file().get_basename()
+		if _only != "" and not name.contains(_only):
+			continue
 		var packed: PackedScene = load(path)
 		if packed == null:
 			push_error("cannot load %s" % path)

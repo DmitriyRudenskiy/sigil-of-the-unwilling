@@ -7,44 +7,74 @@
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/buttons/button_disabled.png" id="5_btn_disabled"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/progress_bars/bar_bg.png" id="6_bar_bg"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/progress_bars/fill_health.png" id="7_fill_health"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/panels/slot_bg.png" id="11_slot"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/sliders/slider_track.png" id="12_slider_track"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/sliders/slider_handle.png" id="13_slider_handle"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/buttons/checkbox_checked.png" id="14_cb_checked"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/buttons/checkbox_unchecked.png" id="15_cb_unchecked"]
 
 [ext_resource type="FontFile" path="res://assets/fonts/PT_Serif-Regular.ttf" id="8_serif"]
 [ext_resource type="FontFile" path="res://assets/fonts/PT_Serif-Bold.ttf" id="9_serif_bold"]
 [ext_resource type="FontFile" path="res://assets/fonts/PT_Mono-Regular.ttf" id="10_mono"]
 
+; --- токены канона (docs/17-ui-style-guide.md §1.2, значения — [[13-art-bible]] §4.1) ---
+; C_BG #281c0f = (0.1569,0.1098,0.0588)      C_BG_DARK #201006 = (0.1255,0.0627,0.0235)
+; C_PANEL #4a3423 = (0.2902,0.2039,0.1373)   C_PANEL_BORDER #3a2415 = (0.2275,0.1412,0.0824)
+; C_GOLD #8a6a3a = (0.5412,0.4157,0.2275)    C_GOLD_BRIGHT #9e7738 = (0.6196,0.4667,0.2196)
+; C_SHADOW #16100a = (0.0863,0.0627,0.0392)  C_SIGN #7a100c = (0.4784,0.0627,0.0471)
+; C_INK #090b0e = (0.0353,0.0431,0.0549)
+; C_TEXT #e8d5a8 = (0.9098,0.8353,0.6588)    C_TEXT_DIM #d9c48f = (0.8510,0.7686,0.5608)
+; C_TEXT_BRIGHT #f5efe0 = (0.9608,0.9373,0.8784)
+; Тень — сажа rgba(0,0,0,0.6), offset (0,2), размер 4–8 (§3); радиусы 0 панель/слот, 2 кнопка.
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_window"]
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_left = 4
-corner_radius_bottom_right = 4
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.0858824, 0.0627451, 0.0392157, 1)
+; К-7: радиус 6 → 0, тень золото → сажа
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.6196, 0.4667, 0.2196, 1)
 bg_color = Color(0.290196, 0.203922, 0.137255, 1)
-shadow_size = 12
-shadow_color = Color(0.541176, 0.415686, 0.227451, 1)
+shadow_size = 8
+shadow_offset = Vector2(0, 2)
+shadow_color = Color(0, 0, 0, 0.6)
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_panel"]
+; К-8: маржа 16/16/16/16 на текстуре 32×32 давала нулевое растяжимое ядро
+; (центр — растянутый пиксель). Маржа = толщина рамки в текстуре = 8, ядро 16×16.
 texture = ExtResource("1_panel")
-margin_left = 16.0
-margin_top = 16.0
-margin_right = 16.0
-margin_bottom = 16.0
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 8.0
+margin_bottom = 8.0
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_slot"]
-texture = ExtResource("1_panel")
-margin_left = 12.0
-margin_top = 12.0
-margin_right = 12.0
-margin_bottom = 12.0
+; К-9: слот рисовался панелью (ExtResource "1_panel"); slot_bg.png темой не
+; использовался. Плюс К-8: маржа 12 → 8 (ядро 16×16).
+texture = ExtResource("11_slot")
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 8.0
+margin_bottom = 8.0
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slot_thin"]
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_left = 4
-corner_radius_bottom_right = 4
+; К-7: радиус 4 → 0 (слот — прямые углы)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -95,10 +125,10 @@ margin_right = 4.0
 margin_bottom = 4.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_red"]
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_left = 4
-corner_radius_bottom_right = 4
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_left = 2
+corner_radius_bottom_right = 2
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -119,24 +149,26 @@ border_color = Color(0.227451, 0.0313725, 0.0235294, 1)
 bg_color = Color(0.478431, 0.0627451, 0.0470588, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_outline"]
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_left = 6
-corner_radius_bottom_right = 6
+; К-7: радиус 6 → 2, тень золото → сажа
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_left = 2
+corner_radius_bottom_right = 2
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
 border_color = Color(0.541176, 0.415686, 0.227451, 1)
 bg_color = Color(0, 0, 0, 0)
-shadow_size = 12
-shadow_color = Color(0.541176, 0.415686, 0.227451, 1)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
+shadow_color = Color(0, 0, 0, 0.6)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_label"]
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_left = 2
-corner_radius_bottom_right = 2
+corner_radius_top_left = 0
+corner_radius_top_right = 0
+corner_radius_bottom_left = 0
+corner_radius_bottom_right = 0
 border_width_left = 0
 border_width_top = 0
 border_width_right = 0
@@ -144,10 +176,10 @@ border_width_bottom = 0
 bg_color = Color(0.227451, 0.156863, 0.101961, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_portrait"]
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_left = 6
-corner_radius_bottom_right = 6
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_left = 2
+corner_radius_bottom_right = 2
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
@@ -156,10 +188,10 @@ border_color = Color(0.12549, 0.0627451, 0.0235294, 1)
 bg_color = Color(0.164706, 0.101961, 0.0431373, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_doll_slot"]
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_left = 6
-corner_radius_bottom_right = 6
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_left = 2
+corner_radius_bottom_right = 2
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
@@ -167,13 +199,14 @@ border_width_bottom = 2
 border_color = Color(0.12549, 0.0627451, 0.0235294, 1)
 bg_color = Color(0.227451, 0.141176, 0.0823529, 1)
 shadow_size = 8
-shadow_color = Color(0.101961, 0.054902, 0.0156863, 1)
+shadow_offset = Vector2(0, 2)
+shadow_color = Color(0, 0, 0, 0.6)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_action_button"]
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_left = 6
-corner_radius_bottom_right = 6
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_left = 2
+corner_radius_bottom_right = 2
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
@@ -182,10 +215,10 @@ border_color = Color(0.12549, 0.0627451, 0.0235294, 1)
 bg_color = Color(0.227451, 0.141176, 0.0823529, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_backpack_slot"]
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_left = 4
-corner_radius_bottom_right = 4
+corner_radius_top_left = 0
+corner_radius_top_right = 0
+corner_radius_bottom_left = 0
+corner_radius_bottom_right = 0
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -193,13 +226,14 @@ border_width_bottom = 1
 border_color = Color(0.12549, 0.0627451, 0.0235294, 1)
 bg_color = Color(0.227451, 0.141176, 0.0823529, 1)
 shadow_size = 6
-shadow_color = Color(0.101961, 0.054902, 0.0156863, 1)
+shadow_offset = Vector2(0, 2)
+shadow_color = Color(0, 0, 0, 0.6)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_side_slot"]
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_left = 4
-corner_radius_bottom_right = 4
+corner_radius_top_left = 0
+corner_radius_top_right = 0
+corner_radius_bottom_left = 0
+corner_radius_bottom_right = 0
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
@@ -207,21 +241,53 @@ border_width_bottom = 2
 border_color = Color(0.141176, 0.0862745, 0.0313725, 1)
 bg_color = Color(0.290196, 0.203922, 0.137255, 1)
 shadow_size = 6
-shadow_color = Color(0.101961, 0.054902, 0.0156863, 1)
+shadow_offset = Vector2(0, 2)
+shadow_color = Color(0, 0, 0, 0.6)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_army_slot"]
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_left = 8
-corner_radius_bottom_right = 8
+; К-5: поле C_SIGN, рамка C_GOLD, радиус 8 → 0 (§4.2); состояния — ниже
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.5412, 0.4157, 0.2275, 1)
+bg_color = Color(0.4784, 0.0627, 0.0471, 1)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
+shadow_color = Color(0, 0, 0, 0.6)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_army_slot_hover"]
+; К-5: состояние hover (§4.2) — рамка C_GOLD_BRIGHT
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.25098, 0.0313725, 0.0392157, 1)
-bg_color = Color(0.541176, 0.0705882, 0.0627451, 1)
-shadow_size = 8
-shadow_color = Color(0.101961, 0.054902, 0.0156863, 1)
+border_color = Color(0.6196, 0.4667, 0.2196, 1)
+bg_color = Color(0.4784, 0.0627, 0.0471, 1)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
+shadow_color = Color(0, 0, 0, 0.6)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_army_slot_selected"]
+; К-5: selected — рамка 2 px C_GOLD_BRIGHT, поле светлее (+яркость C_PANEL)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6196, 0.4667, 0.2196, 1)
+bg_color = Color(0.5412, 0.1647, 0.1451, 1)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
+shadow_color = Color(0, 0, 0, 0.6)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_army_slot_disabled"]
+; К-5: disabled — содержимое 30%, рамка C_PANEL_BORDER (§4.2)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2275, 0.1412, 0.0824, 1)
+bg_color = Color(0.1804, 0.098, 0.0824, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ctl_normal"]
 content_margin_left = 8.0
@@ -303,6 +369,177 @@ border_width_bottom = 2
 border_color = Color(0.7882, 0.6353, 0.1529, 1)
 bg_color = Color(0, 0, 0, 0)
 draw_center = false
+
+; ─── К-1: фокус кнопки (§4.1 focus) — раньше Button/styles/focus не объявлен, ───
+; ─── фокус с клавиатуры/геймпада был невидим (нарушение 07-ui-ux §Accessibility) ───
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_focus"]
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_left = 2
+corner_radius_bottom_right = 2
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6196, 0.4667, 0.2196, 1)
+bg_color = Color(0, 0, 0, 0)
+draw_center = false
+
+; ─── К-3: Slider (§4.6) — track/handle из ассетов, раньше контрол не объявлен ───
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_slider_track"]
+texture = ExtResource("12_slider_track")
+margin_left = 4.0
+margin_top = 4.0
+margin_right = 4.0
+margin_bottom = 4.0
+texture_margin_left = 4.0
+texture_margin_top = 4.0
+texture_margin_right = 4.0
+texture_margin_bottom = 4.0
+content_margin_left = 0.0
+content_margin_top = 6.0
+content_margin_right = 0.0
+content_margin_bottom = 6.0
+
+; ─── К-6: LineEdit (§4.4) ───
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slider_area"]
+; К-3: заполненная часть дорожки — C_GOLD. Имена темы в 4.7: grabber_area /
+; grabber_area_highlight (StyleBox, не Color) — сверено с дефолтной темой движка.
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+bg_color = Color(0.5412, 0.4157, 0.2275, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slider_area_highlight"]
+; hover/focus — C_GOLD_BRIGHT (§4.6)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
+bg_color = Color(0.6196, 0.4667, 0.2196, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lineedit_normal"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2275, 0.1412, 0.0824, 1)
+bg_color = Color(0.1255, 0.0627, 0.0235, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lineedit_readonly"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2275, 0.1412, 0.0824, 1)
+bg_color = Color(0.1255, 0.0627, 0.0235, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lineedit_focus"]
+; focus — рамка 2 px C_GOLD_BRIGHT поверх normal (центр не рисуется)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6196, 0.4667, 0.2196, 1)
+bg_color = Color(0, 0, 0, 0)
+draw_center = false
+
+; ─── К-6: CheckBox (§4.5) — зона нажатия ≥ 40 px задаётся content-маржой ───
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_checkbox_normal"]
+content_margin_left = 0.0
+content_margin_top = 10.0
+content_margin_right = 0.0
+content_margin_bottom = 10.0
+bg_color = Color(0, 0, 0, 0)
+draw_center = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_checkbox_hover"]
+content_margin_left = 0.0
+content_margin_top = 10.0
+content_margin_right = 0.0
+content_margin_bottom = 10.0
+bg_color = Color(0, 0, 0, 0)
+draw_center = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_checkbox_pressed"]
+content_margin_left = 0.0
+content_margin_top = 11.0
+content_margin_right = 0.0
+content_margin_bottom = 9.0
+bg_color = Color(0, 0, 0, 0)
+draw_center = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_checkbox_focus"]
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6196, 0.4667, 0.2196, 1)
+bg_color = Color(0, 0, 0, 0)
+draw_center = false
+
+; ─── К-6: вкладки (§4.7) — normal/hovered/selected/disabled ───
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tab_unselected"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+border_width_bottom = 1
+border_color = Color(0.2275, 0.1412, 0.0824, 1)
+bg_color = Color(0, 0, 0, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tab_hovered"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+border_width_bottom = 1
+border_color = Color(0.5412, 0.4157, 0.2275, 1)
+bg_color = Color(0.2275, 0.1412, 0.0824, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tab_selected"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+border_width_bottom = 2
+border_color = Color(0.6196, 0.4667, 0.2196, 1)
+bg_color = Color(0.2275, 0.1412, 0.0824, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tab_disabled"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+border_width_bottom = 1
+border_color = Color(0.2275, 0.1412, 0.0824, 1)
+bg_color = Color(0, 0, 0, 0)
+
+; ─── К-6: тултип (§3, §4.8) — поле C_INK, рамка 1 px C_GOLD, тень сажа ───
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tooltip"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.5412, 0.4157, 0.2275, 1)
+bg_color = Color(0.0353, 0.0431, 0.0549, 1)
+shadow_size = 6
+shadow_offset = Vector2(0, 2)
+shadow_color = Color(0, 0, 0, 0.6)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
 content_margin_left = 10.0
 content_margin_top = 8.0
@@ -367,6 +604,7 @@ Button/styles/normal = SubResource("StyleBoxTexture_button")
 Button/styles/hover = SubResource("StyleBoxTexture_button_hover")
 Button/styles/pressed = SubResource("StyleBoxTexture_button_pressed")
 Button/styles/disabled = SubResource("StyleBoxTexture_button_disabled")
+Button/styles/focus = SubResource("StyleBoxFlat_button_focus")
 ProgressBar/styles/background = SubResource("StyleBoxTexture_bar_bg")
 ProgressBar/styles/fill = SubResource("StyleBoxTexture_bar_fill")
 Panel/styles/button_red = SubResource("StyleBoxFlat_button_red")
@@ -379,6 +617,11 @@ Panel/styles/action_button = SubResource("StyleBoxFlat_action_button")
 Panel/styles/backpack_slot = SubResource("StyleBoxFlat_backpack_slot")
 Panel/styles/side_slot = SubResource("StyleBoxFlat_side_slot")
 Panel/styles/army_slot = SubResource("StyleBoxFlat_army_slot")
+Panel/styles/army_slot_hover = SubResource("StyleBoxFlat_army_slot_hover")
+Panel/styles/army_slot_selected = SubResource("StyleBoxFlat_army_slot_selected")
+Panel/styles/army_slot_disabled = SubResource("StyleBoxFlat_army_slot_disabled")
+; подложка error-chip (§4.4: голый текст ошибки на C_PANEL запрещён)
+Panel/styles/chip = SubResource("StyleBoxFlat_chip")
 default_font_sizes/small = 14
 default_font_sizes/default = 16
 default_font_sizes/large = 22
@@ -388,6 +631,87 @@ constants/slot_margin = 6
 constants/button_gap = 8
 constants/column_gap = 10
 constants/row_gap = 6
+
+; ─── К-3 Slider: тип темы — HSlider/VSlider (Slider абстрактен, проверено в 4.7) ───
+HSlider/styles/slider = SubResource("StyleBoxTexture_slider_track")
+HSlider/styles/grabber_area = SubResource("StyleBoxFlat_slider_area")
+HSlider/styles/grabber_area_highlight = SubResource("StyleBoxFlat_slider_area_highlight")
+HSlider/icons/grabber = ExtResource("13_slider_handle")
+HSlider/icons/grabber_highlight = ExtResource("13_slider_handle")
+HSlider/icons/grabber_disabled = ExtResource("13_slider_handle")
+VSlider/styles/slider = SubResource("StyleBoxTexture_slider_track")
+VSlider/styles/grabber_area = SubResource("StyleBoxFlat_slider_area")
+VSlider/styles/grabber_area_highlight = SubResource("StyleBoxFlat_slider_area_highlight")
+VSlider/icons/grabber = ExtResource("13_slider_handle")
+VSlider/icons/grabber_highlight = ExtResource("13_slider_handle")
+VSlider/icons/grabber_disabled = ExtResource("13_slider_handle")
+
+; ─── К-6 LineEdit (§4.4) ───
+LineEdit/styles/normal = SubResource("StyleBoxFlat_lineedit_normal")
+LineEdit/styles/read_only = SubResource("StyleBoxFlat_lineedit_readonly")
+LineEdit/styles/focus = SubResource("StyleBoxFlat_lineedit_focus")
+LineEdit/colors/font_color = Color(0.9098, 0.8353, 0.6588, 1)
+LineEdit/colors/font_placeholder_color = Color(0.5412, 0.4157, 0.2275, 1)
+; имена темы 4.7: font_uneditable_color (не font_readonly_color), caret_color
+; (не cursor_color) — сверено с get_color_list() дефолтной темы движка
+LineEdit/colors/font_uneditable_color = Color(0.851, 0.7686, 0.5608, 1)
+LineEdit/colors/font_selected_color = Color(0.9608, 0.9373, 0.8784, 1)
+LineEdit/colors/caret_color = Color(0.9608, 0.9373, 0.8784, 1)
+; выделение текста в дефолтной теме — синее (П-1: синего в теме не остаётся)
+LineEdit/colors/selection_color = Color(0.5412, 0.4157, 0.2275, 1)
+
+; ─── К-6 CheckBox (§4.5): носитель — комплект 20×20 из widgets/buttons (К-2) ───
+CheckBox/styles/normal = SubResource("StyleBoxFlat_checkbox_normal")
+CheckBox/styles/hover = SubResource("StyleBoxFlat_checkbox_hover")
+CheckBox/styles/pressed = SubResource("StyleBoxFlat_checkbox_pressed")
+CheckBox/styles/focus = SubResource("StyleBoxFlat_checkbox_focus")
+CheckBox/icons/checked = ExtResource("14_cb_checked")
+CheckBox/icons/unchecked = ExtResource("15_cb_unchecked")
+CheckBox/icons/checked_disabled = ExtResource("14_cb_checked")
+CheckBox/icons/unchecked_disabled = ExtResource("15_cb_unchecked")
+CheckBox/colors/font_color = Color(0.9098, 0.8353, 0.6588, 1)
+CheckBox/colors/font_hover_color = Color(0.9608, 0.9373, 0.8784, 1)
+CheckBox/colors/font_pressed_color = Color(0.9098, 0.8353, 0.6588, 1)
+CheckBox/colors/font_disabled_color = Color(0.5412, 0.4157, 0.2275, 1)
+; §4.5: галочка C_GOLD_BRIGHT, рамка C_GOLD. Тема объявляет канонный цвет;
+; пиксели ассета (зелёная галочка) — расхождение К-2, правится билетом на комплект
+CheckBox/colors/checkbox_checked_color = Color(0.6196, 0.4667, 0.2196, 1)
+CheckBox/colors/checkbox_unchecked_color = Color(0.5412, 0.4157, 0.2275, 1)
+CheckButton/icons/checked = ExtResource("14_cb_checked")
+CheckButton/icons/unchecked = ExtResource("15_cb_unchecked")
+CheckButton/colors/button_checked_color = Color(0.6196, 0.4667, 0.2196, 1)
+CheckButton/colors/button_unchecked_color = Color(0.5412, 0.4157, 0.2275, 1)
+
+; ─── К-6 вкладки (§4.7): ярлыки — тип темы TabBar, поле — TabContainer ───
+TabBar/styles/tab_selected = SubResource("StyleBoxFlat_tab_selected")
+TabBar/styles/tab_unselected = SubResource("StyleBoxFlat_tab_unselected")
+TabBar/styles/tab_hovered = SubResource("StyleBoxFlat_tab_hovered")
+TabBar/styles/tab_disabled = SubResource("StyleBoxFlat_tab_disabled")
+TabBar/colors/font_selected_color = Color(0.9608, 0.9373, 0.8784, 1)
+TabBar/colors/font_unselected_color = Color(0.851, 0.7686, 0.5608, 1)
+; имя темы 4.7 — font_hovered_color (не font_hover_color)
+TabBar/colors/font_hovered_color = Color(0.9098, 0.8353, 0.6588, 1)
+TabBar/colors/font_disabled_color = Color(0.5412, 0.4157, 0.2275, 1)
+; §4.7 focus — линия 2 px вокруг ярлыка; в дефолтной теме — акцентная (синяя)
+TabBar/styles/tab_focus = SubResource("StyleBoxFlat_button_focus")
+TabContainer/styles/panel = SubResource("StyleBoxTexture_panel")
+; TabContainer перекладывает стили ярлыков ВНУТРЕННЕЙ TabBar своими overrides,
+; поэтому для вкладок внутри TabContainer читаются объявления TabContainer, а не
+; TabBar (проверено кадром: без этих строк ярлыки остались дефолтной темы).
+TabContainer/styles/tab_selected = SubResource("StyleBoxFlat_tab_selected")
+TabContainer/styles/tab_unselected = SubResource("StyleBoxFlat_tab_unselected")
+TabContainer/styles/tab_hovered = SubResource("StyleBoxFlat_tab_hovered")
+TabContainer/styles/tab_disabled = SubResource("StyleBoxFlat_tab_disabled")
+TabContainer/styles/tab_focus = SubResource("StyleBoxFlat_button_focus")
+TabContainer/colors/font_selected_color = Color(0.9608, 0.9373, 0.8784, 1)
+TabContainer/colors/font_unselected_color = Color(0.851, 0.7686, 0.5608, 1)
+TabContainer/colors/font_hovered_color = Color(0.9098, 0.8353, 0.6588, 1)
+TabContainer/colors/font_disabled_color = Color(0.5412, 0.4157, 0.2275, 1)
+
+; ─── К-6 тултип (§3, §4.8) ───
+TooltipPanel/styles/panel = SubResource("StyleBoxFlat_tooltip")
+TooltipLabel/colors/font_color = Color(0.9098, 0.8353, 0.6588, 1)
+TooltipLabel/font_sizes/font_size = 20
 
 LabelSecondary/base_type = "Label"
 LabelSecondary/fonts/font = ExtResource("8_serif")
