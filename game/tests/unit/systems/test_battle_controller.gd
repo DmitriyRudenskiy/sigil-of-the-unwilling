@@ -81,3 +81,34 @@ func test_battle_finished_signal() -> void:
 	bc.battle_finished.emit(BattleState.Side.ATTACKER, [], [])
 	assert_int(got.size()).is_equal(1)
 	assert_that(got[0][0]).is_equal(BattleState.Side.ATTACKER)
+
+
+# UI-3b: flow держит сцену боя до result_accepted (оверлей «Продолжить»).
+# Неинтерактивные клиенты (probe) не могут кликнуть — accept_result() даёт
+# программный путь. Без battle_over — не emit (оверлей ещё не показан).
+func test_accept_result_emits_only_when_battle_over() -> void:
+	var bc = auto_free(BattleController.new())
+	bc._state = BattleState.new()
+	var got: Array = []
+	bc.result_accepted.connect(func(): got.append(true))
+
+	bc.accept_result()
+	assert_int(got.size()).is_equal(0)
+
+	bc._state.battle_over = true
+	bc.accept_result()
+	assert_int(got.size()).is_equal(1)
+
+
+# UI-3b: повторный accept_result после battle_over — идемпотентный emit
+# (flow-подключение CONNECT_ONE_SHOT; повторные emit без слушателей не должны
+# падать и не должны дублировать эффект).
+func test_accept_result_repeat_does_not_crash() -> void:
+	var bc = auto_free(BattleController.new())
+	bc._state = BattleState.new()
+	bc._state.battle_over = true
+	var got: Array = []
+	bc.result_accepted.connect(func(): got.append(true))
+	bc.accept_result()
+	bc.accept_result()
+	assert_int(got.size()).is_equal(2)
