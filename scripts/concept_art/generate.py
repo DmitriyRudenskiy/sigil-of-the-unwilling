@@ -64,6 +64,14 @@ def load_spec(path: Path = SPEC_PATH) -> dict:
         for key in ("id", "style"):
             if key not in v:
                 raise SystemExit(f"spec: в варианте {v.get('id', '?')} нет поля {key}")
+    # Пастбище граблей: слои запроса — style категории → style варианта → frame категории →
+    # subject. Глобальных полей у каталога нет; четыре раунда калибровки правили spec["base"]
+    # и spec["negative"], которые никто не читал, и всё это время модель получала
+    # «tall slender build, head one seventh» из style категории.
+    for dead in ("base", "negative"):
+        if dead in spec:
+            raise SystemExit(f"spec: поле {dead} верхнего уровня не читается генератором — "
+                             f"прави style/frame категории и negative варианта")
     for key in ("model", "probe_models"):
         if not spec.get(key):
             raise SystemExit(f"spec: нет поля {key} — модель выбирается прогоном, не категорией")

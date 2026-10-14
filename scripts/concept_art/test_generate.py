@@ -67,6 +67,16 @@ with tempfile.TemporaryDirectory() as tmp:
     ok(s1 != g.seed_for("v2_grim_diorama", "cursors", "cursor_default"), "затравка не зависит от варианта")
     ok(0 <= s1 < 2**31, "затравка вне диапазона")
 
+    # --- мёртвое глобальное поле падает, а не молча игнорируется
+    for dead in ("base", "negative"):
+        bad = Path(tmp) / f"dead_{dead}.json"
+        bad.write_text(Path(g.SPEC_PATH).read_text().replace('\n "model":', f'\n "{dead}": "x",\n "model":', 1))
+        try:
+            g.load_spec(bad)
+            ok(False, f"глобальное поле {dead} промолчало")
+        except SystemExit as exc:
+            ok(dead in str(exc), f"сообщение про {dead}: {exc}")
+
     # --- слои запроса: стиль эталона -> техника варианта -> кадр -> сюжет
     v = SPEC["variants"][0]
     cat = SPEC["categories"]["cursors"]
