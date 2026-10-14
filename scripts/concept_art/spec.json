@@ -1,0 +1,453 @@
+{
+ "_comment": "Каталог концепт-арта. Стиль задаёт эталон категории (reference + style): новый кадр обязан повторять стиль одного из изображений каталога референсов (правило владельца 2026-10-15). Вариант меняет только технику рендера — без слов о сюжете, пропорциях, палитре и материалах. Слои запроса: style категории -> style варианта -> frame -> subject.",
+ "server": "http://192.168.0.230:9000/mcp",
+ "comfy": "http://192.168.0.230:8188",
+ "out_dir": "concept_art",
+ "export": {
+  "format": "WEBP",
+  "quality": 82
+ },
+ "models": {
+  "krea2": {
+   "tool": "api_generate_image_krea2",
+   "steps": 8,
+   "cfg": 1.0,
+   "unet": "krea2_turbo_fp8_scaled.safetensors",
+   "clip": "qwen3vl_4b_fp8_scaled.safetensors",
+   "vae": "qwen_image_vae.safetensors"
+  },
+  "qwen21": {
+   "tool": "api_generate_image_qwen21",
+   "steps": 25,
+   "unet": "qwen_image_2.1_int8_convrot.safetensors",
+   "clip": "qwen3vl_8b_int8_convrot.safetensors",
+   "vae": "qwen_image_2.1_vae_bf16.safetensors"
+  }
+ },
+ "variants": [
+  {
+   "id": "t1_bold_ink",
+   "name": "t1_bold_ink",
+   "model": "krea2",
+   "ui_model": "qwen21",
+   "style": "bold black ink outlines, flat cel fill, hard-edged single shadow, high-contrast graphic-novel finish",
+   "negative": "photorealism, photograph, gritty realism, dark muddy palette, desaturated, sketch, scribble, text, letters, watermark, extra limbs, cropped figure, scenery, background landscape"
+  },
+  {
+   "id": "t2_soft_render",
+   "name": "t2_soft_render",
+   "model": "krea2",
+   "ui_model": "qwen21",
+   "style": "smooth airbrushed rendering, soft gradients, no visible line, glossy polished surfaces, warm rim light",
+   "negative": "photorealism, photograph, gritty realism, dark muddy palette, desaturated, sketch, scribble, text, letters, watermark, extra limbs, cropped figure, scenery, background landscape"
+  },
+  {
+   "id": "t3_flat_line",
+   "name": "t3_flat_line",
+   "model": "krea2",
+   "ui_model": "qwen21",
+   "style": "uniform thin ink line, flat colours, single shadow tone, minimal surface texture, crisp silhouette",
+   "negative": "photorealism, photograph, gritty realism, dark muddy palette, desaturated, sketch, scribble, text, letters, watermark, extra limbs, cropped figure, scenery, background landscape"
+  },
+  {
+   "id": "t4_painterly",
+   "name": "t4_painterly",
+   "model": "krea2",
+   "ui_model": "qwen21",
+   "style": "loose hand-painted rendering with visible brush texture, rich mid-tones, soft edges, no hard outlines",
+   "negative": "photorealism, photograph, gritty realism, dark muddy palette, desaturated, sketch, scribble, text, letters, watermark, extra limbs, cropped figure, scenery, background landscape"
+  },
+  {
+   "id": "t5_glossy_toon",
+   "name": "t5_glossy_toon",
+   "model": "krea2",
+   "ui_model": "qwen21",
+   "style": "glossy toon rendering, thick bright rim light, simplified bold shapes, high saturation, playful specular highlights",
+   "negative": "photorealism, photograph, gritty realism, dark muddy palette, desaturated, sketch, scribble, text, letters, watermark, extra limbs, cropped figure, scenery, background landscape"
+  }
+ ],
+ "categories": {
+  "units": {
+   "size": [
+    1024,
+    1024
+   ],
+   "count": 12,
+   "frame": "single full-body fantasy character, entire figure visible from head to boots, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, no scenery, no floor, no cast shadow, unit concept art",
+   "items": [
+    {
+     "id": "levy_militiaman",
+     "subject": "human militia levy, padded gambeson, round shield and spear, weathered farmer face"
+    },
+    {
+     "id": "meadow_halberdier",
+     "subject": "human halberdier in kettle helm and mail coif, tall halberd, painted tabard"
+    },
+    {
+     "id": "elven_archer",
+     "subject": "wood elf archer, leaf-pattern cloak, longbow, quiver, keen sharp face"
+    },
+    {
+     "id": "pale_sorcerer",
+     "subject": "pale elf sorcerer, slender, rune-etched staff, layered deep robes"
+    },
+    {
+     "id": "dwarf_fighter",
+     "subject": "mountain dwarf fighter, broad axe, round shield, braided beard, mail shirt"
+    },
+    {
+     "id": "runesmith",
+     "subject": "dwarf runesmith, heavy hammer, runic etchings on leather apron and arms, fur cloak"
+    },
+    {
+     "id": "aumaua_marine",
+     "subject": "tall sea-folk marine, coral-scale armour, trident and tall shield, sea-worn"
+    },
+    {
+     "id": "orlan_stalker",
+     "subject": "dark-skinned stalker, hide armour, twin skinning knives, bone mask on shoulder"
+    },
+    {
+     "id": "godlike_confessor",
+     "subject": "masked zealot confessor, heavy mace, swinging censer on chain, votive metal plates"
+    },
+    {
+     "id": "wolf_raider",
+     "subject": "fur-clad wolf raider, hand axe, coiled lasso, war paint, pelts over shoulders"
+    },
+    {
+     "id": "herald_banneret",
+     "subject": "herald banneret, blank-field tabard, tall banner pole, mail and surcoat"
+    },
+    {
+     "id": "siege_carpenter",
+     "subject": "siege carpenter sapper, leather apron, tool belt, hatchet, folded scaling ladder on back"
+    }
+   ],
+   "reference": "1791743136546-01a12c34-3cb2-72fb-914d-2361d7698797.jpeg",
+   "style": "stylized comic-cartoon fantasy game characters, bold confident ink outlines, smooth semi-real cartoon rendering, saturated fabric colours, heroic upright proportions with clear hands and heads, friendly expressive faces, clean graphic shading with one shadow tone"
+  },
+  "buildings": {
+   "size": [
+    1024,
+    1024
+   ],
+   "count": 27,
+   "frame": "single isolated building, isometric three-quarter view from upper left, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, no scenery, no ground plate, no cast shadow, building concept art",
+   "items": [
+    {
+     "id": "shack",
+     "subject": "peasant shack, wattle-and-daub walls, sagging thatch roof, single dim window"
+    },
+    {
+     "id": "farm",
+     "subject": "family farmstead, thatched house with low stone base, fenced vegetable beds"
+    },
+    {
+     "id": "mill",
+     "subject": "water mill on a stone wheel house, wooden waterwheel, millrace"
+    },
+    {
+     "id": "bakery",
+     "subject": "village bakery, domed brick oven, warm glow at the door, drying racks"
+    },
+    {
+     "id": "mine",
+     "subject": "hillside mine entrance, timber portal, ore cart on rails, pit head frame"
+    },
+    {
+     "id": "smithy",
+     "subject": "blacksmith forge, open front, anvil, quenching barrel, chimney with smoke"
+    },
+    {
+     "id": "market",
+     "subject": "market hall, timber-framed stall rows, striped awnings, produce crates"
+    },
+    {
+     "id": "tavern",
+     "subject": "roadside tavern, two storeys jettied out, hanging sign, shuttered windows"
+    },
+    {
+     "id": "trade_post",
+     "subject": "trade post, palisade enclosure, counting house, stacked goods under lean-to"
+    },
+    {
+     "id": "barracks",
+     "subject": "barracks, long timber hall, weapon racks visible at the door, drill yard"
+    },
+    {
+     "id": "archery_range",
+     "subject": "archery range, butts of straw, covered shooting gallery, target posts"
+    },
+    {
+     "id": "stables",
+     "subject": "stables and paddock, timber stalls, hay loft, mounting block"
+    },
+    {
+     "id": "walls",
+     "subject": "town wall segment, rubble-stone curtain with crenellations and a walkway"
+    },
+    {
+     "id": "school",
+     "subject": "scriptorium school, stone room with arched windows, lecterns and wax tablets"
+    },
+    {
+     "id": "library",
+     "subject": "library hall, tall shelving, chained codices, reading desks, ladder"
+    },
+    {
+     "id": "great_temple",
+     "subject": "great temple, cruciform stone nave, carved portal, bell gable"
+    },
+    {
+     "id": "ancient_vault",
+     "subject": "ancient vault, half-buried masonry dome, broken seal door, older than the town"
+    },
+    {
+     "id": "manor",
+     "subject": "manor house, two-storey stone hall with solar wing, fenced courtyard"
+    },
+    {
+     "id": "sawmill",
+     "subject": "sawmill, pit-saw shed, log ramp, stacked planks, water or horse drive"
+    },
+    {
+     "id": "granary",
+     "subject": "raised granary on staddle stones, thatched loft, vermin-proof posts"
+    },
+    {
+     "id": "well",
+     "subject": "village well, stone curb, timber frame and winch, bucket and trough"
+    },
+    {
+     "id": "sheep_pen",
+     "subject": "sheep pen, hurdle fencing, stone shelter shed, watering trough"
+    },
+    {
+     "id": "orchard",
+     "subject": "walled orchard, ordered fruit trees, bee hives, picking ladders"
+    },
+    {
+     "id": "watchtower",
+     "subject": "watchtower, square stone tower with hoarding, beacon brazier on top"
+    },
+    {
+     "id": "shrine",
+     "subject": "roadside shrine, stone niche with carved glyph, offering stones, worn steps"
+    },
+    {
+     "id": "bathhouse",
+     "subject": "bathhouse, low stone building, steam vents, tiled plunge pool under pergola"
+    },
+    {
+     "id": "caravanserai",
+     "subject": "caravanserai, fortified rectangular yard, arched stalls, gatehouse"
+    }
+   ],
+   "reference": "1791780027871-01a12e67-c922-7390-adb4-faf055ff8ba7.jpeg",
+   "style": "hand-painted isometric fantasy village buildings, cozy warm storybook palette of thatch, timber and pale plaster, soft rounded volumes, warm afternoon light from upper left, painterly but clean edges, small readable props"
+  },
+  "signs": {
+   "size": [
+    1024,
+    1024
+   ],
+   "count": 8,
+   "frame": "one circular medallion sigil, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, brand mark design",
+   "items": [
+    {
+     "id": "sign_spark",
+     "subject": "glyph of a struck spark with radiating short rays"
+    },
+    {
+     "id": "sign_time",
+     "subject": "glyph of an hourglass with falling sand"
+    },
+    {
+     "id": "sign_balance",
+     "subject": "glyph of a balanced scale with two empty pans"
+    },
+    {
+     "id": "sign_wild",
+     "subject": "glyph of a sprouting leaf with visible veins"
+    },
+    {
+     "id": "sign_shadow",
+     "subject": "glyph of a waning crescent moon, dark side visible"
+    },
+    {
+     "id": "sign_harmony",
+     "subject": "glyph of a tuning chord, three strings between two posts"
+    },
+    {
+     "id": "sign_cycle",
+     "subject": "glyph of an ouroboros serpent biting its own tail"
+    },
+    {
+     "id": "sign_basis",
+     "subject": "glyph of a cornerstone block with plumb line"
+    }
+   ],
+   "reference": "1791970213325-01a139be-d2ce-786a-9d3b-1f9bbd4cd245.png",
+   "style": "circular engraved metal medallion sigils, dark iron disc with fine beaded rim and ornamental engraving, one luminous glyph at the center, strong contrast of dark metal and glowing symbol, flat front view"
+  },
+  "cursors": {
+   "size": [
+    1024,
+    1024
+   ],
+   "count": 9,
+   "frame": "one single game cursor icon, bold readable silhouette, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, no hand, no pointer arrow, no text",
+   "items": [
+    {
+     "id": "cursor_default",
+     "subject": "steel gauntlet hand with extended pointing index finger"
+    },
+    {
+     "id": "cursor_walk",
+     "subject": "single leather boot mid-step, sole visible"
+    },
+    {
+     "id": "cursor_enter",
+     "subject": "small arched stone doorway with warm light behind the door"
+    },
+    {
+     "id": "cursor_spell",
+     "subject": "single feathered wing in flight"
+    },
+    {
+     "id": "cursor_attack",
+     "subject": "single drawn sword, edge down, hilt at top"
+    },
+    {
+     "id": "cursor_chop",
+     "subject": "axe biting into a tree stump with wood chips flying"
+    },
+    {
+     "id": "cursor_mine",
+     "subject": "pickaxe striking broken rubble with stone chips flying"
+    },
+    {
+     "id": "cursor_build",
+     "subject": "shovel digging into loose soil with earth flying"
+    },
+    {
+     "id": "cursor_talk",
+     "subject": "open steel gauntlet palm up, offering gesture"
+    }
+   ],
+   "reference": "cursor.jpeg",
+   "style": "hand-drawn game cursor icons, semi-realistic rendered objects with bold dark outlines, polished steel and worn leather, crisp specular highlights, slight three-quarter view"
+  },
+  "resources": {
+   "size": [
+    1024,
+    1024
+   ],
+   "count": 16,
+   "frame": "one single resource pile, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, no text, no frame",
+   "items": [
+    {
+     "id": "res_wood",
+     "subject": "bundle of cut logs with bark, cut ends facing viewer"
+    },
+    {
+     "id": "res_mercury",
+     "subject": "pool of liquid mercury with three floating silver droplets"
+    },
+    {
+     "id": "res_ore",
+     "subject": "pile of raw iron ore stones with metallic flecks"
+    },
+    {
+     "id": "res_sulfur",
+     "subject": "pile of yellow sulfur crystals with powdery dust"
+    },
+    {
+     "id": "res_crystal",
+     "subject": "cluster of pale blue quartz crystals"
+    },
+    {
+     "id": "res_gems",
+     "subject": "loose mixed faceted gemstones, red blue green"
+    },
+    {
+     "id": "res_gold",
+     "subject": "stack of gold coins with a few spilled"
+    },
+    {
+     "id": "res_stone",
+     "subject": "pile of squared grey building stone blocks"
+    },
+    {
+     "id": "res_grain",
+     "subject": "sheaf of bound wheat with spilled kernels"
+    },
+    {
+     "id": "res_iron",
+     "subject": "two stacked forged iron ingots with scale marks"
+    },
+    {
+     "id": "res_leather",
+     "subject": "folded cured leather hides with lacing thongs"
+    },
+    {
+     "id": "res_cloth",
+     "subject": "bolt of undyed linen cloth with a wooden shuttle"
+    },
+    {
+     "id": "res_salt",
+     "subject": "conical pile of coarse rock salt with a wooden scoop"
+    },
+    {
+     "id": "res_herbs",
+     "subject": "bundled herb stems with leaves and a mortar"
+    },
+    {
+     "id": "res_pottery",
+     "subject": "two sealed clay amphorae with rope-wrapped necks"
+    },
+    {
+     "id": "res_charcoal",
+     "subject": "pile of black charcoal lumps in a wicker basket"
+    }
+   ],
+   "reference": "resources.png",
+   "style": "hand-painted game resource icons, compact readable piles of ore, gems and logs, chunky shapes, saturated material colours, warm highlights, dark green earthy base under the pile"
+  },
+  "ui": {
+   "size": [
+    1280,
+    720
+   ],
+   "count": 5,
+   "model": "qwen21",
+   "frame": "complete game user interface screen, 16:9 widescreen layout, readable panel hierarchy, top resource bar, no photographic background, no watermark",
+   "items": [
+    {
+     "id": "ui_start_screen",
+     "subject": "title and start menu screen: dark threshold hall, engraved sigil on a plinth at center, vertical stack of five menu buttons at right"
+    },
+    {
+     "id": "ui_world_map",
+     "subject": "campaign world map screen: hex-tile map with roads, small buildings and unit stacks, thin side panel with settlement list, minimap in corner"
+    },
+    {
+     "id": "ui_city",
+     "subject": "city screen: isometric hex district grid with built buildings and empty slots, building menu panel at right, resource bar on top"
+    },
+    {
+     "id": "ui_inventory",
+     "subject": "character and inventory screen: portrait panel at left, paper-doll equipment slots in the middle, grid of item slots at right, stat list below"
+    },
+    {
+     "id": "ui_battle",
+     "subject": "tactical battle screen: hex battlefield in the middle with two opposing unit stacks, portrait cards in both top corners, turn counter dial at top center, action buttons bottom left"
+    }
+   ],
+   "reference": "1791999397246-01a13b7a-0abb-7b89-a0aa-4d39e5f5f207.jpeg",
+   "style": "dark cinematic fantasy game interface, carved stone and dark wood panels with thin gold filigree, parchment fields, glowing blue sigil accents, moody low-key lighting with one warm light source, engraved serif titling"
+  }
+ },
+ "references_dir": "/Users/user/Downloads/Новая папка с объектами 40"
+}

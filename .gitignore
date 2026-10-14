@@ -12,3 +12,7 @@ game/balance_report.json
 # В git — только карта reference/INDEX.md и тексты docs/13, docs/17. См. INDEX.md «Почему не в git».
 reference/*
 !reference/INDEX.md
+
+# Концепт-арт: 385 сгенерированных кадров (~60–90 МБ). В git — каталог (scripts/concept_art/spec.json),
+# генератор и docs/18-concept-art-variants.md; пиксели воспроизводимы прогоном. См. README.
+/concept_art/
