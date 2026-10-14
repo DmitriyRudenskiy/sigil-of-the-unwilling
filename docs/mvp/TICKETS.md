@@ -4,7 +4,7 @@ tags:
   - gdd
   - mvp
 status: reference
-date: 2026-10-13
+date: 2026-10-14
 ---
 
 # TICKETS.md — тикеты MVP (Фаза 4, шаг 4)
@@ -684,6 +684,204 @@ sword_hellstorm. **Самоликвидация:** генерация сета 2
    моно-строку очков; иконки — image-очередь, не изобретать в коде.
 2. **Q (Авто)** (docs/14 §5): кнопки «Авто» в HUD нет, AI-автобой вне скоупа
    (docs/14 §7) → хоткей не реализован (absent). Реализовать вместе с автобоем.
+
+### Тикет ASSET-1 «чужой пиксель в репо: resources.png (HoMM III)» (2026-10-14, аудит провенанса — [[13-art-bible]] §12)
+
+- **Что найдено:** `game/assets/textures/resources.png` (286 КБ, атлас 4×4) — md5
+  `b34a11b6f199645a5a91509c16b08e0f`, **совпадает с `___STYLE_BOOK/for_local_agent/resources.png`**
+  (референс 21 архива). Словарь атласа (`WOOD MERCURY ORE SULFUR CRYSTAL GEMS GOLD
+  STONE`, `scripts/theme/resource_atlas.gd:15–23`) = ресурсный словарь HoMM III
+  (меркурий/сера/кристалл — его подпись). Файл добавлен `82a0bb02` («re-commit after
+  .git restoration from 2026-09-05 backup») — авторского следа в истории нет.
+- **Почему билет, а не правка этого PR:** вопрос правовой, а не стилевой; замена
+  ассета в том же PR, что и правка документации, смешала бы верифицируемое (документы)
+  с неверифицируемым headless (приёмка нового атласа глазами).
+- **AC:** (1) в репо нет пикселя без записи происхождения; (2) `game/assets/PROVENANCE.md`
+  покрывает все классы ассетов (кто сделал / из чего / на каких правах); (3) вместо
+  чужого атласа — собственный 4×4 по формуле иконки [[13-art-bible]] §7.1 либо
+  ресурсные подписи без иконок; (4) `main_menu_bg.webp` (происходит из референса 04,
+  права на генерацию не проверялись) — проверен или заменён; (5) чекер происхождения
+  в `scripts/` падает на новом ассете без строки в PROVENANCE.
+- **Размер:** M (атлас + 60 артефактов не трогает; фон меню — UI-4)
+- **Зависимости:** —; **приоритет выше всей таблицы [[17-ui-style-guide]] §9**
+- **Блокирует:** любой публичный/релизный билд. Headless-гейт не блокирует.
+
+### Тикет UI-AC7 «кегль < 16 px в UI-сценах: инвентарь 83 нарушений AC7» (2026-10-14, замер к приёмке [[17-ui-style-guide]] §9 Т-5)
+
+- **Глагол игрока:** прочитать интерфейс без лупы (AC7 спеки [[14-ux-battle-hud]]: «тексты ≥ 16 px @720p»).
+- **Что найдено (замер 2026-10-14, `game/scenes/ui/*.tscn`, все `font_size` < 16):**
+  **83 объявления в 12 сценах из 32.** Распределение по кеглю: 8 px ×1, 9 ×2, 10 ×4,
+  12 ×40, 13 ×5, 14 ×30, 15 ×1. По сценам (убыв.): `info_panel` 15, `resources_panel` 13,
+  `skills_panel` 10, `character_creation` 9, `tools_panel` 8, `artifact_inventory_screen` 7,
+  `death_sequence` 7, `save_load_screen` 6, `settings_screen` 3, `arena_hex_cell` 3,
+  `chronicle_entry` 1, `TeamDialogScreen` 1.
+- **Почему билет, а не часть фазы 5 (решение владельца, 2026-10-14):** массовая замена
+  «12 → 16» ломает вёрстку панелей, где текст втиснут в фиксированную ширину (те же
+  `custom_minimum_size` из Л-3), и требует per-case разбора «это подпись, бейдж или
+  стрелка». Фаза 5 — тема и компоненты, не типографика 32 сцен.
+- **Инвентарь (полный, 83 строки) — в приложении ниже; пометка «намеренно» = выглядит
+  осознанным микро-кеглем и решается не автозаменой.**
+
+| Сцена | Узел | Кегль | Строка | Пометка |
+|---|---|---|---|---|
+| `arena_hex_cell.tscn` | `Yield` | 8 | 43 | **намеренно?** — микро-подпись тайла арены |
+| `arena_hex_cell.tscn` | `Feature` | 9 | 57 | **намеренно?** — то же |
+| `arena_hex_cell.tscn` | `Badge` | 9 | 71 | **намеренно?** — бейдж |
+| `info_panel.tscn` | `town_up_btn` | 10 | 215 | **намеренно?** — стрелка «▲» |
+| `info_panel.tscn` | `town_down_btn` | 10 | 295 | **намеренно?** — стрелка «▼» |
+| `info_panel.tscn` | `hero_up_btn` | 10 | 51 | **намеренно?** — стрелка «▲» |
+| `info_panel.tscn` | `hero_down_btn` | 10 | 131 | **намеренно?** — стрелка «▼» |
+| `death_sequence.tscn` | `Reason` | 15 | 50 | пограничный — до 16 один шаг |
+| `info_panel.tscn` | `Name` ×4 | 13 | 68, 85, 102, 119 | фикс — имя отряда/героя читаемым |
+| `save_load_screen.tscn` | `ErrorLabel` | 13 | 208 | фикс — сообщение об ошибке (WCAG 1.4.3) |
+| остальные 72 | — | 12 / 14 | — | фикс на вариации канона (§2: 16 `LabelBody` / 16 `LabelCode` / 20 `LabelNumber`) |
+
+- **AC:** (1) в `game/scenes/ui/` не остаётся `font_size` < 16, кроме узлов, явно
+  зарегистрированных здесь как «намеренно» (и то не ниже 14 — AC7 допускает только
+  зарегистрированное исключение); (2) кегль берётся из вариации темы, а не оверрайда
+  (Т-4 того же реестра расхождений); (3) скриншоты до/после трёх худших сцен
+  (`info_panel`, `resources_panel`, `skills_panel`) в треде — вёрстка не поехала,
+  переносы включены там, где текст переменной длины (Л-2).
+- **Размер:** M (12 сцен, вёрстка + пересчёт переносов; кода почти нет)
+- **Зависимости:** фаза 5 (тема назначена глобально — иначе «кегль из темы» некуда
+  брать); Л-1/Л-2/Л-3 (переносы и ширины) — иначе фикс кегля ломает панель
+- **Не блокирует** headless-гейт; блокирует приёмку UI по AC7.
+
+### Тикет UI-5 «армейский слот: стейты §4.2 и применение стейтов в сценах» (2026-10-14, фаза 5 — остаток К-5, [[17-ui-style-guide]] §4.2 / §9.6)
+
+- **Что сделано фазой 5:** в теме объявлены `army_slot` (был один стейт),
+  `army_slot_hover`, `army_slot_selected`, `army_slot_disabled`; все четыре видны
+  на кадре kitchen-sink (`docs/img/14_theme_phase5_kitchen_sink.png`). Тест
+  `test_army_slot_states_declared` не даёт им исчезнуть.
+- **Остаток (две части):** (1) §4.2 требует ещё два стейта — **valid-target**
+  (рамка 2 px `C_OK` + пунктир внутренней границы) и **invalid-target**
+  (рамка 2 px `C_WARN` + содержимое 50% сажы) — их в теме нет; (2) **ни один
+  стейт не применён в сценах:** `scenes/ui/army_panel.tscn` строит слоты узлами
+  `Panel` без оверрайдов и без реакции на hover/select, а
+  `scripts/ui/artifact_inventory_screen.gd:102` кладёт только `army_slot`.
+- **Почему билет, а не правка фазы 5:** применение стейтов — это обвязка
+  состояний (hover/select/валидность цели) в коде экрана + игровое состояние на
+  кадре, иначе брешь не проверяема глазом; смешивать с темовым актом — значит
+  потерять и то, и другое в одном диффе.
+- **AC:** (1) valid-target / invalid-target объявлены и различимы на кадре не
+  только цветом рамки (§4.2); (2) слот `army_panel.tscn` меняет вид при hover и
+  при выборе; (3) smoke-кадр с заполненным отрядом в треде; (4) тест носителя в
+  `tests/unit/ui/` — тема **+ сцена**, а не только тема.
+- **Размер:** M
+- **Зависимости:** фаза 5 (базовые стейты в теме — есть); UI-AC7 (кегль подписей слота)
+
+### Тикет UI-6 «CheckBox: один комплект 20×20 + индикатор indeterminate» (2026-10-14, фаза 5 — К-2 / §4.5)
+
+- **Что найдено:** в репо два комплекта флажков (`widgets/buttons/` 20×20 и
+  `widgets/decorators/` 16×16), тема использует последние; галка рисовалась
+  кислотно-зелёной `#33ff66` (перекрашена в `C_OK #7aa85a` актом фазы 5).
+  Индикатор **indeterminate не рисуется ничем**: §4.5 требует его там, где
+  состояние «и да, и нет» — мёртвый чекбокс на кадре kitchen-sink это показал.
+- **AC:** (1) один комплект 20×20, второй удалён; (2) зона нажатия ≥ 40 px
+  (сделано темой: `content_margin` 10+10 к иконке 20 — проверить в сцене);
+  (3) `misc_checkbox_mixed.png` либо собственный индикатор по §7.1, состояние
+  доступно с клавиатуры; (4) кадр четырёх состояний в треде.
+- **Размер:** S (ассет + тема), M если с клавиатурной навигацией форм
+- **Зависимости:** фаза 5 (состояния темы объявлены)
+
+## Приложение UI-AC7: полный инвентарь (остальные 70 строк)
+
+| Сцена | Узел | Кегль | Строка |
+|---|---|---|---|
+| `TeamDialogScreen.tscn` | `Consequence` | 12 | 51 |
+| `artifact_inventory_screen.tscn` | `ArmyCount` | 14 | 965 |
+| `artifact_inventory_screen.tscn` | `ArmyCount` | 14 | 996 |
+| `artifact_inventory_screen.tscn` | `ArmyCount` | 14 | 1027 |
+| `artifact_inventory_screen.tscn` | `ArmyCount` | 14 | 1058 |
+| `artifact_inventory_screen.tscn` | `ArmyCount` | 14 | 1089 |
+| `artifact_inventory_screen.tscn` | `ArmyCount` | 14 | 1120 |
+| `artifact_inventory_screen.tscn` | `ArmyCount` | 14 | 1151 |
+| `character_creation.tscn` | `SubtitleLabel` | 12 | 36 |
+| `character_creation.tscn` | `SummaryLabel` | 12 | 116 |
+| `character_creation.tscn` | `NameLabelNode` | 14 | 43 |
+| `character_creation.tscn` | `SexLabelNode` | 14 | 55 |
+| `character_creation.tscn` | `RaceLabelNode` | 14 | 65 |
+| `character_creation.tscn` | `SubraceLabelNode` | 14 | 75 |
+| `character_creation.tscn` | `ClassLabelNode` | 14 | 85 |
+| `character_creation.tscn` | `CultureLabelNode` | 14 | 95 |
+| `character_creation.tscn` | `BackgroundLabelNode` | 14 | 105 |
+| `chronicle_entry.tscn` | `ChronicleEntry` | 14 | 4 |
+| `death_sequence.tscn` | `TurnsLabel` | 14 | 58 |
+| `death_sequence.tscn` | `DateLabel` | 14 | 62 |
+| `death_sequence.tscn` | `CitiesLabel` | 14 | 66 |
+| `death_sequence.tscn` | `GloryLabel` | 14 | 70 |
+| `death_sequence.tscn` | `BattlesLabel` | 14 | 74 |
+| `death_sequence.tscn` | `GenerationsLabel` | 14 | 78 |
+| `info_panel.tscn` | `time_label` | 12 | 27 |
+| `info_panel.tscn` | `Name` | 12 | 232 |
+| `info_panel.tscn` | `Name` | 12 | 249 |
+| `info_panel.tscn` | `Name` | 12 | 266 |
+| `info_panel.tscn` | `Name` | 12 | 283 |
+| `info_panel.tscn` | `status_label` | 12 | 300 |
+| `info_panel.tscn` | `date_label` | 14 | 22 |
+| `resources_panel.tscn` | `Label` | 12 | 22 |
+| `resources_panel.tscn` | `Label` | 12 | 33 |
+| `resources_panel.tscn` | `Label` | 12 | 44 |
+| `resources_panel.tscn` | `Label` | 12 | 55 |
+| `resources_panel.tscn` | `Label` | 12 | 66 |
+| `resources_panel.tscn` | `Label` | 12 | 77 |
+| `resources_panel.tscn` | `Label` | 12 | 88 |
+| `resources_panel.tscn` | `Label` | 12 | 99 |
+| `resources_panel.tscn` | `Label` | 12 | 110 |
+| `resources_panel.tscn` | `Label` | 12 | 121 |
+| `resources_panel.tscn` | `Label` | 12 | 132 |
+| `resources_panel.tscn` | `Label` | 12 | 143 |
+| `resources_panel.tscn` | `Label` | 12 | 154 |
+| `save_load_screen.tscn` | `Info` | 14 | 62 |
+| `save_load_screen.tscn` | `Info` | 14 | 93 |
+| `save_load_screen.tscn` | `Info` | 14 | 124 |
+| `save_load_screen.tscn` | `Info` | 14 | 155 |
+| `save_load_screen.tscn` | `Info` | 14 | 186 |
+| `settings_screen.tscn` | `ApplyButton` | 14 | 156 |
+| `settings_screen.tscn` | `ResetButton` | 14 | 162 |
+| `settings_screen.tscn` | `CancelButton` | 14 | 168 |
+| `skills_panel.tscn` | `NameLabel` | 12 | 17 |
+| `skills_panel.tscn` | `LevelLabel` | 12 | 20 |
+| `skills_panel.tscn` | `NameLabel` | 12 | 27 |
+| `skills_panel.tscn` | `LevelLabel` | 12 | 30 |
+| `skills_panel.tscn` | `NameLabel` | 12 | 37 |
+| `skills_panel.tscn` | `LevelLabel` | 12 | 40 |
+| `skills_panel.tscn` | `NameLabel` | 12 | 47 |
+| `skills_panel.tscn` | `LevelLabel` | 12 | 50 |
+| `skills_panel.tscn` | `NameLabel` | 12 | 57 |
+| `skills_panel.tscn` | `LevelLabel` | 12 | 60 |
+| `tools_panel.tscn` | `SlotLabel` | 12 | 16 |
+| `tools_panel.tscn` | `SlotLabel` | 12 | 21 |
+| `tools_panel.tscn` | `SlotLabel` | 12 | 26 |
+| `tools_panel.tscn` | `SlotLabel` | 12 | 31 |
+| `tools_panel.tscn` | `SlotLabel` | 12 | 36 |
+| `tools_panel.tscn` | `SlotLabel` | 12 | 41 |
+| `tools_panel.tscn` | `SlotLabel` | 12 | 46 |
+| `tools_panel.tscn` | `SlotLabel` | 12 | 51 |
+
+### Тикет ASSET-2 «плоские `button_*.png` — интерим фазы 5; авторская рамка по §4.1» (2026-10-14, фаза 5 — [[17-ui-style-guide]] §9.3 К-13)
+
+- **Что сейчас (интерим, зарегистрирован вместо «потом вспомним»):** четыре текстуры
+  `game/assets/ui/widgets/buttons/button_{normal,hover,pressed,disabled}.png`
+  перекрашены из синего семейства (П-1) в дерево/латунь скриптом
+  `game/tools/recolor_button_textures.py` — цвет канонический, **форма прежняя**:
+  плоское поле без фактуры тёмного дерева, рамка из крайних пикселей исходника,
+  состояний `danger` и `selected` §4.1 в ассетах нет (в теме тоже), inset-рамка
+  pressed 2 px и «сдвиг содержимого +1 px» §4.1 не выражены.
+- **Почему билет, а не часть фазы 5:** фаза 5 закрывала цвет и состояния темы;
+  замена носителя (как рисовать кованый край, фактура, 32×32 vs 9-slice) —
+  ассет-работа с приёмкой глазами, и она идёт тем же контуром провенанса, что
+  ASSET-1 (новый пиксель → строка в `assets/PROVENANCE.md` + чекер происхождения).
+- **AC:** (1) поле читается как тёмное дерево §4.1, а не как плоская заливка;
+  (2) рамка — кованый край §4.1, 9-slice-маржа = её толщине (К-8 не регрессит);
+  (3) состояния normal/hover (+6 L)/pressed (−6 L, inset)/focus/disabled (50 % саже)
+  различимы на кадре kitchen-sink; (4) `danger`/`selected` §4.1 — заведены или
+  списаны в гайд отдельным решением; (5) строка PROVENANCE на каждый новый файл;
+  (6) `tools/recolor_button_textures.py` удалён или помечен историческим (работа
+  сделана, повторный прогон по новым ассетам запрещён).
+- **Размер:** S/M (четыре текстуры + кадры; тема и сцены — потребители, не правятся)
+- **Зависимости:** после **ASSET-1** (тот же провенанс-контур, общий чекер);
+  **не блокирует** ни одну фазу UI.
 
 ### T-125. balance_probe (MCP) — зависание автоигрока на этой машине (локально красный, CI-2 зелёный)
 - **Симптом (2026-10-14, ci-speedup, локальная машина):** `test_balance_probe.py` (2 теста) не завершается за PROBE_TIMEOUT_S=420с: мир бутстапится (иногда >180с — `_wait_world` таймаут), проб стартует и идёт быстро (12 ходов за 5с), затем **ставит на ходу ~36** (дальше ни хода, ни `_finish`). Повторяемо в serial И в параллельном режиме (MCP_WORKERS=3).

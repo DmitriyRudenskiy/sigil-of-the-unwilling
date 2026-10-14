@@ -6,7 +6,7 @@ const C_TEXT_SECONDARY   := Color(0.75, 0.80, 0.95)
 const C_TEXT_GOLD        := Color(1.0, 0.85, 0.4)
 const C_TEXT_LIGHT       := Color(0.95, 0.92, 0.8)
 const C_TEXT_DANGER      := Color(1.0, 0.25, 0.2)
-const C_TEXT_SUCCESS     := Color(0.2, 1.0, 0.4)
+const C_TEXT_SUCCESS     := Color("#7aa85a")  # C_OK (гайд §1.2); было #33ff66 — кислотный, П-3
 const C_TEXT_WARNING     := Color(1.0, 0.85, 0.1)
 const C_TEXT_INFO        := Color(0.7, 0.9, 1.0)
 const C_TEXT_GRAY        := Color(0.5, 0.5, 0.5)
@@ -27,12 +27,14 @@ const C_BG_DARK          := Color(0.05, 0.04, 0.10)
 const C_RARITY_TRACK     := Color(0.15, 0.15, 0.15, 0.5)
 const C_POPUP_BORDER     := Color(0.12, 0.10, 0.08, 0.9)
 
-const C_BTN_NORMAL       := Color(0.15, 0.35, 0.75)
-const C_BTN_HOVER        := Color(0.2, 0.45, 0.9)
-const C_BTN_PRESSED      := Color(0.1, 0.25, 0.6)
-const C_BTN_BORDER       := Color(0.3, 0.5, 0.9)
-const C_BTN_SHADOW       := Color(0.10, 0.20, 0.50, 0.50)
-const C_BTN_TEXT         := Color(0.9, 0.95, 1.0)
+# Кнопка — дерево/латунь канона (гайд §4.1). Синее семейство #2659bf — находка П-1,
+# оно же жило в assets/ui/widgets/buttons/button_*.png (перекрашены тем же актом).
+const C_BTN_NORMAL       := Color("#3a2415")  # C_PANEL_BORDER
+const C_BTN_HOVER        := Color("#4a3423")  # C_PANEL (+яркость)
+const C_BTN_PRESSED      := Color("#281c0f")  # C_BG (вдавлено)
+const C_BTN_BORDER       := Color("#8a6a3a")  # C_GOLD
+const C_BTN_SHADOW       := Color(0.086, 0.063, 0.039, 0.5)  # C_SHADOW #16100a
+const C_BTN_TEXT         := Color("#e8d5a8")  # C_TEXT
 
 const C_BATTLE_HIGHLIGHT_MOVE   := Color(0.2, 0.7, 1.0, 0.28)
 const C_BATTLE_HIGHLIGHT_MOVE_B := Color(0.3, 0.9, 1.0, 0.95)
@@ -126,7 +128,7 @@ const C_VICTORY_TITLE := Color(0.92, 0.84, 0.55)
 const C_DEFEAT_TITLE  := Color(0.75, 0.3, 0.28)
 
 const C_GRID_LINE    := Color(0, 0, 0, 0.4)
-const C_GOLD_OUTLINE := Color(1, 1, 0, 0.6)
+const C_GOLD_OUTLINE := Color(0.620, 0.467, 0.220, 0.6)  # C_GOLD_BRIGHT #9e7738; было #ffff00 (П-2)
 const C_WHITE_DIM_30 := Color(1, 1, 1, 0.3)
 const C_GRAY_DIM_40  := Color(0.5, 0.5, 0.5, 0.4)
 
