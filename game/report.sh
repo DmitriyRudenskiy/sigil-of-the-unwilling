@@ -75,6 +75,9 @@ fi
 echo "## DOCS-LINKS (check_docs_links.py)"
 python3 scripts/check_docs_links.py
 echo "exit check_docs_links = $?"
+echo "## DOCS-INDEX (gen_docs_index.py --check)"
+python3 scripts/gen_docs_index.py --check
+echo "exit gen_docs_index = $?"
 echo
 echo "## КОНФЛИКТ-МАРКЕРЫ (diff3/merge; суперсет CI-grep: docs/ + game/, без addons)"
 hits=$(grep -rn '^<<<<<<< \|^>>>>>>> \|^||||||| ' docs/ game/ --include='*.md' --include='*.gd' --include='*.json' 2>/dev/null | grep -v 'game/addons/' || true)
