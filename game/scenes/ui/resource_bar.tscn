@@ -1,13 +1,13 @@
 [gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/resource_bar.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/ui/icons/resources/wood.png" id="2_wood"]
-[ext_resource type="Texture2D" path="res://assets/ui/icons/resources/mercury.png" id="3_mercury"]
-[ext_resource type="Texture2D" path="res://assets/ui/icons/resources/ore.png" id="4_ore"]
-[ext_resource type="Texture2D" path="res://assets/ui/icons/resources/sulfur.png" id="5_sulfur"]
-[ext_resource type="Texture2D" path="res://assets/ui/icons/resources/crystal.png" id="6_crystal"]
-[ext_resource type="Texture2D" path="res://assets/ui/icons/resources/gems.png" id="7_gems"]
-[ext_resource type="Texture2D" path="res://assets/ui/icons/resources/gold.png" id="8_gold"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/resources/icon_resource_wood.png" id="2_wood"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/resources/icon_resource_mercury.png" id="3_mercury"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/resources/icon_resource_ore.png" id="4_ore"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/resources/icon_resource_sulfur.png" id="5_sulfur"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/resources/icon_resource_crystal.png" id="6_crystal"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/resources/icon_resource_gems.png" id="7_gems"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/resources/icon_resource_gold.png" id="8_gold"]
 
 [node name="ResourceBar" type="HBoxContainer"]
 alignment = 1

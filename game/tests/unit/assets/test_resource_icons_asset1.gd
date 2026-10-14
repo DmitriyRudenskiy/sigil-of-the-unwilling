@@ -28,7 +28,7 @@ const SOOT := Color8(0x16, 0x10, 0x0A)      # §7.1 шаг 5: цвет обво�
 const L_MIN := 0.20         # A-14: яркость массы
 const L_DELTA_MIN := 0.08   # A-14: и контраст против носителя
 const DHASH_MIN := 12       # §12.1: медиана несвязанной пары 18, подозрительная ≤ 10
-const PAIR_MIN := 4         # формы не должны сливаться (замер 2026-10-14: минимум 6)
+const PAIR_MIN := 12         # красная любая пара форм по полю содержимого (минимум 15)
 const _HEX_DIGITS := "0123456789abcdef"
 
 # §4.6 полоса (замер живых артефактов) — те же токены, что у генератора.
@@ -85,8 +85,8 @@ static func _hex64(hex: String) -> int:
 	return v
 
 
-static func _dhash(img: Image) -> int:
-	var small := img.duplicate()
+static func _hash9x8(src: Image) -> int:
+	var small := src.duplicate()
 	small.resize(9, 8)
 	var h := 0
 	for y in range(8):
@@ -94,6 +94,20 @@ static func _dhash(img: Image) -> int:
 			if _lum(small.get_pixel(x, y)) > _lum(small.get_pixel(x + 1, y)):
 				h |= 1 << (y * 8 + x)
 	return h
+
+
+# Анти-рекол: весь канвас — ячейки референса заполняют его целиком.
+static func _dhash(img: Image) -> int:
+	return _hash9x8(img)
+
+
+# Различие форм: только поле содержимого. На всём канвасе мера вырождена —
+# 8 px прозрачных полей дают длинные прогоны равных яркостей, биты гаснут,
+# и расстояние между любыми двумя иконками жмётся к нулю (замер 2026-10-14:
+# по всему канвасу медиана пар 10, максимум 20, красных при пороге 12 — 121/190;
+# по полю — медиана 25, диапазон 12–42).
+static func _dhash_field(img: Image) -> int:
+	return _hash9x8(img.get_region(Rect2i(FIELD, FIELD, 32 - 2 * FIELD, 32 - 2 * FIELD)))
 
 
 static func _hamming(a: int, b: int) -> int:
@@ -262,13 +276,13 @@ func test_contrast_against_carrier() -> void:
 # --- A-9: это не перекрас чужого атласа --------------------------------------
 
 func test_icons_are_not_recolored_homm_cells() -> void:
-	var hashes := {}
+	var forms := {}
 	for id in IDS:
 		var img := _load_image(id)
 		if img == null:
 			continue
+		forms[id] = _dhash_field(img)
 		var h := _dhash(img)
-		hashes[id] = h
 		var best := 64
 		for cell in HOMM_DHASH:
 			best = mini(best, _hamming(h, _hex64(cell)))
@@ -277,10 +291,10 @@ func test_icons_are_not_recolored_homm_cells() -> void:
 				+ "это перекрас, а не рисунок") % [id, best, DHASH_MIN]
 		).is_greater_equal(DHASH_MIN)
 	# формы различаются между собой (гард против вырожденного хэша и близнецов)
-	var ids := hashes.keys()
+	var ids := forms.keys()
 	for i in range(ids.size()):
 		for j in range(i + 1, ids.size()):
-			var d := _hamming(hashes[ids[i]], hashes[ids[j]])
+			var d := _hamming(forms[ids[i]], forms[ids[j]])
 			assert_int(d).override_failure_message(
 				"формы %s и %s неразличимы в 8×8 (dHash %d)" % [ids[i], ids[j], d]
 			).is_greater_equal(PAIR_MIN)

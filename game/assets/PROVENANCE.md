@@ -68,13 +68,13 @@ date: 2026-10-14
 | `game/assets/ui/icons/resources/icon_resource_gems.png` | ASSET-1 | три ромба самоцветов по тону граней; `c3/ok/d7` | наше | чисто |
 | `game/assets/ui/icons/resources/icon_resource_gold.png` | ASSET-1 | пирамида из трёх монет; `gold/b1/b2` | наше | чисто |
 | `game/assets/ui/icons/resources/icon_resource_gold_ore.png` | ASSET-1 | угловатый монолит с золотыми прожилками; `c8/b4/d6` | наше | чисто |
-| `game/assets/ui/icons/resources/icon_resource_limonite.png` | ASSET-1 | приплюснутый желвак с наростом; `c2/c4/c6` | наше | чисто |
+| `game/assets/ui/icons/resources/icon_resource_limonite.png` | ASSET-1 | почковидная масса: низкий плитняк с наросшими почками; `c2/c4/c6` | наше | чисто |
 | `game/assets/ui/icons/resources/icon_resource_mercury.png` | ASSET-1 | толстая капля над лужицей с зазором; `a8/b5/a7` | наше | чисто |
 | `game/assets/ui/icons/resources/icon_resource_oak.png` | ASSET-1 | один крупный жёлудь с чашечкой; `wood/b4/d5` | наше | чисто |
 | `game/assets/ui/icons/resources/icon_resource_ore.png` | ASSET-1 | округлая осыпь с вкраплениями минерала; `c8/a5/d6` | наше | чисто |
-| `game/assets/ui/icons/resources/icon_resource_quartz.png` | ASSET-1 | столбчатый кристалл с большой верхней гранью; `b7/a7/parchment` | наше | чисто |
-| `game/assets/ui/icons/resources/icon_resource_saltpeter.png` | ASSET-1 | мешок с перевязью; `b7/a7/parchment` | наше | чисто |
-| `game/assets/ui/icons/resources/icon_resource_silver.png` | ASSET-1 | слиток лёжа + самородок; `a8/b5/a7` | наше | чисто |
+| `game/assets/ui/icons/resources/icon_resource_quartz.png` | ASSET-1 | наклонная столбчатая призма с короткой парой у ноги; `b7/a7/parchment` | наше | чисто |
+| `game/assets/ui/icons/resources/icon_resource_saltpeter.png` | ASSET-1 | мешок-груша с собранной горловиной и перевязью; `b7/a7/parchment` | наше | чисто |
+| `game/assets/ui/icons/resources/icon_resource_silver.png` | ASSET-1 | штабика: два бруска стопкой; `a8/b5/a7` | наше | чисто |
 | `game/assets/ui/icons/resources/icon_resource_stone.png` | ASSET-1 | два колотых клина; `c8/a6/a7` | наше | чисто |
 | `game/assets/ui/icons/resources/icon_resource_sulfur.png` | ASSET-1 | три гексагональные призмы разной высоты; `gold/b6/b2` | наше | чисто |
 | `game/assets/ui/icons/resources/icon_resource_turquoise.png` | ASSET-1 | кабошон в тёмной оправе с матричными прожилками; `a8/b3/b5` | наше | чисто |
