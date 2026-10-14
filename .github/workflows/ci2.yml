@@ -185,9 +185,13 @@ jobs:
           if-no-files-found: ignore
 
   mcp:
-    name: "MCP e2e (3 workers, xdist)"
+    name: "MCP e2e (2 workers, xdist)"
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # 30 мин: 3 ретрая CI-1(12) × худший случай (2 застопоренных проба × 420с,
+    # T-125-класс). MCP_WORKERS=2 (не 3): 3 воркера на 4 ядра = contention →
+    # T-125-стоп пробов на раннере (ран 38485389297: 20m timeout, 3 попытки).
+    # 3 воркера — после фикса T-125 (см. tasks.md 4.x).
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -248,16 +252,17 @@ jobs:
           fi
           npm run build
 
-      - name: "MCP e2e (MCP_WORKERS=3; ретраи CI-1(12) на раннер-окружение)"
+      - name: "MCP e2e (MCP_WORKERS=2; ретраи CI-1(12) на раннер-окружение)"
         env:
           GODOT_BIN: /tmp/godot/Godot_v4.7-stable_linux.x86_64
           MCP_PYTEST_PY: /tmp/ci2-mcp-venv/bin/python
-          MCP_WORKERS: 3
+          MCP_WORKERS: 2
         run: |
           # Ретрай-политика CI-1(12) распространена на раннер явно (раунд 7 §1.3):
           # холодное окружение/шаренная среда дают «Not connected to game
           # interaction server» — до 3 попыток, лог каждой сохраняется.
-          # MCP_WORKERS=3 (ci-speedup): xdist, порты 9090/9091/9092 (conftest _worker_port).
+          # MCP_WORKERS=2 (ci-speedup): xdist, порты 9090/9091 (conftest _worker_port).
+          # Не 3: contention на 4 ядрах открывает T-125-стоп (ран 38485389297).
           cd game
           RC=1
           for attempt in 1 2 3; do

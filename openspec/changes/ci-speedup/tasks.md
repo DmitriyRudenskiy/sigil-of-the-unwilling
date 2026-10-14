@@ -103,6 +103,13 @@ decoupling, adf523c0) — autoload в project.godot указывает на не
 
 ## Фаза 4: Приёмка (design §Measurement)
 
+CI-ФАКТ (2026-10-14): ран 38485389297 (первый пуш, MCP_WORKERS=3) —
+RED: static ✓, gdunit ✓, mcp ✗ (20m job-timeout: 3 ретрая × T-125-стоп
+пробов — contention на 4 ядрах открывает race-окно; timeline совпадает:
+3×~7.5 мин ≈ отмена 23:57:52). Коррекция: MCP_WORKERS=2 на CI (2 ядра
+на Godot + 2 запаса; serial на раннере зелёный — стоп speed-зависимый);
+job timeout 20→30. 3 воркера — после фикса T-125.
+
 - [ ] 4.1 Локальный полный гейт (run_tests.sh, без env) — зелёный,
   счётчики 2474/38 не изменились
 - [ ] 4.2 Пуш ветки → CI-2: wall time мcp-жоба (цель ≤ ~130с
