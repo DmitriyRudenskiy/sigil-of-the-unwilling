@@ -14,18 +14,20 @@ date: 2026-10-14
 > Статусы: `canon` / `deepened` / `draft` / `reference` / `redirect` /
 > `snapshot` / `archived`. `redirect` — файл-перенаправление, читать цель.
 
-## Реестры и процессы (12)
+## Реестры и процессы (14)
 
 | Заметка | Название | Статус | Дата |
 | --- | --- | --- | --- |
 | [[BANK]] | Банк контента | reference | 2026-10-03 |
-| [[CHANGELOG]] | Журнал изменений docs/ | reference | 2026-10-14 |
+| [[CHANGELOG]] | Журнал изменений docs/ | reference | 2026-10-15 |
 | [[DECISIONS]] | Реестр решений и открытых вопросов | canon | 2026-10-14 |
-| [[QUESTIONS]] | Открытые вопросы — Фаза 4 (MVP и тикеты) | reference | 2026-10-14 |
+| [[QUESTIONS]] | Открытые вопросы — Фаза 4 (MVP и тикеты) | reference | 2026-10-15 |
 | [[ACTOR-ARMY]] | Актёрная модель армии (K-канон) | canon | 2026-10-11 |
+| [[GAP-LIST]] | Gap-лист GDD ↔ код (корзины A/B/C) | draft | 2026-10-15 |
 | [[GDLINT-PROPOSAL]] | gdlint-конфиг — предложение (раунд 12 §3) | reference | 2026-10-12 |
 | [[GDUNIT4-VACUOUS-ASSERT-ISSUE]] | Draft: upstream issue gdUnit4 — silent no-op assert without check method | draft | 2026-10-13 |
 | [[MVP_SCOPE]] | MVP-скоуп — итог Фазы 4 | reference | 2026-10-13 |
+| [[PR-ASSET-1]] | Тело PR ASSET-1 (feat/asset-1-resources) | draft | 2026-10-15 |
 | [[PR-DOCS-ARTBIBLE]] | Тело PR docs (feat/art-bible-rev2) | archived | 2026-10-14 |
 | [[PR-UI-PHASE5]] | Тело PR фазы 5 (feat/ui-phase5) | archived | 2026-10-14 |
 | [[TICKETS]] | Тикеты MVP (T-001…T-113) | reference | 2026-10-14 |
