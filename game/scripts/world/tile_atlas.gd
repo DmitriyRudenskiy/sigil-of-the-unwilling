@@ -1,7 +1,7 @@
 class_name TileAtlas
 extends RefCounted
 
-const SHEET_PATH := "res://assets/tiles/world_tiles.jpeg"
+const SHEET_PATH := "res://assets/tiles/world_tiles.webp"
 const TILE := GameNumbers.TILE_SIZE
 const SOURCE_ID := 0
 const FOG_SOURCE_ID := 1

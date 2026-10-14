@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cisaudg3jbag6"
-path="res://.godot/imported/world_tiles.jpeg-21cfe5cd913d2fe5739bb082045a4684.ctex"
+uid="uid://cgd4mth5ri8wg"
+path="res://.godot/imported/steel_longsword.png-48cbd7b0e22bb1405ed30d2da3d5447f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/tiles/world_tiles.jpeg"
-dest_files=["res://.godot/imported/world_tiles.jpeg-21cfe5cd913d2fe5739bb082045a4684.ctex"]
+source_file="res://assets/artifacts/steel_longsword.png"
+dest_files=["res://.godot/imported/steel_longsword.png-48cbd7b0e22bb1405ed30d2da3d5447f.ctex"]
 
 [params]
 

@@ -130,7 +130,7 @@ const C_GOLD_OUTLINE := Color(1, 1, 0, 0.6)
 const C_WHITE_DIM_30 := Color(1, 1, 1, 0.3)
 const C_GRAY_DIM_40  := Color(0.5, 0.5, 0.5, 0.4)
 
-const SPRITE_SHEET_WORLD    := "res://assets/tiles/world_tiles.jpeg"
+const SPRITE_SHEET_WORLD    := "res://assets/tiles/world_tiles.webp"
 const SPRITE_SHEET_HEX0     := "res://assets/textures/hex_sheet_0.png"
 const SPRITE_SHEET_HEX1     := "res://assets/textures/hex_sheet_1.png"
 const SPRITE_SHEET_RESOURCE := "res://assets/textures/resources.png"
