@@ -185,13 +185,14 @@ jobs:
           if-no-files-found: ignore
 
   mcp:
-    name: "MCP e2e (2 workers, xdist)"
+    name: "MCP e2e (serial на 4-ядерном раннере)"
     runs-on: ubuntu-latest
-    # 30 мин: 3 ретрая CI-1(12) × худший случай (2 проба × 420с под contention
-    # + 180с-бутап). MCP_WORKERS=2 (не 3): 3 воркера на 4 ядра = contention →
-    # T-125-стоп пробов (ран 38485389297: 20m timeout). T-125 резолвлен
-    # (accept_result, f99576de): 2 воркера снова включены; 3 — после
-    # contention-маржи (tasks.md 4.x).
+    # 30 мин: 3 ретрая CI-1(12) × худший случай (2 проба × 420с + 300с-бутап).
+    # MCP_WORKERS=1 (serial): замер 2026-10-14 — 2 воркера на 4 ядрах медленнее
+    # serial (ран 38531735780: MCP 14м35с vs serial 6м31с, ран 38516560617 —
+    # contention 2 Godot × Xvfb software GL). xdist-инфраструктура на месте
+    # (conftest _worker_port, run_tests.sh MCP_WORKERS + perf-serial-стадия) —
+    # включается на раннерах ≥8 ядер / локально (16 ядер: 3м vs 6м serial).
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
@@ -263,19 +264,17 @@ jobs:
           /tmp/godot/Godot_v4.7-stable_linux.x86_64 --headless --path "$GITHUB_WORKSPACE/game" --import > /tmp/godot-import.log 2>&1 || true
           tail -3 /tmp/godot-import.log
 
-      - name: "MCP e2e (2 воркера, xdist; perf — serial; ретраи CI-1(12))"
+      - name: "MCP e2e (serial; ретраи CI-1(12) на раннер-окружение)"
         env:
           GODOT_BIN: /tmp/godot/Godot_v4.7-stable_linux.x86_64
           MCP_PYTEST_PY: /tmp/ci2-mcp-venv/bin/python
-          # MCP_WORKERS=2 (2026-10-14): T-125 резолвлен (accept_result, f99576de —
-          # оба проба PASSED локально 33с/67с; CI-вердикт в этом ране). Диагноз
-          # рана 38502715080 (3 contention-сбоя) закрыт тремя мерами:
-          # (1) probe-стоп — фикс accept_result (UI-3 F оверлей, не contention);
-          # (2) bootstrap 180с — MCP_READY_TIMEOUT_S=300 (маржа под contention,
-          #     потолок, не цель); (3) hexutils_perf 913мс — perf-тесты вынесены
-          #     в serial-стадию (D-177: лимиты калиброваны на свободном раннере).
-          # 3 воркера — после contention-маржи perf-порогов (tasks.md 4.x).
-          MCP_WORKERS: 2
+          # MCP_WORKERS=1 (serial) — замер 2026-10-14: 2 воркера на 4-ядерном
+          # раннере медленнее (ран 38531735780: MCP 14м35с vs serial 6м31с,
+          # ран 38516560617) — contention 2 Godot × Xvfb software GL. T-125
+          # резолвлен (accept_result, f99576de) — параллелизм технически готов
+          # (xdist, порты, perf-serial-стадия, MCP_READY_TIMEOUT_S), включается
+          # на раннерах ≥8 ядер.
+          MCP_WORKERS: 1
           MCP_READY_TIMEOUT_S: 300
         run: |
           # Ретрай-политика CI-1(12) распространена на раннер явно (раунд 7 §1.3):
