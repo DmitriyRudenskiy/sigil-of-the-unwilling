@@ -7,6 +7,7 @@ Hard-fail только на техсбоях (смерть героя, заты�
 from __future__ import annotations
 
 import json
+import os
 import time
 from pathlib import Path
 
@@ -46,7 +47,12 @@ return s
 """
 
 
-def _wait_world(mcp, timeout: float = 180.0) -> None:
+# ci-speedup (2026-10-14): мир-бутап под contention (2 воркера) — та же маржа,
+# что READY_TIMEOUT (env MCP_READY_TIMEOUT_S; локальный дефолт 180 с — не меняется).
+WORLD_READY_TIMEOUT = float(os.environ.get("MCP_READY_TIMEOUT_S", "180"))
+
+
+def _wait_world(mcp, timeout: float = WORLD_READY_TIMEOUT) -> None:
     deadline = time.time() + timeout
     while time.time() < deadline:
         r = mcp.execute_code(

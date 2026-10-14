@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import socket
 import time
 from typing import Any
@@ -20,7 +21,10 @@ DEFAULT_TIMEOUT = 120.0
 # CI-4 (2026-10-13): readiness != время теста. Здоровый старт Godot ~10 c (замер:
 # 4 теста за 9.7 c); зависший старт при 900 c съедал весь бюджет (setup-таймаут
 # 900 c, инцидент раунда 9) и 3 ретрая CI-2. Потолок готовности — 180 c.
-READY_TIMEOUT = 180.0
+# ci-speedup (2026-10-14): MCP_READY_TIMEOUT_S — маржа под contention N воркеров
+# (2 Godot на 4-ядерном раннере: старт >180 с, ран 38502715080). Локальный
+# дефолт 180 с — не меняется.
+READY_TIMEOUT = float(os.environ.get("MCP_READY_TIMEOUT_S", "180"))
 PORT_FREE_TIMEOUT = 60.0
 
 class MCPError(RuntimeError):

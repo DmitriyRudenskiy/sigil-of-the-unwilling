@@ -130,11 +130,30 @@ job timeout 20→30. 3 воркера — после фикса T-125.
     3 contention-сбоя** (probe 420с-стоп; world bootstrap 180с;
     hexutils_perf 913мс > 800мс лимит) — все contention-класса, в serial
     те же тесты зелёные (baseline 38443410901)
-  - **Решение:** MCP на CI = **serial (MCP_WORKERS=1)** до фикса T-125 +
-    contention-маржи perf-порогов. xdist-инфраструктура на месте
-    (conftest `_worker_port`, run_tests.sh `MCP_WORKERS`) — включение после T-125.
-  - Ожидаемый wall (serial): max(static ~1м, gdunit ~2м, mcp ~5.5м) ≈ 6м
-    vs baseline 6м41с (~20%); крупный прирост (mcp 259с → ~130с) — после T-125.
+  - **Решение (промежуточное):** MCP на CI = **serial (MCP_WORKERS=1)** до
+    фикса T-125 + contention-маржи perf-порогов.
+  - **T-125 резолвлен (f99576de): корневая причина = UI-3 F оверлей**
+    (docs/14 §4.F): `battle_flow.gd` держит сцену до `result_accepted`;
+    probe не кликает → стоп на `battle_over` (бой на ходу 36). НЕ
+    contention/speed — изоляция: f0817a00 (без overlay) GREEN (ран
+    38507532780), 6aeea8ba+assertfix (с overlay) RED (ран 38509346264,
+    serial). Фикс: `BattleController.accept_result()` + probe вызывает его
+    (+2 GdUnit). Локально: оба проба PASSED (33с/67с); MCP-свит 38 зелёный;
+    GdUnit 2486 | 0 err | 0 fail.
+  - **Мера 2 (contention-маржа):** `MCP_READY_TIMEOUT_S` env (дефолт 180с не
+    меняется локально; CI: 300с) — bootstrap под 2 воркера (ран 38502715080:
+    «игра не готова за 180 с»).
+  - **Мера 3 (perf-методология):** perf-тесты (test_hexutils_perf.py, 4 теста)
+    — отдельная **serial-стадия** в run_tests.sh при MCP_WORKERS>1: лимиты
+    D-177 калиброваны на свободном раннере (ран 38502715080: 913мс > 800мс
+    под contention). Леджер — сумма по стадиям (xdist «N workers [M items]» +
+    serial «collected N items»); локально проверено (2 воркера: 37 passed +
+    1 skipped = 38, exit 0).
+  - **Решение (итоговое):** MCP на CI = **MCP_WORKERS=2** + MCP_READY_TIMEOUT_S=300
+    + perf-serial. 3 воркера — после contention-маржи perf-порогов.
+  - Ожидаемый wall (2 воркера): max(static ~1м, gdunit ~2м, mcp ~4–5м)
+    ≈ 5м vs baseline 6м41с (~25%); serial (промежуточный) — без прироста
+    (6м40с, ран 38516560617 GREEN — фикс T-125 подтверждён на раннере).
 - [ ] 4.3 Три зелёных рана main после мержа: wall time каждого в
   отчёт (D-148: было 6м41с → стало X)
 - [ ] 4.4 Красный-ран проверка: тест-ветка с падающим MCP-тестом →
