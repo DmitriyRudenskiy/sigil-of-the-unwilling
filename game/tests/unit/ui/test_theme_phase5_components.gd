@@ -13,17 +13,39 @@ extends BaseTest
 # Кегли и шкала шрифтов здесь НЕ проверяются: типографика — один акт билета
 # UI-AC7 (Т-1/Т-4/Т-5), а не фаза 5.
 
-const _theme := preload("res://assets/theme/game_theme.tres")
+const _THEME := preload("res://assets/theme/game_theme.tres")
 const _SOOT := Color(0, 0, 0, 0.6)  # §3: тень — сажа rgba(0,0,0,0.6)
+
+# Критичные items темы — эталон имён Godot 4.7 (сверен с `Theme.data` движка, а
+# не с формулировкой гайда): [класс контрола, theme_type ("" = тот же класс),
+# stylebox-имена, color-имена]. Гард ниже резолвит каждое имя живым контролом.
+const _CRITICAL_ITEMS: Array = [
+	["Button", "", ["normal", "hover", "pressed", "disabled", "focus"], []],
+	["HSlider", "", ["slider", "grabber_area", "grabber_area_highlight"], []],
+	["VSlider", "", ["slider", "grabber_area", "grabber_area_highlight"], []],
+	["LineEdit", "", ["normal", "focus", "read_only"], ["font_color",
+		"font_placeholder_color", "font_uneditable_color", "font_selected_color",
+		"caret_color", "selection_color"]],
+	["CheckBox", "", ["normal", "hover", "pressed", "focus"],
+		["font_color", "checkbox_checked_color", "checkbox_unchecked_color"]],
+	["TabBar", "", ["tab_selected", "tab_unselected", "tab_hovered", "tab_disabled",
+		"tab_focus"], ["font_selected_color", "font_unselected_color",
+		"font_hovered_color", "font_disabled_color"]],
+	# вкладки — на обоих типах (§9.6 п.1): TabContainer резолвит ярлыки сам
+	["TabContainer", "", ["tab_selected", "panel"], ["font_selected_color"]],
+	["ProgressBar", "", ["background", "fill"], []],
+	["Panel", "TooltipPanel", ["panel"], []],
+	["Label", "TooltipLabel", [], ["font_color"]],
+]
 
 # ─── К-1: фокус кнопки ────────────────────────────────────────────────────────
 
 func test_button_focus_state_declared() -> void:
 	# до фазы 5 Button/styles/focus отсутствовал → фокус с клавиатуры невидим
 	for state in ["normal", "hover", "pressed", "disabled", "focus"]:
-		assert_object(_theme.get_stylebox(state, "Button")).is_not_null().override_failure_message(
+		assert_object(_THEME.get_stylebox(state, "Button")).is_not_null().override_failure_message(
 			"Button: нет состояния " + state)
-	var focus: StyleBoxFlat = _theme.get_stylebox("focus", "Button")
+	var focus: StyleBoxFlat = _THEME.get_stylebox("focus", "Button")
 	assert_bool(focus.draw_center).is_false().override_failure_message(
 		"фокус кнопки не должен заливать поле")
 	assert_that(focus.border_width_left).is_equal(2)
@@ -35,36 +57,36 @@ func test_slider_declared_for_both_orientations() -> void:
 	# slider, grabber_area, grabber_area_highlight + grabber*
 	for control in ["HSlider", "VSlider"]:
 		for style in ["slider", "grabber_area", "grabber_area_highlight"]:
-			assert_object(_theme.get_stylebox(style, control)).is_not_null().override_failure_message(
+			assert_object(_THEME.get_stylebox(style, control)).is_not_null().override_failure_message(
 				control + ": нет стиля " + style)
 		for icon in ["grabber", "grabber_highlight", "grabber_disabled"]:
-			assert_object(_theme.get_icon(icon, control)).is_not_null().override_failure_message(
+			assert_object(_THEME.get_icon(icon, control)).is_not_null().override_failure_message(
 				control + ": нет иконки " + icon)
-	assert_str((_theme.get_stylebox("slider", "HSlider") as StyleBoxTexture)
+	assert_str((_THEME.get_stylebox("slider", "HSlider") as StyleBoxTexture)
 		.texture.resource_path).contains("slider_track.png")
 
 # ─── К-6: LineEdit / CheckBox / вкладки / тултип ─────────────────────────────
 
 func test_lineedit_declared() -> void:
 	for style in ["normal", "focus", "read_only"]:
-		assert_object(_theme.get_stylebox(style, "LineEdit")).is_not_null().override_failure_message(
+		assert_object(_THEME.get_stylebox(style, "LineEdit")).is_not_null().override_failure_message(
 			"LineEdit: нет стиля " + style)
 	# имена темы 4.7 — font_uneditable_color и caret_color (не font_readonly_color
 	# / cursor_color); выделение тоже объявлено: по умолчанию оно синее
 	for color in ["font_color", "font_placeholder_color", "font_uneditable_color",
 			"font_selected_color", "caret_color", "selection_color"]:
-		assert_object(_theme.get_color(color, "LineEdit")).is_not_null().override_failure_message(
+		assert_object(_THEME.get_color(color, "LineEdit")).is_not_null().override_failure_message(
 			"LineEdit: нет цвета " + color)
 
 func test_checkbox_declared() -> void:
 	for style in ["normal", "hover", "pressed", "focus"]:
-		assert_object(_theme.get_stylebox(style, "CheckBox")).is_not_null().override_failure_message(
+		assert_object(_THEME.get_stylebox(style, "CheckBox")).is_not_null().override_failure_message(
 			"CheckBox: нет стиля " + style)
 	for icon in ["checked", "unchecked", "checked_disabled", "unchecked_disabled"]:
-		assert_object(_theme.get_icon(icon, "CheckBox")).is_not_null().override_failure_message(
+		assert_object(_THEME.get_icon(icon, "CheckBox")).is_not_null().override_failure_message(
 			"CheckBox: нет иконки " + icon)
 	# §4.5 зона нажатия ≥ 40 px, а не 20: иконка 20 + верх/низ по 10
-	var normal: StyleBox = _theme.get_stylebox("normal", "CheckBox")
+	var normal: StyleBox = _THEME.get_stylebox("normal", "CheckBox")
 	assert_that(int(normal.content_margin_top + normal.content_margin_bottom + 20)) \
 		.is_greater_equal(40)
 
@@ -74,19 +96,19 @@ func test_tabs_declared_on_tabbar_and_tabcontainer() -> void:
 	# TabContainer остаются дефолтной темы (проверено кадром kitchen-sink).
 	for control in ["TabBar", "TabContainer"]:
 		for style in ["tab_selected", "tab_unselected", "tab_hovered", "tab_disabled", "tab_focus"]:
-			assert_object(_theme.get_stylebox(style, control)).is_not_null().override_failure_message(
+			assert_object(_THEME.get_stylebox(style, control)).is_not_null().override_failure_message(
 				control + ": нет стиля " + style)
 		for color in ["font_selected_color", "font_unselected_color", "font_hovered_color",
 				"font_disabled_color"]:
-			assert_object(_theme.get_color(color, control)).is_not_null().override_failure_message(
+			assert_object(_THEME.get_color(color, control)).is_not_null().override_failure_message(
 				control + ": нет цвета " + color)
-	assert_object(_theme.get_stylebox("panel", "TabContainer")).is_not_null()
+	assert_object(_THEME.get_stylebox("panel", "TabContainer")).is_not_null()
 
 func test_tooltip_declared() -> void:
-	var panel: StyleBoxFlat = _theme.get_stylebox("panel", "TooltipPanel")
+	var panel: StyleBoxFlat = _THEME.get_stylebox("panel", "TooltipPanel")
 	assert_object(panel).is_not_null()
 	assert_that(panel.border_width_left).is_equal(1)  # §3: рамка 1 px C_GOLD
-	assert_object(_theme.get_color("font_color", "TooltipLabel")).is_not_null()
+	assert_object(_THEME.get_color("font_color", "TooltipLabel")).is_not_null()
 
 # ─── К-5: состояния армейского слота ─────────────────────────────────────────
 
@@ -95,13 +117,51 @@ func test_army_slot_states_declared() -> void:
 	# hover/selected/disabled (формулировка строки К-5 реестра); valid/invalid-target
 	# и применение стейтов в сценах — билет UI-5 (docs/mvp/TICKETS.md).
 	for style in ["army_slot", "army_slot_hover", "army_slot_selected", "army_slot_disabled"]:
-		var sb: StyleBoxFlat = _theme.get_stylebox(style, "Panel")
+		var sb: StyleBoxFlat = _THEME.get_stylebox(style, "Panel")
 		assert_object(sb).is_not_null().override_failure_message("нет стиля " + style)
 		assert_that(sb.corner_radius_top_left).is_equal(0)  # §4.2: радиус 0
-	var hover: StyleBoxFlat = _theme.get_stylebox("army_slot_hover", "Panel")
-	var base: StyleBoxFlat = _theme.get_stylebox("army_slot", "Panel")
+	var hover: StyleBoxFlat = _THEME.get_stylebox("army_slot_hover", "Panel")
+	var base: StyleBoxFlat = _THEME.get_stylebox("army_slot", "Panel")
 	assert_bool(hover.border_color != base.border_color).is_true().override_failure_message(
 		"hover не отличается от normal")
+
+# ─── Гард имён theme-item (находка §9.6 п.2) ────────────────────────────────
+
+func test_critical_items_resolve_on_live_controls() -> void:
+	# Движок НЕ валидирует имена темы: `set_color("font_readonly_color", "LineEdit")`
+	# ложится в ресурс и не читается никем — контрол молча берёт дефолт, рана без
+	# ошибки. Поэтому гард не «имя объявлено в теме», а «живой контрол резолвит это
+	# имя в то же значение, что лежит в теме»: мокрое имя резолвится в дефолт
+	# движка (замер ниже), а не в объявленное.
+	for row in _CRITICAL_ITEMS:
+		var theme_type := StringName(row[1] if row[1] != "" else row[0])
+		var node: Control = ClassDB.instantiate(row[0]) as Control
+		node.theme = _THEME
+		for item in row[2]:
+			var declared: StyleBox = _THEME.get_stylebox(item, theme_type)
+			assert_bool(node.get_theme_stylebox(item, theme_type) == declared).is_true() \
+				.override_failure_message("%s/%s: контрол резолвит не тот стиль"
+					% [theme_type, item])
+		for item in row[3]:
+			var want: Color = _THEME.get_color(item, theme_type)
+			var got: Color = node.get_theme_color(item, theme_type)
+			assert_bool(got.is_equal_approx(want)).is_true().override_failure_message(
+				"%s/%s: контрол резолвит %s, в теме %s (имя никто не читает?)"
+				% [theme_type, item, got, want])
+		node.free()
+
+func test_wrong_item_name_is_silent_not_error() -> void:
+	# Гард гарда: молчание движка на мокрое имя — замерено, а не вера. Если Godot
+	# начнёт на нём падать или резолвить иначе — краснеет здесь, и это сигнал
+	# переписать тест выше (а не «что-то сломалось в теме»). См. §9.6 п.2.
+	var node := LineEdit.new()
+	node.theme = _THEME
+	assert_bool(node.get_theme_color("font_readonly_color", "LineEdit")
+		.is_equal_approx(Color(0, 0, 0, 1))).is_true().override_failure_message(
+		"мокрое имя перестало быть тихим (или тема заняла это имя) — метод гарда менять")
+	assert_bool(not node.get_theme_color("font_uneditable_color", "LineEdit")
+		.is_equal_approx(Color(0, 0, 0, 1))).is_true()
+	node.free()
 
 # ─── К-7: тень — сажа, углы — прямые ─────────────────────────────────────────
 
@@ -112,7 +172,7 @@ func test_shadows_are_soot_not_gold() -> void:
 		["TooltipPanel", "panel"],
 	]
 	for entry in shadowed:
-		var sb: StyleBoxFlat = _theme.get_stylebox(entry[1], entry[0])
+		var sb: StyleBoxFlat = _THEME.get_stylebox(entry[1], entry[0])
 		assert_object(sb).is_not_null().override_failure_message("%s/%s потерян" % entry)
 		assert_bool(sb.shadow_color.is_equal_approx(_SOOT)).is_true().override_failure_message(
 			"%s/%s: тень %s, канон — сажа rgba(0,0,0,0.6)" % [entry[0], entry[1], sb.shadow_color])
@@ -120,7 +180,7 @@ func test_shadows_are_soot_not_gold() -> void:
 
 func test_panel_and_slot_corners_are_square() -> void:
 	for style in ["window", "slot_thin", "label", "backpack_slot", "side_slot", "army_slot"]:
-		var sb: StyleBoxFlat = _theme.get_stylebox(style, "Panel")
+		var sb: StyleBoxFlat = _THEME.get_stylebox(style, "Panel")
 		assert_that(sb.corner_radius_top_left).is_equal(0).override_failure_message(
 			"Panel/%s: §3 требует прямые углы" % style)
 
@@ -130,20 +190,20 @@ func test_nine_slice_margins_match_frame_thickness() -> void:
 	# маржа = толщина рамки в текстуре (8 px для 32×32), иначе ядро схлопывается
 	# и центр рисуется растянутым пикселем (К-8 — находка фазы 5)
 	for style in ["panel", "slot"]:
-		var sb: StyleBoxTexture = _theme.get_stylebox(style, "Panel")
+		var sb: StyleBoxTexture = _THEME.get_stylebox(style, "Panel")
 		assert_that(int(sb.texture_margin_left)).is_equal(8).override_failure_message(
 			"Panel/%s: texture_margin должен равняться толщине рамки (8)" % style)
 		assert_that(int(sb.texture_margin_right)).is_equal(8)
 	# внутренний отступ панели — PAD 16 (§1.3); слот 40×40 таких полей не вмещает,
 	# у него контент прижат к рамке (8 = толщина)
-	assert_that(int((_theme.get_stylebox("panel", "Panel") as StyleBoxTexture)
+	assert_that(int((_THEME.get_stylebox("panel", "Panel") as StyleBoxTexture)
 		.content_margin_left)).is_equal(16)
-	assert_that(int((_theme.get_stylebox("slot", "Panel") as StyleBoxTexture)
+	assert_that(int((_THEME.get_stylebox("slot", "Panel") as StyleBoxTexture)
 		.content_margin_left)).is_equal(8)
 
 func test_slot_uses_slot_texture_not_panel() -> void:
 	# К-9: slot_bg.png лежал в репо, тема рисовала слот панелью
-	var slot: StyleBoxTexture = _theme.get_stylebox("slot", "Panel")
+	var slot: StyleBoxTexture = _THEME.get_stylebox("slot", "Panel")
 	assert_str(slot.texture.resource_path).contains("slot_bg.png")
 
 # ─── П-1: синее семейство не должно вернуться ────────────────────────────────
@@ -170,10 +230,10 @@ func test_theme_config_button_family_is_wood_not_blue() -> void:
 
 func _theme_colors_of(control: String) -> Array[Color]:
 	var out: Array[Color] = []
-	for item in _theme.get_color_list(control):
-		out.append(_theme.get_color(item, control))
-	for item in _theme.get_stylebox_list(control):
-		var sb: StyleBox = _theme.get_stylebox(item, control)
+	for item in _THEME.get_color_list(control):
+		out.append(_THEME.get_color(item, control))
+	for item in _THEME.get_stylebox_list(control):
+		var sb: StyleBox = _THEME.get_stylebox(item, control)
 		if sb is StyleBoxFlat:
 			out.append((sb as StyleBoxFlat).bg_color)
 			out.append((sb as StyleBoxFlat).border_color)
