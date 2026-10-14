@@ -26,12 +26,12 @@ def ok(cond, what):
 
 
 def write(name: str, color, size=(N, N), object_=True) -> Path:
-    """Кадр size с рамкой цвета color; object_ — нарисован ли в центре объект."""
+    """Кадр size с рамкой цвета color; object_ — нарисован ли в центре объект (фигура в полроста)."""
     p = Path(tmp) / name
     im = Image.new("RGB", size, color)
     if object_:
-        for x in range(size[0] // 2 - 8, size[0] // 2 + 8):
-            for y in range(size[1] // 2 - 8, size[1] // 2 + 8):
+        for x in range(int(size[0] * 0.40), int(size[0] * 0.60)):
+            for y in range(int(size[1] * 0.15), int(size[1] * 0.85)):
                 im.putpixel((x, y), (30, 30, 30))
     im.save(p)
     return p
@@ -105,7 +105,8 @@ with tempfile.TemporaryDirectory() as tmp:
     ok(not g.check_image(p, (1024, 1024), isolated=True)[0], "чужой размер принят")
 
     # --- воротчик белизны: чёрный и серый фон отсекаются, белый — нет
-    ok(g.white_ratio(Image.open(write("white.webp", (255, 255, 255)))) == 1.0, "белизна белого != 1")
+    ok(g.white_ratio(Image.open(write("purewhite.webp", (255, 255, 255), object_=False))) == 1.0,
+       "белизна белого != 1")
     ok(g.white_ratio(Image.open(write("black.webp", (0, 0, 0)))) == 0.0, "белизна чёрного != 0")
     ok(not g.check_image(write("blackbg.webp", (0, 0, 0)), (N, N), isolated=True)[0], "чёрный фон принят")
     ok(not g.check_image(write("greybg.webp", (128, 128, 128)), (N, N), isolated=True)[0], "серый фон принят")
@@ -115,12 +116,26 @@ with tempfile.TemporaryDirectory() as tmp:
     ok(g.content_ratio(Image.open(blank)) == 0.0, "пустой центр посчитан непустым")
     ok(not g.check_image(blank, (N, N), isolated=True)[0], "пустой белый лист принят как результат")
 
+    # --- воротчик «листа с вариантами»: кадр, разрезанный пустой полосой, — не одиночный объект
+    sheet = Path(tmp) / "sheet.webp"
+    im = Image.new("RGB", (N, N), (255, 255, 255))
+    for x0 in (N // 8, N // 2 + N // 8):
+        for y0 in (N // 8, N // 2 + N // 8):
+            for x in range(x0, x0 + N // 5):
+                for y in range(y0, y0 + N // 5):
+                    im.putpixel((x, y), (40, 40, 40))
+    im.save(sheet)
+    ok(g.seam_ratio(Image.open(sheet)) > g.SEAM_MAX, "шов листа 2x2 не посчитан швом")
+    ok(not g.check_image(sheet, (N, N), isolated=True)[0], "лист 2x2 принят как одиночный объект")
+    ok(g.seam_ratio(Image.open(write("figure.webp", (255, 255, 255)))) < g.SEAM_MAX,
+       "шов посчитан у кадра с одиночной фигурой")
+
     # --- воротчик яркости кадров без требования белого фона (экраны UI)
     ok(g.mean_luma(Image.open(write("blank.webp", (255, 255, 255), object_=False))) == 255,
        "яркость белого != 255")
     ok(not g.check_image(write("darkui.webp", (10, 10, 10)), (N, N), isolated=False)[0],
        "почти чёрный экран принят")
-    ok(not g.check_image(write("whiteui.webp", (255, 255, 255)), (N, N), isolated=False)[0],
+    ok(not g.check_image(write("whiteui.webp", (255, 255, 255), object_=False), (N, N), isolated=False)[0],
        "выбитый в белый экран принят")
 
     # --- экспорт в WEBP сохраняет размер и режим RGB

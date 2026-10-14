@@ -33,6 +33,7 @@ WHITE_MIN = 0.60          # доля почти-белого в рамке дл�
 NEAR_WHITE = 235          # порог «белый»: фон образца — 1% чистого и 98% почти-белого
 BORDER = 24               # ширина рамки, px
 CONTENT_MIN = 0.02        # в центральном окне 50% обязана быть картинка, а не пустой белый лист
+SEAM_MAX = 0.995          # почти пустой срез через середину кадра = не одиночный объект (урок c11: лист 2x2)
 LUMA_RANGE = (25, 235)    # средняя яркость кадров без требования белого фона (экраны UI)
 ISOLATED = ("units", "buildings", "signs", "cursors", "resources")
 TERMINAL_BAD = ("error", "not_found", "canceled")
@@ -151,6 +152,27 @@ def mean_luma(im: Image.Image) -> float:
     return sum(i * c for i, c in enumerate(hist)) / n
 
 
+def seam_ratio(im: Image.Image, thr: int = NEAR_WHITE) -> float:
+    """Пустая полоса через середину кадра, за которой контент и выше, и ниже.
+
+    Одиночная фигура такой полосы не имеет; лист с четырьмя вариантами или разрезанный кадр —
+    всегда (урок c11: Krea-2 выдал лист 2x2, гейт белизны его пропустил). Полоса ищется в
+    средней полосе кадра и обязана иметь содержимое с обеих сторон — иначе срабатывает на
+    узкой фигуре, у которой пустые колонки по бокам."""
+    g = im.convert("L").point(lambda p: 255 if p >= thr else 0).resize((64, 64))
+    px = g.load()
+    rows = [sum(px[x, y] for x in range(64)) / 64 / 255 for y in range(64)]
+    cols = [sum(px[x, y] for y in range(64)) / 64 / 255 for x in range(64)]
+
+    def worst(seq):
+        dark = [i for i, v in enumerate(seq) if v < 0.98]   # «в строке есть хоть что-то»
+        if not dark:
+            return 0.0
+        return max((seq[i] for i in range(max(20, dark[0] + 1), min(44, dark[-1]))), default=0.0)
+
+    return max(worst(rows), worst(cols))
+
+
 def check_image(path: Path, size: tuple[int, int], isolated: bool) -> tuple[bool, str]:
     try:
         im = Image.open(path)
@@ -166,6 +188,9 @@ def check_image(path: Path, size: tuple[int, int], isolated: bool) -> tuple[bool
         content = content_ratio(im)
         if content < CONTENT_MIN:
             return False, f"центр пустой: не-белого {content:.1%} < {CONTENT_MIN:.0%}"
+        seam = seam_ratio(im)
+        if seam > SEAM_MAX:
+            return False, f"кадр разрезан пустой полосой {seam:.0%} > {SEAM_MAX:.0%} — лист с вариантами?"
     else:
         luma = mean_luma(im)
         if not LUMA_RANGE[0] <= luma <= LUMA_RANGE[1]:
