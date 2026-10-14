@@ -12,7 +12,7 @@ const _FORGEABLE_IDS: Array[String] = [
 func test_forgeable_ids_have_non_empty_icons() -> void:
 	for id: String in _FORGEABLE_IDS:
 		var path := "res://assets/artifacts/%s.png" % id
-		assert_bool(ResourceLoader.exists(path)).override_failure_message(
+		assert_bool(ResourceLoader.exists(path)).is_true().override_failure_message(
 			"forge даёт id `%s`, а файла иконки нет (%s) — пустая текстура в инвентаре" % [id, path]
 		)
 		if not ResourceLoader.exists(path):
@@ -21,6 +21,6 @@ func test_forgeable_ids_have_non_empty_icons() -> void:
 		assert_int(tex.get_width()).is_equal(64)
 		assert_int(tex.get_height()).is_equal(64)
 		var used: Rect2i = tex.get_image().get_used_rect()
-		assert_bool(used.has_area()).override_failure_message(
+		assert_bool(used.has_area()).is_true().override_failure_message(
 			"иконка `%s` загружается, но пуста (used_rect пуст)" % id
 		)

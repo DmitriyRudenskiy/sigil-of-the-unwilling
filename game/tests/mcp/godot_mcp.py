@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import socket
 import time
 from typing import Any
@@ -20,7 +21,10 @@ DEFAULT_TIMEOUT = 120.0
 # CI-4 (2026-10-13): readiness != время теста. Здоровый старт Godot ~10 c (замер:
 # 4 теста за 9.7 c); зависший старт при 900 c съедал весь бюджет (setup-таймаут
 # 900 c, инцидент раунда 9) и 3 ретрая CI-2. Потолок готовности — 180 c.
-READY_TIMEOUT = 180.0
+# ci-speedup (2026-10-14): MCP_READY_TIMEOUT_S — маржа под contention N воркеров
+# (2 Godot на 4-ядерном раннере: старт >180 с, ран 38502715080). Локальный
+# дефолт 180 с — не меняется.
+READY_TIMEOUT = float(os.environ.get("MCP_READY_TIMEOUT_S", "180"))
 PORT_FREE_TIMEOUT = 60.0
 
 class MCPError(RuntimeError):
@@ -75,10 +79,12 @@ async def wait_port_free(
 
 class GodotMCPClient:
 
-    def __init__(self, portal, session: ClientSession, project_path: str) -> None:
+    def __init__(self, portal, session: ClientSession, project_path: str,
+                 port: int = MCP_INTERACTION_PORT) -> None:
         self._portal = portal
         self._session = session
         self._project_path = project_path
+        self._port = port  # ci-speedup: порт воркера (gwN → 9090+N)
         self._running = False
 
     def execute_code(self, code: str, timeout: float = DEFAULT_TIMEOUT) -> Any:
@@ -113,7 +119,7 @@ class GodotMCPClient:
             await self._call("stop_project", {}, timeout)
         except MCPError as e:
             print(f"[mcp] stop_project: {e}", flush=True)
-        await wait_port_free()
+        await wait_port_free(port=self._port)
 
     async def _execute_code(self, code: str, timeout: float) -> Any:
         return await self._call("game_eval", {"code": code}, timeout)
@@ -122,8 +128,10 @@ class GodotMCPClient:
         await self._call("game_wait", {"frames": frames, "frameType": frame_type}, timeout)
 
     async def _run_scene(self, scene_path: str, timeout: float) -> None:
-        # setup-only: занятый порт = сироты из убитого прогона → немедленный fail (T-120)
-        await wait_port_free(immediate=True)
+        # setup-only: занятый СВОЙ порт = сироты из убитого прогона → немедленный
+        # fail (T-120). ci-speedup: проверяется порт воркера, не дефолт 9090
+        # (в параллельном режиме 9090 может легитимно держать соседний воркер).
+        await wait_port_free(port=self._port, immediate=True)
         await self._call(
             "run_project",
             {"projectPath": self._project_path, "scene": scene_path},

@@ -100,6 +100,15 @@ func show_result_overlay(
 ) -> void:
 	_ui.show_result(winner, surviving_atk.size(), surviving_def.size())
 
+## Неинтерактивный клиент (probe, MCP-автопрогонки): программное подтверждение
+## результата — тот же путь, что кнопка «Продолжить» / Enter/F (docs/14 §4.F).
+## UI-3b: flow держит сцену до result_accepted; без этого автоигрок встаёт на
+## battle_over (сцена не освобождается). Идемпотентно: flow-подключение
+## CONNECT_ONE_SHOT, повторные emit без слушателей.
+func accept_result() -> void:
+	if _state != null and _state.battle_over:
+		result_accepted.emit()
+
 func _generate_terrain() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = _obstacle_seed

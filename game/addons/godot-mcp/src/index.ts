@@ -120,7 +120,12 @@ class GodotServer {
   private nextRequestId: number = 1;
   private lastErrorIndex: number = 0;
   private lastLogIndex: number = 0;
-  private readonly INTERACTION_PORT = 9090;
+  // ci-speedup: порт из env MCP_PORT (конвенция домашней Godot-стороны
+  // tools/mcp/mcp_interaction_server.gd: MCP_PORT → ProjectSettings mcp/port
+  // → 9090). Дефолт 9090 — backward-compat. Параллельные MCP-воркеры
+  // (pytest-xdist) используют 9090+индекс_воркера; spawn наследует env →
+  // Godot-сторона читает то же значение.
+  private readonly INTERACTION_PORT = Number(process.env.MCP_PORT || 9090);
   private readonly AUTOLOAD_NAME = 'McpInteractionServer';
 
   constructor(config?: GodotServerConfig) {

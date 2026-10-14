@@ -153,26 +153,84 @@ export GODOT_PROJECT_PATH="${GODOT_PROJECT_PATH:-$PWD}"
 # conftest.py читает GODOT_PATH (не GODOT_BIN) — баг старого скрипта исправлен.
 # --timeout=900: READY_TIMEOUT в godot_mcp.py = 900 c; старое --timeout=300 резало
 # e2e раньше собственного дедлайна.
-# Полный свит tests/mcp/ (39 тестов), не выборка из 6 файлов.
+# Полный свит tests/mcp/ (38 тестов), не выборка из 6 файлов.
 # --durations=25: per-test timing в хвосте прогона — диагноз «гонка соседних сессий
 # на порту» (ступень на setup каждого теста vs равномерное замедление, CI-1(9), раунд 7).
 # ВНИМАНИЕ (урок 2026-10-05): комментарий МЕЖДУ строками VAR=value \ рвёт env-префикс
 # (bash: присваивания без команды не экспортируются в команду) — GODOT_PATH/GODOT_BIN
 # не доходили до pytest; lifecycle-тесты skip'ались «Godot не найден», node-сервер
 # маскировал баг auto-detection. Комментарии — только ВЫШЕ блока присваиваний.
+# ci-speedup: параллельные MCP-воркеры (pytest-xdist, dist=load — дефолт).
+# MCP_WORKERS: дефолт 1 (локальный прогон — поведение не меняется); CI: 3
+# (4-ядерный раннер, 1 ядро — запас под флейки, D-166-класс). Порт воркера —
+# conftest _worker_port(): gwN → 9090+N (env MCP_PORT; Godot-сторона tools/mcp/
+# читает то же). Без xdist — явная строка + фолбэк на 1 воркер (уровень не
+# молчит, гейт не ослабевает).
+MCP_WORKERS="${MCP_WORKERS:-1}"
+PYTEST_WORKER_ARGS=()
+PERF_SERIAL=0
+if [ "$MCP_WORKERS" -gt 1 ]; then
+	if "$PYTEST_PY" -c 'import xdist' 2>/dev/null; then
+		PYTEST_WORKER_ARGS=(-n "$MCP_WORKERS")
+		# ci-speedup (2026-10-14): perf-тесты — отдельная serial-стадия. Лимиты
+		# D-177 калиброваны на свободном раннере (пол пула × 1.3); под contention
+		# CPU-замер невалиден (ран 38502715080: 913 мс > лимит 800 мс). Perf =
+		# serial на свободном CPU (методология, не оптимизация).
+		PERF_SERIAL=1
+		echo "MCP: параллельные воркеры = $MCP_WORKERS (xdist; порты 9090..$((9089 + MCP_WORKERS))); perf — serial-стадия"
+	else
+		echo "MCP: запрошено MCP_WORKERS=$MCP_WORKERS, но pytest-xdist отсутствует в $PYTEST_PY — прогон с 1 воркером (pip install pytest-xdist)"
+		MCP_WORKERS=1
+	fi
+fi
 MCP_LOG="$(mktemp)"
+PERF_IGNORE=()
+[ "$PERF_SERIAL" -eq 1 ] && PERF_IGNORE=(--ignore=tests/mcp/test_hexutils_perf.py)
 GODOT_PATH="$GODOT" \
 GODOT_BIN="$GODOT" \
-"$PYTEST_PY" -m pytest tests/mcp/ -v --timeout=900 --tb=short --durations=25 2>&1 | tee "$MCP_LOG"
+"$PYTEST_PY" -m pytest tests/mcp/ -v --timeout=900 --tb=short --durations=25 \
+	${PERF_IGNORE[@]+"${PERF_IGNORE[@]}"} ${PYTEST_WORKER_ARGS[@]+"${PYTEST_WORKER_ARGS[@]}"} 2>&1 | tee "$MCP_LOG"
 MCP_RC=${PIPESTATUS[0]}
+if [ "$PERF_SERIAL" -eq 1 ]; then
+	echo "MCP: perf-стадия — serial (test_hexutils_perf.py; D-177: свободный CPU)"
+	GODOT_PATH="$GODOT" \
+	GODOT_BIN="$GODOT" \
+	"$PYTEST_PY" -m pytest tests/mcp/test_hexutils_perf.py -v --timeout=900 --tb=short \
+		2>&1 | tee -a "$MCP_LOG"
+	RC2=${PIPESTATUS[0]}
+	[ "$RC2" -ne 0 ] && MCP_RC=1
+fi
 # Леджер-равенство (fixed-green-семья CI-4, раунд 6 §2): свит обязан отработать
 # всё собранное; прерванный прогон (таймаут сессии, -x в dev-режиме) — красный.
-COLLECTED=$(grep -oE 'collected [0-9]+ items' "$MCP_LOG" | head -1 | grep -oE '[0-9]+' || true)
-SUMMARY=$(grep -E '=+ .*in [0-9.]+s' "$MCP_LOG" | tail -1)
-P=$(echo "$SUMMARY" | grep -oE '[0-9]+ passed' | grep -oE '[0-9]+' || true)
-S=$(echo "$SUMMARY" | grep -oE '[0-9]+ skipped' | grep -oE '[0-9]+' || true)
-F=$(echo "$SUMMARY" | grep -oE '[0-9]+ failed' | grep -oE '[0-9]+' || true)
-E=$(echo "$SUMMARY" | grep -oE '[0-9]+ error' | grep -oE '[0-9]+' || true)
+# ci-speedup (2026-10-14): сумма по стадиям (parallel + perf-serial); под xdist
+# нет «collected N items» — хедер «N workers [M items]» (master распределяет).
+LEDGER=$("$PYTEST_PY" - "$MCP_LOG" <<'PYEOF_LEDGER'
+import re
+import sys
+
+text = open(sys.argv[1], errors="replace").read()
+
+
+def sumre(pat: str) -> int:
+    return sum(int(m) for m in re.findall(pat, text))
+
+
+# Оба формата (взаимоисключаемы в рамках стадии; по стадиям — сумма):
+# serial: «collected N items»; xdist: «N workers [M items]».
+collected = sumre(r"collected (\d+) items") + sum(
+    int(m[1]) for m in re.findall(r"(\d+) workers \[(\d+) items\]", text))
+lines = [l for l in text.splitlines() if re.match(r"=+ .* in [0-9.]+s.* =+$", l)]
+
+
+def sumin(pat: str) -> int:
+    return sum(int(re.search(pat, l).group(1)) for l in lines if re.search(pat, l))
+
+
+print(sumin(r"(\d+) passed"), sumin(r"(\d+) skipped"), sumin(r"(\d+) failed"),
+      sumin(r"(\d+) error"), collected)
+PYEOF_LEDGER
+)
+read -r P S F E COLLECTED <<< "$LEDGER"
 P=${P:-0}; S=${S:-0}; F=${F:-0}; E=${E:-0}; COLLECTED=${COLLECTED:-0}
 SUM=$((P + S + F + E))
 echo "PYTEST LEDGER: passed=$P skipped=$S failed=$F errors=$E collected=$COLLECTED"

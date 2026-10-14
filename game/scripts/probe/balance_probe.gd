@@ -131,6 +131,12 @@ func _handle_battle() -> bool:
 		return false
 	var bs = b.get_battle_state()
 	if bs == null or bs.battle_over:
+		# UI-3b: flow держит сцену до подтверждения результата (оверлей «Продолжить»).
+		# Автоигрок не кликает — подтверждаем программно (BattleController.accept_result),
+		# иначе сцена не освобождается и прогон встаёт на battle_over (T-125, ран
+		# 38509346264: 6aeea8ba красный, f0817a00 зелёный — изоляция).
+		if bs != null and bs.battle_over and b.has_method("accept_result"):
+			b.accept_result()
 		battles_fought += 1
 		return true
 	if first_collision_turn < 0:
