@@ -625,4 +625,11 @@ honest = [{"id": "AP-line-1", "given": 10, "declared": 10, "klass": "self"},
           {"id": "AP-line-3", "given": 4, "declared": 6, "klass": "self"}]
 ok("шкала сжалась" not in stat_out(honest), "здравый расклад помечен сжатием шкалы")
 
+# 81. чужая таблица в файле реестра не двигает версию прибора
+body = j.anchors_version()
+j.ANCHORS.write_text(j.ANCHORS.read_text() + "\n| AP-line-1 | 10 | 8 | 9 |\n",
+                     encoding="utf-8")
+ok(j.anchors_version() == body,
+   "таблица сравнения судей с префиксом AP- сдвинула версию прибора")
+
 print(f"OK: проверок {checks}")

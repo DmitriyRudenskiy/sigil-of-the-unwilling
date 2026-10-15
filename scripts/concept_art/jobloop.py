@@ -486,8 +486,11 @@ def anchor_rows() -> list[dict]:
 
 
 def anchors_body() -> str:
+    """Тело реестра = строки таблицы пар. Таблица сравнения судей в том же файле
+    не тело: форма строки (7 колонок) решает, а не префикс."""
     return "\n".join(l for l in ANCHORS.read_text().splitlines()
-                     if l.startswith("| AP-"))
+                     if l.startswith("| AP-")
+                     and len([x for x in l.strip().strip("|").split("|")]) == 7)
 
 
 def anchors_version() -> str:
