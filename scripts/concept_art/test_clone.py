@@ -64,10 +64,18 @@ ok(j.readiness({"comp": 5, "subject": 5}) == 50, "половина не 50%")
 ok(j.readiness({"comp": 8, "subject": 8, "palette": 8, "text": 0}) < j.readiness({"comp": 8, "subject": 8, "palette": 8}),
    "нулевой текст не должен тянуть готовность вниз — он исключается, а не обнуляется")
 
+# --- прогон без печати не считается: харнесс печатает то, что он придумал ----
+def stamp(uid="IMG-001"):
+    q = j.load()
+    u = q[uid]
+    u["seal"] = j.run_seal(u, u["model"], u["version"], j.json.loads(j.SPEC.read_text()))
+    j.save(q)
+
 # --- accept закрыт до порога, открыт на пороге
 q = j.load()
 q["IMG-001"].update(model="krea2", version=1, file="attempts/IMG-001/krea2_IMG-001_v1.webp")
 j.save(q)
+stamp()
 j.cmd_score(Args(id="IMG-001", criteria=["comp=8", "subject=8", "palette=8"], note=""))
 ok(j.load()["IMG-001"]["history"][-1]["readiness"] == 80, "готовность не 80%")
 try:
@@ -102,6 +110,7 @@ before = (j.DOCS / "report.md").read_text()
 q = j.load()
 q["IMG-001"].update(status="in-queue", version=1, file="attempts/IMG-001/qwen21_IMG-001_v1.webp")
 j.save(q)
+stamp()
 j.cmd_score(Args(id="IMG-001", criteria=["comp=9", "subject=9", "palette=9"], note=""))
 after = (j.DOCS / "report.md").read_text()
 ok(after.startswith(before), "журнал перезаписан вместо дописывания")
@@ -373,15 +382,19 @@ q["IMG-001"]["file"] = "attempts/IMG-001/krea2_IMG-001_v1_P2R0.webp"
 q["IMG-001"]["prompt_version"], q["IMG-001"]["render_version"] = "P2", "R0"
 j.save(q)
 (j.ATTEMPTS / "IMG-001").mkdir(parents=True, exist_ok=True)
+stamp()
 j.cmd_sty(Args(id="IMG-001", rows=["line=10@AP-line-2", "color=9", "texture=9@AP-texture-1",
                                    "shade=9"],
                gap=["color=кожа холоднее", "shade=тень теплее"], judge_pass="revision"))
 rec = j.load()["IMG-001"]["history"][-1]
-ok(rec["kind"] == "sty" and rec["seed"] == j.SEED_PIN and rec["etalons"] == j.etalon_version(),
+ok(rec["seed"] == g.seed_for("copy", "unit-01", "IMG-001") + rec["version"] - 1,
+   f"в замере не тот затравка, что был у генератора: {rec['seed']}")
+ok(rec["kind"] == "sty" and rec["etalons"] == j.etalon_version(),
    f"в замере нет сида/эталонов: {rec}")
 ok(rec["prompt_version"] == "P2" and rec["render_version"] == "R0",
    f"в замере нет пары версий: {rec}")
 ok(rec["sty_pct"] == 92.5 and rec["delta"] is None, f"первый замер: {rec['sty_pct']} {rec['delta']}")
+stamp()
 j.cmd_sty(Args(id="IMG-001", rows=["line=10@AP-line-2", "color=10@AP-color-3",
                                    "texture=9@AP-texture-1", "shade=9@AP-shade-1"],
                gap=[], judge_pass="revision"))
@@ -391,12 +404,15 @@ ok(rec2["sty_pct"] == 95.0 and rec2["delta"]["color"] == 1,
 rep = (j.DOCS / "report.md").read_text()
 ok("расхождений не найдено" in rep and "эталонами test-etalon-1" not in rep,
    "журнал не пишет цитату якоря")
-ok("сид 43" in rep, "журнал не пишет сид")
+seed_real = g.seed_for("copy", "unit-01", "IMG-001") + rec["version"] - 1
+ok(f"сид {seed_real}" in rep, f"журнал не пишет настоящий затравка {seed_real}")
+ok("сид 43" not in rep, "журнал приписывает прогону фиктивный сид атрибуции")
 
 # --- 67. цитата обязана ссылаться на пару из реестра -----------------------
 (j.DOCS / "anchors.md").write_text("| AP-line-2 | 9 | ... |\n", encoding="utf-8")
 seal()
 try:
+    stamp()
     j.cmd_sty(Args(id="IMG-001", rows=["line=9@AP-line-99", "color=9@AP-line-2",
                                        "texture=9@AP-line-2", "shade=9@AP-line-2"],
                    gap=[], judge_pass="revision"))
@@ -471,6 +487,7 @@ before = thermo()
 ok(before, "до контроля термостат не печатался")
 buf = io.StringIO()
 with contextlib.redirect_stdout(buf):
+    stamp()
     j.cmd_sty(Args(id="IMG-001", rows=["line=10@AP-line-1", "color=10@AP-line-1",
                                        "texture=10@AP-line-1", "shade=10@AP-line-1"],
                    gap=[], judge_pass="revision", control="AP-line-1"))
@@ -530,5 +547,25 @@ one = j.lint_style("comic book, warm ochre skin", slot_card)
 ok(not any("смешаны" in m for m in one), f"один жанр помечен смешением: {one}")
 ok(j.card_rows(slot_card) == [("Кожа", "warm ochre skin")],
    f"слот разборался как обязательная строка: {j.card_rows(slot_card)}")
+
+# --- 76. печать прогона: без неё балл не ставится, расхождение снимает её -----
+q = j.load()
+q["IMG-001"].update(model="krea2", version=1,
+                    file="attempts/IMG-001/krea2_IMG-001_v1.webp")
+q["IMG-001"].pop("seal", None)
+j.save(q)
+try:
+    j.cmd_score(Args(id="IMG-001", criteria=["comp=9"], note=""))
+    ok(False, "балл поставлен прогону без печати")
+except SystemExit as e:
+    ok("не запечатан" in str(e), f"отказ не про печать: {e}")
+stamp()
+for k in ("etalon", "sheet", "seed", "prompt_version", "render_version", "dictionary",
+          "instrument", "judge"):
+    ok(k in j.load()["IMG-001"]["seal"], f"в печати нет {k}")
+ok(j.cmd_verify(Args(id="IMG-001")) == 0, "печать не сверилась")
+(j.DOCS / "style-card.md").write_text("словарь переписан")
+ok(j.cmd_verify(Args(id="IMG-001")) == 1 and not j.load()["IMG-001"].get("seal"),
+   "расхождение словаря не сняло печать")
 
 print(f"OK: проверок {checks}")

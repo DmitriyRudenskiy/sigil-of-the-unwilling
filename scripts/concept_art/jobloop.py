@@ -16,6 +16,7 @@ style техника, light свет, bg фон, camera ракурс, text на�
 """
 import argparse
 import hashlib
+import inspect
 import re
 import json
 import shutil
@@ -28,6 +29,8 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+from generate import seed_for        # затравку считает генератор, не копия формулы
 ROOT = HERE.parents[1]
 
 LAB = ROOT / "image-clone"
@@ -163,6 +166,36 @@ def run_versions() -> tuple[str, str]:
     """
     s = json.loads(SPEC.read_text()) if SPEC.is_file() else {}
     return s.get("prompt_version", "P0"), s.get("render", {}).get("id", "R0")
+
+
+def sha12(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()[:12] if path.is_file() else "нет"
+
+
+def judge_version() -> str:
+    """Версия судьи: чем считается готовность. Порог, набор критериев и формула
+    — часть прогона; молча их поправить значит переоценить старые баллы."""
+    body = f"{CRITERIA}|{READINESS_MIN}|" + inspect.getsource(readiness)
+    return "judge-" + hashlib.sha256(body.encode()).hexdigest()[:12]
+
+
+def run_seal(unit: dict, model: str, version: int, spec: dict) -> dict:
+    """Печать прогона: из чего он был сделан. Пишется до рендера, сверяется
+    `verify`, без неё `score` балл не ставит — иначе вердикт нельзя приписать
+    ни промпту, ни словарю, ни прибору (8.21)."""
+    r = spec.get("render", {})
+    return {
+        "etalon": sha12(LAB / unit["reference"]),
+        "sheet": sha12(LAB / unit["sheet"]),
+        "model": model,
+        "seed": seed_for("copy", unit["category"], unit["unit"]) + version - 1,
+        "prompt_version": spec.get("prompt_version", "P0"),
+        "render_version": r.get("id", "R0"),
+        "render": {k: r.get(k) for k in ("cfg", "sampler", "scheduler", "steps", "checkpoint")},
+        "dictionary": sha12(DOCS / "style-card.md"),
+        "instrument": anchors_version() if ANCHORS.is_file() else "нет",
+        "judge": judge_version(),
+    }
 
 
 def attempt_name(unit: dict, model: str, version: int) -> str:
@@ -332,6 +365,8 @@ def cmd_next(a) -> int:
         item["subject"], item["seed_bump"] = unit["subject"], version - 1
         SPEC.write_text(json.dumps(spec, ensure_ascii=False, indent=1) + "\n")
         gen.parent.mkdir(parents=True, exist_ok=True)
+        unit["seal"] = run_seal(unit, model, version, spec)
+        save(q)        # печать до рендера: упавший прогон тоже обязан быть опечатан
         # Имя кадру отдаём серверу до запуска: узел сохранения пишет его сам,
         # локально файл ложится сразу в attempts/ и ничего не переименовывается.
         subprocess.run([sys.executable, str(HERE / "generate.py"), "--spec", str(SPEC),
@@ -614,6 +649,8 @@ def cmd_sty(a) -> int:
     uid, unit = a.id, q[a.id]
     if not unit.get("file"):
         raise SystemExit("кадра нет — сначала next")
+    if not unit.get("seal"):
+        raise SystemExit("прогон не запечатан: STY-числа непроверяемому прогону не ставятся")
     require_anchors()
     gaps = a.gap or []
     a.judge_pass = getattr(a, "judge_pass", "score")
@@ -639,7 +676,8 @@ def cmd_sty(a) -> int:
     rec = {"kind": "sty", "date": str(date.today()), "model": unit["model"],
            "version": unit["version"], "file": unit["file"],
            "prompt_version": unit.get("prompt_version"),
-           "render_version": unit.get("render_version"), "seed": SEED_PIN,
+           "render_version": unit.get("render_version"),
+           "seed": unit["seal"]["seed"],      # настоящий затравка прогона, не SEED_PIN
            "etalons": ver, "anchors": anchors_version() if ANCHORS.is_file() else None,
            "rows": rows, "sty_pct": pct, "tens": tens, "gaps": gaps, "notes": notes,
            "judge_pass": a.judge_pass, "control": a.control, "delta": delta}
@@ -652,7 +690,7 @@ def cmd_sty(a) -> int:
     gap_of = {g.partition("=")[0]: g.partition("=")[2] for g in gaps}
     lines = [f"## {rec['date']} {uid} v{unit['version']} | {unit['model']} "
              f"| {unit.get('prompt_version', 'P?')}{unit.get('render_version', 'R?')}"
-             f" | сид {SEED_PIN} | эталоны {ver} | STY-% {pct} (планка {STY_TARGET})\n",
+             f" | сид {unit['seal']['seed']} | эталоны {ver} | STY-% {pct} (планка {STY_TARGET})\n",
              f"- Файл: {unit['file']}\n"]
     for r in STY_ROWS:
         lines.append(f"- {STY_ROW_RU[r]}: {rows[r]} | {gap_of.get(r, '—')} | "
@@ -690,11 +728,18 @@ def cmd_score(a) -> int:
             raise SystemExit(f"критерий {k!r} не из списка: {', '.join(CRITERIA)}")
         scores[k] = int(v)
     pct = readiness(scores)
-    prev = unit["history"][-1]["readiness"] if unit["history"] else None
+    # история — смешанный журнал (STY-замеры и вердикты readiness не имеют),
+    # дельта считается к последнему замеру готовности, а не к последней записи
+    prev = next((h["readiness"] for h in reversed(unit["history"]) if "readiness" in h),
+                None)
     if not unit.get("file"):
         raise SystemExit("кадра нет — сначала next")
+    if not unit.get("seal"):
+        raise SystemExit("прогон не запечатан: состав прогона не записан до рендера, "
+                         "балл не ставится (`next` печатает сам, сверка — `verify`)")
     unit["history"].append({"version": unit["version"], "model": unit["model"], "date": str(date.today()),
-                            "file": unit.get("file"), "scores": scores, "readiness": pct,
+                            "file": unit.get("file"), "seal": unit["seal"],
+                            "scores": scores, "readiness": pct,
                             "note": a.note or ""})
     unit["best_score"] = max([pct] + [h["readiness"] for h in unit["history"]])
     save(q)
@@ -708,6 +753,27 @@ def cmd_score(a) -> int:
     verdict = "success" if pct >= READINESS_MIN else ("переработка с нуля" if pct < 60 else "точечная правка")
     print(f"{uid} v{unit['version']}: готовность {pct}% (дельта {delta}) -> {verdict}")
     print(f"запись в {DOCS / 'report.md'}")
+    return 0
+
+
+def cmd_verify(a) -> int:
+    """Сверка печати прогона с тем, что в дереве сейчас. Расхождение — печать
+    снимается: кадр, нарисованный другим промптом/словарём/прибором, этим баллом
+    не описывается."""
+    q = load()
+    uid, unit = a.id, q[a.id]
+    stored = unit.get("seal")
+    if not stored:
+        print(f"{uid}: печати нет — прогон без неё не считается, нужен новый `next`")
+        return 1
+    now = run_seal(unit, unit["model"], unit["version"], json.loads(SPEC.read_text()))
+    diff = sorted(k for k in now if now[k] != stored.get(k))
+    if diff:
+        unit.pop("seal")
+        save(q)
+        print(f"{uid}: печать снята, разошлось {', '.join(diff)} — прогон не воспроизведён")
+        return 1
+    print(f"{uid}: печать совпала\n" + json.dumps(stored, ensure_ascii=False, indent=1))
     return 0
 
 
@@ -1056,6 +1122,9 @@ def main() -> int:
     n.set_defaults(f=cmd_next)
     e = sub.add_parser("etalons")
     e.set_defaults(f=cmd_etalons)
+    vf = sub.add_parser("verify", help="сверить печать прогона с деревом")
+    vf.add_argument("id")
+    vf.set_defaults(f=cmd_verify)
     sc = sub.add_parser("score")
     sc.add_argument("id")
     sc.add_argument("criteria", nargs="+")

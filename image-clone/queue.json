@@ -7,10 +7,10 @@
   "category": "unit-01",
   "model": "qwen21",
   "status": "in-queue",
-  "version": 5,
+  "version": 9,
   "versions": {
    "krea2": 3,
-   "qwen21": 5
+   "qwen21": 9
   },
   "best_score": null,
   "max_attempts": 5,
@@ -164,11 +164,113 @@
     "prompt_ceiling": "gloss",
     "readiness": null,
     "note": "P2 анти-глянец: глянец не сдвинулся"
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-15",
+    "model": "qwen21",
+    "version": 7,
+    "file": "attempts/IMG-001/qwen21_IMG-001_v7_P3R0.webp",
+    "prompt_version": "P3",
+    "render_version": "R0",
+    "seed": 1655296456,
+    "etalons": "etalons-8cb5520558f8",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 7,
+     "texture": 6,
+     "shade": 6
+    },
+    "sty_pct": 67.5,
+    "tens": [],
+    "gaps": [
+     "line=контур держит только жилет и обувь, руки и штаны лепятся светотенью",
+     "color=кожа ушла в оранжевый, синий жилета ярче эталона",
+     "texture=лоск на плечах и предплечьях",
+     "shade=вместо плоского локального цвета сплошной градиент"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-15",
+    "model": "qwen21",
+    "version": 8,
+    "file": "attempts/IMG-001/qwen21_IMG-001_v8_P4R0.webp",
+    "prompt_version": "P4",
+    "render_version": "R0",
+    "seed": 1655296457,
+    "etalons": "etalons-8cb5520558f8",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 7,
+     "texture": 6,
+     "shade": 6
+    },
+    "sty_pct": 67.5,
+    "tens": [],
+    "gaps": [
+     "line=контур держит жилет и сапоги, руки и штаны лепятся светотенью",
+     "color=кожа оранжевее охры, синий жилета ярче эталона",
+     "texture=кожа гладкая, живописной тональной вариации нет",
+     "shade=сплошной градиент вместо плоского локального цвета"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 0,
+     "color": 0,
+     "texture": 0,
+     "shade": 0
+    }
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-15",
+    "model": "qwen21",
+    "version": 9,
+    "file": "attempts/IMG-001/qwen21_IMG-001_v9_P5R0.webp",
+    "prompt_version": "P5",
+    "render_version": "R0",
+    "seed": 1655296458,
+    "etalons": "etalons-8cb5520558f8",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 7,
+     "color": 7,
+     "texture": 6,
+     "shade": 6
+    },
+    "sty_pct": 65.0,
+    "tens": [],
+    "gaps": [
+     "line=прожилка жилета пропала, внутренних линий стало меньше",
+     "color=кожа оранжевее охры, синий ярче эталона",
+     "texture=кожа гладкая, живописной вариации нет",
+     "shade=сплошной градиент вместо плоского локального цвета"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": -1,
+     "color": 0,
+     "texture": 0,
+     "shade": 0
+    }
    }
   ],
-  "file": "attempts/IMG-001/qwen21_IMG-001_v5.webp",
+  "file": "attempts/IMG-001/qwen21_IMG-001_v9_P5R0.webp",
   "note": "возврат: баллы выставлены по прежним правилам оценки и недействительны (D10)",
-  "pair": "/Users/user/sigil-concept-art/image-clone/pairs/IMG-001.png"
+  "pair": "/Users/user/sigil-concept-art/image-clone/pairs/IMG-001.png",
+  "prompt_version": "P5",
+  "render_version": "R0"
  },
  "IMG-002": {
   "unit": "IMG-002",
