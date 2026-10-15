@@ -33,6 +33,10 @@ var last_battle_report: Dictionary = {}
 ## Победная оценка (T-117 якорь: ход 21 = финальный рейд отражён/нет).
 var final_battle_seen: bool = false
 var final_raid_repelled: bool = false
+## T-060: ростер партии (R1/R2): [{id, class, race, level, xp, stats{}, luck,
+## state?, uid?}]. Пусто до T-003 (старт: fighter+ranger) и тренировки
+## (CampaignTrainingService — проводка с городским UI, E-5).
+var party: Array = []
 ## Проводка T-110 (cutover, раунд 6): имя героя из создания (pending_new_game);
 ## sign-слой (что несёт Знак) — за MVP-срезом (T-020).
 var hero_name: String = ""
@@ -134,6 +138,9 @@ func _build(campaign_seed: int) -> void:
 func advance_turn() -> void:
 	if campaign.is_done():
 		return
+	# T-060: снабжение партии — выбранные едят 1 еду/день (02-mechanics §3.2;
+	# MVP: пул = партия, резерв — Post-MVP). Синхронизация до settlement-фазы.
+	settlement.party_size = PartySystem.alive_members(party).size()
 	WorldSeasons.set_turns(campaign.current_turn)
 	campaign.advance_auto_phase()  # settlement (авто) → player
 	campaign.end_player_phase()    # player → caravans (MVP: авто, no-op)
@@ -174,6 +181,10 @@ func _request_battle(context: Dictionary) -> void:
 	var parity: bool = float(_statblocks.get("warrior", {}).get("cr", 0)) \
 		<= 0.8 * float(raider_spec.get("cr", 0))
 	last_battle_report = CampaignBattle.resolve(hero, raider, _on_battle_losses)
+	# T-060: партия — XP (после боя, 02-mechanics §3.2 EC3) и потери
+	# (R1: wipe = DEFEAT; сейв и Престиж сохраняются).
+	record_party_xp(last_battle_report, float(raider_spec.get("cr", 0.0)))
+	apply_party_battle_losses(last_battle_report)
 	if tier >= 3:  # финальный рейд (raids.json final_raid: tier 3, босс K-R3)
 		final_battle_seen = true
 		final_raid_repelled = str(last_battle_report.get("outcome", "")) == "win"
@@ -193,6 +204,39 @@ static func _report_has_fate_debt(report: Dictionary, hero_id: String) -> bool:
 		if int(t.get("debt", 0)) > 0 and str(t.get("actor", "")) == hero_id:
 			return true
 	return false
+
+
+## T-060 (07-balance §3): XP партии — бой `100×CR×(1+0.1n)` (только победа:
+## ничья = опыт 0, 07-balance §4/D-128; MVP 1v1 → n=1) + «рейд пережит» 300
+## (outcome != "lose": город пережил рейд; MVP-прокси выживания партии —
+## боевой слой 1v1, партия в бою — за срезом). Начисляется всем живым членам
+## (якорь K-M13 «ход 21 = 5×ур.5» — командный пейсинг).
+func record_party_xp(report: Dictionary, raider_cr: float) -> void:
+	var alive := PartySystem.alive_members(party)
+	if alive.is_empty():
+		return
+	var outcome := str(report.get("outcome", ""))
+	var xp := 0
+	if outcome == "win":
+		xp += PartySystem.xp_from_battle(raider_cr, 1)
+	if outcome != "lose":
+		xp += PartySystem.XP_RAID_SURVIVED
+	if xp <= 0:
+		return
+	for member in alive:
+		PartySystem.grant_xp(member, xp)
+
+
+## T-060 (R1): потери боя → партия (совпадение по uid жителя или id члена).
+## Wipe — конец кампании (DEFEAT); повторный вызов после DONE — no-op.
+func apply_party_battle_losses(report: Dictionary) -> void:
+	var losses: Array = report.get("losses", [])
+	if losses.is_empty():
+		return
+	PartySystem.apply_losses(party, losses)
+	settlement.party_size = PartySystem.alive_members(party).size()
+	if PartySystem.is_wiped(party):
+		campaign.defeat("party_wiped")
 
 
 ## Хук населения (§2.2): потери боя списывают конкретных жителей по
@@ -252,7 +296,7 @@ func build_save_state() -> Dictionary:
 		"campaign": campaign_section,
 		"resources": settlement.stocks.duplicate(),
 		"population": population_system.to_dict(),
-		"party": [],  # партия героя — вне MVP-среза (R1: 1 герой, не 5)
+		"party": party.duplicate(true),  # T-060: партия — состояние (R1); схема party = TYPE_ARRAY
 		"city": {
 			"housing": settlement.housing,
 			"buildings": settlement.buildings.duplicate(true),
@@ -293,6 +337,11 @@ func load_save_state(state: Dictionary) -> void:
 	final_battle_seen = bool(state.get("campaign", {}).get("final_battle_seen", false))
 	final_raid_repelled = bool(state.get("campaign", {}).get("final_raid_repelled", false))
 	population_system = PopulationSystem.from_dict(state.get("population", {}))
+	party = (state.get("party", []) as Array).duplicate(true)  # T-060
+	# T-110: level — производная от xp (пересчёт на загрузке; T-060/K-M13).
+	for member in party:
+		if member is Dictionary:
+			member["level"] = PartySystem.level_for_xp(int(member.get("xp", 0)))
 	var city: Dictionary = state.get("city", {})
 	settlement = SettlementProcessor.from_dict({
 		"stocks": state.get("resources", {}),

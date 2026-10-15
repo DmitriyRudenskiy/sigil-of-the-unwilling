@@ -9,6 +9,28 @@ date: 2026-10-15
 
 # CHANGELOG — docs/
 
+## [2026-10-15] — T-060 (E-2, в работе): слой развития партии — PartySystem + проводка
+
+- Новый чистый модуль `game/scripts/campaign/party_system.gd` (class_name PartySystem):
+  уровни 1–5 с порогами SRD 2700/6500/15000/38000 (K-M13), `grant_xp`, боевой XP
+  `100×CR×(1+0.1n)` (только победа; ничья = 0 — 07-balance §4/D-128), узловой XP 200–800,
+  «рейд пережит» 300, ASI +2/+1 кап 16 (K3; Удача — не объект ASI), потери READY→DEAD
+  (по uid жителя или id члена), wipe, ступень утраты (K-M11), живые члены.
+- Проводка (`campaign_composition.gd`): партия — состояние кампании (сейв roundtrip по
+  схеме T-110 `party` = TYPE_ARRAY; `level` — производная от xp, пересчёт на загрузке);
+  после боя: XP всем живым + применение потерь; wipe → `campaign.defeat("party_wiped")`
+  (R1: DEFEAT, сейв и Престиж сохраняются — EC1); снабжение: `settlement.party_size`
+  = живые члены (синхронизация до settlement-фазы).
+- `turn_driver.gd`: `campaign_status` (ongoing/defeat; сериализуется; T-071 расширит
+  victory) и `defeat(reason)` (повторный вызов — no-op).
+- Тесты: +21 (13 unit `test_party_system.gd` + 8 wiring `test_party_wiring.gd`);
+  2538 | 0 | 0, 2 skipped, 0 orphans; MCP e2e 37 passed + 1 skipped; GATE=0.
+- Вне среза (зафиксировано в статусе T-060): старт-партия fighter+ranger — T-003;
+  проводка узлового XP — T-123 (E-7); UI выбора ASI — T-100 (E-5); потребитель K-M11 —
+  боевой слой партии (MVP-срез — 1v1 автобой); луп мастерства/профессии — 1.0.
+- Обновлены: `docs/mvp/TICKETS.md` (статус T-060), `docs/mvp/GAP-LIST.md` (A-8 → в работе,
+  сводка A), `docs/mvp/EPICS.md` (E-2 → в работе).
+
 ## [2026-10-15] — T-113 (E-6): канон-классы в конструкторе (закрыт)
 
 - **Код (feature-ветка → main):** новый аксессор `game/scripts/data/canon_classes.gd` (class_name CanonClasses: classes/hireable/by_id/name_for/gate_ok; данные — mvp_catalog.json, T-111; гейт 02d §4.1/§4.2, режимы all/any). Конструктор (`character_creation_ui.gd`) — классы теперь из канон-каталога: **MVP-наём 6** (hireable-маска; «Чародей и остальные» — 1.0, в списке нет); legacy `hero_classes.gd` в конструкторе не используется (сам файл не тронут — B-18, диспозиция Q-M44). Профиль (`hero_build_profile.gd`) — класс-лейбл canon-first, legacy-фолбэк (legacy-мир/MCP-пилот проходят legacy-иды; «wizard» валиден в обоих каталогах — MCP e2e не задет; full_cycle берёт `_class_keys[0]` по индексу).
