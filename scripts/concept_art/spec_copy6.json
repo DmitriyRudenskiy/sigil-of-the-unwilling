@@ -1,0 +1,71 @@
+{
+ "_comment": "Калибровка промптов: 12 сюжетов с листа-эталона units, одна задача — копия. Не производственный каталог.",
+ "server": "http://192.168.0.230:9000/mcp",
+ "comfy": "http://192.168.0.230:8188",
+ "out_dir": "concept_art/copy/r6",
+ "export": {
+  "format": "WEBP",
+  "quality": 82
+ },
+ "models": {
+  "krea2": {
+   "tool": "api_generate_image_krea2",
+   "steps": 8,
+   "cfg": 1.0,
+   "unet": "krea2_turbo_fp8_scaled.safetensors",
+   "clip": "qwen3vl_4b_fp8_scaled.safetensors",
+   "vae": "qwen_image_vae.safetensors"
+  },
+  "qwen21": {
+   "tool": "api_generate_image_qwen21",
+   "steps": 25,
+   "unet": "qwen_image_2.1_int8_convrot.safetensors",
+   "clip": "qwen3vl_8b_int8_convrot.safetensors",
+   "vae": "qwen_image_2.1_vae_bf16.safetensors"
+  }
+ },
+ "references_dir": "/Users/user/Downloads/Новая папка с объектами 40",
+ "model": "krea2",
+ "probe_models": [
+  "krea2",
+  "qwen21"
+ ],
+ "variants": [
+  {
+   "id": "copy",
+   "name": "copy",
+   "style": "smooth airbrushed painterly rendering without visible line, matte hand-painted materials, gentle ambient occlusion, low gloss, readable silhouette",
+   "negative": "chibi, toddler proportions, baby face, doll face, toy figure, blind box vinyl, clay render, glossy plastic, shiny enamel, 3d print, cute child, photorealism, photograph, ink outlines, line art, sketch, grayscale, character sheet, turnaround, multiple views, reference sheet, split frame, collage, two characters, dark background, gradient background, scenery, landscape, text, letters, watermark, signature, cropped limbs, extra fingers, deformed hands"
+  }
+ ],
+ "categories": {
+  "units": {
+   "count": 4,
+   "size": [
+    1024,
+    1280
+   ],
+   "reference": "1791743136546-01a12c34-3cb2-72fb-914d-2361d7698797.jpeg",
+   "style": "stylized hand-painted fantasy game character illustration from a single comic-painted art bible, heroic stocky proportions: head about one sixth of the total height, broad shoulders, thick arms, short powerful legs, compact build, mature stylized cartoon face with simplified exaggerated features, large readable eyes, bold expression, hand-painted, never a photograph and never a real person's likeness, matte painterly surfaces with soft airbrush shading and a few visible brush strokes, no ink outlines, saturated but not neon fabric colours, soft single-tone graphic shading, warm key light from the upper left",
+   "frame": "single full-body fantasy character standing exactly as described, entire figure visible from head to boots, whole object with a clear empty margin around it, nothing touching the frame, centered, front view facing the camera straight on, head up and eyes open looking at the viewer, isolated on plain white background with no scenery and no blurred shapes, soft grey contact shadow under the boots only. Left and right in the description are stated as seen by the viewer in the image; never mirror the pose",
+   "items": [
+    {
+     "id": "c05",
+     "subject": "barefoot bald human monk with bare ankles and no boots and no sandals, mature muscular adult, low wide fighting stance, saffron orange robe tied with a brown sash leaving one shoulder bare, long brown prayer bead necklace, wrist beads, both open palms pushed forward, focused adult face, bare feet with visible toes on the ground"
+    },
+    {
+     "id": "c08",
+     "subject": "human ranger scout, hooded forest green cloak over a green tunic, leather straps crossed over the chest, brown beard, one hand raised to his brow shading his eyes as he looks into the distance, the hand on the viewer's left, the other fist on the hip, brown gloves, brown boots, no telescope"
+    },
+    {
+     "id": "c11",
+     "subject": "shirtless human barbarian brute, long brown hair and thick brown beard, muscular adult, bone fang necklace, brown fur loincloth with a rope belt, leather bracers, three red claw scars on the shoulder on the viewer's right, both fists clenched at his sides, wide stance"
+    },
+    {
+     "id": "c12",
+     "subject": "young human bard, curly chestnut hair, wide confident grin, mustard gold coat with dark lapels and a white frill shirt, purple waistcoat, tight mustard breeches, cape with a purple outer side and gold lining worn open, both arms spread wide presenting, brown boots"
+    }
+   ]
+  }
+ }
+}
