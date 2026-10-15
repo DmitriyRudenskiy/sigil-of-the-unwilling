@@ -344,6 +344,7 @@ date: 2026-10-14
 - **AC:** канон — 11 классов (Колдуна нет; «mage» = Волшебник); наём в MVP: 6 (fighter/ranger/cleric/wizard/rogue/paladin); Чародей и остальные — 1.0 (маска) [[MVP-scope]] [[02d-classes-skills]]
 - **Размер:** S
 - **Зависимости:** —
+- **Статус (2026-10-15, E-6):** **выполнен** — данные доставлены T-111 (mvp_catalog.json: 11 классов K1, Колдуна нет; hireable = 6; гейты 02d §4.2; тесты test_mvp_catalog: eleven/six_hireable/gates). Потребитель: конструктор (character_creation_ui) читает канон-каталог через `CanonClasses.hireable()` (новый аксессор `scripts/data/canon_classes.gd`: classes/hireable/by_id/name_for/gate_ok; гейт 02d §4.1/§4.2, режимы all/any; legacy `hero_classes.gd` в конструкторе не используется); профиль (hero_build_profile) — класс-лейбл canon-first, legacy-фолбэк (legacy-мир/MCP-пилот проходят legacy-иды; «wizard» валиден в обоих каталогах — MCP e2e не задет). UI-верификация — deferred (headless). Тесты: test_canon_classes 6/6; гейт 2517 | 0 failures (local).
 
 ### T-115. raids.json — функция давления (остаток T-112)
 - **Глагол игрока:** (система) давить рейдами

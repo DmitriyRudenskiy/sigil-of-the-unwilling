@@ -36,7 +36,7 @@ func summary() -> Dictionary:
 		"sex": GameText.creation_sex_male() if sex == "male" else GameText.creation_sex_female(),
 		"race": _label(_Races.RACES, race),
 		"subrace": _label_subrace(race),
-		"class": _label(_Classes.CLASSES, character_class),
+		"class": _class_label(character_class),
 		"culture": _label(_Cultures.CULTURES, culture),
 		"background": _label(_Cultures.BACKGROUNDS, background),
 		"stats": get_stats(),
@@ -64,6 +64,16 @@ func _label(table: Dictionary, key: String) -> String:
 	if key.is_empty() or not table.has(key):
 		return "—"
 	return table[key].get("name", key)
+
+## T-113: класс — канон-имя (mvp_catalog.json) в первую очередь; legacy-каталог —
+## фолбэк для legacy-идов (legacy-мир/MCP-пилот проходят свои id, в т.ч. priest/cipher/chanter).
+func _class_label(class_id: String) -> String:
+	if class_id.is_empty():
+		return "—"
+	var canon_name := CanonClasses.name_for(class_id)
+	if canon_name != "—":
+		return canon_name
+	return _label(_Classes.CLASSES, class_id)
 
 func _label_subrace(race_key: String) -> String:
 	if race_key.is_empty() or not _Races.RACES.has(race_key):
