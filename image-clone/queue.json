@@ -6,11 +6,11 @@
   "cell": 1,
   "category": "unit-01",
   "model": "qwen21",
-  "status": "redraw",
-  "version": 4,
+  "status": "model-ceiling",
+  "version": 5,
   "versions": {
    "krea2": 3,
-   "qwen21": 4
+   "qwen21": 5
   },
   "best_score": null,
   "max_attempts": 5,
@@ -138,9 +138,35 @@
     "head": true,
     "readiness": null,
     "note": "Правка STYLE (контур) сдвинула стиль: появились внутренние линии мышц и швов, шрам-звезда стал линейным, края жилета читаются. Глянец кожи и 3D-рендерность остались. Нет -> почти за одну правку блока."
+   },
+   {
+    "version": 5,
+    "model": "qwen21",
+    "date": "2026-10-15",
+    "file": "attempts/IMG-001/qwen21_IMG-001_v5.webp",
+    "sty": "near",
+    "sty_notes": [
+     "линия есть, но кожа остаётся лощёной, рендер — трёхмерным"
+    ],
+    "cnt": [
+     "поза: предплечья подняты выше, локти прижаты",
+     "наплечник слева пропал",
+     "рога на поясе пропали",
+     "причёска: ирокез стал меньше",
+     "волосы на груди: куст вместо овальной площадки"
+    ],
+    "ident": [
+     "лицо: форма челюсти и причёска не те"
+    ],
+    "head_sty": false,
+    "identity_ceiling": false,
+    "etalons": "etalons-d5bffd7e0cc3",
+    "prompt_ceiling": "gloss",
+    "readiness": null,
+    "note": "P2 анти-глянец: глянец не сдвинулся"
    }
   ],
-  "file": "attempts/IMG-001/qwen21_IMG-001_v4.webp",
+  "file": "attempts/IMG-001/qwen21_IMG-001_v5.webp",
   "note": "возврат: баллы выставлены по прежним правилам оценки и недействительны (D10)",
   "pair": "/Users/user/sigil-concept-art/image-clone/pairs/IMG-001.png"
  },
@@ -151,11 +177,11 @@
   "cell": 2,
   "category": "unit-01",
   "model": "qwen21",
-  "status": "in-queue",
-  "version": 2,
+  "status": "model-ceiling",
+  "version": 3,
   "versions": {
    "krea2": 1,
-   "qwen21": 2
+   "qwen21": 3
   },
   "best_score": null,
   "max_attempts": 5,
@@ -196,9 +222,34 @@
     },
     "readiness": 85,
     "note": "пропорции и рукавица сели; техника осталась глаже"
+   },
+   {
+    "version": 3,
+    "model": "qwen21",
+    "date": "2026-10-15",
+    "file": "attempts/IMG-002/qwen21_IMG-002_v3.webp",
+    "sty": "near",
+    "sty_notes": [
+     "линия есть, но кожа и металл лощёные, плащ без контура"
+    ],
+    "cnt": [
+     "щит: форма и наклон",
+     "кольчуга под доспехом стала мягче",
+     "плащ: контур пропал",
+     "меч за спиной пропал"
+    ],
+    "ident": [
+     "лицо: борода гуще, нос крупнее"
+    ],
+    "head_sty": false,
+    "identity_ceiling": false,
+    "etalons": "etalons-d5bffd7e0cc3",
+    "prompt_ceiling": "gloss",
+    "readiness": null,
+    "note": "P2 анти-глянец: на этом юните стало даже глаже"
    }
   ],
-  "file": "attempts/IMG-002/qwen21_IMG-002_v2.webp",
+  "file": "attempts/IMG-002/qwen21_IMG-002_v3.webp",
   "note": "возврат: баллы выставлены по прежним правилам оценки и недействительны (D10)",
   "pair": "/Users/user/sigil-concept-art/image-clone/pairs/IMG-002.png"
  },

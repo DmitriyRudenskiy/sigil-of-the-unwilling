@@ -20,9 +20,17 @@ reference/*
 __pycache__/
 *.pyc
 
-# image-clone: пиксели лаборатории (эталонные кропы, попытки, принятые копии, пары).
+# image-clone: пиксели лаборатории (попытки, принятые копии, пары, кропы).
 # В git — docs/, queue.json, spec.json: описание и версия решают, кадры воспроизводимы прогоном.
-/image-clone/references/
+# Кропы выводимы из листов, поэтому в git не идут; их содержимое закреплено хешами
+# в image-clone/references/manifest.json. Сами пиксели эталонов — чужие изображения
+# и генерации без зафиксированных прав (reference/INDEX.md, «Почему не в git»),
+# поэтому в репозитории лежат каталог и манифест, а растр — на диске, в пути
+# внутри репозитория, а не в личной папке.
+/image-clone/references/*
+!/image-clone/references/manifest.json
+/image-clone/etalons/*
+!/image-clone/etalons/manifest.json
 /image-clone/attempts/
 /image-clone/matches/
 /image-clone/pairs/

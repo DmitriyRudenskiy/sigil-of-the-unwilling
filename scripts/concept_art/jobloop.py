@@ -15,6 +15,7 @@ comp кадрирование, subject главный объект, objects со
 style техника, light свет, bg фон, camera ракурс, text надписи.
 """
 import argparse
+import hashlib
 import json
 import shutil
 import subprocess
@@ -37,6 +38,7 @@ DOCS = LAB / "docs"
 QUEUE = LAB / "queue.json"
 SPEC = LAB / "spec.json"
 PAIRS = LAB / "pairs"
+ETALONS = REFS / "manifest.json"
 SHEETS_SRC = Path("/Users/user/sigil-of-the-unwilling-slop/___STYLE_BOOK/for_local_agent/unit")
 
 GRID = (4, 3)                   # колонок, строк на листе
@@ -260,9 +262,35 @@ def check_invariant(q: dict) -> None:
 
 # ------------------------------------------------------------- генерация
 
+def etalon_files() -> list:
+    return sorted(p for p in REFS.rglob("*") if p.is_file() and p.suffix.lower() in (".jpeg", ".png"))
+
+
+def etalon_version() -> str:
+    """Версия эталонного сета: хеш списка «имя:хеш» всех листов и кропов лаборатории."""
+    lines = [f"{p.relative_to(REFS).as_posix()}:{hashlib.sha256(p.read_bytes()).hexdigest()}"
+             for p in etalon_files()]
+    return "etalons-" + hashlib.sha256("\n".join(lines).encode()).hexdigest()[:12]
+
+
+def cmd_etalons(a) -> int:
+    """Зафиксировать эталонный сет: файлы, размеры, хеши, версия. Вердикт сверяется с ней."""
+    rows = [{"file": p.relative_to(REFS).as_posix(), "bytes": p.stat().st_size,
+             "sha256": hashlib.sha256(p.read_bytes()).hexdigest()} for p in etalon_files()]
+    ETALONS.write_text(json.dumps({"version": etalon_version(), "files": rows},
+                                  ensure_ascii=False, indent=1) + "\n")
+    print(f"{ETALONS}: {json.loads(ETALONS.read_text())['version']}, файлов {len(rows)}")
+    return 0
+
+
 def cmd_next(a) -> int:
     q = load()
-    uid, unit = next(((k, v) for k, v in sorted(q.items()) if v["status"] in OPEN), (None, None))
+    if a.id:
+        uid, unit = a.id, q.get(a.id)
+        if not unit or unit["status"] not in OPEN:
+            raise SystemExit(f"{a.id} не в работе: {(unit or {}).get('status', 'нет такого')}")
+    else:
+        uid, unit = next(((k, v) for k, v in sorted(q.items()) if v["status"] in OPEN), (None, None))
     if unit is None:
         print("незакрытых юнитов нет")
         return 0
@@ -333,23 +361,44 @@ def cmd_score(a) -> int:
 
 
 def cmd_verdict(a) -> int:
-    """Вердикт попытки парным тестом к якорю. Приёмка только по нему; проценты — статистика."""
+    """Вердикт попытки парным тестом к якорю. Приёмка только по нему; проценты — статистика.
+
+    Флаг обязан объявить слой: `--sty` и `--head-sty` — стиль, они блокируют;
+    `--cnt` — контент, журнал ручной доводки, не блокирует, кроме экономического
+    порога; `--ident` — похожесть, отдельный слой: пишется, но не блокирует никогда
+    (текстовым промптом не управляется, рычаг — референс-кондишенинг).
+    """
     q = load()
     uid, unit = a.id, q[a.id]
     if a.sty not in STY_VERDICTS:
         raise SystemExit(f"вердикт: {', '.join(STY_VERDICTS)}")
     if not unit.get("file"):
         raise SystemExit("кадра нет — сначала next")
-    cnt = a.cnt or []
+    ver = etalon_version()
+    if not ETALONS.is_file():
+        raise SystemExit(f"нет манифеста эталонов {ETALONS} — jobloop.py etalons")
+    booked = json.loads(ETALONS.read_text())["version"]
+    if booked != ver:
+        raise SystemExit(f"эталонный сет изменился: заявлено {booked}, на диске {ver} — "
+                         f"сверь кропы и пересобери манифест")
+    cnt, ident = a.cnt or [], a.ident or []
     status = "success" if a.sty == "yes" else "in-queue"
     why = ""
-    if status == "in-queue" and (a.head or len(cnt) > CNT_FIXUP_MAX):
-        status, why = "redraw", "голова или кисть" if a.head else f"правок {len(cnt)} > {CNT_FIXUP_MAX}"
+    if status == "in-queue" and (a.head_sty or len(cnt) > CNT_FIXUP_MAX):
+        status, why = "redraw", "стиль лица или кисти" if a.head_sty else f"правок {len(cnt)} > {CNT_FIXUP_MAX}"
+    same = [h for h in unit["history"] if h.get("ident") and h["model"] == unit["model"] and h["sty"] == a.sty]
+    ceiling = bool(ident) and len(same) >= 1
     unit["history"].append({"version": unit["version"], "model": unit["model"], "date": str(date.today()),
-                            "file": unit["file"], "sty": a.sty, "cnt": cnt, "head": bool(a.head),
+                            "file": unit["file"], "sty": a.sty, "sty_notes": a.sty_notes or [],
+                            "cnt": cnt, "ident": ident, "head_sty": bool(a.head_sty),
+                            "identity_ceiling": ceiling, "etalons": ver,
+                            "prompt_ceiling": a.ceiling,
                             "readiness": None, "note": a.note or ""})
     unit["status"] = status
-    if status != "success" and unit["versions"][unit["model"]] >= MAX_ATTEMPTS:
+    if status != "success" and a.ceiling:
+        unit["status"] = status = "model-ceiling"
+        why = f"промпт упёрся в признак: {a.ceiling}"
+    elif status != "success" and unit["versions"][unit["model"]] >= MAX_ATTEMPTS:
         unit["status"] = status = "blocked"
         why = f"исчерпан лимит {MAX_ATTEMPTS} попыток"
     save(q)
@@ -357,10 +406,20 @@ def cmd_verdict(a) -> int:
         with (DOCS / "fixups.md").open("a") as fh:
             fh.write(f"\n## {uid} {unit['model']} v{unit['version']} — {unit['file']}\n")
             fh.writelines(f"- {c}\n" for c in cnt)
+    if ident:
+        with (DOCS / "identity.md").open("a") as fh:
+            fh.write(f"\n## {uid} {unit['model']} v{unit['version']} — {unit['file']}\n"
+                     + "".join(f"- {i}\n" for i in ident)
+                     + ("- `identity-ceiling`: похожесть не двигается промптом — "
+                        "рычаг референс-кондишенинга, не перерисовка\n" if ceiling else ""))
     report(f"## {date.today()} {uid} v{unit['version']} | {unit['model']} | стиль: {a.sty}"
            f"{f' -> {status} ({why})' if why else ''}\n"
-           f"- Файл: {unit['file']}\n- Метрика-подсказка: {unit.get('metric', '—')}\n"
+           f"- Файл: {unit['file']}\n- Эталоны: {ver}\n"
+           f"- Метрика-подсказка: {unit.get('metric', '—')}\n"
+           f"- Стиль ({len(a.sty_notes or [])}): {'; '.join(a.sty_notes or []) or '—'}\n"
            f"- Точечные правки ({len(cnt)}): {'; '.join(cnt) or '—'}\n"
+           f"- Похожесть ({len(ident)}){' — потолок, не блокирует' if ceiling else ''}: "
+           f"{'; '.join(ident) or '—'}\n"
            f"- Заметка: {a.note or '—'}\n")
     if status == "success":
         src = LAB / unit["file"]
@@ -472,7 +531,10 @@ def main() -> int:
     i.set_defaults(f=cmd_init)
     n = sub.add_parser("next")
     n.add_argument("--model", default=None)
+    n.add_argument("--id", default=None, help="взять в работу конкретный юнит, а не первый открытый")
     n.set_defaults(f=cmd_next)
+    e = sub.add_parser("etalons")
+    e.set_defaults(f=cmd_etalons)
     sc = sub.add_parser("score")
     sc.add_argument("id")
     sc.add_argument("criteria", nargs="+")
@@ -481,9 +543,17 @@ def main() -> int:
     vd = sub.add_parser("verdict")
     vd.add_argument("id")
     vd.add_argument("sty", choices=STY_VERDICTS)
+    vd.add_argument("--sty-note", dest="sty_notes", action="append",
+                    help="расхождение стиля со ссылкой на строку словаря (повторяемо)")
     vd.add_argument("--cnt", action="append", help="точечная правка слоя контента (повторяемо)")
-    vd.add_argument("--head", action="store_true", help="есть расхождение головы или кисти")
+    vd.add_argument("--ident", action="append",
+                    help="расхождение похожести: журнал, приёмку не блокирует (повторяемо)")
+    vd.add_argument("--head-sty", dest="head_sty", action="store_true",
+                    help="линия или светотень лица/кистей расходится — это стиль, он блокирует")
     vd.add_argument("--note", default="")
+    vd.add_argument("--ceiling", default="",
+                    help="признак, в который упёрся промпт (gloss, line…): "
+                         "правками слов на этом юните больше не двигается")
     vd.set_defaults(f=cmd_verdict)
     ac = sub.add_parser("accept")
     ac.add_argument("id")

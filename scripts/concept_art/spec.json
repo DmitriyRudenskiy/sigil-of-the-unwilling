@@ -438,7 +438,7 @@
    "style": "dark cinematic fantasy game interface, carved stone and dark wood panels with thin gold filigree, parchment fields, glowing blue sigil accents, moody low-key lighting with one warm light source, engraved serif titling"
   }
  },
- "references_dir": "/Users/user/sigil-of-the-unwilling-slop",
+ "references_dir": "image-clone/etalons",
  "model": "krea2",
  "probe_models": [
   "krea2",

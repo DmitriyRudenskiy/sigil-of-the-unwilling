@@ -36,6 +36,7 @@ j.MATCHES = tmp / "matches"
 j.DOCS = tmp / "docs"
 j.QUEUE = tmp / "queue.json"
 j.PAIRS = tmp / "pairs"
+j.ETALONS = j.REFS / "manifest.json"
 
 unit = {"unit": "IMG-001", "reference": "references/crops/IMG-001.png", "category": "unit-01",
         "sheet": "references/unit-01.jpeg", "cell": 1,
@@ -110,36 +111,74 @@ ok((j.MATCHES / "qwen21_IMG-001_v1.webp").exists(), "копия не легла 
 ok(kept.exists(), "растровые попытки пережили не все команды — кто-то из них удаляет файлы")
 
 # --- вердикт стиля: приёмка только парным тестом, проценты в ней не участвуют
-def verdict(sty, cnt=(), head=False):
+(j.CROPS / "IMG-001").parent.mkdir(parents=True, exist_ok=True)
+(j.CROPS / "IMG-001.png").write_bytes(b"png")
+j.cmd_etalons(Args())
+
+
+def verdict(sty, cnt=(), ident=(), head_sty=False):
     q = j.load()
     q["IMG-001"].update(status="in-queue", model="qwen21", version=2,
                         versions={"qwen21": 2}, file="attempts/IMG-001/qwen21_IMG-001_v2.webp")
     j.save(q)
     (j.ATTEMPTS / "IMG-001").mkdir(parents=True, exist_ok=True)
     (j.ATTEMPTS / "IMG-001" / "qwen21_IMG-001_v2.webp").write_bytes(b"webp")
-    j.cmd_verdict(Args(id="IMG-001", sty=sty, cnt=list(cnt), head=head, note=""))
+    j.cmd_verdict(Args(id="IMG-001", sty=sty, sty_notes=[], cnt=list(cnt),
+                       ident=list(ident), head_sty=head_sty, note="", ceiling=""))
     return j.load()["IMG-001"]
 
 
 u = verdict("yes")
 ok(u["status"] == "success", "вердикт «да» не принял кадр")
 ok((j.MATCHES / "qwen21_IMG-001_v2.webp").exists(), "принятый кадр не лёг в matches")
+ok(u["history"][-1]["etalons"] == j.etalon_version(), "вердикт не записал версию эталонов")
 ok(verdict("no", ["поза: левый локоть"]) ["status"] == "in-queue", "дрейф без головы — не переработка")
-ok(verdict("no", ["поза: левый локоть"], head=True)["status"] == "redraw",
-   "расхождение головы не отправляет перерисовывать")
+ok(verdict("no", ["поза: левый локоть"], head_sty=True)["status"] == "redraw",
+   "стилевое расхождение лица не отправляет перерисовывать")
 ok(len(verdict("no", [f"правка {n}" for n in range(4)]) ["history"][-1]["cnt"]) == 4,
    "список точечных правок не сохранён в историю")
 ok(verdict("no", [f"правка {n}" for n in range(4)]) ["status"] == "redraw",
    "больше трёх точечных правок — не экономический отказ")
 ok("правка 0" in (j.DOCS / "fixups.md").read_text(), "журнал доводок не пишется")
+
+# --- похожесть — отдельный слой: пишется, но приёмку не блокирует никогда
+u = verdict("no", ["поза: левый локоть"], ident=["лицо не похоже"])
+ok(u["status"] == "in-queue", "похожесть заблокировала приёмку — ей нельзя")
+ok(not u["history"][-1]["identity_ceiling"], "потолок похожести объявлен на первой же записи")
+u = verdict("no", ["поза: левый локоть"], ident=["лицо не похоже"])
+ok(u["history"][-1]["identity_ceiling"], "второй одинаковый вердикт по лицу не потолок")
+ok(u["status"] == "in-queue", "потолок похожести не должен менять статус")
+ok("identity-ceiling" in (j.DOCS / "identity.md").read_text(), "журнал похожести не пишется")
+
+# --- потолок по признаку: правки слов кончились, юнит выходит из очереди
+q = j.load()
+q["IMG-001"].update(status="in-queue", model="qwen21", version=1, versions={"qwen21": 1})
+j.save(q)
+j.cmd_verdict(Args(id="IMG-001", sty="near", sty_notes=[], cnt=[], ident=[],
+                   head_sty=False, note="", ceiling="gloss"))
+unit = j.load()["IMG-001"]
+ok(unit["status"] == "model-ceiling", "потолок признака не помечен статусом")
+ok(unit["history"][-1]["prompt_ceiling"] == "gloss", "признак потолка не записан")
+
 q = j.load()
 q["IMG-001"]["versions"] = {"qwen21": j.MAX_ATTEMPTS}
 j.save(q)
 (j.ATTEMPTS / "IMG-001" / "qwen21_IMG-001_v2.webp").write_bytes(b"webp")
-j.cmd_verdict(Args(id="IMG-001", sty="no", cnt=[], head=False, note=""))
+j.cmd_verdict(Args(id="IMG-001", sty="no", sty_notes=[], cnt=[], ident=[], head_sty=False,
+                   note="", ceiling=""))
 ok(j.load()["IMG-001"]["status"] == "blocked", "вердикт «нет» на лимите не блокирует юнит")
 ok(all(h.get("readiness") is not None or "sty" in h for h in j.load()["IMG-001"]["history"]),
    "запись вердикта не отличить от записи готовности")
+
+# --- эталонный сет: вердикт не выдаётся против несверенных пикселей
+(j.CROPS / "IMG-001.png").write_bytes(b"other etalon")
+try:
+    verdict("yes")
+    ok(False, "вердикт прошёл против изменённого эталона")
+except SystemExit as e:
+    ok("эталонный сет" in str(e), f"эталонный дрейф не пойман: {e}")
+j.cmd_etalons(Args())
+ok(verdict("yes")["status"] == "success", "после пересборки манифеста вердикт не ожил")
 
 # --- кроп квадрратный: оправа эталона и прогона общая
 from PIL import Image, ImageDraw                                      # noqa: E402
@@ -215,7 +254,7 @@ def fake_run(cmd, check=False):                        # сервер подме
 
 sub_run, j.subprocess.run = j.subprocess.run, fake_run
 try:
-    j.cmd_next(Args(model=None))
+    j.cmd_next(Args(model=None, id=None))
 finally:
     j.subprocess.run = sub_run
 

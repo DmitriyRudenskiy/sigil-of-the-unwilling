@@ -28,6 +28,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
 SPEC_PATH = HERE / "spec.json"
 WORKFLOWS_PATH = HERE / "workflows.json"
 WORKFLOWS = json.loads(WORKFLOWS_PATH.read_text())   # заготовки графов ComfyUI по моделям
@@ -49,7 +50,10 @@ TERMINAL_BAD = ("error", "not_found", "canceled")
 
 def load_spec(path: Path = SPEC_PATH) -> dict:
     spec = json.loads(Path(path).read_text())
-    refs = Path(spec.get("references_dir", ""))
+    raw = str(spec.get("references_dir", ""))
+    # Путь эталонного сета относительный — от корня репозитория, а не от рабочей папки:
+    # калибровка не должна зависеть от того, откуда запущен прогон.
+    refs = Path(raw) if Path(raw).is_absolute() else ROOT / raw
     if not refs.is_dir():
         raise SystemExit(f"spec: нет каталога эталонов references_dir={spec.get('references_dir')!r}")
     spec["_references"] = refs
