@@ -44,6 +44,9 @@ SIZE = [512, 512]               # размер прогона лаборатор
 MAX_ATTEMPTS = 5
 READINESS_MIN = 85
 MODEL_DEFAULT = "krea2"
+CNT_FIXUP_MAX = 3               # экономический порог: больше точечных правок — перерисовка
+STY_VERDICTS = ("yes", "near", "no")   # да / почти / нет
+OPEN = ("in-queue", "redraw")   # статусы, по которым образец всё ещё берётся в работу
 CRITERIA = ("comp", "subject", "objects", "palette", "style", "light", "bg", "camera", "text")
 OUT_DIR = "concept_art/clone"
 
@@ -259,7 +262,7 @@ def check_invariant(q: dict) -> None:
 
 def cmd_next(a) -> int:
     q = load()
-    uid, unit = next(((k, v) for k, v in sorted(q.items()) if v["status"] == "in-queue"), (None, None))
+    uid, unit = next(((k, v) for k, v in sorted(q.items()) if v["status"] in OPEN), (None, None))
     if unit is None:
         print("незакрытых юнитов нет")
         return 0
@@ -326,6 +329,50 @@ def cmd_score(a) -> int:
     verdict = "success" if pct >= READINESS_MIN else ("переработка с нуля" if pct < 60 else "точечная правка")
     print(f"{uid} v{unit['version']}: готовность {pct}% (дельта {delta}) -> {verdict}")
     print(f"запись в {DOCS / 'report.md'}")
+    return 0
+
+
+def cmd_verdict(a) -> int:
+    """Вердикт попытки парным тестом к якорю. Приёмка только по нему; проценты — статистика."""
+    q = load()
+    uid, unit = a.id, q[a.id]
+    if a.sty not in STY_VERDICTS:
+        raise SystemExit(f"вердикт: {', '.join(STY_VERDICTS)}")
+    if not unit.get("file"):
+        raise SystemExit("кадра нет — сначала next")
+    cnt = a.cnt or []
+    status = "success" if a.sty == "yes" else "in-queue"
+    why = ""
+    if status == "in-queue" and (a.head or len(cnt) > CNT_FIXUP_MAX):
+        status, why = "redraw", "голова или кисть" if a.head else f"правок {len(cnt)} > {CNT_FIXUP_MAX}"
+    unit["history"].append({"version": unit["version"], "model": unit["model"], "date": str(date.today()),
+                            "file": unit["file"], "sty": a.sty, "cnt": cnt, "head": bool(a.head),
+                            "readiness": None, "note": a.note or ""})
+    unit["status"] = status
+    if status != "success" and unit["versions"][unit["model"]] >= MAX_ATTEMPTS:
+        unit["status"] = status = "blocked"
+        why = f"исчерпан лимит {MAX_ATTEMPTS} попыток"
+    save(q)
+    if cnt:
+        with (DOCS / "fixups.md").open("a") as fh:
+            fh.write(f"\n## {uid} {unit['model']} v{unit['version']} — {unit['file']}\n")
+            fh.writelines(f"- {c}\n" for c in cnt)
+    report(f"## {date.today()} {uid} v{unit['version']} | {unit['model']} | стиль: {a.sty}"
+           f"{f' -> {status} ({why})' if why else ''}\n"
+           f"- Файл: {unit['file']}\n- Метрика-подсказка: {unit.get('metric', '—')}\n"
+           f"- Точечные правки ({len(cnt)}): {'; '.join(cnt) or '—'}\n"
+           f"- Заметка: {a.note or '—'}\n")
+    if status == "success":
+        src = LAB / unit["file"]
+        MATCHES.mkdir(parents=True, exist_ok=True)
+        dst = MATCHES / src.name
+        shutil.copy(src, dst)
+        report(f"ИТОГ: ✅ success — {uid} за {unit['versions'][unit['model']]} попыток "
+               f"({unit['model']}) → {dst.name}\n")
+        print(f"{uid} принят (стиль: та же рука) -> {dst}")
+    else:
+        print(f"{uid} v{unit['version']}: стиль {a.sty} -> {status}"
+              + (f" ({why})" if why else "") + f", точечных правок {len(cnt)}")
     return 0
 
 
@@ -401,13 +448,14 @@ def cmd_stat(_a) -> int:
     by_model = {}
     for u in q.values():
         for h in u["history"]:
-            by_model.setdefault(h["model"], []).append((h["readiness"], u["version"]))
+            if h.get("readiness") is not None:
+                by_model.setdefault(h["model"], []).append((h["readiness"], u["version"]))
     print("\nмодель | средний % | средние попытки | замеров")
     for model, rows in sorted(by_model.items()):
         n = len(rows)
         print(f"  {model:8} {sum(r[0] for r in rows) / n:6.1f} "
               f"{sum(r[1] for r in rows) / n:8.1f} {n:8}")
-    open_ = [u for u in sorted(q) if q[u]["status"] == "in-queue"]
+    open_ = [u for u in sorted(q) if q[u]["status"] in OPEN]
     if open_:
         print(f"\nтекущий: {open_[0]} (пока он не закрыт, следующий не начинается)")
     blocked = [u for u in sorted(q) if q[u]["status"] == "blocked"]
@@ -430,6 +478,13 @@ def main() -> int:
     sc.add_argument("criteria", nargs="+")
     sc.add_argument("--note", default="")
     sc.set_defaults(f=cmd_score)
+    vd = sub.add_parser("verdict")
+    vd.add_argument("id")
+    vd.add_argument("sty", choices=STY_VERDICTS)
+    vd.add_argument("--cnt", action="append", help="точечная правка слоя контента (повторяемо)")
+    vd.add_argument("--head", action="store_true", help="есть расхождение головы или кисти")
+    vd.add_argument("--note", default="")
+    vd.set_defaults(f=cmd_verdict)
     ac = sub.add_parser("accept")
     ac.add_argument("id")
     ac.add_argument("--note", default="")

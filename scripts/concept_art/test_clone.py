@@ -109,6 +109,38 @@ ok(q["IMG-001"]["status"] == "success", "после accept юнит не success
 ok((j.MATCHES / "qwen21_IMG-001_v1.webp").exists(), "копия не легла в matches с тем же именем")
 ok(kept.exists(), "растровые попытки пережили не все команды — кто-то из них удаляет файлы")
 
+# --- вердикт стиля: приёмка только парным тестом, проценты в ней не участвуют
+def verdict(sty, cnt=(), head=False):
+    q = j.load()
+    q["IMG-001"].update(status="in-queue", model="qwen21", version=2,
+                        versions={"qwen21": 2}, file="attempts/IMG-001/qwen21_IMG-001_v2.webp")
+    j.save(q)
+    (j.ATTEMPTS / "IMG-001").mkdir(parents=True, exist_ok=True)
+    (j.ATTEMPTS / "IMG-001" / "qwen21_IMG-001_v2.webp").write_bytes(b"webp")
+    j.cmd_verdict(Args(id="IMG-001", sty=sty, cnt=list(cnt), head=head, note=""))
+    return j.load()["IMG-001"]
+
+
+u = verdict("yes")
+ok(u["status"] == "success", "вердикт «да» не принял кадр")
+ok((j.MATCHES / "qwen21_IMG-001_v2.webp").exists(), "принятый кадр не лёг в matches")
+ok(verdict("no", ["поза: левый локоть"]) ["status"] == "in-queue", "дрейф без головы — не переработка")
+ok(verdict("no", ["поза: левый локоть"], head=True)["status"] == "redraw",
+   "расхождение головы не отправляет перерисовывать")
+ok(len(verdict("no", [f"правка {n}" for n in range(4)]) ["history"][-1]["cnt"]) == 4,
+   "список точечных правок не сохранён в историю")
+ok(verdict("no", [f"правка {n}" for n in range(4)]) ["status"] == "redraw",
+   "больше трёх точечных правок — не экономический отказ")
+ok("правка 0" in (j.DOCS / "fixups.md").read_text(), "журнал доводок не пишется")
+q = j.load()
+q["IMG-001"]["versions"] = {"qwen21": j.MAX_ATTEMPTS}
+j.save(q)
+(j.ATTEMPTS / "IMG-001" / "qwen21_IMG-001_v2.webp").write_bytes(b"webp")
+j.cmd_verdict(Args(id="IMG-001", sty="no", cnt=[], head=False, note=""))
+ok(j.load()["IMG-001"]["status"] == "blocked", "вердикт «нет» на лимите не блокирует юнит")
+ok(all(h.get("readiness") is not None or "sty" in h for h in j.load()["IMG-001"]["history"]),
+   "запись вердикта не отличить от записи готовности")
+
 # --- кроп квадрратный: оправа эталона и прогона общая
 from PIL import Image, ImageDraw                                      # noqa: E402
 sheet = Image.new("RGB", (2048, 2048), (255, 255, 255))
