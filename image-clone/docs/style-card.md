@@ -58,7 +58,7 @@ date: 2026-10-15
 
 | Признак | Формулировка | Источник |
 | --- | --- | --- |
-| Плоский локальный цвет + мягкая светотень поверх | `flat local colour with soft volumetric shading over it` | IMG-001, 2026-10-15 |
+| Плоский локальный цвет держится между отдельными формами тени | `flat local colour kept flat between a few soft-edged form shadows where the figure turns away` | IMG-001 кроп, 2026-10-16 (плоскость держится на лице, кубах и ромбах стёганки; растяжки по всей поверхности нет) — переписано из `flat local colour with soft volumetric shading over it` |
 | Матовая поверхность | `matte finish` | IMG-001 v3, 2026-10-15 |
 | Тёплая кожа, одна холодная доминанта одежды, коричневая кожа/дерево | `warm ochre skin, one saturated cold garment colour, brown leather accents` | IMG-001, 2026-10-15 |
 | Блик маленький и мягкий, только на металле и коже | `small soft highlights on metal and leather only` | IMG-001, 2026-10-15 |
@@ -112,6 +112,11 @@ date: 2026-10-15
 
 Отменённое в позитиве:
 
+- ~~`flat local colour with soft volumetric shading over it`~~ — отменено
+  2026-10-16 (P8): «soft volumetric shading over it» читается моделью как
+  разрешение растянуть светотень по всей плоскости — круг 1 цепочки, все три
+  стадии: «сплошной градиент вместо плоского локального цвета». Позитив —
+  строка «Плоский локальный цвет держится между отдельными формами тени».
 - ~~`soft airbrushed shading`~~ — отменено 2026-10-15: тот же термин стоял и в
   плюсе, и в минусе. Семейный признак — мягкая объёмная светотень
   (`soft volumetric shading`), воздушная кисть — способ её получения, который

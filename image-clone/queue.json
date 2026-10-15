@@ -7,12 +7,12 @@
   "category": "unit-01",
   "model": "zimage",
   "status": "in-queue",
-  "version": 2,
+  "version": 3,
   "versions": {
-   "krea2": 5,
+   "krea2": 6,
    "qwen21": 14,
-   "ernie": 2,
-   "zimage": 2
+   "ernie": 3,
+   "zimage": 3
   },
   "best_score": null,
   "max_attempts": 5,
@@ -515,15 +515,138 @@
      "P3",
      "R1"
     ]
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-16",
+    "model": "krea2",
+    "version": 6,
+    "file": "attempts/IMG-001/krea2_IMG-001_v6.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 2,
+    "head": null,
+    "etalons": "etalons-8cb5520558f8",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 7,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 75.0,
+    "tens": [],
+    "gaps": [
+     "line=контур толще и чернее семейного, внутри фигуры линий меньше: лицо и грудь без внутренних линий",
+     "color=кожа темнее и оранжевее охры эталона, синий жилета ближе к эталону, чем в v5",
+     "texture=кожа аэрографно гладкая, живописной микровариации нет, ромбы стёганки плоские",
+     "shade=плоскость держит жилет и штаны, торс растянут градиентом; собственная тень под челюстью появилась"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 1,
+     "color": 2,
+     "texture": 1,
+     "shade": 2
+    }
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-16",
+    "model": "ernie",
+    "version": 3,
+    "file": "attempts/IMG-001/ernie_IMG-001_v3.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 2,
+    "head": null,
+    "etalons": "etalons-8cb5520558f8",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 9,
+     "texture": 9,
+     "shade": 9
+    },
+    "sty_pct": 87.5,
+    "tens": [],
+    "gaps": [
+     "line=внутренний рисунок проще эталонного: меньше складок на штанах, лицо чище",
+     "color=кожа оранжевее охры эталона, васковый подтон на предплечьях",
+     "texture=кожа на плечах и предплечьях местами гладкий пластик",
+     "shade=кубы торса даны мягкой растяжкой; тень под челюстью темнее эталонной"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 1,
+     "color": 1,
+     "texture": 2,
+     "shade": 1
+    }
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-16",
+    "model": "zimage",
+    "version": 3,
+    "file": "attempts/IMG-001/zimage_IMG-001_v3.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 2,
+    "head": null,
+    "etalons": "etalons-8cb5520558f8",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 7,
+     "color": 6,
+     "texture": 7,
+     "shade": 7
+    },
+    "sty_pct": 67.5,
+    "tens": [],
+    "gaps": [
+     "line=лицо без внутренних линий, контур местами размыт и толще семейного",
+     "color=жилет всё ещё серо-голубой, насыщенная земля эталона потеряна, кожа бледнее охры",
+     "texture=живописная вариация есть на жилете, кожа на руках аэрографно гладкая",
+     "shade=тень под челюстью дана пятном, а не формой; торс всё ещё растянут"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": -1,
+     "color": -3,
+     "texture": -2,
+     "shade": -2
+    }
    }
   ],
-  "file": "attempts/IMG-001/zimage_IMG-001_v2.webp",
+  "file": "attempts/IMG-001/zimage_IMG-001_v3.webp",
   "note": "v11 = v7 байт в байт: R-блок до 2026-10-15 не читался генератором, cfg 3.0 в него не ехал; кадр оставлен как свидетельство дыры, не как прогон R1",
   "pair": "/Users/user/sigil-concept-art/image-clone/pairs/IMG-001.png",
-  "prompt_version": "P3",
+  "prompt_version": "P8",
   "render_version": "R1",
   "seed_bump": 8,
-  "cycle": 1,
+  "cycle": 2,
   "cycles": [
    {
     "cycle": 1,
@@ -533,6 +656,15 @@
      "zimage": 60.0
     },
     "mean": 73.3
+   },
+   {
+    "cycle": 2,
+    "sty": {
+     "krea2": 75.0,
+     "ernie": 87.5,
+     "zimage": 67.5
+    },
+    "mean": 76.7
    }
   ],
   "seals": {
@@ -589,6 +721,60 @@
     "dictionary": "fc0143515bdb",
     "instrument": "anchors-aba09390ac52",
     "judge": "judge-95455b01bf98"
+   },
+   "krea2_IMG-001_v6": {
+    "etalon": "eb03b0dcc6b9",
+    "sheet": "6fcea42d3b60",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-001_v3": {
+    "etalon": "eb03b0dcc6b9",
+    "sheet": "6fcea42d3b60",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "zimage_IMG-001_v3": {
+    "etalon": "eb03b0dcc6b9",
+    "sheet": "6fcea42d3b60",
+    "model": "zimage",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "res_multistep",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "z_image_turbo_bf16.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
    }
   },
   "seal": {
@@ -596,7 +782,7 @@
    "sheet": "6fcea42d3b60",
    "model": "zimage",
    "seed": 43,
-   "prompt_version": "P3",
+   "prompt_version": "P8",
    "render_version": "R1",
    "render": {
     "cfg": 1.0,
@@ -605,9 +791,15 @@
     "steps": 8,
     "checkpoint": "z_image_turbo_bf16.safetensors"
    },
-   "dictionary": "fc0143515bdb",
+   "dictionary": "e1a43af78147",
    "instrument": "anchors-aba09390ac52",
    "judge": "judge-95455b01bf98"
+  },
+  "ceilings": {
+   "ernie": {
+    "sty": 87.5,
+    "cycle": 2
+   }
   }
  },
  "IMG-002": {

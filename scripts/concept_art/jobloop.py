@@ -841,7 +841,10 @@ def cmd_sty(a) -> int:
         print(f"контроль вслепую (другой кроп и масштаб): {control_board(a.control)}")
     pct = sty_pct(rows)
     head = head_ratio(getattr(a, "head_ratio", None))
-    prev = next((h for h in reversed(unit["history"]) if h.get("rows")), None)
+    # Дельта — к прошлому замеру той же стадии: сравнить krea2 с предыдущим
+    # замером zimage — это нарисовать движение там, где сменилась модель.
+    prev = next((h for h in reversed(unit["history"])
+                 if h.get("rows") and h["model"] == unit["model"]), None)
     delta = sty_delta(prev.get("rows") if prev else None, rows)
     ver = etalon_version() if ETALONS.is_file() else None
     # Слова круга — общие: замер на других словах не имеет права попадать в тот

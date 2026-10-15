@@ -830,13 +830,21 @@ u.update(model="ernie", version=1, file="attempts/IMG-001/ernie_IMG-001_v1.webp"
 u["seal"] = j.run_seal(u, "ernie", 1, spec)
 j.save(q)
 j.cmd_sty(Args(id="IMG-001", model="ernie", gap=[],
-               rows=["line=8", "color=8", "texture=8", "shade=8"]))
+               rows=["line=6", "color=6", "texture=6", "shade=6"]))
 u = j.load()["IMG-001"]
 ok(u["cycle"] == 1 and u["history"][-1]["cycle"] == 2,
    f"смена P в середине круга не расплела его: cycle={u['cycle']} {u['history'][-1]['cycle']}")
 ok(not any(c["cycle"] == 1 for c in u["cycles"]), "распавшийся круг попал в реестр кругов")
 ok(u["history"][-1]["pair"] == ["P4", u["history"][-1]["render_version"]],
    "замер не запомнил пару круга")
+q = j.load(); u = q["IMG-001"]
+u.update(model="krea2", version=2, file="attempts/IMG-001/krea2_IMG-001_v2.webp")
+u["seal"] = j.run_seal(u, "krea2", 2, spec)
+j.save(q)
+j.cmd_sty(Args(id="IMG-001", model="krea2", gap=[],
+               rows=["line=6", "color=8", "texture=8", "shade=8"]))
+d = j.load()["IMG-001"]["history"][-1]["delta"]
+ok(d["line"] == -2, f"дельта взята не со своей стадии (ernie 6 вместо krea2 8): {d}")
 j.SPEC.write_text(spec_raw)
 
 print(f"OK: проверок {checks}")
