@@ -161,29 +161,50 @@ def pair(jid: str, ref: Path, gen: Path, out: Path, caption: str,
     board.save(out, quality=92)
 
 
+def unit_of(p: Path) -> str:
+    m = re.search(r"IMG-\d+", p.name)
+    return m.group() if m else "?"
+
+
+def is_control(r: dict) -> bool:
+    return "эталон↔эталон" in r["origin"]
+
+
+def sheet_key(r: dict) -> str:
+    """Лист = строка стиля и ОДИН юнит: его эталон и его варианты.
+    Контроль «эталон↔эталон» — общий лист на все строки: там два разных
+    эталонных рисунка, своего юнита у него нет."""
+    return "К" if is_control(r) else r["row"] + ":" + unit_of(r["pair"][0])
+
+
 def grid(pairs_: list[dict], out: Path, h: int = 380) -> None:
-    """2×2: две якорные пары на одном листе. Уровней не видно: подписаны
-    только id пары и роль кадра. Роль берётся из реестра: у контроля
-    «эталон↔эталон» правый кадр — не попытка, врать на доске нельзя."""
+    """Лист: один эталон и его варианты (для контроля — два эталона).
+    Уровней не видно: подписаны id пары, роль кадра и юнит."""
+    control = is_control(pairs_[0])
     cells, seen = [], set()
     for r in pairs_:
-        roles = (("эталон А", "эталон Б") if "эталон↔эталон" in r["origin"]
-                 else ("эталон", "попытка"))
-        for p, role in zip(r["pair"], roles):
-            unit = re.search(r"IMG-\d+", p.name)
-            label = f'{r["id"]} · {role}' + (f' ({unit.group()})' if unit else "")
-            label += " (тот же кадр)" if str(p) in seen else ""
+        for n, p in enumerate(r["pair"]):
+            if str(p) in seen:
+                continue                       # общий эталон листа рисуется один раз
             seen.add(str(p))
+            role = (f"эталон {'АБ'[n]}" if control
+                    else ("эталон" if n == 0 else "вариант"))
             im = Image.open(p).convert("RGB")
-            cells.append((label,
+            cells.append((f'{r["id"]} · {role} ({unit_of(p)})',
                           im.resize((round(im.width * h / im.height), h), Image.LANCZOS)))
     gap, top = 10, 22
     w = max(c[1].width for c in cells)
-    board = Image.new("RGB", (w * 2 + gap * 3, (h + top) * 2 + gap * 3), (255, 255, 255))
+    lines = -(-len(cells) // 2)
+    head = (" · ".join(f'{r["id"]} {r["ru"]}' for r in pairs_) if control else "")
+    pad = 26 if head else 0            # контроль один лист на все строки: чем меряется — в шапке
+    board = Image.new("RGB", (w * 2 + gap * 3, (h + top) * lines + gap * (lines + 1) + pad),
+                      (255, 255, 255))
     d = ImageDraw.Draw(board)
+    if head:
+        d.text((gap + 2, 6), "контроль поперёк листа: " + head, font=FONT, fill=(0, 0, 0))
     for n, (label, im) in enumerate(cells):
         x = gap + (n % 2) * (w + gap)
-        y = gap + (n // 2) * (h + top + gap)
+        y = pad + gap + (n // 2) * (h + top + gap)
         d.text((x + 2, y + 6), label, font=FONT, fill=(0, 0, 0))
         board.paste(im, (x, y + top))
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -498,17 +519,18 @@ def require_anchors() -> str:
 
 
 def chunk_of(rows: list[dict], r: dict) -> list[dict]:
-    """Пара и её сосед по строке: доска всегда рисует две пары сразу."""
-    rs = [x for x in rows if x["row"] == r["row"]]
-    i = next(n for n, x in enumerate(rs) if x["id"] == r["id"])   # сверка по id: check_boards зовёт заглушкой
-    return rs[i - i % 2: i - i % 2 + 2]
+    """Все пары одного листа: та же строка стиля и тот же юнит. Пара без
+    своего кадра из листа выпадает одна, а не утаскивает за собой соседей —
+    иначе один мёртвый якорь обнулял бы половину строки."""
+    return [x for x in rows if sheet_key(x) == sheet_key(r)
+            and all(p.is_file() for p in x["pair"])]
 
 
-def board_path(r: dict, rows: list[dict] | None = None) -> Path:
-    """Имя доски 2×2 — по номерам обеих пар на листе (AP-line-12.png)."""
-    chunk = chunk_of(anchor_rows() if rows is None else rows, r)
-    return PAIRS / "anchors" / ("AP-" + r["row"] + "-"
-                                + "".join(x["id"].split("-")[-1] for x in chunk) + ".png")
+def board_path(r: dict) -> Path:
+    """Имя листа — по строке стиля и юниту (AP-line-IMG-001.png)."""
+    k = sheet_key(r)
+    return PAIRS / "anchors" / ("AP-control.png" if k == "К"
+                                else "AP-" + k.replace(":", "-") + ".png")
 
 
 def seal_boards(rows: list[dict]) -> dict:
@@ -518,22 +540,26 @@ def seal_boards(rows: list[dict]) -> dict:
     out = {}
     for r in rows:
         chunk = chunk_of(rows, r)
-        if not all(p.is_file() for x in chunk for p in x["pair"]):
-            continue          # лист собирается из обеих пар: неполный лист не печатается
-        b = grid_board(chunk, rows)
+        if not chunk:
+            continue          # у пары кадры не на месте — она не в печати, соседи при своих
+        b = grid_board(chunk)
         for x in chunk:
             out[x["id"]] = hashlib.sha256(b.read_bytes()).hexdigest()
     return out
 
 
 def check_boards(manifest: dict) -> list[str]:
-    out = []
+    out, rows = [], anchor_rows()
     for rid, want in manifest.get("boards", {}).items():
-        b = board_path({"id": rid, "row": rid.split("-")[1]})
+        r = next((x for x in rows if x["id"] == rid), None)
+        if r is None:
+            out.append(f"пара {rid} пропала из реестра, доска под печатью")
+            continue
+        b = board_path(r)
         if not b.is_file():
-            out.append(f"доска {rid} удалена из material слепого прохода")
+            out.append(f"доска {b.name} удалена из material слепого прохода")
         elif hashlib.sha256(b.read_bytes()).hexdigest() != want:
-            out.append(f"доска {rid} расходится с опечатанной: судья смотрел не это")
+            out.append(f"доска {b.name} расходится с опечатанной: судья смотрел не это")
     return out
 
 
@@ -566,9 +592,9 @@ def anchor_log() -> list[dict]:
     return json.loads(log.read_text()) if log.is_file() else []
 
 
-def grid_board(chunk: list[dict], rows: list[dict] | None = None) -> Path:
-    """Лист 2×2 для двух пар строки; имя — по номерам пар внутри."""
-    out = board_path(chunk[0], rows)
+def grid_board(chunk: list[dict]) -> Path:
+    """Лист для всех пар строки и юнита; имя — по строке и юниту."""
+    out = board_path(chunk[0])
     out.parent.mkdir(parents=True, exist_ok=True)
     grid(chunk, out)
     return out
@@ -578,17 +604,19 @@ def cmd_anchors_show_all(rows: list[dict]) -> int:
     board = PAIRS / "anchors"
     board.mkdir(parents=True, exist_ok=True)
     for old in board.glob("AP-*.png"):
-        old.unlink()                       # старые доски по две картинки больше не прибор
-    for row in ("line", "color", "texture", "shade"):
-        rs = [r for r in rows if r["row"] == row]
-        for n in range(0, len(rs), 2):
-            chunk = rs[n:n + 2]
-            out = grid_board(chunk, rows)
-            print(f"\n{out}")
-            for r in chunk:
-                print(f"  jobloop.py anchors score {r['id']} {r['row']}=N --pass revision")
-    print(f"\nдосок {len(list(board.glob('AP-*.png')))}, в каждой 2×2 = две пары; "
-          f"уровней не видно; сверка — после записи каждой пары")
+        old.unlink()                       # доски другого кроя больше не прибор
+    sheets = {sheet_key(r): chunk_of(rows, r) for r in rows}
+    for key in sorted(sheets, key=lambda k: (k == "К", k)):
+        chunk = sheets[key]
+        out = grid_board(chunk)
+        head = (f"{chunk[0]['ru']}, {unit_of(chunk[0]['pair'][0])}: эталон и "
+                f"{len(chunk)} варианта" if key != "К"
+                else "контроль: два эталонных листа, меряется по строкам своих пар")
+        print(f"\n{out}  — {head}")
+        for r in chunk:
+            print(f"  jobloop.py anchors score {r['id']} {r['row']}=N --pass revision")
+    print(f"\nлистов {len(sheets)}; на каждом один персонаж: его эталон и его "
+          f"варианты; уровней не видно; сверка — после записи каждой пары")
     return 0
 
 
@@ -651,7 +679,7 @@ def cmd_anchors(a) -> int:
     if not r:
         raise SystemExit(f"пары {a.id} в реестре нет")
     if a.what == "show":
-        board = grid_board(chunk_of(rows, r), rows)
+        board = grid_board(chunk_of(rows, r))
         print("вслепую: уровень заявленного балла скрыт, рядом вторая пара строки\n" + str(board))
         print(f"запись: jobloop.py anchors score {r['id']} {r['row']}=N --pass revision")
         return 0
