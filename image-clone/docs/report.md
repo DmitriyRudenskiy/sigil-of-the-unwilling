@@ -95,3 +95,40 @@
 
 ИТОГ: ✅ success — IMG-003 за 4 попыток (qwen21, 86%) → qwen21_IMG-003_v4.webp
 
+## 2026-10-15 IMG-004 v1 → 82% (было —) | qwen21_IMG-004_v1.webp
+- Промт: barbarian warlord standing wide with both fists clenched at his sides, long wavy dark brown hair past the shoulders and a long full dark brown beard, scowling brows, bare muscular chest with defined abdomen, necklace of animal fangs on a leather cord, red healed scar on the shoulder at the right edge of the frame, brown leather baldric across the chest, studded leather bracers on both forearms, ra
+- Оценки: comp 9, subject 8, objects 8, palette 9, style 7, light 8, bg 9, camera 8
+- Метрика-подсказка: —
+- Дельта: первая
+- Заметка: детали на месте, но голова лысая: длинных волос нет
+
+## 2026-10-15 IMG-004 v2 → 82% (было 82) | qwen21_IMG-004_v2.webp
+- Промт: barbarian warlord with long wavy dark brown hair falling loose past both shoulders, bald head forbidden, standing wide with both fists clenched at his sides, long full dark brown beard, scowling brows, bare muscular chest with defined abdomen, necklace of animal fangs on a leather cord, red healed scar on the shoulder at the right edge of the frame, brown leather baldric across the chest, studded 
+- Оценки: comp 9, subject 8, objects 8, palette 9, style 7, light 8, bg 9, camera 8
+- Метрика-подсказка: —
+- Дельта: +0
+- Заметка: запрет «bald head forbidden» не сработал: темя осталось лысым
+
+## 2026-10-15 IMG-004 v3 → 84% (было 82) | qwen21_IMG-004_v3.webp
+- Промт: barbarian warlord whose whole scalp is covered with thick wavy dark brown hair combed back from a high forehead and falling loose past both shoulders, standing wide with both fists clenched at his sides, long full dark brown beard, scowling brows, bare muscular chest with defined abdomen, necklace of animal fangs on a leather cord, red healed scar on the shoulder at the right edge of the frame, br
+- Оценки: comp 9, subject 9, objects 8, palette 9, style 7, light 8, bg 9, camera 8
+- Метрика-подсказка: —
+- Дельта: +2
+- Заметка: причёска села; на наручах вырос мех, которого у эталона нет
+
+## 2026-10-15 IMG-004 v4 → 84% (было 84) | qwen21_IMG-004_v4.webp
+- Промт: barbarian warlord whose whole scalp is covered with thick wavy dark brown hair combed back from a high forehead and falling loose past both shoulders, standing wide with both fists clenched at his sides, long full dark brown beard, scowling brows, bare muscular chest with defined abdomen, necklace of animal fangs on a leather cord, red healed scar on the shoulder at the right edge of the frame, br
+- Оценки: comp 9, subject 9, objects 8, palette 9, style 7, light 8, bg 9, camera 8
+- Метрика-подсказка: —
+- Дельта: +0
+- Заметка: запрет меха не сработал: мех на наручах остался
+
+## 2026-10-15 IMG-004 v5 → 85% (было 84) | qwen21_IMG-004_v5.webp
+- Промт: barbarian warlord whose whole scalp is covered with thick wavy dark brown hair combed back from a high forehead and falling loose past both shoulders, standing wide with both fists clenched at his sides, long full dark brown beard, scowling brows, bare muscular chest with defined abdomen, necklace of animal fangs on a leather cord, red healed scar on the shoulder at the right edge of the frame, br
+- Оценки: comp 9, subject 9, objects 9, palette 9, style 7, light 8, bg 9, camera 8
+- Метрика-подсказка: —
+- Дельта: +1
+- Заметка: конкретика вместо запрета: две линии заклёпок — и меха на наручах нет
+
+ИТОГ: ✅ success — IMG-004 за 5 попыток (qwen21, 85%) → qwen21_IMG-004_v5.webp
+

@@ -32,6 +32,10 @@
   slightly to the side and shoulders counter-rotated` поднял silhouette с 0.557 до 0.715
   и камеру с 7 до 9. Эталон почти всегда стоит на одной ноге — симметричную позу модель
   рисует по умолчанию и без команды.
+- **Отрицание внутри промта не работает, конкретика работает.** `bald head forbidden` —
+  темя лысое; `whole scalp is covered with thick wavy hair combed back from a high forehead`
+  — причёска села. `no fur anywhere on the arms` — мех остался; `bracers each set with two
+  rows of round metal studs` — мех исчез сам (IMG-004, 82 → 85 %).
 - **Запрет работает только в начале и в конце.** «no bare skin anywhere on the arms» в
   середине промта проигнорировано (v2, v3 — голые плечи); та же фраза первым предложением и
   повтором в конце закрыла вопрос с первой попытки (v4, 84 → 86 %). Работает как с `barefoot`.

@@ -269,15 +269,109 @@
   "cell": 4,
   "category": "unit-01",
   "model": "qwen21",
-  "status": "in-queue",
-  "version": 0,
-  "versions": {},
-  "best_score": null,
+  "status": "success",
+  "version": 5,
+  "versions": {
+   "qwen21": 5
+  },
+  "best_score": 85,
   "max_attempts": 5,
-  "subject": "",
-  "history": [],
-  "file": null,
-  "note": ""
+  "subject": "barbarian warlord whose whole scalp is covered with thick wavy dark brown hair combed back from a high forehead and falling loose past both shoulders, standing wide with both fists clenched at his sides, long full dark brown beard, scowling brows, bare muscular chest with defined abdomen, necklace of animal fangs on a leather cord, red healed scar on the shoulder at the right edge of the frame, brown leather baldric across the chest, both forearms wrapped in smooth brown leather bracers each set with two rows of round metal studs, ragged hide skirt trimmed with pale fur hung from a twisted rope belt, leather boots with pale fur cuffs, hand-painted matte skin with soft visible brush shading, mature stylized cartoon face with simplified exaggerated features",
+  "history": [
+   {
+    "version": 1,
+    "model": "qwen21",
+    "date": "2026-10-15",
+    "file": "attempts/IMG-004/qwen21_IMG-004_v1.webp",
+    "scores": {
+     "comp": 9,
+     "subject": 8,
+     "objects": 8,
+     "palette": 9,
+     "style": 7,
+     "light": 8,
+     "bg": 9,
+     "camera": 8
+    },
+    "readiness": 82,
+    "note": "детали на месте, но голова лысая: длинных волос нет"
+   },
+   {
+    "version": 2,
+    "model": "qwen21",
+    "date": "2026-10-15",
+    "file": "attempts/IMG-004/qwen21_IMG-004_v2.webp",
+    "scores": {
+     "comp": 9,
+     "subject": 8,
+     "objects": 8,
+     "palette": 9,
+     "style": 7,
+     "light": 8,
+     "bg": 9,
+     "camera": 8
+    },
+    "readiness": 82,
+    "note": "запрет «bald head forbidden» не сработал: темя осталось лысым"
+   },
+   {
+    "version": 3,
+    "model": "qwen21",
+    "date": "2026-10-15",
+    "file": "attempts/IMG-004/qwen21_IMG-004_v3.webp",
+    "scores": {
+     "comp": 9,
+     "subject": 9,
+     "objects": 8,
+     "palette": 9,
+     "style": 7,
+     "light": 8,
+     "bg": 9,
+     "camera": 8
+    },
+    "readiness": 84,
+    "note": "причёска села; на наручах вырос мех, которого у эталона нет"
+   },
+   {
+    "version": 4,
+    "model": "qwen21",
+    "date": "2026-10-15",
+    "file": "attempts/IMG-004/qwen21_IMG-004_v4.webp",
+    "scores": {
+     "comp": 9,
+     "subject": 9,
+     "objects": 8,
+     "palette": 9,
+     "style": 7,
+     "light": 8,
+     "bg": 9,
+     "camera": 8
+    },
+    "readiness": 84,
+    "note": "запрет меха не сработал: мех на наручах остался"
+   },
+   {
+    "version": 5,
+    "model": "qwen21",
+    "date": "2026-10-15",
+    "file": "attempts/IMG-004/qwen21_IMG-004_v5.webp",
+    "scores": {
+     "comp": 9,
+     "subject": 9,
+     "objects": 9,
+     "palette": 9,
+     "style": 7,
+     "light": 8,
+     "bg": 9,
+     "camera": 8
+    },
+    "readiness": 85,
+    "note": "конкретика вместо запрета: две линии заклёпок — и меха на наручах нет"
+   }
+  ],
+  "file": "attempts/IMG-004/qwen21_IMG-004_v5.webp",
+  "note": "qwen21 v5, 85%",
+  "pair": "/Users/user/sigil-concept-art/image-clone/pairs/IMG-004.png"
  },
  "IMG-005": {
   "unit": "IMG-005",
