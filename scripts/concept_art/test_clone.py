@@ -506,4 +506,16 @@ ok("floor-check" in buf.getvalue(), f"self не помечен floor-checkом: 
 ok(json.loads((j.DOCS / "anchor-log.json").read_text())[-1]["klass"] == "self",
    "класс судьи не записан")
 
+# --- 74. материал слепого прохода под печатью: подмена доски ловится --------
+ok(json.loads(j.ANCHOR_MANIFEST.read_text())["boards"].get("AP-line-3"),
+   "доска слепого прохода не попала в печать")
+(j.PAIRS / "anchors" / "AP-line-3.png").write_bytes(b"not a board")
+try:
+    j.cmd_stat(None)
+    raise AssertionError("подменённая доска принята")
+except SystemExit as e:
+    ok("расходится с опечатанной" in str(e), f"подмена доски не замечена: {e}")
+seal()
+ok(j.load()["IMG-001"], "после перепечати прибор не вернулся")
+
 print(f"OK: проверок {checks}")

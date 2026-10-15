@@ -397,21 +397,56 @@ def require_anchors() -> str:
     if not ANCHOR_MANIFEST.is_file():
         raise SystemExit(f"реестр якорей не опечатан ({ANCHOR_MANIFEST.name}); "
                          f"живой {live}: `jobloop anchors seal` после правки")
-    want = json.loads(ANCHOR_MANIFEST.read_text())["version"]
-    if want != live:
-        raise SystemExit(f"реестр якорей изменён после опечатки: манифест {want}, "
+    man = json.loads(ANCHOR_MANIFEST.read_text())
+    if man["version"] != live:
+        raise SystemExit(f"реестр якорей изменён после опечатки: манифест {man['version']}, "
                          f"файл {live}; переприсмотр или `jobloop anchors seal`")
+    bad = check_boards(man)
+    if bad:
+        raise SystemExit("; ".join(bad) + " — пересборка: `jobloop anchors seal`")
     return live
+
+
+def board_path(r: dict) -> Path:
+    return PAIRS / "anchors" / f"{r['id']}.png"
+
+
+def seal_boards(rows: list[dict]) -> dict:
+    """Доски слепого прохода под печатью тоже. Реестр — прибор, а доски — то,
+    что реально скорит судья: подменённая доска меняет вердикт, не трогая
+    ни реестра, ни эталонов. Доска детерминирована из строки реестра."""
+    out = {}
+    for r in rows:
+        if not all(p.is_file() for p in r["pair"]):
+            continue
+        b = board_path(r)
+        b.parent.mkdir(parents=True, exist_ok=True)
+        pair(r["id"], r["pair"][0], r["pair"][1], b, r["id"])
+        out[r["id"]] = hashlib.sha256(b.read_bytes()).hexdigest()
+    return out
+
+
+def check_boards(manifest: dict) -> list[str]:
+    out = []
+    for rid, want in manifest.get("boards", {}).items():
+        b = PAIRS / "anchors" / f"{rid}.png"
+        if not b.is_file():
+            out.append(f"доска {rid} удалена из material слепого прохода")
+        elif hashlib.sha256(b.read_bytes()).hexdigest() != want:
+            out.append(f"доска {rid} расходится с опечатанной: судья смотрел не это")
+    return out
 
 
 def cmd_seal(a) -> int:
     body = anchors_body()
     ver = "anchors-" + hashlib.sha256(body.encode()).hexdigest()[:12]
+    rows = anchor_rows()
     ANCHOR_MANIFEST.write_text(json.dumps(
         {"version": ver, "sha256": hashlib.sha256(body.encode()).hexdigest(),
-         "pairs": len(anchor_rows()), "date": str(date.today())},
+         "pairs": len(rows), "date": str(date.today()), "boards": seal_boards(rows)},
         ensure_ascii=False, indent=1) + "\n")
-    print(f"{ANCHOR_MANIFEST}: {ver}, пар {len(anchor_rows())}")
+    n = len(json.loads(ANCHOR_MANIFEST.read_text())["boards"])
+    print(f"{ANCHOR_MANIFEST}: {ver}, пар {len(rows)}, досок опечатано {n}")
     return 0
 
 
