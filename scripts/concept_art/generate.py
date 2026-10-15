@@ -33,8 +33,10 @@ WHITE_MIN = 0.60          # доля почти-белого в рамке дл�
 NEAR_WHITE = 235          # порог «белый»: фон образца — 1% чистого и 98% почти-белого
 BORDER = 24               # ширина рамки, px
 CONTENT_MIN = 0.02        # в центральном окне 50% обязана быть картинка, а не пустой белый лист
-SEAM_MAX = 0.995          # строка считается пустой, если почти-белого в ней не меньше
-SEAM_MASS = 0.15            # ...а по обе её стороны не меньше 15 % контента (урок c11: лист 2x2)
+SEAM_MAX = 250              # строка пуста, если её средняя яркость не ниже (фон 255, тень ~200)
+SEAM_SIDE = 0.02            # ...и по обе стороны разрыва не меньше 2 % контента
+SEAM_GAP = 0.006            # разрыв от 8 px (0,6 % высоты) — это лист, а не фигура:
+                            # у 12 кроев эталона максимальный разрыв — ноль, запас восьмикратный
 LUMA_RANGE = (25, 235)    # средняя яркость кадров без требования белого фона (экраны UI)
 ISOLATED = ("units", "buildings", "signs", "cursors", "resources")
 TERMINAL_BAD = ("error", "not_found", "canceled")
@@ -162,26 +164,34 @@ def mean_luma(im: Image.Image) -> float:
 
 
 def seam_ratio(im: Image.Image, thr: int = NEAR_WHITE) -> float:
-    """Кто сколько занимает по обе стороны от самой пустой горизонтальной полосы кадра.
+    """Доля самого длинного пустого разрыва, делённая на высоту кадра.
 
-    Возвращает min(доли контента сверху, доли снизу) для почти-белой строки: 0 у одиночной
-    фигуры, много — когда кадр разрезан пустой полосой пополам. Урок калибровки: Krea-2 на
-    c11 выдала лист 2×2 (фигура + четыре превью) и прошла воротчик белизны, а шов её сидит
-    на 75 % высоты — любая «средняя полоса» кадра его не видит. Полоса ищется по всей высоте,
-    но требует содержимого с обеих сторон: пустая строка между ног или под ногами — не шов.
-    Строки, а не колонки: фигура с посохом сбоку даёт пустую колонку и в эталоне."""
-    px = im.convert("L").point(lambda p: 255 if p >= thr else 0).resize((64, 64)).load()
-    mass = [1 - sum(px[x, y] for x in range(64)) / 64 / 255 for y in range(64)]
-    total = sum(mass)
+    Одиночная фигура не имеет права быть рассечённой горизонтальной белой полосой: если между
+    двумя кусками контента есть разрыв хотя бы в 1,5 % высоты, это лист (Krea-2 на c11 выдала
+    сетку 2×2, на c08 — полосу из шести превью под ногами) и воротчик белизны такой кадр
+    пропускает, потому что фон белый.
+
+    Строки считаются на полной высоте: ужатие до 64 строк съедало шов в 10 px и c08 прошла.
+    Массой контента шв не меряют — полоса превью весит 10 % и проходила порог в 15 %.
+    Проверяются строки, а не колонки: фигура с посохом даёт пустую колонку и в эталоне."""
+    g = im.convert("L")
+    w, h = g.size
+    means = list(g.resize((1, h), Image.BOX).getdata())      # среднее яркости строки
+    empty = [m >= thr for m in means]
+    content = [max(0, thr - m) for m in means]               # 0 у пустой строки
+    total = sum(content)
     if not total:
         return 0.0
-    best, above = 0.0, 0.0
-    for m in mass:
-        below = total - above - m
-        if m <= 1 - SEAM_MAX and min(above, below) / total > best:
-            best = min(above, below) / total
-        above += m
-    return best
+    above, best, run = 0.0, 0, 0
+    for y, (is_empty, c) in enumerate(zip(empty, content)):
+        if is_empty:
+            run += 1
+            continue
+        below = total - above - c
+        if run and min(above, below) / total >= SEAM_SIDE and run > best:
+            best = run                                       # разрыв только с контентом с обеих сторон
+        run, above = 0, above + c
+    return best / h
 
 
 def check_image(path: Path, size: tuple[int, int], isolated: bool) -> tuple[bool, str]:
@@ -200,9 +210,9 @@ def check_image(path: Path, size: tuple[int, int], isolated: bool) -> tuple[bool
         if content < CONTENT_MIN:
             return False, f"центр пустой: не-белого {content:.1%} < {CONTENT_MIN:.0%}"
         seam = seam_ratio(im)
-        if seam > SEAM_MASS:
+        if seam > SEAM_GAP:
             return False, (f"кадр разрезан пустой полосой: контента по обе стороны {seam:.0%} "
-                           f"> {SEAM_MASS:.0%} — лист с вариантами?")
+                           f"> {SEAM_GAP:.1%} высоты — лист с вариантами?")
     else:
         luma = mean_luma(im)
         if not LUMA_RANGE[0] <= luma <= LUMA_RANGE[1]:

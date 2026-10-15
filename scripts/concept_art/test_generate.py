@@ -135,10 +135,23 @@ with tempfile.TemporaryDirectory() as tmp:
                 for y in range(y0, y0 + N // 5):
                     im.putpixel((x, y), (40, 40, 40))
     im.save(sheet)
-    ok(g.seam_ratio(Image.open(sheet)) > g.SEAM_MASS, "шов листа 2x2 не посчитан швом")
+    ok(g.seam_ratio(Image.open(sheet)) > g.SEAM_GAP, "шов листа 2x2 не посчитан швом")
     ok(not g.check_image(sheet, (N, N), isolated=True)[0], "лист 2x2 принят как одиночный объект")
-    ok(g.seam_ratio(Image.open(write("figure.webp", (255, 255, 255)))) < g.SEAM_MASS,
+    ok(g.seam_ratio(Image.open(write("figure.webp", (255, 255, 255)))) < g.SEAM_GAP,
        "шов посчитан у кадра с одиночной фигурой")
+    # урок c08: под ногами встала полоса из шести превью, разрыв — всего 1 % высоты.
+    # Пока шв мерили массой, полоса (10 % контента) проходила порог в 15 %.
+    strip = Path(tmp) / "strip.webp"
+    im = Image.new("RGB", (N, N), (255, 255, 255))
+    for x in range(int(N * 0.3), int(N * 0.7)):
+        for y in range(int(N * 0.1), int(N * 0.7)):
+            im.putpixel((x, y), (40, 40, 40))
+    for x in range(int(N * 0.05), int(N * 0.95)):
+        for y in range(int(N * 0.82), int(N * 0.97)):
+            im.putpixel((x, y), (60, 60, 60))
+    im.save(strip)
+    ok(g.seam_ratio(Image.open(strip)) > g.SEAM_GAP, "полоса превью под ногами не посчитана листом")
+    ok(not g.check_image(strip, (N, N), isolated=True)[0], "кадр с полосой превью принят объектом")
     # пустая строка, под которой почти ничего нет (тень под ногами), — не шов
     shadow = Path(tmp) / "shadow.webp"
     im = Image.new("RGB", (N, N), (255, 255, 255))
@@ -149,7 +162,7 @@ with tempfile.TemporaryDirectory() as tmp:
         for y in range(int(N * 0.9), int(N * 0.92)):
             im.putpixel((x, y), (200, 200, 200))
     im.save(shadow)
-    ok(g.seam_ratio(Image.open(shadow)) < g.SEAM_MASS, "тень под ногами посчитана швом")
+    ok(g.seam_ratio(Image.open(shadow)) < g.SEAM_GAP, "тень под ногами посчитана швом")
 
     # --- воротчик яркости кадров без требования белого фона (экраны UI)
     ok(g.mean_luma(Image.open(write("blank.webp", (255, 255, 255), object_=False))) == 255,
