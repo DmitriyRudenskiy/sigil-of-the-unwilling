@@ -7,6 +7,7 @@
     jobloop.py accept IMG-001 [--note ...]  готовность >= 85 -> копия в matches/
     jobloop.py reject IMG-001 ["новое описание"] [--note "что не так"]
     jobloop.py model IMG-001 qwen21         сменить модель, счётчик версий начинается с v1
+    jobloop.py subject IMG-001 "описание"   записать письменный анализ до генерации
     jobloop.py stat                         статусы + сводка «модель -> средний % / попытки»
 
 Критерии сверки (0-10, неприменимый не указывать — он выпадает из знаменателя):
@@ -111,7 +112,7 @@ def similarity(ref: Path, gen: Path) -> dict:
 
 
 def pair(jid: str, ref: Path, gen: Path, out: Path, caption: str) -> None:
-    h = 512
+    h = 420
     cells = []
     for p in (ref, gen):
         im = Image.open(p).convert("RGB")
@@ -342,6 +343,11 @@ def cmd_accept(a) -> int:
     shutil.copy(src, dst)
     unit.update(status="success", note=a.note or unit.get("note", ""))
     save(q)
+    doc = DOCS / "prompts.md"
+    with doc.open("a") as fh:
+        fh.write(f"\n## {a.id} — {unit['sheet'].split('/')[-1]}, ячейка {unit['cell']}\n"
+                 f"- Копия: `{dst.name}`, {unit['model']}, {unit['version']} попыток, "
+                 f"{last['readiness']}%\n\n{unit['subject']}\n")
     report(f"ИТОГ: ✅ success — {a.id} за {unit['version']} попыток "
            f"({unit['model']}, {last['readiness']}%) → {dst.name}\n")
     print(f"{a.id} принят -> {dst}")
@@ -372,6 +378,17 @@ def cmd_model(a) -> int:
     unit["versions"].setdefault(a.model, 0)
     save(q)
     print(f"{a.id}: модель {a.model}, следующая попытка — v1 в рамках этой модели")
+    return 0
+
+
+def cmd_subject(a) -> int:
+    q = load()
+    unit = q[a.id]
+    if unit["status"] == "success":
+        raise SystemExit(f"{a.id} закрыт, описание правится только через reject")
+    unit["subject"] = a.text.strip()
+    save(q)
+    print(f"{a.id}: описание {len(unit['subject'])} знаков, кадр ещё не генерировался")
     return 0
 
 
@@ -426,6 +443,10 @@ def main() -> int:
     md.add_argument("id")
     md.add_argument("model")
     md.set_defaults(f=cmd_model)
+    sj = sub.add_parser("subject")
+    sj.add_argument("id")
+    sj.add_argument("text")
+    sj.set_defaults(f=cmd_subject)
     sub.add_parser("stat").set_defaults(f=cmd_stat)
     args = ap.parse_args()
     return args.f(args)

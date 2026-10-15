@@ -34,7 +34,7 @@
   {
    "id": "copy",
    "name": "copy",
-   "style": "smooth airbrushed painterly rendering without visible line, matte hand-painted materials, gentle ambient occlusion, low gloss, readable silhouette",
+   "style": "hand-painted comic game illustration with visible soft brush strokes, matte gouache-like skin texture, subtle canvas grain, warm midtones, no ink outlines, no glossy plastic sheen",
    "negative": "chibi, toddler proportions, baby face, doll face, toy figure, blind box vinyl, clay render, glossy plastic, shiny enamel, 3d print, cute child, photorealism, photograph, ink outlines, line art, sketch, grayscale, character sheet, turnaround, multiple views, reference sheet, split frame, collage, two characters, dark background, gradient background, scenery, landscape, text, letters, watermark"
   }
  ],
@@ -51,15 +51,18 @@
    "items": [
     {
      "id": "IMG-001",
-     "subject": ""
+     "subject": "angry human street brawler in a boxing guard, both bare fists raised at face height, knuckles forward, weight on one leg with the other foot forward, hips turned slightly to the side and shoulders counter-rotated, bald head with a tall dark brown mohawk spike running from forehead to nape, thick scowling brows, square jaw, mouth shut in a snarl, blocky nose, bare muscular chest covered with dark chest hair drawn as short painterly strokes, defined abdomen, small four-pointed star scar on the deltoid at the right edge of the frame, blue diamond-quilted sleeveless puffer vest worn open with nothing under it, clean straight edges with no fraying and no rips, brown leather wrist wraps on both forearms, brown leather belt with a square brass buckle, cuffed blue jeans, brown leather boots with folded cuffs, hand-painted matte skin with soft visible brush shading, mature stylized cartoon face with simplified exaggerated features",
+     "seed_bump": 1
     },
     {
      "id": "IMG-002",
-     "subject": ""
+     "subject": "grizzled crusader knight standing with weight on one leg and hips shifted to the side, tall heroic build with long legs and a head one sixth of the total height, right arm bent with a steel gauntlet enclosing the clenched fist at the left edge of the frame, holding a large heater shield at the right edge of the frame, shield painted red with a broad raised steel equal-armed cross and a riveted steel rim, mature face with a full reddish-brown beard and moustache, scowling brows, reddish-brown hair swept back, cream white cape over both shoulders fastened with a round gold brooch at the shoulder on the left side of the frame, red knee-length draped tunic with a fold across the chest, steel plate pauldrons, arm guards, gauntlet and full leg harness, chainmail at the armpits and neck, brown leather belt with a rectangular brass buckle and a baldric strap across the body, steel sabatons, hand-painted matte skin with soft visible brush shading, mature stylized cartoon face with simplified exaggerated features",
+     "seed_bump": 1
     },
     {
      "id": "IMG-003",
-     "subject": ""
+     "subject": "assassin entirely wrapped in black cloth from neck to feet with no bare skin visible anywhere, crouching low in a stalking pose, both knees bent deep, one hand reaching forward at the left edge of the frame, long curved black claws growing from the wrapped knuckles, pointed black hood with a stiff folded peak at the top of the head, hooded head lowered, only the eyes and the bridge of the nose visible above a black face wrap, angry narrowed eyes under a dark brow, layered black cloth wrappings over shoulders, chest and arms, torn hem of a black robe, baggy black trousers, black cloth-wrapped feet in soft shoes, matte black fabric with soft folds, no bare skin visible anywhere, hand-painted matte skin with soft visible brush shading, mature stylized cartoon face with simplified exaggerated features",
+     "seed_bump": 3
     },
     {
      "id": "IMG-004",

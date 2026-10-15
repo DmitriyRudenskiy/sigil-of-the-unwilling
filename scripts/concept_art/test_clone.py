@@ -38,6 +38,7 @@ j.QUEUE = tmp / "queue.json"
 j.PAIRS = tmp / "pairs"
 
 unit = {"unit": "IMG-001", "reference": "references/crops/IMG-001.png", "category": "unit-01",
+        "sheet": "references/unit-01.jpeg", "cell": 1,
         "model": "krea2", "status": "in-queue", "version": 0, "versions": {}, "best_score": None,
         "max_attempts": j.MAX_ATTEMPTS, "subject": "бравый воин", "history": []}
 j.save({"IMG-001": unit})
