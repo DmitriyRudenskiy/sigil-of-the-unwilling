@@ -275,15 +275,15 @@ def cmd_next(a) -> int:
         item = next(i for i in spec["categories"][unit["category"]]["items"] if i["id"] == uid)
         item["subject"], item["seed_bump"] = unit["subject"], version - 1
         SPEC.write_text(json.dumps(spec, ensure_ascii=False, indent=1) + "\n")
-        raw = ROOT / OUT_DIR / model / "copy" / unit["category"] / f"{uid}.webp"
-        raw.unlink(missing_ok=True)
+        gen.parent.mkdir(parents=True, exist_ok=True)
+        # Имя кадру отдаём серверу до запуска: узел сохранения пишет его сам,
+        # локально файл ложится сразу в attempts/ и ничего не переименовывается.
         subprocess.run([sys.executable, str(HERE / "generate.py"), "--spec", str(SPEC),
-                        "--model", model, "--only", uid], check=False)
-        if not raw.exists():
+                        "--model", model, "--only", uid, "--dest", str(gen),
+                        "--server-prefix", f"{LAB.name}/{uid}/{gen.stem}"], check=False)
+        if not gen.exists():
             print(f"{uid}: генерация не дала файла")
             return 1
-        gen.parent.mkdir(parents=True, exist_ok=True)
-        raw.rename(gen)
     m = similarity(LAB / unit["reference"], gen)
     p = PAIRS / f"{uid}.png"
     pair(uid, LAB / unit["reference"], gen, p, f"{model} v{version} metric={m.get('score')}")

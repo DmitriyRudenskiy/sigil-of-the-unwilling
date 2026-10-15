@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""Генератор концепт-арта: 5 вариантов стиля × 77 сюжетов через ComfyUI MCP.
+"""Генератор концепт-арта: 5 вариантов стиля × 77 сюжетов через ComfyUI.
 
 Каталог сюжетов и стилей — spec.json рядом с этим файлом, кода там нет (см. дельта-спеку
 `concept-art-pipeline`). Прогон возобновляем: существующие файлы пропускаются, затравка
 выводится из идентификатора артефакта, поэтому повтор рисует то же самое.
+
+Имя кадр задаётся до запуска: граф уходит на сервер с `filename_prefix` узла
+сохранения, поэтому локально файл рождается итоговым и ничего не переименовывается.
+Заготовки графов — workflows.json рядом (роли узлов ищутся по `class_type`).
 
     python3 scripts/concept_art/generate.py --dry-run
     python3 scripts/concept_art/generate.py --variant v1_candlelight --only cursor_default
@@ -13,10 +17,8 @@
 from __future__ import annotations
 
 import argparse
-import asyncio
 import binascii
 import json
-import re
 import sys
 import time
 import urllib.parse
@@ -24,11 +26,11 @@ import urllib.request
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
-from mcp import ClientSession
-from mcp.client.streamable_http import streamablehttp_client
 
 HERE = Path(__file__).resolve().parent
 SPEC_PATH = HERE / "spec.json"
+WORKFLOWS_PATH = HERE / "workflows.json"
+WORKFLOWS = json.loads(WORKFLOWS_PATH.read_text())   # заготовки графов ComfyUI по моделям
 WHITE_MIN = 0.60          # доля почти-белого в рамке для изолированных категорий
 NEAR_WHITE = 235          # порог «белый»: фон образца — 1% чистого и 98% почти-белого
 BORDER = 24               # ширина рамки, px
@@ -234,20 +236,52 @@ def http_bytes(url: str) -> bytes:
         return r.read()
 
 
-def download(comfy: str, prompt_id: str, fallback_name: str, dest: Path) -> str:
-    """Байты результата этого задания: имя файла берём из его истории, не из asset_url."""
-    q = urllib.parse.urlencode({"prompt_id": prompt_id})
-    try:
-        hist = http_json(f"{comfy}/history?{q}")
-        imgs = [i for o in hist.get(prompt_id, {}).get("outputs", {}).values()
-                for i in o.get("images", [])]
-        img = imgs[0]
-        name, sub, typ = img["filename"], img.get("subfolder", ""), img.get("type", "output")
-    except Exception:                                          # noqa: BLE001
-        name, sub, typ = fallback_name, "", "output"
-    q = urllib.parse.urlencode({"filename": name, "subfolder": sub, "type": typ})
+def workflow(model_key: str, spec_model: dict, art: dict, prompt: str, neg: str,
+             seed: int, server_name: str) -> dict:
+    """Заготовка графа ComfyUI с подставленными параметрами.
+
+    Имя кадр получает здесь, до запуска: узел сохранения пишет файл сам, и
+    локально его не нужно переименовывать. Роли узлов ищутся по `class_type`,
+    а не по номерам, — перенумерация графа на сервере прогон не ломает.
+    """
+    g = json.loads(json.dumps(WORKFLOWS[model_key]))
+    for node in g.values():
+        ct, i = node["class_type"], node["inputs"]
+        if ct == "CLIPTextEncode":
+            i["text"] = prompt
+        elif ct == "TextEncodeQwenImage21":
+            i["prompt"] = prompt
+            if neg:
+                i["negative_prompt"] = neg
+        elif ct == "EmptyLatentImage":
+            i.update({"width": art["size"][0], "height": art["size"][1]})
+        elif ct == "KSampler":
+            i.update({"seed": seed, "steps": spec_model["steps"], "cfg": spec_model.get("cfg", 1.0)})
+        elif ct == "SaveImage":
+            i["filename_prefix"] = server_name
+    return g
+
+
+def run_job(comfy: str, graph: dict, timeout: int) -> dict:
+    """Задание на сервер и ожидание: возвращает запись файла, которую записал SaveImage."""
+    req = urllib.request.Request(f"{comfy}/prompt", data=json.dumps({"prompt": graph}).encode(),
+                                 headers={"Content-Type": "application/json"})
+    pid = json.load(urllib.request.urlopen(req))["prompt_id"]
+    t0 = time.time()
+    while True:
+        hist = http_json(f"{comfy}/history/{pid}")
+        imgs = [i for o in hist.get(pid, {}).get("outputs", {}).values() for i in o.get("images", [])]
+        if imgs:
+            return imgs[0]
+        if time.time() - t0 > timeout:
+            raise TimeoutError(f"ожидание > {timeout} c (задание {pid})")
+        time.sleep(5)
+
+
+def download(comfy: str, img: dict, dest: Path) -> None:
+    q = urllib.parse.urlencode({"filename": img["filename"], "subfolder": img.get("subfolder", ""),
+                                "type": img.get("type", "output")})
     dest.write_bytes(http_bytes(f"{comfy}/view?{q}"))
-    return name
 
 
 def to_webp(src: Path, dest: Path, quality: int) -> None:
@@ -256,14 +290,9 @@ def to_webp(src: Path, dest: Path, quality: int) -> None:
     im.save(dest, "WEBP", quality=quality)
 
 
-async def tool_text(session: ClientSession, name: str, args: dict) -> str:
-    res = await session.call_tool(name, args)
-    return "\n".join(c.text for c in res.content if getattr(c, "type", "") == "text")
-
-
-async def generate(session: ClientSession, spec: dict, art: dict, timeout: int,
-                   attempt: int = 1) -> dict:
-    """Один сюжет: запрос -> ожидание -> загрузка -> экспорт -> проверки."""
+def generate(spec: dict, art: dict, timeout: int, attempt: int = 1,
+             server_name: str = "") -> dict:
+    """Один сюжет: граф с готовым именем -> ожидание -> загрузка -> экспорт -> проверки."""
     t0 = time.time()
     m = spec["models"][art["model_key"]]
     variant = next(v for v in spec["variants"] if v["id"] == art["variant"])
@@ -274,40 +303,21 @@ async def generate(session: ClientSession, spec: dict, art: dict, timeout: int,
     # затравкой ComfyUI отдаёт из кэша мгновенно и тем же кадром (проверено: 0.2 с, тот же вердикт).
     seed = (seed_for(art["variant"], art["category"], art["id"]) + (attempt - 1)
             + int(art.get("seed_bump", 0)))
-    args = {"unet": m["unet"], "clip": m["clip"], "vae": m["vae"], "prompt": prompt,
-            "width": art["size"][0], "height": art["size"][1], "seed": seed, "steps": m["steps"]}
-    if "cfg" in m:
-        args["cfg"] = m["cfg"]
-    if neg:
-        args["negative_prompt"] = neg
-
-    text = await tool_text(session, m["tool"], args)
-    pid = (re.search(r'"prompt_id":\s*"([0-9a-f-]+)"', text) or [None, None])[1]
-    name = (re.search(r'"filename":\s*"([^"]+)"', text) or [None, None])[1]
-    while pid and not name:
-        if time.time() - t0 > timeout:
-            raise TimeoutError(f"ожидание > {timeout} c")
-        await asyncio.sleep(10)
-        text = await tool_text(session, "get_job", {"prompt_id": pid})
-        st = (re.search(r'"status":\s*"(\w+)"', text) or [None, "?"])[1]
-        if st in TERMINAL_BAD:
-            raise RuntimeError(f"{st}: {text[:200]}")
-        name = (re.search(r'"filename":\s*"([^"]+)"', text) or [None, None])[1]
-        if st == "completed" and not name:
-            raise RuntimeError(f"completed без имени файла: {text[:200]}")
-    if not name:
-        raise RuntimeError(f"сервер не вернул ни задания, ни файла: {text[:200]}")
+    server_name = server_name or f"{art['model_key']}/{art['variant']}/{art['category']}/{art['id']}"
+    img = run_job(spec["comfy"], workflow(art["model_key"], m, art, prompt, neg, seed, server_name),
+                  timeout)
 
     out = art["path"]
     tmp = out.with_suffix(".part.png")
     tmp.parent.mkdir(parents=True, exist_ok=True)
-    server_name = download(spec["comfy"], pid or "", name, tmp)
+    download(spec["comfy"], img, tmp)
     to_webp(tmp, out, spec["export"]["quality"])
     tmp.unlink(missing_ok=True)
     ok, why = check_image(out, art["size"], art["category"] in ISOLATED)
     return {"verdict": "ok" if ok else "fail", "error": why, "seed": seed,
             "model": art["model_key"], "checkpoint": m["unet"], "prompt": prompt,
-            "negative_prompt": neg, "size": list(art["size"]), "server_file": server_name,
+            "negative_prompt": neg, "size": list(art["size"]),
+            "server_file": f"{img.get('subfolder', '')}/{img['filename']}".strip("/").replace("\\", "/"),
             "seconds": round(time.time() - t0, 1), "file": str(out)}
 
 
@@ -394,6 +404,9 @@ def main() -> int:
                     help="стилевой борд: по одному сюжету каждой категории во всех вариантах и во всех "
                          "моделях из probe_models + борд с эталонами на каждую модель")
     ap.add_argument("--model", help="модель прогона (krea2 | qwen21); по умолчанию spec.model")
+    ap.add_argument("--dest", help="итоговый путь одного кадра (с --only): файл пишется сразу в него")
+    ap.add_argument("--server-prefix", dest="server_prefix",
+                    help="имя кадру на сервере (подкаталог/имя); по умолчанию повторяет локальное дерево")
     ap.add_argument("--limit", type=int, help="не больше N артефактов за прогон")
     ap.add_argument("--timeout", type=int, default=900, help="ожидание одного сюжета, c (900)")
     a = ap.parse_args()
@@ -410,6 +423,10 @@ def main() -> int:
     if a.probe:                            # первый сюжет каждой категории, все варианты
         first = {cname: c["items"][0]["id"] for cname, c in spec["categories"].items()}
         arts = [x for x in arts if x["id"] == first[x["category"]]]
+    if a.dest:                             # кадр рождается итоговым именем — промежуточного нет
+        if len(arts) != 1:
+            raise SystemExit("--dest имеет смысл только с одним артефактом (--only)")
+        arts[0]["path"] = Path(a.dest)
 
     if a.dry_run:
         for art in arts:
@@ -445,40 +462,35 @@ def main() -> int:
         todo.append((key, art))
     print(f"к генерации {len(todo)}, пропущено готовых {tally['skip']}", flush=True)
 
-    async def run() -> None:
-        async with streamablehttp_client(spec["server"]) as (r, w, _):
-            async with ClientSession(r, w) as s:
-                await s.initialize()
-                for n, (key, art) in enumerate(todo, 1):
-                    entry = {"variant": art["variant"], "category": art["category"],
-                             "id": art["id"], "subject": art["subject"], "file": str(art["path"])}
-                    tries, verdict, err = 1, "fail", ""
-                    while tries <= 2:
-                        try:
-                            entry.update(await generate(s, spec, art, a.timeout, tries))
-                            verdict = entry["verdict"]
-                            err = entry.get("error", "")
-                        except Exception as exc:                 # noqa: BLE001
-                            verdict, err = "fail", f"{type(exc).__name__}: {exc}"[:300]
-                        if verdict == "ok" or tries == 2:
-                            break
-                        tries += 1
-                        print(f"   retry {key}: {err}", flush=True)
-                    tally[verdict] += 1
-                    if verdict != "ok":
-                        failed.append(key)
-                        reject = out_root / "_reject" / (f"{art['model_key']}__{art['variant']}"
-                                                          f"__{art['category']}__{art['id']}.webp")
-                        reject.parent.mkdir(parents=True, exist_ok=True)
-                        art["path"].rename(reject) if art["path"].exists() else None
-                    entry["verdict"] = verdict
-                    entry["error"] = err
-                    entry["tries"] = tries
-                    record(key, entry)
-                    print(f"[{n}/{len(todo)}] {verdict:4} {key} "
-                          f"{entry.get('seconds', '-')}s {err}", flush=True)
-
-    asyncio.run(run())
+    for n, (key, art) in enumerate(todo, 1):
+        entry = {"variant": art["variant"], "category": art["category"],
+                 "id": art["id"], "subject": art["subject"], "file": str(art["path"])}
+        tries, verdict, err = 1, "fail", ""
+        while tries <= 2:
+            try:
+                entry.update(generate(spec, art, a.timeout, tries, a.server_prefix or ""))
+                verdict = entry["verdict"]
+                err = entry.get("error", "")
+            except Exception as exc:                             # noqa: BLE001
+                verdict, err = "fail", f"{type(exc).__name__}: {exc}"[:300]
+            if verdict == "ok" or tries == 2:
+                break
+            tries += 1
+            print(f"   retry {key}: {err}", flush=True)
+        tally[verdict] += 1
+        if verdict != "ok":
+            failed.append(key)
+            if not a.dest:      # прогон лаборатории: кадр-улика остаётся на своём месте
+                reject = out_root / "_reject" / (f"{art['model_key']}__{art['variant']}"
+                                                  f"__{art['category']}__{art['id']}.webp")
+                reject.parent.mkdir(parents=True, exist_ok=True)
+                art["path"].rename(reject) if art["path"].exists() else None
+        entry["verdict"] = verdict
+        entry["error"] = err
+        entry["tries"] = tries
+        record(key, entry)
+        print(f"[{n}/{len(todo)}] {verdict:4} {key} "
+              f"{entry.get('seconds', '-')}s {err}", flush=True)
     print(f"ИТОГ ok={tally['ok']} skip={tally['skip']} fail={tally['fail']}  манифест: {mpath}")
     for k in failed:
         print(f"  fail: {k}")

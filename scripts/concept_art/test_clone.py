@@ -125,4 +125,77 @@ ok(crop.size[0] == crop.size[1], f"кроп не квадратный: {crop.siz
 ok(abs(crop.size[0] - 600) <= 10, f"кроп не по длинной стороне фигуры: {crop.size}")
 ok(Image.open(out / "cell-12.png").size[0] == crop.size[0], "ячейки режутся по-разному")
 
+# --- имя кадру задаёт сервер: префикс попадает в SaveImage, роли узлов ищутся по class_type
+import generate as g                                                 # noqa: E402
+
+art = {"model_key": "qwen21", "variant": "copy", "category": "unit-01", "id": "IMG-001",
+       "size": [512, 512]}
+PREFIX = "image-clone/IMG-001/qwen21_IMG-001_v1"
+
+
+def by_class(graph, ct):
+    return [n for n in graph.values() if n["class_type"] == ct]
+
+
+for model, neg in (("qwen21", "NEG"), ("krea2", "")):
+    gr = g.workflow(model, {"steps": 25}, art, "ПРОМТ", neg, 123, PREFIX)
+    ok(by_class(gr, "SaveImage")[0]["inputs"]["filename_prefix"] == PREFIX,
+       f"{model}: SaveImage не получил имя — кадр родится мусорным")
+    ok(any(n["inputs"].get("text") == "ПРОМТ" or n["inputs"].get("prompt") == "ПРОМТ"
+           for n in gr.values()), f"{model}: промт не дошёл до узла текста")
+    ok(by_class(gr, "KSampler")[0]["inputs"]["seed"] == 123, f"{model}: затравка не подставлена")
+    ok(by_class(gr, "EmptyLatentImage")[0]["inputs"]["width"] == 512, f"{model}: размер не подставлен")
+
+# --- перенумерация графа не ломает подстановку (роли — по class_type, не по номерам)
+import json as _json                                                # noqa: E402
+_orig = _json.dumps(g.WORKFLOWS["qwen21"])
+try:
+    g.WORKFLOWS["qwen21"] = {f"n{k}": v for k, v in g.WORKFLOWS["qwen21"].items()}
+    gr = g.workflow("qwen21", {"steps": 25}, art, "ПРОМТ", "NEG", 7, PREFIX)
+    ok(by_class(gr, "SaveImage")[0]["inputs"]["filename_prefix"] == PREFIX,
+       "перенумерованный граф потерял имя")
+    ok(by_class(gr, "KSampler")[0]["inputs"]["seed"] == 7, "перенумерованный граф потерял затравку")
+finally:
+    g.WORKFLOWS["qwen21"] = _json.loads(_orig)
+
+# --- у кадра нет промежуточного имени: движок отдаёт серверу итоговый путь
+j.SPEC = tmp / "lab-spec.json"
+spec = {"categories": {"unit-01": {"items": [{"id": "IMG-001", "subject": ""}]}}}
+j.SPEC.write_text(_json.dumps(spec))
+q = j.load()
+q["IMG-001"].update(status="in-queue", model="krea2", version=0, versions={}, file=None)
+j.save(q)
+(j.CROPS).mkdir(parents=True, exist_ok=True)
+Image.new("RGB", (256, 256), "white").save(j.CROPS / "IMG-001.png")
+
+seen_argv = []
+
+
+def fake_run(cmd, check=False):                        # сервер подменён: рисуем кадр прямо в --dest
+    seen_argv.append(cmd)
+    dest = Path(cmd[cmd.index("--dest") + 1])
+    im = Image.new("RGB", (512, 512), "white")
+    ImageDraw.Draw(im).rectangle([180, 60, 330, 450], fill=(20, 30, 40))
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    im.save(dest, "WEBP")
+    return Args(returncode=0)
+
+
+sub_run, j.subprocess.run = j.subprocess.run, fake_run
+try:
+    j.cmd_next(Args(model=None))
+finally:
+    j.subprocess.run = sub_run
+
+ok(len(seen_argv) == 1, "next не вызвал генератор")
+cmd = seen_argv[0]
+ok(cmd[cmd.index("--dest") + 1] == str(j.ATTEMPTS / "IMG-001" / "krea2_IMG-001_v1.webp"),
+   "генератору не передан итоговый путь")
+ok(cmd[cmd.index("--server-prefix") + 1] == f"{j.LAB.name}/IMG-001/krea2_IMG-001_v1",
+   "серверу не передано итоговое имя")
+leftovers = [p.name for p in j.LAB.rglob("IMG-001.webp")]
+ok(not leftovers, f"кадр всё ещё рождается служебным именем: {leftovers}")
+ok((j.ATTEMPTS / "IMG-001" / "krea2_IMG-001_v1.webp").exists(), "кадр не лёг в итоговый путь")
+ok(not (j.LAB / "concept_art").exists(), "служебный путь прогона лаборатории вернулся")
+
 print(f"OK: проверок {checks}")
