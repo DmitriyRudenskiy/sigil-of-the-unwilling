@@ -174,5 +174,181 @@
   "pass": "revision",
   "judge": "pi:agent-sheet-pass",
   "klass": "self"
+ },
+ {
+  "id": "AP-line-1",
+  "date": "2026-10-15",
+  "given": 9,
+  "declared": 10,
+  "anchors": "anchors-aba09390ac52",
+  "etalons": "etalons-8cb5520558f8",
+  "pass": "revision",
+  "judge": "pi:blind-2026-10-15",
+  "klass": "independent"
+ },
+ {
+  "id": "AP-color-1",
+  "date": "2026-10-15",
+  "given": 7,
+  "declared": 10,
+  "anchors": "anchors-aba09390ac52",
+  "etalons": "etalons-8cb5520558f8",
+  "pass": "revision",
+  "judge": "pi:blind-2026-10-15",
+  "klass": "independent"
+ },
+ {
+  "id": "AP-color-4",
+  "date": "2026-10-15",
+  "given": 7,
+  "declared": 7,
+  "anchors": "anchors-aba09390ac52",
+  "etalons": "etalons-8cb5520558f8",
+  "pass": "revision",
+  "judge": "pi:blind-2026-10-15",
+  "klass": "independent"
+ },
+ {
+  "id": "AP-texture-2",
+  "date": "2026-10-15",
+  "given": 9,
+  "declared": 9,
+  "anchors": "anchors-aba09390ac52",
+  "etalons": "etalons-8cb5520558f8",
+  "pass": "revision",
+  "judge": "pi:blind-2026-10-15",
+  "klass": "independent"
+ },
+ {
+  "id": "AP-texture-3",
+  "date": "2026-10-15",
+  "given": 9,
+  "declared": 5,
+  "anchors": "anchors-aba09390ac52",
+  "etalons": "etalons-8cb5520558f8",
+  "pass": "revision",
+  "judge": "pi:blind-2026-10-15",
+  "klass": "independent"
+ },
+ {
+  "id": "AP-texture-4",
+  "date": "2026-10-15",
+  "given": 6,
+  "declared": 7,
+  "anchors": "anchors-aba09390ac52",
+  "etalons": "etalons-8cb5520558f8",
+  "pass": "revision",
+  "judge": "pi:blind-2026-10-15",
+  "klass": "independent"
+ },
+ {
+  "id": "AP-shade-1",
+  "date": "2026-10-15",
+  "given": 8,
+  "declared": 10,
+  "anchors": "anchors-aba09390ac52",
+  "etalons": "etalons-8cb5520558f8",
+  "pass": "revision",
+  "judge": "pi:blind-2026-10-15",
+  "klass": "independent"
+ },
+ {
+  "id": "AP-shade-2",
+  "date": "2026-10-15",
+  "given": 7,
+  "declared": 9,
+  "anchors": "anchors-aba09390ac52",
+  "etalons": "etalons-8cb5520558f8",
+  "pass": "revision",
+  "judge": "pi:blind-2026-10-15",
+  "klass": "independent"
+ },
+ {
+  "id": "AP-shade-3",
+  "date": "2026-10-15",
+  "given": 7,
+  "declared": 7,
+  "anchors": "anchors-aba09390ac52",
+  "etalons": "etalons-8cb5520558f8",
+  "pass": "revision",
+  "judge": "pi:blind-2026-10-15",
+  "klass": "independent"
+ },
+ {
+  "id": "AP-shade-4",
+  "date": "2026-10-15",
+  "given": 9,
+  "declared": 6,
+  "anchors": "anchors-aba09390ac52",
+  "etalons": "etalons-8cb5520558f8",
+  "pass": "revision",
+  "judge": "pi:blind-2026-10-15",
+  "klass": "independent"
+ },
+ {
+  "id": "AP-line-2",
+  "date": "2026-10-15",
+  "given": 7,
+  "declared": 9,
+  "anchors": "anchors-aba09390ac52",
+  "etalons": "etalons-8cb5520558f8",
+  "pass": "revision",
+  "judge": "pi:blind-2026-10-15",
+  "klass": "independent"
+ },
+ {
+  "id": "AP-line-3",
+  "date": "2026-10-15",
+  "given": 9,
+  "declared": 6,
+  "anchors": "anchors-aba09390ac52",
+  "etalons": "etalons-8cb5520558f8",
+  "pass": "revision",
+  "judge": "pi:blind-2026-10-15",
+  "klass": "independent"
+ },
+ {
+  "id": "AP-line-4",
+  "date": "2026-10-15",
+  "given": 9,
+  "declared": 7,
+  "anchors": "anchors-aba09390ac52",
+  "etalons": "etalons-8cb5520558f8",
+  "pass": "revision",
+  "judge": "pi:blind-2026-10-15",
+  "klass": "independent"
+ },
+ {
+  "id": "AP-color-2",
+  "date": "2026-10-15",
+  "given": 9,
+  "declared": 9,
+  "anchors": "anchors-aba09390ac52",
+  "etalons": "etalons-8cb5520558f8",
+  "pass": "revision",
+  "judge": "pi:blind-2026-10-15",
+  "klass": "independent"
+ },
+ {
+  "id": "AP-color-3",
+  "date": "2026-10-15",
+  "given": 8,
+  "declared": 6,
+  "anchors": "anchors-aba09390ac52",
+  "etalons": "etalons-8cb5520558f8",
+  "pass": "revision",
+  "judge": "pi:blind-2026-10-15",
+  "klass": "independent"
+ },
+ {
+  "id": "AP-texture-1",
+  "date": "2026-10-15",
+  "given": 7,
+  "declared": 10,
+  "anchors": "anchors-aba09390ac52",
+  "etalons": "etalons-8cb5520558f8",
+  "pass": "revision",
+  "judge": "pi:blind-2026-10-15",
+  "klass": "independent"
  }
 ]
