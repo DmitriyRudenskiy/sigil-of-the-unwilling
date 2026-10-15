@@ -40,6 +40,9 @@ const PHASE_NAMES := {
 var current_turn: int = 1
 var phase: int = Phase.SETTLEMENT
 var seed: int = 12345  # campaign seed (I1: детерминизм; K-M9: бит-каркас)
+## T-060 (R1): статус кампании — ongoing / defeat (wipe партии); T-071
+## расширит victory (босс/финальный рейд). Стейт, не производное (в сейве).
+var campaign_status: String = "ongoing"
 
 ## Хуки фаз (T-040/T-070 вешают свою логику; каркас — no-op).
 ## settlement: население/события/настроение (T-040, без production — T-122).
@@ -68,6 +71,17 @@ func phase_name() -> String:
 
 func is_done() -> bool:
 	return phase == Phase.DONE
+
+
+## T-060 (R1): wipe всей партии = конец кампании (DEFEAT). Сейв и Престиж
+## сохраняются (02-mechanics §3.2 EC1: нет «game over без возврата»). Повторный
+## вызов — no-op (флаг, не таймер; D-152-семья).
+func defeat(reason: String) -> void:
+	if phase == Phase.DONE:
+		return
+	phase = Phase.DONE
+	campaign_status = "defeat"
+	_log("campaign_defeat:turn=%d:reason=%s" % [current_turn, reason])
 
 
 ## Автофаза: одна авто-фаза за вызов (MVP: player — единственный
@@ -151,6 +165,7 @@ func to_dict() -> Dictionary:
 		"turn": current_turn,
 		"seed": seed,
 		"phase": phase_name(),
+		"status": campaign_status,  # T-060: ongoing/defeat (T-071: victory)
 		"schema_version": SCHEMA_VERSION,
 		"events": _events.duplicate(),
 	}
@@ -162,6 +177,7 @@ static func from_dict(data: Dictionary) -> TurnDriver:
 	driver.current_turn = int(d.get("turn", 1))
 	driver.seed = int(d.get("seed", 12345))
 	driver.phase = _phase_from_name(str(d.get("phase", "player")))
+	driver.campaign_status = str(d.get("status", "ongoing"))  # T-060
 	driver._events = (d.get("events", []) as Array).duplicate()
 	return driver
 
