@@ -7,10 +7,10 @@
   "category": "unit-01",
   "model": "qwen21",
   "status": "in-queue",
-  "version": 9,
+  "version": 14,
   "versions": {
    "krea2": 3,
-   "qwen21": 9
+   "qwen21": 14
   },
   "best_score": null,
   "max_attempts": 5,
@@ -264,13 +264,119 @@
      "texture": 0,
      "shade": 0
     }
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-15",
+    "model": "qwen21",
+    "version": 12,
+    "file": "attempts/IMG-001/qwen21_IMG-001_v12_P3R1.webp",
+    "prompt_version": "P3",
+    "render_version": "R1",
+    "seed": 1655296457,
+    "etalons": "etalons-8cb5520558f8",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 7
+    },
+    "sty_pct": 75.0,
+    "tens": [],
+    "gaps": [
+     "line=лица и кисти не прорисованы линиями, как в эталоне",
+     "color=кожа теплее и темнее охры эталона",
+     "texture=кожа гладкая, живописной тональной вариации нет",
+     "shade=тени всё ещё растянуты, плоского локального цвета мало"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 1,
+     "color": 1,
+     "texture": 1,
+     "shade": 1
+    }
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-15",
+    "model": "qwen21",
+    "version": 13,
+    "file": "attempts/IMG-001/qwen21_IMG-001_v13_P3R2.webp",
+    "prompt_version": "P3",
+    "render_version": "R2",
+    "seed": 1655296458,
+    "etalons": "etalons-8cb5520558f8",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 7,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 75.0,
+    "tens": [],
+    "gaps": [
+     "line=лица и кисти не прорисованы линиями, как в эталоне",
+     "color=кожа перенасыщена, у эталона охра глуше",
+     "texture=плоско, но не живописно: вектор вместо гуаши",
+     "shade=местами уходит в cel-полосы"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 0,
+     "color": -1,
+     "texture": 0,
+     "shade": 1
+    }
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-15",
+    "model": "qwen21",
+    "version": 14,
+    "file": "attempts/IMG-001/qwen21_IMG-001_v14_P7R1.webp",
+    "prompt_version": "P7",
+    "render_version": "R1",
+    "seed": 1655296458,
+    "etalons": "etalons-8cb5520558f8",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 7,
+     "color": 8,
+     "texture": 7,
+     "shade": 7
+    },
+    "sty_pct": 72.5,
+    "tens": [],
+    "gaps": [
+     "line=прожилка жилета пропала, внутренних линий стало меньше, чем в v12",
+     "color=кожа ближе к охре эталона, чем в v13",
+     "texture=плоско, живописной вариации нет",
+     "shade=тени мягче, чем в v13, но всё ещё растянуты"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": -1,
+     "color": 1,
+     "texture": 0,
+     "shade": -1
+    }
    }
   ],
-  "file": "attempts/IMG-001/qwen21_IMG-001_v9_P5R0.webp",
-  "note": "возврат: баллы выставлены по прежним правилам оценки и недействительны (D10)",
+  "file": "attempts/IMG-001/qwen21_IMG-001_v14_P7R1.webp",
+  "note": "v11 = v7 байт в байт: R-блок до 2026-10-15 не читался генератором, cfg 3.0 в него не ехал; кадр оставлен как свидетельство дыры, не как прогон R1",
   "pair": "/Users/user/sigil-concept-art/image-clone/pairs/IMG-001.png",
-  "prompt_version": "P5",
-  "render_version": "R0"
+  "prompt_version": "P7",
+  "render_version": "R1",
+  "seed_bump": 8
  },
  "IMG-002": {
   "unit": "IMG-002",

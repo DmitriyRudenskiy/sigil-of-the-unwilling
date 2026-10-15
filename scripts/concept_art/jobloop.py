@@ -179,6 +179,14 @@ def judge_version() -> str:
     return "judge-" + hashlib.sha256(body.encode()).hexdigest()[:12]
 
 
+def next_seed_bump(unit: dict, prompt_version: str) -> int:
+    """Затравка держится, пока меняется промпт, и крутится только на повторе того
+    же (8.25). Правка слов и новая затравка разом — две переменные, и балл
+    нельзя приписать ни слову, ни удаче; повтор того же промпта — наоборот,
+    лотерея, её и крутим."""
+    return unit.get("seed_bump", 0) + (unit.get("prompt_version") == prompt_version)
+
+
 def run_seal(unit: dict, model: str, version: int, spec: dict) -> dict:
     """Печать прогона: из чего он был сделан. Пишется до рендера, сверяется
     `verify`, без неё `score` балл не ставит — иначе вердикт нельзя приписать
@@ -188,10 +196,13 @@ def run_seal(unit: dict, model: str, version: int, spec: dict) -> dict:
         "etalon": sha12(LAB / unit["reference"]),
         "sheet": sha12(LAB / unit["sheet"]),
         "model": model,
-        "seed": seed_for("copy", unit["category"], unit["unit"]) + version - 1,
+        "seed": seed_for("copy", unit["category"], unit["unit"]) + unit.get("seed_bump", 0),
         "prompt_version": spec.get("prompt_version", "P0"),
         "render_version": r.get("id", "R0"),
-        "render": {k: r.get(k) for k in ("cfg", "sampler", "scheduler", "steps", "checkpoint")},
+        "render": {**{k: r.get(k) for k in ("cfg", "sampler", "scheduler", "steps")},
+                   # вес берётся из блока модели, а не из подписи в render: печать
+                   # обязана писать то, что грузили, а не то, что там написано
+                   "checkpoint": spec.get("models", {}).get(model, {}).get("unet", "нет")},
         "dictionary": sha12(DOCS / "style-card.md"),
         "instrument": anchors_version() if ANCHORS.is_file() else "нет",
         "judge": judge_version(),
@@ -362,7 +373,8 @@ def cmd_next(a) -> int:
             return 1
         spec = json.loads(SPEC.read_text())
         item = next(i for i in spec["categories"][unit["category"]]["items"] if i["id"] == uid)
-        item["subject"], item["seed_bump"] = unit["subject"], version - 1
+        bump = unit["seed_bump"] = next_seed_bump(unit, run_versions()[0])
+        item["subject"], item["seed_bump"] = unit["subject"], bump
         SPEC.write_text(json.dumps(spec, ensure_ascii=False, indent=1) + "\n")
         gen.parent.mkdir(parents=True, exist_ok=True)
         unit["seal"] = run_seal(unit, model, version, spec)

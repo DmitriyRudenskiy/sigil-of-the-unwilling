@@ -81,6 +81,15 @@ def load_spec(path: Path = SPEC_PATH) -> dict:
         if dead in spec:
             raise SystemExit(f"spec: поле {dead} верхнего уровня не читается генератором — "
                              f"прави style/frame категории и negative варианта")
+    r = spec.get("render", {})
+    if r:
+        miss = [k for k in ("id", "model", "cfg", "sampler", "scheduler", "steps", "checkpoint")
+                if k not in r]
+        if miss:
+            raise SystemExit(f"spec: в render нет {', '.join(miss)} — блок читается сэмплером")
+        if r.get("checkpoint") != spec["models"].get(r.get("model", ""), {}).get("unet"):
+            raise SystemExit("spec: render.checkpoint не совпадает с unet модели "
+                             f"{r.get('model')} — печать приписала бы вес, которого не грузили")
     for key in ("model", "probe_models"):
         if not spec.get(key):
             raise SystemExit(f"spec: нет поля {key} — модель выбирается прогоном, не категорией")
@@ -241,7 +250,7 @@ def http_bytes(url: str) -> bytes:
 
 
 def workflow(model_key: str, spec_model: dict, art: dict, prompt: str, neg: str,
-             seed: int, server_name: str) -> dict:
+             seed: int, server_name: str, render: dict | None = None) -> dict:
     """Заготовка графа ComfyUI с подставленными параметрами.
 
     Имя кадр получает здесь, до запуска: узел сохранения пишет файл сам, и
@@ -260,7 +269,14 @@ def workflow(model_key: str, spec_model: dict, art: dict, prompt: str, neg: str,
         elif ct == "EmptyLatentImage":
             i.update({"width": art["size"][0], "height": art["size"][1]})
         elif ct == "KSampler":
-            i.update({"seed": seed, "steps": spec_model["steps"], "cfg": spec_model.get("cfg", 1.0)})
+            # R-блок и есть конфиг рендера: до 2026-10-15 он был подписью, а сэмплер
+            # брал cfg из блока модели (где его нет) и рисовал на 1.0, что бы ни
+            # стояло в spec.render.
+            r = render or {}
+            i.update({"seed": seed, "steps": r.get("steps", spec_model["steps"]),
+                      "cfg": r.get("cfg", spec_model.get("cfg", 1.0)),
+                      "sampler_name": r.get("sampler", "euler"),
+                      "scheduler": r.get("scheduler", "simple")})
         elif ct == "SaveImage":
             i["filename_prefix"] = server_name
     return g
@@ -308,7 +324,8 @@ def generate(spec: dict, art: dict, timeout: int, attempt: int = 1,
     seed = (seed_for(art["variant"], art["category"], art["id"]) + (attempt - 1)
             + int(art.get("seed_bump", 0)))
     server_name = server_name or f"{art['model_key']}/{art['variant']}/{art['category']}/{art['id']}"
-    img = run_job(spec["comfy"], workflow(art["model_key"], m, art, prompt, neg, seed, server_name),
+    img = run_job(spec["comfy"], workflow(art["model_key"], m, art, prompt, neg, seed, server_name,
+                                         spec.get("render", {})),
                   timeout)
 
     out = art["path"]

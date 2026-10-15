@@ -568,4 +568,35 @@ ok(j.cmd_verify(Args(id="IMG-001")) == 0, "печать не сверилась"
 ok(j.cmd_verify(Args(id="IMG-001")) == 1 and not j.load()["IMG-001"].get("seal"),
    "расхождение словаря не сняло печать")
 
+# --- 77. затравка не уезжает вместе с правкой промпта (8.25) ---------------
+u = {"seed_bump": 5, "prompt_version": "P3"}
+ok(j.next_seed_bump(u, "P4") == 5, "смена промпта сдвинула затравку — правка неатрибутируема")
+ok(j.next_seed_bump(u, "P3") == 6, "повтор того же промпта не круит затравку")
+q = j.load()
+q["IMG-001"]["seed_bump"] = 4
+q["IMG-001"].pop("seal", None)
+j.save(q)
+stamp()
+ok(j.load()["IMG-001"]["seal"]["seed"] == g.seed_for("copy", "unit-01", "IMG-001") + 4,
+   "печать запечатала не тот затравку, что считает генератор")
+
+# --- 78. R-блок — конфиг сэмплера, а не подпись под прогон ------------------
+gr = g.workflow("qwen21", {"steps": 25}, art, "ПРОМТ", "NEG", 123, PREFIX,
+                {"cfg": 3.0, "sampler": "dpmpp_2m", "scheduler": "karras", "steps": 30})
+ks = by_class(gr, "KSampler")[0]["inputs"]
+ok((ks["cfg"], ks["sampler_name"], ks["scheduler"], ks["steps"]) ==
+   (3.0, "dpmpp_2m", "karras", 30), f"R не доехал до сэмплера: {ks}")
+ok(by_class(g.workflow("qwen21", {"steps": 25}, art, "П", "", 1, PREFIX),
+           "KSampler")[0]["inputs"]["cfg"] == 1.0, "без R сэмплер обязан остаться на 1.0")
+
+# --- 79. печать пишет грузившийся вес, а не подпись из render ---------------
+spec_r = {"prompt_version": "P9", "render": {"id": "R9", "cfg": 3.0, "sampler": "euler",
+            "scheduler": "simple", "steps": 25, "checkpoint": "chuzhoi_ves.safetensors"},
+          "models": {"qwen21": {"unet": "qwen_image_2.1_int8_convrot.safetensors"}}}
+seal_r = j.run_seal({"reference": "references/x.png", "sheet": "sheets/x.png",
+                     "category": "unit-01", "unit": "IMG-001"}, "qwen21", 1, spec_r)
+ok(seal_r["render"]["checkpoint"] == spec_r["models"]["qwen21"]["unet"],
+   "печать приписала вес из подписи render, а не загруженный")
+ok(seal_r["render"]["cfg"] == 3.0, "печать не записала cfg прогона")
+
 print(f"OK: проверок {checks}")

@@ -26,15 +26,15 @@
  },
  "prompt_version": "P3",
  "render": {
-  "id": "R0",
+  "id": "R1",
   "model": "qwen21",
-  "cfg": 1.0,
+  "cfg": 3.0,
   "sampler": "euler",
   "scheduler": "simple",
   "steps": 25,
   "checkpoint": "qwen_image_2.1_int8_convrot.safetensors",
   "conditioning": "none",
-  "note": "R0 = чем был настроен рендер всех кадров до 2026-10-15 (сверено с историей ComfyUI: cfg 1.0 во всех прогонах)"
+  "note": "R1 = cfg 3.0: первая настройка, при которой текст усиливается, а ветвь негатива жива"
  },
  "references_dir": "/Users/user/sigil-concept-art/image-clone/references",
  "model": "krea2",
@@ -47,7 +47,7 @@
    "id": "copy",
    "name": "copy",
    "style": "2D illustration, comic book, hand-painted comic game illustration with visible soft brush strokes, clean dark warm-brown contour line of even thickness around every shape, every shape enclosed by its own closed contour line of even thickness, thinner interior lines of the same hue for muscles, seams and folds, flat local colour with soft volumetric shading over it, matte finish, matte painted surface with fine painterly tonal variation, warm ochre skin, one saturated cold garment colour, brown leather accents, small soft highlights on metal and leather only, shadows tinted warm with the local colour, single soft contact shadow under the boots, heroic stocky build, head about one fifth and a half of the height, huge traps, thick neck, oversized hands, fists read as solid masses, mature stylized face, simplified exaggerated features, blocky nose, small mouth",
-   "negative": "chibi, toddler proportions, baby face, doll face, toy figure, blind box vinyl, clay render, glossy plastic, shiny enamel, 3d print, cute child, photorealism, photograph, ink outlines, line art, sketch, grayscale, character sheet, turnaround, multiple views, reference sheet, split frame, collage, two characters, dark background, gradient background, scenery, landscape, text, letters, watermark"
+   "negative": "chibi, toddler proportions, baby face, doll face, toy figure, blind box vinyl, clay render, glossy plastic, shiny enamel, 3d print, cute child, photorealism, ink outlines, line art, sketch, photograph, grayscale, character sheet, turnaround, multiple views, reference sheet, split frame, collage, two characters, dark background, gradient background, scenery, landscape, text, letters, watermark"
   }
  ],
  "categories": {
