@@ -162,13 +162,18 @@ def pair(jid: str, ref: Path, gen: Path, out: Path, caption: str,
 
 
 def grid(pairs_: list[dict], out: Path, h: int = 380) -> None:
-    """2×2: две якорные пары на одном листе — эталон и попытка каждой пары.
-    Уровней не видно: подписаны только id пары и роль ячейки."""
-    cells = []
+    """2×2: две якорные пары на одном листе. Уровней не видно: подписаны
+    только id пары и роль кадра. Роль берётся из реестра: у контроля
+    «эталон↔эталон» правый кадр — не попытка, врать на доске нельзя."""
+    cells, seen = [], set()
     for r in pairs_:
-        for p, role in zip(r["pair"], ("эталон", "попытка")):
+        roles = (("эталон А", "эталон Б") if "эталон↔эталон" in r["origin"]
+                 else ("эталон", "попытка"))
+        for p, role in zip(r["pair"], roles):
+            label = f'{r["id"]} · {role}' + (" (тот же кадр)" if str(p) in seen else "")
+            seen.add(str(p))
             im = Image.open(p).convert("RGB")
-            cells.append((f'{r["id"]} · {role}',
+            cells.append((label,
                           im.resize((round(im.width * h / im.height), h), Image.LANCZOS)))
     gap, top = 10, 22
     w = max(c[1].width for c in cells)
