@@ -170,7 +170,9 @@ def grid(pairs_: list[dict], out: Path, h: int = 380) -> None:
         roles = (("эталон А", "эталон Б") if "эталон↔эталон" in r["origin"]
                  else ("эталон", "попытка"))
         for p, role in zip(r["pair"], roles):
-            label = f'{r["id"]} · {role}' + (" (тот же кадр)" if str(p) in seen else "")
+            unit = re.search(r"IMG-\d+", p.name)
+            label = f'{r["id"]} · {role}' + (f' ({unit.group()})' if unit else "")
+            label += " (тот же кадр)" if str(p) in seen else ""
             seen.add(str(p))
             im = Image.open(p).convert("RGB")
             cells.append((label,
