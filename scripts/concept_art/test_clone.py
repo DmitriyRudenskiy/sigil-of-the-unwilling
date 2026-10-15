@@ -606,4 +606,23 @@ ok(seal_r["render"]["checkpoint"] == spec_r["models"]["qwen21"]["unet"],
    "печать приписала вес из подписи render, а не загруженный")
 ok(seal_r["render"]["cfg"] == 3.0, "печать не записала cfg прогона")
 
+# --- 80. сжатая шкала — не то же самое, что промах пар (8.29) ---------------
+def stat_out(log):
+    (j.DOCS / "anchor-log.json").write_text(json.dumps(log), encoding="utf-8")
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        j.cmd_anchors(Args(what="stat", id=None, mark=None,
+                           judge_pass="revision", judge="", klass=None))
+    return out.getvalue()
+
+
+squeezed = [{"id": "AP-line-1", "given": 8, "declared": 10, "klass": "self"},
+            {"id": "AP-line-3", "given": 7, "declared": 6, "klass": "self"}]
+seen = stat_out(squeezed)
+ok("шкала сжалась" in seen, f"сжатие шкалы не отличается от промаха пар: {seen}")
+ok("поставлено 8" in seen, "стат не показывает поставленный балл против заявленного")
+honest = [{"id": "AP-line-1", "given": 10, "declared": 10, "klass": "self"},
+          {"id": "AP-line-3", "given": 4, "declared": 6, "klass": "self"}]
+ok("шкала сжалась" not in stat_out(honest), "здравый расклад помечен сжатием шкалы")
+
 print(f"OK: проверок {checks}")

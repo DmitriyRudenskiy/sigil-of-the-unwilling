@@ -620,6 +620,20 @@ def cmd_anchors_show_all(rows: list[dict]) -> int:
     return 0
 
 
+# Рубрика уровней живёт здесь, а не в реестре: второй судья не должен видеть ни
+# заявленных баллов, ни описаний пар — только шкалу и лист.
+BLIND_BRIEF = (
+    "Ты слепой судья стиля. Реестра якорей ты не видишь, уровней не знаешь.\n"
+    "На каждом листе слева — эталон, справа варианты ТОГО ЖЕ персонажа.\n"
+    "Одна строка стиля на листе; смотреть лист целиком; сходство позы,\n"
+    "лица и кадрирования не считать — меряется только строка листа.\n"
+    "Шкала: 10 — по этой строке расхождений нет; 9 — одно мелкое;\n"
+    "7–8 — заметное расхождение, семья та же; 5–6 — строка держится\n"
+    "клочьями; 1–4 — строка потеряна. Концов шкалы не бойся: если все\n"
+    "твои оценки 6–8, ты не пользуешься шкалой, а не картинка плоха."
+)
+
+
 def cmd_anchors(a) -> int:
     """Реестр якорных пар: show вслепую, score с сверкой после записи, check — структура."""
     if a.what not in ("seal", "check"):
@@ -644,11 +658,22 @@ def cmd_anchors(a) -> int:
                   "он отбраковывается до калибровки")
         elif any(d for d in deltas):
             print("  расхождения рассеянные — конкретные пары на переприсмотр")
+        # сжатие шкалы: верха не достигает никто, низа не занижают. Это не про
+        # пары (пары тогда все «на переприсмотр» сразу), а про шкалу судьи, и
+        # считается по всем классам: self для того и floor-check.
+        hi = [r for r in log if r["declared"] >= 9]
+        lo = [r for r in log if r["declared"] <= 6]
+        if hi and lo and all(r["given"] < r["declared"] for r in hi) \
+                and all(r["given"] >= r["declared"] for r in lo):
+            print(f"  шкала сжалась: из {len(hi)} верхних ни один не дотянут, "
+                  f"из {len(lo)} нижних ни один не занижен — судья не пользуется "
+                  "концами шкалы; править надо шкалу, а не пары")
         if not log:
             print("  слепой проход не начат; подтверждений нет, пороги не объявляются")
         for r in rows:
+            got = "/".join(str(x["given"]) for x in log if x["id"] == r["id"]) or "не судилось"
             print(f"  {r['id']:14} {r['ru']:9} заявлено {r['score']:2} "
-                  f"{r['origin']:16} {r['drift']}")
+                  f"{('поставлено ' + got):19}{r['origin']:16} {r['drift']}")
         return 0
     if a.what == "check":
         bad = []
@@ -673,6 +698,9 @@ def cmd_anchors(a) -> int:
                            f"пара не кодирует противоположное направление")
         print("OK: реестр цел" if not bad else "находки:\n  " + "\n  ".join(bad))
         return 1 if bad else 0
+    if a.what == "brief":
+        print(BLIND_BRIEF)
+        return cmd_anchors_show_all(anchor_rows()) or 0
     if a.what == "blind":
         return cmd_anchors_show_all(rows) or 0
     r = by_id.get(a.id)
@@ -1238,7 +1266,7 @@ def main() -> int:
     sc.add_argument("--note", default="")
     sc.set_defaults(f=cmd_score)
     an = sub.add_parser("anchors")
-    an.add_argument("what", choices=("stat", "check", "show", "score", "blind", "seal"))
+    an.add_argument("what", choices=("stat", "check", "show", "score", "blind", "seal", "brief"))
     an.add_argument("id", nargs="?")
     an.add_argument("mark", nargs="?")
     an.add_argument("--pass", dest="judge_pass", choices=("score", "revision"),
