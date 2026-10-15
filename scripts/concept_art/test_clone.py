@@ -39,11 +39,18 @@ j.QUEUE = tmp / "queue.json"
 j.PAIRS = tmp / "pairs"
 j.ETALONS = j.REFS / "manifest.json"
 j.ANCHORS = j.DOCS / "anchors.md"
+j.ANCHOR_MANIFEST = j.REFS / "anchors-manifest.json"
 
 unit = {"unit": "IMG-001", "reference": "references/crops/IMG-001.png", "category": "unit-01",
         "sheet": "references/unit-01.jpeg", "cell": 1,
         "model": "krea2", "status": "in-queue", "version": 0, "versions": {}, "best_score": None,
         "max_attempts": j.MAX_ATTEMPTS, "subject": "бравый воин", "history": []}
+def seal():
+    """Реестр правится тестами часто; каждый раз — перепечатка, иначе гейт прав."""
+    j.cmd_anchors(Args(what="seal", id=None, mark=None, judge_pass="revision",
+                       judge="", klass="independent"))
+
+
 j.save({"IMG-001": unit})
 
 # --- шаблон имени: <модель>_<юнит>_<версия>[_<P><R>]
@@ -279,10 +286,10 @@ ok(j.attempt_name(unit, "krea2", 2) == "krea2_IMG-001_v2_P2R1",
    f"в имени нет пары версий: {j.attempt_name(unit, 'krea2', 2)}")
 
 # --- 57. линт стилевого блока ----------------------------------------------
-card = ("## 1. Линия\n\n| Признак | Формулировка |\n| --- | --- |\n"
-        "| Контур | `clean dark contour line` |\n\n"
-        "## 2. Цвет\n\n| Признак | Формулировка |\n| --- | --- |\n"
-        "| Кожа | `warm ochre skin` |\n\n"
+card = ("## 1. Линия\n\n| Признак | Формулировка | Источник |\n| --- | --- | --- |\n"
+        "| Контур | `clean dark contour line` | x |\n\n"
+        "## 2. Цвет\n\n| Признак | Формулировка | Источник |\n| --- | --- | --- |\n"
+        "| Кожа | `warm ochre skin` | x |\n\n"
         "## Отрицания\n\n| Токен | Защищаемая строка |\n| --- | --- |\n"
         "| `airbrush` | Контур |\n")
 bad = j.lint_style("clean dark contour line, airbrush, matte, no airbrush, no text", card)
@@ -360,6 +367,7 @@ ok(j.sty_delta(None, full10) is None, "первый замер обязан не
     "| AP-color-3 | 6 | колорит | x | глянец | a ↔ b | x |\n"
     "| AP-texture-1 | 10 | фактура | x | — | a ↔ b | x |\n"
     "| AP-shade-1 | 10 | светотень | x | — | a ↔ b | x |\n", encoding="utf-8")
+seal()
 q = j.load()
 q["IMG-001"]["file"] = "attempts/IMG-001/krea2_IMG-001_v1_P2R0.webp"
 q["IMG-001"]["prompt_version"], q["IMG-001"]["render_version"] = "P2", "R0"
@@ -387,6 +395,7 @@ ok("сид 43" in rep, "журнал не пишет сид")
 
 # --- 67. цитата обязана ссылаться на пару из реестра -----------------------
 (j.DOCS / "anchors.md").write_text("| AP-line-2 | 9 | ... |\n", encoding="utf-8")
+seal()
 try:
     j.cmd_sty(Args(id="IMG-001", rows=["line=9@AP-line-99", "color=9@AP-line-2",
                                        "texture=9@AP-line-2", "shade=9@AP-line-2"],
@@ -409,17 +418,20 @@ reg = "\n".join([
     "| AP-line-4 | 7 | линия | эталон↔попытка | мягче | attempts/IMG-001/ref_a.png ↔ attempts/IMG-002/gen_b.webp | ок",
 ]) + "\n"
 j.ANCHORS.write_text(reg, encoding="utf-8")
+seal()
 ok(len(j.anchor_rows()) == 3, "реестр разобрался не целиком")
 import contextlib, io
 buf = io.StringIO()
 with contextlib.redirect_stdout(buf):
-    rc = j.cmd_anchors(Args(what="check", id=None, mark=None, judge_pass="revision", judge=""))
+    rc = j.cmd_anchors(Args(what="check", id=None, mark=None, judge_pass="revision",
+                            judge="", klass="independent"))
 ok(rc == 1 and any("линия" in x and "одним дрейфом" in x
                    for x in buf.getvalue().splitlines()),
    f"пары одним дрейфом не найдены: {buf.getvalue()}")
 j.ANCHORS.write_text(reg.replace("| AP-line-4 | 7 | линия | эталон↔попытка | мягче |",
                                  "| AP-line-4 | 7 | линия | эталон↔попытка | контур-тяжелее |"),
                      encoding="utf-8")
+seal()
 buf = io.StringIO()
 with contextlib.redirect_stdout(buf):
     rc = j.cmd_anchors(Args(what="check", id=None, mark=None, judge_pass="revision", judge=""))
@@ -429,18 +441,19 @@ ok(not any("линия" in x for x in buf.getvalue().splitlines()),
 # --- 69. слепой проход: уровень скрыт до записи, полоса 5–6 засчитана -------
 buf = io.StringIO()
 with contextlib.redirect_stdout(buf):
-    j.cmd_anchors(Args(what="show", id="AP-line-3", mark=None, judge_pass="revision", judge=""))
+    j.cmd_anchors(Args(what="show", id="AP-line-3", mark=None, judge_pass="revision",
+                       judge="", klass="independent"))
 shown = buf.getvalue()
 ok(" 6" not in shown and "заявлено" not in shown, f"show показал уровень: {shown}")
 buf = io.StringIO()
 with contextlib.redirect_stdout(buf):
     j.cmd_anchors(Args(what="score", id="AP-line-3", mark="line=5",
-                       judge_pass="revision", judge="владелец"))
+                       judge_pass="revision", judge="владелец", klass="independent"))
 ok("подтверждено" in buf.getvalue(), f"полоса 5–6 не засчитана: {buf.getvalue()}")
 buf = io.StringIO()
 with contextlib.redirect_stdout(buf):
     j.cmd_anchors(Args(what="score", id="AP-line-3", mark="line=9",
-                       judge_pass="revision", judge="владелец"))
+                       judge_pass="revision", judge="владелец", klass="independent"))
 ok("переприсмотр" in buf.getvalue(), f"расхождение не замечено: {buf.getvalue()}")
 log = json.loads((j.DOCS / "anchor-log.json").read_text())
 ok(log[-1]["anchors"] == j.anchors_version() and log[-1]["etalons"] == j.etalon_version(),
@@ -462,5 +475,35 @@ with contextlib.redirect_stdout(buf):
                                        "texture=10@AP-line-1", "shade=10@AP-line-1"],
                    gap=[], judge_pass="revision", control="AP-line-1"))
 ok(thermo() == before, f"контроль вслепую сдвинул термостат: {before} -> {thermo()}")
+
+# --- 71. словарь стиля меряется строже задачи: отрицаний в нём нет ----------
+found = j.lint_card("## 1. Линия\n\n| a | b | c |\n| --- | --- | --- |\n"
+                    "| Контур | `no outlines, never floating` | x |\n")
+ok(len(found) == 1 and "Контур" in found[0] and "never" in found[0],
+   f"словарь с отрицанием не найден: {found}")
+ok(not j.lint_card("## Отрицания\n\n| a | b | c |\n| --- | --- | --- |\n"
+                   "| Контур | `no outlines` | x |\n"),
+   "журнал отрицаний проверен как словарь")
+
+# --- 72. реестр якорей под гейтом: молча порвать прибор нельзя --------------
+try:
+    j.ANCHORS.write_text(j.ANCHORS.read_text() + "| AP-line-9 | 5 | линия | x | — | a ↔ b | x |\n",
+                         encoding="utf-8")
+    j.cmd_stat(None)
+    raise AssertionError("изменённый реестр принят")
+except SystemExit as e:
+    ok("изменён после опечатки" in str(e), f"гейт назвал причину иначе: {e}")
+seal()
+ok(j.anchors_version() == json.loads(j.ANCHOR_MANIFEST.read_text())["version"],
+   "печать не сошлась с живым реестром")
+
+# --- 73. класс судьи записан; self — floor-check, не подтверждение ----------
+buf = io.StringIO()
+with contextlib.redirect_stdout(buf):
+    j.cmd_anchors(Args(what="score", id="AP-line-3", mark="line=5", judge_pass="revision",
+                       judge="агент", klass="self"))
+ok("floor-check" in buf.getvalue(), f"self не помечен floor-checkом: {buf.getvalue()}")
+ok(json.loads((j.DOCS / "anchor-log.json").read_text())[-1]["klass"] == "self",
+   "класс судьи не записан")
 
 print(f"OK: проверок {checks}")

@@ -40,6 +40,7 @@ QUEUE = LAB / "queue.json"
 SPEC = LAB / "spec.json"
 PAIRS = LAB / "pairs"
 ETALONS = REFS / "manifest.json"
+ANCHOR_MANIFEST = REFS / "anchors-manifest.json"
 INK_MAX = 235                       # порог «не бумага» для поиска фигуры (тот же, что у гейта)
 SHEETS_SRC = Path("/Users/user/sigil-of-the-unwilling-slop/___STYLE_BOOK/for_local_agent/unit")
 
@@ -124,11 +125,14 @@ def similarity(ref: Path, gen: Path) -> dict:
             "score": round(0.45 * iou + 0.35 * hist + 0.2 * ar, 3)}
 
 
-def pair(jid: str, ref: Path, gen: Path, out: Path, caption: str) -> None:
-    h = 420
+def pair(jid: str, ref: Path, gen: Path, out: Path, caption: str,
+         h: int = 420, inset: float = 0.0) -> None:
     cells = []
     for p in (ref, gen):
         im = Image.open(p).convert("RGB")
+        if inset:                                   # доля короткой стороны
+            d = int(min(im.size) * inset)
+            im = im.crop((d, d, im.width - d, im.height - d))
         cells.append(im.resize((round(im.width * h / im.height), h), Image.LANCZOS))
     board = Image.new("RGB", (cells[0].width + cells[1].width + 12, h + 22), (255, 255, 255))
     board.paste(cells[0], (0, 22))
@@ -304,6 +308,7 @@ def cmd_etalons(a) -> int:
 
 
 def cmd_next(a) -> int:
+    require_anchors()
     q = load()
     if a.id:
         uid, unit = a.id, q.get(a.id)
@@ -369,9 +374,56 @@ def anchor_rows() -> list[dict]:
     return rows
 
 
+def anchors_body() -> str:
+    return "\n".join(l for l in ANCHORS.read_text().splitlines()
+                     if l.startswith("| AP-"))
+
+
 def anchors_version() -> str:
-    body = "\n".join(l for l in ANCHORS.read_text().splitlines() if l.startswith("| AP-"))
-    return "anchors-" + hashlib.sha256(body.encode()).hexdigest()[:12]
+    """Версия прибора = хеш тела реестра (строки пар, без комментариев)."""
+    return "anchors-" + hashlib.sha256(anchors_body().encode()).hexdigest()[:12]
+
+
+def require_anchors() -> str:
+    """Гейт целостности прибора: файл реестра сверяется с манифестом при старте.
+
+    Тесты и человек правят реестр чаще, чем коммитят; хеш ловит это до замера,
+    а не в отчёте. Несовпадение — отказ, как с эталонным сетом.
+    """
+    if not ANCHORS.is_file():
+        return ""            # прибора ещё нет: десятки цитировать не во что
+    body = anchors_body()
+    live = "anchors-" + hashlib.sha256(body.encode()).hexdigest()[:12]
+    if not ANCHOR_MANIFEST.is_file():
+        raise SystemExit(f"реестр якорей не опечатан ({ANCHOR_MANIFEST.name}); "
+                         f"живой {live}: `jobloop anchors seal` после правки")
+    want = json.loads(ANCHOR_MANIFEST.read_text())["version"]
+    if want != live:
+        raise SystemExit(f"реестр якорей изменён после опечатки: манифест {want}, "
+                         f"файл {live}; переприсмотр или `jobloop anchors seal`")
+    return live
+
+
+def cmd_seal(a) -> int:
+    body = anchors_body()
+    ver = "anchors-" + hashlib.sha256(body.encode()).hexdigest()[:12]
+    ANCHOR_MANIFEST.write_text(json.dumps(
+        {"version": ver, "sha256": hashlib.sha256(body.encode()).hexdigest(),
+         "pairs": len(anchor_rows()), "date": str(date.today())},
+        ensure_ascii=False, indent=1) + "\n")
+    print(f"{ANCHOR_MANIFEST}: {ver}, пар {len(anchor_rows())}")
+    return 0
+
+
+def control_board(ap_id: str) -> Path:
+    """Контроль сессии подаётся другим кадрированием, чем в реестровой доске:
+    опознанный контроль перестаёт детектировать дрейф судьи."""
+    r = next(x for x in anchor_rows() if x["id"] == ap_id)
+    out = PAIRS / "controls" / f"{ap_id}.png"
+    # другое кадрирование и другой масштаб: опознанный контроль не детектирует
+    # дрейф судьи, он детектирует только память на доску
+    pair(ap_id, r["pair"][0], r["pair"][1], out, "контроль", h=640, inset=0.06)
+    return out
 
 
 def anchor_log() -> list[dict]:
@@ -391,10 +443,30 @@ def cmd_anchors_show_all(rows: list[dict]) -> int:
 
 def cmd_anchors(a) -> int:
     """Реестр якорных пар: show вслепую, score с сверкой после записи, check — структура."""
+    if a.what not in ("seal", "check"):
+        require_anchors()                # прибор под печатью: молча порвать нельзя
     rows = anchor_rows()
     by_id = {r["id"]: r for r in rows}
+    if a.what == "seal":
+        return cmd_seal(a)
     if a.what == "stat":
-        print(f"{anchors_version()}, пар {len(rows)}, проверок {len(anchor_log())}")
+        log = anchor_log()
+        print(f"{anchors_version()}, пар {len(rows)}, проверок {len(log)}")
+        by = {}
+        for rec in log:
+            by.setdefault(rec.get("klass", "?"), []).append(rec)
+        for k, recs in sorted(by.items()):
+            note = {"independent": "честно слепой", "semi-blind": "несогласие перевешивает",
+                    "self": "floor-check, не подтверждение"}.get(k, "")
+            print(f"  {k:12} записей {len(recs):3}  {note}")
+        deltas = [r["given"] - r["declared"] for r in log if r.get("klass") != "self"]
+        if deltas and (all(d > 0 for d in deltas) or all(d < 0 for d in deltas)):
+            print("  систематический сдвиг всех пар в одну сторону — дрейфует судья, "
+                  "он отбраковывается до калибровки")
+        elif any(d for d in deltas):
+            print("  расхождения рассеянные — конкретные пары на переприсмотр")
+        if not log:
+            print("  слепой проход не начат; подтверждений нет, пороги не объявляются")
         for r in rows:
             print(f"  {r['id']:14} {r['ru']:9} заявлено {r['score']:2} "
                   f"{r['origin']:16} {r['drift']}")
@@ -441,7 +513,7 @@ def cmd_anchors(a) -> int:
         given = int(val)
         rec = {"id": r["id"], "date": str(date.today()), "given": given, "declared": r["score"],
                "anchors": anchors_version(), "etalons": etalon_version(),
-               "pass": a.judge_pass, "judge": a.judge or ""}
+               "pass": a.judge_pass, "judge": a.judge, "klass": a.klass}
         log = anchor_log() + [rec]
         (DOCS / "anchor-log.json").write_text(json.dumps(log, ensure_ascii=False, indent=1) + "\n")
         with (DOCS / "anchor-log.md").open("a") as fh:
@@ -450,6 +522,10 @@ def cmd_anchors(a) -> int:
         hit = given == r["score"] or (r["score"] <= 6 and 5 <= given <= 6)
         print(f"{r['id']}: заявлено {r['score']}, поставлено {given} -> "
               + ("подтверждено" if hit else "переприсмотр: неточно либо якорь, либо описание уровня"))
+        if a.klass == "self":
+            print("  класс self: это floor-check, а не подтверждение пары")
+        elif a.klass == "semi-blind":
+            print("  класс semi-blind: согласие слабо, перевешивает несогласие")
         return 0
     raise SystemExit("нужно: stat | check | show | score")
 
@@ -503,6 +579,7 @@ def cmd_sty(a) -> int:
     uid, unit = a.id, q[a.id]
     if not unit.get("file"):
         raise SystemExit("кадра нет — сначала next")
+    require_anchors()
     gaps = a.gap or []
     a.judge_pass = getattr(a, "judge_pass", "score")
     a.control = getattr(a, "control", None)
@@ -515,6 +592,11 @@ def cmd_sty(a) -> int:
         if dead:
             raise SystemExit(f"якорной пары нет в реестре {ANCHORS.name}: "
                              + ", ".join(sorted(set(dead))))
+    if a.control:
+        if not any(r["id"] == a.control for r in anchor_rows()):
+            raise SystemExit(f"контроль {a.control} не подтверждён слепым проходом: "
+                             f"в реестре такой пары нет")
+        print(f"контроль вслепую (другой кроп и масштаб): {control_board(a.control)}")
     pct = sty_pct(rows)
     prev = next((h for h in reversed(unit["history"]) if h.get("rows")), None)
     delta = sty_delta(prev.get("rows") if prev else None, rows)
@@ -741,16 +823,42 @@ def split_style(style: str) -> tuple[str, str]:
     return (style, "") if i < 0 else (style[:i], style[i + 1:])
 
 
-def card_phrases(card: str) -> list[str]:
-    """Формулировки словаря стиля: только подтверждённые группы, без отменённых."""
+NEG_RE = re.compile(r"\b(no|not|without|never|без)\b")
+JUDGE_CLASSES = ("independent", "semi-blind", "self")
+
+
+def card_rows(card: str) -> list[tuple[str, str]]:
+    """Строки словаря: (признак, формулировка). Только нумерованные секции
+    (журнал отрицаний — не словарь), без отменённых, только ячейка формулировки
+    — источник с цитатами старых отрицаний мерить нельзя."""
     out = []
-    for sec in card.split("\n## ")[1:]:
+    for sec in ("\n" + card).split("\n## ")[1:]:
         if not sec[:1].isdigit():
             continue
         for line in sec.splitlines():
-            if "~~" in line:
+            c = [x.strip() for x in line.strip().strip("|").split("|")]
+            if len(c) != 3 or "~~" in line or "`" not in c[1]:
                 continue
-            out += [c.strip() for c in line.split("`")[1::2]]
+            for form in c[1].split("`")[1::2]:
+                if " | " in form:                         # слот (выбор одного) не обязан
+                    continue
+                out.append((c[0], form.strip()))
+    return out
+
+
+def card_phrases(card: str) -> list[str]:
+    return [f for _, f in card_rows(card)]
+
+
+def lint_card(card: str) -> list[str]:
+    """Словарь меряется строже задачи: источник чище потребителя."""
+    out = []
+    for name, form in card_rows(card):
+        neg = sorted({m.group(0) for m in NEG_RE.finditer(form.lower())})
+        if neg:
+            out.append(f"строка словаря с отрицанием ({', '.join(neg)}): {name!r} — "
+                       f"«{form}»; мера читается с 10-якоря строки, запрет "
+                       f"формулируется положительно")
     return out
 
 
@@ -759,8 +867,7 @@ def lint_style(style: str, card: str) -> list[str]:
     обязана иметь якорь в плюсе. Нарушение = находка, а не падение."""
     plus, minus = split_style(style)
     low, out = plus.lower(), []
-    neg = sorted({m.group(0) for m in re.finditer(r"\b(no|not|without|без)\b",
-                                                  style.lower())})
+    neg = sorted({m.group(0) for m in NEG_RE.finditer(style.lower())})
     if neg:
         out.append("лексическое отрицание в задаче (" + ", ".join(neg) + "): живой "
                    "отрицательной ветки нет ни у одной стадии, эти слова уходят в "
@@ -778,7 +885,8 @@ def lint_style(style: str, card: str) -> list[str]:
 
 def cmd_lint(a) -> int:
     style = json.loads(SPEC.read_text())["variants"][0]["style"]
-    bad = lint_style(style, (DOCS / "style-card.md").read_text())
+    card = (DOCS / "style-card.md").read_text()
+    bad = lint_style(style, card) + lint_card(card)
     for b in bad:
         print(f"- {b}")
     print(f"нарушений {len(bad)}")
@@ -856,6 +964,7 @@ def cmd_reopen(a) -> int:
 
 
 def cmd_stat(_a) -> int:
+    require_anchors()
     q = load()
     tally = {}
     for u in q.values():
@@ -907,12 +1016,14 @@ def main() -> int:
     sc.add_argument("--note", default="")
     sc.set_defaults(f=cmd_score)
     an = sub.add_parser("anchors")
-    an.add_argument("what", choices=("stat", "check", "show", "score", "blind"))
+    an.add_argument("what", choices=("stat", "check", "show", "score", "blind", "seal"))
     an.add_argument("id", nargs="?")
     an.add_argument("mark", nargs="?")
     an.add_argument("--pass", dest="judge_pass", choices=("score", "revision"),
                     default="revision")
-    an.add_argument("--judge", default="")
+    an.add_argument("--judge", default="", help="кто судил (имя или id сессии)")
+    an.add_argument("--class", dest="klass", choices=JUDGE_CLASSES,
+                    help="independent | semi-blind | self (floor-check)")
 
     st = sub.add_parser("sty")
     st.add_argument("id")
@@ -963,7 +1074,6 @@ def main() -> int:
     ro.add_argument("id")
     ro.add_argument("--note", default="")
     ro.set_defaults(f=cmd_reopen)
-    args = ap.parse_args()
     return args.f(args)
 
 
