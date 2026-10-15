@@ -1,5 +1,5 @@
 {
- "_comment": "Каталог концепт-арта. Стиль задаёт эталон категории (reference + style): новый кадр обязан повторять стиль одного из изображений каталога референсов (правило владельца 2026-10-15). Вариант меняет только технику рендера — без слов о сюжете, пропорциях, палитре и материалах. Слои запроса: style категории -> style варианта -> frame -> subject.",
+ "_comment": "Каталог концепт-арта. Стиль задаёт эталон категории (reference + style): новый кадр обязан повторять стиль одного из изображений каталога референсов (правило владельца 2026-10-15). Вариант меняет только технику рендера — без слов о сюжете, пропорциях, палитре и материалах. Слои запроса: style категории -> style варианта -> frame -> subject. Правая/левая сторона сюжета — всегда со стороны зрителя. Признак, который модель часто теряет (босые ноги, шрам, деталь в руке), повторяется в начале subject и в его конце.",
  "server": "http://192.168.0.230:9000/mcp",
  "comfy": "http://192.168.0.230:8188",
  "out_dir": "concept_art",
@@ -29,31 +29,31 @@
    "id": "t1_bold_ink",
    "name": "t1_bold_ink",
    "style": "bold black ink outlines, flat cel fill, hard-edged single shadow, high-contrast graphic-novel finish",
-   "negative": "photorealism, photograph, gritty realism, dark muddy palette, desaturated, sketch, scribble, text, letters, watermark, extra limbs, cropped figure, scenery, background landscape"
+   "negative": "photorealism, photograph, gritty realism, dark muddy palette, desaturated, sketch, scribble, text, letters, watermark, extra limbs, cropped figure, scenery, background landscape, character sheet, turnaround, multiple views, reference sheet, split frame, collage, two characters, blind box vinyl, clay render, glossy plastic, shiny enamel, 3d print, chibi, toddler proportions, baby face, cute child, cropped limbs, extra fingers, deformed hands"
   },
   {
    "id": "t2_soft_render",
    "name": "t2_soft_render",
    "style": "smooth airbrushed rendering, soft gradients, no visible line, glossy polished surfaces, warm rim light",
-   "negative": "photorealism, photograph, gritty realism, dark muddy palette, desaturated, sketch, scribble, text, letters, watermark, extra limbs, cropped figure, scenery, background landscape"
+   "negative": "photorealism, photograph, gritty realism, dark muddy palette, desaturated, sketch, scribble, text, letters, watermark, extra limbs, cropped figure, scenery, background landscape, character sheet, turnaround, multiple views, reference sheet, split frame, collage, two characters, blind box vinyl, clay render, glossy plastic, shiny enamel, 3d print, chibi, toddler proportions, baby face, cute child, cropped limbs, extra fingers, deformed hands"
   },
   {
    "id": "t3_flat_line",
    "name": "t3_flat_line",
    "style": "uniform thin ink line, flat colours, single shadow tone, minimal surface texture, crisp silhouette",
-   "negative": "photorealism, photograph, gritty realism, dark muddy palette, desaturated, sketch, scribble, text, letters, watermark, extra limbs, cropped figure, scenery, background landscape"
+   "negative": "photorealism, photograph, gritty realism, dark muddy palette, desaturated, sketch, scribble, text, letters, watermark, extra limbs, cropped figure, scenery, background landscape, character sheet, turnaround, multiple views, reference sheet, split frame, collage, two characters, blind box vinyl, clay render, glossy plastic, shiny enamel, 3d print, chibi, toddler proportions, baby face, cute child, cropped limbs, extra fingers, deformed hands"
   },
   {
    "id": "t4_painterly",
    "name": "t4_painterly",
    "style": "loose hand-painted rendering with visible brush texture, rich mid-tones, soft edges, no hard outlines",
-   "negative": "photorealism, photograph, gritty realism, dark muddy palette, desaturated, sketch, scribble, text, letters, watermark, extra limbs, cropped figure, scenery, background landscape"
+   "negative": "photorealism, photograph, gritty realism, dark muddy palette, desaturated, sketch, scribble, text, letters, watermark, extra limbs, cropped figure, scenery, background landscape, character sheet, turnaround, multiple views, reference sheet, split frame, collage, two characters, blind box vinyl, clay render, glossy plastic, shiny enamel, 3d print, chibi, toddler proportions, baby face, cute child, cropped limbs, extra fingers, deformed hands"
   },
   {
    "id": "t5_glossy_toon",
    "name": "t5_glossy_toon",
    "style": "glossy toon rendering, thick bright rim light, simplified bold shapes, high saturation, playful specular highlights",
-   "negative": "photorealism, photograph, gritty realism, dark muddy palette, desaturated, sketch, scribble, text, letters, watermark, extra limbs, cropped figure, scenery, background landscape"
+   "negative": "photorealism, photograph, gritty realism, dark muddy palette, desaturated, sketch, scribble, text, letters, watermark, extra limbs, cropped figure, scenery, background landscape, character sheet, turnaround, multiple views, reference sheet, split frame, collage, two characters, blind box vinyl, clay render, glossy plastic, shiny enamel, 3d print, chibi, toddler proportions, baby face, cute child, cropped limbs, extra fingers, deformed hands"
   }
  ],
  "categories": {
@@ -63,7 +63,7 @@
     1024
    ],
    "count": 12,
-   "frame": "single full-body fantasy character, entire figure visible from head to boots, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, no scenery, no floor, no cast shadow, unit concept art",
+   "frame": "single full-body fantasy character standing exactly as described, entire figure visible from head to boots, whole object with a clear empty margin around it, nothing touching the frame, centered, front view facing the camera straight on, head up and eyes open looking at the viewer, isolated on plain white background with no scenery and no blurred shapes, soft grey contact shadow under the boots only. Left and right in the description are stated as seen by the viewer in the image; never mirror the pose",
    "items": [
     {
      "id": "levy_militiaman",
@@ -115,7 +115,7 @@
     }
    ],
    "reference": "1791743136546-01a12c34-3cb2-72fb-914d-2361d7698797.jpeg",
-   "style": "stylized comic-cartoon fantasy game characters, bold confident ink outlines, smooth semi-real cartoon rendering, saturated fabric colours, heroic upright proportions with clear hands and heads, friendly expressive faces, clean graphic shading with one shadow tone"
+   "style": "stylized hand-painted fantasy game character illustration from a single comic-painted art bible, heroic stocky proportions: head about one sixth of the total height, broad shoulders, thick arms, short powerful legs, compact build, mature stylized cartoon face with simplified exaggerated features, large readable eyes, bold expression, hand-painted, never a photograph and never a real person's likeness, matte painterly surfaces with soft airbrush shading and a few visible brush strokes, no ink outlines, saturated but not neon fabric colours, soft single-tone graphic shading, warm key light from the upper left"
   },
   "buildings": {
    "size": [
