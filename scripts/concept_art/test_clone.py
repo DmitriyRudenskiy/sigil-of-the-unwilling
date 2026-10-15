@@ -374,4 +374,14 @@ ok("расхождений не найдено" in rep and "эталонами t
    "журнал не пишет цитату якоря")
 ok("сид 43" in rep, "журнал не пишет сид")
 
+# --- 67. цитата обязана ссылаться на пару из реестра -----------------------
+(j.DOCS / "anchors.md").write_text("| AP-line-2 | 9 | ... |\n", encoding="utf-8")
+try:
+    j.cmd_sty(Args(id="IMG-001", rows=["line=9@AP-line-99", "color=9@AP-line-2",
+                                       "texture=9@AP-line-2", "shade=9@AP-line-2"],
+                   gap=[], revised=True))
+    raise AssertionError("несуществующий якорь принят")
+except SystemExit as e:
+    ok("AP-line-99" in str(e), f"движок не назвал мёртвый якорь: {e}")
+
 print(f"OK: проверок {checks}")

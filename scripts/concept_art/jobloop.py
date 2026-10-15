@@ -56,6 +56,7 @@ STY_ROWS = ("line", "color", "texture", "shade")
 STY_ROW_RU = {"line": "линия", "color": "колорит", "texture": "фактура", "shade": "светотень"}
 STY_TARGET = 93                 # планка «сошлись»: сумма четырёх строк >= 38
 SEED_PIN = 43                   # сид атрибуции: один сид на все модели (EXT-5)
+ANCHORS = DOCS / "anchors.md"   # реестр якорных пар: цитата обязана быть в нём
 OUT_DIR = "concept_art/clone"
 
 # Стиль листа: семейство держит категория, вариант двигает только технику рендера.
@@ -399,6 +400,13 @@ def cmd_sty(a) -> int:
         raise SystemExit("кадра нет — сначала next")
     gaps = a.gap or []
     rows, tens, notes = parse_sty_rows(a.rows, gaps, a.revised)
+    cited = [kv.partition("@")[2] for kv in a.rows if "@" in kv]
+    if cited:
+        reg = ANCHORS.read_text() if ANCHORS.is_file() else ""
+        dead = [c for c in cited if c and c not in reg]
+        if dead:
+            raise SystemExit(f"якорной пары нет в реестре {ANCHORS.name}: "
+                             + ", ".join(sorted(set(dead))))
     pct = sty_pct(rows)
     prev = next((h for h in reversed(unit["history"]) if h.get("rows")), None)
     delta = sty_delta(prev.get("rows") if prev else None, rows)
