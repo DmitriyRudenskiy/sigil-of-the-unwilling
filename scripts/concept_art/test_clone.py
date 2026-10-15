@@ -524,9 +524,16 @@ ok(json.loads((j.DOCS / "anchor-log.json").read_text())[-1]["klass"] == "self",
    "класс судьи не записан")
 
 # --- 74. материал слепого прохода под печатью: подмена доски ловится --------
-ok(json.loads(j.ANCHOR_MANIFEST.read_text())["boards"].get("AP-line-3"),
+row3 = next(x for x in j.anchor_rows() if x["id"] == "AP-line-3")
+board = j.board_path(row3)
+ok(json.loads(j.ANCHOR_MANIFEST.read_text())["boards"].get("AP-line-3") and board.is_file(),
    "доска слепого прохода не попала в печать")
-(j.PAIRS / "anchors" / "AP-line-3.png").write_bytes(b"not a board")
+ok(board.name != "AP-line-3.png", f"доска снова по одной паре: {board.name}")
+man = json.loads(j.ANCHOR_MANIFEST.read_text())["boards"]
+sheet = [x["id"] for x in j.chunk_of(j.anchor_rows(), row3)]
+ok(len(sheet) == 2 and len({man[i] for i in sheet}) == 1,
+   f"лист 2×2 не накрывает обе пары одной печатью: {sheet}")
+board.write_bytes(b"not a board")
 try:
     j.cmd_stat(None)
     raise AssertionError("подменённая доска принята")

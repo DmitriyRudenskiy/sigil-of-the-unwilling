@@ -26,7 +26,7 @@ from datetime import date
 from pathlib import Path
 
 import numpy as np
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
@@ -128,6 +128,20 @@ def similarity(ref: Path, gen: Path) -> dict:
             "score": round(0.45 * iou + 0.35 * hist + 0.2 * ar, 3)}
 
 
+FONT = None
+for _f in ("DejaVuSans.ttf",                                    # Linux / CI
+           "/System/Library/Fonts/Supplemental/Verdana.ttf",     # macOS
+           "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+           "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"):   # Debian
+    try:
+        FONT = ImageFont.truetype(_f, 16)
+        break
+    except OSError:
+        pass
+if FONT is None:                       # у bitmap-шрифта кириллицы нет — подписи квадратами
+    FONT = ImageFont.load_default(16)
+
+
 def pair(jid: str, ref: Path, gen: Path, out: Path, caption: str,
          h: int = 420, inset: float = 0.0) -> None:
     cells = []
@@ -141,8 +155,30 @@ def pair(jid: str, ref: Path, gen: Path, out: Path, caption: str,
     board.paste(cells[0], (0, 22))
     board.paste(cells[1], (cells[0].width + 12, 22))
     d = ImageDraw.Draw(board)
-    d.text((4, 6), f"ОРИГИНАЛ {jid}", fill=(0, 0, 0))
-    d.text((cells[0].width + 16, 6), f"КОПИЯ {caption}", fill=(0, 0, 0))
+    d.text((4, 6), f"ОРИГИНАЛ {jid}", font=FONT, fill=(0, 0, 0))
+    d.text((cells[0].width + 16, 6), f"КОПИЯ {caption}", font=FONT, fill=(0, 0, 0))
+    out.parent.mkdir(parents=True, exist_ok=True)
+    board.save(out, quality=92)
+
+
+def grid(pairs_: list[dict], out: Path, h: int = 380) -> None:
+    """2×2: две якорные пары на одном листе — эталон и попытка каждой пары.
+    Уровней не видно: подписаны только id пары и роль ячейки."""
+    cells = []
+    for r in pairs_:
+        for p, role in zip(r["pair"], ("эталон", "попытка")):
+            im = Image.open(p).convert("RGB")
+            cells.append((f'{r["id"]} · {role}',
+                          im.resize((round(im.width * h / im.height), h), Image.LANCZOS)))
+    gap, top = 10, 22
+    w = max(c[1].width for c in cells)
+    board = Image.new("RGB", (w * 2 + gap * 3, (h + top) * 2 + gap * 3), (255, 255, 255))
+    d = ImageDraw.Draw(board)
+    for n, (label, im) in enumerate(cells):
+        x = gap + (n % 2) * (w + gap)
+        y = gap + (n // 2) * (h + top + gap)
+        d.text((x + 2, y + 6), label, font=FONT, fill=(0, 0, 0))
+        board.paste(im, (x, y + top))
     out.parent.mkdir(parents=True, exist_ok=True)
     board.save(out, quality=92)
 
@@ -454,8 +490,18 @@ def require_anchors() -> str:
     return live
 
 
-def board_path(r: dict) -> Path:
-    return PAIRS / "anchors" / f"{r['id']}.png"
+def chunk_of(rows: list[dict], r: dict) -> list[dict]:
+    """Пара и её сосед по строке: доска всегда рисует две пары сразу."""
+    rs = [x for x in rows if x["row"] == r["row"]]
+    i = next(n for n, x in enumerate(rs) if x["id"] == r["id"])   # сверка по id: check_boards зовёт заглушкой
+    return rs[i - i % 2: i - i % 2 + 2]
+
+
+def board_path(r: dict, rows: list[dict] | None = None) -> Path:
+    """Имя доски 2×2 — по номерам обеих пар на листе (AP-line-12.png)."""
+    chunk = chunk_of(anchor_rows() if rows is None else rows, r)
+    return PAIRS / "anchors" / ("AP-" + r["row"] + "-"
+                                + "".join(x["id"].split("-")[-1] for x in chunk) + ".png")
 
 
 def seal_boards(rows: list[dict]) -> dict:
@@ -464,19 +510,19 @@ def seal_boards(rows: list[dict]) -> dict:
     ни реестра, ни эталонов. Доска детерминирована из строки реестра."""
     out = {}
     for r in rows:
-        if not all(p.is_file() for p in r["pair"]):
-            continue
-        b = board_path(r)
-        b.parent.mkdir(parents=True, exist_ok=True)
-        pair(r["id"], r["pair"][0], r["pair"][1], b, r["id"])
-        out[r["id"]] = hashlib.sha256(b.read_bytes()).hexdigest()
+        chunk = chunk_of(rows, r)
+        if not all(p.is_file() for x in chunk for p in x["pair"]):
+            continue          # лист собирается из обеих пар: неполный лист не печатается
+        b = grid_board(chunk, rows)
+        for x in chunk:
+            out[x["id"]] = hashlib.sha256(b.read_bytes()).hexdigest()
     return out
 
 
 def check_boards(manifest: dict) -> list[str]:
     out = []
     for rid, want in manifest.get("boards", {}).items():
-        b = PAIRS / "anchors" / f"{rid}.png"
+        b = board_path({"id": rid, "row": rid.split("-")[1]})
         if not b.is_file():
             out.append(f"доска {rid} удалена из material слепого прохода")
         elif hashlib.sha256(b.read_bytes()).hexdigest() != want:
@@ -513,13 +559,29 @@ def anchor_log() -> list[dict]:
     return json.loads(log.read_text()) if log.is_file() else []
 
 
+def grid_board(chunk: list[dict], rows: list[dict] | None = None) -> Path:
+    """Лист 2×2 для двух пар строки; имя — по номерам пар внутри."""
+    out = board_path(chunk[0], rows)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    grid(chunk, out)
+    return out
+
+
 def cmd_anchors_show_all(rows: list[dict]) -> int:
     board = PAIRS / "anchors"
     board.mkdir(parents=True, exist_ok=True)
-    for r in rows:
-        pair(r["id"], r["pair"][0], r["pair"][1], board / f"{r['id']}.png", r["id"])
-        print(f"jobloop.py anchors score {r['id']} {r['row']}=N --pass revision")
-    print(f"доски: {board}/ (уровней не видно); сверка — после записи каждой пары")
+    for old in board.glob("AP-*.png"):
+        old.unlink()                       # старые доски по две картинки больше не прибор
+    for row in ("line", "color", "texture", "shade"):
+        rs = [r for r in rows if r["row"] == row]
+        for n in range(0, len(rs), 2):
+            chunk = rs[n:n + 2]
+            out = grid_board(chunk, rows)
+            print(f"\n{out}")
+            for r in chunk:
+                print(f"  jobloop.py anchors score {r['id']} {r['row']}=N --pass revision")
+    print(f"\nдосок {len(list(board.glob('AP-*.png')))}, в каждой 2×2 = две пары; "
+          f"уровней не видно; сверка — после записи каждой пары")
     return 0
 
 
@@ -582,10 +644,8 @@ def cmd_anchors(a) -> int:
     if not r:
         raise SystemExit(f"пары {a.id} в реестре нет")
     if a.what == "show":
-        board = PAIRS / "anchors" / f"{r['id']}.png"
-        board.parent.mkdir(parents=True, exist_ok=True)
-        pair(r["id"], r["pair"][0], r["pair"][1], board, r["id"])
-        print(f"вслепую: уровень заявленного балла скрыт\n{r['pair'][0]}\n{r['pair'][1]}\nдоска: {board}")
+        board = grid_board(chunk_of(rows, r), rows)
+        print("вслепую: уровень заявленного балла скрыт, рядом вторая пара строки\n" + str(board))
         print(f"запись: jobloop.py anchors score {r['id']} {r['row']}=N --pass revision")
         return 0
     if a.what == "score":
