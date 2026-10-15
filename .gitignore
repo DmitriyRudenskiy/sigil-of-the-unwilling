@@ -19,3 +19,10 @@ reference/*
 
 __pycache__/
 *.pyc
+
+# image-clone: пиксели лаборатории (эталонные кропы, попытки, принятые копии, пары).
+# В git — docs/, queue.json, spec.json: описание и версия решают, кадры воспроизводимы прогоном.
+/image-clone/references/
+/image-clone/attempts/
+/image-clone/matches/
+/image-clone/pairs/
