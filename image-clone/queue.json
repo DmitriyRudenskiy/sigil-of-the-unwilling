@@ -7,12 +7,12 @@
   "category": "unit-01",
   "model": "zimage",
   "status": "in-queue",
-  "version": 1,
+  "version": 2,
   "versions": {
-   "krea2": 4,
+   "krea2": 5,
    "qwen21": 14,
-   "ernie": 1,
-   "zimage": 1
+   "ernie": 2,
+   "zimage": 2
   },
   "best_score": null,
   "max_attempts": 5,
@@ -371,14 +371,190 @@
      "texture": 0,
      "shade": -1
     }
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-16",
+    "model": "krea2",
+    "version": 5,
+    "file": "attempts/IMG-001/krea2_IMG-001_v5.webp",
+    "prompt_version": "P3",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-8cb5520558f8",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 7,
+     "color": 8,
+     "texture": 7,
+     "shade": 7
+    },
+    "sty_pct": 72.5,
+    "tens": [],
+    "gaps": [
+     "line=контур есть и ровный, но толще и чернее семейного; внутри фигуры линий меньше эталонного",
+     "color=кожа ушла в загар темнее эталона, синий жилета ярче и холоднее",
+     "texture=глянца нет, но стёганка сведена к плоским ромбам без микровариации",
+     "shade=направление света угадано, собственная тень под челюстью слабее, на трапеции тень цельным пятном"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 0,
+     "color": 0,
+     "texture": 0,
+     "shade": 0
+    }
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-16",
+    "model": "ernie",
+    "version": 2,
+    "file": "attempts/IMG-001/ernie_IMG-001_v2.webp",
+    "prompt_version": "P3",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-8cb5520558f8",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 9,
+     "texture": 9,
+     "shade": 9
+    },
+    "sty_pct": 87.5,
+    "tens": [],
+    "gaps": [
+     "line=вес контура близок к семейному, но внутренний рисунок проще: меньше складок на штанах, лицо чище",
+     "texture=матово в целом, но кожа на трапеции и плечах местами гладкий пластик"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 1,
+     "color": 1,
+     "texture": 2,
+     "shade": 2
+    }
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-16",
+    "model": "zimage",
+    "version": 2,
+    "file": "attempts/IMG-001/zimage_IMG-001_v2.webp",
+    "prompt_version": "P3",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-8cb5520558f8",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 6,
+     "color": 6,
+     "texture": 6,
+     "shade": 6
+    },
+    "sty_pct": 60.0,
+    "tens": [],
+    "gaps": [
+     "color=жилет обесцвечен до серо-голубого, насыщенная земля эталона потеряна",
+     "texture=поверхность аэрографно гладкая, живописной микровариации нет, жилет — ровный градиент",
+     "shade=мягкая растяжка везде, собственные тени под челюстью и под мышкой потеряны"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": -2,
+     "color": -3,
+     "texture": -3,
+     "shade": -3
+    }
    }
   ],
-  "file": "attempts/IMG-001/zimage_IMG-001_v1.webp",
+  "file": "attempts/IMG-001/zimage_IMG-001_v2.webp",
   "note": "v11 = v7 байт в байт: R-блок до 2026-10-15 не читался генератором, cfg 3.0 в него не ехал; кадр оставлен как свидетельство дыры, не как прогон R1",
   "pair": "/Users/user/sigil-concept-art/image-clone/pairs/IMG-001.png",
   "prompt_version": "P3",
   "render_version": "R1",
   "seed_bump": 8,
+  "cycle": 1,
+  "cycles": [
+   {
+    "cycle": 1,
+    "sty": {
+     "krea2": 72.5,
+     "ernie": 87.5,
+     "zimage": 60.0
+    },
+    "mean": 73.3
+   }
+  ],
+  "seals": {
+   "krea2_IMG-001_v5": {
+    "etalon": "eb03b0dcc6b9",
+    "sheet": "6fcea42d3b60",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P3",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "fc0143515bdb",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-001_v2": {
+    "etalon": "eb03b0dcc6b9",
+    "sheet": "6fcea42d3b60",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P3",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "fc0143515bdb",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "zimage_IMG-001_v2": {
+    "etalon": "eb03b0dcc6b9",
+    "sheet": "6fcea42d3b60",
+    "model": "zimage",
+    "seed": 43,
+    "prompt_version": "P3",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "res_multistep",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "z_image_turbo_bf16.safetensors"
+    },
+    "dictionary": "fc0143515bdb",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
   "seal": {
    "etalon": "eb03b0dcc6b9",
    "sheet": "6fcea42d3b60",
@@ -387,13 +563,13 @@
    "prompt_version": "P3",
    "render_version": "R1",
    "render": {
-    "cfg": 3.0,
-    "sampler": "euler",
+    "cfg": 1.0,
+    "sampler": "res_multistep",
     "scheduler": "simple",
-    "steps": 25,
+    "steps": 8,
     "checkpoint": "z_image_turbo_bf16.safetensors"
    },
-   "dictionary": "4b82a9dec4b9",
+   "dictionary": "fc0143515bdb",
    "instrument": "anchors-aba09390ac52",
    "judge": "judge-95455b01bf98"
   }

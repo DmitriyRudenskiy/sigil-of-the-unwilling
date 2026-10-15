@@ -438,6 +438,14 @@ def cmd_next(a) -> int:
         SPEC.write_text(json.dumps(spec, ensure_ascii=False, indent=1) + "\n")
         gen.parent.mkdir(parents=True, exist_ok=True)
         unit["seal"] = run_seal(unit, model, version, spec)
+        # Сид пинится, поэтому неизменная пара (P, R) = побайтовый повтор прошлой
+        # попытки: кадр, замер и круг цепочки были бы поддельным «нет движения».
+        prev = unit.get("seals", {}).get(attempt_name(unit, model, version - 1))
+        if prev == unit["seal"] and not getattr(a, "force", False):
+            raise SystemExit(
+                f"{uid}: {model} v{version} повторит v{version - 1} побайтово — сид "
+                f"пинится, а пара (P, R) не менялась: правь слова (новый P) или --force")
+        unit.setdefault("seals", {})[attempt_name(unit, model, version)] = unit["seal"]
         save(q)        # печать до рендера: упавший прогон тоже обязан быть опечатан
         # Имя кадру отдаём серверу до запуска: узел сохранения пишет его сам,
         # локально файл ложится сразу в attempts/ и ничего не переименовывается.
@@ -796,6 +804,19 @@ def cmd_sty(a) -> int:
     """Замер попытки строками стиля. Единый источник чисел для грида, плато и «сошлись»."""
     q = load()
     uid, unit = a.id, q[a.id]
+    if getattr(a, "model", None):
+        # Замер не «последнего прогона», а конкретной стадии цепочки: кадр берётся
+        # по счётчику стадии, печать пересчитывается — она детерминирована деревом
+        # и спекой, тем же её сверяет `verify`.
+        m, spec = a.model, json.loads(SPEC.read_text())
+        v = unit.get("versions", {}).get(m)
+        if not v:
+            raise SystemExit(f"стадия {m} ещё не генерировалась")
+        f = attempt_path(unit, m, v)
+        if not f.is_file():
+            raise SystemExit(f"кадра стадии {m} нет на диске: {f}")
+        unit.update(model=m, version=v, file=str(f.relative_to(LAB)),
+                    seal=run_seal(unit, m, v, spec))
     if not unit.get("file"):
         raise SystemExit("кадра нет — сначала next")
     if not unit.get("seal"):
@@ -1443,6 +1464,8 @@ def main() -> int:
     n = sub.add_parser("next")
     n.add_argument("--model", default=None)
     n.add_argument("--id", default=None, help="взять в работу конкретный юнит, а не первый открытый")
+    n.add_argument("--force", action="store_true",
+                   help="снять стопор побайтового повтора (неизменная пара P, R)")
     n.set_defaults(f=cmd_next)
     e = sub.add_parser("etalons")
     e.set_defaults(f=cmd_etalons)
@@ -1472,7 +1495,10 @@ def main() -> int:
                     default="score", help="какой судейский проход даёт эти числа")
     st.add_argument("--control", help="AP-id вслепую вставленной контрольной пары")
     st.add_argument("--head-ratio", dest="head_ratio",
-                    help="пропорции головы эталон/попытка, напр. 17/15 (в STY-% не входит)")
+                    help="пропорции головы эталон/попытка, напр. 17/15 (в STY-%% не входит)")
+    st.add_argument("--model",
+                    help="замер стадии цепочки, а не последнего прогона: берётся её "
+                         "последний кадр, печать пересчитывается")
 
 
     vd = sub.add_parser("verdict")

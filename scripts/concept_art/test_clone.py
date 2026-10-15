@@ -413,6 +413,18 @@ seed_real = j.load()["IMG-001"]["seal"]["seed"]
 ok(f"сид {seed_real}" in rep, f"журнал не пишет затравка печати {seed_real}")
 ok(seed_real == 43, f"печать запечатала не пин-сид: {seed_real}")
 
+# --- 66b. замер стадии цепочки, а не последнего прогона --------------------
+q = j.load()
+q["IMG-001"].setdefault("versions", {})["ernie"] = 2
+j.save(q)
+Image.new("RGB", (8, 8), (255, 255, 255)).save(j.ATTEMPTS / "IMG-001" / "ernie_IMG-001_v2.webp")
+j.cmd_sty(Args(id="IMG-001", model="ernie", gap=[],
+               rows=["line=9@AP-line-2", "color=9", "texture=9", "shade=9"]))
+rec = j.load()["IMG-001"]["history"][-1]
+ok(rec["model"] == "ernie" and rec["version"] == 2,
+   f"замер стадии приписан последнему прогону: {rec['model']} v{rec['version']}")
+ok(rec["file"].endswith("ernie_IMG-001_v2.webp"), f"замер не по кадру стадии: {rec['file']}")
+
 # --- 67. цитата обязана ссылаться на пару из реестра -----------------------
 (j.DOCS / "anchors.md").write_text("| AP-line-2 | 9 | ... |\n", encoding="utf-8")
 seal()
@@ -771,5 +783,28 @@ bp = j.board("IMG-001")
 ok(bp.is_file() and bp.parent == j.PAIRS and bp.name == "IMG-001.png",
    f"доска легла не в pairs/<юнит>: {bp}")
 ok(Image.open(bp).size == (1036, 1036), f"доска не 2×2: {Image.open(bp).size}")
+
+# --- 87. неизменная пара (P, R) при пин-сиде не жрёт кадр -------------------
+q = j.load()
+q["IMG-001"].update(status="in-queue", model="krea2", version=1,
+                    versions={"krea2": 1}, file="attempts/IMG-001/krea2_IMG-001_v1.webp")
+q["IMG-001"]["seals"] = {"krea2_IMG-001_v1": j.run_seal(
+    q["IMG-001"], "krea2", 1, json.loads(j.SPEC.read_text()))}
+j.save(q)
+seen_argv.clear()
+sub_run, j.subprocess.run = j.subprocess.run, fake_run
+try:
+    try:
+        j.cmd_next(Args(model="krea2", id="IMG-001", force=False))
+        raised = ""
+    except SystemExit as exc:
+        raised = str(exc)
+    ok("побайтово" in raised, f"повтор прогона с неизменной парой не остановлен: {raised!r}")
+    ok(not (j.ATTEMPTS / "IMG-001" / "krea2_IMG-001_v2.webp").exists(),
+       "стопор сработал уже после генерации кадра")
+    j.cmd_next(Args(model="krea2", id="IMG-001", force=True))
+finally:
+    j.subprocess.run = sub_run
+ok(len(seen_argv) == 1, "--force не обошёл стопор побайтового повтора")
 
 print(f"OK: проверок {checks}")
