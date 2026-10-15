@@ -16,6 +16,7 @@ style техника, light свет, bg фон, camera ракурс, text на�
 """
 import argparse
 import hashlib
+import re
 import json
 import shutil
 import subprocess
@@ -349,6 +350,110 @@ def cmd_next(a) -> int:
 
 # ------------------------------------------------- строки стиля (STY-%)
 
+RU_TO_ROW = {v: k for k, v in STY_ROW_RU.items()}
+
+
+def anchor_rows() -> list[dict]:
+    """Строки реестра: | ID | Балл | Строка | Происхождение | Направление | Пара | Что видно |."""
+    rows = []
+    if not ANCHORS.is_file():
+        raise SystemExit(f"реестр якорей не найден: {ANCHORS}")
+    for line in ANCHORS.read_text().splitlines():
+        c = [x.strip() for x in line.strip().strip("|").split("|")]
+        if len(c) != 7 or not c[0].startswith("AP-"):
+            continue
+        a, b = [x.strip() for x in c[5].split("↔")]
+        rows.append({"id": c[0], "score": int(c[1]), "row": RU_TO_ROW[c[2]], "ru": c[2],
+                     "origin": c[3], "drift": c[4], "why": c[6],
+                     "pair": (LAB / a, LAB / b)})
+    return rows
+
+
+def anchors_version() -> str:
+    body = "\n".join(l for l in ANCHORS.read_text().splitlines() if l.startswith("| AP-"))
+    return "anchors-" + hashlib.sha256(body.encode()).hexdigest()[:12]
+
+
+def anchor_log() -> list[dict]:
+    log = DOCS / "anchor-log.json"
+    return json.loads(log.read_text()) if log.is_file() else []
+
+
+def cmd_anchors_show_all(rows: list[dict]) -> int:
+    board = PAIRS / "anchors"
+    board.mkdir(parents=True, exist_ok=True)
+    for r in rows:
+        pair(r["id"], r["pair"][0], r["pair"][1], board / f"{r['id']}.png", r["id"])
+        print(f"jobloop.py anchors score {r['id']} {r['row']}=N --pass revision")
+    print(f"доски: {board}/ (уровней не видно); сверка — после записи каждой пары")
+    return 0
+
+
+def cmd_anchors(a) -> int:
+    """Реестр якорных пар: show вслепую, score с сверкой после записи, check — структура."""
+    rows = anchor_rows()
+    by_id = {r["id"]: r for r in rows}
+    if a.what == "stat":
+        print(f"{anchors_version()}, пар {len(rows)}, проверок {len(anchor_log())}")
+        for r in rows:
+            print(f"  {r['id']:14} {r['ru']:9} заявлено {r['score']:2} "
+                  f"{r['origin']:16} {r['drift']}")
+        return 0
+    if a.what == "check":
+        bad = []
+        seen = set()
+        for r in rows:
+            if r["id"] in seen:
+                bad.append(f"{r['id']}: дубликат id")
+            seen.add(r["id"])
+            for p in r["pair"]:
+                if not p.is_file():
+                    bad.append(f"{r['id']}: кадра нет на диске: {p.relative_to(LAB)}")
+        for row in STY_ROWS:
+            got = [r for r in rows if r["row"] == row]
+            if not any(r["score"] == 10 for r in got):
+                bad.append(f"{STY_ROW_RU[row]}: нет десятки — строка не откалибрована сверху")
+            low = [r for r in got if r["score"] <= 6]
+            rev = [r for r in got if r["score"] == 7]
+            if not low or not rev:
+                bad.append(f"{STY_ROW_RU[row]}: полоса односторонняя, нужен дрейф в обе стороны")
+            elif {r["drift"] for r in low} & {r["drift"] for r in rev}:
+                bad.append(f"{STY_ROW_RU[row]}: нижняя полоса и семёрка одним дрейфом — "
+                           f"пара не кодирует противоположное направление")
+        print("OK: реестр цел" if not bad else "находки:\n  " + "\n  ".join(bad))
+        return 1 if bad else 0
+    if a.what == "blind":
+        return cmd_anchors_show_all(rows) or 0
+    r = by_id.get(a.id)
+    if not r:
+        raise SystemExit(f"пары {a.id} в реестре нет")
+    if a.what == "show":
+        board = PAIRS / "anchors" / f"{r['id']}.png"
+        board.parent.mkdir(parents=True, exist_ok=True)
+        pair(r["id"], r["pair"][0], r["pair"][1], board, r["id"])
+        print(f"вслепую: уровень заявленного балла скрыт\n{r['pair'][0]}\n{r['pair'][1]}\nдоска: {board}")
+        print(f"запись: jobloop.py anchors score {r['id']} {r['row']}=N --pass revision")
+        return 0
+    if a.what == "score":
+        key, _, val = a.mark.partition("=")
+        if key != r["row"]:
+            raise SystemExit(f"пара про строку {r['ru']}, поставлен балл по {key}")
+        given = int(val)
+        rec = {"id": r["id"], "date": str(date.today()), "given": given, "declared": r["score"],
+               "anchors": anchors_version(), "etalons": etalon_version(),
+               "pass": a.judge_pass, "judge": a.judge or ""}
+        log = anchor_log() + [rec]
+        (DOCS / "anchor-log.json").write_text(json.dumps(log, ensure_ascii=False, indent=1) + "\n")
+        with (DOCS / "anchor-log.md").open("a") as fh:
+            fh.write(f"\n## {rec['date']} {r['id']} — поставлено {given}, "
+                     f"проход {rec['pass']}, реестр {rec['anchors']}\n")
+        hit = given == r["score"] or (r["score"] <= 6 and 5 <= given <= 6)
+        print(f"{r['id']}: заявлено {r['score']}, поставлено {given} -> "
+              + ("подтверждено" if hit else "переприсмотр: неточно либо якорь, либо описание уровня"))
+        return 0
+    raise SystemExit("нужно: stat | check | show | score")
+
+
 def parse_sty_rows(pairs: list[str], gaps: list[str], revised: bool):
     """Баллы четырёх строк стиля. Десятка — сертифицируемое утверждение: только
     с цитатой якорной пары и только пережившая адверсариальный проход. Девятка
@@ -399,7 +504,10 @@ def cmd_sty(a) -> int:
     if not unit.get("file"):
         raise SystemExit("кадра нет — сначала next")
     gaps = a.gap or []
-    rows, tens, notes = parse_sty_rows(a.rows, gaps, a.revised)
+    a.judge_pass = getattr(a, "judge_pass", "score")
+    a.control = getattr(a, "control", None)
+    revised = a.judge_pass == "revision"
+    rows, tens, notes = parse_sty_rows(a.rows, gaps, revised)
     cited = [kv.partition("@")[2] for kv in a.rows if "@" in kv]
     if cited:
         reg = ANCHORS.read_text() if ANCHORS.is_file() else ""
@@ -415,8 +523,9 @@ def cmd_sty(a) -> int:
            "version": unit["version"], "file": unit["file"],
            "prompt_version": unit.get("prompt_version"),
            "render_version": unit.get("render_version"), "seed": SEED_PIN,
-           "etalons": ver, "rows": rows, "sty_pct": pct, "tens": tens,
-           "gaps": gaps, "notes": notes, "revised": bool(a.revised), "delta": delta}
+           "etalons": ver, "anchors": anchors_version() if ANCHORS.is_file() else None,
+           "rows": rows, "sty_pct": pct, "tens": tens, "gaps": gaps, "notes": notes,
+           "judge_pass": a.judge_pass, "control": a.control, "delta": delta}
     unit["history"].append(rec)
     save(q)
     anchor_of = {}
@@ -435,6 +544,9 @@ def cmd_sty(a) -> int:
         lines.append(f"- Десятка: {t}\n")
     for note in notes:
         lines.append(f"- Понижение: {note}\n")
+    if a.control:
+        lines.insert(1, f"- Контроль судьи вслепую: {a.control}"
+                       f" (в термостат десяток не входит)\n")
     lines.append("- Дельта к прошлому замеру: "
                  + ("первый замер" if delta is None else
                     ", ".join(f"{STY_ROW_RU[r]} {delta[r]:+d}" for r in STY_ROWS)) + "\n")
@@ -443,7 +555,7 @@ def cmd_sty(a) -> int:
         print(f"  {STY_ROW_RU[r]:9} {rows[r]:2} | {gap_of.get(r, '—')[:60]}")
     print(f"{uid} {unit['model']} v{unit['version']}: STY-% {pct} "
           f"(планка {STY_TARGET}, сумма {sum(rows.values())}/40) "
-          f"| десяток {len(tens)} | ревизия {'да' if a.revised else 'НЕТ'}")
+          f"| десяток {len(tens)} | проход {a.judge_pass}")
     if notes:
         print("понижения: " + "; ".join(notes))
     return 0
@@ -647,6 +759,13 @@ def lint_style(style: str, card: str) -> list[str]:
     обязана иметь якорь в плюсе. Нарушение = находка, а не падение."""
     plus, minus = split_style(style)
     low, out = plus.lower(), []
+    neg = sorted({m.group(0) for m in re.finditer(r"\b(no|not|without|без)\b",
+                                                  style.lower())})
+    if neg:
+        out.append("лексическое отрицание в задаче (" + ", ".join(neg) + "): живой "
+                   "отрицательной ветки нет ни у одной стадии, эти слова уходят в "
+                   "положительный промпт — прецедент P0: \"no ink outlines\" снял "
+                   "главный носитель стиля; запрет формулируется положительно")
     for clause in minus.lower().replace("no ", "").split(","):
         w = clause.strip()
         if len(w) > 3 and w in low:
@@ -750,7 +869,7 @@ def cmd_stat(_a) -> int:
     tens = total = 0
     for u in q.values():
         for h in u["history"]:
-            if h.get("rows"):
+            if h.get("rows") and not h.get("control"):   # контроли — не попытки
                 total += len(h["rows"])
                 tens += sum(1 for v in h["rows"].values() if v == 10)
     if total:
@@ -787,12 +906,21 @@ def main() -> int:
     sc.add_argument("criteria", nargs="+")
     sc.add_argument("--note", default="")
     sc.set_defaults(f=cmd_score)
+    an = sub.add_parser("anchors")
+    an.add_argument("what", choices=("stat", "check", "show", "score", "blind"))
+    an.add_argument("id", nargs="?")
+    an.add_argument("mark", nargs="?")
+    an.add_argument("--pass", dest="judge_pass", choices=("score", "revision"),
+                    default="revision")
+    an.add_argument("--judge", default="")
+
     st = sub.add_parser("sty")
     st.add_argument("id")
     st.add_argument("rows", nargs="+", help="line=9 color=10@AP-line-2 ... (все четыре)")
     st.add_argument("--gap", action="append", help="row=названное расхождение")
-    st.add_argument("--revised", action="store_true",
-                    help="адверсариальный проход выполнен (без него десятка не ставится)")
+    st.add_argument("--pass", dest="judge_pass", choices=("score", "revision"),
+                    default="score", help="какой судейский проход даёт эти числа")
+    st.add_argument("--control", help="AP-id вслепую вставленной контрольной пары")
 
     vd = sub.add_parser("verdict")
     vd.add_argument("id")
@@ -808,6 +936,8 @@ def main() -> int:
     vd.add_argument("--ceiling", default="",
                     help="признак, в который упёрся промпт (gloss, line…): "
                          "правками слов на этом юните больше не двигается")
+    st.set_defaults(f=cmd_sty)
+    an.set_defaults(f=cmd_anchors)
     vd.set_defaults(f=cmd_verdict)
     ac = sub.add_parser("accept")
     ac.add_argument("id")
