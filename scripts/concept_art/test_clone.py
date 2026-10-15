@@ -315,9 +315,14 @@ ok(any("лексическое отрицание" in b and "no" in b for b in n
    f"линт пропустил морфологию отрицания: {neg}")
 
 # --- 58. reopen: потолок, объявленный на неиспробованном рычаге, снимается --
-unit["status"] = "model-ceiling"
-j.cmd_reopen(Args(id="IMG-001", note="рычаг не проверен на живучесть"))
-ok(j.load()["IMG-001"]["status"] == "in-queue", "reopen не вернул юнит в очередь")
+q = j.load()
+q["IMG-001"].update(status="model-ceiling", ceilings={"ernie": {"sty": 71, "cycle": 2}})
+j.save(q)
+j.cmd_reopen(Args(id="IMG-001", note="рычаг не проверен на живучесть", stages=None))
+back = j.load()["IMG-001"]
+ok(back["status"] == "in-queue", "reopen не вернул юнит в очередь")
+ok(not back.get("ceilings"), "reopen оставил стадии в потолке — цепочка осталась пустой")
+ok("ernie" in (j.DOCS / "report.md").read_text(), "снятие потолка не описано в журнале")
 ok("рычаг не проверен" in (j.DOCS / "report.md").read_text(), "причина снятия не в журнале")
 
 # --- 59. десякая без цитаты якоря не существует ----------------------------
@@ -586,14 +591,26 @@ stamp()
 ok(j.load()["IMG-001"]["seal"]["seed"] == 43,
    "печать запечатала не пин-сид 43, который уйдёт в граф генератора")
 
-# --- 78. R-блок — конфиг сэмплера, а не подпись под прогон ------------------
+# --- 78. R-блок докручивает рендер, а не перекрикивает модель ---------------
 gr = g.workflow("qwen21", {"steps": 25}, art, "ПРОМТ", "NEG", 123, PREFIX,
                 {"cfg": 3.0, "sampler": "dpmpp_2m", "scheduler": "karras", "steps": 30})
 ks = by_class(gr, "KSampler")[0]["inputs"]
-ok((ks["cfg"], ks["sampler_name"], ks["scheduler"], ks["steps"]) ==
-   (3.0, "dpmpp_2m", "karras", 30), f"R не доехал до сэмплера: {ks}")
+ok((ks["cfg"], ks["sampler_name"], ks["scheduler"]) == (3.0, "dpmpp_2m", "karras"),
+   f"R не доехал до сэмплера: {ks}")
+ok(ks["steps"] == 25, "R перебил шаги, которые модель объявила сама")
+ok(by_class(g.workflow("qwen21", {}, art, "П", "", 1, PREFIX, {"steps": 30}),
+            "KSampler")[0]["inputs"]["steps"] == 30,
+   "молчаливая модель обязана взять шаги из R")
 ok(by_class(g.workflow("qwen21", {"steps": 25}, art, "П", "", 1, PREFIX),
            "KSampler")[0]["inputs"]["cfg"] == 1.0, "без R сэмплер обязан остаться на 1.0")
+
+# --- 78b. turbo-стадия не рисуется чужим рендером (цепочка, 8.10) ----------
+turbo = g.workflow("ernie", {"steps": 8, "cfg": 1.0, "sampler": "euler"}, art,
+                    "ПРОМТ", "NEG", 43, PREFIX,
+                    {"cfg": 3.0, "sampler": "dpmpp_2m", "scheduler": "karras", "steps": 25})
+kt = by_class(turbo, "KSampler")[0]["inputs"]
+ok((kt["cfg"], kt["steps"], kt["sampler_name"]) == (1.0, 8, "euler"),
+   f"R-блок соседней модели перебил рендер стадии: {kt}")
 
 # --- 79. печать пишет грузившийся вес, а не подпись из render ---------------
 spec_r = {"prompt_version": "P9", "render": {"id": "R9", "cfg": 3.0, "sampler": "euler",
@@ -604,6 +621,17 @@ seal_r = j.run_seal({"reference": "references/x.png", "sheet": "sheets/x.png",
 ok(seal_r["render"]["checkpoint"] == spec_r["models"]["qwen21"]["unet"],
    "печать приписала вес из подписи render, а не загруженный")
 ok(seal_r["render"]["cfg"] == 3.0, "печать не записала cfg прогона")
+
+# --- 79b. печать пишет рендер стадии, а не R-блок поверх модели -------------
+spec_t = {"render": {"id": "R1", "cfg": 3.0, "sampler": "dpmpp_2m", "scheduler": "karras",
+                     "steps": 25},
+          "models": {"ernie": {"unet": "ernie.safetensors", "cfg": 1.0, "steps": 8,
+                               "sampler": "euler"}}}
+seal_t = j.run_seal({"reference": "references/x.png", "sheet": "sheets/x.png",
+                     "category": "unit-01", "unit": "IMG-001"}, "ernie", 1, spec_t)
+ok((seal_t["render"]["cfg"], seal_t["render"]["steps"], seal_t["render"]["sampler"]) ==
+   (1.0, 8, "euler"), f"печать приписала стадии чужой рендер: {seal_t['render']}")
+ok(seal_t["render"]["scheduler"] == "karras", "печать потеряла scheduler из R")
 
 # --- 80. сжатая шкала — не то же самое, что промах пар (8.29) ---------------
 def stat_out(log):
@@ -705,12 +733,23 @@ ok(cyc and cyc["mean"] == 80 and u["cycle"] == 1 and u["status"] == "in-queue",
 for m in ("krea2", "ernie", "zimage"):
     sty(u, m, 80, 2)
 j.advance_chain(u, sp)
-ok(u["status"] == "paused", f"два цикла без движения не встали на паузу: {u['status']}")
+ok(u["status"] == "paused", f"два круга без движения не встали на паузу: {u['status']}")
+ok(set(u.get("ceilings", {})) == {"krea2", "ernie", "zimage"},
+   "плоская стадия не снята с требования «все три» (model-ceiling)")
+ok(j.stage_of(u, sp) is None, "все стадии в потолке, а цепочка зовёт стадию")
 u["status"] = "in-queue"
 for m in ("krea2", "ernie", "zimage"):
     sty(u, m, 81, 3)
 j.advance_chain(u, sp)
-ok(u["status"] == "blocked", f"три цикла не остановили прогон: {u['status']}")
+ok(u["status"] == "paused" and len(u["ceilings"]) == 3,
+   "движение после потолка молча вернуло стадию в гонку")
+u3 = {"unit": "IMG-003", "history": [], "status": "in-queue", "cycle": 0}
+for c in (1, 2, 3):
+    for m in ("krea2", "ernie", "zimage"):
+        sty(u3, m, 70 + c, c)
+    j.advance_chain(u3, sp)
+ok(u3["status"] == "blocked" and not u3.get("ceilings"),
+   f"три круга с движением не исчерпаны: {u3['status']} {u3.get('ceilings')}")
 u2 = {"unit": "IMG-002", "history": [], "status": "in-queue", "cycle": 0}
 for m in ("krea2", "ernie", "zimage"):
     sty(u2, m, 95, 1)

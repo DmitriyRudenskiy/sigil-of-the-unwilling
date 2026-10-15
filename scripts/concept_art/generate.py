@@ -281,13 +281,15 @@ def workflow(model_key: str, spec_model: dict, art: dict, prompt: str, neg: str,
             # своей чекпоинт свой латентный узел, размеры подставляются в любой из них.
             i.update({"width": art["size"][0], "height": art["size"][1]})
         elif ct == "KSampler":
-            # R-блок и есть конфиг рендера: до 2026-10-15 он был подписью, а сэмплер
-            # брал cfg из блока модели (где его нет) и рисовал на 1.0, что бы ни
-            # стояло в spec.render.
+            # cfg, шаги и сэмплер принадлежат модели, R-блок докручивает то, чего
+            # модель не знает: turbo-стадии (krea2/ernie/z-image) размечены на
+            # cfg 1.0 / 8 шагов, а R1 — наследие qwen21 (cfg 3.0 / 25). Прежний
+            # порядок (R поверх модели) гнал каждую стадию чужим рендером.
             r = render or {}
-            i.update({"seed": seed, "steps": r.get("steps", spec_model["steps"]),
-                      "cfg": r.get("cfg", spec_model.get("cfg", 1.0)),
-                      "sampler_name": r.get("sampler", "euler"),
+            i.update({"seed": seed,
+                      "steps": spec_model.get("steps", r.get("steps", 20)),
+                      "cfg": spec_model.get("cfg", r.get("cfg", 1.0)),
+                      "sampler_name": spec_model.get("sampler", r.get("sampler", "euler")),
                       "scheduler": r.get("scheduler", "simple")})
         elif ct == "SaveImage":
             i["filename_prefix"] = server_name

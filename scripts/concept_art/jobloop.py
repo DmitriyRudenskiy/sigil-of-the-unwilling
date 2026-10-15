@@ -248,6 +248,10 @@ def run_seal(unit: dict, model: str, version: int, spec: dict) -> dict:
     `verify`, без неё `score` балл не ставит — иначе вердикт нельзя приписать
     ни промпту, ни словарю, ни прибору (8.21)."""
     r = spec.get("render", {})
+    m = spec.get("models", {}).get(model, {})
+    # печать пишет то, что ушло в граф: cfg/шаги/сэмплер принадлежат модели,
+    # R-блок докручивает остальное (см. generate.workflow)
+    eff = {k: m.get(k, r.get(k)) for k in ("cfg", "sampler", "scheduler", "steps")}
     return {
         "etalon": sha12(LAB / unit["reference"]),
         "sheet": sha12(LAB / unit["sheet"]),
@@ -255,10 +259,10 @@ def run_seal(unit: dict, model: str, version: int, spec: dict) -> dict:
         "seed": spec.get("seed", SEED_PIN),   # настоящий сид прогона: он же в графе
         "prompt_version": spec.get("prompt_version", "P0"),
         "render_version": r.get("id", "R0"),
-        "render": {**{k: r.get(k) for k in ("cfg", "sampler", "scheduler", "steps")},
+        "render": {**eff,
                    # вес берётся из блока модели, а не из подписи в render: печать
                    # обязана писать то, что грузили, а не то, что там написано
-                   "checkpoint": spec.get("models", {}).get(model, {}).get("unet", "нет")},
+                   "checkpoint": m.get("unet", "нет")},
         "dictionary": sha12(DOCS / "style-card.md"),
         "instrument": anchors_version() if ANCHORS.is_file() else "нет",
         "judge": judge_version(),
@@ -891,56 +895,82 @@ def sty_last(unit: dict, model: str):
                  if h.get("kind") == "sty" and h["model"] == model), None)
 
 
+def sty_cycle(unit: dict, model: str, cycle: int):
+    """STY-% стадии в круге цепочки (несколько замеров одного круга — последний)."""
+    vals = [h["sty_pct"] for h in unit["history"]
+            if h.get("kind") == "sty" and h["model"] == model and h.get("cycle") == cycle]
+    return max(vals) if vals else None
+
+
+def ceilinged(unit: dict, model: str) -> bool:
+    """Стадии, признанные потолком: требование «все три» с неё снято, молча не снимается."""
+    return model in unit.get("ceilings", {})
+
+
 def stage_closed(unit: dict, model: str, spec: dict) -> bool:
-    """Стадия закрыта, когда её последний STY-% не ниже порога этой модели (8.3).
+    """Стадия закрыта честно: её последний STY-% не ниже порога этой модели (8.3).
     Порог калибруется по эталону отдельно для каждой модели; до калибровки — планка."""
     h = sty_last(unit, model)
     return bool(h) and h["sty_pct"] >= spec.get("sty_threshold", {}).get(model, STY_TARGET)
 
 
+def stage_done(unit: dict, model: str, spec: dict) -> bool:
+    """Стадию больше не гоняем: порог взят либо признан потолок."""
+    return stage_closed(unit, model, spec) or ceilinged(unit, model)
+
+
 def stage_of(unit: dict, spec: dict):
     """Следующая стадия цепочки: первая, которая ещё не брала замер в текущем круге
-    и не взяла своего порога. None — круг собран (или все три сошлись)."""
+    и не закрыта (порог или потолок). None — круг собран либо идти некуда."""
     cur = unit.get("cycle", 0) + 1
     for m in chain_of(spec):
-        if stage_closed(unit, m, spec):
+        if stage_done(unit, m, spec):
             continue
-        if not any(h.get("kind") == "sty" and h["model"] == m and h.get("cycle") == cur
-                   for h in unit["history"]):
+        if sty_cycle(unit, m, cur) is None:
             return m
     return None
 
 
 def advance_chain(unit: dict, spec: dict) -> dict | None:
-    """Замыкает цикл цепочки и ставит остановки: «сошлись», автопауза, лимит.
+    """Замыкает цикл цепочки и ставит остановки: потолок стадии, «сошлись», пауза, лимит.
     Цикл = по одному STY-замеру каждой стадии текущего круга; правка промпта
     между стадиями остаётся внутри цикла."""
     stages = chain_of(spec)
     cur = unit.get("cycle", 0) + 1
-    if not all(any(h.get("kind") == "sty" and h["model"] == m and h.get("cycle") == cur
-                   for h in unit["history"]) for m in stages):
+    if not all(sty_cycle(unit, m, cur) is not None for m in stages):
         return None
-    got = {m: max((h["sty_pct"] for h in unit["history"]
-                   if h.get("kind") == "sty" and h["model"] == m and h.get("cycle") == cur),
-                  default=0) for m in stages}
+    got = {m: sty_cycle(unit, m, cur) for m in stages}
     unit["cycle"] = cur
     unit.setdefault("cycles", []).append({"cycle": cur, "sty": got,
                                           "mean": round(sum(got.values()) / len(got), 1)})
     cyc = unit["cycles"][-1]
+    for m in stages:                      # 8.4: два круга без движения — потолок стадии
+        if stage_done(unit, m, spec):
+            continue
+        hist = [sty_cycle(unit, m, c["cycle"]) for c in unit["cycles"]][-CYCLE_PAUSE:]
+        if len(hist) == CYCLE_PAUSE and len(set(hist)) == 1:
+            unit.setdefault("ceilings", {})[m] = {"sty": hist[-1], "cycle": cur}
+            print(f"{unit['unit']}: {m} — {CYCLE_PAUSE} круга без движения STY-% ({hist[-1]}), "
+                  f"снята с требования «все три» (model-ceiling)")
+    menu = ("пауза. Меню: сменить жанровый якорь / сменить модель / признать "
+            "потолок / остановить")
     if all(stage_closed(unit, m, spec) for m in stages):
         unit["status"] = "success"
         print(f"{unit['unit']}: цепочка замкнута — все три стадии не ниже своего порога "
               f"({got})")
-        return cyc
-    means = [c["mean"] for c in unit["cycles"]]
-    if len(means) >= CYCLE_PAUSE and max(means) - min(means) < 1:
+    elif all(stage_done(unit, m, spec) for m in stages):
         unit["status"] = "paused"
-        print(f"{unit['unit']}: {CYCLE_PAUSE} цикла без движения STY-% — пауза. Меню: "
-              f"сменить жанровый якорь / сменить модель / признать потолок / остановить")
-    elif len(means) >= CYCLE_MAX:
-        unit["status"] = "blocked"
-        print(f"{unit['unit']}: {CYCLE_MAX} цикла исчерпаны, кадр не принят — берётся лучший "
-              f"из прошедших, автопродолжения нет (рестарт — записью в журнал)")
+        print(f"{unit['unit']}: гнать нечего — порог не взят ни одной стадией, "
+              f"остальные в потолке ({got}); {menu}")
+    else:
+        means = [c["mean"] for c in unit["cycles"]][-CYCLE_PAUSE:]
+        if len(means) == CYCLE_PAUSE and max(means) - min(means) < 1:
+            unit["status"] = "paused"
+            print(f"{unit['unit']}: {CYCLE_PAUSE} цикла без движения STY-% — {menu}")
+        elif len(unit["cycles"]) >= CYCLE_MAX:
+            unit["status"] = "blocked"
+            print(f"{unit['unit']}: {CYCLE_MAX} цикла исчерпаны, кадр не принят — берётся "
+                  f"лучший из прошедших, автопродолжения нет (рестарт — записью в журнал)")
     return cyc
 
 
@@ -1359,9 +1389,12 @@ def cmd_reopen(a) -> int:
         raise SystemExit("принятый юнит не открывается командой reopen — сначала отзыв приёмки")
     prev = unit["status"]
     unit["status"] = OPEN[0]
+    unit["lifted"] = sorted(unit.get("ceilings", {}))   # что именно возвращено в гонку
+    unit.pop("ceilings", None)   # потолок отозван — стадии снова в гонке, иначе reopen пуст
     save(q)
     report(f"## {date.today()} {a.id} — статус {prev} снят, юнит снова в очереди\n"
-           f"- Причина: {a.note or '—'}\n")
+           f"- Причина: {a.note or '—'}\n"
+           f"- Потолки стадий сняты: {', '.join(unit.get('lifted') or []) or 'все'}\n")
     print(f"{a.id}: {prev} -> {OPEN[0]}")
     return 0
 
