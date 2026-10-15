@@ -132,3 +132,12 @@
 
 ИТОГ: ✅ success — IMG-004 за 5 попыток (qwen21, 85%) → qwen21_IMG-004_v5.webp
 
+## 2026-10-15 IMG-005 v1 → 86% (было —) | qwen21_IMG-005_v1.webp
+- Промт: barefoot gladiator pit fighter standing with weight on one leg, hips turned slightly and shoulders counter-rotated, right bare fist raised at the left edge of the frame, other fist cocked at the waist, shaved scalp with a tall dark mohawk crest standing up, full dark beard, scowling brows, bare muscular chest and abdomen marked with thin healed scratch scars, a single steel pauldron covering the s
+- Оценки: comp 9, subject 9, objects 9, palette 9, style 7, light 8, bg 9, camera 9
+- Метрика-подсказка: —
+- Дельта: первая
+- Заметка: первая попытка: наплечник на нужном плече, босые ноги и обмотки до колен на месте
+
+ИТОГ: ✅ success — IMG-005 за 1 попыток (qwen21, 86%) → qwen21_IMG-005_v1.webp
+
