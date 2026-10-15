@@ -2,7 +2,7 @@
 
 - [ ] 1.1 Создать `image-clone/` с `references/`, `attempts/`, `matches/`, `docs/`
 - [ ] 1.2 Скопировать пять эталонных листов в `references/unit-01.jpeg … unit-05.jpeg`
-- [ ] 1.3 Нарезать 60 ячеек в `references/crops/IMG-001.png … IMG-060.png` (4×3 сетка, трим по белому)
+- [ ] 1.3 Нарезать 60 ячеек в `references/crops/IMG-001.png … IMG-060.png` (4×3 сетка, трим по белому, затем белое поле по бокам до квадрата без масштабирования фигуры)
 - [ ] 1.4 Добавить в `.gitignore` `/image-clone/attempts/`, `/image-clone/matches/`, `/image-clone/references/`
 - [ ] 1.5 Сгенерировать `queue.json`: 60 юнитов, поля `reference`, `sheet`, `cell`, `model`, `status`, `version`, `versions`, `best_score`, `max_attempts`
 - [ ] 1.6 Проверить инвариант: юнитов ровно 60, `IMG-NNN` уникальны, каждый кроп существует
