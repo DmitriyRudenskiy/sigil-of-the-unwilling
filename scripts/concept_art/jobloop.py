@@ -51,6 +51,11 @@ CNT_FIXUP_MAX = 3               # экономический порог: бол�
 STY_VERDICTS = ("yes", "near", "no")   # да / почти / нет
 OPEN = ("in-queue", "redraw")   # статусы, по которым образец всё ещё берётся в работу
 CRITERIA = ("comp", "subject", "objects", "palette", "style", "light", "bg", "camera", "text")
+# Строки слоя стиля: только они дают STY-% и только на них существует десятка.
+STY_ROWS = ("line", "color", "texture", "shade")
+STY_ROW_RU = {"line": "линия", "color": "колорит", "texture": "фактура", "shade": "светотень"}
+STY_TARGET = 93                 # планка «сошлись»: сумма четырёх строк >= 38
+SEED_PIN = 43                   # сид атрибуции: один сид на все модели (EXT-5)
 OUT_DIR = "concept_art/clone"
 
 # Стиль листа: семейство держит категория, вариант двигает только технику рендера.
@@ -338,6 +343,101 @@ def cmd_next(a) -> int:
     print(f"\n>>> {uid} [{unit['category']}] {model} v{version} метрика {m}")
     print(f"оригинал: {LAB / unit['reference']}\nкопия:   {gen}\nпара:    {p}")
     print(f"в журнал: {date.today()} {uid} v{version} | {gen.name}")
+    return 0
+
+
+# ------------------------------------------------- строки стиля (STY-%)
+
+def parse_sty_rows(pairs: list[str], gaps: list[str], revised: bool):
+    """Баллы четырёх строк стиля. Десятка — сертифицируемое утверждение: только
+    с цитатой якорной пары и только пережившая адверсариальный проход. Девятка
+    требует проверки (цитаты или названного расхождения), иначе восемь."""
+    named = {g.partition("=")[0] for g in gaps}
+    rows, tens, notes = {}, [], []
+    for kv in pairs:
+        k, _, v = kv.partition("=")
+        if k not in STY_ROWS:
+            raise SystemExit(f"строка {k!r} не из списка: {', '.join(STY_ROWS)}")
+        score, _, anchor = v.partition("@")
+        score = int(score)
+        if not 0 <= score <= 10:
+            raise SystemExit(f"{k}: балл {score} вне 0..10")
+        ru = STY_ROW_RU[k]
+        if score == 10 and not anchor:
+            notes.append(f"{ru}: 10 без цитаты якоря -> 9")
+            score, anchor = 9, ""
+        elif score == 10 and not revised:
+            notes.append(f"{ru}: 10 не прошла адверсариальный проход -> 9")
+            score = 9
+        if score == 9 and not anchor and k not in named:
+            notes.append(f"{ru}: 9 без проверки и без названного расхождения -> 8")
+            score = 8
+        rows[k] = score
+        if score == 10:
+            tens.append(f"{ru}, против якорной пары {anchor}: расхождений не найдено")
+    missing = [STY_ROW_RU[r] for r in STY_ROWS if r not in rows]
+    if missing:
+        raise SystemExit("нет баллов строк: " + ", ".join(missing)
+                         + " — строка без якорной пары не является мерой")
+    return rows, tens, notes
+
+
+def sty_pct(rows: dict) -> float:
+    return round(sum(rows[r] for r in STY_ROWS) / len(STY_ROWS) * 10, 1)
+
+
+def sty_delta(prev: dict | None, rows: dict) -> dict | None:
+    """Дельта по строкам, а не по баллу: оператору нужно, какая строка двинулась."""
+    return None if not prev else {r: rows[r] - prev.get(r, 0) for r in STY_ROWS}
+
+
+def cmd_sty(a) -> int:
+    """Замер попытки строками стиля. Единый источник чисел для грида, плато и «сошлись»."""
+    q = load()
+    uid, unit = a.id, q[a.id]
+    if not unit.get("file"):
+        raise SystemExit("кадра нет — сначала next")
+    gaps = a.gap or []
+    rows, tens, notes = parse_sty_rows(a.rows, gaps, a.revised)
+    pct = sty_pct(rows)
+    prev = next((h for h in reversed(unit["history"]) if h.get("rows")), None)
+    delta = sty_delta(prev.get("rows") if prev else None, rows)
+    ver = etalon_version() if ETALONS.is_file() else None
+    rec = {"kind": "sty", "date": str(date.today()), "model": unit["model"],
+           "version": unit["version"], "file": unit["file"],
+           "prompt_version": unit.get("prompt_version"),
+           "render_version": unit.get("render_version"), "seed": SEED_PIN,
+           "etalons": ver, "rows": rows, "sty_pct": pct, "tens": tens,
+           "gaps": gaps, "notes": notes, "revised": bool(a.revised), "delta": delta}
+    unit["history"].append(rec)
+    save(q)
+    anchor_of = {}
+    for kv in a.rows:
+        k, _, v = kv.partition("=")
+        anchor_of[k] = v.partition("@")[2]
+    gap_of = {g.partition("=")[0]: g.partition("=")[2] for g in gaps}
+    lines = [f"## {rec['date']} {uid} v{unit['version']} | {unit['model']} "
+             f"| {unit.get('prompt_version', 'P?')}{unit.get('render_version', 'R?')}"
+             f" | сид {SEED_PIN} | эталоны {ver} | STY-% {pct} (планка {STY_TARGET})\n",
+             f"- Файл: {unit['file']}\n"]
+    for r in STY_ROWS:
+        lines.append(f"- {STY_ROW_RU[r]}: {rows[r]} | {gap_of.get(r, '—')} | "
+                     f"{anchor_of.get(r) or '—'}\n")
+    for t in tens:
+        lines.append(f"- Десятка: {t}\n")
+    for note in notes:
+        lines.append(f"- Понижение: {note}\n")
+    lines.append("- Дельта к прошлому замеру: "
+                 + ("первый замер" if delta is None else
+                    ", ".join(f"{STY_ROW_RU[r]} {delta[r]:+d}" for r in STY_ROWS)) + "\n")
+    report("".join(lines))
+    for r in STY_ROWS:
+        print(f"  {STY_ROW_RU[r]:9} {rows[r]:2} | {gap_of.get(r, '—')[:60]}")
+    print(f"{uid} {unit['model']} v{unit['version']}: STY-% {pct} "
+          f"(планка {STY_TARGET}, сумма {sum(rows.values())}/40) "
+          f"| десяток {len(tens)} | ревизия {'да' if a.revised else 'НЕТ'}")
+    if notes:
+        print("понижения: " + "; ".join(notes))
     return 0
 
 
@@ -639,6 +739,15 @@ def cmd_stat(_a) -> int:
         for h in u["history"]:
             if h.get("readiness") is not None:
                 by_model.setdefault(h["model"], []).append((h["readiness"], u["version"]))
+    tens = total = 0
+    for u in q.values():
+        for h in u["history"]:
+            if h.get("rows"):
+                total += len(h["rows"])
+                tens += sum(1 for v in h["rows"].values() if v == 10)
+    if total:
+        print(f"\nдесятки: {tens}/{total} ({100 * tens / total:.0f} %) — термостат "
+              f"якорных пар: доля растёт => якоря поплыли, перекалибровка")
     print("\nмодель | средний % | средние попытки | замеров")
     for model, rows in sorted(by_model.items()):
         n = len(rows)
@@ -670,6 +779,13 @@ def main() -> int:
     sc.add_argument("criteria", nargs="+")
     sc.add_argument("--note", default="")
     sc.set_defaults(f=cmd_score)
+    st = sub.add_parser("sty")
+    st.add_argument("id")
+    st.add_argument("rows", nargs="+", help="line=9 color=10@AP-line-2 ... (все четыре)")
+    st.add_argument("--gap", action="append", help="row=названное расхождение")
+    st.add_argument("--revised", action="store_true",
+                    help="адверсариальный проход выполнен (без него десятка не ставится)")
+
     vd = sub.add_parser("verdict")
     vd.add_argument("id")
     vd.add_argument("sty", choices=STY_VERDICTS)

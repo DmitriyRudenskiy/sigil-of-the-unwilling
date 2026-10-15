@@ -298,4 +298,80 @@ j.cmd_reopen(Args(id="IMG-001", note="рычаг не проверен на жи
 ok(j.load()["IMG-001"]["status"] == "in-queue", "reopen не вернул юнит в очередь")
 ok("рычаг не проверен" in (j.DOCS / "report.md").read_text(), "причина снятия не в журнале")
 
+# --- 59. десякая без цитаты якоря не существует ----------------------------
+rows, tens, notes = j.parse_sty_rows(["line=10", "color=8", "texture=8", "shade=8"], [], True)
+ok(any("без цитаты якоря" in n for n in notes), f"десятка без якоря не порезана: {notes}")
+ok(rows["line"] == 8 and len(notes) == 2,
+   f"строка без цитаты и без проверки падает дважды: {rows} {notes}")
+ok(tens == [], "без цитаты в журнал попала десятка")
+
+# --- 60. десятка обязана пережить адверсариальный проход -------------------
+rows, tens, notes = j.parse_sty_rows(["line=10@AP-line-2", "color=8", "texture=8", "shade=8"],
+                                     [], False)
+ok(rows["line"] == 9 and any("адверсариальный" in n for n in notes),
+   f"десятка без ревизии не порезана: {rows} {notes}")
+
+# --- 61. десятка с цитатой и ревизией живёт, и формула в журнале -----------
+rows, tens, notes = j.parse_sty_rows(["line=10@AP-line-2", "color=8", "texture=8", "shade=8"],
+                                     [], True)
+ok(rows["line"] == 10 and not notes, f"сертифицированная десятка срезана: {rows} {notes}")
+ok(tens == ["линия, против якорной пары AP-line-2: расхождений не найдено"],
+   f"формула десятки не собрана: {tens}")
+
+# --- 62. девятка без проверки падает в восемь ------------------------------
+rows, _, notes = j.parse_sty_rows(["line=9", "color=9", "texture=9", "shade=9"], [], True)
+ok(all(v == 8 for v in rows.values()) and len(notes) == 4,
+   f"девятки без проверки не порезаны: {rows}")
+rows, _, notes = j.parse_sty_rows(["line=9", "color=9@AP-color-1", "texture=9", "shade=9"],
+                                  ["line=контур тоньше на плече"], True)
+ok(rows["line"] == 9 and rows["color"] == 9 and rows["texture"] == 8,
+   f"проверка не учтена: {rows}")
+
+# --- 63. неполный замер — не STY-% -----------------------------------------
+try:
+    j.parse_sty_rows(["line=9", "color=8", "texture=8"], [], True)
+    raise AssertionError("неполный замер принят")
+except SystemExit as e:
+    ok("нет баллов строк" in str(e), f"сообщение не про недостающие строки: {e}")
+
+# --- 64. арифметика планки: 93 требует двух десяток ------------------------
+full10 = {"line": 10, "color": 10, "texture": 9, "shade": 9}
+one10 = {"line": 10, "color": 9, "texture": 9, "shade": 9}
+ok(j.sty_pct(full10) == 95.0 and j.sty_pct(full10) >= j.STY_TARGET,
+   f"10+10+9+9 не даёт 95: {j.sty_pct(full10)}")
+ok(j.sty_pct(one10) < j.STY_TARGET,
+   f"одной десятки хватает для планки: {j.sty_pct(one10)}")
+
+# --- 65. дельта считается по строкам, а не по баллу ------------------------
+d = j.sty_delta({"line": 8, "color": 7, "texture": 7, "shade": 6},
+                {"line": 9, "color": 7, "texture": 8, "shade": 6})
+ok(d == {"line": 1, "color": 0, "texture": 1, "shade": 0}, f"дельта по строкам неверна: {d}")
+ok(j.sty_delta(None, full10) is None, "первый замер обязан не иметь дельты")
+
+# --- 66. замер пишет кортеж {юнит, P, R, сид, эталоны} --------------------
+q = j.load()
+q["IMG-001"]["file"] = "attempts/IMG-001/krea2_IMG-001_v1_P2R0.webp"
+q["IMG-001"]["prompt_version"], q["IMG-001"]["render_version"] = "P2", "R0"
+j.save(q)
+(j.ATTEMPTS / "IMG-001").mkdir(parents=True, exist_ok=True)
+j.cmd_sty(Args(id="IMG-001", rows=["line=10@AP-line-2", "color=9", "texture=9@AP-texture-1",
+                                   "shade=9"],
+               gap=["color=кожа холоднее", "shade=тень теплее"], revised=True))
+rec = j.load()["IMG-001"]["history"][-1]
+ok(rec["kind"] == "sty" and rec["seed"] == j.SEED_PIN and rec["etalons"] == j.etalon_version(),
+   f"в замере нет сида/эталонов: {rec}")
+ok(rec["prompt_version"] == "P2" and rec["render_version"] == "R0",
+   f"в замере нет пары версий: {rec}")
+ok(rec["sty_pct"] == 92.5 and rec["delta"] is None, f"первый замер: {rec['sty_pct']} {rec['delta']}")
+j.cmd_sty(Args(id="IMG-001", rows=["line=10@AP-line-2", "color=10@AP-color-3",
+                                   "texture=9@AP-texture-1", "shade=9@AP-shade-1"],
+               gap=[], revised=True))
+rec2 = j.load()["IMG-001"]["history"][-1]
+ok(rec2["sty_pct"] == 95.0 and rec2["delta"]["color"] == 1,
+   f"дельта по строкам не записана: {rec2['sty_pct']} {rec2['delta']}")
+rep = (j.DOCS / "report.md").read_text()
+ok("расхождений не найдено" in rep and "эталонами test-etalon-1" not in rep,
+   "журнал не пишет цитату якоря")
+ok("сид 43" in rep, "журнал не пишет сид")
+
 print(f"OK: проверок {checks}")
