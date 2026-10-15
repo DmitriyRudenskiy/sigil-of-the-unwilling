@@ -1074,6 +1074,7 @@ def main() -> int:
     ro.add_argument("id")
     ro.add_argument("--note", default="")
     ro.set_defaults(f=cmd_reopen)
+    args = ap.parse_args()
     return args.f(args)
 
 
