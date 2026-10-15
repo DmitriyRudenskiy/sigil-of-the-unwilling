@@ -48,7 +48,7 @@ INK_MAX = 235                       # порог «не бумага» для п
 SHEETS_SRC = Path("/Users/user/sigil-of-the-unwilling-slop/___STYLE_BOOK/for_local_agent/unit")
 
 GRID = (4, 3)                   # колонок, строк на листе
-SIZE = [512, 512]               # размер прогона лаборатории
+SIZE = [1024, 1024]             # размер прогона лаборатории
 MAX_ATTEMPTS = 5
 READINESS_MIN = 85
 MODEL_DEFAULT = "krea2"
@@ -60,7 +60,7 @@ CRITERIA = ("comp", "subject", "objects", "palette", "style", "light", "bg", "ca
 STY_ROWS = ("line", "color", "texture", "shade")
 STY_ROW_RU = {"line": "линия", "color": "колорит", "texture": "фактура", "shade": "светотень"}
 STY_TARGET = 93                 # планка «сошлись»: сумма четырёх строк >= 38
-SEED_PIN = 43                   # сид атрибуции: один сид на все модели (EXT-5)
+SEED_PIN = 43                   # сид прогона: один на все стадии цепочки (7.2)
 ANCHORS = DOCS / "anchors.md"   # реестр якорных пар: цитата обязана быть в нём
 OUT_DIR = "concept_art/clone"
 
@@ -243,14 +243,6 @@ def judge_version() -> str:
     return "judge-" + hashlib.sha256(body.encode()).hexdigest()[:12]
 
 
-def next_seed_bump(unit: dict, prompt_version: str) -> int:
-    """Затравка держится, пока меняется промпт, и крутится только на повторе того
-    же (8.25). Правка слов и новая затравка разом — две переменные, и балл
-    нельзя приписать ни слову, ни удаче; повтор того же промпта — наоборот,
-    лотерея, её и крутим."""
-    return unit.get("seed_bump", 0) + (unit.get("prompt_version") == prompt_version)
-
-
 def run_seal(unit: dict, model: str, version: int, spec: dict) -> dict:
     """Печать прогона: из чего он был сделан. Пишется до рендера, сверяется
     `verify`, без неё `score` балл не ставит — иначе вердикт нельзя приписать
@@ -260,7 +252,7 @@ def run_seal(unit: dict, model: str, version: int, spec: dict) -> dict:
         "etalon": sha12(LAB / unit["reference"]),
         "sheet": sha12(LAB / unit["sheet"]),
         "model": model,
-        "seed": seed_for("copy", unit["category"], unit["unit"]) + unit.get("seed_bump", 0),
+        "seed": spec.get("seed", SEED_PIN),   # настоящий сид прогона: он же в графе
         "prompt_version": spec.get("prompt_version", "P0"),
         "render_version": r.get("id", "R0"),
         "render": {**{k: r.get(k) for k in ("cfg", "sampler", "scheduler", "steps")},
@@ -274,8 +266,9 @@ def run_seal(unit: dict, model: str, version: int, spec: dict) -> dict:
 
 
 def attempt_name(unit: dict, model: str, version: int) -> str:
-    pv, rv = run_versions()
-    return f"{model}_{unit['unit']}_v{version}_{pv}{rv}"
+    """Имя попытки — `<model>_<unit>_v<N>` без суффиксов (спек «Именование результатов»);
+    версии промпта и рендера живут в печати прогона и журнале, не в имени файла."""
+    return f"{model}_{unit['unit']}_v{version}"
 
 
 def attempt_path(unit: dict, model: str, version: int) -> Path:
@@ -427,7 +420,7 @@ def cmd_next(a) -> int:
     if unit is None:
         print("незакрытых юнитов нет")
         return 0
-    model = a.model or unit["model"]
+    model = a.model or stage_of(unit, json.loads(SPEC.read_text())) or unit["model"]
     version = unit["versions"].get(model, 0) + 1
     gen = attempt_path(unit, model, version)
     if not gen.exists():
@@ -437,8 +430,7 @@ def cmd_next(a) -> int:
             return 1
         spec = json.loads(SPEC.read_text())
         item = next(i for i in spec["categories"][unit["category"]]["items"] if i["id"] == uid)
-        bump = unit["seed_bump"] = next_seed_bump(unit, run_versions()[0])
-        item["subject"], item["seed_bump"] = unit["subject"], bump
+        item["subject"] = unit["subject"]
         SPEC.write_text(json.dumps(spec, ensure_ascii=False, indent=1) + "\n")
         gen.parent.mkdir(parents=True, exist_ok=True)
         unit["seal"] = run_seal(unit, model, version, spec)
@@ -452,14 +444,13 @@ def cmd_next(a) -> int:
             print(f"{uid}: генерация не дала файла")
             return 1
     m = similarity(LAB / unit["reference"], gen)
-    p = PAIRS / f"{uid}.png"
-    pair(uid, LAB / unit["reference"], gen, p, f"{model} v{version} metric={m.get('score')}")
     unit["versions"][model] = version
-    unit.update(model=model, version=version, file=str(gen.relative_to(LAB)), pair=str(p),
+    unit.update(model=model, version=version, file=str(gen.relative_to(LAB)),
                 prompt_version=run_versions()[0], render_version=run_versions()[1])
     save(q)
+    p = board(uid)          # доска 2×2 вместо прежней пары 1×1 — тот же pairs/<юнит>
     print(f"\n>>> {uid} [{unit['category']}] {model} v{version} метрика {m}")
-    print(f"оригинал: {LAB / unit['reference']}\nкопия:   {gen}\nпара:    {p}")
+    print(f"оригинал: {LAB / unit['reference']}\nкопия:   {gen}\nдоска:    {p}")
     print(f"в журнал: {date.today()} {uid} v{version} | {gen.name}")
     return 0
 
@@ -781,6 +772,22 @@ def sty_delta(prev: dict | None, rows: dict) -> dict | None:
     return None if not prev else {r: rows[r] - prev.get(r, 0) for r in STY_ROWS}
 
 
+def head_ratio(spec: str | None):
+    """Пропорции головы: `--head-ratio 17/15` = эталон 17%, попытка 15% (высота головы
+    от макушки до подбородка без ушей и головного убора / высота фигуры, способ
+    зафиксирован в `image-clone/docs/style-card.md` §5). Дельта — в журнале;
+    в STY-% не входит."""
+    if not spec:
+        return None
+    try:
+        e, _, p = spec.partition("/")
+        e, p = int(e), int(p)
+    except ValueError:
+        raise SystemExit("пропорции головы пишутся как --head-ratio 17/15 "
+                         "(эталон/попытка, целые проценты)")
+    return {"etalon": e, "attempt": p, "delta": p - e}
+
+
 def cmd_sty(a) -> int:
     """Замер попытки строками стиля. Единый источник чисел для грида, плато и «сошлись»."""
     q = load()
@@ -808,6 +815,7 @@ def cmd_sty(a) -> int:
                              f"в реестре такой пары нет")
         print(f"контроль вслепую (другой кроп и масштаб): {control_board(a.control)}")
     pct = sty_pct(rows)
+    head = head_ratio(getattr(a, "head_ratio", None))
     prev = next((h for h in reversed(unit["history"]) if h.get("rows")), None)
     delta = sty_delta(prev.get("rows") if prev else None, rows)
     ver = etalon_version() if ETALONS.is_file() else None
@@ -815,7 +823,9 @@ def cmd_sty(a) -> int:
            "version": unit["version"], "file": unit["file"],
            "prompt_version": unit.get("prompt_version"),
            "render_version": unit.get("render_version"),
-           "seed": unit["seal"]["seed"],      # настоящий затравка прогона, не SEED_PIN
+           "seed": unit["seal"]["seed"],      # настоящая затравка прогона, не SEED_PIN
+           "cycle": unit.get("cycle", 0) + 1,  # круг цепочки, на котором сделан замер
+           "head": head,                        # пропорции головы: отдельный слой, не STY-%
            "etalons": ver, "anchors": anchors_version() if ANCHORS.is_file() else None,
            "rows": rows, "sty_pct": pct, "tens": tens, "gaps": gaps, "notes": notes,
            "judge_pass": a.judge_pass, "control": a.control, "delta": delta}
@@ -837,6 +847,10 @@ def cmd_sty(a) -> int:
         lines.append(f"- Десятка: {t}\n")
     for note in notes:
         lines.append(f"- Понижение: {note}\n")
+    if head:
+        lines.append(f"- Пропорции головы: эталон {head['etalon']}%, попытка "
+                     f"{head['attempt']}%, дельта {head['delta']:+d} п.п. "
+                     f"(в STY-% не входит; до 8.6 — только измерение и лог)\n")
     if a.control:
         lines.insert(1, f"- Контроль судьи вслепую: {a.control}"
                        f" (в термостат десяток не входит)\n")
@@ -851,7 +865,146 @@ def cmd_sty(a) -> int:
           f"| десяток {len(tens)} | проход {a.judge_pass}")
     if notes:
         print("понижения: " + "; ".join(notes))
+    if head:
+        print(f"голова/фигура: эталон {head['etalon']}%, попытка {head['attempt']}%, "
+              f"дельта {head['delta']:+d} п.п. (в STY-% не входит; гейтинга нет до 8.6)")
+    advance_chain(unit, json.loads(SPEC.read_text()))
+    save(q)
+    board(a.id)
     return 0
+
+
+# ------------------------------------------------------ цепочка стадий (7.4)
+
+CYCLE_PAUSE = 2                 # цикла без движения STY-% → автопауза с меню (8.4)
+CYCLE_MAX = 3                   # цикла цепочки → лучший кадр, автопродолжения нет
+
+
+def chain_of(spec: dict) -> list:
+    """Порядок стадий: krea2 → ernie → z-image → krea2 → … qwen21 вне цепочки (7.8)."""
+    return spec.get("chain", [spec.get("model", MODEL_DEFAULT)])
+
+
+def sty_last(unit: dict, model: str):
+    """Последний STY-замер стадии (не последней попытки — последней правки слов)."""
+    return next((h for h in reversed(unit["history"])
+                 if h.get("kind") == "sty" and h["model"] == model), None)
+
+
+def stage_closed(unit: dict, model: str, spec: dict) -> bool:
+    """Стадия закрыта, когда её последний STY-% не ниже порога этой модели (8.3).
+    Порог калибруется по эталону отдельно для каждой модели; до калибровки — планка."""
+    h = sty_last(unit, model)
+    return bool(h) and h["sty_pct"] >= spec.get("sty_threshold", {}).get(model, STY_TARGET)
+
+
+def stage_of(unit: dict, spec: dict):
+    """Следующая стадия цепочки: первая, которая ещё не брала замер в текущем круге
+    и не взяла своего порога. None — круг собран (или все три сошлись)."""
+    cur = unit.get("cycle", 0) + 1
+    for m in chain_of(spec):
+        if stage_closed(unit, m, spec):
+            continue
+        if not any(h.get("kind") == "sty" and h["model"] == m and h.get("cycle") == cur
+                   for h in unit["history"]):
+            return m
+    return None
+
+
+def advance_chain(unit: dict, spec: dict) -> dict | None:
+    """Замыкает цикл цепочки и ставит остановки: «сошлись», автопауза, лимит.
+    Цикл = по одному STY-замеру каждой стадии текущего круга; правка промпта
+    между стадиями остаётся внутри цикла."""
+    stages = chain_of(spec)
+    cur = unit.get("cycle", 0) + 1
+    if not all(any(h.get("kind") == "sty" and h["model"] == m and h.get("cycle") == cur
+                   for h in unit["history"]) for m in stages):
+        return None
+    got = {m: max((h["sty_pct"] for h in unit["history"]
+                   if h.get("kind") == "sty" and h["model"] == m and h.get("cycle") == cur),
+                  default=0) for m in stages}
+    unit["cycle"] = cur
+    unit.setdefault("cycles", []).append({"cycle": cur, "sty": got,
+                                          "mean": round(sum(got.values()) / len(got), 1)})
+    cyc = unit["cycles"][-1]
+    if all(stage_closed(unit, m, spec) for m in stages):
+        unit["status"] = "success"
+        print(f"{unit['unit']}: цепочка замкнута — все три стадии не ниже своего порога "
+              f"({got})")
+        return cyc
+    means = [c["mean"] for c in unit["cycles"]]
+    if len(means) >= CYCLE_PAUSE and max(means) - min(means) < 1:
+        unit["status"] = "paused"
+        print(f"{unit['unit']}: {CYCLE_PAUSE} цикла без движения STY-% — пауза. Меню: "
+              f"сменить жанровый якорь / сменить модель / признать потолок / остановить")
+    elif len(means) >= CYCLE_MAX:
+        unit["status"] = "blocked"
+        print(f"{unit['unit']}: {CYCLE_MAX} цикла исчерпаны, кадр не принят — берётся лучший "
+              f"из прошедших, автопродолжения нет (рестарт — записью в журнал)")
+    return cyc
+
+
+# ------------------------------------------------------------ доска 2×2
+
+def cnt_status(unit: dict, model: str, version: int) -> str:
+    """Статус слоя CNT для кадра: точечные доводки вердикта этой попытки."""
+    for h in reversed(unit["history"]):
+        if "kind" in h or h.get("model") != model or h.get("version") != version:
+            continue
+        if h.get("head_sty"):
+            return "CNT redraw"
+        n = len(h.get("cnt") or [])
+        return "CNT ok" if not n else f"CNT {n}"
+    return "CNT ?"
+
+
+def board(uid: str) -> Path | None:
+    """Доска 2×2: эталон + по одному кадру каждой стадии. Ярлык в правом нижнем углу
+    каждого сгенерированного кадра: `модель · STY-% · статус CNT`. Доска — отчёт по
+    записям движка, глазами она не пересуживается."""
+    q = load()
+    if uid not in q:
+        return None
+    unit = q[uid]
+    spec = json.loads(SPEC.read_text())
+    cells = [(LAB / unit["reference"], "ЭТАЛОН", "")]
+    for m in chain_of(spec):
+        h = sty_last(unit, m)
+        src = (LAB / h["file"]) if h and h.get("file") else \
+            attempt_path(unit, m, unit["versions"].get(m, 0))
+        if h:
+            label = f"{m} · {h['sty_pct']}% · {cnt_status(unit, m, h['version'])}"
+        else:
+            label = f"{m} · STY не мерян · CNT ?" if src.is_file() else f"{m} · не прогнана"
+        head = f"голова {h['head']['etalon']}→{h['head']['attempt']}" if h and h.get("head") else ""
+        cells.append((src, label, head))
+    side, pad, out = 512, 26, PAIRS / f"{uid}.png"
+    sheet = Image.new("RGB", (side * 2 + 12, side * 2 + 12), (255, 255, 255))
+    d = ImageDraw.Draw(sheet)
+    for n, (src, label, head) in enumerate(cells[:4]):
+        x, y = (n % 2) * (side + 12), (n // 2) * (side + 12)
+        if src.is_file():
+            im = Image.open(src).convert("RGB").resize((side, side), Image.LANCZOS)
+        else:
+            im = Image.new("RGB", (side, side), (235, 235, 235))
+            d.text((x + 8, y + side // 2), f"нет кадра: {src.name}", font=FONT, fill=(120, 0, 0))
+        sheet.paste(im, (x, y))
+        if n:                               # ярлык — только на сгенерированных кадрах
+            for k, text in enumerate(t for t in (label, head) if t):
+                w = d.textlength(text, font=FONT)
+                d.rectangle([x + side - w - 10, y + side - pad * (2 - k),
+                             x + side - 2, y + side - pad * (1 - k) - 4], fill=(255, 255, 255))
+                d.text((x + side - w - 6, y + side - pad * (2 - k) + 2), text, font=FONT,
+                       fill=(0, 0, 0))
+    out.parent.mkdir(parents=True, exist_ok=True)
+    sheet.save(out, quality=92)
+    return out
+
+
+def cmd_board(a) -> int:
+    p = board(a.id)
+    print(f"доска 2×2: {p}" if p else f"{a.id}: юнита в очереди нет")
+    return 0 if p else 1
 
 
 # ------------------------------------------------------------- вердикт
@@ -1285,6 +1438,9 @@ def main() -> int:
     st.add_argument("--pass", dest="judge_pass", choices=("score", "revision"),
                     default="score", help="какой судейский проход даёт эти числа")
     st.add_argument("--control", help="AP-id вслепую вставленной контрольной пары")
+    st.add_argument("--head-ratio", dest="head_ratio",
+                    help="пропорции головы эталон/попытка, напр. 17/15 (в STY-% не входит)")
+
 
     vd = sub.add_parser("verdict")
     vd.add_argument("id")
@@ -1321,6 +1477,9 @@ def main() -> int:
     sj.add_argument("text")
     sj.set_defaults(f=cmd_subject)
     sub.add_parser("stat").set_defaults(f=cmd_stat)
+    bd = sub.add_parser("board", help="доска 2×2: эталон + по кадру каждой стадии")
+    bd.add_argument("id")
+    bd.set_defaults(f=cmd_board)
     sub.add_parser("cut", help="перерезать кропы по боксу фигуры").set_defaults(f=cmd_cut)
     sub.add_parser("lint", help="проверить стилевой блок словарём стиля").set_defaults(f=cmd_lint)
     ro = sub.add_parser("reopen", help="снять статус потолка или блокировки")

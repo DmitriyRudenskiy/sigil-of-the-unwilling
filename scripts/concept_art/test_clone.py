@@ -291,8 +291,8 @@ ok(not (j.LAB / "concept_art").exists(), "служебный путь прого
 spec["prompt_version"] = "P2"
 spec["render"] = {"id": "R1", "cfg": 2.0, "sampler": "euler"}
 j.SPEC.write_text(_json.dumps(spec))
-ok(j.attempt_name(unit, "krea2", 2) == "krea2_IMG-001_v2_P2R1",
-   f"в имени нет пары версий: {j.attempt_name(unit, 'krea2', 2)}")
+ok(j.attempt_name(unit, "krea2", 2) == "krea2_IMG-001_v2",
+   f"имя попытки не по шаблону <model>_<unit>_v<N>: {j.attempt_name(unit, 'krea2', 2)}")
 
 # --- 57. линт стилевого блока ----------------------------------------------
 card = ("## 1. Линия\n\n| Признак | Формулировка | Источник |\n| --- | --- | --- |\n"
@@ -387,8 +387,8 @@ j.cmd_sty(Args(id="IMG-001", rows=["line=10@AP-line-2", "color=9", "texture=9@AP
                                    "shade=9"],
                gap=["color=кожа холоднее", "shade=тень теплее"], judge_pass="revision"))
 rec = j.load()["IMG-001"]["history"][-1]
-ok(rec["seed"] == g.seed_for("copy", "unit-01", "IMG-001") + rec["version"] - 1,
-   f"в замере не тот затравка, что был у генератора: {rec['seed']}")
+ok(rec["seed"] == 43,
+   f"в замере не пин-сид прогона: {rec['seed']}")
 ok(rec["kind"] == "sty" and rec["etalons"] == j.etalon_version(),
    f"в замере нет сида/эталонов: {rec}")
 ok(rec["prompt_version"] == "P2" and rec["render_version"] == "R0",
@@ -404,9 +404,9 @@ ok(rec2["sty_pct"] == 95.0 and rec2["delta"]["color"] == 1,
 rep = (j.DOCS / "report.md").read_text()
 ok("расхождений не найдено" in rep and "эталонами test-etalon-1" not in rep,
    "журнал не пишет цитату якоря")
-seed_real = g.seed_for("copy", "unit-01", "IMG-001") + rec["version"] - 1
-ok(f"сид {seed_real}" in rep, f"журнал не пишет настоящий затравка {seed_real}")
-ok("сид 43" not in rep, "журнал приписывает прогону фиктивный сид атрибуции")
+seed_real = j.load()["IMG-001"]["seal"]["seed"]
+ok(f"сид {seed_real}" in rep, f"журнал не пишет затравка печати {seed_real}")
+ok(seed_real == 43, f"печать запечатала не пин-сид: {seed_real}")
 
 # --- 67. цитата обязана ссылаться на пару из реестра -----------------------
 (j.DOCS / "anchors.md").write_text("| AP-line-2 | 9 | ... |\n", encoding="utf-8")
@@ -575,17 +575,16 @@ ok(j.cmd_verify(Args(id="IMG-001")) == 0, "печать не сверилась"
 ok(j.cmd_verify(Args(id="IMG-001")) == 1 and not j.load()["IMG-001"].get("seal"),
    "расхождение словаря не сняло печать")
 
-# --- 77. затравка не уезжает вместе с правкой промпта (8.25) ---------------
+# --- 77. сид пинится: правка промпта затравку не круит (7.2) ----------------
 u = {"seed_bump": 5, "prompt_version": "P3"}
-ok(j.next_seed_bump(u, "P4") == 5, "смена промпта сдвинула затравку — правка неатрибутируема")
-ok(j.next_seed_bump(u, "P3") == 6, "повтор того же промпта не круит затравку")
+ok(not hasattr(j, "next_seed_bump"), "seed_bump вернулся в путь лаборатории")
 q = j.load()
 q["IMG-001"]["seed_bump"] = 4
 q["IMG-001"].pop("seal", None)
 j.save(q)
 stamp()
-ok(j.load()["IMG-001"]["seal"]["seed"] == g.seed_for("copy", "unit-01", "IMG-001") + 4,
-   "печать запечатала не тот затравку, что считает генератор")
+ok(j.load()["IMG-001"]["seal"]["seed"] == 43,
+   "печать запечатала не пин-сид 43, который уйдёт в граф генератора")
 
 # --- 78. R-блок — конфиг сэмплера, а не подпись под прогон ------------------
 gr = g.workflow("qwen21", {"steps": 25}, art, "ПРОМТ", "NEG", 123, PREFIX,
@@ -631,5 +630,107 @@ j.ANCHORS.write_text(j.ANCHORS.read_text() + "\n| AP-line-1 | 10 | 8 | 9 |\n",
                      encoding="utf-8")
 ok(j.anchors_version() == body,
    "таблица сравнения судей с префиксом AP- сдвинула версию прибора")
+
+# 82. кондишенинг картинкой запрещён фазе обучения — ни в одном графе
+FORBIDDEN = ("IPAdapter", "LoadImage", "VAEEncode", "ControlNet", "Redux", "InstantID",
+             "PuLID", "ReferenceLatent", "Blip", "ImageOnly", "Img2Img", "InpaintModelConditioning")
+for name, graph in g.WORKFLOWS.items():
+    hit = [n["class_type"] for n in graph.values()
+           if any(f.lower() in n["class_type"].lower() for f in FORBIDDEN)]
+    ok(not hit, f"{name}: в граф вернулся conditioning картинкой {hit} — генерация получает только слова")
+
+# 83. стадии ernie и z-image: латент 1024, негатив обнулён узлом, а не текстом
+art1k = dict(art, size=[1024, 1024])
+for model in ("ernie", "zimage"):
+    gr = g.workflow(model, {"steps": 8, "cfg": 1.0}, art1k, "ПРОМТ", "", 43,
+                    f"image-clone/IMG-001/{model}_IMG-001_v1")
+    lat = [n["inputs"] for n in gr.values()
+           if n["class_type"].startswith("Empty") and n["class_type"].endswith("LatentImage")]
+    ok(lat and all(x["width"] == 1024 and x["height"] == 1024 for x in lat),
+       f"{model}: латентный узел не переставлен на 1024")
+    ks = by_class(gr, "KSampler")[0]["inputs"]
+    neg_id = ks["negative"][0]
+    ok(gr[neg_id]["class_type"] == "ConditioningZeroOut",
+       f"{model}: negative не обнулён узлом ({gr[neg_id]['class_type']}) — текст там мёртв")
+    ok(ks["seed"] == 43, f"{model}: граф ушёл не с пином 43")
+    ok(by_class(gr, "SaveImage")[0]["inputs"]["filename_prefix"].startswith(f"image-clone/IMG-001/{model}_"),
+       f"{model}: имя кадра не доехало до узла сохранения")
+
+# 84. пин-сида: правка, версия и attempt затравку не круят (7.2)
+ok(g.seed_of({"seed": 43}, dict(art, seed_bump=9), attempt=5) == 43,
+   "spec.seed не пинит затравку")
+ok(g.seed_of({}, art, attempt=1) == g.seed_of({}, art, attempt=1) != g.seed_of({}, art, attempt=2),
+   "конвейер ассетов потерял выводимую затравку")
+
+# 85. живая спека лаборатории: три стадии, сид 43, кадр 1024, негатив мёртв
+lab = json.loads((Path(j.__file__).resolve().parents[2] / "image-clone" / "spec.json").read_text())
+ok(lab.get("seed") == 43, f"spec лаборатории без пин-сида: {lab.get('seed')}")
+ok(lab.get("chain") == ["krea2", "ernie", "zimage"], f"порядок цепочки: {lab.get('chain')}")
+ok(all(c["size"] == [1024, 1024] for c in lab["categories"].values()),
+   "не все категории переведены на 1024x1024")
+for stage in lab["chain"]:
+    ok(stage in g.WORKFLOWS, f"стадии {stage} нет в workflows.json")
+    ok(lab["models"][stage].get("negative") == "zeroed",
+       f"{stage}: негатив объявлен живым, хотя граф его не читает")
+ok("qwen21" not in lab["chain"], "qwen21 вернулась в цепочку (7.8)")
+
+# 86. пропорции головы — отдельный слой замера (7.6)
+ok(j.head_ratio("17/15") == {"etalon": 17, "attempt": 15, "delta": -2},
+   "пропорции головы записаны не дельтой")
+ok(j.head_ratio(None) is None, "пропущенные пропорции должны быть пустяком")
+try:
+    j.head_ratio("17")
+    ok(False, "кривое значение пропорций принято молча")
+except SystemExit:
+    checks += 1
+
+# 87. стадийная машина: порядок, цикл, «сошлись», пауза, лимит (7.4, 8.4)
+sp = {"chain": ["krea2", "ernie", "zimage"], "sty_threshold": {}}
+
+
+def sty(u, m, pct, cycle):
+    u["history"].append({"kind": "sty", "model": m, "sty_pct": pct, "cycle": cycle,
+                         "version": 1, "file": "attempts/x.webp"})
+
+
+u = {"unit": "IMG-001", "history": [], "status": "in-queue", "cycle": 0}
+ok(j.stage_of(u, sp) == "krea2", "цепочка началась не с krea2")
+sty(u, "krea2", 80, 1)
+ok(j.stage_of(u, sp) == "ernie", "закрытая правкой стадия не отдала место следующей")
+sty(u, "ernie", 80, 1)
+sty(u, "zimage", 80, 1)
+cyc = j.advance_chain(u, sp)
+ok(cyc and cyc["mean"] == 80 and u["cycle"] == 1 and u["status"] == "in-queue",
+   f"первый цикл не замкнут корректно: {cyc} {u['status']}")
+for m in ("krea2", "ernie", "zimage"):
+    sty(u, m, 80, 2)
+j.advance_chain(u, sp)
+ok(u["status"] == "paused", f"два цикла без движения не встали на паузу: {u['status']}")
+u["status"] = "in-queue"
+for m in ("krea2", "ernie", "zimage"):
+    sty(u, m, 81, 3)
+j.advance_chain(u, sp)
+ok(u["status"] == "blocked", f"три цикла не остановили прогон: {u['status']}")
+u2 = {"unit": "IMG-002", "history": [], "status": "in-queue", "cycle": 0}
+for m in ("krea2", "ernie", "zimage"):
+    sty(u2, m, 95, 1)
+j.advance_chain(u2, sp)
+ok(u2["status"] == "success" and j.stage_of(u2, sp) is None,
+   "все три выше порога — а юнит не закрыт")
+
+# 88. доска 2×2 собирается и по неполной цепочке, ярлык — модель · STY-% · CNT
+q = j.load()
+q["IMG-001"].update({"reference": "references/crops/IMG-001.png", "versions": {"krea2": 1},
+                     "history": [{"kind": "sty", "model": "krea2", "sty_pct": 88,
+                                  "version": 1, "cycle": 1,
+                                  "file": "attempts/IMG-001/krea2_IMG-001_v1.webp",
+                                  "head": {"etalon": 17, "attempt": 15, "delta": -2}}]})
+j.save(q)
+(j.CROPS).mkdir(parents=True, exist_ok=True)
+Image.new("RGB", (64, 64), "white").save(j.CROPS / "IMG-001.png")
+bp = j.board("IMG-001")
+ok(bp.is_file() and bp.parent == j.PAIRS and bp.name == "IMG-001.png",
+   f"доска легла не в pairs/<юнит>: {bp}")
+ok(Image.open(bp).size == (1036, 1036), f"доска не 2×2: {Image.open(bp).size}")
 
 print(f"OK: проверок {checks}")

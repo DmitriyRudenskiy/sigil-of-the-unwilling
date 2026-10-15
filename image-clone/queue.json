@@ -5,12 +5,14 @@
   "sheet": "references/unit-01.jpeg",
   "cell": 1,
   "category": "unit-01",
-  "model": "qwen21",
+  "model": "zimage",
   "status": "in-queue",
-  "version": 14,
+  "version": 1,
   "versions": {
-   "krea2": 3,
-   "qwen21": 14
+   "krea2": 4,
+   "qwen21": 14,
+   "ernie": 1,
+   "zimage": 1
   },
   "best_score": null,
   "max_attempts": 5,
@@ -371,12 +373,30 @@
     }
    }
   ],
-  "file": "attempts/IMG-001/qwen21_IMG-001_v14_P7R1.webp",
+  "file": "attempts/IMG-001/zimage_IMG-001_v1.webp",
   "note": "v11 = v7 байт в байт: R-блок до 2026-10-15 не читался генератором, cfg 3.0 в него не ехал; кадр оставлен как свидетельство дыры, не как прогон R1",
   "pair": "/Users/user/sigil-concept-art/image-clone/pairs/IMG-001.png",
-  "prompt_version": "P7",
+  "prompt_version": "P3",
   "render_version": "R1",
-  "seed_bump": 8
+  "seed_bump": 8,
+  "seal": {
+   "etalon": "eb03b0dcc6b9",
+   "sheet": "6fcea42d3b60",
+   "model": "zimage",
+   "seed": 43,
+   "prompt_version": "P3",
+   "render_version": "R1",
+   "render": {
+    "cfg": 3.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 25,
+    "checkpoint": "z_image_turbo_bf16.safetensors"
+   },
+   "dictionary": "4b82a9dec4b9",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  }
  },
  "IMG-002": {
   "unit": "IMG-002",

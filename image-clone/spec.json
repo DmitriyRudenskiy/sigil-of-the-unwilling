@@ -1,5 +1,5 @@
 {
- "_comment": "Оправа лаборатории image-clone: 5 листов по 12 ячеек, прогон 512x512. Сюжеты живёт в queue.json, сюда вкладываются на время генерации.",
+ "_comment": "Оправа лаборатории image-clone: 5 листов по 12 ячеек, прогон 1024x1024, сид 43 на всех стадиях. Сюжеты живёт в queue.json, сюда вкладываются на время генерации.",
  "server": "http://192.168.0.230:9000/mcp",
  "comfy": "http://192.168.0.230:8188",
  "out_dir": "concept_art/clone",
@@ -14,14 +14,38 @@
    "cfg": 1.0,
    "unet": "krea2_turbo_fp8_scaled.safetensors",
    "clip": "qwen3vl_4b_fp8_scaled.safetensors",
-   "vae": "qwen_image_vae.safetensors"
+   "vae": "qwen_image_vae.safetensors",
+   "negative": "zeroed"
   },
   "qwen21": {
    "tool": "api_generate_image_qwen21",
    "steps": 25,
    "unet": "qwen_image_2.1_int8_convrot.safetensors",
    "clip": "qwen3vl_8b_int8_convrot.safetensors",
-   "vae": "qwen_image_2.1_vae_bf16.safetensors"
+   "vae": "qwen_image_2.1_vae_bf16.safetensors",
+   "negative": "param"
+  },
+  "ernie": {
+   "tool": "api_generate_image_ernie",
+   "steps": 8,
+   "cfg": 1.0,
+   "sampler": "euler",
+   "unet": "ernie-image-turbo.safetensors",
+   "clip": "ministral-3-3b.safetensors",
+   "clip_type": "flux2",
+   "vae": "flux2-vae.safetensors",
+   "negative": "zeroed"
+  },
+  "zimage": {
+   "tool": "api_generate_image_zimage",
+   "steps": 8,
+   "cfg": 1.0,
+   "sampler": "res_multistep",
+   "unet": "z_image_turbo_bf16.safetensors",
+   "clip": "qwen_3_4b.safetensors",
+   "clip_type": "lumina2",
+   "vae": "ae.safetensors",
+   "negative": "zeroed"
   }
  },
  "prompt_version": "P3",
@@ -40,7 +64,8 @@
  "model": "krea2",
  "probe_models": [
   "krea2",
-  "qwen21"
+  "ernie",
+  "zimage"
  ],
  "variants": [
   {
@@ -57,8 +82,8 @@
    "style": "stylized hand-painted fantasy game character illustration from a single comic-painted art bible, heroic stocky proportions: head about one sixth of the total height, broad shoulders, thick arms, compact build, mature stylized cartoon face with simplified exaggerated features, large readable eyes, bold expression, hand-painted, never a photograph, matte painterly surfaces with soft airbrushed shading",
    "frame": "single full-body fantasy character standing exactly as described, entire figure visible from head to boots, whole object with a clear empty margin around it, nothing touching the frame, centered, front view facing the camera straight on, head up and eyes open looking at the viewer, isolated on plain white background with no scenery and no blurred shapes, soft grey contact shadow under the feet only, no second copy, no turnaround, no grey clay 3d render, no inset pictures, nothing in the corners",
    "size": [
-    512,
-    512
+    1024,
+    1024
    ],
    "items": [
     {
@@ -122,8 +147,8 @@
    "style": "stylized hand-painted fantasy game character illustration from a single comic-painted art bible, more graphic and crisp than painterly: clean planes of colour, polished metal with sharp speculars, saturated palette, heroic stocky proportions with a head about one sixth of the total height, mature stylized cartoon face with simplified exaggerated features, bold expression, hand-painted, never a photograph",
    "frame": "single full-body fantasy character standing exactly as described, entire figure visible from head to boots, whole object with a clear empty margin around it, nothing touching the frame, centered, front view facing the camera straight on, head up and eyes open looking at the viewer, isolated on plain white background with no scenery and no blurred shapes, soft grey contact shadow under the feet only, no second copy, no turnaround, no grey clay 3d render, no inset pictures, nothing in the corners",
    "size": [
-    512,
-    512
+    1024,
+    1024
    ],
    "items": [
     {
@@ -182,8 +207,8 @@
    "style": "semi-realistic painterly fantasy game character illustration, adult heroic proportions with a head about one seventh of the total height, soft visible brush strokes over rendered planes, restrained palette, mature stylized face with simplified exaggerated features, hand-painted, never a photograph",
    "frame": "single full-body fantasy character standing exactly as described, entire figure visible from head to boots, whole object with a clear empty margin around it, nothing touching the frame, centered, front view facing the camera straight on, head up and eyes open looking at the viewer, isolated on plain white background with no scenery and no blurred shapes, soft grey contact shadow under the feet only, no second copy, no turnaround, no grey clay 3d render, no inset pictures, nothing in the corners",
    "size": [
-    512,
-    512
+    1024,
+    1024
    ],
    "items": [
     {
@@ -242,8 +267,8 @@
    "style": "cartoonish comic fantasy game character illustration, exaggerated proportions with a head about one fifth of the total height, round barrel chest, strong rim light, bold simplified shapes, large readable eyes, cheeky bold expression, hand-painted, never a photograph",
    "frame": "single full-body fantasy character standing exactly as described, entire figure visible from head to boots, whole object with a clear empty margin around it, nothing touching the frame, centered, front view facing the camera straight on, head up and eyes open looking at the viewer, isolated on plain white background with no scenery and no blurred shapes, soft grey contact shadow under the feet only, no second copy, no turnaround, no grey clay 3d render, no inset pictures, nothing in the corners",
    "size": [
-    512,
-    512
+    1024,
+    1024
    ],
    "items": [
     {
@@ -302,8 +327,8 @@
    "style": "stylized hand-painted fantasy game character illustration from a single comic-painted art bible, heroic stocky proportions: head about one sixth of the total height, broad shoulders, thick arms, compact build, mature stylized cartoon face with simplified exaggerated features, large readable eyes, bold expression, hand-painted, never a photograph, matte painterly surfaces with soft airbrushed shading",
    "frame": "single full-body fantasy character standing exactly as described, entire figure visible from head to boots, whole object with a clear empty margin around it, nothing touching the frame, centered, front view facing the camera straight on, head up and eyes open looking at the viewer, isolated on plain white background with no scenery and no blurred shapes, soft grey contact shadow under the feet only, no second copy, no turnaround, no grey clay 3d render, no inset pictures, nothing in the corners",
    "size": [
-    512,
-    512
+    1024,
+    1024
    ],
    "items": [
     {
@@ -356,5 +381,11 @@
     }
    ]
   }
- }
+ },
+ "seed": 43,
+ "chain": [
+  "krea2",
+  "ernie",
+  "zimage"
+ ]
 }

@@ -103,6 +103,16 @@ def seed_for(variant: str, cat: str, item_id: str) -> int:
     return binascii.crc32(f"{variant}/{cat}/{item_id}".encode()) % (2**31)
 
 
+def seed_of(spec: dict, art: dict, attempt: int = 1) -> int:
+    """Затравка кадра. spec.seed (лаборатория: 43) пинит её на всех стадиях: кадр при
+    одном (P, R) обязан выходить побайтово одинаковым, перевыпуск делается правкой
+    слов, а не сидом. Без spec.seed — старая выводимая затравка конвейера ассетов."""
+    if "seed" in spec:
+        return int(spec["seed"])
+    return (seed_for(art["variant"], art["category"], art["id"]) + (attempt - 1)
+            + int(art.get("seed_bump", 0)))
+
+
 def build_prompt(variant: dict, cat: dict, item: dict, negative_param: bool) -> tuple[str, str]:
     """(prompt, negative). Слои: стиль эталона категории -> техника варианта -> кадр -> сюжет.
 
@@ -266,7 +276,9 @@ def workflow(model_key: str, spec_model: dict, art: dict, prompt: str, neg: str,
             i["prompt"] = prompt
             if neg:
                 i["negative_prompt"] = neg
-        elif ct == "EmptyLatentImage":
+        elif ct.startswith("Empty") and ct.endswith("LatentImage"):
+            # EmptyLatentImage / EmptyFlux2LatentImage / EmptySD3LatentImage — у каждой
+            # своей чекпоинт свой латентный узел, размеры подставляются в любой из них.
             i.update({"width": art["size"][0], "height": art["size"][1]})
         elif ct == "KSampler":
             # R-блок и есть конфиг рендера: до 2026-10-15 он был подписью, а сэмплер
@@ -317,12 +329,12 @@ def generate(spec: dict, art: dict, timeout: int, attempt: int = 1,
     m = spec["models"][art["model_key"]]
     variant = next(v for v in spec["variants"] if v["id"] == art["variant"])
     cat = spec["categories"][art["category"]]
-    negative_param = art["model_key"] != "krea2"
+    # Живой негатив только там, где граф действительно ведёт его на сэмплер. В krea2
+    # negative замкнут на positive, в ernie/z-image обнулён ConditioningZeroOut — текст
+    # там мёртв, запрет переезжает в конец положительного промпта.
+    negative_param = m.get("negative", "zeroed") == "param"
     prompt, neg = build_prompt(variant, cat, art, negative_param)
-    # +attempt: повтор при провале воротчика обязан менять затравку — тот же запрос с той же
-    # затравкой ComfyUI отдаёт из кэша мгновенно и тем же кадром (проверено: 0.2 с, тот же вердикт).
-    seed = (seed_for(art["variant"], art["category"], art["id"]) + (attempt - 1)
-            + int(art.get("seed_bump", 0)))
+    seed = seed_of(spec, art, attempt)
     server_name = server_name or f"{art['model_key']}/{art['variant']}/{art['category']}/{art['id']}"
     img = run_job(spec["comfy"], workflow(art["model_key"], m, art, prompt, neg, seed, server_name,
                                          spec.get("render", {})),
@@ -452,7 +464,7 @@ def main() -> int:
     if a.dry_run:
         for art in arts:
             print(f"{art['model_key']}/{art['variant']}/{art['category']}/{art['id']} "
-                  f"{art['size'][0]}x{art['size'][1]} seed={seed_for(art['variant'], art['category'], art['id'])}")
+                  f"{art['size'][0]}x{art['size'][1]} seed={seed_of(spec, art)}")
         print(f"итого: {len(arts)} артефактов, {len(spec['variants'])} вариантов, "
               f"{len({x['id'] for x in arts})} уникальных id сюжетов")
         return 0
