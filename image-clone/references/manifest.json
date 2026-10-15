@@ -1,305 +1,305 @@
 {
- "version": "etalons-d5bffd7e0cc3",
+ "version": "etalons-8cb5520558f8",
  "files": [
   {
    "file": "crops/IMG-001.png",
-   "bytes": 312981,
-   "sha256": "629a0db265d7fbb3b97cd39e5a6f51c8465d3eb5a5496f30a67160f00ba1e59e"
+   "bytes": 312178,
+   "sha256": "eb03b0dcc6b91b703a0557f661242cc622c8261430ee131a8f1606cab0022cb7"
   },
   {
    "file": "crops/IMG-002.png",
-   "bytes": 385666,
-   "sha256": "bc316f86ef161ebc685fa684817ef67dd986844620d7b49e65f1efef85f564a1"
+   "bytes": 389464,
+   "sha256": "a2d38f458b7a0440783e8fd93c3964a9ebff9ab48324a9a74a49e8bd54484d58"
   },
   {
    "file": "crops/IMG-003.png",
-   "bytes": 203803,
-   "sha256": "2e034923ebfc6361a4bf331a86cf60f66118e7c800b72d4cbaf35124cd3e0bbb"
+   "bytes": 201458,
+   "sha256": "7f99de52a14488efef5ce7946db08d7f59fe92c43facd92751400d098828470f"
   },
   {
    "file": "crops/IMG-004.png",
-   "bytes": 403210,
-   "sha256": "d578de48b53e85728e75ad049bca3c767cb485981701e541a88548ec4d4aad34"
+   "bytes": 407792,
+   "sha256": "e3482df199291f1b29686ac67844c668c215b377dc66968322bfa1c97e01f5e0"
   },
   {
    "file": "crops/IMG-005.png",
-   "bytes": 376476,
-   "sha256": "f75c013a2a1d110f57c5dab68f7ed5f2343ef92a80e16d83fb61ad34d0af899f"
+   "bytes": 363351,
+   "sha256": "c44fa31c9ab9b9cd5aa7eedb35a677bf40b786c12b50349e81cae00dde973d1b"
   },
   {
    "file": "crops/IMG-006.png",
-   "bytes": 466467,
-   "sha256": "67d6d8a504bdb9fe76a684eda24edfb6f4ccef4fd36c8ff6278ef7564182795b"
+   "bytes": 464907,
+   "sha256": "397b384afbae53ab66399c5933e50f25223d06d13491a96cda68b617149cced2"
   },
   {
    "file": "crops/IMG-007.png",
-   "bytes": 404966,
-   "sha256": "3e8402d743bbd140e720c41ae032842c4d24c94dd9e0b87c36a8e46f726bffa0"
+   "bytes": 404352,
+   "sha256": "b99c65282a150133152108d99937b7c059e64f99a4468877467c7b990e279929"
   },
   {
    "file": "crops/IMG-008.png",
-   "bytes": 407371,
-   "sha256": "ab8bbf32701c02bcef2d02abf3479fcfeb154c76e460e199acf5c70210569d09"
+   "bytes": 396266,
+   "sha256": "89ec4c74ad83f76ce9d46b131867630d0cd2814ee479fbd840cd51471c4f85d3"
   },
   {
    "file": "crops/IMG-009.png",
-   "bytes": 394862,
-   "sha256": "136a4a22a0c154600ce84ecadb43078d6737f3a0af78e120d559025ab81fea26"
+   "bytes": 413257,
+   "sha256": "cb2e646b7fc2ab81399eded91344f98af2b5720ba6d0f5abd1d5ee82df3ce563"
   },
   {
    "file": "crops/IMG-010.png",
-   "bytes": 415951,
-   "sha256": "4902c0b675df5520472ae50b5988f0d80e9147cc8f19602a07e9e624e479fc28"
+   "bytes": 428054,
+   "sha256": "1edf4a913bd561e7593667067c8d5249deef68a8d929c5c61da1f4ad39c3d866"
   },
   {
    "file": "crops/IMG-011.png",
-   "bytes": 336393,
-   "sha256": "f616801a37c86d73a161272a27a8a3d800f4b7b726468e42147ba1a36b81a40d"
+   "bytes": 336379,
+   "sha256": "15ce397fe2048eea3587654925548d08dabf6ae34b72415f7a532933a7ac6260"
   },
   {
    "file": "crops/IMG-012.png",
-   "bytes": 451030,
-   "sha256": "561b36a6e3b87a06e2f734f6dff18a8b9578fb6773a66b729132b0d77829fa52"
+   "bytes": 476514,
+   "sha256": "f860261081a9e8f02ad28300322af7b9962ee00a94771a32b3129cf5a70ce71e"
   },
   {
    "file": "crops/IMG-013.png",
-   "bytes": 372057,
-   "sha256": "60085ca9413e42f3c70517ea969bf5d72cc2a5fe7c2e6ae6aaa9882085ba4b5c"
+   "bytes": 375144,
+   "sha256": "012e205b422608f2d0191e9d05e1c2a35cf32f8dcfef971cbafba92c9d1b724a"
   },
   {
    "file": "crops/IMG-014.png",
-   "bytes": 326917,
-   "sha256": "462be8978f7aa49047432987b28805b1b639ac1601e667b988d247c7d4fca9c3"
+   "bytes": 326498,
+   "sha256": "6869aaea94bdd631b0827eb3ab6534f94739db36731ccfab14641a1b2abd9dfd"
   },
   {
    "file": "crops/IMG-015.png",
-   "bytes": 270316,
-   "sha256": "d9bec6688d95466fcd8f3c379c7f4e12b00adf66a0d60b85afc56f95b35e0526"
+   "bytes": 266680,
+   "sha256": "5bc3b4224022aa1ab5532f90406936deafe353092058e80e344b1800fd2bd2ad"
   },
   {
    "file": "crops/IMG-016.png",
-   "bytes": 364309,
-   "sha256": "0c4e992b41eb8d3b56b2f9f756ec6e5fda08d005b154f5c8be86c4d827285264"
+   "bytes": 366258,
+   "sha256": "9ba2215a7c240e8d7f223ae2244b2e49e8ceb54b85974f231aeac13366467b5b"
   },
   {
    "file": "crops/IMG-017.png",
-   "bytes": 316612,
-   "sha256": "02221b8596ca9f6cb312ed1bbdf6cd2988a0044e7a15ec972f0cf68d19aa107b"
+   "bytes": 297535,
+   "sha256": "0887d50a0e45daeebca49cdbcee663a0ca60768a4b835768c5d94abde99696a2"
   },
   {
    "file": "crops/IMG-018.png",
-   "bytes": 330800,
-   "sha256": "134e09532c8b22e3fd5f775630d242558e68c823bc9f2e8672f1f83ce401cc08"
+   "bytes": 341544,
+   "sha256": "ede2b41d18142ddf771e6ab749b1fec2953ead049aa6bfc127c6b3874974c893"
   },
   {
    "file": "crops/IMG-019.png",
-   "bytes": 428325,
-   "sha256": "dcf4f2724c001f99197aa203f7e27030f52e1edc0bd7f452ce769d69f148ccc1"
+   "bytes": 428972,
+   "sha256": "e563df10d9e25b997d8c1a0d314086cf510d390daebed17ac58241c072492862"
   },
   {
    "file": "crops/IMG-020.png",
-   "bytes": 295966,
-   "sha256": "8da8b9f1304831b20865290e072cacf7dabfd12a14b6432ef876a97cbb4f2c1d"
+   "bytes": 289131,
+   "sha256": "c7e2bf5d4727a0a0bf7bfd4839d7e2fe28e24e5a2453c44eb9c570fdead70632"
   },
   {
    "file": "crops/IMG-021.png",
-   "bytes": 355882,
-   "sha256": "93770ad6879fce84d2dccb066ffa5b0853c53e44d3020c323ac1c651c6a713a0"
+   "bytes": 370897,
+   "sha256": "a5bfee0d52b9a47ff4f333d2c0d4be3215f55449069dbb4647862318fde3bf9d"
   },
   {
    "file": "crops/IMG-022.png",
-   "bytes": 350306,
-   "sha256": "7ef4e13a499b79d2a7a4e77e62ffe221c95b0f9a6e802b3b5e0d4d1a147f1d6c"
+   "bytes": 353537,
+   "sha256": "88a2540ca7fad8bf5023063cc64e31465be4d4d7944f165815cd20e1b4edbf31"
   },
   {
    "file": "crops/IMG-023.png",
-   "bytes": 332299,
-   "sha256": "5a1a25fc9e20bdb169b8da4587bf865ee1f0dcc88b8b8b93894912c28b9577b5"
+   "bytes": 334165,
+   "sha256": "d73a396d0ea210db8a24d36938681911c5507c61ec73f7b3c8385147bf290efd"
   },
   {
    "file": "crops/IMG-024.png",
-   "bytes": 411910,
-   "sha256": "77822dc3fa12203e4633777110e26c5cd1d8d597127c4ac944bc4b01934da6b6"
+   "bytes": 434648,
+   "sha256": "f05e869d5fae4c2e5586ebf448e1c6c55b5f17044d840db16babf873f708c6bf"
   },
   {
    "file": "crops/IMG-025.png",
-   "bytes": 298775,
-   "sha256": "bc740469d910e9442b83e157f20ebe71455f56b056d55e485ab0aaaf45f1969a"
+   "bytes": 298866,
+   "sha256": "47ce1abe27dda06ab2eaef891076649c2c5b1ca04da8bd2953d1f6a8eda1f10e"
   },
   {
    "file": "crops/IMG-026.png",
-   "bytes": 324110,
-   "sha256": "b0b76d43f046b9963be7ed96d59d8ef69f5ad9ea0d0acf5f21a1b04ced3e923b"
+   "bytes": 325534,
+   "sha256": "57ecd895907583b9dc0a0d999ad871e3905bb7e4cef7f64782b5da80b3ebc10e"
   },
   {
    "file": "crops/IMG-027.png",
-   "bytes": 286611,
-   "sha256": "c8bfabdc934224972047697e62e026b566c07b32af4c84c8d582f344932f9108"
+   "bytes": 286739,
+   "sha256": "dc358018c7ce5e16f14357b2ed9aeb5b4acd728fe3fded0f8fd2507c8272998f"
   },
   {
    "file": "crops/IMG-028.png",
-   "bytes": 366835,
-   "sha256": "97911352c71532ce1cffcb255ac3ea587d8d4d3021802cf34d1fc00a75476ca0"
+   "bytes": 370371,
+   "sha256": "5e6f29ee77a56c9400c5ed0dce4cd67b409b4ac9ae45f23da58f0e5b84729a48"
   },
   {
    "file": "crops/IMG-029.png",
-   "bytes": 299071,
-   "sha256": "bc86e5f0dbfdbe036cd5bd809184fce585e6abde5fbea8575e6e25e3bf3b2933"
+   "bytes": 290978,
+   "sha256": "4773088c34e63ac7e72495a76c3e99a59cbef8fa08a34255add3cca1bb84f240"
   },
   {
    "file": "crops/IMG-030.png",
-   "bytes": 343654,
-   "sha256": "1d4f31e9df2a2b8e4bc3798c5adb6fe2ce56b891596c5e8ca9ccd146faadc36c"
+   "bytes": 340101,
+   "sha256": "d848fadf13090b38bef2495b9cab3bb1a9497ab6d0103a5bcb74a4997a78b463"
   },
   {
    "file": "crops/IMG-031.png",
-   "bytes": 329152,
-   "sha256": "2b298ee3100bbe27868d12f297e40f246a006ff4ca9bf64d2e963a63ea4431b7"
+   "bytes": 322278,
+   "sha256": "bdc91de387bd350511e74be012376ab1a104efcdc547075c392e1b2221c0fe32"
   },
   {
    "file": "crops/IMG-032.png",
-   "bytes": 397194,
-   "sha256": "bd2f89851b65f43d55b39344798fb9254ecfb08a3289b95a2e1ec22e21afb7a1"
+   "bytes": 394883,
+   "sha256": "d86a337eec95aa561675ba1e8cff39e3c23f6d74b034d48bb169cb9d8fac0d02"
   },
   {
    "file": "crops/IMG-033.png",
-   "bytes": 321219,
-   "sha256": "ce4190879bf98ae513bba975686c65d44a931a013eebf43ce793ae34a2ce2515"
+   "bytes": 335417,
+   "sha256": "09f7f865034898ffe0da010a339a776764059c61445c84fc12091c1a2e3a7faa"
   },
   {
    "file": "crops/IMG-034.png",
-   "bytes": 312114,
-   "sha256": "23f2c9ed74b8af6b8973550f4db72cea00140ec78b7dc7971efad5eba9401769"
+   "bytes": 317806,
+   "sha256": "ef99c3d61be61e195e5edd6a28c86df60280b1ce845cfc22eeaf0018c8a13e6e"
   },
   {
    "file": "crops/IMG-035.png",
-   "bytes": 224207,
-   "sha256": "ea6f3007451cdfd7e753913bb2c86474bbb34092a16ff7003d7c394257bd20b2"
+   "bytes": 239294,
+   "sha256": "27df546d26a73d19d91acdc47591ce1ffc1edf20bc9b83c09a9deb1038960cca"
   },
   {
    "file": "crops/IMG-036.png",
-   "bytes": 370666,
-   "sha256": "d74620b7bcc950c67b912740e8298a05b0f44eb51b650ee7687c237c74991b2c"
+   "bytes": 386537,
+   "sha256": "7d0513d7f835fbcc4389708fb136349af007c2ca218e5f47a33d7fe809e3a8a0"
   },
   {
    "file": "crops/IMG-037.png",
-   "bytes": 289288,
-   "sha256": "501148f92c3269a5e356666eea0735aeb7e8d12f7ae9e734bb29a59bf1c516aa"
+   "bytes": 282337,
+   "sha256": "aaa1a31c6da9075277ab8edb61d97f5d6cf2af7ca3e29dc462c46fb55999f98f"
   },
   {
    "file": "crops/IMG-038.png",
-   "bytes": 340774,
-   "sha256": "2b34f86b8e4b7ee688451ce357b2c134a12e4f7bcc18b1721a3c575b25940069"
+   "bytes": 349329,
+   "sha256": "9dbba5b8743e84bbb8ba755c8d5a9e014f177184297ba2c284bce5f36a15459b"
   },
   {
    "file": "crops/IMG-039.png",
-   "bytes": 242426,
-   "sha256": "b61cbb94ee52937f68fbc4b742e8185ea0ad32882ea6dd26ce2475610ce572fc"
+   "bytes": 239582,
+   "sha256": "498d95d9ff513e74c37860ac9d1b2c1ebc3e46a64eea0ad1c88345d6ab072922"
   },
   {
    "file": "crops/IMG-040.png",
-   "bytes": 341399,
-   "sha256": "7e10da3da1e50df94427c94d6b47ab82fe27423216bfbe54b6c8a7dcf4321bf5"
+   "bytes": 341944,
+   "sha256": "dc2c3d37a38a432fa51c4a0137b1401c47553b565e43f4cd043fae77112365a8"
   },
   {
    "file": "crops/IMG-041.png",
-   "bytes": 283934,
-   "sha256": "7c0856f3c77df681670d2efabf829317135a6d1473e030dd74cf3053d53840e6"
+   "bytes": 282152,
+   "sha256": "3f4a0b453c3af1b7ea8ae3686ed283073e318242091acce060642e7bd1626936"
   },
   {
    "file": "crops/IMG-042.png",
-   "bytes": 331057,
-   "sha256": "b333f58669bebc67c94a78080986f41aa83c60081937c457870df268ec7598bc"
+   "bytes": 322983,
+   "sha256": "e6d1b322147ccade2468395d8bdd67b0594349722bdcb7bd96cc39ea9d54c86f"
   },
   {
    "file": "crops/IMG-043.png",
-   "bytes": 357895,
-   "sha256": "648088d4a739398516067a076fc12074bb5a791a90a106c30db9be511e9eec3a"
+   "bytes": 354013,
+   "sha256": "38111facae9755a84591f20eee254f681cb5c2f280857cc2f04172ad13fccfe4"
   },
   {
    "file": "crops/IMG-044.png",
-   "bytes": 281359,
-   "sha256": "55fc96809f60b8d6b22fc0be8e66f953ccfbb51f1cc63e78ea6aa3a0704d21a1"
+   "bytes": 273308,
+   "sha256": "a063dd21cf644b1111cbbfe24fa0f42f237fbcbd962d354b8d3655bda1758401"
   },
   {
    "file": "crops/IMG-045.png",
-   "bytes": 321759,
-   "sha256": "204faa4d7ea6c64a024539a3070f00dda83ff563d407a31ede79f8a2779b3f98"
+   "bytes": 328333,
+   "sha256": "964c08f241babdc013071585a4d66b34a8a5138b3c0fb9fd1dfa0e09031f7cf4"
   },
   {
    "file": "crops/IMG-046.png",
-   "bytes": 378837,
-   "sha256": "0e661c12481a75358bf68f0d12e635cca5582b259a583d981515fd6127be0440"
+   "bytes": 398895,
+   "sha256": "6b8fdd46ffb33206f67d49c5f3f55e95ae9f31c6dbab797eaf37b7418a6476b7"
   },
   {
    "file": "crops/IMG-047.png",
-   "bytes": 341482,
-   "sha256": "855e4e4fe636ef73ee9c74955535b0137cade7a0c4d052d41e56e68f34b20c22"
+   "bytes": 353813,
+   "sha256": "42ea79e626fee11eadcd996c058ef3f107d2f2e6a8214769c67a1bad3fc72e7f"
   },
   {
    "file": "crops/IMG-048.png",
-   "bytes": 417320,
-   "sha256": "dd833bd1d4ddf6e0fad1832a9e53e9642d9492ad34d230464bf91e0a1f7160e0"
+   "bytes": 424371,
+   "sha256": "59c0c5d6749fca061dfc32e4e9a9b875289bab069e602e3e2c14b97402d2a79f"
   },
   {
    "file": "crops/IMG-049.png",
-   "bytes": 339460,
-   "sha256": "c39286fab22a2be7a4832daf48f099d6527fcfbf7c7b790ad73ebcc324c12355"
+   "bytes": 341137,
+   "sha256": "a9e5e49c1269e1f11b2b94d8404f845bb3bf67ebe03f8bc48a8437849e7df659"
   },
   {
    "file": "crops/IMG-050.png",
-   "bytes": 321757,
-   "sha256": "a85065f9e33b45ab17a3da526ee1e98f57551bde490e4cdec275cee99a9b196a"
+   "bytes": 322772,
+   "sha256": "882fc9d0f0b94fccc5e3f0acd569e8e8a1f0376c89f5111f4e3055c5a70d3043"
   },
   {
    "file": "crops/IMG-051.png",
-   "bytes": 282739,
-   "sha256": "d361ea41ab8254ed6e133729abdb7b866c3262ad8cf14c5d0ad7bd5e4bacd4f8"
+   "bytes": 273111,
+   "sha256": "9cf681f1fb935946dc04df86f8f8baf1157b87e7654ebb43cd2342412b175902"
   },
   {
    "file": "crops/IMG-052.png",
-   "bytes": 353812,
-   "sha256": "089193ce64ab919833d6d88d2d108f352795864beee8f47e56832d6b8a285341"
+   "bytes": 355541,
+   "sha256": "7a57cdf912d575b17a9d710180c128631dfda947e15ba5927b313ae0e61c30eb"
   },
   {
    "file": "crops/IMG-053.png",
-   "bytes": 318304,
-   "sha256": "1f01306212f1f7636e701bbe0423248ce4f099deb6acf4a6caf4cca13ac132a0"
+   "bytes": 295113,
+   "sha256": "b21861eaf0815ceab29bf12045ac8dc1dff3e741a25a4dba0d61220d502e1d54"
   },
   {
    "file": "crops/IMG-054.png",
-   "bytes": 425986,
-   "sha256": "cb0a69a3e7eede33ca015d29f56ed81b778f3410b8450cc06e3fabdad52828ca"
+   "bytes": 428117,
+   "sha256": "cbb97f21505e32e7ea2832753342147e00a639bb80754b2301e6b5398d405b9f"
   },
   {
    "file": "crops/IMG-055.png",
-   "bytes": 350911,
-   "sha256": "f224d2ed217ac6d4f02695f57d281438fd8710480617e75b66e52419d7a48226"
+   "bytes": 349269,
+   "sha256": "abd23fba6b54b670f0f5bc5790b17d6088858accb27e04de0a3bf75b29174215"
   },
   {
    "file": "crops/IMG-056.png",
-   "bytes": 348937,
-   "sha256": "2780cd30aaf1b1d86cf3b2394c59e12809c55b11baa19abf8086a765ae10c473"
+   "bytes": 344441,
+   "sha256": "27b66f5173d16255fadefb41d57c84b39af44ad41a08058c04e242e7718360de"
   },
   {
    "file": "crops/IMG-057.png",
-   "bytes": 369493,
-   "sha256": "202f4d9b300507f1ce6d22363120d0c9d1c1df3d5383d6626e78acad6bc63eef"
+   "bytes": 384036,
+   "sha256": "338417fd8928c533bbb564a43a1d5e38e1b8b30a71f204e8d554d862c7c88da9"
   },
   {
    "file": "crops/IMG-058.png",
-   "bytes": 396949,
-   "sha256": "92fe950561b959edb395940f5584a0de1dc08f10b7fb785c1788d01b8bf0afcc"
+   "bytes": 404196,
+   "sha256": "c9c105545a4db56bda30905497187691ed45dc43a5b83aef6426d44e93738df1"
   },
   {
    "file": "crops/IMG-059.png",
-   "bytes": 373136,
-   "sha256": "3ab9bd9174d8b9c1074991c195313f55de52cee6ae6ba9b2c12758c16f69e4f0"
+   "bytes": 378087,
+   "sha256": "31abe15d34465c3a044a6022aad26f85b07f3b31ff80779e9aab60a8fb2fd0c8"
   },
   {
    "file": "crops/IMG-060.png",
-   "bytes": 430287,
-   "sha256": "a1d3a6136e70d394f207e4dd44bbae9ff08b4564df809d55a54e2ebb4df504fd"
+   "bytes": 459159,
+   "sha256": "53f2af44be1a94e836c782c093fc9195b67a07ce0ac295be6eb066c5b9c492c1"
   },
   {
    "file": "unit-01.jpeg",

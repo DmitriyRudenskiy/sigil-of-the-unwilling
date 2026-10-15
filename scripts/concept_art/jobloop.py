@@ -39,6 +39,7 @@ QUEUE = LAB / "queue.json"
 SPEC = LAB / "spec.json"
 PAIRS = LAB / "pairs"
 ETALONS = REFS / "manifest.json"
+INK_MAX = 235                       # порог «не бумага» для поиска фигуры (тот же, что у гейта)
 SHEETS_SRC = Path("/Users/user/sigil-of-the-unwilling-slop/___STYLE_BOOK/for_local_agent/unit")
 
 GRID = (4, 3)                   # колонок, строк на листе
@@ -557,6 +558,61 @@ def cmd_lint(a) -> int:
     return 0
 
 
+def figure_bbox(im: Image.Image, cell: tuple[int, int, int, int],
+                gutter: int = 80, margin: int = 12) -> tuple[int, int, int, int]:
+    """Бокс фигуры, а не ячейки: сетка референса режется по ровным колонкам,
+    рука соседа лезет в кадр, а своя рука лезет за край ячейки.
+
+    Фигура = связный компонент ненугового содержимого, чей центр тяжести лежит
+    в ячейке. Рука, перегнувшая за границу, остаётся своей (центр тяжести в
+    теле), кисть соседа — чужой.
+    """
+    from scipy import ndimage
+    a = np.asarray(im.convert("L"), dtype=np.uint8)
+    x0, y0, x1, y1 = cell
+    win = (max(0, x0 - gutter), max(0, y0 - gutter),
+           min(a.shape[1], x1 + gutter), min(a.shape[0], y1 + gutter))
+    lab, n = ndimage.label(a[win[1]:win[3], win[0]:win[2]] < INK_MAX)
+    boxes = []
+    for i in range(1, n + 1):
+        ys, xs = np.where(lab == i)
+        if len(ys) < 200:
+            continue
+        cx, cy = xs.mean() + win[0], ys.mean() + win[1]
+        if x0 <= cx < x1 and y0 <= cy < y1:
+            boxes.append((xs.min() + win[0], ys.min() + win[1],
+                          xs.max() + win[0], ys.max() + win[1]))
+    if not boxes:
+        return cell
+    return (max(0, min(b[0] for b in boxes) - margin),
+            max(0, min(b[1] for b in boxes) - margin),
+            min(a.shape[1], max(b[2] for b in boxes) + margin),
+            min(a.shape[0], max(b[3] for b in boxes) + margin))
+
+
+def cmd_cut(a) -> int:
+    """Перерезать кропы по боксу фигуры и пересобрать манифест эталонов."""
+    from scipy import ndimage                                    # noqa: F401
+    q = load()
+    for uid, unit in sorted(q.items()):
+        sheet = Image.open(LAB / unit["sheet"])
+        cols, rows = GRID                                   # GRID = (колонок, рядов)
+        idx = unit["cell"] - 1                              # cell в очереди 1-базируется
+        r, c = idx // cols, idx % cols
+        cw, ch = sheet.width // cols, sheet.height // rows
+        cell = (c * cw, r * ch, (c + 1) * cw, (r + 1) * ch)
+        box = figure_bbox(sheet, cell)
+        fig = sheet.crop(box)
+        side = max(fig.size)
+        canvas = Image.new("RGB", (side, side), "white")
+        canvas.paste(fig, ((side - fig.width) // 2, (side - fig.height) // 2))
+        out = LAB / unit["reference"]
+        out.parent.mkdir(parents=True, exist_ok=True)
+        canvas.save(out)
+        print(f"{uid}: ячейка {cell} -> фигура {box} ({side}px)")
+    return cmd_etalons(None)
+
+
 def cmd_reopen(a) -> int:
     """Снять вердиктный статус: потолок отозван, юнит снова в работе."""
     q = load()
@@ -647,6 +703,7 @@ def main() -> int:
     sj.add_argument("text")
     sj.set_defaults(f=cmd_subject)
     sub.add_parser("stat").set_defaults(f=cmd_stat)
+    sub.add_parser("cut", help="перерезать кропы по боксу фигуры").set_defaults(f=cmd_cut)
     sub.add_parser("lint", help="проверить стилевой блок словарём стиля").set_defaults(f=cmd_lint)
     ro = sub.add_parser("reopen", help="снять статус потолка или блокировки")
     ro.add_argument("id")
