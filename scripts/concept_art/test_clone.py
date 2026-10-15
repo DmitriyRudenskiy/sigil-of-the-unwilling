@@ -6,6 +6,7 @@ assert-ами, без сервера: проверяется то, что гла
 порога, знаменатель готовности, журнал только на дописывание.
 """
 import json
+import re
 import sys
 import tempfile
 from pathlib import Path
@@ -44,9 +45,9 @@ unit = {"unit": "IMG-001", "reference": "references/crops/IMG-001.png", "categor
         "max_attempts": j.MAX_ATTEMPTS, "subject": "бравый воин", "history": []}
 j.save({"IMG-001": unit})
 
-# --- шаблон имени: <модель>_<юнит>_<версия>
+# --- шаблон имени: <модель>_<юнит>_<версия>[_<P><R>]
 name = j.attempt_path(unit, "krea2", 3).name
-ok(name == "krea2_IMG-001_v3.webp", f"имя попытки не по шаблону: {name}")
+ok(re.fullmatch(r"krea2_IMG-001_v3(_P\d+R\d+)?\.webp", name), f"имя не по шаблону: {name}")
 ok(j.attempt_path(unit, "qwen21", 1).parent == j.ATTEMPTS / "IMG-001", "попытки не в папке юнита")
 
 # --- готовность: неприменимый критерий выпадает из знаменателя
@@ -260,13 +261,41 @@ finally:
 
 ok(len(seen_argv) == 1, "next не вызвал генератор")
 cmd = seen_argv[0]
-ok(cmd[cmd.index("--dest") + 1] == str(j.ATTEMPTS / "IMG-001" / "krea2_IMG-001_v1.webp"),
+ok(re.fullmatch(r".*/IMG-001/krea2_IMG-001_v1(_P\d+R\d+)?\.webp", cmd[cmd.index("--dest") + 1]),
    "генератору не передан итоговый путь")
-ok(cmd[cmd.index("--server-prefix") + 1] == f"{j.LAB.name}/IMG-001/krea2_IMG-001_v1",
+ok(re.fullmatch(rf"{j.LAB.name}/IMG-001/krea2_IMG-001_v1(_P\d+R\d+)?", cmd[cmd.index("--server-prefix") + 1]),
    "серверу не передано итоговое имя")
 leftovers = [p.name for p in j.LAB.rglob("IMG-001.webp")]
 ok(not leftovers, f"кадр всё ещё рождается служебным именем: {leftovers}")
-ok((j.ATTEMPTS / "IMG-001" / "krea2_IMG-001_v1.webp").exists(), "кадр не лёг в итоговый путь")
+ok(any((j.ATTEMPTS / "IMG-001").glob("krea2_IMG-001_v1*.webp")), "кадр не лёг в итоговый путь")
 ok(not (j.LAB / "concept_art").exists(), "служебный путь прогона лаборатории вернулся")
+
+# --- 56. пара версий прогона (P, R): в имени, в записи, в вердикте ---------
+spec["prompt_version"] = "P2"
+spec["render"] = {"id": "R1", "cfg": 2.0, "sampler": "euler"}
+j.SPEC.write_text(_json.dumps(spec))
+ok(j.attempt_name(unit, "krea2", 2) == "krea2_IMG-001_v2_P2R1",
+   f"в имени нет пары версий: {j.attempt_name(unit, 'krea2', 2)}")
+
+# --- 57. линт стилевого блока ----------------------------------------------
+card = ("## 1. Линия\n\n| Признак | Формулировка |\n| --- | --- |\n"
+        "| Контур | `clean dark contour line` |\n\n"
+        "## 2. Цвет\n\n| Признак | Формулировка |\n| --- | --- |\n"
+        "| Кожа | `warm ochre skin` |\n\n"
+        "## Отрицания\n\n| Токен | Защищаемая строка |\n| --- | --- |\n"
+        "| `airbrush` | Контур |\n")
+bad = j.lint_style("clean dark contour line, airbrush, matte, no airbrush, no text", card)
+ok(any("airbrush" in b and "в плюсе и в минусе" in b for b in bad),
+   f"линт не нашёл токен в двух половинах: {bad}")
+ok(any("warm ochre skin" in b for b in bad), f"линт не нашёл строку словаря без якоря: {bad}")
+ok(not any("clean dark contour line" in b for b in bad), "линт обвинил якорь, который на месте")
+ok(j.lint_style("clean dark contour line, warm ochre skin, no text", card) == [],
+   "чистый блок дал находки")
+
+# --- 58. reopen: потолок, объявленный на неиспробованном рычаге, снимается --
+unit["status"] = "model-ceiling"
+j.cmd_reopen(Args(id="IMG-001", note="рычаг не проверен на живучесть"))
+ok(j.load()["IMG-001"]["status"] == "in-queue", "reopen не вернул юнит в очередь")
+ok("рычаг не проверен" in (j.DOCS / "report.md").read_text(), "причина снятия не в журнале")
 
 print(f"OK: проверок {checks}")

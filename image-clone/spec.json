@@ -24,6 +24,18 @@
    "vae": "qwen_image_2.1_vae_bf16.safetensors"
   }
  },
+ "prompt_version": "P2",
+ "render": {
+  "id": "R0",
+  "model": "qwen21",
+  "cfg": 1.0,
+  "sampler": "euler",
+  "scheduler": "simple",
+  "steps": 25,
+  "checkpoint": "qwen_image_2.1_int8_convrot.safetensors",
+  "conditioning": "none",
+  "note": "R0 = чем был настроен рендер всех кадров до 2026-10-15 (сверено с историей ComfyUI: cfg 1.0 во всех прогонах)"
+ },
  "references_dir": "/Users/user/sigil-concept-art/image-clone/references",
  "model": "krea2",
  "probe_models": [

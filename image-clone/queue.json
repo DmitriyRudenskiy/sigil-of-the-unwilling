@@ -6,7 +6,7 @@
   "cell": 1,
   "category": "unit-01",
   "model": "qwen21",
-  "status": "model-ceiling",
+  "status": "in-queue",
   "version": 5,
   "versions": {
    "krea2": 3,
@@ -177,7 +177,7 @@
   "cell": 2,
   "category": "unit-01",
   "model": "qwen21",
-  "status": "model-ceiling",
+  "status": "in-queue",
   "version": 3,
   "versions": {
    "krea2": 1,

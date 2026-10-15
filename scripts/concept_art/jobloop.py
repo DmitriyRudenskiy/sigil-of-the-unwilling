@@ -142,8 +142,20 @@ def save(q: dict) -> None:
     QUEUE.write_text(json.dumps(q, ensure_ascii=False, indent=1) + "\n")
 
 
+def run_versions() -> tuple[str, str]:
+    """Пара версий прогона: P — слова, R — чем настроен рендер.
+
+    Раздельно, иначе правка сэмплера не отличима от правки промпта и кривая
+    обучения промпту читается по двум переменным сразу. R — заодно провенанс
+    для датасета LoRA: принятые кадры должны собираться под одним R.
+    """
+    s = json.loads(SPEC.read_text()) if SPEC.is_file() else {}
+    return s.get("prompt_version", "P0"), s.get("render", {}).get("id", "R0")
+
+
 def attempt_name(unit: dict, model: str, version: int) -> str:
-    return f"{model}_{unit['unit']}_v{version}"
+    pv, rv = run_versions()
+    return f"{model}_{unit['unit']}_v{version}_{pv}{rv}"
 
 
 def attempt_path(unit: dict, model: str, version: int) -> Path:
@@ -319,7 +331,8 @@ def cmd_next(a) -> int:
     p = PAIRS / f"{uid}.png"
     pair(uid, LAB / unit["reference"], gen, p, f"{model} v{version} metric={m.get('score')}")
     unit["versions"][model] = version
-    unit.update(model=model, version=version, file=str(gen.relative_to(LAB)), pair=str(p))
+    unit.update(model=model, version=version, file=str(gen.relative_to(LAB)), pair=str(p),
+                prompt_version=run_versions()[0], render_version=run_versions()[1])
     save(q)
     print(f"\n>>> {uid} [{unit['category']}] {model} v{version} метрика {m}")
     print(f"оригинал: {LAB / unit['reference']}\nкопия:   {gen}\nпара:    {p}")
@@ -392,6 +405,8 @@ def cmd_verdict(a) -> int:
                             "file": unit["file"], "sty": a.sty, "sty_notes": a.sty_notes or [],
                             "cnt": cnt, "ident": ident, "head_sty": bool(a.head_sty),
                             "identity_ceiling": ceiling, "etalons": ver,
+                            "prompt_version": unit.get("prompt_version"),
+                            "render_version": unit.get("render_version"),
                             "prompt_ceiling": a.ceiling,
                             "readiness": None, "note": a.note or ""})
     unit["status"] = status
@@ -412,7 +427,8 @@ def cmd_verdict(a) -> int:
                      + "".join(f"- {i}\n" for i in ident)
                      + ("- `identity-ceiling`: похожесть не двигается промптом — "
                         "рычаг референс-кондишенинга, не перерисовка\n" if ceiling else ""))
-    report(f"## {date.today()} {uid} v{unit['version']} | {unit['model']} | стиль: {a.sty}"
+    report(f"## {date.today()} {uid} v{unit['version']} | {unit['model']} "
+           f"| {unit.get('prompt_version', 'P?')}{unit.get('render_version', 'R?')} | стиль: {a.sty}"
            f"{f' -> {status} ({why})' if why else ''}\n"
            f"- Файл: {unit['file']}\n- Эталоны: {ver}\n"
            f"- Метрика-подсказка: {unit.get('metric', '—')}\n"
@@ -498,6 +514,64 @@ def cmd_subject(a) -> int:
     return 0
 
 
+def split_style(style: str) -> tuple[str, str]:
+    """Стилевой блок на плюс и минус: минус начинается с первого `no `."""
+    i = style.find(", no ")
+    return (style, "") if i < 0 else (style[:i], style[i + 1:])
+
+
+def card_phrases(card: str) -> list[str]:
+    """Формулировки словаря стиля: только подтверждённые группы, без отменённых."""
+    out = []
+    for sec in card.split("\n## ")[1:]:
+        if not sec[:1].isdigit():
+            continue
+        for line in sec.splitlines():
+            if "~~" in line:
+                continue
+            out += [c.strip() for c in line.split("`")[1::2]]
+    return out
+
+
+def lint_style(style: str, card: str) -> list[str]:
+    """Правила стилевого блока: токен не живёт в двух половинах, строка словаря
+    обязана иметь якорь в плюсе. Нарушение = находка, а не падение."""
+    plus, minus = split_style(style)
+    low, out = plus.lower(), []
+    for clause in minus.lower().replace("no ", "").split(","):
+        w = clause.strip()
+        if len(w) > 3 and w in low:
+            out.append(f"токен {w!r} стоит в плюсе и в минусе одновременно")
+    for phrase in card_phrases(card):
+        if phrase.lower() not in low:
+            out.append(f"строка словаря без якоря в плюсе: {phrase!r}")
+    return sorted(set(out))
+
+
+def cmd_lint(a) -> int:
+    style = json.loads(SPEC.read_text())["variants"][0]["style"]
+    bad = lint_style(style, (DOCS / "style-card.md").read_text())
+    for b in bad:
+        print(f"- {b}")
+    print(f"нарушений {len(bad)}")
+    return 0
+
+
+def cmd_reopen(a) -> int:
+    """Снять вердиктный статус: потолок отозван, юнит снова в работе."""
+    q = load()
+    unit = q[a.id]
+    if unit["status"] in ("success",):
+        raise SystemExit("принятый юнит не открывается командой reopen — сначала отзыв приёмки")
+    prev = unit["status"]
+    unit["status"] = OPEN[0]
+    save(q)
+    report(f"## {date.today()} {a.id} — статус {prev} снят, юнит снова в очереди\n"
+           f"- Причина: {a.note or '—'}\n")
+    print(f"{a.id}: {prev} -> {OPEN[0]}")
+    return 0
+
+
 def cmd_stat(_a) -> int:
     q = load()
     tally = {}
@@ -573,6 +647,11 @@ def main() -> int:
     sj.add_argument("text")
     sj.set_defaults(f=cmd_subject)
     sub.add_parser("stat").set_defaults(f=cmd_stat)
+    sub.add_parser("lint", help="проверить стилевой блок словарём стиля").set_defaults(f=cmd_lint)
+    ro = sub.add_parser("reopen", help="снять статус потолка или блокировки")
+    ro.add_argument("id")
+    ro.add_argument("--note", default="")
+    ro.set_defaults(f=cmd_reopen)
     args = ap.parse_args()
     return args.f(args)
 
