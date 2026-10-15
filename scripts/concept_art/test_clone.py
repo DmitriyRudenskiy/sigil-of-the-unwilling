@@ -807,4 +807,36 @@ finally:
     j.subprocess.run = sub_run
 ok(len(seen_argv) == 1, "--force не обошёл стопор побайтового повтора")
 
+# --- 88. круг живёт на одной паре (P, R) ------------------------------------
+spec_raw = j.SPEC.read_text()
+spec = json.loads(spec_raw)
+spec["chain"] = ["krea2", "ernie", "zimage"]        # круг меряется тремя стадиями
+j.SPEC.write_text(json.dumps(spec, ensure_ascii=False, indent=1))
+q = j.load()
+u = q["IMG-001"]
+u.update(status="in-queue", history=[], cycle=0, cycles=[], ceilings={},
+         versions={"krea2": 2, "ernie": 1, "zimage": 1}, model="krea2", version=2,
+         file="attempts/IMG-001/krea2_IMG-001_v2.webp")
+u["seal"] = j.run_seal(u, "krea2", 2, spec)
+j.save(q)
+j.cmd_sty(Args(id="IMG-001", model="krea2", gap=[],
+               rows=["line=8", "color=8", "texture=8", "shade=8"]))
+ok(j.load()["IMG-001"]["cycle"] == 0, "круг закрылся раньше трёх стадий")
+spec["prompt_version"] = "P4"
+j.SPEC.write_text(json.dumps(spec, ensure_ascii=False, indent=1))
+q = j.load(); u = q["IMG-001"]
+Image.new("RGB", (8, 8), (255, 255, 255)).save(j.ATTEMPTS / "IMG-001" / "ernie_IMG-001_v1.webp")
+u.update(model="ernie", version=1, file="attempts/IMG-001/ernie_IMG-001_v1.webp")
+u["seal"] = j.run_seal(u, "ernie", 1, spec)
+j.save(q)
+j.cmd_sty(Args(id="IMG-001", model="ernie", gap=[],
+               rows=["line=8", "color=8", "texture=8", "shade=8"]))
+u = j.load()["IMG-001"]
+ok(u["cycle"] == 1 and u["history"][-1]["cycle"] == 2,
+   f"смена P в середине круга не расплела его: cycle={u['cycle']} {u['history'][-1]['cycle']}")
+ok(not any(c["cycle"] == 1 for c in u["cycles"]), "распавшийся круг попал в реестр кругов")
+ok(u["history"][-1]["pair"] == ["P4", u["history"][-1]["render_version"]],
+   "замер не запомнил пару круга")
+j.SPEC.write_text(spec_raw)
+
 print(f"OK: проверок {checks}")

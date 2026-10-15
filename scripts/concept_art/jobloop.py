@@ -844,8 +844,18 @@ def cmd_sty(a) -> int:
     prev = next((h for h in reversed(unit["history"]) if h.get("rows")), None)
     delta = sty_delta(prev.get("rows") if prev else None, rows)
     ver = etalon_version() if ETALONS.is_file() else None
+    # Слова круга — общие: замер на других словах не имеет права попадать в тот
+    # же круг, его среднее усреднило бы разные прогоны. Пара — из печати
+    # замеряемой попытки, а не из поля юнита: им меряют чужую стадию.
+    pair = [unit["seal"]["prompt_version"], unit["seal"]["render_version"]]
+    started = cycle_pair(unit)
+    if started and started != pair:
+        unit["cycle"] = unit.get("cycle", 0) + 1
+        print(f"{uid}: круг {unit['cycle']} распался — он начат на "
+              f"{'-'.join(started)}, а замер на {'-'.join(pair)}: новый круг "
+              f"{unit['cycle'] + 1}, распавшийся не считается ни движением, ни потолком")
     rec = {"kind": "sty", "date": str(date.today()), "model": unit["model"],
-           "version": unit["version"], "file": unit["file"],
+           "version": unit["version"], "file": unit["file"], "pair": pair,
            "prompt_version": unit.get("prompt_version"),
            "render_version": unit.get("render_version"),
            "seed": unit["seal"]["seed"],      # настоящая затравка прогона, не SEED_PIN
@@ -916,6 +926,15 @@ def sty_last(unit: dict, model: str):
                  if h.get("kind") == "sty" and h["model"] == model), None)
 
 
+def cycle_pair(unit: dict):
+    """Пара (P, R), на которой начат текущий (ещё не закрытый) круг цепочки."""
+    cur = unit.get("cycle", 0) + 1
+    for h in reversed(unit["history"]):
+        if h.get("kind") == "sty" and h.get("cycle") == cur:
+            return h.get("pair")
+    return None
+
+
 def sty_cycle(unit: dict, model: str, cycle: int):
     """STY-% стадии в круге цепочки (несколько замеров одного круга — последний)."""
     vals = [h["sty_pct"] for h in unit["history"]
@@ -954,8 +973,8 @@ def stage_of(unit: dict, spec: dict):
 
 def advance_chain(unit: dict, spec: dict) -> dict | None:
     """Замыкает цикл цепочки и ставит остановки: потолок стадии, «сошлись», пауза, лимит.
-    Цикл = по одному STY-замеру каждой стадии текущего круга; правка промпта
-    между стадиями остаётся внутри цикла."""
+    Цикл = по одному STY-замеру каждой стадии на одной паре (P, R); смена слов
+    внутри круга расплетает его (см. cycle_pair)."""
     stages = chain_of(spec)
     cur = unit.get("cycle", 0) + 1
     if not all(sty_cycle(unit, m, cur) is not None for m in stages):

@@ -195,7 +195,11 @@
     "notes": [],
     "judge_pass": "score",
     "control": null,
-    "delta": null
+    "delta": null,
+    "pair": [
+     "P3",
+     "R0"
+    ]
    },
    {
     "kind": "sty",
@@ -230,7 +234,11 @@
      "color": 0,
      "texture": 0,
      "shade": 0
-    }
+    },
+    "pair": [
+     "P4",
+     "R0"
+    ]
    },
    {
     "kind": "sty",
@@ -265,7 +273,11 @@
      "color": 0,
      "texture": 0,
      "shade": 0
-    }
+    },
+    "pair": [
+     "P5",
+     "R0"
+    ]
    },
    {
     "kind": "sty",
@@ -300,7 +312,11 @@
      "color": 1,
      "texture": 1,
      "shade": 1
-    }
+    },
+    "pair": [
+     "P3",
+     "R1"
+    ]
    },
    {
     "kind": "sty",
@@ -335,7 +351,11 @@
      "color": -1,
      "texture": 0,
      "shade": 1
-    }
+    },
+    "pair": [
+     "P3",
+     "R2"
+    ]
    },
    {
     "kind": "sty",
@@ -370,7 +390,11 @@
      "color": 1,
      "texture": 0,
      "shade": -1
-    }
+    },
+    "pair": [
+     "P7",
+     "R1"
+    ]
    },
    {
     "kind": "sty",
@@ -407,7 +431,11 @@
      "color": 0,
      "texture": 0,
      "shade": 0
-    }
+    },
+    "pair": [
+     "P3",
+     "R1"
+    ]
    },
    {
     "kind": "sty",
@@ -442,7 +470,11 @@
      "color": 1,
      "texture": 2,
      "shade": 2
-    }
+    },
+    "pair": [
+     "P3",
+     "R1"
+    ]
    },
    {
     "kind": "sty",
@@ -478,7 +510,11 @@
      "color": -3,
      "texture": -3,
      "shade": -3
-    }
+    },
+    "pair": [
+     "P3",
+     "R1"
+    ]
    }
   ],
   "file": "attempts/IMG-001/zimage_IMG-001_v2.webp",
