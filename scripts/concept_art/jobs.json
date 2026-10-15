@@ -1,0 +1,767 @@
+{
+ "model": "krea2",
+ "jobs": [
+  {
+   "id": "a0_01",
+   "cat": "aset0",
+   "subject": "angry human street brawler, adult realistic athletic build with a hairy chest and defined abdominal muscles, head one seventh of the total height, long legs, young adult face with thick scowling brows, clean-shaven, mouth shut in a snarl, shaved head with a tall dark mohawk spike, blue quilted sleeveless denim vest worn open, clean straight edges with no fraying and no rips and no spikes, blue jeans, brown belt with a square brass buckle, brown wrist wraps on both forearms, brown boots with folded cuffs, both fists raised at shoulder height in a fighting stance, a small red cross scar on the upper arm on the viewer's right",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a0_01.png",
+   "status": "accepted",
+   "tries": 4,
+   "score": 0.54,
+   "note": "персонаж совпал; krea2 упорно рисует чиби и щетину — это уровень модели, не промпта",
+   "metric": {
+    "silhouette": 0.617,
+    "colour": 0.265,
+    "fill": 0.85,
+    "score": 0.54
+   },
+   "model": "krea2",
+   "gen": "/Users/user/sigil-concept-art/concept_art/copy/r48/krea2/copy/aset0/a0_01.webp",
+   "pair": "/Users/user/sigil-concept-art/concept_art/pairs48/a0_01.png"
+  },
+  {
+   "id": "a0_02",
+   "cat": "aset0",
+   "subject": "bearded human crusader knight, auburn hair and full beard, stern face, plain red tabard with no cross and no emblem on the chest, white mantle cape fastened with a round gold brooch, polished steel pauldrons and greaves, chainmail sleeves, brown leather belt, a tall heater shield painted red with one large silver cross held on the viewer's right, full plate boots",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a0_02.png",
+   "status": "accepted",
+   "tries": 1,
+   "score": 0.626,
+   "note": "копия перекрасила табард в белый с красным крестом и сделала крест на щите красным",
+   "metric": {
+    "silhouette": 0.774,
+    "colour": 0.267,
+    "fill": 0.921,
+    "score": 0.626
+   },
+   "model": "krea2",
+   "gen": "/Users/user/sigil-concept-art/concept_art/copy/r48/krea2/copy/aset0/a0_02.webp",
+   "pair": "/Users/user/sigil-concept-art/concept_art/pairs48/a0_02.png"
+  },
+  {
+   "id": "a0_03",
+   "cat": "aset0",
+   "subject": "crouching human ninja assassin dressed entirely in matte black cloth wrappings from head to feet, black pointed hood, black face mask covering nose and mouth leaving only narrowed eyes visible, long black clawed gloves, black baggy trousers, soft black shoes, no other colours anywhere, no blue, no green, no red sash, no belt, no bare skin except the eyes, low squatting stance with both hands clawed forward, one single character alone in the frame, no second copy of the character, no inset thumbnails, no extra figures",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a0_03.png",
+   "status": "accepted",
+   "tries": 1,
+   "score": 0.551,
+   "note": "копия — самурай в сине-зелёном кимоно с красным поясом, лицо открыто, внизу лист из трёх мелких фигур",
+   "metric": {
+    "silhouette": 0.586,
+    "colour": 0.277,
+    "fill": 0.954,
+    "score": 0.551
+   },
+   "model": "krea2",
+   "gen": "/Users/user/sigil-concept-art/concept_art/copy/r48/krea2/copy/aset0/a0_03.webp",
+   "pair": "/Users/user/sigil-concept-art/concept_art/pairs48/a0_03.png"
+  },
+  {
+   "id": "a0_04",
+   "cat": "aset0",
+   "subject": "shirtless barbarian warlord with three fresh red claw scratches across his bare shoulder, long dark brown hair and thick beard, snarl, necklace of large animal fangs on a leather cord, brown fur loincloth with a thick rope belt, leather bracers on both forearms, fur-trimmed boots, both fists clenched at his sides, three red claw scratches on the shoulder on the viewer's right",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a0_04.png",
+   "status": "accepted",
+   "tries": 1,
+   "score": 0.616,
+   "note": "совпал; три красных царапины krea2 не рисует ни в начале, ни в конце сюжета (2 попытки)",
+   "metric": {
+    "silhouette": 0.72,
+    "colour": 0.3,
+    "fill": 0.933,
+    "score": 0.616
+   },
+   "model": "krea2",
+   "gen": "/Users/user/sigil-concept-art/concept_art/copy/r48/krea2/copy/aset0/a0_04.webp",
+   "pair": "/Users/user/sigil-concept-art/concept_art/pairs48/a0_04.png"
+  },
+  {
+   "id": "a0_05",
+   "cat": "aset0",
+   "subject": "shirtless barbarian with a tall shaved mohawk and a full brown beard, one steel pauldron on the shoulder on the viewer's left, leather chest strap, ragged rust-orange kilt with a rope belt, leather bracers, strappy sandals, bare feet, fists raised, red scars on the arms",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a0_05.png",
+   "status": "accepted",
+   "tries": 0,
+   "score": 0.529,
+   "note": "совпал; кивок: наплечник в оригинале со стороны ЗРИТЕЛЯ СПРАВА, я просила 'viewer left' — krea2 зеркалит сторону (2-й случай)",
+   "metric": {
+    "silhouette": 0.551,
+    "colour": 0.28,
+    "fill": 0.915,
+    "score": 0.529
+   },
+   "model": "krea2",
+   "gen": "/Users/user/sigil-concept-art/concept_art/copy/r48/krea2/copy/aset0/a0_05.webp",
+   "pair": "/Users/user/sigil-concept-art/concept_art/pairs48/a0_05.png"
+  },
+  {
+   "id": "a0_06",
+   "cat": "aset0",
+   "subject": "old human druid, long white hair and long white beard, cloak of layered green leaves over a brown leather tunic, crossed leather straps with a brass buckle, fang pendant on a cord, a tall gnarled wooden staff wrapped with vines and green leaves, the staff is held in the hand touching the LEFT EDGE of the image, the other hand empty at his side, brown trousers, fur-trimmed boots",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a0_06.png",
+   "status": "accepted",
+   "tries": 1,
+   "score": 0.587,
+   "note": "ПРАВИЛО: 'the hand touching the LEFT EDGE of the image' ставит посох влево; 'on the viewer's left' krea2 зеркалит",
+   "metric": {
+    "silhouette": 0.657,
+    "colour": 0.277,
+    "fill": 0.975,
+    "score": 0.587
+   },
+   "model": "krea2",
+   "gen": "/Users/user/sigil-concept-art/concept_art/copy/r48/krea2/copy/aset0/a0_06.webp",
+   "pair": "/Users/user/sigil-concept-art/concept_art/pairs48/a0_06.png"
+  },
+  {
+   "id": "a0_07",
+   "cat": "aset0",
+   "subject": "young human bard, curly chestnut hair, wide confident grin, mustard-gold coat with gold buttons and a white frill shirt, purple waistcoat, purple cape with gold lining worn open, tight mustard breeches, brown boots, both arms spread wide toward the viewer, one single painted character illustration, no second copy of the character, no turnaround, no three-quarter views, no grey clay 3d render, no inset pictures, nothing in the corners of the frame",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a0_07.png",
+   "status": "accepted",
+   "tries": 1,
+   "score": 0.597,
+   "note": "персонаж совпал, но внизу справа лист-турнэраж из трёх серых 3d-моделей",
+   "metric": {
+    "silhouette": 0.71,
+    "colour": 0.292,
+    "fill": 0.875,
+    "score": 0.597
+   },
+   "model": "krea2",
+   "gen": "/Users/user/sigil-concept-art/concept_art/copy/r48/krea2/copy/aset0/a0_07.webp",
+   "pair": "/Users/user/sigil-concept-art/concept_art/pairs48/a0_07.png"
+  },
+  {
+   "id": "a0_08",
+   "cat": "aset0",
+   "subject": "human ranger scout, hooded forest-green cloak over a green tunic, crossed leather straps with pouches, brown beard, one hand raised to his brow shading his eyes with the hand on the viewer's left, a rolled bedroll on his back on the viewer's right, brown trousers, brown boots",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a0_08.png",
+   "status": "accepted",
+   "tries": 0,
+   "score": 0.582,
+   "note": "совпал, включая сторону руки у брови — зеркалит НЕ всегда, 'edge' всё равно надёжнее",
+   "metric": {
+    "silhouette": 0.704,
+    "colour": 0.282,
+    "fill": 0.835,
+    "score": 0.582
+   },
+   "model": "krea2",
+   "gen": "/Users/user/sigil-concept-art/concept_art/copy/r48/krea2/copy/aset0/a0_08.webp",
+   "pair": "/Users/user/sigil-concept-art/concept_art/pairs48/a0_08.png"
+  },
+  {
+   "id": "a0_09",
+   "cat": "aset0",
+   "subject": "elderly human high priest, grey beard, purple hooded ceremonial robe with gold trim and a gold pendant, cream alb with a gold hem, brown belt, brown shoes, a tall gold staff with an ornamental openwork head held on the viewer's left, the other hand raised palm out",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a0_09.png",
+   "status": "accepted",
+   "tries": 0,
+   "score": 0.584,
+   "note": "",
+   "metric": {
+    "silhouette": 0.654,
+    "colour": 0.291,
+    "fill": 0.938,
+    "score": 0.584
+   },
+   "model": "krea2",
+   "gen": "/Users/user/sigil-concept-art/concept_art/copy/r48/krea2/copy/aset0/a0_09.webp",
+   "pair": "/Users/user/sigil-concept-art/concept_art/pairs48/a0_09.png"
+  },
+  {
+   "id": "a0_10",
+   "cat": "aset0",
+   "subject": "human archmage, long white beard, deep crimson hooded robe with heavy gold embroidery, gold cord belt with a pendant, hood up, both hands cupped in front of him holding a glowing purple arcane orb",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a0_10.png",
+   "status": "accepted",
+   "tries": 0,
+   "score": 0.67,
+   "note": "",
+   "metric": {
+    "silhouette": 0.805,
+    "colour": 0.317,
+    "fill": 0.986,
+    "score": 0.67
+   },
+   "model": "krea2",
+   "gen": "/Users/user/sigil-concept-art/concept_art/copy/r48/krea2/copy/aset0/a0_10.webp",
+   "pair": "/Users/user/sigil-concept-art/concept_art/pairs48/a0_10.png"
+  },
+  {
+   "id": "a0_11",
+   "cat": "aset0",
+   "subject": "gaunt undead ghoul, bald grey skull-like head, hollow black eyes, ragged grey robe with a frayed hem, stooped hunched stance, long clawed hands, bare grey feet, a faint green glow around the hand on the viewer's right",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a0_11.png",
+   "status": "accepted",
+   "tries": 0,
+   "score": 0.539,
+   "note": "",
+   "metric": {
+    "silhouette": 0.62,
+    "colour": 0.309,
+    "fill": 0.757,
+    "score": 0.539
+   },
+   "model": "krea2",
+   "gen": "/Users/user/sigil-concept-art/concept_art/copy/r48/krea2/copy/aset0/a0_11.webp",
+   "pair": "/Users/user/sigil-concept-art/concept_art/pairs48/a0_11.png"
+  },
+  {
+   "id": "a0_12",
+   "cat": "aset0",
+   "subject": "tattooed muscle-bound human fire warrior, long brown hair and beard, bare chest and legs covered with dark tribal tattoos, teal-blue toga skirt with a round gold belt buckle, gold torque necklace, teal cape, brown bracers, brown boots, a large orange flame burning in the open palm of the hand touching the LEFT EDGE of the image, the other fist clenched at his side",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a0_12.png",
+   "status": "accepted",
+   "tries": 1,
+   "score": 0.635,
+   "note": "пламя уехало к правому краю; нет татуировок на груди, руках и ноге",
+   "metric": {
+    "silhouette": 0.754,
+    "colour": 0.276,
+    "fill": 0.995,
+    "score": 0.635
+   },
+   "model": "krea2",
+   "gen": "/Users/user/sigil-concept-art/concept_art/copy/r48/krea2/copy/aset0/a0_12.webp",
+   "pair": "/Users/user/sigil-concept-art/concept_art/pairs48/a0_12.png"
+  },
+  {
+   "id": "a1_01",
+   "cat": "aset1",
+   "subject": "stout red-bearded dwarf lord, long plaited red beard, green surcoat with gold trim over chainmail, large gold pauldrons, brown belt with a pouch, dark trousers, brown boots, one arm raised with a clenched fist, the raised arm on the viewer's left",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a1_01.png",
+   "status": "accepted",
+   "tries": 0,
+   "score": 0.6,
+   "note": "",
+   "metric": {
+    "silhouette": 0.702,
+    "colour": 0.266,
+    "fill": 0.955,
+    "score": 0.6
+   },
+   "model": "krea2",
+   "gen": "/Users/user/sigil-concept-art/concept_art/copy/r48/krea2/copy/aset1/a1_01.webp",
+   "pair": "/Users/user/sigil-concept-art/concept_art/pairs48/a1_01.png"
+  },
+  {
+   "id": "a1_02",
+   "cat": "aset1",
+   "subject": "human knight in full polished silver plate armour, closed helmet with a narrow visor slit and a small spike on top and no face visible, cream cape, cream cloth worn under the armour with no red and no blue, brown leather belt, one gauntlet raised palm forward, the raised gauntlet is the hand touching the LEFT EDGE of the image",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a1_02.png",
+   "status": "accepted",
+   "tries": 1,
+   "score": 0.558,
+   "note": "запястье уехало вправо; под доспехом появилась красно-синяя ткань вместо кремовой",
+   "metric": {
+    "silhouette": 0.628,
+    "colour": 0.286,
+    "fill": 0.874,
+    "score": 0.558
+   },
+   "model": "krea2",
+   "gen": "/Users/user/sigil-concept-art/concept_art/copy/r48/krea2/copy/aset1/a1_02.webp",
+   "pair": "/Users/user/sigil-concept-art/concept_art/pairs48/a1_02.png"
+  },
+  {
+   "id": "a1_03",
+   "cat": "aset1",
+   "subject": "human scout in a mustard hooded tunic with no vest and no second colour, brown belt with pouches, dark green trousers, brown boots, one hand raised to his brow shading his eyes, the hand at his brow is the hand touching the LEFT EDGE of the image, the other arm hanging at his side",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a1_03.png",
+   "status": "accepted",
+   "tries": 1,
+   "score": 0.534,
+   "note": "сторона руки исправлена 'edge'-формулировкой; krea2 всё равно надевает зелёную тунику под горчичный жилет",
+   "metric": {
+    "silhouette": 0.632,
+    "colour": 0.287,
+    "fill": 0.743,
+    "score": 0.534
+   },
+   "model": "krea2",
+   "gen": "/Users/user/sigil-concept-art/concept_art/copy/r48/krea2/copy/aset1/a1_03.webp",
+   "pair": "/Users/user/sigil-concept-art/concept_art/pairs48/a1_03.png"
+  },
+  {
+   "id": "a1_04",
+   "cat": "aset1",
+   "subject": "screaming barbarian, long wild black hair, bare muscular chest, bone fang necklace, ragged brown fur loincloth, leather bracers, fur-trimmed boots, one fist punched upward, the punched fist on the viewer's left",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a1_04.png",
+   "status": "accepted",
+   "tries": 0,
+   "score": 0.606,
+   "note": "",
+   "metric": {
+    "silhouette": 0.702,
+    "colour": 0.291,
+    "fill": 0.941,
+    "score": 0.606
+   },
+   "model": "krea2",
+   "gen": "/Users/user/sigil-concept-art/concept_art/copy/r48/krea2/copy/aset1/a1_04.webp",
+   "pair": "/Users/user/sigil-concept-art/concept_art/pairs48/a1_04.png"
+  },
+  {
+   "id": "a1_05",
+   "cat": "aset1",
+   "subject": "dashing young human duellist, swept black hair, confident smirk, long teal-blue coat with plain gold trim and no buttons down the front, cream shirt under the coat, brown belt with a crossed leather strap, brown gloves, brown boots, no sash and no red cloth, one fist raised, the raised fist is the hand touching the LEFT EDGE of the image",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a1_05.png",
+   "status": "accepted",
+   "tries": 1,
+   "score": 0.488,
+   "note": "кулак уехал вправо; добавились красный кушак и золотые галстуки-застёжки",
+   "metric": {
+    "silhouette": 0.501,
+    "colour": 0.28,
+    "fill": 0.822,
+    "score": 0.488
+   },
+   "model": "krea2",
+   "gen": "/Users/user/sigil-concept-art/concept_art/copy/r48/krea2/copy/aset1/a1_05.webp",
+   "pair": "/Users/user/sigil-concept-art/concept_art/pairs48/a1_05.png"
+  },
+  {
+   "id": "a1_06",
+   "cat": "aset1",
+   "subject": "human ranger in a green hooded cloak and green tunic, crouched low, one arm pointing forward with a finger aimed sideways toward the RIGHT EDGE of the image, the pointing arm is the arm on the right side of the image, brown belt and pouches, brown boots",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a1_06.png",
+   "status": "accepted",
+   "tries": 1,
+   "score": 0.554,
+   "note": "внизу лист из четырёх серых фигур (кадр был старый, до правки рамки); палец смотрит в камеру вместо направления вбок",
+   "metric": {
+    "silhouette": 0.654,
+    "colour": 0.23,
+    "fill": 0.896,
+    "score": 0.554
+   },
+   "model": "krea2",
+   "gen": "/Users/user/sigil-concept-art/concept_art/copy/r48/krea2/copy/aset1/a1_06.webp",
+   "pair": "/Users/user/sigil-concept-art/concept_art/pairs48/a1_06.png"
+  },
+  {
+   "id": "a1_07",
+   "cat": "aset1",
+   "subject": "young blond human mage, long wavy blond hair, deep red robe with a fur collar and gold embroidery, brown belt, brown boots, one hand open with a flame above the palm on the viewer's left, a tall carved wooden staff held on the viewer's right",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a1_07.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a1_08",
+   "cat": "aset1",
+   "subject": "bald human scout with a goatee, olive-green shirt with a crossed leather strap, brown belt with pouches, olive trousers with folded cuffs, brown boots, a bedroll on his back, hands on his hips",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a1_08.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a1_09",
+   "cat": "aset1",
+   "subject": "veteran human paladin, grey hair and beard, white tabard with a gold hem over chainmail, round gold shoulder clasps, cream cape, a wooden shield with a steel rim on the viewer's right, one hand raised palm out on the viewer's left, brown boots",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a1_09.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a1_10",
+   "cat": "aset1",
+   "subject": "young human apprentice mage, tousled brown hair, orange robe with yellow lightning patterns, brown belt, brown boots, a short wand with a crystal head raised on the viewer's left, yellow sparks over the open palm on the viewer's right",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a1_10.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a1_11",
+   "cat": "aset1",
+   "subject": "hunched goblin witch, green wrinkled face with a long nose, purple hooded robe, an open spellbook held in both hands, green flame rising from the book, brown boots",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a1_11.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a1_12",
+   "cat": "aset1",
+   "subject": "human fire sorcerer, swept black hair, open red coat with gold trim showing a bare chest, brown trousers, brown boots, both hands raised with orange flames around them, dark fingernails",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a1_12.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a2_01",
+   "cat": "aset2",
+   "subject": "cheerful young human scout, tousled brown hair, wide grin, green hooded cloak over a studded brown leather jerkin, crossed leather strap, brown belt with pouches, brown trousers, brown boots, hands on hips",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a2_01.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a2_02",
+   "cat": "aset2",
+   "subject": "human knight commander, auburn hair, faint smirk, polished plate armour with a blue cape, cream tunic under the breastplate, brown belt, steel gauntlets and greaves",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a2_02.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a2_03",
+   "cat": "aset2",
+   "subject": "heavy-set human mercenary, long black hair and goatee, open brown leather vest over a bare belly, red sash, brown trousers, brown boots, a gold medallion on a cord",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a2_03.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a2_04",
+   "cat": "aset2",
+   "subject": "bald bare-chested human bruiser, thick neck, snarl, both fists raised, ragged brown fur loincloth, leather bracers, fur-trimmed boots, a scar on the muscle on the viewer's left",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a2_04.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a2_05",
+   "cat": "aset2",
+   "subject": "barefoot bald human monk with bare ankles and no boots and no sandals, saffron-orange robe tied with a dark sash leaving one shoulder bare, long brown prayer bead necklace, low wide fighting stance, bare feet",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a2_05.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a2_06",
+   "cat": "aset2",
+   "subject": "young human woodsman, brown hair, slight smile, green hooded cloak over a green tunic, brown belt with a satchel, brown trousers, brown boots, a tall plain wooden staff held on the viewer's left",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a2_06.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a2_07",
+   "cat": "aset2",
+   "subject": "grinning young human adventurer, wavy brown hair, orange frock coat with brass buttons over a cream shirt and brown waistcoat, brown breeches, brown boots, one index finger raised on the viewer's left, the other hand on his hip",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a2_07.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a2_08",
+   "cat": "aset2",
+   "subject": "dignified human nobleman, salt-and-pepper hair, purple cape with an ornate gold-patterned hem and a gold clasp, brocade gold-brown doublet, tan breeches, brown boots, one hand over his chest",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a2_08.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a2_09",
+   "cat": "aset2",
+   "subject": "red-bearded northman warrior, long orange beard, teal-blue tunic with crossed leather straps, one steel pauldron on the shoulder on the viewer's left, a round wooden shield with a steel boss on the viewer's right, steel greaves, brown boots",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a2_09.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a2_10",
+   "cat": "aset2",
+   "subject": "old human wizard, long white hair and beard, purple robe with the hood down and a brown cord belt, purple slippers, a tall gnarled wooden staff held on the viewer's left",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a2_10.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a2_11",
+   "cat": "aset2",
+   "subject": "grim human inquisitor, slicked black hair, long black coat with a high collar over a black shirt and trousers, red coat lining, black gloves, black boots, one gloved hand raised",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a2_11.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a2_12",
+   "cat": "aset2",
+   "subject": "human holy knight, short black hair, cream mantle cape with a gold hem over plate armour, gold knee cops, both hands holding a closed book against his chest",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a2_12.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a3_01",
+   "cat": "aset3",
+   "subject": "squat human heavy infantryman, buzz-cut dark hair, angry round face, dark grey padded cuirass over chainmail, brown belt with a pouch, dark trousers, brown boots, both fists clenched",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a3_01.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a3_02",
+   "cat": "aset3",
+   "subject": "smiling bearded human knight captain, auburn hair and beard, plate armour with gold trim, white mantle cape, one arm pointing forward toward the viewer's left",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a3_02.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a3_03",
+   "cat": "aset3",
+   "subject": "cheerful young human scribe, light brown hair, big grin, blue tunic with a grey scarf, brown belt with pouches, tan trousers, brown boots, brown gloves, hands on hips",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a3_03.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a3_04",
+   "cat": "aset3",
+   "subject": "barbarian chieftain with crossed arms, long black hair and beard, fur mantle over one shoulder, brown fur loincloth, leather bracers, fur boots, red claw scars on the muscle on the viewer's left",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a3_04.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a3_05",
+   "cat": "aset3",
+   "subject": "barefoot bald human monk with bare ankles and no boots and no sandals, green robe with a brown sash, long brown prayer bead necklace, both hands loose in front, bare feet",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a3_05.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a3_06",
+   "cat": "aset3",
+   "subject": "goofy human peasant, hooded sand-coloured cloak over a beige tunic, brown belt with pouches, brown trousers, brown boots, a wooden staff in the hand on the viewer's left, open-mouthed grin",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a3_06.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a3_07",
+   "cat": "aset3",
+   "subject": "dandy human wine merchant, black hair and a curled moustache, crimson coat with gold braid and a red cape, white frill shirt, brown belt, brown boots, a gold goblet raised on the viewer's left, the other hand on his hip",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a3_07.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a3_08",
+   "cat": "aset3",
+   "subject": "ecstatic human peasant boy, beige shirt with a leather belt, brown trousers, brown boots, one fist raised on the viewer's left, open-mouthed shout",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a3_08.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a3_09",
+   "cat": "aset3",
+   "subject": "barefoot bald human monk-gladiator with bare ankles and no boots, shaved head, mustard-yellow robe worn over one shoulder with a steel pauldron on the shoulder on the viewer's left, brown wrist wraps, brown sash, bare feet",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a3_09.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a3_10",
+   "cat": "aset3",
+   "subject": "human archmage, long white beard, purple robe with a crescent moon emblem and a gold clasp, a tall wooden staff topped with a glowing crystal orb held on the viewer's left, purple slippers",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a3_10.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a3_11",
+   "cat": "aset3",
+   "subject": "old human wizard, long white beard, dark crimson robe with gold embroidery, a tall carved staff with a purple gem held on the viewer's left, brown belt, brown boots",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a3_11.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "a3_12",
+   "cat": "aset3",
+   "subject": "human warlock, swept black hair, dark red robe and cape, both hands holding a glowing red crystal with pink magic ribbons swirling around it, brown bracers, brown boots",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/a3_12.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "c01",
+   "cat": "calib",
+   "subject": "human veteran fighter, stocky mature man, black swept-back hair, thick black handlebar moustache, snarling, chainmail coif under a cobalt blue tabard with gold hem, blue cape, large blue heater-shaped kite shield with steel rim and rivets held low on the viewer's left, right fist clenched and raised at the chest in a fingerless brown glove on the viewer's right, brown belt with square brass buckle, brown boots with turned tops",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/c01.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "c02",
+   "cat": "calib",
+   "subject": "young human paladin, tall athletic, shoulder-length wavy blond hair, clean-shaven calm face, polished silver full plate with gold rosette pauldrons, white cape behind, golden yellow tabard skirt to the knee, steel heater shield with a plain polished face and no emblem mounted low on the viewer's left, gauntleted fist raised to shoulder height on the viewer's right",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/c02.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "c03",
+   "cat": "calib",
+   "subject": "stocky human herald, cheerful grin, brown beard, cream hooded tunic laced at the chest, single steel pauldron only on the shoulder on the viewer's right, brown gloves and belt with a small pouch, olive green hose, brown boots, both hands resting on hips, chest out",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/c03.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "c04",
+   "cat": "calib",
+   "subject": "muscular human barbarian warlord, fiery red hair and long red beard, arms crossed over a bare chest, three parallel red claw scars clearly visible on the bare bicep of the arm on the viewer's left, fur lined brown hide loincloth, shaggy fur cloak draped over the shoulder on the viewer's right with a round bronze brooch, leather bracers, fur trimmed boots, fierce glare",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/c04.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "c05",
+   "cat": "calib",
+   "subject": "barefoot bald human monk with bare ankles and no boots and no sandals, mature muscular adult, low wide fighting stance, saffron orange robe tied with a brown sash leaving one shoulder bare, long brown prayer bead necklace, wrist beads, both open palms pushed forward, focused adult face, bare feet with visible toes on the ground",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/c05.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "c06",
+   "cat": "calib",
+   "subject": "human druid, long brown hair and full beard, cape of layered green leaves over a purple brown tunic, bone fang necklace, standing straight, his right hand grips a gnarled wooden staff topped with a leafy branch, the staff stands at the far left edge of the image, mossy brown boots",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/c06.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "c07",
+   "cat": "calib",
+   "subject": "human noble diplomat, slicked black hair, thin moustache and goatee, deep purple velvet coat with gold embroidered lapels, white frill jabot and cuffs, purple breeches, brown boots, one hand raised to his chest on the viewer's left, the other arm extended palm up on the viewer's right, purple cape with gold trim",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/c07.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "c08",
+   "cat": "calib",
+   "subject": "human ranger scout, hooded forest green cloak over a green tunic, leather straps crossed over the chest, brown beard, one hand raised to his brow shading his eyes as he looks into the distance, the hand on the viewer's left, the other fist on the hip, brown gloves, brown boots, no telescope",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/c08.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "c09",
+   "cat": "calib",
+   "subject": "elderly human high priest, long white beard, violet hooded vestments with gold trim over a long white alb, gold cross pendant, tall plain gold staff with a circular openwork head held upright on the viewer's left, left hand raised palm out in blessing on the viewer's right, brown belt and brown shoes",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/c09.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "c10",
+   "cat": "calib",
+   "subject": "elderly human wizard, long white beard, floor length deep crimson hooded robe with ornate gold hem embroidery, hood up, face visible under the hood with eyes open looking at the viewer, both hands held at the waist cradling a glowing violet magic orb, purple light on the face, standing straight facing the camera",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/c10.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "c11",
+   "cat": "calib",
+   "subject": "shirtless human barbarian brute, long brown hair and thick brown beard, muscular adult, bone fang necklace, brown fur loincloth with a rope belt, leather bracers, three red claw scars on the shoulder on the viewer's right, both fists clenched at his sides, wide stance",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/c11.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  },
+  {
+   "id": "c12",
+   "cat": "calib",
+   "subject": "young human bard, curly chestnut hair, wide confident grin, mustard gold coat with dark lapels and a white frill shirt, purple waistcoat, tight mustard breeches, cape with a purple outer side and gold lining worn open, both arms spread wide presenting, brown boots",
+   "ref": "/Users/user/sigil-concept-art/concept_art/refs48/crops/c12.png",
+   "status": "pending",
+   "tries": 0,
+   "score": null,
+   "note": ""
+  }
+ ]
+}

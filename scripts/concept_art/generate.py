@@ -117,6 +117,7 @@ def artifacts(spec: dict, variants=None, categories=None, only=None, model: str 
                 out.append({
                     "variant": v["id"], "category": cname, "id": item["id"],
                     "subject": item["subject"], "model_key": model,
+                    "seed_bump": item.get("seed_bump", 0),
                     "size": tuple(c["size"]),
                     "path": Path(spec["out_dir"]) / model / v["id"] / cname / f"{item['id']}.webp",
                 })
@@ -271,7 +272,8 @@ async def generate(session: ClientSession, spec: dict, art: dict, timeout: int,
     prompt, neg = build_prompt(variant, cat, art, negative_param)
     # +attempt: повтор при провале воротчика обязан менять затравку — тот же запрос с той же
     # затравкой ComfyUI отдаёт из кэша мгновенно и тем же кадром (проверено: 0.2 с, тот же вердикт).
-    seed = seed_for(art["variant"], art["category"], art["id"]) + (attempt - 1)
+    seed = (seed_for(art["variant"], art["category"], art["id"]) + (attempt - 1)
+            + int(art.get("seed_bump", 0)))
     args = {"unet": m["unet"], "clip": m["clip"], "vae": m["vae"], "prompt": prompt,
             "width": art["size"][0], "height": art["size"][1], "seed": seed, "steps": m["steps"]}
     if "cfg" in m:
