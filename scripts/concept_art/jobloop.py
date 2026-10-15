@@ -862,23 +862,29 @@ NEG_RE = re.compile(r"\b(no|not|without|never|без)\b")
 JUDGE_CLASSES = ("independent", "semi-blind", "self")
 
 
-def card_rows(card: str) -> list[tuple[str, str]]:
-    """Строки словаря: (признак, формулировка). Только нумерованные секции
-    (журнал отрицаний — не словарь), без отменённых, только ячейка формулировки
-    — источник с цитатами старых отрицаний мерить нельзя."""
-    out = []
+def card_cells(card: str):
+    r"""Ячейки строк словаря: (признак, [формулировки]). Только нумерованные
+    секции (журнал отрицаний — не словарь), без отменённых, только ячейка
+    формулировки — источник с цитатами старых отрицаний мерить нельзя.
+    Разделитель ячеек — неэкранированная вертикаль, `\|` внутри ячейки экранирован.
+    Формулировок больше одной = слот (выбор одного), а не конъюнкция."""
     for sec in ("\n" + card).split("\n## ")[1:]:
         if not sec[:1].isdigit():
             continue
         for line in sec.splitlines():
-            c = [x.strip() for x in line.strip().strip("|").split("|")]
+            c = [x.strip() for x in re.split(r"(?<!\\)\|", line.strip().strip("|"))]
             if len(c) != 3 or "~~" in line or "`" not in c[1]:
                 continue
-            for form in c[1].split("`")[1::2]:
-                if " | " in form:                         # слот (выбор одного) не обязан
-                    continue
-                out.append((c[0], form.strip()))
-    return out
+            yield c[0], [f.strip() for f in c[1].split("`")[1::2]]
+
+
+def card_rows(card: str) -> list[tuple[str, str]]:
+    return [(n, f) for n, forms in card_cells(card) if len(forms) == 1 for f in forms]
+
+
+def card_slots(card: str) -> list[list[str]]:
+    """Слоты словаря: выбор ровно одного (жанровый якорь и т.п.)."""
+    return [forms for _, forms in card_cells(card) if len(forms) > 1]
 
 
 def card_phrases(card: str) -> list[str]:
@@ -915,6 +921,11 @@ def lint_style(style: str, card: str) -> list[str]:
     for phrase in card_phrases(card):
         if phrase.lower() not in low:
             out.append(f"строка словаря без якоря в плюсе: {phrase!r}")
+    for opts in card_slots(card):
+        hit = [o for o in opts if o.lower() in low]
+        if len(hit) > 1:
+            out.append("смешаны якоря слота (" + ", ".join(repr(h) for h in hit) +
+                       "): ровно один на версию, иначе вердикт нельзя приписать слову")
     return sorted(set(out))
 
 

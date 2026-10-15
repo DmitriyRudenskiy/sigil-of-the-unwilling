@@ -56,11 +56,6 @@ STYLE−   no glossy plastic sheen, no 3d render look
 | v3 | IMG-001 | P0 | нет — контур лепится светотенью |
 | v4 | IMG-001 | P1 | почти — контур появился, глянец остался |
 
-## P2 — не заполнено
-
-Кандидат: убрать глянец. Проверять только `STYLE−`/`STYLE+` по одной фразе,
-`CONTENT` IMG-001 не трогать.
-
 ## P2 — 2026-10-15, блок STYLE: глянец
 
 Правка одна, `CONTENT` не трогается. Гипотеза: глянец — не потолок модели, а
@@ -124,3 +119,49 @@ Cel-плоскость — не цель: `soft volumetric shading` остаёт
 Версии прогона теперь пара `(Pn, Rm)`: `P` — слова, `R` — чем настроен рендер.
 Без этого ступень P2b нельзя было запустить, не смешав её с правками промпта
 в одном счётчике.
+
+## P3 — 2026-10-15, блок STYLE: словарь вместо отрицаний, жанр один
+
+Правка не по одной фразе, а целиком по блоку: `STYLE+` собран из
+[style-card.md](style-card.md) — каждое слово обязано стоять в словаре и
+наоборот, линт `jobloop.py lint` считает обе стороны и сейчас молчит
+(нарушений 0). Основания:
+
+- **отрицания выведены из плюса совсем.** Пять `no …` в середине промпта —
+  это та самая мёртвая позиция, а живой отрицательной ветки нет ни у одной
+  стадии: null-тест показал минус байт-в-байт при CFG 1.0. Прецедент P0
+  (`no ink outlines` снял главный носитель стиля) переписан положительно,
+  за ним остальные четыре: `matte finish`, `flat local colour`,
+  `small soft highlights … only`, `2D illustration`.
+- **неатрибутированные слова сняты**: `matte gouache-like skin texture`,
+  `warm midtones`, `every shape fully outlined` — под ними нет ни вердикта,
+  ни якорной пары; первый же замер P3 припишет им чужое движение.
+- **жанровый слот заполнен: `comic book`.** Ровно один якорь на версию
+  (EXT-9): эталон первого разбора — комиксовый игровой арт, а `cartoon` —
+  известная зона отказа krea (cel-пятно задокументирован семёрками якорей),
+  толкать модель туда не за чем. Слово `cartoon` убрано и из строки про черты
+  лица: жанр задаёт слот, описание черт не конкурирует с ним. Линт смешение
+  слота находит.
+
+```
+STYLE+   2D illustration, comic book, hand-painted comic game illustration with
+         visible soft brush strokes, clean dark warm-brown contour line of even
+         thickness around every shape, every shape enclosed by its own closed
+         contour line of even thickness, thinner interior lines of the same hue
+         for muscles, seams and folds, flat local colour with soft volumetric
+         shading over it, matte finish, matte painted surface with fine painterly
+         tonal variation, warm ochre skin, one saturated cold garment colour,
+         brown leather accents, small soft highlights on metal and leather only,
+         shadows tinted warm with the local colour, single soft contact shadow
+         under the boots, heroic stocky build, head about one fifth and a half of
+         the height, huge traps, thick neck, oversized hands, fists read as solid
+         masses, mature stylized face, simplified exaggerated features, blocky
+         nose, small mouth
+STYLE−   (пусто: минус спит, отрицания живут в словаре журналом)
+```
+
+Замеров P3 не было и не будет до слепого прохода ⓐ: прибор собран, но
+подтверждений независимым судьёй не имеет ни одна из 16 пар, а `anchors stat`
+печатает «слепой проход не начат». Замер неподтверждённым прибором — это
+запись, которую придётся вычеркнуть; прогон P3 снимается уже калиброванным
+судьёй. `CONTENT` и `PARAMS` не тронуты, сид 43, `R0`.

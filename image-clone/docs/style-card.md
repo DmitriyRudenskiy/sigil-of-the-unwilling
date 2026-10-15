@@ -77,7 +77,7 @@ date: 2026-10-15
 | --- | --- | --- |
 | Голова ~1:5.5, массивные трапеции, толстая шея | `heroic stocky build, head about one fifth and a half of the height, huge traps, thick neck` | IMG-001, 2026-10-15 |
 | Кисти крупнее реалистичных, кулаки читаются массой | `oversized hands, fists read as solid masses` | IMG-001, 2026-10-15 |
-| Черты лица укрупнены, нос блоком, рот небольшой | `mature stylized cartoon face, simplified exaggerated features, blocky nose, small mouth` | IMG-001, 2026-10-15 |
+| Черты лица укрупнены, нос блоком, рот небольшой | `mature stylized face, simplified exaggerated features, blocky nose, small mouth` | IMG-001, 2026-10-15; жанровое слово снято: EXT-9, жанр задаёт слот 0 |
 
 ## Отрицания: исторический журнал (STYLE− мёртв, в задачу не идёт)
 

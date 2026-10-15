@@ -518,4 +518,17 @@ except SystemExit as e:
 seal()
 ok(j.load()["IMG-001"], "после перепечати прибор не вернулся")
 
+# --- 75. жанровый слот: ровно один якорь на версию --------------------------
+slot_card = ("## 0. Семейство\n\n| a | b | c |\n| --- | --- | --- |\n"
+             "| Жанр | `comic book` \\| `cartoon` | x |\n\n"
+             "## 2. Цвет\n\n| a | b | c |\n| --- | --- | --- |\n"
+             "| Кожа | `warm ochre skin` | x |\n")
+mix = j.lint_style("comic book, cartoon, warm ochre skin", slot_card)
+ok(any("смешаны якоря слота" in m and "cartoon" in m for m in mix),
+   f"смешение жанров не найдено: {mix}")
+one = j.lint_style("comic book, warm ochre skin", slot_card)
+ok(not any("смешаны" in m for m in one), f"один жанр помечен смешением: {one}")
+ok(j.card_rows(slot_card) == [("Кожа", "warm ochre skin")],
+   f"слот разборался как обязательная строка: {j.card_rows(slot_card)}")
+
 print(f"OK: проверок {checks}")
