@@ -1,0 +1,103 @@
+{
+ "_comment": "Калибровка промптов: 12 сюжетов с листа-эталона units, одна задача — копия. Не производственный каталог.",
+ "server": "http://192.168.0.230:9000/mcp",
+ "comfy": "http://192.168.0.230:8188",
+ "out_dir": "concept_art/copy",
+ "export": {
+  "format": "WEBP",
+  "quality": 82
+ },
+ "models": {
+  "krea2": {
+   "tool": "api_generate_image_krea2",
+   "steps": 8,
+   "cfg": 1.0,
+   "unet": "krea2_turbo_fp8_scaled.safetensors",
+   "clip": "qwen3vl_4b_fp8_scaled.safetensors",
+   "vae": "qwen_image_vae.safetensors"
+  },
+  "qwen21": {
+   "tool": "api_generate_image_qwen21",
+   "steps": 25,
+   "unet": "qwen_image_2.1_int8_convrot.safetensors",
+   "clip": "qwen3vl_8b_int8_convrot.safetensors",
+   "vae": "qwen_image_2.1_vae_bf16.safetensors"
+  }
+ },
+ "references_dir": "/Users/user/Downloads/Новая папка с объектами 40",
+ "model": "krea2",
+ "probe_models": [
+  "krea2",
+  "qwen21"
+ ],
+ "variants": [
+  {
+   "id": "copy",
+   "name": "copy",
+   "style": "stylized 3D-rendered cartoon game illustration, smooth airbrushed painterly shading, no ink outlines, glossy clean surfaces, soft ambient occlusion, warm key light from upper left, saturated storybook colours, heroic stylized proportions, AAA mobile strategy character art",
+   "negative": "photorealism, photograph, ink outlines, line art, sketch, grayscale, dark background, gradient background, scenery, landscape, text, letters, watermark, signature, cropped limbs, extra fingers, deformed hands, multiple characters, chibi"
+  }
+ ],
+ "categories": {
+  "units": {
+   "count": 12,
+   "size": [
+    1024,
+    1280
+   ],
+   "reference": "1791743136546-01a12c34-3cb2-72fb-914d-2361d7698797.jpeg",
+   "style": "stylized 3D-rendered cartoon fantasy game characters, smooth airbrushed painterly rendering without ink outlines, glossy clean surfaces, saturated storybook fabric colours, heroic stylized proportions with clear hands and heads, expressive friendly faces, soft single-tone graphic shading",
+   "frame": "single full-body fantasy character, entire figure visible from head to boots, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, soft grey contact shadow under the boots",
+   "items": [
+    {
+     "id": "c01",
+     "subject": "human veteran fighter, stocky middle-aged, black swept-back hair, thick black handlebar moustache, snarling scowl, chainmail coif and sleeves, cobalt blue tabard and cape with gold trim, round steel-rimmed blue shield on left arm, raised bare right fist, wide brown leather belt with brass buckle, brown boots with turned tops"
+    },
+    {
+     "id": "c02",
+     "subject": "young human paladin, tall athletic, shoulder-length wavy blond hair, clean-shaven calm face, polished silver full plate armour with gold rosette shoulder rivets, white cape behind, golden yellow tabard skirt, plain steel heater shield on left arm, gauntleted right fist raised"
+    },
+    {
+     "id": "c03",
+     "subject": "stocky human herald, cheerful grin, brown beard, cream hooded tunic laced at the chest, single steel pauldron on left shoulder, brown leather gloves and belt with pouch, olive green hose, brown boots"
+    },
+    {
+     "id": "c04",
+     "subject": "muscular human barbarian warlord, fiery red hair and long red beard, arms crossed over bare chest, three red claw scars on left bicep, fur lined brown hide tunic and loincloth, fur cloak fastened with round bronze brooch, thick leather bracers, fur trimmed boots, fierce glare"
+    },
+    {
+     "id": "c05",
+     "subject": "bald human monk, young, low open-palm fighting stance, saffron orange robe tied with brown sash, long brown prayer bead necklace and wrist beads, bare feet, calm focused face"
+    },
+    {
+     "id": "c06",
+     "subject": "human druid, long brown hair and full beard, cape of layered green leaves over purple brown tunic, bone fang necklace, gnarled wooden staff topped with a leafy branch, mossy brown boots, standing calm"
+    },
+    {
+     "id": "c07",
+     "subject": "human noble diplomat, slicked black hair, thin moustache and goatee, deep purple velvet coat with gold embroidery, white frill jabot and cuffs, purple cape with gold trim, one hand on chest and other palm raised, brown boots"
+    },
+    {
+     "id": "c08",
+     "subject": "human ranger scout, hooded forest green cloak over green tunic, leather chest straps with buckles, brown beard, brass spyglass raised to right eye, brown gloves, brown boots, quiver at hip"
+    },
+    {
+     "id": "c09",
+     "subject": "elderly human high priest, long white beard, violet hooded vestments with gold trim, white alb underneath, gold cross pendant, ornate gold staff with circular openwork head, right hand raised in blessing, brown belt and shoes"
+    },
+    {
+     "id": "c10",
+     "subject": "elderly human wizard, long white beard, deep crimson hooded robe with ornate gold hem embroidery, hood up, glowing violet magic orb held between both palms, faint purple light on the face"
+    },
+    {
+     "id": "c11",
+     "subject": "shirtless human barbarian brute, long brown hair and thick brown beard, muscular, bone fang necklace, brown fur loincloth with rope belt, leather bracers, scar on left shoulder, fists clenched, wide stance"
+    },
+    {
+     "id": "c12",
+     "subject": "young human bard, curly chestnut hair, wide confident grin, mustard gold coat with white frill shirt, purple waistcoat, open purple lined cape, arms spread wide presenting, tan breeches, brown boots"
+    }
+   ]
+  }
+ }
+}

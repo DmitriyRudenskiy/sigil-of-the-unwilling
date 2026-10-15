@@ -35,8 +35,9 @@ BORDER = 24               # ширина рамки, px
 CONTENT_MIN = 0.02        # в центральном окне 50% обязана быть картинка, а не пустой белый лист
 SEAM_MAX = 250              # строка пуста, если её средняя яркость не ниже (фон 255, тень ~200)
 SEAM_SIDE = 0.02            # ...и по обе стороны разрыва не меньше 2 % контента
-SEAM_GAP = 0.006            # разрыв от 8 px (0,6 % высоты) — это лист, а не фигура:
-                            # у 12 кроев эталона максимальный разрыв — ноль, запас восьмикратный
+SEAM_GAP = 0.003            # разрыв от 4 px (0,3 % высоты) — это лист, а не фигура. По 31
+                            # кадру калибровки и 12 кроям эталона пустых полос нет вовсе (0.0),
+                            # а два настоящих листа-обманки дают 0.005 и 0.012
 LUMA_RANGE = (25, 235)    # средняя яркость кадров без требования белого фона (экраны UI)
 ISOLATED = ("units", "buildings", "signs", "cursors", "resources")
 TERMINAL_BAD = ("error", "not_found", "canceled")
@@ -163,7 +164,7 @@ def mean_luma(im: Image.Image) -> float:
     return sum(i * c for i, c in enumerate(hist)) / n
 
 
-def seam_ratio(im: Image.Image, thr: int = NEAR_WHITE) -> float:
+def seam_ratio(im: Image.Image, thr: int = SEAM_MAX) -> float:
     """Доля самого длинного пустого разрыва, делённая на высоту кадра.
 
     Одиночная фигура не имеет права быть рассечённой горизонтальной белой полосой: если между
@@ -211,8 +212,8 @@ def check_image(path: Path, size: tuple[int, int], isolated: bool) -> tuple[bool
             return False, f"центр пустой: не-белого {content:.1%} < {CONTENT_MIN:.0%}"
         seam = seam_ratio(im)
         if seam > SEAM_GAP:
-            return False, (f"кадр разрезан пустой полосой: контента по обе стороны {seam:.0%} "
-                           f"> {SEAM_GAP:.1%} высоты — лист с вариантами?")
+            return False, (f"кадр разрезан пустой "
+                           f"полосой {seam:.1%} высоты — лист с вариантами?")
     else:
         luma = mean_luma(im)
         if not LUMA_RANGE[0] <= luma <= LUMA_RANGE[1]:
