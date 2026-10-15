@@ -2,7 +2,7 @@ class_name CharacterCreationUI
 extends Control
 
 const _Races = preload("res://scripts/data/hero_races.gd")
-const _Classes = preload("res://scripts/data/hero_classes.gd")
+const _Classes = preload("res://scripts/data/canon_classes.gd")  # T-113 (K1): канон-классы, MVP-наём 6
 const _Cultures = preload("res://scripts/data/hero_cultures.gd")
 const _Profile = preload("res://scripts/data/hero_build_profile.gd")
 const _CAMPAIGN_SCENE := "res://scenes/ui/sign_choice.tscn"  # T-002: после героя — выбор Знака, затем кампания
@@ -65,7 +65,12 @@ func _populate_options() -> void:
     _subrace_option.add_item("—")
     _subrace_option.disabled = true
 
-    var class_data := _keys_labels(_Classes.CLASSES)
+    # T-113 (K1): канон-классы из mvp_catalog.json — в MVP наём 6 (hireable-маска);
+    # «Чародей и остальные» — 1.0 (в списке не показываются). Legacy-каталог не используется.
+    var class_table := {}
+    for c in _Classes.hireable():
+        class_table[str(c.get("id", ""))] = {"name": str(c.get("name", c.get("id", "")))}
+    var class_data := _keys_labels(class_table)
     for item in class_data:
         _class_option.add_item(item["name"])
         _class_keys.append(item["id"])
