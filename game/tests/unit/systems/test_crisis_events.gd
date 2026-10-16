@@ -7,13 +7,12 @@ extends BaseTest
 
 ## Choice-effect keys the crisis data format recognizes. The test enforces
 ## FORMAT consistency (catches typos / unknown keys), not runtime wiring.
-## NOTE (pre-existing integration gap): reputation_change, mana_change and the
-## "materials" resource are part of the data model but not yet wired to
-## GameManager's player_data (wood/food/gold). Tracked in tasks.md.
+## Закрытый набор (Q-M79 → (а), D-197): немые ключи из данных удалены
+## (reputation_change, mana_change, permanent_modifier); падение на незнакомом
+## ключе — тест test_crisis_effect_contract.gd + push_error в обработчике.
 const KNOWN_EFFECT_KEYS: Array[String] = [
 	"resource_change", "morale_change", "population_change",
-	"unlock_building", "permanent_modifier", "unlock_law",
-	"reputation_change", "mana_change",
+	"unlock_building", "unlock_law",
 ]
 
 
@@ -51,11 +50,11 @@ const RARE_EVENT_IDS: Array[String] = [
 	"rare_04_mysterious_merchant", "rare_05_ancient_spirit",
 ]
 
-# Keys apply_choice_effects actually applies (the extras in KNOWN_EFFECT_KEYS are
-# recognized data keys but not yet wired to GameManager).
+# Keys apply_choice_effects actually applies (Q-M79 → (а): закрытый набор,
+# немые ключи из данных сняты).
 const WIRED_EFFECT_KEYS: Array[String] = [
 	"resource_change", "morale_change", "population_change",
-	"unlock_building", "permanent_modifier", "unlock_law",
+	"unlock_building", "unlock_law",
 ]
 
 func test_common_events_loaded() -> void:
@@ -133,11 +132,18 @@ func test_common_event_choices_use_wired_keys() -> void:
 				assert_that(WIRED_EFFECT_KEYS.has(str(key))).is_true()
 
 
-## --- Integration: choice/ongoing effects actually mutate GameManager (P0 gap fix) ---
+## --- Integration: choice/ongoing effects actually mutate the carriers ---
+## Канал настроения (morale_change / morale_penalty) идёт на DistrictSystem
+## поселения (Q-M78 → (а), D-197); проверка дохода — test_crisis_effect_contract.gd.
+
+func _districts() -> DistrictSystem:
+	return DistrictSystem.new(MvpInvariants.load_config("districts"), {"farm": 2})
+
 
 func test_choice_effects_apply_to_game_manager() -> void:
 	var gm := _wire_game_manager()
 	var sys := _sys()
+	sys.mood_sink = _districts()
 	sys.apply_choice_effects({
 		"resource_change": {"food": -10, "gold": 20},
 		"population_change": 3,
@@ -146,11 +152,11 @@ func test_choice_effects_apply_to_game_manager() -> void:
 	assert_that(gm.get_resource("food")).is_equal(20)   # 30 - 10
 	assert_that(gm.get_resource("gold")).is_equal(120)  # 100 + 20
 	assert_that(gm.get_population()).is_equal(8)         # 5 + 3
-	assert_that(gm.get_global_morale()).is_equal(45)     # 50 - 5
 
 func test_ongoing_crisis_effects_apply() -> void:
 	var gm := _wire_game_manager()
 	var sys := _sys()
+	sys.mood_sink = _districts()
 	# Data convention (see crisis_*.json): resource_drain is a positive magnitude
 	# (negated in code); morale_penalty/production_reduction are stored signed.
 	sys.apply_crisis_effects({
@@ -159,7 +165,6 @@ func test_ongoing_crisis_effects_apply() -> void:
 		"production_reduction": -0.2,
 	})
 	assert_that(gm.get_resource("food")).is_equal(25)   # 30 - 5
-	assert_that(gm.get_global_morale()).is_equal(42)     # 50 - 8
 	assert_that(gm.player_data.get("production_modifier", 0.0)).is_less(0.0)
 
 func test_unlock_and_modifier_effects_apply() -> void:
@@ -167,12 +172,9 @@ func test_unlock_and_modifier_effects_apply() -> void:
 	var sys := _sys()
 	sys.apply_choice_effects({
 		"unlock_building": "barracks",
-		"permanent_modifier": {"id": "m1", "effect": {"production": 0.1}},
 		"unlock_law": "order_tax_code",
 	})
 	assert_that(gm.has_building("barracks")).is_true()
-	# add_permanent_modifier stores the effect dict directly (no "effect" wrapper)
-	assert_that(gm.player_data["permanent_modifiers"]["m1"].has("production")).is_true()
 	assert_that(sys.law_manager.is_law_active("order_tax_code")).is_true()
 
 func test_resolve_crisis_clears_and_applies_effects() -> void:
@@ -236,9 +238,9 @@ func test_every_choice_is_well_formed() -> void:
 
 func test_ongoing_effects_use_supported_keys() -> void:
 	var sys := _sys()
-	# Keys the ongoing/resolution data format recognizes (population_drain is a
-	# known-unwired data key, see KNOWN_EFFECT_KEYS note).
-	const ONGOING_KEYS: Array[String] = ["resource_drain", "morale_penalty", "production_reduction", "population_drain"]
+	# Keys the ongoing/resolution data format recognizes (Q-M79 → (а): закрытый
+	# набор; population_drain немой — из данных снят).
+	const ONGOING_KEYS: Array[String] = ["resource_drain", "morale_penalty", "production_reduction"]
 	for c in sys.crisis_templates:
 		for key in c.ongoing_effects:
 			assert_that(ONGOING_KEYS.has(str(key))).is_true()

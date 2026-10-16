@@ -30,6 +30,11 @@ func _ready():
 ## (единый корень: раннер D-157 проверяет ту же игру, что видит игрок).
 func _init_campaign() -> void:
 	composition = CampaignComposition.from_campaign_config(CAMPAIGN_SEED)
+	# Q-M78 → (а), D-197: канал настроения каталога событий (morale_change /
+	# morale_penalty) сводится на настроение поселения 02g — DistrictSystem
+	# composition-корня. Поле player_data["morale"] в GameManager снято.
+	if game_manager != null and game_manager.event_system != null:
+		game_manager.event_system.mood_sink = composition.districts
 	var persistence: WorldPersistence = Services.resolve(&"persistence")
 	if persistence == null:
 		return

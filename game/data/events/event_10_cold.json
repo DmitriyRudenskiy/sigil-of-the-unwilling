@@ -18,13 +18,7 @@
         "resource_change": {
           "food": -10
         },
-        "morale_change": 5,
-        "permanent_modifier": {
-          "id": "herbal_cure",
-          "effect": {
-            "health": 0.05
-          }
-        }
+        "morale_change": 5
       },
       "requirements": {}
     },

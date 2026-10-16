@@ -44,8 +44,7 @@
       "tooltip": "Герой станет стражем, но жители опасаются чужака у ворот",
       "impact": 2,
       "effects": {
-        "morale_change": -5,
-        "permanent_modifier": {"id": "hero_guard", "effect": {"defense": 0.1}}
+        "morale_change": -5
       },
       "requirements": {}
     }

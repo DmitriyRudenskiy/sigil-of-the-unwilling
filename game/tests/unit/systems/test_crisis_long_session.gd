@@ -48,6 +48,9 @@ func _count_history(sys: CrisisEventSystem, type: String) -> int:
 func test_long_session_stays_stable() -> void:
 	var gm := _wire_game_manager()
 	var sys := _sys()
+	# Приёмник канала настроения (Q-M78 → (а)) — как в бо́льшем контуре main.gd.
+	var districts := DistrictSystem.new(MvpInvariants.load_config("districts"), {"farm": 2})
+	sys.mood_sink = districts
 	sys.set_difficulty(3)
 	seed(SEED)
 	for day in range(1, DAYS + 1):
@@ -56,7 +59,10 @@ func test_long_session_stays_stable() -> void:
 	assert_that(_count_history(sys, "crisis")).is_greater(0)
 	assert_that(_count_history(sys, "event")).is_greater(0)
 	assert_that(gm.get_population()).is_greater_equal(0)
-	assert_that(gm.get_global_morale()).is_between(0, 100)
+	# Настроение поселения (02g) — приёмник канала morale_*: шкала обязана остаться
+	# в своих границах (вместо снятого изобретённого поля morale у GameManager).
+	for g in districts.mood.keys():
+		assert_float(float(districts.mood[g])).is_between(0.0, 100.0)
 	assert_that(gm.get_resource("food")).is_greater_equal(0)
 	assert_that(gm.get_resource("gold")).is_greater_equal(0)
 	assert_that(gm.get_resource("wood")).is_greater_equal(0)

@@ -43,7 +43,6 @@
       "tooltip": "Опасно, но артефакт начнёт питать поселение силой",
       "impact": 2,
       "effects": {
-        "permanent_modifier": {"id": "awakened_artifact", "effect": {"magic": 0.1}}
       },
       "requirements": {}
     }
