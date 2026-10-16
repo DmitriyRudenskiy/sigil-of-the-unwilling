@@ -64,7 +64,7 @@ date: 2026-10-17
 
 | # | Система | Код | Док-статус |
 |---|---|---|---|
-| B-1 | Кризис-события | `systems/crisis_event_system.gd` + `data/events/*.json` (36) + `events_database.json` | 08-tech (зарегистрировано) |
+| B-1 | Кризис-события | `systems/crisis_event_system.gd` + `data/events/*.json` (36) + `events_database.json` | 08-tech (зарегистрировано); **Q-M77 → (а), D-197**: «события» выведены из MVP-фазы угроз в 1.0-слот. **Q-M78 → (а)**: канал настроения каталога сведён на поселение 02g (`DistrictSystem.apply_mood_delta`, приёмник внедряет `main.gd`) — строка более не «чистый legacy» (см. T-128) |
 | B-2 | Законы | `systems/law_manager.gd` + `data/config/laws.json` | 08-tech (зарегистрировано) |
 | B-3 | Фракции | `systems/faction_reputation.gd` + `data/config/factions.json` | 08-tech (зарегистрировано) |
 | B-4 | Крафт | `systems/crafting_system.gd` + `data/config/crafting_recipes.json` | 08-tech (зарегистрировано) |
@@ -172,7 +172,7 @@ date: 2026-10-17
 | S-6 | §1 TBD: «числа движения (конфиг)», «подмножество знаков», «механика тренировки попутчиков» | TBD | доставлено: movement.json (T-112); T-002/Q-M32 (все 8, S2); CampaignTrainingService + тесты (Q18) | **исправлено** |
 | S-7 | §5 «24 тикета» | 24 | реестр T-001…T-125 | **исправлено** |
 
-Остались в TBD (§1): радиус тумана (T-020), формула/кривая оккупации (Q17), ROUND_CAP (05-content) — все легитимны (T-020 не начат; оккупация — Post-MVP при 1 городе; ROUND_CAP — до первого полного баланс-прогона).
+Остались в TBD (§1): радиус тумана (T-020), формула/кривая оккупации (Q17), LADDER_CAP (05-content; экс-ROUND_CAP, Q-M80 → (а)) — все легитимны (T-020 не начат; оккупация — Post-MVP при 1 городе; ROUND_CAP — до первого полного баланс-прогона).
 
 ## Следующие шаги цепочки
 

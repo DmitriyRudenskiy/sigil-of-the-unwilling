@@ -173,13 +173,29 @@ case-sensitive: `world.tscn`, `battle.tscn`, `main_menu.tscn`).
 - Каталог: `game/data/events/` — `event_*.json` (common), `crisis_*.json`
   (кризисы), `rare_*.json` (редкие), `events_database.json` (служебный, не
   считается в счётчик шаблонов).
+- **Статус слоя (Q-M77 → (а), D-197):** не MVP. «События» сняты с MVP-фазы угроз
+  `docs/01-core-loop.md` §3 и становятся 1.0-слотом; код лежит в корзине **B-1**
+  (T-128) и из кампанийного цикла не вызывается. Правки здесь — сведение на
+  канонических носителей, а не развитие фичи.
 - Логика: `game/scripts/systems/crisis_event_system.gd`.
-- Тесты структуры: `game/tests/unit/systems/test_crisis_events.gd`.
-- Эффекты выборов используют только WIRED_EFFECT_KEYS
-  (resource_change, morale_change, population_change, unlock_building,
-  permanent_modifier, unlock_law).
+- Тесты структуры: `game/tests/unit/systems/test_crisis_events.gd`; контракт
+  эффектов: `game/tests/unit/systems/test_crisis_effect_contract.gd`.
+- **Закрытый набор ключей (Q-M79 → (а), D-197):** эффекты выборов используют
+  только `WIRED_EFFECT_KEYS` (resource_change, morale_change, population_change,
+  unlock_building, unlock_law); **немой ключ роняет игру** (`push_error` + `return`),
+  а не пишется в никуда. `permanent_modifier` удалён из данных как немой; немые
+  `reputation_change` / `mana_change` / `population_drain` удалены из данных
+  (17 строк). `resolution_effects` делегирует в словарь выбора (своих ключей не имеет).
+- **Канал настроения (Q-M78 → (а), D-197):** `morale_change` / `morale_penalty`
+  вызывают `mood_sink` → `DistrictSystem.apply_mood_delta` (настроение поселения,
+  0–100, clamp `game/data/config/districts.json`) — прецедент Таверны (Q-M71).
+  Приёмник внедряет хост (`main.gd._init_campaign`); отсутствие приёмника =
+  `push_error`. Поля `player_data["morale"]` и API `get_global_morale` /
+  `modify_global_morale` **сняты** (писатели без читателя; «мораль» как шкала
+  аннулирована K-M14).
 - `unlock_building` → валидный id из `game/assets/data/buildings.json`;
-  `unlock_law` → валидный id из `LawManager.gd`.
+  `unlock_law` → валидный id из `LawManager.gd` (пассивные эффекты законов —
+  писатели без читателя, см. Q-M81).
 
 ## Git-конвенции
 
