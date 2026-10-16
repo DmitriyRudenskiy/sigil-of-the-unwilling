@@ -22,7 +22,7 @@ date: 2026-09-30
 | PartySystem | `party.add(character)`; `character.damage(n)`; `character.rest(days) → healed_hd`; `party.loss_stage() → int` (утрата = ступень −2 на спасброски до конца боя; `party.morale() → float` удалён — шкалы морали нет, K-M11) | НОВОЕ (HeroSystem влит) |
 | EconomySystem | `economy.tick(city) → Flows{per resource}`; `economy.state(r) → OK/WARN/DEFICIT/COLLAPSE` (06-economy) | расширение ProductionSystem |
 | RaidSystem | `pressure.tick() → Wave?` (функция давления, 02e4 §13.2, K-T5; календарь 7/10/14/17/21 — аннулирован); `pressure.directive(d) → {floor, ceiling, window}` (словарь директив, K-R3); `wave.composition` (K-R3); `raid.resolve(raid, city, hero) → Consequences` (02-mechanics §3.8) | расширение канона |
-| SignSystem | `sign.prestige += delta` (MVP — только престиж, S2); `sign.weekly_trial() → Quest`; `sign.followers() → pop_inflow/week` (Post-MVP, S2) | НОВОЕ (из Части 11) |
+| SignSystem | `sign.prestige += delta` (MVP — только престиж, S2); `sign.trial(period_turns) → Quest` (**Post-MVP**, 02 §3.7; прежде `weekly_trial()` — аннулированная единица «неделя», Q-M63 → (в), D-189); `sign.followers() → pop_inflow/ход` (Post-MVP, S2) | НОВОЕ (из Части 11) |
 | ChronicleSystem | `chronicle.append(event, cause)`; `rumor.tick()` (04-narrative) | НОВОЕ (срез Части 10) |
 | GridSystem, BuildingSystem, WorkerSystem, AdjacencySystem, RoadSystem, NetworkSystem, DistrictSystem, SaveSystem | (BuildingSystem получает SM здания, 02-mechanics §3.5) | ПЕРЕНОС |
 
@@ -64,4 +64,4 @@ date: 2026-09-30
 
 **Порядок (фазы 0–4 без изменений):** pre-prod → прототип (карта+город+1 бой по лестнице) → вертикальный срез → alpha → beta.
 
-**Критерий фазы 1 (прототип):** один полный ход (01-core-loop) играем в сером блоке: движение героя, бой 1×1 по лестнице (02d v1.2), постройка 5 зданий, наём ополченца. #done-if
+**Критерий фазы 1 (прототип):** один полный ход (01-core-loop) играем в сером блоке: движение героя, бой 1×1 по лестнице (02d v1.2), постройка 5 зданий, тренировка Пехотной линии (K-M15; прежде — «наём ополченца»: аннулированы и термин (Q-M55 → (б)), и юнит (K-M15)). #done-if

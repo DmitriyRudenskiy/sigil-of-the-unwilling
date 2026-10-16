@@ -32,6 +32,7 @@
 | Тесты | `game/run_tests.sh` (GdUnit4 headless + MCP e2e) |
 | MCP e2e venv | `/home/user/.venv/godot-mcp-tests` (pytest 9.1.1 + pytest-timeout + pytest-xdist + mcp + anyio) |
 | MCP node_modules | `game/addons/godot-mcp/node_modules` (gitignored; `npm ci` из package-lock) |
+| Ремот `origin` | `git@github.com:DmitriyRudenskiy/sigil-of-the-unwilling.git` — **SSH** (ключ `~/.ssh/id_ed25519`). HTTPS не работает: токен в `gh auth` просрочен (проверено 2026-10-17) → `git push`/`git fetch` идут по SSH, `gh`-операции трекера — отдельный вопрос (реестр тикетов — `docs/mvp/TICKETS.md`, хост — зеркало) |
 
 | OpenSpec | `openspec/changes/<name>/`, CLI: `/usr/bin/openspec` |
 
@@ -48,6 +49,20 @@
 - Коммиты делаются на **feature-ветках** (ветка от `main`), не на `main` напрямую.
 - Тесты — единственный обязательный способ верификации. UI/звук/playtest
   не верифицируются headless → такие задачи помечаются как отложенные (deferred).
+
+## Безопасность команд (D-192)
+
+Урок инцидента 2026-10-17 (агент удалил рабочее дерево опечаткой в абсолютном пути):
+
+1. **Разрушительные команды** (`rm -rf`, `git clean -fdx`, `git reset --hard`, `mv`/перезапись
+   поверх путей репо и `$HOME`) — только после **отдельной** проверки абсолютного пути
+   (`pwd -P`, `test -d`, сверка префикса). Проверка и разрушение — **разные вызовы**;
+   `mv` и `rm` в одной строке через `;`/`&&` **запрещены** (именно этот паттерн и сработал).
+2. **Локальные артефакты вне git — не хранилище.** Всё, на что ссылается вердикт (замеры,
+   скрипты, рендеры-доказательства), коммитится. gitignored-пиксели живут только вместе
+   с картой и md5 (`reference/INDEX.md`) и проверяются `scripts/check_reference_index.py`.
+3. **Перед удалением/перемещением в репо — `git status --ignored`**: не удалять молча то,
+   чего нет в git (так погибли два канон-референса).
 
 ## Верификация
 
