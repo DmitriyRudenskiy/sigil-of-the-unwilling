@@ -173,9 +173,13 @@ case-sensitive: `world.tscn`, `battle.tscn`, `main_menu.tscn`).
 - Каталог: `game/data/events/` — `event_*.json` (common), `crisis_*.json`
   (кризисы), `rare_*.json` (редкие), `events_database.json` (служебный, не
   считается в счётчик шаблонов).
-- **Статус слоя (Q-M77 → (а), D-197):** не MVP. «События» сняты с MVP-фазы угроз
-  `docs/01-core-loop.md` §3 и становятся 1.0-слотом; код лежит в корзине **B-1**
-  (T-128) и из кампанийного цикла не вызывается. Правки здесь — сведение на
+- **Статус слоя (эрратум D-198 к Q-M77 → (а), D-197):** код лежит в корзине **B-1**
+  (T-128), но **вызывается из кампанийного ходу**: каждый тик дня
+  `game/scripts/main/main.gd:81 _advance_day()` → `GameManager.on_day_passed()`
+  (`game_manager.gd:85`) → `crisis_event_system.gd:410` — триггеры событий и кризисов,
+  цикл дня автозапускается (`_is_day_cycle_active = true`, `day_duration = 3.0` с,
+  `next_event_day = 5`). Формулировка «не вызывается из кампанийного цикла» была ложной;
+  статус каталога в MVP — открытый вопрос **Q-M82**. Правки здесь — сведение на
   канонических носителей, а не развитие фичи.
 - Логика: `game/scripts/systems/crisis_event_system.gd`.
 - Тесты структуры: `game/tests/unit/systems/test_crisis_events.gd`; контракт

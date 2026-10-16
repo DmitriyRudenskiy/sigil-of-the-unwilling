@@ -64,7 +64,7 @@ date: 2026-10-17
 
 | # | Система | Код | Док-статус |
 |---|---|---|---|
-| B-1 | Кризис-события | `systems/crisis_event_system.gd` + `data/events/*.json` (36) + `events_database.json` | 08-tech (зарегистрировано); **Q-M77 → (а), D-197**: «события» выведены из MVP-фазы угроз в 1.0-слот. **Q-M78 → (а)**: канал настроения каталога сведён на поселение 02g (`DistrictSystem.apply_mood_delta`, приёмник внедряет `main.gd`) — строка более не «чистый legacy» (см. T-128) |
+| B-1 | Кризис-события | `systems/crisis_event_system.gd` + `data/events/*.json` (36) + `events_database.json` | 08-tech (зарегистрировано); **эрратум D-198**: строка **вызывается из кампанийного ходу** (`main.gd:81 _advance_day` → `GameManager.on_day_passed` → `crisis_event_system.gd:410`) — это не спящий legacy; статус каталога в MVP пересматривается (**Q-M82**, посылка Q-M77 → (а) оказалась ложной). **Q-M78 → (а)**: канал настроения каталога сведён на поселение 02g (`DistrictSystem.apply_mood_delta`, приёмник внедряет `main.gd`) — путь достижим в игре (см. T-128) |
 | B-2 | Законы | `systems/law_manager.gd` + `data/config/laws.json` | 08-tech (зарегистрировано) |
 | B-3 | Фракции | `systems/faction_reputation.gd` + `data/config/factions.json` | 08-tech (зарегистрировано) |
 | B-4 | Крафт | `systems/crafting_system.gd` + `data/config/crafting_recipes.json` | 08-tech (зарегистрировано) |
