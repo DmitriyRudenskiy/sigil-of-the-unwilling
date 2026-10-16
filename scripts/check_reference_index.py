@@ -7,11 +7,16 @@
 
 Ищется:
   1. дубли канонических имён в карте;
-  2. строка карты без файла на диске;
+  2. строка карты без файла на диске — с различением: **заявленная утрата** (статус
+     `утрачен`, инцидент 2026-10-17, D-193) печатается как `LOST (declared)`, случайная
+     пропажа — как `ROW WITHOUT FILE`; и то и другое остаётся падением (выход 1):
+     заявленная утрата — измеряемый долг, а не «зелёный» фон (условие владельца 2026-10-17:
+     обходного правила «в зелёный» не вводится);
   3. файл в reference/ без строки карты;
   4. статус вне словаря этой же карты (секция «Статусы»);
   5. md5 в строке не совпадает с md5 файла (дрейф пикселя);
-  6. пустое поле провенанса у строки (право/происхождение обязаны быть названы).
+  6. пустое поле провенанса у строки (право/происхождение обязаны быть названы);
+  7. противоречие «статус `утрачен`, но файл на месте» (носитель вернулся без правки карты).
 
 Запуск: python3 scripts/check_reference_index.py   (выход ≠ 0 при находках)
 
@@ -33,6 +38,9 @@ STATUSES = set()  # заполняется из словаря карты в mai
 
 MD5_RE = re.compile(r"\b[0-9a-f]{32}\b")
 NUM_RE = re.compile(r"^\d{2}$")
+
+# Статус «носитель утрачен, строка карты остаётся» (инцидент 2026-10-17, D-193).
+LOST_STATUS = "утрачен"
 
 
 def cells(line):
@@ -108,6 +116,7 @@ def main():
 
     rows = parse_rows(lines)
     problems = []
+    declared_lost = []
 
     seen = {}
     for r in rows:
@@ -116,8 +125,15 @@ def main():
         else:
             seen[r["name"]] = r["line"]
 
-        if not os.path.isfile(os.path.join(REF, r["name"])):
-            problems.append(f"ROW WITHOUT FILE: {r['name']} (строка {r['line']})")
+        present = os.path.isfile(os.path.join(REF, r["name"]))
+        if not present:
+            if r["status"] == LOST_STATUS:
+                declared_lost.append(r["name"])
+                problems.append(
+                    f"LOST (declared): {r['name']} (строка {r['line']}) — носитель утрачен "
+                    f"2026-10-17 (D-193), ждёт повторной передачи владельцем")
+            else:
+                problems.append(f"ROW WITHOUT FILE: {r['name']} (строка {r['line']})")
 
         if r["md5"] is None:
             problems.append(f"NO MD5 IN ROW: {r['name']} (строка {r['line']})")
@@ -129,6 +145,9 @@ def main():
         if r["status"] is None:
             problems.append(f"STATUS OUT OF DICTIONARY: {r['name']} (строка {r['line']}); "
                             f"словарь: {', '.join(sorted(STATUSES))}")
+        elif present and r["status"] == LOST_STATUS:
+            problems.append(f"LOST STATUS BUT FILE PRESENT: {r['name']} (строка {r['line']}) — "
+                            f"носитель на месте, сними статус «{LOST_STATUS}» и сверь md5")
 
         if not r["provenance"] or r["provenance"] in {"—", "-"}:
             problems.append(f"EMPTY PROVENANCE: {r['name']} (строка {r['line']})")
@@ -144,6 +163,10 @@ def main():
         print(f"REFERENCE INDEX PROBLEMS ({len(problems)}):")
         for p in problems:
             print(f"  {p}")
+        if declared_lost:
+            print(f"  — из них заявлено утраченными (статус «{LOST_STATUS}», D-193): "
+                  f"{len(declared_lost)}; неожиданных расхождений: "
+                  f"{len(problems) - len(declared_lost)}")
         sys.exit(1)
 
     print(f"OK: reference/INDEX.md ↔ диск согласованы ({len(rows)} файлов комплекта)")
