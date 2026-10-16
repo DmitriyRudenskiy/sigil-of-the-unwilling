@@ -326,32 +326,12 @@ func modify_population(amount: int) -> void:
 	player_data["population"] = max(0, int(player_data.get("population", 0)) + amount)
 
 
-## Глобальная мораль поселения (0..100, дефолт 50).
-## ponytail: поле "morale" изобретено (в player_data его не было); дефолт 50,
-## clamp 0..100. При появлении UI-бара/баланса — пересмотреть диапазон/старт.
-func get_global_morale() -> int:
-	return int(player_data.get("morale", 50))
-
-
-func modify_global_morale(amount: int) -> void:
-	player_data["morale"] = clampi(int(player_data.get("morale", 50)) + amount, 0, 100)
-
-
 ## Разблокировка здания (для эффектов событий)
 func unlock_building(building_id: String) -> void:
 	var buildings: Array = player_data.get("buildings", [])
 	if not buildings.has(building_id):
 		buildings.append(building_id)
 		player_data["buildings"] = buildings
-
-
-## Постоянные модификаторы (id -> effect) из эффектов выбора.
-## ponytail: храним id->effect, агрегация на мораль/производство не сделана —
-## при появлении системы пассивных эффектов (LawManager.passive_effects) свести.
-func add_permanent_modifier(mod_id: String, effect: Dictionary) -> void:
-	if not player_data.has("permanent_modifiers"):
-		player_data["permanent_modifiers"] = {}
-	player_data["permanent_modifiers"][mod_id] = effect
 
 
 ## Модификатор производства (накапливаемый float, напр. -0.2 = -20%).

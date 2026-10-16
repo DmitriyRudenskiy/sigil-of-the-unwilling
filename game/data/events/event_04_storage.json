@@ -40,8 +40,7 @@
       "tooltip": "Превратить находку в источник ресурсов",
       "impact": 2,
       "effects": {
-        "resource_change": {"materials": 5},
-        "permanent_modifier": {"id": "old_storage", "effect": {"production": 0.05}}
+        "resource_change": {"materials": 5}
       },
       "requirements": {}
     }

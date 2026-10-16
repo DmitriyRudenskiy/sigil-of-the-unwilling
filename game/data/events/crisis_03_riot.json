@@ -28,9 +28,7 @@
       "impact": 5,
       "effects": {
         "population_change": -3,
-        "morale_change": 10,
-        "reputation_change": -10,
-        "permanent_modifier": {"id": "iron_fist", "effect": "morale_decay += 0.05"}
+        "morale_change": 10
       },
       "requirements": {}
     },

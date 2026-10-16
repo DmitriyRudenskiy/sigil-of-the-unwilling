@@ -33,8 +33,7 @@
       "tooltip": "Долгосрочное партнёрство принесёт стабильную выгоду",
       "impact": 1,
       "effects": {
-        "morale_change": 10,
-        "permanent_modifier": {"id": "trade_deal", "effect": {"production": 0.05}}
+        "morale_change": 10
       },
       "requirements": {}
     },

@@ -25,8 +25,7 @@
       "tooltip": "Сэкономить сейчас, но постройка будет работать хуже",
       "impact": 3,
       "effects": {
-        "morale_change": -5,
-        "permanent_modifier": {"id": "worn_building", "effect": {"production": -0.1}}
+        "morale_change": -5
       },
       "requirements": {}
     },

@@ -48,7 +48,6 @@
       "tooltip": "Только если есть маг воды",
       "impact": 1,
       "effects": {
-        "mana_change": -20,
         "resource_change": {"materials": -5}
       },
       "requirements": {

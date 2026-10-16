@@ -16,8 +16,7 @@
       "tooltip": "Вал и рвы задержат нападающих",
       "impact": 2,
       "effects": {
-        "resource_change": {"materials": -15},
-        "reputation_change": 5
+        "resource_change": {"materials": -15}
       },
       "requirements": {}
     },
@@ -27,8 +26,7 @@
       "impact": 4,
       "effects": {
         "population_change": -2,
-        "resource_change": {"materials": 20},
-        "reputation_change": 10
+        "resource_change": {"materials": 20}
       },
       "requirements": {}
     },

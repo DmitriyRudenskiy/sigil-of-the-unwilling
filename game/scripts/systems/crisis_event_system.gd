@@ -224,6 +224,12 @@ var crisis_templates: Array[CrisisEventData] = []
 ## Law system (unlocked via event choices, apply passive modifiers).
 var law_manager: LawManager = null
 
+## Приёмник канала настроения (Q-M78 → (а), D-197): DistrictSystem поселения
+## (02g, 0–100). Внедряется хостом (main.gd — composition.districts) или тестом.
+## Отсутствие приёмника — ошибка (push_error), а не тихий no-op: писать больше
+## некуда, изобретённое поле player_data["morale"] снято (запрещено сейвом).
+var mood_sink: Object = null
+
 ## Зависимости внедряются явно (см. GameManager._connect_signals и Main) либо
 ## резолвятся через группы ("game_manager", "ui_manager"), которые менеджеры
 ## регистрируют в своих _ready. Обход дерева через get_parent()/магические
@@ -633,9 +639,13 @@ func apply_crisis_effects(effects: Dictionary):
 			for resource in value:
 				game_manager.modify_resource(resource, -value[resource])
 		elif effect_type == "morale_penalty":
-			game_manager.modify_global_morale(value)
+			_apply_mood_delta(effect_type, value)
 		elif effect_type == "production_reduction":
 			game_manager.apply_production_modifier(value)
+		else:
+			# resolution_effects кризиса говорят словарём выбора (crisis_01_fire:
+			# population_change) — общий диспетчер; неизвестный ключ кричит в нём.
+			apply_choice_effects({effect_type: value})
 
 ## Разрешение кризиса с выбором
 func resolve_crisis(choice_index: int):
@@ -674,16 +684,30 @@ func apply_choice_effects(effects: Dictionary):
 			for resource in value:
 				game_manager.modify_resource(resource, value[resource])
 		elif effect_type == "morale_change":
-			game_manager.modify_global_morale(value)
+			_apply_mood_delta(effect_type, value)
 		elif effect_type == "population_change":
 			game_manager.modify_population(value)
 		elif effect_type == "unlock_building":
 			game_manager.unlock_building(value)
-		elif effect_type == "permanent_modifier":
-			game_manager.add_permanent_modifier(value["id"], value["effect"])
 		elif effect_type == "unlock_law":
 			if law_manager:
 				law_manager.unlock_law(str(value))
+		else:
+			_fail_unknown_effect("apply_choice_effects", effect_type)
+
+
+## Канал настроения каталога → настроение поселения (02g). Q-M78 → (а), D-197.
+func _apply_mood_delta(effect_type: String, value) -> void:
+	if mood_sink == null or not mood_sink.has_method("apply_mood_delta"):
+		push_error("CrisisEventSystem: %s без приёмника настроения (DistrictSystem)" % effect_type)
+		return
+	mood_sink.apply_mood_delta(float(value))
+
+
+## Немой ключ = падение, а не тихий no-op (Q-M79 → (а), D-197). Закрытый набор
+## ключей сверяет тест test_crisis_effect_contract.gd.
+func _fail_unknown_effect(where: String, effect_type) -> void:
+	push_error("CrisisEventSystem.%s: немой ключ эффекта %s (нет обработчика)" % [where, str(effect_type)])
 
 ## Показать панель события (UI).
 ## Словарь-адаптер вместо объекта: show_decision_panel ожидает Dictionary

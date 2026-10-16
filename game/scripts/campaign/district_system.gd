@@ -153,6 +153,15 @@ func apply_event(group: String, delta_key: String) -> void:
 		float(config.get("mood_min", 0.0)), float(config.get("mood_max", 100.0)))
 
 
+## Числовая дельта настроения на всё поселение (Q-M78 → (а), D-197): приёмник
+## канала `morale_change`/`morale_penalty` каталога событий. Шкала 02g (0–100),
+## clamp — districts.json (mood_min/mood_max).
+func apply_mood_delta(amount: float) -> void:
+	for g in mood.keys():
+		mood[g] = clampf(float(mood[g]) + amount,
+			float(config.get("mood_min", 0.0)), float(config.get("mood_max", 100.0)))
+
+
 ## Дельта на все районы (отражённый рейд — поселенческое событие, 02g).
 func apply_event_to_all(delta_key: String) -> void:
 	for g in mood.keys():

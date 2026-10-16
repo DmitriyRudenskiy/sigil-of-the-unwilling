@@ -7,8 +7,7 @@
   "duration_days": 5,
   "icon_path": "res://assets/ui/events/crisis_famine.png",
   "ongoing_effects": {
-    "morale_penalty": -3,
-    "population_drain": 1
+    "morale_penalty": -3
   },
   "resolution_effects": {},
   "choices": [
@@ -37,8 +36,7 @@
       "tooltip": "Унизительно, но необходимо",
       "impact": 3,
       "effects": {
-        "resource_change": {"gold": -15, "food": 10},
-        "reputation_change": -5
+        "resource_change": {"gold": -15, "food": 10}
       },
       "requirements": {
         "building_required": "trade_post"
@@ -50,8 +48,7 @@
       "impact": 5,
       "effects": {
         "morale_change": -50,
-        "resource_change": {"food": 30},
-        "permanent_modifier": {"id": "cannibals", "effect": "max_morale -= 20"}
+        "resource_change": {"food": 30}
       },
       "requirements": {}
     }

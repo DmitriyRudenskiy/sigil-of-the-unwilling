@@ -16,8 +16,7 @@
       "tooltip": "Ритуал затворения потребует редких материалов",
       "impact": 2,
       "effects": {
-        "resource_change": {"materials": -10},
-        "reputation_change": 5
+        "resource_change": {"materials": -10}
       },
       "requirements": {}
     },
@@ -27,8 +26,7 @@
       "impact": 5,
       "effects": {
         "resource_change": {"materials": 20},
-        "morale_change": -10,
-        "permanent_modifier": {"id": "touched_by_magic", "effect": "magic_power += 10"}
+        "morale_change": -10
       },
       "requirements": {}
     },

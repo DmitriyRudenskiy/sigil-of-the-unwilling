@@ -14,8 +14,7 @@
       "tooltip": "Дух дарует поселению свою милость",
       "impact": 1,
       "effects": {
-        "morale_change": 15,
-        "permanent_modifier": {"id": "spirit_blessing", "effect": {"production": 0.1}}
+        "morale_change": 15
       },
       "requirements": {}
     },
