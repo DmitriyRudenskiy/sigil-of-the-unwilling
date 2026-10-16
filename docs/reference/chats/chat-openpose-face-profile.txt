@@ -1,0 +1,117 @@
+### USER
+есть OpenPose, нужно распознать лицо, пример профиль лева, анфас и профиль право. нужно составить матрицу схожеcти у левого и правого она максимальная а у анфаса к профилям разная вот картинка для тестирования алгоритма, перед OpenPose можно использовать face детектор
+
+### ASSISTANT
+## Идея
+
+OpenPose face даёт 70 лендмарок — это **чувствительный к позе** дескриптор (в отличие от ArcFace, который инвариантен к позе и «склеит» все 9 кадров в одну высокую схожесть). Поэтому:
+
+1. **Детектор лиц** (SSD для анфас/полу‑профиля + cascade для чистого профиля, т.к. Haar‑frontal и YuNet профиль в 90° обычно не находят).
+2. **OpenPose face** → 70 точек на каждом кропе.
+3. **Зеркально‑инвариантный дескриптор**: точки центрируем, нормируем по масштабу, и сравниваем с вариантом `min(прямое, зеркальное)` + небольшой доворот в плоскости. Тогда левый профиль ≈ зеркальный правый → **максимальная схожесть**, а анфас к профилю — другая форма → низкая.
+4. Матрица 9×9 = косинусное сходство дескрипторов.
+
+## Код
+
+```python
+import cv2
+import numpy as np
+
+N = 70  # точек OpenPose face
+det_ssd  = cv2.dnn.readNetFromCaffe("deploy.prototxt",
+                 "res10_300x300_ssd_iter_140000.caffemodel")
+op_face  = cv2.dnn.readNetFromCaffe("pose_deploy.prototxt",
+                 "pose_iter_116000.caffemodel")          # OpenPose face
+casc_prof = cv2.CascadeClassifier(
+                 cv2.data.haarcascades + "haarcascade_profile_face.xml")
+
+def pad_crop(img, rect, pad=0.25):
+    h, w = img.shape[:2]; x, y, rw, rh = rect
+    px, py = int(rw*pad), int(rh*pad)
+    return img[max(0,y-py):min(h,y+rh+py), max(0,x-px):min(w,x+rw+px)]
+
+def detect(cell):
+    """Возвращает (кроп, flipped). SSD -> profile-cascade (с зеркалом) -> весь кадр."""
+    h, w = cell.shape[:2]
+    b = cv2.dnn.blobFromImage(cell, 1.0, (300,300), (104,177,123))
+    det_ssd.setInput(b); out = det_ssd.forward()
+    for i in range(out.shape[2]):
+        if out[0,0,i,2] > 0.4:
+            r = (out[0,0,i,3:7]*[w,h,w,h]).astype(int)
+            return pad_crop(cell, r), False
+    for flip in (False, True):                      # каскад обучен на один направл.
+        im = cell if not flip else cv2.flip(cell, 1)
+        rr = casc_prof.detectMultiScale(cv2.cvtColor(im, cv2.COLOR_BGR2GRAY),
+                                        1.1, 3, minSize=(60,60))
+        if len(rr):
+            return pad_crop(im, max(rr, key=lambda t: t[2]*t[3])), flip
+    return cell, False
+
+def landmarks(crop):
+    h, w = crop.shape[:2]
+    b = cv2.dnn.blobFromImage(crop, 1.0, (368,368), (0,0,0), False, False)
+    op_face.setInput(b); ch = op_face.forward()[0][:N]
+    pts = np.empty((N,2))
+    for i in range(N):
+        _,_,_,mx = cv2.minMaxLoc(ch[i])
+        pts[i] = (mx[0]*w/ch[i].shape[1], mx[1]*h/ch[i].shape[0])
+    return pts
+
+def norm_vec(p):
+    p = p - p.mean(0); p = p / np.sqrt((p**2).sum(1).mean())
+    v = p.ravel(); return v / np.linalg.norm(v)
+
+def variants(p):
+    """зеркало + доворот +-20 град: приводим любой ракурс к каноническому"""
+    m = p.copy(); m[:,0] *= -1; res = []
+    for q in (p, m):
+        for a in range(-20, 21, 5):
+            c, s = np.cos(np.radians(a)), np.sin(np.radians(a))
+            res.append(norm_vec(q @ [[c,-s],[s,c]]))
+    return res
+
+def sim(a, b): return max(norm_vec(a) @ vb for vb in variants(b))  # 0..1
+
+# ---------- тест на вашей сетке 3x3 ----------
+img = cv2.imread("grid.jpg"); H, W = img.shape[:2]
+cells = [img[r*H//3:(r+1)*H//3, c*W//3:(c+1)*W//3] for r in range(3) for c in range(3)]
+pts = [landmarks(detect(c)[0]) for c in cells]
+
+S = np.array([[sim(a,b) for b in pts] for a in pts])
+np.set_printoptions(precision=2, suppress=True); print(S)
+```
+
+## Что должна показать матрица (ориентировочно)
+
+| | L | F | R |
+|---|-----|-----|-----|
+| **L** | 1.0 | 0.7 | **0.95** |
+| **F** | 0.7 | 1.0 | 0.7 |
+| **R** | **0.95** | 0.7 | 1.0 |
+
+Пара «левый–правый» максимальна (форма лица зеркально симметрична), анфас–профиль — заметно ниже. Нижний ряд (голова опущена) образует свой кластер из‑за pitch.
+
+## Опционально: контроль через углы позы (PnP)
+
+Если хотите, чтобы L≡R «по определению», оцените yaw/pitch по 6 точкам и стройте схожесть по `(|yaw|, pitch)`:
+
+```python
+M3D = np.array([[0,0,0],[0,-330,-65],[-225,170,-135],
+                [225,170,-135],[-150,-150,-125],[150,-150,-125]], float)
+IDX = [30, 8, 36, 45, 48, 54]
+def yaw_pitch(p, size):
+    cam = np.array([[size,0,size/2],[0,size,size/2],[0,0,1]], float)
+    _, rv, _ = cv2.solvePnP(M3D, p[IDX].astype(float), cam, np.zeros(4))
+    R,_ = cv2.Rodrigues(rv)
+    return (np.degrees(np.arctan2(R[1,0], R[0,0])),
+            np.degrees(np.arctan2(-R[2,0], np.sqrt(R[2,1]**2+R[2,2]**2))))
+# S_pose[i,j] = exp(-((|yaw_i|-|yaw_j|)^2 + (pitch_i-pitch_j)^2) / (2*25^2))
+```
+
+Тогда |yaw|≈90° у обоих профилей → схожесть ≈1, у анфаса ≈0 → к профилям «разная».
+
+## Замечания
+
+- **Ключевой трюк** — зеркальная инвариантность (`variants`): без него левый и правый профиль дали бы низкую схожесть.
+- Веса OpenPose face лежат в репозитории OpenPose (`models/face/pose_iter_116000.caffemodel`); если на чистом профиле OpenPose сыпется — апскейл кропа до 368px + паддинг, или замена на MediaPipe FaceMesh (код дескриптора тот же).
+- Если когда‑нибудь понадобится матрица «тот же человек?» (а не «та же поза?») — это уже не OpenPose, а ArcFace/InsightFace эмбеддинги.

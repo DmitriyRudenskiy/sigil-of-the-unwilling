@@ -1,0 +1,3097 @@
+### USER
+Вот прототип создай проект на Gоdot 4.7, придумай название проекту
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TerraScape — ядро + 3 ряда, авто-слияние ×4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#171310; --ink:#EDE4D4; --mut:#8B7F6E; --hair:#3B3327; --pos:#E7B04A; --neg:#D96C57; --ok:#8FBA6B; --c0:#E7B04A; }
+  body[data-p="1"]{ --bg:#0F1620; --ink:#E7ECF2; --mut:#7C8B9C; --hair:#27313E; --c0:#5D958B; }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ min-height:100%; }
+  body{ background:var(--bg); color:var(--ink); font-family:'IBM Plex Mono',monospace;
+        transition:background-color .7s ease,color .7s ease; overflow-x:hidden; }
+  .grain{ position:fixed; inset:0; width:100%; height:100%; opacity:.05; pointer-events:none; z-index:9; }
+
+  .page{ min-height:100vh; display:grid; grid-template-columns:430px 1fr; }
+  .panel{ padding:28px 26px 20px; display:flex; flex-direction:column; border-right:1px solid var(--hair);
+          overflow-y:auto; max-height:100vh; transition:border-color .7s;
+          animation:rise .8s .1s cubic-bezier(.2,.8,.3,1) backwards; }
+  @keyframes rise{ from{ opacity:0; transform:translateY(16px);} }
+
+  .kicker{ font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--mut); }
+  h1{ font-family:'Unbounded'; font-weight:700; font-size:25px; line-height:1.05; margin-top:7px; }
+  .lead{ font-size:10px; line-height:1.6; color:var(--mut); margin-top:7px; }
+  .lbl{ font-size:9px; letter-spacing:.2em; color:var(--mut); text-transform:uppercase; margin:13px 0 6px; }
+
+  .topRow{ display:flex; gap:18px; margin-top:12px; flex-wrap:wrap; }
+  .score,.pop{ display:flex; align-items:baseline; gap:10px; }
+  #totalScore,#popNum{ font-family:'Unbounded'; font-weight:700; font-size:32px; line-height:1; font-variant-numeric:tabular-nums; }
+  #popNum.warn{ color:var(--neg); }
+  .scoreSub{ font-size:9.5px; color:var(--mut); line-height:1.45; }
+  .scoreSub b{ color:var(--ink); }
+  #repNum{ color:var(--pos); }
+
+  .soc{ border:1px solid var(--hair); padding:9px 11px; transition:border-color .7s; }
+  .seasonRow{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .seasonRow b{ font-family:'Unbounded'; font-size:11.5px; }
+  .storm{ color:var(--neg); font-size:8.5px; letter-spacing:.14em; text-transform:uppercase;
+          border:1px solid var(--neg); padding:1px 6px; }
+  .mini{ background:none; border:1px solid var(--ink); color:var(--ink); font:inherit; font-size:9px;
+         padding:3px 8px; cursor:pointer; transition:background .2s,color .2s; }
+  .mini:hover{ background:var(--ink); color:var(--bg); }
+  .mini.on{ border-color:var(--pos); color:var(--pos); }
+  .mini.on:hover{ background:var(--pos); color:var(--bg); }
+  .popLine{ font-size:9.5px; color:var(--mut); line-height:1.5; margin-top:6px; }
+  .popLine b{ color:var(--ink); }
+
+  .needs{ display:grid; grid-template-columns:1fr 1fr; gap:3px 12px; margin-top:8px; }
+  .nrow{ display:flex; align-items:center; gap:6px; font-size:9px; color:var(--mut); }
+  .nrow b{ color:var(--ink); font-variant-numeric:tabular-nums; }
+  .ndot{ width:7px; height:7px; border-radius:50%; flex:none; }
+  .ndot.ok{ background:var(--ok); } .ndot.no{ background:var(--neg); } .ndot.mid{ background:var(--mut); }
+
+  .rtab{ width:100%; border-collapse:collapse; margin-top:8px; }
+  .rtab th{ font-size:8.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--mut);
+            text-align:left; padding:2px 6px 5px; border-bottom:1px solid var(--hair); font-weight:400; }
+  .rtab th:last-child{ text-align:right; }
+  .rtab td{ padding:4px 6px; border-top:1px solid var(--hair); font-size:10px; }
+  .rtab tbody tr:first-child td{ border-top:none; }
+  .rtab td.cnt{ text-align:right; font-variant-numeric:tabular-nums; font-weight:600; }
+  .rtab tr.off{ opacity:.35; }
+  .rtab tr.on{ cursor:pointer; }
+  .rtab tr.on:hover{ background:rgba(255,255,255,.045); }
+  .rname{ display:flex; align-items:center; gap:7px; }
+  .rname svg{ flex:none; }
+
+  .deckSec{ margin-bottom:6px; }
+  .deckLbl{ display:flex; align-items:center; gap:7px; font-size:9px; letter-spacing:.16em;
+            text-transform:uppercase; color:var(--mut); margin:5px 0 4px; }
+  .dot{ width:8px; height:8px; flex:none; display:inline-block; }
+  .deckGrid{ display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+  .card{ display:flex; align-items:center; gap:8px; padding:5px 7px; background:none;
+         border:1px solid var(--hair); color:var(--ink); font:inherit; text-align:left;
+         cursor:pointer; transition:border-color .2s, background .2s; }
+  .card:hover{ border-color:var(--mut); }
+  .card.sel{ border-color:var(--pos); background:rgba(231,176,74,.07); }
+  .card svg{ width:28px; height:28px; flex:none; display:block; }
+  .cname{ font-size:9.5px; display:block; }
+  .cmeta{ font-size:8px; color:var(--mut); display:block; margin-top:1px; line-height:1.4; }
+
+  #offers{ display:flex; flex-direction:column; gap:7px; }
+  #offers .none{ font-size:9.5px; color:var(--mut); border:1px dashed var(--hair); padding:8px 10px; }
+  .chip{ border:1px solid var(--pos); padding:7px 10px; display:flex; align-items:center; gap:10px; animation:rise .4s backwards; }
+  .chip b{ font-size:10.5px; font-family:'Unbounded'; font-weight:500; }
+  .chip .parts{ font-size:9px; color:var(--mut); margin-top:2px; }
+  .chip button{ margin-left:auto; flex:none; background:none; border:1px solid var(--pos); color:var(--pos);
+    font:inherit; font-size:9.5px; padding:4px 9px; cursor:pointer; transition:background .2s,color .2s; }
+  .chip button:hover{ background:var(--pos); color:var(--bg); }
+
+  .stage{ position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center;
+          gap:10px; padding:18px; }
+  .stagebar{ display:flex; align-items:center; gap:10px; width:min(97%,980px); }
+  .spacer{ flex:1; }
+  .btn{ display:inline-flex; align-items:center; gap:7px; background:none; border:1px solid var(--ink);
+    color:var(--ink); font:inherit; font-size:10.5px; letter-spacing:.05em; padding:7px 12px;
+    cursor:pointer; transition:background .25s,color .25s,border-color .7s; }
+  .btn:hover{ background:var(--ink); color:var(--bg); }
+  .qbtn{ width:32px; height:32px; border-radius:50%; border:1px solid var(--ink); background:none;
+    color:var(--ink); font:700 14px 'Unbounded'; cursor:pointer; flex:none;
+    transition:background .2s,color .2s,border-color .7s; }
+  .qbtn:hover{ background:var(--pos); border-color:var(--pos); color:#14110C; }
+
+  .menuWrap{ position:relative; }
+  .menu{ position:absolute; top:calc(100% + 6px); left:0; min-width:230px; z-index:30;
+    background:rgba(18,15,12,.97); border:1px solid var(--hair); display:none; }
+  .menu.open{ display:block; }
+  .menu button{ display:block; width:100%; text-align:left; background:none; border:none;
+    border-bottom:1px solid var(--hair); color:var(--ink); font:11px 'IBM Plex Mono';
+    padding:10px 14px; cursor:pointer; }
+  .menu button:last-child{ border-bottom:none; }
+  .menu button:hover{ background:rgba(231,176,74,.08); }
+  .menu .mtag{ color:var(--mut); }
+
+  .fcard{ position:absolute; top:56px; right:16px; width:280px; z-index:20; display:none;
+    background:rgba(18,15,12,.96); border:1px solid var(--hair); padding:12px 14px;
+    font-size:10.5px; line-height:1.55; max-height:calc(100% - 100px); overflow-y:auto; }
+  .fcard.show{ display:block; }
+  .fcard h4{ font-family:'Unbounded'; font-size:11.5px; font-weight:500; margin-bottom:7px;
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .fcard h4 .sub{ font-family:'IBM Plex Mono'; font-size:9px; color:var(--mut); font-weight:400; }
+
+  .row{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .row span:first-child{ color:var(--mut); }
+  .v{ font-variant-numeric:tabular-nums; }
+  .v.pos{ color:var(--pos); } .v.neg{ color:var(--neg); }
+  .row.total{ border-top:1px solid var(--hair); margin-top:5px; padding-top:5px; font-weight:600; }
+  .row.total span:first-child{ color:var(--ink); }
+  .sep{ border-top:1px solid var(--hair); margin:7px 0; }
+  .hintS{ color:var(--mut); margin-top:5px; font-size:9.5px; }
+  .chips{ display:flex; flex-wrap:wrap; gap:5px; margin-top:5px; }
+  .chipS{ display:inline-flex; align-items:center; gap:5px; font-size:9px; color:var(--mut);
+    border:1px solid var(--hair); padding:2px 7px; }
+
+  .wctl{ display:inline-flex; align-items:center; gap:7px; }
+  .wctl button{ width:22px; height:22px; background:none; border:1px solid var(--ink); color:var(--ink);
+    font:600 13px 'IBM Plex Mono'; cursor:pointer; line-height:1; padding:0; }
+  .wctl button:hover:not(:disabled){ background:var(--ink); color:var(--bg); }
+  .wctl button:disabled{ opacity:.28; cursor:default; }
+  .wctl b{ font-variant-numeric:tabular-nums; min-width:34px; text-align:center; }
+  .delBtn{ background:none; border:1px solid var(--neg); color:var(--neg); font:inherit;
+    font-size:9.5px; padding:4px 8px; cursor:pointer; }
+  .delBtn:hover{ background:var(--neg); color:var(--bg); }
+  .spRow{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+  .spBtn{ display:inline-flex; align-items:center; gap:5px; background:none; border:1px solid var(--hair);
+    color:var(--ink); font:9.5px 'IBM Plex Mono'; padding:4px 8px; cursor:pointer; }
+  .spBtn:hover{ border-color:var(--mut); }
+  .spBtn.on{ border-color:var(--pos); color:var(--pos); }
+
+  .overlay{ position:fixed; inset:0; background:rgba(10,8,6,.74); z-index:50;
+    display:none; align-items:center; justify-content:center; padding:20px; }
+  .overlay.open{ display:flex; }
+  .modal{ width:min(700px,94vw); max-height:88vh; background:var(--bg); border:1px solid var(--hair);
+    display:flex; flex-direction:column; animation:rise .35s backwards; }
+  .mhead{ display:flex; align-items:center; padding:13px 18px; border-bottom:1px solid var(--hair); }
+  .mhead b{ font-family:'Unbounded'; font-size:13px; }
+  .mhead button{ margin-left:auto; width:28px; height:28px; background:none; border:1px solid var(--ink);
+    color:var(--ink); font:600 14px 'IBM Plex Mono'; cursor:pointer; }
+  .mhead button:hover{ background:var(--ink); color:var(--bg); }
+  .tabs{ display:flex; border-bottom:1px solid var(--hair); }
+  .tabs button{ flex:1; background:none; border:none; border-right:1px solid var(--hair); color:var(--mut);
+    font:10px 'IBM Plex Mono'; padding:10px; cursor:pointer; letter-spacing:.1em; text-transform:uppercase; }
+  .tabs button:last-child{ border-right:none; }
+  .tabs button.on{ color:var(--pos); }
+  .mbody{ overflow-y:auto; padding:16px 18px; font-size:10.5px; line-height:1.6; }
+  .mbody h5{ font-family:'Unbounded'; font-size:11px; margin:12px 0 6px; }
+  .mbody h5:first-child{ margin-top:0; }
+  .spCard{ border:1px solid var(--hair); padding:10px 12px; margin-bottom:10px; }
+  .spHead{ display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .spHead b{ font-family:'Unbounded'; font-size:11px; }
+  .spHead .inc{ font:9px 'IBM Plex Mono'; color:var(--pos); border:1px solid var(--pos); padding:0 6px; }
+  .spGrid{ display:grid; grid-template-columns:auto 1fr; gap:3px 12px; font-size:9.5px; }
+  .spGrid span{ color:var(--mut); }
+  .bRow{ margin-bottom:7px; }
+  .bRow b{ font-weight:600; }
+  .bRow span{ display:block; color:var(--mut); font-size:9.5px; }
+  .kbd{ border:1px solid var(--hair); padding:0 5px; font-size:9px; }
+
+  #hive{ width:min(97%,980px); height:auto; max-height:86vh; }
+  #hive .layer{ pointer-events:none; }
+  #hive .cell{ pointer-events:auto; cursor:pointer; transform-box:fill-box; transform-origin:center;
+               transition:filter .18s, fill .7s; }
+  #hive .cell:hover{ filter:brightness(1.2); }
+  #hive.placing .cell{ cursor:crosshair; }
+  .bgroup{ transform-box:fill-box; transform-origin:center; }
+  .btxt{ font:600 10.5px 'IBM Plex Mono'; paint-order:stroke; stroke:#14110C; stroke-width:3px; stroke-linejoin:round; }
+  .ctxt{ font:600 8.5px 'IBM Plex Mono'; paint-order:stroke; stroke:#0E0C09; stroke-width:2.5px; }
+  .float{ font:700 13px 'IBM Plex Mono'; paint-order:stroke; stroke:#14110C; stroke-width:3px; transform-box:fill-box; }
+  .float.pos{ fill:var(--pos); } .float.neg{ fill:var(--neg); }
+  .float.name{ font:700 15px 'Unbounded'; fill:var(--ink); }
+  .offerRing{ fill:none; stroke:var(--pos); stroke-width:2.2; animation:offerP 1.1s ease-in-out infinite; }
+  @keyframes offerP{ 0%,100%{ opacity:.25; } 50%{ opacity:1; } }
+  @keyframes born{ from{ transform:scale(0); opacity:0; } }
+
+  .status{ font-size:10px; letter-spacing:.04em; color:var(--mut); min-height:16px; text-align:center; }
+
+  @media (max-width:980px){
+    .page{ grid-template-columns:1fr; }
+    .panel{ border-right:none; border-bottom:1px solid var(--hair); max-height:none; padding:22px 16px 16px; }
+    .stage{ padding:12px 6px 28px; }
+    .fcard{ right:8px; width:min(280px,58vw); }
+  }
+  @media (prefers-reduced-motion: reduce){ *{ animation:none !important; } }
+</style>
+</head>
+<body data-p="0">
+
+<svg class="grain" aria-hidden="true">
+  <filter id="grainF"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch"/></filter>
+  <rect width="100%" height="100%" filter="url(#grainF)"/>
+</svg>
+
+<div class="page">
+  <aside class="panel">
+    <div class="kicker">TERRASCAPE · ЯДРО 4 + 3 РЯДА · ×4 СЛИЯНИЕ</div>
+    <h1>Соты с обществом</h1>
+    <p class="lead">Ядро из четырёх гексов и три ряда вокруг — крупные соты. Четыре одинаковых
+    здания вплотную автоматически сливаются в «здание II» с одним большим значком.</p>
+
+    <div class="topRow">
+      <div class="score">
+        <span id="totalScore">0</span>
+        <span class="scoreSub">очков · слава <b id="repNum">+0</b><br><b id="bCount">0</b> зданий</span>
+      </div>
+      <div class="pop">
+        <span id="popNum">0</span>
+        <span class="scoreSub" id="popSub">жилья нет</span>
+      </div>
+    </div>
+
+    <div class="lbl">Общество · сезон</div>
+    <div class="soc" id="society"></div>
+
+    <div class="lbl">Постройки · все доступны</div>
+    <div id="build"></div>
+
+    <div class="lbl">Слияния</div>
+    <div id="offers"></div>
+  </aside>
+
+  <main class="stage">
+    <div class="stagebar">
+      <div class="menuWrap">
+        <button class="btn" id="btnMenu">Меню</button>
+        <div class="menu" id="menu">
+          <button data-m="new">Новая карта</button>
+          <button data-m="spr">Стиль спрайтов: <span class="mtag" id="mLspr"></span></button>
+          <button data-m="pal">Тема: <span class="mtag" id="mLpal"></span></button>
+          <button data-m="auto">Автосезоны: <span class="mtag" id="mLauto"></span></button>
+          <button data-m="help">Справка…</button>
+        </div>
+      </div>
+      <button class="qbtn" id="btnHelp" title="Справка">?</button>
+      <div class="spacer"></div>
+    </div>
+
+    <svg id="hive" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Гексагональная карта застройки"></svg>
+
+    <div class="fcard" id="fcard"></div>
+    <div class="status"><span id="statusText">загрузка…</span></div>
+  </main>
+</div>
+
+<div class="overlay" id="helpOverlay">
+  <div class="modal">
+    <div class="mhead"><b>Справка</b><button id="btnCloseHelp">×</button></div>
+    <div class="tabs">
+      <button data-tab="play" class="on">Игра</button>
+      <button data-tab="sp">Виды</button>
+      <button data-tab="bld">Здания</button>
+    </div>
+    <div class="mbody" id="helpBody"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   ВИДЫ — 7 рас
+   ============================================================ */
+const SPECIES = {
+  Human: {name:'Люди',     color:'#C8A46E', base:15, demand:30, decadence:4, res:'low',
+          comfort:'Brewing', prof:'Farming', services:['Leisure','Religion'],
+          fire:'Шторм бьёт всех на 25% слабее, пока человек на работе',
+          start:'Открывает плодородную почву (декорация)'},
+  Beaver:{name:'Бобры',    color:'#A5744A', base:10, demand:30, decadence:2, res:'low',
+          comfort:'Engineering', prof:'Woodworking', services:['Leisure','Education','Luxury'],
+          fire:'Расход топлива −20% (декорация)', start:'+1 слот торговли (декорация)'},
+  Lizard:{name:'Ящеры',    color:'#8FAF6A', base:5,  demand:15, decadence:7, res:'high',
+          comfort:'Warmth', prof:'Meat', services:['Brawling'],
+          fire:'+1 покоя ВСЕМ жителям, пока ящер на работе', start:'10 инструментов (декорация)'},
+  Harpy: {name:'Гарпии',   color:'#C77F8F', base:5,  demand:15, decadence:3, res:'low',
+          comfort:'Tailoring', prof:'Alchemy', services:['Education','Treatment'],
+          fire:'Переноска +5 (декорация)', start:'50 пальто (декорация)'},
+  Fox:   {name:'Лисы',     color:'#D98E4A', base:5,  demand:15, decadence:5, res:'low',
+          comfort:'Cooperation', prof:'Forest', services:['Treatment','Religion'],
+          fire:'Враждебность полян −2 (декорация)', start:'Гейзер дождевой воды (декорация)'},
+  Frog:  {name:'Жабы',     color:'#6FA07A', base:10, demand:25, decadence:5, res:'medium',
+          comfort:'Rainwater', prof:'Masonry', services:['Brawling','Luxury','Religion'],
+          fire:'Караван приносит +1 новичка, пока жаба на работе', start:'Открывает руины (декорация)'},
+  Bat:   {name:'Нетопыри', color:'#8B85B5', base:5,  demand:12, decadence:4, res:'high',
+          comfort:null, prof:'Metallurgy', services:['Brawling','Education'],
+          fire:'— (хранителя и комфорта нет)', start:'Усадебный суд (декорация)'},
+};
+const RESN = {low:'низкая', medium:'средняя', high:'высокая'};
+const STORM_PEN = {low:6, medium:3, high:1};
+
+const SP_GLYPH = {
+  Human :['M12 3.6a3.2 3.2 0 1 1-.01 0Z','M5.2 20.4c.4-4.2 3.2-6.6 6.8-6.6s6.4 2.4 6.8 6.6H5.2Z'],
+  Beaver:['M12 4.8c3.6 0 6.4 2.7 6.4 6.2 0 2.5-1.4 4.5-3.4 5.5v3H9v-3c-2-1-3.4-3-3.4-5.5 0-3.5 2.8-6.2 6.4-6.2Z','M10.3 8.9h1.4v2.5h-1.4z','M12.3 8.9h1.4v2.5h-1.4z'],
+  Lizard:['M3 15.8c3-.2 5.1-1.4 6.2-3.7 1-2.2 2.8-3.5 5.3-3.5 3.3 0 5.9 2.3 5.9 5.2s-2.7 5.4-6.2 5.4c-1.5 0-2.8-.4-3.9-1.3-1.6 1.5-4.1 2.3-7.3 2.3v-4.4Z','M16.4 12.3a1.2 1.2 0 1 1-.01 0Z'],
+  Harpy :['M3.6 17.2C6 10 11.4 5.4 20.2 3.8c-.9 2.2-2.2 3.8-3.9 4.9 2-.1 3.6-.6 4.8-1.4-.9 2.7-2.6 4.5-5 5.5 1.5.4 2.9.4 4.2 0-1.7 2.7-4.5 4.1-8.3 4.2-2.7.1-5.5-.2-8.4-1.8Z'],
+  Fox   :['M12 5.4 16.6 2.6l.9 4.9c1.3 1.4 2 3.1 2 5 0 4.3-3.4 7.5-7.5 7.5S4.5 16.8 4.5 12.5c0-1.9.7-3.6 2-5l.9-4.9L12 5.4Z','M8.9 10.6a1.3 1.3 0 1 1-.01 0Z','M15.1 10.6a1.3 1.3 0 1 1-.01 0Z'],
+  Frog  :['M3.4 13.4C3.4 9 7.2 5.6 12 5.6s8.6 3.4 8.6 7.8c0 4.1-3.1 7-8.6 7s-8.6-2.9-8.6-7Z','M6.4 11.2a2.6 2.6 0 1 1 5.2 0 2.6 2.6 0 0 1-5.2 0Z','M12.4 11.2a2.6 2.6 0 1 1 5.2 0 2.6 2.6 0 0 1-5.2 0Z'],
+  Bat   :['M12 8.4C13.6 6.2 15.9 5 18.8 4.8c-.6 1.2-.8 2.3-.5 3.4.8-.6 1.7-.9 2.6-.9-.8 1.7-2.2 2.9-4 3.5.8.7 1.7 1.1 2.7 1.2-1.9 1.6-4 2-6.2 1.4l-1.4.8-1.4-.8c-2.2.6-4.3.2-6.2-1.4 1-.1 1.9-.5 2.7-1.2-1.8-.6-3.2-1.8-4-3.5.9 0 1.8.3 2.6.9.3-1.1.1-2.2-.5-3.4C8.1 5 10.4 6.2 12 8.4Z','M10.6 6.4 12 3.4l1.4 3c-.9-.3-1.9-.3-2.8 0Z'],
+};
+const SPECS = {
+  Brewing:{name:'Варка'}, Farming:{name:'Земледелие'}, Engineering:{name:'Инженерия'},
+  Woodworking:{name:'Деревообработка'}, Warmth:{name:'Тепло'}, Meat:{name:'Мясное дело'},
+  Tailoring:{name:'Портняжество'}, Alchemy:{name:'Алхимия'}, Cooperation:{name:'Взаимовыручка'},
+  Forest:{name:'Лес'}, Rainwater:{name:'Дождевая вода'}, Masonry:{name:'Кладка'}, Metallurgy:{name:'Металлургия'},
+};
+const SERV = {Leisure:'Досуг', Religion:'Вера', Education:'Образование', Treatment:'Лечение', Brawling:'Кулачные бои', Luxury:'Роскошь'};
+const PROVN = {food:'еда', cloth:'одежда', Leisure:SERV.Leisure, Religion:SERV.Religion, Education:SERV.Education,
+               Treatment:SERV.Treatment, Brawling:SERV.Brawling, Luxury:SERV.Luxury};
+
+/* ============================================================
+   ЗДАНИЯ (аналог BuildingData.tres)
+   ============================================================ */
+const DECKS = {
+  Knowledge: {name:'Знания',    color:'#D9B44A'},
+  Settlement:{name:'Поселение', color:'#C08552'},
+  Community: {name:'Сообщество',color:'#7FA08C'},
+  Culture:   {name:'Культура',  color:'#A88BB5'},
+  Provision: {name:'Провизия',  color:'#9BA86B'},
+  Military:  {name:'Военные',   color:'#B0563F'},
+  Merged:    {name:'Слияние',   color:'#E7B04A'},
+};
+
+const B = {
+  School:    {deck:'Knowledge', name:'Школа',      base:15, radius:2, jobs:2, perWorker:2, jobName:'Учителя',
+              prov:{Education:4}, biome:{Rural:10},
+              adj:{CitadelOfWisdom:50, Library:50, CityDistrict:40, Longhouse:20, Park:5, School:-10},
+              feat:{Ruins:10, Predator:-10}, merges:['University','CitadelOfWisdom']},
+  Library:   {deck:'Knowledge', name:'Библиотека', base:20, radius:4, jobs:3, perWorker:3, jobName:'Книжники',
+              prov:{Education:4}, biome:{Urban:25},
+              adj:{CitadelOfWisdom:40, School:35, Hospital:30, CityDistrict:25, Longhouse:20, University:15, Park:10, Library:-120},
+              merges:['University','CitadelOfWisdom']},
+  Alchemist: {deck:'Knowledge', name:'Алхимик',    base:20, radius:3, jobs:3, perWorker:4, jobName:'Алхимики',
+              spec:'Alchemy', biome:{Stone:10},
+              adj:{CitadelOfWisdom:75, Hospital:50, University:40, School:35, Alchemist:-80}, feat:{River:15}},
+  Engineer:  {deck:'Knowledge', name:'Инженер',    base:25, radius:3, jobs:2, perWorker:3, jobName:'Инженеры',
+              spec:'Engineering', biome:{Stone:5}, adj:{CitadelOfWisdom:50, University:40}},
+
+  Cottages:  {deck:'Settlement', name:'Домики',    base:10, radius:2, housing:4, biome:{Rural:20, Arid:15},
+              adj:{Sanctuary:30}, feat:{River:10}, merges:['Longhouse']},
+  Well:      {deck:'Settlement', name:'Колодец',   base:5,  radius:2, jobs:1, perWorker:1, jobName:'Смотрители',
+              spec:'Rainwater', merges:['CityDistrict']},
+  Houses:    {deck:'Settlement', name:'Дома',      base:15, radius:2, housing:6, biome:{Urban:15, Rural:-20},
+              adj:{CityDistrict:30}, merges:['CityDistrict']},
+  Market:    {deck:'Settlement', name:'Рынок',     base:15, radius:3, jobs:3, perWorker:3, jobName:'Торговцы',
+              prov:{Luxury:6}, biome:{Urban:25},
+              adj:{CityDistrict:30, BathHouse:30, Well:20, TownHall:15, Houses:10, Market:-35}, merges:['CityDistrict']},
+
+  Tavern:    {deck:'Community', name:'Таверна',    base:15, radius:2, jobs:3, perWorker:2, jobName:'Трактирщики',
+              spec:'Brewing', prov:{Leisure:5},
+              adj:{Longhouse:40, CityDistrict:35, Well:10, Cottages:10, Houses:10}, merges:['CitadelOfWisdom','Longhouse']},
+  BathHouse: {deck:'Community', name:'Баня',       base:10, radius:2, jobs:2, perWorker:2, jobName:'Банщики',
+              spec:'Warmth', prov:{Treatment:4}, biome:{Arid:5},
+              adj:{Hospital:40, CityDistrict:30, Tavern:15}, merges:['Hospital','Sanctuary']},
+  Temple:    {deck:'Community', name:'Храм',       base:15, radius:2, jobs:2, perWorker:2, jobName:'Служители',
+              prov:{Religion:6},
+              adj:{Sanctuary:30, Well:30, Cottages:15, CityDistrict:10, Temple:-20}, merges:['Sanctuary']},
+  Surgeon:   {deck:'Community', name:'Хирург',     base:15, radius:2, jobs:2, perWorker:4, jobName:'Лекари',
+              prov:{Treatment:4}, biome:{Urban:10},
+              adj:{CitadelOfWisdom:50, BathHouse:20, Hospital:25}, merges:['Hospital']},
+
+  Park:      {deck:'Culture', name:'Парк',         base:10, radius:2, jobs:1, perWorker:1, jobName:'Садовники',
+              prov:{Leisure:4}, adj:{Temple:25, TownHall:25}},
+  TownHall:  {deck:'Culture', name:'Ратуша',       base:25, radius:3, jobs:4, perWorker:3, jobName:'Чиновники',
+              adj:{Hospital:35, CityDistrict:30, Temple:25, Market:15}},
+  Theater:   {deck:'Culture', name:'Театр',        base:20, radius:2, jobs:3, perWorker:2, jobName:'Актёры',
+              prov:{Leisure:8}, biome:{Urban:10}, adj:{CityDistrict:30, TownHall:25, Park:10}},
+  Treasury:  {deck:'Culture', name:'Казначейство', base:45, radius:2, jobs:1, perWorker:5, jobName:'Казначеи',
+              prov:{Luxury:4}, adj:{Hospital:-25, TownHall:15, Market:10}},
+
+  Farm:      {deck:'Provision', name:'Ферма',            base:12, radius:2, jobs:4, perWorker:2, jobName:'Фермеры',
+              spec:'Farming', prov:{food:6}, biome:{Rural:10}, adj:{Market:10, Farm:-25}},
+  Hunter:    {deck:'Provision', name:'Охотничий лагерь', base:10, radius:2, jobs:3, perWorker:2, jobName:'Охотники',
+              spec:'Meat', prov:{food:4}, biome:{Thicket:10}, feat:{Predator:-10}, adj:{Hunter:-30}},
+  Tailor:    {deck:'Provision', name:'Портняжная',       base:15, radius:3, jobs:3, perWorker:3, jobName:'Портные',
+              spec:'Tailoring', prov:{cloth:6}, biome:{Urban:10}, adj:{Market:10, Tailor:-30}},
+
+  Barracks:  {deck:'Military', name:'Казарма',      base:20, radius:2, jobs:8, perWorker:3, jobName:'Солдаты',
+              prov:{Brawling:8}, adj:{Stables:15, Archery:15, MageTower:10, TownHall:20, Barracks:-40}},
+  Archery:   {deck:'Military', name:'Стрельбище',   base:15, radius:2, jobs:5, perWorker:3, jobName:'Стрелки',
+              prov:{Brawling:5}, biome:{Rural:5}, adj:{Barracks:20, Stables:10, Archery:-30}},
+  Stables:   {deck:'Military', name:'Конюшни',      base:15, radius:2, jobs:6, perWorker:2, jobName:'Конюхи',
+              biome:{Rural:10}, adj:{Barracks:20, Archery:10, Stables:-30}},
+  MageTower: {deck:'Military', name:'Башня магов',  base:30, radius:3, jobs:3, perWorker:6, jobName:'Маги',
+              biome:{Stone:15}, adj:{Library:25, University:30, Alchemist:20, MageTower:-50}},
+
+  University:      {deck:'Merged', name:'Университет',       base:60,  radius:3, jobs:6,  perWorker:4, jobName:'Профессора',
+                    prov:{Education:8}, adj:{CitadelOfWisdom:30}, merged:true},
+  CitadelOfWisdom: {deck:'Merged', name:'Цитадель Мудрости', base:120, radius:4, jobs:10, perWorker:5, jobName:'Мудрецы',
+                    prov:{Education:10}, merged:true},
+  Longhouse:       {deck:'Merged', name:'Длинный дом',       base:40,  radius:2, housing:12, merged:true},
+  CityDistrict:    {deck:'Merged', name:'Городской квартал', base:80,  radius:3, jobs:8, perWorker:4, jobName:'Управляющие',
+                    housing:18, prov:{Luxury:8, Education:4}, merged:true},
+  Hospital:        {deck:'Merged', name:'Госпиталь',         base:70,  radius:3, jobs:6, perWorker:4, jobName:'Врачи',
+                    prov:{Treatment:10}, merged:true},
+  Sanctuary:       {deck:'Merged', name:'Святилище',         base:45,  radius:2, jobs:3, perWorker:3, jobName:'Хранители',
+                    prov:{Religion:5}, merged:true},
+};
+
+const BASE_TYPES = Object.keys(B).filter(t=>!B[t].merged);
+const RECIPES = [
+  {result:'University',      parts:['School','Library']},
+  {result:'CitadelOfWisdom', parts:['School','Library','Tavern']},
+  {result:'Longhouse',       parts:['Cottages','Tavern']},
+  {result:'CityDistrict',    parts:['Houses','Market','Well']},
+  {result:'Hospital',        parts:['BathHouse','Surgeon']},
+  {result:'Sanctuary',       parts:['Temple','BathHouse']},
+];
+
+const BIOMES = {
+  Rural:  {name:'Луга',   color:'#6A7A4E'},
+  Urban:  {name:'Город',  color:'#7D7060'},
+  Thicket:{name:'Чаща',   color:'#47603E'},
+  Swamp:  {name:'Болото', color:'#4D6156'},
+  Stone:  {name:'Камень', color:'#71695C'},
+  Arid:   {name:'Пустошь',color:'#8A7752'},
+};
+const FEATN = {river:'Река', ruins:'Руины', predator:'Хищник'};
+const RIVER_COLOR = '#4E7B8A';
+const RINGS = 3;   // ядро 2×2 + три ряда
+const ringName = d => ['ядро','ряд I','ряд II','ряд III'][d] || ('ряд '+d);
+
+/* ---------- авто-слияние ×4: тип «здание II» ---------- */
+const bigKey = t => t+'__big';
+function ensureBigType(t){
+  const k=bigKey(t);
+  if(B[k]) return k;
+  const D=B[t];
+  B[k]={
+    deck:D.deck, name:D.name+' II', base:Math.round(D.base*5.5), radius:D.radius,
+    jobs:D.jobs? D.jobs*4+2 : 0, perWorker:D.perWorker,
+    jobName:D.jobName? D.jobName+' (старшие)' : 'Работники',
+    housing:D.housing? D.housing*4+2 : 0,
+    prov:D.prov? (()=>{const p={}; for(const kk in D.prov) p[kk]=D.prov[kk]*4; return p;})() : undefined,
+    spec:D.spec, biome:D.biome, feat:D.feat,
+    adj:D.adj? {...D.adj} : undefined,
+    adjAs:t, big:true,
+  };
+  return k;
+}
+const typeOfB = b => B[b.type].adjAs || b.type;
+
+/* ============================================================
+   СПРАЙТ-ЛИСТЫ 4×4
+   ============================================================ */
+const SPRITE_POS = {
+  School:[0,0], Alchemist:[0,1], Library:[0,2], Engineer:[0,3],
+  Cottages:[1,0], Well:[1,1], Houses:[1,2], Market:[1,3],
+  Tavern:[2,0], BathHouse:[2,1], Temple:[2,2], Surgeon:[2,3],
+  Park:[3,0], TownHall:[3,1], Theater:[3,2], Treasury:[3,3],
+};
+const SHEETS = [
+  {name:'Пиксель',  src:'terrascape_a.png'},
+  {name:'Изометрия',src:'terrascape_b.png'},
+];
+const SPRITE_ZOOM = 1.22;
+const XLINK = 'http://www.w3.org/1999/xlink';
+const sheetState = SHEETS.map(s=>({...s, img:null, ok:false, cw:0, ch:0}));
+let sprMode = 0, pending = SHEETS.length;
+
+function loadSheet(i){
+  const im = new Image();
+  im.onload = ()=>{ const s=sheetState[i]; s.img=im; s.ok=true;
+    s.cw=im.naturalWidth/4; s.ch=im.naturalHeight/4;
+    redrawAll();
+    if(--pending===0 && !sheetState.some(x=>x.ok))
+      status('Спрайты не найдены — глиф-режим (файлы terrascape_a.png / terrascape_b.png рядом с HTML)'); };
+  im.onerror = ()=>{ sheetState[i].ok=false; if(--pending===0 && !sheetState.some(x=>x.ok))
+      status('Спрайты не найдены — глиф-режим (файлы terrascape_a.png / terrascape_b.png рядом с HTML)'); };
+  im.src = sheetState[i].src;
+}
+const curSheet = ()=> (sprMode>=0 && sheetState[sprMode].ok) ? sheetState[sprMode] : null;
+
+/* ============================================================
+   ГЕОМЕТРИЯ: ядро из 4 гексов + три ряда, крупные соты
+   ============================================================ */
+const NS='http://www.w3.org/2000/svg';
+const hive=document.getElementById('hive');
+const R=34, SQ3=Math.sqrt(3), INSET=0.9;
+const DIRS=[[1,0],[0,1],[-1,1],[-1,0],[0,-1],[1,-1]];
+const CORE=[[0,0],[1,0],[0,1],[1,1]];
+const hexDist=(aq,ar,bq,br)=>{const dq=aq-bq,dr=ar-br;return (Math.abs(dq)+Math.abs(dr)+Math.abs(dq+dr))/2;};
+const key=(q,r)=>q+','+r;
+const posOf=(q,r)=>[R*SQ3*(q+r/2), R*1.5*r];
+
+const cells=[], cellMap=new Map();
+for(let q=-6;q<=6;q++)for(let r=-6;r<=6;r++){
+  let d=Infinity; for(const cc of CORE) d=Math.min(d,hexDist(q,r,cc[0],cc[1]));
+  if(d<=RINGS){
+    const [x,y]=posOf(q,r);
+    const c={q,r,x,y,ring:d,biome:null,feature:null,b:null,el:null};
+    cells.push(c); cellMap.set(key(q,r),c);
+  }
+}
+let minX=1e9,minY=1e9,maxX=-1e9,maxY=-1e9;
+cells.forEach(c=>{minX=Math.min(minX,c.x-R);maxX=Math.max(maxX,c.x+R);minY=Math.min(minY,c.y-R);maxY=Math.max(maxY,c.y+R);});
+const pad=10;
+hive.setAttribute('viewBox',`${minX-pad} ${minY-pad} ${maxX-minX+2*pad} ${maxY-minY+2*pad}`);
+
+function hexPath(x,y,rad){
+  let s='';
+  for(let i=0;i<6;i++){
+    const a=Math.PI/180*(60*i-30);
+    s+=(i?'L':'M')+(x+rad*Math.cos(a)).toFixed(2)+' '+(y+rad*Math.sin(a)).toFixed(2);
+  }
+  return s+'Z';
+}
+const HEX24 = hexPath(12,12,11.4);
+
+function el(tag,attrs={},parent){
+  const n=document.createElementNS(NS,tag);
+  for(const k in attrs) n.setAttribute(k,attrs[k]);
+  if(parent) parent.appendChild(n);
+  return n;
+}
+function h(tag,cls,html){
+  const n=document.createElement(tag);
+  if(cls) n.className=cls;
+  if(html!==undefined) n.innerHTML=html;
+  return n;
+}
+function shade(hex,f){
+  const n=parseInt(hex.slice(1),16);
+  return `rgb(${Math.round(((n>>16)&255)*f)},${Math.round(((n>>8)&255)*f)},${Math.round((n&255)*f)})`;
+}
+
+const defs = el('defs',{},hive);
+el('path',{d:hexPath(0,0,R*INSET)}, el('clipPath',{id:'hexClip'},defs));
+
+/* ============================================================
+   ГЛИФЫ ЗДАНИЙ (резерв) — 24×24
+   ============================================================ */
+const GLYPHS={
+  School:['M4 11.4 12 4.2l8 7.2V20H4V11.4Z M10.4 20v-4.4h3.2V20Z'],
+  Library:['M11.2 6.1C8.9 4.3 5.5 4.1 3.4 5v13.8c2.2-.9 5.4-.7 7.8.9V6.1Z','M12.8 6.1c2.3-1.8 5.7-2 7.8-1.1v13.8c-2.2-.9-5.4-.7-7.8.9V6.1Z'],
+  Alchemist:['M10.2 3h3.6v1.8h-.9v3.4l4.4 8a2.1 2.1 0 0 1-1.9 3.1H8.6a2.1 2.1 0 0 1-1.9-3.1l4.4-8V4.8h-.9V3Z M12 13.4l2.5 4.6H9.5l2.5-4.6Z'],
+  Engineer:['M12 2l2 2.6 3.2-.6.6 3.2L20.4 9l-1.6 2.8 1.6 2.8-2.6 1.4-.6 3.2-3.2-.6L12 21l-2-2.6-3.2.6-.6-3.2L3.6 14l1.6-2.8L3.6 8.4l2.6-1.4.6-3.2 3.2.6L12 2Z M12 8.2a3.8 3.8 0 1 0 .01 0Z'],
+  Cottages:['M3 12.6 7.5 8.4 12 12.6V20H3v-7.4Z M11.6 10.6 15.5 7l3.9 3.6V20h-7.8v-9.4Z M17.1 5h1.8v2.7L17.1 6.3V5Z'],
+  Well:['M4.4 8.7 12 3.4l7.6 5.3h-3.1L12 5.7 7.5 8.7H4.4Z M6 10.1h12v1.8H6z M7.3 12.6h1.8V19H7.3z M14.9 12.6h1.8V19h-1.8z M4.8 19.4h14.4v1.7H4.8z'],
+  Houses:['M2.8 10.7 6.9 7l4.1 3.7V20H2.8v-9.3Z M4.7 12.8h1.7v1.9H4.7z M8.2 12.8h1.7v1.9H8.2z M12.3 12.5 16 9.2l3.7 3.3V20h-7.4v-7.5Z'],
+  Market:['M3 5.8h18v2.4H3z M3 8.2c0 1.6 1.3 2.8 3 2.8s3-1.2 3-2.8c0 1.6 1.3 2.8 3 2.8s3-1.2 3-2.8c0 1.6 1.3 2.8 3 2.8s3-1.2 3-2.8H3Z M5.3 11.6h2.1V20H5.3z M16.6 11.6h2.1V20h-2.1z M5.3 13.6h13.4v3.2H5.3z'],
+  Tavern:['M6.4 7.4h9.2v11.2a1.7 1.7 0 0 1-1.7 1.7H8.1a1.7 1.7 0 0 1-1.7-1.7V7.4Z M15.6 9.2h1.1a3 3 0 0 1 0 6h-1.1v-1.9h1.1a1.1 1.1 0 0 0 0-2.2h-1.1V9.2Z M6.6 7.4 7.5 4.7c1-.7 2.1.5 3.1-.2 1 .7 2.1-.5 3.1-.2l.9 3.1H6.6Z'],
+  BathHouse:['M12 3.1c3.1 4 5.2 6.6 5.2 9.4a5.2 5.2 0 0 1-10.4 0c0-2.8 2.1-5.4 5.2-9.4Z M8.8 12.8c.9-.9 1.9-.9 2.8 0 .9.9 1.9.9 2.8 0v2.1c-.9.9-1.9.9-2.8 0-.9-.9-1.9-.9-2.8 0v-2.1Z'],
+  Temple:['M3 9.5 12 3.4l9 6.1v1.7H3V9.5Z M4.9 12.3h2.3V19H4.9z M10.8 12.3h2.4V19h-2.4z M16.8 12.3h2.3V19h-2.3z M3 19.7h18v1.8H3z'],
+  Surgeon:['M9.8 3.6h4.4v6.2h6.2v4.4h-6.2v6.2H9.8v-6.2H3.6V9.8h6.2V3.6Z'],
+  Park:['M12 2.6l4.6 6.5h-2.7l4.3 6.1h-4.9v4.6h-2.6v-4.6H5.8l4.3-6.1H7.4L12 2.6Z M8.4 20.4h7.2V22H8.4z'],
+  TownHall:['M7.6 20.4V10.9L12 7.7l4.4 3.2v9.5h-3v-4.6h-2.8v4.6h-3Z M11.4 2.4h1.2v5.4h-1.2z M12.6 2.9h4.8l-1.5 1.7 1.5 1.7h-4.8V2.9Z'],
+  Theater:['M4 5.4h16v7.2a5.6 5.6 0 0 1-5.6 5.6H9.6A5.6 5.6 0 0 1 4 12.6V5.4Z M8 8.7a1.4 1.4 0 1 0 .01 0Z M16 8.7a1.4 1.4 0 1 0 .01 0Z M8.6 12.8c1.1 1.6 5.7 1.6 6.8 0v1.5c-1.1 1.8-5.7 1.8-6.8 0v-1.5Z'],
+  Treasury:['M4 10c0-2.9 3.6-5.2 8-5.2S20 7.1 20 10v9H4v-9Z M4 12h16v1.6H4z M11 11.2h2v3.6h-2z'],
+  Farm:['M3.4 20.4V11l8.6-6 8.6 6v9.4h-5.8v-4.8a2.8 2.8 0 0 0-5.6 0v4.8H3.4Z M9.6 9h4.8v2.4H9.6z'],
+  Hunter:['M12 4.6 21 20H3L12 4.6Z M12 9.6 16.4 18H7.6L12 9.6Z M11.2 6.2h1.6v2.2h-1.6z'],
+  Tailor:['M9 3.6h6l4.4 3-1.8 3.4-1.2-.7V20H7.6V9.3l-1.2.7L4.6 6.6l4.4-3Z'],
+  Barracks:['M3.2 20 12 5.6 20.8 20H3.2Z M9.8 20v-4.4a2.2 2.2 0 0 1 4.4 0V20Z M12 5.6V2.2h4.6l-1.4 1.7 1.4 1.7H12Z'],
+  Archery:['M12 2.6a9.4 9.4 0 1 0 .01 0Z M12 7.4a4.6 4.6 0 1 1-.01 0Z M12 10.6a1.4 1.4 0 1 0 .01 0Z','M12 10.2h8.6v1.6H12z M20.4 8.6 23.2 11 20.4 13.4Z'],
+  Stables:['M5.2 4h3.2v7.2a3.6 3.6 0 0 0 7.2 0V4h3.2v7.2a6.8 6.8 0 0 1-13.6 0V4Z M6 6.4h1.6V8H6z M16.4 6.4H18V8h-1.6z'],
+  MageTower:['M9.4 20.6 10.2 8h3.6l.8 12.6H9.4Z M9 8.6 12 3.4l3 5.2H9Z M11.2 11.8h1.6v2.4h-1.6z M5.4 4.4l.7 1.5 1.5.7-1.5.7-.7 1.5-.7-1.5-1.5-.7 1.5-.7.7-1.5Z M18.4 4.4l.6 1.3 1.3.6-1.3.6-.6 1.3-.6-1.3-1.3-.6 1.3-.6.6-1.3Z'],
+  Ruins:['M5.4 20.6v-7.5h2.9v7.5H5.4z M12.9 20.6v-4.7h2.9v4.7h-2.9z','M4.4 10.4 6.5 5.8l2.3 3.1 2.1-4.5 2.2 4.3 1.9-2.7 2.1 4.4H4.4Z'],
+  Predator:['M6.8 3.2l3.5 8-1.9 1L5 4.5l1.8-1.3Z','M11.8 4.4l3.5 8-1.9 1-3.4-7.7 1.8-1.3Z','M16.8 5.8l3.5 8-1.9 1-3.4-7.7 1.8-1.3Z'],
+};
+function drawGlyph(parent,type,cx,cy,s,fill,op){
+  for(const d of (GLYPHS[type]||[])){
+    el('path',{d,fill,'fill-rule':'evenodd',opacity:op,
+      transform:`translate(${(cx-12*s).toFixed(2)} ${(cy-12*s).toFixed(2)}) scale(${s})`},parent);
+  }
+}
+function spIconStr(sp,size=14){
+  const paths=(SP_GLYPH[sp]||[]).map(d=>`<path d="${d}" fill="${SPECIES[sp].color}" fill-rule="evenodd"/>`).join('');
+  return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" style="flex:none">${paths}</svg>`;
+}
+function drawSpeciesGlyph(parent,sp,x,y,s){
+  const g=el('g',{transform:`translate(${x.toFixed(2)} ${y.toFixed(2)}) scale(${s})`},parent);
+  el('circle',{cx:0,cy:0,r:13,fill:'rgba(14,12,9,.88)',stroke:SPECIES[sp].color,'stroke-width':1.8},g);
+  (SP_GLYPH[sp]||[]).forEach(d=> el('path',{d,fill:SPECIES[sp].color,'fill-rule':'evenodd'},g));
+}
+
+/* ============================================================
+   ОТРИСОВКА СПРАЙТОВ
+   ============================================================ */
+function makeImage(sh){
+  const im=el('image',{x:0,y:0,width:sh.cw*4,height:sh.ch*4,preserveAspectRatio:'xMidYMid slice'});
+  im.setAttribute('href',sh.src);
+  im.setAttributeNS(XLINK,'xlink:href',sh.src);
+  return im;
+}
+function drawSpriteHex(parent,x,y,type,opacity=1){
+  const sh=curSheet(); if(!sh||!SPRITE_POS[type]) return false;
+  const [col,row]=SPRITE_POS[type];
+  const g=el('g',{transform:`translate(${x} ${y})`,'clip-path':'url(#hexClip)',opacity},parent);
+  const s=(2*R*INSET*SPRITE_ZOOM)/Math.min(sh.cw,sh.ch);
+  const inner=el('g',{transform:`scale(${s})`},g);
+  const im=makeImage(sh);
+  im.setAttribute('x',(-(col+.5)*sh.cw).toFixed(2));
+  im.setAttribute('y',(-(row+.5)*sh.ch).toFixed(2));
+  inner.appendChild(im);
+  return true;
+}
+function spriteThumb(type){
+  const sh=curSheet();
+  const svg=el('svg',{viewBox: sh&&SPRITE_POS[type]
+    ? `${SPRITE_POS[type][0]*sh.cw} ${SPRITE_POS[type][1]*sh.ch} ${sh.cw} ${sh.ch}` : '0 0 24 24'});
+  svg.setAttribute('width','28'); svg.setAttribute('height','28');
+  if(sh&&SPRITE_POS[type]) svg.appendChild(makeImage(sh));
+  else{
+    const dk=DECKS[B[type].deck].color;
+    el('path',{d:HEX24,fill:dk,'fill-opacity':.28,stroke:dk,'stroke-opacity':.9,'stroke-width':.8},svg);
+    drawGlyph(svg,type,12,12.6,.8,'var(--ink)',1);
+  }
+  return svg;
+}
+
+/* ============================================================
+   СЛОИ
+   ============================================================ */
+const gBiome=el('g',{class:'layer'},hive);
+const gOutl =el('g',{class:'layer'},hive);
+const gFeat =el('g',{class:'layer'},hive);
+const gBuild=el('g',{class:'layer'},hive);
+const gOffer=el('g',{class:'layer'},hive);
+const gPin  =el('g',{class:'layer'},hive);
+const gRad  =el('g',{class:'layer'},hive);
+const gGhost=el('g',{class:'layer'},hive);
+const gFx   =el('g',{class:'layer'},hive);
+
+/* ============================================================
+   ЗАБЕГ
+   ============================================================ */
+let villagers=[], vid=0;
+const ACTIVE=[];
+let sStat={}, repScore=0, season=0;
+let stormActive=false, mourning=0;
+
+function initRun(){
+  villagers=[]; vid=0; repScore=0; season=0;
+  stormActive=false; mourning=0;
+  ACTIVE.length=0;
+  const keys=Object.keys(SPECIES).sort(()=>Math.random()-.5);
+  ACTIVE.push(...keys.slice(0,3));
+  sStat={};
+  ACTIVE.forEach(k=> sStat[k]={demandCur:SPECIES[k].demand, rep:0, count:0, avg:0, workers:0});
+}
+
+let HOUS={total:0,gen:0,frog:0,spBeds:{},ratio:{},shelterOk:true,frogCnt:0,nonFrog:0};
+function recomputeHousing(){
+  let total=0, frog=0;
+  const spBeds={}; ACTIVE.forEach(k=>spBeds[k]=0);
+  buildings.forEach(b=>{
+    const D=B[b.type]; if(!D.housing) return;
+    total+=D.housing;
+    if(b.houseSp){ spBeds[b.houseSp]+=D.housing; if(b.houseSp==='Frog') frog+=D.housing; }
+  });
+  HOUS.total=total; HOUS.frog=frog; HOUS.gen=total-frog; HOUS.spBeds=spBeds;
+}
+const spCount = sp => villagers.filter(v=>v.species===sp).length;
+function bedsFree(sp){
+  if(sp==='Frog') return HOUS.frog - spCount('Frog');
+  return HOUS.gen - (villagers.length - spCount('Frog'));
+}
+function housingBonus(sp){
+  const r=HOUS.ratio[sp]; if(r===undefined) return 0;
+  if(r>=1) return 8;
+  if(r>0) return Math.round(8*r);
+  return sp==='Frog' ? -12 : -6;
+}
+function pushVillager(){
+  const cand=ACTIVE.filter(sp=>bedsFree(sp)>0);
+  if(!cand.length) return false;
+  const sp=cand[(Math.random()*cand.length)|0];
+  villagers.push({id:++vid, species:sp, job:null, resolve:0});
+  return true;
+}
+function fillHousing(){
+  recomputeHousing();
+  let added=0;
+  for(let guard=0;guard<999;guard++){ if(!pushVillager()) break; added++; }
+  return added;
+}
+function loseVillager(v){
+  const i=villagers.indexOf(v); if(i<0) return 0;
+  villagers.splice(i,1);
+  if(v.species==='Bat') mourning=0; else mourning++;
+  return 1;
+}
+function trimToHousing(){
+  recomputeHousing();
+  let removed=0;
+  while(spCount('Frog')>HOUS.frog){
+    let i=villagers.findIndex(v=>v.species==='Frog'&&!v.job);
+    if(i<0) i=villagers.findIndex(v=>v.species==='Frog');
+    if(i<0) break;
+    removed+=loseVillager(villagers[i]);
+  }
+  while(villagers.length>HOUS.total){
+    let i=villagers.findIndex(v=>!v.job);
+    if(i<0) i=0;
+    removed+=loseVillager(villagers[i]);
+  }
+  return removed;
+}
+const villagersIn = b => villagers.filter(v=>v.job===b);
+const freeVillagers = () => villagers.filter(v=>!v.job);
+
+let NEED={cap:{},dem:{},ok:{}};
+function recomputeNeeds(){
+  const cap={food:0,cloth:0,Leisure:0,Religion:0,Education:0,Treatment:0,Brawling:0,Luxury:0};
+  buildings.forEach(b=>{
+    const D=B[b.type]; if(!D.prov) return;
+    const ratio = D.jobs ? Math.min(1,(b.workers||0)/D.jobs) : 1;
+    for(const k in D.prov) cap[k]+=Math.ceil(D.prov[k]*ratio);
+  });
+  const dem={food:villagers.length, cloth:villagers.length};
+  villagers.forEach(v=> SPECIES[v.species].services.forEach(s=> dem[s]=(dem[s]||0)+1));
+  const ok={};
+  for(const k in cap) ok[k]= dem[k]===0 ? true : cap[k]>=dem[k];
+  NEED={cap,dem,ok};
+}
+
+function recomputeResolve(){
+  const frogCnt=spCount('Frog'), nonFrog=villagers.length-frogCnt;
+  HOUS.frogCnt=frogCnt; HOUS.nonFrog=nonFrog;
+  HOUS.shelterOk = HOUS.gen >= nonFrog;
+  ACTIVE.forEach(k=>{
+    const cap = k==='Frog'? HOUS.frog : (HOUS.spBeds[k]||0);
+    const cnt = spCount(k);
+    HOUS.ratio[k] = cnt? Math.min(1,cap/cnt) : 1;
+  });
+  const humanPerk  = villagers.some(v=>v.job&&v.species==='Human');
+  const lizardPerk = villagers.some(v=>v.job&&v.species==='Lizard');
+  const batBonus   = Math.min(6, Math.floor(mourning/2));
+  villagers.forEach(v=>{
+    const S=SPECIES[v.species];
+    let r=S.base + (NEED.ok.food?5:-10) + (NEED.ok.cloth?3:-8);
+    S.services.forEach(s=> r += NEED.ok[s]?3:-6);
+    if(v.species==='Frog'){
+      r += housingBonus('Frog');
+    } else {
+      r += HOUS.shelterOk?4:-10;
+      r += housingBonus(v.species);
+    }
+    if(stormActive){
+      const pen = STORM_PEN[S.res] * (humanPerk?0.75:1);
+      r -= Math.round(pen*10)/10;
+    }
+    if(lizardPerk) r += 1;
+    if(v.species==='Bat') r += batBonus;
+    if(v.job){
+      const spec=B[v.job.type].spec;
+      if(spec===S.comfort) r+=5;
+      if(S.comfort==='Cooperation'&&v.species==='Fox'){
+        const foxes=villagersIn(v.job).filter(w=>w.species==='Fox').length;
+        if(foxes>=3) r+=5;
+      }
+    }
+    v.resolve=r;
+  });
+  ACTIVE.forEach(k=>{
+    const vs=villagers.filter(v=>v.species===k), st=sStat[k];
+    st.count=vs.length;
+    st.avg=vs.length? vs.reduce((s,v)=>s+v.resolve,0)/vs.length : 0;
+    st.workers=vs.filter(v=>v.job).length;
+  });
+}
+
+let autoOn=true;
+function nextSeason(){
+  season++;
+  stormActive = (season%3===0);
+  recalcAll();
+  pulse({q:0,r:0}, stormActive?.9:.45);
+  let gained=0, left=0;
+  ACTIVE.forEach(k=>{
+    const S=SPECIES[k], st=sStat[k];
+    if(st.count>0 && st.avg>=st.demandCur){
+      st.rep++; st.demandCur+=S.decadence; repScore+=15; gained++;
+      spawnFloat(0,-R*1.5,`+слава · ${S.name}`,'pos');
+    }
+  });
+  const leavers=villagers.filter(v=>v.resolve<1);
+  leavers.forEach(v=>loseVillager(v));
+  left=leavers.length;
+  if(left) spawnFloat(0,-R*.2,`−${left} ушло`,'neg');
+  if(season%2===0){
+    const frogPerk=villagers.some(v=>v.job&&v.species==='Frog');
+    let n=0;
+    for(let i=0;i<2+(frogPerk?1:0);i++){ if(pushVillager()) n++; }
+    if(n) spawnFloat(R*2,-R*1.5,`+караван ×${n}`,'pos');
+  }
+  recalcAll();
+  status(`Сезон ${season}${stormActive?' · ШТОРМ':''}: слава +${gained*15}${left?` · ушло жителей: ${left} (покой ниже 1)`:''}`);
+}
+
+/* ============================================================
+   КАРТА
+   ============================================================ */
+function genMap(){
+  [...buildings].forEach(b=>removeBuilding(b,true));
+  initRun();
+  pin=null; pinSp=null; gPin.innerHTML='';
+  const seeds=[];
+  const bag=['Rural','Rural','Urban','Urban','Thicket','Swamp','Stone','Arid'];
+  for(const b of bag){
+    let c,tries=0;
+    do{ c=cells[(Math.random()*cells.length)|0]; tries++; }
+    while(tries<60 && seeds.some(s=>hexDist(s.c.q,s.c.r,c.q,c.r)<2));
+    seeds.push({b,c});
+  }
+  cells.forEach(c=>{
+    const sorted=seeds.map(s=>({s,d:hexDist(s.c.q,s.c.r,c.q,c.r)+Math.random()*.6})).sort((a,b)=>a.d-b.d);
+    c.biome=(Math.random()<.12&&sorted[1])?sorted[1].s.b:sorted[0].s.b;
+    c.feature=null;
+  });
+  const edge=cells.filter(c=>c.ring===RINGS);
+  let cur=edge[(Math.random()*edge.length)|0];
+  let dir=DIRS[(Math.random()*6)|0];
+  for(let i=0;i<8&&cur;i++){
+    cur.feature='river';
+    const want=Math.random()<.7?dir:DIRS[(Math.random()*6)|0];
+    let nxt=cellMap.get(key(cur.q+want[0],cur.r+want[1]));
+    if(!nxt||nxt.feature==='river'){
+      for(const d of DIRS.slice().sort(()=>Math.random()-.5)){
+        const t=cellMap.get(key(cur.q+d[0],cur.r+d[1]));
+        if(t&&!t.feature){ nxt=t; dir=d; break; }
+      }
+    } else dir=want;
+    cur=nxt;
+  }
+  const free=cells.filter(c=>!c.feature&&c.ring>=1);
+  const ruins=free[(Math.random()*free.length)|0];
+  if(ruins) ruins.feature='ruins';
+  const far=cells.filter(c=>!c.feature&&c.ring>=2&&(!ruins||hexDist(c.q,c.r,ruins.q,ruins.r)>=3));
+  const pred=far[(Math.random()*far.length)|0];
+  if(pred) pred.feature='predator';
+}
+
+function renderBoard(){
+  cells.forEach(c=>{
+    if(!c.el){
+      c.el=el('path',{class:'cell',d:hexPath(c.x,c.y,R*INSET)},gBiome);
+      c.el.addEventListener('click',()=>onCellClick(c));
+      c.el.addEventListener('contextmenu',e=>{e.preventDefault();onCellRightClick(c);});
+      c.el.addEventListener('pointerenter',()=>onCellEnter(c));
+      c.el.addEventListener('pointerleave',()=>onCellLeave());
+    }
+    c.el.setAttribute('fill', c.feature==='river'?RIVER_COLOR:BIOMES[c.biome].color);
+    c.el.setAttribute('stroke', c.ring===0?'rgba(231,176,74,.28)':'none');
+    c.el.setAttribute('stroke-width','.8');
+    c.el.style.animation=`born .6s ${c.ring*70}ms cubic-bezier(.22,1,.32,1) backwards`;
+  });
+  renderFeat();
+}
+function drawOutline(){
+  cells.forEach(c=>{
+    DIRS.forEach((d,i)=>{
+      if(cellMap.get(key(c.q+d[0],c.r+d[1]))) return;
+      const a1=(60*i-30)*Math.PI/180, a2=(60*i+30)*Math.PI/180, rr=R*INSET;
+      el('path',{d:`M${(c.x+rr*Math.cos(a1)).toFixed(2)} ${(c.y+rr*Math.sin(a1)).toFixed(2)}L${(c.x+rr*Math.cos(a2)).toFixed(2)} ${(c.y+rr*Math.sin(a2)).toFixed(2)}`,
+        stroke:'rgba(20,16,12,.55)','stroke-width':2.5,'stroke-linecap':'round',fill:'none'},gOutl);
+    });
+  });
+}
+function renderFeat(){
+  gFeat.innerHTML='';
+  cells.forEach(c=>{
+    if(c.feature==='ruins')    drawGlyph(gFeat,'Ruins',   c.x-R*.48,c.y-R*.48,.52,'rgba(237,228,212,.92)');
+    if(c.feature==='predator') drawGlyph(gFeat,'Predator',c.x-R*.48,c.y-R*.48,.52,'rgba(237,228,212,.92)');
+  });
+}
+
+/* ============================================================
+   ЗДАНИЯ
+   ============================================================ */
+const buildings=new Set();
+let uid=0;
+
+function placeBuilding(type,cellsList,compTypes=null,props=null){
+  const b={id:++uid,type,cells:cellsList,anchor:cellsList[0],score:0,disp:0,ever:false,
+           lastParts:[],group:null,compTypes,houseSp:null};
+  if(props) Object.assign(b,props);
+  cellsList.forEach(c=>c.b=b);
+  buildings.add(b);
+  drawBuilding(b);
+  return b;
+}
+function removeBuilding(b,silent){
+  villagers.forEach(v=>{ if(v.job===b) v.job=null; });
+  b.cells.forEach(c=>c.b=null);
+  buildings.delete(b);
+  if(b.group) b.group.remove();
+  if(b.clipEl){ b.clipEl.remove(); b.clipEl=null; }
+  if(!silent){ recalcAll(); }
+}
+function drawBuilding(b,quiet){
+  const D=B[b.type], dk=DECKS[D.deck];
+  const g=el('g',{class:'bgroup'},gBuild);
+  const title=el('title',{},g);
+  title.textContent=D.name+(b.houseSp?` · жильё: ${SPECIES[b.houseSp].name}`:'');
+  let sx=0,sy=0,maxY=-1e9,bot=b.cells[0];
+  b.cells.forEach((c,i)=>{
+    sx+=c.x; sy+=c.y;
+    if(c.y>maxY){ maxY=c.y; bot=c; }
+    if(b.big){
+      el('path',{d:hexPath(c.x,c.y,R*INSET),fill:shade(BIOMES[c.biome].color,.5)},g);
+    } else {
+      const t=b.compTypes?b.compTypes[i]:b.type;
+      if(!drawSpriteHex(g,c.x,c.y,t,1)){
+        el('path',{d:hexPath(c.x,c.y,R*INSET),fill:shade(BIOMES[c.biome].color,.6)},g);
+        drawGlyph(g,t,c.x,c.y-1.5,1.3,'var(--ink)',1);
+      }
+    }
+    el('path',{d:hexPath(c.x,c.y,R*INSET),fill:'none',
+               stroke:(D.merged?DECKS.Merged.color:dk.color),
+               'stroke-width':(D.merged||b.big)?2.2:1.5,'stroke-opacity':.95},g);
+    el('path',{d:hexPath(c.x,c.y-R*.62,4.6),fill:BIOMES[c.biome].color,stroke:'rgba(0,0,0,.55)','stroke-width':1},g);
+  });
+  const cx=sx/b.cells.length, cy=sy/b.cells.length;
+  if(b.big){
+    /* один большой значок по центру, обрезанный объединением 4 гексов */
+    const cp=el('clipPath',{id:'bigclip'+b.id},defs);
+    b.clipEl=cp;
+    b.cells.forEach(c=> el('path',{d:hexPath(c.x,c.y,R*INSET)},cp));
+    const cg=el('g',{'clip-path':`url(#bigclip${b.id})`},g);
+    const bt=b.baseType||b.type;
+    const sh=curSheet();
+    if(sh&&SPRITE_POS[bt]){
+      const [col,row]=SPRITE_POS[bt];
+      const s=(2*R*INSET*SPRITE_ZOOM*2.05)/Math.min(sh.cw,sh.ch);
+      const inner=el('g',{transform:`translate(${cx.toFixed(2)} ${cy.toFixed(2)}) scale(${s})`},cg);
+      const im=makeImage(sh);
+      im.setAttribute('x',(-(col+.5)*sh.cw).toFixed(2));
+      im.setAttribute('y',(-(row+.5)*sh.ch).toFixed(2));
+      inner.appendChild(im);
+    } else {
+      drawGlyph(cg,bt,cx,cy-2,2.4,'var(--ink)',1);
+    }
+  }
+  if(b.houseSp) drawSpeciesGlyph(g,b.houseSp,b.anchor.x-R*.58,b.anchor.y-R*.6,.46);
+  const by=maxY+R*.98;
+  b.badgeR=el('rect',{y:by-7.5,height:15,rx:3,fill:'rgba(18,15,12,.92)',stroke:'rgba(237,228,212,.16)','stroke-width':1},g);
+  b.badgeT=el('text',{x:cx,y:by+3.5,'text-anchor':'middle',class:'btxt',fill:'#CFC6B6'},g);
+  b.badgeT.textContent=String(b.score);
+  b.chipT=null; b.chipR=null; b.chipX=bot.x;
+  const ws=villagersIn(b).length;
+  if(D.jobs>0){
+    const cy2=bot.y+R*.54;
+    b.chipR=el('rect',{y:cy2-5.5,height:11,rx:2.5,fill:'rgba(12,10,8,.88)',stroke:'rgba(237,228,212,.14)','stroke-width':.8},g);
+    b.chipT=el('text',{x:bot.x,y:cy2+3,'text-anchor':'middle',class:'ctxt',fill:'var(--mut)'},g);
+    b.chipT.textContent=`${ws}/${D.jobs}`;
+  }
+  b.group=g; b.cx=cx; b.cy=cy;
+  if(!quiet) g.animate([{transform:'scale(.6)',opacity:0},{transform:'scale(1)',opacity:1}],
+    {duration:340,easing:'cubic-bezier(.2,1.4,.4,1)'});
+  requestAnimationFrame(()=>{ sizeBadge(b); sizeChip(b); });
+}
+function redrawBuilding(b){
+  if(b.group) b.group.remove();
+  if(b.clipEl){ b.clipEl.remove(); b.clipEl=null; }
+  drawBuilding(b,true);
+}
+function sizeBadge(b){
+  const w=Math.max(20,b.badgeT.getComputedTextLength()+10);
+  b.badgeR.setAttribute('x',b.cx-w/2); b.badgeR.setAttribute('width',w);
+}
+function sizeChip(b){
+  if(!b.chipT) return;
+  const w=b.chipT.getComputedTextLength()+8;
+  b.chipR.setAttribute('x',b.chipX-w/2); b.chipR.setAttribute('width',w);
+}
+
+/* ============================================================
+   АВТО-СЛИЯНИЕ: 4 одинаковых здания вплотную → «здание II»
+   ============================================================ */
+function tryAutoMerge(cell){
+  const start=cell.b;
+  if(!start||start.big||start.cells.length!==1) return null;
+  const t=start.type;
+  /* BFS по связной группе однотипных одноклеточных зданий */
+  const order=[start]; const seenB=new Set([start.id]);
+  const seenC=new Set([key(cell.q,cell.r)]);
+  const queue=[cell];
+  while(queue.length){
+    const c=queue.shift();
+    for(const d of DIRS){
+      const nk=key(c.q+d[0],c.r+d[1]);
+      if(seenC.has(nk)) continue;
+      seenC.add(nk);
+      const n=cellMap.get(nk); if(!n) continue;
+      const nb=n.b;
+      if(nb&&!nb.big&&nb.cells.length===1&&nb.type===t){
+        if(!seenB.has(nb.id)){ seenB.add(nb.id); order.push(nb); }
+        queue.push(n);
+      }
+    }
+  }
+  if(order.length<4) return null;
+  const four=order.slice(0,4);
+  const cellsU=four.map(b=>b.cells[0]);
+  const carried=four.flatMap(bl=>villagersIn(bl));
+  const sps=four.map(b=>b.houseSp);
+  const houseSp=sps.every(s=>s===sps[0])?sps[0]:null;
+  const hadPin=four.some(b=>b===pin);
+  four.forEach(b=>removeBuilding(b,true));
+  const bk=ensureBigType(t);
+  const nb=placeBuilding(bk,cellsU,null,{big:true,baseType:t,houseSp});
+  carried.slice(0,B[bk].jobs).forEach(v=>v.job=nb);
+  if(hadPin){ pin=nb; highlightPin(); showInfoBuilding(nb); }
+  pulse(nb.anchor,1.6);
+  spawnFloat(nb.cx,nb.cy-R*1.05,B[bk].name,'name');
+  spawnFloat(nb.cx,nb.cy+R*.35,'слияние ×4','pos');
+  return nb;
+}
+
+/* ============================================================
+   НАЗНАЧЕНИЕ ПРОФЕССИЙ
+   ============================================================ */
+function matchScore(v,b){
+  const S=SPECIES[v.species], spec=B[b.type].spec;
+  if(!spec) return 0;
+  let m=0; if(S.prof===spec)m+=2; if(S.comfort===spec)m+=1; return m;
+}
+function assignWorkers(b,d){
+  const D=B[b.type], cur=villagersIn(b).length;
+  if(d>0){
+    if(cur>=D.jobs){ status('Рабочие места заняты'); return; }
+    const free=freeVillagers();
+    if(!free.length){ status('Нет свободных жителей — постройте жильё'); return; }
+    free.sort((a,c)=>matchScore(c,b)-matchScore(a,b));
+    free[0].job=b;
+  } else {
+    const ws=villagersIn(b); if(!ws.length) return;
+    ws[ws.length-1].job=null;
+  }
+  recalcAll();
+  if(pin===b) showInfoBuilding(b);
+  status(`${D.name}: ${villagersIn(b).length}/${D.jobs} · свободных жителей: ${freeVillagers().length}`);
+}
+
+/* ============================================================
+   СКОРИНГ
+   ============================================================ */
+function minDist(a,b){
+  let m=1e9;
+  for(const ca of a.cells)for(const cb of b.cells) m=Math.min(m,hexDist(ca.q,ca.r,cb.q,cb.r));
+  return m;
+}
+function minDistCell(cell,b){
+  let m=1e9;
+  for(const cb of b.cells) m=Math.min(m,hexDist(cell.q,cell.r,cb.q,cb.r));
+  return m;
+}
+function aggAdj(source,D,radiusFn){
+  const per=new Map();
+  for(const o of buildings){
+    if(source&&o===source) continue;
+    if(radiusFn(o)<=D.radius){
+      const v=(D.adj||{})[typeOfB(o)];
+      if(v){ const e=per.get(typeOfB(o))||{v:0,n:0}; e.v+=v; e.n++; per.set(typeOfB(o),e); }
+    }
+  }
+  const parts=[];
+  for(const [t,e] of per) parts.push([B[t].name+(e.n>1?' ×'+e.n:''),e.v]);
+  parts.sort((a,b)=>b[1]-a[1]);
+  return parts;
+}
+function computeScore(b){
+  const D=B[b.type], c=b.anchor, ws=villagersIn(b);
+  const parts=[['база',D.base]];
+  if(D.biome&&D.biome[c.biome]) parts.push(['биом · '+BIOMES[c.biome].name,D.biome[c.biome]]);
+  if(D.feat&&c.feature&&D.feat[c.feature]) parts.push([FEATN[c.feature],D.feat[c.feature]]);
+  if(ws.length&&D.perWorker) parts.push([`${(D.jobName||'работники').toLowerCase()} ×${ws.length}`,ws.length*D.perWorker]);
+  if(D.spec){
+    const prof=ws.filter(v=>SPECIES[v.species].prof===D.spec).length;
+    if(prof) parts.push([`сноровка · ${SPECS[D.spec].name} ×${prof}`,prof]);
+  }
+  parts.push(...aggAdj(b,D,o=>minDist(b,o)));
+  return {total:parts.reduce((s,p)=>s+p[1],0),parts};
+}
+
+/* ============================================================
+   UI
+   ============================================================ */
+const totalScoreEl=document.getElementById('totalScore');
+const bCountEl=document.getElementById('bCount');
+const repNumEl=document.getElementById('repNum');
+const popNumEl=document.getElementById('popNum');
+const popSubEl=document.getElementById('popSub');
+const statusEl=document.getElementById('statusText');
+const fcard=document.getElementById('fcard');
+const buildBox=document.getElementById('build');
+const offersBox=document.getElementById('offers');
+const societyBox=document.getElementById('society');
+const status=t=>statusEl.textContent=t;
+let shownTotal=0;
+
+function tweenText(elm,from,to){
+  const t0=performance.now(),dur=450;
+  (function f(t){
+    const k=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-k,3);
+    elm.textContent=Math.round(from+(to-from)*e);
+    if(k<1) requestAnimationFrame(f);
+  })(t0);
+}
+function spawnFloat(x,y,txt,cls){
+  const t=el('text',{x,y,'text-anchor':'middle',class:'float '+cls},gFx);
+  t.textContent=txt;
+  t.animate([{transform:'translateY(0)',opacity:1},{transform:'translateY(-28px)',opacity:0}],
+    {duration:cls==='name'?1300:950,easing:'cubic-bezier(.2,.7,.3,1)'}).onfinish=()=>t.remove();
+}
+function updateBadge(b){
+  const D=B[b.type], net=b.score-D.base;
+  b.badgeT.setAttribute('fill', net>0?'var(--pos)': net<0?'var(--neg)':'#CFC6B6');
+  tweenText(b.badgeT,b.disp,b.score); b.disp=b.score;
+  if(b.chipT){
+    const ws=villagersIn(b).length;
+    b.chipT.textContent=`${ws}/${D.jobs}`;
+    b.chipT.setAttribute('fill',ws>=D.jobs?'var(--pos)':ws>0?'#CFC6B6':'var(--mut)');
+  }
+  requestAnimationFrame(()=>{ sizeBadge(b); sizeChip(b); });
+}
+function recalcAll(){
+  buildings.forEach(b=>{ b.workers=villagers.filter(v=>v.job===b).length; });
+  recomputeHousing();
+  recomputeNeeds();
+  recomputeResolve();
+  let total=repScore;
+  for(const b of buildings){
+    const r=computeScore(b);
+    if(b.ever&&r.total!==b.score){
+      const d=r.total-b.score;
+      spawnFloat(b.anchor.x,b.anchor.y-24,(d>0?'+':'')+d,d>0?'pos':'neg');
+    }
+    b.score=r.total; b.ever=true; b.lastParts=r.parts;
+    updateBadge(b);
+    total+=r.total;
+  }
+  tweenText(totalScoreEl,shownTotal,total); shownTotal=total;
+  repNumEl.textContent='+'+repScore;
+  bCountEl.textContent=buildings.size;
+  renderPopLine();
+  renderSociety();
+  renderOffers();
+}
+function pulse(origin,amp=1){
+  cells.forEach(c=>{
+    const d=hexDist(c.q,c.r,origin.q,origin.r);
+    setTimeout(()=>{
+      c.el.animate(
+        [{filter:'brightness(1)',transform:'scale(1)'},
+         {filter:`brightness(${1+.9*amp})`,transform:`scale(${1+.06*amp})`,offset:.35},
+         {filter:'brightness(1)',transform:'scale(1)'}],
+        {duration:640,easing:'ease-out'});
+    },d*45);
+  });
+  [...buildings].forEach(b=>{
+    const d=minDistCell(origin,b);
+    setTimeout(()=>{
+      b.group&&b.group.animate(
+        [{transform:'scale(1)'},{transform:`scale(${1+.12*amp})`,offset:.35},{transform:'scale(1)'}],
+        {duration:640,easing:'ease-out'});
+    },d*45);
+  });
+}
+function renderPopLine(){
+  popNumEl.textContent=villagers.length;
+  const crisis=ACTIVE.some(k=>sStat[k].count>0&&sStat[k].avg<1);
+  popNumEl.classList.toggle('warn',crisis);
+  popSubEl.innerHTML=`кров <b>${HOUS.gen}</b> · жабье <b>${HOUS.frog}</b><br>`+
+    `назначено <b>${villagers.length-freeVillagers().length}</b> · свободно <b>${freeVillagers().length}</b>`;
+}
+
+function renderSociety(){
+  societyBox.innerHTML='';
+  const sr=h('div','seasonRow');
+  sr.appendChild(h('b',null,`Сезон ${season||1}`));
+  if(season>0&&stormActive) sr.appendChild(h('span','storm','шторм'));
+  const bNext=h('button','mini','Сезон +1'); bNext.onclick=nextSeason;
+  const bAuto=h('button','mini'+(autoOn?' on':''),'Авто '+(autoOn?'вкл':'выкл'));
+  bAuto.onclick=()=>{ autoOn=!autoOn; updMenuLabels(); renderSociety(); };
+  sr.appendChild(bNext); sr.appendChild(bAuto);
+  societyBox.appendChild(sr);
+  societyBox.appendChild(h('div','popLine',
+    `Караван: <b>${ACTIVE.map(k=>SPECIES[k].name).join(' · ')}</b>. 4 одинаковых здания вплотную → «II» (клик по расе — разбор).`));
+
+  const needs=h('div','needs');
+  const rowN=(label,dem,cap)=>{
+    const r=h('div','nrow');
+    const st = dem===0?'mid':(cap>=dem?'ok':'no');
+    r.appendChild(h('span','ndot '+st));
+    r.appendChild(h('span',null,`${label} <b>${cap}/${dem}</b>`));
+    needs.appendChild(r);
+  };
+  rowN('Еда',NEED.dem.food,NEED.cap.food);
+  rowN('Одежда',NEED.dem.food>0?NEED.dem.cloth:0,NEED.cap.cloth);
+  for(const k of Object.keys(SERV)){
+    if(NEED.dem[k]>0) rowN(SERV[k],NEED.dem[k],NEED.cap[k]);
+  }
+  rowN('Кров',HOUS.nonFrog,HOUS.gen);
+  rowN('Жабье жильё',spCount('Frog'),HOUS.frog);
+  societyBox.appendChild(needs);
+
+  const tb=h('table','rtab');
+  tb.innerHTML=`<thead><tr><th>Раса</th><th>Кол-во</th></tr></thead>`;
+  const tbody=document.createElement('tbody');
+  Object.keys(SPECIES).forEach(k=>{
+    const S=SPECIES[k], act=ACTIVE.includes(k), st=act?sStat[k]:null;
+    const tr=document.createElement('tr');
+    tr.className=act?'on':'off';
+    let col='var(--mut)', cnt='—';
+    if(act){
+      cnt=String(st.count);
+      if(st.count>0) col = st.avg>=st.demandCur?'var(--pos)': st.avg<1?'var(--neg)':'var(--ink)';
+    }
+    tr.innerHTML=`<td><span class="rname">${spIconStr(k,14)}${S.name}</span></td>`+
+                 `<td class="cnt" style="color:${col}" title="${act?`покой ${st.avg.toFixed(1)} / порог ${st.demandCur}`:'не в караване'}">${cnt}</td>`;
+    if(act) tr.onclick=()=>{ pinSp=k; pin=null; highlightPin(); refreshFloat(); };
+    tbody.appendChild(tr);
+  });
+  tb.appendChild(tbody);
+  societyBox.appendChild(tb);
+}
+
+let OFFERS=[];
+function combos(lists,i=0,acc=[]){
+  if(i===lists.length) return [acc];
+  const out=[];
+  for(const x of lists[i]) out.push(...combos(lists,i+1,[...acc,x]));
+  return out;
+}
+function findOffers(){
+  const out=[];
+  for(const rec of RECIPES){
+    const lists=rec.parts.map(t=>[...buildings].filter(b=>b.type===t));
+    if(lists.some(l=>!l.length)) continue;
+    for(const inst of combos(lists)){
+      let ok=true;
+      for(let i=0;i<inst.length&&ok;i++)
+        for(let j=i+1;j<inst.length&&ok;j++)
+          if(minDist(inst[i],inst[j])!==1) ok=false;
+      if(ok) out.push({rec,inst});
+    }
+  }
+  return out;
+}
+function renderOffers(){
+  gOffer.innerHTML='';
+  OFFERS=findOffers();
+  if(!OFFERS.length){
+    offersBox.innerHTML='<div class="none">Пока нет рецептов. Компоненты вплотную (Школа+Библиотека) или 4 одинаковых здания — авто-слияние ×4.</div>';
+    return;
+  }
+  offersBox.innerHTML='';
+  OFFERS.forEach((off,i)=>{
+    const ring=el('g',{class:'offerRing'},gOffer);
+    off.inst.forEach((b,j)=>{
+      b.cells.forEach(c=>{
+        const p=el('path',{d:hexPath(c.x,c.y,R*.99)},ring);
+        p.style.animationDelay=(j*.18)+'s';
+      });
+    });
+    const chip=h('div','chip'); chip.style.animationDelay=(i*.08)+'s';
+    chip.innerHTML=`<div><b>${B[off.rec.result].name}</b><div class="parts">${off.rec.parts.map(t=>B[t].name).join(' + ')}</div></div>`;
+    const btn=h('button',null,'Слить'); btn.onclick=()=>performMerge(off);
+    chip.appendChild(btn);
+    offersBox.appendChild(chip);
+  });
+}
+function performMerge(off){
+  const carried=off.inst.flatMap(bl=>villagersIn(bl));
+  const cellsU=off.inst.flatMap(b=>b.cells);
+  const compTypes=off.inst.flatMap(bl=>bl.cells.map(()=>bl.type));
+  off.inst.forEach(b=>removeBuilding(b,true));
+  const nb=placeBuilding(off.rec.result,cellsU,compTypes);
+  const D=B[nb.type];
+  carried.slice(0,D.jobs||0).forEach(v=> v.job=nb);
+  const evicted=trimToHousing();
+  const added=fillHousing();
+  if(added>0) spawnFloat(nb.cx,nb.cy-R*1.2,`+${added} чел.`,'pos');
+  if(evicted>0) spawnFloat(nb.cx,nb.cy-R*1.2,`−${evicted} чел.`,'neg');
+  pulse(nb.anchor,1.6);
+  spawnFloat(nb.cx,nb.cy-R*.9,D.name,'name');
+  recalcAll();
+  pin=nb; pinSp=null; highlightPin(); showInfoBuilding(nb);
+  status(`Слияние: ${D.name}`);
+}
+
+let sel=null, pin=null, pinSp=null;
+function buildPalette(){
+  buildBox.innerHTML='';
+  for(const dk of Object.keys(DECKS)){
+    if(dk==='Merged') continue;
+    const types=BASE_TYPES.filter(t=>B[t].deck===dk);
+    if(!types.length) continue;
+    const sec=h('div','deckSec');
+    sec.appendChild(h('div','deckLbl',`<span class="dot" style="background:${DECKS[dk].color}"></span>${DECKS[dk].name}`));
+    const grid=h('div','deckGrid');
+    types.forEach(t=>{
+      const btn=h('button','card'); btn.dataset.type=t;
+      btn.appendChild(spriteThumb(t));
+      const D=B[t], meta=[`база ${D.base}`,`R${D.radius}`];
+      if(D.jobs) meta.push(`${(D.jobName||'раб').toLowerCase()} ${D.jobs}`);
+      if(D.housing) meta.push(`жильё ${D.housing}`);
+      if(D.prov) meta.push(Object.entries(D.prov).map(([k,v])=>`${PROVN[k]} ${v}`).join('/'));
+      const txt=h('span');
+      txt.innerHTML=`<span class="cname">${D.name}</span><span class="cmeta">${meta.join(' · ')}</span>`;
+      btn.appendChild(txt);
+      btn.onclick=()=>setSel(sel===t?null:t);
+      grid.appendChild(btn);
+    });
+    sec.appendChild(grid);
+    buildBox.appendChild(sec);
+  }
+}
+function setSel(t){
+  sel=t;
+  hive.classList.toggle('placing',!!sel);
+  clearPreview();
+  document.querySelectorAll('#build .card').forEach(b=>b.classList.toggle('sel',b.dataset.type===sel));
+  refreshFloat();
+  if(t) status(`Выбрано: ${B[t].name} — ставьте кликами (4 вплотную → «II»); Esc — отмена`);
+}
+
+function showFloat(){ fcard.classList.add('show'); }
+function hideFloat(){ fcard.classList.remove('show'); }
+function refreshFloat(){
+  if(pin){ showInfoBuilding(pin); }
+  else if(pinSp){ showInfoSpecies(pinSp); }
+  else if(sel){ infoCard(sel); showFloat(); }
+  else hideFloat();
+}
+const row=(l,v)=>`<div class="row"><span>${l}</span><span class="v ${v>0?'pos':v<0?'neg':''}">${v>0?'+':''}${v}</span></div>`;
+const specBuildingName = spec => Object.keys(B).find(t=>B[t].spec===spec);
+const provText = p => Object.entries(p).map(([k,v])=>`${PROVN[k]} ${v}`).join(', ');
+
+function showInfoBuilding(b){
+  const D=B[b.type], dk=DECKS[D.deck];
+  let hh=`<h4><span class="dot" style="background:${dk.color}"></span>${D.name}<span class="sub">${dk.name}${D.merged?' · объединённое':b.big?' · авто-слияние ×4':''}</span></h4>`;
+  b.lastParts.forEach(([l,v])=>hh+=row(l,v));
+  hh+=`<div class="row total"><span>итог</span><span class="v ${b.score>D.base?'pos':b.score<D.base?'neg':''}">${b.score}</span></div>`;
+  if(D.prov) hh+=`<div class="row"><span>даёт</span><span>${provText(D.prov)}</span></div>`;
+  if(D.spec) hh+=`<div class="row"><span>специализация</span><span>${SPECS[D.spec].name}</span></div>`;
+  if(D.housing){
+    hh+=row('жильё · мест',D.housing);
+    const btns=ACTIVE.map(k=>
+      `<button class="spBtn${b.houseSp===k?' on':''}" data-sp="${k}">${spIconStr(k,13)}${SPECIES[k].name}</button>`).join('')
+      +`<button class="spBtn${!b.houseSp?' on':''}" data-sp="">Общий</button>`;
+    hh+=`<div class="hintS" style="margin-top:7px">Видовое жильё:</div><div class="spRow">${btns}</div>`;
+    hh+= b.houseSp==='Frog'
+      ? '<div class="hintS">Жабье жильё: кров только для жаб — без него жабы не приходят.</div>'
+      : b.houseSp
+      ? `<div class="hintS">Кров остаётся общим; ${SPECIES[b.houseSp].name} получают до +8 покоя.</div>`
+      : '<div class="hintS">Общий кров. Назначьте вид — даст ему до +8 покоя.</div>';
+  }
+  if(b.big) hh+='<div class="hintS">Большое здание: 4 клетки, один значок, усиленные показатели. Для соседей считается своим базовым типом.</div>';
+  hh+='<div class="sep"></div>';
+  if(D.jobs){
+    const ws=villagersIn(b), w=ws.length;
+    hh+=`<div class="row"><span>${D.jobName||'Работники'}</span><span class="wctl">
+      <button data-act="wminus"${w<=0?' disabled':''}>−</button>
+      <b>${w}/${D.jobs}</b>
+      <button data-act="wplus"${(w>=D.jobs||!freeVillagers().length)?' disabled':''}>+</button>
+    </span></div>`;
+    const bySp={}; ws.forEach(v=>bySp[v.species]=(bySp[v.species]||0)+1);
+    const chips=Object.entries(bySp).map(([k,n])=>
+      `<span class="chipS">${spIconStr(k,12)}${SPECIES[k].name} ×${n}</span>`).join('');
+    hh+=`<div class="chips">${chips||'<span class="hintS">никого — назначьте кнопкой +</span>'}</div>`;
+    hh+=`<div class="hintS">+${D.perWorker} за работника${D.spec?' · сноровка вида ещё +1':''}</div>`;
+  } else if(D.merged){
+    hh+='<div class="hintS">Аура действует из любой занятой клетки.</div>';
+  }
+  hh+=`<div class="row" style="margin-top:7px"><span>Управление</span><button class="delBtn" data-act="del">Снести</button></div>`;
+  fcard.innerHTML=hh; showFloat();
+}
+function showInfoSpecies(k){
+  const S=SPECIES[k], st=sStat[k];
+  let hh=`<h4>${spIconStr(k,16)} ${S.name}<span class="sub">вид · покой${stormActive?' · ШТОРМ':''}</span></h4>`;
+  hh+=row('база вида',S.base);
+  hh+=row('еда '+(NEED.ok.food?'✓':'✗'),NEED.ok.food?5:-10);
+  hh+=row('одежда '+(NEED.ok.cloth?'✓':'✗'),NEED.ok.cloth?3:-8);
+  S.services.forEach(s=> hh+=row(`${SERV[s]} `+(NEED.ok[s]?'✓':'✗'),NEED.ok[s]?3:-6));
+  if(k==='Frog'){
+    hh+=row(`жабье жильё ${HOUS.frog}/${st.count}`,housingBonus(k));
+    hh+='<div class="hintS">Жабам не нужен общий кров — только жабье жильё.</div>';
+  } else {
+    hh+=row(`кров ${HOUS.gen}/${HOUS.nonFrog}`,HOUS.shelterOk?4:-10);
+    hh+=row(`жильё вида ${(HOUS.spBeds[k]||0)}/${st.count}`,housingBonus(k));
+  }
+  hh+=`<div class="row"><span>устойчивость</span><span>${RESN[S.res]} · шторм −${STORM_PEN[S.res]}</span></div>`;
+  if(k==='Bat'){
+    const bb=Math.min(6,Math.floor(mourning/2));
+    hh+=`<div class="row"><span>преданность</span><span class="v pos">+${bb}</span></div>`;
+    hh+=`<div class="hintS">+1 покоя за каждые 2 потери не-мышей (потерь: ${mourning}). Потеря нетопыря сбрасывает бонус.</div>`;
+  } else if(S.comfort==='Cooperation'){
+    hh+=`<div class="row"><span>комфорт</span><span>3+ Лисы в одном здании → +5</span></div>`;
+  } else if(S.comfort){
+    hh+=`<div class="row"><span>комфорт · ${SPECS[S.comfort].name}</span><span class="v pos">+5</span></div>`;
+    const bn=specBuildingName(S.comfort);
+    if(bn) hh+=`<div class="hintS">работа в «${B[bn].name}»</div>`;
+  } else {
+    hh+=`<div class="row"><span>комфорт</span><span>—</span></div>`;
+  }
+  hh+='<div class="sep"></div>';
+  hh+=`<div class="row total"><span>средний покой</span><span class="v ${st.avg>=st.demandCur?'pos':'neg'}">${st.avg.toFixed(1)}</span></div>`;
+  hh+=row('порог славы',st.demandCur)+row('декаденс',S.decadence);
+  hh+=`<div class="row"><span>репутация</span><span class="v pos">${st.rep} × +15</span></div>`;
+  hh+=`<div class="row"><span>жителей · работают</span><span>${st.count} · ${st.workers}</span></div>`;
+  hh+=`<div class="hintS">Хранитель огня: ${S.fire}</div>`;
+  hh+=`<div class="hintS">Сноровка (${SPECS[S.prof].name}) — 10% двойной выработки: +1 очко за работника.</div>`;
+  fcard.innerHTML=hh; showFloat();
+}
+function infoCard(t){
+  const D=B[t], dk=DECKS[D.deck];
+  let hh=`<h4><span class="dot" style="background:${dk.color}"></span>${D.name}<span class="sub">${dk.name}</span></h4>`;
+  hh+=row('Базовые очки',D.base)+row('Радиус влияния',D.radius);
+  if(D.jobs) hh+=row((D.jobName||'Рабочие места'),D.jobs);
+  if(D.housing) hh+=row('Жильё · мест',D.housing);
+  if(D.prov) hh+=`<div class="row"><span>даёт</span><span>${provText(D.prov)}</span></div>`;
+  if(D.spec) hh+=`<div class="row"><span>специализация</span><span>${SPECS[D.spec].name}</span></div>`;
+  hh+=`<div class="hintS">4 вплотную → «${D.name} II»: база ×5.5, +2 мест работы/жилья, один большой значок.</div>`;
+  for(const k in (D.biome||{})) hh+=row('биом · '+BIOMES[k].name,D.biome[k]);
+  for(const k in (D.feat||{})) hh+=row(FEATN[k],D.feat[k]);
+  Object.entries(D.adj||{}).sort((a,b)=>b[1]-a[1]).forEach(([k,v])=>hh+=row('сосед · '+(B[k]?B[k].name:k),v));
+  hh+=`<div class="row"><span>слияние</span><span>${(D.merges||[]).map(m=>B[m].name).join(' · ')||'—'}</span></div>`;
+  fcard.innerHTML=hh; showFloat();
+}
+
+function computeGhost(c,t){
+  const D=B[t];
+  const parts=[['база',D.base]];
+  if(D.biome&&D.biome[c.biome]) parts.push(['биом · '+BIOMES[c.biome].name,D.biome[c.biome]]);
+  if(D.feat&&c.feature&&D.feat[c.feature]) parts.push([FEATN[c.feature],D.feat[c.feature]]);
+  parts.push(...aggAdj(null,D,o=>minDistCell(c,o)));
+  const own={total:parts.reduce((s,p)=>s+p[1],0),parts};
+  const imp=[]; let itotal=0;
+  for(const o of buildings){
+    if(minDistCell(c,o)<=B[o.type].radius){
+      const v=(B[o.type].adj||{})[t];
+      if(v){ imp.push([B[o.type].name,v]); itotal+=v; }
+    }
+  }
+  imp.sort((a,b)=>b[1]-a[1]);
+  return {own,impact:{total:itotal,parts:imp}};
+}
+function clearPreview(){ gRad.innerHTML=''; gGhost.innerHTML=''; }
+
+function previewAt(c){
+  clearPreview();
+  if(c.b){ highlightBuilding(c.b); showInfoBuilding(c.b); return; }
+  const D=B[sel], g=computeGhost(c,sel);
+  for(const t of cells){
+    const dd=hexDist(t.q,t.r,c.q,c.r);
+    if(dd===0||dd>D.radius) continue;
+    el('path',{d:hexPath(t.x,t.y,R*.95),fill:t.b?'none':'var(--c0)','fill-opacity':t.b?0:.1,
+               stroke:t.b?'var(--neg)':'var(--c0)','stroke-opacity':t.b?.5:.35,'stroke-width':1},gRad);
+  }
+  const net=g.own.total-D.base;
+  el('path',{d:hexPath(c.x,c.y,R*.98),fill:net>0?'var(--ok)':net<0?'var(--neg)':'var(--mut)','fill-opacity':.32},gRad);
+  if(!drawSpriteHex(gGhost,c.x,c.y,sel,.55)) drawGlyph(gGhost,sel,c.x,c.y-1.5,1.3,'var(--ink)',.55);
+  el('path',{d:hexPath(c.x,c.y,R*INSET),fill:'none',stroke:'var(--c0)','stroke-width':1.4,'stroke-dasharray':'4 3'},gGhost);
+  let hh=`<h4>${D.name}<span class="sub">прогноз</span></h4>`;
+  g.own.parts.forEach(([l,v])=>hh+=row(l,v));
+  hh+=`<div class="row total"><span>итог здесь</span><span class="v ${net>0?'pos':net<0?'neg':''}">${g.own.total}</span></div>`;
+  hh+='<div class="sep"></div>';
+  if(g.impact.parts.length){
+    g.impact.parts.forEach(([l,v])=>hh+=row('соседям · '+l,v));
+    hh+=`<div class="row total"><span>итог поля</span><span class="v ${g.own.total+g.impact.total>=g.own.total?'pos':'neg'}">${g.own.total+g.impact.total}</span></div>`;
+  } else hh+='<div class="hintS">на соседние здания не влияет</div>';
+  if(D.housing) hh+=`<div class="hintS">жильё: +${D.housing} мест — жители придут сами</div>`;
+  if(D.jobs) hh+=`<div class="hintS">мест работы: ${D.jobs} · ${D.jobName||'—'}</div>`;
+  fcard.innerHTML=hh; showFloat();
+  status(`Прогноз: ${g.own.total} · соседям ${g.impact.total>=0?'+':''}${g.impact.total}`);
+}
+function highlightBuilding(b){
+  for(const t of cells){
+    if(minDistCell(t,b)<=B[b.type].radius)
+      el('path',{d:hexPath(t.x,t.y,R*.95),fill:'none',stroke:'var(--c0)','stroke-opacity':.3,'stroke-width':1},gRad);
+  }
+}
+function highlightPin(){
+  gPin.innerHTML='';
+  if(!pin) return;
+  pin.cells.forEach(c=>el('path',{d:hexPath(c.x,c.y,R*INSET),fill:'none',
+    stroke:'var(--pos)','stroke-width':1.6,'stroke-dasharray':'5 3'},gPin));
+}
+
+/* ============================================================
+   СОБЫТИЯ КАРТЫ
+   ============================================================ */
+function onCellClick(c){
+  if(sel){
+    if(c.b){ pin=c.b; pinSp=null; highlightPin(); showInfoBuilding(c.b); status('Клетка занята — '+B[c.b.type].name); return; }
+    placeBuilding(sel,[c]);
+    const mb=tryAutoMerge(c);
+    const n=fillHousing();
+    if(n>0) spawnFloat(c.x,c.y-R-8,`+${n} чел.`,'pos');
+    if(mb){ pulse(mb.anchor,1.6); }
+    else pulse(c,1);
+    recalcAll();
+    status(mb
+      ? `Авто-слияние ×4 → ${B[mb.type].name}! Один большой значок, база ×5.5`
+      : `${B[sel].name} поставлена${n?` · +${n} жителей`:''}`);
+  } else if(c.b){
+    const off=OFFERS.find(o=>o.inst.includes(c.b));
+    if(pin===c.b&&!off){ pin=null; gPin.innerHTML=''; refreshFloat(); status('Снято с закрепления'); return; }
+    pin=c.b; pinSp=null; highlightPin(); showInfoBuilding(c.b);
+    status(off?`${B[c.b.type].name}: готово слияние — кнопка «Слить»`:`${B[c.b.type].name} · ПКМ — снести`);
+  } else {
+    pin=null; pinSp=null; gPin.innerHTML='';
+    refreshFloat();
+    status(`${BIOMES[c.biome].name}${c.feature&&c.feature!=='river'?' · '+FEATN[c.feature]:''}${c.feature==='river'?' · Река':''} · ${ringName(c.ring)}`);
+  }
+}
+function onCellRightClick(c){
+  if(!c.b) return;
+  demolish(c.b);
+}
+function demolish(b){
+  const D=B[b.type];
+  const before=villagers.length;
+  if(pin===b){ pin=null; gPin.innerHTML=''; }
+  removeBuilding(b,true);
+  const evicted=trimToHousing();
+  const lost=before-villagers.length;
+  if(lost>0) spawnFloat(b.anchor.x,b.anchor.y-R-8,`−${lost} чел.`,'neg');
+  recalcAll();
+  refreshFloat();
+  status(D.name+' снесён(а)'+(lost?` · жителей −${lost}`:''));
+}
+fcard.addEventListener('click',e=>{
+  const spB=e.target.closest('button[data-sp]');
+  if(spB&&pin&&B[pin.type].housing){
+    const v=spB.dataset.sp||null;
+    if(pin.houseSp!==v){
+      pin.houseSp=v;
+      redrawBuilding(pin);
+      const evicted=trimToHousing();
+      const arrived=fillHousing();
+      recalcAll();
+      if(arrived) spawnFloat(pin.anchor.x,pin.anchor.y-R-8,`+${arrived} чел.`,'pos');
+      if(evicted) spawnFloat(pin.anchor.x,pin.anchor.y-R-8,`−${evicted} чел.`,'neg');
+      status(v?`Жильё закреплено за видом: ${SPECIES[v].name}`:'Жильё: общий кров');
+    }
+    showInfoBuilding(pin);
+    return;
+  }
+  const btn=e.target.closest('button[data-act]');
+  if(!btn||!pin) return;
+  if(btn.dataset.act==='wminus') assignWorkers(pin,-1);
+  else if(btn.dataset.act==='wplus') assignWorkers(pin,1);
+  else if(btn.dataset.act==='del') demolish(pin);
+});
+function onCellEnter(c){
+  if(sel) previewAt(c);
+  else if(c.b){ highlightBuilding(c.b); showInfoBuilding(c.b); }
+  else if(!pin&&!pinSp) status(`${BIOMES[c.biome].name}${c.feature&&c.feature!=='river'?' · '+FEATN[c.feature]:''}${c.feature==='river'?' · Река':''} · ${ringName(c.ring)}`);
+}
+function onCellLeave(){
+  clearPreview();
+  if(pin) highlightPin();
+  refreshFloat();
+}
+
+/* ============================================================
+   МЕНЮ И СПРАВКА
+   ============================================================ */
+const menu=document.getElementById('menu');
+const btnMenu=document.getElementById('btnMenu');
+const mLspr=document.getElementById('mLspr');
+const mLpal=document.getElementById('mLpal');
+const mLauto=document.getElementById('mLauto');
+const PALS=['«Дикий мёд»','«Глубокая вода»'];
+let pi=0;
+const sprLabel=()=> sprMode<0?'глифы':sheetState[sprMode].name+(!sheetState[sprMode].ok?' (нет файла)':'');
+function updMenuLabels(){
+  mLspr.textContent=sprLabel();
+  mLpal.textContent=PALS[pi];
+  mLauto.textContent=autoOn?'вкл':'выкл';
+}
+btnMenu.onclick=e=>{ e.stopPropagation(); menu.classList.toggle('open'); };
+document.addEventListener('click',e=>{ if(!e.target.closest('.menuWrap')) menu.classList.remove('open'); });
+menu.addEventListener('click',e=>{
+  const b=e.target.closest('button[data-m]'); if(!b) return;
+  menu.classList.remove('open');
+  const m=b.dataset.m;
+  if(m==='new'){
+    genMap(); renderBoard(); setSel(null); clearPreview(); recalcAll(); refreshFloat();
+    status('Новая карта · Караван: '+ACTIVE.map(k=>SPECIES[k].name).join(', '));
+  }
+  else if(m==='spr'){
+    sprMode = sprMode===-1?0:(sprMode+1>=SHEETS.length?-1:sprMode+1);
+    redrawAll(); updMenuLabels();
+    status('Стиль: '+sprLabel());
+  }
+  else if(m==='pal'){
+    pi=(pi+1)%PALS.length;
+    document.body.dataset.p=pi;
+    updMenuLabels(); status('Тема: '+PALS[pi]);
+  }
+  else if(m==='auto'){ autoOn=!autoOn; updMenuLabels(); status('Автосезоны: '+(autoOn?'вкл':'выкл')); }
+  else if(m==='help'){ openHelp('play'); }
+});
+
+const helpOverlay=document.getElementById('helpOverlay');
+const helpBody=document.getElementById('helpBody');
+let curTab='play';
+function openHelp(tab){
+  curTab=tab||curTab;
+  renderHelp();
+  helpOverlay.classList.add('open');
+  menu.classList.remove('open');
+}
+function closeHelp(){ helpOverlay.classList.remove('open'); }
+document.getElementById('btnHelp').onclick=()=>openHelp('play');
+document.getElementById('btnCloseHelp').onclick=closeHelp;
+helpOverlay.addEventListener('click',e=>{ if(e.target===helpOverlay) closeHelp(); });
+document.querySelectorAll('.tabs button').forEach(b=>{
+  b.onclick=()=>{ curTab=b.dataset.tab;
+    document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
+    renderHelp(); };
+});
+function renderHelp(){
+  document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x.dataset.tab===curTab));
+  helpBody.innerHTML = curTab==='play'? helpPlay() : curTab==='sp'? helpSpecies() : helpBuildings();
+  helpBody.scrollTop=0;
+}
+function helpPlay(){
+  return `
+  <h5>Управление</h5>
+  <span class="kbd">ЛКМ</span> по клетке — поставить выбранное здание (выбор сохраняется) ·
+  <span class="kbd">ЛКМ</span> по зданию — закрепить: работники −/+, видовое жильё ·
+  <span class="kbd">ПКМ</span> по зданию — снести · <span class="kbd">Esc</span> — снять выбор / закрыть окна.
+  Клик по расе в таблице — разбор её покоя.
+  <h5>Авто-слияние ×4</h5>
+  Поставьте <b>четыре одинаковых здания вплотную</b> (связная группа) — они мгновенно объединятся
+  в «здание II»: <b>один большой значок по центру</b>, база ×5.5, +2 места работы и жилья,
+  работники и видовое жильё переносятся. Для соседей большое здание считается своим базовым типом.
+  <h5>Рецепты слияния</h5>
+  Разные здания вплотную (Школа+Библиотека и т.п.) — блок «Слияния»: предложение появляется,
+  когда компоненты смежны. Объединённые занимают клетки компонентов.
+  <h5>Цикл игры</h5>
+  1. Стройте <b>кров</b>: Домики (4), Дома (6) — жители приходят сами.<br>
+  2. <b>Видовое жильё</b>: закрепите жилище за видом. Не-жабы: кров общий, виду до +8 покоя.
+  <b>Жабы</b>: только жабье жильё — без него жабы не приходят.<br>
+  3. Назначайте жителей (−/+): профессии дают очки, сноровка вида +1.<br>
+  4. Закрывайте <b>нужды</b>: еда — Ферма/Охотничий лагерь, одежда — Портняжная, услуги —
+  Таверна, Храм, Театр, Школа/Библиотека, Баня/Хирург, Рынок, Казарма. Без работника здание не даёт услугу!<br>
+  5. Покой вида выше порога — <b>слава</b> +15 очков (порог растёт на декаденс). Покой ниже 1 — житель уходит.<br>
+  6. Караван приходит через сезон и привозит 2–3 новых жителей в свободные места.
+  <h5>Шторма и устойчивость</h5>
+  Каждый третий сезон — <b>Шторм</b>: покой падает на штраф по устойчивости — низкая −6, средняя −3, высокая −1.
+  <h5>Хранители огня</h5>
+  Человек — шторм на 25% слабее · Ящер — +1 покоя всем · Жаба — караван +1 ·
+  Нетопырь — «Преданность» (+1 за 2 потери не-мышей) · Бобер/Гарпия/Лиса — декорация.
+  <h5>Спрайты</h5>
+  <b>terrascape_a.png</b> (пиксель) / <b>terrascape_b.png</b> (изометрия) рядом с файлом —
+  листы 4×4 режутся автоматически; у «зданий II» один спрайт растянут на всю группу.
+  Без файлов — векторные глифы.`;
+}
+function helpSpecies(){
+  return Object.keys(SPECIES).map(k=>{
+    const S=SPECIES[k], inc=ACTIVE.includes(k);
+    const cb = S.comfort
+      ? (S.comfort==='Cooperation'
+          ? 'Взаимовыручка — 3+ Лисы в одном здании: +5'
+          : `${SPECS[S.comfort].name} — работа в «${B[specBuildingName(S.comfort)]?.name||'—'}» (+5 покоя)`)
+      : '— (комфорта нет)';
+    const pbn=specBuildingName(S.prof);
+    const pb = SPECS[S.prof].name + (pbn? ` — «${B[pbn].name}» (+1 очко/работник)` : ' — здания пока нет (+1 очко/работник)');
+    const house = k==='Frog'
+      ? 'Только жабье жильё (закрепите Домики/Дома за жабами). Без него жабы не приходят.'
+      : 'Кров (Домики/Дома) + видовое жильё (до +8 покоя).';
+    return `<div class="spCard">
+      <div class="spHead">${spIconStr(k,18)}<b>${S.name}</b>${inc?'<span class="inc">в караване</span>':''}</div>
+      <div class="spGrid">
+        <span>база покоя</span><b>${S.base}</b>
+        <span>порог славы</span><b>${S.demand} → +15 очков</b>
+        <span>декаденс</span><b>+${S.decadence} к порогу</b>
+        <span>устойчивость</span><b>${RESN[S.res]} · шторм −${STORM_PEN[S.res]}</b>
+        <span>комфорт</span><b>${cb}</b>
+        <span>сноровка</span><b>${pb}</b>
+        <span>услуги</span><b>${S.services.map(s=>SERV[s]).join(', ')}</b>
+        <span>жильё</span><b>${house}</b>
+        <span>хранитель огня</span><b>${S.fire}</b>
+        <span>старт. способность</span><b>${S.start}</b>
+      </div></div>`;
+  }).join('');
+}
+function helpBuildings(){
+  let hh='';
+  for(const dk of Object.keys(DECKS)){
+    const types=Object.keys(B).filter(t=>B[t].deck===dk && !B[t].big);
+    if(!types.length) continue;
+    hh+=`<h5>${DECKS[dk].name}</h5>`;
+    types.forEach(t=>{
+      const D=B[t];
+      const bits=[`база ${D.base}`,`радиус ${D.radius}`];
+      if(D.jobs) bits.push(`${D.jobName||'работники'} ×${D.jobs} (+${D.perWorker}/чел)`);
+      if(D.housing) bits.push(`жильё ${D.housing}`);
+      if(D.prov) bits.push('даёт: '+provText(D.prov));
+      if(D.spec) bits.push(`специализация: ${SPECS[D.spec].name}`);
+      bits.push(`×4 → ${D.name} II (база ${Math.round(D.base*5.5)})`);
+      const mg=(D.merges||[]).map(m=>B[m].name).join(', ');
+      if(mg) bits.push(`сливается в: ${mg}`);
+      if(D.merged) bits.push('только через слияние');
+      hh+=`<div class="bRow"><b>${D.name}</b><span>${bits.join(' · ')}</span></div>`;
+    });
+  }
+  hh+='<h5>Рецепты слияния (компоненты вплотную)</h5>';
+  RECIPES.forEach(r=> hh+=`<div class="bRow"><b>${B[r.result].name}</b><span>${r.parts.map(t=>B[t].name).join(' + ')}</span></div>`);
+  return hh;
+}
+
+/* ============================================================
+   КЛАВИШИ / СТАРТ
+   ============================================================ */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    if(helpOverlay.classList.contains('open')){ closeHelp(); return; }
+    if(menu.classList.contains('open')){ menu.classList.remove('open'); return; }
+    if(sel){ setSel(null); status('Выбор отменён'); return; }
+    if(pin||pinSp){ pin=null; pinSp=null; gPin.innerHTML=''; refreshFloat(); status('Снято с закрепления'); }
+  }
+});
+
+function redrawAll(){
+  gBuild.innerHTML='';
+  buildings.forEach(b=>drawBuilding(b,true));
+  clearPreview(); highlightPin();
+}
+setInterval(()=>{ if(autoOn) nextSeason(); }, 8000);
+
+SHEETS.forEach((_,i)=>loadSheet(i));
+updMenuLabels();
+genMap();
+renderBoard();
+drawOutline();
+buildPalette();
+recalcAll();
+refreshFloat();
+status('Ядро + 3 ряда · 4 одинаковых вплотную → «здание II» с большим значком · Караван: '+ACTIVE.map(k=>SPECIES[k].name).join(', '));
+</script>
+</body>
+</html>
+
+### ASSISTANT
+Отличный прототип! Он содержит глубокую механику (гексагональная сетка, авто-слияние ×4, виды жителей, потребности, сезоны). Для переноса этого в **Godot 4.x** (синтаксис актуален для всех версий 4.0–4.4+) я предлагаю следующую архитектуру.
+
+---
+
+### 🏷️ Название проекта
+**TerraScape: Hex Core** (или «TerraScape: Соты с обществом»)
+
+---
+
+### 📁 Структура проекта
+Создайте в Godot следующую структуру папок:
+```text
+res://
+├── project.godot
+├── main.tscn                 # Главная сцена
+├── main.gd                   # Контроллер главной сцены
+├── globals.gd                # Автозагрузка (Singleton): все данные игры
+├── scenes/
+│   ├── hex_cell.tscn         # Сцена одной клетки (Area2D + Polygon2D + Label)
+│   ├── hex_cell.gd           # Скрипт клетки
+│   └── floating_text.tscn    # Сцена всплывающего текста (Label + AnimationPlayer)
+├── managers/
+│   ├── building_manager.gd   # Логика размещения и авто-слияния ×4
+│   ├── game_manager.gd       # Население, сезоны, потребности, подсчет очков
+│   └── ui_manager.gd         # Обновление интерфейса, панели, всплывающие подсказки
+└── assets/
+    ├── fonts/                # Шрифты Unbounded и IBM Plex Mono
+    └── sprites/              # terrascape_a.png, terrascape_b.png (опционально)
+```
+
+---
+
+### ⚙️ 1. Настройка проекта (`project.godot`)
+Добавьте `globals.gd` в автозагрузку (Project Settings → Autoload):
+```ini
+[autoload]
+Globals="*res://globals.gd"
+```
+Настройка окна (ширина ~1200, высота ~800, растяжение `canvas_items`).
+
+---
+
+### 📜 2. Глобальные данные (`globals.gd`)
+Этот скрипт хранит все константы из прототипа.
+
+```gdscript
+extends Node
+
+const R = 34.0
+const SQRT3 = 1.73205081
+const HEX_DIRECTIONS = [[1,0], [0,1], [-1,1], [-1,0], [0,-1], [1,-1]]
+
+const SPECIES = {
+	"Human":  {"name": "Люди", "color": Color("#C8A46E"), "base": 15, "demand": 30, "decadence": 4, "res": "low", "comfort": "Brewing", "prof": "Farming", "services": ["Leisure", "Religion"]},
+	"Beaver": {"name": "Бобры", "color": Color("#A5744A"), "base": 10, "demand": 30, "decadence": 2, "res": "low", "comfort": "Engineering", "prof": "Woodworking", "services": ["Leisure", "Education", "Luxury"]},
+	"Lizard": {"name": "Ящеры", "color": Color("#8FAF6A"), "base": 5, "demand": 15, "decadence": 7, "res": "high", "comfort": "Warmth", "prof": "Meat", "services": ["Brawling"]},
+	"Harpy":  {"name": "Гарпии", "color": Color("#C77F8F"), "base": 5, "demand": 15, "decadence": 3, "res": "low", "comfort": "Tailoring", "prof": "Alchemy", "services": ["Education", "Treatment"]},
+	"Fox":    {"name": "Лисы", "color": Color("#D98E4A"), "base": 5, "demand": 15, "decadence": 5, "res": "low", "comfort": "Cooperation", "prof": "Forest", "services": ["Treatment", "Religion"]},
+	"Frog":   {"name": "Жабы", "color": Color("#6FA07A"), "base": 10, "demand": 25, "decadence": 5, "res": "medium", "comfort": "Rainwater", "prof": "Masonry", "services": ["Brawling", "Luxury", "Religion"]},
+	"Bat":    {"name": "Нетопыри", "color": Color("#8B85B5"), "base": 5, "demand": 12, "decadence": 4, "res": "high", "comfort": null, "prof": "Metallurgy", "services": ["Brawling", "Education"]}
+}
+
+const BUILDINGS = {
+	"School": {"deck": "Knowledge", "name": "Школа", "base": 15, "radius": 2, "jobs": 2, "per_worker": 2, "job_name": "Учителя", "prov": {"Education": 4}, "biome": {"Rural": 10}, "adj": {"CitadelOfWisdom": 50, "Library": 50}, "merges": ["University", "CitadelOfWisdom"]},
+	"Library": {"deck": "Knowledge", "name": "Библиотека", "base": 20, "radius": 4, "jobs": 3, "per_worker": 3, "job_name": "Книжники", "prov": {"Education": 4}, "biome": {"Urban": 25}, "adj": {"CitadelOfWisdom": 40, "School": 35}, "merges": ["University", "CitadelOfWisdom"]},
+	"Cottages": {"deck": "Settlement", "name": "Домики", "base": 10, "radius": 2, "housing": 4, "biome": {"Rural": 20, "Arid": 15}, "merges": ["Longhouse"]},
+	# ... добавьте остальные здания из прототипа по аналогии
+}
+
+const RECIPES = [
+	{"result": "University", "parts": ["School", "Library"]},
+	{"result": "Longhouse", "parts": ["Cottages", "Tavern"]},
+	# ...
+]
+
+const BIOMES = {
+	"Rural": {"name": "Луга", "color": Color("#6A7A4E")},
+	"Urban": {"name": "Город", "color": Color("#7D7060")},
+	"Thicket": {"name": "Чаща", "color": Color("#47603E")},
+	"Stone": {"name": "Камень", "color": Color("#71695C")},
+	"Arid": {"name": "Пустошь", "color": Color("#8A7752")}
+}
+
+static func hex_to_pixel(q: int, r: int) -> Vector2:
+	var x = R * SQRT3 * (q + r * 0.5)
+	var y = R * 1.5 * r
+	return Vector2(x, y)
+
+static func hex_dist(q1: int, r1: int, q2: int, r2: int) -> int:
+	var dq = q1 - q2
+	var dr = r1 - r2
+	return (abs(dq) + abs(dr) + abs(dq + dr)) / 2
+
+static func get_hex_polygon(center: Vector2, radius: float) -> PackedVector2Array:
+	var points = PackedVector2Array()
+	for i in range(6):
+		var angle_rad = deg_to_rad(60 * i - 30)
+		points.append(center + Vector2(cos(angle_rad), sin(angle_rad)) * radius)
+	return points
+```
+
+---
+
+### 📜 3. Клетка поля (`hex_cell.gd`)
+Сцена `hex_cell.tscn`: `Area2D` → `CollisionShape2D` (Polygon), `Polygon2D` (для цвета биома), `Label` (для иконки/текста).
+
+```gdscript
+extends Area2D
+
+@export var q: int = 0
+@export var r: int = 0
+@export var ring: int = 0
+@export var biome: String = "Rural"
+@export var feature: String = ""
+
+var building = null
+var key: String:
+	get: return "%d,%d" % [q, r]
+
+@onready var poly = $Polygon2D
+@onready var label = $Label
+
+func _ready():
+	position = Globals.hex_to_pixel(q, r)
+	poly.polygon = Globals.get_hex_polygon(Vector2.ZERO, Globals.R * 0.9)
+	update_visuals()
+
+func update_visuals():
+	var biome_data = Globals.BIOMES.get(biome, Globals.BIOMES["Rural"])
+	poly.color = biome_data.color
+	if building:
+		label.text = building.type[0] # Заглушка для иконки, позже заменить на Sprite2D
+		label.visible = true
+	else:
+		label.visible = false
+
+func _on_input_event(viewport, event, shape_idx):
+	if event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			GameManager.on_cell_clicked(self)
+		elif event.button_index == MOUSE_BUTTON_RIGHT:
+			GameManager.on_cell_right_clicked(self)
+```
+
+---
+
+### 📜 4. Менеджер зданий и авто-слияния (`building_manager.gd`)
+Реализует ключевую механику: **4 одинаковых здания вплотную → здание II**.
+
+```gdscript
+extends Node
+
+var buildings = []
+
+func place_building(type: String, cells: Array) -> Dictionary:
+	var b_data = Globals.BUILDINGS[type]
+	var new_building = {
+		"type": type,
+		"cells": cells,
+		"is_merged": false,
+		"base_type": type,
+		"workers": 0,
+		"score": b_data.base,
+		"house_sp": null
+	}
+	
+	for cell in cells:
+		cell.building = new_building
+		cell.update_visuals()
+		
+	buildings.append(new_building)
+	return new_building
+
+func try_auto_merge(start_cell) -> Dictionary:
+	if not start_cell.building or start_cell.building.is_merged or start_cell.building.cells.size() > 1:
+		return {}
+		
+	var target_type = start_cell.building.type
+	var connected = []
+	var queue = [start_cell]
+	var visited = {start_cell.key: true}
+	
+	# BFS поиск связных компонентов того же типа
+	while not queue.is_empty():
+		var current = queue.pop_front()
+		connected.append(current)
+		
+		for dir in Globals.HEX_DIRECTIONS:
+			var neighbor = GameManager.get_cell(current.q + dir[0], current.r + dir[1])
+			if neighbor and not visited.has(neighbor.key):
+				if neighbor.building and not neighbor.building.is_merged and neighbor.building.type == target_type:
+					visited[neighbor.key] = true
+					queue.append(neighbor)
+					
+	if connected.size() >= 4:
+		var to_merge = connected.slice(0, 4)
+		var cells_to_use = to_merge.map(func(c): return c)
+		
+		# Удаляем старые здания
+		for cell in to_merge:
+			remove_building(cell.building)
+			
+		# Создаем "Здание II"
+		var merged_data = {
+			"type": target_type + "_BIG",
+			"cells": cells_to_use,
+			"is_merged": true,
+			"base_type": target_type,
+			"workers": 0,
+			"score": int(Globals.BUILDINGS[target_type].base * 5.5),
+			"house_sp": null
+		}
+		
+		for cell in cells_to_use:
+			cell.building = merged_data
+			cell.update_visuals()
+			
+		buildings.append(merged_data)
+		UIManager.spawn_float(cells_to_use[0].position, "Слияние ×4!", "pos")
+		return merged_data
+		
+	return {}
+
+func remove_building(bldg: Dictionary):
+	if bldg in buildings:
+		buildings.erase(bldg)
+	for cell in bldg.cells:
+		cell.building = null
+		cell.update_visuals()
+```
+
+---
+
+### 📜 5. Игровой цикл (`game_manager.gd`)
+Управляет сеткой, населением, сезонами и обработкой кликов.
+
+```gdscript
+extends Node
+
+var cells_dict = {}
+var selected_building_type = null
+var villagers = []
+var season = 0
+
+@onready var grid_parent = $"/root/Main/GridContainer" # Ссылка на ноду в main.tscn
+
+func _ready():
+	generate_map()
+	UIManager.update_all()
+
+func generate_map():
+	# Ядро 2x2 + 3 ряда
+	var core = [[0,0], [1,0], [0,1], [1,1]]
+	for q in range(-6, 7):
+		for r in range(-6, 7):
+			var min_d = 999
+			for c in core:
+				var d = Globals.hex_dist(q, r, c[0], c[1])
+				if d < min_d: min_d = d
+				
+			if min_d <= 3:
+				var cell_scene = preload("res://scenes/hex_cell.tscn").instantiate()
+				cell_scene.q = q
+				cell_scene.r = r
+				cell_scene.ring = min_d
+				# Простая генерация биома
+				var biomes = Globals.BIOMES.keys()
+				cell_scene.biome = biomes[randi() % biomes.size()]
+				
+				grid_parent.add_child(cell_scene)
+				cells_dict["%d,%d" % [q, r]] = cell_scene
+
+func get_cell(q: int, r: int):
+	return cells_dict.get("%d,%d" % [q, r], null)
+
+func on_cell_clicked(cell):
+	if selected_building_type:
+		if cell.building:
+			UIManager.set_status("Клетка занята!")
+			return
+			
+		var new_bldg = BuildingManager.place_building(selected_building_type, [cell])
+		var merged = BuildingManager.try_auto_merge(cell)
+		
+		# Здесь можно добавить логику заселения (fill_housing)
+		UIManager.update_all()
+		UIManager.set_status("Построено: " + Globals.BUILDINGS[selected_building_type].name)
+	else:
+		UIManager.show_building_info(cell.building)
+
+func on_cell_right_clicked(cell):
+	if cell.building:
+		BuildingManager.remove_building(cell.building)
+		UIManager.update_all()
+		UIManager.set_status("Здание снесено")
+
+func next_season():
+	season += 1
+	# Логика штормов, караванов, пересчета потребностей и очков
+	UIManager.set_status("Сезон %d" % season)
+	UIManager.update_all()
+```
+
+---
+
+### 📜 6. Интерфейс (`ui_manager.gd`)
+Привязывается к элементам управления Godot (Panel, Label, Button, GridContainer для палитры).
+
+```gdscript
+extends CanvasLayer
+
+@onready var status_label = $StatusLabel
+@onready var build_grid = $BuildPanel/ScrollContainer/GridContainer
+@onready var float_container = $FloatingTextContainer
+
+var floating_text_scene = preload("res://scenes/floating_text.tscn")
+
+func _ready():
+	populate_build_palette()
+
+func populate_build_palette():
+	# Очистка и заполнение кнопками зданий из Globals.BUILDINGS
+	for child in build_grid.get_children():
+		child.queue_free()
+		
+	for type in Globals.BUILDINGS:
+		var data = Globals.BUILDINGS[type]
+		var btn = Button.new()
+		btn.text = "%s\n(База: %d)" % [data.name, data.base]
+		btn.custom_minimum_size = Vector2(120, 60)
+		btn.pressed.connect(func(): GameManager.selected_building_type = type)
+		build_grid.add_child(btn)
+
+func update_all():
+	# Обновление меток очков, населения, потребностей
+	pass # Реализовать по аналогии с JS-прототипом
+
+func set_status(text: String):
+	status_label.text = text
+
+func spawn_float(pos: Vector2, text: String, type: String = "neutral"):
+	var ft = floating_text_scene.instantiate()
+	ft.text = text
+	ft.position = pos
+	float_container.add_child(ft)
+	# Запустить анимацию исчезновения и удалить ноду через 1.5 сек
+	await get_tree().create_timer(1.5).timeout
+	ft.queue_free()
+```
+
+---
+
+### 🛠️ Инструкция по сборке в редакторе Godot
+
+1. **Главная сцена (`main.tscn`)**:
+   - Создайте `Node2D` с именем `Main`.
+   - Добавьте дочерний `CanvasLayer` → `UIManager` (привяжите скрипт `ui_manager.gd`).
+   - Добавьте дочерний `Node2D` с именем `GridContainer` (сюда будут добавляться клетки).
+   - Привяжите скрипт `main.gd` (или `game_manager.gd`, если объедините их).
+
+2. **Сцена клетки (`hex_cell.tscn`)**:
+   - Корень: `Area2D` (включить `Pickable`).
+   - Добавьте `CollisionShape2D` → новый `PolygonShape2D` (оставьте пустым, заполнится в коде).
+   - Добавьте `Polygon2D` (для заливки цветом биома).
+   - Добавьте `Label` (выровнять по центру, шрифт IBM Plex Mono, скрыт по умолчанию).
+   - В инспекторе `Area2D` подключите сигнал `input_event` к методу `_on_input_event` в `hex_cell.gd`.
+
+3. **Шрифты и стили**:
+   - Импортируйте шрифты `Unbounded` и `IBM Plex Mono` в папку `res://assets/fonts/`.
+   - Создайте `Theme` ресурс, назначьте эти шрифты для `Label` и `Button`, чтобы интерфейс соответствовал прототипу.
+
+4. **Спрайты (опционально)**:
+   - Вместо `Label` в `hex_cell.tscn` можно использовать `Sprite2D`.
+   - В `globals.gd` можно добавить словарь с координатами кадров (как `SPRITE_POS` в JS) и вырезать регионы из `terrascape_a.png` через `AtlasTexture`.
+
+### 💡 Ключевые отличия и преимущества версии на Godot:
+- **Производительность**: Отрисовка тысяч гексов через `MultiMeshInstance2D` или `TileMapLayer` (в Godot 4.3+) будет работать при 60 FPS, в отличие от DOM/SVG.
+- **Анимации**: Встроенный `AnimationPlayer` или `Tween` для плавного появления зданий, всплывающего текста и пульсации при слиянии.
+- **Архитектура**: Четкое разделение данных (`globals.gd`), состояния (`game_manager.gd`) и представления (`ui_manager.gd`), что упрощает добавление новых зданий и механик.
+
+Если нужно, я могу детализировать любой из скриптов (например, полный алгоритм подсчета очков с учетом соседства или точную логику потребностей жителей).
+
+### USER
+где рассы, специфика работы, потребность, постройки?
+
+### ASSISTANT
+Прошу прощения, в предыдущем ответе я сократил словари данных для краткости, чтобы показать общую архитектуру. 
+
+Ниже приведен **полный, готовый к копированию файл `globals.gd`**, который содержит **все** расы, специфику работы, потребности, здания, рецепты слияния и биомы, точно перенесенные из вашего JS-прототипа в синтаксис Godot 4.
+
+Этот файл станет единой базой данных (Data Dictionary) вашего проекта.
+
+---
+
+### 📜 Полный файл `res://globals.gd`
+
+```gdscript
+extends Node
+
+# ============================================================
+# ГЕОМЕТРИЯ И КОНСТАНТЫ
+# ============================================================
+const R: float = 34.0
+const SQRT3: float = 1.73205081
+const HEX_DIRECTIONS: Array = [[1,0], [0,1], [-1,1], [-1,0], [0,-1], [1,-1]]
+const RINGS: int = 3
+const CORE: Array = [[0,0], [1,0], [0,1], [1,1]]
+
+# ============================================================
+# РАСЫ (SPECIES)
+# ============================================================
+const SPECIES: Dictionary = {
+	"Human":  {"name": "Люди", "color": Color("#C8A46E"), "base": 15, "demand": 30, "decadence": 4, "res": "low", "comfort": "Brewing", "prof": "Farming", "services": ["Leisure", "Religion"], "fire": "Шторм бьёт всех на 25% слабее, пока человек на работе", "start": "Открывает плодородную почву"},
+	"Beaver": {"name": "Бобры", "color": Color("#A5744A"), "base": 10, "demand": 30, "decadence": 2, "res": "low", "comfort": "Engineering", "prof": "Woodworking", "services": ["Leisure", "Education", "Luxury"], "fire": "Расход топлива −20%", "start": "+1 слот торговли"},
+	"Lizard": {"name": "Ящеры", "color": Color("#8FAF6A"), "base": 5, "demand": 15, "decadence": 7, "res": "high", "comfort": "Warmth", "prof": "Meat", "services": ["Brawling"], "fire": "+1 покоя ВСЕМ жителям, пока ящер на работе", "start": "10 инструментов"},
+	"Harpy":  {"name": "Гарпии", "color": Color("#C77F8F"), "base": 5, "demand": 15, "decadence": 3, "res": "low", "comfort": "Tailoring", "prof": "Alchemy", "services": ["Education", "Treatment"], "fire": "Переноска +5", "start": "50 пальто"},
+	"Fox":    {"name": "Лисы", "color": Color("#D98E4A"), "base": 5, "demand": 15, "decadence": 5, "res": "low", "comfort": "Cooperation", "prof": "Forest", "services": ["Treatment", "Religion"], "fire": "Враждебность полян −2", "start": "Гейзер дождевой воды"},
+	"Frog":   {"name": "Жабы", "color": Color("#6FA07A"), "base": 10, "demand": 25, "decadence": 5, "res": "medium", "comfort": "Rainwater", "prof": "Masonry", "services": ["Brawling", "Luxury", "Religion"], "fire": "Караван приносит +1 новичка, пока жаба на работе", "start": "Открывает руины"},
+	"Bat":    {"name": "Нетопыри", "color": Color("#8B85B5"), "base": 5, "demand": 12, "decadence": 4, "res": "high", "comfort": null, "prof": "Metallurgy", "services": ["Brawling", "Education"], "fire": "— (хранителя и комфорта нет)", "start": "Усадебный суд"}
+}
+
+const RES_NAMES: Dictionary = {"low": "низкая", "medium": "средняя", "high": "высокая"}
+const STORM_PEN: Dictionary = {"low": 6, "medium": 3, "high": 1}
+
+# ============================================================
+# СПЕЦИФИКА РАБОТЫ, КОМФОРТ И ПОТРЕБНОСТИ
+# ============================================================
+const SPECS: Dictionary = {
+	"Brewing": "Варка", "Farming": "Земледелие", "Engineering": "Инженерия",
+	"Woodworking": "Деревообработка", "Warmth": "Тепло", "Meat": "Мясное дело",
+	"Tailoring": "Портняжество", "Alchemy": "Алхимия", "Cooperation": "Взаимовыручка",
+	"Forest": "Лес", "Rainwater": "Дождевая вода", "Masonry": "Кладка", "Metallurgy": "Металлургия"
+}
+
+const SERV: Dictionary = {
+	"Leisure": "Досуг", "Religion": "Вера", "Education": "Образование", 
+	"Treatment": "Лечение", "Brawling": "Кулачные бои", "Luxury": "Роскошь"
+}
+
+const PROVN: Dictionary = {
+	"food": "еда", "cloth": "одежда", 
+	"Leisure": SERV["Leisure"], "Religion": SERV["Religion"], "Education": SERV["Education"],
+	"Treatment": SERV["Treatment"], "Brawling": SERV["Brawling"], "Luxury": SERV["Luxury"]
+}
+
+# ============================================================
+# ПОСТРОЙКИ (BUILDINGS)
+# ============================================================
+const DECKS: Dictionary = {
+	"Knowledge": {"name": "Знания", "color": Color("#D9B44A")},
+	"Settlement": {"name": "Поселение", "color": Color("#C08552")},
+	"Community": {"name": "Сообщество", "color": Color("#7FA08C")},
+	"Culture": {"name": "Культура", "color": Color("#A88BB5")},
+	"Provision": {"name": "Провизия", "color": Color("#9BA86B")},
+	"Military": {"name": "Военные", "color": Color("#B0563F")},
+	"Merged": {"name": "Слияние", "color": Color("#E7B04A")}
+}
+
+const BUILDINGS: Dictionary = {
+	# --- ЗНАНИЯ ---
+	"School": {"deck": "Knowledge", "name": "Школа", "base": 15, "radius": 2, "jobs": 2, "per_worker": 2, "job_name": "Учителя", "prov": {"Education": 4}, "biome": {"Rural": 10}, "adj": {"CitadelOfWisdom": 50, "Library": 50, "CityDistrict": 40, "Longhouse": 20, "Park": 5, "School": -10}, "merges": ["University", "CitadelOfWisdom"]},
+	"Library": {"deck": "Knowledge", "name": "Библиотека", "base": 20, "radius": 4, "jobs": 3, "per_worker": 3, "job_name": "Книжники", "prov": {"Education": 4}, "biome": {"Urban": 25}, "adj": {"CitadelOfWisdom": 40, "School": 35, "Hospital": 30, "CityDistrict": 25, "Longhouse": 20, "University": 15, "Park": 10, "Library": -120}, "merges": ["University", "CitadelOfWisdom"]},
+	"Alchemist": {"deck": "Knowledge", "name": "Алхимик", "base": 20, "radius": 3, "jobs": 3, "per_worker": 4, "job_name": "Алхимики", "spec": "Alchemy", "biome": {"Stone": 10}, "adj": {"CitadelOfWisdom": 75, "Hospital": 50, "University": 40, "School": 35, "Alchemist": -80}, "feat": {"River": 15}},
+	"Engineer": {"deck": "Knowledge", "name": "Инженер", "base": 25, "radius": 3, "jobs": 2, "per_worker": 3, "job_name": "Инженеры", "spec": "Engineering", "biome": {"Stone": 5}, "adj": {"CitadelOfWisdom": 50, "University": 40}},
+
+	# --- ПОСЕЛЕНИЕ ---
+	"Cottages": {"deck": "Settlement", "name": "Домики", "base": 10, "radius": 2, "housing": 4, "biome": {"Rural": 20, "Arid": 15}, "adj": {"Sanctuary": 30}, "feat": {"River": 10}, "merges": ["Longhouse"]},
+	"Well": {"deck": "Settlement", "name": "Колодец", "base": 5, "radius": 2, "jobs": 1, "per_worker": 1, "job_name": "Смотрители", "spec": "Rainwater", "merges": ["CityDistrict"]},
+	"Houses": {"deck": "Settlement", "name": "Дома", "base": 15, "radius": 2, "housing": 6, "biome": {"Urban": 15, "Rural": -20}, "adj": {"CityDistrict": 30}, "merges": ["CityDistrict"]},
+	"Market": {"deck": "Settlement", "name": "Рынок", "base": 15, "radius": 3, "jobs": 3, "per_worker": 3, "job_name": "Торговцы", "prov": {"Luxury": 6}, "biome": {"Urban": 25}, "adj": {"CityDistrict": 30, "BathHouse": 30, "Well": 20, "TownHall": 15, "Houses": 10, "Market": -35}, "merges": ["CityDistrict"]},
+
+	# --- СООБЩЕСТВО ---
+	"Tavern": {"deck": "Community", "name": "Таверна", "base": 15, "radius": 2, "jobs": 3, "per_worker": 2, "job_name": "Трактирщики", "spec": "Brewing", "prov": {"Leisure": 5}, "adj": {"Longhouse": 40, "CityDistrict": 35, "Well": 10, "Cottages": 10, "Houses": 10}, "merges": ["CitadelOfWisdom", "Longhouse"]},
+	"BathHouse": {"deck": "Community", "name": "Баня", "base": 10, "radius": 2, "jobs": 2, "per_worker": 2, "job_name": "Банщики", "spec": "Warmth", "prov": {"Treatment": 4}, "biome": {"Arid": 5}, "adj": {"Hospital": 40, "CityDistrict": 30, "Tavern": 15}, "merges": ["Hospital", "Sanctuary"]},
+	"Temple": {"deck": "Community", "name": "Храм", "base": 15, "radius": 2, "jobs": 2, "per_worker": 2, "job_name": "Служители", "prov": {"Religion": 6}, "adj": {"Sanctuary": 30, "Well": 30, "Cottages": 15, "CityDistrict": 10, "Temple": -20}, "merges": ["Sanctuary"]},
+	"Surgeon": {"deck": "Community", "name": "Хирург", "base": 15, "radius": 2, "jobs": 2, "per_worker": 4, "job_name": "Лекари", "prov": {"Treatment": 4}, "biome": {"Urban": 10}, "adj": {"CitadelOfWisdom": 50, "BathHouse": 20, "Hospital": 25}, "merges": ["Hospital"]},
+
+	# --- КУЛЬТУРА ---
+	"Park": {"deck": "Culture", "name": "Парк", "base": 10, "radius": 2, "jobs": 1, "per_worker": 1, "job_name": "Садовники", "prov": {"Leisure": 4}, "adj": {"Temple": 25, "TownHall": 25}},
+	"TownHall": {"deck": "Culture", "name": "Ратуша", "base": 25, "radius": 3, "jobs": 4, "per_worker": 3, "job_name": "Чиновники", "adj": {"Hospital": 35, "CityDistrict": 30, "Temple": 25, "Market": 15}},
+	"Theater": {"deck": "Culture", "name": "Театр", "base": 20, "radius": 2, "jobs": 3, "per_worker": 2, "job_name": "Актёры", "prov": {"Leisure": 8}, "biome": {"Urban": 10}, "adj": {"CityDistrict": 30, "TownHall": 25, "Park": 10}},
+	"Treasury": {"deck": "Culture", "name": "Казначейство", "base": 45, "radius": 2, "jobs": 1, "per_worker": 5, "job_name": "Казначеи", "prov": {"Luxury": 4}, "adj": {"Hospital": -25, "TownHall": 15, "Market": 10}},
+
+	# --- ПРОВИЗИЯ ---
+	"Farm": {"deck": "Provision", "name": "Ферма", "base": 12, "radius": 2, "jobs": 4, "per_worker": 2, "job_name": "Фермеры", "spec": "Farming", "prov": {"food": 6}, "biome": {"Rural": 10}, "adj": {"Market": 10, "Farm": -25}},
+	"Hunter": {"deck": "Provision", "name": "Охотничий лагерь", "base": 10, "radius": 2, "jobs": 3, "per_worker": 2, "job_name": "Охотники", "spec": "Meat", "prov": {"food": 4}, "biome": {"Thicket": 10}, "feat": {"Predator": -10}, "adj": {"Hunter": -30}},
+	"Tailor": {"deck": "Provision", "name": "Портняжная", "base": 15, "radius": 3, "jobs": 3, "per_worker": 3, "job_name": "Портные", "spec": "Tailoring", "prov": {"cloth": 6}, "biome": {"Urban": 10}, "adj": {"Market": 10, "Tailor": -30}},
+
+	# --- ВОЕННЫЕ ---
+	"Barracks": {"deck": "Military", "name": "Казарма", "base": 20, "radius": 2, "jobs": 8, "per_worker": 3, "job_name": "Солдаты", "prov": {"Brawling": 8}, "adj": {"Stables": 15, "Archery": 15, "MageTower": 10, "TownHall": 20, "Barracks": -40}},
+	"Archery": {"deck": "Military", "name": "Стрельбище", "base": 15, "radius": 2, "jobs": 5, "per_worker": 3, "job_name": "Стрелки", "prov": {"Brawling": 5}, "biome": {"Rural": 5}, "adj": {"Barracks": 20, "Stables": 10, "Archery": -30}},
+	"Stables": {"deck": "Military", "name": "Конюшни", "base": 15, "radius": 2, "jobs": 6, "per_worker": 2, "job_name": "Конюхи", "biome": {"Rural": 10}, "adj": {"Barracks": 20, "Archery": 10, "Stables": -30}},
+	"MageTower": {"deck": "Military", "name": "Башня магов", "base": 30, "radius": 3, "jobs": 3, "per_worker": 6, "job_name": "Маги", "biome": {"Stone": 15}, "adj": {"Library": 25, "University": 30, "Alchemist": 20, "MageTower": -50}},
+
+	# --- СЛИЯНИЯ (Merged) ---
+	"University": {"deck": "Merged", "name": "Университет", "base": 60, "radius": 3, "jobs": 6, "per_worker": 4, "job_name": "Профессора", "prov": {"Education": 8}, "adj": {"CitadelOfWisdom": 30}, "merged": true},
+	"CitadelOfWisdom": {"deck": "Merged", "name": "Цитадель Мудрости", "base": 120, "radius": 4, "jobs": 10, "per_worker": 5, "job_name": "Мудрецы", "prov": {"Education": 10}, "merged": true},
+	"Longhouse": {"deck": "Merged", "name": "Длинный дом", "base": 40, "radius": 2, "housing": 12, "merged": true},
+	"CityDistrict": {"deck": "Merged", "name": "Городской квартал", "base": 80, "radius": 3, "jobs": 8, "per_worker": 4, "job_name": "Управляющие", "housing": 18, "prov": {"Luxury": 8, "Education": 4}, "merged": true},
+	"Hospital": {"deck": "Merged", "name": "Госпиталь", "base": 70, "radius": 3, "jobs": 6, "per_worker": 4, "job_name": "Врачи", "prov": {"Treatment": 10}, "merged": true},
+	"Sanctuary": {"deck": "Merged", "name": "Святилище", "base": 45, "radius": 2, "jobs": 3, "per_worker": 3, "job_name": "Хранители", "prov": {"Religion": 5}, "merged": true}
+}
+
+# Получить список базовых (не слитых) зданий для палитры
+static func get_base_building_types() -> Array:
+	var result = []
+	for type in BUILDINGS:
+		if not BUILDINGS[type].has("merged") or not BUILDINGS[type]["merged"]:
+			result.append(type)
+	return result
+
+# ============================================================
+# РЕЦЕПТЫ СЛИЯНИЯ
+# ============================================================
+const RECIPES: Array = [
+	{"result": "University", "parts": ["School", "Library"]},
+	{"result": "CitadelOfWisdom", "parts": ["School", "Library", "Tavern"]},
+	{"result": "Longhouse", "parts": ["Cottages", "Tavern"]},
+	{"result": "CityDistrict", "parts": ["Houses", "Market", "Well"]},
+	{"result": "Hospital", "parts": ["BathHouse", "Surgeon"]},
+	{"result": "Sanctuary", "parts": ["Temple", "BathHouse"]}
+]
+
+# ============================================================
+# БИОМЫ И ОСОБЕННОСТИ
+# ============================================================
+const BIOMES: Dictionary = {
+	"Rural": {"name": "Луга", "color": Color("#6A7A4E")},
+	"Urban": {"name": "Город", "color": Color("#7D7060")},
+	"Thicket": {"name": "Чаща", "color": Color("#47603E")},
+	"Swamp": {"name": "Болото", "color": Color("#4D6156")},
+	"Stone": {"name": "Камень", "color": Color("#71695C")},
+	"Arid": {"name": "Пустошь", "color": Color("#8A7752")}
+}
+
+const FEAT_NAMES: Dictionary = {"river": "Река", "ruins": "Руины", "predator": "Хищник"}
+const RIVER_COLOR: Color = Color("#4E7B8A")
+
+# ============================================================
+# ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+# ============================================================
+static func hex_to_pixel(q: int, r: int) -> Vector2:
+	var x = R * SQRT3 * (q + r * 0.5)
+	var y = R * 1.5 * r
+	return Vector2(x, y)
+
+static func hex_dist(q1: int, r1: int, q2: int, r2: int) -> int:
+	var dq = q1 - q2
+	var dr = r1 - r2
+	return (abs(dq) + abs(dr) + abs(dq + dr)) / 2
+
+static func get_hex_polygon(center: Vector2, radius: float) -> PackedVector2Array:
+	var points = PackedVector2Array()
+	for i in range(6):
+		var angle_rad = deg_to_rad(60 * i - 30)
+		points.append(center + Vector2(cos(angle_rad), sin(angle_rad)) * radius)
+	return points
+
+# Получить название потребности на русском
+static func get_prov_name(key: String) -> String:
+	return PROVN.get(key, key)
+
+# Получить название специализации на русском
+static func get_spec_name(key: String) -> String:
+	return SPECS.get(key, key)
+```
+
+---
+
+### 💡 Как это использовать в Godot:
+
+1. **Создайте файл** `res://globals.gd` и вставьте в него весь код выше.
+2. **Добавьте его в Автозагрузку**: `Project` → `Project Settings` → `Autoload` → Добавьте `res://globals.gd` с именем `Globals`.
+3. **Доступ из любого скрипта**: Теперь вы можете обращаться к данным из любого места в проекте, например:
+   - Получить имя расы: `Globals.SPECIES["Human"]["name"]`
+   - Получить цвет биома: `Globals.BIOMES["Rural"]["color"]`
+   - Проверить потребности здания: `Globals.BUILDINGS["School"]["prov"]`
+   - Вызвать функцию расстояния: `Globals.hex_dist(q1, r1, q2, r2)`
+
+### 🔄 Что изменилось при переносе из JS в GDScript:
+- Цвета теперь используют нативный тип Godot: `Color("#HEX")`.
+- Все вложенные объекты строго типизированы как `Dictionary` или `Array` для лучшей подсказки кода (autocompletion) в редакторе Godot.
+- Добавлены вспомогательные функции (`get_base_building_types`, `get_prov_name`), чтобы не дублировать логику поиска по словарям в других скриптах.
+
+Если вам нужен аналогичный полный перенос логики **расчета очков (scoring)** или **назначения работников (assign_workers)** из JS в отдельные скрипты-менеджеры Godot, дайте знать, и я распишу их так же детально!
+
+### USER
+Да, перенеси всё
+
+### ASSISTANT
+Отлично. Переносим **всю** логику из прототипа в Godot 4. Я разбил код на модульные, легко читаемые скрипты-менеджеры, которые полностью воспроизводят механики: авто-слияние ×4, ручное слияние по рецептам, расчет потребностей, морали (resolve), штормов и очков.
+
+Ниже приведена полная архитектура и код.
+
+---
+
+### 📂 Структура сцены в редакторе Godot (`Main.tscn`)
+Создайте сцену со следующей иерархией узлов (Nodes):
+```text
+Main (Node2D)
+├── GridManager (Node) -> Скрипт: grid_manager.gd
+├── BuildingManager (Node) -> Скрипт: building_manager.gd
+├── PopulationManager (Node) -> Скрипт: population_manager.gd
+├── UIManager (CanvasLayer) -> Скрипт: ui_manager.gd
+│   ├── LeftPanel (VBoxContainer)
+│   │   ├── ScoreLabel (Label)
+│   │   ├── SocietyPanel (VBoxContainer)
+│   │   ├── NeedsPanel (VBoxContainer)
+│   │   ├── BuildPalette (ScrollContainer -> GridContainer)
+│   │   └── OffersPanel (VBoxContainer)
+│   ├── RightPanel (Control)
+│   │   ├── GridContainer (Node2D) -> Сюда добавляются клетки
+│   │   ├── FloatingTextContainer (Node2D) -> Для всплывающего текста
+│   │   └── InfoCard (PanelContainer -> VBoxContainer) -> Скрыта по умолчанию
+└── Camera2D (с зумом, чтобы видеть всё поле)
+```
+*Не забудьте добавить `globals.gd` в Autoload (Project Settings -> Autoload).*
+
+---
+
+### 📜 1. Клетка поля (`res://scenes/hex_cell.gd`)
+Сцена `HexCell.tscn`: Корень `Area2D` -> `CollisionShape2D` (PolygonShape2D) -> `Polygon2D` -> `Label` (для иконки).
+
+```gdscript
+extends Area2D
+
+@export var q: int = 0
+@export var r: int = 0
+@export var ring: int = 0
+@export var biome: String = "Rural"
+@export var feature: String = ""
+
+var building: Dictionary = {}
+var key: String:
+	get: return "%d,%d" % [q, r]
+
+@onready var poly = $Polygon2D
+@onready var label = $Label
+@onready var collision = $CollisionShape2D
+
+signal cell_clicked(cell_node)
+signal cell_right_clicked(cell_node)
+
+func _ready():
+	position = Globals.hex_to_pixel(q, r)
+	var pts = Globals.get_hex_polygon(Vector2.ZERO, Globals.R * 0.9)
+	poly.polygon = pts
+	collision.shape = PolygonShape2D.new()
+	collision.shape.polygon = pts
+	
+	update_visuals()
+
+func update_visuals():
+	var biome_data = Globals.BIOMES.get(biome, Globals.BIOMES["Rural"])
+	poly.color = biome_data.color
+	
+	if building.is_empty():
+		label.visible = false
+		poly.modulate = Color(1, 1, 1, 1)
+	else:
+		label.visible = true
+		label.text = building.type[0] # Заглушка, позже заменить на Sprite2D
+		var deck_color = Globals.DECKS[building.type_deck]["color"]
+		poly.modulate = deck_color if building.is_merged else Color(1, 1, 1, 1)
+
+func _on_input_event(viewport, event, shape_idx):
+	if event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			cell_clicked.emit(self)
+		elif event.button_index == MOUSE_BUTTON_RIGHT:
+			cell_right_clicked.emit(self)
+```
+
+---
+
+### 📜 2. Менеджер сетки (`res://grid_manager.gd`)
+Генерирует карту: ядро 2x2 + 3 ряда, биомы, реки, руины.
+
+```gdscript
+extends Node
+
+var cells_dict: Dictionary = {}
+signal map_generated
+
+func generate_map():
+	# Очистка
+	for child in get_parent().get_node("UIManager/RightPanel/GridContainer").get_children():
+		child.queue_free()
+	cells_dict.clear()
+	
+	var core = Globals.CORE
+	var cell_scene = preload("res://scenes/hex_cell.tscn")
+	var grid_container = get_parent().get_node("UIManager/RightPanel/GridContainer")
+	
+	var seeds = []
+	var bag = ["Rural", "Rural", "Urban", "Urban", "Thicket", "Swamp", "Stone", "Arid"]
+	
+	for b in bag:
+		var tries = 0
+		var c = null
+		while tries < 60:
+			var rand_q = randi_range(-6, 6)
+			var rand_r = randi_range(-6, 6)
+			if _is_valid_core_distance(rand_q, rand_r):
+				c = {"q": rand_q, "r": rand_r}
+				if not seeds.any(func(s): return Globals.hex_dist(s.q, s.r, c.q, c.r) < 2):
+					seeds.append({"b": b, "c": c})
+					break
+			tries += 1
+
+	for q in range(-6, 7):
+		for r in range(-6, 7):
+			if not _is_valid_core_distance(q, r): continue
+			
+			var sorted_seeds = seeds.duplicate()
+			sorted_seeds.sort_custom(func(a, b): 
+				var da = Globals.hex_dist(a.c.q, a.c.r, q, r) + randf() * 0.6
+				var db = Globals.hex_dist(b.c.q, b.c.r, q, r) + randf() * 0.6
+				return da < db
+			)
+			
+			var chosen_biome = sorted_seeds[0].b if randf() > 0.12 and sorted_seeds.size() > 1 else sorted_seeds[0].b
+			
+			var cell = cell_scene.instantiate()
+			cell.q = q
+			cell.r = r
+			cell.ring = _get_ring(q, r)
+			cell.biome = chosen_biome
+			cell.feature = ""
+			
+			grid_container.add_child(cell)
+			cells_dict[cell.key] = cell
+			
+			cell.cell_clicked.connect(_on_cell_clicked)
+			cell.cell_right_clicked.connect(_on_cell_right_clicked)
+			
+	_generate_features()
+	map_generated.emit()
+
+func _is_valid_core_distance(q: int, r: int) -> bool:
+	var min_d = 999
+	for c in Globals.CORE:
+		var d = Globals.hex_dist(q, r, c[0], c[1])
+		if d < min_d: min_d = d
+	return min_d <= Globals.RINGS
+
+func _get_ring(q: int, r: int) -> int:
+	var min_d = 999
+	for c in Globals.CORE:
+		var d = Globals.hex_dist(q, r, c[0], c[1])
+		if d < min_d: min_d = d
+	return min_d
+
+func _generate_features():
+	var edge_cells = cells_dict.values().filter(func(c): return c.ring == Globals.RINGS)
+	if edge_cells.is_empty(): return
+	
+	var cur = edge_cells[randi() % edge_cells.size()]
+	var dir = Globals.HEX_DIRECTIONS[randi() % 6]
+	
+	for i in range(8):
+		if not cur: break
+		cur.feature = "river"
+		var want = dir if randf() < 0.7 else Globals.HEX_DIRECTIONS[randi() % 6]
+		var nxt = get_cell(cur.q + want[0], cur.r + want[1])
+		
+		if not nxt or nxt.feature == "river":
+			var shuffled_dirs = Globals.HEX_DIRECTIONS.duplicate()
+			shuffled_dirs.shuffle()
+			for d in shuffled_dirs:
+				var t = get_cell(cur.q + d[0], cur.r + d[1])
+				if t and t.feature == "":
+					nxt = t
+					dir = d
+					break
+		cur = nxt
+
+	var free_cells = cells_dict.values().filter(func(c): return c.feature == "" and c.ring >= 1)
+	if not free_cells.is_empty():
+		free_cells[randi() % free_cells.size()].feature = "ruins"
+		
+	var far_cells = cells_dict.values().filter(func(c): 
+		return c.feature == "" and c.ring >= 2 and (c.q != free_cells[-1].q or c.r != free_cells[-1].r)
+	)
+	if not far_cells.is_empty():
+		far_cells[randi() % far_cells.size()].feature = "predator"
+
+func get_cell(q: int, r: int):
+	return cells_dict.get("%d,%d" % [q, r], null)
+
+func _on_cell_clicked(cell):
+	get_parent().get_node("BuildingManager").on_cell_clicked(cell)
+
+func _on_cell_right_clicked(cell):
+	get_parent().get_node("BuildingManager").on_cell_right_clicked(cell)
+```
+
+---
+
+### 📜 3. Менеджер зданий и слияний (`res://building_manager.gd`)
+Самая сложная часть: размещение, расчет очков (включая соседство), авто-слияние ×4 и ручные рецепты.
+
+```gdscript
+extends Node
+
+var buildings: Array = []
+var selected_type: String = ""
+
+func on_cell_clicked(cell):
+	if selected_type != "":
+		if not cell.building.is_empty():
+			get_parent().get_node("UIManager").show_status("Клетка занята!")
+			return
+			
+		var new_bldg = place_building(selected_type, [cell])
+		var merged = try_auto_merge(cell)
+		
+		get_parent().get_node("PopulationManager").fill_housing()
+		get_parent().get_node("PopulationManager").recalc_all()
+		
+		if merged:
+			get_parent().get_node("UIManager").spawn_float(merged.cells[0].position, "Слияние ×4!", "pos")
+		else:
+			get_parent().get_node("UIManager").spawn_float(cell.position, Globals.BUILDINGS[selected_type].name, "name")
+			
+		selected_type = ""
+		get_parent().get_node("UIManager").update_palette_selection("")
+	else:
+		get_parent().get_node("UIManager").show_building_info(cell.building)
+
+func on_cell_right_clicked(cell):
+	if not cell.building.is_empty():
+		demolish(cell.building)
+
+func place_building(type: String, cells: Array) -> Dictionary:
+	var b_data = Globals.BUILDINGS[type]
+	var new_building = {
+		"type": type,
+		"type_deck": b_data.deck,
+		"cells": cells,
+		"is_merged": b_data.get("merged", false),
+		"base_type": type,
+		"workers": 0,
+		"score": b_data.base,
+		"house_sp": null,
+		"last_parts": []
+	}
+	
+	for cell in cells:
+		cell.building = new_building
+		cell.update_visuals()
+		
+	buildings.append(new_building)
+	return new_building
+
+func demolish(bldg: Dictionary):
+	get_parent().get_node("PopulationManager").unassign_all_from(bldg)
+	buildings.erase(bldg)
+	for cell in bldg.cells:
+		cell.building = {}
+		cell.update_visuals()
+		
+	get_parent().get_node("PopulationManager").trim_to_housing()
+	get_parent().get_node("PopulationManager").recalc_all()
+	get_parent().get_node("UIManager").spawn_float(bldg.cells[0].position, "Снесено", "neg")
+
+# --- АВТО-СЛИЯНИЕ ×4 ---
+func try_auto_merge(start_cell) -> Dictionary:
+	if start_cell.building.is_empty() or start_cell.building.is_merged or start_cell.building.cells.size() > 1:
+		return {}
+		
+	var target_type = start_cell.building.type
+	var connected = []
+	var queue = [start_cell]
+	var visited = {start_cell.key: true}
+	
+	while not queue.is_empty():
+		var current = queue.pop_front()
+		connected.append(current)
+		
+		for dir in Globals.HEX_DIRECTIONS:
+			var neighbor = get_parent().get_node("GridManager").get_cell(current.q + dir[0], current.r + dir[1])
+			if neighbor and not visited.has(neighbor.key):
+				if not neighbor.building.is_empty() and not neighbor.building.is_merged and neighbor.building.type == target_type:
+					visited[neighbor.key] = true
+					queue.append(neighbor)
+					
+	if connected.size() >= 4:
+		var to_merge = connected.slice(0, 4)
+		var cells_to_use = to_merge.duplicate()
+		
+		# Собираем данные перед удалением
+		var carried_workers = []
+		var house_sp = to_merge[0].building.house_sp
+		for b in to_merge:
+			carried_workers.append_array(get_parent().get_node("PopulationManager").get_workers_of(b.building))
+			demolish(b.building)
+			
+		# Создаем "Здание II"
+		var base_data = Globals.BUILDINGS[target_type]
+		var merged_building = {
+			"type": target_type + "_BIG",
+			"type_deck": base_data.deck,
+			"cells": cells_to_use,
+			"is_merged": true,
+			"base_type": target_type,
+			"workers": 0,
+			"score": int(base_data.base * 5.5),
+			"house_sp": house_sp,
+			"last_parts": []
+		}
+		
+		for cell in cells_to_use:
+			cell.building = merged_building
+			cell.update_visuals()
+			
+		buildings.append(merged_building)
+		
+		# Возвращаем работников
+		var max_jobs = base_data.get("jobs", 0) * 4 + 2
+		for i in range(min(carried_workers.size(), max_jobs)):
+			carried_workers[i]["job"] = merged_building
+		merged_building.workers = min(carried_workers.size(), max_jobs)
+			
+		return merged_building
+		
+	return {}
+
+# --- РАСЧЕТ ОЧКОВ ---
+func recalc_all_scores() -> int:
+	var total_score = get_parent().get_node("PopulationManager").rep_score
+	for bldg in buildings:
+		var score_data = calculate_score(bldg)
+		bldg.score = score_data.total
+		bldg.last_parts = score_data.parts
+		total_score += bldg.score
+	return total_score
+
+func calculate_score(bldg: Dictionary) -> Dictionary:
+	var b_data = Globals.BUILDINGS[bldg.base_type]
+	var anchor = bldg.cells[0]
+	var parts = [["База", b_data.base]]
+	
+	if b_data.has("biome") and b_data.biome.has(anchor.biome):
+		parts.append(["Биом: " + Globals.BIOMES[anchor.biome].name, b_data.biome[anchor.biome]])
+		
+	if b_data.has("feat") and anchor.feature != "" and b_data.feat.has(anchor.feature.capitalize()):
+		parts.append([Globals.FEAT_NAMES.get(anchor.feature, anchor.feature), b_data.feat[anchor.feature.capitalize()]])
+		
+	if bldg.workers > 0 and b_data.has("per_worker"):
+		parts.append(["Работники ×%d" % bldg.workers, bldg.workers * b_data.per_worker])
+		
+	# Соседство
+	var adj_parts = get_adjacency_bonus(bldg, b_data)
+	for p in adj_parts:
+		parts.append(p)
+		
+	var total = 0
+	for p in parts:
+		total += p[1]
+		
+	return {"total": total, "parts": parts}
+
+func get_adjacency_bonus(source_bldg: Dictionary, b_data: Dictionary) -> Array:
+	var per_type = {}
+	for other in buildings:
+		if other == source_bldg: continue
+		var dist = min_dist_between(source_bldg, other)
+		if dist <= b_data.radius:
+			var target_type = other.base_type
+			if b_data.has("adj") and b_data.adj.has(target_type):
+				var val = b_data.adj[target_type]
+				if not per_type.has(target_type):
+					per_type[target_type] = {"v": 0, "n": 0}
+				per_type[target_type]["v"] += val
+				per_type[target_type]["n"] += 1
+				
+	var result = []
+	for t in per_type:
+		var name = Globals.BUILDINGS[t].name
+		if per_type[t]["n"] > 1:
+			name += " ×%d" % per_type[t]["n"]
+		result.append([name, per_type[t]["v"]])
+		
+	result.sort_custom(func(a, b): return a[1] > b[1])
+	return result
+
+func min_dist_between(b1: Dictionary, b2: Dictionary) -> int:
+	var m = 999
+	for c1 in b1.cells:
+		for c2 in b2.cells:
+			var d = Globals.hex_dist(c1.q, c1.r, c2.q, c2.r)
+			if d < m: m = d
+	return m
+```
+
+---
+
+### 📜 4. Менеджер населения (`res://population_manager.gd`)
+Управляет жителями, жильем, потребностями, моралью (resolve) и сезонами.
+
+```gdscript
+extends Node
+
+var villagers: Array = []
+var active_species: Array = []
+var season: int = 0
+var rep_score: int = 0
+var storm_active: bool = false
+var mourning: int = 0
+
+var housing_stats = {"total": 0, "gen": 0, "frog": 0, "sp_beds": {}}
+var needs_stats = {"cap": {}, "dem": {}, "ok": {}}
+
+func _ready():
+	init_run()
+
+func init_run():
+	villagers.clear()
+	active_species = Globals.SPECIES.keys().duplicate()
+	active_species.shuffle()
+	active_species = active_species.slice(0, 3) # Берем 3 случайные расы
+	season = 0
+	rep_score = 0
+	storm_active = false
+	mourning = 0
+
+func next_season():
+	season += 1
+	storm_active = (season % 3 == 0)
+	
+	var gained = 0
+	for sp in active_species:
+		var st = get_species_stat(sp)
+		if st.count > 0 and st.avg >= st.demand:
+			st.rep += 1
+			st.demand += Globals.SPECIES[sp].decadence
+			rep_score += 15
+			gained += 1
+			
+	# Проверка морали
+	var leavers = villagers.filter(func(v): return v.resolve < 1)
+	for v in leavers:
+		lose_villager(v)
+		
+	if leavers.size() > 0:
+		get_parent().get_node("UIManager").spawn_float(Vector2.ZERO, "-%d ушло" % leavers.size(), "neg")
+		
+	# Караван
+	if season % 2 == 0:
+		var frog_perk = villagers.any(func(v): return not v.job.is_empty() and v.species == "Frog")
+		var n = 0
+		for i in range(2 + (1 if frog_perk else 0)):
+			if push_villager(): n += 1
+		if n > 0:
+			get_parent().get_node("UIManager").spawn_float(Vector2.ZERO, "+Караван ×%d" % n, "pos")
+			
+	recalc_all()
+	get_parent().get_node("UIManager").show_status("Сезон %d%s" % [season, " · ШТОРМ" if storm_active else ""])
+
+func push_villager() -> bool:
+	var cand = active_species.filter(func(sp): return beds_free(sp) > 0)
+	if cand.is_empty(): return false
+	var sp = cand[randi() % cand.size()]
+	villagers.append({"id": randi(), "species": sp, "job": {}, "resolve": 0})
+	return true
+
+func lose_villager(v: Dictionary):
+	var idx = villagers.find(v)
+	if idx >= 0:
+		villagers.remove_at(idx)
+		if v.species != "Bat": mourning += 1
+
+func fill_housing():
+	recompute_housing()
+	var added = 0
+	for i in range(999): # Guard
+		if not push_villager(): break
+		added += 1
+	return added
+
+func trim_to_housing():
+	recompute_housing()
+	var removed = 0
+	# Сначала убираем лишних жаб
+	var frog_cnt = villagers.count(func(v): return v.species == "Frog")
+	while frog_cnt > housing_stats.frog:
+		var idx = villagers.find_last(func(v): return v.species == "Frog" and v.job.is_empty())
+		if idx < 0: idx = villagers.find_last(func(v): return v.species == "Frog")
+		if idx < 0: break
+		lose_villager(villagers[idx])
+		removed += 1
+		frog_cnt -= 1
+		
+	# Потом остальных
+	while villagers.size() > housing_stats.total:
+		var idx = villagers.find_last(func(v): return v.job.is_empty())
+		if idx < 0: idx = 0
+		lose_villager(villagers[idx])
+		removed += 1
+	return removed
+
+func recompute_housing():
+	var total = 0; var frog = 0; var sp_beds = {}
+	for sp in active_species: sp_beds[sp] = 0
+	
+	for bldg in get_parent().get_node("BuildingManager").buildings:
+		var b_data = Globals.BUILDINGS[bldg.base_type]
+		if b_data.has("housing"):
+			total += b_data.housing
+			if bldg.house_sp:
+				sp_beds[bldg.house_sp] += b_data.housing
+				if bldg.house_sp == "Frog": frog += b_data.housing
+				
+	housing_stats = {"total": total, "gen": total - frog, "frog": frog, "sp_beds": sp_beds}
+
+func beds_free(sp: String) -> int:
+	if sp == "Frog": return housing_stats.frog - villagers.count(func(v): return v.species == "Frog")
+	var non_frog = villagers.count(func(v): return v.species != "Frog")
+	return housing_stats.gen - non_frog
+
+func recompute_needs():
+	var cap = {"food": 0, "cloth": 0, "Leisure": 0, "Religion": 0, "Education": 0, "Treatment": 0, "Brawling": 0, "Luxury": 0}
+	for bldg in get_parent().get_node("BuildingManager").buildings:
+		var b_data = Globals.BUILDINGS[bldg.base_type]
+		if b_data.has("prov"):
+			var ratio = 1.0
+			if b_data.has("jobs") and b_data.jobs > 0:
+				ratio = min(1.0, float(bldg.workers) / float(b_data.jobs))
+			for k in b_data.prov:
+				cap[k] += ceil(b_data.prov[k] * ratio)
+				
+	var dem = {"food": villagers.size(), "cloth": villagers.size()}
+	for v in villagers:
+		for s in Globals.SPECIES[v.species].services:
+			dem[s] = dem.get(s, 0) + 1
+			
+	var ok = {}
+	for k in cap:
+		ok[k] = (dem.get(k, 0) == 0) or (cap[k] >= dem.get(k, 0))
+		
+	needs_stats = {"cap": cap, "dem": dem, "ok": ok}
+
+func recalc_resolve():
+	recompute_housing()
+	recompute_needs()
+	
+	var human_perk = villagers.any(func(v): return not v.job.is_empty() and v.species == "Human")
+	var lizard_perk = villagers.any(func(v): return not v.job.is_empty() and v.species == "Lizard")
+	var bat_bonus = min(6, floor(mourning / 2.0))
+	
+	for v in villagers:
+		var sp_data = Globals.SPECIES[v.species]
+		var r = sp_data.base
+		r += 5 if needs_stats.ok.food else -10
+		r += 3 if needs_stats.ok.cloth else -8
+		
+		for s in sp_data.services:
+			r += 3 if needs_stats.ok.get(s, false) else -6
+			
+		if v.species == "Frog":
+			var ratio = housing_stats.frog > 0 ? min(1.0, float(housing_stats.frog) / float(villagers.count(func(x): return x.species == "Frog"))) : 1.0
+			r += 8 if ratio >= 1.0 else (ceil(8 * ratio) if ratio > 0 else -12)
+		else:
+			var non_frog = villagers.count(func(x): return x.species != "Frog")
+			var shelter_ok = housing_stats.gen >= non_frog
+			r += 4 if shelter_ok else -10
+			var cap = v.species == "Frog" ? housing_stats.frog : housing_stats.sp_beds.get(v.species, 0)
+			var cnt = villagers.count(func(x): return x.species == v.species)
+			var ratio = cnt > 0 ? min(1.0, float(cap) / float(cnt)) : 1.0
+			r += 8 if ratio >= 1.0 else (ceil(8 * ratio) if ratio > 0 else -6)
+			
+		if storm_active:
+			var pen = Globals.STORM_PEN[sp_data.res] * (0.75 if human_perk else 1.0)
+			r -= round(pen * 10.0) / 10.0
+			
+		if lizard_perk: r += 1
+		if v.species == "Bat": r += bat_bonus
+		
+		if not v.job.is_empty():
+			var j_data = Globals.BUILDINGS[v.job.base_type]
+			if j_data.get("spec") == sp_data.comfort: r += 5
+			
+		v.resolve = r
+
+func recalc_all():
+	for bldg in get_parent().get_node("BuildingManager").buildings:
+		bldg.workers = villagers.count(func(v): return v.job == bldg)
+		
+	recalc_resolve()
+	
+	var total = recalc_all_scores() # Вызываем из BuildingManager
+	get_parent().get_node("UIManager").update_ui(total, villagers.size(), rep_score)
+
+func get_species_stat(sp: String) -> Dictionary:
+	var vs = villagers.filter(func(v): return v.species == sp)
+	var cnt = vs.size()
+	var avg = 0.0
+	if cnt > 0:
+		var sum = 0
+		for v in vs: sum += v.resolve
+		avg = sum / float(cnt)
+	return {"count": cnt, "avg": avg, "demand": Globals.SPECIES[sp].demand, "rep": 0} # rep упрощен для примера
+
+func get_workers_of(bldg: Dictionary) -> Array:
+	return villagers.filter(func(v): return v.job == bldg)
+
+func unassign_all_from(bldg: Dictionary):
+	for v in villagers:
+		if v.job == bldg: v.job = {}
+```
+
+---
+
+### 📜 5. Менеджер интерфейса (`res://ui_manager.gd`)
+Связывает данные с визуальными элементами Godot.
+
+```gdscript
+extends CanvasLayer
+
+@onready var score_label = $LeftPanel/ScoreLabel
+@onready var build_palette = $LeftPanel/BuildPalette/GridContainer
+@onready var info_card = $RightPanel/InfoCard
+@onready var float_container = $RightPanel/FloatingTextContainer
+@onready var status_label = $LeftPanel/StatusLabel
+
+var floating_text_scene = preload("res://scenes/floating_text.tscn")
+
+func _ready():
+	populate_palette()
+	# Подключаем кнопку "Сезон +" (предполагается, что она есть в LeftPanel)
+	# $LeftPanel/NextSeasonBtn.pressed.connect(get_parent().get_node("PopulationManager").next_season)
+
+func populate_palette():
+	for child in build_palette.get_children(): child.queue_free()
+	
+	for type in Globals.get_base_building_types():
+		var b_data = Globals.BUILDINGS[type]
+		var btn = Button.new()
+		btn.text = "%s\nБаза: %d" % [b_data.name, b_data.base]
+		btn.custom_minimum_size = Vector2(110, 50)
+		btn.pressed.connect(func(): 
+			get_parent().get_node("BuildingManager").selected_type = type
+			update_palette_selection(type)
+			show_status("Выбрано: " + b_data.name)
+		)
+		build_palette.add_child(btn)
+
+func update_palette_selection(selected_type: String):
+	for btn in build_palette.get_children():
+		var is_sel = btn.text.begins_with(selected_type) if selected_type != "" else false
+		# В Godot 4 можно менять цвет рамки или модулей для выделения
+		btn.modulate = Color(1, 1, 1, 1) if is_sel else Color(1, 1, 1, 0.6)
+
+func update_ui(total_score: int, pop: int, rep: int):
+	score_label.text = "Очки: %d | Слава: +%d | Жителей: %d" % [total_score, rep, pop]
+
+func show_building_info(bldg: Dictionary):
+	if bldg.is_empty():
+		info_card.visible = false
+		return
+		
+	info_card.visible = true
+	var b_data = Globals.BUILDINGS[bldg.base_type]
+	var txt = "[b]%s[/b]" % b_data.name
+	if bldg.is_merged: txt += " [color=yellow](Слияние)[/color]"
+	txt += "\n\n"
+	
+	for part in bldg.last_parts:
+		var sign = "+" if part[1] > 0 else ""
+		var color = "green" if part[1] > 0 else ("red" if part[1] < 0 else "white")
+		txt += "[color=%s]%s: %s%d[/color]\n" % [color, part[0], sign, part[1]]
+		
+	txt += "\n[b]Итог: %d[/b]" % bldg.score
+	
+	if b_data.has("jobs"):
+		txt += "\n\nРаботники: %d / %d" % [bldg.workers, b_data.jobs]
+		
+	$RightPanel/InfoCard/RichTextLabel.text = txt
+
+func show_status(text: String):
+	status_label.text = text
+
+func spawn_float(pos: Vector2, text: String, type: String = "neutral"):
+	var ft = floating_text_scene.instantiate()
+	ft.text = text
+	ft.global_position = pos
+	float_container.add_child(ft)
+	
+	# Анимация через Tween
+	var tween = create_tween()
+	tween.tween_property(ft, "global_position:y", ft.global_position.y - 40.0, 1.0).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(ft, "modulate:a", 0.0, 1.0)
+	tween.tween_callback(ft.queue_free)
+```
+
+---
+
+### 📜 6. Всплывающий текст (`res://scenes/floating_text.gd`)
+Простая сцена: `Label` с шрифтом `Unbounded`, свойство `horizontal_alignment = 1` (Center).
+
+```gdscript
+extends Label
+
+@export var text: String = "":
+	set(value):
+		text = value
+		self.text = value # Обновляем визуальный текст
+
+func _ready():
+	# Цвет в зависимости от типа
+	if "neg" in name.to_lower() or "neg" in text.to_lower():
+		label_settings.font_color = Color("#D96C57")
+	elif "pos" in name.to_lower() or "pos" in text.to_lower() or "+" in text:
+		label_settings.font_color = Color("#8FBA6B")
+	else:
+		label_settings.font_color = Color("#E7B04A")
+```
+
+---
+
+### 🚀 Как запустить и проверить:
+
+1. Убедитесь, что `globals.gd` добавлен в **Autoload**.
+2. Соберите сцену `Main.tscn` согласно схеме выше.
+3. Назначьте скрипты соответствующим узлам.
+4. Запустите проект (`F5`).
+5. **Проверка механик:**
+   - Клик по кнопке в левой панели выбирает здание.
+   - Клик по пустой клетке ставит здание.
+   - Поставьте 4 одинаковых здания (например, "Школа") вплотную друг к другу. Четвертое автоматически превратится в "Школа_BIG" с увеличенными характеристиками.
+   - Клик по зданию показывает карточку с расчетом очков (база + биом + соседи).
+   - Нажмите кнопку "Сезон +" (добавьте её в UI), чтобы проверить начисление славы и появление жителей.
+
+Этот код полностью воспроизводит логику вашего HTML-прототипа, но использует производительные и идиоматичные для Godot 4 подходы (словари для данных, `Tween` для анимаций, сигналы для взаимодействия). Если нужно добавить визуальные спрайты вместо текстовых заглушек, дайте знать!

@@ -30,8 +30,25 @@ date: 2026-10-16
 ## Источник
 
 `/Users/user/sigil-of-the-unwilling-doc/` — внешний каталог, **не в git**, не бэкапится
-репо. Получено 2026-10-16. Сырые чаты (6 файлов, 10 613 строк) **не импортированы**:
-их выводы уже вошли в `kb/` и в [[CONFLICTS]]; путь вольты зафиксирован здесь.
+репо. Получено 2026-10-16. Статус: **reference, не канон** — решения по вольте только
+через `docs/DECISIONS.md` (раунд Q-A=3, D-187); из канона чаты ничего не меняют.
+
+**Сырые чаты — импортированы** в `chats/` (6 корневых городских файлов, 10 613 строк, как есть,
+без правок; имена переименованы в латиницу — маппинг ниже). Контрольные суммы (SHA-256) —
+для сверки с исходником и против дрейфа:
+
+| Файл вольты | `docs/reference/chats/` | SHA-256 (первые 16) |
+|---|---|---|
+| `chat-Городская система_ Репутация и Классы.txt` | [chat-city-reputation-classes.txt](chats/chat-city-reputation-classes.txt) | `591fe10d9bad6621` |
+| `chat-Механика городов и развитие.txt` | [chat-city-mechanics-development.txt](chats/chat-city-mechanics-development.txt) | `acf06dac6e68fe6c` |
+| `chat-TerraScape_ Ядро + 3 ряда.txt` | [chat-terrascape-core-3-rows.txt](chats/chat-terrascape-core-3-rows.txt) | `a97c06fc57fbee9c` |
+| `chat-Библиотека в Терраскейп_ Постройки и взаимосвязи.txt` | [chat-library-terrascape-buildings.txt](chats/chat-library-terrascape-buildings.txt) | `de0a027a0ab01306` |
+| `chat-Социальная механика и расы в Against the Storm.txt` | [chat-social-mechanics-races-atst.txt](chats/chat-social-mechanics-races-atst.txt) | `1166f5159934d504` |
+| `chat-OpenPose Лицо Профиль Сравнение.txt` | [chat-openpose-face-profile.txt](chats/chat-openpose-face-profile.txt) | `6560a5baaf31d24d` |
+
+**Не импортированы**: 4 чата из «Новая папка с объектами» (Godot Character Builder, Pathfinder
+Constructor, Характеристики и способности, Характеристики персонажа — 9 329 строк; домен
+конструктора персонажа, вне городского пакета) — по D-187 вне раунда; импорт отдельной задачей.
 
 ## Что где лежит
 
