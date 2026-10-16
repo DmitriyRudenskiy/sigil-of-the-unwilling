@@ -4,10 +4,26 @@ tags:
   - gdd
   - process
 status: reference
-date: 2026-10-15
+date: 2026-10-16
 ---
 
 # CHANGELOG — docs/
+
+## [2026-10-16] — DOCS-REF: зона `docs/reference/` + импорт концепт-вольта
+
+- Создана зона [`docs/reference/`](reference/README.md) — 29 файлов, ~370 КБ: 27 импортированных
+  из внешнего вольты `/Users/user/sigil-of-the-unwilling-doc/` (не в git) + `README.md` + `CONFLICTS.md`.
+  Зоны: `against-the-storm/` (6), `poe2/` (9, Pillars of Eternity II: Deadfire), `sigil-ats-prototype/`
+  (7, карантин), `dnd/` (2), `terrascape/`, `homm3/`, `allods/` (по 1). Тела — побайтовые копии
+  источника; добавлены frontmatter + provenance-шапка, относительные ссылки переписаны на новые имена.
+- [`CONFLICTS.md`](reference/CONFLICTS.md) — 19 расхождений «вольта ↔ канон» (К-1…К-19),
+  5 внутренних расхождений репо (В-1…В-5) и 4 вопроса источника. В-1/В-2 отсылают к Q-M46;
+  В-3/В-4 — 02g §5.1 и `settlement_species.gd` несут 7 AtS-видов при аннулированном K-M3.
+- [[QUESTIONS]] → **Q-M48…Q-M51**: очередь строительства и время постройки; классы населения
+  vs сословия (BANK 10.2); внутриигровая энциклопедия (Кодекс); естественная убыль населения.
+- [[00-overview]] — одна строка индекса в блоке «Справочники и банк». Больше канон-доков не трогать.
+- OpenSpec: change `docs-reference-vault-import`. `game/run_tests.sh` не запускался — код и данные
+  не менялись (docs-only); тестовый леджер: +0/−0/quarantine 0, нетто 0.
 
 ## [2026-10-15] — T-060 (E-2, в работе): слой развития партии — PartySystem + проводка
 
