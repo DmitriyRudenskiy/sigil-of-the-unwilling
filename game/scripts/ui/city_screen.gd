@@ -152,8 +152,7 @@ func _resource_icon(resource_id: StringName) -> Texture2D:
 	match resource_id:
 		&"food": return ResourceAtlas.texture_for_id(&"food")
 		&"wood": return ResourceAtlas.texture_for_id(&"wood")
-		# iron своей иконки не имеет (вне ASSET-1) — рисуется рудой, как и раньше.
-		&"iron": return ResourceAtlas.texture_for_id(&"ore")
+		&"iron": return ResourceAtlas.texture_for_id(&"iron")
 	return null
 
 func _resource_metric_style(background: Color, border: Color) -> StyleBoxFlat:

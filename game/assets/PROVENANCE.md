@@ -68,6 +68,7 @@ date: 2026-10-14
 | `game/assets/ui/icons/resources/icon_resource_gems.png` | ASSET-1 | три ромба самоцветов по тону граней; `c3/ok/d7` | наше | чисто |
 | `game/assets/ui/icons/resources/icon_resource_gold.png` | ASSET-1 | пирамида из трёх монет; `gold/b1/b2` | наше | чисто |
 | `game/assets/ui/icons/resources/icon_resource_gold_ore.png` | ASSET-1 | угловатый монолит с золотыми прожилками; `c8/b4/d6` | наше | чисто |
+| `game/assets/ui/icons/resources/icon_resource_iron.png` | ASSET-1 (2026-10-15) | подкова: кольцо с разрывом вниз, шесть гвоздевых отверстий; `c8/a8/b5` + акцент `d5` | наше | чисто |
 | `game/assets/ui/icons/resources/icon_resource_limonite.png` | ASSET-1 | почковидная масса: низкий плитняк с наросшими почками; `c2/c4/c6` | наше | чисто |
 | `game/assets/ui/icons/resources/icon_resource_mercury.png` | ASSET-1 | толстая капля над лужицей с зазором; `a8/b5/a7` | наше | чисто |
 | `game/assets/ui/icons/resources/icon_resource_oak.png` | ASSET-1 | один крупный жёлудь с чашечкой; `wood/b4/d5` | наше | чисто |

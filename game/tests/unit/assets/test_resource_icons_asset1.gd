@@ -14,31 +14,35 @@ extends BaseTest
 # A-12 строка провенанса на файл · сверка контраста на носителе (§4.3, номера
 # критерия нет) · потребители (AC-поток, номера критерия нет) ·
 # заполнение поля (смысл A-3 машиной не проверяется: dHash в 16 px и
-# 60%-десатуре вырожден — 190 пар из 190 красных, минимум 0; §12.1).
+# 60%-десатуре вырожден — все пары красные, минимум 0; §12.1).
 #
 # Числовые пороги живут только здесь и в генераторе; [[13-art-bible]] §12.1
 # ссылается на них по имени (PAIR_MIN, DHASH_MIN, BORDER_MIN, …), а не дублирует.
 
 const IDS: Array[String] = [
 	"bog_iron", "cinnabar", "coal", "coal_swamp", "crystal", "food", "gems",
-	"gold", "gold_ore", "limonite", "mercury", "oak", "ore", "quartz",
+	"gold", "gold_ore", "iron", "limonite", "mercury", "oak", "ore", "quartz",
 	"saltpeter", "silver", "stone", "sulfur", "turquoise", "wood",
 ]
+
+# Мера различимости — одна реализация на гейт, на снятие констант A-9 и на
+# печать матрицы (tools/dhash_report.gd). Python-зеркало удалено из репо.
+const Measure := preload("res://tools/dhash_measure.gd")
 
 const ICON_DIR := "res://assets/ui/icons/resources/"
 const FOREIGN_SHEET := "res://assets/textures/resources.png"
 const PROVENANCE_REGISTRY := "res://assets/PROVENANCE.md"
-const FIELD := 8            # §7.1 шаг 2: поле = канвас − 8 px с каждой стороны
+const FIELD := Measure.FIELD            # §7.1 шаг 2: поле = канвас − 8 px
 const SIZE_LIMIT := 6144    # §8.2
-const CARRIER := Color8(0x28, 0x1C, 0x0F)  # §4.1 тёмное дерево поля карты
+const CARRIER := Measure.CARRIER        # §4.1 тёмное дерево поля карты
 const SOOT := Color8(0x16, 0x10, 0x0A)      # §7.1 шаг 5: цвет обводки
 const L_MIN := 0.20         # §4.3: яркость массы (без обводки) на носителе
 const L_DELTA_MIN := 0.08   # §4.3: и контраст против дерева поля
 const SOOT_E := 12.0        # A-5: «это сажа» — допуск ΔE76 против #16100a
 const BORDER_MIN := 0.60    # A-5: ≥ 60 % границы силуэта должно быть обводкой
-const DHASH_MIN := 12       # §12.1: медиана несвязанной пары 18, подозрительная ≤ 10
+const DHASH_MIN := 12        # §12.1: A-9 в оправке поля — подсовывание ячейки 0, шум наших 14
 const PAIR_MIN := 12         # красная любая пара форм по полю содержимого
-const _HEX_DIGITS := "0123456789abcdef"
+const DHASH_MIN_CANVAS := 8  # A-9 в оправке канваса — подсовывание 0, шум наших 11
 
 # §4.6 полоса (замер живых артефактов) — те же токены, что у генератора.
 const PALETTE := {
@@ -55,15 +59,35 @@ const PALETTE := {
 	"ok": "#7aa85a",
 }
 
-# A-9 — dHash 8×8 шестнадцати ячеек атласа HoMM III. Сняты 2026-10-14 с
-# assets/textures/resources.png (md5 b34a11b6f199645a5a91509c16b08e0f) до его
-# удаления: атласа в репо больше нет, а эталон «на что не должно быть похоже»
-# остаётся данными теста.
-const HOMM_DHASH: Array[String] = [
-	"70dafaccdc786004", "50cce4b2b4e4e00c", "d0f4b4ecf0e464a0", "70f696b2d8f83044",
-	"79e8ccb2f2dc5808", "20e8a29ad0f10260", "c8cc76e4ccf07024", "c8e8acf4d8e8e060",
-	"e0c896b4ec69826c", "28e4aeacd0718448", "c0a8ae96e4f8e060", "8278f2aacc706264",
-	"89d0b896d4ccb0b2", "e0e4e4a8b6f47072", "e0e0cad6bcf8797a", "84ca8aac98f06460",
+# A-9 — 16 ячеек удалённого атласа HoMM III (assets/textures/resources.png,
+# md5 b34a11b6f199645a5a91509c16b08e0f, 410×410, сетка 4×4 по 102 px). Атласа в
+# репо больше нет (A-11), а эталон «на что не должно быть похоже» остаётся
+# данными теста — снятыми МЕРОЙ ГЕЙТА (DhashMeasure), той же, которой режется
+# сравнение:
+#   git show 21ff6d2c^:game/assets/textures/resources.png > /tmp/homm_atlas.png
+#   godot --headless --path game -s tools/dhash_report.gd -- --atlas=/tmp/homm_atlas.png
+# Прежние константы были сняты PIL-зеркалом, которого в репо нет и которое их не
+# воспроизводит (ни одна из 16 не совпала ни с одним вариантом раскроя); при
+# кросс-реализационном шуме PIL↔Godot 2–12 бит на пару порог 12 давал ложный
+# PASS там, где проверить было нельзя.
+#
+# Оправки две, потому что векторы подсовывания разные (замер 2026-10-15,
+# tools/dhash_report.gd, худшее из 16 ячеек, 0 = точно та же форма): подсована
+# целиком в 32×32 → канвас 0 / поле 31; подсована в поле §7.1 → канвас 19 /
+# поле 0. Пороги калиброваны по измеренному шуму наших иконок (канвас шумит
+# сильнее — он с 8 px прозрачных полей), а не по §12.1.
+const HOMM_DHASH_CANVAS: Array[String] = [
+	"3052fa8c5c686800", "00e6a4b2b4646000", "78d4deeab4242000", "1ae4debaea380c00",
+	"04eacd62f65c0800", "00e8aaaad8300000", "904966a4d8322000", "74caaa94ca697000",
+	"00ca96b4687a0000", "00e586ae49340000", "1ce38d92a4486810", "0038baa6d9786000",
+	"00d434d6ec5c3000", "00a9e668b4f47000", "3064aad5a8787800", "00e2b5ada9552200",
+]
+
+const HOMM_DHASH_FIELD: Array[String] = [
+	"305afabc5c796000", "08d6d4a6b4752000", "d9f49aecb4a42010", "36b2b6bada790800",
+	"04a8ccb4be551900", "10e0a69add300000", "34d5d446dc4b3000", "24aaacface596010",
+	"20dad4b468680000", "0064ceacd9340000", "5aa98cb6e4786820", "0030faaad8706000",
+	"20c8f896e44d3008", "50a5d4ccb4647000", "40a1c8d6da696808", "60c6968c9a752300",
 ]
 
 
@@ -77,14 +101,6 @@ static func _load_image(id: String) -> Image:
 	var img := Image.new()
 	var err := img.load_png_from_buffer(FileAccess.get_file_as_bytes(_icon_path(id)))
 	return img if err == OK else null
-
-
-# Яркость как её видит глаз на носителе: альфа — смешивание с деревом поля.
-static func _lum(c: Color) -> float:
-	var a := c.a
-	return 0.2126 * (c.r * a + CARRIER.r * (1.0 - a)) \
-		+ 0.7152 * (c.g * a + CARRIER.g * (1.0 - a)) \
-		+ 0.0722 * (c.b * a + CARRIER.b * (1.0 - a))
 
 
 # Lab (D65) — нужно ровно для ΔE76 в A-5: «пограничный пиксель — сажа».
@@ -103,46 +119,6 @@ static func _lab(c: Color) -> Vector3:
 	var fy: float = cube.call(y)
 	var fz: float = cube.call(z)
 	return Vector3(116.0 * fy - 16.0, 500.0 * (fx - fy), 200.0 * (fy - fz))
-
-
-static func _hex64(hex: String) -> int:
-	var v := 0
-	for i in range(hex.length()):
-		v = (v << 4) | _HEX_DIGITS.find(hex[i])
-	return v
-
-
-static func _hash9x8(src: Image) -> int:
-	var small := src.duplicate()
-	small.resize(9, 8)
-	var h := 0
-	for y in range(8):
-		for x in range(8):
-			if _lum(small.get_pixel(x, y)) > _lum(small.get_pixel(x + 1, y)):
-				h |= 1 << (y * 8 + x)
-	return h
-
-
-# Анти-рекол: весь канвас — ячейки референса заполняют его целиком.
-static func _dhash(img: Image) -> int:
-	return _hash9x8(img)
-
-
-# Различие форм: только поле содержимого. На всём канвасе мера вырождена —
-# 8 px прозрачных полей дают длинные прогоны равных яркостей, биты гаснут,
-# и расстояние между любыми двумя иконками жмётся к нулю (замер 2026-10-14:
-# по всему канвасу медиана пар 10, максимум 20, красных при пороге 12 — 121/190;
-# по полю — медиана 25, диапазон 12–42).
-static func _dhash_field(img: Image) -> int:
-	return _hash9x8(img.get_region(Rect2i(FIELD, FIELD, 32 - 2 * FIELD, 32 - 2 * FIELD)))
-
-
-static func _hamming(a: int, b: int) -> int:
-	var d := a ^ b
-	var n := 0
-	for i in range(64):
-		n += (d >> i) & 1
-	return n
 
 
 # --- A-1, A-8: комплект, имена, вес ------------------------------------------
@@ -196,7 +172,7 @@ func test_content_stays_in_field() -> void:
 # --- заполнение поля (не пустое, не заливка) ---------------------------------
 # Это НЕ A-3: критерий A-3 («силуэт опознаётся в 16 px и 60%-десатуре, dHash
 # пар ≥ 12») машиной не проверяется — на таком входе хэш вырожден целиком
-# (замер 2026-10-15: минимум 0, красных 190 пар из 190). A-3 — группа B, глаза.
+# (замер 2026-10-15: минимум 0, красных — все пары). A-3 — группа B, глаза.
 # Здесь — только разумная полоса заполнения, чтобы иконка не была точкой или
 # плашкой.
 
@@ -271,7 +247,7 @@ func test_shading_and_outline_present() -> void:
 				if c.a <= 0.5:
 					continue
 				opaque += 1
-				var l := _lum(c)
+				var l := Measure.lum(c)
 				lo = minf(lo, l)
 				hi = maxf(hi, l)
 				tones[c.to_html(false)] = true
@@ -304,7 +280,7 @@ func test_shading_and_outline_present() -> void:
 # --- сверка контраста на носителе (§4.3; номера критерия нет) ----------------
 
 func test_contrast_against_carrier() -> void:
-	var carrier_l := _lum(CARRIER)
+	var carrier_l := Measure.lum(CARRIER)
 	for id in IDS:
 		var img := _load_image(id)
 		if img == null:
@@ -317,7 +293,7 @@ func test_contrast_against_carrier() -> void:
 				# сажа исключается: обводка по определению темнее носителя (§7.1
 				# шаг 5), считать её в «яркости массы» — столкнуть A-14 с A-5
 				if c.a > 0.5 and c.to_html(false) != SOOT.to_html(false):
-					sum += _lum(c)
+					sum += Measure.lum(c)
 					n += 1
 		if n == 0:
 			continue
@@ -334,25 +310,34 @@ func test_contrast_against_carrier() -> void:
 
 func test_icons_are_not_recolored_homm_cells() -> void:
 	var forms := {}
+	var worst := {"канвас": 64, "поле": 64}
 	for id in IDS:
 		var img := _load_image(id)
 		if img == null:
 			continue
-		forms[id] = _dhash_field(img)
-		var h := _dhash(img)
-		var best := 64
-		for cell in HOMM_DHASH:
-			best = mini(best, _hamming(h, _hex64(cell)))
-		assert_int(best).override_failure_message(
-			("%s: dHash ближе (%d) к ячейке удалённого атласа HoMM III, чем порог %d — "
-				+ "это перекрас, а не рисунок") % [id, best, DHASH_MIN]
-		).is_greater_equal(DHASH_MIN)
+		forms[id] = Measure.hash_field(img)
+		var hashes := {
+			"канвас": [Measure.hash_canvas(img), HOMM_DHASH_CANVAS, DHASH_MIN_CANVAS],
+			"поле": [Measure.hash_field(img), HOMM_DHASH_FIELD, DHASH_MIN],
+		}
+		for framing in hashes:
+			var h: int = hashes[framing][0]
+			var refs: Array[String] = hashes[framing][1]
+			var minimum: int = hashes[framing][2]
+			var best := 64
+			for cell in refs:
+				best = mini(best, Measure.hamming(h, Measure.hex64(cell)))
+			worst[framing] = mini(int(worst[framing]), best)
+			assert_int(best).override_failure_message(
+				("%s: в оправке «%s» ближе (%d) к ячейке удалённого атласа HoMM III, чем "
+					+ "порог %d — это перекрас, а не рисунок") % [id, framing, best, minimum]
+			).is_greater_equal(minimum)
 	# формы различаются между собой (гард против вырожденного хэша и близнецов)
 	var ids := forms.keys()
 	var pairs: Array = []
 	for i in range(ids.size()):
 		for j in range(i + 1, ids.size()):
-			var d := _hamming(forms[ids[i]], forms[ids[j]])
+			var d := Measure.hamming(forms[ids[i]], forms[ids[j]])
 			pairs.append([d, ids[i], ids[j]])
 			assert_int(d).override_failure_message(
 				"формы %s и %s неразличимы в 8×8 (dHash %d)" % [ids[i], ids[j], d]
@@ -364,10 +349,16 @@ func test_icons_are_not_recolored_homm_cells() -> void:
 		pairs.sort_custom(func(a, b):
 			return a[0] < b[0] if a[0] != b[0] else str(a[1]) < str(b[1]))
 		var red := 0
+		var dist: Array[int] = []
 		for p in pairs:
+			dist.append(p[0])
 			if p[0] < PAIR_MIN:
 				red += 1
-		print("DHASH MATRIX (мера гейта, порог %d): пар %d, красных %d" % [PAIR_MIN, pairs.size(), red])
+		dist.sort()
+		print("DHASH MATRIX (мера гейта DhashMeasure, порог %d): пар %d, красных %d" % [
+			PAIR_MIN, pairs.size(), red])
+		print("мин %d · медиана %d · max %d · маржа к порогу %+d" % [
+			dist[0], dist[int(dist.size() / 2.0)], dist[dist.size() - 1], dist[0] - PAIR_MIN])
 		print("худшие 12: ", pairs.slice(0, 12))
 
 
@@ -411,6 +402,8 @@ func test_consumers_resolve_icons() -> void:
 	assert_bool(ResourceAtlas.texture_for_type(ResourceType.CLASSIC_COUNT) == null).is_true()
 	assert_bool(ResourceAtlas.texture_for_id(&"") == null).is_true()
 	assert_bool(ResourceAtlas.texture_for_id(&"no_such_resource") == null).is_true()
-	# food и oak пришли в UI вместе с ASSET-1 (у удалённого атласа их не было)
+	# food и oak пришли в UI вместе с ASSET-1 (у удалённого атласа их не было);
+	# iron — шапка города, где до этого рисовался чужой по смыслу рудой.
 	assert_bool(ResourceAtlas.texture_for_id(&"food") != null).is_true()
 	assert_bool(ResourceAtlas.texture_for_id(&"oak") != null).is_true()
+	assert_bool(ResourceAtlas.texture_for_id(&"iron") != null).is_true()
