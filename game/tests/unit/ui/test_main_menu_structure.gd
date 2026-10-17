@@ -92,3 +92,24 @@ func test_main_menu_disabled_item_does_not_navigate() -> void:
 	await get_tree().process_frame
 	assert_object(get_tree().current_scene).is_equal(before).override_failure_message(
 		"нажатие отключённого пункта не должно менять сцену")
+
+## UI-3 шаг 3 (AC6): «Выход» — не кликабельна; доступные пункты остаются доступными
+## (иначе «отключено» ничего не проверяет: отключённым в колонке может быть всё).
+func test_main_menu_button_disabled_states() -> void:
+	var ui := await _spawn()
+	assert_bool(ui._exit_btn.disabled).is_true().override_failure_message(
+		"«Выход» обязана быть отключена (AC6): выход из игры — не кликом по меню")
+	assert_bool(ui._new_game_btn.disabled).is_false()
+	assert_bool(ui._settings_btn.disabled).is_false()
+
+
+## UI-3 шаг 3: нажатие доступного пункта доходит до обработчика — экран настроек
+## становится видимым (узел — CanvasItem; слой или контрол — не проверяем).
+func test_main_menu_settings_press_shows_screen() -> void:
+	var ui := await _spawn()
+	var layer: CanvasItem = ui.get_node("SettingsScreen")
+	layer.visible = false
+	ui._settings_btn.emit_signal("pressed")
+	await get_tree().process_frame
+	assert_bool(layer.visible).is_true().override_failure_message(
+		"нажатие «Настройки» не открыло экран настроек")
