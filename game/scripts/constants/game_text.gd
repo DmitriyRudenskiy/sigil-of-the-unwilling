@@ -12,6 +12,7 @@ static func menu_settings() -> String: return TranslationServer.translate("menu.
 static func menu_chronicle() -> String: return TranslationServer.translate("menu.chronicle")
 static func menu_exit() -> String: return TranslationServer.translate("menu.exit")
 static func menu_version() -> String: return TranslationServer.translate("menu.version")
+static func menu_title() -> String: return TranslationServer.translate("menu.title")
 static func model_hero_warrior() -> String: return TranslationServer.translate("model.hero_warrior")
 
 static func building_name(id: StringName) -> String:

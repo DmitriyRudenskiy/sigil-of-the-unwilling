@@ -13,6 +13,7 @@ const EN: Dictionary = {
 	"menu.chronicle": "📜 Chronicle",
 	"menu.exit": "Exit",
 	"menu.version": "Sigil of the Unwilling v0.1 — Godot 4.7",
+	"menu.title": "Sigil of the Unwilling",
 	# Бой
 	"battle.select_unit": "Select a creature…",
 	"battle.your_turn": "Your turn",

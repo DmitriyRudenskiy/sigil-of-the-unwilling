@@ -40,6 +40,9 @@ msgstr "Exit"
 msgid "menu.version"
 msgstr "Sigil of the Unwilling v0.1 — Godot 4.7"
 
+msgid "menu.title"
+msgstr "Sigil of the Unwilling"
+
 msgid "model.hero_warrior"
 msgstr "Adjit the Knight"
 
