@@ -1411,9 +1411,15 @@ def cmd_lint(a) -> int:
     return 0
 
 
-def figure_mask(im: Image.Image, cell: tuple[int, int, int, int], gutter: int = 80) -> np.ndarray:
+def figure_mask(im: Image.Image, cell: tuple[int, int, int, int], gutter: int = 80,
+                overhang: int = 16) -> np.ndarray:
     """Маска «своего» содержимого ячейки: связные компоненты, чей центр тяжести
-    лежит в ячейке. Прямоугольник бокса тащит кисть и щит соседа — маска их выбрасывает."""
+    лежит в ячейке, плюс вырезка по границе ячейки с запасом overhang.
+
+    Центра тяжести хватает, пока фигура с соседом — разные компоненты. Когда они
+    соприкасаются (дым, плащ), это одна компонента и сосед едет целиком: 170 из
+    432 листов. Поэтому маска ещё и отсекается прямоугольником ячейки — теряется
+    свес в 17 пикселей, а не половина чужого торса."""
     from scipy import ndimage
     a = np.asarray(im.convert("L"), dtype=np.uint8)
     x0, y0, x1, y1 = cell
@@ -1429,7 +1435,9 @@ def figure_mask(im: Image.Image, cell: tuple[int, int, int, int], gutter: int = 
             keep |= lab == i
     mask = np.zeros(a.shape, bool)
     mask[win[1]:win[3], win[0]:win[2]] = keep
-    return mask
+    clip = np.zeros(a.shape, bool)
+    clip[max(0, y0 - overhang):y1 + overhang, max(0, x0 - overhang):x1 + overhang] = True
+    return mask & clip
 
 
 def figure_bbox(im: Image.Image, cell: tuple[int, int, int, int],
