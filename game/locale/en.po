@@ -16,6 +16,9 @@ msgstr "New game"
 msgid "menu.load_game"
 msgstr "Load"
 
+msgid "menu.credits"
+msgstr "Credits"
+
 msgid "menu.arena"
 msgstr "🏙 City arena"
 
