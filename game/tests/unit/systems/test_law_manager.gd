@@ -2,7 +2,12 @@ extends BaseTest
 
 ## Tests for the Law system (dynamic-world-crisis-system — Laws task).
 ## LawManager is a standalone RefCounted, so the core logic is testable
-## without a scene tree. One test wires it through CrisisEventSystem.
+## without a scene tree.
+##
+## Q-M81 → разбор построчно (D-200): тест склейки с CrisisEventSystem снят вместе
+## с каналом `unlock_law` — LawManager был приватным экземпляром каталога вне
+## дерева и UI, его пассивные эффекты не читал никто. Класс остаётся (корзина
+## B-2, T-128); возврат канала — только с носителем эффектов (T-130).
 
 
 func test_default_catalog_has_three_branches() -> void:
@@ -104,15 +109,3 @@ func test_from_dict_ignores_unknown_ids() -> void:
 	assert_that(lm.is_law_active("order_tax_code")).is_true()
 	assert_that(lm.is_law_active("bogus_law")).is_false()
 	assert_that(lm.active_laws.size()).is_equal(1)
-
-
-## Wiring: CrisisEventSystem owns a LawManager with the default catalog loaded,
-## and an `unlock_law` choice effect value flows through to the manager.
-func test_crisis_system_wires_law_manager() -> void:
-	var sys := make_node(CrisisEventSystem)  # _ready runs -> law_manager + catalog
-	assert_that(sys.law_manager != null).is_true()
-	assert_that(sys.law_manager.laws.size()).is_equal(6)
-	# Simulate the effect dispatch: a choice with {"unlock_law": id}.
-	var choice := CrisisEventSystem.ChoiceData.new({"effects": {"unlock_law": "order_tax_code"}})
-	sys.law_manager.unlock_law(str(choice.effects["unlock_law"]))
-	assert_that(sys.law_manager.is_law_active("order_tax_code")).is_true()

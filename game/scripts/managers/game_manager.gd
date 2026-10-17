@@ -157,23 +157,11 @@ func _on_crisis_triggered(crisis_event) -> void:
 	crisis_started.emit(crisis_event.id)
 
 
-## Применение эффектов (ресурсы, репутация, разблокировка и т.д.)
-func _apply_effects(effects: Dictionary) -> void:
-	for resource in effects.get("resources", {}).keys():
-		var amount = effects["resources"][resource]
-		if player_data.has("resources") and player_data["resources"].has(resource):
-			player_data["resources"][resource] += amount
-
-	if effects.has("reputation"):
-		player_data["reputation"] += effects["reputation"]
-
-	if effects.has("unlock_building"):
-		if not player_data["buildings"].has(effects["unlock_building"]):
-			player_data["buildings"].append(effects["unlock_building"])
-
-	if effects.has("trigger_event"):
-		# ponytail: очередь событий не реализована — логируем id, триггер через on_day_passed
-		event_history.append(str(effects["trigger_event"]))
+## `_apply_effects` снят (Q-M81 → разбор построчно, D-200): в проде не
+## вызывался ниоткуда, а его ветки писали фантомы — player_data["reputation"]
+## (читателей нет; репутация канона — EthicsSystem/SettlementReputation, не это
+## поле) и `trigger_event` в event_history (строка-заглушка вместо очереди).
+## Живой путь эффектов выбора — CrisisEventSystem.apply_choice_effects.
 
 
 ## Обновление состояния мира после выбора
@@ -297,6 +285,17 @@ func get_save_slots() -> Array[String]:
 	return slots
 
 
+## ── Внутренний контур каталога событий (Q-M81 → разбор построчно, D-200) ──
+## `resources` / `population` / `buildings` ниже — приватное состояние каталога:
+## его пишут эффекты событий, его же читают триггеры каталога и гейтинг выбора
+## (decision_panel.is_choice_available), оно же уходит в собственный сейв-блоб.
+## К каноническому поселению (02g настроение, T-110 ресурсы/население) эти
+## поля НЕ подключены и не выдаются за них: в UI они — только требования
+## выбора. Роутинг на канон — отдельное дизайн-решение экономики (T-131), не
+## чистка: у населения канона — резиденты (PopulationSystem), «дельта на N» без
+## ответа «кто именно» в него не переносится; ресурсы каталога (tools/materials)
+## — другой набор, чем wood/food/gold.
+
 ## Есть ли здание (для требований событий)
 func has_building(building_id: String) -> bool:
 	return player_data.get("buildings", []).has(building_id)
@@ -313,20 +312,22 @@ func get_population() -> int:
 
 
 ## Изменение ресурса (создаёт ключ при первом изменении; не уходит в минус).
-## ponytail: ресурсы с нуля (tools/materials из событий) — не каноничный набор
-## wood/food/gold; при появлении ResourceType-реестра валидировать ключ.
+## Внутренний контур каталога (см. шапку выше): tools/materials — не каноничный
+## набор wood/food/gold; валидировать ключ по ResourceType-реестру — T-131.
 func modify_resource(resource: String, amount: int) -> void:
 	var res: Dictionary = player_data.get("resources", {})
 	res[resource] = max(0, int(res.get(resource, 0)) + amount)
 	player_data["resources"] = res
 
 
-## Изменение населения (не уходит в минус)
+## Изменение населения (не уходит в минус). Внутренний контур каталога, см.
+## шапку выше: канон — PopulationSystem с резидентами, роутинг — T-131.
 func modify_population(amount: int) -> void:
 	player_data["population"] = max(0, int(player_data.get("population", 0)) + amount)
 
 
-## Разблокировка здания (для эффектов событий)
+## Разблокировка здания (для эффектов событий). Внутренний контур каталога,
+## см. шапку выше: здания поселения сюда не попадают.
 func unlock_building(building_id: String) -> void:
 	var buildings: Array = player_data.get("buildings", [])
 	if not buildings.has(building_id):
@@ -334,11 +335,10 @@ func unlock_building(building_id: String) -> void:
 		player_data["buildings"] = buildings
 
 
-## Модификатор производства (накапливаемый float, напр. -0.2 = -20%).
-## ponytail: простое накопление; применение к реальному производству — позже.
-func apply_production_modifier(value: float) -> void:
-	player_data["production_modifier"] = float(player_data.get("production_modifier", 0.0)) + value
-
+## `apply_production_modifier` снят (Q-M81 → разбор построчно, D-200): писал в
+## player_data["production_modifier"], где его не читал никто; канонического
+## модификатора производства нет (02g: производство = f(настроение, рабочие,
+## здания)). Ключ данных `production_reduction` выведен из оборота вместе с ним.
 
 ## Получить данные игрока
 func get_player_data() -> Dictionary:

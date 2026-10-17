@@ -35,8 +35,7 @@
       "tooltip": "Принять дар богов и возвести храм",
       "impact": 3,
       "effects": {
-        "morale_change": 15,
-        "unlock_law": "faith_temple"
+        "morale_change": 15
       },
       "requirements": {}
     }

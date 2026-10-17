@@ -10,21 +10,30 @@ extends BaseTest
 ## Ключи выбора: обработаны CrisisEventSystem.apply_choice_effects.
 const CHOICE_KEYS: Array[String] = [
 	"resource_change", "morale_change", "population_change",
-	"unlock_building", "unlock_law",
+	"unlock_building",
 ]
 
 ## Ключи кризиса (ongoing): обработаны apply_crisis_effects напрямую.
 const CRISIS_KEYS: Array[String] = [
-	"resource_drain", "morale_penalty", "production_reduction",
+	"resource_drain", "morale_penalty",
 ]
 
 ## Ключи разрешения кризиса: словарь выбора поверх кризисного (crisis_01_fire:
 ## population_change в resolution_effects) — apply_crisis_effects делегирует их
 ## в apply_choice_effects (Q-M79 → (а)).
 const RESOLUTION_KEYS: Array[String] = [
-	"resource_drain", "morale_penalty", "production_reduction",
+	"resource_drain", "morale_penalty",
 	"resource_change", "morale_change", "population_change",
-	"unlock_building", "unlock_law",
+	"unlock_building",
+]
+
+## Снятые каналы (Q-M81 → разбор построчно, D-200): писатели без читателя.
+## `unlock_law` вёл приватный LawManager вне дерева и UI (пассивные эффекты не
+## читал никто); `production_reduction` писал player_data["production_modifier"],
+## где его не читал никто, а канонического модификатора производства нет.
+## В данных их быть не должно; живой диспетчер на них кричит.
+const RETIRED_EFFECT_KEYS: Array[String] = [
+	"unlock_law", "production_reduction",
 ]
 
 var _gm: GameManager = null
@@ -130,7 +139,67 @@ func test_invented_morale_store_is_removed() -> void:
 	assert_that(_gm.has_method("get_global_morale")).is_false()
 
 
-## Мёртвые ключи удалены из данных вместе с обработчиками (Q-M79 → (а)).
+## Мёртвые ключи удалены из данных вместе с обработчиками (Q-M79 → (а)),
+## писатели без читателя — следом (Q-M81 → разбор построчно, D-200).
 func test_dead_effect_handlers_are_removed() -> void:
 	var gm := _wire_game_manager()
 	assert_that(gm.has_method("add_permanent_modifier")).is_false()
+	assert_that(gm.has_method("apply_production_modifier")).is_false()
+	# Мёртвый обработчик с фантомными писателями (reputation, trigger_event).
+	assert_that(gm.has_method("_apply_effects")).is_false()
+	var sys := _sys()
+	assert_that(sys.serialize_state().has("law")).is_false()
+
+
+# --- Снятые каналы: в данных их нет, диспетчер на них кричит (D-200) ---
+
+func test_retired_channels_absent_from_data() -> void:
+	var sys := _sys()
+	var offenders: Array[String] = []
+	for e in sys.event_templates:
+		if e.id == "":
+			continue
+		for c in e.choices:
+			for key in c.effects.keys():
+				if RETIRED_EFFECT_KEYS.has(str(key)):
+					offenders.append("%s: %s" % [e.id, str(key)])
+	for c in sys.crisis_templates:
+		for key in c.ongoing_effects.keys():
+			if RETIRED_EFFECT_KEYS.has(str(key)):
+				offenders.append("%s/ongoing_effects: %s" % [c.id, str(key)])
+		for key in c.resolution_effects.keys():
+			if RETIRED_EFFECT_KEYS.has(str(key)):
+				offenders.append("%s/resolution_effects: %s" % [c.id, str(key)])
+	assert_that(offenders).override_failure_message(
+		"снятый канал вернулся в данные: " + str(offenders)).is_empty()
+
+
+func test_unlock_law_is_a_retired_channel() -> void:
+	_wire_game_manager()
+	var sys := _sys()
+	await assert_error(func () -> void: sys.apply_choice_effects({"unlock_law": "order_tax_code"})) \
+		.is_push_error("CrisisEventSystem.apply_choice_effects: " \
+		+ "немой ключ эффекта unlock_law (нет обработчика)")
+
+
+func test_production_reduction_is_a_retired_channel() -> void:
+	_wire_game_manager()
+	var sys := _sys()
+	await assert_error(func () -> void: sys.apply_crisis_effects({"production_reduction": -0.1})) \
+		.is_push_error("CrisisEventSystem.apply_choice_effects: " \
+		+ "немой ключ эффекта production_reduction (нет обработчика)")
+	assert_that(_gm.player_data.has("production_modifier")).is_false()
+
+
+## Граница внутреннего контура (D-200): население каталога — собственный счётчик
+## effects/триггеров, каноническое население (резиденты T-110) оно не трогает.
+## Тест фиксирует границу: роутинг на канон — решение T-131, а не случайность.
+func test_population_change_does_not_touch_canonical_residents() -> void:
+	_wire_game_manager()
+	var sys := _sys()
+	var pop := PopulationSystem.new()
+	var before: int = pop.size()
+	sys.apply_choice_effects({"population_change": 3})
+	# Счётчик каталога стартует с 5 (_initialize_game) — канал прибавил к нему.
+	assert_that(_gm.get_population()).is_equal(8)
+	assert_that(pop.size()).is_equal(before)

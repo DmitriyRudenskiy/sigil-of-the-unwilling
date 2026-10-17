@@ -23,9 +23,10 @@ func test_active_crisis_roundtrip() -> void:
 		{"type": "crisis", "id": crisis.id, "day": 40, "resolved": false},
 		{"type": "event", "id": event.id, "day": 38},
 	]
-	assert_that(sys.law_manager.unlock_law("order_tax_code")).is_true()
-
+	# Канал unlock_law снят (Q-M81 → разбор построчно, D-200): сейв-блоб каталога
+	# больше не несёт ключ "law".
 	var state := sys.serialize_state()
+	assert_that(state.has("law")).is_false()
 
 	# Load: новая система (шаблоны загружаются в _ready)
 	var sys2: CrisisEventSystem = make_node(CrisisEventSystem)
@@ -41,7 +42,14 @@ func test_active_crisis_roundtrip() -> void:
 	assert_that(sys2.active_events.size()).is_equal(1)
 	assert_that(sys2.active_events[0].id).is_equal(event.id)
 	assert_that(sys2.event_history.size()).is_equal(2)
-	assert_that(sys2.law_manager.is_law_active("order_tax_code")).is_true()
+
+	# Старое сохранение с ключом "law" грузится без ошибок — ключ игнорируется.
+	var legacy: Dictionary = state.duplicate(true)
+	legacy["law"] = {"active": ["order_tax_code"]}
+	var sys3: CrisisEventSystem = make_node(CrisisEventSystem)
+	sys3.deserialize_state(legacy)
+	assert_that(sys3.day_counter).is_equal(42)
+	assert_that(sys3.current_crisis).is_not_null()
 
 
 func test_resolved_crisis_not_restored_as_active() -> void:

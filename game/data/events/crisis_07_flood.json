@@ -45,8 +45,7 @@
       "effects": {
         "resource_change": {
           "materials": -15
-        },
-        "unlock_law": "order_tax_code"
+        }
       },
       "requirements": {}
     }

@@ -9,11 +9,11 @@
   "triggers": {},
   "choices": [
     {
-      "text": "Изучить в храме (открывает закон паломничества)",
+      "text": "Изучить в храме (+10 настроения)",
       "tooltip": "Жрецы раскроют силу реликвии — поселение обретёт духовную опору",
       "impact": 1,
       "effects": {
-        "unlock_law": "faith_relic_pilgrimage"
+        "morale_change": 10
       },
       "requirements": {
         "building_required": "temple"

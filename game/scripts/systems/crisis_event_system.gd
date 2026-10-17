@@ -221,8 +221,11 @@ var difficulty: int = 3
 var event_templates: Array[DynamicEventData] = []
 var crisis_templates: Array[CrisisEventData] = []
 
-## Law system (unlocked via event choices, apply passive modifiers).
-var law_manager: LawManager = null
+## Канал `unlock_law` снят (Q-M81 → разбор построчно, D-200): LawManager жил
+## приватным объектом этого каталога — не в дереве, не в UI, а
+## `get_passive_effects()` не читал никто в проде. Выбор «принять закон» менял
+## только собственный сейв-блоб каталога. Возвращать канал — вместе с носителем
+## пассивных эффектов (T-130); сами законы — корзина B-2 (T-128), не MVP.
 
 ## Приёмник канала настроения (Q-M78 → (а), D-197): DistrictSystem поселения
 ## (02g, 0–100). Внедряется хостом (main.gd — composition.districts) или тестом.
@@ -242,9 +245,6 @@ func _ready():
 	load_event_templates()
 	load_crisis_templates()
 	update_next_event_day()
-	if law_manager == null:
-		law_manager = LawManager.new()
-		law_manager.load_default_catalog()
 	# UIManager регистрирует группу "ui_manager" в своем _ready.
 	if ui_manager == null:
 		ui_manager = get_tree().get_first_node_in_group("ui_manager") \
@@ -277,7 +277,6 @@ func serialize_state() -> Dictionary:
 		"current_crisis_id": current_crisis.id if current_crisis else "",
 		"active_event_ids": active_ids,
 		"event_history": event_history.duplicate(true),
-		"law": law_manager.to_dict() if law_manager else {},
 	}
 
 ## Восстановление состояния из сохранения. Шаблоны должны быть загружены.
@@ -308,8 +307,7 @@ func deserialize_state(data: Dictionary) -> void:
 		var ev := _find_event_template(str(eid))
 		if ev != null:
 			active_events.append(ev)
-	if law_manager != null:
-		law_manager.from_dict(data.get("law", {}))
+	# Ключ "law" из старых сохранений игнорируется: канал unlock_law снят (D-200).
 
 func _find_crisis_template(id: String) -> CrisisEventData:
 	if id == "":
@@ -640,8 +638,11 @@ func apply_crisis_effects(effects: Dictionary):
 				game_manager.modify_resource(resource, -value[resource])
 		elif effect_type == "morale_penalty":
 			_apply_mood_delta(effect_type, value)
-		elif effect_type == "production_reduction":
-			game_manager.apply_production_modifier(value)
+		# `production_reduction` снят (Q-M81 → разбор построчно, D-200): писатель
+		# в player_data["production_modifier"], читателя нет ни в проде, ни в
+		# каноне — производство 02g есть f(настроение, рабочие, здания)
+		# (DistrictSystem._prod_mult), отдельного модификатора канон не знает.
+		# Незнакомый ключ уходит в apply_choice_effects и падает там на немом.
 		else:
 			# resolution_effects кризиса говорят словарём выбора (crisis_01_fire:
 			# population_change) — общий диспетчер; неизвестный ключ кричит в нём.
@@ -689,9 +690,6 @@ func apply_choice_effects(effects: Dictionary):
 			game_manager.modify_population(value)
 		elif effect_type == "unlock_building":
 			game_manager.unlock_building(value)
-		elif effect_type == "unlock_law":
-			if law_manager:
-				law_manager.unlock_law(str(value))
 		else:
 			_fail_unknown_effect("apply_choice_effects", effect_type)
 

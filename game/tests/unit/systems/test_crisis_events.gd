@@ -12,7 +12,7 @@ extends BaseTest
 ## ключе — тест test_crisis_effect_contract.gd + push_error в обработчике.
 const KNOWN_EFFECT_KEYS: Array[String] = [
 	"resource_change", "morale_change", "population_change",
-	"unlock_building", "unlock_law",
+	"unlock_building",
 ]
 
 
@@ -51,10 +51,11 @@ const RARE_EVENT_IDS: Array[String] = [
 ]
 
 # Keys apply_choice_effects actually applies (Q-M79 → (а): закрытый набор,
-# немые ключи из данных сняты).
+# немые ключи из данных сняты; Q-M81 → разбор построчно, D-200: снят и unlock_law —
+# писатель в приватный LawManager без читателя).
 const WIRED_EFFECT_KEYS: Array[String] = [
 	"resource_change", "morale_change", "population_change",
-	"unlock_building", "unlock_law",
+	"unlock_building",
 ]
 
 func test_common_events_loaded() -> void:
@@ -158,24 +159,20 @@ func test_ongoing_crisis_effects_apply() -> void:
 	var sys := _sys()
 	sys.mood_sink = _districts()
 	# Data convention (see crisis_*.json): resource_drain is a positive magnitude
-	# (negated in code); morale_penalty/production_reduction are stored signed.
+	# (negated in code); morale_penalty is stored signed. production_reduction
+	# снят (D-200): писатель в player_data без читателя.
 	sys.apply_crisis_effects({
 		"resource_drain": {"food": 5},
 		"morale_penalty": -8,
-		"production_reduction": -0.2,
 	})
 	assert_that(gm.get_resource("food")).is_equal(25)   # 30 - 5
-	assert_that(gm.player_data.get("production_modifier", 0.0)).is_less(0.0)
+	assert_that(gm.player_data.has("production_modifier")).is_false()
 
-func test_unlock_and_modifier_effects_apply() -> void:
+func test_unlock_building_effect_applies() -> void:
 	var gm := _wire_game_manager()
 	var sys := _sys()
-	sys.apply_choice_effects({
-		"unlock_building": "barracks",
-		"unlock_law": "order_tax_code",
-	})
+	sys.apply_choice_effects({"unlock_building": "barracks"})
 	assert_that(gm.has_building("barracks")).is_true()
-	assert_that(sys.law_manager.is_law_active("order_tax_code")).is_true()
 
 func test_resolve_crisis_clears_and_applies_effects() -> void:
 	var gm := _wire_game_manager()
@@ -240,7 +237,7 @@ func test_ongoing_effects_use_supported_keys() -> void:
 	var sys := _sys()
 	# Keys the ongoing/resolution data format recognizes (Q-M79 → (а): закрытый
 	# набор; population_drain немой — из данных снят).
-	const ONGOING_KEYS: Array[String] = ["resource_drain", "morale_penalty", "production_reduction"]
+	const ONGOING_KEYS: Array[String] = ["resource_drain", "morale_penalty"]
 	for c in sys.crisis_templates:
 		for key in c.ongoing_effects:
 			assert_that(ONGOING_KEYS.has(str(key))).is_true()
@@ -265,7 +262,6 @@ func test_serialize_deserialize_roundtrip() -> void:
 	sys.day_counter = 42
 	sys.next_event_day = 17
 	sys.event_history.append({"id": "ev_x", "day": 3})
-	sys.law_manager.unlock_law("order_tax_code")
 
 	var data: Dictionary = sys.serialize_state()
 
@@ -279,7 +275,8 @@ func test_serialize_deserialize_roundtrip() -> void:
 	assert_that(sys2.next_event_day).is_equal(17)
 	assert_that(sys2.event_history.size()).is_equal(1)
 	assert_that(sys2.event_history[0].get("id")).is_equal("ev_x")
-	assert_that(sys2.law_manager.is_law_active("order_tax_code")).is_true()
+	# Канал unlock_law снят (D-200): в сейв-блобе каталога больше нет ключа "law".
+	assert_that(data.has("law")).is_false()
 
 
 func test_deserialize_empty_is_noop() -> void:

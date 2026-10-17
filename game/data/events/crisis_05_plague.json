@@ -38,8 +38,7 @@
       "impact": 5,
       "effects": {
         "population_change": -4,
-        "morale_change": 15,
-        "unlock_law": "survival_granary"
+        "morale_change": 15
       },
       "requirements": {}
     }

@@ -35,8 +35,7 @@
       "tooltip": "Равная доля тепла для всех. Жёстко, но справедливо.",
       "impact": 4,
       "effects": {
-        "morale_change": -10,
-        "unlock_law": "survival_granary"
+        "morale_change": -10
       },
       "requirements": {}
     }

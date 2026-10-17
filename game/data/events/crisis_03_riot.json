@@ -7,8 +7,7 @@
   "duration_days": 3,
   "icon_path": "res://assets/ui/events/refugees_event.png",
   "ongoing_effects": {
-    "morale_penalty": -2,
-    "production_reduction": -0.1
+    "morale_penalty": -2
   },
   "resolution_effects": {},
   "choices": [
@@ -37,8 +36,7 @@
       "tooltip": "Перевести требования в закон — долгий, но чистый путь",
       "impact": 3,
       "effects": {
-        "morale_change": -5,
-        "unlock_law": "order_tax_code"
+        "morale_change": -5
       },
       "requirements": {}
     }
