@@ -2069,14 +2069,330 @@
   "sheet": "references/unit-06.png",
   "cell": 1,
   "category": "unit-06",
-  "model": "krea2",
-  "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "model": "ernie",
+  "status": "success",
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1,
+   "zimage": 1
+  },
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
-  "history": []
+  "subject": "human knight standing three-quarter to the left with his right fist raised to shoulder height in a loose guard, left arm holding a tall kite shield low at his side, weight even on both legs, stocky heroic build, middle-aged face with a thick dark brown handlebar moustache turned up at the tips and a faint proud smile, steel helmet with a narrow raised nose guard and a mail aventail framing the jaw, polished steel pauldron riveted over the left shoulder over a chainmail hauberk, deep blue tabard with gold trim and a pale trident sigil on the chest, wide leather belt with a rectangular brass buckle and a sword hilt at the right hip, blue cloth skirt panel with an embroidered gold hem, steel cuisses and greaves with gold edging, brown leather boots, palette steel grey, deep blue and gold trim on brown leather",
+  "history": [
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-061/krea2_IMG-061_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "texture=живописная вариация на пластинах сведена к более ровному градиенту"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-061/ernie_IMG-061_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 8,
+     "shade": 8
+    },
+    "sty_pct": 80.0,
+    "tens": [],
+    "gaps": [
+     "texture=складки ткани упрощены против эталона"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "zimage",
+    "version": 1,
+    "file": "attempts/IMG-061/zimage_IMG-061_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 4,
+     "color": 7,
+     "texture": 4,
+     "shade": 6
+    },
+    "sty_pct": 52.5,
+    "tens": [],
+    "gaps": [
+     "line=тёмного тёплого контура нет, край собран светом",
+     "texture=живописная фактура заменена пластиковым 3D-шейдингом"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-061/ernie_IMG-061_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 2,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 8,
+     "shade": 8
+    },
+    "sty_pct": 80.0,
+    "tens": [],
+    "gaps": [
+     "texture=складки ткани упрощены против эталона"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 0,
+     "color": 0,
+     "texture": 0,
+     "shade": 0
+    }
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-061/krea2_IMG-061_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 2,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "texture=живописная вариация ткани и металла сведена к более ровному градиенту"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 0,
+     "color": 0,
+     "texture": 0,
+     "shade": 0
+    }
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-061/ernie_IMG-061_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 3,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 8,
+     "shade": 8
+    },
+    "sty_pct": 80.0,
+    "tens": [],
+    "gaps": [
+     "texture=складки ткани упрощены против эталона"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 0,
+     "color": 0,
+     "texture": 0,
+     "shade": 0
+    }
+   }
+  ],
+  "seal": {
+   "etalon": "d77e539a2112",
+   "sheet": "1b62e3bafbb6",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-061_v1": {
+    "etalon": "d77e539a2112",
+    "sheet": "1b62e3bafbb6",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-061_v1": {
+    "etalon": "d77e539a2112",
+    "sheet": "1b62e3bafbb6",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "zimage_IMG-061_v1": {
+    "etalon": "d77e539a2112",
+    "sheet": "1b62e3bafbb6",
+    "model": "zimage",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "res_multistep",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "z_image_turbo_bf16.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-061/ernie_IMG-061_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1",
+  "cycle": 2,
+  "cycles": [
+   {
+    "cycle": 1,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 80.0,
+     "zimage": 52.5
+    },
+    "mean": 70.0
+   },
+   {
+    "cycle": 2,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 80.0
+    },
+    "mean": 78.8
+   }
+  ]
  },
  "IMG-062": {
   "unit": "IMG-062",
@@ -2084,14 +2400,292 @@
   "sheet": "references/unit-06.png",
   "cell": 2,
   "category": "unit-06",
-  "model": "krea2",
-  "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "model": "ernie",
+  "status": "success",
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1,
+   "zimage": 1
+  },
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
-  "history": []
+  "subject": "bald human monk standing square to the camera with his right hand raised palm forward at shoulder height in a stop gesture and his left hand pinching the hanging sash at his waist, heavy-set build, thick straight brows and a small frown, close-cropped scalp, saffron-orange sleeveless robe with a wide crossed collar and a darker orange inner fold, long sash cords with knotted tassels and turquoise beads hanging at the hip, prayer-bead necklace of dark polished wood resting on the chest, bare arms with a thin cloth band at one wrist, bare feet with linen wraps wound around the ankles, robe hem falling to the shins over one bared leg, palette saffron orange and warm brown with turquoise accents, matte cloth with soft folds",
+  "history": [
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-062/krea2_IMG-062_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "texture=живописная вариация ткани и металла сведена к более ровному градиенту"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-062/ernie_IMG-062_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 8,
+     "shade": 8
+    },
+    "sty_pct": 80.0,
+    "tens": [],
+    "gaps": [
+     "texture=складки ткани упрощены против эталона"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "zimage",
+    "version": 1,
+    "file": "attempts/IMG-062/zimage_IMG-062_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 4,
+     "color": 7,
+     "texture": 4,
+     "shade": 6
+    },
+    "sty_pct": 52.5,
+    "tens": [],
+    "gaps": [
+     "line=тёмного тёплого контура нет, край собран светом",
+     "texture=живописная фактура заменена пластиковым 3D-шейдингом"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-062/krea2_IMG-062_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 2,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "texture=живописная вариация ткани и металла сведена к более ровному градиенту"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 0,
+     "color": 0,
+     "texture": 0,
+     "shade": 0
+    }
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-062/ernie_IMG-062_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 2,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 8,
+     "shade": 8
+    },
+    "sty_pct": 80.0,
+    "tens": [],
+    "gaps": [
+     "texture=складки ткани упрощены против эталона"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 0,
+     "color": 0,
+     "texture": 0,
+     "shade": 0
+    }
+   }
+  ],
+  "seal": {
+   "etalon": "2adb20c5bcde",
+   "sheet": "1b62e3bafbb6",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-062_v1": {
+    "etalon": "2adb20c5bcde",
+    "sheet": "1b62e3bafbb6",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-062_v1": {
+    "etalon": "2adb20c5bcde",
+    "sheet": "1b62e3bafbb6",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "zimage_IMG-062_v1": {
+    "etalon": "2adb20c5bcde",
+    "sheet": "1b62e3bafbb6",
+    "model": "zimage",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "res_multistep",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "z_image_turbo_bf16.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-062/ernie_IMG-062_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1",
+  "cycle": 2,
+  "cycles": [
+   {
+    "cycle": 1,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 80.0,
+     "zimage": 52.5
+    },
+    "mean": 70.0
+   },
+   {
+    "cycle": 2,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 80.0
+    },
+    "mean": 78.8
+   }
+  ]
  },
  "IMG-063": {
   "unit": "IMG-063",
@@ -2099,14 +2693,208 @@
   "sheet": "references/unit-06.png",
   "cell": 3,
   "category": "unit-06",
-  "model": "krea2",
+  "model": "zimage",
   "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1,
+   "zimage": 1
+  },
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
-  "history": []
+  "subject": "muscular human swordsman standing with weight on one leg and hips turned slightly, a curved scimitar drawn in each hand with both blades swept outward, black hair pulled into a high topknot with a short tail, thick dark brows and a confident smirk, bare shoulders and arms over a cream sleeveless wrap shirt laced over one shoulder, chunky turquoise bead necklace at the throat, dark red sash knotted at the waist with a navy cloth panel hanging down one thigh, riveted leather bracers on both forearms, loose cream trousers tucked into brown leather boots with wrapped calves, palette cream, dark red and navy with steel blades, matte skin and worn canvas",
+  "history": [
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-063/krea2_IMG-063_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "texture=живописная вариация ткани и металла сведена к более ровному градиенту"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-063/ernie_IMG-063_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "texture=стёжка и бусы сведены к более крупным пятнам"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "zimage",
+    "version": 1,
+    "file": "attempts/IMG-063/zimage_IMG-063_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 5,
+     "color": 7,
+     "texture": 4,
+     "shade": 6
+    },
+    "sty_pct": 55.0,
+    "tens": [],
+    "gaps": [
+     "line=контур только на главной фигуре, дубли без него",
+     "texture=пластиковый 3D-шейдинг"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   }
+  ],
+  "seal": {
+   "etalon": "ac4f3df180e2",
+   "sheet": "1b62e3bafbb6",
+   "model": "zimage",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "res_multistep",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "z_image_turbo_bf16.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-063_v1": {
+    "etalon": "ac4f3df180e2",
+    "sheet": "1b62e3bafbb6",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-063_v1": {
+    "etalon": "ac4f3df180e2",
+    "sheet": "1b62e3bafbb6",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "zimage_IMG-063_v1": {
+    "etalon": "ac4f3df180e2",
+    "sheet": "1b62e3bafbb6",
+    "model": "zimage",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "res_multistep",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "z_image_turbo_bf16.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-063/zimage_IMG-063_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1",
+  "cycle": 1,
+  "cycles": [
+   {
+    "cycle": 1,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 77.5,
+     "zimage": 55.0
+    },
+    "mean": 70.0
+   }
+  ]
  },
  "IMG-064": {
   "unit": "IMG-064",
@@ -2114,14 +2902,292 @@
   "sheet": "references/unit-06.png",
   "cell": 4,
   "category": "unit-06",
-  "model": "krea2",
-  "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "model": "ernie",
+  "status": "success",
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1,
+   "zimage": 1
+  },
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
-  "history": []
+  "subject": "human ranger standing three-quarter to the right holding a long spear upright in his right hand, the iron head a broad leaf blade with a small tassel charm hanging below it, hooded olive-green cloak with a thick brown fur collar pulled over the head, brown hair and a short trimmed beard, calm weathered face, leather chest straps crossed over a green tunic with brass buckles, worn brown leather satchel at the left hip, layered green cloak falling past the knees, dark trousers bloused into brown fur-trimmed boots, palette olive green, saddle brown and undyed fur, matte wool and scuffed leather",
+  "history": [
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-064/krea2_IMG-064_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "texture=живописная вариация ткани и металла сведена к более ровному градиенту"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-064/ernie_IMG-064_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 8,
+     "shade": 8
+    },
+    "sty_pct": 80.0,
+    "tens": [],
+    "gaps": [
+     "texture=складки ткани упрощены против эталона"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "zimage",
+    "version": 1,
+    "file": "attempts/IMG-064/zimage_IMG-064_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 4,
+     "color": 7,
+     "texture": 4,
+     "shade": 6
+    },
+    "sty_pct": 52.5,
+    "tens": [],
+    "gaps": [
+     "line=тёмного тёплого контура нет, край собран светом",
+     "texture=живописная фактура заменена пластиковым 3D-шейдингом"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-064/krea2_IMG-064_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 2,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "texture=живописная вариация ткани и металла сведена к более ровному градиенту"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 0,
+     "color": 0,
+     "texture": 0,
+     "shade": 0
+    }
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-064/ernie_IMG-064_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 2,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 8,
+     "shade": 8
+    },
+    "sty_pct": 80.0,
+    "tens": [],
+    "gaps": [
+     "texture=складки ткани упрощены против эталона"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 0,
+     "color": 0,
+     "texture": 0,
+     "shade": 0
+    }
+   }
+  ],
+  "seal": {
+   "etalon": "5f9261b3131a",
+   "sheet": "1b62e3bafbb6",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-064_v1": {
+    "etalon": "5f9261b3131a",
+    "sheet": "1b62e3bafbb6",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-064_v1": {
+    "etalon": "5f9261b3131a",
+    "sheet": "1b62e3bafbb6",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "zimage_IMG-064_v1": {
+    "etalon": "5f9261b3131a",
+    "sheet": "1b62e3bafbb6",
+    "model": "zimage",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "res_multistep",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "z_image_turbo_bf16.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-064/ernie_IMG-064_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1",
+  "cycle": 2,
+  "cycles": [
+   {
+    "cycle": 1,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 80.0,
+     "zimage": 52.5
+    },
+    "mean": 70.0
+   },
+   {
+    "cycle": 2,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 80.0
+    },
+    "mean": 78.8
+   }
+  ]
  },
  "IMG-065": {
   "unit": "IMG-065",
@@ -2129,14 +3195,292 @@
   "sheet": "references/unit-06.png",
   "cell": 5,
   "category": "unit-06",
-  "model": "krea2",
-  "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "model": "ernie",
+  "status": "success",
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1,
+   "zimage": 1
+  },
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
-  "history": []
+  "subject": "human archer in profile facing left at full draw, bow arm straight and draw hand back at the cheek with an arrow nocked, brown hair swept back from the forehead, faint easy smile, long wooden longbow with a pale string, deep green hooded cloak over a dark green tunic with a leather chest strap, studded leather bracer on the bow forearm, quiver of arrows with pale fletching slung over the right shoulder, short sword with a gold hilt at the left hip, knee-length green cape with a folded collar, one steel knee plate, brown boots with turned cuffs, palette forest green, brown leather and steel, matte cloth",
+  "history": [
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-065/krea2_IMG-065_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "texture=живописная вариация сведена к более ровному градиенту"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-065/ernie_IMG-065_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 8,
+     "shade": 8
+    },
+    "sty_pct": 80.0,
+    "tens": [],
+    "gaps": [
+     "texture=складки ткани упрощены против эталона"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "zimage",
+    "version": 1,
+    "file": "attempts/IMG-065/zimage_IMG-065_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 4,
+     "color": 7,
+     "texture": 4,
+     "shade": 6
+    },
+    "sty_pct": 52.5,
+    "tens": [],
+    "gaps": [
+     "line=тёмного тёплого контура нет, край собран светом",
+     "texture=живописная фактура заменена пластиковым 3D-шейдингом"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-065/krea2_IMG-065_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 2,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "texture=живописная вариация ткани и металла сведена к более ровному градиенту"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 0,
+     "color": 0,
+     "texture": 0,
+     "shade": 0
+    }
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-065/ernie_IMG-065_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 2,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 8,
+     "shade": 8
+    },
+    "sty_pct": 80.0,
+    "tens": [],
+    "gaps": [
+     "texture=складки ткани упрощены против эталона"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 0,
+     "color": 0,
+     "texture": 0,
+     "shade": 0
+    }
+   }
+  ],
+  "seal": {
+   "etalon": "c7fe6aa94bf2",
+   "sheet": "1b62e3bafbb6",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-065_v1": {
+    "etalon": "c7fe6aa94bf2",
+    "sheet": "1b62e3bafbb6",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-065_v1": {
+    "etalon": "c7fe6aa94bf2",
+    "sheet": "1b62e3bafbb6",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "zimage_IMG-065_v1": {
+    "etalon": "c7fe6aa94bf2",
+    "sheet": "1b62e3bafbb6",
+    "model": "zimage",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "res_multistep",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "z_image_turbo_bf16.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-065/ernie_IMG-065_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1",
+  "cycle": 2,
+  "cycles": [
+   {
+    "cycle": 1,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 80.0,
+     "zimage": 52.5
+    },
+    "mean": 70.0
+   },
+   {
+    "cycle": 2,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 80.0
+    },
+    "mean": 78.8
+   }
+  ]
  },
  "IMG-066": {
   "unit": "IMG-066",
@@ -2144,14 +3488,292 @@
   "sheet": "references/unit-06.png",
   "cell": 6,
   "category": "unit-06",
-  "model": "krea2",
-  "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "model": "ernie",
+  "status": "success",
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1,
+   "zimage": 1
+  },
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
-  "history": []
+  "subject": "elderly elven druid standing square to the camera, right hand gripping a tall gnarled staff topped with a green leafy sprig and hanging bone charms, left hand resting on a pouch at his belt, long white beard parted over the chest, long grey hair under an antler crown of two branching stag horns, a feather tucked behind one pointed ear, kind narrowed eyes, brown robe under a moss-green tabard embroidered with pale leaf rows, fur-lined cloak over the shoulders, wide leather belt with a green gem brooch and small pouches, tall leather boots, palette bark brown, moss green and bone white, matte wool and weathered wood",
+  "history": [
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-066/krea2_IMG-066_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "texture=живописная вариация ткани и металла сведена к более ровному градиенту"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-066/ernie_IMG-066_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 8,
+     "shade": 8
+    },
+    "sty_pct": 80.0,
+    "tens": [],
+    "gaps": [
+     "texture=складки ткани упрощены против эталона"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "zimage",
+    "version": 1,
+    "file": "attempts/IMG-066/zimage_IMG-066_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 4,
+     "color": 7,
+     "texture": 4,
+     "shade": 6
+    },
+    "sty_pct": 52.5,
+    "tens": [],
+    "gaps": [
+     "line=тёмного тёплого контура нет, край собран светом",
+     "texture=живописная фактура заменена пластиковым 3D-шейдингом"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-066/krea2_IMG-066_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 2,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "texture=живописная вариация ткани и металла сведена к более ровному градиенту"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 0,
+     "color": 0,
+     "texture": 0,
+     "shade": 0
+    }
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-066/ernie_IMG-066_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 2,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 8,
+     "shade": 8
+    },
+    "sty_pct": 80.0,
+    "tens": [],
+    "gaps": [
+     "texture=складки ткани упрощены против эталона"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 0,
+     "color": 0,
+     "texture": 0,
+     "shade": 0
+    }
+   }
+  ],
+  "seal": {
+   "etalon": "80a754dbbd09",
+   "sheet": "1b62e3bafbb6",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-066_v1": {
+    "etalon": "80a754dbbd09",
+    "sheet": "1b62e3bafbb6",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-066_v1": {
+    "etalon": "80a754dbbd09",
+    "sheet": "1b62e3bafbb6",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "zimage_IMG-066_v1": {
+    "etalon": "80a754dbbd09",
+    "sheet": "1b62e3bafbb6",
+    "model": "zimage",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "res_multistep",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "z_image_turbo_bf16.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-066/ernie_IMG-066_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1",
+  "cycle": 2,
+  "cycles": [
+   {
+    "cycle": 1,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 80.0,
+     "zimage": 52.5
+    },
+    "mean": 70.0
+   },
+   {
+    "cycle": 2,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 80.0
+    },
+    "mean": 78.8
+   }
+  ]
  },
  "IMG-067": {
   "unit": "IMG-067",
@@ -2159,14 +3781,292 @@
   "sheet": "references/unit-06.png",
   "cell": 7,
   "category": "unit-06",
-  "model": "krea2",
-  "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "model": "ernie",
+  "status": "success",
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1,
+   "zimage": 1
+  },
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
-  "history": []
+  "subject": "elderly human hedge witch standing weight on one leg, right hand holding a tall wooden staff crowned with a small carved doll and hanging feathers, beads and a dried herb bunch, left hand holding a loop of prayer beads and a small drawstring pouch, wide-brim beige felt hat over soft grey hair, wrinkled face with a warm closed-mouth smile and a long nose, layered cream blouse under a dusty blue-grey skirt, tan cloak fastened at the throat with a round brooch, leather satchel at the hip, brown boots, palette sand beige, oatmeal and dusty blue-grey with brown leather, matte worn cloth",
+  "history": [
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-067/krea2_IMG-067_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "texture=фактура плаща ровнее эталонной"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-067/ernie_IMG-067_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 8,
+     "shade": 8
+    },
+    "sty_pct": 80.0,
+    "tens": [],
+    "gaps": [
+     "texture=складки ткани упрощены против эталона"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "zimage",
+    "version": 1,
+    "file": "attempts/IMG-067/zimage_IMG-067_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 4,
+     "color": 7,
+     "texture": 4,
+     "shade": 6
+    },
+    "sty_pct": 52.5,
+    "tens": [],
+    "gaps": [
+     "line=тёмного тёплого контура нет, край собран светом",
+     "texture=живописная фактура заменена пластиковым 3D-шейдингом"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-067/krea2_IMG-067_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 2,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "texture=живописная вариация ткани и металла сведена к более ровному градиенту"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 0,
+     "color": 0,
+     "texture": 0,
+     "shade": 0
+    }
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-067/ernie_IMG-067_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 2,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 8,
+     "shade": 8
+    },
+    "sty_pct": 80.0,
+    "tens": [],
+    "gaps": [
+     "texture=складки ткани упрощены против эталона"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 0,
+     "color": 0,
+     "texture": 0,
+     "shade": 0
+    }
+   }
+  ],
+  "seal": {
+   "etalon": "14ed51e5adb7",
+   "sheet": "1b62e3bafbb6",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-067_v1": {
+    "etalon": "14ed51e5adb7",
+    "sheet": "1b62e3bafbb6",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-067_v1": {
+    "etalon": "14ed51e5adb7",
+    "sheet": "1b62e3bafbb6",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "zimage_IMG-067_v1": {
+    "etalon": "14ed51e5adb7",
+    "sheet": "1b62e3bafbb6",
+    "model": "zimage",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "res_multistep",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "z_image_turbo_bf16.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-067/ernie_IMG-067_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1",
+  "cycle": 2,
+  "cycles": [
+   {
+    "cycle": 1,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 80.0,
+     "zimage": 52.5
+    },
+    "mean": 70.0
+   },
+   {
+    "cycle": 2,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 80.0
+    },
+    "mean": 78.8
+   }
+  ]
  },
  "IMG-068": {
   "unit": "IMG-068",
@@ -2174,14 +4074,209 @@
   "sheet": "references/unit-06.png",
   "cell": 8,
   "category": "unit-06",
-  "model": "krea2",
+  "model": "zimage",
   "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1,
+   "zimage": 1
+  },
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
-  "history": []
+  "subject": "young human bard standing with one knee bent and weight on the back foot, shoulders lifted mid-step, playing a wooden transverse flute held out to his right side with both hands, cheerful open face, brown curly hair under a brick-red cap stuck through with a white feather, patchwork quilted doublet in brick red and teal with a mustard-yellow scarf knotted at the neck, sleeves pushed to the elbows, wide brown leather belt with a square buckle, patched brown trousers, brown leather boots, small satchel at the hip, palette brick red, teal and mustard yellow, matte quilted fabric with visible stitching",
+  "history": [
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-068/krea2_IMG-068_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 7
+    },
+    "sty_pct": 75.0,
+    "tens": [],
+    "gaps": [
+     "texture=стёжка камзола потеряла вариацию мазка",
+     "shade=светотень плосче, контактнее"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-068/ernie_IMG-068_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "texture=стёжка и бусы сведены к более крупным пятнам"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "zimage",
+    "version": 1,
+    "file": "attempts/IMG-068/zimage_IMG-068_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 4,
+     "color": 7,
+     "texture": 4,
+     "shade": 6
+    },
+    "sty_pct": 52.5,
+    "tens": [],
+    "gaps": [
+     "line=тёмного тёплого контура нет, край собран светом",
+     "texture=живописная фактура заменена пластиковым 3D-шейдингом"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   }
+  ],
+  "seal": {
+   "etalon": "c3ae70a30937",
+   "sheet": "1b62e3bafbb6",
+   "model": "zimage",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "res_multistep",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "z_image_turbo_bf16.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-068_v1": {
+    "etalon": "c3ae70a30937",
+    "sheet": "1b62e3bafbb6",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-068_v1": {
+    "etalon": "c3ae70a30937",
+    "sheet": "1b62e3bafbb6",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "zimage_IMG-068_v1": {
+    "etalon": "c3ae70a30937",
+    "sheet": "1b62e3bafbb6",
+    "model": "zimage",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "res_multistep",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "z_image_turbo_bf16.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-068/zimage_IMG-068_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1",
+  "cycle": 1,
+  "cycles": [
+   {
+    "cycle": 1,
+    "sty": {
+     "krea2": 75.0,
+     "ernie": 77.5,
+     "zimage": 52.5
+    },
+    "mean": 68.3
+   }
+  ]
  },
  "IMG-069": {
   "unit": "IMG-069",
@@ -2189,14 +4284,292 @@
   "sheet": "references/unit-06.png",
   "cell": 9,
   "category": "unit-06",
-  "model": "krea2",
-  "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "model": "ernie",
+  "status": "success",
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1,
+   "zimage": 1
+  },
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
-  "history": []
+  "subject": "young human fire mage standing square to the camera, both hands raised at chest height cupping two flames with fire wreathing his forearms and shoulders, tousled dark brown hair, bright grin, long crimson-red mage coat with a wide gold-trimmed collar and gold flame embroidery along the hem and cuffs, blue gem pendant on a gold chain at the chest, leather belt with a brass buckle and two pouches at the hip, coat open over the knees, dark trousers and brown boots, palette crimson, burnished gold and orange flame with a blue gem accent, matte velvet with soft light on the sleeves",
+  "history": [
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-069/krea2_IMG-069_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "texture=фактура плаща ровнее эталонной"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-069/ernie_IMG-069_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 8,
+     "shade": 8
+    },
+    "sty_pct": 80.0,
+    "tens": [],
+    "gaps": [
+     "texture=складки ткани упрощены против эталона"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "zimage",
+    "version": 1,
+    "file": "attempts/IMG-069/zimage_IMG-069_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 4,
+     "color": 7,
+     "texture": 4,
+     "shade": 6
+    },
+    "sty_pct": 52.5,
+    "tens": [],
+    "gaps": [
+     "line=тёмного тёплого контура нет, край собран светом",
+     "texture=живописная фактура заменена пластиковым 3D-шейдингом"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-069/krea2_IMG-069_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 2,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "texture=живописная вариация ткани и металла сведена к более ровному градиенту"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 0,
+     "color": 0,
+     "texture": 0,
+     "shade": 0
+    }
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-069/ernie_IMG-069_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 2,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 8,
+     "shade": 8
+    },
+    "sty_pct": 80.0,
+    "tens": [],
+    "gaps": [
+     "texture=складки ткани упрощены против эталона"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 0,
+     "color": 0,
+     "texture": 0,
+     "shade": 0
+    }
+   }
+  ],
+  "seal": {
+   "etalon": "d58dde75aef4",
+   "sheet": "1b62e3bafbb6",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-069_v1": {
+    "etalon": "d58dde75aef4",
+    "sheet": "1b62e3bafbb6",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-069_v1": {
+    "etalon": "d58dde75aef4",
+    "sheet": "1b62e3bafbb6",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "zimage_IMG-069_v1": {
+    "etalon": "d58dde75aef4",
+    "sheet": "1b62e3bafbb6",
+    "model": "zimage",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "res_multistep",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "z_image_turbo_bf16.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-069/ernie_IMG-069_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1",
+  "cycle": 2,
+  "cycles": [
+   {
+    "cycle": 1,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 80.0,
+     "zimage": 52.5
+    },
+    "mean": 70.0
+   },
+   {
+    "cycle": 2,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 80.0
+    },
+    "mean": 78.8
+   }
+  ]
  },
  "IMG-070": {
   "unit": "IMG-070",
@@ -2204,14 +4577,292 @@
   "sheet": "references/unit-06.png",
   "cell": 10,
   "category": "unit-06",
-  "model": "krea2",
-  "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "model": "ernie",
+  "status": "success",
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1,
+   "zimage": 1
+  },
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
-  "history": []
+  "subject": "young human herbalist standing square to the camera, both hands cupped at her chest holding a small dark pot from which green sparks and steam rise, long wavy grey hair under a crown of small white and yellow flowers, green eyes, freckled nose, open smile, cream blouse with full sleeves under an olive-green cloak pinned at the throat with a round bronze brooch, brown leather belt with glass vials and a potion bottle hanging at the hip, woven basket of green herbs at her side, long beige skirt over brown boots, palette olive green, cream and warm brown with glass accents, matte linen and leather",
+  "history": [
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-070/krea2_IMG-070_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "texture=живописная вариация ткани и металла сведена к более ровному градиенту"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-070/ernie_IMG-070_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 8,
+     "shade": 8
+    },
+    "sty_pct": 80.0,
+    "tens": [],
+    "gaps": [
+     "texture=складки ткани упрощены против эталона"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "zimage",
+    "version": 1,
+    "file": "attempts/IMG-070/zimage_IMG-070_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 4,
+     "color": 7,
+     "texture": 4,
+     "shade": 6
+    },
+    "sty_pct": 52.5,
+    "tens": [],
+    "gaps": [
+     "line=тёмного тёплого контура нет, край собран светом",
+     "texture=живописная фактура заменена пластиковым 3D-шейдингом"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-070/krea2_IMG-070_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 2,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "texture=живописная вариация ткани и металла сведена к более ровному градиенту"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 0,
+     "color": 0,
+     "texture": 0,
+     "shade": 0
+    }
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-070/ernie_IMG-070_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 2,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 8,
+     "shade": 8
+    },
+    "sty_pct": 80.0,
+    "tens": [],
+    "gaps": [
+     "texture=складки ткани упрощены против эталона"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 0,
+     "color": 0,
+     "texture": 0,
+     "shade": 0
+    }
+   }
+  ],
+  "seal": {
+   "etalon": "8861cba28173",
+   "sheet": "1b62e3bafbb6",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-070_v1": {
+    "etalon": "8861cba28173",
+    "sheet": "1b62e3bafbb6",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-070_v1": {
+    "etalon": "8861cba28173",
+    "sheet": "1b62e3bafbb6",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "zimage_IMG-070_v1": {
+    "etalon": "8861cba28173",
+    "sheet": "1b62e3bafbb6",
+    "model": "zimage",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "res_multistep",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "z_image_turbo_bf16.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-070/ernie_IMG-070_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1",
+  "cycle": 2,
+  "cycles": [
+   {
+    "cycle": 1,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 80.0,
+     "zimage": 52.5
+    },
+    "mean": 70.0
+   },
+   {
+    "cycle": 2,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 80.0
+    },
+    "mean": 78.8
+   }
+  ]
  },
  "IMG-071": {
   "unit": "IMG-071",
@@ -2219,14 +4870,292 @@
   "sheet": "references/unit-06.png",
   "cell": 11,
   "category": "unit-06",
-  "model": "krea2",
-  "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "model": "ernie",
+  "status": "success",
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1,
+   "zimage": 1
+  },
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
-  "history": []
+  "subject": "human knight standing square to the camera, left hand holding a great crystal sword point down at his side, right arm relaxed, long silver-white hair falling past the shoulders, blue eyes and a faint confident smile, midnight-blue cape over full silver plate armour etched with glowing ice-blue runes, a blue gem set in the breastplate and a second at the throat, layered steel pauldrons and vambraces with rune inlays, black tunic under the armour, steel greaves and pointed sabatons, palette polished steel, midnight blue and glowing ice blue, matte metal with cold light in the engraved lines",
+  "history": [
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-071/krea2_IMG-071_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "texture=живописная вариация ткани и металла сведена к более ровному градиенту"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-071/ernie_IMG-071_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 8,
+     "shade": 8
+    },
+    "sty_pct": 80.0,
+    "tens": [],
+    "gaps": [
+     "texture=складки ткани упрощены против эталона"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "zimage",
+    "version": 1,
+    "file": "attempts/IMG-071/zimage_IMG-071_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 4,
+     "color": 7,
+     "texture": 4,
+     "shade": 6
+    },
+    "sty_pct": 52.5,
+    "tens": [],
+    "gaps": [
+     "line=тёмного тёплого контура нет, край собран светом",
+     "texture=живописная фактура заменена пластиковым 3D-шейдингом"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-071/krea2_IMG-071_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 2,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "texture=живописная вариация ткани и металла сведена к более ровному градиенту"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 0,
+     "color": 0,
+     "texture": 0,
+     "shade": 0
+    }
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-071/ernie_IMG-071_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 2,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 8,
+     "shade": 8
+    },
+    "sty_pct": 80.0,
+    "tens": [],
+    "gaps": [
+     "texture=складки ткани упрощены против эталона"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 0,
+     "color": 0,
+     "texture": 0,
+     "shade": 0
+    }
+   }
+  ],
+  "seal": {
+   "etalon": "c4174ad5f185",
+   "sheet": "1b62e3bafbb6",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-071_v1": {
+    "etalon": "c4174ad5f185",
+    "sheet": "1b62e3bafbb6",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-071_v1": {
+    "etalon": "c4174ad5f185",
+    "sheet": "1b62e3bafbb6",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "zimage_IMG-071_v1": {
+    "etalon": "c4174ad5f185",
+    "sheet": "1b62e3bafbb6",
+    "model": "zimage",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "res_multistep",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "z_image_turbo_bf16.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-071/ernie_IMG-071_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1",
+  "cycle": 2,
+  "cycles": [
+   {
+    "cycle": 1,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 80.0,
+     "zimage": 52.5
+    },
+    "mean": 70.0
+   },
+   {
+    "cycle": 2,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 80.0
+    },
+    "mean": 78.8
+   }
+  ]
  },
  "IMG-072": {
   "unit": "IMG-072",
@@ -2234,14 +5163,292 @@
   "sheet": "references/unit-06.png",
   "cell": 12,
   "category": "unit-06",
-  "model": "krea2",
-  "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "model": "ernie",
+  "status": "success",
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1,
+   "zimage": 1
+  },
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
-  "history": []
+  "subject": "scarred human barbarian standing three-quarter to the left, right hand raising a notched curved blade to shoulder height, left hand gripping a tall banner staff whose torn dark red pennant carries a pale trident sigil, bare muscular chest painted with red war stripes across the ribs and shoulder, a wolf-head pauldron of grey fur over the left shoulder on a fur mantle, necklace of bone teeth, studded leather belt with a large rectangular buckle, fur and leather skirt over wrapped thighs, leather wraps on both forearms, brown fur-trimmed boots, short dark hair, scar crossing the face, snarling mouth showing teeth, palette rust red, fur grey-brown and steel",
+  "history": [
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-072/krea2_IMG-072_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "texture=живописная вариация ткани и металла сведена к более ровному градиенту"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-072/ernie_IMG-072_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 8,
+     "shade": 8
+    },
+    "sty_pct": 80.0,
+    "tens": [],
+    "gaps": [
+     "texture=складки ткани упрощены против эталона"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "zimage",
+    "version": 1,
+    "file": "attempts/IMG-072/zimage_IMG-072_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 4,
+     "color": 7,
+     "texture": 4,
+     "shade": 6
+    },
+    "sty_pct": 52.5,
+    "tens": [],
+    "gaps": [
+     "line=тёмного тёплого контура нет, край собран светом",
+     "texture=живописная фактура заменена пластиковым 3D-шейдингом"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-072/krea2_IMG-072_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 2,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "texture=живописная вариация ткани и металла сведена к более ровному градиенту"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 0,
+     "color": 0,
+     "texture": 0,
+     "shade": 0
+    }
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-072/ernie_IMG-072_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 2,
+    "head": null,
+    "etalons": "etalons-6840bb41a5d4",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 8,
+     "shade": 8
+    },
+    "sty_pct": 80.0,
+    "tens": [],
+    "gaps": [
+     "texture=складки ткани упрощены против эталона"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": {
+     "line": 0,
+     "color": 0,
+     "texture": 0,
+     "shade": 0
+    }
+   }
+  ],
+  "seal": {
+   "etalon": "1df928c653ba",
+   "sheet": "1b62e3bafbb6",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-072_v1": {
+    "etalon": "1df928c653ba",
+    "sheet": "1b62e3bafbb6",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-072_v1": {
+    "etalon": "1df928c653ba",
+    "sheet": "1b62e3bafbb6",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "zimage_IMG-072_v1": {
+    "etalon": "1df928c653ba",
+    "sheet": "1b62e3bafbb6",
+    "model": "zimage",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "res_multistep",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "z_image_turbo_bf16.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-072/ernie_IMG-072_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1",
+  "cycle": 2,
+  "cycles": [
+   {
+    "cycle": 1,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 80.0,
+     "zimage": 52.5
+    },
+    "mean": 70.0
+   },
+   {
+    "cycle": 2,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 80.0
+    },
+    "mean": 78.8
+   }
+  ]
  },
  "IMG-073": {
   "unit": "IMG-073",

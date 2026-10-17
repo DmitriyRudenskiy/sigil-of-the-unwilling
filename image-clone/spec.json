@@ -60,7 +60,7 @@
   "conditioning": "none",
   "note": "R1 = cfg 3.0: первая настройка, при которой текст усиливается, а ветвь негатива жива"
  },
- "references_dir": "/Users/user/sigil-concept-art/image-clone/references",
+ "references_dir": "image-clone/references",
  "model": "krea2",
  "probe_models": [
   "krea2",
@@ -393,51 +393,51 @@
    "items": [
     {
      "id": "IMG-061",
-     "subject": ""
+     "subject": "human knight standing three-quarter to the left with his right fist raised to shoulder height in a loose guard, left arm holding a tall kite shield low at his side, weight even on both legs, stocky heroic build, middle-aged face with a thick dark brown handlebar moustache turned up at the tips and a faint proud smile, steel helmet with a narrow raised nose guard and a mail aventail framing the jaw, polished steel pauldron riveted over the left shoulder over a chainmail hauberk, deep blue tabard with gold trim and a pale trident sigil on the chest, wide leather belt with a rectangular brass buckle and a sword hilt at the right hip, blue cloth skirt panel with an embroidered gold hem, steel cuisses and greaves with gold edging, brown leather boots, palette steel grey, deep blue and gold trim on brown leather"
     },
     {
      "id": "IMG-062",
-     "subject": ""
+     "subject": "bald human monk standing square to the camera with his right hand raised palm forward at shoulder height in a stop gesture and his left hand pinching the hanging sash at his waist, heavy-set build, thick straight brows and a small frown, close-cropped scalp, saffron-orange sleeveless robe with a wide crossed collar and a darker orange inner fold, long sash cords with knotted tassels and turquoise beads hanging at the hip, prayer-bead necklace of dark polished wood resting on the chest, bare arms with a thin cloth band at one wrist, bare feet with linen wraps wound around the ankles, robe hem falling to the shins over one bared leg, palette saffron orange and warm brown with turquoise accents, matte cloth with soft folds"
     },
     {
      "id": "IMG-063",
-     "subject": ""
+     "subject": "muscular human swordsman standing with weight on one leg and hips turned slightly, a curved scimitar drawn in each hand with both blades swept outward, black hair pulled into a high topknot with a short tail, thick dark brows and a confident smirk, bare shoulders and arms over a cream sleeveless wrap shirt laced over one shoulder, chunky turquoise bead necklace at the throat, dark red sash knotted at the waist with a navy cloth panel hanging down one thigh, riveted leather bracers on both forearms, loose cream trousers tucked into brown leather boots with wrapped calves, palette cream, dark red and navy with steel blades, matte skin and worn canvas"
     },
     {
      "id": "IMG-064",
-     "subject": ""
+     "subject": "human ranger standing three-quarter to the right holding a long spear upright in his right hand, the iron head a broad leaf blade with a small tassel charm hanging below it, hooded olive-green cloak with a thick brown fur collar pulled over the head, brown hair and a short trimmed beard, calm weathered face, leather chest straps crossed over a green tunic with brass buckles, worn brown leather satchel at the left hip, layered green cloak falling past the knees, dark trousers bloused into brown fur-trimmed boots, palette olive green, saddle brown and undyed fur, matte wool and scuffed leather"
     },
     {
      "id": "IMG-065",
-     "subject": ""
+     "subject": "human archer in profile facing left at full draw, bow arm straight and draw hand back at the cheek with an arrow nocked, brown hair swept back from the forehead, faint easy smile, long wooden longbow with a pale string, deep green hooded cloak over a dark green tunic with a leather chest strap, studded leather bracer on the bow forearm, quiver of arrows with pale fletching slung over the right shoulder, short sword with a gold hilt at the left hip, knee-length green cape with a folded collar, one steel knee plate, brown boots with turned cuffs, palette forest green, brown leather and steel, matte cloth"
     },
     {
      "id": "IMG-066",
-     "subject": ""
+     "subject": "elderly elven druid standing square to the camera, right hand gripping a tall gnarled staff topped with a green leafy sprig and hanging bone charms, left hand resting on a pouch at his belt, long white beard parted over the chest, long grey hair under an antler crown of two branching stag horns, a feather tucked behind one pointed ear, kind narrowed eyes, brown robe under a moss-green tabard embroidered with pale leaf rows, fur-lined cloak over the shoulders, wide leather belt with a green gem brooch and small pouches, tall leather boots, palette bark brown, moss green and bone white, matte wool and weathered wood"
     },
     {
      "id": "IMG-067",
-     "subject": ""
+     "subject": "elderly human hedge witch standing weight on one leg, right hand holding a tall wooden staff crowned with a small carved doll and hanging feathers, beads and a dried herb bunch, left hand holding a loop of prayer beads and a small drawstring pouch, wide-brim beige felt hat over soft grey hair, wrinkled face with a warm closed-mouth smile and a long nose, layered cream blouse under a dusty blue-grey skirt, tan cloak fastened at the throat with a round brooch, leather satchel at the hip, brown boots, palette sand beige, oatmeal and dusty blue-grey with brown leather, matte worn cloth"
     },
     {
      "id": "IMG-068",
-     "subject": ""
+     "subject": "young human bard standing with one knee bent and weight on the back foot, shoulders lifted mid-step, playing a wooden transverse flute held out to his right side with both hands, cheerful open face, brown curly hair under a brick-red cap stuck through with a white feather, patchwork quilted doublet in brick red and teal with a mustard-yellow scarf knotted at the neck, sleeves pushed to the elbows, wide brown leather belt with a square buckle, patched brown trousers, brown leather boots, small satchel at the hip, palette brick red, teal and mustard yellow, matte quilted fabric with visible stitching"
     },
     {
      "id": "IMG-069",
-     "subject": ""
+     "subject": "young human fire mage standing square to the camera, both hands raised at chest height cupping two flames with fire wreathing his forearms and shoulders, tousled dark brown hair, bright grin, long crimson-red mage coat with a wide gold-trimmed collar and gold flame embroidery along the hem and cuffs, blue gem pendant on a gold chain at the chest, leather belt with a brass buckle and two pouches at the hip, coat open over the knees, dark trousers and brown boots, palette crimson, burnished gold and orange flame with a blue gem accent, matte velvet with soft light on the sleeves"
     },
     {
      "id": "IMG-070",
-     "subject": ""
+     "subject": "young human herbalist standing square to the camera, both hands cupped at her chest holding a small dark pot from which green sparks and steam rise, long wavy grey hair under a crown of small white and yellow flowers, green eyes, freckled nose, open smile, cream blouse with full sleeves under an olive-green cloak pinned at the throat with a round bronze brooch, brown leather belt with glass vials and a potion bottle hanging at the hip, woven basket of green herbs at her side, long beige skirt over brown boots, palette olive green, cream and warm brown with glass accents, matte linen and leather"
     },
     {
      "id": "IMG-071",
-     "subject": ""
+     "subject": "human knight standing square to the camera, left hand holding a great crystal sword point down at his side, right arm relaxed, long silver-white hair falling past the shoulders, blue eyes and a faint confident smile, midnight-blue cape over full silver plate armour etched with glowing ice-blue runes, a blue gem set in the breastplate and a second at the throat, layered steel pauldrons and vambraces with rune inlays, black tunic under the armour, steel greaves and pointed sabatons, palette polished steel, midnight blue and glowing ice blue, matte metal with cold light in the engraved lines"
     },
     {
      "id": "IMG-072",
-     "subject": ""
+     "subject": "scarred human barbarian standing three-quarter to the left, right hand raising a notched curved blade to shoulder height, left hand gripping a tall banner staff whose torn dark red pennant carries a pale trident sigil, bare muscular chest painted with red war stripes across the ribs and shoulder, a wolf-head pauldron of grey fur over the left shoulder on a fur mantle, necklace of bone teeth, studded leather belt with a large rectangular buckle, fur and leather skirt over wrapped thighs, leather wraps on both forearms, brown fur-trimmed boots, short dark hair, scar crossing the face, snarling mouth showing teeth, palette rust red, fur grey-brown and steel"
     }
    ]
   },
@@ -2545,7 +2545,36 @@
  "seed": 43,
  "chain": [
   "krea2",
-  "ernie",
-  "zimage"
- ]
+  "ernie"
+ ],
+ "sty_threshold": {
+  "krea2": 75.0,
+  "ernie": 77.5
+ },
+ "chain_note": "zimage снят с цепочки по калибровке 2026-10-17 (12 юнитов unit-06, сид 43, P8/R1): STY 52.5 против krea2 77.5 и ernie 80.0 — тёмный тёплый контур снят, живописная фактура заменена пластиковым 3D-шейдингом, кадр несёт лишние серые фигуры разворота. Его уровень ниже семейного пола ~75, поэтому порог ему выставить нечем; вернуть — одна строка chain.",
+ "sty_calibration": {
+  "date": "2026-10-17",
+  "sample": "IMG-061..072 (unit-06), 12 юнитов × 3 стадии",
+  "pair": "P8/R1",
+  "seed": 43,
+  "judge": "vision суда по паре кроп↔кадр, 4 строки",
+  "krea2": {
+   "min": 75.0,
+   "median": 77.5,
+   "max": 77.5,
+   "порог": 75.0
+  },
+  "ernie": {
+   "min": 77.5,
+   "median": 80.0,
+   "max": 80.0,
+   "порог": 77.5
+  },
+  "zimage": {
+   "min": 52.5,
+   "median": 52.5,
+   "max": 55.0,
+   "порог": null
+  }
+ }
 }

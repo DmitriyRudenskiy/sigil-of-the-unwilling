@@ -380,7 +380,7 @@ def cmd_init(a) -> int:
 def blank_spec() -> dict:
     base = json.loads((HERE / "spec_copy48.json").read_text())
     base["out_dir"] = OUT_DIR
-    base["references_dir"] = str(REFS)
+    base["references_dir"] = str(REFS.relative_to(ROOT))   # относительный: от корня репозитория
     base["model"] = MODEL_DEFAULT
     base["_comment"] = ("Оправа лаборатории image-clone: листы по 12 ячеек, прогон 1024x1024. "
                         "Сюжеты живёт в queue.json, сюда вкладываются на время генерации.")
@@ -894,7 +894,8 @@ def cmd_sty(a) -> int:
     gap_of = {g.partition("=")[0]: g.partition("=")[2] for g in gaps}
     lines = [f"## {rec['date']} {uid} v{unit['version']} | {unit['model']} "
              f"| {unit.get('prompt_version', 'P?')}{unit.get('render_version', 'R?')}"
-             f" | сид {unit['seal']['seed']} | эталоны {ver} | STY-% {pct} (планка {STY_TARGET})\n",
+             f" | сид {unit['seal']['seed']} | эталоны {ver} | STY-% {pct} "
+             f"(планка {sty_bar(unit['model'])})\n",
              f"- Файл: {unit['file']}\n"]
     for r in STY_ROWS:
         lines.append(f"- {STY_ROW_RU[r]}: {rows[r]} | {gap_of.get(r, '—')} | "
@@ -917,7 +918,7 @@ def cmd_sty(a) -> int:
     for r in STY_ROWS:
         print(f"  {STY_ROW_RU[r]:9} {rows[r]:2} | {gap_of.get(r, '—')[:60]}")
     print(f"{uid} {unit['model']} v{unit['version']}: STY-% {pct} "
-          f"(планка {STY_TARGET}, сумма {sum(rows.values())}/40) "
+          f"(планка {sty_bar(unit['model'])}, сумма {sum(rows.values())}/40) "
           f"| десяток {len(tens)} | проход {a.judge_pass}")
     if notes:
         print("понижения: " + "; ".join(notes))
@@ -968,11 +969,17 @@ def ceilinged(unit: dict, model: str) -> bool:
     return model in unit.get("ceilings", {})
 
 
+def sty_bar(model: str, spec: dict | None = None) -> float:
+    """Порог стадии: калибровка по модели (spec.sty_threshold), до калибровки — планка."""
+    s = spec if spec is not None else json.loads(SPEC.read_text())
+    return s.get("sty_threshold", {}).get(model, STY_TARGET)
+
+
 def stage_closed(unit: dict, model: str, spec: dict) -> bool:
     """Стадия закрыта честно: её последний STY-% не ниже порога этой модели (8.3).
     Порог калибруется по эталону отдельно для каждой модели; до калибровки — планка."""
     h = sty_last(unit, model)
-    return bool(h) and h["sty_pct"] >= spec.get("sty_threshold", {}).get(model, STY_TARGET)
+    return bool(h) and h["sty_pct"] >= sty_bar(model, spec)
 
 
 def stage_done(unit: dict, model: str, spec: dict) -> bool:
@@ -1017,7 +1024,7 @@ def advance_chain(unit: dict, spec: dict) -> dict | None:
             "потолок / остановить")
     if all(stage_closed(unit, m, spec) for m in stages):
         unit["status"] = "success"
-        print(f"{unit['unit']}: цепочка замкнута — все три стадии не ниже своего порога "
+        print(f"{unit['unit']}: цепочка замкнута — все стадии не ниже своего порога "
               f"({got})")
     elif all(stage_done(unit, m, spec) for m in stages):
         unit["status"] = "paused"

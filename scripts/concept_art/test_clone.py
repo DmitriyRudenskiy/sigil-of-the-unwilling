@@ -703,10 +703,13 @@ ok(g.seed_of({"seed": 43}, dict(art, seed_bump=9), attempt=5) == 43,
 ok(g.seed_of({}, art, attempt=1) == g.seed_of({}, art, attempt=1) != g.seed_of({}, art, attempt=2),
    "конвейер ассетов потерял выводимую затравку")
 
-# 85. живая спека лаборатории: три стадии, сид 43, кадр 1024, негатив мёртв
+# 85. живая спека лаборатории: цепочка калибрована, сид 43, кадр 1024, негатив мёртв
 lab = json.loads((Path(j.__file__).resolve().parents[2] / "image-clone" / "spec.json").read_text())
 ok(lab.get("seed") == 43, f"spec лаборатории без пин-сида: {lab.get('seed')}")
-ok(lab.get("chain") == ["krea2", "ernie", "zimage"], f"порядок цепочки: {lab.get('chain')}")
+ok(lab.get("chain") == ["krea2", "ernie"], f"порядок цепочки: {lab.get('chain')}")
+ok(all(j.sty_bar(s, lab) != j.STY_TARGET for s in lab["chain"]),
+   "стадия цепочки идёт под некалиброванной планкой "
+   f"{ {s: j.sty_bar(s, lab) for s in lab['chain']} }")
 ok(all(c["size"] == [1024, 1024] for c in lab["categories"].values()),
    "не все категории переведены на 1024x1024")
 for stage in lab["chain"]:
