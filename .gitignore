@@ -35,3 +35,4 @@ __pycache__/
 /image-clone/matches/
 /image-clone/pairs/
 /image-clone/legacy/
+/image-clone/queue.lock

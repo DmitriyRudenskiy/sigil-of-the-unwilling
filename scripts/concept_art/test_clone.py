@@ -199,6 +199,7 @@ j.cmd_etalons(Args())
 ok(verdict("yes")["status"] == "success", "после пересборки манифеста вердикт не ожил")
 
 # --- кроп квадрратный: оправа эталона и прогона общая
+import numpy as np                                                   # noqa: E402
 from PIL import Image, ImageDraw                                      # noqa: E402
 sheet = Image.new("RGB", (2048, 2048), (255, 255, 255))
 d = ImageDraw.Draw(sheet)
@@ -702,10 +703,13 @@ ok(g.seed_of({"seed": 43}, dict(art, seed_bump=9), attempt=5) == 43,
 ok(g.seed_of({}, art, attempt=1) == g.seed_of({}, art, attempt=1) != g.seed_of({}, art, attempt=2),
    "конвейер ассетов потерял выводимую затравку")
 
-# 85. живая спека лаборатории: три стадии, сид 43, кадр 1024, негатив мёртв
+# 85. живая спека лаборатории: цепочка калибрована, сид 43, кадр 1024, негатив мёртв
 lab = json.loads((Path(j.__file__).resolve().parents[2] / "image-clone" / "spec.json").read_text())
 ok(lab.get("seed") == 43, f"spec лаборатории без пин-сида: {lab.get('seed')}")
-ok(lab.get("chain") == ["krea2", "ernie", "zimage"], f"порядок цепочки: {lab.get('chain')}")
+ok(lab.get("chain") == ["krea2", "ernie"], f"порядок цепочки: {lab.get('chain')}")
+ok(all(j.sty_bar(s, lab) != j.STY_TARGET for s in lab["chain"]),
+   "стадия цепочки идёт под некалиброванной планкой "
+   f"{ {s: j.sty_bar(s, lab) for s in lab['chain']} }")
 ok(all(c["size"] == [1024, 1024] for c in lab["categories"].values()),
    "не все категории переведены на 1024x1024")
 for stage in lab["chain"]:
@@ -846,5 +850,57 @@ j.cmd_sty(Args(id="IMG-001", model="krea2", gap=[],
 d = j.load()["IMG-001"]["history"][-1]["delta"]
 ok(d["line"] == -2, f"дельта взята не со своей стадии (ernie 6 вместо krea2 8): {d}")
 j.SPEC.write_text(spec_raw)
+
+# --- init: листов сколько есть; нового комплекта id не должны влезать в чужие
+src_sheets = tmp / "src-sheets"
+src_sheets.mkdir(exist_ok=True)
+
+
+def make_sheet(path, tint):
+    im = Image.new("RGB", (400, 300), (255, 255, 255))
+    d = ImageDraw.Draw(im)
+    for k in range(12):
+        x, y = (k % 4) * 100, (k // 4) * 100
+        d.rectangle((x + 30, y + 20, x + 70, y + 80), fill=tint)
+    im.save(path)
+
+
+make_sheet(src_sheets / "a.png", (40, 40, 40))
+make_sheet(src_sheets / "b.png", (60, 60, 60))
+j.save({})
+j.cmd_init(Args(src=str(src_sheets), style="ink line only"))
+q = j.load()
+ok(len(q) == 24 and "IMG-024" in q, f"init завёл не 24 юнита: {len(q)}")
+ok(q["IMG-013"]["sheet"] == "references/unit-02.png", f"PNG-лист переименован: {q['IMG-013']['sheet']}")
+ok(j.json.loads(j.SPEC.read_text())["categories"]["unit-02"]["style"] == "ink line only",
+   "--style не дошёл в оправу")
+before = json.dumps(j.load(), sort_keys=True)
+j.cmd_init(Args(src=str(src_sheets), style=""))
+ok(json.dumps(j.load(), sort_keys=True) == before, "повтор init по тем же байтам что-то завёл")
+make_sheet(src_sheets / "c.png", (80, 80, 80))
+j.cmd_init(Args(src=str(src_sheets), style=""))
+q = j.load()
+ok(len(q) == 36 and q["IMG-025"]["category"] == "unit-03", "третий лист не продолжил нумерацию")
+ok(q["IMG-001"]["category"] == "unit-01", "повторный init тронул существующие юниты")
+
+# --- cut: кисть соседа внутри бокса фигуры не входит в эталон
+ov = tmp / "src-overlap"
+ov.mkdir(exist_ok=True)
+im = Image.new("RGB", (400, 300), (255, 255, 255))
+d = ImageDraw.Draw(im)
+for k in range(12):
+    x, y = (k % 4) * 100, (k // 4) * 100
+    d.rectangle((x + 30, y + 20, x + 70, y + 80), fill=(30, 30, 30))
+    if k:                       # рука из этой ячейки, перегнувшая за левый край
+        d.rectangle((x - 25, y + 30, x + 70, y + 45), fill=(30, 30, 30))
+im.save(ov / "sheet.png")
+j.save({})
+j.cmd_init(Args(src=str(ov), style=""))
+j.cmd_cut(Args(from_id=None))
+ink = (np.asarray(Image.open(j.CROPS / "IMG-001.png").convert("L")) < 128).sum()
+ok(2450 <= ink <= 2550, f"в эталон легла чужая кисть: чернил {ink}, фигуры 2501")
+(j.CROPS / "IMG-001.png").write_bytes(b"metka")
+j.cmd_cut(Args(from_id="IMG-013"))
+ok((j.CROPS / "IMG-001.png").read_bytes() == b"metka", "--from тронул юнита раньше id")
 
 print(f"OK: проверок {checks}")
