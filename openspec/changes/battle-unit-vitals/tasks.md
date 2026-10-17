@@ -1,14 +1,14 @@
 ## 1. Мана персонажа из Intelligence
 
-- [ ] 1.1 `DnDCombatantProfile`: `mana_max` (вычисляется из INT-модификатора по формуле `maxi(5, 5 * (2 + mod))`), `mana_current`, `to_dict/from_dict`.
-- [ ] 1.2 `BattleState.BattleUnit`: `has_mana()`, `get_mana()`, `get_mana_max()`, `spend_mana(n)`, `refund_mana(n)` — для юнита без профиля возвращают «маны нет».
-- [ ] 1.3 Оплата заклинаний: персонаж платит из личного пула, стек — из `HeroMagic` (существующий путь); возврат при неудаче — в тот же пул (`battle_controller.gd`, `spell_caster.gd`).
-- [ ] 1.4 Тесты: формула (INT 16 → 25, INT 8 → 5), отсутствие маны у стека, списание/возврат в оба пула.
+- [x] 1.1 `DnDCombatantProfile`: `mana_max` (вычисляется из INT-модификатора по формуле `maxi(5, 5 * (2 + mod))`), `mana_current`, `to_dict/from_dict`.
+- [x] 1.2 `BattleState.BattleUnit`: `has_mana()`, `get_mana()`, `get_mana_max()`, `spend_mana(n)`, `refund_mana(n)` — для юнита без профиля возвращают «маны нет».
+- [x] 1.3 Оплата заклинаний: персонаж платит из личного пула, стек — из `HeroMagic` (существующий путь); возврат при неудаче — в тот же пул (`battle_controller.gd`, `spell_caster.gd`).
+- [x] 1.4 Тесты: формула (INT 16 → 25, INT 8 → 5), отсутствие маны у стека, списание/возврат в оба пула.
 
 ## 2. Уровень персонажа
 
-- [ ] 2.1 `DnDCharacterDef.level` → `DnDCombatantProfile.level` (default 1) в `battle_factory.gd`; сериализация профиля.
-- [ ] 2.2 Тесты: уровень из определения, default, round-trip, «уровень не меняет боевые числа».
+- [x] 2.1 `DnDCharacterDef.level` → `DnDCombatantProfile.level` (default 1) в `battle_factory.gd`; сериализация профиля.
+- [x] 2.2 Тесты: уровень из определения, default, round-trip, «уровень не меняет боевые числа».
 
 ## 3. Таймер игрокового хода
 
