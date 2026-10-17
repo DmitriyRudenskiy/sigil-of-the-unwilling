@@ -110,6 +110,21 @@ msgstr "Недостаточно маны или школа не изучена.
 msgid "battle.time_up"
 msgstr "⏳ Время вышло — ход пропущен."
 
+msgid "battle.downed_waits"
+msgstr "{name} без сознания и не действует."
+
+msgid "battle.death_save_roll"
+msgstr "💀 {name}: спасбросок от смерти d20={roll}."
+
+msgid "battle.death_save_stable"
+msgstr "💀 {name} стабилен (d20={roll}) — без сознания, но вне опасности."
+
+msgid "battle.death_save_died"
+msgstr "💀 {name} умер (три провала)."
+
+msgid "battle.death_save_recovered"
+msgstr "💀 {name} приходит в себя на 1 HP (натуристальная 20)."
+
 msgid "battle.unit_info"
 msgstr "{name} | Числ: {count} | HP: {hp} | АТК: {atk} | ЗАЩ: {def} | СКОР: {spd} | {tags}"
 

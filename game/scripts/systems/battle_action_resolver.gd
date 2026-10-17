@@ -236,6 +236,15 @@ static func do_skip(state: BattleState, unit: BattleState.BattleUnit) -> void:
 static func kill_unit(state: BattleState, unit: BattleState.BattleUnit) -> void:
 	if unit == null or not unit.alive:
 		return
+	# battle-unit-vitals D4: удар не убивает персонажа — он падает без сознания.
+	# Настоящая смерть — три провала смертельных бросков (finish_downed_unit);
+	# сюда же попадают уже лежащие юниты, чтобы счётчик «в строю» не упал дважды.
+	if unit.is_dnd_character() and not unit.is_downed():
+		state.down_unit(unit)
+		return
+	if unit.is_downed():
+		state.finish_downed_unit(unit)
+		return
 	unit.alive = false
 	unit.set_count(0)
 	if unit.side == BattleState.Side.ATTACKER:
@@ -248,6 +257,11 @@ static func kill_unit(state: BattleState, unit: BattleState.BattleUnit) -> void:
 
 static func revive_unit(state: BattleState, unit: BattleState.BattleUnit) -> void:
 	if unit == null:
+		return
+	if unit.is_downed():
+		# Лежащего без сознания «воскрешение» не удваивает: он встаёт тем же путём,
+		# что и с nat-20 на спасброске (счётчик «в строю» растёт ровно один раз).
+		state.recover_downed_unit(unit)
 		return
 	if not unit.alive:
 		unit.alive = true

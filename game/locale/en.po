@@ -110,6 +110,21 @@ msgstr "Not enough mana or the school is not learned."
 msgid "battle.time_up"
 msgstr "⏳ Time is up — the turn is skipped."
 
+msgid "battle.downed_waits"
+msgstr "{name} is unconscious and does not act."
+
+msgid "battle.death_save_roll"
+msgstr "💀 {name} death save: d20={roll}."
+
+msgid "battle.death_save_stable"
+msgstr "💀 {name} is stable (d20={roll}) — unconscious but out of danger."
+
+msgid "battle.death_save_died"
+msgstr "💀 {name} died (three failures)."
+
+msgid "battle.death_save_recovered"
+msgstr "💀 {name} comes to at 1 HP (natural 20)."
+
 msgid "battle.unit_info"
 msgstr "{name} | Count: {count} | HP: {hp} | ATK: {atk} | DEF: {def} | SPD: {spd} | {tags}"
 

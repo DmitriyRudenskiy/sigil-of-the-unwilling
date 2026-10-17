@@ -98,6 +98,10 @@ class BattleUnit extends RefCounted:
 	# dnd-live-battle-wiring: current HP pool of a D&D character. -1 = not yet
 	# initialized (pure stack model, or a D&D unit not yet set up).
 	var dnd_current_hp: int = -1
+	# battle-unit-vitals D4: смертельные броски персонажа, упавшего на 0 HP.
+	# null = ни разу не падал. DYING/STABLE — без сознания, но в бою: ход такого
+	# юнита = спасбросок, а не действие.
+	var death_saves: DNDDeathSaves = null
 	# Направление (фасад) юнита для флангов/тыла (tactical-combat фаза 5).
 	# (-1,-1) = не инициализировано (тестовые юниты) → считается FRONT.
 	# NOTE(merge): переименовано facing -> facade, т.к. remote-tactical-battle-system
@@ -155,6 +159,26 @@ class BattleUnit extends RefCounted:
 		if is_dnd_character():
 			return alive and dnd_current_hp > 0
 		return alive and stack != null and stack.is_alive()
+
+	func is_dying() -> bool:
+		return death_saves != null and death_saves.state == DNDDeathSaves.State.DYING
+
+	func is_stable() -> bool:
+		return death_saves != null and death_saves.state == DNDDeathSaves.State.STABLE
+
+	## Без сознания, но жив: лежит на поле, хода не имеет, обычной атакой не берётся.
+	func is_downed() -> bool:
+		return is_dying() or is_stable()
+
+	## Участвует ли ещё в бою — действует или ждёт спасбросков. По этому признаку
+	## юнит остаётся в очереди ходов, когда HP обнулились.
+	func in_battle() -> bool:
+		return is_alive() or is_downed()
+
+	## Может ли юнит действовать в свой ход (D6: из этого же считается победа).
+	## Умирающий и стабилизированный не могут; стэк считается по get_count() > 0.
+	func can_act() -> bool:
+		return is_alive() and not is_downed()
 
 	func get_key() -> String:
 		if stack == null:
@@ -272,10 +296,10 @@ func build_queue() -> void:
 	var atk: Array = []
 	var def: Array = []
 	for u in attacker_units:
-		if u.is_alive():
+		if u.in_battle():
 			atk.append(u)
 	for u in defender_units:
-		if u.is_alive():
+		if u.in_battle():
 			def.append(u)
 
 	# Unified turn order (merge of both battle systems): party-based structure
@@ -308,16 +332,18 @@ func build_queue() -> void:
 	for u in second:
 		turn_queue.append(u)
 
-	# TASK_18 R9 invariants: queue holds exactly the alive units.
+	# TASK_18 R9 invariants: queue holds exactly the units still in the fight.
+	# battle-unit-vitals D4: «в бою» includes unconscious characters — they keep
+	# their queue slot because their turn is the death-saving throw.
 	var _alive: int = 0
 	for u in attacker_units:
-		if u.is_alive():
+		if u.in_battle():
 			_alive += 1
 	for u in defender_units:
-		if u.is_alive():
+		if u.in_battle():
 			_alive += 1
 	for u in turn_queue:
-		assert(u.is_alive(), "build_queue: dead unit in turn queue")
+		assert(u.in_battle(), "build_queue: dead unit in turn queue")
 	assert(turn_queue.size() == _alive, "build_queue: queue size != alive units")
 
 	turn_idx = -1
@@ -358,12 +384,12 @@ func advance_turn() -> void:
 	_normalize_active_unit()
 	# TASK_18 R9 invariant: after normalization the active unit is alive (or battle is over).
 	if active_unit != null:
-		assert(active_unit.is_alive() or battle_over, "advance_turn: active unit is dead")
+		assert(active_unit.in_battle() or battle_over, "advance_turn: active unit is dead")
 
 func _normalize_active_unit() -> void:
 	while turn_idx < turn_queue.size():
 		var u: BattleUnit = turn_queue[turn_idx]
-		if u.is_alive():
+		if u.in_battle():
 			break
 		turn_idx += 1
 
@@ -376,14 +402,14 @@ func _normalize_active_unit() -> void:
 
 func start_new_round() -> void:
 	for u in attacker_units:
-		if u.is_alive():
+		if u.in_battle():
 			u.has_moved = false
 			u.defending = false
 			u.distance_moved_this_turn = 0
 			u.already_reborn = false
 
 	for u in defender_units:
-		if u.is_alive():
+		if u.in_battle():
 			u.has_moved = false
 			u.defending = false
 			u.distance_moved_this_turn = 0
@@ -400,6 +426,81 @@ func start_new_round() -> void:
 	turn_idx = 0
 	active_unit = turn_queue[0]
 	is_player_turn = (active_unit.side == Side.ATTACKER)
+
+## battle-unit-vitals D4: персонаж упал на 0 HP — не смерть, а «умирает».
+## Тело остаётся в бою: за ним сохраняется слот в очереди и его гекс (остальные
+## не могут встать на него), но действовать и быть целью обычной атаки он не может.
+func down_unit(unit: BattleUnit) -> void:
+	if unit == null or unit.is_downed():
+		return
+	unit.dnd_current_hp = 0
+	if unit.death_saves == null:
+		unit.death_saves = DNDDeathSaves.new()
+	unit.death_saves.die_start()
+	unit.has_moved = true
+	_adjust_alive_count(unit.side, -1)
+	_unit_grid.get(unit.side, {}).erase(unit.cell)
+	invalidate_board_cache()
+	check_end()
+
+
+## Три провала спасброска: умирающий умирает по-настоящему — прежним путём стеков.
+## Счётчик «в строю» уже уменьшен на down_unit, здесь не трогается. Защита по
+## alive, а не по is_downed(): к этому моменту спасброски сами выставили DEAD.
+func finish_downed_unit(unit: BattleUnit) -> void:
+	if unit == null or unit.death_saves == null or not unit.alive:
+		return
+	unit.death_saves.state = DNDDeathSaves.State.DEAD
+	unit.alive = false
+	_unit_grid.get(unit.side, {}).erase(unit.cell)
+	invalidate_board_cache()
+	check_end()
+
+
+## Выше 0 HP — спасброски прекращаются, персонаж встаёт (лечебное заклинание,
+## успешное спасение). Nat-20 на спасброске проходит мимо этой ветки: там
+## состояние уже HEALTHY, и вызывается сразу revive_from_death_save.
+func recover_downed_unit(unit: BattleUnit, amount: int = 1) -> void:
+	if unit == null or not unit.is_downed():
+		return
+	unit.death_saves.heal(maxi(1, amount))
+	revive_from_death_save(unit)
+
+
+## Поднять без сознания: HP ≥ 1 и ровно +1 к «в строю». Защита по is_alive()
+## не даёт удвоить счётчик при повторном вызове.
+func revive_from_death_save(unit: BattleUnit) -> void:
+	if unit == null or unit.death_saves == null or unit.is_alive():
+		return
+	unit.dnd_current_hp = maxi(1, unit.dnd_current_hp)
+	_adjust_alive_count(unit.side, 1)
+	invalidate_board_cache()
+
+
+## Спасение (D5): сосед стабилизирует умирающего — тот перестаёт умирать, но
+## остаётся без сознания, пока его не вылечат до 0+ HP.
+func stabilize_downed_unit(unit: BattleUnit) -> bool:
+	if unit == null or not unit.is_dying():
+		return false
+	unit.death_saves.stabilize()
+	return true
+
+
+## Лежащие без сознания стороны — их ищут отдельным запросом: в `_unit_grid` их
+## нет, поэтому обычная атака их не видит, а Rescue — видит.
+func get_downed_units(side: BattleState.Side) -> Array[BattleUnit]:
+	var out: Array[BattleUnit] = []
+	for u in get_units_by_side(side):
+		if u.is_downed():
+			out.append(u)
+	return out
+
+
+func _adjust_alive_count(side: BattleState.Side, delta: int) -> void:
+	if side == Side.ATTACKER:
+		_attacker_alive_count += delta
+	else:
+		_defender_alive_count += delta
 
 func get_turn_info() -> String:
 	if active_unit == null:
@@ -426,10 +527,10 @@ func _rebuild_unit_grid() -> void:
 func _rebuild_all_units_cells() -> void:
 	_all_units_cells.clear()
 	for u in attacker_units:
-		if u.is_alive():
+		if u.is_alive() or u.is_downed():
 			_all_units_cells[u.cell] = true
 	for u in defender_units:
-		if u.is_alive():
+		if u.is_alive() or u.is_downed():
 			_all_units_cells[u.cell] = true
 
 func get_units_by_side(side: BattleState.Side) -> Array[BattleUnit]:
@@ -669,12 +770,22 @@ func check_end() -> BattleState.Side:
 	if battle_over:
 		return battle_winner
 
-	if _attacker_alive_count == 0:
+	# battle-unit-vitals D6: победа — не «все мертвы», а «стороне нечем действовать».
+	# Умирающий, стабилизированный и мёртвый выведены; стэки считаются по count > 0
+	# (это уже внутри can_act()).
+	if not _side_can_act(Side.ATTACKER):
 		BattleActionResolver.force_end(self, Side.DEFENDER)
-	elif _defender_alive_count == 0:
+	elif not _side_can_act(Side.DEFENDER):
 		BattleActionResolver.force_end(self, Side.ATTACKER)
 
 	return battle_winner
+
+
+func _side_can_act(side: BattleState.Side) -> bool:
+	for u in get_units_by_side(side):
+		if u.can_act():
+			return true
+	return false
 
 func get_survivors(side: BattleState.Side) -> Array[UnitStack]:
 	var r: Array[UnitStack] = []

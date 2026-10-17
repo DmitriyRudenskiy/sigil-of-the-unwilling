@@ -104,6 +104,21 @@ msgstr ""
 msgid "battle.time_up"
 msgstr ""
 
+msgid "battle.downed_waits"
+msgstr ""
+
+msgid "battle.death_save_roll"
+msgstr ""
+
+msgid "battle.death_save_stable"
+msgstr ""
+
+msgid "battle.death_save_died"
+msgstr ""
+
+msgid "battle.death_save_recovered"
+msgstr ""
+
 msgid "battle.unit_info"
 msgstr ""
 

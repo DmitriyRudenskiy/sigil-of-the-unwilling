@@ -397,6 +397,12 @@ func _advance_to_next_turn() -> void:
 
 	u.distance_moved_this_turn = 0
 
+	# battle-unit-vitals D4: у лежащего без сознания юнита нет хода — вместо действия
+	# идут смертельные броски; стабилизированный просто ждёт спасения.
+	if u.is_downed():
+		_run_death_saves(u)
+		return
+
 	if u.is_stunned():
 		var stun_effect := -1
 		for eff in u.statuses:
@@ -438,6 +444,34 @@ func _advance_to_next_turn() -> void:
 		_battle_state.arm_turn_timer()
 	else:
 		_run_ai_turn()
+
+## Смертельные броски (D&D 5e) вместо хода: 3 успеха → стабилен, 3 провала → смерть,
+## natuристальная 20 → встаёт на 1 HP. Стабилизированный хода не имеет вовсе.
+func _run_death_saves(unit: BattleState.BattleUnit) -> void:
+	if unit.is_stable():
+		status_updated.emit(GameText.battle_downed_waits(unit.get_display_name()))
+		_on_action_completed()
+		return
+	var res: DNDDeathSaves.DeathSaveResult = _roll_death_save(unit)
+	match unit.death_saves.state:
+		DNDDeathSaves.State.HEALTHY:
+			# natuристальная 20: спасброски сами сбросились в HEALTHY — поднимаем HP.
+			_battle_state.revive_from_death_save(unit)
+			status_updated.emit(GameText.battle_death_save_recovered(unit.get_display_name()))
+		DNDDeathSaves.State.DEAD:
+			_battle_state.finish_downed_unit(unit)
+			status_updated.emit(GameText.battle_death_save_died(unit.get_display_name()))
+		DNDDeathSaves.State.STABLE:
+			status_updated.emit(GameText.battle_death_save_stable(unit.get_display_name(), res.d20))
+		_:
+			status_updated.emit(GameText.battle_death_save_roll(unit.get_display_name(), res.d20))
+	_on_action_completed()
+
+
+## Бросок спасброска — отдельный метод как точка детерминированной подмены в тестах.
+func _roll_death_save(unit: BattleState.BattleUnit) -> DNDDeathSaves.DeathSaveResult:
+	return unit.death_saves.roll(_battle_state.dnd_rng)
+
 
 func _tick_statuses(u: BattleState.BattleUnit) -> void:
 	var to_remove: Array[int] = []

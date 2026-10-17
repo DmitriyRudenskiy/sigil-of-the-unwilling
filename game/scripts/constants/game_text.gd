@@ -100,6 +100,16 @@ static func battle_click_enemy() -> String: return TranslationServer.translate("
 static func battle_no_mana() -> String: return TranslationServer.translate("battle.no_mana")
 
 static func battle_time_up() -> String: return TranslationServer.translate("battle.time_up")
+static func battle_downed_waits(name: String) -> String:
+	return TranslationServer.translate("battle.downed_waits").format({"name": name})
+static func battle_death_save_roll(name: String, roll: int) -> String:
+	return TranslationServer.translate("battle.death_save_roll").format({"name": name, "roll": roll})
+static func battle_death_save_stable(name: String, roll: int) -> String:
+	return TranslationServer.translate("battle.death_save_stable").format({"name": name, "roll": roll})
+static func battle_death_save_died(name: String) -> String:
+	return TranslationServer.translate("battle.death_save_died").format({"name": name})
+static func battle_death_save_recovered(name: String) -> String:
+	return TranslationServer.translate("battle.death_save_recovered").format({"name": name})
 static func battle_unit_info(name: String, count: int, hp: int, atk: int, defn: int, spd: int, tags: String) -> String:
 	return TranslationServer.translate("battle.unit_info").format(
 		{"name": name, "count": count, "hp": hp, "atk": atk, "def": defn, "spd": spd, "tags": tags})
