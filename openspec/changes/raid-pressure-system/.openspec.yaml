@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-07-19
+goal: Formalize the pressure-driven raid canon (tiers, SM, directives,
+  per-resource caps T-127, seasons) against the implemented threat_system.

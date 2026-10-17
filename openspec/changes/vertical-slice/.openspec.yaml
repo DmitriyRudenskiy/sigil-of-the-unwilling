@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-07-19
+goal: Integrate all mechanics into a playable 21-turn campaign (proof-of-fun)
+  with bit-script, arcs, core-loop metrics, and fail states.

@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-07-19
+goal: Formalize the K-canon ladder combat (no dice, luck, death saves,
+  auto mode, enemy AI, states, terrain, flank binom) and close the gaps.

@@ -144,6 +144,31 @@ date: 2026-10-13
 - dev-tickets (T00–T16 + gdd.canvas), SYNC_DECISIONS — удалены (2026-10-02); архивные логи (STRUCTURE_AUDIT, CONFLICTS_REPORT, UNIFICATION_CHANGES, NORMALIZATION_REPORT) — вне wikilink-графа, не редактируются (AGENTS.md, D-106)
 
 
+## OpenSpec workflow (v4, 2026-07-19)
+
+Каждая механика/фича GDD переверстана в OpenSpec-изменение (`openspec/changes/<name>/`: `proposal.md`, `specs/<capability>/spec.md`, `design.md`, `tasks.md`, `.openspec.yaml`, `README.md`). 12 изменений v4 (одно на механику + интеграция):
+
+| Изменение | Механика (GDD) | Статус реализации |
+|---|---|---|
+| `campaign-core-loop` | структура хода, 21 ход, 6 фаз, бит-каркас, детерминизм (01-core-loop) | в основном реализовано (`turn_driver.gd`) |
+| `region-graph-map` | граф регионов, узлы, туман, движение героя (02e1, K-T7) | **не реализовано** в campaign-слое |
+| `party-characters` | партия ≤5, хар-ки/Удача, XP/уровни 1–5, SM персонажа (02 §3.2) | в основном реализовано (`party_system.gd`) |
+| `party-training` | рекруты SM, позиции, резидентная модель (02 §3.3, K-A5) | в основном реализовано (`campaign_training_service.gd`) |
+| `dnd-battle-ladder` | лестница, Удача, death saves, лимит 20, авто-режим (02 §3.4, K-T6) | в основном реализовано (`campaign_battle.gd`) |
+| `city-construction-districts` | районы, здания, рабочие, население (02 §3.5, 02g, K-M1/K-M3/K-M12) | в основном реализовано (T-030/T-040, active changes) |
+| `races-cultures` | 7★ рас, affinity, гибриды, водные (02 §3.6, K-M5/K-A6) | частично (`mvp_catalog.json`) |
+| `signs-prestige` | 8 знаков, Престиж-ledger, ранги, этика (02 §3.7, 02c, K-M16) | частично (`signs.json`, ledger) |
+| `raid-pressure-system` | давление, рейды, капы, сезоны (02 §3.8, K-T5/K-R3) | в основном реализовано (`threat_system.gd`) |
+| `mvp-ui-flow` | 8 экранов, SM навигации, туториал, цели 3 дней (07-ui-ux, K-M8) | частично (экраны есть, SM нет) |
+| `pregame-flow` | конструктор → знак → шар → города → партия → тренировка (00-overview, Q18) | частично (конструктор/знак есть) |
+| `vertical-slice` | интеграция в играбельную 21-ходовую кампанию (MVP-scope, 01-core-loop) | ядро есть, интеграция нет (`main.gd`) |
+
+**Правила dедупликации (v4):** каждое изменение сверяется с `openspec/specs/` (main specs), активными `openspec/changes/` и `openspec/changes/archive/`. Main specs pre-pivot (`tactical-combat`, `core-mechanics`, `settlement-*`, `city-tech-tree`) — **superseded** K-каноном, но не удалены (архивация — реестровый акт). Active changes `campaign-city-*` — **зависимости**, не дублирование. Уже реализованное помечается `[x]` (dead tasks) в `tasks.md`; мёртвые/вытесненные задачи — явно.
+
+**Верификация:** `openspec validate --all --no-interactive` (CLI `~/.npm-global/bin/openspec`, 1.14.3). Базовая линия v4: 64 passed, 1 failed — единственный fail = pre-existing main spec `crafting` (нет `## Requirements`), не введён v4. Все 12 изменений v4 — valid, 0 warnings.
+
+**Реестр противоречий (C-1…C-18):** зафиксирован в [[09-risks#Реестр противоречий (OpenSpec v4, 2026-07-19)|09-risks]] и в `design.md`/`proposal.md` каждого изменения. Статусы: флаг владельцу (C-2, C-3, C-13), документ ведёт код (C-1, C-4, C-11, C-16), код = канон (C-5, C-12), main spec superseded (C-6, C-7, C-8, C-9), терминология (C-14), данные (C-15), уточнение (C-17, C-18).
+
 ## Маппинг нумерации GDD → репо (D-141)
 
 Ссылки владельца «§N» — нумерация GDD «Знаки»; репо-слой — 02-серия. Маппинг (D-134, 2026-10-03):
