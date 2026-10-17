@@ -16,6 +16,9 @@ msgstr "Новая игра"
 msgid "menu.load_game"
 msgstr "Загрузить"
 
+msgid "menu.credits"
+msgstr "Титры"
+
 msgid "menu.arena"
 msgstr "🏙 Арена города"
 

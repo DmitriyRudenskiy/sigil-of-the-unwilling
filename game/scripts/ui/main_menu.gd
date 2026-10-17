@@ -5,10 +5,14 @@ const _UIAnimator = preload("res://scripts/ui/ui_animator.gd")
 const _CharacterCreation = preload("res://scenes/ui/character_creation.tscn")
 const _HeroModelFactory = preload("res://scripts/ui/hero_model_factory.gd")
 
+## Цель «Продолжить» (T-110) — кампанийная сцена; путь назван константой,
+## чтобы тест проверял существование сцены-цели, а не строку наугад.
+const SCENE_CONTINUE := "res://scenes/main/main.tscn"
+
 @onready var _background: TextureRect = $Background
 @onready var _continue_btn: Button = $RightColumn/ContinueButton
 @onready var _new_game_btn: Button = $RightColumn/NewGameButton
-@onready var _load_game_btn: Button = $RightColumn/LoadGameButton
+@onready var _credits_btn: Button = $RightColumn/CreditsButton
 @onready var _settings_btn: Button = $RightColumn/SettingsButton
 @onready var _exit_btn: Button = $RightColumn/ExitButton
 @onready var _version_label: Label = $VersionLabel
@@ -31,6 +35,9 @@ func _ready() -> void:
     _connect_buttons()
     _connect_settings_extras()
     _refresh_continue_button()
+    # Макет 09: пункт «Титры» есть, экрана-носителя нет — кнопка видена и отключена
+    # (Т-133, Q-M90). Отличается от доступной не только цветом: см. _style_buttons.
+    _credits_btn.disabled = true
     _create_save_load_screen()
     _UIAnimator.animate_in(self)
     SoundManager.play_music_cue(&"music_menu")
@@ -68,7 +75,7 @@ func _placeholder() -> ImageTexture:
 
 func _style_buttons() -> void:
     var buttons: Array[Button] = [
-        _continue_btn, _new_game_btn, _load_game_btn,
+        _continue_btn, _new_game_btn, _credits_btn,
         _settings_btn, _exit_btn
     ]
     for btn in buttons:
@@ -86,7 +93,15 @@ func _style_buttons() -> void:
         var sp := sn.duplicate()
         sp.bg_color = ThemeConfig.C_BTN_PRESSED
         btn.add_theme_stylebox_override("pressed", sp)
+        # Недоступная кнопка отличается НЕ только цветом: у неё сняты рамка и тень
+        # (меняется форма), плюс тусклый шрифт и отсутствующая анимация наведения.
+        var sd := sn.duplicate()
+        sd.bg_color = Color(0.06, 0.05, 0.04, 0.55)
+        sd.set_border_width_all(0)
+        sd.shadow_size = 0
+        btn.add_theme_stylebox_override("disabled", sd)
         btn.add_theme_color_override("font_color", ThemeConfig.C_BTN_TEXT)
+        btn.add_theme_color_override("font_disabled_color", Color(0.45, 0.42, 0.35, 1))
         btn.mouse_entered.connect(func() -> void: SoundManager.play_sfx_cue(&"ui_hover"))
         btn.pressed.connect(func() -> void: SoundManager.play_sfx_cue(&"ui_click"))
         _UIAnimator.setup_button(btn)
@@ -94,7 +109,7 @@ func _style_buttons() -> void:
 func _localize() -> void:
     _continue_btn.text = GameText.menu_continue()
     _new_game_btn.text = GameText.menu_new_game()
-    _load_game_btn.text = GameText.menu_load_game()
+    _credits_btn.text = GameText.menu_credits()
     _settings_btn.text = GameText.menu_settings()
     _exit_btn.text = GameText.menu_exit()
     _version_label.text = GameText.menu_version()
@@ -102,7 +117,6 @@ func _localize() -> void:
 func _connect_buttons() -> void:
     _continue_btn.pressed.connect(_on_continue)
     _new_game_btn.pressed.connect(_on_new_game)
-    _load_game_btn.pressed.connect(_on_load_game)
     _settings_btn.pressed.connect(_on_settings)
     _exit_btn.pressed.connect(_on_exit)
 
@@ -129,7 +143,7 @@ func _on_continue() -> void:
     var persistence: WorldPersistence = Services.resolve(&"persistence")
     if persistence != null:
         persistence.pending_campaign_slot = 1
-    get_tree().change_scene_to_file("res://scenes/main/main.tscn")
+    get_tree().change_scene_to_file(SCENE_CONTINUE)
 
 func _on_new_game() -> void:
     _clear_session_caches()
@@ -143,6 +157,9 @@ func _clear_session_caches() -> void:
 
     Services.clear_session()
 
+## ВРЕМЕННО НЕДОСТИЖИМО (Т-133, Q-M90): макет 09 не содержит пункта «Загрузить»,
+## кнопка убрана из колонки; экран выбора сохранения и его проводка оставлены
+## на месте до вердикта о носителе точки входа. Не удалять молча.
 func _on_load_game() -> void:
     _save_load_screen.open("load")
 

@@ -4,6 +4,7 @@ extends RefCounted
 static func menu_continue() -> String: return TranslationServer.translate("menu.continue")
 static func menu_new_game() -> String: return TranslationServer.translate("menu.new_game")
 static func menu_load_game() -> String: return TranslationServer.translate("menu.load_game")
+static func menu_credits() -> String: return TranslationServer.translate("menu.credits")
 static func menu_arena() -> String: return TranslationServer.translate("menu.arena")
 static func menu_model_warrior() -> String: return TranslationServer.translate("menu.model_warrior")
 static func menu_model_mage() -> String: return TranslationServer.translate("menu.model_mage")
