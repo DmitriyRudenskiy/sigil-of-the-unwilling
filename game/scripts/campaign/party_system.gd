@@ -8,21 +8,22 @@ extends RefCounted
 ## "uid" — uid жителя, если член партии — житель (шов §2.2, потери по uid)).
 ## Чистые функции: без ГСЧ, одинаковые входы → одинаковые выходы (I1).
 ##
+## Канон-значения — `data/config/balance/xp.json` (07-balance §3; K-M13: пороги
+## никогда не правятся — при нестыковке бюджета правятся источники). Фолбэк —
+## канон-константы (только при неисправном конфиге, push_warning).
+##
 ## Срез MVP: бой — 1v1 авто-разрешение (T-050), внутрибоевые WOUNDED/UNSTABLE
 ## не персистятся (потери = DEAD, раненые — не потери, слой T-116); REST/лечение
 ## и замена мёртвых (наёмник ур. города−1) — с боем партии (за срезом).
 
-## Пороги XP (SRD) — канон: 02-mechanics §3.2, 07-balance §3; уровни 2–5.
-## K-M13: пороги никогда не правятся — при нестыковке бюджета правятся источники.
-const XP_THRESHOLDS: Array[int] = [0, 2700, 6500, 15000, 38000]
-const MAX_LEVEL := 5
-const MIN_LEVEL := 1
+const XP_JSON := "res://data/config/balance/xp.json"
 
-## Источники XP (07-balance §3, R4): бой 100×CR×(1+0.1n); узел (one-time) 200–800;
-## рейд пережит 300. «Район создан» — не источник (K-M16).
-const XP_RAID_SURVIVED := 300
-const NODE_XP_MIN := 200
-const NODE_XP_MAX := 800
+## Фолбэк — канон 07-balance §3 (SRD-пороги уровней 2–5; K-M13).
+const DEFAULT_THRESHOLDS: Array[int] = [0, 2700, 6500, 15000, 38000]
+const DEFAULT_MAX_LEVEL := 5
+const MIN_LEVEL := 1
+const DEFAULT_RAID_SURVIVED := 300
+const DEFAULT_NODE_RANGE: Array[int] = [200, 800]
 
 ## ASI (K3, 5e): +2 к одной или +1 к двум; практический потолок 16.
 ## Удача (7-я хар-ка) — не объект ASI: расовый модификатор (каталог, K-M5).
@@ -32,14 +33,64 @@ const ASI_ABILITIES: Array[String] = ["str", "dex", "con", "int", "wis", "cha"]
 const STATE_READY := "READY"
 const STATE_DEAD := "DEAD"
 
+static var _cfg: Dictionary = {}
 
-## Уровень по накопленному XP (1..5, кап K-M13).
+
+static func _config() -> Dictionary:
+	if _cfg.is_empty():
+		var file := FileAccess.open(XP_JSON, FileAccess.READ)
+		if file != null:
+			var parsed: Variant = JSON.parse_string(file.get_as_text())
+			if parsed is Dictionary:
+				_cfg = parsed
+			else:
+				push_warning("PartySystem: xp.json не распарсился — канон-фолбэк")
+		else:
+			push_warning("PartySystem: %s не найден — канон-фолбэк" % XP_JSON)
+	return _cfg
+
+
+## Пороги XP [0, ур.2, ур.3, ур.4, ур.5] — xp.json level_thresholds (SRD, K-M13).
+static func thresholds() -> Array:
+	var th: Variant = _config().get("level_thresholds", {})
+	if not (th is Dictionary) or (th as Dictionary).is_empty():
+		return DEFAULT_THRESHOLDS.duplicate()
+	var out: Array = [0]
+	for i in range(2, max_level() + 1):
+		# индекс дефолта = i−1: [0(ур.1), 2700(ур.2), 6500(ур.3), 15000(ур.4), 38000(ур.5)]
+		out.append(int((th as Dictionary).get(str(i), DEFAULT_THRESHOLDS[i - 1])))
+	return out
+
+
+## Кап уровня — xp.json level_cap (K-M13: 1–5).
+static func max_level() -> int:
+	return maxi(MIN_LEVEL, int(_config().get("level_cap", DEFAULT_MAX_LEVEL)))
+
+
+## «Рейд пережит» — xp.json sources.raid_survived (07-balance §3: 300).
+static func raid_survived_xp() -> int:
+	return int((_config().get("sources", {}) as Dictionary).get(
+		"raid_survived", DEFAULT_RAID_SURVIVED))
+
+
+## Диапазон узлового XP (one-time) — xp.json sources.node.range (200–800).
+static func node_xp_range() -> Array:
+	var r: Variant = (_config().get("sources", {}) as Dictionary).get("node", {})
+	if r is Dictionary:
+		var range_: Variant = (r as Dictionary).get("range", [])
+		if range_ is Array and (range_ as Array).size() == 2:
+			return [int((range_ as Array)[0]), int((range_ as Array)[1])]
+	return DEFAULT_NODE_RANGE.duplicate()
+
+
+## Уровень по накопленному XP (1..max_level, кап K-M13).
 static func level_for_xp(xp: int) -> int:
+	var t := thresholds()
 	var level := MIN_LEVEL
-	for i in range(1, XP_THRESHOLDS.size()):
-		if xp >= XP_THRESHOLDS[i]:
+	for i in range(1, t.size()):
+		if xp >= int(t[i]):
 			level = i + 1
-	return clampi(level, MIN_LEVEL, MAX_LEVEL)
+	return clampi(level, MIN_LEVEL, max_level())
 
 
 ## Начислить XP члену партии; уровень поднимается сразу (вызов — ПОСЛЕ боя,
@@ -57,17 +108,20 @@ static func grant_xp(member: Dictionary, amount: int) -> Dictionary:
 		"level_ups": to_level - from_level}
 
 
-## XP за бой (07-balance §3): 100 × CR × (1 + 0.1n), n — число врагов.
-## Победа только: ничья = Престиж/Слава/опыт 0 (07-balance §4, D-128).
+## XP за бой (07-balance §3, xp.json sources.combat): 100 × CR × (1 + 0.1n),
+## n — число врагов. Победа только: ничья = Престиж/Слава/опыт 0
+## (07-balance §4, D-128).
 static func xp_from_battle(cr: float, enemy_count: int) -> int:
 	if cr <= 0.0 or enemy_count < 1:
 		return 0
 	return int(round(100.0 * cr * (1.0 + 0.1 * float(enemy_count))))
 
 
-## XP за узел (one-time, 07-balance §3): 200–800 (лут узлов — строки P-6).
+## XP за узел (one-time, 07-balance §3): кламп в диапазон 200–800
+## (xp.json sources.node.range; лут узлов — строки P-6 / node_loot).
 static func xp_from_node(node_xp: int) -> int:
-	return clampi(node_xp, NODE_XP_MIN, NODE_XP_MAX)
+	var r := node_xp_range()
+	return clampi(node_xp, int(r[0]), int(r[1]))
 
 
 ## ASI (K3): +2 к одной или +1 к двух; потолок 16. Выбор характеристики —

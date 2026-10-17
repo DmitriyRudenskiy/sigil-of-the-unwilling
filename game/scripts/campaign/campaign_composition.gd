@@ -95,6 +95,18 @@ func _build(campaign_seed: int) -> void:
 	# T-116: реестр жителей — источник истины населения (R2: старт 20).
 	population_system = PopulationSystem.new()
 	population_system.seed_population(settlement.population)
+	# T-003 (R2): стартовая партия — fighter 1 + ranger 1, ур.1 (02-mechanics §3.2).
+	# Расы — humans (дефолт; фактические расы/имена старта — с городским UI, остаток T-003).
+	# Stats проходят гейты классов (02d §4.2): fighter any(STR≥13), ranger all(DEX≥13, WIS≥13).
+	party = [
+		{"id": "start_fighter", "class": "fighter", "race": "humans", "level": 1,
+		 "xp": 0, "luck": 0,
+		 "stats": {"str": 14, "dex": 12, "con": 12, "int": 10, "wis": 10, "cha": 10}},
+		{"id": "start_ranger", "class": "ranger", "race": "humans", "level": 1,
+		 "xp": 0, "luck": 0,
+		 "stats": {"str": 10, "dex": 14, "con": 12, "int": 10, "wis": 14, "cha": 10}},
+	]
+	settlement.party_size = PartySystem.alive_members(party).size()
 	campaign.settlement_hook = func() -> Dictionary:
 		# T-122 (Q-M31): settlement-фаза — население/события/настроение (позиция 1);
 		# production-расчёт — вынесен в production-фазу (позиция 6, post-threats).
@@ -220,7 +232,7 @@ func record_party_xp(report: Dictionary, raider_cr: float) -> void:
 	if outcome == "win":
 		xp += PartySystem.xp_from_battle(raider_cr, 1)
 	if outcome != "lose":
-		xp += PartySystem.XP_RAID_SURVIVED
+		xp += PartySystem.raid_survived_xp()
 	if xp <= 0:
 		return
 	for member in alive:
