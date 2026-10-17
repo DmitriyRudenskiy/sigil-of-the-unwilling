@@ -4,10 +4,30 @@ tags:
   - gdd
   - process
 status: reference
-date: 2026-10-18
+date: 2026-10-19
 ---
 
 # CHANGELOG — docs/
+
+## [2026-10-19] — Сведение локальных работ: T-003 + openspec-v4 в main; техдолг по незакрытым контурам
+
+- **T-003 (стартовая партия R2) — в main** (`feat/t003-starting-party` → merge `4b828020`):
+  fighter 1 + ranger 1 ур.1; food-якорь T-041 пересчитан 130→**600** (калибровка ансамбля
+  5 сидов: 600 — минимум без DEFICIT, якоря 3a/3b + mood T-041b). GdUnit 2559/0 (local).
+  Открыт **Q-M91** (подтверждение владельца: 600; + техдолг по единице снабжения — код
+  `UNIT_EAT = 1 еда/юнит/день` vs A-9 «1 еда/персонаж/переход» после Q-M75→(б)/D-191).
+- **openspec-v4 — в main** (`feat/openspec-v4` → merge `6efb3e15`): 12 GDD-механик как
+  OpenSpec changes (docs-only, `check_docs_links.py` OK, 88 заметок).
+- **Техдолг — незакрытые UI-контуры (не мержить до владельца):** `feat/ui-mockup-parity-s3`
+  (1 коммит, шаг 3) и `feat/ui-mockup-parity-s4` (2 коммита, шаг 3+4: виджет-графика вместо
+  плашек) — ассетная UI-работа. Блокирует **Q-M89** (судьба палитрной полосы `C′` и шести
+  ролей без носителя после D-203 — вердикт владельца) + ux-review (не headless-верифицируемо).
+  По протоколу AGENTS.md UI-фича мержится **после** ux-review и явного «мержи» — не до.
+- **Уже в main (ветки stale, ahead=0, к удалению владельцем):** `docs/erratum-d197-events-live`,
+  `docs/gdd-grill-v3{,-pass5,-round5}`, `docs/reference-vault-import`, `docs/t129-closed`,
+  `feat/clone-cut-refer`, `feat/ui-mockup-parity`.
+- **Открытые [human]-вопросы (техдолг, не блокируют main):** Q-M91 (food-якорь 600),
+  Q-M89 (UI-палитра `C′`/роли). Остальные когорты — см. [[QUESTIONS]] «Реестр TBD».
 
 ## [2026-10-18] — ui-mockup-parity: стартовый экран по макету (шаг 3, D-204)
 
