@@ -54,9 +54,13 @@ static func gate_ok(class_id: String, stats: Dictionary) -> bool:
 	var reqs: Array = gate.get("reqs", [])
 	if reqs.is_empty():
 		return true
+	# Ключи — case-insensitive: каталог — «STR», сейв/тренировка — «str» (T-003).
+	var lower_stats: Dictionary = {}
+	for k in stats:
+		lower_stats[str(k).to_lower()] = stats[k]
 	var met := 0
 	for r in reqs:
-		if r is Array and r.size() == 2 and int(stats.get(str(r[0]), 0)) >= int(r[1]):
+		if r is Array and r.size() == 2 and int(lower_stats.get(str(r[0]).to_lower(), 0)) >= int(r[1]):
 			met += 1
 	if str(gate.get("mode", "all")) == "any":
 		return met >= 1

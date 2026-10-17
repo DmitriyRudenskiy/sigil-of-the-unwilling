@@ -384,6 +384,28 @@ MCP e2e `tests/mcp/test_main_menu_clicks.py`: настоящий `InputEventMous
 - [[00-overview]] — одна строка индекса в блоке «Справочники и банк». Больше канон-доков не трогать.
 - OpenSpec: change `docs-reference-vault-import`. `game/run_tests.sh` не запускался — код и данные
   не менялись (docs-only); тестовый леджер: +0/−0/quarantine 0, нетто 0.
+## [2026-10-15] — T-003 (в работе): стартовая партия (R2) + пересчёт T-041 food-якоря
+
+- Стартовая партия fighter 1 + ranger 1, ур.1 (R2, 02-mechanics §3.2) — состояние
+  `CampaignComposition._build`: канон-статы проходят гейты классов (02d §4.2), раса humans
+  (дефолт; фактические расы/имена — с городским UI, остаток T-003), `settlement.party_size`
+  = живые члены, сейв roundtrip (T-110).
+- `CanonClasses.gate_ok` — case-insensitive ключи хар-к (каталог «STR», сейв «str»;
+  согласовано с `CampaignTrainingService._check_class_gate`).
+- **Food-якорь T-041 пересчитан: старт-еда 130→600** (campaign.json). Причина: канон-партия
+  ест 1/день/юнит (+2/день) → нетто −3/день (prod 1 − pop 2 − party 2); при 130 DEFICIT был
+  бы со хода 4 (проверено прогоном). Калибровка ансамбля (5 сидов, farms t1/5/9.. и
+  t4/8/12..): **600 — минимум без DEFICIT** (якоря 3a/3b + mood T-041b); 550 — DEFICIT ходы
+  17–21. Тесты `test_scenario`/`test_mvp_invariants`/`test_t041_anchors`/`test_t041b_anchors`
+  обновлены. Подтверждение владельца — **Q-M91** (новый).
+- PartySystem теперь читает канон-значения из `data/config/balance/xp.json`
+  (level_thresholds/level_cap/sources; фолбэк — канон-константы с push_warning) + тест
+  конфиг-проводки.
+- Остаток T-003: 1 город на графе регионов (MVP-маска) + штраф оккупации — с T-020/E-1;
+  рекрутный конвейер [ПРЕДЛОЖЕНИЕ] — мост 1.0.
+- Тесты: +2 (start party + config wiring); обновлены 2 (food-якорь). Обновлены:
+  `docs/mvp/TICKETS.md` (T-003), `docs/mvp/GAP-LIST.md` (A-8), `docs/mvp/EPICS.md` (E-2),
+  `docs/QUESTIONS.md` (Q-M91).
 
 ## [2026-10-15] — T-060 (E-2, в работе): слой развития партии — PartySystem + проводка
 

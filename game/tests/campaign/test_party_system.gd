@@ -14,6 +14,15 @@ func _member(xp: int = 0, extra: Dictionary = {}) -> Dictionary:
 	return m
 
 
+func test_config_wiring_xp_json() -> void:
+	# Канон-значения — из data/config/balance/xp.json (07-balance §3), не хардкод.
+	var t: Array = PartySystem.thresholds()
+	assert_bool(t == [0, 2700, 6500, 15000, 38000]).override_failure_message("level_thresholds (SRD, K-M13)").is_true()
+	assert_bool(PartySystem.max_level() == 5).is_true()
+	assert_bool(PartySystem.raid_survived_xp() == 300).is_true()
+	assert_bool(PartySystem.node_xp_range() == [200, 800]).is_true()
+
+
 func test_level_thresholds_srd_canon() -> void:
 	# K-M13: пороги SRD — канон (уровни 2–5), правятся источники, не пороги.
 	assert_bool(PartySystem.level_for_xp(0) == 1).is_true()

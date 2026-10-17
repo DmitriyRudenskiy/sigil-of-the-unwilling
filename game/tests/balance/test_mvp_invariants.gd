@@ -22,9 +22,11 @@ func test_canon_values_07_balance() -> void:
 	var campaign: Dictionary = Invariants.load_config("campaign")
 	assert_int(int(campaign.campaign.turns)).override_failure_message("Кампания = 21 ход").is_equal(21)
 	assert_int(int(campaign.campaign.party_max)).override_failure_message("Партия <= 5 (R1)").is_equal(5)
-	# Еда 130 — T-041 food-chain якорь (было 30, R2): DEFICIT без стройки
-	# не ранее хода 7 (нетто −1/день × 120 дней). Атрибуция — TICKETS T-041.
-	assert_int(int(campaign.start_state.resources.food)).override_failure_message("Старт: еда 130 (R2→T-041)").is_equal(130)
+	# Еда 600 — T-041 food-chain якорь (30→130, T-041; 130→600 — T-003 стартовая
+	# партия R2: +2/день, нетто −3/день): калибровка ансамбля (5 сидов, farms
+	# t1/5/9.. и t4/8/12..) — 600 минимум без DEFICIT (якоря 3a/3b + mood T-041b).
+	# Атрибуция — TICKETS T-041/T-003; Q-M91.
+	assert_int(int(campaign.start_state.resources.food)).override_failure_message("Старт: еда 600 (R2→T-041→T-003)").is_equal(600)
 	assert_int(int(campaign.start_state.resources.wood)).override_failure_message("Старт: дерево 20 (R2)").is_equal(20)
 	assert_int(int(campaign.start_state.resources.iron)).override_failure_message("Старт: железо 10 (R2)").is_equal(10)
 	assert_int(int(campaign.supply.hero_capacity_food)).override_failure_message("Ёмкость героя 10 еды (R7)").is_equal(10)

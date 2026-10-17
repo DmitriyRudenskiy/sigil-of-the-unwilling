@@ -82,6 +82,7 @@ func test_record_party_xp_outcomes() -> void:
 
 func test_record_party_xp_empty_party_noop() -> void:
 	var comp := CampaignComposition.from_campaign_config(12345)
+	comp.party = []  # явный пустой кейс: с T-003 старт-партия (fighter+ranger) есть по умолчанию
 	comp.record_party_xp({"outcome": "win"}, 3.0)
 	assert_bool(comp.party.is_empty()).is_true()
 
@@ -113,6 +114,24 @@ func test_losses_empty_report_noop() -> void:
 
 
 ## — 4. Снабжение: party_size = живые члены (02-mechanics §3.2) —
+
+func test_starting_party_r2() -> void:
+	# T-003 (R2): стартовая партия — fighter 1 + ranger 1, ур.1 (02-mechanics §3.2).
+	var comp := CampaignComposition.from_campaign_config(12345)
+	assert_bool(comp.party.size() == 2).is_true()
+	var classes: Array = []
+	for m in comp.party:
+		var d: Dictionary = m
+		classes.append(str(d.get("class", "")))
+		assert_bool(int(d.get("level", 0)) == 1).is_true()
+		assert_bool(int(d.get("xp", -1)) == 0).is_true()
+		# Stats проходят гейты классов (02d §4.2) — case-insensitive (T-003).
+		assert_bool(bool(CanonClasses.gate_ok(str(d.get("class", "")), d.get("stats", {})))) \
+			.override_failure_message("гейт: %s" % str(d.get("class", ""))).is_true()
+	assert_bool(classes.has("fighter") and classes.has("ranger")).is_true()
+	# Снабжение: party_size = живые члены (1 еда/день/юнит — T-041 якорь, Q-M91).
+	assert_bool(comp.settlement.party_size == 2).is_true()
+
 
 func test_party_size_synced_on_advance() -> void:
 	var comp := CampaignComposition.from_campaign_config(12345)
