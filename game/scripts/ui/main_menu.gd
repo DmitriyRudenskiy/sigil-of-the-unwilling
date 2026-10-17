@@ -16,6 +16,7 @@ const SCENE_CONTINUE := "res://scenes/main/main.tscn"
 @onready var _settings_btn: Button = $RightColumn/SettingsButton
 @onready var _exit_btn: Button = $RightColumn/ExitButton
 @onready var _version_label: Label = $VersionLabel
+@onready var _title_lines: Array[Label] = [$TitleLine1, $TitleLine2, $TitleLine3]
 @onready var _settings_screen: SettingsScreen = $SettingsScreen
 @onready var _chronicle_screen: ChronicleScreen = $ChronicleScreen
 @onready var _model_screen: ArtifactInventoryScreen = $HeroModelWindow
@@ -53,6 +54,10 @@ func _find_bg() -> Texture2D:
     # Пути только живые (docs/12-asset-audit.md, Missing): webp — канон фона
     # (docs/13 §8.4, 1920×1080 q85); jpeg/png-предки удалены после приёмки
     # webp (smoke-скрин меню, 2026-10-13); throne.png — последний fallback.
+    # webp 2026-10-19 — художественное основание макета 09 (ui-mockup-parity,
+    # шаг 3): роза из восьми медальонов, трон, туман; леттеринг больше не врос
+    # в фон, он тремя узлами TitleLine1…3 (см. _set_title). Провенанс кадра —
+    # concept_art/manifest.json, krea2/t4_painterly/ui_plates/ui_start_screen_bg.
     var candidates := [
         "res://assets/ui/main_menu_bg.webp",
         "res://assets/ui/throne.png",
@@ -113,6 +118,25 @@ func _localize() -> void:
     _settings_btn.text = GameText.menu_settings()
     _exit_btn.text = GameText.menu_exit()
     _version_label.text = GameText.menu_version()
+    _set_title(GameText.menu_title())
+
+
+func _set_title(title: String) -> void:
+    # Макет 09: титульный леттеринг — три строки по центру кадра (крупно / мелко /
+    # крупно), поверх розы-окна. Строка одна (имя игры — бренд, не фраза), поэтому
+    # разбивка по словам: «первое / середина / последнее»; два слова → средняя
+    # строка пустая и скрыта; одно слово → только первая строка.
+    # Третьим аргументом split() в Godot 4 идёт max_splits, а не case_sensitive:
+    # split(" ", false, true) режет строку один раз и даёт два куска.
+    var words := title.split(" ", false)
+    var lines: Array[String] = [title, "", ""]
+    if words.size() == 2:
+        lines = [words[0], "", words[1]]
+    elif words.size() > 2:
+        lines = [words[0], " ".join(words.slice(1, words.size() - 1)), words[words.size() - 1]]
+    for i in _title_lines.size():
+        _title_lines[i].text = lines[i].to_upper()
+        _title_lines[i].visible = lines[i] != ""
 
 func _connect_buttons() -> void:
     _continue_btn.pressed.connect(_on_continue)

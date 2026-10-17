@@ -32,6 +32,7 @@ extends SceneTree
 
 const OUT_DIR := "/tmp/theme-smoke/"
 const SIZE := Vector2i(1280, 720)
+
 # Мера «кадр настоящий»: разброс яркости по плотной сетке. Однотонный кадр
 # (clear color вместо рендера) даёт ровно 0.0; кадр с любым содержимым — десятыми.
 # Шаг 3, не 17: на самом пустом настоящем кадре (кампейн «День: 1» на сером —
@@ -67,6 +68,15 @@ var _out: String
 var _only := ""
 var _prefix := ""
 var _require_render := false
+# Размер кадра. По умолчанию SIZE (1280×720 — исторический контур), но макеты
+# нарисованы в 1920×1080, и кадр 1280×720 сравнивается с ними с делением на
+# масштаб: каждый замер превращается в арифметику с источником ошибки
+# (приёмка ui-mockup-parity, шаг 3). `window/stretch/mode` = `canvas_items`,
+# поэтому размер окна меняет разрешение растеризации, а не раскладку.
+var _size := SIZE
+var _native := Vector2i(
+	int(ProjectSettings.get_setting("display/window/size/viewport_width")),
+	int(ProjectSettings.get_setting("display/window/size/viewport_height")))
 var _shots := 0
 var _blank := 0
 
@@ -87,6 +97,20 @@ func _initialize() -> void:
 	DirAccess.make_dir_recursive_absolute(_out)
 	_prefix = OS.get_environment("SMOKE_PREFIX")
 	_require_render = OS.get_environment("SMOKE_REQUIRE_RENDER") == "1"
+	var size := OS.get_environment("SMOKE_SIZE")
+	if size.count("x") == 1:
+		var w := size.split("x")[0].to_int()
+		var h := size.split("x")[1].to_int()
+		if w > 0 and h > 0:
+			_size = Vector2i(w, h)
+		else:
+			push_error("SMOKE_SIZE: ожидаем ШИРИНАxВЫСОТА, получено %s" % size)
+			quit(2)
+			return
+	elif size != "":
+		push_error("SMOKE_SIZE: ожидаем ШИРИНАxВЫСОТА, получено %s" % size)
+		quit(2)
+		return
 	# Кадры «до/после» сравниваются попиксельно, поэтому окно обязано быть одним и
 	# тем же в обоих прогонах. `root.size = SIZE` его не гарантирует: macOS отдаёт
 	# окну последний пользовательский размер, аспект меняется, фон масштабируется —
@@ -101,9 +125,20 @@ func _initialize() -> void:
 
 
 func _pin_window() -> void:
+	# 1920×1080 — нативный размер окна из project.godot, и получить его оконным
+	# режимом на этой машине нельзя: macOS клампит окно к видимой области экрана
+	# (меню-бар, Dock), из-за чего оно уезжает к 1900×1007 и продолжает сжиматься
+	# от кадра к кадру — замер 2026-10-19: 1911×1018 → 1901×1008 без единого вызова
+	# DisplayServer. Полноэкранный режим на нативном дисплее даёт ровно 1920×1080
+	# и в размер окна, и в его текстуру (проверено), а `stretch/mode=canvas_items`
+	# не меняет раскладку — только разрешение растеризации.
+	if _size == _native:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+		return
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
-	DisplayServer.window_set_size(SIZE)
+	DisplayServer.window_set_size(_size)
 	DisplayServer.window_set_position(Vector2i.ZERO)
+	(root as Window).size = _size
 
 
 ## Отпечаток состояния, с которым снят кадр (md5 темы + текстуры кнопки). Кадры
@@ -141,7 +176,7 @@ func _run() -> void:
 		_pin_window()
 		await _frames(6)
 		var alive := "ok" if is_instance_valid(scene) else "FREED-ITSELF"
-		var spread := _shot(name)
+		var spread := await _shot(name)
 		print("SHOT %s size=%dx%d local_theme=%s state=%s luma_spread=%.4f blank=%s" % [
 			name, root.size.x, root.size.y, local_theme, alive, spread,
 			"YES" if spread <= MIN_LUMA_SPREAD else "no"
@@ -167,6 +202,20 @@ func _frames(n: int) -> void:
 
 func _shot(name: String) -> float:
 	var img: Image = root.get_window().get_texture().get_image()
+	if img.get_width() != _size.x or img.get_height() != _size.y:
+		# Размер окна ставится до первого кадра, а текстура окна — буфер прошлой
+		# кадры: первый снимок после ресайза ещё старого размера. Молча сохранить
+		# его значит выдать 1280×720 за 1920×1080 — заявленный контракт кадра.
+		await _frames(2)
+		img = root.get_window().get_texture().get_image()
+	if img.get_width() != _size.x or img.get_height() != _size.y:
+		# Кадр не заказанного размера — это не доказательство внешности, а подмена
+		# контракта: молча сохранить 1920×1027 вместо 1920×1080 значит выдать другой
+		# аспект за снимок макета. Считаем это осечкой растеризации.
+		push_error("SMOKE: кадр %s получился %dx%d, заказан %dx%d"
+			% [name, img.get_width(), img.get_height(), _size.x, _size.y])
+		_blank += 1
+		return -1.0
 	var spread := _luma_spread(img)
 	var err := img.save_png(_out + _prefix + name + ".png")
 	if err != OK:
