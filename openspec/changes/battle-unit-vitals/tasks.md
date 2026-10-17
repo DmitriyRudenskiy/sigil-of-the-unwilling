@@ -27,10 +27,12 @@
 
 ## 5. Действие Rescue
 
-- [ ] 5.1 `battle_action_resolver.rescue_unit(state, rescuer, target)`: смежность, цель — умирающий союзник, проверка характеристики DC 10 (`ability_check.gd`), успех → `stabilize()`, nat 20 → `heal(1)`; тратит действие.
+- [x] 5.1 `battle_action_resolver.rescue_unit(state, rescuer, target)`: смежность, цель — умирающий союзник, проверка характеристики DC 10 (`ability_check.gd`), успех → `stabilize()`, nat 20 → `heal(1)`; тратит действие.
 - [ ] 5.2 `battle_turn_executor.request_rescue(target)` + сигнал UI (`rescue_requested`) + `battle_input`-выбор цели; медальон — в шаге 5 UI-паритета.
-- [ ] 5.3 Строки `game_text` + `locale/` (en/ru) для действия и его статуса.
-- [ ] 5.4 Тесты: успех стабилизирует, nat 20 даёт 1 HP, провал не меняет состояние, недоступно без умирающего/смежности, чужой ход запрещён.
+	- сделано: `request_rescue` в исполнителе (тот же guard, что у `request_defend`) и вход `BattleController.request_rescue` под будущий сигнал;
+	- ждёт: кнопка-медальон, её сигнал и выбор цели в `battle_input` — это UI, он едет в шаге 5 UI-паритета.
+- [x] 5.3 Строки `game_text` + `locale/` (en/ru) для действия и его статуса.
+- [x] 5.4 Тесты: успех стабилизирует, nat 20 даёт 1 HP, провал не меняет состояние, недоступно без умирающего/смежности, чужой ход запрещён.
 
 ## 6. Документация и реестры
 

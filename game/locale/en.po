@@ -125,6 +125,18 @@ msgstr "💀 {name} died (three failures)."
 msgid "battle.death_save_recovered"
 msgstr "💀 {name} comes to at 1 HP (natural 20)."
 
+msgid "battle.rescue_action"
+msgstr "Rescue"
+
+msgid "battle.rescued"
+msgstr "🩹 {name} stabilizes {target}."
+
+msgid "battle.rescued_wakes"
+msgstr "🩹 {name} pulls {target} back from the brink."
+
+msgid "battle.rescue_failed"
+msgstr "🩹 {name} fails to rescue {target}."
+
 msgid "battle.unit_info"
 msgstr "{name} | Count: {count} | HP: {hp} | ATK: {atk} | DEF: {def} | SPD: {spd} | {tags}"
 

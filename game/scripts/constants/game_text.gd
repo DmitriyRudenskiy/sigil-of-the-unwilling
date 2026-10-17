@@ -110,6 +110,13 @@ static func battle_death_save_died(name: String) -> String:
 	return TranslationServer.translate("battle.death_save_died").format({"name": name})
 static func battle_death_save_recovered(name: String) -> String:
 	return TranslationServer.translate("battle.death_save_recovered").format({"name": name})
+static func rescue_action() -> String: return TranslationServer.translate("battle.rescue_action")
+static func battle_rescued(name: String, target: String) -> String:
+	return TranslationServer.translate("battle.rescued").format({"name": name, "target": target})
+static func battle_rescued_wakes(name: String, target: String) -> String:
+	return TranslationServer.translate("battle.rescued_wakes").format({"name": name, "target": target})
+static func battle_rescue_failed(name: String, target: String) -> String:
+	return TranslationServer.translate("battle.rescue_failed").format({"name": name, "target": target})
 static func battle_unit_info(name: String, count: int, hp: int, atk: int, defn: int, spd: int, tags: String) -> String:
 	return TranslationServer.translate("battle.unit_info").format(
 		{"name": name, "count": count, "hp": hp, "atk": atk, "def": defn, "spd": spd, "tags": tags})

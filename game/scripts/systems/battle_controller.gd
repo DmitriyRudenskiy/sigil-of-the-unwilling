@@ -172,6 +172,12 @@ func _on_skip() -> void:
 func _on_defend() -> void:
 	_executor.request_defend()
 
+
+## Действие «Спасение» (D5). Медальон и его сигнал подключаются в шаге 5
+## UI-паритета; вход готов и для них, и для тестов.
+func request_rescue(target: BattleState.BattleUnit) -> void:
+	_executor.request_rescue(target)
+
 func _on_spellbook() -> void:
 	_ui.open_spellbook(_state, _hero_magic)
 

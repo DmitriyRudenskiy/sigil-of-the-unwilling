@@ -125,6 +125,18 @@ msgstr "💀 {name} умер (три провала)."
 msgid "battle.death_save_recovered"
 msgstr "💀 {name} приходит в себя на 1 HP (натуристальная 20)."
 
+msgid "battle.rescue_action"
+msgstr "Спасение"
+
+msgid "battle.rescued"
+msgstr "🩹 {name} стабилизирует: {target}."
+
+msgid "battle.rescued_wakes"
+msgstr "🩹 {name} возвращает {target} с того света."
+
+msgid "battle.rescue_failed"
+msgstr "🩹 {name} не удаётся спасти {target}."
+
 msgid "battle.unit_info"
 msgstr "{name} | Числ: {count} | HP: {hp} | АТК: {atk} | ЗАЩ: {def} | СКОР: {spd} | {tags}"
 

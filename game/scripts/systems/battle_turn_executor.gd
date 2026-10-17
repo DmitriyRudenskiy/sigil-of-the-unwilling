@@ -376,6 +376,35 @@ func request_defend() -> void:
 	_morale_allowed = false
 	_on_action_completed()
 
+
+## Действие «Спасение» (D5): активный юнит поднимает умирающего соседа.
+## Медальон и его сигнал — в шаге 5 UI-паритета; вход под них готов здесь.
+## Провал тоже стоит действия: «попробую ещё» не должно быть бесплатным.
+func request_rescue(target: BattleState.BattleUnit) -> void:
+	if _paused:
+		return
+	if _state != State.WAITING_INPUT or _battle_state.active_unit == null:
+		return
+	var unit := _battle_state.active_unit
+	var result := BattleActionResolver.rescue_unit(_battle_state, unit, target)
+	match str(result.get("result", "unknown")):
+		"stabilized":
+			status_updated.emit(
+				GameText.battle_rescued(unit.get_display_name(), target.get_display_name())
+			)
+		"rescued_wakes":
+			status_updated.emit(
+				GameText.battle_rescued_wakes(unit.get_display_name(), target.get_display_name())
+			)
+		"failed":
+			status_updated.emit(
+				GameText.battle_rescue_failed(unit.get_display_name(), target.get_display_name())
+			)
+		_:
+			return
+	_morale_allowed = false
+	_on_action_completed()
+
 func request_retreat() -> void:
 	_retreat_policy.request()
 

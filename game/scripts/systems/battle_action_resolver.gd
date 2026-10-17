@@ -2,6 +2,10 @@ class_name BattleActionResolver
 extends RefCounted
 
 
+## Спасение умирающего (design D5): сложность проверки характеристики спасателя.
+const RESCUE_DC := 10
+
+
 
 ## T17/D2: атака разрешается по лестнице перевеса (02d v1.2) — детерминированно,
 ## без ГСЧ. d20-путь (battle/dnd/) — legacy, из основного флоу выключен.
@@ -364,3 +368,61 @@ static func _try_rebirth(
 	revive_unit(state, def)
 	result["rebirth"] = true
 	return true
+
+
+## Спасение возможно: своё действие, спасатель — персонаж (стеку нечем проверять
+## характеристику), рядом — именно умирающий союзник. Стабилизированный и чужой
+## не подходят, мёртвого не спасти вовсе.
+static func can_rescue(
+	state: BattleState,
+	rescuer: BattleState.BattleUnit,
+	target: BattleState.BattleUnit
+) -> bool:
+	if state == null or rescuer == null or target == null:
+		return false
+	if state.battle_over or not rescuer.can_act() or rescuer.has_moved:
+		return false
+	if not rescuer.is_dnd_character():
+		return false
+	if not target.is_dying() or target.side != rescuer.side:
+		return false
+	return HexUtils.hex_distance(rescuer.cell, target.cell, state.hex_shift_right) == 1
+
+
+## Действие «Спасение» (D5): спасатель проверяет высшую ментальную характеристику
+## против DC 10. Успех — товарищ стабилен; nat 20 — приходит в себя на 1 HP.
+## Провал состояние не меняет, но действие стоит: иначе «попробую ещё» бесплатно.
+## p_d20 — подставной кубик (тесты), как у DNDDeathSaves.roll.
+static func rescue_unit(
+	state: BattleState,
+	rescuer: BattleState.BattleUnit,
+	target: BattleState.BattleUnit,
+	p_d20: int = 0
+) -> Dictionary:
+	if not can_rescue(state, rescuer, target):
+		return {}
+	var modifier := _rescue_modifier(rescuer)
+	var check := DNDAbilityCheck.new()
+	var total: int = check.roll(state.dnd_rng, modifier, false, false, p_d20)
+	var result := {
+		"modifier": modifier, "d20": check.d20_result, "total": total, "dc": RESCUE_DC,
+	}
+	if check.d20_result == 20:
+		state.recover_downed_unit(target)
+		result["result"] = "rescued_wakes"
+	elif check.meets(RESCUE_DC):
+		state.stabilize_downed_unit(target)
+		result["result"] = "stabilized"
+	else:
+		result["result"] = "failed"
+	rescuer.has_moved = true
+	state.invalidate_board_cache()
+	return result
+
+
+## Чем спасают: высшая ментальная характеристика (INT/WIS/CHA).
+static func _rescue_modifier(unit: BattleState.BattleUnit) -> int:
+	var abilities := unit.dnd_profile.abilities
+	return maxi(
+		abilities.get_int_mod(), maxi(abilities.get_wis_mod(), abilities.get_cha_mod())
+	)

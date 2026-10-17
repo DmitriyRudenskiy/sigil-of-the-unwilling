@@ -119,6 +119,18 @@ msgstr ""
 msgid "battle.death_save_recovered"
 msgstr ""
 
+msgid "battle.rescue_action"
+msgstr ""
+
+msgid "battle.rescued"
+msgstr ""
+
+msgid "battle.rescued_wakes"
+msgstr ""
+
+msgid "battle.rescue_failed"
+msgstr ""
+
 msgid "battle.unit_info"
 msgstr ""
 
