@@ -20,11 +20,13 @@ import json
 from pathlib import Path
 q = json.load(open("image-clone/queue.json"))
 A = Path("image-clone/attempts")
+# Версия кадра — следующая после уже печатанной: отклонённый юнит с новыми
+# словами ждёт v2, а не пропускается по признаку «v1 есть».
+need = lambda uid, u, m: not (A / uid / f"{m}_{uid}_v{u.get('versions', {}).get(m, 0) + 1}.webp").exists()
 print(" ".join(sorted(
     uid for uid, u in q.items()
     if u["status"] == "in-queue" and u["subject"].strip()
-    and not all((A / uid / f"{m}_{uid}_v1.webp").exists()
-                for m in ("krea2", "ernie")))))
+    and any(need(uid, u, m) for m in ("krea2", "ernie")))))
 PY
 }
 

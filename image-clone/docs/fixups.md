@@ -38,3 +38,6 @@
 
 ## IMG-079 ernie v1 — attempts/IMG-079/ernie_IMG-079_v1.webp
 - пращник — девушка, не рыжий мужчина
+
+## IMG-084 ernie v1 — attempts/IMG-084/ernie_IMG-084_v1.webp
+- добавлена сабля в руке
