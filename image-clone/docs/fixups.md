@@ -41,3 +41,15 @@
 
 ## IMG-084 ernie v1 — attempts/IMG-084/ernie_IMG-084_v1.webp
 - добавлена сабля в руке
+
+## IMG-088 ernie v1 — attempts/IMG-088/ernie_IMG-088_v1.webp
+- взрослый детина вместо отрока; щит без герба наполовину
+
+## IMG-089 ernie v1 — attempts/IMG-089/ernie_IMG-089_v1.webp
+- взрослый вместо отрока; протез-рука превратился в наплечник
+
+## IMG-094 ernie v1 — attempts/IMG-094/ernie_IMG-094_v1.webp
+- взрослый мужчина вместо девушки-гадалки
+
+## IMG-071 ernie v1 — attempts/IMG-071/ernie_IMG-071_v1.webp
+- взрослый мужчина вместо серебряноволосой рыцарши
