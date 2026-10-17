@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-07-19
+goal: Implement the K-T7 region-graph campaign map (MVP mask, nodes, fog,
+  transitions, hero SM) that the campaign layer currently lacks.

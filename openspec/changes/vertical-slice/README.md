@@ -1,0 +1,3 @@
+# vertical-slice
+
+Вертикальный срез MVP (proof-of-fun, серый прототип, 21 ход, ~3 сессии): интеграция всех механик в играбельную кампанию. Бит-скрипт (1/7/14/17/21), арки (выживание → железо → районы → рейд-проверка), метрики core loop (TTFD ≤ 30 с, action rate 8–15/5 мин, доля решений ≥ 60%), fail-states (голод, гибель партии = единственный конец, Q-M68→(а), D-190). Реализовано: ядро (TurnDriver, SettlementProcessor, ThreatSystem, PopulationSystem, DistrictSystem, PartySystem, CampaignComposition). Остаток: бит-скрипт, метрики, интеграция (main.gd), регион-граф, SM навигации, предыгра. C-18: тики [ПРЕДЛОЖЕНИЕ Q6].

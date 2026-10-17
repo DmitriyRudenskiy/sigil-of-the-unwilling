@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-07-19
+goal: Formalize the 8-screen MVP UI flow (K-M8), navigation SM, tutorial
+  overlay, 3-day goals (M3), and UI invariants.
