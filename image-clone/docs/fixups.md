@@ -74,3 +74,12 @@
 
 ## IMG-107 ernie v1 — attempts/IMG-107/ernie_IMG-107_v1.webp
 - второй лишний
+
+## IMG-108 ernie v1 — attempts/IMG-108/ernie_IMG-108_v1.webp
+- взрослый вместо отрока
+
+## IMG-111 ernie v1 — attempts/IMG-111/ernie_IMG-111_v1.webp
+- мужчина вместо рыцарши
+
+## IMG-112 ernie v1 — attempts/IMG-112/ernie_IMG-112_v1.webp
+- мужчина вместо щитовички

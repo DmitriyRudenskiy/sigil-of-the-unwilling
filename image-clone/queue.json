@@ -10738,8 +10738,95 @@
   },
   "best_score": null,
   "max_attempts": 5,
-  "subject": "young human fisherman-warrior standing square to the camera, right hand holding a three-pronged fish spear upright, left hand gripping a weighted fishing net at his side, short dark hair and a frown, bare tanned chest with a crossed leather strap and one steel shoulder pauldron, brown leather belt with a round sun buckle and a hide skirt, bracers, sandals with wraps, palette tan skin, bark brown and steel, matte leather and wet rope",
-  "history": [],
+  "subject": "boy fisherman-warrior, boyish round face and child's proportions standing square to the camera, right hand holding a three-pronged fish spear upright, left hand gripping a weighted fishing net at his side, short dark hair and a frown, bare tanned chest with a crossed leather strap and one steel shoulder pauldron, brown leather belt with a round sun buckle and a hide skirt, bracers, sandals with wraps, palette tan skin, bark brown and steel, matte leather and wet rope",
+  "history": [
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-108/krea2_IMG-108_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-3bf982188b5e",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "голова крупнее, мазок плосче"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-108/ernie_IMG-108_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-3bf982188b5e",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "фактура проще, тень проще"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "version": 1,
+    "model": "ernie",
+    "date": "2026-10-17",
+    "file": "attempts/IMG-108/ernie_IMG-108_v1.webp",
+    "sty": "no",
+    "sty_notes": [],
+    "cnt": [
+     "взрослый вместо отрока"
+    ],
+    "ident": [],
+    "head_sty": false,
+    "identity_ceiling": false,
+    "etalons": "etalons-3bf982188b5e",
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "prompt_ceiling": "",
+    "readiness": null,
+    "note": ""
+   }
+  ],
   "seal": {
    "etalon": "d885bc28fc3a",
    "sheet": "f6b29e431b2e",
@@ -10798,7 +10885,18 @@
   },
   "file": "attempts/IMG-108/ernie_IMG-108_v1.webp",
   "prompt_version": "P8",
-  "render_version": "R1"
+  "render_version": "R1",
+  "cycle": 1,
+  "cycles": [
+   {
+    "cycle": 1,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 77.5
+    },
+    "mean": 77.5
+   }
+  ]
  },
  "IMG-109": {
   "unit": "IMG-109",
@@ -10807,7 +10905,7 @@
   "cell": 1,
   "category": "unit-10",
   "model": "ernie",
-  "status": "in-queue",
+  "status": "success",
   "version": 1,
   "versions": {
    "krea2": 1,
@@ -10816,7 +10914,92 @@
   "best_score": null,
   "max_attempts": 5,
   "subject": "human crusader knight standing square to the camera, right hand holding a flanged mace head down at his side, left arm carrying a kite shield charged with a broad red cross, closed great helm with a narrow slit over a mail coif, off-white surcoat with a red cross over full polished plate, wide leather belt with a rectangular buckle, steel gauntlets, cuisses and greaves, palette steel grey, off-white and brick red, matte metal with cool light on the edges",
-  "history": [],
+  "history": [
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-109/krea2_IMG-109_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-3bf982188b5e",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "голова крупнее, мазок плосче"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-109/ernie_IMG-109_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-3bf982188b5e",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "фактура проще, тень проще"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "version": 1,
+    "model": "ernie",
+    "date": "2026-10-17",
+    "file": "attempts/IMG-109/ernie_IMG-109_v1.webp",
+    "sty": "yes",
+    "sty_notes": [],
+    "cnt": [],
+    "ident": [],
+    "head_sty": false,
+    "identity_ceiling": false,
+    "etalons": "etalons-3bf982188b5e",
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "prompt_ceiling": "",
+    "readiness": null,
+    "note": ""
+   }
+  ],
   "seal": {
    "etalon": "3677ef5c26df",
    "sheet": "2847a2d574a7",
@@ -10875,7 +11058,18 @@
   },
   "file": "attempts/IMG-109/ernie_IMG-109_v1.webp",
   "prompt_version": "P8",
-  "render_version": "R1"
+  "render_version": "R1",
+  "cycle": 1,
+  "cycles": [
+   {
+    "cycle": 1,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 77.5
+    },
+    "mean": 77.5
+   }
+  ]
  },
  "IMG-110": {
   "unit": "IMG-110",
@@ -10884,7 +11078,7 @@
   "cell": 2,
   "category": "unit-10",
   "model": "ernie",
-  "status": "in-queue",
+  "status": "success",
   "version": 1,
   "versions": {
    "krea2": 1,
@@ -10893,7 +11087,92 @@
   "best_score": null,
   "max_attempts": 5,
   "subject": "burly human barbarian standing square to the camera with both arms folded over his chest, scowling, red hair and a long red beard plaited at the chin, thick fur mantle over bare corded shoulders, necklace of tusks and bone, studded leather arm rings and bracers, hide belt with a round bronze buckle and a ragged leather skirt, axe hanging at the hip, fur-trimmed boots, palette hide brown, rust red and bone, matte fur and weathered leather",
-  "history": [],
+  "history": [
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-110/krea2_IMG-110_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-3bf982188b5e",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "голова крупнее, мазок плосче"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-110/ernie_IMG-110_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-3bf982188b5e",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "фактура проще, тень проще"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "version": 1,
+    "model": "ernie",
+    "date": "2026-10-17",
+    "file": "attempts/IMG-110/ernie_IMG-110_v1.webp",
+    "sty": "yes",
+    "sty_notes": [],
+    "cnt": [],
+    "ident": [],
+    "head_sty": false,
+    "identity_ceiling": false,
+    "etalons": "etalons-3bf982188b5e",
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "prompt_ceiling": "",
+    "readiness": null,
+    "note": ""
+   }
+  ],
   "seal": {
    "etalon": "3162eaf9e1e1",
    "sheet": "2847a2d574a7",
@@ -10952,7 +11231,18 @@
   },
   "file": "attempts/IMG-110/ernie_IMG-110_v1.webp",
   "prompt_version": "P8",
-  "render_version": "R1"
+  "render_version": "R1",
+  "cycle": 1,
+  "cycles": [
+   {
+    "cycle": 1,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 77.5
+    },
+    "mean": 77.5
+   }
+  ]
  },
  "IMG-111": {
   "unit": "IMG-111",
@@ -10970,7 +11260,94 @@
   "best_score": null,
   "max_attempts": 5,
   "subject": "young human knight standing three-quarter to the left, right hand holding a sword point down, left arm carrying a tall shield charged with a gold sun on a blue field, red hair in a high ponytail with loose strands and a steady smile, blue-grey plate armour with a gold sun emblem on the breast and riveted pauldrons, brown belt with a buckle, blue cloth skirt panel, steel cuisses and greaves, palette steel blue-grey, gold and blue, matte metal with soft highlights",
-  "history": [],
+  "history": [
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-111/krea2_IMG-111_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-3bf982188b5e",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "голова крупнее, мазок плосче"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-111/ernie_IMG-111_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-3bf982188b5e",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "фактура проще, тень проще"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "version": 1,
+    "model": "ernie",
+    "date": "2026-10-17",
+    "file": "attempts/IMG-111/ernie_IMG-111_v1.webp",
+    "sty": "no",
+    "sty_notes": [],
+    "cnt": [
+     "мужчина вместо рыцарши"
+    ],
+    "ident": [],
+    "head_sty": false,
+    "identity_ceiling": false,
+    "etalons": "etalons-3bf982188b5e",
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "prompt_ceiling": "",
+    "readiness": null,
+    "note": ""
+   }
+  ],
   "seal": {
    "etalon": "97ed67c8d203",
    "sheet": "2847a2d574a7",
@@ -11029,7 +11406,18 @@
   },
   "file": "attempts/IMG-111/ernie_IMG-111_v1.webp",
   "prompt_version": "P8",
-  "render_version": "R1"
+  "render_version": "R1",
+  "cycle": 1,
+  "cycles": [
+   {
+    "cycle": 1,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 77.5
+    },
+    "mean": 77.5
+   }
+  ]
  },
  "IMG-112": {
   "unit": "IMG-112",
@@ -11046,8 +11434,95 @@
   },
   "best_score": null,
   "max_attempts": 5,
-  "subject": "young human shield-maiden standing square to the camera, right hand holding a tall spear upright, left arm carrying a round shield with painted interlace knots and a steel boss, long blonde hair in two thick braids over the shoulders, calm smile, green wool dress under a leather chest harness with round brooches, fur shoulder roll, woven belt, leather wraps and brown boots, palette moss green, hide tan and steel, matte wool and painted wood",
-  "history": [],
+  "subject": "young woman shield-maiden, clearly female with a feminine face and slim build standing square to the camera, right hand holding a tall spear upright, left arm carrying a round shield with painted interlace knots and a steel boss, long blonde hair in two thick braids over the shoulders, calm smile, green wool dress under a leather chest harness with round brooches, fur shoulder roll, woven belt, leather wraps and brown boots, palette moss green, hide tan and steel, matte wool and painted wood",
+  "history": [
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-112/krea2_IMG-112_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-3bf982188b5e",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "голова крупнее, мазок плосче"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-112/ernie_IMG-112_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-3bf982188b5e",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "фактура проще, тень проще"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "version": 1,
+    "model": "ernie",
+    "date": "2026-10-17",
+    "file": "attempts/IMG-112/ernie_IMG-112_v1.webp",
+    "sty": "no",
+    "sty_notes": [],
+    "cnt": [
+     "мужчина вместо щитовички"
+    ],
+    "ident": [],
+    "head_sty": false,
+    "identity_ceiling": false,
+    "etalons": "etalons-3bf982188b5e",
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "prompt_ceiling": "",
+    "readiness": null,
+    "note": ""
+   }
+  ],
   "seal": {
    "etalon": "e55ce78b4c42",
    "sheet": "2847a2d574a7",
@@ -11106,7 +11581,18 @@
   },
   "file": "attempts/IMG-112/ernie_IMG-112_v1.webp",
   "prompt_version": "P8",
-  "render_version": "R1"
+  "render_version": "R1",
+  "cycle": 1,
+  "cycles": [
+   {
+    "cycle": 1,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 77.5
+    },
+    "mean": 77.5
+   }
+  ]
  },
  "IMG-113": {
   "unit": "IMG-113",
@@ -11115,7 +11601,7 @@
   "cell": 5,
   "category": "unit-10",
   "model": "ernie",
-  "status": "in-queue",
+  "status": "success",
   "version": 1,
   "versions": {
    "krea2": 1,
@@ -11124,7 +11610,92 @@
   "best_score": null,
   "max_attempts": 5,
   "subject": "young human rogue standing weight on one leg, a short sword in his right hand and a dagger in his left held low, deep grey hood over dark hair and a sly grin, dark grey cloak over a brown leather jerkin with crossed straps, wide belt with pouches, bracers, dark trousers bloused into soft boots, palette charcoal grey, brown and steel, matte cloth and scuffed leather",
-  "history": [],
+  "history": [
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-113/krea2_IMG-113_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-3bf982188b5e",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "голова крупнее, мазок плосче"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-113/ernie_IMG-113_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-3bf982188b5e",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "фактура проще, тень проще"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "version": 1,
+    "model": "ernie",
+    "date": "2026-10-17",
+    "file": "attempts/IMG-113/ernie_IMG-113_v1.webp",
+    "sty": "yes",
+    "sty_notes": [],
+    "cnt": [],
+    "ident": [],
+    "head_sty": false,
+    "identity_ceiling": false,
+    "etalons": "etalons-3bf982188b5e",
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "prompt_ceiling": "",
+    "readiness": null,
+    "note": ""
+   }
+  ],
   "seal": {
    "etalon": "5800eb3339de",
    "sheet": "2847a2d574a7",
@@ -11183,7 +11754,18 @@
   },
   "file": "attempts/IMG-113/ernie_IMG-113_v1.webp",
   "prompt_version": "P8",
-  "render_version": "R1"
+  "render_version": "R1",
+  "cycle": 1,
+  "cycles": [
+   {
+    "cycle": 1,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 77.5
+    },
+    "mean": 77.5
+   }
+  ]
  },
  "IMG-114": {
   "unit": "IMG-114",
@@ -11192,7 +11774,7 @@
   "cell": 6,
   "category": "unit-10",
   "model": "ernie",
-  "status": "in-queue",
+  "status": "success",
   "version": 1,
   "versions": {
    "krea2": 1,
@@ -11201,7 +11783,92 @@
   "best_score": null,
   "max_attempts": 5,
   "subject": "young human bard standing mid-gesture with his right hand raised palm up and his left hand at his chest, lute slung across his back, dark hair in a topknot with a short beard and an open grin, white open-collar shirt under a long maroon coat with gold embroidery and fur cuffs, gold pendant on a cord, dark trousers, brown boots with turned tops, palette maroon, gold and cream, matte velvet with gilt trim",
-  "history": [],
+  "history": [
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-114/krea2_IMG-114_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-3bf982188b5e",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "голова крупнее, мазок плосче"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-114/ernie_IMG-114_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-3bf982188b5e",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "фактура проще, тень проще"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "version": 1,
+    "model": "ernie",
+    "date": "2026-10-17",
+    "file": "attempts/IMG-114/ernie_IMG-114_v1.webp",
+    "sty": "yes",
+    "sty_notes": [],
+    "cnt": [],
+    "ident": [],
+    "head_sty": false,
+    "identity_ceiling": false,
+    "etalons": "etalons-3bf982188b5e",
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "prompt_ceiling": "",
+    "readiness": null,
+    "note": ""
+   }
+  ],
   "seal": {
    "etalon": "4a13c891b4e2",
    "sheet": "2847a2d574a7",
@@ -11260,7 +11927,18 @@
   },
   "file": "attempts/IMG-114/ernie_IMG-114_v1.webp",
   "prompt_version": "P8",
-  "render_version": "R1"
+  "render_version": "R1",
+  "cycle": 1,
+  "cycles": [
+   {
+    "cycle": 1,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 77.5
+    },
+    "mean": 77.5
+   }
+  ]
  },
  "IMG-115": {
   "unit": "IMG-115",
@@ -11269,7 +11947,7 @@
   "cell": 7,
   "category": "unit-10",
   "model": "ernie",
-  "status": "in-queue",
+  "status": "success",
   "version": 1,
   "versions": {
    "krea2": 1,
@@ -11278,7 +11956,92 @@
   "best_score": null,
   "max_attempts": 5,
   "subject": "young human falconer standing three-quarter to the left, right gauntleted fist raised with a hawk perched on it, left arm loose, short brown hair and an attentive expression, teal cloak fastened at the shoulder over a brown leather jerkin with buckles, wide belt with pouches, quiver of pale-fletched arrows across the back, brown trousers and boots, palette teal, saddle brown and feather brown, matte leather and cloth",
-  "history": [],
+  "history": [
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "krea2",
+    "version": 1,
+    "file": "attempts/IMG-115/krea2_IMG-115_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-3bf982188b5e",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "голова крупнее, мазок плосче"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "kind": "sty",
+    "date": "2026-10-17",
+    "model": "ernie",
+    "version": 1,
+    "file": "attempts/IMG-115/ernie_IMG-115_v1.webp",
+    "pair": [
+     "P8",
+     "R1"
+    ],
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "seed": 43,
+    "cycle": 1,
+    "head": null,
+    "etalons": "etalons-3bf982188b5e",
+    "anchors": "anchors-aba09390ac52",
+    "rows": {
+     "line": 8,
+     "color": 8,
+     "texture": 7,
+     "shade": 8
+    },
+    "sty_pct": 77.5,
+    "tens": [],
+    "gaps": [
+     "фактура проще, тень проще"
+    ],
+    "notes": [],
+    "judge_pass": "score",
+    "control": null,
+    "delta": null
+   },
+   {
+    "version": 1,
+    "model": "ernie",
+    "date": "2026-10-17",
+    "file": "attempts/IMG-115/ernie_IMG-115_v1.webp",
+    "sty": "yes",
+    "sty_notes": [],
+    "cnt": [],
+    "ident": [],
+    "head_sty": false,
+    "identity_ceiling": false,
+    "etalons": "etalons-3bf982188b5e",
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "prompt_ceiling": "",
+    "readiness": null,
+    "note": ""
+   }
+  ],
   "seal": {
    "etalon": "72197d8b8ae1",
    "sheet": "2847a2d574a7",
@@ -11337,7 +12100,18 @@
   },
   "file": "attempts/IMG-115/ernie_IMG-115_v1.webp",
   "prompt_version": "P8",
-  "render_version": "R1"
+  "render_version": "R1",
+  "cycle": 1,
+  "cycles": [
+   {
+    "cycle": 1,
+    "sty": {
+     "krea2": 77.5,
+     "ernie": 77.5
+    },
+    "mean": 77.5
+   }
+  ]
  },
  "IMG-116": {
   "unit": "IMG-116",
@@ -13270,14 +14044,76 @@
   "sheet": "references/unit-12.png",
   "cell": 9,
   "category": "unit-12",
-  "model": "krea2",
+  "model": "ernie",
   "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1
+  },
   "best_score": null,
   "max_attempts": 5,
   "subject": "young human bard standing mid-verse with both arms spread wide and palms up, lute slung across his back, dark wavy hair and a laughing open mouth, white open-collar shirt under a maroon coat with gold embroidery and a fur-trimmed hem, gold pendant, thin sword at the hip, dark trousers, brown boots, palette maroon, gold and cream, matte velvet with gilt trim",
-  "history": []
+  "history": [],
+  "seal": {
+   "etalon": "b8609be08e61",
+   "sheet": "fe2d70c0bd6d",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-141_v1": {
+    "etalon": "b8609be08e61",
+    "sheet": "fe2d70c0bd6d",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-141_v1": {
+    "etalon": "b8609be08e61",
+    "sheet": "fe2d70c0bd6d",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-141/ernie_IMG-141_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1"
  },
  "IMG-142": {
   "unit": "IMG-142",
@@ -13285,14 +14121,76 @@
   "sheet": "references/unit-12.png",
   "cell": 10,
   "category": "unit-12",
-  "model": "krea2",
+  "model": "ernie",
   "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1
+  },
   "best_score": null,
   "max_attempts": 5,
   "subject": "young human town herald standing square to the camera blowing a brass trumpet held in both hands, blue cap with a gold sun badge and a white feather, navy cape with a gold sun emblem and star embroidery over a white shirt and blue tunic, gold-buckled belt, gauntleted forearm, blue trousers and dark boots, palette navy blue, gold and cream with warm brass, matte wool and polished brass",
-  "history": []
+  "history": [],
+  "seal": {
+   "etalon": "96992a4484f7",
+   "sheet": "fe2d70c0bd6d",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-142_v1": {
+    "etalon": "96992a4484f7",
+    "sheet": "fe2d70c0bd6d",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-142_v1": {
+    "etalon": "96992a4484f7",
+    "sheet": "fe2d70c0bd6d",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-142/ernie_IMG-142_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1"
  },
  "IMG-143": {
   "unit": "IMG-143",
@@ -13300,14 +14198,76 @@
   "sheet": "references/unit-12.png",
   "cell": 11,
   "category": "unit-12",
-  "model": "krea2",
+  "model": "ernie",
   "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1
+  },
   "best_score": null,
   "max_attempts": 5,
   "subject": "young human cartographer-mage standing three-quarter to the left reading a large unfolded map held in both hands, left hand raising a white quill above it, dark tousled hair and an intent gaze, slate-blue robe with a wide-hemmed mantle and a star-patterned cape, leather belt with a satchel and a book, brown boots, palette slate blue, grey and parchment cream, matte wool and paper",
-  "history": []
+  "history": [],
+  "seal": {
+   "etalon": "66537c9828f6",
+   "sheet": "fe2d70c0bd6d",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-143_v1": {
+    "etalon": "66537c9828f6",
+    "sheet": "fe2d70c0bd6d",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-143_v1": {
+    "etalon": "66537c9828f6",
+    "sheet": "fe2d70c0bd6d",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-143/ernie_IMG-143_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1"
  },
  "IMG-144": {
   "unit": "IMG-144",
@@ -13315,14 +14275,76 @@
   "sheet": "references/unit-12.png",
   "cell": 12,
   "category": "unit-12",
-  "model": "krea2",
+  "model": "ernie",
   "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1
+  },
   "best_score": null,
   "max_attempts": 5,
   "subject": "young human astrologer standing square to the camera holding a brass armillary sphere in both hands at chest height, long silver hair with a blue gem at the forehead and calm half-closed eyes, pale grey robe with wide sleeves over a star-and-moon patterned blue under-robe, gold necklace and belt chains, soft grey shoes, pale glow around the sphere, palette silver grey, midnight blue and gold with cool light, matte silk and brass",
-  "history": []
+  "history": [],
+  "seal": {
+   "etalon": "a91b71b69de5",
+   "sheet": "fe2d70c0bd6d",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-144_v1": {
+    "etalon": "a91b71b69de5",
+    "sheet": "fe2d70c0bd6d",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-144_v1": {
+    "etalon": "a91b71b69de5",
+    "sheet": "fe2d70c0bd6d",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-144/ernie_IMG-144_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1"
  },
  "IMG-145": {
   "unit": "IMG-145",
@@ -13330,14 +14352,76 @@
   "sheet": "references/unit-13.png",
   "cell": 1,
   "category": "unit-13",
-  "model": "krea2",
+  "model": "ernie",
   "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1
+  },
   "best_score": null,
   "max_attempts": 5,
   "subject": "young human wizard standing square to the camera, right hand holding a brass-bound staff topped with a blue crystal, left palm raised with a ball of orange flame, brown hair under a tall indigo hat with a gold crescent moon and stars, pleased grin, purple cloak with a gold-hemmed collar over a blue tunic and leather belt, satchel and pouches at the waist, brown boots, palette indigo, violet and gold with cold crystal light and warm fire, matte velvet",
-  "history": []
+  "history": [],
+  "seal": {
+   "etalon": "77b6cc5a1dd9",
+   "sheet": "d57771180b83",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-145_v1": {
+    "etalon": "77b6cc5a1dd9",
+    "sheet": "d57771180b83",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-145_v1": {
+    "etalon": "77b6cc5a1dd9",
+    "sheet": "d57771180b83",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-145/ernie_IMG-145_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1"
  },
  "IMG-146": {
   "unit": "IMG-146",
@@ -13345,14 +14429,76 @@
   "sheet": "references/unit-13.png",
   "cell": 2,
   "category": "unit-13",
-  "model": "krea2",
+  "model": "ernie",
   "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1
+  },
   "best_score": null,
   "max_attempts": 5,
   "subject": "young human artificer standing three-quarter to the left, right hand holding an unfolded parchment map, left arm a jointed brass-and-steel prosthesis, brown hair with round goggles pushed onto the forehead, curious smile, cream shirt under a brown leather harness with buckles and a tool belt hung with gears and a pocket watch, gauntlet cuff, brown trousers, brown boots, palette brass, saddle brown and cream with cool steel, matte leather and polished metal",
-  "history": []
+  "history": [],
+  "seal": {
+   "etalon": "d2a9a97ce6ad",
+   "sheet": "d57771180b83",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-146_v1": {
+    "etalon": "d2a9a97ce6ad",
+    "sheet": "d57771180b83",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-146_v1": {
+    "etalon": "d2a9a97ce6ad",
+    "sheet": "d57771180b83",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-146/ernie_IMG-146_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1"
  },
  "IMG-147": {
   "unit": "IMG-147",
@@ -13360,14 +14506,76 @@
   "sheet": "references/unit-13.png",
   "cell": 3,
   "category": "unit-13",
-  "model": "krea2",
+  "model": "ernie",
   "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1
+  },
   "best_score": null,
   "max_attempts": 5,
   "subject": "young human monk standing square to the camera, right palm raised forward at shoulder height with a glowing gold symbol in it, left hand folded at the chest, shaved head and calm half-closed eyes, saffron-orange robe draped over one shoulder with a cream under-wrap, long prayer beads looped at the waist and over the forearm, wrapped feet, palette saffron orange, cream and warm gold with a soft glow, matte linen",
-  "history": []
+  "history": [],
+  "seal": {
+   "etalon": "556da812d916",
+   "sheet": "d57771180b83",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-147_v1": {
+    "etalon": "556da812d916",
+    "sheet": "d57771180b83",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-147_v1": {
+    "etalon": "556da812d916",
+    "sheet": "d57771180b83",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-147/ernie_IMG-147_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1"
  },
  "IMG-148": {
   "unit": "IMG-148",
@@ -13375,14 +14583,76 @@
   "sheet": "references/unit-13.png",
   "cell": 4,
   "category": "unit-13",
-  "model": "krea2",
+  "model": "ernie",
   "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1
+  },
   "best_score": null,
   "max_attempts": 5,
   "subject": "young human oracle standing square to the camera, right hand holding a brass censer on chains smoking at hip height, left hand at her chest, face veiled below the eyes with a gold brow chain and a thin halo above the hood, cream and sand layered robes with gold embroidered hems, gold chest jewellery and a hanging pendant, long cape falling behind, palette cream, sand and gold with grey smoke, matte linen and gilt",
-  "history": []
+  "history": [],
+  "seal": {
+   "etalon": "8e5f8a820ecf",
+   "sheet": "d57771180b83",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-148_v1": {
+    "etalon": "8e5f8a820ecf",
+    "sheet": "d57771180b83",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-148_v1": {
+    "etalon": "8e5f8a820ecf",
+    "sheet": "d57771180b83",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-148/ernie_IMG-148_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1"
  },
  "IMG-149": {
   "unit": "IMG-149",
@@ -13390,14 +14660,76 @@
   "sheet": "references/unit-13.png",
   "cell": 5,
   "category": "unit-13",
-  "model": "krea2",
+  "model": "ernie",
   "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1
+  },
   "best_score": null,
   "max_attempts": 5,
   "subject": "young human fire-mage standing square to the camera with both arms bent and palms up, orange flame burning in each palm and licking up his hair, dark hair with flame-lit tips, defiant grin, black tunic with gold clasps under a long crimson coat with gold trim, wide belt with a buckle and a pouch, dark trousers, brown boots, palette crimson, gold and ember orange with warm rim light, matte velvet and leather",
-  "history": []
+  "history": [],
+  "seal": {
+   "etalon": "2c69428db4c8",
+   "sheet": "d57771180b83",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-149_v1": {
+    "etalon": "2c69428db4c8",
+    "sheet": "d57771180b83",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-149_v1": {
+    "etalon": "2c69428db4c8",
+    "sheet": "d57771180b83",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-149/ernie_IMG-149_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1"
  },
  "IMG-150": {
   "unit": "IMG-150",
@@ -13405,14 +14737,76 @@
   "sheet": "references/unit-13.png",
   "cell": 6,
   "category": "unit-13",
-  "model": "krea2",
+  "model": "ernie",
   "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1
+  },
   "best_score": null,
   "max_attempts": 5,
   "subject": "young human alchemist standing three-quarter to the left, left hand raising a round flask of glowing orange liquid, right hand on her hip, brown hair in a messy bun with round goggles on top, bright smile, cream blouse with rolled sleeves under a long brown leather apron, belt hung with a row of coloured stoppered bottles and a brass gear charm, gloves, brown boots, palette saddle brown, cream and jewel-bright liquids, matte leather and glass",
-  "history": []
+  "history": [],
+  "seal": {
+   "etalon": "4bfc29b1e016",
+   "sheet": "d57771180b83",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-150_v1": {
+    "etalon": "4bfc29b1e016",
+    "sheet": "d57771180b83",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-150_v1": {
+    "etalon": "4bfc29b1e016",
+    "sheet": "d57771180b83",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-150/ernie_IMG-150_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1"
  },
  "IMG-151": {
   "unit": "IMG-151",
@@ -13420,14 +14814,76 @@
   "sheet": "references/unit-13.png",
   "cell": 7,
   "category": "unit-13",
-  "model": "krea2",
+  "model": "ernie",
   "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1
+  },
   "best_score": null,
   "max_attempts": 5,
   "subject": "elderly human hermit standing square to the camera, right hand holding a tall crook-headed staff, left hand holding prayer beads at the waist, grey hair swept back and a long grey beard, tired kind eyes, coarse grey-brown cloak over a sand tunic, long wooden rosary with a metal pendant, rope belt, sandals, palette ash grey, sand and bark brown, matte rough wool and old wood",
-  "history": []
+  "history": [],
+  "seal": {
+   "etalon": "f12fa7414b53",
+   "sheet": "d57771180b83",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-151_v1": {
+    "etalon": "f12fa7414b53",
+    "sheet": "d57771180b83",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-151_v1": {
+    "etalon": "f12fa7414b53",
+    "sheet": "d57771180b83",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-151/ernie_IMG-151_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1"
  },
  "IMG-152": {
   "unit": "IMG-152",
@@ -13435,14 +14891,76 @@
   "sheet": "references/unit-13.png",
   "cell": 8,
   "category": "unit-13",
-  "model": "krea2",
+  "model": "ernie",
   "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1
+  },
   "best_score": null,
   "max_attempts": 5,
   "subject": "young human pilgrim standing square to the camera, right hand holding a short knife at his chest, left hand holding a tall walking staff, wide brown hat over dark hair and a cheerful face, brown cloak with a bone clasp over a cream shirt and leather jerkin, belt with a pouch, a metal flask and a bedroll, brown trousers and boots, palette bark brown, cream and brass, matte worn leather and wool",
-  "history": []
+  "history": [],
+  "seal": {
+   "etalon": "e2b55bc7d3bd",
+   "sheet": "d57771180b83",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-152_v1": {
+    "etalon": "e2b55bc7d3bd",
+    "sheet": "d57771180b83",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-152_v1": {
+    "etalon": "e2b55bc7d3bd",
+    "sheet": "d57771180b83",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-152/ernie_IMG-152_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1"
  },
  "IMG-153": {
   "unit": "IMG-153",
@@ -13452,12 +14970,73 @@
   "category": "unit-13",
   "model": "krea2",
   "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "version": 1,
+  "versions": {
+   "krea2": 1
+  },
   "best_score": null,
   "max_attempts": 5,
   "subject": "elderly human wizard standing square to the camera, right hand holding a tall staff topped with a glowing blue orb, left palm raised with a flame of blue fire, tall indigo hat starred with gold moons over a long white beard and heavy brows, deep purple robe with a wide gold-hemmed mantle, leather belt with a pouch, brown boots, palette indigo, violet and gold with cold blue light, matte velvet",
-  "history": []
+  "history": [],
+  "seal": {
+   "etalon": "5169a02344de",
+   "sheet": "d57771180b83",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-153_v1": {
+    "etalon": "5169a02344de",
+    "sheet": "d57771180b83",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-153_v1": {
+    "etalon": "5169a02344de",
+    "sheet": "d57771180b83",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-153/krea2_IMG-153_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1"
  },
  "IMG-154": {
   "unit": "IMG-154",
