@@ -475,7 +475,11 @@ def cmd_next(a) -> int:
         unit["seal"] = run_seal(unit, model, version, spec)
         # Сид пинится, поэтому неизменная пара (P, R) = побайтовый повтор прошлой
         # попытки: кадр, замер и круг цепочки были бы поддельным «нет движения».
-        prev = unit.get("seals", {}).get(attempt_name(unit, model, version - 1))
+        # Сравниваем с прошлой версией ЭТОЙ модели: у второй стадии цепочки тот же
+        # текст, что у первой, и сверка с «последним прогоном» пугала бы повтором
+        # на ровном месте.
+        prev = (unit.get("seals", {}).get(attempt_name(unit, model, version - 1))
+                if version > 1 else None)
         if prev == unit["seal"] and not getattr(a, "force", False):
             raise SystemExit(
                 f"{uid}: {model} v{version} повторит v{version - 1} побайтово — сид "
