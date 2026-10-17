@@ -173,23 +173,27 @@ case-sensitive: `world.tscn`, `battle.tscn`, `main_menu.tscn`).
 - Каталог: `game/data/events/` — `event_*.json` (common), `crisis_*.json`
   (кризисы), `rare_*.json` (редкие), `events_database.json` (служебный, не
   считается в счётчик шаблонов).
-- **Статус слоя (эрратум D-198 к Q-M77 → (а), D-197):** код лежит в корзине **B-1**
-  (T-128), но **вызывается из кампанийного ходу**: каждый тик дня
+- **Статус слоя (Q-M82 → (б), D-199 — MVP-носитель):** каталог **в MVP** и **вызывается из кампанийного ходу**: каждый тик дня
   `game/scripts/main/main.gd:81 _advance_day()` → `GameManager.on_day_passed()`
   (`game_manager.gd:85`) → `crisis_event_system.gd:410` — триггеры событий и кризисов,
   цикл дня автозапускается (`_is_day_cycle_active = true`, `day_duration = 3.0` с,
-  `next_event_day = 5`). Формулировка «не вызывается из кампанийного цикла» была ложной;
-  статус каталога в MVP — открытый вопрос **Q-M82**. Правки здесь — сведение на
-  канонических носителей, а не развитие фичи.
+  `next_event_day = 5`). Строка **снята с корзины B-1** (T-128 её не переносит, корзина
+  20 → 19 строк), каталог зарегистрирован в [[MVP-scope]] §1/§2/§4; формулировка
+  «не вызывается из кампанийного цикла» была ложной (эрратум D-198), вердикт
+  Q-M77 → (а) заменён. Правки здесь — сведение на канонических носителей,
+  а не развитие фичи.
 - Логика: `game/scripts/systems/crisis_event_system.gd`.
 - Тесты структуры: `game/tests/unit/systems/test_crisis_events.gd`; контракт
   эффектов: `game/tests/unit/systems/test_crisis_effect_contract.gd`.
-- **Закрытый набор ключей (Q-M79 → (а), D-197):** эффекты выборов используют
+- **Закрытый набор ключей (Q-M79 → (а), D-197; Q-M81, D-200):** эффекты выборов используют
   только `WIRED_EFFECT_KEYS` (resource_change, morale_change, population_change,
-  unlock_building, unlock_law); **немой ключ роняет игру** (`push_error` + `return`),
-  а не пишется в никуда. `permanent_modifier` удалён из данных как немой; немые
-  `reputation_change` / `mana_change` / `population_drain` удалены из данных
-  (17 строк). `resolution_effects` делегирует в словарь выбора (своих ключей не имеет).
+  unlock_building); **немой ключ роняет игру** (`push_error` + `return`),
+  а не пишется в никуда. Сняты как писатели без читателя: `permanent_modifier`;
+  немые `reputation_change` / `mana_change` / `population_drain` (17 строк данных);
+  `production_reduction` (вместе с `apply_production_modifier`) и `unlock_law`
+  (вместе с приватным LawManager каталога и ключом сейва `"law"`) — возврат
+  последнего только с носителем пассивных эффектов, **T-130**. `resolution_effects`
+  делегирует в словарь выбора (своих ключей не имеет).
 - **Канал настроения (Q-M78 → (а), D-197):** `morale_change` / `morale_penalty`
   вызывают `mood_sink` → `DistrictSystem.apply_mood_delta` (настроение поселения,
   0–100, clamp `game/data/config/districts.json`) — прецедент Таверны (Q-M71).
@@ -197,9 +201,12 @@ case-sensitive: `world.tscn`, `battle.tscn`, `main_menu.tscn`).
   `push_error`. Поля `player_data["morale"]` и API `get_global_morale` /
   `modify_global_morale` **сняты** (писатели без читателя; «мораль» как шкала
   аннулирована K-M14).
-- `unlock_building` → валидный id из `game/assets/data/buildings.json`;
-  `unlock_law` → валидный id из `LawManager.gd` (пассивные эффекты законов —
-  писатели без читателя, см. Q-M81).
+- `unlock_building` → валидный id из `game/assets/data/buildings.json`.
+- **Внутренний контур каталога (Q-M81, D-200):** `player_data` каталога
+  (`resources` tools/materials, `population`, `buildings`) пишется эффектами и читается
+  триггерами самого каталога и гейтингом выбора — это **мера события**, а не показатель
+  поселения (канон: резиденты `PopulationSystem`, 3 ресурса 02g). Граница зафиксирована
+  тестом; сведение на канон — **T-131**.
 
 ## Git-конвенции
 
