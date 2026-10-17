@@ -2081,20 +2081,23 @@
   "sheet": "references/unit-02.jpeg",
   "cell": 3,
   "category": "unit-02",
-  "model": "qwen21",
+  "model": "ernie",
   "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1
+  },
   "best_score": null,
   "max_attempts": 5,
   "subject": "lean spy standing wide with feet apart, right arm raised with the palm shading his eyes as he scans the horizon, left arm hanging loose, hooded head turned to the side, thin dark moustache and pointed goatee, sharp eyes under a furrowed brow, mature narrow face, ochre hood pulled over the head with a short cowl over the shoulders, ochre hip-length tunic with a buttoned chest and a jagged hem, dark grey sleeves showing at the wrists, brown leather belt with a square brass buckle, crossed leather straps over the chest and two leather pouches at the hips, dark green trousers, brown leather boots with folded cuffs, hand-painted matte skin with soft visible brush shading, mature stylized cartoon face with simplified exaggerated features",
   "history": [],
-  "file": null,
+  "file": "attempts/IMG-015/ernie_IMG-015_v1.webp",
   "note": "",
   "seal": {
    "etalon": "5bc3b4224022",
    "sheet": "4d7bd89dae4f",
-   "model": "krea2",
+   "model": "ernie",
    "seed": 43,
    "prompt_version": "P8",
    "render_version": "R1",
@@ -2103,7 +2106,7 @@
     "sampler": "euler",
     "scheduler": "simple",
     "steps": 8,
-    "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    "checkpoint": "ernie-image-turbo.safetensors"
    },
    "dictionary": "e1a43af78147",
    "instrument": "anchors-aba09390ac52",
@@ -2145,8 +2148,28 @@
     "dictionary": "e1a43af78147",
     "instrument": "anchors-aba09390ac52",
     "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-015_v1": {
+    "etalon": "5bc3b4224022",
+    "sheet": "4d7bd89dae4f",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
    }
-  }
+  },
+  "prompt_version": "P8",
+  "render_version": "R1"
  },
  "IMG-016": {
   "unit": "IMG-016",
@@ -2154,29 +2177,31 @@
   "sheet": "references/unit-02.jpeg",
   "cell": 4,
   "category": "unit-02",
-  "model": "qwen21",
+  "model": "krea2",
   "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "version": 1,
+  "versions": {
+   "krea2": 1
+  },
   "best_score": null,
   "max_attempts": 5,
   "subject": "savage war chief standing wide with knees bent and chest turned to the front, right fist raised overhead at the left edge of the frame, left fist clenched at the side, mouth wide open in a roar showing teeth, long tangled black hair, heavy scowling brows, square jaw, bare muscular chest and abdomen, necklace of animal teeth and claws on a leather cord, ragged hide skirt trimmed with pale fur hung from a twisted rope belt, leather wraps on both forearms, a small healed scar on the chest at the right edge of the frame, bare legs, brown leather boots trimmed with pale fur, hand-painted matte skin with soft visible brush shading, mature stylized cartoon face with simplified exaggerated features",
   "history": [],
-  "file": null,
+  "file": "attempts/IMG-016/krea2_IMG-016_v1.webp",
   "note": "",
   "seal": {
    "etalon": "9ba2215a7c24",
    "sheet": "4d7bd89dae4f",
-   "model": "krea2,ernie",
+   "model": "ernie",
    "seed": 43,
    "prompt_version": "P8",
    "render_version": "R1",
    "render": {
-    "cfg": 3.0,
+    "cfg": 1.0,
     "sampler": "euler",
     "scheduler": "simple",
-    "steps": 25,
-    "checkpoint": "нет"
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
    },
    "dictionary": "e1a43af78147",
    "instrument": "anchors-aba09390ac52",
@@ -2200,8 +2225,46 @@
     "dictionary": "e1a43af78147",
     "instrument": "anchors-aba09390ac52",
     "judge": "judge-95455b01bf98"
+   },
+   "krea2_IMG-016_v1": {
+    "etalon": "9ba2215a7c24",
+    "sheet": "4d7bd89dae4f",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-016_v1": {
+    "etalon": "9ba2215a7c24",
+    "sheet": "4d7bd89dae4f",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
    }
-  }
+  },
+  "prompt_version": "P8",
+  "render_version": "R1"
  },
  "IMG-017": {
   "unit": "IMG-017",
@@ -32307,7 +32370,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "bearded king standing square to the camera, right arm raised holding a sword overhead, left fist clenched, gold crown over a red-brown mane, blue tabard charged with a gold lion over mail, blue cape, belt with a scabbard, brown boots, palette royal blue, gold and steel, matte velvet, mail and gold leaf",
   "history": []
  },
  "IMG-410": {
@@ -32322,7 +32385,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "blond knight standing square to the camera, left arm behind a shield charged with a red cross, right fist clenched, short blond hair and a scowl, yellow tabard with a red cross over mail, belt with a sword, steel greaves, palette saffron yellow, crimson and steel, matte wool, chain and cold steel",
   "history": []
  },
  "IMG-411": {
@@ -32337,7 +32400,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young man duellist standing square to the camera, right hand raising a curved scimitar, left arm opened wide, black tousled hair and a sly smile, white coat with a white cape, blue sash with a gold clasp, white trousers and boots, palette pearl white, cobalt blue and steel, matte cotton, silk and bright steel",
   "history": []
  },
  "IMG-412": {
@@ -32352,7 +32415,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "red-bearded barbarian standing square to the camera, both hands holding a bound log club shouldered, roaring mouth and wild hair, fur mantle over a green tunic, fur belt with a skull, fur boots, palette moss green, fur brown and bone, matte hide, fur and bound wood",
   "history": []
  },
  "IMG-413": {
@@ -32367,7 +32430,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "bald monk standing square to the camera, both hands working a chained sickle at his chest, hair in a long braided queue and a fierce scowl, saffron robe over dark trousers, prayer beads, wrist wraps, brown boots, palette saffron yellow, iron grey and bead brown, matte cotton, hemp and chain",
   "history": []
  },
  "IMG-414": {
@@ -32382,7 +32445,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young man leaf-walker standing square to the camera, both hands tucked into his cloak, autumn hair under a leaf hood and a calm smile, cloak layered of oak and maple leaves over a bark tunic, rope belt, straw sandals, palette autumn orange, oak green and bark brown, matte dry leaves, bark and hemp",
   "history": []
  },
  "IMG-415": {
@@ -32397,7 +32460,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "man minstrel standing square to the camera, right index finger raised, left hand holding a ribboned tambourine, moustache under a plumed hat, purple coat with gold trim and a magenta cape, pink sash, purple boots, palette violet, magenta and gold, matte satin, silk and ribbon",
   "history": []
  },
  "IMG-416": {
@@ -32412,7 +32475,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "red-bearded woodsman standing square to the camera, right hand holding an axe planted butt-down, left hand loose, fur-trimmed cap over a weathered face, grey fur-lined coat over a tan shirt, belt with a pouch, fur boots, palette slate grey, fur cream and axe steel, matte felt, fur and forged steel",
   "history": []
  },
  "IMG-417": {
@@ -32427,7 +32490,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "old bishop standing square to the camera, right hand raising a spiked iron mace, left fist clenched, long white beard under a shaven crown, magenta vestments with a sun-emblazoned white stole and a gold belt, brown boots, palette magenta, gold and pearl white, matte velvet, gold and pitted iron",
   "history": []
  },
  "IMG-418": {
@@ -32442,7 +32505,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "old wizard standing square to the camera, left hand raising a wand tipped with blue flame, right palm opened, long white beard under a moon-and-star hat, indigo robes printed with moons, belt with a pouch, blue boots, palette indigo, silver and flame cyan, matte velvet, silver thread and live flame",
   "history": []
  },
  "IMG-419": {
@@ -32457,7 +32520,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young man druid standing square to the camera, left hand holding a gnarled staff blooming with green light, right hand tucked in his coat, brown hair under a green hood and a bright smile, green coat with gold trim, belt with a leaf charm, green boots, palette forest green, bark brown and leaf glow, matte wool, bark and green light",
   "history": []
  },
  "IMG-420": {
@@ -32472,7 +32535,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "flame elemental man standing square to the camera, both fists clenched at his sides wreathed in fire, burning hair and a grinning face, rust tunic with a rope belt and a buckle, fur-trimmed boots, palette ember orange, rust red and char black, matte scorched cloth, ash and living flame",
   "history": []
  },
  "IMG-421": {
@@ -32487,7 +32550,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young man halberdier standing square to the camera, right hand holding a poleaxe planted butt-down, left hand on his hip, brown hair and a cheerful face, steel breastplate over mail, red sash, belt with a buckle, brown boots, palette steel grey, crimson and leather brown, matte polished steel, wool and cold iron",
   "history": []
  },
  "IMG-422": {
@@ -32502,7 +32565,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "man knight standing square to the camera, both hands holding a sword planted point-down before him, brown hair and a calm smile, plate cuirass with a sun emblem, cream tabard with gold trim, red cape, steel greaves, palette polished steel, cream and crimson, matte polished steel, wool and gold",
   "history": []
  },
  "IMG-423": {
@@ -32517,7 +32580,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "muscular man club warrior standing square to the camera, right hand holding a spiked club shouldered, left hand on his hip, long braided hair and a toothy grin, fur mantle over a bare chest, fang belt, fur boots, palette hide brown, fur charcoal and bone, matte fur, leather and pitted iron",
   "history": []
  },
  "IMG-424": {
@@ -32532,7 +32595,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "bearded man longbowman standing square to the camera, left hand holding a longbow point down, right hand loose, red beard under a green hood, leather cuirass over a green tunic, quiver on his back, belt with a pouch, brown boots, palette moss green, leather brown and yew, matte wool, leather and bowstring",
   "history": []
  },
  "IMG-425": {
@@ -32547,7 +32610,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young man shadow blade standing square to the camera, right hand holding a short sword point down, left hand gripping a dagger at his hip, dark hair under a hood and a sly grin, leather harness over mail, blue cloak, bracers and boots, palette slate blue, charcoal black and steel, matte worn cloth, leather and dark steel",
   "history": []
  },
  "IMG-426": {
@@ -32562,7 +32625,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "assassin standing square to the camera, right hand raising a curved scimitar, left hand holding a dagger point down, black hood and face wrap over narrowed eyes, black leather coat with crossed belts, black cape, dark boots, palette charcoal black, gunmetal and steel, matte black leather, cloth and oiled steel",
   "history": []
  },
  "IMG-427": {
@@ -32577,7 +32640,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young man bard standing square to the camera, left hand holding a lute neck, right hand strumming at his waist, curly hair under a feathered cap and a wide grin, maroon coat with gold embroidery over an open cream shirt, dark breeches and boots, palette maroon, gold and cream, matte velvet, silk and lute wood",
   "history": []
  },
  "IMG-428": {
@@ -32592,7 +32655,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "bald heavyset monk standing square to the camera, both hands holding a wooden staff shouldered behind his neck, cheerful squint and a smooth head, saffron robe over a tan tunic, prayer beads, rope belt, straw sandals, palette saffron yellow, clay tan and bead brown, matte worn cotton, hemp and smooth wood",
   "history": []
  },
  "IMG-429": {
@@ -32607,7 +32670,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young man astrologer standing square to the camera, right hand raising a star-topped crescent staff, left arm carrying a book, brown hair under a moon-and-star hat and a knowing smile, blue cloak printed with stars over dark clothes, belt with a buckle, brown boots, palette indigo blue, gold and star silver, matte velvet, brass and paper",
   "history": []
  },
  "IMG-430": {
@@ -32622,7 +32685,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "woman sorceress standing square to the camera, left palm raised bearing a purple arcane orb, right hand on her hip, long black braided hair and a sly smile, purple gown with gold filigree and a gemmed belt, thigh slit, purple boots, palette aubergine purple, gold and arcane violet, matte silk, gold and glowing orbs",
   "history": []
  },
  "IMG-431": {
@@ -32637,7 +32700,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "bearded man war cleric standing square to the camera, both hands holding a warhammer shouldered, brown hair and a steady gaze, plate harness with a cream sun-tabard and a cape, gold belt, brown boots, palette steel grey, cream and gold, matte polished steel, wool and forged steel",
   "history": []
  },
  "IMG-432": {
@@ -32652,7 +32715,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "heavyset old druid standing square to the camera, right hand holding a golden crescent-headed staff, left hand tucked in his cloak, grey beard under a leaf crown and a bird perched on his shoulder, green cloak over a cream tunic, bead necklace, rope belt, sandalled feet, palette oak green, bark brown and leaf sprig, matte bark, wool and fresh leaves",
   "history": []
  },
  "IMG-433": {
@@ -32667,7 +32730,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "bearded man axe veteran standing square to the camera, right hand holding a double-bladed poleaxe shouldered, left fist clenched, black beard and a hard stare, steel breastplate over mail, red sash, belt with a buckle, brown boots, palette steel grey, crimson and leather brown, matte worn steel, wool and cold iron",
   "history": []
  },
  "IMG-434": {
@@ -32682,7 +32745,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young man knight standing square to the camera, right arm raising a glowing sword, left hand on his hip, red hair and a confident grin, plate cuirass with a sun emblem, cream tabard, red cape, steel greaves, palette polished steel, crimson and gold, matte polished steel, wool and warm light",
   "history": []
  },
  "IMG-435": {
@@ -32697,7 +32760,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "hairy man bear keeper standing square to the camera, right hand holding a spiked club shouldered, left arm hugging a bear cub to his shoulder, wild black hair and a roaring laugh, fur kilt with a skull belt, sandalled feet, palette bear brown, fur charcoal and bone, matte coarse fur, bone and bound wood",
   "history": []
  },
  "IMG-436": {
@@ -32712,7 +32775,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young man longbowman standing three-quarter to the right, left arm extended holding a longbow, right hand drawing an arrow to his cheek, brown hair under a green hood, green cloak over a leather jerkin, quiver on his back, bracers and boots, palette moss green, saddle brown and yew, matte wool, leather and sinew",
   "history": []
  },
  "IMG-437": {
@@ -32727,7 +32790,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "man ranger standing square to the camera, right hand holding a short sword point down, left hand loose, brown hair under a hood and a weathered face, leather harness over mail, belt with vials and a pouch, dark cloak, brown boots, palette slate grey, leather brown and steel, matte worn leather, wool and scarred steel",
   "history": []
  },
  "IMG-438": {
@@ -32742,7 +32805,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "assassin standing square to the camera, right hand holding a curved scimitar point down, left hand tucked in his belt, black hood and face wrap over narrowed eyes, black leather coat with crossed belts, black cape, dark boots, palette charcoal black, gunmetal and steel, matte black leather, cloth and oiled steel",
   "history": []
  },
  "IMG-439": {
@@ -32757,7 +32820,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young woman bard standing square to the camera, left hand holding a mandola neck, right hand opened in a welcoming gesture, red ponytail under a feathered cap and a wink, maroon bodice with gold trim over a cream blouse, dark breeches and boots, palette maroon, gold and cream, matte velvet, silk and instrument wood",
   "history": []
  },
  "IMG-440": {
@@ -32772,7 +32835,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "old monk standing square to the camera, right hand holding a wooden staff across his body, left palm opened at his side, shaven head with grey brows and a gentle smile, tan robe over a cream tunic, prayer beads, rope belt, straw sandals, palette camel tan, cream and bead brown, matte worn cotton, hemp and smooth wood",
   "history": []
  },
  "IMG-441": {
@@ -32787,7 +32850,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "old wizard standing square to the camera, right hand raising a driftwood staff topped with a glowing star, left arm holding a book and a potion bottle, long white beard under a moon-printed hat, blue cloak printed with stars over blue robes, brown boots, palette indigo blue, silver and star white, matte velvet, bark and glowing light",
   "history": []
  },
  "IMG-442": {
@@ -32802,7 +32865,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "dark-skinned woman sorceress standing square to the camera, both hands raised releasing purple arcane orbs, long black curly hair and a laughing face, purple gown with gold filigree, gold belt and arm rings, gold heels, palette aubergine purple, gold and arcane violet, matte silk, gold and glowing orbs",
   "history": []
  },
  "IMG-443": {
@@ -32817,7 +32880,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "bald heavyset man cleric standing square to the camera, right hand holding a mace upright, left hand tucked in his robe, brown beard and a calm squint, cream tabard with sun motifs over white robes, gold belt, prayer beads, brown boots, palette pearl white, gold and steel, matte linen, gold thread and iron",
   "history": []
  },
  "IMG-444": {
@@ -32832,7 +32895,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young elf woman druid standing square to the camera, left hand holding a crescent moon-headed staff, right hand tucked in her cloak, grey hair under a leaf crown and pointed ears, leaf-layered cloak over a green tunic, fang necklace, vine wraps, brown boots, palette oak green, leaf sprig and moon gold, matte leaves, bark and glowing wood",
   "history": []
  },
  "IMG-445": {
