@@ -1,0 +1,273 @@
+{
+ "generated": "2026-10-18",
+ "generator": "scripts/ui_kit/build_ui_kit.py",
+ "mockup": "reference/09_start_screen_throne.jpeg",
+ "measure": {
+  "plate_game_px": [
+   292,
+   68
+  ],
+  "chamfer_game_px": 14,
+  "frame_px": {
+   "outline": 1,
+   "shine": 4,
+   "groove": 2,
+   "line": 1
+  },
+  "pitch_game_px": 85.6,
+  "gap_game_px": 18.6,
+  "field_lum_percentiles": [
+   39.0,
+   57.0,
+   75.0
+  ]
+ },
+ "material": {
+  "source": "reference/09_start_screen_throne.jpeg",
+  "strips": [
+   "y 765..777",
+   "y 821..831",
+   "y 888..900",
+   "y 944..954",
+   "y 1011..1023",
+   "y 1067..1077",
+   "y 1134..1146",
+   "y 1190..1200",
+   "y 1257..1269",
+   "y 1313..1323"
+  ],
+  "x": [
+   2130,
+   2500
+  ],
+  "grain_sigma_raw_px": 6.71,
+  "grain_sigma_applied_px": 10.94
+ },
+ "derived_states_note": "hover/pressed/disabled — вывод из normal (макет молчит)",
+ "files": {
+  "buttons/button_normal.png": {
+   "size": [
+    96,
+    48
+   ],
+   "kind": "9-slice",
+   "texture_margin": [
+    20,
+    12,
+    20,
+    12
+   ],
+   "note": "состояние normal; по макету"
+  },
+  "buttons/button_menu_normal.png": {
+   "size": [
+    120,
+    68
+   ],
+   "kind": "9-slice",
+   "texture_margin": [
+    20,
+    12,
+    20,
+    12
+   ],
+   "note": "MenuPlate, состояние normal; по макету; скобка по торцам — мерка макета 09"
+  },
+  "buttons/button_hover.png": {
+   "size": [
+    96,
+    48
+   ],
+   "kind": "9-slice",
+   "texture_margin": [
+    20,
+    12,
+    20,
+    12
+   ],
+   "note": "состояние hover; материал и рамка +~18% яркости"
+  },
+  "buttons/button_menu_hover.png": {
+   "size": [
+    120,
+    68
+   ],
+   "kind": "9-slice",
+   "texture_margin": [
+    20,
+    12,
+    20,
+    12
+   ],
+   "note": "MenuPlate, состояние hover; материал и рамка +~18% яркости; скобка по торцам — мерка макета 09"
+  },
+  "buttons/button_pressed.png": {
+   "size": [
+    96,
+    48
+   ],
+   "kind": "9-slice",
+   "texture_margin": [
+    20,
+    12,
+    20,
+    12
+   ],
+   "note": "состояние pressed; −22% яркости, блик перевёрнут (плита утоплена)"
+  },
+  "buttons/button_menu_pressed.png": {
+   "size": [
+    120,
+    68
+   ],
+   "kind": "9-slice",
+   "texture_margin": [
+    20,
+    12,
+    20,
+    12
+   ],
+   "note": "MenuPlate, состояние pressed; −22% яркости, блик перевёрнут (плита утоплена); скобка по торцам — мерка макета 09"
+  },
+  "buttons/button_disabled.png": {
+   "size": [
+    96,
+    48
+   ],
+   "kind": "9-slice",
+   "texture_margin": [
+    20,
+    12,
+    20,
+    12
+   ],
+   "note": "состояние disabled; обесцвечено на 72% и затемнено до 55%"
+  },
+  "buttons/button_menu_disabled.png": {
+   "size": [
+    120,
+    68
+   ],
+   "kind": "9-slice",
+   "texture_margin": [
+    20,
+    12,
+    20,
+    12
+   ],
+   "note": "MenuPlate, состояние disabled; обесцвечено на 72% и затемнено до 55%; скобка по торцам — мерка макета 09"
+  },
+  "panels/panel_bg.png": {
+   "size": [
+    96,
+    96
+   ],
+   "kind": "9-slice",
+   "texture_margin": [
+    12,
+    12,
+    12,
+    12
+   ],
+   "note": ""
+  },
+  "panels/slot_bg.png": {
+   "size": [
+    48,
+    48
+   ],
+   "kind": "9-slice",
+   "texture_margin": [
+    8,
+    8,
+    8,
+    8
+   ],
+   "note": ""
+  },
+  "progress_bars/bar_bg.png": {
+   "size": [
+    40,
+    20
+   ],
+   "kind": "9-slice",
+   "texture_margin": [
+    8,
+    8,
+    8,
+    8
+   ],
+   "note": ""
+  },
+  "progress_bars/fill_health.png": {
+   "size": [
+    40,
+    20
+   ],
+   "kind": "9-slice",
+   "texture_margin": [
+    6,
+    6,
+    6,
+    6
+   ],
+   "note": "вывод: цвет — зелёная полоса макета 11, форма — рамка темы"
+  },
+  "sliders/slider_track.png": {
+   "size": [
+    40,
+    14
+   ],
+   "kind": "9-slice",
+   "texture_margin": [
+    6,
+    6,
+    6,
+    6
+   ],
+   "note": "вывод: макет слайдера не показывает"
+  },
+  "sliders/slider_handle.png": {
+   "size": [
+    20,
+    20
+   ],
+   "kind": "иконка",
+   "texture_margin": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "note": "вывод: макет слайдера не показывает"
+  },
+  "buttons/checkbox_unchecked.png": {
+   "size": [
+    24,
+    24
+   ],
+   "kind": "иконка",
+   "texture_margin": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "note": "вывод: чекбокса в макетах нет, носитель — рамка темы"
+  },
+  "buttons/checkbox_checked.png": {
+   "size": [
+    24,
+    24
+   ],
+   "kind": "иконка",
+   "texture_margin": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "note": "вывод: чекбокса в макетах нет, носитель — рамка темы"
+  }
+ }
+}

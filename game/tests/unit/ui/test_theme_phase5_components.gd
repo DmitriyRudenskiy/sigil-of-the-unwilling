@@ -6,7 +6,7 @@ extends BaseTest
 # Slider/LineEdit/CheckBox/вкладки/тултип рисовались дефолтной темой движка
 # (синее семейство + чужая геометрия). Тест держит три инварианта:
 #   1) компоненты объявлены во всех состояниях канона (К-1/К-3/К-5/К-6);
-#   2) геометрия и тени не уехали: 9-слис = толщина рамки в текстуре (К-8/К-9),
+#   2) геометрия и тени не уехали: маржа 9-слиса накрывает рамку текстуры (К-8/К-9),
 #      тень — сажа, а не золото (К-7), углы панелей/слотов прямые;
 #   3) синего семейства П-1 в тронутых типах не осталось (ни в константах кода,
 #      ни в цветах темы).
@@ -15,6 +15,10 @@ extends BaseTest
 
 const _THEME := preload("res://assets/theme/game_theme.tres")
 const _SOOT := Color(0, 0, 0, 0.6)  # §3: тень — сажа rgba(0,0,0,0.6)
+
+# Толщина рамки носителя (обрез+блик+борозда+линия) — `scripts/ui_kit/build_ui_kit.py`,
+# шаг 4: сталь макета 09. Маржа 9-слиса обязана её накрывать.
+const _FRAME_PX := {"panel": 7, "slot": 6}
 
 # Критичные items темы — эталон имён Godot 4.7 (сверен с `Theme.data` движка, а
 # не с формулировкой гайда): [класс контрола, theme_type ("" = тот же класс),
@@ -186,14 +190,20 @@ func test_panel_and_slot_corners_are_square() -> void:
 
 # ─── К-8 / К-9: 9-слис и носитель слота ──────────────────────────────────────
 
-func test_nine_slice_margins_match_frame_thickness() -> void:
-	# маржа = толщина рамки в текстуре (8 px для 32×32), иначе ядро схлопывается
-	# и центр рисуется растянутым пикселем (К-8 — находка фазы 5)
+func test_nine_slice_margins_cover_frame_thickness() -> void:
+	# Инвариант К-8 (находка фазы 5): маржа обязана накрывать рамку текстуры целиком,
+	# иначе рамка растягивается, а ядро схлопывается в растянутый пиксель. Литерал был
+	# `is_equal(8)` под плейсхолдер 32×32 с рамкой 8; шаг 4 принёс сталь макета 09 с
+	# рамкой 7 px и маржой 12 (запас — на мягкую тень внутри текстуры), поэтому теперь
+	# проверяется сам инвариант, а не толщина прежней заглушки. Верхняя граница
+	# (ненулевое ядро) — test_widget_textures_mockup.gd.
 	for style in ["panel", "slot"]:
 		var sb: StyleBoxTexture = _THEME.get_stylebox(style, "Panel")
-		assert_that(int(sb.texture_margin_left)).is_equal(8).override_failure_message(
-			"Panel/%s: texture_margin должен равняться толщине рамки (8)" % style)
-		assert_that(int(sb.texture_margin_right)).is_equal(8)
+		var frame: int = int(_FRAME_PX[style])
+		assert_that(int(sb.texture_margin_left)).is_greater_equal(frame).override_failure_message(
+			"Panel/%s: texture_margin %d < толщины рамки %d — рамка растянется (К-8)"
+			% [style, sb.texture_margin_left, frame])
+		assert_that(int(sb.texture_margin_right)).is_greater_equal(frame)
 	# внутренний отступ панели — PAD 16 (§1.3); слот 40×40 таких полей не вмещает,
 	# у него контент прижат к рамке (8 = толщина)
 	assert_that(int((_THEME.get_stylebox("panel", "Panel") as StyleBoxTexture)

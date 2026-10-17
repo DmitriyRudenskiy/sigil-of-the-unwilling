@@ -83,28 +83,15 @@ func _style_buttons() -> void:
         _continue_btn, _new_game_btn, _credits_btn,
         _settings_btn, _exit_btn
     ]
+    # Носитель кнопок — тема (вариант MenuPlate: плита макета 09, 9-slice). Здесь
+    # когда-то рисовался StyleBoxFlat из ThemeConfig.C_BTN_*: интерим фазы 5, пока
+    # у темы не было настоящей графики. Оставь его — и он перекрывает тему
+    # (add_theme_stylebox_override сильнее варианта темы), то есть стартовый экран
+    # и дальше рисовался бы плоской заливкой вместо кита шага 4.
     for btn in buttons:
-        var sn := StyleBoxFlat.new()
-        sn.bg_color = ThemeConfig.C_BTN_NORMAL
-        sn.set_corner_radius_all(10)
-        sn.set_border_width_all(2)
-        sn.border_color = ThemeConfig.C_BTN_BORDER
-        sn.shadow_color = ThemeConfig.C_BTN_SHADOW
-        sn.shadow_size = 4
-        btn.add_theme_stylebox_override("normal", sn)
-        var sh := sn.duplicate()
-        sh.bg_color = ThemeConfig.C_BTN_HOVER
-        btn.add_theme_stylebox_override("hover", sh)
-        var sp := sn.duplicate()
-        sp.bg_color = ThemeConfig.C_BTN_PRESSED
-        btn.add_theme_stylebox_override("pressed", sp)
-        # Недоступная кнопка отличается НЕ только цветом: у неё сняты рамка и тень
-        # (меняется форма), плюс тусклый шрифт и отсутствующая анимация наведения.
-        var sd := sn.duplicate()
-        sd.bg_color = Color(0.06, 0.05, 0.04, 0.55)
-        sd.set_border_width_all(0)
-        sd.shadow_size = 0
-        btn.add_theme_stylebox_override("disabled", sd)
+        # Недоступная кнопка отличается не только цветом: у неё свой носитель
+        # (MenuPlate/disabled — обесцвеченная плита), плюс тусклый шрифт и
+        # отсутствующая анимация наведения.
         btn.add_theme_color_override("font_color", ThemeConfig.C_BTN_TEXT)
         btn.add_theme_color_override("font_disabled_color", Color(0.45, 0.42, 0.35, 1))
         btn.mouse_entered.connect(func() -> void: SoundManager.play_sfx_cue(&"ui_hover"))
