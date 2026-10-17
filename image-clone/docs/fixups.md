@@ -125,3 +125,33 @@
 
 ## IMG-145 ernie v1 — attempts/IMG-145/ernie_IMG-145_v1.webp
 - пол/возраст не те
+
+## IMG-146 ernie v1 — attempts/IMG-146/ernie_IMG-146_v1.webp
+- пол/возраст не те
+
+## IMG-147 ernie v1 — attempts/IMG-147/ernie_IMG-147_v1.webp
+- пол/возраст не те
+
+## IMG-148 ernie v1 — attempts/IMG-148/ernie_IMG-148_v1.webp
+- пол/возраст не те
+
+## IMG-149 ernie v1 — attempts/IMG-149/ernie_IMG-149_v1.webp
+- пол/возраст не те
+
+## IMG-152 ernie v1 — attempts/IMG-152/ernie_IMG-152_v1.webp
+- взрослый вместо отрока
+
+## IMG-156 ernie v1 — attempts/IMG-156/ernie_IMG-156_v1.webp
+- взрослый вместо отрока
+
+## IMG-158 ernie v1 — attempts/IMG-158/ernie_IMG-158_v1.webp
+- возраст не тот
+
+## IMG-159 ernie v1 — attempts/IMG-159/ernie_IMG-159_v1.webp
+- возраст не тот
+
+## IMG-162 ernie v1 — attempts/IMG-162/ernie_IMG-162_v1.webp
+- возраст не тот
+
+## IMG-165 ernie v1 — attempts/IMG-165/ernie_IMG-165_v1.webp
+- возраст не тот

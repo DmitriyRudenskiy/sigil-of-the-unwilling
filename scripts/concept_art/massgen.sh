@@ -18,32 +18,43 @@ CHAIN=$(python3 -c "import json;print(' '.join(json.load(open('image-clone/spec.
 pending() {
   python3 - <<'PY'
 import json
+import sys
 from pathlib import Path
 q = json.load(open("image-clone/queue.json"))
 A = Path("image-clone/attempts")
 # Модель берётся из цепочки спека, а не из списка литералов: выпавшую стадию
 # конвейер больше не просит доснимать
 chain = json.load(open("image-clone/spec.json"))["chain"]
-# Версия кадра — следующая после уже печатанной: отклонённый юнит с новыми
-# словами ждёт v2, а не пропускается по признаку «v1 есть».
-need = lambda uid, u, m: not (A / uid / f"{m}_{uid}_v{u.get('versions', {}).get(m, 0) + 1}.webp").exists()
-print(" ".join(sorted(
-    uid for uid, u in q.items()
-    if u["status"] == "in-queue" and u["subject"].strip()
-    and any(need(uid, u, m) for m in chain))))
+# Скоуп задаётся аргументами: старая партия IMG-001..060 гонялась на qwen21,
+# без фильтра конвейер поставил бы ей krea2/ernie второй заход.
+scope = set(sys.argv[1:])
+# Юнит ждёт вердикта, а не кадра, если у каждой стадии цепочки кадр уже есть:
+# просить у него v2 с теми же словами не за чем — конвейер встал бы на стопоре
+# побайтового повтора. Пересъёмка ("redraw") — единственный случай v2.
+def need(uid, u, m):
+    if u["status"] == "redraw":
+        v = u.get("versions", {}).get(m, 0) + 1
+        return not (A / uid / f"{m}_{uid}_v{v}.webp").exists()
+    return not list((A / uid).glob(f"{m}_{uid}_v*.webp"))
+# Печатается по модели на юнита: звать стадию, чей кадр не нужен, — рисовать
+# лишний кадр и сдвигать версию.
+print(" ".join(
+    f"{uid}:{','.join(m for m in chain if need(uid, u, m))}"
+    for uid, u in sorted(q.items())
+    if (not scope or uid in scope)
+    and u["status"] in ("in-queue", "redraw") and u["subject"].strip()
+    and any(need(uid, u, m) for m in chain)))
 PY
 }
 
 while :; do
-  ids=$(pending)
-  # скоуп задаётся аргументами: старая партия IMG-001..060 гонялась на qwen21,
-  # без фильтра конвейер поставил бы ей krea2/ernie второй заход
-  [ -n "$SCOPE" ] && ids=$(comm -12 <(printf '%s\n' $ids) <(printf '%s\n' $SCOPE) | tr '\n' ' ')
-  [ -z "${ids// /}" ] && { echo "$(date +%H:%M) очередь на генерацию пуста"; break; }
-  set -- $ids
-  echo "$(date +%H:%M) в работе: $# юнитов, $1 .. ${@: -1}"
-  for id; do
-    for m in $CHAIN; do
+  set -- $(pending $SCOPE)
+  [ $# -eq 0 ] && { echo "$(date +%H:%M) очередь на генерацию пуста"; break; }
+  last=${@: -1}
+  echo "$(date +%H:%M) в работе: $# юнитов, ${1%%:*} .. ${last%%:*}"
+  for job; do
+    id=${job%%:*}
+    for m in ${job##*:}; do
       python3 $J next --model "$m" --id "$id" 2>&1 | tail -2 || echo "FAIL $id $m"
     done
   done
