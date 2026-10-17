@@ -125,6 +125,22 @@ func test_refund_goes_back_to_the_pool_that_paid() -> void:
 	assert_int(unit.get_mana()).is_equal(10)
 
 
+## Неудачное заклинание возвращает плату тому пулу, который платил: персонаж
+## получает свои очки, а не ману героя (BattleController._last_spell_payer).
+func test_failed_cast_refunds_the_character_not_the_hero() -> void:
+	var bc = auto_free(BattleController.new())  # noqa: auto_free returns Variant
+	var magic := _magic()
+	var unit := _character(INT_SCORE_10)
+	unit.spend_mana(5)
+	bc._hero_magic = magic
+	bc._last_spell_cost = 5
+	bc._last_spell_payer = unit
+	bc._on_spell_cast_failed("no target")
+	assert_int(unit.get_mana()).is_equal(10)
+	assert_int(magic.mana_current).is_equal(20)
+	assert_int(bc._last_spell_cost).is_equal(0)
+
+
 func test_level_comes_from_the_definition() -> void:
 	var def := DnDBattleFactory.DnDCharacterDef.new("lvl", "Levelled")
 	def.level = 7

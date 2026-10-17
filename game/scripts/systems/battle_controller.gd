@@ -199,10 +199,11 @@ func _on_spell_cast_failed(_reason: String) -> void:
 		return
 	if _last_spell_payer != null:
 		_last_spell_payer.refund_mana(_last_spell_cost)
+		_last_spell_cost = 0
+		_last_spell_payer = null
 	elif _hero_magic != null:
 		_hero_magic.refund_mana(_last_spell_cost)
-	_last_spell_cost = 0
-	_last_spell_payer = null
+		_last_spell_cost = 0
 
 func _on_cancel() -> void:
 	_ui.close_spellbook()
