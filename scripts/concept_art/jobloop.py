@@ -319,18 +319,29 @@ def crop_sheet(src: Path, out: Path) -> None:
 
 
 def cmd_init(a) -> int:
+    """Завести листы из каталога. Лист уже заведён, если его байты лежат в эталонах:
+    init идемпотентен по содержимому, а не по числу файлов, и листы нового комплекта
+    продолжают нумерацию существующих (иначе новые юниты влезли бы в чужие id)."""
     src = Path(a.src)
     sheets = sorted(src.glob("*.jpeg")) + sorted(src.glob("*.jpg")) + sorted(src.glob("*.png"))
-    if len(sheets) != 5:
-        raise SystemExit(f"в {src} листов {len(sheets)}, ожидалось 5")
+    if not sheets:
+        raise SystemExit(f"в {src} нет листов")
     CROPS.mkdir(parents=True, exist_ok=True)
     ATTEMPTS.mkdir(parents=True, exist_ok=True)
     MATCHES.mkdir(parents=True, exist_ok=True)
     spec = json.loads(SPEC.read_text()) if SPEC.exists() else blank_spec()
     q = load()
-    for s, sheet in enumerate(sheets):
-        name = f"unit-{s + 1:02d}"
-        dst = REFS / f"{name}.jpeg"
+    known = {sha12(LAB / u["sheet"]) for u in q.values() if u.get("sheet")}
+    n = max((int(m.group(1)) for u in q.values()
+             if (m := re.fullmatch(r"unit-(\d+)", u.get("category", "")))), default=0)
+    new = 0
+    for sheet in sheets:
+        if sha12(sheet) in known:
+            continue
+        new += 1
+        n += 1
+        name = f"unit-{n:02d}"
+        dst = REFS / f"{name}{sheet.suffix.lower()}"
         REFS.mkdir(parents=True, exist_ok=True)
         if not dst.exists():
             shutil.copy(sheet, dst)
@@ -338,25 +349,31 @@ def cmd_init(a) -> int:
         tmp.mkdir(exist_ok=True)
         if not any(tmp.glob("cell-*.png")):
             crop_sheet(dst, tmp)
-        for n in range(GRID[0] * GRID[1]):
-            uid = f"IMG-{s * GRID[0] * GRID[1] + n + 1:03d}"
+        base = (n - 1) * GRID[0] * GRID[1]
+        for k in range(GRID[0] * GRID[1]):
+            uid = f"IMG-{base + k + 1:03d}"
             crop = CROPS / f"{uid}.png"
             if not crop.exists():
-                (tmp / f"cell-{n + 1:02d}.png").rename(crop)
+                (tmp / f"cell-{k + 1:02d}.png").rename(crop)
             if uid in q:
                 continue
             q[uid] = {"unit": uid, "reference": f"references/crops/{uid}.png",
-                      "sheet": f"references/{name}.jpeg", "cell": n + 1, "category": name,
+                      "sheet": f"references/{dst.name}", "cell": k + 1, "category": name,
                       "model": MODEL_DEFAULT, "status": "in-queue", "version": 0,
                       "versions": {}, "best_score": None, "max_attempts": MAX_ATTEMPTS,
                       "subject": "", "history": []}
         shutil.rmtree(tmp, ignore_errors=True)
+        spec["categories"].setdefault(name, {
+            "count": GRID[0] * GRID[1], "reference": dst.name,
+            "style": getattr(a, "style", "") or SHEET_STYLE["unit-01"],
+            "frame": FRAME, "size": SIZE, "items": []})
         spec["categories"][name]["items"] = [
-            {"id": f"IMG-{s * GRID[0] * GRID[1] + n + 1:03d}", "subject": ""} for n in range(12)]
+            {"id": f"IMG-{base + k + 1:03d}", "subject": ""} for k in range(GRID[0] * GRID[1])]
     save(q)
     SPEC.write_text(json.dumps(spec, ensure_ascii=False, indent=1) + "\n")
     check_invariant(q)
-    print(f"юнитов в очереди: {len(q)} (новых не перезаписывали), оправа: {SPEC}")
+    print(f"листов новых: {new}, юнитов в очереди: {len(q)} (существующих не касались), "
+          f"оправа: {SPEC}")
     return 0
 
 
@@ -365,7 +382,7 @@ def blank_spec() -> dict:
     base["out_dir"] = OUT_DIR
     base["references_dir"] = str(REFS)
     base["model"] = MODEL_DEFAULT
-    base["_comment"] = ("Оправа лаборатории image-clone: 5 листов по 12 ячеек, прогон 512x512. "
+    base["_comment"] = ("Оправа лаборатории image-clone: листы по 12 ячеек, прогон 1024x1024. "
                         "Сюжеты живёт в queue.json, сюда вкладываются на время генерации.")
     base["variants"] = [VARIANT]
     base["categories"] = {
@@ -377,8 +394,9 @@ def blank_spec() -> dict:
 
 def check_invariant(q: dict) -> None:
     ids = sorted(q)
-    if len(ids) != 60:
-        raise SystemExit(f"юнитов {len(ids)} != 60")
+    cells = GRID[0] * GRID[1]
+    if len(ids) % cells:
+        raise SystemExit(f"юнитов {len(ids)} — не целое число листов по {cells} ячеек")
     if len(set(ids)) != len(ids):
         raise SystemExit("дубли id")
     missing = [u for u in ids if not (LAB / q[u]["reference"]).is_file()]
@@ -1369,6 +1387,27 @@ def cmd_lint(a) -> int:
     return 0
 
 
+def figure_mask(im: Image.Image, cell: tuple[int, int, int, int], gutter: int = 80) -> np.ndarray:
+    """Маска «своего» содержимого ячейки: связные компоненты, чей центр тяжести
+    лежит в ячейке. Прямоугольник бокса тащит кисть и щит соседа — маска их выбрасывает."""
+    from scipy import ndimage
+    a = np.asarray(im.convert("L"), dtype=np.uint8)
+    x0, y0, x1, y1 = cell
+    win = (max(0, x0 - gutter), max(0, y0 - gutter),
+           min(a.shape[1], x1 + gutter), min(a.shape[0], y1 + gutter))
+    lab, n = ndimage.label(a[win[1]:win[3], win[0]:win[2]] < INK_MAX)
+    keep = np.zeros_like(lab, bool)
+    for i in range(1, n + 1):
+        ys, xs = np.where(lab == i)
+        if len(ys) < 200:
+            continue
+        if x0 <= xs.mean() + win[0] < x1 and y0 <= ys.mean() + win[1] < y1:
+            keep |= lab == i
+    mask = np.zeros(a.shape, bool)
+    mask[win[1]:win[3], win[0]:win[2]] = keep
+    return mask
+
+
 def figure_bbox(im: Image.Image, cell: tuple[int, int, int, int],
                 gutter: int = 80, margin: int = 12) -> tuple[int, int, int, int]:
     """Бокс фигуры, а не ячейки: сетка референса режется по ровным колонкам,
@@ -1402,10 +1441,13 @@ def figure_bbox(im: Image.Image, cell: tuple[int, int, int, int],
 
 
 def cmd_cut(a) -> int:
-    """Перерезать кропы по боксу фигуры и пересобрать манифест эталонов."""
-    from scipy import ndimage                                    # noqa: F401
+    """Перерезать кропы по боксу фигуры и пересобрать манифест эталонов.
+    --from IMG-061 — не трогать юнитов раньше (их печати держат хеш старого эталона)."""
     q = load()
+    first = int(str(getattr(a, "from_id", "") or "0").removeprefix("IMG-")) or None
     for uid, unit in sorted(q.items()):
+        if first and int(uid[4:]) < first:
+            continue
         sheet = Image.open(LAB / unit["sheet"])
         cols, rows = GRID                                   # GRID = (колонок, рядов)
         idx = unit["cell"] - 1                              # cell в очереди 1-базируется
@@ -1413,7 +1455,11 @@ def cmd_cut(a) -> int:
         cw, ch = sheet.width // cols, sheet.height // rows
         cell = (c * cw, r * ch, (c + 1) * cw, (r + 1) * ch)
         box = figure_bbox(sheet, cell)
-        fig = sheet.crop(box)
+        crop = sheet.crop(box)
+        fig = Image.new("RGB", crop.size, "white")
+        fig.paste(crop, (0, 0),
+                  Image.fromarray((figure_mask(sheet, cell)[box[1]:box[3], box[0]:box[2]]
+                                   * 255).astype("uint8"), "L"))
         side = max(fig.size)
         canvas = Image.new("RGB", (side, side), "white")
         canvas.paste(fig, ((side - fig.width) // 2, (side - fig.height) // 2))
@@ -1482,6 +1528,8 @@ def main() -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
     i = sub.add_parser("init")
     i.add_argument("--src", default=str(SHEETS_SRC))
+    i.add_argument("--style", default="",
+                   help="жанровый якорь для новых категорий (по умолчанию — семья unit-01)")
     i.set_defaults(f=cmd_init)
     n = sub.add_parser("next")
     n.add_argument("--model", default=None)
@@ -1561,7 +1609,10 @@ def main() -> int:
     bd = sub.add_parser("board", help="доска 2×2: эталон + по кадру каждой стадии")
     bd.add_argument("id")
     bd.set_defaults(f=cmd_board)
-    sub.add_parser("cut", help="перерезать кропы по боксу фигуры").set_defaults(f=cmd_cut)
+    ct = sub.add_parser("cut", help="перерезать кропы по боксу фигуры")
+    ct.add_argument("--from", dest="from_id", metavar="IMG-NNN",
+                    help="перерезать только юнитов с этого id и позже")
+    ct.set_defaults(f=cmd_cut)
     sub.add_parser("lint", help="проверить стилевой блок словарём стиля").set_defaults(f=cmd_lint)
     ro = sub.add_parser("reopen", help="снять статус потолка или блокировки")
     ro.add_argument("id")
