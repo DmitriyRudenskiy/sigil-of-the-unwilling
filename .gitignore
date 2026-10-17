@@ -36,6 +36,11 @@ __pycache__/
 /image-clone/pairs/
 /image-clone/legacy/
 /image-clone/queue.lock
+# карта: сырые кадры ролей (1024²) выводимы прогоном scripts/gen_map_art.py по seed
+# из MANIFEST.json; носитель — game/assets/tiles|objects, он и лежит в git.
+/image-clone/map/*
+!/image-clone/map/MANIFEST.json
+/image-clone/gen_map_art.log
 
 # git worktrees (изолированные рабочие деревья сессий) — не содержимое репо
 .worktrees/

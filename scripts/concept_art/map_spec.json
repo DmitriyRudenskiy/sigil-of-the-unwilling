@@ -1,0 +1,211 @@
+{
+  "_comment": "Роли графики карты (openspec: world-map-art-variety). Отдельно от spec.json: тот каталог — разведка стиля (5 вариантов × один сюжет на сравнительный борд), здесь — производственный прогон одного утверждённого режима. Сюжеты и промпт-слои живут здесь, в коде их нет. Тона цели — полоса M (game/data/config/map_art_gates.json), снятая с reference/10_map_campaign_town.jpeg.",
+  "comfy": "http://192.168.0.230:8188",
+  "out_dir": "image-clone/map",
+  "export": {
+    "format": "WEBP",
+    "quality": 85
+  },
+  "tile": 82,
+  "prompt_version": "map-1",
+  "models": {
+    "krea2": {
+      "unet": "krea2_turbo_fp8_scaled.safetensors",
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler": "euler",
+      "negative": "zeroed"
+    }
+  },
+  "variants": [
+    {
+      "id": "m1_map",
+      "name": "m1_map",
+      "style": "hand-painted strategy game map art, painterly rendering, soft warm key light, warm browns #664328 #a46739 #ca9861 on parchment #ddd5cc, limited earthy palette, visible brush texture, no photorealism, no glossy shaders",
+      "negative": "photograph, photorealism, 3d render, cgi, glossy plastic, anime, cartoon, line art, sketch, text, letters, watermark, logo, ui, interface, frame, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, text, letters, signature, watermark"
+    }
+  ],
+  "categories": {
+    "materials": {
+      "size": [
+        1024,
+        1024
+      ],
+      "model": "krea2",
+      "isolated": false,
+      "frame": "seamless tileable ground texture viewed straight down from above, flat top-down orthographic view, the same pattern continuing past every edge of the canvas, even soft light with no directional shadow, no border, no vignette, no objects, no trees, no paths, no characters, no text, texture fills the whole canvas edge to edge",
+      "items": [
+        {
+          "id": "mat_grass",
+          "biome": "grass",
+          "target": "#92a26a",
+          "takes": [
+            "short sunlit temperate turf, mossy green grass with a few dry straw blades",
+            "short temperate turf in soft shade, deeper olive green with dark soil showing through",
+            "dry sun-bleached grassland with scattered tiny pale wildflowers",
+            "lush meadow turf with small moss clumps and a few pebbles"
+          ]
+        },
+        {
+          "id": "mat_sand",
+          "biome": "sand",
+          "target": "#cdbe9b",
+          "takes": [
+            "fine pale wind-blown sand with faint ripples",
+            "coarser sandy gravel with scattered small pebbles",
+            "dry cracked sandy earth with sparse dry roots",
+            "warm dune sand with soft shallow hollows"
+          ]
+        },
+        {
+          "id": "mat_snow",
+          "biome": "snow",
+          "target": "#95cde5",
+          "takes": [
+            "wind-packed snow with faint blue shadow hollows",
+            "fresh powdery snow with a few grey pebbles breaking through",
+            "icy crust with fine cracks and pale blue crevices",
+            "dirty late-season snow with thin veins of dark grit"
+          ]
+        },
+        {
+          "id": "mat_swamp",
+          "biome": "swamp",
+          "target": "#486f77",
+          "takes": [
+            "stagnant shallow marsh water with duckweed and dark mud",
+            "wet black mud with rotting reed stubs and scum",
+            "brackish puddles between tussocks of dead sedge",
+            "algae-covered bog water with pale peat foam"
+          ]
+        },
+        {
+          "id": "mat_water",
+          "biome": "water",
+          "target": "#354845",
+          "takes": [
+            "deep still lake water, dark teal, faint long ripples",
+            "slow river water with soft current streaks and pale highlights",
+            "shallow water over dark stones with gentle ripple pattern",
+            "open water with fine wind ripples and no reflection"
+          ]
+        },
+        {
+          "id": "mat_rock",
+          "biome": "rock",
+          "target": "#1d2829",
+          "takes": [
+            "bare grey-brown mountain rock face, cracked and scree-covered",
+            "weathered granite slab with deep vertical fissures",
+            "loose scree and small boulders on stony ground",
+            "dark wet cliff stone with pale mineral veins"
+          ]
+        },
+        {
+          "id": "mat_mud",
+          "biome": "mud",
+          "target": "#6d6d47",
+          "takes": [
+            "trampled wet earth, churned mud with footprints and puddles"
+          ]
+        },
+        {
+          "id": "mat_road",
+          "biome": "road",
+          "target": "#cdbe9b",
+          "takes": [
+            "beaten earth road surface, compacted pale dirt with wheel ruts"
+          ]
+        }
+      ],
+      "style": "painted campaign world map ground, muted natural pigments, close-value earthy colours, fine brush grain"
+    },
+    "objects": {
+      "size": [
+        1024,
+        1024
+      ],
+      "model": "krea2",
+      "isolated": true,
+      "frame": "one single isolated object for a top-down strategy map, whole object with a clear empty margin around it, nothing touching the frame, centered, seen from a high three-quarter angle, base of the object at the bottom, isolated on plain white background, no ground plate, no cast shadow, no text, no frame",
+      "items": [
+        {
+          "id": "obj_tree_deciduous",
+          "group": "vegetation",
+          "subject": "one rounded broadleaf tree, oak-like canopy, painterly green foliage"
+        },
+        {
+          "id": "obj_tree_deciduous_large",
+          "group": "vegetation",
+          "subject": "one large broadleaf tree with a wide heavy canopy and thick trunk"
+        },
+        {
+          "id": "obj_conifer",
+          "group": "vegetation",
+          "subject": "one conical spruce tree, dark blue-green needles"
+        },
+        {
+          "id": "obj_conifer_large",
+          "group": "vegetation",
+          "subject": "one tall old pine tree with a bare lower trunk and a high crown"
+        },
+        {
+          "id": "obj_bush",
+          "group": "vegetation",
+          "subject": "one low round scrub bush with a few dry twigs"
+        },
+        {
+          "id": "obj_reeds",
+          "group": "vegetation",
+          "subject": "one clump of tall marsh reeds with brown seed heads"
+        },
+        {
+          "id": "obj_dead_tree",
+          "group": "vegetation",
+          "subject": "one leafless dead grey tree with broken branches"
+        },
+        {
+          "id": "obj_rock_small",
+          "group": "relief",
+          "subject": "one small moss-covered boulder on a thin base"
+        },
+        {
+          "id": "obj_rock_large",
+          "group": "relief",
+          "subject": "one craggy rock outcrop with sharp broken edges"
+        },
+        {
+          "id": "obj_boulder_snow",
+          "group": "relief",
+          "subject": "one snow-capped grey boulder with ice in its cracks"
+        },
+        {
+          "id": "obj_peak",
+          "group": "relief",
+          "subject": "one steep snowy mountain peak with dark rock showing through the snow"
+        },
+        {
+          "id": "obj_plinth_wood",
+          "group": "plinth",
+          "subject": "one small wooden logging camp platform with stacked cut logs and an axe block"
+        },
+        {
+          "id": "obj_plinth_stone",
+          "group": "plinth",
+          "subject": "one small stone quarry platform with cut blocks and an iron wedge"
+        },
+        {
+          "id": "obj_plinth_food",
+          "group": "plinth",
+          "subject": "one small harvest platform with a grain sheaf, a crate and a scythe"
+        },
+        {
+          "id": "obj_plinth_herb",
+          "group": "plinth",
+          "subject": "one small herb-gathering platform with bundles of dried herbs and a clay pot"
+        }
+      ],
+      "style": "painted campaign world map counter, muted natural pigments, readable silhouette, fine brush grain"
+    }
+  }
+}
