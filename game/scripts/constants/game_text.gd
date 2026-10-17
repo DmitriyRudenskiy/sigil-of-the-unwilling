@@ -98,6 +98,8 @@ static func battle_damage_preview(dmin: int, dmax: int, kmin: int, kmax: int) ->
 static func battle_move_help(name: String) -> String: return TranslationServer.translate("battle.move_help").format({"name": name})
 static func battle_click_enemy() -> String: return TranslationServer.translate("battle.click_enemy")
 static func battle_no_mana() -> String: return TranslationServer.translate("battle.no_mana")
+
+static func battle_time_up() -> String: return TranslationServer.translate("battle.time_up")
 static func battle_unit_info(name: String, count: int, hp: int, atk: int, defn: int, spd: int, tags: String) -> String:
 	return TranslationServer.translate("battle.unit_info").format(
 		{"name": name, "count": count, "hp": hp, "atk": atk, "def": defn, "spd": spd, "tags": tags})

@@ -107,6 +107,9 @@ msgstr "⚔️ Кликните врага с красным контуром."
 msgid "battle.no_mana"
 msgstr "Недостаточно маны или школа не изучена."
 
+msgid "battle.time_up"
+msgstr "⏳ Время вышло — ход пропущен."
+
 msgid "battle.unit_info"
 msgstr "{name} | Числ: {count} | HP: {hp} | АТК: {atk} | ЗАЩ: {def} | СКОР: {spd} | {tags}"
 

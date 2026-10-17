@@ -13,6 +13,14 @@ var turn_idx := 0
 var is_player_turn := true
 var battle_over := false
 
+## battle-unit-vitals: a player turn is bounded in time; running out ends the
+## turn exactly like an explicit "skip". One constant to tune the whole rule.
+const TURN_TIME_LIMIT := 30
+
+var turn_time_limit: int = TURN_TIME_LIMIT
+var turn_time_left: float = float(TURN_TIME_LIMIT)
+var turn_timer_running: bool = false
+
 # T12: ГСЧ d20-пути (D&D-персонажи). Основной флоу лестницы детерминирован
 # и его не использует; бой с dnd-юнитами детерминирован по seed_dnd().
 var dnd_rng := RandomNumberGenerator.new()
@@ -322,6 +330,28 @@ func _top_initiative(p: Array) -> int:
 		var v: int = u.get_initiative() if initiative_order else u.get_speed()
 		top = maxi(top, v)
 	return top
+
+## Arm the turn timer for a fresh player turn: full time, running.
+func arm_turn_timer() -> void:
+	turn_time_left = float(turn_time_limit)
+	turn_timer_running = true
+
+
+## Stop the timer (turn ended, AI turn, modal window, battle over).
+func disarm_turn_timer() -> void:
+	turn_timer_running = false
+
+
+## Advance the timer by delta. True on the frame the time runs out.
+func tick_turn_timer(delta: float) -> bool:
+	if not turn_timer_running:
+		return false
+	turn_time_left = maxf(0.0, turn_time_left - delta)
+	if turn_time_left <= 0.0:
+		turn_timer_running = false
+		return true
+	return false
+
 
 func advance_turn() -> void:
 	turn_idx += 1

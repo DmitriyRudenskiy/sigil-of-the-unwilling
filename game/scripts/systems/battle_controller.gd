@@ -34,6 +34,12 @@ func _ready() -> void:
 	await get_tree().process_frame
 	_view.fit_camera()
 
+## battle-unit-vitals: the turn clock is model state (BattleState); the battle
+## controller is its only ticker, so freeing the scene stops the clock too.
+func _process(delta: float) -> void:
+	if _executor != null:
+		_executor.tick_turn_timer(delta)
+
 func _init_state() -> void:
 	_state = BattleState.new()
 	_ai = BattleAI.new()
@@ -54,6 +60,8 @@ func _wire_ui_signals() -> void:
 	_ui.spell_chosen.connect(_on_spell_chosen)
 	_ui.settings_requested.connect(_on_settings)
 	_ui.settings_closed.connect(resume_from_settings)
+	_ui.spellbook_opened.connect(_pause_turn_timer)
+	_ui.spellbook_closed.connect(_resume_turn_timer)
 
 func _init_input() -> void:
 	_input = BattleInput.new()
@@ -166,6 +174,16 @@ func _on_defend() -> void:
 
 func _on_spellbook() -> void:
 	_ui.open_spellbook(_state, _hero_magic)
+
+## battle-unit-vitals: an open modal spellbook must not eat the turn clock;
+## closing it continues the same remaining time.
+func _pause_turn_timer() -> void:
+	if _executor != null:
+		_executor.pause_turn_timer()
+
+func _resume_turn_timer() -> void:
+	if _executor != null:
+		_executor.resume_turn_timer()
 
 func _on_spell_chosen(spell_id: StringName) -> void:
 	if not _executor.is_input_active():
