@@ -193,6 +193,16 @@ case-sensitive: `world.tscn`, `battle.tscn`, `main_menu.tscn`).
   Q-M77 → (а) заменён. Правки здесь — сведение на канонических носителей,
   а не развитие фичи.
 - Логика: `game/scripts/systems/crisis_event_system.gd`.
+- **Путь игрока (D-202):** `UIManager.decision_made` → `GameManager._on_decision_made` →
+  `CrisisEventSystem.resolve_event_choice` (эффекты выбора + снятие с `active_events` +
+  пометка в истории + закрытие панели); кризисы — `crisis_resolved` → `resolve_crisis`.
+  Тесты этого пути обязаны идти **от сигнала UI**, а не вызывать `apply_choice_effects`
+  напрямую: на вызове метода держались три незамеченных падения fallback-панели и
+  полное отсутствие резолвера выбора.
+- **Панель события (Q-M83 / T-132):** сцен `assets/ui/panels/decision_panel.tscn` и
+  `crisis_panel.tscn` в репо нет — работает fallback-окно `UIManager._create_simple_decision_panel` /
+  `_create_simple_crisis_panel`, а класс `scripts/ui/decision_panel.gd` (пауза-токены, severity,
+  таймер кризиса) не instantiated никем. Носитель панели не выбран — второй путь молча не изобретать.
 - Тесты структуры: `game/tests/unit/systems/test_crisis_events.gd`; контракт
   эффектов: `game/tests/unit/systems/test_crisis_effect_contract.gd`.
 - **Закрытый набор ключей (Q-M79 → (а), D-197; Q-M81, D-200):** эффекты выборов используют
