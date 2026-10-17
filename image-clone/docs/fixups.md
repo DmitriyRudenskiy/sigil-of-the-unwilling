@@ -65,3 +65,12 @@
 
 ## IMG-103 ernie v1 — attempts/IMG-103/ernie_IMG-103_v1.webp
 - взрослый вместо отрока
+
+## IMG-105 ernie v1 — attempts/IMG-105/ernie_IMG-105_v1.webp
+- второй лишний
+
+## IMG-106 ernie v1 — attempts/IMG-106/ernie_IMG-106_v1.webp
+- второй лишний
+
+## IMG-107 ernie v1 — attempts/IMG-107/ernie_IMG-107_v1.webp
+- второй лишний
