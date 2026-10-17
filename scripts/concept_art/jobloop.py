@@ -1533,12 +1533,12 @@ def cmd_stat(_a) -> int:
     print(f"всего {len(q)}: " + ", ".join(f"{k}={v}" for k, v in sorted(tally.items())))
     by_model = {}
     for u in q.values():
-        for h in u["history"]:
+        for h in u.get("history", []):      # юниты старой схемы без журнала
             if h.get("readiness") is not None:
                 by_model.setdefault(h["model"], []).append((h["readiness"], u["version"]))
     tens = total = 0
     for u in q.values():
-        for h in u["history"]:
+        for h in u.get("history", []):
             if h.get("rows") and not h.get("control"):   # контроли — не попытки
                 total += len(h["rows"])
                 tens += sum(1 for v in h["rows"].values() if v == 10)
