@@ -16,6 +16,10 @@ var obstacles: Dictionary = {}
 var _obstacle_seed: int = -1
 var _hero_magic: HeroMagic = null
 var _last_spell_cost := 0
+## battle-unit-vitals: whose pool paid for the last spell. null = the hero's
+## mana paid (plain-stack path); a unit means that character's personal pool.
+## A failed cast refunds the very pool that was charged.
+var _last_spell_payer: BattleState.BattleUnit = null
 
 func _ready() -> void:
 	_init_state()
@@ -178,20 +182,27 @@ func _on_spell_chosen(spell_id: StringName) -> void:
 	_input.start_spell_targeting(spell_id, side, include_dead)
 
 func _on_spell_cast_requested(spell_id: StringName, target: BattleState.BattleUnit) -> void:
-	if _hero_magic != null:
-		var spell = Spells.get_spell(spell_id)
-		if spell == null or not _hero_magic.can_cast_def(spell):
-			_ui.set_status(GameText.battle_no_mana())
-			return
-		var cost = _hero_magic.get_mana_cost_def(spell)
-		_hero_magic.spend_mana(cost)
-		_last_spell_cost = cost
+	var spell = Spells.get_spell(spell_id)
+	var caster: BattleState.BattleUnit = _state.active_unit if _state != null else null
+	# battle-unit-vitals: a character pays from its own Intelligence-derived pool,
+	# a plain stack from the hero's mana; -1 = the cast cannot be paid for.
+	var cost: int = BattleActionResolver.pay_spell_mana(caster, _hero_magic, spell)
+	if cost < 0:
+		_ui.set_status(GameText.battle_no_mana())
+		return
+	_last_spell_cost = cost
+	_last_spell_payer = caster if (caster != null and caster.has_mana()) else null
 	_executor.on_spell_target_selected(spell_id, target)
 
 func _on_spell_cast_failed(_reason: String) -> void:
-	if _hero_magic != null and _last_spell_cost > 0:
+	if _last_spell_cost <= 0:
+		return
+	if _last_spell_payer != null:
+		_last_spell_payer.refund_mana(_last_spell_cost)
+	elif _hero_magic != null:
 		_hero_magic.refund_mana(_last_spell_cost)
-		_last_spell_cost = 0
+	_last_spell_cost = 0
+	_last_spell_payer = null
 
 func _on_cancel() -> void:
 	_ui.close_spellbook()

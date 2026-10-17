@@ -116,6 +116,33 @@ class BattleUnit extends RefCounted:
 		if dnd_profile != null:
 			dnd_current_hp = dnd_profile.max_hp
 
+	## battle-unit-vitals: mana belongs to a character, not to a stack. A unit
+	## without a profile has no pool — consumers must hide the bar, not show 0.
+	func has_mana() -> bool:
+		return dnd_profile != null
+
+	## Current mana (0 when the unit has no pool).
+	func get_mana() -> int:
+		return dnd_profile.get_mana() if dnd_profile != null else 0
+
+	## Maximum mana (0 when the unit has no pool).
+	func get_mana_max() -> int:
+		return dnd_profile.get_mana_max() if dnd_profile != null else 0
+
+	## Spend from the personal pool. False when there is no pool or too little.
+	func spend_mana(amount: int) -> bool:
+		return dnd_profile != null and dnd_profile.spend_mana(amount)
+
+	## Return mana to the personal pool (failed cast).
+	func refund_mana(amount: int) -> void:
+		if dnd_profile != null:
+			dnd_profile.refund_mana(amount)
+
+	## battle-unit-vitals: character level for display; 0 = no level (plain stack),
+	## which the HUD renders as "no level line" rather than "Level: 0".
+	func get_level() -> int:
+		return dnd_profile.level if dnd_profile != null else 0
+
 	func is_alive() -> bool:
 		if is_dnd_character():
 			return alive and dnd_current_hp > 0

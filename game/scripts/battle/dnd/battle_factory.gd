@@ -34,6 +34,8 @@ class DnDCharacterDef:
 	var is_ranged: bool = false
 	var max_hp: int = 10
 	var speed: int = 5
+	## battle-unit-vitals: character level (display-only; never enters a formula).
+	var level: int = 1
 	## Ability scores: "str"/"dex"/"con"/"int"/"wis"/"cha" -> score (1-30).
 	var abilities: Dictionary = {}
 	## DNDArmorClass.ArmorType (default NONE). AC is derived from DEX + armor.
@@ -57,6 +59,7 @@ static func build_profile(def: DnDCharacterDef) -> DnDCombatantProfile:
 	p.weapon = def.weapon
 	p.is_ranged = def.is_ranged
 	p.max_hp = maxi(1, def.max_hp)
+	p.level = maxi(1, def.level)
 	p.armor.armor_type = def.armor_type
 	return p
 

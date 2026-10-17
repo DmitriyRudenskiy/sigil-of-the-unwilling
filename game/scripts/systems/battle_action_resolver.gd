@@ -51,6 +51,31 @@ static func apply_attack(
 	state.check_end()
 	return result
 
+## battle-unit-vitals: charge a spell to the pool the caster actually owns. A
+## D&D character pays its own Intelligence-derived mana; a plain stack pays the
+## hero's mana (unchanged behaviour, including "no hero mana resource = free").
+## Returns the charged amount (0 = nothing to charge) or -1 when the cast is not
+## known or not affordable. The refund side lives with the caller, which knows
+## which pool it charged (BattleController._last_spell_payer).
+static func pay_spell_mana(caster: BattleState.BattleUnit, hero_magic: HeroMagic, spell) -> int:
+	var cost: int = 0
+	if hero_magic != null:
+		cost = hero_magic.get_mana_cost_def(spell)
+	elif spell != null:
+		cost = spell.base_mana
+	if caster != null and caster.has_mana():
+		if spell == null:
+			return -1
+		if hero_magic != null and not hero_magic.knows_def(spell):
+			return -1
+		return cost if caster.spend_mana(cost) else -1
+	if hero_magic == null:
+		return 0
+	if spell == null or not hero_magic.can_cast_def(spell):
+		return -1
+	return cost if hero_magic.spend_mana(cost) else -1
+
+
 static func apply_spell(
 	state: BattleState,
 	spell_id: StringName,
