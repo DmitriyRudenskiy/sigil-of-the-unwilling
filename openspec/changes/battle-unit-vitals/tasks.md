@@ -36,9 +36,9 @@
 
 ## 6. Документация и реестры
 
-- [ ] 6.1 `docs/DECISIONS.md`: мана из INT, уровень display-only, таймер 30 с, DYING+Rescue, победа по «нечем действовать».
-- [ ] 6.2 `docs/mvp/TICKETS.md` + зеркало: тикеты на таймер хода и Rescue; связь с шагом 5 UI.
-- [ ] 6.3 `docs/CHANGELOG.md`; `python3 scripts/check_docs_links.py` чисто.
+- [x] 6.1 `docs/DECISIONS.md`: мана из INT, уровень display-only, таймер 30 с, DYING+Rescue, победа по «нечем действовать».
+- [x] 6.2 `docs/mvp/TICKETS.md` + зеркало: тикеты на таймер хода и Rescue; связь с шагом 5 UI.
+- [x] 6.3 `docs/CHANGELOG.md`; `python3 scripts/check_docs_links.py` чисто.
 
 ## 7. Верификация
 
