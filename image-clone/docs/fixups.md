@@ -53,3 +53,15 @@
 
 ## IMG-071 ernie v1 — attempts/IMG-071/ernie_IMG-071_v1.webp
 - взрослый мужчина вместо серебряноволосой рыцарши
+
+## IMG-097 ernie v1 — attempts/IMG-097/ernie_IMG-097_v1.webp
+- взрослый детина вместо отрока
+
+## IMG-101 ernie v1 — attempts/IMG-101/ernie_IMG-101_v1.webp
+- взрослый вместо отрока
+
+## IMG-102 ernie v1 — attempts/IMG-102/ernie_IMG-102_v1.webp
+- взрослый вместо отрока
+
+## IMG-103 ernie v1 — attempts/IMG-103/ernie_IMG-103_v1.webp
+- взрослый вместо отрока
