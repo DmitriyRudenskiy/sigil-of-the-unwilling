@@ -673,6 +673,30 @@ func resolve_crisis(choice_index: int):
 	current_crisis = null
 	hide_crisis_panel()
 
+
+## Разрешение выбора игрока в обычном событии (проход 9). Резолвера не было:
+## UIManager.decision_made → GameManager._on_decision_made писал в decision_log,
+## эффекты выбора (resource_change / morale_change / population_change /
+## unlock_building) не применял никто, а on_day_passed на следующий день молча
+## сбрасывал active_events — событие исчезало без последствий. Зеркало
+## resolve_crisis: выбор вне диапазона = без эффектов, но событие закрывается.
+func resolve_event_choice(event_id: String, choice_index: int) -> bool:
+	var index := -1
+	for i in range(active_events.size() - 1, -1, -1):
+		if active_events[i].id == event_id:
+			index = i
+			break
+	if index == -1:
+		# Двойной клик или поздний сигнал после on_day_passed — не эффект и не падение.
+		return false
+	var event := active_events[index]
+	active_events.remove_at(index)
+	if choice_index >= 0 and choice_index < event.choices.size():
+		apply_choice_effects(event.choices[choice_index].effects)
+	_mark_resolved("event", event_id, choice_index)
+	hide_event_panel()
+	return true
+
 ## Применение эффектов выбора
 func apply_choice_effects(effects: Dictionary):
 	var game_manager := _gm()
@@ -745,6 +769,12 @@ func hide_crisis_panel():
 	var um := _ui()
 	if um != null and um.has_method("close_crisis_panel"):
 		um.close_crisis_panel()
+
+## Скрыть панель события (панель создаёт UIManager).
+func hide_event_panel():
+	var um := _ui()
+	if um != null and um.has_method("close_decision_panel"):
+		um.close_decision_panel()
 
 ## Проверка было ли событие недавно
 func is_event_recently_occurred(event_id: String) -> bool:

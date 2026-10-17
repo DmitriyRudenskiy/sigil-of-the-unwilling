@@ -126,6 +126,11 @@ func _on_decision_made(event_id: String, choice_index: int) -> void:
 		"choice_index": choice_index
 	})
 	event_history.append(event_id)
+	# Эффекты выбора применяет CrisisEventSystem.resolve_event_choice — по образцу
+	# кризисного пути (_on_crisis_resolved → resolve_crisis). До прохода 9 здесь
+	# был только лог: клик по панели события не менял в игре ничего.
+	if event_system and event_system.has_method("resolve_event_choice"):
+		event_system.resolve_event_choice(event_id, choice_index)
 	_update_world_state_after_choice(event_id, choice_index)
 
 

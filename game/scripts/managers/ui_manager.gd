@@ -8,8 +8,11 @@ signal crisis_resolved(crisis_id: String, choice_index: int)
 
 var decision_panel: PackedScene
 var crisis_panel: PackedScene
-var current_decision_popup: Control
-var current_crisis_popup: Control
+# Fallback-панели — Window (в Godot 4 это Viewport, а не Control), поэтому
+# поле типизировано Node: с Control присваивание падало в рантайме, панель
+# оставалась открытой навсегда (close_decision_panel не находил, что закрывать).
+var current_decision_popup: Node
+var current_crisis_popup: Node
 
 func _ready():
 	# Контракт поиска для CrisisEventSystem (см. его _ready/_ui): в main.tscn
@@ -87,7 +90,12 @@ func _create_simple_decision_panel(event_data: Dictionary, event_id: String):
 	var popup = Window.new()
 	popup.title = event_data.get("title", "Событие")
 	popup.size = Vector2(600, 400)
-	popup.position = (get_viewport().get_visible_rect().size - popup.size) / 2
+	# Godot 4: Window.size — Size2i, а get_visible_rect().size — Vector2;
+	# смешанный оператор '-' падал в рантайме, и панель события не создавалась
+	# вовсе (проход 9; ошибка молча глоталась — до клика по панели ни один
+	# тест не доходил).
+	popup.position = Vector2i(
+		(Vector2(get_viewport().get_visible_rect().size) - Vector2(popup.size)) / 2.0)
 
 	var vbox = VBoxContainer.new()
 	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -124,7 +132,9 @@ func _create_simple_crisis_panel(crisis_data: Dictionary, crisis_id: String):
 	var popup = Window.new()
 	popup.title = "⚠️ КРИЗИС: " + crisis_data.get("title", "Угроза")
 	popup.size = Vector2(700, 500)
-	popup.position = (get_viewport().get_visible_rect().size - popup.size) / 2
+	# Та же правка, что у панели решения (проход 9): Window.size — Size2i.
+	popup.position = Vector2i(
+		(Vector2(get_viewport().get_visible_rect().size) - Vector2(popup.size)) / 2.0)
 	popup.exclusive = true # Блокирует другие окна
 
 	var vbox = VBoxContainer.new()
