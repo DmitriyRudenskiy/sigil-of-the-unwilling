@@ -47,11 +47,10 @@ date: 2026-10-18
 | `game/assets/ui/icons/needs/` | генератор репо `game/scripts/build/gen_need_icons.gd` | 3 png нужд | записей нет | неизвестно |
 | `game/assets/ui/icons/resources/` | **ASSET-1, этот прогон** — `game/tools/gen_resource_icons.py` | 20 png 32×32 по формуле §7.1 | нарисованы в репо, прав третьих лиц нет (бывший атлас HoMM III удалён) | чисто |
 | `game/assets/ui/icons/schools/` | генератор репо `game/scripts/build/gen_school_icons.gd` | 4 png школ магии | записей нет | неизвестно |
-| `game/assets/ui/widgets/buttons/` | `cb9bfe49` (2026-09-16); перекрас синего семейства в канон — `game/tools/recolor_button_textures.py` | 4 png 9-slice состояний кнопки | исходник перекраса — текстура репо, но её приход — тот же `cb9bfe49` | жёлтый — ASSET-2 (своя рамка «кованый край») |
-| `game/assets/ui/widgets/decorators/` | генератор репо `game/scripts/build/gen_widget_textures.gd`; файлы — `cb9bfe49` | 2 png | записей нет | неизвестно |
-| `game/assets/ui/widgets/panels/` | то же | 2 png | записей нет | неизвестно |
-| `game/assets/ui/widgets/progress_bars/` | то же | 5 png | записей нет | неизвестно |
-| `game/assets/ui/widgets/sliders/` | то же | 2 png | записей нет | неизвестно |
+| `game/assets/ui/widgets/buttons/` | генератор репо `scripts/ui_kit/build_ui_kit.py` (шаг 4 ui-mockup-parity, 2026-10-19); прежние файлы — `cb9bfe49` (однотонные заглушки), перекрас `game/tools/recolor_button_textures.py` (удалён этим шагом) | 10 png: базовая кнопка 96×48 ×4 состояний, плита меню 120×68 ×4, чекбокс 24×24 ×2 | геометрия, цвета и зерно — замер макета `reference/09_start_screen_throne.jpeg` (плита 292×68, фаска 14, поле `#233F50`, σ≈11); hover/pressed/disabled выведены — в макете только normal; пофайловый след — `assets/ui/widgets/MANIFEST.json` | чисто — нарисованы в репо по своему замеру, прав третьих лиц нет (ASSET-2: носитель закрыт, §4.1 «дерево» vs сталь макета — вопрос к гайду) |
+| `game/assets/ui/widgets/panels/` | то же | 2 png (panel_bg 96×96, slot_bg 48×48) | та же мерка макета 09; рамка 7 и 6 px — отсюда маржа 9-slice в теме | чисто |
+| `game/assets/ui/widgets/progress_bars/` | то же | 2 png (bar_bg, fill_health 40×20) | форма — рамка макета 09, цвет заполнения — сэмпл зелёной полосы макета 11; `fill_mana`/`fill_xp` не заведены: тема ссылается только на `fill_health`, боевые полосы — шаг 5 | чисто |
+| `game/assets/ui/widgets/sliders/` | то же | 2 png (slider_track, slider_handle) | слайдера в макетах нет — вывод по грамматике рамки темы, помечено в MANIFEST как «вывод» | чисто — вывод, зафиксирован |
 | `game/assets/units/` | не установлено — `8334a974` (2026-08-30) | 190 png юнитов (обычные + `_s`) | записей нет; свип §12.1 чист | неизвестно |
 
 ## Файлы
