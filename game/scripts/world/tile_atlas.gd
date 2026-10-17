@@ -8,6 +8,13 @@ const FOG_SOURCE_ID := 1
 
 enum Biome { GRASS, SAND, SNOW, SWAMP, WATER, ROCK, MUD, LAVA, ROAD, DENSE_FOREST }
 
+## Имена биомов — они же ключи `biome` в манифесте атласа и в данных переходов.
+## Порядок обязан совпадать с enum Biome (индекс = значение enum).
+const BIOME_NAMES := [
+	"grass", "sand", "snow", "swamp", "water",
+	"rock", "mud", "lava", "road", "dense_forest",
+]
+
 const BASE_COORDS := {
 	Biome.GRASS: [Vector2i(0, 0)],
 	Biome.SAND: [Vector2i(1, 0)],

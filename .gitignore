@@ -36,3 +36,6 @@ __pycache__/
 /image-clone/pairs/
 /image-clone/legacy/
 /image-clone/queue.lock
+
+# git worktrees (изолированные рабочие деревья сессий) — не содержимое репо
+.worktrees/
