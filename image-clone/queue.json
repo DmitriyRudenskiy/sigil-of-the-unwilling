@@ -5456,14 +5456,76 @@
   "sheet": "references/unit-07.png",
   "cell": 1,
   "category": "unit-07",
-  "model": "krea2",
+  "model": "ernie",
   "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1
+  },
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
-  "history": []
+  "subject": "elderly human paladin standing square to the camera, right hand raised palm forward at shoulder height in a blessing, left hand resting on the pommel of a longsword planted point down in front of him, long white hair and a full white beard parted over the chest, kind narrowed eyes, polished silver plate armour with a raised sun emblem on the breast and gold-edged faulds, white tabard with an embroidered gold sun falling over the hips, white cape hung from the shoulders, gold belt with a sun buckle, steel gauntlets and greaves, palette polished silver, ivory white and burnished gold, matte metal with warm light on the edges",
+  "history": [],
+  "seal": {
+   "etalon": "9eda753099be",
+   "sheet": "b32574711f4b",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-073_v1": {
+    "etalon": "9eda753099be",
+    "sheet": "b32574711f4b",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-073_v1": {
+    "etalon": "9eda753099be",
+    "sheet": "b32574711f4b",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-073/ernie_IMG-073_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1"
  },
  "IMG-074": {
   "unit": "IMG-074",
@@ -5471,14 +5533,76 @@
   "sheet": "references/unit-07.png",
   "cell": 2,
   "category": "unit-07",
-  "model": "krea2",
+  "model": "ernie",
   "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1
+  },
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
-  "history": []
+  "subject": "elderly human paladin standing square to the camera, right hand raised palm forward at shoulder height in a blessing, left hand resting on the pommel of a longsword planted point down in front of him, long white hair and a full white beard parted over the chest, kind narrowed eyes, polished silver plate armour with a raised sun emblem on the breast and gold-edged faulds, white tabard with an embroidered gold sun falling over the hips, white cape hung from the shoulders, gold belt with a sun buckle, steel gauntlets and greaves, palette polished silver, ivory white and burnished gold, matte metal with warm light on the edges",
+  "history": [],
+  "seal": {
+   "etalon": "38b1f5a79082",
+   "sheet": "b32574711f4b",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-074_v1": {
+    "etalon": "38b1f5a79082",
+    "sheet": "b32574711f4b",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-074_v1": {
+    "etalon": "38b1f5a79082",
+    "sheet": "b32574711f4b",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-074/ernie_IMG-074_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1"
  },
  "IMG-075": {
   "unit": "IMG-075",
@@ -5486,14 +5610,76 @@
   "sheet": "references/unit-07.png",
   "cell": 3,
   "category": "unit-07",
-  "model": "krea2",
+  "model": "ernie",
   "status": "in-queue",
-  "version": 0,
-  "versions": {},
+  "version": 1,
+  "versions": {
+   "krea2": 1,
+   "ernie": 1
+  },
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
-  "history": []
+  "subject": "elderly human paladin standing square to the camera, right hand raised palm forward at shoulder height in a blessing, left hand resting on the pommel of a longsword planted point down in front of him, long white hair and a full white beard parted over the chest, kind narrowed eyes, polished silver plate armour with a raised sun emblem on the breast and gold-edged faulds, white tabard with an embroidered gold sun falling over the hips, white cape hung from the shoulders, gold belt with a sun buckle, steel gauntlets and greaves, palette polished silver, ivory white and burnished gold, matte metal with warm light on the edges",
+  "history": [],
+  "seal": {
+   "etalon": "0921077045a2",
+   "sheet": "b32574711f4b",
+   "model": "ernie",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "ernie-image-turbo.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-075_v1": {
+    "etalon": "0921077045a2",
+    "sheet": "b32574711f4b",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   },
+   "ernie_IMG-075_v1": {
+    "etalon": "0921077045a2",
+    "sheet": "b32574711f4b",
+    "model": "ernie",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "ernie-image-turbo.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  },
+  "file": "attempts/IMG-075/ernie_IMG-075_v1.webp",
+  "prompt_version": "P8",
+  "render_version": "R1"
  },
  "IMG-076": {
   "unit": "IMG-076",
@@ -5507,8 +5693,46 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
-  "history": []
+  "subject": "elderly human paladin standing square to the camera, right hand raised palm forward at shoulder height in a blessing, left hand resting on the pommel of a longsword planted point down in front of him, long white hair and a full white beard parted over the chest, kind narrowed eyes, polished silver plate armour with a raised sun emblem on the breast and gold-edged faulds, white tabard with an embroidered gold sun falling over the hips, white cape hung from the shoulders, gold belt with a sun buckle, steel gauntlets and greaves, palette polished silver, ivory white and burnished gold, matte metal with warm light on the edges",
+  "history": [],
+  "seal": {
+   "etalon": "824adbc236fe",
+   "sheet": "b32574711f4b",
+   "model": "krea2",
+   "seed": 43,
+   "prompt_version": "P8",
+   "render_version": "R1",
+   "render": {
+    "cfg": 1.0,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "steps": 8,
+    "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+   },
+   "dictionary": "e1a43af78147",
+   "instrument": "anchors-aba09390ac52",
+   "judge": "judge-95455b01bf98"
+  },
+  "seals": {
+   "krea2_IMG-076_v1": {
+    "etalon": "824adbc236fe",
+    "sheet": "b32574711f4b",
+    "model": "krea2",
+    "seed": 43,
+    "prompt_version": "P8",
+    "render_version": "R1",
+    "render": {
+     "cfg": 1.0,
+     "sampler": "euler",
+     "scheduler": "simple",
+     "steps": 8,
+     "checkpoint": "krea2_turbo_fp8_scaled.safetensors"
+    },
+    "dictionary": "e1a43af78147",
+    "instrument": "anchors-aba09390ac52",
+    "judge": "judge-95455b01bf98"
+   }
+  }
  },
  "IMG-077": {
   "unit": "IMG-077",
@@ -5522,7 +5746,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young hooded rogue standing weight on one leg, right hand holding a short dagger point up across his chest, left arm loose, cream hood pulled low over dark hair, faint smirk, dark eyes in the shadow of the cowl, brown leather brigandine over a cream wrap shirt, wide belt with pouches, a coin purse and a rolled cord, asymmetric cloak pinned at one shoulder and falling long behind, fingerless gloves, dark trousers bloused into soft brown boots, palette saddle brown, cream and dark steel, matte scuffed leather and wool",
   "history": []
  },
  "IMG-078": {
@@ -5537,7 +5761,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human archer standing three-quarter to the right, bow held across her body in her left hand and an arrow drawn to full length in her right, brown hair tied back with a loose strand at the face, bright confident smile, forest-green cloak over a dark green tunic with a leather chest strap, studded bracer on the bow forearm, quiver of pale-fletched arrows over the shoulder, brown belt with a small pouch, knee-length green cape, brown boots with folded tops, palette forest green, brown leather and steel, matte cloth",
   "history": []
  },
  "IMG-079": {
@@ -5552,7 +5776,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human slinger standing with weight on the back foot, right arm raised overhead swinging a leather sling with a stone, left hand on her hip, red hair under a green cap, freckles and an open grin, cream blouse with gathered sleeves under a brown leather bodice, belted waist with a pouch and a coil of cord, fur-trimmed skirt over patched breeches, leg wraps and brown boots, palette warm brown, cream and green with a rust accent, matte leather and fleece",
   "history": []
  },
  "IMG-080": {
@@ -5567,7 +5791,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human mercenary standing square to the camera, right hand holding three short javelins upright, left arm loose, a round hide-covered shield slung across his back, short brown hair and a serious face, cream scarf wound at the neck, brown leather cuirass over a cream shirt, wide belt with a sword hilt at the hip, dark trousers, brown boots with wraps, palette saddle brown, cream and iron grey, matte leather and hide",
   "history": []
  },
  "IMG-081": {
@@ -5582,7 +5806,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "elderly human wizard standing square to the camera, right hand holding a tall staff topped with a blue crystal crackling with lightning, left arm cradling a thick closed book, tall indigo pointed hat with a gold crescent moon and stars over a long white beard, round spectacles on his nose, kind sharp eyes, purple robe starred with gold, wide sleeves and a gold-trimmed hem, leather belt with a satchel and rolled scrolls, brown boots, palette indigo, violet and gold with cold blue light on the crystal, matte velvet and old paper",
   "history": []
  },
  "IMG-082": {
@@ -5597,7 +5821,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "elderly human cleric standing square to the camera with his hands clasped at the waist, long white hair and a long white beard, calm closed eyes and a faint smile, ivory and pale grey layered vestments with gold embroidered hems over a grey under-tunic, gold chain with a sun-disc medallion at the chest, left hand holding a tall golden staff topped with an open sun ring, pale cape falling behind the shoulders, soft shoes, palette ivory, pale grey and gold with warm metal light, matte linen and gilt",
   "history": []
  },
  "IMG-083": {
@@ -5612,7 +5836,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human spellblade standing mid-stride with weight on one leg, both hands raised at chest height with ribbons of rainbow magic spiralling around them, dark hair swept across a silver half-mask over the eyes, confident smile, long teal coat with dark trim and a flared hem over a plum waistcoat and cream shirt, fingerless gloves, wide belt with a buckle and a book tucked at the hip, dark trousers and brown boots, palette teal, plum and cream with prismatic light, matte wool and soft glow",
   "history": []
  },
  "IMG-084": {
@@ -5627,7 +5851,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human dancer-swordswoman standing in a dancing pose on one bent leg, right hand raising a curved scimitar beside her head, left arm extended wide, black hair in a high bun with a jewelled pin, bright smile, pale blue two-piece outfit with a cropped top and a wrap skirt over bare midriff, sheer blue ribbons floating around the arms, gold belt with a central gem and dangling chains, armlets and anklets, blue slippers, palette pale blue, ivory and gold with translucent fabric, matte skin and gauze",
   "history": []
  },
  "IMG-085": {
@@ -5642,7 +5866,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human duelist standing square to the camera with both arms crossed low, a short sword in each hand angled outward, tousled dark brown hair and a confident half-smile, dark oiled-leather brigandine over a black shirt, wide belt with a buckle and crossed straps over the chest, deep red cape hung from one shoulder, steel bracers, dark trousers bloused into knee-high brown boots, palette dark brown, oxblood red and steel, matte leather with cool light on the blades",
   "history": []
  },
  "IMG-086": {
@@ -5657,7 +5881,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "burly human woodsman standing weight on one leg, both hands stacked on the head of a big broad axe held blade down in front of him, shaggy brown hair and a full beard, calm heavy-lidded eyes, bare muscular arms under a brown leather harness with round metal discs, fur mantle over one shoulder, long moss-green cloak falling behind, tool belt with pouches and a coiled cord, fur-trimmed boots, palette saddle brown, moss green and iron, matte worn leather and fur",
   "history": []
  },
  "IMG-087": {
@@ -5672,7 +5896,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "dwarf warrior standing three-quarter to the left, right hand holding a huge double-bladed axe resting on his shoulder, long flaxen hair and a plaited beard, weathered face, studded leather cuirass over a bare chest, fur shoulder roll, wide belt with a skull plate and a horn pendant, bracers with metal studs, fur-trimmed trousers and heavy boots, palette tan leather, flaxen blonde and steel, matte hide with soft highlights on the axe head",
   "history": []
  },
  "IMG-088": {
@@ -5687,7 +5911,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human squire standing square to the camera, right hand holding a tall spear topped with a small red pennant, left arm carrying a kite shield charged with a red dragon, short brown hair and an open earnest face, polished silver plate armour with a mail coif, red gorget scarf, gold-buckled belt, steel cuisses and greaves over mail, palette steel grey, red and pale gold, matte metal with soft highlights",
   "history": []
  },
  "IMG-089": {
@@ -5702,7 +5926,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human artificer standing three-quarter to the left, right hand raising a small brass device with a glowing filament, left arm a jointed mechanical prosthesis of brass and steel, brown hair with round goggles pushed onto the forehead, curious grin, cream shirt under a long brown leather apron with brass rivets and pockets, tool belt with vials and a satchel, gauntlet cuff, brown boots, palette brass, saddle brown and cream with a warm point of light, matte leather and polished metal",
   "history": []
  },
  "IMG-090": {
@@ -5717,7 +5941,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "human bard standing mid-note with a lute held across his chest, left hand on the neck and right hand over the sound hole, maroon cap with a feather and a laurel band, curled moustache, pleased smile, cream shirt under a plum doublet with gold embroidery, long maroon cape lined with gold pattern, thin sword hanging at the hip, brown boots, palette plum, gold and cream, matte velvet with gilt embroidery",
   "history": []
  },
  "IMG-091": {
@@ -5732,7 +5956,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "elderly human alderman standing square to the camera leaning slightly on a tall dark cane in his right hand, left arm behind his back, tall purple top hat with a gold emblem, round spectacles over a white moustache and beard, purple frock coat with gold buttons and lapel embroidery, waistcoat with a hanging gold chain, dark trousers, black boots, palette aubergine, gold and ivory, matte wool and polished wood",
   "history": []
  },
  "IMG-092": {
@@ -5747,7 +5971,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human druid standing weight on one leg, left hand holding a tall gnarled staff bearing green leaves, right hand loose at his side, short brown hair and a short beard, calm gaze, olive-green cloak with a fur collar fastened by a green leaf brooch, cream tunic under a leather chest strap, belt with pouches and a small blue flask, brown boots, palette olive green, cream and bark brown, matte wool and raw wood",
   "history": []
  },
  "IMG-093": {
@@ -5762,7 +5986,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "stern elderly human wizard standing square to the camera, right hand holding a brass-bound staff topped with a blue crystal, left palm raised with a ball of blue flame, tall indigo hat starred with gold moons, long white beard and heavy brows, deep purple robe with a gold-hemmed mantle, wide sleeves, leather belt with a pouch, brown boots, palette indigo, violet and gold with cold blue light, matte velvet",
   "history": []
  },
  "IMG-094": {
@@ -5777,7 +6001,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human fortune-teller standing square to the camera holding a crystal ball in both hands at chest height, teal hood drawn over dark hair, large calm eyes and a soft smile, layered blue-green robes with an embroidered hem, long scarf crossed over the chest, turquoise pendant and armlets, mist curling around the ball and the feet, dark boots, palette teal, slate blue and pale gold with a cool glow inside the glass, matte wool",
   "history": []
  },
  "IMG-095": {
@@ -5792,7 +6016,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "elderly hedge-witch standing three-quarter to the left, right hand holding a straw broom over her shoulder, left hand on her hip, wide black hat trimmed with leaves, mushrooms and dried herbs over grey hair, round nose and a warm grin, olive-green dress under a stained leather apron, wide belt with hanging pouches, a small kettle and a bundle of herbs, dark skirt hem and stout shoes, palette olive green, bark brown and black with rust accents, matte felt and worn leather",
   "history": []
  },
  "IMG-096": {
@@ -5807,7 +6031,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "human knight standing square to the camera, left hand holding a tall poleaxe upright, right arm loose, closed kettle helm over a mail coif and a short beard, full polished plate armour with a mail tippet, mustard-yellow tabard and sash over the hips and one thigh, gold-buckled belt, steel gauntlets and greaves, palette steel grey and mustard gold, matte metal with warm cloth",
   "history": []
  },
  "IMG-097": {
@@ -5822,7 +6046,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human knight standing three-quarter to the left with his right hand resting on the sword hilt at his hip, left arm loose, fair blond hair swept back and a cheerful face, polished silver plate armour with a mail coif and a gold sun emblem on the breast, blue cloth skirt panel under the faulds, gold-buckled belt, warm yellow cape hung from the shoulders, steel cuisses and greaves, palette steel grey, gold and marigold yellow, matte metal with soft highlights",
   "history": []
  },
  "IMG-098": {
@@ -5837,7 +6061,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "muscular human barbarian standing square to the camera, right hand holding a huge spiked iron maul on his shoulder, left fist on his hip, black hair shaved into a tall mohawk, scowl and a scarred brow, blue-grey studded half-plate over a bare chest, fur shoulder roll, crossed leather straps, wide belt with a rectangular buckle and a hide skirt, studded bracers, fur-trimmed boots, palette slate blue, iron grey and hide brown, matte battered metal and leather",
   "history": []
  },
  "IMG-099": {
@@ -5852,7 +6076,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human ronin standing square to the camera, right hand resting on the hilt of a katana sheathed at his left hip, left arm loose, wide conical straw hat over dark hair and a serious face, brown hooded cloak over a sand-coloured kimono, red sash knotted at the waist with a cord, wrapped trousers and straw sandals, second sheathed blade across the back, palette earth brown, sand and faded red, matte coarse cloth and dry straw",
   "history": []
  },
  "IMG-100": {
@@ -5867,7 +6091,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "human guard standing three-quarter to the left, right hand holding a short sword point down, left arm carrying a tall riveted tower shield charged with a raised trident, kettle helm over a mail coif and a short beard, mail hauberk under a brown leather cuirass, wide belt, brown cloth skirt, steel greaves and boots, palette steel grey, iron and earth brown, matte mail with cool light on the shield boss",
   "history": []
  },
  "IMG-101": {
@@ -5882,7 +6106,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human bard standing mid-song holding a lute across his chest, left hand on the neck and right hand over the strings, blond curls under a green cap with a white feather, open laughing mouth, cream shirt under a green doublet with a leather chest strap, long green cloak with a gold lining, belt with a small pouch and flask, brown boots, palette leaf green, cream and warm wood brown, matte wool and polished lute wood",
   "history": []
  },
  "IMG-102": {
@@ -5897,7 +6121,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human archer standing three-quarter to the right, left hand holding a longbow vertical at his side, right hand loose, brown hair under a deep green hood, determined eyes, green cloak over a brown leather jerkin with a diamond buckle, steel pauldron on one shoulder, studded bracer, quiver of arrows over the shoulder, belt with pouches, brown boots, palette forest green, brown leather and steel, matte cloth",
   "history": []
  },
  "IMG-103": {
@@ -5912,7 +6136,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young bald human crossbowman standing mid-aim with a crossbow shouldered to the right, left arm extended holding the stock, focused squint, mustard-yellow tabard over a green tunic, leather chest piece, belt with a pouch and a quiver of bolts at the hip, bracers, green trousers bloused into brown boots, palette mustard yellow, green and steel, matte leather and cloth",
   "history": []
  },
  "IMG-104": {
@@ -5927,7 +6151,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human hunter crouching low with weight on the front foot, right hand holding a short dagger forward, left hand holding a coiled rope, fur-lined hood over dark hair and a hard stare, brown fur-trimmed cloak over a leather jerkin, wide belt with a buckle and hanging cord, patched trousers, soft brown boots, palette bark brown, hide tan and iron, matte fur and worn leather",
   "history": []
  },
  "IMG-105": {
@@ -5942,7 +6166,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human wizard standing three-quarter to the left, left palm raised holding a glowing blue orb, right hand pointing down at it, tall indigo hat with gold moons and stars over a short brown beard, round face, purple robe with a gold-hemmed mantle over a cream shirt, thick closed book tucked under the right arm, leather belt with a buckle, brown boots, palette indigo, violet and gold with cold blue light, matte velvet and old paper",
   "history": []
  },
  "IMG-106": {
@@ -5957,7 +6181,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human sorceress standing square to the camera with both arms raised to shoulder height, palms up and forks of pale lightning crackling around her hands, long pale silver hair loose over the shoulders, bright smile, pale blue sleeveless dress with a low neckline and a slit skirt, brown belt with a round buckle and a pouch, turquoise pendant, armlets, strappy sandals, translucent blue shawl floating behind, palette pale blue, silver and warm leather with cold light, matte skin and gauze",
   "history": []
  },
  "IMG-107": {
@@ -5972,7 +6196,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human cleric standing three-quarter to the left, left hand raising a spiked mace at shoulder height with sparks around the head, right arm loose, long fair hair under a thin gold halo, blue eyes and a glad smile, polished plate armour with a mail coif, white tabard with an embroidered gold sun over the chest and hips, gold-buckled belt, white cape falling behind, steel greaves, palette steel grey, ivory white and gold with warm light on the mace, matte metal and linen",
   "history": []
  },
  "IMG-108": {
@@ -5987,7 +6211,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human fisherman-warrior standing square to the camera, right hand holding a three-pronged fish spear upright, left hand gripping a weighted fishing net at his side, short dark hair and a frown, bare tanned chest with a crossed leather strap and one steel shoulder pauldron, brown leather belt with a round sun buckle and a hide skirt, bracers, sandals with wraps, palette tan skin, bark brown and steel, matte leather and wet rope",
   "history": []
  },
  "IMG-109": {
@@ -6002,7 +6226,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "human crusader knight standing square to the camera, right hand holding a flanged mace head down at his side, left arm carrying a kite shield charged with a broad red cross, closed great helm with a narrow slit over a mail coif, off-white surcoat with a red cross over full polished plate, wide leather belt with a rectangular buckle, steel gauntlets, cuisses and greaves, palette steel grey, off-white and brick red, matte metal with cool light on the edges",
   "history": []
  },
  "IMG-110": {
@@ -6017,7 +6241,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "burly human barbarian standing square to the camera with both arms folded over his chest, scowling, red hair and a long red beard plaited at the chin, thick fur mantle over bare corded shoulders, necklace of tusks and bone, studded leather arm rings and bracers, hide belt with a round bronze buckle and a ragged leather skirt, axe hanging at the hip, fur-trimmed boots, palette hide brown, rust red and bone, matte fur and weathered leather",
   "history": []
  },
  "IMG-111": {
@@ -6032,7 +6256,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human knight standing three-quarter to the left, right hand holding a sword point down, left arm carrying a tall shield charged with a gold sun on a blue field, red hair in a high ponytail with loose strands and a steady smile, blue-grey plate armour with a gold sun emblem on the breast and riveted pauldrons, brown belt with a buckle, blue cloth skirt panel, steel cuisses and greaves, palette steel blue-grey, gold and blue, matte metal with soft highlights",
   "history": []
  },
  "IMG-112": {
@@ -6047,7 +6271,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human shield-maiden standing square to the camera, right hand holding a tall spear upright, left arm carrying a round shield with painted interlace knots and a steel boss, long blonde hair in two thick braids over the shoulders, calm smile, green wool dress under a leather chest harness with round brooches, fur shoulder roll, woven belt, leather wraps and brown boots, palette moss green, hide tan and steel, matte wool and painted wood",
   "history": []
  },
  "IMG-113": {
@@ -6062,7 +6286,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human rogue standing weight on one leg, a short sword in his right hand and a dagger in his left held low, deep grey hood over dark hair and a sly grin, dark grey cloak over a brown leather jerkin with crossed straps, wide belt with pouches, bracers, dark trousers bloused into soft boots, palette charcoal grey, brown and steel, matte cloth and scuffed leather",
   "history": []
  },
  "IMG-114": {
@@ -6077,7 +6301,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human bard standing mid-gesture with his right hand raised palm up and his left hand at his chest, lute slung across his back, dark hair in a topknot with a short beard and an open grin, white open-collar shirt under a long maroon coat with gold embroidery and fur cuffs, gold pendant on a cord, dark trousers, brown boots with turned tops, palette maroon, gold and cream, matte velvet with gilt trim",
   "history": []
  },
  "IMG-115": {
@@ -6092,7 +6316,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human falconer standing three-quarter to the left, right gauntleted fist raised with a hawk perched on it, left arm loose, short brown hair and an attentive expression, teal cloak fastened at the shoulder over a brown leather jerkin with buckles, wide belt with pouches, quiver of pale-fletched arrows across the back, brown trousers and boots, palette teal, saddle brown and feather brown, matte leather and cloth",
   "history": []
  },
  "IMG-116": {
@@ -6107,7 +6331,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human scout standing three-quarter to the left, left hand raising a lit lantern at shoulder height, right arm loose, brown hair in a ponytail and a bright smile, heavy brown leather coat with buckled straps over a cream shirt, scarf at the neck, large rolled bedroll and pack on the back, belt with pouches and a short knife, knee plates, brown boots, palette saddle brown, cream and warm lantern light, matte worn leather",
   "history": []
  },
  "IMG-117": {
@@ -6122,7 +6346,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "elderly human battle-mage standing square to the camera, right hand holding a tall staff topped with a flanged hammer head, left palm raised with a ball of blue flame, long white hair and a long white beard under a blue hood, stern eyes, deep blue robe with a fur-trimmed mantle and a gold-hemmed hem, wide leather belt with a satchel, brown boots, palette indigo blue, silver-white and steel with cold blue light, matte wool and old wood",
   "history": []
  },
  "IMG-118": {
@@ -6137,7 +6361,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human frost sorceress standing square to the camera, right palm raised with ice crystals and snowflakes floating above it, left hand lifted to the side with a curl of pale gold light, long pale hair in a thick braid over one shoulder, serene smile, pale blue gown with a fitted embroidered bodice, long gloves and a floor-length mantle, silver tiara and pendant, palette ice blue, silver and ivory with cold light, matte satin and frost",
   "history": []
  },
  "IMG-119": {
@@ -6152,7 +6376,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human hedge-mage standing mid-cast with his right hand raised and a green rune circle glowing above the palm, left hand loose, tousled brown hair and a pleased smile, green hooded cloak with gold star embroidery over a brown leather jerkin and cream shirt, wide belt with pouches and a spellbook, bracers, dark trousers, brown boots, palette forest green, cream and gold with a green glow, matte wool and leather",
   "history": []
  },
  "IMG-120": {
@@ -6167,7 +6391,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "human death-knight standing three-quarter to the left, a huge rusted battle axe resting on his right shoulder, left arm hanging empty, black hood over a masked face with a slit and a glint of eyes, full black plate armour with riveted seams and a tattered black cloak, wide belts with buckles and hanging straps, gauntlets, greaves, palette charcoal black, rust brown and cold steel, matte blackened metal with a dull sheen",
   "history": []
  },
  "IMG-121": {
@@ -6182,7 +6406,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human knight standing square to the camera, right hand holding a longsword point down with both hands folded on the pommel, left arm carrying a plain riveted kite shield, fair blond hair and an open smile, polished silver plate armour with a raised gold lion on the breast and gold-edged pauldrons, blue cloth skirt panel, gold-buckled belt, warm yellow cape hung from the shoulders, steel cuisses and greaves, palette steel grey, gold and marigold yellow, matte metal with soft highlights",
   "history": []
  },
  "IMG-122": {
@@ -6197,7 +6421,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "muscular human barbarian standing three-quarter to the left, right hand holding a huge square-headed warhammer resting on his shoulder, left fist on his hip, black hair shaved into a tall mohawk, scarred brow and a grin, blue-grey studded half-plate over a bare chest with a skull boss at the throat, fur shoulder roll, crossed leather straps with a round buckle, hide skirt and belt, studded bracers, fur-trimmed boots, palette slate blue, iron grey and hide brown, matte battered metal",
   "history": []
  },
  "IMG-123": {
@@ -6212,7 +6436,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "human crusader standing square to the camera, right hand holding a flanged mace head down, left arm carrying a kite shield charged with a broad red cross, white hood and mantle with a red cross over a mail coif and a short beard, full polished plate armour, white surcoat with a red cross and red hem trim, wide leather belt with a buckle, steel gauntlets and greaves, palette steel grey, off-white and brick red, matte metal and linen",
   "history": []
  },
  "IMG-124": {
@@ -6227,7 +6451,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human knight-errant standing square to the camera, right hand holding a tall spear upright with a blue pennant, left arm carrying a blue shield charged with a silver crescent moon, closed helm crested with tall pale-blue plumes, polished plate armour with gold trim and a mail coif, blue cloth skirt panel, gold-buckled belt, steel cuisses and greaves, palette steel grey, sapphire blue and gold, matte metal with cool highlights",
   "history": []
  },
  "IMG-125": {
@@ -6242,7 +6466,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "elderly human paladin standing square to the camera, right hand resting on the pommel of a longsword planted point down, left hand raised palm forward at chest height, long white hair and a full white beard, kind narrowed eyes, polished silver plate armour with a gold sun emblem on the breast and round gold pauldrons, white cape over the shoulders, gold-buckled belt, steel cuisses and greaves, palette polished silver, ivory white and gold, matte metal with warm light",
   "history": []
  },
  "IMG-126": {
@@ -6257,7 +6481,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "human knight standing three-quarter to the left, right hand raising a sword upright beside his head, left arm carrying a kite shield charged with a gold lion, long red hair and a full red beard, glad shout, polished silver plate armour with a gold lion boss at the throat and riveted pauldrons, red tabard with a gold lion over the hips, deep red cape, gold-buckled belt, steel greaves, palette steel grey, deep red and gold, matte metal with soft highlights",
   "history": []
  },
  "IMG-127": {
@@ -6272,7 +6496,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "burly human barbarian standing square to the camera with both arms folded over his chest, red hair and a long plaited red beard, scar across one brow and a hard stare, thick dark fur mantle over bare corded shoulders, bone and tusk necklace with a skull at the throat, studded leather arm rings and bracers, wide hide belt with a round buckle, ragged leather skirt and pouches, fur-trimmed boots, palette hide brown, rust red and bone, matte fur and weathered leather",
   "history": []
  },
  "IMG-128": {
@@ -6287,7 +6511,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "human spearman standing square to the camera holding a long ash spear diagonally across his chest with both hands, brown hood over dark hair and a short beard, weathered face, brown leather jerkin over a mail shirt, fur-lined cloak with a bone clasp, wide belt with pouches and a small knife, patched trousers, brown boots, palette bark brown, hide tan and iron, matte worn leather and coarse wool",
   "history": []
  },
  "IMG-129": {
@@ -6302,7 +6526,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "human knight standing square to the camera, right hand holding a tall double-bladed halberd upright, left arm loose, short dark hair and a full beard under a mail coif, full polished plate armour with a gold castle emblem on the breast, blue surcoat with gold trim over the hips, navy cape hung from the shoulders, gold-buckled belt, steel gauntlets and greaves, palette steel grey, sapphire blue and gold, matte metal with cool highlights",
   "history": []
  },
  "IMG-130": {
@@ -6317,7 +6541,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "veteran human spearman standing three-quarter to the left, right hand holding a tall spear upright, left arm carrying a round hide shield with a pale goat device and a steel boss, greying hair and a short beard under a mail cap, weathered scarred face, brown leather cuirass over a mail shirt, fur-collared cloak, wide belt with pouches, mail tassets, brown boots, palette bark brown, iron grey and hide tan, matte worn leather and mail",
   "history": []
  },
  "IMG-131": {
@@ -6332,7 +6556,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "bald human battle-cleric standing square to the camera holding a heavy warhammer upright with both hands at his chest, young clean-shaven face with a scar over one eye and a calm gaze, mustard-yellow cloak over a cream hauberk, leather chest piece with a gold sun emblem, wide belt with a hanging prayer book and a skull pendant, prayer beads at the waist, bracers, brown boots, palette mustard yellow, cream and steel, matte wool and worn leather",
   "history": []
  },
  "IMG-132": {
@@ -6347,7 +6571,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "elderly human high priest standing square to the camera, right hand raised palm forward at shoulder height in a blessing, left hand holding a tall golden staff topped with an open sun ring, long white hair and a long white beard, serene eyes, ivory and white layered vestments with gold embroidered orphreys and sun medallions, gold chain at the chest, pale cape falling behind the shoulders, soft grey shoes, palette ivory, warm white and gold with soft metal light, matte linen and gilt",
   "history": []
  },
  "IMG-133": {
@@ -6362,7 +6586,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "human assassin standing weight on one leg with both arms crossed low, a short dagger in each hand angled outward, deep charcoal hood and a cloth mask over the lower face, only dark eyes visible, black cloak over a dark leather brigandine with crossed straps, wide belt with pouches and a quiver of vials, bracers, dark trousers bloused into soft boots, palette charcoal black, gunmetal and dull steel, matte cloth and scuffed leather",
   "history": []
  },
  "IMG-134": {
@@ -6377,7 +6601,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "elderly human alderman standing square to the camera with both hands folded on the head of a tall cane, tall purple top hat set with a blue gem, round spectacles and a monocle over a white moustache and beard, purple frock coat with gold epaulettes and gold lapel embroidery, waistcoat with a hanging gold chain, dark trousers, dark boots, palette aubergine, gold and ivory, matte wool and polished wood",
   "history": []
  },
  "IMG-135": {
@@ -6392,7 +6616,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human investigator standing three-quarter to the left, right hand holding up a folded letter sealed with red wax, left hand holding a thin dagger point down at his side, swept-back silver hair and a faint knowing smile, grey fitted waistcoat and trousers with a black cravat and a gold watch chain, long black cloak over the shoulders, black gloves, dark shoes, palette slate grey, black and gold with a wax-red seal, matte wool and paper",
   "history": []
  },
  "IMG-136": {
@@ -6407,7 +6631,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "bare-chested human pirate standing square to the camera, right hand raising a curved cutlass beside his head, left hand resting on a second sabre at his hip, dark hair in a high topknot with loose strands and a cocky grin, turquoise bead necklace and gold armbands, teal sash knotted at the waist over baggy off-white trousers, leather bracers and belt with a pouch, brown boots, palette tan skin, teal and bone white with warm steel, matte skin and worn cloth",
   "history": []
  },
  "IMG-137": {
@@ -6422,7 +6646,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human cutpurse standing mid-stride, right hand holding a dagger up beside his shoulder, left arm loose, brown hair under a cream hood and a wide toothy grin, brown leather jerkin over a cream wrap shirt, crossed chest straps, wide belt with pouches and a coil of cord, dark green trousers, brown boots, palette cream, saddle brown and steel, matte cloth and worn leather",
   "history": []
  },
  "IMG-138": {
@@ -6437,7 +6661,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human knife-thrower standing square to the camera winking, both hands raised beside her head each holding three throwing knives, dark hair with red streaks swept up, gold earrings and a playful grin, cream blouse with puffed sleeves under a maroon corset vest with gold trim, checkered maroon-and-gold sash at the hip, dark trousers, maroon boots, palette maroon, gold and cream, matte velvet and steel",
   "history": []
  },
  "IMG-139": {
@@ -6452,7 +6676,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "human bounty hunter standing square to the camera, right hand holding a weighted net coiled at his side, left hand gripping a pale blank mask by its chains, short dark hair with a scar across one eye and a hard mouth, fur-collared brown leather coat over a mail shirt, wide belt with buckles and pouches, studded bracers, a spiked club hanging at the hip, brown boots, palette bark brown, iron grey and bone, matte leather and chain",
   "history": []
  },
  "IMG-140": {
@@ -6467,7 +6691,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "human inquisitor standing three-quarter to the left holding a crossbow across his chest with both hands, short dark hair and a stern face, long black coat with a high collar over dark leather armour, rosary and a metal cross hanging at the belt, lantern swinging from a hook at the hip, quiver of bolts at the shoulder, black boots, palette charcoal black, iron and bone white, matte leather and blackened steel",
   "history": []
  },
  "IMG-141": {
@@ -6482,7 +6706,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human bard standing mid-verse with both arms spread wide and palms up, lute slung across his back, dark wavy hair and a laughing open mouth, white open-collar shirt under a maroon coat with gold embroidery and a fur-trimmed hem, gold pendant, thin sword at the hip, dark trousers, brown boots, palette maroon, gold and cream, matte velvet with gilt trim",
   "history": []
  },
  "IMG-142": {
@@ -6497,7 +6721,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human town herald standing square to the camera blowing a brass trumpet held in both hands, blue cap with a gold sun badge and a white feather, navy cape with a gold sun emblem and star embroidery over a white shirt and blue tunic, gold-buckled belt, gauntleted forearm, blue trousers and dark boots, palette navy blue, gold and cream with warm brass, matte wool and polished brass",
   "history": []
  },
  "IMG-143": {
@@ -6512,7 +6736,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human cartographer-mage standing three-quarter to the left reading a large unfolded map held in both hands, left hand raising a white quill above it, dark tousled hair and an intent gaze, slate-blue robe with a wide-hemmed mantle and a star-patterned cape, leather belt with a satchel and a book, brown boots, palette slate blue, grey and parchment cream, matte wool and paper",
   "history": []
  },
  "IMG-144": {
@@ -6527,7 +6751,7 @@
   "versions": {},
   "best_score": null,
   "max_attempts": 5,
-  "subject": "",
+  "subject": "young human astrologer standing square to the camera holding a brass armillary sphere in both hands at chest height, long silver hair with a blue gem at the forehead and calm half-closed eyes, pale grey robe with wide sleeves over a star-and-moon patterned blue under-robe, gold necklace and belt chains, soft grey shoes, pale glow around the sphere, palette silver grey, midnight blue and gold with cool light, matte silk and brass",
   "history": []
  },
  "IMG-145": {

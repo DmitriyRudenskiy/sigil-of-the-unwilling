@@ -15,6 +15,7 @@ comp кадрирование, subject главный объект, objects со
 style техника, light свет, bg фон, camera ракурс, text надписи.
 """
 import argparse
+import fcntl
 import hashlib
 import inspect
 import re
@@ -213,7 +214,23 @@ def grid(pairs_: list[dict], out: Path, h: int = 380) -> None:
 
 # ------------------------------------------------------------- очередь
 
+_QUEUE_LOCK = None  # держится до выхода процесса
+
+
 def load() -> dict:
+    """Чтение очереди под эксклюзивным замком.
+
+    Очередь правится по схеме «прочитал — изменил — записал», и без замка
+    параллельные команды теряют записи: фоновый цикл генерации, писавший
+    кадр, перетираал свежий замер STY, отданный из другой сессии (проверено
+    2026-10-18 — замер IMG-061 пропал). Замок снимается вместе с процессом,
+    зависший писатель хранилище не блокирует.
+    """
+    global _QUEUE_LOCK
+    if _QUEUE_LOCK is None:
+        QUEUE.parent.mkdir(parents=True, exist_ok=True)
+        _QUEUE_LOCK = open(QUEUE.with_suffix(".lock"), "w")
+        fcntl.flock(_QUEUE_LOCK, fcntl.LOCK_EX)
     return json.loads(QUEUE.read_text()) if QUEUE.exists() else {}
 
 
