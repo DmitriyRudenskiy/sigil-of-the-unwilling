@@ -39,14 +39,17 @@ ATLAS_IMG = ROOT / "game/assets/tiles/world_map_atlas.webp"
 ATLAS_JSON = ROOT / "game/assets/tiles/world_map_atlas.json"
 OBJ_IMG = ROOT / "game/assets/objects/world_map_objects.webp"
 OBJ_JSON = ROOT / "game/assets/objects/world_map_objects.json"
-BAND = np.array([PB.parse_hex(h) for h in GATES["palette"]["band_m"]], dtype=np.float32)
+BAND_HEX = [h.lower() for h in GATES["palette"]["band_m"]]
+BAND = np.array([PB.parse_hex(h) for h in BAND_HEX], dtype=np.float32)
 BAND_LAB = PB.rgb_to_lab(BAND / 255.0)
+RAMP_W = {int(k): np.array(v, dtype=np.float32) for k, v in SPEC["ramp_weights"].items()}
 QUALITY = int(SPEC["export"]["quality"])
+LOSSLESS = bool(SPEC["export"].get("lossless", False))
 VARIANT = SPEC["variants"][0]
 UNSCHARP = ImageFilter.UnsharpMask(radius=1.2, percent=120, threshold=2)
 WRAP_BAND = 128        # ширина зашивки шва на исходнике 1024 (на 82 px — ~10 px)
 FEATHER = 0.22         # доля тайла, на которой утоняется декаль границы
-SIDES = ("E", "NE", "NW", "W", "SW", "SE")
+SIDES = ("e", "ne", "nw", "w", "sw", "se")   # стороны остроконечного шестиугольника
 
 
 # ------------------------------------------------------------------ роли
@@ -64,7 +67,9 @@ def roles() -> list[dict]:
                     "variant": VARIANT["id"], "category": cname, "id": rid, "subject": take,
                     "model_key": cat["model"], "size": tuple(cat["size"]),
                     "biome": item.get("biome") or item.get("group", ""),
-                    "target": item.get("target"), "take": n, "path": RAW / f"{rid}.webp",
+                    "ramp": item.get("ramp"),
+                    "shift": SPEC["variant_shift"][n % len(SPEC["variant_shift"])],
+                    "take": n, "path": RAW / f"{rid}.webp",
                 })
     return out
 
@@ -103,7 +108,7 @@ def render_raw(art: dict, dst: Path, attempt: int) -> dict:
 def render(only: list[str], force: bool, attempts: int) -> int:
     man = json.loads(MANIFEST.read_text()) if MANIFEST.exists() else {}
     for art in roles():
-        if only and art["id"] not in only:
+        if only and not any(o in art["id"] for o in only):
             continue
         if art["path"].exists() and not force:
             continue
@@ -150,23 +155,93 @@ def make_wrap(a: np.ndarray, band: int = WRAP_BAND) -> np.ndarray:
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
-def pull_to_band(a: np.ndarray, target: str | None, to_band: float, to_target: float) -> np.ndarray:
-    """Каждый пиксель тянется к ближайшему тону полосы M (кадр собирается внутри полосы,
-    а не приводится к ней после) и к тону цели биома — он держит ΔE между биомами."""
-    lab = PB.rgb_to_lab(a.astype(np.float32) / 255.0)
-    near = np.take(BAND, ((lab[:, :, None, :] - BAND_LAB[None, None]) ** 2).sum(-1).argmin(-1), axis=0)
-    out = a.astype(np.float32) * (1 - to_band) + near * to_band
-    if target:
-        out = out * (1 - to_target) + np.array(PB.parse_hex(target), dtype=np.float32) * to_target
-    return np.clip(out, 0, 255).astype(np.uint8)
+def lab_to_rgb(lab: np.ndarray) -> np.ndarray:
+    """Обрат к measure_palette_band.rgb_to_lab (D65, sRGB). В общий модуль замера его не
+    несём: гейт обязан оставаться независимым от того, чем красят."""
+    l, a, b = lab[..., 0], lab[..., 1], lab[..., 2]
+    fy = (l + 16) / 116
+    fx, fz = fy + a / 500, fy - b / 200
+    f = np.stack([fx, fy, fz], axis=-1)
+    xyz = np.where(f ** 3 > 0.008856, f ** 3, (f - 16 / 116) / 7.787)
+    xyz = xyz * np.array([0.95047, 1.0, 1.08883])
+    m = np.array([[3.2404542, -1.5371385, -0.4985314],
+                  [-0.9692660, 1.8760108, 0.0415560],
+                  [0.0556434, -0.2040259, 1.0572252]])
+    lin = np.clip(xyz @ m.T, 0, 1)
+    return np.clip(1.055 * lin ** (1 / 2.4) - 0.055, 0, 1)
 
 
-def tile_from(frame: Path, target: str | None) -> Image.Image:
-    """Кадр роли → тайл 82 px: зашивка шва на исходнике, затем полоса M, unsharp, LANCZOS."""
+def mottle(rid: str, size: int, amp: float, cells: int = 5) -> np.ndarray:
+    """Низкочастотное пятно яркости — проталины, куртины, дюны. Частота нарочно низкая
+    (5×5 на тайл): только так различает варианты подпись `atlas/distinct`, сжимающая
+    клетку до 8×8, и только так пятно читается глазом на 82 px. Затравка — id роли."""
+    rng = np.random.default_rng(zlib.crc32(rid.encode()))
+    f = np.tile(rng.normal(size=(cells, cells)), (2, 2))
+    o = int(rng.integers(cells))
+    f = f[o:o + cells, o:o + cells]                     # сдвиг окна = период поля, шов целой
+    small = Image.fromarray(((f + 2) * 63).clip(0, 255).astype(np.uint8), "L")
+    return (np.asarray(small.resize((size, size), Image.BICUBIC), dtype=np.float32) / 127.5 - 1) * amp
+
+
+def ramp_tile(a: np.ndarray, ramp: list[str], shift: float = 0.0,
+              l_bias: np.ndarray | None = None, grain: float = 7.0,
+              dither: float = 2.5, seed: str = "") -> np.ndarray:
+    """Фактура остаётся структурой, цвет биома задаёт рампа тонов полосы.
+
+    Сырьё модели — коричневая фактура у ВСЕХ биомов (снег и вода тоже: средний кадр
+    #8a6944), поэтому «подмешать целевой тон и снапить к ближайшему» не работало:
+    ближайший тон считался по хроматике, тёплые пиксели уезжали в светлый #cdbe9b, и
+    восемь биомов сходились в один бежевый (кадр/contrast 3.9 при пороге 12). Здесь
+    тон пикселя выбирается по его РАНГУ яркости, a/b берутся у тона полосы целиком.
+
+    Ранг, а не min-max: у живой фактуры яркость скошена, и на min-max восемьдесят
+    процентов пикселей уезжали в самый светлый тон рампы — атлас выходил кремовым в
+    крапинку на всех восьми биомах. Квантиль даёт доли тонов ровно `ramp_weights` на
+    любой фактуре, то есть средний цвет биома = среднее его рампы, и контраст между
+    биомами перестаёт зависеть от того, что именно нарисовала модель.
+
+    Вариант биома сдвигает пороги (`variant_shift`), то есть меняет доли тонов: `atlas/
+    distinct` меряет клетку 8×8 как средний цвет, и именно средний цвет он видит
+    разным. Центр тяжести каждого тона водим по L тона — кластер kmeans (`atlas/
+    palette`) остаётся тоном полосы, разброс внутри кластера (фактура) живёт."""
+    lab = PB.rgb_to_lab(np.clip(a, 0, 255) / 255.0)
+    tone = np.array([BAND_LAB[BAND_HEX.index(h)] for h in ramp], dtype=np.float32)
+    l = lab[..., 0] + (0.0 if l_bias is None else l_bias)
+    cuts = np.clip(np.cumsum(RAMP_W[len(ramp)])[:-1] + shift, 0.02, 0.98)
+    # Порог тонится шумом: без него граница двух тонов — гладкая линия, и тайл выглядит
+    # как камуфляж из двух красок. Тот же приём держат ограниченные палитры ручной
+    # работы: переход разбивается в точку. Каждый пиксель при этом остаётся ровно на
+    # тоне полосы (`atlas/palette` меряет доминирующие тона — они не двигаются).
+    rng = np.random.default_rng(zlib.crc32(("dither" + seed).encode()))
+    k = np.searchsorted(np.quantile(l, cuts), l + rng.normal(0.0, dither, l.shape))
+    off = np.clip(l - np.take(tone[:, 0], k), -grain, grain)
+    for i in range(len(ramp)):        # срезка ±grain уводит среднее кластера — возвращаем
+        m = k == i
+        if m.any():
+            off[m] -= off[m].mean()
+    out = np.stack([np.take(tone[:, 0], k) + off,
+                    np.take(tone[:, 1], k), np.take(tone[:, 2], k)], -1)
+    return (lab_to_rgb(out) * 255.0).round().clip(0, 255).astype(np.uint8)
+
+
+def tile_from(frame: Path, ramp: list[str], shift: float = 0.0,
+              rid: str = "") -> Image.Image:
+    """Кадр роли → тайл 82 px: зашивка шва, рампа биома, снова зашивка, unsharp."""
     a = make_wrap(np.asarray(Image.open(frame).convert("RGB")))
-    im = Image.fromarray(a).resize((TILE, TILE), Image.LANCZOS)
-    im = Image.fromarray(pull_to_band(np.asarray(im), target, 0.4, 0.22))
-    return im.filter(UNSCHARP)
+    # unsharp ДО перекраски: он зточит фактуру, из которой берётся ранг яркости, а не
+    # края уже готовых тонов. После квантиля тот же фильтр рисует ореолы между двумя
+    # тонами полосы, и их набирается достаточно, чтобы стать доминирующим кластером
+    # (`atlas/palette` ловил #2e3122 при ΔE 12.2 именно так).
+    im = Image.fromarray(a).resize((TILE, TILE), Image.LANCZOS).filter(UNSCHARP)
+    t = ramp_tile(np.asarray(im), ramp, shift, mottle(rid or frame.stem, TILE, 7.0),
+                  seed=rid or frame.stem)
+    # Второй проход зашивки — уже по цвету. LANCZOS на даунскейле не знает про период
+    # (у края он берёт пиксели за кадром), поэтому col0 и col(-1) различаются на доли
+    # единицы L. Пока яркость была живописной, это никого не волновало; квантиль рампы
+    # ставит порог в середину гистограммы, и те же доли единицы переворачивают тон на
+    # всей кромке — 18 швов из 32 при пороге 24 MAD.
+    im = Image.fromarray(make_wrap(t, band=10))
+    return im.convert("RGBA")   # маска paste() обязана иметь альфу
 
 
 def side_profile(size: int, side: str) -> np.ndarray:
@@ -177,9 +252,9 @@ def side_profile(size: int, side: str) -> np.ndarray:
     y, x = np.mgrid[0:size, 0:size].astype(np.float32)
     cx, cy = size / 2.0, size / 2.0
     q = size / 4.0
-    corners = {"E": ((size, q), (size, 3 * q)), "NE": ((cx, 0), (size, q)),
-               "NW": ((0, q), (cx, 0)), "W": ((0, 3 * q), (0, q)),
-               "SW": ((0, 3 * q), (cx, size)), "SE": ((cx, size), (size, 3 * q))}
+    corners = {"e": ((size, q), (size, 3 * q)), "ne": ((cx, 0), (size, q)),
+               "nw": ((0, q), (cx, 0)), "w": ((0, 3 * q), (0, q)),
+               "sw": ((0, 3 * q), (cx, size)), "se": ((cx, size), (size, 3 * q))}
     (x0, y0), (x1, y1) = corners[side]
     ex, ey = x1 - x0, y1 - y0
     nx, ny = ey / math.hypot(ex, ey), -ex / math.hypot(ex, ey)
@@ -197,13 +272,22 @@ def edge_decal(base: Image.Image, side: str) -> Image.Image:
     return Image.fromarray(np.dstack([a, alpha]).astype(np.uint8), "RGBA")
 
 
-def cut_object(frame: Path) -> Image.Image:
-    """Белый фон → прозрачность порогом по яркости. Flood fill не нужен: фон у кадров
-    однозначный, а дырка в светлой хвое дороже кривизны края силуэта."""
+def cut_object(frame: Path, fit: float = 0.86, bottom: int = 6) -> Image.Image:
+    """Белый фон → прозрачность порогом по яркости, затем силуэт вписан в тайл.
+
+    Порог, а не flood fill: фон у кадров однозначный, а дырка в светлой хвое дороже
+    кривизны края силуэта. Вписывание с нижней кромкой нужно гейтам листа: силуэт не
+    должен занимать больше 0.6 клетки и обязан оставлять прозрачную нижнюю полосу
+    (на неё опирается якорь объекта на клетке)."""
     a = np.asarray(Image.open(frame).convert("RGB")).astype(np.float32)
-    alpha = np.clip((246.0 - a.min(2)) / 46.0, 0.0, 1.0)
+    alpha = np.clip((250.0 - a.min(2)) / 30.0, 0.0, 1.0)
     im = Image.fromarray(np.dstack([a, alpha * 255.0]).astype(np.uint8), "RGBA")
-    return im.resize((TILE, TILE), Image.LANCZOS).filter(UNSCHARP)
+    im = im.crop(im.split()[3].getbbox())
+    s = min(fit * TILE / im.width, (fit * TILE - bottom) / im.height)
+    im = im.resize((max(1, round(im.width * s)), max(1, round(im.height * s))), Image.LANCZOS)
+    out = Image.new("RGBA", (TILE, TILE), (0, 0, 0, 0))
+    out.paste(im, ((TILE - im.width) // 2, TILE - bottom - im.height), im)
+    return out.filter(UNSCHARP)
 
 
 # ------------------------------------------------------------------- сборка
@@ -217,29 +301,33 @@ def assemble() -> int:
     tiles: list[Image.Image] = []
     cells: list[dict] = []
 
-    def add(img: Image.Image, cell: dict) -> None:
-        cell["atlas"] = [(len(tiles) % 8) * TILE, (len(tiles) // 8) * TILE]
-        cell["src_box"] = [0, 0, TILE, TILE]
+    def add(img: Image.Image, cell: dict, src: Path) -> None:
+        cell["atlas"] = [len(tiles) % 8, len(tiles) // 8]   # в ячейках сетки, не в px
+        # окно материала в исходном кадре роли: тайл 82 px обязан быть выкроен из ≥4×,
+        # иначе это даунскейл мыла, а не материала
+        w, h = Image.open(src).size
+        cell["src_box"] = [0, 0, w, h]
         tiles.append(img)
         cells.append(cell)
 
     for r in mats:
-        base = tile_from(r["path"], r["target"])
+        base = tile_from(r["path"], r["ramp"], r["shift"], r["id"])
         add(base, {"id": f"base_{r['biome']}_{r['take']}", "kind": "base", "biome": r["biome"],
-                   "variant": r["take"], "source": str(r["path"].relative_to(ROOT))})
+                   "variant": r["take"], "source": str(r["path"].relative_to(ROOT))}, r["path"])
         if r["take"] == 0:                 # декаль границы один на биом: он про форму края,
             for side in SIDES:             # а не про вариативность заполнения
                 add(edge_decal(base, side),
                     {"id": f"edge_{r['biome']}_{side}", "kind": "edge", "biome": r["biome"],
-                     "side": side, "source": str(r["path"].relative_to(ROOT))})
+                     "side": side, "source": str(r["path"].relative_to(ROOT))}, r["path"])
 
     sheet = Image.new("RGBA", (8 * TILE, math.ceil(len(tiles) / 8) * TILE), (0, 0, 0, 0))
     for i, t in enumerate(tiles):
         sheet.paste(t.convert("RGBA"), ((i % 8) * TILE, (i // 8) * TILE), t)
     ATLAS_IMG.parent.mkdir(parents=True, exist_ok=True)
-    sheet.save(ATLAS_IMG, "WEBP", quality=QUALITY)
+    sheet.save(ATLAS_IMG, "WEBP", quality=QUALITY, lossless=LOSSLESS)
     ATLAS_JSON.write_text(json.dumps({
-        "tile": TILE, "format": "webp", "quality": QUALITY, "sheet": [sheet.width, sheet.height],
+        "tile": TILE, "image": ATLAS_IMG.name, "grid": [8, math.ceil(len(tiles) / 8)],
+        "format": "webp", "quality": QUALITY,
         "prompt_version": SPEC["prompt_version"], "model": SPEC["models"], "cells": cells,
     }, ensure_ascii=False, indent=1))
 
@@ -249,12 +337,13 @@ def assemble() -> int:
         im = cut_object(r["path"])
         osheet.paste(im, ((i % 8) * TILE, (i // 8) * TILE), im)
         ocells.append({"id": r["id"], "group": r["biome"], "anchor": [TILE // 2, TILE - 2],
-                       "atlas": [(i % 8) * TILE, (i // 8) * TILE],
+                       "atlas": [i % 8, i // 8],
                        "source": str(r["path"].relative_to(ROOT))})
     OBJ_IMG.parent.mkdir(parents=True, exist_ok=True)
-    osheet.save(OBJ_IMG, "WEBP", quality=QUALITY)
+    osheet.save(OBJ_IMG, "WEBP", quality=QUALITY, lossless=LOSSLESS)
     OBJ_JSON.write_text(json.dumps({
-        "tile": TILE, "format": "webp", "quality": QUALITY, "sheet": [osheet.width, osheet.height],
+        "tile": TILE, "image": OBJ_IMG.name, "grid": [8, math.ceil(len(objs) / 8)],
+        "format": "webp", "quality": QUALITY,
         "prompt_version": SPEC["prompt_version"], "cells": ocells,
     }, ensure_ascii=False, indent=1))
     print(f"{ATLAS_IMG.relative_to(ROOT)}: {len(cells)} ячеек {sheet.size}, "

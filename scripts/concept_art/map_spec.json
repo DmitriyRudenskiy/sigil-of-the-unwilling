@@ -4,7 +4,8 @@
   "out_dir": "image-clone/map",
   "export": {
     "format": "WEBP",
-    "quality": 85
+    "quality": 90,
+    "lossless": true
   },
   "tile": 82,
   "prompt_version": "map-1",
@@ -38,83 +39,116 @@
         {
           "id": "mat_grass",
           "biome": "grass",
-          "target": "#92a26a",
           "takes": [
             "short sunlit temperate turf, mossy green grass with a few dry straw blades",
             "short temperate turf in soft shade, deeper olive green with dark soil showing through",
             "dry sun-bleached grassland with scattered tiny pale wildflowers",
             "lush meadow turf with small moss clumps and a few pebbles"
+          ],
+          "ramp": [
+            "#6d6d47",
+            "#92a26a"
           ]
         },
         {
           "id": "mat_sand",
           "biome": "sand",
-          "target": "#cdbe9b",
           "takes": [
             "fine pale wind-blown sand with faint ripples",
             "coarser sandy gravel with scattered small pebbles",
             "dry cracked sandy earth with sparse dry roots",
             "warm dune sand with soft shallow hollows"
+          ],
+          "ramp": [
+            "#92a26a",
+            "#cdbe9b"
           ]
         },
         {
           "id": "mat_snow",
           "biome": "snow",
-          "target": "#95cde5",
           "takes": [
             "wind-packed snow with faint blue shadow hollows",
             "fresh powdery snow with a few grey pebbles breaking through",
             "icy crust with fine cracks and pale blue crevices",
             "dirty late-season snow with thin veins of dark grit"
+          ],
+          "ramp": [
+            "#95cde5",
+            "#cdbe9b"
           ]
         },
         {
           "id": "mat_swamp",
           "biome": "swamp",
-          "target": "#486f77",
           "takes": [
             "stagnant shallow marsh water with duckweed and dark mud",
             "wet black mud with rotting reed stubs and scum",
             "brackish puddles between tussocks of dead sedge",
             "algae-covered bog water with pale peat foam"
+          ],
+          "ramp": [
+            "#354845",
+            "#486f77",
+            "#6d6d47"
           ]
         },
         {
           "id": "mat_water",
           "biome": "water",
-          "target": "#354845",
           "takes": [
             "deep still lake water, dark teal, faint long ripples",
             "slow river water with soft current streaks and pale highlights",
             "shallow water over dark stones with gentle ripple pattern",
             "open water with fine wind ripples and no reflection"
+          ],
+          "ramp": [
+            "#1d2829",
+            "#354845"
           ]
         },
         {
           "id": "mat_rock",
           "biome": "rock",
-          "target": "#1d2829",
           "takes": [
             "bare grey-brown mountain rock face, cracked and scree-covered",
             "weathered granite slab with deep vertical fissures",
             "loose scree and small boulders on stony ground",
             "dark wet cliff stone with pale mineral veins"
+          ],
+          "ramp": [
+            "#354845",
+            "#486f77",
+            "#95cde5"
           ]
         },
         {
           "id": "mat_mud",
           "biome": "mud",
-          "target": "#6d6d47",
           "takes": [
-            "trampled wet earth, churned mud with footprints and puddles"
+            "trampled wet earth, churned mud with footprints and puddles",
+            "dark wet clay floor of a trampled camp with straw scraps",
+            "muddy yard with puddles reflecting grey light and dung clods",
+            "wet earth mixed with wood chips and broken twigs"
+          ],
+          "ramp": [
+            "#1d2829",
+            "#6d6d47",
+            "#92a26a"
           ]
         },
         {
           "id": "mat_road",
           "biome": "road",
-          "target": "#cdbe9b",
           "takes": [
-            "beaten earth road surface, compacted pale dirt with wheel ruts"
+            "beaten earth road surface, compacted pale dirt with wheel ruts",
+            "gravelly packed track with small stones and dry dust",
+            "worn muddy cart road with deep parallel ruts",
+            "compacted chalky ground with scattered pebbles and hoof prints"
+          ],
+          "ramp": [
+            "#95cde5",
+            "#6d6d47"
           ]
         }
       ],
@@ -127,7 +161,7 @@
       ],
       "model": "krea2",
       "isolated": true,
-      "frame": "one single isolated object for a top-down strategy map, whole object with a clear empty margin around it, nothing touching the frame, centered, seen from a high three-quarter angle, base of the object at the bottom, isolated on plain white background, no ground plate, no cast shadow, no text, no frame",
+      "frame": "one isolated game sprite, a single object alone in the middle of the frame filling most of it, whole object visible with a clear empty margin, nothing touching the frame edges, seen from a high three-quarter angle with its base at the bottom, plain flat white paper background with nothing else on it, no map, no continents, no globe, no geography, no parchment board, no plaque, no sign, no ground, no cast shadow, no text",
       "items": [
         {
           "id": "obj_tree_deciduous",
@@ -147,7 +181,7 @@
         {
           "id": "obj_conifer_large",
           "group": "vegetation",
-          "subject": "one tall old pine tree with a bare lower trunk and a high crown"
+          "subject": "one tall wide spruce, broad heavy low branches spread across the whole frame, dense dark green needles, the crown fills most of the width"
         },
         {
           "id": "obj_bush",
@@ -162,7 +196,7 @@
         {
           "id": "obj_dead_tree",
           "group": "vegetation",
-          "subject": "one leafless dead grey tree with broken branches"
+          "subject": "one old gnarled dead tree, wide spreading bare twisted branches filling the frame, weathered pale grey bark, no leaves"
         },
         {
           "id": "obj_rock_small",
@@ -205,7 +239,24 @@
           "subject": "one small herb-gathering platform with bundles of dried herbs and a clay pot"
         }
       ],
-      "style": "painted campaign world map counter, muted natural pigments, readable silhouette, fine brush grain"
+      "style": "hand-painted game sprite for a strategy board game, one single object standing alone, muted natural pigments, readable silhouette, fine brush grain"
     }
-  }
+  },
+  "ramp_weights": {
+    "2": [
+      0.4,
+      0.6
+    ],
+    "3": [
+      0.25,
+      0.45,
+      0.3
+    ]
+  },
+  "variant_shift": [
+    -0.12,
+    -0.04,
+    0.04,
+    0.12
+  ]
 }

@@ -252,7 +252,12 @@ def atlas_checks(manifest_path: str, cfg: dict) -> list[tuple[str, bool, str]]:
                 + (f" — {holes[:4]}" if holes else "")))
 
     # — замыкание переходов: у каждого биома все шесть направлений (см. test_tile_transitions) —
-    sides = {"N", "NE", "SE", "S", "SW", "NW"}
+    # Словарь сторон = рёбра остроконечного шестиугольника: сетка odd-r
+    # (city_arena_view._hex_to_pixel: x = size·√3·(col + 0.5·(row&1)), y = size·1.5·row),
+    # соседи E/W/NE/NW/SE/SW, поэтому стороны смотрят на E, W и четыре наклонных.
+    # Прежний набор {N, NE, SE, S, SW, NW} описывал retired 5×5 лист вручную сделанных
+    # картинок (4 ребра + 4 угла), а не геометрию клетки.
+    sides = {"e", "ne", "nw", "w", "sw", "se"}
     edges: dict[str, set] = {}
     for c in manifest["cells"]:
         if c["kind"] == "edge":

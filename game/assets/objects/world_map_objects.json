@@ -1,0 +1,208 @@
+{
+ "tile": 82,
+ "image": "world_map_objects.webp",
+ "grid": [
+  8,
+  2
+ ],
+ "format": "webp",
+ "quality": 90,
+ "prompt_version": "map-1",
+ "cells": [
+  {
+   "id": "obj_tree_deciduous",
+   "group": "vegetation",
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    0,
+    0
+   ],
+   "source": "image-clone/map/raw/obj_tree_deciduous.webp"
+  },
+  {
+   "id": "obj_tree_deciduous_large",
+   "group": "vegetation",
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    1,
+    0
+   ],
+   "source": "image-clone/map/raw/obj_tree_deciduous_large.webp"
+  },
+  {
+   "id": "obj_conifer",
+   "group": "vegetation",
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    2,
+    0
+   ],
+   "source": "image-clone/map/raw/obj_conifer.webp"
+  },
+  {
+   "id": "obj_conifer_large",
+   "group": "vegetation",
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    3,
+    0
+   ],
+   "source": "image-clone/map/raw/obj_conifer_large.webp"
+  },
+  {
+   "id": "obj_bush",
+   "group": "vegetation",
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    4,
+    0
+   ],
+   "source": "image-clone/map/raw/obj_bush.webp"
+  },
+  {
+   "id": "obj_reeds",
+   "group": "vegetation",
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    5,
+    0
+   ],
+   "source": "image-clone/map/raw/obj_reeds.webp"
+  },
+  {
+   "id": "obj_dead_tree",
+   "group": "vegetation",
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    6,
+    0
+   ],
+   "source": "image-clone/map/raw/obj_dead_tree.webp"
+  },
+  {
+   "id": "obj_rock_small",
+   "group": "relief",
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    7,
+    0
+   ],
+   "source": "image-clone/map/raw/obj_rock_small.webp"
+  },
+  {
+   "id": "obj_rock_large",
+   "group": "relief",
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    0,
+    1
+   ],
+   "source": "image-clone/map/raw/obj_rock_large.webp"
+  },
+  {
+   "id": "obj_boulder_snow",
+   "group": "relief",
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    1,
+    1
+   ],
+   "source": "image-clone/map/raw/obj_boulder_snow.webp"
+  },
+  {
+   "id": "obj_peak",
+   "group": "relief",
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    2,
+    1
+   ],
+   "source": "image-clone/map/raw/obj_peak.webp"
+  },
+  {
+   "id": "obj_plinth_wood",
+   "group": "plinth",
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    3,
+    1
+   ],
+   "source": "image-clone/map/raw/obj_plinth_wood.webp"
+  },
+  {
+   "id": "obj_plinth_stone",
+   "group": "plinth",
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    4,
+    1
+   ],
+   "source": "image-clone/map/raw/obj_plinth_stone.webp"
+  },
+  {
+   "id": "obj_plinth_food",
+   "group": "plinth",
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    5,
+    1
+   ],
+   "source": "image-clone/map/raw/obj_plinth_food.webp"
+  },
+  {
+   "id": "obj_plinth_herb",
+   "group": "plinth",
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    6,
+    1
+   ],
+   "source": "image-clone/map/raw/obj_plinth_herb.webp"
+  }
+ ]
+}
