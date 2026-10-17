@@ -1,0 +1,5 @@
+FAIL  frame/variety        water: 0.14 различных из 44 (порог ≥0.75)
+FAIL  frame/periodicity    повторено кадром 0.80 при сдвиге (0, 123) (порог ≤0.60)
+PASS  frame/contrast       road↔rock ΔE=14.8 (порог ≥12.0)
+FAIL  provenance/rows      строк не хватает: ['tiles/world_map_atlas.webp', 'objects/world_map_objects.webp']; проблемных: нет
+GATE=1  (1/4)

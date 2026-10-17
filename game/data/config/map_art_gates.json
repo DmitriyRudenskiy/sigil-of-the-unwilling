@@ -1,0 +1,39 @@
+{
+  "_comment": "Машинные гейты графики карты (openspec: world-map-art-variety). Калибровка по baseline 0c75e086 — пиксели и числа в docs/reference/map-baseline/; на базовой линии frame/variety (0.14) и frame/periodicity (0.80) красные. Пороги меняются только вместе с пересъёмкой базовой линии.",
+  "frame": {
+    "min_biome_cells": 40,
+    "min_variant_uniqueness": 0.75,
+    "max_periodicity": 0.6,
+    "min_biome_contrast_de": 12.0,
+    "identical_epsilon": 6
+  },
+  "atlas": {
+    "min_variants_per_biome": 4,
+    "min_distinct_share": 0.9,
+    "min_cell_std": 4.0
+  },
+  "objects": {
+    "min_silhouette_coverage": 0.15,
+    "max_silhouette_coverage": 0.6,
+    "anchor_transparent": 0.95
+  },
+  "provenance": {
+    "required_files": [
+      "tiles/world_map_atlas.webp",
+      "objects/world_map_objects.webp"
+    ]
+  },
+  "palette": {
+    "band_m": [
+      "#1d2829",
+      "#354845",
+      "#486f77",
+      "#6d6d47",
+      "#92a26a",
+      "#cdbe9b",
+      "#95cde5"
+    ],
+    "max_delta_e": 12,
+    "_comment": "Полоса M — замер reference/10_map_campaign_town.jpeg (носитель комплекта 2026-10-18, D-203); пиксель кадра локален и в git не входит, поэтому записаны сами тона. Приёмка — как в §8.5: доминирующие тона ассета в ΔE ≤ 12 до ближайшего тона полосы."
+  }
+}

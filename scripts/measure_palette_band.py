@@ -124,6 +124,19 @@ def sample(rgb: np.ndarray, n: int = SAMPLE, seed: int = SEED) -> np.ndarray:
     return rgb[rng.choice(len(rgb), size=n, replace=False)]
 
 
+def family(px: np.ndarray) -> list[tuple[tuple[int, int, int], float, float, float]]:
+    """Семейство тонов-носителей пула пикселей: доминирующие, с близкими слиянием."""
+    out: list[tuple[tuple[int, int, int], float, float, float]] = []
+    for tone, share, l, s in sorted(kmeans(px), key=lambda m: -m[1]):
+        if share < DOM_SHARE:
+            continue
+        if any(de76(tone_lab(tone), tone_lab(t[0])) < MERGE_DE for t in out):
+            continue
+        out.append((tone, share, l, s))
+    out.sort(key=lambda t: t[2])
+    return out
+
+
 def hexs(tone: tuple[int, int, int]) -> str:
     return "#{:02x}{:02x}{:02x}".format(*tone)
 
@@ -146,6 +159,28 @@ def parse_hex(s: str) -> tuple[int, int, int]:
     return tuple(int(s[i:i + 2], 16) for i in (0, 2, 4))  # type: ignore[return-value]
 
 
+def _check(paths: list[str], tones: list[tuple[tuple[int, int, int], float, float, float]]) -> int:
+    print(f"\n== проверка кандидата (порог ΔE {ACCEPT_DE:.0f}) ==")
+    bad = 0
+    for path in paths:
+        px = load_pixels(path)
+        if px is None:
+            print(f"  {os.path.basename(path):34s} — не читается")
+            bad += 1
+            continue
+        worst, worst_tone = 0.0, "—"
+        for tone, share, _l, _s in kmeans(px):
+            if share < DOM_SHARE:
+                continue
+            d = float(min(de76(tone_lab(tone), tone_lab(t[0])) for t in tones))
+            if d > worst:
+                worst, worst_tone = d, hexs(tone)
+        verdict = "в допуске" if worst <= ACCEPT_DE else "ВНЕ ДОПУСКА"
+        bad += worst > ACCEPT_DE
+        print(f"  {os.path.basename(path):34s} max ΔE {worst:5.1f} (тон {worst_tone}) → {verdict}")
+    return 1 if bad else 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--game", default="game", help="каталог проекта (game/)")
@@ -154,6 +189,9 @@ def main() -> int:
     ap.add_argument("--tone", nargs="+", metavar="#RRGGBB",
                     help="lum/sat/контраст тона к подложке (--on), проверка правил §4.7/§9.2")
     ap.add_argument("--on", default="#281c0f", help="подложка для --tone (по умолчанию тон тайла)")
+    ap.add_argument("--band-from", metavar="ФАЙЛ",
+                    help="полоса и семейство тонов произвольного кадра-эталона "
+                    "(носитель полосы — канонический кадр, а не живые ассеты)")
     args = ap.parse_args()
 
     if args.tone:
@@ -166,6 +204,23 @@ def main() -> int:
             c = contrast(tone, bg)
             print(f"  {hexs(tone)}  lum {l:.2f}  sat {s:.2f}  контраст {c:5.2f}:1  "
                   f"{'OK' if c >= 3.0 else 'НИЖЕ 3:1'}")
+        return 0
+
+    if args.band_from:
+        px = load_pixels(args.band_from)
+        if px is None:
+            print(f"{args.band_from}: нет непрозрачных пикселей")
+            return 2
+        print(f"== полоса кадра {os.path.basename(args.band_from)} ({BAND_K} тонов) ==")
+        for tone, share, l, s_ in sorted(kmeans(px, BAND_K), key=lambda b: b[2]):
+            print(f"  {hexs(tone)}  lum {l:.2f}  sat {s_:.2f}  {share:5.1%}")
+        fam = family(px)
+        print(f"\n== семейство тонов-носителей кадра (слияние ΔE < {MERGE_DE:.0f}) ==")
+        for tone, _share, l, s_ in fam:
+            print(f"  {hexs(tone)}  lum {l:.2f}  sat {s_:.2f}")
+        print(f"  тонов: {len(fam)}")
+        if args.check:
+            return _check(args.check, fam)
         return 0
 
     buildings = sorted(glob.glob(os.path.join(args.game, "assets/textures/objects/building_*.webp")))
@@ -201,14 +256,7 @@ def main() -> int:
 
     # Носитель приёмки — не сжатые 7 тонов, а семейство доминирующих тонов живых
     # ассетов: новый ассет обязан попасть в ΔE ≤ 12 к одному из них.
-    tones: list[tuple[tuple[int, int, int], float, float, float]] = []
-    for _n, tone, share, l, s in sorted(measured, key=lambda m: -m[2]):
-        if share < DOM_SHARE:
-            continue
-        if any(de76(tone_lab(tone), tone_lab(t[0])) < MERGE_DE for t in tones):
-            continue
-        tones.append((tone, share, l, s))
-    tones.sort(key=lambda t: t[2])
+    tones = family(np.concatenate(pool, axis=0))
     print(f"\n== семейство тонов-носителей (доля ≥ {DOM_SHARE:.0%}, слияние ΔE < {MERGE_DE:.0f}) ==")
     for tone, share, l, s in tones:
         print(f"  {hexs(tone)}  lum {l:.2f}  sat {s:.2f}")
@@ -217,25 +265,7 @@ def main() -> int:
     print(f"до ближайшего тона-носителя; порог {ACCEPT_DE:.0f} (прежний допуск §8.5).")
 
     if args.check:
-        print(f"\n== проверка кандидата (порог ΔE {ACCEPT_DE:.0f}) ==")
-        bad = 0
-        for path in args.check:
-            px = load_pixels(path)
-            if px is None:
-                print(f"  {os.path.basename(path):34s} — не читается")
-                bad += 1
-                continue
-            worst, worst_tone = 0.0, "—"
-            for tone, share, _l, _s in kmeans(px):
-                if share < DOM_SHARE:
-                    continue
-                d = float(min(de76(tone_lab(tone), tone_lab(t[0])) for t in tones))
-                if d > worst:
-                    worst, worst_tone = d, hexs(tone)
-            verdict = "в допуске" if worst <= ACCEPT_DE else "ВНЕ ДОПУСКА"
-            bad += worst > ACCEPT_DE
-            print(f"  {os.path.basename(path):34s} max ΔE {worst:5.1f} (тон {worst_tone}) → {verdict}")
-        return 1 if bad else 0
+        return _check(args.check, tones)
 
     if args.json:
         import json
