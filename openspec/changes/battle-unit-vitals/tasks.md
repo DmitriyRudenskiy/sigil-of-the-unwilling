@@ -42,6 +42,18 @@
 
 ## 7. Верификация
 
-- [ ] 7.1 `game/run_tests.sh` локально зелёный (GdUnit4 0/101 + MCP e2e), тестовый леджер +/−/quarantine.
-- [ ] 7.2 `python3 -m gdtoolkit.linter` по изменённым файлам чисто.
+- [x] 7.1 `game/run_tests.sh` локально зелёный (GdUnit4 0/101 + MCP e2e), тестовый леджер +/−/quarantine.
+- [x] 7.2 `python3 -m gdtoolkit.linter` по изменённым файлам чисто.
+- [x] 7.2 `python3 -m gdtoolkit.linter` по изменённым файлам чисто.
 - [ ] 7.3 Сводка в PR; мерж только по «мержи» владельца после ux-review шага 5.
+
+---
+
+**Гейт-блок (local, 2026-10-19, ветка перебазирована на `origin/main` `04f13058`):**
+`game/run_tests.sh` — GdUnit4 `2725 test cases | 0 errors | 0 failures | 2 skipped |
+0 orphans`, exit 0; MCP e2e — `40 passed, 1 skipped, 0 failed` (266.89 s, venv-fallback:
+системный python3 с mcp+anyio, поддерживаемая конфигурация). Линтер по изменённым файлам:
+новых замечаний нет (`ability_check.gd` — минус одно). Тестовый леджер изменения:
+**+22 / −0 / quarantine 0** (база main = 2703 = 2725 − 22 добавленных; причина — изменение
+добавило 22 теста, удалённых и снятых в карантин нет). UI-слой (полоса маны, уровень,
+таймер, медальон) headless не верифицируется — T-144, T-145.
