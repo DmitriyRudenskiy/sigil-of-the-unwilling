@@ -154,6 +154,19 @@ func test_i1_determinism_same_inputs_same_events() -> void:
 		.override_failure_message("I1: одинаковые вводные → одинаковая последовательность событий")
 
 
+## 4.2: 100 повторов seed+actions → byte-identical state (I1-детерминизм).
+func test_i1_determinism_100_repeats_byte_identical() -> void:
+	var reference := _run_sequence(424242)
+	var ref_events: Array = reference.event_log()
+	var ref_state: Dictionary = reference.to_dict()
+	for i in 100:
+		var run := _run_sequence(424242)
+		assert_that(run.event_log()).is_equal(ref_events) \
+			.override_failure_message("I1: повтор %d/100 — события отличаются" % (i + 1))
+		assert_that(run.to_dict()).is_equal(ref_state) \
+			.override_failure_message("I1: повтор %d/100 — состояние отличается" % (i + 1))
+
+
 func _run_sequence(seed: int) -> TurnDriver:
 	var driver := _new_driver(seed)
 	for i in 3:
@@ -213,3 +226,60 @@ func test_post_mvp_slots_noop() -> void:
 	driver.advance_auto_phase()  # diplomacy — хук не задан
 	assert_that(driver.phase_name()).is_equal("threats") \
 		.override_failure_message("no-op-слоты caravans/diplomacy должны вести в threats")
+
+
+## === 4.3: статус кампании (wipe → defeat; голод сам по себе не defeat) ===
+
+## T-060 (R1): wipe всей партии = конец кампании (DEFEAT).
+func test_wipe_defeat() -> void:
+	var driver := _new_driver()
+	assert_that(driver.campaign_status).is_equal("ongoing")
+	assert_that(driver.is_done()).is_equal(false)
+	driver.defeat("party_wiped")
+	assert_that(driver.campaign_status).is_equal("defeat") \
+		.override_failure_message("wipe должен установить статус defeat")
+	assert_that(driver.is_done()).is_equal(true) \
+		.override_failure_message("defeat должен завершить кампанию")
+
+
+## Повторный вызов defeat — no-op (флаг, не таймер; D-152-семья).
+func test_defeat_idempotent() -> void:
+	var driver := _new_driver()
+	driver.defeat("party_wiped")
+	var status_after_first := driver.campaign_status
+	var events_after_first := driver.event_log().size()
+	driver.defeat("party_wiped_again")
+	assert_that(driver.campaign_status).is_equal(status_after_first) \
+		.override_failure_message("повторный defeat не должен менять статус")
+	assert_that(driver.event_log().size()).is_equal(events_after_first) \
+		.override_failure_message("повторный defeat не должен дублировать событие")
+
+
+## Голод сам по себе не defeat (02-mechanics §3.2: голод — штраф, не конец).
+func test_hunger_alone_not_defeat() -> void:
+	var driver := _new_driver()
+	# Проходим несколько ходов без вызова defeat — статус остаётся ongoing.
+	for i in 3:
+		if driver.is_done():
+			break
+		driver.advance_auto_phase()
+		driver.end_player_phase()
+		driver.advance_auto_phase()
+		driver.advance_auto_phase()
+		driver.advance_auto_phase()
+		driver.advance_auto_phase()
+	assert_that(driver.campaign_status).is_equal("ongoing") \
+		.override_failure_message("голод/прохождение ходов без wipe не должны давать defeat")
+	assert_that(driver.is_done()).is_equal(false)
+
+
+## Статус кампании сериализуется (в сейве).
+func test_defeat_status_serialized() -> void:
+	var driver := _new_driver(555)
+	driver.defeat("party_wiped")
+	var data := driver.to_dict()
+	assert_that(data["status"]).is_equal("defeat")
+	var restored := TurnDriver.from_dict(data)
+	assert_that(restored.campaign_status).is_equal("defeat") \
+		.override_failure_message("статус defeat должен сохраняться в сейве")
+	assert_that(restored.is_done()).is_equal(true)
