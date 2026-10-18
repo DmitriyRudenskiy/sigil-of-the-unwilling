@@ -94,18 +94,68 @@ def main() -> int:
     return 0
 
 
-def shot_seam(shot: str, threshold: float, t: float = 0.50) -> int:
-    """То же — по снимку карты: где декаль реально наедает чужую клетку.
+def _hf(x: np.ndarray) -> float:
+    """Высокочастотная дисперсия участка: σ(p − среднее 3×3). Мера «зерна» материала."""
+    s = np.zeros_like(x)
+    for dy in (-1, 0, 1):
+        for dx in (-1, 0, 1):
+            s += np.roll(np.roll(x, dy, 0), dx, 1)
+    return float(np.std(x - s / 9.0))
 
-    Декаль биома B лежит внутри клетки биома A (map_renderer.paint_transitions),
-    поэтому полоса берётся у общего ребра, со стороны A, и сравнивается со средним
-    обоих биомов: с чужим она обязана совпадать (иначе — чужеродная линия), со своим
-    отличаться вправе (это и есть переход)."""
+
+def _patch(img: np.ndarray, x: int, y: int, r: int = 4) -> np.ndarray:
+    return img[max(0, y - r):y + r, max(0, x - r):x + r]
+
+
+def _profile(img: np.ndarray, own: list, nb: list, means: dict, contrast: float):
+    """Профиль тона поперёк общего ребра: где переход и насколько он размыт.
+
+    Возвращает (t*, ширина, grain) либо None, если профиль нечитаемая (мелкий контраст).
+    t=0 — центр своей клетки, t=0.5 — общее ребро (там перо непрозрачно).
+    t* — где тон становится ближе к чужому биому; ширина — полоса между «ещё свой»
+    (ΔE до своего ≤ 0.25 межбиомного контраста) и «уже чужой»; grain — ВЧ-дисперсия
+    пера у ребра против ВЧ-дисперсии своей базы в глубине клетки.
+    """
+    if contrast < 8.0:
+        return None
+    ts = [i / 40.0 for i in range(2, 21)]
+    da, db = [], []
+    for t in ts:
+        x, y = int(own[0] + t * (nb[0] - own[0])), int(own[1] + t * (nb[1] - own[1]))
+        lab = tone_lab(tuple(_patch(img, x, y).reshape(-1, 3).mean(0)))
+        da.append(de76(lab, tone_lab(tuple(means[own[2]]))))
+        db.append(de76(lab, tone_lab(tuple(means[nb[2]]))))
+    cross = next((t for t, u, v in zip(ts, da, db) if v < u), None)
+    own_side = [t for t, u in zip(ts, da) if u <= 0.25 * contrast]
+    nb_side = [t for t, v in zip(ts, db) if v <= 0.25 * contrast]
+    if cross is None or not own_side or not nb_side:
+        return None
+    width = min(nb_side) - max(own_side)
+    x0, y0 = int(own[0] + 0.10 * (nb[0] - own[0])), int(own[1] + 0.10 * (nb[1] - own[1]))
+    x1, y1 = int(own[0] + 0.46 * (nb[0] - own[0])), int(own[1] + 0.46 * (nb[1] - own[1]))
+    base, feather = _hf(_patch(img, x0, y0)), _hf(_patch(img, x1, y1))
+    return cross, width, (feather / base if base > 1e-6 else 0.0)
+
+
+def shot_seam(shot: str, threshold: float, t: float = 0.50) -> int:
+    """То же — по снимку карты, плюс геометрия и фактура самого пера.
+
+    Декаль биома B лежит внутри клетки биома A (map_renderer.paint_transitions), то есть
+    у общего ребра со стороны A тон = материал B. Отсюда два разных числа, которые до
+    T-138 печатались под одной подписью (урок: «ΔE(перо ↔ тон своей клетки) = 32» — это
+    НЕ дефект перехода, а межбиомный контраст, который frame/contrast требует держать
+    БОЛЬШЕ 12; сравнивать его с нулём — значит требовать слить биомы):
+
+      · ΔE(перо ↔ носимый материал) — мера T-136: кромки нет, если мало;
+      · ΔE(перо ↔ тон своей клетки) — межбиомный контраст на ребре, норма.
+
+    Геометрия перехода — профилем поперёк ребра (_profile): t* и ширина полосы смешения.
+    Фактура — grain: ВЧ-дисперсия пера против ВЧ-дисперсии базы того же биома."""
     geo = json.load(open(f"{shot}.cells.json", encoding="utf-8"))
     tile = int(geo["tile"][0])
     cells = geo["cells"]
     img = np.asarray(Image.open(shot).convert("RGB"), dtype=np.float64)
-    means, strips = {}, []
+    means, strips, geom = {}, [], []
     for biome in sorted({v[2] for v in cells.values()}):
         px = [img[max(0, v[1] - 12):v[1] + 12, max(0, v[0] - 12):v[0] + 12].reshape(-1, 3)
               for v in cells.values() if v[2] == biome]
@@ -123,16 +173,26 @@ def shot_seam(shot: str, threshold: float, t: float = 0.50) -> int:
             patch = img[max(0, my - 4):my + 4, max(0, mx - 4):mx + 4].reshape(-1, 3).mean(0)
             strips.append((de76(tone_lab(tuple(patch)), tone_lab(tuple(means[b]))),
                            de76(tone_lab(tuple(patch)), tone_lab(tuple(means[a]))), a, b))
+            g = _profile(img, val, nb, means,
+                         de76(tone_lab(tuple(means[a])), tone_lab(tuple(means[b]))))
+            if g:
+                geom.append(g)
     if not strips:
         print("в кадре нет пар биомов, где декаль вообще рисуется")
         return 0
     worst = max(strips, key=lambda s: s[0])
-    print(f"пар перехода: {len(strips)}; медиана ΔE(декаль↔свой биом) = "
-          f"{sorted(s[0] for s in strips)[len(strips)//2]:.1f}, "
-          f"медиана ΔE(декаль↔клетка, в которую он наедает) = "
-          f"{sorted(s[1] for s in strips)[len(strips)//2]:.1f}")
-    print(f"худший ΔE(декаль↔свой биом) = {worst[0]:.1f} ({worst[2]}→{worst[3]}), "
+    med = lambda xs: sorted(xs)[len(xs) // 2]
+    print(f"пар перехода: {len(strips)}; медиана ΔE(перо ↔ носимый материал) = "
+          f"{med([s[0] for s in strips]):.1f} (мера T-136, чем меньше, тем лучше), "
+          f"медиана ΔE(перо ↔ тон своей клетки) = {med([s[1] for s in strips]):.1f} "
+          f"(это межбиомный контраст, норма frame/contrast ≥ 12, не дефект)")
+    print(f"худший ΔE(перо ↔ носимый материал) = {worst[0]:.1f} ({worst[2]}→{worst[3]}), "
           f"порог {threshold:.1f} → {'FAIL' if worst[0] > threshold else 'PASS'}")
+    if geom:
+        print(f"профиль поперёк ребра (медиана по {len(geom)} парам): переход на "
+              f"t* = {med([g[0] for g in geom]):.2f}, полоса смешения "
+              f"{med([g[1] for g in geom]):.2f} клетки, grain пера/базы = "
+              f"{med([g[2] for g in geom]):.2f} (1.0 = фактура та же, гладкое перо < 0.7)")
     return 0
 
 
