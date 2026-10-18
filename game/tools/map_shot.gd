@@ -10,7 +10,19 @@ extends SceneTree
 ##
 ## Запуск НЕ headless (нужен рендер, см. tools/ux_shots.gd):
 ##   Godot --path game -s tools/map_shot.gd -- --seed=4242 --size=40 --out=/tmp/map.png
-##   --fog=1 — оставить туман войны (по умолчанию снят: меряется террейн, а не видимость)
+##   --fog=1 — включить туман войны (по умолчанию снят: машинные меры меряют террейн).
+##   --zoom=0.5 — масштаб кадра (тот же Camera2D.zoom, что ZOOM_LEVELS в игре: 0.5…2.25,
+##            дефолт 1.0). Нужен глазному ревью «видно на масштабе, на котором играют»;
+##            геометрия кадра и размер тайла пишутся в тех же единицах, что нарисованы.
+##
+## Про --fog (T-137): раньше флаг только «не мешал» и молчал: туман рисует
+## map_renderer по VisibilityMap, а её в этом харнессе никто не создавал (в игре её
+## создаёт world_controller), значит `mg.visibility` был null при обоих значениях и
+## кадр от флага не менялся ни на байт. Теперь флаг включает туман тем же состоянием,
+## что живой рантайм на старте (`world_bootstrap`: VisibilityMap + recompute до первого
+## кадра), и падает с кодом 4, если туман не включился. Кадр с туманом — предмет
+## глазного ревью (п. 8 чек-листа), а не машинных мер: в `check_map_art` он не подаётся,
+## тумана нет ни в 17 мерах, ни в мутациях `--self-test` (гейт печатает свой охват).
 
 const DEFAULT_SEED := 4242
 const DEFAULT_SIZE := 40
@@ -21,6 +33,7 @@ func _initialize() -> void:
 	var out := _arg("--out", "/tmp/map-shot/map.png")
 	var seed_value := int(_arg("--seed", str(DEFAULT_SEED)))
 	var side := int(_arg("--size", str(DEFAULT_SIZE)))
+	var zoom := float(_arg("--zoom", "1"))
 	var with_fog := _arg("--fog", "0") == "1"
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(out).get_base_dir())
 
@@ -47,13 +60,32 @@ func _initialize() -> void:
 	# Кадр задаём сдвигом узла карты: камера в offscreen-вьюпорте не гарантирована,
 	# а сдвиг — тот же, из которого считается геометрия кадра.
 	var center: Vector2 = mg.map_to_local(Vector2i(side / 2, side / 2))
-	scene.position = Vector2(float(VIEWPORT_SIZE.x), float(VIEWPORT_SIZE.y)) / 2.0 - center
+	# Зум — масштаб узла карты (в игре это Camera2D.zoom). Сдвиг вычитается уже после
+	# масштаба, а геометрия умножается на тот же коэффициент: иначе клетки.json разойдутся
+	# с пикселями и меры начнут мерить не там, где нарисовано.
+	scene.scale = Vector2(zoom, zoom)
+	scene.position = Vector2(float(VIEWPORT_SIZE.x), float(VIEWPORT_SIZE.y)) / 2.0 - center * zoom
 
-	if not with_fog and mg.visibility != null:
+	# По умолчанию тумана нет: карту красит map_generator в _ready(), VisibilityMap не
+	# создаётся. Ветка «снять туман» отсюда удалена как мёртвая — при null visibility
+	# она не выполнялась никогда, только выглядела как действие.
+	var fog_cells := 0
+	if with_fog:
+		var vis = load("res://scripts/core/visibility_map.gd").new()
+		vis.set_map_size(side, side)
+		# То же состояние, что мир на старте: обзор героя в центре карты, своих городов нет.
+		vis.recompute(Vector2i(side / 2, side / 2), [], GameNumbers.FOG_HERO_SIGHT,
+				GameNumbers.FOG_CITY_SIGHT, mg.hex_shift_right)
+		mg.visibility = vis
+		mg.apply_fog(vis)
 		for cell in mg.model.terrain_grid:
-			mg.visibility.explored[cell] = true
-			mg.visibility.visible[cell] = true
-		mg.apply_fog(mg.visibility)
+			if not vis.is_explored(cell) or not vis.is_visible(cell):
+				fog_cells += 1
+		if fog_cells == 0:
+			# Флаг не имеет права снова значить «ничего»: просили туман — требуй туман.
+			push_error("map_shot: --fog=1 запрошен, туман не включился (вне видимости 0 клеток)")
+			quit(4)
+			return
 
 	await _frames(20)
 
@@ -67,18 +99,21 @@ func _initialize() -> void:
 		push_error("map_shot: не удалось записать %s" % global_out)
 		quit(3)
 		return
-	_dump_geometry(mg, scene, global_out, img.get_size(), to_biome, biome_names)
-	print("SHOT %s %dx%d seed=%d cells=%d" % [global_out, img.get_width(), img.get_height(),
-		seed_value, mg.model.terrain_grid.size()])
+	_dump_geometry(mg, scene, global_out, img.get_size(), to_biome, biome_names, zoom)
+	var fog_flag := "on" if with_fog else "off"
+	print("SHOT %s %dx%d seed=%d cells=%d fog=%s fog_cells=%d zoom=%.2f" % [
+		global_out, img.get_width(), img.get_height(), seed_value,
+		mg.model.terrain_grid.size(), fog_flag, fog_cells, zoom,
+	])
 	quit(0)
 
 
 ## Геометрия кадра: центр клетки в пикселях снимка (локация клетки + сдвиг узла).
 func _dump_geometry(mg, scene: Node2D, shot_path: String, size: Vector2i,
-		to_biome: Dictionary, biome_names: PackedStringArray) -> void:
+		to_biome: Dictionary, biome_names: PackedStringArray, zoom: float = 1.0) -> void:
 	var cells := {}
 	for cell in mg.model.terrain_grid:
-		var p: Vector2 = mg.map_to_local(cell) + scene.position
+		var p: Vector2 = mg.map_to_local(cell) * zoom + scene.position
 		if p.x < 0.0 or p.y < 0.0 or p.x > size.x or p.y > size.y:
 			continue
 		# Подпись биома — только для группировки клеток при замере; само различие
@@ -89,7 +124,7 @@ func _dump_geometry(mg, scene: Node2D, shot_path: String, size: Vector2i,
 		cells["%d,%d" % [cell.x, cell.y]] = [int(round(p.x)), int(round(p.y)),
 			biome_names[biome].to_lower()]
 	var payload := {
-		"tile": [int(mg.get_tile_size().x), int(mg.get_tile_size().y)],
+		"tile": [int(round(mg.get_tile_size().x * zoom)), int(round(mg.get_tile_size().y * zoom))],
 		"size": [size.x, size.y],
 		"seed": mg.seed_value,
 		"cells": cells,

@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import sys
 import zlib
 from pathlib import Path
@@ -47,6 +48,8 @@ QUALITY = int(SPEC["export"]["quality"])
 LOSSLESS = bool(SPEC["export"].get("lossless", False))
 VARIANT = SPEC["variants"][0]
 UNSCHARP = ImageFilter.UnsharpMask(radius=1.2, percent=120, threshold=2)
+# Эксперимент T-138 (глазной A/B по глубине ямы зерна); 0 — атлас побайтово прежний.
+GRAIN_INJECT = float(os.environ.get("GRAIN_INJECT", "0"))
 WRAP_BAND = 128        # ширина зашивки шва на исходнике 1024 (на 82 px — ~10 px)
 FEATHER = 0.22         # доля тайла, на которой утоняется декаль границы
 SIDES = ("e", "ne", "nw", "w", "sw", "se")   # стороны остроконечного шестиугольника
@@ -270,8 +273,18 @@ def edge_decal(base: Image.Image, side: str) -> Image.Image:
 
     `base` — среднее по вариантам биома, а не вариант 0 (вердикт В1 → (1), D-205):
     соседняя клетка стоит любым из четырёх, и декаль по одному из них вносит в стык
-    половину рампы вариантов. Среднее делит худший шаг пополам и не растит атлас."""
+    половину рампы вариантов. Среднее делит худший шаг пополам и не растит атлас.
+
+    GRAIN_INJECT (0 = по умолчанию, атлас побайтово прежний) — эксперимент T-138: вернуть
+    декалю высокочастотную составляющую, съеденную усреднением четырёх вариантов.
+    Среднее делит дисперсию зерна ~вдвое, отсюда яма Δgrain 0.80× в полосе пера; инжект
+    поднимает дно ямы, не трогая её ширину (ширину задаёт FEATHER). Нужен ровно для того,
+    чтобы глазной A/B решал вопрос глубины, а не ширины."""
     a = np.asarray(base.convert("RGB")).astype(np.float32)
+    if GRAIN_INJECT:
+        soft = np.asarray(Image.fromarray(a.astype(np.uint8)).filter(
+            ImageFilter.GaussianBlur(1.0)), dtype=np.float32)
+        a = np.clip(a + GRAIN_INJECT * (a - soft), 0.0, 255.0)
     alpha = side_profile(TILE, side) * 255.0
     return Image.fromarray(np.dstack([a, alpha]).astype(np.uint8), "RGBA")
 
