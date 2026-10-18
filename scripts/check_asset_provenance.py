@@ -97,13 +97,19 @@ def main():
     # охват — «покрыто» читается шире, чем проверяет машина).
     order = sorted(statuses.items(), key=lambda kv: -kv[1])
     not_clean = covered - statuses.get("чисто", 0)
+    # Два вида незнания не сводятся в одно число: «покрыто наличием записи» значит разное
+    # для строки класса (семейство известно, файл внутри него не проверялся) и для
+    # строки файла (файл известен, права не установлены).
+    named = sorted(r for r in files
+                   if files[r] != "чисто" and os.path.exists(os.path.join(ROOT, r)))
     print("  охват: «покрыто» = у файла есть строка провенанса, НЕ «права очищены». "
           "Статусы: %s." % ", ".join("%s %d" % (s, n) for s, n in order))
     print("         у %d из %d права не подтверждены (§8.4 открыт), и exit 0 этого НЕ ловит "
           "— он ловит только отсутствие строки и статус «красный»"
           % (not_clean, covered))
-    named = sorted(r for r in files
-                   if files[r] != "чисто" and os.path.exists(os.path.join(ROOT, r)))
+    print("         из них %d закрыты СТРОКОЙ КЛАССА (уровень семейства), %d — поимённо "
+          "(уровень файла): это разные виды незнания, не складывать в одно число"
+          % (not_clean - len(named), len(named)))
     if named:
         print("         поимённые файлы вне «чисто» (%d): %s"
               % (len(named), ", ".join(os.path.basename(r) for r in named[:6])))

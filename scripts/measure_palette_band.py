@@ -191,6 +191,13 @@ def main() -> int:
     ap.add_argument("--tone", nargs="+", metavar="#RRGGBB",
                     help="lum/sat/контраст тона к подложке (--on), проверка правил §4.7/§9.2")
     ap.add_argument("--on", default="#281c0f", help="подложка для --tone (по умолчанию тон тайла)")
+    ap.add_argument("--band-m", action="store_true",
+                    help="приёмка не по C′ (выведена из проверяемых ассетов), а по фиксированной "
+                         "полосе M из map_art_gates.json — полосе КАРТЫ. Нужна, чтобы отличить "
+                         "«ассет плох» от «меру приложили не к тому классу ассетов»")
+    ap.add_argument("--pool-include", metavar="ФАЙЛ",
+                    help="добавить файл в пул C′ (тест вакуумности: вернуть в пул удалённый "
+                         "носитель и посмотреть, щёлкнет ли приёмка при неизменных зданиях)")
     ap.add_argument("--band-from", metavar="ФАЙЛ",
                     help="полоса и семейство тонов произвольного кадра-эталона "
                     "(носитель полосы — канонический кадр, а не живые ассеты)")
@@ -226,6 +233,7 @@ def main() -> int:
         return 0
 
     buildings = sorted(glob.glob(os.path.join(args.game, "assets/textures/objects/building_*.webp")))
+    extra = [args.pool_include] if args.pool_include else []
     if not buildings:
         print(f"живых ассетов не найдено под {args.game}/assets — запускать из корня репо")
         return 2
@@ -245,6 +253,15 @@ def main() -> int:
         for tone, share, l, s in kmeans(px):
             measured.append((name, tone, share, l, s))
             print(f"  {name:34s} {hexs(tone)}  lum {l:.2f}  sat {s:.2f}  {share:5.1%}")
+
+    for path in extra:
+        px = load_pixels(path)
+        if px is None:
+            print(f"  {os.path.basename(path)}: не читается — в пул не добавлен")
+            continue
+        pool.append(sample(px))
+        print(f"  + в пул C′ добавлен внешний носитель: {os.path.basename(path)} "
+              f"(не здание; приёмка зданий при этом меряется по тем же 12 файлам)")
 
     # Полоса C′ = k-кластерное квантование ОБЪЕДИНЁННОГО содержимого живых ассетов.
     # Вес файла одинаков (проба на файл), чтобы один крупный лист не переопределил полосу.
@@ -266,6 +283,18 @@ def main() -> int:
     print(f"  тонов: {len(tones)}")
     print("\nПриёмка нового ассета: --check <файл> → максимум ΔE его доминирующих тонов")
     print(f"до ближайшего тона-носителя; порог {ACCEPT_DE:.0f} (прежний допуск §8.5).")
+
+    if args.check and args.band_m:
+        import json
+        cfg = json.load(open(os.path.join(args.game, "data/config/map_art_gates.json"), encoding="utf-8"))
+        band_m = [(parse_hex(h), 1.0, 0.0, 0.0) for h in cfg["palette"]["band_m"]]
+        print(f"\n== приёмка по полосе M ({len(band_m)} тонов, фиксированный конфиг "
+              f"map_art_gates.json; к пулу C′ отношения не имеет) ==")
+        print("   ПОЛОСА M — ЭТО ПОЛОСА КАРТЫ (строка §4.6 «M. Палитра карты», гейт atlas/palette). "
+              "Здания канонически принимаются по C′ (§9.1, §4.6 «здания … C′»), поэтому «вне M» для "
+              "здания — не дефект, а признак другого класса ассетов; читать вывод надо так же, как "
+              "32.0: это расстояние между классами, а не падение.")
+        return _check(args.check, band_m)
 
     if args.check:
         return _check(args.check, tones)
