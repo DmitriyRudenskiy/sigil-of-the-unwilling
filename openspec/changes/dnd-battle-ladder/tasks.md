@@ -17,7 +17,7 @@
 
 ## 3. Состояния, местность, бином
 
-- [ ] 3.1 Состояния: prone (−2/+2), высотный статус (полёт, hover; носитель MVP — волшебник) — `campaign_battle.gd`/`battle_rules.gd`.
+- [x] 3.1 Состояния: prone (−2/+2), высотный статус (полёт, hover; носитель MVP — волшебник) — `campaign_battle.gd`/`battle_rules.gd`. *(_state_margin: prone ±2, elevated ±2; сосуществование. Тесты: test_prone_and_elevated_mask_coexist, test_elevated_defender_penalizes_attacker. «Носитель = волшебник» — data/config (класс не вшит в бой в MVP).)*
 - [ ] 3.2 Blink (заклинание из ячеек волшебника, K-M7) — `campaign_battle.gd`.
 - [ ] 3.3 Местность 3 типа (болото/шипы/высота, C3) — абстрактные модификаторы ±2 (без hex, C-3).
 - [ ] 3.4 Бином «Фланг» (fighter+ranger против одного врага, с хода 1) — единственный бином MVP (02b A.4).
