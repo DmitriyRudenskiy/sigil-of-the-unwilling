@@ -18,6 +18,9 @@ var campaign: TurnDriver
 var settlement: SettlementProcessor
 var threats: ThreatSystem
 var population_system: PopulationSystem
+## T-020/T-021/T-022: регион-граф (MVP-маска S1, movement.json): туман, движение
+## по рёбрам, SM героя, one-time loot. Секция сейва "map" → "region".
+var region_map: RegionMap
 ## T-030: районный слой (7 групп, настроение, рабочие, нужды).
 var districts: DistrictSystem
 var district_config: Dictionary = {}
@@ -140,6 +143,14 @@ func _build(campaign_seed: int) -> void:
 	# pre-production запасы. season_mult — из WorldSeasons (I1: инжест).
 	campaign.production_hook = func() -> Dictionary:
 		return settlement.process_production(WorldSeasons.production_mult())
+	# T-020/T-021: регион-граф — MVP-маска S1 (movement.json), герой в городе (R01).
+	# Запас партии на переход — 0 (пополнение из стока поселения — с UI, остаток T-021);
+	# headless: герой в городе (авто-рейд на него не ведётся — R5).
+	region_map = RegionMap.new()
+	region_map.init_campaign(PartySystem.alive_members(party).size(), 0.0)
+	# player-фаза: тик времени герой-слоя (авто-режим 2 дня → возврат в город, Y10).
+	campaign.player_hook = func() -> void:
+		region_map.tick_days(1)
 
 
 ## Один ход кампании (T-010, T-122): фиксированный 6-фазный порядок
@@ -166,7 +177,9 @@ func _threat_context() -> Dictionary:
 	return {
 		"stocks": settlement.stocks,  # ссылка: урон рейда — в стопки поселения
 		"has_barracks": _has_barracks(),  # T-030: казарма из зданий поселения
-		"hero_in_city": true,  # фаза игрока решает (MVP: герой в городе)
+		# T-020: герой в городе (R01) → бой (CR 1/2/6); в походе → авто-рейд (R5).
+		"hero_in_city": region_map == null
+			or region_map.hero_region == region_map.start_region,
 		"battle_handler": _request_battle,
 	}
 
@@ -317,7 +330,7 @@ func build_save_state() -> Dictionary:
 			# T-030: настроение районов — состояние (не производная), в сейве.
 			"districts": districts.to_dict(),
 		},
-		"map": {"threats": threats.to_dict()},
+		"map": {"threats": threats.to_dict(), "region": region_map.to_dict()},  # T-020: регион-граф
 		"prestige": {"ledger": prestige_ledger.duplicate(true)},
 		"sign": {"id": sign_id},  # T-002: состояние Знака (R1) — выбор 1 из 8 на всю игру
 	}
@@ -365,6 +378,8 @@ func load_save_state(state: Dictionary) -> void:
 		"population": population_system.size(),
 	})
 	threats = ThreatSystem.from_dict(state.get("map", {}).get("threats", {}))
+	# T-020: регион-граф — секция "map".region (старый сейв без неё → старт R01).
+	region_map = RegionMap.from_dict((state.get("map", {}) as Dictionary).get("region", {}))
 	# T-030: районный слой — конфиг/каталог те же (сейв хранит только настроение).
 	district_config = _json(DISTRICTS_JSON)
 	district_jobs_by_id = _district_jobs()

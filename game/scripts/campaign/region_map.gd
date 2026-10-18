@@ -299,6 +299,11 @@ func to_dict() -> Dictionary:
 
 
 static func from_dict(data: Dictionary) -> RegionMap:
+	if data.is_empty():
+		# Старый сейв без секции "region" — старт (герой в R01, туман радиус 1).
+		var fresh := RegionMap.new()
+		fresh.init_campaign(2, 0.0)
+		return fresh
 	var m := RegionMap.new()
 	var ver: int = int(data.get("schema_version", 0))
 	if ver != SCHEMA_VERSION:

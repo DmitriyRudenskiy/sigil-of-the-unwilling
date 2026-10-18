@@ -14,11 +14,11 @@
 - [x] 2.3 SM героя: EXPLORE/ENGAGE/BATTLE/VICTORY/DEFEAT/RETREAT; авто-режим при 2 днях без выбора; отступление = авто-возврат за 1 день без боёв (Y10). *(RegionMap hero_state + retreat/tick_days.)*
 - [ ] 2.4 FS: скорость ≤ 0 → ход заканчивается на текущем регионе; окружение → ENGAGE обязателен; рейд по региону героя → бой, победа → −50% последствий.
 - [ ] 2.5 Инвариант доходимости якорей 7/14/21 (K-M4): авто-балансировщик по данным (смещает узлы, не скорость).
-- [ ] 2.6 Шов в `TurnDriver`: player-фаза — переходы героя; шов в `ThreatSystem`: «герой в городе → бой (CR 1/2/6)», «герой в походе → авто-рейд» (R5).
+- [x] 2.6 Шов в `TurnDriver`: player-фаза — переходы героя (`TurnDriver.player_hook` → `RegionMap.tick_days`); шов в `ThreatSystem`: «герой в городе → бой (CR 1/2/6)», «герой в походе → авто-рейд» (R5) — `hero_in_city` из позиции героя в `CampaignComposition._threat_context`.
 
 ## 3. Сейв
 
-- [ ] 3.1 Секция карты в `MvpSaveSchema`: позиция героя, открытые регионы, visited-узлы; миграция fail-fast (save-migration). *(основа готова: RegionMap.to_dict/from_dict + SCHEMA_VERSION fail-fast; интеграция в MvpSaveSchema — не начата.)*
+- [x] 3.1 Секция карты в сейве: `map.region` (позиция героя, открытые регионы, visited-узлы, SM, запас); миграция fail-fast (save-migration) + старый сейв без секции → старт в городе. *(RegionMap.to_dict/from_dict + SCHEMA_VERSION; `CampaignComposition.build_save_state/load_save_state`.)*
 
 ## 4. Верификация
 
