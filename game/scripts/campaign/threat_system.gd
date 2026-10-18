@@ -43,7 +43,10 @@ var global_phase_mult: Dictionary = {1: 1.0, 2: 1.25, 3: 1.5, 21: 2.0}
 var tier_thresholds: Dictionary = {1: 30.0, 2: 100.0, 3: 250.0}  # K-T5 (§5)
 var tier_power: Dictionary = {1: 15.0, 2: 30.0, 3: 60.0}  # R6
 var defense_barracks: float = 0.2  # R6
-var loss_cap_fraction: float = 0.3  # cap ≤30%/день
+var loss_cap_fraction: float = 0.3  # дефолтный кап (ресурс не в loss_caps)
+# Per-ресурсные капы за рейд (Q-M58→(в), D-189, T-127): еда ≤40%, железо/дерево ≤30%.
+# Заменяет единый loss_cap_fraction = 0.3. Кап — per-рейд, не per-ход.
+var loss_caps: Dictionary = {"food": 0.4, "wood": 0.3, "iron": 0.3}
 var cooldown_turns: int = 3  # K-T5
 var arrival_turns: int = 1  # прибытие в следующую threats-фазу
 var camp_k_p: int = 2  # D-130
@@ -291,6 +294,12 @@ func _place_camp(tier: int, report: Dictionary) -> String:
 	return camp_id
 
 
+## Per-ресурсный кап за рейд (Q-M58→(в), D-189, T-127): еда 0.4, остальное 0.3.
+## Ресурс не в loss_caps → дефолт loss_cap_fraction.
+func loss_cap_for(resource: String) -> float:
+	return float(loss_caps.get(resource, loss_cap_fraction))
+
+
 func _resolve_raid(turn: int, stocks: Dictionary, barracks: bool, hero: bool,
 		battle_handler: Callable, report: Dictionary) -> Dictionary:
 	var tier: int = int(wave["tier"])
@@ -299,7 +308,7 @@ func _resolve_raid(turn: int, stocks: Dictionary, barracks: bool, hero: bool,
 	var defense: float = defense_barracks if barracks else 0.0
 	var loss: float = power * (1.0 - defense)
 	var before: float = float(stocks.get(target, 0.0))
-	loss = minf(loss, loss_cap_fraction * before)  # cap ≤30%/день
+	loss = minf(loss, loss_cap_for(target) * before)  # per-ресурсный кап (Q-M58→(в))
 	stocks[target] = before - loss
 	raids_count += 1
 	max_tier_raided = maxi(max_tier_raided, tier)
@@ -316,7 +325,7 @@ func _resolve_raid(turn: int, stocks: Dictionary, barracks: bool, hero: bool,
 	}
 	_log("ход %d: рейд тира %d — цель %s, урон %.1f (power %.0f, defense %.1f)%s"
 			% [turn, tier, target, loss, power, defense,
-				", cap 30%%" if result["cap_applied"] else ""], report)
+				", cap %.0f%%" % (loss_cap_for(target) * 100.0) if result["cap_applied"] else ""], report)
 	if hero:
 		result["battle_requested"] = true
 		_log("ход %d: герой в городе — бой (CR %s, шов T-050)" % [turn, str(cr_range(turn))], report)
@@ -440,7 +449,12 @@ func _load_raids_config() -> void:
 	tier_thresholds = _num_keys(tiers.get("thresholds", tier_thresholds))
 	tier_power = _num_keys(tiers.get("power", tier_power))
 	defense_barracks = float(cfg.get("defense_barracks", defense_barracks))
-	loss_cap_fraction = float(cfg.get("loss_cap_fraction", loss_cap_fraction))
+	# Дефолтный кап — loss_cap_per_day (raids.json); per-ресурсные — loss_caps
+	# (Q-M58→(в), D-189, T-127): еда 0.4, железо/дерево 0.3.
+	loss_cap_fraction = float(cfg.get("loss_cap_per_day", loss_cap_fraction))
+	var caps: Dictionary = cfg.get("loss_caps", {})
+	if caps != {}:
+		loss_caps = caps.duplicate()
 	cooldown_turns = int(cfg.get("cooldown_turns", cooldown_turns))
 	arrival_turns = int(cfg.get("arrival_turns", arrival_turns))
 	camp_k_p = int(cfg.get("camp_k_p", camp_k_p))
