@@ -71,6 +71,8 @@ const PULSE_ANIM_SEC := GameNumbersBattle.PULSE_ANIM_SEC
 const PULSE_SCALE := GameNumbersBattle.PULSE_SCALE
 
 const TILE_SIZE := GameNumbersMap.TILE_SIZE
+const MAP_FOG_DIM := GameNumbersMap.MAP_FOG_DIM
+const MAP_FOG_MODULATE := GameNumbersMap.MAP_FOG_MODULATE
 const MAP_SIZE_MIN := GameNumbersMap.MAP_SIZE_MIN
 const MAP_SIZE_MAX := GameNumbersMap.MAP_SIZE_MAX
 const MAP_VILLAGE_COUNT := GameNumbersMap.MAP_VILLAGE_COUNT

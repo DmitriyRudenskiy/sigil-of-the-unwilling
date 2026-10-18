@@ -211,3 +211,48 @@ func test_delta_fog_persistence() -> void:
 	var d2 := WorldStateDelta.new()
 	d2.deserialize(data)
 	assert_that(d2.fog_explored.size()).is_equal(2)
+
+
+## Инвариант тумана по всем слоям (спека «Туман войны по всем слоям», вердикт
+## В2 → (в), D-205): открытая, но не видимая клетка затемняет статичные носители
+## той же кратностью, что и база (база затемняется в TileAtlas тем же
+## `GameNumbers.MAP_FOG_DIM`), а вражеский стеки остаётся скрыт — туман не должен
+## отдавать разведку врагом.
+func test_explored_cell_dims_static_carriers() -> void:
+	var v := VisibilityMap.new()
+	v.set_map_size(15, 15)
+	v.recompute(Vector2i(7, 7), [], 3, 4)
+	# Источник ушёл: прежнее поле осталось открытым, но вышло из видимости.
+	v.recompute(Vector2i(1, 13), [], 3, 4)
+	var dimmed_cell := Vector2i(-1, -1)
+	for c in v.explored:
+		if not v.is_visible(c):
+			dimmed_cell = c
+			break
+	assert_bool(dimmed_cell != Vector2i(-1, -1)).is_true()
+
+	var spawner = auto_free(WorldSpawner.new())
+	var carrier = auto_free(Node2D.new())
+	var stack = auto_free(Node2D.new())
+	spawner._resource_nodes[dimmed_cell] = carrier
+	spawner._enemy_nodes[dimmed_cell] = stack
+	spawner.apply_fog_visibility(v)
+	assert_bool(carrier.visible).is_true()
+	assert_float(carrier.modulate.r).is_equal_approx(GameNumbers.MAP_FOG_DIM, 0.001)
+	assert_bool(stack.visible).is_false()
+
+	# Тот же носитель в видимой клетке возвращается к полной яркости.
+	var nodes = auto_free(ResourceNodeManager.new())
+	nodes._nodes[dimmed_cell] = carrier
+	nodes.apply_fog_visibility(v)
+	assert_bool(carrier.visible).is_true()
+	assert_float(carrier.modulate.r).is_equal_approx(GameNumbers.MAP_FOG_DIM, 0.001)
+	v.recompute(dimmed_cell, [], 3, 4)
+	nodes.apply_fog_visibility(v)
+	assert_float(carrier.modulate.r).is_equal_approx(1.0, 0.001)
+
+	# Невидимая и неоткрытая клетка — носителей нет ни в одном слое.
+	var far := Vector2i(1, 1)
+	nodes._nodes[far] = stack
+	nodes.apply_fog_visibility(v)
+	assert_bool(stack.visible).is_false()

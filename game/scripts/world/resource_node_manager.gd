@@ -57,11 +57,16 @@ func setup(container: Node2D, rng: RandomNumberGenerator, resource_registry: Nod
 	_resource_registry = resource_registry
 	_map_to_local_fn = map_to_local_fn
 
+## Носитель добычи — статичный объект (В2 → (в), D-205): открытая, но не видимая
+## клетка затемняет узел той же кратностью, что и базу, а не прячет его; невидимая
+## клетка пуста.
 func apply_fog_visibility(vis) -> void:
 	if vis == null:
 		return
 	for cell in _nodes:
-		_nodes[cell].visible = vis.is_visible(cell)
+		var node: Node2D = _nodes[cell]
+		node.visible = vis.is_explored(cell)
+		node.modulate = Color.WHITE if vis.is_visible(cell) else GameNumbers.MAP_FOG_MODULATE
 
 func get_node_at(cell: Vector2i) -> ResourceNode:
 	return _nodes.get(cell, null)

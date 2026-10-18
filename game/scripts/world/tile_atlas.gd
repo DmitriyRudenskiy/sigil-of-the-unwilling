@@ -146,7 +146,8 @@ func _build_fog_source(tex: Texture2D) -> void:
 	for y in img.get_height():
 		for x in img.get_width():
 			var c: Color = img.get_pixel(x, y)
-			img.set_pixel(x, y, Color(c.r * 0.45, c.g * 0.45, c.b * 0.45, c.a))
+			img.set_pixel(x, y, Color(c.r * GameNumbers.MAP_FOG_DIM, c.g * GameNumbers.MAP_FOG_DIM,
+					c.b * GameNumbers.MAP_FOG_DIM, c.a))
 	_fog_tex = ImageTexture.create_from_image(img)
 	_fog_src = TileSetAtlasSource.new()
 	_fog_src.texture = _fog_tex

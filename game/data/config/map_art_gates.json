@@ -12,7 +12,7 @@
     "min_variants_per_biome": 4,
     "min_distinct_share": 0.9,
     "min_cell_std": 4.0,
-    "max_weight_kb": 600,
+    "max_weight_kb": 1500,
     "min_source_scale": 4,
     "max_seam_mad": 24.0,
     "min_base_opacity": 0.99
