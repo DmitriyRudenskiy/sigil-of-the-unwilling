@@ -109,6 +109,21 @@ fi
 
 fi
 echo ""
+echo "=== lint: gdlint (T-141, report-only) ==="
+# D-210: gdlint ищет .gdlintrc по рабочему каталогу. Скрипт выше делает cd в game/,
+# поэтому секция ниже работает именно с проектным конфигом; запуск из корня репо —
+# ДРУГОЙ конфиг (дефолт), в котором часть правил выключена проектом. Дельта-гейт
+# (падение на росте против базы) — вторая половина T-141, не подключена: конфиг линтера
+# сам помечен «report-only, до утверждения владельцем».
+LINT_PY="${LINT_PY:-python3}"
+if "$LINT_PY" -c 'import gdtoolkit.linter' 2>/dev/null && [ -f .gdlintrc ]; then
+	LINT_OUT="$("$LINT_PY" -m gdtoolkit.linter scripts tools 2>&1 | tail -1)"
+	echo "LINT: ${LINT_OUT:-нет вывода} (scripts + tools)"
+	echo "LINT: конфиг = $(pwd)/.gdlintrc (CWD=game); сигнал = ДЕЛЬТА против базы, не «чисто» (T-141); гейт не подключён"
+else
+	echo "LINT: SKIPPED (нет gdtoolkit у $LINT_PY или нет .gdlintrc в $(pwd))"
+fi
+echo ""
 echo "=== MCP tests (tugcantopaloglu/godot-mcp) ==="
 MCP_SERVER="${GODOT_MCP_SERVER:-$PWD/addons/godot-mcp/build/index.js}"
 if [ ! -f "$MCP_SERVER" ]; then
