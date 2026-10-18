@@ -454,6 +454,54 @@ func test_winter_enemy_mult_t115() -> void:
 	assert_float(float(ts.wave["power"])).is_equal_approx(60.0, 1e-6)
 
 
+## raid-pressure 4.1: Wealth clamp — [wealth_min, wealth_max] (дефолты 0.5/2.0;
+## конфиг 0.6/1.5 грузится в игре, _new_ts — дефолты).
+func test_wealth_clamp_t115() -> void:
+	var ts := _new_ts()
+	# Высокие запасы: 1 + 0.005×400 = 3.0 → clamp к wealth_max (2.0).
+	var high: Dictionary = {"food": 400.0, "wood": 0.0, "iron": 0.0}
+	assert_float(ts.compute_pressure(1, high)).is_equal_approx(4.0 * 2.0, 1e-6)
+	# Средние запасы: 1 + 0.005×120 = 1.6 → в пределах, clamp не срабатывает.
+	var mid: Dictionary = {"food": 120.0, "wood": 0.0, "iron": 0.0}
+	assert_float(ts.compute_pressure(1, mid)).is_equal_approx(4.0 * 1.6, 1e-6)
+	# Пусто: 1.0 (в пределах, clamp не срабатывает).
+	var zero: Dictionary = {"food": 0.0, "wood": 0.0, "iron": 0.0}
+	assert_float(ts.compute_pressure(1, zero)).is_equal_approx(4.0 * 1.0, 1e-6)
+
+
+## raid-pressure 4.1: рост Region_History после cooldown.
+func test_region_history_growth_t115() -> void:
+	# history = 1 + 0.05×(turns_since_raid − cooldown); 0 в cooldown.
+	var ts := _new_ts()
+	ts.turns_since_last_raid = -1  # рейдов не было
+	assert_float(ts._region_history()).is_equal_approx(1.0, 1e-6)
+	ts.turns_since_last_raid = 3  # ровно cooldown → after = 0 → 1.0
+	assert_float(ts._region_history()).is_equal_approx(1.0, 1e-6)
+	ts.turns_since_last_raid = 8  # after = 5 → 1.25
+	assert_float(ts._region_history()).is_equal_approx(1.0 + 0.05 * 5, 1e-6)
+	# В cooldown — 0 (регион «помнит», D-130).
+	ts.region_cooldown = 2
+	assert_float(ts._region_history()).is_equal_approx(0.0, 1e-6)
+
+
+## raid-pressure 4.2: tiers — пороги 30/100/250, сила 15/30/60, оборона 0.2.
+func test_tier_thresholds_power_t115() -> void:
+	var ts := _new_ts()
+	assert_int(int(ts.tier_thresholds[1])).is_equal(30)
+	assert_float(float(ts.tier_power[1])).is_equal_approx(15.0, 1e-6)
+	assert_int(int(ts.tier_thresholds[2])).is_equal(100)
+	assert_float(float(ts.tier_power[2])).is_equal_approx(30.0, 1e-6)
+	assert_int(int(ts.tier_thresholds[3])).is_equal(250)
+	assert_float(float(ts.tier_power[3])).is_equal_approx(60.0, 1e-6)
+	assert_float(ts.defense_barracks).is_equal_approx(0.2, 1e-6)
+	# Оборона: с казармой loss = power×(1−0.2); без — power.
+	var stocks: Dictionary = {"food": 100.0, "wood": 0.0, "iron": 0.0}
+	ts.wave = {"tier": 1, "power": 15.0, "target": "food", "camp_id": "x",
+		"turns_to_arrival": 0, "forced": false}
+	var r: Dictionary = ts.process_turn(8, {"stocks": stocks, "has_barracks": true})
+	assert_float(r["raid"]["loss"]).is_equal_approx(15.0 * 0.8, 1e-6)
+
+
 func test_window_strong_raid_turn17_t115() -> void:
 	# K-R3 window (бит 17): сильный рейд (тир ≥ 2) гарантирован в окне бита
 	# [14..20] — сильнее cooldown и повышает естественную волну в пути.

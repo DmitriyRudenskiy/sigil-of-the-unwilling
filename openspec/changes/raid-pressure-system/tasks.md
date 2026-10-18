@@ -24,9 +24,9 @@
 
 ## 4. Верификация
 
-- [ ] 4.1 GdUnit4: давление (Wealth clamp, фазы, рост после cooldown).
-- [ ] 4.2 GdUnit4: тиры (пороги 30/100/250; power 15/30/60; defense барраки 0.2).
+- [x] 4.1 GdUnit4: давление (Wealth clamp, фазы, рост после cooldown). *(test_pressure_formula (фазы) + test_wealth_clamp_t115 (clamp) + test_region_history_growth_t115 (рост после cooldown).)*
+- [x] 4.2 GdUnit4: тиры (пороги 30/100/250; power 15/30/60; defense барраки 0.2). *(test_tier_thresholds_power_t115: пороги/сила + оборона казарм 0.2 (loss = power×0.8).)*
 - [x] 4.3 GdUnit4: per-ресурсные капы (еда ≤40%, железо/оружие ≤30%). *(test_threat_system: test_per_resource_caps, test_per_resource_cap_food_vs_iron, test_cap_only_when_loss_exceeds.)*
-- [ ] 4.4 GdUnit4: директивы (первый ≈ ход 7; финальный к ходу 21; floor не ломается).
+- [x] 4.4 GdUnit4: директивы (первый ≈ ход 7; финальный к ходу 21; floor не ломается). *(test_floor_first_raid_turn7 + test_final_tier_by_turn21.)*
 - [x] 4.5 GdUnit4: AFK-каскад (капы per-рейд; все районы разрушены → город выживает). *(test_threat_system: test_afk_cascade_no_chain_collapse — 10 рейдов tier 3 подряд, запасы не уходят в минус (кап per-рейд); + cooldown ×2 из 2.2.)*
-- [ ] 4.6 GdUnit4: зима (enemy_mult 1.25; production_mult 0.4).
+- [x] 4.6 GdUnit4: зима (enemy_mult 1.25; production_mult 0.4). *(test_winter_enemy_mult_t115 (enemy_mult 1.25) + test_world_threat_rings (production_mult 0.4).)*
