@@ -2,8 +2,10 @@
 """Замер полосы «содержимое» (C′) по живым ассетам.
 
 Основание: Q-M43 → (а) (владелец, 2026-10-16). Полоса содержимого выводится из того,
-что уже стоит в игре (`building_*.webp`, `world_tiles.webp`), а не из референса:
-референс-носитель полосы C (`reference/01`) утрачен 2026-10-17 и чисел не даёт.
+что уже стоит в игре (`building_*.webp`), а не из референса: референс-носитель
+полосы C (`reference/01`) утрачен 2026-10-17 и чисел не даёт. Лист `world_tiles.webp`
+из пула снят 2026-10-18 (шаг 4.1 world-map-art-variety: файл удалён, карта принята
+полосой M, D-203) — вердикт о судьбе `C′` без тайлов открыт, Q-M89.
 
 Приёмка нового ассета содержимого: каждый его кластер в ΔE ≤ 12 (CIE76) до ближайшего
 тона полосы C′. Порог — прежний допуск §8.5, изменён только носитель полосы.
@@ -224,15 +226,16 @@ def main() -> int:
         return 0
 
     buildings = sorted(glob.glob(os.path.join(args.game, "assets/textures/objects/building_*.webp")))
-    tiles = sorted(glob.glob(os.path.join(args.game, "assets/tiles/world_tiles*.webp")))
-    if not buildings and not tiles:
+    if not buildings:
         print(f"живых ассетов не найдено под {args.game}/assets — запускать из корня репо")
         return 2
+    print("носитель C′ — живые здания; карта (лист world_tiles.webp удалён 2026-10-18) "
+          "принимается полосой M — см. D-203, Q-M89")
 
     measured: list[tuple[str, tuple[int, int, int], float, float, float]] = []
     pool: list[np.ndarray] = []
     print("== замер живых ассетов содержимого (k-means, k=8, seed=0) ==")
-    for path in tiles + buildings:
+    for path in buildings:
         name = os.path.basename(path)
         px = load_pixels(path)
         if px is None:
