@@ -19,6 +19,7 @@
     "wood": 0.3,
     "iron": 0.3
   },
+  "_note_target": "ИНЕРТНЫЕ (1.0, не читается кодом, C-5): target_weights / visibility_formula / target_score ниже — legacy-декларации. Код = канон: детерминированный выбор цели = argmin по запасам ресурса, тай-брейк — меньший id (threat_system._pick_target). Веса 0.5/0.3/0.2 и visibility_formula в MVP не применяются (C-17: формула синхронизирована с кодом в 02-mechanics §3.8).",
   "target_weights": {
     "food": 0.5,
     "wood": 0.3,
