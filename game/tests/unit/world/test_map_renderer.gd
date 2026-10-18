@@ -18,9 +18,15 @@ func _make_tileset() -> TileSet:
 	var ts := TileSet.new()
 	ts.tile_size = Vector2i(16, 16)
 	var all_coords: Array = TileAtlas.all_coords()
+	# Псевдо-текстура — по факту манифеста: квадрат 4×2 на 80 клеток не тянет,
+	# Godot ругался «tile is outside the texture» и тайлы не создавались вовсе.
+	var last := Vector2i(0, 0)
+	for coords in all_coords:
+		last = Vector2i(max(last.x, coords.x + 1), max(last.y, coords.y + 1))
 	for sid in [TileAtlas.SOURCE_ID, TileAtlas.FOG_SOURCE_ID]:
 		var src := TileSetAtlasSource.new()
-		src.texture = ImageTexture.create_from_image(Image.create_empty(64, 32, false, Image.FORMAT_RGBA8))
+		src.texture = ImageTexture.create_from_image(
+			Image.create_empty(last.x * 16, last.y * 16, false, Image.FORMAT_RGBA8))
 		src.texture_region_size = Vector2i(16, 16)
 		for coords in all_coords:
 			src.create_tile(coords)
@@ -259,3 +265,75 @@ func test_transitions_are_deterministic() -> void:
 	layer.queue_free()
 	for l in layers:
 		l.queue_free()
+
+
+## ── Варианты на реальной карте (задача 4.5) ──────────────────────────────────
+
+## Карта 40×40, окрашенная штатным генератором: клетка → координата в листе,
+## плюс террейн клетки. Сейв карту не хранит — при загрузке она пересоздаётся из
+## seed_value (world_bootstrap берёт его из run_seed), поэтому «вариант пережил
+## save/load» = «второй генератор с тем же сидом красится клетка в клетку».
+func _gen_painted(seed_value: int) -> Dictionary:
+	var gen: MapGenerator = make_node(MapGenerator)
+	gen._seed_value = seed_value
+	gen._map_width = 40
+	gen._map_height = 40
+	gen.generate()
+	var layer := _make_layer()
+	MapRenderer.new(gen.model).paint(layer)
+	var painted: Dictionary = {}
+	for cell in layer.get_used_cells():
+		painted[cell] = layer.get_cell_atlas_coords(cell)
+	layer.queue_free()
+	return {"painted": painted, "terrain": gen.model.terrain_grid}
+
+
+func test_variants_survive_map_rebuild() -> void:
+	var first: Dictionary = _gen_painted(4242)
+	var again: Dictionary = _gen_painted(4242)
+	var other: Dictionary = _gen_painted(777)
+	var a: Dictionary = first["painted"]
+	var b: Dictionary = again["painted"]
+	assert_that(b.size()).is_equal(a.size())
+	var changed := 0
+	for cell in a:
+		if b.get(cell) != a[cell]:
+			changed += 1
+	assert_that(changed).is_equal(0)
+	# Другой сид — другая раскраска: иначе variant_for не зависит от сида.
+	var o: Dictionary = other["painted"]
+	var foreign := 0
+	for cell in a:
+		if o.has(cell) and o[cell] == a[cell]:
+			foreign += 1
+	assert_that(foreign < a.size()).is_true()
+
+
+## Разнообразие обязано быть видно в кадре: у каждого биома, которого в кадре
+## 40×40 не меньше 20 клеток, встречаются все четыре варианта базы. У редкого
+## биома четырёх не бывает по арифметике хэша, поэтому порог и счёт по факту.
+func test_generated_frame_shows_all_four_variants() -> void:
+	var generated: Dictionary = _gen_painted(4242)
+	var painted: Dictionary = generated["painted"]
+	var terrain: Dictionary = generated["terrain"]
+	var seen: Dictionary = {}
+	var cells: Dictionary = {}
+	for cell in painted:
+		var terrain_id: int = int(terrain.get(cell, -1))
+		if not MapRenderer.TERRAIN_TO_BIOME.has(terrain_id):
+			continue
+		var biome: int = MapRenderer.TERRAIN_TO_BIOME[terrain_id]
+		if not seen.has(biome):
+			seen[biome] = {}
+		(seen[biome] as Dictionary)[painted[cell]] = true
+		cells[biome] = int(cells.get(biome, 0)) + 1
+	var roomy := 0
+	var full := 0
+	for biome in seen:
+		if int(cells[biome]) < 20:
+			continue
+		roomy += 1
+		if (seen[biome] as Dictionary).size() == TileAtlas.base_coords(biome).size():
+			full += 1
+	assert_that(roomy).is_greater(0)
+	assert_that(full).is_equal(roomy)
