@@ -110,3 +110,14 @@ func _mods(r: Dictionary) -> Dictionary:
 		if r.modifiers[k] != 0:
 			m[str(k)] = int(r.modifiers[k])  # T-123: float→int (JSON), см. _gate_reqs
 	return m
+
+func test_origin_flag_present() -> void:
+	# K-A6 (2026-10-02): водные/конструкты = флаги origin, не группы;
+	# все текущие 7 рас — наземные (origin: "land"); флаг в данных (1.0).
+	var valid_origins := ["land", "aquatic", "construct"]
+	for r in catalog.get("races", []):
+		assert_bool(bool(r.has("origin"))).override_failure_message("раса %s: нет поля origin (K-A6)" % r.id).is_true()
+		assert_bool(bool(valid_origins.has(r.origin))).override_failure_message("раса %s: origin=%s не валиден (ожидалось %s)" % [r.id, r.origin, valid_origins]).is_true()
+	# Все текущие 7 рас — наземные (водные/конструкты — миграционный горизонт каталога 54, не первый эшелон)
+	for r in catalog.get("races", []):
+		assert_bool(bool(r.origin == "land")).override_failure_message("раса %s: origin=%s, ожидалось land (первый эшелон — все наземные)" % [r.id, r.origin]).is_true()

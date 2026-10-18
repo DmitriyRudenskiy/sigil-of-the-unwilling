@@ -26,13 +26,13 @@
     {"id": "wizard", "name": "Волшебник", "key_feature": "Книга заклинаний", "source": "изучение", "gate": {"mode": "all", "reqs": [["INT", 13]]}, "hireable": true}
   ],
   "races": [
-    {"id": "gnomes", "name": "Гномы", "group": "engineers_builders", "modifiers": {"STR": 0, "DEX": 0, "CON": 0, "INT": 2, "WIS": 0, "CHA": 0}, "luck": 0, "first_tier": true},
-    {"id": "halflings", "name": "Полурослики", "group": "farmers_brewers", "modifiers": {"STR": 0, "DEX": 2, "CON": 0, "INT": 0, "WIS": 0, "CHA": 0}, "luck": 0, "first_tier": true},
-    {"id": "tieflings", "name": "Тифлинги", "group": "alchemists_flame", "modifiers": {"STR": 0, "DEX": 0, "CON": 0, "INT": 1, "WIS": 0, "CHA": 2}, "luck": 0, "first_tier": true},
-    {"id": "elves", "name": "Эльфы", "group": "weavers_crafters", "modifiers": {"STR": 0, "DEX": 2, "CON": 0, "INT": 0, "WIS": 0, "CHA": 0}, "luck": 0, "first_tier": true},
-    {"id": "humans", "name": "Люди", "group": "merchants_diplomats", "modifiers": {"STR": 0, "DEX": 0, "CON": 0, "INT": 0, "WIS": 0, "CHA": 0}, "luck": 0, "first_tier": true},
-    {"id": "dwarves", "name": "Дворфы", "group": "metallurgists_technicians", "modifiers": {"STR": 0, "DEX": 0, "CON": 2, "INT": 0, "WIS": 0, "CHA": 0}, "luck": 0, "first_tier": true},
-    {"id": "half_orcs", "name": "Полуорки", "group": "hunters_trackers", "modifiers": {"STR": 2, "DEX": 0, "CON": 1, "INT": 0, "WIS": 0, "CHA": 0}, "luck": 0, "first_tier": true}
+    {"id": "gnomes", "name": "Гномы", "group": "engineers_builders", "origin": "land", "modifiers": {"STR": 0, "DEX": 0, "CON": 0, "INT": 2, "WIS": 0, "CHA": 0}, "luck": 0, "first_tier": true},
+    {"id": "halflings", "name": "Полурослики", "group": "farmers_brewers", "origin": "land", "modifiers": {"STR": 0, "DEX": 2, "CON": 0, "INT": 0, "WIS": 0, "CHA": 0}, "luck": 0, "first_tier": true},
+    {"id": "tieflings", "name": "Тифлинги", "group": "alchemists_flame", "origin": "land", "modifiers": {"STR": 0, "DEX": 0, "CON": 0, "INT": 1, "WIS": 0, "CHA": 2}, "luck": 0, "first_tier": true},
+    {"id": "elves", "name": "Эльфы", "group": "weavers_crafters", "origin": "land", "modifiers": {"STR": 0, "DEX": 2, "CON": 0, "INT": 0, "WIS": 0, "CHA": 0}, "luck": 0, "first_tier": true},
+    {"id": "humans", "name": "Люди", "group": "merchants_diplomats", "origin": "land", "modifiers": {"STR": 0, "DEX": 0, "CON": 0, "INT": 0, "WIS": 0, "CHA": 0}, "luck": 0, "first_tier": true},
+    {"id": "dwarves", "name": "Дворфы", "group": "metallurgists_technicians", "origin": "land", "modifiers": {"STR": 0, "DEX": 0, "CON": 2, "INT": 0, "WIS": 0, "CHA": 0}, "luck": 0, "first_tier": true},
+    {"id": "half_orcs", "name": "Полуорки", "group": "hunters_trackers", "origin": "land", "modifiers": {"STR": 2, "DEX": 0, "CON": 1, "INT": 0, "WIS": 0, "CHA": 0}, "luck": 0, "first_tier": true}
   ],
   "archetype_rules": {
     "initial_satisfaction": 50,
