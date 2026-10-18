@@ -101,6 +101,10 @@ def _unfogged(img: Image.Image, keys: list[str], cells: dict, tile: int) -> list
     return [k for k, v in zip(keys, lum) if v > FOG_CUT * med]
 
 
+def _neigh_dirs(cells: dict, key: str) -> list[tuple[int, int]]:
+    return NEIGH_ODD if int(key.split(",")[1]) % 2 else NEIGH_EVEN
+
+
 def frame_checks(shot: str, cfg: dict) -> list[tuple[str, bool, str]]:
     with open(shot + ".cells.json", encoding="utf-8") as f:
         geo = json.load(f)
@@ -181,6 +185,8 @@ def frame_checks(shot: str, cfg: dict) -> list[tuple[str, bool, str]]:
         out.append(("frame/contrast", d >= float(fcfg["min_biome_contrast_de"]),
                     f"{a}↔{b} ΔE={d:.1f} по внутренности гекса "
                     f"(порог ≥{float(fcfg['min_biome_contrast_de']):.1f})"))
+
+    # — шов перехода: перо на ребре двух биомов не выбивается за тон обоих соседей (T-142) —
     return out
 
 
@@ -485,27 +491,30 @@ def _fixture_shot(cfg: dict, workdir: str) -> str:
     """Снимок-образец для frame-мер: два биома по 9×9 клеток offset-решётки.
 
     Клетки одного биома отличаются вариантом базы (ступенька тона), решётка —
-    как у живого рендера (шаг 82×123, нечётный ряд сдвинут на полшага).
+    как у живого рендера (шаг 82×123, нечётный ряд сдвинут на полшага). Блоки
+    биомов **смежные** (без столбца-щели) и **без горизонтальных щелей**: иначе в
+    образце нет ни одного общего ребра между биомами, а середина диагонального
+    ребра попадает в чёрный зазор, и `frame/edge-step` мерит не переход, а дыру.
     """
     tile, pitch_y, side = 82, 123, 9
     band = [parse_hex(t) for t in cfg["palette"]["band_m"]]
     base = {FIXTURE_BIOMES[0]: np.array(band[4], dtype=np.float64),
             FIXTURE_BIOMES[1]: np.array(band[6], dtype=np.float64)}
-    cols = side * 2 + 1
+    cols = side * 2
     rows = side
     canvas = np.zeros((rows * pitch_y + tile // 2, cols * tile + tile // 2, 3), dtype=np.uint8)
     cells, rng = {}, random.Random(7)
-    yy, xx = np.mgrid[0:tile, 0:tile].astype(np.float64) / tile
+    yy, xx = np.mgrid[0:pitch_y, 0:tile].astype(np.float64) / tile
     wave = 1.0 + 0.25 * np.sin(6 * np.pi * xx) * np.cos(6 * np.pi * yy)
     for bi, biome in enumerate(FIXTURE_BIOMES):
         for r in range(rows):
             for c in range(side):
-                col = bi * (side + 1) + c
+                col = bi * side + c
                 x = col * tile + (tile // 2 if r % 2 else 0)
                 y = r * pitch_y
                 v = rng.randrange(4)
                 rgb = (base[biome] * (1.0 + 0.14 * v) * wave[..., None]).clip(0, 255).astype(np.uint8)
-                canvas[y:y + tile, x:x + tile] = rgb
+                canvas[y:y + pitch_y, x:x + tile] = rgb
                 cells[f"{col},{r}"] = [x + tile // 2, y + tile // 2, biome]
     shot = os.path.join(workdir, "shot", "shot.png")
     os.makedirs(os.path.dirname(shot), exist_ok=True)
@@ -515,13 +524,15 @@ def _fixture_shot(cfg: dict, workdir: str) -> str:
     return shot
 
 
-def _mutate_shot(shot: str, cfg: dict, *, single_variant=False, merge_biomes=False) -> None:
+def _mutate_shot(shot: str, cfg: dict, *, single_variant=False,
+                 merge_biomes=False) -> None:
     """Мутации кадра: один вариант на биом / рампа биома сведена к соседнему."""
     with open(shot + ".cells.json", encoding="utf-8") as f:
         cells = json.load(f)["cells"]
     img = Image.open(shot).convert("RGB")
     arr = np.asarray(img, dtype=np.uint8).copy()
     tile = 82
+    pitch_y = 123
     band = [parse_hex(t) for t in cfg["palette"]["band_m"]]
     src = {(int(k.split(",")[0]), int(k.split(",")[1])): (v[0], v[1], v[2])
            for k, v in cells.items()}
@@ -530,11 +541,12 @@ def _mutate_shot(shot: str, cfg: dict, *, single_variant=False, merge_biomes=Fal
     for (col, row), (cx, cy, biome) in src.items():   # в cells.json — центры клеток
         x, y = cx - half, cy - half
         if single_variant and biome == FIXTURE_BIOMES[0]:
-            arr[y:y + tile, x:x + tile] = np.array(band[4], dtype=np.uint8)
+            arr[y:y + pitch_y, x:x + tile] = np.array(band[4], dtype=np.uint8)
         if merge_biomes and biome == FIXTURE_BIOMES[1]:
             # копия соседнего биома клетка-в-клетку: та же рампа, тот же узор
-            sx, sy, _ = src[(col - side - 1, row)]
-            arr[y:y + tile, x:x + tile] = arr[sy - half:sy + half, sx - half:sx + half]
+            sx, sy, _ = src[(col - side, row)]
+            arr[y:y + pitch_y, x:x + tile] = arr[sy - half:sy - half + pitch_y,
+                                                 sx - half:sx - half + tile]
     Image.fromarray(arr).save(shot)
 
 
