@@ -9,6 +9,21 @@ date: 2026-10-19
 
 # CHANGELOG — docs/
 
+## [2026-10-19] — dnd-battle-ladder: авто-режим + death saves margin_N (5 задач, GdUnit 2689/0)
+
+- **2.1 (скелет)**: `select_target` (min HP, тай-брейк меньший id) + `resolve_multi` (N vs M, тот же движок `_strike`/`_death_saves`) + отступление при «frightened» (outcome retreat/win). 10 тестов (test_battle_auto_ai.gd). НЕ подключено к кампании (там пока 1v1 `resolve`) — интеграция = следующий шаг.
+- **2.3**: отчёт в `resolve_multi` (outcome/rounds/trace/losses/battle_over); «один для обоих режимов» тривиально (MVP — только авто); ничья 20 раундов → потери [], без XP/Престижа. Тесты: test_resolve_multi_report_structure, test_resolve_multi_draw_20_rounds_no_xp_prestige.
+- **5.2**: death saves margin_N = mod(CON) + supply(N=1) − (N−1), ровно 3 спаса (N=1..3); 3 провала = смерть, 3 успеха = WOUNDED (не погиб), смешанный = стабилизация. supply_bonus в make_combatant (additive, default 0) — шов для SupplySystem. 4 теста.
+- **5.3**: детерминизм авто-режима, 100 повторов → byte-identical. Тест: test_resolve_multi_100_repeats_byte_identical.
+- **3.1 (верификация)**: prone/высотный уже реализованы (_state_margin: prone ±2, elevated ±2) и протестированы (test_prone_and_elevated_mask_coexist, test_elevated_defender_penalizes_attacker). «Носитель = волшебник» — data/config (класс не вшит в бой в MVP).
+- **Техдолг (неоднозначные боевые задачи, owner-verdict / TBD):**
+  - **3.3 (местность 3 типа)**: «абстрактные модификаторы ±2» — не определено, к чему применяется (атака? спас? инициатива?). Нужен owner-verdict.
+  - **3.4 (бином «Фланг»)**: «позиционный бонус fighter+ranger против одного врага» — значение бонуса не задано в каноне. Нужен owner-verdict / баланс-конфиг Ф4.
+  - **4.2 (пул ОУ)**: ручной-режим механика (Fate Shift/Save); MVP — только авто-режим, пул ОУ не используется. Отложено до ручного режима.
+  - **5.5 (мораль)**: потери = −2 ступени к спасам до конца боя; принуд. отступление при 0 HD. Требует battle-level state (потери партии) — сложнее, чем скелет. Отложено.
+  - **2.2 (AI врага)**: greedy уже есть (select_target); босс хода 21 (CR 6–8) — способность не задана в каноне (детерминированная, параметры Ф4). Нужен owner-verdict.
+  - **3.2 (Blink)**: без координат (C-3) — blink не имеет смысла в чистой лестнице. Отложено до вердикта C-3.
+
 ## [2026-10-18] — Одиннадцатый круг: мерж исполнен; две мои коррекции (свои 355 вместо 432; у 17-й меры нет теста)
 
 - **`tool/lint-line-t141` смержен в `main`** (`01f69f6d`, два родителя, аддитивность сверена
