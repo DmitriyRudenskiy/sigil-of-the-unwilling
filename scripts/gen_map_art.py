@@ -339,6 +339,24 @@ def assemble() -> int:
         bases.setdefault(r["biome"], []).append(base)
         first_path.setdefault(r["biome"], r["path"])
 
+    # Средний тон вариантов одного биома выравнивается к общему (T-143, глазной вердикт
+    # 11.3 «налепанные заплаты»): `variant_shift` сдвигает пороги рампы, отчего среднее
+    # L* уезжает на 3…13 ΔE, и карта собирается из тоновых заплат с прямым швом по
+    # ребру клетки. Выравнивается именно среднее: низкочастотное пятно (`mottle`) и
+    # зерно — то, чем варианты различаются по-настоящему, — остаются нетронутыми, и
+    # подписи гейтов продолжают их видеть (замер по текущему атласу: после
+    # выравнивания `atlas/distinct` 8×8 и подпись `frame/variety` 4×4 — 1.00,
+    # попиксельный ΔE между вариантами 8…28).
+    for biome, vs in bases.items():
+        labs = [PB.rgb_to_lab(np.asarray(v.convert("RGB"), dtype=np.float64) / 255.0)
+                for v in vs]
+        target = np.mean([l.reshape(-1, 3).mean(0) for l in labs], axis=0)
+        for v, l in zip(vs, labs):
+            rgb = lab_to_rgb(l - (l.reshape(-1, 3).mean(0) - target)) * 255.0
+            fixed = Image.fromarray(rgb.round().astype(np.uint8), "RGB").convert("RGBA")
+            fixed.putalpha(v.split()[3])
+            v.paste(fixed, (0, 0))
+
     # Декаль границы один на биом: он про форму края, а не про вариативность заполнения.
     for biome, variants in bases.items():
         mean = Image.fromarray(

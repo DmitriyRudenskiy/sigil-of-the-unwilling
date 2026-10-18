@@ -37,6 +37,7 @@ from measure_palette_band import (  # noqa: E402  (общая метрика п�
     kmeans,
     load_pixels,
     parse_hex,
+    rgb_to_lab,
     tone_lab,
 )
 
@@ -238,6 +239,28 @@ def atlas_checks(manifest_path: str, cfg: dict) -> list[tuple[str, bool, str]]:
     out.append(("atlas/distinct", share >= float(acfg["min_distinct_share"]),
                 f"различных базовых тайлов {share:.2f} (порог "
                 f"≥{float(acfg['min_distinct_share']):.2f})"))
+
+    # — тон вариантов: варианты одного биома не имеют права различаться СРЕДНИМ тоном.
+    # Разница средних — это не «разнообразие», а тоновая заплата с прямым швом по
+    # ребру клетки (T-143, глазной вердикт 11.3 «налепанные заплаты»): на кадре такой
+    # шаг неотличим от внутренней полосы тайла (замер: контроль A|A p90 13.8 против
+    # теста A|B p90 14.1), поэтому он меряется по атласу, где контроль тривиален.
+    # Разнообразие оставляют низкочастотное пятно и зерно — они здесь не меряются.
+    tone: dict[str, list[np.ndarray]] = {}
+    for c in bases:
+        lab_tile = rgb_to_lab(cell_image(c["atlas"]).astype(np.float64) / 255.0)
+        tone.setdefault(c["biome"], []).append(lab_tile.reshape(-1, 3).mean(0))
+    worst_biome, worst_de = "", 0.0
+    for biome, means in tone.items():
+        for i in range(len(means)):
+            for j in range(i + 1, len(means)):
+                d = float(de76(means[i], means[j]))
+                if d > worst_de:
+                    worst_biome, worst_de = biome, d
+    limit = float(acfg["max_variant_tone_de"])
+    out.append(("atlas/variant-tone", worst_de <= limit,
+                f"макс. ΔE средних тонов вариантов одного биома: {worst_de:.1f} "
+                f"({worst_biome}) при пороге ≤{limit:.1f}"))
 
     flat = [c for c in bases if float(cell_image(c["atlas"]).std()) < float(acfg["min_cell_std"])]
     out.append(("atlas/not-flat", not flat,
@@ -450,7 +473,10 @@ def _fixture(cfg: dict, workdir: str) -> str:
     for i, biome in enumerate(FIXTURE_BIOMES):
         for v in range(4):
             x, y = (i * 4 + v) % cols, (i * 4 + v) // cols
-            put(x, y, opaque(tone(wave * (0.2 + 0.2 * v) + 0.06 * v + 0.13 * i)))
+            # варианты различаются структурой узора (амплитуда волны), но НЕ средним
+            # тоном: `atlas/variant-tone` требует равных средних, иначе «чистый
+            # образец» сам нарушает тот гард, который обязан ловить мутацией
+            put(x, y, opaque(tone(0.5 + (wave - 0.5) * (0.2 + 0.2 * v) + 0.13 * i)))
             cells.append({"id": f"base_{biome}_{v}", "kind": "base", "biome": biome,
                           "variant": v, "atlas": [x, y], "src_box": [0, 0, 400, 400]})
         for d, side in enumerate(FIXTURE_SIDES):
@@ -587,6 +613,10 @@ def self_test(cfg: dict) -> int:
              lambda: _mutate(atlas, drop_edge=True)),
             ("atlas/decal-tone", "предумножить RGB декаля на альфу",
              lambda: _mutate(atlas, premultiply=True)),
+            ("atlas/variant-tone", "разнести варианты по среднему тону",
+             lambda: _mutate(atlas, variant_tone=True)),
+            ("atlas/distinct", "свернуть все варианты в один",
+             lambda: _mutate(atlas, collapse_variants=True)),
             ("frame/variety", "оставить один вариант на биом",
              lambda: _mutate_shot(shot, cfg, single_variant=True)),
             ("frame/contrast", "свести рампу биома к соседней",
@@ -606,7 +636,8 @@ def self_test(cfg: dict) -> int:
 
 
 def _mutate(root: str, *, shift_edges=False, src_box=None, fill=False,
-            repaint=None, punch=False, drop_edge=False, premultiply=False) -> None:
+            repaint=None, punch=False, drop_edge=False, premultiply=False,
+            variant_tone=False, collapse_variants=False) -> None:
     """Одна мутация образца: пиксели и/или манифест."""
     manifest = os.path.join(root, os.path.basename(root) + ".json")
     with open(manifest, encoding="utf-8") as f:
@@ -620,7 +651,8 @@ def _mutate(root: str, *, shift_edges=False, src_box=None, fill=False,
     if drop_edge:
         data["cells"] = [c for c in data["cells"] if not (
             c.get("kind") == "edge" and c.get("side") == "e")]
-    if repaint is not None or punch or fill or shift_edges or premultiply:
+    if (repaint is not None or punch or fill or shift_edges or premultiply or variant_tone
+            or collapse_variants):
         arr = np.asarray(img.convert("RGBA")).copy()
         for c in data["cells"]:
             x, y = int(c["atlas"][0]) * tile, int(c["atlas"][1]) * tile
@@ -638,11 +670,28 @@ def _mutate(root: str, *, shift_edges=False, src_box=None, fill=False,
                 cell[..., 3] = a * 255.0
                 cell[..., :3] *= a[..., None]
                 arr[y:y + tile, x:x + tile] = np.rint(cell).astype(np.uint8)
+            if variant_tone and c.get("kind") == "base":
+                # тот же дефект, что чинит T-143: варианты одного биома разъезжаются
+                # средним тоном (полярность по чётности варианта), пятно и зерно целы
+                f = 1.18 if int(c.get("variant", 0)) % 2 else 0.86
+                cell = arr[y:y + tile, x:x + tile, :3].astype(np.float64) * f
+                arr[y:y + tile, x:x + tile, :3] = np.clip(cell, 0, 255).astype(np.uint8)
             if shift_edges and c.get("kind") == "base":
                 # кромка перестаёт продолжать противоположную (сдвиг окна кроя из
                 # не-бесшовного материала); циклический сдвиг гард не ловит — он бесшовен
                 arr[y:y + tile, x:x + 6, :3] = 255 - arr[y:y + tile, x:x + 6, :3]
         img = Image.fromarray(arr)
+        if collapse_variants:
+            # «все варианты свёрнуты в один»: клетка варианта копируется в нулевой
+            # вариант своего биома побайтово — атлас теряет разнообразие по-настоящему
+            first = {c["biome"]: c["atlas"] for c in data["cells"]
+                     if c.get("kind") == "base" and int(c.get("variant", 0)) == 0}
+            for c in data["cells"]:
+                if c.get("kind") == "base" and int(c.get("variant", 0)) > 0:
+                    sx, sy = first[c["biome"]]
+                    x, y = int(c["atlas"][0]) * tile, int(c["atlas"][1]) * tile
+                    arr[y:y + tile, x:x + tile] = arr[sy * tile:sy * tile + tile,
+                                                      sx * tile:sx * tile + tile]
         img.save(path, lossless=True)
     with open(manifest, "w", encoding="utf-8") as f:
         json.dump(data, f)
