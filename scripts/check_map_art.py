@@ -28,9 +28,10 @@ import sys
 from collections import Counter
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFilter
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from gen_map_art import hex_mask          # noqa: E402  геометрия клетки — одна на генератор и гейт
 from measure_palette_band import (  # noqa: E402  (общая метрика палитры §4.6)
     DOM_SHARE,
     de76,
@@ -212,6 +213,7 @@ def atlas_checks(manifest_path: str, cfg: dict) -> list[tuple[str, bool, str]]:
     image_path = os.path.join(os.path.dirname(manifest_path), manifest["image"])
     full = Image.open(image_path)
     img = full.convert("RGB")
+    rgba = full.convert("RGBA")
     tile = int(manifest["tile"])
     out: list[tuple[str, bool, str]] = []
     acfg = cfg["atlas"]
@@ -223,6 +225,20 @@ def atlas_checks(manifest_path: str, cfg: dict) -> list[tuple[str, bool, str]]:
     def signature(atlas_xy) -> bytes:
         small = Image.fromarray(cell_image(atlas_xy)).resize((PATCH, PATCH), Image.BOX)
         return (np.asarray(small, dtype=np.uint8) >> (8 - COLOR_BITS)).astype(np.uint8).tobytes()
+
+    # Видимая часть базового тайла — гекс движка, а не квадрат 82×82: под
+    # прозрачными углами webp хранит обнулённый (premultiplied) RGB, и тон,
+    # дисперсия и шов, померенные по квадрату, считают мусор вместо карты.
+    hex_in = np.asarray(Image.fromarray(np.asarray(hex_mask(tile), dtype=np.uint8))
+                        .filter(ImageFilter.MinFilter(5))) > 0
+    hex_out = np.asarray(Image.fromarray(np.asarray(hex_mask(tile), dtype=np.uint8))
+                         .filter(ImageFilter.MaxFilter(5))) < 250
+
+    def cell_hex(atlas_xy) -> np.ndarray:
+        """RGB видимых пикселей клетки: (N,3)."""
+        x, y = int(atlas_xy[0]) * tile, int(atlas_xy[1]) * tile
+        cell = np.asarray(rgba.crop((x, y, x + tile, y + tile)))
+        return cell[hex_in][:, :3]
 
     bases = [c for c in manifest["cells"] if c["kind"] == "base"]
     by_biome: dict[str, list] = {}
@@ -248,7 +264,7 @@ def atlas_checks(manifest_path: str, cfg: dict) -> list[tuple[str, bool, str]]:
     # Разнообразие оставляют низкочастотное пятно и зерно — они здесь не меряются.
     tone: dict[str, list[np.ndarray]] = {}
     for c in bases:
-        lab_tile = rgb_to_lab(cell_image(c["atlas"]).astype(np.float64) / 255.0)
+        lab_tile = rgb_to_lab(cell_hex(c["atlas"]).astype(np.float64) / 255.0)
         tone.setdefault(c["biome"], []).append(lab_tile.reshape(-1, 3).mean(0))
     worst_biome, worst_de = "", 0.0
     for biome, means in tone.items():
@@ -262,7 +278,8 @@ def atlas_checks(manifest_path: str, cfg: dict) -> list[tuple[str, bool, str]]:
                 f"макс. ΔE средних тонов вариантов одного биома: {worst_de:.1f} "
                 f"({worst_biome}) при пороге ≤{limit:.1f}"))
 
-    flat = [c for c in bases if float(cell_image(c["atlas"]).std()) < float(acfg["min_cell_std"])]
+    flat = [c for c in bases
+            if float(cell_hex(c["atlas"]).std()) < float(acfg["min_cell_std"])]
     out.append(("atlas/not-flat", not flat,
                 f"плоских (дисперсия <{float(acfg['min_cell_std']):.1f}): {len(flat)}"
                 + (f" — {flat[:4]}" if flat else "")))
@@ -302,31 +319,43 @@ def atlas_checks(manifest_path: str, cfg: dict) -> list[tuple[str, bool, str]]:
                 f"{len(thin_src)}" + (f" — {thin_src[:3]}" if thin_src else "")
                 + (f"; без источника {len(no_src)}" if no_src else "")))
 
-    # — бесшовность базы: противоположные кромки тайла обязаны продолжаться (wrap-крой) —
+    # — бесшовность базы: противоположные кромки тайла обязаны продолжаться (wrap-крой).
+    # Меряется только вертикальная пара сторон: у гекса с остриём сверху рёбра W/E
+    # лежат на кромках тайла, а остальные четыре сходятся в вершины, то есть
+    # «верх↔низ» в пространстве тайла больше не общее ребро (T-143).
     seams = []
     for c in bases:
-        cell = np.asarray(Image.fromarray(cell_image(c["atlas"])).convert("RGB"), dtype=np.int16)
-        lr = float(np.abs(cell[:, 0] - cell[:, -1]).mean())
-        tb = float(np.abs(cell[0] - cell[-1]).mean())
-        if max(lr, tb) > float(cfg["atlas"]["max_seam_mad"]):
-            seams.append(f"{c['id']}({max(lr, tb):.0f})")
+        x, y = int(c["atlas"][0]) * tile, int(c["atlas"][1]) * tile
+        cell = np.asarray(rgba.crop((x, y, x + tile, y + tile)), dtype=np.int16)
+        both = (cell[:, 0, 3] >= 250) & (cell[:, -1, 3] >= 250)
+        lr = float(np.abs(cell[both, 0, :3] - cell[both, -1, :3]).mean()) if both.any() else 0.0
+        if lr > float(cfg["atlas"]["max_seam_mad"]):
+            seams.append(f"{c['id']}({lr:.0f})")
     out.append(("atlas/seamless", not seams,
-                f"рваных швов {len(seams)} из {len(bases)} (порог "
+                f"рваных швов {len(seams)} из {len(bases)} на сторонах W/E (порог "
                 f"{float(cfg['atlas']['max_seam_mad']):.0f} MAD)"
                 + (f" — {seams[:4]}" if seams else "")))
 
-    # — непрозрачность базы: база закрывает клетку целиком, иначе под ней дыра —
-    rgba = full.convert("RGBA")
-    holes = []
-    for c in bases:
+    # — форма клетки: каждый тайл атласа обязан быть вырезан тем же гексом, что
+    # рисует движок. Квадратная (непрозрачная по всему кваду) клетка в гекс-
+    # тайлсете красит прямые углы поверх соседей: ряды кладутся с шагом 3/4 высоты,
+    # квады наезжают, и по карте идёт сетка прямоугольников (T-143, глазной вердикт
+    # 11.3 «налепанные заплаты»). Меряются и базы, и декали границы — дефект один.
+    bad = []
+    for c in manifest["cells"]:
         x, y = int(c["atlas"][0]) * tile, int(c["atlas"][1]) * tile
         alpha = np.asarray(rgba.crop((x, y, x + tile, y + tile)))[:, :, 3]
-        if float((alpha >= 250).mean()) < float(cfg["atlas"]["min_base_opacity"]):
-            holes.append(c["id"])
-    out.append(("atlas/base-opaque", not holes,
-                f"прозрачных баз {len(holes)} из {len(bases)} (порог "
-                f"{float(cfg['atlas']['min_base_opacity']):.2f} непрозрачных пикселей)"
-                + (f" — {holes[:4]}" if holes else "")))
+        opaque = float(alpha[hex_in].mean()) / 255.0 >= float(cfg["atlas"]["min_base_opacity"])
+        corner = float(alpha[hex_out].max()) <= float(cfg["atlas"]["max_base_corner_alpha"])
+        # Внутри гекса декаль обязан полупрозрачным пером — это его природа
+        # (`atlas/decal-tone`), поэтому требовать от него непрозрачности нельзя.
+        if not corner or (c["kind"] == "base" and not opaque):
+            bad.append(c["id"])
+    out.append(("atlas/hex-shape", not bad,
+                f"клеток вне гекса {len(bad)} из {len(manifest['cells'])} (порог "
+                f"{float(cfg['atlas']['min_base_opacity']):.2f} непрозрачных внутри гекса, "
+                f"угол ≤{float(cfg['atlas']['max_base_corner_alpha']):.0f})"
+                + (f" — {bad[:4]}" if bad else "")))
 
     # — замыкание переходов: у каждого биома все шесть направлений (см. test_tile_transitions) —
     # Словарь сторон = рёбра остроконечного шестиугольника: сетка odd-r
@@ -467,8 +496,10 @@ def _fixture(cfg: dict, workdir: str) -> str:
         target = obj_canvas if on_objects else canvas
         target[y * tile:(y + 1) * tile, x * tile:(x + 1) * tile] = rgba
 
-    def opaque(rgb: np.ndarray) -> np.ndarray:
-        return np.dstack([rgb, np.full(rgb.shape[:2], 255, dtype=np.uint8)])
+    def hexed(rgb: np.ndarray) -> np.ndarray:
+        """База образца — гексом, как её рисует движок (иначе «чистый образец»
+        сам нарушает `atlas/base-hex`)."""
+        return np.dstack([rgb, np.asarray(hex_mask(rgb.shape[0]), dtype=np.uint8)])
 
     for i, biome in enumerate(FIXTURE_BIOMES):
         for v in range(4):
@@ -476,12 +507,12 @@ def _fixture(cfg: dict, workdir: str) -> str:
             # варианты различаются структурой узора (амплитуда волны), но НЕ средним
             # тоном: `atlas/variant-tone` требует равных средних, иначе «чистый
             # образец» сам нарушает тот гард, который обязан ловить мутацией
-            put(x, y, opaque(tone(0.5 + (wave - 0.5) * (0.2 + 0.2 * v) + 0.13 * i)))
+            put(x, y, hexed(tone(0.5 + (wave - 0.5) * (0.2 + 0.2 * v) + 0.13 * i)))
             cells.append({"id": f"base_{biome}_{v}", "kind": "base", "biome": biome,
                           "variant": v, "atlas": [x, y], "src_box": [0, 0, 400, 400]})
         for d, side in enumerate(FIXTURE_SIDES):
             x, y = (i * 6 + d) % cols, (i * 6 + d) // cols + 2
-            put(x, y, opaque(tone(wave * 0.6 + 0.2 * d / 6 + 0.1 * i)))
+            put(x, y, hexed(tone(wave * 0.6 + 0.2 * d / 6 + 0.1 * i)))
             cells.append({"id": f"edge_{biome}_{side.lower()}", "kind": "edge",
                           "biome": biome, "side": side.lower(), "atlas": [x, y]})
 
@@ -607,8 +638,10 @@ def self_test(cfg: dict) -> int:
              lambda: _mutate(objects, fill=True)),
             ("atlas/palette", "подменить носитель полосы",
              lambda: _mutate(atlas, repaint=(255, 0, 128))),
-            ("atlas/base-opaque", "пробить базу насквозь",
+            ("atlas/hex-shape", "пробить базу насквозь",
              lambda: _mutate(atlas, punch=True)),
+            ("atlas/hex-shape", "вернуть квадратную базу",
+             lambda: _mutate(atlas, square=True)),
             ("atlas/edge-closure", "снять переход",
              lambda: _mutate(atlas, drop_edge=True)),
             ("atlas/decal-tone", "предумножить RGB декаля на альфу",
@@ -637,7 +670,7 @@ def self_test(cfg: dict) -> int:
 
 def _mutate(root: str, *, shift_edges=False, src_box=None, fill=False,
             repaint=None, punch=False, drop_edge=False, premultiply=False,
-            variant_tone=False, collapse_variants=False) -> None:
+            variant_tone=False, collapse_variants=False, square=False) -> None:
     """Одна мутация образца: пиксели и/или манифест."""
     manifest = os.path.join(root, os.path.basename(root) + ".json")
     with open(manifest, encoding="utf-8") as f:
@@ -652,7 +685,7 @@ def _mutate(root: str, *, shift_edges=False, src_box=None, fill=False,
         data["cells"] = [c for c in data["cells"] if not (
             c.get("kind") == "edge" and c.get("side") == "e")]
     if (repaint is not None or punch or fill or shift_edges or premultiply or variant_tone
-            or collapse_variants):
+            or collapse_variants or square):
         arr = np.asarray(img.convert("RGBA")).copy()
         for c in data["cells"]:
             x, y = int(c["atlas"][0]) * tile, int(c["atlas"][1]) * tile
@@ -660,6 +693,10 @@ def _mutate(root: str, *, shift_edges=False, src_box=None, fill=False,
                 arr[y:y + tile, x:x + tile, :3] = repaint
             if punch and c.get("kind") == "base":
                 arr[y:y + tile, x:x + tile, 3] = 0
+            if square:
+                # регресс T-143: клетка снова непрозрачна по всему кваду — движок
+                # рисует её квадратом, и по карте идёт сетка прямоугольников
+                arr[y:y + tile, x:x + tile, 3] = 255
             if fill:
                 arr[y:y + tile, x:x + tile] = (10, 20, 30, 255)
             if premultiply and c.get("kind") == "edge":

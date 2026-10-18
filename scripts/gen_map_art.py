@@ -23,7 +23,7 @@ import zlib
 from pathlib import Path
 
 import numpy as np
-from PIL import Image, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts" / "concept_art"))
@@ -50,7 +50,26 @@ VARIANT = SPEC["variants"][0]
 UNSCHARP = ImageFilter.UnsharpMask(radius=1.2, percent=120, threshold=2)
 # Эксперимент T-138 (глазной A/B по глубине ямы зерна); 0 — атлас побайтово прежний.
 GRAIN_INJECT = float(os.environ.get("GRAIN_INJECT", "0"))
-WRAP_BAND = 128        # ширина зашивки шва на исходнике 1024 (на 82 px — ~10 px)
+WRAP_BAND = 32         # ширина зашивки шва на исходнике 1024 (на 82 px — ~2.5 px)
+WRAP_TILE_BAND = 3     # то же на тайле 82 px после квантования
+
+
+def hex_mask(size: int = TILE) -> Image.Image:
+    """Альфа клетки атласа (базы и декаля границы): гекс с остриём сверху в коробке size×size.
+
+    Движок кладёт тайлы как `TILE_SHAPE_HEXAGON` (tile_atlas.gd:build_hex), но рисует
+    каждый тайл квадратным квадом: ряды идут с шагом 3/4 высоты, поэтому квады
+    соседних рядов наезжают друг на друга на 1/4. Непрозрачная квадратная база
+    в таких условиях рисует поверх соседей прямые углы — на карте это сетка
+    прямоугольников поверх гексов (глазной вердикт 11.3 «налепанные заплаты»,
+    T-143). Угловые треугольники обязаны быть прозрачными.
+    """
+    m = Image.new("L", (size, size), 0)
+    ImageDraw.Draw(m).polygon([
+        (size / 2, 0), (size, size / 4), (size, size * 3 / 4),
+        (size / 2, size), (0, size * 3 / 4), (0, size / 4)], fill=255)
+    return m
+
 FEATHER = 0.22         # доля тайла, на которой утоняется декаль границы
 SIDES = ("e", "ne", "nw", "w", "sw", "se")   # стороны остроконечного шестиугольника
 
@@ -243,7 +262,7 @@ def tile_from(frame: Path, ramp: list[str], shift: float = 0.0,
     # единицы L. Пока яркость была живописной, это никого не волновало; квантиль рампы
     # ставит порог в середину гистограммы, и те же доли единицы переворачивают тон на
     # всей кромке — 18 швов из 32 при пороге 24 MAD.
-    im = Image.fromarray(make_wrap(t, band=10))
+    im = Image.fromarray(make_wrap(t, band=WRAP_TILE_BAND))
     return im.convert("RGBA")   # маска paste() обязана иметь альфу
 
 
@@ -346,13 +365,16 @@ def assemble() -> int:
     # зерно — то, чем варианты различаются по-настоящему, — остаются нетронутыми, и
     # подписи гейтов продолжают их видеть (замер по текущему атласу: после
     # выравнивания `atlas/distinct` 8×8 и подпись `frame/variety` 4×4 — 1.00,
-    # попиксельный ΔE между вариантами 8…28).
+    # попиксельный ΔE между вариантами 8…28). Среднее берётся по гексу движка,
+    # а не по квадрату 82×82: глаз видит гекс, угловые треугольники не рисуются.
+    hex_in = np.asarray(hex_mask()) > 0
     for biome, vs in bases.items():
         labs = [PB.rgb_to_lab(np.asarray(v.convert("RGB"), dtype=np.float64) / 255.0)
                 for v in vs]
-        target = np.mean([l.reshape(-1, 3).mean(0) for l in labs], axis=0)
-        for v, l in zip(vs, labs):
-            rgb = lab_to_rgb(l - (l.reshape(-1, 3).mean(0) - target)) * 255.0
+        means = [l[hex_in].reshape(-1, 3).mean(0) for l in labs]
+        target = np.mean(means, axis=0)
+        for v, l, mean in zip(vs, labs, means):
+            rgb = lab_to_rgb(l - (mean - target)) * 255.0
             fixed = Image.fromarray(rgb.round().astype(np.uint8), "RGB").convert("RGBA")
             fixed.putalpha(v.split()[3])
             v.paste(fixed, (0, 0))
@@ -369,9 +391,15 @@ def assemble() -> int:
                 first_path[biome])
 
     sheet = Image.new("RGBA", (8 * TILE, math.ceil(len(tiles) / 8) * TILE), (0, 0, 0, 0))
+    mask = hex_mask()
     for i, t in enumerate(tiles):
+        t = t.convert("RGBA")
+        # И база, и декаль границы — гексом: движок рисует каждый тайл квадратным
+        # квадом, а ряды идут с шагом 3/4 высоты, поэтому непрозрачные углы
+        # наезжают на соседей и рисуют на карте сетку прямоугольников (T-143).
+        t.putalpha(Image.fromarray(np.minimum(np.asarray(mask), np.asarray(t.split()[3]))))
         # Без маски (см. cut_object): paste(src, pos, src) предумножил бы RGB на альфу.
-        sheet.paste(t.convert("RGBA"), ((i % 8) * TILE, (i // 8) * TILE))
+        sheet.paste(t, ((i % 8) * TILE, (i // 8) * TILE))
     ATLAS_IMG.parent.mkdir(parents=True, exist_ok=True)
     sheet.save(ATLAS_IMG, "WEBP", quality=QUALITY, lossless=LOSSLESS)
     ATLAS_JSON.write_text(json.dumps({
