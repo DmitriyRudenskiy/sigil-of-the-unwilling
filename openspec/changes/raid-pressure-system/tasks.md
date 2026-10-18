@@ -15,7 +15,7 @@
 - [x] 2.1 Per-ресурсные капы (T-127): еда ≤40%, железо/оружие ≤30% за рейд (в пределах хода) — `threat_system.gd` (замена единого `loss_cap_fraction = 0.3`). *(Сделано: `loss_caps` {food 0.4, wood/iron 0.3} в raids.json + `loss_cap_for(resource)`; дефолт для неизвестного ресурса = `loss_cap_per_day`. Кап per-рейд. 3 теста.)*
 - [x] 2.2 Cooldown ×2 при «все районы разрушены» (город выживает: производство −50%, частота −50%). *(Сделано: `effective_cooldown(all_ruined)` = cooldown_turns×2; флаг `all_districts_destroyed` в threat-context (composition: все 7 групп без зданий). «Город выживает» гарантировано (defeat = только wipe партии / все запасы ≤0). «Production −50%» — при нуле зданий производство уже 0; явный −50% к базовому производству — за срезом (нет базового производства вне зданий в MVP). 2 теста.)*
 - [ ] 2.3 EC: рейд по зданию на ремонте → ×0.5 к RUINED; рейд по клетке героя → бой, победа → −50% последствий.
-- [ ] 2.4 Герой в городе → бой (CR 1/2/6); герой в походе → авто-рейд (defense = здания 13.3) — проверить/добавить в `threat_system.gd`.
+- [x] 2.4 Герой в городе → бой (CR 1/2/6); герой в походе → авто-рейд (defense = здания 13.3) — проверить/добавить в `threat_system.gd`. *(Верифицировано: уже реализовано — `_resolve_raid`: hero → `battle_requested=true` + battle_handler (CR по фазам, шов T-050); hero=false → авто-рейд (R5, только loss). defense = `defense_barracks` (0.2) при казарме, иначе 0 (R6; стены/прочие здания — Post-MVP). Тест: `test_hero_in_city_battle_request`.)*
 
 ## 3. Синк (C-5, C-17)
 
@@ -28,5 +28,5 @@
 - [ ] 4.2 GdUnit4: тиры (пороги 30/100/250; power 15/30/60; defense барраки 0.2).
 - [x] 4.3 GdUnit4: per-ресурсные капы (еда ≤40%, железо/оружие ≤30%). *(test_threat_system: test_per_resource_caps, test_per_resource_cap_food_vs_iron, test_cap_only_when_loss_exceeds.)*
 - [ ] 4.4 GdUnit4: директивы (первый ≈ ход 7; финальный к ходу 21; floor не ломается).
-- [ ] 4.5 GdUnit4: AFK-каскад (капы per-рейд; все районы разрушены → город выживает).
+- [x] 4.5 GdUnit4: AFK-каскад (капы per-рейд; все районы разрушены → город выживает). *(test_threat_system: test_afk_cascade_no_chain_collapse — 10 рейдов tier 3 подряд, запасы не уходят в минус (кап per-рейд); + cooldown ×2 из 2.2.)*
 - [ ] 4.6 GdUnit4: зима (enemy_mult 1.25; production_mult 0.4).

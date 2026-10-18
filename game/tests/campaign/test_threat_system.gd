@@ -367,6 +367,25 @@ func test_cap_only_when_loss_exceeds() -> void:
 	assert_that(bool(r["raid"]["cap_applied"])).is_equal(false)
 
 
+## raid-pressure 4.5: AFK-каскад — капы per-рейд предотвращают chain collapse.
+## Много рейдов подряд: запасы не уходят в минус (кап per-рейд ограничивает урон).
+func test_afk_cascade_no_chain_collapse() -> void:
+	var ts := _new_ts()
+	var stocks: Dictionary = {"food": 50.0, "wood": 50.0, "iron": 50.0}
+	# 10 рейдов подряд (tier 3, power 60) — без капа запасы ушли бы в минус.
+	for i in range(10):
+		ts.wave = {"tier": 3, "power": 60.0, "target": "food", "camp_id": "x",
+			"turns_to_arrival": 0, "forced": false}
+		ts.process_turn(10 + i, {"stocks": stocks, "has_barracks": false,
+			"hero_in_city": false})
+		# Инвариант: запасы не уходят в минус (кап per-рейд).
+		assert_float(stocks["food"]).is_greater(-1e-9) \
+			.override_failure_message("food ушёл в минус на рейде %d" % i)
+	# После серии рейдов food > 0 (кап ограничивает урон, city выживает).
+	assert_float(stocks["food"]).is_greater(0.0) \
+		.override_failure_message("food = 0 после AFK-каскада (chain collapse)")
+
+
 ## raid-pressure 2.2 (K-R3): «все районы разрушены» → cooldown ×2 (частота −50%).
 func test_cooldown_doubled_when_all_districts_ruined() -> void:
 	# Базовый cooldown (не все разрушены) = cooldown_turns (3).
