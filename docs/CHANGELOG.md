@@ -65,6 +65,12 @@ date: 2026-10-19
   4.5: тест AFK-каскада (chain collapse не происходит). 2.4 верифицировано (hero→бой/авто-рейд
   уже в коде). Часть 1 (здание на ремонте → ×0.5 к RUINED) — отложена (building-level targeting
   за срезом MVP). GdUnit **2669/0** (local).
+- **raid-pressure-system 4.1/4.2/4.4/4.6 + 3.1/3.2** (верификация + синк; `feat/raid-verification-tests` → `c4011796`, `feat/raid-c5-c17-sync` → `a38e1488`):
+  4.1/4.2/4.4/4.6 — верификационные тесты (Wealth clamp, Region_History-рост, тиры/оборона,
+  директивы, зима) — GdUnit **2672/0**. 3.1/3.2 — синк C-5/C-17: инертные ключи raids.json
+  пометены `_note_target` («1.0, не читается»), формула цели синхронизирована (argmin, Q-M30 (б));
+  C-5/C-17 → разрешены. **raid-pressure-system завершён** (18 done, 1 partial — 2.3 часть 1
+  отложена, 0 open).
 - **raid-pressure-system 2.2 Cooldown ×2** (K-R3; `feat/raid-cooldown-x2` → `44e0d0df`):
   `ThreatSystem.effective_cooldown(all_ruined)` = `cooldown_turns×2` (частота рейдов −50%);
   флаг `all_districts_destroyed` в threat-context (composition: все 7 канон-групп без зданий);
