@@ -21,8 +21,8 @@ date: 2026-10-18
 | `game/run_tests.sh` → GdUnit4 (headless) | **279 сьютов, 2669 кейсов, 0 ошибок, 0 провалов, 0 flaky, 2 skipped, 0 сирот, exit 0**; ORPHAN-GATE OK |
 | `game/run_tests.sh` → MCP e2e (живой Godot, Xvfb) | **40 passed / 1 skipped / 0 failed** (268 с) |
 | `scripts/check_map_art.py` (файлы) | `GATE=0` — 14 мер, 1 явно пропущена (`frame/*` без `--shot`) |
-| `scripts/check_map_art.py --shot` (кадр живого рендера) | круга 14: **18 мер, 1 FAIL** — `frame/edge-step` 9.9 ΔE при пороге 5.0 (**T-142**), `GATE=1`; до новой меры тот же кадр был 17/17 |
-| `scripts/check_map_art.py --self-test` | **11/11** мутаций пойманы (в т.ч. «выбить перо перехода за тон обоих соседей») |
+| `scripts/check_map_art.py --shot` (кадр живого рендера) | круга 15: **17 мер, GATE=0** на `edge-step-t142.png`; `frame/edge-step` круга 14 **отозвана** — контроль по рёбрам одного биома (max 19.0) выше измеряемого шва (max 9.9), см. [[BASELINE]] и **T-142** |
+| `scripts/check_map_art.py --self-test` | **10/10** мутаций пойманы (мутация «выбить перо перехода» снята вместе с мерой) |
 | `scripts/check_asset_provenance.py` | зелёный, 439/439, охват печатается сам |
 | `python3 scripts/check_docs_links.py` | OK (91 заметка) |
 | `openspec validate world-map-art-variety --strict` | valid |
@@ -104,7 +104,7 @@ date: 2026-10-18
 | шов декали ΔE(перо ↔ носимый тон), медиана / худший | 6.7 / 20.5 | **3.6 / 11.6** | `review-t136/`, `measure_decal_seam.py` |
 | Δgrain перо ↔ своя клетка (та же ткань) | — | **0.80×** при контроле **0.98×** (760 пар) | `review-t136/REVIEW.md` |
 | контроль «полосы нет» (однородная ткань) | — | 0.98× (норма 0.9–1.1) | там же |
-| приёмка кадра живого рендера | 17/17 на круге 11 | круга 14: **18 мер, 1 FAIL** (`frame/edge-step`, T-142) | `check_map_art.py --shot`, носитель `edge-step-t142.png` |
+| приёмка кадра живого рендера | 17/17 на круге 11 | круга 15: **17/17**, но про шов это не утверждает ничего (мера отозвана, T-142 открыт) | `check_map_art.py --shot`, носитель `edge-step-t142.png` |
 | туман в кадре | флаг был no-op | `fog_cells=1563/1600`, `quit(4)` при нуле | `map_shot.gd`, D-207 |
 | атлас (носитель) | — | md5 `aa628cc2d1e2d4f22ec8e76f784a60fd` | §9.1 арт-библии |
 | лист объектов (носитель) | — | md5 `8fd69c61331e15a76e7209db6a175138` | там же |

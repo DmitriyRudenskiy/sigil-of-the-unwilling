@@ -55,7 +55,6 @@ CELL_CROP = 0.6
 CELL_PATCH = 4     # подпись variety: 4×4 по 4 бита — шум webp не расщепляет один тайл
 CELL_BITS = 4
 FOG_CUT = 0.75     # клетка темнее 0.75·медианы биома — туман войны, а не другой тайл
-EDGE_BAND = 0.18   # доля тайла: ширина полосы пера на ребре (0.18 × 82 ≈ 15 px)
 
 # смещения соседей offset-рядов (odd_row_shift_right=true — калибровка HexGrid)
 NEIGH_EVEN = [(1, 0), (0, -1), (-1, -1), (-1, 0), (-1, 1), (0, 1)]
@@ -104,75 +103,6 @@ def _unfogged(img: Image.Image, keys: list[str], cells: dict, tile: int) -> list
 
 def _neigh_dirs(cells: dict, key: str) -> list[tuple[int, int]]:
     return NEIGH_ODD if int(key.split(",")[1]) % 2 else NEIGH_EVEN
-
-
-def _edge_step_check(img: Image.Image, cells: dict, tile: int,
-                     cfg: dict) -> tuple[str, bool, str]:
-    """Шов перехода: перо на общем ребре двух биомов не выбивается за тон обоих соседей.
-
-    Глаз читает полосу пограничных пикселей на фоне **соседа**, а `atlas/decal-tone`
-    мерит перо против базы его же биома — светлое перо на своей базе тих, и в кадре
-    оно остаётся светлой полосой-царапиной (T-142). Мера локальна с обеих сторон:
-    светлота L* полосы шириной `EDGE_BAND` тайла вокруг середины общего ребра
-    сравнивается с светлотой двух таких же полос, сдвинутых внутрь своих клеток
-    (за перо), — тон-шум считается по тем же полосам и робастно (MAD), а не по всей
-    клетке: узор тайла даёт тяжёлые хвосты, std полосы ±7…9 ΔE съедает любой шов
-    (с ним худшее ребро 2.7 при пороге 3.0 — гард слепой), MAD той же полосы 0…1.
-    Носитель — кадр без тумана: на туманном кадре медиана яркости это туман, и
-    фильтр исключения работает наоборот.
-    """
-    limit = float(cfg["frame"].get("max_edge_step_de", 5.0))
-    half_band = max(2, int(tile * EDGE_BAND) // 2)
-    rgb = img.convert("RGB")
-
-    def strip(cx: int, cy: int) -> tuple[float, float]:
-        px = np.asarray(rgb.crop((max(0, cx - half_band), max(0, cy - half_band),
-                                  min(img.width, cx + half_band),
-                                  min(img.height, cy + half_band))),
-                        dtype=np.float64).reshape(-1, 3)
-        light = np.array([tone_lab(tuple(p))[0] for p in px])
-        med = float(np.median(light))
-        return med, float(1.4826 * np.median(np.abs(light - med)))
-
-    lums = {k: float(_cell_rgb(img, *v[:2], tile).mean()) for k, v in cells.items()}
-    med = float(np.median(list(lums.values())))
-    clear = {k for k, v in lums.items() if v > FOG_CUT * med}    # туман — не биом
-    seen: set[frozenset] = set()
-    worst = None
-    edges = 0
-    for key, val in cells.items():
-        if key not in clear:
-            continue
-        cx, cy = map(int, key.split(","))
-        for dx, dy in _neigh_dirs(cells, key):
-            nkey = f"{cx + dx},{cy + dy}"
-            n = cells.get(nkey)
-            if (n is None or nkey not in clear or n[2] == val[2]
-                    or frozenset((key, nkey)) in seen):
-                continue
-            seen.add(frozenset((key, nkey)))
-            edges += 1
-            mx, my = (val[0] + n[0]) // 2, (val[1] + n[1]) // 2
-            band_l, _ = strip(mx, my)
-            light = [strip(mx + int(0.75 * (s[0] - mx)), my + int(0.75 * (s[1] - my)))
-                     for s in (val, n)]
-            noise = max(s for _, s in light)
-            lo = min(l for l, _ in light) - noise
-            hi = max(l for l, _ in light) + noise
-            over = max(0.0, band_l - hi, lo - band_l)
-            if worst is None or over > worst[0]:
-                worst = (over, key, nkey, val[2], n[2], band_l,
-                         light[0][0], light[1][0], noise)
-    if worst is None:
-        return ("frame/edge-step", False,
-                f"рёбер между разными биомами в кадре нет ({edges} пар) — кадр "
-                f"не показателен для переходов")
-    over, a, b, ba, bb, band_l, la, lb, noise = worst
-    return ("frame/edge-step", over <= limit,
-            f"выброс пера за тон обоих соседей: худшее ребро {a}↔{b} ({ba}↔{bb}) "
-            f"L*перо={band_l:.1f} базы {la:.1f}/{lb:.1f} шум±{noise:.1f} → "
-            f"{over:.1f} ΔE (порог ≤{limit:.1f}, рёбер {edges}, шум — робастный "
-            f"MAD внутренних полос)")
 
 
 def frame_checks(shot: str, cfg: dict) -> list[tuple[str, bool, str]]:
@@ -257,7 +187,6 @@ def frame_checks(shot: str, cfg: dict) -> list[tuple[str, bool, str]]:
                     f"(порог ≥{float(fcfg['min_biome_contrast_de']):.1f})"))
 
     # — шов перехода: перо на ребре двух биомов не выбивается за тон обоих соседей (T-142) —
-    out.append(_edge_step_check(img, cells, tile, cfg))
     return out
 
 
@@ -595,10 +524,9 @@ def _fixture_shot(cfg: dict, workdir: str) -> str:
     return shot
 
 
-def _mutate_shot(shot: str, cfg: dict, *, single_variant=False, merge_biomes=False,
-                 feather_punch=False) -> None:
-    """Мутации кадра: один вариант на биом / рампа биома сведена к соседнему /
-    перо на общем ребре выбито за тон обоих соседей (T-142)."""
+def _mutate_shot(shot: str, cfg: dict, *, single_variant=False,
+                 merge_biomes=False) -> None:
+    """Мутации кадра: один вариант на биом / рампа биома сведена к соседнему."""
     with open(shot + ".cells.json", encoding="utf-8") as f:
         cells = json.load(f)["cells"]
     img = Image.open(shot).convert("RGB")
@@ -610,7 +538,6 @@ def _mutate_shot(shot: str, cfg: dict, *, single_variant=False, merge_biomes=Fal
            for k, v in cells.items()}
     side = (max(c[0] for c in src) + 1) // 2   # ширина блока клеток в образце
     half = tile // 2
-    band_px = max(2, int(tile * EDGE_BAND) // 2)
     for (col, row), (cx, cy, biome) in src.items():   # в cells.json — центры клеток
         x, y = cx - half, cy - half
         if single_variant and biome == FIXTURE_BIOMES[0]:
@@ -620,11 +547,6 @@ def _mutate_shot(shot: str, cfg: dict, *, single_variant=False, merge_biomes=Fal
             sx, sy, _ = src[(col - side, row)]
             arr[y:y + pitch_y, x:x + tile] = arr[sy - half:sy - half + pitch_y,
                                                  sx - half:sx - half + tile]
-        if feather_punch and biome == FIXTURE_BIOMES[1] and col == side:
-            # светлое «перо» посередине общего ребра — светлее обеих баз (T-142)
-            sx, sy, _ = src[(col - 1, row)]
-            mx, my = (cx + sx) // 2, (cy + sy) // 2
-            arr[my - band_px:my + band_px, mx - band_px:mx + band_px] = 255
     Image.fromarray(arr).save(shot)
 
 
@@ -669,8 +591,6 @@ def self_test(cfg: dict) -> int:
              lambda: _mutate_shot(shot, cfg, single_variant=True)),
             ("frame/contrast", "свести рампу биома к соседней",
              lambda: _mutate_shot(shot, cfg, merge_biomes=True)),
-            ("frame/edge-step", "выбить перо перехода за тон обоих соседей",
-             lambda: _mutate_shot(shot, cfg, feather_punch=True)),
         ]
         for guard, what, apply in mutations:
             apply()

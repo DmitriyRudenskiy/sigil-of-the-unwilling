@@ -6,8 +6,7 @@
     "max_periodicity": 0.6,
     "min_biome_contrast_de": 12.0,
     "identical_epsilon": 6,
-    "min_sampled_cells": 20,
-    "max_edge_step_de": 5.0
+    "min_sampled_cells": 20
   },
   "atlas": {
     "min_variants_per_biome": 4,
