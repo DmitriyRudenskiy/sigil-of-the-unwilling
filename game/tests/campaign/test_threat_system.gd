@@ -367,6 +367,48 @@ func test_cap_only_when_loss_exceeds() -> void:
 	assert_that(bool(r["raid"]["cap_applied"])).is_equal(false)
 
 
+## raid-pressure 4.5: AFK-каскад — капы per-рейд предотвращают chain collapse.
+## Много рейдов подряд: запасы не уходят в минус (кап per-рейд ограничивает урон).
+func test_afk_cascade_no_chain_collapse() -> void:
+	var ts := _new_ts()
+	var stocks: Dictionary = {"food": 50.0, "wood": 50.0, "iron": 50.0}
+	# 10 рейдов подряд (tier 3, power 60) — без капа запасы ушли бы в минус.
+	for i in range(10):
+		ts.wave = {"tier": 3, "power": 60.0, "target": "food", "camp_id": "x",
+			"turns_to_arrival": 0, "forced": false}
+		ts.process_turn(10 + i, {"stocks": stocks, "has_barracks": false,
+			"hero_in_city": false})
+		# Инвариант: запасы не уходят в минус (кап per-рейд).
+		assert_float(stocks["food"]).is_greater(-1e-9) \
+			.override_failure_message("food ушёл в минус на рейде %d" % i)
+	# После серии рейдов food > 0 (кап ограничивает урон, city выживает).
+	assert_float(stocks["food"]).is_greater(0.0) \
+		.override_failure_message("food = 0 после AFK-каскада (chain collapse)")
+
+
+## raid-pressure 2.2 (K-R3): «все районы разрушены» → cooldown ×2 (частота −50%).
+func test_cooldown_doubled_when_all_districts_ruined() -> void:
+	# Базовый cooldown (не все разрушены) = cooldown_turns (3).
+	var ts := _new_ts()
+	ts.wave = {"tier": 1, "power": 15.0, "target": "food", "camp_id": "x",
+		"turns_to_arrival": 0, "forced": false}
+	var stocks: Dictionary = {"food": 100.0, "wood": 0.0, "iron": 0.0}
+	ts.process_turn(8, {"stocks": stocks, "has_barracks": false,
+		"hero_in_city": false, "all_districts_destroyed": false})
+	assert_int(ts.region_cooldown).is_equal(3)
+	assert_int(ts.effective_cooldown(false)).is_equal(3)
+
+	# Все районы разрушены → cooldown ×2 = 6.
+	var ts2 := _new_ts()
+	ts2.wave = {"tier": 1, "power": 15.0, "target": "food", "camp_id": "x",
+		"turns_to_arrival": 0, "forced": false}
+	var stocks2: Dictionary = {"food": 100.0, "wood": 0.0, "iron": 0.0}
+	ts2.process_turn(8, {"stocks": stocks2, "has_barracks": false,
+		"hero_in_city": false, "all_districts_destroyed": true})
+	assert_int(ts2.region_cooldown).is_equal(6)
+	assert_int(ts2.effective_cooldown(true)).is_equal(6)
+
+
 func test_winter_enemy_mult_t115() -> void:
 	# Q-M29: зима (каждый 4-й ход) — enemy_mult 1.25 к силе волны; финал — без бонуса.
 	var ts := _new_ts()

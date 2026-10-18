@@ -195,8 +195,23 @@ func _threat_context() -> Dictionary:
 		# T-020: герой в городе (R01) → бой (CR 1/2/6); в походе → авто-рейд (R5).
 		"hero_in_city": region_map == null
 			or region_map.hero_region == region_map.start_region,
+		# raid-pressure 2.2 (K-R3): все районы разрушены → cooldown ×2 (город выживает).
+		"all_districts_destroyed": _all_districts_destroyed(),
 		"battle_handler": _request_battle,
 	}
+
+
+## raid-pressure 2.2 (K-R3): «все районы разрушены» = все 7 канон-групп без
+## зданий (AFK-каскад: город выживает, cooldown ×2, production −50%).
+func _all_districts_destroyed() -> bool:
+	var present: Dictionary = {}
+	for b in settlement.buildings:
+		if b is Dictionary:
+			present[str((b as Dictionary).get("group", ""))] = true
+	for g in SettlementProcessor.GROUPS:
+		if present.has(str(g)):
+			return false
+	return true
 
 
 ## Шов T-050 (акт 12-й итерации §2.2): бой K-канона — единичные комбатанты,

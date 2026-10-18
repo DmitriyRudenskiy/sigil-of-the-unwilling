@@ -9,6 +9,20 @@ date: 2026-10-19
 
 # CHANGELOG — docs/
 
+## [2026-10-19] — raid-pressure-system 2.1/2.2 (per-ресурсные капы + cooldown ×2) в main
+
+- **raid-pressure-system 2.1 Per-ресурсные капы** (Q-M58→(в), D-189, T-127; `feat/raid-per-resource-caps` → `632fb298`):
+  единый `loss_cap_fraction` (0.3) → `loss_caps` {еда 0.4, дерево/железо 0.3} в `raids.json`.
+  `ThreatSystem.loss_cap_for(resource)` (неизвестный ресурс → дефолт `loss_cap_per_day`);
+  `_resolve_raid`: `loss = min(power×(1−defense), loss_cap_for(target)×before)`; кап per-рейд
+  (не per-ход). Еда ≤40%, железо/дерево ≤30%.
+- **raid-pressure-system 2.2 Cooldown ×2** (K-R3; `feat/raid-cooldown-x2` → `44e0d0df`):
+  `ThreatSystem.effective_cooldown(all_ruined)` = `cooldown_turns×2` (частота рейдов −50%);
+  флаг `all_districts_destroyed` в threat-context (composition: все 7 канон-групп без зданий);
+  «город выживает» гарантировано (defeat = только wipe партии / все запасы ≤0).
+- **Тесты:** test_threat_system (значения капов, food 40% vs iron 30%, кап только при
+  превышении, cooldown ×2) + test_campaign_wiring (проводка флага). GdUnit **2667/0** (local).
+
 ## [2026-10-18] — Фоллоу-ап шага 10 по ревью: знаменатель провенанса самораскрывается, ноль `C′` признан вакуумным, аудит достижимости 13 id
 
 - **B — `check_asset_provenance.py` печатает свой охват** (D-206 на новом месте): зелёный
