@@ -58,25 +58,73 @@ def walk_assets():
                 yield os.path.relpath(os.path.join(dirpath, name), ROOT).replace(os.sep, "/")
 
 
+def tally(assets, files, classes):
+    """Две ортогональные проекции одного множества — считать их должно быть можно без
+    файловой системы, иначе следующий рефакторинг схлопнет разбивку обратно в одно число.
+
+    -> (покрыто, {статус: n}, {вид незнания: n}, не_чисто, поимённые_вне_чисто)
+    """
+    named_dirs = {p[:p.rfind("/") + 1] for p in files}
+    covered, statuses, kind = 0, {}, {}
+    for rel in assets:
+        dir_ = rel[:rel.rfind("/") + 1]
+        status = files.get(rel) or ("" if dir_ in named_dirs else classes.get(dir_, ""))
+        if not status:
+            continue
+        covered += 1
+        statuses[status] = statuses.get(status, 0) + 1
+        if status != "чисто":
+            k = ("жёлтый поимённо (своя строка)" if rel in files
+                 else "неизвестно по классу" if status == "неизвестно"
+                 else "жёлтый по наследству класса")
+            kind[k] = kind.get(k, 0) + 1
+    not_clean = covered - statuses.get("чисто", 0)
+    named = sorted(r for r in files if files[r] != "чисто" and r in set(assets))
+    return covered, statuses, kind, not_clean, named
+
+
+def self_test():
+    """Обе проекции на синтетике: срез по статусу и срез по уровню строки обязаны
+    сходиться к одному знаменателю и не должны схлопываться друг в друга."""
+    files = {"b/y.png": "жёлтый", "c/z.png": "чисто"}
+    classes = {"a/": "неизвестно", "b/": "жёлтый", "d/": "жёлтый"}
+    assets = ["a/1.png", "a/2.png", "d/x.png", "b/y.png", "c/z.png"]
+    covered, statuses, kind, not_clean, named = tally(assets, files, classes)
+    assert covered == 5 and statuses == {"неизвестно": 2, "жёлтый": 2, "чисто": 1}
+    # проекция «статус»: однородная, сумма = знаменателю незнания
+    assert kind == {"неизвестно по классу": 2, "жёлтый по наследству класса": 1,
+                    "жёлтый поимённо (своя строка)": 1}
+    assert sum(kind.values()) == not_clean == 4
+    # проекция «уровень строки»: другая, и численно НЕ равна первой
+    assert len(named) == 1 and not_clean - len(named) == 3
+    # каталог с файловой строкой — поимённый: классовая строка внутрь него не действует
+    # (иначе новый файл в таком каталоге прошёл бы молча), а безстрочный — не покрыт
+    assert tally(["b/x.png"], files, classes)[0] == 0
+    assert tally(["c/z.png", "a/1.png"], files, classes)[0] == 2
+    assert tally(["c/orphan.png"], files, classes)[0] == 0
+    print("SELF-TEST: OK (проекции статус/уровень строки расходятся: 4 = 2+1+1, "
+          "срез уровня 3/1)")
+    return 0
+
+
 def main():
+    if "--self-test" in sys.argv:
+        return self_test()
     files, classes, withdrawn = parse_registry()
     # Каталог с файловыми строками — «поимённый»: классовая строка внутри него не
     # работает, иначе новый файл в таком каталоге прошёл бы молча.
     named = {p[:p.rfind("/") + 1] for p in files}
     problems = []
-    covered = 0
     total = 0
-    statuses = {}
-    for rel in walk_assets():
-        total += 1
+    assets = list(walk_assets())
+    total = len(assets)
+    covered, statuses, kind, not_clean, _named_eff = tally(assets, files, classes)
+    for rel in assets:
         dir_ = rel[:rel.rfind("/") + 1]
         status = files.get(rel) or ("" if dir_ in named else classes.get(dir_, ""))
         if not status:
             problems.append("нет строки провенанса: %s" % rel)
-            continue
-        covered += 1
-        statuses[status] = statuses.get(status, 0) + 1
-        if status == "красный":
+        elif status == "красный":
             problems.append("статус «красный» (чужой пиксель в репо): %s" % rel)
     for path in sorted(files):
         if not os.path.exists(os.path.join(ROOT, path)):
@@ -96,10 +144,8 @@ def main():
     # Знаменатель сам говорит, что он покрывает (D-206: число обязано печатать свой
     # охват — «покрыто» читается шире, чем проверяет машина).
     order = sorted(statuses.items(), key=lambda kv: -kv[1])
-    not_clean = covered - statuses.get("чисто", 0)
-    # Два вида незнания не сводятся в одно число: «покрыто наличием записи» значит разное
-    # для строки класса (семейство известно, файл внутри него не проверялся) и для
-    # строки файла (файл известен, права не установлены).
+    # not_clean и разбивка — из tally(); exit-семантика не изменилась: падают только
+    # отсутствие строки и статус «красный».
     named = sorted(r for r in files
                    if files[r] != "чисто" and os.path.exists(os.path.join(ROOT, r)))
     print("  охват: «покрыто» = у файла есть строка провенанса, НЕ «права очищены». "
@@ -107,8 +153,11 @@ def main():
     print("         у %d из %d права не подтверждены (§8.4 открыт), и exit 0 этого НЕ ловит "
           "— он ловит только отсутствие строки и статус «красный»"
           % (not_clean, covered))
-    print("         из них %d закрыты СТРОКОЙ КЛАССА (уровень семейства), %d — поимённо "
-          "(уровень файла): это разные виды незнания, не складывать в одно число"
+    print("         однородная разбивка по статусу: %s"
+          % ", ".join("%s %d" % (k, kind[k]) for k in sorted(kind)))
+    print("         (срез «%d строкой класса / %d поимённо» — ДРУГАЯ проекция, по уровню "
+          "строки, а не по статусу: внутри «строкой класса» и неизвестно-классовые, и "
+          "жёлтые-по-наследству, поэтому однородной считается разбивка по статусу)"
           % (not_clean - len(named), len(named)))
     if named:
         print("         поимённые файлы вне «чисто» (%d): %s"
