@@ -117,9 +117,13 @@ echo "=== lint: gdlint (T-141, report-only) ==="
 # сам помечен «report-only, до утверждения владельцем».
 LINT_PY="${LINT_PY:-python3}"
 if "$LINT_PY" -c 'import gdtoolkit.linter' 2>/dev/null && [ -f .gdlintrc ]; then
-	LINT_OUT="$("$LINT_PY" -m gdtoolkit.linter scripts tools 2>&1 | tail -1)"
-	echo "LINT: ${LINT_OUT:-нет вывода} (scripts + tools)"
-	echo "LINT: конфиг = $(pwd)/.gdlintrc (CWD=game); сигнал = ДЕЛЬТА против базы, не «чисто» (T-141); гейт не подключён"
+	# Знаменатель печатается раздельно (D-210: мера печатает охват): 1268 на репо целиком
+	# на 66 % состоят из вендорного addons/, и дельта-гейт по нему мерил бы чужой код.
+	LINT_OWN="$("$LINT_PY" -m gdtoolkit.linter scripts tools tests 2>&1 | tail -1)"
+	LINT_VENDOR="$("$LINT_PY" -m gdtoolkit.linter addons 2>&1 | tail -1)"
+	echo "LINT: свои (scripts + tools + tests): ${LINT_OWN:-нет вывода}"
+	echo "LINT: вендор (addons, в дельту не входит): ${LINT_VENDOR:-нет вывода}"
+	echo "LINT: конфиг = $(pwd)/.gdlintrc (CWD=game); сигнал = ДЕЛЬТА против базы по СВОИМ, не «чисто» (T-141); гейт не подключён"
 else
 	echo "LINT: SKIPPED (нет gdtoolkit у $LINT_PY или нет .gdlintrc в $(pwd))"
 fi
