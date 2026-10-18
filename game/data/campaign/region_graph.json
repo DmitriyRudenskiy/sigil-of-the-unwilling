@@ -1,0 +1,944 @@
+{
+  "version": 1,
+  "source": "docs/02e1-base-map.md (канон, D-125, 2026-10-03)",
+  "map_id": "MAP-1",
+  "k_a": 2,
+  "regions": {
+    "E1": {
+      "id": "E1",
+      "biome": "plains",
+      "water": false,
+      "layer1_nodes": [
+        "farms"
+      ],
+      "dungeon_chance": 0.1,
+      "anomaly_chance": 0.04
+    },
+    "E2": {
+      "id": "E2",
+      "biome": "plains",
+      "water": false,
+      "layer1_nodes": [
+        "farms"
+      ],
+      "dungeon_chance": 0.1,
+      "anomaly_chance": 0.04
+    },
+    "E3": {
+      "id": "E3",
+      "biome": "plains",
+      "water": false,
+      "layer1_nodes": [
+        "farms"
+      ],
+      "dungeon_chance": 0.1,
+      "anomaly_chance": 0.04
+    },
+    "E4": {
+      "id": "E4",
+      "biome": "rift",
+      "water": false,
+      "layer1_nodes": [
+        "sulfur"
+      ],
+      "dungeon_chance": 0.4,
+      "anomaly_chance": 0.12,
+      "boss": true,
+      "difficulty_anchor": 5
+    },
+    "E5": {
+      "id": "E5",
+      "biome": "plains",
+      "water": false,
+      "layer1_nodes": [
+        "farms"
+      ],
+      "dungeon_chance": 0.1,
+      "anomaly_chance": 0.04,
+      "luxury": "Пепельная Роса"
+    },
+    "E6": {
+      "id": "E6",
+      "biome": "forest",
+      "water": false,
+      "layer1_nodes": [
+        "wood"
+      ],
+      "dungeon_chance": 0.25,
+      "anomaly_chance": 0.04
+    },
+    "E7": {
+      "id": "E7",
+      "biome": "forest",
+      "water": false,
+      "layer1_nodes": [
+        "wood"
+      ],
+      "dungeon_chance": 0.25,
+      "anomaly_chance": 0.04
+    },
+    "E8": {
+      "id": "E8",
+      "biome": "plains",
+      "water": false,
+      "layer1_nodes": [
+        "farms"
+      ],
+      "dungeon_chance": 0.1,
+      "anomaly_chance": 0.04
+    },
+    "E9": {
+      "id": "E9",
+      "biome": "plains",
+      "water": false,
+      "layer1_nodes": [
+        "farms"
+      ],
+      "dungeon_chance": 0.1,
+      "anomaly_chance": 0.04
+    },
+    "E10": {
+      "id": "E10",
+      "biome": "forest",
+      "water": false,
+      "layer1_nodes": [
+        "wood"
+      ],
+      "dungeon_chance": 0.25,
+      "anomaly_chance": 0.04
+    },
+    "E11": {
+      "id": "E11",
+      "biome": "plains",
+      "water": false,
+      "layer1_nodes": [
+        "farms"
+      ],
+      "dungeon_chance": 0.1,
+      "anomaly_chance": 0.04
+    },
+    "E12": {
+      "id": "E12",
+      "biome": "swamp",
+      "water": false,
+      "layer1_nodes": [],
+      "dungeon_chance": 0.3,
+      "anomaly_chance": 0.04
+    },
+    "E13": {
+      "id": "E13",
+      "biome": "forest",
+      "water": false,
+      "layer1_nodes": [
+        "wood"
+      ],
+      "dungeon_chance": 0.25,
+      "anomaly_chance": 0.04
+    },
+    "E14": {
+      "id": "E14",
+      "biome": "plains",
+      "water": false,
+      "layer1_nodes": [
+        "farms"
+      ],
+      "dungeon_chance": 0.1,
+      "anomaly_chance": 0.04
+    },
+    "E15": {
+      "id": "E15",
+      "biome": "plains",
+      "water": false,
+      "layer1_nodes": [
+        "farms"
+      ],
+      "dungeon_chance": 0.1,
+      "anomaly_chance": 0.04
+    },
+    "E16": {
+      "id": "E16",
+      "biome": "forest",
+      "water": false,
+      "layer1_nodes": [
+        "wood"
+      ],
+      "dungeon_chance": 0.25,
+      "anomaly_chance": 0.04
+    },
+    "N1": {
+      "id": "N1",
+      "biome": "forest",
+      "water": false,
+      "layer1_nodes": [
+        "wood"
+      ],
+      "dungeon_chance": 0.25,
+      "anomaly_chance": 0.04
+    },
+    "N2": {
+      "id": "N2",
+      "biome": "forest",
+      "water": false,
+      "layer1_nodes": [
+        "wood"
+      ],
+      "dungeon_chance": 0.25,
+      "anomaly_chance": 0.04,
+      "luxury": "Янтарь Перволесья"
+    },
+    "N3": {
+      "id": "N3",
+      "biome": "plains",
+      "water": false,
+      "layer1_nodes": [
+        "farms"
+      ],
+      "dungeon_chance": 0.1,
+      "anomaly_chance": 0.04
+    },
+    "N4": {
+      "id": "N4",
+      "biome": "plains",
+      "water": false,
+      "layer1_nodes": [
+        "farms"
+      ],
+      "dungeon_chance": 0.1,
+      "anomaly_chance": 0.04
+    },
+    "N5": {
+      "id": "N5",
+      "biome": "forest",
+      "water": false,
+      "layer1_nodes": [
+        "wood"
+      ],
+      "dungeon_chance": 0.25,
+      "anomaly_chance": 0.04
+    },
+    "N6": {
+      "id": "N6",
+      "biome": "plains",
+      "water": false,
+      "layer1_nodes": [
+        "farms"
+      ],
+      "dungeon_chance": 0.1,
+      "anomaly_chance": 0.04
+    },
+    "N7": {
+      "id": "N7",
+      "biome": "water",
+      "water": true,
+      "layer1_nodes": [],
+      "dungeon_chance": 0.0,
+      "anomaly_chance": 0.04,
+      "luxury": "Речная Бирюза"
+    },
+    "N8": {
+      "id": "N8",
+      "biome": "water",
+      "water": true,
+      "layer1_nodes": [],
+      "dungeon_chance": 0.0,
+      "anomaly_chance": 0.04
+    },
+    "N9": {
+      "id": "N9",
+      "biome": "hills",
+      "water": false,
+      "layer1_nodes": [
+        "crystals",
+        "iron"
+      ],
+      "dungeon_chance": 0.15,
+      "anomaly_chance": 0.04
+    },
+    "N10": {
+      "id": "N10",
+      "biome": "swamp",
+      "water": false,
+      "layer1_nodes": [
+        "mercury"
+      ],
+      "dungeon_chance": 0.3,
+      "anomaly_chance": 0.04,
+      "luxury": "Лунный Шёлк"
+    },
+    "N11": {
+      "id": "N11",
+      "biome": "swamp",
+      "water": false,
+      "layer1_nodes": [],
+      "dungeon_chance": 0.3,
+      "anomaly_chance": 0.04
+    },
+    "N12": {
+      "id": "N12",
+      "biome": "forest",
+      "water": false,
+      "layer1_nodes": [
+        "wood"
+      ],
+      "dungeon_chance": 0.25,
+      "anomaly_chance": 0.04
+    },
+    "N13": {
+      "id": "N13",
+      "biome": "mountains",
+      "water": false,
+      "layer1_nodes": [
+        "sulfur",
+        "iron"
+      ],
+      "dungeon_chance": 0.2,
+      "anomaly_chance": 0.04,
+      "luxury": "Громовой Хрусталь"
+    },
+    "N14": {
+      "id": "N14",
+      "biome": "plains",
+      "water": false,
+      "layer1_nodes": [
+        "farms"
+      ],
+      "dungeon_chance": 0.1,
+      "anomaly_chance": 0.04
+    },
+    "S1": {
+      "id": "S1",
+      "biome": "forest",
+      "water": false,
+      "layer1_nodes": [
+        "wood"
+      ],
+      "dungeon_chance": 0.25,
+      "anomaly_chance": 0.04
+    },
+    "S2": {
+      "id": "S2",
+      "biome": "forest",
+      "water": false,
+      "layer1_nodes": [
+        "wood"
+      ],
+      "dungeon_chance": 0.25,
+      "anomaly_chance": 0.04,
+      "luxury": "Живица Мирового Древа"
+    },
+    "S3": {
+      "id": "S3",
+      "biome": "plains",
+      "water": false,
+      "layer1_nodes": [
+        "farms"
+      ],
+      "dungeon_chance": 0.1,
+      "anomaly_chance": 0.04
+    },
+    "S4": {
+      "id": "S4",
+      "biome": "plains",
+      "water": false,
+      "layer1_nodes": [
+        "farms"
+      ],
+      "dungeon_chance": 0.1,
+      "anomaly_chance": 0.04
+    },
+    "S5": {
+      "id": "S5",
+      "biome": "hills",
+      "water": false,
+      "layer1_nodes": [
+        "iron"
+      ],
+      "dungeon_chance": 0.15,
+      "anomaly_chance": 0.04,
+      "luxury": "Охристый Мрамор"
+    },
+    "S6": {
+      "id": "S6",
+      "biome": "hills",
+      "water": false,
+      "layer1_nodes": [
+        "iron"
+      ],
+      "dungeon_chance": 0.15,
+      "anomaly_chance": 0.04
+    },
+    "S7": {
+      "id": "S7",
+      "biome": "water",
+      "water": true,
+      "layer1_nodes": [],
+      "dungeon_chance": 0.0,
+      "anomaly_chance": 0.04
+    },
+    "S8": {
+      "id": "S8",
+      "biome": "water",
+      "water": true,
+      "layer1_nodes": [],
+      "dungeon_chance": 0.0,
+      "anomaly_chance": 0.04
+    },
+    "S9": {
+      "id": "S9",
+      "biome": "plains",
+      "water": false,
+      "layer1_nodes": [
+        "farms"
+      ],
+      "dungeon_chance": 0.1,
+      "anomaly_chance": 0.04
+    },
+    "S10": {
+      "id": "S10",
+      "biome": "swamp",
+      "water": false,
+      "layer1_nodes": [
+        "mercury"
+      ],
+      "dungeon_chance": 0.3,
+      "anomaly_chance": 0.04,
+      "luxury": "Серебристый Вереск"
+    },
+    "S11": {
+      "id": "S11",
+      "biome": "plains",
+      "water": false,
+      "layer1_nodes": [
+        "farms"
+      ],
+      "dungeon_chance": 0.1,
+      "anomaly_chance": 0.04
+    },
+    "S12": {
+      "id": "S12",
+      "biome": "plains",
+      "water": false,
+      "layer1_nodes": [
+        "farms"
+      ],
+      "dungeon_chance": 0.1,
+      "anomaly_chance": 0.04,
+      "luxury": "Песок Вечности"
+    },
+    "S13": {
+      "id": "S13",
+      "biome": "mountains",
+      "water": false,
+      "layer1_nodes": [
+        "crystals",
+        "iron"
+      ],
+      "dungeon_chance": 0.2,
+      "anomaly_chance": 0.04,
+      "luxury": "Полуночный Аметист"
+    },
+    "S14": {
+      "id": "S14",
+      "biome": "forest",
+      "water": false,
+      "layer1_nodes": [
+        "wood"
+      ],
+      "dungeon_chance": 0.25,
+      "anomaly_chance": 0.04
+    },
+    "CN": {
+      "id": "CN",
+      "biome": "mountains",
+      "water": false,
+      "layer1_nodes": [
+        "iron"
+      ],
+      "dungeon_chance": 0.25,
+      "anomaly_chance": 0.12
+    },
+    "CS": {
+      "id": "CS",
+      "biome": "swamp",
+      "water": false,
+      "layer1_nodes": [],
+      "dungeon_chance": 0.25,
+      "anomaly_chance": 0.12
+    }
+  },
+  "edges": [
+    [
+      "E1",
+      "E2"
+    ],
+    [
+      "E2",
+      "E3"
+    ],
+    [
+      "E3",
+      "E4"
+    ],
+    [
+      "E4",
+      "E5"
+    ],
+    [
+      "E5",
+      "E6"
+    ],
+    [
+      "E6",
+      "E7"
+    ],
+    [
+      "E7",
+      "E8"
+    ],
+    [
+      "E8",
+      "E9"
+    ],
+    [
+      "E10",
+      "E9"
+    ],
+    [
+      "E10",
+      "E11"
+    ],
+    [
+      "E11",
+      "E12"
+    ],
+    [
+      "E12",
+      "E13"
+    ],
+    [
+      "E13",
+      "E14"
+    ],
+    [
+      "E14",
+      "E15"
+    ],
+    [
+      "E15",
+      "E16"
+    ],
+    [
+      "E1",
+      "E16"
+    ],
+    [
+      "N1",
+      "N2"
+    ],
+    [
+      "N2",
+      "N3"
+    ],
+    [
+      "N3",
+      "N4"
+    ],
+    [
+      "N4",
+      "N5"
+    ],
+    [
+      "N5",
+      "N6"
+    ],
+    [
+      "N6",
+      "N7"
+    ],
+    [
+      "N7",
+      "N8"
+    ],
+    [
+      "N8",
+      "N9"
+    ],
+    [
+      "N10",
+      "N9"
+    ],
+    [
+      "N10",
+      "N11"
+    ],
+    [
+      "N11",
+      "N12"
+    ],
+    [
+      "N12",
+      "N13"
+    ],
+    [
+      "N13",
+      "N14"
+    ],
+    [
+      "N1",
+      "N14"
+    ],
+    [
+      "S1",
+      "S2"
+    ],
+    [
+      "S2",
+      "S3"
+    ],
+    [
+      "S3",
+      "S4"
+    ],
+    [
+      "S4",
+      "S5"
+    ],
+    [
+      "S5",
+      "S6"
+    ],
+    [
+      "S6",
+      "S7"
+    ],
+    [
+      "S7",
+      "S8"
+    ],
+    [
+      "S8",
+      "S9"
+    ],
+    [
+      "S10",
+      "S9"
+    ],
+    [
+      "S10",
+      "S11"
+    ],
+    [
+      "S11",
+      "S12"
+    ],
+    [
+      "S12",
+      "S13"
+    ],
+    [
+      "S13",
+      "S14"
+    ],
+    [
+      "S1",
+      "S14"
+    ],
+    [
+      "E1",
+      "N1"
+    ],
+    [
+      "E1",
+      "N2"
+    ],
+    [
+      "E2",
+      "N2"
+    ],
+    [
+      "E2",
+      "N3"
+    ],
+    [
+      "E3",
+      "N3"
+    ],
+    [
+      "E3",
+      "N4"
+    ],
+    [
+      "E4",
+      "N4"
+    ],
+    [
+      "E4",
+      "N5"
+    ],
+    [
+      "E5",
+      "N5"
+    ],
+    [
+      "E5",
+      "N6"
+    ],
+    [
+      "E6",
+      "N6"
+    ],
+    [
+      "E6",
+      "N7"
+    ],
+    [
+      "E7",
+      "N7"
+    ],
+    [
+      "E7",
+      "N8"
+    ],
+    [
+      "E8",
+      "N7"
+    ],
+    [
+      "E8",
+      "N8"
+    ],
+    [
+      "E9",
+      "N8"
+    ],
+    [
+      "E9",
+      "N9"
+    ],
+    [
+      "E10",
+      "N9"
+    ],
+    [
+      "E10",
+      "N10"
+    ],
+    [
+      "E11",
+      "N10"
+    ],
+    [
+      "E11",
+      "N11"
+    ],
+    [
+      "E12",
+      "N11"
+    ],
+    [
+      "E12",
+      "N12"
+    ],
+    [
+      "E13",
+      "N12"
+    ],
+    [
+      "E13",
+      "N13"
+    ],
+    [
+      "E14",
+      "N13"
+    ],
+    [
+      "E14",
+      "N14"
+    ],
+    [
+      "E15",
+      "N14"
+    ],
+    [
+      "E15",
+      "N1"
+    ],
+    [
+      "E16",
+      "N14"
+    ],
+    [
+      "E16",
+      "N1"
+    ],
+    [
+      "E1",
+      "S1"
+    ],
+    [
+      "E1",
+      "S2"
+    ],
+    [
+      "E2",
+      "S2"
+    ],
+    [
+      "E2",
+      "S3"
+    ],
+    [
+      "E3",
+      "S3"
+    ],
+    [
+      "E3",
+      "S4"
+    ],
+    [
+      "E4",
+      "S4"
+    ],
+    [
+      "E4",
+      "S5"
+    ],
+    [
+      "E5",
+      "S5"
+    ],
+    [
+      "E5",
+      "S6"
+    ],
+    [
+      "E6",
+      "S6"
+    ],
+    [
+      "E6",
+      "S7"
+    ],
+    [
+      "E7",
+      "S7"
+    ],
+    [
+      "E7",
+      "S8"
+    ],
+    [
+      "E8",
+      "S7"
+    ],
+    [
+      "E8",
+      "S8"
+    ],
+    [
+      "E9",
+      "S8"
+    ],
+    [
+      "E9",
+      "S9"
+    ],
+    [
+      "E10",
+      "S9"
+    ],
+    [
+      "E10",
+      "S10"
+    ],
+    [
+      "E11",
+      "S10"
+    ],
+    [
+      "E11",
+      "S11"
+    ],
+    [
+      "E12",
+      "S11"
+    ],
+    [
+      "E12",
+      "S12"
+    ],
+    [
+      "E13",
+      "S12"
+    ],
+    [
+      "E13",
+      "S13"
+    ],
+    [
+      "E14",
+      "S13"
+    ],
+    [
+      "E14",
+      "S14"
+    ],
+    [
+      "E15",
+      "S14"
+    ],
+    [
+      "E15",
+      "S1"
+    ],
+    [
+      "E16",
+      "S14"
+    ],
+    [
+      "E16",
+      "S1"
+    ],
+    [
+      "CN",
+      "N1"
+    ],
+    [
+      "CN",
+      "N8"
+    ],
+    [
+      "CS",
+      "S1"
+    ],
+    [
+      "CS",
+      "S8"
+    ]
+  ],
+  "fords": [
+    [
+      "N6",
+      "N9"
+    ],
+    [
+      "S6",
+      "S9"
+    ]
+  ],
+  "mvp_mask": {
+    "id": "MVP-1",
+    "start": "E3",
+    "regions": [
+      "E3",
+      "E4",
+      "N4",
+      "N5",
+      "N6"
+    ]
+  },
+  "starts": {
+    "Искра": "E3",
+    "Время": "N6"
+  }
+}

@@ -2,7 +2,7 @@
 
 ## 1. Данные графа
 
-- [ ] 1.1 `game/data/campaign/region_graph.json` — MAP-1: фиксированный граф 40–48 регионов (id, биом, рёбра, terrain_preference узлов). *(не начат; MVP работает на маске S1 из movement.json.)*
+- [x] 1.1 `game/data/campaign/region_graph.json` — MAP-1: фиксированный граф 46 регионов (E1–E16, N1–N14, S1–S14, CN/CS), биомы, рёбра (112), Layer-1 узлы, роскошь, MVP-маска {E3,E4,N4,N5,N6}, босс E4. *(канон 02e1-base-map, D-125; валидация — test_region_graph_data.gd 8/8. **Следующий шаг:** RegionMap читает `movement.json → mvp_mask` (R01–R05) — синхронизация именования с E/N/S (единый источник) — post-MVP.)*
 - [x] 1.2 MVP-маска: связное подмножество 5 регионов (K-R4) + 1 стартовый регион. *(реализовано в `movement.json → mvp_mask`, S1: R01–R05; единый источник данных, отдельный файл не нужен.)*
 - [x] 1.3 Узлы MVP: 4 узла (camp R02, ruin R03, ore R04, [camp,ruin] R05) + 1 город игрока (R01). *(жёсткая привязка в movement.json; нейтральные поселения — post-MVP.)*
 - [x] 1.4 One-time loot (Y4): руины 10 дерева + 5 железа + 300 XP; руда 20 железа + 300 XP; лагерь 5 еды + 10 железа + 400 XP — каталог `RegionMap.loot_catalog()`. *(детерминизм: нижняя граница XP.)*
