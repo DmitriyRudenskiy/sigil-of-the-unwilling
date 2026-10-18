@@ -15,6 +15,7 @@
 
     python3 scripts/measure_decal_seam.py
 """
+import argparse
 import json
 import os
 import sys
@@ -24,6 +25,11 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from measure_palette_band import de76, tone_lab  # noqa: E402  (общая метрика палитры §4.6)
+from check_map_art import NEIGH_EVEN, NEIGH_ODD  # noqa: E402  (соседи offset-рядов)
+
+# Порядок биомов = TileAtlas.BIOME_NAMES: по нему paint_transitions решает, кто
+# из пары красит переход (младший красит в свою клетку материал старшего).
+BIOME_ORDER = ["grass", "sand", "snow", "swamp", "water", "rock", "mud", "road"]
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ATLAS = os.path.join(ROOT, "game/assets/tiles")
@@ -42,11 +48,19 @@ def _mean_lab(px: np.ndarray):
 
 
 def main() -> int:
-    with open(os.path.join(ATLAS, "world_map_atlas.json"), encoding="utf-8") as f:
-        man = json.load(f)
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--atlas", default=ATLAS)
+    ap.add_argument("--shot", default="", help="снимок карты (рядом лежит .cells.json)")
+    ap.add_argument("--t", type=float, default=0.50,
+                    help="доля пути к центру соседней клетки, где брать полосу")
+    a = ap.parse_args()
     with open(GATES, encoding="utf-8") as f:
         threshold = float(json.load(f)["frame"]["min_biome_contrast_de"])
-    img = np.asarray(Image.open(os.path.join(ATLAS, man["image"])).convert("RGBA"),
+    if a.shot:
+        return shot_seam(a.shot, threshold, a.t)
+    with open(os.path.join(a.atlas, "world_map_atlas.json"), encoding="utf-8") as f:
+        man = json.load(f)
+    img = np.asarray(Image.open(os.path.join(a.atlas, man["image"])).convert("RGBA"),
                      dtype=np.uint8)
     cells, t = man["cells"], int(man["tile"])
 
@@ -77,6 +91,48 @@ def main() -> int:
     print("\nрампа базы = шаг между самыми разными вариантами одного биома (член, который "
           "тикет считал главным);\nстык v0/v3 = шаг декаля к левому краю базы 0-го/3-го "
           "варианта — если оба большие и близкие, виноват не вариант.")
+    return 0
+
+
+def shot_seam(shot: str, threshold: float, t: float = 0.50) -> int:
+    """То же — по снимку карты: где декаль реально наедает чужую клетку.
+
+    Декаль биома B лежит внутри клетки биома A (map_renderer.paint_transitions),
+    поэтому полоса берётся у общего ребра, со стороны A, и сравнивается со средним
+    обоих биомов: с чужим она обязана совпадать (иначе — чужеродная линия), со своим
+    отличаться вправе (это и есть переход)."""
+    geo = json.load(open(f"{shot}.cells.json", encoding="utf-8"))
+    tile = int(geo["tile"][0])
+    cells = geo["cells"]
+    img = np.asarray(Image.open(shot).convert("RGB"), dtype=np.float64)
+    means, strips = {}, []
+    for biome in sorted({v[2] for v in cells.values()}):
+        px = [img[max(0, v[1] - 12):v[1] + 12, max(0, v[0] - 12):v[0] + 12].reshape(-1, 3)
+              for v in cells.values() if v[2] == biome]
+        means[biome] = np.concatenate(px).mean(0)
+    for key, val in cells.items():
+        cx, cy = map(int, key.split(","))
+        for d in (NEIGH_ODD if cy % 2 else NEIGH_EVEN):
+            nb = cells.get(f"{cx + d[0]},{cy + d[1]}")
+            if not nb or val[2] == nb[2]:
+                continue
+            a, b = val[2], nb[2]                       # декаль b лежит внутри клетки a
+            if BIOME_ORDER.index(b) <= BIOME_ORDER.index(a):
+                continue                    # красит сосед, не эта клетка
+            mx, my = int(val[0] + t * (nb[0] - val[0])), int(val[1] + t * (nb[1] - val[1]))
+            patch = img[max(0, my - 4):my + 4, max(0, mx - 4):mx + 4].reshape(-1, 3).mean(0)
+            strips.append((de76(tone_lab(tuple(patch)), tone_lab(tuple(means[b]))),
+                           de76(tone_lab(tuple(patch)), tone_lab(tuple(means[a]))), a, b))
+    if not strips:
+        print("в кадре нет пар биомов, где декаль вообще рисуется")
+        return 0
+    worst = max(strips, key=lambda s: s[0])
+    print(f"пар перехода: {len(strips)}; медиана ΔE(декаль↔свой биом) = "
+          f"{sorted(s[0] for s in strips)[len(strips)//2]:.1f}, "
+          f"медиана ΔE(декаль↔клетка, в которую он наедает) = "
+          f"{sorted(s[1] for s in strips)[len(strips)//2]:.1f}")
+    print(f"худший ΔE(декаль↔свой биом) = {worst[0]:.1f} ({worst[2]}→{worst[3]}), "
+          f"порог {threshold:.1f} → {'FAIL' if worst[0] > threshold else 'PASS'}")
     return 0
 
 

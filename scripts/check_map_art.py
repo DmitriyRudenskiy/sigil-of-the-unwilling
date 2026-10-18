@@ -315,6 +315,34 @@ def atlas_checks(manifest_path: str, cfg: dict) -> list[tuple[str, bool, str]]:
                 f"биомов с переходами {len(edges)} из {len(by_biome)}"
                 + (f"; дыры {dict(list(gaps.items())[:2])}" if gaps else "")))
 
+    # — тон декаля: перо перехода — материал своего биома, а не тёмная полоса.
+    # Полоса 0.3 ≤ α ≤ 0.9 — тем и декаль наедает чужую клетку; если её RGB темнее
+    # базы биома сильнее, чем шаг между двумя биомами, переход читается границей.
+    # Так и было: `paste(тайл, позиция, тайл)` в gen_map_art предумножал RGB на альфу
+    # (маска-изображение смешивает с прозрачным чёрным) — 13–21 ΔE тёмной кромки.
+    def _cell_px(c: dict) -> np.ndarray:
+        x, y = int(c["atlas"][0]) * tile, int(c["atlas"][1]) * tile
+        return np.asarray(rgba.crop((x, y, x + tile, y + tile)), dtype=np.uint8)
+
+    limit = float(cfg["frame"]["min_biome_contrast_de"])
+    worst_de, worst_biome = 0.0, "—"
+    for biome in sorted({c["biome"] for c in manifest["cells"]}):
+        group = [c for c in manifest["cells"] if c["biome"] == biome]
+        base = np.concatenate([_cell_px(c).reshape(-1, 4) for c in group
+                               if c["kind"] == "base"])
+        edge = np.concatenate([_cell_px(c).reshape(-1, 4) for c in group
+                               if c["kind"] == "edge"])
+        feather = (edge[:, 3] >= 77) & (edge[:, 3] <= 230)
+        if feather.sum() < 8:
+            continue            # переход целиком непрозрачен — мерить нечего
+        d = float(de76(tone_lab(tuple(edge[feather][:, :3].mean(0))),
+                       tone_lab(tuple(base[:, :3].mean(0)))))
+        if d > worst_de:
+            worst_de, worst_biome = d, biome
+    out.append(("atlas/decal-tone", worst_de <= limit,
+                f"худший ΔE(перо декаля ↔ база биома) {worst_de:.1f} ({worst_biome}); "
+                f"порог ≤{limit:.1f}"))
+
     # — палитра: доминирующие тона атласа против полосы M (носитель — канонический
     #   кадр кампании, пиксель локален, потому тона записаны в конфиге) —
     band = [parse_hex(t) for t in cfg["palette"]["band_m"]]
@@ -545,6 +573,8 @@ def self_test(cfg: dict) -> int:
              lambda: _mutate(atlas, punch=True)),
             ("atlas/edge-closure", "снять переход",
              lambda: _mutate(atlas, drop_edge=True)),
+            ("atlas/decal-tone", "предумножить RGB декаля на альфу",
+             lambda: _mutate(atlas, premultiply=True)),
             ("frame/variety", "оставить один вариант на биом",
              lambda: _mutate_shot(shot, cfg, single_variant=True)),
             ("frame/contrast", "свести рампу биома к соседней",
@@ -564,7 +594,7 @@ def self_test(cfg: dict) -> int:
 
 
 def _mutate(root: str, *, shift_edges=False, src_box=None, fill=False,
-            repaint=None, punch=False, drop_edge=False) -> None:
+            repaint=None, punch=False, drop_edge=False, premultiply=False) -> None:
     """Одна мутация образца: пиксели и/или манифест."""
     manifest = os.path.join(root, os.path.basename(root) + ".json")
     with open(manifest, encoding="utf-8") as f:
@@ -578,7 +608,7 @@ def _mutate(root: str, *, shift_edges=False, src_box=None, fill=False,
     if drop_edge:
         data["cells"] = [c for c in data["cells"] if not (
             c.get("kind") == "edge" and c.get("side") == "e")]
-    if repaint is not None or punch or fill or shift_edges:
+    if repaint is not None or punch or fill or shift_edges or premultiply:
         arr = np.asarray(img.convert("RGBA")).copy()
         for c in data["cells"]:
             x, y = int(c["atlas"][0]) * tile, int(c["atlas"][1]) * tile
@@ -588,6 +618,14 @@ def _mutate(root: str, *, shift_edges=False, src_box=None, fill=False,
                 arr[y:y + tile, x:x + tile, 3] = 0
             if fill:
                 arr[y:y + tile, x:x + tile] = (10, 20, 30, 255)
+            if premultiply and c.get("kind") == "edge":
+                # тот же дефект, что ушёл в атлас: полупрозрачный край с RGB, уже
+                # умноженным на альфу, — глазами это тёмная кайма перехода
+                a = np.linspace(1.0, 0.0, tile)[None, :].repeat(tile, axis=0)
+                cell = arr[y:y + tile, x:x + tile].astype(np.float64)
+                cell[..., 3] = a * 255.0
+                cell[..., :3] *= a[..., None]
+                arr[y:y + tile, x:x + tile] = np.rint(cell).astype(np.uint8)
             if shift_edges and c.get("kind") == "base":
                 # кромка перестаёт продолжать противоположную (сдвиг окна кроя из
                 # не-бесшовного материала); циклический сдвиг гард не ловит — он бесшовен

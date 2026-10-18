@@ -266,7 +266,11 @@ def side_profile(size: int, side: str) -> np.ndarray:
 
 
 def edge_decal(base: Image.Image, side: str) -> Image.Image:
-    """Декаль границы — тот же материал биома, что и база, с альфа-профилем стороны."""
+    """Декаль границы — тот же материал биома, что и база, с альфа-профилем стороны.
+
+    `base` — среднее по вариантам биома, а не вариант 0 (вердикт В1 → (1), D-205):
+    соседняя клетка стоит любым из четырёх, и декаль по одному из них вносит в стык
+    половину рампы вариантов. Среднее делит худший шаг пополам и не растит атлас."""
     a = np.asarray(base.convert("RGB")).astype(np.float32)
     alpha = side_profile(TILE, side) * 255.0
     return Image.fromarray(np.dstack([a, alpha]).astype(np.uint8), "RGBA")
@@ -286,7 +290,10 @@ def cut_object(frame: Path, fit: float = 0.86, bottom: int = 6) -> Image.Image:
     s = min(fit * TILE / im.width, (fit * TILE - bottom) / im.height)
     im = im.resize((max(1, round(im.width * s)), max(1, round(im.height * s))), Image.LANCZOS)
     out = Image.new("RGBA", (TILE, TILE), (0, 0, 0, 0))
-    out.paste(im, ((TILE - im.width) // 2, TILE - bottom - im.height), im)
+    # Без маски: paste(src, pos, src) смешивает с прозрачным чёрным фоном и по альфе,
+    # то есть превращает RGB в предумноженный (RGB×α) — полупрозрачный край силуэта
+    # становится тёмной каймой. Копирование без маски сохраняет straight alpha.
+    out.paste(im, ((TILE - im.width) // 2, TILE - bottom - im.height))
     return out.filter(UNSCHARP)
 
 
@@ -300,6 +307,8 @@ def assemble() -> int:
         raise SystemExit("нет ни одной сгенерированной роли — сначала генерация")
     tiles: list[Image.Image] = []
     cells: list[dict] = []
+    bases: dict[str, list[Image.Image]] = {}
+    first_path: dict[str, Path] = {}
 
     def add(img: Image.Image, cell: dict, src: Path) -> None:
         cell["atlas"] = [len(tiles) % 8, len(tiles) // 8]   # в ячейках сетки, не в px
@@ -314,15 +323,24 @@ def assemble() -> int:
         base = tile_from(r["path"], r["ramp"], r["shift"], r["id"])
         add(base, {"id": f"base_{r['biome']}_{r['take']}", "kind": "base", "biome": r["biome"],
                    "variant": r["take"], "source": str(r["path"].relative_to(ROOT))}, r["path"])
-        if r["take"] == 0:                 # декаль границы один на биом: он про форму края,
-            for side in SIDES:             # а не про вариативность заполнения
-                add(edge_decal(base, side),
-                    {"id": f"edge_{r['biome']}_{side}", "kind": "edge", "biome": r["biome"],
-                     "side": side, "source": str(r["path"].relative_to(ROOT))}, r["path"])
+        bases.setdefault(r["biome"], []).append(base)
+        first_path.setdefault(r["biome"], r["path"])
+
+    # Декаль границы один на биом: он про форму края, а не про вариативность заполнения.
+    for biome, variants in bases.items():
+        mean = Image.fromarray(
+            np.mean([np.asarray(v.convert("RGB"), dtype=np.float32) for v in variants],
+                    axis=0).astype(np.uint8), "RGB")
+        for side in SIDES:
+            add(edge_decal(mean, side),
+                {"id": f"edge_{biome}_{side}", "kind": "edge", "biome": biome,
+                 "side": side, "source": str(first_path[biome].relative_to(ROOT))},
+                first_path[biome])
 
     sheet = Image.new("RGBA", (8 * TILE, math.ceil(len(tiles) / 8) * TILE), (0, 0, 0, 0))
     for i, t in enumerate(tiles):
-        sheet.paste(t.convert("RGBA"), ((i % 8) * TILE, (i // 8) * TILE), t)
+        # Без маски (см. cut_object): paste(src, pos, src) предумножил бы RGB на альфу.
+        sheet.paste(t.convert("RGBA"), ((i % 8) * TILE, (i // 8) * TILE))
     ATLAS_IMG.parent.mkdir(parents=True, exist_ok=True)
     sheet.save(ATLAS_IMG, "WEBP", quality=QUALITY, lossless=LOSSLESS)
     ATLAS_JSON.write_text(json.dumps({
@@ -335,7 +353,7 @@ def assemble() -> int:
     osheet = Image.new("RGBA", (8 * TILE, math.ceil(len(objs) / 8) * TILE), (0, 0, 0, 0))
     for i, r in enumerate(objs):
         im = cut_object(r["path"])
-        osheet.paste(im, ((i % 8) * TILE, (i // 8) * TILE), im)
+        osheet.paste(im, ((i % 8) * TILE, (i // 8) * TILE))
         ocells.append({"id": r["id"], "group": r["biome"], "anchor": [TILE // 2, TILE - 2],
                        "atlas": [i % 8, i // 8],
                        "source": str(r["path"].relative_to(ROOT))})

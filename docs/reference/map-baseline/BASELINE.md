@@ -5,7 +5,7 @@ tags:
   - art
   - world-map
 status: reference
-date: 2026-10-18
+date: 2026-10-19
 ---
 
 # Базовая линия графики карты
@@ -17,10 +17,16 @@ date: 2026-10-18
 ## Как переснять
 
 ```bash
+Godot --headless --path game --import   # обязательно: иначе кадр рисуется старой текстурой
 Godot --path game -s tools/map_shot.gd -- --seed=4242 --size=40 \
       --out=docs/reference/map-baseline/baseline.png
-python3 scripts/check_map_art.py --shot docs/reference/map-baseline/baseline.png --allow-missing
+python3 scripts/check_map_art.py --shot docs/reference/map-baseline/baseline.png
 ```
+
+Без `--import` съёмка берёт импортированный webp прошлого атласа: манифест уже новый,
+пиксели старые, и вместо перехода в кадре серые квадраты (урок T-136: `frame/contrast`
+обвинял правку атласа, которой только что померил). Флаг `--allow-missing` из прежней
+команды выведен — гейт сам пишет `SKIP frame/*` с причиной.
 
 `tools/map_shot.gd` рендерит настоящий `MapGenerator` в offscreen-вьюпорт (не headless —
 нужен рендер, тот же режим, что у `tools/ux_shots.gd`) и рядом с PNG пишет
@@ -38,6 +44,13 @@ seed 4242, карта 40×40, в кадре 171 клетка (`gate.txt` — в�
 | `frame/periodicity` — доля кадра, повторенная сдвигом решётки (0, 123) | **0.80** | ≤ 0.60 | **FAIL** |
 | `frame/contrast` — ближайшие биомы кадра (road↔rock) | ΔE 14.8 | ≥ 12.0 | PASS |
 | `atlas/*`, `objects/*` | носителей ещё нет | — | FAIL (красный и есть смысл гейта) |
+
+## Не путать с доказательством T-136
+
+`atlas-t136.png` (+ `.cells.json`, `gate-t136.txt`) рядом — это **не базовая линия**, а
+снимок текущего атласа (после правки склейки декалей, T-136): на нём гейт зелёный
+(17/17). Базовая линия выше остаётся снимком «до», на котором она обязана быть красной;
+её md5 и пиксели не меняются.
 | `provenance/rows` | строк нет | — | FAIL |
 
 Таблица — вывод **прежних** мер (`gate.txt`); как они выглядят после T-135 и почему
