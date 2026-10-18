@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Замер тонального шага «декаль перехода vs база соседней клетки» (T-136).
+"""Замер перехода между биомами: кромка, геометрия и фактура (T-136, T-138).
 
 Две меры, обе — ΔE76 до среднего Lab по альфе:
 
@@ -17,7 +17,9 @@
 """
 import argparse
 import json
+import math
 import os
+import re
 import sys
 
 import numpy as np
@@ -103,38 +105,74 @@ def _hf(x: np.ndarray) -> float:
     return float(np.std(x - s / 9.0))
 
 
-def _patch(img: np.ndarray, x: int, y: int, r: int = 4) -> np.ndarray:
-    return img[max(0, y - r):y + r, max(0, x - r):x + r]
+def _patch(img: np.ndarray, x: int, y: int, r: int = 6) -> np.ndarray:
+    return img[max(0, int(y) - r):int(y) + r, max(0, int(x) - r):int(x) + r]
+
+
+def _at(own: list, nb: list, t: float, off: float = 0.0) -> tuple:
+    """Точка на оси «центр своей клетки → центр соседней», боковой сдвиг off — в долях
+    межцентрового расстояния. Ось нормирована по паре, поэтому направление гекса
+    (у которого сосед по E/W ближе, чем по диагонали) в единицы не лезет."""
+    ux, uy = nb[0] - own[0], nb[1] - own[1]
+    d = math.hypot(ux, uy)
+    ux, uy, ox, oy = ux / d, uy / d, -uy / d, ux / d
+    return own[0] + t * ux * d + off * ox * d, own[1] + t * uy * d + off * oy * d
+
+
+def _tone(img: np.ndarray, own: list, nb: list, means: dict, t: float, off: float = 0.0):
+    """(ΔE до тона своей клетки, ΔE до тона соседней) в точке оси."""
+    x, y = _at(own, nb, t, off)
+    lab = tone_lab(tuple(_patch(img, x, y).reshape(-1, 3).mean(0)))
+    return (de76(lab, tone_lab(tuple(means[own[2]]))),
+            de76(lab, tone_lab(tuple(means[nb[2]]))))
+
+
+def _grain(img: np.ndarray, own: list, nb: list, t: float, off: float = 0.0) -> float:
+    """Зерно материала в точке оси: медиана ВЧ-дисперсии по трём боковым сдвигам."""
+    return float(np.median([_hf(_patch(img, *_at(own, nb, t, o)))
+                            for o in (off - 0.15, off, off + 0.15)]))
+
+
+def _feather() -> float:
+    """FEATHER из gen_map_art.py. Читается из исходника, а не импортируется: gen_map_art
+    тянет image-clone-раннер, а молча продублировать константу — значит через месяц
+    померить не ту глубину пера, что рисует атлас."""
+    src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                            "gen_map_art.py"), encoding="utf-8").read()
+    return float(re.search(r"^FEATHER = ([\d.]+)", src, re.M).group(1))
 
 
 def _profile(img: np.ndarray, own: list, nb: list, means: dict, contrast: float):
-    """Профиль тона поперёк общего ребра: где переход и насколько он размыт.
+    """Геометрия перехода поперёк ребра: (t*, ширина полосы, std t* вдоль ребра).
 
-    Возвращает (t*, ширина, grain) либо None, если профиль нечитаемая (мелкий контраст).
-    t=0 — центр своей клетки, t=0.5 — общее ребро (там перо непрозрачно).
     t* — где тон становится ближе к чужому биому; ширина — полоса между «ещё свой»
-    (ΔE до своего ≤ 0.25 межбиомного контраста) и «уже чужой»; grain — ВЧ-дисперсия
-    пера у ребра против ВЧ-дисперсии своей базы в глубине клетки.
+    (ΔE до своего ≤ 0.25 межбиомного контраста) и «уже чужой»; std t* по пяти боковым
+    сдвигам — насколько граница блуждает: у отпечатка прямоугольной кисти она была бы
+    ~0, у материала — дрожит на суб-тайловом масштабе. None, если контраст мелок и
+    профиль не читается.
     """
     if contrast < 8.0:
         return None
     ts = [i / 40.0 for i in range(2, 21)]
     da, db = [], []
     for t in ts:
-        x, y = int(own[0] + t * (nb[0] - own[0])), int(own[1] + t * (nb[1] - own[1]))
-        lab = tone_lab(tuple(_patch(img, x, y).reshape(-1, 3).mean(0)))
-        da.append(de76(lab, tone_lab(tuple(means[own[2]]))))
-        db.append(de76(lab, tone_lab(tuple(means[nb[2]]))))
+        u, v = _tone(img, own, nb, means, t)
+        da.append(u)
+        db.append(v)
     cross = next((t for t, u, v in zip(ts, da, db) if v < u), None)
     own_side = [t for t, u in zip(ts, da) if u <= 0.25 * contrast]
     nb_side = [t for t, v in zip(ts, db) if v <= 0.25 * contrast]
     if cross is None or not own_side or not nb_side:
         return None
-    width = min(nb_side) - max(own_side)
-    x0, y0 = int(own[0] + 0.10 * (nb[0] - own[0])), int(own[1] + 0.10 * (nb[1] - own[1]))
-    x1, y1 = int(own[0] + 0.46 * (nb[0] - own[0])), int(own[1] + 0.46 * (nb[1] - own[1]))
-    base, feather = _hf(_patch(img, x0, y0)), _hf(_patch(img, x1, y1))
-    return cross, width, (feather / base if base > 1e-6 else 0.0)
+    spread = []
+    for off in (-0.3, -0.15, 0.0, 0.15, 0.3):
+        for t in ts:
+            u, v = _tone(img, own, nb, means, t, off)
+            if v < u:
+                spread.append(t)
+                break
+    std = float(np.std(spread)) if len(spread) >= 3 else 0.0
+    return cross, min(nb_side) - max(own_side), std
 
 
 def shot_seam(shot: str, threshold: float, t: float = 0.50) -> int:
@@ -150,12 +188,20 @@ def shot_seam(shot: str, threshold: float, t: float = 0.50) -> int:
       · ΔE(перо ↔ тон своей клетки) — межбиомный контраст на ребре, норма.
 
     Геометрия перехода — профилем поперёк ребра (_profile): t* и ширина полосы смешения.
-    Фактура — grain: ВЧ-дисперсия пера против ВЧ-дисперсии базы того же биома."""
+    Фактура — профиль ВЧ-дисперсии по той же оси t: перо (t≈0.45) против **того же
+    материала в его собственной клетке** (t≈0.95). Прежнее сравнение пера с базой
+    соседнего биома меряло разницу двух материалов, а не сглаживание декалем.
+
+    Единицы печатаются отдельной строкой и все размеры профиля — в долях межцентрового
+    расстояния данной пары: у гекса сосед по E/W ближе, чем по диагонали, поэтому
+    «тайл» и «клетка» — непереводимые без коэффициента оси, а смешение осей и породило
+    исходную ошибку T-138."""
     geo = json.load(open(f"{shot}.cells.json", encoding="utf-8"))
     tile = int(geo["tile"][0])
     cells = geo["cells"]
     img = np.asarray(Image.open(shot).convert("RGB"), dtype=np.float64)
-    means, strips, geom = {}, [], []
+    means, strips, geom, strong, same = {}, [], [], [], []
+    dist = []          # межцентровые расстояния по всем рёбрам: у гекса они разные
     for biome in sorted({v[2] for v in cells.values()}):
         px = [img[max(0, v[1] - 12):v[1] + 12, max(0, v[0] - 12):v[0] + 12].reshape(-1, 3)
               for v in cells.values() if v[2] == biome]
@@ -164,24 +210,46 @@ def shot_seam(shot: str, threshold: float, t: float = 0.50) -> int:
         cx, cy = map(int, key.split(","))
         for d in (NEIGH_ODD if cy % 2 else NEIGH_EVEN):
             nb = cells.get(f"{cx + d[0]},{cy + d[1]}")
-            if not nb or val[2] == nb[2]:
+            if nb:
+                dist.append(math.hypot(nb[0] - val[0], nb[1] - val[1]))
+    for key, val in cells.items():
+        cx, cy = map(int, key.split(","))
+        for d in (NEIGH_ODD if cy % 2 else NEIGH_EVEN):
+            nb = cells.get(f"{cx + d[0]},{cy + d[1]}")
+            if not nb:
+                continue
+            if val[2] == nb[2]:
+                # Контроль: у одноимённых соседей перехода нет, и профиль зерна по такой
+                # оси обязан быть плоским. Без этой точки 0.80× у декаля не с чем
+                # сравнить: неясно, где шумовой пол самой меры.
+                same.append((val, nb))
                 continue
             a, b = val[2], nb[2]                       # декаль b лежит внутри клетки a
             if BIOME_ORDER.index(b) <= BIOME_ORDER.index(a):
                 continue                    # красит сосед, не эта клетка
             mx, my = int(val[0] + t * (nb[0] - val[0])), int(val[1] + t * (nb[1] - val[1]))
             patch = img[max(0, my - 4):my + 4, max(0, mx - 4):mx + 4].reshape(-1, 3).mean(0)
+            contrast = de76(tone_lab(tuple(means[a])), tone_lab(tuple(means[b])))
             strips.append((de76(tone_lab(tuple(patch)), tone_lab(tuple(means[b]))),
                            de76(tone_lab(tuple(patch)), tone_lab(tuple(means[a]))), a, b))
-            g = _profile(img, val, nb, means,
-                         de76(tone_lab(tuple(means[a])), tone_lab(tuple(means[b]))))
+            g = _profile(img, val, nb, means, contrast)
             if g:
                 geom.append(g)
+            if contrast >= threshold:
+                strong.append((val, nb))
     if not strips:
         print("в кадре нет пар биомов, где декаль вообще рисуется")
         return 0
     worst = max(strips, key=lambda s: s[0])
     med = lambda xs: sorted(xs)[len(xs) // 2]
+    feather = _feather()
+    f_px = feather * tile
+    print(f"единицы: тайл {tile} px; клетка = межцентровое расстояние, у гекса оно "
+          f"разное по направлениям ({min(dist):.0f}–{max(dist):.0f} px, 1 тайл = "
+          f"{tile / max(dist):.2f}–{tile / min(dist):.2f} клетки); FEATHER {feather:.2f} "
+          f"тайла = {f_px:.0f} px = {f_px / max(dist):.2f}–{f_px / min(dist):.2f} клетки. "
+          f"Ось t ниже — доля межцентрового расстояния своей пары: 0 центр своей клетки, "
+          f"0.5 общее ребро, 1.0 центр соседней.")
     print(f"пар перехода: {len(strips)}; медиана ΔE(перо ↔ носимый материал) = "
           f"{med([s[0] for s in strips]):.1f} (мера T-136, чем меньше, тем лучше), "
           f"медиана ΔE(перо ↔ тон своей клетки) = {med([s[1] for s in strips]):.1f} "
@@ -189,10 +257,39 @@ def shot_seam(shot: str, threshold: float, t: float = 0.50) -> int:
     print(f"худший ΔE(перо ↔ носимый материал) = {worst[0]:.1f} ({worst[2]}→{worst[3]}), "
           f"порог {threshold:.1f} → {'FAIL' if worst[0] > threshold else 'PASS'}")
     if geom:
-        print(f"профиль поперёк ребра (медиана по {len(geom)} парам): переход на "
-              f"t* = {med([g[0] for g in geom]):.2f}, полоса смешения "
-              f"{med([g[1] for g in geom]):.2f} клетки, grain пера/базы = "
-              f"{med([g[2] for g in geom]):.2f} (1.0 = фактура та же, гладкое перо < 0.7)")
+        print(f"геометрия перехода (медиана по {len(geom)} парам): t* = "
+              f"{med([g[0] for g in geom]):.2f}, полоса смешения "
+              f"{med([g[1] for g in geom]):.2f} клетки, std(t*) вдоль ребра = "
+              f"{med([g[2] for g in geom]):.3f} — насколько граница блуждает; у отпечатка "
+              f"прямоугольной кисти была бы ~0")
+    if strong:
+        grid = [i / 10.0 + 0.05 for i in range(10)]
+        rows = {"↔A": [], "↔B": [], "зерно": []}
+        for t in grid:
+            a, b, g = [], [], []
+            for own, nb in strong:
+                u, v = _tone(img, own, nb, means, t)
+                a.append(u)
+                b.append(v)
+                g.append(_grain(img, own, nb, t))
+            for name, vals in (("↔A", a), ("↔B", b), ("зерно", g)):
+                rows[name].append(float(np.median(vals)))
+        print(f"профиль поперёк ребра (медиана по {len(strong)} парам с контрастом ≥ "
+              f"{threshold:.0f}; A — своя клетка, B — соседняя, чей материал несёт перо):")
+        print("  t     " + " ".join(f"{t:5.2f}" for t in grid))
+        for name, vals in rows.items():
+            print(f"  {name:6}" + " ".join(f"{x:5.1f}" for x in vals))
+        if same:
+            edge = float(np.median([_grain(img, own, nb, 0.45) for own, nb in same]))
+            base = float(np.median([_grain(img, own, nb, 0.95) for own, nb in same]))
+            print(f"контроль ({len(same)} пар одноимённых соседей, декаль на этой оси не "
+                  f"рисуется нигде): зерно у ребра {edge:.1f} против {base:.1f} в базе → "
+                  f"{edge / base:.2f}× = шумовой пол меры; всё, что ниже него, — "
+                  f"сглаживание декалем, а не край тайла и не фильтр")
+        gf, gb = rows["зерно"][4], rows["зерно"][9]
+        print(f"Δgrain пера = {gf:.1f} против {gb:.1f} у того же материала в его "
+              f"собственной клетке (t=0.45 против t=0.95) → {gf / gb:.2f}×, "
+              f"Δ = {gf - gb:+.1f}")
     return 0
 
 
