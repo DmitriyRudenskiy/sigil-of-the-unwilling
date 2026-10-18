@@ -26,11 +26,11 @@
 
 - [ ] 4.1 Карточка врага M1: AC/HP/удача/способности видны всегда — `battle_ui.gd` (деталь в mvp-ui-flow).
 - [ ] 4.2 Удача: пул ОУ = 1+modLuck, Fate Shift (1 ОУ), Save (2 ОУ), долг судьбы (K-R1) — `campaign_battle.gd`.
-- [ ] 4.3 Сдвиг ±2 (вверх/вниз) — MVP (K-M6); имя «преимущество/неудача» не использовать.
+- [x] 4.3 Сдвиг ±2 (вверх/вниз) — MVP (K-M6); имя «преимущество/неудача» не использовать. *(Верифицировано: `ADVANTAGE_MARGIN = 2` (GameNumbersBattle); `_state_margin` в campaign_battle.gd применяет ±2 (prone/elevated). Каноническое имя — «сдвиг ±2» (K-M6), не «преимущество/неудача».)*
 
 ## 5. Верификация
 
-- [ ] 5.1 GdUnit4: зоны лестницы (границы: 4−modLuck, 0, −(3+modLuck), −(8+modLuck)); Триумф = ×2, Частичный = ½.
+- [x] 5.1 GdUnit4: зоны лестницы (границы: 4−modLuck, 0, −(3+modLuck), −(8+modLuck)); Триумф = ×2, Частичный = ½. *(Верифицировано: test_battle_rules.gd — test_ladder_zone_base_thresholds (границы 4/0/−3/−8), test_ladder_zone_luck_shifts_thresholds (4−modLuck / −(3+modLuck) / −(8+modLuck)), test_calculate_attack_zone_triumph_double_damage (×2), test_calculate_attack_zone_partial_half_damage (½).)*
 - [ ] 5.2 GdUnit4: death saves (margin_N формула, 3/3); лимит 20 раундов → ничья (без XP).
 - [ ] 5.3 GdUnit4: авто-режим (детерминизм, отступление при frightened); 100 повторов → byte-identical.
 - [ ] 5.4 GdUnit4: бином «Фланг» (fighter+ranger → бонус); prone (−2/+2); местность (±2).
