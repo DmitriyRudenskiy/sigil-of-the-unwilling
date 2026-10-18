@@ -117,13 +117,19 @@ echo "=== lint: gdlint (T-141, report-only) ==="
 # сам помечен «report-only, до утверждения владельцем».
 LINT_PY="${LINT_PY:-python3}"
 if "$LINT_PY" -c 'import gdtoolkit.linter' 2>/dev/null && [ -f .gdlintrc ]; then
-	# Знаменатель печатается раздельно (D-210: мера печатает охват): 1268 на репо целиком
-	# на 66 % состоят из вендорного addons/, и дельта-гейт по нему мерил бы чужой код.
-	LINT_OWN="$("$LINT_PY" -m gdtoolkit.linter scripts tools tests 2>&1 | tail -1)"
+	# Знаменатель печатается раздельно (D-210: мера печатает охват). Корзин — ТРИ, а не две:
+	# внутри tools/ лежит tools/mcp (77 из 78 находок tools/) — закоммиченная и пропатченная
+	# в репо копия серверной части godot-mcp (отличается от копии в addons/, preload'ит
+	# res://scripts/core/game_logger.gd). Две корзины по каталогам («свои 432» / «вендор 836»)
+	# дали бы 432 своих, из которых 77 — чужие. Ось «кто это пишет» ≠ ось «в каком каталоге
+	# лежит» — та же ошибка, что каталог-vs-рантайм в предикате мержа (D-210 п. 6).
+	LINT_OWN="$("$LINT_PY" -m gdtoolkit.linter scripts tests tools/*.gd 2>&1 | tail -1)"
+	LINT_FORK="$("$LINT_PY" -m gdtoolkit.linter tools/mcp 2>&1 | tail -1)"
 	LINT_VENDOR="$("$LINT_PY" -m gdtoolkit.linter addons 2>&1 | tail -1)"
-	echo "LINT: свои (scripts + tools + tests): ${LINT_OWN:-нет вывода}"
-	echo "LINT: вендор (addons, в дельту не входит): ${LINT_VENDOR:-нет вывода}"
-	echo "LINT: конфиг = $(pwd)/.gdlintrc (CWD=game); сигнал = ДЕЛЬТА против базы по СВОИМ, не «чисто» (T-141); гейт не подключён"
+	echo "LINT: свои (scripts + tests + tools/*.gd): ${LINT_OWN:-нет вывода}"
+	echo "LINT: вендор-наследие (tools/mcp — патченная копия godot-mcp, вне дельты): ${LINT_FORK:-нет вывода}"
+	echo "LINT: вендор (addons, вне дельты): ${LINT_VENDOR:-нет вывода}"
+	echo "LINT: конфиг = $(pwd)/.gdlintrc (CWD=game); сигнал = ДЕЛЬТА против базы по СВОИМ 355, не «чисто» (T-141); гейт не подключён"
 else
 	echo "LINT: SKIPPED (нет gdtoolkit у $LINT_PY или нет .gdlintrc в $(pwd))"
 fi
