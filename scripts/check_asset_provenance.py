@@ -7,7 +7,10 @@
   3. у файла статус «красный» — чужой пиксель лежать в репо не может.
 
 Ассеты = изображения, аудио, шрифты. Данные (.json), .tres и .gd — авторский код
-репо, не проверяются. Запуск: python3 scripts/check_asset_provenance.py
+репо, не проверяются. Чекер НЕ проверяет: очищены ли права (статусы «неизвестно» и
+«жёлтый» проходят), и не трогает §«Снятые позиции» — там записи об удалённых файлах,
+существование которых проверять нечего. Вывод печатает свой охват (D-206).
+Запуск: python3 scripts/check_asset_provenance.py
 """
 import os
 import re
@@ -22,10 +25,17 @@ ROW = re.compile(r"^\|\s*`?([^|`]+?)`?\s*\|")
 
 
 def parse_registry():
-    """-> ({путь ассета: статус}, {каталог: статус}) из таблиц реестра."""
+    """-> ({путь ассета: статус}, {каталог: статус}, сколько снятых позиций)."""
     files, classes = {}, {}
+    withdrawn = 0
+    in_withdrawn = False
     with open(REGISTRY, encoding="utf-8") as fh:
         for line in fh:
+            if line.startswith("## "):
+                in_withdrawn = "Снятые позиции" in line
+                continue
+            if in_withdrawn and line.lstrip().startswith("-"):
+                withdrawn += 1
             m = ROW.match(line)
             if not m:
                 continue
@@ -38,7 +48,7 @@ def parse_registry():
                 classes[path] = status
             else:
                 files[path] = status
-    return files, classes
+    return files, classes, withdrawn
 
 
 def walk_assets():
@@ -49,13 +59,14 @@ def walk_assets():
 
 
 def main():
-    files, classes = parse_registry()
+    files, classes, withdrawn = parse_registry()
     # Каталог с файловыми строками — «поимённый»: классовая строка внутри него не
     # работает, иначе новый файл в таком каталоге прошёл бы молча.
     named = {p[:p.rfind("/") + 1] for p in files}
     problems = []
     covered = 0
     total = 0
+    statuses = {}
     for rel in walk_assets():
         total += 1
         dir_ = rel[:rel.rfind("/") + 1]
@@ -64,6 +75,7 @@ def main():
             problems.append("нет строки провенанса: %s" % rel)
             continue
         covered += 1
+        statuses[status] = statuses.get(status, 0) + 1
         if status == "красный":
             problems.append("статус «красный» (чужой пиксель в репо): %s" % rel)
     for path in sorted(files):
@@ -81,6 +93,24 @@ def main():
         return 1
     print("ПРОВЕНАНС: %d/%d ассетов покрыто (%d классов, %d файлов)"
           % (covered, total, len(classes), len(files)))
+    # Знаменатель сам говорит, что он покрывает (D-206: число обязано печатать свой
+    # охват — «покрыто» читается шире, чем проверяет машина).
+    order = sorted(statuses.items(), key=lambda kv: -kv[1])
+    not_clean = covered - statuses.get("чисто", 0)
+    print("  охват: «покрыто» = у файла есть строка провенанса, НЕ «права очищены». "
+          "Статусы: %s." % ", ".join("%s %d" % (s, n) for s, n in order))
+    print("         у %d из %d права не подтверждены (§8.4 открыт), и exit 0 этого НЕ ловит "
+          "— он ловит только отсутствие строки и статус «красный»"
+          % (not_clean, covered))
+    named = sorted(r for r in files
+                   if files[r] != "чисто" and os.path.exists(os.path.join(ROOT, r)))
+    if named:
+        print("         поимённые файлы вне «чисто» (%d): %s"
+              % (len(named), ", ".join(os.path.basename(r) for r in named[:6])))
+    if withdrawn:
+        print("         ещё %d записей в §«Снятые позиции» (ассеты, удалённые из репо) — "
+              "чекером не проверяются by design: существование нечего проверять, след "
+              "происхождения держится в прозе" % withdrawn)
     return 0
 
 
