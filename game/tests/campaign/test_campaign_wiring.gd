@@ -30,6 +30,34 @@ func test_empty_hero_name_roundtrip() -> void:
 	assert_str(c.hero_name).is_equal("")
 
 
+## raid-pressure 2.2 (K-R3): «все районы разрушены» — проводка флага в threat-context
+## и cooldown ×2.
+func test_all_districts_destroyed_flag_and_cooldown() -> void:
+	var c := _composition()
+	# Старт: есть здания (5 стартовых) → не все разрушены.
+	assert_bool(c._all_districts_destroyed()) \
+		.override_failure_message("старт с зданиями помечен как все разрушены").is_false()
+	assert_bool((c._threat_context() as Dictionary).get("all_districts_destroyed", true)) \
+		.override_failure_message("флаг не в threat-context").is_false()
+
+	# Убираем все здания → все 7 групп пусты → все разрушены.
+	c.settlement.buildings = []
+	assert_bool(c._all_districts_destroyed()) \
+		.override_failure_message("пустое поселение не помечено как все разрушены").is_true()
+	assert_bool((c._threat_context() as Dictionary).get("all_districts_destroyed", false)) \
+		.override_failure_message("флаг не передался в threat-context").is_true()
+
+	# Cooldown ×2 при всех разрушенных (K-R3): 3 → 6.
+	assert_int(c.threats.effective_cooldown(true)).is_equal(6)
+	assert_int(c.threats.effective_cooldown(false)).is_equal(3)
+
+	# Одно здание любой группы → не все разрушены.
+	c.settlement.buildings = [{"id": "farm", "group": "Земледельцы и Пивовары",
+		"output_day": {"food": 1.0}, "efficiency": 1.0}]
+	assert_bool(c._all_districts_destroyed()) \
+		.override_failure_message("один район жив → не все разрушены").is_false()
+
+
 # --- T-020: регион-граф в составе кампании (сборка, сейв, контекст угроз) ---
 
 func test_region_map_initialized_in_composition() -> void:

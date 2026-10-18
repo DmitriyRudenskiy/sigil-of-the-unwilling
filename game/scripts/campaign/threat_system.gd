@@ -96,6 +96,7 @@ func process_turn(turn: int, context: Dictionary = {}) -> Dictionary:
 	var stocks: Dictionary = context.get("stocks", {})
 	var barracks: bool = bool(context.get("has_barracks", has_barracks))
 	var hero: bool = bool(context.get("hero_in_city", hero_in_city))
+	var all_ruined: bool = bool(context.get("all_districts_destroyed", false))
 	var battle_handler: Callable = context.get("battle_handler", Callable())
 	var report := {
 		"turn": turn,
@@ -118,7 +119,7 @@ func process_turn(turn: int, context: Dictionary = {}) -> Dictionary:
 			accumulator = 0.0
 			_spawn_wave(turn, int(d.get("tier_num", 3)), true, report, 0, stocks,
 					str(d.get("composition", "boss")))
-			report["raid"] = _strike_wave(turn, stocks, barracks, hero, battle_handler, report)
+			report["raid"] = _strike_wave(turn, stocks, barracks, hero, all_ruined, battle_handler, report)
 			report["wave"] = wave.duplicate()
 			report["accumulator"] = 0.0
 			return report
@@ -138,7 +139,7 @@ func process_turn(turn: int, context: Dictionary = {}) -> Dictionary:
 		_set_state(SM_INBOUND, turn, report)
 		wave["turns_to_arrival"] = int(wave["turns_to_arrival"]) - 1
 		if int(wave["turns_to_arrival"]) <= 0:
-			report["raid"] = _strike_wave(turn, stocks, barracks, hero, battle_handler, report)
+			report["raid"] = _strike_wave(turn, stocks, barracks, hero, all_ruined, battle_handler, report)
 		report["accumulator"] = accumulator
 		report["wave"] = wave.duplicate()
 		return report
@@ -166,18 +167,26 @@ func process_turn(turn: int, context: Dictionary = {}) -> Dictionary:
 
 
 ## Удар активной волны (STRIKE → RESOLVED → COOLDOWN; K-T5: аккумулятор → 0).
+## all_ruined (raid-pressure 2.2): все районы разрушены → cooldown ×2
+## (частота рейдов −50%); город выживает, floor-директивы не ломаются (K-R3).
 func _strike_wave(turn: int, stocks: Dictionary, barracks: bool, hero: bool,
-		battle_handler: Callable, report: Dictionary) -> Dictionary:
+		all_ruined: bool, battle_handler: Callable, report: Dictionary) -> Dictionary:
 	_set_state(SM_STRIKE, turn, report)
 	var raid := _resolve_raid(turn, stocks, barracks, hero, battle_handler, report)
 	_set_state(SM_RESOLVED, turn, report)
 	accumulator = 0.0  # K-T5: после рейда аккумулятор → 0
-	region_cooldown = cooldown_turns
+	region_cooldown = effective_cooldown(all_ruined)
 	turns_since_last_raid = 0
 	_set_state(SM_COOLDOWN, turn, report)
 	report["wave"] = {}
 	wave = {}
 	return raid
+
+
+## raid-pressure 2.2 (K-R3): cooldown ×2 при «все районы разрушены»
+## (частота рейдов −50%); иначе базовый cooldown_turns.
+func effective_cooldown(all_ruined: bool) -> int:
+	return cooldown_turns * 2 if all_ruined else cooldown_turns
 
 
 func compute_pressure(turn: int, stocks: Dictionary) -> float:
