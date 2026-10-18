@@ -22,8 +22,10 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import random
 import re
 import sys
+from collections import Counter
 
 import numpy as np
 from PIL import Image
@@ -47,22 +49,56 @@ PATCH = 8          # во сколько сжимается патч клетк�
 COLOR_BITS = 5     # квант канала в патче: 5 бит гасит шум сжатия, но не склеивает тайлы
 
 
-def _patch(img: Image.Image, x: int, y: int, tile: int) -> bytes:
-    """Патч клетки → сравнимая подпись: усреднение до PATCH×PATCH и квант канала."""
-    half = tile // 2
-    box = (max(0, x - half), max(0, y - half),
-           min(img.width, x + half), min(img.height, y + half))
-    small = img.crop(box).convert("RGB").resize((PATCH, PATCH), Image.BOX)
+# Клетка гекса вписана в тайл, и квадратный кроп целого тайла на четверть состоит
+# из пикселей соседей — поэтому все клеточные меры берут внутренность гекса.
+CELL_CROP = 0.6
+CELL_PATCH = 4     # подпись variety: 4×4 по 4 бита — шум webp не расщепляет один тайл
+CELL_BITS = 4
+FOG_CUT = 0.75     # клетка темнее 0.75·медианы биома — туман войны, а не другой тайл
+
+# смещения соседей offset-рядов (odd_row_shift_right=true — калибровка HexGrid)
+NEIGH_EVEN = [(1, 0), (0, -1), (-1, -1), (-1, 0), (-1, 1), (0, 1)]
+NEIGH_ODD = [(1, 0), (1, -1), (0, -1), (-1, 0), (0, 1), (1, 1)]
+
+
+def _cell_crop(img: Image.Image, x: int, y: int, tile: int) -> Image.Image:
+    half = max(1, int(tile * CELL_CROP) // 2)
+    return img.crop((max(0, x - half), max(0, y - half),
+                     min(img.width, x + half), min(img.height, y + half))).convert("RGB")
+
+
+def _cell_rgb(img: Image.Image, x: int, y: int, tile: int) -> np.ndarray:
+    return np.asarray(_cell_crop(img, x, y, tile), dtype=np.float64).reshape(-1, 3).mean(0)
+
+
+def _cell_sig(img: Image.Image, x: int, y: int, tile: int) -> bytes:
+    small = _cell_crop(img, x, y, tile).resize((CELL_PATCH, CELL_PATCH), Image.BOX)
     px = (np.asarray(small, dtype=np.uint8).reshape(-1, 3)
-          >> (8 - COLOR_BITS)).astype(np.uint8)
+          >> (8 - CELL_BITS)).astype(np.uint8)
     return px.tobytes()
 
 
-def _mean(img: Image.Image, x: int, y: int, tile: int) -> np.ndarray:
-    half = tile // 2
-    box = (max(0, x - half), max(0, y - half),
-           min(img.width, x + half), min(img.height, y + half))
-    return np.asarray(img.crop(box).convert("RGB"), dtype=np.float64).reshape(-1, 3).mean(0)
+def _interior(cells: dict, biome: str) -> list[str]:
+    """Клетки биома, у которых все шесть соседей — тот же биом.
+
+    Клетка на границе показывает чужой тайл, а затуманенная — затемнение: и то и
+    другое меняет пиксели, но не тайл, поэтому разнообразие считается по внутренним.
+    """
+    out = []
+    for key, val in cells.items():
+        if val[2] != biome:
+            continue
+        cx, cy = map(int, key.split(","))
+        if all(cells.get(f"{cx + d[0]},{cy + d[1]}", [0, 0, biome])[2] == biome
+               for d in (NEIGH_ODD if cy % 2 else NEIGH_EVEN)):
+            out.append(key)
+    return out
+
+
+def _unfogged(img: Image.Image, keys: list[str], cells: dict, tile: int) -> list[str]:
+    lum = [_cell_rgb(img, *cells[k][:2], tile).mean() for k in keys]
+    med = float(np.median(lum))
+    return [k for k, v in zip(keys, lum) if v > FOG_CUT * med]
 
 
 def frame_checks(shot: str, cfg: dict) -> list[tuple[str, bool, str]]:
@@ -74,26 +110,32 @@ def frame_checks(shot: str, cfg: dict) -> list[tuple[str, bool, str]]:
     out: list[tuple[str, bool, str]] = []
     fcfg = cfg["frame"]
 
-    # — доля различных клеток-тайлов внутри биома (красный на одном тайле на биом) —
-    by_biome: dict[str, list[str]] = {}
-    for key, val in cells.items():
-        by_biome.setdefault(val[2], []).append(key)
+    # — разнообразие: 1 − доля модального тайла биома. Красный, когда биом держится
+    # на одном тайле; порог 0.75 = «ни один вариант не занимает больше четверти».
+    # Считается по внутренним клеткам вне тумана (см. _interior / _unfogged).
     min_cells = int(fcfg["min_biome_cells"])
-    worst = None
-    for biome, keys in sorted(by_biome.items()):
-        if len(keys) < min_cells:
+    min_sampled = int(fcfg.get("min_sampled_cells", 20))
+    biomes = sorted({v[2] for v in cells.values()})
+    variety = {}
+    for biome in biomes:
+        if sum(1 for v in cells.values() if v[2] == biome) < min_cells:
             continue
-        uniq = len({_patch(img, *cells[k][:2], tile) for k in keys}) / len(keys)
-        if worst is None or uniq < worst[1]:
-            worst = (biome, uniq, len(keys))
-    if worst is None:
+        keys = _unfogged(img, _interior(cells, biome), cells, tile)
+        if len(keys) < min_sampled:
+            continue
+        sigs = Counter(_cell_sig(img, *cells[k][:2], tile) for k in keys)
+        variety[biome] = (1.0 - sigs.most_common(1)[0][1] / len(keys), len(keys))
+    if not variety:
         out.append(("frame/variety", False,
-                    f"в кадре нет биома с ≥{min_cells} клеток — кадр не показателен"))
+                    f"в кадре нет биома с ≥{min_cells} клеток, из которых ≥{min_sampled} "
+                    f"внутренние вне тумана, — кадр не показателен "
+                    f"({img.width}×{img.height})"))
     else:
-        biome, uniq, n = worst
-        out.append(("frame/variety", uniq >= float(fcfg["min_variant_uniqueness"]),
-                    f"{biome}: {uniq:.2f} различных из {n} (порог "
-                    f"≥{float(fcfg['min_variant_uniqueness']):.2f})"))
+        worst = min(variety, key=lambda b: variety[b][0])
+        out.append(("frame/variety", variety[worst][0] >= float(fcfg["min_variant_uniqueness"]),
+                    "1 − доля модального тайла: "
+                    + ", ".join(f"{b}={v[0]:.2f}/{v[1]}кл" for b, v in sorted(variety.items()))
+                    + f" (худший {worst}, порог ≥{float(fcfg['min_variant_uniqueness']):.2f})"))
 
     # — периодичность: кадр совпадает сам с собой со сдвигом на вектор решётки?
     # Мера — доля пикселей, повторенных с точностью до шума сжатия: при одном тайле
@@ -115,11 +157,16 @@ def frame_checks(shot: str, cfg: dict) -> list[tuple[str, bool, str]]:
                 f"повторено кадром {periodicity:.2f} при сдвиге {best[1]} (порог "
                 f"≤{float(fcfg['max_periodicity']):.2f})"))
 
-    # — контраст биоминов: самые близкие по среднему цвету биомы кадра —
+    # — контраст биоминов: самые близкие по среднему цвету биомы кадра. Среднее —
+    # по внутренности гекса (CELL_CROP), затуманенные клетки исключены: и то и
+    # другое подтягивает средний цвет биома к соседу/тьме, а не измеряет тайл.
     means = {}
-    for biome, keys in by_biome.items():
-        patch = np.stack([_mean(img, *cells[k][:2], tile) for k in keys])
-        means[biome] = patch.mean(0)
+    for biome in biomes:
+        keys = _unfogged(img, [k for k, v in cells.items() if v[2] == biome], cells, tile)
+        if not keys:
+            continue
+        means[biome] = np.stack([_cell_rgb(img, *cells[k][:2], tile)
+                                 for k in keys]).mean(0)
     closest = None
     names = sorted(means)
     for i, a in enumerate(names):
@@ -132,7 +179,8 @@ def frame_checks(shot: str, cfg: dict) -> list[tuple[str, bool, str]]:
     else:
         d, a, b = closest
         out.append(("frame/contrast", d >= float(fcfg["min_biome_contrast_de"]),
-                    f"{a}↔{b} ΔE={d:.1f} (порог ≥{float(fcfg['min_biome_contrast_de']):.1f})"))
+                    f"{a}↔{b} ΔE={d:.1f} по внутренности гекса "
+                    f"(порог ≥{float(fcfg['min_biome_contrast_de']):.1f})"))
     return out
 
 
@@ -339,7 +387,7 @@ def provenance_check(cfg: dict) -> list[tuple[str, bool, str]]:
 # проходить целиком, каждая мутация — валить ровно свой гейт.
 
 FIXTURE_BIOMES = ("grass", "water")
-FIXTURE_SIDES = ("N", "NE", "SE", "S", "SW", "NW")
+FIXTURE_SIDES = ("E", "NE", "NW", "W", "SW", "SE")  # рёбра odd-r гекса, как в гейте
 
 
 def _fixture(cfg: dict, workdir: str) -> str:
@@ -375,7 +423,7 @@ def _fixture(cfg: dict, workdir: str) -> str:
             x, y = (i * 6 + d) % cols, (i * 6 + d) // cols + 2
             put(x, y, opaque(tone(wave * 0.6 + 0.2 * d / 6 + 0.1 * i)))
             cells.append({"id": f"edge_{biome}_{side.lower()}", "kind": "edge",
-                          "biome": biome, "side": side, "atlas": [x, y]})
+                          "biome": biome, "side": side.lower(), "atlas": [x, y]})
 
     # объекты: силуэт ~40% площади и пустая прозрачная нижняя кромка
     obj_cells, blob = [], np.zeros((tile, tile, 4), dtype=np.uint8)  # объекты — свой лист
@@ -402,7 +450,64 @@ def _fixture(cfg: dict, workdir: str) -> str:
     with open(os.path.join(objects, "objects.json"), "w", encoding="utf-8") as f:
         json.dump({"tile": tile, "grid": [cols, rows], "image": "objects.webp",
                    "cells": obj_cells}, f)
-    return atlas, objects
+    return atlas, objects, _fixture_shot(cfg, workdir)
+
+
+def _fixture_shot(cfg: dict, workdir: str) -> str:
+    """Снимок-образец для frame-мер: два биома по 9×9 клеток offset-решётки.
+
+    Клетки одного биома отличаются вариантом базы (ступенька тона), решётка —
+    как у живого рендера (шаг 82×123, нечётный ряд сдвинут на полшага).
+    """
+    tile, pitch_y, side = 82, 123, 9
+    band = [parse_hex(t) for t in cfg["palette"]["band_m"]]
+    base = {FIXTURE_BIOMES[0]: np.array(band[4], dtype=np.float64),
+            FIXTURE_BIOMES[1]: np.array(band[6], dtype=np.float64)}
+    cols = side * 2 + 1
+    rows = side
+    canvas = np.zeros((rows * pitch_y + tile // 2, cols * tile + tile // 2, 3), dtype=np.uint8)
+    cells, rng = {}, random.Random(7)
+    yy, xx = np.mgrid[0:tile, 0:tile].astype(np.float64) / tile
+    wave = 1.0 + 0.25 * np.sin(6 * np.pi * xx) * np.cos(6 * np.pi * yy)
+    for bi, biome in enumerate(FIXTURE_BIOMES):
+        for r in range(rows):
+            for c in range(side):
+                col = bi * (side + 1) + c
+                x = col * tile + (tile // 2 if r % 2 else 0)
+                y = r * pitch_y
+                v = rng.randrange(4)
+                rgb = (base[biome] * (1.0 + 0.14 * v) * wave[..., None]).clip(0, 255).astype(np.uint8)
+                canvas[y:y + tile, x:x + tile] = rgb
+                cells[f"{col},{r}"] = [x + tile // 2, y + tile // 2, biome]
+    shot = os.path.join(workdir, "shot", "shot.png")
+    os.makedirs(os.path.dirname(shot), exist_ok=True)
+    Image.fromarray(canvas).save(shot)
+    with open(shot + ".cells.json", "w", encoding="utf-8") as f:
+        json.dump({"seed": 0, "tile": [tile, tile], "cells": cells}, f)
+    return shot
+
+
+def _mutate_shot(shot: str, cfg: dict, *, single_variant=False, merge_biomes=False) -> None:
+    """Мутации кадра: один вариант на биом / рампа биома сведена к соседнему."""
+    with open(shot + ".cells.json", encoding="utf-8") as f:
+        cells = json.load(f)["cells"]
+    img = Image.open(shot).convert("RGB")
+    arr = np.asarray(img, dtype=np.uint8).copy()
+    tile = 82
+    band = [parse_hex(t) for t in cfg["palette"]["band_m"]]
+    src = {(int(k.split(",")[0]), int(k.split(",")[1])): (v[0], v[1], v[2])
+           for k, v in cells.items()}
+    side = (max(c[0] for c in src) + 1) // 2   # ширина блока клеток в образце
+    half = tile // 2
+    for (col, row), (cx, cy, biome) in src.items():   # в cells.json — центры клеток
+        x, y = cx - half, cy - half
+        if single_variant and biome == FIXTURE_BIOMES[0]:
+            arr[y:y + tile, x:x + tile] = np.array(band[4], dtype=np.uint8)
+        if merge_biomes and biome == FIXTURE_BIOMES[1]:
+            # копия соседнего биома клетка-в-клетку: та же рампа, тот же узор
+            sx, sy, _ = src[(col - side - 1, row)]
+            arr[y:y + tile, x:x + tile] = arr[sy - half:sy + half, sx - half:sx + half]
+    Image.fromarray(arr).save(shot)
 
 
 def self_test(cfg: dict) -> int:
@@ -410,13 +515,14 @@ def self_test(cfg: dict) -> int:
     import tempfile
     work = tempfile.mkdtemp(prefix="map_art_selftest_")
     try:
-        atlas, objects = _fixture(cfg, work)
+        atlas, objects, shot = _fixture(cfg, work)
         cfg = json.loads(json.dumps(cfg))   # мутации не должны трогать пороги
         cfg["provenance"]["required_files"] = []
 
         def gates() -> dict[str, bool]:
             out = {}
-            for name, ok, _ in (atlas_checks(atlas + "/atlas.json", cfg)
+            for name, ok, _ in (frame_checks(shot, cfg)
+                                + atlas_checks(atlas + "/atlas.json", cfg)
                                 + object_checks(objects + "/objects.json", cfg)):
                 out[name] = ok
             return out
@@ -439,6 +545,10 @@ def self_test(cfg: dict) -> int:
              lambda: _mutate(atlas, punch=True)),
             ("atlas/edge-closure", "снять переход",
              lambda: _mutate(atlas, drop_edge=True)),
+            ("frame/variety", "оставить один вариант на биом",
+             lambda: _mutate_shot(shot, cfg, single_variant=True)),
+            ("frame/contrast", "свести рампу биома к соседней",
+             lambda: _mutate_shot(shot, cfg, merge_biomes=True)),
         ]
         for guard, what, apply in mutations:
             apply()
@@ -467,7 +577,7 @@ def _mutate(root: str, *, shift_edges=False, src_box=None, fill=False,
             c["src_box"] = src_box
     if drop_edge:
         data["cells"] = [c for c in data["cells"] if not (
-            c.get("kind") == "edge" and c.get("side") == "N")]
+            c.get("kind") == "edge" and c.get("side") == "e")]
     if repaint is not None or punch or fill or shift_edges:
         arr = np.asarray(img.convert("RGBA")).copy()
         for c in data["cells"]:
