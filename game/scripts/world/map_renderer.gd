@@ -50,8 +50,21 @@ func paint_city_zones(tile_map: TileMapLayer) -> void:
 		var zone: Dictionary = city_zones[cell]
 		var r: int = int(zone.ring)
 		var biome: int = TileAtlas.Biome.MUD if r == 0 else (TileAtlas.Biome.ROAD if r == 1 else TileAtlas.Biome.SAND)
-		var coords: Array = TileAtlas.BASE_COORDS[biome]
-		tile_map.set_cell(cell, TileAtlas.SOURCE_ID, coords[0])
+		tile_map.set_cell(cell, TileAtlas.SOURCE_ID, _base(cell, biome))
+
+## База биома для клетки: вариант выбирается по клетке и сиду карты (задача 4.3),
+## поэтому картина не зависит от порядка обхода словаря и переживает save/load.
+func _base(cell: Vector2i, biome: int) -> Vector2i:
+	var variants: Array = TileAtlas.base_coords(biome)
+	if variants.is_empty():
+		push_error("TileAtlas: у биома %s нет базовых тайлов" % TileAtlas.BIOME_NAMES[biome])
+		return Vector2i.ZERO
+	return variants[TileAtlas.variant_for(cell, int(_seed()), variants.size())]
+
+
+func _seed() -> int:
+	return int(model.seed_value) if model != null and "seed_value" in model else 0
+
 
 func paint(tile_map: TileMapLayer) -> void:
 	tile_map.clear()
@@ -60,8 +73,7 @@ func paint(tile_map: TileMapLayer) -> void:
 		if not TERRAIN_TO_BIOME.has(terrain_id):
 			continue
 		var biome: int = TERRAIN_TO_BIOME[terrain_id]
-		var coords: Array = TileAtlas.BASE_COORDS[biome]
-		tile_map.set_cell(cell, TileAtlas.SOURCE_ID, coords[0])
+		tile_map.set_cell(cell, TileAtlas.SOURCE_ID, _base(cell, biome))
 
 func apply_fog(tile_map: TileMapLayer, visibility: _VisibilityMap) -> void:
 	if visibility == null or tile_map == null:
@@ -74,11 +86,11 @@ func apply_fog(tile_map: TileMapLayer, visibility: _VisibilityMap) -> void:
 		if not TERRAIN_TO_BIOME.has(terrain_id):
 			continue
 		var biome: int = TERRAIN_TO_BIOME[terrain_id]
-		var coords: Array = TileAtlas.BASE_COORDS[biome]
+		var coords: Vector2i = _base(cell, biome)
 		if not visibility.is_visible(cell):
-			tile_map.set_cell(cell, TileAtlas.FOG_SOURCE_ID, coords[0])
+			tile_map.set_cell(cell, TileAtlas.FOG_SOURCE_ID, coords)
 		else:
-			tile_map.set_cell(cell, TileAtlas.SOURCE_ID, coords[0])
+			tile_map.set_cell(cell, TileAtlas.SOURCE_ID, coords)
 	fog_refreshed.emit()
 
 func paint_decor(_decor_layer: TileMapLayer) -> void:

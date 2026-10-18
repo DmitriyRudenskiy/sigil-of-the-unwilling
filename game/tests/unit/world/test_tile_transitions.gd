@@ -62,7 +62,10 @@ func _edges(manifest: Dictionary) -> Dictionary:
 		var biome := String(cell.get("biome", ""))
 		if not out.has(biome):
 			out[biome] = {}
-		out[biome][String(cell.get("side", ""))] = String(cell.get("id", ""))
+		# Манифест — данные, и имя стороны в нём строчное (оно входит в id клетки:
+		# edge_grass_e). Контракт направления — верхний регистр SIDES, поэтому
+		# нормализуем здесь, а не в генераторе.
+		out[biome][String(cell.get("side", "")).to_upper()] = String(cell.get("id", ""))
 	return out
 
 

@@ -11,16 +11,20 @@ class _Flag:
 	var value := false
 
 
+## Псевдо-тайлсет: клетки берутся из манифеста атласа, а не из квадрата 4×2 —
+## иначе set_cell на реальной координате листа молча пишет пустоту.
 func _make_tileset() -> TileSet:
 	var ts := TileSet.new()
 	ts.tile_size = Vector2i(16, 16)
+	var all_coords: Array = []
+	for biome in TileAtlas.BIOME_NAMES.size():
+		all_coords.append_array(TileAtlas.base_coords(biome))
 	for sid in [TileAtlas.SOURCE_ID, TileAtlas.FOG_SOURCE_ID]:
 		var src := TileSetAtlasSource.new()
 		src.texture = ImageTexture.create_from_image(Image.create_empty(64, 32, false, Image.FORMAT_RGBA8))
 		src.texture_region_size = Vector2i(16, 16)
-		for y in 2:
-			for x in 4:
-				src.create_tile(Vector2i(x, y))
+		for coords in all_coords:
+			src.create_tile(coords)
 		ts.add_source(src, sid)
 	return ts
 
@@ -50,9 +54,40 @@ func test_paint_uses_biome_source_per_terrain() -> void:
 	assert_that(layer.get_cell_source_id(grass)).is_equal(TileAtlas.SOURCE_ID)
 	assert_that(layer.get_cell_source_id(water)).is_equal(TileAtlas.SOURCE_ID)
 	assert_that(layer.get_cell_source_id(mountain)).is_equal(TileAtlas.SOURCE_ID)
-	assert_that(layer.get_cell_atlas_coords(grass)).is_equal(TileAtlas.BASE_COORDS[TileAtlas.Biome.GRASS][0])
-	assert_that(layer.get_cell_atlas_coords(water)).is_equal(TileAtlas.BASE_COORDS[TileAtlas.Biome.WATER][0])
-	assert_that(layer.get_cell_atlas_coords(mountain)).is_equal(TileAtlas.BASE_COORDS[TileAtlas.Biome.ROCK][0])
+	# Вариант клетки выбирается по клетке и сиду, поэтому проверяется принадлежность
+	# множеству вариантов биома, а не конкретная клетка листа.
+	var outside: Array[String] = []
+	for pair in [[grass, TileAtlas.Biome.GRASS], [water, TileAtlas.Biome.WATER],
+			[mountain, TileAtlas.Biome.ROCK]]:
+		var cell: Vector2i = pair[0]
+		var coords: Vector2i = layer.get_cell_atlas_coords(cell)
+		if not TileAtlas.base_coords(pair[1]).has(coords):
+			outside.append("%s=%s не вариант %s" % [
+				str(cell), str(coords), TileAtlas.BIOME_NAMES[pair[1]]])
+	assert_array(outside).is_empty()
+	layer.queue_free()
+
+
+## Один и тот же тайлмап, перекрашенный дважды (paint → туман → paint), обязан
+## дать те же варианты: выбор детерминирован по клетке, а не по порядку обхода.
+func test_variant_choice_is_deterministic() -> void:
+	var model := _FakeModel.new()
+	model.terrain_grid = {
+		Vector2i(0, 0): HexUtils.Terrain.GRASS, Vector2i(1, 0): HexUtils.Terrain.GRASS,
+		Vector2i(2, 0): HexUtils.Terrain.WATER, Vector2i(3, 0): HexUtils.Terrain.WATER,
+		Vector2i(4, 0): HexUtils.Terrain.SNOW, Vector2i(5, 0): HexUtils.Terrain.ROAD,
+	}
+	var layer := _make_layer()
+	var renderer := MapRenderer.new(model)
+	renderer.paint(layer)
+	var before: Array[String] = []
+	for cell in model.terrain_grid:
+		before.append(str(layer.get_cell_atlas_coords(cell)))
+	renderer.paint(layer)
+	var after: Array[String] = []
+	for cell in model.terrain_grid:
+		after.append(str(layer.get_cell_atlas_coords(cell)))
+	assert_array(after).is_equal(before)
 	layer.queue_free()
 
 

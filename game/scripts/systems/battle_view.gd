@@ -50,10 +50,17 @@ func setup() -> void:
 		get_viewport().size_changed.connect(fit_camera)
 
 func paint_field() -> void:
-	var grass: Vector2i = TileAtlas.BASE_COORDS[TileAtlas.Biome.GRASS][0]
+	# Координаты читаются из манифеста атласа; вариант берётся по клетке, чтобы
+	# поле боя не выглядело одним штампованным тайлом.
+	var variants: Array = TileAtlas.base_coords(TileAtlas.Biome.GRASS)
+	if variants.is_empty():
+		push_error("TileAtlas: у биома grass нет базовых тайлов")
+		return
 	for y in range(-RING, BattleState.BH + RING):
 		for x in range(-RING, BattleState.BW + RING):
-			_tile_map.set_cell(Vector2i(x, y), TileAtlas.SOURCE_ID, grass)
+			var cell := Vector2i(x, y)
+			_tile_map.set_cell(cell, TileAtlas.SOURCE_ID,
+				variants[TileAtlas.variant_for(cell, 0, variants.size())])
 
 func add_obstacle(cell: Vector2i, emoji: String) -> void:
 	var lbl: Label = _ObstacleLabel.instantiate()
