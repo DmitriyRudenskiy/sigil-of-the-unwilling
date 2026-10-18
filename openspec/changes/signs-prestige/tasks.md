@@ -11,8 +11,8 @@
 
 ## 2. Разрывы
 
-- [ ] 2.1 SM знака: DORMANT→ACTIVE (выбор); ACTIVE→SLEEPING (Престиж ≤ 0); SLEEPING→ACTIVE (Престиж > 0); SLEEPING ≠ game over.
-- [ ] 2.2 Фракционные действия: ≤12 за кампанию; штраф стиля только за повтор; 13-е → без начисления; счётчик в ledger (`faction_actions_used`).
+- [x] 2.1 SM знака: DORMANT→ACTIVE (выбор); ACTIVE→SLEEPING (Престиж ≤ 0); SLEEPING→ACTIVE (Престиж > 0); SLEEPING ≠ game over. (`sign_system.gd`)
+- [x] 2.2 Фракционные действия: ≤12 за кампанию; штраф стиля только за повтор; 13-е → без начисления; счётчик в сейве (`faction_actions_used`). (`sign_system.gd`)
 - [ ] 2.3 Косметические ранги в UI: титул/рамка (5 рангов) — mvp-ui-flow.
 - [ ] 2.4 UI-счётчик «N осталось» (фракционные действия) — mvp-ui-flow.
 - [ ] 2.5 Хроника: события знака (выбор, SLEEPING/ACTIVE, ранги) — mvp-ui-flow.
@@ -25,8 +25,8 @@
 
 ## 4. Верификация
 
-- [ ] 4.1 GdUnit4: SM знака (DORMANT→ACTIVE→SLEEPING→ACTIVE; SLEEPING ≠ game over).
-- [ ] 4.2 GdUnit4: фракционные действия (12-е — начисление, 13-е — без; штраф стиля за повтор).
+- [x] 4.1 GdUnit4: SM знака (DORMANT→ACTIVE→SLEEPING→ACTIVE; SLEEPING ≠ game over). (`test_sign_system.gd`)
+- [x] 4.2 GdUnit4: фракционные действия (12-е — начисление, 13-е — без; штраф стиля за повтор). (`test_sign_system.gd`)
 - [ ] 4.3 GdUnit4: ранги (пороги 0/200/500/1000/2000; понижение при падении).
 - [ ] 4.4 GdUnit4: косметика (S2: притока населения нет).
 - [ ] 4.5 GdUnit4: смерть носителя → «утрата» (−2 к спасам), кампания продолжается (R1, K-M11).
