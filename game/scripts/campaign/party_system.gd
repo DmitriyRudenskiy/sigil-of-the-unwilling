@@ -17,6 +17,7 @@ extends RefCounted
 ## и замена мёртвых (наёмник ур. города−1) — с боем партии (за срезом).
 
 const XP_JSON := "res://data/config/balance/xp.json"
+const CAMPAIGN_JSON := "res://data/config/balance/campaign.json"
 
 ## Фолбэк — канон 07-balance §3 (SRD-пороги уровней 2–5; K-M13).
 const DEFAULT_THRESHOLDS: Array[int] = [0, 2700, 6500, 15000, 38000]
@@ -185,3 +186,78 @@ static func alive_members(party: Array) -> Array:
 		if member is Dictionary and str(member.get("state", STATE_READY)) != STATE_DEAD:
 			out.append(member)
 	return out
+
+
+## ─────────────────────────────────────────────────────────────────────────────
+## Ветеран (party-characters 3.1, Q-M56→(а), K-M10, D-189): статус пережившего
+## бойца (не юнит/ярус). Счётчик battles_survived — входная величина (сейв);
+## порог N — баланс-кран F4 (campaign.json → veteran.battles_to_veteran);
+## бонус — +1 ступень к спасам/проверкам до конца боя (применение — боевой
+## слой T-116; MVP-бой 1v1 авто — за срезом, здесь — только статус и значение).
+## Чистые функции: без ГСЧ, одинаковые входы → одинаковые выходы (I1).
+
+## Фолбэк-конфиг (только при неисправном campaign.json, push_warning).
+const DEFAULT_VETERAN_BATTLES := 5
+const DEFAULT_VETERAN_STEP := 1
+
+static var _campaign_cfg: Dictionary = {}
+
+
+static func _campaign_config() -> Dictionary:
+	if _campaign_cfg.is_empty():
+		var file := FileAccess.open(CAMPAIGN_JSON, FileAccess.READ)
+		if file != null:
+			var parsed: Variant = JSON.parse_string(file.get_as_text())
+			if parsed is Dictionary:
+				_campaign_cfg = parsed
+			else:
+				push_warning("PartySystem: campaign.json не распарсился — ветеран-фолбэк")
+		else:
+			push_warning("PartySystem: %s не найден — ветеран-фолбэк" % CAMPAIGN_JSON)
+	return _campaign_cfg
+
+
+## Порог N боёв для статуса Ветеран — campaign.json veteran.battles_to_veteran
+## (баланс-кран F4; Фазa 3 = ходы 14–17, 03-progression).
+static func veteran_threshold() -> int:
+	var v: Variant = _campaign_config().get("veteran", {})
+	if v is Dictionary:
+		return maxi(1, int((v as Dictionary).get("battles_to_veteran", DEFAULT_VETERAN_BATTLES)))
+	return DEFAULT_VETERAN_BATTLES
+
+
+## Ступень бонуса Ветерана к спасам/проверкам — campaign.json
+## veteran.save_step_bonus (канон +1, K-M10).
+static func veteran_save_step() -> int:
+	var v: Variant = _campaign_config().get("veteran", {})
+	if v is Dictionary:
+		return int((v as Dictionary).get("save_step_bonus", DEFAULT_VETERAN_STEP))
+	return DEFAULT_VETERAN_STEP
+
+
+## Статус Ветеран: пережито боёв (battles_survived) ≥ порога N.
+static func is_veteran(member: Dictionary) -> bool:
+	if not (member is Dictionary):
+		return false
+	return int(member.get("battles_survived", 0)) >= veteran_threshold()
+
+
+## Бонус Ветерана к спасам/проверкам: +N ступеней если Ветеран, иначе 0.
+## Потребитель — боевой слой T-116 (до конца боя); MVP-бой 1v1 авто — за срезом.
+static func veteran_bonus(member: Dictionary) -> int:
+	return veteran_save_step() if is_veteran(member) else 0
+
+
+## Отметить пережитый бой: +1 к battles_survived у каждого ЖИВОГО члена
+## (вызов — ПОСЛЕ apply_losses: павшие в этом бою неincrement-ятся). Возвращает
+## число отмеченных членов.
+static func record_battle_survival(party: Array) -> int:
+	var marked := 0
+	for member in party:
+		if not (member is Dictionary):
+			continue
+		if str(member.get("state", STATE_READY)) == STATE_DEAD:
+			continue
+		member["battles_survived"] = int(member.get("battles_survived", 0)) + 1
+		marked += 1
+	return marked

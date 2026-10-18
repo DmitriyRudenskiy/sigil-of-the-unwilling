@@ -27,6 +27,11 @@
     "hero_capacity_food": 10,
     "starvation_attack_penalty": -2
   },
+  "veteran": {
+    "_note": "party-characters 3.1 (Q-M56→(а), K-M10, D-189): Ветеран = статус пережившего бойца (не юнит/ярус). battles_to_veteran — порог N (баланс-кран F4; Фазa 3 = ходы 14–17, 03-progression). save_step_bonus — +1 ступень к спасам/проверкам до конца боя (применение — боевой слой T-116; MVP-бой 1v1 авто — за срезом).",
+    "battles_to_veteran": 5,
+    "save_step_bonus": 1
+  },
   "cr_anchors": {
     "phase_1": {
       "turns": [

@@ -225,6 +225,9 @@ func _request_battle(context: Dictionary) -> void:
 	# (R1: wipe = DEFEAT; сейв и Престиж сохраняются).
 	record_party_xp(last_battle_report, float(raider_spec.get("cr", 0.0)))
 	apply_party_battle_losses(last_battle_report)
+	# party-characters 3.1 (K-M10): Ветеран — счётчик пережитых боёв (после
+	# потерь: павшие в этом бою неincrement-ятся; статус → +1 ступень в T-116).
+	PartySystem.record_battle_survival(party)
 	if tier >= 3:  # финальный рейд (raids.json final_raid: tier 3, босс K-R3)
 		final_battle_seen = true
 		final_raid_repelled = str(last_battle_report.get("outcome", "")) == "win"
