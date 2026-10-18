@@ -47,6 +47,9 @@ var campaign_status: String = "ongoing"
 ## Хуки фаз (T-040/T-070 вешают свою логику; каркас — no-op).
 ## settlement: население/события/настроение (T-040, без production — T-122).
 var settlement_hook: Callable
+## T-020/T-021: player-фаза — переходы героя (RegionMap): авто-режим/отступление
+## (time-based); решение игрока (куда идти) — через UI, до end_player_phase.
+var player_hook: Callable
 ## caravans/diplomacy: post-MVP-слоты (Q-M31 §1.3) — no-op в MVP.
 var caravans_hook: Callable
 var diplomacy_hook: Callable
@@ -132,6 +135,8 @@ func end_player_phase() -> void:
 func _enter_player_phase() -> void:
 	phase = Phase.PLAYER
 	_log("player:turn=%d" % current_turn)
+	if player_hook.is_valid():
+		player_hook.call()
 
 
 func _finish_turn() -> void:
