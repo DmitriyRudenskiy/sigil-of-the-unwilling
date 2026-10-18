@@ -31,7 +31,7 @@
 ## 5. Верификация
 
 - [x] 5.1 GdUnit4: зоны лестницы (границы: 4−modLuck, 0, −(3+modLuck), −(8+modLuck)); Триумф = ×2, Частичный = ½. *(Верифицировано: test_battle_rules.gd — test_ladder_zone_base_thresholds (границы 4/0/−3/−8), test_ladder_zone_luck_shifts_thresholds (4−modLuck / −(3+modLuck) / −(8+modLuck)), test_calculate_attack_zone_triumph_double_damage (×2), test_calculate_attack_zone_partial_half_damage (½).)*
-- [ ] 5.2 GdUnit4: death saves (margin_N формула, 3/3); лимит 20 раундов → ничья (без XP).
+- [x] 5.2 GdUnit4: death saves (margin_N формула, 3/3); лимит 20 раундов → ничья (без XP). *(margin_N = mod(CON) + supply(N=1) − (N−1), ровно 3 спаса; 3 провала = смерть, 3 успеха = WOUNDED (не погиб), смешанный = стабилизация. Тесты: test_death_saves_margin_n_con1_two_success_one_fail, test_death_saves_margin_n_con2_three_success_wounded, test_death_saves_supply_bonus_rescues_first_save, test_death_saves_supply_bonus_not_enough.)*
 - [x] 5.3 GdUnit4: авто-режим (детерминизм, отступление при frightened); 100 повторов → byte-identical. *(test_battle_auto_ai.gd: test_resolve_multi_deterministic, test_resolve_multi_retreat_on_frightened, test_resolve_multi_enemy_frightened_is_win, test_resolve_multi_100_repeats_byte_identical.)*
 - [ ] 5.4 GdUnit4: бином «Фланг» (fighter+ranger → бонус); prone (−2/+2); местность (±2).
 - [ ] 5.5 GdUnit4: мораль аннулирована (потери = −2 ступени к спасам до конца боя; принуд. отступление при 0 HD).

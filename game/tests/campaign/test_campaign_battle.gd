@@ -130,6 +130,47 @@ func test_death_saves_stabilize_at_or_above_zero() -> void:
 	assert_bool(bool(b["dead"])).is_false()
 
 
+## — 5.2: death saves margin_N = mod(CON) + supply(N=1) − (N−1) (Q-M57→(а)) —
+
+func test_death_saves_margin_n_con1_two_success_one_fail() -> void:
+	# con=1: N=1 (1≥0 успех), N=2 (0≥0 успех), N=3 (−1<0 провал) → 2/1 → не погиб.
+	var a := _c({"attack": 25, "damage": 5})
+	var b := _r({"con": 1})
+	var report := CampaignBattleScript.resolve(a, b)
+	assert_bool(bool(b["dead"])).is_false()
+	assert_int((report["losses"] as Array).size()).is_equal(0)
+
+
+func test_death_saves_margin_n_con2_three_success_wounded() -> void:
+	# con=2: N=1 (2≥0), N=2 (1≥0), N=3 (0≥0) → 3 успеха = WOUNDED (не погиб).
+	var a := _c({"attack": 25, "damage": 5})
+	var b := _r({"con": 2})
+	var report := CampaignBattleScript.resolve(a, b)
+	assert_bool(bool(b["dead"])).is_false()
+	assert_int((report["losses"] as Array).size()).is_equal(0)
+
+
+func test_death_saves_supply_bonus_rescues_first_save() -> void:
+	# con=−1, supply_bonus=2: N=1 (−1+2=1≥0 успех), N=2 (−2<0), N=3 (−3<0) →
+	# 1/2 → не погиб (снабжение спасает 1-й спас, Q-M57→(а)).
+	var a := _c({"attack": 25, "damage": 5})
+	var b := _r({"con": -1, "supply_bonus": 2})
+	var report := CampaignBattleScript.resolve(a, b)
+	assert_bool(bool(b["dead"])).is_false()
+	assert_int((report["losses"] as Array).size()).is_equal(0)
+
+
+func test_death_saves_supply_bonus_not_enough() -> void:
+	# con=−2, supply_bonus=2: N=1 (−2+2=0≥0 успех), N=2 (−3<0), N=3 (−4<0) →
+	# 1/2 → не погиб. con=−3, supply_bonus=2: N=1 (−3+2=−1<0), N=2 (−4<0), N=3 (−5<0)
+	# → 3 провала → смерть.
+	var a := _c({"attack": 25, "damage": 5})
+	var b := _r({"con": -3, "supply_bonus": 2})
+	var report := CampaignBattleScript.resolve(a, b)
+	assert_bool(bool(b["dead"])).is_true()
+	assert_array(report["losses"]).contains_exactly([77])
+
+
 ## — Лимит 20 раундов — ничья (D-128) —
 
 func test_20_round_limit_is_draw() -> void:
