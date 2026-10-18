@@ -9,6 +9,31 @@ date: 2026-10-19
 
 # CHANGELOG — docs/
 
+## [2026-10-19] — Party-characters 3.1/3.2 (Ветеран + Снабжение) + city-construction 2.1 (K-M16) в main
+
+- **party-characters 3.1 Ветеран** (K-M10, Q-M56→(а), D-189; `feat/party-veteran` → `0d294bca`):
+  статус пережившего бойца (не юнит/ярус). `PartySystem`: счётчик `battles_survived`,
+  порог N=5 (баланс-кран F4, `campaign.json → veteran`), `is_veteran`, `veteran_bonus`
+  (+1 ступень к спасам/проверкам). Инкремент в `_request_battle` после потерь (павшие в
+  бою не increment-ятся). Применение +1 в бою — боевой слой T-116 (MVP-бой 1v1 авто — за
+  срезом). 10 тестов (`test_veteran.gd`).
+- **party-characters 3.2 Снабжение** (R7, Q-M75→(б); `feat/party-supply` → `747737db`):
+  `SupplySystem`: ёмкость 10 еды, расход 1/персонаж/переход, старт с полным запасом;
+  полный (>50%) → +2 к 1-му спасу; голод (0) → −2 к атакам (P-4). Сейв — под-ключ
+  `campaign.supply` (не топ-секция: схема T-110 валидирует минимальные тест-состояния).
+  Примирение с плейсхолдер-едой `RegionMap` (старт 0, restock=UI) — техдолг **Q-M91**.
+  11 тестов (`test_supply_system.gd`).
+- **city-construction-districts 2.1** (K-M16; `feat/district-no-grant` → `9e01e735`):
+  верификация — «район создан» не источник Престижа и не XP. Престиж — только ledger
+  `battle_victory` (T-112), XP — только бой/узел/рейд (T-060); строительство и районный
+  процесс без начислений. 4 теста (`test_district_no_grant.gd`).
+- **Отложено (зафиксировано):** city-construction 2.4 (ферма у леса +15% — требует
+  террейн-adjacency; сейчас `recompute_adjacency` — только здание→здание, есть правило
+  sawmill→food +15%); party-characters 2.1/2.2 (WOUNDED/REST — внутрибоевые состояния,
+  слой T-116, не персистятся в MVP); party-training 3.1–3.3 (синк C-12/C-13 — вердикт
+  владельца).
+- GdUnit **2662/0** (local), docs-links OK (90 заметок).
+
 ## [2026-10-19] — Сведение локальных работ: T-003 + openspec-v4 в main; техдолг по незакрытым контурам
 
 - **T-003 (стартовая партия R2) — в main** (`feat/t003-starting-party` → merge `4b828020`):
