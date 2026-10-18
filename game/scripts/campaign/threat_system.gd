@@ -318,6 +318,16 @@ func _resolve_raid(turn: int, stocks: Dictionary, barracks: bool, hero: bool,
 	var loss: float = power * (1.0 - defense)
 	var before: float = float(stocks.get(target, 0.0))
 	loss = minf(loss, loss_cap_for(target) * before)  # per-ресурсный кап (Q-M58→(в))
+	var cap_applied: bool = loss < power * (1.0 - defense) - 1e-9
+	# raid-pressure 2.3: рейд по клетке героя → бой; победа → −50% последствий.
+	# Бой — до применения урона (исход определяет размер урона).
+	var battle_won: bool = false
+	if hero and battle_handler.is_valid():
+		var outcome: String = str(battle_handler.call({"turn": turn, "tier": tier,
+			"cr_range": cr_range(turn), "target": target, "loss": loss}))
+		battle_won = (outcome == "win")
+	if battle_won:
+		loss = loss * 0.5  # победа героя → −50% последствий рейда
 	stocks[target] = before - loss
 	raids_count += 1
 	max_tier_raided = maxi(max_tier_raided, tier)
@@ -328,19 +338,17 @@ func _resolve_raid(turn: int, stocks: Dictionary, barracks: bool, hero: bool,
 		"defense": defense,
 		"target": target,
 		"loss": loss,
-		"cap_applied": loss < power * (1.0 - defense) - 1e-9,
-		"battle_requested": false,
+		"cap_applied": cap_applied,
+		"battle_requested": hero,
+		"battle_won": battle_won,
 		"cr_range": cr_range(turn),
 	}
-	_log("ход %d: рейд тира %d — цель %s, урон %.1f (power %.0f, defense %.1f)%s"
+	_log("ход %d: рейд тира %d — цель %s, урон %.1f (power %.0f, defense %.1f)%s%s"
 			% [turn, tier, target, loss, power, defense,
-				", cap %.0f%%" % (loss_cap_for(target) * 100.0) if result["cap_applied"] else ""], report)
+				", cap %.0f%%" % (loss_cap_for(target) * 100.0) if cap_applied else "",
+				", бой: победа → −50%" if battle_won else ""], report)
 	if hero:
-		result["battle_requested"] = true
 		_log("ход %d: герой в городе — бой (CR %s, шов T-050)" % [turn, str(cr_range(turn))], report)
-		if battle_handler.is_valid():
-			battle_handler.call({"turn": turn, "tier": tier, "cr_range": cr_range(turn),
-				"power": power, "target": target, "loss": loss})
 	else:
 		_log("ход %d: героя нет — авто-рейд (R5)" % turn, report)
 	return result

@@ -367,6 +367,35 @@ func test_cap_only_when_loss_exceeds() -> void:
 	assert_that(bool(r["raid"]["cap_applied"])).is_equal(false)
 
 
+## raid-pressure 2.3: рейд по клетке героя → бой; победа → −50% последствий.
+func test_hero_victory_reduces_consequences_50() -> void:
+	# Герой в городе, бой → победа: урон halved.
+	# food: stock 100, power 15, defense 0 → loss = 15; победа → 7.5.
+	var ts := _new_ts()
+	ts.wave = {"tier": 1, "power": 15.0, "target": "food", "camp_id": "x",
+		"turns_to_arrival": 0, "forced": false}
+	var stocks: Dictionary = {"food": 100.0, "wood": 0.0, "iron": 0.0}
+	var r: Dictionary = ts.process_turn(8, {
+		"stocks": stocks, "has_barracks": false, "hero_in_city": true,
+		"battle_handler": func(_ctx: Dictionary) -> String: return "win"})
+	assert_that(bool(r["raid"]["battle_requested"])).is_equal(true)
+	assert_that(bool(r["raid"]["battle_won"])).is_equal(true)
+	assert_float(r["raid"]["loss"]).is_equal_approx(7.5, 1e-6)
+	assert_float(stocks["food"]).is_equal_approx(92.5, 1e-6)
+
+	# Поражение: урон полный (15), без halving.
+	var ts2 := _new_ts()
+	ts2.wave = {"tier": 1, "power": 15.0, "target": "food", "camp_id": "x",
+		"turns_to_arrival": 0, "forced": false}
+	var stocks2: Dictionary = {"food": 100.0, "wood": 0.0, "iron": 0.0}
+	var r2: Dictionary = ts2.process_turn(8, {
+		"stocks": stocks2, "has_barracks": false, "hero_in_city": true,
+		"battle_handler": func(_ctx: Dictionary) -> String: return "lose"})
+	assert_that(bool(r2["raid"]["battle_won"])).is_equal(false)
+	assert_float(r2["raid"]["loss"]).is_equal_approx(15.0, 1e-6)
+	assert_float(stocks2["food"]).is_equal_approx(85.0, 1e-6)
+
+
 ## raid-pressure 4.5: AFK-каскад — капы per-рейд предотвращают chain collapse.
 ## Много рейдов подряд: запасы не уходят в минус (кап per-рейд ограничивает урон).
 func test_afk_cascade_no_chain_collapse() -> void:
