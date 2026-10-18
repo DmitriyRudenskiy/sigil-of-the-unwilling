@@ -253,6 +253,29 @@ func retreat() -> Dictionary:
 	return report
 
 
+## T-024 (FS): рейд по региону героя (поход) → бой; победа → −50% последствий.
+## Рейд по городу (R01) — через ThreatSystem (hero_in_city), не здесь.
+## Возвращает true, если бой состоялся (герой в походе).
+func field_raid(victory: bool) -> Dictionary:
+	var report := {"ok": false, "events": [] as Array}
+	if hero_region == start_region:
+		report["error"] = "рейд по городу — через ThreatSystem (hero_in_city)"
+		return report
+	if hero_state != STATE_EXPLORE:
+		report["error"] = "рейд возможен в EXPLORE (%s)" % hero_state
+		return report
+	_set_state(STATE_ENGAGE, report)
+	_set_state(STATE_BATTLE, report)
+	if victory:
+		_set_state(STATE_VICTORY, report)
+		_log("рейд по %s: победа, −50%% последствий" % hero_region, report)
+	else:
+		_set_state(STATE_DEFEAT, report)
+		_log("рейд по %s: поражение" % hero_region, report)
+	report["ok"] = true
+	return report
+
+
 ## Авто-режим (Y10): 2 дня без выбора → детерминированный ход (возврат к
 ## ближайшему узлу/городу). MVP: возврат в город (без боёв).
 func tick_days(days: int) -> void:
@@ -287,9 +310,10 @@ func resolve_battle() -> void:
 		days_without_choice = 0
 
 
-func _set_state(next: String) -> void:
+func _set_state(next: String, report: Dictionary = {}) -> void:
 	if next != hero_state:
 		hero_state = next
+		_log("SM: %s" % next, report)
 
 
 func _log(msg: String, report: Dictionary = {}) -> void:

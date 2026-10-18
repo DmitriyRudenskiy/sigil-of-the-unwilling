@@ -170,6 +170,31 @@ func test_retreat_returns_to_city() -> void:
 	assert_bool(m.hero_state == RegionMap.STATE_EXPLORE).is_true()
 
 
+## — 6b. FS (T-024): рейд по региону героя (поход) → бой; победа → −50% —
+
+func test_field_raid_victory() -> void:
+	var m := _make()
+	m.travel("R02")
+	var r: Dictionary = m.field_raid(true)
+	assert_bool(bool(r.ok)).is_true()
+	assert_bool(m.hero_state == RegionMap.STATE_VICTORY).is_true()
+
+
+func test_field_raid_defeat() -> void:
+	var m := _make()
+	m.travel("R02")
+	var r: Dictionary = m.field_raid(false)
+	assert_bool(bool(r.ok)).is_true()
+	assert_bool(m.hero_state == RegionMap.STATE_DEFEAT).is_true()
+
+
+func test_field_raid_in_city_rejected() -> void:
+	# Рейд по городу (R01) — через ThreatSystem (hero_in_city), не field_raid.
+	var m := _make()
+	var r: Dictionary = m.field_raid(true)
+	assert_bool(not bool(r.ok)).is_true()
+
+
 ## — 7. Авто-режим (Y10): 2 дня без выбора → возврат в город —
 
 func test_auto_mode_returns_to_city() -> void:
