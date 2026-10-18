@@ -2,6 +2,10 @@ class_name GameNumbersMap
 extends RefCounted
 
 const TILE_SIZE                  := 82    # тайл карты в тайл-шиде, px (TileAtlas)
+# Кратность затемнения открытой, но не видимой клетки — одна для базы и для
+# объектов (спека «Туман войны по всем слоям»; вердикт В2 → (в), D-205).
+const MAP_FOG_DIM := 0.45
+const MAP_FOG_MODULATE := Color(MAP_FOG_DIM, MAP_FOG_DIM, MAP_FOG_DIM)
 const MAP_SIZE_MIN              := 40
 const MAP_SIZE_MAX              := 70
 const MAP_VILLAGE_COUNT         := 8

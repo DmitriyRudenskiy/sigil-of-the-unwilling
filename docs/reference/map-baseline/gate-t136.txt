@@ -1,0 +1,58 @@
+# Доказательство T-136 (2026-10-19, локально): атлас после правки склейки + декаля от среднего варианта.
+# Кадр: Godot --path game -s tools/map_shot.gd -- --seed=4242 --size=40 --out=... (перед съёмкой --import!)
+
+$ md5 atlas/objects
+aa628cc2d1e2d4f22ec8e76f784a60fd
+8fd69c61331e15a76e7209db6a175138
+
+$ python3 scripts/check_map_art.py --shot docs/reference/map-baseline/atlas-t136.png
+PASS  frame/variety        1 − доля модального тайла: grass=0.86/73кл, water=0.78/27кл (худший water, порог ≥0.60)
+PASS  frame/periodicity    повторено кадром 0.33 при сдвиге (82, 0) (порог ≤0.60)
+PASS  frame/contrast       grass↔sand ΔE=14.4 по внутренности гекса (порог ≥12.0)
+PASS  atlas/variants       биомов: 8, мин. вариантов 4 (порог ≥4)
+PASS  atlas/distinct       различных базовых тайлов 1.00 (порог ≥0.90)
+PASS  atlas/not-flat       плоских (дисперсия <4.0): 0
+PASS  atlas/naming         имен вне `category_name_variant` (нижний регистр): 0
+PASS  atlas/structure      656×820 при сетке 8×10×82; вес 311 КБ (потолок 1500)
+PASS  atlas/resolution     окон материала меньше 82×4 px: 0
+PASS  atlas/seamless       рваных швов 0 из 32 (порог 24 MAD)
+PASS  atlas/base-opaque    прозрачных баз 0 из 32 (порог 0.99 непрозрачных пикселей)
+PASS  atlas/edge-closure   биомов с переходами 8 из 8
+PASS  atlas/decal-tone     худший ΔE(перо декаля ↔ база биома) 1.1 (mud); порог ≤12.0
+PASS  atlas/palette        max ΔE до полосы M 4.4 (тон #757852); порог ≤12
+PASS  objects/coverage     пустых 0, залитых 0 из 15; полоса 0.15–0.60
+PASS  objects/anchor       без прозрачной нижней кромки: 0
+PASS  provenance/rows      строк не хватает: нет; проблемных: нет
+GATE=0  (0 падений из 17 проверено, 0 пропущено явно)
+
+$ python3 scripts/check_map_art.py --self-test
+PASS  selftest/clean      чистый образец: все гарды зелёные
+PASS  selftest/atlas/seamless     разорвать шов → пойман
+PASS  selftest/atlas/resolution   понизить разрешение материала → пойман
+PASS  selftest/objects/coverage   залить фон объекта → пойман
+PASS  selftest/atlas/palette      подменить носитель полосы → пойман
+PASS  selftest/atlas/base-opaque  пробить базу насквозь → пойман
+PASS  selftest/atlas/edge-closure снять переход → пойман
+PASS  selftest/atlas/decal-tone   предумножить RGB декаля на альфу → пойман
+PASS  selftest/frame/variety      оставить один вариант на биом → пойман
+PASS  selftest/frame/contrast     свести рампу биома к соседней → пойман
+
+$ python3 scripts/measure_decal_seam.py
+порог «не читается как граница биома»: ΔE ≥ 12.0
+
+биом    рампа базы  стык v0  стык v3  L* базы  L* декаля
+grass          4.7      3.5      2.9     60.5       54.5
+mud           11.7     12.2      5.7     50.6       40.6
+road          12.7      9.6      8.1     51.1       61.1
+rock          18.7      4.6      3.0     50.8       47.5
+sand           4.9      2.5      1.6     69.3       71.1
+snow           9.4      2.5      0.7     77.5       77.8
+swamp          5.9      5.5      1.7     43.9       40.1
+water          1.7      2.2      1.9     21.8       22.7
+
+рампа базы = шаг между самыми разными вариантами одного биома (член, который тикет считал главным);
+стык v0/v3 = шаг декаля к левому краю базы 0-го/3-го варианта — если оба большие и близкие, виноват не вариант.
+
+$ python3 scripts/measure_decal_seam.py --shot docs/reference/map-baseline/atlas-t136.png
+пар перехода: 80; медиана ΔE(декаль↔свой биом) = 3.6, медиана ΔE(декаль↔клетка, в которую он наедает) = 32.0
+худший ΔE(декаль↔свой биом) = 11.6 (grass→road), порог 12.0 → PASS

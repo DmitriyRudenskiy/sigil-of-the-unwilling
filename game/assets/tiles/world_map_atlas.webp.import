@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dfnh6oiccr2wf"
-path="res://.godot/imported/world_tiles.webp-746cbf0b1748b277c71dc020c0e9b149.ctex"
+uid="uid://byahla0i3jj2c"
+path="res://.godot/imported/world_map_atlas.webp-25b723b09df416791a575dfae955953c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/tiles/world_tiles.webp"
-dest_files=["res://.godot/imported/world_tiles.webp-746cbf0b1748b277c71dc020c0e9b149.ctex"]
+source_file="res://assets/tiles/world_map_atlas.webp"
+dest_files=["res://.godot/imported/world_map_atlas.webp-25b723b09df416791a575dfae955953c.ctex"]
 
 [params]
 

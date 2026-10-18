@@ -21,20 +21,28 @@ var _scroll_nodes: Dictionary = {}
 var _scrolls: Dictionary = {}
 var fog_vis = null
 
+## Туман для объектов карты. Вердикт владельца (В2 → (в), D-205): статичное
+## содержимое открытой, но не видимой клетки не прячется, а затемняется той же
+## кратностью, что и база (спека «Туман войны по всем слоям»), а вражеские стеки
+## и дальше скрыты — затемнённый стеки отдали бы разведку врагом, чего спека
+## запрещает («в тумане нет яркого содержимого» — про добычу, а не про врага).
 func apply_fog_visibility(vis) -> void:
 	fog_vis = vis
 	if vis == null:
 		return
+	_dim_static(_resource_nodes, vis)
+	_dim_static(_chest_nodes, vis)
+	_dim_static(_scroll_nodes, vis)
+	_dim_static(_village_nodes, vis)
 	for cell in _enemy_nodes:
 		_enemy_nodes[cell].visible = vis.is_visible(cell)
-	for cell in _resource_nodes:
-		_resource_nodes[cell].visible = vis.is_visible(cell)
-	for cell in _chest_nodes:
-		_chest_nodes[cell].visible = vis.is_visible(cell)
-	for cell in _scroll_nodes:
-		_scroll_nodes[cell].visible = vis.is_visible(cell)
-	for cell in _village_nodes:
-		_village_nodes[cell].visible = vis.is_visible(cell)
+
+
+func _dim_static(nodes: Dictionary, vis) -> void:
+	for cell in nodes:
+		var node: Node2D = nodes[cell]
+		node.visible = vis.is_explored(cell)
+		node.modulate = Color.WHITE if vis.is_visible(cell) else GameNumbers.MAP_FOG_MODULATE
 
 var _sprite_cache: Dictionary = {}
 

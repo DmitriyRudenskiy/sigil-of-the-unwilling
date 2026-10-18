@@ -1,0 +1,1382 @@
+{
+ "tile": 82,
+ "image": "world_map_atlas.webp",
+ "grid": [
+  8,
+  10
+ ],
+ "format": "webp",
+ "quality": 90,
+ "prompt_version": "map-1",
+ "model": {
+  "krea2": {
+   "unet": "krea2_turbo_fp8_scaled.safetensors",
+   "steps": 8,
+   "cfg": 1.0,
+   "sampler": "euler",
+   "negative": "zeroed"
+  }
+ },
+ "cells": [
+  {
+   "id": "base_grass_0",
+   "kind": "base",
+   "biome": "grass",
+   "variant": 0,
+   "source": "image-clone/map/raw/mat_grass_0.webp",
+   "atlas": [
+    0,
+    0
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_grass_1",
+   "kind": "base",
+   "biome": "grass",
+   "variant": 1,
+   "source": "image-clone/map/raw/mat_grass_1.webp",
+   "atlas": [
+    1,
+    0
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_grass_2",
+   "kind": "base",
+   "biome": "grass",
+   "variant": 2,
+   "source": "image-clone/map/raw/mat_grass_2.webp",
+   "atlas": [
+    2,
+    0
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_grass_3",
+   "kind": "base",
+   "biome": "grass",
+   "variant": 3,
+   "source": "image-clone/map/raw/mat_grass_3.webp",
+   "atlas": [
+    3,
+    0
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_sand_0",
+   "kind": "base",
+   "biome": "sand",
+   "variant": 0,
+   "source": "image-clone/map/raw/mat_sand_0.webp",
+   "atlas": [
+    4,
+    0
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_sand_1",
+   "kind": "base",
+   "biome": "sand",
+   "variant": 1,
+   "source": "image-clone/map/raw/mat_sand_1.webp",
+   "atlas": [
+    5,
+    0
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_sand_2",
+   "kind": "base",
+   "biome": "sand",
+   "variant": 2,
+   "source": "image-clone/map/raw/mat_sand_2.webp",
+   "atlas": [
+    6,
+    0
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_sand_3",
+   "kind": "base",
+   "biome": "sand",
+   "variant": 3,
+   "source": "image-clone/map/raw/mat_sand_3.webp",
+   "atlas": [
+    7,
+    0
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_snow_0",
+   "kind": "base",
+   "biome": "snow",
+   "variant": 0,
+   "source": "image-clone/map/raw/mat_snow_0.webp",
+   "atlas": [
+    0,
+    1
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_snow_1",
+   "kind": "base",
+   "biome": "snow",
+   "variant": 1,
+   "source": "image-clone/map/raw/mat_snow_1.webp",
+   "atlas": [
+    1,
+    1
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_snow_2",
+   "kind": "base",
+   "biome": "snow",
+   "variant": 2,
+   "source": "image-clone/map/raw/mat_snow_2.webp",
+   "atlas": [
+    2,
+    1
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_snow_3",
+   "kind": "base",
+   "biome": "snow",
+   "variant": 3,
+   "source": "image-clone/map/raw/mat_snow_3.webp",
+   "atlas": [
+    3,
+    1
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_swamp_0",
+   "kind": "base",
+   "biome": "swamp",
+   "variant": 0,
+   "source": "image-clone/map/raw/mat_swamp_0.webp",
+   "atlas": [
+    4,
+    1
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_swamp_1",
+   "kind": "base",
+   "biome": "swamp",
+   "variant": 1,
+   "source": "image-clone/map/raw/mat_swamp_1.webp",
+   "atlas": [
+    5,
+    1
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_swamp_2",
+   "kind": "base",
+   "biome": "swamp",
+   "variant": 2,
+   "source": "image-clone/map/raw/mat_swamp_2.webp",
+   "atlas": [
+    6,
+    1
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_swamp_3",
+   "kind": "base",
+   "biome": "swamp",
+   "variant": 3,
+   "source": "image-clone/map/raw/mat_swamp_3.webp",
+   "atlas": [
+    7,
+    1
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_water_0",
+   "kind": "base",
+   "biome": "water",
+   "variant": 0,
+   "source": "image-clone/map/raw/mat_water_0.webp",
+   "atlas": [
+    0,
+    2
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_water_1",
+   "kind": "base",
+   "biome": "water",
+   "variant": 1,
+   "source": "image-clone/map/raw/mat_water_1.webp",
+   "atlas": [
+    1,
+    2
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_water_2",
+   "kind": "base",
+   "biome": "water",
+   "variant": 2,
+   "source": "image-clone/map/raw/mat_water_2.webp",
+   "atlas": [
+    2,
+    2
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_water_3",
+   "kind": "base",
+   "biome": "water",
+   "variant": 3,
+   "source": "image-clone/map/raw/mat_water_3.webp",
+   "atlas": [
+    3,
+    2
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_rock_0",
+   "kind": "base",
+   "biome": "rock",
+   "variant": 0,
+   "source": "image-clone/map/raw/mat_rock_0.webp",
+   "atlas": [
+    4,
+    2
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_rock_1",
+   "kind": "base",
+   "biome": "rock",
+   "variant": 1,
+   "source": "image-clone/map/raw/mat_rock_1.webp",
+   "atlas": [
+    5,
+    2
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_rock_2",
+   "kind": "base",
+   "biome": "rock",
+   "variant": 2,
+   "source": "image-clone/map/raw/mat_rock_2.webp",
+   "atlas": [
+    6,
+    2
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_rock_3",
+   "kind": "base",
+   "biome": "rock",
+   "variant": 3,
+   "source": "image-clone/map/raw/mat_rock_3.webp",
+   "atlas": [
+    7,
+    2
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_mud_0",
+   "kind": "base",
+   "biome": "mud",
+   "variant": 0,
+   "source": "image-clone/map/raw/mat_mud_0.webp",
+   "atlas": [
+    0,
+    3
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_mud_1",
+   "kind": "base",
+   "biome": "mud",
+   "variant": 1,
+   "source": "image-clone/map/raw/mat_mud_1.webp",
+   "atlas": [
+    1,
+    3
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_mud_2",
+   "kind": "base",
+   "biome": "mud",
+   "variant": 2,
+   "source": "image-clone/map/raw/mat_mud_2.webp",
+   "atlas": [
+    2,
+    3
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_mud_3",
+   "kind": "base",
+   "biome": "mud",
+   "variant": 3,
+   "source": "image-clone/map/raw/mat_mud_3.webp",
+   "atlas": [
+    3,
+    3
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_road_0",
+   "kind": "base",
+   "biome": "road",
+   "variant": 0,
+   "source": "image-clone/map/raw/mat_road_0.webp",
+   "atlas": [
+    4,
+    3
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_road_1",
+   "kind": "base",
+   "biome": "road",
+   "variant": 1,
+   "source": "image-clone/map/raw/mat_road_1.webp",
+   "atlas": [
+    5,
+    3
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_road_2",
+   "kind": "base",
+   "biome": "road",
+   "variant": 2,
+   "source": "image-clone/map/raw/mat_road_2.webp",
+   "atlas": [
+    6,
+    3
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "base_road_3",
+   "kind": "base",
+   "biome": "road",
+   "variant": 3,
+   "source": "image-clone/map/raw/mat_road_3.webp",
+   "atlas": [
+    7,
+    3
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_grass_e",
+   "kind": "edge",
+   "biome": "grass",
+   "side": "e",
+   "source": "image-clone/map/raw/mat_grass_0.webp",
+   "atlas": [
+    0,
+    4
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_grass_ne",
+   "kind": "edge",
+   "biome": "grass",
+   "side": "ne",
+   "source": "image-clone/map/raw/mat_grass_0.webp",
+   "atlas": [
+    1,
+    4
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_grass_nw",
+   "kind": "edge",
+   "biome": "grass",
+   "side": "nw",
+   "source": "image-clone/map/raw/mat_grass_0.webp",
+   "atlas": [
+    2,
+    4
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_grass_w",
+   "kind": "edge",
+   "biome": "grass",
+   "side": "w",
+   "source": "image-clone/map/raw/mat_grass_0.webp",
+   "atlas": [
+    3,
+    4
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_grass_sw",
+   "kind": "edge",
+   "biome": "grass",
+   "side": "sw",
+   "source": "image-clone/map/raw/mat_grass_0.webp",
+   "atlas": [
+    4,
+    4
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_grass_se",
+   "kind": "edge",
+   "biome": "grass",
+   "side": "se",
+   "source": "image-clone/map/raw/mat_grass_0.webp",
+   "atlas": [
+    5,
+    4
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_sand_e",
+   "kind": "edge",
+   "biome": "sand",
+   "side": "e",
+   "source": "image-clone/map/raw/mat_sand_0.webp",
+   "atlas": [
+    6,
+    4
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_sand_ne",
+   "kind": "edge",
+   "biome": "sand",
+   "side": "ne",
+   "source": "image-clone/map/raw/mat_sand_0.webp",
+   "atlas": [
+    7,
+    4
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_sand_nw",
+   "kind": "edge",
+   "biome": "sand",
+   "side": "nw",
+   "source": "image-clone/map/raw/mat_sand_0.webp",
+   "atlas": [
+    0,
+    5
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_sand_w",
+   "kind": "edge",
+   "biome": "sand",
+   "side": "w",
+   "source": "image-clone/map/raw/mat_sand_0.webp",
+   "atlas": [
+    1,
+    5
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_sand_sw",
+   "kind": "edge",
+   "biome": "sand",
+   "side": "sw",
+   "source": "image-clone/map/raw/mat_sand_0.webp",
+   "atlas": [
+    2,
+    5
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_sand_se",
+   "kind": "edge",
+   "biome": "sand",
+   "side": "se",
+   "source": "image-clone/map/raw/mat_sand_0.webp",
+   "atlas": [
+    3,
+    5
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_snow_e",
+   "kind": "edge",
+   "biome": "snow",
+   "side": "e",
+   "source": "image-clone/map/raw/mat_snow_0.webp",
+   "atlas": [
+    4,
+    5
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_snow_ne",
+   "kind": "edge",
+   "biome": "snow",
+   "side": "ne",
+   "source": "image-clone/map/raw/mat_snow_0.webp",
+   "atlas": [
+    5,
+    5
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_snow_nw",
+   "kind": "edge",
+   "biome": "snow",
+   "side": "nw",
+   "source": "image-clone/map/raw/mat_snow_0.webp",
+   "atlas": [
+    6,
+    5
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_snow_w",
+   "kind": "edge",
+   "biome": "snow",
+   "side": "w",
+   "source": "image-clone/map/raw/mat_snow_0.webp",
+   "atlas": [
+    7,
+    5
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_snow_sw",
+   "kind": "edge",
+   "biome": "snow",
+   "side": "sw",
+   "source": "image-clone/map/raw/mat_snow_0.webp",
+   "atlas": [
+    0,
+    6
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_snow_se",
+   "kind": "edge",
+   "biome": "snow",
+   "side": "se",
+   "source": "image-clone/map/raw/mat_snow_0.webp",
+   "atlas": [
+    1,
+    6
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_swamp_e",
+   "kind": "edge",
+   "biome": "swamp",
+   "side": "e",
+   "source": "image-clone/map/raw/mat_swamp_0.webp",
+   "atlas": [
+    2,
+    6
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_swamp_ne",
+   "kind": "edge",
+   "biome": "swamp",
+   "side": "ne",
+   "source": "image-clone/map/raw/mat_swamp_0.webp",
+   "atlas": [
+    3,
+    6
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_swamp_nw",
+   "kind": "edge",
+   "biome": "swamp",
+   "side": "nw",
+   "source": "image-clone/map/raw/mat_swamp_0.webp",
+   "atlas": [
+    4,
+    6
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_swamp_w",
+   "kind": "edge",
+   "biome": "swamp",
+   "side": "w",
+   "source": "image-clone/map/raw/mat_swamp_0.webp",
+   "atlas": [
+    5,
+    6
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_swamp_sw",
+   "kind": "edge",
+   "biome": "swamp",
+   "side": "sw",
+   "source": "image-clone/map/raw/mat_swamp_0.webp",
+   "atlas": [
+    6,
+    6
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_swamp_se",
+   "kind": "edge",
+   "biome": "swamp",
+   "side": "se",
+   "source": "image-clone/map/raw/mat_swamp_0.webp",
+   "atlas": [
+    7,
+    6
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_water_e",
+   "kind": "edge",
+   "biome": "water",
+   "side": "e",
+   "source": "image-clone/map/raw/mat_water_0.webp",
+   "atlas": [
+    0,
+    7
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_water_ne",
+   "kind": "edge",
+   "biome": "water",
+   "side": "ne",
+   "source": "image-clone/map/raw/mat_water_0.webp",
+   "atlas": [
+    1,
+    7
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_water_nw",
+   "kind": "edge",
+   "biome": "water",
+   "side": "nw",
+   "source": "image-clone/map/raw/mat_water_0.webp",
+   "atlas": [
+    2,
+    7
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_water_w",
+   "kind": "edge",
+   "biome": "water",
+   "side": "w",
+   "source": "image-clone/map/raw/mat_water_0.webp",
+   "atlas": [
+    3,
+    7
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_water_sw",
+   "kind": "edge",
+   "biome": "water",
+   "side": "sw",
+   "source": "image-clone/map/raw/mat_water_0.webp",
+   "atlas": [
+    4,
+    7
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_water_se",
+   "kind": "edge",
+   "biome": "water",
+   "side": "se",
+   "source": "image-clone/map/raw/mat_water_0.webp",
+   "atlas": [
+    5,
+    7
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_rock_e",
+   "kind": "edge",
+   "biome": "rock",
+   "side": "e",
+   "source": "image-clone/map/raw/mat_rock_0.webp",
+   "atlas": [
+    6,
+    7
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_rock_ne",
+   "kind": "edge",
+   "biome": "rock",
+   "side": "ne",
+   "source": "image-clone/map/raw/mat_rock_0.webp",
+   "atlas": [
+    7,
+    7
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_rock_nw",
+   "kind": "edge",
+   "biome": "rock",
+   "side": "nw",
+   "source": "image-clone/map/raw/mat_rock_0.webp",
+   "atlas": [
+    0,
+    8
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_rock_w",
+   "kind": "edge",
+   "biome": "rock",
+   "side": "w",
+   "source": "image-clone/map/raw/mat_rock_0.webp",
+   "atlas": [
+    1,
+    8
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_rock_sw",
+   "kind": "edge",
+   "biome": "rock",
+   "side": "sw",
+   "source": "image-clone/map/raw/mat_rock_0.webp",
+   "atlas": [
+    2,
+    8
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_rock_se",
+   "kind": "edge",
+   "biome": "rock",
+   "side": "se",
+   "source": "image-clone/map/raw/mat_rock_0.webp",
+   "atlas": [
+    3,
+    8
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_mud_e",
+   "kind": "edge",
+   "biome": "mud",
+   "side": "e",
+   "source": "image-clone/map/raw/mat_mud_0.webp",
+   "atlas": [
+    4,
+    8
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_mud_ne",
+   "kind": "edge",
+   "biome": "mud",
+   "side": "ne",
+   "source": "image-clone/map/raw/mat_mud_0.webp",
+   "atlas": [
+    5,
+    8
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_mud_nw",
+   "kind": "edge",
+   "biome": "mud",
+   "side": "nw",
+   "source": "image-clone/map/raw/mat_mud_0.webp",
+   "atlas": [
+    6,
+    8
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_mud_w",
+   "kind": "edge",
+   "biome": "mud",
+   "side": "w",
+   "source": "image-clone/map/raw/mat_mud_0.webp",
+   "atlas": [
+    7,
+    8
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_mud_sw",
+   "kind": "edge",
+   "biome": "mud",
+   "side": "sw",
+   "source": "image-clone/map/raw/mat_mud_0.webp",
+   "atlas": [
+    0,
+    9
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_mud_se",
+   "kind": "edge",
+   "biome": "mud",
+   "side": "se",
+   "source": "image-clone/map/raw/mat_mud_0.webp",
+   "atlas": [
+    1,
+    9
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_road_e",
+   "kind": "edge",
+   "biome": "road",
+   "side": "e",
+   "source": "image-clone/map/raw/mat_road_0.webp",
+   "atlas": [
+    2,
+    9
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_road_ne",
+   "kind": "edge",
+   "biome": "road",
+   "side": "ne",
+   "source": "image-clone/map/raw/mat_road_0.webp",
+   "atlas": [
+    3,
+    9
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_road_nw",
+   "kind": "edge",
+   "biome": "road",
+   "side": "nw",
+   "source": "image-clone/map/raw/mat_road_0.webp",
+   "atlas": [
+    4,
+    9
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_road_w",
+   "kind": "edge",
+   "biome": "road",
+   "side": "w",
+   "source": "image-clone/map/raw/mat_road_0.webp",
+   "atlas": [
+    5,
+    9
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_road_sw",
+   "kind": "edge",
+   "biome": "road",
+   "side": "sw",
+   "source": "image-clone/map/raw/mat_road_0.webp",
+   "atlas": [
+    6,
+    9
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  },
+  {
+   "id": "edge_road_se",
+   "kind": "edge",
+   "biome": "road",
+   "side": "se",
+   "source": "image-clone/map/raw/mat_road_0.webp",
+   "atlas": [
+    7,
+    9
+   ],
+   "src_box": [
+    0,
+    0,
+    1024,
+    1024
+   ]
+  }
+ ]
+}
