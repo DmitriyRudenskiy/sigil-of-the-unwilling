@@ -17,6 +17,16 @@ var _resource_layer: Node2D
 ## порядок задаёт TileAtlas.SIDES; MapRenderer.paint_transitions().
 var transition_layers: Array = []
 
+## Отладочное отключение слоёв (world-map-layer-stack 5.1): имя слоя → его узел.
+## Порядок отрисовки фиксирован порядком создания в `_ensure_layers()` и этому
+## словарю не равен. Слои, у которых своей графики ещё нет (дороги, горный рельеф,
+## растительность), заводятся вместе с графикой (6.2, 7.x) — пустой TileMapLayer
+## под будущую картинку ничего не включает и не выключает. Носители ресурсов и
+## вражеских стеков живут не здесь: `ResourceNodes` у ResourceNodeManager и
+## маркеры у ui_manager.marker_layer.
+var render_layers: Dictionary = {}
+
+
 var terrain_grid: Dictionary:
 	get: return model.terrain_grid if model != null else {}
 
@@ -139,13 +149,20 @@ func _ensure_layers() -> void:
 		_tile_map.tile_set = tileset
 
 	transition_layers.clear()
+	var root: Node2D = get_node_or_null("TileMapTransitions")
+	if root == null:
+		# Один узел на все шесть подслоёв: отключается слой 2 целиком (5.1),
+		# а порядок внутри него задаётся порядком обхода SIDES.
+		root = Node2D.new()
+		root.name = "TileMapTransitions"
+		add_child(root)
 	for side: String in TileAtlas.SIDES:
 		var tname := "TileMapTransition_" + side
-		var tlayer: TileMapLayer = get_node_or_null(tname)
+		var tlayer: TileMapLayer = root.get_node_or_null(tname)
 		if tlayer == null:
 			tlayer = TileMapLayer.new()
 			tlayer.name = tname
-			add_child(tlayer)
+			root.add_child(tlayer)
 		if tileset != null:
 			tlayer.tile_set = tileset
 		transition_layers.append(tlayer)
@@ -163,6 +180,22 @@ func _ensure_layers() -> void:
 		_resource_layer = Node2D.new()
 		_resource_layer.name = "ResourceLayer"
 		add_child(_resource_layer)
+
+	render_layers = {
+		"terrain": _tile_map,
+		"transitions": root,
+		"vegetation": _decor_layer,
+	}
+
+
+## Снять/вернуть слой по имени. Только отрисовка: модель, проходимость и
+## стоимость движения слоя не знают (спека «Слои не влияют на логику»).
+func set_layer_enabled(layer: String, enabled: bool) -> void:
+	var node: Node = render_layers.get(layer)
+	if node == null:
+		push_error("MapGenerator: нет отлаживаемого слоя %s" % layer)
+		return
+	node.visible = enabled
 
 func apply_fog(visibility_) -> void:
 	if visibility_ == null or renderer == null:
