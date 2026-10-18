@@ -39,6 +39,7 @@ static func make_combatant(spec: Dictionary) -> Dictionary:
 		"prone": bool(spec.get("prone", false)),
 		"elevated": bool(spec.get("elevated", false)),
 		"fate_debt": int(spec.get("fate_debt", 0)),
+		"frightened": bool(spec.get("frightened", false)),  # 2.1: триггер отступления авто-режима
 	}
 
 
@@ -207,6 +208,125 @@ static func _finalize(outcome: String, rounds: int, first_id: String,
 		"trace": trace,
 		"losses": losses,
 		"battle_over": true,  # поллинг флага, не таймер (D-152-семья)
+	}
+	if population_hook.is_valid():
+		population_hook.call(losses, report)
+	return report
+
+
+## ═══════════ Авто-режим (dnd-battle-ladder 2.1): политика поверх того же движка ═══════════
+## Чистая лестница без координат (C-3): «в радиусе» = все живые. Детерминизм K2:
+## те же входы → тот же отчёт байт в байт. Не трогает 1v1-путь (resolve).
+
+## Выбор цели (авто-режим, 2.1): мин. HP среди живых, тай-брейк меньший id.
+## Возвращает комбатанта или {} (нет живых целей).
+static func select_target(foes: Array) -> Dictionary:
+	var best: Dictionary = {}
+	for c in foes:
+		if int(c.get("hp", 0)) <= 0 or bool(c.get("dead", false)):
+			continue
+		if best.is_empty():
+			best = c
+			continue
+		var hp_c: int = int(c["hp"])
+		var hp_best: int = int(best["hp"])
+		if hp_c < hp_best or (hp_c == hp_best and str(c["id"]) < str(best["id"])):
+			best = c
+	return best
+
+
+## Инициатива для N комбатантов: «Удача + Ловкость» (как 1v1), тай-брейк
+## Ловкость → ID. Возвращает массив комбатантов в порядке ходов.
+static func _initiative_order(combatants: Array) -> Array:
+	var sorted: Array = combatants.duplicate()
+	sorted.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var sa: int = int(a["luck"]) + int(a["dex"])
+		var sb: int = int(b["luck"]) + int(b["dex"])
+		if sa != sb:
+			return sa > sb
+		if int(a["dex"]) != int(b["dex"]):
+			return int(a["dex"]) > int(b["dex"])
+		return str(a["id"]) < str(b["id"])
+	)
+	return sorted
+
+
+static func _side_wiped(side: Array) -> bool:
+	for c in side:
+		if int(c.get("hp", 0)) > 0:
+			return false
+	return true
+
+
+## Разрешение боя N vs M (авто-режим, dnd-battle-ladder 2.1). party/enemies —
+## массивы комбатантов (make_combatant). Тот же движок (_strike/_death_saves);
+## детерминированный AI: min HP, тай-брейк меньший id; отступление при
+## «frightened». Один отчёт (REPORT) для обоих режимов. outcome — с точки
+## зрения партии: win/lose/retreat/draw.
+static func resolve_multi(party: Array, enemies: Array,
+		population_hook: Callable = Callable()) -> Dictionary:
+	var party_ids: Dictionary = {}
+	for c in party:
+		party_ids[str(c["id"])] = true
+	var all: Array = []
+	all.append_array(party)
+	all.append_array(enemies)
+	var order := _initiative_order(all)
+	var trace: Array = []
+	var outcome := "draw"
+	var round_no := 0
+	while round_no < MAX_ROUNDS:
+		round_no += 1
+		for atk in order:
+			if int(atk["hp"]) <= 0 or bool(atk.get("dead", false)):
+				continue
+			var is_party: bool = party_ids.has(str(atk["id"]))
+			# Авто-режим: отступление при «frightened» (2.1).
+			if bool(atk.get("frightened", false)):
+				outcome = "retreat" if is_party else "win"
+				return _finalize_multi(outcome, round_no, trace, party, enemies, population_hook)
+			# Выбор цели: min HP, тай-брейк меньший id (в досягаемости = все).
+			var foes: Array = enemies if is_party else party
+			var target := select_target(foes)
+			if target.is_empty():
+				continue
+			var hit := _strike(atk, target)
+			target["hp"] = int(target["hp"]) - int(hit["damage"])
+			trace.append({
+				"round": round_no, "actor": str(atk["id"]), "target": str(target["id"]),
+				"zone": str(hit["zone"]), "margin": int(hit["margin"]),
+				"damage": int(hit["damage"]), "reckoning": bool(hit["reckoning"]),
+				"debt": int(hit["debt"]),
+			})
+			if int(target["hp"]) <= 0:
+				var dead := _death_saves(target)
+				target["dead"] = dead
+				trace.append({"round": round_no, "actor": str(target["id"]),
+					"zone": "death_saves", "dead": dead})
+			# Конец боя: одна сторона вычистлена.
+			if _side_wiped(enemies):
+				outcome = "win"
+				return _finalize_multi(outcome, round_no, trace, party, enemies, population_hook)
+			if _side_wiped(party):
+				outcome = "lose"
+				return _finalize_multi(outcome, round_no, trace, party, enemies, population_hook)
+	# Лимит 20 раундов — ничья (D-128).
+	outcome = "draw"
+	return _finalize_multi(outcome, round_no, trace, party, enemies, population_hook)
+
+
+static func _finalize_multi(outcome: String, rounds: int, trace: Array,
+		party: Array, enemies: Array, population_hook: Callable) -> Dictionary:
+	var losses: Array = []
+	for c in party:
+		if bool(c.get("dead", false)) and int(c.get("character_uid", -1)) >= 0:
+			losses.append(int(c["character_uid"]))
+	var report := {
+		"outcome": outcome,
+		"rounds": rounds,
+		"trace": trace,
+		"losses": losses,
+		"battle_over": true,
 	}
 	if population_hook.is_valid():
 		population_hook.call(losses, report)
