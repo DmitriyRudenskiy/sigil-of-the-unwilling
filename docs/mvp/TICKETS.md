@@ -4,7 +4,7 @@ tags:
   - gdd
   - mvp
 status: reference
-date: 2026-10-17
+date: 2026-10-18
 ---
 
 # TICKETS.md — тикеты MVP (Фаза 4, шаг 4)
