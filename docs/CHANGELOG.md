@@ -16,6 +16,12 @@ date: 2026-10-19
   `ThreatSystem.loss_cap_for(resource)` (неизвестный ресурс → дефолт `loss_cap_per_day`);
   `_resolve_raid`: `loss = min(power×(1−defense), loss_cap_for(target)×before)`; кап per-рейд
   (не per-ход). Еда ≤40%, железо/дерево ≤30%.
+- **raid-pressure-system 2.3 (часть 2) + 4.5/2.4** (K-R3; `feat/raid-hero-victory-50` → `e254f348`):
+  рейд по клетке героя → бой, победа → −50% последствий. `_request_battle` возвращает исход
+  ("win"/"lose"/"draw"); `_resolve_raid`: бой до применения урона, `battle_won` → loss×0.5.
+  4.5: тест AFK-каскада (chain collapse не происходит). 2.4 верифицировано (hero→бой/авто-рейд
+  уже в коде). Часть 1 (здание на ремонте → ×0.5 к RUINED) — отложена (building-level targeting
+  за срезом MVP). GdUnit **2669/0** (local).
 - **raid-pressure-system 2.2 Cooldown ×2** (K-R3; `feat/raid-cooldown-x2` → `44e0d0df`):
   `ThreatSystem.effective_cooldown(all_ruined)` = `cooldown_turns×2` (частота рейдов −50%);
   флаг `all_districts_destroyed` в threat-context (composition: все 7 канон-групп без зданий);
