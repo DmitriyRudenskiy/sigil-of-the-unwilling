@@ -216,12 +216,14 @@ func _all_districts_destroyed() -> bool:
 
 ## Шов T-050 (акт 12-й итерации §2.2): бой K-канона — единичные комбатанты,
 ## лестница 02d, без RNG. Статблоки — баланс-конфиг (K-M15, числа — T-041).
-func _request_battle(context: Dictionary) -> void:
+## raid-pressure 2.3: возвращает исход боя ("win"/"lose"/"draw") — победа героя
+## снижает последствия рейда на 50% (читает threat_system через battle_handler).
+func _request_battle(context: Dictionary) -> String:
 	if campaign == null or campaign.is_done():
-		return
+		return ""
 	campaign.request_battle(context)
 	if _statblocks.is_empty():
-		return  # статблоков нет (баланс-конфиг) — бой не разрешается
+		return ""  # статблоков нет (баланс-конфиг) — бой не разрешается
 	var tier: int = int(context.get("tier", 1))
 	var hero := CampaignBattle.make_recruit(
 		_statblocks.get("warrior", {}), population_system.conscript())
@@ -255,6 +257,7 @@ func _request_battle(context: Dictionary) -> void:
 		if _report_has_fate_debt(last_battle_report, str(hero.get("id", ""))):
 			ethics.record_fate_debt_win(campaign.current_turn)
 	_record_battle_prestige(context, last_battle_report, parity)
+	return str(last_battle_report.get("outcome", ""))
 
 
 static func _report_has_fate_debt(report: Dictionary, hero_id: String) -> bool:
