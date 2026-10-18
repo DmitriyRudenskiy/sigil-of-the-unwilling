@@ -49,6 +49,10 @@ var sign_id: String = ""
 ## signs-prestige 2.1/2.2 (T-129): SM знака + фракционные действия.
 ## sign_id — дублирует sign_system.sign_id (созвместимость с существующим кодом).
 var sign_system: SignSystem
+## party-characters 3.2 (R7, Q-M75→(б), P-4): снабжение героя — еда в походе.
+## Ёмкость 10; расход 1/персонаж/переход; полный (>50%) → +2 к 1-му спасу;
+## голод (0) → −2 к атакам. Числа — campaign.json → supply (K-M15).
+var supply_system: SupplySystem
 var _boss_prestige_given: bool = false
 var _statblocks: Dictionary = {}
 var _victory_sources: Dictionary = {}
@@ -103,6 +107,9 @@ func _build(campaign_seed: int) -> void:
 	# signs-prestige 2.1/2.2: SM знака + фракционные действия (≤12, prestige.json).
 	sign_system = SignSystem.new()
 	sign_system.faction_actions_max = int(prestige.get("faction_actions_max", 12))
+	# party-characters 3.2: снабжение героя — еда в походе (R7, Q-M75→(б), P-4).
+	# Числа — campaign.json → supply (K-M15); старт с полным запасом.
+	supply_system = SupplySystem.from_config(scenario)
 	# T-116: реестр жителей — источник истины населения (R2: старт 20).
 	population_system = PopulationSystem.new()
 	population_system.seed_population(settlement.population)
@@ -326,6 +333,10 @@ func build_save_state() -> Dictionary:
 	# T-124: журнал/аккумуляторы/Репутация — состояние (события не пересчитываются
 	# при загрузке, I1); секция словарная — schema_version не тронут (T-110).
 	campaign_section["ethics"] = ethics.to_dict()
+	# party-characters 3.2: снабжение героя (еда в походе) — под-ключ секции
+	# "campaign" (не топ-уровневая секция: старая схема валидирует только
+	# известные топ-секции; под-ключ не ломает минимальные тест-состояния).
+	campaign_section["supply"] = supply_system.to_dict()
 	var state := {
 		"campaign": campaign_section,
 		"resources": settlement.stocks.duplicate(),
@@ -388,6 +399,14 @@ func load_save_state(state: Dictionary) -> void:
 		sign_data["sign_id"] = sign_data["id"]
 	sign_system = SignSystem.from_dict(sign_data)
 	sign_id = sign_system.sign_id
+	# party-characters 3.2: снабжение героя (под-ключ "supply" секции "campaign");
+	# старый сейв без него → старт с полным запасом (ёмкость из конфига).
+	var supply_cfg: Dictionary = _json(CAMPAIGN_JSON)
+	var supply_data: Dictionary = (state.get("campaign", {}) as Dictionary).get("supply", {})
+	if supply_data.is_empty():
+		supply_system = SupplySystem.from_config(supply_cfg)
+	else:
+		supply_system = SupplySystem.from_dict(supply_data)
 	# Синхронизация SM с балансом (старый сейв: баланс > 0 → ACTIVE).
 	if sign_system.sign_id != "":
 		_sign_system_prestige_sync()
