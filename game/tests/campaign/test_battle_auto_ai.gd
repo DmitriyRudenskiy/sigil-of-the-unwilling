@@ -119,3 +119,42 @@ func test_resolve_multi_deterministic() -> void:
 	var r1 := CampaignBattleScript.resolve_multi(party.duplicate(true), enemies.duplicate(true))
 	var r2 := CampaignBattleScript.resolve_multi(party.duplicate(true), enemies.duplicate(true))
 	assert_dict(r1).is_equal(r2)
+
+
+## — 5.3: детерминизм авто-режима, 100 повторов → byte-identical —
+
+func test_resolve_multi_100_repeats_byte_identical() -> void:
+	var party := [_c({"id": "p1", "hp": 50, "attack": 15, "damage": 5})]
+	var enemies := [
+		_e({"id": "e1", "hp": 30, "attack": 8, "damage": 4}),
+		_e({"id": "e2", "hp": 25, "attack": 7, "damage": 3}),
+	]
+	var first := CampaignBattleScript.resolve_multi(party.duplicate(true), enemies.duplicate(true))
+	for i in range(100):
+		var r := CampaignBattleScript.resolve_multi(party.duplicate(true), enemies.duplicate(true))
+		assert_dict(r).is_equal(first)
+
+
+## — 2.3: отчёт боя (REPORT) — один для обоих режимов; ничья без XP/Престижа —
+
+func test_resolve_multi_report_structure() -> void:
+	var party := [_c({"id": "p1", "hp": 100, "attack": 20, "damage": 15})]
+	var enemies := [_e({"id": "e1", "hp": 10, "attack": 5, "damage": 1})]
+	var report := CampaignBattleScript.resolve_multi(party, enemies)
+	assert_bool(report.has("outcome")).is_true()
+	assert_bool(report.has("rounds")).is_true()
+	assert_bool(report.has("trace")).is_true()
+	assert_bool(report.has("losses")).is_true()
+	assert_bool(bool(report["battle_over"])).is_true()
+
+
+func test_resolve_multi_draw_20_rounds_no_xp_prestige() -> void:
+	var party := [_c({"id": "p1", "hp": 100, "attack": 5, "damage": 0})]
+	var enemies := [_e({"id": "e1", "hp": 100, "attack": 5, "damage": 0})]
+	var report := CampaignBattleScript.resolve_multi(party, enemies)
+	assert_str(str(report["outcome"])).is_equal("draw")
+	assert_int(int(report["rounds"])).is_equal(20)
+	# Ничья: никто не пал → потери пустые; отчёт не несёт XP/Престиж.
+	assert_int((report["losses"] as Array).size()).is_equal(0)
+	assert_bool(not report.has("xp")).is_true()
+	assert_bool(not report.has("prestige")).is_true()

@@ -13,7 +13,7 @@
 
 - [~] 2.1 Авто-режим: детерминированный AI (мин. HP в радиусе, тай-брейк меньший id); отступление при «frightened»; тот же движок, один отчёт. *(Скелет готов: `select_target` (min HP, тай-брейк меньший id) + `resolve_multi` (N vs M, тот же движок `_strike`/`_death_saves`) + отступление при «frightened» (outcome retreat/win). 10 тестов (test_battle_auto_ai.gd), GdUnit 2682/0. НЕ подключено к кампании (там пока 1v1 `resolve`) — интеграция = следующий шаг.)*
 - [ ] 2.2 AI врага (Y3): greedy; босс хода 21 (CR 6–8): greedy + способность при HP партии < 50% (детерминированная, параметры — баланс-конфиг Ф4).
-- [ ] 2.3 Отчёт боя (REPORT): один для обоих режимов; ничья (20 раундов) — потери, без XP/Престижа.
+- [x] 2.3 Отчёт боя (REPORT): один для обоих режимов; ничья (20 раундов) — потери, без XP/Престижа. *(Отчёт в `resolve_multi` (outcome/rounds/trace/losses/battle_over); «один для обоих режимов» тривиально в MVP (только авто-режим); ничья 20 раундов → потери [], без XP/Престижа. Тесты: test_resolve_multi_report_structure, test_resolve_multi_draw_20_rounds_no_xp_prestige.)*
 
 ## 3. Состояния, местность, бином
 
@@ -32,6 +32,6 @@
 
 - [x] 5.1 GdUnit4: зоны лестницы (границы: 4−modLuck, 0, −(3+modLuck), −(8+modLuck)); Триумф = ×2, Частичный = ½. *(Верифицировано: test_battle_rules.gd — test_ladder_zone_base_thresholds (границы 4/0/−3/−8), test_ladder_zone_luck_shifts_thresholds (4−modLuck / −(3+modLuck) / −(8+modLuck)), test_calculate_attack_zone_triumph_double_damage (×2), test_calculate_attack_zone_partial_half_damage (½).)*
 - [ ] 5.2 GdUnit4: death saves (margin_N формула, 3/3); лимит 20 раундов → ничья (без XP).
-- [ ] 5.3 GdUnit4: авто-режим (детерминизм, отступление при frightened); 100 повторов → byte-identical.
+- [x] 5.3 GdUnit4: авто-режим (детерминизм, отступление при frightened); 100 повторов → byte-identical. *(test_battle_auto_ai.gd: test_resolve_multi_deterministic, test_resolve_multi_retreat_on_frightened, test_resolve_multi_enemy_frightened_is_win, test_resolve_multi_100_repeats_byte_identical.)*
 - [ ] 5.4 GdUnit4: бином «Фланг» (fighter+ranger → бонус); prone (−2/+2); местность (±2).
 - [ ] 5.5 GdUnit4: мораль аннулирована (потери = −2 ступени к спасам до конца боя; принуд. отступление при 0 HD).
