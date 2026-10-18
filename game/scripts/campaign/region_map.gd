@@ -121,6 +121,24 @@ func neighbors(region: String) -> Array:
 	return adjacency.get(region, [])
 
 
+## T-025: инвариант доходимости — недостижимые из старта регионы (BFS по рёбрам).
+## Пусто = граф MVP-маски связен (якоря 7/14/21 достижимы по данным, K-M4).
+func unreachable_regions() -> Array[String]:
+	var visited: Dictionary = {start_region: true}
+	var queue: Array[String] = [start_region]
+	while not queue.is_empty():
+		var cur: String = queue.pop_front()
+		for n in adjacency.get(cur, []):
+			if not visited.has(n):
+				visited[n] = true
+				queue.append(n)
+	var unreachable: Array[String] = []
+	for r in regions:
+		if not visited.has(r):
+			unreachable.append(r)
+	return unreachable
+
+
 ## Доступен ли переход в регион (сосед + открыт в тумане).
 func can_travel(to_region: String) -> bool:
 	return hero_state == STATE_EXPLORE \

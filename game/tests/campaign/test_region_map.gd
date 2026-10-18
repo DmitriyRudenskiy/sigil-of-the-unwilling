@@ -30,6 +30,14 @@ func test_adjacency_symmetric() -> void:
 	assert_bool(m.neighbors("R05") == ["R04"]).is_true()
 
 
+## T-025: инвариант доходимости якорей 7/14/21 (K-M4) — граф связен.
+func test_reachability_all_regions_from_start() -> void:
+	var m := RegionMap.new()
+	# Все 5 регионов MVP-маски достижимы из R01 (пусто = ок).
+	assert_bool(m.unreachable_regions().is_empty()) \
+		.override_failure_message("граф MVP-маски связен (якоря 7/14/21 достижимы)").is_true()
+
+
 ## — 2. Туман (Q-M54 → (а)): радиус 1, город всегда видим —
 
 func test_fog_radius_1_on_start() -> void:
