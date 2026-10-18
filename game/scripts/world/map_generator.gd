@@ -13,6 +13,10 @@ var _tile_map: TileMapLayer
 var _decor_layer: TileMapLayer
 var _resource_layer: Node2D
 
+## Подслои перехода (слой 2 «стыки и переходы») — по одному на сторону гекса,
+## порядок задаёт TileAtlas.SIDES; MapRenderer.paint_transitions().
+var transition_layers: Array = []
+
 var terrain_grid: Dictionary:
 	get: return model.terrain_grid if model != null else {}
 
@@ -71,6 +75,7 @@ func generate() -> void:
 	model.village_count = GameNumbers.MAP_VILLAGE_COUNT
 
 	renderer = MapRenderer.new(model)
+	renderer.transition_layers = transition_layers
 	spawner = MapSpawner.new(model)
 	var units_reg: Node = Services.resolve(&"units")
 	if units_reg != null:
@@ -132,6 +137,18 @@ func _ensure_layers() -> void:
 		push_error("TileAtlas: failed to build hex tileset (missing %s)" % TileAtlas.SHEET_PATH)
 	else:
 		_tile_map.tile_set = tileset
+
+	transition_layers.clear()
+	for side: String in TileAtlas.SIDES:
+		var tname := "TileMapTransition_" + side
+		var tlayer: TileMapLayer = get_node_or_null(tname)
+		if tlayer == null:
+			tlayer = TileMapLayer.new()
+			tlayer.name = tname
+			add_child(tlayer)
+		if tileset != null:
+			tlayer.tile_set = tileset
+		transition_layers.append(tlayer)
 
 	_decor_layer = get_node_or_null("TileMapDecor")
 	if _decor_layer == null:

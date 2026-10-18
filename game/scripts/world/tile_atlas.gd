@@ -28,6 +28,10 @@ const BIOME_NAMES := [
 	"rock", "mud", "road",
 ]
 
+## Стороны гекса: тот же порядок, что биты `HexUtils.get_neighbor(cell, bit)` и
+## поле `side` в манифесте (восток, северо-восток, северо-запад, запад,...).
+const SIDES := ["e", "ne", "nw", "w", "sw", "se"]
+
 static var _manifest: Dictionary = {}
 static var _fog_tex: ImageTexture
 
@@ -52,21 +56,55 @@ static func manifest() -> Dictionary:
 	return _manifest
 
 
-## Варианты базы биома — координаты в листе, в порядке возрастания variant.
-static func base_coords(biome: int) -> Array:
-	var variants: Array = []
+## Индекс манифеста: {biome: [координата...]}, {"biome:side": координата}.
+## Строится один раз: `_base()` и `paint_transitions()` зовут эти функции на каждую
+## клетку карты, а скан списка клеток на каждый вызов — это 3600 × 80 операций
+## на один paint (и на каждое обновление тумана).
+static var _index: Dictionary = {}
+
+
+static func _ensure_index() -> void:
+	if not _index.is_empty():
+		return
+	var groups: Dictionary = {}
+	var edges: Dictionary = {}
+	var all: Array = []
 	for cell in manifest().get("cells", []):
-		if String(cell.get("kind", "")) != "base":
-			continue
-		if String(cell.get("biome", "")) != BIOME_NAMES[biome]:
-			continue
 		var atlas: Array = cell.get("atlas", [0, 0])
-		variants.append([int(cell.get("variant", 0)), Vector2i(int(atlas[0]), int(atlas[1]))])
-	variants.sort_custom(func(a, b): return a[0] < b[0])
-	var out: Array = []
-	for pair in variants:
-		out.append(pair[1])
-	return out
+		var coords := Vector2i(int(atlas[0]), int(atlas[1]))
+		all.append(coords)
+		var biome := String(cell.get("biome", ""))
+		if String(cell.get("kind", "")) == "base":
+			if not groups.has(biome):
+				groups[biome] = []
+			(groups[biome] as Array).append([int(cell.get("variant", 0)), coords])
+		else:
+			edges["%s:%s" % [biome, cell.get("side", "")]] = coords
+	var base: Dictionary = {}
+	for biome in groups:
+		var rows: Array = groups[biome]
+		rows.sort_custom(func(a, b): return a[0] < b[0])
+		var coords_list: Array = []
+		for pair in rows:
+			coords_list.append(pair[1])
+		base[biome] = coords_list
+	_index = {"base": base, "edge": edges, "all": all}
+
+
+## Варианты базы биома — координаты в листе, в порядке возрастания variant.
+## Массив общий на всех вызывающего: не править его на месте.
+static func base_coords(biome: int) -> Array:
+	_ensure_index()
+	return (_index["base"] as Dictionary).get(BIOME_NAMES[biome], []) as Array
+
+
+## Клетка декаля «материал биома наедает сторону side» (слой стыков).
+## [-1,-1] — перехода в атласе нет; по spec world-map-tile-atlas это провал
+## приёмки, молчаливого фолбэка на базу нет намеренно.
+static func edge_coords(biome: int, side: String) -> Vector2i:
+	_ensure_index()
+	return (_index["edge"] as Dictionary).get(
+		"%s:%s" % [BIOME_NAMES[biome], side], Vector2i(-1, -1))
 
 
 ## Номер варианта базы для клетки — хэш от клетки и сида карты. Детерминизм
@@ -76,6 +114,12 @@ static func variant_for(cell: Vector2i, seed_value: int, count: int) -> int:
 	if count <= 1:
 		return 0
 	return int(hash("%d:%d:%d" % [cell.x, cell.y, seed_value])) % count
+
+
+static func all_coords() -> Array:
+	"""Все клетки листа (база + переходы) — для псевдо-тайлсетов в тестах."""
+	_ensure_index()
+	return _index["all"] as Array
 
 
 func build() -> bool:
@@ -90,9 +134,8 @@ func build() -> bool:
 	_src.texture_region_size = Vector2i(TILE, TILE)
 	_tileset.add_source(_src, SOURCE_ID)
 	_build_fog_source(tex)
-	for biome in BIOME_NAMES.size():
-		for coords in base_coords(biome):
-			_src.create_tile(coords)
+	for coords in all_coords():
+		_src.create_tile(coords)
 	return true
 
 
@@ -109,9 +152,8 @@ func _build_fog_source(tex: Texture2D) -> void:
 	_fog_src.texture = _fog_tex
 	_fog_src.texture_region_size = Vector2i(TILE, TILE)
 	_tileset.add_source(_fog_src, FOG_SOURCE_ID)
-	for biome in BIOME_NAMES.size():
-		for coords in base_coords(biome):
-			_fog_src.create_tile(coords)
+	for coords in all_coords():
+		_fog_src.create_tile(coords)
 
 
 func tileset() -> TileSet:
@@ -129,9 +171,8 @@ func build_hex() -> TileSet:
 	src.texture = tex
 	src.texture_region_size = Vector2i(TILE, TILE)
 	ts.add_source(src, SOURCE_ID)
-	for biome in BIOME_NAMES.size():
-		for coords in base_coords(biome):
-			src.create_tile(coords)
+	for coords in all_coords():
+		src.create_tile(coords)
 	return ts
 
 
@@ -147,6 +188,7 @@ static func build_hex_tileset() -> TileSet:
 
 static func clear_cache() -> void:
 	_manifest = {}
+	_index = {}
 	_fog_tex = null
 	var main_loop := Engine.get_main_loop()
 	if main_loop is SceneTree:

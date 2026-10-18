@@ -21,6 +21,12 @@ const TERRAIN_TO_BIOME := {
 
 var model
 
+## Слой 2 «стыки и переходы» (world-map-layer-stack): по подслою на сторону гекса.
+## В одной клетке может сходиться до пяти чужих биомов, а TileMapLayer хранит один
+## тайл в клетке, поэтому направлений в одном подслое не помещается. Задаёт
+## MapGenerator; пусто — переходы не рисуются (юнит-тесты базы рисуют только слой 1).
+var transition_layers: Array = []
+
 ## city-hex-layout 4.1: кэш "тайл → город" (ядро/кольцо N); пересчёт при cities_changed.
 ## cell -> {city, ring} (0 = ядро)
 var city_zones: Dictionary = {}
@@ -41,16 +47,71 @@ func rebuild_city_zones(cities: Array) -> void:
 				if not city_zones.has(cell):
 					city_zones[cell] = {"city": city, "ring": r}
 
-## city-hex-layout 4.2: окраска ядра и колец 1–3 (палитра TileAtlas, без новых текстур).
-## Ядро — MUD, кольцо 1 — ROAD, кольца 2–3 — SAND.
+## city-hex-layout 4.2: окраска ядра и колец 1–3 (палитра TileAtlas, без новых
+## текстур); палитра — _zone_biome.
 func paint_city_zones(tile_map: TileMapLayer) -> void:
 	if tile_map == null:
 		return
 	for cell in city_zones:
 		var zone: Dictionary = city_zones[cell]
-		var r: int = int(zone.ring)
-		var biome: int = TileAtlas.Biome.MUD if r == 0 else (TileAtlas.Biome.ROAD if r == 1 else TileAtlas.Biome.SAND)
-		tile_map.set_cell(cell, TileAtlas.SOURCE_ID, _base(cell, biome))
+		tile_map.set_cell(cell, TileAtlas.SOURCE_ID, _base(cell, _zone_biome(int(zone.ring))))
+	paint_transitions()
+
+
+## Палитра города (city-hex-layout 4.2): ядро — MUD, кольцо 1 — ROAD, кольца 2–3 — SAND.
+func _zone_biome(r: int) -> int:
+	if r == 0:
+		return TileAtlas.Biome.MUD
+	return TileAtlas.Biome.ROAD if r == 1 else TileAtlas.Biome.SAND
+
+
+## Биом клетки так, как он нарисован: ил/дорога города перекрывают рельеф, и
+## переходы обязаны считать соседство по картинке, а не по terrain_grid.
+## -1 — клетки на карте нет (или рельеф не рисуется).
+func _biome_at(cell: Vector2i) -> int:
+	if city_zones.has(cell):
+		return _zone_biome(int(city_zones[cell].ring))
+	return TERRAIN_TO_BIOME.get(model.terrain_grid.get(cell, -1), -1)
+
+
+## Переходы биомов (задача 4.4): декаль соседа кладётся на клетку со стороны
+## соседа, поэтому граница не «рубится», а наедает в чужую клетку градиентом.
+## Красит только «старший» биом пары (порядок — enum TileAtlas.Biome): если бы
+## красили обе клетки границы, цвета просто поменялись бы местами и твёрдый стык
+## остался бы на месте. Детерминировано по клетке, как и варианты базы.
+func paint_transitions(visibility = null) -> void:
+	for layer in transition_layers:
+		if layer is TileMapLayer:
+			layer.clear()
+	if transition_layers.is_empty():
+		return
+	for cell in model.terrain_grid:
+		var biome: int = _biome_at(cell)
+		if biome < 0:
+			continue
+		if visibility != null and not visibility.is_explored(cell):
+			continue
+		var source: int = TileAtlas.SOURCE_ID
+		if visibility != null and not visibility.is_visible(cell):
+			source = TileAtlas.FOG_SOURCE_ID
+		for bit in TileAtlas.SIDES.size():
+			var neighbor: Vector2i = HexUtils.get_neighbor(cell, bit)
+			# Декаль выдал бы биом за краем тумана: сосед, которого игрок ещё
+			# не видел, не имеет права подкрашивать соседнюю клетку.
+			if visibility != null and not visibility.is_explored(neighbor):
+				continue
+			var other: int = _biome_at(neighbor)
+			# Молчит, когда сосед тот же, когда его нет (-1) и когда очередь
+			# красить — у него (он видит нас «старшим» и красит в свою клетку).
+			if other <= biome:
+				continue
+			var side: String = TileAtlas.SIDES[bit]
+			var coords: Vector2i = TileAtlas.edge_coords(other, side)
+			if coords.x < 0:
+				push_error("TileAtlas: нет перехода %s→%s на стороне %s" % [
+					TileAtlas.BIOME_NAMES[biome], TileAtlas.BIOME_NAMES[other], side])
+				continue
+			(transition_layers[bit] as TileMapLayer).set_cell(cell, source, coords)
 
 ## База биома для клетки: вариант выбирается по клетке и сиду карты (задача 4.3),
 ## поэтому картина не зависит от порядка обхода словаря и переживает save/load.
@@ -74,6 +135,7 @@ func paint(tile_map: TileMapLayer) -> void:
 			continue
 		var biome: int = TERRAIN_TO_BIOME[terrain_id]
 		tile_map.set_cell(cell, TileAtlas.SOURCE_ID, _base(cell, biome))
+	paint_transitions()
 
 func apply_fog(tile_map: TileMapLayer, visibility: _VisibilityMap) -> void:
 	if visibility == null or tile_map == null:
@@ -91,6 +153,7 @@ func apply_fog(tile_map: TileMapLayer, visibility: _VisibilityMap) -> void:
 			tile_map.set_cell(cell, TileAtlas.FOG_SOURCE_ID, coords)
 		else:
 			tile_map.set_cell(cell, TileAtlas.SOURCE_ID, coords)
+	paint_transitions(visibility)
 	fog_refreshed.emit()
 
 func paint_decor(_decor_layer: TileMapLayer) -> void:
