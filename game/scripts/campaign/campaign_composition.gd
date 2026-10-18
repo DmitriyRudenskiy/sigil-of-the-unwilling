@@ -46,10 +46,14 @@ var hero_name: String = ""
 ## T-002 «Выбор знака»: id Знака кампании (Signs: spark/time/balance/primal/
 ## shadow/harmony/cycle/basis); "" — не выбран (вне UI-пути). Сейв-секция "sign".
 var sign_id: String = ""
+## signs-prestige 2.1/2.2 (T-129): SM знака + фракционные действия.
+## sign_id — дублирует sign_system.sign_id (созвместимость с существующим кодом).
+var sign_system: SignSystem
 var _boss_prestige_given: bool = false
 var _statblocks: Dictionary = {}
 var _victory_sources: Dictionary = {}
 var _ranks: Array = []
+var _rank_names: Dictionary = {}
 
 
 static func from_campaign_config(campaign_seed: int) -> CampaignComposition:
@@ -65,6 +69,7 @@ func _build(campaign_seed: int) -> void:
 	var prestige := _json(PRESTIGE_JSON)
 	_victory_sources = prestige.get("sources", {}).get("battle_victory", {})
 	_ranks = prestige.get("ranks", [])
+	_rank_names = prestige.get("rank_names", {}) as Dictionary
 	campaign = TurnDriver.new()
 	campaign.seed = campaign_seed
 	# T-117: стартовое состояние — сценарий campaign.json (R2), не хардкод.
@@ -95,6 +100,9 @@ func _build(campaign_seed: int) -> void:
 	ethics_config = _json(ETHICS_JSON)
 	sign_vectors = EthicsSystem.load_sign_vectors(_json(SIGNS_JSON))
 	ethics = EthicsSystem.new_for_sign(sign_id, ethics_config)
+	# signs-prestige 2.1/2.2: SM знака + фракционные действия (≤12, prestige.json).
+	sign_system = SignSystem.new()
+	sign_system.faction_actions_max = int(prestige.get("faction_actions_max", 12))
 	# T-116: реестр жителей — источник истины населения (R2: старт 20).
 	population_system = PopulationSystem.new()
 	population_system.seed_population(settlement.population)
@@ -302,6 +310,7 @@ func _add_ledger(turn: int, id: String, amount: float) -> void:
 	prestige_ledger.append({
 		"turn": turn, "source_type": "battle_victory", "id": id, "amount": amount,
 	})
+	_sign_system_prestige_sync()
 
 
 ## ---- T-110: сборка секций кампании (контракт MvpSaveSchema) ----
@@ -332,11 +341,25 @@ func build_save_state() -> Dictionary:
 		},
 		"map": {"threats": threats.to_dict(), "region": region_map.to_dict()},  # T-020: регион-граф
 		"prestige": {"ledger": prestige_ledger.duplicate(true)},
-		"sign": {"id": sign_id},  # T-002: состояние Знака (R1) — выбор 1 из 8 на всю игру
+		"sign": _sign_save_section(),
 	}
 	# Нормализация int→float: JSON round-trip теряет тип int (числа → float);
 	# нормализуем при сборке — сейв байтово равен roundtrip-у (контракт T-110).
 	return _to_json_types(state)
+
+
+## Секция сейва "sign": sign_id (composition, источник истины) + состояние
+## SignSystem (SM, фракционные действия). Backward compat: ключ "id".
+func _sign_save_section() -> Dictionary:
+	var section: Dictionary = {"id": sign_id}
+	if sign_system != null:
+		# Синхронизация: sign_id (composition) — источник истины.
+		sign_system.sign_id = sign_id
+		var ss := sign_system.to_dict()
+		for k in ss.keys():
+			if k != "sign_id":  # sign_id уже в "id"
+				section[k] = ss[k]
+	return section
 
 
 static func _to_json_types(value: Variant) -> Variant:
@@ -358,7 +381,16 @@ static func _to_json_types(value: Variant) -> Variant:
 func load_save_state(state: Dictionary) -> void:
 	campaign = TurnDriver.from_dict(state.get("campaign", {}))
 	hero_name = str(state.get("campaign", {}).get("hero_name", ""))
-	sign_id = str((state.get("sign", {}) as Dictionary).get("id", ""))  # T-002
+	# signs-prestige 2.1/2.2: SM знака + фракционные действия (секция "sign").
+	# Backward compat: старый сейв {id} → sign_id; новый {sign_id, state, ...}.
+	var sign_data: Dictionary = state.get("sign", {})
+	if not sign_data.has("sign_id") and sign_data.has("id"):
+		sign_data["sign_id"] = sign_data["id"]
+	sign_system = SignSystem.from_dict(sign_data)
+	sign_id = sign_system.sign_id
+	# Синхронизация SM с балансом (старый сейв: баланс > 0 → ACTIVE).
+	if sign_system.sign_id != "":
+		_sign_system_prestige_sync()
 	final_battle_seen = bool(state.get("campaign", {}).get("final_battle_seen", false))
 	final_raid_repelled = bool(state.get("campaign", {}).get("final_raid_repelled", false))
 	population_system = PopulationSystem.from_dict(state.get("population", {}))
@@ -432,10 +464,59 @@ func _district_jobs() -> Dictionary:
 
 
 ## T-002/T-124: выбор Знака — одна точка входа (знак несёт и этический референс).
+## signs-prestige 2.1: DORMANT→ACTIVE (выбор); один знак на носителя (инвариант).
 func set_sign(id: String) -> void:
-	sign_id = id
+	if sign_system != null:
+		sign_system.select_sign(id)
+		sign_id = sign_system.sign_id
+	else:
+		sign_id = id
 	if ethics != null:
-		ethics.sign_id = id
+		ethics.sign_id = sign_id
+
+
+## Престиж-сальдо (производная: sum ledger; T-110: не хранится в сейве).
+func prestige_balance() -> int:
+	var balance := 0.0
+	for e in prestige_ledger:
+		balance += float(e.get("amount", 0.0))
+	return int(balance)
+
+
+## Престиж-ранг (индекс 0..4: Безымянный/Знаемый/Почитаемый/Славный/Легендарный).
+## Падение ниже порога = понижение (K-M16).
+func prestige_rank() -> int:
+	var balance := prestige_balance()
+	var rank := 0
+	for i in _ranks.size():
+		if balance >= int(_ranks[i]):
+			rank = i
+	return rank
+
+
+## Престиж-титул (имя ранга из prestige.json rank_names).
+func prestige_rank_name() -> String:
+	var rank := prestige_rank()
+	var key := str(int(_ranks[rank])) if rank < _ranks.size() else "0"
+	return str(_rank_names.get(key, "Безымянный"))
+
+
+## signs-prestige 2.2: фракционное действие знака (≤12, штраф стиля за повтор).
+## Возвращает amount (0 если: SLEEPING/DORMANT, лимит исчерпан, повтор).
+func perform_sign_action(id: String, amount: float) -> float:
+	if sign_system == null:
+		return 0.0
+	var granted := sign_system.perform_faction_action(id, int(amount), campaign.current_turn)
+	if granted > 0:
+		_add_ledger(campaign.current_turn, "faction_%s" % id, float(granted))
+		_sign_system_prestige_sync()
+	return float(granted)
+
+
+## SM знака: синхронизация с балансом Престижа (ACTIVE→SLEEPING при ≤0).
+func _sign_system_prestige_sync() -> void:
+	if sign_system != null:
+		sign_system.on_prestige_changed(prestige_balance())
 
 
 func _has_barracks() -> bool:
