@@ -120,14 +120,14 @@ func test_raid_resolution_power_defense_cap() -> void:
 	var r2: Dictionary = ts2.process_turn(8,
 		{"stocks": stocks2, "has_barracks": true, "hero_in_city": false})
 	assert_float(r2["raid"]["loss"]).is_equal_approx(12.0, 1e-6)
-	# Cap ≤30%/день: stock 10 → loss = min(15, 3) = 3.
+	# Per-ресурсный кап (Q-M58→(в), T-127): food ≤40%. stock 10 → loss = min(15, 4) = 4.
 	var ts3 := _new_ts()
 	ts3.wave = {"tier": 1, "power": 15.0, "target": "food", "camp_id": "x",
 		"turns_to_arrival": 0, "forced": false}
 	var stocks3: Dictionary = {"food": 10.0, "wood": 0.0, "iron": 0.0}
 	var r3: Dictionary = ts3.process_turn(8,
 		{"stocks": stocks3, "has_barracks": false, "hero_in_city": false})
-	assert_float(r3["raid"]["loss"]).is_equal_approx(3.0, 1e-6)
+	assert_float(r3["raid"]["loss"]).is_equal_approx(4.0, 1e-6)
 	assert_that(bool(r3["raid"]["cap_applied"])).is_equal(true)
 	# Power тиров: 15/30/60 (R6; raids.json — источник чисел, T-115).
 	assert_float(ts.tier_power[1]).is_equal_approx(15.0, 1e-6)
@@ -317,6 +317,54 @@ func test_config_driven_numbers_t115() -> void:
 		turns.append(int(ts.directives[k]["turn"]))
 	turns.sort()
 	assert_array(turns).is_equal([7, 14, 17, 21])
+
+
+## raid-pressure-system 2.1 (Q-M58→(в), D-189, T-127): per-ресурсные капы за рейд.
+## еда ≤40%, железо/дерево ≤30%; ресурс не в loss_caps → дефолт loss_cap_fraction.
+func test_per_resource_caps() -> void:
+	var ts := _new_ts()
+	# Значения капов из raids.json (loss_caps).
+	assert_float(ts.loss_cap_for("food")).is_equal_approx(0.4, 1e-6)
+	assert_float(ts.loss_cap_for("wood")).is_equal_approx(0.3, 1e-6)
+	assert_float(ts.loss_cap_for("iron")).is_equal_approx(0.3, 1e-6)
+	# Ресурс не в loss_caps → дефолт loss_cap_fraction (0.3).
+	assert_float(ts.loss_cap_for("unknown_res")).is_equal_approx(0.3, 1e-6)
+
+
+## Per-ресурсный кап: food 40% vs iron 30% на одинаковом stock.
+func test_per_resource_cap_food_vs_iron() -> void:
+	# food: stock 10, power 15 → loss = min(15, 0.4×10) = 4.
+	var ts_f := _new_ts()
+	ts_f.wave = {"tier": 1, "power": 15.0, "target": "food", "camp_id": "x",
+		"turns_to_arrival": 0, "forced": false}
+	var stocks_f: Dictionary = {"food": 10.0, "wood": 0.0, "iron": 0.0}
+	var r_f: Dictionary = ts_f.process_turn(8,
+		{"stocks": stocks_f, "has_barracks": false, "hero_in_city": false})
+	assert_float(r_f["raid"]["loss"]).is_equal_approx(4.0, 1e-6)
+	assert_that(bool(r_f["raid"]["cap_applied"])).is_equal(true)
+
+	# iron: stock 10, power 15 → loss = min(15, 0.3×10) = 3 (строже, чем food).
+	var ts_i := _new_ts()
+	ts_i.wave = {"tier": 1, "power": 15.0, "target": "iron", "camp_id": "x",
+		"turns_to_arrival": 0, "forced": false}
+	var stocks_i: Dictionary = {"food": 0.0, "wood": 0.0, "iron": 10.0}
+	var r_i: Dictionary = ts_i.process_turn(8,
+		{"stocks": stocks_i, "has_barracks": false, "hero_in_city": false})
+	assert_float(r_i["raid"]["loss"]).is_equal_approx(3.0, 1e-6)
+	assert_that(bool(r_i["raid"]["cap_applied"])).is_equal(true)
+
+
+## Кап — per-рейд, не per-ход: большой запас не трогает кап.
+func test_cap_only_when_loss_exceeds() -> void:
+	# food: stock 100, power 15 → loss = 15 < 0.4×100 = 40 → кап не применяется.
+	var ts := _new_ts()
+	ts.wave = {"tier": 1, "power": 15.0, "target": "food", "camp_id": "x",
+		"turns_to_arrival": 0, "forced": false}
+	var stocks: Dictionary = {"food": 100.0, "wood": 0.0, "iron": 0.0}
+	var r: Dictionary = ts.process_turn(8,
+		{"stocks": stocks, "has_barracks": false, "hero_in_city": false})
+	assert_float(r["raid"]["loss"]).is_equal_approx(15.0, 1e-6)
+	assert_that(bool(r["raid"]["cap_applied"])).is_equal(false)
 
 
 func test_winter_enemy_mult_t115() -> void:

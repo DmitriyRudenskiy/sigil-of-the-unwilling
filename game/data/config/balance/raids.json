@@ -14,6 +14,11 @@
   },
   "loss_formula": "loss = power * (1 - defense)",
   "loss_cap_per_day": 0.3,
+  "loss_caps": {
+    "food": 0.4,
+    "wood": 0.3,
+    "iron": 0.3
+  },
   "target_weights": {
     "food": 0.5,
     "wood": 0.3,
