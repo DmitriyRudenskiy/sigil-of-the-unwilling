@@ -13,7 +13,7 @@
 
 ## 2. Разрывы
 
-- [ ] 2.1 «Район создан» — не источник Престижа и не XP (K-M16): проверить `district_system.gd`/`CampaignComposition` (событие без начислений).
+- [x] 2.1 «Район создан» — не источник Престижа и не XP (K-M16): проверить `district_system.gd`/`CampaignComposition` (событие без начислений). *(Верифицировано: Престиж — только ledger battle_victory (T-112), XP — только бой/узел/рейд (T-060); строительство и районный процесс без начислений. Тесты: `test_district_no_grant.gd` (4).)*
 - [ ] 2.2 Распад района: теги ниже порога 3 дня → район снимается (таймер на районе, событие в хронику).
 - [ ] 2.3 SM здание: GHOST→BUILDING→WORKING→(DISABLED/RUINED→REPAIRING); ауры только от WORKING; маппинг на construction-queue (`construction_turns_remaining`, `state`).
 - [ ] 2.4 1 правило соседства MVP (ферма у леса +15%) — проверить/добавить в `settlement_processor.gd`.
