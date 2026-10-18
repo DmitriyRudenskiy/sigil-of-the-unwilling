@@ -132,7 +132,6 @@ const C_GOLD_OUTLINE := Color(0.620, 0.467, 0.220, 0.6)  # C_GOLD_BRIGHT #9e7738
 const C_WHITE_DIM_30 := Color(1, 1, 1, 0.3)
 const C_GRAY_DIM_40  := Color(0.5, 0.5, 0.5, 0.4)
 
-const SPRITE_SHEET_WORLD    := "res://assets/tiles/world_tiles.webp"
 const SPRITE_SHEET_HEX0     := "res://assets/textures/hex_sheet_0.png"
 const SPRITE_SHEET_HEX1     := "res://assets/textures/hex_sheet_1.png"
 const SPRITE_HERO_KNIGHT    := "res://assets/characters/hero_knight.png"
