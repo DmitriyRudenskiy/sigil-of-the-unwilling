@@ -40,6 +40,7 @@ static func make_combatant(spec: Dictionary) -> Dictionary:
 		"elevated": bool(spec.get("elevated", false)),
 		"fate_debt": int(spec.get("fate_debt", 0)),
 		"frightened": bool(spec.get("frightened", false)),  # 2.1: триггер отступления авто-режима
+		"supply_bonus": int(spec.get("supply_bonus", 0)),  # 5.2: снабжение → 1-й спас (Q-M57→(а))
 	}
 
 
@@ -131,8 +132,14 @@ static func _step_down(zone: StringName) -> StringName:
 static func _death_saves(fallen: Dictionary) -> bool:  # true — погиб
 	var successes := 0
 	var failures := 0
-	while successes < DEATH_SAVES_NEEDED and failures < DEATH_SAVES_NEEDED:
-		if int(fallen["con"]) >= 0:
+	var con: int = int(fallen["con"])
+	var supply_bonus: int = int(fallen.get("supply_bonus", 0))
+	# Ровно DEATH_SAVES_NEEDED спасов (N=1..3); margin_N только для N≤3
+	# (Q-M57→(а)). 3 провала = смерть; 3 успеха = WOUNDED (T-116, не
+	# персистится в MVP); смешанный — стабилизация (не потеря).
+	for n in range(1, DEATH_SAVES_NEEDED + 1):
+		var margin_n: int = con + (supply_bonus if n == 1 else 0) - (n - 1)
+		if margin_n >= 0:
 			successes += 1
 		else:
 			failures += 1
