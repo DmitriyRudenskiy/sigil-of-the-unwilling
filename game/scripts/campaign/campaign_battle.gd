@@ -49,6 +49,7 @@ static func make_combatant(spec: Dictionary) -> Dictionary:
 		"elevated": bool(spec.get("elevated", false)),
 		"fate_debt": int(spec.get("fate_debt", 0)),
 		"frightened": bool(spec.get("frightened", false)),  # 2.1: триггер отступления авто-режима
+		"terrain": str(spec.get("terrain", "")),  # 3.3 (C3): swamp/spikes/height — абстрактные ±2 (без hex, C-3)
 		"supply_bonus": int(spec.get("supply_bonus", 0)),  # 5.2: снабжение → 1-й спас (Q-M57→(а))
 		"hunger_penalty": int(spec.get("hunger_penalty", 0)),  # party-characters 3.2: голод (0 еды) → −2 к атакам (P-4)
 		"state": str(spec.get("state", STATE_READY)),  # T-116 SM: ready/wounded/unstable (dead — в бою)
@@ -107,11 +108,31 @@ static func _state_margin(atk: Dictionary, def_: Dictionary) -> int:
 	return m
 
 
+## Местность (3.3, C3): 3 типа как абстрактные модификаторы ±2 (без hex,
+## C-3): болото — −2 к атакам занимающего; шипы — −2 к атакам по
+## занимающему; высота — +2 к атакам занимающего (и −2 к атакам снизу).
+## Стек без капа (02d) — сосуществует с _state_margin.
+static func _terrain_margin(atk: Dictionary, def_: Dictionary) -> int:
+	var m := 0
+	var at: String = str(atk.get("terrain", ""))
+	var dt: String = str(def_.get("terrain", ""))
+	if at == "swamp":
+		m -= GameNumbers.ADVANTAGE_MARGIN
+	elif at == "height":
+		m += GameNumbers.ADVANTAGE_MARGIN
+	if dt == "spikes":
+		m -= GameNumbers.ADVANTAGE_MARGIN
+	elif dt == "height":
+		m -= GameNumbers.ADVANTAGE_MARGIN
+	return m
+
+
 ## Один удар по лестнице с Долгом судьбы (Б.4). Возвращает {zone, damage,
 ## margin, reckoning}. Порог долга = бонус мастерства; достигнут — Расплата
 ## (ступень ниже, долг → 0); долг ≥ 1 — штраф 1,25 (привязка — Ф3).
 static func _strike(atk: Dictionary, def_: Dictionary) -> Dictionary:
 	var margin: int = int(atk["attack"]) - int(def_["ac"]) + _state_margin(atk, def_) \
+		+ _terrain_margin(atk, def_) \
 		+ int(atk.get("hunger_penalty", 0))  # голод (P-4): −2 к перевесу атаки
 	var reckoning := false
 	var debt_before: int = int(atk["fate_debt"])  # T-124: долг в trace (журнал этики)
