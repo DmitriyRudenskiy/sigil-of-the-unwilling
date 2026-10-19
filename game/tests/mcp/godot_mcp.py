@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import json
 import os
 import socket
@@ -110,6 +111,22 @@ class GodotMCPClient:
 
     def stop_running_scene(self, timeout: float = DEFAULT_TIMEOUT) -> None:
         self._portal.call(self._stop_on_loop, timeout)
+
+    def screenshot(self, timeout: float = DEFAULT_TIMEOUT) -> bytes:
+        """PNG текущего кадра. `game_screenshot` отдаёт image-блок, а не JSON,
+        поэтому `_call`/`_first_text` его теряют — читаем content напрямую."""
+        return self._portal.call(self._screenshot, timeout)
+
+    async def _screenshot(self, timeout: float) -> bytes:
+        result = await self._session.call_tool(
+            "game_screenshot", {}, read_timeout_seconds=_timeout_for(timeout)
+        )
+        if _is_error(result):
+            raise MCPError(f"тулз game_screenshot вернул ошибку: {_first_text(result)}")
+        for block in getattr(result, "content", []) or []:
+            if getattr(block, "type", None) == "image":
+                return base64.b64decode(block.data)
+        raise MCPError("game_screenshot не вернул image-блок")
 
     async def _stop_on_loop(self, timeout: float) -> None:
         if not self._running:
