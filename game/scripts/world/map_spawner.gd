@@ -85,13 +85,56 @@ func place_resources(reachable = null, spacing := -1) -> void:
 				if HexUtils.hex_distance(cell, nb) <= spacing:
 					blocked[nb] = true
 
+## Растительность (7.2): объект по биомам, id — из манифеста листа объектов
+## (`MapObjects.ids()`). Только отрисовка: ни проходимость, ни стоимость
+## движения decor_cells не читают (спека «Слои не влияют на логику»), поэтому
+## куст на клетке — не препятствие. Прежние «palm»/«cactus» были id, которых в
+## листе объектов нет ни одного, а рисовать их было нечем: слой молча оставался
+## пустым (носитель растительности появился только с партией объектов).
+const DECOR_FOREST := ["obj_tree_deciduous", "obj_tree_deciduous_large", "obj_conifer"]
+const DECOR_DENSE := ["obj_conifer_large", "obj_tree_deciduous_large"]
+const DECOR_SHRUB := ["obj_bush"]
+const DECOR_FOREST_CHANCE := 0.6
+const DECOR_DENSE_CHANCE := 0.85
+## У кромки леса кусты читаются как край леса, в глубине лугов — реже, иначе
+## луга зарастают в сплошной лес.
+const DECOR_EDGE_CHANCE := 0.25
+const DECOR_GRASS_CHANCE := 0.06
+
+
 func place_decor() -> void:
 	model.decor_cells.clear()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = model.seed_value + 900
 	for cell in model.terrain_grid:
-		if model.terrain_grid[cell] == HexUtils.Terrain.SAND and rng.randf() < 0.04:
-			model.decor_cells[cell] = "palm" if rng.randf() > 0.5 else "cactus"
+		if model.village_cells.has(cell) or model.resource_cells.has(cell):
+			continue
+		var pool: Array = []
+		var chance := 0.0
+		match int(model.terrain_grid[cell]):
+			HexUtils.Terrain.FOREST:
+				pool = DECOR_FOREST
+				chance = DECOR_FOREST_CHANCE
+			HexUtils.Terrain.DENSE_FOREST:
+				pool = DECOR_DENSE
+				chance = DECOR_DENSE_CHANCE
+			HexUtils.Terrain.GRASS:
+				pool = DECOR_SHRUB
+				chance = DECOR_EDGE_CHANCE if _near_forest(cell) else DECOR_GRASS_CHANCE
+			_:
+				continue
+		if rng.randf() >= chance:
+			continue
+		model.decor_cells[cell] = String(pool[rng.randi() % pool.size()])
+
+
+## Кромка леса — у клетки есть сосед-лес или плотный лес.
+func _near_forest(cell: Vector2i) -> bool:
+	for nb in HexUtils.get_all_neighbors(cell):
+		var t: int = int(model.terrain_grid.get(nb, -1))
+		if t == HexUtils.Terrain.FOREST or t == HexUtils.Terrain.DENSE_FOREST:
+			return true
+	return false
 
 # Ранняя игра: кольцевые тиры врагов (early-game-foundation, world-threat-rings).
 # Кольцо 1 — дикие животные, 2 — гуманоиды, 3 — монстры.

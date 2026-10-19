@@ -107,12 +107,14 @@ func generate() -> void:
 	forest_gen.generate()
 
 	renderer.paint(_tile_map)
-	renderer.paint_decor(_decor_layer)
 
 	spawner.place_villages()
 	reachable_cells = _compute_reachable_cells()
 	spawner.place_resources(reachable_cells)
 	spawner.place_decor()
+	# Растительность рисуется ПОСЛЕ расстановки: до неё decor_cells пуст, и
+	# прежний порядок (paint до place) рисовал пустой слой, где данных ещё нет.
+	renderer.paint_decor(_decor_layer)
 	spawner.place_enemies(reachable_cells)
 
 	# Generate roads after villages and resources are placed
@@ -172,8 +174,11 @@ func _ensure_layers() -> void:
 		_decor_layer = TileMapLayer.new()
 		_decor_layer.name = "TileMapDecor"
 		add_child(_decor_layer)
-	if tileset != null:
-		_decor_layer.tile_set = tileset
+	if _decor_layer.tile_set == null:
+		# Свой тайлсет: растительность живёт на листе объектов, а не в атласе
+		# биомов. Геометрия та же (гекс, tile_size 82), поэтому клетки слоя
+		# не разъезжаются с базой.
+		_decor_layer.tile_set = MapObjects.build_tileset()
 
 	_resource_layer = get_node_or_null("ResourceLayer")
 	if _resource_layer == null:
