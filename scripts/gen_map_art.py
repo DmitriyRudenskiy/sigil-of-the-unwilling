@@ -93,6 +93,9 @@ def roles() -> list[dict]:
                     "ramp": item.get("ramp"),
                     "shift": SPEC["variant_shift"][n % len(SPEC["variant_shift"])],
                     "take": n, "path": RAW / f"{rid}.webp",
+                    # масштаб силуэта в тайле: по умолчанию 0.86, ниже — для напольных
+                    # объектов (подлесок на 0.86 читается деревом, а не подлеском)
+                    "fit": float(item.get("fit", 0.86)),
                 })
     return out
 
@@ -443,7 +446,7 @@ def assemble() -> int:
     ocells = []
     osheet = Image.new("RGBA", (8 * TILE, math.ceil(len(objs) / 8) * TILE), (0, 0, 0, 0))
     for i, r in enumerate(objs):
-        im = cut_object(r["path"])
+        im = cut_object(r["path"], r["fit"])
         osheet.paste(im, ((i % 8) * TILE, (i // 8) * TILE))
         ocells.append({"id": r["id"], "group": r["biome"], "anchor": [TILE // 2, TILE - 2],
                        "atlas": [i % 8, i // 8],

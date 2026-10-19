@@ -99,8 +99,17 @@ const DECOR_FOREST := ["obj_tree_deciduous", "obj_tree_deciduous_large", "obj_co
 	"obj_undergrowth"]
 const DECOR_DENSE := ["obj_conifer_large", "obj_tree_deciduous_large", "obj_undergrowth"]
 const DECOR_SHRUB := ["obj_bush"]
+## Рельеф (7.1): гора и мерзлота были биомами без носителя вообще — валуны, склон,
+## вершина и снежный валун лежали в листе неиспользованными. Пул на биом, как в
+## лесу: один объект на клетку, тип читается по силуэту, а не по данным.
+# obj_rock_small из пула снят: мох на «тонком основании» читается как топиарий
+# на ножке, а не как валун (глазной прогон кадра relief-t71).
+const DECOR_MOUNTAIN := ["obj_slope", "obj_rock_large", "obj_summit", "obj_peak"]
+const DECOR_SNOW := ["obj_boulder_snow", "obj_peak"]
 const DECOR_FOREST_CHANCE := 0.6
 const DECOR_DENSE_CHANCE := 0.85
+const DECOR_MOUNTAIN_CHANCE := 0.25
+const DECOR_SNOW_CHANCE := 0.4
 ## У кромки леса кусты читаются как край леса, в глубине лугов — реже, иначе
 ## луга зарастают в сплошной лес.
 const DECOR_EDGE_CHANCE := 0.25
@@ -126,6 +135,12 @@ func place_decor() -> void:
 			HexUtils.Terrain.GRASS:
 				pool = DECOR_SHRUB
 				chance = DECOR_EDGE_CHANCE if _near_forest(cell) else DECOR_GRASS_CHANCE
+			HexUtils.Terrain.MOUNTAIN:
+				pool = DECOR_MOUNTAIN
+				chance = DECOR_MOUNTAIN_CHANCE
+			HexUtils.Terrain.SNOW:
+				pool = DECOR_SNOW
+				chance = DECOR_SNOW_CHANCE
 			_:
 				continue
 		if rng.randf() >= chance:

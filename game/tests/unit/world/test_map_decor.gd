@@ -61,21 +61,20 @@ func test_vegetation_is_deterministic_by_seed() -> void:
 	assert_that(str(c)).is_not_equal(str(a))
 
 
-## Правила по биомам: плотный лес и лес не пустые, вода/камень/дорога — пустые,
-## деревня не зарастает, у кромки кустов больше, чем в глубине лугов.
+## Правила по биомам: плотный лес и лес не пустые, вода/дорога — пустые, деревня
+## не зарастает, у кромки кустов больше, чем в глубине лугов.
 func test_vegetation_follows_biome_rules() -> void:
 	var water := Vector2i(6, 0)
-	var mountain := Vector2i(6, 1)
 	var road := Vector2i(6, 2)
 	var village := Vector2i(5, 3)
 	var m := _field({
 		water: HexUtils.Terrain.WATER,
-		mountain: HexUtils.Terrain.MOUNTAIN,
+		Vector2i(6, 1): HexUtils.Terrain.MOUNTAIN,
 		road: HexUtils.Terrain.ROAD,
 	})
 	m.village_cells = [village]
 	var decor := _place(m)
-	for cell in [water, mountain, road, village]:
+	for cell in [water, road, village]:
 		assert_that(decor.has(cell)).is_false()
 	var forest_cells := 0
 	var forest_green := 0
@@ -132,9 +131,38 @@ func test_paint_decor_writes_only_known_objects() -> void:
 ## — ровно урок «palm»/«cactus».
 func test_decor_pools_reference_known_objects() -> void:
 	var ids: Array = MapObjects.ids()
-	for pool in [MapSpawner.DECOR_FOREST, MapSpawner.DECOR_DENSE, MapSpawner.DECOR_SHRUB]:
+	for pool in [MapSpawner.DECOR_FOREST, MapSpawner.DECOR_DENSE, MapSpawner.DECOR_SHRUB,
+			MapSpawner.DECOR_MOUNTAIN, MapSpawner.DECOR_SNOW]:
 		for object_id in pool:
 			assert_that(ids).contains(String(object_id))
+
+
+## Рельеф (7.1): гора и мерзлота обязаны получать носитель своего биома — валун
+## в горах и снежный валун в тундре различаются, и ни там ни там не растут деревья.
+func test_relief_follows_biome() -> void:
+	var m := _field()
+	# Полосы рельефа шире поля: на 8 клетках «ни одного объекта» — случайность
+	# жребия, а не правило, и тест падал бы при любой правке плотности.
+	m.map_width = 16
+	for y in m.map_height:
+		for x in range(4, m.map_width):
+			m.terrain_grid[Vector2i(x, y)] = (
+				HexUtils.Terrain.MOUNTAIN if y < 2 else HexUtils.Terrain.SNOW)
+	var decor := _place(m, 3)
+	var mountain := 0
+	var snow := 0
+	for cell in decor:
+		if cell.x < 4:
+			continue  # лесная половина поля — к рельефу отношения не имеет
+		var object_id := String(decor[cell])
+		if cell.y < 2:
+			mountain += 1
+			assert_that(MapSpawner.DECOR_MOUNTAIN).contains(object_id)
+		else:
+			snow += 1
+			assert_that(MapSpawner.DECOR_SNOW).contains(object_id)
+	assert_that(mountain).is_greater(0)
+	assert_that(snow).is_greater(0)
 
 
 ## Подлесок — ярус внутри леса, а не отдельный биом: он обязан ставиться и не
@@ -169,3 +197,22 @@ func test_vegetation_never_blocks_clicks() -> void:
 	assert_int(layer.tile_set.get_physics_layers_count()).is_equal(0)
 	assert_that(layer.get_script()).is_null()
 	assert_that(layer.get_used_cells().size()).is_greater(0)
+
+
+## Тень — отдельный элемент (7.1): у каждого объекта своя клетка тени, тень лежит
+## под объектом (узел создан раньше) и рисует не пиксели силуэта, а свой тайл.
+func test_shadow_is_a_separate_element() -> void:
+	var gen: MapGenerator = make_node(MapGenerator)
+	gen._seed_value = 4242
+	gen._map_width = 20
+	gen._map_height = 20
+	gen.generate()
+	var decor: TileMapLayer = gen.get_node("TileMapDecor")
+	var shadow: TileMapLayer = gen.get_node("TileMapShadow")
+	assert_that(shadow.get_index()).is_less(decor.get_index())
+	var used := decor.get_used_cells()
+	assert_that(used.size()).is_greater(0)
+	assert_that(shadow.get_used_cells().size()).is_equal(used.size())
+	for cell in used:
+		assert_that(shadow.get_cell_source_id(cell)).is_equal(MapObjects.SHADOW_SOURCE_ID)
+		assert_that(decor.get_cell_source_id(cell)).is_equal(MapObjects.SOURCE_ID)

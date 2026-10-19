@@ -3,7 +3,7 @@
  "image": "world_map_objects.webp",
  "grid": [
   8,
-  2
+  3
  ],
  "format": "webp",
  "quality": 90,
@@ -216,6 +216,84 @@
     1
    ],
    "source": "image-clone/map/raw/obj_undergrowth.webp"
+  },
+  {
+   "id": "obj_slope",
+   "group": "relief",
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    0,
+    2
+   ],
+   "source": "image-clone/map/raw/obj_slope.webp"
+  },
+  {
+   "id": "obj_summit",
+   "group": "relief",
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    1,
+    2
+   ],
+   "source": "image-clone/map/raw/obj_summit.webp"
+  },
+  {
+   "id": "obj_camp_wood",
+   "group": "camp",
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    2,
+    2
+   ],
+   "source": "image-clone/map/raw/obj_camp_wood.webp"
+  },
+  {
+   "id": "obj_camp_stone",
+   "group": "camp",
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    3,
+    2
+   ],
+   "source": "image-clone/map/raw/obj_camp_stone.webp"
+  },
+  {
+   "id": "obj_camp_food",
+   "group": "camp",
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    4,
+    2
+   ],
+   "source": "image-clone/map/raw/obj_camp_food.webp"
+  },
+  {
+   "id": "obj_camp_herb",
+   "group": "camp",
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    5,
+    2
+   ],
+   "source": "image-clone/map/raw/obj_camp_herb.webp"
   }
  ]
 }

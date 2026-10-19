@@ -11,9 +11,21 @@ const SHEET_PATH := "res://assets/objects/world_map_objects.webp"
 const MANIFEST_PATH := "res://assets/objects/world_map_objects.json"
 const TILE := GameNumbers.TILE_SIZE
 const SOURCE_ID := 0
+## Тень — отдельный элемент партии 7.1: не запечена в спрайт объекта, а кладётся
+## своей клеткой в слой под растительностью. Рисуется процедурно (мягкий эллипс),
+## потому что модель на «тень» рисует тёмное пятно с краем, а гейт листа требует от
+## объекта силуэта и прозрачной опоры — тень им не является.
+## ponytail: эллипс по формуле; если глаз попросит живописную тень — кадр в лист
+## объектов со своим гейтом, слой и вызов останутся теми же.
+const SHADOW_SOURCE_ID := 1
+const SHADOW_TILE := Vector2i(0, 0)
+const SHADOW_ALPHA := 0.5
+const SHADOW_RX := 0.40   # доли тайла
+const SHADOW_RY := 0.18
 
 static var _manifest: Dictionary = {}
 static var _coords: Dictionary = {}
+static var _shadow_tex: ImageTexture
 
 
 ## Манифест листа: {tile, grid, cells: [{id, atlas}]}.
@@ -67,7 +79,31 @@ static func build_tileset() -> TileSet:
 	ts.add_source(src, SOURCE_ID)
 	for coords in _coords.values():
 		src.create_tile(coords)
+	var shadow := TileSetAtlasSource.new()
+	shadow.texture = shadow_texture()
+	shadow.texture_region_size = Vector2i(TILE, TILE)
+	shadow.create_tile(SHADOW_TILE)
+	ts.add_source(shadow, SHADOW_SOURCE_ID)
 	return ts
+
+
+## Мягкий тёмный эллипс с опорой у нижней кромки клетки — туда, где у объекта
+## основание (якорь манифеста `[TILE/2, TILE-2]`).
+static func shadow_texture() -> ImageTexture:
+	if _shadow_tex != null:
+		return _shadow_tex
+	var img := Image.create(TILE, TILE, false, Image.FORMAT_RGBA8)
+	var cx := TILE * 0.5
+	var cy := float(TILE) - 8.0
+	for y in TILE:
+		for x in TILE:
+			var nx := (x + 0.5 - cx) / (TILE * SHADOW_RX)
+			var ny := (y + 0.5 - cy) / (TILE * SHADOW_RY)
+			var r2 := nx * nx + ny * ny
+			var a := 0.0 if r2 >= 1.0 else SHADOW_ALPHA * pow(1.0 - r2, 1.5)
+			img.set_pixel(x, y, Color(0.0, 0.0, 0.0, a))
+	_shadow_tex = ImageTexture.create_from_image(img)
+	return _shadow_tex
 
 
 static func clear_cache() -> void:
