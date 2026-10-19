@@ -1,7 +1,6 @@
 class_name BattleSpellbookPanel
 extends Control
 
-const THEME_PATH := "res://assets/theme/game_theme.tres"
 const MAX_SPELL_BUTTONS := 10
 
 signal spell_chosen(spell_id: StringName)
@@ -9,12 +8,15 @@ signal spell_chosen(spell_id: StringName)
 var _hero: HeroController
 var _magic: HeroMagic
 var _spell_registry: Node = null
-var _theme: Theme = null
 var _spell_buttons: Array[Button] = []
 
+# Темы здесь нет намеренно (T-147). Раньше панель звала
+# add_theme_stylebox_override("panel", ...) на себе и на кнопках — но `panel`
+# не является stylebox-именем ни у Control, ни у Button, а движок на мокрое имя
+# темы молчит (замер — test_wrong_item_name_is_silent_not_error). Оба
+# переопределения были мертвым кодом и не давали никакого вида. Одеть спелбук
+# по киту шага 4 — работа макета (шаг 5), а не этот фикс: здесь нет пикселя изменений.
 func _ready() -> void:
-    _theme = load(THEME_PATH) as Theme
-    _apply_theme()
     _collect_buttons()
 
 func _collect_buttons() -> void:
@@ -33,13 +35,6 @@ func setup(hero: HeroController = null, magic: HeroMagic = null, registry: Node 
     _refresh()
     if _magic != null and not _magic.changed.is_connected(_refresh):
         _magic.changed.connect(_refresh)
-
-func _apply_theme() -> void:
-    if _theme == null:
-        return
-    var sb := _theme.get_stylebox("panel", "Panel")
-    if sb:
-        add_theme_stylebox_override("panel", sb)
 
 func _refresh() -> void:
 
@@ -63,10 +58,6 @@ func _refresh() -> void:
         btn.tooltip_text = "%s | Lv.%d" % [spell.school, spell.level]
         # ui-icons: иконка школы магии (schools/air|fire|water|earth.png)
         btn.icon = ThemeConfig.icon_texture(ThemeConfig.ICON_DIR_SCHOOLS + str(spell.school).to_lower() + ".png")
-        if _theme != null:
-            var bsb := _theme.get_stylebox("button", "Panel")
-            if bsb:
-                btn.add_theme_stylebox_override("panel", bsb)
         btn.add_theme_color_override("font_color", ThemeConfig.C_TEXT_GOLD_SOFT)
 
         if btn.pressed.is_connected(_on_spell_pressed):
