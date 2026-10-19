@@ -26,7 +26,7 @@
 
 ## 4. Верификация
 
-- [ ] 4.1 GdUnit4: 1 клетка = 1 здание; placement по terrain_preference (жёсткая).
+- [x] 4.1 GdUnit4: 1 клетка = 1 здание; placement по terrain_preference (жёсткая). (2026-10-19, локальный агент: покрыто — `test_city_layout_is_52_cells_and_placement_respects_terrain_and_occupancy` (terrain-жёсткость: wrong_terrain → ok=false; occupied → ok=false; footprint [[0,0]] → 1 клетка) + новый `test_mvp_catalog_one_cell_per_building` (инвариант данных: все 98 зданий MVP-каталога — footprint ровно 1 клетка-якорь [0,0]).)
 - [ ] 4.2 GdUnit4: район создан → 0 Престижа, 0 XP (K-M16); распад через 3 дня.
 - [ ] 4.3 GdUnit4: аура только от WORKING; ферма у леса +15%.
-- [ ] 4.4 GdUnit4: население от производства (рейд по еде → DEFICIT, не обвал).
+- [x] 4.4 GdUnit4: население от производства (рейд по еде → DEFICIT, не обвал). (2026-10-19, локальный агент: покрыто — `test_start_state_one_turn` (поток еды → SM DEFICIT, pop стабилен), `test_t122_raid_hits_pre_production_stocks` (рейд бьёт запасы ДО production), `test_afk_cascade_no_chain_collapse` (10 рейдов — цепного обвала нет) + новый `test_raid_food_deficit_no_population_collapse` (рейд по еде → SM DEFICIT, население > 0 и не ниже стартового; MVP m-множители = 1, K-M12).)
