@@ -66,6 +66,8 @@ on_session_end:
   log {duration, actions, loops_closed, replan_after_tooltip_ts}
 ```
 
+**Реализация (2026-10-19, campaign-core-loop 2.1–2.4):** телеметрия — `TelemetryLog` (`game/scripts/campaign/telemetry_log.gd`) + проводка в `campaign_composition.gd`: `action{type, choice_count}` (UI-глаголы build/train/move → `record_action`; fight — авто-событие боя), `loop_closed` (рейд + acted + поход + возврат + ongoing), `replan_after_tooltip` (триггер — UI-подсказка «Почему так?», deferred). Метка времени = ход кампании (I1, детерминизм); wall-clock `t` (сек) — опциональное поле, которое добавляет UI-слой в playtest. Post-hoc отчёт — `TelemetryLog.compute_metrics()` (все 6 метрик + pass-флаги) и `loop_closure_rate()` (≥70% меж-сессийно). Headless симуляция метрики не считает (нет «игрока»): лог сессии — артефакт сессии, не часть сейва. D1/D7 — playtest (задача 2.5).
+
 **Fail-states цикла (и защита от каждого):**
 1. **«Нечего делать»** (нет угроз, нет целей): планировщик угроз гарантирует ≥1 цели на каждый день (рейд/узел карты/испытание знака, 02-mechanics §3.8).
 2. **«Принуждают»** (только одна осмысленная опция): инвариант UI — в любой фазе игрока ≥2 доступных глаголов (двинул/построил/тренировал).

@@ -49,7 +49,7 @@ The campaign SHALL be deterministic (I1): identical inputs (seed, actions) SHALL
 - **AND** no run diverges at any tick
 
 ### Requirement: Core loop metrics
-The campaign SHALL emit telemetry events to compute core-loop metrics: time-to-first-decision (TTFD ≤ 30s), action rate (8-15 actions/5min), decision ratio (≥60% actions are decisions), loop closure (≥70% of turns close the loop), session length (35-50min), D1 retention (≥35%), D7 retention (≥15%).
+The campaign SHALL emit telemetry events to a session log to compute core-loop metrics: TTFD (≤ 30s), action rate (8-15/5min), decision ratio (≥60%), loop closure (≥70% of sessions close at least one full loop), session length (35-50min), D1 (≥35%), D7 (≥15%). Event timestamps SHALL be the campaign turn (I1); wall-clock time is an optional field added by the UI layer in playtest.
 
 #### Scenario: Telemetry event on player action
 - **WHEN** the player performs a verb (build/train/move/fight)
@@ -57,8 +57,13 @@ The campaign SHALL emit telemetry events to compute core-loop metrics: time-to-f
 - **AND** the event is included in the metrics report
 
 #### Scenario: Loop closure event
-- **WHEN** a turn ends with the player having completed at least one full loop (see threat → replan → strengthen → expedition → return → raid survived)
+- **WHEN** a turn ends with all loop flags set: a raid struck during the threats phase, the player acted, the hero made an expedition (left the city), the hero is back in the city at turn end, and the campaign is ongoing
 - **THEN** a `loop_closed` event is emitted for that turn
+
+#### Scenario: Post-hoc metrics report
+- **WHEN** the session log is analyzed after the session ends
+- **THEN** the report includes TTFD, action rate, decision ratio, loop closure, session length, and replan-after-tooltip values with pass flags against the GDD targets
+- **AND** metrics without wall-clock timestamps are reported as not computable
 
 ### Requirement: Core loop fail states
 The campaign SHALL enforce fail states: AFK caps per resource per raid (food ≤40%, iron/weapons ≤30% — see `raid-pressure-system`), hunger (1 food per character per transition, capacity 10; hunger → −2 to attacks), and the invariant that at least two player verbs are always available in the player phase.
