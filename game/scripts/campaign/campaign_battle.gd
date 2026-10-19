@@ -50,6 +50,7 @@ static func make_combatant(spec: Dictionary) -> Dictionary:
 		"fate_debt": int(spec.get("fate_debt", 0)),
 		"frightened": bool(spec.get("frightened", false)),  # 2.1: триггер отступления авто-режима
 		"terrain": str(spec.get("terrain", "")),  # 3.3 (C3): swamp/spikes/height — абстрактные ±2 (без hex, C-3)
+		"class": str(spec.get("class", "")),  # 3.4 (02b A.4): класс для биномов (fighter/ranger — «Фланг»)
 		"luck_ou": int(spec.get("luck_ou", maxi(0, 1 + int(spec.get("luck", 0))))),  # 4.2 (02d §4): пул ОУ = 1 + modLuck
 		"auto_luck": bool(spec.get("auto_luck", false)),  # 4.2: авто-политика Удачи (детерминистичная, K2)
 		"supply_bonus": int(spec.get("supply_bonus", 0)),  # 5.2: снабжение → 1-й спас (Q-M57→(а))
@@ -132,9 +133,9 @@ static func _terrain_margin(atk: Dictionary, def_: Dictionary) -> int:
 ## Один удар по лестнице с Долгом судьбы (Б.4). Возвращает {zone, damage,
 ## margin, reckoning}. Порог долга = бонус мастерства; достигнут — Расплата
 ## (ступень ниже, долг → 0); долг ≥ 1 — штраф 1,25 (привязка — Ф3).
-static func _strike(atk: Dictionary, def_: Dictionary) -> Dictionary:
+static func _strike(atk: Dictionary, def_: Dictionary, flank_bonus: int = 0) -> Dictionary:
 	var margin: int = int(atk["attack"]) - int(def_["ac"]) + _state_margin(atk, def_) \
-		+ _terrain_margin(atk, def_) \
+		+ _terrain_margin(atk, def_) + flank_bonus \
 		+ int(atk.get("hunger_penalty", 0))  # голод (P-4): −2 к перевесу атаки
 	var reckoning := false
 	var debt_before: int = int(atk["fate_debt"])  # T-124: долг в trace (журнал этики)
@@ -380,6 +381,37 @@ static func select_target(foes: Array) -> Dictionary:
 	return best
 
 
+## 3.4 (02b A.4): «Фланг» — партнёр пары fighter ↔ ranger, если в партии
+## и жив (условие активации: оба в партии и живы, SM A.2). "" — нет.
+static func _flank_partner(party: Array, id: String) -> String:
+	var my_class := ""
+	for c in party:
+		if str(c["id"]) == id:
+			my_class = str(c.get("class", ""))
+	var partner_class := ""
+	if my_class == "fighter":
+		partner_class = "ranger"
+	elif my_class == "ranger":
+		partner_class = "fighter"
+	else:
+		return ""
+	for c in party:
+		if str(c.get("class", "")) == partner_class \
+					and int(c.get("hp", 0)) > 0 and not bool(c.get("dead", false)):
+			return str(c["id"])
+	return ""
+
+
+## 3.4: целеуказание по id (только легальная цель: жива, не dead, не retreat).
+static func _find_target(foes: Array, target_id: String) -> Dictionary:
+	for c in foes:
+		if str(c["id"]) == target_id and int(c.get("hp", 0)) > 0 \
+					and not bool(c.get("dead", false)) \
+					and not bool(c.get("retreated", false)):
+			return c
+	return {}
+
+
 ## Инициатива для N комбатантов: «Удача + Ловкость» (как 1v1), тай-брейк
 ## Ловкость → ID. Возвращает массив комбатантов в порядке ходов.
 static func _initiative_order(combatants: Array) -> Array:
@@ -432,8 +464,13 @@ static func resolve_multi(party: Array, enemies: Array,
 	var trace: Array = []
 	var outcome := "draw"
 	var round_no := 0
+	# «Фланг» (3.4, 02b A.4): после успешной атаки одного — следующая атака
+	# другого по той же цели в этом раунде +2 к Итогу (1/раунд на пару;
+	# BROKEN_DEAD — один умер → добивка не применяется).Pending: {by, target}.
+	var flank_pending: Dictionary = {}
 	while round_no < MAX_ROUNDS:
 		round_no += 1
+		flank_pending = {}  # +2 живёт до конца раунда (02b A.4)
 		for atk in order:
 			if int(atk["hp"]) <= 0 or bool(atk.get("dead", false)):
 				continue
@@ -447,14 +484,34 @@ static func resolve_multi(party: Array, enemies: Array,
 			var target := select_target(foes)
 			if target.is_empty():
 				continue
-			var hit := _strike(atk, target)
+			# «Фланг» (3.4): авто-политика — приоритет цели, по которой уже били
+			# в раунде (02b A.4 edge case); бонус +2 на ту же цель.
+			var flank_bonus := 0
+			var flanked := false
+			if is_party:
+				var partner_id := _flank_partner(party, str(atk["id"]))
+				if partner_id != "" and str(flank_pending.get("by", "")) == partner_id:
+					var pt: String = str(flank_pending.get("target", ""))
+					var p_target := _find_target(foes, pt)
+					if not p_target.is_empty():
+						target = p_target
+					if str(pt) == str(target["id"]):
+						flank_bonus = 2
+						flanked = true
+					flank_pending = {}  # «до первой атаки второго (что раньше)»
+			var hit := _strike(atk, target, flank_bonus)
 			target["hp"] = int(target["hp"]) - int(hit["damage"])
 			trace.append({
 				"round": round_no, "actor": str(atk["id"]), "target": str(target["id"]),
 				"zone": str(hit["zone"]), "margin": int(hit["margin"]),
 				"damage": int(hit["damage"]), "reckoning": bool(hit["reckoning"]),
 				"debt": int(hit["debt"]), "luck_used": str(hit["luck_used"]),
+				"flank": flanked,  # 3.4: «Фланг» сработал (+2)
 			})
+			# «Фланг» (3.4): pending — успешная атака (damage > 0) члена пары.
+			if is_party and int(hit["damage"]) > 0 and flank_pending.is_empty() \
+						and _flank_partner(party, str(atk["id"])) != "":
+				flank_pending = {"by": str(atk["id"]), "target": str(target["id"])}
 			if int(target["hp"]) <= 0:
 				var dead := _death_saves(target)
 				target["dead"] = dead
