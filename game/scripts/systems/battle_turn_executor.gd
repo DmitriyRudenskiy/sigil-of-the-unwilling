@@ -97,8 +97,37 @@ func resume_battle() -> void:
 func is_paused() -> bool:
 	return _paused
 
+
+## battle-unit-vitals: the turn clock lives in BattleState; the executor owns
+## when it runs — armed only while waiting for the player's input, so AI turns
+## never spend it. A modal window pauses it without losing the remaining time.
+var _turn_timer_armed := false
+
+func is_turn_timer_armed() -> bool:
+	return _turn_timer_armed
+
+func pause_turn_timer() -> void:
+	if _turn_timer_armed and _battle_state != null:
+		_battle_state.turn_timer_running = false
+
+func resume_turn_timer() -> void:
+	if _turn_timer_armed and _battle_state != null:
+		_battle_state.turn_timer_running = true
+
+## Called every frame from the battle controller; expiry skips the turn the
+## same way the "skip" button does.
+func tick_turn_timer(delta: float) -> void:
+	if not _turn_timer_armed or _paused or _state != State.WAITING_INPUT:
+		return
+	if _battle_state == null or not _battle_state.turn_timer_running:
+		return
+	if _battle_state.tick_turn_timer(delta):
+		status_updated.emit(GameText.battle_time_up())
+		request_skip()
+
 func start_battle() -> void:
 	_paused = false
+	_turn_timer_armed = false
 	_pending_completion = PendingAction.NONE
 	_end_emitted = false
 	_morale_allowed = false
@@ -347,6 +376,35 @@ func request_defend() -> void:
 	_morale_allowed = false
 	_on_action_completed()
 
+
+## Действие «Спасение» (D5): активный юнит поднимает умирающего соседа.
+## Медальон и его сигнал — в шаге 5 UI-паритета; вход под них готов здесь.
+## Провал тоже стоит действия: «попробую ещё» не должно быть бесплатным.
+func request_rescue(target: BattleState.BattleUnit) -> void:
+	if _paused:
+		return
+	if _state != State.WAITING_INPUT or _battle_state.active_unit == null:
+		return
+	var unit := _battle_state.active_unit
+	var result := BattleActionResolver.rescue_unit(_battle_state, unit, target)
+	match str(result.get("result", "unknown")):
+		"stabilized":
+			status_updated.emit(
+				GameText.battle_rescued(unit.get_display_name(), target.get_display_name())
+			)
+		"rescued_wakes":
+			status_updated.emit(
+				GameText.battle_rescued_wakes(unit.get_display_name(), target.get_display_name())
+			)
+		"failed":
+			status_updated.emit(
+				GameText.battle_rescue_failed(unit.get_display_name(), target.get_display_name())
+			)
+		_:
+			return
+	_morale_allowed = false
+	_on_action_completed()
+
 func request_retreat() -> void:
 	_retreat_policy.request()
 
@@ -367,6 +425,12 @@ func _advance_to_next_turn() -> void:
 		return
 
 	u.distance_moved_this_turn = 0
+
+	# battle-unit-vitals D4: у лежащего без сознания юнита нет хода — вместо действия
+	# идут смертельные броски; стабилизированный просто ждёт спасения.
+	if u.is_downed():
+		_run_death_saves(u)
+		return
 
 	if u.is_stunned():
 		var stun_effect := -1
@@ -405,8 +469,38 @@ func _advance_to_next_turn() -> void:
 			return
 
 		_transition_to(State.WAITING_INPUT)
+		_turn_timer_armed = true
+		_battle_state.arm_turn_timer()
 	else:
 		_run_ai_turn()
+
+## Смертельные броски (D&D 5e) вместо хода: 3 успеха → стабилен, 3 провала → смерть,
+## natuристальная 20 → встаёт на 1 HP. Стабилизированный хода не имеет вовсе.
+func _run_death_saves(unit: BattleState.BattleUnit) -> void:
+	if unit.is_stable():
+		status_updated.emit(GameText.battle_downed_waits(unit.get_display_name()))
+		_on_action_completed()
+		return
+	var res: DNDDeathSaves.DeathSaveResult = _roll_death_save(unit)
+	match unit.death_saves.state:
+		DNDDeathSaves.State.HEALTHY:
+			# natuристальная 20: спасброски сами сбросились в HEALTHY — поднимаем HP.
+			_battle_state.revive_from_death_save(unit)
+			status_updated.emit(GameText.battle_death_save_recovered(unit.get_display_name()))
+		DNDDeathSaves.State.DEAD:
+			_battle_state.finish_downed_unit(unit)
+			status_updated.emit(GameText.battle_death_save_died(unit.get_display_name()))
+		DNDDeathSaves.State.STABLE:
+			status_updated.emit(GameText.battle_death_save_stable(unit.get_display_name(), res.d20))
+		_:
+			status_updated.emit(GameText.battle_death_save_roll(unit.get_display_name(), res.d20))
+	_on_action_completed()
+
+
+## Бросок спасброска — отдельный метод как точка детерминированной подмены в тестах.
+func _roll_death_save(unit: BattleState.BattleUnit) -> DNDDeathSaves.DeathSaveResult:
+	return unit.death_saves.roll(_battle_state.dnd_rng)
+
 
 func _tick_statuses(u: BattleState.BattleUnit) -> void:
 	var to_remove: Array[int] = []
@@ -506,6 +600,10 @@ func _emit_end() -> void:
 func _transition_to(new_state: State) -> void:
 	_state = new_state
 	_state_token += 1
+	if new_state != State.WAITING_INPUT:
+		_turn_timer_armed = false
+		if _battle_state != null:
+			_battle_state.disarm_turn_timer()
 	phase_changed.emit(new_state)
 	if _retreat_policy.is_requested() and new_state == State.WAITING_INPUT:
 		_retreat_policy._execute()

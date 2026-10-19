@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cl6cc5v3rpkdo"
-path="res://.godot/imported/bar_mana_fill.png-834b2aa8332b4a94c4a2d3d226c07e02.ctex"
+uid="uid://c7hbqtejocglh"
+path="res://.godot/imported/button_menu_pressed.png-f4c9e59244de3ce8dfd3034427a777a9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/widgets/progress_bars/bar_mana_fill.png"
-dest_files=["res://.godot/imported/bar_mana_fill.png-834b2aa8332b4a94c4a2d3d226c07e02.ctex"]
+source_file="res://assets/ui/widgets/buttons/button_menu_pressed.png"
+dest_files=["res://.godot/imported/button_menu_pressed.png-f4c9e59244de3ce8dfd3034427a777a9.ctex"]
 
 [params]
 

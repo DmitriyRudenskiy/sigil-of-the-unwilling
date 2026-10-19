@@ -18,6 +18,55 @@ var max_hp: int = 10
 ## Tactical bonuses are derived from these via DnDTacticalBonuses.
 var class_id: String = ""
 var race_id: String = ""
+## battle-unit-vitals: character level. Display-only — it never enters an
+## attack/AC/damage formula (owner rule 2026-10-18). Travels with the profile
+## so a saved battle keeps the level it showed.
+var level: int = 1
+## battle-unit-vitals: current mana pool. -1 = not drawn yet; the pool size
+## depends on `abilities`, which the factory fills AFTER _init, so it is
+## materialized lazily on first access (see get_mana()).
+var mana_current: int = -1
+
+## Mana step in points (a +1 INT step buys this much more mana).
+const MANA_PER_INT_STEP := 5
+## Mana in INT-steps at Intelligence 10 (modifier +0).
+const MANA_BASE_INT_STEPS := 2
+
+
+## battle-unit-vitals: mana pool of a character = 5 × (2 + INT modifier), never
+## below one step, so any profile-bearing unit can afford at least the default
+## 5-point spell. A plain stack (no profile) has no mana at all — see
+## BattleState.BattleUnit.has_mana().
+func get_mana_max() -> int:
+	return maxi(MANA_PER_INT_STEP, MANA_PER_INT_STEP * (MANA_BASE_INT_STEPS + abilities.get_int_mod()))
+
+
+## Current mana, drawing the pool from Intelligence on first access.
+func get_mana() -> int:
+	if mana_current < 0:
+		mana_current = get_mana_max()
+	return mana_current
+
+
+## Spend mana from the personal pool. False when the pool cannot cover it.
+func spend_mana(amount: int) -> bool:
+	if amount <= 0:
+		return true
+	if get_mana() < amount:
+		return false
+	mana_current = get_mana() - amount
+	return true
+
+
+## Return mana (failed cast), capped at the pool size.
+func refund_mana(amount: int) -> void:
+	mana_current = mini(get_mana_max(), get_mana() + amount)
+
+
+## Highest mental ability modifier (INT/WIS/CHA) — the ability a Rescue check
+## of this character is made with (battle-unit-vitals).
+func get_rescue_mod() -> int:
+	return maxi(abilities.get_int_mod(), maxi(abilities.get_wis_mod(), abilities.get_cha_mod()))
 
 
 func _init(p_id: String = "", p_name: String = "") -> void:
@@ -91,6 +140,8 @@ func to_dict() -> Dictionary:
 		"max_hp": max_hp,
 		"class_id": class_id,
 		"race_id": race_id,
+		"level": level,
+		"mana_current": mana_current,
 	}
 
 
@@ -104,4 +155,7 @@ static func from_dict(data: Dictionary) -> DnDCombatantProfile:
 	p.max_hp = int(data.get("max_hp", 10))
 	p.class_id = str(data.get("class_id", ""))
 	p.race_id = str(data.get("race_id", ""))
+	p.level = int(data.get("level", 1))
+	# Absent key = pool not drawn yet (lazy, follows the current INT).
+	p.mana_current = int(data.get("mana_current", -1))
 	return p

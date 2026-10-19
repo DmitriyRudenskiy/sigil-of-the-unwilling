@@ -10,6 +10,8 @@ signal skip_requested
 signal defend_requested
 signal spellbook_requested
 signal spell_chosen(spell_id: StringName)
+signal spellbook_opened
+signal spellbook_closed
 signal settings_requested
 signal settings_closed
 signal result_accepted
@@ -289,8 +291,9 @@ func _on_spellbook_chosen(id: StringName) -> void:
 	spell_chosen.emit(id)
 
 func close_spellbook() -> void:
-	if _spellbook_panel != null:
+	if _spellbook_panel != null and _spellbook_panel.visible:
 		_spellbook_panel.visible = false
+		spellbook_closed.emit()
 
 func _on_retreat() -> void:
 	retreat_requested.emit()
@@ -334,6 +337,7 @@ func open_spellbook(_state: BattleState, magic: HeroMagic = null) -> void:
 	if magic != null:
 		_spellbook_panel.setup(null, magic, null)
 	_spellbook_panel.visible = true
+	spellbook_opened.emit()
 
 func _on_settings() -> void:
 	settings_requested.emit()

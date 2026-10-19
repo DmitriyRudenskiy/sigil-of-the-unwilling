@@ -40,6 +40,9 @@ msgstr "Выход"
 msgid "menu.version"
 msgstr "Sigil of the Unwilling v0.1 — Godot 4.7"
 
+msgid "menu.title"
+msgstr "Sigil of the Unwilling"
+
 msgid "model.hero_warrior"
 msgstr "Аджит — Рыцарь"
 
@@ -103,6 +106,36 @@ msgstr "⚔️ Кликните врага с красным контуром."
 
 msgid "battle.no_mana"
 msgstr "Недостаточно маны или школа не изучена."
+
+msgid "battle.time_up"
+msgstr "⏳ Время вышло — ход пропущен."
+
+msgid "battle.downed_waits"
+msgstr "{name} без сознания и не действует."
+
+msgid "battle.death_save_roll"
+msgstr "💀 {name}: спасбросок от смерти d20={roll}."
+
+msgid "battle.death_save_stable"
+msgstr "💀 {name} стабилен (d20={roll}) — без сознания, но вне опасности."
+
+msgid "battle.death_save_died"
+msgstr "💀 {name} умер (три провала)."
+
+msgid "battle.death_save_recovered"
+msgstr "💀 {name} приходит в себя на 1 HP (натуристальная 20)."
+
+msgid "battle.rescue_action"
+msgstr "Спасение"
+
+msgid "battle.rescued"
+msgstr "🩹 {name} стабилизирует: {target}."
+
+msgid "battle.rescued_wakes"
+msgstr "🩹 {name} возвращает {target} с того света."
+
+msgid "battle.rescue_failed"
+msgstr "🩹 {name} не удаётся спасти {target}."
 
 msgid "battle.unit_info"
 msgstr "{name} | Числ: {count} | HP: {hp} | АТК: {atk} | ЗАЩ: {def} | СКОР: {spd} | {tags}"

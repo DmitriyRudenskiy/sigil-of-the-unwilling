@@ -436,6 +436,22 @@
    ],
    "reference": "1791999397246-01a13b7a-0abb-7b89-a0aa-4d39e5f5f207.jpeg",
    "style": "dark cinematic fantasy game interface, carved stone and dark wood panels with thin gold filigree, parchment fields, glowing blue sigil accents, moody low-key lighting with one warm light source, engraved serif titling"
+  },
+  "ui_plates": {
+   "size": [
+    1280,
+    720
+   ],
+   "count": 1,
+   "frame": "empty interior establishing plate painted for a title screen, 16:9 widescreen, one continuous painting edge to edge, no user interface, no panels, no buttons, no icons, no text, no letters, no logo, no watermark, right third of the frame calm and uncluttered",
+   "items": [
+    {
+     "id": "ui_start_screen_bg",
+     "subject": "vast gothic throne hall at night, perfectly symmetrical frontal composition seen straight down the central axis: an enormous circular rose window of carved stone tracery exactly centred in the frame, its circle filling the upper two thirds of the image, ringed with eight round jewel medallions in lapis blue, emerald green, amber gold and amethyst purple, deep blue starry night sky glowing behind the glass, golden rays from its centre; a large carved stone throne on a wide stepped dais at the lower centre directly beneath the window, throne generously sized and clearly readable; two identical tall gothic pillars flanking the window at equal distance left and right; matching alcoves of plain dark stone at both outer edges; thick cold mist pooling across the flagstone floor; two warm amber brazier flames lighting the floor and the pillar bases against the cold blue; saturated blue-slate palette with thin gold filigree accents"
+    }
+   ],
+   "reference": "1791999397246-01a13b7a-0abb-7b89-a0aa-4d39e5f5f207.jpeg",
+   "style": "dark cinematic fantasy concept painting, carved stone and dark wood with thin gold filigree, strong glowing blue key light from the rose window, one small warm ember source, rich saturated mid-tones, moody but readable shadows"
   }
  },
  "references_dir": "image-clone/etalons",

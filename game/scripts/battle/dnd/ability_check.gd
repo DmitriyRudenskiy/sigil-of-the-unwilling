@@ -14,19 +14,31 @@ var has_disadvantage: bool = false
 
 
 ## Roll a check. Returns the total (d20 + modifier).
-func roll(rng: RandomNumberGenerator, p_modifier: int, p_advantage: bool = false, p_disadvantage: bool = false) -> int:
+## p_d20 > 0 — подставной кубик (тесты): броска нет, преимущество не применяется.
+func roll(
+	rng: RandomNumberGenerator,
+	p_modifier: int,
+	p_advantage: bool = false,
+	p_disadvantage: bool = false,
+	p_d20: int = 0
+) -> int:
 	modifier = p_modifier
 	has_advantage = p_advantage and not p_disadvantage
 	has_disadvantage = p_disadvantage and not p_advantage
 
-	d20_result = rng.randi_range(1, 20)
-	if has_advantage:
+	if p_d20 > 0:
+		d20_result = p_d20
+		second_d20 = 0
+	elif has_advantage:
+		d20_result = rng.randi_range(1, 20)
 		second_d20 = rng.randi_range(1, 20)
 		d20_result = maxi(d20_result, second_d20)
 	elif has_disadvantage:
+		d20_result = rng.randi_range(1, 20)
 		second_d20 = rng.randi_range(1, 20)
 		d20_result = mini(d20_result, second_d20)
 	else:
+		d20_result = rng.randi_range(1, 20)
 		second_d20 = 0
 
 	total = d20_result + modifier

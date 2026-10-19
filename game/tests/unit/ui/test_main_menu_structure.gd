@@ -113,3 +113,33 @@ func test_main_menu_settings_press_shows_screen() -> void:
 	await get_tree().process_frame
 	assert_bool(layer.visible).is_true().override_failure_message(
 		"нажатие «Настройки» не открыло экран настроек")
+
+
+## UI-3 шаг 3 (макет 09): титульный леттеринг — три строки по центру кадра, верхний
+## регистр, разбивка «первое / середина / последнее». Тест поймал `split(" ", false,
+## true)`: третьим аргументом в Godot 4 идёт max_splits, а не case_sensitive, и заголовок
+## резался один раз — «OF THE UNWILLING» одной строкой вместо двух.
+func test_main_menu_title_splits_into_three_lines() -> void:
+	var ui := await _spawn()
+	var lines: Array = []
+	for line in ui._title_lines:
+		lines.append(line.text)
+	assert_array(lines).is_equal(["SIGIL", "OF THE", "UNWILLING"]).override_failure_message(
+		"титул раскладывается по макету 09: первое / середина / последнее, в верхнем регистре")
+	for line in ui._title_lines:
+		assert_bool(line.visible).is_true().override_failure_message(
+			"непустая строка титула не должна прятаться")
+
+
+## Одно слово — только первая строка; два слова — средняя пустая и скрыта. Иначе
+## пустой Label резервирует место и рвёт вертикальный ритм титула.
+func test_main_menu_title_short_titles() -> void:
+	var ui := await _spawn()
+	ui._set_title("Sigil")
+	assert_bool(ui._title_lines[0].visible).is_true()
+	assert_bool(ui._title_lines[1].visible).is_false()
+	assert_bool(ui._title_lines[2].visible).is_false()
+	ui._set_title("Sigil Unwilling")
+	assert_array([ui._title_lines[0].text, ui._title_lines[1].text, ui._title_lines[2].text]) \
+		.is_equal(["SIGIL", "", "UNWILLING"])
+	assert_bool(ui._title_lines[1].visible).is_false()

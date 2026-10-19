@@ -72,6 +72,16 @@ func can_cast_def(spell: SpellRegistry.SpellDef) -> bool:
 		return false
 	return mana_current >= get_mana_cost_def(spell)
 
+
+## battle-unit-vitals: knowledge gate alone (school learned), ignoring every
+## mana pool. A D&D character pays from its own Intelligence-derived mana, so
+## the hero's remaining mana must not gate that cast.
+func knows_def(spell: SpellRegistry.SpellDef) -> bool:
+	if spell == null:
+		return false
+	var school_id: int = SchoolType.from_key(spell.school.to_lower())
+	return school_level(school_id) >= spell.level
+
 func get_mana_cost_def(spell: SpellRegistry.SpellDef) -> int:
 	if spell == null:
 		return 0

@@ -2,6 +2,10 @@ class_name BattleActionResolver
 extends RefCounted
 
 
+## Спасение умирающего (design D5): сложность проверки характеристики спасателя.
+const RESCUE_DC := 10
+
+
 
 ## T17/D2: атака разрешается по лестнице перевеса (02d v1.2) — детерминированно,
 ## без ГСЧ. d20-путь (battle/dnd/) — legacy, из основного флоу выключен.
@@ -50,6 +54,31 @@ static func apply_attack(
 	state.invalidate_board_cache()
 	state.check_end()
 	return result
+
+## battle-unit-vitals: charge a spell to the pool the caster actually owns. A
+## D&D character pays its own Intelligence-derived mana; a plain stack pays the
+## hero's mana (unchanged behaviour, including "no hero mana resource = free").
+## Returns the charged amount (0 = nothing to charge) or -1 when the cast is not
+## known or not affordable. The refund side lives with the caller, which knows
+## which pool it charged (BattleController._last_spell_payer).
+static func pay_spell_mana(caster: BattleState.BattleUnit, hero_magic: HeroMagic, spell) -> int:
+	var cost: int = 0
+	if hero_magic != null:
+		cost = hero_magic.get_mana_cost_def(spell)
+	elif spell != null:
+		cost = spell.base_mana
+	if caster != null and caster.has_mana():
+		if spell == null:
+			return -1
+		if hero_magic != null and not hero_magic.knows_def(spell):
+			return -1
+		return cost if caster.spend_mana(cost) else -1
+	if hero_magic == null:
+		return 0
+	if spell == null or not hero_magic.can_cast_def(spell):
+		return -1
+	return cost if hero_magic.spend_mana(cost) else -1
+
 
 static func apply_spell(
 	state: BattleState,
@@ -211,6 +240,15 @@ static func do_skip(state: BattleState, unit: BattleState.BattleUnit) -> void:
 static func kill_unit(state: BattleState, unit: BattleState.BattleUnit) -> void:
 	if unit == null or not unit.alive:
 		return
+	# battle-unit-vitals D4: удар не убивает персонажа — он падает без сознания.
+	# Настоящая смерть — три провала смертельных бросков (finish_downed_unit);
+	# сюда же попадают уже лежащие юниты, чтобы счётчик «в строю» не упал дважды.
+	if unit.is_dnd_character() and not unit.is_downed():
+		state.down_unit(unit)
+		return
+	if unit.is_downed():
+		state.finish_downed_unit(unit)
+		return
 	unit.alive = false
 	unit.set_count(0)
 	if unit.side == BattleState.Side.ATTACKER:
@@ -223,6 +261,11 @@ static func kill_unit(state: BattleState, unit: BattleState.BattleUnit) -> void:
 
 static func revive_unit(state: BattleState, unit: BattleState.BattleUnit) -> void:
 	if unit == null:
+		return
+	if unit.is_downed():
+		# Лежащего без сознания «воскрешение» не удваивает: он встаёт тем же путём,
+		# что и с nat-20 на спасброске (счётчик «в строю» растёт ровно один раз).
+		state.recover_downed_unit(unit)
 		return
 	if not unit.alive:
 		unit.alive = true
@@ -325,3 +368,61 @@ static func _try_rebirth(
 	revive_unit(state, def)
 	result["rebirth"] = true
 	return true
+
+
+## Спасение возможно: своё действие, спасатель — персонаж (стеку нечем проверять
+## характеристику), рядом — именно умирающий союзник. Стабилизированный и чужой
+## не подходят, мёртвого не спасти вовсе.
+static func can_rescue(
+	state: BattleState,
+	rescuer: BattleState.BattleUnit,
+	target: BattleState.BattleUnit
+) -> bool:
+	if state == null or rescuer == null or target == null:
+		return false
+	if state.battle_over or not rescuer.can_act() or rescuer.has_moved:
+		return false
+	if not rescuer.is_dnd_character():
+		return false
+	if not target.is_dying() or target.side != rescuer.side:
+		return false
+	return HexUtils.hex_distance(rescuer.cell, target.cell, state.hex_shift_right) == 1
+
+
+## Действие «Спасение» (D5): спасатель проверяет высшую ментальную характеристику
+## против DC 10. Успех — товарищ стабилен; nat 20 — приходит в себя на 1 HP.
+## Провал состояние не меняет, но действие стоит: иначе «попробую ещё» бесплатно.
+## p_d20 — подставной кубик (тесты), как у DNDDeathSaves.roll.
+static func rescue_unit(
+	state: BattleState,
+	rescuer: BattleState.BattleUnit,
+	target: BattleState.BattleUnit,
+	p_d20: int = 0
+) -> Dictionary:
+	if not can_rescue(state, rescuer, target):
+		return {}
+	var modifier := _rescue_modifier(rescuer)
+	var check := DNDAbilityCheck.new()
+	var total: int = check.roll(state.dnd_rng, modifier, false, false, p_d20)
+	var result := {
+		"modifier": modifier, "d20": check.d20_result, "total": total, "dc": RESCUE_DC,
+	}
+	if check.d20_result == 20:
+		state.recover_downed_unit(target)
+		result["result"] = "rescued_wakes"
+	elif check.meets(RESCUE_DC):
+		state.stabilize_downed_unit(target)
+		result["result"] = "stabilized"
+	else:
+		result["result"] = "failed"
+	rescuer.has_moved = true
+	state.invalidate_board_cache()
+	return result
+
+
+## Чем спасают: высшая ментальная характеристика (INT/WIS/CHA).
+static func _rescue_modifier(unit: BattleState.BattleUnit) -> int:
+	var abilities := unit.dnd_profile.abilities
+	return maxi(
+		abilities.get_int_mod(), maxi(abilities.get_wis_mod(), abilities.get_cha_mod())
+	)

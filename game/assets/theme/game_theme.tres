@@ -10,6 +10,10 @@
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/panels/slot_bg.png" id="11_slot"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/sliders/slider_track.png" id="12_slider_track"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/sliders/slider_handle.png" id="13_slider_handle"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/buttons/button_menu_normal.png" id="16_btn_menu_normal"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/buttons/button_menu_hover.png" id="17_btn_menu_hover"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/buttons/button_menu_pressed.png" id="18_btn_menu_pressed"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/buttons/button_menu_disabled.png" id="19_btn_menu_disabled"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/buttons/checkbox_checked.png" id="14_cb_checked"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/buttons/checkbox_unchecked.png" id="15_cb_unchecked"]
 
@@ -40,17 +44,17 @@ shadow_offset = Vector2(0, 2)
 shadow_color = Color(0, 0, 0, 0.6)
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_panel"]
-; К-8: маржа 16/16/16/16 на текстуре 32×32 давала нулевое растяжимое ядро
-; (центр — растянутый пиксель). Маржа = толщина рамки в текстуре = 8, ядро 16×16.
+; К-8: маржа обязана равняться толщине рамки в текстуре, иначе рамка тянется.
+; Текстура 96×96, рамка 7 px (шаг 4, scripts/ui_kit) → маржа 12, ядро 72×72.
 texture = ExtResource("1_panel")
 margin_left = 8.0
 margin_top = 8.0
 margin_right = 8.0
 margin_bottom = 8.0
-texture_margin_left = 8.0
-texture_margin_top = 8.0
-texture_margin_right = 8.0
-texture_margin_bottom = 8.0
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
 content_margin_left = 16.0
 content_margin_top = 16.0
 content_margin_right = 16.0
@@ -58,7 +62,7 @@ content_margin_bottom = 16.0
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_slot"]
 ; К-9: слот рисовался панелью (ExtResource "1_panel"); slot_bg.png темой не
-; использовался. Плюс К-8: маржа 12 → 8 (ядро 16×16).
+; использовался. К-8: маржа = рамка текстуры (шаг 4: текстура 48×48, рамка 6).
 texture = ExtResource("11_slot")
 margin_left = 8.0
 margin_top = 8.0
@@ -82,12 +86,19 @@ border_width_bottom = 1
 border_color = Color(0.12549, 0.0627451, 0.0235294, 1)
 bg_color = Color(0.227451, 0.141176, 0.0823529, 1)
 
+; ─── Шаг 4 (ui-mockup-parity): у кнопочных текстур не было texture_margin —
+; ─── 9-slice не работал, плита тянулась целиком (К-8 та же болезнь). Маржа =
+; ─── фаска + рамка текстуры: бока 20 (фаска 10 + рамка 7), верх/низ 12.
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_button"]
 texture = ExtResource("2_btn_normal")
 margin_left = 8.0
 margin_top = 8.0
 margin_right = 8.0
 margin_bottom = 8.0
+texture_margin_left = 20.0
+texture_margin_top = 12.0
+texture_margin_right = 20.0
+texture_margin_bottom = 12.0
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_button_hover"]
 texture = ExtResource("3_btn_hover")
@@ -95,6 +106,10 @@ margin_left = 8.0
 margin_top = 8.0
 margin_right = 8.0
 margin_bottom = 8.0
+texture_margin_left = 20.0
+texture_margin_top = 12.0
+texture_margin_right = 20.0
+texture_margin_bottom = 12.0
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_button_pressed"]
 texture = ExtResource("4_btn_pressed")
@@ -102,6 +117,10 @@ margin_left = 8.0
 margin_top = 8.0
 margin_right = 8.0
 margin_bottom = 8.0
+texture_margin_left = 20.0
+texture_margin_top = 12.0
+texture_margin_right = 20.0
+texture_margin_bottom = 12.0
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_button_disabled"]
 texture = ExtResource("5_btn_disabled")
@@ -109,6 +128,56 @@ margin_left = 8.0
 margin_top = 8.0
 margin_right = 8.0
 margin_bottom = 8.0
+texture_margin_left = 20.0
+texture_margin_top = 12.0
+texture_margin_right = 20.0
+texture_margin_bottom = 12.0
+
+; ─── MenuPlate: плита стартового экрана макета 09 (со скобкой по торцам).
+; ─── Базовая Button орнамента не имеет: на кнопках 28…48 px он рассыпается.
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_menu_normal"]
+texture = ExtResource("16_btn_menu_normal")
+margin_left = 12.0
+margin_top = 10.0
+margin_right = 12.0
+margin_bottom = 10.0
+texture_margin_left = 20.0
+texture_margin_top = 12.0
+texture_margin_right = 20.0
+texture_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_menu_hover"]
+texture = ExtResource("17_btn_menu_hover")
+margin_left = 12.0
+margin_top = 10.0
+margin_right = 12.0
+margin_bottom = 10.0
+texture_margin_left = 20.0
+texture_margin_top = 12.0
+texture_margin_right = 20.0
+texture_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_menu_pressed"]
+texture = ExtResource("18_btn_menu_pressed")
+margin_left = 12.0
+margin_top = 10.0
+margin_right = 12.0
+margin_bottom = 10.0
+texture_margin_left = 20.0
+texture_margin_top = 12.0
+texture_margin_right = 20.0
+texture_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_menu_disabled"]
+texture = ExtResource("19_btn_menu_disabled")
+margin_left = 12.0
+margin_top = 10.0
+margin_right = 12.0
+margin_bottom = 10.0
+texture_margin_left = 20.0
+texture_margin_top = 12.0
+texture_margin_right = 20.0
+texture_margin_bottom = 12.0
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_bar_bg"]
 texture = ExtResource("6_bar_bg")
@@ -116,6 +185,10 @@ margin_left = 4.0
 margin_top = 4.0
 margin_right = 4.0
 margin_bottom = 4.0
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_bar_fill"]
 texture = ExtResource("7_fill_health")
@@ -123,6 +196,10 @@ margin_left = 4.0
 margin_top = 4.0
 margin_right = 4.0
 margin_bottom = 4.0
+texture_margin_left = 6.0
+texture_margin_top = 6.0
+texture_margin_right = 6.0
+texture_margin_bottom = 6.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_red"]
 corner_radius_top_left = 2
@@ -392,10 +469,10 @@ margin_left = 4.0
 margin_top = 4.0
 margin_right = 4.0
 margin_bottom = 4.0
-texture_margin_left = 4.0
-texture_margin_top = 4.0
-texture_margin_right = 4.0
-texture_margin_bottom = 4.0
+texture_margin_left = 6.0
+texture_margin_top = 6.0
+texture_margin_right = 6.0
+texture_margin_bottom = 6.0
 content_margin_left = 0.0
 content_margin_top = 6.0
 content_margin_right = 0.0
@@ -766,6 +843,15 @@ BibleButton/styles/hover = SubResource("StyleBoxFlat_ctl_hover")
 BibleButton/styles/pressed = SubResource("StyleBoxFlat_ctl_pressed")
 BibleButton/styles/disabled = SubResource("StyleBoxFlat_ctl_disabled")
 BibleButton/styles/focus = SubResource("StyleBoxFlat_ctl_focus")
+
+; ─── MenuPlate (шаг 4, ui-mockup-parity): плита макета 09 со скобкой по торцам.
+; ─── Носитель — button_menu_*; базовая Button остаётся строгой плитой.
+MenuPlate/base_type = "Button"
+MenuPlate/styles/normal = SubResource("StyleBoxTexture_menu_normal")
+MenuPlate/styles/hover = SubResource("StyleBoxTexture_menu_hover")
+MenuPlate/styles/pressed = SubResource("StyleBoxTexture_menu_pressed")
+MenuPlate/styles/disabled = SubResource("StyleBoxTexture_menu_disabled")
+MenuPlate/styles/focus = SubResource("StyleBoxFlat_button_focus")
 PanelCard/base_type = "PanelContainer"
 PanelCard/styles/panel = SubResource("StyleBoxFlat_card")
 PanelActive/base_type = "PanelContainer"

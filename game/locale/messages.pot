@@ -34,6 +34,9 @@ msgstr ""
 msgid "menu.version"
 msgstr ""
 
+msgid "menu.title"
+msgstr ""
+
 msgid "model.hero_warrior"
 msgstr ""
 
@@ -96,6 +99,36 @@ msgid "battle.click_enemy"
 msgstr ""
 
 msgid "battle.no_mana"
+msgstr ""
+
+msgid "battle.time_up"
+msgstr ""
+
+msgid "battle.downed_waits"
+msgstr ""
+
+msgid "battle.death_save_roll"
+msgstr ""
+
+msgid "battle.death_save_stable"
+msgstr ""
+
+msgid "battle.death_save_died"
+msgstr ""
+
+msgid "battle.death_save_recovered"
+msgstr ""
+
+msgid "battle.rescue_action"
+msgstr ""
+
+msgid "battle.rescued"
+msgstr ""
+
+msgid "battle.rescued_wakes"
+msgstr ""
+
+msgid "battle.rescue_failed"
 msgstr ""
 
 msgid "battle.unit_info"

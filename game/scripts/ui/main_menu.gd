@@ -16,6 +16,7 @@ const SCENE_CONTINUE := "res://scenes/main/main.tscn"
 @onready var _settings_btn: Button = $RightColumn/SettingsButton
 @onready var _exit_btn: Button = $RightColumn/ExitButton
 @onready var _version_label: Label = $VersionLabel
+@onready var _title_lines: Array[Label] = [$TitleLine1, $TitleLine2, $TitleLine3]
 @onready var _settings_screen: SettingsScreen = $SettingsScreen
 @onready var _chronicle_screen: ChronicleScreen = $ChronicleScreen
 @onready var _model_screen: ArtifactInventoryScreen = $HeroModelWindow
@@ -53,6 +54,10 @@ func _find_bg() -> Texture2D:
     # Пути только живые (docs/12-asset-audit.md, Missing): webp — канон фона
     # (docs/13 §8.4, 1920×1080 q85); jpeg/png-предки удалены после приёмки
     # webp (smoke-скрин меню, 2026-10-13); throne.png — последний fallback.
+    # webp 2026-10-19 — художественное основание макета 09 (ui-mockup-parity,
+    # шаг 3): роза из восьми медальонов, трон, туман; леттеринг больше не врос
+    # в фон, он тремя узлами TitleLine1…3 (см. _set_title). Провенанс кадра —
+    # concept_art/manifest.json, krea2/t4_painterly/ui_plates/ui_start_screen_bg.
     var candidates := [
         "res://assets/ui/main_menu_bg.webp",
         "res://assets/ui/throne.png",
@@ -78,28 +83,15 @@ func _style_buttons() -> void:
         _continue_btn, _new_game_btn, _credits_btn,
         _settings_btn, _exit_btn
     ]
+    # Носитель кнопок — тема (вариант MenuPlate: плита макета 09, 9-slice). Здесь
+    # когда-то рисовался StyleBoxFlat из ThemeConfig.C_BTN_*: интерим фазы 5, пока
+    # у темы не было настоящей графики. Оставь его — и он перекрывает тему
+    # (add_theme_stylebox_override сильнее варианта темы), то есть стартовый экран
+    # и дальше рисовался бы плоской заливкой вместо кита шага 4.
     for btn in buttons:
-        var sn := StyleBoxFlat.new()
-        sn.bg_color = ThemeConfig.C_BTN_NORMAL
-        sn.set_corner_radius_all(10)
-        sn.set_border_width_all(2)
-        sn.border_color = ThemeConfig.C_BTN_BORDER
-        sn.shadow_color = ThemeConfig.C_BTN_SHADOW
-        sn.shadow_size = 4
-        btn.add_theme_stylebox_override("normal", sn)
-        var sh := sn.duplicate()
-        sh.bg_color = ThemeConfig.C_BTN_HOVER
-        btn.add_theme_stylebox_override("hover", sh)
-        var sp := sn.duplicate()
-        sp.bg_color = ThemeConfig.C_BTN_PRESSED
-        btn.add_theme_stylebox_override("pressed", sp)
-        # Недоступная кнопка отличается НЕ только цветом: у неё сняты рамка и тень
-        # (меняется форма), плюс тусклый шрифт и отсутствующая анимация наведения.
-        var sd := sn.duplicate()
-        sd.bg_color = Color(0.06, 0.05, 0.04, 0.55)
-        sd.set_border_width_all(0)
-        sd.shadow_size = 0
-        btn.add_theme_stylebox_override("disabled", sd)
+        # Недоступная кнопка отличается не только цветом: у неё свой носитель
+        # (MenuPlate/disabled — обесцвеченная плита), плюс тусклый шрифт и
+        # отсутствующая анимация наведения.
         btn.add_theme_color_override("font_color", ThemeConfig.C_BTN_TEXT)
         btn.add_theme_color_override("font_disabled_color", Color(0.45, 0.42, 0.35, 1))
         btn.mouse_entered.connect(func() -> void: SoundManager.play_sfx_cue(&"ui_hover"))
@@ -113,6 +105,25 @@ func _localize() -> void:
     _settings_btn.text = GameText.menu_settings()
     _exit_btn.text = GameText.menu_exit()
     _version_label.text = GameText.menu_version()
+    _set_title(GameText.menu_title())
+
+
+func _set_title(title: String) -> void:
+    # Макет 09: титульный леттеринг — три строки по центру кадра (крупно / мелко /
+    # крупно), поверх розы-окна. Строка одна (имя игры — бренд, не фраза), поэтому
+    # разбивка по словам: «первое / середина / последнее»; два слова → средняя
+    # строка пустая и скрыта; одно слово → только первая строка.
+    # Третьим аргументом split() в Godot 4 идёт max_splits, а не case_sensitive:
+    # split(" ", false, true) режет строку один раз и даёт два куска.
+    var words := title.split(" ", false)
+    var lines: Array[String] = [title, "", ""]
+    if words.size() == 2:
+        lines = [words[0], "", words[1]]
+    elif words.size() > 2:
+        lines = [words[0], " ".join(words.slice(1, words.size() - 1)), words[words.size() - 1]]
+    for i in _title_lines.size():
+        _title_lines[i].text = lines[i].to_upper()
+        _title_lines[i].visible = lines[i] != ""
 
 func _connect_buttons() -> void:
     _continue_btn.pressed.connect(_on_continue)
