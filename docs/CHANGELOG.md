@@ -9,6 +9,26 @@ date: 2026-10-19
 
 # CHANGELOG — docs/
 
+## [2026-10-19] — dnd-battle-ladder 3.3: местность 3 типа (C3) как абстрактные ±2 (GdUnit 2738/0)
+
+- **3.3** (spec: «Terrain SHALL have 3 types (swamp, spikes, height, C3)»; design:
+  «местность = абстрактные модификаторы (±2 за тип: болото/шипы/высота, C3)»,
+  без hex, C-3) в `campaign_battle.gd`:
+  - поле `terrain` комбатанта (данные, K-M15; дефолт "" — без местности);
+  - `_terrain_margin()` в перевесе атаки (`_strike`): **swamp** — −2 к атакам
+    занимающего; **spikes** — −2 к атакам по занимающему; **height** — +2 к
+    атакам занимающего (и −2 к атакам снизу); значения — `ADVANTAGE_MARGIN` (2);
+  - стек без капа (02d) — сосуществует с `_state_margin` (prone/высотный
+    статус, K-M7); действует в 1v1 и multi (тот же `_strike`);
+  - back-compat: без `terrain` перевес не меняется (все существующие тесты
+    зелёные без правок).
+- Тесты: `test_battle_terrain.gd` (7) — болото (success→partial, урон 5→2),
+  шипы, высота (success→triumph, урон ×2), атака снизу, стек prone+болото (−3),
+  multi-путь, back-compat.
+- **GdUnit 2738/0** (2731 + 7), full suite зелёный.
+- dnd-battle-ladder: 14 done / 1 partial (2.1) / 6 open (2.2 босс-ИИ,
+  3.2 Blink, 3.4/5.4 «Фланг», 4.1 карточка врага M1, 4.2 пул Удачи).
+
 ## [2026-10-19] — dnd-battle-ladder 5.5: мораль аннулирована (K-M11) в multi-бое (GdUnit 2731/0)
 
 - **5.5** (spec: «The morale scale (0-100) SHALL NOT exist (K-M11). Losses
