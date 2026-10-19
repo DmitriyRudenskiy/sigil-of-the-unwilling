@@ -18,6 +18,15 @@ const MAX_ROUNDS: int = 20  # D-128: лимит боя — ничья
 const FATE_PENALTY_DIVISOR: float = 1.25  # «Судьба следит» (02d §4.2); привязка к лестнице — Ф3 ( interim: margin/1,25)
 const DEATH_SAVES_NEEDED: int = 3  # death saves 3/3 (T-050 AC, mod ТЕЛ)
 
+## SM персонажа (02-mechanics §3.2, T-116 слой): READY → WOUNDED → UNSTABLE →
+## DEAD. WOUNDED/UNSTABLE — внутрибоевые состояния, не персистятся между
+## боями (MVP-срез: потери = DEAD, раненые — не потери). «Следующий бой при
+## HD = 0» (WOUNDED → UNSTABLE) — вход в бой с hit_dice ≤ 0.
+const STATE_READY := "ready"
+const STATE_WOUNDED := "wounded"
+const STATE_UNSTABLE := "unstable"
+const STATE_DEAD := "dead"
+
 
 ## Комбатант = Dictionary-рекорд. Статблоки — из баланс-конфига (K-M15:
 ## «ни одна позиция не хардкодится в коде»), сюда приходят готовыми.
@@ -42,7 +51,23 @@ static func make_combatant(spec: Dictionary) -> Dictionary:
 		"frightened": bool(spec.get("frightened", false)),  # 2.1: триггер отступления авто-режима
 		"supply_bonus": int(spec.get("supply_bonus", 0)),  # 5.2: снабжение → 1-й спас (Q-M57→(а))
 		"hunger_penalty": int(spec.get("hunger_penalty", 0)),  # party-characters 3.2: голод (0 еды) → −2 к атакам (P-4)
+		"state": str(spec.get("state", STATE_READY)),  # T-116 SM: ready/wounded/unstable (dead — в бою)
 	}
+
+
+## Порог WOUNDED (02-mechanics SM): hit_dice ≤ 0 в бою → WOUNDED (падение =
+## ранение, не смерть; смерть — только 3 провала death saves).
+static func is_wounded_threshold(hp: int) -> bool:
+	return hp <= 0
+
+
+## Death saves с SM-переходами (T-116): UNSTABLE → DEAD (3 провала) или
+## WOUNDED (стабилизирован — не потеря). Мутирует `fallen` (state),
+## возвращает true — погиб.
+static func _death_saves_resolve(fallen: Dictionary) -> bool:
+	var dead := _death_saves(fallen)
+	fallen["state"] = STATE_DEAD if dead else STATE_WOUNDED
+	return dead
 
 
 ## A5-шов: юнит-рекрут при создании получает character_uid конкретного
@@ -162,13 +187,32 @@ static func resolve(a: Dictionary, b: Dictionary,
 	var trace: Array = []
 	var outcome := "draw"
 	var round_no := 0
+	# T-116 SM: «следующий бой при HD = 0» (WOUNDED → UNSTABLE) — комбатант
+	# входит в бой с hit_dice ≤ 0: спасброски до раунда 1 (тот же
+	# _death_saves, детерминизм). 3 провала → DEAD (бой кончен); стабилизирован
+	# → WOUNDED (0 HP — не атакует, цикл пропускает), бой продолжается.
+	for c in [a, b]:
+		if is_wounded_threshold(int(c["hp"])):
+			c["state"] = STATE_UNSTABLE
+			var dead := _death_saves_resolve(c)
+			c["dead"] = dead
+			trace.append({"round": 0, "actor": str(c["id"]),
+				"zone": "death_saves", "dead": dead, "state": str(c["state"])})
+	if bool(a.get("dead", false)) or bool(b.get("dead", false)):
+		outcome = "draw" if bool(a.get("dead", false)) and bool(b.get("dead", false)) \
+			else ("lose" if bool(a.get("dead", false)) else "win")
+		return _finalize(outcome, 0, first_id, trace, a, b, population_hook)
 	while round_no < MAX_ROUNDS:
 		round_no += 1
 		for pair in [[order[0], order[1]], [order[1], order[0]]]:
 			var atk: Dictionary = pair[0]
 			var def_: Dictionary = pair[1]
-			if int(atk["hp"]) <= 0 or int(def_["hp"]) <= 0:
+			if is_wounded_threshold(int(atk["hp"])):
+				# 0 HP — не атакует (WOUNDED/UNSTABLE: действий нет, T-116).
 				continue
+			# Атака по 0-HP защитнику возможна (5e: без сознания) — только в
+			# случае «бой при HD = 0» (unstable-вход); в обычном потоке бой
+			# кончается на падении.
 			var hit := _strike(atk, def_)
 			def_["hp"] = int(def_["hp"]) - int(hit["damage"])
 			trace.append({
@@ -181,19 +225,22 @@ static func resolve(a: Dictionary, b: Dictionary,
 				"reckoning": bool(hit["reckoning"]),
 				"debt": int(hit["debt"]),  # T-124: Долг судьбы у атакующего (победа с долгом)
 			})
-			if int(def_["hp"]) <= 0:
-				var dead := _death_saves(def_)
+			if is_wounded_threshold(int(def_["hp"])):
+				# T-116 SM: READY → WOUNDED (порог hit_dice ≤ 0) → UNSTABLE (спасы).
+				def_["state"] = STATE_UNSTABLE
+				var dead := _death_saves_resolve(def_)
 				def_["dead"] = dead
 				trace.append({
 					"round": round_no, "actor": str(def_["id"]),
 					"zone": "death_saves", "dead": dead,
+					"state": str(def_["state"]),
 				})
 				# Поверженный выбывает: смерть — по death saves; стабилизированный
 				# — ранен (не потеря населения; слой T-116), но бой кончен.
 				outcome = "win" if str(atk["id"]) == str(a["id"]) else "lose"
 				return _finalize(outcome, round_no, first_id, trace, a, b, population_hook)
 		# Обопыльная смерть в раунде (оба ≤0 до проверки) — ничья.
-		if int(a["hp"]) <= 0 and int(b["hp"]) <= 0:
+		if is_wounded_threshold(int(a["hp"])) and is_wounded_threshold(int(b["hp"])):
 			outcome = "draw"
 			return _finalize(outcome, round_no, first_id, trace, a, b, population_hook)
 	# Лимит 20 раундов — ничья (D-128).
@@ -207,15 +254,18 @@ static func _finalize(outcome: String, rounds: int, first_id: String,
 		trace: Array, a: Dictionary, b: Dictionary,
 		population_hook: Callable) -> Dictionary:
 	var losses: Array = []
+	var states: Dictionary = {}
 	for c in [a, b]:
 		if bool(c.get("dead", false)) and int(c["character_uid"]) >= 0:
 			losses.append(int(c["character_uid"]))
+		states[str(c["id"])] = str(c.get("state", STATE_READY))
 	var report := {
 		"outcome": outcome,
 		"rounds": rounds,
 		"first_actor": first_id,
 		"trace": trace,
 		"losses": losses,
+		"states": states,  # T-116 SM: финальные состояния (внутрибоевые, не сейв)
 		"battle_over": true,  # поллинг флага, не таймер (D-152-семья)
 	}
 	if population_hook.is_valid():

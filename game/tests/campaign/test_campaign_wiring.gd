@@ -130,3 +130,26 @@ func _hero_first_margin(report: Dictionary) -> int:
 		if e.has("margin") and str(e.get("actor", "")) != "raider_t1":
 			return int(e["margin"])
 	return -999
+
+
+## party-characters 2.1 (T-116 SM): WOUNDED не переносится между боями —
+## бой N+1 начинается с READY (свежий комбатант из статблока, state не в
+## сейве). Бой 1: ослабленный герой (hp 1) против tier 3 — падает и
+## стабилизируется (con 3 → 3 успеха) → WOUNDED. Бой 2: восстановленный
+## герой против tier 1 — READY (hp 45, не 1).
+func test_wounded_not_persisted_between_battles() -> void:
+	var c := _composition()
+	var warrior: Dictionary = c._statblocks["warrior"]
+	var saved_hp: int = int(warrior.get("hp", 0))
+	warrior["hp"] = 1  # герой падает от первого удара tier 3 (урон 11)
+	var r1: String = c._request_battle({"tier": 3})
+	assert_str(r1) \
+		.override_failure_message("бой 1: ослабленный герой проигрывает").is_equal("lose")
+	assert_str(str(c.last_battle_report["states"][""])) \
+		.override_failure_message("бой 1: герой WOUNDED (стабилизирован, con 3)").is_equal("wounded")
+	warrior["hp"] = saved_hp  # восстановление (боец собирается из статблока)
+	var r2: String = c._request_battle({"tier": 1})
+	assert_str(r2) \
+		.override_failure_message("бой 2: герой выигрывает").is_equal("win")
+	assert_str(str(c.last_battle_report["states"][""])) \
+		.override_failure_message("бой 2: старт с READY (WOUNDED не переносится)").is_equal("ready")

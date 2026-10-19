@@ -9,6 +9,35 @@ date: 2026-10-19
 
 # CHANGELOG — docs/
 
+## [2026-10-19] — party-characters 2.1: T-116 SM WOUNDED/UNSTABLE в боевом движке (GdUnit 2718/0)
+
+- **party-characters 2.1** (spec: «WOUNDED and UNSTABLE SHALL be in-battle
+  states (T-116 layer)»): SM персонажа в `campaign_battle.gd` (1v1-путь):
+  - константы `STATE_READY/WOUNDED/UNSTABLE/DEAD`; `state` — поле
+    `make_combatant` (дефолт `ready`);
+  - `is_wounded_threshold(hp)` — явный порог WOUNDED (`hp ≤ 0`);
+  - `_death_saves_resolve()` — обёртка над `_death_saves` (margin_N, 3 спаса):
+    3 провала → `DEAD` (потеря), иначе → `WOUNDED` (стабилизирован, не
+    потеря — MVP-срез «потери = DEAD»);
+  - **unstable-вход**: комбатант с `hp ≤ 0` на старте боя («следующий бой при
+    HD = 0») делает спасброски до раунда 1 (trace `round: 0, zone:
+    death_saves`); 3 провала — бой кончен без раундов, стабилизирован — бой
+    продолжается (0 HP не атакует);
+  - падение в бою: `UNSTABLE` → спасы → `DEAD`/`WOUNDED`; 1v1-бой кончается
+    на падении (существующая семантика сохранена);
+  - `states` (финальные состояния) — новое аддитивное поле battle_report.
+- **Не персистятся между боями** (MVP): state не в сейве, каждый бой —
+  свежий комбатант из статблока. `resolve_multi`/`_finalize_multi` не
+  тронуты (отдельный скелет 2.1 dnd-battle-ladder).
+- Тесты: `test_campaign_battle.gd` +8 (state-дефолт, порог, fall
+  stabilized/dead, unstable-entry: saves-before-round1 / dead /
+  both-stabilized-draw, not-persisted), `test_campaign_wiring.gd` +1
+  (кампания: ослабленный герой tier 3 → WOUNDED, следующий бой tier 1 →
+  READY). **GdUnit 2718/0** (2709 + 9), full suite зелёный.
+- party-characters: 12 done / 1 partial (4.3 — REST) / 5 open → 2.1 закрыт.
+  Следующее в изменении: 2.2 REST в городе (формула `(2+CON)×хит-дизайн` —
+  «хит-дизайн» без канонического значения, нужен вердикт/предположение).
+
 ## [2026-10-19] — Голод → −2 к атакам: проводка в боевой движок (campaign-core-loop 3.2, party-characters 4.3→хвост REST, GdUnit 2709/0)
 
 - **Что:** голод (0 еды) теперь реально бьёт по бою: `hunger_penalty` — новое поле комбатанта (`make_combatant`, дефолт 0 — аддитивно, паттерн `supply_bonus`); `_strike` прибавляет его к margin атаки; `_request_battle` ставит герою `supply_system.attack_penalty()` (−2 при голоде, 0 иначе).
