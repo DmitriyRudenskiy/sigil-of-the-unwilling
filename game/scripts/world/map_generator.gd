@@ -223,6 +223,9 @@ func apply_fog(visibility_) -> void:
 	if visibility_ == null or renderer == null:
 		return
 	renderer.apply_fog(_tile_map, visibility_)
+	# Объектные слои туман находит сам (T-145): перекраска идёт от модели, поэтому
+	# отступивший туман возвращает растительность, а не стирает её навсегда.
+	renderer.paint_decor(_decor_layer, _shadow_layer, visibility_)
 
 func is_walkable(cell: Vector2i) -> bool:
 	return model.is_walkable(cell) if model != null else false

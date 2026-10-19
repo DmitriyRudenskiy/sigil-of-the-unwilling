@@ -263,5 +263,18 @@ if [ "$MCP_RC" -eq 0 ] && [ "$SUM" -ne "$COLLECTED" ]; then
 	echo "PYTEST: RED (неполный прогон: сумма $SUM != collected $COLLECTED — свит встал/прервался)"
 	MCP_RC=1
 fi
+# Python-гейт генератора арта (T-145): `scripts/test_gen_map_art.py` не входит ни в одну
+# секцию выше (MCP-секция знает только tests/mcp/), а без него затемнённый побратим листа
+# и кратность MAP_FOG_DIM проверялись бы только руками. Секция не молчит: нет pytest/PIL —
+# явная строка SKIPPED (конвенция MCP-секции).
+echo "=== python: генератор арта карты (scripts/test_gen_map_art.py) ==="
+GEN_PY="${GEN_PY:-python3}"
+if "$GEN_PY" -c 'import pytest, PIL' 2>/dev/null; then
+	"$GEN_PY" -m pytest ../scripts/test_gen_map_art.py -q --tb=short 2>&1 | tail -5
+	[ "${PIPESTATUS[0]}" -ne 0 ] && MCP_RC=1
+else
+	echo "GENART: SKIPPED (нет pytest или PIL в $GEN_PY — pip install pytest pillow)"
+fi
+
 # Очистка (Xvfb, инжект-артефакты, node/godot MCP-процессы) — в trap cleanup_mcp (EXIT).
 exit "$MCP_RC"

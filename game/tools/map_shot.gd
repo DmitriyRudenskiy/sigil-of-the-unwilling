@@ -31,6 +31,13 @@ const VIEWPORT_SIZE := Vector2i(1280, 720)
 
 func _initialize() -> void:
 	var out := _arg("--out", "/tmp/map-shot/map.png")
+	if not out.begins_with("/") and not out.contains("://"):
+		# T-147: относительный путь Godot понимает от каталога проекта, а не процесса, и
+		# `--out=docs/reference/x.png` молча писалось в game/docs/reference/…. Молча —
+		# вот проблема: зелёная строка SHOT при неверном месте. Требуем абсолютный путь.
+		push_error("map_shot: --out должен быть абсолютным (или res://…): %s" % out)
+		quit(2)
+		return
 	var seed_value := int(_arg("--seed", str(DEFAULT_SEED)))
 	var side := int(_arg("--size", str(DEFAULT_SIZE)))
 	var zoom := float(_arg("--zoom", "1"))
@@ -135,6 +142,17 @@ func _dump_geometry(mg, scene: Node2D, shot_path: String, size: Vector2i,
 		"seed": mg.seed_value,
 		"cells": cells,
 	}
+	# T-145: состояние тумана каждой клетки — часть описания кадра (тот же принцип, что у
+	# геометрии выше): без него нельзя проверить, что объекты погасли там же, где база,
+	# и не догадываться о радиусе обзора по пикселям.
+	if mg.visibility != null:
+		var fog := {}
+		for cell in mg.model.terrain_grid:
+			if not mg.visibility.is_explored(cell):
+				fog["%d,%d" % [cell.x, cell.y]] = "hidden"
+			elif not mg.visibility.is_visible(cell):
+				fog["%d,%d" % [cell.x, cell.y]] = "dimmed"
+		payload["fog"] = fog
 	var f := FileAccess.open(shot_path + ".cells.json", FileAccess.WRITE)
 	if f != null:
 		f.store_string(JSON.stringify(payload))

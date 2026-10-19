@@ -8,6 +8,7 @@ extends RefCounted
 ## `tile_atlas.gd`), поэтому его здесь не заводим вторым экземпляром.
 
 const SHEET_PATH := "res://assets/objects/world_map_objects.webp"
+const FOG_SHEET_PATH := "res://assets/objects/world_map_objects_fog.webp"
 const MANIFEST_PATH := "res://assets/objects/world_map_objects.json"
 const TILE := GameNumbers.TILE_SIZE
 const SOURCE_ID := 0
@@ -22,10 +23,16 @@ const SHADOW_TILE := Vector2i(0, 0)
 const SHADOW_ALPHA := 0.5
 const SHADOW_RX := 0.40   # доли тайла
 const SHADOW_RY := 0.18
+## Затемнённая копия листа для тумана войны (дефект T-145): тот же узор, те же
+## координаты, вторая пара источников — как `TileAtlas.FOG_SOURCE_ID` у базы. Без
+## неё объект либо оставался ярким над стёртой базой, либо пропадал и на открытой
+## клетке, где спека требует затемнённое содержимое того же слоя.
+const FOG_SOURCE_ID := 2
+const SHADOW_FOG_SOURCE_ID := 3
 
 static var _manifest: Dictionary = {}
 static var _coords: Dictionary = {}
-static var _shadow_tex: ImageTexture
+static var _fog_texes: Dictionary = {}
 
 
 ## Манифест листа: {tile, grid, cells: [{id, atlas}]}.
@@ -84,14 +91,43 @@ static func build_tileset() -> TileSet:
 	shadow.texture_region_size = Vector2i(TILE, TILE)
 	shadow.create_tile(SHADOW_TILE)
 	ts.add_source(shadow, SHADOW_SOURCE_ID)
+	_add_source(ts, fog_sheet_texture(), FOG_SOURCE_ID, _coords.values())
+	_add_source(ts, shadow_texture(GameNumbers.MAP_FOG_DIM), SHADOW_FOG_SOURCE_ID, [SHADOW_TILE])
 	return ts
 
 
+## Затемнённый лист — отдельный файл, его печатает `gen_map_art.py --fog-twin`
+## (в этом билде Godot у `Image` нет ни `modulate_rect`, ни поштучной модуляции
+## клетки, а цикл по 5 млн пикселей в GDScript дороговат каждой генерацией карты).
+## Если файла нет — карта остаётся ярким деревом над стёртой базой, ровно тот
+## дефект, из-за которого всё и делалось, поэтому тест на его наличие обязателен.
+static func fog_sheet_texture() -> Texture2D:
+	if _fog_texes.has("objects"):
+		return _fog_texes["objects"]
+	var tex := load(FOG_SHEET_PATH)
+	if not (tex is Texture2D):
+		GameLogger.error("MapObjects: нет %s — пересобрать `gen_map_art.py --fog-twin`" % FOG_SHEET_PATH)
+		return load(SHEET_PATH)
+	_fog_texes["objects"] = tex
+	return tex
+
+
+static func _add_source(ts: TileSet, tex: Texture2D, source_id: int, tiles: Array) -> void:
+	var src := TileSetAtlasSource.new()
+	src.texture = tex
+	src.texture_region_size = Vector2i(TILE, TILE)
+	for coords in tiles:
+		src.create_tile(coords)
+	ts.add_source(src, source_id)
+
+
 ## Мягкий тёмный эллипс с опорой у нижней кромки клетки — туда, где у объекта
-## основание (якорь манифеста `[TILE/2, TILE-2]`).
-static func shadow_texture() -> ImageTexture:
-	if _shadow_tex != null:
-		return _shadow_tex
+## основание (якорь манифеста `[TILE/2, TILE-2]`). `dim` — тень гасится в тумане
+## по альфе (RGB у неё почти чёрный, множить RGB было бы видно как «ничего»).
+static func shadow_texture(dim: float = 1.0) -> ImageTexture:
+	var key := "shadow_%s" % dim
+	if _fog_texes.has(key):
+		return _fog_texes[key]
 	var img := Image.create(TILE, TILE, false, Image.FORMAT_RGBA8)
 	var cx := TILE * 0.5
 	var cy := float(TILE) - 8.0
@@ -100,12 +136,13 @@ static func shadow_texture() -> ImageTexture:
 			var nx := (x + 0.5 - cx) / (TILE * SHADOW_RX)
 			var ny := (y + 0.5 - cy) / (TILE * SHADOW_RY)
 			var r2 := nx * nx + ny * ny
-			var a := 0.0 if r2 >= 1.0 else SHADOW_ALPHA * pow(1.0 - r2, 1.5)
+			var a := 0.0 if r2 >= 1.0 else SHADOW_ALPHA * dim * pow(1.0 - r2, 1.5)
 			img.set_pixel(x, y, Color(0.0, 0.0, 0.0, a))
-	_shadow_tex = ImageTexture.create_from_image(img)
-	return _shadow_tex
+	_fog_texes[key] = ImageTexture.create_from_image(img)
+	return _fog_texes[key]
 
 
 static func clear_cache() -> void:
 	_manifest = {}
 	_coords = {}
+	_fog_texes = {}
