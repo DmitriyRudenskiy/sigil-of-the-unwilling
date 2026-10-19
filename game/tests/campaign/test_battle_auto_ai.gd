@@ -158,3 +158,54 @@ func test_resolve_multi_draw_20_rounds_no_xp_prestige() -> void:
 	assert_int((report["losses"] as Array).size()).is_equal(0)
 	assert_bool(not report.has("xp")).is_true()
 	assert_bool(not report.has("prestige")).is_true()
+
+
+## — dnd-battle-ladder 5.5 (K-M11): мораль аннулирована —
+
+## Шкала морали (0–100) не существует: ни у комбатанта, ни в отчёте.
+func test_no_morale_scale() -> void:
+	var party := [_c({"id": "p1"})]
+	var enemies := [_e({"id": "e1"})]
+	var report := CampaignBattleScript.resolve_multi(party, enemies)
+	assert_bool(not report.has("morale")).is_true()
+	assert_bool(not party[0].has("morale")).is_true()
+	assert_bool(not enemies[0].has("morale")).is_true()
+
+
+## Потеря → −2 ступени к спасам выживших той же стороны до конца боя.
+## A (con −1) погибает в R1 (3 провала) → потеря; B (con 1) падает в R4:
+## без штрафа стабилизировался бы (2 успеха 1 провал), с −2 — 3 провала →
+## смерть. E (hp 12, урон 2/раунд от B) жив до конца (2 HP).
+func test_loss_penalty_minus_two_saves() -> void:
+	var a := _c({"id": "A", "hp": 1, "con": -1, "ac": 20, "attack": 10, "damage": 1})
+	var b := _c({"id": "B", "hp": 25, "con": 1, "ac": 20, "attack": 10, "damage": 1})
+	var e := _e({"id": "E", "hp": 12, "con": 1, "ac": 5, "attack": 20, "damage": 10})
+	var report := CampaignBattleScript.resolve_multi([a, b], [e])
+	assert_bool(bool(a.get("dead", false))) \
+		.override_failure_message("A (con −1): 3 провала → смерть").is_true()
+	assert_int(int(b.get("save_penalty", 0))) \
+		.override_failure_message("потеря → −2 к спасам (K-M11)").is_equal(2)
+	assert_bool(bool(b.get("dead", false))) \
+		.override_failure_message("B: con 1 − 2 → 3 провала → смерть").is_true()
+	assert_str(str(report["outcome"])).is_equal("lose")
+	assert_int(int(e["hp"])).is_equal(2)  # E жив (A после R1 не атакует)
+
+
+## Контроль: без потери штрафа нет. A (con 1) стабилизирован (2 успеха
+## 1 провал) → принуд. отступление при 0 HD (не атакует с R2); B (con 1)
+## падает без штрафа → стабилизирован → отступил, не потерян.
+func test_no_loss_no_penalty_and_forced_retreat_at_0_hd() -> void:
+	var a := _c({"id": "A", "hp": 1, "con": 1, "ac": 20, "attack": 10, "damage": 1})
+	var b := _c({"id": "B", "hp": 25, "con": 1, "ac": 20, "attack": 10, "damage": 1})
+	var e := _e({"id": "E", "hp": 12, "con": 1, "ac": 5, "attack": 20, "damage": 10})
+	var report := CampaignBattleScript.resolve_multi([a, b], [e])
+	assert_bool(not bool(a.get("dead", false))) \
+		.override_failure_message("A (con 1): 2 успеха 1 провал → стабилизирован").is_true()
+	assert_bool(bool(a.get("retreated", false))) \
+		.override_failure_message("0 HD → принуд. отступление").is_true()
+	assert_int(int(b.get("save_penalty", 0))).is_equal(0)
+	assert_bool(bool(b.get("retreated", false))) \
+		.override_failure_message("B стабилизирован → отступил (не потеря)").is_true()
+	assert_bool(not bool(b.get("dead", false))).is_true()
+	assert_int(int(e["hp"])).is_equal(2)  # A не атакует с R2 (отступил)
+	assert_int((report["losses"] as Array).size()).is_equal(0)
