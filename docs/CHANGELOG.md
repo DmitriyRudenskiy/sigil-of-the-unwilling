@@ -9,6 +9,39 @@ date: 2026-10-19
 
 # CHANGELOG — docs/
 
+## [2026-10-19] — vertical-slice 2.1–2.4: бит-скрипт 21 хода, метрики, fail-states, арки (GdUnit 2808/0)
+
+- **2.1** (spec: «bit-script for 21 turns with skeleton at turns 1/7/14/17/21;
+  turn 3 rumor — Post-MVP; threat lines — directives only, K-R3») — код
+  выполнен: `BIT_TURNS = [1,7,14,17,21]` + `is_bit_turn()` (turn_driver.gd);
+  директивы K-R3 — raids.json (first_raid/7 floor tutorial, district/14,
+  strong_raid/17 window, final_raid/21 floor boss CR 6–8) + threat_system.gd;
+  ход 3 «слух» — Post-MVP (K-M9), в каркасе отсутствует. Тесты:
+  `test_bit_script_skeleton` (новый) + существующие (`test_floor_first_raid_turn7`,
+  `test_final_tier_by_turn21`, `test_window_strong_raid_turn17_t115`,
+  `test_config_driven_numbers_t115` — [7,14,17,21]). Остаток: запись хроники
+  + 1-строчный диалог NPC в `main.gd` (UI, headless невозможен) → `[~]`.
+- **2.2** (метрики валидации core loop) — исполнено в campaign-core-loop
+  2.1–2.4: `TelemetryLog` (события `action`/`loop_closed`/
+  `replan_after_tooltip`, post-hoc `compute_metrics`, GDD-цели) — `[x]`.
+- **2.3** (fail-states) — голод партии: `SupplySystem` (1 еда/персонаж/переход,
+  ёмкость 10, party-characters 3.2); голод → −2 к атакам (P-4, РЕШЁН: «роль
+  снабжения в бою — прежде всего «голод → −2 к атакам»», 02-mechanics §3.4)
+  — `hunger_penalty` (campaign-core-loop 3.2); снабжение → +2 к первой
+  проверке (P-4) — `supply_bonus` в death saves (dnd-battle-ladder 5.2);
+  гибель всей партии = единственный конец (Q-M68→(а), D-190) — wipe → defeat
+  (`test_wipe_defeat`, `test_hunger_alone_not_defeat`,
+  `test_hero_death_campaign_continues`) — `[x]`.
+- **2.4** (арки) — 1–6 выживание → 7–13 железо (рейд ход 7 — floor K-R3) →
+  14–20 районы и пережившие (директива district/14; «Ветеран» = статус,
+  K-M10, Q-M56→(а), D-189 — party-characters 3.1) → ход 21 рейд-проверка
+  (final_raid floor, boss CR 6–8) — `[x]`.
+- **Тесты:** +1 (`test_bit_script_skeleton`), нетто 2807 → **2808/0**.
+- **Остаток vertical-slice:** 2.5 tutorial/3-day goals (UI, mvp-ui-flow);
+  2.6/2.7/2.8 — требования-ссылки на другие изменения (region-graph-map —
+  код готов; mvp-ui-flow/pregame-flow — UI); 3.1 Q-M82 (вердикт владельца);
+  3.2 C-18 синк docs.
+
 ## [2026-10-19] — OpenSpec: battle-unit-vitals заархивирован, дельта синхронизирована в спеку (код не менялся)
 
 - **Архив**: `openspec/changes/battle-unit-vitals/` → `openspec/changes/archive/2026-10-19-battle-unit-vitals/`

@@ -283,3 +283,17 @@ func test_defeat_status_serialized() -> void:
 	assert_that(restored.campaign_status).is_equal("defeat") \
 		.override_failure_message("статус defeat должен сохраняться в сейве")
 	assert_that(restored.is_done()).is_equal(true)
+
+
+## vertical-slice 2.1: бит-скрипт 21 хода — каркас 1/7/14/17/21 (K-M9).
+## Ход 3 «слух» — Post-MVP (K-M9): в BIT_TURNS отсутствует.
+func test_bit_script_skeleton() -> void:
+	assert_that(TurnDriver.BIT_TURNS).is_equal([1, 7, 14, 17, 21])
+	assert_that(TurnDriver.is_bit_turn(1)).is_equal(true)
+	assert_that(TurnDriver.is_bit_turn(7)).is_equal(true)
+	assert_that(TurnDriver.is_bit_turn(14)).is_equal(true)
+	assert_that(TurnDriver.is_bit_turn(17)).is_equal(true)
+	assert_that(TurnDriver.is_bit_turn(21)).is_equal(true)
+	assert_that(TurnDriver.is_bit_turn(3)) \
+		.override_failure_message("ход 3 «слух» — Post-MVP (K-M9)").is_equal(false)
+	assert_that(TurnDriver.is_bit_turn(10)).is_equal(false)
