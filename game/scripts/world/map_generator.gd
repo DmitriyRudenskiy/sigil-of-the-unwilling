@@ -179,6 +179,13 @@ func _ensure_layers() -> void:
 		# биомов. Геометрия та же (гекс, tile_size 82), поэтому клетки слоя
 		# не разъезжаются с базой.
 		_decor_layer.tile_set = MapObjects.build_tileset()
+	# Растительность не участвует во вводе (вердикт владельца по Q-M94, D-213): юнит
+	# к северу от кроны перекрывается деревом, и единственное, чего это не имеет
+	# права делать, — лишать клика. Держится на двух фактах: у тайлсета слоя нет
+	# физических слоёв (а `input_pickable` в Godot 4.7 есть только у
+	# CollisionObject2D/Control, так что ставить нечего), и клик мира идёт через
+	# `WorldInput._unhandled_input`, куда `TileMapLayer` не вмешивается. Первый
+	# факт — под проверкой `test_vegetation_never_blocks_clicks`.
 
 	_resource_layer = get_node_or_null("ResourceLayer")
 	if _resource_layer == null:

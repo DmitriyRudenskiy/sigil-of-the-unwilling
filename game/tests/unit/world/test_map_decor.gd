@@ -125,3 +125,22 @@ func test_paint_decor_writes_only_known_objects() -> void:
 	MapRenderer.new(m).paint_decor(layer)
 	assert_that(layer.get_cell_source_id(Vector2i(0, 0))).is_equal(MapObjects.SOURCE_ID)
 	assert_that(layer.get_cell_source_id(Vector2i(1, 0))).is_equal(-1)
+
+
+## Растительность не участвует во вводе (вердикт владельца по Q-M94, D-213):
+## юнит к северу от кроны перекрывается деревом — и обязан оставаться
+## кликабельным. Перехватить клик могли бы только коллизии тайлсета или скрипт
+## слоя с обработчиком ввода: у слоя нет ни того ни другого. Проверка на слое
+## генератора, а не на самодельном TileMapLayer: именно его создаёт
+## _ensure_layers().
+func test_vegetation_never_blocks_clicks() -> void:
+	var gen: MapGenerator = make_node(MapGenerator)
+	gen._seed_value = 4242
+	gen._map_width = 20
+	gen._map_height = 20
+	gen.generate()
+	var layer: TileMapLayer = gen.get_node("TileMapDecor")
+	assert_that(layer.tile_set).is_not_null()
+	assert_int(layer.tile_set.get_physics_layers_count()).is_equal(0)
+	assert_that(layer.get_script()).is_null()
+	assert_that(layer.get_used_cells().size()).is_greater(0)
