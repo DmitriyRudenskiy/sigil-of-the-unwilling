@@ -139,3 +139,34 @@ func test_party_size_synced_on_advance() -> void:
 	comp.party[2]["state"] = PartySystem.STATE_DEAD
 	comp.advance_turn()
 	assert_bool(comp.settlement.party_size == 2).is_true()
+
+
+## party-characters 4.2 (R1, Q-M68→(а)): смерть героя НЕ кончает кампанию —
+## конец только при полном wipe партии. Герой-наборник не член партии: его
+## смерть — потеря населения (conscript списан), партия не тронута, кампания
+## продолжается. («Утрата» −2 к спасам страха/очарования — тактический слой,
+## deferred: в лестничном боевом движке таких спасов нет.)
+func test_hero_death_campaign_continues() -> void:
+	var comp := CampaignComposition.from_campaign_config(12345)
+	comp.party = [_member(100)]  # партия отделена от героя-наборника
+	var pop_before: int = comp.population_system.size()
+	var warrior: Dictionary = comp._statblocks["warrior"]
+	var saved_hp: int = int(warrior.get("hp", 0))
+	var saved_con: int = int(warrior.get("con", 0))
+	# Ослабленный герой (hp 1, con −3) против tier 3: падает, 3 провала
+	# спасбросков → DEAD (потеря = uid наборника).
+	warrior["hp"] = 1
+	warrior["con"] = -3
+	var r1: String = comp._request_battle({"tier": 3})
+	warrior["hp"] = saved_hp
+	warrior["con"] = saved_con
+	assert_str(r1) \
+		.override_failure_message("ослабленный герой проигрывает tier 3").is_equal("lose")
+	assert_bool(not comp.campaign.is_done()) \
+		.override_failure_message("смерть героя ≠ defeat (R1: конец только при wipe партии)").is_true()
+	assert_int(comp.population_system.size()) \
+		.override_failure_message("наборник списан из населения").is_equal(pop_before - 1)
+	assert_int(comp.settlement.party_size) \
+		.override_failure_message("партия не тронута (герой — не член партии)").is_equal(1)
+	assert_bool(str(comp.party[0].get("state", PartySystem.STATE_READY)) == PartySystem.STATE_READY) \
+		.override_failure_message("член партии жив").is_true()
