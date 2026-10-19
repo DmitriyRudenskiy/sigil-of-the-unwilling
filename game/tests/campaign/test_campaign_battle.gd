@@ -236,3 +236,112 @@ func test_hunger_penalty_lowers_margin_and_zone() -> void:
 		.override_failure_message("голод: margin −2 (P-4)").is_equal(-1)
 	assert_str(str(h2["zone"])).is_equal("partial")
 	assert_int(int(h2["damage"])).is_equal(2)
+
+
+## ═══════════ T-116 SM: WOUNDED/UNSTABLE (party-characters 2.1) ═══════════
+## SM (02-mechanics §3.2): READY → WOUNDED (hit_dice ≤ 0) → UNSTABLE (спасы)
+## → DEAD (3 провала) / WOUNDED (стабилизирован). Внутрибоевые состояния,
+## не персистятся между боями (MVP-срез: потери = DEAD, раненые — не потери).
+
+func test_state_default_ready() -> void:
+	var c := CampaignBattleScript.make_combatant({})
+	assert_str(str(c["state"])) \
+		.override_failure_message("дефолт — READY").is_equal(CampaignBattleScript.STATE_READY)
+
+
+func test_is_wounded_threshold() -> void:
+	assert_bool(CampaignBattleScript.is_wounded_threshold(0)).is_true()
+	assert_bool(CampaignBattleScript.is_wounded_threshold(-3)).is_true()
+	assert_bool(CampaignBattleScript.is_wounded_threshold(1)).is_false()
+
+
+func test_fall_stabilized_is_wounded_not_loss() -> void:
+	# con 1: margin 1/0/−1 → 2 успеха, 1 провал → стабилизирован: WOUNDED,
+	# не потеря (character_uid не в losses).
+	var hero := _c({"hp": 1, "con": 1})
+	var raider := _r({"hp": 100, "ac": 1})
+	var d := CampaignBattleScript.resolve(hero, raider)
+	assert_str(str(d["states"]["hero"])) \
+		.override_failure_message("стабилизированный — WOUNDED").is_equal(CampaignBattleScript.STATE_WOUNDED)
+	assert_str(str(d["states"]["raider"])).is_equal(CampaignBattleScript.STATE_READY)
+	assert_int(d["losses"].size()).is_equal(0)
+	var ds := _find_trace_zone(d, "death_saves")
+	assert_str(str(ds["state"])) \
+		.override_failure_message("trace: финальное состояние в death_saves").is_equal(CampaignBattleScript.STATE_WOUNDED)
+	assert_bool(bool(ds["dead"])).is_false()
+
+
+func test_fall_three_failures_is_dead_loss() -> void:
+	# con −3: margin −3/−4/−5 → 3 провала → DEAD, потеря = character_uid.
+	var hero := _c({"hp": 1, "con": -3})
+	var raider := _r({"hp": 100, "ac": 1})
+	var d := CampaignBattleScript.resolve(hero, raider)
+	assert_str(str(d["states"]["hero"])) \
+		.override_failure_message("3 провала — DEAD").is_equal(CampaignBattleScript.STATE_DEAD)
+	assert_int(d["losses"].size()).is_equal(1)
+	assert_int(d["losses"][0]).is_equal(1)
+
+
+func test_unstable_entry_saves_before_round1() -> void:
+	# «Следующий бой при HD = 0» (WOUNDED → UNSTABLE): вход с hp 0, спасброски
+	# до раунда 1. con 3 → 3 успеха → WOUNDED (стабилизирован), бой
+	# продолжается; 0 HP — не атакует, оппонент бьёт → падение → спасы снова
+	# (con 3 → стабилизирован), 1v1-бой кончен.
+	var hero := _c({"hp": 0, "con": 3})
+	var d := CampaignBattleScript.resolve(hero, _r({}))
+	assert_int(d["trace"].size()).is_greater(1)
+	var t0: Dictionary = d["trace"][0]
+	assert_int(int(t0["round"])) \
+		.override_failure_message("входные спасброски — до раунда 1").is_equal(0)
+	assert_str(str(t0["actor"])).is_equal("hero")
+	assert_str(str(t0["zone"])).is_equal("death_saves")
+	assert_str(str(t0["state"])) \
+		.override_failure_message("3 успеха — WOUNDED").is_equal(CampaignBattleScript.STATE_WOUNDED)
+	assert_str(str(d["states"]["hero"])).is_equal(CampaignBattleScript.STATE_WOUNDED)
+	assert_str(str(d["states"]["raider"])).is_equal(CampaignBattleScript.STATE_READY)
+	assert_int(d["losses"].size()).is_equal(0)
+
+
+func test_unstable_entry_dead() -> void:
+	# Вход с hp 0 + con −3 → 3 провала до раунда 1 → DEAD, бой кончен.
+	var hero := _c({"hp": 0, "con": -3})
+	var d := CampaignBattleScript.resolve(hero, _r({}))
+	assert_int(int(d["rounds"])).is_equal(0)
+	assert_str(str(d["outcome"])).is_equal("lose")
+	assert_str(str(d["states"]["hero"])) \
+		.override_failure_message("3 провала — DEAD").is_equal(CampaignBattleScript.STATE_DEAD)
+	assert_int(d["losses"].size()).is_equal(1)
+
+
+func test_unstable_entry_both_stabilized_draw() -> void:
+	# Оба входят с 0 HP и стабилизируются → никто не атакует (0 HP) →
+	# тупик — ничья.
+	var hero := _c({"hp": 0, "con": 3})
+	var raider := _r({"hp": 0, "con": 3})
+	var d := CampaignBattleScript.resolve(hero, raider)
+	assert_str(str(d["outcome"])) \
+		.override_failure_message("оба 0 HP — ничья").is_equal("draw")
+	assert_str(str(d["states"]["hero"])).is_equal(CampaignBattleScript.STATE_WOUNDED)
+	assert_str(str(d["states"]["raider"])).is_equal(CampaignBattleScript.STATE_WOUNDED)
+
+
+func test_states_not_persisted_between_battles() -> void:
+	# MVP-срез (T-116): WOUNDED/UNSTABLE не переносятся между боями — каждый
+	# бой начинается с READY (новый комбатант из статблока, state не в сейве).
+	var hero1 := _c({"hp": 1, "con": 3})
+	CampaignBattleScript.resolve(hero1, _r({"hp": 100, "ac": 1}))
+	assert_str(str(hero1["state"])) \
+		.override_failure_message("бой 1: герой стабилизирован").is_equal(CampaignBattleScript.STATE_WOUNDED)
+	# Следующий бой — свежий комбатант (как делает кампания).
+	var hero2 := _c({})
+	assert_str(str(hero2["state"])) \
+		.override_failure_message("бой 2: старт с READY").is_equal(CampaignBattleScript.STATE_READY)
+	assert_int(int(hero2["hp"])).is_equal(11)
+
+
+func _find_trace_zone(report: Dictionary, zone: String) -> Dictionary:
+	for e in report.get("trace", []):
+		var entry: Dictionary = e
+		if str(entry.get("zone", "")) == zone:
+			return entry
+	return {}

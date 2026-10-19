@@ -12,7 +12,7 @@
 
 ## 2. Слой T-116: внутрибоевые состояния
 
-- [ ] 2.1 WOUNDED/UNSTABLE в боевом контексте (`campaign_battle.gd`): порог WOUNDED, переходы READY→WOUNDED→UNSTABLE→DEAD; не персистятся между боями.
+- [x] 2.1 WOUNDED/UNSTABLE в боевом контексте (`campaign_battle.gd`): порог WOUNDED, переходы READY→WOUNDED→UNSTABLE→DEAD; не персистятся между боями. Реализовано: константы STATE_*, `is_wounded_threshold()`, `_death_saves_resolve()` (3 провала → DEAD, иначе WOUNDED), unstable-вход (hp ≤ 0 на старте боя → спасы до раунда 1), `states` в battle_report. Внутрибоевые состояния (T-116), не персистятся между боями (MVP-срез: потери = DEAD). Тесты: `test_campaign_battle.gd` (8: state/threshold/fall-stabilized/fall-dead/unstable-entry ×3/not-persisted), `test_campaign_wiring.gd: test_wounded_not_persisted_between_battles` (GdUnit 2718/0).
 - [ ] 2.2 REST в городе: 1 день, лечение `(2 + CON) × хит-дизайн`; WOUNDED → READY при HP выше порога.
 - [ ] 2.3 Замена мёртвых: попутчик того же класса через тренировку (party-training), уровень 1 (конфиг `replacement_level`; C-1 — вердикт владельца по «уровню города − 1»).
 
