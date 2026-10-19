@@ -9,6 +9,32 @@ date: 2026-10-19
 
 # CHANGELOG — docs/
 
+## [2026-10-19] — dnd-battle-ladder 4.2: Удача (02d §4) — пул ОУ, Fate Shift, Save, Долг судьбы (GdUnit 2749/0)
+
+- **4.2** (spec: «Luck SHALL be the 7th attribute with a pool of OU = 1 + modLuck;
+  Fate Shift (1 OU) SHALL shift the result one zone up; Save (2 OU) SHALL
+  convert a Critical Failure to Failure; the debt of fate (K-R1) SHALL apply
+  when the pool is exhausted») в `campaign_battle.gd`:
+  - поле `luck_ou` комбатанта: инициализация `1 + modLuck` (кламп ≥ 0);
+  - API: `fate_shift(atk)` (1 ОУ; отказ при пустом пуле → `fate_debt += 1`,
+    Долг судьбы K-R1), `save_action(atk)` (2 ОУ; то же), `step_up(zone)`
+    (обратный `_step_down`);
+  - авто-политика `auto_luck` в `_strike` (после reckoning, детерминистичная
+    K2): Save при fumble (→ failure), Fate Shift при partial/failure
+    (консервативно: success не «жжёт» на triumph); только при достаточном
+    пуле — Долг начисляется на явном отказе (ручной слой), не в авто-пути;
+  - trace: `luck_used` ("" / "save" / "fate_shift") в 1v1 и multi;
+  - кампания: герой (игрок) — `auto_luck = true` в `_request_battle`; рейдер
+    не тратьёт Удачу (сценарии спека — про игрока); текущие tier-бои
+    (triumph-маржи героя) не меняются (полный сьют зелёный без правок).
+- Тесты: `test_battle_luck.gd` (11) — пул (1+modLuck, кламп), Fate Shift
+  (расход/отказ+долг), Save (расход 2/отказ+долг), step_up по всей лестнице,
+  авто-политика (partial→success, fumble→failure, success не тратит, пустой
+  пул → без долга), back-compat (без флага Удача не тратится).
+- **GdUnit 2749/0** (2738 + 11), full suite зелёный.
+- dnd-battle-ladder: 15 done / 1 partial (2.1) / 5 open (2.2 босс-ИИ,
+  3.2 Blink, 3.4/5.4 «Фланг», 4.1 карточка врага M1).
+
 ## [2026-10-19] — dnd-battle-ladder 3.3: местность 3 типа (C3) как абстрактные ±2 (GdUnit 2738/0)
 
 - **3.3** (spec: «Terrain SHALL have 3 types (swamp, spikes, height, C3)»; design:
