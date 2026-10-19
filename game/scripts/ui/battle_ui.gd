@@ -130,11 +130,18 @@ func _apply_theme() -> void:
 func theme_root_theme(t: Theme) -> void:
 	for c in ["bottom_bar", "initiative_bar", "target_card", "end_overlay", "history_panel"]:
 		get_node(NodePath(c)).theme = t
-	var sb := _theme.get_stylebox("panel", "Panel")
-	if sb == null:
-		return
-	_bottom_bar.add_theme_stylebox_override("panel", sb)
-	_history_panel.add_theme_stylebox_override("panel", sb)
+	# Носитель плит — тема, а не код. В game_theme.tres нет носителя для
+	# PanelContainer, поэтому раньше сюда клался `Panel/styles/panel`
+	# через add_theme_stylebox_override — а переопределение узла сильнее темы,
+	# так что кит шага 4 на этих двух панелях не мог проявиться ни при каком
+	# изменении темы (T-147). Приём тот же, что у ячеек инициативы
+	# (PanelCard/PanelActive/PanelDead): узел переводится на вариант темы, и
+	# StyleBoxTexture_panel (9-slice panel_bg.png) резолвится сам.
+	# Вариант — именно PanelPlate, а не «Panel»: незарегистрированный тип движок
+	# не резолвит (замер — test_battle_theme_carrier.gd), а «Panel» в теме —
+	# мешок стилей, к которому код обращается по имени, а не тип виджета.
+	_bottom_bar.theme_type_variation = &"PanelPlate"
+	_history_panel.theme_type_variation = &"PanelPlate"
 
 func _connect_skeleton() -> void:
 	_action_buttons = [_retreat_btn, _wait_btn, _attack_button, _defend_btn, _skip_btn]

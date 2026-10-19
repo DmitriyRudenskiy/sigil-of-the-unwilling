@@ -860,6 +860,13 @@ PanelDead/base_type = "PanelContainer"
 PanelDead/styles/panel = SubResource("StyleBoxFlat_dead")
 PanelOverlay/base_type = "PanelContainer"
 PanelOverlay/styles/panel = SubResource("StyleBoxFlat_overlay")
+; T-147: носитель-плита для панелей боевого слоя. Тот же StyleBoxTexture_panel, что
+; раньше клался на узлы кодом, теперь вынесен в вариант темы: переопределение узла
+; сильнее темы и не давало киту проявиться. ВНИМАНИЕ: вариант обязан быть
+; зарегистрирован с base_type — на «Panel» (это мешок стилей, не тип виджета) движок
+; носитель не резолвит, замерено в test_battle_theme_carrier.gd.
+PanelPlate/base_type = "PanelContainer"
+PanelPlate/styles/panel = SubResource("StyleBoxTexture_panel")
 LabelDead/base_type = "Label"
 LabelDead/fonts/font = ExtResource("8_serif")
 LabelDead/font_sizes/font_size = 16
