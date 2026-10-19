@@ -22,6 +22,34 @@ date: 2026-10-19
 - **Валидация**: `openspec validate --specs --strict` даёт те же 6 предсуществующих падений, что и до
   правки (в их числе `tactical-combat`: требования «Класс/расовые тактические бонусы» и «D&D-бой по
   определениям персонажей» без SHALL/MUST — отдельный хвост гигиены); новых ошибок синк не внёс.
+## [2026-10-19] — dnd-battle-ladder 3.4/5.4: бином «Фланг» (02b A.4) — единственный бином MVP (GdUnit 2754/0)
+
+- **3.4** (spec: «The Flank binom (fighter + ranger) SHALL apply +2 to the
+  second attack on the same target in the round; once per round per pair;
+  BROKEN_DEAD — no finisher if one dies») в `campaign_battle.gd`:
+  - поле `class` комбатанта (spec `make_combatant`, дефолт `""`);
+  - `_flank_partner(party, id)`: партнёр пары fighter ↔ ranger, если в партии
+    и жив (условие активации SM A.2: «оба в партии и живы»);
+  - pending `{by, target}` на раунд: успешная атака (damage > 0) члена пары;
+  - следующая атака партнёра по той же цели — `+2` к margin (K-M6: сдвиг
+    вверх = +2) через параметр `_strike(..., flank_bonus)`; бонус потребляется
+    на первой атаке второго («до конца раунда или до первой атаки второго —
+    что раньше»); 1/раунд на пару;
+  - авто-политика (02b A.4 edge case): приоритет цели, по которой уже били в
+    раунде (детерминированно, K2);
+  - BROKEN_DEAD: партнёр мёртв → `_flank_partner` = `""` → добивки нет;
+  - только партия (вражеские fighter/ranger не бинуются — биномы = механика
+    партии, 02b A.2);
+  - `flank: bool` в trace multi-боёв (наблюдаемость, 2.3).
+- **5.4** — покрыто: «Фланг» — `test_battle_flank.gd` (5 тестов: бонус +2/
+  1-на-раунд, BROKEN_DEAD, pending-цель умерла, fighter+fighter — нет бинама,
+  враги не бинуются); prone (−2/+2) — `test_campaign_battle.gd` (маска K-M7);
+  местность (±2) — `test_battle_terrain.gd` (3.3).
+- **Тесты:** +5 (`test_battle_flank.gd`), нетто 2749 → **2754/0**.
+- **Остаток dnd-battle-ladder:** 2.2 босс хода 21 (параметры способности —
+  Ф4/вердикт владельца), 3.2 Blink (формула Ф1 не задана — вердикт владельца),
+  4.1 карточка врага M1 (UI, headless невозможен), 2.1 остаток (ручной
+  режим — UI-слой).
 
 ## [2026-10-19] — dnd-battle-ladder 4.2: Удача (02d §4) — пул ОУ, Fate Shift, Save, Долг судьбы (GdUnit 2749/0)
 
