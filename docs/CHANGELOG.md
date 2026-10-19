@@ -9,6 +9,16 @@ date: 2026-10-19
 
 # CHANGELOG — docs/
 
+## [2026-10-19] — campaign-core-loop 2.1–2.4: телеметрия лог сессии (GdUnit 2706/0)
+
+- **2.1**: `TelemetryLog` (`scripts/campaign/telemetry_log.gd`) + `CampaignComposition.record_action(verb, choice_count)` — событие `action{type, choice_count}`; глаголы build/train/move (UI → сюда) + fight (авто-событие в `_request_battle`, MVP: авто-оборона, choice_count 1).
+- **2.2**: `loop_closed` — полный цикл за ход: рейд ударил (threats-фаза) + acted (действие игрока) + expedition (`record_expedition()`, герой покинул город) + возврат (герой в городе к концу хода) + ongoing. Оценка — после threats, до production.
+- **2.3 (partial)**: `replan_after_tooltip` — событие + API готовы; триггер — UI-подсказка «Почему так?» (deferred, не headless-верифицируемо, mvp-ui-flow).
+- **2.4**: `TelemetryLog.compute_metrics(events)` — post-hoc отчёт по всем 6 метрикам GDD 01-core-loop (TTFD ≤30с, action rate 8–15/5мин, decision ratio ≥60%, loop closure, session 35–50мин, replan ≤10мин) + `pass`-флаги; `loop_closure_rate(sessions)` — меж-сессийная агрегация «сессии с ≥1 полным циклом» ≥ 70%. D1/D7 — playtest (2.5, не headless).
+- **Ключевые решения:** (1) метки времени = ход кампании (I1, детерминизм); wall-clock `t` (сек) — опциональное поле события, которое добавляет UI-слой в playtest — headless-прогоны byte-identical (тест: 100 повторов). (2) лог сессии — артефакт сессии, НЕ часть кампанийного сейва (T-110-схема не расширяется). (3) headless симуляция метрики не считает: без игрока expedition не ставится → `loop_closed` не fires (дизайн-решение #2: метрики — за телеметрией, не за симуляцией).
+- **Тестовый леджер:** +16 (test_telemetry.gd) / −0 / quarantine 0; было 2690 → стало 2706. Причина: новые события/отчёт, регрессий нет.
+- Мерж: `54ca1067` (feat/core-loop-telemetry, rebase на `d893a243` — map-art T-143, без пересечения файлов).
+
 ## [2026-10-19] — dnd-battle-ladder: авто-режим + death saves margin_N (5 задач, GdUnit 2689/0)
 
 - **2.1 (скелет)**: `select_target` (min HP, тай-брейк меньший id) + `resolve_multi` (N vs M, тот же движок `_strike`/`_death_saves`) + отступление при «frightened» (outcome retreat/win). 10 тестов (test_battle_auto_ai.gd). НЕ подключено к кампании (там пока 1v1 `resolve`) — интеграция = следующий шаг.
