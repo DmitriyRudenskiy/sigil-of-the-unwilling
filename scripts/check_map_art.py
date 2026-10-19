@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import random
 import re
@@ -49,6 +50,7 @@ OBJECTS = os.path.join(ROOT, "game/assets/objects/world_map_objects.json")
 PROVENANCE = os.path.join(ROOT, "game/assets/PROVENANCE.md")
 PATCH = 8          # во сколько сжимается патч клетки перед сравнением
 COLOR_BITS = 5     # квант канала в патче: 5 бит гасит шум сжатия, но не склеивает тайлы
+ORIENT_BINS = 18   # бинов ориентации градиента по 180° (не направленная, шаг 10°)
 
 
 # Клетка гекса вписана в тайл, и квадратный кроп целого тайла на четверть состоит
@@ -284,6 +286,38 @@ def atlas_checks(manifest_path: str, cfg: dict) -> list[tuple[str, bool, str]]:
                 f"плоских (дисперсия <{float(acfg['min_cell_std']):.1f}): {len(flat)}"
                 + (f" — {flat[:4]}" if flat else "")))
 
+    # — направление мазка у вариантов (T-143, круг 18): равный средний тон ткани не
+    # ровняет. Четыре независимых рисунка на бим глаз собирает в диагональную «ёлочку»,
+    # и ни одна тон-мера, ни `frame/variety`, ни `measure_mottle_cut.py` этого не видят
+    # (все трое меряют тон или средний профиль, а не ориентацию). Гистограмма
+    # ориентации градиента по гексу движка, вес — модуль градиента; мера — худшее
+    # попарное L1-расхождение внутри биома. Порог 0.30: атлас «четыре рисунка» даёт
+    # 0.35…0.70 (песок 0.70), атлас фаз — 0.07…0.18 (носитель
+    # `review-11-3/phase-variants-t143.png`).
+    def orientation(atlas_xy) -> np.ndarray:
+        cell = cell_image(atlas_xy)
+        lum = rgb_to_lab(cell.astype(np.float64) / 255.0)[..., 0]
+        gy, gx = np.gradient(lum)
+        ang = np.degrees(np.arctan2(gy, gx)) % 180.0
+        hist, _ = np.histogram(ang[hex_in], bins=ORIENT_BINS, range=(0.0, 180.0),
+                               weights=np.hypot(gx, gy)[hex_in])
+        return hist / max(float(hist.sum()), 1e-9)
+
+    fabric: dict[str, list[np.ndarray]] = {}
+    for c in bases:
+        fabric.setdefault(c["biome"], []).append(orientation(c["atlas"]))
+    worst_biome, worst_l1 = "", 0.0
+    for biome, hists in fabric.items():
+        for i in range(len(hists)):
+            for j in range(i + 1, len(hists)):
+                d = float(np.abs(hists[i] - hists[j]).sum())
+                if d > worst_l1:
+                    worst_biome, worst_l1 = biome, d
+    limit = float(acfg["max_variant_orientation_l1"])
+    out.append(("atlas/orientation", worst_l1 <= limit,
+                f"макс. L1-расхождение направления мазка вариантов: {worst_l1:.2f} "
+                f"({worst_biome}) при пороге ≤{limit:.2f}"))
+
     # — структура: имена, кратность, пересечения, вес —
     bad_names = [c["id"] for c in manifest["cells"] if not re.fullmatch(r"[a-z0-9_]+", c["id"])]
     out.append(("atlas/naming", not bad_names,
@@ -502,12 +536,17 @@ def _fixture(cfg: dict, workdir: str) -> str:
         return np.dstack([rgb, np.asarray(hex_mask(rgb.shape[0]), dtype=np.uint8)])
 
     for i, biome in enumerate(FIXTURE_BIOMES):
+        # ткань биома одна, варианты — её фазы (как в `gen_map_art` после круга 18):
+        # разный рисунок у вариантов — это ровно тот дефект, который ловит
+        # `atlas/orientation`, и «чистый образец» не имеет права его нарушать
+        fabric = [0.5 + (0.5 * np.sin(2 * np.pi * (xx + v / 4.0)) * np.cos(2 * np.pi * yy))
+                  for v in range(4)]
         for v in range(4):
             x, y = (i * 4 + v) % cols, (i * 4 + v) // cols
-            # варианты различаются структурой узора (амплитуда волны), но НЕ средним
-            # тоном: `atlas/variant-tone` требует равных средних, иначе «чистый
-            # образец» сам нарушает тот гард, который обязан ловить мутацией
-            put(x, y, hexed(tone(0.5 + (wave - 0.5) * (0.2 + 0.2 * v) + 0.13 * i)))
+            # варианты различаются фазой узора, но НЕ средним тоном:
+            # `atlas/variant-tone` требует равных средних, иначе «чистый образец» сам
+            # нарушает тот гард, который обязан ловить мутацией
+            put(x, y, hexed(tone(0.5 + (fabric[v] - 0.5) * 0.6 + 0.13 * i)))
             cells.append({"id": f"base_{biome}_{v}", "kind": "base", "biome": biome,
                           "variant": v, "atlas": [x, y], "src_box": [0, 0, 400, 400]})
         for d, side in enumerate(FIXTURE_SIDES):
@@ -650,6 +689,8 @@ def self_test(cfg: dict) -> int:
              lambda: _mutate(atlas, variant_tone=True)),
             ("atlas/distinct", "свернуть все варианты в один",
              lambda: _mutate(atlas, collapse_variants=True)),
+            ("atlas/orientation", "вернуть четыре разных рисунка на биом",
+             lambda: _mutate(atlas, variant_art=True)),
             ("frame/variety", "оставить один вариант на биом",
              lambda: _mutate_shot(shot, cfg, single_variant=True)),
             ("frame/contrast", "свести рампу биома к соседней",
@@ -670,7 +711,8 @@ def self_test(cfg: dict) -> int:
 
 def _mutate(root: str, *, shift_edges=False, src_box=None, fill=False,
             repaint=None, punch=False, drop_edge=False, premultiply=False,
-            variant_tone=False, collapse_variants=False, square=False) -> None:
+            variant_tone=False, collapse_variants=False, square=False,
+            variant_art=False) -> None:
     """Одна мутация образца: пиксели и/или манифест."""
     manifest = os.path.join(root, os.path.basename(root) + ".json")
     with open(manifest, encoding="utf-8") as f:
@@ -685,7 +727,7 @@ def _mutate(root: str, *, shift_edges=False, src_box=None, fill=False,
         data["cells"] = [c for c in data["cells"] if not (
             c.get("kind") == "edge" and c.get("side") == "e")]
     if (repaint is not None or punch or fill or shift_edges or premultiply or variant_tone
-            or collapse_variants or square):
+            or collapse_variants or square or variant_art):
         arr = np.asarray(img.convert("RGBA")).copy()
         for c in data["cells"]:
             x, y = int(c["atlas"][0]) * tile, int(c["atlas"][1]) * tile
@@ -713,6 +755,18 @@ def _mutate(root: str, *, shift_edges=False, src_box=None, fill=False,
                 f = 1.18 if int(c.get("variant", 0)) % 2 else 0.86
                 cell = arr[y:y + tile, x:x + tile, :3].astype(np.float64) * f
                 arr[y:y + tile, x:x + tile, :3] = np.clip(cell, 0, 255).astype(np.uint8)
+            if variant_art and c.get("kind") == "base":
+                # регресс T-143 круга 18: у каждого варианта свой рисунок со своим
+                # направлением мазка (в сырье это были четыре независимых арта). Здесь —
+                # полоса под углом 30°·variant: ориентация гистограммы разъезжается,
+                # средний тон и дисперсия остаются прежними
+                v = int(c.get("variant", 0))
+                ang = math.radians(30.0 * v)
+                yy, xx = np.mgrid[0:tile, 0:tile]
+                phase = (xx * math.cos(ang) + yy * math.sin(ang)) * (2 * math.pi / 9.0)
+                cell = arr[y:y + tile, x:x + tile, :3].astype(np.float64)
+                cell = np.clip(cell + 40.0 * np.sign(np.sin(phase))[..., None], 0, 255)
+                arr[y:y + tile, x:x + tile, :3] = cell.astype(np.uint8)
             if shift_edges and c.get("kind") == "base":
                 # кромка перестаёт продолжать противоположную (сдвиг окна кроя из
                 # не-бесшовного материала); циклический сдвиг гард не ловит — он бесшовен
