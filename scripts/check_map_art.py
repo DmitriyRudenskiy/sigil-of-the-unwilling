@@ -463,7 +463,7 @@ def object_checks(manifest_path: str, cfg: dict) -> list[tuple[str, bool, str]]:
     tile = int(manifest["tile"])
     ocfg = cfg["objects"]
     out: list[tuple[str, bool, str]] = []
-    thin, fat, anchor = [], [], []
+    thin, fat, anchor, film = [], [], [], []
     for c in manifest["cells"]:
         x, y = int(c["atlas"][0]) * tile, int(c["atlas"][1]) * tile
         alpha = np.asarray(img.crop((x, y, x + tile, y + tile)))[:, :, 3]
@@ -473,12 +473,20 @@ def object_checks(manifest_path: str, cfg: dict) -> list[tuple[str, bool, str]]:
         # якорь по нижней кромке: сама нижняя строка тайла — пустой прозрачной полосы
         if float((alpha[-max(1, tile // 20):, :] > 16).mean()) > 1.0 - float(ocfg["anchor_transparent"]):
             anchor.append(c["id"])
+        # «плёнка»: модель рисует серую виньетку вокруг сюжета, порог маттинга делает
+        # из неё полупрозрачное поле, и на карте объект едет светлым квадратом. Кадр с
+        # чистым фоном даёт полосу 0.01–0.04 (край силуэта), кадр с виньеткой — 0.38.
+        if float(((alpha > 12) & (alpha < 178)).mean()) > float(ocfg["max_film_band"]):
+            film.append(c["id"])
     out.append(("objects/coverage", not thin and not fat,
                 f"пустых {len(thin)}, залитых {len(fat)} из {len(manifest['cells'])}; "
                 f"полоса {float(ocfg['min_silhouette_coverage']):.2f}–"
                 f"{float(ocfg['max_silhouette_coverage']):.2f}"))
     out.append(("objects/anchor", not anchor,
                 f"без прозрачной нижней кромки: {len(anchor)}" + (f" — {anchor[:4]}" if anchor else "")))
+    out.append(("objects/film", not film,
+                f"плёнка фона (полупрозрачное поле вокруг сюжета) > "
+                f"{float(ocfg['max_film_band']):.2f}: {len(film)}" + (f" — {film[:4]}" if film else "")))
     return out
 
 
@@ -675,6 +683,8 @@ def self_test(cfg: dict) -> int:
              lambda: _mutate(atlas, src_box=[0, 0, 120, 120])),
             ("objects/coverage", "залить фон объекта",
              lambda: _mutate(objects, fill=True)),
+            ("objects/film", "вернуть плёнку фона вокруг сюжета",
+             lambda: _mutate(objects, film=True)),
             ("atlas/palette", "подменить носитель полосы",
              lambda: _mutate(atlas, repaint=(255, 0, 128))),
             ("atlas/hex-shape", "пробить базу насквозь",
@@ -709,7 +719,7 @@ def self_test(cfg: dict) -> int:
         shutil.rmtree(work, ignore_errors=True)
 
 
-def _mutate(root: str, *, shift_edges=False, src_box=None, fill=False,
+def _mutate(root: str, *, shift_edges=False, src_box=None, fill=False, film=False,
             repaint=None, punch=False, drop_edge=False, premultiply=False,
             variant_tone=False, collapse_variants=False, square=False,
             variant_art=False) -> None:
@@ -726,7 +736,7 @@ def _mutate(root: str, *, shift_edges=False, src_box=None, fill=False,
     if drop_edge:
         data["cells"] = [c for c in data["cells"] if not (
             c.get("kind") == "edge" and c.get("side") == "e")]
-    if (repaint is not None or punch or fill or shift_edges or premultiply or variant_tone
+    if (repaint is not None or punch or fill or film or shift_edges or premultiply or variant_tone
             or collapse_variants or square or variant_art):
         arr = np.asarray(img.convert("RGBA")).copy()
         for c in data["cells"]:
@@ -741,6 +751,11 @@ def _mutate(root: str, *, shift_edges=False, src_box=None, fill=False,
                 arr[y:y + tile, x:x + tile, 3] = 255
             if fill:
                 arr[y:y + tile, x:x + tile] = (10, 20, 30, 255)
+            if film:
+                # регресс кадра obj_undergrowth: модель легла серой виньеткой, порог
+                # маттинга оставил от неё полупрозрачное поле — на карте это светлый
+                # квадрат вокруг объекта
+                arr[y:y + tile, x:x + tile, 3] = np.maximum(arr[y:y + tile, x:x + tile, 3], 90)
             if premultiply and c.get("kind") == "edge":
                 # тот же дефект, что ушёл в атлас: полупрозрачный край с RGB, уже
                 # умноженным на альфу, — глазами это тёмная кайма перехода

@@ -156,8 +156,27 @@ func apply_fog(tile_map: TileMapLayer, visibility: _VisibilityMap) -> void:
 	paint_transitions(visibility)
 	fog_refreshed.emit()
 
-func paint_decor(_decor_layer: TileMapLayer) -> void:
-	pass
+## Слой 5 «растительность» (7.2): объект из листа объектов в свою клетку.
+## Источника у слоя свой (лист объектов), а не атлас биомов, поэтому и тайлсет
+## на слое обязан быть свой — `MapObjects.build_tileset()`.
+## Тень (7.1) — отдельным слоем под объектом: та же клетка, другой источник того
+## же тайлсета. Запечённая в спрайт тень не гасится туманом и не перекрашивается
+## вместе с объектом, поэтому она элемент, а не пиксели силуэта.
+func paint_decor(decor_layer: TileMapLayer, shadow_layer: TileMapLayer = null) -> void:
+	if decor_layer == null:
+		return
+	decor_layer.clear()
+	if shadow_layer != null:
+		shadow_layer.clear()
+	for cell in model.decor_cells:
+		var object_id := String(model.decor_cells[cell])
+		var coords := MapObjects.coords_for(object_id)
+		if coords.x < 0:
+			push_error("MapRenderer: объект %s не в манифесте листа объектов" % object_id)
+			continue
+		decor_layer.set_cell(cell, MapObjects.SOURCE_ID, coords)
+		if shadow_layer != null:
+			shadow_layer.set_cell(cell, MapObjects.SHADOW_SOURCE_ID, MapObjects.SHADOW_TILE)
 
 func clear_city_zones(tile_map: TileMapLayer) -> void:
 	if tile_map == null:

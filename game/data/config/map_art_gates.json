@@ -18,12 +18,13 @@
     "min_base_opacity": 0.99,
     "max_base_corner_alpha": 16,
     "max_variant_tone_de": 3.0,
-    "max_variant_orientation_l1": 0.30
+    "max_variant_orientation_l1": 0.3
   },
   "objects": {
     "min_silhouette_coverage": 0.15,
     "max_silhouette_coverage": 0.6,
-    "anchor_transparent": 0.95
+    "anchor_transparent": 0.95,
+    "max_film_band": 0.08
   },
   "provenance": {
     "required_files": [

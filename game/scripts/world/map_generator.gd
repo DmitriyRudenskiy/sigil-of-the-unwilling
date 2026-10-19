@@ -11,6 +11,7 @@ var reachable_cells: Dictionary = {}
 
 var _tile_map: TileMapLayer
 var _decor_layer: TileMapLayer
+var _shadow_layer: TileMapLayer
 var _resource_layer: Node2D
 
 ## Подслои перехода (слой 2 «стыки и переходы») — по одному на сторону гекса,
@@ -107,12 +108,14 @@ func generate() -> void:
 	forest_gen.generate()
 
 	renderer.paint(_tile_map)
-	renderer.paint_decor(_decor_layer)
 
 	spawner.place_villages()
 	reachable_cells = _compute_reachable_cells()
 	spawner.place_resources(reachable_cells)
 	spawner.place_decor()
+	# Растительность рисуется ПОСЛЕ расстановки: до неё decor_cells пуст, и
+	# прежний порядок (paint до place) рисовал пустой слой, где данных ещё нет.
+	renderer.paint_decor(_decor_layer, _shadow_layer)
 	spawner.place_enemies(reachable_cells)
 
 	# Generate roads after villages and resources are placed
@@ -167,13 +170,32 @@ func _ensure_layers() -> void:
 			tlayer.tile_set = tileset
 		transition_layers.append(tlayer)
 
+	_shadow_layer = get_node_or_null("TileMapShadow")
+	if _shadow_layer == null:
+		_shadow_layer = TileMapLayer.new()
+		_shadow_layer.name = "TileMapShadow"
+		add_child(_shadow_layer)
+
 	_decor_layer = get_node_or_null("TileMapDecor")
 	if _decor_layer == null:
 		_decor_layer = TileMapLayer.new()
 		_decor_layer.name = "TileMapDecor"
 		add_child(_decor_layer)
-	if tileset != null:
-		_decor_layer.tile_set = tileset
+	if _decor_layer.tile_set == null:
+		# Свой тайлсет: растительность живёт на листе объектов, а не в атласе
+		# биомов. Геометрия та же (гекс, tile_size 82), поэтому клетки слоя
+		# не разъезжаются с базой.
+		_decor_layer.tile_set = MapObjects.build_tileset()
+	# Тени — под растительностью и в том же тайлсете (источник `SHADOW_SOURCE_ID`),
+	# отдельный тайлсет значил бы вторую текстуру ради одного тайла.
+	_shadow_layer.tile_set = _decor_layer.tile_set
+	# Растительность не участвует во вводе (вердикт владельца по Q-M94, D-213): юнит
+	# к северу от кроны перекрывается деревом, и единственное, чего это не имеет
+	# права делать, — лишать клика. Держится на двух фактах: у тайлсета слоя нет
+	# физических слоёв (а `input_pickable` в Godot 4.7 есть только у
+	# CollisionObject2D/Control, так что ставить нечего), и клик мира идёт через
+	# `WorldInput._unhandled_input`, куда `TileMapLayer` не вмешивается. Первый
+	# факт — под проверкой `test_vegetation_never_blocks_clicks`.
 
 	_resource_layer = get_node_or_null("ResourceLayer")
 	if _resource_layer == null:
