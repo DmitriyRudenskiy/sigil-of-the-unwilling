@@ -186,7 +186,7 @@
         {
           "id": "obj_bush",
           "group": "vegetation",
-          "subject": "one low round scrub bush with a few dry twigs"
+          "subject": "one leafy deciduous shrub, rounded crown of small green leaves, a few thin brown stems at the base, fresh green foliage"
         },
         {
           "id": "obj_reeds",
@@ -237,6 +237,13 @@
           "id": "obj_plinth_herb",
           "group": "plinth",
           "subject": "one small herb-gathering platform with bundles of dried herbs and a clay pot"
+        },
+        {
+          "id": "obj_undergrowth",
+          "group": "vegetation",
+          "takes": [
+            "a low wide thicket of young leafy saplings, several thin bare stems rising from one small base, a flat spreading canopy of small green leaves and fern-like fronds, half as tall as it is wide"
+          ]
         }
       ],
       "style": "hand-painted game sprite for a strategy board game, one single object standing alone, muted natural pigments, readable silhouette, fine brush grain"

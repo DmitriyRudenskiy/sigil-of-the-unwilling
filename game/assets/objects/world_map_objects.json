@@ -203,6 +203,19 @@
     1
    ],
    "source": "image-clone/map/raw/obj_plinth_herb.webp"
+  },
+  {
+   "id": "obj_undergrowth",
+   "group": "vegetation",
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    7,
+    1
+   ],
+   "source": "image-clone/map/raw/obj_undergrowth.webp"
   }
  ]
 }

@@ -127,6 +127,31 @@ func test_paint_decor_writes_only_known_objects() -> void:
 	assert_that(layer.get_cell_source_id(Vector2i(1, 0))).is_equal(-1)
 
 
+## Пулы обязаны ссылаться на id листа объектов. Тест «расставленные id ⊆ манифест»
+## ловит опечатку в пуле только если клетка с этим id выпала, а молча пустой слой
+## — ровно урок «palm»/«cactus».
+func test_decor_pools_reference_known_objects() -> void:
+	var ids: Array = MapObjects.ids()
+	for pool in [MapSpawner.DECOR_FOREST, MapSpawner.DECOR_DENSE, MapSpawner.DECOR_SHRUB]:
+		for object_id in pool:
+			assert_that(ids).contains(String(object_id))
+
+
+## Подлесок — ярус внутри леса, а не отдельный биом: он обязан ставиться и не
+## вытеснять деревья и кусты того же биома целиком.
+func test_undergrowth_shares_the_forest() -> void:
+	var decor := _place(_field(), 5)
+	var undergrowth := 0
+	var other := 0
+	for cell in decor:
+		if String(decor[cell]).begins_with("obj_undergrowth"):
+			undergrowth += 1
+		else:
+			other += 1
+	assert_that(undergrowth).is_greater(0)
+	assert_that(other).is_greater(0)
+
+
 ## Растительность не участвует во вводе (вердикт владельца по Q-M94, D-213):
 ## юнит к северу от кроны перекрывается деревом — и обязан оставаться
 ## кликабельным. Перехватить клик могли бы только коллизии тайлсета или скрипт

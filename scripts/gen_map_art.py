@@ -24,6 +24,7 @@ from pathlib import Path
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
+from scipy.ndimage import label as label_components
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts" / "concept_art"))
@@ -311,12 +312,25 @@ def edge_decal(base: Image.Image, side: str) -> Image.Image:
 def cut_object(frame: Path, fit: float = 0.86, bottom: int = 6) -> Image.Image:
     """Белый фон → прозрачность порогом по яркости, затем силуэт вписан в тайл.
 
-    Порог, а не flood fill: фон у кадров однозначный, а дырка в светлой хвое дороже
-    кривизны края силуэта. Вписывание с нижней кромкой нужно гейтам листа: силуэт не
-    должен занимать больше 0.6 клетки и обязан оставлять прозрачную нижнюю полосу
-    (на неё опирается якорь объекта на клетке)."""
+    Порог плюс связность с краем кадра: фон у кадров светлый, но не всегда чистый
+    (серая виньетка), а дырка в светлой хвое дороже кривизны края силуэта, поэтому
+    фоном считается только светлое, доходящее до рамки. Вписывание с нижней кромкой
+    нужно гейтам листа: силуэт не должен занимать больше 0.6 клетки и обязан оставлять
+    прозрачную нижнюю полосу (на неё опирается якорь объекта на клетке)."""
     a = np.asarray(Image.open(frame).convert("RGB")).astype(np.float32)
     alpha = np.clip((250.0 - a.min(2)) / 30.0, 0.0, 1.0)
+    # «Плёнка»: модель кладёт вокруг сюжета серую виньетку, и порог выше делает из неё
+    # полупрозрачное поле (на карте — светлый квадрат вокруг объекта). Вычитается только
+    # то, что тянется от края кадра: светлые пиксели внутри сюжета (хвоя, снег, белизна
+    # берёсты) до края не доходят и остаются на месте — за это порог вместо flood fill
+    # и держали, связность возвращает ровно то, что он резал по цвету.
+    near = a.min(2) >= 200.0
+    components, _ = label_components(near)
+    touching = (set(components[0, :]) | set(components[-1, :])
+                | set(components[:, 0]) | set(components[:, -1]))
+    touching.discard(0)
+    if touching:
+        alpha[np.isin(components, list(touching))] = 0.0
     im = Image.fromarray(np.dstack([a, alpha * 255.0]).astype(np.uint8), "RGBA")
     im = im.crop(im.split()[3].getbbox())
     s = min(fit * TILE / im.width, (fit * TILE - bottom) / im.height)

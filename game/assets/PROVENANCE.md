@@ -36,7 +36,7 @@ date: 2026-10-18
 | `game/assets/textures/` | не установлено — `44c5513b` (2026-09-03, astral-macro) | 3 png шардов/неба | записей нет | неизвестно |
 | `game/assets/textures/objects/` | не установлено — `62dc74d2` (2026-10-07, «obj36») | 12 png объектов карты | записей нет | неизвестно |
 | `game/assets/objects/` | конвейер репо `scripts/gen_map_art.py` (world-map-art-variety) | лист изолированных объектов карты `world_map_objects.webp` | comfyui/image-clone: роли из `scripts/concept_art/map_spec.json`, кадр 1024² → силуэт; права на модель Krea-2 turbo не проверялись | жёлтый |
-| `game/assets/objects/world_map_objects.webp` | то же | 15 объектов 82 px, comfyui/image-clone, seed'ы в `image-clone/map/MANIFEST.json` | права на модель не проверялись | жёлтый |
+| `game/assets/objects/world_map_objects.webp` | то же | 16 объектов 82 px, comfyui/image-clone, seed'ы в `image-clone/map/MANIFEST.json` (2026-10-19: `obj_bush` перегенерирован, добавлен `obj_undergrowth`) | права на модель не проверялись | жёлтый |
 | `game/assets/tiles/` | не установлено — `44c5513b` (2026-09-03) | 1 png тайла | записей нет | неизвестно |
 | `game/assets/tiles/world_map_atlas.webp` | конвейер репо `scripts/gen_map_art.py` (world-map-art-variety) | comfyui/image-clone: 8 биомов × 4 варианта базы + 6 декалей границ на биом, 82 px; материал 1024² → зашивка шва → полоса M | права на модель Krea-2 turbo не проверялись | жёлтый |
 | `game/assets/ui/` | AI-генерация референса 04; `17e75cf4` как конверсия jpeg из «image-очереди» | `main_menu_bg.webp` 1920×1080 | права на генерацию не проверялись | жёлтый — перегенерация с чистой палитрой (UI-4) |

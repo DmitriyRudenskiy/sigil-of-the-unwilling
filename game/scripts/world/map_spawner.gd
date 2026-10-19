@@ -91,8 +91,13 @@ func place_resources(reachable = null, spacing := -1) -> void:
 ## куст на клетке — не препятствие. Прежние «palm»/«cactus» были id, которых в
 ## листе объектов нет ни одного, а рисовать их было нечем: слой молча оставался
 ## пустым (носитель растительности появился только с партией объектов).
-const DECOR_FOREST := ["obj_tree_deciduous", "obj_tree_deciduous_large", "obj_conifer"]
-const DECOR_DENSE := ["obj_conifer_large", "obj_tree_deciduous_large"]
+## Подлесок (7.1, кадр `review-11-3/undergrowth-*.png`) — напольный ярус того же
+## леса: он не отдельный биом, а доля клеток леса наряду с деревьями, поэтому он
+## в тех же пулах, а не вторым проходом (один объект на клетку — меньше кода и
+## не надо решать, кто кого перекрывает в пределах клетки).
+const DECOR_FOREST := ["obj_tree_deciduous", "obj_tree_deciduous_large", "obj_conifer",
+	"obj_undergrowth"]
+const DECOR_DENSE := ["obj_conifer_large", "obj_tree_deciduous_large", "obj_undergrowth"]
 const DECOR_SHRUB := ["obj_bush"]
 const DECOR_FOREST_CHANCE := 0.6
 const DECOR_DENSE_CHANCE := 0.85

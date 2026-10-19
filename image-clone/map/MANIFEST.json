@@ -426,11 +426,11 @@
   "seed": 230610855,
   "attempt": 1,
   "prompt_version": "map-1",
-  "prompt": "hand-painted game sprite for a strategy board game, one single object standing alone, muted natural pigments, readable silhouette, fine brush grain, hand-painted strategy game map art, painterly rendering, soft warm key light, warm browns #664328 #a46739 #ca9861 on parchment #ddd5cc, limited earthy palette, visible brush texture, no photorealism, no glossy shaders, one isolated game sprite, a single object alone in the middle of the frame filling most of it, whole object visible with a clear empty margin, nothing touching the frame edges, seen from a high three-quarter angle with its base at the bottom, plain flat white paper background with nothing else on it, no map, no continents, no globe, no geography, no parchment board, no plaque, no sign, no ground, no cast shadow, no text, one low round scrub bush with a few dry twigs, no photograph, photorealism, 3d render, cgi, glossy plastic, anime, cartoon, line art, sketch, text, letters, watermark, logo, ui, interface, frame, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, text, letters, signature, watermark",
+  "prompt": "hand-painted game sprite for a strategy board game, one single object standing alone, muted natural pigments, readable silhouette, fine brush grain, hand-painted strategy game map art, painterly rendering, soft warm key light, warm browns #664328 #a46739 #ca9861 on parchment #ddd5cc, limited earthy palette, visible brush texture, no photorealism, no glossy shaders, one isolated game sprite, a single object alone in the middle of the frame filling most of it, whole object visible with a clear empty margin, nothing touching the frame edges, seen from a high three-quarter angle with its base at the bottom, plain flat white paper background with nothing else on it, no map, no continents, no globe, no geography, no parchment board, no plaque, no sign, no ground, no cast shadow, no text, one leafy deciduous shrub, rounded crown of small green leaves, a few thin brown stems at the base, fresh green foliage, no photograph, photorealism, 3d render, cgi, glossy plastic, anime, cartoon, line art, sketch, text, letters, watermark, logo, ui, interface, frame, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, text, letters, signature, watermark",
   "negative": "",
   "model": "krea2",
   "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
-  "server_file": "map_obj_bush_a1_00002_.png",
+  "server_file": "map_obj_bush_a1_00003_.png",
   "file": "image-clone/map/raw/obj_bush.webp"
  },
  "obj_reeds": {
@@ -684,5 +684,47 @@
   "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
   "server_file": "map_mat_road_3_a1_00001_.png",
   "file": "image-clone/map/raw/mat_road_3.webp"
+ },
+ "obj_undergrowth_0": {
+  "id": "obj_undergrowth_0",
+  "ok": true,
+  "why": "",
+  "seed": 167959098,
+  "attempt": 1,
+  "prompt_version": "map-1",
+  "prompt": "hand-painted game sprite for a strategy board game, one single object standing alone, muted natural pigments, readable silhouette, fine brush grain, hand-painted strategy game map art, painterly rendering, soft warm key light, warm browns #664328 #a46739 #ca9861 on parchment #ddd5cc, limited earthy palette, visible brush texture, no photorealism, no glossy shaders, one isolated game sprite, a single object alone in the middle of the frame filling most of it, whole object visible with a clear empty margin, nothing touching the frame edges, seen from a high three-quarter angle with its base at the bottom, plain flat white paper background with nothing else on it, no map, no continents, no globe, no geography, no parchment board, no plaque, no sign, no ground, no cast shadow, no text, a low wide thicket of young leafy saplings, several thin bare stems rising from one small base, a flat spreading canopy of small green leaves and fern-like fronds, half as tall as it is wide, no photograph, photorealism, 3d render, cgi, glossy plastic, anime, cartoon, line art, sketch, text, letters, watermark, logo, ui, interface, frame, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, text, letters, signature, watermark",
+  "negative": "",
+  "model": "krea2",
+  "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
+  "server_file": "map_obj_undergrowth_0_a1_00011_.png",
+  "file": "image-clone/map/raw/obj_undergrowth_0.webp"
+ },
+ "obj_undergrowth_1": {
+  "id": "obj_undergrowth_1",
+  "ok": true,
+  "why": "",
+  "seed": 2097539756,
+  "attempt": 1,
+  "prompt_version": "map-1",
+  "prompt": "hand-painted game sprite for a strategy board game, one single object standing alone, muted natural pigments, readable silhouette, fine brush grain, hand-painted strategy game map art, painterly rendering, soft warm key light, warm browns #664328 #a46739 #ca9861 on parchment #ddd5cc, limited earthy palette, visible brush texture, no photorealism, no glossy shaders, one isolated game sprite, a single object alone in the middle of the frame filling most of it, whole object visible with a clear empty margin, nothing touching the frame edges, seen from a high three-quarter angle with its base at the bottom, plain flat white paper background with nothing else on it, no map, no continents, no globe, no geography, no parchment board, no plaque, no sign, no ground, no cast shadow, no text, a low wide bramble thicket of young leafy bushes and fern-like fronds growing close together, thin stems, fresh green and olive leaves, flat and spreading, twice as wide as it is tall, no photograph, photorealism, 3d render, cgi, glossy plastic, anime, cartoon, line art, sketch, text, letters, watermark, logo, ui, interface, frame, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, text, letters, signature, watermark",
+  "negative": "",
+  "model": "krea2",
+  "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
+  "server_file": "map_obj_undergrowth_1_a1_00014_.png",
+  "file": "image-clone/map/raw/obj_undergrowth_1.webp"
+ },
+ "obj_undergrowth": {
+  "id": "obj_undergrowth",
+  "ok": true,
+  "why": "",
+  "seed": 2087573235,
+  "attempt": 1,
+  "prompt_version": "map-1",
+  "prompt": "hand-painted game sprite for a strategy board game, one single object standing alone, muted natural pigments, readable silhouette, fine brush grain, hand-painted strategy game map art, painterly rendering, soft warm key light, warm browns #664328 #a46739 #ca9861 on parchment #ddd5cc, limited earthy palette, visible brush texture, no photorealism, no glossy shaders, one isolated game sprite, a single object alone in the middle of the frame filling most of it, whole object visible with a clear empty margin, nothing touching the frame edges, seen from a high three-quarter angle with its base at the bottom, plain flat white paper background with nothing else on it, no map, no continents, no globe, no geography, no parchment board, no plaque, no sign, no ground, no cast shadow, no text, a low wide thicket of young leafy saplings, several thin bare stems rising from one small base, a flat spreading canopy of small green leaves and fern-like fronds, half as tall as it is wide, no photograph, photorealism, 3d render, cgi, glossy plastic, anime, cartoon, line art, sketch, text, letters, watermark, logo, ui, interface, frame, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, text, letters, signature, watermark",
+  "negative": "",
+  "model": "krea2",
+  "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
+  "server_file": "map_obj_undergrowth_a1_00001_.png",
+  "file": "image-clone/map/raw/obj_undergrowth.webp"
  }
 }
