@@ -209,3 +209,30 @@ func test_hook_emits_even_with_empty_losses() -> void:
 func test_make_recruit_carries_character_uid() -> void:
 	var recruit := CampaignBattleScript.make_recruit(_warrior, 42)
 	assert_int(int(recruit["character_uid"])).is_equal(42)
+
+
+## — Голод (party-characters 3.2 / campaign-core-loop 3.2, P-4) —
+
+func test_hunger_penalty_default_zero() -> void:
+	var c := CampaignBattleScript.make_combatant({})
+	assert_int(int(c.get("hunger_penalty", 0))).is_equal(0)
+
+
+func test_hunger_penalty_lowers_margin_and_zone() -> void:
+	# attack 13 vs ac 12, luck 0: margin 1 → success (урон 5);
+	# с голодом (−2): margin −1 → partial (урон 2, половина).
+	var d1 := CampaignBattleScript.resolve(
+		_c({"hp": 100}), _r({"hp": 100, "ac": 12}))
+	var d2 := CampaignBattleScript.resolve(
+		_c({"hp": 100, "hunger_penalty": -2}), _r({"hp": 100, "ac": 12}))
+	var h1: Dictionary = d1["trace"][0]
+	var h2: Dictionary = d2["trace"][0]
+	assert_str(str(h1["actor"])) \
+		.override_failure_message("герой ходит первым (тай-брейк ID)").is_equal("hero")
+	assert_int(int(h1["margin"])).is_equal(1)
+	assert_str(str(h1["zone"])).is_equal("success")
+	assert_int(int(h1["damage"])).is_equal(5)
+	assert_int(int(h2["margin"])) \
+		.override_failure_message("голод: margin −2 (P-4)").is_equal(-1)
+	assert_str(str(h2["zone"])).is_equal("partial")
+	assert_int(int(h2["damage"])).is_equal(2)

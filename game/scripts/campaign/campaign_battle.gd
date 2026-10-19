@@ -41,6 +41,7 @@ static func make_combatant(spec: Dictionary) -> Dictionary:
 		"fate_debt": int(spec.get("fate_debt", 0)),
 		"frightened": bool(spec.get("frightened", false)),  # 2.1: триггер отступления авто-режима
 		"supply_bonus": int(spec.get("supply_bonus", 0)),  # 5.2: снабжение → 1-й спас (Q-M57→(а))
+		"hunger_penalty": int(spec.get("hunger_penalty", 0)),  # party-characters 3.2: голод (0 еды) → −2 к атакам (P-4)
 	}
 
 
@@ -85,7 +86,8 @@ static func _state_margin(atk: Dictionary, def_: Dictionary) -> int:
 ## margin, reckoning}. Порог долга = бонус мастерства; достигнут — Расплата
 ## (ступень ниже, долг → 0); долг ≥ 1 — штраф 1,25 (привязка — Ф3).
 static func _strike(atk: Dictionary, def_: Dictionary) -> Dictionary:
-	var margin: int = int(atk["attack"]) - int(def_["ac"]) + _state_margin(atk, def_)
+	var margin: int = int(atk["attack"]) - int(def_["ac"]) + _state_margin(atk, def_) \
+		+ int(atk.get("hunger_penalty", 0))  # голод (P-4): −2 к перевесу атаки
 	var reckoning := false
 	var debt_before: int = int(atk["fate_debt"])  # T-124: долг в trace (журнал этики)
 	var threshold: int = int(atk["proficiency"])  # порог = бонус мастерства (K-R1, Б.4)

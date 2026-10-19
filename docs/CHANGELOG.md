@@ -9,6 +9,13 @@ date: 2026-10-19
 
 # CHANGELOG — docs/
 
+## [2026-10-19] — Голод → −2 к атакам: проводка в боевой движок (campaign-core-loop 3.2, party-characters 4.3→хвост REST, GdUnit 2709/0)
+
+- **Что:** голод (0 еды) теперь реально бьёт по бою: `hunger_penalty` — новое поле комбатанта (`make_combatant`, дефолт 0 — аддитивно, паттерн `supply_bonus`); `_strike` прибавляет его к margin атаки; `_request_battle` ставит герою `supply_system.attack_penalty()` (−2 при голоде, 0 иначе).
+- **Закрыто:** campaign-core-loop **3.2** (`[x]`: ёмкость 10 + расход 1/персонаж/переход — SupplySystem; −2 к атакам — боевой движок); party-characters **4.3** — голод полностью (включая боевой движок); остаток 4.3 — только REST (ждёт 2.2, «хит-дизайн»-множитель — вердикт владельца).
+- **Тестовый леджер:** +3 (test_campaign_battle.gd: default_zero, lowers_margin_and_zone; test_campaign_wiring.gd: wired_into_battle) / −0 / quarantine 0; было 2706 → стало 2709. Причина: новая механика боя, регрессий нет.
+- **Спеки:** delta campaign-core-loop синхронизирована с реализацией (loop closure = «≥70% сессий», loop_closed-флаги, post-hoc сценарий); 01-core-loop — блок «Реализация» телеметрии.
+
 ## [2026-10-19] — campaign-core-loop 2.1–2.4: телеметрия лог сессии (GdUnit 2706/0)
 
 - **2.1**: `TelemetryLog` (`scripts/campaign/telemetry_log.gd`) + `CampaignComposition.record_action(verb, choice_count)` — событие `action{type, choice_count}`; глаголы build/train/move (UI → сюда) + fight (авто-событие в `_request_battle`, MVP: авто-оборона, choice_count 1).

@@ -312,6 +312,9 @@ func _request_battle(context: Dictionary) -> String:
 	var tier: int = int(context.get("tier", 1))
 	var hero := CampaignBattle.make_recruit(
 		_statblocks.get("warrior", {}), population_system.conscript())
+	# party-characters 3.2 / campaign-core-loop 3.2 (P-4): голод (0 еды) →
+	# −2 к атакам; штраф из SupplySystem, держится до resupply в городе.
+	hero["hunger_penalty"] = supply_system.attack_penalty()
 	var raider_spec: Dictionary = _statblocks.get(
 		"raider_tier_%d" % tier, _statblocks.get("raider_final", {}))
 	var raider := CampaignBattle.make_combatant(raider_spec)

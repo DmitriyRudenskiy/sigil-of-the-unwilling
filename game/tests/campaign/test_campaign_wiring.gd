@@ -100,3 +100,33 @@ func test_old_save_without_region_starts_in_city() -> void:
 	c.load_save_state(state)
 	assert_str(c.region_map.hero_region).is_equal("R01")
 	assert_bool(c.region_map.open_regions.has("R02")).is_true()
+
+
+## party-characters 3.2 / campaign-core-loop 3.2 (P-4): голод (0 еды) → −2
+## к атакам — проводка в бой: у голодного героя margin первого удара ниже
+## на |штраф|, чем у сытого (тот же seed, тот же рейд).
+func test_hunger_penalty_wired_into_battle() -> void:
+	var c1: CampaignComposition = CampaignComposition.from_campaign_config(777)
+	var c2: CampaignComposition = CampaignComposition.from_campaign_config(777)
+	assert_int(c2.supply_system.food()).is_equal(10)
+	c2.supply_system.consume_for_travel(10)  # еда 10 → 0: голод
+	assert_bool(c2.supply_system.is_hungry()).is_true()
+	var turn := 0
+	while c1.last_battle_report.is_empty() and turn < 21:
+		turn += 1
+		c1.advance_turn()
+		c2.advance_turn()
+	assert_bool(not c1.last_battle_report.is_empty()) \
+		.override_failure_message("до хода 21 боя не было").is_true()
+	var m1 := _hero_first_margin(c1.last_battle_report)
+	var m2 := _hero_first_margin(c2.last_battle_report)
+	assert_int(m2) \
+		.override_failure_message("голод: margin героя −2 (P-4)").is_equal(m1 - 2)
+
+
+func _hero_first_margin(report: Dictionary) -> int:
+	for entry in report.get("trace", []):
+		var e: Dictionary = entry
+		if e.has("margin") and str(e.get("actor", "")) != "raider_t1":
+			return int(e["margin"])
+	return -999
