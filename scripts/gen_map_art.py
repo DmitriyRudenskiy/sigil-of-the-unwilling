@@ -351,8 +351,26 @@ def assemble() -> int:
         tiles.append(img)
         cells.append(cell)
 
+    # Варианты биома — фазы ОДНОЙ ткани, а не четыре разных рисунка (глазной приём 11.3,
+    # круг 18): четыре независимых кадра различаются направлением и масштабом мазка —
+    # ориентационное расхождение градиента (L1 по 18 бинам) у песка 0.94, у дороги 0.56,
+    # у травы 0.27 — и карта собирается диагональной «ёлочкой»: глаз читает мозаику
+    # плиток, а не ландшафт (носитель `review-11-3/phase-variants-t143.png`). Циклический
+    # сдвиг зашитого тайла статистики не меняет: соседние клетки различаются зерном,
+    # а не тканью. Рампа и `shift` take'а во всех, кроме нулевого, не участвуют: тон
+    # варианта выравнивается к среднему биома ниже по коду, а `atlas/distinct` (8×8)
+    # различает фазы и так: `atlas/distinct` 1.00 при пороге ≥0.90.
+    fabric: dict[str, np.ndarray] = {}
+
     for r in mats:
-        base = tile_from(r["path"], r["ramp"], r["shift"], r["id"])
+        if r["take"] == 0:
+            base = tile_from(r["path"], r["ramp"], r["shift"], r["id"])
+            fabric[r["biome"]] = np.asarray(base)
+        else:
+            rng = np.random.default_rng(zlib.crc32(r["id"].encode()))
+            dy, dx = rng.integers(11, 71, 2)   # фаза: не кратно 1/2 тайла, чтобы глаз не ловил период
+            rolled = np.roll(np.roll(fabric[r["biome"]], int(dy), 0), int(dx), 1)
+            base = Image.fromarray(make_wrap(rolled, band=WRAP_TILE_BAND), "RGBA")
         add(base, {"id": f"base_{r['biome']}_{r['take']}", "kind": "base", "biome": r["biome"],
                    "variant": r["take"], "source": str(r["path"].relative_to(ROOT))}, r["path"])
         bases.setdefault(r["biome"], []).append(base)
