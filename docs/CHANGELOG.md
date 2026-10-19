@@ -9,6 +9,31 @@ date: 2026-10-19
 
 # CHANGELOG — docs/
 
+## [2026-10-19] — city-construction-districts 4.1/4.4: GdUnit4 — 1 клетка = 1 здание, рейд по еде → DEFICIT без обвала (GdUnit 2810/0)
+
+- **4.1** (GdUnit4: «1 клетка = 1 здание; placement по terrain_preference
+  (жёсткая)») — покрыто: существующий
+  `test_city_layout_is_52_cells_and_placement_respects_terrain_and_occupancy`
+  (terrain-жёсткость: wrong_terrain → `ok=false`; occupied → `ok=false`;
+  footprint `[[0,0]]` → 1 клетка) + новый
+  `test_mvp_catalog_one_cell_per_building` (инвариант данных: все 98 зданий
+  `campaign_building_catalog.json` — footprint ровно 1 клетка-якорь `[0,0]`;
+  JSON-парсинг даёт float-координаты — сравнение в клеточном пространстве
+  через `footprint_cells`).
+- **4.4** (GdUnit4: «население от производства (рейд по еде → DEFICIT, не
+  обвал)») — покрыто: существующие `test_start_state_one_turn` (поток еды →
+  SM DEFICIT, pop стабилен), `test_t122_raid_hits_pre_production_stocks`
+  (рейд бьёт запасы ДО production), `test_afk_cascade_no_chain_collapse`
+  (10 рейдов подряд — цепного обвала нет) + новый
+  `test_raid_food_deficit_no_population_collapse` (рейд обнуляет еду → SM
+  `DEFICIT`; население > 0 и не ниже стартового; MVP: m-множители = 1, K-M12).
+- **Тесты:** +2, нетто 2808 → **2810/0**.
+- **Остаток city-construction-districts:** 2.2 распад района (теги — новая
+  механика), 2.3 SM здания (GHOST/BUILDING/WORKING/DISABLED/RUINED/REPAIRING),
+  2.4 ферма у леса +15% (terrain-adjacency), 3.1 C-2 (вердикт владельца),
+  3.2 C-9 (superseded/архив — реестровый акт), 4.2 распад (ждёт 2.2),
+  4.3 аура WORKING + ферма у леса (ждёт 2.3/2.4).
+
 ## [2026-10-19] — vertical-slice 2.6/3.2: C-18 синк docs — тики = 1.0 [ПРЕДЛОЖЕНИЕ Q6], движок MVP = фазы
 
 - **C-18** (09-risks: 01-core-loop «тик — деление дня…» vs код `turn_driver.gd`

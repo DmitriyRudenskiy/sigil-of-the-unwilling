@@ -227,3 +227,27 @@ func test_t122_winter_turn_consistent() -> void:
 	# Дерево: 2.0 × 0.4 × 20 = 16.0 (зиму production-фаза видит в том же ходе, где рейды ×1.25).
 	assert_float(prod_report["production"]["wood"]).is_equal_approx(16.0, 1e-6)
 	WorldSeasons.reset()  # не загрязнять статичный счётчик других тестов
+
+
+## city-construction-districts 4.4: «население от производства (рейд по еде →
+## DEFICIT, не обвал)» — рейд обнуляет еду → SM еда DEFICIT; население не
+## обваливается (MVP: m-множители = 1, K-M12; популяция остаётся > 0 и
+## функционирует).
+func test_raid_food_deficit_no_population_collapse() -> void:
+	var p := _start_state()
+	var start_pop := p.population
+	# Рейд (threats) обнуляет запасы ДО production.
+	p.stocks["food"] = 0.0
+	var r: Dictionary = p.process_production(1.0)
+	# SM еда: B ≤ 0 → DEFICIT (не обвал экономики: производство идёт,
+	# производство в DEFICIT ×0.25, запасы не уходят ниже −(потребление − prod)).
+	assert_that(p.sm["food"]["state"]).is_equal("DEFICIT") \
+		.override_failure_message("рейд по еде должен вести SM в DEFICIT")
+	# Население: не обвал — остаётся > 0 и не ниже стартового (MVP: m = 1, K-M12;
+	# рождения идут, кап = жильё).
+	assert_int(p.population).is_greater(0) \
+		.override_failure_message("население обвалилось до 0")
+	assert_int(p.population).is_greater_equal(start_pop) \
+		.override_failure_message("население упало ниже стартового после рейда по еде")
+	# Отчёт: ход прошёл, production рассчитан (не краш).
+	assert_int(r["days"]).is_equal(20)

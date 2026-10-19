@@ -1,6 +1,7 @@
 extends BaseTest
 
 const CampaignBuildingPlacement = preload("res://scripts/city/campaign_building_placement.gd")
+const CampaignBuildingCatalog = preload("res://scripts/data/campaign_building_catalog.gd")
 const HexUtils = preload("res://scripts/core/hex_utils.gd")
 const ArenaRingSystem = preload("res://scripts/city/arena_ring_system.gd")
 
@@ -147,3 +148,22 @@ func _has_issue(issues: Array, fragment: String) -> bool:
 		if String(issue).contains(fragment):
 			return true
 	return false
+
+
+## city-construction-districts 4.1: «1 клетка = 1 здание» — инвариант данных
+## MVP-каталога: каждый building footprint [[0,0]] (одна клетка).
+func test_mvp_catalog_one_cell_per_building() -> void:
+	var catalog := CampaignBuildingCatalog.load_catalog()
+	var buildings: Array = catalog.get("buildings", [])
+	assert_that(buildings.size()).is_greater(0)
+	for b in buildings:
+		if not (b is Dictionary):
+			continue
+		var id := String(b.get("id", ""))
+		# JSON-парсинг даёт float-координаты — сравниваем в клеточном пространстве
+		# (footprint_cells нормализует int-ово).
+		var cells := CampaignBuildingPlacement.footprint_cells(Vector2i.ZERO, b.get("footprint", []))
+		assert_that(cells.size()).is_equal(1) \
+			.override_failure_message("MVP: 1 клетка = 1 здание (footprint = ровно 1 клетка): %s" % id)
+		assert_that(cells[0]).is_equal(Vector2i.ZERO) \
+			.override_failure_message("MVP: footprint = одна клетка-якорь [0,0]: %s" % id)
