@@ -13,6 +13,9 @@ const PRESTIGE_JSON := "res://data/config/balance/prestige.json"
 const DISTRICTS_JSON := "res://data/config/balance/districts.json"
 const ETHICS_JSON := "res://data/config/balance/ethics.json"
 const SIGNS_JSON := "res://data/signs.json"
+## campaign-core-loop 2.1: глаголы действия (spec: build/train/move/fight;
+## GDD 01-core-loop «Цикл 5 минут»: двинул/решил/построил/снабдил + тренировка).
+const ACTION_VERBS := ["build", "train", "move", "fight"]
 
 var campaign: TurnDriver
 var settlement: SettlementProcessor
@@ -33,6 +36,15 @@ var sign_vectors: Dictionary = {}
 ## сальдо — производная, в сейве не хранится (T-110).
 var prestige_ledger: Array = []
 var last_battle_report: Dictionary = {}
+## campaign-core-loop 2.1–2.4: телеметрия лог сессии (GDD 01-core-loop).
+## Дизайн-решение #2: события → лог сессии, отчёт — post-hoc (playtest);
+## лог — артефакт сессии, НЕ часть сейва. I1: метка времени = ход кампании.
+var telemetry: TelemetryLog
+## campaign-core-loop 2.2: флаги полного цикла за ход (loop_closed).
+## Сбрасываются в конце хода; действия UI между ходами копятся в них.
+var _loop_flags: Dictionary = {}
+## Отчёт threats-фазы текущего хода (2.2: «увидел угрозу» = рейд ударил).
+var last_threat_report: Dictionary = {}
 ## Победная оценка (T-117 якорь: ход 21 = финальный рейд отражён/нет).
 var final_battle_seen: bool = false
 var final_raid_repelled: bool = false
@@ -153,7 +165,9 @@ func _build(campaign_seed: int) -> void:
 		rep_report["population"] = pop_report
 		return rep_report
 	campaign.threats_hook = func() -> Dictionary:
-		return threats.process_turn(campaign.current_turn, _threat_context())
+		var rep := threats.process_turn(campaign.current_turn, _threat_context())
+		last_threat_report = rep  # 2.2: «увидел угрозу» (рейд этого хода)
+		return rep
 	# T-122 (Q-M31): production — позиция 6 (post-threats): рейды бьют
 	# pre-production запасы. season_mult — из WorldSeasons (I1: инжест).
 	campaign.production_hook = func() -> Dictionary:
@@ -166,6 +180,10 @@ func _build(campaign_seed: int) -> void:
 	# player-фаза: тик времени герой-слоя (авто-режим 2 дня → возврат в город, Y10).
 	campaign.player_hook = func() -> void:
 		region_map.tick_days(1)
+	# campaign-core-loop 2.1: старт сессии — TTFD меряется от game_start
+	# до первого action (GDD 01-core-loop).
+	telemetry = TelemetryLog.new()
+	telemetry.record("game_start", {"turn": 1})
 
 
 ## Один ход кампании (T-010, T-122): фиксированный 6-фазный порядок
@@ -176,6 +194,8 @@ func _build(campaign_seed: int) -> void:
 func advance_turn() -> void:
 	if campaign.is_done():
 		return
+	if telemetry != null:
+		telemetry.set_turn(campaign.current_turn)  # 2.1: кампанийное время (I1)
 	# T-060: снабжение партии — выбранные едят 1 еду/день (02-mechanics §3.2;
 	# MVP: пул = партия, резерв — Post-MVP). Синхронизация до settlement-фазы.
 	settlement.party_size = PartySystem.alive_members(party).size()
@@ -185,7 +205,69 @@ func advance_turn() -> void:
 	campaign.advance_auto_phase()  # caravans (no-op) → diplomacy (no-op)
 	campaign.advance_auto_phase()  # diplomacy (no-op) → threats
 	campaign.advance_auto_phase()  # threats (авто) → production
+	_evaluate_loop_closed()        # 2.2: цикл хода N (после рейда, до production)
 	campaign.advance_auto_phase()  # production (авто) → finish
+
+
+## campaign-core-loop 2.1: действие игрока (UI → сюда; headless — авто-fight
+## в _request_battle). Событие `action{type, choice_count}` в лог сессии
+## (GDD 01-core-loop). type — глагол из ACTION_VERBS; choice_count — число
+## осмысленных опций (≥2 = «решение» в метрике decision ratio).
+func record_action(verb: String, choice_count: int = 1) -> void:
+	if telemetry == null:
+		return
+	if not ACTION_VERBS.has(verb):
+		push_warning("CampaignComposition: неизвестный глагол действия: %s" % verb)
+		return
+	telemetry.record("action", {
+		"turn": campaign.current_turn,
+		"type": verb,
+		"choice_count": maxi(0, int(choice_count)),
+	})
+	_loop_flags["acted"] = true
+
+
+## campaign-core-loop 2.2: герой покинул город (UI → сюда, остаток T-021).
+## Флаг «поход» для loop_closed (поход → возврат к концу хода).
+func record_expedition() -> void:
+	_loop_flags["expedition"] = true
+
+
+## campaign-core-loop 2.3: replan_after_tooltip — перепланировка после
+## подсказки «почему так?» (aha-момент, GDD 01-core-loop). Триггер — UI
+## (deferred, не headless-верифицируемо); событие и API готовы.
+func record_replan_after_tooltip() -> void:
+	if telemetry == null:
+		return
+	telemetry.record("replan_after_tooltip", {"turn": campaign.current_turn})
+
+
+## campaign-core-loop 2.2: loop_closed — полный цикл за ход (GDD 01-core-loop
+## «Цикл сессии»): увидел угрозу (рейд ударил) → решил (действие игрока)
+## → поход (герой покинул город) → возврат (герой в городе к концу хода)
+## → пережил рейд (кампания ongoing). Headless: без игрока флаги не копятся
+## (авто-fight даёт acted, но expedition не ставится) → событие не fires
+## (дизайн-решение #2: метрики — за телеметрией, не за симуляцией).
+func _evaluate_loop_closed() -> void:
+	if telemetry == null:
+		return
+	var raid := _raid_happened_this_turn()
+	var hero_home := region_map == null \
+		or region_map.hero_region == region_map.start_region
+	var acted := bool(_loop_flags.get("acted", false))
+	var expedition := bool(_loop_flags.get("expedition", false))
+	if acted and expedition and raid and hero_home \
+			and campaign.campaign_status == "ongoing":
+		telemetry.record("loop_closed", {
+			"turn": campaign.current_turn,
+			"raid": true, "acted": true, "expedition": true,
+		})
+	_loop_flags = {}  # флаги следующего хода (действия UI между ходами)
+
+
+## 2.2: рейд ударил в этом ходу (threats-фаза) — «увидел угрозу».
+func _raid_happened_this_turn() -> bool:
+	return not (last_threat_report.get("raid", {}) as Dictionary).is_empty()
 
 
 func _threat_context() -> Dictionary:
@@ -222,6 +304,9 @@ func _request_battle(context: Dictionary) -> String:
 	if campaign == null or campaign.is_done():
 		return ""
 	campaign.request_battle(context)
+	# campaign-core-loop 2.1: глагол fight — MVP: авто-оборона (choice_count 1,
+	# не «решение» в метрике decision ratio).
+	record_action("fight", 1)
 	if _statblocks.is_empty():
 		return ""  # статблоков нет (баланс-конфиг) — бой не разрешается
 	var tier: int = int(context.get("tier", 1))

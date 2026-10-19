@@ -11,10 +11,10 @@
 
 ## 2. Метрики core loop
 
-- [ ] 2.1 Телеметрия событий: `action{type, choice_count}` с timestamp (build/train/move/fight)
-- [ ] 2.2 Телеметрия: `loop_closed` (ход, в котором замкнут цикл «увидел → двинул → решил → построил → снабдил → пережил рейд»)
-- [ ] 2.3 Телеметрия: `replan_after_tooltip` (перепланирование после подсказки «почему так»)
-- [ ] 2.4 Отчёт по метрикам: TTFD ≤30s, rate 8–15/5min, decision ratio ≥60%, loop closure ≥70%, сессия 35–50min (post-hoc анализ лога сессии)
+- [x] 2.1 Телеметрия событий: `action{type, choice_count}` с timestamp (build/train/move/fight) — `TelemetryLog` (`scripts/campaign/telemetry_log.gd`) + `CampaignComposition.record_action(verb, choice_count)`; timestamp = ход кампании (I1, детерминированно), wall-clock `t` (сек) — опциональное поле, которое добавляет UI в playtest; UI-глаголы build/train/move → `record_action`, `fight` — авто-событие в `_request_battle` (MVP: авто-оборона, choice_count 1). Лог сессии — артефакт сессии, не часть сейва. *(GdUnit test_telemetry.gd: 16/0.)*
+- [x] 2.2 Телеметрия: `loop_closed` (ход, в котором замкнут цикл «увидел → двинул → решил → построил → снабдил → пережил рейд») — `loop_closed` fires на ходу, где все флаги: рейд ударил (threats-фаза) + действие игрока (`acted`) + поход (`record_expedition()`, герой покинул город) + возврат (герой в городе к концу хода) + ongoing. Headless: без игрока expedition не ставится → событие не fires (дизайн-решение #2: метрики — за телеметрией, не за симуляцией). *(4 теста: полный цикл, без похода, без рейда, герой не вернулся.)*
+- [~] 2.3 Телеметрия: `replan_after_tooltip` (перепланирование после подсказки «почему так») — событие + `record_replan_after_tooltip()` готовы (1 тест); триггер — UI-подсказка «Почему так?» (deferred: не headless-верифицируемо, mvp-ui-flow).
+- [x] 2.4 Отчёт по метрикам: TTFD ≤30s, rate 8–15/5min, decision ratio ≥60%, loop closure ≥70%, сессия 35–50min (post-hoc анализ лога сессии) — `TelemetryLog.compute_metrics(events)` (post-hoc отчёт: все 6 метрик GDD + `pass`-флаги по целям; без wall-clock `t` — только счётчики, временные метрики = -1.0/null) + `loop_closure_rate(sessions)` (меж-сессийная агрегация «сессии с ≥1 полным циклом» ≥ 70%). D1/D7 — playtest (2.5). *(3 теста: полная сессия 40 мин, headless без wall-clock, меж-сессийный rate.)*
 - [ ] 2.5 D1 ≥35% / D7 ≥15% — deferred: измеряется только в playtest (критерий MVP)
 
 ## 3. Fail states
