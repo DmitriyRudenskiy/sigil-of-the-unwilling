@@ -9,6 +9,20 @@ date: 2026-10-19
 
 # CHANGELOG — docs/
 
+## [2026-10-19] — city-construction-districts 3.2: C-9 — `city-tech-tree` помечен SUPERSEDED (MVP), реестровый акт (D-215)
+
+- **C-9** (main spec `city-tech-tree` — pre-pivot, superseded K-M3) разрешён:
+  баннер `> **SUPERSEDED (MVP)**` в шапе `openspec/specs/city-tech-tree/spec.md`
+  (K-M3: уровни города 1–11 аннулированы; контент = носитель правила для 1.0,
+  Q-M46/Q-M52). Файл **не стёрт** — реестровая практика (пометка, не стирание;
+  архивация main spec = структурное действие, не требуется для снятия
+  противоречия). Реестровый акт: D-215 в `DECISIONS.md`, C-9 → «разрешено» в
+  `09-risks.md`, task 3.2 → `[x]`. OpenSpec-валидатор с баннером — green
+  (67 passed, 1 pre-existing crafting).
+- **C-2** (campaign-city-level-progression) остаётся на вердикте владельца —
+  пометка C-9 на него не распространяется автоматически (разные носители,
+  общее каноническое ядро K-M3).
+
 ## [2026-10-19] — city-construction-districts 4.1/4.4: GdUnit4 — 1 клетка = 1 здание, рейд по еде → DEFICIT без обвала (GdUnit 2810/0)
 
 - **4.1** (GdUnit4: «1 клетка = 1 здание; placement по terrain_preference
