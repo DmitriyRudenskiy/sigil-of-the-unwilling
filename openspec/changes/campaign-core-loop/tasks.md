@@ -20,7 +20,7 @@
 ## 3. Fail states
 
 - [x] 3.1 AFK-капы per-ресурс per-рейд: еда ≤40%, железо/оружие ≤30% (Q-M58→(в), D-189) — реализация в `raid-pressure-system` (T-127), здесь — только требование. *(Верифицировано: реализовано в raid-pressure-system 2.1 — `loss_caps` {еда 0.4, дерево/железо 0.3} + `loss_cap_for(resource)`; GdUnit 2672/0.)*
-- [ ] 3.2 Голод: ёмкость 10 еды, расход 1/персонаж/переход (R7, Q-M75→(б)), голод → −2 к атакам — реализация в `party-characters`/`dnd-battle-ladder`
+- [x] 3.2 Голод: ёмкость 10 еды, расход 1/персонаж/переход (R7, Q-M75→(б)) — `SupplySystem` (party-characters 3.2); голод → −2 к атакам — проводка в боевой движок: `hunger_penalty` в `make_combatant` + margin в `_strike` (P-4); проводка `supply_system.attack_penalty()` → герой в `_request_battle` (тесты: `test_campaign_battle.gd` ×2, `test_campaign_wiring.gd: test_hunger_penalty_wired_into_battle`)
 - [ ] 3.3 Инвариант «≥2 доступных глагола в player-фазе» — smoke-чек-лист в `mvp-ui-flow`
 
 ## 4. Верификация

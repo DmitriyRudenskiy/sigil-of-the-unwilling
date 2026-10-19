@@ -26,5 +26,5 @@
 
 - [x] 4.1 GdUnit4: пороги уровней (2699/2700), ASI-кап 16, Удача вне ASI. *(Верифицировано: test_party_system.gd — test_level_thresholds_srd_canon (2699→ур.1, 2700→ур.2), test_asi_apply_and_cap (потолок 16), test_asi_rejects_invalid (Удача — не объект ASI).)*
 - [ ] 4.2 GdUnit4: wipe → defeat; смерть героя → «утрата» (−2 к спасам страха/очарования), кампания продолжается.
-- [~] 4.3 GdUnit4: REST (лечение по формуле), голод (−2 к атакам), ветеран (+1 ступень, до конца боя). Голод — готов (`test_supply_system.gd: test_hunger_penalty`); ветеран — готов (`test_veteran.gd`); REST — ждёт 2.2.
+- [~] 4.3 GdUnit4: REST (лечение по формуле), голод (−2 к атакам), ветеран (+1 ступень, до конца боя). Голод — готов, включая боевой движок: `SupplySystem.attack_penalty()` → `hunger_penalty` в `make_combatant`/`_strike` (P-4; `test_supply_system.gd: test_hunger_penalty`, `test_campaign_battle.gd: test_hunger_penalty_*`, `test_campaign_wiring.gd: test_hunger_penalty_wired_into_battle`); ветеран — готов (`test_veteran.gd`); REST — ждёт 2.2.
 - [ ] 4.4 GdUnit4: район создан → 0 XP (K-M16).
