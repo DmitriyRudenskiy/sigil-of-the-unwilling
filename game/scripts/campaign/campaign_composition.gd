@@ -315,6 +315,10 @@ func _request_battle(context: Dictionary) -> String:
 	# party-characters 3.2 / campaign-core-loop 3.2 (P-4): голод (0 еды) →
 	# −2 к атакам; штраф из SupplySystem, держится до resupply в городе.
 	hero["hunger_penalty"] = supply_system.attack_penalty()
+	# dnd-battle-ladder 4.2 (02d §4): Удача — пул ОУ = 1 + modLuck; MVP-бой —
+	# авто-режим, политика Удачи героя (детерминистичная, K2): Save / Fate
+	# Shift. Рейдер (враг) Удачу не тратьёт (сценарии спека — про игрока).
+	hero["auto_luck"] = true
 	var raider_spec: Dictionary = _statblocks.get(
 		"raider_tier_%d" % tier, _statblocks.get("raider_final", {}))
 	var raider := CampaignBattle.make_combatant(raider_spec)

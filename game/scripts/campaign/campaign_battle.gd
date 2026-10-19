@@ -50,6 +50,8 @@ static func make_combatant(spec: Dictionary) -> Dictionary:
 		"fate_debt": int(spec.get("fate_debt", 0)),
 		"frightened": bool(spec.get("frightened", false)),  # 2.1: триггер отступления авто-режима
 		"terrain": str(spec.get("terrain", "")),  # 3.3 (C3): swamp/spikes/height — абстрактные ±2 (без hex, C-3)
+		"luck_ou": int(spec.get("luck_ou", maxi(0, 1 + int(spec.get("luck", 0))))),  # 4.2 (02d §4): пул ОУ = 1 + modLuck
+		"auto_luck": bool(spec.get("auto_luck", false)),  # 4.2: авто-политика Удачи (детерминистичная, K2)
 		"supply_bonus": int(spec.get("supply_bonus", 0)),  # 5.2: снабжение → 1-й спас (Q-M57→(а))
 		"hunger_penalty": int(spec.get("hunger_penalty", 0)),  # party-characters 3.2: голод (0 еды) → −2 к атакам (P-4)
 		"state": str(spec.get("state", STATE_READY)),  # T-116 SM: ready/wounded/unstable (dead — в бою)
@@ -145,6 +147,11 @@ static func _strike(atk: Dictionary, def_: Dictionary) -> Dictionary:
 	if reckoning:
 		zone = _step_down(zone)
 		atk["fate_debt"] = 0  # долг сбрасывается в 0
+	var luck_used := ""
+	if bool(atk.get("auto_luck", false)):
+		var luck: Dictionary = _auto_luck(atk, zone)  # 4.2: Save / Fate Shift
+		zone = luck["zone"]
+		luck_used = str(luck["used"])
 	var base: int = int(atk["damage"])
 	var damage := 0
 	match zone:
@@ -157,7 +164,7 @@ static func _strike(atk: Dictionary, def_: Dictionary) -> Dictionary:
 		_:
 			damage = 0  # Провал / Критпровал (фамбл) — 0
 	return {"zone": zone, "damage": damage, "margin": margin,
-		"reckoning": reckoning, "debt": debt_before}
+		"reckoning": reckoning, "debt": debt_before, "luck_used": luck_used}
 
 
 ## Ступень вниз по лестнице (Расплата): Триумф→Успех→Частичный→Провал; на
@@ -173,6 +180,61 @@ static func _step_down(zone: StringName) -> StringName:
 		BattleRulesScript.ZONE_FAILURE:
 			return BattleRulesScript.ZONE_FUMBLE
 	return zone
+
+
+## 4.2 (02d §4): Fate Shift (1 ОУ) — потратить 1 ОУ из пула.
+## Пул исчерпан → отказ + Долг судьбы (K-R1). Возвращает true — потрачено.
+static func fate_shift(atk: Dictionary) -> bool:
+	if int(atk.get("luck_ou", 0)) >= 1:
+		atk["luck_ou"] = int(atk["luck_ou"]) - 1
+		return true
+	atk["fate_debt"] = int(atk.get("fate_debt", 0)) + 1  # Долг судьбы (K-R1)
+	return false
+
+
+## 4.2 (02d §4): Save (2 ОУ) — потратить 2 ОУ (критпровал → провал).
+## Пул < 2 → отказ + Долг судьбы (K-R1). Возвращает true — потрачено.
+static func save_action(atk: Dictionary) -> bool:
+	if int(atk.get("luck_ou", 0)) >= 2:
+		atk["luck_ou"] = int(atk["luck_ou"]) - 2
+		return true
+	atk["fate_debt"] = int(atk.get("fate_debt", 0)) + 1  # Долг судьбы (K-R1)
+	return false
+
+
+## 4.2: шаг вверх по лестнице (Fate Shift). Триумф — верх (no-op).
+static func step_up(zone: StringName) -> StringName:
+	match zone:
+		BattleRulesScript.ZONE_FUMBLE:
+			return BattleRulesScript.ZONE_FAILURE
+		BattleRulesScript.ZONE_FAILURE:
+			return BattleRulesScript.ZONE_PARTIAL
+		BattleRulesScript.ZONE_PARTIAL:
+			return BattleRulesScript.ZONE_SUCCESS
+		BattleRulesScript.ZONE_SUCCESS:
+			return BattleRulesScript.ZONE_TRIUMPH
+	return zone
+
+
+## 4.2: авто-политика Удачи (детерминистичная, K2) — поверх того же
+## движка: Save (2 ОУ): критпровал → провал; Fate Shift (1 ОУ): результат на
+## ступень вверх при partial/failure/fumble (консервативно: success не
+## «жжёт» на triumph). Только при достаточном пуле — Долг судьбы
+## начисляется на явном отказе (ручной слой, K-R1), не в авто-пути.
+## Возвращает {zone, used} (used: "" / "save" / "fate_shift").
+static func _auto_luck(atk: Dictionary, zone: StringName) -> Dictionary:
+	var used := ""
+	if zone == BattleRulesScript.ZONE_FUMBLE and int(atk.get("luck_ou", 0)) >= 2:
+		save_action(atk)
+		zone = BattleRulesScript.ZONE_FAILURE
+		used = "save"
+	elif int(atk.get("luck_ou", 0)) >= 1 \
+				and zone != BattleRulesScript.ZONE_TRIUMPH \
+				and zone != BattleRulesScript.ZONE_SUCCESS:
+		fate_shift(atk)
+		zone = step_up(zone)
+		used = "fate_shift"
+	return {"zone": zone, "used": used}
 
 
 ## Death saves (Т-050 AC: mod ТЕЛ, 3/3), детерминированно: проверка раунда =
@@ -246,6 +308,7 @@ static func resolve(a: Dictionary, b: Dictionary,
 				"damage": int(hit["damage"]),
 				"reckoning": bool(hit["reckoning"]),
 				"debt": int(hit["debt"]),  # T-124: Долг судьбы у атакующего (победа с долгом)
+				"luck_used": str(hit["luck_used"]),  # 4.2: Удача (save/fate_shift/"")
 			})
 			if is_wounded_threshold(int(def_["hp"])):
 				# T-116 SM: READY → WOUNDED (порог hit_dice ≤ 0) → UNSTABLE (спасы).
@@ -390,7 +453,7 @@ static func resolve_multi(party: Array, enemies: Array,
 				"round": round_no, "actor": str(atk["id"]), "target": str(target["id"]),
 				"zone": str(hit["zone"]), "margin": int(hit["margin"]),
 				"damage": int(hit["damage"]), "reckoning": bool(hit["reckoning"]),
-				"debt": int(hit["debt"]),
+				"debt": int(hit["debt"]), "luck_used": str(hit["luck_used"]),
 			})
 			if int(target["hp"]) <= 0:
 				var dead := _death_saves(target)

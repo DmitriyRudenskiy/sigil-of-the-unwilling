@@ -25,7 +25,7 @@
 ## 4. UI и данные
 
 - [ ] 4.1 Карточка врага M1: AC/HP/удача/способности видны всегда — `battle_ui.gd` (деталь в mvp-ui-flow).
-- [ ] 4.2 Удача: пул ОУ = 1+modLuck, Fate Shift (1 ОУ), Save (2 ОУ), долг судьбы (K-R1) — `campaign_battle.gd`.
+- [x] 4.2 Удача: пул ОУ = 1+modLuck, Fate Shift (1 ОУ), Save (2 ОУ), долг судьбы (K-R1) — `campaign_battle.gd`. Реализовано: поле `luck_ou` (инициализация 1 + modLuck, кламп ≥ 0) + `auto_luck` (авто-политика); API: `fate_shift` (1 ОУ; отказ при пустом пуле → `fate_debt += 1`, K-R1), `save_action` (2 ОУ; то же), `step_up` (обратный `_step_down`); авто-политика в `_strike` (после reckoning): Save при fumble, Fate Shift при partial/failure (консервативно: success не «жжёт» на triumph), только при достаточном пуле (долг — только на явном ручном отказе); trace: `luck_used` (""/save/fate_shift). Кампания: герой (игрок) — `auto_luck = true`; рейдер не тратьёт Удачу (сценарии спека — про игрока); текущие tier-бои (triumph-маржи) не меняются. Тесты: `test_battle_luck.gd` (11). GdUnit 2749/0.
 - [x] 4.3 Сдвиг ±2 (вверх/вниз) — MVP (K-M6); имя «преимущество/неудача» не использовать. *(Верифицировано: `ADVANTAGE_MARGIN = 2` (GameNumbersBattle); `_state_margin` в campaign_battle.gd применяет ±2 (prone/elevated). Каноническое имя — «сдвиг ±2» (K-M6), не «преимущество/неудача».)*
 
 ## 5. Верификация
