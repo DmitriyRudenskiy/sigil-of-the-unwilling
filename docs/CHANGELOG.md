@@ -9,6 +9,28 @@ date: 2026-10-19
 
 # CHANGELOG — docs/
 
+## [2026-10-19] — party-characters: верификационный батч 4.2/4.4/3.3 (GdUnit 2719/0)
+
+- **4.2** (R1, Q-M68→(а)): смерть героя НЕ кончает кампанию — новый тест
+  `test_party_wiring.gd: test_hero_death_campaign_continues` (ослабленный
+  герой hp 1/con −3, tier 3 → DEAD: наборник списан из населения, партия не
+  тронута, не defeat). Wipe → defeat — уже покрыт
+  (`test_turn_driver.gd: test_wipe_defeat`, `test_party_wiring.gd:
+  test_wipe_defeats_campaign_and_preserves_prestige`). «Утрата» (−2 к спасам
+  страха/очарования до конца боя, K-M11) — **deferred**: в лестничном боевом
+  движке таких спасов нет (тактический слой dnd-battle-ladder).
+- **4.4** (K-M16): район создан → 0 XP/Престижа — уже покрыт
+  `test_district_no_grant.gd` (3 теста + контраст «бой даёт»). Помечено
+  верифицированным.
+- **3.3**: сейв-поля сверены с MVP-срезом — `veteran_count` =
+  `battles_survived` в члене партии (персистится, `test_serialization_
+  preserves_counter`); `food` = `campaign.supply` (персистится, `test_
+  serialization_roundtrip`); `wounded` — намеренно не персистится (2.1,
+  внутрибоевое T-116). MvpSaveSchema не расширяется.
+- party-characters: 12 done / 3 partial (4.2, 4.3, 3.3) / 2 open (2.2 REST —
+  «хит-дизайн» без канонического значения + напряжение с неперсистентным
+  WOUNDED; 2.3 замена мёртвых — зависит от party-training).
+
 ## [2026-10-19] — party-characters 2.1: T-116 SM WOUNDED/UNSTABLE в боевом движке (GdUnit 2718/0)
 
 - **party-characters 2.1** (spec: «WOUNDED and UNSTABLE SHALL be in-battle
