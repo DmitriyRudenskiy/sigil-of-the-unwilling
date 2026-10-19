@@ -9,6 +9,29 @@ date: 2026-10-19
 
 # CHANGELOG — docs/
 
+## [2026-10-19] — dnd-battle-ladder 5.5: мораль аннулирована (K-M11) в multi-бое (GdUnit 2731/0)
+
+- **5.5** (spec: «The morale scale (0-100) SHALL NOT exist (K-M11). Losses
+  SHALL grant -2 steps to saves until the end of the battle. Forced retreat
+  SHALL occur at 0 hit dice.») в `resolve_multi` (`campaign_battle.gd`):
+  - `_death_saves` читает `save_penalty` (дефолт 0; 1v1-путь не затронут —
+    там бой кончается на первом падении);
+  - `_apply_loss_penalty()`: смерть комбатанта → −2 ступени к спасам
+    выжившим той же стороны (плоский штраф, идемпотентен; до конца боя —
+    бой кончается);
+  - принуд. отступление при 0 HD: стабилизированный (не погибший) при
+    hp ≤ 0 → `retreated = true` — покидает бой: не атакует (цикл пропускает
+    hp ≤ 0), не является целью (`select_target` явно пропускает retreated);
+  - шкалы морали нет (ни у комбатанта, ни в отчёте).
+- Тесты: `test_battle_auto_ai.gd` +3 — `test_no_morale_scale` (нет поля
+  morale), `test_loss_penalty_minus_two_saves` (A con −1 погибает → B con 1
+  с −2: 3 провала → смерть; без штрафа B стабилизировался бы),
+  `test_no_loss_no_penalty_and_forced_retreat_at_0_hd` (контроль: без потери
+  штрафа нет, стабилизированные отступают, E жив, losses пуст).
+- **GdUnit 2731/0** (2728 + 3), full suite зелёный.
+- dnd-battle-ladder: 13 done / 1 partial (2.1 — отступление при frightened
+  только в авто-режиме; ручной режим — 4.2) / 7 open.
+
 ## [2026-10-19] — party-characters: верификационный батч 4.2/4.4/3.3 (GdUnit 2719/0)
 
 - **4.2** (R1, Q-M68→(а)): смерть героя НЕ кончает кампанию — новый тест

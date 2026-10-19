@@ -161,11 +161,12 @@ static func _death_saves(fallen: Dictionary) -> bool:  # true — погиб
 	var failures := 0
 	var con: int = int(fallen["con"])
 	var supply_bonus: int = int(fallen.get("supply_bonus", 0))
+	var save_penalty: int = int(fallen.get("save_penalty", 0))  # 5.5: потери → −2 (K-M11)
 	# Ровно DEATH_SAVES_NEEDED спасов (N=1..3); margin_N только для N≤3
 	# (Q-M57→(а)). 3 провала = смерть; 3 успеха = WOUNDED (T-116, не
 	# персистится в MVP); смешанный — стабилизация (не потеря).
 	for n in range(1, DEATH_SAVES_NEEDED + 1):
-		var margin_n: int = con + (supply_bonus if n == 1 else 0) - (n - 1)
+		var margin_n: int = con + (supply_bonus if n == 1 else 0) - (n - 1) - save_penalty
 		if margin_n >= 0:
 			successes += 1
 		else:
@@ -282,7 +283,8 @@ static func _finalize(outcome: String, rounds: int, first_id: String,
 static func select_target(foes: Array) -> Dictionary:
 	var best: Dictionary = {}
 	for c in foes:
-		if int(c.get("hp", 0)) <= 0 or bool(c.get("dead", false)):
+		if int(c.get("hp", 0)) <= 0 or bool(c.get("dead", false)) \
+					or bool(c.get("retreated", false)):
 			continue
 		if best.is_empty():
 			best = c
@@ -308,6 +310,18 @@ static func _initiative_order(combatants: Array) -> Array:
 		return str(a["id"]) < str(b["id"])
 	)
 	return sorted
+
+
+## 5.5 (K-M11): потеря → −2 ступени к спасам выжившим той же стороны
+## до конца боя (плоский штраф; шкала морали не существует).
+static func _apply_loss_penalty(party: Array, enemies: Array,
+		party_ids: Dictionary, fallen: Dictionary) -> void:
+	var side: Array = party if party_ids.has(str(fallen["id"])) else enemies
+	for c in side:
+		if str(c["id"]) == str(fallen["id"]):
+			continue
+		if int(c.get("hp", 0)) > 0 and not bool(c.get("dead", false)):
+			c["save_penalty"] = 2
 
 
 static func _side_wiped(side: Array) -> bool:
@@ -362,6 +376,14 @@ static func resolve_multi(party: Array, enemies: Array,
 				target["dead"] = dead
 				trace.append({"round": round_no, "actor": str(target["id"]),
 					"zone": "death_saves", "dead": dead})
+				if dead:
+					# 5.5 (K-M11): потеря → −2 ступени к спасам выжившим
+					# той же стороны до конца боя (шкала морали аннулирована).
+					_apply_loss_penalty(party, enemies, party_ids, target)
+				else:
+					# 5.5: принуд. отступление при 0 HD — стабилизированный
+					# покидает бой (не атакует, не является целью).
+					target["retreated"] = true
 			# Конец боя: одна сторона вычистлена.
 			if _side_wiped(enemies):
 				outcome = "win"
