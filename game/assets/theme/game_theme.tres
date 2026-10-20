@@ -864,6 +864,65 @@ shadow_size = 5
 shadow_offset = Vector2(0, 2)
 shadow_color = Color(0, 0, 0, 0.34)
 
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_city_panel_gold"]
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.572549045085907, 0.45490196347236633, 0.23137255012989044, 1)
+bg_color = Color(0.12941177189350128, 0.11764705926179886, 0.0941176488995552, 1)
+shadow_size = 5
+shadow_offset = Vector2(0, 2)
+shadow_color = Color(0, 0, 0, 0.34)
+; T-147 подсрез 2: шапка, инспектор и легенда города (было _panel_style(Color("#211e18"), Color("#92743b"))).
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_city_panel_dark"]
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4000000059604645, 0.33725491166114807, 0.21960784494876862, 1)
+bg_color = Color(0.10588235408067703, 0.09803921729326248, 0.08235294371843338, 1)
+shadow_size = 5
+shadow_offset = Vector2(0, 2)
+shadow_color = Color(0, 0, 0, 0.34)
+; T-147 подсрез 2: сайдбар строительства и легаси-панель (было _panel_style(Color("#1b1915"), Color("#665638"))).
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_city_board_panel"]
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4000000059604645, 0.33725491166114807, 0.21960784494876862, 1)
+bg_color = Color(0.09019608050584793, 0.09803921729326248, 0.08235294371843338, 0.44999998807907104)
+shadow_size = 5
+shadow_offset = Vector2(0, 2)
+shadow_color = Color(0, 0, 0, 0.34)
+; T-147 подсрез 2: фон доски города. Альфа 0.45 перенесена float-в-float: 0.45 -> 0.44999998807907104,
+; тот же float32, что кладёт движок при Color("#171915", 0.45); округление сюда сдвинуло бы пикселы под полупрозрачным фоном.
 [resource]
 Panel/styles/panel = SubResource("StyleBoxTexture_panel")
 Panel/styles/window = SubResource("StyleBoxFlat_window")
@@ -1150,3 +1209,14 @@ CityResourceMetric/styles/normal = SubResource("StyleBoxFlat_city_metric_normal"
 CityResourceMetric/styles/hover = SubResource("StyleBoxFlat_city_metric_hover")
 CityResourceMetric/styles/pressed = SubResource("StyleBoxFlat_city_metric_pressed")
 CityResourceMetric/styles/disabled = SubResource("StyleBoxFlat_city_metric_disabled")
+; T-147 (подсрез 2 города). Панели оболочки города: узлы созданы кодом как PanelContainer,
+; поэтому base_type обязан быть "PanelContainer" — у Panel/BoxContainer/VBoxContainer
+; законного носителя "panel" нет (замер — test_city_screen_theme_carrier.gd). Три носителя
+; на шесть снятых override'ов: gold (шапка, инспектор, легенда), dark (сайдбар, легаси),
+; board (фон доски, альфа 0.45).
+CityPanelGold/base_type = "PanelContainer"
+CityPanelGold/styles/panel = SubResource("StyleBoxFlat_city_panel_gold")
+CityPanelDark/base_type = "PanelContainer"
+CityPanelDark/styles/panel = SubResource("StyleBoxFlat_city_panel_dark")
+CityBoardPanel/base_type = "PanelContainer"
+CityBoardPanel/styles/panel = SubResource("StyleBoxFlat_city_board_panel")
