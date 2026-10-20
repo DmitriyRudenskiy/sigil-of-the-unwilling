@@ -29,7 +29,7 @@
 
 ## 4. Верификация
 
-- [ ] 4.1 GdUnit4: бит-скрипт (ходы 1/7/14/17/21; ход 3 — Post-MVP).
-- [ ] 4.2 GdUnit4: fail-states (голод партии; гибель всей партии = конец кампании).
-- [ ] 4.3 GdUnit4: арки (1–6/7–13/14–20/21; «Ветеран» = статус).
+- [x] 4.1 GdUnit4: бит-скрипт (ходы 1/7/14/17/21; ход 3 — Post-MVP). (2026-10-19, локальный агент: покрыто — `test_bit_script_skeleton` (test_turn_driver.gd) + `test_floor_first_raid_turn7`, `test_final_tier_by_turn21`, `test_window_strong_raid_turn17_t115`, `test_config_driven_numbers_t115` (test_threat_system.gd); ход 3 «слух» — Post-MVP (K-M9), в каркасе отсутствует по канону.)
+- [x] 4.2 GdUnit4: fail-states (голод партии; гибель всей партии = конец кампании). (2026-10-19, локальный агент: покрыто — голод: `test_hunger_penalty_default_zero`, `test_hunger_penalty_lowers_margin_and_zone` (test_campaign_battle.gd, P-4: −2 к атакам); wipe: `test_wipe_defeats_campaign_and_preserves_prestige` (test_party_wiring.gd, D-190: wipe = единственный конец кампании, Престиж сохраняется).)
+- [x] 4.3 GdUnit4: арки (1–6/7–13/14–20/21; «Ветеран» = статус). (2026-10-19, локальный агент: покрыто — арки = структура кампании: ход 7 рейд (`test_floor_first_raid_turn7`), ход 14 район (бит-скрипт, `test_bit_script_skeleton`), ход 21 финальный рейд (`test_final_tier_by_turn21`), «Ветеран» = статус (test_veteran.gd, K-M10).)
 - [ ] 4.4 Playtest (не headless): 21 ход, ~3 сессии; метрики (TTFD, action rate, доля решений, закрытость цикла) — отложенно (deferred, UI/звук/playtest не верифицируются headless).
