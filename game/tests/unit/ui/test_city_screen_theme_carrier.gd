@@ -31,9 +31,10 @@ const _STATES := {
 }
 
 ## Сколько add_theme_stylebox_override обязано остаться в city_screen.gd после
-# подсреза 2: 16 было, 4 снято подсрезом 1 (чипы), 6 — подсрезом 2 (панели оболочки).
-# Остальное — подрез 3 (каталог зданий, 5) и 4 (фокус клавиатуры, 1).
-const _REMAINING_OVERRIDES := 6
+# подсреза 3: 16 было, 4 снято подсрезом 1 (чипы), 6 — подсрезом 2 (панели
+# оболочки), 5 — подсрезом 3 (каталог зданий). Один оставшийся — фокус клавиатуры
+# (подрез 4), он ждёт решения владельца про Button/focus.
+const _REMAINING_OVERRIDES := 1
 
 ## Снятые подсрезом 2 панели оболочки: имя узла → [носитель, фон, рамка]. Значения
 # — те же выражения, что стояли в снятом коде (_panel_style(Color("#211e18"), …)),
@@ -47,6 +48,17 @@ const _SHELL := {
 	"LegacyActionsPanel": ["CityPanelDark", Color("#1b1915"), Color("#665638")],
 	"CityBoardPanel": ["CityBoardPanel", Color("#171915", 0.45), Color("#665638")],
 }
+
+const _CARD_IDLE := ["CityCard", Color("#211e18"), Color("#665638")]
+const _CARD_SELECTED := ["CityCardSelected", Color("#29241b"), Color("#d3ae5d")]
+const _TAB_IDLE_BG := Color("#211e18", 0.45)
+const _TAB_IDLE_BORDER := Color("#665638")
+const _TAB_ACTIVE_BG := Color("#392f1d")
+const _COST_BG := Color("#392f1d")
+const _COST_BORDER := Color("#b28b42")
+
+var _hero: Node = null
+
 
 var _screen: Node = null
 
@@ -360,3 +372,302 @@ func test_unknown_variation_does_not_resolve_shell_style() -> void:
 	assert_bool(got != null and got.get_instance_id() == want.get_instance_id()).is_false() \
 		.override_failure_message("несуществующий носитель резолвит стиль панели — проверка пуста")
 	panel.free()
+
+
+# ── Подсрез 3: каталог зданий ───────────────────────────────────────────────────
+#
+# Карточки, вкладки и панель стоимости каталога красились стилями, которые код
+# собирал в `_panel_style` и в двух локальных StyleBoxFlat. Перенесены в тему
+# носителями CityCard / CityCardSelected / CityCostPanel (base_type = "PanelContainer")
+# и CityTab (base_type = "Button").
+#
+# Главное отличие этого подреза от первых двух: выбор карточки — рантайм-мутация.
+# Раньше она перекрашивала карточку новым override'ом; теперь меняет носитель
+# (боевой прецедент PanelActive/PanelDead). Значит гард обязан проверять не только
+# «стиль тот», но и «переключение работает в обе стороны», иначе миграция могла бы
+# просто заморозить первую карточку золотой.
+#
+# Кадр состояния (съёмка 2026-10-20) снимается тем же кодом, что `_open_catalog`
+# ниже: без него сцена показывает пустой каталог (city == null), и нулевая дельта
+# доказывала бы отсутствие карточек, а не отсутствие сдвига.
+
+## Каталог открывается только с городом: `_render_catalog_cards` выходит из early-return
+# при city == null. Город и seed фиксированы — тот же код, что CAPTURE_SETUP съёмки.
+func _open_catalog() -> Node:
+	var screen := _mk_screen()
+	var city := City.new()
+	city.center = Vector2i(18, 20)
+	_hero = auto_free(HeroController.new())
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	screen.setup(city, _hero, Vector2i(18, 20), rng, Vector2i(48, 48))
+	screen.open()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	# та же строка, что CAPTURE_SETUP съёмки: кадр «с выбранной карточкой» без неё
+	# не существует, и гард выделения проверял бы пустое состояние
+	screen._on_building_card_pressed("campaign_farm")
+	await get_tree().process_frame
+	return screen
+
+
+func _cards(screen: Node) -> Array[Node]:
+	var scroll := screen.find_child("CatalogScroll", true, false)
+	assert_that(scroll).is_not_null()
+	var list := scroll.get_child(0)
+	assert_int(list.get_child_count()).is_greater(3) \
+		.override_failure_message("каталог не отрисовался — гард проверял пустой экран")
+	var cards: Array[Node] = []
+	for child in list.get_children():
+		if String(child.name).begins_with("BuildingCard_"):
+			cards.append(child)
+	return cards
+
+
+## AC3 (а): карточки переведены на носители, override'ов нет; выбранная — на CityCardSelected.
+func test_catalog_cards_carry_theme_variation() -> void:
+	var screen := await _open_catalog()
+	var cards := _cards(screen)
+	var selected_seen := 0
+	for card in cards:
+		assert_str(card.get_class()).is_equal("PanelContainer") \
+			.override_failure_message(
+				"карточка %s сменила тип: носители заявлены с base_type = \"PanelContainer\"" % card.name
+			)
+		var variation := str(card.theme_type_variation)
+		assert_bool(variation in ["CityCard", "CityCardSelected"]).is_true() \
+			.override_failure_message(
+				"карточка %s несёт носитель %s — ожидались CityCard / CityCardSelected"
+				% [card.name, variation]
+			)
+		assert_bool(card.has_theme_stylebox_override("panel")).is_false() \
+			.override_failure_message(
+				"карточка %s всё ещё несёт override на \"panel\" — он сильнее темы" % card.name
+			)
+		if variation == "CityCardSelected":
+			selected_seen += 1
+	assert_int(selected_seen).is_equal(1) \
+		.override_failure_message(
+			"выбранных карточек %d вместо одной — состояние выделения рисует не носитель" % selected_seen
+		)
+
+
+## AC3 (б): резолв даёт ровно снятые значения покоя и выделения.
+func test_catalog_card_states_resolve_transcribed_values() -> void:
+	var screen := await _open_catalog()
+	var cards := _cards(screen)
+	var idle: PanelContainer = null
+	var selected: PanelContainer = null
+	for card in cards:
+		if str(card.theme_type_variation) == "CityCardSelected":
+			selected = card as PanelContainer
+		else:
+			idle = card as PanelContainer
+	assert_that(idle).is_not_null()
+	assert_that(selected).is_not_null()
+	# Рамки — литералы снятого кода (`Color("#d3ae5d") if selected else Color("#665638")`).
+	# accent_gold (#e0bd67) здесь ошибкой: он у вкладок, и путаница двух золотых
+	# меняла бы кадр на глазах, но не совпала бы с «до».
+	_check_card_style(idle, "CityCard", Color("#211e18"), Color("#665638"))
+	_check_card_style(selected, "CityCardSelected", Color("#29241b"), Color("#d3ae5d"))
+
+
+func _check_card_style(
+	node: PanelContainer, variation: String, want_bg: Color, want_border: Color
+) -> void:
+	var got: StyleBoxFlat = node.get_theme_stylebox("panel") as StyleBoxFlat
+	assert_that(got).is_not_null()
+	var theme_style: StyleBoxFlat = _THEME.get_stylebox("panel", variation) as StyleBoxFlat
+	assert_bool(got.get_instance_id() == theme_style.get_instance_id()).is_true() \
+		.override_failure_message(
+			"карточка %s резолвит не %s (носитель не применился)" % [node.name, variation]
+		)
+	assert_bool(got.bg_color == want_bg).is_true() \
+		.override_failure_message(
+			"карточка %s: фон %s ≠ перенесённый %s" % [node.name, got.bg_color, want_bg]
+		)
+	assert_bool(got.border_color == want_border).is_true() \
+		.override_failure_message(
+			"карточка %s: рамка %s ≠ перенесённая %s" % [node.name, got.border_color, want_border]
+		)
+	assert_int(got.border_width_left).is_equal(1)
+	assert_int(got.corner_radius_top_left).is_equal(6)
+	assert_int(got.shadow_size).is_equal(5)
+	assert_that(got.shadow_offset).is_equal(Vector2(0, 2))
+	assert_bool(got.shadow_color == Color(0, 0, 0, 0.34)).is_true() \
+		.override_failure_message("карточка %s потеряла тень" % node.name)
+	assert_that(got.get_content_margin(SIDE_LEFT)).is_equal(12.0)
+	assert_that(got.get_content_margin(SIDE_TOP)).is_equal(10.0)
+
+
+## Рантайм-мутация: нажатие переносит выделение, отмена возвращает всех в покой.
+# Это проверка поведения, а не стилей: если бы миграция оставила старый override или
+# забыла сбросить носитель, кадр «до» и «после» разошлись бы, но тест ниже ловит
+# конкретную поломку (какое именно карточка осталась золотой), а не пиксел.
+func test_selection_switches_carrier_both_ways() -> void:
+	var screen := await _open_catalog()
+	var cards := _cards(screen)
+	var first := String(cards[0].name).trim_prefix("BuildingCard_")
+	var second := String(cards[1].name).trim_prefix("BuildingCard_")
+	screen._on_building_card_pressed(first)
+	assert_str(str(cards[0].theme_type_variation)).is_equal("CityCardSelected") \
+		.override_failure_message("нажатая карточка не стала CityCardSelected")
+	assert_str(str(cards[1].theme_type_variation)).is_equal("CityCard") \
+		.override_failure_message("сосед нажатой карточки не остался в покое")
+	screen._on_building_card_pressed(second)
+	assert_str(str(cards[1].theme_type_variation)).is_equal("CityCardSelected") \
+		.override_failure_message("вторая карточка не получила выделение")
+	assert_str(str(cards[0].theme_type_variation)).is_equal("CityCard") \
+		.override_failure_message(
+			"первая карточка осталась золотой: выделение не снимается — раньше это делал override"
+		)
+	screen.cancel_placement()
+	for card in cards:
+		assert_str(str(card.theme_type_variation)).is_equal("CityCard") \
+			.override_failure_message(
+				"после cancel_placement карточка %s несёт %s" % [card.name, card.theme_type_variation]
+			)
+	assert_str(str(screen.get("_selected_building_id"))).is_empty() \
+		.override_failure_message(
+			"cancel_placement не сбросил выбранный id — следующий кадр "
+			+ "каталога выйдет выделенным"
+		)
+
+
+## Вкладки: один носитель на четыре состояния. Активной вкладка становилась сменой
+# button_pressed, поэтому второго носителя нет — состояние выбирает стиль само.
+func test_catalog_tabs_carry_four_states() -> void:
+	var screen := await _open_catalog()
+	var tabs_node := screen.find_child("CategoryTabs", true, false)
+	assert_that(tabs_node).is_not_null()
+	var tabs := tabs_node.get_children()
+	assert_int(tabs.size()).is_equal(5) \
+		.override_failure_message("вкладок %d вместо пяти — гард проверял не каталог" % tabs.size())
+	var idle_normal: StyleBoxFlat = _THEME.get_stylebox("normal", "CityTab") as StyleBoxFlat
+	var idle_hover: StyleBoxFlat = _THEME.get_stylebox("hover", "CityTab") as StyleBoxFlat
+	var active_pressed: StyleBoxFlat = _THEME.get_stylebox("pressed", "CityTab") as StyleBoxFlat
+	var active_hover_pressed: StyleBoxFlat = (
+		_THEME.get_stylebox("hover_pressed", "CityTab") as StyleBoxFlat
+	)
+	for tab in tabs:
+		var button := tab as Button
+		assert_that(button).is_not_null()
+		assert_str(str(button.theme_type_variation)).is_equal("CityTab") \
+			.override_failure_message("вкладка %s не переведена на носитель CityTab" % button.name)
+		for state in ["normal", "hover", "pressed", "hover_pressed"]:
+			assert_bool(button.has_theme_stylebox_override(state)).is_false() \
+				.override_failure_message(
+					"вкладка %s в состоянии %s несёт override — он сильнее темы" % [button.name, state]
+				)
+		var got_normal: StyleBoxFlat = button.get_theme_stylebox("normal") as StyleBoxFlat
+		var got_pressed: StyleBoxFlat = button.get_theme_stylebox("pressed") as StyleBoxFlat
+		assert_bool(got_normal.get_instance_id() == idle_normal.get_instance_id()).is_true() \
+			.override_failure_message("покой вкладки резолвит не CityTab/normal")
+		assert_bool(got_pressed.get_instance_id() == active_pressed.get_instance_id()).is_true() \
+			.override_failure_message("активная вкладка резолвит не CityTab/pressed")
+		# normal и hover — один и тот же стиль (в снятом коде их красил один StyleBoxFlat)
+		assert_bool(got_normal.get_instance_id() == idle_hover.get_instance_id()).is_true() \
+			.override_failure_message(
+				"hover вкладки отличается от normal — в снятом коде "
+				+ "они были одним стилем"
+			)
+		assert_bool(got_pressed.get_instance_id() == active_hover_pressed.get_instance_id()).is_true() \
+			.override_failure_message("hover_pressed вкладки отличается от pressed")
+		assert_bool(got_normal.bg_color == _TAB_IDLE_BG).is_true() \
+			.override_failure_message(
+				"фон покоя вкладки %s ≠ перенесённого %s" % [got_normal.bg_color, _TAB_IDLE_BG]
+			)
+		assert_that(got_normal.bg_color.a).is_equal(_TAB_IDLE_BG.a) \
+			.override_failure_message("альфа покоя вкладки уехала: %s" % got_normal.bg_color.a)
+		assert_bool(got_normal.border_color == _TAB_IDLE_BORDER).is_true() \
+			.override_failure_message("рамка покоя вкладки %s ≠ перенесённой" % got_normal.border_color)
+		assert_bool(got_pressed.bg_color == _TAB_ACTIVE_BG).is_true() \
+			.override_failure_message("фон активной вкладки %s ≠ перенесённого" % got_pressed.bg_color)
+		assert_bool(got_pressed.border_color == CityScreen.PALETTE["accent_gold"]).is_true() \
+			.override_failure_message(
+				"рамка активной вкладки %s ≠ PALETTE.accent_gold" % got_pressed.border_color
+			)
+		assert_int(got_normal.corner_radius_top_left).is_equal(4)
+		assert_int(got_normal.border_width_left).is_equal(1)
+		# StyleBoxFlat.new() в снятом коде полей не имел — приписать им нули значило бы
+		# сдвинуть текст вкладок относительно кадра «до».
+		assert_that(got_normal.get_content_margin(SIDE_LEFT)).is_equal(-1.0) \
+			.override_failure_message("у стиля вкладки появились поля содержимого — текст сдвинется")
+
+
+## Панель стоимости — отдельный PanelContainer внутри карточки: у него свои поля (8/5)
+# и радиус (4), поэтому он не мог унаследовать носитель карточки.
+func test_cost_panel_carries_theme_variation() -> void:
+	var screen := await _open_catalog()
+	var cards := _cards(screen)
+	var checked := 0
+	for card in cards:
+		var cost := card.find_child("BuildingCostPanel", true, false) as PanelContainer
+		if cost == null:
+			continue
+		checked += 1
+		assert_str(str(cost.theme_type_variation)).is_equal("CityCostPanel") \
+			.override_failure_message("панель стоимости карточки %s не на носителе" % card.name)
+		assert_bool(cost.has_theme_stylebox_override("panel")).is_false() \
+			.override_failure_message("панель стоимости всё ещё несёт override")
+		var got: StyleBoxFlat = cost.get_theme_stylebox("panel") as StyleBoxFlat
+		assert_that(got).is_not_null()
+		assert_bool(got.bg_color == _COST_BG).is_true() \
+			.override_failure_message("фон стоимости %s ≠ перенесённого %s" % [got.bg_color, _COST_BG])
+		assert_bool(got.border_color == _COST_BORDER).is_true() \
+			.override_failure_message(
+				"рамка стоимости %s ≠ перенесённой %s" % [got.border_color, _COST_BORDER]
+			)
+		assert_that(got.get_content_margin(SIDE_LEFT)).is_equal(8.0)
+		assert_that(got.get_content_margin(SIDE_TOP)).is_equal(5.0)
+		assert_int(got.corner_radius_top_left).is_equal(4)
+		assert_int(got.shadow_size).is_equal(0) \
+			.override_failure_message("у стоимости появилась тень — в снятом StyleBoxFlat её не было")
+	assert_int(checked).is_greater(0) \
+		.override_failure_message("ни одной панели стоимости не найдено — гард проверял пустоту")
+
+
+## AC1 для подсреза: пять обходов сняты, в файле остался один (фокус), и фабрика
+# стилей `_panel_style` удалена — после этого подреза изобретать стиль коду негде.
+func test_catalog_overrides_removed_and_counter_ratcheted() -> void:
+	var f := FileAccess.open("res://scripts/ui/city_screen.gd", FileAccess.READ)
+	assert_that(f).is_not_null()
+	var text := f.get_as_text()
+	f.close()
+	var live := 0
+	var offenders := PackedStringArray()
+	for line in text.split("\n"):
+		var t := line.strip_edges()
+		if t.begins_with("#") or t.begins_with(";"):
+			continue
+		if "add_theme_stylebox_override" not in t:
+			continue
+		live += 1
+		offenders.append(t.left(70))
+	assert_bool("_panel_style" in text).is_false() \
+		.override_failure_message(
+			"фабрика стилей _panel_style вернулась: после подреза 4 ей некого создавать"
+		)
+	assert_int(live).is_equal(_REMAINING_OVERRIDES) \
+		.override_failure_message(
+			"в city_screen.gd %d stylebox-override вместо %d (остался только фокус):\n%s"
+			% [live, _REMAINING_OVERRIDES, "\n".join(offenders)]
+		)
+	for line in offenders:
+		assert_bool("focus" in line).is_true() \
+			.override_failure_message(
+				"оставшийся override — не фокус клавиатуры, а новый обход: " + line
+			)
+
+
+## Негативный контроль: несуществующий носитель не резолвит стиль карточки.
+func test_unknown_variation_does_not_resolve_card_style() -> void:
+	var card := PanelContainer.new()
+	card.theme_type_variation = "CityCardMissing"
+	get_tree().root.add_child(card)
+	await get_tree().process_frame
+	var got: StyleBox = card.get_theme_stylebox("panel")
+	var want: StyleBox = _THEME.get_stylebox("panel", "CityCard")
+	assert_bool(got != null and got.get_instance_id() == want.get_instance_id()).is_false() \
+		.override_failure_message("несуществующий носитель резолвит стиль карточки — проверка пуста")
+	card.free()
