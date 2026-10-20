@@ -6,6 +6,13 @@ const _BATTLE_UI_SCENE := preload("res://scenes/ui/battle_ui.tscn")
 
 var _ui: Node = null
 
+# uid — детерминированный счётчик. Раньше был `get_child_count() + randi() % 1000`,
+# и изредка два юнита получали одинаковый uid: Godot переименовывал второго узла в
+# `cell_<uid>@2`, а тест искал ячейку по `"cell_%d" % uid` и брал чужую (мёртвую
+# ячейку — активной), отсюда плавающий FAILED в полном прогоне. Коллизия
+# воспроизведена вручную: `Expecting: 'PanelDead' but was 'PanelActive'`.
+var _uid_seq: int = 1000
+
 func after_test() -> void:
 	if _ui != null and is_instance_valid(_ui):
 		_ui.free()
@@ -14,7 +21,8 @@ func after_test() -> void:
 func _mk_unit(p_name: String, count: int, hp: int = 5) -> BattleState.BattleUnit:
 	var stats := UnitStats.new(p_name.to_lower(), p_name, 5, 3, hp, 2, 4)
 	var u := BattleState.BattleUnit.new(UnitStack.new(stats, count))
-	u.uid = _ui.get_child_count() + randi() % 1000
+	_uid_seq += 1
+	u.uid = _uid_seq
 	return u
 
 func _mk_ui() -> BattleUI:
