@@ -155,14 +155,6 @@ func _resource_icon(resource_id: StringName) -> Texture2D:
 		&"iron": return ResourceAtlas.texture_for_id(&"iron")
 	return null
 
-func _resource_metric_style(background: Color, border: Color) -> StyleBoxFlat:
-	var style := _panel_style(background, border)
-	style.content_margin_left = 8
-	style.content_margin_top = 5
-	style.content_margin_right = 8
-	style.content_margin_bottom = 5
-	return style
-
 func _apply_keyboard_focus(control: Control) -> void:
 	var focus := StyleBoxFlat.new()
 	focus.bg_color = Color(0, 0, 0, 0)
@@ -225,10 +217,10 @@ func _build_shell() -> void:
 		metric.icon = _resource_icon(id)
 		metric.add_theme_constant_override("h_separation", 8)
 		metric.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		metric.add_theme_stylebox_override("normal", _resource_metric_style(Color("#30291d"), Color("#9a804d")))
-		metric.add_theme_stylebox_override("hover", _resource_metric_style(Color("#3b3120"), PALETTE.accent_gold))
-		metric.add_theme_stylebox_override("pressed", _resource_metric_style(Color("#45391f"), PALETTE.accent_gold))
-		metric.add_theme_stylebox_override("disabled", _resource_metric_style(Color("#211e18"), Color("#665638")))
+		# T-147 (подсрез 1 города). Четыре состояния чипа рисовались стилем, который код
+		# собирал на ходу; теперь они вынесены в тему носителем CityResourceMetric —
+		# значения перенесены float-в-float, кадр обязан остаться тем же.
+		metric.theme_type_variation = &"CityResourceMetric"
 		_apply_keyboard_focus(metric)
 		metric.add_theme_color_override("font_color", PALETTE.text_metric)
 		metric.pressed.connect(_on_resource_pressed.bind(id))
