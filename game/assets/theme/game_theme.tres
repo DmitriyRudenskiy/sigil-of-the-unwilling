@@ -784,6 +784,86 @@ border_width_bottom = 2
 border_color = Color(0.62, 0.47, 0.22, 1)
 bg_color = Color(0.16, 0.11, 0.06, 0.95)
 
+; T-147 (подсрез 1 города). Чипы ресурсов города: четыре состояния Button, которые
+; код изобретал на ходу (_resource_metric_style → _panel_style + поля 8/5). Значения
+; перенесены float-в-float (полная точность float32, иначе проверка точного равенства
+; цвета в test_city_screen_theme_carrier.gd врёт), вариант — в конце файла.
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_city_metric_normal"]
+content_margin_left = 8.0
+content_margin_top = 5.0
+content_margin_right = 8.0
+content_margin_bottom = 5.0
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.6039215922355652, 0.501960813999176, 0.3019607961177826, 1)
+bg_color = Color(0.1882352977991104, 0.1607843190431595, 0.1137254908680916, 1)
+shadow_size = 5
+shadow_offset = Vector2(0, 2)
+shadow_color = Color(0, 0, 0, 0.34)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_city_metric_hover"]
+content_margin_left = 8.0
+content_margin_top = 5.0
+content_margin_right = 8.0
+content_margin_bottom = 5.0
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.8784313797950745, 0.7411764860153198, 0.4039215743541718, 1)
+bg_color = Color(0.2313725501298904, 0.1921568661928177, 0.125490203499794, 1)
+shadow_size = 5
+shadow_offset = Vector2(0, 2)
+shadow_color = Color(0, 0, 0, 0.34)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_city_metric_pressed"]
+content_margin_left = 8.0
+content_margin_top = 5.0
+content_margin_right = 8.0
+content_margin_bottom = 5.0
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.8784313797950745, 0.7411764860153198, 0.4039215743541718, 1)
+bg_color = Color(0.2705882489681244, 0.2235294133424759, 0.1215686276555061, 1)
+shadow_size = 5
+shadow_offset = Vector2(0, 2)
+shadow_color = Color(0, 0, 0, 0.34)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_city_metric_disabled"]
+content_margin_left = 8.0
+content_margin_top = 5.0
+content_margin_right = 8.0
+content_margin_bottom = 5.0
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.3372549116611481, 0.2196078449487686, 1)
+bg_color = Color(0.1294117718935013, 0.1176470592617989, 0.0941176488995552, 1)
+shadow_size = 5
+shadow_offset = Vector2(0, 2)
+shadow_color = Color(0, 0, 0, 0.34)
+
 [resource]
 Panel/styles/panel = SubResource("StyleBoxTexture_panel")
 Panel/styles/window = SubResource("StyleBoxFlat_window")
@@ -1060,3 +1140,13 @@ ButtonAction/base_type = "Button"
 ButtonAction/styles/normal = SubResource("StyleBoxFlat_action")
 PanelInfoSlot/base_type = "Panel"
 PanelInfoSlot/styles/panel = SubResource("StyleBoxTexture_slot")
+; T-147 (подсрез 1 города). Чипы ресурсов: узлы имеют тип Button, поэтому base_type
+; обязан быть "Button" — на «Panel» (мешок стилей, не тип виджета) движок носитель не
+; резолвит (замер — test_battle_theme_carrier.gd). Вариант объявляет четыре состояния;
+; hover_pressed/selected/focus остаются от базового Button — снятие override'а не
+; должен был их перекрыть (проверка — test_city_screen_theme_carrier.gd).
+CityResourceMetric/base_type = "Button"
+CityResourceMetric/styles/normal = SubResource("StyleBoxFlat_city_metric_normal")
+CityResourceMetric/styles/hover = SubResource("StyleBoxFlat_city_metric_hover")
+CityResourceMetric/styles/pressed = SubResource("StyleBoxFlat_city_metric_pressed")
+CityResourceMetric/styles/disabled = SubResource("StyleBoxFlat_city_metric_disabled")
