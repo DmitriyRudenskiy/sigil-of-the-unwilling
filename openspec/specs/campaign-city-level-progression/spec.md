@@ -1,5 +1,15 @@
 # campaign-city-level-progression Specification
 
+> **SUPERSEDED (MVP) — вердикт владельца 2026-10-20 (C-2, D-216); синк 2026-10-20.**
+> Требования (уровни города 1–11, 52-клеточный город, гейтинг клеток уровнем)
+> **REMOVED** из кампанийной модели поселения (V-1/K-M3: механических уровней города
+> нет). Кампанийное поселение развивается через районы/здания/рабочих/население/
+> престиж (`district_system`/`population_system`/`settlement_processor`); уровень не
+> гейтит здания/районы/население/действия игрока. Legacy 52-hex city (`City.level`,
+> world-режим, `CampaignCityProgression`) — вне кампанийного скоупа, не трогается.
+> Требования ниже — носитель правила для 1.0 (Q-M46/Q-M52: уровни = 1.0), сохранены
+> в git-истории и доках 02e*. Файл не удаляется: реестровая практика (прецедент C-9).
+
 ## Purpose
 
 Defines campaign-specific city progression from level 1 through 11, using each level to unlock occupied building cells in the fixed 52-cell city. It does not restore the legacy military tech tree, source-game currencies, or city-size expansion.

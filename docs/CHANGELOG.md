@@ -9,6 +9,21 @@ date: 2026-10-20
 
 # CHANGELOG — docs/
 
+## [2026-10-20] — V-1: механических уровней города нет (C-2 → superseded, D-216)
+
+- **`openspec/specs/campaign-city-level-progression/spec.md`**: баннер
+  `> **SUPERSEDED (MVP)**` (прецедент C-9/D-215) — требования (уровни 1–11,
+  52-клеточный город, гейтинг клеток уровнем) сняты из кампанийной модели
+  поселения. Файл не удалён (реестровая практика).
+- **`docs/09-risks.md`**: C-2 → **разрешено 2026-10-20** (V-1/D-216).
+- **`openspec/changes/city-construction-districts/tasks.md`**: 3.1 → `[x]`.
+- **Граница:** кампанийное поселение развивается через районы/здания/рабочих/
+  население/престиж (`district_system`/`population_system`/`settlement_processor`);
+  уровень не гейтит здания/районы/население/действия. Legacy 52-hex city
+  (`City.level`, world-режим, `CampaignCityProgression`) — вне кампанийного скоупа,
+  не трогается. Код кампании уровней уже не использует (task 1.8 `[x]`) —
+  изменения docs/spec-only, без кода.
+
 ## [2026-10-20] — V-6: alive-модель лимита партии (D-221)
 
 - **`game/scripts/campaign/campaign_training_service.gd`**: оба гейта лимита
