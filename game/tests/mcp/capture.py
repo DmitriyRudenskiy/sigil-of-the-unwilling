@@ -1,0 +1,185 @@
+"""Хелпер съёмки экрана — визуальная приёмка «экран ↔ макет».
+
+Зачем: снимки «до/после» сравнимы по пикселям только при равном размере кадра,
+а размер окна Godot зависит от хоста. Замер 2026-10-20: запуск по умолчанию даёт
+то 1900×1007, то 1818×1007; оконный режим зажат полезной областью экрана
+(1920×1027 вместо запрошенных 1920×1080); Xvfb в run_tests.sh поднимается
+1024×768. Поэтому хелпер: (1) выставляет канонический размер, (2) проверяет
+фактический по IHDR снимка, (3) падает при расхождении вместо молчаливой записи
+несравнимого кадра.
+
+PNG в git не кладутся (пересоздаваемые бинари; политика хранения в репозитории
+ещё не решена): файлы — в `~/.local/share/sigil-reserve/<имя>/`, в тред ревью
+идёт манифест текстом вместе с командой воспроизведения.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import os
+import subprocess
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+# Кадр = размер вьюпорта проекта (project.godot) и макетов reference/*.png.
+CANONICAL_SIZE = (1920, 1080)
+SIZE_ENV = "CAPTURE_SIZE"
+PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
+
+
+class CaptureError(RuntimeError):
+    """Съёмка не удалась или кадр недействителен (размер ≠ канон)."""
+
+
+def parse_size(text: str) -> tuple[int, int]:
+    """"1920x1080" → (1920, 1080)."""
+    parts = str(text).lower().replace("×", "x").strip().split("x")
+    if len(parts) != 2:
+        raise CaptureError(f"размер надо задать как ШxВ, получено: {text!r}")
+    try:
+        width, height = int(parts[0]), int(parts[1])
+    except ValueError as e:
+        raise CaptureError(f"размер должен быть числом: {text!r}") from e
+    if width <= 0 or height <= 0:
+        raise CaptureError(f"размер должен быть положительным: {text!r}")
+    return width, height
+
+
+def canonical_size(env: dict[str, str] | None = None) -> tuple[int, int]:
+    """Канон кадра: CAPTURE_SIZE или CANONICAL_SIZE."""
+    raw = (os.environ if env is None else env).get(SIZE_ENV, "").strip()
+    return parse_size(raw) if raw else CANONICAL_SIZE
+
+
+def png_size(raw: bytes) -> tuple[int, int]:
+    """Размер из IHDR — без зависимостей от PIL."""
+    if not raw.startswith(PNG_MAGIC):
+        raise CaptureError("это не PNG — game_screenshot вернул не изображение")
+    if len(raw) < 24:
+        raise CaptureError("PNG обрезан — заголовка IHDR не хватает")
+    header = raw[16:24]
+    return int.from_bytes(header[:4], "big"), int.from_bytes(header[4:], "big")
+
+
+def sha256_hex(raw: bytes) -> str:
+    return hashlib.sha256(raw).hexdigest()
+
+
+def pin_window_code(size: tuple[int, int]) -> str:
+    """GDScript выставления кадра.
+
+    Полный экран даём только когда канон равен размеру экрана: иначе окно
+    зажало бы полезной областью (менюбар/док) и вернуло бы свой, неканонический
+    размер. Проверка фактического размера — всё равно за снимком.
+    """
+    return (
+        "var w = get_window()\n"
+        f"var target = Vector2i({size[0]}, {size[1]})\n"
+        "if target == DisplayServer.screen_get_size():\n"
+        "\tw.mode = Window.MODE_FULLSCREEN\n"
+        "else:\n"
+        "\tw.mode = Window.MODE_WINDOWED\n"
+        "\tw.size = target\n"
+        "return [w.size.x, w.size.y, w.mode]\n"
+    )
+
+
+def verify_frame(raw: bytes, size: tuple[int, int]) -> tuple[int, int]:
+    """Размер снимка обязан равняться канону, иначе снимок недействителен."""
+    actual = png_size(raw)
+    if actual != tuple(size):
+        raise CaptureError(
+            f"кадр {actual[0]}×{actual[1]} ≠ канонический {size[0]}×{size[1]} — "
+            "снимок недействителен: попиксельное сравнение «до/после» валидно "
+            "только при равном размере. Причины: (а) дисплей хоста меньше канона "
+            "— канон достигается окном во весь экран, нужен дисплей ровно "
+            f"{size[0]}×{size[1]}; (б) прогоны под Xvfb: run_tests.sh поднимает "
+            "1024×768, там канон недостижим — поднимите Xvfb "
+            f"`-screen 0 {size[0]}x{size[1]}x24` или осознанно снимайте меньшим "
+            f"размером через {SIZE_ENV}."
+        )
+    return actual
+
+
+def reserve_dir(name: str) -> Path:
+    """Каталог снимков вне репозитория: ~/.local/share/sigil-reserve/<имя>."""
+    root = Path.home() / ".local" / "share" / "sigil-reserve" / name
+    root.mkdir(parents=True, exist_ok=True)
+    return root
+
+
+def git_output(*args: str, cwd: Path | None = None) -> str:
+    """Короткая ревизия git или заглушка — манифест не должен падать из-за среды."""
+    try:
+        out = subprocess.run(
+            ("git", *args), cwd=str(cwd) if cwd else None,
+            capture_output=True, text=True, timeout=10, check=True,
+        )
+        return out.stdout.strip()
+    except Exception:  # noqa: BLE001 — манифест переживает отсутствие git
+        return "?"
+
+
+def utc_now() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+
+
+def render_manifest(meta: dict[str, Any], rows: list[dict[str, Any]]) -> str:
+    """MANIFEST.md установленного формата (см. docs/mvp/CAPTURE-HELPER.md)."""
+    lines = [f"# Манифест снимков — {meta.get('title', 'без названия')}", ""]
+    for key in (
+        "HEAD", "База", "Дата/время", "Инструмент", "Фикстура",
+        "Канонический размер", "Команда воспроизведения", "Сравнение валидно",
+    ):
+        if key in meta:
+            lines.append(f"- {key}: `{meta[key]}`")
+    lines += ["", "| Файл | Состояние | Разрешение | Байт | SHA-256 |", "| --- | --- | --- | --- | --- |"]
+    for row in rows:
+        lines.append(
+            f"| `{row['file']}` | {row.get('state', '?')} | {row['size'][0]}×{row['size'][1]} "
+            f"| {row['bytes']} | `{row['sha256']}` |"
+        )
+    lines.append("")
+    for note in meta.get("notes", []):
+        lines.append(f"- Оговорка: {note}")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def capture_scene(mcp: Any, scene: str, out_dir: Path, name: str,
+                  state: str, size: tuple[int, int] | None = None,
+                  settle_frames: int = 30) -> dict[str, Any]:
+    """Снимает сцену каноническим кадром; пишет PNG, возвращает строку манифеста."""
+    size = tuple(size or canonical_size())
+    mcp.run_scene(scene)
+    mcp.wait_ready()
+    mcp.wait_frames(20)
+    mcp.execute_code(pin_window_code(size))
+    mcp.wait_frames(settle_frames)
+    raw = mcp.screenshot()
+    actual = verify_frame(raw, size)
+    path = Path(out_dir) / f"{name}.png"
+    path.write_bytes(raw)
+    return {
+        "file": path.name, "state": state, "size": actual,
+        "bytes": len(raw), "sha256": sha256_hex(raw), "path": path,
+    }
+
+
+def manifest_meta(title: str, fixture: str, size: tuple[int, int],
+                  command: str, notes: list[str] | None = None,
+                  comparison_valid: str = "да (одинаковый канонический размер)") -> dict[str, Any]:
+    """Шапка манифеста: HEAD, база, время, инструмент, фикстура, команда."""
+    return {
+        "title": title,
+        "HEAD": git_output("rev-parse", "HEAD"),
+        "База": git_output("rev-parse", "--short", "origin/main") + " (origin/main)",
+        "Дата/время": utc_now(),
+        "Инструмент": "game_screenshot через MCP / живой Godot (без --headless)",
+        "Фикстура": fixture,
+        "Канонический размер": f"{size[0]}×{size[1]}",
+        "Команда воспроизведения": command,
+        "Сравнение валидно": comparison_valid,
+        "notes": list(notes or []),
+    }
