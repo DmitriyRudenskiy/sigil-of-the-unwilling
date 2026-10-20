@@ -11,9 +11,9 @@
 
 ## 2. SM навигации и туториал
 
-- [ ] 2.1 SM навигации: PREGAME→MENU→MAP→(CITY/BATTLE/PARTY/CHRONICLE/SETTINGS); BATTLE→MAP («Продолжить», K-M8); MAP→ХРОНИКА anytime; *→TUTORIAL (первый вход, 1 раз) — `campaign_ui_manager.gd` (новый) или `world_ui_manager.gd` (legacy hex).
+- [~] 2.1 SM навигации: PREGAME→MENU→MAP→(CITY/BATTLE/PARTY/CHRONICLE/SETTINGS); BATTLE→MAP («Продолжить», K-M8); MAP→ХРОНИКА anytime; *→TUTORIAL (первый вход, 1 раз). **Сделано (headless-логика):** `scripts/ui/campaign_navigation.gd` — чистый SM (граф переходов, туториал «1 раз» внутри SM, сейв/загрузка, инвариант «нет выхода в никуда»), 15 тестов (5.1). **Отложено (визуал):** `campaign_ui_manager.gd` — привязка SM к сценам (показать/скрыть экраны по `current`).
 - [ ] 2.2 Туториал-оверлей (первые ходы, не сцена) — `tutorial_overlay.gd` (новый); срабатывает на первый вход в экран (1 раз).
-- [ ] 2.3 Панель целей 3 дней (M3): день 1 — ферма + барраки; день 2 — тренировка воина (K-M15, Q18); день 3 — руины; панель видна, пока не выполнены все цели — `main.gd`.
+- [~] 2.3 Панель целей 3 дней (M3): день 1 — ферма + барраки; день 2 — тренировка воина (K-M15, Q18); день 3 — руины; панель видна, пока не выполнены все цели. **Сделано (headless-логика):** `scripts/ui/campaign_goal_tracker.gd` — цели (building/train/region), события, видимость, «не показывается снова», сейв/загрузка, 11 тестов (5.2). **Отложено (визуал):** панель в `main.gd` (отрисовка по `visible()`/`pending()`).
 
 ## 3. Экран партии и инварианты
 
@@ -29,7 +29,7 @@
 
 ## 5. Верификация
 
-- [ ] 5.1 GdUnit4: SM навигации (PREGAME→MENU→MAP→...; BATTLE→MAP; MAP→ХРОНИКА anytime; *→TUTORIAL 1 раз).
-- [ ] 5.2 GdUnit4: панель целей 3 дней (день 1/2/3; панель скрыта после выполнения).
+- [x] 5.1 GdUnit4: SM навигации (PREGAME→MENU→MAP→...; BATTLE→MAP; MAP→ХРОНИКА anytime; *→TUTORIAL 1 раз) — `tests/campaign/test_campaign_navigation.gd` (15 тестов).
+- [x] 5.2 GdUnit4: панель целей 3 дней (день 1/2/3; панель скрыта после выполнения) — `tests/campaign/test_campaign_goal_tracker.gd` (11 тестов).
 - [ ] 5.3 GdUnit4: экран партии («что освободит слот» при полной партии).
 - [ ] 5.4 UI smoke: 8 экранов (K-M8) — навигация без «закрыть в никуда».

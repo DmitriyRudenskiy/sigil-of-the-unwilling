@@ -9,6 +9,27 @@ date: 2026-10-20
 
 # CHANGELOG — docs/
 
+## [2026-10-20] — mvp-ui-flow: headless-логика SM навигации + панели целей 3 дней (UI-подготовка)
+
+- **Что сделано:** UI-подготовка (headless-часть, без визуальной приёмки) — два чистых
+  модуля логики, полностью покрытых GdUnit4:
+  - `game/scripts/ui/campaign_navigation.gd` — **SM навигации** (mvp-ui-flow 2.1, K-M8):
+    граф переходов PREGAME→MENU→MAP→(CITY/BATTLE/PARTY/CHRONICLE/SETTINGS)→MAP;
+    BATTLE→MAP только («Продолжить»); MAP→ХРОНИКА anytime; туториал «1 раз» на первый
+    вход в экран (гарантия внутри SM); сейв/загрузка; инвариант «нет выхода в никуда».
+  - `game/scripts/ui/campaign_goal_tracker.gd` — **панель целей 3 дней** (mvp-ui-flow 2.3, M3):
+    цели building/train/region (день 1 — ферма+казармы; день 2 — тренировка воина, K-M15/Q18;
+    день 3 — руины); события, видимость (`visible()`), «не показывается снова», сейв/загрузка.
+- **Тесты:** `tests/campaign/test_campaign_navigation.gd` (15) +
+  `tests/campaign/test_campaign_goal_tracker.gd` (11) = +26. Полный прогон: **2848/0**
+  (2 skipped).
+- **Отложено (визуал, ux-review):** `campaign_ui_manager.gd` (привязка SM к сценам),
+  панель целей в `main.gd`, туториал-оверлей `tutorial_overlay.gd`, экран партии
+  (3.1/3.2), разрешение (4.x), UI smoke (5.4). Статусы: mvp-ui-flow 2.1/2.3 → [~],
+  5.1/5.2 → [x].
+- **Верификация:** GdUnit4 2848/0 (local); `check_docs_links.py` OK; CI не проверялся
+  (по инструкции).
+
 ## [2026-10-20] — OpenSpec: синк 8 завершённых change в main-спеки + статус-хвосты districts/vertical-slice
 
 - **Что сделано:** дельты завершённых change синхронизированы в `openspec/specs/` (workflow: sync
