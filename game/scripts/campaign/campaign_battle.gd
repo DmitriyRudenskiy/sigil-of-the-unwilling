@@ -168,6 +168,41 @@ static func _strike(atk: Dictionary, def_: Dictionary, flank_bonus: int = 0) -> 
 		"reckoning": reckoning, "debt": debt_before, "luck_used": luck_used}
 
 
+## Разбивка перевеса удара для UI (3.4: все правила D&D видны). Чистая
+## проекция (без мутации atk/def_, в отличие от _strike): компоненты margin
+## + зона (до auto-luck-политики). margin/zone/reckoning совпадают с _strike.
+static func strike_breakdown(atk: Dictionary, def_: Dictionary, flank_bonus: int = 0) -> Dictionary:
+	var base_margin: int = int(atk["attack"]) - int(def_["ac"])
+	var state_margin: int = _state_margin(atk, def_)
+	var terrain_margin: int = _terrain_margin(atk, def_)
+	var hunger: int = int(atk.get("hunger_penalty", 0))
+	var margin: int = base_margin + state_margin + terrain_margin + flank_bonus + hunger
+	var debt: int = int(atk["fate_debt"])
+	var threshold: int = int(atk["proficiency"])
+	var reckoning := debt >= threshold and debt > 0
+	var fate_penalty := false
+	if not reckoning and debt >= 1:
+		margin = int(floor(float(margin) / FATE_PENALTY_DIVISOR))
+		fate_penalty = true
+	var zone: StringName = BattleRulesScript.ladder_zone(margin, int(atk["luck"]))
+	if reckoning:
+		zone = _step_down(zone)
+	return {
+		"attack": int(atk["attack"]),
+		"ac": int(def_["ac"]),
+		"base_margin": base_margin,
+		"state_margin": state_margin,
+		"terrain_margin": terrain_margin,
+		"flank_bonus": flank_bonus,
+		"hunger_penalty": hunger,
+		"fate_debt": debt,
+		"fate_penalty": fate_penalty,
+		"reckoning": reckoning,
+		"total_margin": margin,
+		"zone": str(zone),
+	}
+
+
 ## Ступень вниз по лестнице (Расплата): Триумф→Успех→Частичный→Провал; на
 ## Провале — Критпровал.
 static func _step_down(zone: StringName) -> StringName:

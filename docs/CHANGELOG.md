@@ -9,6 +9,22 @@ date: 2026-10-20
 
 # CHANGELOG — docs/
 
+## [2026-10-20] — Бой: «все правила D&D видны» (UI-подготовка, mvp-ui-flow 3.4)
+
+- **Разбивка перевеса удара** — `CampaignBattle.strike_breakdown(atk, def_, flank_bonus)`
+  (публичная, чистая проекция без мутации, в отличие от `_strike`): компоненты margin
+  (base/state/terrain/flank/hunger) + fate-штраф/Расплата + зона. margin/zone/reckoning
+  совпадают с `_strike`.
+- **Слой данных боевого UI** — `scripts/ui/battle_info_model.gd`: `active_rules(atk, def_,
+  flank)` (список активных условий: prone/elevated/terrain_*/flank/hunger/fate_debt),
+  `combatant_card(c)` (карточка бойца), `strike_info` (делегат в `strike_breakdown`).
+- **16 GdUnit4-тестов** (`tests/campaign/test_battle_info_model.gd`): компоненты margin
+  (base/prone/terrain/flank/hunger/fate/reckoning), немутация `fate_debt`, active_rules
+  (пусто/prone/terrain/flank/hunger/fate_debt), combatant_card, делегирование strike_info.
+- **Тест-уровни:** GdUnit 2931/0 (было 2915 → стало 2931: +16).
+- **Остаток (визуал/ux-review):** отрисовка разбивки/правил в `battle_ui.gd`, справка по
+  клавише.
+
 ## [2026-10-20] — Экран карты: headless view model (UI-подготовка, mvp-ui-flow 3.3)
 
 - **Слой данных экрана карты** — `scripts/ui/map_screen_model.gd` (view model поверх
