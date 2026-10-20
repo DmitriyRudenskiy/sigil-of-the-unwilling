@@ -21,10 +21,9 @@ extends RefCounted
 ##       при alive-подсчёте смерть реально освобождает слот);
 ##   (2) settlement-потребление уже считает alive (campaign_composition:
 ##       settlement.party_size = alive_members(party).size()).
-## ⚠ НЕСОГЛАСОВАННОСТЬ (tech debt, зона party-training): CampaignTrainingService
-##   гейтит тренировку по ВЕСЬ party.size() (включая DEAD) — при 5 членах, из
-##   которых 3 мёртвы, тренировка заблокирована, хотя по alive-модели слот
-##   свободен. Разносить — задача владельца (см. CHANGELOG).
+## D-221 (V-6, 2026-10-20): несогласованность снята — CampaignTrainingService
+##   теперь гейтит по alive_members (DEAD не занимают слот и не блокируют
+##   тренировку/рекрутинг), согласовано с alive-моделью экрана и settlement.
 
 ## Дефолт = CampaignTrainingService.PARTY_CAPACITY (5).
 const DEFAULT_CAPACITY := 5

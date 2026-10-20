@@ -5,7 +5,7 @@
 - [x] 1.1 Training-действия из каталога зданий (поле `training`) — `campaign_training_service.gd` (available_training_actions)
 - [x] 1.2 Class-gates по `mvp_catalog.json` — `campaign_training_service.gd` (_approved_class)
 - [x] 1.3 Расовые тиры (K-M5) — `campaign_training_service.gd`
-- [x] 1.4 PARTY_CAPACITY = 5, партия полна → действий нет — `campaign_training_service.gd`
+- [x] 1.4 PARTY_CAPACITY = 5, партия полна → действий нет — `campaign_training_service.gd`. **(2026-10-20, D-221/V-6):** гейт — **alive-модель** (`PartySystem.alive_members`): «полна» = живых ≥ 5; DEAD не занимают слот и не блокируют тренировку/рекрутинг (согласовано с `party_screen_model`/`campaign_composition`). Тесты: `test_campaign_training_service.gd` (+4 alive-теста).
 - [x] 1.5 Валидация стоимости по `CAMPAIGN_MVP_IDS` — `campaign_training_service.gd`
 - [x] 1.6 Тренировка только в городе (герой в городе — условие) — `campaign_training_service.gd`/`city_screen.gd`
 
