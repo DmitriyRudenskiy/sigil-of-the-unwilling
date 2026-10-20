@@ -163,9 +163,9 @@ func _build_team_box(h: HeroController) -> void:
 		info.add_theme_font_size_override("font_size", 11)
 		var bars := HBoxContainer.new()
 		bars.add_theme_constant_override("separation", 3)
-		bars.add_child(_mini_bar(bond, Color(0.35, 0.6, 1.0)))
-		bars.add_child(_mini_bar(trust, Color(0.35, 0.8, 0.45)))
-		bars.add_child(_mini_bar(romance, Color(0.9, 0.45, 0.7)))
+		bars.add_child(_mini_bar(bond, &"MiniBarBond"))
+		bars.add_child(_mini_bar(trust, &"MiniBarTrust"))
+		bars.add_child(_mini_bar(romance, &"MiniBarRomance"))
 		var talk := Button.new()
 		talk.text = "💬 Поговорить"
 		talk.tooltip_text = "Связь %d · Верность %d · Романтика %d" % [bond, trust, romance]
@@ -176,21 +176,17 @@ func _build_team_box(h: HeroController) -> void:
 		row.add_child(talk)
 		_team_box.add_child(row)
 
-func _mini_bar(value: int, color: Color) -> ProgressBar:
+## Мини-полоса связи. Носитель стиля — вариант темы (MiniBarBond / MiniBarTrust /
+## MiniBarRomance), а не переопределение на узле: цвет семантический и живёт в теме
+## (T-147). Фон полос общий — StyleBoxFlat_minibar_bg.
+func _mini_bar(value: int, variation: StringName) -> ProgressBar:
 	var bar := ProgressBar.new()
+	bar.theme_type_variation = variation
 	bar.min_value = 0.0
 	bar.max_value = 100.0
 	bar.value = clampf(float(value), 0.0, 100.0)
 	bar.show_percentage = false
 	bar.custom_minimum_size = Vector2(44, 8)
-	var fill := StyleBoxFlat.new()
-	fill.bg_color = color
-	fill.set_corner_radius_all(2)
-	bar.add_theme_stylebox_override("fill", fill)
-	var bg := StyleBoxFlat.new()
-	bg.bg_color = Color(0.12, 0.12, 0.15)
-	bg.set_corner_radius_all(2)
-	bar.add_theme_stylebox_override("background", bg)
 	return bar
 
 func _stage_icon(bond: int, romance: int) -> String:
