@@ -64,6 +64,8 @@ static func roster_model(party: Array, capacity: int) -> Dictionary:
 			"xp": int(member.get("xp", 0)),
 			"state": state,
 			"is_veteran": PartySystem.is_veteran(member),
+			"stats": (member.get("stats", {}) as Dictionary).duplicate(),  # 6 атрибутов (str/dex/con/int/wis/cha)
+			"luck": int(member.get("luck", 0)),
 		})
 	return {
 		"members": members,

@@ -160,3 +160,23 @@ func test_build_model_not_full_passes_options() -> void:
 	var m: Dictionary = Model.build_model(_party(2), 5, 0, options)
 	assert_bool(m["slot_hint"]["show"]).is_false()
 	assert_int(m["training_options"].size()).is_equal(1)
+
+
+## 3.1 (проводка в PartyScreen): статы + Удача в строке бойца.
+func test_roster_member_stats_and_luck() -> void:
+	var member := _m("p1", "fighter", "human", 2, 1200)
+	member["stats"] = {"str": 15, "dex": 12, "con": 14, "int": 10, "wis": 11, "cha": 9}
+	member["luck"] = 2
+	var r: Dictionary = Model.roster_model([member], 5)
+	var m0: Dictionary = r["members"][0]
+	assert_int(m0["stats"]["str"]).is_equal(15)
+	assert_int(m0["stats"]["cha"]).is_equal(9)
+	assert_int(m0["luck"]).is_equal(2)
+
+
+func test_roster_member_stats_luck_defaults() -> void:
+	# без stats/luck в данных — дефолты (пустой stats, luck 0)
+	var r: Dictionary = Model.roster_model([_m("p1")], 5)
+	var m0: Dictionary = r["members"][0]
+	assert_int(m0["stats"].size()).is_equal(0)
+	assert_int(m0["luck"]).is_equal(0)
