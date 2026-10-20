@@ -19,7 +19,7 @@
 
 - [~] 3.1 Экран партии (отдельный) — `party_screen.gd` (новый); данные — `party_system.gd`. **Готово: слой данных (view model) `scripts/ui/party_screen_model.gd`** (roster + ёмкость + подсказка, чистая логика, headless). **Отложено (визуал, ux-review):** визуальный `party_screen.gd` (Control-сцена).
 - [x] 3.2 ПАРТИЯ: очередь тренировки пуста и партия полна → «что освободит слот» (ссылка на бой/смерть), не пустота. **Готово: `PartyScreenModel.slot_hint()`** (alive-подсчёт: смерть в бою освобождает слот; `HINT_LINK_BATTLE_DEATH`); 15 GdUnit4-тестов. Несогласованность с гейтом `CampaignTrainingService` (total vs alive) — tech debt (CHANGELOG).
-- [ ] 3.3 Инвариант ≤2 клика до причины (столп 1) — все экраны.
+- [~] 3.3 Инвариант ≤2 клика до причины (столп 1) — все экраны. **Сделано (headless, экран карты):** `scripts/ui/map_screen_model.gd` — view model поверх RegionMap; каждое действие/опция движения возвращает `{available, reason}` (move/visit_node/retreat/field_raid + travel_options) — причина всегда на месте, UI просто показывает `reason`. 16 GdUnit4-тестов. **Остаток (визуал/другие экраны):** привязка к сцене карты + распространение паттерна `{available, reason}` на остальные экраны (город/бой/партия/хроника/настройки).
 - [ ] 3.4 В бою все правила D&D видны без подсказок (справка — по клавише) — `battle_ui.gd`.
 
 ## 4. Разрешение

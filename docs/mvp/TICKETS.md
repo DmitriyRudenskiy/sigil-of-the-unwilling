@@ -57,6 +57,17 @@ date: 2026-10-19
   `pregame_party_ui.gd`, проводка штрафа оккупации в кампанию, проводка тренировки в
   `campaign_training_service.gd` (зона party-training). **Техдолг:** финальная кривая
   оккупации TBD (баланс) + механическое применение штрафа.
+- **Статус (2026-10-20, локальный агент, mvp-ui-flow 3.3):**
+  **headless-логика экрана карты (UI-подготовка) готова** — `scripts/ui/map_screen_model.gd`
+  (view model поверх RegionMap, чистая логика без сцены): туман/видимость
+  (`visible_regions`/`fog_regions`), позиция героя (`hero`), карточка региона
+  (`region_card`: biome/node/visible/is_hero/is_start/looted), опции движения
+  (`travel_options`) и действия (`actions`: move/visit_node/retreat/field_raid) — каждое
+  возвращает `{available, reason}`. Это headless-реализация инварианта 3.3 (≤2 клика до
+  причины) для экрана карты: причина всегда на месте, UI просто показывает `reason`.
+  16 GdUnit4-тестов (`tests/campaign/test_map_screen_model.gd`). **Остаток (визуал/ux-review):**
+  привязка к сцене карты + распространение паттерна `{available, reason}` на остальные
+  экраны (город/бой/партия/хроника/настройки).
 
 ## Кампания и карта (T-01x/02x)
 
