@@ -13,14 +13,6 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/settings_screen.tscn" id="11"]
 [ext_resource type="PackedScene" path="res://scenes/ui/TeamDialogScreen.tscn" id="12"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_opt"]
-bg_color = Color(0.16, 0.11, 0.06, 0.95)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.62, 0.47, 0.22, 1)
-
 [node name="AdventureUI" type="CanvasLayer"]
 layer = 10
 script = ExtResource("1")
@@ -94,7 +86,6 @@ offset_left = -150.0
 offset_top = -60.0
 offset_right = 150.0
 offset_bottom = 60.0
-theme_override_styles/panel = SubResource("StyleBoxFlat_opt")
 theme_override_constants/separation = 6
 
 [node name="OptionsTitle" type="Label" parent="OptionsPopup"]

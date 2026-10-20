@@ -2,18 +2,6 @@
 
 [ext_resource type="Script" uid="uid://cyfxyhme3ipdr" path="res://scripts/ui/info_panel.gd" id="1"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_action"]
-content_margin_left = 6.0
-content_margin_top = 4.0
-content_margin_right = 6.0
-content_margin_bottom = 4.0
-bg_color = Color(0.52, 0.2, 0.16, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.788235, 0.635294, 0.352941, 1)
-
 [node name="InfoPanel" type="VBoxContainer" unique_id=1031557464]
 script = ExtResource("1")
 
@@ -137,31 +125,31 @@ layout_mode = 2
 [node name="CastleButton" type="Button" parent="columns/btn_col_left" unique_id=1796585662]
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_action")
+theme_type_variation = &"ButtonAction"
 text = "🏰"
 
 [node name="CampButton" type="Button" parent="columns/btn_col_left" unique_id=1860553613]
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_action")
+theme_type_variation = &"ButtonAction"
 text = "⛺"
 
 [node name="ShipButton" type="Button" parent="columns/btn_col_left" unique_id=549631103]
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_action")
+theme_type_variation = &"ButtonAction"
 text = "🚢"
 
 [node name="ScoutButton" type="Button" parent="columns/btn_col_left" unique_id=1267201545]
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_action")
+theme_type_variation = &"ButtonAction"
 text = "🔍"
 
 [node name="JournalButton" type="Button" parent="columns/btn_col_left" unique_id=1191903265]
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_action")
+theme_type_variation = &"ButtonAction"
 text = "📜"
 
 [node name="btn_col_right" type="VBoxContainer" parent="columns" unique_id=1981371776]
@@ -170,31 +158,31 @@ layout_mode = 2
 [node name="FlagButton" type="Button" parent="columns/btn_col_right" unique_id=393141783]
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_action")
+theme_type_variation = &"ButtonAction"
 text = "🚩"
 
 [node name="StableButton" type="Button" parent="columns/btn_col_right" unique_id=1310417078]
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_action")
+theme_type_variation = &"ButtonAction"
 text = "🐎"
 
 [node name="ForgeButton" type="Button" parent="columns/btn_col_right" unique_id=1135352731]
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_action")
+theme_type_variation = &"ButtonAction"
 text = "⚒️"
 
 [node name="ArmyButton" type="Button" parent="columns/btn_col_right" unique_id=1755641892]
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_action")
+theme_type_variation = &"ButtonAction"
 text = "🪖"
 
 [node name="EndTurnButton" type="Button" parent="columns/btn_col_right" unique_id=1898408408]
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_action")
+theme_type_variation = &"ButtonAction"
 text = "⏳"
 
 [node name="town_col" type="VBoxContainer" parent="columns" unique_id=2135174230]

@@ -9,8 +9,6 @@ signal settings_applied
 signal hex_borders_toggled(on: bool)
 
 const RIGHT_W := 252
-const C_BG := ThemeConfig.C_PANEL_BG
-const C_BORDER := ThemeConfig.C_PANEL_BORDER
 
 @onready var _minimap: MinimapPanel = $RightColumn/Box/PanelsBox/MinimapPanel
 @onready var _army: ArmyPanel = $RightColumn/Box/PanelsBox/ArmyPanel
@@ -35,13 +33,10 @@ var _border_check: CheckBox
 
 func _ready() -> void:
 	layer = 10
-	var p := get_node("RightColumn") as PanelContainer
-	var s := StyleBoxFlat.new()
-	s.bg_color = C_BG
-	s.set_border_width_all(2)
-	s.set_content_margin_all(10.0)
-	s.border_color = C_BORDER
-	p.add_theme_stylebox_override("panel", s)
+	# T-147: стиль правой колонки изобретался кодом (StyleBoxFlat.new() + цвета из
+	# ThemeConfig). Носитель — вариант темы PanelAdventureColumn, значения стиля
+	# перенесены в game_theme.tres без изменений.
+	(get_node("RightColumn") as PanelContainer).theme_type_variation = "PanelAdventureColumn"
 
 	_options_popup.get_node("OptionsTitle").text = GameText.adventure_options()
 	_options_popup.get_node("ShowMarkersButton").text = GameText.adventure_show_markers()

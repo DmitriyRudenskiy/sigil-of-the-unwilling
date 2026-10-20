@@ -16,7 +16,6 @@ var _timer: Timer:
 func _ready() -> void:
 	_ok.pressed.connect(_on_ok)
 	_timer.timeout.connect(_on_auto_dismiss)
-	_apply_style()
 
 func show_resource(resource_id: StringName, amount: int = 0) -> void:
 	var tex: Texture2D = ResourceIcons.get_texture(resource_id)
@@ -35,11 +34,3 @@ func _on_ok() -> void:
 
 func _on_auto_dismiss() -> void:
 	visible = false
-
-func _apply_style() -> void:
-	var theme_: Theme = load("res://assets/theme/game_theme.tres")
-	if theme_ == null:
-		return
-	var sb := theme_.get_stylebox("panel", "Panel")
-	if sb != null:
-		add_theme_stylebox_override("panel", sb)

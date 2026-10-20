@@ -752,6 +752,38 @@ corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 bg_color = Color(0.9, 0.45, 0.7, 1)
 
+; T-147 (хвост): кнопки действий в инфо-панели — десять кнопочных
+; theme_override_styles/normal, лежавших в самом info_panel.tscn (не в коде).
+; Перенесены как есть; hover/pressed по-прежнему приходят от типа Button,
+; потому что вариант объявляет только normal.
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_action"]
+content_margin_left = 6.0
+content_margin_top = 4.0
+content_margin_right = 6.0
+content_margin_bottom = 4.0
+bg_color = Color(0.52, 0.2, 0.16, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.788235, 0.635294, 0.352941, 1)
+
+; T-147 (хвост): транскрипция стиля, который adventure_ui.gd изобретал кодом
+; (ThemeConfig.C_PANEL_BG / C_PANEL_BORDER, бордер 2, поля 10). Такого стиля в теме
+; не было ни у одного носителя — цвета 0.16/0.11/0.06 и 0.62/0.47/0.22 не встречались
+; ни в одном StyleBox. Значения перенесены float-в-float, кадр менять не должны.
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_adventure_column"]
+content_margin_left = 10.0
+content_margin_top = 10.0
+content_margin_right = 10.0
+content_margin_bottom = 10.0
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.62, 0.47, 0.22, 1)
+bg_color = Color(0.16, 0.11, 0.06, 0.95)
+
 [resource]
 Panel/styles/panel = SubResource("StyleBoxTexture_panel")
 Panel/styles/window = SubResource("StyleBoxFlat_window")
@@ -1016,3 +1048,15 @@ SwatchButtonDisabled/styles/panel = SubResource("StyleBoxTexture_button_disabled
 ; Красная кнопка: normal брался из Panel/button_red, остальное — по Button.
 DangerButton/base_type = "Button"
 DangerButton/styles/normal = SubResource("StyleBoxFlat_button_red")
+; T-147 (хвост). Правая колонка карты приключений: стиль был изобретён кодом, теперь
+; он здесь (см. StyleBoxFlat_adventure_column выше).
+PanelAdventureColumn/base_type = "PanelContainer"
+PanelAdventureColumn/styles/panel = SubResource("StyleBoxFlat_adventure_column")
+; Слоты героя/города в инфо-панели: узлы имеют тип Panel, а не PanelContainer, поэтому
+; вариант обязан быть заявлен с base_type = "Panel" — иначе резолв уходит на Panel/panel
+; и слот получает не тот стиль (замер — test_tail_screens_theme_carrier.gd).
+; Кнопки действий инфо-панели: узлы имеют тип Button, поэтому base_type = "Button".
+ButtonAction/base_type = "Button"
+ButtonAction/styles/normal = SubResource("StyleBoxFlat_action")
+PanelInfoSlot/base_type = "Panel"
+PanelInfoSlot/styles/panel = SubResource("StyleBoxTexture_slot")
