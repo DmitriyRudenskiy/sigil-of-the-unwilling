@@ -22,11 +22,11 @@
 
 - [ ] 3.1 C-2: main spec `campaign-city-level-progression` (уровни 1–11) vs K-M3 (аннулированы) + Q-M46/Q-M52 (K-M3 в силе, уровни = 1.0) — вердикт: оставить как 1.0 или пометить superseded.
 - [x] 3.2 C-9: main spec `city-tech-tree` (pre-pivot) — пометка superseded или архивация (реестровый акт). (2026-10-19, локальный агент: реестровый акт — баннер `> **SUPERSEDED (MVP)**` в шапе spec (K-M3: уровни аннулированы; контент = носитель 1.0, Q-M46/Q-M52); файл не стёрт; D-215 в DECISIONS.md; C-9 в 09-risks.md разрешён; OpenSpec-валидатор green.)
-- [ ] 3.3 C-11: синк `MVP-scope.md` («район создан — источник Престижа (500)» → «не источник», K-M16).
+- [x] 3.3 C-11: синк `MVP-scope.md` («район создан — источник Престижа (500)» → «не источник», K-M16). (Выполнено 2026-10-19 в рамках signs-prestige 3.2: `MVP-scope.md:57` — «район создан — **не** источник Престижа (K-M16, самокоррекция K-M1; C-11 синк 2026-10-19)»; C-11 в 09-risks.md разрешён.)
 
 ## 4. Верификация
 
 - [x] 4.1 GdUnit4: 1 клетка = 1 здание; placement по terrain_preference (жёсткая). (2026-10-19, локальный агент: покрыто — `test_city_layout_is_52_cells_and_placement_respects_terrain_and_occupancy` (terrain-жёсткость: wrong_terrain → ok=false; occupied → ok=false; footprint [[0,0]] → 1 клетка) + новый `test_mvp_catalog_one_cell_per_building` (инвариант данных: все 98 зданий MVP-каталога — footprint ровно 1 клетка-якорь [0,0]).)
-- [ ] 4.2 GdUnit4: район создан → 0 Престижа, 0 XP (K-M16); распад через 3 дня.
+- [~] 4.2 GdUnit4: район создан → 0 Престижа, 0 XP (K-M16); распад через 3 дня. (2026-10-19, локальный агент: первая половина покрыта — `test_district_no_grant.gd` (test_district_creation_grants_nothing, test_district_process_turn_grants_nothing, контроль test_battle_win_does_grant_prestige); вторая половина (распад через 3 дня) ждёт 2.2 (теги/таймер района).)
 - [ ] 4.3 GdUnit4: аура только от WORKING; ферма у леса +15%.
 - [x] 4.4 GdUnit4: население от производства (рейд по еде → DEFICIT, не обвал). (2026-10-19, локальный агент: покрыто — `test_start_state_one_turn` (поток еды → SM DEFICIT, pop стабилен), `test_t122_raid_hits_pre_production_stocks` (рейд бьёт запасы ДО production), `test_afk_cascade_no_chain_collapse` (10 рейдов — цепного обвала нет) + новый `test_raid_food_deficit_no_population_collapse` (рейд по еде → SM DEFICIT, население > 0 и не ниже стартового; MVP m-множители = 1, K-M12).)
