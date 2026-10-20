@@ -35,7 +35,9 @@
   предикату: у узлов экрана нет ни одного из трёх механизмов, а носитель резолвится.
 - Аудит репозитория: `theme_override_styles/*` в `game/scenes/**` считается и
   регистрируется так же, как `add_theme_stylebox_override` в `game/scripts/**`
-  (сейчас по сценам учёта нет).
+  (до этого учёта по сценам не было вовсе). Замер 2026-10-20: код — 20 вызовов в
+  3 файлах; сцены — 1 `theme_override_styles/`, 62 `theme_override_colors/`,
+  3 `theme_override_fonts/`, 89 `theme_override_constants/`.
 - Правила приёмки (`docs/mvp/CAPTURE-HELPER.md`) дополнены усиленным AC2 для
   технических переносов с нулевой дельтой.
 
