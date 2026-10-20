@@ -17,8 +17,8 @@
 
 ## 3. Экран партии и инварианты
 
-- [ ] 3.1 Экран партии (отдельный) — `party_screen.gd` (новый); данные — `party_system.gd`.
-- [ ] 3.2 ПАРТИЯ: очередь тренировки пуста и партия полна → «что освободит слот» (ссылка на бой/смерть), не пустота.
+- [~] 3.1 Экран партии (отдельный) — `party_screen.gd` (новый); данные — `party_system.gd`. **Готово: слой данных (view model) `scripts/ui/party_screen_model.gd`** (roster + ёмкость + подсказка, чистая логика, headless). **Отложено (визуал, ux-review):** визуальный `party_screen.gd` (Control-сцена).
+- [x] 3.2 ПАРТИЯ: очередь тренировки пуста и партия полна → «что освободит слот» (ссылка на бой/смерть), не пустота. **Готово: `PartyScreenModel.slot_hint()`** (alive-подсчёт: смерть в бою освобождает слот; `HINT_LINK_BATTLE_DEATH`); 15 GdUnit4-тестов. Несогласованность с гейтом `CampaignTrainingService` (total vs alive) — tech debt (CHANGELOG).
 - [ ] 3.3 Инвариант ≤2 клика до причины (столп 1) — все экраны.
 - [ ] 3.4 В бою все правила D&D видны без подсказок (справка — по клавише) — `battle_ui.gd`.
 
@@ -31,5 +31,5 @@
 
 - [x] 5.1 GdUnit4: SM навигации (PREGAME→MENU→MAP→...; BATTLE→MAP; MAP→ХРОНИКА anytime; *→TUTORIAL 1 раз) — `tests/campaign/test_campaign_navigation.gd` (15 тестов).
 - [x] 5.2 GdUnit4: панель целей 3 дней (день 1/2/3; панель скрыта после выполнения) — `tests/campaign/test_campaign_goal_tracker.gd` (11 тестов).
-- [ ] 5.3 GdUnit4: экран партии («что освободит слот» при полной партии).
+- [x] 5.3 GdUnit4: экран партии («что освободит слот» при полной партии) — `tests/campaign/test_party_screen_model.gd` (15 тестов).
 - [ ] 5.4 UI smoke: 8 экранов (K-M8) — навигация без «закрыть в никуда».

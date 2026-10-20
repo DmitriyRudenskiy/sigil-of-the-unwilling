@@ -294,6 +294,7 @@ date: 2026-10-19
 - **Размер:** L
 - **Зависимости:** T-020, T-030, T-050, T-060, T-090
 - **Статус (2026-10-20, локальный агент, mvp-ui-flow 2.1/5.1):** **headless-логика SM навигации готова** — `scripts/ui/campaign_navigation.gd` (чистый SM: PREGAME→MENU→MAP→под-экраны, BATTLE→MAP, MAP→ХРОНИКА anytime, туториал «1 раз» внутри SM, сейв/загрузка, инвариант «нет выхода в никуда»); 15 GdUnit4-тестов (`tests/campaign/test_campaign_navigation.gd`). **Остаток (визуал, ux-review):** `campaign_ui_manager.gd` — привязка SM к сценам.
+- **Статус (2026-10-20, локальный агент, mvp-ui-flow 3.1/3.2/5.3):** **headless-логика экрана партии готова** — `scripts/ui/party_screen_model.gd` (view model: roster + ёмкость + «что освободит слот» при полной партии, ссылка `battle/death`; alive-подсчёт — смерть освобождает слот); 15 GdUnit4-тестов (`tests/campaign/test_party_screen_model.gd`). **Техдолг (вердикт владельца):** `CampaignTrainingService` гейтит по total party (включая DEAD) — не согласовано с alive-моделью. **Остаток (визуал, ux-review):** визуальный `party_screen.gd`.
 
 ### T-101. Туториал (цели 3 первых дней)
 - **Глагол игрока:** освоиться за 10 минут
