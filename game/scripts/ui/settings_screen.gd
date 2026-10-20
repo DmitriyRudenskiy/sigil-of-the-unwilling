@@ -9,13 +9,8 @@ signal arena_requested
 signal chronicle_requested
 signal model_requested(variant: String)
 
-const C_BG := ThemeConfig.C_PANEL_DARK
-const C_BORDER := ThemeConfig.C_PANEL_BORDER_ALT
 const C_TEXT := ThemeConfig.C_TEXT_PRIMARY
 const C_TITLE := ThemeConfig.C_TEXT_GOLD
-const C_BTN_BG := ThemeConfig.C_BTN_NORMAL
-const C_BTN_HOVER := ThemeConfig.C_BTN_HOVER
-const C_BTN_PRESS := ThemeConfig.C_BTN_PRESSED
 
 var _zoom_selector: OptionButton
 var _fullscreen_toggle: CheckBox
@@ -204,12 +199,12 @@ func _on_additional_chronicle() -> void:
 func _on_additional_model() -> void:
 	model_requested.emit("warrior")
 
+## T-147 (технический перенос, нулевая визуальная дельта): плашка и кнопки экрана
+## больше не рисуют StyleBoxFlat на узлах. Переопределение стиля на узле сильнее темы,
+## поэтому ни один кит не мог их перекрасить. Узел теперь только объявляет носителя,
+## а значения стиля живут в game_theme.tres (PanelSettings, SettingsButton).
 func _apply_style() -> void:
-	var style := StyleBoxFlat.new()
-	style.bg_color = C_BG
-	style.set_border_width_all(2)
-	style.border_color = C_BORDER
-	(get_node("Panel") as PanelContainer).add_theme_stylebox_override("panel", style)
+	(get_node("Panel") as PanelContainer).theme_type_variation = &"PanelSettings"
 
 	var box := get_node("Panel/Box")
 	for btn_name in ["ApplyButton", "ResetButton", "CancelButton"]:
@@ -218,20 +213,7 @@ func _apply_style() -> void:
 		_style_button(btn)
 
 func _style_button(btn: Button) -> void:
-	var sn := StyleBoxFlat.new()
-	sn.bg_color = C_BTN_BG
-	sn.set_corner_radius_all(6)
-	sn.set_border_width_all(1)
-	sn.border_color = ThemeConfig.C_BTN_BORDER
-	btn.add_theme_stylebox_override("normal", sn)
-
-	var sh := sn.duplicate()
-	sh.bg_color = C_BTN_HOVER
-	btn.add_theme_stylebox_override("hover", sh)
-
-	var sp := sn.duplicate()
-	sp.bg_color = C_BTN_PRESS
-	btn.add_theme_stylebox_override("pressed", sp)
+	btn.theme_type_variation = &"SettingsButton"
 
 func _restore_state() -> void:
 	_zoom_selector.selected = _settings.zoom_index

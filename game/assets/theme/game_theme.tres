@@ -671,6 +671,87 @@ corner_radius_top_right = 2
 corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 
+; T-147 (перенос экрана настроек в тему, нулевая визуальная дельта). Значения
+; повторяют снятые add_theme_stylebox_override в settings_screen.gd: плашка
+; C_PANEL_DARK с рамкой 2 px C_PANEL_BORDER_ALT и кнопки C_BTN_NORMAL/HOVER/PRESSED
+; с рамкой 1 px C_BTN_BORDER и скруглением 6. Цвета — float32 от тех же 8-битных
+; каналов, что даёт Color("#…") в GDScript, чтобы резолв совпал побитово.
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_settings_panel"]
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.5, 0.38, 0.18, 1)
+bg_color = Color(0.08, 0.06, 0.04, 0.95)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_settings_btn_normal"]
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.5411764979362488, 0.4156862795352936, 0.22745098173618317, 1)
+bg_color = Color(0.22745098173618317, 0.1411764770746231, 0.08235294371843338, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_settings_btn_hover"]
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.5411764979362488, 0.4156862795352936, 0.22745098173618317, 1)
+bg_color = Color(0.29019609093666077, 0.20392157137393951, 0.13725490868091583, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_settings_btn_pressed"]
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.5411764979362488, 0.4156862795352936, 0.22745098173618317, 1)
+bg_color = Color(0.1568627506494522, 0.10980392247438431, 0.05882352963089943, 1)
+
+; T-147: мини-полосы команды в hero_status_panel (связь/верность/романтика).
+; Значения bg_color — те же float-литералы, что были в add_theme_stylebox_override:
+; побитовое совпадение обязательно, иначе пиксельная сверка (SHA-256) расходится
+; при визуальной идентичности (урок AC3, fix/t-147-settings-screen).
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_minibar_bg"]
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+bg_color = Color(0.12, 0.12, 0.15, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_minibar_bond"]
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+bg_color = Color(0.35, 0.6, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_minibar_trust"]
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+bg_color = Color(0.35, 0.8, 0.45, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_minibar_romance"]
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+bg_color = Color(0.9, 0.45, 0.7, 1)
+
 [resource]
 Panel/styles/panel = SubResource("StyleBoxTexture_panel")
 Panel/styles/window = SubResource("StyleBoxFlat_window")
@@ -867,6 +948,14 @@ PanelOverlay/styles/panel = SubResource("StyleBoxFlat_overlay")
 ; носитель не резолвит, замерено в test_battle_theme_carrier.gd.
 PanelPlate/base_type = "PanelContainer"
 PanelPlate/styles/panel = SubResource("StyleBoxTexture_panel")
+; T-147: экран настроек. Носители стиля, пришедшие из add_theme_stylebox_override;
+; вариант обязан быть зарегистрирован с base_type (замер — test_battle_theme_carrier.gd).
+PanelSettings/base_type = "PanelContainer"
+PanelSettings/styles/panel = SubResource("StyleBoxFlat_settings_panel")
+SettingsButton/base_type = "Button"
+SettingsButton/styles/normal = SubResource("StyleBoxFlat_settings_btn_normal")
+SettingsButton/styles/hover = SubResource("StyleBoxFlat_settings_btn_hover")
+SettingsButton/styles/pressed = SubResource("StyleBoxFlat_settings_btn_pressed")
 LabelDead/base_type = "Label"
 LabelDead/fonts/font = ExtResource("8_serif")
 LabelDead/font_sizes/font_size = 16
@@ -880,3 +969,15 @@ LabelCell/base_type = "Label"
 LabelCell/fonts/font = ExtResource("8_serif")
 LabelCell/font_sizes/font_size = 16
 LabelCell/colors/font_color = Color(0.9098, 0.8353, 0.6588, 1)
+; T-147: мини-полосы команды. Три варианта на ProgressBar — цвета семантические
+; (связь/верность/романтика), поэтому их три, а не один; фон общий. Вариант обязан
+; быть зарегистрирован с base_type — иначе носитель не резолвится.
+MiniBarBond/base_type = "ProgressBar"
+MiniBarBond/styles/fill = SubResource("StyleBoxFlat_minibar_bond")
+MiniBarBond/styles/background = SubResource("StyleBoxFlat_minibar_bg")
+MiniBarTrust/base_type = "ProgressBar"
+MiniBarTrust/styles/fill = SubResource("StyleBoxFlat_minibar_trust")
+MiniBarTrust/styles/background = SubResource("StyleBoxFlat_minibar_bg")
+MiniBarRomance/base_type = "ProgressBar"
+MiniBarRomance/styles/fill = SubResource("StyleBoxFlat_minibar_romance")
+MiniBarRomance/styles/background = SubResource("StyleBoxFlat_minibar_bg")
