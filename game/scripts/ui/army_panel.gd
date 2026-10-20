@@ -1,29 +1,18 @@
 class_name ArmyPanel
 extends PanelContainer
 
-const C_SLOT_BG := ThemeConfig.C_SLOT_BG
-const C_BORDER := ThemeConfig.C_PANEL_BORDER
 const C_TEXT := ThemeConfig.C_TEXT_PRIMARY
 
 var _slots: Array[Panel] = []
 
+# Стили корня и слотов — носители темы ArmyPanel / ArmySlot, назначенные в сцене
+# (T-147): у PanelContainer и Panel законный носитель "panel" есть, коду рисовать
+# нечего. Остался только цвет текста — это цвета, их забирает T-148.
 func _ready() -> void:
-	var aps := StyleBoxFlat.new()
-	aps.bg_color = ThemeConfig.C_PANEL_MID
-	aps.set_corner_radius_all(4)
-	aps.set_border_width_all(2)
-	aps.border_color = C_BORDER
-	add_theme_stylebox_override("panel", aps)
-
 	var grid := get_node("Grid") as GridContainer
 
 	for i in 8:
 		var slot := grid.get_node("Slot%d" % i) as Panel
-		var ss := StyleBoxFlat.new()
-		ss.bg_color = C_SLOT_BG
-		ss.set_corner_radius_all(3)
-		slot.add_theme_stylebox_override("panel", ss)
-
 		var ct := slot.get_node("HBox/Count") as Label
 		ct.add_theme_color_override("font_color", C_TEXT)
 
