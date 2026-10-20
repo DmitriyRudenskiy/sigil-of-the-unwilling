@@ -186,7 +186,8 @@ func _build_shell() -> void:
 	var header := PanelContainer.new()
 	header.name = "ScreenHeader"
 	header.custom_minimum_size.y = 72
-	header.add_theme_stylebox_override("panel", _panel_style(Color("#211e18"), Color("#92743b")))
+	# T-147 (подсрез 2): стиль панели в теме (CityPanelGold), а не в override'е узла.
+	header.theme_type_variation = &"CityPanelGold"
 	layout.add_child(header)
 	var header_row := HBoxContainer.new()
 	header_row.name = "HeaderRow"
@@ -265,7 +266,7 @@ func _build_shell() -> void:
 	_sidebar = PanelContainer.new()
 	_sidebar.name = "BuildSidebar"
 	_sidebar.custom_minimum_size = Vector2(330, 0)
-	_sidebar.add_theme_stylebox_override("panel", _panel_style(Color("#1b1915"), Color("#665638")))
+	_sidebar.theme_type_variation = &"CityPanelDark"
 	workspace.add_child(_sidebar)
 	var sidebar_box := VBoxContainer.new()
 	sidebar_box.add_theme_constant_override("separation", 8)
@@ -331,8 +332,8 @@ func _build_shell() -> void:
 	board_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	board_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	board_panel.custom_minimum_size = Vector2(400, 360)
-	var board_style := _panel_style(Color("#171915", 0.45), Color("#665638"))
-	board_panel.add_theme_stylebox_override("panel", board_style)
+	# Альфа фона 0.45 перенесена в тему float-в-float (StyleBoxFlat_city_board_panel).
+	board_panel.theme_type_variation = &"CityBoardPanel"
 	workspace.add_child(board_panel)
 	var board_area := Control.new()
 	board_area.name = "BoardArea"
@@ -360,7 +361,7 @@ func _build_shell() -> void:
 	_inspector_panel.offset_top = -190.0
 	_inspector_panel.offset_right = 360.0
 	_inspector_panel.offset_bottom = -16.0
-	_inspector_panel.add_theme_stylebox_override("panel", _panel_style(Color("#211e18"), Color("#92743b")))
+	_inspector_panel.theme_type_variation = &"CityPanelGold"
 	board_area.add_child(_inspector_panel)
 	var inspector_box := VBoxContainer.new()
 	inspector_box.add_theme_constant_override("separation", 6)
@@ -382,7 +383,7 @@ func _build_shell() -> void:
 	legend.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	legend.position = Vector2(-205, -150)
 	legend.custom_minimum_size = Vector2(190, 132)
-	legend.add_theme_stylebox_override("panel", _panel_style(Color("#211e18"), Color("#92743b")))
+	legend.theme_type_variation = &"CityPanelGold"
 	board_area.add_child(legend)
 	var legend_box := VBoxContainer.new()
 	legend_box.add_theme_constant_override("separation", 3)
@@ -400,7 +401,9 @@ func _build_shell() -> void:
 	_legacy_panel = PanelContainer.new()
 	_legacy_panel.name = "LegacyActionsPanel"
 	_legacy_panel.visible = false
-	_legacy_panel.add_theme_stylebox_override("panel", _panel_style(Color("#1b1915"), Color("#665638")))
+	# Легаси-панель скрыта (visible = false) и включается переключателем: носитель тот же,
+	# что у сайдбара; скрытость — негативный контроль кадра, а не повод снимать стиль иначе.
+	_legacy_panel.theme_type_variation = &"CityPanelDark"
 	layout.add_child(_legacy_panel)
 	var legacy_box := VBoxContainer.new()
 	_legacy_panel.add_child(legacy_box)
