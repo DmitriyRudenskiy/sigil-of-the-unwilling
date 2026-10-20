@@ -24,33 +24,54 @@ func test_non_playable_races_excluded() -> void:
 	assert_bool(Model.is_playable_race("unknown")).is_false()
 
 
-## === 4.3: штраф оккупации (3-й город → штраф; растёт с каждым) ===
+## === 4.3: штраф оккупации (V-4/D-219: ступенчатая кривая по времени) ===
 
-func test_occupation_penalty_first_two_free() -> void:
+func test_occupation_penalty_zero_turns() -> void:
 	assert_int(Model.occupation_penalty(0)).is_equal(0)
-	assert_int(Model.occupation_penalty(1)).is_equal(0)
-	assert_int(Model.occupation_penalty(2)).is_equal(0)
 
 
-func test_occupation_penalty_grows_from_third_city() -> void:
-	var base := Model.OCCUPATION_PENALTY_BASE
-	assert_int(Model.occupation_penalty(3)).is_equal(base)
-	assert_int(Model.occupation_penalty(4)).is_equal(base * 2)
-	assert_int(Model.occupation_penalty(5)).is_equal(base * 3)
+func test_occupation_penalty_step_curve() -> void:
+	# 0 → 0; 1–2 → −1; 3–4 → −2; 5+ → −3 (кап).
+	assert_int(Model.occupation_penalty(0)).is_equal(0)
+	assert_int(Model.occupation_penalty(1)).is_equal(-1)
+	assert_int(Model.occupation_penalty(2)).is_equal(-1)
+	assert_int(Model.occupation_penalty(3)).is_equal(-2)
+	assert_int(Model.occupation_penalty(4)).is_equal(-2)
+	assert_int(Model.occupation_penalty(5)).is_equal(-3)
 
 
-func test_occupation_penalty_monotonic() -> void:
-	# «Возрастающий штраф» — строго неубывающий по числу городов.
-	var prev := 0
-	for n in range(0, 12):
-		var p := Model.occupation_penalty(n)
-		assert_bool(p >= prev).is_true()
-		prev = p
+func test_occupation_penalty_capped() -> void:
+	# Кап −3: 5+ ходов все дают −3 (не экспонента, не каскад).
+	for t in [5, 6, 10, 50, 1000]:
+		assert_int(Model.occupation_penalty(t)).is_equal(-3)
 
 
-func test_occupation_penalty_custom_base() -> void:
-	assert_int(Model.occupation_penalty(3, 7)).is_equal(7)
-	assert_int(Model.occupation_penalty(5, 7)).is_equal(21)
+func test_occupation_penalty_negative_input_clamped() -> void:
+	# Отрицательное время → 0 (clamp, детерминированно).
+	assert_int(Model.occupation_penalty(-1)).is_equal(0)
+	assert_int(Model.occupation_penalty(-100)).is_equal(0)
+
+
+func test_occupation_penalty_after_liberation_recovers() -> void:
+	# После освобождения −1 за полный ход до 0: −3 → −2 → −1 → 0.
+	assert_int(Model.occupation_penalty_after_liberation(0, -3)).is_equal(-3)
+	assert_int(Model.occupation_penalty_after_liberation(1, -3)).is_equal(-2)
+	assert_int(Model.occupation_penalty_after_liberation(2, -3)).is_equal(-1)
+	assert_int(Model.occupation_penalty_after_liberation(3, -3)).is_equal(0)
+
+
+func test_occupation_penalty_after_liberation_capped_at_zero() -> void:
+	# Восстановление не уходит в плюс (кап 0).
+	assert_int(Model.occupation_penalty_after_liberation(4, -3)).is_equal(0)
+	assert_int(Model.occupation_penalty_after_liberation(100, -3)).is_equal(0)
+	assert_int(Model.occupation_penalty_after_liberation(0, -1)).is_equal(-1)
+	assert_int(Model.occupation_penalty_after_liberation(1, -1)).is_equal(0)
+
+
+func test_occupation_penalty_after_liberation_positive_input_clamped() -> void:
+	# Положительный penalty_at_liberation → clamp к 0 (штраф ≤ 0).
+	assert_int(Model.occupation_penalty_after_liberation(0, 5)).is_equal(0)
+	assert_int(Model.occupation_penalty_after_liberation(2, 5)).is_equal(0)
 
 
 ## === 4.4: стартовая партия (≤5 попутчиков; у каждого класс/раса/внешний вид) ===
