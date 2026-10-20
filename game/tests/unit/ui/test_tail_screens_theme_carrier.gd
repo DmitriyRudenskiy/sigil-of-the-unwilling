@@ -18,6 +18,13 @@ extends BaseTest
 # вариант, который узел не использует (не тот base_type для типа узла), и проверка
 # уровня темы это промолчит. Замер 2026-10-20: на живой сцене витрины 24/24 варианта
 # резолвят на узле; автономный промт с узлом вне сцены — врёт.
+#
+# Каждый assert_* здесь и во всех гардах темы обязан иметь терминал (is_true, is_equal,
+# …). Семь проверок этого файла были написаны как `assert_bool(x)`
+# `.override_failure_message(...)` — без терминала GdUnit их не выполняет, проверка
+# есть в коде и её нет в прогоне (класс T-123, повтор 2026-10-20; сканер
+# `scripts/ci2_vacuous_asserts.py`). Зелёный прогон о таком не сообщает: силу гарда
+# надо проверять мутацией, а не доверять её наличию терминалов.
 const _THEME := preload("res://assets/theme/game_theme.tres")
 const _SCENES := {
 	"adventure_ui": preload("res://scenes/ui/adventure_ui.tscn"),
@@ -96,15 +103,16 @@ func test_adventure_column_carries_transcribed_style() -> void:
 	var want: StyleBoxFlat = _THEME.get_stylebox("panel", "PanelAdventureColumn") as StyleBoxFlat
 	assert_that(got).is_not_null()
 	assert_bool(got.get_instance_id() == want.get_instance_id()) \
-		.override_failure_message("узел не резолвит носитель PanelAdventureColumn")
+		.override_failure_message("узел не резолвит носитель PanelAdventureColumn").is_true()
 	# Значения снятого переопределения: ThemeConfig.C_PANEL_BG / C_PANEL_BORDER,
 	# бордер 2 со всех сторон, поля 10.
 	var bg := got.bg_color
 	var bd := got.border_color
 	assert_bool(bg == ThemeConfig.C_PANEL_BG) \
-		.override_failure_message("фон %s ≠ перенесённый %s" % [bg, ThemeConfig.C_PANEL_BG])
+		.override_failure_message("фон %s ≠ перенесённый %s" % [bg, ThemeConfig.C_PANEL_BG]).is_true()
 	assert_bool(bd == ThemeConfig.C_PANEL_BORDER) \
-		.override_failure_message("рамка %s ≠ перенесённая %s" % [bd, ThemeConfig.C_PANEL_BORDER])
+		.override_failure_message("рамка %s ≠ перенесённая %s" % [bd, ThemeConfig.C_PANEL_BORDER]) \
+		.is_true()
 	assert_int(got.border_width_left).is_equal(2)
 	assert_int(got.border_width_top).is_equal(2)
 	assert_int(got.border_width_right).is_equal(2)
@@ -135,7 +143,7 @@ func test_info_panel_slots_resolve_slot_style() -> void:
 			assert_bool(got.get_instance_id() == want.get_instance_id()) \
 				.override_failure_message(
 					"слот %s%d резолвит не Panel/slot (носитель не применился)" % [cols[1], i]
-				)
+				).is_true()
 	assert_int(seen).is_equal(8)
 
 
@@ -151,7 +159,7 @@ func test_resource_popup_resolves_plate_by_type() -> void:
 	var want: StyleBox = _THEME.get_stylebox("panel", "Panel")
 	assert_that(got).is_not_null()
 	assert_bool(got.get_instance_id() == want.get_instance_id()) \
-		.override_failure_message("попап потерял фон Panel/panel, который резолвится по типу")
+		.override_failure_message("попап потерял фон Panel/panel, который резолвится по типу").is_true()
 
 
 ## artifact_chest_dialog: корень — голый Control. Он не рисует "panel" ни при каком
@@ -185,12 +193,12 @@ func test_info_panel_action_buttons_resolve_action_style() -> void:
 				.override_failure_message("%s не на носителе темы" % btn.name)
 			var got: StyleBox = btn.get_theme_stylebox("normal")
 			assert_bool(got != null and got.get_instance_id() == want_normal.get_instance_id()) \
-				.override_failure_message("%s резолвит не ButtonAction/normal" % btn.name)
+				.override_failure_message("%s резолвит не ButtonAction/normal" % btn.name).is_true()
 			var hov: StyleBox = btn.get_theme_stylebox("hover")
 			assert_bool(hov != null and hov.get_instance_id() == want_hover.get_instance_id()) \
 				.override_failure_message(
 					"%s потерял hover от типа Button (вариант его перекрыл)" % btn.name
-				)
+				).is_true()
 	assert_int(seen).is_equal(10)
 
 

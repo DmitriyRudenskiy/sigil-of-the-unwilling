@@ -134,6 +134,27 @@ else
 	echo "LINT: SKIPPED (нет gdtoolkit у $LINT_PY или нет .gdlintrc в $(pwd))"
 fi
 echo ""
+echo "=== vacuous asserts: сканер T-123 (гейт) ==="
+# Класс «вечно-зелёных» тестов: `assert_*(x)` без check-метода в GdUnit4 НЕ проверяет
+# ничего — тест зелёный всегда. Сканер жил только в CI-2 (checker 6), а вердикт проекта —
+# локальный прогон (директива владельца 2026-10-13), поэтому гард мог быть пустым и
+# зелёным: 2026-10-20 так нашлись 7 мёртвых проверок в уже смерженном
+# test_tail_screens_theme_carrier.gd (срез T-147). Выход сканера — падение гейта.
+# Сканер требует корень репо как рабочую директорию (git ls-files game/tests).
+if command -v python3 >/dev/null 2>&1; then
+	if VACUOUS="$(cd .. && python3 scripts/ci2_vacuous_asserts.py 2>&1)"; then
+		echo "VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)"
+	else
+		echo "VACUOUS-ASSERT-GATE: RED — assert без check-метода не проверяет НИЧЕГО (T-123):"
+		echo "$VACUOUS"
+		echo "  Правка: добавить терминал (.is_true() / .is_equal(...)); ложные срабатывания —"
+		echo "  в scripts/ci2_vacuous_allowlist.txt (пусто = строго)"
+		exit 1
+	fi
+else
+	echo "VACUOUS-ASSERT-GATE: SKIPPED (python3 не найден — уровень молчит, зафиксировать в отчёте)"
+fi
+echo ""
 echo "=== MCP tests (tugcantopaloglu/godot-mcp) ==="
 MCP_SERVER="${GODOT_MCP_SERVER:-$PWD/addons/godot-mcp/build/index.js}"
 if [ ! -f "$MCP_SERVER" ]; then
