@@ -15,14 +15,34 @@ extends Control
 # Запуск: godot --path game res://scenes/ui/kitchen_sink.tscn
 # Кадры: tools/theme_smoke.gd (сцена в списке SCENES).
 
-const THEME_PATH := "res://assets/theme/game_theme.tres"
+# Имена стилей витрины → варианты темы (T-147). Витрина обязана показывать тему,
+# поэтому путь один: узел получает вариант темы, а не копию стиля из темы —
+# add_theme_stylebox_override сильнее темы и делал узлы недосягаемыми для кита.
+# Подписи в кадре по-прежнему печатают имя стиля, а не имя варианта: иначе кадр
+# поехал бы от переноса (AC2 — нулевая визуальная дельта).
+const PANEL_VARIATIONS := {
+	"panel": &"PanelPlate",
+	"window": &"PanelWindow",
+	"slot": &"PanelSlot",
+	"slot_thin": &"PanelSlotThin",
+	"army_slot": &"PanelArmySlot",
+	"army_slot_hover": &"PanelArmySlotHover",
+	"army_slot_selected": &"PanelArmySlotSelected",
+	"army_slot_disabled": &"PanelArmySlotDisabled",
+	"chip": &"PanelChip",
+}
 
-var _theme: Theme
+# Образцы состояний кнопки: витрина рисует стиль Button на PanelContainer.
+const BUTTON_SWATCH_VARIATIONS := {
+	"normal": &"SwatchButtonNormal",
+	"hover": &"SwatchButtonHover",
+	"pressed": &"SwatchButtonPressed",
+	"disabled": &"SwatchButtonDisabled",
+}
 
 
 func _ready() -> void:
-	_theme = load(THEME_PATH)
-	var bg := _panel_style("panel")
+	var bg := _panel_style(&"PanelPlate")
 	var margin := MarginContainer.new()
 	bg.add_child(margin)
 	for m in ["margin_left", "margin_top", "margin_right", "margin_bottom"]:
@@ -83,13 +103,11 @@ func _caption(text: String) -> Label:
 	return l
 
 
-# Панель с именованным стилем темы: тот же путь, что у прод-кода
-# (artifact_inventory_screen._style) — §1.1 «только стиль темы по имени».
-func _panel_style(style_name: String, min_size := Vector2(0, 0)) -> PanelContainer:
+# Панель с носителем стиля из темы: вариант темы вместо копии стиля, положенной
+# на узел (тот же SubResource, что и раньше, — значения не меняются).
+func _panel_style(variation: StringName, min_size := Vector2(0, 0)) -> PanelContainer:
 	var p := PanelContainer.new()
-	var sb := _theme.get_stylebox(style_name, "Panel")
-	if sb != null:
-		p.add_theme_stylebox_override("panel", sb)
+	p.theme_type_variation = variation
 	if min_size != Vector2.ZERO:
 		p.custom_minimum_size = min_size
 	return p
@@ -116,7 +134,7 @@ func _sec_buttons(grid: GridContainer) -> void:
 		var cell := VBoxContainer.new()
 		cell.add_theme_constant_override("separation", 2)
 		var p := PanelContainer.new()
-		p.add_theme_stylebox_override("panel", _theme.get_stylebox(st, "Button"))
+		p.theme_type_variation = BUTTON_SWATCH_VARIATIONS[st]
 		p.custom_minimum_size = Vector2(112, 40)
 		var lbl := _label(st, "LabelSecondary")
 		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -136,11 +154,10 @@ func _sec_buttons(grid: GridContainer) -> void:
 	_captioned(row2, "disabled", off)
 	var danger := Button.new()
 	danger.text = "Danger"
-	danger.add_theme_stylebox_override("normal", _theme.get_stylebox("button_red", "Panel"))
+	danger.theme_type_variation = &"DangerButton"
 	_captioned(row2, "danger (C_SIGN)", danger)
 	var focused := Button.new()
 	focused.text = "Focus"
-	focused.add_theme_stylebox_override("focus", _theme.get_stylebox("focus", "Button"))
 	_captioned(row2, "К-1: focus", focused)
 
 
@@ -168,11 +185,11 @@ func _sec_panels(grid: GridContainer) -> void:
 	var box := _section(grid, "Panel / Slot (§4.2, К-5/7/8/9)")
 	var row := _row(box)
 	for st in ["panel", "window", "slot", "slot_thin"]:
-		_captioned(row, st, _panel_style(st, Vector2(112, 40)))
+		_captioned(row, st, _panel_style(PANEL_VARIATIONS[st], Vector2(112, 40)))
 	var row2 := _row(box)
 	for st in ["army_slot", "army_slot_hover", "army_slot_selected", "army_slot_disabled"]:
 		_captioned(row2, st.replace("army_slot", "army").lstrip("_"),
-			_panel_style(st, Vector2(112, 40)))
+			_panel_style(PANEL_VARIATIONS[st], Vector2(112, 40)))
 
 
 # ─── §4.7 TabContainer (К-6) ─────────────────────────────────────────────────
@@ -183,7 +200,7 @@ func _sec_tabs(grid: GridContainer) -> void:
 	tabs.custom_minimum_size = Vector2(360, 96)
 	for i in 3:
 		var page := PanelContainer.new()
-		page.add_theme_stylebox_override("panel", _theme.get_stylebox("slot_thin", "Panel"))
+		page.theme_type_variation = &"PanelSlotThin"
 		page.add_child(_label("страница %d — поле §3" % (i + 1), "LabelBody"))
 		tabs.add_child(page)
 		tabs.set_tab_title(i, "Вкладка %d" % (i + 1))
@@ -237,7 +254,7 @@ func _sec_lineedit(grid: GridContainer) -> void:
 	ro.editable = false
 	_captioned(row, "read-only", ro, Vector2(168, 40))
 	# §4.4: голый текст ошибки на C_PANEL запрещён — только на подложке chip
-	var chip := _panel_style("chip")
+	var chip := _panel_style(&"PanelChip")
 	var chip_text := Label.new()
 	chip_text.text = "ошибка: слишком мало"
 	chip_text.theme_type_variation = "ChipError"
