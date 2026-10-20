@@ -39,12 +39,16 @@ The globe SHALL show an open world with regions and cities (region graph, K-T7 �
 - **AND** the player can see regions and cities
 
 ### Requirement: Step 4 - Cities
-The player SHALL be able to select any number of cities. For each city after the second, an increasing occupation penalty SHALL apply (curve — TBD, 02-mechanics §3.1).
+The player SHALL be able to select any number of cities. The occupation penalty is a runtime, time-based modifier (V-4/D-219): 0 turns under occupation → 0; 1–2 → −1; 3–4 → −2; 5+ → −3 (cap −3); after liberation, the penalty SHALL decrease by 1 per full turn until 0. It applies to city output/training/existing modifiers, deterministically, without random penalties or cascading unplayability.
 
-#### Scenario: Occupation penalty
-- **WHEN** the player selects a third city
-- **THEN** an occupation penalty is applied
-- **AND** the penalty increases with each additional city
+#### Scenario: Occupation penalty step curve
+- **WHEN** a city has been occupied for 3 turns
+- **THEN** the occupation penalty is −2
+- **AND** the penalty is capped at −3 for 5 or more turns
+
+#### Scenario: Occupation penalty recovery after liberation
+- **WHEN** a city with penalty −3 is liberated
+- **THEN** the penalty decreases by 1 per full turn until it reaches 0
 
 ### Requirement: Step 5 - Party
 The party SHALL have up to 5 companions. Each companion SHALL have their own class, race, and appearance (§3.2).
