@@ -981,3 +981,38 @@ MiniBarTrust/styles/background = SubResource("StyleBoxFlat_minibar_bg")
 MiniBarRomance/base_type = "ProgressBar"
 MiniBarRomance/styles/fill = SubResource("StyleBoxFlat_minibar_romance")
 MiniBarRomance/styles/background = SubResource("StyleBoxFlat_minibar_bg")
+
+; T-147: витрина kitchen_sink. Пять add_theme_stylebox_override брали стиль из темы
+; и клали его на узел кодом — переопределение сильнее темы, поэтому кит над этими
+; узлами не властен. Переносим сами имена: вариант темы ссылается на тот же
+; SubResource, значения не меняются (отсюда нулевая визуальная дельта). Вариант
+; обязан быть зарегистрирован с base_type (замер — test_battle_theme_carrier.gd).
+PanelWindow/base_type = "PanelContainer"
+PanelWindow/styles/panel = SubResource("StyleBoxFlat_window")
+PanelSlot/base_type = "PanelContainer"
+PanelSlot/styles/panel = SubResource("StyleBoxTexture_slot")
+PanelSlotThin/base_type = "PanelContainer"
+PanelSlotThin/styles/panel = SubResource("StyleBoxFlat_slot_thin")
+PanelArmySlot/base_type = "PanelContainer"
+PanelArmySlot/styles/panel = SubResource("StyleBoxFlat_army_slot")
+PanelArmySlotHover/base_type = "PanelContainer"
+PanelArmySlotHover/styles/panel = SubResource("StyleBoxFlat_army_slot_hover")
+PanelArmySlotSelected/base_type = "PanelContainer"
+PanelArmySlotSelected/styles/panel = SubResource("StyleBoxFlat_army_slot_selected")
+PanelArmySlotDisabled/base_type = "PanelContainer"
+PanelArmySlotDisabled/styles/panel = SubResource("StyleBoxFlat_army_slot_disabled")
+PanelChip/base_type = "PanelContainer"
+PanelChip/styles/panel = SubResource("StyleBoxFlat_chip")
+; Образцы состояний кнопки: витрина рисует стиль Button на PanelContainer — это
+; единственный способ показать hover/pressed без мыши и без нажатия.
+SwatchButtonNormal/base_type = "PanelContainer"
+SwatchButtonNormal/styles/panel = SubResource("StyleBoxTexture_button")
+SwatchButtonHover/base_type = "PanelContainer"
+SwatchButtonHover/styles/panel = SubResource("StyleBoxTexture_button_hover")
+SwatchButtonPressed/base_type = "PanelContainer"
+SwatchButtonPressed/styles/panel = SubResource("StyleBoxTexture_button_pressed")
+SwatchButtonDisabled/base_type = "PanelContainer"
+SwatchButtonDisabled/styles/panel = SubResource("StyleBoxTexture_button_disabled")
+; Красная кнопка: normal брался из Panel/button_red, остальное — по Button.
+DangerButton/base_type = "Button"
+DangerButton/styles/normal = SubResource("StyleBoxFlat_button_red")
