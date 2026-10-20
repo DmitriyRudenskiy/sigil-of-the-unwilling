@@ -177,8 +177,9 @@ override'а на страницу вкладок в витрине сначал�
 прошла зелёным; и в тот же день тот же класс нашёлся в уже смерженном
 `test_tail_screens_theme_carrier.gd` (7 проверок). Причина повтора: сканер
 `scripts/ci2_vacuous_asserts.py` жил только в CI-2, а вердикт проекта — локальный прогон,
-в который сканер не был подключён. Устраняется веткой `fix/t-123-tail-guard-terminals`
-(терминалы семи проверкам + `VACUOUS-ASSERT-GATE` в `game/run_tests.sh`).
+в который сканер не был подключён. Устранено веткой `fix/t-123-tail-guard-terminals`
+(терминалы семи проверкам + `VACUOUS-ASSERT-GATE` в `game/run_tests.sh`, вызывается на
+каждом локальном прогоне).
 Черновик issue в gdUnit4 — [[GDUNIT4-VACUOUS-ASSERT-ISSUE]].
 
 ## Проверенное
