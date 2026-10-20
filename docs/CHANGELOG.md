@@ -9,6 +9,24 @@ date: 2026-10-20
 
 # CHANGELOG — docs/
 
+## [2026-10-20] — Проводка SM навигации к экранам (UI-подготовка, mvp-ui-flow 2.1/5.5)
+
+- **Campaign-менеджер 8 экранов** — `scripts/ui/campaign_ui_manager.gd` (дизайн
+  mvp-ui-flow: «новый campaign_ui_manager.gd», world_ui_manager — legacy hex): проводка
+  `CampaignNavigation` (SM) к слоям-экранам.
+  - `register_screen(id, node)` / `has_screen` / `current_screen()`;
+  - `show_screen(id) -> {ok, reason, tutorial}` — переход по SM + show/hide слоёв;
+  - `can_show(id) -> {available, reason}` — инвариант «≤2 клика до причины» (3.3);
+  - `visible_screens()` — инвариант одного активного экрана;
+  - сигналы `screen_changed` / `tutorial_requested` для визуального слоя.
+- **12 GdUnit4-тестов** (`tests/campaign/test_campaign_ui_manager.gd`): начальное
+  состояние, навигация PREGAME→MENU→MAP→под-экраны→MAP, BATTLE→только MAP,
+  unknown-экран, can_show (current/allowed/not_allowed/unknown), один активный
+  экран, сигналы screen_changed/tutorial_requested (туториал «1 раз»).
+- **Тест-уровни:** GdUnit 2943/0 (было 2931 → стало 2943: +12), 0 orphan.
+- **Остаток (визуал/ux-review):** `.tscn` с реальными экранами + раскладка (экраны —
+  зарегистрированные CanvasItem; здесь — headless-слой проводки).
+
 ## [2026-10-20] — Бой: «все правила D&D видны» (UI-подготовка, mvp-ui-flow 3.4)
 
 - **Разбивка перевеса удара** — `CampaignBattle.strike_breakdown(atk, def_, flank_bonus)`
