@@ -563,7 +563,9 @@ func cancel_placement() -> void:
 	var card_list := _catalog_scroll.get_child(0)
 	for card in card_list.get_children():
 		if card is PanelContainer and String(card.name).begins_with("BuildingCard_"):
-			card.add_theme_stylebox_override("panel", _panel_style(Color("#211e18"), Color("#665638")))
+			# отмена размещения снимает выделение: карточка возвращается к покою сменой
+			# носителя, а не новым override'ом (боевой прецедент PanelActive/PanelDead)
+			card.theme_type_variation = &"CityCard"
 	_show_cell_inspector(_selected_cell)
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -824,18 +826,10 @@ func _initialize_campaign_catalog() -> void:
 		tab.add_theme_color_override("font_color", PALETTE.text_muted)
 		tab.add_theme_color_override("font_pressed_color", PALETTE.accent_gold)
 		tab.add_theme_color_override("font_hover_color", PALETTE.text_primary)
-		var idle := StyleBoxFlat.new()
-		idle.bg_color = Color("#211e18", 0.45)
-		idle.border_color = Color("#665638")
-		idle.set_border_width_all(1)
-		idle.set_corner_radius_all(4)
-		var active := StyleBoxFlat.new()
-		active.bg_color = Color("#392f1d")
-		active.border_color = PALETTE.accent_gold
-		active.set_border_width_all(1)
-		active.set_corner_radius_all(4)
-		for state in ["normal", "hover", "pressed", "hover_pressed"]:
-			tab.add_theme_stylebox_override(state, active if state in ["pressed", "hover_pressed"] else idle)
+		# Носитель объявляет четыре состояния сразу: normal/hover — покой, pressed/
+		# hover_pressed — активная. Второй носитель для «активной» не нужен: вкладка и до
+		# переноса становилась активной сменой button_pressed, а не перекраской.
+		tab.theme_type_variation = &"CityTab"
 		_apply_keyboard_focus(tab)
 		tab.pressed.connect(_on_category_tab_pressed.bind(category_index))
 		_category_tabs.add_child(tab)
@@ -919,10 +913,8 @@ func _make_building_card(definition: Dictionary) -> PanelContainer:
 	card.name = "BuildingCard_" + building_id
 	card.custom_minimum_size.y = 172.0
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var selected := building_id == _selected_building_id
-	card.add_theme_stylebox_override("panel", _panel_style(
-		Color("#29241b") if selected else Color("#211e18"),
-		Color("#d3ae5d") if selected else Color("#665638")))
+	card.theme_type_variation = (
+		&"CityCardSelected" if building_id == _selected_building_id else &"CityCard")
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 6)
 	card.add_child(box)
@@ -970,16 +962,7 @@ func _make_building_card(definition: Dictionary) -> PanelContainer:
 
 	var cost_panel := PanelContainer.new()
 	cost_panel.name = "BuildingCostPanel"
-	var cost_style := StyleBoxFlat.new()
-	cost_style.bg_color = Color("#392f1d")
-	cost_style.border_color = Color("#b28b42")
-	cost_style.set_border_width_all(1)
-	cost_style.set_corner_radius_all(4)
-	cost_style.content_margin_left = 8
-	cost_style.content_margin_top = 5
-	cost_style.content_margin_right = 8
-	cost_style.content_margin_bottom = 5
-	cost_panel.add_theme_stylebox_override("panel", cost_style)
+	cost_panel.theme_type_variation = &"CityCostPanel"
 	box.add_child(cost_panel)
 	var cost_row := HBoxContainer.new()
 	cost_row.name = "BuildingCost"
@@ -1153,9 +1136,7 @@ func _on_building_card_pressed(building_id: String) -> void:
 	for card in card_list.get_children():
 		if card is PanelContainer and String(card.name).begins_with("BuildingCard_"):
 			var selected := String(card.name) == "BuildingCard_" + building_id
-			card.add_theme_stylebox_override("panel", _panel_style(
-				Color("#29241b") if selected else Color("#211e18"),
-				Color("#d3ae5d") if selected else Color("#665638")))
+			card.theme_type_variation = &"CityCardSelected" if selected else &"CityCard"
 	if _selected_cell.x >= 0:
 		_refresh_placement_preview(_selected_cell)
 	_update_placement_controls()
@@ -1165,21 +1146,6 @@ func _find_campaign_building(building_id: String) -> Dictionary:
 		if String(definition.get("id", "")) == building_id:
 			return definition
 	return {}
-
-func _panel_style(background: Color, border: Color) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = background
-	style.border_color = border
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(6)
-	style.shadow_color = Color(0.0, 0.0, 0.0, 0.34)
-	style.shadow_size = 5
-	style.shadow_offset = Vector2(0, 2)
-	style.content_margin_left = 12
-	style.content_margin_top = 10
-	style.content_margin_right = 12
-	style.content_margin_bottom = 10
-	return style
 
 func _resource_label(id: StringName) -> String:
 	match id:
