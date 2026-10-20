@@ -117,6 +117,42 @@ func test_training_rejects_full_party_and_unapproved_generic_unit() -> void:
 	assert_that(unit_result.reason).is_equal("unsupported_class:swordsmen")
 	assert_that(unsupported.party.is_empty()).is_true()
 
+## D-221 (V-6): alive-модель — DEAD не занимают слот и не блокируют тренировку.
+func _state_alive_dead(alive: int, dead: int) -> Dictionary:
+	var state := _state(alive)
+	for index in range(dead):
+		state.party.append({"id": "dead_%d" % index, "class": "fighter",
+			"race": "humans", "level": 1, "xp": 0, "stats": {"str": 13},
+			"luck": 0, "state": "DEAD"})
+	return state
+
+func test_training_allows_dead_members_in_roster() -> void:
+	# 3 живых + 2 мёртвых = 5 в ростере, но alive 3 < 5 → тренировка разрешена.
+	var state := _state_alive_dead(3, 2)
+	var result := TrainingService.train(state, _building_catalog(), 10, "fighter", _trainee())
+	assert_that(result.ok).is_true()
+	assert_that(state.party.size()).is_equal(6)  # 3 + 2 dead + новый рекрут
+
+func test_training_blocks_when_5_alive_even_with_dead() -> void:
+	# 5 живых + 2 мёртвых = 7 в ростере, alive 5 >= 5 → блок.
+	var state := _state_alive_dead(5, 2)
+	var result := TrainingService.train(state, _building_catalog(), 10, "fighter", _trainee())
+	assert_that(result.ok).is_false()
+	assert_that(result.reason).is_equal("party_capacity_reached")
+	assert_that(state.party.size()).is_equal(7)  # новый не добавлен
+
+func test_available_actions_allows_dead_in_roster() -> void:
+	# 3 живых + 2 мёртвых → опции доступны (alive 3 < 5).
+	var state := _state_alive_dead(3, 2)
+	var options := TrainingService.available_training_actions(state, _building_catalog())
+	assert_that(options.size()).is_equal(1)
+
+func test_available_actions_blocked_when_5_alive_with_dead() -> void:
+	# 5 живых + 2 мёртвых → опции пусты (alive 5 >= 5).
+	var state := _state_alive_dead(5, 2)
+	var options := TrainingService.available_training_actions(state, _building_catalog())
+	assert_that(options.is_empty()).is_true()
+
 func test_training_payment_failure_is_atomic() -> void:
 	var state := _state(0, {"food": 10.0, "wood": 0.0, "iron": 0.0})
 	var before_resources: Dictionary = state.resources.duplicate(true)

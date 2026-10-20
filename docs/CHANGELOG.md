@@ -9,6 +9,21 @@ date: 2026-10-20
 
 # CHANGELOG — docs/
 
+## [2026-10-20] — V-6: alive-модель лимита партии (D-221)
+
+- **`game/scripts/campaign/campaign_training_service.gd`**: оба гейта лимита
+  партии (`available_training_actions` + `train`) переведены с total `party.size()`
+  на `PartySystem.alive_members(party).size()`. DEAD не занимают активный слот
+  и не блокируют тренировку/рекрутинг; новый рекрут занимает живой слот при
+  `alive_count < capacity`. Согласовано с `party_screen_model` (alive) и
+  `campaign_composition` (`settlement.party_size = alive_members`).
+- **`game/scripts/ui/party_screen_model.gd`**: tech-dead-пометка о несогласованности
+  снята (D-221).
+- **Тесты**: `test_campaign_training_service.gd` +4 alive-теста (3 живых+2 мёртвых →
+  тренировка разрешена; 5 живых+2 мёртвых → блок; `available_training_actions`
+  аналогично). 13/0, 0 orphans.
+- **Доки**: `party-training/tasks.md` 1.4 (alive-модель), TICKETS.md (статус D-221/V-6).
+
 ## [2026-10-20] — Вердикты владельца V-1…V-6 зафиксированы (D-216…D-221)
 
 - **`docs/mvp/VERDICT-REQUEST.md`**: V-1…V-6 помечены «решено» (вердикт + D-*);

@@ -5,6 +5,11 @@ const MvpSaveSchema := preload("res://scripts/campaign/save/mvp_save_schema.gd")
 const CatalogPath := "res://assets/data/mvp_catalog.json"
 const PARTY_CAPACITY := 5
 
+## D-221 (V-6, 2026-10-20): лимит партии и гейтинг — alive-модель.
+## DEAD не занимают активный слот и не блокируют тренировку/рекрутинг;
+## согласовано с party_screen_model (alive) и campaign_composition
+## (settlement.party_size = alive_members).
+
 static func available_training_actions(
 	state: Dictionary,
 	building_catalog: Dictionary,
@@ -12,7 +17,8 @@ static func available_training_actions(
 	admin_capacity: int = 0
 ) -> Array[Dictionary]:
 	var options: Array[Dictionary] = []
-	if not MvpSaveSchema.validate(state).is_empty() or state.party.size() >= PARTY_CAPACITY:
+	if not MvpSaveSchema.validate(state).is_empty() \
+			or PartySystem.alive_members(state.party).size() >= PARTY_CAPACITY:
 		return options
 	var catalog := _load_catalog()
 	var built_ids: Array[String] = []
@@ -85,7 +91,7 @@ static func train(
 	for member in party:
 		if member is Dictionary and String(member.get("id", "")) == trainee_id:
 			return _failure("duplicate_party_member:%s" % trainee_id)
-	if party.size() >= mini(PARTY_CAPACITY, maxi(party_capacity, 0)):
+	if PartySystem.alive_members(party).size() >= mini(PARTY_CAPACITY, maxi(party_capacity, 0)):
 		return _failure("party_capacity_reached")
 
 	var city: Dictionary = state.get("city", {})
