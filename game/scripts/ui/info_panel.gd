@@ -1,7 +1,6 @@
 class_name InfoPanel
 extends VBoxContainer
 
-const THEME_PATH := "res://assets/theme/game_theme.tres"
 const C_TEXT := ThemeConfig.C_TEXT_PRIMARY
 const C_GOLD := ThemeConfig.C_TEXT_GOLD
 
@@ -12,7 +11,6 @@ const C_GOLD := ThemeConfig.C_TEXT_GOLD
 
 var _hero_slots: Array[Panel] = []
 var _town_slots: Array[Panel] = []
-var _theme: Theme = null
 
 signal end_turn_pressed
 signal options_requested
@@ -23,8 +21,6 @@ var month := 1
 
 func _ready() -> void:
 	add_theme_constant_override("separation", 6)
-	_theme = load(THEME_PATH)
-	_apply_theme()
 	_collect_slots()
 	_connect_buttons()
 	(get_node("date_label") as Label).text = _fmt_date()
@@ -32,28 +28,6 @@ func _ready() -> void:
 		for child: Node in (get_node(col_name) as Control).get_children():
 			if child is Button:
 				(child as Button).tooltip_text = GameText.info_tooltip(child.name)
-
-func _apply_theme() -> void:
-	if _theme == null:
-		return
-	var sb := _theme.get_stylebox("slot", "Panel")
-	if sb == null:
-		return
-	for slot in _get_slot_nodes():
-		slot.add_theme_stylebox_override("panel", sb)
-
-func _get_slot_nodes() -> Array:
-	var out: Array[Panel] = []
-	for i in 4:
-		var h := get_node_or_null("columns/hero_col/hero_slot_%d" % i)
-		if h is Panel:
-			out.append(h)
-	var t: Array[Panel] = []
-	for i in 4:
-		var v := get_node_or_null("columns/town_col/town_slot_%d" % i)
-		if v is Panel:
-			t.append(v)
-	return out + t
 
 func _collect_slots() -> void:
 	_hero_slots = []
@@ -65,6 +39,11 @@ func _collect_slots() -> void:
 		var t := get_node_or_null("columns/town_col/town_slot_%d" % i)
 		if t is Panel:
 			_town_slots.append(t)
+	# T-147: раньше на каждый слот клалась копия Panel/slot. Узлы имеют тип Panel,
+	# поэтому носитель — PanelInfoSlot (base_type = "Panel"), иначе резолв уходит
+	# на Panel/panel и слот получает не тот стиль.
+	for slot in _hero_slots + _town_slots:
+		slot.theme_type_variation = "PanelInfoSlot"
 
 func _connect_buttons() -> void:
 	_end_turn_btn.pressed.connect(func(): end_turn_pressed.emit())
