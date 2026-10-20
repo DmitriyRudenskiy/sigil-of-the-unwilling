@@ -9,6 +9,29 @@ date: 2026-10-20
 
 # CHANGELOG — docs/
 
+## [2026-10-20] — OpenSpec: синк 8 завершённых change в main-спеки + статус-хвосты districts/vertical-slice
+
+- **Что сделано:** дельты завершённых change синхронизированы в `openspec/specs/` (workflow: sync
+  после завершения, до архива). Новые main-спеки (8): `raid-pressure-system` (10 req),
+  `region-graph-map` (7 req), `autopilot-roles` (5), `balance-report` (3), `scenario-matrix` (3),
+  `style-reference-archive` (5), `campaign-city-construction` (3), `campaign-city-economy` (9 —
+  слиты дельты двух change: building-economy 3 + balance-tuning 6). Дополнение существующей
+  `balance-probe` (+1 req: отчёт по экономике города кампании). Замена pre-pivot спеков
+  `campaign-city-building-economy` (5 файлов): `city-tech-tree`, `settlement-buildings`,
+  `settlement-reputation`, `settlement-resolve`, `settlement-species` — REMOVED-требования
+  удалены (Reason/Migration — в дельте), ADDED-требования добавлены, Purpose/баннеры
+  обновлены под пост-пивот состояние.
+- **C-9-баннер `city-tech-tree` уточнён:** pre-pivot требования (уровни 1–11) теперь
+  фактически REMOVED из спека (не только помечены); pre-pivot контент остаётся носителем
+  правила для 1.0 в доках 02e* и git-истории (Q-M46/Q-M52), пост-пивот требования —
+  текущий контракт.
+- **Статус-хвосты (уже смёржены, в CHANGELOG не были зафиксированы):**
+  city-construction-districts 3.3 [x] (C-11 синк выполнен) и 4.2 [~] (первая половина покрыта
+  `test_district_no_grant.gd`; вторая — обвал района — ждёт 2.2 «tags»); vertical-slice
+  4.1/4.2/4.3 [x] (верификация покрыта существующими тестами: бит-скрипт, fail-states, арки).
+- **Верификация:** `openspec validate --specs`: 48 passed, 1 failed (pre-existing `crafting`);
+  `--changes`: 27 passed, 0 failed. Код не менялся — только спеки и CHANGELOG.
+
 ## [2026-10-20] — Счётчики гейт-документации приведены к факту
 
 - **Что исправлено:** в [[TICKETS]]-соседних гейт-документах числа тестов отстали от свита —

@@ -1,130 +1,94 @@
 # settlement-buildings Specification
 
+> **Синк 2026-10-20 (campaign-city-building-economy).** Pre-pivot требования
+> (Hearth/Warehouse, лагеря, жильё, сервис/Unified и др.) **REMOVED**
+> (Reason/Migration — в дельте change); pre-pivot контент — носитель правила
+> для 1.0 (доки 02e*, git-история). Пост-пивот требования ниже — текущий
+> контракт capability.
+
 ## Purpose
-Определяет здания поселения: стартовые (Hearth, Warehouse), лагеря,
-производство с одним рецептом, жильё (Shelter/Big Shelter/дома видов
-с ценами и улучшениями), сервис/Unified, стройку свободными
-поселенцами и продвинутые здания (Small Warehouse, Trading Post,
-Rainpunk).
+Определяет здания кампании: единый source-traceable каталог зданий,
+размещение и взаимодействие с TerraScape, сохранение состояния города при
+мержах каталога, военные здания как источники class-based обучения и
+защитные здания как вклад в оборону кампании.
 ## Requirements
-### Requirement: Стартовые здания
-Поселение SHALL начинаться с Ancient Hearth (греет жильё в радиусе,
-точка отдыха/еды, уровни 1–3) и Main Warehouse (центральный склад).
 
-#### Scenario: Основание
-- **WHEN** караван основывает поселение
-- **THEN** Hearth и Warehouse построены в ядре кластера
-- **AND** всё жильё строится в радиусе Hearth
+### Requirement: Unified source-traceable building catalog
+The source inventory SHALL maintain a version-bounded public-reference manifest. Each observed row SHALL preserve its source name/ID, category, URL, source snapshot, confidence, and disposition. The inventory SHALL distinguish confirmed, candidate, and unknown evidence; it SHALL record unobserved roster areas as coverage gaps instead of fabricating entries. Campaign catalog inclusion SHALL require a confirmed row and an approved campaign role. Candidate/unknown rows remain non-admitted until evidence is added.
 
-#### Scenario: Уровни Hearth
-- **WHEN** в радиусе Hearth дома и декор (парк)
-- **THEN** Hearth повышает уровень: L1 +1 Resolve всем, L2 +10%
-  скорости производства, L3 +10% шанс двойного производства
+#### Scenario: Source coverage audit
+- **WHEN** the source manifest and campaign catalog are validated
+- **THEN** every observed source row has provenance, confidence, and exactly one disposition
+- **AND** every confirmed in-scope row maps to a canonical catalog entry or a documented exclusion
+- **AND** candidate/unknown rows remain identified as non-admitted with a reason
+- **AND** unobserved source coverage is reported as unknown, not as a completed roster count
 
-### Requirement: Лагеря сбора
-Поселение SHALL строить лагеря (Woodcutters, Stonecutters,
-Harvesters — всегда; Small Foragers — малые узлы; Small Herbalists —
-уровень 2); малые лагеря собирают только с малых узлов.
+#### Scenario: Duplicate source buildings
+- **WHEN** two source entries perform the same adapted role
+- **THEN** they map to one canonical building or an explicitly data-driven variant
+- **AND** the mapping preserves distinct effects only when they change player-visible behavior
 
-#### Scenario: Сбор
-- **WHEN** поселенец в Woodcutters' Camp
-- **THEN** за цикл — ресурс с ближайшего узла
-- **AND** активный лагерь лесорубов увеличивает Hostility
+#### Scenario: Out-of-scope AoE IV structure
+- **WHEN** an AoE IV source entry is a dock, naval producer, landmark/wonder without an eligible campaign class-training or defensive role, or a non-building unit
+- **THEN** it is excluded with a recorded reason
 
-#### Scenario: Малый узел
-- **WHEN** обычный лагерь стоит рядом с малым узлом
-- **THEN** он не собирает с него (нужен малый лагерь)
+### Requirement: Building placement and TerraScape interactions
+Buildings SHALL use the campaign city's canonical hex layout. Each building definition SHALL declare its footprint, placement constraints, role, costs, upkeep, jobs, production/service effects, and applicable neighbor interactions. TerraScape-inspired synergies and penalties SHALL be computed from explicit data and shown with their causes. Adjacency values SHALL be signed basis points; aggregated effects SHALL be clamped to ±10,000 basis points.
 
-### Requirement: Производство с одним рецептом
-Производственные здания (Lumber Mill, Bakery, Granary, Crude
-Workstation, Cooperage-гарпии, Tinctury-бобры) SHALL производить
-один выбранный рецепт за раз; смена рецепта — в любой момент.
+#### Scenario: Place a compatible building
+- **WHEN** the player selects a building and a legal unoccupied site
+- **THEN** the building is placed if its cost and prerequisites are satisfied
+- **AND** its effects on itself and affected neighbors are recalculated
 
-#### Scenario: Один рецепт
-- **WHEN** Lumber Mill построен
-- **THEN** он производит только доски, пока рецепт не сменён
+#### Scenario: Placement is blocked
+- **WHEN** the chosen site violates footprint, terrain, district, or prerequisite rules
+- **THEN** placement is rejected without changing city state
+- **AND** the blocking reason is shown
 
-#### Scenario: Тематические здания
-- **WHEN** построен Cooperage (harpy)
-- **THEN** варианты рецептов: бочки, coats, чай
-- **AND** Tinctury (beaver): эль, вино, пигмент
+#### Scenario: Neighbor effect explanation
+- **WHEN** a building receives or causes a synergy or penalty
+- **THEN** the UI can identify the neighboring building, rule, and resulting value
 
-#### Scenario: Гибкость рецептов
-- **WHEN** в рецепте несколько допустимых ингредиентов
-- **THEN** производство подстраивается под доступные ресурсы
+### Requirement: Building merges preserve city state
+A merge SHALL be available only when its declared recipe and spatial conditions are met. Merging SHALL produce the declared resulting building and preserve or explicitly resolve constituent costs, workers, residents, stock, and effects without duplicating value.
 
-### Requirement: Жильё с ценами и улучшениями
-Система жилья SHALL включать: Shelter (3, древесина, всегда; frog
-отказывается), Big Shelter (3, древесина, "Древние знания"), дома
-видов (2, цены/унлоки из таблицы); улучшения домов — 2 уровня, на
-каждом выбор 1 из 2 бонусов; frog — только видовой дом.
+#### Scenario: Valid merge
+- **WHEN** all required component buildings satisfy the merge recipe and placement conditions
+- **THEN** they are replaced by the merged building as one atomic operation
+- **AND** the resulting building has the declared footprint and effects
 
-#### Scenario: Цены домов
-- **WHEN** строится Human House
-- **THEN** стоимость 4 доски + 2 кирпича, унлок Vanguard Spire L1
-- **AND** Beaver 8 досок (L2), Lizard 2 ткани + 2 кирпича (L3),
-  Harpy 4 ткани (L4), Fox (L6, цена TBD)
+#### Scenario: Invalid merge
+- **WHEN** a merge is missing a component or spatial condition
+- **THEN** no building or city stock changes
+- **AND** the unmet condition is identified
 
-#### Scenario: Улучшение дома
-- **WHEN** дом улучшается на уровне 1
-- **THEN** выбирается 1 из 2 бонусов (например, beaver: +15%
-  скорость или +1 место)
-- **AND** общий бонус: +1 Resolve жителю
+### Requirement: Military buildings support campaign character training
+Military buildings SHALL enable only training actions explicitly supported by the campaign's approved class-based character/party model. They SHALL NOT create generic `UnitRegistry` stacks or import AoE IV troop stats. Training SHALL consume registered goods and respect existing party/capacity rules; buildings without an approved training mapping MAY remain infrastructure-only.
 
-#### Scenario: Автопереселение
-- **WHEN** построен дом и есть бездомные этого вида
-- **THEN** они автоматически заселяются
-- **AND** бонус жилья применяется
+#### Scenario: Train an approved campaign class
+- **WHEN** a military building's training role is active and its declared prerequisites, costs, and party capacity are satisfied
+- **THEN** the canonical campaign character/party pipeline performs the training action
+- **AND** the city ledger records the cost and training cause
 
-#### Scenario: Радиус Hearth
-- **WHEN** попытка построить жильё вне радиуса Ancient Hearth
-- **THEN** постройка запрещена
+#### Scenario: Unsupported source troop
+- **WHEN** a source building trains a troop role that has no approved campaign class mapping
+- **THEN** that troop does not appear as a training choice
+- **AND** the source building is either adapted as support infrastructure or explicitly excluded
 
-### Requirement: Сервис и Unified
-Здания сервиса (таверна) SHALL давать доступ к сервисным
-потребностям; Unified/Commons (SC L6) — несколько сервисных
-потребностей в одном месте с меньшим бонусом.
+#### Scenario: Naval unit is not trainable
+- **WHEN** a source template represents a naval unit or requires a naval producer
+- **THEN** it is absent from the campaign training choices
+- **AND** it adds no naval stock, capacity, or battle behavior
 
-#### Scenario: Таверна
-- **WHEN** постройка таверны
-- **THEN** поселенцы получают доступ к элю
-- **AND** бонус Resolve за сервис
+### Requirement: Defensive buildings contribute to campaign defense
+Static defensive buildings SHALL contribute their declared protection, coverage, or fortification effects to the existing city defense and pressure-based raid resolution. They SHALL NOT resolve as a separate real-time combat mode.
 
-#### Scenario: Unified
-- **WHEN** построен Unified/Commons
-- **THEN** удовлетворяет несколько сервисных потребностей
-- **AND** бонус меньше, чем у специализированного здания
+#### Scenario: Raid against fortified city
+- **WHEN** a pressure-generated raid targets a city with working defensive buildings
+- **THEN** the existing raid resolver applies their declared defense effects
+- **AND** the ledger/chronicle identifies which defenses modified the outcome
 
-### Requirement: Стройка свободными поселенцами
-Здания SHALL строиться свободными поселенцами при наличии
-материалов; стройка занимает циклы; для ускорения можно уволить
-рабочих с производства.
-
-#### Scenario: Стройка
-- **WHEN** есть материалы и свободные поселенцы
-- **THEN** постройка идёт N циклов, рабочие не производят
-
-#### Scenario: Нет рабочих
-- **WHEN** свободных поселенцев нет
-- **THEN** постройка не начинается, материалы не списываются
-
-### Requirement: Продвинутые здания
-Поселение SHALL строить продвинутые здания: Small Warehouse (рядом
-с удалённым производством — меньше время переноски), Trading Post
-(товары → Amber, покупка ресурсов/зданий), Rainpunk Engines (в
-зданиях — +Resolve работников), дождевую воду (в производство —
-скорость/крит/Resolve).
-
-#### Scenario: Small Warehouse
-- **WHEN** постройка Small Warehouse рядом с фермой
-- **THEN** время переноски ресурсов с фермы уменьшается
-
-#### Scenario: Trading Post
-- **WHEN** постройка Trading Post
-- **THEN** товары обмениваются на Amber
-- **AND** недостающие ресурсы/здания покупаются у торговцев
-
-#### Scenario: Rainpunk
-- **WHEN** в здание установлен Rainpunk Engine
-- **THEN** Resolve работников здания повышается
-
+#### Scenario: Defense building is disabled
+- **WHEN** a defensive building is ruined, unstaffed, or otherwise inactive under its data rules
+- **THEN** only its declared inactive-state effects apply
+- **AND** it provides no active defense bonus

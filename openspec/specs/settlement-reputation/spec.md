@@ -1,95 +1,33 @@
 # settlement-reputation Specification
 
+> **Синк 2026-10-20 (campaign-city-building-economy).** Pre-pivot требования
+> (Demand/Decadence, Hostility, штормы, Prestige-уровни, условия поражения)
+> **REMOVED** (Reason/Migration — в дельте change); pre-pivot контент —
+> носитель правила для 1.0 (доки 02e*, git-история). Пост-пивот требования
+> ниже — текущий контракт capability.
+
 ## Purpose
-Определяет метр репутации (Demand/Decadence) как условие победы,
-враждебность леса (Hostility) с glade, штормы, Prestige-уровни и
-условия поражения.
+Определяет репутацию/состояние города кампании: рейдерское давление
+кампании — единственный рейд-таймер города, а satisfaction и Sign Prestige
+остаются отдельными величинами (не валюда победы).
 ## Requirements
-### Requirement: Репутация как победа
-Поселение SHALL иметь общий метр репутации (0..цель); очки
-начисляются видами, чей средний Resolve выше Demand; заполнение
-метра — победа.
 
-#### Scenario: Победа
-- **WHEN** метр репутации заполнен
-- **THEN** прогон завершается победой
-- **AND** итоговая статистика доступна
+### Requirement: Campaign raid pressure remains the only city raid clock
+City raids SHALL be generated and paced by the canonical campaign pressure system. Building and population effects MAY modify declared pressure inputs or defense values but SHALL NOT schedule raids by fixed settlement cycles or a separate Hostility meter.
 
-#### Scenario: Наполнение
-- **WHEN** вид держит Resolve выше Demand N циклов
-- **THEN** метр растёт на очки вида
-- **AND** при Decadence порог Demand вида снижается (репутация
-  доступнее)
+#### Scenario: Building changes raid pressure
+- **WHEN** a city building or population effect modifies a configured pressure input
+- **THEN** the pressure system receives the explicit deterministic modifier
+- **AND** the source is available in the raid explanation
 
-### Requirement: Враждебность леса и glade
-Hostility SHALL расти от: прошедших лет, новых поселенцев, открытых
-glade, активных лагерей лесорубов; Small Hearth в новых районах
-снижает общую Hostility; focus — на Dangerous/Forbidden glade
-(лучшие ресурсы/события).
+#### Scenario: City turn without pressure threshold
+- **WHEN** a campaign city turn resolves and the pressure accumulator has not crossed a configured threshold
+- **THEN** no raid is generated solely because a source-game storm or calendar trigger fired
 
-#### Scenario: Рост Hostility
-- **WHEN** проходит год / прибывает поселенец / открывается glade /
-  работает лагерь лесорубов
-- **THEN** Hostility увеличивается
+### Requirement: Satisfaction and Sign Prestige remain separate
+City group satisfaction SHALL NOT award, spend, or store Sign Prestige unless a separately authorized Sign rule explicitly defines such a transaction.
 
-#### Scenario: Сдерживание
-- **WHEN** построен Small Hearth
-- **THEN** общий прирост Hostility уменьшается
-
-#### Scenario: Опасные glade
-- **WHEN** поселенец расчищает Dangerous/Forbidden glade
-- **THEN** лучшие ресурсы/события
-- **AND** риск выше (нужны инструменты)
-
-### Requirement: Штормы
-Шторм SHALL бить по Resolve поселенцев пропорционально Hostility;
-coats дают +3 в шторм; во время шторма можно уволить лесорубов
-(снижение Hostility); критический сброс — массовый исход.
-
-#### Scenario: Шторм
-- **WHEN** начинается шторм
-- **THEN** поселенцы теряют Resolve (∝ Hostility)
-- **AND** coats +3 Resolve
-
-#### Scenario: Управление штормом
-- **WHEN** во время шторма уволены лесорубы
-- **THEN** Hostility ниже → штраф шторма меньше
-
-#### Scenario: Массовый исход
-- **WHEN** после шторма Resolve большинства критически низок
-- **THEN** за циклы поселение теряет большинство населения
-
-### Requirement: Prestige-уровни
-После освоения базовой сложности SHALL открываться Prestige-уровни
-(1–10, не-remote), каждый добавляет негативный модификатор.
-
-#### Scenario: Prestige 1
-- **WHEN** выбран Prestige 1
-- **THEN** победа требует +4 репутации, приказы сложнее
-
-#### Scenario: Prestige 6
-- **WHEN** выбран Prestige 6
-- **THEN** все здания стоят +50% дороже
-
-#### Scenario: Prestige 7/8
-- **WHEN** выбран Prestige 7 (еда) / 8 (роскошь)
-- **THEN** 50% шанс съесть/использовать 2 единицы вместо 1
-
-#### Scenario: Prestige 2/5/9/10
-- **WHEN** выбран Prestige 2 (шторм дольше) / 5 (исход ×2) / 9
-  (glade −33% скорость) / 10 (товары −50% для торговцев)
-- **THEN** соответствующий модификатор действует
-
-### Requirement: Условия поражения
-Прогон SHALL завершаться поражением, если все поселенцы ушли/умерли
-или достигнут порог критической нестабильности.
-
-#### Scenario: Вымирание
-- **WHEN** поселение без поселенцев
-- **THEN** поражение
-- **AND** ресурсы учтены в meta (Smoldering City)
-
-#### Scenario: Нестабильность
-- **WHEN** достигнут порог критической нестабильности
-- **THEN** поражение
-
+#### Scenario: High satisfaction
+- **WHEN** all city groups have high satisfaction
+- **THEN** only the declared city and population effects occur
+- **AND** Sign Prestige is unchanged absent an eligible Sign event

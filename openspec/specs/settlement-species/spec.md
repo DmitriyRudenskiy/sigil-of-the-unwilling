@@ -1,78 +1,49 @@
 # settlement-species Specification
 
+> **Синк 2026-10-20 (campaign-city-building-economy).** Pre-pivot требования
+> (7 видов со статистикой, караван ≤3 видов, специализации) **REMOVED**
+> (Reason/Migration — в дельте change); pre-pivot контент — носитель
+> правила для 1.0 (доки 02e*, git-история). Пост-пивот требования ниже —
+> текущий контракт capability.
+
 ## Purpose
-Определяет виды поселенцев (7: 5 основных + 2 DLC), их статистику
-с точными определениями, формирование каравана (не более трёх видов)
-и механику специализаций.
+Определяет население города кампании: семь канонических экономических
+архетипов ведут симуляцию населения; архетипы задают потребности и
+предпочтения работы, а не жёсткие job locks (жители = расы кампании, K-M3).
 ## Requirements
-### Requirement: Семь видов с полной статистикой
-Система SHALL определять 5 основных видов (human, beaver, lizard,
-harpie, fox) и 2 DLC-вида (frog, bat) со статистикой: Base Resolve,
-Demand, Decadence, Hunger Tolerance, Break Interval, черты.
 
-#### Scenario: Основные виды
-- **WHEN** система инициализируется
-- **THEN** human (Resolve 15, Demand 30, Decadence +4, голод 6,
-  перерыв 2:00), beaver (10/30/+2/6/2:00), lizard (5/15/+7/12/1:40),
-  harpy (5/15/+3/4/1:40), fox (5/15/+5/3/2:00) зарегистрированы
-- **AND** черты видов влияют на поведение (human — дождь, lizard —
-  недоверие, harpy — агрессия, fox — лес)
+### Requirement: Seven economic archetypes drive population simulation
+The city SHALL simulate residents by the seven canonical economic archetypes: Инженеры & Строители, Земледельцы & Пивовары, Алхимики & Хранители Пламени, Ткачи & Ремесленники, Торговцы & Дипломаты, Охотники & Следопыты, Металлурги & Техники. A resident's ancestry MAY be retained as identity metadata but SHALL NOT create a parallel needs, housing, or production simulation.
 
-#### Scenario: Frog (DLC)
-- **WHEN** куплен DLC "Keepers of the Stone" и SC L9
-- **THEN** frog доступен (Resolve 10, Demand 25, Decadence 5,
-  голод 8, перерыв 2:30)
-- **AND** frog отказывается жить в Shelter (нужен видовой дом)
+#### Scenario: Resident archetype is resolved
+- **WHEN** a resident with a known ancestry enters the city
+- **THEN** the city assigns or receives the resident's canonical economic archetype
+- **AND** city simulation uses that archetype while preserving ancestry for display or narrative
 
-#### Scenario: Bat (DLC, TBD)
-- **WHEN** куплен DLC "Nightwatchers" и SC L11
-- **THEN** bat доступен
-- **AND** до уточнения статистики bat не может быть в караване
+#### Scenario: Unknown ancestry mapping
+- **WHEN** a resident's ancestry has no configured archetype mapping
+- **THEN** the resident receives the configured neutral/fallback archetype or is rejected by scenario validation
+- **AND** the choice is explicit and deterministic
 
-### Requirement: Определения статистик
-Статистика вида SHALL иметь следующие значения: Base Resolve —
-стартовое настроение без бонусов; Demand — уровень Resolve, при
-котором вид начинает генерировать репутацию; Decadence — на сколько
-падает максимальный порог Demand за каждое полученное очко
-репутации; Hunger Tolerance — единицы голода до падения Resolve;
-Break Interval — период перерыва у очага.
+#### Scenario: Ancestry does not duplicate mechanics
+- **WHEN** two residents share an archetype but have different ancestry metadata
+- **THEN** their group-level city needs and work preferences are evaluated by the same archetype rules
+- **AND** ancestry-specific effects apply only when separately declared as campaign character data
 
-#### Scenario: Demand и репутация
-- **WHEN** средний Resolve вида выше его Demand
-- **THEN** вид генерирует очки репутации
-- **AND** чем выше Demand, тем сложнее репутация
+### Requirement: Archetypes define needs and work preferences, not hard job locks
+Each archetype SHALL declare its city needs, eligible/specialized building roles, and deterministic production or satisfaction modifiers. A resident SHALL remain assignable outside its preferred role unless a building or scenario explicitly defines a hard requirement.
 
-#### Scenario: Decadence
-- **WHEN** вид получил очко репутации
-- **THEN** его максимальный порог Demand снижается на Decadence
-- **AND** репутация становится доступнее (порог падает)
+#### Scenario: Preferred work role
+- **WHEN** a resident works in a building role preferred by its archetype
+- **THEN** the declared deterministic work modifier applies to that building's production
+- **AND** the modifier is visible in the production breakdown
 
-### Requirement: Караван не более чем из трёх видов
-Поселение SHALL формироваться из каравана с не более чем 3
-различными видами; состав каравана определяет виды поселения.
+#### Scenario: Non-preferred work role
+- **WHEN** a resident works in another eligible building role
+- **THEN** the assignment remains valid
+- **AND** only explicitly declared preference modifiers differ
 
-#### Scenario: Караван из трёх видов
-- **WHEN** караван содержит human, beaver, harpy
-- **THEN** поселение принимает всех трёх
-- **AND** жильё/специализации каждого вида доступны
-
-#### Scenario: Караван из четырёх видов
-- **WHEN** караван пытается включить 4-й вид
-- **THEN** 4-й вид отклоняется
-- **AND** поселение остаётся с 3 видами
-
-### Requirement: Специализации поселенцев
-Поселенец SHALL иметь специализацию: работа в здании своей
-специализации даёт Proficiency (10% шанс двойного производства) и
-Comfort (+5 Resolve).
-
-#### Scenario: Работа по специализации
-- **WHEN** поселенец работает в здании своей специализации
-- **THEN** 10% шанс двойного улова за цикл
-- **AND** +5 Resolve комфорта
-
-#### Scenario: Работа вне специализации
-- **WHEN** тот же поселенец работает в чужой специализации
-- **THEN** бонусы не применяются
-- **AND** производство в базовом темпе
-
+#### Scenario: No random output bonus
+- **WHEN** a specialization modifies production
+- **THEN** the output is computed deterministically from state and declared modifiers
+- **AND** no chance-based double-yield roll is performed

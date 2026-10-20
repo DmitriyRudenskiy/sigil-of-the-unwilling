@@ -1,78 +1,55 @@
 # city-tech-tree Specification
 
-> **SUPERSEDED (MVP) — реестровый акт 2026-10-19 (C-9, D-215).**
-> Pre-pivot spec: уровни города 1–11 и tech tree **аннулированы K-M3**
-> (жители = расы кампании, уровней города нет; канон — 02g, 00-overview).
-> Контент — носитель правила для 1.0 (Q-M46/Q-M52: уровни = 1.0), не источник
-> истины для MVP. Файл не удаляется (реестровая практика: пометка, не стирание).
+> **SUPERSEDED (MVP) — реестровый акт 2026-10-19 (C-9, D-215); синк 2026-10-20 (campaign-city-building-economy).**
+> Pre-pivot требования (уровни города 1–11, tech tree, тир найма, тир оружия)
+> **REMOVED** синком (Reason/Migration — в дельте change; K-M3: уровней города нет).
+> Pre-pivot контент — носитель правила для 1.0 (Q-M46/Q-M52: уровни = 1.0),
+> сохранён в доках 02e* и git-истории. Пост-пивот требования ниже —
+> текущий контракт capability (файл не удаляется: реестровая практика).
 
 ## Purpose
 
-Вводит развитие города по 11 уровням с расписанием открытия зданий, военными зданиями (стрельбище, библиотека, конюшня), наймом военных юнитов для героя и тирами оружия (дерево → железо → магия).
+Определяет пост-пивот развитие города кампании: открытие зданий явными
+pre-requirement'ами (без уровней города 1–11), class-based обучение персонажей
+с capacity/data-gate и лимиты города от административных зданий (канон —
+02g, 00-overview; K-M3).
 
 ## Requirements
 
-### Requirement: Уровни города 1–11
-Город SHALL развиваться с 1 по 11 уровень; повышение уровня требует процветания, населения и числа зданий (пороги растут с уровнем). Уровень города определяет доступные здания и тир найма.
+### Requirement: Building unlocks use explicit prerequisites, not city levels
+A campaign building SHALL be available when all declared prerequisites are met: required registered resources, prerequisite buildings/roles, scenario flags, and administrative capacity where applicable. No building SHALL require a city level from 1 to 11.
 
-#### Scenario: Повышение уровня
-- **WHEN** город выполняет требования своего текущего уровня
-- **THEN** город повышает уровень на 1
-- **AND** открываются здания, привязанные к новому уровню
+#### Scenario: All prerequisites met
+- **WHEN** the city satisfies every declared building prerequisite and has room/capacity
+- **THEN** the building becomes available
+- **AND** the UI lists the satisfied conditions
 
-#### Scenario: Максимальный уровень
-- **WHEN** город достиг 11 уровня
-- **THEN** повышение невозможно
-- **AND** все здания дерева доступны (кроме site-здания, требующих особых точек карты)
+#### Scenario: Prerequisite missing
+- **WHEN** one or more declared prerequisites are unmet
+- **THEN** the building remains unavailable
+- **AND** the player sees the exact unmet prerequisite without resource loss
 
-### Requirement: Расписание открытия зданий
-Каждое здание SHALL быть привязано к минимальному уровню города; строительство недоступно до достижения уровня. Расписание включает (минимальные уровни): казармы — 1, стрельбище — 3, рудник — 4, библиотека — 7, конюшня — 6; остальные здания дерева — по уровню, определяемому разработкой.
+### Requirement: Character training is capacity- and data-gated
+A military building SHALL offer only training actions explicitly linked to an approved campaign character class. Training SHALL check registered costs, declared infrastructure, and existing party/capacity limits before any stock is deducted. It SHALL use the canonical character/party pipeline, not the legacy generic UnitRegistry roster.
 
-#### Scenario: Здание закрыто уровнем
-- **WHEN** город 2-го уровня пытается построить стрельбище
-- **THEN** строительство недоступно
-- **AND** интерфейс показывает требуемый уровень
+#### Scenario: Valid training
+- **WHEN** the class-training action is unlocked and all costs, prerequisites, and party-capacity requirements are met
+- **THEN** the canonical campaign character/party pipeline completes the action and costs are committed atomically
 
-#### Scenario: Здание открывается
-- **WHEN** город повышает уровень до 3
-- **THEN** стрельбище становится доступным для строительства
+#### Scenario: Training unavailable
+- **WHEN** the class is not approved, its prerequisite is missing, or capacity is full
+- **THEN** training is rejected with a specific reason
+- **AND** city stocks and party members remain unchanged
 
-### Requirement: Военные здания определяют типы найма
-Стрельбище SHALL открывать найм стрелков (лучники и их продвижения), библиотека — магических юнитов (маг и его продвижения), конюшня — кавалерии, казармы — пехоты. Тип найма зависит от уровня здания.
+### Requirement: Administrative buildings set city capacity
+Where a limit is required, it SHALL come from the existing campaign party/capacity rules or an explicit administrative building/scenario rule, never from a city level. Capacity SHALL be visible; changes SHALL not delete existing buildings or characters.
 
-#### Scenario: Найм лучников в стрельбище
-- **WHEN** в городе есть стрельбище и ресурсы хранилища достаточны
-- **THEN** герой может нанять стек лучников
-- **AND** при повышении уровня стрельбища доступен следующий тип стрелков (продвижение)
+#### Scenario: Capacity reached
+- **WHEN** an action would exceed a declared capacity
+- **THEN** the action is blocked before costs are deducted
+- **AND** the UI identifies the capacity source and available limit
 
-#### Scenario: Найм без здания невозможен
-- **WHEN** в городе нет библиотеки
-- **THEN** найм магических юнитов недоступен
-
-### Requirement: Найм добавляет юнит в армию героя
-Наём SHALL добавлять стек юнитов в армию героя при наличии героя в городе и достаточных ресурсах хранилища; стоимость списывается из хранилища.
-
-#### Scenario: Успешный найм
-- **WHEN** герой в городе нанимает доступный тип юнита
-- **THEN** стек юнитов появляется в армии героя
-- **AND** ресурсы хранилища списаны
-
-#### Scenario: Найм без героя
-- **WHEN** герой отсутствует в городе
-- **THEN** найм невозможен
-
-### Requirement: Тиры оружия
-Найденный юнит SHALL получать тир оружия, определяемый уровнем города: T1 «дерево» (уровни 1–4, базовые характеристики), T2 «железо» (уровни 5–8, атака и защита +60%), T3 «магия» (уровни 9–11, ещё +66% сверх T2 и тег магического оружия). Тир фиксируется в стеке при найме.
-
-#### Scenario: Тир следует за уровнем города
-- **WHEN** город 5-го уровня нанимает мечников
-- **THEN** стеку присваивается тир «железо» с усиленными атакой и защитой
-
-#### Scenario: Тир закрепляется за стеком
-- **WHEN** юниты наняты в городе 5-го уровня (тир «железо»), а город затем строится до 9-го
-- **THEN** старые стеки сохраняют тир «железо»
-- **AND** новые наймы получают тир «магия»
-
-#### Scenario: Магическое оружие
-- **WHEN** юнит нанят с тиром «магия»
-- **THEN** его атаки несут тег магического оружия, видимый в бою
+#### Scenario: Capacity source is disabled
+- **WHEN** the administrative building granting capacity becomes inactive
+- **THEN** existing entities remain intact
+- **AND** new actions exceeding the reduced capacity are blocked
