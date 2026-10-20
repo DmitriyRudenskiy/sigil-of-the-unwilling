@@ -62,12 +62,20 @@ def test_verify_frame_падает_на_чужом_размере_с_диагн�
     assert "Xvfb" in text and capture.SIZE_ENV in text
 
 
-def test_pin_window_code_выбирает_полный_экран_для_канона():
+def test_pin_window_code_не_уходит_в_полный_экран():
+    """Полноэкранный пин на macOS вешает present — снимок замирает и врёт о состоянии.
+
+    Окно уезжает в собственный Space, macOS перестаёт просить кадры, а
+    `get_texture()` отдаёт первый полноэкранный кадр: размер канонический, картинка
+    правильная, рантайм-правки не видны. Канон поэтому дают рамкой без полей: у
+    обычного окна высоту отъедает менюбар (1920×1027 вместо 1920×1080 — замер).
+    """
     code = capture.pin_window_code((1920, 1080))
     assert "Vector2i(1920, 1080)" in code
-    assert "Window.MODE_FULLSCREEN" in code
     assert "DisplayServer.screen_get_size()" in code
-    # меньший размер идёт окном, а не полным экраном
+    assert "MODE_FULLSCREEN" not in code
+    assert "borderless = true" in code
+    # меньший размер — тоже окно, но уже с полями (канон не требуется)
     assert "MODE_WINDOWED" in capture.pin_window_code((1024, 768))
 
 
@@ -94,6 +102,78 @@ def test_reserve_dir_вне_репозитория(tmp_path, monkeypatch):
     assert out.is_dir()
 
 
+def test_setup_code_пусто_без_переменной():
+    assert capture.setup_code({}) == ""
+    assert capture.setup_code({capture.SETUP_ENV: "   "}) == ""
+
+
+def test_setup_code_инлайн_и_срезает_края():
+    assert capture.setup_code({capture.SETUP_ENV: "\n  pass\n"}) == "pass"
+
+
+def test_setup_code_читает_файл_по_собаке(tmp_path):
+    src = tmp_path / "setup.gd"
+    src.write_text("print(1)\n", encoding="utf-8")
+    assert capture.setup_code({capture.SETUP_ENV: f"@{src}"}) == "print(1)"
+
+
+def test_setup_code_падает_на_несуществующем_файле(tmp_path):
+    missing = tmp_path / "nope.gd"
+    with pytest.raises(CaptureError) as e:
+        capture.setup_code({capture.SETUP_ENV: f"@{missing}"})
+    assert capture.SETUP_ENV in str(e.value) and "файла нет" in str(e.value)
+
+
+class _RecordingMcp:
+    """Мок MCP-клиента: пишет порядок вызовов, отдаёт валидный PNG на скриншот."""
+
+    def __init__(self) -> None:
+        self.calls: list[str] = []
+
+    def run_scene(self, scene: str) -> None:
+        self.calls.append("run_scene")
+
+    def wait_ready(self) -> None:
+        self.calls.append("wait_ready")
+
+    def wait_frames(self, n: int) -> None:
+        self.calls.append(f"wait_frames:{n}")
+
+    def execute_code(self, code: str) -> None:
+        self.calls.append(f"execute::{code.strip()}")
+
+    def screenshot(self) -> bytes:
+        self.calls.append("screenshot")
+        return _png(*capture.CANONICAL_SIZE)
+
+    def index(self, needle: str) -> int:
+        for i, call in enumerate(self.calls):
+            if needle in call:
+                return i
+        raise AssertionError(f"вызов с {needle!r} не записан: {self.calls}")
+
+
+def test_capture_scene_ставит_состояние_после_пина_но_до_скриншота(tmp_path):
+    mcp = _RecordingMcp()
+    row = capture.capture_scene(
+        mcp, "res://scenes/x.tscn", tmp_path, "x", "тест",
+        setup_code="select_card()\n",
+    )
+    # порядок: пин окна → состояние → усаживание → скриншот
+    assert mcp.index("borderless = true") < mcp.index("select_card()") < mcp.index("screenshot")
+    assert mcp.index("select_card()") < mcp.index("screenshot")
+    assert mcp.calls.index("wait_frames:30") > mcp.index("select_card()"), \
+        "состояние должно успеть усесться до снимка"
+    assert row["sha256"] == capture.sha256_hex(_png(*capture.CANONICAL_SIZE))
+
+
+def test_capture_scene_без_состояния_не_вызывает_лишнего(tmp_path):
+    mcp = _RecordingMcp()
+    capture.capture_scene(mcp, "res://scenes/x.tscn", tmp_path, "x", "тест")
+    executes = [c for c in mcp.calls if c.startswith("execute::")]
+    assert len(executes) == 1 and "borderless = true" in executes[0], mcp.calls
+
+
 # ── съёмка по запросу ──────────────────────────────────────────────────────
 
 CAPTURE_REASON = (
@@ -109,13 +189,23 @@ def test_capture(mcp):
     label = os.environ.get("CAPTURE_LABEL", "после")
     name = os.environ.get("CAPTURE_NAME", os.path.splitext(os.path.basename(scene))[0])
     out_dir = capture.reserve_dir(os.environ.get("CAPTURE_OUT", "shots"))
+    setup = capture.setup_code()
     command = (
         f"CAPTURE_SCENE={scene} CAPTURE_LABEL={label} CAPTURE_NAME={name} "
-        "CAPTURE_OUT=<каталог> pytest tests/mcp/test_capture.py -q --timeout=900"
+        f"CAPTURE_OUT=<каталог>{' CAPTURE_SETUP=… ' if setup else ''}"
+        "pytest tests/mcp/test_capture.py -q --timeout=900"
     )
     notes = [n for n in [os.environ.get("CAPTURE_NOTE", "").strip()] if n]
+    if setup:
+        # кадр состояния без кода состояния невоспроизводим: кодируем его в манифест
+        digest = capture.sha256_hex(setup.encode("utf-8"))[:8]
+        notes.append(
+            f"{capture.SETUP_ENV}: {len(setup.splitlines())} строк GDScript, "
+            f"sha256:{digest} — кадр снят после этого кода, не сразу после загрузки сцены"
+        )
 
-    row = capture.capture_scene(mcp, scene, out_dir, name, label, size=size)
+    row = capture.capture_scene(mcp, scene, out_dir, name, label, size=size,
+                                setup_code=setup)
     meta = capture.manifest_meta(
         title=f"{label}: {name}", fixture=scene, size=size, command=command, notes=notes,
     )

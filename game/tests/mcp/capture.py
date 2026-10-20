@@ -25,6 +25,7 @@ from typing import Any
 # Кадр = размер вьюпорта проекта (project.godot) и макетов reference/*.png.
 CANONICAL_SIZE = (1920, 1080)
 SIZE_ENV = "CAPTURE_SIZE"
+SETUP_ENV = "CAPTURE_SETUP"
 PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
 
 
@@ -67,21 +68,32 @@ def sha256_hex(raw: bytes) -> str:
 
 
 def pin_window_code(size: tuple[int, int]) -> str:
-    """GDScript выставления кадра.
+    """GDScript выставления кадра: канонический размер без ухода в полный экран.
 
-    Полный экран даём только когда канон равен размеру экрана: иначе окно
-    зажало бы полезной областью (менюбар/док) и вернуло бы свой, неканонический
-    размер. Проверка фактического размера — всё равно за снимком.
+    Рамка без полей (`borderless`) даёт ровно канон: у обычного окна высота
+    зажимается менюбаром (1920×1080 превращается в 1920×1027 — замер на macOS).
+
+    `MODE_FULLSCREEN` для канонического размера давать НЕЛЬЗЯ, и это не косметика:
+    на macOS полноэкранное окно уезжает в собственный Space, macOS перестаёт просить
+    кадры, а `get_viewport().get_texture()` отдаёт первое полноэкранное изображение.
+    Следствие хитрое: снимок выглядит правильным (размер канонический, экран
+    отрисован) и перестает реагировать на всё, что происходит в дереве. Счёт
+    `Engine.get_frames_drawn()` растёт, пикселы — нет. Любой кадр состояния
+    (`CAPTURE_SETUP`) при таком пине молча снимается как кадр покоя (замер —
+    test_capture.py, урок 2026-10-20: кадры подсреза 3 не отличались от пустого
+    каталога, хотя карточки в дереве были видны).
     """
     return (
         "var w = get_window()\n"
         f"var target = Vector2i({size[0]}, {size[1]})\n"
         "if target == DisplayServer.screen_get_size():\n"
-        "\tw.mode = Window.MODE_FULLSCREEN\n"
+        "\tw.mode = Window.MODE_WINDOWED\n"
+        "\tw.borderless = true\n"
+        "\tw.size = target\n"
         "else:\n"
         "\tw.mode = Window.MODE_WINDOWED\n"
         "\tw.size = target\n"
-        "return [w.size.x, w.size.y, w.mode]\n"
+        "return [w.size.x, w.size.y, w.mode, w.borderless]\n"
     )
 
 
@@ -147,15 +159,40 @@ def render_manifest(meta: dict[str, Any], rows: list[dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
+def setup_code(env: dict[str, str] | None = None) -> str:
+    """Код, доводящий экран до нужного состояния, из `CAPTURE_SETUP`.
+
+    Значение — либо инлайн-GDScript, либо `@путь/к/файлу` (для многострочного кода:
+    переменная окружения с переносами воспроизводится хуже файла). Пусто = состояние
+    не менять, то есть поведение вызывающего не меняется вовсе.
+
+    Зачем: часть кадров существует только в состоянии, которого нет в `_ready`
+    (выбранная карточка каталога, открытая легаси-панель). Снимать «сцену как есть»
+    и называть это кадром состояния — значит снять другой кадр.
+    """
+    raw = str((env if env is not None else os.environ).get(SETUP_ENV, "")).strip()
+    if not raw:
+        return ""
+    if raw.startswith("@"):
+        path = Path(raw[1:]).expanduser()
+        if not path.is_file():
+            raise CaptureError(f"{SETUP_ENV}={raw}: файла нет — {path}")
+        return path.read_text(encoding="utf-8").strip()
+    return raw
+
+
 def capture_scene(mcp: Any, scene: str, out_dir: Path, name: str,
                   state: str, size: tuple[int, int] | None = None,
-                  settle_frames: int = 30) -> dict[str, Any]:
+                  settle_frames: int = 30, setup_code: str = "") -> dict[str, Any]:
     """Снимает сцену каноническим кадром; пишет PNG, возвращает строку манифеста."""
     size = tuple(size or canonical_size())
     mcp.run_scene(scene)
     mcp.wait_ready()
     mcp.wait_frames(20)
     mcp.execute_code(pin_window_code(size))
+    if setup_code:
+        # состояние ставится до усаживания: один settle покрывает и пин, и состояние
+        mcp.execute_code(setup_code)
     mcp.wait_frames(settle_frames)
     raw = mcp.screenshot()
     actual = verify_frame(raw, size)
