@@ -68,6 +68,14 @@ date: 2026-10-19
   16 GdUnit4-тестов (`tests/campaign/test_map_screen_model.gd`). **Остаток (визуал/ux-review):**
   привязка к сцене карты + распространение паттерна `{available, reason}` на остальные
   экраны (город/бой/партия/хроника/настройки).
+- **Статус (2026-10-20, локальный агент, mvp-ui-flow 3.4):**
+  **headless-логика «все правила D&D видны» в бою готова** —
+  `CampaignBattle.strike_breakdown(atk, def_, flank)` (чистая разбивка перевеса: base/
+  state/terrain/flank/hunger/fate/reckoning + зона; без мутации, в отличие от `_strike`)
+  + `scripts/ui/battle_info_model.gd` (`active_rules` — список активных условий,
+  `combatant_card`, `strike_info`). 16 GdUnit4-тестов (`tests/campaign/test_battle_info_model.gd`).
+  **Остаток (визуал/ux-review):** отрисовка разбивки/правил в `battle_ui.gd`, справка по
+  клавише.
 
 ## Кампания и карта (T-01x/02x)
 
