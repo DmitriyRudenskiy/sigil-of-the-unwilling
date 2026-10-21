@@ -155,6 +155,8 @@ static func train(
 	member["xp"] = maxi(0, int(member.get("xp", 0)))
 	member["stats"] = stats.duplicate(true)
 	member["luck"] = int(member.get("luck", 0))
+	# V-5 (D-220): новый член стартует с полным персистентным HP.
+	PartySystem.ensure_hp(member)
 	party.append(member)
 	state["party"] = party
 	state["resources"] = resources.serialize()

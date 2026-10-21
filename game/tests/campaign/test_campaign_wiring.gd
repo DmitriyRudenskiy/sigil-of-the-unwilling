@@ -132,24 +132,35 @@ func _hero_first_margin(report: Dictionary) -> int:
 	return -999
 
 
-## party-characters 2.1 (T-116 SM): WOUNDED не переносится между боями —
-## бой N+1 начинается с READY (свежий комбатант из статблока, state не в
-## сейве). Бой 1: ослабленный герой (hp 1) против tier 3 — падает и
-## стабилизируется (con 3 → 3 успеха) → WOUNDED. Бой 2: восстановленный
-## герой против tier 1 — READY (hp 45, не 1).
-func test_wounded_not_persisted_between_battles() -> void:
+## V-5 (D-220) заменила старую формулу (WOUNDED не переносится, боец — свежий
+## из статблока): герой, выживший с 0 HP → член партии 1 HP + WOUNDED (ростерный
+## статус, D4 — персистится между боями); REST в городе (D3) → полный HP +
+## READY; следующий бой стартует с current_hp.
+func test_wounded_persisted_and_rested() -> void:
 	var c := _composition()
-	var warrior: Dictionary = c._statblocks["warrior"]
-	var saved_hp: int = int(warrior.get("hp", 0))
-	warrior["hp"] = 1  # герой падает от первого удара tier 3 (урон 11)
+	var m: Dictionary = c.party[0]
+	PartySystem.ensure_hp(m)
+	# Бой 1: герой (current_hp 1) против босса tier 3 — падает от первого
+	# удара (мощный 12), стабилизируется (con 3) → WOUNDED.
+	m["current_hp"] = 1
 	var r1: String = c._request_battle({"tier": 3})
 	assert_str(r1) \
 		.override_failure_message("бой 1: ослабленный герой проигрывает").is_equal("lose")
 	assert_str(str(c.last_battle_report["states"][""])) \
 		.override_failure_message("бой 1: герой WOUNDED (стабилизирован, con 3)").is_equal("wounded")
-	warrior["hp"] = saved_hp  # восстановление (боец собирается из статблока)
+	assert_int(int(m.get("current_hp", -1))) \
+		.override_failure_message("член: 1 HP после боя (D-220)").is_equal(1)
+	assert_bool(str(m.get("state", "")) == PartySystem.STATE_WOUNDED) \
+		.override_failure_message("WOUNDED персистится между боями (ростерный статус, D4)").is_true()
+	# REST (D3): полный HP + READY.
+	PartySystem.rest(c.party)
+	assert_int(int(m.get("current_hp", -1))) \
+		.override_failure_message("REST: current_hp = max_hp").is_equal(45)
+	assert_bool(str(m.get("state", "")) == PartySystem.STATE_READY) \
+		.override_failure_message("REST: WOUNDED → READY").is_true()
+	# Бой 2: герой с полным HP.
 	var r2: String = c._request_battle({"tier": 1})
 	assert_str(r2) \
 		.override_failure_message("бой 2: герой выигрывает").is_equal("win")
 	assert_str(str(c.last_battle_report["states"][""])) \
-		.override_failure_message("бой 2: старт с READY (WOUNDED не переносится)").is_equal("ready")
+		.override_failure_message("бой 2: старт с READY (после REST)").is_equal("ready")

@@ -33,6 +33,15 @@ const ASI_ABILITIES: Array[String] = ["str", "dex", "con", "int", "wis", "cha"]
 
 const STATE_READY := "READY"
 const STATE_DEAD := "DEAD"
+## V-5 (D-220, D4): ростерный статус «выжил с 0 HP» (боевой WOUNDED T-116,
+## перенесённый в ростер). Живой (считается в alive_members/wipe/лимите),
+## без механического штрафа, снимается REST'ом.
+const STATE_WOUNDED := "WOUNDED"
+
+## V-5 (D-220, D2): max_hp всех членов партии — hp warrior-статблока
+## (герой-прокси MVP-боя; класс-маппинг — вне V-5). Фолбэк — только при
+## неисправном campaign.json (push_warning, прецедент DEFAULT_*).
+const DEFAULT_HERO_MAX_HP := 45
 
 static var _cfg: Dictionary = {}
 
@@ -179,13 +188,84 @@ static func loss_stage(hero_alive: bool) -> int:
 	return 0 if hero_alive else 1
 
 
-## Живые члены партии (state != DEAD).
+## Живые члены партии (state != DEAD; WOUNDED — живой, D-220/D4).
 static func alive_members(party: Array) -> Array:
 	var out: Array = []
 	for member in party:
 		if member is Dictionary and str(member.get("state", STATE_READY)) != STATE_DEAD:
 			out.append(member)
 	return out
+
+
+## ═════════════════════════════════════════════════════════════════════════
+## V-5 (D-220): упрощённый персистентный HP + REST. Чистые функции (I1):
+## одинаковые входы → одинаковые выходы; мутация — только переданных
+## Dictionary (члены партии / массив ростера).
+
+## max_hp всех членов партии — hp warrior-статблока (D2: герой-прокси MVP;
+## класс-маппинг — вне V-5). campaign.json unit_statblocks.warrior.hp.
+static func hero_max_hp() -> int:
+	var sb: Variant = _campaign_config().get("unit_statblocks", {})
+	if sb is Dictionary:
+		var w: Variant = (sb as Dictionary).get("warrior", {})
+		if w is Dictionary:
+			var hp: int = int((w as Dictionary).get("hp", 0))
+			if hp > 0:
+				return hp
+		push_warning("PartySystem: unit_statblocks.warrior.hp не найден — фолбэк %d" % DEFAULT_HERO_MAX_HP)
+	return DEFAULT_HERO_MAX_HP
+
+
+## V-5 (D-220): идемпотентная миграция/инициализация полей HP члена.
+## Правила (план V-5 §2): нет max_hp → hero_max_hp(); DEAD — не воскрешаем;
+## жив без current_hp → current_hp = max_hp; жив с current_hp ≤ 0 → 1 + WOUNDED.
+## Повторный вызов не меняет валидное состояние (идемпотентность).
+static func ensure_hp(member: Dictionary) -> void:
+	if not (member is Dictionary):
+		return
+	if not member.has("max_hp") or int(member.get("max_hp", 0)) <= 0:
+		member["max_hp"] = hero_max_hp()
+	if str(member.get("state", STATE_READY)) == STATE_DEAD:
+		return  # мёртвые не воскрешаем (боевой ресурс — 0 или отсутствует)
+	if not member.has("current_hp"):
+		member["current_hp"] = int(member["max_hp"])  # живой без current_hp → полный
+	elif int(member["current_hp"]) <= 0:
+		member["current_hp"] = 1  # живой с ≤0 → 1 + ближайшее ранение (D-220)
+		member["state"] = STATE_WOUNDED
+
+
+## V-5 (D-220): REST в городе. Живые (READY/WOUNDED) → current_hp = max_hp,
+## state = READY (излечимые снимаются); DEAD не восстанавливаются.
+## Идемпотентен. Возвращает {rested} — число восстановленных.
+static func rest(party: Array) -> Dictionary:
+	var rested := 0
+	for member in party:
+		if not (member is Dictionary):
+			continue
+		if str(member.get("state", STATE_READY)) == STATE_DEAD:
+			continue
+		member["current_hp"] = int(member.get("max_hp", hero_max_hp()))
+		member["state"] = STATE_READY
+		rested += 1
+	return {"rested": rested}
+
+
+## V-5 (D-220): результат боя → член партии (персистентный HP). Правила
+## (план V-5 §4): dead → DEAD/0; hp > 0 → current_hp = hp (статус не
+## меняется — WOUNDED живёт до REST'а); hp ≤ 0 (выжил по death saves) →
+## 1 + WOUNDED. Мутация — только `member`.
+static func apply_battle_result(member: Dictionary, final_hp: int, dead: bool) -> void:
+	if not (member is Dictionary):
+		return
+	if dead:
+		member["state"] = STATE_DEAD
+		member["current_hp"] = 0
+		return
+	if final_hp > 0:
+		member["current_hp"] = final_hp
+		return
+	member["current_hp"] = 1  # выжил с 0 → 1 HP + ранение (D-220)
+	member["state"] = STATE_WOUNDED
 
 
 ## ─────────────────────────────────────────────────────────────────────────────

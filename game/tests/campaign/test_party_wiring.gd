@@ -141,32 +141,32 @@ func test_party_size_synced_on_advance() -> void:
 	assert_bool(comp.settlement.party_size == 2).is_true()
 
 
-## party-characters 4.2 (R1, Q-M68→(а)): смерть героя НЕ кончает кампанию —
-## конец только при полном wipe партии. Герой-наборник не член партии: его
-## смерть — потеря населения (conscript списан), партия не тронута, кампания
-## продолжается. («Утрата» −2 к спасам страха/очарования — тактический слой,
-## deferred: в лестничном боевом движке таких спасов нет.)
-func test_hero_death_campaign_continues() -> void:
+## V-5 (D-220) заменила старую формулу (герой-наборник не член партии, смерть —
+## потеря населения): герой = первый живой член ростера (D1); смерть → DEAD
+## ровно у этого члена, второй член жив, кампания продолжается (R1: конец
+## только при wipe партии); только-ростерный герой (uid −1) не даёт потери
+## населения. Полное покрытие — test_party_hp_rest.gd.
+func test_hero_death_marks_member_and_campaign_continues() -> void:
 	var comp := CampaignComposition.from_campaign_config(12345)
-	comp.party = [_member(100)]  # партия отделена от героя-наборника
+	comp.party = [_member(-1), _member(-2)]
 	var pop_before: int = comp.population_system.size()
 	var warrior: Dictionary = comp._statblocks["warrior"]
-	var saved_hp: int = int(warrior.get("hp", 0))
 	var saved_con: int = int(warrior.get("con", 0))
-	# Ослабленный герой (hp 1, con −3) против tier 3: падает, 3 провала
-	# спасбросков → DEAD (потеря = uid наборника).
-	warrior["hp"] = 1
+	# Ослабленный герой (current_hp 1, con −3) против tier 3: падает, 3 провала
+	# спасбросков → DEAD (герой = первый член ростера, D1).
+	comp.party[0]["current_hp"] = 1
 	warrior["con"] = -3
 	var r1: String = comp._request_battle({"tier": 3})
-	warrior["hp"] = saved_hp
 	warrior["con"] = saved_con
 	assert_str(r1) \
 		.override_failure_message("ослабленный герой проигрывает tier 3").is_equal("lose")
+	assert_bool(str(comp.party[0].get("state", "")) == PartySystem.STATE_DEAD) \
+		.override_failure_message("первый член (герой) — DEAD").is_true()
+	assert_bool(str(comp.party[1].get("state", PartySystem.STATE_READY)) == PartySystem.STATE_READY) \
+		.override_failure_message("второй член жив").is_true()
 	assert_bool(not comp.campaign.is_done()) \
-		.override_failure_message("смерть героя ≠ defeat (R1: конец только при wipe партии)").is_true()
-	assert_int(comp.population_system.size()) \
-		.override_failure_message("наборник списан из населения").is_equal(pop_before - 1)
+		.override_failure_message("смерть первого ≠ defeat (R1: конец только при wipe партии)").is_true()
 	assert_int(comp.settlement.party_size) \
-		.override_failure_message("партия не тронута (герой — не член партии)").is_equal(1)
-	assert_bool(str(comp.party[0].get("state", PartySystem.STATE_READY)) == PartySystem.STATE_READY) \
-		.override_failure_message("член партии жив").is_true()
+		.override_failure_message("party_size = живые = 1").is_equal(1)
+	assert_int(comp.population_system.size()) \
+		.override_failure_message("только-ростерный герой (uid −1) — без потери населения").is_equal(pop_before)

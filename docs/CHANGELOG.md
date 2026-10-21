@@ -9,6 +9,40 @@ date: 2026-10-21
 
 # CHANGELOG — docs/
 
+## [2026-10-21] — V-5: упрощённый персистентный HP + REST (D-220)
+
+- **Вердикт владельца (2026-10-20, D-220; план-гейт подтверждён 2026-10-21,
+  D1–D4):** `current_hp` члена партии сохраняется между боями; бой стартует с
+  текущим `current_hp`; REST в городе полностью восстанавливает живым и снимает
+  `WOUNDED`; DEAD не восстанавливаются; выживание с 0 HP (death saves) → 1 HP +
+  `WOUNDED`. Временные хиты / short rest / сложное лечение — не вводят.
+- **`game/scripts/campaign/party_system.gd`**: `STATE_WOUNDED` (ростерный
+  статус, D4: живой — alive_members/wipe/лимит, без штрафа, снимается REST'ом);
+  `hero_max_hp()` (warrior-статблок, фолбэк 45, D2); `ensure_hp()` (идемпотентная
+  миграция: без `current_hp` → полный; ≤0 → 1+WOUNDED; DEAD не воскрешаем);
+  `rest()` (живые → max_hp/READY; DEAD не трогаем); `apply_battle_result()`
+  (dead → DEAD/0; hp>0 → keep; hp≤0 → 1+WOUNDED).
+- **`game/scripts/campaign/campaign_composition.gd`**: герой боя = первый живой
+  член ростера (D1); `character_uid` = uid самого героя либо −1 (только-ростерный
+  член: без потери населения, двойной смерти нет); вход в бой — из `current_hp`
+  (кламп ≥ 1); write-back после боя + синк `party_size` + wipe-проверка (uid −1
+  обходит losses); REST автоматически в settlement-фазе при герое в городе (D3;
+  шов: поход → REST нет); миграция в `init_campaign` / `load_save_state`.
+- **`game/scripts/campaign/campaign_training_service.gd`**: новый член —
+  `ensure_hp` (старт с полным HP).
+- **Тесты:** `game/tests/campaign/test_party_hp_rest.gd` (+15: миграция,
+  REST, write-back, персистентность без REST, settlement-REST (в городе/поход),
+  раненый → REST, миграция сейва, смерть героя (ровно один DEAD; партия 1 →
+  wipe/defeat; партия 2 → следующий герой — второй член; двойной смерти нет),
+  WOUNDED-живой (alive_members/лимит), враги без персистентности/детерминизм).
+  Адаптировано 2 теста (старые формулы «герой не член партии» /
+  «WOUNDED не переносится между боями» аннулированы V-5: `test_party_wiring.gd`,
+  `test_campaign_wiring.gd`). GdUnit 3010/0, 2 skipped, 0 orphans; якоря
+  T-041/T-041b зелёные (REST каждый ход → старт боя с полным HP, как до V-5).
+- **Не тронуты:** боевой контракт (`campaign_battle.gd`), враги и боссы,
+  инициатива/таргетинг, XP/`record_battle_survival`, сейв-схема (миграция
+  полевая, версия 1.0), UI, баланс-числа.
+
 ## [2026-10-21] — V-3: минимальный босс — ровно 2 способности (D-218)
 
 - **Вердикт владельца (2026-10-20, D-218; уточнение D-222 — без зон):** один
