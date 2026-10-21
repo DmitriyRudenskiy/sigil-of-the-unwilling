@@ -38,8 +38,8 @@ static var _hero_portrait: Texture2D = null
 @onready var _attack_button: Button = $"bottom_bar/bar_box/right_box/attack_btn"
 @onready var _turn_line: Label = $"bottom_bar/info_box/turn_line"
 @onready var _log_line: Label = $"bottom_bar/info_box/log_row/log_line"
-@onready var _history_up: Button = $"bottom_bar/info_box/log_row/history_nav/history_up"
-@onready var _history_down: Button = $"bottom_bar/info_box/log_row/history_nav/history_down"
+# ▲▼ прокрутки лога из сцены сняты (макет 11 их не несёт); обработчики
+# остались и работают со стрелок ↑/↓, поэтому здесь только ☰.
 @onready var _history_btn: Button = $"bottom_bar/info_box/log_row/history_btn"
 @onready var _defend_btn: Button = $"bottom_bar/bar_box/right_box/defend_btn"
 @onready var _skip_btn: Button = $"bottom_bar/bar_box/right_box/skip_btn"
@@ -80,10 +80,6 @@ func _ready() -> void:
 	_theme = load(THEME_PATH)
 	_apply_theme()
 	_connect_skeleton()
-	if not _history_up.pressed.is_connected(_on_history_up):
-		_history_up.pressed.connect(_on_history_up)
-	if not _history_down.pressed.is_connected(_on_history_down):
-		_history_down.pressed.connect(_on_history_down)
 	if not _history_btn.pressed.is_connected(_on_history_toggle):
 		_history_btn.pressed.connect(_on_history_toggle)
 	if not _spellbook_panel.spell_chosen.is_connected(_on_spellbook_chosen):
@@ -181,6 +177,9 @@ func set_status(text: String) -> void:
 		_history.pop_front()
 	_history_pos = _history.size() - 1
 	_log_line.text = text
+	# ☰ макет 11 не несёт отдельной кнопки истории: она просыпается вместе с
+	# первой записью лога, а до первой записи в полосе нечего смотреть.
+	_history_btn.visible = true
 
 func set_attack_preview(text: String) -> void:
 	# B: предпросмотр урона — error-chip (лёгальная подложка #281c0f, docs/14 §2)
@@ -494,6 +493,8 @@ func _on_history_toggle() -> void:
 	if _history_panel.visible:
 		_history_panel.visible = false
 		return
+	# Пустая история по клавише H открывается как раньше (test_battle_ui_hotkeys):
+	# кнопка ☰ до первой записи не видна, а клавиша — задокументированный вход.
 	_history_list.clear()
 	for line in _history:
 		_history_list.add_item(line)

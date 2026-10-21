@@ -115,6 +115,78 @@ func test_zone_d_medallions_stay_square() -> void:
 		).is_equal(100)
 
 
+## Макет 11: у нижних медальонов — эмблема-файл, а не текстовый глиф. Эмодзи в
+## `Button.text` рисовался шрифтом системы (на одном экране — цветные иконки
+## Windows, на другом — квадраты), не масштабировался под кольцо и не красился
+## в состояния. Подпись вынесена в дочерний `caption`, поэтому `text` кнопки
+## обязан остаться пустым — иначе шрифт вернётся в кадр.
+func test_zone_d_medallions_show_emblem_textures() -> void:
+	var ui: BattleUI = _mk_ui()
+	await get_tree().process_frame
+	var emblems := {
+		"bottom_bar/bar_box/left_box/settings_btn": "emblem_gear.png",
+		"bottom_bar/bar_box/left_box/retreat_btn": "emblem_flag.png",
+		"bottom_bar/bar_box/left_box/rescue_btn": "emblem_ring.png",
+		"bottom_bar/bar_box/right_box/attack_btn": "emblem_swords.png",
+		"bottom_bar/bar_box/right_box/spellbook_btn": "emblem_book.png",
+		"bottom_bar/bar_box/right_box/wait_btn": "emblem_hourglass.png",
+		"bottom_bar/bar_box/right_box/defend_btn": "emblem_shield.png",
+		"bottom_bar/bar_box/right_box/skip_btn": "emblem_skip.png",
+	}
+	for p: String in emblems:
+		var b := ui.get_node_or_null(p) as Button
+		assert_bool(b != null).override_failure_message("нет медальона %s" % p).is_true()
+		if b == null:
+			continue
+		assert_bool(b.icon != null).override_failure_message(
+			"%s: эмблема не назначена — в кадре снова текстовый глиф" % p
+		).is_true()
+		if b.icon != null:
+			assert_str(b.icon.resource_path.get_file()).override_failure_message(
+				"%s: ожидался %s" % [p, emblems[p]]
+			).is_equal(emblems[p])
+		assert_str(b.text).override_failure_message(
+			"%s: подпись макета — под кольцом, не внутри него" % p
+		).is_empty()
+
+
+## Правый ряд макета 11 начинается с двух пустых медальонов (слоты под будущие
+## команды). Они не кнопки: несвязанный Button обещал бы нажатие, которого нет.
+## Стрелки ▲▼ прокрутки лога макет не несёт — сняты, вход в историю один — ☰.
+func test_zone_d_empty_slots_and_log_controls() -> void:
+	var ui: BattleUI = _mk_ui()
+	var right := ui.get_node_or_null("bottom_bar/bar_box/right_box") as HBoxContainer
+	assert_bool(right != null).is_true()
+	if right == null:
+		return
+	assert_int(right.get_child_count()).override_failure_message(
+		"правый ряд: два пустых слота + пять команд макета"
+	).is_equal(7)
+	for slot_name: String in ["slot_empty_1", "slot_empty_2"]:
+		var slot := right.get_node_or_null(slot_name)
+		assert_bool(slot != null).override_failure_message("нет слота %s" % slot_name).is_true()
+		if slot == null:
+			continue
+		assert_bool(not (slot is Button)).override_failure_message(
+			"%s: декорация не должна быть кнопкой" % slot_name
+		).is_true()
+		assert_int(slot.mouse_filter).override_failure_message(
+			"%s: слот ловит клики/фокус" % slot_name
+		).is_equal(Control.MOUSE_FILTER_IGNORE)
+	assert_bool(right.get_child(0) == right.get_node_or_null("slot_empty_1")).is_true() \
+		.override_failure_message("слоты — первыми в ряду, как в макете")
+	assert_bool(ui.get_node_or_null("bottom_bar/info_box/log_row/history_nav") == null) \
+		.override_failure_message("кластер ▲▼ макет не задумывал")
+	assert_bool(ui.get_node_or_null("bottom_bar/info_box/log_row/history_btn") != null) \
+		.override_failure_message("☰ — единственная кнопка входа в историю боя")
+	# До первой записи лога смотреть нечего — ☰ не висит сиротским табом.
+	assert_bool(ui._history_btn.visible).is_false() \
+		.override_failure_message("пустая история — кнопки истории в кадре нет")
+	ui.set_status("скелет атакует")
+	assert_bool(ui._history_btn.visible).is_true() \
+		.override_failure_message("первая запись — ☰ появляется")
+
+
 func test_zone_f_result_overlay_single_exit() -> void:
 	var ui: BattleUI = _mk_ui()
 	assert_bool(ui._end_overlay.visible).is_false()

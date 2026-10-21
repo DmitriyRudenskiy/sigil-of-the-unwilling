@@ -4,6 +4,15 @@
 [ext_resource type="PackedScene" uid="uid://df2h40vir4ujo" path="res://scenes/ui/battle_spellbook_panel.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/settings_screen.tscn" id="3"]
 [ext_resource type="Script" path="res://scripts/ui/turn_timer.gd" id="4_timer"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_gear.png" id="10_emblem_gear"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_flag.png" id="11_emblem_flag"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_ring.png" id="12_emblem_ring"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_swords.png" id="13_emblem_swords"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_book.png" id="14_emblem_book"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_hourglass.png" id="15_emblem_hourglass"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_shield.png" id="16_emblem_shield"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_skip.png" id="17_emblem_skip"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/buttons/button_round_normal.png" id="18_plate_empty"]
 
 [node name="BattleUI" type="CanvasLayer" unique_id=732893136]
 script = ExtResource("1")
@@ -50,24 +59,12 @@ size_flags_horizontal = 3
 theme_type_variation = &"LabelSecondary"
 horizontal_alignment = 1
 
-[node name="history_nav" type="VBoxContainer" parent="bottom_bar/info_box/log_row" unique_id=1504756874]
-layout_mode = 2
-mouse_filter = 2
-theme_override_constants/separation = 0
-
-[node name="history_up" type="Button" parent="bottom_bar/info_box/log_row/history_nav" unique_id=1050830087]
-custom_minimum_size = Vector2(24, 16)
-layout_mode = 2
-theme_type_variation = &"BibleButton"
-text = "▲"
-
-[node name="history_down" type="Button" parent="bottom_bar/info_box/log_row/history_nav" unique_id=1287344208]
-custom_minimum_size = Vector2(24, 16)
-layout_mode = 2
-theme_type_variation = &"BibleButton"
-text = "▼"
-
+; Макет 11 в строке лога не несёт ни стрелок прокрутки, ни самой строки: ▲▼
+; убраны как чужеродный кластер; ☰ остался — единственная кнопка входа в
+; историю боя (вторая — клавиша H), виден с первой записи лога, а построчную
+; прокрутку заменили стрелки ↑/↓ (обработчик тот же, что у снятых кнопок).
 [node name="history_btn" type="Button" parent="bottom_bar/info_box/log_row" unique_id=1494162177]
+visible = false
 custom_minimum_size = Vector2(24, 32)
 layout_mode = 2
 theme_type_variation = &"BibleButton"
@@ -95,7 +92,8 @@ custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
 theme_type_variation = &"RoundIconButton"
-text = "⚙️"
+icon = ExtResource("10_emblem_gear")
+expand_icon = true
 
 [node name="caption" type="Label" parent="bottom_bar/bar_box/left_box/settings_btn"]
 layout_mode = 1
@@ -116,7 +114,8 @@ custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
 theme_type_variation = &"RoundIconButton"
-text = "🏕️"
+icon = ExtResource("11_emblem_flag")
+expand_icon = true
 
 [node name="caption" type="Label" parent="bottom_bar/bar_box/left_box/retreat_btn"]
 layout_mode = 1
@@ -137,7 +136,8 @@ custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
 theme_type_variation = &"RoundIconButton"
-text = "🛟"
+icon = ExtResource("12_emblem_ring")
+expand_icon = true
 
 [node name="caption" type="Label" parent="bottom_bar/bar_box/left_box/rescue_btn"]
 layout_mode = 1
@@ -163,12 +163,34 @@ layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 20
 
+; Пустые медальоны макета 11 (в правом ряду два слота под будущие команды).
+; Это декорация, а не кнопки: несвязанный Button обещал бы нажатие, которого
+; нет, поэтому TextureRect с mouse_filter=IGNORE — он не ловит ни клик, ни фокус.
+[node name="slot_empty_1" type="TextureRect" parent="bottom_bar/bar_box/right_box"]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("18_plate_empty")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="slot_empty_2" type="TextureRect" parent="bottom_bar/bar_box/right_box"]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("18_plate_empty")
+expand_mode = 1
+stretch_mode = 5
+
 [node name="attack_btn" type="Button" parent="bottom_bar/bar_box/right_box" unique_id=1049647265]
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
 theme_type_variation = &"RoundIconButton"
-text = "⚔️"
+icon = ExtResource("13_emblem_swords")
+expand_icon = true
 
 [node name="caption" type="Label" parent="bottom_bar/bar_box/right_box/attack_btn"]
 layout_mode = 1
@@ -189,7 +211,8 @@ custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
 theme_type_variation = &"RoundIconButton"
-text = "📖"
+icon = ExtResource("14_emblem_book")
+expand_icon = true
 
 [node name="caption" type="Label" parent="bottom_bar/bar_box/right_box/spellbook_btn"]
 layout_mode = 1
@@ -210,7 +233,8 @@ custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
 theme_type_variation = &"RoundIconButton"
-text = "🏃"
+icon = ExtResource("15_emblem_hourglass")
+expand_icon = true
 
 [node name="caption" type="Label" parent="bottom_bar/bar_box/right_box/wait_btn"]
 layout_mode = 1
@@ -231,7 +255,8 @@ custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
 theme_type_variation = &"RoundIconButton"
-text = "🛡️"
+icon = ExtResource("16_emblem_shield")
+expand_icon = true
 
 [node name="caption" type="Label" parent="bottom_bar/bar_box/right_box/defend_btn"]
 layout_mode = 1
@@ -252,7 +277,8 @@ custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 size_flags_vertical = 4
 theme_type_variation = &"RoundIconButton"
-text = "⏳"
+icon = ExtResource("17_emblem_skip")
+expand_icon = true
 
 [node name="caption" type="Label" parent="bottom_bar/bar_box/right_box/skip_btn"]
 layout_mode = 1

@@ -18,7 +18,12 @@ const RING_LOW := Color("#e05a4a")   # C_DANGER-ступень шкалы
 const RING_WIDTH := 8.0
 const RING_GLOW := 20.0
 const RING_EDGE := Color("#f6e2b0")   # светлая кромка кольца макета (замер 255,249,226)
-const RING_DISC := Color(0.06, 0.04, 0.02, 0.55)  # тёмный диск под числом
+# Замер макета 11 по сканлайну (y=300, кадр 2816): ядро дугы — кремовое
+# (250,242,167), наружная сторона — золото (251,210,144), внутренний спад —
+# тёплый (197,150,104). Кольцо поэтому не плоское: под золотом широкое мягкое
+# свечение, поверх — кремовое ядро.
+const RING_CORE := Color("#faf2a7")
+const RING_DISC := Color(0.10, 0.06, 0.02, 0.62)  # тёплый тёмный диск под числом
 const LOW_SECONDS := 5
 
 var seconds_left: int = 0
@@ -77,3 +82,9 @@ func _draw() -> void:
 	# дорожка того же цвета, без отдельного цвета и без отдельного носителя.
 	draw_arc(center, radius, -PI * 0.5, -PI * 0.5 + TAU * frac, 96, Color(color, 0.28), RING_GLOW, true)
 	draw_arc(center, radius, -PI * 0.5, -PI * 0.5 + TAU * frac, 96, color, RING_WIDTH, true)
+	# Кремовое ядро дуги (замер макета — см. RING_CORE): без него кольцо выглядит
+	# плоским золотом, а на макете оно светится изнутри.
+	draw_arc(
+		center, radius + RING_WIDTH * 0.25, -PI * 0.5, -PI * 0.5 + TAU * frac, 96,
+		Color(RING_CORE, 0.85 if running else 0.45), 3.0, true
+	)
