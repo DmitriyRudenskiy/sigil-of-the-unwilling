@@ -100,9 +100,8 @@ func test_adventure_column_carries_transcribed_style() -> void:
 	assert_str(str(col.theme_type_variation)).is_equal("PanelAdventureColumn") \
 		.override_failure_message("правая колонка не переведена на носитель темы")
 	var got: StyleBoxFlat = col.get_theme_stylebox("panel") as StyleBoxFlat
-	var want: StyleBoxFlat = _THEME.get_stylebox("panel", "PanelAdventureColumn") as StyleBoxFlat
 	assert_that(got).is_not_null()
-	assert_bool(got.get_instance_id() == want.get_instance_id()) \
+	assert_bool(ThemeCarrierGuard.resolves_carrier(col, _THEME, "panel", "PanelAdventureColumn")) \
 		.override_failure_message("узел не резолвит носитель PanelAdventureColumn").is_true()
 	# Значения снятого переопределения: ThemeConfig.C_PANEL_BG / C_PANEL_BORDER,
 	# бордер 2 со всех сторон, поля 10.
@@ -129,7 +128,6 @@ func test_adventure_column_carries_transcribed_style() -> void:
 func test_info_panel_slots_resolve_slot_style() -> void:
 	var scene := _mk("info_panel")
 	await get_tree().process_frame
-	var want: StyleBox = _THEME.get_stylebox("slot", "Panel")
 	var seen := 0
 	for cols in [["hero_col", "hero_slot_"], ["town_col", "town_slot_"]]:
 		for i in 4:
@@ -138,9 +136,8 @@ func test_info_panel_slots_resolve_slot_style() -> void:
 			seen += 1
 			assert_str(str(slot.theme_type_variation)).is_equal("PanelInfoSlot") \
 				.override_failure_message("слот %s%d не на носителе темы" % [cols[1], i])
-			var got: StyleBox = slot.get_theme_stylebox("panel")
-			assert_that(got).is_not_null()
-			assert_bool(got.get_instance_id() == want.get_instance_id()) \
+			assert_that(slot.get_theme_stylebox("panel")).is_not_null()
+			assert_bool(ThemeCarrierGuard.resolves_carrier(slot, _THEME, "panel", "PanelInfoSlot")) \
 				.override_failure_message(
 					"слот %s%d резолвит не Panel/slot (носитель не применился)" % [cols[1], i]
 				).is_true()
@@ -155,10 +152,8 @@ func test_resource_popup_resolves_plate_by_type() -> void:
 	await get_tree().process_frame
 	assert_str(root.get_class()).is_equal("Panel")
 	assert_str(str(root.theme_type_variation)).is_empty()
-	var got: StyleBox = root.get_theme_stylebox("panel")
-	var want: StyleBox = _THEME.get_stylebox("panel", "Panel")
-	assert_that(got).is_not_null()
-	assert_bool(got.get_instance_id() == want.get_instance_id()) \
+	assert_that(root.get_theme_stylebox("panel")).is_not_null()
+	assert_bool(ThemeCarrierGuard.resolves_carrier(root, _THEME, "panel", "Panel")) \
 		.override_failure_message("попап потерял фон Panel/panel, который резолвится по типу").is_true()
 
 
@@ -181,8 +176,6 @@ func test_chest_dialog_root_cannot_paint_panel() -> void:
 func test_info_panel_action_buttons_resolve_action_style() -> void:
 	var scene := _mk("info_panel")
 	await get_tree().process_frame
-	var want_normal: StyleBox = _THEME.get_stylebox("normal", "ButtonAction")
-	var want_hover: StyleBox = _THEME.get_stylebox("hover", "Button")
 	var seen := 0
 	for col in ["btn_col_left", "btn_col_right"]:
 		for btn in scene.get_node("columns/%s" % col).get_children():
@@ -191,11 +184,9 @@ func test_info_panel_action_buttons_resolve_action_style() -> void:
 			seen += 1
 			assert_str(str(btn.theme_type_variation)).is_equal("ButtonAction") \
 				.override_failure_message("%s не на носителе темы" % btn.name)
-			var got: StyleBox = btn.get_theme_stylebox("normal")
-			assert_bool(got != null and got.get_instance_id() == want_normal.get_instance_id()) \
+			assert_bool(ThemeCarrierGuard.resolves_carrier(btn, _THEME, "normal", "ButtonAction")) \
 				.override_failure_message("%s резолвит не ButtonAction/normal" % btn.name).is_true()
-			var hov: StyleBox = btn.get_theme_stylebox("hover")
-			assert_bool(hov != null and hov.get_instance_id() == want_hover.get_instance_id()) \
+			assert_bool(ThemeCarrierGuard.resolves_carrier(btn, _THEME, "hover", "Button")) \
 				.override_failure_message(
 					"%s потерял hover от типа Button (вариант его перекрыл)" % btn.name
 				).is_true()
@@ -226,7 +217,5 @@ func test_unknown_variation_does_not_resolve_slot_style() -> void:
 	get_tree().root.add_child(p)
 	_spawned.append(p)
 	await get_tree().process_frame
-	var got: StyleBox = p.get_theme_stylebox("panel")
-	var slot: StyleBox = _THEME.get_stylebox("slot", "Panel")
-	assert_bool(got != null and got.get_instance_id() == slot.get_instance_id()).is_false() \
+	assert_bool(ThemeCarrierGuard.resolves_carrier(p, _THEME, "panel", "PanelInfoSlot")).is_false() \
 		.override_failure_message("несуществующий носитель резолвит Panel/slot — проверка пуста")

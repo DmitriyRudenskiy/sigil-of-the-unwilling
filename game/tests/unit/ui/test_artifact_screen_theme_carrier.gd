@@ -126,8 +126,11 @@ func test_outline_carries_theme_variation() -> void:
 	var outline := _node(screen, "Center/Window/Outline")
 	assert_str(str(outline.theme_type_variation)).is_equal("ArtifactOutline") \
 		.override_failure_message("`Outline` не переведён на носитель ArtifactOutline")
-	assert_bool(outline.has_theme_stylebox_override("panel")).is_false() \
-		.override_failure_message("`Outline` всё ещё несёт override — он сильнее темы")
+	var ov := ThemeCarrierGuard.stylebox_overrides(outline)
+	assert_int(ov.size()).is_equal(0) \
+		.override_failure_message(
+			"`Outline` всё ещё несёт override — он сильнее темы: %s" % ", ".join(ov.keys())
+		)
 
 
 ## (а) `Bottom` переведён на носитель темы и не несёт override.
@@ -137,8 +140,11 @@ func test_bottom_carries_theme_variation() -> void:
 	var bottom := _node(screen, "Center/Window/Bottom")
 	assert_str(str(bottom.theme_type_variation)).is_equal("ArtifactBottom") \
 		.override_failure_message("`Bottom` не переведён на носитель ArtifactBottom")
-	assert_bool(bottom.has_theme_stylebox_override("panel")).is_false() \
-		.override_failure_message("`Bottom` всё ещё несёт override — он сильнее темы")
+	var ov := ThemeCarrierGuard.stylebox_overrides(bottom)
+	assert_int(ov.size()).is_equal(0) \
+		.override_failure_message(
+			"`Bottom` всё ещё несёт override — он сильнее темы: %s" % ", ".join(ov.keys())
+		)
 
 
 ## (б) резолв живого узла даёт ровно снятые значения — и именно тот ресурс, который
@@ -146,14 +152,11 @@ func test_bottom_carries_theme_variation() -> void:
 func test_outline_resolves_transcribed_values() -> void:
 	var screen := _mk_screen()
 	await get_tree().process_frame
-	var got: StyleBoxFlat = _node(screen, "Center/Window/Outline").get_theme_stylebox("panel") as StyleBoxFlat
+	var outline := _node(screen, "Center/Window/Outline")
+	var got: StyleBoxFlat = outline.get_theme_stylebox("panel") as StyleBoxFlat
 	assert_that(got).is_not_null() \
 		.override_failure_message("`Outline` резолвит не StyleBoxFlat — класс стиля часть снятого значения")
-	if got == null:
-		return
-	var declared: StyleBoxFlat = _THEME.get_stylebox("panel", "ArtifactOutline") as StyleBoxFlat
-	assert_that(declared).is_not_null()
-	assert_bool(got.get_instance_id() == declared.get_instance_id()).is_true() \
+	assert_bool(ThemeCarrierGuard.resolves_carrier(outline, _THEME, "panel", "ArtifactOutline")).is_true() \
 		.override_failure_message("`Outline` резолвит не ArtifactOutline/styles/panel")
 	var bad := _diff_flat(got, _reference_outline_style())
 	assert_int(bad.size()).is_equal(0) \
@@ -165,14 +168,11 @@ func test_outline_resolves_transcribed_values() -> void:
 func test_bottom_resolves_transcribed_values() -> void:
 	var screen := _mk_screen()
 	await get_tree().process_frame
-	var got: StyleBoxTexture = _node(screen, "Center/Window/Bottom").get_theme_stylebox("panel") as StyleBoxTexture
+	var bottom := _node(screen, "Center/Window/Bottom")
+	var got: StyleBoxTexture = bottom.get_theme_stylebox("panel") as StyleBoxTexture
 	assert_that(got).is_not_null() \
 		.override_failure_message("`Bottom` резолвит не StyleBoxTexture — класс стиля часть снятого значения")
-	if got == null:
-		return
-	var declared: StyleBoxTexture = _THEME.get_stylebox("panel", "ArtifactBottom") as StyleBoxTexture
-	assert_that(declared).is_not_null()
-	assert_bool(got.get_instance_id() == declared.get_instance_id()).is_true() \
+	assert_bool(ThemeCarrierGuard.resolves_carrier(bottom, _THEME, "panel", "ArtifactBottom")).is_true() \
 		.override_failure_message("`Bottom` резолвит не ArtifactBottom/styles/panel")
 	var bad := _diff_texture(got, _reference_bottom_style())
 	assert_int(bad.size()).is_equal(0) \
@@ -183,13 +183,16 @@ func test_bottom_resolves_transcribed_values() -> void:
 # носитель заявлен, но до резолва не доходит (не тот base_type — и проверка резолва
 # выше была бы пуста).
 func test_nodes_do_not_fall_back_to_panel_container_default() -> void:
+	# Замечено (2026-07-06, design.md): тема не имеет записи PanelContainer, поэтому
+	# эта проверка пуста по инстансам (узел и theme.get_stylebox дают встроенный
+	# дефолт движка разными инстансами) — защита экрана несёт проверка резолва.
+	# Функция сохранена как регрессивный якорь на семантику предиката.
 	var screen := _mk_screen()
 	await get_tree().process_frame
-	var fallback: StyleBox = _THEME.get_stylebox("panel", "PanelContainer")
-	assert_that(fallback).is_not_null()
 	for path in ["Center/Window/Outline", "Center/Window/Bottom"]:
-		var got: StyleBox = _node(screen, path).get_theme_stylebox("panel")
-		assert_bool(got.get_instance_id() != fallback.get_instance_id()).is_true() \
+		assert_bool(
+			ThemeCarrierGuard.falls_back_to_type_default(_node(screen, path), _THEME, "panel", "PanelContainer")
+		).is_false() \
 			.override_failure_message("`%s` резолвит дефолт PanelContainer — носитель не применился" % path)
 
 
@@ -199,9 +202,7 @@ func test_unknown_variation_does_not_resolve_these_styles() -> void:
 	var probe := PanelContainer.new()
 	probe.theme_type_variation = &"ArtifactBottomMissing"
 	get_tree().root.add_child(probe)
-	var declared: StyleBox = _THEME.get_stylebox("panel", "ArtifactBottom")
-	var got: StyleBox = probe.get_theme_stylebox("panel")
-	assert_bool(got == null or got.get_instance_id() != declared.get_instance_id()).is_true() \
+	assert_bool(ThemeCarrierGuard.resolves_carrier(probe, _THEME, "panel", "ArtifactBottom")).is_false() \
 		.override_failure_message("чужой носитель резолвит ArtifactBottom — проверка резолва пуста")
 	probe.free()
 

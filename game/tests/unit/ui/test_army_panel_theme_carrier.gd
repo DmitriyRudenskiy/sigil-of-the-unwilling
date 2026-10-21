@@ -108,14 +108,16 @@ func test_panel_and_slots_carry_theme_variations() -> void:
 	await get_tree().process_frame
 	assert_str(str(panel.theme_type_variation)).is_equal("ArmyPanel") \
 		.override_failure_message("корень панели не переведён на носитель ArmyPanel")
-	assert_bool(panel.has_theme_stylebox_override("panel")).is_false() \
-		.override_failure_message("корень всё ещё несёт override — он сильнее темы")
+	var pov := ThemeCarrierGuard.stylebox_overrides(panel)
+	assert_int(pov.size()).is_equal(0) \
+		.override_failure_message("корень всё ещё несёт override — он сильнее темы: %s" % ", ".join(pov.keys()))
 	for i in 8:
 		var slot := _slot(panel, i)
 		assert_str(str(slot.theme_type_variation)).is_equal("ArmySlot") \
 			.override_failure_message("слот %d не переведён на носитель ArmySlot" % i)
-		assert_bool(slot.has_theme_stylebox_override("panel")).is_false() \
-			.override_failure_message("слот %d всё ещё несёт override" % i)
+		var sov := ThemeCarrierGuard.stylebox_overrides(slot)
+		assert_int(sov.size()).is_equal(0) \
+			.override_failure_message("слот %d всё ещё несёт override: %s" % [i, ", ".join(sov.keys())])
 
 
 ## AC3 (б): резолв живого узла даёт ровно снятые значения — и именно тот ресурс,
@@ -125,8 +127,7 @@ func test_panel_resolves_transcribed_values() -> void:
 	await get_tree().process_frame
 	var got: StyleBoxFlat = panel.get_theme_stylebox("panel") as StyleBoxFlat
 	assert_that(got).is_not_null()
-	var declared: StyleBoxFlat = _THEME.get_stylebox("panel", "ArmyPanel") as StyleBoxFlat
-	assert_bool(got.get_instance_id() == declared.get_instance_id()).is_true() \
+	assert_bool(ThemeCarrierGuard.resolves_carrier(panel, _THEME, "panel", "ArmyPanel")).is_true() \
 		.override_failure_message("корень резолвит не ArmyPanel/styles/panel")
 	var bad := _diff(got, _reference_panel_style())
 	assert_int(bad.size()).is_equal(0) \
@@ -137,11 +138,10 @@ func test_slots_resolve_transcribed_values() -> void:
 	var panel := _mk_panel()
 	await get_tree().process_frame
 	var want := _reference_slot_style()
-	var declared: StyleBoxFlat = _THEME.get_stylebox("panel", "ArmySlot") as StyleBoxFlat
 	for i in 8:
 		var got: StyleBoxFlat = _slot(panel, i).get_theme_stylebox("panel") as StyleBoxFlat
 		assert_that(got).is_not_null()
-		assert_bool(got.get_instance_id() == declared.get_instance_id()).is_true() \
+		assert_bool(ThemeCarrierGuard.resolves_carrier(_slot(panel, i), _THEME, "panel", "ArmySlot")).is_true() \
 			.override_failure_message("слот %d резолвит не ArmySlot/styles/panel" % i)
 		var bad := _diff(got, want)
 		assert_int(bad.size()).is_equal(0) \
@@ -154,10 +154,10 @@ func test_slots_resolve_transcribed_values() -> void:
 func test_slots_do_not_fall_back_to_panel_default() -> void:
 	var panel := _mk_panel()
 	await get_tree().process_frame
-	var fallback: StyleBox = _THEME.get_stylebox("panel", "Panel")
 	for i in 8:
-		var got: StyleBox = _slot(panel, i).get_theme_stylebox("panel")
-		assert_bool(got.get_instance_id() != fallback.get_instance_id()).is_true() \
+		assert_bool(
+			ThemeCarrierGuard.falls_back_to_type_default(_slot(panel, i), _THEME, "panel", "Panel")
+		).is_false() \
 			.override_failure_message(
 				"слот %d резолвит Panel/styles/panel — носитель ArmySlot не применился" % i
 			)
@@ -169,9 +169,7 @@ func test_unknown_variation_does_not_resolve_slot_style() -> void:
 	var probe := Panel.new()
 	probe.theme_type_variation = &"ArmySlotMissing"
 	get_tree().root.add_child(probe)
-	var slot_style: StyleBox = _THEME.get_stylebox("panel", "ArmySlot")
-	var got: StyleBox = probe.get_theme_stylebox("panel")
-	assert_bool(got == null or got.get_instance_id() != slot_style.get_instance_id()).is_true() \
+	assert_bool(ThemeCarrierGuard.resolves_carrier(probe, _THEME, "panel", "ArmySlot")).is_false() \
 		.override_failure_message("чужой носитель резолвит ArmySlot — проверка резолва пуста")
 	probe.free()
 

@@ -36,6 +36,11 @@ const _STATES := {
 # (подрез 4), он ждёт решения владельца про Button/focus.
 const _REMAINING_OVERRIDES := 1
 
+## Документированный остаток: override клавиатурного фокуса на Button-узлах города
+# (подсрез 4.8, ждёт Q-M95). Предикат считает обходом любой stylebox-override, кроме
+# имён из этого списка — иначе гард падал бы на легитимном остатке.
+const _FOCUS_ALLOWED := ["focus"]
+
 ## Снятые подсрезом 2 панели оболочки: имя узла → [носитель, фон, рамка]. Значения
 # — те же выражения, что стояли в снятом коде (_panel_style(Color("#211e18"), …)),
 # поэтому перенос «на глаз» падает. Фон доски — Color("#171915", 0.45): альфа
@@ -94,9 +99,11 @@ func test_chips_carry_theme_variation() -> void:
 			)
 		assert_str(str(chip.theme_type_variation)).is_equal("CityResourceMetric") \
 			.override_failure_message("чип %s не переведён на носитель темы" % id)
-		assert_bool(chip.has_theme_stylebox_override("normal")) \
-			.override_failure_message("чип %s всё ещё несёт override — он сильнее темы" % id) \
-			.is_false()
+		var ov := ThemeCarrierGuard.stylebox_overrides(chip, _FOCUS_ALLOWED)
+		assert_int(ov.size()).is_equal(0) \
+			.override_failure_message(
+				"чип %s всё ещё несёт override — он сильнее темы: %s" % [id, ", ".join(ov.keys())]
+			)
 
 
 ## AC3 (б): резолв из темы даёт ровно снятые значения, а не «что-то похожее».
@@ -112,8 +119,7 @@ func test_chips_resolve_transcribed_values() -> void:
 			var want_border: Color = want[1] if want[1] != null else CityScreen.PALETTE["accent_gold"]
 			var got: StyleBoxFlat = chip.get_theme_stylebox(state) as StyleBoxFlat
 			assert_that(got).is_not_null()
-			var theme_style: StyleBoxFlat = _THEME.get_stylebox(state, "CityResourceMetric") as StyleBoxFlat
-			assert_bool(got.get_instance_id() == theme_style.get_instance_id()).is_true() \
+			assert_bool(ThemeCarrierGuard.resolves_carrier(chip, _THEME, state, "CityResourceMetric")).is_true() \
 				.override_failure_message(
 					"чип %s в состоянии %s резолвит не CityResourceMetric " % [id, state]
 					+ "(носитель не применился)"
@@ -156,13 +162,9 @@ func test_chips_resolve_transcribed_values() -> void:
 func test_chips_keep_states_outside_variation() -> void:
 	var screen := _mk_screen()
 	await get_tree().process_frame
-	var want_hover_pressed: StyleBox = _THEME.get_stylebox("hover_pressed", "Button")
 	for id in ["Food", "Wood", "Iron"]:
 		var chip := _chip(screen, id)
-		var got: StyleBox = chip.get_theme_stylebox("hover_pressed")
-		assert_bool(
-			got != null and got.get_instance_id() == want_hover_pressed.get_instance_id()
-		).is_true() \
+		assert_bool(ThemeCarrierGuard.resolves_carrier(chip, _THEME, "hover_pressed", "Button")).is_true() \
 			.override_failure_message(
 				"чип %s потерял hover_pressed от типа Button " % id
 				+ "— вариант объявил состояние, которого в снятом коде не было"
@@ -204,9 +206,7 @@ func test_unknown_variation_does_not_resolve_chip_style() -> void:
 	b.theme_type_variation = "CityResourceMetricMissing"
 	get_tree().root.add_child(b)
 	await get_tree().process_frame
-	var got: StyleBox = b.get_theme_stylebox("normal")
-	var want: StyleBox = _THEME.get_stylebox("normal", "CityResourceMetric")
-	assert_bool(got != null and got.get_instance_id() == want.get_instance_id()).is_false() \
+	assert_bool(ThemeCarrierGuard.resolves_carrier(b, _THEME, "normal", "CityResourceMetric")).is_false() \
 		.override_failure_message("несуществующий носитель резолвит стиль чипа — проверка пуста")
 	b.free()
 
@@ -243,9 +243,10 @@ func test_shell_panels_carry_theme_variation() -> void:
 		var want_variation: String = _SHELL[node_name][0]
 		assert_str(str(panel.theme_type_variation)).is_equal(want_variation) \
 			.override_failure_message("панель %s не переведена на носитель %s" % [node_name, want_variation])
-		assert_bool(panel.has_theme_stylebox_override("panel")).is_false() \
+		var ov := ThemeCarrierGuard.stylebox_overrides(panel, _FOCUS_ALLOWED)
+		assert_int(ov.size()).is_equal(0) \
 			.override_failure_message(
-				"панель %s всё ещё несёт override на \"panel\" — он сильнее темы" % node_name
+				"панель %s всё ещё несёт override — он сильнее темы: %s" % [node_name, ", ".join(ov.keys())]
 			)
 
 
@@ -259,8 +260,7 @@ func test_shell_panels_resolve_transcribed_values() -> void:
 		var variation: String = spec[0]
 		var got: StyleBoxFlat = panel.get_theme_stylebox("panel") as StyleBoxFlat
 		assert_that(got).is_not_null()
-		var theme_style: StyleBoxFlat = _THEME.get_stylebox("panel", variation) as StyleBoxFlat
-		assert_bool(got.get_instance_id() == theme_style.get_instance_id()).is_true() \
+		assert_bool(ThemeCarrierGuard.resolves_carrier(panel, _THEME, "panel", variation)).is_true() \
 			.override_failure_message(
 				"панель %s резолвит не %s (носитель не применился)" % [node_name, variation]
 			)
@@ -367,9 +367,7 @@ func test_unknown_variation_does_not_resolve_shell_style() -> void:
 	panel.theme_type_variation = "CityPanelGoldMissing"
 	get_tree().root.add_child(panel)
 	await get_tree().process_frame
-	var got: StyleBox = panel.get_theme_stylebox("panel")
-	var want: StyleBox = _THEME.get_stylebox("panel", "CityPanelGold")
-	assert_bool(got != null and got.get_instance_id() == want.get_instance_id()).is_false() \
+	assert_bool(ThemeCarrierGuard.resolves_carrier(panel, _THEME, "panel", "CityPanelGold")).is_false() \
 		.override_failure_message("несуществующий носитель резолвит стиль панели — проверка пуста")
 	panel.free()
 
@@ -440,9 +438,10 @@ func test_catalog_cards_carry_theme_variation() -> void:
 				"карточка %s несёт носитель %s — ожидались CityCard / CityCardSelected"
 				% [card.name, variation]
 			)
-		assert_bool(card.has_theme_stylebox_override("panel")).is_false() \
+		var ov := ThemeCarrierGuard.stylebox_overrides(card, _FOCUS_ALLOWED)
+		assert_int(ov.size()).is_equal(0) \
 			.override_failure_message(
-				"карточка %s всё ещё несёт override на \"panel\" — он сильнее темы" % card.name
+				"карточка %s всё ещё несёт override — он сильнее темы: %s" % [card.name, ", ".join(ov.keys())]
 			)
 		if variation == "CityCardSelected":
 			selected_seen += 1
@@ -477,8 +476,7 @@ func _check_card_style(
 ) -> void:
 	var got: StyleBoxFlat = node.get_theme_stylebox("panel") as StyleBoxFlat
 	assert_that(got).is_not_null()
-	var theme_style: StyleBoxFlat = _THEME.get_stylebox("panel", variation) as StyleBoxFlat
-	assert_bool(got.get_instance_id() == theme_style.get_instance_id()).is_true() \
+	assert_bool(ThemeCarrierGuard.resolves_carrier(node, _THEME, "panel", variation)).is_true() \
 		.override_failure_message(
 			"карточка %s резолвит не %s (носитель не применился)" % [node.name, variation]
 		)
@@ -543,9 +541,10 @@ func test_catalog_tabs_carry_four_states() -> void:
 	var tabs := tabs_node.get_children()
 	assert_int(tabs.size()).is_equal(5) \
 		.override_failure_message("вкладок %d вместо пяти — гард проверял не каталог" % tabs.size())
-	var idle_normal: StyleBoxFlat = _THEME.get_stylebox("normal", "CityTab") as StyleBoxFlat
+	# idle_hover и active_hover_pressed нужны кросс-проверкам «normal == hover» и
+	# «pressed == hover_pressed» (в снятом коде это были одни StyleBoxFlat); резолв
+	# самого носителя — через предикат.
 	var idle_hover: StyleBoxFlat = _THEME.get_stylebox("hover", "CityTab") as StyleBoxFlat
-	var active_pressed: StyleBoxFlat = _THEME.get_stylebox("pressed", "CityTab") as StyleBoxFlat
 	var active_hover_pressed: StyleBoxFlat = (
 		_THEME.get_stylebox("hover_pressed", "CityTab") as StyleBoxFlat
 	)
@@ -554,16 +553,16 @@ func test_catalog_tabs_carry_four_states() -> void:
 		assert_that(button).is_not_null()
 		assert_str(str(button.theme_type_variation)).is_equal("CityTab") \
 			.override_failure_message("вкладка %s не переведена на носитель CityTab" % button.name)
-		for state in ["normal", "hover", "pressed", "hover_pressed"]:
-			assert_bool(button.has_theme_stylebox_override(state)).is_false() \
-				.override_failure_message(
-					"вкладка %s в состоянии %s несёт override — он сильнее темы" % [button.name, state]
-				)
+		var ov := ThemeCarrierGuard.stylebox_overrides(button, _FOCUS_ALLOWED)
+		assert_int(ov.size()).is_equal(0) \
+			.override_failure_message(
+				"вкладка %s несёт override — он сильнее темы: %s" % [button.name, ", ".join(ov.keys())]
+			)
 		var got_normal: StyleBoxFlat = button.get_theme_stylebox("normal") as StyleBoxFlat
 		var got_pressed: StyleBoxFlat = button.get_theme_stylebox("pressed") as StyleBoxFlat
-		assert_bool(got_normal.get_instance_id() == idle_normal.get_instance_id()).is_true() \
+		assert_bool(ThemeCarrierGuard.resolves_carrier(button, _THEME, "normal", "CityTab")).is_true() \
 			.override_failure_message("покой вкладки резолвит не CityTab/normal")
-		assert_bool(got_pressed.get_instance_id() == active_pressed.get_instance_id()).is_true() \
+		assert_bool(ThemeCarrierGuard.resolves_carrier(button, _THEME, "pressed", "CityTab")).is_true() \
 			.override_failure_message("активная вкладка резолвит не CityTab/pressed")
 		# normal и hover — один и тот же стиль (в снятом коде их красил один StyleBoxFlat)
 		assert_bool(got_normal.get_instance_id() == idle_hover.get_instance_id()).is_true() \
@@ -608,8 +607,11 @@ func test_cost_panel_carries_theme_variation() -> void:
 		checked += 1
 		assert_str(str(cost.theme_type_variation)).is_equal("CityCostPanel") \
 			.override_failure_message("панель стоимости карточки %s не на носителе" % card.name)
-		assert_bool(cost.has_theme_stylebox_override("panel")).is_false() \
-			.override_failure_message("панель стоимости всё ещё несёт override")
+		var ov := ThemeCarrierGuard.stylebox_overrides(cost, _FOCUS_ALLOWED)
+		assert_int(ov.size()).is_equal(0) \
+			.override_failure_message(
+				"панель стоимости всё ещё несёт override: %s" % ", ".join(ov.keys())
+			)
 		var got: StyleBoxFlat = cost.get_theme_stylebox("panel") as StyleBoxFlat
 		assert_that(got).is_not_null()
 		assert_bool(got.bg_color == _COST_BG).is_true() \
@@ -666,8 +668,6 @@ func test_unknown_variation_does_not_resolve_card_style() -> void:
 	card.theme_type_variation = "CityCardMissing"
 	get_tree().root.add_child(card)
 	await get_tree().process_frame
-	var got: StyleBox = card.get_theme_stylebox("panel")
-	var want: StyleBox = _THEME.get_stylebox("panel", "CityCard")
-	assert_bool(got != null and got.get_instance_id() == want.get_instance_id()).is_false() \
+	assert_bool(ThemeCarrierGuard.resolves_carrier(card, _THEME, "panel", "CityCard")).is_false() \
 		.override_failure_message("несуществующий носитель резолвит стиль карточки — проверка пуста")
 	card.free()

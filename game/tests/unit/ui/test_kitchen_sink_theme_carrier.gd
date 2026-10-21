@@ -86,15 +86,12 @@ func _variation_counts(controls: Array[Control]) -> Dictionary:
 func test_sink_has_no_stylebox_overrides() -> void:
 	var scene := _mk_sink()
 	for c in _walk(scene):
-		for prop in c.get_property_list():
-			var pname: String = prop["name"]
-			if not pname.begins_with("theme_override_styles/"):
-				continue
-			assert_object(c.get(pname)).is_null() \
-				.override_failure_message(
-					"на %s (%s) висит stylebox-override %s"
-					% [c.name, c.theme_type_variation, pname.trim_prefix("theme_override_styles/")]
-				)
+		var ov := ThemeCarrierGuard.stylebox_overrides(c)
+		assert_int(ov.size()).is_equal(0) \
+			.override_failure_message(
+				"на %s (%s) висит stylebox-override: %s"
+				% [c.name, c.theme_type_variation, ", ".join(ov.keys())]
+			)
 
 
 ## AC3: витрина переведена на варианты темы — каждый заявленный носитель встречается
@@ -131,7 +128,7 @@ func test_removed_focus_override_was_dead() -> void:
 	_nodes.append(btn)
 	btn.theme = _THEME
 	get_tree().root.add_child(btn)
-	assert_bool(btn.get_theme_stylebox("focus") == _THEME.get_stylebox("focus", "Button")).is_true() \
+	assert_bool(ThemeCarrierGuard.resolves_carrier(btn, _THEME, "focus", "Button")).is_true() \
 		.override_failure_message("Button резолвит focus не из темы — удаление override меняло пиксел")
 
 
@@ -144,6 +141,5 @@ func test_unregistered_type_does_not_resolve_carrier() -> void:
 	p.theme = _THEME
 	p.theme_type_variation = &"PanelWindowMissing"
 	get_tree().root.add_child(p)
-	assert_bool(p.get_theme_stylebox("panel") == _THEME.get_stylebox("panel", "PanelWindow")) \
-		.is_false() \
+	assert_bool(ThemeCarrierGuard.resolves_carrier(p, _THEME, "panel", "PanelWindow")).is_false() \
 		.override_failure_message("несуществующий тип резолвит носитель — проверка ничего не стоит")

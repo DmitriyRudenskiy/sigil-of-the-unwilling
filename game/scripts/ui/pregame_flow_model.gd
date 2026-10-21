@@ -31,6 +31,52 @@ const OCCUPATION_PENALTY_MAX := 3
 ## «Попутчики тренируются, а не нанимаются»; модель наёмного рынка вытеснена.
 const TRAINING_SOURCES: Array[String] = ["city_resident", "companion", "event_npc"]
 
+## 4.1 (Q18, 00-overview [КАНОН]): порядок 6 шагов предыгрового потока:
+## конструктор → знак → земной шар → города → партия → тренировка.
+## Ход 1 начинается только после завершения всех шести (spec: Pregame sequence).
+const FLOW_STEPS: Array[String] = [
+	"constructor", "sign", "globe", "cities", "party", "training",
+]
+
+
+## 4.1: состояние предыгрового потока (headless; UI привязывается к нему —
+## deferred, ux-review). Детерминированно: без RNG и UI. Шаги завершаются
+## только по порядку (advance()); пропусков и повторного входа нет.
+class PregameFlow:
+	var _completed: int = 0
+
+	func step_count() -> int:
+		return FLOW_STEPS.size()
+
+	## Канонический порядок шагов (снимок: мутация не затрагивает модель).
+	func steps() -> Array:
+		return FLOW_STEPS.duplicate()
+
+	## Текущий шаг ("" — поток завершён).
+	func current_step() -> String:
+		if _completed >= FLOW_STEPS.size():
+			return ""
+		return FLOW_STEPS[_completed]
+
+	func completed_steps() -> int:
+		return _completed
+
+	## Завершает текущий шаг. true — шаг завершён; false — поток уже
+	## завершён (no-op, за пределами порядка не уходить).
+	func advance() -> bool:
+		if _completed >= FLOW_STEPS.size():
+			return false
+		_completed += 1
+		return true
+
+	func is_complete() -> bool:
+		return _completed >= FLOW_STEPS.size()
+
+	## Ход 1 начинается только когда все 6 шагов завершены (spec: "turn 1
+	## does not start until all steps are complete").
+	func can_start_turn_1() -> bool:
+		return is_complete()
+
 
 ## 2.1/3.2 (C-15): playable-раса? (маска 3: люди/полуорки/эльфы).
 static func is_playable_race(race_id: String) -> bool:

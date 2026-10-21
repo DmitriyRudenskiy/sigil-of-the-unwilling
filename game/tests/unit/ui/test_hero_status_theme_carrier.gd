@@ -75,10 +75,6 @@ func _mini_bars(panel: Control) -> Array[ProgressBar]:
 	return out
 
 
-func _local_override(c: Control, item: String) -> StyleBox:
-	return c.get("theme_override_styles/" + item) as StyleBox
-
-
 func test_mini_bars_exist_only_with_a_team() -> void:
 	var panel := _mk_panel_with_team()
 	assert_int(_mini_bars(panel).size()).is_equal(3) \
@@ -88,9 +84,9 @@ func test_mini_bars_exist_only_with_a_team() -> void:
 func test_mini_bars_have_no_stylebox_overrides() -> void:
 	var panel := _mk_panel_with_team()
 	for bar in _mini_bars(panel):
-		for item in ["fill", "background"]:
-			assert_object(_local_override(bar, item)).is_null() \
-				.override_failure_message("на мини-полосе висит override %s" % item)
+		var ov := ThemeCarrierGuard.stylebox_overrides(bar)
+		assert_int(ov.size()).is_equal(0) \
+			.override_failure_message("на мини-полосе висит stylebox-переопределение: %s" % ", ".join(ov.keys()))
 
 
 func test_mini_bars_take_carrier_from_theme() -> void:
@@ -137,6 +133,5 @@ func test_unregistered_type_does_not_resolve_carrier() -> void:
 	bar.theme = _THEME
 	bar.theme_type_variation = &"MiniBarBondMissing"
 	get_tree().root.add_child(bar)
-	var resolved: StyleBox = bar.get_theme_stylebox("fill")
-	assert_bool(resolved == _THEME.get_stylebox("fill", "MiniBarBond")).is_false() \
+	assert_bool(ThemeCarrierGuard.resolves_carrier(bar, _THEME, "fill", "MiniBarBond")).is_false() \
 		.override_failure_message("несуществующий тип резолвит носитель — проверка ничего не стоит")
