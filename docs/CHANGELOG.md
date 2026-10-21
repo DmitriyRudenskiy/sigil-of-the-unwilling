@@ -9,6 +9,17 @@ date: 2026-10-21
 
 # CHANGELOG — docs/
 
+## [2026-10-21] — theme-type-hygiene: процессные задачи 1.2/1.3/2.1–2.4 (корзины, реестр мёртвых, общий предикат гарда)
+
+- **Суть:** разблокированные процессные задачи change `theme-type-hygiene` (T-147/T-148): разложение находок 1.1 по корзинам, реестр мёртвых переопределений, канон определения «обход темы» в CAPTURE-HELPER, общий предикат гарда + унификация восьми гардов, мутационная проверка каждого гарда.
+- **1.2/1.3 (design.md):** 21 находка (20 кодовых + 1 сценевая): (а) — `city_screen` 16, `army_panel` 2, `artifact_inventory_screen` 2; (б) — `minimap_panel.tscn` (ответственность среза 3.1); (в) — ровно один кандидат: `focus` в `city_screen.gd::_apply_keyboard_focus` (12 потребителей, прокомментирован по месту, ждёт Q-M95). Реестр мёртвых — 8 записей: 6 сняты в срезах, 2 `focus` на `Label` в городе живы (снимаются 4.8).
+- **2.1 (`docs/mvp/CAPTURE-HELPER.md`):** раздел «Что считается обходом темы» — определение трёх механизмов (в `TICKETS.md` было с 2026-10-20).
+- **2.2:** `game/tests/helpers/theme_carrier_guard.gd` (`class_name ThemeCarrierGuard`: `stylebox_overrides` / `resolves_carrier` / `falls_back_to_type_default`) + 8 прямых тестов `test_theme_carrier_guard.gd`; нюанс null-значений `get_property_list()` и вырождение fallback-проверки для типов без записи в теме зафиксированы в design.md §2.2.
+- **2.3:** восемь гардов `test_*_theme_carrier.gd` унифицированы на предикаты хелпера; негативный контроль — `resolves_carrier(probe, …, fake)` is_false; гард города передаёт `allowed = ["focus"]` под документированный остаток Q-M95 (ратч `_REMAINING_OVERRIDES := 1` не тронут).
+- **2.4:** 8 мутаций (возврат снятого override в исходник), все покраснили (2–26 падений), протокол — design.md §2.4, все откатаны, `scripts/ui` после откатов чист.
+- **Верификация:** GdUnit полный прогон — **3051 test cases, 0 errors, 0 failures** (база 3043, +8 = тесты хелпера); `check_docs_links.py` — pass; `openspec validate --specs` — 54/54; linter — SKIPPED (нет gdtoolkit на машине, гейт-жёлтый).
+- **Не тронуто:** игровой код (изменения — тесты + документация); блокировки Q-M95 (4.8) и Q-M96 (6.2–6.5) не сняты.
+
 ## [2026-10-21] — openspec/specs/crafting: фикс валидации (не хватало заголовка `## Requirements`)
 
 - **Суть:** pre-existing падение `openspec validate --specs` (53 passed, 1 failed) — в спеке `crafting` (создана в `7f25f3e2`) отсутствовал обязательный заголовок секции `## Requirements`: блоки `### Requirement:` шли сразу после `## Purpose`.

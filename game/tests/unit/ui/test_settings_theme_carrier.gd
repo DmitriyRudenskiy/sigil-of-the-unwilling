@@ -40,10 +40,6 @@ func _mk_screen() -> Control:
 	return screen
 
 
-func _local_override(c: Control, item: String) -> StyleBox:
-	return c.get("theme_override_styles/" + item) as StyleBox
-
-
 func _settings_buttons(screen: Control) -> Array[Button]:
 	var out: Array[Button] = []
 	for btn_name in ["ApplyButton", "ResetButton", "CancelButton"]:
@@ -54,12 +50,17 @@ func _settings_buttons(screen: Control) -> Array[Button]:
 func test_settings_screen_has_no_stylebox_overrides() -> void:
 	var screen := _mk_screen()
 	var panel := screen.get_node("Panel") as PanelContainer
-	assert_object(_local_override(panel, "panel")).is_null() \
-		.override_failure_message("на панели экрана настроек висит stylebox-переопределение")
+	var pov := ThemeCarrierGuard.stylebox_overrides(panel)
+	assert_int(pov.size()).is_equal(0) \
+		.override_failure_message(
+			"на панели экрана настроек висит stylebox-переопределение: %s" % ", ".join(pov.keys())
+		)
 	for btn in _settings_buttons(screen):
-		for state in _BTN_STATES:
-			assert_object(_local_override(btn, state)).is_null() \
-				.override_failure_message("на кнопке экрана настроек висит override %s" % state)
+		var bov := ThemeCarrierGuard.stylebox_overrides(btn)
+		assert_int(bov.size()).is_equal(0) \
+			.override_failure_message(
+				"на кнопке экрана настроек висит stylebox-переопределение: %s" % ", ".join(bov.keys())
+			)
 
 
 func test_settings_nodes_take_carrier_from_theme() -> void:
@@ -114,6 +115,5 @@ func test_unregistered_type_does_not_resolve_carrier() -> void:
 	panel.theme = _THEME
 	panel.theme_type_variation = &"PanelSettingsMissing"
 	get_tree().root.add_child(panel)
-	var resolved: StyleBox = panel.get_theme_stylebox("panel")
-	assert_bool(resolved == _THEME.get_stylebox("panel", "PanelSettings")).is_false() \
+	assert_bool(ThemeCarrierGuard.resolves_carrier(panel, _THEME, "panel", "PanelSettings")).is_false() \
 		.override_failure_message("несуществующий тип резолвит носитель — проверка ничего не стоит")

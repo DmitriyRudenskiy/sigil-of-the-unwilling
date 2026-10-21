@@ -29,21 +29,16 @@ func _mk_ui() -> BattleUI:
 	get_tree().root.add_child(ui)
 	return ui
 
-## Локальное переопределение видно в псевдосвойстве, наследование темы — нет.
-func _local_override(c: Control) -> StyleBox:
-	return c.get("theme_override_styles/panel") as StyleBox
-
 func test_battle_panels_take_carrier_from_theme() -> void:
 	var ui: BattleUI = _mk_ui()
-	var plate: StyleBox = _THEME.get_stylebox("panel", "Panel")
-	assert_object(plate).is_not_null().override_failure_message("в теме нет Panel/styles/panel")
 	for pair in [["нижняя панель", ui._bottom_bar], ["панель истории", ui._history_panel]]:
 		var panel: PanelContainer = pair[1]
-		assert_object(_local_override(panel)).is_null() \
-			.override_failure_message("%s: на узле висит stylebox-переопределение" % pair[0])
+		var ov := ThemeCarrierGuard.stylebox_overrides(panel)
+		assert_int(ov.size()).is_equal(0) \
+			.override_failure_message("%s: на узле висит stylebox-переопределение: %s" % [pair[0], ", ".join(ov.keys())])
 		assert_str(str(panel.theme_type_variation)).is_equal("PanelPlate") \
 			.override_failure_message("%s: панель не переведена на вариант темы PanelPlate" % pair[0])
-		assert_bool(panel.get_theme_stylebox("panel") == plate).is_true() \
+		assert_bool(ThemeCarrierGuard.resolves_carrier(panel, _THEME, "panel", "PanelPlate")).is_true() \
 			.override_failure_message(
 				"%s: резолвится не тот носитель, что лежал в override (вид изменится)" % pair[0])
 
@@ -56,8 +51,7 @@ func test_unregistered_type_does_not_resolve_carrier() -> void:
 	panel.theme = _THEME
 	panel.theme_type_variation = &"Panel"
 	get_tree().root.add_child(panel)
-	var resolved: StyleBox = panel.get_theme_stylebox("panel")
-	assert_bool(resolved == _THEME.get_stylebox("panel", "Panel")).is_false() \
+	assert_bool(ThemeCarrierGuard.resolves_carrier(panel, _THEME, "panel", "Panel")).is_false() \
 		.override_failure_message("«Panel» резолвится — замер устарел")
 	assert_str(str(_THEME.get_type_variation_base("PanelPlate"))).is_equal("PanelContainer") \
 		.override_failure_message("PanelPlate не зарегистрирован как вариант PanelContainer")
