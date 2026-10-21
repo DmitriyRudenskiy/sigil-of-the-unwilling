@@ -1003,6 +1003,38 @@ border_width_bottom = 1
 border_color = Color(0.6980392336845398, 0.545098066329956, 0.25882354378700256, 1)
 bg_color = Color(0.2235294133424759, 0.18431372940540314, 0.11372549086809158, 1)
 ; T-147 подсрез 3: панель стоимости в карточке (было Color("#392f1d"), рамка Color("#b28b42"), поля 8/5).
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_army_panel"]
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6200000047683716, 0.4699999988079071, 0.2199999988079071, 1)
+bg_color = Color(0.30000001192092896, 0.20000000298023224, 0.11999999731779099, 1)
+; T-147 (army_panel): корень панели — было StyleBoxFlat.new() в _ready, bg ThemeConfig.C_PANEL_MID,
+; рамка 2 px ThemeConfig.C_PANEL_BORDER, радиус 4. Значения перенесены float-в-float.
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_army_unit_slot"]
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+bg_color = Color(0.3499999940395355, 0.23999999463558197, 0.15000000596046448, 1)
+; T-147 (army_panel): слот юнита — было StyleBoxFlat.new() в _ready, bg ThemeConfig.C_SLOT_BG,
+; радиус 3, без рамки. Рамки не было: добавив её «для красоты», гард бы не поймал, а кадр бы уехал.
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_minimap_frame"]
+bg_color = Color(0.290196, 0.0509804, 0.0509804, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.788235, 0.635294, 0.352941, 1)
+; T-147 (миникарта): рамка `Frame` (Panel) — было `theme_override_styles/panel` с локальным
+; `StyleBoxFlat_frame` в minimap_panel.tscn. Значения перенесены посимвольно (правило 2),
+; теновых аналогов с таким bg/рамкой в теме нет — ресурс новый, а не переиспользование.
 [resource]
 Panel/styles/panel = SubResource("StyleBoxTexture_panel")
 Panel/styles/window = SubResource("StyleBoxFlat_window")
@@ -1321,3 +1353,14 @@ CityTab/styles/normal = SubResource("StyleBoxFlat_city_tab_idle")
 CityTab/styles/hover = SubResource("StyleBoxFlat_city_tab_idle")
 CityTab/styles/pressed = SubResource("StyleBoxFlat_city_tab_active")
 CityTab/styles/hover_pressed = SubResource("StyleBoxFlat_city_tab_active")
+; T-147 (army_panel). Корень — PanelContainer, восемь слотов — Panel: у обоих типов есть
+; законный носитель "panel", поэтому обход ушёл в тему без обходных манёвров. Назначение
+; носителя — сценевое (army_panel.tscn), а не кодовое: узел объявлен в сцене.
+ArmyPanel/base_type = "PanelContainer"
+ArmyPanel/styles/panel = SubResource("StyleBoxFlat_army_panel")
+ArmySlot/base_type = "Panel"
+ArmySlot/styles/panel = SubResource("StyleBoxFlat_army_unit_slot")
+; T-147 (миникарта): единственный легальный носитель для `Panel` — `panel`; узел `Frame`
+; объявлен в сцене, поэтому назначение — сценевое (`theme_type_variation`), а не кодовое.
+MinimapFrame/base_type = "Panel"
+MinimapFrame/styles/panel = SubResource("StyleBoxFlat_minimap_frame")

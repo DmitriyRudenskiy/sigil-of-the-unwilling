@@ -4,6 +4,7 @@
 
 [node name="ArmyPanel" type="PanelContainer"]
 script = ExtResource("1")
+theme_type_variation = &"ArmyPanel"
 
 [node name="Grid" type="GridContainer" parent="."]
 layout_mode = 2
@@ -12,6 +13,7 @@ theme_override_constants/h_separation = 6
 theme_override_constants/v_separation = 6
 
 [node name="Slot0" type="Panel" parent="Grid"]
+theme_type_variation = &"ArmySlot"
 layout_mode = 2
 custom_minimum_size = Vector2(0, 40)
 size_flags_horizontal = 3
@@ -32,6 +34,7 @@ layout_mode = 2
 text = "0"
 
 [node name="Slot1" type="Panel" parent="Grid"]
+theme_type_variation = &"ArmySlot"
 layout_mode = 2
 custom_minimum_size = Vector2(0, 40)
 size_flags_horizontal = 3
@@ -52,6 +55,7 @@ layout_mode = 2
 text = "0"
 
 [node name="Slot2" type="Panel" parent="Grid"]
+theme_type_variation = &"ArmySlot"
 layout_mode = 2
 custom_minimum_size = Vector2(0, 40)
 size_flags_horizontal = 3
@@ -72,6 +76,7 @@ layout_mode = 2
 text = "0"
 
 [node name="Slot3" type="Panel" parent="Grid"]
+theme_type_variation = &"ArmySlot"
 layout_mode = 2
 custom_minimum_size = Vector2(0, 40)
 size_flags_horizontal = 3
@@ -92,6 +97,7 @@ layout_mode = 2
 text = "0"
 
 [node name="Slot4" type="Panel" parent="Grid"]
+theme_type_variation = &"ArmySlot"
 layout_mode = 2
 custom_minimum_size = Vector2(0, 40)
 size_flags_horizontal = 3
@@ -112,6 +118,7 @@ layout_mode = 2
 text = "0"
 
 [node name="Slot5" type="Panel" parent="Grid"]
+theme_type_variation = &"ArmySlot"
 layout_mode = 2
 custom_minimum_size = Vector2(0, 40)
 size_flags_horizontal = 3
@@ -132,6 +139,7 @@ layout_mode = 2
 text = "0"
 
 [node name="Slot6" type="Panel" parent="Grid"]
+theme_type_variation = &"ArmySlot"
 layout_mode = 2
 custom_minimum_size = Vector2(0, 40)
 size_flags_horizontal = 3
@@ -152,6 +160,7 @@ layout_mode = 2
 text = "0"
 
 [node name="Slot7" type="Panel" parent="Grid"]
+theme_type_variation = &"ArmySlot"
 layout_mode = 2
 custom_minimum_size = Vector2(0, 40)
 size_flags_horizontal = 3
