@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://cs1lav0566l80" path="res://scripts/ui/battle_ui.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://df2h40vir4ujo" path="res://scenes/ui/battle_spellbook_panel.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/settings_screen.tscn" id="3"]
+[ext_resource type="Script" path="res://scripts/ui/turn_timer.gd" id="4_timer"]
 
 [node name="BattleUI" type="CanvasLayer" unique_id=732893136]
 script = ExtResource("1")
@@ -26,28 +27,30 @@ theme_override_constants/separation = 6
 [node name="settings_btn" type="Button" parent="bottom_bar/bar_box/left_box" unique_id=2037716000]
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-mouse_filter = 2
 theme_type_variation = &"BibleButton"
 text = "⚙️"
 
 [node name="retreat_btn" type="Button" parent="bottom_bar/bar_box/left_box" unique_id=1675398027]
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-mouse_filter = 2
 theme_type_variation = &"BibleButton"
 text = "🏕️"
+
+[node name="rescue_btn" type="Button" parent="bottom_bar/bar_box/left_box"]
+custom_minimum_size = Vector2(44, 44)
+layout_mode = 2
+theme_type_variation = &"BibleButton"
+text = "🛟"
 
 [node name="wait_btn" type="Button" parent="bottom_bar/bar_box/left_box" unique_id=868382487]
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-mouse_filter = 2
 theme_type_variation = &"BibleButton"
 text = "🏃"
 
 [node name="attack_btn" type="Button" parent="bottom_bar/bar_box/left_box" unique_id=1049647265]
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-mouse_filter = 2
 theme_type_variation = &"BibleButton"
 text = "⚔️"
 
@@ -100,21 +103,18 @@ theme_override_constants/separation = 6
 [node name="defend_btn" type="Button" parent="bottom_bar/bar_box/right_box" unique_id=1028730142]
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-mouse_filter = 2
 theme_type_variation = &"BibleButton"
 text = "🛡️"
 
 [node name="skip_btn" type="Button" parent="bottom_bar/bar_box/right_box" unique_id=515267544]
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-mouse_filter = 2
 theme_type_variation = &"BibleButton"
 text = "⏳"
 
 [node name="spellbook_btn" type="Button" parent="bottom_bar/bar_box/right_box" unique_id=152440698]
 custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-mouse_filter = 2
 theme_type_variation = &"BibleButton"
 text = "📖"
 
@@ -160,8 +160,10 @@ show_additional = false
 
 [node name="initiative_bar" type="PanelContainer" parent="." unique_id=732893137]
 anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 76.0
+anchor_left = 0.18
+anchor_right = 0.82
+offset_top = 96.0
+offset_bottom = 172.0
 grow_horizontal = 2
 theme_type_variation = &"PanelCard"
 
@@ -177,6 +179,245 @@ text = "Очередь"
 [node name="init_box" type="HBoxContainer" parent="initiative_bar/init_col"]
 layout_mode = 2
 theme_override_constants/separation = 6
+
+[node name="hero_cards" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="hero_left" type="PanelContainer" parent="hero_cards"]
+visible = false
+layout_mode = 1
+offset_left = 16.0
+offset_top = 8.0
+offset_right = 336.0
+offset_bottom = 128.0
+theme_type_variation = &"PanelCard"
+
+[node name="row" type="HBoxContainer" parent="hero_cards/hero_left"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="portrait" type="TextureRect" parent="hero_cards/hero_left/row"]
+custom_minimum_size = Vector2(88, 88)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="info" type="VBoxContainer" parent="hero_cards/hero_left/row"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="name" type="Label" parent="hero_cards/hero_left/row/info"]
+layout_mode = 2
+text_overrun_behavior = 2
+theme_type_variation = &"LabelBody"
+
+[node name="level_row" type="HBoxContainer" parent="hero_cards/hero_left/row/info"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="level_key" type="Label" parent="hero_cards/hero_left/row/info/level_row"]
+layout_mode = 2
+theme_type_variation = &"LabelSecondary"
+text = "Ур. "
+
+[node name="level_num" type="Label" parent="hero_cards/hero_left/row/info/level_row"]
+layout_mode = 2
+theme_type_variation = &"LabelNumber"
+theme_override_font_sizes/font_size = 14
+
+[node name="hp_row" type="Control" parent="hero_cards/hero_left/row/info"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="hp_bar" type="ProgressBar" parent="hero_cards/hero_left/row/info/hp_row"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+show_percentage = false
+
+[node name="hp_num" type="Label" parent="hero_cards/hero_left/row/info/hp_row"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"LabelBarNumber"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="mana_row" type="Control" parent="hero_cards/hero_left/row/info"]
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+
+[node name="mana_bar" type="ProgressBar" parent="hero_cards/hero_left/row/info/mana_row"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"ProgressBarMana"
+show_percentage = false
+
+[node name="mana_num" type="Label" parent="hero_cards/hero_left/row/info/mana_row"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"LabelBarNumber"
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="hero_right" type="PanelContainer" parent="hero_cards"]
+visible = false
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -336.0
+offset_top = 8.0
+offset_right = -16.0
+offset_bottom = 128.0
+grow_horizontal = 0
+theme_type_variation = &"PanelCard"
+
+[node name="row" type="HBoxContainer" parent="hero_cards/hero_right"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 2
+
+[node name="info" type="VBoxContainer" parent="hero_cards/hero_right/row"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="name" type="Label" parent="hero_cards/hero_right/row/info"]
+layout_mode = 2
+text_overrun_behavior = 2
+horizontal_alignment = 2
+theme_type_variation = &"LabelBody"
+
+[node name="level_row" type="HBoxContainer" parent="hero_cards/hero_right/row/info"]
+layout_mode = 2
+theme_override_constants/separation = 0
+alignment = 2
+
+[node name="level_key" type="Label" parent="hero_cards/hero_right/row/info/level_row"]
+layout_mode = 2
+theme_type_variation = &"LabelSecondary"
+text = "Ур. "
+
+[node name="level_num" type="Label" parent="hero_cards/hero_right/row/info/level_row"]
+layout_mode = 2
+theme_type_variation = &"LabelNumber"
+theme_override_font_sizes/font_size = 14
+
+[node name="hp_row" type="Control" parent="hero_cards/hero_right/row/info"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="hp_bar" type="ProgressBar" parent="hero_cards/hero_right/row/info/hp_row"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+inverted_fill = true
+show_percentage = false
+
+[node name="hp_num" type="Label" parent="hero_cards/hero_right/row/info/hp_row"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"LabelBarNumber"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="mana_row" type="Control" parent="hero_cards/hero_right/row/info"]
+visible = false
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+
+[node name="mana_bar" type="ProgressBar" parent="hero_cards/hero_right/row/info/mana_row"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"ProgressBarMana"
+show_percentage = false
+
+[node name="mana_num" type="Label" parent="hero_cards/hero_right/row/info/mana_row"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"LabelBarNumber"
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="portrait" type="TextureRect" parent="hero_cards/hero_right/row"]
+custom_minimum_size = Vector2(88, 88)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="turn_timer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -40.0
+offset_top = 176.0
+offset_right = 40.0
+offset_bottom = 256.0
+grow_horizontal = 2
+script = ExtResource("4_timer")
+
+[node name="num" type="Label" parent="turn_timer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"LabelNumber"
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="target_card" type="PanelContainer" parent="." unique_id=732893140]
 visible = false

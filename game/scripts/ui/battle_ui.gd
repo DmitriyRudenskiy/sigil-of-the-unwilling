@@ -2,8 +2,11 @@ class_name BattleUI
 extends CanvasLayer
 
 const THEME_PATH := "res://assets/theme/game_theme.tres"
+const HERO_PORTRAIT_PATH := "res://assets/ui/hero/portrait.png"
+const _PORTRAIT_PX := 48.0
 
 signal retreat_requested
+signal rescue_requested
 signal wait_requested
 signal attack_mode_requested
 signal skip_requested
@@ -16,9 +19,13 @@ signal settings_requested
 signal settings_closed
 signal result_accepted
 
+static var _portrait_tex: Dictionary = {}
+static var _hero_portrait: Texture2D = null
+
 @onready var _bottom_bar: PanelContainer = $bottom_bar
 @onready var _settings_btn: Button = $"bottom_bar/bar_box/left_box/settings_btn"
 @onready var _retreat_btn: Button = $"bottom_bar/bar_box/left_box/retreat_btn"
+@onready var _rescue_btn: Button = $"bottom_bar/bar_box/left_box/rescue_btn"
 @onready var _wait_btn: Button = $"bottom_bar/bar_box/left_box/wait_btn"
 @onready var _attack_button: Button = $"bottom_bar/bar_box/left_box/attack_btn"
 @onready var _turn_line: Label = $"bottom_bar/bar_box/center_box/turn_line"
@@ -32,6 +39,9 @@ signal result_accepted
 @onready var _history_panel: PanelContainer = $history_panel
 @onready var _history_list: ItemList = $"history_panel/history_list"
 @onready var _init_box: HBoxContainer = $initiative_bar/init_col/init_box
+@onready var _hero_left: Control = $hero_cards/hero_left
+@onready var _hero_right: Control = $hero_cards/hero_right
+@onready var _turn_timer: TurnTimer = $turn_timer
 @onready var _target_card: PanelContainer = $target_card
 @onready var _tc_name: Label = $"target_card/tc_box/tc_name"
 @onready var _tc_count: Label = $"target_card/tc_box/tc_count_row/tc_count"
@@ -54,6 +64,7 @@ var _theme: Theme = null
 var _history: Array[String] = []
 var _history_pos := 0
 var _initiative_units: Array[BattleState.BattleUnit] = []
+var _hero_refs: Dictionary = {}
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -144,8 +155,9 @@ func theme_root_theme(t: Theme) -> void:
 	_history_panel.theme_type_variation = &"PanelPlate"
 
 func _connect_skeleton() -> void:
-	_action_buttons = [_retreat_btn, _wait_btn, _attack_button, _defend_btn, _skip_btn]
+	_action_buttons = [_retreat_btn, _rescue_btn, _wait_btn, _attack_button, _defend_btn, _skip_btn]
 	_retreat_btn.pressed.connect(_on_retreat)
+	_rescue_btn.pressed.connect(_on_rescue)
 	_wait_btn.pressed.connect(_on_wait)
 	_attack_button.pressed.connect(_on_attack_mode)
 	_defend_btn.pressed.connect(_on_defend)
@@ -231,6 +243,13 @@ func _make_initiative_cell(unit: BattleState.BattleUnit) -> PanelContainer:
 		hatch.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		hatch.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		cell.add_child(hatch)
+	# Макет (шаг 5.2) + docs/14 §4.A: ячейка — портрет 48 с бейджем уровня,
+	# имя и HP справа от него. Портрет — юнит-арт из assets/units (190 файлов),
+	# бейдж — BattleUnit.get_level(); нуля вместо уровня нет: строка скрыта.
+	var row := HBoxContainer.new()
+	row.name = "row"
+	row.add_theme_constant_override("separation", 4)
+	row.add_child(_make_initiative_portrait(unit))
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 0)
 	var name_label := Label.new()
@@ -242,8 +261,52 @@ func _make_initiative_cell(unit: BattleState.BattleUnit) -> PanelContainer:
 	hp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(name_label)
 	box.add_child(hp_label)
-	cell.add_child(box)
+	row.add_child(box)
+	cell.add_child(row)
 	return cell
+
+
+
+
+func _make_initiative_portrait(unit: BattleState.BattleUnit) -> Control:
+	var box := Control.new()
+	box.name = "portrait_box"
+	box.custom_minimum_size = Vector2(_PORTRAIT_PX, _PORTRAIT_PX)
+	var portrait := TextureRect.new()
+	portrait.name = "portrait"
+	portrait.texture = _unit_portrait(unit.get_key())
+	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	portrait.set_anchors_preset(Control.PRESET_FULL_RECT)
+	if not unit.is_alive():
+		portrait.modulate = Color(0.4, 0.4, 0.4, 0.8)  # десат мёртвого (docs/14 §4.A)
+	box.add_child(portrait)
+	var level: int = unit.get_level()
+	if level > 0:
+		var badge := Label.new()
+		badge.name = "level_badge"
+		badge.theme_type_variation = "LabelNumber"
+		badge.text = str(level)
+		badge.add_theme_font_size_override("font_size", 12)
+		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		badge.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+		badge.position = Vector2(-14, -14)
+		box.add_child(badge)
+	return box
+
+
+
+
+static func _unit_portrait(key: String) -> Texture2D:
+	if _portrait_tex.has(key):
+		return _portrait_tex[key]
+	var tex: Texture2D = null
+	var path := UnitSprites.find_portrait(key)
+	if path != "" and ResourceLoader.exists(path):
+		tex = load(path) as Texture2D
+	_portrait_tex[key] = tex
+	return tex
 
 static var _hatch_tex: ImageTexture = null
 
@@ -304,6 +367,107 @@ func close_spellbook() -> void:
 
 func _on_retreat() -> void:
 	retreat_requested.emit()
+
+func _on_rescue() -> void:
+	rescue_requested.emit()
+
+
+# --- Карточки героев (макет, шаг 5.2) ------------------------------------
+# Герой — боец стороны (`HeroController.get_hero_battle_stack`, ключ `hero`),
+# поэтому имя, портрет и HP читаются из его `BattleUnit`, а текущее HP пишет
+# обратно сам бой (`world_battle_coordinator.set_combat_hp`). Мана — `HeroMagic`,
+# она есть только у своей стороны: у вражеской карточки полоса маны скрыта.
+# Героя в бою может не быть (армия без командира) — карточка скрыта целиком:
+# нулей вместо данных нет (docs/14 §3).
+
+
+
+func update_hero_cards(state: BattleState, magic: HeroMagic = null) -> void:
+	_fill_hero_card(_hero_left, state, BattleState.Side.ATTACKER, magic)
+	_fill_hero_card(_hero_right, state, BattleState.Side.DEFENDER, null)
+
+
+func _hero_of_side(state: BattleState, side: BattleState.Side) -> BattleState.BattleUnit:
+	if state == null:
+		return null
+	for u in state.get_units_by_side(side):
+		if u.get_key() == GameNumbersHero.HERO_BATTLE_KEY:
+			return u
+	return null
+
+
+func _hero_card_refs(panel: Control) -> Dictionary:
+	if not _hero_refs.has(panel.name):
+		_hero_refs[panel.name] = {
+			"portrait": panel.get_node("row/portrait"),
+			"name": panel.get_node("row/info/name"),
+			"level_row": panel.get_node("row/info/level_row"),
+			"level_num": panel.get_node("row/info/level_row/level_num"),
+			"hp_row": panel.get_node("row/info/hp_row"),
+			"hp_bar": panel.get_node("row/info/hp_row/hp_bar"),
+			"hp_num": panel.get_node("row/info/hp_row/hp_num"),
+			"mana_row": panel.get_node("row/info/mana_row"),
+			"mana_bar": panel.get_node("row/info/mana_row/mana_bar"),
+			"mana_num": panel.get_node("row/info/mana_row/mana_num"),
+		}
+	return _hero_refs[panel.name]
+
+
+func _fill_hero_card(
+	panel: Control,
+	state: BattleState,
+	side: BattleState.Side,
+	magic: HeroMagic
+) -> void:
+	var hero := _hero_of_side(state, side)
+	panel.visible = hero != null
+	if hero == null:
+		return
+	var c := _hero_card_refs(panel)
+	c["portrait"].texture = _hero_portrait_texture()
+	c["name"].text = hero.get_display_name()
+	var level: int = hero.get_level()
+	c["level_row"].visible = level > 0
+	c["level_num"].text = str(level)
+	# Полоса здоровья — только там, где текущее HP действительно меняется
+	# (dnd-персонаж). У стекового юнита get_hp() равен максимуму, и полоса
+	# всегда была бы полной — то есть врала бы о неизменности.
+	var tracked: bool = hero.is_dnd_character()
+	c["hp_row"].visible = tracked
+	if tracked:
+		var mx: int = maxi(1, int(hero.dnd_profile.max_hp))
+		var cur: int = clampi(hero.get_hp(), 0, mx)
+		c["hp_bar"].max_value = float(mx)
+		c["hp_bar"].value = float(cur)
+		c["hp_num"].text = "%d/%d" % [cur, mx]
+	var has_mana: bool = magic != null and magic.mana_max > 0
+	c["mana_row"].visible = has_mana
+	if has_mana:
+		c["mana_bar"].max_value = float(magic.mana_max)
+		c["mana_bar"].value = float(clampi(magic.mana_current, 0, magic.mana_max))
+		c["mana_num"].text = "%d/%d" % [magic.mana_current, magic.mana_max]
+
+
+
+
+static func _hero_portrait_texture() -> Texture2D:
+	if _hero_portrait == null and ResourceLoader.exists(HERO_PORTRAIT_PATH):
+		_hero_portrait = load(HERO_PORTRAIT_PATH) as Texture2D
+	return _hero_portrait
+
+
+# --- Таймер хода (макет, шаг 5.3) -----------------------------------------
+# Значения несёт BattleState (turn_time_left / turn_time_limit / turn_timer_running);
+# режим без ограничения — неактивное состояние элемента, а не исчезание.
+func set_turn_timer(seconds_left: float, limit: int, running: bool) -> void:
+	if _turn_timer != null:
+		_turn_timer.set_state(seconds_left, limit, running)
+
+
+# «Спасение» (макет, шаг 5.2): кнопка активна, только когда есть кого поднимать.
+func set_rescue_enabled(enabled: bool) -> void:
+	if _rescue_btn != null:
+		_rescue_btn.disabled = not enabled
 
 func _on_wait() -> void:
 	wait_requested.emit()

@@ -1035,6 +1035,19 @@ border_color = Color(0.788235, 0.635294, 0.352941, 1)
 ; T-147 (миникарта): рамка `Frame` (Panel) — было `theme_override_styles/panel` с локальным
 ; `StyleBoxFlat_frame` в minimap_panel.tscn. Значения перенесены посимвольно (правило 2),
 ; теновых аналогов с таким bg/рамкой в теме нет — ресурс новый, а не переиспользование.
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_bar_fill_mana"]
+texture = ExtResource("7_fill_health")
+modulate_color = Color(0.4, 0.62, 1, 1)
+margin_left = 4.0
+margin_top = 4.0
+margin_right = 4.0
+margin_bottom = 4.0
+texture_margin_left = 6.0
+texture_margin_top = 6.0
+texture_margin_right = 6.0
+texture_margin_bottom = 6.0
+
 [resource]
 Panel/styles/panel = SubResource("StyleBoxTexture_panel")
 Panel/styles/window = SubResource("StyleBoxFlat_window")
@@ -1375,3 +1388,19 @@ ArtifactOutline/base_type = "PanelContainer"
 ArtifactOutline/styles/panel = SubResource("StyleBoxFlat_outline")
 ArtifactBottom/base_type = "PanelContainer"
 ArtifactBottom/styles/panel = SubResource("StyleBoxTexture_panel")
+; Шаг 5.2 (макет боевого HUD): полоса маны героя — тот же трек, что и здоровье,
+; но тон другой: две одинаковые полосы рядом читаются как одна величина.
+ProgressBarMana/base_type = "ProgressBar"
+ProgressBarMana/styles/background = SubResource("StyleBoxTexture_bar_bg")
+ProgressBarMana/styles/fill = SubResource("StyleBoxTexture_bar_fill_mana")
+; Шаг 5.2 (макет): число поверх полосы героя — белым с тёмной тенью. Кремовый
+; LabelNumber на зелёной заливке и на тёмном треке читается по-разному; макет
+; даёт белое число, читаемое на обоих.
+LabelBarNumber/base_type = "Label"
+LabelBarNumber/fonts/font = ExtResource("10_mono")
+LabelBarNumber/font_sizes/font_size = 13
+LabelBarNumber/colors/font_color = Color(1, 1, 1, 1)
+LabelBarNumber/colors/font_shadow_color = Color(0.05, 0.03, 0.02, 0.95)
+LabelBarNumber/font_shadow_size_1 = 2
+LabelBarNumber/font_shadow_offset_x = 0
+LabelBarNumber/font_shadow_offset_y = 1

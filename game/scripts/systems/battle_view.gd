@@ -185,6 +185,25 @@ func animate_attack(attacker: BattleState.BattleUnit, defender: BattleState.Batt
 	tw.tween_property(attacker_node, "position", start_pos, GameNumbers.ATTACK_LUNGE_BACK_SEC)
 	tw.finished.connect(func(): _active_tweens.erase(attacker.uid))
 
+## Шаг 5.4 (спека battle-hud, «Шквал событий»): предел одновременно видимых
+## чисел. Сверх предела старое число снимается сразу — новое информативнее
+## старого, а накопление «до бесконечности» заслоняет поле и боковые панели.
+const MAX_SIMULTANEOUS_NUMBERS := 8
+
+var _numbers: Array[Node] = []
+
+
+func _register_number(label: Node) -> void:
+	for n in _numbers.duplicate():
+		if not is_instance_valid(n) or not n.is_inside_tree():
+			_numbers.erase(n)
+	while _numbers.size() >= MAX_SIMULTANEOUS_NUMBERS:
+		var oldest: Node = _numbers.pop_front()
+		if is_instance_valid(oldest):
+			oldest.queue_free()
+	_numbers.append(label)
+
+
 func show_floating_text(cell: Vector2i, text: String, color: Color) -> void:
 	var label: Label = _FloatingText.instantiate()
 	label.text = text
@@ -193,6 +212,7 @@ func show_floating_text(cell: Vector2i, text: String, color: Color) -> void:
 	label.z_index = 20
 
 	add_child(label)
+	_register_number(label)
 
 	var tw := create_tween()
 	tw.tween_property(label, "position:y", label.position.y - GameNumbers.FLOATING_TEXT_RISE_PX, GameNumbers.FLOATING_TEXT_FADE_SEC)
@@ -210,6 +230,7 @@ func show_damage_number(unit: BattleState.BattleUnit, damage: int) -> void:
 	label.z_index = 21
 
 	add_child(label)
+	_register_number(label)
 
 	var tw := create_tween()
 	tw.tween_property(label, "position:y", label.position.y - GameNumbers.DAMAGE_NUMBER_RISE_PX, GameNumbers.DAMAGE_NUMBER_FADE_SEC)
