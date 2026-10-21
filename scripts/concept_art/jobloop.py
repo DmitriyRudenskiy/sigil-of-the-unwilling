@@ -475,7 +475,11 @@ def cmd_next(a) -> int:
         unit["seal"] = run_seal(unit, model, version, spec)
         # Сид пинится, поэтому неизменная пара (P, R) = побайтовый повтор прошлой
         # попытки: кадр, замер и круг цепочки были бы поддельным «нет движения».
-        prev = unit.get("seals", {}).get(attempt_name(unit, model, version - 1))
+        # Сравниваем с прошлой версией ЭТОЙ модели: у второй стадии цепочки тот же
+        # текст, что у первой, и сверка с «последним прогоном» пугала бы повтором
+        # на ровном месте.
+        prev = (unit.get("seals", {}).get(attempt_name(unit, model, version - 1))
+                if version > 1 else None)
         if prev == unit["seal"] and not getattr(a, "force", False):
             raise SystemExit(
                 f"{uid}: {model} v{version} повторит v{version - 1} побайтово — сид "
@@ -1411,9 +1415,15 @@ def cmd_lint(a) -> int:
     return 0
 
 
-def figure_mask(im: Image.Image, cell: tuple[int, int, int, int], gutter: int = 80) -> np.ndarray:
+def figure_mask(im: Image.Image, cell: tuple[int, int, int, int], gutter: int = 80,
+                overhang: int = 16) -> np.ndarray:
     """Маска «своего» содержимого ячейки: связные компоненты, чей центр тяжести
-    лежит в ячейке. Прямоугольник бокса тащит кисть и щит соседа — маска их выбрасывает."""
+    лежит в ячейке, плюс вырезка по границе ячейки с запасом overhang.
+
+    Центра тяжести хватает, пока фигура с соседом — разные компоненты. Когда они
+    соприкасаются (дым, плащ), это одна компонента и сосед едет целиком: 170 из
+    432 листов. Поэтому маска ещё и отсекается прямоугольником ячейки — теряется
+    свес в 17 пикселей, а не половина чужого торса."""
     from scipy import ndimage
     a = np.asarray(im.convert("L"), dtype=np.uint8)
     x0, y0, x1, y1 = cell
@@ -1429,7 +1439,9 @@ def figure_mask(im: Image.Image, cell: tuple[int, int, int, int], gutter: int = 
             keep |= lab == i
     mask = np.zeros(a.shape, bool)
     mask[win[1]:win[3], win[0]:win[2]] = keep
-    return mask
+    clip = np.zeros(a.shape, bool)
+    clip[max(0, y0 - overhang):y1 + overhang, max(0, x0 - overhang):x1 + overhang] = True
+    return mask & clip
 
 
 def figure_bbox(im: Image.Image, cell: tuple[int, int, int, int],
@@ -1521,12 +1533,12 @@ def cmd_stat(_a) -> int:
     print(f"всего {len(q)}: " + ", ".join(f"{k}={v}" for k, v in sorted(tally.items())))
     by_model = {}
     for u in q.values():
-        for h in u["history"]:
+        for h in u.get("history", []):      # юниты старой схемы без журнала
             if h.get("readiness") is not None:
                 by_model.setdefault(h["model"], []).append((h["readiness"], u["version"]))
     tens = total = 0
     for u in q.values():
-        for h in u["history"]:
+        for h in u.get("history", []):
             if h.get("rows") and not h.get("control"):   # контроли — не попытки
                 total += len(h["rows"])
                 tens += sum(1 for v in h["rows"].values() if v == 10)
