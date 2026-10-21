@@ -1024,6 +1024,17 @@ corner_radius_bottom_left = 3
 bg_color = Color(0.3499999940395355, 0.23999999463558197, 0.15000000596046448, 1)
 ; T-147 (army_panel): слот юнита — было StyleBoxFlat.new() в _ready, bg ThemeConfig.C_SLOT_BG,
 ; радиус 3, без рамки. Рамки не было: добавив её «для красоты», гард бы не поймал, а кадр бы уехал.
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_minimap_frame"]
+bg_color = Color(0.290196, 0.0509804, 0.0509804, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.788235, 0.635294, 0.352941, 1)
+; T-147 (миникарта): рамка `Frame` (Panel) — было `theme_override_styles/panel` с локальным
+; `StyleBoxFlat_frame` в minimap_panel.tscn. Значения перенесены посимвольно (правило 2),
+; теновых аналогов с таким bg/рамкой в теме нет — ресурс новый, а не переиспользование.
 [resource]
 Panel/styles/panel = SubResource("StyleBoxTexture_panel")
 Panel/styles/window = SubResource("StyleBoxFlat_window")
@@ -1349,3 +1360,7 @@ ArmyPanel/base_type = "PanelContainer"
 ArmyPanel/styles/panel = SubResource("StyleBoxFlat_army_panel")
 ArmySlot/base_type = "Panel"
 ArmySlot/styles/panel = SubResource("StyleBoxFlat_army_unit_slot")
+; T-147 (миникарта): единственный легальный носитель для `Panel` — `panel`; узел `Frame`
+; объявлен в сцене, поэтому назначение — сценевое (`theme_type_variation`), а не кодовое.
+MinimapFrame/base_type = "Panel"
+MinimapFrame/styles/panel = SubResource("StyleBoxFlat_minimap_frame")
