@@ -5,11 +5,21 @@ extends BaseTest
 var screen: CityScreen = null
 var city: RefCounted = null
 var hero: Node2D = null
+var window_size: Vector2i = Vector2i.ZERO
+var window_size_saved := false
 
 func _main_root() -> Node:
 	return Engine.get_main_loop().root
 
 func before_test() -> void:
+	# Headless-окно — 64×64: экран города открывался бы в компактном режиме шапки
+	# (порог — HEADER_COMPACT_BELOW), и тесты HUD проверяли бы короткую форму
+	# подписей вместо развёрнутой. Замер ведём на настоящем разрешении; приём
+	# тот же, что в test_sidebar_collapses_at_compact_width.
+	var window := _main_root() as Window
+	window_size = window.size
+	window_size_saved = true
+	window.size = Vector2i(1920, 1080)
 	screen = load("res://scenes/ui/city_screen.tscn").instantiate() as CityScreen
 	_main_root().add_child(screen)
 	city = City.new()
@@ -32,6 +42,9 @@ func after_test() -> void:
 	screen = null
 	hero = null
 	city = null
+	if window_size_saved:
+		(_main_root() as Window).size = window_size
+		window_size_saved = false
 
 func test_setup_binds_city_and_hero() -> void:
 	assert_that(screen.city).is_equal(city)
