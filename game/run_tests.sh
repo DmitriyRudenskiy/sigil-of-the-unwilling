@@ -263,7 +263,7 @@ if [ "$MCP_RC" -eq 0 ] && [ "$SUM" -ne "$COLLECTED" ]; then
 	echo "PYTEST: RED (неполный прогон: сумма $SUM != collected $COLLECTED — свит встал/прервался)"
 	MCP_RC=1
 fi
-# Python-гейт генератора арта (T-145): `scripts/test_gen_map_art.py` не входит ни в одну
+# Python-гейт генератора арта (T-150): `scripts/test_gen_map_art.py` не входит ни в одну
 # секцию выше (MCP-секция знает только tests/mcp/), а без него затемнённый побратим листа
 # и кратность MAP_FOG_DIM проверялись бы только руками. Секция не молчит: нет pytest/PIL —
 # явная строка SKIPPED (конвенция MCP-секции).
