@@ -39,6 +39,38 @@ date: 2026-10-21
   deferred, mvp-ui-flow), финальный престиж-ранг — read-only
   `prestige_rank_name()` (T-129), UI-отчёт ранга — deferred.
 
+## [2026-10-21] — Влита `feat/clone-cut-refer`, реестр веток сведён к одному `main`
+
+- Ветка image-clone (16 коммитов, база `a3e89b9a` 2026-10-17) влита мержем `0d24a66e`
+  по указанию владельца — первая работа, влитая уже после `D-224`. Приносит описания
+  `unit-14…unit-41` (`IMG-073…492`, все 492 юнита описаны), вердикты 084…145, фикс
+  маски кропа (соседний персонаж попадал в кадры в 170 листах из 432), починку
+  `massgen` (стадия не склеивалась, ожидание следующей версии кадра) и устойчивость
+  `jobloop stat` к юнитам старой схемы без журнала прогонов.
+- Пересечений с `main` нет и это проверено пофайлово, а не «на глаз»: ветка меняла
+  `image-clone/{queue,spec}.json`, `docs/{report,fixups}.md`, `references/manifest.json`,
+  `scripts/concept_art/{jobloop.py,judge_board.py,massgen.sh}`; `main` за то же время —
+  `image-clone/map/MANIFEST.json` и `scripts/concept_art/{map_spec,spec}.json`.
+  Общих файлов ноль, `merge-tree` чистый.
+- Гейт на дереве мержа (local): GdUnit 3021/3023, 2 skipped, 0 ошибок, 0 сирот;
+  ORPHAN-GATE OK; VACUOUS-ASSERT OK; gdlint «свои» 357 = база; MCP e2e 61/2/0;
+  секция генератора арта 5 passed; `run_tests.sh` `EXIT=0`. Самопроверка пайплайна
+  `test_generate.py` — `OK: проверок 66`; в голом дереве она падает **одинаково на main
+  и на ветке** (эталоны `image-clone/etalons` в git не лежат), так что это окружение,
+  а не регрессия.
+- **Удалены все ветки, кроме `main`:** локальная `feat/clone-cut-refer` (коммиты —
+  предки `main`), пять ветвей клона `-second` (`docs/close-world-map-art-variety` —
+  предок `main`, `feat/clone-cut-refer` — тот же SHA, `s3`/`s4`/`s5` — содержимое уже
+  в `main`, каждая застрахована бандлом из `.reserve/stale-refs-2026-10-21/`). На
+  `origin` head один. Каталоги `-doc` и `-slop` репозиториями не оказались — `.git`
+  отсутствует, веток там не было.
+- Рабочий каталог переведён на `main`. Переключение сначала отказалось: четыре файла
+  `openspec/changes/ui-verification-gates/` лежали в дереве неиндексированными копиями
+  и совпадали с main байт-в-байт — вынесены, восстановлены из `main`, сверены, стёрты.
+  Незакоммиченное (`image-clone/queue.json`, `image-clone/spec.json`,
+  `scripts/concept_art/massgen.sh`, а также untracked `image-clone/docs/corrections-raw/`
+  и `scripts/concept_art/audit_subjects.py`) — не ветка, поэтому сохранено как есть.
+
 ## [2026-10-21] — `D-224`: работа переведена на `main`, норма о feature-ветках отменена
 
 - Указанием владельца сняты три нормы прежнего порядка: коммиты на feature-ветках
