@@ -180,23 +180,33 @@
       "hp": 55,
       "ac": 15,
       "attack": 16,
-      "damage": 11,
+      "damage": 8,
       "luck": 0,
       "dex": 12,
       "con": 3,
       "proficiency": 3,
-      "cr": 7
+      "cr": 7,
+      "is_boss": true,
+      "boss_powerful_strike_mult": 1.5,
+      "boss_powerful_strike_cooldown": 2,
+      "boss_rage_threshold": 0.5,
+      "boss_rage_damage_mult": 1.25
     },
     "raider_final": {
       "hp": 55,
       "ac": 15,
       "attack": 16,
-      "damage": 11,
+      "damage": 8,
       "luck": 0,
       "dex": 12,
       "con": 3,
       "proficiency": 3,
-      "cr": 8
+      "cr": 8,
+      "is_boss": true,
+      "boss_powerful_strike_mult": 1.5,
+      "boss_powerful_strike_cooldown": 2,
+      "boss_rage_threshold": 0.5,
+      "boss_rage_damage_mult": 1.25
     }
   },
   "tutorial": {

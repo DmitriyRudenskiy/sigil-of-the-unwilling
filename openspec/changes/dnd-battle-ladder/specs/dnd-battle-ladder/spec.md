@@ -74,12 +74,19 @@ Auto mode SHALL use the same engine as manual mode with a deterministic AI (mini
 - **AND** the battle ends with a DEFEAT or RETREAT outcome
 
 ### Requirement: Enemy AI
-Enemy AI SHALL be greedy (minimum HP in radius, tiebreak by lower id). The turn-21 boss SHALL be greedy plus a special ability when the party's HP is below 50%.
+Enemy AI SHALL be greedy (minimum HP in radius, tiebreak by lower id). The turn-21 boss SHALL be greedy plus exactly two abilities (D-218, owner verdict 2026-10-20; no positional zones, D-222): (1) a telegraphed powerful strike — deterministic target (existing targeting: the opponent in 1v1, `select_target` in multi), base damage × 1.5, cooldown of 2 turns, no RNG; (2) a rage phase — activates once when the boss's own HP drops to ≤ 50% of its max HP, +25% damage for the rest of the battle, no extra phases, minions, or control. All parameters SHALL be data-driven (balance config).
 
-#### Scenario: Boss special ability
-- **WHEN** the turn-21 boss detects the party's HP below 50%
-- **THEN** the boss uses its special ability
-- **AND** the ability is deterministic (no RNG)
+#### Scenario: Boss powerful strike
+- **WHEN** the boss acts and its powerful-strike cooldown is 0
+- **THEN** the strike deals base damage × 1.5 to its deterministic target
+- **AND** the cooldown is set to 2 turns
+- **AND** the strike is telegraphed in the battle trace (`boss_powerful`)
+
+#### Scenario: Boss rage phase
+- **WHEN** the boss's HP drops to ≤ 50% of its max HP
+- **THEN** the rage phase activates once
+- **AND** the boss's damage is multiplied by 1.25 for the rest of the battle
+- **AND** the activation is recorded in the battle trace (`boss_rage`)
 
 ### Requirement: Enemy stats visible
 Enemy stats (AC, HP, luck, abilities) SHALL be visible to the player at all times (M1).

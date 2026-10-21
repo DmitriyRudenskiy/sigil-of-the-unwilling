@@ -4,10 +4,38 @@ tags:
   - gdd
   - process
 status: reference
-date: 2026-10-20
+date: 2026-10-21
 ---
 
 # CHANGELOG — docs/
+
+## [2026-10-21] — V-3: минимальный босс — ровно 2 способности (D-218)
+
+- **Вердикт владельца (2026-10-20, D-218; уточнение D-222 — без зон):** один
+  упрощённый шаблон босса, ровно 2 способности: (1) **телеграфируемый мощный
+  удар** — детерминированная цель (штатный таргетинг), урон × 1.5, кулдаун 2 хода,
+  без RNG; (2) **фаза ярости** — один раз при HP босса ≤ 50 % max, +25 % урона до
+  конца боя, без доп. фаз/миньонов/контроля. Все параметры — в данных.
+- **`game/scripts/campaign/campaign_battle.gd`**: `make_combatant` — поля
+  `is_boss`, `max_hp`, `boss_powerful_strike_mult`/`boss_powerful_strike_cooldown`,
+  `boss_rage_threshold`/`boss_rage_damage_mult` (дефолты — не-боссы не тронуты);
+  `_boss_strike` (мощный удар при кулдауне 0, множитель ярости, trace-флаги
+  `boss_powerful`/`boss_rage`); `_check_boss_rage` (одноразовая активация после
+  урона, trace-запись `boss_rage`). `resolve` (1v1) и `resolve_multi`
+  маршрутизируют только удары босса в `_boss_strike`; остальной бой не тронут.
+- **`game/data/config/balance/campaign.json`**: `raider_tier_3`/`raider_final` —
+  `is_boss: true` + параметры способностей (×1.5, CD 2, ≤50 %, ×1.25); базовый
+  урон 11 → 8 — компенсация способностей (баланс-якоря T-041/T-041b держатся:
+  `test_mutual_balance_vs_boss_all_win`, `test_final_raid_repelled` и др.).
+- **Тесты:** `game/tests/campaign/test_battle_boss.gd` (9: мощный удар ×1.5 на
+  первом ходу; кулдаун 2 (мощный на 1/4, обычный на 2–3); детерминизм (byte-
+  identical trace); активация ярости на пороге (ровно 1 раз); +25 % к урону;
+  не-реактивация; data-driven порог (0.75 → активация на ходу 2); не-боссы
+  не тронуты ×2). GdUnit 2981 | 0 errors | 0 failures | 0 orphans.
+- **Spec/tasks:** `openspec/changes/dnd-battle-ladder` — Requirement «Enemy AI»
+  синхронизирован с D-218 (триггер ярости — HP босса, не партии; ровно 2
+  способности; без зон, D-222); задача 2.2 закрыта. `VERDICT-REQUEST.md` — V-3
+  «Исполнено», очередь 2 закрыта.
 
 ## [2026-10-20] — V-2 уточнение: Blink дескоуплен, зоны не вводятся (D-222)
 
