@@ -24,6 +24,7 @@ offset_bottom = 670.0
 
 
 [node name="Outline" type="PanelContainer" unique_id=1003 parent="Center/Window"]
+theme_type_variation = &"ArtifactOutline"
 
 
 [node name="Left" type="Control" unique_id=1004 parent="Center/Window"]
@@ -931,6 +932,7 @@ offset_bottom = 588.0
 
 
 [node name="Bottom" type="PanelContainer" unique_id=1106 parent="Center/Window"]
+theme_type_variation = &"ArtifactBottom"
 anchors_preset = 10
 offset_left = 10.0
 offset_top = 470.0

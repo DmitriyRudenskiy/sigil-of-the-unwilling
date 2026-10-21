@@ -1364,3 +1364,14 @@ ArmySlot/styles/panel = SubResource("StyleBoxFlat_army_unit_slot")
 ; объявлен в сцене, поэтому назначение — сценевое (`theme_type_variation`), а не кодовое.
 MinimapFrame/base_type = "Panel"
 MinimapFrame/styles/panel = SubResource("StyleBoxFlat_minimap_frame")
+; T-147 (artifact_inventory_screen). Из 62 узлов, которым код навязывал имя
+; `panel`, рисовали его ровно два (замер — кадры до/после и погрупповая
+; раскраска): остальные 60 — TextureRect, Button и голый Control — это имя не
+; рисуют вовсе, оно для них не носитель. Два оставшихся PanelContainer рисуют
+; готовые стили темы, поэтому носитель — прямое назначение уже существующего
+; ресурса, без нового sub_resource. Назначение носителя — сценевое
+; (artifact_inventory_screen.tscn), а не кодовое.
+ArtifactOutline/base_type = "PanelContainer"
+ArtifactOutline/styles/panel = SubResource("StyleBoxFlat_outline")
+ArtifactBottom/base_type = "PanelContainer"
+ArtifactBottom/styles/panel = SubResource("StyleBoxTexture_panel")
