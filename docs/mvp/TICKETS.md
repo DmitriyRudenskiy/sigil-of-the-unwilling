@@ -2589,7 +2589,11 @@ gdlint по изменённым файлам 38 против 198 на тех ж
   `panel` (замер рантаймом по живому дереву: 40 `TextureRect`, 16 `Button`, 4
   `Control`, 2 `PanelContainer`). Рисуют `panel` из них **два** — проверено
   погрупповой раскраской: `TextureRect`/`Button`/`Control` — 0 пикселов дельты кадра,
-  `PanelContainer` — 169 387 (bbox 494,346–1450,1000). Живое перенесено: `Outline` →
+  `PanelContainer` — 169 387 (bbox 494,346–1450,1000). Тот же пин, прогнанный на
+  дереве «после» — тоже ноль пикселов (пара `artifact_before_dead_pin` /
+  `artifact_after_dead_pin` с сохранённым кодом состояния в манифесте), то есть
+  «мёртвые узлы не меняются ни там ни там» из 3.3 закрыто кадрами, а не словами;
+  размечается надмножество — 100 узлов против 62 тронутых кодом. Живое перенесено: `Outline` →
   носитель `ArtifactOutline`, `Bottom` → `ArtifactBottom` (оба `base_type =
   "PanelContainer"`, стили — уже существующие `StyleBoxFlat_outline` и
   `StyleBoxTexture_panel`, новых `sub_resource` нет), назначение сценевое. Мёртвое
