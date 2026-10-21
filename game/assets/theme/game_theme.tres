@@ -14,8 +14,13 @@
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/buttons/button_menu_hover.png" id="17_btn_menu_hover"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/buttons/button_menu_pressed.png" id="18_btn_menu_pressed"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/buttons/button_menu_disabled.png" id="19_btn_menu_disabled"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/buttons/button_round_normal.png" id="20_rb_normal"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/buttons/button_round_hover.png" id="21_rb_hover"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/buttons/button_round_pressed.png" id="22_rb_pressed"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/buttons/button_round_disabled.png" id="23_rb_disabled"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/buttons/checkbox_checked.png" id="14_cb_checked"]
 [ext_resource type="Texture2D" path="res://assets/ui/widgets/buttons/checkbox_unchecked.png" id="15_cb_unchecked"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/progress_bars/fill_mana.png" id="24_fill_mana"]
 
 [ext_resource type="FontFile" path="res://assets/fonts/PT_Serif-Regular.ttf" id="8_serif"]
 [ext_resource type="FontFile" path="res://assets/fonts/PT_Serif-Bold.ttf" id="9_serif_bold"]
@@ -1036,9 +1041,61 @@ border_color = Color(0.788235, 0.635294, 0.352941, 1)
 ; `StyleBoxFlat_frame` в minimap_panel.tscn. Значения перенесены посимвольно (правило 2),
 ; теновых аналогов с таким bg/рамкой в теме нет — ресурс новый, а не переиспользование.
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_none"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_round_normal"]
+texture = ExtResource("20_rb_normal")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_round_hover"]
+texture = ExtResource("21_rb_hover")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_round_pressed"]
+texture = ExtResource("22_rb_pressed")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_round_disabled"]
+texture = ExtResource("23_rb_disabled")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_queue_tile"]
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(0.09, 0.06, 0.03, 0.92)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.42, 0.32, 0.16, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_queue_tile_active"]
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(0.14, 0.1, 0.05, 0.95)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.788, 0.635, 0.153, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_queue_tile_dead"]
+content_margin_left = 2.0
+content_margin_top = 2.0
+content_margin_right = 2.0
+content_margin_bottom = 2.0
+bg_color = Color(0.05, 0.04, 0.03, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.16, 0.11, 0.06, 1)
+
+; Мана-полоса макета 11 — синий #1a75bd (замер по макету), а не тонированный
+; зелёный: умножение цвета по зелёной текстуре даёт грязный сине-зелёный.
+; Поэтому у маны своя заливка той же геометрии (scripts/ui_kit/build_mana_bar.py).
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_bar_fill_mana"]
-texture = ExtResource("7_fill_health")
-modulate_color = Color(0.4, 0.62, 1, 1)
+texture = ExtResource("24_fill_mana")
 margin_left = 4.0
 margin_top = 4.0
 margin_right = 4.0
@@ -1404,3 +1461,57 @@ LabelBarNumber/colors/font_shadow_color = Color(0.05, 0.03, 0.02, 0.95)
 LabelBarNumber/font_shadow_size_1 = 2
 LabelBarNumber/font_shadow_offset_x = 0
 LabelBarNumber/font_shadow_offset_y = 1
+; Шаг 5 (макет 11): нижний ряд боя — круглые кованые медальоны, а не плитки
+; меню. Плашка генерируется по разрезу макета (scripts/ui_kit/build_round_button.py),
+; геометрия и состояния — только здесь; в сцене остаётся размер и текст.
+RoundIconButton/base_type = "Button"
+RoundIconButton/fonts/font = ExtResource("8_serif")
+RoundIconButton/font_sizes/font_size = 52
+; Иконки макета 11 — чеканка по бронзе, а не цветные вклейки: глиф эмодзи
+; домножается тёплым золотом, поэтому ряд читается одним металлом.
+RoundIconButton/colors/font_color = Color(0.87, 0.68, 0.34, 1)
+RoundIconButton/colors/font_hover_color = Color(0.98, 0.83, 0.5, 1)
+RoundIconButton/colors/font_pressed_color = Color(0.7, 0.53, 0.26, 1)
+RoundIconButton/colors/font_disabled_color = Color(0.6, 0.5, 0.34, 0.55)
+RoundIconButton/styles/normal = SubResource("StyleBoxTexture_round_normal")
+RoundIconButton/styles/hover = SubResource("StyleBoxTexture_round_hover")
+RoundIconButton/styles/pressed = SubResource("StyleBoxTexture_round_pressed")
+RoundIconButton/styles/disabled = SubResource("StyleBoxTexture_round_disabled")
+RoundIconButton/styles/focus = SubResource("StyleBoxEmpty_none")
+; Подпись под медальоном (макет: «Menu», «Surrender» …) — светлое с тёмной
+; обводкой: текст лежит на живом поле боя, а не на панели.
+LabelButtonCaption/base_type = "Label"
+LabelButtonCaption/fonts/font = ExtResource("8_serif")
+LabelButtonCaption/font_sizes/font_size = 22
+LabelButtonCaption/colors/font_color = Color(0.9255, 0.8745, 0.7373, 1)
+LabelButtonCaption/colors/font_shadow_color = Color(0.03, 0.02, 0.01, 0.9)
+LabelButtonCaption/font_shadow_size_1 = 3
+LabelButtonCaption/horizontal_alignment = 1
+; Имя героя в карточке макета 11 — крупная антиква: карточка читается издалека.
+LabelHeroName/base_type = "Label"
+LabelHeroName/fonts/font = ExtResource("9_serif_bold")
+LabelHeroName/font_sizes/font_size = 36
+LabelHeroName/colors/font_color = Color(0.902, 0.8118, 0.6039, 1)
+LabelHeroName/colors/font_shadow_color = Color(0.03, 0.02, 0.01, 0.85)
+LabelHeroName/font_shadow_size_1 = 3
+; Число таймера хода (макет 11): крупная золотая антиква в кольце.
+LabelTurnTimer/base_type = "Label"
+LabelTurnTimer/fonts/font = ExtResource("9_serif_bold")
+LabelTurnTimer/font_sizes/font_size = 96
+LabelTurnTimer/colors/font_color = Color(0.9529, 0.8627, 0.6863, 1)
+LabelTurnTimer/colors/font_shadow_color = Color(0.05, 0.02, 0.0, 0.9)
+LabelTurnTimer/font_shadow_size_1 = 4
+; Бейдж уровня в плитке очереди (макет 11): белое число на тёмном углу плитки.
+LabelQueueBadge/base_type = "Label"
+LabelQueueBadge/fonts/font = ExtResource("9_serif_bold")
+LabelQueueBadge/font_sizes/font_size = 20
+LabelQueueBadge/colors/font_color = Color(0.96, 0.94, 0.88, 1)
+LabelQueueBadge/colors/font_shadow_color = Color(0.02, 0.01, 0.01, 0.95)
+LabelQueueBadge/font_shadow_size_1 = 3
+; Ячейка очереди хода (макет 11): квадратный портрет, активный — золотая рама.
+PanelQueueTile/base_type = "PanelContainer"
+PanelQueueTile/styles/panel = SubResource("StyleBoxFlat_queue_tile")
+PanelQueueTileActive/base_type = "PanelContainer"
+PanelQueueTileActive/styles/panel = SubResource("StyleBoxFlat_queue_tile_active")
+PanelQueueTileDead/base_type = "PanelContainer"
+PanelQueueTileDead/styles/panel = SubResource("StyleBoxFlat_queue_tile_dead")

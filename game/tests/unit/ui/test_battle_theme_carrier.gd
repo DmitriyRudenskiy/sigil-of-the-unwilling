@@ -37,7 +37,7 @@ func test_battle_panels_take_carrier_from_theme() -> void:
 	var ui: BattleUI = _mk_ui()
 	var plate: StyleBox = _THEME.get_stylebox("panel", "Panel")
 	assert_object(plate).is_not_null().override_failure_message("в теме нет Panel/styles/panel")
-	for pair in [["нижняя панель", ui._bottom_bar], ["панель истории", ui._history_panel]]:
+	for pair in [["панель истории", ui._history_panel]]:
 		var panel: PanelContainer = pair[1]
 		assert_object(_local_override(panel)).is_null() \
 			.override_failure_message("%s: на узле висит stylebox-переопределение" % pair[0])
@@ -46,6 +46,17 @@ func test_battle_panels_take_carrier_from_theme() -> void:
 		assert_bool(panel.get_theme_stylebox("panel") == plate).is_true() \
 			.override_failure_message(
 				"%s: резолвится не тот носитель, что лежал в override (вид изменится)" % pair[0])
+
+## Макет 11: нижний ряд — медальоны лежат на поле, плиты под ними нет. Узел
+## поэтому выведен из PanelContainer в Control: если плиту вернут, `panel`
+## у Control не резолвится ни у какого варианта, а тест поймает это здесь.
+func test_bottom_bar_has_no_plate_carrier() -> void:
+	var ui: BattleUI = _mk_ui()
+	assert_that(ui._bottom_bar).is_not_null()
+	assert_bool(ui._bottom_bar is PanelContainer).is_false() \
+		.override_failure_message("нижняя панель снова плита: макет даёт медальоны на поле")
+	assert_object(_local_override(ui._bottom_bar)).is_null()
+
 
 ## Вариант темы обязан быть зарегистрирован с base_type: на «Panel» (мешок стилей,
 ## не тип виджета) движок носитель не резолвит — отдаёт дефолт движка. Гард на

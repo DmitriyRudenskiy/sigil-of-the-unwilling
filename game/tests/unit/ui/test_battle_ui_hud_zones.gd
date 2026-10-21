@@ -48,9 +48,9 @@ func test_zone_a_initiative_cells_and_active() -> void:
 	var active_cell: PanelContainer = cells["cell_%d" % active.uid]
 	var dead_cell: PanelContainer = cells["cell_%d" % dead.uid]
 	var plain_cell: PanelContainer = cells["cell_%d" % alive.uid]
-	assert_str(str(active_cell.theme_type_variation)).is_equal("PanelActive")
-	assert_str(str(dead_cell.theme_type_variation)).is_equal("PanelDead")
-	assert_str(str(plain_cell.theme_type_variation)).is_equal("PanelCard")
+	assert_str(str(active_cell.theme_type_variation)).is_equal("PanelQueueTileActive")
+	assert_str(str(dead_cell.theme_type_variation)).is_equal("PanelQueueTileDead")
+	assert_str(str(plain_cell.theme_type_variation)).is_equal("PanelQueueTile")
 
 func test_zone_b_target_card_live_fields() -> void:
 	var ui: BattleUI = _mk_ui()
@@ -82,6 +82,38 @@ func test_zone_b_zero_defense_row_hidden() -> void:
 	ui.show_target_card(u)
 	assert_bool(ui._tc_def.visible).is_false() \
 		.override_failure_message("нет источника — строка скрыта")
+
+## Медальон нижней панели — квадрат, а не эллипс. `HBoxContainer` растягивает
+## детей поперёк оси, и кнопка 100×100 в полосе высотой 134 становилась
+## эллипсом 96×134: тесты зовут хендлеры и этого не видят, а на снимке круг
+## выглядит «почти круглым». Замер макета 11 — design.md §5 п.8.
+func test_zone_d_medallions_stay_square() -> void:
+	var ui: BattleUI = _mk_ui()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var paths := [
+		"bottom_bar/bar_box/left_box/settings_btn",
+		"bottom_bar/bar_box/left_box/retreat_btn",
+		"bottom_bar/bar_box/left_box/rescue_btn",
+		"bottom_bar/bar_box/right_box/attack_btn",
+		"bottom_bar/bar_box/right_box/spellbook_btn",
+		"bottom_bar/bar_box/right_box/wait_btn",
+		"bottom_bar/bar_box/right_box/defend_btn",
+		"bottom_bar/bar_box/right_box/skip_btn",
+	]
+	for p: String in paths:
+		var b := ui.get_node_or_null(p) as Button
+		assert_bool(b != null).override_failure_message("нет медальона %s" % p).is_true()
+		if b == null:
+			continue
+		var size := b.get_global_rect().size
+		assert_int(int(size.y)).override_failure_message(
+			"%s: медальон %s — контейнер растянул его в эллипс" % [p, str(size)]
+		).is_equal(int(size.x))
+		assert_int(int(size.x)).override_failure_message(
+			"%s: медальон %d px, макет 11 — 100 px" % [p, int(size.x)]
+		).is_equal(100)
+
 
 func test_zone_f_result_overlay_single_exit() -> void:
 	var ui: BattleUI = _mk_ui()

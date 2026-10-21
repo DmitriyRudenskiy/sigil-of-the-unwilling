@@ -3,7 +3,12 @@ extends CanvasLayer
 
 const THEME_PATH := "res://assets/theme/game_theme.tres"
 const HERO_PORTRAIT_PATH := "res://assets/ui/hero/portrait.png"
-const _PORTRAIT_PX := 48.0
+# Ячейка очереди хода (макет 11) — квадратный портрет 72 с бейджем уровня.
+const _TILE_PX := 94.0  # макет 11: плитка очереди ~94 px, щель 5 px
+# Варианты темы ячейки: обычный / активный (золотая рама) / мёртвый.
+const TILE_VARIANT := "PanelQueueTile"
+const TILE_VARIANT_ACTIVE := "PanelQueueTileActive"
+const TILE_VARIANT_DEAD := "PanelQueueTileDead"
 
 signal retreat_requested
 signal rescue_requested
@@ -22,17 +27,20 @@ signal result_accepted
 static var _portrait_tex: Dictionary = {}
 static var _hero_portrait: Texture2D = null
 
-@onready var _bottom_bar: PanelContainer = $bottom_bar
+# Макет 11: нижний ряд — два кластера медальонов без плиты. Слева — отступление
+# и спасение, справа — боевые команды. Путь узла меняется вместе с составом
+# кластеров, поэтому он здесь и обязан совпадать со сценой.
+@onready var _bottom_bar: Control = $bottom_bar
 @onready var _settings_btn: Button = $"bottom_bar/bar_box/left_box/settings_btn"
 @onready var _retreat_btn: Button = $"bottom_bar/bar_box/left_box/retreat_btn"
 @onready var _rescue_btn: Button = $"bottom_bar/bar_box/left_box/rescue_btn"
-@onready var _wait_btn: Button = $"bottom_bar/bar_box/left_box/wait_btn"
-@onready var _attack_button: Button = $"bottom_bar/bar_box/left_box/attack_btn"
-@onready var _turn_line: Label = $"bottom_bar/bar_box/center_box/turn_line"
-@onready var _log_line: Label = $"bottom_bar/bar_box/center_box/log_row/log_line"
-@onready var _history_up: Button = $"bottom_bar/bar_box/center_box/log_row/history_nav/history_up"
-@onready var _history_down: Button = $"bottom_bar/bar_box/center_box/log_row/history_nav/history_down"
-@onready var _history_btn: Button = $"bottom_bar/bar_box/center_box/log_row/history_btn"
+@onready var _wait_btn: Button = $"bottom_bar/bar_box/right_box/wait_btn"
+@onready var _attack_button: Button = $"bottom_bar/bar_box/right_box/attack_btn"
+@onready var _turn_line: Label = $"bottom_bar/info_box/turn_line"
+@onready var _log_line: Label = $"bottom_bar/info_box/log_row/log_line"
+@onready var _history_up: Button = $"bottom_bar/info_box/log_row/history_nav/history_up"
+@onready var _history_down: Button = $"bottom_bar/info_box/log_row/history_nav/history_down"
+@onready var _history_btn: Button = $"bottom_bar/info_box/log_row/history_btn"
 @onready var _defend_btn: Button = $"bottom_bar/bar_box/right_box/defend_btn"
 @onready var _skip_btn: Button = $"bottom_bar/bar_box/right_box/skip_btn"
 @onready var _spellbook_btn: Button = $"bottom_bar/bar_box/right_box/spellbook_btn"
@@ -151,7 +159,8 @@ func theme_root_theme(t: Theme) -> void:
 	# Вариант — именно PanelPlate, а не «Panel»: незарегистрированный тип движок
 	# не резолвит (замер — test_battle_theme_carrier.gd), а «Panel» в теме —
 	# мешок стилей, к которому код обращается по имени, а не тип виджета.
-	_bottom_bar.theme_type_variation = &"PanelPlate"
+	# Плита нижней панели макетом снята: медальоны лежат на поле. Носитель
+	# остаётся только у панели истории (она по-прежнему плита).
 	_history_panel.theme_type_variation = &"PanelPlate"
 
 func _connect_skeleton() -> void:
@@ -234,8 +243,9 @@ func update_initiative(
 func _make_initiative_cell(unit: BattleState.BattleUnit) -> PanelContainer:
 	var cell := PanelContainer.new()
 	var dead: bool = not unit.is_alive()
-	cell.theme_type_variation = "PanelDead" if dead else "PanelCard"
+	cell.theme_type_variation = TILE_VARIANT_DEAD if dead else TILE_VARIANT
 	cell.name = "cell_%d" % unit.uid
+	cell.custom_minimum_size = Vector2(_TILE_PX, _TILE_PX)
 	if dead:
 		var hatch := TextureRect.new()
 		hatch.texture = _hatch_texture()
@@ -243,25 +253,13 @@ func _make_initiative_cell(unit: BattleState.BattleUnit) -> PanelContainer:
 		hatch.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		hatch.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		cell.add_child(hatch)
-	# Макет (шаг 5.2) + docs/14 §4.A: ячейка — портрет 48 с бейджем уровня,
-	# имя и HP справа от него. Портрет — юнит-арт из assets/units (190 файлов),
-	# бейдж — BattleUnit.get_level(); нуля вместо уровня нет: строка скрыта.
+	# Макет 11: ячейка — квадратный портрет с бейджем уровня в углу. Имени и
+	# чисел в ней нет: имя и здоровье даёт карточка цели, количество — на поле
+	# (композиция — макет, поведение — спека docs/14 §4.A).
 	var row := HBoxContainer.new()
 	row.name = "row"
-	row.add_theme_constant_override("separation", 4)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(_make_initiative_portrait(unit))
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 0)
-	var name_label := Label.new()
-	name_label.theme_type_variation = "LabelDead" if dead else "LabelCell"
-	name_label.text = unit.get_display_name()
-	var hp_label := Label.new()
-	hp_label.theme_type_variation = "LabelNumber"
-	hp_label.text = str(unit.get_hp())
-	hp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	box.add_child(name_label)
-	box.add_child(hp_label)
-	row.add_child(box)
 	cell.add_child(row)
 	return cell
 
@@ -271,7 +269,8 @@ func _make_initiative_cell(unit: BattleState.BattleUnit) -> PanelContainer:
 func _make_initiative_portrait(unit: BattleState.BattleUnit) -> Control:
 	var box := Control.new()
 	box.name = "portrait_box"
-	box.custom_minimum_size = Vector2(_PORTRAIT_PX, _PORTRAIT_PX)
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.custom_minimum_size = Vector2(_TILE_PX - 4.0, _TILE_PX - 4.0)
 	var portrait := TextureRect.new()
 	portrait.name = "portrait"
 	portrait.texture = _unit_portrait(unit.get_key())
@@ -284,14 +283,14 @@ func _make_initiative_portrait(unit: BattleState.BattleUnit) -> Control:
 	box.add_child(portrait)
 	var level: int = unit.get_level()
 	if level > 0:
+		# Бейдж уровня — в нижнем левом углу плитки (макет 11).
 		var badge := Label.new()
 		badge.name = "level_badge"
-		badge.theme_type_variation = "LabelNumber"
+		badge.theme_type_variation = "LabelQueueBadge"
 		badge.text = str(level)
-		badge.add_theme_font_size_override("font_size", 12)
 		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		badge.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
-		badge.position = Vector2(-14, -14)
+		badge.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+		badge.position = Vector2(4, -24)
 		box.add_child(badge)
 	return box
 
@@ -328,10 +327,10 @@ func _refresh_initiative_highlight(active_unit: BattleState.BattleUnit) -> void:
 	for child in _init_box.get_children():
 		if child is PanelContainer and child.name.begins_with("cell_"):
 			var uid: int = int(child.name.get_slice("_", 1))
-			if child.theme_type_variation == "PanelDead":
+			if child.theme_type_variation == TILE_VARIANT_DEAD:
 				continue
 			var is_active: bool = active_unit != null and uid == active_unit.uid
-			child.theme_type_variation = "PanelActive" if is_active else "PanelCard"
+			child.theme_type_variation = TILE_VARIANT_ACTIVE if is_active else TILE_VARIANT
 
 # F: финал боя — единственный выход «Продолжить» (docs/14 §4.F); потери — моно
 # (числа отделены от подписи: end_info serif + end_numbers LabelNumber).

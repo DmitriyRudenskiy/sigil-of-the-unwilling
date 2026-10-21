@@ -15,7 +15,10 @@ const RING_TRACK := ThemeConfig.C_PANEL_BG
 # #c9a227 → нейтральный → #e05a4a; последние секунды — алый.
 const RING_FILL := Color("#c9a227")  # C_GOLDEN
 const RING_LOW := Color("#e05a4a")   # C_DANGER-ступень шкалы
-const RING_WIDTH := 5.0
+const RING_WIDTH := 8.0
+const RING_GLOW := 20.0
+const RING_EDGE := Color("#f6e2b0")   # светлая кромка кольца макета (замер 255,249,226)
+const RING_DISC := Color(0.06, 0.04, 0.02, 0.55)  # тёмный диск под числом
 const LOW_SECONDS := 5
 
 var seconds_left: int = 0
@@ -54,9 +57,14 @@ func _draw() -> void:
 	var w: float = minf(size.x, size.y)
 	if w <= RING_WIDTH * 2.0:
 		return
-	var radius: float = w * 0.5 - RING_WIDTH
 	var center := size * 0.5
-	draw_arc(center, radius, 0.0, TAU, 64, RING_TRACK, RING_WIDTH, true)
+	# Макет 11: кольцо двойное — тонкая светлая кромка по внешнему краю и
+	# рабочая дуга остатка внутри, между ними тёмный диск под числом.
+	var outer: float = w * 0.5 - 2.0
+	var radius: float = outer - RING_WIDTH - 3.0
+	draw_circle(center, radius - RING_WIDTH * 0.5, RING_DISC)
+	draw_arc(center, outer, 0.0, TAU, 96, Color(RING_EDGE, 0.75), 2.0, true)
+	draw_arc(center, radius, 0.0, TAU, 96, RING_TRACK, RING_WIDTH, true)
 	if limit <= 0:
 		return
 	var frac: float = clampf(float(seconds_left) / float(maxi(1, limit)), 0.0, 1.0)
@@ -65,4 +73,7 @@ func _draw() -> void:
 	var color := RING_LOW if seconds_left <= LOW_SECONDS else RING_FILL
 	if not running:
 		color.a = 0.55  # пауза (выбор цели, открытая книга) — кольцо гаснет, не врёт
-	draw_arc(center, radius, -PI * 0.5, -PI * 0.5 + TAU * frac, 64, color, RING_WIDTH, true)
+	# Макет 11: кольцо светится — под тонкой дугой широкая полупрозрачная
+	# дорожка того же цвета, без отдельного цвета и без отдельного носителя.
+	draw_arc(center, radius, -PI * 0.5, -PI * 0.5 + TAU * frac, 96, Color(color, 0.28), RING_GLOW, true)
+	draw_arc(center, radius, -PI * 0.5, -PI * 0.5 + TAU * frac, 96, color, RING_WIDTH, true)

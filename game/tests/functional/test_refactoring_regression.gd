@@ -113,9 +113,9 @@ func test_battle_ui_scene_has_skeleton() -> void:
 	_track(battle_ui)
 	battle_ui.name = "TestBattleUI"
 	assert_bool(battle_ui.has_method("_connect_skeleton")).is_true()
-	# left_box: settings, retreat, rescue (макет боевого HUD — «Спасение»), wait,
-	# attack; right_box: defend, skip, spellbook.
-	assert_that(battle_ui.get_node_or_null("bottom_bar/bar_box/left_box").get_child_count()).is_equal(5)
-	assert_that(battle_ui.get_node_or_null("bottom_bar/bar_box/right_box").get_child_count()).is_equal(3)
+	# Макет 11, нижний ряд: слева — settings, retreat, rescue; справа — attack,
+	# spellbook, wait, defend, skip (skip — инвариант, остаётся).
+	assert_that(battle_ui.get_node_or_null("bottom_bar/bar_box/left_box").get_child_count()).is_equal(3)
+	assert_that(battle_ui.get_node_or_null("bottom_bar/bar_box/right_box").get_child_count()).is_equal(5)
 	assert_bool(battle_ui.has_method("set_status")).is_true()
 	assert_bool(battle_ui.has_method("update_initiative")).is_true()
