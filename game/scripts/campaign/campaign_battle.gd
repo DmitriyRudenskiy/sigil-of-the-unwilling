@@ -56,6 +56,15 @@ static func make_combatant(spec: Dictionary) -> Dictionary:
 		"supply_bonus": int(spec.get("supply_bonus", 0)),  # 5.2: снабжение → 1-й спас (Q-M57→(а))
 		"hunger_penalty": int(spec.get("hunger_penalty", 0)),  # party-characters 3.2: голод (0 еды) → −2 к атакам (P-4)
 		"state": str(spec.get("state", STATE_READY)),  # T-116 SM: ready/wounded/unstable (dead — в бою)
+		# V-3 (D-218): минимальный босс — 2 способности, параметры в данных.
+		"is_boss": bool(spec.get("is_boss", false)),
+		"max_hp": int(spec.get("max_hp", int(spec.get("hp", 1)))),
+		"boss_powerful_strike_mult": float(spec.get("boss_powerful_strike_mult", 1.5)),
+		"boss_powerful_strike_cooldown": int(spec.get("boss_powerful_strike_cooldown", 2)),
+		"boss_rage_threshold": float(spec.get("boss_rage_threshold", 0.5)),
+		"boss_rage_damage_mult": float(spec.get("boss_rage_damage_mult", 1.25)),
+		"_boss_strike_cd": int(spec.get("_boss_strike_cd", 0)),
+		"_boss_rage_active": bool(spec.get("_boss_rage_active", false)),
 	}
 
 
@@ -166,6 +175,49 @@ static func _strike(atk: Dictionary, def_: Dictionary, flank_bonus: int = 0) -> 
 			damage = 0  # Провал / Критпровал (фамбл) — 0
 	return {"zone": zone, "damage": damage, "margin": margin,
 		"reckoning": reckoning, "debt": debt_before, "luck_used": luck_used}
+
+
+## V-3 (D-218): удар босса — мощный удар (×1.5, CD 2) + ярость (×1.25,
+## один раз при HP ≤ порога). Чистый таргетинг (_strike) не тронут; множители
+## применяются к финальному урону. Мутация: _boss_strike_cd (кулдаун),
+## флаг boss_powerful/boss_rage в результате. Детерминированно (K2).
+static func _boss_strike(atk: Dictionary, def_: Dictionary, flank_bonus: int = 0) -> Dictionary:
+	var hit := _strike(atk, def_, flank_bonus)
+	var mult := 1.0
+	var used_powerful := false
+	# Мощный удар: готов, когда кулдаун = 0. После использования — CD.
+	var cd: int = int(atk.get("_boss_strike_cd", 0))
+	if cd == 0:
+		mult *= float(atk.get("boss_powerful_strike_mult", 1.5))
+		atk["_boss_strike_cd"] = int(atk.get("boss_powerful_strike_cooldown", 2))
+		used_powerful = true
+	elif cd > 0:
+		atk["_boss_strike_cd"] = cd - 1  # кулдаун тикает, пока босс действует
+	# Ярость: +25% урона (один раз, при HP ≤ порога — см. _check_boss_rage).
+	if bool(atk.get("_boss_rage_active", false)):
+		mult *= float(atk.get("boss_rage_damage_mult", 1.25))
+	if mult != 1.0:
+		hit["damage"] = int(round(float(hit["damage"]) * mult))
+	hit["boss_powerful"] = used_powerful
+	hit["boss_rage"] = bool(atk.get("_boss_rage_active", false))
+	return hit
+
+
+## V-3 (D-218): активация ярости босса — один раз при HP ≤ порога (доля max_hp).
+## Вызывается после нанесения урона боссу. Мутация: _boss_rage_active; запись
+## в trace (zone = "boss_rage").
+static func _check_boss_rage(c: Dictionary, round_no: int, trace: Array) -> void:
+	if not bool(c.get("is_boss", false)):
+		return
+	if bool(c.get("_boss_rage_active", false)):
+		return
+	if int(c["hp"]) <= 0:
+		return  # мёртв — ярость не активируется
+	var max_hp: int = int(c.get("max_hp", int(c["hp"])))
+	var threshold: int = int(round(float(max_hp) * float(c.get("boss_rage_threshold", 0.5))))
+	if int(c["hp"]) <= threshold:
+		c["_boss_rage_active"] = true
+		trace.append({"round": round_no, "actor": str(c["id"]), "zone": "boss_rage"})
 
 
 ## Разбивка перевеса удара для UI (3.4: все правила D&D видны). Чистая
@@ -333,7 +385,10 @@ static func resolve(a: Dictionary, b: Dictionary,
 			# Атака по 0-HP защитнику возможна (5e: без сознания) — только в
 			# случае «бой при HD = 0» (unstable-вход); в обычном потоке бой
 			# кончается на падении.
-			var hit := _strike(atk, def_)
+			# V-3 (D-218): босс — мощный удар + ярость (параметры в данных);
+			# не-босс — штатный _strike (поведение обычных боёв не меняется).
+			var hit := _boss_strike(atk, def_) if bool(atk.get("is_boss", false)) \
+				else _strike(atk, def_)
 			def_["hp"] = int(def_["hp"]) - int(hit["damage"])
 			trace.append({
 				"round": round_no,
@@ -345,7 +400,10 @@ static func resolve(a: Dictionary, b: Dictionary,
 				"reckoning": bool(hit["reckoning"]),
 				"debt": int(hit["debt"]),  # T-124: Долг судьбы у атакующего (победа с долгом)
 				"luck_used": str(hit["luck_used"]),  # 4.2: Удача (save/fate_shift/"")
+				"boss_powerful": bool(hit.get("boss_powerful", false)),  # V-3: мощный удар
+				"boss_rage": bool(hit.get("boss_rage", false)),  # V-3: ярость
 			})
+			_check_boss_rage(def_, round_no, trace)  # V-3: ярость при HP ≤ порога
 			if is_wounded_threshold(int(def_["hp"])):
 				# T-116 SM: READY → WOUNDED (порог hit_dice ≤ 0) → UNSTABLE (спасы).
 				def_["state"] = STATE_UNSTABLE
@@ -534,7 +592,9 @@ static func resolve_multi(party: Array, enemies: Array,
 						flank_bonus = 2
 						flanked = true
 					flank_pending = {}  # «до первой атаки второго (что раньше)»
-			var hit := _strike(atk, target, flank_bonus)
+			# V-3 (D-218): босс — мощный удар + ярость; не-босс — штатный _strike.
+			var hit := _boss_strike(atk, target, flank_bonus) if bool(atk.get("is_boss", false)) \
+				else _strike(atk, target, flank_bonus)
 			target["hp"] = int(target["hp"]) - int(hit["damage"])
 			trace.append({
 				"round": round_no, "actor": str(atk["id"]), "target": str(target["id"]),
@@ -542,7 +602,10 @@ static func resolve_multi(party: Array, enemies: Array,
 				"damage": int(hit["damage"]), "reckoning": bool(hit["reckoning"]),
 				"debt": int(hit["debt"]), "luck_used": str(hit["luck_used"]),
 				"flank": flanked,  # 3.4: «Фланг» сработал (+2)
+				"boss_powerful": bool(hit.get("boss_powerful", false)),  # V-3: мощный удар
+				"boss_rage": bool(hit.get("boss_rage", false)),  # V-3: ярость
 			})
+			_check_boss_rage(target, round_no, trace)  # V-3: ярость при HP ≤ порога
 			# «Фланг» (3.4): pending — успешная атака (damage > 0) члена пары.
 			if is_party and int(hit["damage"]) > 0 and flank_pending.is_empty() \
 						and _flank_partner(party, str(atk["id"])) != "":
