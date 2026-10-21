@@ -7,7 +7,7 @@
 - [x] 1.3 Бит-каркас K-M9: биты 1/7/14/17/21 — `turn_driver.gd` (BIT_TURNS)
 - [x] 1.4 Сезоны: season_index = (turn−1) % 4, зима каждый 4-й ход, production_mult/enemy_mult — `world_seasons.gd` (Q-M27/Q-M29)
 - [x] 1.5 Детерминизм I1: ГСЧ из campaign seed — `turn_driver.gd`/`campaign_battle.gd`
-- [x] 1.6 Статус кампании: defeat = wipe партии (единственный путь, Q-M68→(а), D-190); victory = пережить рейд хода 21 (R5) — `turn_driver.gd:76`, `party_system.gd:108`, T-071
+- [~] 1.6 Статус кампании: defeat = wipe партии (единственный путь, Q-M68→(а), D-190) — готово (`turn_driver.gd: defeat()`, `party_system.gd: is_wiped`); victory = пережить рейд хода 21 (R5) — **deferred T-071 (post-MVP)**: `TurnDriver.victory()` не существует (статусы — ongoing/defeat), «Campaign victory»-сценарий спеки — ожидает T-071 (post-verdict-аудит 2026-10-21: [x] было завышением)
 
 ## 2. Метрики core loop
 

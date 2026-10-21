@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Канон боевой системы post-pivot: D&D без кубиков, лестничное разрешение (K-T6), Удача как 7-я характеристика, death saves, SM боя, лимит 20 раундов (D-128), авто-режим, AI врага (Y3), состояния (prone/высотный, K-M7), blink (K-M7), местность 3 типа (C3), бином «Фланг», мораль аннулирована (K-M11), детерминизм (K2). Источник: GDD 02-mechanics §3.4, 02b (биномы/местность), 02d (лестница, Удача), MVP-scope (Бой).
+Канон боевой системы post-pivot: D&D без кубиков, лестничное разрешение (K-T6), Удача как 7-я характеристика, death saves, SM боя, лимит 20 раундов (D-128), авто-режим, AI врага (Y3), состояния (prone/высотный, K-M7), blink (K-M7 — **отложен вне MVP, D-222: позиционных зон/клеток/координат нет**), местность 3 типа (C3), бином «Фланг» (по цели, не по позиции), мораль аннулирована (K-M11), детерминизм (K2). Источник: GDD 02-mechanics §3.4, 02b (биномы/местность), 02d (лестница, Удача), MVP-scope (Бой).
 
 ## ADDED Requirements
 
@@ -97,7 +97,7 @@ Enemy stats (AC, HP, luck, abilities) SHALL be visible to the player at all time
 - **AND** the card is always accessible during battle
 
 ### Requirement: States and terrain
-States SHALL include prone (-2/+2) and elevation status (flight, K-M7). Blink (K-M7, wizard spell from cells) SHALL be available in MVP. Terrain SHALL have 3 types (swamp, spikes, height, C3). The binom "Flank" (fighter + ranger) SHALL be active from turn 1 and is the only MVP binom.
+States SHALL include prone (-2/+2) and elevation status (flight, K-M7). Blink (K-M7) is **deferred, not part of MVP (D-222, 2026-10-20)**: no grid, cells, coordinates, or positional zones are introduced; a future Blink requires a separate owner verdict on a positioning system. Terrain SHALL have 3 types (swamp, spikes, height, C3) as abstract modifiers (no hex). The binom "Flank" (fighter + ranger) SHALL be active from turn 1 and is the only MVP binom; it is keyed by shared target, not by position (D-222).
 
 #### Scenario: Prone penalty
 - **WHEN** a character is prone
@@ -105,9 +105,9 @@ States SHALL include prone (-2/+2) and elevation status (flight, K-M7). Blink (K
 - **AND** the state is visible in the UI
 
 #### Scenario: Flank binom
-- **WHEN** a fighter and a ranger are adjacent to the same enemy
+- **WHEN** a fighter and a ranger attack the same enemy in the same round (position-free, D-222)
 - **THEN** the "Flank" binom is active
-- **AND** the binom grants its bonus
+- **AND** the second attack against that target gets its +2 margin bonus
 
 ### Requirement: Morale is deprecated
 The morale scale (0-100) SHALL NOT exist (K-M11). Losses SHALL grant -2 steps to saves until the end of the battle. Forced retreat SHALL occur at 0 hit dice.
