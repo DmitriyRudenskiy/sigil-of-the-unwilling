@@ -7,7 +7,7 @@
 сейв/лоад прогресса. Интеграции: HeroStrategicResources, HeroInventory,
 WeaponTechService, ArtifactRegistry, SaveData (v8).
 
-
+## Requirements
 
 ### Requirement: Рецепты крафта SHALL валидироваться при загрузке
 `CraftingSystem` загружает рецепты из `game/data/config/crafting_recipes.json`. Каждый рецепт: `id`, `display_name`, `slot` (из `Artifact.Slot`), `resources` (карта `StringName -> int`, значения >0, ключи — валидные id из `ResourceRegistry`), `requires_tech` (1..5), `requires_workshop` (bool), `weight` (>0), `rarity` (minor/major/relic). Неизвестный ресурс/слот/отрицательный вес → push_error, рецепт пропускается; остальные загружаются.
