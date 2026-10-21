@@ -40,8 +40,9 @@ const PHASE_NAMES := {
 var current_turn: int = 1
 var phase: int = Phase.SETTLEMENT
 var seed: int = 12345  # campaign seed (I1: детерминизм; K-M9: бит-каркас)
-## T-060 (R1): статус кампании — ongoing / defeat (wipe партии); T-071
-## расширит victory (босс/финальный рейд). Стейт, не производное (в сейве).
+## T-060 (R1) / T-071 (R5): статус кампании — ongoing / defeat (wipe партии,
+## D-190) / victory (пережить рейд хода 21 при любом запасе > 0). Стейт,
+## не производное (в сейве).
 var campaign_status: String = "ongoing"
 
 ## Хуки фаз (T-040/T-070 вешают свою логику; каркас — no-op).
@@ -60,6 +61,10 @@ var production_hook: Callable
 
 ## Шов T-050: обработчик вызова боя (context: {cause, turn, ...}).
 var battle_request_handler: Callable
+## T-071 (R5): предикат victory — «любой запас > 0» (инжест: TurnDriver не
+## знает про сток; хост — CampaignComposition). Вызывается в конце хода 21
+## при статусе ongoing.
+var victory_check_hook: Callable
 
 var _events: Array = []  # I1: детерминированный журнал (сериализуется)
 
@@ -85,6 +90,17 @@ func defeat(reason: String) -> void:
 	phase = Phase.DONE
 	campaign_status = "defeat"
 	_log("campaign_defeat:turn=%d:reason=%s" % [current_turn, reason])
+
+
+## T-071 (R5): victory — верхний конец кампании: пережить рейд хода 21 при
+## любом запасе > 0 (спека campaign-core-loop «Campaign victory»). Идемпотентен,
+## как defeat() (DONE-лок; wipe остаётся единственным defeat-путём — D-190).
+func victory(reason: String) -> void:
+	if phase == Phase.DONE:
+		return
+	phase = Phase.DONE
+	campaign_status = "victory"
+	_log("campaign_victory:turn=%d:reason=%s" % [current_turn, reason])
 
 
 ## Автофаза: одна авто-фаза за вызов (MVP: player — единственный
@@ -141,6 +157,17 @@ func _enter_player_phase() -> void:
 
 func _finish_turn() -> void:
 	if current_turn >= TOTAL_TURNS:
+		# T-071 (R5): конец кампании — верхний сценарий victory (пережил рейд
+		# хода 21 + любой запас > 0). defeat (wipe) срабатывает раньше (в
+		# threats-фазе, DONE-лок); здесь статус либо ongoing (survived), либо
+		# уже defeat. Запасов нет → victory не даётся (условие спеки),
+		# кампания завершается со статусом ongoing (edge, журнал — для
+		# наблюдаемости).
+		if campaign_status == "ongoing":
+			if victory_check_hook.is_valid() and victory_check_hook.call():
+				victory("survived_final_raid")
+			else:
+				_log("campaign_end_without_victory:turn=%d" % current_turn)
 		phase = Phase.DONE
 		_log("campaign_done:turn=%d" % current_turn)
 		return
@@ -170,7 +197,7 @@ func to_dict() -> Dictionary:
 		"turn": current_turn,
 		"seed": seed,
 		"phase": phase_name(),
-		"status": campaign_status,  # T-060: ongoing/defeat (T-071: victory)
+		"status": campaign_status,  # T-060/T-071: ongoing/defeat/victory
 		"schema_version": SCHEMA_VERSION,
 		"events": _events.duplicate(),
 	}

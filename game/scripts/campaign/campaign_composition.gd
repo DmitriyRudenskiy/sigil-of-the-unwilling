@@ -180,6 +180,11 @@ func _build(campaign_seed: int) -> void:
 	# pre-production запасы. season_mult — из WorldSeasons (I1: инжест).
 	campaign.production_hook = func() -> Dictionary:
 		return settlement.process_production(WorldSeasons.production_mult())
+	# T-071 (R5): victory — пережить рейд хода 21 при любом запасе > 0.
+	# Предикат инжестится в драйвер (TurnDriver не знает про сток); вызов —
+	# в конце хода 21 при статусе ongoing (defeat/wipe блокирует раньше, D-190).
+	campaign.victory_check_hook = func() -> bool:
+		return _any_stock_positive()
 	# T-020/T-021: регион-граф — MVP-маска S1 (movement.json), герой в городе (R01).
 	# Запас партии на переход — 0 (пополнение из стока поселения — с UI, остаток T-021);
 	# headless: герой в городе (авто-рейд на него не ведётся — R5).
@@ -302,6 +307,16 @@ func _all_districts_destroyed() -> bool:
 		if present.has(str(g)):
 			return false
 	return true
+
+
+## T-071 (R5): условие victory — любой запас поселения > 0 (K-R2-реестр
+## ресурсов). Сток — после production-фазы хода 21 (рейды бьют pre-production
+## запасы, T-122; production ход 21 — в итог).
+func _any_stock_positive() -> bool:
+	for r in ThreatSystem.RESOURCES:
+		if float(settlement.stocks.get(r, 0.0)) > 0.0:
+			return true
+	return false
 
 
 ## Шов T-050 (акт 12-й итерации §2.2): бой K-канона — единичные комбатанты,
