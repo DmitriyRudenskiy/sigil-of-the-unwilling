@@ -1,5 +1,7 @@
 # Design
 
+> **Статус (2026-10-21, post-verdict):** C-3 (сетка в боевом экране) и Blink закрыты вердиктами владельца — **D-217** (сетки/координат нет) и **D-222** (позиционные зоны не вводят, Blink — deferred вне MVP). Значит, все места ниже, где blink/сетка/координаты/позиционные зоны описаны как активная цель MVP, — **устарели**; бой остаётся абстрактной лестницей, босс — по D-218 (мощный удар + ярость, без зон). Активный канон — в `specs/dnd-battle-ladder/spec.md` и `tasks.md`.
+
 ## Context
 
 `campaign_battle.gd` (T-050-слой) реализует: `make_combatant`/`make_recruit`, `initiative_first` (mod DEX, тай-брейк CON, id), `_state_margin` (перевес), `_strike` (урон), `_step_down` (зона вниз), `_death_saves` (mod CON, 3/3), `resolve`, `_finalize`; `MAX_ROUNDS = 20` (D-128: ничья), `FATE_PENALTY_DIVISOR = 1.25` («Судьба следит» 02d §4.2, привязка к лестнице — Ф3, interim: margin/1,25), `DEATH_SAVES_NEEDED = 3`. `battle_rules.gd` — зоны/урон. Не реализовано: авто-режим, состояния (prone/высотный), blink, местность, бином «Фланг», AI врага (greedy + босс), карточка врага M1.
