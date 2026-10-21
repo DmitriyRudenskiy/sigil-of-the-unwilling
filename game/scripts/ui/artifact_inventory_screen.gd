@@ -4,7 +4,6 @@ class_name ArtifactInventoryScreen
 
 
 var _hero: HeroController = null
-var _theme: Theme = null
 
 var _tex_cache: Dictionary = {}
 
@@ -69,46 +68,8 @@ func close() -> void:
 
 func _ready() -> void:
 	add_theme_color_override("font_color", TEXT_GOLD)
-	_theme = load("res://assets/theme/game_theme.tres") as Theme
-	_apply_theme()
 	_connect_signals()
 	_build()
-
-func _apply_theme() -> void:
-	if _theme == null:
-		return
-	_style("Center/Window", "panel")
-	_style("Center/Window/Outline", "outline")
-	_style("Center/Window/Left", "panel")
-	_style("Center/Window/Right", "panel")
-	_style("Center/Window/Side", "panel")
-	_style("Center/Window/Bottom", "panel")
-	_style("Center/Window/Left/Portrait", "portrait")
-	for i in 4:
-		_style("Center/Window/Left/StatIcon_%d" % i, "slot")
-	for i in 16:
-		_style("Center/Window/Right/DollSlot_%d" % i, "doll_slot")
-	for i in 6:
-		_style("Center/Window/Right/Inventory/BackpackSlot_%d" % i, "backpack_slot")
-	_style("Center/Window/Right/Equip", "action_button")
-	_style("Center/Window/Right/Remove", "action_button")
-	_style("Center/Window/Right/Dispose", "action_button")
-	_style("Center/Window/Right/Inventory/Prev", "action_button")
-	_style("Center/Window/Right/Inventory/Next", "action_button")
-	for i in 6:
-		_style("Center/Window/Side/SideSlot_%d" % i, "side_slot")
-	_style("Center/Window/Side/Ok", "action_button")
-	for i in 7:
-		_style("Center/Window/Bottom/ArmySlot_%d" % i, "army_slot")
-	for i in 4:
-		_style("Center/Window/Bottom/Formations/Form_%d" % i, "action_button")
-
-func _style(path: String, theme_name: String) -> void:
-	var n := get_node_or_null(path)
-	if n is Control and _theme:
-		var sb := _theme.get_stylebox(theme_name, "Panel")
-		if sb:
-			n.add_theme_stylebox_override("panel", sb)
 
 func _theme_font_size(path: String, name_: String) -> void:
 	var sizes := {"small": 14, "default": 16, "large": 22, "stat": 16}
@@ -153,7 +114,6 @@ func _connect_btn(path: String, handler: Callable) -> void:
 			b.pressed.connect(handler)
 
 func _build() -> void:
-	_apply_theme()
 	_build_left()
 	_build_right()
 	_build_side()
@@ -227,7 +187,6 @@ func _build_left() -> void:
 			continue
 		var lvl := _skill_level(i)
 		var has := lvl > 0
-		_set_style_slot(slot, has)
 		var sic := get_node_or_null("Center/Window/Left/Skill_%d/SkillIcon" % i)
 		if sic is TextureRect:
 			sic.texture = _tex(_SKILL_ICON[i], 40, 40) if i < _SKILL_ICON.size() else null
@@ -235,13 +194,6 @@ func _build_left() -> void:
 		if ll is Label:
 			ll.text = str(lvl)
 			ll.visible = has
-
-func _set_style_slot(slot: Button, has: bool) -> void:
-	if _theme == null:
-		return
-	var sb := _theme.get_stylebox("action_button" if has else "slot", "Panel")
-	if sb:
-		slot.add_theme_stylebox_override("panel", sb)
 
 func _build_right() -> void:
 	var right := get_node_or_null("Center/Window/Right")

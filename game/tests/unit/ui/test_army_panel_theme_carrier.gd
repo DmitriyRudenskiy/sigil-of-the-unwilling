@@ -22,9 +22,9 @@ const _SCENE := preload("res://scenes/ui/army_panel.tscn")
 
 ## Сколько add_theme_stylebox_override обязано остаться во всём game/scripts:
 # city_screen.gd — 1 (фокус клавиатуры, подрез 4 ждёт решения владельца про
-# Button/focus), artifact_inventory_screen.gd — 2 (следующий подсрез). Растёт —
-# значит обход вернулся туда, где его уже убрали.
-const _REMAINING_IN_SCRIPTS := 3
+# Button/focus). Растёт — значит обход вернулся туда, где его уже убрали; после
+# каждого снятого подреза константа уменьшается, иначе гард молчит на новом нуле.
+const _REMAINING_IN_SCRIPTS := 1
 
 var _panel: Control = null
 
