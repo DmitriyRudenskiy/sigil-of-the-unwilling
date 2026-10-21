@@ -1,9 +1,77 @@
 extends BaseTest
-## pregame-flow 4.2/4.3/4.4/4.5: GdUnit4 — headless-логика предыгрового потока.
-## 4.2 playable slice 3 (C-15); 4.3 штраф оккупации; 4.4 стартовая партия ≤5;
-## 4.5 тренировка как база (попутчики тренируются, не нанимаются).
+## pregame-flow 4.1/4.2/4.3/4.4/4.5: GdUnit4 — headless-логика предыгрового
+## потока. 4.1 поток 6 шагов до хода 1 (порядок Q18); 4.2 playable slice 3
+## (C-15); 4.3 штраф оккупации; 4.4 стартовая партия ≤5; 4.5 тренировка как
+## база (попутчики тренируются, не нанимаются).
 
 const Model = preload("res://scripts/ui/pregame_flow_model.gd")
+
+
+## === 4.1: предыгровой поток (6 шагов до хода 1; порядок Q18) ===
+
+func test_flow_steps_canon_order() -> void:
+	# Q18 (00-overview [КАНОН]): конструктор → знак → земной шар → города →
+	# партия → тренировка. Точный порядок, 6 шагов.
+	assert_int(Model.FLOW_STEPS.size()).is_equal(6)
+	assert_str(str(Model.FLOW_STEPS[0])).is_equal("constructor")
+	assert_str(str(Model.FLOW_STEPS[1])).is_equal("sign")
+	assert_str(str(Model.FLOW_STEPS[2])).is_equal("globe")
+	assert_str(str(Model.FLOW_STEPS[3])).is_equal("cities")
+	assert_str(str(Model.FLOW_STEPS[4])).is_equal("party")
+	assert_str(str(Model.FLOW_STEPS[5])).is_equal("training")
+
+
+func test_flow_starts_at_constructor() -> void:
+	var flow: Model.PregameFlow = Model.PregameFlow.new()
+	assert_str(str(flow.current_step())).is_equal("constructor")
+	assert_int(flow.completed_steps()).is_equal(0)
+	assert_int(flow.step_count()).is_equal(6)
+	assert_bool(flow.is_complete()).is_false()
+	assert_bool(flow.can_start_turn_1()).is_false() \
+		.override_failure_message("ход 1 не начинается до завершения всех 6 шагов")
+
+
+func test_flow_advances_in_canon_order() -> void:
+	var flow: Model.PregameFlow = Model.PregameFlow.new()
+	var expected: Array = ["sign", "globe", "cities", "party", "training", ""]
+	for i in range(6):
+		assert_bool(flow.advance()).is_true() \
+			.override_failure_message("advance %d: шаг должен завершиться" % (i + 1))
+		assert_int(flow.completed_steps()).is_equal(i + 1)
+		# После завершения шага N текущий — шаг N+1 (последний → "").
+		assert_str(str(flow.current_step())).is_equal(expected[i])
+
+
+func test_flow_turn1_gated_on_all_steps() -> void:
+	var flow: Model.PregameFlow = Model.PregameFlow.new()
+	# 0–5 завершённых шагов → ход 1 заблокирован; ровно 6 → разрешён.
+	for done in range(0, 6):
+		assert_bool(flow.can_start_turn_1()).is_false() \
+			.override_failure_message("%d/6 шагов: ход 1 ещё не начался" % done)
+		flow.advance()
+	assert_bool(flow.can_start_turn_1()).is_true() \
+		.override_failure_message("6/6 шагов: ход 1 разрешён")
+
+
+func test_flow_advance_after_complete_is_noop() -> void:
+	var flow: Model.PregameFlow = Model.PregameFlow.new()
+	for i in range(6):
+		flow.advance()
+	assert_bool(flow.advance()).is_false() \
+		.override_failure_message("advance после завершения — no-op (false)")
+	assert_int(flow.completed_steps()).is_equal(6)
+	assert_str(str(flow.current_step())).is_equal("")
+	assert_bool(flow.is_complete()).is_true()
+
+
+func test_flow_steps_snapshot_isolated() -> void:
+	var flow: Model.PregameFlow = Model.PregameFlow.new()
+	var snap: Array = flow.steps()
+	snap.append("injected")
+	snap.clear()
+	assert_int(flow.step_count()).is_equal(6) \
+		.override_failure_message("steps() — снимок: мутация не затрагивает модель")
+	assert_str(str(flow.current_step())).is_equal("constructor")
 
 
 ## === 4.2: playable slice 3 (C-15: люди/полуорки/эльфы) ===
