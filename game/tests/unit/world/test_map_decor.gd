@@ -216,3 +216,37 @@ func test_shadow_is_a_separate_element() -> void:
 	for cell in used:
 		assert_that(shadow.get_cell_source_id(cell)).is_equal(MapObjects.SHADOW_SOURCE_ID)
 		assert_that(decor.get_cell_source_id(cell)).is_equal(MapObjects.SOURCE_ID)
+
+
+## Туман гасит объектный слой (дефект T-150, кадр `fog-decor-t145.png`): база под
+## деревом стиралась, а дерево оставалось висеть на сером поле. Правило спеки
+## «Туман войны по всем слоям»: не открыта — пусто, открыта и не видима — затемнена
+## той же кратности, что база (`MapObjects.FOG_SOURCE_ID`), а не спрятана.
+func test_decor_follows_fog() -> void:
+	var gen: MapGenerator = make_node(MapGenerator)
+	gen._seed_value = 4242
+	gen._map_width = 20
+	gen._map_height = 20
+	gen.generate()
+	var decor: TileMapLayer = gen.get_node("TileMapDecor")
+	var shadow: TileMapLayer = gen.get_node("TileMapShadow")
+	var cells: Array = decor.get_used_cells()
+	assert_that(cells.size()).is_greater_equal(3)
+	var hidden: Vector2i = cells[0]
+	var explored: Vector2i = cells[1]
+	var visible: Vector2i = cells[2]
+	var vis := VisibilityMap.new()
+	vis.set_map_size(20, 20)
+	vis.explored = {explored: true, visible: true}
+	vis.visible = {visible: true}
+	gen.apply_fog(vis)
+
+	assert_that(decor.get_cell_tile_data(hidden)).is_null()
+	assert_that(shadow.get_cell_tile_data(hidden)).is_null()
+	for cell in decor.get_used_cells():
+		assert_that(vis.explored.has(cell)).is_true()
+	assert_that(decor.get_cell_source_id(visible)).is_equal(MapObjects.SOURCE_ID)
+	assert_that(shadow.get_cell_source_id(visible)).is_equal(MapObjects.SHADOW_SOURCE_ID)
+	assert_that(decor.get_cell_source_id(explored)).is_equal(MapObjects.FOG_SOURCE_ID)
+	assert_that(shadow.get_cell_source_id(explored)).is_equal(MapObjects.SHADOW_FOG_SOURCE_ID)
+	assert_that(shadow.get_used_cells().size()).is_equal(decor.get_used_cells().size())
