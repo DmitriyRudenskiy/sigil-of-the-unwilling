@@ -162,7 +162,15 @@ func apply_fog(tile_map: TileMapLayer, visibility: _VisibilityMap) -> void:
 ## Тень (7.1) — отдельным слоем под объектом: та же клетка, другой источник того
 ## же тайлсета. Запечённая в спрайт тень не гасится туманом и не перекрашивается
 ## вместе с объектом, поэтому она элемент, а не пиксели силуэта.
-func paint_decor(decor_layer: TileMapLayer, shadow_layer: TileMapLayer = null) -> void:
+## `visibility` (дефект T-150, кадр `fog-decor-t145.png`): без фильтра объект переживал
+## туман — база под деревом стиралась, а дерево оставалось висеть на сером поле.
+## Правило спеки «Туман войны по всем слоям»: не открыта — пусто, открыта и не видима —
+## затемнено **той же кратности**, что база (`GameNumbers.MAP_FOG_DIM`), а не спрятано.
+func paint_decor(
+	decor_layer: TileMapLayer,
+	shadow_layer: TileMapLayer = null,
+	visibility: VisibilityMap = null
+) -> void:
 	if decor_layer == null:
 		return
 	decor_layer.clear()
@@ -174,9 +182,17 @@ func paint_decor(decor_layer: TileMapLayer, shadow_layer: TileMapLayer = null) -
 		if coords.x < 0:
 			push_error("MapRenderer: объект %s не в манифесте листа объектов" % object_id)
 			continue
-		decor_layer.set_cell(cell, MapObjects.SOURCE_ID, coords)
+		var in_fog := false
+		if visibility != null:
+			if not visibility.is_explored(cell):
+				continue
+			in_fog = not visibility.is_visible(cell)
+		decor_layer.set_cell(cell,
+				MapObjects.FOG_SOURCE_ID if in_fog else MapObjects.SOURCE_ID, coords)
 		if shadow_layer != null:
-			shadow_layer.set_cell(cell, MapObjects.SHADOW_SOURCE_ID, MapObjects.SHADOW_TILE)
+			shadow_layer.set_cell(cell,
+				MapObjects.SHADOW_FOG_SOURCE_ID if in_fog else MapObjects.SHADOW_SOURCE_ID,
+				MapObjects.SHADOW_TILE)
 
 func clear_city_zones(tile_map: TileMapLayer) -> void:
 	if tile_map == null:

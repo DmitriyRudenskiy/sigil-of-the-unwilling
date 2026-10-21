@@ -40,6 +40,9 @@ MANIFEST = ROOT / SPEC["out_dir"] / "MANIFEST.json"
 ATLAS_IMG = ROOT / "game/assets/tiles/world_map_atlas.webp"
 ATLAS_JSON = ROOT / "game/assets/tiles/world_map_atlas.json"
 OBJ_IMG = ROOT / "game/assets/objects/world_map_objects.webp"
+OBJ_FOG_IMG = ROOT / "game/assets/objects/world_map_objects_fog.webp"
+# Зеркало `GameNumbersMap.MAP_FOG_DIM`: затемнённый побратим листа печатается здесь.
+MAP_FOG_DIM = 0.45
 OBJ_JSON = ROOT / "game/assets/objects/world_map_objects.json"
 BAND_HEX = [h.lower() for h in GATES["palette"]["band_m"]]
 BAND = np.array([PB.parse_hex(h) for h in BAND_HEX], dtype=np.float32)
@@ -453,6 +456,7 @@ def assemble() -> int:
                        "source": str(r["path"].relative_to(ROOT))})
     OBJ_IMG.parent.mkdir(parents=True, exist_ok=True)
     osheet.save(OBJ_IMG, "WEBP", quality=QUALITY, lossless=LOSSLESS)
+    fog_twin()
     OBJ_JSON.write_text(json.dumps({
         "tile": TILE, "image": OBJ_IMG.name, "grid": [8, math.ceil(len(objs) / 8)],
         "format": "webp", "quality": QUALITY,
@@ -494,17 +498,39 @@ def repro(rid: str) -> int:
     return 0 if (ha == hb and ha != hc) else 1
 
 
+def fog_twin() -> int:
+    """Затемнённый побратим листа объектов (дефект T-150): туман войны кладёт тот же
+    объект вторым источником тайлсета, и кратность обязана быть той же, что у базы
+    (`GameNumbersMap.MAP_FOG_DIM` — источник истины, здесь только зеркало).
+
+    Печатаем отдельным файлом, а не красим на лету: в этом билде Godot у `Image` нет
+    ни `modulate_rect`, ни поштучной модуляции клетки, а цикл по 5 млн пикселей в
+    GDScript подорожал бы каждой генерации карты."""
+    src = Image.open(OBJ_IMG).convert("RGBA")
+    a = np.asarray(src).astype(np.float32)
+    a[..., :3] *= MAP_FOG_DIM
+    Image.fromarray(a.astype(np.uint8), "RGBA").save(
+        OBJ_FOG_IMG, "WEBP", quality=QUALITY, lossless=LOSSLESS)
+    rel = OBJ_FOG_IMG.relative_to(ROOT) if OBJ_FOG_IMG.is_relative_to(ROOT) else OBJ_FOG_IMG
+    print(f"{rel}: ×{MAP_FOG_DIM}, {OBJ_FOG_IMG.stat().st_size // 1024} KiB")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--only", default="")
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--attempts", type=int, default=3)
     ap.add_argument("--assemble", action="store_true")
+    ap.add_argument("--fog-twin", action="store_true",
+                    help="пересобрать затемнённый побратим листа из уже собранного листа")
     ap.add_argument("--contact-sheet", action="store_true")
     ap.add_argument("--repro", default="")
     a = ap.parse_args()
     if a.assemble:
         return assemble()
+    if a.fog_twin:
+        return fog_twin()
     if a.contact_sheet:
         return contact_sheet(ROOT / SPEC["out_dir"] / "sheet_map_art.webp")
     if a.repro:
