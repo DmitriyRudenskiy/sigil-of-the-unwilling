@@ -7,7 +7,7 @@
 - [x] 1.3 Бит-каркас K-M9: биты 1/7/14/17/21 — `turn_driver.gd` (BIT_TURNS)
 - [x] 1.4 Сезоны: season_index = (turn−1) % 4, зима каждый 4-й ход, production_mult/enemy_mult — `world_seasons.gd` (Q-M27/Q-M29)
 - [x] 1.5 Детерминизм I1: ГСЧ из campaign seed — `turn_driver.gd`/`campaign_battle.gd`
-- [~] 1.6 Статус кампании: defeat = wipe партии (единственный путь, Q-M68→(а), D-190) — готово (`turn_driver.gd: defeat()`, `party_system.gd: is_wiped`); victory = пережить рейд хода 21 (R5) — **deferred T-071 (post-MVP)**: `TurnDriver.victory()` не существует (статусы — ongoing/defeat), «Campaign victory»-сценарий спеки — ожидает T-071 (post-verdict-аудит 2026-10-21: [x] было завышением)
+- [x] 1.6 Статус кампании: defeat = wipe партии (единственный путь, Q-M68→(а), D-190) — готово (`turn_driver.gd: defeat()`, `party_system.gd: is_wiped`); victory = пережить рейд хода 21 при любом запасе > 0 (R5) — готово (T-071, 2026-10-21: `TurnDriver.victory()` + `victory_check_hook` (инжест предиката «любой запас > 0»), проверка в конце хода 21 при статусе ongoing; «Campaign victory»-сценарий спеки закрыт; edge «пережил, но запасы ≤ 0» → ongoing + журнал)
 
 ## 2. Метрики core loop
 
@@ -27,4 +27,4 @@
 
 - [x] 4.1 GdUnit4: порядок фаз (production после threats), no-op caravans/diplomacy. *(test_turn_driver.gd: test_phase_order_mandate, test_post_mvp_slots_noop.)*
 - [x] 4.2 GdUnit4: 100 повторов seed+actions → byte-identical state. *(test_turn_driver.gd: test_i1_determinism_100_repeats_byte_identical.)*
-- [x] 4.3 GdUnit4: статус кампании (wipe → defeat; голод сам по себе не defeat). *(test_turn_driver.gd: test_wipe_defeat, test_defeat_idempotent, test_hunger_alone_not_defeat, test_defeat_status_serialized. **victory (рейд 21) — T-071, post-MVP.)*
+- [x] 4.3 GdUnit4: статус кампании (wipe → defeat; голод сам по себе не defeat; victory — ход 21 + запас > 0, wipe в ходу 21 → defeat, не victory). *(test_turn_driver.gd: test_wipe_defeat, test_defeat_idempotent, test_hunger_alone_not_defeat, test_defeat_status_serialized; test_campaign_victory.gd (14, T-071, 2026-10-21).)*
