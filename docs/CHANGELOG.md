@@ -9,6 +9,36 @@ date: 2026-10-21
 
 # CHANGELOG — docs/
 
+## [2026-10-21] — T-071: campaign victory (верхний конец кампании, R5)
+
+- **Суть:** кампания теперь может завершиться победой: пережить рейд хода 21
+  при любом запасе > 0 → `campaign_status = "victory"` (спека
+  campaign-core-loop «Campaign victory», R5). Defeat не тронут: wipe партии —
+  единственный defeat-путь (D-190). Баланс не тронут (якоря T-041/T-041b
+  зелёные).
+- **Код:** `turn_driver.gd` — `victory(reason)` (идемпотентен, DONE-лок как у
+  `defeat()`), `victory_check_hook` (инжест предиката: TurnDriver не знает про
+  сток), проверка в `_finish_turn()` в конце хода 21 при статусе ongoing;
+  edge «пережил рейд, но все запасы ≤ 0» → victory не даётся, кампания
+  завершается ongoing (журнал `campaign_end_without_victory` — наблюдаемость).
+  `campaign_composition.gd` — проводка хука в `_any_stock_positive()`
+  (K-R2-сток после production-фазы хода 21; рейды бьют pre-production запасы,
+  T-122). Схема сейва не тронута (поле `status` — строка; миграция не нужна).
+- **Тесты:** +14 (`tests/campaign/test_campaign_victory.gd`): статусная машина
+  (idempotency, DONE-лок в обе стороны), ход 21 с/без запаса, хук вызывается
+  ровно один раз, wipe в ходу 21 → defeat (не victory), сериализация +
+  схема T-110, полный прогон (seed 12345) → victory, сейв roundtrip
+  (байтовая идентичность, паттерн cutover), edge «без запаса → ongoing»,
+  wipe в финальном бою → defeat. Леджер: +14 / −0 / quarantine 0 / нетто +14,
+  было 3022 → стало 3036, 0 orphans.
+- **Доки:** `campaign-core-loop` tasks 1.6 [~]→[x] (victory исполнен, пометка
+  «post-MVP» снята — R5/MVP-scope), 4.3 — victory-покрытие; `TICKETS.md`
+  T-071 — тикет закрыт полностью (босс — V-3/D-218, победа — этот статус,
+  поражение — D-190).
+- **Не тронуто:** `victory_assessment()` (T-117-якорь), UI (victory-экран —
+  deferred, mvp-ui-flow), финальный престиж-ранг — read-only
+  `prestige_rank_name()` (T-129), UI-отчёт ранга — deferred.
+
 ## [2026-10-21] — `D-224`: работа переведена на `main`, норма о feature-ветках отменена
 
 - Указанием владельца сняты три нормы прежнего порядка: коммиты на feature-ветках
@@ -57,36 +87,6 @@ date: 2026-10-21
   недоходима: её обещание «секция не молчит» не выполняется ровно там, где нужнее всего.
 - Дальний ref `docs/close-world-map-art-variety` (`f5a25334`) снят после мержа и сверен
   `ls-remote` (D-139). На `origin` остался один head — `main`.
-
-## [2026-10-21] — T-071: campaign victory (верхний конец кампании, R5)
-
-- **Суть:** кампания теперь может завершиться победой: пережить рейд хода 21
-  при любом запасе > 0 → `campaign_status = "victory"` (спека
-  campaign-core-loop «Campaign victory», R5). Defeat не тронут: wipe партии —
-  единственный defeat-путь (D-190). Баланс не тронут (якоря T-041/T-041b
-  зелёные).
-- **Код:** `turn_driver.gd` — `victory(reason)` (идемпотентен, DONE-лок как у
-  `defeat()`), `victory_check_hook` (инжест предиката: TurnDriver не знает про
-  сток), проверка в `_finish_turn()` в конце хода 21 при статусе ongoing;
-  edge «пережил рейд, но все запасы ≤ 0» → victory не даётся, кампания
-  завершается ongoing (журнал `campaign_end_without_victory` — наблюдаемость).
-  `campaign_composition.gd` — проводка хука в `_any_stock_positive()`
-  (K-R2-сток после production-фазы хода 21; рейды бьют pre-production запасы,
-  T-122). Схема сейва не тронута (поле `status` — строка; миграция не нужна).
-- **Тесты:** +14 (`tests/campaign/test_campaign_victory.gd`): статусная машина
-  (idempotency, DONE-лок в обе стороны), ход 21 с/без запаса, хук вызывается
-  ровно один раз, wipe в ходу 21 → defeat (не victory), сериализация +
-  схема T-110, полный прогон (seed 12345) → victory, сейв roundtrip
-  (байтовая идентичность, паттерн cutover), edge «без запаса → ongoing»,
-  wipe в финальном бою → defeat. Леджер: +14 / −0 / quarantine 0 / нетто +14,
-  было 3022 → стало 3036, 0 orphans.
-- **Доки:** `campaign-core-loop` tasks 1.6 [~]→[x] (victory исполнен, пометка
-  «post-MVP» снята — R5/MVP-scope), 4.3 — victory-покрытие; `TICKETS.md`
-  T-071 — тикет закрыт полностью (босс — V-3/D-218, победа — этот статус,
-  поражение — D-190).
-- **Не тронуто:** `victory_assessment()` (T-117-якорь), UI (victory-экран —
-  deferred, mvp-ui-flow), финальный престиж-ранг — read-only
-  `prestige_rank_name()` (T-129), UI-отчёт ранга — deferred.
 
 ## [2026-10-21] — Post-verdict reconciliation (аудит синхронности после D-216…D-222, docs-only)
 
