@@ -136,8 +136,16 @@ func _build(campaign_seed: int) -> void:
 		 "xp": 0, "luck": 0,
 		 "stats": {"str": 10, "dex": 14, "con": 12, "int": 10, "wis": 14, "cha": 10}},
 	]
+	# V-5 (D-220): персистентный HP — инициализация полей (max_hp/current_hp).
+	for _m in party:
+		PartySystem.ensure_hp(_m)
 	settlement.party_size = PartySystem.alive_members(party).size()
 	campaign.settlement_hook = func() -> Dictionary:
+		# V-5 (D-220, D3): REST в городе — живые → max_hp, WOUNDED → READY
+		# (DEAD не восстанавливаются). Шов: герой в походе → REST в этом
+		# ходу нет → урон переносится между боями.
+		if region_map != null and region_map.hero_region == region_map.start_region:
+			PartySystem.rest(party)
 		# T-122 (Q-M31): settlement-фаза — население/события/настроение (позиция 1);
 		# production-расчёт — вынесен в production-фазу (позиция 6, post-threats).
 		# T-124: сверка на ходах 10/20 (в начале settlement-фазы — покрывает события
@@ -310,8 +318,20 @@ func _request_battle(context: Dictionary) -> String:
 	if _statblocks.is_empty():
 		return ""  # статблоков нет (баланс-конфиг) — бой не разрешается
 	var tier: int = int(context.get("tier", 1))
+	# V-5 (D-220, D1): герой боя = первый живой член ростера (детерминированно).
+	# character_uid — uid самого героя (житель), либо −1 (только-ростерный
+	# член — потерь населению нет; двойной смерти не возникает, условие 2).
+	var hero_member: Dictionary = {}
+	var alive: Array = PartySystem.alive_members(party)
+	if not alive.is_empty():
+		hero_member = alive[0]
+	var hero_uid: int = int(hero_member.get("uid", -1))
 	var hero := CampaignBattle.make_recruit(
-		_statblocks.get("warrior", {}), population_system.conscript())
+		_statblocks.get("warrior", {}), hero_uid)
+	# V-5 (D-220): бой начинается с текущим current_hp (живой: кламп ≥ 1).
+	if not hero_member.is_empty():
+		hero["hp"] = maxi(int(hero_member.get("current_hp", int(hero["hp"]))), 1)
+		hero["max_hp"] = int(hero_member.get("max_hp", int(hero["max_hp"])))
 	# party-characters 3.2 / campaign-core-loop 3.2 (P-4): голод (0 еды) →
 	# −2 к атакам; штраф из SupplySystem, держится до resupply в городе.
 	hero["hunger_penalty"] = supply_system.attack_penalty()
@@ -330,6 +350,20 @@ func _request_battle(context: Dictionary) -> String:
 	var parity: bool = float(_statblocks.get("warrior", {}).get("cr", 0)) \
 		<= 0.8 * float(raider_spec.get("cr", 0))
 	last_battle_report = CampaignBattle.resolve(hero, raider, _on_battle_losses)
+	# V-5 (D-220): результат героя → член партии (персистентный HP / WOUNDED /
+	# DEAD). До apply_party_battle_losses: uid-механизм не дублирует смерть
+	# (apply_losses пропускает уже DEAD).
+	if not hero_member.is_empty():
+		PartySystem.apply_battle_result(
+			hero_member, int(hero.get("hp", 0)), bool(hero.get("dead", false)))
+		# party_size = живые (инвариант party_screen_model): смерть героя с
+		# uid −1 не попадает в losses — синк здесь, не только в apply_losses.
+		settlement.party_size = PartySystem.alive_members(party).size()
+		# V-5 (R1): конец = wipe партии. Смерть героя с uid −1 обходит
+		# apply_party_battle_losses (losses пуст) — проверка здесь (defeat()
+		# идемпотентен: повторный вызов — no-op).
+		if PartySystem.is_wiped(party):
+			campaign.defeat("party_wiped")
 	# T-060: партия — XP (после боя, 02-mechanics §3.2 EC3) и потери
 	# (R1: wipe = DEFEAT; сейв и Престиж сохраняются).
 	record_party_xp(last_battle_report, float(raider_spec.get("cr", 0.0)))
@@ -531,6 +565,9 @@ func load_save_state(state: Dictionary) -> void:
 	for member in party:
 		if member is Dictionary:
 			member["level"] = PartySystem.level_for_xp(int(member.get("xp", 0)))
+			# V-5 (D-220): миграция персистентного HP (идемпотентная; старый
+			# сейв без current_hp → полный; DEAD — не воскрешаем).
+			PartySystem.ensure_hp(member)
 	var city: Dictionary = state.get("city", {})
 	settlement = SettlementProcessor.from_dict({
 		"stocks": state.get("resources", {}),

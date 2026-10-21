@@ -36,12 +36,21 @@ Characters SHALL gain XP from: battle `100 * CR * (1 + 0.1 * n)`, node (one-time
 - **AND** the event is logged in the chronicle without XP
 
 ### Requirement: Character state machine
-A character SHALL follow the state machine READY → WOUNDED → UNSTABLE → DEAD. WOUNDED and UNSTABLE SHALL be in-battle states (T-116 layer). REST in the city SHALL take 1 day and heal `(2 + CON) * hit_die` HP. A DEAD character SHALL be replaced by a companion of the same class via training (§3.3), level 1 in MVP (C-1: the "city level - 1" formula is a dead reference, K-M3).
+A character SHALL follow the state machine READY → WOUNDED → UNSTABLE → DEAD. WOUNDED and UNSTABLE SHALL be in-battle states (T-116 layer). **V-5/D-220 (2026-10-21):** the party hero's `current_hp` SHALL persist between battles (battle starts from stored `current_hp`); a hero who survives a battle at 0 HP (death saves) SHALL leave the roster-level `WOUNDED` state with `current_hp = 1` (D4: alive — counts for `alive_members`/wipe/party limit, no combat penalty); a hero who dies SHALL become `DEAD` (exactly one roster member, no duplicate deaths). REST SHALL fully restore living members (READY/WOUNDED → `max_hp`/READY) and SHALL NOT restore DEAD members; the `(2 + CON) * hit_die` healing formula is deferred (hit-die design has no canon). `max_hp` of all members SHALL be the warrior statblock proxy (D2; class→statblock mapping is out of V-5 scope). A DEAD character SHALL be replaced by a companion of the same class via training (§3.3), level 1 in MVP (C-1: the "city level - 1" formula is a dead reference, K-M3).
 
 #### Scenario: Rest heals
-- **WHEN** a WOUNDED character rests in the city for 1 day
-- **THEN** the character heals (2 + CON modifier) * hit_die HP
-- **AND** the state returns to READY if HP is above the WOUNDED threshold
+- **WHEN** the hero is in the city and the settlement phase runs (D3: automatic REST)
+- **THEN** every living member (READY/WOUNDED) is restored to `max_hp` and set to READY
+- **AND** DEAD members are untouched
+
+#### Scenario: Wounded persists between battles
+- **WHEN** the hero survives a battle at 0 HP (stabilized by death saves) and no REST has occurred
+- **THEN** the roster member is WOUNDED with `current_hp = 1`
+- **AND** the next battle starts from `current_hp = 1`
+
+#### Scenario: Out of city — no REST
+- **WHEN** the hero is outside the start region when the settlement phase runs
+- **THEN** no REST occurs and battle damage persists into the next battle
 
 #### Scenario: Replacement after death
 - **WHEN** a party member dies and the player trains a replacement of the same class

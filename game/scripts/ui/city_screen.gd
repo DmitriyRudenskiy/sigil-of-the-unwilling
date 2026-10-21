@@ -155,6 +155,10 @@ func _resource_icon(resource_id: StringName) -> Texture2D:
 		&"iron": return ResourceAtlas.texture_for_id(&"iron")
 	return null
 
+# Единственный оставшийся обход темы в game/scripts: `focus` — носитель уровня
+# проекта, его перенос в тему меняет вид фокуса сразу на всех экранах (бой, карта,
+# меню, город). Ждёт решения владельца; подсрез ведёт `chore/theme-type-hygiene`
+# (tasks 4.8). Хелпер вызывают 12 потребителей — правка одна на все.
 func _apply_keyboard_focus(control: Control) -> void:
 	var focus := StyleBoxFlat.new()
 	focus.bg_color = Color(0, 0, 0, 0)
