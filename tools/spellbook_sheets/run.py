@@ -5,6 +5,10 @@
 
 Без `--yes` инструмент останавливается на прототипе: детекция + кроп + QC-кадры
 первого листа, чтобы человек сверил рамки до полного прогона.
+
+`--crops` — вход уже представляет собой каталог готовых кропов `…_<01..12>.png`
+(например, после ручной сортировки): SAM и детекция пропускаются, отбор и
+сборка листов — те же.
 """
 import argparse
 import datetime as dt
@@ -31,6 +35,17 @@ def sources(input_dir):
         if p.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp"):
             out.append(p)
     return out
+
+
+def rows_from_crops(paths):
+    """Записи «листа» по уже готовым кропам: группа = исходный файл из имени."""
+    by = {}
+    for p in paths:
+        by.setdefault(p.stem.rsplit("_", 1)[0], []).append(p.name)
+    w, h = Image.open(paths[0]).size
+    return [{"source": f"{stem}.png", "width": w, "height": h, "mode": "crops",
+             "masks": len(names), "clamped": [], "crops": sorted(names)}
+            for stem, names in sorted(by.items())]
 
 
 def crop_all(srcs, out, args, predictor=None, qc_only=False):
@@ -84,11 +99,16 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--input", required=True)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--crops", action="store_true",
+                    help="--input — каталог готовых кропов, детекцию пропустить")
     ap.add_argument("--cell", type=int, default=320)
     ap.add_argument("--pad", type=float, default=D.PAD)
     ap.add_argument("--min-frac", type=float, default=D.MIN_FRAC)
     ap.add_argument("--prompt", default=D.PROMPT)
     ap.add_argument("--max-intra-sim", type=float, default=0.80)
+    ap.add_argument("--unique-subjects", action="store_true",
+                    help="сюжет не более одного раза во всех листах: второй экземпляр "
+                         "той же книги+ячейки идёт в остаток")
     ap.add_argument("--seed", type=int, default=43)
     ap.add_argument("--max-clusters", type=int, default=10)
     ap.add_argument("--sam-device", default="mps")
@@ -104,12 +124,23 @@ def main():
         srcs = srcs[:args.limit]
     print(f"Аудит: {len(srcs)} файлов в {args.input}")
 
-    predictor = D.client(args.sam_device)
-    rows, crop_paths = crop_all(srcs, out, args, predictor, qc_only=not args.yes)
-    if not args.yes:
-        return 2
+    if args.crops:
+        rows = rows_from_crops(srcs)
+        print(f"Кроповый вход: {len(srcs)} файлов, книг {len(rows)} — SAM пропущен")
+        crop_paths = srcs
+    else:
+        predictor = D.client(args.sam_device)
+        rows, crop_paths = crop_all(srcs, out, args, predictor, qc_only=not args.yes)
+        if not args.yes:
+            return 2
     if len(crop_paths) < 9:
         raise SystemExit(f"кропов меньше 9 ({len(crop_paths)}) — листов не собрать")
+
+    if args.crops:
+        gone = [p for p in crop_paths if not p.is_file()]
+        if gone:
+            raise SystemExit(f"кропов не стало ({len(gone)}) — в каталоге шла сортировка "
+                             f"во время прогона; перезапусти: {gone[0].name} …")
 
     print("Векторизация:")
     E = V.load_or_embed(out, crop_paths, device=args.embed_device)
@@ -123,6 +154,19 @@ def main():
 
     print("Отбор:")
     pool = list(range(len(crop_paths)))
+    twins = []
+    if args.unique_subjects:
+        # «тот же сюжет» = та же книга и та же ячейка 4×3 в двух съёмках разворота
+        seen = set()
+        keep = []
+        for i, k in enumerate(same_obj):
+            if k in seen:
+                twins.append(i)
+            else:
+                seen.add(k)
+                keep.append(i)
+        pool = keep
+        print(f"  сюжетов-близнецов отложено: {len(twins)}")
     nines, meta_rows, warns, reps = [], [], [], []
     while len(pool) >= 9:
         nine, meta = S.select_nine(E, pool, 9, args.seed, args.max_clusters)
@@ -150,6 +194,7 @@ def main():
 
     sheets_dir = out / "sheets"
     sheets_dir.mkdir(exist_ok=True)
+    (out / "qc").mkdir(exist_ok=True)
     md5 = {}
     for old in sheets_dir.glob("*.png"):
         old.unlink()
@@ -159,11 +204,11 @@ def main():
         contact(p, out / "qc" / p.name)
         md5[s] = hashlib.md5(p.read_bytes()).hexdigest()
 
-    residual = [crop_paths[i].name for i in pool]
+    residual = [crop_paths[i].name for i in pool + twins]
     (out / "residual").mkdir(exist_ok=True)
     for old in (out / "residual").glob("*.png"):
         old.unlink()
-    for i in pool:
+    for i in pool + twins:
         (out / "residual" / crop_paths[i].name).write_bytes(crop_paths[i].read_bytes())
 
     report = {
@@ -182,6 +227,7 @@ def main():
         "selection": meta_rows,
         "first_last_centroid_distance": round(d_first_last, 4),
         "replacements": reps,
+        "duplicate_subjects": [crop_paths[i].name for i in twins],
         "warnings": warns,
         "residual": residual,
     }
@@ -206,10 +252,13 @@ def render_report(r, args):
     modes = {}
     for rec in r["sources"]:
         modes[rec["mode"]] = modes.get(rec["mode"], 0) + 1
-    L = [f"# Листы иконок из `{args.input}`", "",
+    pool_kind = "готовых кропов" if args.crops else "сырья"
+    L = [f"# Листы иконок из `{args.input}` ({pool_kind})", "",
          f"Сгенерировано {r['generated']}. Python {r['python']}, numpy {r['numpy']}, "
-         f"SAM на `{r['sam_device']}`, CLIP на `{r['embed_device']}`.", "",
-         "## Аудит входного пула", "",
+         + ("SAM пропущен (вход — готовые кропы), " if args.crops
+            else f"SAM на `{r['sam_device']}`, ")
+         + f"CLIP на `{r['embed_device']}`.", "",
+         "## Аудит входного пула" + (" — по готовым кропам, детекция пропущена" if args.crops else ""), "",
          "| лист | разрешение | режим | масок | кропов | кламп |", "| --- | --- | --- | --- | --- | --- |"]
     for rec in r["sources"]:
         L.append(f"| `{rec['source'][:28]}…` | {rec['width']}×{rec['height']} | {rec['mode']} | "
@@ -232,6 +281,11 @@ def render_report(r, args):
     if r["warnings"]:
         L += ["## Предупреждения", ""] + [f"- {w}" for w in r["warnings"]] + [""]
     L += [f"## Остаток ({len(r['residual'])})", ""] + [f"- `{n}`" for n in r["residual"]] + [""]
+    if r.get("duplicate_subjects"):
+        L += [f"## Отложено как второй экземпляр того же сюжета ({len(r['duplicate_subjects'])})", "",
+              "Второй снимок того же разворота: та же книга и та же ячейка. Без флага",
+              "`--unique-subjects` обе копии попали бы на листы — в разных листах",
+              "векторный порог их не останавливает.", ""] + [f"- `{n}`" for n in r["duplicate_subjects"]] + [""]
     L += ["## Контрольные числа", "",
           f"- кропов: {sum(len(rec['crops']) for rec in r['sources'])}",
           f"- листов 3×3: {len(r['sheets'])}",

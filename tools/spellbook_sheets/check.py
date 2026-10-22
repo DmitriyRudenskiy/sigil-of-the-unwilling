@@ -15,9 +15,11 @@ import numpy as np
 ap = argparse.ArgumentParser()
 ap.add_argument("--out", required=True)
 ap.add_argument("--max-intra-sim", type=float, default=0.80)
+ap.add_argument("--crops-dir", help="где лежат кропы (по умолчанию <out>/crops)")
 a = ap.parse_args()
 
 out, rep = Path(a.out), json.loads((Path(a.out) / "sheets.json").read_text())
+CD = Path(a.crops_dir) if a.crops_dir else out / "crops"
 E = np.load(Path(a.out) / "embeddings.npz", allow_pickle=True)["E"]
 names = [str(n) for n in np.load(Path(a.out) / "embeddings.npz", allow_pickle=True)["names"]]
 row = {n: i for i, n in enumerate(names)}
@@ -42,7 +44,7 @@ want(len(set(cells)) == len(cells), "кроп использован больш�
 want(not (set(cells) & set(rep["residual"])), "остаток пересекается с листами")
 want(len(cells) % 9 == 0, f"{len(cells)} использованных не делится на 9")
 for n in cells + rep["residual"]:
-    want((Path(a.out) / "crops" / n).is_file(), f"нет файла {n}")
+    want((CD / n).is_file(), f"нет файла {n}")
 for s in rep["sheets"]:
     want((Path(a.out) / "sheets" / f"sheet_{s['sheet']:02d}.png").is_file(), f"нет листа {s['sheet']}")
 
