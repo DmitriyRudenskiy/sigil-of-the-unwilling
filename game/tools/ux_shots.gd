@@ -6,13 +6,17 @@ extends SceneTree
 # Каждый кадр — независимое состояние; вызовы защищены has_method/has_node —
 # harness должен запускаться и на «before»-коммите (до шага 2).
 
-const OUT := "/tmp/ux-shots/"
+const OUT_DIR := "/tmp/ux-shots/"
 
+var _out: String = OUT_DIR
 var _shots_done := 0
 
 
 func _initialize() -> void:
-	DirAccess.make_dir_recursive_absolute(OUT)
+	var override_env: String = OS.get_environment("UX_SHOTS_OUT")
+	if override_env != "":
+		_out = override_env
+	DirAccess.make_dir_recursive_absolute(_out)
 	root.size = Vector2i(1280, 720)
 	_run()
 
@@ -87,6 +91,71 @@ func _run() -> void:
 		)
 		await _shot(ui, "09_log_long")
 
+	# --- ui-mockup-parity §5: карточки героев, таймер, «Спасение» -------------
+	# Кадры ниже — рабочее состояние HUD: финальная плашка (кадр 08) затемняет
+	# весь экран и перекрывает зоны, поэтому её убираем.
+	var end := ui.get_node_or_null("end_overlay")
+	if end != null:
+		end.visible = false
+	if ui.has_method("hide_target_card"):
+		ui.hide_target_card()
+	# Таймер публикует контроллер из состояния (`_process`), поэтому кадры
+	# выставляют состояние, а не текст на экране — иначе каждый кадр затирает
+	# настоящее значение.
+	var live_state = scene.get("_state")
+	var state := BattleState.new()
+	var own = _make_hero("Веном Карен", 30, 40, 7)
+	own.side = BattleState.Side.ATTACKER
+	var foe = _make_hero("Лейн", 99, 100, 30)
+	foe.side = BattleState.Side.DEFENDER
+	var mob = _make_unit("Скелет-страж", 7, 21, 12, 3, 4)
+	mob.side = BattleState.Side.DEFENDER
+	state.attacker_units.append(own)
+	state.defender_units.append(foe)
+	state.defender_units.append(mob)
+	if ui.has_method("update_hero_cards"):
+		var magic := HeroMagic.new()
+		magic.mana_max = 20
+		magic.mana_current = 14
+		ui.update_hero_cards(state, magic)
+		var queue: Array[BattleState.BattleUnit] = []
+		for u in [own, foe, mob]:
+			queue.append(u)
+		ui.update_initiative(queue, own)
+		if live_state != null:
+			live_state.turn_time_limit = 30
+			live_state.turn_time_left = 12.0
+			live_state.turn_timer_running = true
+		if ui.has_method("set_rescue_enabled"):
+			ui.set_rescue_enabled(true)
+		await _shot(ui, "10_hero_cards")
+
+	# остаток на исходе (красное кольцо) — состояние, а не новый элемент
+	if live_state != null:
+		live_state.turn_time_left = 4.0
+		await _shot(ui, "11_timer_low")
+
+	# ни одного героя и никакого таймера: пустые носители => пустые зоны,
+	# а не нули (правило «никаких фейковых чисел», docs/14 §3)
+	if ui.has_method("update_hero_cards"):
+		var bare := BattleState.new()
+		var plain = _make_unit("Костяной часовой", 21, 21, 12, 3, 6)
+		plain.side = BattleState.Side.ATTACKER
+		bare.attacker_units.append(plain)
+		bare.defender_units.append(mob)
+		ui.update_hero_cards(bare, null)
+		var bare_queue: Array[BattleState.BattleUnit] = []
+		for u in [plain, mob]:
+			bare_queue.append(u)
+		ui.update_initiative(bare_queue, plain)
+		if ui.has_method("set_rescue_enabled"):
+			ui.set_rescue_enabled(false)
+		if live_state != null:
+			live_state.turn_time_limit = 0
+			live_state.turn_time_left = 0.0
+			live_state.turn_timer_running = false
+		await _shot(ui, "12_no_hero_no_timer")
+
 	print("UX_SHOTS_DONE=%d" % _shots_done)
 	quit(0)
 
@@ -108,6 +177,19 @@ func _make_unit(p_name: String, hp: int, max_hp: int, ac: int, atk: int, count: 
 	return unit
 
 
+func _make_hero(p_name: String, hp: int, max_hp: int, level: int):
+	var key := String(GameNumbersHero.HERO_BATTLE_KEY)
+	var stats := UnitStats.new(key, p_name, 6, 8, 1, 5, 2, [])
+	var stack := UnitStack.new(stats, 1)
+	var profile := DnDCombatantProfile.new(key, p_name)
+	profile.max_hp = max_hp
+	profile.level = level
+	var unit := BattleState.BattleUnit.new(stack)
+	unit.dnd_profile = profile
+	unit.dnd_current_hp = hp
+	return unit
+
+
 func _frames(n: int) -> void:
 	for i in n:
 		await process_frame
@@ -116,7 +198,7 @@ func _frames(n: int) -> void:
 func _shot(ui: Node, name: String) -> void:
 	await _frames(3)
 	var img: Image = root.get_window().get_texture().get_image()
-	var path := OUT + name + ".png"
+	var path := _out + name + ".png"
 	var err := img.save_png(path)
 	if err != OK:
 		push_error("save_png failed: %s (%d)" % [path, err])

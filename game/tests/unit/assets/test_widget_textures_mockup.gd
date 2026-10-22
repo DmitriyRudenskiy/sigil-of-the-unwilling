@@ -27,6 +27,20 @@ const TEXTURES_MIN := 12    # тема обязана кормиться кит�
 const STATES: Array[String] = ["normal", "hover", "pressed", "disabled"]
 
 
+## Род носителя по манифесту кита: "9-slice", "full-bleed" или "" (не описан).
+static func _kit_kind(path: String) -> String:
+	var man: Variant = JSON.parse_string(FileAccess.get_file_as_string(MANIFEST_PATH))
+	if not (man is Dictionary):
+		return ""
+	var files: Variant = (man as Dictionary).get("files", {})
+	if not (files is Dictionary):
+		return ""
+	var entry: Variant = (files as Dictionary).get(path.trim_prefix(KIT_DIR + "/"), {})
+	if not (entry is Dictionary):
+		return ""
+	return String((entry as Dictionary).get("kind", ""))
+
+
 # --- утилиты -----------------------------------------------------------------
 
 static func _image_of(path: String) -> Image:
@@ -151,6 +165,7 @@ func test_chamfer_is_cut_not_painted_black() -> void:
 func test_nine_slice_margins_present_and_non_degenerate() -> void:
 	var theme := _theme()
 	var checked := 0
+	var full_bleed := 0
 	for type in theme.get_stylebox_type_list():
 		for style in theme.get_stylebox_list(type):
 			var sb := theme.get_stylebox(style, type)
@@ -160,6 +175,17 @@ func test_nine_slice_margins_present_and_non_degenerate() -> void:
 			var w := float((t.texture as Texture2D).get_width())
 			var h := float((t.texture as Texture2D).get_height())
 			var key := "%s/%s" % [type, style]
+			# Полноцветный носитель (круглый медальон макета 11) обязан быть
+			# заявлен в манифесте: у круга нет фаски, которую можно размазать, и
+			# 9-slice к нему не применяется. Исключение действует, только пока
+			# носитель квадратный, — неквадратный без маржи растянется.
+			if _kit_kind(t.texture.resource_path) == "full-bleed":
+				full_bleed += 1
+				assert_float(w).override_failure_message(
+					"%s: full-bleed носитель %s не квадратный (%d×%d) — его растянёт"
+					% [key, t.texture.resource_path, int(w), int(h)]
+				).is_equal(h)
+				continue
 			checked += 1
 			# К-8b: маржа 0 = 9-slice выключен, текстура тянется целиком.
 			assert_float(t.texture_margin_left).override_failure_message(
@@ -179,12 +205,17 @@ func test_nine_slice_margins_present_and_non_degenerate() -> void:
 				% [key, t.texture_margin_top, t.texture_margin_bottom, int(h)]
 			).is_less(h)
 	assert_int(checked).is_greater_equal(8)
+	# Обратная сторона исключения: круглые медальоны нижней панели боя обязаны
+	# быть в теме (четыре состояния), а не «молча» ездить на плите.
+	assert_int(full_bleed).override_failure_message(
+		"в теме не осталось full-bleed носителей — круглые медальоны съехали с RoundIconButton"
+	).is_greater_equal(4)
 
 
 # --- 4. состояния не копии ---------------------------------------------------
 
 func test_button_states_are_not_copies() -> void:
-	for family in ["button", "button_menu"]:
+	for family in ["button", "button_menu", "button_round"]:
 		var bytes := {}
 		for st in STATES:
 			var path := "%s/buttons/%s_%s.png" % [KIT_DIR, family, st]
@@ -272,6 +303,8 @@ func test_manifest_margins_match_theme() -> void:
 		var rel: String = String(sb.texture.resource_path).trim_prefix(KIT_DIR + "/")
 		if not files.has(rel):
 			continue
+		if _kit_kind(String(sb.texture.resource_path)) == "full-bleed":
+			continue  # у полноцветного носителя нарезки нет по построению
 		var want: Array = []
 		for v in files[rel]["texture_margin"]:  # JSON отдаёт числа float'ом
 			want.append(int(v))

@@ -37,8 +37,12 @@ func _ready() -> void:
 ## battle-unit-vitals: the turn clock is model state (BattleState); the battle
 ## controller is its only ticker, so freeing the scene stops the clock too.
 func _process(delta: float) -> void:
-	if _executor != null:
-		_executor.tick_turn_timer(delta)
+	if _executor == null:
+		return
+	_executor.tick_turn_timer(delta)
+	# Шаг 5.3: часы — состояние, экран их только показывает (виджет сам гасит
+	# перерисовку, пока показанная секунда не изменилась).
+	_ui.set_turn_timer(_state.turn_time_left, _state.turn_time_limit, _state.turn_timer_running)
 
 func _init_state() -> void:
 	_state = BattleState.new()
@@ -52,6 +56,7 @@ func _init_executor() -> void:
 
 func _wire_ui_signals() -> void:
 	_ui.retreat_requested.connect(_on_retreat)
+	_ui.rescue_requested.connect(_on_rescue)
 	_ui.wait_requested.connect(_on_wait)
 	_ui.attack_mode_requested.connect(_on_attack_mode)
 	_ui.skip_requested.connect(_on_skip)
@@ -177,6 +182,23 @@ func _on_defend() -> void:
 ## UI-паритета; вход готов и для них, и для тестов.
 func request_rescue(target: BattleState.BattleUnit) -> void:
 	_executor.request_rescue(target)
+
+
+## Шаг 5.2: «Спасение» поднимает лежащего союзника стороны активного юнита.
+func _rescue_target() -> BattleState.BattleUnit:
+	if _state == null or _state.active_unit == null:
+		return null
+	for u in _state.get_units_by_side(_state.active_unit.side):
+		if u.is_downed():
+			return u
+	return null
+
+
+func _on_rescue() -> void:
+	var target := _rescue_target()
+	if target == null:
+		return
+	request_rescue(target)
 
 func _on_spellbook() -> void:
 	_ui.open_spellbook(_state, _hero_magic)
@@ -314,6 +336,7 @@ func _get_damage_wait() -> SceneTreeTimer:
 
 func _on_status_updated(text: String) -> void:
 	_ui.set_status(text)
+	_refresh_hero_hud()
 
 func _on_clear_highlights() -> void:
 	_input.clear_highlights()
@@ -368,6 +391,14 @@ func start_battle(
 
 func _on_initiative_changed() -> void:
 	_ui.update_initiative(_state.turn_queue, _state.active_unit)
+	_refresh_hero_hud()
+
+
+## Карточки героев и доступность «Спасения» — производные от состояния сторон;
+# обновляются на смену хода и на каждое событие боя (HP/мана меняются в бою).
+func _refresh_hero_hud() -> void:
+	_ui.update_hero_cards(_state, _hero_magic)
+	_ui.set_rescue_enabled(_rescue_target() != null)
 
 func get_battle_state() -> BattleState:
 	return _state

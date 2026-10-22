@@ -3,120 +3,296 @@
 [ext_resource type="Script" uid="uid://cs1lav0566l80" path="res://scripts/ui/battle_ui.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://df2h40vir4ujo" path="res://scenes/ui/battle_spellbook_panel.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/settings_screen.tscn" id="3"]
+[ext_resource type="Script" path="res://scripts/ui/turn_timer.gd" id="4_timer"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_gear.png" id="10_emblem_gear"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_flag.png" id="11_emblem_flag"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_ring.png" id="12_emblem_ring"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_swords.png" id="13_emblem_swords"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_book.png" id="14_emblem_book"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_hourglass.png" id="15_emblem_hourglass"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_shield.png" id="16_emblem_shield"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/emblems/emblem_skip.png" id="17_emblem_skip"]
+[ext_resource type="Texture2D" path="res://assets/ui/widgets/buttons/button_round_normal.png" id="18_plate_empty"]
 
 [node name="BattleUI" type="CanvasLayer" unique_id=732893136]
 script = ExtResource("1")
 
-[node name="bottom_bar" type="PanelContainer" parent="." unique_id=401530964]
+[node name="bottom_bar" type="Control" parent="." unique_id=401530964]
+z_index = 2
+mouse_filter = 2
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -64.0
+offset_top = -160.0
 grow_vertical = 0
 
-[node name="bar_box" type="HBoxContainer" parent="bottom_bar" unique_id=649631543]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="left_box" type="HBoxContainer" parent="bottom_bar/bar_box" unique_id=1295565224]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="settings_btn" type="Button" parent="bottom_bar/bar_box/left_box" unique_id=2037716000]
-custom_minimum_size = Vector2(44, 44)
-layout_mode = 2
+[node name="info_box" type="VBoxContainer" parent="bottom_bar"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -340.0
+offset_top = -150.0
+offset_right = 340.0
+offset_bottom = -104.0
+grow_horizontal = 2
+grow_vertical = 0
 mouse_filter = 2
-theme_type_variation = &"BibleButton"
-text = "⚙️"
-
-[node name="retreat_btn" type="Button" parent="bottom_bar/bar_box/left_box" unique_id=1675398027]
-custom_minimum_size = Vector2(44, 44)
-layout_mode = 2
-mouse_filter = 2
-theme_type_variation = &"BibleButton"
-text = "🏕️"
-
-[node name="wait_btn" type="Button" parent="bottom_bar/bar_box/left_box" unique_id=868382487]
-custom_minimum_size = Vector2(44, 44)
-layout_mode = 2
-mouse_filter = 2
-theme_type_variation = &"BibleButton"
-text = "🏃"
-
-[node name="attack_btn" type="Button" parent="bottom_bar/bar_box/left_box" unique_id=1049647265]
-custom_minimum_size = Vector2(44, 44)
-layout_mode = 2
-mouse_filter = 2
-theme_type_variation = &"BibleButton"
-text = "⚔️"
-
-[node name="center_box" type="VBoxContainer" parent="bottom_bar/bar_box" unique_id=272864844]
-layout_mode = 2
-size_flags_horizontal = 3
 theme_override_constants/separation = 0
 
-[node name="turn_line" type="Label" parent="bottom_bar/bar_box/center_box" unique_id=1435724026]
+[node name="turn_line" type="Label" parent="bottom_bar/info_box" unique_id=1435724026]
 layout_mode = 2
 theme_type_variation = &"LabelSecondary"
 horizontal_alignment = 1
 
-[node name="log_row" type="HBoxContainer" parent="bottom_bar/bar_box/center_box" unique_id=1128916303]
+[node name="log_row" type="HBoxContainer" parent="bottom_bar/info_box" unique_id=1128916303]
 layout_mode = 2
+mouse_filter = 2
 theme_override_constants/separation = 4
 
-[node name="log_line" type="Label" parent="bottom_bar/bar_box/center_box/log_row" unique_id=1677388078]
+[node name="log_line" type="Label" parent="bottom_bar/info_box/log_row" unique_id=1677388078]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_type_variation = &"LabelSecondary"
 horizontal_alignment = 1
 
-[node name="history_nav" type="VBoxContainer" parent="bottom_bar/bar_box/center_box/log_row" unique_id=1504756874]
-layout_mode = 2
-theme_override_constants/separation = 0
-
-[node name="history_up" type="Button" parent="bottom_bar/bar_box/center_box/log_row/history_nav" unique_id=1050830087]
-custom_minimum_size = Vector2(24, 16)
-layout_mode = 2
-theme_type_variation = &"BibleButton"
-text = "▲"
-
-[node name="history_down" type="Button" parent="bottom_bar/bar_box/center_box/log_row/history_nav" unique_id=1287344208]
-custom_minimum_size = Vector2(24, 16)
-layout_mode = 2
-theme_type_variation = &"BibleButton"
-text = "▼"
-
-[node name="history_btn" type="Button" parent="bottom_bar/bar_box/center_box/log_row" unique_id=1494162177]
+; Макет 11 в строке лога не несёт ни стрелок прокрутки, ни самой строки: ▲▼
+; убраны как чужеродный кластер; ☰ остался — единственная кнопка входа в
+; историю боя (вторая — клавиша H), виден с первой записи лога, а построчную
+; прокрутку заменили стрелки ↑/↓ (обработчик тот же, что у снятых кнопок).
+[node name="history_btn" type="Button" parent="bottom_bar/info_box/log_row" unique_id=1494162177]
+visible = false
 custom_minimum_size = Vector2(24, 32)
 layout_mode = 2
 theme_type_variation = &"BibleButton"
 text = "☰"
 
+[node name="bar_box" type="HBoxContainer" parent="bottom_bar"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 20.0
+offset_top = 6.0
+offset_right = -30.0
+offset_bottom = 140.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_constants/separation = 34
+
+[node name="left_box" type="HBoxContainer" parent="bottom_bar/bar_box" unique_id=1295565224]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 20
+
+[node name="settings_btn" type="Button" parent="bottom_bar/bar_box/left_box" unique_id=2037716000]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"RoundIconButton"
+icon = ExtResource("10_emblem_gear")
+expand_icon = true
+
+[node name="caption" type="Label" parent="bottom_bar/bar_box/left_box/settings_btn"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -70.0
+offset_top = 100.0
+offset_right = 70.0
+offset_bottom = 128.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_type_variation = &"LabelButtonCaption"
+text = "Меню"
+
+[node name="retreat_btn" type="Button" parent="bottom_bar/bar_box/left_box" unique_id=1675398027]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"RoundIconButton"
+icon = ExtResource("11_emblem_flag")
+expand_icon = true
+
+[node name="caption" type="Label" parent="bottom_bar/bar_box/left_box/retreat_btn"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -70.0
+offset_top = 100.0
+offset_right = 70.0
+offset_bottom = 128.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_type_variation = &"LabelButtonCaption"
+text = "Отступить"
+
+[node name="rescue_btn" type="Button" parent="bottom_bar/bar_box/left_box"]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"RoundIconButton"
+icon = ExtResource("12_emblem_ring")
+expand_icon = true
+
+[node name="caption" type="Label" parent="bottom_bar/bar_box/left_box/rescue_btn"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -70.0
+offset_top = 100.0
+offset_right = 70.0
+offset_bottom = 128.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_type_variation = &"LabelButtonCaption"
+text = "Спасение"
+
+[node name="spacer" type="Control" parent="bottom_bar/bar_box"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
 [node name="right_box" type="HBoxContainer" parent="bottom_bar/bar_box" unique_id=1793962726]
 layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="defend_btn" type="Button" parent="bottom_bar/bar_box/right_box" unique_id=1028730142]
-custom_minimum_size = Vector2(44, 44)
-layout_mode = 2
 mouse_filter = 2
-theme_type_variation = &"BibleButton"
-text = "🛡️"
+theme_override_constants/separation = 20
 
-[node name="skip_btn" type="Button" parent="bottom_bar/bar_box/right_box" unique_id=515267544]
-custom_minimum_size = Vector2(44, 44)
+; Пустые медальоны макета 11 (в правом ряду два слота под будущие команды).
+; Это декорация, а не кнопки: несвязанный Button обещал бы нажатие, которого
+; нет, поэтому TextureRect с mouse_filter=IGNORE — он не ловит ни клик, ни фокус.
+[node name="slot_empty_1" type="TextureRect" parent="bottom_bar/bar_box/right_box"]
+custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
+size_flags_vertical = 4
 mouse_filter = 2
-theme_type_variation = &"BibleButton"
-text = "⏳"
+texture = ExtResource("18_plate_empty")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="slot_empty_2" type="TextureRect" parent="bottom_bar/bar_box/right_box"]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("18_plate_empty")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="attack_btn" type="Button" parent="bottom_bar/bar_box/right_box" unique_id=1049647265]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"RoundIconButton"
+icon = ExtResource("13_emblem_swords")
+expand_icon = true
+
+[node name="caption" type="Label" parent="bottom_bar/bar_box/right_box/attack_btn"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -70.0
+offset_top = 100.0
+offset_right = 70.0
+offset_bottom = 128.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_type_variation = &"LabelButtonCaption"
+text = "Атака"
 
 [node name="spellbook_btn" type="Button" parent="bottom_bar/bar_box/right_box" unique_id=152440698]
-custom_minimum_size = Vector2(44, 44)
+custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"RoundIconButton"
+icon = ExtResource("14_emblem_book")
+expand_icon = true
+
+[node name="caption" type="Label" parent="bottom_bar/bar_box/right_box/spellbook_btn"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -70.0
+offset_top = 100.0
+offset_right = 70.0
+offset_bottom = 128.0
+grow_horizontal = 2
 mouse_filter = 2
-theme_type_variation = &"BibleButton"
-text = "📖"
+theme_type_variation = &"LabelButtonCaption"
+text = "Книга"
+
+[node name="wait_btn" type="Button" parent="bottom_bar/bar_box/right_box" unique_id=868382487]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"RoundIconButton"
+icon = ExtResource("15_emblem_hourglass")
+expand_icon = true
+
+[node name="caption" type="Label" parent="bottom_bar/bar_box/right_box/wait_btn"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -70.0
+offset_top = 100.0
+offset_right = 70.0
+offset_bottom = 128.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_type_variation = &"LabelButtonCaption"
+text = "Ждать"
+
+[node name="defend_btn" type="Button" parent="bottom_bar/bar_box/right_box" unique_id=1028730142]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"RoundIconButton"
+icon = ExtResource("16_emblem_shield")
+expand_icon = true
+
+[node name="caption" type="Label" parent="bottom_bar/bar_box/right_box/defend_btn"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -70.0
+offset_top = 100.0
+offset_right = 70.0
+offset_bottom = 128.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_type_variation = &"LabelButtonCaption"
+text = "Защита"
+
+[node name="skip_btn" type="Button" parent="bottom_bar/bar_box/right_box" unique_id=515267544]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+size_flags_vertical = 4
+theme_type_variation = &"RoundIconButton"
+icon = ExtResource("17_emblem_skip")
+expand_icon = true
+
+[node name="caption" type="Label" parent="bottom_bar/bar_box/right_box/skip_btn"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -70.0
+offset_top = 100.0
+offset_right = 70.0
+offset_bottom = 128.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_type_variation = &"LabelButtonCaption"
+text = "Пропуск"
 
 [node name="history_panel" type="PanelContainer" parent="." unique_id=1195533949]
 visible = false
@@ -158,25 +334,268 @@ grow_vertical = 2
 persistent = true
 show_additional = false
 
-[node name="initiative_bar" type="PanelContainer" parent="." unique_id=732893137]
+[node name="initiative_bar" type="Control" parent="." unique_id=732893137]
+z_index = 2
+mouse_filter = 2
 anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 76.0
+anchor_left = 0.2318
+anchor_right = 0.75
+offset_top = 8.0
+offset_bottom = 105.0
 grow_horizontal = 2
-theme_type_variation = &"PanelCard"
 
 [node name="init_col" type="VBoxContainer" parent="initiative_bar"]
 layout_mode = 2
+mouse_filter = 2
 theme_override_constants/separation = 0
-
-[node name="init_caption" type="Label" parent="initiative_bar/init_col"]
-layout_mode = 2
-theme_type_variation = &"LabelSecondary"
-text = "Очередь"
 
 [node name="init_box" type="HBoxContainer" parent="initiative_bar/init_col"]
 layout_mode = 2
-theme_override_constants/separation = 6
+mouse_filter = 2
+theme_override_constants/separation = 5
+
+[node name="hero_cards" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="hero_left" type="PanelContainer" parent="hero_cards"]
+visible = false
+layout_mode = 1
+offset_left = 55.0
+offset_top = 12.0
+offset_right = 395.0
+offset_bottom = 155.0
+theme_type_variation = &"PanelCard"
+
+[node name="row" type="HBoxContainer" parent="hero_cards/hero_left"]
+layout_mode = 2
+theme_override_constants/separation = 13
+
+[node name="portrait" type="TextureRect" parent="hero_cards/hero_left/row"]
+custom_minimum_size = Vector2(110, 130)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="info" type="VBoxContainer" parent="hero_cards/hero_left/row"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="name" type="Label" parent="hero_cards/hero_left/row/info"]
+layout_mode = 2
+text_overrun_behavior = 2
+theme_type_variation = &"LabelHeroName"
+
+[node name="hp_row" type="Control" parent="hero_cards/hero_left/row/info"]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+
+[node name="hp_bar" type="ProgressBar" parent="hero_cards/hero_left/row/info/hp_row"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+show_percentage = false
+
+[node name="hp_num" type="Label" parent="hero_cards/hero_left/row/info/hp_row"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"LabelBarNumber"
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="mana_row" type="Control" parent="hero_cards/hero_left/row/info"]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+
+[node name="mana_bar" type="ProgressBar" parent="hero_cards/hero_left/row/info/mana_row"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"ProgressBarMana"
+show_percentage = false
+
+[node name="mana_num" type="Label" parent="hero_cards/hero_left/row/info/mana_row"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"LabelBarNumber"
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="level_row" type="HBoxContainer" parent="hero_cards/hero_left/row/info"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="level_key" type="Label" parent="hero_cards/hero_left/row/info/level_row"]
+layout_mode = 2
+theme_type_variation = &"LabelSecondary"
+theme_override_font_sizes/font_size = 24
+text = "Ур. "
+
+[node name="level_num" type="Label" parent="hero_cards/hero_left/row/info/level_row"]
+layout_mode = 2
+theme_type_variation = &"LabelNumber"
+theme_override_font_sizes/font_size = 24
+
+[node name="hero_right" type="PanelContainer" parent="hero_cards"]
+visible = false
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -395.0
+offset_top = 12.0
+offset_right = -55.0
+offset_bottom = 155.0
+grow_horizontal = 0
+theme_type_variation = &"PanelCard"
+
+[node name="row" type="HBoxContainer" parent="hero_cards/hero_right"]
+layout_mode = 2
+theme_override_constants/separation = 13
+alignment = 2
+
+[node name="info" type="VBoxContainer" parent="hero_cards/hero_right/row"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="name" type="Label" parent="hero_cards/hero_right/row/info"]
+layout_mode = 2
+text_overrun_behavior = 2
+horizontal_alignment = 2
+theme_type_variation = &"LabelHeroName"
+
+[node name="hp_row" type="Control" parent="hero_cards/hero_right/row/info"]
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+
+[node name="hp_bar" type="ProgressBar" parent="hero_cards/hero_right/row/info/hp_row"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+inverted_fill = true
+show_percentage = false
+
+[node name="hp_num" type="Label" parent="hero_cards/hero_right/row/info/hp_row"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"LabelBarNumber"
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="mana_row" type="Control" parent="hero_cards/hero_right/row/info"]
+visible = false
+custom_minimum_size = Vector2(0, 25)
+layout_mode = 2
+
+[node name="mana_bar" type="ProgressBar" parent="hero_cards/hero_right/row/info/mana_row"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"ProgressBarMana"
+show_percentage = false
+
+[node name="mana_num" type="Label" parent="hero_cards/hero_right/row/info/mana_row"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"LabelBarNumber"
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="level_row" type="HBoxContainer" parent="hero_cards/hero_right/row/info"]
+layout_mode = 2
+theme_override_constants/separation = 0
+alignment = 2
+
+[node name="level_key" type="Label" parent="hero_cards/hero_right/row/info/level_row"]
+layout_mode = 2
+theme_type_variation = &"LabelSecondary"
+theme_override_font_sizes/font_size = 24
+text = "Ур. "
+
+[node name="level_num" type="Label" parent="hero_cards/hero_right/row/info/level_row"]
+layout_mode = 2
+theme_type_variation = &"LabelNumber"
+theme_override_font_sizes/font_size = 24
+
+[node name="portrait" type="TextureRect" parent="hero_cards/hero_right/row"]
+custom_minimum_size = Vector2(110, 130)
+layout_mode = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="turn_timer" type="Control" parent="."]
+z_index = 2
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.508
+anchor_right = 0.508
+offset_left = -79.0
+offset_top = 137.0
+offset_right = 79.0
+offset_bottom = 295.0
+grow_horizontal = 2
+script = ExtResource("4_timer")
+
+[node name="num" type="Label" parent="turn_timer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_type_variation = &"LabelTurnTimer"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="target_card" type="PanelContainer" parent="." unique_id=732893140]
 visible = false
