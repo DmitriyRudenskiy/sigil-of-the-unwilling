@@ -23,11 +23,15 @@ const CityScreenScene := preload("res://scenes/ui/city_screen.tscn")
 
 const CITY_BUTTON_NAME := "CityButton"
 const CITY_SCREEN_NAME := "CityScreen"
+## Экран города в машине навигации кампании: id перехода и куда возвращаться.
+const CITY_SCREEN_ID := &"city"
+const MAP_SCREEN_ID := &"map"
 
 var city: City = null
 var city_screen: CityScreen = null
 var _top_row: HBoxContainer = null
 var _city_button: Button = null
+var _ui_manager: CampaignUIManager = null
 
 
 func _ready() -> void:
@@ -62,6 +66,16 @@ func _build() -> void:
 	_top_row.add_child(_city_button)
 
 
+## Проводка до машины навигации кампании (`CampaignUIManager`). Порядок важен:
+## менеджер привязывается до `bind_city`, иначе экран не будет в нём зарегистрирован.
+## Без менеджера носитель работает по-старому — открывает экран напрямую.
+func bind_ui_manager(manager: CampaignUIManager) -> void:
+	if manager == null or manager == _ui_manager:
+		return
+	_ui_manager = manager
+	_ui_manager.screen_changed.connect(_on_screen_changed)
+
+
 ## Привязка кампейн-города: экран создаётся здесь, а не в `_ready` — слой HUD
 ## переживает отсутствие города (сейв без города, тест без данных), а экран
 ## без города показывать нечего.
@@ -79,6 +93,11 @@ func bind_city(value: City, rng: RandomNumberGenerator = null) -> void:
 		city_screen.visible = false
 		city_screen.close_requested.connect(_on_city_screen_close_requested)
 		add_child(city_screen)
+		# Экран живёт в носителе, но активным экраном он становится только через
+		# машину навигации: иначе `visible_screens()` врёт, а чужой переход
+		# (бой, партия) не гасит город.
+		if _ui_manager != null:
+			_ui_manager.register_screen(CITY_SCREEN_ID, city_screen)
 	# Герой кампейн-слоя — не `HeroController` (партия — словари ростера),
 	# а карта кампейна — не `MapGenerator`: экран принимает город и без них
 	# (подпись переносимого груза и рельеф клеток тогда просто не рисуются).
@@ -89,15 +108,19 @@ func bind_city(value: City, rng: RandomNumberGenerator = null) -> void:
 func open_city_screen() -> void:
 	if city_screen == null:
 		return
-	city_screen.open()
-	city_screen_opened.emit()
+	# Открытие идёт через SM: отказ машины (переход запрещён из боя, партии,
+	# хроники) оставляет кампанию в её экране, а не кладёт город поверх.
+	if _ui_manager != null and not bool(_ui_manager.show_screen(CITY_SCREEN_ID).get("ok", false)):
+		return
+	_open_city_screen()
 
 
 func close_city_screen() -> void:
 	if city_screen == null or not city_screen.is_open():
 		return
-	city_screen.close()
-	city_screen_closed.emit()
+	if _ui_manager != null:
+		_ui_manager.show_screen(MAP_SCREEN_ID)
+	_close_city_screen()
 
 
 func is_city_screen_open() -> bool:
@@ -118,3 +141,22 @@ func _on_city_pressed() -> void:
 
 func _on_city_screen_close_requested() -> void:
 	close_city_screen()
+
+
+## Смена активного экрана машиной, а не игроком: уход в бой/партию/хронику
+## закрывает город, иначе под следующим экраном остался бы живой открытый город.
+func _on_screen_changed(screen: StringName) -> void:
+	if screen != CITY_SCREEN_ID:
+		_close_city_screen()
+
+
+func _open_city_screen() -> void:
+	city_screen.open()
+	city_screen_opened.emit()
+
+
+func _close_city_screen() -> void:
+	if city_screen == null or not city_screen.is_open():
+		return
+	city_screen.close()
+	city_screen_closed.emit()

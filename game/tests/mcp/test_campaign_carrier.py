@@ -16,13 +16,15 @@ from __future__ import annotations
 HUD = "CampaignHUD/CampaignHud"
 BUTTON = "CampaignHUD/CampaignHud/TopButtons/CityButton"
 SCREEN = "CampaignHUD/CampaignHud/CityScreen"
+MANAGER = "CampaignUIManager"
 
 
 def _state(mcp) -> dict:
-    """Состояние носителя одной командой: слой, кнопка, экран, кампейн-город."""
+    """Состояние носителя одной командой: слой, кнопка, экран, машина, город."""
     return mcp.execute_code(
         f"var s = get_tree().current_scene\n"
         f'var hud = s.get_node_or_null("{HUD}")\n'
+        f'var mgr = s.get_node_or_null("{MANAGER}")\n'
         'var comp = s.get("composition") if s != null else null\n'
         "return {"
         '"hud": hud != null, '
@@ -34,6 +36,11 @@ def _state(mcp) -> dict:
         '"open": hud.is_city_screen_open() if hud != null else null, '
         '"city": hud.city != null if hud != null else null, '
         '"city_name": hud.city.display_name if hud != null and hud.city != null else "", '
+        '"manager": mgr != null, '
+        '"at": str(mgr.current_screen()) if mgr != null else "", '
+        '"registered": mgr.has_screen(&"city") if mgr != null else null, '
+        '"shown": mgr.visible_screens().map(func(id) -> String: return String(id)) '
+        'if mgr != null else [], '
         '"turn": comp.campaign.current_turn if comp != null else -1}'
     )
 
@@ -66,6 +73,10 @@ def test_button_press_opens_city_screen(full_cycle):
     full_cycle.wait_frames(30)
     st = _state(full_cycle)
     assert st["open"] and st["visible"], f"экран города не открылся по нажатию: {st}"
+    assert st["at"] == "city", f"машина навигации не переведена в город: {st}"
+    assert st["shown"] == ["city"], (
+        f"инвариант одного активного экрана нарушен: {st}"
+    )
 
 
 def test_second_press_closes_city_screen(full_cycle):
@@ -106,20 +117,19 @@ def test_carrier_survives_turn_tick(full_cycle):
     )
 
 
-def test_carrier_is_standalone_host(full_cycle):
-    """Слой — самостоятельный хост: `CampaignUIManager` в `main.tscn` не поднят.
+def test_city_screen_registered_in_campaign_ui_manager(full_cycle):
+    """Экран города живёт в машине навигации (указание владельца 2026-10-23).
 
-    Зафиксировано, а не подразумевается: открытый вопрос владельцу (регистрировать
-    ли экраны в `CampaignUIManager` ради SM-переходов) решается с полным знанием
-    о том, что носитель сегодня работает и без него.
+    Узел экрана по-прежнему строится носителем (`CampaignHud.bind_city`), но
+    активным экраном он становится только через `CampaignUIManager`: переходы
+    проверяются SM, виден ровно один экран, чужой переход гасит город. До
+    регистрации носитель был самостоятельным хостом, и «какой экран сейчас»
+    нигде не было.
     """
-    children = full_cycle.execute_code(
-        "var out = []\n"
-        "for c in get_tree().current_scene.get_children():\n"
-        '    out.append(str(c.name))\n'
-        "return {\"children\": out}"
-    )["children"]
-    assert "UIManager" in children, f"в main.tscn должен быть узел UIManager: {children}"
-    assert "CampaignUIManager" not in children, (
-        f"CampaignUIManager поднят — носитель больше не самостоятельный хост: {children}"
+    st = _state(full_cycle)
+    assert st["manager"], f"CampaignUIManager не поднят в main.tscn: {st}"
+    assert st["at"] == "map", (
+        f"кампания обязана стартовать на карте, а не на {st['at']}: {st}"
     )
+    assert st["registered"] is True, f"город не зарегистрирован в машине: {st}"
+    assert st["shown"] == [], f"до открытия экрана не должно быть видно: {st}"

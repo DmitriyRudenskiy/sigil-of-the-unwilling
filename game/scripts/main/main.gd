@@ -21,6 +21,9 @@ var _city_screen_paused: bool = false
 @onready var ui_manager: UIManager = $UIManager
 @onready var day_label: Label = $CanvasLayer/DayLabel if has_node("CanvasLayer/DayLabel") else null
 @onready var campaign_hud: CampaignHud = $CampaignHUD/CampaignHud if has_node("CampaignHUD/CampaignHud") else null
+## Машина навигации кампании (mvp-ui-flow K-M8): один активный экран. Снимается
+## с узла, а не создаётся кодом: сцена — носитель состава кампании.
+@onready var campaign_ui_manager: CampaignUIManager = $CampaignUIManager if has_node("CampaignUIManager") else null
 
 
 func _ready():
@@ -40,6 +43,10 @@ func _init_campaign() -> void:
 	if game_manager != null and game_manager.event_system != null:
 		game_manager.event_system.mood_sink = composition.districts
 	_apply_pending_flow()
+	# Кампания начинается на карте: без этого шага машина осталась бы на
+	# PREGAME, и переход в город был бы запрещён.
+	if campaign_ui_manager != null:
+		campaign_ui_manager.begin_campaign()
 	_mount_campaign_hud()
 
 
@@ -80,6 +87,9 @@ func _mount_campaign_hud() -> void:
 	# архивном мире без героя.
 	var city_rng := RandomNumberGenerator.new()
 	city_rng.seed = int(composition.campaign.seed)
+	# Порядок обязателен: экран регистрируется в машине внутри `bind_city`,
+	# поэтому менеджер привязывается раньше.
+	campaign_hud.bind_ui_manager(campaign_ui_manager)
 	campaign_hud.bind_city(composition.city, city_rng)
 	campaign_hud.city_screen_opened.connect(_on_city_screen_opened)
 	campaign_hud.city_screen_closed.connect(_on_city_screen_closed)

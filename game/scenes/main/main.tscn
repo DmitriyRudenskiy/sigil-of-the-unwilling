@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=3 uid="uid://main123"]
+[gd_scene load_steps=8 format=3 uid="uid://main123"]
 
 [ext_resource type="Script" path="res://scripts/main/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/managers/game_manager.gd" id="2_gm"]
 [ext_resource type="Script" path="res://scripts/managers/ui_manager.gd" id="3_ui"]
 [ext_resource type="Script" path="res://scripts/systems/crisis_event_system.gd" id="4_crisis"]
 [ext_resource type="Script" path="res://scripts/ui/campaign_hud.gd" id="5_hud"]
+[ext_resource type="Script" path="res://scripts/ui/campaign_ui_manager.gd" id="6_uimgr"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_main")
@@ -14,6 +15,12 @@ script = ExtResource("2_gm")
 
 [node name="UIManager" type="Node" parent="."]
 script = ExtResource("3_ui")
+
+; Машина навигации кампании (mvp-ui-flow K-M8): один активный экран, переходы
+; по SM. Самих экранов здесь нет — они строятся кодом в носителях, а сюда
+; регистрируются (`CampaignHud.bind_city` → `register_screen`).
+[node name="CampaignUIManager" type="Node" parent="."]
+script = ExtResource("6_uimgr")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
