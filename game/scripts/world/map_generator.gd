@@ -50,6 +50,10 @@ var _seed_value: int = 0
 var _map_width: int = 0
 var _map_height: int = 0
 var hex_shift_right: bool = true
+## world-map-art-variety 9.3: версия генератора карты мира (SaveData).
+## Ставится ДО add_child (генерация идёт в _ready): старый сейв (1) —
+## раскладка старым правилом, новая партия (2) — таблица биомов.
+var generator_version: int = SaveData.CURRENT_GENERATOR_VERSION
 
 var seed_value: int:
 	get:
@@ -111,7 +115,7 @@ func generate() -> void:
 
 	spawner.place_villages()
 	reachable_cells = _compute_reachable_cells()
-	spawner.place_resources(reachable_cells)
+	spawner.place_resources(reachable_cells, -1, generator_version)
 	spawner.place_decor()
 	# Растительность рисуется ПОСЛЕ расстановки: до неё decor_cells пуст, и
 	# прежний порядок (paint до place) рисовал пустой слой, где данных ещё нет.

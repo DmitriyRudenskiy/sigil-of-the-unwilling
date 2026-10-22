@@ -209,6 +209,12 @@ static func _create_map(parent: Node2D, R: BootstrapResult) -> void:
 	R.map_gen = map_scene.instantiate() as MapGenerator
 	R.map_gen.name = "MapGenerator"
 	R.map_gen.seed_value = R.rng.randi() % 999999
+	# world-map-art-variety 9.3: старый сейв (generator_version = 1) — карта
+	# воспроизводится старым правилом (раскладка не переигрывается, добыча не
+	# теряется); новая партия — таблица биомов. Ставится до add_child: генерация
+	# идёт в _ready.
+	if R.loaded_save != null:
+		R.map_gen.generator_version = int(R.loaded_save.generator_version)
 	parent.add_child(R.map_gen)
 
 static func _create_hero(parent: Node2D, R: BootstrapResult) -> void:

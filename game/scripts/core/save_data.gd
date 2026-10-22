@@ -1,8 +1,12 @@
 extends RefCounted
 class_name SaveData
 
-const CURRENT_VERSION := 8
-const CURRENT_GENERATOR_VERSION := 1
+const CURRENT_VERSION := 9
+## world-map-art-variety 9.3: версия генератора карты мира. 1 — наследственная
+## раскладка (равномерный бросок по 7 типам), 2 — таблица «биом → группа
+## ресурсов» (biome_resources.json). Старые сейвы не переигрываются: карта
+## грузится старым правилом по маркеру, добыча не теряется.
+const CURRENT_GENERATOR_VERSION := 2
 
 var version: int = CURRENT_VERSION
 var generator_version: int = CURRENT_GENERATOR_VERSION
@@ -53,6 +57,8 @@ func from_dict(data: Dictionary) -> void:
 		_migrate_v5_to_v6(data)
 	if version < 8:
 		_migrate_v7_to_v8(data)
+	if version < 9:
+		_migrate_v8_to_v9(data)
 	version = CURRENT_VERSION
 
 	run_seed = int(data.get("run_seed", 0))
@@ -131,6 +137,16 @@ func _migrate_v7_to_v8(data: Dictionary) -> void:
 		data["hero"] = {}
 	if not data["hero"].has("crafting"):
 		data["hero"]["crafting"] = {}
+
+
+## v8 → v9 (world-map-art-variety 9.3): маркер версии генератора карты.
+## Все сейвы до таблицы биомов — наследственная генерация (1): карта
+## воспроизводится старым правилом, уже открытые узлы не переигрываются.
+## Сейвы, записанные актуальным кодом, поле уже несут (to_dict); явный
+## дефолт — для очень старых сейвов, прошедших цепочку миграций без поля.
+func _migrate_v8_to_v9(data: Dictionary) -> void:
+	if not data.has("generator_version"):
+		data["generator_version"] = 1
 
 func is_valid() -> bool:
 	if run_seed <= 0:

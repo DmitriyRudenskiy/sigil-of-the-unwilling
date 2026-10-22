@@ -90,7 +90,8 @@ func test_save_data_v7_to_v8_migration() -> void:
 	var loaded := SaveData.new()
 	loaded.from_dict(dict)
 	assert_that(loaded.version).is_equal(SaveData.CURRENT_VERSION)
-	assert_that(loaded.version).is_equal(8)
+	# v7 → v8 (crafting) → v9 (generator_version, world-map-art-variety 9.4).
+	assert_that(loaded.version).is_equal(9)
 	# Миграция добавила пустой crafting.
 	assert_that(loaded.hero.has("crafting")).is_true()
 	assert_that(loaded.hero["crafting"]).is_equal({})

@@ -42,7 +42,66 @@ func place_villages() -> void:
 				if HexUtils.hex_distance(cell, nb) <= spacing:
 					blocked[nb] = true
 
-func place_resources(reachable = null, spacing := -1) -> void:
+## world-map-art-variety 9.1/9.2: таблица «биом → группа ресурсов» — данные,
+## не код: правка таблицы не требует правки спавнера. Наследственная генерация
+## (generator_version = 1) таблицы не читает — раскладка старых сейвов
+## воспроизводится старым правилом (9.3).
+const BIOME_RESOURCES_PATH := "res://data/config/biome_resources.json"
+
+static var _table_cache: Dictionary = {}
+static var _table_cached := false
+
+## Разрешённая таблица: {biome_ids: {биом: [id]}, id_biomes: {id: [биом]}}.
+## Структура файла: {"biomes": {имя биома: [имена типов]}} — тип выбирается
+## равномерно из списка биома. Кеш на процесс — файл статичен; тесты читают
+## `_load_biome_table()` напрямую (мимо кеша).
+static func biome_table() -> Dictionary:
+	if not _table_cached:
+		_table_cached = true
+		_table_cache = _load_biome_table()
+	return _table_cache
+
+static func _load_biome_table() -> Dictionary:
+	var out := {"biome_ids": {}, "id_biomes": {}}
+	var f := FileAccess.open(BIOME_RESOURCES_PATH, FileAccess.READ)
+	if f == null:
+		push_error("MapSpawner: нет таблицы биомов %s" % BIOME_RESOURCES_PATH)
+		return out
+	var data = JSON.parse_string(f.get_as_text())
+	if not (data is Dictionary):
+		push_error("MapSpawner: таблица биомов %s не читается как JSON" % BIOME_RESOURCES_PATH)
+		return out
+	var biomes_raw: Dictionary = data.get("biomes", {})
+	var biome_ids: Dictionary = {}
+	for biome in biomes_raw:
+		var ids: Array[int] = []
+		for name in biomes_raw[biome]:
+			var id := ResourceType.from_name(str(name))
+			if id < 0:
+				push_error("MapSpawner: неизвестный ресурс '%s' в биоме '%s'" % [str(name), str(biome)])
+				continue
+			ids.append(id)
+		biome_ids[str(biome)] = ids
+	var id_biomes: Dictionary = {}
+	for biome in biome_ids:
+		for id in biome_ids[biome]:
+			if not id_biomes.has(id):
+				id_biomes[id] = []
+			(id_biomes[id] as Array).append(str(biome))
+	out["biome_ids"] = biome_ids
+	out["id_biomes"] = id_biomes
+	return out
+
+## Группа ресурсов террейна (пусто — на этом биоме ресурсов нет).
+static func biome_ids_for_terrain(terrain_id: int) -> Array[int]:
+	if terrain_id < 0 or terrain_id >= HexUtils.TERRAIN_NAMES.size():
+		return []
+	var table := biome_table()
+	return (table["biome_ids"] as Dictionary).get(
+		HexUtils.TERRAIN_NAMES[terrain_id], [] as Array[int]) as Array[int]
+
+func place_resources(reachable = null, spacing := -1,
+		generator_version: int = SaveData.CURRENT_GENERATOR_VERSION) -> void:
 	model.resource_cells.clear()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = model.seed_value + 700
@@ -54,6 +113,12 @@ func place_resources(reachable = null, spacing := -1) -> void:
 	if reachable == null:
 		reachable = _get_reachable_cells()
 
+	## world-map-art-variety 9.2: новая генерация (generator_version >= 2) —
+	## выбор из группы биома (таблица biome_resources.json); наследственная
+	## (== 1) — прежний равномерный бросок 0..6 без изменений, чтобы старые
+	## сейвы воспроизводили раскладку клетка-в-клетку (9.3).
+	var by_biome: bool = generator_version >= SaveData.CURRENT_GENERATOR_VERSION
+
 	var candidates: Array[Vector2i] = []
 	for cell in model.terrain_grid:
 		if not reachable.has(cell):
@@ -62,6 +127,8 @@ func place_resources(reachable = null, spacing := -1) -> void:
 		if t == HexUtils.Terrain.WATER or t == HexUtils.Terrain.MOUNTAIN:
 			continue
 		if model.village_cells.has(cell):
+			continue
+		if by_biome and biome_ids_for_terrain(t).is_empty():
 			continue
 		candidates.append(cell)
 
@@ -78,12 +145,47 @@ func place_resources(reachable = null, spacing := -1) -> void:
 			break
 		if blocked.has(cell):
 			continue
-		model.resource_cells[cell] = rng.randi_range(0, 6)
+		if by_biome:
+			var group: Array[int] = biome_ids_for_terrain(int(model.terrain_grid[cell]))
+			model.resource_cells[cell] = group[rng.randi_range(0, group.size() - 1)]
+		else:
+			model.resource_cells[cell] = rng.randi_range(0, 6)
 		for y in range(cell.y - spacing, cell.y + spacing + 1):
 			for x in range(cell.x - spacing, cell.x + spacing + 1):
 				var nb := Vector2i(x, y)
 				if HexUtils.hex_distance(cell, nb) <= spacing:
 					blocked[nb] = true
+	print_resource_report()
+
+## world-map-art-variety 9.2: отчёт генерации — доля ресурсов «на своём
+## биоме» (тип в группе биома клетки) и количество по типам. Доля считается
+## по итоговой раскладке, а не по правилу: наследственная карта (v1) печатает
+## фактический дрейф, новая (v2) — 1.0.
+func resource_report() -> Dictionary:
+	var table := biome_table()
+	var total: int = int(model.resource_cells.size())
+	var home := 0
+	var by_type: Dictionary = {}
+	for cell in model.resource_cells:
+		var id: int = int(model.resource_cells[cell])
+		by_type[id] = int(by_type.get(id, 0)) + 1
+		var t: int = int(model.terrain_grid.get(cell, -1))
+		if t >= 0 and t < HexUtils.TERRAIN_NAMES.size():
+			var ids: Array[int] = (table["biome_ids"] as Dictionary).get(
+				HexUtils.TERRAIN_NAMES[t], [] as Array[int]) as Array[int]
+			if ids.has(id):
+				home += 1
+	var share: float = float(home) / float(total) if total > 0 else 1.0
+	return {"total": total, "home_share": share, "by_type": by_type}
+
+func print_resource_report() -> void:
+	var r := resource_report()
+	var parts: PackedStringArray = []
+	var by_type: Dictionary = r["by_type"]
+	for id in by_type:
+		parts.append("%s:%d" % [ResourceType.to_key(int(id)), int(by_type[id])])
+	print("[MapSpawner] resources: total=%d home_share=%.3f by_type=%s" % [
+		int(r["total"]), float(r["home_share"]), ", ".join(parts) if parts.size() > 0 else "—"])
 
 ## Растительность (7.2): объект по биомам, id — из манифеста листа объектов
 ## (`MapObjects.ids()`). Только отрисовка: ни проходимость, ни стоимость

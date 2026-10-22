@@ -9,6 +9,17 @@ date: 2026-10-22
 
 # CHANGELOG — docs/
 
+## [2026-10-22] — world-map-art-variety §9: ресурсы тактической карты по биомам
+
+- **Суть:** секция 9 change `world-map-art-variety`: тактические ресурсы мира (классические 7 id) теперь привязаны к биому, а не к равномерному броску; старые сохранения не переигрываются.
+- **9.1 (таблица):** `game/data/config/biome_resources.json` — `{"biomes": {биом: [имена типов]}}`. Маппинг: `forest`/`dense_forest` → `[wood]`; `snow` → `[ore, crystal, gems]`; `sand` → `[ore, crystal, gems]`; `grass` → `[gold, ore, crystal, gems, wood]`; `swamp` → `[mercury, sulfur]`. Непроходимые (MOUNTAIN/WATER/RIVER) в таблице отсутствуют → ресурса не несут. Группы спеки маппятся на id (в классическом каталоге нет отдельных дичи/продовольствия/скота/трав): продовольствие/скот → `gold`, травы → `mercury`/`sulfur`.
+- **9.2 (спавн):** `map_spawner.gd:place_resources(reachable, spacing, generator_version)` — v2 выбирает тип из списка биома клетки (`biome_ids_for_terrain`, статичный кеш таблицы); v1 (legacy) сохраняет старый равномерный бросок и порядок `rng`. Отчёт генерации `resource_report()`/`print_resource_report()` печатает `total`, `home_share` (доля «на своём биоме») и `by_type`.
+- **9.3 (миграция):** `SaveData.CURRENT_VERSION` 8→9, `CURRENT_GENERATOR_VERSION` 1→2, `_migrate_v8_to_v9()` (нет `generator_version` → 1 = legacy). Загрузка ставит `MapGenerator.generator_version` из сейва (`world_bootstrap._create_map()`), прежние узлы не переигрываются, добыча не теряется.
+- **9.4 (тесты):** `game/tests/unit/world/test_resource_terrain_fit.gd` — 7 тестов, все зелёные (лес не даёт руду, высоты → камень/руда, непроходимые → ничего, home_share ≥ 1.0, legacy-правила, миграция v8→v9, покрытие таблицы).
+- **9.5 (баланс):** `game/tools/diag_biome_resources.gd 50` (50 сидов, v1 vs v2). **Камень/руда не хуже базовой ✓:** v2 `ore 3.9 + crystal 4.5 + gems 4.3 = 12.7/карта` при базе `11.3`. Полные: wood 6.8 (база 3.7), gold 3.4 (база 3.7), mercury 0.9 (база 3.1), sulfur 1.0 (база 3.0), home_share 1.000 (legacy 0.596). **Решение:** проходимые высоты — только SNOW (0.9% клеток), строгая привязка «камень/руда → только SNOW» давала руду 0.1/карту (база 11.3) → кампания ломалась; группа камня/руды расширена на SAND + GRASS (геологически оправдано, спека не запрещает). **Флажок владельцу:** mercury/sulfur (алхимическая ниша) ~3 → ~0.9; таблица — данные, правка не требует правки спавнера.
+- **Верификация:** GdUnit полный прогон — **3088 test cases, 0 errors, 1 failure, 2 skipped, 0 orphans**; единственное падение — `test_battle_ui_responsive` (предсуществующее, чужая battle-HUD работа ui-mockup-parity §5, вошедшая в мерж `defae2f6`; **не моя зона, не чинил**). Мои 7 тестов зелёные, 0 новых падений. `check_docs_links.py` — pass.
+- **Не тронуто:** battle UI (чужая активная зона); CI не проверялся (по инструкции).
+
 ## [2026-10-21] — ui-verification-gates 2.1–3.3: контраст-гард (WCAG) + ассет-гейт (Pillow) + T-155/T-156
 
 - **Суть:** секции 2–3 change `ui-verification-gates`: контраст-гард WCAG-канона (2.1–2.3), ассет-гейт `scripts/check_ui_assets.py` (3.1/3.3) + первый прогон с adjudication (3.2 — до решения владельца).
