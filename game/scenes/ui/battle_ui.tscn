@@ -356,11 +356,9 @@ theme_override_constants/separation = 5
 
 [node name="hero_cards" type="Control" parent="."]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+anchors_preset = 10
+offset_bottom = 155.0
 grow_horizontal = 2
-grow_vertical = 2
 mouse_filter = 2
 
 [node name="hero_left" type="PanelContainer" parent="hero_cards"]
