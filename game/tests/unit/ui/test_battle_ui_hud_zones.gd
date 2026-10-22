@@ -176,9 +176,9 @@ func test_zone_d_empty_slots_and_log_controls() -> void:
 	assert_bool(right.get_child(0) == right.get_node_or_null("slot_empty_1")).is_true() \
 		.override_failure_message("слоты — первыми в ряду, как в макете")
 	assert_bool(ui.get_node_or_null("bottom_bar/info_box/log_row/history_nav") == null) \
-		.override_failure_message("кластер ▲▼ макет не задумывал")
+		.override_failure_message("кластер ▲▼ макет не задумывал").is_true()
 	assert_bool(ui.get_node_or_null("bottom_bar/info_box/log_row/history_btn") != null) \
-		.override_failure_message("☰ — единственная кнопка входа в историю боя")
+		.override_failure_message("☰ — единственная кнопка входа в историю боя").is_true()
 	# До первой записи лога смотреть нечего — ☰ не висит сиротским табом.
 	assert_bool(ui._history_btn.visible).is_false() \
 		.override_failure_message("пустая история — кнопки истории в кадре нет")
