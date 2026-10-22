@@ -986,3 +986,6 @@ msgstr ""
 
 msgid "load.no_save"
 msgstr ""
+
+msgid "campaign.city"
+msgstr ""

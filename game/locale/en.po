@@ -1044,3 +1044,6 @@ msgstr "Load error"
 msgid "load.no_save"
 msgstr "Save not found"
 
+
+msgid "campaign.city"
+msgstr "City"

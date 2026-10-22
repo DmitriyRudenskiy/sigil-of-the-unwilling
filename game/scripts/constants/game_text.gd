@@ -446,3 +446,5 @@ static func save_failed() -> String: return TranslationServer.translate("save.fa
 static func load_ok() -> String: return TranslationServer.translate("load.ok")
 static func load_failed() -> String: return TranslationServer.translate("load.failed")
 static func no_save_found() -> String: return TranslationServer.translate("load.no_save")
+
+static func campaign_city() -> String: return TranslationServer.translate("campaign.city")
