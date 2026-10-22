@@ -12,7 +12,6 @@ var reachable_cells: Dictionary = {}
 var _tile_map: TileMapLayer
 var _decor_layer: TileMapLayer
 var _shadow_layer: TileMapLayer
-var _resource_layer: Node2D
 
 ## Подслои перехода (слой 2 «стыки и переходы») — по одному на сторону гекса,
 ## порядок задаёт TileAtlas.SIDES; MapRenderer.paint_transitions().
@@ -200,12 +199,8 @@ func _ensure_layers() -> void:
 	# CollisionObject2D/Control, так что ставить нечего), и клик мира идёт через
 	# `WorldInput._unhandled_input`, куда `TileMapLayer` не вмешивается. Первый
 	# факт — под проверкой `test_vegetation_never_blocks_clicks`.
-
-	_resource_layer = get_node_or_null("ResourceLayer")
-	if _resource_layer == null:
-		_resource_layer = Node2D.new()
-		_resource_layer.name = "ResourceLayer"
-		add_child(_resource_layer)
+	# Мёртвый `ResourceLayer` (создавался, никто в него не писал — носители живут
+	# в `ResourceNodes` у ResourceNodeManager) снят в 5.1.
 
 	render_layers = {
 		"terrain": _tile_map,

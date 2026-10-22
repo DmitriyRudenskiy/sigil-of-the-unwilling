@@ -511,6 +511,11 @@ static func _create_resource_nodes(parent: Node2D, R: BootstrapResult) -> void:
 
 	var node_container := Node2D.new()
 	node_container.name = "ResourceNodes"
+	# world-map-art-variety 5.2: вертикальная сортировка объектного слоя — южный
+	# объект перекрывает северный при пересечении по вертикали (D-205). Носитель
+	# стоит основанием в центре клетки (якорь манифеста), поэтому сортировка по
+	# y узла = сортировка по нижнему краю.
+	node_container.y_sort_enabled = true
 	parent.add_child(node_container)
 	R.resource_node_manager.setup(node_container, R.rng, Resources, R.map_gen.map_to_local)
 

@@ -9,6 +9,17 @@ date: 2026-10-23
 
 # CHANGELOG — docs/
 
+## [2026-10-23] — world-map-art-variety 4.2/5.1/5.2: источник деталей, резервный атлас, mёртвый слой, y-сортировка
+
+- **Суть:** доработка секций 4.2/5.1/5.2 change `world-map-art-variety`: отдельный источник деталей в тайлсете, резервный атлас при отсутствии нового файла, снятие мёртвого `ResourceLayer`, вертикальная сортировка объектного слоя.
+- **4.2 (источник деталей):** `tile_atlas.gd`: `DETAIL_SOURCE_ID` + `_build_detail_source()` — отдельный `TileSetAtlasSource` поверх базы, клетки из манифеста `kind=="detail"`; пока атлас их не несёт, источник не добавляется (инфраструктура готова, спека «Слой деталей поверх базы»).
+- **4.2 (резервный атлас):** `tile_atlas.gd`: `_build_fallback_tileset()` — при отсутствии нового файла `build_hex()` возвращает процедурный нейтральный гекс-тайл + `GameLogger.error` с путём (карта работоспособна, а не пуста; спека «Резервный атлас до зелёного гейта»). Старый лист удалён, поэтому резерв — процедурная клетка.
+- **5.1 (мёртвый слой):** `map_generator.gd` + `map_generator.tscn`: снят мёртвый `ResourceLayer` (создавался, никто в него не писал — носители живут в `ResourceNodes` у ResourceNodeManager); `EXPECTED` в `test_map_layers.gd` обновлён.
+- **5.2 (y-сортировка):** `world_bootstrap.gd`: контейнер `ResourceNodes` — `y_sort_enabled = true`; носитель стоит основанием в центре клетки (якорь манифеста низ-центр), поэтому y узла = нижний край. Южный объект перекрывает северный (D-205).
+- **Тесты:** +3: `test_map_layers.gd::test_object_layer_y_sorts_south_over_north` (пара «север/юг» — южный носитель ниже по y), `test_map_decor.gd::test_fallback_tileset_is_workable` (резерв — один нейтральный гекс-тайл), `test_map_decor.gd::test_detail_source_absent_without_detail_cells` (без детальных клеток источника нет).
+- **Верификация:** GdUnit полный прогон — **3094 test cases, 0 errors, 0 failures, 2 skipped, 0 orphans**, exit 0 (база 3091 → +3). `check_docs_links.py` — pass.
+- **Не тронуто:** battle UI (чужая зона); CI не проверялся (по инструкции).
+
 ## [2026-10-23] — world-map-art-variety 7.3/7.4: носитель добычи (obj_camp_*) + тесты
 
 - **Суть:** секции 7.3–7.4 change `world-map-art-variety`: на клетке открытого ресурсного узла теперь объект-носитель типа добычи (лагерь из листа `world_map_objects.webp`), а не иконка; у исчерпанного узла носитель затемнён.

@@ -6,9 +6,10 @@ extends BaseTest
 const _HexPathfinding = preload("res://scripts/core/hex_pathfinding.gd")
 const _TerrainCostTable = preload("res://scripts/data/terrain_cost_table.gd")
 
-## Порядок отрисовки: база → стыки → растительность → объекты. Задаётся одним
-## местом — порядком создания в MapGenerator._ensure_layers().
-const EXPECTED := ["TileMapTerrain", "TileMapTransitions", "TileMapDecor", "ResourceLayer"]
+## Порядок отрисовки: база → стыки → растительность. Задаётся одним местом —
+## порядком создания в MapGenerator._ensure_layers(). Мёртвый `ResourceLayer`
+## снят в 5.1 (носители живут в `ResourceNodes` у ResourceNodeManager, не здесь).
+const EXPECTED := ["TileMapTerrain", "TileMapTransitions", "TileMapDecor"]
 
 
 func _gen(seed_value: int) -> MapGenerator:
@@ -67,6 +68,38 @@ func test_disabled_layers_do_not_change_paths() -> void:
 	assert_that(gen.get_node("TileMapTerrain").visible).is_false()
 	assert_that(gen.get_node("TileMapTransitions").visible).is_false()
 	assert_that(_paths_and_cost(model, start, goal, w, h)).is_equal(before)
+
+
+## Вертикальная сортировка объектного слоя (5.2, D-205): носители добычи живут
+## в y-сортируемом контейнере (`ResourceNodes`, `world_bootstrap._create_resource_nodes`),
+## поэтому южный объект перекрывает северный при пересечении по вертикали. Носитель
+## стоит основанием в центре клетки, так что y узла = нижний край; проверка на паре
+## «север/юг»: южный носитель имеет бо́льшую глобальную y и рисуется поверх.
+func test_object_layer_y_sorts_south_over_north() -> void:
+	var container := Node2D.new()
+	container.y_sort_enabled = true  # как в world_bootstrap._create_resource_nodes
+	add_child(container)
+	var mgr := ResourceNodeManager.new()
+	add_child(mgr)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 1
+	# map_to_local: клетка → позиция, y растёт на юг (как у гекс-тайлмапа).
+	var map_to_local := func(cell: Vector2i) -> Vector2:
+		return Vector2(cell.x * 73.0, cell.y * 82.0)
+	mgr.setup(container, rng, Resources, map_to_local)
+	var north := Vector2i(3, 2)
+	var south := Vector2i(3, 3)
+	var n_node: ResourceNode = mgr._spawn_node(north, &"oak", 3)
+	var s_node: ResourceNode = mgr._spawn_node(south, &"oak", 3)
+	n_node.discover()
+	s_node.discover()
+	assert_that(container.y_sort_enabled).is_true()
+	# Оба носителя в контейнере, южный ниже по y → рисуется поверх северного.
+	assert_that(n_node.get_parent()).is_equal(container)
+	assert_that(s_node.get_parent()).is_equal(container)
+	assert_that(s_node.global_position.y).is_greater(n_node.global_position.y)
+	# Якорь — низ-центр: основание носителя в центре клетки, спрайт смещён вверх.
+	assert_that(s_node.sprite.position.y).is_less(0.0)
 
 
 ## Путь, его стоимость и проходимость клеток — то, что слой мог бы испортить,
