@@ -117,7 +117,7 @@ func test_turn21_survived_no_stock_stays_ongoing() -> void:
 		.override_failure_message("без запаса victory не даётся (условие спеки)")
 	assert_bool(driver.is_done()).is_true()
 	assert_bool(_log_contains(driver.event_log(), "campaign_end_without_victory:turn=21")) \
-		.override_failure_message("журнал: конец кампании без victory")
+		.is_true().override_failure_message("журнал: конец кампании без victory")
 
 
 ## До хода 21 victory не проверяется: ход 20 завершён → ongoing, не done,
@@ -273,7 +273,7 @@ func test_turn21_survived_no_stock_not_victory() -> void:
 	assert_str(str(comp.campaign.campaign_status)).is_equal("ongoing") \
 		.override_failure_message("без запаса victory не даётся (условие спеки)")
 	assert_bool(_log_contains(comp.campaign.event_log(), "campaign_end_without_victory:turn=21")) \
-		.override_failure_message("журнал: конец кампании без victory")
+		.is_true().override_failure_message("журнал: конец кампании без victory")
 
 
 ## Wipe в финальном бою (ход 21) → defeat, не victory (D-190: wipe —
