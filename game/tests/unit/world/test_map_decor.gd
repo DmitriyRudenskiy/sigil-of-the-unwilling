@@ -218,6 +218,53 @@ func test_shadow_is_a_separate_element() -> void:
 		assert_that(decor.get_cell_source_id(cell)).is_equal(MapObjects.SOURCE_ID)
 
 
+## Носитель добычи (7.3): маппинг типа добычи → лагерь покрывает каждый скрытый
+## ресурс (иначе открытая клетка осталась бы без носителя — «клетка, отображающая
+## добычу, обязана иметь носитель»). Каждый лагерь — объект из листа, а не опечатка.
+func test_carrier_mapping_covers_all_hidden_resources() -> void:
+	var hidden_ids: Array = Resources.get_hidden_resource_ids()
+	assert_that(hidden_ids.size()).is_greater(0)
+	var sheet_ids: Array = MapObjects.ids()
+	for id in hidden_ids:
+		var camp: String = ResourceNode.RESOURCE_TO_CAMP.get(id, "")
+		assert_that(camp).override_failure_message("носитель для %s" % id).is_not_equal("")
+		assert_that(sheet_ids).override_failure_message("лагерь %s в листе (ресурс %s)" % [camp, id]).contains(camp)
+
+
+## Носитель добычи (7.3): у открытого узла есть объект-носитель — текстура из листа
+## объектов (не null), якорь смещён к низу клетки (низ-центр), иконка снята.
+func test_developed_node_has_carrier() -> void:
+	var node := _make_resource_node(&"oak")
+	node.discover()
+	assert_that(node.carrier_id()).is_equal("obj_camp_wood")
+	assert_that(node.carrier_texture()).is_not_null()
+	assert_that(node.sprite.texture).is_not_null()
+	# Носитель — полный тайл (не иконка 0.4) и стоит основанием в центре клетки.
+	assert_that(node.sprite.scale).is_equal(Vector2.ONE)
+	assert_that(node.sprite.position.y).is_less(0.0)
+	assert_that(node.outline.visible).is_false()
+
+
+## Носитель добычи (7.3): у исчерпанного узла носитель затемнён (не белый) —
+## клетка не выглядит разрабатываемой; контура нет. Сам объект не пропадает
+## (состояние «исчерпано», а не «пусто»). 
+func test_exhausted_node_carrier_dimmed() -> void:
+	var node := _make_resource_node(&"oak")
+	node.discover()
+	assert_that(node.sprite.modulate).is_equal(Color.WHITE)
+	node.exhaust()
+	assert_that(node.sprite.modulate).is_not_equal(Color.WHITE)
+	assert_that(node.sprite.texture).is_not_null()
+	assert_that(node.outline.visible).is_false()
+
+
+func _make_resource_node(id: StringName) -> ResourceNode:
+	var node: ResourceNode = load("res://scenes/entities/resource_node.tscn").instantiate()
+	add_child(node)
+	node.init_node(id, Vector2i.ZERO, 3)
+	return node
+
+
 ## Туман гасит объектный слой (дефект T-150, кадр `fog-decor-t145.png`): база под
 ## деревом стиралась, а дерево оставалось висеть на сером поле. Правило спеки
 ## «Туман войны по всем слоям»: не открыта — пусто, открыта и не видима — затемнена

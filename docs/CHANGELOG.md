@@ -4,10 +4,19 @@ tags:
   - gdd
   - process
 status: reference
-date: 2026-10-22
+date: 2026-10-23
 ---
 
 # CHANGELOG — docs/
+
+## [2026-10-23] — world-map-art-variety 7.3/7.4: носитель добычи (obj_camp_*) + тесты
+
+- **Суть:** секции 7.3–7.4 change `world-map-art-variety`: на клетке открытого ресурсного узла теперь объект-носитель типа добычи (лагерь из листа `world_map_objects.webp`), а не иконка; у исчерпанного узла носитель затемнён.
+- **7.3 (носитель):** `resource_node.gd`: `RESOURCE_TO_CAMP` маппинг типа добычи → лагерь (по группе, не по id): лесопилка `obj_camp_wood` (oak, wood), шахта `obj_camp_stone` (silver, quartz, turquoise, limonite, coal, gold_ore, coal_swamp, bog_iron, stone), алхимия `obj_camp_herb` (saltpeter, cinnabar), ферма `obj_camp_food` (food). `carrier_texture()` — область листа по `MapObjects.coords_for` (AtlasTexture); `_carrier_offset()` — якорь манифеста `[41,80]` (низ-центр) → смещение спрайта, чтобы основание стояло в центре клетки. Состояния: HIDDEN — приглушённая иконка (подсказка о скрытом узле), DISCOVERED — объект-носитель (полный тайл, якорь вниз), EXHAUSTED — тот же носитель затемнён (`C_GRAY_DIM_40`) — клетка не выглядит разрабатываемой. Носитель — статичный объект: в тумане затемняется, не прячется (как база, `apply_fog_visibility`).
+- **7.4 (тесты):** `test_map_decor.gd` +3: `test_carrier_mapping_covers_all_hidden_resources` (маппинг покрывает каждый скрытый ресурс, каждый лагерь — в листе), `test_developed_node_has_carrier` (у открытого узла носитель — текстура из листа, полный тайл, якорь вниз, без контура), `test_exhausted_node_carrier_dimmed` (у исчерпанного носитель затемнён, не белый, без контура; объект не пропадает — состояние «исчерпано», не «пусто»).
+- **Дизайн-решение (флажок ux-review):** маппинг типа добычи → лагерь (один лагерь на группу) — зафиксировано для ревью владельца; визуал носителя (полный тайл вместо иконки) — к ux-review.
+- **Верификация:** GdUnit полный прогон — **3091 test cases, 0 errors, 0 failures, 2 skipped, 0 orphans**, exit 0 (база 3088 → +3). `check_docs_links.py` — pass.
+- **Не тронуто:** battle UI (чужая зона); CI не проверялся (по инструкции).
 
 ## [2026-10-22] — world-map-art-variety §9: ресурсы тактической карты по биомам
 
