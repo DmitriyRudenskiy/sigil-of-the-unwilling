@@ -61,6 +61,12 @@ var sign_id: String = ""
 ## signs-prestige 2.1/2.2 (T-129): SM знака + фракционные действия.
 ## sign_id — дублирует sign_system.sign_id (созвместимость с существующим кодом).
 var sign_system: SignSystem
+## Носитель городского экрана в игровом пути (ui-mockup-parity §7.1, Q-M87 → (б),
+## D-204): кампейн-город как модель `City` с кампейн-постройками. Источник
+## истины кампейн-экономики — `settlement` (SettlementProcessor), город —
+## модель застройки и жителей; сведение моделей в одну — вопрос владельцу
+## Q-M98, здесь не решается.
+var city: City = null
 ## party-characters 3.2 (R7, Q-M75→(б), P-4): снабжение героя — еда в походе.
 ## Ёмкость 10; расход 1/персонаж/переход; полный (>50%) → +2 к 1-му спасу;
 ## голод (0) → −2 к атакам. Числа — campaign.json → supply (K-M15).
@@ -99,6 +105,9 @@ func _build(campaign_seed: int) -> void:
 	}
 	settlement.population = int(start.get("population", 20))
 	settlement.housing = int(start.get("housing", 20))
+	# Город-носитель экрана города: те же числа старта, что у поселения
+	# (campaign.json → start_state), тот же seed-поток (I1: своего ГСЧ нет).
+	city = CampaignCity.start(settlement.stocks, settlement.population)
 	settlement.buildings = [
 		{"id": "farm", "group": "Земледельцы и Пивовары",
 			"output_day": {"food": 1.0}, "efficiency": 1.0},
@@ -179,7 +188,12 @@ func _build(campaign_seed: int) -> void:
 	# T-122 (Q-M31): production — позиция 6 (post-threats): рейды бьют
 	# pre-production запасы. season_mult — из WorldSeasons (I1: инжест).
 	campaign.production_hook = func() -> Dictionary:
-		return settlement.process_production(WorldSeasons.production_mult())
+		var report: Dictionary = settlement.process_production(WorldSeasons.production_mult())
+		# Очередь достройки кампейн-построек города (носителя экрана): построенное
+		# игроком не должно навсегда остаться «в стройке». Производство ресурсов
+		# кампейн-постройками — не здесь (это была бы вторая экономика; Q-M98).
+		report["city_construction"] = _process_city_construction()
+		return report
 	# T-071 (R5): victory — пережить рейд хода 21 при любом запасе > 0.
 	# Предикат инжестится в драйвер (TurnDriver не знает про сток); вызов —
 	# в конце хода 21 при статусе ongoing (defeat/wipe блокирует раньше, D-190).
@@ -220,6 +234,21 @@ func advance_turn() -> void:
 	campaign.advance_auto_phase()  # threats (авто) → production
 	_evaluate_loop_closed()        # 2.2: цикл хода N (после рейда, до production)
 	campaign.advance_auto_phase()  # production (авто) → finish
+
+
+## Проход очереди достройки города-носителя (production-фаза). Построенное в
+## экране города с `construction_turns > 0` становится активным через N ходов —
+## тот же процессор, что у мирового пути (`CampaignConstructionProcessor`), но
+## без экономики кампейн-построек: она была бы вторым счётом ресурсов рядом с
+## SettlementProcessor (сведение — Q-M98).
+func _process_city_construction() -> Dictionary:
+	if city == null:
+		return {}
+	var ctx := TurnContext.new()
+	ctx.turn_number = campaign.current_turn
+	ctx.cities = [city]
+	ctx.is_campaign = true
+	return CampaignConstructionProcessor.new().process(ctx)
 
 
 ## campaign-core-loop 2.1: действие игрока (UI → сюда; headless — авто-fight
@@ -511,6 +540,11 @@ func build_save_state() -> Dictionary:
 			"party_size": settlement.party_size,
 			# T-030: настроение районов — состояние (не производная), в сейве.
 			"districts": districts.to_dict(),
+			# Носитель городского экрана (ui-mockup-parity §7.1): застройка и
+			# жители города — состояние; сериализует сам город (City.serialize →
+			# CitySerializer), а не пересказ полей. Нет города (композиция без
+			# _build) → секции нет, загрузка такого сейва вернёт стартовый город.
+			"campaign_city": city.serialize() if city != null else {},
 		},
 		"map": {"threats": threats.to_dict(), "region": region_map.to_dict()},  # T-020: регион-граф
 		"prestige": {"ledger": prestige_ledger.duplicate(true)},
@@ -583,16 +617,22 @@ func load_save_state(state: Dictionary) -> void:
 			# V-5 (D-220): миграция персистентного HP (идемпотентная; старый
 			# сейв без current_hp → полный; DEAD — не воскрешаем).
 			PartySystem.ensure_hp(member)
-	var city: Dictionary = state.get("city", {})
+	var city_data: Dictionary = state.get("city", {})
 	settlement = SettlementProcessor.from_dict({
 		"stocks": state.get("resources", {}),
-		"housing": city.get("housing", 0),
-		"buildings": city.get("buildings", []),
-		"sm": city.get("sm", {}),
-		"party_size": city.get("party_size", 0),
+		"housing": city_data.get("housing", 0),
+		"buildings": city_data.get("buildings", []),
+		"sm": city_data.get("sm", {}),
+		"party_size": city_data.get("party_size", 0),
 		# population — производная ростери (T-110: не храним), восстанавливаем:
 		"population": population_system.size(),
 	})
+	# Город-носитель экрана города (§7.1). Загрузка не вызывает _build, поэтому
+	# город поднимается здесь: сначала стартовый из тех же чисел campaign.json,
+	# затем поверх — сохранённое состояние, если секция есть (сейвы до §7.1).
+	city = CampaignCity.start(settlement.stocks, settlement.population)
+	if city_data.get("campaign_city") is Dictionary:
+		city.deserialize(city_data.get("campaign_city", {}))
 	threats = ThreatSystem.from_dict(state.get("map", {}).get("threats", {}))
 	# T-020: регион-граф — секция "map".region (старый сейв без неё → старт R01).
 	region_map = RegionMap.from_dict((state.get("map", {}) as Dictionary).get("region", {}))
@@ -600,7 +640,7 @@ func load_save_state(state: Dictionary) -> void:
 	district_config = _json(DISTRICTS_JSON)
 	district_jobs_by_id = _district_jobs()
 	districts = DistrictSystem.from_dict(
-		city.get("districts", {}), district_config, district_jobs_by_id)
+		city_data.get("districts", {}), district_config, district_jobs_by_id)
 	prestige_ledger = (state.get("prestige", {}) as Dictionary).get("ledger", []).duplicate(true)
 	_boss_prestige_given = false
 	for e in prestige_ledger:

@@ -1043,3 +1043,6 @@ msgstr "Ошибка загрузки"
 
 msgid "load.no_save"
 msgstr "Сохранение не найдено"
+
+msgid "campaign.city"
+msgstr "Город"

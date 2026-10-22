@@ -12,6 +12,15 @@ const CampaignCityProgression := preload("res://scripts/city/campaign_city_progr
 const CampaignBuildingPlacement := preload("res://scripts/city/campaign_building_placement.gd")
 const CampaignDefenseResolver := preload("res://scripts/city/campaign_defense_resolver.gd")
 
+## Узкий экран: из шапки уходит подзаголовок, чипы переходят на короткую форму,
+## вторичные метрики (жильё, уровень города) скрываются. Порог — не оценка «на
+## глаз»: развёрнутая строка стоит 240 (заголовок) + 292 (подзаголовок) + 712
+## (три чипа с дельтами) + 110 + 68 + 148 + 192 (жители, жильё, уровень, выход)
+## + 6×12 (промежутки) = 1834 px, плюс отступы панели и экрана = 1898 px. До
+## этой ширины развёрнутая шапка гарантированно вылезает за край — ровно то
+## обрезание, которое видно на съёмке «до» ui-mockup-parity.
+const HEADER_COMPACT_BELOW := 1900.0
+
 const PALETTE := {
 	"background": Color("#11120f"),
 	"panel": Color("#211e18"),
@@ -78,6 +87,8 @@ var _legacy_actions: HBoxContainer
 var _legacy_toggle: Button
 var _sidebar_button: Button
 var _sidebar_collapsed := false
+var _header_compact := false
+var _header_subtitle: Label
 var _sidebar_override := false
 var _opened := false
 var terrain_provider: Callable = Callable()
@@ -209,6 +220,7 @@ func _build_shell() -> void:
 	subtitle.add_theme_color_override("font_color", Color("#c6b78f"))
 	subtitle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header_row.add_child(subtitle)
+	_header_subtitle = subtitle
 	var metrics := HBoxContainer.new()
 	metrics.name = "ResourceHud"
 	metrics.add_theme_constant_override("separation", 6)
@@ -249,6 +261,10 @@ func _build_shell() -> void:
 	header_row.add_child(_housing_metric)
 	_city_level_button = Button.new()
 	_city_level_button.name = "CityLevelProgression"
+	# Пустая кнопка до привязки города — в кадре она выглядела как обрезанный
+	# синий квадрат (съёмка «до», ui-mockup-parity). Показывает её только
+	# _update_campaign_hud, то есть когда город привязан.
+	_city_level_button.visible = false
 	_city_level_button.focus_mode = Control.FOCUS_ALL
 	_city_level_button.tooltip_text = "Уровень и занятые клетки города"
 	_apply_keyboard_focus(_city_level_button)
@@ -446,6 +462,19 @@ func _build_shell() -> void:
 	_message_label = Label.new()
 	_message_label.name = "CityMessage"
 	_message_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# Длинная причина отказа (отклонённое строительство и т.п.) не имеет права
+	# раздувать минимальную ширину футера: без этого строка выталкивает весь
+	# экран за правый край — ровно то обрезание, что видно на съёмке «до»
+	# ui-mockup-parity. autowrap обнуляет минимальную ширину; max_lines_visible +
+	# многоточие оставляют из переноса одну строку; custom_minimum_size держит
+	# высоту, которую контейнер иначе считает от нулевой ширины (1 px вместо
+	# строки — подпись становится невидимой).
+	_message_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_message_label.max_lines_visible = 1
+	_message_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_message_label.clip_text = true
+	_message_label.custom_minimum_size = Vector2(0, 23)
+	_message_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_message_label.add_theme_color_override("font_color", Color("#d5cdbb"))
 	footer.add_child(_message_label)
 
@@ -588,12 +617,28 @@ func _on_resource_pressed(resource_id: StringName) -> void:
 func _update_campaign_hud() -> void:
 	for resource_id in ResourceRegistry.CAMPAIGN_MVP_IDS:
 		var button: Button = _resource_buttons[resource_id]
-		var balance := "—" if city.resource_ctx == null else "%.1f" % city.resource_ctx.amount(resource_id)
-		var net := _resource_net(resource_id)
-		button.text = "%s  %s  %s" % [_resource_label(resource_id), balance, net]
+		var label := _resource_label(resource_id)
+		if city.resource_ctx == null:
+			# Ресурсного контекста нет — показываем прочерк в обоих полях, чтобы
+			# «0.0» не выглядело как настоящий нулевой баланс.
+			if _header_compact:
+				button.text = "%s  —" % label
+			else:
+				button.text = "%s  —  Δ —" % label
+			continue
+		var amount := city.resource_ctx.amount(resource_id)
+		# Компактный режим (узкое окно): целое значение без дельты. Развёрнутая
+		# подпись на четырёх чипах с длинными числами вытесняет кнопку выхода за
+		# правый край — дефект, зафиксированный съёмкой «до» ui-mockup-parity.
+		button.text = ("%s %s" % [label, "%.0f" % amount]) \
+			if _header_compact else \
+			("%s  %s  %s" % [label, "%.1f" % amount, _resource_net(resource_id)])
 	_population_metric.text = "Жители %d / %d" % [city.pop_total(), city.pop_cap()]
 	_housing_metric.text = "Жильё %d" % city.housing_total()
-	_city_level_button.visible = _is_campaign_city()
+	# Компактный режим шапки: вторичные метрики уходят, чтобы строка влезала в
+	# узкое окно (порог и причина — у _set_header_compact).
+	_housing_metric.visible = not _header_compact
+	_city_level_button.visible = _is_campaign_city() and not _header_compact
 	if _city_level_button.visible:
 		var used := CampaignCityProgression.occupied_cells(city).size()
 		var limit := CampaignCityProgression.cell_limit(city.level)
@@ -1175,12 +1220,25 @@ func _set_sidebar_collapsed(value: bool) -> void:
 	_sidebar_button.text = "Каталог" if value else "Свернуть"
 
 func _on_screen_resized() -> void:
+	var effective_width := size.x
+	var window := get_window()
+	if window != null:
+		effective_width = minf(effective_width, window.size.x)
 	if not _sidebar_override and is_instance_valid(_sidebar):
-		var effective_width := size.x
-		var window := get_window()
-		if window != null:
-			effective_width = minf(effective_width, window.size.x)
 		_set_sidebar_collapsed(effective_width < 1450.0)
+	_set_header_compact(effective_width < HEADER_COMPACT_BELOW)
+
+func _set_header_compact(value: bool) -> void:
+	if _header_compact == value:
+		return
+	_header_compact = value
+	if is_instance_valid(_header_subtitle):
+		_header_subtitle.visible = not value
+	if city != null and is_instance_valid(_city_level_button):
+		_update_campaign_hud()
+	elif is_instance_valid(_housing_metric):
+		# До привязки города видимость метрик принадлежит сборщику дерева.
+		_housing_metric.visible = not value
 
 func setup(c: City, h: HeroController, h_cell: Vector2i,
 		r: RandomNumberGenerator = null, m_bounds: Vector2i = Vector2i.ZERO,
@@ -1243,6 +1301,10 @@ func refresh() -> void:
 		_message_label.text = GameText.city_intro()
 	_sidebar_button.visible = true
 	_board.bind_city(city, _campaign_catalog, terrain_provider)
+	# Подпись-заглушка «План города» — только пока доски нечем заполнять. Раньше
+	# она гасла лишь по клику по клетке, и на открытом экране с городом золотая
+	# надпись висела поверх живого плана (кадр «до» ui-mockup-parity).
+	_board_placeholder.visible = _board.get_rendered_cells().is_empty()
 	_board.set_selection(_selected_cell if _selected_cell.x >= 0 else city.center)
 	_update_campaign_hud()
 	if _catalog_rendered:
