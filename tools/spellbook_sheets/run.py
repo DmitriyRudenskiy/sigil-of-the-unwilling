@@ -244,11 +244,28 @@ def main():
     md5 = {}
     for old in sheets_dir.glob("*.png"):
         old.unlink()
+    for old in (out / "qc").glob("sheet_*.png"):
+        old.unlink()  # иначе превью от прошлого прогона выдают 54 листа за 53
     for s, nine in enumerate(nines):
         p = sheets_dir / f"sheet_{s:02d}.png"
         assemble([crop_paths[i] for i in nine], p, args.cell)
         contact(p, out / "qc" / p.name)
         md5[s] = hashlib.md5(p.read_bytes()).hexdigest()
+
+    # обзор: все листы одной картинкой — смотреть негодующие листы глазами
+    from PIL import ImageDraw
+    gcols = int(np.ceil(np.sqrt(len(nines))))
+    grows = int(np.ceil(len(nines) / gcols))
+    gw = 200
+    ov = Image.new("RGB", (gcols * gw, grows * gw), "black")
+    dr = ImageDraw.Draw(ov)
+    for s, nine in enumerate(nines):
+        t = Image.open(sheets_dir / f"sheet_{s:02d}.png").resize((gw, gw), Image.LANCZOS)
+        x, y = (s % gcols) * gw, (s // gcols) * gw
+        ov.paste(t, (x, y))
+        dr.rectangle([x, y, x + gw - 1, y + gw - 1], outline=(80, 80, 80))
+        dr.text((x + 4, y + 3), str(s), fill="yellow")
+    ov.save(out / "qc" / "overview.png")
 
     residual = [crop_paths[i].name for i in pool + twins]
     (out / "residual").mkdir(exist_ok=True)
