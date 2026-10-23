@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="UnitStats" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/ability.gd" id="1_3msto"]
+[ext_resource type="Script" path="res://scripts/combat/unit_stats.gd" id="2_x1o1s"]
+
+[sub_resource type="Resource" id="Resource_okh38"]
+script = ExtResource("1_3msto")
+id = &"dagger_dance"
+display_name = "Танец кинжалов"
+cost = 2
+cooldown = 2
+multiplier = 0.7
+hits = 2
+
+[resource]
+script = ExtResource("2_x1o1s")
+id = &"cutthroat"
+display_name = "Тайный убийца"
+max_hp = 70
+attack = 19
+defense = 4
+initiative = 16
+abilities = Array[ExtResource("1_3msto")]([SubResource("Resource_okh38")])

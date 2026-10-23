@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="UnitStats" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/ability.gd" id="1_ge4jo"]
+[ext_resource type="Script" path="res://scripts/combat/unit_stats.gd" id="2_f36hb"]
+
+[sub_resource type="Resource" id="Resource_eb4pm"]
+script = ExtResource("1_ge4jo")
+id = &"thunderstorm"
+display_name = "Гроза"
+cost = 3
+cooldown = 3
+multiplier = 1.2
+target_kind = 1
+applies = Array[StringName]([&"bleed"])
+
+[resource]
+script = ExtResource("2_f36hb")
+id = &"stormmage"
+display_name = "Маг грозы"
+max_hp = 180
+attack = 24
+defense = 9
+initiative = 12
+abilities = Array[ExtResource("1_ge4jo")]([SubResource("Resource_eb4pm")])

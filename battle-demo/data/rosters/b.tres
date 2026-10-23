@@ -1,0 +1,142 @@
+[gd_resource type="Resource" script_class="RosterData" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/roster_data.gd" id="1_ce30u"]
+[ext_resource type="Script" path="res://scripts/combat/unit_stats.gd" id="2_g40sl"]
+[ext_resource type="Script" path="res://scripts/combat/ability.gd" id="3_iwnce"]
+
+[sub_resource type="Resource" id="Resource_cnnbj"]
+script = ExtResource("3_iwnce")
+id = &"impaling_thrust"
+display_name = "Пронзающий выпад"
+cost = 2
+cooldown = 2
+multiplier = 1.6
+defense_ignores = 0.5
+
+[sub_resource type="Resource" id="Resource_jf0pn"]
+script = ExtResource("2_g40sl")
+id = &"spearman"
+display_name = "Копейщик"
+max_hp = 90
+attack = 16
+defense = 8
+initiative = 9
+abilities = Array[ExtResource("3_iwnce")]([SubResource("Resource_cnnbj")])
+
+[sub_resource type="Resource" id="Resource_c613e"]
+script = ExtResource("3_iwnce")
+id = &"volley"
+display_name = "Залп"
+cost = 3
+cooldown = 3
+multiplier = 1.3
+applies = Array[StringName]([&"bleed"])
+
+[sub_resource type="Resource" id="Resource_biq11"]
+script = ExtResource("2_g40sl")
+id = &"archer"
+display_name = "Лучница"
+max_hp = 70
+attack = 18
+defense = 4
+initiative = 13
+abilities = Array[ExtResource("3_iwnce")]([SubResource("Resource_c613e")])
+
+[sub_resource type="Resource" id="Resource_cj05d"]
+script = ExtResource("3_iwnce")
+id = &"siphon"
+display_name = "Иссушение"
+cost = 3
+cooldown = 2
+multiplier = 1.4
+
+[sub_resource type="Resource" id="Resource_5blpj"]
+script = ExtResource("2_g40sl")
+id = &"wizard"
+display_name = "Волшебник"
+max_hp = 65
+attack = 20
+defense = 5
+initiative = 11
+abilities = Array[ExtResource("3_iwnce")]([SubResource("Resource_cj05d")])
+
+[sub_resource type="Resource" id="Resource_j2k7c"]
+script = ExtResource("3_iwnce")
+id = &"evil_eye"
+display_name = "Сглаз"
+cost = 3
+cooldown = 3
+applies = Array[StringName]([&"weaken", &"bleed"])
+
+[sub_resource type="Resource" id="Resource_mdl5m"]
+script = ExtResource("2_g40sl")
+id = &"sorcerer"
+display_name = "Чародей"
+max_hp = 75
+attack = 14
+abilities = Array[ExtResource("3_iwnce")]([SubResource("Resource_j2k7c")])
+
+[sub_resource type="Resource" id="Resource_jtg1j"]
+script = ExtResource("3_iwnce")
+id = &"cleave"
+display_name = "Рубящий удар"
+cost = 3
+cooldown = 2
+multiplier = 1.8
+self_applies = Array[StringName]([&"bleed"])
+
+[sub_resource type="Resource" id="Resource_xig5f"]
+script = ExtResource("2_g40sl")
+id = &"barbarian"
+display_name = "Варвар"
+max_hp = 105
+attack = 22
+defense = 5
+initiative = 6
+abilities = Array[ExtResource("3_iwnce")]([SubResource("Resource_jtg1j")])
+
+[sub_resource type="Resource" id="Resource_okh38"]
+script = ExtResource("3_iwnce")
+id = &"dagger_dance"
+display_name = "Танец кинжалов"
+cost = 2
+cooldown = 2
+multiplier = 0.7
+hits = 2
+
+[sub_resource type="Resource" id="Resource_3dfcu"]
+script = ExtResource("2_g40sl")
+id = &"cutthroat"
+display_name = "Тайный убийца"
+max_hp = 70
+attack = 19
+defense = 4
+initiative = 16
+abilities = Array[ExtResource("3_iwnce")]([SubResource("Resource_okh38")])
+
+[sub_resource type="Resource" id="Resource_nb0ap"]
+script = ExtResource("3_iwnce")
+id = &"blessing"
+display_name = "Благословение"
+cost = 2
+cooldown = 2
+multiplier = 0.0
+target_kind = 2
+deals_damage = false
+applies = Array[StringName]([&"regen"])
+
+[sub_resource type="Resource" id="Resource_1tarp"]
+script = ExtResource("2_g40sl")
+id = &"priest"
+display_name = "Жрец"
+attack = 11
+defense = 7
+initiative = 8
+abilities = Array[ExtResource("3_iwnce")]([SubResource("Resource_nb0ap")])
+
+[resource]
+script = ExtResource("1_ce30u")
+id = &"b"
+title = "Ритм"
+difference = "Есть жрец, нет рыцаря: линия тонкая, живём благословением"
+units = Array[ExtResource("2_g40sl")]([SubResource("Resource_jf0pn"), SubResource("Resource_biq11"), SubResource("Resource_5blpj"), SubResource("Resource_mdl5m"), SubResource("Resource_xig5f"), SubResource("Resource_3dfcu"), SubResource("Resource_1tarp")])

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="UnitStats" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/ability.gd" id="1_3s4g3"]
+[ext_resource type="Script" path="res://scripts/combat/unit_stats.gd" id="2_linbl"]
+
+[sub_resource type="Resource" id="Resource_j2k7c"]
+script = ExtResource("1_3s4g3")
+id = &"evil_eye"
+display_name = "Сглаз"
+cost = 3
+cooldown = 3
+applies = Array[StringName]([&"weaken", &"bleed"])
+
+[resource]
+script = ExtResource("2_linbl")
+id = &"sorcerer"
+display_name = "Чародей"
+max_hp = 75
+attack = 14
+abilities = Array[ExtResource("1_3s4g3")]([SubResource("Resource_j2k7c")])

@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="UnitStats" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/ability.gd" id="1_5svf2"]
+[ext_resource type="Script" path="res://scripts/combat/unit_stats.gd" id="2_k6b1d"]
+
+[sub_resource type="Resource" id="Resource_jtg1j"]
+script = ExtResource("1_5svf2")
+id = &"cleave"
+display_name = "Рубящий удар"
+cost = 3
+cooldown = 2
+multiplier = 1.8
+self_applies = Array[StringName]([&"bleed"])
+
+[resource]
+script = ExtResource("2_k6b1d")
+id = &"barbarian"
+display_name = "Варвар"
+max_hp = 105
+attack = 22
+defense = 5
+initiative = 6
+abilities = Array[ExtResource("1_5svf2")]([SubResource("Resource_jtg1j")])

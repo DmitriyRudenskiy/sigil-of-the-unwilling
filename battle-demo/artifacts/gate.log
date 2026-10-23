@@ -12,7 +12,229 @@ Please note that tests that use UI interaction do not work correctly in headless
 Godot 'InputEvents' are not transported by the Godot engine in headless mode and therefore
 have no effect in the test!
 [0m
-Given directory or file does not exists: res://tests
-[38;2;255;255;0mNo test cases found, abort test run![0m
+Scanning for test suites in: res://tests
+[38;2;100;149;237mInstalling GdUnit4 session system hooks.[0m
+[38;2;100;149;237mSession hook 'GdUnitHtmlTestReporter' installed.[0m
+[38;2;100;149;237mSession hook 'GdUnitXMLTestReporter' installed.[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/combat/test_battle_outcome.gd[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_outcome.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_victory_when_no_enemies_left[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_outcome.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_victory_when_no_enemies_left[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_outcome.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_defeat_when_no_player_units_left[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_outcome.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_defeat_when_no_player_units_left[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_outcome.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_queue_stops_after_battle_ended[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_outcome.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_queue_stops_after_battle_ended[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 1ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_outcome.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_stalemate_guard_reports_no_result[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_outcome.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_stalemate_guard_reports_no_result[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 4ms[0m
+[38;2;128;128;128m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 4 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 23ms[0m
+[38;2;128;128;128m[0m
+[38;2;128;128;128m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_bleed_ticks_damage_on_owner_turn[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_bleed_ticks_damage_on_owner_turn[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_status_expires_after_its_duration[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_status_expires_after_its_duration[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 1ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_stun_blocks_action[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_stun_blocks_action[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_stun_leaves_only_pass_available[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_stun_leaves_only_pass_available[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_stun_is_gone_next_turn[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_stun_is_gone_next_turn[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_weaken_multiplies_attack[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_weaken_multiplies_attack[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_regen_heals_up_to_cap[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_regen_heals_up_to_cap[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_same_status_refreshes_instead_of_stacking[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_same_status_refreshes_instead_of_stacking[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_unknown_status_is_rejected[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_unknown_status_is_rejected[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_focus_grows_only_after_first_turn[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_focus_grows_only_after_first_turn[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_focus_is_capped[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_focus_is_capped[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 11 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 37ms[0m
+[38;2;128;128;128m[0m
+[38;2;128;128;128m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/combat/test_determinism.gd[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_determinism.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_same_seed_reproduces_the_whole_battle[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_determinism.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_same_seed_reproduces_the_whole_battle[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 4ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_determinism.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_battle_actually_happened[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_determinism.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_battle_actually_happened[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 5ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_determinism.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_different_seed_changes_damage_draw[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_determinism.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_different_seed_changes_damage_draw[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 3ms[0m
+[38;2;128;128;128m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 3 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 17ms[0m
+[38;2;128;128;128m[0m
+[38;2;128;128;128m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/combat/test_turn_queue.gd[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_turn_queue.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_order_by_initiative_descending[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_turn_queue.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_order_by_initiative_descending[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_turn_queue.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_tie_gives_player_side_first[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_turn_queue.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_tie_gives_player_side_first[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_turn_queue.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_tie_within_side_ordered_by_slot[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_turn_queue.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_tie_within_side_ordered_by_slot[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_turn_queue.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_order_independent_of_input_order[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_turn_queue.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_order_independent_of_input_order[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_turn_queue.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_dead_units_are_skipped[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_turn_queue.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_dead_units_are_skipped[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 3ms[0m
+[38;2;128;128;128m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 5 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 21ms[0m
+[38;2;128;128;128m[0m
+[38;2;128;128;128m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/combat/test_damage.gd[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_damage.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_damage_is_integer_and_at_least_one[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_damage.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_damage_is_integer_and_at_least_one[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_damage.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_damage_reproducible_for_same_seed[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_damage.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_damage_reproducible_for_same_seed[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_damage.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_variance_stays_in_band[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_damage.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_variance_stays_in_band[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 4ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_damage.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_defense_reduces_damage[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_damage.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_defense_reduces_damage[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_damage.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_defense_ignores_part_of_defense[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_damage.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_defense_ignores_part_of_defense[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_damage.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_weaken_lowers_attack[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_damage.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_weaken_lowers_attack[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 6 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 26ms[0m
+[38;2;128;128;128m[0m
+[38;2;128;128;128m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/combat/test_enemy_ai.gd[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_enemy_ai.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_enemy_acts_without_player_input[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_enemy_ai.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_enemy_acts_without_player_input[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_enemy_ai.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_enemy_uses_ready_ability[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_enemy_ai.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_enemy_uses_ready_ability[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 3ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_enemy_ai.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_enemy_falls_back_to_attack_without_focus[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_enemy_ai.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_enemy_falls_back_to_attack_without_focus[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 3ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_enemy_ai.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_enemy_targets_weakest_player_unit[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_enemy_ai.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_enemy_targets_weakest_player_unit[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_enemy_ai.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_stunned_enemy_passes[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_enemy_ai.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_stunned_enemy_passes[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 5 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 21ms[0m
+[38;2;128;128;128m[0m
+[38;2;128;128;128m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/combat/test_combat_without_scene.gd[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_combat_without_scene.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_battle_runs_without_touching_scene_tree[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_combat_without_scene.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_battle_runs_without_touching_scene_tree[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_combat_without_scene.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_combat_layer_has_no_display_references[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_combat_without_scene.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_combat_layer_has_no_display_references[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 3ms[0m
+[38;2;128;128;128m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 2 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 12ms[0m
+[38;2;128;128;128m[0m
+[38;2;128;128;128m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/combat/test_action_legality.gd[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_action_legality.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_one_action_per_turn[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_action_legality.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_one_action_per_turn[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_action_legality.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_ability_requires_focus[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_action_legality.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_ability_requires_focus[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_action_legality.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_ability_goes_on_cooldown[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_action_legality.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_ability_goes_on_cooldown[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_action_legality.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_cooldown_expires[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_action_legality.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_cooldown_expires[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_action_legality.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_ability_without_target_is_unavailable[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_action_legality.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_ability_without_target_is_unavailable[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_action_legality.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_pass_is_always_available[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_action_legality.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_pass_is_always_available[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+[38;2;128;128;128m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 6 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 26ms[0m
+[38;2;128;128;128m[0m
+[38;2;128;128;128m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/data/test_data_library.gd[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_library.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_all_units_load[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_library.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_all_units_load[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 5ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_library.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_real_data_passes_validation[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_library.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_real_data_passes_validation[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 6ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_library.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_rosters_are_the_designed_pair[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_library.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_rosters_are_the_designed_pair[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 4ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_library.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_rosters_differ_by_exactly_one_unit[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_library.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_rosters_differ_by_exactly_one_unit[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 4ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_library.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_enemy_is_not_in_the_pool[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_library.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_enemy_is_not_in_the_pool[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 6ms[0m
+[38;2;128;128;128m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 5 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 34ms[0m
+[38;2;128;128;128m[0m
+[38;2;128;128;128m[0m
+[38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_missing_unit_is_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_missing_unit_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 12ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_dead_unit_stats_are_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_dead_unit_stats_are_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_unit_without_ability_is_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_unit_without_ability_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_unknown_status_is_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_unknown_status_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_ability_cost_above_focus_cap_is_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_ability_cost_above_focus_cap_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 8ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_duplicate_unit_in_roster_is_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_duplicate_unit_in_roster_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 10ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_unknown_unit_in_roster_is_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_unknown_unit_in_roster_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 10ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_enemy_in_roster_is_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_enemy_in_roster_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 13ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_roster_of_wrong_size_is_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_roster_of_wrong_size_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_roster_without_title_is_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_roster_without_title_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 10ms[0m
+[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_identical_rosters_are_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_identical_rosters_are_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 8ms[0m
+[38;2;128;128;128m[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 11 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 126ms[0m
+[38;2;128;128;128m[0m
+[38;2;128;128;128m[0m
+[38;2;30;144;255mOverall Summary:[0m[38;2;255;255;255m 58 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m
+[38;2;233;150;122mExecuted test suites: (10/10)[0m
+[38;2;233;150;122mExecuted test cases : (58/58)[0m
+[38;2;233;150;122mTotal execution time: 343ms[0m
+[38;2;255;255;255m [0m[38;2;100;149;237mOpen XML Report at: file:///Users/user/sigil-of-the-unwilling/battle-demo/reports/report_12/results.xml[0m
+[38;2;100;149;237mOpen HTML Report at: file:///Users/user/sigil-of-the-unwilling/battle-demo/reports/report_12/index.html[0m
 [38;2;233;150;122mExit code: 0[0m
 Run dispose test resources

@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="UnitStats" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/ability.gd" id="1_hp4xu"]
+[ext_resource type="Script" path="res://scripts/combat/unit_stats.gd" id="2_o31s0"]
+
+[sub_resource type="Resource" id="Resource_nb0ap"]
+script = ExtResource("1_hp4xu")
+id = &"blessing"
+display_name = "Благословение"
+cost = 2
+cooldown = 2
+multiplier = 0.0
+target_kind = 2
+deals_damage = false
+applies = Array[StringName]([&"regen"])
+
+[resource]
+script = ExtResource("2_o31s0")
+id = &"priest"
+display_name = "Жрец"
+attack = 11
+defense = 7
+initiative = 8
+abilities = Array[ExtResource("1_hp4xu")]([SubResource("Resource_nb0ap")])

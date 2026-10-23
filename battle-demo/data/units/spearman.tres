@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="UnitStats" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/ability.gd" id="1_gedo6"]
+[ext_resource type="Script" path="res://scripts/combat/unit_stats.gd" id="2_mvcyl"]
+
+[sub_resource type="Resource" id="Resource_cnnbj"]
+script = ExtResource("1_gedo6")
+id = &"impaling_thrust"
+display_name = "Пронзающий выпад"
+cost = 2
+cooldown = 2
+multiplier = 1.6
+defense_ignores = 0.5
+
+[resource]
+script = ExtResource("2_mvcyl")
+id = &"spearman"
+display_name = "Копейщик"
+max_hp = 90
+attack = 16
+defense = 8
+initiative = 9
+abilities = Array[ExtResource("1_gedo6")]([SubResource("Resource_cnnbj")])
