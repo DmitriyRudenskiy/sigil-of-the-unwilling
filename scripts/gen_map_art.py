@@ -41,6 +41,8 @@ ATLAS_IMG = ROOT / "game/assets/tiles/world_map_atlas.webp"
 ATLAS_JSON = ROOT / "game/assets/tiles/world_map_atlas.json"
 OBJ_IMG = ROOT / "game/assets/objects/world_map_objects.webp"
 OBJ_FOG_IMG = ROOT / "game/assets/objects/world_map_objects_fog.webp"
+ROAD_IMG = ROOT / "game/assets/objects/world_map_roads.webp"
+ROAD_JSON = ROOT / "game/assets/objects/world_map_roads.json"
 # Зеркало `GameNumbersMap.MAP_FOG_DIM`: затемнённый побратим листа печатается здесь.
 MAP_FOG_DIM = 0.45
 OBJ_JSON = ROOT / "game/assets/objects/world_map_objects.json"
@@ -99,6 +101,9 @@ def roles() -> list[dict]:
                     # масштаб силуэта в тайле: по умолчанию 0.86, ниже — для напольных
                     # объектов (подлесок на 0.86 читается деревом, а не подлеском)
                     "fit": float(item.get("fit", 0.86)),
+                    # дороги (6.1): тип декали — strip (полоса на всю ширину) или
+                    # intersection (звезда на 3+ ветки); поворот полосы — в коде
+                    "kind": item.get("kind", ""),
                 })
     return out
 
@@ -349,13 +354,147 @@ def cut_object(frame: Path, fit: float = 0.86, bottom: int = 6) -> Image.Image:
     return out.filter(UNSCHARP)
 
 
+def cut_road(frame: Path, kind: str = "strip") -> Image.Image:
+    """Дорожная декаль: белый фон → прозрачность (порог + связность с краем),
+    затем декаль вписана в тайл по центру (не по нижнему краю, как объекты).
+
+    strip — полоса дороги на всю ширину тайла (горизонтально, поворот по
+    направлениям гекса — в коде); intersection — звезда на 3+ ветки, вписана
+    в тайл целиком. Прозрачный фон: база биома видна по сторонам от дороги.
+    """
+    a = np.asarray(Image.open(frame).convert("RGB")).astype(np.float32)
+    alpha = np.clip((250.0 - a.min(2)) / 30.0, 0.0, 1.0)
+    near = a.min(2) >= 200.0
+    components, _ = label_components(near)
+    touching = (set(components[0, :]) | set(components[-1, :])
+                | set(components[:, 0]) | set(components[:, -1]))
+    touching.discard(0)
+    if touching:
+        alpha[np.isin(components, list(touching))] = 0.0
+    im = Image.fromarray(np.dstack([a, alpha * 255.0]).astype(np.uint8), "RGBA")
+    im = im.crop(im.split()[3].getbbox())
+    if kind == "strip":
+        # Полоса на всю ширину тайла: ширина = TILE, высота пропорциональна.
+        s = TILE / im.width
+        im = im.resize((TILE, max(1, round(im.height * s))), Image.LANCZOS)
+        out = Image.new("RGBA", (TILE, TILE), (0, 0, 0, 0))
+        out.paste(im, (0, (TILE - im.height) // 2))
+    else:
+        # Перекрёсток: вписать в тайл целиком (fit 0.95), по центру.
+        s = min(0.95 * TILE / im.width, 0.95 * TILE / im.height)
+        im = im.resize((max(1, round(im.width * s)), max(1, round(im.height * s))), Image.LANCZOS)
+        out = Image.new("RGBA", (TILE, TILE), (0, 0, 0, 0))
+        out.paste(im, ((TILE - im.width) // 2, (TILE - im.height) // 2))
+    return out.filter(UNSCHARP)
+
+
+# --------------------------------------------------------------- дороги (6.1)
+
+# Три оси гекса в экранных координатах (y вниз): поворот горизонтальной полосы
+# на 0°/±60° даёт оси e–w, ne–sw, nw–se — тот же набор осей, что направления
+# SIDES и таблицы соседей T_*_RIGHT в движке (проверено по главному направлению
+# материала каждого тайла: −0.4°, −60.2°, +59.5°).
+ROAD_AXES = (("ew", 0.0), ("nesw", 60.0), ("nwse", -60.0))
+
+
+def rotate_road(im: Image.Image, angle: float) -> Image.Image:
+    """Поворот декали вокруг центра тайла. expand=False: канвас 82×82 не растёт,
+    прозрачные углы остаются прозрачными — декаль, а не квадрат."""
+    if angle == 0.0:
+        return im
+    return im.rotate(angle, resample=Image.BICUBIC, expand=False,
+                     center=(TILE / 2, TILE / 2))
+
+
+def road_edge_decal(strip: Image.Image, side: str) -> Image.Image:
+    """Кромка дороги на стороне `side`: материал полосы с альфа-профилем стороны
+    гекса — та же механика, что у границ биомов (`edge_decal`/`side_profile`).
+    Дорожный материал — ядро полосы (строки с плотной альфой), разложенное по
+    профилю: кромка читается как та же дорога, что и полоса, только по краю."""
+    a = np.asarray(strip.convert("RGB")).astype(np.float32)
+    alpha = np.asarray(strip.split()[3]).astype(np.float32)
+    rows = alpha.mean(axis=1)
+    ys = np.where(rows > rows.max() * 0.5)[0]
+    mat = a[int(ys.min()):int(ys.max()) + 1].mean(axis=0)   # материал по длине дороги
+    prof = side_profile(TILE, side) * 255.0
+    out = np.tile(mat[None, :, :], (TILE, 1, 1)).astype(np.float32)
+    return Image.fromarray(np.dstack([out, prof]).astype(np.uint8), "RGBA")
+
+
+def build_road_sheet(roads: list[dict]) -> list[dict]:
+    """Лист дорог (6.1): декали на прозрачном фоне, по центру тайла. Отдельный
+    лист — не объекты (те якорятся вниз) и не атлас (то бесшовная база).
+
+    Сгенерированные роли (полоса/перекрёсток/мост × основная/второстепенная)
+    детерминированно достраиваются до полного набора, который требует слой
+    дорог 6.2: TileMapLayer не поворачивает квад, поэтому оси гекса и стороны
+    кромки — отдельные клетки листа. Новых прогонов это не требует: всё
+    выводится из уже принятых raw-ролей, байт листа стабилен при том же raw.
+    """
+    def surface(role_id: str) -> str:
+        return "primary" if "primary" in role_id else "secondary"
+
+    def raw_of(suffix: str) -> Path:
+        for r in roads:
+            if r["id"].endswith(suffix):
+                if not r["path"].exists():
+                    raise SystemExit(f"нет raw-роли дорог {r['path']}")
+                return r["path"]
+        raise SystemExit(f"в спеке нет дорожной роли {suffix}")
+
+    tiles: list[Image.Image] = []
+    cells: list[dict] = []
+
+    def add(img: Image.Image, cell: dict, src: Path) -> None:
+        cell["atlas"] = [len(tiles) % 8, len(tiles) // 8]
+        cell["source"] = str(src.relative_to(ROOT))
+        tiles.append(img)
+        cells.append(cell)
+
+    for kind, suffix in (("strip", "strip"), ("bridge", "bridge")):
+        for role in ("primary", "secondary"):
+            path = raw_of(f"{suffix}_{role}")
+            base = cut_road(path, "strip")
+            for axis, angle in ROAD_AXES:
+                add(rotate_road(base, angle),
+                    {"id": f"road_{kind}_{axis}_{role}", "kind": kind,
+                     "surface": surface(role), "axis": axis}, path)
+
+    for role in ("primary", "secondary"):
+        path = raw_of(f"intersection_{role}")
+        add(cut_road(path, "intersection"),
+            {"id": f"road_intersection_{role}", "kind": "intersection",
+             "surface": surface(role)}, path)
+
+    for role in ("primary", "secondary"):
+        path = raw_of(f"strip_{role}")
+        base = cut_road(path, "strip")
+        for side in SIDES:
+            add(road_edge_decal(base, side),
+                {"id": f"road_edge_{side}_{role}", "kind": "edge",
+                 "surface": surface(role), "side": side}, path)
+
+    sheet = Image.new("RGBA", (8 * TILE, math.ceil(len(tiles) / 8) * TILE), (0, 0, 0, 0))
+    for i, t in enumerate(tiles):
+        sheet.paste(t, ((i % 8) * TILE, (i // 8) * TILE))
+    ROAD_IMG.parent.mkdir(parents=True, exist_ok=True)
+    sheet.save(ROAD_IMG, "WEBP", quality=QUALITY, lossless=LOSSLESS)
+    ROAD_JSON.write_text(json.dumps({
+        "tile": TILE, "image": ROAD_IMG.name, "grid": [8, math.ceil(len(tiles) / 8)],
+        "format": "webp", "quality": QUALITY,
+        "prompt_version": SPEC["prompt_version"], "cells": cells,
+    }, ensure_ascii=False, indent=1))
+    return cells
+
+
 # ------------------------------------------------------------------- сборка
 
 
 def assemble() -> int:
     mats = [r for r in roles() if r["category"] == "materials" and r["path"].exists()]
     objs = [r for r in roles() if r["category"] == "objects" and r["path"].exists()]
-    if not mats:
+    roads = [r for r in roles() if r["category"] == "roads" and r["path"].exists()]
+    if not mats and not objs and not roads:
         raise SystemExit("нет ни одной сгенерированной роли — сначала генерация")
     tiles: list[Image.Image] = []
     cells: list[dict] = []
@@ -382,100 +521,120 @@ def assemble() -> int:
     # различает фазы и так: `atlas/distinct` 1.00 при пороге ≥0.90.
     fabric: dict[str, np.ndarray] = {}
 
-    for r in mats:
-        if r["take"] == 0:
-            base = tile_from(r["path"], r["ramp"], r["shift"], r["id"])
-            fabric[r["biome"]] = np.asarray(base)
-        else:
-            rng = np.random.default_rng(zlib.crc32(r["id"].encode()))
-            dy, dx = rng.integers(11, 71, 2)   # фаза: не кратно 1/2 тайла, чтобы глаз не ловил период
-            rolled = np.roll(np.roll(fabric[r["biome"]], int(dy), 0), int(dx), 1)
-            base = Image.fromarray(make_wrap(rolled, band=WRAP_TILE_BAND), "RGBA")
-        add(base, {"id": f"base_{r['biome']}_{r['take']}", "kind": "base", "biome": r["biome"],
-                   "variant": r["take"], "source": str(r["path"].relative_to(ROOT))}, r["path"])
-        bases.setdefault(r["biome"], []).append(base)
-        first_path.setdefault(r["biome"], r["path"])
+    if mats:
+        for r in mats:
+            if r["take"] == 0:
+                base = tile_from(r["path"], r["ramp"], r["shift"], r["id"])
+                fabric[r["biome"]] = np.asarray(base)
+            else:
+                rng = np.random.default_rng(zlib.crc32(r["id"].encode()))
+                dy, dx = rng.integers(11, 71, 2)   # фаза: не кратно 1/2 тайла, чтобы глаз не ловил период
+                rolled = np.roll(np.roll(fabric[r["biome"]], int(dy), 0), int(dx), 1)
+                base = Image.fromarray(make_wrap(rolled, band=WRAP_TILE_BAND), "RGBA")
+            add(base, {"id": f"base_{r['biome']}_{r['take']}", "kind": "base", "biome": r["biome"],
+                       "variant": r["take"], "source": str(r["path"].relative_to(ROOT))}, r["path"])
+            bases.setdefault(r["biome"], []).append(base)
+            first_path.setdefault(r["biome"], r["path"])
 
-    # Средний тон вариантов одного биома выравнивается к общему (T-143, глазной вердикт
-    # 11.3 «налепанные заплаты»): `variant_shift` сдвигает пороги рампы, отчего среднее
-    # L* уезжает на 3…13 ΔE, и карта собирается из тоновых заплат с прямым швом по
-    # ребру клетки. Выравнивается именно среднее: низкочастотное пятно (`mottle`) и
-    # зерно — то, чем варианты различаются по-настоящему, — остаются нетронутыми, и
-    # подписи гейтов продолжают их видеть (замер по текущему атласу: после
-    # выравнивания `atlas/distinct` 8×8 и подпись `frame/variety` 4×4 — 1.00,
-    # попиксельный ΔE между вариантами 8…28). Среднее берётся по гексу движка,
-    # а не по квадрату 82×82: глаз видит гекс, угловые треугольники не рисуются.
-    hex_in = np.asarray(hex_mask()) > 0
-    for biome, vs in bases.items():
-        labs = [PB.rgb_to_lab(np.asarray(v.convert("RGB"), dtype=np.float64) / 255.0)
-                for v in vs]
-        means = [l[hex_in].reshape(-1, 3).mean(0) for l in labs]
-        target = np.mean(means, axis=0)
-        for v, l, mean in zip(vs, labs, means):
-            rgb = lab_to_rgb(l - (mean - target)) * 255.0
-            fixed = Image.fromarray(rgb.round().astype(np.uint8), "RGB").convert("RGBA")
-            fixed.putalpha(v.split()[3])
-            v.paste(fixed, (0, 0))
+        # Средний тон вариантов одного биома выравнивается к общему (T-143, глазной
+        # вердикт 11.3 «налепанные заплаты»): `variant_shift` сдвигает пороги рампы,
+        # отчего среднее L* уезжает на 3…13 ΔE, и карта собирается из тоновых заплат
+        # с прямым швом по ребру клетки. Выравнивается именно среднее: низкочастотное
+        # пятно (`mottle`) и зерно — то, чем варианты различаются по-настоящему, —
+        # остаются нетронутыми, и подписи гейтов продолжают их видеть (замер по
+        # текущему атласу: после выравнивания `atlas/distinct` 8×8 и подпись
+        # `frame/variety` 4×4 — 1.00, попиксельный ΔE между вариантами 8…28).
+        # Среднее берётся по гексу движка, а не по квадрату 82×82: глаз видит гекс,
+        # угловые треугольники не рисуются.
+        hex_in = np.asarray(hex_mask()) > 0
+        for biome, vs in bases.items():
+            labs = [PB.rgb_to_lab(np.asarray(v.convert("RGB"), dtype=np.float64) / 255.0)
+                    for v in vs]
+            means = [l[hex_in].reshape(-1, 3).mean(0) for l in labs]
+            target = np.mean(means, axis=0)
+            for v, l, mean in zip(vs, labs, means):
+                rgb = lab_to_rgb(l - (mean - target)) * 255.0
+                fixed = Image.fromarray(rgb.round().astype(np.uint8), "RGB").convert("RGBA")
+                fixed.putalpha(v.split()[3])
+                v.paste(fixed, (0, 0))
 
-    # Декаль границы один на биом: он про форму края, а не про вариативность заполнения.
-    for biome, variants in bases.items():
-        mean = Image.fromarray(
-            np.mean([np.asarray(v.convert("RGB"), dtype=np.float32) for v in variants],
-                    axis=0).astype(np.uint8), "RGB")
-        for side in SIDES:
-            add(edge_decal(mean, side),
-                {"id": f"edge_{biome}_{side}", "kind": "edge", "biome": biome,
-                 "side": side, "source": str(first_path[biome].relative_to(ROOT))},
-                first_path[biome])
+        # Декаль границы один на биом: он про форму края, а не про вариативность заполнения.
+        for biome, variants in bases.items():
+            mean = Image.fromarray(
+                np.mean([np.asarray(v.convert("RGB"), dtype=np.float32) for v in variants],
+                        axis=0).astype(np.uint8), "RGB")
+            for side in SIDES:
+                add(edge_decal(mean, side),
+                    {"id": f"edge_{biome}_{side}", "kind": "edge", "biome": biome,
+                     "side": side, "source": str(first_path[biome].relative_to(ROOT))},
+                    first_path[biome])
 
-    sheet = Image.new("RGBA", (8 * TILE, math.ceil(len(tiles) / 8) * TILE), (0, 0, 0, 0))
-    mask = hex_mask()
-    for i, t in enumerate(tiles):
-        t = t.convert("RGBA")
-        # И база, и декаль границы — гексом: движок рисует каждый тайл квадратным
-        # квадом, а ряды идут с шагом 3/4 высоты, поэтому непрозрачные углы
-        # наезжают на соседей и рисуют на карте сетку прямоугольников (T-143).
-        t.putalpha(Image.fromarray(np.minimum(np.asarray(mask), np.asarray(t.split()[3]))))
-        # Без маски (см. cut_object): paste(src, pos, src) предумножил бы RGB на альфу.
-        sheet.paste(t, ((i % 8) * TILE, (i // 8) * TILE))
-    ATLAS_IMG.parent.mkdir(parents=True, exist_ok=True)
-    sheet.save(ATLAS_IMG, "WEBP", quality=QUALITY, lossless=LOSSLESS)
-    ATLAS_JSON.write_text(json.dumps({
-        "tile": TILE, "image": ATLAS_IMG.name, "grid": [8, math.ceil(len(tiles) / 8)],
-        "format": "webp", "quality": QUALITY,
-        "prompt_version": SPEC["prompt_version"], "model": SPEC["models"], "cells": cells,
-    }, ensure_ascii=False, indent=1))
+        sheet = Image.new("RGBA", (8 * TILE, math.ceil(len(tiles) / 8) * TILE), (0, 0, 0, 0))
+        mask = hex_mask()
+        for i, t in enumerate(tiles):
+            t = t.convert("RGBA")
+            # И база, и декаль границы — гексом: движок рисует каждый тайл квадратным
+            # квадом, а ряды идут с шагом 3/4 высоты, поэтому непрозрачные углы
+            # наезжают на соседей и рисуют на карте сетку прямоугольников (T-143).
+            t.putalpha(Image.fromarray(np.minimum(np.asarray(mask), np.asarray(t.split()[3]))))
+            # Без маски (см. cut_object): paste(src, pos, src) предумножил бы RGB на альфу.
+            sheet.paste(t, ((i % 8) * TILE, (i // 8) * TILE))
+        ATLAS_IMG.parent.mkdir(parents=True, exist_ok=True)
+        sheet.save(ATLAS_IMG, "WEBP", quality=QUALITY, lossless=LOSSLESS)
+        ATLAS_JSON.write_text(json.dumps({
+            "tile": TILE, "image": ATLAS_IMG.name, "grid": [8, math.ceil(len(tiles) / 8)],
+            "format": "webp", "quality": QUALITY,
+            "prompt_version": SPEC["prompt_version"], "model": SPEC["models"], "cells": cells,
+        }, ensure_ascii=False, indent=1))
 
-    ocells = []
-    osheet = Image.new("RGBA", (8 * TILE, math.ceil(len(objs) / 8) * TILE), (0, 0, 0, 0))
-    for i, r in enumerate(objs):
-        im = cut_object(r["path"], r["fit"])
-        osheet.paste(im, ((i % 8) * TILE, (i // 8) * TILE))
-        ocells.append({"id": r["id"], "group": r["biome"], "anchor": [TILE // 2, TILE - 2],
-                       "atlas": [i % 8, i // 8],
-                       "source": str(r["path"].relative_to(ROOT))})
-    OBJ_IMG.parent.mkdir(parents=True, exist_ok=True)
-    osheet.save(OBJ_IMG, "WEBP", quality=QUALITY, lossless=LOSSLESS)
-    fog_twin()
-    OBJ_JSON.write_text(json.dumps({
-        "tile": TILE, "image": OBJ_IMG.name, "grid": [8, math.ceil(len(objs) / 8)],
-        "format": "webp", "quality": QUALITY,
-        "prompt_version": SPEC["prompt_version"], "cells": ocells,
-    }, ensure_ascii=False, indent=1))
-    print(f"{ATLAS_IMG.relative_to(ROOT)}: {len(cells)} ячеек {sheet.size}, "
-          f"{ATLAS_IMG.stat().st_size // 1024} KiB · {OBJ_IMG.relative_to(ROOT)}: "
-          f"{len(ocells)} объектов, {OBJ_IMG.stat().st_size // 1024} KiB")
+    if objs:
+        ocells = []
+        osheet = Image.new("RGBA", (8 * TILE, math.ceil(len(objs) / 8) * TILE), (0, 0, 0, 0))
+        for i, r in enumerate(objs):
+            im = cut_object(r["path"], r["fit"])
+            osheet.paste(im, ((i % 8) * TILE, (i // 8) * TILE))
+            ocells.append({"id": r["id"], "group": r["biome"], "anchor": [TILE // 2, TILE - 2],
+                           "atlas": [i % 8, i // 8],
+                           "source": str(r["path"].relative_to(ROOT))})
+        OBJ_IMG.parent.mkdir(parents=True, exist_ok=True)
+        osheet.save(OBJ_IMG, "WEBP", quality=QUALITY, lossless=LOSSLESS)
+        fog_twin()
+        OBJ_JSON.write_text(json.dumps({
+            "tile": TILE, "image": OBJ_IMG.name, "grid": [8, math.ceil(len(objs) / 8)],
+            "format": "webp", "quality": QUALITY,
+            "prompt_version": SPEC["prompt_version"], "cells": ocells,
+        }, ensure_ascii=False, indent=1))
+
+    # Дороги (6.1): декали на прозрачном фоне, по центру тайла. Отдельный лист
+    # (не объекты — якорь вниз, не атлас — бесшовная база): слой дорог 6.2 строит
+    # из него тайлсет, поворот полосы по направлениям гекса — в коде.
+    rcells = build_road_sheet(roads) if roads else []
+    parts = []
+    if mats:
+        parts.append(f"{ATLAS_IMG.relative_to(ROOT)}: {len(cells)} ячеек {sheet.size}, "
+                     f"{ATLAS_IMG.stat().st_size // 1024} KiB")
+    if objs:
+        parts.append(f"{OBJ_IMG.relative_to(ROOT)}: {len(ocells)} объектов, "
+                     f"{OBJ_IMG.stat().st_size // 1024} KiB")
+    if roads:
+        parts.append(f"{ROAD_IMG.relative_to(ROOT)}: {len(rcells)} дорог, "
+                     f"{ROAD_IMG.stat().st_size // 1024} KiB")
+    print(" · ".join(parts))
     return 0
 
 
 def contact_sheet(out: Path) -> int:
-    """Лист приёмки: тайлы и объекты на фоне карты, масштаб ×2 (вердикт — за владельцем)."""
+    """Лист приёмки: тайлы, объекты и дороги на фоне карты, масштаб ×2 (вердикт — за владельцем)."""
     atlas = Image.open(ATLAS_IMG).convert("RGBA")
     objs = Image.open(OBJ_IMG).convert("RGBA")
-    bg = Image.new("RGBA", (max(atlas.width, objs.width), atlas.height + objs.height + TILE * 2),
-                   (*PB.parse_hex("#1d2829"), 255))
+    roads = Image.open(ROAD_IMG).convert("RGBA") if ROAD_IMG.exists() else None
+    h = atlas.height + objs.height + TILE * 2 + ((roads.height + TILE) if roads else 0)
+    w = max(atlas.width, objs.width, (roads.width if roads else 0))
+    bg = Image.new("RGBA", (w, h), (*PB.parse_hex("#1d2829"), 255))
     bg.paste(atlas, (0, 0), atlas)
     bg.paste(objs, (0, atlas.height + TILE), objs)
+    if roads:
+        bg.paste(roads, (0, atlas.height + objs.height + TILE * 2), roads)
     bg = bg.convert("RGB").resize((bg.width * 2, bg.height * 2), Image.NEAREST)
     out.parent.mkdir(parents=True, exist_ok=True)
     bg.save(out, "WEBP", quality=90)

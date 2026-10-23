@@ -283,6 +283,48 @@
     }
    ],
    "style": "hand-painted game sprite for a strategy board game, one single object standing alone, muted natural pigments, readable silhouette, fine brush grain"
+  },
+  "roads": {
+   "size": [
+    1024,
+    1024
+   ],
+   "model": "krea2",
+   "isolated": true,
+   "frame": "a flat painted road surface seen straight down from above, top-down orthographic view, the road strip runs horizontally across the middle of the frame from left edge to right edge, plain flat white paper background above and below the road, no map, no continents, no globe, no geography, no parchment board, no plaque, no sign, no cast shadow, no text, no border",
+   "items": [
+    {
+     "id": "road_strip_primary",
+     "kind": "strip",
+     "subject": "a wide main road, compacted pale cobblestone with fine gravel, two faint parallel wheel ruts, warm beige-grey tone"
+    },
+    {
+     "id": "road_strip_secondary",
+     "kind": "strip",
+     "subject": "a narrow secondary track, beaten dirt with small pebbles and dry dust, no ruts, muted earthy brown tone"
+    },
+    {
+     "id": "road_intersection_primary",
+     "kind": "intersection",
+     "subject": "a road intersection, a wide main road crossing the frame horizontally with two branches going up-left and up-right at 60 degrees, compacted pale cobblestone with fine gravel, warm beige-grey tone"
+    },
+    {
+     "id": "road_intersection_secondary",
+     "kind": "intersection",
+     "subject": "a track intersection, a narrow beaten dirt track crossing the frame horizontally with two branches going up-left and up-right at 60 degrees, muted earthy brown tone"
+    },
+    {
+     "id": "road_bridge_primary",
+     "kind": "strip",
+     "subject": "a stone bridge crossing the frame horizontally, a wide main road on dark stone slabs with low stone parapets on both sides, warm beige-grey tone"
+    },
+    {
+     "id": "road_bridge_secondary",
+     "kind": "strip",
+     "subject": "a wooden plank bridge crossing the frame horizontally, a narrow track on weathered brown planks with thin wooden rails on both sides, muted earthy brown tone"
+    }
+   ],
+   "style": "painted campaign world map road surface, muted natural pigments, close-value earthy colours, fine brush grain"
   }
  },
  "ramp_weights": {
