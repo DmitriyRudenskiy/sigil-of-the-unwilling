@@ -17,13 +17,31 @@ var _shadow_layer: TileMapLayer
 ## порядок задаёт TileAtlas.SIDES; MapRenderer.paint_transitions().
 var transition_layers: Array = []
 
+## Слой 3 «дороги» (world-map-art-variety 6.2): основная декаль (полоса/
+## перекрёсток/мост) и шесть подслоёв кромки — по одному на сторону гекса,
+## как у переходов: в одной клетке дороги сходятся разными сторонами, а
+## TileMapLayer хранит один тайл в клетке. Красит MapRenderer.paint_roads().
+var road_layer: TileMapLayer
+var road_edge_layers: Array = []
+
+## Порядок отрисовки (specs/world-map-layer-stack): база → стыки → дороги →
+## тени → растительность. Задаёт **этот список**, а не порядок объявления в
+## сцене и не порядок создания в `_ensure_layers()`: `map_generator.tscn`
+## объявлял `TileMapDecor` вторым, и в игре растительность рисовалась под
+## стыками и тенями, хотя тест порядка строил скрипт, а не сцену, и молчал.
+## Горного рельефа в списке нет: своей графики у слоя ещё нет (5.1 — пустой
+## TileMapLayer под будущую картинку ничего не включает и не выключает).
+const LAYER_ORDER := [
+	"TileMapTerrain", "TileMapTransitions", "TileMapRoads", "TileMapShadow", "TileMapDecor",
+]
+
 ## Отладочное отключение слоёв (world-map-layer-stack 5.1): имя слоя → его узел.
-## Порядок отрисовки фиксирован порядком создания в `_ensure_layers()` и этому
-## словарю не равен. Слои, у которых своей графики ещё нет (дороги, горный рельеф,
-## растительность), заводятся вместе с графикой (6.2, 7.x) — пустой TileMapLayer
-## под будущую картинку ничего не включает и не выключает. Носители ресурсов и
-## вражеских стеков живут не здесь: `ResourceNodes` у ResourceNodeManager и
-## маркеры у ui_manager.marker_layer.
+## Порядок отрисовки задаёт `LAYER_ORDER` (он же применяется к дереву), этому
+## словарю он не равен. Слои, у которых своей графики ещё нет (горный рельеф,
+## носители вражеских стеков), заводятся вместе с графикой (7.x, 8.x) — пустой
+## TileMapLayer под будущую картинку ничего не включает и не выключает. Носители
+## ресурсов и вражеских стеков живут не здесь: `ResourceNodes` у ResourceNodeManager
+## и маркеры у ui_manager.marker_layer.
 var render_layers: Dictionary = {}
 
 
@@ -90,6 +108,8 @@ func generate() -> void:
 
 	renderer = MapRenderer.new(model)
 	renderer.transition_layers = transition_layers
+	renderer.road_layer = road_layer
+	renderer.road_edge_layers = road_edge_layers
 	spawner = MapSpawner.new(model)
 	var units_reg: Node = Services.resolve(&"units")
 	if units_reg != null:
@@ -127,6 +147,9 @@ func generate() -> void:
 
 	# Re-render to include roads
 	renderer.paint(_tile_map)
+	# Слой дорог — после генератора дорог: до него road_grid пуст, и слой молчал
+	# бы там, где дорога уже есть (тот же порядок, что с растительностью).
+	renderer.paint_roads()
 
 func _compute_reachable_cells() -> Dictionary:
 	var start_cell: Vector2i = model.find_spawn_cell(hex_shift_right)
@@ -173,6 +196,37 @@ func _ensure_layers() -> void:
 			tlayer.tile_set = tileset
 		transition_layers.append(tlayer)
 
+	# Слой 3 «дороги» (6.2) — между стыками и тенями/растительностью: декаль
+	# покрытия лежит поверх базы, но не перекрывает носители объектов. Свой тайлсет:
+	# дороги живут на отдельном листе, геометрия та же (гекс, tile_size 82),
+	# поэтому клетки не разъезжаются с базой.
+	road_edge_layers.clear()
+	var roads_root: Node2D = get_node_or_null("TileMapRoads")
+	if roads_root == null:
+		roads_root = Node2D.new()
+		roads_root.name = "TileMapRoads"
+		add_child(roads_root)
+	road_layer = roads_root.get_node_or_null("TileMapRoad")
+	if road_layer == null:
+		road_layer = TileMapLayer.new()
+		road_layer.name = "TileMapRoad"
+		roads_root.add_child(road_layer)
+	for side: String in TileAtlas.SIDES:
+		var rname := "TileMapRoadEdge_" + side
+		var rlayer: TileMapLayer = roads_root.get_node_or_null(rname)
+		if rlayer == null:
+			rlayer = TileMapLayer.new()
+			rlayer.name = rname
+			roads_root.add_child(rlayer)
+		road_edge_layers.append(rlayer)
+	if road_layer.tile_set == null:
+		var road_tileset := MapRoads.build_tileset()
+		if road_tileset == null:
+			push_error("MapRoads: failed to build road tileset (missing %s)" % MapRoads.SHEET_PATH)
+		else:
+			for rlayer in [road_layer] + road_edge_layers:
+				(rlayer as TileMapLayer).tile_set = road_tileset
+
 	_shadow_layer = get_node_or_null("TileMapShadow")
 	if _shadow_layer == null:
 		_shadow_layer = TileMapLayer.new()
@@ -205,8 +259,20 @@ func _ensure_layers() -> void:
 	render_layers = {
 		"terrain": _tile_map,
 		"transitions": root,
+		"roads": roads_root,
 		"vegetation": _decor_layer,
 	}
+	_apply_layer_order()
+
+
+## Ставит детей в порядок `LAYER_ORDER`. Нужен именно он, а не «кто раньше
+## создан»: `world.tscn` приносит готовые узлы из `map_generator.tscn`, и их
+## объявленный в сцене порядок перебивал намерение кода.
+func _apply_layer_order() -> void:
+	for i in LAYER_ORDER.size():
+		var node: Node = get_node_or_null(LAYER_ORDER[i])
+		if node != null:
+			move_child(node, i)
 
 
 ## Снять/вернуть слой по имени. Только отрисовка: модель, проходимость и
@@ -222,6 +288,9 @@ func apply_fog(visibility_) -> void:
 	if visibility_ == null or renderer == null:
 		return
 	renderer.apply_fog(_tile_map, visibility_)
+	# Дороги — тоже слой (правило «туман войны по всем слоям»), иначе над стёртой
+	# базой висит яркая полоса (дефект T-150 в чистом виде).
+	renderer.paint_roads(visibility_)
 	# Объектные слои туман находит сам (T-150): перекраска идёт от модели, поэтому
 	# отступивший туман возвращает растительность, а не стирает её навсегда.
 	renderer.paint_decor(_decor_layer, _shadow_layer, visibility_)

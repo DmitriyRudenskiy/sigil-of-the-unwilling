@@ -27,6 +27,22 @@ var model
 ## MapGenerator; пусто — переходы не рисуются (юнит-тесты базы рисуют только слой 1).
 var transition_layers: Array = []
 
+## Слой 3 «дороги» (world-map-art-variety 6.2): основная декаль и шесть подслоёв
+## кромки. Задаёт MapGenerator; пусто — дороги не рисуются (юнит-тесты рельефа
+## рисуют только слой 1, как и с переходами).
+var road_layer: TileMapLayer
+var road_edge_layers: Array = []
+
+## Поверхность декали по типу дороги: specs/roads требует, чтобы основная (MST)
+## отличалась от второстепенной, и лист несёт ровно эти две. Тропа (TRAIL) идёт
+## второстепенной: отдельной картинки у неё нет, а выдумывать её здесь значило бы
+## просить у листа то, чего в нём нет (несовпадение ловит тест набора листа).
+const SURFACE_BY_ROAD_TYPE := {
+	MapRoadGenerator.RoadType.PRIMARY: "primary",
+	MapRoadGenerator.RoadType.SECONDARY: "secondary",
+	MapRoadGenerator.RoadType.TRAIL: "secondary",
+}
+
 ## city-hex-layout 4.1: кэш "тайл → город" (ядро/кольцо N); пересчёт при cities_changed.
 ## cell -> {city, ring} (0 = ядро)
 var city_zones: Dictionary = {}
@@ -112,6 +128,90 @@ func paint_transitions(visibility = null) -> void:
 					TileAtlas.BIOME_NAMES[biome], TileAtlas.BIOME_NAMES[other], side])
 				continue
 			(transition_layers[bit] as TileMapLayer).set_cell(cell, source, coords)
+
+## Слой 3 «дороги» (world-map-art-variety 6.2, specs/roads): декаль покрытия
+## поверх базы. Тип выбирается по соседям и остаётся картинкой: проходимость и
+## стоимость движения живут в terrain_grid/bridge_cells («Слои не влияют на
+## логику» — проверка `test_road_layer_toggle_does_not_change_paths`). База под
+## дорогой остаётся биомом ROAD — она и есть «обочина», декаль лежит сверху на
+## прозрачном фоне, поэтому решение не трогает модель и не требует хранить
+## «что было под дорогой».
+##   * клетка в bridge_cells → мост (переправа через реку — мост ставит туда
+##     MapRoadGenerator, там же база остаётся водой);
+##   * ≥3 соседей-дороги → перекрёсток;
+##   * иначе → полоса по оси дорог;
+##   * сосед без дороги (в том числе край карты) → кромка на этой стороне.
+func paint_roads(visibility = null) -> void:
+	if road_layer == null:
+		return
+	road_layer.clear()
+	for layer in road_edge_layers:
+		if layer is TileMapLayer:
+			layer.clear()
+	if road_edge_layers.size() != TileAtlas.SIDES.size():
+		push_error("MapRenderer: подслоёв кромки %d, сторон гекса %d" % [
+			road_edge_layers.size(), TileAtlas.SIDES.size()])
+		return
+	for cell in model.road_grid:
+		if visibility != null and not visibility.is_explored(cell):
+			continue
+		var fogged: bool = visibility != null and not visibility.is_visible(cell)
+		var src: int = MapRoads.FOG_SOURCE_ID if fogged else MapRoads.SOURCE_ID
+		var surface: String = SURFACE_BY_ROAD_TYPE.get(
+				int(model.road_grid[cell]), "secondary")
+		var bits: Array = _road_neighbor_bits(cell)
+		var axis: String = _road_axis(bits)
+		var main_id: String
+		if model.bridge_cells.has(cell):
+			main_id = MapRoads.bridge_id(axis, surface)
+		elif bits.size() >= 3:
+			main_id = MapRoads.intersection_id(surface)
+		else:
+			main_id = MapRoads.strip_id(axis, surface)
+		var coords: Vector2i = MapRoads.coords_for(main_id)
+		if coords.x < 0:
+			push_error("MapRoads: нет декали %s в манифесте листа дорог" % main_id)
+			continue
+		road_layer.set_cell(cell, src, coords)
+		for bit in TileAtlas.SIDES.size():
+			if bits.has(bit):
+				continue  # сосед — дорога: кромки там нет, там полотно
+			var side: String = TileAtlas.SIDES[bit]
+			var edge: String = MapRoads.edge_id(side, surface)
+			var ecoords: Vector2i = MapRoads.coords_for(edge)
+			if ecoords.x < 0:
+				push_error("MapRoads: нет кромки %s в манифесте листа дорог" % edge)
+				continue
+			(road_edge_layers[bit] as TileMapLayer).set_cell(cell, src, ecoords)
+
+
+## Соседи-дороги клетки: стороны (`TileAtlas.SIDES`), за которыми тоже дорога.
+func _road_neighbor_bits(cell: Vector2i) -> Array:
+	var bits: Array = []
+	for bit in TileAtlas.SIDES.size():
+		if model.road_grid.has(HexUtils.get_neighbor(cell, bit)):
+			bits.append(bit)
+	return bits
+
+
+## Ориентация полосы: ось, на которой стоит больше всего соседей-дорог. У
+## прямого участка это его единственная ось (два соседей на противоположных
+## сторонах), у поворота соседи лежат на разных осях и равенство разрешает
+## порядок MapRoads.AXES — детерминизм важнее угадывания, куда «больше хочется».
+func _road_axis(bits: Array) -> String:
+	var counts: Dictionary = {}
+	for bit in bits:
+		var side: String = TileAtlas.SIDES[int(bit)]
+		var axis: String = String(MapRoads.AXIS_BY_SIDE[side])
+		counts[axis] = int(counts.get(axis, 0)) + 1
+	var best: String = String(MapRoads.AXES[0])
+	var best_n: int = 0
+	for candidate in MapRoads.AXES:
+		if int(counts.get(candidate, 0)) > best_n:
+			best = String(candidate)
+			best_n = int(counts.get(candidate, 0))
+	return best
+
 
 ## База биома для клетки: вариант выбирается по клетке и сиду карты (задача 4.3),
 ## поэтому картина не зависит от порядка обхода словаря и переживает save/load.

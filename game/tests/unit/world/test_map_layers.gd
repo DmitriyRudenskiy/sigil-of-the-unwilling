@@ -6,10 +6,15 @@ extends BaseTest
 const _HexPathfinding = preload("res://scripts/core/hex_pathfinding.gd")
 const _TerrainCostTable = preload("res://scripts/data/terrain_cost_table.gd")
 
-## Порядок отрисовки: база → стыки → растительность. Задаётся одним местом —
-## порядком создания в MapGenerator._ensure_layers(). Мёртвый `ResourceLayer`
+## Порядок отрисовки: база → стыки → дороги → тени → растительность. Задаётся
+## одним местом — `MapGenerator.LAYER_ORDER` (он же применяет его к дереву).
+## Тени раньше попадали в список фильтр-намеренно («проверим три главных»);
+## теперь слой дорог заставил перечислить все: со списком неполным порядок
+## можно было переставить, а тест бы этого не заметил. Мёртвый `ResourceLayer`
 ## снят в 5.1 (носители живут в `ResourceNodes` у ResourceNodeManager, не здесь).
-const EXPECTED := ["TileMapTerrain", "TileMapTransitions", "TileMapDecor"]
+const EXPECTED := [
+	"TileMapTerrain", "TileMapTransitions", "TileMapRoads", "TileMapShadow", "TileMapDecor",
+]
 
 
 func _gen(seed_value: int) -> MapGenerator:

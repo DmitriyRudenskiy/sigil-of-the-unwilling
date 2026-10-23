@@ -42,6 +42,7 @@ ATLAS_JSON = ROOT / "game/assets/tiles/world_map_atlas.json"
 OBJ_IMG = ROOT / "game/assets/objects/world_map_objects.webp"
 OBJ_FOG_IMG = ROOT / "game/assets/objects/world_map_objects_fog.webp"
 ROAD_IMG = ROOT / "game/assets/objects/world_map_roads.webp"
+ROAD_FOG_IMG = ROOT / "game/assets/objects/world_map_roads_fog.webp"
 ROAD_JSON = ROOT / "game/assets/objects/world_map_roads.json"
 # Зеркало `GameNumbersMap.MAP_FOG_DIM`: затемнённый побратим листа печатается здесь.
 MAP_FOG_DIM = 0.45
@@ -479,6 +480,7 @@ def build_road_sheet(roads: list[dict]) -> list[dict]:
         sheet.paste(t, ((i % 8) * TILE, (i // 8) * TILE))
     ROAD_IMG.parent.mkdir(parents=True, exist_ok=True)
     sheet.save(ROAD_IMG, "WEBP", quality=QUALITY, lossless=LOSSLESS)
+    fog_twin(ROAD_IMG, ROAD_FOG_IMG)
     ROAD_JSON.write_text(json.dumps({
         "tile": TILE, "image": ROAD_IMG.name, "grid": [8, math.ceil(len(tiles) / 8)],
         "format": "webp", "quality": QUALITY,
@@ -657,21 +659,21 @@ def repro(rid: str) -> int:
     return 0 if (ha == hb and ha != hc) else 1
 
 
-def fog_twin() -> int:
-    """Затемнённый побратим листа объектов (дефект T-150): туман войны кладёт тот же
+def fog_twin(src: Path = OBJ_IMG, dst: Path = OBJ_FOG_IMG) -> int:
+    """Затемнённый побратим листа (дефект T-150): туман войны кладёт тот же
     объект вторым источником тайлсета, и кратность обязана быть той же, что у базы
     (`GameNumbersMap.MAP_FOG_DIM` — источник истины, здесь только зеркало).
 
     Печатаем отдельным файлом, а не красим на лету: в этом билде Godot у `Image` нет
     ни `modulate_rect`, ни поштучной модуляции клетки, а цикл по 5 млн пикселей в
     GDScript подорожал бы каждой генерации карты."""
-    src = Image.open(OBJ_IMG).convert("RGBA")
-    a = np.asarray(src).astype(np.float32)
+    im = Image.open(src).convert("RGBA")
+    a = np.asarray(im).astype(np.float32)
     a[..., :3] *= MAP_FOG_DIM
     Image.fromarray(a.astype(np.uint8), "RGBA").save(
-        OBJ_FOG_IMG, "WEBP", quality=QUALITY, lossless=LOSSLESS)
-    rel = OBJ_FOG_IMG.relative_to(ROOT) if OBJ_FOG_IMG.is_relative_to(ROOT) else OBJ_FOG_IMG
-    print(f"{rel}: ×{MAP_FOG_DIM}, {OBJ_FOG_IMG.stat().st_size // 1024} KiB")
+        dst, "WEBP", quality=QUALITY, lossless=LOSSLESS)
+    rel = dst.relative_to(ROOT) if dst.is_relative_to(ROOT) else dst
+    print(f"{rel}: ×{MAP_FOG_DIM}, {dst.stat().st_size // 1024} KiB")
     return 0
 
 
@@ -689,7 +691,15 @@ def main() -> int:
     if a.assemble:
         return assemble()
     if a.fog_twin:
-        return fog_twin()
+        # Каждый лист, который уже собран: объекты и дороги — независимые носители.
+        done = 0
+        for sheet_src, sheet_dst in ((OBJ_IMG, OBJ_FOG_IMG), (ROAD_IMG, ROAD_FOG_IMG)):
+            if sheet_src.exists():
+                fog_twin(sheet_src, sheet_dst)
+                done += 1
+        if not done:
+            raise SystemExit("нет ни одного собранного листа — сначала --assemble")
+        return 0
     if a.contact_sheet:
         return contact_sheet(ROOT / SPEC["out_dir"] / "sheet_map_art.webp")
     if a.repro:
