@@ -16,6 +16,8 @@ ap = argparse.ArgumentParser()
 ap.add_argument("--out", required=True)
 ap.add_argument("--max-intra-sim", type=float, default=0.80)
 ap.add_argument("--crops-dir", help="где лежат кропы (по умолчанию <out>/crops)")
+ap.add_argument("--no-books", action="store_true",
+                help="каждый файл — сам себе сюжет (разворотов книг нет)")
 a = ap.parse_args()
 
 out, rep = Path(a.out), json.loads((Path(a.out) / "sheets.json").read_text())
@@ -51,7 +53,8 @@ for s in rep["sheets"]:
 # 2. запрет внутри листа: порог и «та же книга + та же ячейка»
 stem = {f.rsplit(".", 1)[0]: b for f, b in books.items()}
 # кроп разворота = «книга + ячейка», одиночный файл = сам себе сюжет
-key = {n: ((stem[n.rsplit("_", 1)[0]], n[-6:-4]) if "_" in n else n) for n in names}
+key = ({n: n for n in names} if a.no_books else
+       {n: ((stem[n.rsplit("_", 1)[0]], n[-6:-4]) if "_" in n else n) for n in names})
 for s in rep["sheets"]:
     v = [row[c] for c in s["cells"]]
     want(len(v) == 9, f"лист {s['sheet']}: клеток {len(v)}")
