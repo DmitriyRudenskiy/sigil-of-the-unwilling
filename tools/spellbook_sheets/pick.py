@@ -127,14 +127,14 @@ def fix_nine(nine, S, same_object, unused, thr):
 def topup(nine, S, same_object, unused, n, thr):
     """Добор до `n` штук самым далёким неиспользованным кандидатом — то же
     правило, что у замены в `fix_nine`. Родные квоты могут дать меньше 9, когда
-    размер кластера меньше квоты. -> (девять, добрать нечем)"""
+    размер кластера меньше квоты. Под порог не попал -> лист не добирается
+    (дубли в листе дороже, чем неполный лист), `short=True` -> в остаток.
+    -> (девять, добрать нечем)"""
     nine = list(nine)
     while len(nine) < n:
         taken, keys = set(nine), {same_object[x] for x in nine}
         cand = [c for c in unused if c not in taken and same_object[c] not in keys
                 and all(S[c, x] <= thr for x in nine)]
-        if not cand:
-            cand = [c for c in unused if c not in taken]
         if not cand:
             return nine, True
         nine.append(max(cand, key=lambda c: (min(S[c, x] for x in nine), -c)))
@@ -218,6 +218,12 @@ if __name__ == "__main__":
     assert 48 not in got and 49 in got and len(got) == 9 and not w2, (got, w2)
     got, w2 = fix_nine(nine9, S2, same2, [], thr=0.9)
     assert w2 and 48 in got, (got, w2)
+
+    # добор: под порог никого -> short=True, девятка не заполняется «кем попало»
+    got, short = topup([0, 1, 2], S, same, [3, 4, 5], 9, 0.8)   # 0..5 — один кластер, ~1.0
+    assert short and got == [0, 1, 2], (got, short)
+    got, short = topup([0, 1, 2], S, same, [3, 4, 5, 12, 18, 24, 30, 36, 42], 9, 0.8)
+    assert not short and len(got) == 9 and 12 in got and not {3, 4, 5} & set(got), (got, short)
 
     C = centroids([list(range(9)), list(range(9, 18)), list(range(18, 24))], E2)
     order, d = order_sheets(C)

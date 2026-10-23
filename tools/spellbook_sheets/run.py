@@ -215,9 +215,14 @@ def main():
         nine, short = S.topup(nine, Sim, same_obj, free, 9, args.max_intra_sim)
         pre = set(nine)
         nine, w = S.fix_nine(nine, Sim, same_obj, [i for i in pool if i not in set(nine)], args.max_intra_sim)
-        if short:
-            w.append("добрать до 9 нечем")
         pool = [i for i in pool if i not in set(nine)]
+        if not nine:
+            break  # защита от зацикливания: девятка пуста, pool не уменьшается
+        if short:
+            # до 9 не добрать в пределах порога — лист не печатаем, кропы в остаток
+            twins += nine
+            warns.append(f"лист {len(nines)}: до 9 не добрать ({len(nine)}) — в остаток")
+            continue
         for out_, in_ in zip(sorted(pre - set(nine)), sorted(set(nine) - pre)):
             reps.append(f"лист {len(nines)}: `{crop_paths[out_].name}` → `{crop_paths[in_].name}`")
         nines.append(nine)
