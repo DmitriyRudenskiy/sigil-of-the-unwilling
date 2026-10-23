@@ -40,6 +40,26 @@ def masses(paths):
     return np.array(out)
 
 
+def dark_shards(paths, mass, flat_min=0.09):
+    """Тёмные залитые осколки: светлая рамка кадра + тёмная сцена внутри — маска
+    проглатывает фон, в кадре остаётся плоская чёрная лужа вместо здания.
+    Признак: масса >0.45, объект тёмный (средняя яркость <55) и в нём есть
+    крупная плоская почти-чёрная лужа. Тёмный замок с текстурой выживает."""
+    from scipy import ndimage
+    out = []
+    for p, m in zip(paths, mass):
+        ok = False
+        if m > 0.45:
+            a = np.asarray(Image.open(p).convert("RGB").resize((192, 192), Image.LANCZOS),
+                           dtype=np.int16)
+            fg = np.abs(a - 255).sum(-1) > 90
+            if fg.any() and a[fg].mean() < 55:
+                ok = bool(ndimage.binary_opening(fg & (a.sum(-1) < 75),
+                                                 np.ones((9, 9))).mean() >= flat_min)
+        out.append(ok)
+    return np.array(out, dtype=bool)
+
+
 def size_bands(pool, mass, edges=(0.0, 0.30, 0.45, 0.60, 1.01)):
     """Полосы по «массе»: лист собирается внутри одной, иначе в одном листу
     рядом оказываются плоский сарай и трёхэтажный замок.
@@ -158,6 +178,8 @@ def main():
     ap.add_argument("--min-mass", type=float, default=0.12,                    help="занятая доля кадра ниже порога — это не здание, а плитка/обрезок, в остаток")
     ap.add_argument("--max-mass", type=float, default=0.85,
                     help="выше порога — квадрат сцены вместо силуэта здания, в остаток")
+    ap.add_argument("--dark-flat", type=float, default=0.09,
+                    help="доля плоской почти-чёрной лужи в тёмном кадре; 0 — выключить")
     ap.add_argument("--no-size-bands", action="store_true",
                     help="не группировать лист по размеру объекта")
     ap.add_argument("--seed", type=int, default=43)
@@ -252,6 +274,7 @@ def main():
         print(f"  отложено по глобальному порогу {args.global_max_sim}: {len(twins) - len(already)}")
     nines, meta_rows, warns, reps = [], [], [], []
     Mass = masses(crop_paths)
+    Shard = dark_shards(crop_paths, Mass, args.dark_flat) if args.dark_flat > 0 else np.zeros(len(crop_paths), bool)
     thin = [i for i in pool if not args.min_mass <= Mass[i] <= args.max_mass]
     if thin:
         twins += thin
@@ -259,6 +282,11 @@ def main():
         print(f"  пустых/залитых кадров (масса вне [{args.min_mass}, {args.max_mass}]) "
               f"отложено: {len(thin)}")
     bands = [pool]
+    shards = [i for i in pool if Shard[i]]
+    if shards:
+        twins += shards
+        pool = [i for i in pool if not Shard[i]]
+        print(f"  тёмных залитых осколков (плоская лужа >= {args.dark_flat}) отложено: {len(shards)}")
     if not args.no_size_bands:
         bands, rest = size_bands(pool, Mass)
         twins += rest

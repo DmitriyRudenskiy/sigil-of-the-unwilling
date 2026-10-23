@@ -95,11 +95,13 @@ CROP_POS = {
 # подписи и скриншоты стратегий отвечают «нет»
 CROP_NEG = {
     "building": ["a screenshot of a strategy game", "a landscape with many buildings",
-                 "a farm field", "an animal pen", "a fountain", "a theater stage",
-                 "a bridge", "a statue monument", "an orchard with fruit trees",
+                 "a farm field", "a wheat field", "an animal pen", "a fountain",
+                 "a theater stage", "a bridge", "a statue monument", "an orchard with fruit trees",
                  "beehives", "a user interface card", "written text and letters",
                  "a photograph of a house", "a game map", "fantasy creature", "a person",
-                 "a weapon"],
+                 "a knight in armor", "a weapon", "a treasure chest", "a stone well",
+                 "a wooden cart", "wooden crates", "a tent", "a rock formation",
+                 "a pile of logs", "a flag banner"],
 }
 
 
