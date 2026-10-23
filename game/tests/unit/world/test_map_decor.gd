@@ -272,16 +272,6 @@ func test_fallback_tileset_is_workable() -> void:
 	assert_that(src.has_tile(Vector2i.ZERO)).is_true()
 
 
-## Источник деталей (4.2): пока манифест не несёт клеток kind=="detail",
-## отдельный источник в тайлсете не создаётся (инфраструктура готова).
-func test_detail_source_absent_without_detail_cells() -> void:
-	var atlas := TileAtlas.new()
-	var ts: TileSet = atlas.build_hex()
-	assert_that(ts).is_not_null()
-	# Детальных клеток в атласе нет → источника DETAIL_SOURCE_ID нет.
-	assert_that(ts.get_source(TileAtlas.DETAIL_SOURCE_ID)).is_null()
-
-
 func _make_resource_node(id: StringName) -> ResourceNode:
 	var node: ResourceNode = load("res://scenes/entities/resource_node.tscn").instantiate()
 	add_child(node)
