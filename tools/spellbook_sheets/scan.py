@@ -132,11 +132,14 @@ def stage_scan(args):
           f"порог {args.min_score} → кандидатов {len(keep)}")
 
 
-def objects(im, min_frac=0.02, max_n=3):
+def objects(im, min_frac=0.02, max_n=3, atlas_min=8):
     """Квадраты объектов на однотонном фоне: порог по цвету рамки + связные компоненты.
 
     -> (список боксов в пикселях `im`, доля переднего плана). Боксов нет -> [] ;
     фона нет (фото, скриншот) -> ([], frac) при frac > 0.9.
+
+    Атлас (спрайт-шит: >= `atlas_min` отдельных кусков) режется по сырым
+    компонентам — с дилейтом соседние спрайты склеиваются в один бокс.
     """
     from scipy import ndimage
     a = np.asarray(im.convert("RGB"), dtype=np.int16)
@@ -149,15 +152,27 @@ def objects(im, min_frac=0.02, max_n=3):
     frac = float(fg.mean())
     if not 0.005 <= frac <= 0.9:
         return [], frac
+    raw, _ = ndimage.label(fg, structure=np.ones((3, 3)))
+    sizes = np.bincount(raw.ravel())[1:]
+    floor = 0.002 * fg.sum()
+    if sizes.size and np.count_nonzero(sizes >= floor) >= atlas_min:
+        return _boxes(raw, sizes, max_n, floor, min_side=24), frac
     lab, n = ndimage.label(ndimage.binary_dilation(fg, np.ones((3, 3)), iterations=2),
                            structure=np.ones((3, 3)))
+    return _boxes(lab, np.bincount(lab.ravel())[1:], max_n, min_frac * fg.sum()), frac
+
+
+def _boxes(lab, sizes, max_n, min_area, min_side=0):
+    """Боксы компонент по убыванию площади: не больше `max_n`, мельче `min_area` не берём."""
     out = []
-    for i, area in sorted(enumerate(np.bincount(lab.ravel())[1:], 1), key=lambda x: -x[1]):
-        if area < min_frac * fg.sum() or len(out) >= max_n:
+    for i, area in sorted(enumerate(sizes, 1), key=lambda x: -x[1]):
+        if area < min_area or len(out) >= max_n:
             break
         ys, xs = np.nonzero(lab == i)
+        if min(xs.max() - xs.min(), ys.max() - ys.min()) < min_side:
+            continue
         out.append([int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1, int(area)])
-    return out, frac
+    return out
 
 
 def stage_crop(args):
@@ -276,6 +291,17 @@ def selfcheck():
     assert len(objects(im)[0]) == 2, objects(im)[0]
     # пёстрый кадр без фона -> «не кроить»
     assert objects(Image.new("RGB", (200, 200), (90, 30, 200)))[0] == []
+    # атлас 5x5: сетка склеивается дилейтом, но сырые компоненты дают 25 спрайтов
+    from PIL import ImageDraw as _D
+    at = Image.new("RGB", (300, 300), "white")
+    d = _D.Draw(at)
+    for r in range(5):
+        for c in range(5):
+            d.rectangle([10 + c * 60, 10 + r * 60, 50 + c * 60, 50 + r * 60], fill=(60, 40, 90))
+    boxes, frac = objects(at, max_n=40)
+    assert len(boxes) == 25, len(boxes)
+    assert len(objects(at, max_n=3)[0]) == 3 and 0.4 < frac < 0.5, frac
+    assert len(objects(at, max_n=40)[0][0][:4]) == 4
     print("ok")
 
 
