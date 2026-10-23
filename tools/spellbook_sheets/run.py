@@ -31,6 +31,33 @@ import pick as S  # noqa: E402
 Image.MAX_IMAGE_PIXELS = None
 
 
+def masses(paths):
+    """Доля занятых пикселей в кадре — «размер» объекта на глаз."""
+    out = []
+    for p in paths:
+        a = np.asarray(Image.open(p).convert("L").resize((96, 96), Image.LANCZOS))
+        out.append(float((255 - a > 40).mean()))
+    return np.array(out)
+
+
+def size_bands(pool, mass, edges=(0.0, 0.30, 0.45, 0.60, 1.01)):
+    """Полосы по «массе»: лист собирается внутри одной, иначе в одном листу
+    рядом оказываются плоский сарай и трёхэтажный замок.
+
+    -> (полосы с >=9 кропов, остатки) — остатки нечего листать, они в остаток.
+    """
+    out = [[] for _ in range(len(edges) - 1)]
+    for i in pool:
+        for b in range(len(edges) - 1):
+            if edges[b] <= mass[i] < edges[b + 1]:
+                out[b].append(i)
+                break
+    bands, rest = [], []
+    for b in out:
+        bands.append(b) if len(b) >= 9 else rest.extend(b)
+    return bands, rest
+
+
 def sources(input_dir):
     out = []
     for p in sorted(Path(input_dir).iterdir()):
@@ -111,8 +138,8 @@ def contact(sheet_path, out_png, width=760):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--input", required=True)
-    ap.add_argument("--out", required=True)
+    ap.add_argument("--input", default="")
+    ap.add_argument("--out", default="")
     ap.add_argument("--crops", action="store_true",
                     help="--input — каталог готовых кропов, детекцию пропустить")
     ap.add_argument("--no-books", action="store_true",
@@ -128,14 +155,28 @@ def main():
     ap.add_argument("--global-max-sim", type=float, default=0.95,
                     help="сюжет не более одного раза во ВСЁМ пуле: копия ближе к уже "
                          "взятой, чем порог, идёт в остаток (0 = выключено)")
+    ap.add_argument("--min-mass", type=float, default=0.12,
+                    help="занятая доля кадра ниже порога — это не здание, а плитка/обрезок, в остаток")
+    ap.add_argument("--no-size-bands", action="store_true",
+                    help="не группировать лист по размеру объекта")
     ap.add_argument("--seed", type=int, default=43)
     ap.add_argument("--max-clusters", type=int, default=10)
     ap.add_argument("--sam-device", default="mps")
     ap.add_argument("--embed-device", default="cpu")
     ap.add_argument("--limit", type=int, default=0, help="только N первых листов (отладка)")
     ap.add_argument("--yes", action="store_true", help="прототип уже сверен, идти до конца")
+    ap.add_argument("--selftest", action="store_true", help="проверить size_bands и выйти")
     args = ap.parse_args()
+    if args.selftest:
+        m = np.array([0.4] * 9 + [0.8] * 8)
+        bands, rest = size_bands(list(range(17)), m)
+        assert [len(b) for b in bands] == [9] and sorted(rest) == list(range(9, 17)), (bands, rest)
+        assert size_bands(list(range(9)), np.array([0.4] * 9))[0][0] == list(range(9))
+        print("ok")
+        return
 
+    if not args.input or not args.out:
+        raise SystemExit("--input и --out обязательны (--selftest — без них)")
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     srcs = sources(args.input)
@@ -209,30 +250,46 @@ def main():
         pool = keep
         print(f"  отложено по глобальному порогу {args.global_max_sim}: {len(twins) - len(already)}")
     nines, meta_rows, warns, reps = [], [], [], []
-    while len(pool) >= 9:
-        nine, meta = S.select_nine(E, pool, 9, args.seed, args.max_clusters)
-        free = [i for i in pool if i not in set(nine)]
-        nine, short = S.topup(nine, Sim, same_obj, free, 9, args.max_intra_sim)
-        pre = set(nine)
-        nine, w = S.fix_nine(nine, Sim, same_obj, [i for i in pool if i not in set(nine)], args.max_intra_sim)
-        pool = [i for i in pool if i not in set(nine)]
-        if not nine:
-            break  # защита от зацикливания: девятка пуста, pool не уменьшается
-        if short:
-            # до 9 не добрать в пределах порога — лист не печатаем, кропы в остаток
-            twins += nine
-            warns.append(f"лист {len(nines)}: до 9 не добрать ({len(nine)}) — в остаток")
-            continue
-        for out_, in_ in zip(sorted(pre - set(nine)), sorted(set(nine) - pre)):
-            reps.append(f"лист {len(nines)}: `{crop_paths[out_].name}` → `{crop_paths[in_].name}`")
-        nines.append(nine)
-        intra = max(Sim[i, j] for a, i in enumerate(nine) for j in nine[a + 1:])
-        meta_rows.append({"sheet": len(nines) - 1, "mode": meta["mode"], "target_k": meta["target_k"],
-                          "lrs": round(float(meta.get("lrs", 0.0)), 4), "cells": len(nine),
-                          "max_intra_sim": round(float(intra), 4), "left": len(pool)})
-        warns += [f"лист {len(nines) - 1}: {x}" for x in w]
-        print(f"  лист {len(nines) - 1:2d}: {meta['mode']:<13} k={meta['target_k']:<2} "
-              f"LRS={meta.get('lrs', 0):.4f} max_intra={intra:.3f} осталось {len(pool)}", flush=True)
+    Mass = masses(crop_paths)
+    thin = [i for i in pool if Mass[i] < args.min_mass]
+    if thin:
+        twins += thin
+        pool = [i for i in pool if Mass[i] >= args.min_mass]
+        print(f"  пустых кадров (масса < {args.min_mass}) отложено: {len(thin)}")
+    bands = [pool]
+    if not args.no_size_bands:
+        bands, rest = size_bands(pool, Mass)
+        twins += rest
+        print(f"  полос по размеру: {[len(b) for b in bands]} · не в полосу: {len(rest)}")
+    left = []
+    for band in bands:
+        pool = band
+        while len(pool) >= 9:
+          nine, meta = S.select_nine(E, pool, 9, args.seed, args.max_clusters)
+          free = [i for i in pool if i not in set(nine)]
+          nine, short = S.topup(nine, Sim, same_obj, free, 9, args.max_intra_sim)
+          pre = set(nine)
+          nine, w = S.fix_nine(nine, Sim, same_obj, [i for i in pool if i not in set(nine)], args.max_intra_sim)
+          pool = [i for i in pool if i not in set(nine)]
+          if not nine:
+              break  # защита от зацикливания: девятка пуста, pool не уменьшается
+          if short:
+              # до 9 не добрать в пределах порога — лист не печатаем, кропы в остаток
+              twins += nine
+              warns.append(f"лист {len(nines)}: до 9 не добрать ({len(nine)}) — в остаток")
+              continue
+          for out_, in_ in zip(sorted(pre - set(nine)), sorted(set(nine) - pre)):
+              reps.append(f"лист {len(nines)}: `{crop_paths[out_].name}` → `{crop_paths[in_].name}`")
+          nines.append(nine)
+          intra = max(Sim[i, j] for a, i in enumerate(nine) for j in nine[a + 1:])
+          meta_rows.append({"sheet": len(nines) - 1, "mode": meta["mode"], "target_k": meta["target_k"],
+                            "lrs": round(float(meta.get("lrs", 0.0)), 4), "cells": len(nine),
+                            "max_intra_sim": round(float(intra), 4), "left": len(pool)})
+          warns += [f"лист {len(nines) - 1}: {x}" for x in w]
+          print(f"  лист {len(nines) - 1:2d}: {meta['mode']:<13} k={meta['target_k']:<2} "
+                f"LRS={meta.get('lrs', 0):.4f} max_intra={intra:.3f} осталось {len(pool)}", flush=True)
+        left += pool
+    pool = left
 
     C = S.centroids(nines, E)
     order, d_first_last = S.order_sheets(C)
