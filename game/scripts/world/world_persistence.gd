@@ -199,6 +199,9 @@ func apply_loaded_save(data: SaveData, ctx) -> void:
 	for cell in ctx.world_delta.defeated_enemies:
 		if ctx.map_gen:
 			ctx.map_gen.enemy_stacks.erase(cell)
+			# Тир живёт ровно столько, сколько стэк: висячий тир над перевыпущенным
+			# на том же месте стэком нарисовал бы носитель чужого кольца.
+			ctx.map_gen.enemy_tiers.erase(cell)
 		if ctx.spawner:
 			ctx.spawner.remove_enemy_at(cell)
 

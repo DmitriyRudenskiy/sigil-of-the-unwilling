@@ -894,5 +894,47 @@
   "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
   "server_file": "map_road_bridge_secondary_a1_00001_.png",
   "file": "image-clone/map/raw/road_bridge_secondary.webp"
+ },
+ "threat_ring1_wild": {
+  "id": "threat_ring1_wild",
+  "ok": true,
+  "why": "",
+  "seed": 1447862440,
+  "attempt": 1,
+  "prompt_version": "map-1",
+  "prompt": "hand-painted world map threat marker, one single marker standing alone, muted natural pigments with one cold or sickly accent, readable silhouette, fine brush grain, hand-painted strategy game map art, painterly rendering, soft warm key light, warm browns #664328 #a46739 #ca9861 on parchment #ddd5cc, limited earthy palette, visible brush texture, no photorealism, no glossy shaders, one isolated game sprite, a single object alone in the middle of the frame filling most of it, whole object visible with a clear empty margin, nothing touching the frame edges, seen from a high three-quarter angle with its base at the bottom, plain flat white paper background with nothing else on it, no map, no continents, no globe, no geography, no parchment board, no plaque, no sign, no ground, no cast shadow, no text, a wild beast lair marker, a low wide heap of weathered grey-brown animal hides and bleached animal bones and antlers hung on crooked wooden stakes, muted grey-tan tone, no photograph, photorealism, 3d render, cgi, glossy plastic, anime, cartoon, line art, sketch, text, letters, watermark, logo, ui, interface, frame, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, text, letters, signature, watermark",
+  "negative": "",
+  "model": "krea2",
+  "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
+  "server_file": "map_threat_ring1_wild_a1_00001_.png",
+  "file": "image-clone/map/raw/threat_ring1_wild.webp"
+ },
+ "threat_ring2_raiders": {
+  "id": "threat_ring2_raiders",
+  "ok": true,
+  "why": "",
+  "seed": 743983112,
+  "attempt": 1,
+  "prompt_version": "map-1",
+  "prompt": "hand-painted world map threat marker, one single marker standing alone, muted natural pigments with one cold or sickly accent, readable silhouette, fine brush grain, hand-painted strategy game map art, painterly rendering, soft warm key light, warm browns #664328 #a46739 #ca9861 on parchment #ddd5cc, limited earthy palette, visible brush texture, no photorealism, no glossy shaders, one isolated game sprite, a single object alone in the middle of the frame filling most of it, whole object visible with a clear empty margin, nothing touching the frame edges, seen from a high three-quarter angle with its base at the bottom, plain flat white paper background with nothing else on it, no map, no continents, no globe, no geography, no parchment board, no plaque, no sign, no ground, no cast shadow, no text, a raider warband marker, a tall tattered dark oxblood war banner hung on a notched wooden spear shaft with a rusted axe head lashed to it, deep dull red and rust tone, no photograph, photorealism, 3d render, cgi, glossy plastic, anime, cartoon, line art, sketch, text, letters, watermark, logo, ui, interface, frame, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, text, letters, signature, watermark",
+  "negative": "",
+  "model": "krea2",
+  "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
+  "server_file": "map_threat_ring2_raiders_a1_00001_.png",
+  "file": "image-clone/map/raw/threat_ring2_raiders.webp"
+ },
+ "threat_ring3_monsters": {
+  "id": "threat_ring3_monsters",
+  "ok": true,
+  "why": "",
+  "seed": 680387569,
+  "attempt": 1,
+  "prompt_version": "map-1",
+  "prompt": "hand-painted world map threat marker, one single marker standing alone, muted natural pigments with one cold or sickly accent, readable silhouette, fine brush grain, hand-painted strategy game map art, painterly rendering, soft warm key light, warm browns #664328 #a46739 #ca9861 on parchment #ddd5cc, limited earthy palette, visible brush texture, no photorealism, no glossy shaders, one isolated game sprite, a single object alone in the middle of the frame filling most of it, whole object visible with a clear empty margin, nothing touching the frame edges, seen from a high three-quarter angle with its base at the bottom, plain flat white paper background with nothing else on it, no map, no continents, no globe, no geography, no parchment board, no plaque, no sign, no ground, no cast shadow, no text, a monster lair marker, a tall black obsidian obelisk carved with a jagged pale sigil, faint sickly green glow at its base, near-black stone with cold green accent, no photograph, photorealism, 3d render, cgi, glossy plastic, anime, cartoon, line art, sketch, text, letters, watermark, logo, ui, interface, frame, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, text, letters, signature, watermark",
+  "negative": "",
+  "model": "krea2",
+  "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
+  "server_file": "map_threat_ring3_monsters_a1_00001_.png",
+  "file": "image-clone/map/raw/threat_ring3_monsters.webp"
  }
 }

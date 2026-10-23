@@ -269,6 +269,62 @@ const THREAT_RING3 := ["trolls", "stone_golem", "iron_golem", "fire_elemental",
 const THREAT_RING2_RADIUS := 12
 const THREAT_RING3_RADIUS := 24
 
+
+## Кольцо угрозы по дистанции от истока угрозы (world-map-art-variety 8.2).
+## Одна функция на правило: из того же правила выбирается и пул юнитов, поэтому
+## номер тира не имеет права разойтись с тем, чем стэк реально набран (два
+## независимых описания радиусов разошлись бы молча — носитель кольца 2 рисовался
+## бы над стэком из кольца 3).
+static func threat_ring(dist: int) -> int:
+	if dist < THREAT_RING2_RADIUS:
+		return MapThreat.RING_WILD
+	if dist < THREAT_RING3_RADIUS:
+		return MapThreat.RING_RAIDERS
+	return MapThreat.RING_MONSTERS
+
+
+## Тир по юниту; 0 — юнит не из пулов колец (faction sets шире колец).
+## Проверка сверху вниз: ключ, попавший в несколько пулов, тянет в самое
+## опасное кольцо — носитель обязан предупреждать о худшем, что есть в стэке.
+static func threat_ring_of_unit(key: String) -> int:
+	if THREAT_RING3.has(key):
+		return MapThreat.RING_MONSTERS
+	if THREAT_RING2.has(key):
+		return MapThreat.RING_RAIDERS
+	if THREAT_RING1.has(key):
+		return MapThreat.RING_WILD
+	return 0
+
+
+## Тир по составу стэка (максимум по юнитам); 0 — ни один юнит не опознан.
+static func threat_ring_of_army(army: Array) -> int:
+	var best := 0
+	for stack in army:
+		if stack == null or not stack.has_method("get_key"):
+			continue
+		best = maxi(best, threat_ring_of_unit(String(stack.get_key())))
+	return best
+
+
+## Разрешение тира стэка. Порядок: записанный создателем → состав → дистанция от
+## клетки старта. Последний шаг — подстраховка для стэков, созданных вне
+## place_enemies (тесты, чужие писатели): носитель остаётся детерминированным
+## правилом, а не случайностью, которую запрещает спека. Полноту записанных
+## тиров держат тесты на писателей, а не push_error в рантайме: игрок не должен
+## получать промах писателя ошибкой в консоль.
+static func resolve_threat_ring(model: MapModel, cell: Vector2i, army: Array) -> int:
+	var written := int(model.enemy_tiers.get(cell, 0))
+	if written in MapThreat.RINGS:
+		return written
+	var by_composition := threat_ring_of_army(army)
+	if by_composition > 0:
+		return by_composition
+	var start: Vector2i = model.find_spawn_cell()
+	if start.x < 0:
+		return MapThreat.RING_MONSTERS
+	return threat_ring(HexUtils.hex_distance(cell, start))
+
+
 # Минимальная дистанция спавна врага от клеток города. >= ENEMY_AGGRO_RADIUS (8),
 # иначе стая сразу в aggro радиусе города захватывает его за 1–2 хода —
 # DEFEAT на ходу 2, ранняя игра непроходима (найдено balance-core прогонкой).
@@ -283,6 +339,7 @@ func set_known_cities(cities: Array) -> void:
 
 func place_enemies(reachable = null) -> void:
 	model.enemy_stacks.clear()
+	model.enemy_tiers.clear()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = model.seed_value + 777
 
@@ -318,6 +375,7 @@ func place_enemies(reachable = null) -> void:
 
 		# Ранняя игра: тир по дистанции от старта, случайный выбор из общего пула запрещён
 		var dist: int = HexUtils.hex_distance(cell, threat_origin) if threat_origin.x >= 0 else THREAT_RING3_RADIUS
+		var ring: int = threat_ring(dist)
 		var pool: Array = _threat_pool(dist)
 		var army: Array[UnitStack] = []
 
@@ -332,10 +390,20 @@ func place_enemies(reachable = null) -> void:
 
 		if army.size() > 0:
 			model.enemy_stacks[cell] = army
+			# Тир пишется рядом со стэком и из того же `dist`, что выбрал пул: между
+			# «чем набран стэк» и «какой у него носитель» не должно быть второго решения.
+			model.enemy_tiers[cell] = ring
 			placed += 1
 
 func _threat_origin() -> Vector2i:
-	for city in known_cities:
+	return threat_origin_of(known_cities, model)
+
+
+## Исток колец угрозы: город игрока, а если его ещё нет — клетка старта.
+## Статик затем, что тот же исток нужен тем, кто дописывает стэки уже после
+## генерации (EnemyGrowthSystem), а не только первому расстановщику.
+static func threat_origin_of(cities: Array, model: MapModel) -> Vector2i:
+	for city in cities:
 		if city != null and city.owner == &"player" and city.center is Vector2i:
 			return city.center
 	return model.find_spawn_cell()
@@ -368,9 +436,10 @@ func _near_city(cell: Vector2i) -> bool:
 	return false
 
 static func _threat_pool(dist: int) -> Array:
-	if dist < THREAT_RING2_RADIUS:
+	var ring := threat_ring(dist)
+	if ring == MapThreat.RING_WILD:
 		return THREAT_RING1
-	if dist < THREAT_RING3_RADIUS:
+	if ring == MapThreat.RING_RAIDERS:
 		return THREAT_RING2
 	return THREAT_RING3
 

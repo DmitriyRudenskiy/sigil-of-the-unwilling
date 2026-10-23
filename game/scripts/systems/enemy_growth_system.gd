@@ -46,6 +46,9 @@ func on_stack_defeated(cell: Vector2i, army: Array) -> void:
 		"x": cell.x,
 		"y": cell.y,
 		"units": units,
+		# Кольцо переживает перерождение: побеждённый стэк возвращается тем же
+		# кольцом, каким он был (носитель читается из тира, а тир — из модели).
+		"ring": int(_map_gen.enemy_tiers.get(cell, 0)) if _map_gen != null else 0,
 		"turns_left": GameNumbers.ENEMY_RESPAWN_TURNS,
 	})
 	GameLogger.world("Enemy stack at %s will respawn in %d turns" % [str(cell), GameNumbers.ENEMY_RESPAWN_TURNS])
@@ -68,6 +71,7 @@ func _process_respawns(report: Dictionary) -> void:
 			var army := _build_army(q[i].get("units", []))
 			if not army.is_empty() and _stack_count() < GameNumbers.MAP_ENEMY_COUNT and _can_spawn_at(cell):
 				_map_gen.enemy_stacks[cell] = army
+				_map_gen.enemy_tiers[cell] = _ring_for(cell, army, int(q[i].get("ring", 0)))
 				_world_delta.defeated_enemies.erase(cell)
 				if _spawner != null and _spawner.has_method("spawn_enemy_visual"):
 					_spawner.spawn_enemy_visual(cell, army)
@@ -94,6 +98,7 @@ func _process_season(season: int, report: Dictionary) -> void:
 		if army.is_empty():
 			continue
 		_map_gen.enemy_stacks[cell] = army
+		_map_gen.enemy_tiers[cell] = _ring_for(cell, army, 0)
 		report["season_spawns"] = int(report.get("season_spawns", 0)) + 1
 		if _spawner != null and _spawner.has_method("spawn_enemy_visual"):
 			_spawner.spawn_enemy_visual(cell, army)
@@ -108,6 +113,23 @@ func _queue() -> Array:
 
 func _stack_count() -> int:
 	return _map_gen.enemy_stacks.size()
+
+
+## Тир стэка, созданного после генерации. Наследованный (перерождение) важнее
+## состава, состав важнее дистанции: случайного нося здесь нет намеренно, а
+## faction sets шире колец, поэтому у сезонного стэка тир чаще всего именно
+## дистанционный. Тот же порядок, что у `MapSpawner.resolve_threat_ring`.
+func _ring_for(cell: Vector2i, army: Array, inherited: int) -> int:
+	if inherited in MapThreat.RINGS:
+		return inherited
+	var ring: int = MapSpawner.threat_ring_of_army(army)
+	if ring > 0:
+		return ring
+	var origin: Vector2i = MapSpawner.threat_origin_of(
+		_cities_mgr.cities if _cities_mgr != null else [], _map_gen.model)
+	if origin.x < 0:
+		return MapThreat.RING_MONSTERS
+	return MapSpawner.threat_ring(HexUtils.hex_distance(cell, origin))
 
 func _can_spawn_at(cell: Vector2i) -> bool:
 	if _map_gen == null or not _map_gen.is_walkable(cell):

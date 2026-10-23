@@ -190,6 +190,28 @@ func _make_enemy_node(cell: Vector2i, army: Array) -> Node2D:
 			Color(0.7, 0.15, 0.1),
 			Color(0.2, 0.05, 0.05)
 		)
+	# Носитель тира (world-map-art-variety 8.2): подложка под портретом, номер
+	# кольца читается из модели мира (`MapSpawner.resolve_threat_ring`), а не из
+	# картинки и не из случайности. Портрет — юнит, подложка — кольцо угрозы;
+	# состав стэка для боя по-прежнему берётся из `enemy_stacks` (спека: «носитель
+	# не подменяет данные»). Подложка — потомок стэка, поэтому туман войны, который
+	# прячет целый узел (D-205), прячет и её: разведка врага не отдаётся затемнённым
+	# кольцом.
+	var back := e.get_node_or_null("Backing")
+	if back != null:
+		var ring: int = 0
+		if map.model != null:
+			ring = MapSpawner.resolve_threat_ring(map.model, cell, army)
+		else:
+			ring = MapSpawner.threat_ring_of_army(army)
+		# ring == 0 возможен только во второй ветке: модели мира ещё нет и ни один
+		# юнит не опознан. Дорисовать кольцо наугад нельзя (спека запрещает
+		# случайность), но и оставить стэк в чужом носителе нельзя — спрайт
+		# прячется целиком.
+		back.visible = ring > 0
+		if ring > 0:
+			back.texture = MapThreat.carrier_texture(ring)
+			back.position = MapThreat.carrier_offset(ring)
 	e.position = map.map_to_local(cell)
 	return e
 

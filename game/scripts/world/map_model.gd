@@ -29,6 +29,14 @@ var village_cells: Array[Vector2i] = []
 var resource_cells: Dictionary = {}
 var decor_cells: Dictionary = {}
 var enemy_stacks: Dictionary = {}
+## Тир (кольцо угрозы) стэка: клетка → 1|2|3 (world-map-art-variety 8.2). Пишется
+## тем, кто создаёт стэк, и читается визуальным носителем: спека «Визуальный
+## носитель тира» требует, чтобы носитель читался из тира, а не назначался
+## случайно. Поле отдельное, а не производная от состава: сезонные стэки
+## EnemyGrowthSystem набираются из faction sets, большинство ключей которых не
+## входит ни в один пул колец (замер по unit_registry.FACTION_SETS: 84 ключа,
+## в пулах колец — меньше трети), поэтому «тир по юниту» для них не определён.
+var enemy_tiers: Dictionary = {}
 var chest_cells: Array[Vector2i] = []
 
 var _blocked_cache: Dictionary = {}

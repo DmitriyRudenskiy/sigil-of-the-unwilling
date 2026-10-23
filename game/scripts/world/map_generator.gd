@@ -63,6 +63,9 @@ var decor_cells: Dictionary:
 var enemy_stacks: Dictionary:
 	get: return model.enemy_stacks if model != null else {}
 
+var enemy_tiers: Dictionary:
+	get: return model.enemy_tiers if model != null else {}
+
 var _seed_value: int = 0
 var _map_width: int = 0
 var _map_height: int = 0

@@ -1,0 +1,55 @@
+{
+ "tile": 82,
+ "image": "world_map_threat.webp",
+ "grid": [
+  8,
+  1
+ ],
+ "format": "webp",
+ "quality": 90,
+ "prompt_version": "map-1",
+ "cells": [
+  {
+   "id": "threat_ring1_wild",
+   "group": "threat",
+   "ring": 1,
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    0,
+    0
+   ],
+   "source": "image-clone/map/raw/threat_ring1_wild.webp"
+  },
+  {
+   "id": "threat_ring2_raiders",
+   "group": "threat",
+   "ring": 2,
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    1,
+    0
+   ],
+   "source": "image-clone/map/raw/threat_ring2_raiders.webp"
+  },
+  {
+   "id": "threat_ring3_monsters",
+   "group": "threat",
+   "ring": 3,
+   "anchor": [
+    41,
+    80
+   ],
+   "atlas": [
+    2,
+    0
+   ],
+   "source": "image-clone/map/raw/threat_ring3_monsters.webp"
+  }
+ ]
+}

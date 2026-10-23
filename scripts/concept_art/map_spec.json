@@ -325,6 +325,34 @@
     }
    ],
    "style": "painted campaign world map road surface, muted natural pigments, close-value earthy colours, fine brush grain"
+  },
+  "threat": {
+   "size": [
+    1024,
+    1024
+   ],
+   "model": "krea2",
+   "isolated": true,
+   "frame": "one isolated game sprite, a single object alone in the middle of the frame filling most of it, whole object visible with a clear empty margin, nothing touching the frame edges, seen from a high three-quarter angle with its base at the bottom, plain flat white paper background with nothing else on it, no map, no continents, no globe, no geography, no parchment board, no plaque, no sign, no ground, no cast shadow, no text",
+   "style": "hand-painted world map threat marker, one single marker standing alone, muted natural pigments with one cold or sickly accent, readable silhouette, fine brush grain",
+   "_note": "world-map-art-variety 8.1: носитель тира вражеского стэка (три кольца угрозы). Кольца различаются и силуэтом, и тоном — требование спеки «Визуальный носитель тира»: различие смежных колец обязано быть измеримым, поэтому слова про силуэт и тон в subject'ах не декоративные. Сырьё ролей — image-clone/map/raw/threat_ring*.webp; лист собирается в game/assets/objects/world_map_threat.webp (отдельный от объектов: объектные raw-кадры на этой машине потеряны, а assemble() пишет лист только из наличных ролей). Побратим-в-тумане не нужен: вражеские стэки в открытой, но не видимой клетке скрыты целиком (вердикт В2 → (в), D-205).",
+   "items": [
+    {
+     "id": "threat_ring1_wild",
+     "group": "threat",
+     "subject": "a wild beast lair marker, a low wide heap of weathered grey-brown animal hides and bleached animal bones and antlers hung on crooked wooden stakes, muted grey-tan tone"
+    },
+    {
+     "id": "threat_ring2_raiders",
+     "group": "threat",
+     "subject": "a raider warband marker, a tall tattered dark oxblood war banner hung on a notched wooden spear shaft with a rusted axe head lashed to it, deep dull red and rust tone"
+    },
+    {
+     "id": "threat_ring3_monsters",
+     "group": "threat",
+     "subject": "a monster lair marker, a tall black obsidian obelisk carved with a jagged pale sigil, faint sickly green glow at its base, near-black stone with cold green accent"
+    }
+   ]
   }
  },
  "ramp_weights": {

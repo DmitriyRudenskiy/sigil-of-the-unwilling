@@ -44,6 +44,8 @@ OBJ_FOG_IMG = ROOT / "game/assets/objects/world_map_objects_fog.webp"
 ROAD_IMG = ROOT / "game/assets/objects/world_map_roads.webp"
 ROAD_FOG_IMG = ROOT / "game/assets/objects/world_map_roads_fog.webp"
 ROAD_JSON = ROOT / "game/assets/objects/world_map_roads.json"
+THREAT_IMG = ROOT / "game/assets/objects/world_map_threat.webp"
+THREAT_JSON = ROOT / "game/assets/objects/world_map_threat.json"
 # Зеркало `GameNumbersMap.MAP_FOG_DIM`: затемнённый побратим листа печатается здесь.
 MAP_FOG_DIM = 0.45
 OBJ_JSON = ROOT / "game/assets/objects/world_map_objects.json"
@@ -105,6 +107,11 @@ def roles() -> list[dict]:
                     # дороги (6.1): тип декали — strip (полоса на всю ширину) или
                     # intersection (звезда на 3+ ветки); поворот полосы — в коде
                     "kind": item.get("kind", ""),
+                    # isolated — свойство категории, а не имени: приёмка кадра
+                    # («объект в поле белого, а не бесшовная ткань») обязана идти из
+                    # map_spec.json, иначе новая изолированная категория (носители
+                    # тиров, 8.1) молча проверялась бы как ткань
+                    "isolated": bool(cat.get("isolated", False)),
                 })
     return out
 
@@ -132,7 +139,7 @@ def render_raw(art: dict, dst: Path, attempt: int) -> dict:
     G.download(SPEC["comfy"], img, tmp)
     G.to_webp(tmp, dst, QUALITY)
     tmp.unlink(missing_ok=True)
-    ok, why = G.check_image(dst, art["size"], art["category"] == "objects")
+    ok, why = G.check_image(dst, art["size"], art["isolated"])
     return {"id": art["id"], "ok": ok, "why": why, "seed": seed, "attempt": attempt,
             "prompt_version": SPEC["prompt_version"], "prompt": prompt, "negative": neg,
             "model": art["model_key"], "checkpoint": model["unet"],
@@ -492,11 +499,38 @@ def build_road_sheet(roads: list[dict]) -> list[dict]:
 # ------------------------------------------------------------------- сборка
 
 
+def whole_or_skip(category: str, present: list[dict], sheet: Path) -> list[dict]:
+    """Сырьё ролей — в gitignored `image-clone/map/raw`, лист — в репо и на него уже
+    смотрит игра. Поэтому неполное сырьё — не повод писать укороченный лист:
+    `assemble()` перебирает наличные роли, и на машине, где половина кадров
+    потеряна, он собрал бы лист из того, что есть, а манифест перестал бы описывать
+    то, что игра ещё читает (у объектов 22 роли, и лист, собранный из трёх новых
+    носителей тиров, ронял бы каждую карту). Категория с неполным сырьём
+    пропускается с явной строкой — молчание здесь и было бы отказом."""
+    total = len([r for r in roles() if r["category"] == category])
+    if len(present) == total:
+        return present
+    if not present:
+        return present                          # пусто и писать нечего — молчание честно
+    if sheet.exists():
+        print(f"{category}: ПРОПУЩЕНО (ролей {len(present)} из {total}, "
+              f"лист {sheet.name} не тронут)")
+        return []
+    print(f"{category}: НЕПОЛНО (ролей {len(present)} из {total}, листа ещё нет — "
+          f"пишу неполный)")
+    return present
+
+
 def assemble() -> int:
-    mats = [r for r in roles() if r["category"] == "materials" and r["path"].exists()]
-    objs = [r for r in roles() if r["category"] == "objects" and r["path"].exists()]
-    roads = [r for r in roles() if r["category"] == "roads" and r["path"].exists()]
-    if not mats and not objs and not roads:
+    mats = whole_or_skip("materials", [r for r in roles() if r["category"] == "materials"
+                                       and r["path"].exists()], ATLAS_IMG)
+    objs = whole_or_skip("objects", [r for r in roles() if r["category"] == "objects"
+                                     and r["path"].exists()], OBJ_IMG)
+    roads = whole_or_skip("roads", [r for r in roles() if r["category"] == "roads"
+                                    and r["path"].exists()], ROAD_IMG)
+    threats = whole_or_skip("threat", [r for r in roles() if r["category"] == "threat"
+                                       and r["path"].exists()], THREAT_IMG)
+    if not mats and not objs and not roads and not threats:
         raise SystemExit("нет ни одной сгенерированной роли — сначала генерация")
     tiles: list[Image.Image] = []
     cells: list[dict] = []
@@ -607,6 +641,28 @@ def assemble() -> int:
             "prompt_version": SPEC["prompt_version"], "cells": ocells,
         }, ensure_ascii=False, indent=1))
 
+    # Носители тиров (8.1): три маркера колец угрозы, якорь вниз как у объектов,
+    # но отдельным листом — у объектов своё сырьё и свой манифест, а носитель тира
+    # читается из модели и переживает смерть объектов (и наоборот). Побратима
+    # «в тумане» нет: вражеские стэки в открытой, но не видимой клетке скрыты
+    # целиком (вердикт В2 → (в), D-205), затемнять нечего.
+    tcells: list[dict] = []
+    if threats:
+        tsheet = Image.new("RGBA", (8 * TILE, math.ceil(len(threats) / 8) * TILE),
+                           (0, 0, 0, 0))
+        for i, r in enumerate(threats):
+            tsheet.paste(cut_object(r["path"], r["fit"]), ((i % 8) * TILE, (i // 8) * TILE))
+            tcells.append({"id": r["id"], "group": r["biome"], "ring": i + 1,
+                           "anchor": [TILE // 2, TILE - 2], "atlas": [i % 8, i // 8],
+                           "source": str(r["path"].relative_to(ROOT))})
+        THREAT_IMG.parent.mkdir(parents=True, exist_ok=True)
+        tsheet.save(THREAT_IMG, "WEBP", quality=QUALITY, lossless=LOSSLESS)
+        THREAT_JSON.write_text(json.dumps({
+            "tile": TILE, "image": THREAT_IMG.name, "grid": [8, math.ceil(len(threats) / 8)],
+            "format": "webp", "quality": QUALITY,
+            "prompt_version": SPEC["prompt_version"], "cells": tcells,
+        }, ensure_ascii=False, indent=1))
+
     # Дороги (6.1): декали на прозрачном фоне, по центру тайла. Отдельный лист
     # (не объекты — якорь вниз, не атлас — бесшовная база): слой дорог 6.2 строит
     # из него тайлсет, поворот полосы по направлениям гекса — в коде.
@@ -621,6 +677,9 @@ def assemble() -> int:
     if roads:
         parts.append(f"{ROAD_IMG.relative_to(ROOT)}: {len(rcells)} дорог, "
                      f"{ROAD_IMG.stat().st_size // 1024} KiB")
+    if tcells:
+        parts.append(f"{THREAT_IMG.relative_to(ROOT)}: {len(tcells)} носителей тира, "
+                     f"{THREAT_IMG.stat().st_size // 1024} KiB")
     print(" · ".join(parts))
     return 0
 
@@ -630,13 +689,17 @@ def contact_sheet(out: Path) -> int:
     atlas = Image.open(ATLAS_IMG).convert("RGBA")
     objs = Image.open(OBJ_IMG).convert("RGBA")
     roads = Image.open(ROAD_IMG).convert("RGBA") if ROAD_IMG.exists() else None
-    h = atlas.height + objs.height + TILE * 2 + ((roads.height + TILE) if roads else 0)
-    w = max(atlas.width, objs.width, (roads.width if roads else 0))
+    threat = Image.open(THREAT_IMG).convert("RGBA") if THREAT_IMG.exists() else None
+    extra = [x for x in (roads, threat) if x is not None]
+    h = atlas.height + objs.height + TILE * 2 + sum(x.height + TILE for x in extra)
+    w = max([atlas.width, objs.width] + [x.width for x in extra])
     bg = Image.new("RGBA", (w, h), (*PB.parse_hex("#1d2829"), 255))
     bg.paste(atlas, (0, 0), atlas)
     bg.paste(objs, (0, atlas.height + TILE), objs)
-    if roads:
-        bg.paste(roads, (0, atlas.height + objs.height + TILE * 2), roads)
+    y = atlas.height + objs.height + TILE * 2
+    for x in extra:
+        bg.paste(x, (0, y), x)
+        y += x.height + TILE
     bg = bg.convert("RGB").resize((bg.width * 2, bg.height * 2), Image.NEAREST)
     out.parent.mkdir(parents=True, exist_ok=True)
     bg.save(out, "WEBP", quality=90)
