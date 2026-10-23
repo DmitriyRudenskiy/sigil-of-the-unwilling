@@ -296,6 +296,7 @@ def main():
         pool = band
         while len(pool) >= 9:
           nine, meta = S.select_nine(E, pool, 9, args.seed, args.max_clusters)
+          nine = list(dict.fromkeys(nine))  # кластерная квота иногда отдаёт индекс дважды
           free = [i for i in pool if i not in set(nine)]
           nine, short = S.topup(nine, Sim, same_obj, free, 9, args.max_intra_sim)
           pre = set(nine)
