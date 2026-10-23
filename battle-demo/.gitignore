@@ -1,0 +1,4 @@
+.godot/
+artifacts/screenshots/
+__pycache__/
+*.DS_Store

@@ -1,40 +1,40 @@
 ## 0. Контракт исполнения (до первой строчки кода)
 
-- [ ] 0.1 Зафиксировать отклонения ТЗ↔реальность отдельным актом: `battle-demo/docs/agent-skills.md` — таблица «фаза → скилл → артефакт → чем проверяется» из ТЗ §«Цепочка скиллов» плюс таблица отклонений из `design.md` (GUT→GdUnit4, пути, read-агент, CI/PR, `handoff`, `setup-engine`)
-- [ ] 0.2 Проверить, что в `agent-skills.md` и в задачах этого файла нет ни одной формулировки «показать/спросить у пользователя»: `grep -rniE "покаж(и|ите|уем) (пользователю|владельцу)" openspec/changes/battle-demo-two-rosters battle-demo/docs` → пусто
-- [ ] 0.3 Завести `battle-demo/docs/known-issues.md` с шапкой «отклонение, файл, мера, что мешает, что уже сделано» и правилом трёх итераций
+- [x] 0.1 Зафиксировать отклонения ТЗ↔реальность отдельным актом: `battle-demo/docs/agent-skills.md` — таблица «фаза → скилл → артефакт → чем проверяется» из ТЗ §«Цепочка скиллов» плюс таблица отклонений из `design.md` (GUT→GdUnit4, пути, read-агент, CI/PR, `handoff`, `setup-engine`)
+- [x] 0.2 Проверить, что в артефактах и задачах нет ни одной инструкции к человеку: `grep -rniE "(покажи|покажите|спроси|спросите) (пользователю|владельцу)" openspec/changes/battle-demo-two-rosters battle-demo/docs | grep -v "«"` → пусто (кавычки «» отсекают упоминания самого запрета)
+- [x] 0.3 Завести `battle-demo/docs/known-issues.md` с шапкой «отклонение, файл, мера, что мешает, что уже сделано» и правилом трёх итераций
 
 ## 1. Каркас проекта и зелёный гейт (`setup-engine`, `test-setup`, `test-helpers`)
 
-- [ ] 1.1 Перечитать `battle-demo/docs/agent-skills.md` — контракт фазы 1
-- [ ] 1.2 Сверка движка: `godot --version` = 4.7.x, зафиксировать версию и путь в `battle-demo/docs/architecture.md` (вместо `setup-engine` поверх занятого движка — D12)
-- [ ] 1.3 Создать `battle-demo/project.godot` (Godot 4.7, main scene = `scenes/roster_select.tscn`), `.gitignore` для `artifacts/screenshots/` и кэшей импорта
-- [ ] 1.4 Скопировать аддон GdUnit4 из `game/addons/` в `battle-demo/addons/`, проверить `godot --headless --path battle-demo --import`
-- [ ] 1.5 Собрать `battle-demo/run_tests.sh` по образцу `game/run_tests.sh`: GdUnit4 headless, маппинг кодов выхода `0`/`101` → гейт 0, подъём `Xvfb` на свободном дисплее (:97 → :91–:98, чужие не трогать), явная строка `SKIPPED (причина)` вместо молчания
-- [ ] 1.6 Зелёный гейт на пустом проекте: `battle-demo/run_tests.sh` → exit 0, в логе видно число тестов (0) и версию Godot
+- [x] 1.1 Перечитать `battle-demo/docs/agent-skills.md` — контракт фазы 1
+- [x] 1.2 Сверка движка: `godot --version` = 4.7.x, зафиксировать версию и путь в `battle-demo/docs/architecture.md` (вместо `setup-engine` поверх занятого движка — D12)
+- [x] 1.3 Создать `battle-demo/project.godot` (Godot 4.7, main scene = `scenes/roster_select.tscn`), `.gitignore` для `artifacts/screenshots/` и кэшей импорта
+- [x] 1.4 Скопировать аддон GdUnit4 из `game/addons/` в `battle-demo/addons/`, проверить `godot --headless --path battle-demo --import`
+- [x] 1.5 Собрать `battle-demo/run_tests.sh` по образцу `game/run_tests.sh`: GdUnit4 headless, маппинг кодов выхода `0`/`101` → гейт 0, подъём `Xvfb` на свободном дисплее (:97 → :91–:98, чужие не трогать), явная строка `SKIPPED (причина)` вместо молчания
+- [x] 1.6 Зелёный гейт на пустом проекте: `battle-demo/run_tests.sh` → exit 0, в логе видно число тестов (0) и версию Godot
 - [ ] 1.7 Тестовые хелперы (`test-helpers`): `battle-demo/tests/helpers/battle_factory.gd` (бой по составу + seed + скриптованный ввод), `sprite_asserts.gd` (проверка PNG: размер, альфа, непустой кадр)
 
 ## 2. ADR и архитектура (`architecture-decision`, `create-architecture`, `domain-modeling`)
 
-- [ ] 2.1 Перечитать `battle-demo/docs/agent-skills.md` — контракт фазы 2
-- [ ] 2.2 `battle-demo/docs/decisions.md` — ADR-001 «GdUnit4 вместо GUT» (контекст, альтернативы, последствия)
-- [ ] 2.3 ADR-002 «Отдельное дерево `battle-demo/`, а не пути ТЗ в корне» с доказательством коллизий (`test -e docs/decisions.md` → истина на case-insensitive FS)
-- [ ] 2.4 ADR-003 «Генерация через существующий `scripts/concept_art/generate.py` + свой `variant`» и ADR-004 «Лист поз 2×2 вместо покадровой генерации»
-- [ ] 2.5 `battle-demo/docs/architecture.md` — модель без нод (`CombatState`, `UnitStats`, `Action`, `StatusEffect`, `TurnQueue`), сигналы наружу, границы «данные/правила/отображение», соответствие спекам `turn-battle-core`, `roster-lineups`, `battle-demo-ui`
-- [ ] 2.6 `battle-demo/docs/glossary.md` (`domain-modeling`): юнит, набор, пул, ход, действие, статус, лист поз, кадр, вердикт приёмки — один термин = одно определение
+- [x] 2.1 Перечитать `battle-demo/docs/agent-skills.md` — контракт фазы 2
+- [x] 2.2 `battle-demo/docs/decisions.md` — ADR-001 «GdUnit4 вместо GUT» (контекст, альтернативы, последствия)
+- [x] 2.3 ADR-002 «Отдельное дерево `battle-demo/`, а не пути ТЗ в корне» с доказательством коллизий (`test -e docs/decisions.md` → истина на case-insensitive FS)
+- [x] 2.4 ADR-003 «Генерация через существующий `scripts/concept_art/generate.py` + свой `variant`» и ADR-004 «Лист поз 2×2 вместо покадровой генерации»
+- [x] 2.5 `battle-demo/docs/architecture.md` — модель без нод (`CombatState`, `UnitStats`, `Action`, `StatusEffect`, `TurnQueue`), сигналы наружу, границы «данные/правила/отображение», соответствие спекам `turn-battle-core`, `roster-lineups`, `battle-demo-ui`
+- [x] 2.6 `battle-demo/docs/glossary.md` (`domain-modeling`): юнит, набор, пул, ход, действие, статус, лист поз, кадр, вердикт приёмки — один термин = одно определение
 
 ## 3. Дизайн-доки и оценка (`art-bible`, `asset-spec`, `quick-design`, `ux-design`, `design-review`, `consistency-check`, `scope-check`, `estimate`)
 
-- [ ] 3.1 Перечитать `battle-demo/docs/agent-skills.md` — контракт фазы 3
-- [ ] 3.2 `battle-demo/docs/art-bible.md` — стилевой контракт девяти персонажей: силуэт, контур, палитра, свет, пропорции в кадре 512×512, pivot «низ-центр»; ссылка на `docs/13-art-bible.md` как на канон основного проекта (только чтение)
-- [ ] 3.3 Реестр девяти персонажей: соответствие файл-источник → id → роль → сторона (`player`/`enemy`) → набор(ы); девять строк, девятый = постоянный враг
-- [ ] 3.4 `battle-demo/docs/design-brief.md` (`quick-design`) — боевые правила: формула урона, инициатива, длины статусов, список способностей на персонажа, условия победы; числа помечены как до `balance-check`
-- [ ] 3.5 `battle-demo/docs/ui-spec.md` (`ux-design`) — HP-бар, полоса порядка ходов, панель способностей, селектор набора, экран результата; доступность с клавиатуры; метрики читаемости (минимальный кегль, контраст)
-- [ ] 3.6 `battle-demo/docs/asset-spec.md` (`asset-spec`) — на каждого персонажа: 5 анимаций × 4 кадра, что происходит в кадре, промпт-строка, референс-источник; итого 45 листов поз
-- [ ] 3.7 `battle-demo/docs/design-review.md` — ревью design-brief и ui-spec на полноту и реализуемость, вердикт по каждому разделу
-- [ ] 3.8 `battle-demo/docs/consistency-report.md` (`consistency-check`) — сверка доков между собой и со спеками изменения: конфликтов «требование ↔ отсутствие в макете» нет
-- [ ] 3.9 `battle-demo/docs/scope-report.md` (`scope-check`) — состав против ТЗ: аудио, полировка, сюжет, уровни, локализация, мультиплеер, сохранения, лайв-опс — отсутствуют
-- [ ] 3.10 `battle-demo/docs/estimate.md` (`estimate`) — оценка по фазам с генерацией (45 листов ≈ 1 ч сервера + повторы) и списком того, что вырезается при перерасходе
+- [x] 3.1 Перечитать `battle-demo/docs/agent-skills.md` — контракт фазы 3
+- [x] 3.2 `battle-demo/docs/art-bible.md` — стилевой контракт девяти персонажей: силуэт, контур, палитра, свет, пропорции в кадре 512×512, pivot «низ-центр»; ссылка на `docs/13-art-bible.md` как на канон основного проекта (только чтение)
+- [x] 3.3 Реестр девяти персонажей: соответствие файл-источник → id → роль → сторона (`player`/`enemy`) → набор(ы); девять строк, девятый = постоянный враг
+- [x] 3.4 `battle-demo/docs/design-brief.md` (`quick-design`) — боевые правила: формула урона, инициатива, длины статусов, список способностей на персонажа, условия победы; числа помечены как до `balance-check`
+- [x] 3.5 `battle-demo/docs/ui-spec.md` (`ux-design`) — HP-бар, полоса порядка ходов, панель способностей, селектор набора, экран результата; доступность с клавиатуры; метрики читаемости (минимальный кегль, контраст)
+- [x] 3.6 `battle-demo/docs/asset-spec.md` (`asset-spec`) — на каждого персонажа: 5 анимаций × 4 кадра (`idle` стоит / `walk` идёт слева направо / `attack` наносит удар / `hit` принимает удар / `turn` поворачивается), что происходит в кадре, промпт-строка, референс-источник; итого 45 листов поз
+- [x] 3.7 `battle-demo/docs/design-review.md` — ревью design-brief и ui-spec на полноту и реализуемость, вердикт по каждому разделу
+- [x] 3.8 `battle-demo/docs/consistency-report.md` (`consistency-check`) — сверка доков между собой и со спеками изменения: конфликтов «требование ↔ отсутствие в макете» нет
+- [x] 3.9 `battle-demo/docs/scope-report.md` (`scope-check`) — состав против ТЗ: аудио, полировка, сюжет, уровни, локализация, мультиплеер, сохранения, лайв-опс — отсутствуют
+- [x] 3.10 `battle-demo/docs/estimate.md` (`estimate`) — оценка по фазам с генерацией (45 листов ≈ 1 ч сервера + повторы) и списком того, что вырезается при перерасходе
 
 ## 4. Боевое ядро (`tdd`, `systematic-debugging`)
 
@@ -64,7 +64,7 @@
 - [ ] 6.1 Перечитать `battle-demo/docs/agent-skills.md` — контракт фазы 6
 - [ ] 6.2 Проверить доступность сервера и инструментов: `comfy_upload_image`, `comfy_list_nodes`, `comfy_search_nodes`, `comfy_open_workflow`, `comfy_list_workflows`, `comfy_validate_workflow`, `comfy_generate_image`, `comfy_wait_for_completion`, `comfy_get_history`, `comfy_get_queue`, `comfy_get_view`, `comfy_list_models` — каждый вызван, ответ в журнал
 - [ ] 6.3 Сверить, что очередь ComfyUI не занята чужим прогоном (`comfy_get_queue`); при занятой — не стартовать, зафиксировать в `known-issues.md` и вернуться позже
-- [ ] 6.4 `battle-demo/tools/spec.json` для `generate.py`: `variant = demo_char`, категория `characters`, 45 сюжетов (9 × 5 анимаций), 1024², модель и шаги, единый промпт-шаблон с меняющимся описанием персонажа и позой анимации, белый фон
+- [ ] 6.4 `battle-demo/tools/spec.json` для `generate.py`: `variant = demo_char`, категория `characters`, 45 сюжетов (9 × 5 анимаций), 1024², модель и шаги, единый промпт-шаблон с меняющимся описанием персонажа и позой анимации (в `walk` — шаг вправо, в `turn` — стадии разворота), белый фон
 - [ ] 6.5 Дымный прогон: `--only` одного персонажа одной анимации, `--dry-run` → 45 строк; загрузка байтов только через `GET /history/<id>` → `GET /view`
 - [ ] 6.6 Фоновый прогон 45 листов с возобновлением по файлу; итоговая строка `ИТОГ ok=… skip=… fail=…` в `battle-demo/artifacts/generate.log` (коммитится лог, не пиксели)
 - [ ] 6.7 Каждый отказ — повтор с новым seed; после трёх итераций на сюжет — запись в `known-issues.md`, прогон продолжается
@@ -76,15 +76,15 @@
 - [ ] 7.2 `battle-demo/tools/cut_frames.py`: flood-fill от границ листа → альфа, нарезка 2×2 → четыре PNG 512×512, имя `char_<side>_<name>_<anim>_<NN>.png`, вывод в `battle-demo/assets/sprites/<char>/`
 - [ ] 7.3 `battle-demo/tools/audit_sprites.py`: размер, альфа, непустой кадр, вне сетки, дубликаты имён, полнота комплекта 9 × 5 × 4; отчёт `battle-demo/docs/asset-audit-report.md` со строкой-вердиктом на файл и счётчиками
 - [ ] 7.4 Красные тесты аудита на подставных PNG (без альфы, не тот размер, пустой кадр, имя вне схемы, дубликат) — `battle-demo/tests/unit/tools/test_sprite_audit.gd` или pytest-самопроверка по образцу `test_generate.py`
-- [ ] 7.5 `battle-demo/tools/build_sprite_frames.gd`: обход принятых PNG → `SpriteFrames` `.tres` по одному на персонажа, `idle` зациклен, остальные однократные
-- [ ] 7.6 Тест: у девяти персонажей пять анимаций, у каждой ≥ 4 кадра, `idle` зациклен, `.tres` пересобирается идемпотентно (повторный запуск не меняет файл)
+- [ ] 7.5 `battle-demo/tools/build_sprite_frames.gd`: обход принятых PNG → `SpriteFrames` `.tres` по одному на персонажа; `idle` и `walk` зациклены, `attack`/`hit`/`turn` однократные
+- [ ] 7.6 Тест: у девяти персонажей ровно пять анимаций `idle/walk/attack/hit/turn` и нет `death`, у каждой ≥ 4 кадра, `idle` и `walk` зациклены, `.tres` пересобирается идемпотентно (повторный запуск не меняет файл)
 - [ ] 7.7 Отбраковка по геометрии: листы, не прошедшие 7.3, — в повтор 6.6; в `known-issues.md` только то, что не удалось после трёх итераций
 
 ## 8. Анимация и визуальная приёмка спрайтов (read-агент)
 
 - [ ] 8.1 Перечитать `battle-demo/docs/agent-skills.md` — контракт фазы 8
-- [ ] 8.2 `battle-demo/scenes/battle_unit.tscn` + `battle_unit.gd`: `AnimatedSprite2D`, состояния `idle/walk/attack/hit/death`, pivot «низ-центр», единый масштаб
-- [ ] 8.3 Тесты: смена состояния выбирает нужную анимацию; `attack` проигрывается один раз; смерть переводит в `death`
+- [ ] 8.2 `battle-demo/scenes/battle_unit.tscn` + `battle_unit.gd`: `AnimatedSprite2D`, состояния `idle/walk/attack/hit/turn`, pivot «низ-центр», единый масштаб, `flip_h` по стороне, гибель — `modulate` поверх последнего кадра
+- [ ] 8.3 Тесты: смена состояния выбирает нужную анимацию; `attack` проигрывается один раз; `walk` двигает юнита игрока вправо, а врага — влево; `turn` не меняет масштаб и pivot; гибель не меняет анимацию, только обесцвечивание
 - [ ] 8.4 Синхронизация сигнала урона с контактным кадром `attack` — тест по номеру кадра/таймингу, а не «на глаз»
 - [ ] 8.5 `battle-demo/tools/contact_sheet.py`: контактный лист девяти принятых персонажей (по 5 анимаций) + строки «источник ↔ генерация»
 - [ ] 8.6 Стилевой вердикт read-агентом (`pi -p --no-tools --no-session --mode text @лист.png`, прецедент `blind_judge.py`) по чек-листу art-bible: силуэт, контур, палитра, свет, артефакты генерации, обрезка по краю, масштаб между персонажами
