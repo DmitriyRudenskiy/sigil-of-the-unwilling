@@ -356,6 +356,14 @@
     Класс известен: contention-семейство T-125 / CI-1(12). Обход — `MCP_PORT` (читает и
     conftest, и Godot-сторона `tools/mcp/`); новых тикетов не заведено, чтобы не плодить
     дубли T-125
+  — **срез после сведения с main (2026-10-23, мерж `aa87bca1` параллельной сессии).**
+    GdUnit **3142 кейса | 0 | 0 | 0 flaky | 2 skipped | 0 сирот** (мои 3125 + 17 их
+    тестов города), MCP e2e `passed=68 skipped=2 failed=1 collected=71`. Единственное
+    падение — `test_main_menu_buttons_live::test_live_disabled_states` с тем же
+    симптомом готовности: те же тесты на приватном порту `MCP_PORT=9198` проходят за
+    **7.35 с** → снова contention (T-125), не регрессия мержа. Вслепую `-X ours` на
+    первой попытке сведения съел чужую строку `Q-M97` в `docs/QUESTIONS.md` — откатано,
+    разрешение ручное, сверка `git diff` против обоих родителей (21 файл их / 40 моих)
 - [x] 11.2 `python3 -m gdtoolkit.linter` по изменённым и новым `.gd` — чисто; `scripts/check_map_art.py` зелёный и по файлам, и по снимку живого рендера
   — `Success: no problems found` (в т.ч. новый `game/tools/variant_distribution.gd`, из `game/` по
     `game/.gdlintrc` — урок §3); чекер: файлы `GATE=0` (15 мер + 1 явный SKIP), кадр
