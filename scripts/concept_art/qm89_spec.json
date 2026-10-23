@@ -1,0 +1,90 @@
+{
+ "_comment": "Q-M89 (ui-mockup-parity): носители для шести ролей, оставшихся без эталона после D-203. Сюжеты и стили — только здесь; генерация через ComfyUI MCP (spec.server).",
+ "server": "http://192.168.0.230:9000/mcp",
+ "comfy": "http://192.168.0.230:8188",
+ "out_dir": "/Users/user/sigil-concept-art/concept_art",
+ "export": {
+  "format": "WEBP",
+  "quality": 82
+ },
+ "models": {
+  "krea2": {
+   "tool": "api_generate_image_krea2",
+   "steps": 8,
+   "cfg": 1.0,
+   "unet": "krea2_turbo_fp8_scaled.safetensors",
+   "clip": "qwen3vl_4b_fp8_scaled.safetensors",
+   "vae": "qwen_image_vae.safetensors"
+  },
+  "qwen21": {
+   "tool": "api_generate_image_qwen21",
+   "steps": 25,
+   "unet": "qwen_image_2.1_int8_convrot.safetensors",
+   "clip": "qwen3vl_8b_int8_convrot.safetensors",
+   "vae": "qwen_image_2.1_vae_bf16.safetensors"
+  }
+ },
+ "model": "krea2",
+ "references_dir": "/Users/user/sigil-concept-art/image-clone/etalons",
+ "variants": [
+  {
+   "id": "c1_carriers",
+   "name": "c1_carriers",
+   "style": "art-bible reference carrier plate: one subject rendered cleanly, crisp readable silhouette, hand-painted texture with visible brushwork, low-key cinematic lighting, muted warm palette with a single deep red accent, no photographic blur",
+   "negative": "photograph, photorealism, watermark, signature, blurry, garbled letters, rainbow palette, neon, extra limbs, jpeg artifacts"
+  }
+ ],
+ "categories": {
+  "carriers_sigil": {
+   "size": [
+    1024,
+    1024
+   ],
+   "count": 2,
+   "reference": "1791970213325-01a139be-d2ce-786a-9d3b-1f9bbd4cd245.png",
+   "style": "circular engraved metal medallion sigils, dark iron disc with fine beaded rim and ornamental engraving, one luminous glyph at the center, strong contrast of dark metal and glowing symbol, flat front view",
+   "frame": "engraved metal work seen straight on, centered, filling most of the frame, worn iron and bronze with fine beaded rims and dull red inlay, plain dark neutral ground with a clear empty margin, soft contact shadow, no text, no letters, no watermark",
+   "items": [
+    {
+     "id": "sigil_medallions",
+     "subject": "five circular medallions arranged in a loose arc, each engraved with a different variant of the same sigil mark, a bound ring crossed by a cracked vertical bar, beaded rims, scratched metal, deep red inlay in the engraving"
+    },
+    {
+     "id": "ritual_circle",
+     "subject": "top-down view of a ritual circle paved in dark stone, concentric engraved rings, radial spokes, eight notches on the rim, a shallow channel of dull red light along the engraving, moss in the joints, cracked flagstones"
+    }
+   ]
+  },
+  "carriers_ui": {
+   "size": [
+    1024,
+    1024
+   ],
+   "count": 4,
+   "reference": "1791999397246-01a13b7a-0abb-7b89-a0aa-4d39e5f5f207.jpeg",
+   "style": "dark cinematic fantasy game interface, carved stone and dark wood panels with thin gold filigree, parchment fields, glowing blue sigil accents, moody low-key lighting with one warm light source, engraved serif titling",
+   "frame": "reference carrier plate for a dark fantasy game interface, carved stone and dark wood panels with thin gold filigree and deep red accents, muted warm palette, low-key lighting, everything fully inside the frame, no watermark, no signature",
+   "items": [
+    {
+     "id": "title_lettering",
+     "subject": "ornate carved iron title lettering spelling exactly the words \"SIGIL OF THE UNWILLING\" in two centered lines of serif capitals, bevelled metal letters with rust-red edges and thin gold filigree, correct legible spelling, plain dark ground"
+    },
+    {
+     "id": "content_sheet",
+     "subject": "reference sheet of twelve small fantasy soldier figures arranged in a tidy grid of four columns and three rows with even margins, each figure a different silhouette, each standing on its own small dark plate, thin gold grid lines"
+    },
+    {
+     "id": "icon_glyphs_a",
+     "subject": "sheet of sixteen simple monoline interface glyphs in a grid of four by four: sword, shield, bow, helmet, scroll, lantern, coin, wheat sheaf, hammer, anvil, key, chalice, skull, flame, droplet, leaf, thin engraved gold lines on dark stone tiles, no text"
+    },
+    {
+     "id": "icon_glyphs_b",
+     "subject": "sheet of sixteen simple monoline interface glyphs in a grid of four by four: hourglass, eye, hand, crown, tower, bridge, campfire, tent, chain, ring, moon, sun, snowflake, tree, bone, arrow, thin engraved gold lines on dark stone tiles, no text"
+    }
+   ]
+  }
+ },
+ "probe_models": [
+  "krea2"
+ ]
+}

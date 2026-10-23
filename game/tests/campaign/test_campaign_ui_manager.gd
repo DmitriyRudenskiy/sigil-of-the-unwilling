@@ -122,6 +122,37 @@ func test_single_active_screen() -> void:
 	assert_bool((screens[&"map"] as CanvasItem).visible).is_true()
 
 
+# --- begin_campaign: кампания стартует на карте (носитель экрана, D-226) ---
+
+func test_begin_campaign_starts_at_map() -> void:
+	var seen: Array = []
+	mgr.screen_changed.connect(func(s: StringName) -> void: seen.append(s))
+	var tutorials: Array = []
+	mgr.tutorial_requested.connect(func(s: StringName) -> void: tutorials.append(s))
+	mgr.begin_campaign()
+	assert_str(mgr.current_screen()).is_equal("map")
+	assert_int(seen.size()).is_equal(1)
+	assert_bool(seen.has(&"map")).is_true()
+	assert_bool((screens[&"map"] as CanvasItem).visible).is_true()
+	# Обходной путь, а не проход через MENU: туториалов ни меню, ни карты.
+	assert_int(tutorials.size()).is_equal(0)
+
+
+func test_begin_campaign_keeps_open_campaign_screen() -> void:
+	mgr.begin_campaign()
+	var opened: Dictionary = mgr.show_screen(&"city")
+	assert_bool(opened["ok"]).is_true()
+	mgr.begin_campaign()
+	assert_str(mgr.current_screen()).is_equal("city")
+
+
+func test_city_reachable_right_after_begin_campaign() -> void:
+	mgr.begin_campaign()
+	var r: Dictionary = mgr.show_screen(&"city")
+	assert_bool(r["ok"]).is_true()
+	assert_str(mgr.current_screen()).is_equal("city")
+
+
 # --- сигналы ---
 
 func test_screen_changed_signal() -> void:

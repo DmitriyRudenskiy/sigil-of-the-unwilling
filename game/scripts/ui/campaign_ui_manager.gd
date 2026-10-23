@@ -89,6 +89,22 @@ func visible_screens() -> Array:
 	return out
 
 
+## Кампания стартует на карте: машина начинается с PREGAME, а предигра
+## (персонаж → подпись) отыграна до неё. Обходной путь, а не show_screen(&"map"):
+## переход PREGAME→MENU→MAP выдал бы два туториала экранов (меню и карты),
+## которых в кампании нет. Из кампейн-экранов не трогает ничего — повторный
+## вход в кампанию не сбрасывает открытый экран. Туториал карты здесь не
+## запрашивается: потребителя `tutorial_requested` у носителя ещё нет, запрос
+## ушёл бы в никуда, а отметка «показан» уже сжгла бы единственный показ.
+func begin_campaign() -> void:
+	if nav.current != CampaignNavigation.Screen.PREGAME \
+			and nav.current != CampaignNavigation.Screen.MENU:
+		return
+	nav.current = CampaignNavigation.Screen.MAP
+	_apply_current()
+	screen_changed.emit(current_screen())
+
+
 func _apply_current() -> void:
 	var cur := current_screen()
 	for id in _screens:

@@ -117,11 +117,11 @@ func test_open_screen_shows_live_board_not_placeholder() -> void:
 func test_day_cycle_pauses_while_city_screen_open() -> void:
 	var main := await _boot_campaign()
 	var hud := _hud()
-	assert_bool(main._city_screen_paused).is_false()
+	assert_bool(main._campaign_screen_paused).is_false()
 	hud.open_city_screen()
-	assert_bool(main._city_screen_paused).is_true()
+	assert_bool(main._campaign_screen_paused).is_true()
 	hud.close_city_screen()
-	assert_bool(main._city_screen_paused).is_false()
+	assert_bool(main._campaign_screen_paused).is_false()
 
 
 func test_close_button_of_screen_returns_to_campaign() -> void:
@@ -133,7 +133,75 @@ func test_close_button_of_screen_returns_to_campaign() -> void:
 	await get_tree().process_frame
 	assert_bool(screen.visible).is_false()
 	assert_bool(hud.is_city_screen_open()).is_false()
-	assert_bool(main._city_screen_paused).is_false()
+	assert_bool(main._campaign_screen_paused).is_false()
+
+
+## Экран города зарегистрирован в машине навигации (указание владельца
+## 2026-10-23, D-226): узел по-прежнему живёт в носителе, но активным экраном
+## становится только через `CampaignUIManager` — иначе `visible_screens()` врёт,
+## а кампания остаётся без единого «какой экран сейчас».
+func test_city_screen_registered_in_campaign_ui_manager() -> void:
+	var main := await _boot_campaign()
+	var manager := main.campaign_ui_manager as CampaignUIManager
+	assert_that(manager).is_not_null()
+	# Кампания стартует на карте: без begin_campaign машина осталась бы PREGAME.
+	assert_str(String(manager.current_screen())).is_equal("map")
+	assert_bool(manager.has_screen(&"city")).is_true()
+	assert_int(manager.visible_screens().size()).is_equal(0)
+
+
+func test_open_city_screen_moves_state_machine_to_city() -> void:
+	var main := await _boot_campaign()
+	var manager := main.campaign_ui_manager as CampaignUIManager
+	_hud().open_city_screen()
+	assert_str(String(manager.current_screen())).is_equal("city")
+	# Инвариант одного активного экрана: виден ровно город.
+	var visible: Array = manager.visible_screens()
+	assert_int(visible.size()).is_equal(1)
+	assert_str(String(visible[0])).is_equal("city")
+
+
+func test_close_city_screen_returns_state_machine_to_map() -> void:
+	var main := await _boot_campaign()
+	var manager := main.campaign_ui_manager as CampaignUIManager
+	var hud := _hud()
+	hud.open_city_screen()
+	hud.close_city_screen()
+	assert_str(String(manager.current_screen())).is_equal("map")
+	assert_bool(hud.is_city_screen_open()).is_false()
+	assert_bool((main.get_node(CITY_SCREEN_PATH) as CityScreen).visible).is_false()
+	assert_int(manager.visible_screens().size()).is_equal(0)
+
+
+## Переход запрещён — экрана нет: из боя город не открывается, и машина остаётся
+## в бою. Причина — та же гарантия «≤2 клика до причины» (mvp-ui-flow 3.3).
+func test_city_screen_refused_when_machine_is_in_battle() -> void:
+	var main := await _boot_campaign()
+	var manager := main.campaign_ui_manager as CampaignUIManager
+	assert_bool(bool(manager.show_screen(&"battle").get("ok", false))).is_true()
+	var hud := _hud()
+	hud.open_city_screen()
+	assert_bool(hud.is_city_screen_open()).is_false()
+	assert_str(String(manager.current_screen())).is_equal("battle")
+	assert_bool((main.get_node(CITY_SCREEN_PATH) as CityScreen).visible).is_false()
+	assert_str(String(manager.can_show(&"city").get("reason", ""))) \
+		.is_equal("not_allowed_from_battle")
+
+
+## Носитель без машины (чистые тесты слоя, хосты без `main.tscn`) не обязан её
+## иметь: прямое открытие работает, как работало до регистрации экрана.
+func test_carrier_opens_screen_without_ui_manager() -> void:
+	var hud := CampaignHud.new()
+	_main = hud
+	_root().add_child(hud)
+	await get_tree().process_frame
+	hud.bind_city(CampaignComposition.from_campaign_config(12345).city)
+	assert_bool(hud.is_city_screen_open()).is_false()
+	hud.open_city_screen()
+	assert_bool(hud.is_city_screen_open()).is_true()
+	assert_bool((hud.get_node("CityScreen") as CityScreen).visible).is_true()
+	hud.close_city_screen()
+	assert_bool(hud.is_city_screen_open()).is_false()
 
 
 ## Стартовый город = старт кампании: запасы и население из campaign.json

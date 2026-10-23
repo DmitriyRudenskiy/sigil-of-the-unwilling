@@ -1046,3 +1046,15 @@ msgstr "Сохранение не найдено"
 
 msgid "campaign.city"
 msgstr "Город"
+
+msgid "campaign.party"
+msgstr "Партия"
+
+msgid "campaign.turn"
+msgstr "Ход"
+
+msgid "campaign.turn_hint"
+msgstr "Завершить текущий ход"
+
+msgid "campaign.date"
+msgstr "Месяц {month} · Неделя {week} · День {day}"
