@@ -155,8 +155,9 @@ def main():
     ap.add_argument("--global-max-sim", type=float, default=0.95,
                     help="сюжет не более одного раза во ВСЁМ пуле: копия ближе к уже "
                          "взятой, чем порог, идёт в остаток (0 = выключено)")
-    ap.add_argument("--min-mass", type=float, default=0.12,
-                    help="занятая доля кадра ниже порога — это не здание, а плитка/обрезок, в остаток")
+    ap.add_argument("--min-mass", type=float, default=0.12,                    help="занятая доля кадра ниже порога — это не здание, а плитка/обрезок, в остаток")
+    ap.add_argument("--max-mass", type=float, default=0.85,
+                    help="выше порога — квадрат сцены вместо силуэта здания, в остаток")
     ap.add_argument("--no-size-bands", action="store_true",
                     help="не группировать лист по размеру объекта")
     ap.add_argument("--seed", type=int, default=43)
@@ -251,11 +252,12 @@ def main():
         print(f"  отложено по глобальному порогу {args.global_max_sim}: {len(twins) - len(already)}")
     nines, meta_rows, warns, reps = [], [], [], []
     Mass = masses(crop_paths)
-    thin = [i for i in pool if Mass[i] < args.min_mass]
+    thin = [i for i in pool if not args.min_mass <= Mass[i] <= args.max_mass]
     if thin:
         twins += thin
-        pool = [i for i in pool if Mass[i] >= args.min_mass]
-        print(f"  пустых кадров (масса < {args.min_mass}) отложено: {len(thin)}")
+        pool = [i for i in pool if args.min_mass <= Mass[i] <= args.max_mass]
+        print(f"  пустых/залитых кадров (масса вне [{args.min_mass}, {args.max_mass}]) "
+              f"отложено: {len(thin)}")
     bands = [pool]
     if not args.no_size_bands:
         bands, rest = size_bands(pool, Mass)

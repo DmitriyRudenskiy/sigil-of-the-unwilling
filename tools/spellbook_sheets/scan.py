@@ -87,15 +87,32 @@ def open_small(p, side=MAX_SIDE):
     return im
 
 
-def score_frames(paths, query, device="cpu", batch=32):
+CROP_POS = {
+    "building": ["a single building game asset on a plain background",
+                 "an isolated house or castle sprite", "one building illustration"],
+}
+# кроп — это ассет одного здания, а не кадр игры: поля, загоны, фонтаны, сцены,
+# подписи и скриншоты стратегий отвечают «нет»
+CROP_NEG = {
+    "building": ["a screenshot of a strategy game", "a landscape with many buildings",
+                 "a farm field", "an animal pen", "a fountain", "a theater stage",
+                 "a bridge", "a statue monument", "an orchard with fruit trees",
+                 "beehives", "a user interface card", "written text and letters",
+                 "a photograph of a house", "a game map", "fantasy creature", "a person",
+                 "a weapon"],
+}
+
+
+def score_frames(paths, query, device="cpu", batch=32, pos=None, neg=None):
     """-> P(объект) на кадр: softmax по позитивным/негативным подсказкам CLIP."""
     import torch
     import transformers
     torch.set_num_threads(max(1, (os_cpu_count() - 1) if device == "cpu" else 8))
     model = transformers.CLIPModel.from_pretrained(V.MODEL).to(device).eval()
     pr = transformers.CLIPProcessor.from_pretrained(V.MODEL)
-    lines = [f"a painting of a {x}" for x in POS[query] + NEG[query]]
-    npos = len(POS[query])
+    pos, neg = pos or POS, neg or NEG
+    lines = [f"a painting of a {x}" for x in pos[query] + neg[query]]
+    npos = len(pos[query])
     with torch.no_grad():
         t = model.get_text_features(**pr(text=lines, padding=True, return_tensors="pt").to(device))
         if not isinstance(t, torch.Tensor):
@@ -150,6 +167,7 @@ def objects(im, min_frac=0.02, max_n=3, atlas_min=8):
     else:
         border = np.concatenate([a[0], a[-1], a[:, 0], a[:, -1]])
         fg = np.abs(a - np.median(border, axis=0)).sum(-1) > 40
+        fg &= ~_chroma_key(a, ndimage)      # альфа-источники не правим: фон задаёт альфа
     fg = ndimage.binary_opening(fg, np.ones((3, 3)))
     frac = float(fg.mean())
     if not 0.005 <= frac <= 0.9:
@@ -170,6 +188,24 @@ def objects(im, min_frac=0.02, max_n=3, atlas_min=8):
     max_area = 2.0 * np.median(sizes[sizes >= floor]) if atlas and (sizes >= floor).any() else 0
     return _boxes(lab, sizes, max_n, floor, max_area,
                   min_side=12 if atlas else 0), frac, lab
+
+
+def _chroma_key(a, ndimage):
+    """Фон-хромакей: насыщенный пурпур/циана/зелень, *связанный с рамкой кадра*.
+
+    Пурпурная подложка под спрайтом — это фон, даже когда медиана рамки белая.
+    Условие связи с рамкой нужно, чтобы не съесть пурпурную крышу: у неё с фоном
+    нет общего пути из пурпурных пикселей."""
+    mx, mn = a.max(-1), a.min(-1)
+    sat = (mx - mn) > 50
+    r, g, b = a[..., 0], a[..., 1], a[..., 2]
+    key = sat & (((r > 110) & (b > 110) & (g < r - 40) & (g < b - 40)) |       # пурпур
+                 ((g > 110) & (b > 110) & (r < g - 40)) |                     # циана
+                 ((g > 110) & (r < g - 40) & (b < g - 40)))                   # зелень
+    lab, n = ndimage.label(key, structure=np.ones((3, 3)))
+    border = np.unique(np.concatenate([lab[0].ravel(), lab[-1].ravel(),
+                                       lab[:, 0].ravel(), lab[:, -1].ravel()]))
+    return np.isin(lab, border[border > 0])
 
 
 def _largest_parts(lab):
@@ -277,7 +313,7 @@ def stage_crop(args):
 def stage_cropscore(args):
     """Тот же CLIP по готовым кропам: `--min-score` ниже порога -> out/rejected/."""
     paths = sorted(p for p in (args.out / "crops").iterdir() if p.suffix.lower() in EXT)
-    p = score_frames(paths, args.query, args.device)
+    p = score_frames(paths, args.query, args.device, pos=CROP_POS, neg=CROP_NEG)
     rej = args.out / "rejected"
     rej.mkdir(exist_ok=True)
     (args.out / "crop_scores.json").write_text(json.dumps(
@@ -377,6 +413,17 @@ def selfcheck():
     assert len(bh) == 1 and bh[0][1] < 82, bh
     # пёстрый кадр без фона -> «не кроить»
     assert objects(Image.new("RGB", (200, 200), (90, 30, 200)))[0] == []
+    # хромакей: пурпурная подложка, связанная с рамкой, — фон; пурпурная крыша — нет
+    kk = Image.new("RGB", (200, 200), "white")
+    dk = _D.Draw(kk)
+    dk.rectangle([0, 120, 199, 199], fill=(220, 20, 220))     # подложка до рамки
+    dk.rectangle([70, 60, 130, 120], fill=(120, 60, 30))      # дом
+    dk.rectangle([80, 40, 120, 59], fill=(220, 20, 220))      # крыша того же цвета, но не фон
+    bk, _, labk = objects(kk)
+    assert len(bk) == 1 and bk[0][3] < 122, bk                # бокс — дом, без подложки
+    ak = np.asarray(tile(kk, labk, bk[0], size=200))
+    roof = int((np.abs(ak - np.array((220, 20, 220))).sum(-1) < 60).sum())
+    assert roof > 500, roof                                   # крыша в кадре осталась
     print("ok")
 
 
