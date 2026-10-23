@@ -449,6 +449,8 @@ static func no_save_found() -> String: return TranslationServer.translate("load.
 
 static func campaign_city() -> String: return TranslationServer.translate("campaign.city")
 static func campaign_party() -> String: return TranslationServer.translate("campaign.party")
+static func campaign_turn() -> String: return TranslationServer.translate("campaign.turn")
+static func campaign_turn_hint() -> String: return TranslationServer.translate("campaign.turn_hint")
 static func campaign_date(month: int, week: int, day: int) -> String:
 	return TranslationServer.translate("campaign.date").format(
 		{"month": month, "week": week, "day": day})

@@ -9,8 +9,9 @@ extends Control
 ## поднят и экран партии (`PartyScreen` был техническим экраном без
 ## вызывающего — его данные, `composition.party`, существуют).
 ##
-## Полоса счётчиков и дата макета подняты здесь же (7.9–7.11); миникарта с
-## содержимым и кнопка хода (§7.4/7.15) остаются незакрытыми — у них нет
+## Полоса счётчиков и дата макета подняты здесь же (7.9–7.11); кнопка хода —
+## там же (7.4/7.13, указание владельца 2026-10-23: ход по кнопке, авто-таймера
+## дня нет). Миникарта с содержимым (§7.15) остаётся незакрытой — у неё нет
 ## носителя: поля карты в `main.tscn` нет, дата живёт строкой на месте панели.
 ##
 ## Дерево строится кодом, как в `city_screen.gd`: сцена-оболочка без единого
@@ -21,6 +22,10 @@ signal city_screen_opened
 signal city_screen_closed
 signal party_screen_opened
 signal party_screen_closed
+## 7.13 — ход кампании запрашивается нажатием. Слой не знает, как устроен ход
+## (`CampaignComposition.advance_turn` + `GameManager.on_day_passed` — это
+## драйвер в `main.gd`), поэтому просит, а не делает: носитель сигнала — хост.
+signal turn_requested
 
 const CityScreenScene := preload("res://scenes/ui/city_screen.tscn")
 const PartyScreenModelScript := preload("res://scripts/ui/party_screen_model.gd")
@@ -28,6 +33,7 @@ const CounterRegistry := preload("res://scripts/ui/campaign_counters.gd")
 const CalendarScript := preload("res://scripts/campaign/campaign_calendar.gd")
 
 const CITY_BUTTON_NAME := "CityButton"
+const TURN_BUTTON_NAME := "TurnButton"
 const COUNTER_BAR_NAME := "CounterBar"
 const DATE_LABEL_NAME := "CampaignDate"
 const CITY_SCREEN_NAME := "CityScreen"
@@ -48,6 +54,11 @@ var party_screen: PartyScreen = null
 var _top_row: HBoxContainer = null
 var _city_button: Button = null
 var _party_button: Button = null
+var _turn_button: Button = null
+## Защита от повторного нажатия во время обработки хода (7.13): пока эмитится
+## `turn_requested`, второе нажатие — не второй ход.
+var _turn_handling: bool = false
+var _turn_enabled: bool = false
 var _ui_manager: CampaignUIManager = null
 var _party: Array = []
 var _party_capacity: int = PartyScreenModelScript.DEFAULT_CAPACITY
@@ -104,6 +115,20 @@ func get_date_text() -> String:
 	return "" if date == null else date.text
 
 
+## 7.13 — доступность кнопки хода. Её выключает хост (`main.gd`), когда ход
+## сделать нельзя: открыт экран кампании (время стоит), идёт кризис (ход не
+## игрового экрана), или кампания закончена. Слой не решает это сам — он не
+## знает ни про кризис, ни про экран боя.
+func set_turn_enabled(value: bool) -> void:
+	_turn_enabled = value
+	if _turn_button != null:
+		_turn_button.disabled = not value
+
+
+func is_turn_enabled() -> bool:
+	return _turn_enabled and _turn_button != null and not _turn_button.disabled
+
+
 func _build() -> void:
 	name = "CampaignHud"
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -116,9 +141,9 @@ func _build() -> void:
 	_top_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_top_row)
 	_top_row.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	# Ширина ряда под две кнопки: 16 + 140 + 16 + 140 от правого края.
+	# Ширина ряда под три кнопки: 3 × 140 + 2 × 16 separation + 16 отступ.
 	_top_row.add_theme_constant_override("separation", 16)
-	_top_row.offset_left = -312.0
+	_top_row.offset_left = -460.0
 	_top_row.offset_right = -16.0
 	_top_row.offset_top = 16.0
 	_top_row.offset_bottom = 56.0
@@ -142,6 +167,22 @@ func _build() -> void:
 	_party_button.disabled = true
 	_party_button.pressed.connect(_on_party_pressed)
 	_top_row.add_child(_party_button)
+
+	_turn_button = Button.new()
+	_turn_button.name = TURN_BUTTON_NAME
+	# Короткая подпись в ряд с «Город»/«Партия»; что именно делает кнопка —
+	# в подсказке (7.13: нажатие завершает ход, а не «следующий день»).
+	_turn_button.text = GameText.campaign_turn()
+	_turn_button.tooltip_text = GameText.campaign_turn_hint()
+	_turn_button.custom_minimum_size = Vector2(140, 40)
+	# Кнопка появляется только вместе с драйвером: `main.gd` включает её после
+	# того, как подключит `turn_requested`. Нажатие без обработчика обещало бы
+	# ход, которого нет (конвенция «нет несуществующих действий»). 7.13: авто-
+	# таймера дня нет, и до привязки на экране не остаётся ни одного способа
+	# закончить ход — это честно: кампания без драйвера хода не поднята.
+	_turn_button.disabled = true
+	_turn_button.pressed.connect(_on_turn_pressed)
+	_top_row.add_child(_turn_button)
 	_build_counter_bar()
 	_build_date_label()
 
@@ -324,6 +365,18 @@ func _on_city_pressed() -> void:
 
 func _on_city_screen_close_requested() -> void:
 	close_city_screen()
+
+
+## 7.13 — нажатие просит ход ровно один раз. Замок держится на время обработки:
+## повторный `pressed` внутри того же кадра (двойной клик, скриптовый эмит из
+## теста, наведение клавиши ввода) не должен давать второй `advance_turn` —
+## задвоенный ход менял бы дату и счётчики дважды.
+func _on_turn_pressed() -> void:
+	if _turn_handling or not _turn_enabled:
+		return
+	_turn_handling = true
+	turn_requested.emit()
+	_turn_handling = false
 
 
 func _on_party_pressed() -> void:
