@@ -121,7 +121,7 @@ def os_cpu_count():
 
 
 def stage_scan(args):
-    files = images(args.input)
+    files = images(args.root)
     print(f"файлов (после md5-дедупа): {len(files)} · свободно {free_mem_pct()}%")
     p = score_frames(files, args.query, args.device)
     np.savez_compressed(args.out / "scan.npz", p=p, names=np.array([str(x) for x in files]))
@@ -164,6 +164,11 @@ def stage_crop(args):
     """Кропы объектов в out/crops. Метод `trim` — фон+компоненты (CPU), `sam` — SAM 3.1."""
     import detect as D
     cand = [Path(x) for x in json.loads((args.out / "candidates.json").read_text())]
+    if args.exclude:
+        skip = args.exclude.split(",")
+        dropped = [c for c in cand if any(s in str(c) for s in skip)]
+        cand = [c for c in cand if not any(s in str(c) for s in skip)]
+        print(f"исключено по --exclude {skip}: {len(dropped)} кадров")
     crops = args.out / "crops"
     crops.mkdir(exist_ok=True)
     predict = D.client("mps") if args.method == "sam" else None
@@ -229,6 +234,9 @@ def _same(a, b):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--input", type=Path)
+    ap.add_argument("--root", type=Path,
+                    default=Path("/Users/user/sigil-of-the-unwilling-slop"),
+                    help="дерево с кадрами для --stage scan")
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--query", default="building", choices=sorted(POS))
     ap.add_argument("--stage", choices=["scan", "crop", "cropscore"], required=True)
@@ -240,10 +248,9 @@ def main():
     ap.add_argument("--method", choices=["trim", "sam"], default="trim")
     ap.add_argument("--device", default="cpu", help="CLIP: cpu (по умолчанию) или mps")
     ap.add_argument("--min-free", type=int, default=25, help="% свободной памяти для старта")
+    ap.add_argument("--exclude", default="", help="подстроки пути, чьи кадры не кроить")
     ap.add_argument("--force", action="store_true")
     args = ap.parse_args()
-    if args.stage == "scan" and not args.input:
-        ap.error("--input обязателен на стадии scan")
     free = free_mem_pct()
     if free < args.min_free and not args.force:
         sys.exit(f"свободно {free}% памяти — ниже порога {args.min_free}%. "
