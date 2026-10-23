@@ -19,7 +19,6 @@ var _campaign_screen_paused: bool = false
 
 @onready var game_manager: GameManager = $GameManager
 @onready var ui_manager: UIManager = $UIManager
-@onready var day_label: Label = $CanvasLayer/DayLabel if has_node("CanvasLayer/DayLabel") else null
 @onready var campaign_hud: CampaignHud = $CampaignHUD/CampaignHud if has_node("CampaignHUD/CampaignHud") else null
 ## Машина навигации кампании (mvp-ui-flow K-M8): один активный экран. Снимается
 ## с узла, а не создаётся кодом: сцена — носитель состава кампании.
@@ -97,6 +96,10 @@ func _mount_campaign_hud() -> void:
 	campaign_hud.city_screen_closed.connect(_on_campaign_screen_closed)
 	campaign_hud.party_screen_opened.connect(_on_campaign_screen_opened)
 	campaign_hud.party_screen_closed.connect(_on_campaign_screen_closed)
+	# Полоса счётчиков и дата — за носителем: первый вызов сразу после привязки
+	# города, дальше — по сигналу дня (`_on_day_passed`). Своего счёта дней у HUD
+	# нет (D-200).
+	campaign_hud.refresh_campaign(game_manager.get_current_day())
 
 
 func _connect_ui():
@@ -122,12 +125,15 @@ func _advance_day():
 		composition.advance_turn()
 	if game_manager:
 		game_manager.on_day_passed()
-	if day_label:
-		day_label.text = "День: %d" % game_manager.get_current_day()
 
 
 func _on_day_passed(day: int):
 	GameLogger.world("Наступил день %d" % day)
+	# Счётчики и дата пересчитываются из носителя на каждый день — узел HUD
+	# переживает и кризис, и ручной ход (7.13), поэтому сигнал `day_passed`
+	# единственный источник обновления, а не `_advance_day`.
+	if campaign_hud != null:
+		campaign_hud.refresh_campaign(day)
 
 
 func _on_crisis_started(crisis_id: String):

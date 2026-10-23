@@ -1050,3 +1050,6 @@ msgstr "City"
 
 msgid "campaign.party"
 msgstr "Party"
+
+msgid "campaign.date"
+msgstr "Month {month} Week {week} Day {day}"

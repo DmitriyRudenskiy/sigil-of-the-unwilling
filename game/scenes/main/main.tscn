@@ -22,23 +22,13 @@ script = ExtResource("3_ui")
 [node name="CampaignUIManager" type="Node" parent="."]
 script = ExtResource("6_uimgr")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
-
-[node name="DayLabel" type="Label" parent="CanvasLayer"]
-layout_mode = 0
-offset_left = 20.0
-offset_top = 20.0
-offset_right = 200.0
-offset_bottom = 50.0
-text = "День: 1"
-theme_override_font_sizes/font_size = 24
-
 [node name="CrisisEventSystem" type="Node" parent="."]
 script = ExtResource("4_crisis")
 
 ; Слой кампейн-HUD (ui-mockup-parity §7.1, Q-M87 → (б), D-204): носитель экрана
 ; города в игровом пути. Отдельный CanvasLayer — экран города не зависит от
-; DayLabel и кризисных поповеров; дерево строит сам скрипт (конвенция экранов).
+; кризисных поповеров; дерево строит сам скрипт (конвенция экранов). Дата и
+; счётчики макета живут здесь же (7.10/7.11), служебный `DayLabel` снят.
 [node name="CampaignHUD" type="CanvasLayer" parent="."]
 layer = 5
 

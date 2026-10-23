@@ -9,8 +9,9 @@ extends Control
 ## поднят и экран партии (`PartyScreen` был техническим экраном без
 ## вызывающего — его данные, `composition.party`, существуют).
 ##
-## Полоса ресурсов, миникарта и кнопка хода (§7.3) здесь же — они не заведены:
-## их носители данных ещё не решены в задачах 7.2 (реестр счётчиков).
+## Полоса счётчиков и дата макета подняты здесь же (7.9–7.11); миникарта с
+## содержимым и кнопка хода (§7.4/7.15) остаются незакрытыми — у них нет
+## носителя: поля карты в `main.tscn` нет, дата живёт строкой на месте панели.
 ##
 ## Дерево строится кодом, как в `city_screen.gd`: сцена-оболочка без единого
 ## узла — конвенция экранов игры (T-147/T-148: тема через роли, не через
@@ -23,8 +24,12 @@ signal party_screen_closed
 
 const CityScreenScene := preload("res://scenes/ui/city_screen.tscn")
 const PartyScreenModelScript := preload("res://scripts/ui/party_screen_model.gd")
+const CounterRegistry := preload("res://scripts/ui/campaign_counters.gd")
+const CalendarScript := preload("res://scripts/campaign/campaign_calendar.gd")
 
 const CITY_BUTTON_NAME := "CityButton"
+const COUNTER_BAR_NAME := "CounterBar"
+const DATE_LABEL_NAME := "CampaignDate"
 const CITY_SCREEN_NAME := "CityScreen"
 const PARTY_BUTTON_NAME := "PartyButton"
 const PARTY_SCREEN_NAME := "PartyScreen"
@@ -46,10 +51,57 @@ var _party_button: Button = null
 var _ui_manager: CampaignUIManager = null
 var _party: Array = []
 var _party_capacity: int = PartyScreenModelScript.DEFAULT_CAPACITY
+## Полоса счётчиков: id строки реестра → контейнер счётчика. Значений здесь нет:
+## числа читаются из носителя при каждом обновлении (D-200).
+var _counters: Dictionary = {}
 
 
 func _ready() -> void:
 	_build()
+
+
+## 7.10 — единственная точка, из которой полоса и дата получают числа. Здесь
+## ничего не запоминается: значения читаются из носителя, дата пересчитывается
+## из дня кампании (D-200; спека `campaign-hud`: месяц и неделя пересчитываются,
+## а не хранятся). Счётчик, который кампейн-состояние не ведёт, прячется: ноль
+## вместо «носителя нет» врал бы.
+func refresh_campaign(day: int) -> void:
+	for row_id in _counters:
+		var box := _counters[row_id] as Control
+		if box == null or not is_instance_valid(box):
+			continue
+		var text := CounterRegistry.value_text(CounterRegistry.row_by_id(row_id), city)
+		var value := box.get_node_or_null("Value") as Label
+		if value != null:
+			value.text = text
+		box.visible = text != ""
+	var date := get_node_or_null(DATE_LABEL_NAME) as Label
+	if date != null:
+		date.text = CalendarScript.date_label(day)
+
+
+## Текст счётчика по id строки реестра ("" — счётчик не показан).
+func get_counter_text(row_id: StringName) -> String:
+	var box := _counters.get(row_id) as Control
+	if box == null or not is_instance_valid(box) or not box.visible:
+		return ""
+	var value := box.get_node_or_null("Value") as Label
+	return "" if value == null else value.text
+
+
+## Сколько счётчиков полоса рисует (тест: ровно строки реестра с носителем).
+func get_counter_count() -> int:
+	var count := 0
+	for row_id in _counters:
+		var box := _counters[row_id] as Control
+		if box != null and is_instance_valid(box) and box.visible:
+			count += 1
+	return count
+
+
+func get_date_text() -> String:
+	var date := get_node_or_null(DATE_LABEL_NAME) as Label
+	return "" if date == null else date.text
 
 
 func _build() -> void:
@@ -90,6 +142,59 @@ func _build() -> void:
 	_party_button.disabled = true
 	_party_button.pressed.connect(_on_party_pressed)
 	_top_row.add_child(_party_button)
+	_build_counter_bar()
+	_build_date_label()
+
+
+## 7.10 — полоса счётчиков макета: один контейнер на строку реестра, порядок —
+## как в макете слева направо. В макете счётчики выглядят кнопками, но делать
+## мёртвые кнопки нельзя (конвенция «нет несуществующих действий»): это метки с
+## иконкой, а каноническое имя ресурса уходит в подсказку.
+func _build_counter_bar() -> void:
+	var bar := HBoxContainer.new()
+	bar.name = COUNTER_BAR_NAME
+	bar.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	bar.offset_left = 16.0
+	bar.offset_top = 16.0
+	bar.add_theme_constant_override("separation", 8)
+	add_child(bar)
+	for row in CounterRegistry.rendered_rows():
+		var box := HBoxContainer.new()
+		box.name = "Counter_%s" % String(row.get("id", &""))
+		box.tooltip_text = CounterRegistry.label_text(row)
+		box.add_theme_constant_override("separation", 4)
+		var icon := TextureRect.new()
+		icon.name = "Icon"
+		icon.custom_minimum_size = Vector2(24, 24)
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.texture = CounterRegistry.icon(row)
+		box.add_child(icon)
+		var value := Label.new()
+		value.name = "Value"
+		box.add_child(value)
+		bar.add_child(box)
+		_counters[row.get("id", &"")] = box
+
+
+## 7.11 — дата макета. В макете она живёт в панели миникарты (левый нижний
+## угол); панели с содержимым нет — показывать на миникарте нечего, пока в
+## игровом пути нет поля карты, поэтому здесь только строка даты на её месте.
+##
+## Прямоугольник задан всеми четырьмя offset'ами, а не двумя: у пресета
+## BOTTOM_LEFT якоря верх/низ стоят на нижней границе, и при `offset_top = 0`
+## высота_label'а получается нулевой — текст есть в модели, его нет на экране
+## (функциональный тест по `get_date_text()` этого не видит, кадр — да).
+func _build_date_label() -> void:
+	var date := Label.new()
+	date.name = DATE_LABEL_NAME
+	date.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	date.offset_left = 24.0
+	date.offset_top = -48.0
+	date.offset_right = 424.0
+	date.offset_bottom = -24.0
+	date.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	add_child(date)
 
 
 ## Проводка до машины навигации кампании (`CampaignUIManager`). Порядок важен:

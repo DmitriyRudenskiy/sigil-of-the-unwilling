@@ -1049,3 +1049,6 @@ msgstr "Город"
 
 msgid "campaign.party"
 msgstr "Партия"
+
+msgid "campaign.date"
+msgstr "Месяц {month} · Неделя {week} · День {day}"

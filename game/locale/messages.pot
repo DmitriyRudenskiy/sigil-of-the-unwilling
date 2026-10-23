@@ -992,3 +992,6 @@ msgstr ""
 
 msgid "campaign.party"
 msgstr ""
+
+msgid "campaign.date"
+msgstr ""

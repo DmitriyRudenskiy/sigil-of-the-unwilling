@@ -63,6 +63,17 @@ def _state(mcp) -> dict:
         'hud.party_screen.get_header_text() '
         'if hud != null and hud.party_screen != null else "", '
         '"party_registered": mgr.has_screen(&"party") if mgr != null else null, '
+        '"counters": '
+        'hud.get_counter_count() if hud != null else -1, '
+        '"counter_food": hud.get_counter_text(&"food") if hud != null else "", '
+        '"carrier_food": str(int(hud.city.resource_ctx.amount(&"food"))) '
+        'if hud != null and hud.city != null else "", '
+        '"date": hud.get_date_text() if hud != null else "", '
+        '"date_expected": CampaignCalendar.date_label('
+        's.get_node("GameManager").get_current_day()) '
+        'if s.get_node_or_null("GameManager") != null else "", '
+        '"day_label": s.get_node_or_null("CanvasLayer/DayLabel") != null, '
+        '"bar": hud.get_node_or_null("CounterBar") != null, '
         '"shown": mgr.visible_screens().map(func(id) -> String: return String(id)) '
         'if mgr != null else [], '
         '"turn": comp.campaign.current_turn if comp != null else -1}'
@@ -74,7 +85,7 @@ def test_carrier_bound_after_new_game(full_cycle):
     st = _state(full_cycle)
     assert st["turn"] >= 1, f"кампания не стартовала: {st}"
     assert st["hud"], f"слой носителя отсутствует в main.tscn: {st}"
-    assert st["layer"] == 5, f"слой носителя должен быть 5 (над DayLabel): {st}"
+    assert st["layer"] == 5, f"слой носителя должен быть 5 (над служебными слоями): {st}"
     assert st["button"], f"кнопка «Город» не построена: {st}"
     assert st["disabled"] is False, (
         "кнопка «Город» обязана стать доступной после привязки города — "
@@ -208,3 +219,45 @@ def test_switching_city_to_party_closes_city_in_live_game(full_cycle):
     )
     assert st["party_open"] is True, f"партия не открылась из города: {st}"
     assert st["shown"] == ["party"], f"под партией остался видимый экран: {st}"
+
+
+def test_counter_bar_shows_the_live_campaign_carrier(full_cycle):
+    """Полоса счётчиков (7.10) в живом кампейне: значения — из носителя города.
+
+    GdUnit поднимает `main.tscn` тоже, но четвёртый уровень нужен здесь потому,
+    что полоса читает `City.resource_ctx` города, собранного игрой (меню →
+    создание персонажа → Знак → `main.tscn`), а не город, собранный тестом.
+    """
+    st = _state(full_cycle)
+    assert st["bar"], f"полоса счётчиков не построена: {st}"
+    assert st["counters"] == 3, (
+        "видимых счётчика ровно три — MVP-триада food/wood/iron; остальным "
+        f"строкам реестра нечем показать значение (T-157): {st}"
+    )
+    assert st["counter_food"] == st["carrier_food"] and st["counter_food"] != "", (
+        f"счётчик еды показывает не число носителя: {st}"
+    )
+    assert st["day_label"] is False, (
+        f"служебный DayLabel вернулся — на экране две копии дня: {st}"
+    )
+
+
+def test_date_follows_the_day_in_live_game(full_cycle):
+    """Дата макета (7.11) пересчитывается из дня кампании на каждый ход."""
+    before = _state(full_cycle)
+    assert before["date"] == before["date_expected"] and before["date"] != "", (
+        f"дата не равна пересчёту дня кампании: {before}"
+    )
+    full_cycle.execute_code(
+        "get_tree().current_scene._advance_day()\n"
+        "return true"
+    )
+    full_cycle.wait_frames(30)
+    after = _state(full_cycle)
+    assert after["date"] == after["date_expected"], (
+        f"после хода дата разошлась с днём кампании: {after}"
+    )
+    assert after["date"] != before["date"], (
+        f"ход прошёл, а дата стоит на месте: было {before['date']}, "
+        f"стало {after['date']}"
+    )
