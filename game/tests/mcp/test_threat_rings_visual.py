@@ -112,10 +112,22 @@ return {"ready": true, "hero": {"x": hero_cell.x, "y": hero_cell.y}, "cells": ce
 """.replace("__UNIT__", UNIT_KEY)
 
 # Замер по кадру вьюпорта. Окно = фактический прямоугольник носителя, приведённый
-# к координатам вьюпорта через `get_canvas_transform()` (CanvasItem → вьюпорт):
-# `Camera2D.get_screen_transform()` даёт координаты ОКНА, а снимок — кадр вьюпорта
-# (замер 2026-10-23: при окне 1024×768 и вьюпорте 1920×1080 окна уезжали и мера
-# 45.1 оказывалась различием ландшафта, а не носителя).
+# к пикселям кадра: мировая трансформация узла → `Camera2D.get_canvas_transform()`
+# (координаты вьюпорта) → масштаб контента `кадр / visible_rect`.
+#
+# Калибровки, каждая из которых стоила тесту красного прогона (T-160):
+#   1. `Camera2D.get_screen_transform()` даёт координаты ОКНА, а снимок — кадр
+#      вьюпорта (замер 2026-10-23: при окне 1024×768 и вьюпорте 1920×1080 окна
+#      уезжали, а «различие колец» оказывалось различием травы);
+#   2. `get_global_transform_with_canvas()` учитывает сдвиг камеры ЗАДВОЙНО
+#      (замер 2026-10-23: окно уехало на 188 px, вклад носителя стал 0);
+#   3. координаты вьюпорта ≠ пиксели кадра, когда проекция `window/stretch/mode =
+#      canvas_items` даёт content_scale ≠ 1 (замер 2026-10-24, T-160): при базовом
+#      вьюпорте 960×540 и кадре 1920×1080 окно без поправки попадало в траву, а
+#      вклад носителя был ровно 0.0; при чужом окне 1900×1007 (k ≈ 0.99, сдвиг
+#      ~10 px при носителе 82 px) вклад кольца 2 падал 5.4 → 2.91 при пороге 3.0.
+#      На машине, где окно равно базовому вьюпорту, k = 1 и тест зелёный — этим
+#      он и врал.
 _MEASURE = """
 var world = get_tree().current_scene
 var spawner = world.get_node("WorldSpawner")
@@ -123,11 +135,10 @@ var img: Image = world.get_viewport().get_texture().get_image()
 var cam: Camera2D = world.get_viewport().get_camera_2d()
 if cam == null:
     return {"error": "камеры мира нет"}
-# Мировые координаты → координаты вьюпорта. `CanvasItem.get_canvas_transform()`
-# камеры НЕ учитывает, а `get_global_transform_with_canvas()` учитывает ЗАДВОЙНО
-# (замер 2026-10-23: окно уехало на 188 px = сдвиг камеры, окно попало на траву,
-# вклад носителя стал 0). Поэтому берётся чистая мировая трансформация узла и она
-# умножается на `Camera2D.get_canvas_transform()`.
+# Пиксели кадра = координаты вьюпорта × content-scale. `get_visible_rect().size` —
+# логический вьюпорт, `img` — снимок окна; при stretch=canvas_items они различаются.
+var vp_size: Vector2 = world.get_viewport().get_visible_rect().size
+var scale := Vector2(float(img.get_width()) / vp_size.x, float(img.get_height()) / vp_size.y)
 var cam_xform: Transform2D = cam.get_canvas_transform()
 var out: Array = []
 var want: Array = __WANT__
@@ -141,8 +152,8 @@ for entry in want:
         return {"error": "носителя нет: " + str(cell)}
     var g: Transform2D = back.get_global_transform()
     var lr: Rect2 = back.get_rect()
-    var p0: Vector2 = cam_xform * (g * lr.position)
-    var p1: Vector2 = cam_xform * (g * lr.end)
+    var p0: Vector2 = (cam_xform * (g * lr.position)) * scale
+    var p1: Vector2 = (cam_xform * (g * lr.end)) * scale
     var r := Rect2i(int(p0.x), int(p0.y), int(p1.x - p0.x), int(p1.y - p0.y))
     # Окно отсекается по кадру, а не отбрасывается: оба замера («с носителем» и
     # «без») берут ОДНО и то же окно, поэтому частичное попадание в кадр не портит
@@ -167,6 +178,7 @@ for entry in want:
         "mean": [sum.x / n, sum.y / n, sum.z / n],
     })
 return {"frame": [img.get_width(), img.get_height()], "samples": out, \\
+    "viewport": [vp_size.x, vp_size.y], "scale": [scale.x, scale.y], \\
     "camera": [cam.position.x, cam.position.y]}
 """
 
@@ -308,7 +320,9 @@ def test_three_rings_differ_on_map_screenshot(full_game):
     frame, bare = _measure_with_background(mcp, cells)
     _write_manifest("three", f"world.tscn (fixture full_game), стэки {UNIT_KEY} с тирами 1/2/3",
                     size, rows, [
-        "окно замера = прямоугольник носителя в координатах вьюпорта",
+        "окно замера = прямоугольник носителя в пикселях кадра (координаты вьюпорта "
+        f"× content-scale; кадр {frame['frame']}, вьюпорт {frame.get('viewport')}, "
+        f"scale {[round(float(v), 4) for v in frame.get('scale', [])]})",
         "вклад носителя = окно с носителем минус тот же кадр без носителя",
         f"портрет отряда во всех окнах одинаков ({UNIT_KEY}), различие даёт носитель",
     ])
@@ -321,8 +335,10 @@ def test_three_rings_differ_on_map_screenshot(full_game):
         assert own >= MIN_CARRIER_PRESENCE, (
             f"кольцо {ring}: окно {_sample(frame, ring)['rect']} кадра "
             f"{frame['frame']} не накрывает носитель — вклад {own:.1f} < "
-            f"{MIN_CARRIER_PRESENCE}. Окно меряет ландшафт, и любое «различие колец» "
-            "под таким окном — ложь."
+            f"{MIN_CARRIER_PRESENCE}. Геометрия: вьюпорт {frame.get('viewport')}, "
+            f"content-scale {[round(v, 4) for v in frame.get('scale', [])]} "
+            f"(окно без поправки на него = уехавшее окно). Окно меряет ландшафт, "
+            "и любое «различие колец» под таким окном — ложь."
         )
 
     for pair in [(1, 2), (2, 3)]:
@@ -335,6 +351,55 @@ def test_three_rings_differ_on_map_screenshot(full_game):
             f"{_sample(frame, pair[0])['rect']} и {_sample(frame, pair[1])['rect']}, "
             f"герой {setup['hero']})"
         )
+
+
+_SET_SCALE = """
+var win: Window = get_tree().root.get_window()
+win.content_scale_mode = Window.CONTENT_SCALE_MODE_CANVAS_ITEMS
+win.content_scale_aspect = Window.CONTENT_SCALE_ASPECT_EXPAND
+win.content_scale_size = Vector2i(__W__, __H__)
+await Engine.get_main_loop().process_frame
+var vp: Vector2 = get_tree().root.get_visible_rect().size
+return {"viewport": [vp.x, vp.y]}
+"""
+
+
+def test_carrier_measure_survives_content_scale(full_game):
+    """Мера окна не зависит от content-scale (T-160).
+
+    На машине, где окно равно базовому вьюпорту, `кадр / visible_rect` = 1, и
+    забытый масштаб не виден: тест зелёный, а на чужом окне 1900×1007 вклад
+    кольца падает 5.4 → 2.91 при пороге 3.0. Поэтому окно специально делается
+    не-единичным: вклад носителя обязан остаться выше порога.
+    """
+    mcp = full_game
+    setup = _setup(mcp)
+    mcp.wait_frames(40)
+    cells = [{"x": c["x"], "y": c["y"], "ring": t}
+             for c, t in zip(setup["cells"], setup["tiers"])]
+    try:
+        geo = mcp.execute_code(_SET_SCALE.replace("__W__", "960").replace("__H__", "540"))
+        mcp.wait_frames(40)
+        frame, bare = _measure_with_background(mcp, cells)
+        vw, vh = frame.get("viewport", [0, 0])
+        fw, fh = frame["frame"]
+        real = (fw / float(vw)) if vw else 1.0
+        assert abs(real - 1.0) > 0.5, (
+            f"content-scale не сдвинулся: кадр {frame['frame']} / вьюпорт "
+            f"{frame.get('viewport')} = {real:.3f} ({geo}) — проверка ничего не "
+            "проверяет"
+        )
+        for ring in (1, 2, 3):
+            own = _distance(_contribution(frame, bare, ring), [0.0, 0.0, 0.0])
+            assert own >= MIN_CARRIER_PRESENCE, (
+                f"кольцо {ring} при content-scale {real:.3f} (кадр {frame['frame']}, "
+                f"вьюпорт {frame.get('viewport')}) не накрыто окном: вклад "
+                f"{own:.1f} < {MIN_CARRIER_PRESENCE} — окно считается без поправки "
+                "на масштаб контента"
+            )
+    finally:
+        mcp.execute_code(_SET_SCALE.replace("__W__", "1920").replace("__H__", "1080"))
+        mcp.wait_frames(20)
 
 
 def test_tier_change_changes_carrier(full_game):

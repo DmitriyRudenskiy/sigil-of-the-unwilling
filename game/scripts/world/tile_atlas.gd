@@ -16,10 +16,9 @@ const MANIFEST_PATH := "res://assets/tiles/world_map_atlas.json"
 const TILE := GameNumbers.TILE_SIZE
 const SOURCE_ID := 0
 const FOG_SOURCE_ID := 1
-## world-map-art-variety 4.2: отдельный источник деталей (трава, камни, трещины)
-## поверх базы. Клетки — из манифеста (kind == "detail"); пока атлас их не несёт,
-## источник не добавляется (спека «Слой деталей поверх базы»).
-const DETAIL_SOURCE_ID := 2
+## world-map-art-variety 4.2 / Q-M98 → (б), D-232: отдельного источника деталей
+## нет — «мелочь на земле» несут вариант базы (4.3) и растительность (7.2),
+## восьмой группы отрисовки в `world-map-layer-stack` не заводилось.
 
 enum Biome { GRASS, SAND, SNOW, SWAMP, WATER, ROCK, MUD, ROAD }
 
@@ -183,7 +182,6 @@ func build_hex() -> TileSet:
 	ts.add_source(src, SOURCE_ID)
 	for coords in all_coords():
 		src.create_tile(coords)
-	_build_detail_source(ts, tex)
 	return ts
 
 
@@ -203,26 +201,6 @@ func _build_fallback_tileset() -> TileSet:
 	ts.add_source(src, SOURCE_ID)
 	src.create_tile(Vector2i.ZERO)
 	return ts
-
-
-## world-map-art-variety 4.2: отдельный источник деталей (трава, камни, трещины)
-## поверх базы. Клетки — из манифеста (kind == "detail"); пока атлас их не несёт,
-## источник не добавляется (спека «Слой деталей поверх базы»). Детали — чистая
-## визуализация: не влияют на террейн, проходимость и стоимость движения.
-func _build_detail_source(ts: TileSet, tex: Texture2D) -> void:
-	var detail_coords: Array = []
-	for cell in manifest().get("cells", []):
-		if String(cell.get("kind", "")) == "detail":
-			var atlas: Array = cell.get("atlas", [0, 0])
-			detail_coords.append(Vector2i(int(atlas[0]), int(atlas[1])))
-	if detail_coords.is_empty():
-		return
-	var detail_src := TileSetAtlasSource.new()
-	detail_src.texture = tex
-	detail_src.texture_region_size = Vector2i(TILE, TILE)
-	ts.add_source(detail_src, DETAIL_SOURCE_ID)
-	for coords in detail_coords:
-		detail_src.create_tile(coords)
 
 
 static func build_hex_tileset() -> TileSet:
