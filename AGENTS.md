@@ -219,10 +219,10 @@ case-sensitive: `world.tscn`, `battle.tscn`, `main_menu.tscn`).
   (кризисы), `rare_*.json` (редкие), `events_database.json` (служебный, не
   считается в счётчик шаблонов).
 - **Статус слоя (Q-M82 → (б), D-199 — MVP-носитель):** каталог **в MVP** и **вызывается из кампанийного ходу**: каждый тик дня
-  `game/scripts/main/main.gd:81 _advance_day()` → `GameManager.on_day_passed()`
-  (`game_manager.gd:85`) → `crisis_event_system.gd:410` — триггеры событий и кризисов,
-  цикл дня автозапускается (`_is_day_cycle_active = true`, `day_duration = 3.0` с,
-  `next_event_day = 5`). Строка **снята с корзины B-1** (T-128 её не переносит, корзина
+  `game/scripts/main/main.gd:134 _advance_day()` → `GameManager.on_day_passed()`
+  (`game_manager.gd:85`) → `crisis_event_system.gd:410` — триггеры событий и кризисов.
+  Ход двигает кнопка слоя `CampaignHud`, авто-таймер `day_duration` снят (D-229);
+  `next_event_day = 5` (`crisis_event_system.gd:176`). Строка **снята с корзины B-1** (T-128 её не переносит, корзина
   20 → 19 строк), каталог зарегистрирован в [[MVP-scope]] §1/§2/§4; формулировка
   «не вызывается из кампанийного цикла» была ложной (эрратум D-198), вердикт
   Q-M77 → (а) заменён. Правки здесь — сведение на канонических носителей,
