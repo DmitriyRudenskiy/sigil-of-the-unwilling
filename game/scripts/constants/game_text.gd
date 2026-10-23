@@ -448,3 +448,4 @@ static func load_failed() -> String: return TranslationServer.translate("load.fa
 static func no_save_found() -> String: return TranslationServer.translate("load.no_save")
 
 static func campaign_city() -> String: return TranslationServer.translate("campaign.city")
+static func campaign_party() -> String: return TranslationServer.translate("campaign.party")

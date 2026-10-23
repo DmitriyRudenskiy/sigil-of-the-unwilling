@@ -117,11 +117,11 @@ func test_open_screen_shows_live_board_not_placeholder() -> void:
 func test_day_cycle_pauses_while_city_screen_open() -> void:
 	var main := await _boot_campaign()
 	var hud := _hud()
-	assert_bool(main._city_screen_paused).is_false()
+	assert_bool(main._campaign_screen_paused).is_false()
 	hud.open_city_screen()
-	assert_bool(main._city_screen_paused).is_true()
+	assert_bool(main._campaign_screen_paused).is_true()
 	hud.close_city_screen()
-	assert_bool(main._city_screen_paused).is_false()
+	assert_bool(main._campaign_screen_paused).is_false()
 
 
 func test_close_button_of_screen_returns_to_campaign() -> void:
@@ -133,7 +133,7 @@ func test_close_button_of_screen_returns_to_campaign() -> void:
 	await get_tree().process_frame
 	assert_bool(screen.visible).is_false()
 	assert_bool(hud.is_city_screen_open()).is_false()
-	assert_bool(main._city_screen_paused).is_false()
+	assert_bool(main._campaign_screen_paused).is_false()
 
 
 ## Экран города зарегистрирован в машине навигации (указание владельца

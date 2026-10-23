@@ -1,4 +1,5 @@
-"""ui-mockup-parity §7.1 (Q-M87 → (б), D-204): носитель экрана города в игровом пути.
+"""ui-mockup-parity §7.1/7.3 (Q-M87 → (б), D-204; регистрация — D-226/D-227):
+носитель экранов кампании (город, партия) в игровом пути.
 
 Граница уровня (тот же урок, что у `test_main_menu_buttons_live`): настоящего
 попадания мышью из скрипта в Godot 4.7 нет — `push_input` из команды MCP-сервера
@@ -7,16 +8,27 @@
 пути (меню → создание персонажа → Знак → `main.tscn`), состояние кнопки и экрана,
 и проводка сигналов эмитом `pressed` / `close_requested` вместо клика.
 
-Что именно это покрывает и не покрывает GdUnit: в юнит-тестах экран города
-существует сам по себе, а `main.tscn` с поднятым слоем HUD и привязанным
-кампейн-городом живёт только здесь — четвёртый уровень (живой Godot).
+Что именно это покрывает и не покрывает GdUnit: в юнит-тестах экраны города и
+партии существуют сами по себе, а `main.tscn` с поднятым слоем HUD,
+привязанным кампейн-городом и живым ростером партии живёт только здесь —
+четвёртый уровень (живой Godot).
 """
 from __future__ import annotations
 
 HUD = "CampaignHUD/CampaignHud"
 BUTTON = "CampaignHUD/CampaignHud/TopButtons/CityButton"
 SCREEN = "CampaignHUD/CampaignHud/CityScreen"
+PARTY_BUTTON = "CampaignHUD/CampaignHud/TopButtons/PartyButton"
+PARTY_SCREEN = "CampaignHUD/CampaignHud/PartyScreen"
 MANAGER = "CampaignUIManager"
+
+
+def _press(mcp, path: str) -> None:
+    mcp.execute_code(
+        f'get_tree().current_scene.get_node("{path}").emit_signal("pressed")\n'
+        "return true"
+    )
+    mcp.wait_frames(15)
 
 
 def _state(mcp) -> dict:
@@ -39,6 +51,18 @@ def _state(mcp) -> dict:
         '"manager": mgr != null, '
         '"at": str(mgr.current_screen()) if mgr != null else "", '
         '"registered": mgr.has_screen(&"city") if mgr != null else null, '
+        '"party_button": hud != null and hud.get_node_or_null("TopButtons/PartyButton") != null, '
+        '"party_disabled": '
+        'hud.get_node("TopButtons/PartyButton").disabled if hud != null else null, '
+        '"party_text": hud.get_node("TopButtons/PartyButton").text if hud != null else "", '
+        '"party_screen": hud != null and hud.party_screen != null, '
+        '"party_open": hud.is_party_screen_open() if hud != null else null, '
+        '"party_visible": '
+        'hud.party_screen.visible if hud != null and hud.party_screen != null else null, '
+        '"party_header": '
+        'hud.party_screen.get_header_text() '
+        'if hud != null and hud.party_screen != null else "", '
+        '"party_registered": mgr.has_screen(&"party") if mgr != null else null, '
         '"shown": mgr.visible_screens().map(func(id) -> String: return String(id)) '
         'if mgr != null else [], '
         '"turn": comp.campaign.current_turn if comp != null else -1}'
@@ -133,3 +157,54 @@ def test_city_screen_registered_in_campaign_ui_manager(full_cycle):
     )
     assert st["registered"] is True, f"город не зарегистрирован в машине: {st}"
     assert st["shown"] == [], f"до открытия экрана не должно быть видно: {st}"
+
+
+def test_party_screen_registered_in_campaign_ui_manager(full_cycle):
+    """Экран партии поднят тем же носителем и зарегистрирован в машине (D-227).
+
+    До этого раунда `PartyScreen` был техническим экраном без вызывающего:
+    данные партии существовали, входа в них из игры — нет.
+    """
+    st = _state(full_cycle)
+    assert st["party_button"], f"кнопка «Партия» не построена: {st}"
+    assert st["party_disabled"] is False, (
+        f"кнопка «Партия» обязана стать доступной после привязки ростера: {st}"
+    )
+    assert st["party_text"] == "Партия", (
+        f"подпись кнопки из локали и по глоссарию «Партия» "
+        f"(отряд — военная единица города): {st}"
+    )
+    assert st["party_screen"], f"экран партии не создан при привязке: {st}"
+    assert st["party_registered"] is True, f"партия не зарегистрирована в машине: {st}"
+    assert st["party_open"] is False and st["party_visible"] is False, (
+        f"экран партии не имеет права быть открытым до нажатия: {st}"
+    )
+
+
+def test_button_press_opens_party_screen_with_live_roster(full_cycle):
+    """Нажатие «Партия» открывает экран с живым ростером кампании."""
+    _press(full_cycle, PARTY_BUTTON)
+    st = _state(full_cycle)
+    assert st["party_open"] and st["party_visible"], f"экран партии не открылся: {st}"
+    assert st["at"] == "party", f"машина навигации не переведена в партию: {st}"
+    assert st["shown"] == ["party"], f"инвариант одного активного экрана нарушен: {st}"
+    assert st["party_header"] == "Партия: 2/5", (
+        f"экран показывает не стартовый ростер кампании (fighter + ranger): {st}"
+    )
+
+
+def test_switching_city_to_party_closes_city_in_live_game(full_cycle):
+    """Смена экрана слоя в живом рантайме: город закрывается, а не лежит под партией.
+
+    Машина запрещает `CITY→PARTY`, поэтому носитель идёт через карту — иначе
+    игрок, открывший город, не смог бы попасть в партию вообще.
+    """
+    _press(full_cycle, BUTTON)
+    _press(full_cycle, PARTY_BUTTON)
+    st = _state(full_cycle)
+    assert st["at"] == "party", f"машина не дошла до партии: {st}"
+    assert st["open"] is False and st["visible"] is False, (
+        f"город не закрылся при переходе в партию: {st}"
+    )
+    assert st["party_open"] is True, f"партия не открылась из города: {st}"
+    assert st["shown"] == ["party"], f"под партией остался видимый экран: {st}"

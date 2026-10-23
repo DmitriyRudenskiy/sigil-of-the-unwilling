@@ -13,9 +13,9 @@ const CAMPAIGN_SEED: int = 12345  # I1: seed = seed кампании
 var composition: CampaignComposition
 var _day_timer: float = 0.0
 var _is_day_cycle_active: bool = true
-## Экран города открыт — кампейн-время стоит (тот же приём, что пауза на
-## кризисе: игрок не теряет ходы, пока разбирается с застройкой).
-var _city_screen_paused: bool = false
+## Экран кампании открыт — кампейн-время стоит (тот же приём, что пауза на
+## кризисе: игрок не теряет ходы, пока разбирается с застройкой или ростером).
+var _campaign_screen_paused: bool = false
 
 @onready var game_manager: GameManager = $GameManager
 @onready var ui_manager: UIManager = $UIManager
@@ -75,10 +75,11 @@ func _apply_pending_flow() -> void:
 			composition.load_save_state(result.get("state", {}))
 
 
-## Носитель экрана города в игровом пути (ui-mockup-parity §7.1; носитель
+## Носитель экранов кампании в игровом пути (ui-mockup-parity §7.1; носитель
 ## выбран владельцем: Q-M87 → (б), D-204 — новый слой HUD на main.tscn, а не
 ## реанимация архивного world.tscn). До этого слоя CityScreen был сценой без
-## вызывающего: из «Новой игры» в него было попасть нечем.
+## вызывающего, а PartyScreen — экраном без вызывающего: из «Новой игры» в них
+## было попасть нечем.
 func _mount_campaign_hud() -> void:
 	if campaign_hud == null or composition == null:
 		return
@@ -91,8 +92,11 @@ func _mount_campaign_hud() -> void:
 	# поэтому менеджер привязывается раньше.
 	campaign_hud.bind_ui_manager(campaign_ui_manager)
 	campaign_hud.bind_city(composition.city, city_rng)
-	campaign_hud.city_screen_opened.connect(_on_city_screen_opened)
-	campaign_hud.city_screen_closed.connect(_on_city_screen_closed)
+	campaign_hud.bind_party(composition.party)
+	campaign_hud.city_screen_opened.connect(_on_campaign_screen_opened)
+	campaign_hud.city_screen_closed.connect(_on_campaign_screen_closed)
+	campaign_hud.party_screen_opened.connect(_on_campaign_screen_opened)
+	campaign_hud.party_screen_closed.connect(_on_campaign_screen_closed)
 
 
 func _connect_ui():
@@ -103,7 +107,7 @@ func _connect_ui():
 
 
 func _process(delta: float):
-	if not _is_day_cycle_active or _city_screen_paused or game_manager.is_crisis_active_now():
+	if not _is_day_cycle_active or _campaign_screen_paused or game_manager.is_crisis_active_now():
 		return
 	_day_timer += delta
 	if _day_timer >= day_duration:
@@ -136,9 +140,9 @@ func _on_crisis_ended(crisis_id: String, resolved: bool):
 	GameLogger.info("Кризис завершен: %s" % ("успешно" if resolved else "провалено"), "Main")
 
 
-func _on_city_screen_opened() -> void:
-	_city_screen_paused = true
+func _on_campaign_screen_opened() -> void:
+	_campaign_screen_paused = true
 
 
-func _on_city_screen_closed() -> void:
-	_city_screen_paused = false
+func _on_campaign_screen_closed() -> void:
+	_campaign_screen_paused = false

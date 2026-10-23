@@ -1046,3 +1046,6 @@ msgstr "Сохранение не найдено"
 
 msgid "campaign.city"
 msgstr "Город"
+
+msgid "campaign.party"
+msgstr "Партия"

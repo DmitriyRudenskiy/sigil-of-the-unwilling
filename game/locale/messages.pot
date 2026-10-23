@@ -989,3 +989,6 @@ msgstr ""
 
 msgid "campaign.city"
 msgstr ""
+
+msgid "campaign.party"
+msgstr ""
