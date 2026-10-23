@@ -8,7 +8,9 @@
 
 `--crops` — вход уже представляет собой каталог готовых кропов `…_<01..12>.png`
 (например, после ручной сортировки): SAM и детекция пропускаются, отбор и
-сборка листов — те же.
+сборка листов — те же. `--no-books` — каждый файл отдельный сюжет (одиночные
+иконки, не снимки разворотов): спаривание съёмок и запрет «та же книга + та же
+ячейка» пропускаются, остаётся только векторный порог.
 """
 import argparse
 import datetime as dt
@@ -41,11 +43,23 @@ def rows_from_crops(paths):
     """Записи «листа» по уже готовым кропам: группа = исходный файл из имени."""
     by = {}
     for p in paths:
-        by.setdefault(p.stem.rsplit("_", 1)[0], []).append(p.name)
-    w, h = Image.open(paths[0]).size
-    return [{"source": f"{stem}.png", "width": w, "height": h, "mode": "crops",
-             "masks": len(names), "clamped": [], "crops": sorted(names)}
-            for stem, names in sorted(by.items())]
+        by.setdefault(p.stem.rsplit("_", 1)[0], []).append(p)
+    rows = []
+    for stem, ps in sorted(by.items()):
+        w, h = Image.open(ps[0]).size
+        rows.append({"source": f"{stem}.png", "width": w, "height": h, "mode": "crops",
+                     "masks": len(ps), "clamped": [], "crops": sorted(q.name for q in ps)})
+    return rows
+
+
+def rows_from_files(paths):
+    """Каждый файл — отдельный сюжет (одиночные иконки)."""
+    rows = []
+    for p in paths:
+        w, h = Image.open(p).size
+        rows.append({"source": p.name, "width": w, "height": h, "mode": "file",
+                     "masks": 1, "clamped": [], "crops": [p.name]})
+    return rows
 
 
 def crop_all(srcs, out, args, predictor=None, qc_only=False):
@@ -101,6 +115,8 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--crops", action="store_true",
                     help="--input — каталог готовых кропов, детекцию пропустить")
+    ap.add_argument("--no-books", action="store_true",
+                    help="каждый файл — отдельный сюжет, спаривание съёмок пропустить")
     ap.add_argument("--cell", type=int, default=320)
     ap.add_argument("--pad", type=float, default=D.PAD)
     ap.add_argument("--min-frac", type=float, default=D.MIN_FRAC)
@@ -109,6 +125,9 @@ def main():
     ap.add_argument("--unique-subjects", action="store_true",
                     help="сюжет не более одного раза во всех листах: второй экземпляр "
                          "той же книги+ячейки идёт в остаток")
+    ap.add_argument("--global-max-sim", type=float, default=0.95,
+                    help="сюжет не более одного раза во ВСЁМ пуле: копия ближе к уже "
+                         "взятой, чем порог, идёт в остаток (0 = выключено)")
     ap.add_argument("--seed", type=int, default=43)
     ap.add_argument("--max-clusters", type=int, default=10)
     ap.add_argument("--sam-device", default="mps")
@@ -124,7 +143,11 @@ def main():
         srcs = srcs[:args.limit]
     print(f"Аудит: {len(srcs)} файлов в {args.input}")
 
-    if args.crops:
+    if args.no_books:
+        rows = rows_from_files(srcs)
+        print(f"Отдельные сюжеты: {len(srcs)} файлов — детекция и спаривание пропущены")
+        crop_paths = srcs
+    elif args.crops:
         rows = rows_from_crops(srcs)
         print(f"Кроповый вход: {len(srcs)} файлов, книг {len(rows)} — SAM пропущен")
         crop_paths = srcs
@@ -136,7 +159,7 @@ def main():
     if len(crop_paths) < 9:
         raise SystemExit(f"кропов меньше 9 ({len(crop_paths)}) — листов не собрать")
 
-    if args.crops:
+    if args.crops or args.no_books:
         gone = [p for p in crop_paths if not p.is_file()]
         if gone:
             raise SystemExit(f"кропов не стало ({len(gone)}) — в каталоге шла сортировка "
@@ -147,10 +170,15 @@ def main():
     Sim = E @ E.T
 
     by_name = {p.name: i for i, p in enumerate(crop_paths)}
-    emb_by_file = {rec["source"]: E[[by_name[n] for n in rec["crops"]]] for rec in rows}
-    books = S.pair_books([r["source"] for r in rows], emb_by_file)
-    # «тот же объект» = та же книга (одна из пары съёмок) + та же ячейка 4×3
-    same_obj = [(_book_of(p.name, rows, books), p.name[-6:-4]) for p in crop_paths]
+    if args.no_books:
+        # сюжет = файл: спаривать нечего, запрещать «ту же ячейку» негде
+        books = {p.name: i for i, p in enumerate(crop_paths)}
+        same_obj = list(range(len(crop_paths)))
+    else:
+        emb_by_file = {rec["source"]: E[[by_name[n] for n in rec["crops"]]] for rec in rows}
+        books = S.pair_books([r["source"] for r in rows], emb_by_file)
+        # «тот же объект» = та же книга (одна из пары съёмок) + та же ячейка 4×3
+        same_obj = [(_book_of(p.name, rows, books), p.name[-6:-4]) for p in crop_paths]
 
     print("Отбор:")
     pool = list(range(len(crop_paths)))
@@ -167,6 +195,19 @@ def main():
                 keep.append(i)
         pool = keep
         print(f"  сюжетов-близнецов отложено: {len(twins)}")
+    if args.global_max_sim > 0:
+        # векторный порог антидубля действует внутри листа; почти идентичные кадры,
+        # разъехавшиеся по разным листам, он не видит вовсе
+        already, keep = set(twins), []
+        for i in range(len(crop_paths)):
+            if i in already:
+                continue
+            if any(Sim[i, k] > args.global_max_sim for k in keep):
+                twins.append(i)
+            else:
+                keep.append(i)
+        pool = keep
+        print(f"  отложено по глобальному порогу {args.global_max_sim}: {len(twins) - len(already)}")
     nines, meta_rows, warns, reps = [], [], [], []
     while len(pool) >= 9:
         nine, meta = S.select_nine(E, pool, 9, args.seed, args.max_clusters)
@@ -252,20 +293,28 @@ def render_report(r, args):
     modes = {}
     for rec in r["sources"]:
         modes[rec["mode"]] = modes.get(rec["mode"], 0) + 1
-    pool_kind = "готовых кропов" if args.crops else "сырья"
+    pool_kind = "отдельных сюжетов" if args.no_books else ("готовых кропов" if args.crops else "сырья")
     L = [f"# Листы иконок из `{args.input}` ({pool_kind})", "",
          f"Сгенерировано {r['generated']}. Python {r['python']}, numpy {r['numpy']}, "
-         + ("SAM пропущен (вход — готовые кропы), " if args.crops
+         + ("SAM пропущен (вход — готовые изображения), " if args.crops or args.no_books
             else f"SAM на `{r['sam_device']}`, ")
          + f"CLIP на `{r['embed_device']}`.", "",
-         "## Аудит входного пула" + (" — по готовым кропам, детекция пропущена" if args.crops else ""), "",
-         "| лист | разрешение | режим | масок | кропов | кламп |", "| --- | --- | --- | --- | --- | --- |"]
-    for rec in r["sources"]:
-        L.append(f"| `{rec['source'][:28]}…` | {rec['width']}×{rec['height']} | {rec['mode']} | "
-                 f"{rec['masks']} | {len(rec['crops'])} | "
-                 f"{', '.join(map(str, rec['clamped'])) or '—'} |")
+         "## Аудит входного пула" + (" — по готовым файлам, детекция пропущена"
+                                     if args.crops or args.no_books else ""), ""]
+    if args.no_books:
+        w = [rec["width"] for rec in r["sources"]]
+        L += [f"Файлов: {len(r['sources'])}, каждый — отдельный сюжет. "
+              f"Разрешение {min(w)}…{max(w)} px, квадратные. "
+              f"Спаривание съёмок пропущено, антидубль работает только векторным порогом.", ""]
+    else:
+        L += ["| лист | разрешение | режим | масок | кропов | кламп |",
+              "| --- | --- | --- | --- | --- | --- |"]
+        for rec in r["sources"]:
+            L.append(f"| `{rec['source'][:28]}…` | {rec['width']}×{rec['height']} | {rec['mode']} | "
+                     f"{rec['masks']} | {len(rec['crops'])} | "
+                     f"{', '.join(map(str, rec['clamped'])) or '—'} |")
     L += ["", f"Режимы детекции: {json.dumps(modes, ensure_ascii=False)}. "
-          f"Книг (пар съёмок): {len(set(r['books'].values()))}.", "",
+          f"{'Сюжетов' if args.no_books else 'Книг (пар съёмок)'}: {len(set(r['books'].values()))}.", "",
           "## Листы", "",
           "| лист | режим отбора | k | LRS | max intra-sim | md5 листа |",
           "| --- | --- | --- | --- | --- | --- |"]
@@ -282,10 +331,11 @@ def render_report(r, args):
         L += ["## Предупреждения", ""] + [f"- {w}" for w in r["warnings"]] + [""]
     L += [f"## Остаток ({len(r['residual'])})", ""] + [f"- `{n}`" for n in r["residual"]] + [""]
     if r.get("duplicate_subjects"):
-        L += [f"## Отложено как второй экземпляр того же сюжета ({len(r['duplicate_subjects'])})", "",
-              "Второй снимок того же разворота: та же книга и та же ячейка. Без флага",
-              "`--unique-subjects` обе копии попали бы на листы — в разных листах",
-              "векторный порог их не останавливает.", ""] + [f"- `{n}`" for n in r["duplicate_subjects"]] + [""]
+        L += [f"## Отложено как повтор ({len(r['duplicate_subjects'])})", "",
+              "Второй экземпляр того же сюжета (та же книга и та же ячейка в двух съёмках)",
+              "или копия, стоящая ближе `--global-max-sim` к уже взятому сюжету. Векторный",
+              "порог антидубля их не останавливает: он действует внутри листа, а эти",
+              "копии разъезжаются по разным.", ""] + [f"- `{n}`" for n in r["duplicate_subjects"]] + [""]
     L += ["## Контрольные числа", "",
           f"- кропов: {sum(len(rec['crops']) for rec in r['sources'])}",
           f"- листов 3×3: {len(r['sheets'])}",

@@ -50,7 +50,8 @@ for s in rep["sheets"]:
 
 # 2. запрет внутри листа: порог и «та же книга + та же ячейка»
 stem = {f.rsplit(".", 1)[0]: b for f, b in books.items()}
-key = {n: (stem[n.rsplit("_", 1)[0]], n[-6:-4]) for n in names}
+# кроп разворота = «книга + ячейка», одиночный файл = сам себе сюжет
+key = {n: ((stem[n.rsplit("_", 1)[0]], n[-6:-4]) if "_" in n else n) for n in names}
 for s in rep["sheets"]:
     v = [row[c] for c in s["cells"]]
     want(len(v) == 9, f"лист {s['sheet']}: клеток {len(v)}")
