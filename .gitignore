@@ -12,6 +12,14 @@ game/balance_report.json
 # В git — только карта reference/INDEX.md и тексты docs/13, docs/17. См. INDEX.md «Почему не в git».
 reference/*
 !reference/INDEX.md
+# Пиксели спелбука (264 кропа, 29 листов, QC) — локально; в git — текстовые
+# артефакты прогона (отчёт, состав листов, детекция). См. reference/spellbook/README.md.
+!reference/spellbook/
+reference/spellbook/*
+!reference/spellbook/README.md
+!reference/spellbook/report.md
+!reference/spellbook/sheets.json
+!reference/spellbook/detections.json
 
 # Python-кэш (gen_docs_index.py импортирует check_docs_links; инструменты генерации ассетов game/tools, scripts/)
 __pycache__/

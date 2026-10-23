@@ -47,16 +47,19 @@ def test_object_sheet_cells_are_not_empty(objects: dict) -> None:
         assert (cell_px[..., 3] > 32).mean() > 0.02, f"пустая клетка листа: {cell['id']}"
 
 
-def test_fog_twin_is_the_sheet_dimmed_by_the_engine_factor(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_fog_twin_is_the_sheet_dimmed_by_the_engine_factor(tmp_path: Path) -> None:
     """Туман войны кладёт тот же объект вторым источником (`MapObjects.FOG_SOURCE_ID`),
     и кратность обязана совпасть с базой — иначе «затемнённая база при ярком
     дереве» возвращается с другой стороны. Альфа обязана остаться: тень — альфа,
-    а не цвет."""
+    а не цвет.
+
+    Куда писать — **аргумент**, не `monkeypatch` по `OBJ_FOG_IMG`: дефолт
+    `dst=OBJ_FOG_IMG` связывается в момент `import`, и подмена глобалии тесту не
+    подчинялась — тест писал в отслеживаемый ассет и читал несуществующий
+    tmp-путь (T-161).
+    """
     out = tmp_path / "fog.webp"
-    monkeypatch.setattr(art, "OBJ_FOG_IMG", out)
-    art.fog_twin()
+    art.fog_twin(dst=out)
     with Image.open(art.OBJ_IMG) as base_img, Image.open(out) as fog_img:
         base = np.asarray(base_img.convert("RGBA")).astype(np.float64)
         fog = np.asarray(fog_img.convert("RGBA")).astype(np.float64)

@@ -1047,3 +1047,15 @@ msgstr "Save not found"
 
 msgid "campaign.city"
 msgstr "City"
+
+msgid "campaign.party"
+msgstr "Party"
+
+msgid "campaign.turn"
+msgstr "Turn"
+
+msgid "campaign.turn_hint"
+msgstr "Finish the current turn"
+
+msgid "campaign.date"
+msgstr "Month {month} Week {week} Day {day}"

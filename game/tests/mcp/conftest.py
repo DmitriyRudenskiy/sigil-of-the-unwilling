@@ -247,11 +247,10 @@ def full_cycle(mcp):
                 timeout=15.0,
             )
             if r.get("alive"):
-                # Таймер дня не должен конкурировать с ручными ходами тестов.
-                mcp.execute_code(
-                    "get_tree().current_scene._is_day_cycle_active = false\n"
-                    'return {"ok": true}'
-                )
+                # D-229: авто-таймер дня снят — флага `_is_day_cycle_active` в
+                # сцене нет, а запись в несуществующее свойство роняет eval и рвёт
+                # сокет interaction server («Connection closed» у всех тестов
+                # дальше; CAPTURE-HELPER, правило 10). Ход двигает кнопка.
                 break
         except Exception:  # noqa: BLE001 — загрузка сцены может блокировать main loop
             pass
