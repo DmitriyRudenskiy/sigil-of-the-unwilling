@@ -135,8 +135,9 @@ def stage_scan(args):
 def objects(im, min_frac=0.02, max_n=3, atlas_min=8):
     """Квадраты объектов на однотонном фоне: порог по цвету рамки + связные компоненты.
 
-    -> (список боксов в пикселях `im`, доля переднего плана). Боксов нет -> [] ;
-    фона нет (фото, скриншот) -> ([], frac) при frac > 0.9.
+    -> (список боксов в пикселях `im`, доля переднего плана, метка компонент для
+    маски или None). Боксов нет -> [] ; фона нет (фото, скриншот) -> ([], frac, None)
+    при frac > 0.9.
 
     Атлас (спрайт-шит: >= `atlas_min` отдельных кусков) режется по сырым
     компонентам — с дилейтом соседние спрайты склеиваются в один бокс.
@@ -151,19 +152,23 @@ def objects(im, min_frac=0.02, max_n=3, atlas_min=8):
     fg = ndimage.binary_opening(fg, np.ones((3, 3)))
     frac = float(fg.mean())
     if not 0.005 <= frac <= 0.9:
-        return [], frac
+        return [], frac, None
     raw, _ = ndimage.label(fg, structure=np.ones((3, 3)))
     sizes = np.bincount(raw.ravel())[1:]
     floor = 0.002 * fg.sum()
     if sizes.size and np.count_nonzero(sizes >= floor) >= atlas_min:
-        return _boxes(raw, sizes, max_n, floor, min_side=24), frac
+        return _boxes(raw, sizes, max_n, floor, min_side=12), frac, raw
     lab, n = ndimage.label(ndimage.binary_dilation(fg, np.ones((3, 3)), iterations=2),
                            structure=np.ones((3, 3)))
-    return _boxes(lab, np.bincount(lab.ravel())[1:], max_n, min_frac * fg.sum()), frac
+    return _boxes(lab, np.bincount(lab.ravel())[1:], max_n, min_frac * fg.sum()), frac, None
 
 
 def _boxes(lab, sizes, max_n, min_area, min_side=0):
-    """Боксы компонент по убыванию площади: не больше `max_n`, мельче `min_area` не берём."""
+    """Боксы компонент по убыванию площади: не больше `max_n`, мельче `min_area` не берём.
+
+    Шестой элемент — номер компоненты в `lab`, нужен `tile()` чтобы вырезать
+    объект маской и не утащить соседа при расширении в квадрат.
+    """
     out = []
     for i, area in sorted(enumerate(sizes, 1), key=lambda x: -x[1]):
         if area < min_area or len(out) >= max_n:
@@ -171,8 +176,23 @@ def _boxes(lab, sizes, max_n, min_area, min_side=0):
         ys, xs = np.nonzero(lab == i)
         if min(xs.max() - xs.min(), ys.max() - ys.min()) < min_side:
             continue
-        out.append([int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1, int(area)])
+        out.append([int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1,
+                    int(area), i])
     return out
+
+
+def tile(im, lab, box, size=512, bg=(255, 255, 255)):
+    """Квадрат объекта: с маской (`lab`) — только пиксели своей компоненты на фоне `bg`,
+    без неё — просто квадрат кадра. Маска и лечит подтаскивание соседей: квадрат
+    шире бокса, а чужие спрайты в него не попадают."""
+    import detect as D
+    l, t, r, b = D.square(box, *im.size)[:4]
+    crop = im.crop((l, t, r, b)).convert("RGB")
+    if lab is not None:
+        m = Image.fromarray((lab[t:b, l:r] == box[5]).astype("uint8") * 255)
+        crop = Image.composite(crop, Image.new("RGB", crop.size, bg),
+                               m.resize(crop.size, Image.NEAREST))
+    return crop.resize((size, size), Image.LANCZOS)
 
 
 def stage_crop(args):
@@ -202,15 +222,15 @@ def stage_crop(args):
             for b in boxes:
                 if all(not _same(b, u) for u in uniq):
                     uniq.append(b)
-            frac = 1.0
+            frac, lab = 1.0, None
         else:
-            uniq, frac = objects(im, args.min_frac, args.max_per_frame)
+            uniq, frac, lab = objects(im, args.min_frac, args.max_per_frame)
         if not uniq:
             stats["без фона" if frac > 0.9 else "без объекта"] += 1
             uniq = [[0, 0, im.size[0], im.size[1], 1]]      # объект = весь кадр
+            lab = None
         for k, b in enumerate(uniq[:args.max_per_frame]):
-            l, t, r, bo, _ = D.square(b, *im.size)
-            im.crop((l, t, r, bo)).resize((512, 512), Image.LANCZOS).convert("RGB").save(
+            tile(im, lab, b).convert("RGB").save(
                 crops / f"{i:04d}_{p.stem[:24].replace(' ', '_')}_{k}.png")
             stats["кропов"] += 1
         im.close()
@@ -283,25 +303,27 @@ def selfcheck():
     # дом на белом фоне -> один бокс по объекту, фон не попал
     im = Image.new("RGB", (200, 200), "white")
     ImageDraw.Draw(im).rectangle([40, 60, 120, 150], fill=(120, 60, 30))
-    boxes, frac = objects(im)
+    boxes, frac, _ = objects(im)
     assert len(boxes) == 1 and abs(frac - 0.18) < 0.03, (boxes, frac)
     assert all(abs(x - y) <= 3 for x, y in zip(boxes[0][:4], [40, 60, 121, 151])), boxes[0]
     # два объекта -> два бокса, порядок по площади
     ImageDraw.Draw(im).rectangle([150, 20, 190, 60], fill=(10, 90, 40))
     assert len(objects(im)[0]) == 2, objects(im)[0]
+    # атлас 3x3 широких плашек: квадрат тянется на соседа, маска обязана отсечь
+    from PIL import ImageDraw as _D
+    at = Image.new("RGB", (200, 200), "white")
+    d = _D.Draw(at)
+    for r in range(3):
+        for c in range(3):
+            col = (60, 40, 90) if (r + c) % 2 == 0 else (200, 30, 30)
+            d.rectangle([10 + c * 70, 10 + r * 40, 70 + c * 70, 30 + r * 40], fill=col)
+    boxes, frac, lab = objects(at, max_n=40, atlas_min=3)
+    assert len(boxes) == 9 and len(objects(at, max_n=4, atlas_min=3)[0]) == 4, len(boxes)
+    a = np.asarray(tile(at, lab, boxes[0], size=200))
+    near = lambda c: int((np.abs(a - np.array(c)).sum(-1) < 90).sum())
+    assert near((60, 40, 90)) > 5000 and near((200, 30, 30)) == 0, (near((60, 40, 90)), near((200, 30, 30)))
     # пёстрый кадр без фона -> «не кроить»
     assert objects(Image.new("RGB", (200, 200), (90, 30, 200)))[0] == []
-    # атлас 5x5: сетка склеивается дилейтом, но сырые компоненты дают 25 спрайтов
-    from PIL import ImageDraw as _D
-    at = Image.new("RGB", (300, 300), "white")
-    d = _D.Draw(at)
-    for r in range(5):
-        for c in range(5):
-            d.rectangle([10 + c * 60, 10 + r * 60, 50 + c * 60, 50 + r * 60], fill=(60, 40, 90))
-    boxes, frac = objects(at, max_n=40)
-    assert len(boxes) == 25, len(boxes)
-    assert len(objects(at, max_n=3)[0]) == 3 and 0.4 < frac < 0.5, frac
-    assert len(objects(at, max_n=40)[0][0][:4]) == 4
     print("ok")
 
 
