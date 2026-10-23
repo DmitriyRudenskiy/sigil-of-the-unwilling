@@ -133,14 +133,15 @@ def stage_scan(args):
 
 
 def objects(im, min_frac=0.02, max_n=3, atlas_min=8):
-    """Квадраты объектов на однотонном фоне: порог по цвету рамки + связные компоненты.
+    """Объекты на однотонном фоне: порог по цвету рамки + связные компоненты.
 
-    -> (список боксов в пикселях `im`, доля переднего плана, метка компонент для
-    маски или None). Боксов нет -> [] ; фона нет (фото, скриншот) -> ([], frac, None)
-    при frac > 0.9.
+    -> (боксы в пикселях `im`, доля переднего плана, метка компонент для маски).
+    Боксов нет -> [];  фона нет (фото, скриншот) -> ([], frac, None) при frac > 0.9.
 
-    Атлас (спрайт-шит: >= `atlas_min` отдельных кусков) режется по сырым
-    компонентам — с дилейтом соседние спрайты склеиваются в один бокс.
+    Атлас (спрайт-шит: >= `atlas_min` кусков) считается по сырым компонентам —
+    с дилейтом соседние спрайты склеиваются в один бокс. Одиночные кадры
+    группируются дилейтом (крыша, труба, забор = одно здание), но внутри
+    группы остаётся крупнейший кусок: два соприкасющихся спрайта — это не объект.
     """
     from scipy import ndimage
     a = np.asarray(im.convert("RGB"), dtype=np.int16)
@@ -153,18 +154,51 @@ def objects(im, min_frac=0.02, max_n=3, atlas_min=8):
     frac = float(fg.mean())
     if not 0.005 <= frac <= 0.9:
         return [], frac, None
-    raw, _ = ndimage.label(fg, structure=np.ones((3, 3)))
-    sizes = np.bincount(raw.ravel())[1:]
-    floor = 0.002 * fg.sum()
-    if sizes.size and np.count_nonzero(sizes >= floor) >= atlas_min:
-        return _boxes(raw, sizes, max_n, floor, min_side=12), frac, raw
-    lab, n = ndimage.label(ndimage.binary_dilation(fg, np.ones((3, 3)), iterations=2),
-                           structure=np.ones((3, 3)))
-    return _boxes(lab, np.bincount(lab.ravel())[1:], max_n, min_frac * fg.sum()), frac, None
+    atlas = np.count_nonzero(
+        np.bincount(ndimage.label(fg, structure=np.ones((3, 3)))[0].ravel())[1:]
+        >= 0.002 * fg.sum()) >= atlas_min
+    # сырые компоненты: эрозия внутри каждой разрывает касание соседних объектов
+    lab = _largest_parts(ndimage.label(fg, structure=np.ones((3, 3)))[0])
+    if not atlas:                                 # здание = куски рядом (крыша, труба, забор)
+        grp, _ = ndimage.label(ndimage.binary_dilation(lab > 0, np.ones((3, 3)), iterations=2),
+                               structure=np.ones((3, 3)))
+        lab = np.where(lab > 0, grp, 0)           # маска — свои пиксели, без «мостов»
+    floor = 0.002 * fg.sum() if atlas else min_frac * fg.sum()
+    sizes = np.bincount(lab.ravel())[1:]
+    # в атласе слипшийся кусок вдвое больше среднего спрайта — разделить его нечем,
+    # перекрывающиеся фигуры морфология не врассыпную: в отбраковку
+    max_area = 2.0 * np.median(sizes[sizes >= floor]) if atlas and (sizes >= floor).any() else 0
+    return _boxes(lab, sizes, max_n, floor, max_area,
+                  min_side=12 if atlas else 0), frac, lab
 
 
-def _boxes(lab, sizes, max_n, min_area, min_side=0):
-    """Боксы компонент по убыванию площади: не больше `max_n`, мельче `min_area` не берём.
+def _largest_parts(lab):
+    """Один объект в компоненте: ядро (эрозия на 8% меньшей стороны) разрывает
+    касание и перекрытие соседних спрайтов, пиксели разбираются по ближайшему
+    ядру — остаётся крупнейшее. Дом с трубой и забором ядро даёт одночастное,
+    поэтому не режется; перекрывающиеся фигуры эрозия не склеивает."""
+    from scipy import ndimage
+    out = np.zeros_like(lab)
+    for g in np.unique(lab):
+        if not g:
+            continue
+        ys, xs = np.nonzero(lab == g)
+        sl = (slice(int(ys.min()), int(ys.max()) + 1), slice(int(xs.min()), int(xs.max()) + 1))
+        m = lab[sl] == g
+        sub, n = ndimage.label(ndimage.distance_transform_edt(m) > 0.08 * min(m.shape),
+                               structure=np.ones((3, 3))) if min(m.shape) >= 24 else (m, 1)
+        if n > 1:
+            big = int(np.argmax(np.bincount(sub.ravel())[1:])) + 1
+            near = ndimage.distance_transform_edt(sub == 0, return_distances=False,
+                                                  return_indices=True)
+            m = sub[tuple(near)] == big
+        out[sl] = np.where(m, g, out[sl])          # боксы соседних компонент могут перекрываться
+    return out
+
+
+def _boxes(lab, sizes, max_n, min_area, max_area=0, min_side=0):
+    """Боксы компонент по убыванию площади: не больше `max_n`, мельче `min_area` и
+    крупнее `max_area` не берём.
 
     Шестой элемент — номер компоненты в `lab`, нужен `tile()` чтобы вырезать
     объект маской и не утащить соседа при расширении в квадрат.
@@ -173,6 +207,8 @@ def _boxes(lab, sizes, max_n, min_area, min_side=0):
     for i, area in sorted(enumerate(sizes, 1), key=lambda x: -x[1]):
         if area < min_area or len(out) >= max_n:
             break
+        if max_area and area > max_area:
+            continue
         ys, xs = np.nonzero(lab == i)
         if min(xs.max() - xs.min(), ys.max() - ys.min()) < min_side:
             continue
@@ -182,9 +218,9 @@ def _boxes(lab, sizes, max_n, min_area, min_side=0):
 
 
 def tile(im, lab, box, size=512, bg=(255, 255, 255)):
-    """Квадрат объекта: с маской (`lab`) — только пиксели своей компоненты на фоне `bg`,
-    без неё — просто квадрат кадра. Маска и лечит подтаскивание соседей: квадрат
-    шире бокса, а чужие спрайты в него не попадают."""
+    """Квадрат объекта на однотонном фоне: берутся пиксели своей компоненты,
+    остальное — `bg`. Маска лечит и подтаскивание соседа (квадрат шире бокса),
+    и пёстрый фон исходника."""
     import detect as D
     l, t, r, b = D.square(box, *im.size)[:4]
     crop = im.crop((l, t, r, b)).convert("RGB")
@@ -227,8 +263,7 @@ def stage_crop(args):
             uniq, frac, lab = objects(im, args.min_frac, args.max_per_frame)
         if not uniq:
             stats["без фона" if frac > 0.9 else "без объекта"] += 1
-            uniq = [[0, 0, im.size[0], im.size[1], 1]]      # объект = весь кадр
-            lab = None
+            continue                                  # кадра без фона не кроим
         for k, b in enumerate(uniq[:args.max_per_frame]):
             tile(im, lab, b).convert("RGB").save(
                 crops / f"{i:04d}_{p.stem[:24].replace(' ', '_')}_{k}.png")
@@ -322,6 +357,24 @@ def selfcheck():
     a = np.asarray(tile(at, lab, boxes[0], size=200))
     near = lambda c: int((np.abs(a - np.array(c)).sum(-1) < 90).sum())
     assert near((60, 40, 90)) > 5000 and near((200, 30, 30)) == 0, (near((60, 40, 90)), near((200, 30, 30)))
+    # слипшаяся пара спрайтов вдвое больше среднего — в лист её нельзя, в отбраковку
+    d.rectangle([10, 10, 140, 30], fill=(60, 40, 90))
+    assert len(objects(at, max_n=40, atlas_min=3)[0]) == 7, len(objects(at, max_n=40, atlas_min=3)[0])
+    # два соприкасающихся прямоугольника = не один объект: берём крупнейший, чужого в кадре нет
+    two = Image.new("RGB", (200, 200), "white")
+    d2 = _D.Draw(two)
+    d2.rectangle([20, 50, 100, 150], fill=(60, 40, 90))
+    d2.rectangle([98, 60, 160, 140], fill=(200, 30, 30))
+    # перекрывающиеся фигуры в ОДИНОЧНОМ кадре — известный предел: без сегментации
+    # они один объект; в атласе такой кусок отсекается по размеру (выше)
+    b2, _, lab2 = objects(two, max_n=5)
+    assert len(b2) == 1, b2
+    # дом с оторванной трубой = ОДИН объект (куски в 3 px друг от друга)
+    house = Image.new("RGB", (200, 200), "white")
+    _D.Draw(house).rectangle([60, 100, 120, 160], fill=(120, 60, 30))
+    _D.Draw(house).rectangle([90, 80, 100, 97], fill=(120, 60, 30))
+    bh, _, _ = objects(house)
+    assert len(bh) == 1 and bh[0][1] < 82, bh
     # пёстрый кадр без фона -> «не кроить»
     assert objects(Image.new("RGB", (200, 200), (90, 30, 200)))[0] == []
     print("ok")
