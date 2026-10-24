@@ -179,6 +179,13 @@ func _build(campaign_seed: int) -> void:
 		rep_report["districts"] = districts.process_turn(
 			settlement.buildings, settlement.population, settlement.party_size,
 			str((settlement.sm.get("food", {}) as Dictionary).get("state", "OK")))
+		# 2.2 (D-235): снятие района — событие в хронику. Носитель хроники — telemetry
+		# (T-158), отдельного журнала районов в MVP нет.
+		if telemetry != null:
+			for g in (rep_report["districts"] as Dictionary).get("disbanded", []):
+				telemetry.record("district_disbanded", {
+					"group": str(g), "turn": campaign.current_turn,
+				})
 		rep_report["population"] = pop_report
 		return rep_report
 	campaign.threats_hook = func() -> Dictionary:
