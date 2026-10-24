@@ -18,7 +18,16 @@
       Отчёт: файл + число образцов. Внутренность не сканируется: мягкие
       тени внутри иконок (низко-альфовый чёрный) — техника рисования, не
       ореол; ореол — на кромке изображения (proposal: «на полупрозрачных
-      краях»).
+      краях»). Исключение — **область скола по углу** (T-156, вариант (а)):
+      размер скола измеряется по самой альфе (профиль края) и обязательно
+      доказывается диагональной силуэтой; внутри этой зоны AA-кромка
+      сигнатурной формы плитки (арт-библия §4.1) образцом не считается.
+      Прямые рёбра проверяются полностью, скошенных углов нет — исключения
+      нет тоже.
+
+`--self-test` — проверка самого гарда (задача 3.2, протокол мутаций): синтетический
+ореол на прямом краю обязан быть найден, синтетический чамфер — не найден.
+Без самопроверки «зелёный гейт» после исключения T-156 ничего не значит.
 
 Область: game/assets/ui/widgets/ (buttons/panels/sliders/progress_bars;
 классификация — MANIFEST.json, kind "9-slice"/"иконка") +
@@ -54,6 +63,7 @@ HALO_STEP = 7              # (c): шаг выборки периметра
 HALO_ALPHA_LO = 10         # (c): 10 < alpha < 200
 HALO_ALPHA_HI = 200
 HALO_RGB_SUM_MAX = 60      # (c): r+g+b < 60 — почти чёрный
+CHAMFER_AA = 2             # (c): ширина AA-кромки скола, px (запас к измеренному)
 
 
 def corner_alphas(im):
@@ -120,10 +130,113 @@ def check_center(im):
     return []
 
 
-def halo_samples(im):
+def _opaque(v):
+    return v > OPAQUE_RING_MIN
+
+
+def _col_start(px, x0_range, y):
+    """Первый непрозрачный x в строке y (силуэт слева); None — строка пуста."""
+    for x in x0_range:
+        if _opaque(px[x, y][3]):
+            return x
+    return None
+
+
+def _row_start(px, y0_range, x):
+    """Первый непрозрачный y в столбце x (силуэт сверху); None — столбец пуст."""
+    for y in y0_range:
+        if _opaque(px[x, y][3]):
+            return y
+    return None
+
+
+def chamfer_cuts(im):
+    """(c) -> {'tl': c, 'tr': c, 'bl': c, 'br': c} — измеренные сколы углов.
+
+    Размер скола — сколько пикселей от угла вдоль края альфа ещё не непрозрачная
+    (профиль края). Одного профиля мало: его даёт и ореол автокропа, залегший по
+    всему краю. Поэтому требуется **диагональная силуэта**: у настоящего скола
+    левый край силуэта в строке y=c уже у устья (x=0), а в строке y=0 он стоит у
+    x=c; у ореола над прямолинейным краем силуэт в обеих строках начинается в
+    одном и том же месте. Без подтверждения скол не засчитывается, исключение не
+    действует, образец остаётся нарушением (T-156, вариант (а)).
+    """
+    px = im.load()
+    w, h = im.size
+    xs = range(w)
+    ys = range(h)
+    cuts = {}
+
+    def ramp(vals):
+        n = 0
+        for v in vals:
+            if _opaque(v):
+                break
+            n += 1
+        return n
+
+    top = [px[x, 0][3] for x in xs]
+    bottom = [px[x, h - 1][3] for x in xs]
+    left = [px[0, y][3] for y in ys]
+    right = [px[w - 1, y][3] for y in ys]
+    cand = {
+        "tl": (ramp(top), ramp(left)),
+        "tr": (ramp(top[::-1]), ramp(right)),
+        "bl": (ramp(bottom), ramp(left[::-1])),
+        "br": (ramp(bottom[::-1]), ramp(right[::-1])),
+    }
+    for corner, (cx, cy) in cand.items():
+        c = max(cx, cy)
+        if c <= 0:
+            cuts[corner] = 0
+            continue
+        c = min(c, w // 2, h // 2)
+        if not _chamfer_proven(px, w, h, corner, c):
+            cuts[corner] = 0
+            continue
+        cuts[corner] = c
+    return cuts
+
+
+def _chamfer_proven(px, w, h, corner, c):
+    """Диагональная силуэта: кромка у угла уходит внутрь под 45 градусов."""
+    d = min(c, w // 2, h // 2)
+    y_far = d
+    y_near = 0 if corner in ("tl", "tr") else h - 1
+    if y_far == y_near:
+        return False
+    if corner in ("tl", "bl"):
+        near = _col_start(px, range(w), y_near)
+        far = _col_start(px, range(w), y_far)
+        if near is None or far is None:
+            return False
+        return near >= c - 1 and far <= 1
+    near = _col_start(px, range(w - 1, -1, -1), y_near)
+    far = _col_start(px, range(w - 1, -1, -1), y_far)
+    if near is None or far is None:
+        return False
+    return near <= w - c and far >= w - 2
+
+
+def _in_chamfer(cuts, w, h, x, y):
+    """Лежит ли точка периметра в зоне скола какого-нибудь угла."""
+    for corner, c in cuts.items():
+        if c <= 0:
+            continue
+        r = c + CHAMFER_AA
+        dx = x if corner in ("tl", "bl") else w - 1 - x
+        dy = y if corner in ("tl", "tr") else h - 1 - y
+        if dx <= r and dy <= r:
+            return True
+    return False
+
+
+def halo_samples(im, cuts=None):
     """(c) -> список (x, y, alpha, rgb) на периметре, шаг HALO_STEP."""
     px = im.load()
     w, h = im.size
+    if cuts is None:
+        cuts = chamfer_cuts(im)
     pts = []
     seen = set()
 
@@ -131,6 +244,8 @@ def halo_samples(im):
         if (x, y) in seen:
             return
         seen.add((x, y))
+        if _in_chamfer(cuts, w, h, x, y):
+            return
         r, g, b, a = px[x, y]
         if HALO_ALPHA_LO < a < HALO_ALPHA_HI and r + g + b < HALO_RGB_SUM_MAX:
             pts.append((x, y, a, (r, g, b)))
@@ -152,7 +267,81 @@ def check_halo(im):
             % (len(pts), pts[:3])]
 
 
+def self_test():
+    """Протокол мутаций для самого гарда (задача 3.2).
+
+    (1) синтетический ореол автокропа (тёмная полупрозрачная кромка по прямому
+        краю) обязан быть найден — иначе проверка пустая;
+    (2) синтетический чамфер (диагональный скол с AA) обязан НЕ найтись — иначе
+        исключение T-156 не отличает дизайн от дефекта.
+    """
+    fails = []
+
+    # (1) ореол: прямоугольник с непрозрачным телом и кромкой 2 px alpha=150,
+    #     почти чёрная; по всему периметру.
+    w, h = 60, 40
+    body = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    pb = body.load()
+    for y in range(h):
+        for x in range(w):
+            pb[x, y] = (120, 90, 40, 255)
+    for t in range(2):
+        for x in range(w):
+            for y in (t, h - 1 - t):
+                pb[x, y] = (4, 10, 16, 150)
+        for y in range(h):
+            for x in (t, w - 1 - t):
+                pb[x, y] = (4, 10, 16, 150)
+    got = check_halo(body)
+    if not got:
+        fails.append("мутация «ореол на прямом краю» не найдена — проверка (c) пуста")
+
+    # (2) чамфер: тот же прямоугольник, но у каждого угла срезан угол 45
+    #     градусов, AA-кромка лежит по диагонали и красится той же почти
+    #     чёрной краской (сигнатурная форма плитки, арт-библия §4.1).
+    c = 12
+    ch = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    pc = ch.load()
+    for y in range(h):
+        for x in range(w):
+            smin = min(x + y, (w - 1 - x) + y, x + (h - 1 - y), (w - 1 - x) + (h - 1 - y))
+            if smin < c:
+                continue  # снаружи скола
+            if smin < c + 2:
+                pc[x, y] = (4, 10, 16, 150)  # AA диагональной кромки
+            else:
+                pc[x, y] = (120, 90, 40, 255)
+    got2 = check_halo(ch)
+    if got2:
+        fails.append("мутация «чамфер-AA по углам» найдена как ореол — исключение "
+                     "T-156 не отличает дизайн от дефекта: %s" % got2)
+
+    # (3) подмножество: у прямоугольника без сколов исключений нет вовсе.
+    if chamfer_cuts(body) != {"tl": 0, "tr": 0, "bl": 0, "br": 0}:
+        fails.append("у прямоугольника без сколов измерились сколы — исключение "
+                     "шире, чем должно быть")
+    cuts = chamfer_cuts(ch)
+    if min(cuts.values()) <= 0:
+        fails.append("у чамфер-плитки скол не измерился (%s) — исключение не сработает "
+                     "и на реальном ките" % cuts)
+
+    if fails:
+        print("check_ui_assets: SELF-TEST ПРОВАЛЕН:")
+        for f in fails:
+            print("  - %s" % f)
+        return 1
+    print("check_ui_assets: SELF-TEST OK — ореол на прямом краю ловится, "
+          "чамфер-AA не ловится, скошенный прямоугольник без исключений")
+    return 0
+
+
 def main():
+    if "--self-test" in sys.argv[1:]:
+        return self_test()
+    if len(sys.argv[1:]):
+        print("использование: check_ui_assets.py [--self-test]")
+        return 2
+
     if not os.path.isfile(MANIFEST):
         print("check_ui_assets: нет MANIFEST: %s" % MANIFEST)
         return 2
