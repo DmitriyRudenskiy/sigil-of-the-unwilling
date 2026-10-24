@@ -83,6 +83,22 @@ static func is_playable_race(race_id: String) -> bool:
 	return PLAYABLE_RACES.has(race_id)
 
 
+## 2.1 (Q-M100 → (а), D-239): список рас конструктора = канон-каталог (first_tier)
+## под маской playable slice 3. До D-239 конструктор наполнялся из hero_races.gd
+## (6 рас MoM-тила: `elf` ≠ каталожное `elves`), а маска не имела ни одного
+## потребителя. Чисел раса в MVP-конструкторе не даёт: SRD-модификаторы каталога —
+## шесть атрибутов (str/dex/con/int/wis/cha), словарь статов героя — MoM-восьмёрка,
+## читателя у модификаторов нет (T-176); вымышленные бонусы не заводятся.
+static func playable_race_options() -> Array:
+	var out: Array = []
+	for race in CanonRaces.first_tier():
+		var race_id := String(race.get("id", ""))
+		if not is_playable_race(race_id):
+			continue
+		out.append({"id": race_id, "name": String(race.get("name", race_id))})
+	return out
+
+
 ## V-4 (D-219): штраф оккупации по времени под оккупацией. Ступенчатая кривая
 ## с капом: 0 ходов → 0; 1–2 → −1; 3–4 → −2; 5+ → −3 (кап −3). Детерминированно,
 ## без случайных штрафов и каскадной непроходимости. Возвращает модификатор

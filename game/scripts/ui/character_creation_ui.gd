@@ -57,7 +57,11 @@ func _populate_options() -> void:
         _sex_option.add_item(item["name"])
         _sex_keys.append(item["id"])
 
-    var race_data := _keys_labels(_Races.RACES)
+    # Q-M100 → (а) (D-239): расы конструктора — канон-каталог (mvp_catalog.json,
+    # first_tier) под маской playable slice 3; T-113 сделал то же с классами
+    # (hireable-маска). Legacy-таблица hero_races.gd больше не источник списка,
+    # она остаётся фолбэком подрас/бонусов для легаси-идов (подрас у канон-рас нет).
+    var race_data: Array = PregameFlowModel.playable_race_options()
     for item in race_data:
         _race_option.add_item(item["name"])
         _race_keys.append(item["id"])

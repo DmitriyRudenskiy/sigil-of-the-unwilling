@@ -208,3 +208,32 @@ func test_trainable_sources() -> void:
 	# Наём (вытесненная модель §3.3) — не источник тренировки.
 	assert_bool(Model.is_trainable_source("hire")).is_false()
 	assert_bool(Model.is_trainable_source("mercenary_market")).is_false()
+
+
+## === 2.1 (Q-M100 → (а), D-239): список рас конструктора ===
+
+## Маска playable slice 3 получила первого потребителя: options = каталог (first_tier)
+## ⊆ PLAYABLE_RACES, имена — из каталога. До D-239 конструктор читал hero_races.gd.
+func test_playable_race_options_are_masked_catalog() -> void:
+	var options: Array = Model.playable_race_options()
+	assert_int(options.size()).is_equal(3)
+	var ids: Array[String] = []
+	var names: Array[String] = []
+	for option in options:
+		ids.append(String(option.get("id", "")))
+		names.append(String(option.get("name", "")))
+	assert_bool(ids == Array(["elves", "humans", "half_orcs"])) \
+		.override_failure_message("порядок/состав playable slice: %s" % ids).is_true()
+	assert_bool(names == Array(["Эльфы", "Люди", "Полуорки"])) \
+		.override_failure_message("имена берутся из каталога: %s" % names).is_true()
+
+
+## Вне slice — остальные 4 расы каталога и любой легаси-id MoM-тила: маска не
+## «ловит» чужие ids, список конструктора их не предложит.
+func test_playable_race_options_exclude_non_slice() -> void:
+	var ids: Array[String] = []
+	for option in Model.playable_race_options():
+		ids.append(String(option.get("id", "")))
+	for outside in ["gnomes", "halflings", "tieflings", "dwarves", "elf", "dwarf", "aumaua"]:
+		assert_bool(not ids.has(outside)) \
+			.override_failure_message("вне slice, но в списке: %s" % outside).is_true()
