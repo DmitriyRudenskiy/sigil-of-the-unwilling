@@ -740,6 +740,154 @@ def fog_twin(src: Path = OBJ_IMG, dst: Path = OBJ_FOG_IMG) -> int:
     return 0
 
 
+def ramp_of(biome: str) -> list[str]:
+    """Рампа биома из спека (там же источник правды про тоны материалов)."""
+    for it in SPEC["categories"]["materials"]["items"]:
+        if it.get("biome") == biome:
+            return [h.lower() for h in it["ramp"]]
+    raise SystemExit(f"в спеке нет материала биома {biome}")
+
+
+def tones(ramp: list[str]) -> np.ndarray:
+    """Lab-тоны рампы; тон вне полосы M — ошибка вызова, а не тихая подмена."""
+    bad = [h for h in ramp if h not in BAND_HEX]
+    if bad:
+        raise SystemExit(f"тонов вне полосы M нет: {', '.join(bad)} (полоса: {BAND_HEX})")
+    return np.array([BAND_LAB[BAND_HEX.index(h)] for h in ramp], dtype=np.float64)
+
+
+def lab_u8(lab: np.ndarray) -> np.ndarray:
+    """Lab (0…100) → uint8 RGB тем же преобразованием, что `ramp_tile`."""
+    return (lab_to_rgb(lab) * 255.0).round().clip(0, 255).astype(np.uint8)
+
+
+def recolor_cell(rgb: np.ndarray, old: list[str], new: list[str]) -> np.ndarray:
+    """Пиксель → его тон-кластер → новый тон, отклонение сохраняется.
+
+    `ramp_tile` кладёт пикселю тон рампы по рангу яркости и оставляет зерно как
+    отклонение L от тона; здесь тот же шаг в обратную сторону: ближайший тон старой
+    рампы в Lab даёт кластер, разность пикселя с кластером (зерно, низкочастотное
+    пятно `mottle`, тень декаля, следы webp-сжатия) сохраняется целиком, а кластер
+    заменяется новым тоном. Поэтому фактура не меняется ни на пиксель, а цвет
+    уходит целиком — в том числе тогда, когда новых тонов другое количество
+    (кластеры отображаются пропорционально индексу).
+    """
+    lab = PB.rgb_to_lab(rgb.astype(np.float64) / 255.0)
+    ot, nt = tones(old), tones(new)
+    k = ((lab[:, :, None, :] - ot[None, None, :, :]) ** 2).sum(-1).argmin(-1)
+    # Индекс кластера — и есть структура (ранг яркости сырья); если новых тонов
+    # другое число, индексы отображаются в новый масштаб пропорционально.
+    idx = k if len(new) == len(old) else np.round(
+        k * (len(new) - 1) / max(1, len(old) - 1)).astype(int)
+    off = lab - ot[k]
+    return (lab_to_rgb(nt[idx] + off) * 255.0
+            ).round().clip(0, 255).astype(np.uint8)
+
+
+def recolor(mapping: dict[str, list[str]], out: Path, ab: Path | None = None) -> int:
+    """Перекраска клеток уже собранного атласа в другие тоны полосы (T-163).
+
+    Raw-кадров восьми материалов на машине сборки нет, а `assemble()` пишет лист
+    только из наличных ролей, значит «поправить рампу и пересобрать» = заново
+    генерировать все материалы на GPU. Этот шаг меняет только то, что меняет рампа:
+    цвет тон-кластеров. Носитель не трогается — пишется лист-кандидат и манифест-
+    побратим, чтобы `check_map_art.py --atlas` прогнал по нему весь набор мер.
+    """
+    src = Image.open(ATLAS_IMG).convert("RGBA")
+    man = json.loads(ATLAS_JSON.read_text())
+    if out.resolve() == ATLAS_IMG.resolve():
+        raise SystemExit("носитель не перезаписывается: --recolor-out в другой путь")
+    # Клетки пишутся в numpy-буфер, а не через `Image.paste`: paste с RGBA-источником
+    # домножает полупрозрачные пиксели декалей на то, что лежало под ними, и граница
+    # биома после перекраски «в себя» уже не совпадает с носителем.
+    dst = np.asarray(src).copy()
+    # Голубой тон полосы — именно он на белёсых чёрточках читается как вода (T-163).
+    blue = PB.tone_lab(PB.parse_hex("#95cde5"))
+    hex_in = np.asarray(hex_mask()) > 0
+    for biome, new_ramp in mapping.items():
+        old_ramp = ramp_of(biome)
+        tones(new_ramp)
+        share = [0, 0]
+        total = 0
+        items: list[list] = []
+        for c in man["cells"]:
+            if c.get("biome") != biome or c.get("kind") not in ("base", "edge"):
+                continue
+            x, y = int(c["atlas"][0]) * TILE, int(c["atlas"][1]) * TILE
+            cell = src.crop((x, y, x + TILE, y + TILE))
+            rgb = np.asarray(cell.convert("RGB"))
+            new_rgb = recolor_cell(rgb, old_ramp, new_ramp)
+            for i, arr in enumerate((rgb, new_rgb)):
+                lab = PB.rgb_to_lab(arr.astype(np.float64) / 255.0)
+                share[i] += int((PB.de76(lab, blue) < 12).sum())
+            total += int(hex_in.sum())
+            items.append([c["id"], (x, y), new_rgb, np.asarray(cell.split()[3])])
+        # Доли тонов у вариантов различаются по замыслу (`variant_shift` фазы), поэтому
+        # после смены тонов средние тона вариантов разъезжаются заново: выравнивание —
+        # тот же шаг, что `assemble()` кладёт сразу за рампой, и тот же порог
+        # `atlas/variant-tone`. Декаль границы собирается из средних вариантов, значит
+        # получает среднее из смещений.
+        bases = [it for it in items if it[0].startswith("base_")]
+        delta: list[np.ndarray] = []
+        if bases:
+            labs = [PB.rgb_to_lab(it[2].astype(np.float64) / 255.0) for it in bases]
+            means = [lab[hex_in].reshape(-1, 3).mean(0) for lab in labs]
+            target = np.mean(means, axis=0)
+            delta = [-(m - target) for m in means]
+            for it, lab, d in zip(bases, labs, delta):
+                it[2] = lab_u8(lab + d)
+        edge_shift = np.mean(delta, axis=0) if delta else 0.0
+        for it in items:
+            if not it[0].startswith("base_"):
+                it[2] = lab_u8(PB.rgb_to_lab(it[2].astype(np.float64) / 255.0) + edge_shift)
+            x, y = it[1]
+            dst[y:y + TILE, x:x + TILE, :3] = it[2]
+            dst[y:y + TILE, x:x + TILE, 3] = it[3]
+        print(f"{biome:6s} {str(old_ramp):34s} → {str(new_ramp):34s} около-голубого: "
+              f"{100.0 * share[0] / max(1, total):.0f}% → {100.0 * share[1] / max(1, total):.0f}%")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    dst_img = Image.fromarray(dst, "RGBA")
+    dst_img.save(out, "WEBP", quality=QUALITY, lossless=LOSSLESS)
+    man["image"] = out.name
+    out.with_suffix(".json").write_text(json.dumps(man, ensure_ascii=False, indent=1))
+    print(f"кандидат: {out} + {out.with_suffix('.json')} "
+          f"({out.stat().st_size // 1024} KiB, носитель не тронут)")
+    if ab is not None:
+        recolor_ab(src, dst_img, mapping, ab)
+    return 0
+
+
+def recolor_ab(before: Image.Image, after: Image.Image, mapping: dict[str, list[str]],
+               out: Path, scale: int = 2) -> None:
+    """A/B-лист для глазного вердикта: строка биома — сначала все варианты «до»,
+    затем все «после», тем же порядком манифеста, без ресайза кроме целого ×2."""
+    man = json.loads(ATLAS_JSON.read_text())
+    pad, lab_h = 6, 16
+    cols = 4
+    w = (TILE * scale + pad) * cols * 2 + pad
+    h = (TILE * scale + lab_h + pad) * len(mapping) + pad
+    sheet = Image.new("RGBA", (w, h), (*PB.parse_hex("#1d2829"), 255))
+    d = ImageDraw.Draw(sheet)
+    for r, biome in enumerate(mapping):
+        y = pad + r * (TILE * scale + lab_h + pad)
+        d.text((pad, y), f"{biome} BEFORE", fill=(235, 235, 225, 255))
+        y0 = y + lab_h
+        n = 0
+        for c in man["cells"]:
+            if c.get("biome") != biome or c.get("kind") != "base":
+                continue
+            x, yy = int(c["atlas"][0]) * TILE, int(c["atlas"][1]) * TILE
+            box = (x, yy, x + TILE, yy + TILE)
+            for side, im in enumerate((before, after)):
+                cell = im.crop(box).resize((TILE * scale, TILE * scale), Image.NEAREST)
+                sheet.paste(cell, (pad + (side * cols + n) * (TILE * scale + pad), y0), cell)
+            n += 1
+        d.text((pad + cols * (TILE * scale + pad), y), f"{biome} AFTER", fill=(235, 235, 225, 255))
+    out.parent.mkdir(parents=True, exist_ok=True)
+    sheet.convert("RGB").save(out)
+    print(f"A/B: {out}")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--only", default="")
@@ -750,6 +898,13 @@ def main() -> int:
                     help="пересобрать затемнённый побратим листа из уже собранного листа")
     ap.add_argument("--contact-sheet", action="store_true")
     ap.add_argument("--repro", default="")
+    ap.add_argument("--recolor", default="",
+                    help='JSON вида {"road": ["#6d6d47", "#cdbe9b"]} — перекраска '
+                         "клеток готового атласа в другие тоны полосы, без raw-кадров")
+    ap.add_argument("--recolor-out", default="",
+                    help="куда положить лист-кандидат (рядом ляжет манифест-побратим)")
+    ap.add_argument("--recolor-ab", default="",
+                    help="туда же положить A/B-лист для глазного вердикта владельца")
     a = ap.parse_args()
     if a.assemble:
         return assemble()
@@ -767,6 +922,14 @@ def main() -> int:
         return contact_sheet(ROOT / SPEC["out_dir"] / "sheet_map_art.webp")
     if a.repro:
         return repro(a.repro)
+    if a.recolor:
+        if not a.recolor_out:
+            raise SystemExit("--recolor без --recolor-out: кандидат писать некуда")
+        mapping = {k.lower(): [h.lower() for h in v] for k, v in
+                   json.loads(Path(a.recolor).read_text() if Path(a.recolor).exists()
+                              else a.recolor).items()}
+        return recolor(mapping, Path(a.recolor_out),
+                       Path(a.recolor_ab) if a.recolor_ab else None)
     return render([s for s in a.only.split(",") if s], a.force, a.attempts)
 
 
