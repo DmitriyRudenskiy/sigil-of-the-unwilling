@@ -54,7 +54,7 @@ applies = Array[StringName]([&"bleed"])
 [sub_resource type="Resource" id="Resource_biq11"]
 script = ExtResource("2_eaomo")
 id = &"archer"
-display_name = "Лучница"
+display_name = "Лучник"
 max_hp = 70
 attack = 18
 defense = 4
@@ -126,7 +126,7 @@ hits = 2
 [sub_resource type="Resource" id="Resource_3dfcu"]
 script = ExtResource("2_eaomo")
 id = &"cutthroat"
-display_name = "Тайный убийца"
+display_name = "Головорез"
 max_hp = 70
 attack = 19
 defense = 4

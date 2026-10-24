@@ -15,7 +15,7 @@ hits = 2
 [resource]
 script = ExtResource("2_x1o1s")
 id = &"cutthroat"
-display_name = "Тайный убийца"
+display_name = "Головорез"
 max_hp = 70
 attack = 19
 defense = 4

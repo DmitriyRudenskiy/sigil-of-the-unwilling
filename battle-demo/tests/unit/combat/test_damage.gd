@@ -61,6 +61,23 @@ func test_defense_ignores_part_of_defense() -> void:
 	assert_int(piercing).is_greater(plain)
 
 
+func test_lethal_hit_zeroes_hp_and_marks_dead() -> void:
+	var combat := BattleFactory.state(
+		BattleFactory.roster([BattleFactory.stats(&"hero", 100, 60, 0, 20)]),
+		[BattleFactory.stats(&"glass", 10, 1, 0, 10)],
+		3,
+	)
+	var foe: BattleUnit = combat.foes_of(combat.current)[0]
+	var deaths: Array = []
+	combat.unit_died.connect(func(unit: BattleUnit) -> void: deaths.append(unit.uid()))
+	combat.perform(BattleAction.attack(combat.current, foe))
+	assert_int(foe.hp).is_equal(0)
+	assert_bool(foe.died).is_true()
+	assert_bool(foe.is_alive()).is_false()
+	assert_array(deaths).is_equal([foe.uid()])
+	assert_int(combat.alive(BattleUnit.SIDE_ENEMY).size()).is_equal(0)
+
+
 func test_weaken_lowers_attack() -> void:
 	var actor := BattleUnit.new(BattleFactory.stats(&"a", 50, 20, 0, 10), BattleUnit.SIDE_PLAYER, 0)
 	assert_int(actor.effective_attack()).is_equal(20)

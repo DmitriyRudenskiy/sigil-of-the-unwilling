@@ -1,0 +1,55 @@
+== initialize http://192.168.0.230:9000/mcp
+"serverInfo":{"name":"ComfyUI_MCP_Server","version":"1.30.0"}
+session: нет (stateless)
+== tools/list
+"name":"api_edit_image_qwen21"
+"name":"api_generate_image_krea2"
+"name":"api_generate_image_qwen21"
+"name":"api_generate_image"
+"name":"api_remove_background"
+"name":"api_segment_sam3"
+"name":"api_upscale_image"
+"name":"api_upscale_seedvr2"
+"name":"cancel_job"
+"name":"get_asset_metadata"
+"name":"get_defaults"
+"name":"get_job"
+"name":"get_publish_info"
+"name":"get_queue_status"
+"name":"list_assets"
+"name":"list_models"
+"name":"list_workflows"
+"name":"publish_asset"
+"name":"regenerate"
+"name":"run_workflow"
+"name":"set_comfyui_output_root"
+"name":"set_defaults"
+"name":"view_image"
+== tools/call get_queue_status
+event: message
+data: {"jsonrpc":"2.0","id":3,"result":{"content":[{"type":"text","text":"{\n  \"status\": \"success\",\n  \"queue_running\": [],\n  \"queue_pending\": [],\n  \"running_count\": 0,\n  \"pending_count\": 0\n}"}],"isError":false}}
+
+
+
+== tools/call list_models
+event: message
+data: {"jsonrpc":"2.0","id":3,"result":{"content":[{"type":"text","text":"{\n  \"models\": [\n    \"flux1-dev-fp8.safetensors\",\n    \"v1-5-pruned-emaonly-fp16.safetensors\"\n  ],\n  \"count\": 2,\n  \"default\": \"v1-5-pruned-emaonly.ckpt\"\n}"}],"isError":false}}
+
+
+
+== tools/call list_workflows
+event: message
+data: {"jsonrpc":"2.0","id":3,"result":{"content":[{"type":"text","text":"{\n  \"workflows\": [\n    {\n      \"id\": \"api_edit_image_qwen21\",\n      \"name\": \"Api Edit Image Qwen21\",\n      \"description\": \"Execute the 'api_edit_image_qwen21' workflow.\",\n      \"available_inputs\": {\n        \"unet\": {\n          \"type\": \"str\",\n          \"required\": true,\n          \"description\": \"Value for 'unet'.\"\n        },\n        \"clip\": {\n          \"type\": \"str\",\n          \"required\": true,\n          \"description\": \"Value for 'clip'.\"\n        },\n        \"vae\": {\n          \"type\": \"str\",\n          \"required\": true,\n          \"description\": \"Value for 'vae'.\"\n        },\n        \"image\": {\n          \"type\": \"str\",\n          \"required\": true,\n          \"description\": \"Value for 'image'.\"\n        },\n        \"prompt\": {\n          \"type\": \"str\",\n          \"required\": true,\n          \"description\": \"Main text prompt used inside the workflow.\"\n        },\n        \"negative_prompt\": {\n          \"type\": \"str\",\n          \"required\": false,\n          \"description\": \"Negative prompt to
+== GET http://192.168.0.230:8188/queue
+running=0 pending=0
+== GET http://192.168.0.230:8188/object_info (узлы графа D13/D14)
+TextEncodeQwenImage21 OK
+QwenImage21Cache OK
+UNETLoader OK
+CLIPLoader OK
+VAELoader OK
+LoadImage OK
+SaveImage OK
+KSampler OK
+VAEDecode OK
+OpenposePreprocessor OK

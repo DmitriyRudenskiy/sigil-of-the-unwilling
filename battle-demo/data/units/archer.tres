@@ -15,7 +15,7 @@ applies = Array[StringName]([&"bleed"])
 [resource]
 script = ExtResource("2_myn1o")
 id = &"archer"
-display_name = "Лучница"
+display_name = "Лучник"
 max_hp = 70
 attack = 18
 defense = 4
