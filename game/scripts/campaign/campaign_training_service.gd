@@ -10,6 +10,9 @@ const PARTY_CAPACITY := 5
 ## предложение, ждёт вердикта автора; носитель — campaign.json
 ## training.population_per_unit, фолбэк — эта константа.
 const DEFAULT_POPULATION_PER_UNIT := 10
+## Уровень замены мёртвых (party-characters 2.3): в MVP — 1 (C-1: «уровень
+## города − 1» — мёртвая ссылка, K-M3).
+const DEFAULT_REPLACEMENT_LEVEL := 1
 
 static var _balance_config: Dictionary = {}
 
@@ -226,6 +229,14 @@ static func population_per_unit() -> int:
 	return int((block as Dictionary).get("population_per_unit", DEFAULT_POPULATION_PER_UNIT))
 
 
+## Уровень замены мёртвых из конфига (party-characters 2.3).
+static func replacement_level() -> int:
+	var block: Variant = _balance().get("training", {})
+	if not (block is Dictionary):
+		return DEFAULT_REPLACEMENT_LEVEL
+	return maxi(1, int((block as Dictionary).get("replacement_level", DEFAULT_REPLACEMENT_LEVEL)))
+
+
 ## Множитель одновременности N (формула 02-mechanics §3.3: progress +=
 ## tick / (t_тренировки × N)). Числа в GDD нет → 1 и строка в реестре
 ## 07-balance §10.
@@ -435,6 +446,26 @@ static func request_training(city: City, building_catalog: Dictionary, building_
 	}
 	city.campaign_training.append(record)
 	return {"ok": true, "recruit": record}
+
+
+## Замена мёртвого (party-characters 2.3): «a DEAD character SHALL be replaced by
+## a companion of the same class via training, level 1 in MVP» — класс берётся из
+## покойного, уровень назначается конфигом, а не заявителем. Расу спецификация не
+## фиксирует — кандидат приходит со своей. Слот партии DEAD не занимает (alive-
+## модель V-6/D-221), поэтому `party_alive` считается как обычно.
+static func request_replacement(city: City, building_catalog: Dictionary, building_uid: int,
+		dead_member: Dictionary, candidate: Dictionary, party_alive: int,
+		scenario_flags: Array = [], admin_capacity: int = 0,
+		population_per_unit: int = 0) -> Dictionary:
+	if String(dead_member.get("state", PartySystem.STATE_READY)) != PartySystem.STATE_DEAD:
+		return _failure("member_not_dead")
+	var class_id := String(dead_member.get("class", ""))
+	if class_id.is_empty():
+		return _failure("dead_member_class_missing")
+	var trainee := candidate.duplicate(true)
+	trainee["level"] = replacement_level()
+	return request_training(city, building_catalog, building_uid, class_id, trainee,
+		party_alive, scenario_flags, admin_capacity, population_per_unit)
 
 
 ## Тик очереди (production-фаза). SM: REQUESTED→TRAINING на следующем ходу,

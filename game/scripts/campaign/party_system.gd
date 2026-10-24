@@ -4,7 +4,8 @@ extends RefCounted
 ## потери и wipe.
 ##
 ## Данные — state.party: [{id, class, race, level, xp, stats{}, luck, state?, uid?}]
-## (MvpSaveSchema: party = TYPE_ARRAY; "state" — входная величина: READY/DEAD;
+## (MvpSaveSchema: party = TYPE_ARRAY; "state" — входная величина: READY/WOUNDED/
+## DEAD — WOUNDED персистится с 2026-10-21, V-5/D-220;
 ## "uid" — uid жителя, если член партии — житель (шов §2.2, потери по uid)).
 ## Чистые функции: без ГСЧ, одинаковые входы → одинаковые выходы (I1).
 ##
@@ -12,9 +13,12 @@ extends RefCounted
 ## никогда не правятся — при нестыковке бюджета правятся источники). Фолбэк —
 ## канон-константы (только при неисправном конфиге, push_warning).
 ##
-## Срез MVP: бой — 1v1 авто-разрешение (T-050), внутрибоевые WOUNDED/UNSTABLE
-## не персистятся (потери = DEAD, раненые — не потери, слой T-116); REST/лечение
-## и замена мёртвых (наёмник ур. города−1) — с боем партии (за срезом).
+## Срез MVP: бой — 1v1 авто-разрешение (T-050); внутрибоевые WOUNDED/UNSTABLE —
+## слой T-116, между боями от него живёт только ростерный WOUNDED (V-5/D-220:
+## выживший с 0 HP остаётся WOUNDED, раненые — не потери; потери = DEAD);
+## REST — здесь (`rest`, полное восстановление живых); замена мёртвых — тренировкой
+## того же класса (`CampaignTrainingService.request_replacement`, party-characters
+## 2.3; уровень — из конфига, C-1: в MVP 1, формула «уровень города − 1» мертва).
 
 const XP_JSON := "res://data/config/balance/xp.json"
 const CAMPAIGN_JSON := "res://data/config/balance/campaign.json"

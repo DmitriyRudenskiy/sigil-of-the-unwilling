@@ -231,3 +231,62 @@ func test_production_phase_ticks_queue_and_fills_party() -> void:
 	comp.advance_turn()
 	assert_that(PartySystem.alive_members(comp.party).size()).is_equal(alive + 1)
 	assert_that(city.campaign_training).is_empty()
+
+
+## party-characters 2.3: замена мёртвого — тот же класс, уровень из конфига.
+func test_replacement_reuses_dead_class_and_config_level() -> void:
+	var city := _city()
+	city.campaign_buildings.append({
+		"uid": 8, "id": "aoe4_barracks", "state": "active",
+		"construction_turns_remaining": 0, "cell": Vector2i(21, 21),
+	})
+	var dead := {"id": "h1", "class": "fighter", "race": "humans", "level": 3, "state": "DEAD"}
+	var result := CampaignTrainingService.request_replacement(
+		city, CampaignBuildingCatalog.load_catalog(), 8, dead,
+		{"id": "v9", "race": "humans", "stats": {"str": 14, "dex": 10, "con": 10, "int": 10,
+			"wis": 10, "cha": 10}}, 2)
+	assert_bool(result.ok).is_true()
+	var record: Dictionary = city.campaign_training[0]
+	assert_that(String(record.get("class_id", ""))).is_equal("fighter")
+	assert_that(int((record.get("trainee", {}) as Dictionary).get("level", 0))) \
+		.is_equal(CampaignTrainingService.replacement_level())
+	var issued := CampaignTrainingService.advance_training_turn(city, 5)
+	var member: Dictionary = (issued.members as Array)[0]
+	assert_that(String(member.get("class", ""))).is_equal("fighter")
+	assert_that(int(member.get("level", 0))) \
+		.is_equal(CampaignTrainingService.replacement_level())
+
+
+## 2.3: «замена мёртвых» — не «тренировка живого»: живой кандидат отклоняется.
+func test_replacement_refuses_living_member() -> void:
+	var city := _city()
+	var uid := _barracks(city)
+	var result := CampaignTrainingService.request_replacement(
+		city, CampaignBuildingCatalog.load_catalog(), uid,
+		{"id": "h1", "class": "fighter", "state": "READY"}, _trainee("v9"), 2)
+	assert_bool(result.ok).is_false()
+	assert_that(String(result.reason)).is_equal("member_not_dead")
+	assert_that(city.campaign_training).is_empty()
+	assert_float(city.resource_ctx.amount(&"iron")).is_equal_approx(20.0, 0.0001)
+
+
+## 2.3: класс покойного должен тренироваться именно в этом здании.
+func test_replacement_requires_class_trained_in_that_building() -> void:
+	var city := _city()
+	city.campaign_buildings.append({
+		"uid": 8, "id": "aoe4_barracks", "state": "active",
+		"construction_turns_remaining": 0, "cell": Vector2i(21, 21),
+	})
+	var result := CampaignTrainingService.request_replacement(
+		city, CampaignBuildingCatalog.load_catalog(), 8,
+		{"id": "h2", "class": "ranger", "state": "DEAD"},
+		{"id": "v10", "race": "humans",
+			"stats": {"str": 10, "dex": 14, "con": 10, "int": 10, "wis": 14, "cha": 10}}, 2)
+	assert_bool(result.ok).is_false()
+	assert_that(String(result.reason)).is_equal("class_not_trained_here:ranger")
+	assert_that(city.campaign_training).is_empty()
+
+
+## 2.3: уровень замены — число из конфига, а не из словаря кандидата.
+func test_replacement_level_reads_balance_config() -> void:
+	assert_int(CampaignTrainingService.replacement_level()).is_equal(1)
