@@ -2,3 +2,158 @@
 [skip] knight/walk: покадрово, D5 (походка клипом не собирается)
 [skip] knight/attack: уже годен
 [run ] knight/hit
+{
+  "char": "knight",
+  "anim": "hit",
+  "seed": 1101,
+  "length": 33,
+  "corner_before_clip": [
+    0,
+    255,
+    0
+  ],
+  "seconds": {
+    "first_frame": 150.7,
+    "chromakey": 3.0,
+    "clip": 42.2
+  },
+  "total_seconds": 196.0,
+  "audit": {
+    "frames": 33,
+    "motion_first_last": 55.3,
+    "sharpness_min": 1367.5,
+    "sharpness_median": 1559.0,
+    "pivot_slide_x": 31.8,
+    "pivot_sway_x": 31.8,
+    "feet_drift_x": 7.5,
+    "feet_drift_y": 0,
+    "chroma_pixels_kept": 0,
+    "chroma_share": 0.0
+  },
+  "loop": null,
+  "subsampled": [
+    "battle-demo/artifacts/clips/knight/hit/frame_01.png",
+    "battle-demo/artifacts/clips/knight/hit/frame_12.png",
+    "battle-demo/artifacts/clips/knight/hit/frame_22.png",
+    "battle-demo/artifacts/clips/knight/hit/frame_33.png"
+  ],
+  "verdict": "брак: корпус уехал по полу (31.8 px за цикл)"
+}
+[skip] knight/turn: уже годен
+[skip] spearman/idle: уже годен
+[skip] spearman/walk: покадрово, D5 (походка клипом не собирается)
+[run ] spearman/attack
+{
+  "char": "spearman",
+  "anim": "attack",
+  "seed": 1102,
+  "length": 33,
+  "corner_before_clip": [
+    0,
+    255,
+    0
+  ],
+  "seconds": {
+    "first_frame": 159.8,
+    "chromakey": 3.0,
+    "clip": 42.2
+  },
+  "total_seconds": 205.1,
+  "audit": {
+    "frames": 33,
+    "motion_first_last": 14.9,
+    "sharpness_min": 2127.8,
+    "sharpness_median": 3338.8,
+    "pivot_slide_x": 0.6,
+    "pivot_sway_x": 38.9,
+    "feet_drift_x": 61.5,
+    "feet_drift_y": 1,
+    "chroma_pixels_kept": 0,
+    "chroma_share": 0.0
+  },
+  "loop": null,
+  "subsampled": [
+    "battle-demo/artifacts/clips/spearman/attack/frame_01.png",
+    "battle-demo/artifacts/clips/spearman/attack/frame_12.png",
+    "battle-demo/artifacts/clips/spearman/attack/frame_22.png",
+    "battle-demo/artifacts/clips/spearman/attack/frame_33.png"
+  ],
+  "verdict": "брак: есть смазанные кадры"
+}
+[run ] spearman/hit
+{
+  "char": "spearman",
+  "anim": "hit",
+  "seed": 1102,
+  "length": 33,
+  "corner_before_clip": [
+    0,
+    255,
+    0
+  ],
+  "seconds": {
+    "first_frame": 159.8,
+    "chromakey": 3.0,
+    "clip": 42.3
+  },
+  "total_seconds": 205.1,
+  "audit": {
+    "frames": 33,
+    "motion_first_last": 56.8,
+    "sharpness_min": 2832.9,
+    "sharpness_median": 3540.6,
+    "pivot_slide_x": 4.0,
+    "pivot_sway_x": 8.7,
+    "feet_drift_x": 19.5,
+    "feet_drift_y": 1,
+    "chroma_pixels_kept": 0,
+    "chroma_share": 0.0
+  },
+  "loop": null,
+  "subsampled": [
+    "battle-demo/artifacts/clips/spearman/hit/frame_01.png",
+    "battle-demo/artifacts/clips/spearman/hit/frame_12.png",
+    "battle-demo/artifacts/clips/spearman/hit/frame_22.png",
+    "battle-demo/artifacts/clips/spearman/hit/frame_33.png"
+  ],
+  "verdict": "годен: движение 56.8, резкость 2832.9/3540.6, снос 4.0 px, хромакей 0"
+}
+[run ] spearman/turn
+{
+  "char": "spearman",
+  "anim": "turn",
+  "seed": 1102,
+  "length": 33,
+  "corner_before_clip": [
+    0,
+    255,
+    0
+  ],
+  "seconds": {
+    "first_frame": 159.8,
+    "chromakey": 3.0,
+    "clip": 42.3
+  },
+  "total_seconds": 205.1,
+  "audit": {
+    "frames": 33,
+    "motion_first_last": 61.5,
+    "sharpness_min": 3527.7,
+    "sharpness_median": 3970.7,
+    "pivot_slide_x": 10.2,
+    "pivot_sway_x": 22.2,
+    "feet_drift_x": 89.5,
+    "feet_drift_y": 13,
+    "chroma_pixels_kept": 0,
+    "chroma_share": 0.0
+  },
+  "loop": null,
+  "subsampled": [
+    "battle-demo/artifacts/clips/spearman/turn/frame_01.png",
+    "battle-demo/artifacts/clips/spearman/turn/frame_12.png",
+    "battle-demo/artifacts/clips/spearman/turn/frame_22.png",
+    "battle-demo/artifacts/clips/spearman/turn/frame_33.png"
+  ],
+  "verdict": "брак: корпус уехал по полу (10.2 px за цикл)"
+}
+[run ] archer/idle

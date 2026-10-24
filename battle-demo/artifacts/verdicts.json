@@ -24,5 +24,8 @@
   "battle-demo/artifacts/clips/knight/attack": "годен: движение 9.9, резкость 1041.7/1447.6, снос 0.1 px, хромакей 0",
   "battle-demo/artifacts/clips/knight/hit": "брак: корпус уехал по полу (31.8 px за цикл)",
   "battle-demo/artifacts/clips/knight/turn": "годен: движение 46.3, резкость 1408.7/1517.9, снос 7.0 px, хромакей 0",
-  "battle-demo/artifacts/clips/spearman/idle": "годен: движение 9.2, резкость 4223.7/4561.0, снос 0.2 px, хромакей 0 — петля ping-pong (стык не найден)"
+  "battle-demo/artifacts/clips/spearman/idle": "годен: движение 9.2, резкость 4223.7/4561.0, снос 0.2 px, хромакей 0 — петля ping-pong (стык не найден)",
+  "battle-demo/artifacts/clips/spearman/attack": "брак: есть смазанные кадры",
+  "battle-demo/artifacts/clips/spearman/hit": "годен: движение 56.8, резкость 2832.9/3540.6, снос 4.0 px, хромакей 0",
+  "battle-demo/artifacts/clips/spearman/turn": "брак: корпус уехал по полу (10.2 px за цикл)"
 }
