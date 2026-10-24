@@ -15,6 +15,8 @@ const GameLogger := preload("res://scripts/core/game_logger.gd")
 ## ход уходит под руками).
 
 const CAMPAIGN_SEED: int = 12345  # I1: seed = seed кампании
+## Главное меню — куда уходит кампания по кнопке «В меню» (mvp-ui-flow 5.4).
+const MAIN_MENU_SCENE := "res://scenes/main_menu.tscn"
 var composition: CampaignComposition
 ## Экран кампании открыт — кампейн-время стоит (тот же приём, что пауза на
 ## кризисе: игрок не теряет ходы, пока разбирается с застройкой или ростером).
@@ -100,6 +102,12 @@ func _mount_campaign_hud() -> void:
 	campaign_hud.city_screen_closed.connect(_on_campaign_screen_closed)
 	campaign_hud.party_screen_opened.connect(_on_campaign_screen_opened)
 	campaign_hud.party_screen_closed.connect(_on_campaign_screen_closed)
+	campaign_hud.settings_screen_opened.connect(_on_campaign_screen_opened)
+	campaign_hud.settings_screen_closed.connect(_on_campaign_screen_closed)
+	campaign_hud.menu_requested.connect(_on_menu_requested)
+	# mvp-ui-flow 5.4: настроек у живого кампейна не было — экран жил в меню и в
+	# бою, а из кампании к нему не вело ничего.
+	campaign_hud.bind_settings(Services.resolve(&"settings"))
 	# 7.13: ход кампании делается кнопкой слоя. Обработчик — тот же путь,
 	# что был у таймера (`advance_turn` + `on_day_passed`), чтобы кнопка не
 	# заводила второй порядок фаз.
@@ -152,6 +160,48 @@ func _on_day_passed(day: int):
 	# единственный источник обновления, а не `_advance_day`.
 	if campaign_hud != null:
 		campaign_hud.refresh_campaign(day)
+	# Автосохранение хода (mvp-ui-flow 5.4): у переключателя «Автосохранение» до
+	# этого шага не было читателя — настройка писалась экраном настроек и не
+	# читалась никем, поэтому кампанийный слот в живом прохождении не создавался,
+	# а «Продолжить» в меню оставался выключенным навсегда.
+	_autosave_campaign()
+
+
+## Запись кампанийного слота (T-110). Возвращает результат носителя —
+## `{ok, message}` — чтобы вызывающий отличил отказ записи от успеха: молча
+## проглоченная ошибка сейва значит потерянный ход, о котором игрок не знает.
+func save_campaign_slot() -> Dictionary:
+	if composition == null:
+		return {"ok": false, "message": "campaign composition is not ready"}
+	return MvpSaveManager.save_slot(
+		MvpSaveManager.CAMPAIGN_SLOT, composition.build_save_state())
+
+
+## Автосохранение по настройке: пишет только когда оно включено (по умолчанию
+## выключено — `Settings.DEFAULT_AUTO_SAVE`), иначе переключатель снова стал бы
+## декорацией.
+func _autosave_campaign() -> void:
+	var settings: Object = Services.resolve(&"settings")
+	if settings == null or not bool(settings.auto_save):
+		return
+	var result: Dictionary = save_campaign_slot()
+	if not bool(result.get("ok", false)):
+		GameLogger.warn(
+			"Автосохранение хода не записано: %s" % str(result.get("message", "")), "Main")
+
+
+## Выход в главное меню (mvp-ui-flow 5.4). Сохраняется всегда, а не по
+## переключателю: другого пути записать кампанию у игрока нет, а потерять
+## прохождение из-за нажатия «В меню» — не фича, а дефект. Меню при этом
+## открывается и с отказом записи (терять из-за ошибки диска саму возможность
+## выйти — второе наказание); «Продолжить» просто останется выключенным.
+func _on_menu_requested() -> void:
+	var result: Dictionary = save_campaign_slot()
+	if not bool(result.get("ok", false)):
+		GameLogger.warn(
+			"Кампания не сохранена при выходе в меню: %s" % str(result.get("message", "")),
+			"Main")
+	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
 
 
 func _on_crisis_started(crisis_id: String):

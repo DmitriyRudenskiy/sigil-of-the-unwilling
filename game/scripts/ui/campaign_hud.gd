@@ -22,12 +22,19 @@ signal city_screen_opened
 signal city_screen_closed
 signal party_screen_opened
 signal party_screen_closed
+signal settings_screen_opened
+signal settings_screen_closed
 ## 7.13 — ход кампании запрашивается нажатием. Слой не знает, как устроен ход
 ## (`CampaignComposition.advance_turn` + `GameManager.on_day_passed` — это
 ## драйвер в `main.gd`), поэтому просит, а не делает: носитель сигнала — хост.
 signal turn_requested
+## Выход в главное меню: тот же разбор, что и с ходом. Слой не знает ни про
+## сцену меню, ни про сейв — он просит; хост сохраняет кампанийный слот и меняет
+## сцену (mvp-ui-flow 5.4: возврата в меню из живого кампейна не было вовсе).
+signal menu_requested
 
 const CityScreenScene := preload("res://scenes/ui/city_screen.tscn")
+const SettingsScreenScene := preload("res://scenes/ui/settings_screen.tscn")
 const PartyScreenModelScript := preload("res://scripts/ui/party_screen_model.gd")
 const CounterRegistry := preload("res://scripts/ui/campaign_counters.gd")
 const CalendarScript := preload("res://scripts/campaign/campaign_calendar.gd")
@@ -39,21 +46,28 @@ const DATE_LABEL_NAME := "CampaignDate"
 const CITY_SCREEN_NAME := "CityScreen"
 const PARTY_BUTTON_NAME := "PartyButton"
 const PARTY_SCREEN_NAME := "PartyScreen"
+const SETTINGS_BUTTON_NAME := "SettingsButton"
+const MENU_BUTTON_NAME := "MenuButton"
+const SETTINGS_SCREEN_NAME := "SettingsScreen"
 ## Экраны в машине навигации кампании: id перехода и куда возвращаться.
 const CITY_SCREEN_ID := &"city"
 const PARTY_SCREEN_ID := &"party"
+const SETTINGS_SCREEN_ID := &"settings"
 const MAP_SCREEN_ID := &"map"
 ## Экраны, которыми владеет этот слой: переключение между ними идёт через
 ## карту (см. `_show_campaign_screen`), чужие экраны (бой, хроника) слой не
 ## имеет права покидать сам.
-const HUD_SCREEN_IDS: Array[StringName] = [CITY_SCREEN_ID, PARTY_SCREEN_ID]
+const HUD_SCREEN_IDS: Array[StringName] = [CITY_SCREEN_ID, PARTY_SCREEN_ID, SETTINGS_SCREEN_ID]
 
 var city: City = null
 var city_screen: CityScreen = null
 var party_screen: PartyScreen = null
+var settings_screen: SettingsScreen = null
 var _top_row: HBoxContainer = null
 var _city_button: Button = null
 var _party_button: Button = null
+var _settings_button: Button = null
+var _menu_button: Button = null
 var _turn_button: Button = null
 ## Защита от повторного нажатия во время обработки хода (7.13): пока эмитится
 ## `turn_requested`, второе нажатие — не второй ход.
@@ -141,9 +155,9 @@ func _build() -> void:
 	_top_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_top_row)
 	_top_row.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	# Ширина ряда под три кнопки: 3 × 140 + 2 × 16 separation + 16 отступ.
+	# Ширина ряда под пять кнопок: 5 × 140 + 4 × 16 separation + 16 отступ.
 	_top_row.add_theme_constant_override("separation", 16)
-	_top_row.offset_left = -460.0
+	_top_row.offset_left = -790.0
 	_top_row.offset_right = -16.0
 	_top_row.offset_top = 16.0
 	_top_row.offset_bottom = 56.0
@@ -167,6 +181,29 @@ func _build() -> void:
 	_party_button.disabled = true
 	_party_button.pressed.connect(_on_party_pressed)
 	_top_row.add_child(_party_button)
+
+	_settings_button = Button.new()
+	_settings_button.name = SETTINGS_BUTTON_NAME
+	_settings_button.text = GameText.campaign_settings()
+	_settings_button.custom_minimum_size = Vector2(140, 40)
+	# До привязки сервиса настроек кнопки нет: без `Settings` экран настроек сам
+	# себя закрывает в `_ready` (конвенция «нет несуществующих действий»). До
+	# 2026-10-24 настроек в кампании не было вовсе: из живого кампейна они были
+	# недостижимы (экран жил только в меню и в бою).
+	_settings_button.disabled = true
+	_settings_button.pressed.connect(_on_settings_pressed)
+	_top_row.add_child(_settings_button)
+
+	_menu_button = Button.new()
+	_menu_button.name = MENU_BUTTON_NAME
+	_menu_button.text = GameText.campaign_menu()
+	_menu_button.tooltip_text = GameText.campaign_menu_hint()
+	_menu_button.custom_minimum_size = Vector2(140, 40)
+	# Кнопка включена сразу, в отличие от города и партии: действие существует
+	# независимо от привязок — выйти в меню можно всегда, а сохранение перед
+	# выходом делает хост. Что именно делает кнопка — в подсказке (7.13).
+	_menu_button.pressed.connect(_on_menu_pressed)
+	_top_row.add_child(_menu_button)
 
 	_turn_button = Button.new()
 	_turn_button.name = TURN_BUTTON_NAME
@@ -358,6 +395,69 @@ func refresh_party_screen() -> void:
 		party_screen.refresh(_party, _party_capacity, [])
 
 
+## Привязка настроек: экран создаётся здесь же, что город и партия. Порядок
+## вызовов важен: `setup()` до `add_child` (иначе `_ready` не найдёт сервис и
+## экран закроет себя сам), `persistent = true` до первого закрытия (без него
+## `_do_close()` освободил бы узел, а ссылка слоя осталась бы висячей),
+## `show_additional = false` — потому что дополнительный блок настроек это
+## контекст меню («Арена», «Хроника», предпросмотр модели): в кампании арена и
+## предпросмотр не играют, а у кампанийной хроники нет носителя контента
+## (T-175), так что эти три кнопки здесь были бы мёртвыми.
+func bind_settings(settings: Node) -> void:
+	if settings == null:
+		return
+	if settings_screen == null or not is_instance_valid(settings_screen):
+		settings_screen = SettingsScreenScene.instantiate() as SettingsScreen
+		settings_screen.name = SETTINGS_SCREEN_NAME
+		settings_screen.persistent = true
+		settings_screen.show_additional = false
+		settings_screen.setup(settings)
+		add_child(settings_screen)
+		settings_screen.visible = false
+		settings_screen.closed.connect(_on_settings_screen_closed)
+		if _ui_manager != null:
+			_ui_manager.register_screen(SETTINGS_SCREEN_ID, settings_screen)
+	if _settings_button != null:
+		_settings_button.disabled = false
+
+
+func open_settings_screen() -> void:
+	if settings_screen == null:
+		return
+	if not _show_campaign_screen(SETTINGS_SCREEN_ID):
+		return
+	settings_screen.visible = true
+	settings_screen_opened.emit()
+
+
+func close_settings_screen() -> void:
+	if settings_screen == null or not settings_screen.visible:
+		return
+	if _ui_manager != null:
+		_ui_manager.show_screen(MAP_SCREEN_ID)
+	_close_settings_screen()
+
+
+func is_settings_screen_open() -> bool:
+	return settings_screen != null and is_instance_valid(settings_screen) \
+		and settings_screen.visible
+
+
+func _on_settings_pressed() -> void:
+	if is_settings_screen_open():
+		close_settings_screen()
+	else:
+		open_settings_screen()
+
+
+func _on_settings_screen_closed() -> void:
+	close_settings_screen()
+
+
+func _on_menu_pressed() -> void:
+	menu_requested.emit()
+
+
 func _on_city_pressed() -> void:
 	if is_city_screen_open():
 		close_city_screen()
@@ -397,6 +497,11 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		if is_party_screen_open():
 			close_party_screen()
 			get_viewport().set_input_as_handled()
+		elif is_settings_screen_open():
+			# Экран настроек закрывается своей «Отменой», но Esc — ожидание игрока,
+			# а не выход из-за экрана: закрытие идёт тем же путём, что и кнопка.
+			close_settings_screen()
+			get_viewport().set_input_as_handled()
 
 
 ## Смена активного экрана машиной, а не игроком: уход в бой/партию/хронику
@@ -407,6 +512,8 @@ func _on_screen_changed(screen: StringName) -> void:
 		_close_city_screen()
 	if screen != PARTY_SCREEN_ID:
 		_close_party_screen()
+	if screen != SETTINGS_SCREEN_ID:
+		_close_settings_screen()
 
 
 func _open_city_screen() -> void:
@@ -431,6 +538,14 @@ func _close_party_screen() -> void:
 		return
 	party_screen.visible = false
 	party_screen_closed.emit()
+
+
+func _close_settings_screen() -> void:
+	if settings_screen == null or not is_instance_valid(settings_screen) \
+			or not settings_screen.visible:
+		return
+	settings_screen.visible = false
+	settings_screen_closed.emit()
 
 
 ## Открыть экран кампании через машину. Между двумя экранами слоя машина
