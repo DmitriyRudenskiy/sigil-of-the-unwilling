@@ -26,15 +26,28 @@ var _red_pos: PackedVector2Array = PackedVector2Array()
 
 var _hex_size: float = 32.0
 var _city_marks: Array = []
-var _threat_pos: PackedVector2Array = PackedVector2Array()
+var _threat_cells: Array[Vector2i] = []
 var _terrain_mgr: Variant = null
 var _terrain_pos: Dictionary = {}
+var _fog: RefCounted = null
 
 func setup(map: MapGenerator) -> void:
 	_map_gen = map
 	z_index = 5
 	if _map_gen and _map_gen.has_valid_tilemap():
 		_hex_size = _map_gen.get_tile_size().x * 0.5
+
+## Туман — источник истины «показывать ли маркер» (docs/02g §2.1: неисследованная
+## клетка пуста, без ресурсов и маркеров). Хост (WorldController) передаёт свой
+## VisibilityMap при каждом `_fog_refreshed`; без него слой рисует всё, как раньше
+## (юнит-тесты собирают его без карты видимости).
+func set_fog(fog: RefCounted) -> void:
+	_fog = fog
+	queue_redraw()
+
+## Показан ли маркер на клетке: канон — только на исследованной.
+func marker_visible_at(cell: Vector2i) -> bool:
+	return _fog == null or _fog.is_explored(cell)
 
 func show_markers(hero_cell: Vector2i, mp: float, dist_map: Dictionary) -> void:
 	_hero_cell = hero_cell
@@ -97,20 +110,24 @@ func set_city_markers(cities: Array) -> void:
 		_city_marks.append({"cell": city.center, "pos": _map_gen.map_to_local(city.center), "city": city})
 	queue_redraw()
 
+## Клик по маркеру города: та же граница тумана, что и у отрисовки (02g §2.1) —
+## город за туманом не виден, значит и клика по нему быть не может.
 func city_at_cell(cell: Vector2i) -> City:
+	if not marker_visible_at(cell):
+		return null
 	for m in _city_marks:
 		if m.cell == cell:
 			return m.city
 	return null
 
 func set_threat_markers(cells: Array) -> void:
-	_threat_pos.clear()
+	_threat_cells.clear()
 	if _map_gen == null or not _map_gen.has_valid_tilemap():
 		queue_redraw()
 		return
 	for cell in cells:
 		if cell is Vector2i:
-			_threat_pos.append(_map_gen.map_to_local(cell))
+			_threat_cells.append(cell)
 	queue_redraw()
 
 func set_terrain_resource_markers(terrain_mgr: Variant) -> void:
@@ -137,7 +154,7 @@ func refresh_terrain_markers() -> void:
 	queue_redraw()
 
 func _process(_d: float) -> void:
-	if (_visible and not _green_pos.is_empty()) or not _threat_pos.is_empty():
+	if (_visible and not _green_pos.is_empty()) or not _threat_cells.is_empty():
 		queue_redraw()
 
 func _draw() -> void:
@@ -145,11 +162,16 @@ func _draw() -> void:
 		return
 
 	var pulse_t: float = Time.get_ticks_msec() / 1000.0
-	for pos in _threat_pos:
+	for cell in _threat_cells:
+		if not marker_visible_at(cell):
+			continue
 		var ring_r: float = _hex_size * (0.30 + 0.08 * sin(pulse_t * 4.0))
-		draw_arc(pos, ring_r, 0.0, TAU, 32, ThemeConfig.C_MARKER_DANGER_ARC, 2.5)
+		draw_arc(_map_gen.map_to_local(cell), ring_r, 0.0, TAU, 32,
+			ThemeConfig.C_MARKER_DANGER_ARC, 2.5)
 
 	for m in _city_marks:
+		if not marker_visible_at(m.cell):
+			continue
 		var pos: Vector2 = m.pos
 		draw_circle(pos, _hex_size * 0.22, ThemeConfig.C_MARKER_MAGIC_FILL)
 		draw_arc(pos, _hex_size * 0.22, 0.0, TAU, 32, ThemeConfig.C_MARKER_MAGIC_RING, 2.0)
@@ -159,6 +181,8 @@ func _draw() -> void:
 			int(_hex_size * 2.0), 14, ThemeConfig.C_MARKER_LABEL)
 
 	for cell in _terrain_pos:
+		if not marker_visible_at(cell):
+			continue
 		var m: Dictionary = _terrain_pos[cell]
 		var pos: Vector2 = m["pos"]
 		var glyph: String = "✗" if m["exhausted"] else "⛏️"

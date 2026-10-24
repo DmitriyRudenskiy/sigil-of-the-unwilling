@@ -80,6 +80,11 @@ func _on_fog_refreshed() -> void:
 		_bootstrap_result.spawner.apply_fog_visibility(_visibility)
 	if resource_node_manager != null and resource_node_manager.has_method("apply_fog_visibility"):
 		resource_node_manager.apply_fog_visibility(_visibility)
+	# Маркерный слой рисуется в UI и тумана не знал: шахты (⛏/✗), названия городов
+	# и дуги угрозы отрисовывались по всей карте, то есть светили сквозь туман
+	# (T-165). Канон — docs/02g §2.1: неисследованная клетка без маркеров.
+	if is_instance_valid(_ui_manager) and _ui_manager.get("marker_layer") != null:
+		_ui_manager.marker_layer.set_fog(_visibility)
 
 func get_fog(): return _visibility
 func _on_end_turn_from_router() -> void: pass
