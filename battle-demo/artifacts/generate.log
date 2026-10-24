@@ -14,3 +14,273 @@
 [14/14] battle-demo/artifacts/gen/knight/turn_04.png seed=1101 127 c/кадр, всего 29.6 мин
 кадров в манифесте: 20 → battle-demo/artifacts/generation-manifest.json
 ИТОГ ok=14 skip=6 fail=0
+[1/160] battle-demo/artifacts/gen/spearman/idle_01.png seed=1102 124 c/кадр, всего 2.1 мин
+[2/160] battle-demo/artifacts/gen/spearman/idle_02.png seed=1102 124 c/кадр, всего 4.1 мин
+[3/160] battle-demo/artifacts/gen/spearman/idle_03.png seed=1102 125 c/кадр, всего 6.2 мин
+[4/160] battle-demo/artifacts/gen/spearman/idle_04.png seed=1102 125 c/кадр, всего 8.3 мин
+[5/160] battle-demo/artifacts/gen/spearman/walk_01.png seed=1102 126 c/кадр, всего 10.5 мин
+[6/160] battle-demo/artifacts/gen/spearman/walk_02.png seed=1102 126 c/кадр, всего 12.6 мин
+[7/160] battle-demo/artifacts/gen/spearman/walk_03.png seed=1102 126 c/кадр, всего 14.7 мин
+[8/160] battle-demo/artifacts/gen/spearman/walk_04.png seed=1102 126 c/кадр, всего 16.8 мин
+[9/160] battle-demo/artifacts/gen/spearman/attack_01.png seed=1102 126 c/кадр, всего 18.9 мин
+[10/160] battle-demo/artifacts/gen/spearman/attack_02.png seed=1102 126 c/кадр, всего 21.0 мин
+[11/160] battle-demo/artifacts/gen/spearman/attack_03.png seed=1102 126 c/кадр, всего 23.1 мин
+[12/160] battle-demo/artifacts/gen/spearman/attack_04.png seed=1102 126 c/кадр, всего 25.3 мин
+[13/160] battle-demo/artifacts/gen/spearman/hit_01.png seed=1102 126 c/кадр, всего 27.4 мин
+[14/160] battle-demo/artifacts/gen/spearman/hit_02.png seed=1102 126 c/кадр, всего 29.5 мин
+[15/160] battle-demo/artifacts/gen/spearman/hit_03.png seed=1102 127 c/кадр, всего 31.6 мин
+[16/160] battle-demo/artifacts/gen/spearman/hit_04.png seed=1102 126 c/кадр, всего 33.7 мин
+[17/160] battle-demo/artifacts/gen/spearman/turn_01.png seed=1102 127 c/кадр, всего 35.9 мин
+[18/160] battle-demo/artifacts/gen/spearman/turn_02.png seed=1102 127 c/кадр, всего 38.0 мин
+[19/160] battle-demo/artifacts/gen/spearman/turn_03.png seed=1102 127 c/кадр, всего 40.1 мин
+[20/160] battle-demo/artifacts/gen/spearman/turn_04.png seed=1102 127 c/кадр, всего 42.2 мин
+[21/160] battle-demo/artifacts/gen/archer/idle_01.png seed=1103 127 c/кадр, всего 44.3 мин
+[22/160] battle-demo/artifacts/gen/archer/idle_02.png seed=1103 127 c/кадр, всего 46.4 мин
+[23/160] battle-demo/artifacts/gen/archer/idle_03.png seed=1103 127 c/кадр, всего 48.6 мин
+[24/160] battle-demo/artifacts/gen/archer/idle_04.png seed=1103 127 c/кадр, всего 50.7 мин
+[25/160] battle-demo/artifacts/gen/archer/walk_01.png seed=1103 127 c/кадр, всего 52.8 мин
+[26/160] battle-demo/artifacts/gen/archer/walk_02.png seed=1103 127 c/кадр, всего 54.9 мин
+[27/160] battle-demo/artifacts/gen/archer/walk_03.png seed=1103 127 c/кадр, всего 57.0 мин
+[28/160] battle-demo/artifacts/gen/archer/walk_04.png seed=1103 127 c/кадр, всего 59.1 мин
+[29/160] battle-demo/artifacts/gen/archer/attack_01.png seed=1103 127 c/кадр, всего 61.2 мин
+[30/160] battle-demo/artifacts/gen/archer/attack_02.png seed=1103 127 c/кадр, всего 63.3 мин
+[31/160] battle-demo/artifacts/gen/archer/attack_03.png seed=1103 127 c/кадр, всего 65.4 мин
+[32/160] battle-demo/artifacts/gen/archer/attack_04.png seed=1103 127 c/кадр, всего 67.6 мин
+[33/160] battle-demo/artifacts/gen/archer/hit_01.png seed=1103 127 c/кадр, всего 69.7 мин
+[34/160] battle-demo/artifacts/gen/archer/hit_02.png seed=1103 127 c/кадр, всего 71.8 мин
+[35/160] battle-demo/artifacts/gen/archer/hit_03.png seed=1103 127 c/кадр, всего 73.9 мин
+[36/160] battle-demo/artifacts/gen/archer/hit_04.png seed=1103 127 c/кадр, всего 76.0 мин
+[37/160] battle-demo/artifacts/gen/archer/turn_01.png seed=1103 127 c/кадр, всего 78.1 мин
+[38/160] battle-demo/artifacts/gen/archer/turn_02.png seed=1103 127 c/кадр, всего 80.3 мин
+[39/160] battle-demo/artifacts/gen/archer/turn_03.png seed=1103 127 c/кадр, всего 82.4 мин
+[40/160] battle-demo/artifacts/gen/archer/turn_04.png seed=1103 127 c/кадр, всего 84.5 мин
+[41/160] battle-demo/artifacts/gen/wizard/idle_01.png seed=1104 127 c/кадр, всего 86.6 мин
+[42/160] battle-demo/artifacts/gen/wizard/idle_02.png seed=1104 127 c/кадр, всего 88.8 мин
+[43/160] battle-demo/artifacts/gen/wizard/idle_03.png seed=1104 127 c/кадр, всего 90.9 мин
+[44/160] battle-demo/artifacts/gen/wizard/idle_04.png seed=1104 127 c/кадр, всего 93.0 мин
+[45/160] battle-demo/artifacts/gen/wizard/walk_01.png seed=1104 127 c/кадр, всего 95.1 мин
+[46/160] battle-demo/artifacts/gen/wizard/walk_02.png seed=1104 127 c/кадр, всего 97.2 мин
+[47/160] battle-demo/artifacts/gen/wizard/walk_03.png seed=1104 127 c/кадр, всего 99.3 мин
+[48/160] battle-demo/artifacts/gen/wizard/walk_04.png seed=1104 127 c/кадр, всего 101.4 мин
+[49/160] battle-demo/artifacts/gen/wizard/attack_01.png seed=1104 127 c/кадр, всего 103.5 мин
+[50/160] battle-demo/artifacts/gen/wizard/attack_02.png seed=1104 127 c/кадр, всего 105.6 мин
+[51/160] battle-demo/artifacts/gen/wizard/attack_03.png seed=1104 127 c/кадр, всего 107.7 мин
+[52/160] battle-demo/artifacts/gen/wizard/attack_04.png seed=1104 127 c/кадр, всего 109.8 мин
+[53/160] battle-demo/artifacts/gen/wizard/hit_01.png seed=1104 127 c/кадр, всего 111.9 мин
+[54/160] battle-demo/artifacts/gen/wizard/hit_02.png seed=1104 127 c/кадр, всего 114.1 мин
+[55/160] FAIL wizard/hit_03: <urlopen error [Errno 60] Operation timed out>
+[56/160] FAIL wizard/hit_04: <urlopen error [Errno 60] Operation timed out>
+[57/160] FAIL <urlopen error [Errno 60] Operation timed out>
+[58/160] FAIL <urlopen error [Errno 60] Operation timed out>
+[59/160] FAIL <urlopen error [Errno 60] Operation timed out>
+[60/160] FAIL <urlopen error [Errno 60] Operation timed out>
+[61/160] FAIL <urlopen error [Errno 60] Operation timed out>
+[62/160] FAIL <urlopen error [Errno 60] Operation timed out>
+[63/160] FAIL <urlopen error [Errno 65] No route to host>
+[64/160] FAIL <urlopen error [Errno 64] Host is down>
+[65/160] FAIL <urlopen error [Errno 64] Host is down>
+[66/160] FAIL <urlopen error [Errno 64] Host is down>
+[67/160] FAIL <urlopen error [Errno 64] Host is down>
+[68/160] FAIL <urlopen error [Errno 64] Host is down>
+[69/160] FAIL <urlopen error [Errno 64] Host is down>
+[70/160] FAIL <urlopen error [Errno 64] Host is down>
+[71/160] FAIL <urlopen error [Errno 64] Host is down>
+[72/160] FAIL <urlopen error [Errno 64] Host is down>
+[73/160] FAIL <urlopen error [Errno 64] Host is down>
+[74/160] FAIL <urlopen error [Errno 64] Host is down>
+[75/160] FAIL <urlopen error [Errno 64] Host is down>
+[76/160] FAIL <urlopen error [Errno 64] Host is down>
+[77/160] FAIL <urlopen error [Errno 64] Host is down>
+[78/160] FAIL <urlopen error [Errno 64] Host is down>
+[79/160] FAIL <urlopen error [Errno 64] Host is down>
+[80/160] FAIL <urlopen error [Errno 64] Host is down>
+[81/160] FAIL <urlopen error [Errno 64] Host is down>
+[82/160] FAIL <urlopen error [Errno 64] Host is down>
+[83/160] FAIL <urlopen error [Errno 64] Host is down>
+[84/160] FAIL <urlopen error [Errno 64] Host is down>
+[85/160] FAIL <urlopen error [Errno 64] Host is down>
+[86/160] FAIL <urlopen error [Errno 64] Host is down>
+[87/160] FAIL <urlopen error [Errno 64] Host is down>
+[88/160] FAIL <urlopen error [Errno 64] Host is down>
+[89/160] FAIL <urlopen error [Errno 64] Host is down>
+[90/160] FAIL <urlopen error [Errno 64] Host is down>
+[91/160] FAIL <urlopen error [Errno 64] Host is down>
+[92/160] FAIL <urlopen error [Errno 64] Host is down>
+[93/160] FAIL <urlopen error [Errno 64] Host is down>
+[94/160] FAIL <urlopen error [Errno 64] Host is down>
+[95/160] FAIL <urlopen error [Errno 64] Host is down>
+[96/160] FAIL <urlopen error [Errno 64] Host is down>
+[97/160] FAIL <urlopen error [Errno 64] Host is down>
+[98/160] FAIL <urlopen error [Errno 64] Host is down>
+[99/160] FAIL <urlopen error [Errno 64] Host is down>
+[100/160] FAIL <urlopen error [Errno 64] Host is down>
+[101/160] FAIL <urlopen error [Errno 64] Host is down>
+[102/160] FAIL <urlopen error [Errno 64] Host is down>
+[103/160] FAIL <urlopen error [Errno 64] Host is down>
+[104/160] FAIL <urlopen error [Errno 64] Host is down>
+[105/160] FAIL <urlopen error [Errno 64] Host is down>
+[106/160] FAIL <urlopen error [Errno 64] Host is down>
+[107/160] FAIL <urlopen error [Errno 64] Host is down>
+[108/160] FAIL <urlopen error [Errno 64] Host is down>
+[109/160] FAIL <urlopen error [Errno 64] Host is down>
+[110/160] FAIL <urlopen error [Errno 64] Host is down>
+[111/160] FAIL <urlopen error [Errno 64] Host is down>
+[112/160] FAIL <urlopen error [Errno 64] Host is down>
+[113/160] FAIL <urlopen error [Errno 64] Host is down>
+[114/160] FAIL <urlopen error [Errno 64] Host is down>
+[115/160] FAIL <urlopen error [Errno 64] Host is down>
+[116/160] FAIL <urlopen error [Errno 64] Host is down>
+[117/160] FAIL <urlopen error [Errno 64] Host is down>
+[118/160] FAIL <urlopen error [Errno 64] Host is down>
+[119/160] FAIL <urlopen error [Errno 64] Host is down>
+[120/160] FAIL <urlopen error [Errno 64] Host is down>
+[121/160] FAIL <urlopen error [Errno 64] Host is down>
+[122/160] FAIL <urlopen error [Errno 64] Host is down>
+[123/160] FAIL <urlopen error [Errno 64] Host is down>
+[124/160] FAIL <urlopen error [Errno 64] Host is down>
+[125/160] FAIL <urlopen error [Errno 64] Host is down>
+[126/160] FAIL <urlopen error [Errno 64] Host is down>
+[127/160] FAIL <urlopen error [Errno 64] Host is down>
+[128/160] FAIL <urlopen error [Errno 64] Host is down>
+[129/160] FAIL <urlopen error [Errno 64] Host is down>
+[130/160] FAIL <urlopen error [Errno 64] Host is down>
+[131/160] FAIL <urlopen error [Errno 64] Host is down>
+[132/160] FAIL <urlopen error [Errno 64] Host is down>
+[133/160] FAIL <urlopen error [Errno 64] Host is down>
+[134/160] FAIL <urlopen error [Errno 64] Host is down>
+[135/160] FAIL <urlopen error [Errno 64] Host is down>
+[136/160] FAIL <urlopen error [Errno 64] Host is down>
+[137/160] FAIL <urlopen error [Errno 64] Host is down>
+[138/160] FAIL <urlopen error [Errno 64] Host is down>
+[139/160] FAIL <urlopen error [Errno 64] Host is down>
+[140/160] FAIL <urlopen error [Errno 64] Host is down>
+[141/160] FAIL <urlopen error [Errno 64] Host is down>
+[142/160] FAIL <urlopen error [Errno 64] Host is down>
+[143/160] FAIL <urlopen error [Errno 64] Host is down>
+[144/160] FAIL <urlopen error [Errno 64] Host is down>
+[145/160] FAIL <urlopen error [Errno 64] Host is down>
+[146/160] FAIL <urlopen error [Errno 64] Host is down>
+[147/160] FAIL <urlopen error [Errno 64] Host is down>
+[148/160] FAIL <urlopen error [Errno 64] Host is down>
+[149/160] FAIL <urlopen error [Errno 64] Host is down>
+[150/160] FAIL <urlopen error [Errno 64] Host is down>
+[151/160] FAIL <urlopen error [Errno 64] Host is down>
+[152/160] FAIL <urlopen error [Errno 64] Host is down>
+[153/160] FAIL <urlopen error [Errno 64] Host is down>
+[154/160] FAIL <urlopen error [Errno 64] Host is down>
+[155/160] FAIL <urlopen error [Errno 64] Host is down>
+[156/160] FAIL <urlopen error [Errno 64] Host is down>
+[157/160] FAIL <urlopen error [Errno 64] Host is down>
+[158/160] FAIL <urlopen error [Errno 64] Host is down>
+[159/160] FAIL <urlopen error [Errno 64] Host is down>
+[160/160] FAIL <urlopen error [Errno 64] Host is down>
+кадров в манифесте: 78 → battle-demo/artifacts/generation-manifest.json
+ИТОГ ok=54 skip=20 fail=106
+[1/106] battle-demo/artifacts/gen/wizard/hit_03.png seed=1104 36 c/кадр, всего 0.6 мин
+[2/106] battle-demo/artifacts/gen/wizard/hit_04.png seed=1104 41 c/кадр, всего 1.4 мин
+[3/106] battle-demo/artifacts/gen/wizard/turn_01.png seed=1104 36 c/кадр, всего 1.8 мин
+[4/106] battle-demo/artifacts/gen/wizard/turn_02.png seed=1104 39 c/кадр, всего 2.6 мин
+[5/106] battle-demo/artifacts/gen/wizard/turn_03.png seed=1104 36 c/кадр, всего 3.0 мин
+[6/106] battle-demo/artifacts/gen/sorcerer/idle_01.png seed=1105 35 c/кадр, всего 3.5 мин
+[7/106] battle-demo/artifacts/gen/wizard/turn_04.png seed=2104 36 c/кадр, всего 4.2 мин
+[8/106] battle-demo/artifacts/gen/sorcerer/idle_02.png seed=1105 36 c/кадр, всего 4.8 мин
+[9/106] battle-demo/artifacts/gen/sorcerer/idle_03.png seed=1105 36 c/кадр, всего 5.3 мин
+[10/106] battle-demo/artifacts/gen/sorcerer/idle_04.png seed=1105 34 c/кадр, всего 5.7 мин
+[11/106] battle-demo/artifacts/gen/sorcerer/walk_01.png seed=1105 34 c/кадр, всего 6.1 мин
+[12/106] battle-demo/artifacts/gen/sorcerer/walk_02.png seed=1105 33 c/кадр, всего 6.6 мин
+[13/106] battle-demo/artifacts/gen/sorcerer/walk_03.png seed=1105 32 c/кадр, всего 7.0 мин
+[14/106] battle-demo/artifacts/gen/sorcerer/walk_04.png seed=1105 32 c/кадр, всего 7.4 мин
+[15/106] battle-demo/artifacts/gen/sorcerer/attack_01.png seed=1105 31 c/кадр, всего 7.8 мин
+[16/106] battle-demo/artifacts/gen/sorcerer/attack_02.png seed=1105 31 c/кадр, всего 8.2 мин
+[17/106] battle-demo/artifacts/gen/sorcerer/attack_03.png seed=1105 30 c/кадр, всего 8.6 мин
+[18/106] battle-demo/artifacts/gen/sorcerer/attack_04.png seed=1105 30 c/кадр, всего 9.0 мин
+[19/106] battle-demo/artifacts/gen/sorcerer/hit_01.png seed=1105 30 c/кадр, всего 9.5 мин
+[20/106] battle-demo/artifacts/gen/sorcerer/hit_02.png seed=1105 30 c/кадр, всего 10.0 мин
+[21/106] battle-demo/artifacts/gen/sorcerer/hit_03.png seed=1105 31 c/кадр, всего 10.7 мин
+[22/106] battle-demo/artifacts/gen/sorcerer/hit_04.png seed=1105 31 c/кадр, всего 11.5 мин
+[23/106] battle-demo/artifacts/gen/sorcerer/turn_01.png seed=1105 32 c/кадр, всего 12.2 мин
+[24/106] battle-demo/artifacts/gen/sorcerer/turn_02.png seed=1105 32 c/кадр, всего 12.9 мин
+[25/106] battle-demo/artifacts/gen/sorcerer/turn_03.png seed=1105 33 c/кадр, всего 13.7 мин
+[26/106] battle-demo/artifacts/gen/sorcerer/turn_04.png seed=1105 33 c/кадр, всего 14.4 мин
+[27/106] battle-demo/artifacts/gen/barbarian/idle_01.png seed=1106 33 c/кадр, всего 14.9 мин
+[28/106] battle-demo/artifacts/gen/barbarian/idle_02.png seed=1106 33 c/кадр, всего 15.3 мин
+[29/106] battle-demo/artifacts/gen/barbarian/idle_03.png seed=1106 33 c/кадр, всего 16.1 мин
+[30/106] battle-demo/artifacts/gen/barbarian/idle_04.png seed=1106 34 c/кадр, всего 16.8 мин
+[31/106] battle-demo/artifacts/gen/barbarian/walk_01.png seed=1106 34 c/кадр, всего 17.3 мин
+[32/106] battle-demo/artifacts/gen/barbarian/walk_02.png seed=1106 33 c/кадр, всего 17.7 мин
+[33/106] battle-demo/artifacts/gen/barbarian/walk_03.png seed=1106 33 c/кадр, всего 18.2 мин
+[34/106] battle-demo/artifacts/gen/barbarian/walk_04.png seed=1106 33 c/кадр, всего 18.6 мин
+[35/106] battle-demo/artifacts/gen/barbarian/attack_01.png seed=1106 33 c/кадр, всего 19.1 мин
+[36/106] battle-demo/artifacts/gen/barbarian/attack_02.png seed=1106 33 c/кадр, всего 19.6 мин
+[37/106] battle-demo/artifacts/gen/barbarian/attack_03.png seed=1106 32 c/кадр, всего 19.9 мин
+[38/106] battle-demo/artifacts/gen/barbarian/attack_04.png seed=1106 33 c/кадр, всего 20.8 мин
+[39/106] battle-demo/artifacts/gen/barbarian/hit_01.png seed=1106 33 c/кадр, всего 21.6 мин
+[40/106] battle-demo/artifacts/gen/barbarian/hit_02.png seed=1106 33 c/кадр, всего 22.3 мин
+[41/106] battle-demo/artifacts/gen/barbarian/hit_03.png seed=1106 34 c/кадр, всего 23.0 мин
+[42/106] battle-demo/artifacts/gen/barbarian/hit_04.png seed=1106 34 c/кадр, всего 23.6 мин
+[43/106] battle-demo/artifacts/gen/barbarian/turn_01.png seed=1106 34 c/кадр, всего 24.3 мин
+[44/106] battle-demo/artifacts/gen/barbarian/turn_02.png seed=1106 34 c/кадр, всего 25.0 мин
+[45/106] battle-demo/artifacts/gen/barbarian/turn_03.png seed=1106 34 c/кадр, всего 25.7 мин
+[46/106] battle-demo/artifacts/gen/barbarian/turn_04.png seed=1106 34 c/кадр, всего 26.4 мин
+[47/106] battle-demo/artifacts/gen/stormmage/idle_01.png seed=1107 35 c/кадр, всего 27.2 мин
+[48/106] battle-demo/artifacts/gen/stormmage/idle_02.png seed=1107 35 c/кадр, всего 28.0 мин
+[49/106] battle-demo/artifacts/gen/stormmage/idle_03.png seed=1107 35 c/кадр, всего 28.6 мин
+[50/106] battle-demo/artifacts/gen/stormmage/idle_04.png seed=1107 35 c/кадр, всего 29.5 мин
+[51/106] battle-demo/artifacts/gen/stormmage/walk_01.png seed=1107 35 c/кадр, всего 30.1 мин
+[52/106] battle-demo/artifacts/gen/stormmage/walk_02.png seed=1107 35 c/кадр, всего 30.6 мин
+[53/106] battle-demo/artifacts/gen/stormmage/walk_03.png seed=1107 35 c/кадр, всего 31.1 мин
+[54/106] battle-demo/artifacts/gen/stormmage/walk_04.png seed=1107 35 c/кадр, всего 31.9 мин
+[55/106] battle-demo/artifacts/gen/stormmage/attack_01.png seed=1107 35 c/кадр, всего 32.3 мин
+[56/106] battle-demo/artifacts/gen/stormmage/attack_02.png seed=1107 35 c/кадр, всего 32.9 мин
+[57/106] battle-demo/artifacts/gen/stormmage/attack_03.png seed=1107 35 c/кадр, всего 33.7 мин
+[58/106] battle-demo/artifacts/gen/stormmage/attack_04.png seed=1107 35 c/кадр, всего 34.2 мин
+[59/106] battle-demo/artifacts/gen/stormmage/hit_01.png seed=1107 36 c/кадр, всего 35.0 мин
+[60/106] battle-demo/artifacts/gen/stormmage/hit_02.png seed=1107 36 c/кадр, всего 35.5 мин
+[61/106] battle-demo/artifacts/gen/stormmage/hit_03.png seed=1107 35 c/кадр, всего 36.0 мин
+[62/106] battle-demo/artifacts/gen/stormmage/hit_04.png seed=1107 38 c/кадр, всего 39.0 мин
+[63/106] battle-demo/artifacts/gen/stormmage/turn_01.png seed=1107 38 c/кадр, всего 39.6 мин
+[64/106] battle-demo/artifacts/gen/stormmage/turn_02.png seed=1107 38 c/кадр, всего 40.1 мин
+[65/106] battle-demo/artifacts/gen/stormmage/turn_04.png seed=1107 38 c/кадр, всего 41.4 мин
+[66/106] battle-demo/artifacts/gen/stormmage/turn_03.png seed=2107 38 c/кадр, всего 41.8 мин
+[67/106] battle-demo/artifacts/gen/cutthroat/idle_01.png seed=1108 38 c/кадр, всего 42.2 мин
+[68/106] battle-demo/artifacts/gen/cutthroat/idle_02.png seed=1108 38 c/кадр, всего 42.7 мин
+[69/106] battle-demo/artifacts/gen/cutthroat/idle_03.png seed=1108 37 c/кадр, всего 43.1 мин
+[70/106] battle-demo/artifacts/gen/cutthroat/idle_04.png seed=1108 37 c/кадр, всего 43.5 мин
+[71/106] battle-demo/artifacts/gen/cutthroat/walk_01.png seed=1108 37 c/кадр, всего 43.9 мин
+[72/106] battle-demo/artifacts/gen/cutthroat/walk_02.png seed=1108 37 c/кадр, всего 44.3 мин
+[73/106] battle-demo/artifacts/gen/cutthroat/walk_03.png seed=1108 37 c/кадр, всего 44.8 мин
+[74/106] battle-demo/artifacts/gen/cutthroat/walk_04.png seed=1108 37 c/кадр, всего 45.6 мин
+[75/106] battle-demo/artifacts/gen/cutthroat/attack_01.png seed=1108 37 c/кадр, всего 46.4 мин
+[76/106] battle-demo/artifacts/gen/cutthroat/attack_02.png seed=1108 37 c/кадр, всего 47.3 мин
+[77/106] battle-demo/artifacts/gen/cutthroat/attack_03.png seed=1108 38 c/кадр, всего 48.1 мин
+[78/106] battle-demo/artifacts/gen/cutthroat/attack_04.png seed=1108 40 c/кадр, всего 51.5 мин
+[79/106] battle-demo/artifacts/gen/cutthroat/hit_01.png seed=1108 40 c/кадр, всего 52.3 мин
+[80/106] battle-demo/artifacts/gen/cutthroat/hit_02.png seed=1108 40 c/кадр, всего 52.7 мин
+[81/106] battle-demo/artifacts/gen/cutthroat/hit_04.png seed=1108 40 c/кадр, всего 54.0 мин
+[82/106] battle-demo/artifacts/gen/cutthroat/hit_03.png seed=2108 40 c/кадр, всего 54.5 мин
+[83/106] battle-demo/artifacts/gen/cutthroat/turn_01.png seed=1108 40 c/кадр, всего 54.9 мин
+[84/106] battle-demo/artifacts/gen/cutthroat/turn_02.png seed=1108 40 c/кадр, всего 55.3 мин
+[85/106] battle-demo/artifacts/gen/cutthroat/turn_03.png seed=1108 39 c/кадр, всего 55.8 мин
+[86/106] battle-demo/artifacts/gen/cutthroat/turn_04.png seed=1108 39 c/кадр, всего 56.2 мин
+[87/106] battle-demo/artifacts/gen/priest/idle_01.png seed=1109 39 c/кадр, всего 56.6 мин
+[88/106] battle-demo/artifacts/gen/priest/idle_02.png seed=1109 39 c/кадр, всего 57.0 мин
+[89/106] battle-demo/artifacts/gen/priest/idle_03.png seed=1109 39 c/кадр, всего 57.5 мин
+[90/106] battle-demo/artifacts/gen/priest/idle_04.png seed=1109 39 c/кадр, всего 58.0 мин
+[91/106] battle-demo/artifacts/gen/priest/walk_01.png seed=1109 39 c/кадр, всего 58.6 мин
+[92/106] battle-demo/artifacts/gen/priest/walk_02.png seed=1109 39 c/кадр, всего 59.2 мин
+[93/106] battle-demo/artifacts/gen/priest/walk_03.png seed=1109 39 c/кадр, всего 59.9 мин
+[94/106] battle-demo/artifacts/gen/priest/walk_04.png seed=1109 39 c/кадр, всего 60.6 мин
+[95/106] battle-demo/artifacts/gen/priest/attack_01.png seed=1109 39 c/кадр, всего 61.3 мин
+[96/106] battle-demo/artifacts/gen/priest/attack_02.png seed=1109 39 c/кадр, всего 62.0 мин
+[97/106] battle-demo/artifacts/gen/priest/attack_03.png seed=1109 39 c/кадр, всего 62.8 мин
+[98/106] battle-demo/artifacts/gen/priest/attack_04.png seed=1109 39 c/кадр, всего 63.7 мин
+[99/106] battle-demo/artifacts/gen/priest/hit_01.png seed=1109 39 c/кадр, всего 64.5 мин
+[100/106] battle-demo/artifacts/gen/priest/hit_02.png seed=1109 41 c/кадр, всего 67.7 мин
+[101/106] battle-demo/artifacts/gen/priest/hit_03.png seed=1109 41 c/кадр, всего 68.5 мин
+[102/106] battle-demo/artifacts/gen/priest/hit_04.png seed=1109 41 c/кадр, всего 68.9 мин
+[103/106] battle-demo/artifacts/gen/priest/turn_01.png seed=1109 41 c/кадр, всего 70.2 мин
+[104/106] battle-demo/artifacts/gen/priest/turn_03.png seed=1109 42 c/кадр, всего 73.3 мин
+[105/106] battle-demo/artifacts/gen/priest/turn_02.png seed=2109 42 c/кадр, всего 73.8 мин
+[106/106] battle-demo/artifacts/gen/priest/turn_04.png seed=1109 42 c/кадр, всего 74.3 мин
+кадров в манифесте: 184 → battle-demo/artifacts/generation-manifest.json
+ИТОГ ok=106 skip=74 fail=0
