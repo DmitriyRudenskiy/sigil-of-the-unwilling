@@ -13,6 +13,9 @@ const PRESTIGE_JSON := "res://data/config/balance/prestige.json"
 const DISTRICTS_JSON := "res://data/config/balance/districts.json"
 const ETHICS_JSON := "res://data/config/balance/ethics.json"
 const SIGNS_JSON := "res://data/signs.json"
+## T-182: тип узла-цели M3 («посетить руины») — то же значение, что ключ
+## `loot_catalog` у RegionMap; отдельная константа, чтобы цель и лут не разъехались.
+const NODE_RUIN := "ruin"
 ## campaign-core-loop 2.1: глаголы действия (spec: build/train/move/fight;
 ## GDD 01-core-loop «Цикл 5 минут»: двинул/решил/построил/снабдил + тренировка).
 const ACTION_VERBS := ["build", "train", "move", "fight"]
@@ -51,6 +54,14 @@ var last_threat_report: Dictionary = {}
 ## под-ключ "chronicle" секции "campaign" (прецеденты supply/ethics: схема T-110
 ## не тронута); телеметрия для хроники не годится — это метрики сессии, не лента.
 var chronicle: ChronicleLog = ChronicleLog.new()
+## mvp-ui-flow 2.3 (T-182, M3): панель целей первых трёх дней — ферма и казармы
+## (день 1), тренировка воина (день 2), руины (день 3). Логика трекера была
+## написана ещё в 5.2, но носителя у неё не было: ни одного вызова
+## CampaignGoalTracker в скриптах, кроме собственного теста, — модель без читателя.
+## Пишут те же места, что готовят отчёты хода: достройка города, выдача рекрута,
+## первый визит узла. В сейве — под-ключ "goals" секции "campaign" (прецеденты
+## chronicle/supply/ethics: топ-секцию не добавляем, схему T-110 не трогаем).
+var goals: CampaignGoalTracker = CampaignGoalTracker.new()
 ## Победная оценка (T-117 якорь: ход 21 = финальный рейд отражён/нет).
 var final_battle_seen: bool = false
 var final_raid_repelled: bool = false
@@ -235,6 +246,12 @@ func _build(campaign_seed: int) -> void:
 	# headless: герой в городе (авто-рейд на него не ведётся — R5).
 	region_map = RegionMap.new()
 	region_map.init_campaign(PartySystem.alive_members(party).size(), 0.0)
+	_connect_region_map()
+	# T-182: цели M3 на живом кампейне. Регион руин берётся из данных маски, а не из
+	# строки: у руин свои id в movement.json, и хардкод разошёлся бы с ними в тот же
+	# день, когда маску перерисуют (Q-M91-семья: у регион-графа и маски id разные).
+	goals = CampaignGoalTracker.new(
+			CampaignGoalTracker.default_mvp_goals(_first_region_with_node(NODE_RUIN)))
 	# player-фаза: тик времени герой-слоя (авто-режим 2 дня → возврат в город, Y10).
 	campaign.player_hook = func() -> void:
 		region_map.tick_days(1)
@@ -282,7 +299,15 @@ func _process_city_construction() -> Dictionary:
 	ctx.turn_number = campaign.current_turn
 	ctx.cities = [city]
 	ctx.is_campaign = true
-	return CampaignConstructionProcessor.new().process(ctx)
+	var report: Dictionary = CampaignConstructionProcessor.new().process(ctx)
+	# T-182: цель дня 1 закрывает постройка, а не отчёт. Процессор отдаёт uid
+	# инстансов города, а цели живут id каталога (campaign_farm, campaign_barracks):
+	# числа двух счётов не смешиваем, между ними один переводчик — _city_building_id.
+	for uid in report.get("completed", []):
+		var building_id := _city_building_id(int(uid))
+		if building_id != "":
+			goals.note_building_built(building_id)
+	return report
 
 
 ## Один проход очереди тренировки (production-фаза). Стоимость списана на
@@ -296,7 +321,48 @@ func _process_city_training() -> Dictionary:
 		city, CampaignTrainingService.PARTY_CAPACITY - alive)
 	for member in report.get("members", []):
 		party.append(member)
+		# T-182: выпущенный рекрут закрывает цель дня 2. Класс — из материализованного
+		# члена ("class"), а не из заявки: заявка могла простоять в очередь с другим.
+		goals.note_training_completed(String(member.get("class", "")))
 	return report
+
+
+## T-182: id постройки каталога по uid инстанса города (переводчик между отчётом
+## достройки и целями M3). Пустая строка — инстанс уже не найден (снесён в тот же
+## ход), цель тогда не закрывается: выдумывать постройку нечем.
+func _city_building_id(uid: int) -> String:
+	if city == null:
+		return ""
+	for instance in city.campaign_buildings:
+		if instance is Dictionary and int(instance.get("uid", -1)) == uid:
+			return String(instance.get("id", ""))
+	return ""
+
+
+## T-182: первый регион маски с узлом нужного типа (для цели «посетить руины»):
+## узлы и их id живут в movement.json, поэтому регион под цель вычисляется, а не
+## пишется строкой.
+func _first_region_with_node(node: String) -> String:
+	if region_map == null:
+		return ""
+	for r in region_map.regions:
+		if region_map.node_type(str(r)) == node:
+			return str(r)
+	return ""
+
+
+## T-182: связка «визит узла → цель M3». Переподключается и после загрузки:
+## `region_map` при загрузке создаётся заново (`RegionMap.from_dict`), и связь со
+## старым объектом ушла бы вместе с ним — цель «руины» молча осталась бы недостижимой.
+func _connect_region_map() -> void:
+	if region_map == null:
+		return
+	if not region_map.node_visited.is_connected(_on_node_visited):
+		region_map.node_visited.connect(_on_node_visited)
+
+
+func _on_node_visited(region: String, _node: String) -> void:
+	goals.note_region_visited(region)
 
 
 ## campaign-core-loop 2.1: действие игрока (UI → сюда; headless — авто-fight
@@ -624,6 +690,9 @@ func build_save_state() -> Dictionary:
 	# которых игрок уже не видел, не появляются второй раз). Под-ключ секции
 	# "campaign", как supply/ethics: топ-секцию не добавляем, схему T-110 не трогаем.
 	campaign_section["chronicle"] = chronicle.to_dict()
+	# T-182: цели M3 — состояние (какие цели закрыл игрок, не пересчитывается из
+	# входов: построенное потом снесут, а цель осталась бы закрытой — так и задумано).
+	campaign_section["goals"] = goals.to_dict()
 	# T-124: журнал/аккумуляторы/Репутация — состояние (события не пересчитываются
 	# при загрузке, I1); секция словарная — schema_version не тронут (T-110).
 	campaign_section["ethics"] = ethics.to_dict()
@@ -743,6 +812,16 @@ func load_save_state(state: Dictionary) -> void:
 	threats = ThreatSystem.from_dict(state.get("map", {}).get("threats", {}))
 	# T-020: регион-граф — секция "map".region (старый сейв без неё → старт R01).
 	region_map = RegionMap.from_dict((state.get("map", {}) as Dictionary).get("region", {}))
+	_connect_region_map()  # T-182: цель «руины» висит на сигнале свежего регион-графа
+	# T-182: цели (под-ключ "goals" секции "campaign"); старый сейв без них — свежий
+	# набор M3 уже с регионом руин из загруженной маски. Разбор — после регион-графа:
+	# до него поиск региона руин смотрел бы на прошлую кампанию.
+	var goals_data: Dictionary = (state.get("campaign", {}) as Dictionary).get("goals", {})
+	if goals_data.is_empty():
+		goals = CampaignGoalTracker.new(
+				CampaignGoalTracker.default_mvp_goals(_first_region_with_node(NODE_RUIN)))
+	else:
+		goals = CampaignGoalTracker.from_dict(goals_data)
 	# T-030: районный слой — конфиг/каталог те же (сейв хранит только настроение).
 	district_config = _json(DISTRICTS_JSON)
 	district_jobs_by_id = _district_jobs()

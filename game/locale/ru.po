@@ -1125,3 +1125,21 @@ msgstr "Завершить текущий ход"
 
 msgid "campaign.date"
 msgstr "Месяц {month} · Неделя {week} · День {day}"
+
+msgid "campaign.goals_title"
+msgstr "Цели первых дней"
+
+msgid "campaign.goal_day"
+msgstr "День {day}"
+
+msgid "campaign.goal.farm"
+msgstr "Построить ферму"
+
+msgid "campaign.goal.barracks"
+msgstr "Построить казармы"
+
+msgid "campaign.goal.train_warrior"
+msgstr "Потренировать воина"
+
+msgid "campaign.goal.ruins"
+msgstr "Посетить руины"

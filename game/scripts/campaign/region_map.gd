@@ -21,6 +21,12 @@ extends RefCounted
 const MOVEMENT_CONFIG_PATH := "res://data/config/balance/movement.json"
 const SCHEMA_VERSION: int = 1  # v1 — текущая: позиция, туман, visited-узлы.
 
+## T-182 (mvp-ui-flow 2.3, M3): первый визит узла — событие для панели целей.
+## Эмится только когда loot реально выдан: повторный клик по выграбленному узлу
+## визитом не считается, иначе цель закрывалась бы нажатием, а не походом.
+## Слушатель — композиция (`_on_node_visited`); сам `visit_node` о целях не знает.
+signal node_visited(region: String, node: String)
+
 const STATE_EXPLORE := "EXPLORE"
 const STATE_ENGAGE := "ENGAGE"
 const STATE_BATTLE := "BATTLE"
@@ -219,6 +225,7 @@ func visit_node(region: String) -> Dictionary:
 	visited_nodes.append(key)
 	result["looted"] = true
 	result["rewards"] = loot_catalog(result["node"]).duplicate(true)
+	node_visited.emit(region, result["node"])
 	_log("узел %s (%s) — one-time loot" % [region, result["node"]], {"events": []})
 	return result
 

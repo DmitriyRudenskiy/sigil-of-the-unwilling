@@ -465,6 +465,17 @@ static func campaign_menu() -> String: return TranslationServer.translate("campa
 static func campaign_menu_hint() -> String: return TranslationServer.translate("campaign.menu_hint")
 static func campaign_turn() -> String: return TranslationServer.translate("campaign.turn")
 static func campaign_turn_hint() -> String: return TranslationServer.translate("campaign.turn_hint")
+static func campaign_goals_title() -> String: return TranslationServer.translate("campaign.goals_title")
+static func campaign_goal_day(day: int) -> String:
+	return TranslationServer.translate("campaign.goal_day").format({"day": day})
+
+## Строка цели M3 по её id. Ключ выводится из id, поэтому набор закрыт и сторожится
+## тестом (`test_campaign_goals_panel`): цель без перевода показала бы игроку сырой
+## ключ — тот же класс брака, что немой ключ эффекта в каталоге событий (Q-M79).
+static func campaign_goal(goal_id: String) -> String:
+	return TranslationServer.translate("campaign.goal.%s" % goal_id)
+
+
 static func campaign_date(month: int, week: int, day: int) -> String:
 	return TranslationServer.translate("campaign.date").format(
 		{"month": month, "week": week, "day": day})

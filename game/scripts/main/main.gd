@@ -114,6 +114,11 @@ func _mount_campaign_hud() -> void:
 	campaign_hud.bind_chronicle(composition.chronicle)
 	campaign_hud.chronicle_screen_opened.connect(_on_campaign_screen_opened)
 	campaign_hud.chronicle_screen_closed.connect(_on_campaign_screen_closed)
+	# mvp-ui-flow 2.3 (T-182): панель целей первых трёх дней (M3). Логика трекера
+	# была написана ещё в 5.2, но ни один скрипт её не вызывал: целей у игрока не
+	# было видно. Привязка — после загрузки слота, чтобы панель смотрела на тот
+	# трекер, который принёс сейв, а не на вытесненный им.
+	campaign_hud.bind_goals(composition.goals)
 	# 7.13: ход кампании делается кнопкой слоя. Обработчик — тот же путь,
 	# что был у таймера (`advance_turn` + `on_day_passed`), чтобы кнопка не
 	# заводила второй порядок фаз.

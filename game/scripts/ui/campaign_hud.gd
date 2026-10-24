@@ -48,6 +48,9 @@ const CITY_BUTTON_NAME := "CityButton"
 const TURN_BUTTON_NAME := "TurnButton"
 const COUNTER_BAR_NAME := "CounterBar"
 const DATE_LABEL_NAME := "CampaignDate"
+const GOALS_PANEL_NAME := "GoalsPanel"
+const GOALS_TITLE_NAME := "GoalsTitle"
+const GOALS_LIST_NAME := "GoalsList"
 const CITY_SCREEN_NAME := "CityScreen"
 const PARTY_BUTTON_NAME := "PartyButton"
 const PARTY_SCREEN_NAME := "PartyScreen"
@@ -98,6 +101,13 @@ var _party_capacity: int = PartyScreenModelScript.DEFAULT_CAPACITY
 ## (уход в бой), и по `visible` слой не отличил бы это от своего закрытия.
 var _chronicle: ChronicleLog = null
 var _chronicle_open: bool = false
+## mvp-ui-flow 2.3 (T-182, M3): панель целей первых трёх дней. Носитель только
+## рисует то, что посчитал `CampaignGoalTracker`; сам трекер живёт в композиции.
+## Без привязки панели нет: список целей без носителя обещал бы цели, которых
+## никто не проверяет (конвенция «нет несуществующих действий»).
+var _goals: CampaignGoalTracker = null
+var _goals_panel: PanelContainer = null
+var _goals_list: VBoxContainer = null
 ## Полоса счётчиков: id строки реестра → контейнер счётчика. Значений здесь нет:
 ## числа читаются из носителя при каждом обновлении (D-200).
 var _counters: Dictionary = {}
@@ -125,6 +135,7 @@ func refresh_campaign(day: int) -> void:
 	var date := get_node_or_null(DATE_LABEL_NAME) as Label
 	if date != null:
 		date.text = CalendarScript.date_label(day)
+	_refresh_goals()
 
 
 ## Текст счётчика по id строки реестра ("" — счётчик не показан).
@@ -255,6 +266,7 @@ func _build() -> void:
 	_top_row.add_child(_turn_button)
 	_build_counter_bar()
 	_build_date_label()
+	_build_goals_panel()
 
 
 ## 7.10 — полоса счётчиков макета: один контейнер на строку реестра, порядок —
@@ -306,6 +318,49 @@ func _build_date_label() -> void:
 	date.offset_bottom = -24.0
 	date.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	add_child(date)
+
+
+## mvp-ui-flow 2.3 (T-182, M3): панель целей первых трёх дней — левый верхний
+## угол, под полосой счётчиков: макетных 8 экранов у HUD нет (D-185: путь
+## макета в репо отсутствует), поэтому место выбирается по принципу «не трогать
+## занятые зоны»: счётчики слева сверху, кнопки справа сверху, дата слева снизу.
+## Карточка — `PanelCard` (поле панели с золотой рамкой), как и остальные панели
+## поверх поля; панель скрыта до привязки трекера.
+func _build_goals_panel() -> void:
+	var panel := PanelContainer.new()
+	panel.name = GOALS_PANEL_NAME
+	panel.theme_type_variation = &"PanelCard"
+	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	panel.offset_left = 16.0
+	panel.offset_top = 64.0
+	panel.offset_right = 356.0
+	panel.offset_bottom = 64.0
+	panel.grow_vertical = Control.GROW_DIRECTION_END
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.visible = false
+	var column := VBoxContainer.new()
+	column.name = "GoalsColumn"
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.add_theme_constant_override("separation", 4)
+	panel.add_child(column)
+	var title := Label.new()
+	title.name = GOALS_TITLE_NAME
+	title.text = GameText.campaign_goals_title()
+	# Кегль — токенами темы, не оверрайдами (гайд §2). Оговорка: гайд называет роли
+	# «подзаголовок 24» (`LabelSubheading`) и «вторичный 16» (`LabelCaption`), а в
+	# теме объявлены `LabelStrong` 24 и `LabelSecondary` 16 — те же роли и кегли под
+	# другими именами. Расхождение имён темы и гайда — предмет theme-type-hygiene,
+	# здесь берётся тот носитель, который реально существует.
+	title.theme_type_variation = &"LabelStrong"
+	column.add_child(title)
+	var list := VBoxContainer.new()
+	list.name = GOALS_LIST_NAME
+	list.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	list.add_theme_constant_override("separation", 2)
+	column.add_child(list)
+	_goals_panel = panel
+	_goals_list = list
+	add_child(panel)
 
 
 ## Проводка до машины навигации кампании (`CampaignUIManager`). Порядок важен:
@@ -371,6 +426,71 @@ func bind_party(party: Array, capacity: int = PartyScreenModelScript.DEFAULT_CAP
 			_ui_manager.register_screen(PARTY_SCREEN_ID, party_screen)
 	refresh_party_screen()
 	_party_button.disabled = false
+
+
+## Привязка трекера целей M3 (хост вызывает её вслед за поднятием кампании).
+## Смена трекера переподключается: загрузка сейва приносит другой объект
+## (`CampaignGoalTracker.from_dict`), и панель обязана слушать новый, а не вчерашний.
+func bind_goals(tracker: CampaignGoalTracker) -> void:
+	if tracker == _goals:
+		return
+	if _goals != null and _goals.goal_completed.is_connected(_on_goal_completed):
+		_goals.goal_completed.disconnect(_on_goal_completed)
+	_goals = tracker
+	if _goals != null and not _goals.goal_completed.is_connected(_on_goal_completed):
+		_goals.goal_completed.connect(_on_goal_completed)
+	_refresh_goals()
+
+
+## Текст строки цели (тест и хост читают то, что видит игрок; "" — панель не привязана).
+func get_goal_text(goal_id: String) -> String:
+	if _goals_list == null:
+		return ""
+	var row := _goals_list.get_node_or_null("Goal_%s" % goal_id) as Label
+	return "" if row == null else row.text
+
+
+## Список незакрытых целей, сгруппированных по дням. Панель видна, пока цели не
+## закрыты все (`CampaignGoalTracker.visible()`), и прячется целиком: «всё
+## сделано» — это отсутствие панели, а не пустой список под заголовком.
+func _refresh_goals() -> void:
+	if _goals_panel == null or _goals_list == null:
+		return
+	for child in _goals_list.get_children():
+		_goals_list.remove_child(child)
+		child.queue_free()
+	var pending: Array = [] if _goals == null else _goals.pending()
+	# pending() сохраняет порядок трекера, а он приходит из сейва любым. Заголовки
+	# дней печатаются сменой дня, поэтому список приводится к порядку по дню: иначе
+	# две цели дня 1, разнесённые целью дня 2, дали бы два заголовка «День 1».
+	pending.sort_custom(func(a, b): return int(a.get("day", 0)) < int(b.get("day", 0)))
+	var day := -1
+	for goal in pending:
+		var goal_day := int(goal.get("day", 0))
+		if goal_day != day:
+			_daily_header(goal_day)
+			day = goal_day
+		var row := Label.new()
+		var goal_id := String(goal.get("id", ""))
+		row.name = "Goal_%s" % goal_id
+		row.text = "· %s" % GameText.campaign_goal(goal_id)
+		row.theme_type_variation = &"LabelBody"
+		row.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_goals_list.add_child(row)
+	_goals_panel.visible = _goals != null and _goals.visible()
+
+
+## Заголовок дня внутри списка целей.
+func _daily_header(goal_day: int) -> void:
+	var head := Label.new()
+	head.name = "GoalDay%d" % goal_day
+	head.text = GameText.campaign_goal_day(goal_day)
+	head.theme_type_variation = &"LabelSecondary"
+	_goals_list.add_child(head)
+
+
+func _on_goal_completed(_goal_id: String) -> void:
+	_refresh_goals()
 
 
 func open_city_screen() -> void:

@@ -1125,3 +1125,21 @@ msgstr "Finish the current turn"
 
 msgid "campaign.date"
 msgstr "Month {month} Week {week} Day {day}"
+
+msgid "campaign.goals_title"
+msgstr "First-day goals"
+
+msgid "campaign.goal_day"
+msgstr "Day {day}"
+
+msgid "campaign.goal.farm"
+msgstr "Build the farm"
+
+msgid "campaign.goal.barracks"
+msgstr "Build the barracks"
+
+msgid "campaign.goal.train_warrior"
+msgstr "Train a warrior"
+
+msgid "campaign.goal.ruins"
+msgstr "Visit the ruins"
