@@ -326,5 +326,427 @@
       "battle-demo/artifacts/clips/spearman/turn/frame_33.png"
     ],
     "verdict": "брак: корпус уехал по полу (10.2 px за цикл)"
+  },
+  {
+    "char": "archer",
+    "anim": "idle",
+    "seed": 1103,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "first_frame": 159.8,
+      "chromakey": 3.0,
+      "clip": 42.2
+    },
+    "total_seconds": 205.0,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 12.0,
+      "sharpness_min": 819.9,
+      "sharpness_median": 944.8,
+      "pivot_slide_x": 0.4,
+      "pivot_sway_x": 0.9,
+      "feet_drift_x": 2.5,
+      "feet_drift_y": 0,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": {
+      "window": 17,
+      "seam": 3.01,
+      "frame_step": 1.73,
+      "ping_pong": true
+    },
+    "subsampled": [
+      "battle-demo/artifacts/clips/archer/idle/frame_01.png",
+      "battle-demo/artifacts/clips/archer/idle/frame_06.png",
+      "battle-demo/artifacts/clips/archer/idle/frame_12.png",
+      "battle-demo/artifacts/clips/archer/idle/frame_17.png"
+    ],
+    "verdict": "годен: движение 12.0, резкость 819.9/944.8, снос 0.4 px, хромакей 0 — петля ping-pong (стык не найден)"
+  },
+  {
+    "char": "archer",
+    "anim": "attack",
+    "seed": 1103,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "first_frame": 159.7,
+      "chromakey": 3.0,
+      "clip": 42.2
+    },
+    "total_seconds": 205.0,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 5.4,
+      "sharpness_min": 561.5,
+      "sharpness_median": 777.5,
+      "pivot_slide_x": 0.2,
+      "pivot_sway_x": 9.7,
+      "feet_drift_x": 39.0,
+      "feet_drift_y": 0,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/archer/attack/frame_01.png",
+      "battle-demo/artifacts/clips/archer/attack/frame_12.png",
+      "battle-demo/artifacts/clips/archer/attack/frame_22.png",
+      "battle-demo/artifacts/clips/archer/attack/frame_33.png"
+    ],
+    "verdict": "годен: движение 5.4, резкость 561.5/777.5, снос 0.2 px, хромакей 0"
+  },
+  {
+    "char": "archer",
+    "anim": "hit",
+    "seed": 1103,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "first_frame": 159.7,
+      "chromakey": 3.0,
+      "clip": 42.2
+    },
+    "total_seconds": 204.9,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 46.5,
+      "sharpness_min": 635.9,
+      "sharpness_median": 727.6,
+      "pivot_slide_x": 20.7,
+      "pivot_sway_x": 21.9,
+      "feet_drift_x": 31.5,
+      "feet_drift_y": 1,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/archer/hit/frame_01.png",
+      "battle-demo/artifacts/clips/archer/hit/frame_12.png",
+      "battle-demo/artifacts/clips/archer/hit/frame_22.png",
+      "battle-demo/artifacts/clips/archer/hit/frame_33.png"
+    ],
+    "verdict": "брак: корпус уехал по полу (20.7 px за цикл)"
+  },
+  {
+    "char": "archer",
+    "anim": "turn",
+    "seed": 1103,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "first_frame": 159.8,
+      "chromakey": 3.0,
+      "clip": 42.2
+    },
+    "total_seconds": 205.1,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 32.4,
+      "sharpness_min": 629.0,
+      "sharpness_median": 663.1,
+      "pivot_slide_x": 5.7,
+      "pivot_sway_x": 6.8,
+      "feet_drift_x": 10.5,
+      "feet_drift_y": 5,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/archer/turn/frame_01.png",
+      "battle-demo/artifacts/clips/archer/turn/frame_12.png",
+      "battle-demo/artifacts/clips/archer/turn/frame_22.png",
+      "battle-demo/artifacts/clips/archer/turn/frame_33.png"
+    ],
+    "verdict": "годен: движение 32.4, резкость 629.0/663.1, снос 5.7 px, хромакей 0"
+  },
+  {
+    "char": "wizard",
+    "anim": "idle",
+    "seed": 1104,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "first_frame": 159.8,
+      "chromakey": 3.0,
+      "clip": 42.3
+    },
+    "total_seconds": 205.2,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 25.7,
+      "sharpness_min": 578.2,
+      "sharpness_median": 616.1,
+      "pivot_slide_x": 2.2,
+      "pivot_sway_x": 3.4,
+      "feet_drift_x": 18.0,
+      "feet_drift_y": 1,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": {
+      "window": 17,
+      "seam": 14.77,
+      "frame_step": 4.76,
+      "ping_pong": true
+    },
+    "subsampled": [
+      "battle-demo/artifacts/clips/wizard/idle/frame_01.png",
+      "battle-demo/artifacts/clips/wizard/idle/frame_06.png",
+      "battle-demo/artifacts/clips/wizard/idle/frame_12.png",
+      "battle-demo/artifacts/clips/wizard/idle/frame_17.png"
+    ],
+    "verdict": "годен: движение 25.7, резкость 578.2/616.1, снос 2.2 px, хромакей 0 — петля ping-pong (стык не найден)"
+  },
+  {
+    "char": "wizard",
+    "anim": "attack",
+    "seed": 1104,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "first_frame": 159.8,
+      "chromakey": 3.1,
+      "clip": 42.2
+    },
+    "total_seconds": 205.1,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 28.1,
+      "sharpness_min": 288.1,
+      "sharpness_median": 496.7,
+      "pivot_slide_x": 2.1,
+      "pivot_sway_x": 68.5,
+      "feet_drift_x": 89.5,
+      "feet_drift_y": 1,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/wizard/attack/frame_01.png",
+      "battle-demo/artifacts/clips/wizard/attack/frame_12.png",
+      "battle-demo/artifacts/clips/wizard/attack/frame_22.png",
+      "battle-demo/artifacts/clips/wizard/attack/frame_33.png"
+    ],
+    "verdict": "брак: есть смазанные кадры"
+  },
+  {
+    "char": "wizard",
+    "anim": "hit",
+    "seed": 1104,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "first_frame": 159.7,
+      "chromakey": 3.0,
+      "clip": 42.2
+    },
+    "total_seconds": 205.0,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 36.4,
+      "sharpness_min": 821.7,
+      "sharpness_median": 978.9,
+      "pivot_slide_x": 13.5,
+      "pivot_sway_x": 14.7,
+      "feet_drift_x": 14.0,
+      "feet_drift_y": 0,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/wizard/hit/frame_01.png",
+      "battle-demo/artifacts/clips/wizard/hit/frame_12.png",
+      "battle-demo/artifacts/clips/wizard/hit/frame_22.png",
+      "battle-demo/artifacts/clips/wizard/hit/frame_33.png"
+    ],
+    "verdict": "брак: корпус уехал по полу (13.5 px за цикл)"
+  },
+  {
+    "char": "wizard",
+    "anim": "turn",
+    "seed": 1104,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "first_frame": 159.8,
+      "chromakey": 3.0,
+      "clip": 42.2
+    },
+    "total_seconds": 205.1,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 37.5,
+      "sharpness_min": 680.0,
+      "sharpness_median": 776.6,
+      "pivot_slide_x": 1.2,
+      "pivot_sway_x": 8.0,
+      "feet_drift_x": 24.5,
+      "feet_drift_y": 1,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/wizard/turn/frame_01.png",
+      "battle-demo/artifacts/clips/wizard/turn/frame_12.png",
+      "battle-demo/artifacts/clips/wizard/turn/frame_22.png",
+      "battle-demo/artifacts/clips/wizard/turn/frame_33.png"
+    ],
+    "verdict": "годен: движение 37.5, резкость 680.0/776.6, снос 1.2 px, хромакей 0"
+  },
+  {
+    "char": "sorcerer",
+    "anim": "idle",
+    "seed": 1105,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "first_frame": 159.8,
+      "chromakey": 3.0,
+      "clip": 42.2
+    },
+    "total_seconds": 205.0,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 23.7,
+      "sharpness_min": 1013.9,
+      "sharpness_median": 1226.7,
+      "pivot_slide_x": 0.2,
+      "pivot_sway_x": 0.9,
+      "feet_drift_x": 9.0,
+      "feet_drift_y": 0,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": {
+      "window": 17,
+      "seam": 10.22,
+      "frame_step": 5.32,
+      "ping_pong": true
+    },
+    "subsampled": [
+      "battle-demo/artifacts/clips/sorcerer/idle/frame_01.png",
+      "battle-demo/artifacts/clips/sorcerer/idle/frame_06.png",
+      "battle-demo/artifacts/clips/sorcerer/idle/frame_12.png",
+      "battle-demo/artifacts/clips/sorcerer/idle/frame_17.png"
+    ],
+    "verdict": "годен: движение 23.7, резкость 1013.9/1226.7, снос 0.2 px, хромакей 0 — петля ping-pong (стык не найден)"
+  },
+  {
+    "char": "sorcerer",
+    "anim": "attack",
+    "seed": 1105,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "first_frame": 159.8,
+      "chromakey": 3.0,
+      "clip": 42.3
+    },
+    "total_seconds": 205.1,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 30.1,
+      "sharpness_min": 839.9,
+      "sharpness_median": 1065.7,
+      "pivot_slide_x": 0.5,
+      "pivot_sway_x": 10.6,
+      "feet_drift_x": 41.5,
+      "feet_drift_y": 0,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/sorcerer/attack/frame_01.png",
+      "battle-demo/artifacts/clips/sorcerer/attack/frame_12.png",
+      "battle-demo/artifacts/clips/sorcerer/attack/frame_22.png",
+      "battle-demo/artifacts/clips/sorcerer/attack/frame_33.png"
+    ],
+    "verdict": "годен: движение 30.1, резкость 839.9/1065.7, снос 0.5 px, хромакей 0"
+  },
+  {
+    "char": "sorcerer",
+    "anim": "hit",
+    "seed": 1105,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "first_frame": 159.8,
+      "chromakey": 3.1,
+      "clip": 42.3
+    },
+    "total_seconds": 205.1,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 32.2,
+      "sharpness_min": 863.0,
+      "sharpness_median": 973.0,
+      "pivot_slide_x": 23.4,
+      "pivot_sway_x": 27.6,
+      "feet_drift_x": 68.5,
+      "feet_drift_y": 1,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/sorcerer/hit/frame_01.png",
+      "battle-demo/artifacts/clips/sorcerer/hit/frame_12.png",
+      "battle-demo/artifacts/clips/sorcerer/hit/frame_22.png",
+      "battle-demo/artifacts/clips/sorcerer/hit/frame_33.png"
+    ],
+    "verdict": "брак: корпус уехал по полу (23.4 px за цикл)"
   }
 ]

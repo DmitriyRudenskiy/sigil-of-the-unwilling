@@ -27,5 +27,16 @@
   "battle-demo/artifacts/clips/spearman/idle": "годен: движение 9.2, резкость 4223.7/4561.0, снос 0.2 px, хромакей 0 — петля ping-pong (стык не найден)",
   "battle-demo/artifacts/clips/spearman/attack": "брак: есть смазанные кадры",
   "battle-demo/artifacts/clips/spearman/hit": "годен: движение 56.8, резкость 2832.9/3540.6, снос 4.0 px, хромакей 0",
-  "battle-demo/artifacts/clips/spearman/turn": "брак: корпус уехал по полу (10.2 px за цикл)"
+  "battle-demo/artifacts/clips/spearman/turn": "брак: корпус уехал по полу (10.2 px за цикл)",
+  "battle-demo/artifacts/clips/archer/idle": "годен: движение 12.0, резкость 819.9/944.8, снос 0.4 px, хромакей 0 — петля ping-pong (стык не найден)",
+  "battle-demo/artifacts/clips/archer/attack": "годен: движение 5.4, резкость 561.5/777.5, снос 0.2 px, хромакей 0",
+  "battle-demo/artifacts/clips/archer/hit": "брак: корпус уехал по полу (20.7 px за цикл)",
+  "battle-demo/artifacts/clips/archer/turn": "годен: движение 32.4, резкость 629.0/663.1, снос 5.7 px, хромакей 0",
+  "battle-demo/artifacts/clips/wizard/idle": "годен: движение 25.7, резкость 578.2/616.1, снос 2.2 px, хромакей 0 — петля ping-pong (стык не найден)",
+  "battle-demo/artifacts/clips/wizard/attack": "брак: есть смазанные кадры",
+  "battle-demo/artifacts/clips/wizard/hit": "брак: корпус уехал по полу (13.5 px за цикл)",
+  "battle-demo/artifacts/clips/wizard/turn": "годен: движение 37.5, резкость 680.0/776.6, снос 1.2 px, хромакей 0",
+  "battle-demo/artifacts/clips/sorcerer/idle": "годен: движение 23.7, резкость 1013.9/1226.7, снос 0.2 px, хромакей 0 — петля ping-pong (стык не найден)",
+  "battle-demo/artifacts/clips/sorcerer/attack": "годен: движение 30.1, резкость 839.9/1065.7, снос 0.5 px, хромакей 0",
+  "battle-demo/artifacts/clips/sorcerer/hit": "брак: корпус уехал по полу (23.4 px за цикл)"
 }

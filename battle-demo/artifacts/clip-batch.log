@@ -1,159 +1,28 @@
-[skip] knight/idle: уже годен
-[skip] knight/walk: покадрово, D5 (походка клипом не собирается)
-[skip] knight/attack: уже годен
-[run ] knight/hit
-{
-  "char": "knight",
-  "anim": "hit",
-  "seed": 1101,
-  "length": 33,
-  "corner_before_clip": [
-    0,
-    255,
-    0
-  ],
-  "seconds": {
-    "first_frame": 150.7,
-    "chromakey": 3.0,
-    "clip": 42.2
-  },
-  "total_seconds": 196.0,
-  "audit": {
-    "frames": 33,
-    "motion_first_last": 55.3,
-    "sharpness_min": 1367.5,
-    "sharpness_median": 1559.0,
-    "pivot_slide_x": 31.8,
-    "pivot_sway_x": 31.8,
-    "feet_drift_x": 7.5,
-    "feet_drift_y": 0,
-    "chroma_pixels_kept": 0,
-    "chroma_share": 0.0
-  },
-  "loop": null,
-  "subsampled": [
-    "battle-demo/artifacts/clips/knight/hit/frame_01.png",
-    "battle-demo/artifacts/clips/knight/hit/frame_12.png",
-    "battle-demo/artifacts/clips/knight/hit/frame_22.png",
-    "battle-demo/artifacts/clips/knight/hit/frame_33.png"
-  ],
-  "verdict": "брак: корпус уехал по полу (31.8 px за цикл)"
-}
-[skip] knight/turn: уже годен
-[skip] spearman/idle: уже годен
-[skip] spearman/walk: покадрово, D5 (походка клипом не собирается)
-[run ] spearman/attack
-{
-  "char": "spearman",
-  "anim": "attack",
-  "seed": 1102,
-  "length": 33,
-  "corner_before_clip": [
-    0,
-    255,
-    0
-  ],
-  "seconds": {
-    "first_frame": 159.8,
-    "chromakey": 3.0,
-    "clip": 42.2
-  },
-  "total_seconds": 205.1,
-  "audit": {
-    "frames": 33,
-    "motion_first_last": 14.9,
-    "sharpness_min": 2127.8,
-    "sharpness_median": 3338.8,
-    "pivot_slide_x": 0.6,
-    "pivot_sway_x": 38.9,
-    "feet_drift_x": 61.5,
-    "feet_drift_y": 1,
-    "chroma_pixels_kept": 0,
-    "chroma_share": 0.0
-  },
-  "loop": null,
-  "subsampled": [
-    "battle-demo/artifacts/clips/spearman/attack/frame_01.png",
-    "battle-demo/artifacts/clips/spearman/attack/frame_12.png",
-    "battle-demo/artifacts/clips/spearman/attack/frame_22.png",
-    "battle-demo/artifacts/clips/spearman/attack/frame_33.png"
-  ],
-  "verdict": "брак: есть смазанные кадры"
-}
-[run ] spearman/hit
-{
-  "char": "spearman",
-  "anim": "hit",
-  "seed": 1102,
-  "length": 33,
-  "corner_before_clip": [
-    0,
-    255,
-    0
-  ],
-  "seconds": {
-    "first_frame": 159.8,
-    "chromakey": 3.0,
-    "clip": 42.3
-  },
-  "total_seconds": 205.1,
-  "audit": {
-    "frames": 33,
-    "motion_first_last": 56.8,
-    "sharpness_min": 2832.9,
-    "sharpness_median": 3540.6,
-    "pivot_slide_x": 4.0,
-    "pivot_sway_x": 8.7,
-    "feet_drift_x": 19.5,
-    "feet_drift_y": 1,
-    "chroma_pixels_kept": 0,
-    "chroma_share": 0.0
-  },
-  "loop": null,
-  "subsampled": [
-    "battle-demo/artifacts/clips/spearman/hit/frame_01.png",
-    "battle-demo/artifacts/clips/spearman/hit/frame_12.png",
-    "battle-demo/artifacts/clips/spearman/hit/frame_22.png",
-    "battle-demo/artifacts/clips/spearman/hit/frame_33.png"
-  ],
-  "verdict": "годен: движение 56.8, резкость 2832.9/3540.6, снос 4.0 px, хромакей 0"
-}
-[run ] spearman/turn
-{
-  "char": "spearman",
-  "anim": "turn",
-  "seed": 1102,
-  "length": 33,
-  "corner_before_clip": [
-    0,
-    255,
-    0
-  ],
-  "seconds": {
-    "first_frame": 159.8,
-    "chromakey": 3.0,
-    "clip": 42.3
-  },
-  "total_seconds": 205.1,
-  "audit": {
-    "frames": 33,
-    "motion_first_last": 61.5,
-    "sharpness_min": 3527.7,
-    "sharpness_median": 3970.7,
-    "pivot_slide_x": 10.2,
-    "pivot_sway_x": 22.2,
-    "feet_drift_x": 89.5,
-    "feet_drift_y": 13,
-    "chroma_pixels_kept": 0,
-    "chroma_share": 0.0
-  },
-  "loop": null,
-  "subsampled": [
-    "battle-demo/artifacts/clips/spearman/turn/frame_01.png",
-    "battle-demo/artifacts/clips/spearman/turn/frame_12.png",
-    "battle-demo/artifacts/clips/spearman/turn/frame_22.png",
-    "battle-demo/artifacts/clips/spearman/turn/frame_33.png"
-  ],
-  "verdict": "брак: корпус уехал по полу (10.2 px за цикл)"
-}
-[run ] archer/idle
+# Пакет клипов Wan 2.2 I2V — журнал прогона `gen_clip.py --all`
+#
+# Журнал пересобран из clip-manifest.json: начало исходного лога затёрто
+# неудачной попыткой перезапуска пакета (2026-10-25, редирект `>` по пути лога,
+# процесс при этом жил). Пиксели клипов — в artifacts/clips/, вердикты — в verdicts.json.
+# Остановлен по команде владельца на 20 клипах из 45 (barbarian idle/attack и
+# sorcerer turn прерваны на середине, каталоги пустые — прогон возобновляем).
+
+knight/idle | seed=1101 | движение=19.7 | резкость=1607.4/1677.3 | хромакей=0.0 | петля=17 | годен: движение 19.7, резкость 1607.4/1677.3, снос 1.7 px, хромакей 0 — петля ping-pong (стык не найден)
+knight/turn | seed=1101 | движение=46.3 | резкость=1408.7/1517.9 | хромакей=0.0 | петля=ping-pong | годен: движение 46.3, резкость 1408.7/1517.9, снос 7.0 px, хромакей 0
+spearman/idle | seed=1102 | движение=9.2 | резкость=4223.7/4561.0 | хромакей=0.0 | петля=17 | годен: движение 9.2, резкость 4223.7/4561.0, снос 0.2 px, хромакей 0 — петля ping-pong (стык не найден)
+knight/attack | seed=1101 | движение=9.9 | резкость=1041.7/1447.6 | хромакей=0.0 | петля=ping-pong | годен: движение 9.9, резкость 1041.7/1447.6, снос 0.1 px, хромакей 0
+knight/walk | seed=1101 | движение=73.5 | резкость=1109.4/1251.3 | хромакей=0.0 | петля=26 | брак: корпус уехал по полу (31.1 px за цикл)
+knight/hit | seed=1101 | первый_кадр=150.7с | клип=42.2с | всего=196.0с | движение=55.3 | резкость=1367.5/1559.0 | хромакей=0.0 | петля=ping-pong | брак: корпус уехал по полу (31.8 px за цикл)
+spearman/attack | seed=1102 | первый_кадр=159.8с | клип=42.2с | всего=205.1с | движение=14.9 | резкость=2127.8/3338.8 | хромакей=0.0 | петля=ping-pong | брак: есть смазанные кадры
+spearman/hit | seed=1102 | первый_кадр=159.8с | клип=42.3с | всего=205.1с | движение=56.8 | резкость=2832.9/3540.6 | хромакей=0.0 | петля=ping-pong | годен: движение 56.8, резкость 2832.9/3540.6, снос 4.0 px, хромакей 0
+spearman/turn | seed=1102 | первый_кадр=159.8с | клип=42.3с | всего=205.1с | движение=61.5 | резкость=3527.7/3970.7 | хромакей=0.0 | петля=ping-pong | брак: корпус уехал по полу (10.2 px за цикл)
+archer/idle | seed=1103 | первый_кадр=159.8с | клип=42.2с | всего=205.0с | движение=12.0 | резкость=819.9/944.8 | хромакей=0.0 | петля=17 | годен: движение 12.0, резкость 819.9/944.8, снос 0.4 px, хромакей 0 — петля ping-pong (стык не найден)
+archer/attack | seed=1103 | первый_кадр=159.7с | клип=42.2с | всего=205.0с | движение=5.4 | резкость=561.5/777.5 | хромакей=0.0 | петля=ping-pong | годен: движение 5.4, резкость 561.5/777.5, снос 0.2 px, хромакей 0
+archer/hit | seed=1103 | первый_кадр=159.7с | клип=42.2с | всего=204.9с | движение=46.5 | резкость=635.9/727.6 | хромакей=0.0 | петля=ping-pong | брак: корпус уехал по полу (20.7 px за цикл)
+archer/turn | seed=1103 | первый_кадр=159.8с | клип=42.2с | всего=205.1с | движение=32.4 | резкость=629.0/663.1 | хромакей=0.0 | петля=ping-pong | годен: движение 32.4, резкость 629.0/663.1, снос 5.7 px, хромакей 0
+wizard/idle | seed=1104 | первый_кадр=159.8с | клип=42.3с | всего=205.2с | движение=25.7 | резкость=578.2/616.1 | хромакей=0.0 | петля=17 | годен: движение 25.7, резкость 578.2/616.1, снос 2.2 px, хромакей 0 — петля ping-pong (стык не найден)
+wizard/attack | seed=1104 | первый_кадр=159.8с | клип=42.2с | всего=205.1с | движение=28.1 | резкость=288.1/496.7 | хромакей=0.0 | петля=ping-pong | брак: есть смазанные кадры
+wizard/hit | seed=1104 | первый_кадр=159.7с | клип=42.2с | всего=205.0с | движение=36.4 | резкость=821.7/978.9 | хромакей=0.0 | петля=ping-pong | брак: корпус уехал по полу (13.5 px за цикл)
+wizard/turn | seed=1104 | первый_кадр=159.8с | клип=42.2с | всего=205.1с | движение=37.5 | резкость=680.0/776.6 | хромакей=0.0 | петля=ping-pong | годен: движение 37.5, резкость 680.0/776.6, снос 1.2 px, хромакей 0
+sorcerer/idle | seed=1105 | первый_кадр=159.8с | клип=42.2с | всего=205.0с | движение=23.7 | резкость=1013.9/1226.7 | хромакей=0.0 | петля=17 | годен: движение 23.7, резкость 1013.9/1226.7, снос 0.2 px, хромакей 0 — петля ping-pong (стык не найден)
+sorcerer/attack | seed=1105 | первый_кадр=159.8с | клип=42.3с | всего=205.1с | движение=30.1 | резкость=839.9/1065.7 | хромакей=0.0 | петля=ping-pong | годен: движение 30.1, резкость 839.9/1065.7, снос 0.5 px, хромакей 0
+sorcerer/hit | seed=1105 | первый_кадр=159.8с | клип=42.3с | всего=205.1с | движение=32.2 | резкость=863.0/973.0 | хромакей=0.0 | петля=ping-pong | брак: корпус уехал по полу (23.4 px за цикл)
