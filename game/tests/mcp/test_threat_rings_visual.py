@@ -87,9 +87,30 @@ for i in picked.size():
     var c: Vector2i = picked[i]
     map.model.enemy_stacks[c] = [reg.make_stack("__UNIT__", rng, 1.0)]
     map.model.enemy_tiers[c] = int(tiers[i])
-    if fog != null:
-        fog.visible[c] = 1
-        fog.explored[c] = 1
+# Туман пересчитывается вызовом, а не прикосновением к клеткам. Прежний
+# `fog.visible[c] = fog.explored[c] = 1` рисовал клетку-одиночку среди серого
+# фона — состояние, которого игра производить не умеет (обзор это диск), и кадр
+# «носитель рядом с пустотой» был доказательством несуществующей ситуации.
+# Теперь легальный recompute: радиус считается до дальнего стэка, чтобы все три
+# окна попали в исследованное, города — те же источники, что у бутстрапа.
+var fog_legal := true
+var fog_state := [0, 0]
+if fog != null:
+    var need := 0
+    for pc in picked:
+        need = maxi(need, HexUtils.hex_distance(hero_cell, pc))
+    var sources: Array = []
+    for city in cities.cities:
+        if city != null and city.owner == &"player" and city.center is Vector2i:
+            sources.append(city.center)
+    fog.recompute(hero_cell, sources, need + 2, GameNumbers.FOG_CITY_SIGHT)
+    if map.has_valid_tilemap():
+        map.apply_fog(fog)
+    for pc in picked:
+        for n in HexUtils.core_cells(pc):
+            if not fog.is_explored(n):
+                fog_legal = false
+    fog_state = [fog.explored.size(), fog.visible.size()]
 spawner.respawn_enemies()
 # Кадр обязан быть неподвижным: замеры «с носителем» и «без носителя» вычитаются,
 # и сдвиг камеры между ними обнуляет вычитание. Движут камеру мира два независимых
@@ -106,7 +127,8 @@ var cells: Array = []
 for c in picked:
     cells.append({"x": c.x, "y": c.y})
 return {"ready": true, "hero": {"x": hero_cell.x, "y": hero_cell.y}, "cells": cells, \\
-    "tiers": tiers, "fog": fog != null, "camera": [cam.position.x, cam.position.y], \\
+    "tiers": tiers, "fog": fog != null, "fog_legal": fog_legal, "fog_state": fog_state, \\
+    "camera": [cam.position.x, cam.position.y], \\
     "viewport": [world.get_viewport().get_visible_rect().size.x, \\
         world.get_viewport().get_visible_rect().size.y]}
 """.replace("__UNIT__", UNIT_KEY)
@@ -205,6 +227,13 @@ return {"ok": true}
 def _setup(mcp) -> dict:
     r = mcp.execute_code(_SETUP)
     assert r.get("ready") is True, f"мир не готов к съёмке колец: {r}"
+    # Кадр-доказательство обязан снимать состояние, которое игра умеет
+    # производить: вокруг каждого стэка исследовано всё соседство, а не одна
+    # клетка (иначе «носитель рядом с пустотой» — артефакт фикстуры, T-165).
+    assert r.get("fog_legal") is True, (
+        f"фикстура нарисовала нелегальный туман: исследовано {r.get('fog_state')}, "
+        "у какого-то стэка есть неисследованный сосед"
+    )
     return r
 
 
