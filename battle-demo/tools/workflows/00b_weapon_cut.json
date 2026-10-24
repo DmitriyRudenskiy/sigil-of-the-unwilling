@@ -1,0 +1,126 @@
+{
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "qwen_image_2.1_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen3vl_8b_int8_convrot.safetensors",
+      "type": "qwen_image",
+      "device": "default"
+    }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "qwen_image_2.1_vae_bf16.safetensors"
+    }
+  },
+  "4": {
+    "class_type": "QwenImage21Cache",
+    "inputs": {
+      "model": ["1", 0],
+      "device": "auto",
+      "dtype": "default"
+    }
+  },
+  "11": {
+    "class_type": "LoadImage",
+    "inputs": {"image": "kit_source.png"}
+  },
+  "19": {
+    "class_type": "ImageScaleToMaxDimension",
+    "inputs": {
+      "image": ["11", 0],
+      "upscale_method": "lanczos",
+      "largest_size": 1024
+    }
+  },
+  "18": {
+    "class_type": "GetImageSize",
+    "inputs": {"image": ["19", 0]}
+  },
+  "15": {
+    "class_type": "EmptyImage",
+    "inputs": {
+      "width": ["18", 0],
+      "height": ["18", 1],
+      "batch_size": 1,
+      "color": 65280
+    }
+  },
+  "13": {
+    "class_type": "LoadBackgroundRemovalModel",
+    "inputs": {"bg_removal_name": "birefnet.safetensors"}
+  },
+  "14": {
+    "class_type": "RemoveBackground",
+    "inputs": {
+      "bg_removal_model": ["13", 0],
+      "image": ["19", 0]
+    }
+  },
+  "16": {
+    "class_type": "ImageCompositeMasked",
+    "inputs": {
+      "destination": ["15", 0],
+      "source": ["19", 0],
+      "x": 0,
+      "y": 0,
+      "resize_source": true,
+      "mask": ["14", 0]
+    }
+  },
+  "7": {
+    "class_type": "TextEncodeQwenImage21",
+    "inputs": {
+      "clip": ["2", 0],
+      "vae": ["3", 0],
+      "prompt": "Remove the character and everything except the weapon. Only the weapon from the reference image, single isolated object, centered, whole object inside the frame, product shot on a flat solid pure green background, no shadow, no reflection, no floor, sharp focus, preserving the style of the original image.",
+      "negative_prompt": "",
+      "resolution": 1024,
+      "images.image_1": ["16", 0]
+    }
+  },
+  "8": {
+    "class_type": "KSampler",
+    "inputs": {
+      "model": ["4", 0],
+      "positive": ["7", 0],
+      "negative": ["7", 1],
+      "latent_image": ["7", 2],
+      "seed": 43,
+      "steps": 25,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0
+    }
+  },
+  "9": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": ["8", 0],
+      "vae": ["3", 0]
+    }
+  },
+  "21": {
+    "class_type": "ImageScaleToMaxDimension",
+    "inputs": {
+      "image": ["9", 0],
+      "upscale_method": "lanczos",
+      "largest_size": 1024
+    }
+  },
+  "10": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": ["21", 0],
+      "filename_prefix": "sotu_kit/cut"
+    }
+  }
+}

@@ -12,9 +12,12 @@ const UNIT_SCENE := "res://scenes/battle_unit.tscn"
 ## читаться, поэтому линия стоит в ~2×.
 const UNIT_SCALE := 3.0
 const ROW_Y := 700.0
-const PLAYER_X := 320.0
-const ENEMY_X := 1560.0
-const STEP_X := 230.0
+## Линия из семи юнитов обязана помещаться до противника: при шаге 230 от 320
+## седьмой вставал в 1700 — за спиной врага, и его полоса HP лезла на чужую
+## (кадр `screen-start.png`, 2026-10-25).
+const PLAYER_X := 200.0
+const ENEMY_X := 1700.0
+const STEP_X := 190.0
 ## Сколько своих показывать на поле (в бою их семь, для приёмки достаточно линии).
 const LINE_SIZE := 4
 ## Цикл показа дорожек для живого прогона (`auto_cycle`).
@@ -69,6 +72,11 @@ func spawn(unit: BattleUnit) -> BattleUnitView:
 	add_child(view)
 	_views[unit.uid()] = view
 	return view
+
+
+## Картинка юнита боя (экрану нужно ставить метку и полосы по позиции).
+func view_of(unit: BattleUnit) -> BattleUnitView:
+	return _views.get(unit.uid())
 
 
 ## Связка с боевым ядром (задача 8.4): отклик картинки идёт из сигналов, а не из

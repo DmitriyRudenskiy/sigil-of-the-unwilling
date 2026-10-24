@@ -2,6 +2,8 @@
 artifacts/gen/
 artifacts/clips/
 assets/a_pose/
+# Промежуточные листы кита (21 МБ) — пересобираются tools/gen_kit.py.
+assets/kit/
 artifacts/screenshots/
 __pycache__/
 *.DS_Store
