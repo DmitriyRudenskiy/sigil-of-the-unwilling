@@ -11,7 +11,7 @@
 | 5 | `1792065652955-01a13f6e-…jpeg` | `sorcerer` | чародей | player | 5 | да | да |
 | 6 | `1792115804850-01a1426b-…jpeg` | `barbarian` | brute | player | 6 | да | да |
 | 7 | `1792116192660-01a14272-…jpeg` | `stormmage` | враг | enemy | — | враг | враг |
-| 8 | `1792116358916-01a14273-…jpeg` | `cutthroat` | дуэлянт | player | 7 | да | да |
+| 8 | `1792116358916-01a14273-…jpeg` | `cutthroat` | головорез | player | 7 | да | да |
 | 9 | `flux-3-image_a_Перенести_стиль_с_из.png` | `priest` | саппорт | player | 8 | — | да |
 
 Источник — `/Users/user/sigil-of-the-unwilling-slop/Новая папка с объектами 2/`

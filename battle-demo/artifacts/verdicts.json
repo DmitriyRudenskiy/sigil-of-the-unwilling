@@ -1,0 +1,8 @@
+{
+ "battle-demo/artifacts/gen/knight/idle_01.png": "брак: поза не читается — кадр совпадает с idle_02 (мелкий сдвиг 5 px); карта переработана",
+ "battle-demo/artifacts/gen/knight/idle_02.png": "брак: то же",
+ "battle-demo/artifacts/gen/knight/walk_01.png": "годен: профильный шаг, идентичность и стиль держатся",
+ "battle-demo/artifacts/gen/knight/walk_02.png": "годен: стойка на прямой ноге; щит круглый вместо киварного — следить",
+ "battle-demo/artifacts/gen/knight/walk_03.png": "годен: вышаг сзади, плащ пропал — править на 6.9",
+ "battle-demo/artifacts/gen/knight/walk_04.png": "годен: вышаг, щит круглый"
+}

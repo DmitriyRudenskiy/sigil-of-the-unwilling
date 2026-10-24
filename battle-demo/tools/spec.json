@@ -1,0 +1,109 @@
+{
+  "_comment": "Носитель прогона фазы 6 (задача 6.6): персонаж → кадр-источник → скелет позы → лист. Генерация — редактирование кадра-источника (D13), позу задаёт скелет DWPose этого же персонажа (D14). Пути относительные — от корня репо.",
+  "comfy": "http://192.168.0.230:8188",
+  "sources_dir": "/Users/user/sigil-of-the-unwilling-slop/Новая папка с объектами 2",
+  "portraits_dir": "battle-demo/assets/portraits",
+  "poses_dir": "battle-demo/assets/poses",
+  "out_dir": "battle-demo/artifacts/gen",
+  "manifest": "battle-demo/artifacts/generation-manifest.json",
+  "filename_prefix": "sotu-battle",
+  "prompt": "the same character as in the first image — {look} — same face, same hair, same clothes and same weapon, in the same hand-drawn game character illustration style as the first image, full body, standing in the pose from the second image, plain white background, no shadow on the ground",
+  "negative_prompt": "photorealism, photograph, 3d render, text, watermark, frame, background scenery, shadow on the ground, extra fingers, deformed hands, extra limbs, cropped body",
+  "graph": {
+    "unet": "qwen_image_2.1_int8_convrot.safetensors",
+    "clip": "qwen3vl_8b_int8_convrot.safetensors",
+    "clip_type": "qwen_image",
+    "vae": "qwen_image_2.1_vae_bf16.safetensors",
+    "resolution": 768,
+    "steps": 25,
+    "cfg": 1.0,
+    "sampler_name": "euler",
+    "scheduler": "simple",
+    "denoise": 1.0
+  },
+  "animations": [
+    "idle",
+    "walk",
+    "attack",
+    "hit",
+    "turn"
+  ],
+  "frames": 4,
+  "characters": [
+    {
+      "id": "knight",
+      "side": "player",
+      "source": "1791100960204-01a105ef-57c1-7301-b8c1-c447176cd7af.png",
+      "seed": 1101,
+      "look": "bearded knight in polished steel plate armour under a cream tabard with gold trim, round shield and warhammer"
+    },
+    {
+      "id": "spearman",
+      "side": "player",
+      "source": "1791101630355-01a105f9-6660-7c80-b05d-4652b03d9df0.jpeg",
+      "seed": 1102,
+      "look": "soldier in full steel plate armour and scale mail holding a long spear with a leaf-shaped head"
+    },
+    {
+      "id": "archer",
+      "side": "player",
+      "source": "1791101803599-01a105fb-80a1-7bf7-a31e-1d31481fceab.png",
+      "seed": 1103,
+      "look": "young man in a green hooded cloak and leather armour, quiver of arrows on his back, short bow"
+    },
+    {
+      "id": "wizard",
+      "side": "player",
+      "source": "1791102224890-01a10602-bdb2-78ee-834c-91446fbbf13c.png",
+      "seed": 1104,
+      "look": "old long-bearded mage in a blue robe with a twisted wooden staff topped by a glowing blue crystal"
+    },
+    {
+      "id": "sorcerer",
+      "side": "player",
+      "source": "1792065652955-01a13f6e-2906-7649-b4c7-76d1cad1a10e.jpeg",
+      "seed": 1105,
+      "look": "sorcerer in a tattered deep-purple hooded robe and purple sash with a gem buckle"
+    },
+    {
+      "id": "barbarian",
+      "side": "player",
+      "source": "1792115804850-01a1426b-71d7-70b9-9752-03c121a14745.jpeg",
+      "seed": 1106,
+      "look": "shirtless muscular barbarian with a black moustache, fur cloak and fur-skirt, big double-bladed axe over his shoulder"
+    },
+    {
+      "id": "stormmage",
+      "side": "enemy",
+      "source": "1792116192660-01a14272-17af-7577-b484-14d9062c43cb.jpeg",
+      "seed": 1107,
+      "look": "wild white-haired old mage in a dark blue coat, lightning crackling around his hand"
+    },
+    {
+      "id": "cutthroat",
+      "side": "player",
+      "source": "1792116358916-01a14273-ea22-78a2-a8d0-ca14616728cb.jpeg",
+      "seed": 1108,
+      "look": "stocky man in a beige shirt with a steel pauldron, a dagger in each hand"
+    },
+    {
+      "id": "priest",
+      "side": "player",
+      "source": "flux-3-image_a_Перенести_стиль_с_из.png",
+      "seed": 1109,
+      "look": "heavy-set man in a cream tabard with gold trim over chainmail, arms open"
+    }
+  ],
+  "motion_reference": {
+    "walk": {
+      "dir": "battle-demo/assets/poses/_dwpose/walk-sample",
+      "cells": [
+        0,
+        6,
+        12,
+        18
+      ],
+      "_": "образец походки владельца assets/reference/walk-sample.png, лист 5×5; четыре равноотстоящие клетки"
+    }
+  }
+}

@@ -101,7 +101,7 @@ func _pool() -> Array:
 			_ability(&"impaling_thrust", "Пронзающий выпад", 2, 2, 1.6,
 				Ability.TargetKind.ENEMY_SINGLE, [], [], 1, 0.5),
 		]),
-		_unit(&"archer", "Лучница", 70, 18, 4, 13, [
+		_unit(&"archer", "Лучник", 70, 18, 4, 13, [
 			_ability(&"volley", "Залп", 3, 3, 1.3,
 				Ability.TargetKind.ENEMY_SINGLE, [&"bleed"]),
 		]),
@@ -116,7 +116,7 @@ func _pool() -> Array:
 			_ability(&"cleave", "Рубящий удар", 3, 2, 1.8,
 				Ability.TargetKind.ENEMY_SINGLE, [], [&"bleed"]),
 		]),
-		_unit(&"cutthroat", "Тайный убийца", 70, 19, 4, 16, [
+		_unit(&"cutthroat", "Головорез", 70, 19, 4, 16, [
 			_ability(&"dagger_dance", "Танец кинжалов", 2, 2, 0.7,
 				Ability.TargetKind.ENEMY_SINGLE, [], [], 2),
 		]),
