@@ -29,6 +29,10 @@ VERDICTS = ROOT / "battle-demo/artifacts/verdicts.json"
 GREEN = (0, 255, 0)
 # Анимации, которые в движке крутятся по кругу (D9): для них ищется стык петли.
 LOOP_ANIMS = {"idle", "walk"}
+# Походка — не клипом: Wan ведёт персонажа через кадр (снос 31 px за цикл),
+# сдвигом кадра это не выпрямляется. Решение владельца 2026-10-24: `walk` —
+# покадровый фолбэк D5 (`gen_frames.py`), клипами идут остальные четыре.
+PER_FRAME_ANIMS = {"walk"}
 
 
 def load_workflow(name: str) -> dict:
@@ -304,26 +308,40 @@ def batch(args: argparse.Namespace) -> int:
     Каждый клип — отдельным процессом этого же файла: сбой одного клипа (таймаут
     сервера, неудачный seed) не роняет двухчасовую очередь, а возобновление —
     это повторный запуск: манифест помнит, что уже принято.
+
+    Ось перебора — персонажи × анимации: `clip_prompt` в спеке ключуется
+    анимацией, а не персонажом (первая версия пакета перепутала их местами и
+    наслала бы `--char idle --anim t`).
     """
+    spec = comfy.load_spec()
     accepted = set()
     if MANIFEST.exists():
         accepted = {(row["char"], row["anim"])
                     for row in json.loads(MANIFEST.read_text())
                     if row.get("verdict", "").startswith("годен")}
     ok = skipped = failed = 0
-    for char, anims in comfy.load_spec()["clip_prompt"].items():
-        for anim in anims:
-            if (char, anim) in accepted:
-                print(f"[skip] {char}/{anim}: уже годен", flush=True)
-                skipped += 1
-                continue
-            command = [sys.executable, str(Path(__file__).resolve()),
-                       "--char", char, "--anim", anim, "--comfy", args.comfy]
-            print(f"[run ] {char}/{anim}", flush=True)
-            if subprocess.run(command, check=False).returncode == 0:
-                ok += 1
-            else:
-                failed += 1
+    queue = [(character["id"], anim) for character in spec["characters"]
+             for anim in spec["clip_prompt"]]
+    for char, anim in queue:
+        if anim in PER_FRAME_ANIMS:
+            print(f"[skip] {char}/{anim}: покадрово, D5 (походка клипом не собирается)",
+                  flush=True)
+            skipped += 1
+            continue
+        if (char, anim) in accepted:
+            print(f"[skip] {char}/{anim}: уже годен", flush=True)
+            skipped += 1
+            continue
+        if args.dry_run:
+            print(f"[dry ] {char}/{anim}", flush=True)
+            continue
+        command = [sys.executable, str(Path(__file__).resolve()),
+                   "--char", char, "--anim", anim, "--comfy", args.comfy]
+        print(f"[run ] {char}/{anim}", flush=True)
+        if subprocess.run(command, check=False).returncode == 0:
+            ok += 1
+        else:
+            failed += 1
     print(f"ИТОГ ok={ok} skip={skipped} fail={failed}", flush=True)
     return 0 if not failed else 1
 
