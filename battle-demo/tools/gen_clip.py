@@ -96,6 +96,26 @@ def unkey(frame: Path, threshold: int = 60, grow: int = 2) -> Image.Image:
     return merged
 
 
+def contact_x(alpha: Image.Image, band: int = 6) -> float:
+    """Центр тяжести последних `band` px силуэта — проксима «точки опоры».
+
+    Мера корпуса (полоса сверху) для вердикта о скольжении не годится: `hit` —
+    это наклон, персонаж отыгрывает удар, оставаясь на месте. Полоса снизу —
+    там ботинки, они ездить не должны. Узких полос (2 px) избегаем: на них
+    мера шумит (sorcerer/hit: 6.3 px при h=2 против 0.5 при h≥3).
+    """
+    import numpy as np
+
+    box = alpha.getbbox()
+    if not box:
+        return 0.0
+    strip = np.asarray(alpha, dtype="float64")[max(box[3] - band, 0):box[3], :]
+    total = strip.sum()
+    if not total:
+        return 0.0
+    return float((np.arange(strip.shape[1]) * strip.sum(axis=0)).sum() / total)
+
+
 def measure(paths: list[Path]) -> dict:
     """Машинная проверка клипа (6.13 в миниатюре): движение, резкость, pivot, хромакей.
 
@@ -137,6 +157,10 @@ def measure(paths: list[Path]) -> dict:
         return float((np.arange(mask.shape[1]) * mask.sum(axis=0)).sum() / total)
 
     bodies = [body_x(alpha) for alpha in alphas]
+    # Снос по точке опоры — см. `contact_x`.
+    contacts = [contact_x(alpha) for alpha in alphas]
+    contact_slide_x = abs(contacts[-1] - contacts[0])
+    contact_sway_x = max(contacts) - min(contacts)
     # За вердикт отвечает снос: насколько уехал корпус за цикл (первый ↔ последний
     # кадр). Размах по всем кадрам — часть шага (корпус качается), он только
     # сообщается. Порог на размахе валил честный walk: прогон 2026-10-24 показал
@@ -170,6 +194,8 @@ def measure(paths: list[Path]) -> dict:
         "sharpness_median": round(statistics.median(sharp), 1),
         "pivot_slide_x": round(slide_x, 1),
         "pivot_sway_x": round(sway_x, 1),
+        "contact_slide_x": round(contact_slide_x, 1),
+        "contact_sway_x": round(contact_sway_x, 1),
         "feet_drift_x": round(max(p[0] for p in pivots) - min(p[0] for p in pivots), 1)
         if pivots else 0.0,
         "feet_drift_y": round(max(p[1] for p in pivots) - min(p[1] for p in pivots), 1)
@@ -191,6 +217,13 @@ def register(images: list[Image.Image]) -> list[Image.Image]:
     он снял из 31 px только 8. По Y не трогаем: покачивание и есть анимация.
     """
     import numpy as np
+
+    # Регистр лечит привязку к полу, а не позу. Если ступни за цикл не сшли с
+    # места, двигать кадры нечем, а сдвиг по корпусу сам и вносит скольжение:
+    # прогон 2026-10-24, knight/hit — 0.1 px до регистра, 8.1 px после.
+    feet = [contact_x(image.getchannel("A")) for image in images]
+    if abs(feet[-1] - feet[0]) <= 3:
+        return images
 
     def profile(image: Image.Image):
         mask = np.asarray(image.getchannel("A"), dtype="float64")
@@ -264,8 +297,11 @@ def verdict(report: dict) -> str:
         faults.append("анимация не двинулась")
     if audit["sharpness_min"] < 0.7 * audit["sharpness_median"]:
         faults.append("есть смазанные кадры")
-    if audit["pivot_slide_x"] > 8:
-        faults.append(f"корпус уехал по полу ({audit['pivot_slide_x']} px за цикл)")
+    # `turn` — поворот: нижняя точка силуэта при развороте уезжает (у рыцаря
+    # прогона 2026-10-24 — на 105 px при ногах на месте), прокси опоры там не
+    # работает. Для `turn` снос только сообщается.
+    if report["anim"] != "turn" and audit["contact_slide_x"] > 8:
+        faults.append(f"ступни уехали по полу ({audit['contact_slide_x']} px за цикл)")
     if audit["chroma_share"] > 0.0005:
         faults.append(f"остался хромакей ({audit['chroma_pixels_kept']} px, "
                       f"{audit['chroma_share'] * 100:.3f}% удержанных пикселей)")
@@ -276,8 +312,8 @@ def verdict(report: dict) -> str:
         " — петля ping-pong (стык не найден)" if loop["ping_pong"]
         else f" — петля замыкается (стык {loop['seam']} при шаге {loop['frame_step']})")
     return (f"годен: движение {audit['motion_first_last']}, резкость "
-            f"{audit['sharpness_min']}/{audit['sharpness_median']}, снос "
-            f"{audit['pivot_slide_x']} px, хромакей {audit['chroma_pixels_kept']}{seam}")
+            f"{audit['sharpness_min']}/{audit['sharpness_median']}, снос ступней "
+            f"{audit['contact_slide_x']} px, хромакей {audit['chroma_pixels_kept']}{seam}")
 
 
 def self_test() -> int:
@@ -306,6 +342,34 @@ def self_test() -> int:
         aligned = register([figure, moved])
         boxes = [image.getchannel("A").getbbox() for image in aligned]
         assert boxes[0][0] == boxes[1][0], f"сведение не сработало: {boxes}"
+
+        # Вердикт о скольжении смотрит на ступни, а не на корпус: `hit` — наклон
+        # на месте, и register не должен от этого двигать кадр.
+        def shoot(name: str, top: int, bottom: int) -> dict:
+            paths = []
+            for index in range(3):
+                image = Image.new("RGB", (64, 64), GREEN)
+                draw = ImageDraw.Draw(image)
+                draw.rectangle((20 + index * top, 10, 30 + index * top, 30), fill=(9, 9, 9))
+                draw.rectangle((20 + index * bottom, 30, 30 + index * bottom, 50), fill=(9, 9, 9))
+                path = Path(tmp) / f"{name}{index}.png"
+                image.save(path)
+                paths.append(path)
+            keyed = []
+            for index, image in enumerate(register([unkey(path) for path in paths])):
+                path = Path(tmp) / f"{name}k{index}.png"
+                image.save(path)
+                keyed.append(path)
+            return {"anim": "hit", "corner_before_clip": list(GREEN), "audit": measure(keyed)}
+
+        # Ноги уехали под неподвижным корпусом — register (якорь по корпусу) их
+        # не лечит, вердикт по ступням обязан поймать.
+        slid, leaned = shoot("slide", 0, 6), shoot("lean", 8, 0)
+        assert "ступни уехали" in verdict(slid), verdict(slid)
+        assert "ступни" not in verdict(leaned), verdict(leaned)
+        assert leaned["audit"]["pivot_slide_x"] > 3, "наклон корпуса должен мериться"
+        turned = shoot("turn", 0, 20) | {"anim": "turn"}
+        assert "ступни" not in verdict(turned), verdict(turned)
     print("self-test OK")
     return 0
 
@@ -367,6 +431,9 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--reuse", action="store_true",
                         help="не перегенерировать: взять first_raw/first_chroma/raw/, что уже лежат")
+    parser.add_argument("--reaudit", action="store_true",
+                        help="то же, что --reuse, но вовсе без сервера: пересобрать кадры и "
+                             "вердикт из raw/, что уже лежат (для смены порогов аудита)")
     parser.add_argument("--all", action="store_true",
                         help="пакетный режим: все клипы из spec.json, пропуская уже годные (6.12)")
     parser.add_argument("--self-test", action="store_true", help="проверить кеинг и прорежку без сервера")
@@ -385,54 +452,59 @@ def main() -> int:
     if (args.length - 1) % 4:
         parser.error(f"length={args.length} не 4n+1")
     out_dir = CLIPS / args.char / args.anim
-    prefix = f"sotu/{args.char}-{args.anim}"
-
-    first_graph = load_workflow("01b_first_frame_pose_controlnet")
-    set_inputs(first_graph, "14", image=upload_portrait(spec, args.char, args.comfy))
-    set_inputs(first_graph, "5", image=upload_pose(spec, args, args.comfy))
-    set_inputs(first_graph, "8", seed=seed)
-    set_inputs(first_graph, "10", filename_prefix=f"{prefix}/01_first")
-
-    chroma_graph = load_workflow("02_chromakey_first_frame")
-    set_inputs(chroma_graph, "7", filename_prefix=f"{prefix}/02_chroma")
-
-    clip_graph = load_workflow("03_wan22_i2v_512_frames")
-    set_inputs(clip_graph, "6", text=args.prompt or spec["clip_prompt"][args.anim])
-    set_inputs(clip_graph, "8", length=args.length)
-    set_inputs(clip_graph, "13", noise_seed=seed)
-    set_inputs(clip_graph, "17", filename_prefix=f"{prefix}/03_video/clip")
-    set_inputs(clip_graph, "18", filename_prefix=f"{prefix}/03_frames/frame")
-
-    if args.dry_run:
-        for name, graph in (("01b", first_graph), ("02", chroma_graph), ("03", clip_graph)):
-            print(f"--- {name}: узлов {len(graph)}")
-        print(f"out: {out_dir}")
-        return 0
-
-    out_dir.mkdir(parents=True, exist_ok=True)
-    timings: dict[str, float] = {}
+    raw_dir = out_dir / "raw"
     first = out_dir / "first_raw.png"
     chroma = out_dir / "first_chroma.png"
-    raw_dir = out_dir / "raw"
-    reuse = args.reuse
+    timings: dict[str, float] = {}
 
-    if not (reuse and first.exists()):
-        images, timings["first_frame"] = run(args.comfy, first_graph, "01b")
-        comfy.save_output(args.comfy, images[0], first)
+    if args.reaudit:
+        # Переаудит без сервера: кадры лежат, меняется только мера и вердикт.
+        raw = sorted(path for path in raw_dir.glob("*")
+                     if path.suffix.lower() in IMAGE_SUFFIXES)
+        if not (raw and chroma.exists()):
+            parser.error(f"{out_dir}: для переаудита нужны raw/ и first_chroma.png")
+    else:
+        prefix = f"sotu/{args.char}-{args.anim}"
+        first_graph = load_workflow("01b_first_frame_pose_controlnet")
+        set_inputs(first_graph, "14", image=upload_portrait(spec, args.char, args.comfy))
+        set_inputs(first_graph, "5", image=upload_pose(spec, args, args.comfy))
+        set_inputs(first_graph, "8", seed=seed)
+        set_inputs(first_graph, "10", filename_prefix=f"{prefix}/01_first")
 
-    if not (reuse and chroma.exists()):
-        set_inputs(chroma_graph, "1", image=comfy.upload(args.comfy, first, f"sotu-{args.char}-{args.anim}-start.png"))
-        images, timings["chromakey"] = run(args.comfy, chroma_graph, "02")
-        comfy.save_output(args.comfy, images[0], chroma)
+        chroma_graph = load_workflow("02_chromakey_first_frame")
+        set_inputs(chroma_graph, "7", filename_prefix=f"{prefix}/02_chroma")
+
+        clip_graph = load_workflow("03_wan22_i2v_512_frames")
+        set_inputs(clip_graph, "6", text=args.prompt or spec["clip_prompt"][args.anim])
+        set_inputs(clip_graph, "8", length=args.length)
+        set_inputs(clip_graph, "13", noise_seed=seed)
+        set_inputs(clip_graph, "17", filename_prefix=f"{prefix}/03_video/clip")
+        set_inputs(clip_graph, "18", filename_prefix=f"{prefix}/03_frames/frame")
+
+        if args.dry_run:
+            for name, graph in (("01b", first_graph), ("02", chroma_graph), ("03", clip_graph)):
+                print(f"--- {name}: узлов {len(graph)}")
+            print(f"out: {out_dir}")
+            return 0
+
+        out_dir.mkdir(parents=True, exist_ok=True)
+        reuse = args.reuse
+        if not (reuse and first.exists()):
+            images, timings["first_frame"] = run(args.comfy, first_graph, "01b")
+            comfy.save_output(args.comfy, images[0], first)
+        if not (reuse and chroma.exists()):
+            set_inputs(chroma_graph, "1", image=comfy.upload(args.comfy, first, f"sotu-{args.char}-{args.anim}-start.png"))
+            images, timings["chromakey"] = run(args.comfy, chroma_graph, "02")
+            comfy.save_output(args.comfy, images[0], chroma)
+        raw = sorted(path for path in raw_dir.glob("*")
+                     if path.suffix.lower() in IMAGE_SUFFIXES) if reuse else []
+        if not raw:
+            shutil.rmtree(raw_dir, ignore_errors=True)
+            set_inputs(clip_graph, "5", image=comfy.upload(args.comfy, chroma, f"sotu-{args.char}-{args.anim}-chroma.png"))
+            images, timings["clip"] = run(args.comfy, clip_graph, "03", timeout=3600)
+            raw = fetch(args.comfy, images, raw_dir)
+
     corner = Image.open(chroma).convert("RGB").getpixel((0, 0))
-
-    raw = sorted(path for path in raw_dir.glob("*")
-                 if path.suffix.lower() in IMAGE_SUFFIXES) if reuse else []
-    if not raw:
-        shutil.rmtree(raw_dir, ignore_errors=True)
-        set_inputs(clip_graph, "5", image=comfy.upload(args.comfy, chroma, f"sotu-{args.char}-{args.anim}-chroma.png"))
-        images, timings["clip"] = run(args.comfy, clip_graph, "03", timeout=3600)
-        raw = fetch(args.comfy, images, raw_dir)
 
     keyed_images = register([unkey(path) for path in raw])
     keyed = []
