@@ -1,0 +1,56 @@
+{
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": { "unet_name": "qwen_image_2.1_int8_convrot.safetensors", "weight_dtype": "default" }
+  },
+  "2": {
+    "class_type": "CLIPLoader",
+    "inputs": { "clip_name": "qwen3vl_8b_int8_convrot.safetensors", "type": "qwen_image", "device": "default" }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": { "vae_name": "qwen_image_2.1_vae_bf16.safetensors" }
+  },
+  "4": {
+    "class_type": "LoadImage",
+    "inputs": { "image": "inpaint_source.png" }
+  },
+  "5": {
+    "class_type": "TextEncodeQwenImage21",
+    "inputs": {
+      "clip": ["2", 0],
+      "vae": ["3", 0],
+      "prompt": "Place the character from the reference image centered in the frame, full body visible head to feet with a small margin, standing in a neutral relaxed starting pose, body and face turned three-quarters towards the camera, plain flat light grey background, single character, no text, keep the face, hair, outfit and proportions of the reference exactly.",
+      "negative_prompt": "two characters, cropped head, extra limbs, text, watermark, busy background",
+      "resolution": 512,
+      "images": [["4", 0]]
+    }
+  },
+  "6": {
+    "class_type": "QwenImage21Cache",
+    "inputs": { "model": ["1", 0], "device": "auto", "dtype": "default" }
+  },
+  "7": {
+    "class_type": "KSampler",
+    "inputs": {
+      "seed": 20261024, "steps": 25, "cfg": 1.0, "sampler_name": "euler", "scheduler": "simple",
+      "denoise": 1.0, "model": ["6", 0], "positive": ["5", 0], "negative": ["5", 1], "latent_image": ["5", 2]
+    }
+  },
+  "8": {
+    "class_type": "VAEDecode",
+    "inputs": { "samples": ["7", 0], "vae": ["3", 0] }
+  },
+  "9": {
+    "class_type": "ImageRemoveAlpha+",
+    "inputs": { "image": ["8", 0] }
+  },
+  "10": {
+    "class_type": "ImageScale",
+    "inputs": { "image": ["9", 0], "upscale_method": "lanczos", "width": 512, "height": 512, "crop": "center" }
+  },
+  "11": {
+    "class_type": "SaveImage",
+    "inputs": { "images": ["10", 0], "filename_prefix": "WanClip/01_first_frame" }
+  }
+}

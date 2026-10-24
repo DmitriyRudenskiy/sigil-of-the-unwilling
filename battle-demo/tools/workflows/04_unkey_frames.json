@@ -1,0 +1,34 @@
+{
+  "1": {
+    "class_type": "LoadImagesFromFolderKJ",
+    "inputs": {
+      "folder": "C:/path/to/ComfyUI/output/WanClip/03_frames",
+      "width": -1,
+      "height": -1,
+      "keep_aspect_ratio": "crop",
+      "image_load_cap": 0,
+      "start_index": 0,
+      "include_subfolders": false
+    }
+  },
+  "2": {
+    "class_type": "MaskFromColor+",
+    "inputs": { "image": ["1", 0], "red": 0, "green": 255, "blue": 0, "threshold": 60 }
+  },
+  "3": {
+    "class_type": "EmptyImage",
+    "inputs": { "width": 512, "height": 512, "batch_size": 1, "color": 0 }
+  },
+  "4": {
+    "class_type": "GrowMask",
+    "inputs": { "mask": ["2", 0], "expand": 2, "tapered_corners": false }
+  },
+  "5": {
+    "class_type": "ImageCompositeFromMaskBatch+",
+    "inputs": { "image_from": ["1", 0], "image_to": ["3", 0], "mask": ["4", 0] }
+  },
+  "6": {
+    "class_type": "SaveImage",
+    "inputs": { "images": ["5", 0], "filename_prefix": "WanClip/04_keyed/frame" }
+  }
+}

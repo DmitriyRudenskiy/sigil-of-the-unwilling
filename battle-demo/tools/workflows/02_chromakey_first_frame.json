@@ -1,0 +1,44 @@
+{
+  "1": {
+    "class_type": "LoadImage",
+    "inputs": { "image": "wan_start.png" }
+  },
+  "2": {
+    "class_type": "LoadBackgroundRemovalModel",
+    "inputs": { "bg_removal_name": "birefnet.safetensors" }
+  },
+  "3": {
+    "class_type": "RemoveBackground",
+    "inputs": { "bg_removal_model": ["2", 0], "image": ["1", 0] }
+  },
+  "4": {
+    "class_type": "ImageCropByMaskAndResize",
+    "inputs": {
+      "image": ["1", 0],
+      "mask": ["3", 0],
+      "base_resolution": 512,
+      "padding": 24,
+      "min_crop_resolution": 256,
+      "max_crop_resolution": 1024
+    }
+  },
+  "5": {
+    "class_type": "EmptyImage",
+    "inputs": { "width": 512, "height": 512, "batch_size": 1, "color": 65280 }
+  },
+  "6": {
+    "class_type": "ImageCompositeMasked",
+    "inputs": {
+      "destination": ["5", 0],
+      "source": ["4", 0],
+      "x": 0,
+      "y": 0,
+      "resize_source": true,
+      "mask": ["4", 1]
+    }
+  },
+  "7": {
+    "class_type": "SaveImage",
+    "inputs": { "images": ["6", 0], "filename_prefix": "WanClip/02_chroma_start" }
+  }
+}

@@ -9,6 +9,13 @@
   "filename_prefix": "sotu-battle",
   "prompt": "the same character as in the first image — {look} — same face, same hair, same clothes and same weapon, in the same hand-drawn game character illustration style as the first image, full body, standing in the pose from the second image, plain white background, no shadow on the ground",
   "negative_prompt": "photorealism, photograph, 3d render, text, watermark, frame, background scenery, shadow on the ground, extra fingers, deformed hands, extra limbs, cropped body",
+  "clip_prompt": {
+    "idle": "the character breathes calmly, a slight rise of the chest and a tiny weight shift, plain green screen background stays unchanged, locked static camera, the character stays the same size and stays in the middle of the frame, same face, same clothes, same weapon, nothing else moves",
+    "walk": "the character walks on the spot with steady even steps, legs lifting and landing, torso bobbing slightly, plain green screen background stays unchanged, locked static camera, the character stays the same size and stays in the middle of the frame, same face, same clothes, same weapon, nothing else moves",
+    "attack": "the character swings the weapon in a big arc and returns to the guard, plain green screen background stays unchanged, locked static camera, the character stays the same size and stays in the middle of the frame, same face, same clothes, same weapon, nothing else moves",
+    "hit": "the character flinches backward, head snapping back, then braces itself, plain green screen background stays unchanged, locked static camera, the character stays the same size and stays in the middle of the frame, same face, same clothes, same weapon, nothing else moves",
+    "turn": "the character turns to face the other side, shoulders and hips rotating, ending in a mirrored stance, plain green screen background stays unchanged, locked static camera, the character stays the same size and stays in the middle of the frame, same face, same clothes, same weapon, nothing else moves"
+  },
   "graph": {
     "unet": "qwen_image_2.1_int8_convrot.safetensors",
     "clip": "qwen3vl_8b_int8_convrot.safetensors",
