@@ -23,7 +23,11 @@ The MVP SHALL have 3 training positions (K-M15 basic soldiers): infantry line (f
 - **AND** the UI shows the missing building
 
 ### Requirement: Training costs and time
-Training costs SHALL be deducted immediately upon request. Training time SHALL be measured in days/ticks: `progress += tick / (t * N)`. The MVP basic soldier costs SHALL follow the balance config (07-balance §3); where the GDD table and code diverge (C-12: "10 weapons" vs "2 iron"), the code and K-R2 resource registry are authoritative until the owner syncs the GDD.
+Training costs SHALL be deducted immediately upon request. Training time SHALL be measured in days/ticks: `progress += tick / (t * N)`. **Q-M101 → (в) (агент, D-237, 2026-10-24):**
+разрешение времени в MVP — «к следующему ходу»: тик кампании = одни сутки, субсуточного
+планировщика нет, а канон-время 0.6/0.5 дня при таком тике даёт `progress ≥ 1` в том же тике.
+TRAINING при этом остаётся наблюдаемым состоянием (заявка до тика; пауза разрушенным зданием
+удерживает его неограниченно), поэтому SM рекрута не вырожден в одну запись. The MVP basic soldier costs SHALL follow the balance config (07-balance §3); where the GDD table and code diverge (C-12: "10 weapons" vs "2 iron"), the code and K-R2 resource registry are authoritative until the owner syncs the GDD.
 
 #### Scenario: Cost deducted at request
 - **WHEN** the player requests fighter training (20 food + 2 iron in code)
