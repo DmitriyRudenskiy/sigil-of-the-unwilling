@@ -1,0 +1,68 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/attack/00.png" id="1_y1e17"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/attack/01.png" id="2_27iip"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/attack/02.png" id="3_rea7l"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/attack/03.png" id="4_fc6fg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/idle/00.png" id="5_yqvb4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/idle/01.png" id="6_wjroi"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/idle/02.png" id="7_5l1ai"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/idle/03.png" id="8_oqlr0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/turn/00.png" id="9_v8b17"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/turn/01.png" id="10_2xybw"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/turn/02.png" id="11_rama1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/turn/03.png" id="12_ft7l8"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_y1e17")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_27iip")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_rea7l")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_fc6fg")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_yqvb4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_wjroi")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_5l1ai")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_oqlr0")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_v8b17")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_2xybw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_rama1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_ft7l8")
+}],
+"loop": 0,
+"name": &"turn",
+"speed": 8.0
+}]

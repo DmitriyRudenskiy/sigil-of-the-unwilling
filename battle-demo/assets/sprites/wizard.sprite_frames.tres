@@ -1,0 +1,68 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/hit/00.png" id="1_mdkhk"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/hit/01.png" id="2_vp2w4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/hit/02.png" id="3_qp7cw"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/hit/03.png" id="4_1o64n"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/idle/00.png" id="5_uonsn"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/idle/01.png" id="6_xquff"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/idle/02.png" id="7_plr1e"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/idle/03.png" id="8_xfflf"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/turn/00.png" id="9_42fqs"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/turn/01.png" id="10_gdiqo"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/turn/02.png" id="11_bougg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/wizard/turn/03.png" id="12_fnufj"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_mdkhk")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_vp2w4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_qp7cw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_1o64n")
+}],
+"loop": 0,
+"name": &"hit",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_uonsn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_xquff")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_plr1e")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_xfflf")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_42fqs")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_gdiqo")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_bougg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_fnufj")
+}],
+"loop": 0,
+"name": &"turn",
+"speed": 8.0
+}]

@@ -1,0 +1,43 @@
+{
+  "char": "stormmage",
+  "feet_offset": [
+    -64,
+    -112
+  ],
+  "animations": [
+    {
+      "name": "attack",
+      "loop": false,
+      "fps": 8.0,
+      "frames": [
+        "res://assets/sprites/stormmage/attack/00.png",
+        "res://assets/sprites/stormmage/attack/01.png",
+        "res://assets/sprites/stormmage/attack/02.png",
+        "res://assets/sprites/stormmage/attack/03.png"
+      ]
+    },
+    {
+      "name": "hit",
+      "loop": false,
+      "fps": 8.0,
+      "frames": [
+        "res://assets/sprites/stormmage/hit/00.png",
+        "res://assets/sprites/stormmage/hit/01.png",
+        "res://assets/sprites/stormmage/hit/02.png",
+        "res://assets/sprites/stormmage/hit/03.png"
+      ]
+    },
+    {
+      "name": "idle",
+      "loop": true,
+      "fps": 4.0,
+      "frames": [
+        "res://assets/sprites/stormmage/idle/00.png",
+        "res://assets/sprites/stormmage/idle/01.png",
+        "res://assets/sprites/stormmage/idle/02.png",
+        "res://assets/sprites/stormmage/idle/03.png"
+      ]
+    }
+  ],
+  "out": "res://assets/sprites/stormmage.sprite_frames.tres"
+}

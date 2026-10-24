@@ -1,0 +1,68 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/hit/00.png" id="1_ajyog"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/hit/01.png" id="2_d8mud"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/hit/02.png" id="3_1qbgr"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/hit/03.png" id="4_5tuet"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/idle/00.png" id="5_to14v"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/idle/01.png" id="6_hfwaa"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/idle/02.png" id="7_8sxm3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/idle/03.png" id="8_ccpor"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/turn/00.png" id="9_a476d"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/turn/01.png" id="10_2g8vf"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/turn/02.png" id="11_uqvac"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/turn/03.png" id="12_1mnmh"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_ajyog")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_d8mud")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_1qbgr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_5tuet")
+}],
+"loop": 0,
+"name": &"hit",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_to14v")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_hfwaa")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_8sxm3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_ccpor")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_a476d")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_2g8vf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_uqvac")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_1mnmh")
+}],
+"loop": 0,
+"name": &"turn",
+"speed": 8.0
+}]

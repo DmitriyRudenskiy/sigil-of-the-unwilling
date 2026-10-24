@@ -1,0 +1,68 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/attack/00.png" id="1_feuid"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/attack/01.png" id="2_tis23"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/attack/02.png" id="3_2v005"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/attack/03.png" id="4_u18l5"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/hit/00.png" id="5_enuts"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/hit/01.png" id="6_leb3h"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/hit/02.png" id="7_1r6ji"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/hit/03.png" id="8_21ef3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/idle/00.png" id="9_js4tg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/idle/01.png" id="10_1vu75"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/idle/02.png" id="11_nl1is"]
+[ext_resource type="Texture2D" path="res://assets/sprites/stormmage/idle/03.png" id="12_3qmml"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_feuid")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_tis23")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_2v005")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_u18l5")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_enuts")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_leb3h")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_1r6ji")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_21ef3")
+}],
+"loop": 0,
+"name": &"hit",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_js4tg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_1vu75")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_nl1is")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_3qmml")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 4.0
+}]

@@ -1,0 +1,89 @@
+class_name BattleUnitView extends Node2D
+
+## Визуальный слой юнита на поле (задача 8.2).
+##
+## Привязка боя к картинке — это **имя дорожки**: `assets/sprites/<id>.sprite_frames.tres`
+## собирается из принятых клипов (`tools/build_sprite_frames.py`), и дорожка
+## называется так же, как анимация боя (`idle/walk/attack/hit/turn`). Отдельного
+## словаря «событие → анимация» здесь нет и быть не должно.
+##
+## Холст кадра — 128×128, ступни в (64, 112), поэтому узел рисует кадр со сдвигом
+## `(-64, -112)` при `centered = false`: позиция узла = точка опоры на полу,
+## поправок на конкретный кадр нет.
+##
+## Гибели как дорожки нет (D10): мёртвый юнит стоит на последнем кадре
+## обесцвеченным — `modulate`, а не четвёртая генерация.
+
+const SPRITE_DIR := "res://assets/sprites"
+const FEET_OFFSET := Vector2(-64, -112)
+const DEAD_MODULATE := Color(0.4, 0.42, 0.48)
+## Проход линии: `walk` — единственная дорожка, которая двигает узел по полу.
+## Скорость в пикселях секунды до масштаба поля; направление — на противника.
+const WALK_SPEED := 120.0
+
+## Экземпляр боя. Назначается и до `_ready` (поле собирает юнитов сразу), и после.
+var unit: BattleUnit:
+	set(value):
+		unit = value
+		if sprite != null:
+			_bind()
+
+var _dead := false
+
+@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
+
+
+func _ready() -> void:
+	sprite.centered = false
+	sprite.offset = FEET_OFFSET
+	if unit != null:
+		_bind()
+
+
+func _process(delta: float) -> void:
+	if unit == null or _dead:
+		return
+	if unit.died:
+		_dead = true
+		sprite.stop()
+		modulate = DEAD_MODULATE
+		return
+	if sprite.animation == &"walk" and sprite.is_playing():
+		position.x += delta * WALK_SPEED * (1.0 if _faces_right() else -1.0)
+
+
+## Состояние = дорожка. Дорожки, которой нет в собранном наборе, не роняет поле:
+## юнит остаётся на текущей, а причину видно в `push_error`.
+func play(state: StringName) -> void:
+	var frames := sprite.sprite_frames
+	if frames == null:
+		return
+	if not frames.has_animation(state):
+		push_error("%s: дорожки %s нет в %s" % [unit.uid(), state, frames.resource_path])
+		return
+	sprite.animation = state
+	sprite.play()
+
+
+func _bind() -> void:
+	# Враг смотрит на линию игрока; разворот — зеркалом, не отдельной генерацией.
+	# Он не зависит от дорожек, поэтому и ставится до загрузки набора.
+	sprite.flip_h = not _faces_right()
+	var path := "%s/%s.sprite_frames.tres" % [SPRITE_DIR, unit.stats.id]
+	if not FileAccess.file_exists(path):
+		# Клипы этого юнита ещё не приняты (7.4) — юнит выходит без картинки,
+		# дорожки собираются по мере приёмки: tools/build_sprite_frames.py.
+		push_warning("нет дорожек юнита: %s" % path)
+		return
+	var frames := load(path) as SpriteFrames
+	if frames == null:
+		push_error("дорожки не загрузились: %s (нужен --import)" % path)
+		return
+	sprite.sprite_frames = frames
+	play(&"idle")
+
+
+## Сторона задаёт всё, что отличается у противников картинкой: куда смотреть и
+## куда идти. Масштаб и pivot — общие для обеих сторон (задача 8.2).
+func _faces_right() -> bool:
+	return unit.side == BattleUnit.SIDE_PLAYER

@@ -187,6 +187,17 @@ def measure(paths: list[Path]) -> dict:
         a = np.asarray(kept, dtype="bool")
         residue += int((((g - np.maximum(r, b)) > 5) & a).sum())
         kept_total += int(a.sum())
+    # Фон, который ункей оставил внутри силуэта: прогон 2026-10-25 на поле боя
+    # показал белую заливку за фигурой (spearman/attack — 79% силуэта). Зелёный
+    # кант этой мерой не ловится: залировка белая, а не зелёная. Метрика — доля
+    # удержанных пикселей в «плоском белом» (все каналы > 235): у честного рыцаря
+    # с белым доспехом и белым плащом это 0.7% (блики), у залировки — десятки.
+    flat_white = 0
+    for path, alpha in zip(paths, alphas):
+        channels = [np.asarray(c, dtype="int16") for c in Image.open(path).convert("RGB").split()]
+        kept = alpha.point(lambda v: 255 if v > 20 else 0)
+        a = np.asarray(kept, dtype="bool")
+        flat_white += int(((np.minimum.reduce(channels) > 235) & a).sum())
     return {
         "frames": len(paths),
         "motion_first_last": round(motion, 1),
@@ -204,6 +215,7 @@ def measure(paths: list[Path]) -> dict:
         # Доля зелёного в удержанных пикселях: силуэты кадров разного размера,
         # поэтому порог — доля, а не число пикселей.
         "chroma_share": round(residue / max(kept_total, 1), 6),
+        "flat_white_share": round(flat_white / max(kept_total, 1), 4),
     }
 
 
@@ -305,6 +317,9 @@ def verdict(report: dict) -> str:
     if audit["chroma_share"] > 0.0005:
         faults.append(f"остался хромакей ({audit['chroma_pixels_kept']} px, "
                       f"{audit['chroma_share'] * 100:.3f}% удержанных пикселей)")
+    if audit["flat_white_share"] > 0.25:
+        faults.append(f"фон не удалён (плоский белый "
+                      f"{audit['flat_white_share'] * 100:.0f}% силуэта)")
     if faults:
         return "брак: " + "; ".join(faults)
     loop = report.get("loop")
@@ -313,7 +328,8 @@ def verdict(report: dict) -> str:
         else f" — петля замыкается (стык {loop['seam']} при шаге {loop['frame_step']})")
     return (f"годен: движение {audit['motion_first_last']}, резкость "
             f"{audit['sharpness_min']}/{audit['sharpness_median']}, снос ступней "
-            f"{audit['contact_slide_x']} px, хромакей {audit['chroma_pixels_kept']}{seam}")
+            f"{audit['contact_slide_x']} px, хромакей {audit['chroma_pixels_kept']}, "
+            f"плоский белый {audit['flat_white_share'] * 100:.1f}%{seam}")
 
 
 def self_test() -> int:

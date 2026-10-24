@@ -1,0 +1,68 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/attack/00.png" id="1_bsiil"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/attack/01.png" id="2_swyi3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/attack/02.png" id="3_ryd2t"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/attack/03.png" id="4_p8o8t"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/hit/00.png" id="5_u81d5"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/hit/01.png" id="6_500ih"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/hit/02.png" id="7_hry3r"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/hit/03.png" id="8_ibhdf"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/idle/00.png" id="9_p22pk"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/idle/01.png" id="10_703el"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/idle/02.png" id="11_v63uf"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/idle/03.png" id="12_lqq1k"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_bsiil")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_swyi3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_ryd2t")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_p8o8t")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_u81d5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_500ih")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_hry3r")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_ibhdf")
+}],
+"loop": 0,
+"name": &"hit",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_p22pk")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_703el")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_v63uf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_lqq1k")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 4.0
+}]

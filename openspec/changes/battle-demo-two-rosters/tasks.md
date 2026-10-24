@@ -209,9 +209,18 @@
 
 ## 8. Анимация и визуальная приёмка спрайтов (read-агент)
 
-- [ ] 8.1 Перечитать `battle-demo/docs/agent-skills.md` — контракт фазы 8
-- [ ] 8.2 `battle-demo/scenes/battle_unit.tscn` + `battle_unit.gd`: `AnimatedSprite2D`, состояния `idle/walk/attack/hit/turn`, pivot «низ-центр», единый масштаб, `flip_h` по стороне, гибель — `modulate` поверх последнего кадра
-- [ ] 8.3 Тесты: смена состояния выбирает нужную анимацию; `attack` проигрывается один раз; `walk` двигает юнита игрока вправо, а врага — влево; `turn` не меняет масштаб и pivot; гибель не меняет анимацию, только обесцвечивание
+- [x] 8.1 Перечитать `battle-demo/docs/agent-skills.md` — контракт фазы 8 (2026-10-25)
+- [x] 8.2 `battle-demo/scenes/battle_unit.tscn` + `battle_unit.gd`: `AnimatedSprite2D`, состояния `idle/walk/attack/hit/turn`, pivot «низ-центр», единый масштаб, `flip_h` по стороне, гибель — `modulate` поверх последнего кадра
+  (2026-10-25. Слой лежит в `scripts/view/`, а не в `scripts/combat/`: тест
+  `test_combat_layer_has_no_display_references` запрещает боевому ядру знать про
+  движковые узлы. Скрипт — `battle_unit_view.gd` (`class_name BattleUnitView`),
+  имя `battle_unit.gd`/`BattleUnit` занято экземпляром боя. Поле для приёмки —
+  `scenes/battle_field.tscn`, кадр — `tools/capture_battle.tscn`.)
+- [x] 8.3 Тесты: смена состояния выбирает нужную анимацию; `attack` проигрывается один раз; `walk` двигает юнита игрока вправо, а врага — влево; `turn` не меняет масштаб и pivot; гибель не меняет анимацию, только обесцвечивание
+  (2026-10-25, `tests/unit/combat/test_battle_unit_view.gd`, 8 кейсов. Кадр
+  приёмки вскрыл три дорожки с неудалённым фоном — `spearman/attack`,
+  `wizard/attack`, `stormmage/turn`; для них в `gen_clip.py` добавлена мера
+  «плоский белый», дорожки сняты с годных и ждут перегенерации.)
 - [ ] 8.4 Синхронизация сигнала урона с контактным кадром `attack` — тест по номеру кадра/таймингу, а не «на глаз»
 - [ ] 8.5 `battle-demo/tools/contact_sheet.py`: контактный лист девяти принятых персонажей (по 5 анимаций) + строки «источник ↔ генерация»
 - [ ] 8.6 Стилевой вердикт read-агентом (`pi -p --no-tools --no-session --mode text @лист.png`, прецедент `blind_judge.py`) по чек-листу art-bible: силуэт, контур, палитра, свет, артефакты генерации, обрезка по краю, масштаб между персонажами
