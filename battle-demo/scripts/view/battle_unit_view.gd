@@ -21,6 +21,12 @@ const DEAD_MODULATE := Color(0.4, 0.42, 0.48)
 ## Скорость в пикселях секунды до масштаба поля; направление — на противника.
 const WALK_SPEED := 120.0
 
+## Кадр, в котором оружие достигает цели (задача 8.4): отклик цели откладывается
+## на `(кадр + 1) / скорость дорожки`. Прореженные до 4 кадров дорожки `attack`
+## кривую вылета не показывают (размах силуэта по кадрам ±5 px, пик разбросан по
+## номерам), поэтому номер закреплён здесь, а не выводится из картинок.
+const CONTACT_FRAMES := {&"attack": 2}
+
 ## Экземпляр боя. Назначается и до `_ready` (поле собирает юнитов сразу), и после.
 var unit: BattleUnit:
 	set(value):
@@ -44,12 +50,32 @@ func _process(delta: float) -> void:
 	if unit == null or _dead:
 		return
 	if unit.died:
-		_dead = true
-		sprite.stop()
-		modulate = DEAD_MODULATE
+		die()
 		return
 	if sprite.animation == &"walk" and sprite.is_playing():
 		position.x += delta * WALK_SPEED * (1.0 if _faces_right() else -1.0)
+
+
+## Гибель: обесцвечивание последнего кадра (D10), без смены дорожки.
+func die() -> void:
+	_dead = true
+	sprite.stop()
+	modulate = DEAD_MODULATE
+
+
+func is_alive() -> bool:
+	return unit != null and not unit.died
+
+
+## Задержка до контактного кадра дорожки, секунды. 0.0 — дорожки нет, и отклик
+## уходит сразу (молчание дороже: причину видно в `play`).
+func contact_delay(track: StringName = &"attack") -> float:
+	var frames := sprite.sprite_frames
+	if frames == null or not frames.has_animation(track):
+		return 0.0
+	var count := frames.get_frame_count(track)
+	var contact := mini(int(CONTACT_FRAMES.get(track, count - 1)), count - 1)
+	return float(contact + 1) / frames.get_animation_speed(track)
 
 
 ## Состояние = дорожка. Дорожки, которой нет в собранном наборе, не роняет поле:

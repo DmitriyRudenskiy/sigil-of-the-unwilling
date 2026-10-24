@@ -22,12 +22,15 @@ const SHOWCASE := [&"idle", &"attack", &"hit", &"turn"]
 const SHOWCASE_SECONDS := 1.2
 
 var auto_cycle := true
-var _views: Array[BattleUnitView] = []
+var _views := {}
 var _shown := 0
 var _elapsed := 0.0
 
 
 func _ready() -> void:
+	if not auto_cycle:
+		# Бой (9.3) рассаживает юнитов сам, из `CombatState`.
+		return
 	var units := DataLibrary.load_units()
 	var roster := DataLibrary.load_roster("a")
 	for slot in min(LINE_SIZE, roster.units.size()):
@@ -48,19 +51,59 @@ func _process(delta: float) -> void:
 
 ## Проигрывает дорожку у всех юнитов поля.
 func show_state(state: StringName) -> void:
-	for view in _views:
+	for view in _views.values():
 		view.play(state)
 
 
-func _spawn(stats: UnitStats, side: int, slot: int) -> void:
+## Картинка юнита по его экземпляру боя (для `CombatState`, а не для витрины).
+func spawn(unit: BattleUnit) -> BattleUnitView:
 	var view := load(UNIT_SCENE).instantiate() as BattleUnitView
-	view.unit = BattleUnit.new(stats, side, slot)
+	view.unit = unit
 	view.scale = Vector2(UNIT_SCALE, UNIT_SCALE)
-	var offset := slot * STEP_X
+	var offset := unit.slot * STEP_X
 	view.position = (
 		Vector2(PLAYER_X + offset, ROW_Y)
-		if side == BattleUnit.SIDE_PLAYER
+		if unit.side == BattleUnit.SIDE_PLAYER
 		else Vector2(ENEMY_X - offset, ROW_Y)
 	)
 	add_child(view)
-	_views.append(view)
+	_views[unit.uid()] = view
+	return view
+
+
+## Связка с боевым ядром (задача 8.4): отклик картинки идёт из сигналов, а не из
+## опроса состояния. Витрина (`auto_cycle`) гаснет: иначе она переставляет
+## дорожки быстрее, чем доходит контактный кадр.
+func attach(combat: CombatState) -> void:
+	auto_cycle = false
+	if not combat.action_performed.is_connected(on_action):
+		combat.action_performed.connect(on_action)
+
+
+## Отклик на выполненное действие: `hit` цели стартует не в момент, когда ядро
+## уже начислило урон, а на контактном кадре атакующего. Мёртвая цель на этом же
+## кадре гаснет — дорожки гибели нет (D10).
+func on_action(action: BattleAction) -> void:
+	if action.kind != BattleAction.Kind.ATTACK or action.damage.is_empty():
+		return
+	var attacker: BattleUnitView = _views.get(action.actor.uid())
+	if attacker == null:
+		return
+	for target in action.targets:
+		var victim: BattleUnitView = _views.get(target.uid())
+		if victim != null:
+			_later(victim, attacker.contact_delay())
+
+
+func _later(victim: BattleUnitView, delay: float) -> void:
+	await get_tree().create_timer(delay).timeout
+	if not is_instance_valid(victim):
+		return
+	if victim.is_alive():
+		victim.play(&"hit")
+	else:
+		victim.die()
+
+
+func _spawn(stats: UnitStats, side: int, slot: int) -> void:
+	spawn(BattleUnit.new(stats, side, slot))
