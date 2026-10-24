@@ -1,0 +1,62 @@
+[
+  {
+    "char": "knight",
+    "anim": "idle",
+    "seed": 1101,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {},
+    "total_seconds": 0,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 10.0,
+      "sharpness_min": 1058.2,
+      "sharpness_median": 1115.1,
+      "pivot_drift_x": 1.0,
+      "pivot_drift_y": 0,
+      "chroma_pixels_kept": 0
+    },
+    "subsampled": [
+      "battle-demo/artifacts/clips/knight/idle/frame_01.png",
+      "battle-demo/artifacts/clips/knight/idle/frame_12.png",
+      "battle-demo/artifacts/clips/knight/idle/frame_22.png",
+      "battle-demo/artifacts/clips/knight/idle/frame_33.png"
+    ]
+  },
+  {
+    "char": "knight",
+    "anim": "walk",
+    "seed": 1101,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "first_frame": 244.6,
+      "chromakey": 99.6,
+      "clip": 72.4
+    },
+    "total_seconds": 416.5,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 35.9,
+      "sharpness_min": 545.1,
+      "sharpness_median": 597.6,
+      "pivot_drift_x": 31.5,
+      "pivot_drift_y": 6,
+      "chroma_pixels_kept": 0
+    },
+    "subsampled": [
+      "battle-demo/artifacts/clips/knight/walk/frame_01.png",
+      "battle-demo/artifacts/clips/knight/walk/frame_12.png",
+      "battle-demo/artifacts/clips/knight/walk/frame_22.png",
+      "battle-demo/artifacts/clips/knight/walk/frame_33.png"
+    ]
+  }
+]

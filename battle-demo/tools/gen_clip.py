@@ -44,9 +44,16 @@ def run(comfy_url: str, graph: dict, label: str, timeout: int = 1800) -> tuple[l
     return comfy.outputs_of(entry), time.time() - started
 
 
+IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp"}
+
+
 def fetch(comfy_url: str, images: list[dict], out_dir: Path) -> list[Path]:
-    return [comfy.save_output(comfy_url, image, out_dir / Path(image["filename"]).name)
-            for image in images]
+    """Скачивает кадры. SaveVideo тоже попадает в outputs — не-картинки пропускаем."""
+    return sorted(
+        comfy.save_output(comfy_url, image, out_dir / Path(image["filename"]).name)
+        for image in images
+        if Path(image["filename"]).suffix.lower() in IMAGE_SUFFIXES
+    )
 
 
 def unkey(frame: Path, threshold: int = 60, grow: int = 2) -> Image.Image:
@@ -72,15 +79,18 @@ def unkey(frame: Path, threshold: int = 60, grow: int = 2) -> Image.Image:
 
 
 def measure(paths: list[Path]) -> dict:
-    """Машинная проверка клипа (6.13 в миниатюре): движение, резкость, pivot, хромакей."""
+    """Машинная проверка клипа (6.13 в миниатюре): движение, резкость, pivot, хромакей.
+
+    На входе — кадры **после ункея** (RGBA): альфа даёт силуэт и pivot, RGB — то,
+    что не закрыто альфой, то есть зелёный кант внутри силуэта.
+    """
     import numpy as np
 
     frames = [np.asarray(Image.open(path).convert("RGB"), dtype="int16") for path in paths]
-    alphas = [unkey(path).split()[3] for path in paths]
-    grays = [np.asarray(image.convert("L"), dtype="float64") for image in
-             (Image.open(path).convert("RGB") for path in paths)]
+    alphas = [Image.open(path).getchannel("A") for path in paths]
+    grays = [np.asarray(Image.open(path).convert("L"), dtype="float64") for path in paths]
     sharpness = [
-        float(((g[:, 2:] - g[:, :-2])**2 + (g[2:, :] - g[:-2, :])**2).mean())
+        float(((g[:, 2:] - g[:, :-2])**2).mean() + ((g[2:, :] - g[:-2, :])**2).mean())
         for g in grays
     ]
     # Движение: средний модуль разности первого и последнего кадра (0–255).
@@ -152,6 +162,8 @@ def main() -> int:
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--comfy", default="http://192.168.0.230:8188")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--reuse", action="store_true",
+                        help="не перегенерировать: взять first_raw/first_chroma/raw/, что уже лежат")
     parser.add_argument("--self-test", action="store_true", help="проверить кеинг и прорежку без сервера")
     args = parser.parse_args()
 
@@ -172,7 +184,7 @@ def main() -> int:
     set_inputs(first_graph, "14", image=upload_portrait(spec, args.char, args.comfy))
     set_inputs(first_graph, "5", image=upload_pose(spec, args, args.comfy))
     set_inputs(first_graph, "8", seed=seed)
-    set_inputs(first_graph, "12", filename_prefix=f"{prefix}/01_first")
+    set_inputs(first_graph, "10", filename_prefix=f"{prefix}/01_first")
 
     chroma_graph = load_workflow("02_chromakey_first_frame")
     set_inputs(chroma_graph, "7", filename_prefix=f"{prefix}/02_chroma")
@@ -192,18 +204,27 @@ def main() -> int:
 
     out_dir.mkdir(parents=True, exist_ok=True)
     timings: dict[str, float] = {}
+    first = out_dir / "first_raw.png"
+    chroma = out_dir / "first_chroma.png"
+    raw_dir = out_dir / "raw"
+    reuse = args.reuse
 
-    images, timings["first_frame"] = run(args.comfy, first_graph, "01b")
-    first = comfy.save_output(args.comfy, images[0], out_dir / "first_raw.png")
+    if not (reuse and first.exists()):
+        images, timings["first_frame"] = run(args.comfy, first_graph, "01b")
+        comfy.save_output(args.comfy, images[0], first)
 
-    set_inputs(chroma_graph, "1", image=comfy.upload(args.comfy, first, f"sotu-{args.char}-{args.anim}-start.png"))
-    images, timings["chromakey"] = run(args.comfy, chroma_graph, "02")
-    chroma = comfy.save_output(args.comfy, images[0], out_dir / "first_chroma.png")
+    if not (reuse and chroma.exists()):
+        set_inputs(chroma_graph, "1", image=comfy.upload(args.comfy, first, f"sotu-{args.char}-{args.anim}-start.png"))
+        images, timings["chromakey"] = run(args.comfy, chroma_graph, "02")
+        comfy.save_output(args.comfy, images[0], chroma)
     corner = Image.open(chroma).convert("RGB").getpixel((0, 0))
 
-    set_inputs(clip_graph, "5", image=comfy.upload(args.comfy, chroma, f"sotu-{args.char}-{args.anim}-chroma.png"))
-    images, timings["clip"] = run(args.comfy, clip_graph, "03", timeout=3600)
-    raw = fetch(args.comfy, images, out_dir / "raw")
+    raw = sorted(path for path in raw_dir.glob("*")
+                 if path.suffix.lower() in IMAGE_SUFFIXES) if reuse else []
+    if not raw:
+        set_inputs(clip_graph, "5", image=comfy.upload(args.comfy, chroma, f"sotu-{args.char}-{args.anim}-chroma.png"))
+        images, timings["clip"] = run(args.comfy, clip_graph, "03", timeout=3600)
+        raw = fetch(args.comfy, images, raw_dir)
 
     keyed = []
     for index, path in enumerate(raw):

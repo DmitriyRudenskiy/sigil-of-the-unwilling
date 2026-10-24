@@ -1,5 +1,6 @@
 .godot/
 artifacts/gen/
+artifacts/clips/
 artifacts/screenshots/
 __pycache__/
 *.DS_Store
