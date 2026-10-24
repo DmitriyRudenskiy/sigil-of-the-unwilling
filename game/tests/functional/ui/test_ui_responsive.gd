@@ -27,6 +27,19 @@ extends BaseTest
 ##     Перекрытия < 100 px² (квадрат 10×10) не считаются — это
 ##     субпиксельные срезы (party-строки: Icon/Avatar × Name, 17–18 px²);
 ##     наименьшее реальное перекрытие в кодовой базе — 650 px².
+## (3) (T-173, 2026-10-24) экран не должен требовать прокрутки: минимум
+##     содержимого ScrollContainer больше его собственного размера
+##     (> _TOLERANCE_PX). Осознанные прокручиваемые области — _SCROLL_ALLOWED с
+##     основанием; своих «известных дефектов» у этой проверки нет — замер
+##     2026-10-24 не нашёл ни одной неосознанной активной полосы.
+##     Метрика — НЕ `get_v_scroll_bar().max_value`: он даёт 669 px на
+##     character_creation и 23 px на city_screen там, где контент влезает (у
+##     скрытой полосы page не обновляется, max_value = высота контента); живой
+##     кадр 1280×720 подтверждает: полос на этих экранах нет. Аномалию
+##     LegacyActionsPanel (контейнер 0 px ширины при контенте 1187 px при
+##     горизонтальном режиме DISABLE) проверка НЕ видит: без прокрутки по оси это
+##     не скролл, а обрезка, и исключение по предку-ScrollContainer в проверке (1)
+##     её прячет — **T-180**.
 ##
 ## Известные дефекты (T-154, 2026-10-21): нарушения, совпадающие с
 ## _KNOWN_VIOLATIONS, печатаются в лог, но НЕ краснят гейт — дефект
@@ -140,6 +153,26 @@ const _KNOWN_VIOLATIONS := {
 	# дефект того же окна покрывается standalone-записями выше.
 }
 
+## Осознанные прокручиваемые области (T-173): нормализованные пути (см.
+## _norm_path: автоимена `@VBoxContainer@89` → `@VBoxContainer@*`). Каждая
+## запись — с основанием; отсутствие экрана в списке значит «прокрутки тут нет».
+const _SCROLL_ALLOWED := {
+	"world_ui": [
+		# Единственная живая полоса в наборе: контент 1695 px в колонке 1060 px
+		# (кадр ~/.local/share/sigil-reserve/responsive-t173/world-720.png).
+		# Носителя у экрана нет: точка входа — scenes/archive/world.tscn, её
+		# вызывает WorldStateSerializer.start_game(), у которого нет ни вызова,
+		# ни autoload (замер T-173). Архив остаётся в гейте ради проверок (1) и (2).
+		"WorldUILayer/AdventureUI/RightColumn/Box",
+	],
+	"chronicle_screen": [
+		# Лента кампании произвольной длины (D-240): прокрутка — проектное
+		# решение. Пустой экран полосу не показывает (замер overflow_y = 0),
+		# запись страхует длину ленты, а не фиксирует дефект.
+		"Root/Panel/VBox/Scroll",
+	],
+}
+
 const _SCREENS := {
 	"main_menu": "res://scenes/main_menu.tscn",
 	"settings_screen": "res://scenes/ui/settings_screen.tscn",
@@ -149,6 +182,8 @@ const _SCREENS := {
 	"battle_ui": "res://scenes/ui/battle_ui.tscn",
 	"artifact_inventory_screen": "res://scenes/ui/artifact_inventory_screen.tscn",
 	"world_ui": "res://scenes/ui/world_ui.tscn",
+	# 2026-10-24 (T-173): живой экран кампании из D-240; раньше в наборе его не было.
+	"chronicle_screen": "res://scenes/ui/chronicle_screen.tscn",
 }
 
 ## Явные исключения (спека «Экран с игровым состоянием исключён явно»).
@@ -188,6 +223,7 @@ func _check_screen(id: String) -> void:
 		var batch: Array[String] = []
 		_check_bounds(id, _screen, vp, res, batch)
 		_check_overlaps(id, _screen, batch)
+		_check_scroll(id, _screen, batch)
 		for v in batch:
 			if _match_known(id, v, matched_prefixes):
 				known.append(v)
@@ -257,6 +293,62 @@ func _check_bounds(id: String, node: Node, vp: Rect2, win: Vector2i, out: Array[
 			out.append(
 				"вне вьюпорта win=%s layout=%s: %s rect=%s" % [win, vp.size, _path(node, control), r]
 			)
+
+
+## (3) T-173: экран не должен требовать прокрутки. Минимум содержимого
+## ScrollContainer сравнивается с его собственным размером: если содержимое
+## больше — полоса активна, игрок не видит часть интерфейса без скролла.
+## Дети ScrollContainer выкладываются столбцом, поэтому по высоте берётся СУММА
+## минимумов детей, по ширине — МАКСИМУМ (то, что считает сам движок).
+## Учитываются только видимые в дереве контейнеры с включённым режимом прокрутки
+## по соответствующей оси (DISABLE = контент обрезается, а не прокручивается;
+## это ловит проверка (1), если элемент выходит за вьюпорт).
+func _check_scroll(id: String, root: Node, out: Array[String]) -> void:
+	var scrolls: Array[ScrollContainer] = []
+	_collect_scrolls(root, scrolls)
+	for sc in scrolls:
+		var cy := 0.0
+		var cx := 0.0
+		for ch in sc.get_children():
+			if ch is Control:
+				var min_size: Vector2 = (ch as Control).get_combined_minimum_size()
+				cy += min_size.y
+				cx = maxf(cx, min_size.x)
+		var oy: float = cy - sc.size.y
+		var ox: float = cx - sc.size.x
+		var why := ""
+		if sc.vertical_scroll_mode != ScrollContainer.SCROLL_MODE_DISABLED and oy > _TOLERANCE_PX:
+			why = "по высоте: контент %d px в окне %d px (+%d px)" % [int(cy), int(sc.size.y), int(oy)]
+		elif sc.horizontal_scroll_mode != ScrollContainer.SCROLL_MODE_DISABLED and ox > _TOLERANCE_PX:
+			why = "по ширине: контент %d px в окне %d px (+%d px)" % [int(cx), int(sc.size.x), int(ox)]
+		if why == "":
+			continue
+		var path := _norm_path(_path(root, sc))
+		if path in _SCROLL_ALLOWED.get(id, []):
+			continue
+		out.append("прокрутка %s: %s (%s)" % [id, path, why])
+
+
+## Сбор видимых в дереве ScrollContainer (собирается всё дерево, включая сам узел).
+func _collect_scrolls(node: Node, out: Array[ScrollContainer]) -> void:
+	if node is ScrollContainer and (node as Control).is_visible_in_tree():
+		out.append(node as ScrollContainer)
+	for ch in node.get_children():
+		_collect_scrolls(ch, out)
+
+
+## Godot даёт контейнерам без имени автоимена вида `@VBoxContainer@89`, счётчик
+## меняется между запусками — нормализуем суффикс, чтобы записи allowlist были
+## воспроизводимы между прогонами.
+func _norm_path(path: String) -> String:
+	var parts: Array[String] = []
+	for part in path.split("/"):
+		if part.begins_with("@") and part.length() > 1 and part[part.length() - 1].is_valid_int():
+			var at := part.rfind("@")
+			parts.append(part.substr(0, at) + "@*")
+		else:
+			parts.append(part)
+	return "/".join(parts)
 
 
 ## Есть ли у элемента предок-ScrollContainer (не считая его самого).
@@ -374,3 +466,36 @@ func test_artifact_inventory_screen_responsive() -> void:
 
 func test_world_ui_responsive() -> void:
 	await _check_screen("world_ui")
+
+
+func test_chronicle_screen_responsive() -> void:
+	await _check_screen("chronicle_screen")
+
+
+## Проверка (3) не должна стать молчаливой (требование T-173): синтетический
+## ScrollContainer с контентом выше окна обязан быть назван нарушением — иначе
+## зелёный гейт ничего не значит. Два высоких ребёнка заодно страхуют от
+## повторного срабатывания на каждого ребёнка (одно нарушение на контейнер).
+## Позитивный кейс (полосы нет) — все экраны набора, кроме двух осознанных
+## записей _SCROLL_ALLOWED.
+func test_scroll_check_lovit_perepolnenie() -> void:
+	var host := Node.new()
+	host.name = "ProbeHost"
+	get_tree().root.add_child(host)
+	auto_free(host)
+	var sc := ScrollContainer.new()
+	sc.name = "ProbeScroll"
+	var inner := VBoxContainer.new()
+	inner.custom_minimum_size = Vector2(180, 400)
+	sc.add_child(inner)
+	var inner2 := VBoxContainer.new()
+	inner2.custom_minimum_size = Vector2(120, 400)
+	sc.add_child(inner2)
+	host.add_child(sc)
+	sc.size = Vector2(200, 100)
+	await get_tree().process_frame
+	var out: Array[String] = []
+	_check_scroll("probe", host, out)
+	assert_int(out.size()).is_equal(1)
+	assert_str(out[0]).contains("ProbeScroll")
+	assert_str(out[0]).contains("+700 px")
