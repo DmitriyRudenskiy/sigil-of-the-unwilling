@@ -120,6 +120,9 @@ func test_training_rejects_full_party_and_unapproved_generic_unit() -> void:
 ## D-221 (V-6): alive-модель — DEAD не занимают слот и не блокируют тренировку.
 func _state_alive_dead(alive: int, dead: int) -> Dictionary:
 	var state := _state(alive)
+	# Порог населения (2.4) здесь не предмет теста — 100 жителей закрывают
+	# любой состав партии (10 × (5 + 1) = 60).
+	state.population = {"count": 100, "housing": 100}
 	for index in range(dead):
 		state.party.append({"id": "dead_%d" % index, "class": "fighter",
 			"race": "humans", "level": 1, "xp": 0, "stats": {"str": 13},
@@ -175,3 +178,56 @@ func test_training_rejects_inactive_building_and_unknown_resource() -> void:
 	var resource_result := TrainingService.train(unknown_cost, bad_catalog, 10, "fighter", _trainee())
 	assert_that(resource_result.reason).is_equal("unregistered_training_resource:gold")
 	assert_that(unknown_cost.party.is_empty()).is_true()
+
+
+## 4.4 / 2.4: порог населения (10 жителей на юнит, [ПРЕДЛОЖЕНИЕ] EC3) блокирует
+## запрос — опция скрыта, заявка отклонена, списаний нет.
+func test_population_threshold_blocks_training_request() -> void:
+	var state := _state(0, {"food": 10.0, "wood": 0.0, "iron": 5.0})
+	state.population = {"count": 9, "housing": 20}
+	assert_that(TrainingService.available_training_actions(state, _building_catalog()).is_empty()).is_true()
+	var result := TrainingService.train(state, _building_catalog(), 10, "fighter", _trainee())
+	assert_that(result.ok).is_false()
+	assert_that(str(result.reason).begins_with("population_below_threshold")).is_true()
+	assert_that(state.resources.food).is_equal(10.0)
+	assert_that(state.party.is_empty()).is_true()
+
+
+## Тултип «нужно +N жителей»: порог считается на юнит — живые в партии + тот,
+## кого тренируем (spec: «UI shows the population constraint»). 4 живых + 1 → 50.
+func test_population_gate_reports_missing_residents() -> void:
+	var state := _state(4)
+	var gate := TrainingService.population_gate(state)
+	assert_that(bool(gate.get("ok", true))).is_false()
+	assert_that(int(gate.get("required", 0))).is_equal(50)
+	assert_that(int(gate.get("missing", 0))).is_equal(30)
+	state.population = {"count": 50, "housing": 50}
+	assert_that(bool(TrainingService.population_gate(state).get("ok", false))).is_true()
+
+
+## 2.4: число порога — из баланса-конфига (campaign.json training), не из кода.
+func test_population_threshold_reads_balance_config() -> void:
+	assert_that(TrainingService.population_per_unit()).is_equal(10)
+
+
+## Канон времени тренировки (07-balance «Базовые бойцы MVP», K-M15): воин 0.6,
+## следопыт 0.5; волшебника нет — T-041 (0.0 = число не установлено).
+func test_training_days_come_from_balance_config() -> void:
+	assert_float(TrainingService.training_days("fighter")).is_equal_approx(0.6, 0.0001)
+	assert_float(TrainingService.training_days("ranger")).is_equal_approx(0.5, 0.0001)
+	assert_float(TrainingService.training_days("wizard")).is_equal_approx(0.0, 0.0001)
+
+
+## Живой сейв держит застройку в city.campaign_city (город сериализует себя сам),
+## T-110-форма — в city.campaign_buildings. Читатель один: иначе слой тренировки
+## слеп к живой кампании (корень «опции тренировки не прокинуты», campaign_hud).
+func test_building_instances_read_live_city_nesting() -> void:
+	var state := _state()
+	var live_buildings: Array = state.city.campaign_buildings.duplicate(true)
+	state.city.erase("campaign_buildings")
+	state.city["campaign_city"] = {"schema_version": 4, "campaign_buildings": live_buildings}
+	var catalog := _building_catalog()
+	assert_that(TrainingService.available_training_actions(state, catalog).size()).is_equal(1)
+	var result := TrainingService.train(state, catalog, 10, "fighter", _trainee())
+	assert_that(result.ok).is_true()
+	assert_that(state.party.size()).is_equal(1)

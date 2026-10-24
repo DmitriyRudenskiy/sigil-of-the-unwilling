@@ -3,7 +3,15 @@ extends RefCounted
 
 const MvpSaveSchema := preload("res://scripts/campaign/save/mvp_save_schema.gd")
 const CatalogPath := "res://assets/data/mvp_catalog.json"
+const BalanceConfigPath := "res://data/config/balance/campaign.json"
 const PARTY_CAPACITY := 5
+
+## 2.4 [ПРЕДЛОЖЕНИЕ] (02-mechanics §3.3 EC3): «10 жителей на юнит». Число —
+## предложение, ждёт вердикта автора; носитель — campaign.json
+## training.population_per_unit, фолбэк — эта константа.
+const DEFAULT_POPULATION_PER_UNIT := 10
+
+static var _balance_config: Dictionary = {}
 
 ## D-221 (V-6, 2026-10-20): лимит партии и гейтинг — alive-модель.
 ## DEAD не занимают активный слот и не блокируют тренировку/рекрутинг;
@@ -14,20 +22,26 @@ static func available_training_actions(
 	state: Dictionary,
 	building_catalog: Dictionary,
 	scenario_flags: Array = [],
-	admin_capacity: int = 0
+	admin_capacity: int = 0,
+	population_per_unit: int = 0
 ) -> Array[Dictionary]:
 	var options: Array[Dictionary] = []
 	if not MvpSaveSchema.validate(state).is_empty() \
 			or PartySystem.alive_members(state.party).size() >= PARTY_CAPACITY:
 		return options
+	# 2.4: ниже порога населения запросов нет. Причина — не здесь: список пуст,
+	# тултип читает population_gate() (spec: «UI shows the population constraint»).
+	if not bool(population_gate(state, population_per_unit).get("ok", false)):
+		return options
 	var catalog := _load_catalog()
+	var instances := _building_instances(state)
 	var built_ids: Array[String] = []
-	for instance in state.city.get("campaign_buildings", []):
+	for instance in instances:
 		if not (instance is Dictionary) or int(instance.get("construction_turns_remaining", 0)) > 0 \
 				or String(instance.get("state", "active")) == "ruined":
 			continue
 		built_ids.append(String(instance.get("id", "")))
-	for instance in state.city.get("campaign_buildings", []):
+	for instance in instances:
 		if not (instance is Dictionary) or String(instance.get("state", "active")) != "active" \
 				or int(instance.get("construction_turns_remaining", 0)) > 0:
 			continue
@@ -66,7 +80,8 @@ static func train(
 	scenario_flags: Array = [],
 	admin_capacity: int = 0,
 	party_capacity: int = PARTY_CAPACITY,
-	resource_context: ResourceContext = null
+	resource_context: ResourceContext = null,
+	population_per_unit: int = 0
 ) -> Dictionary:
 	var schema_error := MvpSaveSchema.validate(state)
 	if not schema_error.is_empty():
@@ -93,9 +108,12 @@ static func train(
 			return _failure("duplicate_party_member:%s" % trainee_id)
 	if PartySystem.alive_members(party).size() >= mini(PARTY_CAPACITY, maxi(party_capacity, 0)):
 		return _failure("party_capacity_reached")
+	var people := population_gate(state, population_per_unit)
+	if not bool(people.get("ok", false)):
+		return _failure("population_below_threshold:%d<%d"
+			% [int(people.get("population", 0)), int(people.get("required", 0))])
 
-	var city: Dictionary = state.get("city", {})
-	var instances: Array = city.get("campaign_buildings", [])
+	var instances := _building_instances(state)
 	var instance: Dictionary = {}
 	for candidate in instances:
 		if candidate is Dictionary and int(candidate.get("uid", -1)) == building_uid:
@@ -161,6 +179,80 @@ static func train(
 	state["party"] = party
 	state["resources"] = resources.serialize()
 	return {"ok": true, "member": member, "flow": paid.get("flow", {})}
+
+## Инстансы кампейн-зданий из состояния кампании. Две вложенности — это не два
+## носителя: T-110-форма сейва держит застройку в `city.campaign_buildings`,
+## живой сейв композиции — в `city.campaign_city.campaign_buildings` (город
+## сериализует себя сам, CitySerializer.serialize). Читатель один: иначе сервис
+## слеп к живому сейву — ровно тот корень, из-за которого «опции тренировки не
+## прокинуты» (campaign_hud.gd:283).
+static func _building_instances(state: Dictionary) -> Array:
+	var city: Dictionary = state.get("city", {})
+	var direct: Variant = city.get("campaign_buildings", [])
+	if direct is Array and not (direct as Array).is_empty():
+		return direct
+	var nested: Variant = city.get("campaign_city", {})
+	if nested is Dictionary:
+		var nested_list: Variant = (nested as Dictionary).get("campaign_buildings", [])
+		if nested_list is Array:
+			return nested_list
+	return []
+
+
+## 2.4: порог населения [ПРЕДЛОЖЕНИЕ] (02-mechanics §3.3 EC3). Порог считается
+## на юнита: живые в партии + тот, кого тренируем. {ok, required, population,
+## missing} — missing и есть «нужно +N жителей» для тултипа.
+## per_unit = 0 — число из баланса-конфига; баланс-зонды фиксируют его сами
+## (город зонда живёт своими жителями, порог — не предмет тех тестов).
+static func population_gate(state: Dictionary, per_unit: int = 0) -> Dictionary:
+	var per := per_unit
+	if per <= 0:
+		per = population_per_unit()
+	var required := per * (PartySystem.alive_members(state.get("party", [])).size() + 1)
+	var have := int((state.get("population", {}) as Dictionary).get("count", 0))
+	return {
+		"ok": have >= required,
+		"required": required,
+		"population": have,
+		"missing": maxi(0, required - have),
+	}
+
+
+## Число порога из конфига (campaign.json training.population_per_unit).
+static func population_per_unit() -> int:
+	var block: Variant = _balance().get("training", {})
+	if not (block is Dictionary):
+		return DEFAULT_POPULATION_PER_UNIT
+	return int((block as Dictionary).get("population_per_unit", DEFAULT_POPULATION_PER_UNIT))
+
+
+## Время тренировки класса в днях (07-balance «Базовые бойцы MVP», K-M15).
+## 0.0 — числа нет (волшебник, T-041): тренировка этого класса не генерируется.
+static func training_days(class_id: String) -> float:
+	var block: Variant = _balance().get("training", {})
+	if not (block is Dictionary):
+		return 0.0
+	var days: Variant = (block as Dictionary).get("days", {})
+	if not (days is Dictionary) or not (days as Dictionary).has(class_id):
+		return 0.0
+	return float((days as Dictionary)[class_id])
+
+
+## Баланс-конфиг кампании (campaign.json); кэш на процесс, фолбэк — константы.
+static func _balance() -> Dictionary:
+	if _balance_config.is_empty():
+		var file := FileAccess.open(BalanceConfigPath, FileAccess.READ)
+		if file == null:
+			push_warning("CampaignTrainingService: %s не найден — фолбэк порога"
+				% BalanceConfigPath)
+			return _balance_config
+		var parsed: Variant = JSON.parse_string(file.get_as_text())
+		if parsed is Dictionary:
+			_balance_config = parsed
+		else:
+			push_warning("CampaignTrainingService: campaign.json не распарсился — фолбэк")
+	return _balance_config
+
 
 static func _load_catalog() -> Dictionary:
 	if not FileAccess.file_exists(CatalogPath):

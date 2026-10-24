@@ -99,7 +99,11 @@ func _run_scenario() -> Dictionary:
 		state, _building_catalog(), 10, "fighter",
 		{"id": "guard_1", "name": "Guard", "race": "humans",
 			"stats": {"str": 13, "dex": 10, "con": 10, "int": 10, "wis": 10, "cha": 10}},
-		[], 0, CampaignTrainingService.PARTY_CAPACITY, city.resource_ctx)
+		[], 0, CampaignTrainingService.PARTY_CAPACITY, city.resource_ctx,
+		# Порог 2.4 (10 жителей на юнит, [ПРЕДЛОЖЕНИЕ]) здесь не предмет теста:
+		# город зонда — 2 жителя, отношение фиксируется параметром (1 юнит на 2),
+		# экономика сценария от порога не зависит.
+		2)
 	assert_bool(trained.ok).is_true()
 	var context := TurnContext.new()
 	context.cities.append(city)

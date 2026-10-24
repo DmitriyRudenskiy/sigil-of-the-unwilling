@@ -19,7 +19,9 @@ func _sample_state() -> Dictionary:
 	return {
 		"campaign": {"turn": 1, "seed": 12345, "phase": "exploration"},
 		"resources": {"food": 30, "wood": 20, "iron": 10},
-		"population": {"count": 20, "housing": 20},
+		# 40, а не 20: порог тренировки 2.4 (10 жителей на юнит) требует
+		# 10 × (2 живых + тренируемый) = 30; число здесь ничего не экономит.
+		"population": {"count": 40, "housing": 20},
 		"party": [
 			{"id": "hero_1", "class": "fighter", "race": "gnome", "level": 1, "xp": 0, "stats": {"str": 15, "dex": 10, "con": 14, "int": 12, "wis": 11, "cha": 8}, "luck": 0},
 			{"id": "hero_2", "class": "ranger", "race": "halfling", "level": 1, "xp": 0, "stats": {"str": 10, "dex": 15, "con": 12, "int": 11, "wis": 13, "cha": 9}, "luck": 0},
