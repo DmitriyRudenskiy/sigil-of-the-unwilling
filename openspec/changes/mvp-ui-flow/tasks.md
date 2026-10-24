@@ -5,7 +5,11 @@
 - [x] 1.1 Меню — `main_menu.gd`
 - [x] 1.2 Город — `city_screen.gd`, `campaign_city_board.gd`
 - [x] 1.3 Бой — `battle_ui.gd`
-- [x] 1.4 Хроника — `chronicle_screen.gd`
+- [x] 1.4 Хроника — `chronicle_screen.gd`. **Дополнено 2026-10-24 (D-240):** у экрана появился второй
+      режим — кампанийная лента (`show_records`, `[{turn, lines}]`, свежие ходы сверху) вместо
+      единственного «итога забега» (`show_entries`, легаси-контур, не тронут); перенос длинных
+      строк починен в сцене (`horizontal_scroll_mode = 0`: с включённым горизонтальным скроллом
+      `ScrollContainer` даёт строке бесконечную ширину, и `autowrap` не срабатывал).
 - [x] 1.5 Настройки — `settings_screen.gd`
 - [x] 1.6 Предыгра (частично) — `character_creation_ui.gd`, `sign_choice_ui.gd` (не связаны — pregame-flow)
 
@@ -19,7 +23,7 @@
 
 - [~] 3.1 Экран партии (отдельный) — `party_screen.gd` (новый); данные — `party_system.gd`. **Готово: слой данных (view model) `scripts/ui/party_screen_model.gd`** (roster + ёмкость + подсказка + статы/Удача, чистая логика, headless). **Готово (технический экран, headless):** `scripts/ui/party_screen.gd` — Control-экран поверх view model: 5 слотов (занятые/пустые), строка бойца (класс/раса/уровень/XP/статы/Удача/Ветеран), состояния READY/WOUNDED/UNSTABLE/DEAD (alive-подсчёт в заголовке), подсказка 3.2, инвариант ≤capacity, явное `refresh()` + сигнал `screen_updated` (PartySystem без сигналов → хост обновляет); 13 GdUnit4-тестов (5.6). **Отложено (визуал, ux-review):** раскладка/тема/иконки по мокапам (ui-mockup-parity, зона владельца).
 - [x] 3.2 ПАРТИЯ: очередь тренировки пуста и партия полна → «что освободит слот» (ссылка на бой/смерть), не пустота. **Готово: `PartyScreenModel.slot_hint()`** (alive-подсчёт: смерть в бою освобождает слот; `HINT_LINK_BATTLE_DEATH`); 15 GdUnit4-тестов. ~~Несогласованность с гейтом `CampaignTrainingService` (total vs alive) — tech debt~~ → **разрешено (V-6/D-221, 2026-10-20)**: гейт `CampaignTrainingService` переведён на alive-модель (`PartySystem.alive_members`), несогласованность снята.
-- [~] 3.3 Инвариант ≤2 клика до причины (столп 1) — все экраны. **Сделано (headless, экран карты):** `scripts/ui/map_screen_model.gd` — view model поверх RegionMap; каждое действие/опция движения возвращает `{available, reason}` (move/visit_node/retreat/field_raid + travel_options) — причина всегда на месте, UI просто показывает `reason`. 16 GdUnit4-тестов. **Остаток (визуал/другие экраны):** привязка к сцене карты + распространение паттерна `{available, reason}` на остальные экраны (город/бой/партия/хроника/настройки).
+- [~] 3.3 Инвариант ≤2 клика до причины (столп 1) — все экраны. **Сделано (headless, экран карты):** `scripts/ui/map_screen_model.gd` — view model поверх RegionMap; каждое действие/опция движения возвращает `{available, reason}` (move/visit_node/retreat/field_raid + travel_options) — причина всегда на месте, UI просто показывает `reason`. 16 GdUnit4-тестов. **Остаток (визуал/другие экраны):** привязка к сцене карты + распространение паттерна `{available, reason}` на остальные экраны (город/бой/партия/хроника/настройки). **Замер по хронике (2026-10-24, D-240):** на живом кампейне паттерн сработал, но поводом для правки стал не он, а отказ навигации CHRONICLE→CITY: кнопка выглядела живой, а ответа не было — чтобы не нарушать «≤2 клика до причины», хроника внесена в `HUD_SCREEN_IDS` и соседняя кнопка роутится через карту (замер и обоснование — в тесте `test_neighbour_button_closes_feed_and_opens_city`).
 - [~] 3.4 В бою все правила D&D видны без подсказок (справка — по клавише) — `battle_ui.gd`. **Сделано (headless):** `CampaignBattle.strike_breakdown(atk, def_, flank)` — чистая разбивка перевеса удара (base/state/terrain/flank/hunger/fate/reckoning + зона, без мутации, в отличие от `_strike`) + `scripts/ui/battle_info_model.gd` (`active_rules` — список активных условий, `combatant_card`, `strike_info`). 16 GdUnit4-тестов. **Отложено (визуал/ux-review):** отрисовка разбивки/правил в `battle_ui.gd`, справка по клавише.
 
 ## 4. Разрешение
@@ -67,6 +71,10 @@
       (7, живая `main.tscn`, от нажатия кнопки). ux-review этих двух состояний сделана зрением
       (D-230): кадры 1920×1080 `~/.local/share/sigil-reserve/campaign-entries-d238/`, разбор и
       принятые расхождения — в CHANGELOG; попутно исправлена подпись `settings.autosave`,
-      которая после появления читателя врала в обе стороны. **Остаток:** хроника — нет ни входа, ни носителя
-      контента (**T-175**, нужен вердикт о формате кампанийной записи); smoke снимается после
-      неё; боевой экран в smoke — зона `battle-demo-two-rosters` (чужая сессия).
+      которая после появления читателя врала в обе стороны. **Снято 2026-10-24 (D-240):** у хроники
+      появился и вход, и носитель — кнопка «Хроника» в той же полосе, лента `ChronicleLog`
+      (кампанийное состояние, подключ сейва `campaign.chronicle`, запись = i18n-ключ), экран —
+      второй режим `ChronicleScreen`; тесты `tests/functional/ui/test_campaign_chronicle_carrier.gd`
+      (6, живая `main.tscn`, от нажатия кнопки). Из кампейна достижимы 6 экранов из 8 (преигра и
+      меню — до-игровые). **Остаток:** боевой экран в smoke — зона `battle-demo-two-rosters`
+      (чужая сессия); после него smoke снимается.

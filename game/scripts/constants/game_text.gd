@@ -346,6 +346,15 @@ static func chronicle_entry(icon: String, gen: int, name: String, path: String, 
 		{"icon": icon, "gen": gen, "name": name, "path": path, "outcome": outcome,
 		"turns": turns, "glory": glory, "w": w, "l": l})
 
+# ─── Хроника поселения (D-240) ────────────────────────────────
+# Лента событий кампании: запись хранит ключ перевода и именованные аргументы
+# (ChronicleLog), поэтому текст собирается здесь, а не в системе-писателе.
+
+static func chronicle_campaign_title() -> String: return TranslationServer.translate("chronicle.campaign_title")
+static func chronicle_turn(turn: int) -> String: return TranslationServer.translate("chronicle.turn").format({"turn": turn})
+static func chronicle_line(key: String, args: Dictionary = {}) -> String:
+	return TranslationServer.translate(key).format(args)
+
 static func settings_title() -> String: return TranslationServer.translate("settings.title")
 static func settings_graphics() -> String: return TranslationServer.translate("settings.graphics")
 static func settings_zoom() -> String: return TranslationServer.translate("settings.zoom")
@@ -449,6 +458,8 @@ static func no_save_found() -> String: return TranslationServer.translate("load.
 
 static func campaign_city() -> String: return TranslationServer.translate("campaign.city")
 static func campaign_party() -> String: return TranslationServer.translate("campaign.party")
+static func campaign_chronicle() -> String: return TranslationServer.translate("campaign.chronicle")
+static func campaign_chronicle_hint() -> String: return TranslationServer.translate("campaign.chronicle_hint")
 static func campaign_settings() -> String: return TranslationServer.translate("campaign.settings")
 static func campaign_menu() -> String: return TranslationServer.translate("campaign.menu")
 static func campaign_menu_hint() -> String: return TranslationServer.translate("campaign.menu_hint")

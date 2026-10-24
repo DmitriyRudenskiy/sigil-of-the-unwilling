@@ -24,6 +24,10 @@ signal party_screen_opened
 signal party_screen_closed
 signal settings_screen_opened
 signal settings_screen_closed
+## D-240: хроника поселения — слой не знает содержимое ленты, он просит его
+## показать (те же сигналы, что у города и партии: хост по ним выключает ход).
+signal chronicle_screen_opened
+signal chronicle_screen_closed
 ## 7.13 — ход кампании запрашивается нажатием. Слой не знает, как устроен ход
 ## (`CampaignComposition.advance_turn` + `GameManager.on_day_passed` — это
 ## драйвер в `main.gd`), поэтому просит, а не делает: носитель сигнала — хост.
@@ -35,6 +39,7 @@ signal menu_requested
 
 const CityScreenScene := preload("res://scenes/ui/city_screen.tscn")
 const SettingsScreenScene := preload("res://scenes/ui/settings_screen.tscn")
+const ChronicleScreenScene := preload("res://scenes/ui/chronicle_screen.tscn")
 const PartyScreenModelScript := preload("res://scripts/ui/party_screen_model.gd")
 const CounterRegistry := preload("res://scripts/ui/campaign_counters.gd")
 const CalendarScript := preload("res://scripts/campaign/campaign_calendar.gd")
@@ -49,24 +54,36 @@ const PARTY_SCREEN_NAME := "PartyScreen"
 const SETTINGS_BUTTON_NAME := "SettingsButton"
 const MENU_BUTTON_NAME := "MenuButton"
 const SETTINGS_SCREEN_NAME := "SettingsScreen"
+const CHRONICLE_BUTTON_NAME := "ChronicleButton"
+const CHRONICLE_SCREEN_NAME := "ChronicleScreen"
 ## Экраны в машине навигации кампании: id перехода и куда возвращаться.
 const CITY_SCREEN_ID := &"city"
 const PARTY_SCREEN_ID := &"party"
 const SETTINGS_SCREEN_ID := &"settings"
+const CHRONICLE_SCREEN_ID := &"chronicle"
 const MAP_SCREEN_ID := &"map"
 ## Экраны, которыми владеет этот слой: переключение между ними идёт через
-## карту (см. `_show_campaign_screen`), чужие экраны (бой, хроника) слой не
-## имеет права покидать сам.
-const HUD_SCREEN_IDS: Array[StringName] = [CITY_SCREEN_ID, PARTY_SCREEN_ID, SETTINGS_SCREEN_ID]
+## карту (см. `_show_campaign_screen`), чужие экраны (бой) слой не имеет права
+## покидать сам.
+## Хроника (D-240) — здесь же, хотя по канону навигации (K-M8,
+## `CampaignNavigation`) из неё есть один ход — в карту. Соседняя кнопка слоя
+## обязана делать этот ход сама (CHRONICLE → MAP → цель): живая на вид кнопка,
+## которая молча упирается в отказ навигации, нарушает инвариант «≤2 клика до
+## причины» (mvp-ui-flow 3.3) — отказ без причины игроку не объясняют.
+const HUD_SCREEN_IDS: Array[StringName] = [
+	CITY_SCREEN_ID, PARTY_SCREEN_ID, SETTINGS_SCREEN_ID, CHRONICLE_SCREEN_ID,
+]
 
 var city: City = null
 var city_screen: CityScreen = null
 var party_screen: PartyScreen = null
 var settings_screen: SettingsScreen = null
+var chronicle_screen: ChronicleScreen = null
 var _top_row: HBoxContainer = null
 var _city_button: Button = null
 var _party_button: Button = null
 var _settings_button: Button = null
+var _chronicle_button: Button = null
 var _menu_button: Button = null
 var _turn_button: Button = null
 ## Защита от повторного нажатия во время обработки хода (7.13): пока эмитится
@@ -76,6 +93,11 @@ var _turn_enabled: bool = false
 var _ui_manager: CampaignUIManager = null
 var _party: Array = []
 var _party_capacity: int = PartyScreenModelScript.DEFAULT_CAPACITY
+## Носитель ленты (D-240) и состояние открытости хроники. Состояние держится
+## флагом, а не по `visible` экрана: машина навигации может погасить слой сама
+## (уход в бой), и по `visible` слой не отличил бы это от своего закрытия.
+var _chronicle: ChronicleLog = null
+var _chronicle_open: bool = false
 ## Полоса счётчиков: id строки реестра → контейнер счётчика. Значений здесь нет:
 ## числа читаются из носителя при каждом обновлении (D-200).
 var _counters: Dictionary = {}
@@ -155,9 +177,9 @@ func _build() -> void:
 	_top_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_top_row)
 	_top_row.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	# Ширина ряда под пять кнопок: 5 × 140 + 4 × 16 separation + 16 отступ.
+	# Ширина ряда под шесть кнопок: 6 × 140 + 5 × 16 separation + 16 отступ.
 	_top_row.add_theme_constant_override("separation", 16)
-	_top_row.offset_left = -790.0
+	_top_row.offset_left = -936.0
 	_top_row.offset_right = -16.0
 	_top_row.offset_top = 16.0
 	_top_row.offset_bottom = 56.0
@@ -181,6 +203,17 @@ func _build() -> void:
 	_party_button.disabled = true
 	_party_button.pressed.connect(_on_party_pressed)
 	_top_row.add_child(_party_button)
+
+	_chronicle_button = Button.new()
+	_chronicle_button.name = CHRONICLE_BUTTON_NAME
+	_chronicle_button.text = GameText.campaign_chronicle()
+	_chronicle_button.tooltip_text = GameText.campaign_chronicle_hint()
+	_chronicle_button.custom_minimum_size = Vector2(140, 40)
+	# Как и с городом/партией: до привязки ленты кнопки нет — без носителя
+	# кнопка обещала бы экран, в котором нечего показать.
+	_chronicle_button.disabled = true
+	_chronicle_button.pressed.connect(_on_chronicle_pressed)
+	_top_row.add_child(_chronicle_button)
 
 	_settings_button = Button.new()
 	_settings_button.name = SETTINGS_BUTTON_NAME
@@ -401,8 +434,8 @@ func refresh_party_screen() -> void:
 ## `_do_close()` освободил бы узел, а ссылка слоя осталась бы висячей),
 ## `show_additional = false` — потому что дополнительный блок настроек это
 ## контекст меню («Арена», «Хроника», предпросмотр модели): в кампании арена и
-## предпросмотр не играют, а у кампанийной хроники нет носителя контента
-## (T-175), так что эти три кнопки здесь были бы мёртвыми.
+## предпросмотр не играют, а его `chronicle_requested` в кампейне некем слушается
+## — кнопка была бы мёртвой. Кампейнская лента (D-240) — своя кнопка слоя.
 func bind_settings(settings: Node) -> void:
 	if settings == null:
 		return
@@ -458,6 +491,80 @@ func _on_menu_pressed() -> void:
 	menu_requested.emit()
 
 
+## Привязка хроники (D-240): экран создаётся здесь же, что город и партия.
+## Кнопка включается только с носителем ленты: без `ChronicleLog` экран показывал
+## бы пустоту там, где у кампании просто не было событий.
+func bind_chronicle(log: ChronicleLog) -> void:
+	if log == null:
+		return
+	_chronicle = log
+	if chronicle_screen == null or not is_instance_valid(chronicle_screen):
+		chronicle_screen = ChronicleScreenScene.instantiate() as ChronicleScreen
+		chronicle_screen.name = CHRONICLE_SCREEN_NAME
+		add_child(chronicle_screen)
+		chronicle_screen.closed.connect(_on_chronicle_screen_closed)
+		if _ui_manager != null:
+			_ui_manager.register_screen(CHRONICLE_SCREEN_ID, chronicle_screen)
+	if _chronicle_button != null:
+		_chronicle_button.disabled = false
+
+
+## Лента перечитывается при каждом открытии: записи добавляются ходами, а экран
+## не имеет права показывать состояние на момент привязки (тот же приём, что у
+## партии).
+func refresh_chronicle_screen() -> void:
+	if chronicle_screen == null or not is_instance_valid(chronicle_screen) \
+			or _chronicle == null:
+		return
+	chronicle_screen.show_records(_chronicle.records())
+
+
+func open_chronicle_screen() -> void:
+	if chronicle_screen == null or _chronicle == null or _chronicle_open:
+		return
+	if not _show_campaign_screen(CHRONICLE_SCREEN_ID):
+		return
+	_chronicle_open = true
+	refresh_chronicle_screen()
+	chronicle_screen_opened.emit()
+
+
+func close_chronicle_screen() -> void:
+	if not _chronicle_open:
+		return
+	# Закрытие идёт через машину: она гасит слой и возвращает кампанию на карту.
+	if _ui_manager != null and _ui_manager.current_screen() == CHRONICLE_SCREEN_ID:
+		_ui_manager.show_screen(MAP_SCREEN_ID)
+	_finish_chronicle_close()
+
+
+func is_chronicle_screen_open() -> bool:
+	return _chronicle_open and chronicle_screen != null \
+			and is_instance_valid(chronicle_screen) and chronicle_screen.visible
+
+
+func _on_chronicle_pressed() -> void:
+	if is_chronicle_screen_open():
+		close_chronicle_screen()
+	else:
+		open_chronicle_screen()
+
+
+## Экран погасил себя сам (своя кнопка «Закрыть»): слой догоняет машину, иначе
+## навигация осталась бы на хронике, а кнопка хода — выключенной.
+func _on_chronicle_screen_closed() -> void:
+	close_chronicle_screen()
+
+
+func _finish_chronicle_close() -> void:
+	if not _chronicle_open:
+		return
+	_chronicle_open = false
+	if chronicle_screen != null and is_instance_valid(chronicle_screen):
+		chronicle_screen.visible = false
+	chronicle_screen_closed.emit()
+
+
 func _on_city_pressed() -> void:
 	if is_city_screen_open():
 		close_city_screen()
@@ -502,6 +609,12 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			# а не выход из-за экрана: закрытие идёт тем же путём, что и кнопка.
 			close_settings_screen()
 			get_viewport().set_input_as_handled()
+		elif is_chronicle_screen_open():
+			# У ленты своего Esc-выхода нет (экран знает только «Закрыть»), а по
+			# канону из неё один переход — в карту: без этой ветки она закрывалась
+			# бы только мышью.
+			close_chronicle_screen()
+			get_viewport().set_input_as_handled()
 
 
 ## Смена активного экрана машиной, а не игроком: уход в бой/партию/хронику
@@ -514,6 +627,8 @@ func _on_screen_changed(screen: StringName) -> void:
 		_close_party_screen()
 	if screen != SETTINGS_SCREEN_ID:
 		_close_settings_screen()
+	if screen != CHRONICLE_SCREEN_ID:
+		_finish_chronicle_close()
 
 
 func _open_city_screen() -> void:

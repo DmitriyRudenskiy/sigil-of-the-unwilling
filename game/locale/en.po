@@ -813,6 +813,57 @@ msgstr "Close"
 msgid "chronicle.entry"
 msgstr "{icon} {gen}. {name} ({path}) — {outcome} | turns {turns}, glory {glory}, battles {w}/{l}"
 
+# ─── Хроника поселения (D-240) ──────────────────────────────
+# Биты — канонные строки 04-narrative; остальные — стиль «факт».
+
+msgid "chronicle.campaign_title"
+msgstr "Chronicle"
+
+msgid "chronicle.turn"
+msgstr "Turn {turn}"
+
+msgid "chronicle.day_summary"
+msgstr "And {count} more."
+
+msgid "chronicle.bit_sign"
+msgstr "You never asked. The Sigil arrived anyway. The town is small — start with it."
+
+msgid "chronicle.bit_first_raid"
+msgstr "They came for the grain. Took a third. Noted."
+
+msgid "chronicle.bit_district"
+msgstr "The town has a name now. The baker gave it."
+
+msgid "chronicle.bit_strong_raid"
+msgstr "They know where your weak side is. Now you know it too."
+
+msgid "chronicle.bit_final_raid"
+msgstr "The Unwilling one stands. Not because it wants to — because it stands."
+
+msgid "chronicle.raid_repelled"
+msgstr "They came — and took nothing."
+
+msgid "chronicle.raid_deficit"
+msgstr "They came when things were at their worst."
+
+msgid "chronicle.raid_party_away"
+msgstr "The party was on the road."
+
+msgid "chronicle.raids_all_ruined"
+msgstr "They fell back — and we survived."
+
+msgid "chronicle.wave_warning"
+msgstr "A wave is inbound: expect a raid."
+
+msgid "chronicle.food_warn"
+msgstr "Food: supplies running out."
+
+msgid "chronicle.district_created"
+msgstr "District founded: {group}."
+
+msgid "chronicle.district_disbanded"
+msgstr "District dissolved: {group}."
+
 # ─── Настройки ─────────────────────────────────────────────────
 msgid "settings.title"
 msgstr "⚙️ Settings"
@@ -1050,6 +1101,12 @@ msgstr "City"
 
 msgid "campaign.party"
 msgstr "Party"
+
+msgid "campaign.chronicle"
+msgstr "Chronicle"
+
+msgid "campaign.chronicle_hint"
+msgstr "Settlement event feed: what happened and why"
 
 msgid "campaign.settings"
 msgstr "Settings"

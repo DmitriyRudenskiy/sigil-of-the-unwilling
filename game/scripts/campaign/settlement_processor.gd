@@ -182,7 +182,13 @@ func _update_sm(r: String, cons: float, day: int, report: Dictionary) -> void:
 		s["state"] = next
 		s["days_positive"] = 0
 		s["days_negative"] = 0
+		# D-240: переход SM — структурированный факт в отчёте (читатель хроники:
+		# 06-economy «WARN — жёлтый индикатор + хроника»). Строка _log для этого
+		# не годится: она машинная («day 7: food OK→WARN (B=4.2)»).
 		_log("day %d: %s %s→%s (B=%.1f)" % [day, r, prev, next, float(stocks[r])], report)
+		if not report.has("sm_transitions"):
+			report["sm_transitions"] = []
+		(report["sm_transitions"] as Array).append({"resource": r, "from": prev, "to": next})
 
 
 func _log(msg: String, report: Dictionary) -> void:

@@ -45,6 +45,12 @@ var telemetry: TelemetryLog
 var _loop_flags: Dictionary = {}
 ## Отчёт threats-фазы текущего хода (2.2: «увидел угрозу» = рейд ударил).
 var last_threat_report: Dictionary = {}
+## T-175 → D-240: хроника поселения — лента событий «что случилось и почему»
+## (04-narrative, главный канал нарратива MVP). Пишут системы-носители событий
+## (биты 1/7/14/17/21, рейд, район, еда), читает `ChronicleScreen`. В сейве —
+## под-ключ "chronicle" секции "campaign" (прецеденты supply/ethics: схема T-110
+## не тронута); телеметрия для хроники не годится — это метрики сессии, не лента.
+var chronicle: ChronicleLog = ChronicleLog.new()
 ## Победная оценка (T-117 якорь: ход 21 = финальный рейд отражён/нет).
 var final_battle_seen: bool = false
 var final_raid_repelled: bool = false
@@ -179,13 +185,26 @@ func _build(campaign_seed: int) -> void:
 		rep_report["districts"] = districts.process_turn(
 			settlement.buildings, settlement.population, settlement.party_size,
 			str((settlement.sm.get("food", {}) as Dictionary).get("state", "OK")))
-		# 2.2 (D-235): снятие района — событие в хронику. Носитель хроники — telemetry
-		# (T-158), отдельного журнала районов в MVP нет.
+		# 2.2 (D-235): снятие района — событие в хронику.
 		if telemetry != null:
 			for g in (rep_report["districts"] as Dictionary).get("disbanded", []):
 				telemetry.record("district_disbanded", {
 					"group": str(g), "turn": campaign.current_turn,
 				})
+		# D-240: рождение и снятие района — записи хроники (04-narrative: «район»
+		# — ключевое событие, «запись с причиной»). Бит хода 14 («район создан») —
+		# единственный из каркаса K-M9 с календарём в каноне (K-R3), но пишет
+		# текст при первом рождении, а не по номеру хода: календарный триггер
+		# разрешён нарративным битам, а ложный бит на ходу 14 без события — ложь.
+		var drep: Dictionary = rep_report["districts"] as Dictionary
+		if not drep.get("created", []).is_empty():
+			chronicle.record_bit(campaign.current_turn, "bit_district", "chronicle.bit_district")
+			for g in drep.get("created", []):
+				chronicle.record_line(
+						campaign.current_turn, "chronicle.district_created", {"group": str(g)})
+		for g in drep.get("disbanded", []):
+			chronicle.record_line(
+					campaign.current_turn, "chronicle.district_disbanded", {"group": str(g)})
 		rep_report["population"] = pop_report
 		return rep_report
 	campaign.threats_hook = func() -> Dictionary:
@@ -196,6 +215,7 @@ func _build(campaign_seed: int) -> void:
 	# pre-production запасы. season_mult — из WorldSeasons (I1: инжест).
 	campaign.production_hook = func() -> Dictionary:
 		var report: Dictionary = settlement.process_production(WorldSeasons.production_mult())
+		_record_food_transitions(report)
 		# Очередь достройки кампейн-построек города (носителя экрана): построенное
 		# игроком не должно навсегда остаться «в стройке». Производство ресурсов
 		# кампейн-постройками — не здесь (это была бы вторая экономика; Q-M98).
@@ -222,6 +242,8 @@ func _build(campaign_seed: int) -> void:
 	# до первого action (GDD 01-core-loop).
 	telemetry = TelemetryLog.new()
 	telemetry.record("game_start", {"turn": 1})
+	# D-240: бит хода 1 «Знак выбрал тебя» (04-narrative, каркас K-M9 — MVP).
+	chronicle.record_bit(1, "bit_sign", "chronicle.bit_sign")
 
 
 ## Один ход кампании (T-010, T-122): фиксированный 6-фазный порядок
@@ -244,6 +266,7 @@ func advance_turn() -> void:
 	campaign.advance_auto_phase()  # diplomacy (no-op) → threats
 	campaign.advance_auto_phase()  # threats (авто) → production
 	_evaluate_loop_closed()        # 2.2: цикл хода N (после рейда, до production)
+	_advance_chronicle()           # D-240: биты и причины рейда этого хода
 	campaign.advance_auto_phase()  # production (авто) → finish
 
 
@@ -335,6 +358,57 @@ func _evaluate_loop_closed() -> void:
 ## 2.2: рейд ударил в этом ходу (threats-фаза) — «увидел угрозу».
 func _raid_happened_this_turn() -> bool:
 	return not (last_threat_report.get("raid", {}) as Dictionary).is_empty()
+
+
+## D-240: WARN по еде — в хронику (06-economy §SM: «WARN — жёлтый индикатор
+## + хроника»). Переход берётся из отчёта SM, а не из копии прошлого состояния:
+## единственный владелец факта «состояние сменилось» — сам SM поселения.
+func _record_food_transitions(report: Dictionary) -> void:
+	for t in report.get("sm_transitions", []):
+		if str((t as Dictionary).get("resource", "")) == "food" \
+				and str((t as Dictionary).get("to", "")) == "WARN":
+			chronicle.record_line(campaign.current_turn, "chronicle.food_warn")
+
+
+## D-240: хроника threats-фазы (вызывается после рейда, до production).
+## Биты (04-narrative, каркас K-M9) пишутся одним событием каждый и не
+## повторяются; причины рейда складываются в одну запись ≤3 строк (EC: «один
+## текстовый блок за событие ≤3 строки», «хроника называет причину»). Текст —
+## канон битов; не-битовые строки — авторские, стиль «факт» (канон задаёт
+## содержание, а не формулировку: 00-overview «они пришли — и не взяли»,
+## 06-economy «пришли, когда вам было хуже всего», 02-mechanics «партия была в
+## пути», «они отступили — выжить удалось»). Биты 3 («слух») и 10 (смерть
+## персонажа) — не этот срез: слуховой движок Post-MVP, у смерти персонажа нет
+## носителя в кампанийном пути (T-179).
+func _advance_chronicle() -> void:
+	var turn: int = campaign.current_turn
+	var wave: Dictionary = last_threat_report.get("wave", {}) as Dictionary
+	# 07-balance §5: «предупреждение — в хронике в ход генерации».
+	if not wave.is_empty() and int(wave.get("turn", -1)) == turn:
+		chronicle.record_line(turn, "chronicle.wave_warning")
+	var raid: Dictionary = last_threat_report.get("raid", {}) as Dictionary
+	if raid.is_empty():
+		return
+	var is_boss: bool = str(raid.get("composition", "")) == "boss"
+	if not chronicle.has_bit("bit_first_raid"):
+		chronicle.record_bit(turn, "bit_first_raid", "chronicle.bit_first_raid")
+	if is_boss:
+		chronicle.record_bit(turn, "bit_final_raid", "chronicle.bit_final_raid")
+	elif int(raid.get("tier", 0)) >= 2:
+		chronicle.record_bit(turn, "bit_strong_raid", "chronicle.bit_strong_raid")
+	var causes: Array = []
+	if float(raid.get("loss", 0.0)) <= 1e-9:
+		# «Не взяли» = нулевой урон рейда; когда брать было нечего, формулировка
+		# канона тоже верна (00-overview: «они пришли — и не взяли»).
+		causes.append({"key": "chronicle.raid_repelled", "args": {}})
+	if str((settlement.sm.get("food", {}) as Dictionary).get("state", "OK")) == "DEFICIT":
+		causes.append({"key": "chronicle.raid_deficit", "args": {}})
+	if not bool(raid.get("battle_requested", false)):
+		# Рейд не принял бой: партия вне города (02-mechanics «партия была в пути»).
+		causes.append({"key": "chronicle.raid_party_away", "args": {}})
+	if _all_districts_destroyed():
+		causes.append({"key": "chronicle.raids_all_ruined", "args": {}})
+	chronicle.record_event(turn, causes)
 
 
 func _threat_context() -> Dictionary:
@@ -546,6 +620,10 @@ func build_save_state() -> Dictionary:
 	campaign_section["final_battle_seen"] = final_battle_seen
 	campaign_section["final_raid_repelled"] = final_raid_repelled
 	campaign_section["hero_name"] = hero_name
+	# D-240: хроника — состояние (лента не пересчитывается из входов: события,
+	# которых игрок уже не видел, не появляются второй раз). Под-ключ секции
+	# "campaign", как supply/ethics: топ-секцию не добавляем, схему T-110 не трогаем.
+	campaign_section["chronicle"] = chronicle.to_dict()
 	# T-124: журнал/аккумуляторы/Репутация — состояние (события не пересчитываются
 	# при загрузке, I1); секция словарная — schema_version не тронут (T-110).
 	campaign_section["ethics"] = ethics.to_dict()
@@ -628,6 +706,10 @@ func load_save_state(state: Dictionary) -> void:
 		supply_system = SupplySystem.from_config(supply_cfg)
 	else:
 		supply_system = SupplySystem.from_dict(supply_data)
+	# D-240: хроника (под-ключ "chronicle"); старый сейв без неё → пустая лента
+	# (что уже случилось — не восстанавливаем, выдумывать записи нечем).
+	chronicle = ChronicleLog.from_dict(
+			(state.get("campaign", {}) as Dictionary).get("chronicle", {}))
 	# Синхронизация SM с балансом (старый сейв: баланс > 0 → ACTIVE).
 	if sign_system.sign_id != "":
 		_sign_system_prestige_sync()

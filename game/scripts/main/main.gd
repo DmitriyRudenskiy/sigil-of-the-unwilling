@@ -108,6 +108,12 @@ func _mount_campaign_hud() -> void:
 	# mvp-ui-flow 5.4: настроек у живого кампейна не было — экран жил в меню и в
 	# бою, а из кампании к нему не вело ничего.
 	campaign_hud.bind_settings(Services.resolve(&"settings"))
+	# D-240: хроника поселения. У ленты появился носитель (`ChronicleLog` в
+	# кампании, пишется системами-событиями), поэтому у слоя появилась и кнопка:
+	# до этого у игрока не было способа увидеть, что случилось с поселением.
+	campaign_hud.bind_chronicle(composition.chronicle)
+	campaign_hud.chronicle_screen_opened.connect(_on_campaign_screen_opened)
+	campaign_hud.chronicle_screen_closed.connect(_on_campaign_screen_closed)
 	# 7.13: ход кампании делается кнопкой слоя. Обработчик — тот же путь,
 	# что был у таймера (`advance_turn` + `on_day_passed`), чтобы кнопка не
 	# заводила второй порядок фаз.
