@@ -39,11 +39,11 @@ disable_set_ownership = true
 theme_override_constants/separation = 12
 [node name="TitleLabel" type="Label" parent="Overlay/Scroll/Root"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_type_variation = &"LabelStrong"
 horizontal_alignment = 1
 [node name="SubtitleLabel" type="Label" parent="Overlay/Scroll/Root"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 12
+theme_type_variation = &"LabelSecondary"
 horizontal_alignment = 1
 [node name="NameRow" type="HBoxContainer" parent="Overlay/Scroll/Root"]
 custom_minimum_size = Vector2(720, 28)
@@ -51,7 +51,7 @@ layout_mode = 2
 [node name="NameLabelNode" type="Label" parent="Overlay/Scroll/Root/NameRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(120, 28)
-theme_override_font_sizes/font_size = 14
+theme_type_variation = &"LabelBody"
 horizontal_alignment = 2
 [node name="NameEdit" type="LineEdit" parent="Overlay/Scroll/Root/NameRow"]
 layout_mode = 2
@@ -64,7 +64,7 @@ layout_mode = 2
 [node name="SexLabelNode" type="Label" parent="Overlay/Scroll/Root/SexRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(120, 28)
-theme_override_font_sizes/font_size = 14
+theme_type_variation = &"LabelBody"
 horizontal_alignment = 2
 [node name="SexOption" type="OptionButton" parent="Overlay/Scroll/Root/SexRow"]
 layout_mode = 2
@@ -75,7 +75,7 @@ layout_mode = 2
 [node name="RaceLabelNode" type="Label" parent="Overlay/Scroll/Root/RaceRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(120, 28)
-theme_override_font_sizes/font_size = 14
+theme_type_variation = &"LabelBody"
 horizontal_alignment = 2
 [node name="RaceOption" type="OptionButton" parent="Overlay/Scroll/Root/RaceRow"]
 layout_mode = 2
@@ -86,7 +86,7 @@ layout_mode = 2
 [node name="SubraceLabelNode" type="Label" parent="Overlay/Scroll/Root/SubraceRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(120, 28)
-theme_override_font_sizes/font_size = 14
+theme_type_variation = &"LabelBody"
 horizontal_alignment = 2
 [node name="SubraceOption" type="OptionButton" parent="Overlay/Scroll/Root/SubraceRow"]
 layout_mode = 2
@@ -97,7 +97,7 @@ layout_mode = 2
 [node name="ClassLabelNode" type="Label" parent="Overlay/Scroll/Root/ClassRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(120, 28)
-theme_override_font_sizes/font_size = 14
+theme_type_variation = &"LabelBody"
 horizontal_alignment = 2
 [node name="ClassOption" type="OptionButton" parent="Overlay/Scroll/Root/ClassRow"]
 layout_mode = 2
@@ -108,7 +108,7 @@ layout_mode = 2
 [node name="CultureLabelNode" type="Label" parent="Overlay/Scroll/Root/CultureRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(120, 28)
-theme_override_font_sizes/font_size = 14
+theme_type_variation = &"LabelBody"
 horizontal_alignment = 2
 [node name="CultureOption" type="OptionButton" parent="Overlay/Scroll/Root/CultureRow"]
 layout_mode = 2
@@ -119,7 +119,7 @@ layout_mode = 2
 [node name="BackgroundLabelNode" type="Label" parent="Overlay/Scroll/Root/BackgroundRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(120, 28)
-theme_override_font_sizes/font_size = 14
+theme_type_variation = &"LabelBody"
 horizontal_alignment = 2
 [node name="BackgroundOption" type="OptionButton" parent="Overlay/Scroll/Root/BackgroundRow"]
 layout_mode = 2
@@ -130,7 +130,7 @@ layout_mode = 2
 [node name="SummaryLabel" type="Label" parent="Overlay/Scroll/Root"]
 custom_minimum_size = Vector2(640, 96)
 layout_mode = 2
-theme_override_font_sizes/font_size = 12
+theme_type_variation = &"LabelSecondary"
 horizontal_alignment = 0
 [node name="Spacer2" type="Control" parent="Overlay/Scroll/Root"]
 custom_minimum_size = Vector2(0, 8)
