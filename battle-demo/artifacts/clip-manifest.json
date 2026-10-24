@@ -1,44 +1,6 @@
 [
   {
     "char": "knight",
-    "anim": "walk",
-    "seed": 1101,
-    "length": 33,
-    "corner_before_clip": [
-      0,
-      255,
-      0
-    ],
-    "seconds": {},
-    "total_seconds": 0,
-    "audit": {
-      "frames": 33,
-      "motion_first_last": 74.6,
-      "sharpness_min": 1111.0,
-      "sharpness_median": 1251.6,
-      "pivot_slide_x": 31.1,
-      "pivot_sway_x": 33.2,
-      "feet_drift_x": 41.5,
-      "feet_drift_y": 6,
-      "chroma_pixels_kept": 3088,
-      "chroma_share": 0.001001
-    },
-    "loop": {
-      "window": 24,
-      "seam": 103.37,
-      "frame_step": 27.38,
-      "ping_pong": true
-    },
-    "subsampled": [
-      "battle-demo/artifacts/clips/knight/walk/frame_01.png",
-      "battle-demo/artifacts/clips/knight/walk/frame_09.png",
-      "battle-demo/artifacts/clips/knight/walk/frame_16.png",
-      "battle-demo/artifacts/clips/knight/walk/frame_24.png"
-    ],
-    "verdict": "брак: корпус уехал по полу (31.1 px за цикл); остался хромакей (3088 px, 0.100% удержанных пикселей)"
-  },
-  {
-    "char": "knight",
     "anim": "idle",
     "seed": 1101,
     "length": 33,
@@ -63,8 +25,8 @@
     },
     "loop": {
       "window": 17,
-      "seam": 5.44,
-      "frame_step": 2.63,
+      "seam": 5.63,
+      "frame_step": 2.88,
       "ping_pong": true
     },
     "subsampled": [
@@ -74,5 +36,180 @@
       "battle-demo/artifacts/clips/knight/idle/frame_17.png"
     ],
     "verdict": "годен: движение 19.7, резкость 1607.4/1677.3, снос 1.7 px, хромакей 0 — петля ping-pong (стык не найден)"
+  },
+  {
+    "char": "knight",
+    "anim": "turn",
+    "seed": 1101,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {},
+    "total_seconds": 0,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 46.3,
+      "sharpness_min": 1408.7,
+      "sharpness_median": 1517.9,
+      "pivot_slide_x": 7.0,
+      "pivot_sway_x": 7.1,
+      "feet_drift_x": 23.5,
+      "feet_drift_y": 2,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/knight/turn/frame_01.png",
+      "battle-demo/artifacts/clips/knight/turn/frame_12.png",
+      "battle-demo/artifacts/clips/knight/turn/frame_22.png",
+      "battle-demo/artifacts/clips/knight/turn/frame_33.png"
+    ],
+    "verdict": "годен: движение 46.3, резкость 1408.7/1517.9, снос 7.0 px, хромакей 0"
+  },
+  {
+    "char": "spearman",
+    "anim": "idle",
+    "seed": 1102,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {},
+    "total_seconds": 0,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 9.2,
+      "sharpness_min": 4223.7,
+      "sharpness_median": 4561.0,
+      "pivot_slide_x": 0.2,
+      "pivot_sway_x": 0.4,
+      "feet_drift_x": 0.5,
+      "feet_drift_y": 1,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": {
+      "window": 17,
+      "seam": 1.28,
+      "frame_step": 0.57,
+      "ping_pong": true
+    },
+    "subsampled": [
+      "battle-demo/artifacts/clips/spearman/idle/frame_01.png",
+      "battle-demo/artifacts/clips/spearman/idle/frame_06.png",
+      "battle-demo/artifacts/clips/spearman/idle/frame_12.png",
+      "battle-demo/artifacts/clips/spearman/idle/frame_17.png"
+    ],
+    "verdict": "годен: движение 9.2, резкость 4223.7/4561.0, снос 0.2 px, хромакей 0 — петля ping-pong (стык не найден)"
+  },
+  {
+    "char": "knight",
+    "anim": "hit",
+    "seed": 1101,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {},
+    "total_seconds": 0,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 55.3,
+      "sharpness_min": 1367.5,
+      "sharpness_median": 1559.0,
+      "pivot_slide_x": 31.8,
+      "pivot_sway_x": 31.8,
+      "feet_drift_x": 7.5,
+      "feet_drift_y": 0,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/knight/hit/frame_01.png",
+      "battle-demo/artifacts/clips/knight/hit/frame_12.png",
+      "battle-demo/artifacts/clips/knight/hit/frame_22.png",
+      "battle-demo/artifacts/clips/knight/hit/frame_33.png"
+    ],
+    "verdict": "брак: корпус уехал по полу (31.8 px за цикл)"
+  },
+  {
+    "char": "knight",
+    "anim": "attack",
+    "seed": 1101,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {},
+    "total_seconds": 0,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 9.9,
+      "sharpness_min": 1041.7,
+      "sharpness_median": 1447.6,
+      "pivot_slide_x": 0.1,
+      "pivot_sway_x": 21.3,
+      "feet_drift_x": 24.5,
+      "feet_drift_y": 1,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/knight/attack/frame_01.png",
+      "battle-demo/artifacts/clips/knight/attack/frame_12.png",
+      "battle-demo/artifacts/clips/knight/attack/frame_22.png",
+      "battle-demo/artifacts/clips/knight/attack/frame_33.png"
+    ],
+    "verdict": "годен: движение 9.9, резкость 1041.7/1447.6, снос 0.1 px, хромакей 0"
+  },
+  {
+    "char": "knight",
+    "anim": "walk",
+    "seed": 1101,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {},
+    "total_seconds": 0,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 73.5,
+      "sharpness_min": 1109.4,
+      "sharpness_median": 1251.3,
+      "pivot_slide_x": 31.1,
+      "pivot_sway_x": 33.2,
+      "feet_drift_x": 41.5,
+      "feet_drift_y": 6,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": {
+      "window": 26,
+      "seam": 22.12,
+      "frame_step": 28.93,
+      "ping_pong": false
+    },
+    "subsampled": [
+      "battle-demo/artifacts/clips/knight/walk/frame_01.png",
+      "battle-demo/artifacts/clips/knight/walk/frame_09.png",
+      "battle-demo/artifacts/clips/knight/walk/frame_18.png",
+      "battle-demo/artifacts/clips/knight/walk/frame_26.png"
+    ],
+    "verdict": "брак: корпус уехал по полу (31.1 px за цикл)"
   }
 ]

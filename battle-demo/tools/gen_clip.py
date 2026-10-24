@@ -71,21 +71,29 @@ def unkey(frame: Path, threshold: int = 60, grow: int = 2) -> Image.Image:
 
     Повторяет `MaskFromColor+ (0,255,0) threshold=60` → `GrowMask expand=2` из
     `04_unkey_frames.json` (там нужен абсолютный путь на сервере, здесь — пиксели).
+
+    Плюс деспил, которого в исходном workflow нет: пиксели, где зелёный перевешивает
+    оба канала больше чем на 3, но не достаточно для кея, остаются на объекте
+    зелёным кантом (прогон 2026-10-24: ботинки рыцаря, 0.05–0.1% удержанных
+    пикселей каждого кадра). Они и внутри силуэта, и на канте — поэтому
+    ограничивать их краем нельзя, они правятся у всех удержанных.
     """
+    import numpy as np
+
     image = Image.open(frame).convert("RGB")
-    red, green, blue = (channel.load() for channel in image.split())
-    width, height = image.size
-    mask = Image.new("L", (width, height), 0)
-    pixels = mask.load()
-    for y in range(height):
-        for x in range(width):
-            if green[x, y] - max(red[x, y], blue[x, y]) > threshold:
-                pixels[x, y] = 255
+    red, green, blue = (np.asarray(channel, dtype="int16") for channel in image.split())
+    key = green - np.maximum(red, blue) > threshold
+    mask = Image.fromarray(np.uint8(key) * 255)
     if grow:
         mask = mask.filter(ImageFilter.MaxFilter(2 * grow + 1))
     alpha = Image.eval(mask, lambda value: 255 - value)
-    image.putalpha(alpha)
-    return image
+    kept = np.asarray(alpha) > 0
+    # Потолок: зелёный может остаться на 25 единиц впереди остальных каналов.
+    capped = np.minimum(green, np.maximum(red, blue) + 3)
+    merged = Image.merge("RGB", [Image.fromarray(np.uint8(np.clip(channel, 0, 255)))
+                                 for channel in (red, capped, blue)])
+    merged.putalpha(alpha)
+    return merged
 
 
 def measure(paths: list[Path]) -> dict:
@@ -153,7 +161,7 @@ def measure(paths: list[Path]) -> dict:
         kept = alpha.point(lambda v: 255 if v > 20 else 0)
         r, g, b = (np.asarray(channel, dtype="int16") for channel in rgb.split())
         a = np.asarray(kept, dtype="bool")
-        residue += int((((g - np.maximum(r, b)) > 25) & a).sum())
+        residue += int((((g - np.maximum(r, b)) > 5) & a).sum())
         kept_total += int(a.sum())
     return {
         "frames": len(paths),

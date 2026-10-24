@@ -1,0 +1,4 @@
+[skip] knight/idle: уже годен
+[skip] knight/walk: покадрово, D5 (походка клипом не собирается)
+[skip] knight/attack: уже годен
+[run ] knight/hit

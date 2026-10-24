@@ -20,5 +20,9 @@
   "battle-demo/artifacts/gen/knight/turn_03.png": "брак: кадр совпадает с turn_04 (0.68 слишком близко к 1.0)",
   "battle-demo/artifacts/gen/knight/turn_04.png": "брак: то же — кадр 3 и 4 не различаются",
   "battle-demo/artifacts/clips/knight/idle": "годен: движение 19.7, резкость 1607.4/1677.3, снос 1.7 px, хромакей 0 — петля ping-pong (стык не найден)",
-  "battle-demo/artifacts/clips/knight/walk": "брак: корпус уехал по полу (31.1 px за цикл); остался хромакей (3088 px, 0.100% удержанных пикселей)"
+  "battle-demo/artifacts/clips/knight/walk": "брак: корпус уехал по полу (31.1 px за цикл)",
+  "battle-demo/artifacts/clips/knight/attack": "годен: движение 9.9, резкость 1041.7/1447.6, снос 0.1 px, хромакей 0",
+  "battle-demo/artifacts/clips/knight/hit": "брак: корпус уехал по полу (31.8 px за цикл)",
+  "battle-demo/artifacts/clips/knight/turn": "годен: движение 46.3, резкость 1408.7/1517.9, снос 7.0 px, хромакей 0",
+  "battle-demo/artifacts/clips/spearman/idle": "годен: движение 9.2, резкость 4223.7/4561.0, снос 0.2 px, хромакей 0 — петля ping-pong (стык не найден)"
 }
