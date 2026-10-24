@@ -34,12 +34,12 @@ extends BaseTest
 ##     2026-10-24 не нашёл ни одной неосознанной активной полосы.
 ##     Метрика — НЕ `get_v_scroll_bar().max_value`: он даёт 669 px на
 ##     character_creation и 23 px на city_screen там, где контент влезает (у
-##     скрытой полосы page не обновляется, max_value = высота контента); живой
-##     кадр 1280×720 подтверждает: полос на этих экранах нет. Аномалию
-##     LegacyActionsPanel (контейнер 0 px ширины при контенте 1187 px при
-##     горизонтальном режиме DISABLE) проверка НЕ видит: без прокрутки по оси это
-##     не скролл, а обрезка, и исключение по предку-ScrollContainer в проверке (1)
-##     её прячет — **T-180**.
+##     скрытой полосы page не обновляется); живой кадр 1280×720 подтверждает: полос
+##     на этих экранах нет. Скрытые в дереве контейнеры не меряются вовсе: у них
+##     макет не считан, и цифры с них не являются доказательством (на такой цифре
+##     0×54 при контенте 1187 px родился несуществующий T-180). Экраны со свёрнутыми
+##     по умолчанию панелями проверяются вторично в раскрытом состоянии — см.
+##     test_city_screen_legacy_panel_open_responsive.
 ##
 ## Известные дефекты (T-154, 2026-10-21): нарушения, совпадающие с
 ## _KNOWN_VIOLATIONS, печатаются в лог, но НЕ краснят гейт — дефект
@@ -209,7 +209,9 @@ func after_test() -> void:
 	await get_tree().process_frame
 
 
-func _check_screen(id: String) -> void:
+## id — ключ _SCREENS; opener — необязательный хук состояния-варианта (вызывается
+## после успокоения макета, проверяется то же состояние тремя проверками).
+func _check_screen(id: String, opener: Callable = Callable()) -> void:
 	var unknown: Array[String] = []
 	var known: Array[String] = []
 	var matched_prefixes := {}  # path_prefix -> true (детект устаревших записей)
@@ -219,6 +221,10 @@ func _check_screen(id: String) -> void:
 		if _screen == null:
 			unknown.append("%s: экран не стартовал на %s" % [id, res])
 			continue
+		if opener.is_valid():
+			opener.call(_screen)
+			for _i in _SETTLE_FRAMES:
+				await get_tree().process_frame
 		var vp: Rect2 = get_viewport().get_visible_rect()
 		var batch: Array[String] = []
 		_check_bounds(id, _screen, vp, res, batch)
@@ -470,6 +476,21 @@ func test_world_ui_responsive() -> void:
 
 func test_chronicle_screen_responsive() -> void:
 	await _check_screen("chronicle_screen")
+
+
+## Состояние-вариант живого города (T-173): переключатель «Классические действия
+## города» разворачивает панель, скрытую по умолчанию. В исходном состоянии гейт её
+## не видит, а цифры со скрытого узла бессмысленны (0×54 при контенте 1187 px —
+## на этом замере родился и померил ошибку несуществующий T-180), поэтому раскрытое
+## состояние проверяется теми же тремя проверками отдельно.
+func test_city_screen_legacy_panel_open_responsive() -> void:
+	await _check_screen("city_screen", func(s: Node) -> void:
+		var toggle := s.get_node_or_null("ScreenMargin/ScreenLayout/ScreenFooter/LegacyToggle") as Button
+		assert_object(toggle).is_not_null().override_failure_message(
+			"город обязан нести переключатель легаси-действ — иначе состояние-вариант не проверить"
+		)
+		toggle.pressed.emit()
+	)
 
 
 ## Проверка (3) не должна стать молчаливой (требование T-173): синтетический
