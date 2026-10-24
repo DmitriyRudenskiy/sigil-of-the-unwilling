@@ -11,6 +11,8 @@ extends SceneTree
 ## Запуск НЕ headless (нужен рендер, см. tools/ux_shots.gd):
 ##   Godot --path game -s tools/map_shot.gd -- --seed=4242 --size=40 --out=/tmp/map.png
 ##   --fog=1 — включить туман войны (по умолчанию снят: машинные меры меряют террейн).
+##   --atlas=/tmp/x.webp — снять кадр с другим листом тайлов, не трогая носитель
+##            (глазной вердикт по перекраске, T-163; раскладка листа обязана совпадать).
 ##   --zoom=0.5 — масштаб кадра (тот же Camera2D.zoom, что ZOOM_LEVELS в игре: 0.5…2.25,
 ##            дефолт 1.0). Нужен глазному ревью «видно на масштабе, на котором играют»;
 ##            геометрия кадра и размер тайла пишутся в тех же единицах, что нарисованы.
@@ -100,6 +102,21 @@ func _initialize() -> void:
 			quit(4)
 			return
 
+	# --atlas=path — тот же рендер, но с другим листом тайлов; носитель не трогается.
+	# Нужно глазному вердикту по перекраске (T-163): `gen_map_art.py --recolor` печатает
+	# лист-кандидат той же раскладки, значит подменяется только пиксельная часть, а кадр
+	# остаётся кадром того же `MapGenerator` с теми же туманом и зумом.
+	var alt := _arg("--atlas", "")
+	if alt != "":
+		var swapped := _swap_atlas(scene, alt, int(atlas.TILE), int(atlas.FOG_SOURCE_ID))
+		if swapped == 0:
+			# Причина одна из двух: лист не грузится как изображение, либо раскладка не
+			# совпадает с атласом биомов (размер листа или размер региона тайлсета).
+			push_error("map_shot: --atlas=%s: подменён 0 источников тайлсета" % alt)
+			quit(5)
+			return
+		print("ATLAS %s: источников подменено %d" % [alt, swapped])
+
 	await _frames(20)
 
 	var img := viewport.get_texture().get_image()
@@ -157,6 +174,42 @@ func _dump_geometry(mg, scene: Node2D, shot_path: String, size: Vector2i,
 	if f != null:
 		f.store_string(JSON.stringify(payload))
 		f.close()
+
+
+## Подмена пиксельной части атласа биомов (T-163). Затемнённый побратим строится тем же
+## множителем, что `TileAtlas._build_fog_source`, иначе клетки тумана рисовались бы
+## исходным листом и вердикт снимался бы по кадру, которого в игре нет.
+func _swap_atlas(root: Node, path: String, tile: int, fog_id: int) -> int:
+	var sheet := Image.load_from_file(ProjectSettings.globalize_path(path))
+	if sheet == null:
+		return 0
+	var base_tex := ImageTexture.create_from_image(sheet)
+	var fog_img := sheet.duplicate()
+	var dim := float(GameNumbers.MAP_FOG_DIM)
+	for y in fog_img.get_height():
+		for x in fog_img.get_width():
+			var c: Color = fog_img.get_pixelv(Vector2i(x, y))
+			fog_img.set_pixelv(Vector2i(x, y),
+					Color(c.r * dim, c.g * dim, c.b * dim, c.a))
+	var fog_tex := ImageTexture.create_from_image(fog_img)
+	var swapped := 0
+	for n in root.find_children("*", "TileMapLayer", true, false):
+		var ts: TileSet = (n as TileMapLayer).tile_set
+		if ts == null:
+			continue
+		for i in ts.get_source_count():
+			var sid := ts.get_source_id(i)
+			var src := ts.get_source(sid)
+			if not (src is TileSetAtlasSource):
+				continue
+			var a := src as TileSetAtlasSource
+			if a.texture == null or a.texture_region_size != Vector2i(tile, tile):
+				continue
+			if a.texture.get_size() != Vector2(sheet.get_width(), sheet.get_height()):
+				continue
+			a.texture = fog_tex if sid == fog_id else base_tex
+			swapped += 1
+	return swapped
 
 
 func _arg(name: String, def: String) -> String:

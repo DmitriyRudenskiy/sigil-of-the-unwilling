@@ -14,6 +14,11 @@ var config: Dictionary
 var jobs_by_id: Dictionary
 ## group -> настроение (float 0–100).
 var mood: Dictionary = {}
+## group -> {"present": bool, "below_days": int} — состояние распада (2.2, D-235).
+## Район остаётся проекцией города; персистится только гистерезис «сколько ходов
+## подряд группа без зданий». Ключ — 7 канонических групп, строка «без группы»
+## районами не считается (это отсутствие района).
+var district_state: Dictionary = {}
 
 
 func _init(p_config: Dictionary = {}, p_jobs_by_id: Dictionary = {}) -> void:
@@ -76,6 +81,9 @@ func process_turn(
 			"mood": float(mood.get(str(g), config.get("mood_start", 70.0))),
 			"buildings": 0, "workers": 0, "jobs": 0,
 			"need_cap": 0.0, "need_dem": 0.0,
+			# Жив ли район этот ход (2.2). Строка «без группы» всегда true: распад
+			# применяется только к 7 каноническим группам.
+			"present": true,
 		}
 	var food_net: float = 0.0
 	for b in buildings:
@@ -135,8 +143,36 @@ func process_turn(
 			low = true
 	if low:
 		desertion = int(float(days) / 2.0) * int(config.get("desertion_per_two_days_low", 1))
+	# 5. Распад района (2.2, D-235): «теги ниже порога 3 дня подряд → район снят».
+	# Мерой «тегов собраны» в носителе служит наличие у группы хотя бы одного
+	# здания — радиуса и перечня тегов у проекции нет (расхождение зафиксировано
+	# в carrier notes спеки). Смысл гистерезиса: здание вернули за 3 хода — район
+	# жив и его настроение (а значит и множитель производства) сохранено; дольше —
+	# запись района уничтожена, настроение сброшено к стартовому.
+	var disbanded: Array = []
+	var below_limit: int = int(config.get("disband_below_days", 3))
+	for g in SettlementProcessorScript.GROUPS:
+		var grp := str(g)
+		var st: Dictionary = district_state.get(grp, {"present": false, "below_days": 0})
+		if int((districts[grp] as Dictionary)["buildings"]) > 0:
+			st["present"] = true
+			st["below_days"] = 0
+		elif bool(st["present"]):
+			st["below_days"] = int(st["below_days"]) + 1
+			if int(st["below_days"]) >= below_limit:
+				st["present"] = false
+				st["below_days"] = 0
+				mood[grp] = float(config.get("mood_start", 70.0))
+				(districts[grp] as Dictionary)["mood"] = float(mood[grp])
+				disbanded.append(grp)
+		else:
+			st["present"] = false
+			st["below_days"] = 0
+		district_state[grp] = st
+		(districts[grp] as Dictionary)["present"] = bool(st["present"])
 	return {
 		"districts": districts,
+		"disbanded": disbanded,
 		"desertion": desertion,
 		"food_net_per_day": food_net,
 		"events": report_events,
@@ -230,7 +266,12 @@ static func merge_three(buildings: Array, catalog: Dictionary, result_id: String
 
 
 func to_dict() -> Dictionary:
-	return {"mood": mood.duplicate(true)}
+	return {
+		"mood": mood.duplicate(true),
+		# 2.2 (D-235): гистерезис распада — состояние, не производная: без него
+		# «3 хода подряд» перезапускались бы каждой загрузкой сейва.
+		"district_state": district_state.duplicate(true),
+	}
 
 
 static func from_dict(data: Dictionary, p_config: Dictionary = {}, p_jobs_by_id: Dictionary = {}) -> DistrictSystem:
@@ -238,4 +279,12 @@ static func from_dict(data: Dictionary, p_config: Dictionary = {}, p_jobs_by_id:
 	for g in (data.get("mood", {}) as Dictionary).keys():
 		if sys.mood.has(str(g)):
 			sys.mood[str(g)] = float((data.get("mood") as Dictionary)[g])
+	for g in (data.get("district_state", {}) as Dictionary).keys():
+		var grp := str(g)
+		var raw: Dictionary = (data.get("district_state") as Dictionary)[g]
+		# JSON round-trip теряет int (см. _to_json_types в campaign_composition).
+		sys.district_state[grp] = {
+			"present": bool(raw.get("present", false)),
+			"below_days": int(raw.get("below_days", 0)),
+		}
 	return sys

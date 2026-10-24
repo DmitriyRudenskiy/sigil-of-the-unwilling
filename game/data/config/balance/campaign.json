@@ -27,6 +27,16 @@
     "hero_capacity_food": 10,
     "starvation_attack_penalty": -2
   },
+  "training": {
+    "_note": "party-training 2.1/2.4. days — канон 07-balance «Базовые бойцы MVP» (K-M15): воин 0.6 дня, следопыт 0.5 дня; волшебника нет — T-041 (без числа тренировка не генерируется). population_per_unit — [ПРЕДЛОЖЕНИЕ] (02-mechanics §3.3 EC3: «10 жителей на юнит»), вердикт автора. concurrency_n — множитель N из формулы 02-mechanics `progress += tick / (t_тренировки × N)`: числа в GDD нет, в MVP = 1 (одновременность не замедляет), строка в реестре 07-balance §10. replacement_level — уровень замены мёртвого (party-characters 2.3): в MVP 1, C-1 («уровень города − 1») — мёртвая ссылка (K-M3).",
+    "days": {
+      "fighter": 0.6,
+      "ranger": 0.5
+    },
+    "concurrency_n": 1,
+    "population_per_unit": 10,
+    "replacement_level": 1
+  },
   "veteran": {
     "_note": "party-characters 3.1 (Q-M56→(а), K-M10, D-189): Ветеран = статус пережившего бойца (не юнит/ярус). battles_to_veteran — порог N (баланс-кран F4; Фазa 3 = ходы 14–17, 03-progression). save_step_bonus — +1 ступень к спасам/проверкам до конца боя (применение — боевой слой T-116; MVP-бой 1v1 авто — за срезом).",
     "battles_to_veteran": 5,

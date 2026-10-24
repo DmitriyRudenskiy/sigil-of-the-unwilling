@@ -145,15 +145,15 @@ func _loc() -> String:
 func _refresh_continue_button() -> void:
     # Cutover-проводка (раунд 6, T-110): Continue — кампанийный MVP-слот 1
     # (MvpSaveManager), не легаси-сейв мира.
-    _continue_btn.disabled = not MvpSaveManager.has_save_in_slot(1)
+    _continue_btn.disabled = not MvpSaveManager.has_save_in_slot(MvpSaveManager.CAMPAIGN_SLOT)
 
 func _on_continue() -> void:
-    if not MvpSaveManager.has_save_in_slot(1):
+    if not MvpSaveManager.has_save_in_slot(MvpSaveManager.CAMPAIGN_SLOT):
         return
     # Проводка T-110: Continue → main.tscn → load_save_state (слот 1).
     var persistence: WorldPersistence = Services.resolve(&"persistence")
     if persistence != null:
-        persistence.pending_campaign_slot = 1
+        persistence.pending_campaign_slot = MvpSaveManager.CAMPAIGN_SLOT
     get_tree().change_scene_to_file(SCENE_CONTINUE)
 
 func _on_new_game() -> void:

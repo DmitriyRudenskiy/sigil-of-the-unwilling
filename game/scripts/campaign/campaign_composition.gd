@@ -179,6 +179,13 @@ func _build(campaign_seed: int) -> void:
 		rep_report["districts"] = districts.process_turn(
 			settlement.buildings, settlement.population, settlement.party_size,
 			str((settlement.sm.get("food", {}) as Dictionary).get("state", "OK")))
+		# 2.2 (D-235): снятие района — событие в хронику. Носитель хроники — telemetry
+		# (T-158), отдельного журнала районов в MVP нет.
+		if telemetry != null:
+			for g in (rep_report["districts"] as Dictionary).get("disbanded", []):
+				telemetry.record("district_disbanded", {
+					"group": str(g), "turn": campaign.current_turn,
+				})
 		rep_report["population"] = pop_report
 		return rep_report
 	campaign.threats_hook = func() -> Dictionary:
@@ -193,6 +200,10 @@ func _build(campaign_seed: int) -> void:
 		# игроком не должно навсегда остаться «в стройке». Производство ресурсов
 		# кампейн-постройками — не здесь (это была бы вторая экономика; Q-M98).
 		report["city_construction"] = _process_city_construction()
+		# party-training 2.1 (T-170, вариант (а)): SM рекрута города-носителя.
+		# После достройки: у готового рекрута освобождается слот партии —
+		# выдача делается здесь, сервис слотов партии не видит.
+		report["city_training"] = _process_city_training()
 		return report
 	# T-071 (R5): victory — пережить рейд хода 21 при любом запасе > 0.
 	# Предикат инжестится в драйвер (TurnDriver не знает про сток); вызов —
@@ -249,6 +260,20 @@ func _process_city_construction() -> Dictionary:
 	ctx.cities = [city]
 	ctx.is_campaign = true
 	return CampaignConstructionProcessor.new().process(ctx)
+
+
+## Один проход очереди тренировки (production-фаза). Стоимость списана на
+## заявки (request_training), здесь только SM и выдача: готовые словари членов
+## добавляются в партию, слоты считает композиция.
+func _process_city_training() -> Dictionary:
+	if city == null or city.campaign_training.is_empty():
+		return {}
+	var alive := PartySystem.alive_members(party).size()
+	var report: Dictionary = CampaignTrainingService.advance_training_turn(
+		city, CampaignTrainingService.PARTY_CAPACITY - alive)
+	for member in report.get("members", []):
+		party.append(member)
+	return report
 
 
 ## campaign-core-loop 2.1: действие игрока (UI → сюда; headless — авто-fight

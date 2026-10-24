@@ -139,6 +139,43 @@ func test_apply_fog_three_states() -> void:
 	layer.queue_free()
 
 
+## Т-168: «куда» кладётся туман важнее, чем «что» лежит в клетке.
+##
+## Соседний тест проверяет, что в клетке стоит `FOG_SOURCE_ID`, — и проходил, пока
+## гексовый тайлсет этого источника не объявлял: `TileMapLayer` молча рисует пустоту
+## вместо тайла из несуществующего источника. Проверка ниже идёт от носителя: каждый
+## источник, который рендер поставил в клетку, обязан существовать в собираемом игрой
+## тайлсете, иначе клетка не будет нарисована.
+func test_apply_fog_sources_exist_in_shipped_tileset() -> void:
+	var model := _FakeModel.new()
+	model.terrain_grid = {
+		Vector2i(0, 0): HexUtils.Terrain.GRASS,
+		Vector2i(1, 0): HexUtils.Terrain.SNOW,
+		Vector2i(2, 0): HexUtils.Terrain.WATER,
+		Vector2i(3, 0): HexUtils.Terrain.ROAD,
+	}
+	var layer := _make_layer()
+	var vis := VisibilityMap.new()
+	vis.set_map_size(10, 10)
+	vis.explored = {Vector2i(0, 0): true, Vector2i(1, 0): true, Vector2i(2, 0): true}
+	vis.visible = {Vector2i(0, 0): true}
+	MapRenderer.new(model).apply_fog(layer, vis)
+
+	var shipped := TileAtlas.build_hex_tileset()
+	var missing: Array[String] = []
+	for cell in model.terrain_grid:
+		var sid: int = layer.get_cell_source_id(cell)
+		if sid == -1:
+			continue
+		if not shipped.has_source(sid):
+			missing.append("%s → источник %d нет в тайлсете карты" % [str(cell), sid])
+	assert_array(missing).is_empty()
+	# Фикстура обязана создавать все три состояния тумана, иначе проверка выше
+	# проходила бы на пустом списке.
+	assert_that(layer.get_cell_source_id(Vector2i(1, 0))).is_equal(TileAtlas.FOG_SOURCE_ID)
+	layer.queue_free()
+
+
 func test_apply_fog_null_safety() -> void:
 	var model := _FakeModel.new()
 	var layer := _make_layer()

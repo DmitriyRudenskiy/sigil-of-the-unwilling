@@ -197,3 +197,48 @@ func test_battle_bonus_excludes_social_stats() -> void:
 	assert_that(b["attack"]).is_equal(3)
 	assert_that(b["defense"]).is_equal(1)
 	assert_bool(bool(not b.has("int") and not b.has("cha"))).is_true()
+
+
+## === Q-M100 → (а) (D-239): раса конструктора = канон-каталог ===
+
+
+## Подпись расы — канон-имя из mvp_catalog.json; легаси-id по-прежнему подписывается
+## hero_races.gd (фолбэк), как классы после T-113.
+func test_race_label_prefers_canon_catalog() -> void:
+	var p := _full_profile()
+	p.race = "half_orcs"
+	assert_str(String(p.summary()["race"])).is_equal("Полуорки")
+	p.race = "dwarf"
+	assert_str(String(p.summary()["race"])).is_equal("Дварф")
+	p.race = "nobody"
+	assert_str(String(p.summary()["race"])).is_equal("—")
+
+
+## Чисел раса канон-идой не даёт: SRD-модификаторы каталога — шесть атрибутов,
+## словарь статов героя — MoM-восьмёрка, читателя у них нет (T-176). Сравниваем
+## статы того же профиля без расы: расхождение = 0, выдуманные бонусы не появились.
+func test_canon_race_adds_no_stat_bonuses() -> void:
+	var bare := _profile_with_race("")
+	for race_id in ["humans", "half_orcs", "elves"]:
+		var with_race := _profile_with_race(race_id)
+		for stat in with_race:
+			assert_int(int(with_race[stat])).is_equal(int(bare.get(stat, 0)))
+
+
+## Легаси-раста (MoM-тила, hero_races.gd) числами по-прежнему играет — фолбэк снят
+## быть не может: на нём держится легаси-контур (Q-M44, корзина B).
+func test_legacy_race_still_adds_bonuses() -> void:
+	var bare := _profile_with_race("")
+	var dwarf := _profile_with_race("dwarf")
+	assert_int(int(dwarf["defense"]) - int(bare["defense"])).is_equal(2)
+	assert_int(int(dwarf["attack"]) - int(bare["attack"])).is_equal(1)
+
+
+func _profile_with_race(race_id: String) -> Dictionary:
+	var p := HeroBuildProfile.new()
+	p.name = "Тест"
+	p.race = race_id
+	p.character_class = "fighter"
+	p.culture = "aedyr"
+	p.background = "soldier"
+	return p.get_stats()

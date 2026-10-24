@@ -24,6 +24,10 @@ func is_valid() -> bool:
 
 func get_stats() -> Dictionary:
 	var s := base_stats.duplicate()
+	# Q-M100 (D-239): бонусы расы читаются из легаси-таблицы hero_races.gd, поэтому
+	# канон-id каталога (`humans`/`half_orcs`/`elves`) расовых прибавок не даёт: числа
+	# первого эшелона — шесть атрибутов (02e3 SRD), а не MoM-восьмёрка статов героя,
+	# и читателя у них нет (T-176). Вымышленные бонусы не заводятся.
 	s = _add_bonuses(race, _Races.RACES, s)
 	s = _add_bonuses(character_class, _Classes.CLASSES, s)
 	s = _add_bonuses(culture, _Cultures.CULTURES, s)
@@ -34,7 +38,7 @@ func summary() -> Dictionary:
 	return {
 		"name": name if not name.is_empty() else "—",
 		"sex": GameText.creation_sex_male() if sex == "male" else GameText.creation_sex_female(),
-		"race": _label(_Races.RACES, race),
+		"race": _race_label(race),
 		"subrace": _label_subrace(race),
 		"class": _class_label(character_class),
 		"culture": _label(_Cultures.CULTURES, culture),
@@ -74,6 +78,19 @@ func _class_label(class_id: String) -> String:
 	if canon_name != "—":
 		return canon_name
 	return _label(_Classes.CLASSES, class_id)
+
+
+## Q-M100 → (а) (D-239): раса — канон-имя (mvp_catalog.json) в первую очередь,
+## legacy-таблица hero_races.gd — фолбэк для легаси-идов (тот же порядок, что у
+## `_class_label` после T-113).
+func _race_label(race_id: String) -> String:
+	if race_id.is_empty():
+		return "—"
+	var canon_name := CanonRaces.name_for(race_id)
+	if canon_name != "—":
+		return canon_name
+	return _label(_Races.RACES, race_id)
+
 
 func _label_subrace(race_key: String) -> String:
 	if race_key.is_empty() or not _Races.RACES.has(race_key):

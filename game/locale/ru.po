@@ -863,7 +863,7 @@ msgid "settings.model"
 msgstr "🗡 Модель героя"
 
 msgid "settings.autosave"
-msgstr "Автосохранение при выходе"
+msgstr "Автосохранение каждый ход"
 
 msgid "settings.adult_content"
 msgstr "Взрослый контент в диалогах (18+)"
@@ -1049,6 +1049,15 @@ msgstr "Город"
 
 msgid "campaign.party"
 msgstr "Партия"
+
+msgid "campaign.settings"
+msgstr "Настройки"
+
+msgid "campaign.menu"
+msgstr "В меню"
+
+msgid "campaign.menu_hint"
+msgstr "Сохранить кампанию и вернуться в главное меню"
 
 msgid "campaign.turn"
 msgstr "Ход"

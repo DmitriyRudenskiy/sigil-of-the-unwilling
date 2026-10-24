@@ -9,7 +9,7 @@ signal relocation_completed(new_center: Vector2i)
 
 enum Faction { DEFAULT, NECROPHAGE, ALLAYI, CULTISTS }
 
-const SERIALIZATION_VERSION := 5
+const SERIALIZATION_VERSION := 6
 
 var uid := 0
 var display_name := ""
@@ -52,6 +52,12 @@ var pop: Array[PopUnit] = []
 var boroughs: Array[Borough] = []
 var buildings: Array[UniqueBuilding] = []
 var campaign_buildings: Array[Dictionary] = []
+## party-training 2.1/2.5 (T-170, вариант (а)): очередь тренировки рекрутов.
+## Запись: {uid, class_id, race_id, trainee, training_building_uid, state,
+## progress, cost}. uid — своя последовательность очереди (не _uid_seq).
+## Носитель — живой City; T-110-форма (плоский city.campaign_buildings) не
+## используется: её никто, кроме сериализатора-предка, не производит.
+var campaign_training: Array[Dictionary] = []
 var campaign_group_state: Dictionary = {}
 # race-economy (Phase 2, вариант A): расовая композиция города {race_id: count}.
 # {} = нет рас (backward-compat). Заполняется иммиграцией/основанием (дефер).

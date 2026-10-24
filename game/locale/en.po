@@ -863,7 +863,7 @@ msgid "settings.model"
 msgstr "🗡 Hero model"
 
 msgid "settings.autosave"
-msgstr "Autosave on exit"
+msgstr "Autosave each turn"
 
 msgid "settings.adult_content"
 msgstr "Adult content in dialogs (18+)"
@@ -1050,6 +1050,15 @@ msgstr "City"
 
 msgid "campaign.party"
 msgstr "Party"
+
+msgid "campaign.settings"
+msgstr "Settings"
+
+msgid "campaign.menu"
+msgstr "Menu"
+
+msgid "campaign.menu_hint"
+msgstr "Save the campaign and return to the main menu"
 
 msgid "campaign.turn"
 msgstr "Turn"
