@@ -256,3 +256,76 @@ func test_explored_cell_dims_static_carriers() -> void:
 	nodes._nodes[far] = stack
 	nodes.apply_fog_visibility(v)
 	assert_bool(stack.visible).is_false()
+
+
+## Т-168: гексовая сборка тайлсета обязана объявлять побратима тумана.
+##
+## Почему проверка смотрит на `TileAtlas`, а не на `MapRenderer`: рендер и до правки
+## клал «исследовано, но не видно» в `TileAtlas.FOG_SOURCE_ID`, и `test_apply_fog_
+## three_states` это видело — но в фейковом тайлсете самого теста. `TileMapLayer` на
+## ссылку в несуществующий источник не ругается: он рисует пустоту, поэтому память
+## тумана (клетка, из которой игрок вышел) выглядела как никогда не открытая земля.
+## Квадратный `build()` побратима добавлял, гексовый `build_hex()` — нет.
+func test_hex_tileset_declares_the_fog_twin() -> void:
+	var ts := TileAtlas.build_hex_tileset()
+	assert_bool(ts.has_source(TileAtlas.SOURCE_ID)).is_true()
+	assert_bool(ts.has_source(TileAtlas.FOG_SOURCE_ID)).is_true()
+	var base := ts.get_source(TileAtlas.SOURCE_ID) as TileSetAtlasSource
+	var twin := ts.get_source(TileAtlas.FOG_SOURCE_ID) as TileSetAtlasSource
+	if twin == null:
+		# Случай уже уронил тест проверкой `has_source` выше; возврат — только чтобы
+		# не упасть на `twin.texture` и не превратить падение в шум.
+		return
+	# Тот же лист: размер и набор тайлов совпадают, иначе `apply_fog` не сможет
+	# положить туман в ту же клетку тем же тайлом.
+	assert_that(twin.texture.get_size()).is_equal(base.texture.get_size())
+	assert_that(twin.get_tiles_count()).is_equal(base.get_tiles_count())
+	assert_that(int(twin.texture_region_size.x)).is_equal(int(TileAtlas.TILE))
+
+	# И та же картинка, помноженная на `MAP_FOG_DIM` по RGB при неизменной альфе —
+	# та кратность, о которой говорит тест затемнённых носителей выше.
+	var dim := float(GameNumbers.MAP_FOG_DIM)
+	var bimg: Image = base.texture.get_image()
+	var timg: Image = twin.texture.get_image()
+	var checked := 0
+	var y := 0
+	while y < bimg.get_height() and checked < 3:
+		var x := 0
+		while x < bimg.get_width() and checked < 3:
+			var c: Color = bimg.get_pixel(x, y)
+			if c.a > 0.5:
+				var f: Color = timg.get_pixel(x, y)
+				for ch in [0, 1, 2]:
+					var want: int = int(round([c.r, c.g, c.b][ch] * dim * 255.0))
+					var got: int = int(round([f.r, f.g, f.b][ch] * 255.0))
+					assert_int(absi(got - want)).is_less_equal(1)
+				assert_int(int(round(f.a * 255.0))).is_equal(int(round(c.a * 255.0)))
+				checked += 1
+			x += 37
+		y += 53
+	assert_int(checked).is_greater_equal(1)
+
+
+## Т-168 (общая форма): каждый слой обязан объявлять все источники, в которые пишет
+## рендер. Дефект жил ровно в этом месте — гексовый тайлсет биомов молчал про
+## `FOG_SOURCE_ID`, тогда как дороги и объекты объявляли своих побратимей.
+func test_every_layer_declares_the_sources_the_renderer_uses() -> void:
+	var cases := {
+		"биом": [TileAtlas.build_hex_tileset(),
+			[TileAtlas.SOURCE_ID, TileAtlas.FOG_SOURCE_ID]],
+		"дороги": [MapRoads.build_tileset(),
+			[MapRoads.SOURCE_ID, MapRoads.FOG_SOURCE_ID]],
+		"объекты": [MapObjects.build_tileset(),
+			[MapObjects.SOURCE_ID, MapObjects.SHADOW_SOURCE_ID,
+				MapObjects.FOG_SOURCE_ID, MapObjects.SHADOW_FOG_SOURCE_ID]],
+	}
+	var missing: Array[String] = []
+	for cname in cases:
+		var ts: TileSet = cases[cname][0]
+		if ts == null:
+			missing.append("%s: тайлсет не собрался" % str(cname))
+			continue
+		for sid in cases[cname][1]:
+			if not ts.has_source(sid):
+				missing.append("%s: источник %d не объявлен" % [str(cname), sid])
+	assert_array(missing).is_empty()

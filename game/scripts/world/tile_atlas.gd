@@ -142,16 +142,23 @@ func build() -> bool:
 	return true
 
 
-## Затемнённый лист для тумана войны: тот же тайлсет, второй источник, те же
-## координаты — иначе `apply_fog` не сможет класть туман в ту же клетку.
-func _build_fog_source(tex: Texture2D) -> void:
-	var img: Image = tex.get_image().duplicate()
+## Затемнённый побратим листа (`GameNumbers.MAP_FOG_DIM` по RGB, альфа нетронута).
+## Нужен именно вторым листом, а не `modulate` слоя: туман различает клетки, а слой
+## затемнял бы и то, что в поле зрения.
+static func _dimmed_image(src: Image) -> Image:
+	var img: Image = src.duplicate()
+	var dim := float(GameNumbers.MAP_FOG_DIM)
 	for y in img.get_height():
 		for x in img.get_width():
 			var c: Color = img.get_pixel(x, y)
-			img.set_pixel(x, y, Color(c.r * GameNumbers.MAP_FOG_DIM, c.g * GameNumbers.MAP_FOG_DIM,
-					c.b * GameNumbers.MAP_FOG_DIM, c.a))
-	_fog_tex = ImageTexture.create_from_image(img)
+			img.set_pixel(x, y, Color(c.r * dim, c.g * dim, c.b * dim, c.a))
+	return img
+
+
+## Затемнённый лист для тумана войны: тот же тайлсет, второй источник, те же
+## координаты — иначе `apply_fog` не сможет класть туман в ту же клетку.
+func _build_fog_source(tex: Texture2D) -> void:
+	_fog_tex = ImageTexture.create_from_image(_dimmed_image(tex.get_image()))
 	_fog_src = TileSetAtlasSource.new()
 	_fog_src.texture = _fog_tex
 	_fog_src.texture_region_size = Vector2i(TILE, TILE)
@@ -182,6 +189,18 @@ func build_hex() -> TileSet:
 	ts.add_source(src, SOURCE_ID)
 	for coords in all_coords():
 		src.create_tile(coords)
+	# Побратим тумана объявляется и здесь, а не только в квадратном `build()`
+	# (T-168): `MapRenderer.apply_fog` и `paint_transitions` кладут «исследовано, но
+	# не видно» в `FOG_SOURCE_ID`, а `TileMapLayer` на ссылку в несуществующий
+	# источник не ругается — он рисует пустоту. Пока источника не было, память
+	# тумана (клетка, которую игрок видел и из которой вышел) становилась
+	# неотличима от никогда не открытой земли.
+	var fog_src := TileSetAtlasSource.new()
+	fog_src.texture = ImageTexture.create_from_image(_dimmed_image(tex.get_image()))
+	fog_src.texture_region_size = Vector2i(TILE, TILE)
+	ts.add_source(fog_src, FOG_SOURCE_ID)
+	for coords in all_coords():
+		fog_src.create_tile(coords)
 	return ts
 
 
@@ -200,6 +219,13 @@ func _build_fallback_tileset() -> TileSet:
 	src.texture_region_size = Vector2i(TILE, TILE)
 	ts.add_source(src, SOURCE_ID)
 	src.create_tile(Vector2i.ZERO)
+	# Побратим тумана нужен и резерву: правило «открыто и не видно — затемнено» не
+	# отменяется из-за того, что основной лист не загрузился (T-168).
+	var fog_src := TileSetAtlasSource.new()
+	fog_src.texture = ImageTexture.create_from_image(_dimmed_image(img))
+	fog_src.texture_region_size = Vector2i(TILE, TILE)
+	ts.add_source(fog_src, FOG_SOURCE_ID)
+	fog_src.create_tile(Vector2i.ZERO)
 	return ts
 
 
