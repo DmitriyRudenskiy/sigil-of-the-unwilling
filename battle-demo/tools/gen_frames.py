@@ -51,7 +51,9 @@ def main() -> int:
     # идут (D-185), а реестр с md5/seed/промптом обязан быть в репозитории.
     manifest_path = ROOT / spec["manifest"]
     manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else []
-    done = {row["path"] for row in manifest}
+    # Возобновление: кадр считается сделанным, если он есть в манифесте И лежит
+    # на диске — снять кадр к перегенерации значит удалить файл.
+    done = {row["path"] for row in manifest if (ROOT / row["path"]).exists()}
 
     jobs = []
     for character in spec["characters"]:

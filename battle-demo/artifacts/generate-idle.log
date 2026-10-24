@@ -1,0 +1,6 @@
+[1/4] battle-demo/artifacts/gen/knight/idle_01.png seed=1101 124 c/кадр, всего 2.1 мин
+[2/4] battle-demo/artifacts/gen/knight/idle_02.png seed=1101 124 c/кадр, всего 4.1 мин
+[3/4] battle-demo/artifacts/gen/knight/idle_03.png seed=1101 125 c/кадр, всего 6.2 мин
+[4/4] battle-demo/artifacts/gen/knight/idle_04.png seed=1101 125 c/кадр, всего 8.4 мин
+кадров в манифесте: 24 → battle-demo/artifacts/generation-manifest.json
+ИТОГ ok=4 skip=0 fail=0

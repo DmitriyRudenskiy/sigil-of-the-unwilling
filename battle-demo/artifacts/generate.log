@@ -6,3 +6,11 @@
 [6/14] battle-demo/artifacts/gen/knight/attack_04.png seed=1101 126 c/кадр, всего 12.6 мин
 [7/14] battle-demo/artifacts/gen/knight/hit_01.png seed=1101 126 c/кадр, всего 14.7 мин
 [8/14] battle-demo/artifacts/gen/knight/hit_02.png seed=1101 126 c/кадр, всего 16.9 мин
+[9/14] battle-demo/artifacts/gen/knight/hit_03.png seed=1101 127 c/кадр, всего 19.0 мин
+[10/14] battle-demo/artifacts/gen/knight/hit_04.png seed=1101 127 c/кадр, всего 21.1 мин
+[11/14] battle-demo/artifacts/gen/knight/turn_01.png seed=1101 127 c/кадр, всего 23.3 мин
+[12/14] battle-demo/artifacts/gen/knight/turn_02.png seed=1101 127 c/кадр, всего 25.4 мин
+[13/14] battle-demo/artifacts/gen/knight/turn_03.png seed=1101 127 c/кадр, всего 27.5 мин
+[14/14] battle-demo/artifacts/gen/knight/turn_04.png seed=1101 127 c/кадр, всего 29.6 мин
+кадров в манифесте: 20 → battle-demo/artifacts/generation-manifest.json
+ИТОГ ok=14 skip=6 fail=0
