@@ -71,3 +71,12 @@ The city SHALL NOT use city levels (K-M3). Limits SHALL be administrative buildi
 - **WHEN** the player attempts to build a building
 - **THEN** the only gates are prerequisites, resources, and placement
 - **AND** no city level check is performed
+
+## Carrier notes (агент, 2026-10-24)
+
+Термины требований → имена в коде (полная таблица — `design.md` § «Carrier notes», маппинг состояний — § «Маппинг SM здания»), чтобы при синке в main spec текст читался вместе с носителем:
+
+- `terrain_preference` (P-3) → `placement.terrain_tags` + `placement.requires_special_site`; жёсткость держит `CampaignBuildingPlacement.explain_placement`. Поля с именем `terrain_preference` в репо нет.
+- «ферма у леса +15%» → соседняя лесопилка: `campaign_sawmill.adjacency[0]` = `forest_edge_farm`, `target_role: food_production`, `radius: 1`, `output_bp: 1500`. Леса как размещаемого объекта городской сетки нет; расхождение формулировки с носителем осознанно и заперто тестами переписи каталога.
+- SM здания → пара полей `state` (`inactive`/`active`/`ruined`) + `construction_turns_remaining`; GHOST — инстанса ещё нет (превью размещения), DISABLED — вакансия рабочих, REPAIRING — носителя нет (чинящего в кампанийном слое нет).
+- «район» → группа `DistrictSystem` (7 + без группы): проекция города, своего upkeep не имеет, между ходами состояния не хранит. Поэтому последнее предложение Requirement «Districts are emergent» (распад по 3 дням) и требование хроники блокированы выбором носителя района — **Q-M99**.

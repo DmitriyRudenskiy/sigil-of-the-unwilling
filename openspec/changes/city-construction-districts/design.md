@@ -25,4 +25,33 @@
 - [C-2: уровни 1–11 в main spec vs K-M3] → до вердикта владельца: код не вводит уровни (legacy `city.level` — не campaign-механика); spec помечается superseded или остаётся как 1.0 — решение владельца.
 - [C-11: MVP-scope.md «район создан — источник Престижа»] → канон = K-M16; синк docs (реестр TBD).
 - [SM здание vs construction-queue `inactive`] → маппинг: BUILDING = `construction_turns_remaining > 0`; RUINED = `state == "ruined"`; REPAIRING — новая задача (реализация в construction-queue или здесь — по вердикту).
-- [Распад района (3 дня) не реализован] → задача 2.2; таймер на районе (district_system.gd).
+- [Распад района (3 дня) не реализован] → задача 2.2; таймер на районе (district_system.gd). Уточнено 2026-10-24: «таймер на районе» не строится на текущем носителе — у района нет ни собственного содержания (оно у зданий), ни состояния между ходами (район пересчитывается из города каждый ход, в сейв не пишется), ни перечня тегов и числа порога; вопрос носителя — **Q-M99**.
+
+## Маппинг SM здания (2.3, 2026-10-24)
+
+Состояние здания в кампанийном носителе — **пара полей** инстанса в `city.campaign_buildings`, отдельного перечисления нет и вводить его нечем (единственный читатель — проверки ниже). GHOST — не состояние инстанса: это превращение превью размещения до создания инстанса (`explain_request` → `explain_placement`), инстанс с этим состоянием не существует.
+
+| Состояние GDD | Носитель (поля инстанса) | Кто пишет | Кто читает |
+| --- | --- | --- | --- |
+| GHOST | инстанса нет; превью по `explain_request`/`explain_placement` | `city_screen`/`campaign_city_board` | та же проверка при подтверждении |
+| BUILDING | `state == "inactive"` при установке; далее `construction_turns_remaining > 0` | `campaign_building_construction_service.request` | `campaign_construction_processor` (тик), `economic_turn_processor`, `campaign_defense_resolver`, `CampaignBuildingPlacement` |
+| WORKING | `state == "active"` и `construction_turns_remaining == 0` | `campaign_construction_processor` (по окончании стройки) | все потребители выше + `campaign_training_service` |
+| DISABLED | отдельного значения нет: вакансия рабочих (`assigned_workers < jobs`) при active-состоянии | `worker_assignment`, `DistrictSystem.process_turn` | эконом-процессор (рецепт не крутится без рабочих) |
+| RUINED | `state == "ruined"` | `campaign_building_merger` (хотя бы один компонент разрушен) | `campaign_training_service`, `CampaignBuildingPlacement`, `city_screen` («разрушено») |
+| REPAIRING | **носителя нет** | — | — |
+
+`REPAIRING` кодом не вводится: write-точек `ruined → *` в кампанийном слое нет — мерж только сохраняет `ruined`, если хоть один компонент разрушен, то есть чинящего нет. Вводить состояние раньше носителя — писатель без читателя (прецедент Q-M79/Q-M81).
+
+Ауры (соседство) берутся только от WORKING и применяются только к WORKING: `CampaignBuildingPlacement._evaluate_one` отсевает и источник, и цель по признаку `state != "active" || construction_turns_remaining > 0` — обе половины заперты тестами (`test_inactive_or_ruined_buildings_do_not_supply_adjacency_effects`, `test_shipped_forest_edge_rule_needs_working_source_at_radius_one`).
+
+## Carrier notes (термин спеки → имя в коде)
+
+| Термин спеки | Носитель |
+| --- | --- |
+| `terrain_preference` (жёсткая привязка, P-3) | `placement.terrain_tags` + `placement.requires_special_site` в каталоге; проверка — `CampaignBuildingPlacement.explain_placement` (жёсткая: несовпадение → `ok = false`, не штраф). Ключа с именем `terrain_preference` в репо нет. |
+| «ферма у леса +15%» | `campaign_sawmill.adjacency[0]`: `id: forest_edge_farm`, `target_role: food_production`, `radius: 1`, `effect: output_bp`, `value: 1500` (1500 б.п. = +15%). Самого леса как размещаемого объекта городской сетки нет — роль леса играет соседнее лесозаготовительное здание; ни ферма, ни лесопилка terrain-ограничений не имеют (`terrain_tags: []`). |
+| «1 клетка = 1 здание» | `footprint` ровно из одной клетки у всех 98 зданий каталога (тест `test_mvp_catalog_one_cell_per_building`) + `_occupied_cells` при размещении. |
+| «район» | группа `SettlementProcessor.GROUPS` в `DistrictSystem` (7 + без группы): проекция текущего города, свой upkeep не имеет, между ходами состояния не хранит → распад (2.2) блокирован Q-M99. |
+| «событие в хронику» | `GameEventBus.chronicle_entry_added` / `chronicle` носителя (`endgame_controller._append_chronicle_entry` — единственный писатель на сегодня). |
+
+Каталог в Context указан как «23 здания» — с тех пор вырос до 98 (основная масса — переносные карточки AOE4/TerraScape, `campaign_*` — MVP-ядро); число не является мерой скоупа этой спеки и оставлено как история.

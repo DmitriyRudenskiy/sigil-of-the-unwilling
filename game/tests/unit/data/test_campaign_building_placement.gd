@@ -152,6 +152,108 @@ func _has_issue(issues: Array, fragment: String) -> bool:
 
 ## city-construction-districts 4.1: «1 клетка = 1 здание» — инвариант данных
 ## MVP-каталога: каждый building footprint [[0,0]] (одна клетка).
+## city-construction-districts 2.4/4.3: правило соседства в MVP — одно на каталог.
+## Канон — «ферма у леса +15%» (02-mechanics §3.5, 02g §3). Носитель MVP — лесопилка
+## рядом с фермой (rule id `forest_edge_farm`): самого леса как размещаемого объекта
+## на городской сетке нет, роль леса играет соседнее лесозаготовительное здание.
+## Числа не хардкод теста: проверяется ровно то, что объявлено в каталоге, и то,
+## что из этого следует по сетке.
+func _catalog_buildings() -> Array:
+	var catalog := CampaignBuildingCatalog.load_catalog()
+	assert_that(catalog.is_empty()).is_false()
+	var buildings: Array = catalog.get("buildings", [])
+	assert_that(buildings.size()).is_greater(0)
+	return buildings
+
+
+func _catalog_instance(definition_id: String, cell: Vector2i) -> Dictionary:
+	for definition in _catalog_buildings():
+		if definition is Dictionary and String(definition.get("id", "")) == definition_id:
+			var instance: Dictionary = definition.duplicate(true)
+			instance["cell"] = cell
+			# WORKING по носителю: active + пустая очередь стройки
+			# (city-construction-districts 2.3, маппинг SM на construction-queue).
+			instance["state"] = "active"
+			instance["construction_turns_remaining"] = 0
+			return instance
+	fail("здание %s отсутствует в кампанийном каталоге" % definition_id)
+	return {}
+
+
+func _farm_bonus(sawmill: Dictionary, farm: Dictionary) -> float:
+	var results := CampaignBuildingPlacement.recompute_adjacency([sawmill, farm])
+	var breakdown: Dictionary = _find_building_result(results, "campaign_farm").get("breakdown", {})
+	return float(breakdown.get("effects", {}).get("output_bp", 0.0))
+
+
+func test_mvp_catalog_has_exactly_one_adjacency_rule() -> void:
+	var rules := 0
+	var owner_id := ""
+	var rule := {}
+	for definition in _catalog_buildings():
+		if not (definition is Dictionary):
+			continue
+		for entry in definition.get("adjacency", []):
+			rules += 1
+			owner_id = String(definition.get("id", ""))
+			rule = entry
+	assert_that(rules).is_equal(1) \
+		.override_failure_message("MVP: ровно одно правило соседства на каталог")
+	assert_that(owner_id).is_equal("campaign_sawmill")
+	assert_that(String(rule.get("id", ""))).is_equal("forest_edge_farm")
+	assert_that(String(rule.get("target_role", ""))).is_equal("food_production")
+	assert_that(int(rule.get("radius", 0))).is_equal(1)
+	assert_that(String(rule.get("effect", ""))).is_equal("output_bp")
+	# 1500 б.п. = +15% канонического правила
+	assert_that(float(rule.get("value", 0.0))).is_equal(1500.0)
+
+
+func test_shipped_forest_edge_rule_gives_the_farm_fifteen_percent() -> void:
+	var center := ArenaRingSystem.center()
+	var farm := _catalog_instance("campaign_farm", HexUtils.get_neighbor(center, 0, true))
+	var sawmill := _catalog_instance("campaign_sawmill", center)
+	assert_that(_farm_bonus(sawmill, farm)).is_equal(1500.0)
+	var results := CampaignBuildingPlacement.recompute_adjacency([sawmill, farm])
+	var causes: Array = _find_building_result(results, "campaign_farm").get("breakdown", {}).get("causes", [])
+	assert_that(causes.size()).is_equal(1)
+	assert_that(String(causes[0].get("source_id", ""))).is_equal("campaign_sawmill")
+	assert_that(String(causes[0].get("rule_id", ""))).is_equal("forest_edge_farm")
+	# Правило односторонее: лесопилка рядом с фермой ничего не получает.
+	var sawmill_effects: Dictionary = _find_building_result(results, "campaign_sawmill") \
+		.get("breakdown", {}).get("effects", {})
+	assert_bool(sawmill_effects.is_empty()).is_true()
+
+
+func test_shipped_forest_edge_rule_needs_working_source_at_radius_one() -> void:
+	var center := ArenaRingSystem.center()
+	var farm := _catalog_instance("campaign_farm", center)
+	var sawmill := _catalog_instance("campaign_sawmill", HexUtils.get_neighbor(center, 0, true))
+	assert_that(_farm_bonus(sawmill, farm)).is_equal(1500.0)
+	# Радиус 1: отодвинули лесопилку — леса (т.е. её) рядом уже нет.
+	var far_cell := HexUtils.get_neighbor(HexUtils.get_neighbor(center, 0, true), 0, true)
+	assert_that(HexUtils.hex_distance(center, far_cell, true)).is_equal(2)
+	var far_sawmill := _catalog_instance("campaign_sawmill", far_cell)
+	assert_that(_farm_bonus(far_sawmill, farm)).is_equal(0.0)
+	# BUILDING (state inactive) — аура не действует.
+	sawmill["state"] = "inactive"
+	assert_that(_farm_bonus(sawmill, farm)).is_equal(0.0)
+	# BUILDING в очереди стройки (state active, но remaining > 0) — тоже нет.
+	sawmill["state"] = "active"
+	sawmill["construction_turns_remaining"] = 2
+	assert_that(_farm_bonus(sawmill, farm)).is_equal(0.0)
+	# RUINED — нет.
+	sawmill["construction_turns_remaining"] = 0
+	sawmill["state"] = "ruined"
+	assert_that(_farm_bonus(sawmill, farm)).is_equal(0.0)
+	# WORKING — бонус возвращается: эффект производный от состояний, не кэш.
+	sawmill["state"] = "active"
+	assert_that(_farm_bonus(sawmill, farm)).is_equal(1500.0)
+	# Стройка на самой ферме (BUILDING-цель) — бонус не применяется к тому, кто
+	# ещё не работает.
+	farm["construction_turns_remaining"] = 1
+	assert_that(_farm_bonus(sawmill, farm)).is_equal(0.0)
+
+
 func test_mvp_catalog_one_cell_per_building() -> void:
 	var catalog := CampaignBuildingCatalog.load_catalog()
 	var buildings: Array = catalog.get("buildings", [])
