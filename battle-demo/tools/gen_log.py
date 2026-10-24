@@ -39,8 +39,33 @@ def main() -> int:
             f"| `{row['source_portrait']}` | `{row['pose_map']}` | {row['seed']} "
             f"| {row['resolution']} | `{row['path']}` | {row['md5'][:8]} "
             f"| {verdicts.get(row['path'], 'не смотрен')} |")
+
+    clip_manifest = ROOT / "battle-demo/artifacts/clip-manifest.json"
+    clips = json.loads(clip_manifest.read_text()) if clip_manifest.exists() else []
+    if clips:
+        lines += [
+            "",
+            "## Клипы (D15, `tools/gen_clip.py`)",
+            "",
+            "Строка = один клип: 33 кадра движения, из них 4 после прорежки.",
+            "Машинная проверка — `measure()` и `verdict()` там же; вердикт —",
+            "`artifacts/verdicts.json` по каталогу клипа. Пиксели кадров — вне git (D-185).",
+            "",
+            "| персонаж | анимация | seed | кадров | движение | резкость мин./медиана | "
+            "снос корпуса | хромакей | вердикт |",
+            "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+        ]
+        for row in clips:
+            audit = row["audit"]
+            key = f"battle-demo/artifacts/clips/{row['char']}/{row['anim']}"
+            lines.append(
+                f"| {row['char']} | {row['anim']} | {row['seed']} | {audit['frames']} "
+                f"| {audit['motion_first_last']} | {audit['sharpness_min']}/{audit['sharpness_median']} "
+                f"| {audit['pivot_slide_x']} px | {audit['chroma_pixels_kept']} "
+                f"| {verdicts.get(key, 'не смотрен')} |")
+
     OUT.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print(f"строк: {len(rows)} → {OUT.relative_to(ROOT)}")
+    print(f"строк: {len(rows)} кадров + {len(clips)} клипов → {OUT.relative_to(ROOT)}")
     return 0
 
 

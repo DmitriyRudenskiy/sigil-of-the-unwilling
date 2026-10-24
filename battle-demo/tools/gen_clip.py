@@ -10,11 +10,14 @@ Workflow'ы — копия скилла `wan22-i2v-character-clip` (см. `workf
 """
 import argparse
 import json
+import shutil
 import statistics
+import subprocess
+import sys
 import time
 from pathlib import Path
 
-from PIL import Image, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter
 import comfy
 
 HERE = Path(__file__).resolve().parent
@@ -22,7 +25,10 @@ ROOT = comfy.ROOT
 WF = HERE / "workflows"
 CLIPS = ROOT / "battle-demo/artifacts/clips"
 MANIFEST = ROOT / "battle-demo/artifacts/clip-manifest.json"
+VERDICTS = ROOT / "battle-demo/artifacts/verdicts.json"
 GREEN = (0, 255, 0)
+# Анимации, которые в движке крутятся по кругу (D9): для них ищется стык петли.
+LOOP_ANIMS = {"idle", "walk"}
 
 
 def load_workflow(name: str) -> dict:
@@ -89,13 +95,42 @@ def measure(paths: list[Path]) -> dict:
     frames = [np.asarray(Image.open(path).convert("RGB"), dtype="int16") for path in paths]
     alphas = [Image.open(path).getchannel("A") for path in paths]
     grays = [np.asarray(Image.open(path).convert("L"), dtype="float64") for path in paths]
-    sharpness = [
-        float(((g[:, 2:] - g[:, :-2])**2).mean() + ((g[2:, :] - g[:-2, :])**2).mean())
-        for g in grays
-    ]
-    # Движение: средний модуль разности первого и последнего кадра (0–255).
-    motion = float(abs(frames[0] - frames[-1]).mean())
-    # Pivot: низ центра альфы. Дрейф — максимум расхождения по кадрам.
+    # Градиент считаем только внутри силуэта, на 2 px от края: граница силуэта о
+    # край кадра — это не резкость, а артефакт кадрирования.
+    masks = [np.asarray(alpha.filter(ImageFilter.MinFilter(5)), dtype="float64") / 255
+             for alpha in alphas]
+    def sharpness(gray, mask):
+        """Средний квадрат градиента внутри силуэта (пара пикселей — оба под маской)."""
+        total = 0.0
+        for a, b, ma, mb in ((gray[:, :-2], gray[:, 2:], mask[:, :-2], mask[:, 2:]),
+                             (gray[:-2, :], gray[2:, :], mask[:-2, :], mask[2:, :])):
+            keep = ma * mb
+            if keep.sum():
+                total += float((((b - a) ** 2) * keep).sum() / keep.sum())
+        return total
+
+    sharp = [sharpness(gray, mask) for gray, mask in zip(grays, masks)]
+    # Движение: средний модуль разности первого и последнего кадра внутри силуэта
+    # (0–255); по всему кадру меру съел бы неподвижный фон.
+    keep = np.clip(masks[0] + masks[-1], 0.0, 1.0)
+    motion = float((abs(frames[0] - frames[-1]) * keep[..., None]).sum() / max(keep.sum() * 3, 1))
+    # Дрейф корпуса: разброс центра тяжести **верха** силуэта (голова, плечи) — того,
+    # что по полу ездить не должно. Разброс нижне-центра альфа-бокса (ступней) в
+    # шаге двигается сам — это и есть анимация, поэтому feet_* только сообщается.
+    def body_x(alpha: Image.Image) -> float:
+        mask = np.asarray(alpha, dtype="float64")[:max(int(alpha.height * 0.4), 1), :]
+        total = mask.sum()
+        if not total:
+            return 0.0
+        return float((np.arange(mask.shape[1]) * mask.sum(axis=0)).sum() / total)
+
+    bodies = [body_x(alpha) for alpha in alphas]
+    # За вердикт отвечает снос: насколько уехал корпус за цикл (первый ↔ последний
+    # кадр). Размах по всем кадрам — часть шага (корпус качается), он только
+    # сообщается. Порог на размахе валил честный walk: прогон 2026-10-24 показал
+    # качание 11 px при сносе 0.
+    slide_x = abs(bodies[-1] - bodies[0]) if bodies else 0.0
+    sway_x = max(bodies) - min(bodies) if bodies else 0.0
     pivots = []
     for image in alphas:
         box = image.getbbox()
@@ -103,22 +138,99 @@ def measure(paths: list[Path]) -> dict:
             pivots.append(((box[0] + box[2]) / 2, box[3]))
     drift_x = max(p[0] for p in pivots) - min(p[0] for p in pivots) if pivots else 0.0
     drift_y = max(p[1] for p in pivots) - min(p[1] for p in pivots) if pivots else 0.0
-    # Хромакей после ункея: сколько зелёного осталось внутри силуэта.
+    # Хромакей после ункея: сколько зелёного осталось в удержанных пикселях.
+    # Порог — не «чистый зелёный», а «зелёный перевешивает оба других канала на 25»:
+    # спил на ботинках рыцаря (прогон 2026-10-24, кадры 16 и 24) — бледно-зелёный,
+    # правило «g-r > 60» его не видело и вердикт врал.
     residue = 0
+    kept_total = 0
     for path, alpha in zip(paths, alphas):
         rgb = Image.open(path).convert("RGB")
-        kept = alpha.point(lambda v: 255 if v > 200 else 0)
+        kept = alpha.point(lambda v: 255 if v > 20 else 0)
         r, g, b = (np.asarray(channel, dtype="int16") for channel in rgb.split())
         a = np.asarray(kept, dtype="bool")
-        residue += int((((g - r > 60) & (g - b > 60)) & a).sum())
+        residue += int((((g - np.maximum(r, b)) > 25) & a).sum())
+        kept_total += int(a.sum())
     return {
         "frames": len(paths),
         "motion_first_last": round(motion, 1),
-        "sharpness_min": round(min(sharpness), 1),
-        "sharpness_median": round(statistics.median(sharpness), 1),
-        "pivot_drift_x": round(drift_x, 1),
-        "pivot_drift_y": round(drift_y, 1),
+        "sharpness_min": round(min(sharp), 1),
+        "sharpness_median": round(statistics.median(sharp), 1),
+        "pivot_slide_x": round(slide_x, 1),
+        "pivot_sway_x": round(sway_x, 1),
+        "feet_drift_x": round(max(p[0] for p in pivots) - min(p[0] for p in pivots), 1)
+        if pivots else 0.0,
+        "feet_drift_y": round(max(p[1] for p in pivots) - min(p[1] for p in pivots), 1)
+        if pivots else 0.0,
         "chroma_pixels_kept": residue,
+        # Доля зелёного в удержанных пикселях: силуэты кадров разного размера,
+        # поэтому порог — доля, а не число пикселей.
+        "chroma_share": round(residue / max(kept_total, 1), 6),
+    }
+
+
+def register(images: list[Image.Image]) -> list[Image.Image]:
+    """Сводит кадры клипа по X к первому кадру (6.14).
+
+    Wan держит позу, но не привязку к полу: в `walk` корпус уехал на 31 px
+    (known-issues 5). Якорь — максимум взаимной корреляции профилей столбцов
+    альфы (целочисленный сдвиг, при котором силуэт кадра лучше всего налаживается
+    на первый). Центр тяжести силуэта для этого не годится: на прогоне 2026-10-24
+    он снял из 31 px только 8. По Y не трогаем: покачивание и есть анимация.
+    """
+    import numpy as np
+
+    def profile(image: Image.Image):
+        mask = np.asarray(image.getchannel("A"), dtype="float64")
+        # Только верх силуэта (голова и плечи): в шаге ноги ездят, корпус — нет.
+        profile = mask[:max(int(image.height * 0.4), 1), :].sum(axis=0)
+        return profile - profile.mean()
+
+    reference = profile(images[0])
+    spectrum = np.fft.rfft(reference)
+    aligned = []
+    for image in images:
+        current = profile(image)
+        correlation = np.fft.irfft(np.fft.rfft(current) * np.conj(spectrum), n=image.width)
+        peak = int(np.argmax(correlation))
+        # Пик на k означает «кадр = первый кадр, сдвинутый вправо на k» → на место
+        # его ставит сдвиг -k.
+        shift = peak - image.width if peak > image.width // 2 else peak
+        shift = -shift
+        if not shift:
+            aligned.append(image)
+            continue
+        canvas = Image.new("RGBA", image.size, (0, 0, 0, 0))
+        canvas.paste(image, (shift, 0), image)
+        aligned.append(canvas)
+    return aligned
+
+
+def loop_window(paths: list[Path], count: int) -> tuple[list[Path], dict]:
+    """Окно клипа под петлю: последний кадр — ближайший по позе к первому (6.14).
+
+    Если стык не найден (последний кадр всё равно далёк от первого), петля
+    собирается в движке как `ping-pong` (D9) — об этом говорит флаг `ping_pong`.
+    """
+    import numpy as np
+
+    small = [np.asarray(Image.open(path).convert("L").resize((128, 128), Image.LANCZOS),
+                        dtype="int16") for path in paths]
+
+    def distance(a, b) -> float:
+        return float(abs(a - b).mean())
+
+    seam_of = {k: distance(small[0], small[k]) for k in range(len(paths) // 2, len(paths))}
+    best = min(seam_of, key=seam_of.get)
+    typical = statistics.median(
+        [distance(small[i], small[min(i + count, len(small) - 1)])
+         for i in range(0, len(small) - 1, count)] or [1.0]) or 1.0
+    seam = seam_of[best]
+    return paths[:best + 1], {
+        "window": best + 1,
+        "seam": round(seam, 2),
+        "frame_step": round(typical, 2),
+        "ping_pong": bool(seam > 1.5 * typical),
     }
 
 
@@ -128,6 +240,32 @@ def subsample(paths: list[Path], count: int) -> list[Path]:
         return list(paths)
     step = (len(paths) - 1) / (count - 1)
     return [paths[round(i * step)] for i in range(count)]
+
+
+def verdict(report: dict) -> str:
+    """Машинная проверка клипа (6.13) — до просмотра. Пороги по замерам 6.11."""
+    audit = report["audit"]
+    faults = []
+    if tuple(report["corner_before_clip"]) != GREEN:
+        faults.append("хромакей не залит: угол первого кадра не (0,255,0)")
+    if audit["motion_first_last"] < 2.0:
+        faults.append("анимация не двинулась")
+    if audit["sharpness_min"] < 0.7 * audit["sharpness_median"]:
+        faults.append("есть смазанные кадры")
+    if audit["pivot_slide_x"] > 8:
+        faults.append(f"корпус уехал по полу ({audit['pivot_slide_x']} px за цикл)")
+    if audit["chroma_share"] > 0.0005:
+        faults.append(f"остался хромакей ({audit['chroma_pixels_kept']} px, "
+                      f"{audit['chroma_share'] * 100:.3f}% удержанных пикселей)")
+    if faults:
+        return "брак: " + "; ".join(faults)
+    loop = report.get("loop")
+    seam = "" if not loop else (
+        " — петля ping-pong (стык не найден)" if loop["ping_pong"]
+        else f" — петля замыкается (стык {loop['seam']} при шаге {loop['frame_step']})")
+    return (f"годен: движение {audit['motion_first_last']}, резкость "
+            f"{audit['sharpness_min']}/{audit['sharpness_median']}, снос "
+            f"{audit['pivot_slide_x']} px, хромакей {audit['chroma_pixels_kept']}{seam}")
 
 
 def self_test() -> int:
@@ -147,8 +285,47 @@ def self_test() -> int:
         picked = [p.name for p in subsample(paths, 4)]
         assert picked == ["0.png", "3.png", "5.png", "8.png"], picked
         assert len(subsample(paths, 40)) == 9
+
+        # Сведение по X: кадр, сдвинутый на 7 px, обязан вернуться на место.
+        figure = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+        ImageDraw.Draw(figure).rectangle((20, 10, 30, 50), fill=(9, 9, 9, 255))
+        moved = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
+        moved.paste(figure, (7, 0), figure)
+        aligned = register([figure, moved])
+        boxes = [image.getchannel("A").getbbox() for image in aligned]
+        assert boxes[0][0] == boxes[1][0], f"сведение не сработало: {boxes}"
     print("self-test OK")
     return 0
+
+
+def batch(args: argparse.Namespace) -> int:
+    """Пакетный режим 6.12: все клипы из spec.json, уже годные не трогаем.
+
+    Каждый клип — отдельным процессом этого же файла: сбой одного клипа (таймаут
+    сервера, неудачный seed) не роняет двухчасовую очередь, а возобновление —
+    это повторный запуск: манифест помнит, что уже принято.
+    """
+    accepted = set()
+    if MANIFEST.exists():
+        accepted = {(row["char"], row["anim"])
+                    for row in json.loads(MANIFEST.read_text())
+                    if row.get("verdict", "").startswith("годен")}
+    ok = skipped = failed = 0
+    for char, anims in comfy.load_spec()["clip_prompt"].items():
+        for anim in anims:
+            if (char, anim) in accepted:
+                print(f"[skip] {char}/{anim}: уже годен", flush=True)
+                skipped += 1
+                continue
+            command = [sys.executable, str(Path(__file__).resolve()),
+                       "--char", char, "--anim", anim, "--comfy", args.comfy]
+            print(f"[run ] {char}/{anim}", flush=True)
+            if subprocess.run(command, check=False).returncode == 0:
+                ok += 1
+            else:
+                failed += 1
+    print(f"ИТОГ ok={ok} skip={skipped} fail={failed}", flush=True)
+    return 0 if not failed else 1
 
 
 def main() -> int:
@@ -164,13 +341,17 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--reuse", action="store_true",
                         help="не перегенерировать: взять first_raw/first_chroma/raw/, что уже лежат")
+    parser.add_argument("--all", action="store_true",
+                        help="пакетный режим: все клипы из spec.json, пропуская уже годные (6.12)")
     parser.add_argument("--self-test", action="store_true", help="проверить кеинг и прорежку без сервера")
     args = parser.parse_args()
 
     if args.self_test:
         return self_test()
+    if args.all:
+        return batch(args)
     if not (args.char and args.anim):
-        parser.error("нужны --char и --anim")
+        parser.error("нужны --char и --anim (или --all)")
 
     spec = comfy.load_spec()
     character = character_of(spec, args.char)
@@ -222,18 +403,23 @@ def main() -> int:
     raw = sorted(path for path in raw_dir.glob("*")
                  if path.suffix.lower() in IMAGE_SUFFIXES) if reuse else []
     if not raw:
+        shutil.rmtree(raw_dir, ignore_errors=True)
         set_inputs(clip_graph, "5", image=comfy.upload(args.comfy, chroma, f"sotu-{args.char}-{args.anim}-chroma.png"))
         images, timings["clip"] = run(args.comfy, clip_graph, "03", timeout=3600)
         raw = fetch(args.comfy, images, raw_dir)
 
+    keyed_images = register([unkey(path) for path in raw])
     keyed = []
-    for index, path in enumerate(raw):
-        image = unkey(path)
+    for index, image in enumerate(keyed_images):
         image.thumbnail((512, 512), Image.LANCZOS)
         target = out_dir / f"frame_{index + 1:02d}.png"
         image.save(target)
         keyed.append(target)
-    picked = subsample(keyed, args.frames)
+    window = keyed
+    loop = None
+    if args.anim in LOOP_ANIMS and len(keyed) > args.frames:
+        window, loop = loop_window(keyed, args.frames)
+    picked = subsample(window, args.frames)
     for index, path in enumerate(picked):
         Image.open(path).save(out_dir / f"sprite_{index + 1:02d}.png")
 
@@ -243,8 +429,10 @@ def main() -> int:
         "seconds": {k: round(v, 1) for k, v in timings.items()},
         "total_seconds": round(sum(timings.values()), 1),
         "audit": measure(keyed),
+        "loop": loop,
         "subsampled": [str(path.relative_to(ROOT)) for path in picked],
     }
+    report["verdict"] = verdict(report)
     print(json.dumps(report, ensure_ascii=False, indent=2))
 
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8")) if MANIFEST.exists() else []
@@ -252,6 +440,10 @@ def main() -> int:
                 if not (row["char"] == args.char and row["anim"] == args.anim)]
     manifest.append(report)
     MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+    verdicts = json.loads(VERDICTS.read_text(encoding="utf-8")) if VERDICTS.exists() else {}
+    verdicts[f"battle-demo/artifacts/clips/{args.char}/{args.anim}"] = report["verdict"]
+    VERDICTS.write_text(json.dumps(verdicts, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return 0
 
 
