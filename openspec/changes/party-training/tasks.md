@@ -11,12 +11,25 @@
 
 ## 2. SM рекрута и паузы
 
-- [ ] 2.1 SM рекрута: REQUESTED→TRAINING→READY→(партия); STANDING при полной партии — Post-MVP (MVP: не создавать, UI «что освободит слот»).
-  → **заблокировано носителем: T-170.** Рекрут — состояние, а тикать состояние можно только там, где живёт город. Сервис сидит над словарём сейва (T-110), которого живая кампания не производит (город сериализуется блобом `city.campaign_city`), а все остальные читатели работают с объектом `City`. Третий носитель не изобретается; наблюдаемость TRAINING при канон-времени 0.6 дня — вопрос владельцу **Q-M101**. Снято в рамках острова: единый читатель инстансов зданий (`_building_instances` видит и `city.campaign_buildings`, и живую вложенность `city.campaign_city.campaign_buildings`).
-- [ ] 2.2 PAUSED при разрыве сети (здание разрушено/продано); PAUSED→TRAINING при восстановлении, таймер не сбрасывается; пауза ≠ отмена (стоимость не возвращается).
-  → тот же блокатор (**T-170**): в островке нечего паузить, рекрут-экземпляра нет.
+- [x] 2.1 SM рекрута: REQUESTED→TRAINING→READY→(партия); STANDING при полной партии — Post-MVP (MVP: не создавать, UI «что освободит слот»).
+  → **Снято с T-170 вариантом (а) (2026-10-24):** носитель — живой `City`, очередь
+  `City.campaign_training` (`{uid, class_id, race_id, trainee, training_building_uid, state,
+  progress, cost}`), тик — production-фаза `campaign_composition._process_city_training()`
+  (после достройки: слоты партии считает композиция, не сервис). Переходы: заявка →
+  REQUESTED (стоимость списана с `city.resource_ctx` — тем же путём, что стройка города),
+  живой инстанс здания → TRAINING, `progress ≥ 1` → READY, свободный слот → выдача члена
+  партии и запись уходит из очереди. STANDING не заводится (Post-MVP): при полной партии
+  рекрут стоит в READY и ждёт слота (spec: «does not enter party»). Инстанс здания —
+  `state == "active" && construction_turns_remaining <= 0` (стройкам тик не идёт).
+  Наблюдаемость TRAINING при канон-времени 0.6 дня — всё ещё вопрос владельцу **Q-M101**
+  (тест `test_canon_training_time_fits_into_single_turn` фиксирует следствие, а не мечту).
+- [x] 2.2 PAUSED при разрыве сети (здание разрушено/продано); PAUSED→TRAINING при восстановлении, таймер не сбрасывается; пауза ≠ отмена (стоимость не возвращается).
+  → Разрыв = инстанса нет (`uid` не найден — продажа) или он не активен (рейд/руина).
+  Прогресс стоит, стоимость не возвращается; возврат инстанса → TRAINING с того же
+  прогресса. Тест: 4.2.
 - [ ] 2.3 Резидентная модель статусов (K-A5) в `population_system.gd`: Child/Worker/Mentor/Recruit/Fighter/Hero/Party-in-field; призыв = вакансия (производство останавливается).
-  → **T-170** + отдельный разбор: у `PopUnit.State` сейчас легаси-набор `{WORKER, FOLLOWER, MILITIA, SCHOLAR}` (`scripts/world/pop_unit.gd:4`), не K-A5; сводить два набора надо решением, а не молча переписывать enum.
+  → Блокатор сменился: носитель-очередь есть (T-170, вариант (а)), нет набора статусов.
+  У `PopUnit.State` легаси-набор `{WORKER, FOLLOWER, MILITIA, SCHOLAR}` (`scripts/world/pop_unit.gd:4`), не K-A5; сводить два набора надо решением, а не молча переписывать enum.
 - [x] 2.4 Порог населения 10 на юнит [ПРЕДЛОЖЕНИЕ] — конфиг с пометкой, вердикт автора.
   → **Carrier-note.** Число легло в `data/config/balance/campaign.json` → `training`:
   `population_per_unit: 10` + `_note` с пометкой «[ПРЕДЛОЖЕНИЕ] (02-mechanics §3.3 EC3),
@@ -28,9 +41,12 @@
   тренируемый)`; `available_training_actions` при недоборе возвращает `[]` (опция скрыта),
   `train()` → `population_below_threshold:N<M`; текст «нужно +N жителей» берётся из `missing`
   того же гейта (spec: «UI shows the population constraint»).
-- [ ] 2.5 Сейв: рекрут-экземпляр {building_uid, class_id, progress, state} — MvpSaveSchema, миграция fail-fast.
-  → **T-170**: до выбора носителя неизвестно, где ключу жить (`CitySerializer` с bump'ом
-  и миграцией против секции T-110); дублировать состояние в двух местах сейва нельзя.
+- [x] 2.5 Сейв: рекрут-экземпляр {building_uid, class_id, progress, state} — MvpSaveSchema, миграция fail-fast.
+  → Ключ — `City.campaign_training` (не отдельная секция: `MvpSaveSchema.SECTIONS` закрыт,
+  `city` — свободная форма, а живой город и так сериализуется блобом `city.campaign_city`).
+  `CitySerializer`: запись + строгое чтение (запись без `class_id`/`state` → `push_error` и
+  отбрасывание, молчаливого «починили» нет), `SERIALIZATION_VERSION` 5 → 6, миграция
+  `from_version < 6` → пустая очередь. Тесты: roundtrip, старый сейв, битая запись.
 
 ## 3. Синк данных (C-12, C-13)
 
@@ -40,12 +56,17 @@
 
 ## 4. Верификация
 
-- [ ] 4.1 GdUnit4: SM рекрута (TRAINING→PAUSED→TRAINING, таймер сохраняется; стоимость не возвращается).
-  → **T-170** (тиковать нечего, пока на носителе нет очереди рекрутов).
-- [ ] 4.2 GdUnit4: разрыв сети (рейд по зданию, продажа здания) → PAUSED; восстановление → TRAINING.
-  → **T-170**.
+- [x] 4.1 GdUnit4: SM рекрута (TRAINING→PAUSED→TRAINING, таймер сохраняется; стоимость не возвращается).
+  → `tests/unit/campaign/test_campaign_training_live.gd` (живой носитель) +
+  `test_production_phase_ticks_queue_and_fills_party` (шов кампании: `advance_turn()` →
+  рекрут в партии). Шаг тика — `speed_n` из конфига (`concurrency_n`), субсуточное время
+  растягивается множителем, иначе канон-время не наблюдаемо (Q-M101).
+- [x] 4.2 GdUnit4: разрыв сети (рейд по зданию, продажа здания) → PAUSED; восстановление → TRAINING.
+  → `test_network_break_pauses_and_resume_keeps_progress_and_cost`: руина → PAUSED (прогресс
+  и списанная стоимость стоят) → активен → TRAINING с тем же прогрессом → `campaign_buildings`
+  пуст (продажа) → снова PAUSED.
 - [ ] 4.3 GdUnit4: резидентная модель (призыв → вакансия → производство останавливается).
-  → **T-170** + разбор набора статусов (см. 2.3).
+  → **T-170** остаётся только для этой задачи: очередь-носитель есть, резидентной модели K-A5 нет.
 - [x] 4.4 GdUnit4: порог населения (10 на юнит) → тренировка недоступна.
   → `test_campaign_training_service.gd`: `test_population_threshold_blocks_training_request`
   (опция скрыта, заявка отклонена, списаний нет), `test_population_gate_reports_missing_residents`

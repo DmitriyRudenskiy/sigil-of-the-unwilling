@@ -52,6 +52,7 @@ static func serialize(city: City) -> Dictionary:
 		blds_arr.append(building.serialize())
 	d["buildings"] = blds_arr
 	d["campaign_buildings"] = _campaign_buildings_to_list(city.campaign_buildings)
+	d["campaign_training"] = _campaign_training_to_list(city.campaign_training)
 	d["campaign_group_state"] = city.campaign_group_state.duplicate(true)
 	var race_pop_str: Dictionary = {}
 	for r in city.race_pop:
@@ -134,6 +135,20 @@ static func deserialize(city: City, data: Dictionary) -> void:
 			city.campaign_buildings.append(instance)
 	var group_state: Variant = data.get("campaign_group_state", {})
 	city.campaign_group_state = group_state.duplicate(true) if group_state is Dictionary else {}
+	# party-training 2.5: очередь тренировки читается строго — запись без class_id
+	# или state не «чинится» молча, а видна ошибкой (fail-fast вместо тихой
+	# потери рекрута).
+	city.campaign_training.clear()
+	var training_raw: Variant = data.get("campaign_training", [])
+	if not (training_raw is Array):
+		push_error("CitySerializer: campaign_training должен быть массивом — очередь сброшена")
+		training_raw = []
+	for record in training_raw:
+		if not (record is Dictionary) or not (record as Dictionary).has("class_id") \
+				or not (record as Dictionary).has("state"):
+			push_error("CitySerializer: запись очереди тренировки без class_id/state — пропущена")
+			continue
+		city.campaign_training.append((record as Dictionary).duplicate(true))
 	city.race_pop.clear()
 	for rk in data.get("race_pop", {}):
 		city.race_pop[StringName(rk)] = int(data["race_pop"][rk])
@@ -179,8 +194,18 @@ static func _migrate_city_data(data: Dictionary, from_version: int) -> Dictionar
 		var group_state: Variant = migrated.get("campaign_group_state", {})
 		if not migrated.has("campaign_group_state") or not (group_state is Dictionary):
 			migrated["campaign_group_state"] = {}
+	if from_version < 6 and not migrated.has("campaign_training"):
+		migrated["campaign_training"] = []
 	migrated["version"] = City.SERIALIZATION_VERSION
 	return migrated
+
+
+## party-training 2.5: записи очереди — plain-JSON, достаточно глубокого копирования.
+static func _campaign_training_to_list(queue: Array[Dictionary]) -> Array:
+	var out: Array = []
+	for record in queue:
+		out.append(record.duplicate(true))
+	return out
 
 static func _campaign_buildings_to_list(buildings: Array[Dictionary]) -> Array:
 	var out: Array = []

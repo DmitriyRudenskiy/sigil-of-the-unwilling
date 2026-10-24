@@ -280,9 +280,11 @@ func bind_city(value: City, rng: RandomNumberGenerator = null) -> void:
 ## Привязка партии: экран создаётся здесь, как и город — слой переживает
 ## тест без данных и ростер, которого ещё нет. Ёмкость — из модели экрана
 ## (там же, откуда её берёт ростер), хост может передать свою.
-## Граница: опции тренировки не прокинуты — `CampaignTrainingService
-## .available_training_actions` читает сейв-стейт со схемой T-110, а не поля
-## композиции; экран без опций рисует ростер и подсказку слота.
+## Граница: опций в этом экране нет, но уже не из-за сервиса — живая форма
+## `CampaignTrainingService.available_training_actions_city` читает `City` (T-170,
+## вариант (а)); кнопки заявки в HUD слоя кампании нет, она относится к UI-слою города
+## (`mvp-ui-flow`), и за ней ux-review. Dict-форма `available_training_actions`
+## остаётся наследием T-110 — вычищается в T-171.
 func bind_party(party: Array, capacity: int = PartyScreenModelScript.DEFAULT_CAPACITY) -> void:
 	_party = party
 	_party_capacity = capacity
