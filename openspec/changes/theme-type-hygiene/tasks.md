@@ -289,3 +289,12 @@
 - [ ] 6.5 `T-148.5` — `font_shadow_color` (3), `theme_override_fonts` (3, все —
       `main_menu`, `ExtResource("6")`), `theme_override_constants` (89) — отдельные
       группы того же тикета, после `font_color`.
+      *Частично (2026-10-25, T-191, D-247): группа `theme_override_constants` разобрана
+      механически — гард `game/tests/unit/ui/test_theme_override_reader.gd` сверяет группу и
+      имя item с fallback-темой движка по цепочке базовых классов, плюс проверяет, что
+      `theme_type_variation` называет объявленный тип. Снято семь строк без читателя
+      (`letter_spacing` × 3 на титуле, опечатка группы `font_size` × 3 в `artifact_chest_dialog`,
+      `separation` на `CenterContainer`); счётчик 279 → 272, ролей 104/0. Остаток 6.5 — живые
+      объявления со снятием в носитель: 54 цвета (Q-M96), 3 `theme_override_fonts` титула и его
+      кегли 206/41/123 (одна вариация не покрывает три кегля), 90 констант в основном местная
+      геометрия контейнеров.*

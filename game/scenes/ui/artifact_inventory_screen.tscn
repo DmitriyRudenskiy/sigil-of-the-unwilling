@@ -10,7 +10,6 @@ offset_top = 10.0
 offset_right = 990.0
 offset_bottom = 690.0
 custom_minimum_size = Vector2(980, 680)
-theme_override_constants/separation = 8
 
 
 
