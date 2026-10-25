@@ -36,7 +36,7 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 disable_set_ownership = true
-theme_override_constants/separation = 12
+theme_type_variation = &"FormStack"
 [node name="TitleLabel" type="Label" parent="Overlay/Scroll/Root"]
 layout_mode = 2
 theme_type_variation = &"LabelStrong"
@@ -48,6 +48,7 @@ horizontal_alignment = 1
 [node name="NameRow" type="HBoxContainer" parent="Overlay/Scroll/Root"]
 custom_minimum_size = Vector2(720, 28)
 layout_mode = 2
+theme_type_variation = &"FormRow"
 [node name="NameLabelNode" type="Label" parent="Overlay/Scroll/Root/NameRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(120, 28)
@@ -61,6 +62,7 @@ max_length = 32
 [node name="SexRow" type="HBoxContainer" parent="Overlay/Scroll/Root"]
 custom_minimum_size = Vector2(720, 28)
 layout_mode = 2
+theme_type_variation = &"FormRow"
 [node name="SexLabelNode" type="Label" parent="Overlay/Scroll/Root/SexRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(120, 28)
@@ -72,6 +74,7 @@ size_flags_horizontal = 3
 [node name="RaceRow" type="HBoxContainer" parent="Overlay/Scroll/Root"]
 custom_minimum_size = Vector2(720, 28)
 layout_mode = 2
+theme_type_variation = &"FormRow"
 [node name="RaceLabelNode" type="Label" parent="Overlay/Scroll/Root/RaceRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(120, 28)
@@ -83,6 +86,7 @@ size_flags_horizontal = 3
 [node name="SubraceRow" type="HBoxContainer" parent="Overlay/Scroll/Root"]
 custom_minimum_size = Vector2(720, 28)
 layout_mode = 2
+theme_type_variation = &"FormRow"
 [node name="SubraceLabelNode" type="Label" parent="Overlay/Scroll/Root/SubraceRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(120, 28)
@@ -94,6 +98,7 @@ size_flags_horizontal = 3
 [node name="ClassRow" type="HBoxContainer" parent="Overlay/Scroll/Root"]
 custom_minimum_size = Vector2(720, 28)
 layout_mode = 2
+theme_type_variation = &"FormRow"
 [node name="ClassLabelNode" type="Label" parent="Overlay/Scroll/Root/ClassRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(120, 28)
@@ -105,6 +110,7 @@ size_flags_horizontal = 3
 [node name="CultureRow" type="HBoxContainer" parent="Overlay/Scroll/Root"]
 custom_minimum_size = Vector2(720, 28)
 layout_mode = 2
+theme_type_variation = &"FormRow"
 [node name="CultureLabelNode" type="Label" parent="Overlay/Scroll/Root/CultureRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(120, 28)
@@ -116,6 +122,7 @@ size_flags_horizontal = 3
 [node name="BackgroundRow" type="HBoxContainer" parent="Overlay/Scroll/Root"]
 custom_minimum_size = Vector2(720, 28)
 layout_mode = 2
+theme_type_variation = &"FormRow"
 [node name="BackgroundLabelNode" type="Label" parent="Overlay/Scroll/Root/BackgroundRow"]
 layout_mode = 2
 custom_minimum_size = Vector2(120, 28)

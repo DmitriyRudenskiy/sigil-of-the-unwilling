@@ -1519,3 +1519,24 @@ PanelQueueTileActive/base_type = "PanelContainer"
 PanelQueueTileActive/styles/panel = SubResource("StyleBoxFlat_queue_tile_active")
 PanelQueueTileDead/base_type = "PanelContainer"
 PanelQueueTileDead/styles/panel = SubResource("StyleBoxFlat_queue_tile_dead")
+; T-148 6.4 (D-253). Зазор строки формы создания героя. До этого `separation` резолвился
+; 4 — это значение по умолчанию BoxContainer в движке, а не решение темы: канон гайда
+; «зазор в строке 8» (§1.3 `PAD_SM`, §4 «между секциями PAD_LG 24, зазор в строке 8»),
+; носителя у числа не было. Роль — первый в теме носитель группы `constants`, поэтому
+; гард test_creation_form_row_role.gd проверяет три вещи: резолв строки равен
+; объявлению роли, `separation` — законный элемент BoxContainer в фолбэк-теме движка
+; (письмо без читателя — класс D-247) и в сцене нет сценевого `theme_override_constants`.
+; Эрратум: унаследованное утверждение T-185 «визуальный зазор метка↔поле гуляет
+; 15…73 px» кадром не подтвердилось. Метки стоят с `horizontal_alignment = 2` (RIGHT),
+; в кадре двоеточия выстроены в колонку, зазор метка↔поле одинаковый; числа 15…73 px
+; получены формулой `124 − (0 + ширина_текста)`, то есть мерили остаток колонки при
+; левом выравнивании, которого в сцене нет. Настоящий дефект — отсутствие носителя
+; зазора, а не гуляющий зазор.
+FormRow/base_type = "BoxContainer"
+FormRow/constants/separation = 8
+; Форма создания героя по вертикали (T-148 6.4, D-253). До этого `Root` нёс сценевой
+; `theme_override_constants/separation = 12` — вне сетки 8 px (§1.3 «все размеры кратно 8»)
+; и без носителя. Выбран `PAD` 16: поля формы — не «строка» (ей канон отдаёт 8, см. FormRow)
+; и не «секция» (24), а соседние элементы одной секции.
+FormStack/base_type = "VBoxContainer"
+FormStack/constants/separation = 16
