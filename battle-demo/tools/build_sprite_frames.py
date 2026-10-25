@@ -2,13 +2,22 @@
 """Собирает `AnimatedSprite2D`-атлас из принятых клипов (задача 6.15, D10).
 
 На входе — клипы, помеченные в `artifacts/verdicts.json` как годные. Каждый кадр
-приводится к каноническому холсту: силуэт масштабируется до высоты 96 px (D1),
+приводится к каноническому холсту: силуэт масштабируется до высоты UNIT_HEIGHT,
 ступни ставятся в общую точку отрисовки. После этого pivot у всех кадров одного
 юнита общий, и в движке спрайт ставится в точку мира без поправок на кадр.
 
-Холст 128×128, ступни — в (64, 112). Узел в сцене обязан быть с
-`centered = false` и `offset = Vector2(-64, -112)`; это один константный параметр,
-его пишет сюда, а не в голову читателю.
+Холст 512×512, ступни — в (256, 448), высота силуэта 384 px (спека
+`battle-demo-sprites`, «Техническая форма кадра»). Узел в сцене обязан быть с
+`centered = false`, `offset = Vector2(-256, -448)` и `scale = 0.25`: движок рисует
+юнита в тех же 96 px, что и до переезда на 512, — масштаб кадра и масштаб экрана
+разведены и встречаются в одной константе `ENGINE_SCALE` в
+`scripts/view/battle_unit_view.gd`.
+
+Имя файла кадра — `char_<side>_<name>_<anim>_<NN>.png` (спека «Нейминг файлов»),
+`side` — `player` или `enemy`, `NN` — номер кадра с единицы (`01..04`,
+`docs/asset-spec.md` «Выходные файлы»); кадры юнита лежат в
+`assets/sprites/<id>/` — так же, как их собирает `.sprite_frames`.
+Форму, имена и полноту по всем файлам проверяет `tools/audit_sprites.py`.
 
 Текстуры (png) в git не идут (D-185): их пересобирает `gen_clip.py` + этот
 инструмент. Сам `.sprite_frames` пишет Godot (`tools/build_sprite_frames.gd`) —
@@ -46,11 +55,32 @@ APOSE = ROOT / "artifacts/clips-apose"
 APOSE_NO_WEAPON = {"archer", "barbarian", "cutthroat", "knight"}
 FRAME_COUNT = 4
 
-CANVAS = 128
-# Стопы канона: x — середина холста, y — на 16 px ниже низа силуэта не ставим,
-# берем 112, чтобы над головой остался запас в 16 px при силуете в 96 px.
-FEET = (64, 112)
-UNIT_HEIGHT = 96
+## Форма кадра по спеке: холст 512×512, силуэт 384 px, ступни в (256, 448) —
+## те же пропорции, что были у 128-канваса, умноженные на 4. Клип модели и так
+## приходит 512×512, так что это не апскейл, а отказ от лишнего даунскейла.
+CANVAS = 512
+FEET = (256, 448)
+UNIT_HEIGHT = 384
+## Запас по бокам холста: касание края силуэтом аудит считает браком.
+EDGE_MARGIN = 8
+## Враг в демо один, и он не из пула (постоянный зверь), поэтому `side` в имени
+## файла выводится из id, а не хранится в данных юнита.
+ENEMY_IDS = {"wolf"}
+
+
+def frame_name(char: str, anim: str, index: int) -> str:
+    """Имя файла кадра по схеме спеки: `char_<side>_<name>_<anim>_<NN>.png`.
+
+    `index` — номер дорожки с нуля, `NN` — с единицы (`01..04`).
+    """
+    side = "enemy" if char in ENEMY_IDS else "player"
+    return f"char_{side}_{char}_{anim}_{index + 1:02d}.png"
+
+
+def frame_target(char: str, anim: str, index: int) -> tuple[Path, str]:
+    """Куда писать кадр и как на него ссылается план сборки `.sprite_frames`."""
+    name = frame_name(char, anim, index)
+    return SPRITES / char / name, f"res://assets/sprites/{char}/{name}"
 # Частота дорожки: 4 кадра клипа на цикл (D9). Удар и получение урона читаются
 # быстрее; `turn` — разворот на месте, он тоже короткий.
 FPS = {"idle": 4.0, "walk": 4.0, "attack": 8.0, "hit": 8.0, "turn": 8.0}
@@ -81,13 +111,19 @@ def distinct_frames(clip_dir: Path, count: int) -> list[Path]:
 
 
 def normalize(source: Path, target: Path) -> None:
-    """Один кадр → канонический холст: высота силуэта 96 px, ступни в FEET."""
+    """Один кадр → канонический холст: высота силуэта UNIT_HEIGHT, ступни в FEET.
+
+    Кроме высоты ограничивается и ширина — с запасом `EDGE_MARGIN`: широкий кадр
+    (рык волка в `attack` перекрывает холст целиком) иначе обрезается по краю, а
+    это брак по спеке («Персонаж обрезан по краю»).
+    """
     image = Image.open(source).convert("RGBA")
     box = image.getchannel("A").getbbox()
     if not box:
         raise SystemExit(f"{source}: пустой кадр, ступни ставить некуда")
     silhouette = image.crop(box)
-    scale = UNIT_HEIGHT / (box[3] - box[1])
+    scale = min(UNIT_HEIGHT / (box[3] - box[1]),
+                (CANVAS - 2 * EDGE_MARGIN) / (box[2] - box[0]))
     size = (max(1, round(silhouette.width * scale)),
             max(1, round(silhouette.height * scale)))
     silhouette = silhouette.resize(size, Image.LANCZOS)
@@ -119,9 +155,9 @@ def apose_tracks(char: str) -> dict[str, list[str]]:
         clip_dir = report.parent
         frames = []
         for index, path in enumerate(distinct_frames(clip_dir, FRAME_COUNT)):
-            target = SPRITES / char / anim / f"{index:02d}.png"
+            target, res_path = frame_target(char, anim, index)
             normalize(path, target)
-            frames.append(f"res://assets/sprites/{char}/{anim}/{index:02d}.png")
+            frames.append(res_path)
         tracks[anim] = frames
     return tracks
 
@@ -142,9 +178,9 @@ def build(char: str) -> dict:
         path_dir = key
         frames = []
         for index, path in enumerate(distinct_frames(ROOT.parent / path_dir, len(row["subsampled"]))):
-            target = SPRITES / char / row["anim"] / f"{index:02d}.png"
+            target, res_path = frame_target(char, row["anim"], index)
             normalize(path, target)
-            frames.append(f"res://assets/sprites/{char}/{row['anim']}/{index:02d}.png")
+            frames.append(res_path)
         animations[row["anim"]] = frames
 
     for name, frames in apose_tracks(char).items():

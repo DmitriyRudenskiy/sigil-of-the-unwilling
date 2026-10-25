@@ -18,7 +18,7 @@ Scanning for test suites in: res://tests
 [38;2;100;149;237mSession hook 'GdUnitXMLTestReporter' installed.[0m
 [38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/combat/test_battle_outcome.gd[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_outcome.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_victory_when_no_enemies_left[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_outcome.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_victory_when_no_enemies_left[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_outcome.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_victory_when_no_enemies_left[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 3ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_outcome.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_defeat_when_no_player_units_left[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_outcome.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_defeat_when_no_player_units_left[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
@@ -27,9 +27,9 @@ Scanning for test suites in: res://tests
   [38;2;250;235;215mres://tests/unit/combat/test_battle_outcome.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_queue_stops_after_battle_ended[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_outcome.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_stalemate_guard_reports_no_result[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_outcome.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_stalemate_guard_reports_no_result[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 3ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_outcome.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_stalemate_guard_reports_no_result[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 4ms[0m
 [38;2;128;128;128m[0m
-[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 4 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 21ms[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 4 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 24ms[0m
 [38;2;128;128;128m[0m
 [38;2;128;128;128m[0m
 [38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/combat/test_battle_result.gd[0m
@@ -37,8 +37,8 @@ Scanning for test suites in: res://tests
 WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_result_screen_appears_with_the_outcome (res://tests/unit/combat/test_battle_result.gd:26)
@@ -54,8 +54,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_result_screen_appears_with_the_outcome (res://tests/unit/combat/test_battle_result.gd:26)
@@ -68,14 +68,14 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
          [11] _execute (res://addons/gdunit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:26)
          [12] execute (res://addons/gdunit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
          [13] _execute (res://addons/gdunit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:36)
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_result.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_result_screen_appears_with_the_outcome[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 293ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_result.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_result_screen_appears_with_the_outcome[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 764ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_result.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_no_battle_actions_after_the_result[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
 WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_no_battle_actions_after_the_result (res://tests/unit/combat/test_battle_result.gd:44)
@@ -99,8 +99,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_no_battle_actions_after_the_result (res://tests/unit/combat/test_battle_result.gd:44)
@@ -121,17 +121,17 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
          [19] _execute (res://addons/gdunit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
          [20] execute (res://addons/gdunit4/src/core/_TestCase.gd:41)
          [21] test_completed (res://addons/gdunit4/src/core/_TestCase.gd:86)
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_result.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_no_battle_actions_after_the_result[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 169ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_result.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_no_battle_actions_after_the_result[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 524ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_result.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_action_after_the_result_changes_nothing[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_result.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_action_after_the_result_changes_nothing[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
 [38;2;128;128;128m[0m
-[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 3 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 471ms[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 3 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 1s 297ms[0m
 [38;2;128;128;128m[0m
 [38;2;128;128;128m[0m
 [38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m
   [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_bleed_ticks_damage_on_owner_turn[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_bleed_ticks_damage_on_owner_turn[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_bleed_ticks_damage_on_owner_turn[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 3ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_status_expires_after_its_duration[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_status_expires_after_its_duration[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
@@ -161,26 +161,26 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
   [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_focus_grows_only_after_first_turn[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_focus_is_capped[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_focus_is_capped[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_status_effects.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_focus_is_capped[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 3ms[0m
 [38;2;128;128;128m[0m
-[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 11 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 37ms[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 11 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 40ms[0m
 [38;2;128;128;128m[0m
 [38;2;128;128;128m[0m
 [38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_bind_starts_idle_and_faces_the_enemy_line[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_bind_starts_idle_and_faces_the_enemy_line[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 8ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_bind_starts_idle_and_faces_the_enemy_line[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 67ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_enemy_side_is_mirrored[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_enemy_side_is_mirrored[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 8ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_enemy_side_is_mirrored[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 66ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_state_selects_the_track[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_state_selects_the_track[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_state_selects_the_track[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 63ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_unknown_state_keeps_the_unit_on_its_track[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
 ERROR: knight#0: дорожки fly нет в 
    at: push_error (core/variant/variant_utility.cpp:1023)
    GDScript backtrace (most recent call first):
-       [0] play (res://scripts/view/battle_unit_view.gd:88)
+       [0] play (res://scripts/view/battle_unit_view.gd:94)
        [1] test_unknown_state_keeps_the_unit_on_its_track (res://tests/unit/combat/test_battle_unit_view.gd:84)
        [2] _execute_test_case (res://addons/gdunit4/src/core/_TestCase.gd:79)
        [3] execute (res://addons/gdunit4/src/core/_TestCase.gd:40)
@@ -199,32 +199,32 @@ ERROR: knight#0: дорожки fly нет в
        [16] _execute (res://addons/gdunit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
        [17] execute (res://addons/gdunit4/src/core/_TestCase.gd:41)
        [18] test_completed (res://addons/gdunit4/src/core/_TestCase.gd:86)
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_unknown_state_keeps_the_unit_on_its_track[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_unknown_state_keeps_the_unit_on_its_track[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 64ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_attack_is_played_once[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_attack_is_played_once[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 292ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_attack_is_played_once[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 248ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_walk_moves_player_right_and_enemy_left[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_walk_moves_player_right_and_enemy_left[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 90ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_walk_moves_player_right_and_enemy_left[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 186ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_turn_keeps_scale_and_pivot[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_turn_keeps_scale_and_pivot[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 69ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_turn_keeps_scale_and_pivot[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 125ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_death_stops_on_the_last_frame_and_desaturates[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_death_stops_on_the_last_frame_and_desaturates[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_death_stops_on_the_last_frame_and_desaturates[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 64ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_contact_delay_is_the_contact_frame_over_track_speed[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_contact_delay_is_the_contact_frame_over_track_speed[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_contact_delay_is_the_contact_frame_over_track_speed[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 62ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_hit_starts_on_the_contact_frame_not_before[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_hit_starts_on_the_contact_frame_not_before[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 350ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_hit_starts_on_the_contact_frame_not_before[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 257ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_action_signal_from_the_core_lands_on_the_contact_frame[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
 WARNING: нет дорожек юнита: res://assets/sprites/foe.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] test_action_signal_from_the_core_lands_on_the_contact_frame (res://tests/unit/combat/test_battle_unit_view.gd:170)
          [4] _execute_test_case (res://addons/gdunit4/src/core/_TestCase.gd:79)
@@ -244,9 +244,9 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe.sprite_frame
          [18] _execute (res://addons/gdunit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
          [19] execute (res://addons/gdunit4/src/core/_TestCase.gd:41)
          [20] test_completed (res://addons/gdunit4/src/core/_TestCase.gd:86)
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_action_signal_from_the_core_lands_on_the_contact_frame[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 395ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_unit_view.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_action_signal_from_the_core_lands_on_the_contact_frame[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 410ms[0m
 [38;2;128;128;128m[0m
-[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 11 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 1s 275ms[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 11 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 1s 640ms[0m
 [38;2;128;128;128m[0m
 [38;2;128;128;128m[0m
 [38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m
@@ -254,8 +254,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe.sprite_frame
 WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_strip_has_one_card_per_unit (res://tests/unit/combat/test_battle_hud.gd:38)
@@ -271,8 +271,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_strip_has_one_card_per_unit (res://tests/unit/combat/test_battle_hud.gd:38)
@@ -288,8 +288,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_strip_has_one_card_per_unit (res://tests/unit/combat/test_battle_hud.gd:38)
@@ -302,14 +302,14 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
          [11] _execute (res://addons/gdunit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:26)
          [12] execute (res://addons/gdunit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
          [13] _execute (res://addons/gdunit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:36)
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_strip_has_one_card_per_unit[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 173ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_strip_has_one_card_per_unit[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 528ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_focus_pips_match_the_active_unit[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
 WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_focus_pips_match_the_active_unit (res://tests/unit/combat/test_battle_hud.gd:45)
@@ -333,8 +333,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_focus_pips_match_the_active_unit (res://tests/unit/combat/test_battle_hud.gd:45)
@@ -358,8 +358,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_focus_pips_match_the_active_unit (res://tests/unit/combat/test_battle_hud.gd:45)
@@ -380,14 +380,14 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
          [19] _execute (res://addons/gdunit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
          [20] execute (res://addons/gdunit4/src/core/_TestCase.gd:41)
          [21] test_completed (res://addons/gdunit4/src/core/_TestCase.gd:86)
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_focus_pips_match_the_active_unit[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 165ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_focus_pips_match_the_active_unit[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 519ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_round_counter_follows_the_queue[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
 WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_round_counter_follows_the_queue (res://tests/unit/combat/test_battle_hud.gd:52)
@@ -411,8 +411,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_round_counter_follows_the_queue (res://tests/unit/combat/test_battle_hud.gd:52)
@@ -436,8 +436,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_round_counter_follows_the_queue (res://tests/unit/combat/test_battle_hud.gd:52)
@@ -458,14 +458,14 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
          [19] _execute (res://addons/gdunit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
          [20] execute (res://addons/gdunit4/src/core/_TestCase.gd:41)
          [21] test_completed (res://addons/gdunit4/src/core/_TestCase.gd:86)
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_round_counter_follows_the_queue[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 161ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_round_counter_follows_the_queue[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 564ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_ability_button_goes_dark_on_cooldown[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
 WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_ability_button_goes_dark_on_cooldown (res://tests/unit/combat/test_battle_hud.gd:61)
@@ -489,8 +489,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_ability_button_goes_dark_on_cooldown (res://tests/unit/combat/test_battle_hud.gd:61)
@@ -514,8 +514,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_ability_button_goes_dark_on_cooldown (res://tests/unit/combat/test_battle_hud.gd:61)
@@ -536,14 +536,14 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
          [19] _execute (res://addons/gdunit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
          [20] execute (res://addons/gdunit4/src/core/_TestCase.gd:41)
          [21] test_completed (res://addons/gdunit4/src/core/_TestCase.gd:86)
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_ability_button_goes_dark_on_cooldown[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 161ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_ability_button_goes_dark_on_cooldown[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 567ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_dead_units_leave_the_order_strip[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
 WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_dead_units_leave_the_order_strip (res://tests/unit/combat/test_battle_hud.gd:76)
@@ -567,8 +567,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_dead_units_leave_the_order_strip (res://tests/unit/combat/test_battle_hud.gd:76)
@@ -592,8 +592,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_dead_units_leave_the_order_strip (res://tests/unit/combat/test_battle_hud.gd:76)
@@ -614,14 +614,14 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
          [19] _execute (res://addons/gdunit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
          [20] execute (res://addons/gdunit4/src/core/_TestCase.gd:41)
          [21] test_completed (res://addons/gdunit4/src/core/_TestCase.gd:86)
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_dead_units_leave_the_order_strip[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 159ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_dead_units_leave_the_order_strip[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 555ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_no_commands_once_the_battle_is_over[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
 WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_no_commands_once_the_battle_is_over (res://tests/unit/combat/test_battle_hud.gd:88)
@@ -645,8 +645,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_no_commands_once_the_battle_is_over (res://tests/unit/combat/test_battle_hud.gd:88)
@@ -670,8 +670,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_no_commands_once_the_battle_is_over (res://tests/unit/combat/test_battle_hud.gd:88)
@@ -692,14 +692,14 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
          [19] _execute (res://addons/gdunit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
          [20] execute (res://addons/gdunit4/src/core/_TestCase.gd:41)
          [21] test_completed (res://addons/gdunit4/src/core/_TestCase.gd:86)
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_no_commands_once_the_battle_is_over[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 212ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_no_commands_once_the_battle_is_over[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 605ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_the_ui_never_gets_an_enemy_turn[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
 WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_the_ui_never_gets_an_enemy_turn (res://tests/unit/combat/test_battle_hud.gd:103)
@@ -723,8 +723,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_the_ui_never_gets_an_enemy_turn (res://tests/unit/combat/test_battle_hud.gd:103)
@@ -748,8 +748,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_the_ui_never_gets_an_enemy_turn (res://tests/unit/combat/test_battle_hud.gd:103)
@@ -770,14 +770,14 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
          [19] _execute (res://addons/gdunit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
          [20] execute (res://addons/gdunit4/src/core/_TestCase.gd:41)
          [21] test_completed (res://addons/gdunit4/src/core/_TestCase.gd:86)
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_the_ui_never_gets_an_enemy_turn[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 178ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_the_ui_never_gets_an_enemy_turn[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 532ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_defeated_commander_stays_on_his_panel[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
 WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_defeated_commander_stays_on_his_panel (res://tests/unit/combat/test_battle_hud.gd:118)
@@ -801,8 +801,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_defeated_commander_stays_on_his_panel (res://tests/unit/combat/test_battle_hud.gd:118)
@@ -826,8 +826,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_defeated_commander_stays_on_his_panel (res://tests/unit/combat/test_battle_hud.gd:118)
@@ -848,14 +848,14 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
          [19] _execute (res://addons/gdunit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
          [20] execute (res://addons/gdunit4/src/core/_TestCase.gd:41)
          [21] test_completed (res://addons/gdunit4/src/core/_TestCase.gd:86)
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_defeated_commander_stays_on_his_panel[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 212ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_defeated_commander_stays_on_his_panel[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 596ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_units_stand_on_distinct_hexes_of_their_own_flank[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
 WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_units_stand_on_distinct_hexes_of_their_own_flank (res://tests/unit/combat/test_battle_hud.gd:130)
@@ -879,8 +879,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_units_stand_on_distinct_hexes_of_their_own_flank (res://tests/unit/combat/test_battle_hud.gd:130)
@@ -904,8 +904,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_units_stand_on_distinct_hexes_of_their_own_flank (res://tests/unit/combat/test_battle_hud.gd:130)
@@ -926,14 +926,14 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
          [19] _execute (res://addons/gdunit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
          [20] execute (res://addons/gdunit4/src/core/_TestCase.gd:41)
          [21] test_completed (res://addons/gdunit4/src/core/_TestCase.gd:86)
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_units_stand_on_distinct_hexes_of_their_own_flank[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 161ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_units_stand_on_distinct_hexes_of_their_own_flank[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 565ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_commands_stand_clear_of_the_field[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
 WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_commands_stand_clear_of_the_field (res://tests/unit/combat/test_battle_hud.gd:147)
@@ -957,8 +957,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_commands_stand_clear_of_the_field (res://tests/unit/combat/test_battle_hud.gd:147)
@@ -982,8 +982,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_commands_stand_clear_of_the_field (res://tests/unit/combat/test_battle_hud.gd:147)
@@ -1004,17 +1004,17 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
          [19] _execute (res://addons/gdunit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
          [20] execute (res://addons/gdunit4/src/core/_TestCase.gd:41)
          [21] test_completed (res://addons/gdunit4/src/core/_TestCase.gd:86)
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_commands_stand_clear_of_the_field[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 159ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_commands_stand_clear_of_the_field[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 534ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_the_top_band_holds_the_counter_and_the_name[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_the_top_band_holds_the_counter_and_the_name[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 157ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_the_top_band_holds_the_counter_and_the_name[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 528ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_enemy_bars_are_a_different_colour[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
 WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_enemy_bars_are_a_different_colour (res://tests/unit/combat/test_battle_hud.gd:188)
@@ -1038,8 +1038,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_enemy_bars_are_a_different_colour (res://tests/unit/combat/test_battle_hud.gd:188)
@@ -1063,8 +1063,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_enemy_bars_are_a_different_colour (res://tests/unit/combat/test_battle_hud.gd:188)
@@ -1085,14 +1085,14 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
          [19] _execute (res://addons/gdunit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
          [20] execute (res://addons/gdunit4/src/core/_TestCase.gd:41)
          [21] test_completed (res://addons/gdunit4/src/core/_TestCase.gd:86)
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_enemy_bars_are_a_different_colour[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 158ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_enemy_bars_are_a_different_colour[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 537ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_the_current_card_is_outlined_in_gold[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
 WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_the_current_card_is_outlined_in_gold (res://tests/unit/combat/test_battle_hud.gd:204)
@@ -1116,8 +1116,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_the_current_card_is_outlined_in_gold (res://tests/unit/combat/test_battle_hud.gd:204)
@@ -1141,8 +1141,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_the_current_card_is_outlined_in_gold (res://tests/unit/combat/test_battle_hud.gd:204)
@@ -1163,27 +1163,27 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
          [19] _execute (res://addons/gdunit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
          [20] execute (res://addons/gdunit4/src/core/_TestCase.gd:41)
          [21] test_completed (res://addons/gdunit4/src/core/_TestCase.gd:86)
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_the_current_card_is_outlined_in_gold[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 162ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_hud.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_the_current_card_is_outlined_in_gold[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 518ms[0m
 [38;2;128;128;128m[0m
-[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 13 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2s 243ms[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 13 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 7s 190ms[0m
 [38;2;128;128;128m[0m
 [38;2;128;128;128m[0m
 [38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/combat/test_roster_select.gd[0m
   [38;2;250;235;215mres://tests/unit/combat/test_roster_select.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_both_rosters_are_described_before_choice[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/combat/test_roster_select.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_both_rosters_are_described_before_choice[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 7ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_roster_select.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_both_rosters_are_described_before_choice[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 10ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_roster_select.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_selection_moves_between_cards[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_roster_select.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_selection_moves_between_cards[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_roster_select.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_choice_is_written_to_the_flow[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/combat/test_roster_select.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_choice_is_written_to_the_flow[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 10ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_roster_select.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_choice_is_written_to_the_flow[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
 [38;2;128;128;128m[0m
-[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 3 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 32ms[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 3 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 35ms[0m
 [38;2;128;128;128m[0m
 [38;2;128;128;128m[0m
 [38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/combat/test_determinism.gd[0m
   [38;2;250;235;215mres://tests/unit/combat/test_determinism.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_same_seed_reproduces_the_whole_battle[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/combat/test_determinism.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_same_seed_reproduces_the_whole_battle[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 4ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_determinism.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_same_seed_reproduces_the_whole_battle[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 3ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_determinism.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_battle_actually_happened[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_determinism.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_battle_actually_happened[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 3ms[0m
@@ -1199,7 +1199,7 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
   [38;2;250;235;215mres://tests/unit/combat/test_turn_queue.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_order_by_initiative_descending[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_turn_queue.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_tie_gives_player_side_first[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/combat/test_turn_queue.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_tie_gives_player_side_first[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 1ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_turn_queue.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_tie_gives_player_side_first[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_turn_queue.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_tie_within_side_ordered_by_slot[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_turn_queue.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_tie_within_side_ordered_by_slot[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
@@ -1210,7 +1210,7 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
   [38;2;250;235;215mres://tests/unit/combat/test_turn_queue.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_dead_units_are_skipped[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_turn_queue.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_dead_units_are_skipped[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
 [38;2;128;128;128m[0m
-[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 5 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 19ms[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 5 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 20ms[0m
 [38;2;128;128;128m[0m
 [38;2;128;128;128m[0m
 [38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/combat/test_battle_screen.gd[0m
@@ -1218,8 +1218,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
 WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_bars_match_the_model_after_every_action (res://tests/unit/combat/test_battle_screen.gd:43)
@@ -1235,8 +1235,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_bars_match_the_model_after_every_action (res://tests/unit/combat/test_battle_screen.gd:43)
@@ -1252,8 +1252,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_bars_match_the_model_after_every_action (res://tests/unit/combat/test_battle_screen.gd:43)
@@ -1266,14 +1266,14 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
          [11] _execute (res://addons/gdunit4/src/core/execution/stages/GdUnitTestCaseExecutionStage.gd:26)
          [12] execute (res://addons/gdunit4/src/core/execution/stages/IGdUnitExecutionStage.gd:19)
          [13] _execute (res://addons/gdunit4/src/core/execution/stages/GdUnitTestSuiteExecutionStage.gd:36)
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_screen.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_bars_match_the_model_after_every_action[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 174ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_screen.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_bars_match_the_model_after_every_action[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 564ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_screen.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_dead_unit_keeps_an_empty_bar[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
 WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_dead_unit_keeps_an_empty_bar (res://tests/unit/combat/test_battle_screen.gd:52)
@@ -1297,8 +1297,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_dead_unit_keeps_an_empty_bar (res://tests/unit/combat/test_battle_screen.gd:52)
@@ -1322,8 +1322,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_dead_unit_keeps_an_empty_bar (res://tests/unit/combat/test_battle_screen.gd:52)
@@ -1344,14 +1344,14 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
          [19] _execute (res://addons/gdunit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
          [20] execute (res://addons/gdunit4/src/core/_TestCase.gd:41)
          [21] test_completed (res://addons/gdunit4/src/core/_TestCase.gd:86)
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_screen.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_dead_unit_keeps_an_empty_bar[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 174ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_screen.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_dead_unit_keeps_an_empty_bar[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 579ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_screen.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_active_cell_follows_the_queue[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
 WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_active_cell_follows_the_queue (res://tests/unit/combat/test_battle_screen.gd:70)
@@ -1375,8 +1375,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_active_cell_follows_the_queue (res://tests/unit/combat/test_battle_screen.gd:70)
@@ -1400,8 +1400,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_active_cell_follows_the_queue (res://tests/unit/combat/test_battle_screen.gd:70)
@@ -1422,14 +1422,14 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
          [19] _execute (res://addons/gdunit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
          [20] execute (res://addons/gdunit4/src/core/_TestCase.gd:41)
          [21] test_completed (res://addons/gdunit4/src/core/_TestCase.gd:86)
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_screen.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_active_cell_follows_the_queue[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 173ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_screen.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_active_cell_follows_the_queue[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 576ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_screen.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_fallen_unit_is_marked_with_a_cross[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
 WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_fallen_unit_is_marked_with_a_cross (res://tests/unit/combat/test_battle_screen.gd:89)
@@ -1453,8 +1453,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_fallen_unit_is_marked_with_a_cross (res://tests/unit/combat/test_battle_screen.gd:89)
@@ -1478,8 +1478,8 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
          [4] test_fallen_unit_is_marked_with_a_cross (res://tests/unit/combat/test_battle_screen.gd:89)
@@ -1500,20 +1500,20 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
          [19] _execute (res://addons/gdunit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
          [20] execute (res://addons/gdunit4/src/core/_TestCase.gd:41)
          [21] test_completed (res://addons/gdunit4/src/core/_TestCase.gd:86)
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_screen.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_fallen_unit_is_marked_with_a_cross[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 173ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_screen.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_fallen_unit_is_marked_with_a_cross[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 574ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_screen.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_hp_bar_clears_the_row_above[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_screen.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_hp_bar_clears_the_row_above[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_screen.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_hp_bar_clears_the_row_above[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 3ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_battle_screen.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_the_fallen_sprite_is_desaturated_at_once[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
 WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
-         [4] test_the_fallen_sprite_is_desaturated_at_once (res://tests/unit/combat/test_battle_screen.gd:132)
+         [4] test_the_fallen_sprite_is_desaturated_at_once (res://tests/unit/combat/test_battle_screen.gd:136)
          [5] _execute_test_case (res://addons/gdunit4/src/core/_TestCase.gd:79)
          [6] execute (res://addons/gdunit4/src/core/_TestCase.gd:40)
          [7] _execute (res://addons/gdunit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
@@ -1534,11 +1534,11 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_a.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
-         [4] test_the_fallen_sprite_is_desaturated_at_once (res://tests/unit/combat/test_battle_screen.gd:132)
+         [4] test_the_fallen_sprite_is_desaturated_at_once (res://tests/unit/combat/test_battle_screen.gd:136)
          [5] _execute_test_case (res://addons/gdunit4/src/core/_TestCase.gd:79)
          [6] execute (res://addons/gdunit4/src/core/_TestCase.gd:40)
          [7] _execute (res://addons/gdunit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
@@ -1559,11 +1559,11 @@ WARNING: нет дорожек юнита: res://assets/sprites/hero_b.sprite_fr
 WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_frames.tres
      at: push_warning (core/variant/variant_utility.cpp:1033)
      GDScript backtrace (most recent call first):
-         [0] _bind (res://scripts/view/battle_unit_view.gd:102)
-         [1] _ready (res://scripts/view/battle_unit_view.gd:46)
+         [0] _bind (res://scripts/view/battle_unit_view.gd:108)
+         [1] _ready (res://scripts/view/battle_unit_view.gd:52)
          [2] spawn (res://scripts/view/battle_field.gd:137)
          [3] run (res://scripts/view/battle_screen.gd:90)
-         [4] test_the_fallen_sprite_is_desaturated_at_once (res://tests/unit/combat/test_battle_screen.gd:132)
+         [4] test_the_fallen_sprite_is_desaturated_at_once (res://tests/unit/combat/test_battle_screen.gd:136)
          [5] _execute_test_case (res://addons/gdunit4/src/core/_TestCase.gd:79)
          [6] execute (res://addons/gdunit4/src/core/_TestCase.gd:40)
          [7] _execute (res://addons/gdunit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
@@ -1581,9 +1581,9 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
          [19] _execute (res://addons/gdunit4/src/core/execution/stages/single/GdUnitTestCaseSingleTestStage.gd:10)
          [20] execute (res://addons/gdunit4/src/core/_TestCase.gd:41)
          [21] test_completed (res://addons/gdunit4/src/core/_TestCase.gd:86)
-  [38;2;250;235;215mres://tests/unit/combat/test_battle_screen.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_the_fallen_sprite_is_desaturated_at_once[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 173ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_battle_screen.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_the_fallen_sprite_is_desaturated_at_once[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 551ms[0m
 [38;2;128;128;128m[0m
-[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 6 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 881ms[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 6 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2s 867ms[0m
 [38;2;128;128;128m[0m
 [38;2;128;128;128m[0m
 [38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/combat/test_damage.gd[0m
@@ -1594,7 +1594,7 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
   [38;2;250;235;215mres://tests/unit/combat/test_damage.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_damage_reproducible_for_same_seed[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_damage.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_variance_stays_in_band[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/combat/test_damage.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_variance_stays_in_band[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 4ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_damage.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_variance_stays_in_band[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 5ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_damage.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_defense_reduces_damage[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_damage.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_defense_reduces_damage[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
@@ -1608,7 +1608,7 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
   [38;2;250;235;215mres://tests/unit/combat/test_damage.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_weaken_lowers_attack[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_damage.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_weaken_lowers_attack[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
 [38;2;128;128;128m[0m
-[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 7 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 28ms[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 7 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 31ms[0m
 [38;2;128;128;128m[0m
 [38;2;128;128;128m[0m
 [38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/combat/test_enemy_ai.gd[0m
@@ -1627,7 +1627,7 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
   [38;2;250;235;215mres://tests/unit/combat/test_enemy_ai.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_stunned_enemy_passes[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_enemy_ai.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_stunned_enemy_passes[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
 [38;2;128;128;128m[0m
-[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 5 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 20ms[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 5 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 21ms[0m
 [38;2;128;128;128m[0m
 [38;2;128;128;128m[0m
 [38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/combat/test_combat_without_scene.gd[0m
@@ -1635,9 +1635,9 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
   [38;2;250;235;215mres://tests/unit/combat/test_combat_without_scene.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_battle_runs_without_touching_scene_tree[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_combat_without_scene.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_combat_layer_has_no_display_references[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/combat/test_combat_without_scene.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_combat_layer_has_no_display_references[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 4ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_combat_without_scene.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_combat_layer_has_no_display_references[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 5ms[0m
 [38;2;128;128;128m[0m
-[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 2 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 11ms[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 2 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 14ms[0m
 [38;2;128;128;128m[0m
 [38;2;128;128;128m[0m
 [38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/combat/test_action_legality.gd[0m
@@ -1667,9 +1667,9 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
   [38;2;250;235;215mres://tests/unit/combat/test_roster_invariance.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_same_battle_with_two_rosters[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 3ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/combat/test_roster_invariance.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_designed_pair_plays_by_the_same_rules[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/combat/test_roster_invariance.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_designed_pair_plays_by_the_same_rules[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 8ms[0m
+  [38;2;250;235;215mres://tests/unit/combat/test_roster_invariance.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_designed_pair_plays_by_the_same_rules[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
 [38;2;128;128;128m[0m
-[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 2 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 17ms[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 2 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 18ms[0m
 [38;2;128;128;128m[0m
 [38;2;128;128;128m[0m
 [38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/combat/test_stepwise_only.gd[0m
@@ -1684,9 +1684,9 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
 [38;2;128;128;128m[0m
 [38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/view/test_sprite_tracks.gd[0m
   [38;2;250;235;215mres://tests/unit/view/test_sprite_tracks.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_every_unit_has_four_tracks_of_four_frames[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/view/test_sprite_tracks.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_every_unit_has_four_tracks_of_four_frames[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 92ms[0m
+  [38;2;250;235;215mres://tests/unit/view/test_sprite_tracks.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_every_unit_has_four_tracks_of_four_frames[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 536ms[0m
 [38;2;128;128;128m[0m
-[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 1 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 98ms[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 1 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 542ms[0m
 [38;2;128;128;128m[0m
 [38;2;128;128;128m[0m
 [38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/data/test_data_library.gd[0m
@@ -1694,7 +1694,7 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
   [38;2;250;235;215mres://tests/unit/data/test_data_library.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_all_units_load[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 5ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/data/test_data_library.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_real_data_passes_validation[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/data/test_data_library.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_real_data_passes_validation[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 6ms[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_library.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_real_data_passes_validation[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 7ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/data/test_data_library.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_rosters_are_the_designed_pair[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/data/test_data_library.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_rosters_are_the_designed_pair[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 4ms[0m
@@ -1703,17 +1703,17 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
   [38;2;250;235;215mres://tests/unit/data/test_data_library.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_rosters_differ_symmetrically[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 4ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/data/test_data_library.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_every_pool_unit_plays[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/data/test_data_library.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_every_pool_unit_plays[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 5ms[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_library.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_every_pool_unit_plays[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 6ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/data/test_data_library.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_enemy_is_not_in_the_pool[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/data/test_data_library.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_enemy_is_not_in_the_pool[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 6ms[0m
 [38;2;128;128;128m[0m
-[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 6 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 40ms[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 6 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 46ms[0m
 [38;2;128;128;128m[0m
 [38;2;128;128;128m[0m
 [38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m
   [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_missing_unit_is_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_missing_unit_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 8ms[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_missing_unit_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 10ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_dead_unit_stats_are_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_dead_unit_stats_are_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
@@ -1722,59 +1722,59 @@ WARNING: нет дорожек юнита: res://assets/sprites/foe_a.sprite_fra
   [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_unit_without_ability_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_unknown_status_is_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_unknown_status_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 8ms[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_unknown_status_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 10ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_ability_cost_above_focus_cap_is_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_ability_cost_above_focus_cap_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 8ms[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_ability_cost_above_focus_cap_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_duplicate_unit_in_roster_is_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_duplicate_unit_in_roster_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 8ms[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_duplicate_unit_in_roster_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_unknown_unit_in_roster_is_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_unknown_unit_in_roster_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_enemy_in_roster_is_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_enemy_in_roster_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 13ms[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_enemy_in_roster_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 14ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_roster_of_wrong_size_is_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_roster_of_wrong_size_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 8ms[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_roster_of_wrong_size_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_roster_without_title_is_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_roster_without_title_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 8ms[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_roster_without_title_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_identical_rosters_are_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_identical_rosters_are_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_pool_unit_outside_every_roster_is_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_pool_unit_outside_every_roster_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 13ms[0m
+  [38;2;250;235;215mres://tests/unit/data/test_data_validation.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_pool_unit_outside_every_roster_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 14ms[0m
 [38;2;128;128;128m[0m
-[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 12 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 130ms[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 12 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 140ms[0m
 [38;2;128;128;128m[0m
 [38;2;128;128;128m[0m
 [38;2;0;206;209mRun Test Suite: [0m[38;2;250;235;215mres://tests/unit/helpers/test_sprite_asserts.gd[0m
   [38;2;250;235;215mres://tests/unit/helpers/test_sprite_asserts.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_frame_ok_has_no_problems[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/helpers/test_sprite_asserts.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_frame_ok_has_no_problems[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 12ms[0m
+  [38;2;250;235;215mres://tests/unit/helpers/test_sprite_asserts.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_frame_ok_has_no_problems[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 13ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/helpers/test_sprite_asserts.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_wrong_size_is_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/helpers/test_sprite_asserts.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_wrong_size_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 5ms[0m
+  [38;2;250;235;215mres://tests/unit/helpers/test_sprite_asserts.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_wrong_size_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 6ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/helpers/test_sprite_asserts.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_missing_alpha_is_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/helpers/test_sprite_asserts.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_missing_alpha_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 8ms[0m
+  [38;2;250;235;215mres://tests/unit/helpers/test_sprite_asserts.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_missing_alpha_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 9ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/helpers/test_sprite_asserts.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_empty_frame_is_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
-  [38;2;250;235;215mres://tests/unit/helpers/test_sprite_asserts.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_empty_frame_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 12ms[0m
+  [38;2;250;235;215mres://tests/unit/helpers/test_sprite_asserts.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_empty_frame_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 13ms[0m
 [38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/helpers/test_sprite_asserts.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_missing_file_is_reported[0m[38;2;34;139;34m STARTED[0m[38;2;128;128;128m[0m
   [38;2;250;235;215mres://tests/unit/helpers/test_sprite_asserts.gd[0m[38;2;128;128;128m > [0m[38;2;250;235;215mtest_missing_file_is_reported[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 2ms[0m
 [38;2;128;128;128m[0m
-[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 5 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 47ms[0m
+[38;2;30;144;255mStatistics:[0m[38;2;128;128;128m 5 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m[38;2;34;139;34m PASSED[0m[38;2;100;149;237m 51ms[0m
 [38;2;128;128;128m[0m
 [38;2;128;128;128m[0m
 [38;2;30;144;255mOverall Summary:[0m[38;2;255;255;255m 107 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |[0m
 [38;2;233;150;122mExecuted test suites: (19/19)[0m
 [38;2;233;150;122mExecuted test cases : (107/107)[0m
-[38;2;233;150;122mTotal execution time: 5s 419ms[0m
-[38;2;255;255;255m [0m[38;2;100;149;237mOpen XML Report at: file:///Users/user/sigil-of-the-unwilling/battle-demo/reports/report_82/results.xml[0m
-[38;2;100;149;237mOpen HTML Report at: file:///Users/user/sigil-of-the-unwilling/battle-demo/reports/report_82/index.html[0m
+[38;2;233;150;122mTotal execution time: 14s 25ms[0m
+[38;2;255;255;255m [0m[38;2;100;149;237mOpen XML Report at: file:///Users/user/sigil-of-the-unwilling/battle-demo/reports/report_86/results.xml[0m
+[38;2;100;149;237mOpen HTML Report at: file:///Users/user/sigil-of-the-unwilling/battle-demo/reports/report_86/index.html[0m
 [38;2;233;150;122mExit code: 0[0m
 Run dispose test resources

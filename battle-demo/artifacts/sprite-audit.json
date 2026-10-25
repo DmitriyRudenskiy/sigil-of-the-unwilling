@@ -1,0 +1,1781 @@
+{
+  "canvas": "512x512",
+  "frames_per_track": 4,
+  "checked": 196,
+  "accepted": 196,
+  "rejected": 0,
+  "missing": [],
+  "quarantine": [
+    "priest/hit"
+  ],
+  "fill_height_pct": {
+    "min": 71,
+    "max": 75
+  },
+  "files": [
+    {
+      "file": "archer/char_player_archer_attack_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        70
+      ]
+    },
+    {
+      "file": "archer/char_player_archer_attack_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        75
+      ]
+    },
+    {
+      "file": "archer/char_player_archer_attack_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        65
+      ]
+    },
+    {
+      "file": "archer/char_player_archer_attack_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        71
+      ]
+    },
+    {
+      "file": "archer/char_player_archer_hit_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        73
+      ]
+    },
+    {
+      "file": "archer/char_player_archer_hit_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        71
+      ]
+    },
+    {
+      "file": "archer/char_player_archer_hit_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        53
+      ]
+    },
+    {
+      "file": "archer/char_player_archer_hit_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        55
+      ]
+    },
+    {
+      "file": "archer/char_player_archer_idle_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        70
+      ]
+    },
+    {
+      "file": "archer/char_player_archer_idle_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        71
+      ]
+    },
+    {
+      "file": "archer/char_player_archer_idle_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        70
+      ]
+    },
+    {
+      "file": "archer/char_player_archer_idle_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        69
+      ]
+    },
+    {
+      "file": "archer/char_player_archer_turn_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        69
+      ]
+    },
+    {
+      "file": "archer/char_player_archer_turn_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        71
+      ]
+    },
+    {
+      "file": "archer/char_player_archer_turn_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        74
+      ]
+    },
+    {
+      "file": "archer/char_player_archer_turn_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        75
+      ]
+    },
+    {
+      "file": "archer/char_player_archer_walk_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        28
+      ]
+    },
+    {
+      "file": "archer/char_player_archer_walk_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        30
+      ]
+    },
+    {
+      "file": "archer/char_player_archer_walk_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        31
+      ]
+    },
+    {
+      "file": "archer/char_player_archer_walk_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        32
+      ]
+    },
+    {
+      "file": "barbarian/char_player_barbarian_attack_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        74
+      ]
+    },
+    {
+      "file": "barbarian/char_player_barbarian_attack_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        77
+      ]
+    },
+    {
+      "file": "barbarian/char_player_barbarian_attack_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        84
+      ]
+    },
+    {
+      "file": "barbarian/char_player_barbarian_attack_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        76
+      ]
+    },
+    {
+      "file": "barbarian/char_player_barbarian_hit_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        73
+      ]
+    },
+    {
+      "file": "barbarian/char_player_barbarian_hit_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        72
+      ]
+    },
+    {
+      "file": "barbarian/char_player_barbarian_hit_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        72
+      ]
+    },
+    {
+      "file": "barbarian/char_player_barbarian_hit_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        71
+      ]
+    },
+    {
+      "file": "barbarian/char_player_barbarian_idle_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        73
+      ]
+    },
+    {
+      "file": "barbarian/char_player_barbarian_idle_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        74
+      ]
+    },
+    {
+      "file": "barbarian/char_player_barbarian_idle_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        74
+      ]
+    },
+    {
+      "file": "barbarian/char_player_barbarian_idle_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        74
+      ]
+    },
+    {
+      "file": "barbarian/char_player_barbarian_turn_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        74
+      ]
+    },
+    {
+      "file": "barbarian/char_player_barbarian_turn_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        69
+      ]
+    },
+    {
+      "file": "barbarian/char_player_barbarian_turn_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        66
+      ]
+    },
+    {
+      "file": "barbarian/char_player_barbarian_turn_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        65
+      ]
+    },
+    {
+      "file": "barbarian/char_player_barbarian_walk_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        50
+      ]
+    },
+    {
+      "file": "barbarian/char_player_barbarian_walk_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        39
+      ]
+    },
+    {
+      "file": "barbarian/char_player_barbarian_walk_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        45
+      ]
+    },
+    {
+      "file": "barbarian/char_player_barbarian_walk_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        49
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_attack_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        73
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_attack_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        56
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_attack_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        67
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_attack_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        73
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_hit_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        73
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_hit_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        72
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_hit_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        63
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_hit_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        64
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_idle_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        73
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_idle_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        73
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_idle_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        72
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_idle_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        72
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_turn_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        71
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_turn_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        74
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_turn_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        66
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_turn_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        60
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_walk_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        48
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_walk_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        54
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_walk_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        36
+      ]
+    },
+    {
+      "file": "cutthroat/char_player_cutthroat_walk_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        36
+      ]
+    },
+    {
+      "file": "knight/char_player_knight_attack_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        72
+      ]
+    },
+    {
+      "file": "knight/char_player_knight_attack_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        70
+      ]
+    },
+    {
+      "file": "knight/char_player_knight_attack_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        78
+      ]
+    },
+    {
+      "file": "knight/char_player_knight_attack_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        72
+      ]
+    },
+    {
+      "file": "knight/char_player_knight_hit_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        77
+      ]
+    },
+    {
+      "file": "knight/char_player_knight_hit_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        76
+      ]
+    },
+    {
+      "file": "knight/char_player_knight_hit_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        74
+      ]
+    },
+    {
+      "file": "knight/char_player_knight_hit_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        72
+      ]
+    },
+    {
+      "file": "knight/char_player_knight_idle_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        72
+      ]
+    },
+    {
+      "file": "knight/char_player_knight_idle_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        72
+      ]
+    },
+    {
+      "file": "knight/char_player_knight_idle_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        72
+      ]
+    },
+    {
+      "file": "knight/char_player_knight_idle_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        72
+      ]
+    },
+    {
+      "file": "knight/char_player_knight_turn_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        72
+      ]
+    },
+    {
+      "file": "knight/char_player_knight_turn_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        72
+      ]
+    },
+    {
+      "file": "knight/char_player_knight_turn_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        69
+      ]
+    },
+    {
+      "file": "knight/char_player_knight_turn_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        68
+      ]
+    },
+    {
+      "file": "knight/char_player_knight_walk_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        40
+      ]
+    },
+    {
+      "file": "knight/char_player_knight_walk_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        40
+      ]
+    },
+    {
+      "file": "knight/char_player_knight_walk_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        41
+      ]
+    },
+    {
+      "file": "knight/char_player_knight_walk_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        39
+      ]
+    },
+    {
+      "file": "priest/char_player_priest_attack_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        74
+      ]
+    },
+    {
+      "file": "priest/char_player_priest_attack_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        72
+      ]
+    },
+    {
+      "file": "priest/char_player_priest_attack_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        75
+      ]
+    },
+    {
+      "file": "priest/char_player_priest_attack_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        66
+      ]
+    },
+    {
+      "file": "priest/char_player_priest_idle_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        75
+      ]
+    },
+    {
+      "file": "priest/char_player_priest_idle_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        61
+      ]
+    },
+    {
+      "file": "priest/char_player_priest_idle_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        48
+      ]
+    },
+    {
+      "file": "priest/char_player_priest_idle_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        48
+      ]
+    },
+    {
+      "file": "priest/char_player_priest_turn_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        74
+      ]
+    },
+    {
+      "file": "priest/char_player_priest_turn_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        48
+      ]
+    },
+    {
+      "file": "priest/char_player_priest_turn_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        46
+      ]
+    },
+    {
+      "file": "priest/char_player_priest_turn_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        53
+      ]
+    },
+    {
+      "file": "priest/char_player_priest_walk_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        61
+      ]
+    },
+    {
+      "file": "priest/char_player_priest_walk_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        44
+      ]
+    },
+    {
+      "file": "priest/char_player_priest_walk_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        45
+      ]
+    },
+    {
+      "file": "priest/char_player_priest_walk_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        46
+      ]
+    },
+    {
+      "file": "sorcerer/char_player_sorcerer_attack_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        73
+      ]
+    },
+    {
+      "file": "sorcerer/char_player_sorcerer_attack_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        56
+      ]
+    },
+    {
+      "file": "sorcerer/char_player_sorcerer_attack_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        64
+      ]
+    },
+    {
+      "file": "sorcerer/char_player_sorcerer_attack_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        61
+      ]
+    },
+    {
+      "file": "sorcerer/char_player_sorcerer_hit_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        74
+      ]
+    },
+    {
+      "file": "sorcerer/char_player_sorcerer_hit_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        57
+      ]
+    },
+    {
+      "file": "sorcerer/char_player_sorcerer_hit_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        44
+      ]
+    },
+    {
+      "file": "sorcerer/char_player_sorcerer_hit_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        38
+      ]
+    },
+    {
+      "file": "sorcerer/char_player_sorcerer_idle_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        43
+      ]
+    },
+    {
+      "file": "sorcerer/char_player_sorcerer_idle_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        37
+      ]
+    },
+    {
+      "file": "sorcerer/char_player_sorcerer_idle_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        31
+      ]
+    },
+    {
+      "file": "sorcerer/char_player_sorcerer_idle_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        31
+      ]
+    },
+    {
+      "file": "sorcerer/char_player_sorcerer_turn_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        18
+      ]
+    },
+    {
+      "file": "sorcerer/char_player_sorcerer_turn_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        19
+      ]
+    },
+    {
+      "file": "sorcerer/char_player_sorcerer_turn_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        13
+      ]
+    },
+    {
+      "file": "sorcerer/char_player_sorcerer_turn_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        16
+      ]
+    },
+    {
+      "file": "sorcerer/char_player_sorcerer_walk_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        43
+      ]
+    },
+    {
+      "file": "sorcerer/char_player_sorcerer_walk_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        36
+      ]
+    },
+    {
+      "file": "sorcerer/char_player_sorcerer_walk_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        34
+      ]
+    },
+    {
+      "file": "sorcerer/char_player_sorcerer_walk_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        32
+      ]
+    },
+    {
+      "file": "spearman/char_player_spearman_attack_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        35
+      ]
+    },
+    {
+      "file": "spearman/char_player_spearman_attack_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        32
+      ]
+    },
+    {
+      "file": "spearman/char_player_spearman_attack_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        42
+      ]
+    },
+    {
+      "file": "spearman/char_player_spearman_attack_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        39
+      ]
+    },
+    {
+      "file": "spearman/char_player_spearman_hit_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        77
+      ]
+    },
+    {
+      "file": "spearman/char_player_spearman_hit_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        81
+      ]
+    },
+    {
+      "file": "spearman/char_player_spearman_hit_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        78
+      ]
+    },
+    {
+      "file": "spearman/char_player_spearman_hit_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        72
+      ]
+    },
+    {
+      "file": "spearman/char_player_spearman_idle_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        75
+      ]
+    },
+    {
+      "file": "spearman/char_player_spearman_idle_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        75
+      ]
+    },
+    {
+      "file": "spearman/char_player_spearman_idle_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        74
+      ]
+    },
+    {
+      "file": "spearman/char_player_spearman_idle_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        74
+      ]
+    },
+    {
+      "file": "spearman/char_player_spearman_turn_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        75
+      ]
+    },
+    {
+      "file": "spearman/char_player_spearman_turn_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        83
+      ]
+    },
+    {
+      "file": "spearman/char_player_spearman_turn_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        58
+      ]
+    },
+    {
+      "file": "spearman/char_player_spearman_turn_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        72
+      ]
+    },
+    {
+      "file": "spearman/char_player_spearman_walk_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        45
+      ]
+    },
+    {
+      "file": "spearman/char_player_spearman_walk_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        46
+      ]
+    },
+    {
+      "file": "spearman/char_player_spearman_walk_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        53
+      ]
+    },
+    {
+      "file": "spearman/char_player_spearman_walk_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        50
+      ]
+    },
+    {
+      "file": "stormmage/char_player_stormmage_attack_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        74
+      ]
+    },
+    {
+      "file": "stormmage/char_player_stormmage_attack_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        45
+      ]
+    },
+    {
+      "file": "stormmage/char_player_stormmage_attack_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        54
+      ]
+    },
+    {
+      "file": "stormmage/char_player_stormmage_attack_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        53
+      ]
+    },
+    {
+      "file": "stormmage/char_player_stormmage_hit_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        73
+      ]
+    },
+    {
+      "file": "stormmage/char_player_stormmage_hit_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        71
+      ]
+    },
+    {
+      "file": "stormmage/char_player_stormmage_hit_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        63
+      ]
+    },
+    {
+      "file": "stormmage/char_player_stormmage_hit_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        57
+      ]
+    },
+    {
+      "file": "stormmage/char_player_stormmage_idle_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        42
+      ]
+    },
+    {
+      "file": "stormmage/char_player_stormmage_idle_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        34
+      ]
+    },
+    {
+      "file": "stormmage/char_player_stormmage_idle_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        31
+      ]
+    },
+    {
+      "file": "stormmage/char_player_stormmage_idle_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        29
+      ]
+    },
+    {
+      "file": "stormmage/char_player_stormmage_turn_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        49
+      ]
+    },
+    {
+      "file": "stormmage/char_player_stormmage_turn_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        44
+      ]
+    },
+    {
+      "file": "stormmage/char_player_stormmage_turn_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        32
+      ]
+    },
+    {
+      "file": "stormmage/char_player_stormmage_turn_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        28
+      ]
+    },
+    {
+      "file": "stormmage/char_player_stormmage_walk_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        42
+      ]
+    },
+    {
+      "file": "stormmage/char_player_stormmage_walk_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        41
+      ]
+    },
+    {
+      "file": "stormmage/char_player_stormmage_walk_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        35
+      ]
+    },
+    {
+      "file": "stormmage/char_player_stormmage_walk_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        30
+      ]
+    },
+    {
+      "file": "wizard/char_player_wizard_attack_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        56
+      ]
+    },
+    {
+      "file": "wizard/char_player_wizard_attack_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        49
+      ]
+    },
+    {
+      "file": "wizard/char_player_wizard_attack_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        52
+      ]
+    },
+    {
+      "file": "wizard/char_player_wizard_attack_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        63
+      ]
+    },
+    {
+      "file": "wizard/char_player_wizard_hit_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        73
+      ]
+    },
+    {
+      "file": "wizard/char_player_wizard_hit_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        72
+      ]
+    },
+    {
+      "file": "wizard/char_player_wizard_hit_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        68
+      ]
+    },
+    {
+      "file": "wizard/char_player_wizard_hit_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        67
+      ]
+    },
+    {
+      "file": "wizard/char_player_wizard_idle_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        53
+      ]
+    },
+    {
+      "file": "wizard/char_player_wizard_idle_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        48
+      ]
+    },
+    {
+      "file": "wizard/char_player_wizard_idle_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        48
+      ]
+    },
+    {
+      "file": "wizard/char_player_wizard_idle_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        49
+      ]
+    },
+    {
+      "file": "wizard/char_player_wizard_turn_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        72
+      ]
+    },
+    {
+      "file": "wizard/char_player_wizard_turn_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        65
+      ]
+    },
+    {
+      "file": "wizard/char_player_wizard_turn_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        64
+      ]
+    },
+    {
+      "file": "wizard/char_player_wizard_turn_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        62
+      ]
+    },
+    {
+      "file": "wizard/char_player_wizard_walk_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        53
+      ]
+    },
+    {
+      "file": "wizard/char_player_wizard_walk_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        60
+      ]
+    },
+    {
+      "file": "wizard/char_player_wizard_walk_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        57
+      ]
+    },
+    {
+      "file": "wizard/char_player_wizard_walk_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        49
+      ]
+    },
+    {
+      "file": "wolf/char_enemy_wolf_attack_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        71
+      ]
+    },
+    {
+      "file": "wolf/char_enemy_wolf_attack_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        71,
+        97
+      ]
+    },
+    {
+      "file": "wolf/char_enemy_wolf_attack_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        83
+      ]
+    },
+    {
+      "file": "wolf/char_enemy_wolf_attack_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        65
+      ]
+    },
+    {
+      "file": "wolf/char_enemy_wolf_hit_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        71
+      ]
+    },
+    {
+      "file": "wolf/char_enemy_wolf_hit_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        65
+      ]
+    },
+    {
+      "file": "wolf/char_enemy_wolf_hit_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        73
+      ]
+    },
+    {
+      "file": "wolf/char_enemy_wolf_hit_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        80
+      ]
+    },
+    {
+      "file": "wolf/char_enemy_wolf_idle_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        71
+      ]
+    },
+    {
+      "file": "wolf/char_enemy_wolf_idle_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        71
+      ]
+    },
+    {
+      "file": "wolf/char_enemy_wolf_idle_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        74
+      ]
+    },
+    {
+      "file": "wolf/char_enemy_wolf_idle_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        73
+      ]
+    },
+    {
+      "file": "wolf/char_enemy_wolf_turn_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        71
+      ]
+    },
+    {
+      "file": "wolf/char_enemy_wolf_turn_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        63
+      ]
+    },
+    {
+      "file": "wolf/char_enemy_wolf_turn_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        53
+      ]
+    },
+    {
+      "file": "wolf/char_enemy_wolf_turn_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        44
+      ]
+    },
+    {
+      "file": "wolf/char_enemy_wolf_walk_01.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        71
+      ]
+    },
+    {
+      "file": "wolf/char_enemy_wolf_walk_02.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        70
+      ]
+    },
+    {
+      "file": "wolf/char_enemy_wolf_walk_03.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        69
+      ]
+    },
+    {
+      "file": "wolf/char_enemy_wolf_walk_04.png",
+      "ok": true,
+      "problems": [],
+      "fill": [
+        75,
+        69
+      ]
+    }
+  ]
+}

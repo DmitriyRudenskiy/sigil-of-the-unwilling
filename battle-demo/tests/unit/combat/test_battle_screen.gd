@@ -112,14 +112,18 @@ func test_fallen_unit_is_marked_with_a_cross() -> void:
 ## от кадра: кто поднимет `UNIT_SCALE` или опустит `BAR_LIFT`, увидит падение
 ## здесь, а не через read-агента на `a_mid`.
 func test_hp_bar_clears_the_row_above() -> void:
-	var canvas := 128.0  # холст кадра, ступни в (64, 112)
+	# Холст кадра комплекта — 512, ступни в (256, 448); на экран он попадает с
+	# масштабом вьюера, поэтому мировые расстояния считаются как
+	# `(холст + смещение) × ENGINE_SCALE × UNIT_SCALE`.
+	var canvas := 512.0
 	var unit_scale := BattleField.UNIT_SCALE
+	var view_scale := BattleUnitView.ENGINE_SCALE * unit_scale
 	var pitch := sqrt(3.0) * BattleField.HEX_RADIUS  # шаг ряда odd-r
-	var sprite_bottom := (canvas + BattleUnitView.FEET_OFFSET.y) * unit_scale
+	var sprite_bottom := (canvas + BattleUnitView.FEET_OFFSET.y) * view_scale
 	var bar_top := pitch - BattleScreen.BAR_LIFT * unit_scale - BattleScreen.BAR_SIZE.y
 	# Полоса над головой своего юнита (спека: зазор ≥ 8 px).
-	assert_float(BattleScreen.BAR_LIFT * unit_scale + BattleUnitView.FEET_OFFSET.y * unit_scale) \
-		.is_greater_equal(8.0)
+	assert_float((BattleScreen.BAR_LIFT + BattleUnitView.FEET_OFFSET.y * BattleUnitView.ENGINE_SCALE)
+			* unit_scale).is_greater_equal(8.0)
 	# И не касается силуэта верхнего ряда.
 	assert_float(bar_top - sprite_bottom).is_greater_equal(8.0)
 

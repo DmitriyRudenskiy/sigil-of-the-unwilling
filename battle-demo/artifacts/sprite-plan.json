@@ -1,8 +1,8 @@
 {
   "char": "wolf",
   "feet_offset": [
-    -64,
-    -112
+    -256,
+    -448
   ],
   "animations": [
     {
@@ -10,10 +10,10 @@
       "loop": false,
       "fps": 8.0,
       "frames": [
-        "res://assets/sprites/wolf/attack/00.png",
-        "res://assets/sprites/wolf/attack/01.png",
-        "res://assets/sprites/wolf/attack/02.png",
-        "res://assets/sprites/wolf/attack/03.png"
+        "res://assets/sprites/wolf/char_enemy_wolf_attack_01.png",
+        "res://assets/sprites/wolf/char_enemy_wolf_attack_02.png",
+        "res://assets/sprites/wolf/char_enemy_wolf_attack_03.png",
+        "res://assets/sprites/wolf/char_enemy_wolf_attack_04.png"
       ]
     },
     {
@@ -21,10 +21,10 @@
       "loop": false,
       "fps": 8.0,
       "frames": [
-        "res://assets/sprites/wolf/hit/00.png",
-        "res://assets/sprites/wolf/hit/01.png",
-        "res://assets/sprites/wolf/hit/02.png",
-        "res://assets/sprites/wolf/hit/03.png"
+        "res://assets/sprites/wolf/char_enemy_wolf_hit_01.png",
+        "res://assets/sprites/wolf/char_enemy_wolf_hit_02.png",
+        "res://assets/sprites/wolf/char_enemy_wolf_hit_03.png",
+        "res://assets/sprites/wolf/char_enemy_wolf_hit_04.png"
       ]
     },
     {
@@ -32,10 +32,10 @@
       "loop": true,
       "fps": 4.0,
       "frames": [
-        "res://assets/sprites/wolf/idle/00.png",
-        "res://assets/sprites/wolf/idle/01.png",
-        "res://assets/sprites/wolf/idle/02.png",
-        "res://assets/sprites/wolf/idle/03.png"
+        "res://assets/sprites/wolf/char_enemy_wolf_idle_01.png",
+        "res://assets/sprites/wolf/char_enemy_wolf_idle_02.png",
+        "res://assets/sprites/wolf/char_enemy_wolf_idle_03.png",
+        "res://assets/sprites/wolf/char_enemy_wolf_idle_04.png"
       ]
     },
     {
@@ -43,10 +43,10 @@
       "loop": false,
       "fps": 8.0,
       "frames": [
-        "res://assets/sprites/wolf/turn/00.png",
-        "res://assets/sprites/wolf/turn/01.png",
-        "res://assets/sprites/wolf/turn/02.png",
-        "res://assets/sprites/wolf/turn/03.png"
+        "res://assets/sprites/wolf/char_enemy_wolf_turn_01.png",
+        "res://assets/sprites/wolf/char_enemy_wolf_turn_02.png",
+        "res://assets/sprites/wolf/char_enemy_wolf_turn_03.png",
+        "res://assets/sprites/wolf/char_enemy_wolf_turn_04.png"
       ]
     },
     {
@@ -54,10 +54,10 @@
       "loop": true,
       "fps": 4.0,
       "frames": [
-        "res://assets/sprites/wolf/walk/00.png",
-        "res://assets/sprites/wolf/walk/01.png",
-        "res://assets/sprites/wolf/walk/02.png",
-        "res://assets/sprites/wolf/walk/03.png"
+        "res://assets/sprites/wolf/char_enemy_wolf_walk_01.png",
+        "res://assets/sprites/wolf/char_enemy_wolf_walk_02.png",
+        "res://assets/sprites/wolf/char_enemy_wolf_walk_03.png",
+        "res://assets/sprites/wolf/char_enemy_wolf_walk_04.png"
       ]
     }
   ],
