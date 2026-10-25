@@ -665,7 +665,15 @@ func _save_report() -> void:
 		f.store_string(JSON.stringify(report(), "  "))
 		f.close()
 
+## Клетка героя. Освобождённый герой — не «клетка (0,0)», а «героя нет»: возвращаем
+## `(-1, -1)`, тот же страж, что и «цели нет». Зеро было бы настоящей клеткой карты, и
+## `TravelerRole.goal_met()` объявлял бы прибытие на старте. Пустое значение здесь не
+## косметика: `metrics()` ролей вызывается и после `_finish()`, когда героя уже нет
+## (`_process` к тому времени завершает прогон, а отчёт всё равно читает метрики), и до
+## стража это стоило прогону матрицы SegFault'ом (T-207).
 func _hero_cell() -> Vector2i:
+	if _hero == null or not is_instance_valid(_hero):
+		return Vector2i(-1, -1)
 	var mv: Node = _hero.get_component("Movement")
 	return mv.get_current_cell() if mv != null else Vector2i.ZERO
 

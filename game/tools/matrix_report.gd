@@ -145,11 +145,22 @@ func _run_profile(role_id: String, class_id: String, turns: int) -> Dictionary:
 	row.state = str(endgame.get("state", "?"))
 	row.reason = str(endgame.get("end_reason", ""))
 	row.survived = bool(metrics.get("survived", false))
+	# Чем закончился прогон для героя: «done=true» при пропавшем герое — это не успех,
+	# а молчаливый выход автопилота из партии (задача 9.3, T-207).
+	var hero_ref: Variant = pilot._hero
+	row.hero = "null" if hero_ref == null else (
+		"freed" if not is_instance_valid(hero_ref) else (
+			"alive" if bool(hero_ref.is_alive) else "dead"))
 	# Убийства считает только AdventurerRole (задача 3.3: «≥8/11 классов с ≥1 убийством»);
 	# у остальных ролей ключа нет, и в строке его не бывает.
 	if metrics.has("kills"):
 		row.kills = int(metrics.get("kills", 0))
 		row.kill_goal = int(metrics.get("kill_goal", 0))
+	# Остальные метрики роли (arrived/distance/biomes у Путешественника, gold_goal у
+	# Торговца…) печатаются как есть: строка матрицы — отчёт, а не фиксированная схема.
+	for key in metrics:
+		if not row.has(key) and typeof(metrics[key]) != TYPE_DICTIONARY and typeof(metrics[key]) != TYPE_ARRAY:
+			row[key] = metrics[key]
 	if trace and row.error.begins_with("бой-висяк"):
 		# Состав и свойства юнитов зависшего боя: «удары по 0 урона» и «некого достать»
 		# по кадрам неразличимы, а правила у них разные (T-205).
