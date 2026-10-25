@@ -15,6 +15,7 @@ const EXPECTED_IDS := [
 	&"cutthroat",
 	&"priest",
 	&"stormmage",
+	&"wolf",
 ]
 
 

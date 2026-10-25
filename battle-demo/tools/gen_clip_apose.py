@@ -43,6 +43,10 @@ def main() -> int:
     parser.add_argument("--char", required=True)
     parser.add_argument("--anim", required=True)
     parser.add_argument("--mirror", choices=["auto", "yes", "no"], default="auto")
+    parser.add_argument("--prompt", default=None,
+                        help="промпт вместо spec.clip_prompt: у зверей он свой "
+                             "(`the character ... same weapon` модель доставляет "
+                             "оруженосца рядом с волком)")
     parser.add_argument("--length", type=int, default=81, help="кадров клипа, 4n+1")
     parser.add_argument("--frames", type=int, default=4, help="кадров после прорежки")
     parser.add_argument("--seed", type=int, default=None)
@@ -58,8 +62,9 @@ def main() -> int:
     out_dir = OUT / args.char / args.anim
     raw_dir = out_dir / "raw"
 
+    prompt = args.prompt or spec["clip_prompt"][args.anim]
     graph = gc.load_workflow(WF)
-    gc.set_inputs(graph, "6", text=spec["clip_prompt"][args.anim])
+    gc.set_inputs(graph, "6", text=prompt)
     gc.set_inputs(graph, "8", length=args.length, batch_size=1)
     gc.set_inputs(graph, "13", noise_seed=seed)
     gc.set_inputs(graph, "18", filename_prefix=f"sotu/{args.char}-{args.anim}/03_frames/frame")
@@ -94,6 +99,7 @@ def main() -> int:
         Image.open(path).save(out_dir / f"sprite_{index + 1:02d}.png")
 
     report = {"char": args.char, "anim": args.anim, "seed": seed, "mirror": mirror,
+              "prompt": prompt,
               "length": args.length, "seconds": round(seconds, 1),
               "corner_before_clip": list(corner),
               "audit": gc.measure(keyed), "subsampled": [str(p) for p in picked]}

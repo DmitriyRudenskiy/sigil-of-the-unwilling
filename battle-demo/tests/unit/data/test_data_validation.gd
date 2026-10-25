@@ -69,7 +69,8 @@ func test_unknown_unit_in_roster_is_reported() -> void:
 func test_enemy_in_roster_is_reported() -> void:
 	var roster := _roster("a")
 	roster.units[0] = _units()[DataLibrary.ENEMY_ID]
-	assert_bool(_fires(_roster_problems(roster), "враг stormmage в наборе игрока")).is_true()
+	assert_bool(_fires(_roster_problems(roster),
+		"враг %s в наборе игрока" % DataLibrary.ENEMY_ID)).is_true()
 
 
 func test_roster_of_wrong_size_is_reported() -> void:

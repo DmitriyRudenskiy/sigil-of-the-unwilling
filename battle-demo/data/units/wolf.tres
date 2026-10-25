@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="UnitStats" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/ability.gd" id="1_xpvn6"]
+[ext_resource type="Script" path="res://scripts/combat/unit_stats.gd" id="2_tq7su"]
+
+[sub_resource type="Resource" id="Resource_p68bg"]
+script = ExtResource("1_xpvn6")
+id = &"rend"
+display_name = "Разрывание"
+cost = 3
+cooldown = 2
+multiplier = 1.2
+hits = 2
+applies = Array[StringName]([&"bleed"])
+
+[resource]
+script = ExtResource("2_tq7su")
+id = &"wolf"
+display_name = "Волк"
+max_hp = 240
+attack = 26
+initiative = 14
+abilities = Array[ExtResource("1_xpvn6")]([SubResource("Resource_p68bg")])

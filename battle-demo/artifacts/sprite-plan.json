@@ -1,5 +1,5 @@
 {
-  "char": "priest",
+  "char": "wolf",
   "feet_offset": [
     -64,
     -112
@@ -10,10 +10,21 @@
       "loop": false,
       "fps": 8.0,
       "frames": [
-        "res://assets/sprites/priest/attack/00.png",
-        "res://assets/sprites/priest/attack/01.png",
-        "res://assets/sprites/priest/attack/02.png",
-        "res://assets/sprites/priest/attack/03.png"
+        "res://assets/sprites/wolf/attack/00.png",
+        "res://assets/sprites/wolf/attack/01.png",
+        "res://assets/sprites/wolf/attack/02.png",
+        "res://assets/sprites/wolf/attack/03.png"
+      ]
+    },
+    {
+      "name": "hit",
+      "loop": false,
+      "fps": 8.0,
+      "frames": [
+        "res://assets/sprites/wolf/hit/00.png",
+        "res://assets/sprites/wolf/hit/01.png",
+        "res://assets/sprites/wolf/hit/02.png",
+        "res://assets/sprites/wolf/hit/03.png"
       ]
     },
     {
@@ -21,10 +32,10 @@
       "loop": true,
       "fps": 4.0,
       "frames": [
-        "res://assets/sprites/priest/idle/00.png",
-        "res://assets/sprites/priest/idle/01.png",
-        "res://assets/sprites/priest/idle/02.png",
-        "res://assets/sprites/priest/idle/03.png"
+        "res://assets/sprites/wolf/idle/00.png",
+        "res://assets/sprites/wolf/idle/01.png",
+        "res://assets/sprites/wolf/idle/02.png",
+        "res://assets/sprites/wolf/idle/03.png"
       ]
     },
     {
@@ -32,10 +43,10 @@
       "loop": false,
       "fps": 8.0,
       "frames": [
-        "res://assets/sprites/priest/turn/00.png",
-        "res://assets/sprites/priest/turn/01.png",
-        "res://assets/sprites/priest/turn/02.png",
-        "res://assets/sprites/priest/turn/03.png"
+        "res://assets/sprites/wolf/turn/00.png",
+        "res://assets/sprites/wolf/turn/01.png",
+        "res://assets/sprites/wolf/turn/02.png",
+        "res://assets/sprites/wolf/turn/03.png"
       ]
     },
     {
@@ -43,12 +54,12 @@
       "loop": true,
       "fps": 4.0,
       "frames": [
-        "res://assets/sprites/priest/walk/00.png",
-        "res://assets/sprites/priest/walk/01.png",
-        "res://assets/sprites/priest/walk/02.png",
-        "res://assets/sprites/priest/walk/03.png"
+        "res://assets/sprites/wolf/walk/00.png",
+        "res://assets/sprites/wolf/walk/01.png",
+        "res://assets/sprites/wolf/walk/02.png",
+        "res://assets/sprites/wolf/walk/03.png"
       ]
     }
   ],
-  "out": "res://assets/sprites/priest.sprite_frames.tres"
+  "out": "res://assets/sprites/wolf.sprite_frames.tres"
 }

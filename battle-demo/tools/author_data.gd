@@ -90,7 +90,8 @@ func _unit(
 	return built
 
 
-## Порядок возврата = порядок пула (позиции 1–8). Девятый, stormmage, — враг.
+## Порядок возврата = порядок пула (позиции 1–9): набор A берёт 1–7, B — 2–8.
+## Девятым в пул вернулся stormmage: с 2026-10-26 враг — зверь, а не маг.
 func _pool() -> Array:
 	return [
 		_unit(&"knight", "Рыцарь", 120, 12, 12, 7, [
@@ -124,13 +125,19 @@ func _pool() -> Array:
 			_ability(&"blessing", "Благословение", 2, 2, 0.0,
 				Ability.TargetKind.ALLY_SINGLE, [&"regen"], [], 1, 0.0, false),
 		]),
+		_unit(&"stormmage", "Маг грозы", 180, 24, 9, 12, [
+			_ability(&"thunderstorm", "Гроза", 3, 3, 1.2,
+				Ability.TargetKind.ENEMY_ALL, [&"bleed"]),
+		]),
 	]
 
 
+## Враг один против семи, поэтому держит дольше мага: hp выше, броня ниже —
+## волк живёт рывками и укусами, а не щитом. Укус двойной и оставляет рану.
 func _enemy() -> UnitStats:
-	return _unit(&"stormmage", "Маг грозы", 180, 24, 9, 12, [
-		_ability(&"thunderstorm", "Гроза", 3, 3, 1.2,
-			Ability.TargetKind.ENEMY_ALL, [&"bleed"]),
+	return _unit(&"wolf", "Волк", 240, 26, 6, 14, [
+		_ability(&"rend", "Разрывание", 3, 2, 1.2,
+			Ability.TargetKind.ENEMY_SINGLE, [&"bleed"], [], 2),
 	])
 
 

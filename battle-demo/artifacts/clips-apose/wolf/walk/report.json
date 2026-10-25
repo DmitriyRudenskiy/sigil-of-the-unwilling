@@ -1,0 +1,35 @@
+{
+ "char": "wolf",
+ "anim": "walk",
+ "seed": 1204,
+ "mirror": false,
+ "length": 81,
+ "seconds": 63.3,
+ "corner_before_clip": [
+  5,
+  178,
+  19
+ ],
+ "audit": {
+  "frames": 81,
+  "motion_first_last": 42.1,
+  "sharpness_min": 1031.2,
+  "sharpness_median": 1124.0,
+  "pivot_slide_x": 2.1,
+  "pivot_sway_x": 8.3,
+  "contact_slide_x": 19.5,
+  "contact_sway_x": 168.9,
+  "feet_drift_x": 16.5,
+  "feet_drift_y": 17,
+  "chroma_pixels_kept": 0,
+  "chroma_share": 0.0,
+  "flat_white_share": 0.0
+ },
+ "subsampled": [
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/wolf/walk/frame_01.png",
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/wolf/walk/frame_17.png",
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/wolf/walk/frame_34.png",
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/wolf/walk/frame_50.png"
+ ],
+ "verdict": "годен: движение 42.1, резкость 1031.2/1124.0, снос ступней 19.5 px, хромакей 0, плоский белый 0.0%"
+}

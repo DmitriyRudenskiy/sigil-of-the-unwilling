@@ -10,9 +10,10 @@
 | 4 | `1791102224890-01a10602-…png` | `wizard` | маг | player | 4 | да | да |
 | 5 | `1792065652955-01a13f6e-…jpeg` | `sorcerer` | чародей | player | 5 | да | да |
 | 6 | `1792115804850-01a1426b-…jpeg` | `barbarian` | brute | player | 6 | да | да |
-| 7 | `1792116192660-01a14272-…jpeg` | `stormmage` | враг | enemy | — | враг | враг |
+| 7 | `1792116192660-01a14272-…jpeg` | `stormmage` | маг | player | 9 | да | да |
 | 8 | `1792116358916-01a14273-…jpeg` | `cutthroat` | головорез | player | 7 | да | да |
 | 9 | `flux-3-image_a_Перенести_стиль_с_из.png` | `priest` | саппорт | player | 8 | — | да |
+| 10 | `assets/beasts/wolf.png` (t2i, `tools/gen_beast.py`) | `wolf` | **враг** | enemy | — | враг | враг |
 
 Источник — `/Users/user/sigil-of-the-unwilling-slop/Новая папка с объектами 2/`
 (девять файлов, 1024²/2048², **альфы нет ни у одного** — альфу даёт генерация и

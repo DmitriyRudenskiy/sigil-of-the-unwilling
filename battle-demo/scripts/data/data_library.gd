@@ -12,10 +12,10 @@ extends RefCounted
 ## Каталог юнитов и наборы. Файлы создаёт tools/author_data.gd.
 const UNITS_DIR := "res://data/units"
 const ROSTER_IDS := ["a", "b"]
-const ENEMY_ID := &"stormmage"
-## Восемь юнитов в пуле плюс один враг.
-const UNIT_COUNT := 9
-const POOL_SIZE := 8
+const ENEMY_ID := &"wolf"
+## Девять юнитов в пуле плюс один враг (с 2026-10-26 это зверь — волк).
+const UNIT_COUNT := 10
+const POOL_SIZE := 9
 const ROSTER_SIZE := 7
 
 
