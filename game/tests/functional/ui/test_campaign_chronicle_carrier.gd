@@ -18,6 +18,8 @@ extends BaseTest
 ##    пересоздания слоя;
 ## 6. Esc и кнопка «Закрыть» на экране возвращают на карту ровно один сигнал.
 ## 7. события Знака (выбор, титул) видны в отрендеренной ленте (T-187).
+## 8. строка первого рейда видна в отрендеренной ленте — остаток vertical-slice 2.1,
+##    закрытый ходом, а не головой о «headless не умеет».
 
 const MAIN_SCENE_PATH := "res://scenes/main/main.tscn"
 const TOP_BUTTONS_PATH := "CampaignHUD/CampaignHud/TopButtons"
@@ -228,6 +230,45 @@ func test_sign_events_reach_the_rendered_feed() -> void:
 	await _press(CHRONICLE_BUTTON_PATH)
 	assert_bool(_texts().has(GameText.chronicle_line("chronicle.rank_changed", {"rank": "Знаемый"}))) \
 			.override_failure_message("смена титула не дошла до экрана").is_true()
+
+
+## vertical-slice 2.1 (остаток): угрозовые строки доходят до отрендеренной ленты.
+## Долгие годы этот хвост задачи жил с оправданием «UI, headless невозможен»; с D-230
+## (ux-review зрением агента) и MCP-съёмкой оно ложно, а данных для проверки было
+## достаточно и раньше: `_advance_chronicle()` пишет бит рейда из отчёта угроз.
+## Путь — тот же, что у игрока: семь нажатий кнопки хода (пол — рейд K-R3 на 7-м
+## ходу) и кнопка «Хроника»; между ними — повторное открытие, чтобы «до рейда» тоже
+## было проверено на живом экране.
+##
+## Проверяется именно бит, а не строка-причина: канон 04-narrative («Пришли за
+## зерном. Унесли треть. Записал.») держит и цель, и потерю в строке бита, а четыре
+## ключа `chronicle.raid_*` — это особые случаи (не взяли / дефицит / партия в пути /
+## все районы в руинах), которых в базовом сценарии на 7-м ходу не происходит. Их
+## доставка — уровень данных (`test_chronicle_writers.gd`), здесь же важно, что
+## строка появляется ходом рейда, а не при поднятии сцены.
+## «До рейда» снимается только на открытой ленте: закрытый экран не заполнен, и
+## проверка «строки нет» на пустом списке была бы ложной защитой — бит, записанный
+## на старте кампании, прошёл бы мимо неё (проверено мутацией M4 из `tools/
+## mut_chronicle_raid.sh`: с «закрытым» before-гардом мутация оставалась зелёной).
+func test_raid_lines_reach_the_rendered_feed() -> void:
+	await _mount()
+	var bit_line := GameText.chronicle_line("chronicle.bit_first_raid")
+	await _press(CHRONICLE_BUTTON_PATH)
+	var before := _texts()
+	assert_bool(before.has(GameText.chronicle_line("chronicle.bit_sign"))) \
+			.override_failure_message(
+				"лента до рейда обязана быть отрендерена: иначе проверка «нет строки» пуста") \
+			.is_true()
+	assert_bool(not before.has(bit_line)) \
+			.override_failure_message("бит рейда не может быть в ленте до первого рейда").is_true()
+	await _press(CHRONICLE_BUTTON_PATH)
+	for _day in range(7):
+		await _press(TURN_BUTTON_PATH)
+	assert_int(_main.composition.campaign.current_turn).is_greater_equal(7)
+	await _press(CHRONICLE_BUTTON_PATH)
+	assert_bool(_texts().has(bit_line)) \
+			.override_failure_message(
+				"строка первого рейда не дошла до отрендеренной ленты").is_true()
 
 
 func after_test() -> void:
