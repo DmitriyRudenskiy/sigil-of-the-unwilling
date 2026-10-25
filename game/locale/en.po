@@ -19,6 +19,12 @@ msgstr "Load"
 msgid "menu.credits"
 msgstr "Credits"
 
+msgid "menu.continue_unavailable"
+msgstr "No campaign save: start a new game."
+
+msgid "menu.credits_unavailable"
+msgstr "Credits are not available yet."
+
 msgid "menu.arena"
 msgstr "🏙 City arena"
 
@@ -36,6 +42,9 @@ msgstr "📜 Chronicle"
 
 msgid "menu.exit"
 msgstr "Exit"
+
+msgid "menu.exit_unavailable"
+msgstr "Quitting the game is not a menu action."
 
 msgid "menu.version"
 msgstr "Sigil of the Unwilling v0.1 — Godot 4.7"
@@ -708,6 +717,9 @@ msgstr "Race:"
 msgid "creation.subrace_label"
 msgstr "Subrace:"
 
+msgid "creation.subrace_unavailable"
+msgstr "No subraces in the MVP — pick a race above."
+
 msgid "creation.class_label"
 msgstr "Class:"
 
@@ -1106,6 +1118,12 @@ msgstr "Load error"
 
 msgid "load.no_save"
 msgstr "Save not found"
+
+msgid "save.slot_empty_unavailable"
+msgstr "Slot is empty: no save written yet."
+
+msgid "save.load_mode_unavailable"
+msgstr "This screen is in save mode."
 
 
 msgid "campaign.city"

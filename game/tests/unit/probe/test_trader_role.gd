@@ -1,5 +1,21 @@
 extends BaseTest
 
+## Профиль Торговца на архивном мире. Оба кейса когда-то были сняты одним skip'ом
+## «дрейф калибровки после слияния» (ветка `fix/world-session-baseline`). Пересъёмка
+## 2026-10-25 (`GdUnitCmdTool.gd`, headless) показала, что обоснование ложно, а
+## под ним — дефект владения сценой боя: завершившийся бой остаётся узлом `Battle`
+## под root (его владелец — `BattleFlow`, а он живёт вместе с миром), и следующий
+## автопрогон того же процесса находил его в `BalanceProbe._handle_battle()`, видел
+## `battle_over` и зависал там: `turn` стоял на 0, `battles_fought` += 1 за кадр.
+## Переменной оказался порядок прогонов: `druid → fighter` красный, `fighter → druid`
+## зелёный — то есть цвет гейта зависел от алфавита имён тестов.
+## Фикс — `BattleFlow._exit_tree()` снимает сцену вместе с владельцем (**T-204**),
+## после чего оба кейса живут в одном процессе и skip'ов в файле нет. Порядок в файле
+## и есть регрессия на заражение процесса: `druid` первым, `fighter` вторым — ровно
+## тот порядок, который до фикса был красным.
+## Урок в реестр (D-254): skip без даты пересъёмки — утверждение, которое обязан
+## перепроверить следующий, а не характеристика кода; переснять skip дешевле, чем
+## наследовать его обоснование.
 func test_sale_counts_only_a_real_transaction() -> void:
 	var city := _city_with_market()
 	city.storage[&"wood"] = 5.0
@@ -33,7 +49,7 @@ func test_noop_stock_does_not_count_as_a_deal() -> void:
 
 	pilot.free()
 
-func test_world_role_trader_completes_a_sale_headlessly(do_skip := true, skip_reason := "дрейф калибровки после слияния: autopilot-калибровка Trader настроена на добрапционный state ветки (fix/world-session-baseline); на эволюционировавших скриптах main сделки не закрываются в бюджете кадров; перенастройка = инициатива probe") -> void:
+func test_world_role_trader_completes_a_sale_headlessly() -> void:
 	const class_id := "druid"
 	const role_id := "trader"
 	var seed_value: int = ScenarioTargets.seed_for(class_id, role_id)
@@ -66,7 +82,7 @@ func test_world_role_trader_completes_a_sale_headlessly(do_skip := true, skip_re
 	world.queue_free()
 	await get_tree().process_frame
 
-func test_fighter_trader_returns_to_market_with_real_cargo(do_skip := true, skip_reason := "дрейф калибровки после слияния (тот же класс, что и test_world_role_trader_completes_a_sale_headlessly)") -> void:
+func test_fighter_trader_returns_to_market_with_real_cargo() -> void:
 	const class_id := "fighter"
 	const role_id := "trader"
 	var seed_value: int = ScenarioTargets.seed_for(class_id, role_id)

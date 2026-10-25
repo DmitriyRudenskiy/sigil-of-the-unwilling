@@ -19,6 +19,12 @@ msgstr "Загрузить"
 msgid "menu.credits"
 msgstr "Титры"
 
+msgid "menu.continue_unavailable"
+msgstr "Нет сохранения кампании: начните новую игру."
+
+msgid "menu.credits_unavailable"
+msgstr "Титры ещё не сделаны."
+
 msgid "menu.arena"
 msgstr "🏙 Арена города"
 
@@ -36,6 +42,9 @@ msgstr "📜 Летопись"
 
 msgid "menu.exit"
 msgstr "Выход"
+
+msgid "menu.exit_unavailable"
+msgstr "Выход из игры — не через меню."
 
 msgid "menu.version"
 msgstr "Sigil of the Unwilling v0.1 — Godot 4.7"
@@ -708,6 +717,9 @@ msgstr "Раса:"
 msgid "creation.subrace_label"
 msgstr "Подраса:"
 
+msgid "creation.subrace_unavailable"
+msgstr "Подрас в MVP нет — раса выбирается выше."
+
 msgid "creation.class_label"
 msgstr "Класс:"
 
@@ -1107,6 +1119,12 @@ msgstr "Ошибка загрузки"
 
 msgid "load.no_save"
 msgstr "Сохранение не найдено"
+
+msgid "save.slot_empty_unavailable"
+msgstr "Слот пуст: сохранение ещё не записано."
+
+msgid "save.load_mode_unavailable"
+msgstr "Экран открыт в режиме сохранения."
 
 msgid "campaign.city"
 msgstr "Город"
