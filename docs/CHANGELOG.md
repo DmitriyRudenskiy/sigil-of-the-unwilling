@@ -56,9 +56,10 @@ date: 2026-10-25
 того, как в фикстуре дальняя цель встала перед соседом — порядок в списке целей теперь
 обоснован комментарием).
 
-**Гейт (local):** GdUnit 3386 / 0 / 0 / 0 skipped / 0 orphans; MCP — 80 passed / 2 skipped /
-0 failed (+1 ошибка readiness на 180 с при памяти 45/46 GB, тот же кейс
-`test_campaign_carrier.py::test_second_press_closes_city_screen` зелёным в изоляции за 3.18 с).
+**Гейт (local):** GdUnit **3386 / 0 / 0 / 0 skipped / 0 orphans**; MCP — **81 passed /
+2 skipped / 0 failed / 0 errors** (83 collected). Промежуточный прогон до фикса теста поймал
+`SCRIPT ERROR` в `test_battle_damage_numbers_cap.gd` (чтение `_numbers` как `Node`) — см.
+T-206; финальный прогон зелёный целиком.
 
 
 ## [2026-10-25] — Матрица Торговца переснята целиком: выживание 4/11 → 9/11, цель по-прежнему 0/11 (9.2, 2.4)
