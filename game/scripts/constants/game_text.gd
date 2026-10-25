@@ -5,6 +5,11 @@ static func menu_continue() -> String: return TranslationServer.translate("menu.
 static func menu_new_game() -> String: return TranslationServer.translate("menu.new_game")
 static func menu_load_game() -> String: return TranslationServer.translate("menu.load_game")
 static func menu_credits() -> String: return TranslationServer.translate("menu.credits")
+# Причины выключенного пункта (mvp-ui-flow 3.3, столп 1 «≤2 клика до причины»):
+# недоступность обязана быть названа на месте, а не только обесцвечена.
+static func menu_continue_unavailable() -> String: return TranslationServer.translate("menu.continue_unavailable")
+static func menu_credits_unavailable() -> String: return TranslationServer.translate("menu.credits_unavailable")
+static func menu_exit_unavailable() -> String: return TranslationServer.translate("menu.exit_unavailable")
 static func menu_arena() -> String: return TranslationServer.translate("menu.arena")
 static func menu_model_warrior() -> String: return TranslationServer.translate("menu.model_warrior")
 static func menu_model_mage() -> String: return TranslationServer.translate("menu.model_mage")
@@ -301,6 +306,7 @@ static func creation_name_label() -> String: return TranslationServer.translate(
 static func creation_sex_label() -> String: return TranslationServer.translate("creation.sex_label")
 static func creation_race_label() -> String: return TranslationServer.translate("creation.race_label")
 static func creation_subrace_label() -> String: return TranslationServer.translate("creation.subrace_label")
+static func creation_subrace_unavailable() -> String: return TranslationServer.translate("creation.subrace_unavailable")
 static func creation_class_label() -> String: return TranslationServer.translate("creation.class_label")
 static func creation_culture_label() -> String: return TranslationServer.translate("creation.culture_label")
 static func creation_background_label() -> String: return TranslationServer.translate("creation.background_label")
@@ -455,6 +461,8 @@ static func save_failed() -> String: return TranslationServer.translate("save.fa
 static func load_ok() -> String: return TranslationServer.translate("load.ok")
 static func load_failed() -> String: return TranslationServer.translate("load.failed")
 static func no_save_found() -> String: return TranslationServer.translate("load.no_save")
+static func save_slot_empty_unavailable() -> String: return TranslationServer.translate("save.slot_empty_unavailable")
+static func save_load_mode_unavailable() -> String: return TranslationServer.translate("save.load_mode_unavailable")
 
 static func campaign_city() -> String: return TranslationServer.translate("campaign.city")
 static func campaign_party() -> String: return TranslationServer.translate("campaign.party")
