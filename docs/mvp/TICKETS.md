@@ -3764,6 +3764,18 @@ interaction server») и `test_team_romance_e2e::test_adult_gate` (ERROR в setu
 путём). Счёт смены: 15 прогонов, 13 с гонкой, потерянных тестов — 19. Жертвой может оказаться
 любой кейс — правило «переснимать на свежем порту, а не искать вину в коде» остаётся.
 
+
+**Дозамер (2026-10-26, гейт смены D-260, `MCP_WORKERS=1`, память ~45/46 ГБ занято).** Симптом —
+`errors=1` на сборке фикстуры: `test_campaign_carrier.py::test_city_screen_registered_in_campaign_ui_manager`
+(`MCPError: игра не готова за 180 с … Not connected to game interaction server`, `conftest.py:217 →
+wait_ready`), при `passed=80 skipped=2 failed=0 collected=83`. Изолированный перезапуск того же файла
+(`DISPLAY=:96`, `MCP_PORT=9095`) — **11 passed за 32.59 с**, и в успешном логе те же строки
+`[SERVER] Error response: Not connected to game interaction server.` перед `Connected … on port 9095`:
+180 с не хватает не на «падение», а на **медленный handshake**. Тем же вечером так же упал
+`test_settlement_storm.py::test_settlement_determinism` (та же строка readiness, изолированно — 2 passed
+за 5.02 с). Форма отчёта не меняется (числа прогона + изолированный перезапуск), assertion readiness не
+ослабляется: **два потерянных теста за смену при нуле реальных падений**.
+
 ### Тикет T-173 «Основной экран кампании живёт со скроллом: контент правой колонки 1695 px в колонке 1060 px; «нет скролла» нечем проверить» (2026-10-24, свип mvp-ui-flow 4.1/4.2)
 
 **Зависит:** — · **Блокирует:** mvp-ui-flow 4.1 (вторая половина) · **Владелец:** агент + вердикт владельца · **Статус:** закрыт 2026-10-24 (проверка (3) в `test_ui_responsive.gd`); вердикт вынесен по делегированию владельца; постановка содержит erratum ниже
