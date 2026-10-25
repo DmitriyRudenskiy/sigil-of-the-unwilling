@@ -21,6 +21,15 @@ extends BaseTest
 #
 # Что осталось в этих же сценах и ждёт `Q-M96`: шесть золотых подписей уровня навыка
 # (`SkillLevel`, корзина S3). Гард их не трогает и держит их счётчиком.
+#
+# **Поправка (T-189, UI-AC7).** Семь `ArmyCount` перешли на роль `LabelNumber`
+# (кегль 14 был ниже порога AC7; по §2 счётчики — числа, 20 PT Mono), то есть перестали быть «узлами без носителя» — по
+# прецеденту T-185 («подписи получили золото ролей темы, это перевод в носитель, а не
+# локальная перекраска»). Историческое утверждение 6.1 от этого не меняется: у
+# базового `Label` в теме цвета нет (кейс ниже), и снятая запись и сегодня резолвилась
+# бы в белый — это по-прежнему проверяется на `unit_sprite/CountLabel`, где носителя
+# нет. Синтаксический пункт «на узле нет носителя» заменён семантическим: счётчик одет
+# ровно в объявленную роль, а его цвет — ровно цвет роли, без локальной записи.
 
 const _ARTIFACT_SCENE := preload("res://scenes/ui/artifact_inventory_screen.tscn")
 const _UNIT_SPRITE_SCENE := preload("res://scenes/ui/unit_sprite.tscn")
@@ -35,6 +44,11 @@ const _REMOVED_COLOR := Color(1, 1, 1, 1)
 # Экран артефактов: 6 золотых `SkillLevel` (S3, ждут Q-M96). Спрайт юнита: ноль.
 const _REMAINING_ARTIFACT := 6
 const _REMAINING_UNIT_SPRITE := 0
+
+## Роль, в которую T-189 одел семь счётчиков войск (вместо обхода 14 px). Шкала
+## §2 [[17-ui-style-guide]] отдаёт «числа/статы … счётчики» строке «20 | LabelNumber
+## | PT Mono» — тот же носитель, что на боевом HUD, а не «вторичный текст».
+const _ARMY_COUNT_ROLE := "LabelNumber"
 
 const _ARMY_COUNT_PATHS: Array[String] = [
 	"Center/Window/Bottom/ArmySlot_0/ArmyCount",
@@ -84,14 +98,15 @@ func test_dead_overrides_removed_and_live_ones_kept() -> void:
 		.override_failure_message("в unit_sprite.tscn не должно остаться font_color")
 
 
-## Снятые узлы не имели своего носителя, и в сценах нет вложенной темы: иначе
-# «белый = дефолт» не выполняется и удаление было бы перекраской.
+## Экран артефактов: счётчик одет ровно в объявленную роль (T-189), спрайт юнита:
+# носителя по-прежнему нет — на нём держится исходное доказательство 6.1. Вложенной
+# `theme` нет ни там ни там, иначе резолв пошёл бы мимо темы игры.
 func test_removed_nodes_carry_no_variation_and_scenes_no_nested_theme() -> void:
 	for label in _labels(_ARMY_COUNT_PATHS, _ARTIFACT_SCENE):
-		assert_str(str(label.theme_type_variation)).is_empty() \
+		assert_str(str(label.theme_type_variation)).is_equal(_ARMY_COUNT_ROLE) \
 			.override_failure_message(
-				"%s: на узле носитель темы — снятый белый резолвился бы не из дефолта"
-				% label.name
+				"%s: ждался носитель %s — кегль счётчика обязан приезжать из роли (AC7)"
+				% [label.name, _ARMY_COUNT_ROLE]
 			)
 	for label in _labels(["CountLabel"], _UNIT_SPRITE_SCENE):
 		assert_str(str(label.theme_type_variation)).is_empty() \
@@ -108,14 +123,24 @@ func test_removed_nodes_carry_no_variation_and_scenes_no_nested_theme() -> void:
 			)
 
 
-## Нулевая дельта: без снятой записи узел рисует тот же цвет, что рисовал с ней.
-func test_removed_nodes_still_resolve_the_removed_color() -> void:
+## Цвет счётчика — **цвет роли из темы**, а не локальная запись и не дефолт движка:
+# локальный `font_color` вернул бы в сцену ровно тот тип мёртвой записи, из-за
+# которого и писался этот гард, а белый дефолт означал бы, что роль слетела.
+func test_army_counters_resolve_the_role_color_not_a_local_override() -> void:
+	var theme: Theme = load(_THEME_FILE)
+	assert_that(theme).is_not_null()
+	var role_color: Color = theme.get_color("font_color", _ARMY_COUNT_ROLE)
 	for label in _labels(_ARMY_COUNT_PATHS, _ARTIFACT_SCENE):
-		assert_bool(label.get_theme_color("font_color") == _REMOVED_COLOR).is_true() \
+		assert_bool(label.get_theme_color("font_color") == role_color).is_true() \
 			.override_failure_message(
-				"%s: после снятия записи резолвится %s, ждался снятый %s"
-				% [label.name, label.get_theme_color("font_color"), _REMOVED_COLOR]
+				"%s: резолвится %s, ждался цвет роли %s (%s)"
+				% [label.name, label.get_theme_color("font_color"), _ARMY_COUNT_ROLE, role_color]
 			)
+
+
+## Нулевая дельта там, где носителя нет: без снятой записи узел рисует тот же цвет,
+# что рисовал с ней.
+func test_removed_nodes_still_resolve_the_removed_color() -> void:
 	for label in _labels(["CountLabel"], _UNIT_SPRITE_SCENE):
 		assert_bool(label.get_theme_color("font_color") == _REMOVED_COLOR).is_true() \
 			.override_failure_message(

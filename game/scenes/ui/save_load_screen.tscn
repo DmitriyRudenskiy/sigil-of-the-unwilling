@@ -59,7 +59,7 @@ theme_override_constants/separation = 12
 layout_mode = 2
 size_flags_horizontal = 3
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 14
+theme_type_variation = &"LabelSecondary"
 text = "Пустой слот"
 
 [node name="Buttons" type="HBoxContainer" parent="Panel/Box/SlotList/Slot0/HBox"]
@@ -90,7 +90,7 @@ theme_override_constants/separation = 12
 layout_mode = 2
 size_flags_horizontal = 3
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 14
+theme_type_variation = &"LabelSecondary"
 text = "Пустой слот"
 
 [node name="Buttons" type="HBoxContainer" parent="Panel/Box/SlotList/Slot1/HBox"]
@@ -121,7 +121,7 @@ theme_override_constants/separation = 12
 layout_mode = 2
 size_flags_horizontal = 3
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 14
+theme_type_variation = &"LabelSecondary"
 text = "Пустой слот"
 
 [node name="Buttons" type="HBoxContainer" parent="Panel/Box/SlotList/Slot2/HBox"]
@@ -152,7 +152,7 @@ theme_override_constants/separation = 12
 layout_mode = 2
 size_flags_horizontal = 3
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 14
+theme_type_variation = &"LabelSecondary"
 text = "Пустой слот"
 
 [node name="Buttons" type="HBoxContainer" parent="Panel/Box/SlotList/Slot3/HBox"]
@@ -183,7 +183,7 @@ theme_override_constants/separation = 12
 layout_mode = 2
 size_flags_horizontal = 3
 vertical_alignment = 1
-theme_override_font_sizes/font_size = 14
+theme_type_variation = &"LabelSecondary"
 text = "Пустой слот"
 
 [node name="Buttons" type="HBoxContainer" parent="Panel/Box/SlotList/Slot4/HBox"]
@@ -205,7 +205,7 @@ disabled = true
 [node name="ErrorLabel" type="Label" parent="Panel/Box"]
 layout_mode = 2
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 13
+theme_type_variation = &"LabelSecondary"
 theme_override_colors/font_color = Color(1, 0.3, 0.2, 1)
 text = ""
 
