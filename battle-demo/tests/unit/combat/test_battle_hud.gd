@@ -89,6 +89,8 @@ func test_no_commands_once_the_battle_is_over() -> void:
 	BattleFactory.auto_play(combat)
 	assert_bool(combat.finished).is_true()
 	assert_int(screen.hud.command_count()).is_equal(0)
+	# И подпись-причина тоже уходит: без кнопок она повисает сиротой у края.
+	assert_bool(not screen.hud.reason.visible)
 
 
 ## Ход противника разыгрывается внутри `_advance` (ИИ ходит сразу, как только
@@ -135,3 +137,71 @@ func test_units_stand_on_distinct_hexes_of_their_own_flank() -> void:
 	assert_float(screen.field.view_of(combat.units[0]).position.x).is_less(
 		screen.field.view_of(foes[0]).position.x
 	)
+
+
+## 10.13: команды — колонкой за правым краем поля. 1500 px — правый край самого
+## правого силуэта (клетка col 7 + половина фигуры в масштабе 2.2); строкой
+## внизу кнопки ложились на сетку и на волков.
+func test_commands_stand_clear_of_the_field() -> void:
+	var screen := _screen()
+	screen.run(_combat())
+	var shown := 0
+	for button in screen.hud.commands.get_children():
+		if not is_instance_valid(button) or not button.visible:
+			continue
+		shown += 1
+		var rect: Rect2 = button.get_rect()
+		# Правый край — в кадре (24 px от кромки), левый — за правым силуэтом
+		# поля: клетка col 7 плюс половина фигуры в текущем масштабе (~1590 px).
+		assert_bool(rect.position.x >= 1600.0)
+		assert_bool(rect.end.x <= screen.hud.VIEWPORT_WIDTH - 24.0)
+		# Подпись не залезает на рамку пилюли: «Танец кинжалов» на 216 px
+		# выступал за кнопку (read-агент 2026-10-25, `a_start`).
+		var text_w: float = button.get_theme_font("font").get_string_size(
+			button.text, HORIZONTAL_ALIGNMENT_LEFT, -1.0,
+			button.get_theme_font_size("font")).x
+		assert_bool(text_w <= rect.size.x - 24.0)
+	assert_int(shown).is_greater(0)
+
+
+## Итерация 2 (read-агент 2026-10-25): круг счётчика лежал на верхнем ряду
+## гексов, подпись активного юнита — на нижнем. Оба стоят в тёмной полосе над
+## полем: нижняя кромка не касается верхней вершины сетки, подпись не залезает
+## ни на панели командиров, ни на счётчик.
+func test_the_top_band_holds_the_counter_and_the_name() -> void:
+	var screen := _screen()
+	var field_top: float = BattleField.HEX_ORIGIN.y - BattleField.HEX_RADIUS
+	var strip_bottom: float = screen.hud.STRIP_TOP + screen.hud.STRIP_CELL
+	var counter: Rect2 = screen.hud.counter_rect()
+	assert_bool(counter.position.y >= strip_bottom)
+	assert_bool(counter.end.y <= field_top)
+	var name_rect: Rect2 = screen.active_label.get_rect()
+	assert_bool(name_rect.position.y >= strip_bottom)
+	assert_bool(name_rect.end.y <= field_top)
+	assert_bool(not name_rect.intersects(counter))
+
+
+## Полоса противника отличается от своей: зелёная у обеих сторон читалась как
+## «свои» (read-агент: «враг-волк справа с зелёной полосой как свои»).
+func test_enemy_bars_are_a_different_colour() -> void:
+	var screen := _screen()
+	screen.run(_combat())
+	var mine: ColorRect = null
+	var foe: ColorRect = null
+	for unit in screen.combat.units:
+		if unit.side == BattleUnit.SIDE_PLAYER:
+			mine = screen.bar_of(unit)
+		else:
+			foe = screen.bar_of(unit)
+	assert_bool(mine.color != foe.color)
+	assert_bool(foe.color != screen.BAR_TRACK)
+
+
+## Карточка текущего юнита обведена золотом, и отметка идёт за очередью. Тест
+## был заявлен в `docs/ui-review-2026-10-25.md`, но не написан — написан здесь.
+func test_the_current_card_is_outlined_in_gold() -> void:
+	var screen := _screen()
+	screen.run(_combat())
+	assert_str(screen.hud.marked_card_uid()).is_equal(screen.combat.current.uid())
+	screen.combat.perform(BattleAction.skip(screen.combat.current))
+	assert_str(screen.hud.marked_card_uid()).is_equal(screen.combat.current.uid())

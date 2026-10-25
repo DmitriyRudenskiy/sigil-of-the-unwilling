@@ -11,12 +11,17 @@
 import concurrent.futures as cf
 import os
 import subprocess
+import sys
 from datetime import date
 from pathlib import Path
 
 DEMO = Path(__file__).resolve().parent.parent
 SHOTS = DEMO / "artifacts/screenshots"
-OUT = DEMO / f"docs/ui-read-judge-{date.today()}.md"
+## Раунд приёмки: `-r2`, `-r3`, … — отдельный файл на каждый прогон, чтобы
+## итерации (задача 10.4: «по каждому fail — правка и повтор») не затирали
+## предыдущий журнал. Пустая строка — первый раунд дня.
+ROUND = sys.argv[1] if len(sys.argv) > 1 else ""
+OUT = DEMO / f"docs/ui-read-judge-{date.today()}{ROUND}.md"
 
 # Кадр → состояние, снятое с него (без чисел: их агент читает с пикселей).
 FRAMES = [

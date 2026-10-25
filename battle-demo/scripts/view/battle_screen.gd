@@ -15,20 +15,31 @@ class_name BattleScreen extends Node2D
 const BAR_SIZE := Vector2(96, 10)
 const BAR_FILL := Color(0.55, 0.78, 0.42)
 const BAR_TRACK := Color(0.12, 0.12, 0.14)
-const MARKER_SIZE := Vector2(96, 6)
-const MARKER_COLOR := Color(0.95, 0.8, 0.35)
-## Полоса — над головой: ступни в (64, 112) холста, фигура в нём ~96 px, то есть
-## голова заканчивается на ~100 px над ногами на единицу масштаба. Больше запас —
-## полоса лезет под ноги юниту заднего ряда (сетка ставит ряды в 150 px друг от
-## друга, кадр `hud-2.png`, 2026-10-26).
-const BAR_LIFT := 100.0
+## Гибель: полоса остаётся пустой (спека), но дорожка не багрянеет — багряная
+## полоса на тёмном фоне читалась как залитый HP (read-агент 2026-10-25: «у
+## юнита красная полоса при живой позе — мёртвый/раненый/враг неразличимо»,
+## «погибший волк несёт над собой красную полосу как живой»). Погибшего метит
+## крест поверх пустой полосы: он не похож ни на заполненную полосу, ни на волю.
+const DEATH_MARK := "✕"
+const DEATH_MARK_COLOR := Color(0.95, 0.32, 0.22)
+const DEATH_MARK_FONT := 26
+## Полоса противника — кирпичная: зелёная у обеих сторон читалась как «свои»
+## (read-агент: «враг-волк справа с зелёной полосой как свои»). Сторона видна
+## и по углу поля, но полосу игрок читает быстрее, чем силуэт.
+const BAR_FILL_ENEMY := Color(0.74, 0.27, 0.2)
+## Подъём полосы над опорами юнита — в масштабе самого юнита (`BAR_LIFT ×
+## view.scale.y`), чтобы полоса оставалась над головой при любом `UNIT_SCALE`.
+## 120 × 1.1 = 132 px: 123 px фигуры + 8 px зазора спеки (задача 10.10; раньше
+## было 100 × 2.2 = 220 px при 246 px фигуры — полоса лежала на корпусе).
+const BAR_LIFT := 120.0
 
 var combat: CombatState
 
 var _bars := {}
 
+var _marks := {}
+
 @onready var field: BattleField = $Field
-@onready var marker: ColorRect = $Marker
 @onready var active_label: Label = $ActiveLabel
 @onready var hud: BattleHud = $HUD
 @onready var result_view: BattleResult = $Result
@@ -78,7 +89,7 @@ func run(built: CombatState) -> void:
 	combat.battle_ended.connect(_on_battle_ended)
 	for unit in combat.units:
 		var view := field.spawn(unit)
-		_bars[unit.uid()] = _make_bar(view)
+		_bars[unit.uid()] = _make_bar(view, unit)
 	_refresh_all()
 	_on_turn(combat.current)
 
@@ -100,8 +111,9 @@ func _on_battle_ended(outcome: int) -> void:
 	# Активного юнита после конца боя нет: жёлтая метка и подпись под полем
 	# остались бы висящей подсказкой про последнего ходившего (read-агент:
 	# «сирота-подпись» на кадре результата).
+	field.active_cell = Vector2i(-1, -1)
+	field.queue_redraw()
 	active_label.text = ""
-	marker.visible = false
 	result_view.show_outcome(outcome, combat.turn_index)
 
 
@@ -113,8 +125,10 @@ func _reset_view() -> void:
 	for fill: ColorRect in _bars.values():
 		fill.get_parent().free()
 	_bars = {}
+	_marks = {}
 	field.clear_views()
-	marker.visible = false
+	field.active_cell = Vector2i(-1, -1)
+	field.queue_redraw()
 	active_label.text = ""
 	result_view.visible = false
 
@@ -124,10 +138,11 @@ func _on_turn(unit: BattleUnit) -> void:
 		return
 	var view: BattleUnitView = field.view_of(unit)
 	if view != null:
-		marker.visible = true
-		marker.position = view.position + Vector2(-MARKER_SIZE.x / 2.0, 8.0)
-		# Маркер — над своим рядом, иначе юниты дальних рядов его затирают.
-		marker.z_index = view.z_index + 1
+		# Признак хода — обведённая клетка (задача 10.12). Полоска под ногами,
+		# которая была здесь раньше, ушла: на кадре она читалась то ли чужим
+		# HP-баром, то ли обрезком грани шестиугольника.
+		field.active_cell = field.cell_of(unit)
+		field.queue_redraw()
 	active_label.text = unit.stats.display_name
 
 
@@ -136,10 +151,20 @@ func _refresh_all() -> void:
 		var fill: ColorRect = _bars.get(unit.uid())
 		if fill != null:
 			# Мёртвый юнит остаётся с пустой полосой: hp 0 → ширина 0.
+			var dead := unit.hp <= 0
 			fill.size.x = maxf(0.0, (BAR_SIZE.x - 2.0) * float(unit.hp) / unit.stats.max_hp)
+			(_marks[unit.uid()] as Label).visible = dead
+			if dead:
+				# Обесцвечивание идёт тем же сигналом, что и полоса: `_process`
+				# вьюера догоняет гибель кадром позже, и съёмка кадров ловила
+				# цветного погибшего (read-агент 2026-10-25, `b_mid`: «юнит с
+				# красным X нарисован тем же непрозрачным спрайтом, что живые»).
+				var view: BattleUnitView = field.view_of(unit)
+				if view != null:
+					view.die()
 
 
-func _make_bar(view: BattleUnitView) -> ColorRect:
+func _make_bar(view: BattleUnitView, unit: BattleUnit) -> ColorRect:
 	var track := ColorRect.new()
 	track.color = BAR_TRACK
 	track.size = BAR_SIZE
@@ -149,8 +174,19 @@ func _make_bar(view: BattleUnitView) -> ColorRect:
 	track.z_index = view.z_index
 	add_child(track)
 	var fill := ColorRect.new()
-	fill.color = BAR_FILL
+	fill.color = BAR_FILL if unit.side == BattleUnit.SIDE_PLAYER else BAR_FILL_ENEMY
 	fill.position = Vector2(1, 1)
 	fill.size = Vector2(BAR_SIZE.x - 2.0, BAR_SIZE.y - 2.0)
 	track.add_child(fill)
+	var mark := Label.new()
+	mark.text = DEATH_MARK
+	mark.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	mark.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	mark.position = Vector2(0.0, -11.0)
+	mark.size = Vector2(BAR_SIZE.x, BAR_SIZE.y + 22.0)
+	mark.add_theme_font_size_override("font_size", DEATH_MARK_FONT)
+	mark.add_theme_color_override("font_color", DEATH_MARK_COLOR)
+	mark.visible = false
+	track.add_child(mark)
+	_marks[unit.uid()] = mark
 	return fill

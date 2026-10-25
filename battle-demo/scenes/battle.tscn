@@ -10,14 +10,6 @@ script = ExtResource("1_screen")
 
 [node name="Field" parent="." instance=ExtResource("2_field")]
 
-[node name="Marker" type="ColorRect" parent="."]
-visible = false
-offset_left = -48.0
-offset_top = 8.0
-offset_right = 48.0
-offset_bottom = 14.0
-color = Color(0.95, 0.8, 0.35, 1)
-
 [node name="HUD" type="CanvasLayer" parent="."]
 script = ExtResource("3_hud")
 
@@ -25,10 +17,10 @@ script = ExtResource("3_hud")
 script = ExtResource("4_result")
 
 [node name="ActiveLabel" type="Label" parent="."]
-offset_left = 760.0
-offset_top = 1004.0
-offset_right = 1160.0
-offset_bottom = 1048.0
+offset_left = 490.0
+offset_top = 138.0
+offset_right = 890.0
+offset_bottom = 182.0
 theme_override_font_sizes/font_size = 28
 text = ""
 horizontal_alignment = 1

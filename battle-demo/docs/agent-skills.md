@@ -38,6 +38,21 @@
 
 ## Отметки фаз
 
+Отмечено 2026-10-25 (задача 10.8). «Выполнен» = артефакт фазы лежит по пути
+контракта; «носитель другой» = работа сделана, но не тем файлом, что назван в
+контракте (причина в сноске); «открыто» = задача группы не сделана.
+
 | Фаза | Скилл выполнен | Артефакт (путь) |
 | --- | --- | --- |
-| 0 | — | — |
+| 0 | да | `docs/agent-skills.md`, `docs/known-issues.md` |
+| 1 | да | `project.godot`, `addons/gdunit4/`, `run_tests.sh`, `tests/helpers/` |
+| 2 | да | `docs/decisions.md`, `docs/architecture.md`, `docs/glossary.md` |
+| 3 | да | `docs/art-bible.md`, `docs/design-brief.md`, `docs/ui-spec.md`, `docs/asset-spec.md`, `docs/design-review.md`, `docs/consistency-report.md`, `docs/scope-report.md`, `docs/estimate.md` |
+| 4 | да | `scripts/combat/`, `tests/unit/combat/`, `docs/test-evidence.md` |
+| 5 | да | `data/units/*.tres`, `data/rosters/*.tres`, `tests/unit/data/` |
+| 6 | частично | `tools/spec.json`, `artifacts/generate.log`, `docs/generation-log.md`. Открыто: 6.8, 6.9, 6.10, 6.15, 6.16 (покадровый фолбэк и лист экипировки — не гнались; клип-путь D15 дал девять комплектов) |
+| 7 | носитель другой | названных `tools/cut_frames.py`, `tools/audit_sprites.py`, `docs/asset-audit-report.md` в репо нет: фон снимает ункей в `tools/gen_clip.py`/`tools/mirror_anim.py` (мера спила — `known-issues.md` №6), аудит треков делают тесты `tests/unit/helpers/test_sprite_asserts.gd` и `tests/unit/view/test_sprite_tracks.gd`, сборка `.tres` — `tools/build_sprite_frames.gd` + `.py` |
+| 8 | частично (8.1–8.4) | `scenes/battle_unit.tscn`, `scripts/view/battle_unit_view.gd`, `tests/unit/combat/test_battle_unit_view.gd`. Открыто: 8.5–8.9 — контактный лист, стилевой вердикт read-агента, `docs/sprite-review-*.md`, `docs/animation-review-*.md`, I2V-ветка |
+| 9 | да | `scenes/roster_select.tscn`, `scenes/battle.tscn`, `scripts/view/`, `tools/capture_screens.gd` (+8 кадров приёмки), `tests/unit/combat/test_battle_{screen,hud}.gd` |
+| 10 | да | `docs/qa-plan.md`, `docs/ui-review-2026-10-25.md`, `docs/ui-read-judge-2026-10-25{,-r3,-r4}.md`, `docs/regression-suite.md` (с леджером), `docs/known-issues.md` (№7), отметки здесь |
+| 11 | нет | `docs/handoff.md`, `CHANGELOG.md`, `docs/vertical-slice.md`, `docs/gate-check.md` — группа 11 не начата |

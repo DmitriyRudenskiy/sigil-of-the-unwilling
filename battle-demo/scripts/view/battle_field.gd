@@ -13,10 +13,13 @@ class_name BattleField extends Node2D
 ## тактике; дистанции и зоны поражения ядро не считает (мандат демо).
 
 const UNIT_SCENE := "res://scenes/battle_unit.tscn"
-## Масштаб кадра на поле: холст 128 px, персонаж в нём ~96 px. Клетка 173×200,
-## фигура перекрывает её по высоте в ~1.2 раза — как в макете, где юнит выше
-## своего шестиугольника, но не закрывает соседей.
-const UNIT_SCALE := 2.2
+## Масштаб кадра на поле: холст 128 px, персонаж в нём ~96 px. Выбран так, чтобы
+## полоса HP влезала над головой не глядя на соседний ряд (задача 10.10): при
+## шаге ряда `sqrt(3)·HEX_RADIUS` = 173 px фигура занимает 112·1.1 = 123 px над
+## опорами и 18 px под ними, между силуэтом верхнего ряда и полосой нижнего
+## остаётся 14 px. Прежние 2.2 давали 246 px на 173 px шага — полоса ложились
+## на спрайт верхнего юнита и читалась как его.
+const UNIT_SCALE := 1.1
 const HEX_RADIUS := 100.0
 const GRID_COLS := 8
 const GRID_ROWS := 5
@@ -37,6 +40,12 @@ const SHOWCASE := [&"idle", &"attack", &"hit", &"turn"]
 const SHOWCASE_SECONDS := 1.2
 const HEX_LINE := Color(0.62, 0.72, 0.86, 0.3)
 const HEX_LINE_MID := Color(0.62, 0.72, 0.86, 0.5)
+## Обводка клетки активного юнита (задача 10.12). Полоска 96×6 под ногами на
+## фоне сетки не читалась признаком хода — признак теперь весь шестиугольник.
+const ACTIVE_LINE := Color(0.95, 0.8, 0.35, 0.95)
+
+## Клетка активного юнита или `(-1, -1)`, когда активного нет (конец боя).
+var active_cell := Vector2i(-1, -1)
 
 var auto_cycle := true
 var _views := {}
@@ -106,6 +115,13 @@ func _draw() -> void:
 			for corner in shape:
 				points.append(corner + center)
 			draw_polyline(points, line, 2.0, true)
+	if active_cell.x >= 0 and active_cell.y >= 0 \
+		and active_cell.x < GRID_COLS and active_cell.y < GRID_ROWS:
+		var active := PackedVector2Array()
+		var at := hex_center(active_cell.x, active_cell.y)
+		for corner in shape:
+			active.append(corner + at)
+		draw_polyline(active, ACTIVE_LINE, 5.0, true)
 
 
 ## Картинка юнита по его экземпляру боя (для `CombatState`, а не для витрины).

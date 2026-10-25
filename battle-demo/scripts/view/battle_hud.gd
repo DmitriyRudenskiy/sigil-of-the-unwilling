@@ -26,23 +26,38 @@ const TEXT := Color(0.93, 0.9, 0.84)
 const FONT := 24
 const FONT_SMALL := 18
 const STRIP_CELL := 84.0
+## Верх полосы порядка — тёмная полоса над полем; счётчик раунда и подпись
+## активного юнита стоят под ней и проверяют зазор этим числом.
+const STRIP_TOP := 24.0
 const PANEL_SIZE := Vector2(392, 132)
-const BUTTON_SIZE := Vector2(216, 64)
+## 264 px — чтобы самое длинное имя способности («Танец кинжалов», кегль 24)
+## влезало в пилюлю с полями: на 216 px текст залезал на рамку кнопки
+## (read-агент 2026-10-25, `a_start`).
+const BUTTON_SIZE := Vector2(264, 64)
 const HP_WIDTH := 242.0
 const VIEWPORT_WIDTH := 1920.0
+## Команды — колонкой в правом поле. Правый край сетки — x 1380 (клетка col 7),
+## но фигура в масштабе 2.2 шире клетки и доходит до ~1500, поэтому колонка
+## стоит у правого края вьюпорта: строкой внизу и ближе к полю кнопки ложились
+## на шестиугольники и на волков (задача 10.13).
+## Колонка команд прижата к правому краю: правый край кнопки — 24 px от края
+## кадра, поэтому ширина кнопки входит в координату, а не догоняется числом.
+const COMMAND_X := VIEWPORT_WIDTH - 24.0 - BUTTON_SIZE.x
+const COMMAND_TOP := 300.0
+const COMMAND_STEP := 80.0
 
 var combat: CombatState
-
+var commands := Control.new()
+var reason := Label.new()
+var _counter: Control
 var _left := {}
 var _right := {}
 var _strip := {}
 var _ring := Label.new()
-var commands := Control.new()
 ## Кнопки команд по id: пересборка панели идёт из сигнала кнопки, поэтому старые
 ## узлы снимаются `queue_free` (free() внутри собственного `pressed` — locked
 ## object), а поиск идёт по словарю, а не по дереву.
 var _buttons := {}
-var _reason := Label.new()
 
 
 func _ready() -> void:
@@ -52,12 +67,12 @@ func _ready() -> void:
 	add_child(_round_counter())
 	commands.name = "Commands"
 	add_child(commands)
-	_reason.add_theme_font_size_override("font_size", FONT_SMALL)
-	_reason.add_theme_color_override("font_color", GOLD)
-	_reason.position = Vector2(VIEWPORT_WIDTH - 24.0 - 400.0, 1004.0)
-	_reason.size = Vector2(400.0, 26.0)
-	_reason.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	add_child(_reason)
+	reason.add_theme_font_size_override("font_size", FONT_SMALL)
+	reason.add_theme_color_override("font_color", GOLD)
+	reason.position = Vector2(1596.0, COMMAND_TOP + 6.0 * COMMAND_STEP)
+	reason.size = Vector2(300.0, 26.0)
+	reason.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	add_child(reason)
 
 
 ## Связка с ядром: однократная подписка на все сигналы состояния.
@@ -172,21 +187,32 @@ func _hero_panel(at: Vector2, store: Dictionary, mirrored := false) -> Control:
 	return panel
 
 
+## Круг счётчика раунда. Полоса порядка занимает y 24..108, верхняя вершина
+## верхнего ряда гексов — y 230: круг в 96 px встаёт в зазор между ними
+## (122..218). Раньше он стоял на 150 и налезал на сетку (read-агент 2026-10-25:
+## «круг счётчика перекрывает верхний ряд гексов»). Круг держим в коде, а не
+## в макете: его размер — часть проверки «не лезет на поле».
 func _round_counter() -> Control:
 	var holder := Panel.new()
-	holder.position = Vector2(VIEWPORT_WIDTH / 2.0 - 56.0, 150.0)
-	holder.size = Vector2(112, 112)
-	var style := _style(Color(0.12, 0.1, 0.06, 0.95), 56.0, GOLD)
+	holder.position = Vector2(VIEWPORT_WIDTH / 2.0 - 48.0, 122.0)
+	holder.size = Vector2(96, 96)
+	var style := _style(Color(0.12, 0.1, 0.06, 0.95), 48.0, GOLD)
 	style.set_border_width_all(3)
 	holder.add_theme_stylebox_override("panel", style)
 	_ring.position = Vector2.ZERO
 	_ring.size = holder.size
 	_ring.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_ring.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_ring.add_theme_font_size_override("font_size", 52)
+	_ring.add_theme_font_size_override("font_size", 44)
 	_ring.add_theme_color_override("font_color", GOLD)
 	holder.add_child(_ring)
+	_counter = holder
 	return holder
+
+
+## Прямоугольник счётчика — тесту сверять его с верхом поля, а не пиксели.
+func counter_rect() -> Rect2:
+	return _counter.get_rect()
 
 
 ## Команды активного юнита: базовая атака, его способности и «Ждать». Состав и
@@ -197,10 +223,10 @@ func _commands_for(unit: BattleUnit) -> void:
 		child.queue_free()
 	_buttons = {}
 	var legal: Array[BattleAction] = combat.legal_actions(unit)
-	var at := Vector2(VIEWPORT_WIDTH - 24.0 - BUTTON_SIZE.x, 924.0)
+	var at := Vector2(COMMAND_X, COMMAND_TOP)
 	if not legal.is_empty():
 		_command_button("Атака", &"", at, _attack_action(legal), "")
-		at.x -= BUTTON_SIZE.x + 16.0
+		at.y += COMMAND_STEP
 		for ability in unit.stats.abilities:
 			var state := combat.ability_state(unit, ability)
 			var action := _ability_action(legal, ability.id)
@@ -208,9 +234,10 @@ func _commands_for(unit: BattleUnit) -> void:
 				ability.display_name, ability.id, at, action,
 				"" if state == &"ready" else _reason_of(state)
 			)
-			at.x -= BUTTON_SIZE.x + 16.0
-	_command_button("Ждать", &"__wait", Vector2(24.0, 924.0), _skip_action(legal), "")
-	var menu := _button("Меню", &"__menu", Vector2(24.0, 1000.0))
+			at.y += COMMAND_STEP
+	_command_button("Ждать", &"__wait", at, _skip_action(legal), "")
+	at.y += COMMAND_STEP
+	var menu := _button("Меню", &"__menu", at)
 	menu.pressed.connect(
 		func() -> void: get_tree().change_scene_to_file("res://scenes/roster_select.tscn")
 	)
@@ -265,12 +292,17 @@ func refresh(_x = null) -> void:
 	_refresh_strip()
 	if actor != null and not combat.finished:
 		_commands_for(actor)
-		_reason.text = ""
+		reason.text = ""
+		reason.visible = true
 	else:
 		# После конца боя команд нет: `CombatState.perform` на финише
 		# утверждает, поэтому висящая кнопка была бы падением, а не ходом.
+		# Подпись «бой окончен» — тоже сирота: исход объявляет экран
+		# результата, а одинокая надпись у правого края без своих кнопок
+		# читается как обрезок панели (read-агент 2026-10-25, `b_result`).
 		_clear_commands()
-		_reason.text = "бой окончен"
+		reason.text = ""
+		reason.visible = false
 
 
 func _clear_commands() -> void:
@@ -318,7 +350,7 @@ func _refresh_strip() -> void:
 		# в полосе порядка врала бы о том, кто ещё ходит.
 		if unit.is_alive():
 			units.append(unit)
-	var at := Vector2(VIEWPORT_WIDTH / 2.0 - units.size() * STRIP_CELL / 2.0, 24.0)
+	var at := Vector2(VIEWPORT_WIDTH / 2.0 - units.size() * STRIP_CELL / 2.0, STRIP_TOP)
 	for index in units.size():
 		var unit: BattleUnit = units[index]
 		var root := Panel.new()
@@ -341,6 +373,18 @@ func _refresh_strip() -> void:
 		root.add_child(fill)
 		add_child(root)
 		_strip[unit.uid()] = {"root": root, "hp": fill, "unit": unit}
+
+
+## Карточка текущего юнита обведена золотым (`GOLD`), у остальных — `PANEL_EDGE`.
+## Возвращает uid помеченной карточки: отметка сверяется с `combat.current`,
+## а не с порядком отрисовки (спека «очередь с отметкой текущего»; в отчёте
+## `ui-review-2026-10-25.md` этот тест заявлен, но написан не был).
+func marked_card_uid() -> String:
+	for uid: String in _strip:
+		var style := (_strip[uid]["root"] as Panel).get_theme_stylebox("panel") as StyleBoxFlat
+		if style != null and style.border_color.is_equal_approx(GOLD):
+			return uid
+	return ""
 
 
 ## --- мелочь ---------------------------------------------------------------
