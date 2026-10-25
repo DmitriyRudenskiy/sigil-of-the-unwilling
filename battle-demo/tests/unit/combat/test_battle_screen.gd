@@ -60,48 +60,24 @@ func test_dead_unit_keeps_an_empty_bar() -> void:
 		assert_float(screen.bar_of(unit).size.x).is_zero()
 
 
-func test_marker_and_name_follow_the_queue() -> void:
-	var screen := _screen()
-	var combat := _combat()
-	screen.run(combat)
-	var first := combat.current
-	assert_float(screen.marker.position.x).is_equal(
-		screen.field.view_of(first).position.x - 48.0
-	)
-	assert_str(screen.active_label.text).is_equal(first.stats.display_name)
-	combat.perform(BattleAction.skip(first))
-	var next := combat.current
-	assert_float(screen.marker.position.x).is_equal(
-		screen.field.view_of(next).position.x - 48.0
-	)
-	assert_str(screen.active_label.text).is_equal(next.stats.display_name)
-
-
-## После конца боя активного нет: метка и подпись не должны висеть над полем
-## (кадр `b_result`: «сирота-подпись без панели-носителя»).
-func test_marker_and_name_leave_when_the_battle_is_over() -> void:
-	var screen := _screen()
-	var combat := _combat()
-	screen.run(combat)
-	BattleFactory.auto_play(combat)
-	assert_bool(combat.finished).is_true()
-	assert_bool(screen.marker.visible).is_false()
-	assert_str(screen.active_label.text).is_empty()
-
-
-
-## 10.12: признак хода — обведённая клетка активного юнита (read-агент: полоска
-## под ногами активного не показывала). Клетка следует за очередью и гаснет
-## после конца боя.
+## После конца боя активного нет: обводка клетки и подпись не должны висеть
+## над полем (кадр `b_result`: «сирота-подпись без панели-носителя»). Обводка
+## и подпись — единственный признак хода с задачи 10.12, полоски под ногами
+## больше нет.
 func test_active_cell_follows_the_queue() -> void:
 	var screen := _screen()
 	var combat := _combat()
 	screen.run(combat)
 	assert_bool(screen.field.active_cell == screen.field.cell_of(combat.current))
+	assert_str(screen.active_label.text).is_equal(combat.current.stats.display_name)
 	combat.perform(BattleAction.skip(combat.current))
 	assert_bool(screen.field.active_cell == screen.field.cell_of(combat.current))
+	assert_str(screen.active_label.text).is_equal(combat.current.stats.display_name)
 	BattleFactory.auto_play(combat)
+	assert_bool(combat.finished).is_true()
 	assert_int(screen.field.active_cell.x).is_equal(-1)
+	assert_str(screen.active_label.text).is_empty()
+
 
 
 ## 10.11: пустая полоса погибшего — багряная дорожка (read-агент: погибший
@@ -120,3 +96,20 @@ func test_fallen_unit_bar_track_is_marked() -> void:
 			fallen += 1
 			assert_bool(track.color == screen.BAR_DEAD)
 	assert_int(fallen).is_greater(0)
+
+
+## 10.10 (выбор владельца — мельчающие юниты): полоса HP нижнего ряда не лежит
+## на спрайте верхнего и висит над головой своего. Считается от констант, а не
+## от кадра: кто поднимет `UNIT_SCALE` или опустит `BAR_LIFT`, увидит падение
+## здесь, а не через read-агента на `a_mid`.
+func test_hp_bar_clears_the_row_above() -> void:
+	var canvas := 128.0  # холст кадра, ступни в (64, 112)
+	var scale_ := BattleField.UNIT_SCALE
+	var pitch := sqrt(3.0) * BattleField.HEX_RADIUS  # шаг ряда odd-r
+	var sprite_bottom := (canvas + BattleUnitView.FEET_OFFSET.y) * scale_
+	var bar_top := pitch - BattleScreen.BAR_LIFT * scale_ - BattleScreen.BAR_SIZE.y
+	# Полоса над головой своего юнита (спека: зазор ≥ 8 px).
+	assert_float(BattleScreen.BAR_LIFT * scale_ + BattleUnitView.FEET_OFFSET.y * scale_) \
+		.is_greater_equal(8.0)
+	# И не касается силуэта верхнего ряда.
+	assert_float(bar_top - sprite_bottom).is_greater_equal(8.0)

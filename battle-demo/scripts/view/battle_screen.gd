@@ -19,20 +19,17 @@ const BAR_TRACK := Color(0.12, 0.12, 0.14)
 ## у живого на малом hp, отличалась только шириной заполнения — на кадре
 ## гибель не читалась. Пустая полоса становится багряной.
 const BAR_DEAD := Color(0.45, 0.11, 0.11)
-const MARKER_SIZE := Vector2(96, 6)
-const MARKER_COLOR := Color(0.95, 0.8, 0.35)
-## Полоса — над головой: ступни в (64, 112) холста, фигура в нём ~96 px, то есть
-## голова заканчивается на ~100 px над ногами на единицу масштаба. Больше запас —
-## полоса лезет под ноги юниту заднего ряда (сетка ставит ряды в 150 px друг от
-## друга, кадр `hud-2.png`, 2026-10-26).
-const BAR_LIFT := 100.0
+## Подъём полосы над опорами юнита — в масштабе самого юнита (`BAR_LIFT ×
+## view.scale.y`), чтобы полоса оставалась над головой при любом `UNIT_SCALE`.
+## 120 × 1.1 = 132 px: 123 px фигуры + 8 px зазора спеки (задача 10.10; раньше
+## было 100 × 2.2 = 220 px при 246 px фигуры — полоса лежала на корпусе).
+const BAR_LIFT := 120.0
 
 var combat: CombatState
 
 var _bars := {}
 
 @onready var field: BattleField = $Field
-@onready var marker: ColorRect = $Marker
 @onready var active_label: Label = $ActiveLabel
 @onready var hud: BattleHud = $HUD
 @onready var result_view: BattleResult = $Result
@@ -104,10 +101,9 @@ func _on_battle_ended(outcome: int) -> void:
 	# Активного юнита после конца боя нет: жёлтая метка и подпись под полем
 	# остались бы висящей подсказкой про последнего ходившего (read-агент:
 	# «сирота-подпись» на кадре результата).
-	active_label.text = ""
-	marker.visible = false
 	field.active_cell = Vector2i(-1, -1)
 	field.queue_redraw()
+	active_label.text = ""
 	result_view.show_outcome(outcome, combat.turn_index)
 
 
@@ -122,7 +118,6 @@ func _reset_view() -> void:
 	field.clear_views()
 	field.active_cell = Vector2i(-1, -1)
 	field.queue_redraw()
-	marker.visible = false
 	active_label.text = ""
 	result_view.visible = false
 
@@ -132,10 +127,9 @@ func _on_turn(unit: BattleUnit) -> void:
 		return
 	var view: BattleUnitView = field.view_of(unit)
 	if view != null:
-		marker.visible = true
-		marker.position = view.position + Vector2(-MARKER_SIZE.x / 2.0, 8.0)
-		# Маркер — над своим рядом, иначе юниты дальних рядов его затирают.
-		marker.z_index = view.z_index + 1
+		# Признак хода — обведённая клетка (задача 10.12). Полоска под ногами,
+		# которая была здесь раньше, ушла: на кадре она читалась то ли чужим
+		# HP-баром, то ли обрезком грани шестиугольника.
 		field.active_cell = field.cell_of(unit)
 		field.queue_redraw()
 	active_label.text = unit.stats.display_name
