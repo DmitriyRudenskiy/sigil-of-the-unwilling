@@ -253,3 +253,52 @@ func test_theme_has_custom_types_beyond_native_classes() -> void:
 		"собственные типы темы исчезли — гард можно упрощать, но тогда и этот кейс"
 		).is_greater_equal(1)
 	assert_str(", ".join(PackedStringArray(custom))).contains("TooltipLabel")
+
+## 5. Роль темы не имеет права объявлять кегль ниже UI-пола (16 px, UI-AC7).
+#
+# Сюжет отдельный, и вот какой: гард выше следит, чтобы узел не объявлял имя,
+# который никто не читает, но он молчит, когда *сама роль* просит кегль, ниже
+# пола. Такая роль тихая: она проходит `theme_type_variation`, резолвится и
+# рисует 13 px там, где гайд требует 16. Измерено по файлу темы: из 21 роли с
+# объявленным `font_sizes/font_size` такая ровно одна.
+#
+# Позволенный список — не поблажка, а реестр с обратной силой: запись живёт,
+# пока роль правда существует и правда ниже пола. Починят роль — кейс красный,
+# пока запись не снята (тот же приём, что со счётчиками `_REMAINING_OVERRIDES`
+# в theme_carrier_guard).
+const _FONT_FLOOR := 16
+const _SUB_FLOOR_ROLES := {
+	"LabelBarNumber": "T-192 (нижняя полоса боя, 13 px; зона другой сессии)",
+}
+
+var _re_theme_font_size := RegEx.create_from_string(
+	"(?m)^([A-Za-z0-9_]+)/font_sizes/font_size = (\\d+)$")
+
+
+func test_no_theme_role_declares_a_font_below_the_floor() -> void:
+	var file := FileAccess.open("res://assets/theme/game_theme.tres", FileAccess.READ)
+	assert_that(file).is_not_null()
+	var text := file.get_as_text()
+	file.close()
+	var bad: PackedStringArray = PackedStringArray()
+	var declared := {}
+	for m in _re_theme_font_size.search_all(text):
+		var role := m.get_string(1)
+		var size := int(m.get_string(2))
+		declared[role] = size
+		if size < _FONT_FLOOR and not _SUB_FLOOR_ROLES.has(role):
+			bad.append("%s = %d (пол %d)" % [role, size, _FONT_FLOOR])
+	assert_int(bad.size()).override_failure_message(
+		"роли темы ниже кегельного пола: " + ", ".join(bad)
+		).is_equal(0)
+	# Обратная сила реестра: позволённая роль обязана быть жива и правда ниже пола.
+	for role in _SUB_FLOOR_ROLES:
+		var why := String(_SUB_FLOOR_ROLES[role])
+		assert_bool(declared.has(role)).override_failure_message(
+			"позволение {role} ({why}) отжито — запись надо снять из гарда"
+				.format({"role": role, "why": why})
+			).is_true()
+		assert_int(int(declared[role])).override_failure_message(
+			"роль {role} больше не ниже пола — запись {why} отжита"
+				.format({"role": role, "why": why})
+			).is_less(_FONT_FLOOR)

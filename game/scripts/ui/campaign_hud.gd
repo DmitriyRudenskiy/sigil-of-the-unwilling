@@ -49,6 +49,10 @@ const TURN_BUTTON_NAME := "TurnButton"
 const COUNTER_BAR_NAME := "CounterBar"
 const DATE_LABEL_NAME := "CampaignDate"
 const GOALS_PANEL_NAME := "GoalsPanel"
+## ui-mockup-parity 7.12 — панель отряда снизу и её слоты (`PartySlot_0…4`).
+const PARTY_PANEL_NAME := "PartyPanel"
+const PARTY_SLOTS_NAME := "PartySlots"
+const PARTY_SLOT_NAME := "PartySlot"
 const GOALS_TITLE_NAME := "GoalsTitle"
 const GOALS_LIST_NAME := "GoalsList"
 ## mvp-ui-flow 2.2 (T-186): туториал-оверлей первых ходов (K-M8: оверлей, не экран).
@@ -110,6 +114,11 @@ var _chronicle_open: bool = false
 var _goals: CampaignGoalTracker = null
 var _goals_panel: PanelContainer = null
 var _goals_list: VBoxContainer = null
+## 7.12 — панель отряда: ряд слотов и сами кнопки. Данных здесь нет: слоты
+## читают `PartyScreenModel` поверх `_party` при каждом обновлении (D-200).
+var _party_panel: PanelContainer = null
+var _party_slots_row: HBoxContainer = null
+var _party_slots: Array[Button] = []
 ## mvp-ui-flow 2.2 (T-186): модалка первой директивы. Как и панель целей, слоя
 ## без данных не имеет: без привязанных директив оверлей не показывается
 ## (конвенция «нет несуществующих действий»). Директивы — `campaign.json →
@@ -148,6 +157,10 @@ func refresh_campaign(day: int) -> void:
 	if date != null:
 		date.text = CalendarScript.date_label(day)
 	_refresh_goals()
+	# Состав партии меняется не только в момент привязки (тренировка, бой, смерть),
+	# а `refresh_campaign` — единная точка обновления слоя; `bind_party` хост
+	# вызывает один раз при поднятии кампейна.
+	_refresh_party_panel()
 
 
 ## Текст счётчика по id строки реестра ("" — счётчик не показан).
@@ -279,6 +292,16 @@ func _build() -> void:
 	_build_counter_bar()
 	_build_date_label()
 	_build_goals_panel()
+	_build_party_panel()
+	# 7.17: полоса кнопок — на роль темы (`ButtonAction`), а не на дефолтный вид
+	# `Button`, который в кампании давал ахроматический серый (макет — золото по
+	# тёмному). Роль одна на ряд: кнопки ряда однотипны, а локальные оверрайды
+	# цвета/кегля запрещены конвенцией T-147/T-148.
+	for button in [
+		_city_button, _party_button, _chronicle_button, _settings_button,
+		_menu_button, _turn_button,
+	]:
+		button.theme_type_variation = &"ButtonAction"
 	_build_tutorial_overlay()
 
 
@@ -308,6 +331,11 @@ func _build_counter_bar() -> void:
 		box.add_child(icon)
 		var value := Label.new()
 		value.name = "Value"
+		# Гайд §2: «Числа/статы — счётчики ресурсов» идут ролью `LabelNumber`
+		# (20 PT Mono). Без роли число резолвило 16 px движковским белым без
+		# гарнитуры — то есть полоса счётчиков была единственной строкой макета,
+		# нарисованной вне темы (7.17).
+		value.theme_type_variation = &"LabelNumber"
 		box.add_child(value)
 		bar.add_child(box)
 		_counters[row.get("id", &"")] = box
@@ -330,6 +358,10 @@ func _build_date_label() -> void:
 	date.offset_right = 424.0
 	date.offset_bottom = -24.0
 	date.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	# Дата — вторичная строка (гайд §2, `LabelSecondary` 16): она не счётчик, но
+	# и не заголовок; роль несёт ещё и гарнитуру с цветом, поэтому «просто кегль»
+	# здесь не выбор.
+	date.theme_type_variation = &"LabelSecondary"
 	add_child(date)
 
 
@@ -374,6 +406,107 @@ func _build_goals_panel() -> void:
 	_goals_panel = panel
 	_goals_list = list
 	add_child(panel)
+
+
+## ui-mockup-parity 7.12 — панель отряда снизу: пять слотов из `PartyScreenModel`.
+#
+## Слот — не второй список партии, а ярлык к её экрану: занятый слот открывает
+## `PartyScreen` тем же путём, что верхняя кнопка, пустой — выключен и на выбор
+## не реагирует (спека campaign-hud «Пустой слот», конвенция «нет несуществующих
+## действий»). Своего состояния «выбран кто-то» в слое нет намеренно: второй
+## носитель выбора разошёлся бы с экраном партии (урок двух носителей населения,
+## T-183), а «активный отряд» макета в MVP нечем — партия одна, и это
+## зарегистрировано (T-193), а не имитировано подсветкой.
+##
+## Панель растёт от нижнего левого якоря вверх и вправо: нижняя полоса кадра
+## свободна (поля карты в `main.tscn` нет, D-204), дата стоит ниже, цели — сверху
+## слева. Как и у панели целей, прямоугольник задан якорями, а размер добирается
+## минимальным размером детей.
+func _build_party_panel() -> void:
+	var panel := PanelContainer.new()
+	panel.name = PARTY_PANEL_NAME
+	panel.theme_type_variation = &"PanelCard"
+	panel.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	panel.offset_left = 16.0
+	panel.offset_top = -128.0
+	panel.offset_bottom = -60.0
+	panel.offset_right = 16.0
+	panel.grow_horizontal = Control.GROW_DIRECTION_END
+	panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	# Как и панель целей: плита не имеет права перехватывать клики кампании.
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# До привязки партии панели нет: пять пустых рамок выглядели бы обещанием
+	# отряда, которого нет.
+	panel.visible = false
+	var row := HBoxContainer.new()
+	row.name = PARTY_SLOTS_NAME
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_theme_constant_override("separation", 8)
+	panel.add_child(row)
+	_party_panel = panel
+	_party_slots_row = row
+	add_child(panel)
+	_rebuild_party_slots(_party_capacity)
+
+
+## Слотов ровно столько, сколько ёмкость партии: `PartyScreenModel` знает про
+# `DEFAULT_CAPACITY` (= `CampaignTrainingService.PARTY_CAPACITY`), свою моду
+# слой не изобретает.
+func _rebuild_party_slots(capacity: int) -> void:
+	if _party_slots_row == null:
+		return
+	for child in _party_slots_row.get_children():
+		_party_slots_row.remove_child(child)
+		child.queue_free()
+	_party_slots.clear()
+	for i in maxi(capacity, 0):
+		var slot := Button.new()
+		slot.name = "%s_%d" % [PARTY_SLOT_NAME, i]
+		slot.theme_type_variation = &"ButtonAction"
+		slot.custom_minimum_size = Vector2(128, 52)
+		# Пустой слот выключен до первого наполнения: нажатие несуществующего
+		# бойца не должно быть действием (7.12, спека «Пустой слот»). Включает и
+		# подписывает их `_refresh_party_panel`.
+		slot.disabled = true
+		slot.pressed.connect(_on_party_slot_pressed)
+		_party_slots_row.add_child(slot)
+		_party_slots.append(slot)
+
+
+## Слоты читают модель партии, а не своё состояние: `bind_party` получает живой
+## массив `composition.party`, поэтому перечисление при каждом обновлении кампейна
+## даёт тот же источник, что у экрана партии.
+func _refresh_party_panel() -> void:
+	if _party_panel == null or _party_slots.is_empty():
+		return
+	var model: Dictionary = PartyScreenModelScript.roster_model(_party, _party_capacity)
+	var shown: Array = []
+	for member in (model.get("members", []) as Array):
+		# Мёртвый в бою слота не занимает — та же alive-модель (D-221), что у
+		# экрана партии и у гейтинга тренировки.
+		if str(member.get("state", PartySystem.STATE_READY)) != PartySystem.STATE_DEAD:
+			shown.append(member)
+	for i in _party_slots.size():
+		var slot := _party_slots[i]
+		if i >= shown.size():
+			slot.disabled = true
+			slot.text = ""
+			slot.tooltip_text = ""
+			continue
+		var member: Dictionary = shown[i]
+		slot.disabled = false
+		slot.text = "%s · ур. %d" % [str(member.get("id", "")), int(member.get("level", 1))]
+		slot.tooltip_text = "%s — %s, %s, ур. %d" % [
+			str(member.get("id", "")), str(member.get("class", "")),
+			str(member.get("race", "")), int(member.get("level", 1)),
+		]
+
+
+## Занятый слот открывает экран партии — тем же путём, что верхняя кнопка (машина
+## навигации + перечитывание данных). Пустой слот до обработчика не доходит: он
+## `disabled`.
+func _on_party_slot_pressed() -> void:
+	open_party_screen()
 
 
 ## mvp-ui-flow 2.2 (T-186): директивы первых ходов (`campaign.json → tutorial`).
@@ -463,7 +596,13 @@ func bind_city(value: City, rng: RandomNumberGenerator = null) -> void:
 ## остаётся наследием T-110 — вычищается в T-171.
 func bind_party(party: Array, capacity: int = PartyScreenModelScript.DEFAULT_CAPACITY) -> void:
 	_party = party
-	_party_capacity = capacity
+	if capacity != _party_capacity:
+		# Ёмкость могла прийти из сейва или из другого носителя — слоты
+		# перестраиваются, а не прячутся: лишние слоты были бы обещанием бойца.
+		_party_capacity = capacity
+		_rebuild_party_slots(capacity)
+	else:
+		_party_capacity = capacity
 	if _party_button == null:
 		return
 	if party_screen == null:
@@ -476,6 +615,9 @@ func bind_party(party: Array, capacity: int = PartyScreenModelScript.DEFAULT_CAP
 		if _ui_manager != null:
 			_ui_manager.register_screen(PARTY_SCREEN_ID, party_screen)
 	refresh_party_screen()
+	_refresh_party_panel()
+	if _party_panel != null:
+		_party_panel.visible = true
 	_party_button.disabled = false
 
 

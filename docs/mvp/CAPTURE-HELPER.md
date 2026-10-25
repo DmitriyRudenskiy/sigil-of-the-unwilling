@@ -69,6 +69,13 @@ python3 -m pytest tests/mcp/test_capture.py -q --timeout=900
 `CAPTURE_SETUP=…` добавляется в команду воспроизведения — кадр с состоянием
 воспроизводится так же однозначно, как без него.
 
+**Ловушка синтаксиса.** Префикс `@` — не украшение: без него текст аргумента считается
+инлайн-GDScript, и путь до `res://` не компилируется. Симптом невнятный —
+`MCPError: тулз game_eval вернул ошибку: eval failed: Failed to compile GDScript (error 43)`,
+по которому ищешь ошибку в скрипте, а не в вызове (проверено 2026-10-25 на
+`CAPTURE_SETUP=tools/capture/campaign_party_panel.gd`, правильный вариант —
+`CAPTURE_SETUP=@tools/capture/campaign_party_panel.gd`).
+
 Где кадр нужен вердикту, а не отладке, **файл сетапа коммитится** (D-192: пиксели git не
 носят, а код, которым кадр поднят, обязан доживать вместе с вердиктом): пример —
 `game/tools/capture/campaign_settings_open.gd` (поднимает `SettingsScreen` нажатием кнопки
