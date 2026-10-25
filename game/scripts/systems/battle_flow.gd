@@ -7,6 +7,13 @@ signal battle_completed(winner: BattleState.Side, surviving_atk: Array[UnitStack
 const _BATTLE_SCENE := preload("res://scenes/battle.tscn")
 
 var _active_battle: Node = null
+## Узел сцены боя под root, пока он жив. После `_on_battle_finished` `_active_battle`
+## уже `null`, а сцена остаётся до оверлея «Продолжить» — именно она и оставалась
+## сиротой под root, когда мир снимали с дерева: следующий автопрогон в том же
+## процессе находил её в `_handle_battle()`, видел `battle_over` и зависал на ней,
+## не доходя до хода (T-204: druid→fighter, `turn` стоит на 0, `battles_fought` +1
+## за кадр).
+var _battle_node: Node = null
 
 func start_battle(
 	attacker_army: Array[UnitStack],
@@ -28,6 +35,7 @@ func start_battle(
 
 	_active_battle = _BATTLE_SCENE.instantiate()
 	_active_battle.name = "Battle"
+	_battle_node = _active_battle
 
 	get_tree().root.add_child(_active_battle)
 
@@ -62,6 +70,8 @@ func _finish_battle(
 ) -> void:
 	if is_instance_valid(battle):
 		battle.queue_free()
+	if _battle_node == battle:
+		_battle_node = null
 	RenderingServer.set_default_clear_color(ThemeConfig.C_BATTLE_BG_FLOW)
 	if winner == BattleState.Side.ATTACKER:
 		SoundManager.play_sfx_cue(&"battle_victory")
@@ -69,3 +79,12 @@ func _finish_battle(
 		SoundManager.play_sfx_cue(&"battle_defeat")
 	SoundManager.play_music_cue(&"music_world")
 	battle_completed.emit(winner, surviving_atk, surviving_def)
+
+## Владелец сцены боя — flow. Снимают flow (вместе с миром) — снимается и сцена:
+## оставшись под root, она превращалась в вечный «бой завершён» для любого
+## следующего автопрогона того же процесса (T-204).
+func _exit_tree() -> void:
+	if is_instance_valid(_battle_node):
+		_battle_node.queue_free()
+	_battle_node = null
+	_active_battle = null
