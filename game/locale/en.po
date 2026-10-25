@@ -1141,6 +1141,9 @@ msgstr "Month {month} Week {week} Day {day}"
 msgid "campaign.goals_title"
 msgstr "First-day goals"
 
+msgid "campaign.prestige_label"
+msgstr "Prestige"
+
 msgid "campaign.goal_day"
 msgstr "Day {day}"
 

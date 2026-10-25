@@ -50,6 +50,7 @@ const SIMPLE_CARRIERS := {
 	"кнопка меню (7.14)": TOP_BUTTONS_PATH + "/MenuButton",
 	"панель отряда (7.12)": PARTY_PANEL_PATH,
 	"панель целей (mvp-ui-flow 2.3)": HUD_PATH + "/GoalsPanel",
+	"плита Знака (signs-prestige 2.3)": HUD_PATH + "/SignPlaque",
 }
 
 var _main: Node = null
@@ -228,6 +229,12 @@ func test_hud_elements_resolve_from_theme_roles() -> void:
 ## ненулевую область. Печатается покрытие — отчёт гейта обязан его видеть.
 func test_frame_composition_coverage_is_complete() -> void:
 	var main := await _boot_campaign()
+	# Плита Знака — носитель, привязанный к состоянию: без выбранного Знака её
+	# нет (раннер и препрейм-тесты). Игровой путь Знак выбирает всегда, поэтому
+	# покрытие считается по кампании со Знаком, а не по голому запуску.
+	main.composition.set_sign("spark")
+	_hud().refresh_campaign(main.game_manager.get_current_day())
+	await get_tree().process_frame
 	var total := 0
 	var covered := 0
 	var missing: PackedStringArray = PackedStringArray()

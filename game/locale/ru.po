@@ -1141,6 +1141,9 @@ msgstr "Месяц {month} · Неделя {week} · День {day}"
 msgid "campaign.goals_title"
 msgstr "Цели первых дней"
 
+msgid "campaign.prestige_label"
+msgstr "Престиж"
+
 msgid "campaign.goal_day"
 msgstr "День {day}"
 

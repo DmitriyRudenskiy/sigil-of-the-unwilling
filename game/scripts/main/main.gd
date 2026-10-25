@@ -119,6 +119,10 @@ func _mount_campaign_hud() -> void:
 	# было видно. Привязка — после загрузки слота, чтобы панель смотрела на тот
 	# трекер, который принёс сейв, а не на вытесненный им.
 	campaign_hud.bind_goals(composition.goals)
+	# signs-prestige 2.3: Престиж считался с волны 1, но носителя у него не было —
+	# `prestige_rank_name()` не читал никто, кроме хроники (T-187). Плита Знака
+	# печатает числа композиции, своих у слоя нет (D-200).
+	campaign_hud.bind_sign(composition)
 	# mvp-ui-flow 2.2 (T-186): директивы первых ходов. Их принёс хост: у слоя нет
 	# права самому читать баланс-конфиг, а без директив оверлей молчит.
 	campaign_hud.bind_tutorial(composition.tutorial_directives())

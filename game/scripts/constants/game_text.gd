@@ -466,6 +466,10 @@ static func campaign_menu_hint() -> String: return TranslationServer.translate("
 static func campaign_turn() -> String: return TranslationServer.translate("campaign.turn")
 static func campaign_turn_hint() -> String: return TranslationServer.translate("campaign.turn_hint")
 static func campaign_goals_title() -> String: return TranslationServer.translate("campaign.goals_title")
+## signs-prestige 2.3: подпись числа Престижа на плите Знака. Подпись отдельной
+## строкой, а не вшита в текст: роль числа — `LabelNumber` (гайд §2), а «240»
+## без подписи — число без рассказа.
+static func campaign_prestige_label() -> String: return TranslationServer.translate("campaign.prestige_label")
 static func campaign_goal_day(day: int) -> String:
 	return TranslationServer.translate("campaign.goal_day").format({"day": day})
 

@@ -65,6 +65,10 @@ const MENU_BUTTON_NAME := "MenuButton"
 const SETTINGS_SCREEN_NAME := "SettingsScreen"
 const CHRONICLE_BUTTON_NAME := "ChronicleButton"
 const CHRONICLE_SCREEN_NAME := "ChronicleScreen"
+const SIGN_PLAQUE_NAME := "SignPlaque"
+const SIGN_NAME_LABEL_NAME := "SignName"
+const SIGN_RANK_LABEL_NAME := "SignRank"
+const SIGN_PRESTIGE_LABEL_NAME := "SignPrestige"
 ## Экраны в машине навигации кампании: id перехода и куда возвращаться.
 const CITY_SCREEN_ID := &"city"
 const PARTY_SCREEN_ID := &"party"
@@ -119,6 +123,14 @@ var _goals_list: VBoxContainer = null
 var _party_panel: PanelContainer = null
 var _party_slots_row: HBoxContainer = null
 var _party_slots: Array[Button] = []
+## signs-prestige 2.3 — плита Знака (имя, титул ранга, Престиж). Как и у панели
+## отряда, значений здесь нет: композиция — единственный носитель Престижа
+## (K-M16), слой только печатает её числа (D-200).
+var _composition: CampaignComposition = null
+var _sign_plaque: PanelContainer = null
+var _sign_name: Label = null
+var _sign_rank: Label = null
+var _sign_prestige: Label = null
 ## mvp-ui-flow 2.2 (T-186): модалка первой директивы. Как и панель целей, слоя
 ## без данных не имеет: без привязанных директив оверлей не показывается
 ## (конвенция «нет несуществующих действий»). Директивы — `campaign.json →
@@ -161,6 +173,7 @@ func refresh_campaign(day: int) -> void:
 	# а `refresh_campaign` — единная точка обновления слоя; `bind_party` хост
 	# вызывает один раз при поднятии кампейна.
 	_refresh_party_panel()
+	_refresh_sign_plaque()
 
 
 ## Текст счётчика по id строки реестра ("" — счётчик не показан).
@@ -293,6 +306,7 @@ func _build() -> void:
 	_build_date_label()
 	_build_goals_panel()
 	_build_party_panel()
+	_build_sign_plaque()
 	# 7.17: полоса кнопок — на роль темы (`ButtonAction`), а не на дефолтный вид
 	# `Button`, который в кампании давал ахроматический серый (макет — золото по
 	# тёмному). Роль одна на ряд: кнопки ряда однотипны, а локальные оверрайды
@@ -507,6 +521,107 @@ func _refresh_party_panel() -> void:
 ## `disabled`.
 func _on_party_slot_pressed() -> void:
 	open_party_screen()
+
+
+## signs-prestige 2.3 — плита Знака: имя знака, титул ранга и Престиж.
+##
+## У Престижа до этой правки не было носителя на экране: ранги, титулы и SM Знака
+## считались в композиции и попадали на экран только строкой хроники (T-187), а
+## `prestige_rank_name()` не читал никто. Плита — не второй счётчик, а печать
+## готовых чисел композиции (`prestige_balance`, `prestige_rank_name`,
+## `sign_display_name`), поэтому разойтись с носителем она не может (D-200).
+##
+## Угол — нижний правый: панель целей заняла верх слева, кнопки — верх справа,
+## панель отряда и дата — низ слева; правый нижний угол в кадре единственный
+## свободный. Пиксельного макета-эталона под рукой нет (D-185), поэтому выбор
+## угла — решение слоя, а не сверка с макетом.
+##
+## Плиты нет до выбора Знака: «Безымянный · Престиж 0» было бы статусом, которого
+## игрок ещё не получал (конвенция «нет несуществующих сущностей»), а DORMANT в
+## препрейме — штатное состояние раннера и тестов, а не кампания.
+func _build_sign_plaque() -> void:
+	var panel := PanelContainer.new()
+	panel.name = SIGN_PLAQUE_NAME
+	panel.theme_type_variation = &"PanelCard"
+	panel.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	panel.offset_right = -16.0
+	panel.offset_bottom = -60.0
+	panel.offset_top = -128.0
+	panel.offset_left = -16.0
+	panel.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	# Плита — статус, а не действие: клики кампании она перехватывать не должна.
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.visible = false
+	var column := VBoxContainer.new()
+	column.name = "SignColumn"
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.add_theme_constant_override("separation", 2)
+	panel.add_child(column)
+	# 7.17: роль темы, а не локальные оверрайды цвета/кегля (T-147/T-148).
+	_sign_name = Label.new()
+	_sign_name.name = SIGN_NAME_LABEL_NAME
+	_sign_name.theme_type_variation = &"LabelStrong"
+	column.add_child(_sign_name)
+	_sign_rank = Label.new()
+	_sign_rank.name = SIGN_RANK_LABEL_NAME
+	_sign_rank.theme_type_variation = &"LabelSecondary"
+	column.add_child(_sign_rank)
+	var prestige_row := HBoxContainer.new()
+	prestige_row.name = "SignPrestigeRow"
+	prestige_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	prestige_row.add_theme_constant_override("separation", 6)
+	column.add_child(prestige_row)
+	# Подпись у числа обязательна: «240» без подписи — число без рассказа, а
+	# вшить число в подпись — потерять роль `LabelNumber` (гайд §2).
+	var caption := Label.new()
+	caption.name = "SignPrestigeCaption"
+	caption.text = GameText.campaign_prestige_label()
+	caption.theme_type_variation = &"LabelSecondary"
+	prestige_row.add_child(caption)
+	_sign_prestige = Label.new()
+	_sign_prestige.name = SIGN_PRESTIGE_LABEL_NAME
+	_sign_prestige.theme_type_variation = &"LabelNumber"
+	prestige_row.add_child(_sign_prestige)
+	_sign_plaque = panel
+	add_child(panel)
+
+
+## Пересчёт плиты. Вызывается из `refresh_campaign`: Престиж меняется ходами
+## (фракционные действия, события), а не только в момент привязки.
+func _refresh_sign_plaque() -> void:
+	if _sign_plaque == null:
+		return
+	var sign_id := "" if _composition == null else str(_composition.sign_id)
+	_sign_plaque.visible = _composition != null and sign_id != ""
+	if not _sign_plaque.visible:
+		return
+	_sign_name.text = _composition.sign_display_name(sign_id)
+	_sign_rank.text = _composition.prestige_rank_name()
+	_sign_prestige.text = str(_composition.prestige_balance())
+
+
+## signs-prestige 2.3 — привязка носителя Престижа. Композиция передаётся как
+## есть: у слоя нет права пересчитывать ранг или Престиж (K-M16, D-200).
+func bind_sign(value: CampaignComposition) -> void:
+	if _composition == value:
+		return
+	_composition = value
+	_refresh_sign_plaque()
+
+
+## Что плита показывает игроку ("" — плиты нет; тесты и хост читают кадр,
+## а не пересчитывают модель).
+func get_sign_text() -> String:
+	return "" if _sign_plaque == null or not _sign_plaque.visible else _sign_name.text
+
+
+func get_sign_rank_text() -> String:
+	return "" if _sign_plaque == null or not _sign_plaque.visible else _sign_rank.text
+
+
+func get_prestige_text() -> String:
+	return "" if _sign_plaque == null or not _sign_plaque.visible else _sign_prestige.text
 
 
 ## mvp-ui-flow 2.2 (T-186): директивы первых ходов (`campaign.json → tutorial`).

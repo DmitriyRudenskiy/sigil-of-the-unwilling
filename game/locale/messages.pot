@@ -999,6 +999,9 @@ msgstr ""
 msgid "campaign.goals_title"
 msgstr ""
 
+msgid "campaign.prestige_label"
+msgstr ""
+
 msgid "campaign.goal_day"
 msgstr ""
 
