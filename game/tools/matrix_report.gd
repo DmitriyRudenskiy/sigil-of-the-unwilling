@@ -145,6 +145,11 @@ func _run_profile(role_id: String, class_id: String, turns: int) -> Dictionary:
 	row.state = str(endgame.get("state", "?"))
 	row.reason = str(endgame.get("end_reason", ""))
 	row.survived = bool(metrics.get("survived", false))
+	# Убийства считает только AdventurerRole (задача 3.3: «≥8/11 классов с ≥1 убийством»);
+	# у остальных ролей ключа нет, и в строке его не бывает.
+	if metrics.has("kills"):
+		row.kills = int(metrics.get("kills", 0))
+		row.kill_goal = int(metrics.get("kill_goal", 0))
 	if trace and row.error.begins_with("бой-висяк"):
 		# Состав и свойства юнитов зависшего боя: «удары по 0 урона» и «некого достать»
 		# по кадрам неразличимы, а правила у них разные (T-205).
@@ -280,6 +285,10 @@ func _summarize(role_id: String, turns: int) -> Dictionary:
 	s["gold_max"] = int(golds[golds.size() - 1]) if not golds.is_empty() else 0
 	s["margin_median"] = int(margins[margins.size() / 2]) if not margins.is_empty() else 0
 	s["gold_goal_reached"] = "%d/%d" % [int(golds.filter(func(g) -> bool: return g >= 1000).size()), _rows.size()]
+	if _rows.any(func(r) -> bool: return r.has("kills")):
+		# Порог 3.3 — число классов хотя бы с одним убийством, а не сумма убийств.
+		s["with_kill"] = "%d/%d" % [int(_rows.filter(func(r) -> bool: return int(r.get("kills", 0)) > 0).size()), _rows.size()]
+		s["kills"] = int(_rows.map(func(r) -> int: return int(r.get("kills", 0))).reduce(func(a, b) -> int: return a + b))
 	return s
 
 
