@@ -17,8 +17,11 @@ const BAR_FILL := Color(0.55, 0.78, 0.42)
 const BAR_TRACK := Color(0.12, 0.12, 0.14)
 const MARKER_SIZE := Vector2(96, 6)
 const MARKER_COLOR := Color(0.95, 0.8, 0.35)
-## Полоса — над головой: холст 128 px при масштабе 3 даёт юнита ростом ~336 px.
-const BAR_LIFT := 350.0
+## Полоса — над головой: ступни в (64, 112) холста, фигура в нём ~96 px, то есть
+## голова заканчивается на ~100 px над ногами на единицу масштаба. Больше запас —
+## полоса лезет под ноги юниту заднего ряда (сетка ставит ряды в 150 px друг от
+## друга, кадр `hud-2.png`, 2026-10-26).
+const BAR_LIFT := 100.0
 
 var combat: CombatState
 
@@ -27,6 +30,7 @@ var _bars := {}
 @onready var field: BattleField = $Field
 @onready var marker: ColorRect = $Marker
 @onready var active_label: Label = $ActiveLabel
+@onready var hud: BattleHud = $HUD
 
 
 func _enter_tree() -> void:
@@ -49,6 +53,7 @@ func start_roster(id: String, seed_value: int = 1) -> void:
 func run(built: CombatState) -> void:
 	combat = built
 	field.attach(combat)
+	hud.attach(combat)
 	combat.turn_started.connect(_on_turn)
 	combat.action_performed.connect(_on_action)
 	combat.unit_died.connect(_on_action)
@@ -77,6 +82,8 @@ func _on_turn(unit: BattleUnit) -> void:
 	if view != null:
 		marker.visible = true
 		marker.position = view.position + Vector2(-MARKER_SIZE.x / 2.0, 8.0)
+		# Маркер — над своим рядом, иначе юниты дальних рядов его затирают.
+		marker.z_index = view.z_index + 1
 	active_label.text = unit.stats.display_name
 
 
@@ -92,7 +99,10 @@ func _make_bar(view: BattleUnitView) -> ColorRect:
 	var track := ColorRect.new()
 	track.color = BAR_TRACK
 	track.size = BAR_SIZE
-	track.position = view.position + Vector2(-BAR_SIZE.x / 2.0, -BAR_LIFT)
+	track.position = view.position + Vector2(
+		-BAR_SIZE.x / 2.0, -BAR_LIFT * view.scale.y
+	)
+	track.z_index = view.z_index
 	add_child(track)
 	var fill := ColorRect.new()
 	fill.color = BAR_FILL
