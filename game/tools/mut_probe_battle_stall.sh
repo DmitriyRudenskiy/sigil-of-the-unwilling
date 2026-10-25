@@ -54,7 +54,7 @@ mutate '		if d == 1:
 run M3-ближний-бьёт-издалека
 
 mutate '	return ",".join(parts)' \
-	'	return "%s|%s|%s" % [",".join(parts), str(bs.active_unit.uid), str(bs.active_unit.has_moved)]'
+	'	return "%s|%d|%s" % [",".join(parts), int(bs.turn_idx), str(bs.active_unit.uid if bs.active_unit != null else -1)]'
 run M4-ключ-из-активного-юнита
 
 mutate '		int(u.cell.x), int(u.cell.y), int(u.get_count())]' \

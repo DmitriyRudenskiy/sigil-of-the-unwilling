@@ -190,18 +190,29 @@ func animate_attack(attacker: BattleState.BattleUnit, defender: BattleState.Batt
 ## старого, а накопление «до бесконечности» заслоняет поле и боковые панели.
 const MAX_SIMULTANEOUS_NUMBERS := 8
 
-var _numbers: Array[Node] = []
+## Храним instance id, а не узлы. Typed-массив на этом месте и ронял ошибки движка в
+## каждый бой автопрогона: `Array[Node].erase(freed)` отваливается на проверке значения
+## («Condition "!_p->typed.validate(value, \"erase\")" is true»), а `var oldest: Node =
+## pop_front()` на освобождённом элементе даёт «Trying to assign invalid previously freed
+## instance». Метка числа умирает в tween-колбэке, то есть между регистрациями всегда,
+## поэтому оба случая — штатные, а не аварийные (замер: 8 строк ошибок на профиль
+## Ranger/Trader, `game/tools/matrix_report.gd`; T-206).
+var _numbers: Array[int] = []
 
 
 func _register_number(label: Node) -> void:
-	for n in _numbers.duplicate():
-		if not is_instance_valid(n) or not n.is_inside_tree():
-			_numbers.erase(n)
+	var i := _numbers.size() - 1
+	while i >= 0:
+		var n := instance_from_id(_numbers[i])
+		if n == null or not n.is_inside_tree():
+			_numbers.remove_at(i)
+		i -= 1
 	while _numbers.size() >= MAX_SIMULTANEOUS_NUMBERS:
-		var oldest: Node = _numbers.pop_front()
-		if is_instance_valid(oldest):
+		var oldest := instance_from_id(_numbers[0])
+		if oldest != null:
 			oldest.queue_free()
-	_numbers.append(label)
+		_numbers.remove_at(0)
+	_numbers.append(label.get_instance_id())
 
 
 func show_floating_text(cell: Vector2i, text: String, color: Color) -> void:
