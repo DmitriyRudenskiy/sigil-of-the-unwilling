@@ -7,6 +7,7 @@ extends SceneTree
 ##   godot --headless --path game -s res://tools/matrix_report.gd -- <role> [turns] [class,...]
 ##   godot --headless --path game -s res://tools/matrix_report.gd -- trader 90
 ##   godot --headless --path game -s res://tools/matrix_report.gd -- trader 90 druid,fighter
+## Трасса медленных ходов (для ячеек, упирающихся в предохранитель): `MATRIX_TRACE=1`
 ##
 ## Флаг MCP_TEST инструмент ставит сам: `WorldSaveLoadService.handle_headless_exit()`
 ## при headless и НЕ-тестовом запуске завершает процесс через секунду — живой игре это
@@ -34,6 +35,11 @@ const SCENARIO_PILOT_GD := "res://scripts/probe/ScenarioPilot.gd"
 const PILOT_SCENE := "res://scenes/probe/ScenarioPilot.tscn"
 const FRAME_CAP := 30000
 const DEFAULT_TURNS := 90
+## Порог «медленного хода» для трассы (`MATRIX_TRACE=1`): на здоровых профилях ход
+## укладывается в ~330 кадров, а ячейка Ranger/Trader (2026-10-25) жигала по 1500.
+## Трасса печатает только превысившие ходы — по ней и ищутся ячейки, упирающиеся в
+## предохранитель FRAME_CAP (неполные прогоны 9.3).
+const SLOW_TURN_FRAMES := 400
 
 var _rows: Array[Dictionary] = []
 
@@ -92,10 +98,30 @@ func _run_profile(role_id: String, class_id: String, turns: int) -> Dictionary:
 		await process_frame
 		return row
 	pilot.max_turns = turns
+	var trace := OS.get_environment("MATRIX_TRACE") != ""
+	var last_turn := int(pilot.turn)
+	var frames_this_turn := 0
+	var battles_at_turn_start := 0
 	for _frame in FRAME_CAP:
 		if pilot.done or not is_instance_valid(pilot._hero):
 			break
 		await process_frame
+		frames_this_turn += 1
+		if trace and frames_this_turn % 1000 == 0:
+			print("MATRIX-BEAT|" + _row_to_line(_battle_beat(class_id, last_turn, frames_this_turn, pilot)))
+			print("MATRIX-BURST|class=%s|%s" % [class_id, await _burst(pilot)])
+		if int(pilot.turn) != last_turn:
+			if trace and frames_this_turn > SLOW_TURN_FRAMES:
+				print("MATRIX-SLOW|class=%s|turn=%d|frames=%d|cell=%s|battles=%d|stuck=%d" % [
+					class_id, last_turn, frames_this_turn, str(pilot._hero_cell()),
+					int(pilot.battles_fought) - battles_at_turn_start, int(pilot.stuck)])
+			last_turn = int(pilot.turn)
+			frames_this_turn = 0
+			battles_at_turn_start = int(pilot.battles_fought)
+	if trace and frames_this_turn > SLOW_TURN_FRAMES:
+		print("MATRIX-SLOW|class=%s|turn=%d|frames=%d|cell=%s|battles=%d|stuck=%d|unfinished=true" % [
+			class_id, last_turn, frames_this_turn, str(pilot._hero_cell()),
+			int(pilot.battles_fought) - battles_at_turn_start, int(pilot.stuck)])
 	var metrics: Dictionary = pilot.role.metrics(pilot)
 	var endgame: Dictionary = world.get_endgame_state()
 	row.turns = int(pilot.turn)
@@ -119,6 +145,88 @@ func _run_profile(role_id: String, class_id: String, turns: int) -> Dictionary:
 	await process_frame
 	await process_frame
 	return row
+
+
+## Сердцебиение медленного хода: где именно горят кадры — в бою (и на каком юните),
+## в пути или в самом шаге политика. Показывается раз в 1000 кадров внутри хода.
+func _battle_beat(class_id: String, turn_number: int, frames: int, pilot: Node) -> Dictionary:
+	var b: Node = root.get_node_or_null("Battle")
+	var bs = null
+	var out := {"class": class_id, "turn": turn_number, "frames": frames,
+		"battle": "none", "over": "", "idx": "", "unit": "", "left": "", "cell": "",
+		"player": "", "timer": "", "queue": "", "attacked": "", "wait_req": ""}
+	if b != null and b.has_method("get_battle_state"):
+		bs = b.get_battle_state()
+		out.battle = "node"
+		if bs != null:
+			out.over = str(bs.battle_over)
+			out.idx = str(bs.turn_idx)
+			out.left = "%.1f" % float(bs.turn_time_left)
+			out.player = str(bs.is_player_turn)
+			out.timer = str(bs.turn_timer_running)
+			out.queue = str(bs.turn_queue.size())
+			var u = bs.active_unit
+			out.unit = "none" if u == null else "%s alive=%s moved=%s uid=%d cell=%s" % [
+				str(u.side), str(u.is_alive()), str(u.get("has_moved")), int(u.uid), str(u.cell)]
+			if u != null:
+				out.attacked = str(u.get("has_attacked"))
+	# Состояние исполнителя решает, кто именно стоит: WAITING_INPUT (3-й член
+	# enum'а State = 2) с неотработанной политикой автоигрока или ANIMATING/TURN_START
+	# с незавершённым await. Плюс вооружён ли часы хода и не стоит ли дерево на паузе
+	# (Timer-узлы на дереве под паузой не тикают).
+	var ex: Node = b.get_node_or_null("BattleTurnExecutor")
+	if ex != null:
+		out.player = "%s state=%s armed=%s" % [str(bs.is_player_turn) if bs != null else "",
+			"%s paused=%s token=%s" % [str(ex.get_current_state()), str(ex.get("_paused")),
+				str(ex.get("_pause_token"))], str(ex.is_turn_timer_armed())]
+		var timers := 0
+		for t in _collect_timers(ex):
+			if not t.stopped:
+				timers += 1
+		var cs = b.get("_state")
+		out.wait_req = "ctrl_proc=%s ctrl_state_same=%s ex_bs_same=%s exec_null=%s" % [
+			str(b.is_processing()), str(cs == bs),
+			str(ex.get("_battle_state") == bs), str(ex == null)]
+	if pilot._hero != null and is_instance_valid(pilot._hero):
+		out.cell = str(pilot._hero_cell())
+	out.timer = "%s stall=%d/%s proc=%s" % [str(bs.turn_timer_running) if bs != null else "",
+		int(pilot.get("_battle_stall_frames")), str(pilot.get("_battle_stall_key")),
+		str(pilot.is_processing())]
+	return out
+
+
+## 12 кадров подряд: кто реально активен и каким объектом боя — когда ключ
+## сталла «меняется каждый кадр», по этому следу видно, чередуются ли юниты или
+## живут два BattleState.
+func _burst(pilot: Node) -> String:
+	var out := ""
+	for i in 12:
+		await process_frame
+		var b: Node = root.get_node_or_null("Battle")
+		if b == null or not b.has_method("get_battle_state"):
+			out += "none "
+			continue
+		var bs = b.get_battle_state()
+		if bs == null:
+			out += "null "
+			continue
+		var u = bs.active_unit
+		out += "%d:%d/%d:%d " % [bs.get_instance_id() % 100000, int(bs.turn_idx),
+			0 if u == null else int(u.uid), 0 if u == null else int(_battles_fought(pilot))]
+	return out.strip_edges()
+
+
+func _battles_fought(pilot: Node) -> int:
+	return int(pilot.battles_fought)
+
+
+func _collect_timers(node: Node) -> Array[Timer]:
+	var out: Array[Timer] = []
+	for child in node.get_children():
+		if child is Timer:
+			out.append(child)
+		out.append_array(_collect_timers(child))
+	return out
 
 
 func _summarize(role_id: String, turns: int) -> Dictionary:

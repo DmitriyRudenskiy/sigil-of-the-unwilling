@@ -37,6 +37,13 @@ var first_collision_turn := -1
 var first_win_turn := -1
 var losses := 0
 var battles_fought := 0
+## Сталл-сеть боя: кадров без необратимого прогресса до принудительного skip() и до
+## технического падения (матрица обязана видеть ошибку, а не молча упираться в
+## предохранитель кадров).
+const BATTLE_STALL_WAIT_FRAMES := 120
+const BATTLE_STALL_FAIL_FRAMES := 600
+var _battle_stall_key := ""
+var _battle_stall_frames := 0
 var _lost_enemy_cells: Dictionary = {}
 var snapshots: Array = []
 var warnings: Array = []
@@ -52,6 +59,8 @@ func start_probe(world: Node, p_seed: int) -> Dictionary:
 	turn = 0
 	stuck = 0
 	stuck_max_seen = 0
+	_battle_stall_key = ""
+	_battle_stall_frames = 0
 	first_building_turn = -1
 	first_recruit_turn = -1
 	first_collision_turn = -1
@@ -125,6 +134,52 @@ func report() -> Dictionary:
 	return rep
 
 # ── Бой: один авто-действие за кадр (паттерн test_battle_full_e2e) ──────────
+## Необратимый прогресс боя: где стоят юниты, живы ли, сколько их в строю.
+## Специально НЕ включает очередь хода, активного юнита и has_moved: BattleActionResolver
+## .do_wait() перекладывает юнита в конец turn_queue, не расходуя ход (T-205), и в бое
+## без достижимых целей очередь крутится между двумя юнитами бесконечно — на ключе из
+## «активного юнита» сталл-сеть обнулялась бы каждый кадр.
+static func battle_progress_key(bs: BattleState) -> String:
+	var parts := PackedStringArray()
+	for u in bs.attacker_units:
+		parts.append(_unit_progress_token(u))
+	for u in bs.defender_units:
+		parts.append(_unit_progress_token(u))
+	parts.sort()
+	return ",".join(parts)
+
+
+static func _unit_progress_token(u: BattleState.BattleUnit) -> String:
+	return "%d:%s:%d:%d:%d" % [
+		int(u.uid), "a" if u.is_alive() else ("d" if u.is_downed() else "x"),
+		int(u.cell.x), int(u.cell.y), int(u.get_count())]
+
+
+## Правила приёма атаки — те же, что у BattleTurnExecutor.request_attack: сосед
+## (дистанция 1) доступен любому юниту, дальнобойный без соседа — только цель,
+## проходящую BattleLineOfSight.can_target_ranged (дальность, линия видимости,
+## листва). Прежняя политика брала «ближайшего врага на d > 1» для любого
+## дальнобойного: исполнителю неважно, что цель вне радиуса или без линии —
+## запрос отклонялся молча, автоигрок повторял его кадр за кадром (отсюда и
+## сталл-сеть ниже, и неполная ячейка Ranger/Trader в матрице).
+static func pick_attack_target(bs: BattleState, unit: BattleState.BattleUnit) -> BattleState.BattleUnit:
+	var enemy_side := BattleState.Side.DEFENDER if unit.side == BattleState.Side.ATTACKER else BattleState.Side.ATTACKER
+	var adjacent: BattleState.BattleUnit = null
+	var ranged: BattleState.BattleUnit = null
+	var best_d := INF
+	for e in bs.get_units_by_side(enemy_side):
+		if not e.is_alive():
+			continue
+		var d := HexUtils.hex_distance(unit.cell, e.cell, bs.hex_shift_right)
+		if d == 1:
+			adjacent = e
+			break
+		if unit.is_ranged() and d < best_d and BattleLineOfSight.can_target_ranged(bs, unit.cell, e):
+			best_d = d
+			ranged = e
+	return adjacent if adjacent != null else ranged
+
+
 func _handle_battle() -> bool:
 	var b: Node = get_tree().root.get_node_or_null("Battle")
 	if b == null or not b.has_method("get_battle_state"):
@@ -147,25 +202,36 @@ func _handle_battle() -> bool:
 	var executor: Node = b.get_node_or_null("BattleTurnExecutor")
 	if executor == null:
 		return true
-	var enemy_side = BattleState.Side.DEFENDER if unit.side == BattleState.Side.ATTACKER else BattleState.Side.ATTACKER
-	var enemy_units = bs.get_units_by_side(enemy_side)
-	# 1) атака ближайшего в радиусе (ближний — сосед, дальнобойный — любой)
-	var target = null
-	var best := INF
-	for e in enemy_units:
-		if not e.is_alive():
-			continue
-		var d := HexUtils.hex_distance(unit.cell, e.cell, bs.hex_shift_right)
-		if unit.is_ranged():
-			if d > 1 and d < best:
-				best = d
-				target = e
-		elif d == 1 and target == null:
-			target = e
+	# Сталл-сеть: автоигрок шлёт по одному запросу за кадр, а отказ исполнителя
+	# молчалив (request_* просто возвращаются). Без сети кадр повторяется до
+	# бесконечности: Ranger/Trader (seed 465305719) сжёг 21 211 кадров на ходе 20 и
+	# упёрся в предохранитель матрицы (матричный отчёт 2026-10-25). Ключ — НЕ активный
+	# юнит и не has_moved: в бою-патруле (T-205) они чередуются каждый кадр, и сеть на
+	# таком ключе не накапливает никогда.
+	var stall_key := battle_progress_key(bs)
+	if stall_key == _battle_stall_key:
+		_battle_stall_frames += 1
+	else:
+		_battle_stall_key = stall_key
+		_battle_stall_frames = 0
+	if _battle_stall_frames >= BATTLE_STALL_FAIL_FRAMES:
+		_fail("бой-висяк: ни движения, ни потерь %d кадров (ход %d, юниты %s)" % [
+			_battle_stall_frames, turn, stall_key])
+		return true
+	if _battle_stall_frames >= BATTLE_STALL_WAIT_FRAMES:
+		# wait() в патруле только перекладывает юнита в конец очереди (do_wait),
+		# ход не расходуется — поэтому skip, как это делает кнопка прохода хода.
+		executor.request_skip()
+		return true
+	var enemy_units = bs.get_units_by_side(
+		BattleState.Side.DEFENDER if unit.side == BattleState.Side.ATTACKER else BattleState.Side.ATTACKER)
+	# 1) атака: только то, что примет исполнитель (см. pick_attack_target)
+	var target := pick_attack_target(bs, unit)
 	if target != null:
 		executor.request_attack(unit, target)
 		return true
 	# 2) сдвиг к ближайшему
+	var best := INF
 	if not unit.has_moved:
 		var nearest = null
 		best = INF
