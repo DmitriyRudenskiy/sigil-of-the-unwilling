@@ -3,7 +3,7 @@ extends BaseTest
 # T-207: `_hero_cell()` на освобождённом герое ронял процесс (SIGSEGV), а не возвращал
 # «героя нет».
 #
-# Как это выглядело (матричный прогон `traveler 90`, 2026-10-25, `/tmp/mx_traveler.log`):
+# Как это выглядело (матричный прогон `traveler 90`, 2026-10-26, `mx_traveler.log`):
 # после второй строки матрицы Godot падал с `handle_crash: Program crashed with signal 11`,
 # бэктрейс `balance_probe.gd:669 _hero_cell ← TravelerRole.gd:65 goal_met ←
 # TravelerRole.gd:68 metrics ← matrix_report.gd:133`. Профиль уже завершился

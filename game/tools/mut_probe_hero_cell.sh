@@ -58,8 +58,10 @@ run M2-страж-ноль-вместо-стражи
 mutate "$ROLE" '	var gone: bool = hero == null or not is_instance_valid(hero)' '	var gone: bool = false'
 run M3-роль-не-смотрит-на-валидность
 
-mutate "$ROLE" '		"hp": int(hero.combat_hp) if not gone else 0,' '		"hp": int(hero.combat_hp) if hero != null else 0,'
-run M4-hp-читается-всегда
+# Не «hero != null вместо gone»: для освобождённого экземпляра сравнение с null и так
+# истино, мутант получился бы эквивалентным. Бьём по прямому чтению поля героя.
+mutate "$ROLE" '		"hp": int(hero.combat_hp) if not gone else 0,' '		"hp": int(pilot._hero.combat_hp),'
+run M4-hp-читается-без-стража
 
 mutate "$PROBE" '	if _hero == null or not is_instance_valid(_hero):
 		return Vector2i(-1, -1)

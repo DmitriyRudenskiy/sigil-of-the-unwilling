@@ -1,0 +1,17 @@
+# после фикса (HEAD 437b8a13): 11/11 строк, city_level/buildings/population
+# источник: /tmp/mx_builder2.log (матричные строки + строки падения/ошибок, шум движка отброшен)
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+MATRIX-START|role=builder|turns=90|classes=11
+MATRIX|attempts=-1|battles=33|buildings=26|buildings_goal=2|hero=alive|block=|city_level=1|city_level_goal=2|class=barbarian|deals=0|done=true|error=|gold=0|margin=0|market=false|population=1|population_goal=8|reason=|seed=616125505|state=RUNNING|survived=true|turns=92
+MATRIX|attempts=-1|battles=1|buildings=15|buildings_goal=2|hero=alive|block=|city_level=2|city_level_goal=2|class=chanter|deals=0|done=true|error=|gold=0|margin=0|market=false|population=7|population_goal=8|reason=|seed=550432139|state=RUNNING|survived=true|turns=35
+MATRIX|attempts=-1|battles=12|buildings=12|buildings_goal=2|hero=alive|block=|city_level=2|city_level_goal=2|class=cipher|deals=0|done=true|error=|gold=0|margin=0|market=false|population=8|population_goal=8|reason=|seed=917109845|state=RUNNING|survived=true|turns=28
+MATRIX|attempts=-1|battles=3|buildings=14|buildings_goal=2|hero=alive|block=|city_level=2|city_level_goal=2|class=druid|deals=0|done=true|error=|gold=0|margin=0|market=false|population=8|population_goal=8|reason=|seed=1469196208|state=RUNNING|survived=true|turns=28
+MATRIX|attempts=-1|battles=6|buildings=22|buildings_goal=2|hero=alive|block=|city_level=1|city_level_goal=2|class=fighter|deals=0|done=true|error=|gold=0|margin=0|market=false|population=0|population_goal=8|reason=|seed=1115086861|state=RUNNING|survived=true|turns=90
+MATRIX|attempts=-1|battles=3|buildings=4|buildings_goal=2|hero=alive|block=|city_level=2|city_level_goal=2|class=monk|deals=0|done=true|error=|gold=0|margin=0|market=false|population=8|population_goal=8|reason=|seed=2047355965|state=RUNNING|survived=true|turns=10
+MATRIX|attempts=-1|battles=3|buildings=5|buildings_goal=2|hero=alive|block=|city_level=2|city_level_goal=2|class=paladin|deals=0|done=true|error=|gold=0|margin=0|market=false|population=8|population_goal=8|reason=|seed=127670880|state=RUNNING|survived=true|turns=11
+MATRIX|attempts=-1|battles=32|buildings=24|buildings_goal=2|hero=alive|block=|city_level=1|city_level_goal=2|class=priest|deals=0|done=true|error=|gold=0|margin=0|market=false|population=0|population_goal=8|reason=|seed=1739236022|state=RUNNING|survived=true|turns=91
+MATRIX|attempts=-1|battles=30|buildings=19|buildings_goal=2|hero=alive|block=|city_level=1|city_level_goal=2|class=ranger|deals=0|done=true|error=|gold=0|margin=0|market=false|population=0|population_goal=8|reason=|seed=19907924|state=RUNNING|survived=true|turns=90
+MATRIX|attempts=-1|battles=44|buildings=21|buildings_goal=2|hero=alive|block=|city_level=1|city_level_goal=2|class=rogue|deals=0|done=true|error=|gold=0|margin=0|market=false|population=1|population_goal=8|reason=|seed=1701587817|state=RUNNING|survived=true|turns=93
+MATRIX|attempts=-1|battles=7|buildings=15|buildings_goal=2|hero=alive|block=|city_level=2|city_level_goal=2|class=wizard|deals=0|done=true|error=|gold=0|margin=0|market=false|population=10|population_goal=8|reason=|seed=512858568|state=RUNNING|survived=true|turns=36
+MATRIX-SUMMARY|class=SUMMARY|deals=0|gold_goal_reached=0/11|gold_max=0|gold_median=0|margin_median=0|profiles=11|role=builder|survived=11/11|turns=90
+ERROR: 34 resources still in use at exit (run with --verbose for details).

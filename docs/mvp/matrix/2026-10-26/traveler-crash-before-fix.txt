@@ -1,0 +1,39 @@
+# до фикса стража (HEAD af5b7d33): SIGSEGV на 3-м классе
+# источник: /tmp/mx_traveler.log (матричные строки + строки падения/ошибок, шум движка отброшен)
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+MATRIX-START|role=traveler|turns=90|classes=11
+MATRIX|attempts=-1|battles=0|block=|class=barbarian|deals=0|done=true|error=|gold=0|margin=0|market=false|reason=|seed=1469461902|state=RUNNING|survived=true|turns=4
+MATRIX|attempts=-1|battles=0|block=|class=chanter|deals=0|done=true|error=|gold=0|margin=0|market=false|reason=|seed=1765951644|state=RUNNING|survived=true|turns=14
+handle_crash: Program crashed with signal 11
+[1] 79e718445330 (libc.so.6+45330) - /lib/x86_64-linux-gnu/libc.so.6(+0x45330) [0x79e718445330]
+[2] 46a6c37 (main+42a6c37) - godot() [0x46a6c37]
+[3] af3128 (main+6f3128) - godot() [0xaf3128]
+[4] 9347ce (main+5347ce) - godot() [0x9347ce]
+[5] 48efb25 (main+44efb25) - godot() [0x48efb25]
+[6] 46a6c3b (main+42a6c3b) - godot() [0x46a6c3b]
+[7] af3128 (main+6f3128) - godot() [0xaf3128]
+[8] 9347ce (main+5347ce) - godot() [0x9347ce]
+[9] 48efb25 (main+44efb25) - godot() [0x48efb25]
+[10] 46a6c3b (main+42a6c3b) - godot() [0x46a6c3b]
+[11] af3128 (main+6f3128) - godot() [0xaf3128]
+[12] 9347ce (main+5347ce) - godot() [0x9347ce]
+[13] 48efb25 (main+44efb25) - godot() [0x48efb25]
+[14] 46a6c3b (main+42a6c3b) - godot() [0x46a6c3b]
+[15] af3128 (main+6f3128) - godot() [0xaf3128]
+[16] 9b64b4 (main+5b64b4) - godot() [0x9b64b4]
+[17] 9bac32 (main+5bac32) - godot() [0x9bac32]
+[18] 9d0953 (main+5d0953) - godot() [0x9d0953]
+[19] 48efbbb (main+44efbbb) - godot() [0x48efbbb]
+[20] 4685a5d (main+4285a5d) - godot() [0x4685a5d]
+[21] 4685de4 (main+4285de4) - godot() [0x4685de4]
+[22] 4978a64 (main+4578a64) - godot() [0x4978a64]
+[23] 2b4bd54 (main+274bd54) - godot() [0x2b4bd54]
+[24] 562cc9 (main+162cc9) - godot() [0x562cc9]
+[25] 42c58f (main+2c58f) - godot() [0x42c58f]
+[26] 79e71842a1ca (libc.so.6+2a1ca) - /lib/x86_64-linux-gnu/libc.so.6(+0x2a1ca) [0x79e71842a1ca]
+[27] 79e71842a28b (libc.so.6+2a28b) - /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x8b) [0x79e71842a28b]
+[28] 4870fa (main+870fa) - godot() [0x4870fa]
+    [0] _hero_cell (res://scripts/probe/balance_probe.gd:669)
+    [1] goal_met (res://scripts/probe/TravelerRole.gd:65)
+    [2] metrics (res://scripts/probe/TravelerRole.gd:68)
+    [3] _run_profile (res://tools/matrix_report.gd:133)
