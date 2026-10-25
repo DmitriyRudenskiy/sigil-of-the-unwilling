@@ -88,3 +88,35 @@ func test_marker_and_name_leave_when_the_battle_is_over() -> void:
 	assert_bool(screen.marker.visible).is_false()
 	assert_str(screen.active_label.text).is_empty()
 
+
+
+## 10.12: признак хода — обведённая клетка активного юнита (read-агент: полоска
+## под ногами активного не показывала). Клетка следует за очередью и гаснет
+## после конца боя.
+func test_active_cell_follows_the_queue() -> void:
+	var screen := _screen()
+	var combat := _combat()
+	screen.run(combat)
+	assert_bool(screen.field.active_cell == screen.field.cell_of(combat.current))
+	combat.perform(BattleAction.skip(combat.current))
+	assert_bool(screen.field.active_cell == screen.field.cell_of(combat.current))
+	BattleFactory.auto_play(combat)
+	assert_int(screen.field.active_cell.x).is_equal(-1)
+
+
+## 10.11: пустая полоса погибшего — багряная дорожка (read-агент: погибший
+## стоял в живой позе, гибель не читалась).
+func test_fallen_unit_bar_track_is_marked() -> void:
+	var screen := _screen()
+	var combat := _combat()
+	screen.run(combat)
+	BattleFactory.auto_play(combat)
+	var fallen := 0
+	for unit in combat.units:
+		var track: ColorRect = screen.bar_of(unit).get_parent()
+		if unit.is_alive():
+			assert_bool(track.color == screen.BAR_TRACK)
+		else:
+			fallen += 1
+			assert_bool(track.color == screen.BAR_DEAD)
+	assert_int(fallen).is_greater(0)

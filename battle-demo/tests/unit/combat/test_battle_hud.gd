@@ -135,3 +135,18 @@ func test_units_stand_on_distinct_hexes_of_their_own_flank() -> void:
 	assert_float(screen.field.view_of(combat.units[0]).position.x).is_less(
 		screen.field.view_of(foes[0]).position.x
 	)
+
+
+## 10.13: команды — колонкой за правым краем поля. 1500 px — правый край самого
+## правого силуэта (клетка col 7 + половина фигуры в масштабе 2.2); строкой
+## внизу кнопки ложились на сетку и на волков.
+func test_commands_stand_clear_of_the_field() -> void:
+	var screen := _screen()
+	screen.run(_combat())
+	var shown := 0
+	for button in screen.hud.commands.get_children():
+		if not is_instance_valid(button) or not button.visible:
+			continue
+		shown += 1
+		assert_float(button.position.x).is_greater(1500.0)
+	assert_int(shown).is_greater(0)

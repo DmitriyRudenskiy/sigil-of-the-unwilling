@@ -15,6 +15,10 @@ class_name BattleScreen extends Node2D
 const BAR_SIZE := Vector2(96, 10)
 const BAR_FILL := Color(0.55, 0.78, 0.42)
 const BAR_TRACK := Color(0.12, 0.12, 0.14)
+## Дорожка мёртвого юнита (задача 10.11): пустая полоса того же цвета, что и
+## у живого на малом hp, отличалась только шириной заполнения — на кадре
+## гибель не читалась. Пустая полоса становится багряной.
+const BAR_DEAD := Color(0.45, 0.11, 0.11)
 const MARKER_SIZE := Vector2(96, 6)
 const MARKER_COLOR := Color(0.95, 0.8, 0.35)
 ## Полоса — над головой: ступни в (64, 112) холста, фигура в нём ~96 px, то есть
@@ -102,6 +106,8 @@ func _on_battle_ended(outcome: int) -> void:
 	# «сирота-подпись» на кадре результата).
 	active_label.text = ""
 	marker.visible = false
+	field.active_cell = Vector2i(-1, -1)
+	field.queue_redraw()
 	result_view.show_outcome(outcome, combat.turn_index)
 
 
@@ -114,6 +120,8 @@ func _reset_view() -> void:
 		fill.get_parent().free()
 	_bars = {}
 	field.clear_views()
+	field.active_cell = Vector2i(-1, -1)
+	field.queue_redraw()
 	marker.visible = false
 	active_label.text = ""
 	result_view.visible = false
@@ -128,6 +136,8 @@ func _on_turn(unit: BattleUnit) -> void:
 		marker.position = view.position + Vector2(-MARKER_SIZE.x / 2.0, 8.0)
 		# Маркер — над своим рядом, иначе юниты дальних рядов его затирают.
 		marker.z_index = view.z_index + 1
+		field.active_cell = field.cell_of(unit)
+		field.queue_redraw()
 	active_label.text = unit.stats.display_name
 
 
@@ -136,6 +146,8 @@ func _refresh_all() -> void:
 		var fill: ColorRect = _bars.get(unit.uid())
 		if fill != null:
 			# Мёртвый юнит остаётся с пустой полосой: hp 0 → ширина 0.
+			var dead := unit.hp <= 0
+			fill.get_parent().color = BAR_DEAD if dead else BAR_TRACK
 			fill.size.x = maxf(0.0, (BAR_SIZE.x - 2.0) * float(unit.hp) / unit.stats.max_hp)
 
 

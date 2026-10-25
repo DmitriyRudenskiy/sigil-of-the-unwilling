@@ -30,6 +30,13 @@ const PANEL_SIZE := Vector2(392, 132)
 const BUTTON_SIZE := Vector2(216, 64)
 const HP_WIDTH := 242.0
 const VIEWPORT_WIDTH := 1920.0
+## Команды — колонкой в правом поле. Правый край сетки — x 1380 (клетка col 7),
+## но фигура в масштабе 2.2 шире клетки и доходит до ~1500, поэтому колонка
+## стоит у правого края вьюпорта: строкой внизу и ближе к полю кнопки ложились
+## на шестиугольники и на волков (задача 10.13).
+const COMMAND_X := 1680.0
+const COMMAND_TOP := 300.0
+const COMMAND_STEP := 80.0
 
 var combat: CombatState
 
@@ -54,8 +61,8 @@ func _ready() -> void:
 	add_child(commands)
 	_reason.add_theme_font_size_override("font_size", FONT_SMALL)
 	_reason.add_theme_color_override("font_color", GOLD)
-	_reason.position = Vector2(VIEWPORT_WIDTH - 24.0 - 400.0, 1004.0)
-	_reason.size = Vector2(400.0, 26.0)
+	_reason.position = Vector2(1596.0, COMMAND_TOP + 6.0 * COMMAND_STEP)
+	_reason.size = Vector2(300.0, 26.0)
 	_reason.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	add_child(_reason)
 
@@ -197,10 +204,10 @@ func _commands_for(unit: BattleUnit) -> void:
 		child.queue_free()
 	_buttons = {}
 	var legal: Array[BattleAction] = combat.legal_actions(unit)
-	var at := Vector2(VIEWPORT_WIDTH - 24.0 - BUTTON_SIZE.x, 924.0)
+	var at := Vector2(COMMAND_X, COMMAND_TOP)
 	if not legal.is_empty():
 		_command_button("Атака", &"", at, _attack_action(legal), "")
-		at.x -= BUTTON_SIZE.x + 16.0
+		at.y += COMMAND_STEP
 		for ability in unit.stats.abilities:
 			var state := combat.ability_state(unit, ability)
 			var action := _ability_action(legal, ability.id)
@@ -208,9 +215,10 @@ func _commands_for(unit: BattleUnit) -> void:
 				ability.display_name, ability.id, at, action,
 				"" if state == &"ready" else _reason_of(state)
 			)
-			at.x -= BUTTON_SIZE.x + 16.0
-	_command_button("Ждать", &"__wait", Vector2(24.0, 924.0), _skip_action(legal), "")
-	var menu := _button("Меню", &"__menu", Vector2(24.0, 1000.0))
+			at.y += COMMAND_STEP
+	_command_button("Ждать", &"__wait", at, _skip_action(legal), "")
+	at.y += COMMAND_STEP
+	var menu := _button("Меню", &"__menu", at)
 	menu.pressed.connect(
 		func() -> void: get_tree().change_scene_to_file("res://scenes/roster_select.tscn")
 	)
