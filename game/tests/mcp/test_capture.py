@@ -167,6 +167,29 @@ def test_capture_scene_ставит_состояние_после_пина_но_
     assert row["sha256"] == capture.sha256_hex(_png(*capture.CANONICAL_SIZE))
 
 
+class _ReportingMcp(_RecordingMcp):
+    """Мок, возвращающий словарь из кода состояния (так делает живой `execute_code`)."""
+
+    def execute_code(self, code: str):
+        self.calls.append(f"execute::{code.strip()}")
+        return {"ok": True, "plaque_visible": True} if "select_card()" in code else None
+
+
+def test_capture_scene_отдаёт_отчёт_кода_состояния(tmp_path):
+    """Манифест обязан хранить не только sha256 кода, но и то, что он вернул."""
+    mcp = _ReportingMcp()
+    row = capture.capture_scene(
+        mcp, "res://scenes/x.tscn", tmp_path, "x", "тест", setup_code="select_card()\n",
+    )
+    assert row["setup_result"] == {"ok": True, "plaque_visible": True}
+
+
+def test_capture_scene_без_кода_состояния_не_выдумывает_отчёт(tmp_path):
+    mcp = _ReportingMcp()
+    row = capture.capture_scene(mcp, "res://scenes/x.tscn", tmp_path, "x", "тест")
+    assert row["setup_result"] is None
+
+
 class _TwoFrameMcp(_RecordingMcp):
     """Мок, отдающий разный рисунок на каждом снимке: видно, какой кадр пошёл в отчёт."""
 
@@ -237,6 +260,11 @@ def test_capture(mcp):
 
     row = capture.capture_scene(mcp, scene, out_dir, name, label, size=size,
                                 setup_code=setup)
+    if setup and row.get("setup_result") is not None:
+        # Отчёт кода состояния идёт в манифест: без него кадр — только пиксели,
+        # а «состояние применилось» остаётся верой (урок 2026-10-25: кадр плиты
+        # совпал байт в байт с кадром без плиты).
+        notes.append(f"{capture.SETUP_ENV} вернул: {row['setup_result']}")
     meta = capture.manifest_meta(
         title=f"{label}: {name}", fixture=scene, size=size, command=command, notes=notes,
     )

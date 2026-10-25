@@ -192,9 +192,10 @@ def capture_scene(mcp: Any, scene: str, out_dir: Path, name: str,
     mcp.wait_ready()
     mcp.wait_frames(20)
     mcp.execute_code(pin_window_code(size))
+    setup_result: Any = None
     if setup_code:
         # состояние ставится до усаживания: один settle покрывает и пин, и состояние
-        mcp.execute_code(setup_code)
+        setup_result = mcp.execute_code(setup_code)
     mcp.wait_frames(settle_frames)
     # Прайминг: первый после пина окна снимок отдаёт УСТАРЕВШУЮ текстуру вьюпорта.
     # Замер (T-188, Linux/Xvfb): кадр состояния `campaign_sign_chronicle_open.gd`
@@ -213,6 +214,11 @@ def capture_scene(mcp: Any, scene: str, out_dir: Path, name: str,
     return {
         "file": path.name, "state": state, "size": actual,
         "bytes": len(raw), "sha256": sha256_hex(raw), "path": path,
+        # Отчёт кода состояния: кадр без задокументированного состояния — только
+        # пиксели. Замер 2026-10-25: кадр «плита Знака» сошёлся байт в байт с
+        # кадром без плиты, потому что состояние не применилось, а манифест
+        # хранил лишь sha256 кода.
+        "setup_result": setup_result,
     }
 
 
