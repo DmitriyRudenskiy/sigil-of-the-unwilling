@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Мутационная батарея гейта «Собиратель: узлы ≠ единицы» (задача 4.2 цикла
-# scenario-matrix-behavior-reliability, T-209). Каждый мутант обязан покраснить
+# scenario-matrix-behavior-reliability, T-210). Каждый мутант обязан покраснить
 # test_collector_nodes_vs_units.gd; зелёный мутант = дыра меры.
 #
 # Мутации бьют по всем трём слоям: счётчик узлов (M1, M2), мера цели (M3 — единицы

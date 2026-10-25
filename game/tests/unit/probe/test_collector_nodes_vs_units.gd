@@ -1,7 +1,7 @@
 extends BaseTest
 
 ## Срез «Собиратель: узлы ≠ единицы» (задача 4.2 цикла
-## `scenario-matrix-behavior-reliability`, T-209). Замер матрицы 2026-10-26
+## `scenario-matrix-behavior-reliability`, T-210). Замер матрицы 2026-10-26
 ## (`MATRIX_REPEAT=2 … collector 90`): Fighter и Wizard заканчивали забег на **первом
 ## ходе** с `rare_extracted = 50`, а `resources_per_day` у классов различается в 40 раз
 ## (1.2 … 50.0). Причина не в политике роли, а в мере цели: `rare_goal = 10` считается
