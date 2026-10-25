@@ -1,28 +1,241 @@
-# Пакет клипов Wan 2.2 I2V — журнал прогона `gen_clip.py --all`
-#
-# Журнал пересобран из clip-manifest.json: начало исходного лога затёрто
-# неудачной попыткой перезапуска пакета (2026-10-25, редирект `>` по пути лога,
-# процесс при этом жил). Пиксели клипов — в artifacts/clips/, вердикты — в verdicts.json.
-# Остановлен по команде владельца на 20 клипах из 45 (barbarian idle/attack и
-# sorcerer turn прерваны на середине, каталоги пустые — прогон возобновляем).
-
-knight/idle | seed=1101 | движение=19.7 | резкость=1607.4/1677.3 | хромакей=0.0 | петля=17 | годен: движение 19.7, резкость 1607.4/1677.3, снос 1.7 px, хромакей 0 — петля ping-pong (стык не найден)
-knight/turn | seed=1101 | движение=46.3 | резкость=1408.7/1517.9 | хромакей=0.0 | петля=ping-pong | годен: движение 46.3, резкость 1408.7/1517.9, снос 7.0 px, хромакей 0
-spearman/idle | seed=1102 | движение=9.2 | резкость=4223.7/4561.0 | хромакей=0.0 | петля=17 | годен: движение 9.2, резкость 4223.7/4561.0, снос 0.2 px, хромакей 0 — петля ping-pong (стык не найден)
-knight/attack | seed=1101 | движение=9.9 | резкость=1041.7/1447.6 | хромакей=0.0 | петля=ping-pong | годен: движение 9.9, резкость 1041.7/1447.6, снос 0.1 px, хромакей 0
-knight/walk | seed=1101 | движение=73.5 | резкость=1109.4/1251.3 | хромакей=0.0 | петля=26 | брак: корпус уехал по полу (31.1 px за цикл)
-knight/hit | seed=1101 | первый_кадр=150.7с | клип=42.2с | всего=196.0с | движение=55.3 | резкость=1367.5/1559.0 | хромакей=0.0 | петля=ping-pong | брак: корпус уехал по полу (31.8 px за цикл)
-spearman/attack | seed=1102 | первый_кадр=159.8с | клип=42.2с | всего=205.1с | движение=14.9 | резкость=2127.8/3338.8 | хромакей=0.0 | петля=ping-pong | брак: есть смазанные кадры
-spearman/hit | seed=1102 | первый_кадр=159.8с | клип=42.3с | всего=205.1с | движение=56.8 | резкость=2832.9/3540.6 | хромакей=0.0 | петля=ping-pong | годен: движение 56.8, резкость 2832.9/3540.6, снос 4.0 px, хромакей 0
-spearman/turn | seed=1102 | первый_кадр=159.8с | клип=42.3с | всего=205.1с | движение=61.5 | резкость=3527.7/3970.7 | хромакей=0.0 | петля=ping-pong | брак: корпус уехал по полу (10.2 px за цикл)
-archer/idle | seed=1103 | первый_кадр=159.8с | клип=42.2с | всего=205.0с | движение=12.0 | резкость=819.9/944.8 | хромакей=0.0 | петля=17 | годен: движение 12.0, резкость 819.9/944.8, снос 0.4 px, хромакей 0 — петля ping-pong (стык не найден)
-archer/attack | seed=1103 | первый_кадр=159.7с | клип=42.2с | всего=205.0с | движение=5.4 | резкость=561.5/777.5 | хромакей=0.0 | петля=ping-pong | годен: движение 5.4, резкость 561.5/777.5, снос 0.2 px, хромакей 0
-archer/hit | seed=1103 | первый_кадр=159.7с | клип=42.2с | всего=204.9с | движение=46.5 | резкость=635.9/727.6 | хромакей=0.0 | петля=ping-pong | брак: корпус уехал по полу (20.7 px за цикл)
-archer/turn | seed=1103 | первый_кадр=159.8с | клип=42.2с | всего=205.1с | движение=32.4 | резкость=629.0/663.1 | хромакей=0.0 | петля=ping-pong | годен: движение 32.4, резкость 629.0/663.1, снос 5.7 px, хромакей 0
-wizard/idle | seed=1104 | первый_кадр=159.8с | клип=42.3с | всего=205.2с | движение=25.7 | резкость=578.2/616.1 | хромакей=0.0 | петля=17 | годен: движение 25.7, резкость 578.2/616.1, снос 2.2 px, хромакей 0 — петля ping-pong (стык не найден)
-wizard/attack | seed=1104 | первый_кадр=159.8с | клип=42.2с | всего=205.1с | движение=28.1 | резкость=288.1/496.7 | хромакей=0.0 | петля=ping-pong | брак: есть смазанные кадры
-wizard/hit | seed=1104 | первый_кадр=159.7с | клип=42.2с | всего=205.0с | движение=36.4 | резкость=821.7/978.9 | хромакей=0.0 | петля=ping-pong | брак: корпус уехал по полу (13.5 px за цикл)
-wizard/turn | seed=1104 | первый_кадр=159.8с | клип=42.2с | всего=205.1с | движение=37.5 | резкость=680.0/776.6 | хромакей=0.0 | петля=ping-pong | годен: движение 37.5, резкость 680.0/776.6, снос 1.2 px, хромакей 0
-sorcerer/idle | seed=1105 | первый_кадр=159.8с | клип=42.2с | всего=205.0с | движение=23.7 | резкость=1013.9/1226.7 | хромакей=0.0 | петля=17 | годен: движение 23.7, резкость 1013.9/1226.7, снос 0.2 px, хромакей 0 — петля ping-pong (стык не найден)
-sorcerer/attack | seed=1105 | первый_кадр=159.8с | клип=42.3с | всего=205.1с | движение=30.1 | резкость=839.9/1065.7 | хромакей=0.0 | петля=ping-pong | годен: движение 30.1, резкость 839.9/1065.7, снос 0.5 px, хромакей 0
-sorcerer/hit | seed=1105 | первый_кадр=159.8с | клип=42.3с | всего=205.1с | движение=32.2 | резкость=863.0/973.0 | хромакей=0.0 | петля=ping-pong | брак: корпус уехал по полу (23.4 px за цикл)
+[skip] knight/idle: уже годен
+[skip] knight/walk: покадрово, D5 (походка клипом не собирается)
+[skip] knight/attack: уже годен
+[skip] knight/hit: уже годен
+[skip] knight/turn: уже годен
+[skip] spearman/idle: уже годен
+[skip] spearman/walk: покадрово, D5 (походка клипом не собирается)
+[run ] spearman/attack
+[ref ] spearman: battle-demo/assets/kit/spearman_composed.png
+{
+  "char": "spearman",
+  "anim": "attack",
+  "seed": 1102,
+  "length": 33,
+  "corner_before_clip": [
+    247,
+    249,
+    254
+  ],
+  "seconds": {
+    "first_frame": 150.7,
+    "clip": 90.5
+  },
+  "total_seconds": 241.3,
+  "audit": {
+    "frames": 33,
+    "motion_first_last": 14.4,
+    "sharpness_min": 1223.7,
+    "sharpness_median": 1429.9,
+    "pivot_slide_x": 0.0,
+    "pivot_sway_x": 0.0,
+    "contact_slide_x": 0.0,
+    "contact_sway_x": 0.0,
+    "feet_drift_x": 0.0,
+    "feet_drift_y": 0,
+    "chroma_pixels_kept": 0,
+    "chroma_share": 0.0
+  },
+  "loop": null,
+  "subsampled": [
+    "battle-demo/artifacts/clips/spearman/attack/frame_01.png",
+    "battle-demo/artifacts/clips/spearman/attack/frame_12.png",
+    "battle-demo/artifacts/clips/spearman/attack/frame_22.png",
+    "battle-demo/artifacts/clips/spearman/attack/frame_33.png"
+  ],
+  "verdict": "годен: движение 14.4, резкость 1223.7/1429.9, снос ступней 0.0 px, хромакей 0"
+}
+[skip] spearman/hit: уже годен
+[skip] spearman/turn: уже годен
+[skip] archer/idle: уже годен
+[skip] archer/walk: покадрово, D5 (походка клипом не собирается)
+[skip] archer/attack: уже годен
+[skip] archer/hit: уже годен
+[skip] archer/turn: уже годен
+[skip] wizard/idle: уже годен
+[skip] wizard/walk: покадрово, D5 (походка клипом не собирается)
+[run ] wizard/attack
+[ref ] wizard: battle-demo/assets/kit/wizard_composed.png
+{
+  "char": "wizard",
+  "anim": "attack",
+  "seed": 1104,
+  "length": 33,
+  "corner_before_clip": [
+    239,
+    244,
+    250
+  ],
+  "seconds": {
+    "first_frame": 159.9,
+    "clip": 42.2
+  },
+  "total_seconds": 202.1,
+  "audit": {
+    "frames": 33,
+    "motion_first_last": 17.4,
+    "sharpness_min": 561.8,
+    "sharpness_median": 777.0,
+    "pivot_slide_x": 0.0,
+    "pivot_sway_x": 0.0,
+    "contact_slide_x": 0.0,
+    "contact_sway_x": 0.0,
+    "feet_drift_x": 0.0,
+    "feet_drift_y": 0,
+    "chroma_pixels_kept": 0,
+    "chroma_share": 0.0
+  },
+  "loop": null,
+  "subsampled": [
+    "battle-demo/artifacts/clips/wizard/attack/frame_01.png",
+    "battle-demo/artifacts/clips/wizard/attack/frame_12.png",
+    "battle-demo/artifacts/clips/wizard/attack/frame_22.png",
+    "battle-demo/artifacts/clips/wizard/attack/frame_33.png"
+  ],
+  "verdict": "годен: движение 17.4, резкость 561.8/777.0, снос ступней 0.0 px, хромакей 0"
+}
+[skip] wizard/hit: уже годен
+[skip] wizard/turn: уже годен
+[skip] sorcerer/idle: уже годен
+[skip] sorcerer/walk: покадрово, D5 (походка клипом не собирается)
+[skip] sorcerer/attack: уже годен
+[skip] sorcerer/hit: уже годен
+[run ] sorcerer/turn
+[ref ] sorcerer: battle-demo/assets/a_pose/sorcerer.png
+{
+  "char": "sorcerer",
+  "anim": "turn",
+  "seed": 1105,
+  "length": 33,
+  "corner_before_clip": [
+    251,
+    249,
+    247
+  ],
+  "seconds": {
+    "first_frame": 159.8,
+    "clip": 42.3
+  },
+  "total_seconds": 202.0,
+  "audit": {
+    "frames": 33,
+    "motion_first_last": 22.3,
+    "sharpness_min": 429.1,
+    "sharpness_median": 724.0,
+    "pivot_slide_x": 0.0,
+    "pivot_sway_x": 0.0,
+    "contact_slide_x": 0.0,
+    "contact_sway_x": 0.0,
+    "feet_drift_x": 0.0,
+    "feet_drift_y": 0,
+    "chroma_pixels_kept": 0,
+    "chroma_share": 0.0
+  },
+  "loop": null,
+  "subsampled": [
+    "battle-demo/artifacts/clips/sorcerer/turn/frame_01.png",
+    "battle-demo/artifacts/clips/sorcerer/turn/frame_12.png",
+    "battle-demo/artifacts/clips/sorcerer/turn/frame_22.png",
+    "battle-demo/artifacts/clips/sorcerer/turn/frame_33.png"
+  ],
+  "verdict": "брак: есть смазанные кадры"
+}
+[skip] barbarian/idle: уже годен
+[skip] barbarian/walk: покадрово, D5 (походка клипом не собирается)
+[skip] barbarian/attack: уже годен
+[skip] barbarian/hit: уже годен
+[skip] barbarian/turn: уже годен
+[skip] stormmage/idle: уже годен
+[skip] stormmage/walk: покадрово, D5 (походка клипом не собирается)
+[skip] stormmage/attack: уже годен
+[skip] stormmage/hit: уже годен
+[run ] stormmage/turn
+[ref ] stormmage: battle-demo/assets/a_pose/stormmage.png
+{
+  "char": "stormmage",
+  "anim": "turn",
+  "seed": 1107,
+  "length": 33,
+  "corner_before_clip": [
+    250,
+    249,
+    253
+  ],
+  "seconds": {
+    "first_frame": 159.8,
+    "clip": 42.3
+  },
+  "total_seconds": 202.1,
+  "audit": {
+    "frames": 33,
+    "motion_first_last": 33.5,
+    "sharpness_min": 753.4,
+    "sharpness_median": 964.3,
+    "pivot_slide_x": 0.0,
+    "pivot_sway_x": 0.0,
+    "contact_slide_x": 0.0,
+    "contact_sway_x": 0.0,
+    "feet_drift_x": 0.0,
+    "feet_drift_y": 0,
+    "chroma_pixels_kept": 0,
+    "chroma_share": 0.0
+  },
+  "loop": null,
+  "subsampled": [
+    "battle-demo/artifacts/clips/stormmage/turn/frame_01.png",
+    "battle-demo/artifacts/clips/stormmage/turn/frame_12.png",
+    "battle-demo/artifacts/clips/stormmage/turn/frame_22.png",
+    "battle-demo/artifacts/clips/stormmage/turn/frame_33.png"
+  ],
+  "verdict": "годен: движение 33.5, резкость 753.4/964.3, снос ступней 0.0 px, хромакей 0"
+}
+[skip] cutthroat/idle: уже годен
+[skip] cutthroat/walk: покадрово, D5 (походка клипом не собирается)
+[skip] cutthroat/attack: уже годен
+[skip] cutthroat/hit: уже годен
+[skip] cutthroat/turn: уже годен
+[skip] priest/idle: уже годен
+[skip] priest/walk: покадрово, D5 (походка клипом не собирается)
+[skip] priest/attack: уже годен
+[run ] priest/hit
+[ref ] priest: battle-demo/assets/a_pose/priest.png
+{
+  "char": "priest",
+  "anim": "hit",
+  "seed": 1109,
+  "length": 33,
+  "corner_before_clip": [
+    111,
+    201,
+    69
+  ],
+  "seconds": {
+    "first_frame": 159.8,
+    "clip": 42.3
+  },
+  "total_seconds": 202.1,
+  "audit": {
+    "frames": 33,
+    "motion_first_last": 56.3,
+    "sharpness_min": 1106.5,
+    "sharpness_median": 1285.9,
+    "pivot_slide_x": 9.5,
+    "pivot_sway_x": 33.4,
+    "contact_slide_x": 79.8,
+    "contact_sway_x": 106.8,
+    "feet_drift_x": 48.0,
+    "feet_drift_y": 8,
+    "chroma_pixels_kept": 0,
+    "chroma_share": 0.0
+  },
+  "loop": null,
+  "subsampled": [
+    "battle-demo/artifacts/clips/priest/hit/frame_01.png",
+    "battle-demo/artifacts/clips/priest/hit/frame_12.png",
+    "battle-demo/artifacts/clips/priest/hit/frame_22.png",
+    "battle-demo/artifacts/clips/priest/hit/frame_33.png"
+  ],
+  "verdict": "брак: ступни уехали по полу (79.8 px за цикл)"
+}
+[skip] priest/turn: уже годен
+ИТОГ ok=5 skip=40 fail=0

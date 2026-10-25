@@ -1,6 +1,6 @@
 #extends GdUnitTestSuite
 # tests/unit/combat/test_damage.gd
-# [AI]: сгенерировано по задаче 4.3 tasks.md, проверено человеком.
+# [AI]: сгенерировано по задаче 4.3 tasks.md.
 # Формула урона: целое, нижняя граница 1, воспроизводимость по seed.
 
 extends GdUnitTestSuite

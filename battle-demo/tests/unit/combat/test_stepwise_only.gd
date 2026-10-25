@@ -1,6 +1,6 @@
 #extends GdUnitTestSuite
 # tests/unit/combat/test_stepwise_only.gd
-# [AI]: задача 4.11 tasks.md, проверено человеком.
+# [AI]: задача 4.11 tasks.md.
 # Пошаговость: пока выбор действия не подтверждён, мир стоит — ни чужих ходов,
 # ни сдвинутых шкал. От ATB и real-time модель защищена отсутствием собственного
 # шага по времени: у CombatState нет _process, мир меняется только из perform().

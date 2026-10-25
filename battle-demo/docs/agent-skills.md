@@ -55,4 +55,4 @@
 | 8 | частично (8.1–8.4) | `scenes/battle_unit.tscn`, `scripts/view/battle_unit_view.gd`, `tests/unit/combat/test_battle_unit_view.gd`. Открыто: 8.5–8.9 — контактный лист, стилевой вердикт read-агента, `docs/sprite-review-*.md`, `docs/animation-review-*.md`, I2V-ветка |
 | 9 | да | `scenes/roster_select.tscn`, `scenes/battle.tscn`, `scripts/view/`, `tools/capture_screens.gd` (+8 кадров приёмки), `tests/unit/combat/test_battle_{screen,hud}.gd` |
 | 10 | да | `docs/qa-plan.md`, `docs/ui-review-2026-10-25.md`, `docs/ui-read-judge-2026-10-25{,-r3,-r4}.md`, `docs/regression-suite.md` (с леджером), `docs/known-issues.md` (№7), отметки здесь |
-| 11 | нет | `docs/handoff.md`, `CHANGELOG.md`, `docs/vertical-slice.md`, `docs/gate-check.md` — группа 11 не начата |
+| 11 | да (кроме 11.9) | `docs/test-coverage-matrix.md`, `docs/gate-check.md`, `docs/handoff.md`, `CHANGELOG.md`, `docs/vertical-slice.md`, `docs/ui-read-judge-2026-10-26.md`. Открыто: 11.9 — push по явному «мержи» владельца; вердикт ворот — **FAIL** (два блокера «спека ↔ носитель») |

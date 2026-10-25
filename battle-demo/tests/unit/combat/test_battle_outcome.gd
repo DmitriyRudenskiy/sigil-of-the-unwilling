@@ -1,6 +1,6 @@
 #extends GdUnitTestSuite
 # tests/unit/combat/test_battle_outcome.gd
-# [AI]: сгенерировано по задаче 4.6 tasks.md, проверено человеком.
+# [AI]: сгенерировано по задаче 4.6 tasks.md.
 # Исход боя: победа, поражение, остановка очереди, страховка по лимиту ходов.
 
 extends GdUnitTestSuite

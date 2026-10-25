@@ -1,6 +1,6 @@
 #extends GdUnitTestSuite
 # tests/unit/combat/test_action_legality.gd
-# [AI]: сгенерировано по задаче 4.5 tasks.md, проверено человеком.
+# [AI]: сгенерировано по задаче 4.5 tasks.md.
 # Легальность действий: одно действие за ход, расход, кулдаун, цель.
 
 extends GdUnitTestSuite

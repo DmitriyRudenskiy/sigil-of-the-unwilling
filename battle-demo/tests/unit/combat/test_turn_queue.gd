@@ -1,6 +1,6 @@
 #extends GdUnitTestSuite
 # tests/unit/combat/test_turn_queue.gd
-# [AI]: сгенерировано по задаче 4.2 tasks.md, проверено человеком.
+# [AI]: сгенерировано по задаче 4.2 tasks.md.
 # Очередь ходов: инициатива, тай-брейки, пропуск мёртвых.
 
 extends GdUnitTestSuite

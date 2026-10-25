@@ -16,3 +16,13 @@ artifacts/clips-apose/*/*/*.png
 artifacts/clips-apose/*/*/*/*.png
 # Зеркало A-pose для съёмки — вывод того же драйвера (`--mirror`), не источник.
 artifacts/mirror-src/
+
+# Вывод инструментов, пересобираемый: gen_kit.py (листы экипировки), mirror_anim.py
+# (зеркало для съёмки), gen_a_pose_v2.py (первые кадры A-pose). В git идут отчёты
+# и манифесты, пиксели — нет (D-185).
+artifacts/kit/
+artifacts/clips-mirror/
+assets/a_pose_v2/
+
+# Побочный продукт импорта движком карт поз: их читает Python-конвейер, не игра.
+assets/poses/**/*.import

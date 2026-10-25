@@ -1,6 +1,6 @@
 extends SceneTree
 
-# [AI]: сгенерировано по задаче 5.1–5.3 tasks.md, проверено человеком.
+# [AI]: сгенерировано по задаче 5.1–5.3 tasks.md.
 #
 # Автор скрипт данных: собирает девять UnitStats и два RosterData и сохраняет
 # .tres. Рукой эти файлы не пишем — формат typed-массивов в ресурсах Godot
@@ -43,10 +43,13 @@ func _init() -> void:
 		var error := ResourceSaver.save(roster, path)
 		assert(error == OK, "не сохранён %s (%d)" % [path, error])
 
-	print("Сохранено юнитов: %d, наборов: %d" % [all.size(), rosters.size()])
+	print("Сохранено юнитов: %d, наборов: %d" % [
+		all.size(), rosters.size()
+	])
 	quit(0)
 
 
+# gdlint: ignore=function-arguments-number
 func _ability(
 	id: StringName,
 	display_name: String,
@@ -155,7 +158,9 @@ func _enemy() -> UnitStats:
 	])
 
 
-func _roster(id: StringName, title: String, difference: String, unit_ids: Array, by_id) -> RosterData:
+func _roster(
+	id: StringName, title: String, difference: String, unit_ids: Array, by_id
+) -> RosterData:
 	var built := RosterData.new()
 	built.id = id
 	built.title = title

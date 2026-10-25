@@ -47,7 +47,12 @@ func start() -> void:
 
 ## Публичная точка входа игрока: выполнить действие и передать ход.
 func perform(action: BattleAction) -> void:
-	assert(not finished, "действие после конца боя")
+	if finished:
+		# Действие после результата игнорируется (спека battle-demo-ui, «Экран
+		# результата»): состоянием нельзя пошевелиться из-под модалки. `assert`
+		# для этого не годился — в релизной сборке он вырезается, и ход всё же
+		# менял бы бой.
+		return
 	_execute(action)
 	if finished:
 		return
@@ -71,8 +76,8 @@ func allies_of(unit: BattleUnit) -> Array[BattleUnit]:
 	return alive(unit.side)
 
 
-## &"ready" | &"cost" | &"cooldown" | &"no_target" — причина недоступности
-## показывает панель (спека battle-demo-ui).
+## &"ready" | &"cost" | &"cooldown" | &"no_target" | &"stun" — причина
+## недоступности показывает панель (спека battle-demo-ui).
 func ability_state(unit: BattleUnit, ability: Ability) -> StringName:
 	if unit.has_status(&"stun"):
 		return &"stun"

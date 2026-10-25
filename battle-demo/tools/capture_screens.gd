@@ -1,6 +1,6 @@
 extends Node
 
-# [AI]: сгенерировано по задаче 9.10 tasks.md, проверено человеком.
+# [AI]: сгенерировано по задаче 9.10 tasks.md.
 #
 # Съёмка четырёх состояний двух наборов (спека `battle-demo-ui`, «Кадры
 # приёмки»): выбор набора, старт, середина, результат → 8 кадров в
@@ -36,7 +36,7 @@ func _ready() -> void:
 		# Кадр выбора снимается на каждый набор со своим выделением: имя файла
 		# обязано читаться как `<roster>_<state>` (спека), а игроку в этом кадре
 		# видно, какой набор он подтверждает.
-		var choice: RosterSelect = load("res://scenes/roster_select.tscn").instantiate()
+		var choice: RosterSelect = load(DemoFlow.ROSTER_SCENE).instantiate()
 		_stage.add_child(choice)
 		choice.select(roster)
 		await _shot("%s_select" % roster, choice)

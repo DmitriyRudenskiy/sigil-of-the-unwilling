@@ -33,7 +33,7 @@ date: 2026-10-25
 | 11 | Смертельный удар обнуляет HP и помечает мёртвым | `test_lethal_hit_zeroes_hp_and_marks_dead` |
 | 12 | Противник ходит сам, без ввода игрока: готовая способность, откат на атаку, выбор слабого, пропуск оглушённым | `test_enemy_acts_without_player_input`, `test_enemy_uses_ready_ability`, `test_enemy_falls_back_to_attack_without_focus`, `test_enemy_targets_weakest_player_unit`, `test_stunned_enemy_passes` |
 | 13 | Исход: победа/поражение/пат, очередь после конца останавливается | `test_victory_when_no_enemies_left`, `test_defeat_when_no_player_units_left`, `test_queue_stops_after_battle_ended`, `test_stalemate_guard_reports_no_result` |
-| 14 | Экран результата появляется и закрывает ввод боя | `test_result_screen_appears_with_the_outcome`, `test_no_battle_actions_after_the_result` |
+| 14 | Экран результата появляется, ввод боя закрыт, состояние за модалкой не двигается | `test_result_screen_appears_with_the_outcome`, `test_no_battle_actions_after_the_result`, `test_action_after_the_result_changes_nothing` |
 | 15 | Один и тот же бой двумя наборами идёт по одним правилам | `test_same_battle_with_two_rosters`, `test_designed_pair_plays_by_the_same_rules` |
 | 16 | Тот же сид — тот же бой целиком; другой сид — другие броски | `test_same_seed_reproduces_the_whole_battle`, `test_different_seed_changes_damage_draw`, `test_battle_actually_happened` |
 | 17 | Пока игрок выбирает, мир стоит; меняется только по подтверждённому выбору | `test_world_frozen_while_choosing`, `test_world_changes_only_on_confirmed_choice` |
@@ -55,8 +55,7 @@ date: 2026-10-25
 | Полоса противника не отличалась от своей (10.16) | `test_enemy_bars_are_a_different_colour` |
 | Отметка карточки текущего юнита нечем было читать (10.18) | `test_the_current_card_is_outlined_in_gold` |
 | Полоса порядка не убирала павших; команды жили после конца боя | `test_dead_units_leave_the_order_strip`, `test_no_commands_once_the_battle_is_over` |
-| Клик цели попадал по рамке карточки, а не по спрайту (10.16) | `test_click_on_the_figure_hits_the_figure_not_the_frame` |
-| Кадр приёмки был 1920×1027 вместо 1920×1080 (10.17) | `test_the_frame_is_exactly_the_specified_size` |
+| Действие после финала меняло бой (в релизе `assert` вырезается) — ревью 11.2 | `test_action_after_the_result_changes_nothing` |
 | Подпись команды шире кнопки — текст лез на рамку (10.19) | `test_commands_stand_clear_of_the_field` (ширина надписи влезает в `BUTTON_SIZE` с полями) |
 | Обесцвечивание спрайта запаздывало на кадр от полосы (10.20) | `test_the_fallen_sprite_is_desaturated_at_once` |
 | После конца боя у края висела сирота «бой окончен» (10.21) | `test_no_commands_once_the_battle_is_over` (команд 0 и `reason` скрыт) |
@@ -72,6 +71,7 @@ date: 2026-10-25
 | Пробел | Чем не является | Что нужно |
 | --- | --- | --- |
 | Ветка «мало воли» в панели команд (`cost` → кнопка недоступна) | кулдаун-ветка закрыта `test_ability_button_goes_dark_on_cooldown`, `test_ability_requires_focus` закрывает модель | тест на `legal_actions`/панель при `focus < cost` — одна кнопка, тот же механизм, что у кулдауна |
+| Размер кадра приёмки ровно 1920×1080 | тестом не проверяется: это свойство съёмки, а не модели | мера: `tools/capture_screens.tscn` → восемь строк `→ OK` с размером (журнал `ui-review-2026-10-25.md`) |
 | Раскладка кадров (пересечения, обрезка) | тестом не проверяется: это свойство кадра, а не модели | процедура: `tools/capture_screens.tscn` → `tools/ui_read_judge.py` → вердикт в тред. Геометрия, вынесенная в константы, при этом закреплена тестами из §2 |
 | Звук, playtest, «ощущение» | нечем снять на этой машине | отложено владельцем (D-185): кадр — да, звук — нет |
 
@@ -87,7 +87,8 @@ date: 2026-10-25
 | `95589ad2` — враг-волк, пять треков | 88 | 0 |
 | `74fe0668` — путь игрока + приёмка UI (10.10–10.14) | 98 | +10 |
 | `889ab6d3` — панель поверженного, метка после боя, размер кадра (10.15–10.17) | 100 | +2 |
-| рабочее дерево (10.18–10.21) | **106** | **+6** |
+| рабочее дерево (10.18–10.21) | 106 | +6 |
+| ревью диффа (11.2) — guard вместо `assert` в `perform` | **107** | **+1** |
 
 Нетто фазы 9–10: **+23 / −0** (83 → 106). Каждый новый кейс закрывает
 конкретное отклонение read-агента или слепую зону smoke-прогона (см. §2).

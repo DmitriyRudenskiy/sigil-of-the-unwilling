@@ -112,8 +112,3 @@ func deal_damage(amount: int) -> void:
 	hp = clampi(hp - maxi(0, amount), 0, max_hp())
 	if hp == 0:
 		died = true
-
-
-func heal(amount: int) -> void:
-	if is_alive():
-		hp = mini(max_hp(), hp + maxi(0, amount))

@@ -1,6 +1,6 @@
 class_name BattleResult extends CanvasLayer
 
-# [AI]: сгенерировано по задаче 9.7 tasks.md, проверено человеком.
+# [AI]: сгенерировано по задаче 9.7 tasks.md.
 #
 # Экран результата (спека `battle-demo-ui`, «Экран результата»): исход, число
 # ходов и два выхода — повтор того же набора и смена набора. Лежит слоем
@@ -9,7 +9,7 @@ class_name BattleResult extends CanvasLayer
 #
 # Боевые действия после результата не гасятся здесь — их не предлагает HUD
 # (`refresh` снимает кнопки, когда бой окончен), а `CombatState.perform` на
-# финише утверждает. Экран лишь то, что видит игрок.
+# финише молча возвращает управление. Экран лишь то, что видит игрок.
 
 signal replay
 signal change_roster
@@ -19,7 +19,6 @@ const TEXT := Color(0.93, 0.9, 0.84)
 const MUTED := Color(0.66, 0.64, 0.6)
 const FONT := 24
 const FONT_HEAD := 64
-const ROSTER_SCENE := "res://scenes/roster_select.tscn"
 
 var _head := Label.new()
 var _note := Label.new()

@@ -1,6 +1,6 @@
 #extends GdUnitTestSuite
 # tests/unit/combat/test_determinism.gd
-# [AI]: сгенерировано по задаче 4.7 tasks.md, проверено человеком.
+# [AI]: сгенерировано по задаче 4.7 tasks.md.
 # Детерминизм: тот же seed и тот же ввод дают тот же бой.
 
 extends GdUnitTestSuite

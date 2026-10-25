@@ -1,0 +1,22 @@
+[kit ] extract archer/bow → archer_bow.png (1024, 1024) за 72 c
+[kit ] merge archer шаг 1 → archer_merge1.png (1024, 1024) за 51 c
+[comp] archer archer_composed.png → /Users/user/sigil-of-the-unwilling/tmp/shots/kit-archer.png
+[kit ] extract barbarian/axe → barbarian_axe.png (1024, 1024) за 42 c
+[kit ] merge barbarian шаг 1 → barbarian_merge1.png (1024, 1024) за 48 c
+[comp] barbarian barbarian_composed.png → /Users/user/sigil-of-the-unwilling/tmp/shots/kit-barbarian.png
+[kit ] extract cutthroat/dagger_r → cutthroat_dagger_r.png (1024, 1024) за 39 c
+[kit ] extract cutthroat/dagger_l → cutthroat_dagger_l.png (1024, 1024) за 0 c
+[kit ] merge cutthroat шаг 1 → cutthroat_merge1.png (1024, 1024) за 48 c
+[kit ] merge cutthroat шаг 2 → cutthroat_merge2.png (1024, 1024) за 48 c
+[comp] cutthroat cutthroat_composed.png → /Users/user/sigil-of-the-unwilling/tmp/shots/kit-cutthroat.png
+[kit ] extract knight/mace → knight_mace.png (1024, 1024) за 66 c
+[kit ] extract knight/shield → knight_shield.png (1024, 1024) за 69 c
+[kit ] merge knight шаг 1 → knight_merge1.png (1024, 1024) за 51 c
+[kit ] merge knight шаг 2 → knight_merge2.png (1024, 1024) за 48 c
+[comp] knight knight_composed.png → /Users/user/sigil-of-the-unwilling/tmp/shots/kit-knight.png
+[kit ] extract spearman/spear → spearman_spear.png (1024, 1024) за 75 c
+[kit ] merge spearman шаг 1 → spearman_merge1.png (1024, 1024) за 51 c
+[comp] spearman spearman_composed.png → /Users/user/sigil-of-the-unwilling/tmp/shots/kit-spearman.png
+[kit ] extract wizard/staff → wizard_staff.png (1024, 1024) за 75 c
+[kit ] merge wizard шаг 1 → wizard_merge1.png (1024, 1024) за 48 c
+[comp] wizard wizard_composed.png → /Users/user/sigil-of-the-unwilling/tmp/shots/kit-wizard.png

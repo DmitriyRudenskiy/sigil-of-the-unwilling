@@ -112,5 +112,93 @@
       ],
       "_": "образец походки владельца assets/reference/walk-sample.png, лист 5×5; четыре равноотстоящие клетки"
     }
+  },
+  "kit": {
+    "_comment": "Собранный кадр персонажа (D17, задача 6.16). Цепочка владельца 2026-10-25: extract.<имя>.prompt — вырезка ОДНОГО предмета с портрета на белый фон (04_weapon_extract), merge.<имя>.prompt — склейка предмета с A-pose-кадром и перерисовкой кистей в захват (05_weapon_merge); предметов несколько — несколько прогонов подряд, база следующего = результат предыдущего. Пиксельной раскладки больше нет: позицию, масштаб и захват задаёт промпт. priest, sorcerer, stormmage — без физического оружия.",
+    "archer": {
+      "extract": {
+        "bow": {
+          "prompt": "Extract ONLY the recurve bow from the input image. Remove the character, hands, fingers, arms, and all background. Reconstruct the parts of the weapon hidden behind the hands so the handle/shaft is complete, continuous, and has no holes or missing sections. Preserve only real design holes that are part of the weapon. Place the full weapon centered, not cropped, in orthographic front view, on a pure white background, no shadow, no reflection, no border, no text, no watermark. Clean game item card asset, sharp edges, high resolution, preserve original colors and materials."
+        }
+      },
+      "merge": {
+        "bow": {
+          "prompt": "Redraw the character's arms and hands to firmly grip the recurve bow. Hold the bow upright in the left hand at its grip, the middle of the riser; the right hand stays empty at his side. Fingers must wrap tightly around the grip, thumb visible on the near side, correct occlusion. Match the weapon's scale, perspective, and rotation exactly to the hands. Remove the weapon's white background completely. Preserve the original weapon design, colors, and materials. Add realistic contact shadows between hands and weapon. Keep the character's face, identity, outfit, and green background unchanged."
+        }
+      }
+    },
+    "barbarian": {
+      "extract": {
+        "axe": {
+          "prompt": "Extract ONLY the two-handed axe from the input image. Remove the character, hands, fingers, arms, and all background. Reconstruct the parts of the weapon hidden behind the hands so the handle/shaft is complete, continuous, and has no holes or missing sections. Preserve only real design holes that are part of the weapon. Place the full weapon centered, not cropped, in orthographic front view, on a pure white background, no shadow, no reflection, no border, no text, no watermark. Clean game item card asset, sharp edges, high resolution, preserve original colors and materials."
+        }
+      },
+      "merge": {
+        "axe": {
+          "prompt": "Redraw the character's arms and hands to firmly grip the two-handed axe. He carries the axe over his right shoulder: the right hand grips the haft near its middle, the left hand grips the lower end of the haft, the blade head above the shoulder. Fingers must wrap tightly around the grip, thumb visible on the near side, correct occlusion. Match the weapon's scale, perspective, and rotation exactly to the hands. Remove the weapon's white background completely. Preserve the original weapon design, colors, and materials. Add realistic contact shadows between hands and weapon. Keep the character's face, identity, outfit, and green background unchanged."
+        }
+      }
+    },
+    "cutthroat": {
+      "extract": {
+        "dagger_r": {
+          "prompt": "Extract ONLY the short dagger from the input image. Remove the character, hands, fingers, arms, and all background. Reconstruct the parts of the weapon hidden behind the hands so the handle/shaft is complete, continuous, and has no holes or missing sections. Preserve only real design holes that are part of the weapon. Place the full weapon centered, not cropped, in orthographic front view, on a pure white background, no shadow, no reflection, no border, no text, no watermark. Clean game item card asset, sharp edges, high resolution, preserve original colors and materials."
+        },
+        "dagger_l": {
+          "prompt": "Extract ONLY the short dagger from the input image. Remove the character, hands, fingers, arms, and all background. Reconstruct the parts of the weapon hidden behind the hands so the handle/shaft is complete, continuous, and has no holes or missing sections. Preserve only real design holes that are part of the weapon. Place the full weapon centered, not cropped, in orthographic front view, on a pure white background, no shadow, no reflection, no border, no text, no watermark. Clean game item card asset, sharp edges, high resolution, preserve original colors and materials."
+        }
+      },
+      "merge": {
+        "dagger_r": {
+          "prompt": "Redraw the character's arms and hands to firmly grip the short dagger. The right hand grips this dagger by the handle down at his side, blade pointing down and slightly outward; the left hand stays empty. Fingers must wrap tightly around the grip, thumb visible on the near side, correct occlusion. Match the weapon's scale, perspective, and rotation exactly to the hands. Remove the weapon's white background completely. Preserve the original weapon design, colors, and materials. Add realistic contact shadows between hands and weapon. Keep the character's face, identity, outfit, and green background unchanged."
+        },
+        "dagger_l": {
+          "prompt": "Redraw the character's arms and hands to firmly grip the short dagger. The left hand grips this second dagger by the handle down at his side, blade pointing down and slightly outward; the right hand keeps gripping its own dagger. Fingers must wrap tightly around the grip, thumb visible on the near side, correct occlusion. Match the weapon's scale, perspective, and rotation exactly to the hands. Remove the weapon's white background completely. Preserve the original weapon design, colors, and materials. Add realistic contact shadows between hands and weapon. Keep the character's face, identity, outfit, and green background unchanged."
+        }
+      }
+    },
+    "knight": {
+      "extract": {
+        "mace": {
+          "prompt": "Extract ONLY the war mace from the input image. Remove the character, hands, fingers, arms, and all background. Reconstruct the parts of the weapon hidden behind the hands so the handle/shaft is complete, continuous, and has no holes or missing sections. Preserve only real design holes that are part of the weapon. Place the full weapon centered, not cropped, in orthographic front view, on a pure white background, no shadow, no reflection, no border, no text, no watermark. Clean game item card asset, sharp edges, high resolution, preserve original colors and materials."
+        },
+        "shield": {
+          "prompt": "Extract ONLY the kite shield from the input image. Remove the character, hands, fingers, arms, and all background. Reconstruct the parts of the weapon hidden behind the hands so the handle/shaft is complete, continuous, and has no holes or missing sections. Preserve only real design holes that are part of the weapon. Place the full weapon centered, not cropped, in orthographic front view, on a pure white background, no shadow, no reflection, no border, no text, no watermark. Clean game item card asset, sharp edges, high resolution, preserve original colors and materials."
+        }
+      },
+      "merge": {
+        "mace": {
+          "prompt": "Redraw the character's arms and hands to firmly grip the war mace. The right hand grips the mace by its haft at his side, the head of the mace just above the fist, the chain loose; the left hand stays empty. Fingers must wrap tightly around the grip, thumb visible on the near side, correct occlusion. Match the weapon's scale, perspective, and rotation exactly to the hands. Remove the weapon's white background completely. Preserve the original weapon design, colors, and materials. Add realistic contact shadows between hands and weapon. Keep the character's face, identity, outfit, and green background unchanged."
+        },
+        "shield": {
+          "prompt": "Redraw the character's arms and hands to firmly grip the kite shield. The left forearm carries the shield: the left hand grips the straps behind it, the shield face turned to the viewer, its top near the shoulder; the right hand keeps gripping its mace. Fingers must wrap tightly around the grip, thumb visible on the near side, correct occlusion. Match the weapon's scale, perspective, and rotation exactly to the hands. Remove the weapon's white background completely. Preserve the original weapon design, colors, and materials. Add realistic contact shadows between hands and weapon. Keep the character's face, identity, outfit, and green background unchanged."
+        }
+      }
+    },
+    "spearman": {
+      "extract": {
+        "spear": {
+          "prompt": "Extract ONLY the spear from the input image. Remove the character, hands, fingers, arms, and all background. Reconstruct the parts of the weapon hidden behind the hands so the handle/shaft is complete, continuous, and has no holes or missing sections. Preserve only real design holes that are part of the weapon. Place the full weapon centered, not cropped, in orthographic front view, on a pure white background, no shadow, no reflection, no border, no text, no watermark. Clean game item card asset, sharp edges, high resolution, preserve original colors and materials."
+        }
+      },
+      "merge": {
+        "spear": {
+          "prompt": "Redraw the character's arms and hands to firmly grip the spear. He holds the spear upright beside him: the right hand grips the shaft at hip height, the shaft stays fully visible and unbroken from the steel head above his shoulder down to the butt on the ground in front of his feet, the shaft in front of the body, never behind the armour. Fingers must wrap tightly around the grip, thumb visible on the near side, correct occlusion. Match the weapon's scale, perspective, and rotation exactly to the hands. Remove the weapon's white background completely. Preserve the original weapon design, colors, and materials. Add realistic contact shadows between hands and weapon. Keep the character's face, identity, outfit, and green background unchanged."
+        }
+      },
+      "seed": 50
+    },
+    "wizard": {
+      "extract": {
+        "staff": {
+          "prompt": "Extract ONLY the crystal staff from the input image. Remove the character, hands, fingers, arms, and all background. Reconstruct the parts of the weapon hidden behind the hands so the handle/shaft is complete, continuous, and has no holes or missing sections. Preserve only real design holes that are part of the weapon. Place the full weapon centered, not cropped, in orthographic front view, on a pure white background, no shadow, no reflection, no border, no text, no watermark. Clean game item card asset, sharp edges, high resolution, preserve original colors and materials."
+        }
+      },
+      "merge": {
+        "staff": {
+          "prompt": "Redraw the character's arms and hands to firmly grip the crystal staff. The left hand grips the staff at shoulder height, the staff upright, the crystal above the hand and the ferrule on the ground; the right hand stays empty. Fingers must wrap tightly around the grip, thumb visible on the near side, correct occlusion. Match the weapon's scale, perspective, and rotation exactly to the hands. Remove the weapon's white background completely. Preserve the original weapon design, colors, and materials. Add realistic contact shadows between hands and weapon. Keep the character's face, identity, outfit, and green background unchanged."
+        }
+      }
+    }
   }
 }

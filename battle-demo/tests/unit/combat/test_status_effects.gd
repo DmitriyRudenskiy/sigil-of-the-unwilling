@@ -1,6 +1,6 @@
 #extends GdUnitTestSuite
 # tests/unit/combat/test_status_effects.gd
-# [AI]: сгенерировано по задаче 4.4 tasks.md, проверено человеком.
+# [AI]: сгенерировано по задаче 4.4 tasks.md.
 # Статусы: длительность в ходах владельца, тики, ненакладывание.
 
 extends GdUnitTestSuite

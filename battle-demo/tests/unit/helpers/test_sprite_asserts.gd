@@ -1,6 +1,6 @@
 #extends GdUnitTestSuite
 # tests/unit/helpers/test_sprite_asserts.gd
-# [AI]: задача 1.7 tasks.md, проверено человеком.
+# [AI]: задача 1.7 tasks.md.
 # Хелпер проверки кадров обязан находить все три дефекта и молчать на годном файле.
 
 extends GdUnitTestSuite
@@ -25,7 +25,8 @@ func test_empty_frame_is_reported() -> void:
 
 
 func test_missing_file_is_reported() -> void:
-	assert_str(";".join(SpriteAsserts.check_frame("user://net-takogo-fayla.png"))).contains("нет файла")
+	var problems := ";".join(SpriteAsserts.check_frame("user://net-takogo-fayla.png"))
+	assert_str(problems).contains("нет файла")
 
 
 func _write(format: int, side: int, color: Color) -> PackedStringArray:

@@ -7,9 +7,8 @@ class_name BattleScreen extends Node2D
 ## ядра, поэтому рассинхрон ловится тестом, а не кадром: после любого
 ## `action_performed` полосы перерисовываются в том же кадре.
 ##
-## Очередь ходов, панель способностей и экран результата — следующие задачи
-## (9.5–9.7); здесь то, без чего бой не виден: две линии, метка активного юнита
-## и его имя.
+## Очередь ходов, панель способностей и экран результата подключены здесь же
+## (9.5–9.7): экран только подписывает `CombatState` своими узлами.
 
 ## Метрики читаемости зафиксированы в `docs/ui-spec.md` (96×10 px, кегль ≥ 24).
 const BAR_SIZE := Vector2(96, 10)
@@ -60,7 +59,7 @@ func _ready() -> void:
 	)
 	result_view.change_roster.connect(
 		func() -> void:
-			get_tree().change_scene_to_file("res://scenes/roster_select.tscn")
+			get_tree().change_scene_to_file(DemoFlow.ROSTER_SCENE)
 	)
 	# Экран запускается сам: игрок пришёл сюда с выбора набора, а не из теста.
 	if combat == null:

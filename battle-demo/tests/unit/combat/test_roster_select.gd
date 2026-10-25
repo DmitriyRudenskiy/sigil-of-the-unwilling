@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 # tests/unit/combat/test_roster_select.gd
-# [AI]: сгенерировано по задаче 9.2 tasks.md, проверено человеком.
+# [AI]: сгенерировано по задаче 9.2 tasks.md.
 #
 # Выбор набора: отличия видно до выбора (спека `battle-demo-ui`), выбор живёт в
 # маршруте демо, переход — одна клавиатура.

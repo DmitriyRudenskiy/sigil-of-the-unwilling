@@ -1,6 +1,6 @@
 #extends GdUnitTestSuite
 # tests/unit/combat/test_roster_invariance.gd
-# [AI]: задача 4.11 tasks.md, проверено человеком.
+# [AI]: задача 4.11 tasks.md.
 # Смена набора не меняет правил: один и тот же бой, сыгранный двумя наборами с
 # одним seed и одним скриптованным вводом (пропуск), обязан дать тот же порядок
 # ходов по инициативе и те же числа урона.
@@ -12,8 +12,10 @@ func test_same_battle_with_two_rosters() -> void:
 	# Наборы различаются идентификатором и одним юнитом с одинаковыми
 	# характеристиками: правила не имеют права это заметить.
 	var shared := BattleFactory.stats(&"hero", 120, 30, 5, 20)
-	var a := _play(BattleFactory.roster([shared, BattleFactory.stats(&"extra_a", 90, 15, 8, 12)], &"a"))
-	var b := _play(BattleFactory.roster([shared, BattleFactory.stats(&"extra_b", 90, 15, 8, 12)], &"b"))
+	var extra_a := BattleFactory.stats(&"extra_a", 90, 15, 8, 12)
+	var extra_b := BattleFactory.stats(&"extra_b", 90, 15, 8, 12)
+	var a := _play(BattleFactory.roster([shared, extra_a], &"a"))
+	var b := _play(BattleFactory.roster([shared, extra_b], &"b"))
 	assert_str(a["order"]).is_not_equal("")
 	assert_str(b["order"]).is_equal(a["order"])
 	assert_str(b["damage"]).is_equal(a["damage"])
@@ -51,7 +53,8 @@ func _play(roster: RosterData) -> Dictionary:
 		combat.perform(BattleAction.skip(combat.current))
 	for action in combat.history:
 		for uid in action.damage:
-			damage.append("%s>%s:%d" % [_name(action.actor), uid.replace("extra_a", "extra_b"), action.damage[uid]])
+			var who: String = uid.replace("extra_a", "extra_b")
+			damage.append("%s>%s:%d" % [_name(action.actor), who, action.damage[uid]])
 	return {
 		"order": ",".join(order),
 		"damage": ",".join(damage),

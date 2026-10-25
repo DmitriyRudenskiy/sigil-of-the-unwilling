@@ -1,6 +1,6 @@
 #extends GdUnitTestSuite
 # tests/unit/combat/test_enemy_ai.gd
-# [AI]: сгенерировано по задаче 4.8 tasks.md, проверено человеком.
+# [AI]: сгенерировано по задаче 4.8 tasks.md.
 # ИИ противника: ход без игрока, выбор способности, цель по слабости, пропуск под stun.
 
 extends GdUnitTestSuite

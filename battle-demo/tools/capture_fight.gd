@@ -33,5 +33,7 @@ func _ready() -> void:
 			await get_tree().process_frame
 		var image: Image = get_viewport().get_texture().get_image()
 		var error := image.save_png("%s/fight-%d.png" % [OUT, action])
-		print("fight-%d → %s (%dx%d)" % [action, error_string(error), image.get_width(), image.get_height()])
+		print("fight-%d → %s (%dx%d)" % [
+    action, error_string(error), image.get_width(), image.get_height()
+])
 	get_tree().quit(0)

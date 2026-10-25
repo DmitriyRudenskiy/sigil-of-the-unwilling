@@ -37,7 +37,7 @@ const BUTTON_SIZE := Vector2(264, 64)
 const HP_WIDTH := 242.0
 const VIEWPORT_WIDTH := 1920.0
 ## Команды — колонкой в правом поле. Правый край сетки — x 1380 (клетка col 7),
-## но фигура в масштабе 2.2 шире клетки и доходит до ~1500, поэтому колонка
+## но фигура в масштабе 1.1 шире клетки и доходит до ~1590, поэтому колонка
 ## стоит у правого края вьюпорта: строкой внизу и ближе к полю кнопки ложились
 ## на шестиугольники и на волков (задача 10.13).
 ## Колонка команд прижата к правому краю: правый край кнопки — 24 px от края
@@ -239,7 +239,7 @@ func _commands_for(unit: BattleUnit) -> void:
 	at.y += COMMAND_STEP
 	var menu := _button("Меню", &"__menu", at)
 	menu.pressed.connect(
-		func() -> void: get_tree().change_scene_to_file("res://scenes/roster_select.tscn")
+		func() -> void: get_tree().change_scene_to_file(DemoFlow.ROSTER_SCENE)
 	)
 	commands.add_child(menu)
 

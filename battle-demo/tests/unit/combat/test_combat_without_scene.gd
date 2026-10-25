@@ -1,6 +1,6 @@
 #extends GdUnitTestSuite
 # tests/unit/combat/test_combat_without_scene.gd
-# [AI]: сгенерировано по задаче 4.9 tasks.md, проверено человеком.
+# [AI]: сгенерировано по задаче 4.9 tasks.md.
 # Модель не зависит от отображения: бой прогоняется без единого узла, и в слоях
 # scripts/combat нет ни одной ссылки на Node, сцены или дерево.
 
