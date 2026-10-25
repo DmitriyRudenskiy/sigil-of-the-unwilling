@@ -9,8 +9,15 @@ var role: ScenarioRole = null
 var class_id: String = ""
 var goal_reached_turn := -1
 var extracted_total := 0
+## Счётчик УЗЛОВ, а не единиц добычи (задача 4.2, T-209). Сигнал
+## `resource_extracted` приносит `amount = ResourceType.pickup_amount`: у золота это
+## **50 единиц на один узел** при редкой цели «10». Без пары «узел/единицы» строка
+## матрицы не отвечает на вопрос, собрал ли Собиратель десять ресурсов или нашёл одно
+## золотое месторождение,
+var extracted_nodes := 0
 var _rare_ids: Array = []
 var _rare_count := 0
+var _rare_nodes := 0
 
 func _ready() -> void:
 	GameEventBus.resource_extracted.connect(_on_resource_extracted)
@@ -28,8 +35,7 @@ func start_scenario(world: Node, p_seed: int, role_id: String, p_class_id: Strin
 		return {"error": "неизвестная роль: %s" % role_id}
 	var target: Dictionary = role.target
 	_rare_ids = target.get("rare_ids", [])
-	_rare_count = 0
-	extracted_total = 0
+	_reset_extraction_counters()
 	goal_reached_turn = -1
 	var r: Dictionary = start_probe(world, p_seed)
 	if r.get("error") != null or r.get("status") != "probe_started":
@@ -78,10 +84,26 @@ static func make_role(role_id: String, target: Dictionary) -> ScenarioRole:
 func rare_count() -> int:
 	return _rare_count
 
+## Сброс счётчиков добычи. Вынесен в метод ради теста: матрица гоняет 11 профилей
+## в одном процессе, и непройденный сброс означал бы, что второй класс начинает забег
+## с чужой добычей (тот же класс дефекта, что переживший teardown бой, T-204).
+func _reset_extraction_counters() -> void:
+	_rare_count = 0
+	_rare_nodes = 0
+	extracted_total = 0
+	extracted_nodes = 0
+
+## Сколько РАЗНЫХ узлов редкого типа реально снято со спавнера (задача 4.2: отчёт
+## обязан различать узлы и единицы — цель роли считается в единицах).
+func rare_nodes() -> int:
+	return _rare_nodes
+
 func _on_resource_extracted(_cell: Vector2i, resource_id: StringName, amount: int) -> void:
 	extracted_total += amount
+	extracted_nodes += 1
 	if _rare_ids.has(ResourceType.from_name(resource_id)):
 		_rare_count += amount
+		_rare_nodes += 1
 
 ## Ранний финиш: цель роли достигнута (проверяется перед каждым шагом).
 ## Хук act: роль сама обрабатывает кадр (базовый цикл не вызывается).

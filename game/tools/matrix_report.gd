@@ -7,6 +7,9 @@ extends SceneTree
 ##   godot --headless --path game -s res://tools/matrix_report.gd -- <role> [turns] [class,...]
 ##   godot --headless --path game -s res://tools/matrix_report.gd -- trader 90
 ##   godot --headless --path game -s res://tools/matrix_report.gd -- trader 90 druid,fighter
+## Повторный прогон каждого профиля тем же seed (проверка детерминированности, задачи
+## 4.3/5.3/7.3): `MATRIX_REPEAT=2` перед тем же вызовом — печатает `MATRIX-DETERMINISM`.
+## Повторные прогоны в сводку не входят.
 ## Трасса медленных ходов (для ячеек, упирающихся в предохранитель): `MATRIX_TRACE=1`,
 ## частота снимков — `MATRIX_BEAT_FRAMES` (по умолчанию 1000 кадров хода).
 ##
@@ -49,6 +52,13 @@ const SLOW_TURN_FRAMES := 400
 ## (не `const`: значение читается из окружения, а `const` требует константного выражения)
 var BEAT_FRAMES := 1000 if OS.get_environment("MATRIX_BEAT_FRAMES") == "" else maxi(10, int(OS.get_environment("MATRIX_BEAT_FRAMES")))
 
+## Сколько раз прогнать каждый профиль в одном процессе (`MATRIX_REPEAT=2`). Задачи
+## 4.3, 5.3 и 7.3 требуют «проверить идентичность повторного прогона одного seed», и
+## проверять это обязан инструмент, а не память оператора: seed профиля детерминирован
+## (`ScenarioTargets.seed_for(class, role)`), поэтому расхождение строк — это либо ГСЧ
+## вне сида, либо состояние, пережившее teardown (класс T-204).
+var REPEAT := maxi(1, int(OS.get_environment("MATRIX_REPEAT")))
+
 var _rows: Array[Dictionary] = []
 
 
@@ -76,8 +86,31 @@ func _initialize() -> void:
 	for class_id in classes:
 		var row := await _run_profile(role_id, class_id, turns)
 		print("MATRIX|" + _row_to_line(row))
+		if REPEAT > 1:
+			await _determinism_check(role_id, class_id, turns, row)
 	print("MATRIX-SUMMARY|" + _row_to_line(_summarize(role_id, turns)))
 	quit(0)
+
+
+## Повторные прогоны того же seed и сравнение строк целиком (4.3/5.3/7.3). Сравнение —
+## по напечатанной строке, а не по полям: печатается именно она, и именно её переносят
+## в `tasks.md`. Повторные строки в сводку не попадают: сводка считается по первому прогону.
+func _determinism_check(role_id: String, class_id: String, turns: int, first: Dictionary) -> void:
+	var base := _row_to_line(first)
+	var hashes: PackedStringArray = PackedStringArray([base.md5_text().substr(0, 8)])
+	var same := true
+	for n in REPEAT - 1:
+		var again := await _run_profile(role_id, class_id, turns)
+		if not _rows.is_empty():
+			_rows.pop_back()  # повтор — не профиль: сводка остаётся по первому прогону
+		var line := _row_to_line(again)
+		hashes.append(line.md5_text().substr(0, 8))
+		if line != base:
+			same = false
+			print("MATRIX-DIFF|class=%s|run=%d" % [class_id, n + 2])
+			print("MATRIX-ROW-A|" + base)
+			print("MATRIX-ROW-B|" + line)
+	print("MATRIX-DETERMINISM|class=%s|runs=%d|same=%s|hashes=%s" % [class_id, REPEAT, str(same), ",".join(hashes)])
 
 
 func _run_profile(role_id: String, class_id: String, turns: int) -> Dictionary:
