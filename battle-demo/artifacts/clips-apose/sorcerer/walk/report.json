@@ -1,0 +1,35 @@
+{
+ "char": "sorcerer",
+ "anim": "walk",
+ "seed": 1106,
+ "mirror": true,
+ "length": 81,
+ "seconds": 63.4,
+ "corner_before_clip": [
+  15,
+  174,
+  0
+ ],
+ "audit": {
+  "frames": 81,
+  "motion_first_last": 33.8,
+  "sharpness_min": 1461.5,
+  "sharpness_median": 2055.4,
+  "pivot_slide_x": 4.2,
+  "pivot_sway_x": 6.5,
+  "contact_slide_x": 17.3,
+  "contact_sway_x": 94.5,
+  "feet_drift_x": 27.5,
+  "feet_drift_y": 16,
+  "chroma_pixels_kept": 0,
+  "chroma_share": 0.0,
+  "flat_white_share": 0.0
+ },
+ "subsampled": [
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/sorcerer/walk/frame_01.png",
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/sorcerer/walk/frame_19.png",
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/sorcerer/walk/frame_36.png",
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/sorcerer/walk/frame_54.png"
+ ],
+ "verdict": "годен: движение 33.8, резкость 1461.5/2055.4, снос ступней 17.3 px, хромакей 0, плоский белый 0.0%"
+}

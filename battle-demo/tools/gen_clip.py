@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 """Клип-путь кадров анимации (D15, задачи 6.11–6.15).
 
-Цепочка: 01b первый кадр (идентичность + поза через Union ControlNet) →
-02 хромакей `#00FF00` → 03 Wan 2.2 I2V (512×512, length=4n+1) → снятие хромакея
-локально (те же пороги, что `04_unkey_frames.json`) → прореживание до N кадров.
+Цепочка: 01b первый кадр (идентичность + поза через Union ControlNet; референс —
+собранный кадр D17) → локальная заливка фона хромакеем (`ensure_green_plate`,
+второго прогона модели нет) → 03 Wan 2.2 I2V (512×512, length=4n+1) →
+снятие зелёного локально (те же пороги, что `04_unkey_frames.json`) → прореживание
+до N кадров. Шага `02_chromakey_first_frame` больше нет (владелец, 2026-10-25):
+второй прогон модели ради `#00FF00` в углу не нужен, а сам угол нужен —
+замер по манифесту в `ensure_green_plate`. Кей терпимый (`g - max(r,b) > 60`).
 
 Workflow'ы — копия скилла `wan22-i2v-character-clip` (см. `workflows/README.md`).
-Только stdlib + PIL.
+Stdlib + PIL, numpy — внутри двух пиксельных функций (`unkey`, заливка фона).
 """
 import argparse
 import json
@@ -64,6 +68,54 @@ def fetch(comfy_url: str, images: list[dict], out_dir: Path) -> list[Path]:
         for image in images
         if Path(image["filename"]).suffix.lower() in IMAGE_SUFFIXES
     )
+
+
+def greenish(color) -> bool:
+    """Угол кадра — хромакей (тот же порог, что кей `g - max(r,b) > 60`, с запасом)."""
+    red, green, blue = color[0], color[1], color[2]
+    return green > 150 and green > max(red, blue) + 40
+
+
+def ensure_green_plate(frame: Path, floor: int = 170, spread: int = 30) -> bool:
+    """Фон первого кадра — залитый хромакей. Локально, без второго прогона модели.
+
+    Модель не обязана помнить про зелёный: по манифесту 2026-10-25 угол зелёный →
+    31 клип принят из 33, угол белый → 0 принят из 4, и все четыре отказа — «фон
+    не удалён, плоский белый 69–86% силуэта». Шаг `02_chromakey_first_frame`
+    (второй прогон модели) снят владельцем 2026-10-25, поэтому светлая связная
+    область от краёв кадра заливается `#00FF00` здесь и разрастается на 2 px —
+    иначе по силуэту остаётся светлый орез, который кей не берёт.
+
+    Возвращает True, если переливала (угол уже зелёный — файл не трогается).
+    """
+    import numpy as np
+
+    image = Image.open(frame).convert("RGB")
+    pixels = np.asarray(image, dtype="int16")
+    if greenish(pixels[0, 0]):
+        return False
+    # Светлое и почти бесцветное: белый, серый, кремовый фон студии. Тёмный контур
+    # персонажа для этого условия — стена, затопление через него не проходит.
+    light = ((pixels.min(axis=2) > floor)
+             & (pixels.max(axis=2) - pixels.min(axis=2) < spread))
+    filled = np.zeros_like(light)
+    filled[:3, :] = filled[-3:, :] = filled[:, :3] = filled[:, -3:] = True
+    filled &= light
+    while True:
+        grown = filled.copy()
+        grown[1:, :] |= filled[:-1, :]
+        grown[:-1, :] |= filled[1:, :]
+        grown[:, 1:] |= filled[:, :-1]
+        grown[:, :-1] |= filled[:, 1:]
+        grown &= light
+        if int(grown.sum()) == int(filled.sum()):
+            break
+        filled = grown
+    plate = np.asarray(Image.fromarray(np.uint8(filled) * 255)
+                       .filter(ImageFilter.MaxFilter(5))) > 0
+    out = np.where(plate[..., None], np.array(GREEN, dtype="int16"), pixels)
+    Image.fromarray(np.uint8(out), "RGB").save(frame)
+    return True
 
 
 def unkey(frame: Path, threshold: int = 60, grow: int = 2) -> Image.Image:
@@ -303,8 +355,8 @@ def verdict(report: dict) -> str:
     """Машинная проверка клипа (6.13) — до просмотра. Пороги по замерам 6.11."""
     audit = report["audit"]
     faults = []
-    if tuple(report["corner_before_clip"]) != GREEN:
-        faults.append("хромакей не залит: угол первого кадра не (0,255,0)")
+    if not greenish(report["corner_before_clip"]):
+        faults.append("фон первого кадра не залит хромакеем")
     if audit["motion_first_last"] < 2.0:
         faults.append("анимация не двинулась")
     if audit["sharpness_min"] < 0.7 * audit["sharpness_median"]:
@@ -312,7 +364,14 @@ def verdict(report: dict) -> str:
     # `turn` — поворот: нижняя точка силуэта при развороте уезжает (у рыцаря
     # прогона 2026-10-24 — на 105 px при ногах на месте), прокси опоры там не
     # работает. Для `turn` снос только сообщается.
-    if report["anim"] != "turn" and audit["contact_slide_x"] > 8:
+    # `walk` — шаг: ступня по определению путешествует по полу (замер 2026-10-25,
+    # 9 персонажей: contact_slide 44–140 px при pivot_slide 1.4–9.5, т.е. корпус
+    # не сходил с места). Шагом судим корпус по pivot_slide_x, иначе весь
+    # walk-цикл — ложный брак.
+    if report["anim"] == "walk":
+        if audit["pivot_slide_x"] > 24:
+            faults.append(f"корпус уехал ({audit['pivot_slide_x']} px за цикл)")
+    elif report["anim"] != "turn" and audit["contact_slide_x"] > 8:
         faults.append(f"ступни уехали по полу ({audit['contact_slide_x']} px за цикл)")
     if audit["chroma_share"] > 0.0005:
         faults.append(f"остался хромакей ({audit['chroma_pixels_kept']} px, "
@@ -446,7 +505,7 @@ def main() -> int:
     parser.add_argument("--comfy", default="http://192.168.0.230:8188")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--reuse", action="store_true",
-                        help="не перегенерировать: взять first_raw/first_chroma/raw/, что уже лежат")
+                        help="не перегенерировать: взять first_raw/raw/, что уже лежат")
     parser.add_argument("--reaudit", action="store_true",
                         help="то же, что --reuse, но вовсе без сервера: пересобрать кадры и "
                              "вердикт из raw/, что уже лежат (для смены порогов аудита)")
@@ -470,15 +529,14 @@ def main() -> int:
     out_dir = CLIPS / args.char / args.anim
     raw_dir = out_dir / "raw"
     first = out_dir / "first_raw.png"
-    chroma = out_dir / "first_chroma.png"
     timings: dict[str, float] = {}
 
     if args.reaudit:
         # Переаудит без сервера: кадры лежат, меняется только мера и вердикт.
         raw = sorted(path for path in raw_dir.glob("*")
                      if path.suffix.lower() in IMAGE_SUFFIXES)
-        if not (raw and chroma.exists()):
-            parser.error(f"{out_dir}: для переаудита нужны raw/ и first_chroma.png")
+        if not (raw and first.exists()):
+            parser.error(f"{out_dir}: для переаудита нужны raw/ и first_raw.png")
     else:
         prefix = f"sotu/{args.char}-{args.anim}"
         first_graph = load_workflow("01b_first_frame_pose_controlnet")
@@ -486,9 +544,6 @@ def main() -> int:
         set_inputs(first_graph, "5", image=upload_pose(spec, args, args.comfy))
         set_inputs(first_graph, "8", seed=seed)
         set_inputs(first_graph, "10", filename_prefix=f"{prefix}/01_first")
-
-        chroma_graph = load_workflow("02_chromakey_first_frame")
-        set_inputs(chroma_graph, "7", filename_prefix=f"{prefix}/02_chroma")
 
         clip_graph = load_workflow("03_wan22_i2v_512_frames")
         set_inputs(clip_graph, "6", text=args.prompt or spec["clip_prompt"][args.anim])
@@ -498,7 +553,7 @@ def main() -> int:
         set_inputs(clip_graph, "18", filename_prefix=f"{prefix}/03_frames/frame")
 
         if args.dry_run:
-            for name, graph in (("01b", first_graph), ("02", chroma_graph), ("03", clip_graph)):
+            for name, graph in (("01b", first_graph), ("03", clip_graph)):
                 print(f"--- {name}: узлов {len(graph)}")
             print(f"out: {out_dir}")
             return 0
@@ -508,19 +563,20 @@ def main() -> int:
         if not (reuse and first.exists()):
             images, timings["first_frame"] = run(args.comfy, first_graph, "01b")
             comfy.save_output(args.comfy, images[0], first)
-        if not (reuse and chroma.exists()):
-            set_inputs(chroma_graph, "1", image=comfy.upload(args.comfy, first, f"sotu-{args.char}-{args.anim}-start.png"))
-            images, timings["chromakey"] = run(args.comfy, chroma_graph, "02")
-            comfy.save_output(args.comfy, images[0], chroma)
+        if ensure_green_plate(first):
+            print(f"[plate] фон залит локально: {first}")
         raw = sorted(path for path in raw_dir.glob("*")
                      if path.suffix.lower() in IMAGE_SUFFIXES) if reuse else []
         if not raw:
+            # Клип на белом фоне завернётся в том же месте — не тратить I2V.
+            if not greenish(Image.open(first).convert("RGB").getpixel((0, 0))):
+                raise SystemExit(f"{out_dir}: фон первого кадра не залился хромакеем")
             shutil.rmtree(raw_dir, ignore_errors=True)
-            set_inputs(clip_graph, "5", image=comfy.upload(args.comfy, chroma, f"sotu-{args.char}-{args.anim}-chroma.png"))
+            set_inputs(clip_graph, "5", image=comfy.upload(args.comfy, first, f"sotu-{args.char}-{args.anim}-start.png"))
             images, timings["clip"] = run(args.comfy, clip_graph, "03", timeout=3600)
             raw = fetch(args.comfy, images, raw_dir)
 
-    corner = Image.open(chroma).convert("RGB").getpixel((0, 0))
+    corner = Image.open(first).convert("RGB").getpixel((0, 0))
 
     keyed_images = register([unkey(path) for path in raw])
     keyed = []
@@ -569,10 +625,22 @@ def character_of(spec: dict, char_id: str) -> dict:
 
 
 def upload_portrait(spec: dict, char: str, comfy_url: str) -> str:
-    portrait = ROOT / spec["portraits_dir"] / f"{char}.png"
-    if not portrait.exists():
-        raise SystemExit(f"нет кадра-источника {portrait}")
-    return comfy.upload(comfy_url, portrait, f"sotu-{char}.png")
+    """Референс `01b` — собранный кадр D17 (A-pose + лист экипировки).
+
+    Порядок: `assets/kit/<char>_composed.png` → `assets/a_pose/<char>.png`
+    (персонажи без физического оружия) → портрет. Портрет остаётся только
+    входом генерации A-pose: из него оружие уходит вместе с позой, а словами
+    оно не возвращается (распад предмета).
+    """
+    assets = ROOT / "battle-demo/assets"
+    for path in (assets / "kit" / f"{char}_composed.png",
+                 assets / "a_pose" / f"{char}.png",
+                 ROOT / spec["portraits_dir"] / f"{char}.png"):
+        if path.exists():
+            if path.parent != ROOT / spec["portraits_dir"]:
+                print(f"[ref ] {char}: {path.relative_to(ROOT)}", flush=True)
+            return comfy.upload(comfy_url, path, f"sotu-{char}.png")
+    raise SystemExit(f"нет ни собранного кадра, ни A-pose, ни портрета для {char}")
 
 
 def upload_pose(spec: dict, args, comfy_url: str) -> str:

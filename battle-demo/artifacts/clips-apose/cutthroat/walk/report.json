@@ -1,0 +1,35 @@
+{
+ "char": "cutthroat",
+ "anim": "walk",
+ "seed": 1108,
+ "mirror": false,
+ "length": 81,
+ "seconds": 0.0,
+ "corner_before_clip": [
+  5,
+  180,
+  20
+ ],
+ "audit": {
+  "frames": 81,
+  "motion_first_last": 40.4,
+  "sharpness_min": 2658.6,
+  "sharpness_median": 2978.5,
+  "pivot_slide_x": 2.7,
+  "pivot_sway_x": 8.8,
+  "contact_slide_x": 139.7,
+  "contact_sway_x": 192.3,
+  "feet_drift_x": 42.5,
+  "feet_drift_y": 19,
+  "chroma_pixels_kept": 0,
+  "chroma_share": 0.0,
+  "flat_white_share": 0.0029
+ },
+ "subsampled": [
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/cutthroat/walk/frame_01.png",
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/cutthroat/walk/frame_20.png",
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/cutthroat/walk/frame_40.png",
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/cutthroat/walk/frame_59.png"
+ ],
+ "verdict": "годен: движение 40.4, резкость 2658.6/2978.5, снос ступней 139.7 px, хромакей 0, плоский белый 0.3%"
+}

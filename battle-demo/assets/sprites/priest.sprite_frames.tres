@@ -1,32 +1,36 @@
 [gd_resource type="SpriteFrames" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/sprites/priest/attack/00.png" id="1_y1e17"]
-[ext_resource type="Texture2D" path="res://assets/sprites/priest/attack/01.png" id="2_27iip"]
-[ext_resource type="Texture2D" path="res://assets/sprites/priest/attack/02.png" id="3_rea7l"]
-[ext_resource type="Texture2D" path="res://assets/sprites/priest/attack/03.png" id="4_fc6fg"]
-[ext_resource type="Texture2D" path="res://assets/sprites/priest/idle/00.png" id="5_yqvb4"]
-[ext_resource type="Texture2D" path="res://assets/sprites/priest/idle/01.png" id="6_wjroi"]
-[ext_resource type="Texture2D" path="res://assets/sprites/priest/idle/02.png" id="7_5l1ai"]
-[ext_resource type="Texture2D" path="res://assets/sprites/priest/idle/03.png" id="8_oqlr0"]
-[ext_resource type="Texture2D" path="res://assets/sprites/priest/turn/00.png" id="9_v8b17"]
-[ext_resource type="Texture2D" path="res://assets/sprites/priest/turn/01.png" id="10_2xybw"]
-[ext_resource type="Texture2D" path="res://assets/sprites/priest/turn/02.png" id="11_rama1"]
-[ext_resource type="Texture2D" path="res://assets/sprites/priest/turn/03.png" id="12_ft7l8"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/attack/00.png" id="1_yqvb4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/attack/01.png" id="2_wjroi"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/attack/02.png" id="3_5l1ai"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/attack/03.png" id="4_oqlr0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/idle/00.png" id="5_v8b17"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/idle/01.png" id="6_2xybw"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/idle/02.png" id="7_rama1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/idle/03.png" id="8_ft7l8"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/turn/00.png" id="9_7rhdo"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/turn/01.png" id="10_xd7ew"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/turn/02.png" id="11_m58c4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/turn/03.png" id="12_8828t"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/walk/00.png" id="13_w00cq"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/walk/01.png" id="14_tbojg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/walk/02.png" id="15_m60pe"]
+[ext_resource type="Texture2D" path="res://assets/sprites/priest/walk/03.png" id="16_dcjhl"]
 
 [resource]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("1_y1e17")
+"texture": ExtResource("1_yqvb4")
 }, {
 "duration": 1.0,
-"texture": ExtResource("2_27iip")
+"texture": ExtResource("2_wjroi")
 }, {
 "duration": 1.0,
-"texture": ExtResource("3_rea7l")
+"texture": ExtResource("3_5l1ai")
 }, {
 "duration": 1.0,
-"texture": ExtResource("4_fc6fg")
+"texture": ExtResource("4_oqlr0")
 }],
 "loop": 0,
 "name": &"attack",
@@ -34,16 +38,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("5_yqvb4")
+"texture": ExtResource("5_v8b17")
 }, {
 "duration": 1.0,
-"texture": ExtResource("6_wjroi")
+"texture": ExtResource("6_2xybw")
 }, {
 "duration": 1.0,
-"texture": ExtResource("7_5l1ai")
+"texture": ExtResource("7_rama1")
 }, {
 "duration": 1.0,
-"texture": ExtResource("8_oqlr0")
+"texture": ExtResource("8_ft7l8")
 }],
 "loop": 1,
 "name": &"idle",
@@ -51,18 +55,35 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("9_v8b17")
+"texture": ExtResource("9_7rhdo")
 }, {
 "duration": 1.0,
-"texture": ExtResource("10_2xybw")
+"texture": ExtResource("10_xd7ew")
 }, {
 "duration": 1.0,
-"texture": ExtResource("11_rama1")
+"texture": ExtResource("11_m58c4")
 }, {
 "duration": 1.0,
-"texture": ExtResource("12_ft7l8")
+"texture": ExtResource("12_8828t")
 }],
 "loop": 0,
 "name": &"turn",
 "speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("13_w00cq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_tbojg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_m60pe")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_dcjhl")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 4.0
 }]

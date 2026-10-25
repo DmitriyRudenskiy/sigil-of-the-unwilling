@@ -1,0 +1,35 @@
+{
+ "char": "archer",
+ "anim": "walk",
+ "seed": 1103,
+ "mirror": false,
+ "length": 81,
+ "seconds": 0.0,
+ "corner_before_clip": [
+  6,
+  181,
+  20
+ ],
+ "audit": {
+  "frames": 81,
+  "motion_first_last": 38.5,
+  "sharpness_min": 1113.1,
+  "sharpness_median": 1268.8,
+  "pivot_slide_x": 1.7,
+  "pivot_sway_x": 4.7,
+  "contact_slide_x": 43.9,
+  "contact_sway_x": 116.0,
+  "feet_drift_x": 21.0,
+  "feet_drift_y": 23,
+  "chroma_pixels_kept": 0,
+  "chroma_share": 0.0,
+  "flat_white_share": 0.0
+ },
+ "subsampled": [
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/archer/walk/frame_01.png",
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/archer/walk/frame_20.png",
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/archer/walk/frame_40.png",
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/archer/walk/frame_59.png"
+ ],
+ "verdict": "годен: движение 38.5, резкость 1113.1/1268.8, снос ступней 43.9 px, хромакей 0, плоский белый 0.0%"
+}

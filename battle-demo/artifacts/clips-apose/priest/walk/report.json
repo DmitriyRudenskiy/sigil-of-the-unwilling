@@ -1,0 +1,35 @@
+{
+ "char": "priest",
+ "anim": "walk",
+ "seed": 1109,
+ "mirror": true,
+ "length": 81,
+ "seconds": 0.0,
+ "corner_before_clip": [
+  12,
+  164,
+  0
+ ],
+ "audit": {
+  "frames": 81,
+  "motion_first_last": 65.7,
+  "sharpness_min": 2078.7,
+  "sharpness_median": 2483.7,
+  "pivot_slide_x": 9.5,
+  "pivot_sway_x": 21.4,
+  "contact_slide_x": 86.1,
+  "contact_sway_x": 149.1,
+  "feet_drift_x": 20.5,
+  "feet_drift_y": 22,
+  "chroma_pixels_kept": 0,
+  "chroma_share": 0.0,
+  "flat_white_share": 0.0007
+ },
+ "subsampled": [
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/priest/walk/frame_01.png",
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/priest/walk/frame_16.png",
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/priest/walk/frame_32.png",
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/priest/walk/frame_47.png"
+ ],
+ "verdict": "годен: движение 65.7, резкость 2078.7/2483.7, снос ступней 86.1 px, хромакей 0, плоский белый 0.1%"
+}

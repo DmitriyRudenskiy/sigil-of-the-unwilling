@@ -1,0 +1,35 @@
+{
+ "char": "sorcerer",
+ "anim": "idle",
+ "seed": 1105,
+ "mirror": true,
+ "length": 81,
+ "seconds": 0.0,
+ "corner_before_clip": [
+  15,
+  174,
+  0
+ ],
+ "audit": {
+  "frames": 81,
+  "motion_first_last": 29.2,
+  "sharpness_min": 1492.3,
+  "sharpness_median": 1983.4,
+  "pivot_slide_x": 0.6,
+  "pivot_sway_x": 2.5,
+  "contact_slide_x": 0.2,
+  "contact_sway_x": 0.4,
+  "feet_drift_x": 65.0,
+  "feet_drift_y": 0,
+  "chroma_pixels_kept": 0,
+  "chroma_share": 0.0,
+  "flat_white_share": 0.0001
+ },
+ "subsampled": [
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/sorcerer/idle/frame_01.png",
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/sorcerer/idle/frame_23.png",
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/sorcerer/idle/frame_44.png",
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/sorcerer/idle/frame_66.png"
+ ],
+ "verdict": "годен: движение 29.2, резкость 1492.3/1983.4, снос ступней 0.2 px, хромакей 0, плоский белый 0.0%"
+}

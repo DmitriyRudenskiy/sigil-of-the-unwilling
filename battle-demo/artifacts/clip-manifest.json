@@ -13,12 +13,14 @@
     "total_seconds": 0,
     "audit": {
       "frames": 33,
-      "motion_first_last": 19.7,
+      "motion_first_last": 15.5,
       "sharpness_min": 1607.4,
       "sharpness_median": 1677.3,
-      "pivot_slide_x": 1.7,
-      "pivot_sway_x": 1.9,
-      "feet_drift_x": 2.5,
+      "pivot_slide_x": 0.3,
+      "pivot_sway_x": 0.5,
+      "contact_slide_x": 0.6,
+      "contact_sway_x": 4.3,
+      "feet_drift_x": 1.0,
       "feet_drift_y": 0,
       "chroma_pixels_kept": 0,
       "chroma_share": 0.0
@@ -26,7 +28,7 @@
     "loop": {
       "window": 17,
       "seam": 5.63,
-      "frame_step": 2.88,
+      "frame_step": 2.84,
       "ping_pong": true
     },
     "subsampled": [
@@ -35,7 +37,7 @@
       "battle-demo/artifacts/clips/knight/idle/frame_12.png",
       "battle-demo/artifacts/clips/knight/idle/frame_17.png"
     ],
-    "verdict": "годен: движение 19.7, резкость 1607.4/1677.3, снос 1.7 px, хромакей 0 — петля ping-pong (стык не найден)"
+    "verdict": "годен: движение 15.5, резкость 1607.4/1677.3, снос ступней 0.6 px, хромакей 0 — петля ping-pong (стык не найден)"
   },
   {
     "char": "knight",
@@ -56,6 +58,8 @@
       "sharpness_median": 1517.9,
       "pivot_slide_x": 7.0,
       "pivot_sway_x": 7.1,
+      "contact_slide_x": 113.3,
+      "contact_sway_x": 118.6,
       "feet_drift_x": 23.5,
       "feet_drift_y": 2,
       "chroma_pixels_kept": 0,
@@ -68,7 +72,7 @@
       "battle-demo/artifacts/clips/knight/turn/frame_22.png",
       "battle-demo/artifacts/clips/knight/turn/frame_33.png"
     ],
-    "verdict": "годен: движение 46.3, резкость 1408.7/1517.9, снос 7.0 px, хромакей 0"
+    "verdict": "годен: движение 46.3, резкость 1408.7/1517.9, снос ступней 113.3 px, хромакей 0"
   },
   {
     "char": "spearman",
@@ -89,6 +93,8 @@
       "sharpness_median": 4561.0,
       "pivot_slide_x": 0.2,
       "pivot_sway_x": 0.4,
+      "contact_slide_x": 0.2,
+      "contact_sway_x": 0.4,
       "feet_drift_x": 0.5,
       "feet_drift_y": 1,
       "chroma_pixels_kept": 0,
@@ -106,7 +112,7 @@
       "battle-demo/artifacts/clips/spearman/idle/frame_12.png",
       "battle-demo/artifacts/clips/spearman/idle/frame_17.png"
     ],
-    "verdict": "годен: движение 9.2, резкость 4223.7/4561.0, снос 0.2 px, хромакей 0 — петля ping-pong (стык не найден)"
+    "verdict": "годен: движение 9.2, резкость 4223.7/4561.0, снос ступней 0.2 px, хромакей 0 — петля ping-pong (стык не найден)"
   },
   {
     "char": "knight",
@@ -126,8 +132,10 @@
       "sharpness_min": 1041.7,
       "sharpness_median": 1447.6,
       "pivot_slide_x": 0.1,
-      "pivot_sway_x": 21.3,
-      "feet_drift_x": 24.5,
+      "pivot_sway_x": 25.9,
+      "contact_slide_x": 0.3,
+      "contact_sway_x": 36.1,
+      "feet_drift_x": 30.5,
       "feet_drift_y": 1,
       "chroma_pixels_kept": 0,
       "chroma_share": 0.0
@@ -139,7 +147,7 @@
       "battle-demo/artifacts/clips/knight/attack/frame_22.png",
       "battle-demo/artifacts/clips/knight/attack/frame_33.png"
     ],
-    "verdict": "годен: движение 9.9, резкость 1041.7/1447.6, снос 0.1 px, хромакей 0"
+    "verdict": "годен: движение 9.9, резкость 1041.7/1447.6, снос ступней 0.3 px, хромакей 0"
   },
   {
     "char": "knight",
@@ -160,6 +168,8 @@
       "sharpness_median": 1251.3,
       "pivot_slide_x": 31.1,
       "pivot_sway_x": 33.2,
+      "contact_slide_x": 54.3,
+      "contact_sway_x": 136.8,
       "feet_drift_x": 41.5,
       "feet_drift_y": 6,
       "chroma_pixels_kept": 0,
@@ -177,7 +187,7 @@
       "battle-demo/artifacts/clips/knight/walk/frame_18.png",
       "battle-demo/artifacts/clips/knight/walk/frame_26.png"
     ],
-    "verdict": "брак: корпус уехал по полу (31.1 px за цикл)"
+    "verdict": "брак: ступни уехали по полу (54.3 px за цикл)"
   },
   {
     "char": "knight",
@@ -189,20 +199,18 @@
       255,
       0
     ],
-    "seconds": {
-      "first_frame": 150.7,
-      "chromakey": 3.0,
-      "clip": 42.2
-    },
-    "total_seconds": 196.0,
+    "seconds": {},
+    "total_seconds": 0,
     "audit": {
       "frames": 33,
-      "motion_first_last": 55.3,
+      "motion_first_last": 48.5,
       "sharpness_min": 1367.5,
       "sharpness_median": 1559.0,
-      "pivot_slide_x": 31.8,
-      "pivot_sway_x": 31.8,
-      "feet_drift_x": 7.5,
+      "pivot_slide_x": 23.8,
+      "pivot_sway_x": 23.8,
+      "contact_slide_x": 0.1,
+      "contact_sway_x": 0.6,
+      "feet_drift_x": 1.5,
       "feet_drift_y": 0,
       "chroma_pixels_kept": 0,
       "chroma_share": 0.0
@@ -214,44 +222,7 @@
       "battle-demo/artifacts/clips/knight/hit/frame_22.png",
       "battle-demo/artifacts/clips/knight/hit/frame_33.png"
     ],
-    "verdict": "брак: корпус уехал по полу (31.8 px за цикл)"
-  },
-  {
-    "char": "spearman",
-    "anim": "attack",
-    "seed": 1102,
-    "length": 33,
-    "corner_before_clip": [
-      0,
-      255,
-      0
-    ],
-    "seconds": {
-      "first_frame": 159.8,
-      "chromakey": 3.0,
-      "clip": 42.2
-    },
-    "total_seconds": 205.1,
-    "audit": {
-      "frames": 33,
-      "motion_first_last": 14.9,
-      "sharpness_min": 2127.8,
-      "sharpness_median": 3338.8,
-      "pivot_slide_x": 0.6,
-      "pivot_sway_x": 38.9,
-      "feet_drift_x": 61.5,
-      "feet_drift_y": 1,
-      "chroma_pixels_kept": 0,
-      "chroma_share": 0.0
-    },
-    "loop": null,
-    "subsampled": [
-      "battle-demo/artifacts/clips/spearman/attack/frame_01.png",
-      "battle-demo/artifacts/clips/spearman/attack/frame_12.png",
-      "battle-demo/artifacts/clips/spearman/attack/frame_22.png",
-      "battle-demo/artifacts/clips/spearman/attack/frame_33.png"
-    ],
-    "verdict": "брак: есть смазанные кадры"
+    "verdict": "годен: движение 48.5, резкость 1367.5/1559.0, снос ступней 0.1 px, хромакей 0"
   },
   {
     "char": "spearman",
@@ -263,20 +234,18 @@
       255,
       0
     ],
-    "seconds": {
-      "first_frame": 159.8,
-      "chromakey": 3.0,
-      "clip": 42.3
-    },
-    "total_seconds": 205.1,
+    "seconds": {},
+    "total_seconds": 0,
     "audit": {
       "frames": 33,
-      "motion_first_last": 56.8,
+      "motion_first_last": 55.2,
       "sharpness_min": 2832.9,
       "sharpness_median": 3540.6,
-      "pivot_slide_x": 4.0,
-      "pivot_sway_x": 8.7,
-      "feet_drift_x": 19.5,
+      "pivot_slide_x": 1.0,
+      "pivot_sway_x": 3.9,
+      "contact_slide_x": 0.1,
+      "contact_sway_x": 0.4,
+      "feet_drift_x": 17.0,
       "feet_drift_y": 1,
       "chroma_pixels_kept": 0,
       "chroma_share": 0.0
@@ -288,7 +257,7 @@
       "battle-demo/artifacts/clips/spearman/hit/frame_22.png",
       "battle-demo/artifacts/clips/spearman/hit/frame_33.png"
     ],
-    "verdict": "годен: движение 56.8, резкость 2832.9/3540.6, снос 4.0 px, хромакей 0"
+    "verdict": "годен: движение 55.2, резкость 2832.9/3540.6, снос ступней 0.1 px, хромакей 0"
   },
   {
     "char": "spearman",
@@ -300,12 +269,8 @@
       255,
       0
     ],
-    "seconds": {
-      "first_frame": 159.8,
-      "chromakey": 3.0,
-      "clip": 42.3
-    },
-    "total_seconds": 205.1,
+    "seconds": {},
+    "total_seconds": 0,
     "audit": {
       "frames": 33,
       "motion_first_last": 61.5,
@@ -313,6 +278,8 @@
       "sharpness_median": 3970.7,
       "pivot_slide_x": 10.2,
       "pivot_sway_x": 22.2,
+      "contact_slide_x": 157.3,
+      "contact_sway_x": 183.6,
       "feet_drift_x": 89.5,
       "feet_drift_y": 13,
       "chroma_pixels_kept": 0,
@@ -325,7 +292,7 @@
       "battle-demo/artifacts/clips/spearman/turn/frame_22.png",
       "battle-demo/artifacts/clips/spearman/turn/frame_33.png"
     ],
-    "verdict": "брак: корпус уехал по полу (10.2 px за цикл)"
+    "verdict": "годен: движение 61.5, резкость 3527.7/3970.7, снос ступней 157.3 px, хромакей 0"
   },
   {
     "char": "archer",
@@ -337,20 +304,18 @@
       255,
       0
     ],
-    "seconds": {
-      "first_frame": 159.8,
-      "chromakey": 3.0,
-      "clip": 42.2
-    },
-    "total_seconds": 205.0,
+    "seconds": {},
+    "total_seconds": 0,
     "audit": {
       "frames": 33,
-      "motion_first_last": 12.0,
+      "motion_first_last": 11.3,
       "sharpness_min": 819.9,
       "sharpness_median": 944.8,
-      "pivot_slide_x": 0.4,
-      "pivot_sway_x": 0.9,
-      "feet_drift_x": 2.5,
+      "pivot_slide_x": 0.6,
+      "pivot_sway_x": 0.7,
+      "contact_slide_x": 0.1,
+      "contact_sway_x": 0.5,
+      "feet_drift_x": 1.5,
       "feet_drift_y": 0,
       "chroma_pixels_kept": 0,
       "chroma_share": 0.0
@@ -358,7 +323,7 @@
     "loop": {
       "window": 17,
       "seam": 3.01,
-      "frame_step": 1.73,
+      "frame_step": 1.76,
       "ping_pong": true
     },
     "subsampled": [
@@ -367,7 +332,7 @@
       "battle-demo/artifacts/clips/archer/idle/frame_12.png",
       "battle-demo/artifacts/clips/archer/idle/frame_17.png"
     ],
-    "verdict": "годен: движение 12.0, резкость 819.9/944.8, снос 0.4 px, хромакей 0 — петля ping-pong (стык не найден)"
+    "verdict": "годен: движение 11.3, резкость 819.9/944.8, снос ступней 0.1 px, хромакей 0 — петля ping-pong (стык не найден)"
   },
   {
     "char": "archer",
@@ -379,20 +344,18 @@
       255,
       0
     ],
-    "seconds": {
-      "first_frame": 159.7,
-      "chromakey": 3.0,
-      "clip": 42.2
-    },
-    "total_seconds": 205.0,
+    "seconds": {},
+    "total_seconds": 0,
     "audit": {
       "frames": 33,
       "motion_first_last": 5.4,
       "sharpness_min": 561.5,
       "sharpness_median": 777.5,
       "pivot_slide_x": 0.2,
-      "pivot_sway_x": 9.7,
-      "feet_drift_x": 39.0,
+      "pivot_sway_x": 31.6,
+      "contact_slide_x": 0.3,
+      "contact_sway_x": 1.7,
+      "feet_drift_x": 37.0,
       "feet_drift_y": 0,
       "chroma_pixels_kept": 0,
       "chroma_share": 0.0
@@ -404,7 +367,7 @@
       "battle-demo/artifacts/clips/archer/attack/frame_22.png",
       "battle-demo/artifacts/clips/archer/attack/frame_33.png"
     ],
-    "verdict": "годен: движение 5.4, резкость 561.5/777.5, снос 0.2 px, хромакей 0"
+    "verdict": "годен: движение 5.4, резкость 561.5/777.5, снос ступней 0.3 px, хромакей 0"
   },
   {
     "char": "archer",
@@ -416,20 +379,18 @@
       255,
       0
     ],
-    "seconds": {
-      "first_frame": 159.7,
-      "chromakey": 3.0,
-      "clip": 42.2
-    },
-    "total_seconds": 204.9,
+    "seconds": {},
+    "total_seconds": 0,
     "audit": {
       "frames": 33,
-      "motion_first_last": 46.5,
-      "sharpness_min": 635.9,
+      "motion_first_last": 45.2,
+      "sharpness_min": 635.8,
       "sharpness_median": 727.6,
-      "pivot_slide_x": 20.7,
-      "pivot_sway_x": 21.9,
-      "feet_drift_x": 31.5,
+      "pivot_slide_x": 19.7,
+      "pivot_sway_x": 25.8,
+      "contact_slide_x": 0.7,
+      "contact_sway_x": 0.9,
+      "feet_drift_x": 43.0,
       "feet_drift_y": 1,
       "chroma_pixels_kept": 0,
       "chroma_share": 0.0
@@ -441,7 +402,7 @@
       "battle-demo/artifacts/clips/archer/hit/frame_22.png",
       "battle-demo/artifacts/clips/archer/hit/frame_33.png"
     ],
-    "verdict": "брак: корпус уехал по полу (20.7 px за цикл)"
+    "verdict": "годен: движение 45.2, резкость 635.8/727.6, снос ступней 0.7 px, хромакей 0"
   },
   {
     "char": "archer",
@@ -453,12 +414,8 @@
       255,
       0
     ],
-    "seconds": {
-      "first_frame": 159.8,
-      "chromakey": 3.0,
-      "clip": 42.2
-    },
-    "total_seconds": 205.1,
+    "seconds": {},
+    "total_seconds": 0,
     "audit": {
       "frames": 33,
       "motion_first_last": 32.4,
@@ -466,6 +423,8 @@
       "sharpness_median": 663.1,
       "pivot_slide_x": 5.7,
       "pivot_sway_x": 6.8,
+      "contact_slide_x": 24.2,
+      "contact_sway_x": 24.4,
       "feet_drift_x": 10.5,
       "feet_drift_y": 5,
       "chroma_pixels_kept": 0,
@@ -478,7 +437,7 @@
       "battle-demo/artifacts/clips/archer/turn/frame_22.png",
       "battle-demo/artifacts/clips/archer/turn/frame_33.png"
     ],
-    "verdict": "годен: движение 32.4, резкость 629.0/663.1, снос 5.7 px, хромакей 0"
+    "verdict": "годен: движение 32.4, резкость 629.0/663.1, снос ступней 24.2 px, хромакей 0"
   },
   {
     "char": "wizard",
@@ -490,28 +449,26 @@
       255,
       0
     ],
-    "seconds": {
-      "first_frame": 159.8,
-      "chromakey": 3.0,
-      "clip": 42.3
-    },
-    "total_seconds": 205.2,
+    "seconds": {},
+    "total_seconds": 0,
     "audit": {
       "frames": 33,
-      "motion_first_last": 25.7,
+      "motion_first_last": 28.0,
       "sharpness_min": 578.2,
       "sharpness_median": 616.1,
-      "pivot_slide_x": 2.2,
-      "pivot_sway_x": 3.4,
-      "feet_drift_x": 18.0,
+      "pivot_slide_x": 0.8,
+      "pivot_sway_x": 1.7,
+      "contact_slide_x": 2.6,
+      "contact_sway_x": 2.9,
+      "feet_drift_x": 14.5,
       "feet_drift_y": 1,
       "chroma_pixels_kept": 0,
       "chroma_share": 0.0
     },
     "loop": {
       "window": 17,
-      "seam": 14.77,
-      "frame_step": 4.76,
+      "seam": 14.16,
+      "frame_step": 5.45,
       "ping_pong": true
     },
     "subsampled": [
@@ -520,44 +477,7 @@
       "battle-demo/artifacts/clips/wizard/idle/frame_12.png",
       "battle-demo/artifacts/clips/wizard/idle/frame_17.png"
     ],
-    "verdict": "годен: движение 25.7, резкость 578.2/616.1, снос 2.2 px, хромакей 0 — петля ping-pong (стык не найден)"
-  },
-  {
-    "char": "wizard",
-    "anim": "attack",
-    "seed": 1104,
-    "length": 33,
-    "corner_before_clip": [
-      0,
-      255,
-      0
-    ],
-    "seconds": {
-      "first_frame": 159.8,
-      "chromakey": 3.1,
-      "clip": 42.2
-    },
-    "total_seconds": 205.1,
-    "audit": {
-      "frames": 33,
-      "motion_first_last": 28.1,
-      "sharpness_min": 288.1,
-      "sharpness_median": 496.7,
-      "pivot_slide_x": 2.1,
-      "pivot_sway_x": 68.5,
-      "feet_drift_x": 89.5,
-      "feet_drift_y": 1,
-      "chroma_pixels_kept": 0,
-      "chroma_share": 0.0
-    },
-    "loop": null,
-    "subsampled": [
-      "battle-demo/artifacts/clips/wizard/attack/frame_01.png",
-      "battle-demo/artifacts/clips/wizard/attack/frame_12.png",
-      "battle-demo/artifacts/clips/wizard/attack/frame_22.png",
-      "battle-demo/artifacts/clips/wizard/attack/frame_33.png"
-    ],
-    "verdict": "брак: есть смазанные кадры"
+    "verdict": "годен: движение 28.0, резкость 578.2/616.1, снос ступней 2.6 px, хромакей 0 — петля ping-pong (стык не найден)"
   },
   {
     "char": "wizard",
@@ -569,20 +489,18 @@
       255,
       0
     ],
-    "seconds": {
-      "first_frame": 159.7,
-      "chromakey": 3.0,
-      "clip": 42.2
-    },
-    "total_seconds": 205.0,
+    "seconds": {},
+    "total_seconds": 0,
     "audit": {
       "frames": 33,
-      "motion_first_last": 36.4,
+      "motion_first_last": 33.3,
       "sharpness_min": 821.7,
       "sharpness_median": 978.9,
-      "pivot_slide_x": 13.5,
-      "pivot_sway_x": 14.7,
-      "feet_drift_x": 14.0,
+      "pivot_slide_x": 17.5,
+      "pivot_sway_x": 25.6,
+      "contact_slide_x": 0.2,
+      "contact_sway_x": 0.4,
+      "feet_drift_x": 23.5,
       "feet_drift_y": 0,
       "chroma_pixels_kept": 0,
       "chroma_share": 0.0
@@ -594,7 +512,7 @@
       "battle-demo/artifacts/clips/wizard/hit/frame_22.png",
       "battle-demo/artifacts/clips/wizard/hit/frame_33.png"
     ],
-    "verdict": "брак: корпус уехал по полу (13.5 px за цикл)"
+    "verdict": "годен: движение 33.3, резкость 821.7/978.9, снос ступней 0.2 px, хромакей 0"
   },
   {
     "char": "wizard",
@@ -606,12 +524,8 @@
       255,
       0
     ],
-    "seconds": {
-      "first_frame": 159.8,
-      "chromakey": 3.0,
-      "clip": 42.2
-    },
-    "total_seconds": 205.1,
+    "seconds": {},
+    "total_seconds": 0,
     "audit": {
       "frames": 33,
       "motion_first_last": 37.5,
@@ -619,6 +533,8 @@
       "sharpness_median": 776.6,
       "pivot_slide_x": 1.2,
       "pivot_sway_x": 8.0,
+      "contact_slide_x": 176.2,
+      "contact_sway_x": 177.2,
       "feet_drift_x": 24.5,
       "feet_drift_y": 1,
       "chroma_pixels_kept": 0,
@@ -631,7 +547,7 @@
       "battle-demo/artifacts/clips/wizard/turn/frame_22.png",
       "battle-demo/artifacts/clips/wizard/turn/frame_33.png"
     ],
-    "verdict": "годен: движение 37.5, резкость 680.0/776.6, снос 1.2 px, хромакей 0"
+    "verdict": "годен: движение 37.5, резкость 680.0/776.6, снос ступней 176.2 px, хромакей 0"
   },
   {
     "char": "sorcerer",
@@ -643,12 +559,8 @@
       255,
       0
     ],
-    "seconds": {
-      "first_frame": 159.8,
-      "chromakey": 3.0,
-      "clip": 42.2
-    },
-    "total_seconds": 205.0,
+    "seconds": {},
+    "total_seconds": 0,
     "audit": {
       "frames": 33,
       "motion_first_last": 23.7,
@@ -656,6 +568,8 @@
       "sharpness_median": 1226.7,
       "pivot_slide_x": 0.2,
       "pivot_sway_x": 0.9,
+      "contact_slide_x": 1.6,
+      "contact_sway_x": 1.9,
       "feet_drift_x": 9.0,
       "feet_drift_y": 0,
       "chroma_pixels_kept": 0,
@@ -673,12 +587,204 @@
       "battle-demo/artifacts/clips/sorcerer/idle/frame_12.png",
       "battle-demo/artifacts/clips/sorcerer/idle/frame_17.png"
     ],
-    "verdict": "годен: движение 23.7, резкость 1013.9/1226.7, снос 0.2 px, хромакей 0 — петля ping-pong (стык не найден)"
+    "verdict": "годен: движение 23.7, резкость 1013.9/1226.7, снос ступней 1.6 px, хромакей 0 — петля ping-pong (стык не найден)"
   },
   {
     "char": "sorcerer",
     "anim": "attack",
     "seed": 1105,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {},
+    "total_seconds": 0,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 27.3,
+      "sharpness_min": 839.9,
+      "sharpness_median": 1065.7,
+      "pivot_slide_x": 2.5,
+      "pivot_sway_x": 14.8,
+      "contact_slide_x": 0.7,
+      "contact_sway_x": 2.0,
+      "feet_drift_x": 35.5,
+      "feet_drift_y": 0,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/sorcerer/attack/frame_01.png",
+      "battle-demo/artifacts/clips/sorcerer/attack/frame_12.png",
+      "battle-demo/artifacts/clips/sorcerer/attack/frame_22.png",
+      "battle-demo/artifacts/clips/sorcerer/attack/frame_33.png"
+    ],
+    "verdict": "годен: движение 27.3, резкость 839.9/1065.7, снос ступней 0.7 px, хромакей 0"
+  },
+  {
+    "char": "sorcerer",
+    "anim": "hit",
+    "seed": 1105,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {},
+    "total_seconds": 0,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 31.6,
+      "sharpness_min": 863.0,
+      "sharpness_median": 973.0,
+      "pivot_slide_x": 20.4,
+      "pivot_sway_x": 21.9,
+      "contact_slide_x": 0.5,
+      "contact_sway_x": 8.8,
+      "feet_drift_x": 73.0,
+      "feet_drift_y": 1,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/sorcerer/hit/frame_01.png",
+      "battle-demo/artifacts/clips/sorcerer/hit/frame_12.png",
+      "battle-demo/artifacts/clips/sorcerer/hit/frame_22.png",
+      "battle-demo/artifacts/clips/sorcerer/hit/frame_33.png"
+    ],
+    "verdict": "годен: движение 31.6, резкость 863.0/973.0, снос ступней 0.5 px, хромакей 0"
+  },
+  {
+    "char": "barbarian",
+    "anim": "idle",
+    "seed": 1106,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "first_frame": 159.8,
+      "chromakey": 3.0,
+      "clip": 42.2
+    },
+    "total_seconds": 205.0,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 15.5,
+      "sharpness_min": 1070.2,
+      "sharpness_median": 1134.7,
+      "pivot_slide_x": 1.3,
+      "pivot_sway_x": 2.0,
+      "contact_slide_x": 0.0,
+      "contact_sway_x": 0.7,
+      "feet_drift_x": 1.0,
+      "feet_drift_y": 0,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": {
+      "window": 18,
+      "seam": 2.9,
+      "frame_step": 2.95,
+      "ping_pong": false
+    },
+    "subsampled": [
+      "battle-demo/artifacts/clips/barbarian/idle/frame_01.png",
+      "battle-demo/artifacts/clips/barbarian/idle/frame_07.png",
+      "battle-demo/artifacts/clips/barbarian/idle/frame_12.png",
+      "battle-demo/artifacts/clips/barbarian/idle/frame_18.png"
+    ],
+    "verdict": "годен: движение 15.5, резкость 1070.2/1134.7, снос ступней 0.0 px, хромакей 0 — петля замыкается (стык 2.9 при шаге 2.95)"
+  },
+  {
+    "char": "barbarian",
+    "anim": "attack",
+    "seed": 1106,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "first_frame": 159.8,
+      "chromakey": 3.1,
+      "clip": 42.3
+    },
+    "total_seconds": 205.2,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 22.9,
+      "sharpness_min": 934.6,
+      "sharpness_median": 1054.9,
+      "pivot_slide_x": 15.9,
+      "pivot_sway_x": 36.8,
+      "contact_slide_x": 0.1,
+      "contact_sway_x": 0.5,
+      "feet_drift_x": 36.5,
+      "feet_drift_y": 0,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/barbarian/attack/frame_01.png",
+      "battle-demo/artifacts/clips/barbarian/attack/frame_12.png",
+      "battle-demo/artifacts/clips/barbarian/attack/frame_22.png",
+      "battle-demo/artifacts/clips/barbarian/attack/frame_33.png"
+    ],
+    "verdict": "годен: движение 22.9, резкость 934.6/1054.9, снос ступней 0.1 px, хромакей 0"
+  },
+  {
+    "char": "barbarian",
+    "anim": "hit",
+    "seed": 1106,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "first_frame": 159.8,
+      "chromakey": 3.1,
+      "clip": 42.2
+    },
+    "total_seconds": 205.1,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 52.5,
+      "sharpness_min": 913.4,
+      "sharpness_median": 961.5,
+      "pivot_slide_x": 4.6,
+      "pivot_sway_x": 5.9,
+      "contact_slide_x": 0.0,
+      "contact_sway_x": 0.8,
+      "feet_drift_x": 27.0,
+      "feet_drift_y": 1,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/barbarian/hit/frame_01.png",
+      "battle-demo/artifacts/clips/barbarian/hit/frame_12.png",
+      "battle-demo/artifacts/clips/barbarian/hit/frame_22.png",
+      "battle-demo/artifacts/clips/barbarian/hit/frame_33.png"
+    ],
+    "verdict": "годен: движение 52.5, резкость 913.4/961.5, снос ступней 0.0 px, хромакей 0"
+  },
+  {
+    "char": "barbarian",
+    "anim": "turn",
+    "seed": 1106,
     "length": 33,
     "corner_before_clip": [
       0,
@@ -693,29 +799,114 @@
     "total_seconds": 205.1,
     "audit": {
       "frames": 33,
-      "motion_first_last": 30.1,
-      "sharpness_min": 839.9,
-      "sharpness_median": 1065.7,
-      "pivot_slide_x": 0.5,
-      "pivot_sway_x": 10.6,
-      "feet_drift_x": 41.5,
-      "feet_drift_y": 0,
+      "motion_first_last": 42.8,
+      "sharpness_min": 1056.8,
+      "sharpness_median": 1089.3,
+      "pivot_slide_x": 10.6,
+      "pivot_sway_x": 16.1,
+      "contact_slide_x": 51.5,
+      "contact_sway_x": 51.7,
+      "feet_drift_x": 44.0,
+      "feet_drift_y": 5,
       "chroma_pixels_kept": 0,
       "chroma_share": 0.0
     },
     "loop": null,
     "subsampled": [
-      "battle-demo/artifacts/clips/sorcerer/attack/frame_01.png",
-      "battle-demo/artifacts/clips/sorcerer/attack/frame_12.png",
-      "battle-demo/artifacts/clips/sorcerer/attack/frame_22.png",
-      "battle-demo/artifacts/clips/sorcerer/attack/frame_33.png"
+      "battle-demo/artifacts/clips/barbarian/turn/frame_01.png",
+      "battle-demo/artifacts/clips/barbarian/turn/frame_12.png",
+      "battle-demo/artifacts/clips/barbarian/turn/frame_22.png",
+      "battle-demo/artifacts/clips/barbarian/turn/frame_33.png"
     ],
-    "verdict": "годен: движение 30.1, резкость 839.9/1065.7, снос 0.5 px, хромакей 0"
+    "verdict": "годен: движение 42.8, резкость 1056.8/1089.3, снос ступней 51.5 px, хромакей 0"
   },
   {
-    "char": "sorcerer",
+    "char": "stormmage",
+    "anim": "idle",
+    "seed": 1107,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "first_frame": 159.8,
+      "chromakey": 3.0,
+      "clip": 42.3
+    },
+    "total_seconds": 205.1,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 34.9,
+      "sharpness_min": 1038.2,
+      "sharpness_median": 1149.5,
+      "pivot_slide_x": 28.2,
+      "pivot_sway_x": 28.2,
+      "contact_slide_x": 0.1,
+      "contact_sway_x": 0.4,
+      "feet_drift_x": 31.0,
+      "feet_drift_y": 1,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": {
+      "window": 23,
+      "seam": 13.65,
+      "frame_step": 8.23,
+      "ping_pong": true
+    },
+    "subsampled": [
+      "battle-demo/artifacts/clips/stormmage/idle/frame_01.png",
+      "battle-demo/artifacts/clips/stormmage/idle/frame_08.png",
+      "battle-demo/artifacts/clips/stormmage/idle/frame_16.png",
+      "battle-demo/artifacts/clips/stormmage/idle/frame_23.png"
+    ],
+    "verdict": "годен: движение 34.9, резкость 1038.2/1149.5, снос ступней 0.1 px, хромакей 0 — петля ping-pong (стык не найден)"
+  },
+  {
+    "char": "stormmage",
+    "anim": "attack",
+    "seed": 1107,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "first_frame": 159.8,
+      "chromakey": 3.0,
+      "clip": 42.2
+    },
+    "total_seconds": 205.1,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 36.1,
+      "sharpness_min": 842.9,
+      "sharpness_median": 1123.7,
+      "pivot_slide_x": 34.7,
+      "pivot_sway_x": 56.6,
+      "contact_slide_x": 0.0,
+      "contact_sway_x": 0.9,
+      "feet_drift_x": 60.5,
+      "feet_drift_y": 1,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/stormmage/attack/frame_01.png",
+      "battle-demo/artifacts/clips/stormmage/attack/frame_12.png",
+      "battle-demo/artifacts/clips/stormmage/attack/frame_22.png",
+      "battle-demo/artifacts/clips/stormmage/attack/frame_33.png"
+    ],
+    "verdict": "годен: движение 36.1, резкость 842.9/1123.7, снос ступней 0.0 px, хромакей 0"
+  },
+  {
+    "char": "stormmage",
     "anim": "hit",
-    "seed": 1105,
+    "seed": 1107,
     "length": 33,
     "corner_before_clip": [
       0,
@@ -725,28 +916,503 @@
     "seconds": {
       "first_frame": 159.8,
       "chromakey": 3.1,
-      "clip": 42.3
+      "clip": 42.2
     },
     "total_seconds": 205.1,
     "audit": {
       "frames": 33,
-      "motion_first_last": 32.2,
-      "sharpness_min": 863.0,
-      "sharpness_median": 973.0,
-      "pivot_slide_x": 23.4,
-      "pivot_sway_x": 27.6,
-      "feet_drift_x": 68.5,
+      "motion_first_last": 31.8,
+      "sharpness_min": 836.2,
+      "sharpness_median": 936.1,
+      "pivot_slide_x": 35.5,
+      "pivot_sway_x": 35.5,
+      "contact_slide_x": 0.1,
+      "contact_sway_x": 0.2,
+      "feet_drift_x": 10.5,
+      "feet_drift_y": 0,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/stormmage/hit/frame_01.png",
+      "battle-demo/artifacts/clips/stormmage/hit/frame_12.png",
+      "battle-demo/artifacts/clips/stormmage/hit/frame_22.png",
+      "battle-demo/artifacts/clips/stormmage/hit/frame_33.png"
+    ],
+    "verdict": "годен: движение 31.8, резкость 836.2/936.1, снос ступней 0.1 px, хромакей 0"
+  },
+  {
+    "char": "cutthroat",
+    "anim": "idle",
+    "seed": 1108,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "first_frame": 160.0,
+      "chromakey": 3.0,
+      "clip": 42.2
+    },
+    "total_seconds": 205.3,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 24.0,
+      "sharpness_min": 2401.3,
+      "sharpness_median": 2500.1,
+      "pivot_slide_x": 0.1,
+      "pivot_sway_x": 2.7,
+      "contact_slide_x": 0.2,
+      "contact_sway_x": 0.3,
+      "feet_drift_x": 2.5,
+      "feet_drift_y": 0,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": {
+      "window": 31,
+      "seam": 9.82,
+      "frame_step": 4.64,
+      "ping_pong": true
+    },
+    "subsampled": [
+      "battle-demo/artifacts/clips/cutthroat/idle/frame_01.png",
+      "battle-demo/artifacts/clips/cutthroat/idle/frame_11.png",
+      "battle-demo/artifacts/clips/cutthroat/idle/frame_21.png",
+      "battle-demo/artifacts/clips/cutthroat/idle/frame_31.png"
+    ],
+    "verdict": "годен: движение 24.0, резкость 2401.3/2500.1, снос ступней 0.2 px, хромакей 0 — петля ping-pong (стык не найден)"
+  },
+  {
+    "char": "cutthroat",
+    "anim": "attack",
+    "seed": 1108,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "first_frame": 159.8,
+      "chromakey": 72.4,
+      "clip": 42.2
+    },
+    "total_seconds": 274.4,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 8.6,
+      "sharpness_min": 1683.4,
+      "sharpness_median": 2129.1,
+      "pivot_slide_x": 0.2,
+      "pivot_sway_x": 57.4,
+      "contact_slide_x": 0.2,
+      "contact_sway_x": 0.5,
+      "feet_drift_x": 48.0,
+      "feet_drift_y": 0,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/cutthroat/attack/frame_01.png",
+      "battle-demo/artifacts/clips/cutthroat/attack/frame_12.png",
+      "battle-demo/artifacts/clips/cutthroat/attack/frame_22.png",
+      "battle-demo/artifacts/clips/cutthroat/attack/frame_33.png"
+    ],
+    "verdict": "годен: движение 8.6, резкость 1683.4/2129.1, снос ступней 0.2 px, хромакей 0"
+  },
+  {
+    "char": "cutthroat",
+    "anim": "hit",
+    "seed": 1108,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "first_frame": 192.9,
+      "chromakey": 3.0,
+      "clip": 42.3
+    },
+    "total_seconds": 238.2,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 52.4,
+      "sharpness_min": 1897.8,
+      "sharpness_median": 2009.0,
+      "pivot_slide_x": 18.3,
+      "pivot_sway_x": 18.5,
+      "contact_slide_x": 0.5,
+      "contact_sway_x": 0.6,
+      "feet_drift_x": 36.0,
+      "feet_drift_y": 0,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/cutthroat/hit/frame_01.png",
+      "battle-demo/artifacts/clips/cutthroat/hit/frame_12.png",
+      "battle-demo/artifacts/clips/cutthroat/hit/frame_22.png",
+      "battle-demo/artifacts/clips/cutthroat/hit/frame_33.png"
+    ],
+    "verdict": "годен: движение 52.4, резкость 1897.8/2009.0, снос ступней 0.5 px, хромакей 0"
+  },
+  {
+    "char": "cutthroat",
+    "anim": "turn",
+    "seed": 1108,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "first_frame": 159.8,
+      "chromakey": 3.0,
+      "clip": 42.2
+    },
+    "total_seconds": 205.0,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 53.0,
+      "sharpness_min": 1689.4,
+      "sharpness_median": 1815.4,
+      "pivot_slide_x": 13.2,
+      "pivot_sway_x": 14.8,
+      "contact_slide_x": 123.4,
+      "contact_sway_x": 146.0,
+      "feet_drift_x": 49.0,
+      "feet_drift_y": 11,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/cutthroat/turn/frame_01.png",
+      "battle-demo/artifacts/clips/cutthroat/turn/frame_12.png",
+      "battle-demo/artifacts/clips/cutthroat/turn/frame_22.png",
+      "battle-demo/artifacts/clips/cutthroat/turn/frame_33.png"
+    ],
+    "verdict": "годен: движение 53.0, резкость 1689.4/1815.4, снос ступней 123.4 px, хромакей 0"
+  },
+  {
+    "char": "priest",
+    "anim": "idle",
+    "seed": 1109,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "first_frame": 159.8,
+      "chromakey": 54.5,
+      "clip": 81.4
+    },
+    "total_seconds": 295.7,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 38.6,
+      "sharpness_min": 2150.2,
+      "sharpness_median": 2297.0,
+      "pivot_slide_x": 3.3,
+      "pivot_sway_x": 5.4,
+      "contact_slide_x": 0.2,
+      "contact_sway_x": 0.4,
+      "feet_drift_x": 5.5,
+      "feet_drift_y": 0,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": {
+      "window": 17,
+      "seam": 13.69,
+      "frame_step": 5.34,
+      "ping_pong": true
+    },
+    "subsampled": [
+      "battle-demo/artifacts/clips/priest/idle/frame_01.png",
+      "battle-demo/artifacts/clips/priest/idle/frame_06.png",
+      "battle-demo/artifacts/clips/priest/idle/frame_12.png",
+      "battle-demo/artifacts/clips/priest/idle/frame_17.png"
+    ],
+    "verdict": "годен: движение 38.6, резкость 2150.2/2297.0, снос ступней 0.2 px, хромакей 0 — петля ping-pong (стык не найден)"
+  },
+  {
+    "char": "priest",
+    "anim": "attack",
+    "seed": 1109,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "first_frame": 192.9,
+      "chromakey": 72.4,
+      "clip": 84.5
+    },
+    "total_seconds": 349.9,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 18.6,
+      "sharpness_min": 812.0,
+      "sharpness_median": 883.2,
+      "pivot_slide_x": 2.8,
+      "pivot_sway_x": 25.2,
+      "contact_slide_x": 0.0,
+      "contact_sway_x": 0.7,
+      "feet_drift_x": 29.5,
       "feet_drift_y": 1,
       "chroma_pixels_kept": 0,
       "chroma_share": 0.0
     },
     "loop": null,
     "subsampled": [
-      "battle-demo/artifacts/clips/sorcerer/hit/frame_01.png",
-      "battle-demo/artifacts/clips/sorcerer/hit/frame_12.png",
-      "battle-demo/artifacts/clips/sorcerer/hit/frame_22.png",
-      "battle-demo/artifacts/clips/sorcerer/hit/frame_33.png"
+      "battle-demo/artifacts/clips/priest/attack/frame_01.png",
+      "battle-demo/artifacts/clips/priest/attack/frame_12.png",
+      "battle-demo/artifacts/clips/priest/attack/frame_22.png",
+      "battle-demo/artifacts/clips/priest/attack/frame_33.png"
     ],
-    "verdict": "брак: корпус уехал по полу (23.4 px за цикл)"
+    "verdict": "годен: движение 18.6, резкость 812.0/883.2, снос ступней 0.0 px, хромакей 0"
+  },
+  {
+    "char": "priest",
+    "anim": "turn",
+    "seed": 1109,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "first_frame": 159.9,
+      "chromakey": 3.1,
+      "clip": 42.3
+    },
+    "total_seconds": 205.2,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 66.1,
+      "sharpness_min": 659.7,
+      "sharpness_median": 924.8,
+      "pivot_slide_x": 10.8,
+      "pivot_sway_x": 21.2,
+      "contact_slide_x": 162.4,
+      "contact_sway_x": 163.3,
+      "feet_drift_x": 36.0,
+      "feet_drift_y": 12,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/priest/turn/frame_01.png",
+      "battle-demo/artifacts/clips/priest/turn/frame_12.png",
+      "battle-demo/artifacts/clips/priest/turn/frame_22.png",
+      "battle-demo/artifacts/clips/priest/turn/frame_33.png"
+    ],
+    "verdict": "годен: движение 66.1, резкость 659.7/924.8, снос ступней 162.4 px, хромакей 0"
+  },
+  {
+    "char": "stormmage",
+    "anim": "turn",
+    "seed": 1107,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "clip": 39.2
+    },
+    "total_seconds": 39.2,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 55.9,
+      "sharpness_min": 969.8,
+      "sharpness_median": 1176.0,
+      "pivot_slide_x": 21.4,
+      "pivot_sway_x": 25.5,
+      "contact_slide_x": 0.1,
+      "contact_sway_x": 0.3,
+      "feet_drift_x": 43.0,
+      "feet_drift_y": 0,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0,
+      "flat_white_share": 0.0408
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/stormmage/turn/frame_01.png",
+      "battle-demo/artifacts/clips/stormmage/turn/frame_12.png",
+      "battle-demo/artifacts/clips/stormmage/turn/frame_22.png",
+      "battle-demo/artifacts/clips/stormmage/turn/frame_33.png"
+    ],
+    "verdict": "годен: движение 55.9, резкость 969.8/1176.0, снос ступней 0.1 px, хромакей 0, плоский белый 4.1%"
+  },
+  {
+    "char": "priest",
+    "anim": "hit",
+    "seed": 1113,
+    "length": 17,
+    "corner_before_clip": [
+      111,
+      201,
+      69
+    ],
+    "seconds": {
+      "clip": 36.2
+    },
+    "total_seconds": 36.2,
+    "audit": {
+      "frames": 17,
+      "motion_first_last": 64.1,
+      "sharpness_min": 1280.2,
+      "sharpness_median": 1387.9,
+      "pivot_slide_x": 25.5,
+      "pivot_sway_x": 27.9,
+      "contact_slide_x": 65.0,
+      "contact_sway_x": 117.7,
+      "feet_drift_x": 50.5,
+      "feet_drift_y": 7,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0,
+      "flat_white_share": 0.0
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/priest/hit/frame_01.png",
+      "battle-demo/artifacts/clips/priest/hit/frame_06.png",
+      "battle-demo/artifacts/clips/priest/hit/frame_12.png",
+      "battle-demo/artifacts/clips/priest/hit/frame_17.png"
+    ],
+    "verdict": "брак: ступни уехали по полу (65.0 px за цикл)"
+  },
+  {
+    "char": "spearman",
+    "anim": "attack",
+    "seed": 1115,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "clip": 39.2
+    },
+    "total_seconds": 39.2,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 48.7,
+      "sharpness_min": 3760.7,
+      "sharpness_median": 4660.4,
+      "pivot_slide_x": 2.8,
+      "pivot_sway_x": 27.5,
+      "contact_slide_x": 0.1,
+      "contact_sway_x": 0.4,
+      "feet_drift_x": 82.0,
+      "feet_drift_y": 0,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0,
+      "flat_white_share": 0.0043
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/spearman/attack/frame_01.png",
+      "battle-demo/artifacts/clips/spearman/attack/frame_12.png",
+      "battle-demo/artifacts/clips/spearman/attack/frame_22.png",
+      "battle-demo/artifacts/clips/spearman/attack/frame_33.png"
+    ],
+    "verdict": "годен: движение 48.7, резкость 3760.7/4660.4, снос ступней 0.1 px, хромакей 0, плоский белый 0.4%"
+  },
+  {
+    "char": "wizard",
+    "anim": "attack",
+    "seed": 1116,
+    "length": 33,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "clip": 39.2
+    },
+    "total_seconds": 39.2,
+    "audit": {
+      "frames": 33,
+      "motion_first_last": 70.3,
+      "sharpness_min": 1210.8,
+      "sharpness_median": 1517.2,
+      "pivot_slide_x": 16.4,
+      "pivot_sway_x": 45.8,
+      "contact_slide_x": 0.1,
+      "contact_sway_x": 0.3,
+      "feet_drift_x": 45.5,
+      "feet_drift_y": 0,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0,
+      "flat_white_share": 0.0426
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/wizard/attack/frame_01.png",
+      "battle-demo/artifacts/clips/wizard/attack/frame_12.png",
+      "battle-demo/artifacts/clips/wizard/attack/frame_22.png",
+      "battle-demo/artifacts/clips/wizard/attack/frame_33.png"
+    ],
+    "verdict": "годен: движение 70.3, резкость 1210.8/1517.2, снос ступней 0.1 px, хромакей 0, плоский белый 4.3%"
+  },
+  {
+    "char": "sorcerer",
+    "anim": "turn",
+    "seed": 1118,
+    "length": 17,
+    "corner_before_clip": [
+      0,
+      255,
+      0
+    ],
+    "seconds": {
+      "clip": 36.2
+    },
+    "total_seconds": 36.2,
+    "audit": {
+      "frames": 17,
+      "motion_first_last": 18.3,
+      "sharpness_min": 694.1,
+      "sharpness_median": 729.4,
+      "pivot_slide_x": 0.1,
+      "pivot_sway_x": 0.8,
+      "contact_slide_x": 0.2,
+      "contact_sway_x": 1.7,
+      "feet_drift_x": 9.0,
+      "feet_drift_y": 2,
+      "chroma_pixels_kept": 0,
+      "chroma_share": 0.0,
+      "flat_white_share": 0.0
+    },
+    "loop": null,
+    "subsampled": [
+      "battle-demo/artifacts/clips/sorcerer/turn/frame_01.png",
+      "battle-demo/artifacts/clips/sorcerer/turn/frame_06.png",
+      "battle-demo/artifacts/clips/sorcerer/turn/frame_12.png",
+      "battle-demo/artifacts/clips/sorcerer/turn/frame_17.png"
+    ],
+    "verdict": "годен: движение 18.3, резкость 694.1/729.4, снос ступней 0.2 px, хромакей 0, плоский белый 0.0%"
   }
 ]

@@ -9,7 +9,7 @@ extends Node
 ## Пиксели в git не идут (D-185) — кадры пишутся в `tmp/shots/`.
 
 const OUT := "/Users/user/sigil-of-the-unwilling/tmp/shots"
-const STATES := ["idle", "attack", "hit", "turn"]
+const STATES := ["idle", "walk", "attack", "hit", "turn"]
 ## Кадр берётся через несколько кадров движка: спрайт должен успеть переключиться.
 const SETTLE := 4
 
@@ -18,8 +18,11 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(OUT)
 	get_window().size = Vector2i(1920, 1080)
 	var field: BattleField = load("res://scenes/battle_field.tscn").instantiate()
-	field.auto_cycle = false
 	add_child(field)
+	# Рассадка происходит в `_ready` поля под `auto_cycle`; витрину гасим сразу
+	# после, иначе она сама переставляет дорожки быстрее, чем мы снимаем кадр.
+	field.auto_cycle = false
+	await get_tree().process_frame
 	for state: String in STATES:
 		field.show_state(StringName(state))
 		for _settle in SETTLE:

@@ -8,3 +8,11 @@ artifacts/screenshots/
 __pycache__/
 *.DS_Store
 /reports/
+
+# Клипы A-pose (VIDEO_1.json, 81 кадр на клип): 582 МБ пикселей, пересобираются
+# `tools/gen_clip_apose.py`. В git — только `report.json` (seed, промпт, замеры
+# аудита): он и есть доказательство вердикта. Пиксели в git не идут (D-185).
+artifacts/clips-apose/*/*/*.png
+artifacts/clips-apose/*/*/*/*.png
+# Зеркало A-pose для съёмки — вывод того же драйвера (`--mirror`), не источник.
+artifacts/mirror-src/

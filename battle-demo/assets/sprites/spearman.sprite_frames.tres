@@ -1,32 +1,57 @@
 [gd_resource type="SpriteFrames" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/sprites/spearman/hit/00.png" id="1_ajyog"]
-[ext_resource type="Texture2D" path="res://assets/sprites/spearman/hit/01.png" id="2_d8mud"]
-[ext_resource type="Texture2D" path="res://assets/sprites/spearman/hit/02.png" id="3_1qbgr"]
-[ext_resource type="Texture2D" path="res://assets/sprites/spearman/hit/03.png" id="4_5tuet"]
-[ext_resource type="Texture2D" path="res://assets/sprites/spearman/idle/00.png" id="5_to14v"]
-[ext_resource type="Texture2D" path="res://assets/sprites/spearman/idle/01.png" id="6_hfwaa"]
-[ext_resource type="Texture2D" path="res://assets/sprites/spearman/idle/02.png" id="7_8sxm3"]
-[ext_resource type="Texture2D" path="res://assets/sprites/spearman/idle/03.png" id="8_ccpor"]
-[ext_resource type="Texture2D" path="res://assets/sprites/spearman/turn/00.png" id="9_a476d"]
-[ext_resource type="Texture2D" path="res://assets/sprites/spearman/turn/01.png" id="10_2g8vf"]
-[ext_resource type="Texture2D" path="res://assets/sprites/spearman/turn/02.png" id="11_uqvac"]
-[ext_resource type="Texture2D" path="res://assets/sprites/spearman/turn/03.png" id="12_1mnmh"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/attack/00.png" id="1_a476d"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/attack/01.png" id="2_2g8vf"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/attack/02.png" id="3_uqvac"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/attack/03.png" id="4_1mnmh"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/hit/00.png" id="5_76dwc"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/hit/01.png" id="6_inyqb"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/hit/02.png" id="7_442xh"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/hit/03.png" id="8_spcar"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/idle/00.png" id="9_22kyb"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/idle/01.png" id="10_y3fpt"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/idle/02.png" id="11_ehll0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/idle/03.png" id="12_xspx7"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/turn/00.png" id="13_b65cw"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/turn/01.png" id="14_ter2e"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/turn/02.png" id="15_5ltuq"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/turn/03.png" id="16_iwtv5"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/walk/00.png" id="17_ed8r1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/walk/01.png" id="18_u5a1u"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/walk/02.png" id="19_haxvb"]
+[ext_resource type="Texture2D" path="res://assets/sprites/spearman/walk/03.png" id="20_65dwe"]
 
 [resource]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("1_ajyog")
+"texture": ExtResource("1_a476d")
 }, {
 "duration": 1.0,
-"texture": ExtResource("2_d8mud")
+"texture": ExtResource("2_2g8vf")
 }, {
 "duration": 1.0,
-"texture": ExtResource("3_1qbgr")
+"texture": ExtResource("3_uqvac")
 }, {
 "duration": 1.0,
-"texture": ExtResource("4_5tuet")
+"texture": ExtResource("4_1mnmh")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_76dwc")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_inyqb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_442xh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_spcar")
 }],
 "loop": 0,
 "name": &"hit",
@@ -34,16 +59,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("5_to14v")
+"texture": ExtResource("9_22kyb")
 }, {
 "duration": 1.0,
-"texture": ExtResource("6_hfwaa")
+"texture": ExtResource("10_y3fpt")
 }, {
 "duration": 1.0,
-"texture": ExtResource("7_8sxm3")
+"texture": ExtResource("11_ehll0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("8_ccpor")
+"texture": ExtResource("12_xspx7")
 }],
 "loop": 1,
 "name": &"idle",
@@ -51,18 +76,35 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("9_a476d")
+"texture": ExtResource("13_b65cw")
 }, {
 "duration": 1.0,
-"texture": ExtResource("10_2g8vf")
+"texture": ExtResource("14_ter2e")
 }, {
 "duration": 1.0,
-"texture": ExtResource("11_uqvac")
+"texture": ExtResource("15_5ltuq")
 }, {
 "duration": 1.0,
-"texture": ExtResource("12_1mnmh")
+"texture": ExtResource("16_iwtv5")
 }],
 "loop": 0,
 "name": &"turn",
 "speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("17_ed8r1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_u5a1u")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_haxvb")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20_65dwe")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 4.0
 }]

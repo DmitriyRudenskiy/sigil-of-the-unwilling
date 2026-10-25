@@ -1,32 +1,40 @@
 [gd_resource type="SpriteFrames" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/attack/00.png" id="1_bsiil"]
-[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/attack/01.png" id="2_swyi3"]
-[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/attack/02.png" id="3_ryd2t"]
-[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/attack/03.png" id="4_p8o8t"]
-[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/hit/00.png" id="5_u81d5"]
-[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/hit/01.png" id="6_500ih"]
-[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/hit/02.png" id="7_hry3r"]
-[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/hit/03.png" id="8_ibhdf"]
-[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/idle/00.png" id="9_p22pk"]
-[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/idle/01.png" id="10_703el"]
-[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/idle/02.png" id="11_v63uf"]
-[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/idle/03.png" id="12_lqq1k"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/attack/00.png" id="1_p22pk"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/attack/01.png" id="2_703el"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/attack/02.png" id="3_v63uf"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/attack/03.png" id="4_lqq1k"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/hit/00.png" id="5_6cul1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/hit/01.png" id="6_whsqy"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/hit/02.png" id="7_1405k"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/hit/03.png" id="8_qwvuu"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/idle/00.png" id="9_56ddv"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/idle/01.png" id="10_duufs"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/idle/02.png" id="11_m3cdn"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/idle/03.png" id="12_va3gl"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/turn/00.png" id="13_jsfir"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/turn/01.png" id="14_niwyj"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/turn/02.png" id="15_bttle"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/turn/03.png" id="16_va7lt"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/walk/00.png" id="17_qkh85"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/walk/01.png" id="18_81k0c"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/walk/02.png" id="19_tri4i"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sorcerer/walk/03.png" id="20_a7jbh"]
 
 [resource]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("1_bsiil")
+"texture": ExtResource("1_p22pk")
 }, {
 "duration": 1.0,
-"texture": ExtResource("2_swyi3")
+"texture": ExtResource("2_703el")
 }, {
 "duration": 1.0,
-"texture": ExtResource("3_ryd2t")
+"texture": ExtResource("3_v63uf")
 }, {
 "duration": 1.0,
-"texture": ExtResource("4_p8o8t")
+"texture": ExtResource("4_lqq1k")
 }],
 "loop": 0,
 "name": &"attack",
@@ -34,16 +42,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("5_u81d5")
+"texture": ExtResource("5_6cul1")
 }, {
 "duration": 1.0,
-"texture": ExtResource("6_500ih")
+"texture": ExtResource("6_whsqy")
 }, {
 "duration": 1.0,
-"texture": ExtResource("7_hry3r")
+"texture": ExtResource("7_1405k")
 }, {
 "duration": 1.0,
-"texture": ExtResource("8_ibhdf")
+"texture": ExtResource("8_qwvuu")
 }],
 "loop": 0,
 "name": &"hit",
@@ -51,18 +59,52 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("9_p22pk")
+"texture": ExtResource("9_56ddv")
 }, {
 "duration": 1.0,
-"texture": ExtResource("10_703el")
+"texture": ExtResource("10_duufs")
 }, {
 "duration": 1.0,
-"texture": ExtResource("11_v63uf")
+"texture": ExtResource("11_m3cdn")
 }, {
 "duration": 1.0,
-"texture": ExtResource("12_lqq1k")
+"texture": ExtResource("12_va3gl")
 }],
 "loop": 1,
 "name": &"idle",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("13_jsfir")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_niwyj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_bttle")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_va7lt")
+}],
+"loop": 0,
+"name": &"turn",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("17_qkh85")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_81k0c")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_tri4i")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20_a7jbh")
+}],
+"loop": 1,
+"name": &"walk",
 "speed": 4.0
 }]

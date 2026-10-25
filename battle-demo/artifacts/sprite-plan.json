@@ -1,5 +1,5 @@
 {
-  "char": "stormmage",
+  "char": "priest",
   "feet_offset": [
     -64,
     -112
@@ -10,21 +10,10 @@
       "loop": false,
       "fps": 8.0,
       "frames": [
-        "res://assets/sprites/stormmage/attack/00.png",
-        "res://assets/sprites/stormmage/attack/01.png",
-        "res://assets/sprites/stormmage/attack/02.png",
-        "res://assets/sprites/stormmage/attack/03.png"
-      ]
-    },
-    {
-      "name": "hit",
-      "loop": false,
-      "fps": 8.0,
-      "frames": [
-        "res://assets/sprites/stormmage/hit/00.png",
-        "res://assets/sprites/stormmage/hit/01.png",
-        "res://assets/sprites/stormmage/hit/02.png",
-        "res://assets/sprites/stormmage/hit/03.png"
+        "res://assets/sprites/priest/attack/00.png",
+        "res://assets/sprites/priest/attack/01.png",
+        "res://assets/sprites/priest/attack/02.png",
+        "res://assets/sprites/priest/attack/03.png"
       ]
     },
     {
@@ -32,12 +21,34 @@
       "loop": true,
       "fps": 4.0,
       "frames": [
-        "res://assets/sprites/stormmage/idle/00.png",
-        "res://assets/sprites/stormmage/idle/01.png",
-        "res://assets/sprites/stormmage/idle/02.png",
-        "res://assets/sprites/stormmage/idle/03.png"
+        "res://assets/sprites/priest/idle/00.png",
+        "res://assets/sprites/priest/idle/01.png",
+        "res://assets/sprites/priest/idle/02.png",
+        "res://assets/sprites/priest/idle/03.png"
+      ]
+    },
+    {
+      "name": "turn",
+      "loop": false,
+      "fps": 8.0,
+      "frames": [
+        "res://assets/sprites/priest/turn/00.png",
+        "res://assets/sprites/priest/turn/01.png",
+        "res://assets/sprites/priest/turn/02.png",
+        "res://assets/sprites/priest/turn/03.png"
+      ]
+    },
+    {
+      "name": "walk",
+      "loop": true,
+      "fps": 4.0,
+      "frames": [
+        "res://assets/sprites/priest/walk/00.png",
+        "res://assets/sprites/priest/walk/01.png",
+        "res://assets/sprites/priest/walk/02.png",
+        "res://assets/sprites/priest/walk/03.png"
       ]
     }
   ],
-  "out": "res://assets/sprites/stormmage.sprite_frames.tres"
+  "out": "res://assets/sprites/priest.sprite_frames.tres"
 }

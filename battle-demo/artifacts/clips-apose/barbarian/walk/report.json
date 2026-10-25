@@ -1,0 +1,35 @@
+{
+ "char": "barbarian",
+ "anim": "walk",
+ "seed": 1106,
+ "mirror": true,
+ "length": 81,
+ "seconds": 0.0,
+ "corner_before_clip": [
+  10,
+  162,
+  0
+ ],
+ "audit": {
+  "frames": 81,
+  "motion_first_last": 37.5,
+  "sharpness_min": 1417.2,
+  "sharpness_median": 1677.2,
+  "pivot_slide_x": 1.8,
+  "pivot_sway_x": 7.1,
+  "contact_slide_x": 126.1,
+  "contact_sway_x": 168.8,
+  "feet_drift_x": 37.0,
+  "feet_drift_y": 36,
+  "chroma_pixels_kept": 0,
+  "chroma_share": 0.0,
+  "flat_white_share": 0.0
+ },
+ "subsampled": [
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/barbarian/walk/frame_01.png",
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/barbarian/walk/frame_27.png",
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/barbarian/walk/frame_53.png",
+  "/Users/user/sigil-of-the-unwilling/battle-demo/artifacts/clips-apose/barbarian/walk/frame_79.png"
+ ],
+ "verdict": "годен: движение 37.5, резкость 1417.2/1677.2, снос ступней 126.1 px, хромакей 0, плоский белый 0.0%"
+}

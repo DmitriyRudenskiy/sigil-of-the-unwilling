@@ -1,36 +1,40 @@
 [gd_resource type="SpriteFrames" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/sprites/archer/attack/00.png" id="1_epn63"]
-[ext_resource type="Texture2D" path="res://assets/sprites/archer/attack/01.png" id="2_6ala1"]
-[ext_resource type="Texture2D" path="res://assets/sprites/archer/attack/02.png" id="3_8boqr"]
-[ext_resource type="Texture2D" path="res://assets/sprites/archer/attack/03.png" id="4_a0yc5"]
-[ext_resource type="Texture2D" path="res://assets/sprites/archer/hit/00.png" id="5_aja8g"]
-[ext_resource type="Texture2D" path="res://assets/sprites/archer/hit/01.png" id="6_uwh5h"]
-[ext_resource type="Texture2D" path="res://assets/sprites/archer/hit/02.png" id="7_esbik"]
-[ext_resource type="Texture2D" path="res://assets/sprites/archer/hit/03.png" id="8_x4fwj"]
-[ext_resource type="Texture2D" path="res://assets/sprites/archer/idle/00.png" id="9_qot04"]
-[ext_resource type="Texture2D" path="res://assets/sprites/archer/idle/01.png" id="10_ir8e6"]
-[ext_resource type="Texture2D" path="res://assets/sprites/archer/idle/02.png" id="11_xesap"]
-[ext_resource type="Texture2D" path="res://assets/sprites/archer/idle/03.png" id="12_dwyg1"]
-[ext_resource type="Texture2D" path="res://assets/sprites/archer/turn/00.png" id="13_rd8t0"]
-[ext_resource type="Texture2D" path="res://assets/sprites/archer/turn/01.png" id="14_g42n3"]
-[ext_resource type="Texture2D" path="res://assets/sprites/archer/turn/02.png" id="15_4hrr4"]
-[ext_resource type="Texture2D" path="res://assets/sprites/archer/turn/03.png" id="16_co00b"]
+[ext_resource type="Texture2D" path="res://assets/sprites/archer/attack/00.png" id="1_aja8g"]
+[ext_resource type="Texture2D" path="res://assets/sprites/archer/attack/01.png" id="2_uwh5h"]
+[ext_resource type="Texture2D" path="res://assets/sprites/archer/attack/02.png" id="3_esbik"]
+[ext_resource type="Texture2D" path="res://assets/sprites/archer/attack/03.png" id="4_x4fwj"]
+[ext_resource type="Texture2D" path="res://assets/sprites/archer/hit/00.png" id="5_qot04"]
+[ext_resource type="Texture2D" path="res://assets/sprites/archer/hit/01.png" id="6_ir8e6"]
+[ext_resource type="Texture2D" path="res://assets/sprites/archer/hit/02.png" id="7_xesap"]
+[ext_resource type="Texture2D" path="res://assets/sprites/archer/hit/03.png" id="8_dwyg1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/archer/idle/00.png" id="9_rd8t0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/archer/idle/01.png" id="10_g42n3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/archer/idle/02.png" id="11_4hrr4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/archer/idle/03.png" id="12_co00b"]
+[ext_resource type="Texture2D" path="res://assets/sprites/archer/turn/00.png" id="13_axpwc"]
+[ext_resource type="Texture2D" path="res://assets/sprites/archer/turn/01.png" id="14_ifgpd"]
+[ext_resource type="Texture2D" path="res://assets/sprites/archer/turn/02.png" id="15_2w37m"]
+[ext_resource type="Texture2D" path="res://assets/sprites/archer/turn/03.png" id="16_04pub"]
+[ext_resource type="Texture2D" path="res://assets/sprites/archer/walk/00.png" id="17_w7sws"]
+[ext_resource type="Texture2D" path="res://assets/sprites/archer/walk/01.png" id="18_ynmvh"]
+[ext_resource type="Texture2D" path="res://assets/sprites/archer/walk/02.png" id="19_d6iav"]
+[ext_resource type="Texture2D" path="res://assets/sprites/archer/walk/03.png" id="20_hidti"]
 
 [resource]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("1_epn63")
+"texture": ExtResource("1_aja8g")
 }, {
 "duration": 1.0,
-"texture": ExtResource("2_6ala1")
+"texture": ExtResource("2_uwh5h")
 }, {
 "duration": 1.0,
-"texture": ExtResource("3_8boqr")
+"texture": ExtResource("3_esbik")
 }, {
 "duration": 1.0,
-"texture": ExtResource("4_a0yc5")
+"texture": ExtResource("4_x4fwj")
 }],
 "loop": 0,
 "name": &"attack",
@@ -38,16 +42,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("5_aja8g")
+"texture": ExtResource("5_qot04")
 }, {
 "duration": 1.0,
-"texture": ExtResource("6_uwh5h")
+"texture": ExtResource("6_ir8e6")
 }, {
 "duration": 1.0,
-"texture": ExtResource("7_esbik")
+"texture": ExtResource("7_xesap")
 }, {
 "duration": 1.0,
-"texture": ExtResource("8_x4fwj")
+"texture": ExtResource("8_dwyg1")
 }],
 "loop": 0,
 "name": &"hit",
@@ -55,16 +59,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("9_qot04")
+"texture": ExtResource("9_rd8t0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("10_ir8e6")
+"texture": ExtResource("10_g42n3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("11_xesap")
+"texture": ExtResource("11_4hrr4")
 }, {
 "duration": 1.0,
-"texture": ExtResource("12_dwyg1")
+"texture": ExtResource("12_co00b")
 }],
 "loop": 1,
 "name": &"idle",
@@ -72,18 +76,35 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("13_rd8t0")
+"texture": ExtResource("13_axpwc")
 }, {
 "duration": 1.0,
-"texture": ExtResource("14_g42n3")
+"texture": ExtResource("14_ifgpd")
 }, {
 "duration": 1.0,
-"texture": ExtResource("15_4hrr4")
+"texture": ExtResource("15_2w37m")
 }, {
 "duration": 1.0,
-"texture": ExtResource("16_co00b")
+"texture": ExtResource("16_04pub")
 }],
 "loop": 0,
 "name": &"turn",
 "speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("17_w7sws")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_ynmvh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_d6iav")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20_hidti")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 4.0
 }]
