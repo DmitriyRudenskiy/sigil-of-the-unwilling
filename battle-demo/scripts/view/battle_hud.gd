@@ -97,6 +97,11 @@ func command_enabled(ability_id: StringName) -> bool:
 	return button != null and not button.disabled
 
 
+## Сколько команд в панели (после конца боя — ноль, см. `_clear_commands`).
+func command_count() -> int:
+	return _buttons.size()
+
+
 ## Причина, по которой команда погашена (метрика спеки: «подпись причины»).
 func command_reason(ability_id: StringName) -> String:
 	var button := command(ability_id)
@@ -229,11 +234,20 @@ func refresh(_x = null) -> void:
 	_fill_panel(_right, foes[0] if not foes.is_empty() else null)
 	_ring.text = str(combat.turn_index + 1)
 	_refresh_strip()
-	if actor != null:
+	if actor != null and not combat.finished:
 		_commands_for(actor)
 		_reason.text = ""
 	else:
+		# После конца боя команд нет: `CombatState.perform` на финише
+		# утверждает, поэтому висящая кнопка была бы падением, а не ходом.
+		_clear_commands()
 		_reason.text = "бой окончен"
+
+
+func _clear_commands() -> void:
+	for child in commands.get_children():
+		child.queue_free()
+	_buttons = {}
 
 
 func _fill_panel(store: Dictionary, unit: BattleUnit) -> void:
@@ -268,7 +282,12 @@ func _refresh_strip() -> void:
 	for cell in _strip.values():
 		cell["root"].free()
 	_strip = {}
-	var units: Array = combat.order
+	var units: Array = []
+	for unit in combat.order:
+		# Погибшие из очереди уходят (спека 9.5): карточка мёртвого юнита
+		# в полосе порядка врала бы о том, кто ещё ходит.
+		if unit.is_alive():
+			units.append(unit)
 	var at := Vector2(VIEWPORT_WIDTH / 2.0 - units.size() * STRIP_CELL / 2.0, 24.0)
 	for index in units.size():
 		var unit: BattleUnit = units[index]
@@ -281,8 +300,6 @@ func _refresh_strip() -> void:
 		)
 		var portrait := _portrait(unit.stats.id, STRIP_CELL - 20.0)
 		portrait.position = Vector2(6, 6)
-		if not unit.is_alive():
-			portrait.modulate = Color(0.4, 0.4, 0.45, 1)
 		root.add_child(portrait)
 		var track := _rect(Vector2(STRIP_CELL - 20, 5), HP_TRACK)
 		track.position = Vector2(6, STRIP_CELL - 12)

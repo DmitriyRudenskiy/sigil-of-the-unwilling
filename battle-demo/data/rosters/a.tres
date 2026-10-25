@@ -137,5 +137,5 @@ abilities = Array[ExtResource("3_qlayx")]([SubResource("Resource_okh38")])
 script = ExtResource("1_sqimk")
 id = &"a"
 title = "Стена"
-difference = "Есть рыцарь, нет жреца: держим удар, лечения нет"
+difference = "Есть рыцарь и копейщик, нет жреца и мага грозы: держим удар, лечения нет"
 units = Array[ExtResource("2_eaomo")]([SubResource("Resource_sg0bq"), SubResource("Resource_jf0pn"), SubResource("Resource_biq11"), SubResource("Resource_5blpj"), SubResource("Resource_mdl5m"), SubResource("Resource_xig5f"), SubResource("Resource_3dfcu")])

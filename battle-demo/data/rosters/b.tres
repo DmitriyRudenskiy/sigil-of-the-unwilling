@@ -4,25 +4,6 @@
 [ext_resource type="Script" path="res://scripts/combat/unit_stats.gd" id="2_g40sl"]
 [ext_resource type="Script" path="res://scripts/combat/ability.gd" id="3_iwnce"]
 
-[sub_resource type="Resource" id="Resource_cnnbj"]
-script = ExtResource("3_iwnce")
-id = &"impaling_thrust"
-display_name = "Пронзающий выпад"
-cost = 2
-cooldown = 2
-multiplier = 1.6
-defense_ignores = 0.5
-
-[sub_resource type="Resource" id="Resource_jf0pn"]
-script = ExtResource("2_g40sl")
-id = &"spearman"
-display_name = "Копейщик"
-max_hp = 90
-attack = 16
-defense = 8
-initiative = 9
-abilities = Array[ExtResource("3_iwnce")]([SubResource("Resource_cnnbj")])
-
 [sub_resource type="Resource" id="Resource_c613e"]
 script = ExtResource("3_iwnce")
 id = &"volley"
@@ -134,9 +115,29 @@ defense = 7
 initiative = 8
 abilities = Array[ExtResource("3_iwnce")]([SubResource("Resource_nb0ap")])
 
+[sub_resource type="Resource" id="Resource_eb4pm"]
+script = ExtResource("3_iwnce")
+id = &"thunderstorm"
+display_name = "Гроза"
+cost = 3
+cooldown = 3
+multiplier = 1.2
+target_kind = 1
+applies = Array[StringName]([&"bleed"])
+
+[sub_resource type="Resource" id="Resource_fansq"]
+script = ExtResource("2_g40sl")
+id = &"stormmage"
+display_name = "Маг грозы"
+max_hp = 180
+attack = 24
+defense = 9
+initiative = 12
+abilities = Array[ExtResource("3_iwnce")]([SubResource("Resource_eb4pm")])
+
 [resource]
 script = ExtResource("1_ce30u")
 id = &"b"
 title = "Ритм"
-difference = "Есть жрец, нет рыцаря: линия тонкая, живём благословением"
-units = Array[ExtResource("2_g40sl")]([SubResource("Resource_jf0pn"), SubResource("Resource_biq11"), SubResource("Resource_5blpj"), SubResource("Resource_mdl5m"), SubResource("Resource_xig5f"), SubResource("Resource_3dfcu"), SubResource("Resource_1tarp")])
+difference = "Есть жрец и маг грозы, нет рыцаря и копейщика: тонкая линия, живём благословением и уроном"
+units = Array[ExtResource("2_g40sl")]([SubResource("Resource_biq11"), SubResource("Resource_5blpj"), SubResource("Resource_mdl5m"), SubResource("Resource_xig5f"), SubResource("Resource_3dfcu"), SubResource("Resource_1tarp"), SubResource("Resource_fansq")])

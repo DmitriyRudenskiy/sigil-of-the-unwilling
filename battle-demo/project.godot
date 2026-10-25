@@ -10,6 +10,10 @@ config/name="Sigil of the Unwilling — Battle Demo"
 run/main_scene="res://scenes/roster_select.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
+[autoload]
+
+DemoFlow="*res://scripts/demo_flow.gd"
+
 [display]
 
 window/size/viewport_width=1920

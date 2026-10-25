@@ -36,20 +36,35 @@ func test_rosters_are_the_designed_pair() -> void:
 	var b := DataLibrary.load_roster("b")
 	assert_int(a.units.size()).is_equal(DataLibrary.ROSTER_SIZE)
 	assert_int(b.units.size()).is_equal(DataLibrary.ROSTER_SIZE)
-	# A = позиции 1–7 (есть рыцарь, нет жреца), B = позиции 2–8 (наоборот).
+	# A = позиции 1–7 (тяжёлая линия), B = позиции 3–9 (урон и лечение).
 	assert_bool(_has(a, &"knight")).is_true()
-	assert_bool(_has(a, &"priest")).is_false()
+	assert_bool(_has(a, &"stormmage")).is_false()
 	assert_bool(_has(b, &"knight")).is_false()
-	assert_bool(_has(b, &"priest")).is_true()
+	assert_bool(_has(b, &"stormmage")).is_true()
 	assert_str(a.title).is_not_equal(b.title)
 	assert_str(a.difference).is_not_equal(b.difference)
 
 
-func test_rosters_differ_by_exactly_one_unit() -> void:
+func test_rosters_differ_symmetrically() -> void:
 	var a := _ids(DataLibrary.load_roster("a"))
 	var b := _ids(DataLibrary.load_roster("b"))
-	assert_int(_difference(a, b).size()).is_equal(1)
-	assert_int(_difference(b, a).size()).is_equal(1)
+	var only_a := _difference(a, b).size()
+	assert_int(only_a).is_greater(0)
+	assert_int(_difference(b, a).size()).is_equal(only_a)
+
+
+## Юнит пула, которого нет ни в одном наборе, — мёртвый груз: он генерится,
+## валидируется и никогда не выходит на поле.
+func test_every_pool_unit_plays() -> void:
+	var covered := {}
+	for roster in DataLibrary.load_rosters():
+		for stats in roster.units:
+			covered[stats.id] = true
+	var missing: Array[String] = []
+	for id in DataLibrary.load_units():
+		if id != DataLibrary.ENEMY_ID and not covered.has(id):
+			missing.append(String(id))
+	assert_str(", ".join(missing)).is_empty()
 
 
 func test_enemy_is_not_in_the_pool() -> void:

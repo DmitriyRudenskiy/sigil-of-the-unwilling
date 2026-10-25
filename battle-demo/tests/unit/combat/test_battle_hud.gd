@@ -70,6 +70,43 @@ func test_ability_button_goes_dark_on_cooldown() -> void:
 	assert_bool(screen.hud.command_enabled(&"smite")).is_false()
 
 
+func test_dead_units_leave_the_order_strip() -> void:
+	var screen := _screen()
+	var combat := _combat()
+	screen.run(combat)
+	var victim: BattleUnit = combat.foes_of(combat.current)[0]
+	victim.hp = 0
+	screen.hud.refresh()
+	assert_int(screen.hud.strip_count()).is_equal(combat.units.size() - 1)
+
+
+## После конца боя воевать нечем: `CombatState.perform` на финише утверждает,
+## поэтому висящая кнопка была бы падением, а не ходом.
+func test_no_commands_once_the_battle_is_over() -> void:
+	var screen := _screen()
+	var combat := _combat()
+	screen.run(combat)
+	BattleFactory.auto_play(combat)
+	assert_bool(combat.finished).is_true()
+	assert_int(screen.hud.command_count()).is_equal(0)
+
+
+## Ход противника разыгрывается внутри `_advance` (ИИ ходит сразу, как только
+## очередь до него доходит), поэтому UI чужого хода не видит вовсе: панель
+## команд заполняется только своим юнитом. Специка 9.6 — «для юнита противника
+## действий нет».
+func test_the_ui_never_gets_an_enemy_turn() -> void:
+	var screen := _screen()
+	var combat := _combat()
+	screen.run(combat)
+	for _turn in 12:
+		if combat.finished:
+			break
+		assert_int(combat.current.side).is_equal(BattleUnit.SIDE_PLAYER)
+		assert_int(screen.hud.command_count()).is_greater(0)
+		combat.perform(BattleAction.skip(combat.current))
+
+
 func test_units_stand_on_distinct_hexes_of_their_own_flank() -> void:
 	var screen := _screen()
 	var combat := _combat()

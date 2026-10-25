@@ -97,6 +97,20 @@ func test_identical_rosters_are_reported() -> void:
 	assert_bool(_fires(problems, "различаются на 0 и 0 юнитов")).is_true()
 
 
+## Жреца меняем на рыцаря, чтобы размер набора и правило отличий не сработали
+## раньше: проверять хотим ровно покрытие пула.
+func test_pool_unit_outside_every_roster_is_reported() -> void:
+	var second := _roster("b")
+	var swapped: Array[UnitStats] = []
+	for stats in second.units:
+		swapped.append(
+			_units()[&"knight"] if stats.id == &"priest" else stats
+		)
+	second.units = swapped
+	var problems := DataLibrary.validate(_units(), [_roster("a"), second])
+	assert_bool(_fires(problems, "не входит ни в один набор")).is_true()
+
+
 func _units_problems(units: Dictionary) -> Array[String]:
 	return DataLibrary.validate(units, DataLibrary.load_rosters())
 

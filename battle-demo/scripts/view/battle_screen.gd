@@ -31,12 +31,26 @@ var _bars := {}
 @onready var marker: ColorRect = $Marker
 @onready var active_label: Label = $ActiveLabel
 @onready var hud: BattleHud = $HUD
+@onready var result_view: BattleResult = $Result
 
 
 func _enter_tree() -> void:
 	# Витрина выключается до `_ready` поля, иначе линия из данных ростеров
 	# разъедется с юнитами боя.
 	$Field.auto_cycle = false
+
+
+func _ready() -> void:
+	result_view.replay.connect(
+		func() -> void: get_tree().reload_current_scene()
+	)
+	result_view.change_roster.connect(
+		func() -> void:
+			get_tree().change_scene_to_file("res://scenes/roster_select.tscn")
+	)
+	# Экран запускается сам: игрок пришёл сюда с выбора набора, а не из теста.
+	if combat == null:
+		start_roster(DemoFlow.roster_id)
 
 
 ## Состав из данных — то, что приносит выбор набора (9.2).
@@ -51,12 +65,14 @@ func start_roster(id: String, seed_value: int = 1) -> void:
 ## Экземпляр боя до `start()` или после: очередь на момент подписки уже стоит на
 ## активном юните, поэтому его метка ставится сразу.
 func run(built: CombatState) -> void:
+	_reset_view()
 	combat = built
 	field.attach(combat)
 	hud.attach(combat)
 	combat.turn_started.connect(_on_turn)
 	combat.action_performed.connect(_on_action)
 	combat.unit_died.connect(_on_action)
+	combat.battle_ended.connect(_on_battle_ended)
 	for unit in combat.units:
 		var view := field.spawn(unit)
 		_bars[unit.uid()] = _make_bar(view)
@@ -73,6 +89,26 @@ func bar_of(unit: BattleUnit) -> ColorRect:
 
 func _on_action(_action) -> void:
 	_refresh_all()
+
+
+## Исход — только надпись и выходы (задача 9.7). Бой к этому моменту окончен в
+## модели, и экран результата ничего не решает: он показывает `combat.result`.
+func _on_battle_ended(outcome: int) -> void:
+	result_view.show_outcome(outcome, combat.turn_index)
+
+
+## Повтор боя на том же экране: старые картинки и полосы снимаются, иначе
+## второй `run` оставил бы два набора полос над одними юнитами.
+func _reset_view() -> void:
+	if combat == null:
+		return
+	for fill: ColorRect in _bars.values():
+		fill.get_parent().free()
+	_bars = {}
+	field.clear_views()
+	marker.visible = false
+	active_label.text = ""
+	result_view.visible = false
 
 
 func _on_turn(unit: BattleUnit) -> void:

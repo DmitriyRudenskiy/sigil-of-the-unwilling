@@ -125,6 +125,14 @@ func spawn(unit: BattleUnit) -> BattleUnitView:
 	return view
 
 
+## Сброс картинок перед новым боем на том же экране (повтор с экрана результата).
+func clear_views() -> void:
+	for view: BattleUnitView in _views.values():
+		view.free()
+	_views = {}
+	_cells = {}
+
+
 ## Клетка юнита — для тестов рассадки и для подсветки выбранной клетки.
 func cell_of(unit: BattleUnit) -> Vector2i:
 	return _cells.get(unit.uid(), Vector2i(-1, -1))

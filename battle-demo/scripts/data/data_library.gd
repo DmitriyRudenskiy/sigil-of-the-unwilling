@@ -123,10 +123,12 @@ static func _check_rosters(units: Dictionary, rosters: Array, problems: Array[St
 		membership[roster.id] = ids
 	if membership.size() == ROSTER_IDS.size():
 		_check_roster_difference(membership, problems)
+		_check_pool_coverage(units, membership, problems)
 
 
-## Наборы различаются ровно одним юнитом с каждой стороны — иначе «два набора»
-## это два разных состава, а не вариация.
+## Наборы различаются, но остаются вариацией одного состава: с каждой стороны
+## одинаковое число юнитов, которых нет у другой (иначе «два набора» — это два
+## разных состава, а не выбор).
 static func _check_roster_difference(membership: Dictionary, problems: Array[String]) -> void:
 	var first: Dictionary = membership[ROSTER_IDS[0]]
 	var second: Dictionary = membership[ROSTER_IDS[1]]
@@ -138,10 +140,25 @@ static func _check_roster_difference(membership: Dictionary, problems: Array[Str
 	for id in second:
 		if not first.has(id):
 			only_second += 1
-	if only_first != 1 or only_second != 1:
+	if only_first == 0 or only_first != only_second:
 		problems.append(
 			(
-				"наборы различаются на %d и %d юнитов, ожидалось по одному"
+				"наборы различаются на %d и %d юнитов, ожидалось одинаково и больше нуля"
 				% [only_first, only_second]
 			)
 		)
+
+
+## Каждый юнит пула обязан играть хотя бы в одном наборе: юнит, которого нет ни
+## в одном составе, — писатель без читателя (проверено на маге грозы, который
+## после возвращения в пул остался за обоими наборами).
+static func _check_pool_coverage(
+	units: Dictionary, membership: Dictionary, problems: Array[String]
+) -> void:
+	var covered := {}
+	for ids: Dictionary in membership.values():
+		for id in ids:
+			covered[id] = true
+	for id in units:
+		if id != ENEMY_ID and not covered.has(id):
+			problems.append("юнит %s не входит ни в один набор" % id)

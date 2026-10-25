@@ -18,11 +18,25 @@ func _init() -> void:
 		assert(error == OK, "не сохранён %s (%d)" % [path, error])
 		by_id[stats.id] = stats
 
+	# Сдвиг набора B на две позиции, а не на одну: с 2026-10-26 в пуле девять
+	# юнитов (маг грозы вернулся в пул, врагом стал зверь), и при сдвиге на одну
+	# девятый юнит не попадал бы ни в один состав.
 	var rosters := [
-		_roster(&"a", "Стена", "Есть рыцарь, нет жреца: держим удар, лечения нет",
-			["knight", "spearman", "archer", "wizard", "sorcerer", "barbarian", "cutthroat"], by_id),
-		_roster(&"b", "Ритм", "Есть жрец, нет рыцаря: линия тонкая, живём благословением",
-			["spearman", "archer", "wizard", "sorcerer", "barbarian", "cutthroat", "priest"], by_id),
+		_roster(
+			&"a",
+			"Стена",
+			"Есть рыцарь и копейщик, нет жреца и мага грозы: держим удар, лечения нет",
+			["knight", "spearman", "archer", "wizard", "sorcerer", "barbarian", "cutthroat"],
+			by_id,
+		),
+		_roster(
+			&"b",
+			"Ритм",
+			("Есть жрец и маг грозы, нет рыцаря и копейщика: тонкая линия, "
+				+ "живём благословением и уроном"),
+			["archer", "wizard", "sorcerer", "barbarian", "cutthroat", "priest", "stormmage"],
+			by_id,
+		),
 	]
 	for roster in rosters:
 		var path := "res://data/rosters/%s.tres" % roster.id
