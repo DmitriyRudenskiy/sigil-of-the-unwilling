@@ -12,6 +12,12 @@ extends SceneTree
 ## Повторные прогоны в сводку не входят.
 ## Трасса медленных ходов (для ячеек, упирающихся в предохранитель): `MATRIX_TRACE=1`,
 ## частота снимков — `MATRIX_BEAT_FRAMES` (по умолчанию 1000 кадров хода).
+## Трасса городского реестра (задача 6.1 «проследить общий City-ledger»): `MATRIX_LEDGER=1`,
+## частота — `MATRIX_LEDGER_EVERY` ходов (по умолчанию 10) + обязательный снимок на конце
+## прогона. Строка `MATRIX-LEDGER` печатает запасы и потоки еды, жильё, население, здания,
+## **именованные блокировки следующего уровня** и почему не строится каждый id из
+## `BalanceProbe.BUILD_QUEUE`. Только чтение: кнопки `CityScreen` тратят запасы и строят,
+## поэтому трасса повторяет их проверки, а не вызывает их.
 ##
 ## Флаг MCP_TEST инструмент ставит сам: `WorldSaveLoadService.handle_headless_exit()`
 ## при headless и НЕ-тестовом запуске завершает процесс через секунду — живой игре это
@@ -58,6 +64,12 @@ var BEAT_FRAMES := 1000 if OS.get_environment("MATRIX_BEAT_FRAMES") == "" else m
 ## (`ScenarioTargets.seed_for(class, role)`), поэтому расхождение строк — это либо ГСЧ
 ## вне сида, либо состояние, пережившее teardown (класс T-204).
 var REPEAT := maxi(1, int(OS.get_environment("MATRIX_REPEAT")))
+
+## Снимки City-реестра по ходу прогона (задача 6.1). Отдельный флаг, а не часть трассы
+## кадров: ledger нужен на здоровых профилях, чтобы отличить «нет ресурсов» от «нет места»
+## и от «условие уровня не выполнено», а трасса кадров — на зависших.
+var LEDGER := OS.get_environment("MATRIX_LEDGER") != ""
+var LEDGER_EVERY := 10 if OS.get_environment("MATRIX_LEDGER_EVERY") == "" else maxi(1, int(OS.get_environment("MATRIX_LEDGER_EVERY")))
 
 var _rows: Array[Dictionary] = []
 
@@ -152,6 +164,8 @@ func _run_profile(role_id: String, class_id: String, turns: int) -> Dictionary:
 			print("MATRIX-BEAT|" + _row_to_line(_battle_beat(class_id, last_turn, frames_this_turn, pilot)))
 			print("MATRIX-BURST|class=%s|iid:turn/uid=%s" % [class_id, await _burst()])
 		if int(pilot.turn) != last_turn:
+			if LEDGER and int(pilot.turn) % LEDGER_EVERY == 0:
+				print("MATRIX-LEDGER|" + _row_to_line(_ledger_snapshot(class_id, pilot)))
 			if trace and frames_this_turn > SLOW_TURN_FRAMES:
 				print("MATRIX-SLOW|class=%s|turn=%d|frames=%d|cell=%s|battles=%d|stuck=%d" % [
 					class_id, last_turn, frames_this_turn, str(pilot._hero_cell()),
@@ -163,6 +177,10 @@ func _run_profile(role_id: String, class_id: String, turns: int) -> Dictionary:
 		print("MATRIX-SLOW|class=%s|turn=%d|frames=%d|cell=%s|battles=%d|stuck=%d|unfinished=true" % [
 			class_id, last_turn, frames_this_turn, str(pilot._hero_cell()),
 			int(pilot.battles_fought) - battles_at_turn_start, int(pilot.stuck)])
+	if LEDGER:
+		# Конечный снимок обязателен: вопрос 6.1 — не «как рос город», а «чего не хватило
+		# до уровня 2 и до второго здания», а это видно только на последнем ходе.
+		print("MATRIX-LEDGER|" + _row_to_line(_ledger_snapshot(class_id, pilot)))
 	var metrics: Dictionary = pilot.role.metrics(pilot)
 	var endgame: Dictionary = world.get_endgame_state()
 	row.turns = int(pilot.turn)
@@ -207,6 +225,83 @@ func _run_profile(role_id: String, class_id: String, turns: int) -> Dictionary:
 	await process_frame
 	await process_frame
 	return row
+
+
+## Снимок городского реестра (задача 6.1). **Только чтение**: `CityScreen.build_pressed`,
+## `recruit_pressed` и `level_up_pressed` исполняют действие (строят, нанимают, поднимают
+## уровень), поэтому трасса повторяет их проверки — `level_up_check` /
+## `ProsperitySystem.can_level_up`, `first_free_build_cell`, `can_build_building`, —
+## иначе сам замер двигал бы то, что измеряет (тот же принцип, что у сенситивной пробы
+## D-258: наблюдение не должно менять наблюдаемое).
+func _ledger_snapshot(class_id: String, pilot: Node) -> Dictionary:
+	var out := {"class": class_id, "turn": int(pilot.turn)}
+	var city = pilot._player_city
+	if city == null:
+		out["city"] = "none"
+		return out
+	out["level"] = int(city.level)
+	out["prosperity"] = "%.0f" % float(city.prosperity)
+	out["pop"] = int(city.pop_total())
+	out["pop_capped"] = int(city.pop_capped())
+	out["housing"] = int(city.housing_total())
+	out["bld"] = int(city.buildings.size())
+	out["boroughs"] = int(city.boroughs.size())
+	out["food"] = "%.1f" % float(city.food_stockpile)
+	out["food_in"] = "%.1f" % float(city.food_supply_this_turn)
+	out["food_out"] = "%.1f" % float(city.food_demand_this_turn)
+	out["starving"] = str(bool(city.starving))
+	out["storage"] = _storage_line(city)
+	out["level_block"] = _level_block(city)
+	out["build_block"] = _build_block(pilot, city)
+	return out
+
+
+func _storage_line(city) -> String:
+	var keys: Array = city.storage.keys()
+	keys.sort()
+	var parts: Array[String] = []
+	for k in keys:
+		var v: float = float(city.storage[k])
+		if v > 0.0:
+			parts.append("%s:%d" % [str(k), int(v)])
+	return ",".join(parts) if not parts.is_empty() else "empty"
+
+
+## Именованное условие следующего уровня — то же разветвление, что в
+## `CityScreen.level_up_pressed`: у campaign-города это клеточный лимит, у мирового —
+## процветание/население/здания. Различать их нужно именно в трассе: «город не растёт»
+## при campaign-переносчике и при мировом — это два разных дефекта.
+func _level_block(city) -> String:
+	if not city.campaign_buildings.is_empty():
+		var cc: Dictionary = CampaignCityProgression.level_up_check(city)
+		if bool(cc.get("ok", false)):
+			return "campaign:ok"
+		return "campaign:%s %d/%d" % [str(cc.get("reason", "?")), int(cc.get("used", 0)), int(cc.get("limit", 0))]
+	var check: Dictionary = ProsperitySystem.can_level_up(city)
+	if bool(check.get("ok", false)):
+		return "ok"
+	return "; ".join(check.get("reasons", []))
+
+
+## Почему не строится каждый id из очереди стройки автопилота (запасы, место, требования).
+func _build_block(pilot: Node, city) -> String:
+	var screen: Node = pilot._city_screen
+	if screen == null:
+		return "no_screen"
+	var bounds: Vector2i = screen.map_bounds
+	var parts: Array[String] = []
+	for def_id in BalanceProbe.BUILD_QUEUE:
+		var bdef = BuildingDefs.def_by_id(StringName(str(def_id)))
+		if bdef == null:
+			parts.append("%s:?" % str(def_id))
+			continue
+		var cell: Vector2i = city.first_free_build_cell(bdef, bounds)
+		if cell == Vector2i(-1, -1):
+			parts.append("%s:no_cell" % str(def_id))
+			continue
+		var check: CityCheck = city.can_build_building(bdef, cell)
+		parts.append("%s:%s" % [str(def_id), "ok" if check.ok else String(check.reason)])
+	return "; ".join(parts)
 
 
 ## Сердцебиение медленного хода: где именно горят кадры — в бою (и на каком юните),
