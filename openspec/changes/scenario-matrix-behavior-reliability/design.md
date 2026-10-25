@@ -135,3 +135,29 @@ Rollback is limited to the individual behavior/reporting changes; retain baselin
 - `BalanceProbe._walk_to()` now retries the requested cell when movement points increased even if the hero has not advanced yet. Focused regression test covers the refreshed-MP/no-displacement branch (`test_balance_probe.gd` 3/3).
 - Replaying Druid/Trader seed `1885368939` after the fix kept the hero alive through the configured 90-turn profile (probe reported turn 92), with 53 real deals and industry 21; the Trader goal remains unmet. This confirms the particular turn-41 exhaustion was avoided, not that Trader economics or all seven prior deaths are resolved.
 - An attempted combined rerun of the seven formerly dead Trader profiles exceeded GdUnit's default five-minute test timeout after partial results; it is incomplete and is not counted. Re-run the profiles in bounded batches before claiming a survival-matrix improvement. A CityBuilder rerun after the shared route change also hit that timeout during Barbarian at turn 58; no post-route-change Builder regression conclusion is claimed. No Traveler behavior was changed; the frame-cap cells remain a separate follow-up.
+
+## Trader 11-profile re-run on one process after the isolation fix (2026-10-25)
+
+- Carrier: `game/tools/matrix_report.gd` (`godot --headless --path game -s res://tools/matrix_report.gd -- trader 90`). The tool is committed because the numbers below are cited from `tasks.md` 9.2/2.4 and local artifacts outside git are not storage (D-192). Seeds are `ScenarioTargets.seed_for(class, "trader")`, class order is sorted, so the report repeats byte for byte.
+- One process now legally holds all eleven profiles. Earlier rounds could not: the second world profile in a process stalled on an orphaned `Battle` node under the root viewport, `turn` stayed 0 and `battles_fought` grew one per frame (**T-204**, ownership fix D-255). The standing instruction to run "bounded batches" was a workaround for that defect, not a timeout constraint; it is retracted here.
+- Results (90-turn profiles, `goal = industry 1000` unchanged):
+
+| class | seed | turn | deals | industry | margin | market (attempts) | battles | state |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Barbarian | 268633511 | 90 | 68 | 78 | −22 | yes (1) | 40 | RUNNING |
+| Chanter | 1374210727 | 90 | 63 | 86 | −14 | yes (1) | 54 | RUNNING |
+| Cipher | 1111463770 | 32 | 34 | 159 | 59 | yes (1) | 9 | DEFEAT `total_collapse` |
+| Druid | 1885368939 | 92 | 54 | 21 | −79 | yes (1) | 13 | RUNNING |
+| Fighter | 1086736233 | 90 | 59 | 353 | 253 | yes (1) | 17 | RUNNING |
+| Monk | 398012254 | 90 | 73 | 106 | 6 | yes (1) | 40 | RUNNING |
+| Paladin | 604377470 | 90 | 57 | 99 | −1 | yes (1) | 27 | RUNNING |
+| Priest | 1356452789 | 90 | 79 | 114 | 14 | yes (1) | 32 | RUNNING |
+| Ranger | 465305719 | 20 | 14 | 111 | 11 | yes (1) | 6 | incomplete: 30 000-frame cap at turn 20 |
+| Rogue | 2021247702 | 92 | 73 | 102 | 2 | yes (1) | 24 | DEFEAT `total_collapse` |
+| Wizard | 1490911174 | 90 | 68 | 209 | 109 | yes (1) | 2 | RUNNING |
+
+- Totals: **642 confirmed deals** across 11 profiles (2026-10-09 baseline: 547), industry range **21…353**, median **106** (baseline range 0…187), goal reached **0/11** — unchanged, and neither the goal nor the `industry` bucket was touched. Survival **9/11** against the baseline **4/11**: the seven exhaustion deaths are no longer reproducible; both remaining failures end with `end_reason = total_collapse` (Cipher turn 32, Rogue turn 92), not `hero_died("exhaustion")`.
+- This closes 9.2 as a measurement: all eleven Trader profiles (the seven formerly fatal ones included) completed in one process without technical errors. It does not convert survival into goal attainment — the Trader goal stays unmet 0/11, and the two documented sinks (role-inappropriate repeated construction in the shared `BalanceProbe` build queue, unrepelled raids) plus the low-needs routing question remain the open diagnosis.
+- Reproducibility control: re-running Druid and Wizard through the same tool in a separate process returned identical rows (Druid 54 deals / industry 21 / turn 92; Wizard 68 deals / industry 209 / turn 90). Druid also reproduces the 2026-10-09 post-route-fix replay (53 deals / industry 21) within one deal.
+- Caveat carried forward unchanged: `margin` subtracts `gold_start = 100`, while `CityFactory` starts industry at 30, so `margin` is not a start-to-current delta (see "Trader target semantics"). Read the column as a fixed-offset label, not as profit.
+- New observation, not diagnosed here: Ranger/Trader is the first Trader cell that hits the 30 000-frame safety cap (turn 20, 6 battles, still `RUNNING`). It is classified incomplete, neither success nor technical failure, in the same way as the Traveler/Druid and Traveler/Chanter cells of 9.3.
