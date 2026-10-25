@@ -51,6 +51,8 @@ const DATE_LABEL_NAME := "CampaignDate"
 const GOALS_PANEL_NAME := "GoalsPanel"
 const GOALS_TITLE_NAME := "GoalsTitle"
 const GOALS_LIST_NAME := "GoalsList"
+## mvp-ui-flow 2.2 (T-186): туториал-оверлей первых ходов (K-M8: оверлей, не экран).
+const TUTORIAL_OVERLAY_NAME := "TutorialOverlay"
 const CITY_SCREEN_NAME := "CityScreen"
 const PARTY_BUTTON_NAME := "PartyButton"
 const PARTY_SCREEN_NAME := "PartyScreen"
@@ -108,6 +110,15 @@ var _chronicle_open: bool = false
 var _goals: CampaignGoalTracker = null
 var _goals_panel: PanelContainer = null
 var _goals_list: VBoxContainer = null
+## mvp-ui-flow 2.2 (T-186): модалка первой директивы. Как и панель целей, слоя
+## без данных не имеет: без привязанных директив оверлей не показывается
+## (конвенция «нет несуществующих действий»). Директивы — `campaign.json →
+## tutorial`, их приносит хост.
+var _tutorial: TutorialOverlay = null
+var _tutorial_directives: Dictionary = {}
+## Последний день, который хост показал слою. Своего счёта дней у HUD нет
+## (D-200) — это значение того же пуша, что рисует дату.
+var _campaign_day: int = 0
 ## Полоса счётчиков: id строки реестра → контейнер счётчика. Значений здесь нет:
 ## числа читаются из носителя при каждом обновлении (D-200).
 var _counters: Dictionary = {}
@@ -123,6 +134,7 @@ func _ready() -> void:
 ## а не хранятся). Счётчик, который кампейн-состояние не ведёт, прячется: ноль
 ## вместо «носителя нет» врал бы.
 func refresh_campaign(day: int) -> void:
+	_campaign_day = day
 	for row_id in _counters:
 		var box := _counters[row_id] as Control
 		if box == null or not is_instance_valid(box):
@@ -267,6 +279,7 @@ func _build() -> void:
 	_build_counter_bar()
 	_build_date_label()
 	_build_goals_panel()
+	_build_tutorial_overlay()
 
 
 ## 7.10 — полоса счётчиков макета: один контейнер на строку реестра, порядок —
@@ -363,6 +376,41 @@ func _build_goals_panel() -> void:
 	add_child(panel)
 
 
+## mvp-ui-flow 2.2 (T-186): директивы первых ходов (`campaign.json → tutorial`).
+## Пустой словарь = оверлею нечего показывать: слой молчит, а не сочиняет текст.
+func bind_tutorial(directives: Dictionary) -> void:
+	_tutorial_directives = directives.duplicate(true)
+
+
+func is_tutorial_open() -> bool:
+	return _tutorial != null and _tutorial.is_open()
+
+
+## Текст показанной директивы ("" — оверлей закрыт). Тест и хост читают то, что
+## видит игрок.
+func get_tutorial_text() -> String:
+	return "" if _tutorial == null else _tutorial.directive_text()
+
+
+func _build_tutorial_overlay() -> void:
+	var overlay := TutorialOverlay.new()
+	overlay.name = TUTORIAL_OVERLAY_NAME
+	add_child(overlay)
+	_tutorial = overlay
+
+
+## Первый вход в экран (mvp-ui-flow: «* → TUTORIAL … on first entry to a screen»).
+## Экран в сигнатуре не нужен: содержимое оверлея — директива дня, а не справка
+## про экран; текста про экраны в репо нет ни в одном носителе, и сочинять его
+## здесь означало бы изобретать канон.
+func _on_tutorial_requested(_screen: StringName) -> void:
+	if _tutorial == null or _tutorial_directives.is_empty():
+		return
+	_tutorial.try_show(
+		_campaign_day, String(_tutorial_directives.get("day_%d" % _campaign_day, ""))
+	)
+
+
 ## Проводка до машины навигации кампании (`CampaignUIManager`). Порядок важен:
 ## менеджер привязывается до `bind_city`, иначе экран не будет в нём зарегистрирован.
 ## Без менеджера носитель работает по-старому — открывает экран напрямую.
@@ -371,6 +419,9 @@ func bind_ui_manager(manager: CampaignUIManager) -> void:
 		return
 	_ui_manager = manager
 	_ui_manager.screen_changed.connect(_on_screen_changed)
+	# mvp-ui-flow 2.2 (T-186): потребитель `tutorial_requested`. До этого среза
+	# сигнал уходил в никуда — «оверлей первых ходов» существовал только в спеке.
+	_ui_manager.tutorial_requested.connect(_on_tutorial_requested)
 
 
 ## Привязка кампейн-города: экран создаётся здесь, а не в `_ready` — слой HUD

@@ -62,6 +62,11 @@ var chronicle: ChronicleLog = ChronicleLog.new()
 ## первый визит узла. В сейве — под-ключ "goals" секции "campaign" (прецеденты
 ## chronicle/supply/ethics: топ-секцию не добавляем, схему T-110 не трогаем).
 var goals: CampaignGoalTracker = CampaignGoalTracker.new()
+## mvp-ui-flow 2.2 (T-186): директивы первых дней (`campaign.json → tutorial`).
+## Конфиг, а не состояние кампании: в сейв не пишется и из сейва не читается,
+## поэтому грузится один раз лениво.
+var _tutorial_directives: Dictionary = {}
+var _tutorial_loaded: bool = false
 ## Победная оценка (T-117 якорь: ход 21 = финальный рейд отражён/нет).
 var final_battle_seen: bool = false
 var final_raid_repelled: bool = false
@@ -934,6 +939,17 @@ func _has_barracks() -> bool:
 		if str(b.get("id", "")).contains("barracks"):
 			return true
 	return false
+
+
+## Директивы первых дней (`campaign.json → tutorial`): {"day_1": "...", ...}.
+## До T-186 блок читал только инвариант reachability; оверлей первых ходов —
+## его первый читатель-игрок. Пустой блок = показывать нечего.
+func tutorial_directives() -> Dictionary:
+	if not _tutorial_loaded:
+		var block: Variant = _json(CAMPAIGN_JSON).get("tutorial", {})
+		_tutorial_directives = block if block is Dictionary else {}
+		_tutorial_loaded = true
+	return _tutorial_directives
 
 
 func _json(path: String) -> Dictionary:
