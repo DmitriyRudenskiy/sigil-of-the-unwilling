@@ -39,7 +39,9 @@ func _ready() -> void:
 
 
 ## Зарегистрировать слой-экран (id из SCREEN_NAMES).
-func register_screen(id: StringName, node: CanvasItem) -> void:
+## Узел — `Node`, а не `CanvasItem`: хроника поселения (D-240) — `CanvasLayer`
+## (у неё свой слой поверх HUD), и `CanvasItem`-тип отсек бы её на входе.
+func register_screen(id: StringName, node: Node) -> void:
 	_screens[id] = node
 	_set_visible(id, false)
 
@@ -83,8 +85,7 @@ func show_screen(id: StringName) -> Dictionary:
 func visible_screens() -> Array:
 	var out: Array = []
 	for id in _screens:
-		var node: Node = _screens[id]
-		if node is CanvasItem and (node as CanvasItem).visible:
+		if _is_visible(_screens[id]):
 			out.append(id)
 	return out
 
@@ -94,8 +95,12 @@ func visible_screens() -> Array:
 ## переход PREGAME→MENU→MAP выдал бы два туториала экранов (меню и карты),
 ## которых в кампании нет. Из кампейн-экранов не трогает ничего — повторный
 ## вход в кампанию не сбрасывает открытый экран. Туториал карты здесь не
-## запрашивается: потребителя `tutorial_requested` у носителя ещё нет, запрос
-## ушёл бы в никуда, а отметка «показан» уже сжгла бы единственный показ.
+## запрашивается: потребитель `tutorial_requested` (слой HUD, T-186) монтируется
+## после этого вызова — `main.gd: _init_campaign → begin_campaign →
+## _mount_campaign_hud`, — поэтому запрос ушёл бы в никуда, а отметка «показан»
+## уже сжёг бы единственный показ. Первый вход в карту случается и без него:
+## это первое закрытие любого кампейн-экрана (CITY → MAP), к которому слой уже
+## привязан.
 func begin_campaign() -> void:
 	if nav.current != CampaignNavigation.Screen.PREGAME \
 			and nav.current != CampaignNavigation.Screen.MENU:
@@ -115,6 +120,18 @@ func _set_visible(id: StringName, visible: bool) -> void:
 	var node: Node = _screens.get(id)
 	if node is CanvasItem:
 		(node as CanvasItem).visible = visible
+	elif node is CanvasLayer:
+		(node as CanvasLayer).visible = visible
+
+
+## Видимость зарегистрированного слоя (у `CanvasItem` и `CanvasLayer` свой
+## `visible`, общего интерфейса у них нет).
+func _is_visible(node: Node) -> bool:
+	if node is CanvasItem:
+		return (node as CanvasItem).visible
+	if node is CanvasLayer:
+		return (node as CanvasLayer).visible
+	return false
 
 
 func _enum_of(id: StringName) -> int:

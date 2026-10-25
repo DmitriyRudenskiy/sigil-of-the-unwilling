@@ -10,7 +10,6 @@ offset_top = 10.0
 offset_right = 990.0
 offset_bottom = 690.0
 custom_minimum_size = Vector2(980, 680)
-theme_override_constants/separation = 8
 
 
 
@@ -962,10 +961,10 @@ offset_bottom = 70.0
 [node name="ArmyCount" type="Label" unique_id=1109 parent="Center/Window/Bottom/ArmySlot_0"]
 visible = false
 mouse_filter = 2
-horizontal_alignment = 1
-theme_override_font_sizes/font_size = 14
-offset_left = 50.0
-offset_top = 56.0
+horizontal_alignment = 2
+theme_type_variation = &"LabelNumber"
+offset_left = 6.0
+offset_top = 50.0
 offset_right = 74.0
 offset_bottom = 76.0
 
@@ -992,10 +991,10 @@ offset_bottom = 70.0
 [node name="ArmyCount" type="Label" unique_id=1112 parent="Center/Window/Bottom/ArmySlot_1"]
 visible = false
 mouse_filter = 2
-horizontal_alignment = 1
-theme_override_font_sizes/font_size = 14
-offset_left = 50.0
-offset_top = 56.0
+horizontal_alignment = 2
+theme_type_variation = &"LabelNumber"
+offset_left = 6.0
+offset_top = 50.0
 offset_right = 74.0
 offset_bottom = 76.0
 
@@ -1022,10 +1021,10 @@ offset_bottom = 70.0
 [node name="ArmyCount" type="Label" unique_id=1115 parent="Center/Window/Bottom/ArmySlot_2"]
 visible = false
 mouse_filter = 2
-horizontal_alignment = 1
-theme_override_font_sizes/font_size = 14
-offset_left = 50.0
-offset_top = 56.0
+horizontal_alignment = 2
+theme_type_variation = &"LabelNumber"
+offset_left = 6.0
+offset_top = 50.0
 offset_right = 74.0
 offset_bottom = 76.0
 
@@ -1052,10 +1051,10 @@ offset_bottom = 70.0
 [node name="ArmyCount" type="Label" unique_id=1118 parent="Center/Window/Bottom/ArmySlot_3"]
 visible = false
 mouse_filter = 2
-horizontal_alignment = 1
-theme_override_font_sizes/font_size = 14
-offset_left = 50.0
-offset_top = 56.0
+horizontal_alignment = 2
+theme_type_variation = &"LabelNumber"
+offset_left = 6.0
+offset_top = 50.0
 offset_right = 74.0
 offset_bottom = 76.0
 
@@ -1082,10 +1081,10 @@ offset_bottom = 70.0
 [node name="ArmyCount" type="Label" unique_id=1121 parent="Center/Window/Bottom/ArmySlot_4"]
 visible = false
 mouse_filter = 2
-horizontal_alignment = 1
-theme_override_font_sizes/font_size = 14
-offset_left = 50.0
-offset_top = 56.0
+horizontal_alignment = 2
+theme_type_variation = &"LabelNumber"
+offset_left = 6.0
+offset_top = 50.0
 offset_right = 74.0
 offset_bottom = 76.0
 
@@ -1112,10 +1111,10 @@ offset_bottom = 70.0
 [node name="ArmyCount" type="Label" unique_id=1124 parent="Center/Window/Bottom/ArmySlot_5"]
 visible = false
 mouse_filter = 2
-horizontal_alignment = 1
-theme_override_font_sizes/font_size = 14
-offset_left = 50.0
-offset_top = 56.0
+horizontal_alignment = 2
+theme_type_variation = &"LabelNumber"
+offset_left = 6.0
+offset_top = 50.0
 offset_right = 74.0
 offset_bottom = 76.0
 
@@ -1142,10 +1141,10 @@ offset_bottom = 70.0
 [node name="ArmyCount" type="Label" unique_id=1127 parent="Center/Window/Bottom/ArmySlot_6"]
 visible = false
 mouse_filter = 2
-horizontal_alignment = 1
-theme_override_font_sizes/font_size = 14
-offset_left = 50.0
-offset_top = 56.0
+horizontal_alignment = 2
+theme_type_variation = &"LabelNumber"
+offset_left = 6.0
+offset_top = 50.0
 offset_right = 74.0
 offset_bottom = 76.0
 

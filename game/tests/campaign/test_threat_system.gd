@@ -548,3 +548,30 @@ func test_anchor_reachability_t115() -> void:
 			strong_in_window = true
 	assert_that(strong_in_window).is_equal(true)
 	assert_int(int(reports[20]["raid"]["tier"])).is_equal(3)
+
+
+## D-240: волна несёт ход генерации, а рейд — состав. Хроника обязана
+## предупреждать «в ход генерации» (07-balance §5) и различать финальный рейд по
+## директиве composition = босс (K-R3), а не по тиру: тир 3 бывает не только у
+## финала, а бит ≤21 — про босса, а не про арифметику давления.
+func test_wave_carries_generation_turn_and_raid_carries_composition() -> void:
+	var ts := _new_ts()
+	var reports: Array = _run(7, ts)
+	var wave: Dictionary = reports[6]["wave"]
+	assert_str(str(wave.get("composition", ""))) \
+		.override_failure_message("floor-волна потеряла состав директивы").is_equal("tutorial")
+	assert_int(int(wave.get("turn", -1))) \
+		.override_failure_message("у волны нет хода генерации").is_equal(7)
+	# Рейд (ход 8 = 7 + прибытие, героя нет → авто-рейд R5): состав долетает до
+	# читателя в результате, а не только в состоянии системы.
+	var r8: Dictionary = ts.process_turn(8, {
+		"stocks": {"food": 30.0, "wood": 20.0, "iron": 10.0}, "hero_in_city": false})
+	assert_str(str((r8["raid"] as Dictionary).get("composition", ""))) \
+		.override_failure_message("рейд потерял состав волны").is_equal("tutorial")
+	# Финал (ход 21, K-R3: boss-состав).
+	var ts2 := _new_ts()
+	_run(20, ts2)
+	var r21: Dictionary = ts2.process_turn(21, {
+		"stocks": {"food": 30.0, "wood": 20.0, "iron": 10.0}, "hero_in_city": false})
+	assert_str(str((r21["raid"] as Dictionary).get("composition", ""))) \
+		.override_failure_message("финальный рейд не помечен босс-составом").is_equal("boss")

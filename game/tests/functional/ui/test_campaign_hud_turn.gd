@@ -23,6 +23,7 @@ extends BaseTest
 const MAIN_SCENE_PATH := "res://scenes/main/main.tscn"
 const TURN_BUTTON_PATH := "CampaignHUD/CampaignHud/TopButtons/TurnButton"
 const Calendar := preload("res://scripts/campaign/campaign_calendar.gd")
+const CounterRegistry := preload("res://scripts/ui/campaign_counters.gd")
 
 var _main: Node = null
 var _window_size := Vector2i.ZERO
@@ -98,6 +99,45 @@ func test_pressing_turn_button_advances_one_turn() -> void:
 	assert_int(_day()).is_equal(day + 1)
 	assert_str(_hud().get_date_text()).is_equal(Calendar.date_label(day + 1))
 	assert_str(_hud().get_date_text()).is_not_equal(date_before)
+
+
+## 7.6 (остаток): «завершение хода от нажатия меняет дату и счётчики». Дату
+## покрывает кейс выше, здесь — вторая половина: полоса обязана остаться на
+## значениях носителя, а не на засталых числах. Сравнение «отрисованное ↔
+## пересчитанное из `City`», поэтому рассинхрон (ход прошёл, полоса не обновилась)
+## даёт красный, а не зелёное тавтологическое сравнение двух одних и тех же рук.
+## Вторая половина кейса меняет носитель руками: если бы полоса перечитывалась
+## только при `_ready`, она бы осталась на старом числе.
+func test_counters_follow_the_carrier_after_press() -> void:
+	await _boot_campaign()
+	var hud := _hud()
+	assert_int(hud.get_counter_count()).is_greater(0)
+	_assert_counters_match_carrier()
+	# Носитель сдвигается руками (продукция хода могла бы ничего не изменить, и
+	# тогда кейс молча ничего бы не проверял). Берётся первый **видимый**
+	# счётчик: строки без значения реестр прячет, и трогать их — значит проверять
+	# не отрисованное, а воображаемое.
+	var row: Dictionary = CounterRegistry.rendered_rows()[0]
+	for candidate in CounterRegistry.rendered_rows():
+		if CounterRegistry.value_text(candidate, hud.city) != "":
+			row = candidate
+			break
+	var id := StringName(row.get("resource", &""))
+	hud.city.resource_ctx.add(id, 137.0, "test:7.6")
+	_turn_button().pressed.emit()
+	await get_tree().process_frame
+	_assert_counters_match_carrier()
+	var shown := hud.get_counter_text(StringName(row.get("id", &"")))
+	assert_str(shown).is_equal(str(int(hud.city.resource_ctx.amount(id))))
+
+
+func _assert_counters_match_carrier() -> void:
+	var hud := _hud()
+	for row in CounterRegistry.rendered_rows():
+		var row_id := StringName(row.get("id", &""))
+		assert_str(hud.get_counter_text(row_id)).override_failure_message(
+			"счётчик %s разошёлся с носителем" % String(row_id)
+			).is_equal(CounterRegistry.value_text(row, hud.city))
 
 
 ## Защита от повторного нажатия во время обработки (7.13): обработчик хода

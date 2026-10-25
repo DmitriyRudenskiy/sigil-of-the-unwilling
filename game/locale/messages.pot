@@ -995,3 +995,21 @@ msgstr ""
 
 msgid "campaign.date"
 msgstr ""
+
+msgid "campaign.goals_title"
+msgstr ""
+
+msgid "campaign.goal_day"
+msgstr ""
+
+msgid "campaign.goal.farm"
+msgstr ""
+
+msgid "campaign.goal.barracks"
+msgstr ""
+
+msgid "campaign.goal.train_warrior"
+msgstr ""
+
+msgid "campaign.goal.ruins"
+msgstr ""

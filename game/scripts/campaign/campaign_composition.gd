@@ -13,6 +13,9 @@ const PRESTIGE_JSON := "res://data/config/balance/prestige.json"
 const DISTRICTS_JSON := "res://data/config/balance/districts.json"
 const ETHICS_JSON := "res://data/config/balance/ethics.json"
 const SIGNS_JSON := "res://data/signs.json"
+## T-182: тип узла-цели M3 («посетить руины») — то же значение, что ключ
+## `loot_catalog` у RegionMap; отдельная константа, чтобы цель и лут не разъехались.
+const NODE_RUIN := "ruin"
 ## campaign-core-loop 2.1: глаголы действия (spec: build/train/move/fight;
 ## GDD 01-core-loop «Цикл 5 минут»: двинул/решил/построил/снабдил + тренировка).
 const ACTION_VERBS := ["build", "train", "move", "fight"]
@@ -45,6 +48,25 @@ var telemetry: TelemetryLog
 var _loop_flags: Dictionary = {}
 ## Отчёт threats-фазы текущего хода (2.2: «увидел угрозу» = рейд ударил).
 var last_threat_report: Dictionary = {}
+## T-175 → D-240: хроника поселения — лента событий «что случилось и почему»
+## (04-narrative, главный канал нарратива MVP). Пишут системы-носители событий
+## (биты 1/7/14/17/21, рейд, район, еда), читает `ChronicleScreen`. В сейве —
+## под-ключ "chronicle" секции "campaign" (прецеденты supply/ethics: схема T-110
+## не тронута); телеметрия для хроники не годится — это метрики сессии, не лента.
+var chronicle: ChronicleLog = ChronicleLog.new()
+## mvp-ui-flow 2.3 (T-182, M3): панель целей первых трёх дней — ферма и казармы
+## (день 1), тренировка воина (день 2), руины (день 3). Логика трекера была
+## написана ещё в 5.2, но носителя у неё не было: ни одного вызова
+## CampaignGoalTracker в скриптах, кроме собственного теста, — модель без читателя.
+## Пишут те же места, что готовят отчёты хода: достройка города, выдача рекрута,
+## первый визит узла. В сейве — под-ключ "goals" секции "campaign" (прецеденты
+## chronicle/supply/ethics: топ-секцию не добавляем, схему T-110 не трогаем).
+var goals: CampaignGoalTracker = CampaignGoalTracker.new()
+## mvp-ui-flow 2.2 (T-186): директивы первых дней (`campaign.json → tutorial`).
+## Конфиг, а не состояние кампании: в сейв не пишется и из сейва не читается,
+## поэтому грузится один раз лениво.
+var _tutorial_directives: Dictionary = {}
+var _tutorial_loaded: bool = false
 ## Победная оценка (T-117 якорь: ход 21 = финальный рейд отражён/нет).
 var final_battle_seen: bool = false
 var final_raid_repelled: bool = false
@@ -76,6 +98,14 @@ var _statblocks: Dictionary = {}
 var _victory_sources: Dictionary = {}
 var _ranks: Array = []
 var _rank_names: Dictionary = {}
+## signs-prestige 2.5 (T-187): имена знаков из каталога (`signs.json → name`).
+## Хроника обязана называть Знак, а не показывать игроку id из данных.
+var _sign_names: Dictionary = {}
+## T-187: титул, о котором лента уже сообщила. «До/после» нельзя вычислять из
+## баланса внутри синхронизации: `_add_ledger` меняет ledger до вызова SM, и
+## `prestige_rank()` на входе уже показывает новый ранг (первое же начисление
+## через 200 молча осталось бы без строки — замер T-187).
+var _chronicle_rank: int = 0
 
 
 static func from_campaign_config(campaign_seed: int) -> CampaignComposition:
@@ -91,6 +121,7 @@ func _build(campaign_seed: int) -> void:
 	var prestige := _json(PRESTIGE_JSON)
 	_victory_sources = prestige.get("sources", {}).get("battle_victory", {})
 	_ranks = prestige.get("ranks", [])
+	_chronicle_rank = prestige_rank()
 	_rank_names = prestige.get("rank_names", {}) as Dictionary
 	campaign = TurnDriver.new()
 	campaign.seed = campaign_seed
@@ -123,7 +154,9 @@ func _build(campaign_seed: int) -> void:
 	districts = DistrictSystem.new(district_config, district_jobs_by_id)
 	# T-124: этический слой — журнал/сверка/Репутация (числа — ethics.json, K-M15).
 	ethics_config = _json(ETHICS_JSON)
-	sign_vectors = EthicsSystem.load_sign_vectors(_json(SIGNS_JSON))
+	var signs_raw: Dictionary = _json(SIGNS_JSON)
+	sign_vectors = EthicsSystem.load_sign_vectors(signs_raw)
+	_sign_names = _sign_names_of(signs_raw)
 	ethics = EthicsSystem.new_for_sign(sign_id, ethics_config)
 	# signs-prestige 2.1/2.2: SM знака + фракционные действия (≤12, prestige.json).
 	sign_system = SignSystem.new()
@@ -179,13 +212,26 @@ func _build(campaign_seed: int) -> void:
 		rep_report["districts"] = districts.process_turn(
 			settlement.buildings, settlement.population, settlement.party_size,
 			str((settlement.sm.get("food", {}) as Dictionary).get("state", "OK")))
-		# 2.2 (D-235): снятие района — событие в хронику. Носитель хроники — telemetry
-		# (T-158), отдельного журнала районов в MVP нет.
+		# 2.2 (D-235): снятие района — событие в хронику.
 		if telemetry != null:
 			for g in (rep_report["districts"] as Dictionary).get("disbanded", []):
 				telemetry.record("district_disbanded", {
 					"group": str(g), "turn": campaign.current_turn,
 				})
+		# D-240: рождение и снятие района — записи хроники (04-narrative: «район»
+		# — ключевое событие, «запись с причиной»). Бит хода 14 («район создан») —
+		# единственный из каркаса K-M9 с календарём в каноне (K-R3), но пишет
+		# текст при первом рождении, а не по номеру хода: календарный триггер
+		# разрешён нарративным битам, а ложный бит на ходу 14 без события — ложь.
+		var drep: Dictionary = rep_report["districts"] as Dictionary
+		if not drep.get("created", []).is_empty():
+			chronicle.record_bit(campaign.current_turn, "bit_district", "chronicle.bit_district")
+			for g in drep.get("created", []):
+				chronicle.record_line(
+						campaign.current_turn, "chronicle.district_created", {"group": str(g)})
+		for g in drep.get("disbanded", []):
+			chronicle.record_line(
+					campaign.current_turn, "chronicle.district_disbanded", {"group": str(g)})
 		rep_report["population"] = pop_report
 		return rep_report
 	campaign.threats_hook = func() -> Dictionary:
@@ -196,6 +242,7 @@ func _build(campaign_seed: int) -> void:
 	# pre-production запасы. season_mult — из WorldSeasons (I1: инжест).
 	campaign.production_hook = func() -> Dictionary:
 		var report: Dictionary = settlement.process_production(WorldSeasons.production_mult())
+		_record_food_transitions(report)
 		# Очередь достройки кампейн-построек города (носителя экрана): построенное
 		# игроком не должно навсегда остаться «в стройке». Производство ресурсов
 		# кампейн-постройками — не здесь (это была бы вторая экономика; Q-M98).
@@ -215,6 +262,12 @@ func _build(campaign_seed: int) -> void:
 	# headless: герой в городе (авто-рейд на него не ведётся — R5).
 	region_map = RegionMap.new()
 	region_map.init_campaign(PartySystem.alive_members(party).size(), 0.0)
+	_connect_region_map()
+	# T-182: цели M3 на живом кампейне. Регион руин берётся из данных маски, а не из
+	# строки: у руин свои id в movement.json, и хардкод разошёлся бы с ними в тот же
+	# день, когда маску перерисуют (Q-M91-семья: у регион-графа и маски id разные).
+	goals = CampaignGoalTracker.new(
+			CampaignGoalTracker.default_mvp_goals(_first_region_with_node(NODE_RUIN)))
 	# player-фаза: тик времени герой-слоя (авто-режим 2 дня → возврат в город, Y10).
 	campaign.player_hook = func() -> void:
 		region_map.tick_days(1)
@@ -222,6 +275,8 @@ func _build(campaign_seed: int) -> void:
 	# до первого action (GDD 01-core-loop).
 	telemetry = TelemetryLog.new()
 	telemetry.record("game_start", {"turn": 1})
+	# D-240: бит хода 1 «Знак выбрал тебя» (04-narrative, каркас K-M9 — MVP).
+	chronicle.record_bit(1, "bit_sign", "chronicle.bit_sign")
 
 
 ## Один ход кампании (T-010, T-122): фиксированный 6-фазный порядок
@@ -244,6 +299,7 @@ func advance_turn() -> void:
 	campaign.advance_auto_phase()  # diplomacy (no-op) → threats
 	campaign.advance_auto_phase()  # threats (авто) → production
 	_evaluate_loop_closed()        # 2.2: цикл хода N (после рейда, до production)
+	_advance_chronicle()           # D-240: биты и причины рейда этого хода
 	campaign.advance_auto_phase()  # production (авто) → finish
 
 
@@ -259,7 +315,15 @@ func _process_city_construction() -> Dictionary:
 	ctx.turn_number = campaign.current_turn
 	ctx.cities = [city]
 	ctx.is_campaign = true
-	return CampaignConstructionProcessor.new().process(ctx)
+	var report: Dictionary = CampaignConstructionProcessor.new().process(ctx)
+	# T-182: цель дня 1 закрывает постройка, а не отчёт. Процессор отдаёт uid
+	# инстансов города, а цели живут id каталога (campaign_farm, campaign_barracks):
+	# числа двух счётов не смешиваем, между ними один переводчик — _city_building_id.
+	for uid in report.get("completed", []):
+		var building_id := _city_building_id(int(uid))
+		if building_id != "":
+			goals.note_building_built(building_id)
+	return report
 
 
 ## Один проход очереди тренировки (production-фаза). Стоимость списана на
@@ -273,7 +337,48 @@ func _process_city_training() -> Dictionary:
 		city, CampaignTrainingService.PARTY_CAPACITY - alive)
 	for member in report.get("members", []):
 		party.append(member)
+		# T-182: выпущенный рекрут закрывает цель дня 2. Класс — из материализованного
+		# члена ("class"), а не из заявки: заявка могла простоять в очередь с другим.
+		goals.note_training_completed(String(member.get("class", "")))
 	return report
+
+
+## T-182: id постройки каталога по uid инстанса города (переводчик между отчётом
+## достройки и целями M3). Пустая строка — инстанс уже не найден (снесён в тот же
+## ход), цель тогда не закрывается: выдумывать постройку нечем.
+func _city_building_id(uid: int) -> String:
+	if city == null:
+		return ""
+	for instance in city.campaign_buildings:
+		if instance is Dictionary and int(instance.get("uid", -1)) == uid:
+			return String(instance.get("id", ""))
+	return ""
+
+
+## T-182: первый регион маски с узлом нужного типа (для цели «посетить руины»):
+## узлы и их id живут в movement.json, поэтому регион под цель вычисляется, а не
+## пишется строкой.
+func _first_region_with_node(node: String) -> String:
+	if region_map == null:
+		return ""
+	for r in region_map.regions:
+		if region_map.node_type(str(r)) == node:
+			return str(r)
+	return ""
+
+
+## T-182: связка «визит узла → цель M3». Переподключается и после загрузки:
+## `region_map` при загрузке создаётся заново (`RegionMap.from_dict`), и связь со
+## старым объектом ушла бы вместе с ним — цель «руины» молча осталась бы недостижимой.
+func _connect_region_map() -> void:
+	if region_map == null:
+		return
+	if not region_map.node_visited.is_connected(_on_node_visited):
+		region_map.node_visited.connect(_on_node_visited)
+
+
+func _on_node_visited(region: String, _node: String) -> void:
+	goals.note_region_visited(region)
 
 
 ## campaign-core-loop 2.1: действие игрока (UI → сюда; headless — авто-fight
@@ -335,6 +440,57 @@ func _evaluate_loop_closed() -> void:
 ## 2.2: рейд ударил в этом ходу (threats-фаза) — «увидел угрозу».
 func _raid_happened_this_turn() -> bool:
 	return not (last_threat_report.get("raid", {}) as Dictionary).is_empty()
+
+
+## D-240: WARN по еде — в хронику (06-economy §SM: «WARN — жёлтый индикатор
+## + хроника»). Переход берётся из отчёта SM, а не из копии прошлого состояния:
+## единственный владелец факта «состояние сменилось» — сам SM поселения.
+func _record_food_transitions(report: Dictionary) -> void:
+	for t in report.get("sm_transitions", []):
+		if str((t as Dictionary).get("resource", "")) == "food" \
+				and str((t as Dictionary).get("to", "")) == "WARN":
+			chronicle.record_line(campaign.current_turn, "chronicle.food_warn")
+
+
+## D-240: хроника threats-фазы (вызывается после рейда, до production).
+## Биты (04-narrative, каркас K-M9) пишутся одним событием каждый и не
+## повторяются; причины рейда складываются в одну запись ≤3 строк (EC: «один
+## текстовый блок за событие ≤3 строки», «хроника называет причину»). Текст —
+## канон битов; не-битовые строки — авторские, стиль «факт» (канон задаёт
+## содержание, а не формулировку: 00-overview «они пришли — и не взяли»,
+## 06-economy «пришли, когда вам было хуже всего», 02-mechanics «партия была в
+## пути», «они отступили — выжить удалось»). Биты 3 («слух») и 10 (смерть
+## персонажа) — не этот срез: слуховой движок Post-MVP, у смерти персонажа нет
+## носителя в кампанийном пути (T-179).
+func _advance_chronicle() -> void:
+	var turn: int = campaign.current_turn
+	var wave: Dictionary = last_threat_report.get("wave", {}) as Dictionary
+	# 07-balance §5: «предупреждение — в хронике в ход генерации».
+	if not wave.is_empty() and int(wave.get("turn", -1)) == turn:
+		chronicle.record_line(turn, "chronicle.wave_warning")
+	var raid: Dictionary = last_threat_report.get("raid", {}) as Dictionary
+	if raid.is_empty():
+		return
+	var is_boss: bool = str(raid.get("composition", "")) == "boss"
+	if not chronicle.has_bit("bit_first_raid"):
+		chronicle.record_bit(turn, "bit_first_raid", "chronicle.bit_first_raid")
+	if is_boss:
+		chronicle.record_bit(turn, "bit_final_raid", "chronicle.bit_final_raid")
+	elif int(raid.get("tier", 0)) >= 2:
+		chronicle.record_bit(turn, "bit_strong_raid", "chronicle.bit_strong_raid")
+	var causes: Array = []
+	if float(raid.get("loss", 0.0)) <= 1e-9:
+		# «Не взяли» = нулевой урон рейда; когда брать было нечего, формулировка
+		# канона тоже верна (00-overview: «они пришли — и не взяли»).
+		causes.append({"key": "chronicle.raid_repelled", "args": {}})
+	if str((settlement.sm.get("food", {}) as Dictionary).get("state", "OK")) == "DEFICIT":
+		causes.append({"key": "chronicle.raid_deficit", "args": {}})
+	if not bool(raid.get("battle_requested", false)):
+		# Рейд не принял бой: партия вне города (02-mechanics «партия была в пути»).
+		causes.append({"key": "chronicle.raid_party_away", "args": {}})
+	if _all_districts_destroyed():
+		causes.append({"key": "chronicle.raids_all_ruined", "args": {}})
+	chronicle.record_event(turn, causes)
 
 
 func _threat_context() -> Dictionary:
@@ -546,6 +702,13 @@ func build_save_state() -> Dictionary:
 	campaign_section["final_battle_seen"] = final_battle_seen
 	campaign_section["final_raid_repelled"] = final_raid_repelled
 	campaign_section["hero_name"] = hero_name
+	# D-240: хроника — состояние (лента не пересчитывается из входов: события,
+	# которых игрок уже не видел, не появляются второй раз). Под-ключ секции
+	# "campaign", как supply/ethics: топ-секцию не добавляем, схему T-110 не трогаем.
+	campaign_section["chronicle"] = chronicle.to_dict()
+	# T-182: цели M3 — состояние (какие цели закрыл игрок, не пересчитывается из
+	# входов: построенное потом снесут, а цель осталась бы закрытой — так и задумано).
+	campaign_section["goals"] = goals.to_dict()
 	# T-124: журнал/аккумуляторы/Репутация — состояние (события не пересчитываются
 	# при загрузке, I1); секция словарная — schema_version не тронут (T-110).
 	campaign_section["ethics"] = ethics.to_dict()
@@ -628,9 +791,16 @@ func load_save_state(state: Dictionary) -> void:
 		supply_system = SupplySystem.from_config(supply_cfg)
 	else:
 		supply_system = SupplySystem.from_dict(supply_data)
+	# D-240: хроника (под-ключ "chronicle"); старый сейв без неё → пустая лента
+	# (что уже случилось — не восстанавливаем, выдумывать записи нечем).
+	chronicle = ChronicleLog.from_dict(
+			(state.get("campaign", {}) as Dictionary).get("chronicle", {}))
 	# Синхронизация SM с балансом (старый сейв: баланс > 0 → ACTIVE).
 	if sign_system.sign_id != "":
-		_sign_system_prestige_sync()
+		# T-187: молча. Лента — часть сейва, а переходы SM здесь пересчитываются
+		# из баланса: писать их заново значило бы выдумать события, которых игрок
+		# не видел (или показать их второй раз).
+		_sign_system_prestige_sync(false)
 	final_battle_seen = bool(state.get("campaign", {}).get("final_battle_seen", false))
 	final_raid_repelled = bool(state.get("campaign", {}).get("final_raid_repelled", false))
 	population_system = PopulationSystem.from_dict(state.get("population", {}))
@@ -661,6 +831,16 @@ func load_save_state(state: Dictionary) -> void:
 	threats = ThreatSystem.from_dict(state.get("map", {}).get("threats", {}))
 	# T-020: регион-граф — секция "map".region (старый сейв без неё → старт R01).
 	region_map = RegionMap.from_dict((state.get("map", {}) as Dictionary).get("region", {}))
+	_connect_region_map()  # T-182: цель «руины» висит на сигнале свежего регион-графа
+	# T-182: цели (под-ключ "goals" секции "campaign"); старый сейв без них — свежий
+	# набор M3 уже с регионом руин из загруженной маски. Разбор — после регион-графа:
+	# до него поиск региона руин смотрел бы на прошлую кампанию.
+	var goals_data: Dictionary = (state.get("campaign", {}) as Dictionary).get("goals", {})
+	if goals_data.is_empty():
+		goals = CampaignGoalTracker.new(
+				CampaignGoalTracker.default_mvp_goals(_first_region_with_node(NODE_RUIN)))
+	else:
+		goals = CampaignGoalTracker.from_dict(goals_data)
 	# T-030: районный слой — конфиг/каталог те же (сейв хранит только настроение).
 	district_config = _json(DISTRICTS_JSON)
 	district_jobs_by_id = _district_jobs()
@@ -673,7 +853,9 @@ func load_save_state(state: Dictionary) -> void:
 			_boss_prestige_given = true
 	# T-124: этический слой — нет секции (старый сейв) → дефолты (Репутация 0).
 	ethics_config = _json(ETHICS_JSON)
-	sign_vectors = EthicsSystem.load_sign_vectors(_json(SIGNS_JSON))
+	var signs_raw: Dictionary = _json(SIGNS_JSON)
+	sign_vectors = EthicsSystem.load_sign_vectors(signs_raw)
+	_sign_names = _sign_names_of(signs_raw)
 	ethics = EthicsSystem.from_dict(
 		(state.get("campaign", {}) as Dictionary).get("ethics", {}), ethics_config)
 	ethics.sign_id = sign_id
@@ -715,6 +897,7 @@ func _district_jobs() -> Dictionary:
 ## T-002/T-124: выбор Знака — одна точка входа (знак несёт и этический референс).
 ## signs-prestige 2.1: DORMANT→ACTIVE (выбор); один знак на носителя (инвариант).
 func set_sign(id: String) -> void:
+	var was := sign_system.sign_id if sign_system != null else sign_id
 	if sign_system != null:
 		sign_system.select_sign(id)
 		sign_id = sign_system.sign_id
@@ -722,6 +905,14 @@ func set_sign(id: String) -> void:
 		sign_id = id
 	if ethics != null:
 		ethics.sign_id = sign_id
+	# signs-prestige 2.5 (T-187): «выбор знака» — событие ленты. Отметка «один
+	# знак на носителя» уже в SM (повторный вызов — no-op), поэтому строка пишется
+	# ровно одна: пустой id до SM не доходит (main.gd), а повторный выбор не меняет
+	# sign_id и не пишет ничего. Открывающий бит «Знак всё равно пришёл» (K-M9, бит 1)
+	# — не дубль: он про приход Знака, эта строка — какой именно Знак взят.
+	if sign_id != "" and was == "":
+		chronicle.record_line(
+				campaign.current_turn, "chronicle.sign_chosen", {"sign": sign_display_name(sign_id)})
 
 
 ## Престиж-сальдо (производная: sum ledger; T-110: не хранится в сейве).
@@ -741,6 +932,22 @@ func prestige_rank() -> int:
 		if balance >= int(_ranks[i]):
 			rank = i
 	return rank
+
+
+## Отображаемое имя Знака из каталога. Неизвестный id отдаётся как есть: строка
+## «Выбран Знак: spark.» — видимый след рассогласования данных, пустая строка —
+## невидимый (конвенция «немой ключ хуже падающего», Q-M79).
+func sign_display_name(id: String) -> String:
+	return str(_sign_names.get(id, id))
+
+
+## `signs.json` → {id: name}.
+static func _sign_names_of(signs_json: Dictionary) -> Dictionary:
+	var out := {}
+	for s in signs_json.get("signs", []):
+		if s is Dictionary:
+			out[str((s as Dictionary).get("id", ""))] = str((s as Dictionary).get("name", ""))
+	return out
 
 
 ## Престиж-титул (имя ранга из prestige.json rank_names).
@@ -763,9 +970,33 @@ func perform_sign_action(id: String, amount: float) -> float:
 
 
 ## SM знака: синхронизация с балансом Престижа (ACTIVE→SLEEPING при ≤0).
-func _sign_system_prestige_sync() -> void:
-	if sign_system != null:
-		sign_system.on_prestige_changed(prestige_balance())
+## `record_events` — писать ли в хронику то, что изменилось (signs-prestige 2.5,
+## T-187). false — только на загрузке сейва: там лента приезжает из файла.
+func _sign_system_prestige_sync(record_events: bool = true) -> void:
+	if sign_system == null:
+		return
+	var was_state := sign_system.sign_state
+	sign_system.on_prestige_changed(prestige_balance())
+	if not record_events:
+		# Загрузка: помечаем текущий титул «показанным», иначе первая же синхронизация
+		# после load объявит ранг заново.
+		_chronicle_rank = prestige_rank()
+		return
+	# SLEEPING ≠ game over (K-M16, 2.1): лента обязана это проговаривать, иначе
+	# «знак уснул» читается как конец партии.
+	if sign_system.sign_state != was_state:
+		if sign_system.sign_state == SignSystem.STATE_SLEEPING:
+			chronicle.record_line(campaign.current_turn, "chronicle.sign_sleeping")
+		elif was_state == SignSystem.STATE_SLEEPING:
+			chronicle.record_line(campaign.current_turn, "chronicle.sign_awakened")
+	# Титул (Ф4-шкала, 5 рангов). Одна строка на пересечение, а не по строке на
+	# каждый пройденный порог: одним начислением можно перескочить через два ранга,
+	# а игрок видит итог, а не перебор строк.
+	var now_rank := prestige_rank()
+	if now_rank != _chronicle_rank:
+		_chronicle_rank = now_rank
+		chronicle.record_line(
+				campaign.current_turn, "chronicle.rank_changed", {"rank": prestige_rank_name()})
 
 
 func _has_barracks() -> bool:
@@ -773,6 +1004,17 @@ func _has_barracks() -> bool:
 		if str(b.get("id", "")).contains("barracks"):
 			return true
 	return false
+
+
+## Директивы первых дней (`campaign.json → tutorial`): {"day_1": "...", ...}.
+## До T-186 блок читал только инвариант reachability; оверлей первых ходов —
+## его первый читатель-игрок. Пустой блок = показывать нечего.
+func tutorial_directives() -> Dictionary:
+	if not _tutorial_loaded:
+		var block: Variant = _json(CAMPAIGN_JSON).get("tutorial", {})
+		_tutorial_directives = block if block is Dictionary else {}
+		_tutorial_loaded = true
+	return _tutorial_directives
 
 
 func _json(path: String) -> Dictionary:

@@ -24,6 +24,10 @@ signal party_screen_opened
 signal party_screen_closed
 signal settings_screen_opened
 signal settings_screen_closed
+## D-240: хроника поселения — слой не знает содержимое ленты, он просит его
+## показать (те же сигналы, что у города и партии: хост по ним выключает ход).
+signal chronicle_screen_opened
+signal chronicle_screen_closed
 ## 7.13 — ход кампании запрашивается нажатием. Слой не знает, как устроен ход
 ## (`CampaignComposition.advance_turn` + `GameManager.on_day_passed` — это
 ## драйвер в `main.gd`), поэтому просит, а не делает: носитель сигнала — хост.
@@ -35,6 +39,7 @@ signal menu_requested
 
 const CityScreenScene := preload("res://scenes/ui/city_screen.tscn")
 const SettingsScreenScene := preload("res://scenes/ui/settings_screen.tscn")
+const ChronicleScreenScene := preload("res://scenes/ui/chronicle_screen.tscn")
 const PartyScreenModelScript := preload("res://scripts/ui/party_screen_model.gd")
 const CounterRegistry := preload("res://scripts/ui/campaign_counters.gd")
 const CalendarScript := preload("res://scripts/campaign/campaign_calendar.gd")
@@ -43,30 +48,51 @@ const CITY_BUTTON_NAME := "CityButton"
 const TURN_BUTTON_NAME := "TurnButton"
 const COUNTER_BAR_NAME := "CounterBar"
 const DATE_LABEL_NAME := "CampaignDate"
+const GOALS_PANEL_NAME := "GoalsPanel"
+## ui-mockup-parity 7.12 — панель отряда снизу и её слоты (`PartySlot_0…4`).
+const PARTY_PANEL_NAME := "PartyPanel"
+const PARTY_SLOTS_NAME := "PartySlots"
+const PARTY_SLOT_NAME := "PartySlot"
+const GOALS_TITLE_NAME := "GoalsTitle"
+const GOALS_LIST_NAME := "GoalsList"
+## mvp-ui-flow 2.2 (T-186): туториал-оверлей первых ходов (K-M8: оверлей, не экран).
+const TUTORIAL_OVERLAY_NAME := "TutorialOverlay"
 const CITY_SCREEN_NAME := "CityScreen"
 const PARTY_BUTTON_NAME := "PartyButton"
 const PARTY_SCREEN_NAME := "PartyScreen"
 const SETTINGS_BUTTON_NAME := "SettingsButton"
 const MENU_BUTTON_NAME := "MenuButton"
 const SETTINGS_SCREEN_NAME := "SettingsScreen"
+const CHRONICLE_BUTTON_NAME := "ChronicleButton"
+const CHRONICLE_SCREEN_NAME := "ChronicleScreen"
 ## Экраны в машине навигации кампании: id перехода и куда возвращаться.
 const CITY_SCREEN_ID := &"city"
 const PARTY_SCREEN_ID := &"party"
 const SETTINGS_SCREEN_ID := &"settings"
+const CHRONICLE_SCREEN_ID := &"chronicle"
 const MAP_SCREEN_ID := &"map"
 ## Экраны, которыми владеет этот слой: переключение между ними идёт через
-## карту (см. `_show_campaign_screen`), чужие экраны (бой, хроника) слой не
-## имеет права покидать сам.
-const HUD_SCREEN_IDS: Array[StringName] = [CITY_SCREEN_ID, PARTY_SCREEN_ID, SETTINGS_SCREEN_ID]
+## карту (см. `_show_campaign_screen`), чужие экраны (бой) слой не имеет права
+## покидать сам.
+## Хроника (D-240) — здесь же, хотя по канону навигации (K-M8,
+## `CampaignNavigation`) из неё есть один ход — в карту. Соседняя кнопка слоя
+## обязана делать этот ход сама (CHRONICLE → MAP → цель): живая на вид кнопка,
+## которая молча упирается в отказ навигации, нарушает инвариант «≤2 клика до
+## причины» (mvp-ui-flow 3.3) — отказ без причины игроку не объясняют.
+const HUD_SCREEN_IDS: Array[StringName] = [
+	CITY_SCREEN_ID, PARTY_SCREEN_ID, SETTINGS_SCREEN_ID, CHRONICLE_SCREEN_ID,
+]
 
 var city: City = null
 var city_screen: CityScreen = null
 var party_screen: PartyScreen = null
 var settings_screen: SettingsScreen = null
+var chronicle_screen: ChronicleScreen = null
 var _top_row: HBoxContainer = null
 var _city_button: Button = null
 var _party_button: Button = null
 var _settings_button: Button = null
+var _chronicle_button: Button = null
 var _menu_button: Button = null
 var _turn_button: Button = null
 ## Защита от повторного нажатия во время обработки хода (7.13): пока эмитится
@@ -76,6 +102,32 @@ var _turn_enabled: bool = false
 var _ui_manager: CampaignUIManager = null
 var _party: Array = []
 var _party_capacity: int = PartyScreenModelScript.DEFAULT_CAPACITY
+## Носитель ленты (D-240) и состояние открытости хроники. Состояние держится
+## флагом, а не по `visible` экрана: машина навигации может погасить слой сама
+## (уход в бой), и по `visible` слой не отличил бы это от своего закрытия.
+var _chronicle: ChronicleLog = null
+var _chronicle_open: bool = false
+## mvp-ui-flow 2.3 (T-182, M3): панель целей первых трёх дней. Носитель только
+## рисует то, что посчитал `CampaignGoalTracker`; сам трекер живёт в композиции.
+## Без привязки панели нет: список целей без носителя обещал бы цели, которых
+## никто не проверяет (конвенция «нет несуществующих действий»).
+var _goals: CampaignGoalTracker = null
+var _goals_panel: PanelContainer = null
+var _goals_list: VBoxContainer = null
+## 7.12 — панель отряда: ряд слотов и сами кнопки. Данных здесь нет: слоты
+## читают `PartyScreenModel` поверх `_party` при каждом обновлении (D-200).
+var _party_panel: PanelContainer = null
+var _party_slots_row: HBoxContainer = null
+var _party_slots: Array[Button] = []
+## mvp-ui-flow 2.2 (T-186): модалка первой директивы. Как и панель целей, слоя
+## без данных не имеет: без привязанных директив оверлей не показывается
+## (конвенция «нет несуществующих действий»). Директивы — `campaign.json →
+## tutorial`, их приносит хост.
+var _tutorial: TutorialOverlay = null
+var _tutorial_directives: Dictionary = {}
+## Последний день, который хост показал слою. Своего счёта дней у HUD нет
+## (D-200) — это значение того же пуша, что рисует дату.
+var _campaign_day: int = 0
 ## Полоса счётчиков: id строки реестра → контейнер счётчика. Значений здесь нет:
 ## числа читаются из носителя при каждом обновлении (D-200).
 var _counters: Dictionary = {}
@@ -91,6 +143,7 @@ func _ready() -> void:
 ## а не хранятся). Счётчик, который кампейн-состояние не ведёт, прячется: ноль
 ## вместо «носителя нет» врал бы.
 func refresh_campaign(day: int) -> void:
+	_campaign_day = day
 	for row_id in _counters:
 		var box := _counters[row_id] as Control
 		if box == null or not is_instance_valid(box):
@@ -103,6 +156,11 @@ func refresh_campaign(day: int) -> void:
 	var date := get_node_or_null(DATE_LABEL_NAME) as Label
 	if date != null:
 		date.text = CalendarScript.date_label(day)
+	_refresh_goals()
+	# Состав партии меняется не только в момент привязки (тренировка, бой, смерть),
+	# а `refresh_campaign` — единная точка обновления слоя; `bind_party` хост
+	# вызывает один раз при поднятии кампейна.
+	_refresh_party_panel()
 
 
 ## Текст счётчика по id строки реестра ("" — счётчик не показан).
@@ -155,9 +213,9 @@ func _build() -> void:
 	_top_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_top_row)
 	_top_row.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	# Ширина ряда под пять кнопок: 5 × 140 + 4 × 16 separation + 16 отступ.
+	# Ширина ряда под шесть кнопок: 6 × 140 + 5 × 16 separation + 16 отступ.
 	_top_row.add_theme_constant_override("separation", 16)
-	_top_row.offset_left = -790.0
+	_top_row.offset_left = -936.0
 	_top_row.offset_right = -16.0
 	_top_row.offset_top = 16.0
 	_top_row.offset_bottom = 56.0
@@ -181,6 +239,17 @@ func _build() -> void:
 	_party_button.disabled = true
 	_party_button.pressed.connect(_on_party_pressed)
 	_top_row.add_child(_party_button)
+
+	_chronicle_button = Button.new()
+	_chronicle_button.name = CHRONICLE_BUTTON_NAME
+	_chronicle_button.text = GameText.campaign_chronicle()
+	_chronicle_button.tooltip_text = GameText.campaign_chronicle_hint()
+	_chronicle_button.custom_minimum_size = Vector2(140, 40)
+	# Как и с городом/партией: до привязки ленты кнопки нет — без носителя
+	# кнопка обещала бы экран, в котором нечего показать.
+	_chronicle_button.disabled = true
+	_chronicle_button.pressed.connect(_on_chronicle_pressed)
+	_top_row.add_child(_chronicle_button)
 
 	_settings_button = Button.new()
 	_settings_button.name = SETTINGS_BUTTON_NAME
@@ -222,6 +291,18 @@ func _build() -> void:
 	_top_row.add_child(_turn_button)
 	_build_counter_bar()
 	_build_date_label()
+	_build_goals_panel()
+	_build_party_panel()
+	# 7.17: полоса кнопок — на роль темы (`ButtonAction`), а не на дефолтный вид
+	# `Button`, который в кампании давал ахроматический серый (макет — золото по
+	# тёмному). Роль одна на ряд: кнопки ряда однотипны, а локальные оверрайды
+	# цвета/кегля запрещены конвенцией T-147/T-148.
+	for button in [
+		_city_button, _party_button, _chronicle_button, _settings_button,
+		_menu_button, _turn_button,
+	]:
+		button.theme_type_variation = &"ButtonAction"
+	_build_tutorial_overlay()
 
 
 ## 7.10 — полоса счётчиков макета: один контейнер на строку реестра, порядок —
@@ -250,6 +331,11 @@ func _build_counter_bar() -> void:
 		box.add_child(icon)
 		var value := Label.new()
 		value.name = "Value"
+		# Гайд §2: «Числа/статы — счётчики ресурсов» идут ролью `LabelNumber`
+		# (20 PT Mono). Без роли число резолвило 16 px движковским белым без
+		# гарнитуры — то есть полоса счётчиков была единственной строкой макета,
+		# нарисованной вне темы (7.17).
+		value.theme_type_variation = &"LabelNumber"
 		box.add_child(value)
 		bar.add_child(box)
 		_counters[row.get("id", &"")] = box
@@ -272,7 +358,190 @@ func _build_date_label() -> void:
 	date.offset_right = 424.0
 	date.offset_bottom = -24.0
 	date.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	# Дата — вторичная строка (гайд §2, `LabelSecondary` 16): она не счётчик, но
+	# и не заголовок; роль несёт ещё и гарнитуру с цветом, поэтому «просто кегль»
+	# здесь не выбор.
+	date.theme_type_variation = &"LabelSecondary"
 	add_child(date)
+
+
+## mvp-ui-flow 2.3 (T-182, M3): панель целей первых трёх дней — левый верхний
+## угол, под полосой счётчиков: макетных 8 экранов у HUD нет (D-185: путь
+## макета в репо отсутствует), поэтому место выбирается по принципу «не трогать
+## занятые зоны»: счётчики слева сверху, кнопки справа сверху, дата слева снизу.
+## Карточка — `PanelCard` (поле панели с золотой рамкой), как и остальные панели
+## поверх поля; панель скрыта до привязки трекера.
+func _build_goals_panel() -> void:
+	var panel := PanelContainer.new()
+	panel.name = GOALS_PANEL_NAME
+	panel.theme_type_variation = &"PanelCard"
+	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	panel.offset_left = 16.0
+	panel.offset_top = 64.0
+	panel.offset_right = 356.0
+	panel.offset_bottom = 64.0
+	panel.grow_vertical = Control.GROW_DIRECTION_END
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.visible = false
+	var column := VBoxContainer.new()
+	column.name = "GoalsColumn"
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.add_theme_constant_override("separation", 4)
+	panel.add_child(column)
+	var title := Label.new()
+	title.name = GOALS_TITLE_NAME
+	title.text = GameText.campaign_goals_title()
+	# Кегль — токенами темы, не оверрайдами (гайд §2). Оговорка: гайд называет роли
+	# «подзаголовок 24» (`LabelSubheading`) и «вторичный 16» (`LabelCaption`), а в
+	# теме объявлены `LabelStrong` 24 и `LabelSecondary` 16 — те же роли и кегли под
+	# другими именами. Расхождение имён темы и гайда — предмет theme-type-hygiene,
+	# здесь берётся тот носитель, который реально существует.
+	title.theme_type_variation = &"LabelStrong"
+	column.add_child(title)
+	var list := VBoxContainer.new()
+	list.name = GOALS_LIST_NAME
+	list.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	list.add_theme_constant_override("separation", 2)
+	column.add_child(list)
+	_goals_panel = panel
+	_goals_list = list
+	add_child(panel)
+
+
+## ui-mockup-parity 7.12 — панель отряда снизу: пять слотов из `PartyScreenModel`.
+#
+## Слот — не второй список партии, а ярлык к её экрану: занятый слот открывает
+## `PartyScreen` тем же путём, что верхняя кнопка, пустой — выключен и на выбор
+## не реагирует (спека campaign-hud «Пустой слот», конвенция «нет несуществующих
+## действий»). Своего состояния «выбран кто-то» в слое нет намеренно: второй
+## носитель выбора разошёлся бы с экраном партии (урок двух носителей населения,
+## T-183), а «активный отряд» макета в MVP нечем — партия одна, и это
+## зарегистрировано (T-193), а не имитировано подсветкой.
+##
+## Панель растёт от нижнего левого якоря вверх и вправо: нижняя полоса кадра
+## свободна (поля карты в `main.tscn` нет, D-204), дата стоит ниже, цели — сверху
+## слева. Как и у панели целей, прямоугольник задан якорями, а размер добирается
+## минимальным размером детей.
+func _build_party_panel() -> void:
+	var panel := PanelContainer.new()
+	panel.name = PARTY_PANEL_NAME
+	panel.theme_type_variation = &"PanelCard"
+	panel.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	panel.offset_left = 16.0
+	panel.offset_top = -128.0
+	panel.offset_bottom = -60.0
+	panel.offset_right = 16.0
+	panel.grow_horizontal = Control.GROW_DIRECTION_END
+	panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	# Как и панель целей: плита не имеет права перехватывать клики кампании.
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# До привязки партии панели нет: пять пустых рамок выглядели бы обещанием
+	# отряда, которого нет.
+	panel.visible = false
+	var row := HBoxContainer.new()
+	row.name = PARTY_SLOTS_NAME
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_theme_constant_override("separation", 8)
+	panel.add_child(row)
+	_party_panel = panel
+	_party_slots_row = row
+	add_child(panel)
+	_rebuild_party_slots(_party_capacity)
+
+
+## Слотов ровно столько, сколько ёмкость партии: `PartyScreenModel` знает про
+# `DEFAULT_CAPACITY` (= `CampaignTrainingService.PARTY_CAPACITY`), свою моду
+# слой не изобретает.
+func _rebuild_party_slots(capacity: int) -> void:
+	if _party_slots_row == null:
+		return
+	for child in _party_slots_row.get_children():
+		_party_slots_row.remove_child(child)
+		child.queue_free()
+	_party_slots.clear()
+	for i in maxi(capacity, 0):
+		var slot := Button.new()
+		slot.name = "%s_%d" % [PARTY_SLOT_NAME, i]
+		slot.theme_type_variation = &"ButtonAction"
+		slot.custom_minimum_size = Vector2(128, 52)
+		# Пустой слот выключен до первого наполнения: нажатие несуществующего
+		# бойца не должно быть действием (7.12, спека «Пустой слот»). Включает и
+		# подписывает их `_refresh_party_panel`.
+		slot.disabled = true
+		slot.pressed.connect(_on_party_slot_pressed)
+		_party_slots_row.add_child(slot)
+		_party_slots.append(slot)
+
+
+## Слоты читают модель партии, а не своё состояние: `bind_party` получает живой
+## массив `composition.party`, поэтому перечисление при каждом обновлении кампейна
+## даёт тот же источник, что у экрана партии.
+func _refresh_party_panel() -> void:
+	if _party_panel == null or _party_slots.is_empty():
+		return
+	var model: Dictionary = PartyScreenModelScript.roster_model(_party, _party_capacity)
+	var shown: Array = []
+	for member in (model.get("members", []) as Array):
+		# Мёртвый в бою слота не занимает — та же alive-модель (D-221), что у
+		# экрана партии и у гейтинга тренировки.
+		if str(member.get("state", PartySystem.STATE_READY)) != PartySystem.STATE_DEAD:
+			shown.append(member)
+	for i in _party_slots.size():
+		var slot := _party_slots[i]
+		if i >= shown.size():
+			slot.disabled = true
+			slot.text = ""
+			slot.tooltip_text = ""
+			continue
+		var member: Dictionary = shown[i]
+		slot.disabled = false
+		slot.text = "%s · ур. %d" % [str(member.get("id", "")), int(member.get("level", 1))]
+		slot.tooltip_text = "%s — %s, %s, ур. %d" % [
+			str(member.get("id", "")), str(member.get("class", "")),
+			str(member.get("race", "")), int(member.get("level", 1)),
+		]
+
+
+## Занятый слот открывает экран партии — тем же путём, что верхняя кнопка (машина
+## навигации + перечитывание данных). Пустой слот до обработчика не доходит: он
+## `disabled`.
+func _on_party_slot_pressed() -> void:
+	open_party_screen()
+
+
+## mvp-ui-flow 2.2 (T-186): директивы первых ходов (`campaign.json → tutorial`).
+## Пустой словарь = оверлею нечего показывать: слой молчит, а не сочиняет текст.
+func bind_tutorial(directives: Dictionary) -> void:
+	_tutorial_directives = directives.duplicate(true)
+
+
+func is_tutorial_open() -> bool:
+	return _tutorial != null and _tutorial.is_open()
+
+
+## Текст показанной директивы ("" — оверлей закрыт). Тест и хост читают то, что
+## видит игрок.
+func get_tutorial_text() -> String:
+	return "" if _tutorial == null else _tutorial.directive_text()
+
+
+func _build_tutorial_overlay() -> void:
+	var overlay := TutorialOverlay.new()
+	overlay.name = TUTORIAL_OVERLAY_NAME
+	add_child(overlay)
+	_tutorial = overlay
+
+
+## Первый вход в экран (mvp-ui-flow: «* → TUTORIAL … on first entry to a screen»).
+## Экран в сигнатуре не нужен: содержимое оверлея — директива дня, а не справка
+## про экран; текста про экраны в репо нет ни в одном носителе, и сочинять его
+## здесь означало бы изобретать канон.
+func _on_tutorial_requested(_screen: StringName) -> void:
+	if _tutorial == null or _tutorial_directives.is_empty():
+		return
+	_tutorial.try_show(
+		_campaign_day, String(_tutorial_directives.get("day_%d" % _campaign_day, ""))
+	)
 
 
 ## Проводка до машины навигации кампании (`CampaignUIManager`). Порядок важен:
@@ -283,6 +552,9 @@ func bind_ui_manager(manager: CampaignUIManager) -> void:
 		return
 	_ui_manager = manager
 	_ui_manager.screen_changed.connect(_on_screen_changed)
+	# mvp-ui-flow 2.2 (T-186): потребитель `tutorial_requested`. До этого среза
+	# сигнал уходил в никуда — «оверлей первых ходов» существовал только в спеке.
+	_ui_manager.tutorial_requested.connect(_on_tutorial_requested)
 
 
 ## Привязка кампейн-города: экран создаётся здесь, а не в `_ready` — слой HUD
@@ -324,7 +596,13 @@ func bind_city(value: City, rng: RandomNumberGenerator = null) -> void:
 ## остаётся наследием T-110 — вычищается в T-171.
 func bind_party(party: Array, capacity: int = PartyScreenModelScript.DEFAULT_CAPACITY) -> void:
 	_party = party
-	_party_capacity = capacity
+	if capacity != _party_capacity:
+		# Ёмкость могла прийти из сейва или из другого носителя — слоты
+		# перестраиваются, а не прячутся: лишние слоты были бы обещанием бойца.
+		_party_capacity = capacity
+		_rebuild_party_slots(capacity)
+	else:
+		_party_capacity = capacity
 	if _party_button == null:
 		return
 	if party_screen == null:
@@ -337,7 +615,75 @@ func bind_party(party: Array, capacity: int = PartyScreenModelScript.DEFAULT_CAP
 		if _ui_manager != null:
 			_ui_manager.register_screen(PARTY_SCREEN_ID, party_screen)
 	refresh_party_screen()
+	_refresh_party_panel()
+	if _party_panel != null:
+		_party_panel.visible = true
 	_party_button.disabled = false
+
+
+## Привязка трекера целей M3 (хост вызывает её вслед за поднятием кампании).
+## Смена трекера переподключается: загрузка сейва приносит другой объект
+## (`CampaignGoalTracker.from_dict`), и панель обязана слушать новый, а не вчерашний.
+func bind_goals(tracker: CampaignGoalTracker) -> void:
+	if tracker == _goals:
+		return
+	if _goals != null and _goals.goal_completed.is_connected(_on_goal_completed):
+		_goals.goal_completed.disconnect(_on_goal_completed)
+	_goals = tracker
+	if _goals != null and not _goals.goal_completed.is_connected(_on_goal_completed):
+		_goals.goal_completed.connect(_on_goal_completed)
+	_refresh_goals()
+
+
+## Текст строки цели (тест и хост читают то, что видит игрок; "" — панель не привязана).
+func get_goal_text(goal_id: String) -> String:
+	if _goals_list == null:
+		return ""
+	var row := _goals_list.get_node_or_null("Goal_%s" % goal_id) as Label
+	return "" if row == null else row.text
+
+
+## Список незакрытых целей, сгруппированных по дням. Панель видна, пока цели не
+## закрыты все (`CampaignGoalTracker.visible()`), и прячется целиком: «всё
+## сделано» — это отсутствие панели, а не пустой список под заголовком.
+func _refresh_goals() -> void:
+	if _goals_panel == null or _goals_list == null:
+		return
+	for child in _goals_list.get_children():
+		_goals_list.remove_child(child)
+		child.queue_free()
+	var pending: Array = [] if _goals == null else _goals.pending()
+	# pending() сохраняет порядок трекера, а он приходит из сейва любым. Заголовки
+	# дней печатаются сменой дня, поэтому список приводится к порядку по дню: иначе
+	# две цели дня 1, разнесённые целью дня 2, дали бы два заголовка «День 1».
+	pending.sort_custom(func(a, b): return int(a.get("day", 0)) < int(b.get("day", 0)))
+	var day := -1
+	for goal in pending:
+		var goal_day := int(goal.get("day", 0))
+		if goal_day != day:
+			_daily_header(goal_day)
+			day = goal_day
+		var row := Label.new()
+		var goal_id := String(goal.get("id", ""))
+		row.name = "Goal_%s" % goal_id
+		row.text = "· %s" % GameText.campaign_goal(goal_id)
+		row.theme_type_variation = &"LabelBody"
+		row.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_goals_list.add_child(row)
+	_goals_panel.visible = _goals != null and _goals.visible()
+
+
+## Заголовок дня внутри списка целей.
+func _daily_header(goal_day: int) -> void:
+	var head := Label.new()
+	head.name = "GoalDay%d" % goal_day
+	head.text = GameText.campaign_goal_day(goal_day)
+	head.theme_type_variation = &"LabelSecondary"
+	_goals_list.add_child(head)
+
+
+func _on_goal_completed(_goal_id: String) -> void:
+	_refresh_goals()
 
 
 func open_city_screen() -> void:
@@ -401,8 +747,8 @@ func refresh_party_screen() -> void:
 ## `_do_close()` освободил бы узел, а ссылка слоя осталась бы висячей),
 ## `show_additional = false` — потому что дополнительный блок настроек это
 ## контекст меню («Арена», «Хроника», предпросмотр модели): в кампании арена и
-## предпросмотр не играют, а у кампанийной хроники нет носителя контента
-## (T-175), так что эти три кнопки здесь были бы мёртвыми.
+## предпросмотр не играют, а его `chronicle_requested` в кампейне некем слушается
+## — кнопка была бы мёртвой. Кампейнская лента (D-240) — своя кнопка слоя.
 func bind_settings(settings: Node) -> void:
 	if settings == null:
 		return
@@ -458,6 +804,80 @@ func _on_menu_pressed() -> void:
 	menu_requested.emit()
 
 
+## Привязка хроники (D-240): экран создаётся здесь же, что город и партия.
+## Кнопка включается только с носителем ленты: без `ChronicleLog` экран показывал
+## бы пустоту там, где у кампании просто не было событий.
+func bind_chronicle(log: ChronicleLog) -> void:
+	if log == null:
+		return
+	_chronicle = log
+	if chronicle_screen == null or not is_instance_valid(chronicle_screen):
+		chronicle_screen = ChronicleScreenScene.instantiate() as ChronicleScreen
+		chronicle_screen.name = CHRONICLE_SCREEN_NAME
+		add_child(chronicle_screen)
+		chronicle_screen.closed.connect(_on_chronicle_screen_closed)
+		if _ui_manager != null:
+			_ui_manager.register_screen(CHRONICLE_SCREEN_ID, chronicle_screen)
+	if _chronicle_button != null:
+		_chronicle_button.disabled = false
+
+
+## Лента перечитывается при каждом открытии: записи добавляются ходами, а экран
+## не имеет права показывать состояние на момент привязки (тот же приём, что у
+## партии).
+func refresh_chronicle_screen() -> void:
+	if chronicle_screen == null or not is_instance_valid(chronicle_screen) \
+			or _chronicle == null:
+		return
+	chronicle_screen.show_records(_chronicle.records())
+
+
+func open_chronicle_screen() -> void:
+	if chronicle_screen == null or _chronicle == null or _chronicle_open:
+		return
+	if not _show_campaign_screen(CHRONICLE_SCREEN_ID):
+		return
+	_chronicle_open = true
+	refresh_chronicle_screen()
+	chronicle_screen_opened.emit()
+
+
+func close_chronicle_screen() -> void:
+	if not _chronicle_open:
+		return
+	# Закрытие идёт через машину: она гасит слой и возвращает кампанию на карту.
+	if _ui_manager != null and _ui_manager.current_screen() == CHRONICLE_SCREEN_ID:
+		_ui_manager.show_screen(MAP_SCREEN_ID)
+	_finish_chronicle_close()
+
+
+func is_chronicle_screen_open() -> bool:
+	return _chronicle_open and chronicle_screen != null \
+			and is_instance_valid(chronicle_screen) and chronicle_screen.visible
+
+
+func _on_chronicle_pressed() -> void:
+	if is_chronicle_screen_open():
+		close_chronicle_screen()
+	else:
+		open_chronicle_screen()
+
+
+## Экран погасил себя сам (своя кнопка «Закрыть»): слой догоняет машину, иначе
+## навигация осталась бы на хронике, а кнопка хода — выключенной.
+func _on_chronicle_screen_closed() -> void:
+	close_chronicle_screen()
+
+
+func _finish_chronicle_close() -> void:
+	if not _chronicle_open:
+		return
+	_chronicle_open = false
+	if chronicle_screen != null and is_instance_valid(chronicle_screen):
+		chronicle_screen.visible = false
+	chronicle_screen_closed.emit()
+
+
 func _on_city_pressed() -> void:
 	if is_city_screen_open():
 		close_city_screen()
@@ -502,6 +922,12 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			# а не выход из-за экрана: закрытие идёт тем же путём, что и кнопка.
 			close_settings_screen()
 			get_viewport().set_input_as_handled()
+		elif is_chronicle_screen_open():
+			# У ленты своего Esc-выхода нет (экран знает только «Закрыть»), а по
+			# канону из неё один переход — в карту: без этой ветки она закрывалась
+			# бы только мышью.
+			close_chronicle_screen()
+			get_viewport().set_input_as_handled()
 
 
 ## Смена активного экрана машиной, а не игроком: уход в бой/партию/хронику
@@ -514,6 +940,8 @@ func _on_screen_changed(screen: StringName) -> void:
 		_close_party_screen()
 	if screen != SETTINGS_SCREEN_ID:
 		_close_settings_screen()
+	if screen != CHRONICLE_SCREEN_ID:
+		_finish_chronicle_close()
 
 
 func _open_city_screen() -> void:

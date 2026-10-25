@@ -108,6 +108,20 @@ func _mount_campaign_hud() -> void:
 	# mvp-ui-flow 5.4: настроек у живого кампейна не было — экран жил в меню и в
 	# бою, а из кампании к нему не вело ничего.
 	campaign_hud.bind_settings(Services.resolve(&"settings"))
+	# D-240: хроника поселения. У ленты появился носитель (`ChronicleLog` в
+	# кампании, пишется системами-событиями), поэтому у слоя появилась и кнопка:
+	# до этого у игрока не было способа увидеть, что случилось с поселением.
+	campaign_hud.bind_chronicle(composition.chronicle)
+	campaign_hud.chronicle_screen_opened.connect(_on_campaign_screen_opened)
+	campaign_hud.chronicle_screen_closed.connect(_on_campaign_screen_closed)
+	# mvp-ui-flow 2.3 (T-182): панель целей первых трёх дней (M3). Логика трекера
+	# была написана ещё в 5.2, но ни один скрипт её не вызывал: целей у игрока не
+	# было видно. Привязка — после загрузки слота, чтобы панель смотрела на тот
+	# трекер, который принёс сейв, а не на вытесненный им.
+	campaign_hud.bind_goals(composition.goals)
+	# mvp-ui-flow 2.2 (T-186): директивы первых ходов. Их принёс хост: у слоя нет
+	# права самому читать баланс-конфиг, а без директив оверлей молчит.
+	campaign_hud.bind_tutorial(composition.tutorial_directives())
 	# 7.13: ход кампании делается кнопкой слоя. Обработчик — тот же путь,
 	# что был у таймера (`advance_turn` + `on_day_passed`), чтобы кнопка не
 	# заводила второй порядок фаз.

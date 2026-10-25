@@ -153,16 +153,13 @@ theme_override_constants/separation = 12
 custom_minimum_size = Vector2(160, 36)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 14
 
 [node name="ResetButton" type="Button" parent="Panel/Box/ButtonRow"]
 custom_minimum_size = Vector2(160, 36)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 14
 
 [node name="CancelButton" type="Button" parent="Panel/Box/ButtonRow"]
 custom_minimum_size = Vector2(160, 36)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 14

@@ -234,6 +234,10 @@ func _spawn_wave(turn: int, tier: int, forced: bool, report: Dictionary,
 	var camp_id: String = _place_camp(tier, report)
 	wave = {
 		"tier": tier,
+		# D-240: ход генерации волны — читатель хроники (07-balance §5: «предупреждение
+		# — в хронике в ход генерации»). Без него лента не могла бы отличить
+		# «волну только что породили» от «волна всё ещё в пути».
+		"turn": turn,
 		# Q-M29: зимний enemy_mult к силе волны (финальный ход — без бонуса).
 		"power": float(tier_power[tier]) * _enemy_mult(turn),
 		"target": target,
@@ -334,6 +338,9 @@ func _resolve_raid(turn: int, stocks: Dictionary, barracks: bool, hero: bool,
 	var result := {
 		"turn": turn,
 		"tier": tier,
+		# D-240: состав волны долетает до читателя — бит «финальный рейд» (≤21)
+		# различается не тиром, а директивой composition = босс (K-R3).
+		"composition": str(wave.get("composition", "")),
 		"power": power,
 		"defense": defense,
 		"target": target,

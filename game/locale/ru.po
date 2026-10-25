@@ -813,6 +813,70 @@ msgstr "Закрыть"
 msgid "chronicle.entry"
 msgstr "{icon} {gen}. {name} ({path}) — {outcome} | ходы {turns}, слава {glory}, боёв {w}/{l}"
 
+# ─── Хроника поселения (D-240) ──────────────────────────────
+# Биты — канонные строки 04-narrative «Ключевые биты кампании»; не-битовые —
+# стиль «факт» (канон называет содержание: 00-overview, 02-mechanics, 06-economy).
+
+msgid "chronicle.campaign_title"
+msgstr "Хроника"
+
+msgid "chronicle.turn"
+msgstr "Ход {turn}"
+
+msgid "chronicle.day_summary"
+msgstr "И ещё {count}."
+
+msgid "chronicle.bit_sign"
+msgstr "Ты не просил. Знак всё равно пришёл. Город маленький — начни с него."
+
+msgid "chronicle.bit_first_raid"
+msgstr "Пришли за зерном. Унесли треть. Записал."
+
+msgid "chronicle.bit_district"
+msgstr "У города теперь есть имя. Его назвала пекарка."
+
+msgid "chronicle.bit_strong_raid"
+msgstr "Они знают, где твоя слабая сторона. Теперь знают и ты."
+
+msgid "chronicle.bit_final_raid"
+msgstr "Нежелающий стоит. Не потому что хочет — потому что стоит."
+
+msgid "chronicle.raid_repelled"
+msgstr "Они пришли — и не взяли."
+
+msgid "chronicle.raid_deficit"
+msgstr "Пришли, когда вам было хуже всего."
+
+msgid "chronicle.raid_party_away"
+msgstr "Партия была в пути."
+
+msgid "chronicle.raids_all_ruined"
+msgstr "Они отступили — выжить удалось."
+
+msgid "chronicle.wave_warning"
+msgstr "В пути волна: жди рейда."
+
+msgid "chronicle.food_warn"
+msgstr "Еда: припасы на исходе."
+
+msgid "chronicle.district_created"
+msgstr "Основан район: {group}."
+
+msgid "chronicle.district_disbanded"
+msgstr "Район снят: {group}."
+
+msgid "chronicle.sign_chosen"
+msgstr "Выбран Знак: {sign}."
+
+msgid "chronicle.sign_sleeping"
+msgstr "Престиж иссяк — Знак уснул. Поселение это не убивает."
+
+msgid "chronicle.sign_awakened"
+msgstr "Престиж вернулся — Знак снова активен."
+
+msgid "chronicle.rank_changed"
+msgstr "Титул носителя: {rank}."
+
 # ─── Настройки ─────────────────────────────────────────────────
 msgid "settings.title"
 msgstr "⚙️ Настройки"
@@ -1050,6 +1114,12 @@ msgstr "Город"
 msgid "campaign.party"
 msgstr "Партия"
 
+msgid "campaign.chronicle"
+msgstr "Хроника"
+
+msgid "campaign.chronicle_hint"
+msgstr "Лента событий поселения: что случилось и почему"
+
 msgid "campaign.settings"
 msgstr "Настройки"
 
@@ -1067,3 +1137,21 @@ msgstr "Завершить текущий ход"
 
 msgid "campaign.date"
 msgstr "Месяц {month} · Неделя {week} · День {day}"
+
+msgid "campaign.goals_title"
+msgstr "Цели первых дней"
+
+msgid "campaign.goal_day"
+msgstr "День {day}"
+
+msgid "campaign.goal.farm"
+msgstr "Построить ферму"
+
+msgid "campaign.goal.barracks"
+msgstr "Построить казармы"
+
+msgid "campaign.goal.train_warrior"
+msgstr "Потренировать воина"
+
+msgid "campaign.goal.ruins"
+msgstr "Посетить руины"

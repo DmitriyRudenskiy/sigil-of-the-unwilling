@@ -1418,6 +1418,14 @@ CityCostPanel/styles/panel = SubResource("StyleBoxFlat_city_cost_panel")
 ; hover_pressed — активная), а активной вкладка становилась сменой button_pressed.
 ; Значит второй носитель не нужен: состояние уже выбирает стиль (проверка —
 ; test_city_screen_theme_carrier.gd), и CityTabActive в design.md не завёлся.
+; UI-AC7 (T-189): заголовок карточки каталога — Button (он же кнопка выбора), а
+; кегль его держался обходом 17 px, то есть вне шкалы §2 и ниже соседних ролей.
+; Носитель объявляет только шрифт и кегль (20 = «основной текст» §2): цвета трёх
+; состояний экран по-прежнему задаёт сам, потому что их палитра — ось Q-M96, а её
+; этот срез не решает.
+CityCardTitle/base_type = "Button"
+CityCardTitle/fonts/font = ExtResource("8_serif")
+CityCardTitle/font_sizes/font_size = 20
 CityTab/base_type = "Button"
 CityTab/styles/normal = SubResource("StyleBoxFlat_city_tab_idle")
 CityTab/styles/hover = SubResource("StyleBoxFlat_city_tab_idle")

@@ -871,7 +871,6 @@ func _initialize_campaign_catalog() -> void:
 		tab.button_pressed = category_index == 0
 		tab.custom_minimum_size.y = 30
 		tab.focus_mode = Control.FOCUS_ALL
-		tab.add_theme_font_size_override("font_size", 12)
 		tab.add_theme_color_override("font_color", PALETTE.text_muted)
 		tab.add_theme_color_override("font_pressed_color", PALETTE.accent_gold)
 		tab.add_theme_color_override("font_hover_color", PALETTE.text_primary)
@@ -991,7 +990,7 @@ func _make_building_card(definition: Dictionary) -> PanelContainer:
 	select.focus_mode = Control.FOCUS_ALL
 	select.flat = true
 	select.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	select.add_theme_font_size_override("font_size", 17)
+	select.theme_type_variation = &"CityCardTitle"
 	select.add_theme_color_override("font_color", PALETTE.text_primary)
 	select.add_theme_color_override("font_hover_color", PALETTE.accent_gold)
 	select.add_theme_color_override("font_pressed_color", PALETTE.accent_gold)
@@ -1005,7 +1004,8 @@ func _make_building_card(definition: Dictionary) -> PanelContainer:
 	role_line.text = " · ".join(roles).to_upper()
 	role_line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	role_line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	role_line.add_theme_font_size_override("font_size", 11)
+	role_line.name = "BuildingRoles"
+	role_line.theme_type_variation = &"LabelSecondary"
 	role_line.add_theme_color_override("font_color", PALETTE.text_muted)
 	details.add_child(role_line)
 
@@ -1020,7 +1020,7 @@ func _make_building_card(definition: Dictionary) -> PanelContainer:
 	var cost_caption := Label.new()
 	cost_caption.name = "CostCaption"
 	cost_caption.text = "СТОИМОСТЬ"
-	cost_caption.add_theme_font_size_override("font_size", 10)
+	cost_caption.theme_type_variation = &"LabelSecondary"
 	cost_caption.add_theme_color_override("font_color", PALETTE.text_muted)
 	cost_caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	cost_row.add_child(cost_caption)
@@ -1055,7 +1055,7 @@ func _make_building_card(definition: Dictionary) -> PanelContainer:
 	effect_line.text = _building_effect_summary(definition)
 	effect_line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	effect_line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	effect_line.add_theme_font_size_override("font_size", 13)
+	effect_line.theme_type_variation = &"LabelSecondary"
 	effect_line.add_theme_color_override("font_color", PALETTE.text_body)
 	box.add_child(effect_line)
 	var prerequisite_line := Label.new()
@@ -1063,13 +1063,13 @@ func _make_building_card(definition: Dictionary) -> PanelContainer:
 	prerequisite_line.text = _building_prerequisite_text(definition)
 	prerequisite_line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	prerequisite_line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	prerequisite_line.add_theme_font_size_override("font_size", 12)
+	prerequisite_line.theme_type_variation = &"LabelSecondary"
 	prerequisite_line.add_theme_color_override("font_color", PALETTE.text_muted)
 	box.add_child(prerequisite_line)
 	var status_line := Label.new()
 	status_line.name = "BuildingAvailability"
 	status_line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	status_line.add_theme_font_size_override("font_size", 12)
+	status_line.theme_type_variation = &"LabelSecondary"
 	box.add_child(status_line)
 	_update_building_availability(status_line, definition)
 	return card

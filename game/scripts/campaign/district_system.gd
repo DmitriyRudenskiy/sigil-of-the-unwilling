@@ -150,11 +150,20 @@ func process_turn(
 	# жив и его настроение (а значит и множитель производства) сохранено; дольше —
 	# запись района уничтожена, настроение сброшено к стартовому.
 	var disbanded: Array = []
+	# D-240: рождение района — переход «нет зданий → есть здания». Первый проход
+	# служит базовой линией: стартовые пять зданий не «созданные районы», иначе
+	# ход 1 выдал бы игроку записи о том, чего он не делал. Признаком «базовая
+	# линия взята» служит сам district_state: он пуст только до первого прохода
+	# и восстановлен из сейва (то есть после загрузки базовая линия уже взята).
+	var created: Array = []
+	var presence_taken := not district_state.is_empty()
 	var below_limit: int = int(config.get("disband_below_days", 3))
 	for g in SettlementProcessorScript.GROUPS:
 		var grp := str(g)
 		var st: Dictionary = district_state.get(grp, {"present": false, "below_days": 0})
 		if int((districts[grp] as Dictionary)["buildings"]) > 0:
+			if presence_taken and not bool(st["present"]):
+				created.append(grp)
 			st["present"] = true
 			st["below_days"] = 0
 		elif bool(st["present"]):
@@ -173,6 +182,7 @@ func process_turn(
 	return {
 		"districts": districts,
 		"disbanded": disbanded,
+		"created": created,
 		"desertion": desertion,
 		"food_net_per_day": food_net,
 		"events": report_events,

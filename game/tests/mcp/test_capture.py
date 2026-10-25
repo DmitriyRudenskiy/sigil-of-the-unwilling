@@ -167,6 +167,37 @@ def test_capture_scene_ставит_состояние_после_пина_но_
     assert row["sha256"] == capture.sha256_hex(_png(*capture.CANONICAL_SIZE))
 
 
+class _TwoFrameMcp(_RecordingMcp):
+    """Мок, отдающий разный рисунок на каждом снимке: видно, какой кадр пошёл в отчёт."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.shots: int = 0
+
+    def screenshot(self) -> bytes:
+        self.calls.append("screenshot")
+        self.shots += 1
+        return _png(*capture.CANONICAL_SIZE) + (b"" if self.shots == 1 else b"live")
+
+
+def test_capture_scene_праймит_текстуру_до_отчётного_кадра(tmp_path):
+    """T-188: первый после пина снимок — устаревшая текстура, он не может быть отчётным.
+
+    Замер: кадр состояния совпал байтами с кадром «до состояния»; живой кадр
+    получался только вторым снимком подряд.
+    """
+    mcp = _TwoFrameMcp()
+    row = capture.capture_scene(
+        mcp, "res://scenes/x.tscn", tmp_path, "x", "тест", setup_code="select_card()\n",
+    )
+    shots = [i for i, call in enumerate(mcp.calls) if call == "screenshot"]
+    assert len(shots) == 2, f"ожидался прайминг + отчётный кадр: {mcp.calls}"
+    assert mcp.calls[shots[0] + 1] == f"wait_frames:{capture.PRIME_SETTLE_FRAMES}"
+    assert shots[0] > mcp.index("select_card()"), "прайминг — после состояния"
+    # Отчётный кадр — второй: именно его байты уходят в sha256 манифеста.
+    assert row["sha256"] == capture.sha256_hex(_png(*capture.CANONICAL_SIZE) + b"live")
+
+
 def test_capture_scene_без_состояния_не_вызывает_лишнего(tmp_path):
     mcp = _RecordingMcp()
     capture.capture_scene(mcp, "res://scenes/x.tscn", tmp_path, "x", "тест")
