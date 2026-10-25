@@ -161,3 +161,96 @@ Rollback is limited to the individual behavior/reporting changes; retain baselin
 - Reproducibility control: re-running Druid and Wizard through the same tool in a separate process returned identical rows (Druid 54 deals / industry 21 / turn 92; Wizard 68 deals / industry 209 / turn 90). Druid also reproduces the 2026-10-09 post-route-fix replay (53 deals / industry 21) within one deal.
 - Caveat carried forward unchanged: `margin` subtracts `gold_start = 100`, while `CityFactory` starts industry at 30, so `margin` is not a start-to-current delta (see "Trader target semantics"). Read the column as a fixed-offset label, not as profit.
 - New observation, not diagnosed here: Ranger/Trader is the first Trader cell that hits the 30 000-frame safety cap (turn 20, 6 battles, still `RUNNING`). It is classified incomplete, neither success nor technical failure, in the same way as the Traveler/Druid and Traveler/Chanter cells of 9.3.
+  - **Erratum, same day.** That row is superseded by «Ranger/Trader was not slow — it was deadlocked» below: the cell is neither slow nor merely incomplete, it is a battle that cannot end (**T-205**), and the auto-player now reports it by name instead of consuming the frame budget. The table's numbers for Ranger (14 deals, industry 111, turn 20) still stand; its classification does not.
+
+## Ranger/Trader was not slow — it was a battle that cannot end (2026-10-25, T-205, D-256)
+
+- Why the cell looked slow: the frame budget, not the turn count. Tracing frames inside one world turn (`MATRIX_TRACE=1` in `game/tools/matrix_report.gd`) put **21 211 of the 30 000 frames on turn 20**, in a single battle that never ended.
+- Evidence (Ranger/Trader, seed `465305719`, turn 20). One and the same `BattleState` — the snapshot reports `ctrl_state_same=true`, `ex_bs_same=true`:
+
+| observation | value |
+| --- | --- |
+| executor state | `WAITING_INPUT`, `_paused=false`, `_pause_token=0` |
+| `_turn_timer_armed`, `bs.turn_timer_running` | `true` / `true` |
+| `bs.turn_time_left` | **30.0, never lower, ≥ 600 frames** |
+| `bs.turn_idx` — the **queue cursor** (`battle_state.gd:383/396`), not a round counter | cycles 0…5 across a 12-frame burst |
+| battle composition | 3 attacker stacks (5/42/20 fighters) at (11,0) (9,0) (10,0); 3 defender stacks (53/25/46) at (12,0) (11,1) (12,3); all alive, none downed |
+| battle log during the stall | **129 lines `Gremlin/Lizardman/Beholder → Wraith: damage=0 killed=0`** |
+| retaliation | `Wraith → …: damage=60 killed=7/4/3` — four times, then never again |
+
+- Mechanism. Rounds advance normally; the **state** is a fixed point. Damage comes from the deterministic ladder («Без ГСЧ», `BattleDamageResolver`), so `damage=0` is a structural property of the pair, not bad luck: `kills=0`, stack sizes never change, and `check_end()` only fires when a side has no living units. The only real blow in the window was a **retaliation**, and by canon a unit retaliates once per battle (`openspec/specs/tactical-combat/spec.md:362` — «контратакует 1 раз за бой»; `has_retaliated` is never reset anywhere, which is the rule, not a bug). What is left is «hit for zero, never be hit back» with **no round cap, no draw rule and no standoff rule** in the battle code. The turn clock cannot rescue it either: entering `WAITING_INPUT` calls `arm_turn_timer()`, and an autopilot that acts every frame re-arms the clock faster than it runs (measured: exactly 30.0 for ≥ 600 frames).
+- A human has moves that this profile did not (in other battles of the same seed `Герой → Wraith: damage=240 killed=10`); the stalled battle is a garrison battle **without the hero**, which is exactly what the autopilot cannot break.
+- Fixed on the autopilot side (`game/scripts/probe/balance_probe.gd`); the engine standoff was deliberately not touched:
+  - `pick_attack_target()` proposes only what `BattleTurnExecutor.request_attack` would accept (adjacent for anyone; otherwise, for ranged units, only a `BattleLineOfSight.can_target_ranged` target). The previous policy asked for the nearest enemy at `d > 1`; the executor rejected it silently and the probe repeated it every frame — 8 714 frames on turn 4 of this very profile.
+  - `battle_progress_key()` measures **irreversible** progress (cells, liveness, stack sizes). A key built from the active unit or `has_moved` — the first version — would never accumulate here, because rounds do advance and the cursor keeps moving.
+  - Stall net: `BATTLE_STALL_WAIT_FRAMES` (120) without irreversible progress → `request_skip()`; `BATTLE_STALL_FAIL_FRAMES` (600) → named failure. Cost of the deadlock drops from 21 211 frames to 600, and the matrix reads `error=бой-висяк: ни движения, ни потерь 600 кадров (ход 20, …)` instead of a silent `done=false`.
+  - Not attempted: the draw/standoff rule, the damage floor, the round cap, the clock re-arming. All four are the shape of tactical combat — the owner's call, registered as **T-205** with measurements, a one-command reproduction and a post-fix check.
+- Tooling that came out of it: with `MATRIX_TRACE=1`, a profile that fails on the stall now prints `MATRIX-UNIT|side=…|uid=…|count=…` lines, and the snapshot interval is configurable (`MATRIX_BEAT_FRAMES=100`) because the default 1 000-frame interval never fires before a 600-frame net.
+- Re-run after the fix (`trader 90`, all eleven classes, one process): aggregates **identical** — 642 deals, goal 0/11, industry 21…353, median 106, survived 9/11, market 11/11 on attempt 1, every row byte-identical to the pre-fix run. Only the Ranger row changed class: same 14 deals / industry 111 / turn 20, now a named failure. Eleven profiles, zero silent frame-cap exhaustions.
+- Engine stderr found while reading the same logs (T-206, fixed): a freed floating-damage label could not be removed from `BattleView._numbers: Array[Node]` — 8 `ERROR`/`SCRIPT ERROR` lines per Ranger profile (`Array.erase(freed)` fails typed validation; `var oldest: Node = pop_front()` assigns a freed instance). `_numbers` now holds instance ids; the matrix rows are byte-identical and the error count is 0.
+- Carried lesson (D-256): a frame budget is not a verdict, and a no-progress detector keyed on queue state measures the queue, not the game.
+
+## The Traveler matrix was incomplete because the process died (2026-10-26, T-207, D-257)
+
+`matrix_report.gd -- traveler 90` не доходил до конца матрицы, и девять строк из одиннадцати
+не печатались. Это не «медленный профиль» и не «маршрутный тупик» (гипотезы 9.3), а падение
+процесса на третьем классе:
+
+```
+handle_crash: Program crashed with signal 11
+[0] _hero_cell (res://scripts/probe/balance_probe.gd:669)
+[1] goal_met  (res://scripts/probe/TravelerRole.gd:65)
+[2] metrics   (res://scripts/probe/TravelerRole.gd:68)
+[3] _run_profile (res://tools/matrix_report.gd:133)
+```
+
+Механизм: `_process` штатно завершает прогон, когда героя нет (`balance_probe.gd:104`; `_step`
+— то же на 261), но **отчёт матрицы спрашивает метрики роли уже после `_finish()`**, а
+`_hero_cell()` читал `_hero.get_component("Movement")` у освобождённого экземпляра. Чтение с
+освобождённого объекта в Godot не возвращает `null` — оно валит процесс. Из пяти ролей только
+`AdventurerRole` проверял `is_instance_valid`; остальные читали `pilot._hero` вслепую.
+
+Страж — `Vector2i(-1, -1)`, а не `Vector2i.ZERO`: ноль это настоящая клетка карты, и
+`TravelerRole.goal_met()` (`_hero_cell() == _target`) объявлял бы прибытие в стартовую точку —
+страховка от падения покупалась бы ложным успехом. `(-1, -1)` уже занят ролями под «цели нет»,
+поэтому ложь идёт в безопасную сторону по построению. Внутри фикса всплыл тот же класс ошибки,
+что T-206: `var hero: Node = pilot._hero` на освобождённом экземпляре сам даёт
+`Trying to assign invalid previously freed instance` (освобождённый объект при этом **равен**
+`null`, так что проверка `hero != null` после освобождения истинна и ничего не сторожит);
+переменная сделана `Variant`, проверка — через `is_instance_valid`. Мера:
+`game/tests/unit/probe/test_probe_hero_cell_after_death.gd` (6 кейсов, включая «герой без
+Movement даёт (0,0) и это не то же самое, что «героя нет»») и батарея
+`game/tools/mut_probe_hero_cell.sh` — 5/5 красных; падение процесса батарея тоже считает
+красным, потому что именно так выглядел исходный дефект.
+
+## The re-measured matrix: all 55 cells, one process per role (2026-10-26)
+
+После T-207 каждая роль меряется одним процессом и отдаёт все 11 строк. Строка матрицы
+дополнена полями `hero=alive|dead|freed|null` и метриками роли (`arrived`, `distance`,
+`biomes`, `kills`, `city_level`, `rare_extracted`, …): `done=true` само по себе не отличало
+«дошёл» от «автопилот молча вышел из партии».
+
+| роль | цель роли | результат | ≥8/11 | выживание | комментарий |
+| --- | --- | --- | --- | --- | --- |
+| Trader | золото ≥1000 | 0/11 | ✗ | 9/11 | строка переснята ранее (сделки 11/11, оборот 642) |
+| Collector | редких ≥10 | 10/11 | ✓ | 10/11 | Monk — `unsuccessored_death` на ходу 41 |
+| Traveler | дошёл (кольцо 25) | 9/11 | ✓ | 9/11 | Druid (ход 9) и Cipher (ход 31) — DEFEAT |
+| Adventurer | ≥5 убийств | 3/11 | ✗ | 11/11 | с ≥1 убийством 9/11; 22 убийства всего |
+| Builder | город ≥2 + ≥4 построек | 6/11 | ✗ | 11/11 | построек 4…26 у всех, уровень 1 — у 5 профилей |
+
+Три роли ниже порога; цели не снижались (формулировка 8.1). Что нового даёт пересъёмка:
+
+* **Traveler** доходит за 4…17 ходов (дистанция 39, биомы 1…5) — «неполные» ячейки 9.3 были
+  следом упавшего процесса; реальный incomplete — Wizard: 93 хода при заказе 90, `distance=42`
+  при кольце 25, `arrived=false`, `hp=1`. Цель роли — **точное совпадение клетки**, поэтому
+  профиль, прошедший за кольцо, никогда не «доходит» (**T-208**).
+* **Builder** подтверждает 9.4: Barbarian доходит до 92 хода и 33 боёв без frame cap — прежний
+  «timeout на Barbarian» был обрывом прогона, а не медленностью. У пяти профилей, оставшихся
+  на 1-м уровне города, бюджет сожжён боями (30…44 боя, население 0…1 при цели 8): форма
+  прогона, а не экономика построек, решает исход цели.
+* **Превышение бюджета (ходы 91…93) воспроизводится в двух ролях** — `_end_turn()` проверяет
+  `turn >= max_turns` только на границе хода, а `_walk_to()` добирает ходы внутри себя. Для
+  матрицы это значит, что «90 ходов» в отчёте — не верхняя граница прогона (**T-208**).
+* **A-класс наблюдения по Adventurer:** урона много, убийств мало (Ranger: 35 боёв → 1
+  убийство; Chanter 6 боёв и Wizard 10 боёв → 0) — тот же профиль сил, что даёт бой-пат в
+  T-205, только в профилированной дозе.

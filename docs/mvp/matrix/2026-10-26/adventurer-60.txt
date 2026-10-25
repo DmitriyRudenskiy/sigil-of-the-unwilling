@@ -1,0 +1,17 @@
+# до фикса (HEAD af5b7d33, счётчик убийств уже в инструменте): kills/kill_goal
+# источник: /tmp/mx_adventurer.log (матричные строки + строки падения/ошибок, шум движка отброшен)
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+MATRIX-START|role=adventurer|turns=60|classes=11
+MATRIX|kill_goal=5|kills=5|attempts=-1|battles=6|block=|class=barbarian|deals=0|done=true|error=|gold=0|margin=0|market=false|reason=|seed=1481186023|state=RUNNING|survived=true|turns=35
+MATRIX|kill_goal=5|kills=0|attempts=-1|battles=6|block=|class=chanter|deals=0|done=true|error=|gold=0|margin=0|market=false|reason=|seed=119624935|state=RUNNING|survived=true|turns=60
+MATRIX|kill_goal=5|kills=2|attempts=-1|battles=27|block=|class=cipher|deals=0|done=true|error=|gold=0|margin=0|market=false|reason=|seed=2118222897|state=RUNNING|survived=true|turns=60
+MATRIX|kill_goal=5|kills=1|attempts=-1|battles=3|block=|class=druid|deals=0|done=true|error=|gold=0|margin=0|market=false|reason=|seed=1059021645|state=RUNNING|survived=true|turns=60
+MATRIX|kill_goal=5|kills=5|attempts=-1|battles=7|block=|class=fighter|deals=0|done=true|error=|gold=0|margin=0|market=false|reason=|seed=80119704|state=RUNNING|survived=true|turns=12
+MATRIX|kill_goal=5|kills=1|attempts=-1|battles=2|block=|class=monk|deals=0|done=true|error=|gold=0|margin=0|market=false|reason=|seed=1397225540|state=RUNNING|survived=true|turns=60
+MATRIX|kill_goal=5|kills=5|attempts=-1|battles=6|block=|class=paladin|deals=0|done=true|error=|gold=0|margin=0|market=false|reason=|seed=1931611581|state=RUNNING|survived=true|turns=15
+MATRIX|kill_goal=5|kills=1|attempts=-1|battles=19|block=|class=priest|deals=0|done=true|error=|gold=0|margin=0|market=false|reason=|seed=665972471|state=RUNNING|survived=true|turns=60
+MATRIX|kill_goal=5|kills=1|attempts=-1|battles=35|block=|class=ranger|deals=0|done=true|error=|gold=0|margin=0|market=false|reason=|seed=1057700285|state=RUNNING|survived=true|turns=60
+MATRIX|kill_goal=5|kills=1|attempts=-1|battles=3|block=|class=rogue|deals=0|done=true|error=|gold=0|margin=0|market=false|reason=|seed=991894253|state=RUNNING|survived=true|turns=60
+MATRIX|kill_goal=5|kills=0|attempts=-1|battles=10|block=|class=wizard|deals=0|done=true|error=|gold=0|margin=0|market=false|reason=|seed=1070197613|state=RUNNING|survived=true|turns=60
+MATRIX-SUMMARY|class=SUMMARY|deals=0|gold_goal_reached=0/11|gold_max=0|gold_median=0|kills=22|margin_median=0|profiles=11|role=adventurer|survived=11/11|turns=60|with_kill=9/11
+ERROR: 34 resources still in use at exit (run with --verbose for details).

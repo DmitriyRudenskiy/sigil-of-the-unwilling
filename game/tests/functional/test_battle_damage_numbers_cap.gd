@@ -39,7 +39,11 @@ func test_numbers_never_steal_clicks_from_the_controls() -> void:
 
 	view.show_floating_text(Vector2i(0, 0), "-100", Color.RED)
 	await get_tree().process_frame
-	var number: Node = view._numbers.back()
+	# `_numbers` хранит instance id, а не узлы: метка умирает в tween-колбэке, и
+	# обращение к освобождённомy узлу из typed-массива — это падение движка, а не
+	# проверка (T-206).
+	var number: Node = instance_from_id(view._numbers.back())
+	assert_bool(is_instance_valid(number)).is_true()
 	assert_int(number.mouse_filter).is_equal(Control.MOUSE_FILTER_IGNORE)
 
 	# Панель действий обязана принимать мышь (спека: «элементы управления остаются

@@ -65,9 +65,17 @@ func goal_met(pilot: Node) -> bool:
 	return _target != Vector2i(-1, -1) and pilot._hero_cell() == _target
 
 func metrics(pilot: Node) -> Dictionary:
-	var arrived: bool = goal_met(pilot)
+	# Отчёт читает метрики и после конца прогона — героя к этому моменту уже нет в дереве.
+	# Чтение с освобождённого — не «ноль», а падение процесса (T-207), поэтому проверяем
+	# валидность, как это делает AdventurerRole.
+	# `var hero: Node = pilot._hero` на освобождённом экземпляре — это само по себе
+	# «Trying to assign invalid previously freed instance» (тот же класс, что T-206), поэтому
+	# читаем либо прямо из поля, либо через Variant.
+	var hero: Variant = pilot._hero
+	var gone: bool = hero == null or not is_instance_valid(hero)
+	var arrived: bool = goal_met(pilot) and not gone
 	var dist := 0
-	if _start != Vector2i(-1, -1):
+	if _start != Vector2i(-1, -1) and not gone:
 		dist = HexUtils.hex_distance(pilot._hero_cell(), _start)
 	return {
 		"arrived": arrived,
@@ -76,6 +84,6 @@ func metrics(pilot: Node) -> Dictionary:
 		"biomes": int(_biomes.size()),
 		"biome_goal": int(target.get("biome_goal", 3)),
 		"turns": pilot.turn,
-		"hp": int(pilot._hero.combat_hp) if pilot._hero != null else 0,
+		"hp": int(hero.combat_hp) if not gone else 0,
 		"survived": survived(pilot),
 	}
