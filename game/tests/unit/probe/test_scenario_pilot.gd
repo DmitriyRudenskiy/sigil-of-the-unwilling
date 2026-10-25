@@ -55,6 +55,11 @@ func test_collector_metrics_shape() -> void:
 	assert_bool(bool(int(m.get("rare_goal", -1)) == int(ScenarioTargets.role("collector").get("rare_goal", -99)))).is_true()
 	assert_bool(bool(m.has("resources_per_day"))).is_true()
 	assert_bool(bool(m.has("survived"))).is_true()
+	# Задача 4.2 (2026-10-26): отчёт обязан различать узлы и единицы — «50» в замере
+	# было одним золотым узлом (T-209). Ключи без этого теста жили бы только в коде роли.
+	assert_bool(bool(m.has("rare_nodes"))).is_true()
+	assert_bool(bool(m.has("resource_nodes_extracted"))).is_true()
+	assert_bool(bool(m.has("rare_targets_seen"))).is_true()
 
 func test_collector_collect_target_prefers_rare() -> void:
 	# Редкий узел дальше, обычный ближе — политика должна выбрать редкий.
@@ -177,7 +182,9 @@ class _FakePilot extends Node:
 	var _world: Node = null
 	var turn := 1
 	var extracted_total := 0
+	var extracted_nodes := 0
 	var _rare_count := 0
+	var _rare_nodes := 0
 
 	func _init() -> void:
 		_spawner = sp
@@ -213,3 +220,9 @@ class _FakePilot extends Node:
 
 	func rare_count() -> int:
 		return _rare_count
+
+	## Зеркало реального пилота (задача 4.2, T-209): фейк обязан поспевать за
+	## поверхностью, которую читают роли, иначе «форма метрик» проверялась бы на
+	## устаревшем контракте.
+	func rare_nodes() -> int:
+		return _rare_nodes
