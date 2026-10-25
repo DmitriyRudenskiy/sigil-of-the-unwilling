@@ -17,6 +17,7 @@ extends BaseTest
 ## 5. экран перечитывает ленту при каждом открытии — новые ходы видны без
 ##    пересоздания слоя;
 ## 6. Esc и кнопка «Закрыть» на экране возвращают на карту ровно один сигнал.
+## 7. события Знака (выбор, титул) видны в отрендеренной ленте (T-187).
 
 const MAIN_SCENE_PATH := "res://scenes/main/main.tscn"
 const TOP_BUTTONS_PATH := "CampaignHUD/CampaignHud/TopButtons"
@@ -205,6 +206,28 @@ func test_close_button_and_escape_return_to_map() -> void:
 		.override_failure_message("Esc обязан закрывать хронику").is_true()
 	assert_int(closed.size()) \
 		.override_failure_message("Esc не должен закрывать дважды").is_equal(2)
+
+
+## signs-prestige 2.5 (T-187): события Знака доезжают до отрендеренной ленты.
+## Выбор идёт production-путём (`main._apply_pending_flow` вызывает ровно этот
+## метод композиции), поэтому на живом экране проверяется строка, а не словарь.
+func test_sign_events_reach_the_rendered_feed() -> void:
+	await _mount()
+	_main.composition.set_sign("spark")
+	await _press(CHRONICLE_BUTTON_PATH)
+	var texts := _texts()
+	assert_bool(texts.has(GameText.chronicle_line("chronicle.sign_chosen", {"sign": "Искра"}))) \
+			.override_failure_message("выбор Знака не дошёл до экрана ленты").is_true()
+	assert_bool(texts.has(GameText.chronicle_line("chronicle.bit_sign"))) \
+			.override_failure_message("открывающий бит обязан остаться перед выбором").is_true()
+	# Титул — то же событие ленты, но через баланс: начисление проходит `_add_ledger`,
+	# где живёт синхронизация SM (единственный живой путь Престижа — бой, но он
+	# здесь не нужен: важен отрезок ledger → лента → экран).
+	_main.composition.perform_sign_action("forge", 250.0)
+	await _press(CHRONICLE_BUTTON_PATH)
+	await _press(CHRONICLE_BUTTON_PATH)
+	assert_bool(_texts().has(GameText.chronicle_line("chronicle.rank_changed", {"rank": "Знаемый"}))) \
+			.override_failure_message("смена титула не дошла до экрана").is_true()
 
 
 func after_test() -> void:

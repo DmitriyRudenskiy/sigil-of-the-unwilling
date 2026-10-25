@@ -865,6 +865,18 @@ msgstr "Основан район: {group}."
 msgid "chronicle.district_disbanded"
 msgstr "Район снят: {group}."
 
+msgid "chronicle.sign_chosen"
+msgstr "Выбран Знак: {sign}."
+
+msgid "chronicle.sign_sleeping"
+msgstr "Престиж иссяк — Знак уснул. Поселение это не убивает."
+
+msgid "chronicle.sign_awakened"
+msgstr "Престиж вернулся — Знак снова активен."
+
+msgid "chronicle.rank_changed"
+msgstr "Титул носителя: {rank}."
+
 # ─── Настройки ─────────────────────────────────────────────────
 msgid "settings.title"
 msgstr "⚙️ Настройки"

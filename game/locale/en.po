@@ -864,6 +864,18 @@ msgstr "District founded: {group}."
 msgid "chronicle.district_disbanded"
 msgstr "District dissolved: {group}."
 
+msgid "chronicle.sign_chosen"
+msgstr "The Sigil is chosen: {sign}."
+
+msgid "chronicle.sign_sleeping"
+msgstr "Prestige ran dry — the Sigil fell asleep. This does not end the settlement."
+
+msgid "chronicle.sign_awakened"
+msgstr "Prestige returned — the Sigil is awake again."
+
+msgid "chronicle.rank_changed"
+msgstr "The bearer's title: {rank}."
+
 # ─── Настройки ─────────────────────────────────────────────────
 msgid "settings.title"
 msgstr "⚙️ Settings"

@@ -41,6 +41,11 @@ const KNOWN_KEYS: Array[String] = [
 	"chronicle.food_warn",
 	"chronicle.district_created",
 	"chronicle.district_disbanded",
+	# signs-prestige 2.5 (T-187): события Знака — выбор, transitions SM, титул.
+	"chronicle.sign_chosen",
+	"chronicle.sign_sleeping",
+	"chronicle.sign_awakened",
+	"chronicle.rank_changed",
 	SUMMARY_KEY,
 ]
 

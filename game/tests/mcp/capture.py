@@ -24,6 +24,8 @@ from typing import Any
 
 # Кадр = размер вьюпорта проекта (project.godot) и макетов reference/*.png.
 CANONICAL_SIZE = (1920, 1080)
+# Сколько кадров ждём между праймингом и отчётным снимком (см. capture_scene).
+PRIME_SETTLE_FRAMES = 5
 SIZE_ENV = "CAPTURE_SIZE"
 SETUP_ENV = "CAPTURE_SETUP"
 PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
@@ -194,6 +196,16 @@ def capture_scene(mcp: Any, scene: str, out_dir: Path, name: str,
         # состояние ставится до усаживания: один settle покрывает и пин, и состояние
         mcp.execute_code(setup_code)
     mcp.wait_frames(settle_frames)
+    # Прайминг: первый после пина окна снимок отдаёт УСТАРЕВШУЮ текстуру вьюпорта.
+    # Замер (T-188, Linux/Xvfb): кадр состояния `campaign_sign_chronicle_open.gd`
+    # сошёл байт в байт с кадром «до состояния» (sha256 92e8c588… у обоих), хотя
+    # следом за съёмкой тот же процесс показывал открытую хронику. Симптом коварен:
+    # размер канонический, сцена отрисована, состояние в дереве — вердикт по такому
+    # кадру неверный, а зелёный. Ровно тот же класс брака, что описан в
+    # `pin_window_code` для полноэкранного режима на macOS, — поэтому первый снимок
+    # выбрасывается, а отчётным становится второй, снятый после него.
+    mcp.screenshot()
+    mcp.wait_frames(PRIME_SETTLE_FRAMES)
     raw = mcp.screenshot()
     actual = verify_frame(raw, size)
     path = Path(out_dir) / f"{name}.png"
