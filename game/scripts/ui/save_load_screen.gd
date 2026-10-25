@@ -18,7 +18,19 @@ var _wired := false
 
 func _ready() -> void:
 	_wire()
+	_explain_scene_defaults()
 	visible = false
+
+
+## Столп 1 (mvp-ui-flow 3.3): слоты выключены самим `.tscn` — до первого `open()`
+## экран показывал десять серых кнопок без объяснения. Причина ставится сразу при
+## монтировании, а `_refresh_slots` дальше ведёт её по состоянию данных.
+func _explain_scene_defaults() -> void:
+	for i in SLOT_COUNT:
+		for rel in ["HBox/Buttons/LoadButton", "HBox/Buttons/DeleteButton"]:
+			var button: Button = _get_slot_node(i, rel)
+			if button != null and button.disabled and button.tooltip_text == "":
+				button.tooltip_text = GameText.save_slot_empty_unavailable()
 
 
 func _wire() -> void:
@@ -68,17 +80,36 @@ func _refresh_slots() -> void:
 		if data == null:
 			if info_label != null:
 				info_label.text = GameText.no_save_found()
-			if load_btn != null:
-				load_btn.disabled = true
-			if delete_btn != null:
-				delete_btn.disabled = true
+			# Столп 1 (mvp-ui-flow 3.3): в пустом слоте обе кнопки выключены — игрок
+			# читает причину на месте, а не гадает, живой ли это экран.
+			_set_unavailable(load_btn, GameText.save_slot_empty_unavailable())
+			_set_unavailable(delete_btn, GameText.save_slot_empty_unavailable())
 		else:
 			if info_label != null:
 				info_label.text = _format_slot_info(data)
-			if load_btn != null:
-				load_btn.disabled = (_mode != "load")
-			if delete_btn != null:
-				delete_btn.disabled = false
+			_set_available(delete_btn)
+			if _mode == "load":
+				_set_available(load_btn)
+			else:
+				# Заполненный слот в режиме записи: «Загрузить» неактивна — это не
+				# сломанный слот, а режим экрана.
+				_set_unavailable(load_btn, GameText.save_load_mode_unavailable())
+
+
+## Пара «состояние + причина» ставится одним вызовом: выключить контрол и не
+## назвать причину теперь нельзя (столп 1, mvp-ui-flow 3.3).
+static func _set_unavailable(button: Button, reason: String) -> void:
+	if button == null:
+		return
+	button.disabled = true
+	button.tooltip_text = reason
+
+
+static func _set_available(button: Button) -> void:
+	if button == null:
+		return
+	button.disabled = false
+	button.tooltip_text = ""
 
 
 func _read_slot(slot: int) -> SaveData:

@@ -38,7 +38,14 @@ func _ready() -> void:
     _refresh_continue_button()
     # Макет 09: пункт «Титры» есть, экрана-носителя нет — кнопка видена и отключена
     # (Т-133, Q-M90). Отличается от доступной не только цветом: см. _style_buttons.
+    # Причина — на месте (mvp-ui-flow 3.3, столп 1): обесцвеченная плита без ответа
+    # на «почему?» выглядит сломанной точкой входа, а не отложенным экраном.
     _credits_btn.disabled = true
+    _credits_btn.tooltip_text = GameText.menu_credits_unavailable()
+    # «Выход» выключена самим `.tscn` по AC6 макета 09 (UI-3 шаг 3: «выход из игры —
+    # не кликом по меню»): пункт инертен намеренно и навсегда. Причина показывается
+    # так же, как у временных пунктов, — иначе вечная серая плита читается багом.
+    _exit_btn.tooltip_text = GameText.menu_exit_unavailable()
     _create_save_load_screen()
     _UIAnimator.animate_in(self)
     SoundManager.play_music_cue(&"music_menu")
@@ -145,7 +152,12 @@ func _loc() -> String:
 func _refresh_continue_button() -> void:
     # Cutover-проводка (раунд 6, T-110): Continue — кампанийный MVP-слот 1
     # (MvpSaveManager), не легаси-сейв мира.
-    _continue_btn.disabled = not MvpSaveManager.has_save_in_slot(MvpSaveManager.CAMPAIGN_SLOT)
+    var missing: bool = not MvpSaveManager.has_save_in_slot(MvpSaveManager.CAMPAIGN_SLOT)
+    _continue_btn.disabled = missing
+    # Столп 1 (mvp-ui-flow 3.3): у выключенного пункта причина читается на месте —
+    # «Продолжить» молчал серой плитой, и игрок без сейва не отличал «нет сохранения»
+    # от «меню сломалось». У доступной кнопки подсказки нет: она ничего не объясняет.
+    _continue_btn.tooltip_text = GameText.menu_continue_unavailable() if missing else ""
 
 func _on_continue() -> void:
     if not MvpSaveManager.has_save_in_slot(MvpSaveManager.CAMPAIGN_SLOT):

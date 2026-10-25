@@ -83,6 +83,10 @@ func _populate_options() -> void:
 
     _subrace_option.add_item("—")
     _subrace_option.disabled = true
+    # Канон-расы конструктора (Q-M100 → (а), D-239) подрас не имеют, поэтому список
+    # пуст всегда. Причина — на месте (столп 1, mvp-ui-flow 3.3): пустая строка «—»
+    # без объяснения читается как баг выбора, а не как отсутствие сущности.
+    _subrace_option.tooltip_text = GameText.creation_subrace_unavailable()
 
     # T-113 (K1): канон-классы из mvp_catalog.json — в MVP наём 6 (hireable-маска);
     # «Чародей и остальные» — 1.0 (в списке не показываются). Legacy-каталог не используется.
@@ -123,8 +127,11 @@ func _on_race_changed(_idx: int) -> void:
     if subraces.is_empty():
         _subrace_option.set_disabled(true)
         _subrace_option.add_item("—")
+        _subrace_option.tooltip_text = GameText.creation_subrace_unavailable()
     else:
         _subrace_option.set_disabled(false)
+        # Причина больше не нужна: список жив и объясняет себя сам.
+        _subrace_option.tooltip_text = ""
         for sub in subraces:
             _subrace_option.add_item(sub.get("name", sub.get("id", "")))
             _subrace_keys.append(sub.get("id", ""))
