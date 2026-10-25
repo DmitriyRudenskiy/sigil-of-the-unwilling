@@ -75,3 +75,16 @@ func test_marker_and_name_follow_the_queue() -> void:
 		screen.field.view_of(next).position.x - 48.0
 	)
 	assert_str(screen.active_label.text).is_equal(next.stats.display_name)
+
+
+## После конца боя активного нет: метка и подпись не должны висеть над полем
+## (кадр `b_result`: «сирота-подпись без панели-носителя»).
+func test_marker_and_name_leave_when_the_battle_is_over() -> void:
+	var screen := _screen()
+	var combat := _combat()
+	screen.run(combat)
+	BattleFactory.auto_play(combat)
+	assert_bool(combat.finished).is_true()
+	assert_bool(screen.marker.visible).is_false()
+	assert_str(screen.active_label.text).is_empty()
+

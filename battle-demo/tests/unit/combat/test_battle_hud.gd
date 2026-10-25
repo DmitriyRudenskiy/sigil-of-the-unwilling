@@ -107,6 +107,21 @@ func test_the_ui_never_gets_an_enemy_turn() -> void:
 		combat.perform(BattleAction.skip(combat.current))
 
 
+## Панель полководца противника не пустеет после победы: на ней остаётся
+## поверженный с нулём HP. Прочерк вместо имени — потерянное значение (кадр
+## `a_result`, read-агент 2026-10-26).
+func test_defeated_commander_stays_on_his_panel() -> void:
+	var screen := _screen()
+	var combat := _combat()
+	screen.run(combat)
+	BattleFactory.auto_play(combat)
+	assert_bool(combat.finished).is_true()
+	assert_str(screen.hud.commander_name(BattleUnit.SIDE_ENEMY)).is_equal("foe_a")
+	assert_str(screen.hud.commander_note(BattleUnit.SIDE_ENEMY)).contains("0 / 400")
+	# Воля у поверженного не горит: залитые пипсы читались как живой ресурс.
+	assert_int(screen.hud.commander_focus_pips(BattleUnit.SIDE_ENEMY)).is_zero()
+
+
 func test_units_stand_on_distinct_hexes_of_their_own_flank() -> void:
 	var screen := _screen()
 	var combat := _combat()

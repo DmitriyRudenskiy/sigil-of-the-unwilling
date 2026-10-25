@@ -29,7 +29,9 @@ func _ready() -> void:
 	layer = 20
 	visible = false
 	var dim := ColorRect.new()
-	dim.size = Vector2(1920, 1080)
+	# На весь вьюпорт, а не «1920×1080»: при `stretch/aspect="expand"` окно шире
+	# 16:9 показывает за правым краем непрокрытую полосу (кадр `a_result`).
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	dim.color = Color(0.02, 0.02, 0.03, 0.72)
 	add_child(dim)
 	var panel := Panel.new()

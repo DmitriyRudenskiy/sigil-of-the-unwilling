@@ -41,6 +41,9 @@ func _enter_tree() -> void:
 
 
 func _ready() -> void:
+	# HUD выше слоя результата: затемнение модалки снимало контраст всему
+	# интерфейсу (кадр `a_result`), а геометрически модалка с HUD не пересекается.
+	hud.layer = result_view.layer + 1
 	result_view.replay.connect(
 		func() -> void: get_tree().reload_current_scene()
 	)
@@ -94,6 +97,11 @@ func _on_action(_action) -> void:
 ## Исход — только надпись и выходы (задача 9.7). Бой к этому моменту окончен в
 ## модели, и экран результата ничего не решает: он показывает `combat.result`.
 func _on_battle_ended(outcome: int) -> void:
+	# Активного юнита после конца боя нет: жёлтая метка и подпись под полем
+	# остались бы висящей подсказкой про последнего ходившего (read-агент:
+	# «сирота-подпись» на кадре результата).
+	active_label.text = ""
+	marker.visible = false
 	result_view.show_outcome(outcome, combat.turn_index)
 
 

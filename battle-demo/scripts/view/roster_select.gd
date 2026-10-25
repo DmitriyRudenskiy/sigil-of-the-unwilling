@@ -24,7 +24,9 @@ var _cards := []
 
 
 func _ready() -> void:
-	add_child(_rect(Vector2(1920, 1080), Color(0.05, 0.05, 0.06, 1.0)))
+	# Фон на весь вьюпорт: при `stretch/aspect="expand"` окно шире 16:9 иначе
+	# показывает за правым краем непрокрытую полосу (кадр `b_select`).
+	add_child(_rect(Vector2.ZERO, Color(0.05, 0.05, 0.06, 1.0), true))
 	var title := _label(FONT_TITLE, GOLD)
 	title.text = "Выбор набора"
 	title.position = Vector2(0, 48)
@@ -140,8 +142,10 @@ func _label(size: int, color: Color) -> Label:
 	return label
 
 
-func _rect(size: Vector2, color: Color) -> ColorRect:
+func _rect(size: Vector2, color: Color, full_rect := false) -> ColorRect:
 	var rect := ColorRect.new()
 	rect.size = size
+	if full_rect:
+		rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	rect.color = color
 	return rect

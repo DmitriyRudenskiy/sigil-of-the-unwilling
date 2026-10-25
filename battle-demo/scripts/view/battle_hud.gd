@@ -91,6 +91,30 @@ func round_number() -> int:
 	return int(_ring.text)
 
 
+## Подпись панели полководца стороны. После конца боя на ней остаётся поверженный
+## противник, а не прочерк: панель без имени — это потерянное значение.
+func commander_name(side: int) -> String:
+	return String(_store(side)["title"].text)
+
+
+## Строка HP панели полководца стороны ("0 / 400 · почин 60").
+func commander_note(side: int) -> String:
+	return String(_store(side)["note"].text)
+
+
+## Сколько ячеек воли закрашено в панели полководца стороны.
+func commander_focus_pips(side: int) -> int:
+	var filled := 0
+	for pip in _store(side)["pips"].get_children():
+		if pip.color == FOCUS_FILL:
+			filled += 1
+	return filled
+
+
+func _store(side: int) -> Dictionary:
+	return _left if side == BattleUnit.SIDE_PLAYER else _right
+
+
 ## Команда в панели активна? (кулдаун и нехватка воли гасят кнопку).
 func command_enabled(ability_id: StringName) -> bool:
 	var button := command(ability_id)
@@ -227,9 +251,14 @@ func refresh(_x = null) -> void:
 	if combat == null:
 		return
 	var actor := combat.current
-	var foes: Array[BattleUnit] = (
-		combat.foes_of(actor) if actor != null else combat.alive(BattleUnit.SIDE_ENEMY)
-	)
+	var foes: Array[BattleUnit] = combat.foes_of(actor) if actor != null else []
+	if foes.is_empty():
+		# На победе живых противников нет, а панель полководца обязана остаться
+		# с именем и нулём HP: `foes_of` считает живых, поверженного берём из
+		# полного списка стороны.
+		for unit in combat.units:
+			if unit.side == BattleUnit.SIDE_ENEMY:
+				foes.append(unit)
 	_fill_panel(_left, actor)
 	_fill_panel(_right, foes[0] if not foes.is_empty() else null)
 	_ring.text = str(combat.turn_index + 1)
@@ -271,9 +300,10 @@ func _set_pips(holder: Control, unit: BattleUnit) -> void:
 	if unit == null:
 		return
 	for pip in BattleUnit.FOCUS_MAX:
-		var rect := _rect(
-			Vector2(26, 14), FOCUS_FILL if pip < unit.focus else FOCUS_TRACK
-		)
+		# Воля есть только у живого: залитые пипсы поверженного полководца
+		# читались как «у него ещё есть ресурс» (кадр `a_result`).
+		var lit := pip < unit.focus and unit.is_alive()
+		var rect := _rect(Vector2(26, 14), FOCUS_FILL if lit else FOCUS_TRACK)
 		rect.position = Vector2(pip * 32.0, 0.0)
 		holder.add_child(rect)
 
