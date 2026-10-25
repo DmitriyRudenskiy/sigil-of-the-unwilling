@@ -19,19 +19,39 @@ FAILED=0
 run() {
 	local name="$1"
 	local out
-	# Классификатор ловит и падения, и фейлы: мутант, роняющий скрипт, даёт
-	# «1 errors | N failures», и узкий шаблон «0 errors | …» выдал бы пустой матч,
-	# который здесь же и трактуется как «зелёный».
+	# Классификатор читает ВСЮ тройку «N test cases | E errors | F failures»: прогон, в
+	# котором не нашлось ни одного теста (конфликт с чужим Godot-процессом на шаренной
+	# машине — урок 2026-10-26, когда мутант отдал «0 errors | 0 failures» и был засчитан
+	# зелёным), обязан считаться нечитаемым, а не зелёным.
+	wait_for_godot
 	out=$(cd game && timeout 600 "$G" --headless --path . -s addons/gdunit4/bin/GdUnitCmdTool.gd \
-		--ignoreHeadlessMode -c -a "$TEST" 2>&1 | grep -oE "[0-9]+ errors \| [0-9]+ failures" | tail -1)
+		--ignoreHeadlessMode -c -a "$TEST" 2>&1 | grep -oE "[0-9]+ test cases \| [0-9]+ errors \| [0-9]+ failures" | tail -1)
 	echo "$name: $out"
 	case "$out" in
-	"" | *"0 errors | 0 failures"*)
-		echo "  !! ЗЕЛЁНЫЙ (или нечитаемый) МУТАНТ — гейт не ловит"
+	"" | "0 test cases |"*)
+		echo "  !! НЕЧИТАЕМЫЙ ПРОГОН (0 тестов или пустой вывод) — мутант не засчитан"
+		FAILED=1
+		;;
+	*"0 errors | 0 failures"*)
+		echo "  !! ЗЕЛЁНЫЙ МУТАНТ — гейт не ловит"
 		FAILED=1
 		;;
 	esac
 	git checkout -- "$2"
+}
+
+# На шаренной машине нельзя запускать второй Godot, пока жив первый (протокол зависших
+# процессов): ждём освобождения, чужое не убиваем.
+wait_for_godot() {
+	local waited=0
+	while pgrep -x godot >/dev/null 2>&1; do
+		sleep 5
+		waited=$((waited + 5))
+		if [ "$waited" -ge 300 ]; then
+			echo "  !! godot не освобождает машину 5 минут — прогон прерван"
+			exit 1
+		fi
+	done
 }
 
 mutate() { # файл, python-выражение

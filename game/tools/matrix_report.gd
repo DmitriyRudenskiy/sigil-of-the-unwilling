@@ -95,12 +95,23 @@ func _initialize() -> void:
 	if args.size() > 2:
 		classes = Array(args[2].split(","))
 	print("MATRIX-START|role=%s|turns=%d|classes=%d" % [role_id, turns, classes.size()])
+	var broken: Array[String] = []
 	for class_id in classes:
 		var row := await _run_profile(role_id, class_id, turns)
 		print("MATRIX|" + _row_to_line(row))
+		if str(row.get("error", "")) != "":
+			broken.append("%s(%s)" % [class_id, row.error])
 		if REPEAT > 1:
 			await _determinism_check(role_id, class_id, turns, row)
 	print("MATRIX-SUMMARY|" + _row_to_line(_summarize(role_id, turns)))
+	# Профиль с ошибкой — не «недобор цели», а неработающий прогон. Без этой строки и
+	# кода выхода матрица, собранная на сломанных скриптах, выглядит как замер: 11
+	# строк `error=?` с `turns=-1` отработали с кодом 0 (2026-10-26), и отличить их от
+	# честного «цель не достигнута» можно было только глазами по `turns=-1`.
+	if not broken.is_empty():
+		print("MATRIX-ERRORS|n=%d|classes=%s" % [broken.size(), ",".join(broken)])
+		quit(1)
+		return
 	quit(0)
 
 
@@ -227,6 +238,16 @@ func _run_profile(role_id: String, class_id: String, turns: int) -> Dictionary:
 	return row
 
 
+## Зависимости трассы грузятся **в рантайме** (урок 2026-10-26: статическая отсылка к
+## классу, в цепочке которого есть автозагрузка, ломает весь `-s` режим — `Services`
+## резолвится до регистрации автозагрузок, скрипт помечается некомпиллируемым, и матрица
+## отдала 11 пустых профилей с `error=?`, отработав «успешно» с кодом 0).
+const PROSPERITY_SYSTEM_GD := "res://scripts/city/prosperity_system.gd"
+const CAMPAIGN_PROGRESSION_GD := "res://scripts/city/campaign_city_progression.gd"
+const BUILDING_DEFS_GD := "res://scripts/data/building_defs.gd"
+const BALANCE_PROBE_GD := "res://scripts/probe/balance_probe.gd"
+
+
 ## Снимок городского реестра (задача 6.1). **Только чтение**: `CityScreen.build_pressed`,
 ## `recruit_pressed` и `level_up_pressed` исполняют действие (строят, нанимают, поднимают
 ## уровень), поэтому трасса повторяет их проверки — `level_up_check` /
@@ -273,11 +294,11 @@ func _storage_line(city) -> String:
 ## при campaign-переносчике и при мировом — это два разных дефекта.
 func _level_block(city) -> String:
 	if not city.campaign_buildings.is_empty():
-		var cc: Dictionary = CampaignCityProgression.level_up_check(city)
+		var cc: Dictionary = load(CAMPAIGN_PROGRESSION_GD).level_up_check(city)
 		if bool(cc.get("ok", false)):
 			return "campaign:ok"
 		return "campaign:%s %d/%d" % [str(cc.get("reason", "?")), int(cc.get("used", 0)), int(cc.get("limit", 0))]
-	var check: Dictionary = ProsperitySystem.can_level_up(city)
+	var check: Dictionary = load(PROSPERITY_SYSTEM_GD).can_level_up(city)
 	if bool(check.get("ok", false)):
 		return "ok"
 	return "; ".join(check.get("reasons", []))
@@ -290,8 +311,9 @@ func _build_block(pilot: Node, city) -> String:
 		return "no_screen"
 	var bounds: Vector2i = screen.map_bounds
 	var parts: Array[String] = []
-	for def_id in BalanceProbe.BUILD_QUEUE:
-		var bdef = BuildingDefs.def_by_id(StringName(str(def_id)))
+	var defs = load(BUILDING_DEFS_GD)
+	for def_id in load(BALANCE_PROBE_GD).BUILD_QUEUE:
+		var bdef = defs.def_by_id(StringName(str(def_id)))
 		if bdef == null:
 			parts.append("%s:?" % str(def_id))
 			continue
@@ -299,7 +321,9 @@ func _build_block(pilot: Node, city) -> String:
 		if cell == Vector2i(-1, -1):
 			parts.append("%s:no_cell" % str(def_id))
 			continue
-		var check: CityCheck = city.can_build_building(bdef, cell)
+		# Без аннотации типа: `CityCheck` — вложенный класс, его отсылка так же тянет
+		# цепочку автозагрузок (см. урок в константах выше).
+		var check = city.can_build_building(bdef, cell)
 		parts.append("%s:%s" % [str(def_id), "ok" if check.ok else String(check.reason)])
 	return "; ".join(parts)
 
