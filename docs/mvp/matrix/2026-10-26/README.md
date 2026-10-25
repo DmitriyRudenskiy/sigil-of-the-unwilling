@@ -23,8 +23,11 @@ godot --headless --path game -s res://tools/matrix_report.gd -- <role> <turns> [
 ```
 
 Инструмент — `game/tools/matrix_report.gd`; трасса кадров — `MATRIX_TRACE=1`,
-снимок зависшего боя — `MATRIX_TRACE=1` + `MATRIX_BEAT_FRAMES`. Каждый лог ниже — один
-процесс Godot на роль (11 классов), движок 4.7.stable.official.5b4e0cb0f.
+снимок зависшего боя — `MATRIX_TRACE=1` + `MATRIX_BEAT_FRAMES`. Проверка идентичности
+повторного прогона того же seed (задачи 4.3/5.3/7.3) — `MATRIX_REPEAT=2`: каждый профиль
+гонится N раз в одном процессе, печатается `MATRIX-DETERMINISM|class=…|same=…|hashes=…`,
+при расхождении — `MATRIX-DIFF` с обеими строками. Каждый лог ниже — один процесс Godot
+на роль (11 классов), движок 4.7.stable.official.5b4e0cb0f.
 
 ## Состав
 
@@ -36,6 +39,9 @@ godot --headless --path game -s res://tools/matrix_report.gd -- <role> <turns> [
 | `collector-90.txt` | `437b8a13` | 11/11 строк: `rare_extracted`, `resources_per_day` |
 | `adventurer-60.txt` | `af5b7d33` (счётчик убийств уже в инструменте) | `kills`, `kill_goal`, 9/11 с ≥1 убийством |
 | `trader-90.txt` | `af5b7d33` | 11 профилей Торговца за один процесс + **шум T-206** (см. ниже) |
+| `collector-90-repeat2.txt` | `8155d61a` (`MATRIX_REPEAT=2`) | Собиратель, 22 прогона (11 классов × 2): `same=true` у всех 11 |
+| `collector-90-nodes.txt` | `8155d61a` (счётчики узлов) | те же 11 профилей с `rare_nodes`, `rare_targets_seen`, `resource_nodes_extracted` → **T-209** |
+| `traveler-60-repeat2.txt` | `683b09e5` (`MATRIX_REPEAT=2`) | Путешественник, 60 ходов, 22 прогона: `same=true` у всех 11; `arrived` 9/11, `biomes` 1…5 |
 
 Из логов оставлены строки `MATRIX*`, заголовок движка и строки падения/ошибок; остальной шум
 отброшен. Формат строки: `MATRIX|key=value|…` (ключи упорядочены), `MATRIX-START`/
@@ -54,3 +60,13 @@ godot --headless --path game -s res://tools/matrix_report.gd -- <role> <turns> [
    кольце цели 25 и остался `arrived=false`.
 5. **Форма «урон есть, убийств мало»** (Adventurer: Ranger 35 боёв → 1 убийство; Chanter и
    Wizard → 0) — тот же профиль сил, что даёт бой-пат T-205, только в дозе поменьше.
+6. **Цель Собирателя закрывается одним узлом.** В `collector-90-nodes.txt` у всех 11
+   профилей `rare_nodes` = 1…2 при `rare_goal = 10`: Fighter и Wizard сняли **по одному
+   узлу** (`rare_nodes=1`, `resource_nodes_extracted=1`) и закончили забег на первом ходе,
+   потому что `ResourceType.pickup_amount(GOLD) = 50` единиц на узел → **T-209**.
+7. **Прогон детерминирован:** 22 + 22 повтора того же seed в одном процессе дали
+   байт-в-байт совпадающие строки (`same=true`, 22/22 и 22/22 ключей). Матрица воспроизводима
+   без «проверено глазами».
+8. **Путешественник доходит за 4–17 ходов из бюджета 90** (`distance=39` при кольце 25),
+   а `biome_goal = 2` из переносчика не проверяется никем: Priest прибыл с `biomes=1`
+   и `arrived=true` (задача 5.3 просит ≥3) → **T-210**.
