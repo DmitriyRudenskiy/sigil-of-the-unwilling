@@ -17,6 +17,11 @@ const PORTRAIT_DIR := "res://assets/portraits"
 const PANEL := Color(0.09, 0.08, 0.07, 0.92)
 const PANEL_EDGE := Color(0.62, 0.48, 0.24, 1.0)
 const HP_FILL := Color(0.36, 0.78, 0.31)
+## Полоса врага обязана читаться чужой: зелёная полоса в правом блоке
+## (read-отчёт 2026-10-26) рисовала «свой» там, где противник. Тон тот же,
+## что у `BattleScreen.BAR_FILL_ENEMY` на поле — глаз читает одну идею в двух
+## местах.
+const HP_FILL_ENEMY := Color(0.74, 0.27, 0.2)
 const HP_TRACK := Color(0.1, 0.11, 0.13, 1.0)
 const FOCUS_FILL := Color(0.31, 0.55, 0.86)
 const FOCUS_TRACK := Color(0.12, 0.14, 0.18, 1.0)
@@ -117,6 +122,11 @@ func commander_note(side: int) -> String:
 	return String(_store(side)["note"].text)
 
 
+## Цвет заполнения полосы HP стороны: своим — зелёный, чужим — ржавый.
+func commander_hp_color(side: int) -> Color:
+	return (_store(side)["hp"] as ColorRect).color
+
+
 ## Сколько ячеек воли закрашено в панели полководца стороны.
 func commander_focus_pips(side: int) -> int:
 	var filled := 0
@@ -167,7 +177,7 @@ func _hero_panel(at: Vector2, store: Dictionary, mirrored := false) -> Control:
 	var track := _rect(Vector2(HP_WIDTH + 2, 14), HP_TRACK)
 	track.position = Vector2(132, 54) if not mirrored else Vector2(15, 54)
 	panel.add_child(track)
-	var fill := _rect(Vector2(HP_WIDTH, 12), HP_FILL)
+	var fill := _rect(Vector2(HP_WIDTH, 12), HP_FILL if not mirrored else HP_FILL_ENEMY)
 	fill.position = Vector2(133, 55) if not mirrored else Vector2(16, 55)
 	panel.add_child(fill)
 	var pips := Control.new()
@@ -288,7 +298,10 @@ func refresh(_x = null) -> void:
 				foes.append(unit)
 	_fill_panel(_left, actor)
 	_fill_panel(_right, foes[0] if not foes.is_empty() else null)
-	_ring.text = str(combat.turn_index + 1)
+	# Номер играемого хода, а не следующего: кольцо обновляется на `turn_started`
+	# уже после `turn_index += 1`, и `+ 1` рисовал «22» над результатом
+	# «Ходов: 21» (read-отчёт 2026-10-26). До первого хода — единица.
+	_ring.text = str(maxi(combat.turn_index, 1))
 	_refresh_strip()
 	if actor != null and not combat.finished:
 		_commands_for(actor)
@@ -367,7 +380,8 @@ func _refresh_strip() -> void:
 		track.position = Vector2(6, STRIP_CELL - 12)
 		root.add_child(track)
 		var fill := _rect(
-			Vector2((STRIP_CELL - 22) * clampf(unit.hp_fraction(), 0.0, 1.0), 3), HP_FILL
+			Vector2((STRIP_CELL - 22) * clampf(unit.hp_fraction(), 0.0, 1.0), 3),
+			HP_FILL if unit.side == BattleUnit.SIDE_PLAYER else HP_FILL_ENEMY
 		)
 		fill.position = Vector2(7, STRIP_CELL - 11)
 		root.add_child(fill)

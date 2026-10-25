@@ -16,7 +16,6 @@ class_name BattleUnitView extends Node2D
 ## Гибели как дорожки нет (D10): мёртвый юнит стоит на последнем кадре
 ## обесцвеченным — `modulate`, а не четвёртая генерация.
 
-const SPRITE_DIR := "res://assets/sprites"
 const FEET_OFFSET := Vector2(-256, -448)
 ## 512-й холст комплекта → 128-й холст движка: 96 px силуэта на поле, как было
 ## до переезда комплекта на форму спеки (ADR-008).
@@ -101,10 +100,11 @@ func _bind() -> void:
 	# Враг смотрит на линию игрока; разворот — зеркалом, не отдельной генерацией.
 	# Он не зависит от дорожек, поэтому и ставится до загрузки набора.
 	sprite.flip_h = not _faces_right()
-	var path := "%s/%s.sprite_frames.tres" % [SPRITE_DIR, unit.stats.id]
+	var path := DataLibrary.sprite_frames_path(unit.stats.id)
 	if not FileAccess.file_exists(path):
-		# Клипы этого юнита ещё не приняты (7.4) — юнит выходит без картинки,
-		# дорожки собираются по мере приёмки: tools/build_sprite_frames.py.
+		# По настоящих данным сюда не попасть: `DataLibrary.validate` не пустит
+		# юнита без дорожек (AC 26). Остаётся путём для синтетических юнитов
+		# тестов, у которых id свой, а картинки нет.
 		push_warning("нет дорожек юнита: %s" % path)
 		return
 	var frames := load(path) as SpriteFrames

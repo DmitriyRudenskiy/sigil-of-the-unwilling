@@ -69,3 +69,20 @@ func _snapshot(combat: CombatState) -> String:
 		combat.order.size(), combat.turn_index, combat.result,
 		str(combat.finished), combat.history.size(), ",".join(hp),
 	]
+
+
+## «Сменить набор» уводит с экрана боя (AC 24): проводка была и раньше, но
+## переход никем не проверялся. Проверяется как факт о дереве — какая сцена
+## становится текущей, а не только «сигнал эмитнулся».
+func test_change_roster_leaves_the_battle_screen() -> void:
+	var screen := _screen()
+	var before := get_tree().get_current_scene()
+	screen.result_view.change_roster.emit()
+	# Переход отложен, а сцена ещё и грузится: одна пустая рамка не покрывает.
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var arrived := get_tree().get_current_scene()
+	assert_object(arrived).is_not_null()
+	assert_str(arrived.scene_file_path).is_equal(DemoFlow.ROSTER_SCENE)
+	arrived.free()
+	assert_bool(get_tree().get_current_scene() == before).is_true()

@@ -46,13 +46,40 @@ func test_focus_pips_match_the_active_unit() -> void:
 	assert_int(screen.hud.active_focus_pips()).is_equal(combat.current.focus)
 
 
+## Кольцо держит номер играемого хода. `+ 1` в нём был off-by-one: кольцо
+## обновляется уже после `turn_index += 1`, и на кадре результата спорило с
+## «Ходов:» (22 против 21, read-отчёт 2026-10-26).
 func test_round_counter_follows_the_queue() -> void:
 	var screen := _screen()
 	var combat := _combat()
 	screen.run(combat)
-	assert_int(screen.hud.round_number()).is_equal(combat.turn_index + 1)
+	assert_int(screen.hud.round_number()).is_equal(maxi(combat.turn_index, 1))
 	combat.perform(BattleAction.skip(combat.current))
-	assert_int(screen.hud.round_number()).is_equal(combat.turn_index + 1)
+	assert_int(screen.hud.round_number()).is_equal(combat.turn_index)
+
+
+## Те же ходы в двух местах экрана: кольцо на поле и «Ходов:» на результате
+## обязаны назвать одно число.
+func test_round_counter_agrees_with_the_result_note() -> void:
+	var screen := _screen()
+	var combat := _combat()
+	screen.run(combat)
+	BattleFactory.auto_play(combat)
+	assert_bool(combat.finished).is_true()
+	assert_str(screen.result_view.note_text()).is_equal(
+		"Ходов: %d" % screen.hud.round_number()
+	)
+
+
+## Цвет полосы HP кодирует сторону: правый блок не обязан притворяться своим
+## (полосы на поле это делали всегда, панели полководцев — нет).
+func test_hp_bar_colour_encodes_the_side() -> void:
+	var screen := _screen()
+	screen.run(_combat())
+	var mine := screen.hud.commander_hp_color(BattleUnit.SIDE_PLAYER)
+	assert_bool(mine == BattleHud.HP_FILL).is_true()
+	var enemy := screen.hud.commander_hp_color(BattleUnit.SIDE_ENEMY)
+	assert_bool(enemy == BattleHud.HP_FILL_ENEMY).is_true()
 
 
 func test_ability_button_goes_dark_on_cooldown() -> void:

@@ -38,6 +38,16 @@ func test_unit_without_ability_is_reported() -> void:
 	assert_bool(_fires(_units_problems(units), "нужна ровно одна способность")).is_true()
 
 
+## Дорожки ищутся по id, поэтому юнит без спрайт-набора — битые данные, а не
+## «юнит без картинки»: запуск обязан завершиться ошибкой (AC 26).
+func test_unit_without_sprite_tracks_is_reported() -> void:
+	var units := _units()
+	var ghost := units[&"knight"].duplicate(true) as UnitStats
+	ghost.id = &"knight_ghost"
+	units[&"knight_ghost"] = ghost
+	assert_bool(_fires(_units_problems(units), "knight_ghost: нет спрайт-набора")).is_true()
+
+
 func test_unknown_status_is_reported() -> void:
 	var units := _units()
 	var status_ids: Array[StringName] = units[&"sorcerer"].abilities[0].applies

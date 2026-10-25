@@ -11,6 +11,8 @@ extends RefCounted
 
 ## Каталог юнитов и наборы. Файлы создаёт tools/author_data.gd.
 const UNITS_DIR := "res://data/units"
+## Дорожки спрайтов — единственное место, где живёт схема этого имени.
+const SPRITES_DIR := "res://assets/sprites"
 const ROSTER_IDS := ["a", "b"]
 const ENEMY_ID := &"wolf"
 ## Девять юнитов в пуле плюс один враг (с 2026-10-26 это зверь — волк).
@@ -21,6 +23,13 @@ const ROSTER_SIZE := 7
 
 static func roster_path(id: String) -> String:
 	return "res://data/rosters/%s.tres" % id
+
+
+## Спрайт-набор юнита ищется по id — поля спрайта в `UnitStats` нет. AC 26
+## требует, чтобы юнит без дорожек был ошибкой запуска, а не «юнитом без
+## картинки»; носитель ссылки (поле vs id) остаётся вопросом §5-В.
+static func sprite_frames_path(id: StringName) -> String:
+	return "%s/%s.sprite_frames.tres" % [SPRITES_DIR, id]
 
 
 ## id -> UnitStats по всем .tres каталога.
@@ -69,6 +78,10 @@ static func _check_units(units: Dictionary, problems: Array[String]) -> void:
 			problems.append("%s: hp/attack/initiative должны быть больше нуля" % who)
 		if stats.abilities.size() != 1:
 			problems.append("%s: нужна ровно одна способность" % who)
+		# Юнит без дорожек — битые данные, а не «юнит без картинки»: дорожки
+		# ищутся по id, и молчаливый пропуск прятал опечатку в id до самого боя.
+		if not FileAccess.file_exists(sprite_frames_path(stats.id)):
+			problems.append("%s: нет спрайт-набора %s" % [who, sprite_frames_path(stats.id)])
 		for ability in stats.abilities:
 			_check_ability(who, ability, problems)
 

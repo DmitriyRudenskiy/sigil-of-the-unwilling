@@ -84,6 +84,12 @@ func outcome_text() -> String:
 	return _head.text
 
 
+## Строка со счётчиком сыгранных ходов — её читает глаз рядом с кольцом
+## счётчика, и спорить с кольцом она не вправе.
+func note_text() -> String:
+	return _note.text
+
+
 func _button(text: String, at: Vector2) -> Button:
 	var button := Button.new()
 	button.text = text
