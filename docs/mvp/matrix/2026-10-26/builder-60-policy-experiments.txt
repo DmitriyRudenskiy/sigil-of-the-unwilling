@@ -1,0 +1,108 @@
+# Городостроитель: две гипотезы 6.2, проверенные матрицей (обе опровергнуты)
+
+Замер — тот же прогон, что и в `builder-60-ledger.txt` (11 классов × 60 ходов, seed из
+`ScenarioTargets`, `MATRIX_REPEAT=2`), HEAD `18f8becd` + правка автопилота. Изменяется
+только порядок действий автопилота; формула уровня, population 8 и building goal 2 не
+трогнуты (прямой запрет задачи 6.2).
+
+## Гипотеза 1 — «стройка закапывает прокорм» (стоп-сигнал стройки в голод)
+
+Правило: не начинать стройку, если `city.starving` или пул еды меньше 3 ходов
+потребления (`food_stockpile < food_demand_this_turn × 3`). Основание — трасса:
+каждое здание списывает upkeep едой (`economic_turn_processor.gd:116`), прирост
+населения оплачивается из того же пула (`city_growth_service.gd:44`), а уровнем 2
+управляет именно население.
+
+| класс | здания было → стало | блокировано ходов | причина | население было → стало | уровень было → стало |
+| --- | --- | --- | --- | --- | --- |
+| barbarian | 18 → 0 | 20 | starving | 3 → 3 | 1 → 1 |
+| chanter | 15 → 6 | 7 | food_pool<3x2.0 | 7 → 9 | 2 → 2 |
+| cipher | 12 → 12 | 0 | — | 8 → 8 | 2 → 2 |
+| druid | 14 → 11 | 2 | starving | 8 → 8 | 2 → 2 |
+| fighter | 17 → 6 | 12 | starving | 3 → 3 | 1 → 1 |
+| monk | 4 → 4 | 0 | — | 8 → 8 | 2 → 2 |
+| paladin | 5 → 5 | 0 | — | 8 → 8 | 2 → 2 |
+| priest | 19 → 0 | 17 | food_pool<3x2.0 | 2 → 3 | 1 → 1 |
+| ranger | 15 → 11 | 7 | starving | 1 → 0 | 1 → 1 |
+| rogue | 15 → 0 | 20 | food_pool<3x2.0 | 3 → 3 | 1 → 1 |
+| wizard | 15 → 7 | 12 | starving | 10 → 5 | 2 → 1 |
+
+**Цель: 6/11 → 5/11 (хуже).** Стоп-сигнал сработал (barbarian/priest/rogue не
+построили ни одного здания за 60 ходов), но население у них не выросло ни на единицу
+(3 → 3, 2 → 3): голод этих городов не вызван стройкой. У wizard правило отняло
+цель (уровень 2 на 36-м ходу → уровень 1, население 10 → 5): здания с назначенными
+работниками еду и производят, поэтому «меньше строек» ≠ «больше еды».
+
+## Гипотеза 2 — «очередь строит не то» (ферма первой)
+
+`BUILD_QUEUE: [barracks, market, farm, range] → [farm, barracks, market, range]`,
+стоп-сигнал снят.
+
+| класс | здания было → стало | население было → стало | уровень было → стало |
+| --- | --- | --- | --- |
+| barbarian | 18 → 21 | 3 → 3 | 1 → 1 |
+| chanter | 15 → 16 | 7 → 7 | 2 → 2 |
+| cipher | 12 → 12 | 8 → 8 | 2 → 2 |
+| druid | 14 → 14 | 8 → 8 | 2 → 2 |
+| fighter | 17 → 19 | 3 → 3 | 1 → 1 |
+| monk | 4 → 4 | 8 → 8 | 2 → 2 |
+| paladin | 5 → 5 | 8 → 8 | 2 → 2 |
+| priest | 19 → 19 | 2 → 2 | 1 → 1 |
+| ranger | 15 → 18 | 1 → 2 | 1 → 1 |
+| rogue | 15 → 13 | 3 → 2 | 1 → 1 |
+| wizard | 15 → 15 | 10 → 10 | 2 → 2 |
+
+**Цель: 6/11 → 6/11 (то же), население максимум 10 (было 10).** Очередь не
+определяет исход: у barbarian по-прежнему 18 зданий и население 3.
+
+## Вывод
+
+1. Ни одна правка **порядка действий** автопилота не меняет счёт цели. Задача 6.2
+   в ветке «исправить доказанные проблемы порядка действий» для Городостроителя
+   не имеет доказанного предмета: обе формулировки проверены и опровергнуты.
+2. Разделителем классов в трассе является **стартовый город seed'а**: пул еды на
+   первом снимке 43.4 (cipher, уровень 2 к 28-му ходу), 30.0 (monk, 10-й ход),
+   25.2 (fighter, ranger — к 60-му ходу 0.0 и вымирание) и 0.0 (barbarian, priest,
+   rogue — голод с 10-го хода). При этом fighter/ranger стартовали как успешные, но
+   израсходовали пул: исход решает экономика роста населения, а не порядок строек.
+3. Уровень 2 требует население ≥ 8; прирост покупается едой из пула по
+   `growth_threshold = база × pop_capped^степень`; продовольственная база мирового
+   города — окрестности боров и клетки работников (`city_yield_calculator.gd:41-59`),
+   а **боров за 60 ходов не заведено ни у одного класса** (`boroughs=0` во всех
+   снимках): база не растёт, пока растёт потребление. Это предмет баланса/механики
+   (T-211), а не порядка действий автопилота, и любое числовое решение здесь меняет
+   матрицу — решение за владельцем (прецедент D-256, T-208).
+4. Обе правки **сняты с носителя**: эксперимент не показал выигрыша, а гипотеза 1
+   ещё и уронила цель до 5/11. Матрица остаётся мерой автопилота, который есть.
+
+## Строки матрицы, вариант 1 (стоп-сигнал)
+
+```
+MATRIX|attempts=-1|battles=19|block=|build_block=starving|build_blocked_turns=20|buildings=0|buildings_goal=2|city_level=1|city_level_goal=2|class=barbarian|deals=0|done=true|error=|gold=0|hero=alive|margin=0|market=false|population=3|population_goal=8|reason=|seed=616125505|state=RUNNING|survived=true|turns=60
+MATRIX|attempts=-1|battles=2|block=|build_block=food_pool<3x2.0|build_blocked_turns=7|buildings=6|buildings_goal=2|city_level=2|city_level_goal=2|class=chanter|deals=0|done=true|error=|gold=0|hero=alive|margin=0|market=false|population=9|population_goal=8|reason=|seed=550432139|state=RUNNING|survived=true|turns=35
+MATRIX|attempts=-1|battles=12|block=|build_block=|build_blocked_turns=0|buildings=12|buildings_goal=2|city_level=2|city_level_goal=2|class=cipher|deals=0|done=true|error=|gold=0|hero=alive|margin=0|market=false|population=8|population_goal=8|reason=|seed=917109845|state=RUNNING|survived=true|turns=28
+MATRIX|attempts=-1|battles=3|block=|build_block=starving|build_blocked_turns=2|buildings=11|buildings_goal=2|city_level=2|city_level_goal=2|class=druid|deals=0|done=true|error=|gold=0|hero=alive|margin=0|market=false|population=8|population_goal=8|reason=|seed=1469196208|state=RUNNING|survived=true|turns=28
+MATRIX|attempts=-1|battles=0|block=|build_block=starving|build_blocked_turns=12|buildings=6|buildings_goal=2|city_level=1|city_level_goal=2|class=fighter|deals=0|done=true|error=|gold=0|hero=alive|margin=0|market=false|population=3|population_goal=8|reason=|seed=1115086861|state=RUNNING|survived=true|turns=61
+MATRIX|attempts=-1|battles=3|block=|build_block=|build_blocked_turns=0|buildings=4|buildings_goal=2|city_level=2|city_level_goal=2|class=monk|deals=0|done=true|error=|gold=0|hero=alive|margin=0|market=false|population=8|population_goal=8|reason=|seed=2047355965|state=RUNNING|survived=true|turns=10
+MATRIX|attempts=-1|battles=3|block=|build_block=|build_blocked_turns=0|buildings=5|buildings_goal=2|city_level=2|city_level_goal=2|class=paladin|deals=0|done=true|error=|gold=0|hero=alive|margin=0|market=false|population=8|population_goal=8|reason=|seed=127670880|state=RUNNING|survived=true|turns=11
+MATRIX|attempts=-1|battles=7|block=|build_block=food_pool<3x2.0|build_blocked_turns=17|buildings=0|buildings_goal=2|city_level=1|city_level_goal=2|class=priest|deals=0|done=true|error=|gold=0|hero=alive|margin=0|market=false|population=3|population_goal=8|reason=|seed=1739236022|state=RUNNING|survived=true|turns=61
+MATRIX|attempts=-1|battles=12|block=|build_block=starving|build_blocked_turns=7|buildings=11|buildings_goal=2|city_level=1|city_level_goal=2|class=ranger|deals=0|done=true|error=|gold=0|hero=alive|margin=0|market=false|population=0|population_goal=8|reason=|seed=19907924|state=RUNNING|survived=true|turns=60
+MATRIX|attempts=-1|battles=33|block=|build_block=food_pool<3x2.0|build_blocked_turns=20|buildings=0|buildings_goal=2|city_level=1|city_level_goal=2|class=rogue|deals=0|done=true|error=|gold=0|hero=alive|margin=0|market=false|population=3|population_goal=8|reason=|seed=1701587817|state=RUNNING|survived=true|turns=62
+MATRIX|attempts=-1|battles=10|block=|build_block=starving|build_blocked_turns=12|buildings=7|buildings_goal=2|city_level=1|city_level_goal=2|class=wizard|deals=0|done=true|error=|gold=0|hero=alive|margin=0|market=false|population=5|population_goal=8|reason=|seed=512858568|state=RUNNING|survived=true|turns=61
+```
+
+## Строки матрицы, вариант 2 (ферма первой)
+
+```
+MATRIX|attempts=-1|battles=16|block=|build_block=|build_blocked_turns=0|buildings=21|buildings_goal=2|city_level=1|city_level_goal=2|class=barbarian|deals=0|done=true|error=|gold=0|hero=alive|margin=0|market=false|population=3|population_goal=8|reason=|seed=616125505|state=RUNNING|survived=true|turns=60
+MATRIX|attempts=-1|battles=1|block=|build_block=|build_blocked_turns=0|buildings=16|buildings_goal=2|city_level=2|city_level_goal=2|class=chanter|deals=0|done=true|error=|gold=0|hero=alive|margin=0|market=false|population=7|population_goal=8|reason=|seed=550432139|state=RUNNING|survived=true|turns=35
+MATRIX|attempts=-1|battles=12|block=|build_block=|build_blocked_turns=0|buildings=12|buildings_goal=2|city_level=2|city_level_goal=2|class=cipher|deals=0|done=true|error=|gold=0|hero=alive|margin=0|market=false|population=8|population_goal=8|reason=|seed=917109845|state=RUNNING|survived=true|turns=28
+MATRIX|attempts=-1|battles=3|block=|build_block=|build_blocked_turns=0|buildings=14|buildings_goal=2|city_level=2|city_level_goal=2|class=druid|deals=0|done=true|error=|gold=0|hero=alive|margin=0|market=false|population=8|population_goal=8|reason=|seed=1469196208|state=RUNNING|survived=true|turns=28
+MATRIX|attempts=-1|battles=0|block=|build_block=|build_blocked_turns=0|buildings=19|buildings_goal=2|city_level=1|city_level_goal=2|class=fighter|deals=0|done=true|error=|gold=0|hero=alive|margin=0|market=false|population=3|population_goal=8|reason=|seed=1115086861|state=RUNNING|survived=true|turns=60
+MATRIX|attempts=-1|battles=3|block=|build_block=|build_blocked_turns=0|buildings=4|buildings_goal=2|city_level=2|city_level_goal=2|class=monk|deals=0|done=true|error=|gold=0|hero=alive|margin=0|market=false|population=8|population_goal=8|reason=|seed=2047355965|state=RUNNING|survived=true|turns=10
+MATRIX|attempts=-1|battles=3|block=|build_block=|build_blocked_turns=0|buildings=5|buildings_goal=2|city_level=2|city_level_goal=2|class=paladin|deals=0|done=true|error=|gold=0|hero=alive|margin=0|market=false|population=8|population_goal=8|reason=|seed=127670880|state=RUNNING|survived=true|turns=11
+MATRIX|attempts=-1|battles=21|block=|build_block=|build_blocked_turns=0|buildings=19|buildings_goal=2|city_level=1|city_level_goal=2|class=priest|deals=0|done=true|error=|gold=0|hero=alive|margin=0|market=false|population=2|population_goal=8|reason=|seed=1739236022|state=RUNNING|survived=true|turns=61
+MATRIX|attempts=-1|battles=13|block=|build_block=|build_blocked_turns=0|buildings=18|buildings_goal=2|city_level=1|city_level_goal=2|class=ranger|deals=0|done=true|error=|gold=0|hero=alive|margin=0|market=false|population=2|population_goal=8|reason=|seed=19907924|state=RUNNING|survived=true|turns=60
+MATRIX|attempts=-1|battles=28|block=|build_block=|build_blocked_turns=0|buildings=13|buildings_goal=2|city_level=1|city_level_goal=2|class=rogue|deals=0|done=true|error=|gold=0|hero=alive|margin=0|market=false|population=2|population_goal=8|reason=total_collapse|seed=1701587817|state=DEFEAT|survived=false|turns=44
+MATRIX|attempts=-1|battles=7|block=|build_block=|build_blocked_turns=0|buildings=15|buildings_goal=2|city_level=2|city_level_goal=2|class=wizard|deals=0|done=true|error=|gold=0|hero=alive|margin=0|market=false|population=10|population_goal=8|reason=|seed=512858568|state=RUNNING|survived=true|turns=36
+```
