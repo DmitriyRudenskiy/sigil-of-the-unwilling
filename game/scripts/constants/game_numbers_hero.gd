@@ -5,6 +5,10 @@ const HERO_DAILY_MOVEMENT       := 10.0
 const HERO_BASE_SPEED           := 120.0
 const TOOL_INVENTORY_SLOTS      := 8
 const MAX_BACKPACK_SIZE         := 16
+## Сетка снаряжения (grid-inventory-and-merchant): 6×4 = 24 клетки вместо
+## счёта предметов. Ширина 6 — чтобы копьё 1×6 ложилось и горизонтально,
+## и вертикально. Число — заявка на баланс (docs/07-balance.md §10).
+const INVENTORY_GRID            := Vector2i(6, 4)
 const MAX_HERO_ARMY_SIZE        := 7
 const HERO_RETREAT_LOSS_FRACTION := 0.5
 const HERO_LEVEL_UP_EXP         := 100

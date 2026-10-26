@@ -209,9 +209,12 @@ func test_backpack_full_rolls_back_resources() -> void:
 	_sys.load_recipes()
 	var s := _strategic({&"wood": 4, &"oak": 2})
 	var inv := HeroInventory.new()
-	inv.backpack.resize(HeroInventory.MAX_BACKPACK)
-	for i in HeroInventory.MAX_BACKPACK:
-		inv.backpack[i] = Artifact.new(&"filler_%d" % i)
+	# «Полный рюкзак» со сменой носителя — это забитая сетка, а не счёт
+	# предметов (grid-inventory-and-merchant): 20 предметов оставляют полосу
+	# 4×1, щиту 2×2 в неё не встать.
+	for i in 20:
+		assert_bool(inv.add_to_backpack(Artifact.new(&"filler_%d" % i))).is_true()
+	assert_that(inv.free_cell_count()).is_equal(4)
 	var ctx := _ctx(s, inv, 1, false)
 	var res := _sys.craft(&"wooden_shield", ctx)
 	assert_bool(bool(res["ok"])).is_false()
@@ -219,7 +222,7 @@ func test_backpack_full_rolls_back_resources() -> void:
 	# Откат: ресурсы на месте.
 	assert_int(int(s.get_all()[&"wood"])).is_equal(4)
 	assert_int(int(s.get_all()[&"oak"])).is_equal(2)
-	assert_int(inv.backpack.size()).is_equal(HeroInventory.MAX_BACKPACK)
+	assert_that(inv.backpack.size()).is_equal(20)
 
 
 func test_item_crafted_signal_emitted() -> void:

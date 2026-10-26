@@ -1,7 +1,7 @@
 extends RefCounted
 class_name SaveData
 
-const CURRENT_VERSION := 9
+const CURRENT_VERSION := 10
 ## world-map-art-variety 9.3: версия генератора карты мира. 1 — наследственная
 ## раскладка (равномерный бросок по 7 типам), 2 — таблица «биом → группа
 ## ресурсов» (biome_resources.json). Старые сейвы не переигрываются: карта
@@ -59,6 +59,8 @@ func from_dict(data: Dictionary) -> void:
 		_migrate_v7_to_v8(data)
 	if version < 9:
 		_migrate_v8_to_v9(data)
+	if version < 10:
+		_migrate_v9_to_v10(data)
 	version = CURRENT_VERSION
 
 	run_seed = int(data.get("run_seed", 0))
@@ -147,6 +149,52 @@ func _migrate_v7_to_v8(data: Dictionary) -> void:
 func _migrate_v8_to_v9(data: Dictionary) -> void:
 	if not data.has("generator_version"):
 		data["generator_version"] = 1
+
+## v9 → v10 (grid-inventory-and-merchant): рюкзак — сетка, а не список.
+## Плоский массив v9 раскладывается по порядку: габарит берётся из слота
+## предмета, не влезшие получают «перевес» (-1, -1) и НЕ удаляются — такой
+## предмет виден, продаётся и надевается. Повторная загрузка идемпотентна:
+## если позиции уже записаны, ничего не перекладывается.
+func _migrate_v9_to_v10(data: Dictionary) -> void:
+	var raw_hero = data.get("hero", {})
+	if not (raw_hero is Dictionary):
+		return
+	var raw_inv = (raw_hero as Dictionary).get("inventory", {})
+	if not (raw_inv is Dictionary):
+		return
+	var inv: Dictionary = raw_inv
+	if inv.has("cells"):
+		return
+	var items = inv.get("backpack", [])
+	if not (items is Array):
+		return
+	var positions: Array = []
+	var used := {}
+	for entry in items:
+		var cells := _v9_cells_of(entry)
+		var fit := HeroInventory.first_fit(cells, used)
+		var origin: Vector2i = fit["origin"]
+		var rot := bool(fit["rotated"])
+		positions.append([origin.x, origin.y, 1 if rot else 0])
+		if origin != HeroInventory.NO_CELL:
+			for cell in HeroInventory.rect(cells, origin, rot):
+				used[cell] = true
+	inv["cells"] = positions
+
+
+## Габарит предмета сейва v9: по id из реестра либо из полного словаря крафта.
+func _v9_cells_of(entry) -> Vector2i:
+	if entry is Dictionary:
+		return Artifact.from_dict(entry).resolved_cells()
+	if entry == null or str(entry) == "":
+		return Vector2i.ZERO
+	var reg: Node = Services.resolve(&"artifacts")
+	if reg == null:
+		return Vector2i(1, 1)
+	var art: Artifact = reg.get_by_id(StringName(entry))
+	# Неизвестный id всё равно выпадет на загрузке; клетку отдаём минимальную.
+	return art.resolved_cells() if art != null else Vector2i(1, 1)
+
 
 func is_valid() -> bool:
 	if run_seed <= 0:

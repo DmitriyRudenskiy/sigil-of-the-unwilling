@@ -14,6 +14,26 @@ enum WeaponCategory { SIMPLE, MARTIAL, EXOTIC }
 
 enum AcBonusType { NONE, ARMOR, SHIELD, NATURAL, DEFLECTION, DODGE }
 
+## Габарит предмета в клетках сетки снаряжения (grid-inventory-and-merchant).
+## Позиция — не производная от слота: копьё и лук живут в одном слоте WEAPON и
+## занимают разное число клеток, поэтому габарит — поле данных. Значение по
+## умолчанию берётся от слота; явное значение в данных перебивает таблицу.
+## Числа — заявка на баланс (docs/07-balance.md §10).
+const SLOT_CELLS: Dictionary = {
+    Slot.HEAD: Vector2i(2, 2),
+    Slot.NECK: Vector2i(1, 2),
+    Slot.TORSO: Vector2i(2, 3),
+    Slot.WEAPON: Vector2i(2, 3),
+    Slot.SHIELD: Vector2i(2, 2),
+    Slot.LEGS: Vector2i(2, 2),
+    Slot.BOOTS: Vector2i(1, 2),
+    Slot.RING_L: Vector2i(1, 1),
+    Slot.RING_R: Vector2i(1, 1),
+    Slot.MISC_A: Vector2i(1, 1),
+    Slot.MISC_B: Vector2i(1, 1),
+    Slot.SPELLBOOK: Vector2i(2, 2),
+}
+
 @export var id: StringName
 @export var display_name: String
 @export var slot: Slot
@@ -25,6 +45,9 @@ enum AcBonusType { NONE, ARMOR, SHIELD, NATURAL, DEFLECTION, DODGE }
 @export var value_gold: int = 0
 @export var description: String = ""
 @export var weight: float = 0.0
+## Габарит в клетках сетки; ZERO = «в данных не задан» → SLOT_CELLS по слоту.
+## Поворот разрешён всем неквадратным предметам, отдельного флага нет.
+@export var cells: Vector2i = Vector2i.ZERO
 
 var combat: Dictionary = {}
 var armor: Dictionary = {}
@@ -43,6 +66,11 @@ static func from_dict(data: Dictionary) -> Artifact:
     a.value_gold = int(data.get("value_gold", 0))
     a.description = str(data.get("description", ""))
     a.weight = float(data.get("weight", 0.0))
+    var raw_cells = data.get("cells", Vector2i.ZERO)
+    if raw_cells is Array and raw_cells.size() >= 2:
+        a.cells = Vector2i(int(raw_cells[0]), int(raw_cells[1]))
+    elif raw_cells is Vector2i:
+        a.cells = raw_cells
     a.combat = (data.get("combat", {}) as Dictionary).duplicate(true)
     a.armor = (data.get("armor", {}) as Dictionary).duplicate(true)
     a.ac_bonus_type = data.get("ac_bonus_type", AcBonusType.NONE)
@@ -74,6 +102,7 @@ func to_dict() -> Dictionary:
         "value_gold": value_gold,
         "description": description,
         "weight": weight,
+        "cells": [cells.x, cells.y],
         "combat": combat.duplicate(true),
         "armor": armor.duplicate(true),
         "ac_bonus_type": ac_bonus_type,
@@ -93,7 +122,8 @@ func _init(
     p_weight: float = 0.0,
     p_combat: Dictionary = {},
     p_armor: Dictionary = {},
-    p_ac_bonus_type: AcBonusType = AcBonusType.NONE
+    p_ac_bonus_type: AcBonusType = AcBonusType.NONE,
+    p_cells: Vector2i = Vector2i.ZERO
 ) -> void:
     id = p_id
     display_name = p_display_name
@@ -105,6 +135,7 @@ func _init(
     value_gold = p_value_gold
     description = p_description
     weight = p_weight
+    cells = p_cells
     combat = p_combat.duplicate(true)
     armor = p_armor.duplicate(true)
     ac_bonus_type = p_ac_bonus_type
@@ -199,6 +230,41 @@ static func damage_type_name(dt: DamageType) -> String:
 
 func is_ring() -> bool:
     return slot == Slot.RING_L or slot == Slot.RING_R
+
+# --- Габарит в сетке (grid-inventory-and-merchant) ---
+
+static func is_valid_cells(c: Vector2i) -> bool:
+    return c.x > 0 and c.y > 0
+
+## Габарит по умолчанию для слота; ZERO — слота нет в таблице.
+static func default_cells_for_slot(p_slot: Slot) -> Vector2i:
+    return SLOT_CELLS.get(p_slot, Vector2i.ZERO)
+
+## Действующий габарит: явный из данных, иначе — по слоту.
+func resolved_cells() -> Vector2i:
+    return cells if is_valid_cells(cells) else default_cells_for_slot(slot)
+
+func cell_count() -> int:
+    var c := resolved_cells()
+    return c.x * c.y
+
+## Причина, по которой габарит считать нечем; "" — данных достаточно.
+## Явный, но бессмысленный габарит — ошибка, а не повод молча взять дефолт слота.
+func cells_error() -> String:
+    if cells != Vector2i.ZERO and not is_valid_cells(cells):
+        return "габарит %s: стороны должны быть больше нуля" % str(cells)
+    if is_valid_cells(default_cells_for_slot(slot)):
+        return ""
+    return "габарит не задан, слот %s не в таблице SLOT_CELLS" % str(slot)
+
+## Габарит для игрока: «6 клеток» / «2 клетки» / «1 клетка».
+func cells_text() -> String:
+    var n := cell_count()
+    if n % 10 == 1 and n % 100 != 11:
+        return "%d клетка" % n
+    if n % 10 in [2, 3, 4] and not (n % 100 in [12, 13, 14]):
+        return "%d клетки" % n
+    return "%d клеток" % n
 
 func get_rarity_name() -> String:
     match rarity:

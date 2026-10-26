@@ -168,7 +168,7 @@ func test_save_migration_markers() -> void:
 		"world": {},
 	})
 	assert_int(legacy.version).is_equal(SaveData.CURRENT_VERSION)
-	assert_int(legacy.version).is_equal(9)
+	assert_int(legacy.version).is_equal(10)
 	assert_int(legacy.generator_version).is_equal(1)
 
 	var legacy_marked := SaveData.new()
