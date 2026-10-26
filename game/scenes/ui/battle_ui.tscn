@@ -660,6 +660,18 @@ text = "Защита: "
 layout_mode = 2
 theme_type_variation = &"LabelNumber"
 
+[node name="tc_luck_row" type="HBoxContainer" parent="target_card/tc_box" unique_id=732893170]
+layout_mode = 2
+
+[node name="tc_luck_key" type="Label" parent="target_card/tc_box/tc_luck_row" unique_id=732893171]
+layout_mode = 2
+theme_type_variation = &"LabelBody"
+text = "Удача: "
+
+[node name="tc_luck" type="Label" parent="target_card/tc_box/tc_luck_row" unique_id=732893172]
+layout_mode = 2
+theme_type_variation = &"LabelNumber"
+
 [node name="tc_atk_row" type="HBoxContainer" parent="target_card/tc_box" unique_id=732893152]
 layout_mode = 2
 

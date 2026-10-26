@@ -57,6 +57,8 @@ static var _hero_portrait: Texture2D = null
 @onready var _tc_count_row: HBoxContainer = $"target_card/tc_box/tc_count_row"
 @onready var _tc_hp: Label = $"target_card/tc_box/tc_hp_row/tc_hp"
 @onready var _tc_def: Label = $"target_card/tc_box/tc_def_row/tc_def"
+@onready var _tc_luck_row: HBoxContainer = $"target_card/tc_box/tc_luck_row"
+@onready var _tc_luck: Label = $"target_card/tc_box/tc_luck_row/tc_luck"
 @onready var _tc_atk_row: HBoxContainer = $"target_card/tc_box/tc_atk_row"
 @onready var _tc_atk: Label = $"target_card/tc_box/tc_atk_row/tc_atk"
 @onready var _tc_preview: Label = $"target_card/tc_box/tc_preview"
@@ -204,6 +206,11 @@ func show_target_card(unit: BattleState.BattleUnit, caption: String = "Цель"
 	var defense: int = unit.get_defense()
 	_tc_def.text = str(defense)
 	_tc_def.visible = defense > 0
+	## T-221 (D-268): Удача — только при наличии носителя; «0 без источника» было бы
+	## выдуманным числом, M1 это прямо запрещает.
+	_tc_luck_row.visible = unit.has_luck()
+	if unit.has_luck():
+		_tc_luck.text = "%+d" % unit.luck
 	var atk: int = unit.dnd_profile.get_attack_bonus() if unit.dnd_profile != null else 0
 	_tc_atk_row.visible = unit.dnd_profile != null
 	_tc_atk.text = "+%d" % atk
