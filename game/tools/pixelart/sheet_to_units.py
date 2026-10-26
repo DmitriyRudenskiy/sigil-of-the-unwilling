@@ -252,6 +252,13 @@ def frame_of(mask: np.ndarray, rgb: np.ndarray, bbox) -> np.ndarray:
     return canvas
 
 
+def tight_of(mask: np.ndarray, rgb: np.ndarray, bbox) -> np.ndarray:
+    """Кадp в край: прямоугольник силуэта, фон залит белым, поля нет."""
+    y0, y1, x0, x1 = bbox
+    crop, m = rgb[y0:y1, x0:x1], mask[y0:y1, x0:x1, None]
+    return np.where(m, crop, 255.0).astype(np.uint8)
+
+
 def cache_index(cache_dir: Path) -> dict[str, list[Path]]:
     """md5 кадра → файлы кэша (по содержимому, не по имени)."""
     index: dict[str, list[Path]] = {}
@@ -269,7 +276,7 @@ def cache_put(cache_dir: Path, frame: np.ndarray, *, sheet: str, cell,
     png = cache_dir / f'{name}.png'
     newly = not png.exists()
     if newly:
-        Image.fromarray(frame, 'RGBA').save(png)
+        Image.fromarray(frame).save(png)
         (cache_dir / f'{name}.json').write_text(json.dumps({
             'sheet': str(sheet), 'cell': list(cell), 'md5_frame': md5_frame,
             'md5_unit': md5_unit, 'source_bbox': list(source_bbox),
@@ -299,23 +306,24 @@ def analyse_sheet(path: str | Path) -> dict:
 
 
 def crop_sheet(path: str | Path, out_dir: str | Path,
-               cache_dir: str | Path | None = None) -> dict:
+               cache_dir: str | Path | None = None, *, tight=False,
+               flat=False) -> dict:
     """Вырезать принятые отбором ячейки в out_dir/<лист>/; оригиналы не трогаются."""
     started = time.perf_counter()
     rgb, path = load_rgb(path)
     alpha = alpha_of(rgb)
     cells, rows, cols = grid_cells(seeds_of(alpha))
-    out_dir = Path(out_dir) / path.stem
+    out_dir = Path(out_dir) if flat else Path(out_dir) / path.stem
     out_dir.mkdir(parents=True, exist_ok=True)
     cache_dir = Path(cache_dir) if cache_dir else path.parent / '_unit_cache'
     written, skipped, duplicate = [], [], 0
     for key, mask in sorted(cells.items()):
         accepted, reasons = screen_cell(mask)
-        bbox = cell_bbox(mask)
+        bbox = cell_bbox(mask, pad=0 if tight else 8)
         if not accepted or bbox is None:
             skipped.append({'cell': key, 'reasons': reasons})
             continue
-        frame = frame_of(mask, rgb, bbox)
+        frame = tight_of(mask, rgb, bbox) if tight else frame_of(mask, rgb, bbox)
         unit_md5 = hashlib.md5(frame.tobytes()).hexdigest()
         png, newly = cache_put(cache_dir, frame, sheet=path.name, cell=key,
                                md5_frame=unit_md5, md5_unit=unit_md5,
@@ -338,6 +346,9 @@ def main(argv=None) -> int:
     ap.add_argument('--crop', action='store_true', help='вырезать отобранное')
     ap.add_argument('--out', type=Path, default=None)
     ap.add_argument('--cache', type=Path, default=None)
+    ap.add_argument('--tight', action='store_true',
+                    help='кадр в край силуэта на белом фоне, без канваса 1024')
+    ap.add_argument('--flat', action='store_true', help='без подкаталога на лист')
     args = ap.parse_args(argv)
     if not (args.dry_run or args.crop):
         ap.error('нужен --dry-run и/или --crop')
@@ -352,7 +363,8 @@ def main(argv=None) -> int:
             print(f"  ({key[0]},{key[1]}) {flag} {'; '.join(cell['reasons'])}")
         if args.crop:
             result = crop_sheet(sheet, args.out or sheet.parent / 'units',
-                                cache_dir=args.cache)
+                                cache_dir=args.cache, tight=args.tight,
+                                flat=args.flat)
             print(f"  вырезано {len(result['written'])}, "
                   f"дубликатов {result['duplicate']}")
     return 0
