@@ -1,0 +1,13 @@
+# game/run_tests.sh — локальный прогон (local), смена gdd-phase-workflow, 2026-10-27
+# начало прогона: HEAD 6727ef7c; game/ в смене не задевался (docs/, scripts/, .pi/skills/)
+# полный stdout/stderr не коммитится (6,9 МБ); строки ниже — из него же
+Overall Summary: 3464 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans |
+Executed test suites: (365/365)
+Executed test cases : (3464/3464)
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+LINT: SKIPPED (нет gdtoolkit у python3 или нет .gdlintrc в /home/user/sigil-of-the-unwilling/game)
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+PYTEST LEDGER: passed=81 skipped=2 failed=0 errors=0 collected=83
+MCP VERDICT: GREEN
+READINESS-CLASSIFIER: selftest GREEN
+EXIT=0
