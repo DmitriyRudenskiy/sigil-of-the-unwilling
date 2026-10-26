@@ -6,6 +6,11 @@
 #
 # MCP e2e (feat/mcp-e2e-activation, 2026-10-04): venv + Xvfb + GODOT_PATH +
 # --timeout=900; MCP-секция не имеет права молчать (явные PYTEST: SKIPPED).
+#
+# D-265 (владелец, 2026-10-26): error fixture-readiness («игра не готова за 180 с») —
+# ЖЁЛТЫЙ, а не красный. Классификация — по junit-отчёту (`scripts/classify_mcp_junit.py`),
+# жёлтый печатается с именами жертв; всё остальное (assert, другой error, неполный прогон,
+# неразобранный журнал) остаётся красным.
 set -u
 cd "$(dirname "$0")"
 # CI-1-семья (владелец 2026-10-05, раунд 5 вердикт §1.1; тикет T-120):
@@ -230,11 +235,15 @@ if [ "$MCP_WORKERS" -gt 1 ]; then
 	fi
 fi
 MCP_LOG="$(mktemp)"
+# D-265: машинно-читаемый журнал той же секции (по нему readiness отличается от регрессии).
+JUNIT_MCP="$(mktemp)"
+JUNIT_PERF="$(mktemp)"
 PERF_IGNORE=()
 [ "$PERF_SERIAL" -eq 1 ] && PERF_IGNORE=(--ignore=tests/mcp/test_hexutils_perf.py)
 GODOT_PATH="$GODOT" \
 GODOT_BIN="$GODOT" \
 "$PYTEST_PY" -m pytest tests/mcp/ -v --timeout=900 --tb=short --durations=25 \
+	--junitxml="$JUNIT_MCP" \
 	${PERF_IGNORE[@]+"${PERF_IGNORE[@]}"} ${PYTEST_WORKER_ARGS[@]+"${PYTEST_WORKER_ARGS[@]}"} 2>&1 | tee "$MCP_LOG"
 MCP_RC=${PIPESTATUS[0]}
 if [ "$PERF_SERIAL" -eq 1 ]; then
@@ -242,6 +251,7 @@ if [ "$PERF_SERIAL" -eq 1 ]; then
 	GODOT_PATH="$GODOT" \
 	GODOT_BIN="$GODOT" \
 	"$PYTEST_PY" -m pytest tests/mcp/test_hexutils_perf.py -v --timeout=900 --tb=short \
+		--junitxml="$JUNIT_PERF" \
 		2>&1 | tee -a "$MCP_LOG"
 	RC2=${PIPESTATUS[0]}
 	[ "$RC2" -ne 0 ] && MCP_RC=1
@@ -280,9 +290,36 @@ read -r P S F E COLLECTED <<< "$LEDGER"
 P=${P:-0}; S=${S:-0}; F=${F:-0}; E=${E:-0}; COLLECTED=${COLLECTED:-0}
 SUM=$((P + S + F + E))
 echo "PYTEST LEDGER: passed=$P skipped=$S failed=$F errors=$E collected=$COLLECTED"
-if [ "$MCP_RC" -eq 0 ] && [ "$SUM" -ne "$COLLECTED" ]; then
+LEDGER_OK=1
+[ "$SUM" -ne "$COLLECTED" ] && LEDGER_OK=0
+if [ "$MCP_RC" -eq 0 ] && [ "$LEDGER_OK" -eq 0 ]; then
 	echo "PYTEST: RED (неполный прогон: сумма $SUM != collected $COLLECTED — свит встал/прервался)"
 	MCP_RC=1
+fi
+# D-265 (владелец, 2026-10-26): readiness-error — жёлтый. Красный снимается ТОЛЬКО если
+# junit-журнал целиком состоит из readiness-ошибок (подпись «игра не готова за», единственный
+# источник — wait_ready в tests/mcp/godot_mcp.py). Неполный прогон, неразобранный журнал и
+# любой другой error красный не снимают; жёлтый печатается поимённо.
+CLS="../scripts/classify_mcp_junit.py"
+JUNIT_ARGS=("$JUNIT_MCP")
+[ "$PERF_SERIAL" -eq 1 ] && JUNIT_ARGS+=("$JUNIT_PERF")
+if [ ! -f "$CLS" ]; then
+	echo "MCP READINESS: SKIPPED (нет $CLS — readiness-error остаётся красным)"
+elif [ "$LEDGER_OK" -eq 0 ]; then
+	echo "MCP READINESS: SKIPPED (прогон неполный — красный не снимается)"
+else
+	"$PYTEST_PY" "$CLS" "${JUNIT_ARGS[@]}"
+	case $? in
+		0) : ;;
+		3)
+			if [ "$MCP_RC" -ne 0 ]; then
+				echo "MCP READINESS: YELLOW — красный снят как readiness, не регрессия (D-265)"
+				MCP_RC=0
+			fi
+			;;
+		1) MCP_RC=1 ;;
+		*) echo "MCP READINESS: журнал не разобран — readiness-error остаётся красным" ;;
+	esac
 fi
 # Python-гейт генератора арта (T-150): `scripts/test_gen_map_art.py` не входит ни в одну
 # секцию выше (MCP-секция знает только tests/mcp/), а без него затемнённый побратим листа
@@ -295,6 +332,16 @@ if "$GEN_PY" -c 'import pytest, PIL' 2>/dev/null; then
 	[ "${PIPESTATUS[0]}" -ne 0 ] && MCP_RC=1
 else
 	echo "GENART: SKIPPED (нет pytest или PIL в $GEN_PY — pip install pytest pillow)"
+fi
+
+# Сами-тест классификатора (D-265): тот решает, что считать жёлтым, и обязан краснеть сам,
+# а не молчать. PYTHONPATH не нужен — файл лежит рядом и импортируется по пути.
+echo "=== python: классификатор MCP-журнала (scripts/test_classify_mcp_junit.py) ==="
+if "$PYTEST_PY" -c 'import pytest' 2>/dev/null; then
+	"$PYTEST_PY" -m pytest ../scripts/test_classify_mcp_junit.py -q --tb=short -p no:cacheprovider 2>&1 | tail -3
+	[ "${PIPESTATUS[0]}" -ne 0 ] && MCP_RC=1
+else
+	echo "READINESS-CLASSIFIER: SKIPPED (нет pytest в $PYTEST_PY)"
 fi
 
 # Очистка (Xvfb, инжект-артефакты, node/godot MCP-процессы) — в trap cleanup_mcp (EXIT).
