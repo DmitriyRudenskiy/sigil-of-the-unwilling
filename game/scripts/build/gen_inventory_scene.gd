@@ -159,7 +159,10 @@ func _build() -> void:
 	for i in 6:
 		_add_node(
 			"BackpackSlot_" + str(i), "TextureRect", "Center/Window/Right/Inventory",
-			"offset_left = " + str(49 + i * 61) + ".0\noffset_top = 9.0\noffset_right = " + str(105 + i * 61) + ".0\noffset_bottom = 65.0\n", uid)
+			# custom_minimum_size обязателен: `TextureRect` внутри контейнера без минимума
+			# получает нулевую ширину, но рисует свои 56 px — сосед вставал вплотную и
+			# закрывал рамку выбора (T-218; правка только в .tscn терялась при перегенерации).
+			"custom_minimum_size = Vector2(56, 56)\noffset_left = " + str(49 + i * 61) + ".0\noffset_top = 9.0\noffset_right = " + str(105 + i * 61) + ".0\noffset_bottom = 65.0\n", uid)
 		uid += 1
 		_add_node(
 			"BpIcon", "TextureRect", "Center/Window/Right/Inventory/BackpackSlot_" + str(i),
