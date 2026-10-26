@@ -84,8 +84,25 @@ def alpha_of(rgb) -> np.ndarray:
     return (255.0 - rgb.min(axis=2)) > DARK_THRESHOLD
 
 
+def fill_holes(mask: np.ndarray) -> np.ndarray:
+    """Силуэт без полостей: светлые участки костюма порог считает фоном.
+
+    Полость — пиксель, до которого нельзя дойти из внешнего фона. Вызывать на
+    маске одного кадра: на листе целиком полость между соседними персонажами
+    заполняется и склеивает их в один компонент (проверено на set-15).
+    """
+    reached = mask.astype(np.uint8)
+    cv2.floodFill(reached, np.zeros((mask.shape[0] + 2, mask.shape[1] + 2), np.uint8),
+                  (0, 0), 1)
+    return np.maximum(mask, 1 - reached)
+
+
 def seeds_of(alpha: np.ndarray) -> list[np.ndarray]:
-    """Крупные связные компоненты листа — по одному на персонажа (обычно)."""
+    """Крупные связные компоненты листа — по одному на персонажа (обычно).
+
+    Силуэт здесь НЕ заполняется: полости — часть меры сегментации (по ним
+    сетка видит, где персонажи стоят вплотную). Заполнение — на этапе кадра.
+    """
     mask = cv2.morphologyEx(
         alpha.astype(np.uint8), cv2.MORPH_CLOSE,
         cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5)))
@@ -318,12 +335,15 @@ def crop_sheet(path: str | Path, out_dir: str | Path,
     cache_dir = Path(cache_dir) if cache_dir else path.parent / '_unit_cache'
     written, skipped, duplicate = [], [], 0
     for key, mask in sorted(cells.items()):
-        accepted, reasons = screen_cell(mask)
-        bbox = cell_bbox(mask, pad=0 if tight else 8)
+        accepted, reasons = screen_cell(mask)   # отбор — по голому порогу (мера сегментации)
+        # В кадр идёт заполненный силуэт: светлые участки костюма порог считает
+        # фоном и вырезает их белым — «дыры внутри контура».
+        cut = fill_holes(mask)
+        bbox = cell_bbox(cut, pad=0 if tight else 8)
         if not accepted or bbox is None:
             skipped.append({'cell': key, 'reasons': reasons})
             continue
-        frame = tight_of(mask, rgb, bbox) if tight else frame_of(mask, rgb, bbox)
+        frame = tight_of(cut, rgb, bbox) if tight else frame_of(cut, rgb, bbox)
         unit_md5 = hashlib.md5(frame.tobytes()).hexdigest()
         png, newly = cache_put(cache_dir, frame, sheet=path.name, cell=key,
                                md5_frame=unit_md5, md5_unit=unit_md5,
