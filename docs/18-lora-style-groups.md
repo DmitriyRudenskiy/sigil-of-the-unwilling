@@ -5,7 +5,7 @@ tags:
   - art
   - ml
 status: reference
-date: 2026-10-26
+date: 2026-10-27
 ---
 
 # Теги стилей LoRA: что измерено
@@ -153,10 +153,19 @@ silhouette 0.015 → 0.014), но числа черновика не являю�
 «large head» без меры — приписывать кадру немереное; смысл чиби вносит слово
 `chibi`.
 
+## Упаковка обратно в листы
+
+`game/tools/pixelart/units_to_sheet.py` собирает нарезку обратно в листы 3×4 по
+12 кадров — со смешанным составом: доли тегов в листе равны долям корпуса
+(5/4/2/1), соседями по стороне стоят только другие теги. Нужно один стиль на
+лист — `--by-tag`. Листы нужны как эталон для генерации и для проверки резака:
+собранные 62 листа разрезаются обратно на 733/733 кадра.
+
 ## Воспроизведение
 
 ```sh
 python3 game/tools/pixelart/style_probe.py --images ~/Downloads/_make_for_lora/units_tight
+python3 game/tools/pixelart/units_to_sheet.py --in ~/Downloads/_make_for_lora/units_tight
 ```
 
 Кадры лежат в подкаталогах по тегам (`units_tight/1_cartoon/…`), поиск

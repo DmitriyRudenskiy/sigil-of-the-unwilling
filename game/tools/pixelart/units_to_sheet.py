@@ -25,14 +25,14 @@ import itertools
 from collections import defaultdict
 from pathlib import Path
 
+import numpy as np
 from PIL import Image
 
-from sheet_to_units import sheet_files
+from sheet_to_units import screen_cell, sheet_files
 
 ROWS, COLS = 3, 4
-FRAC = 0.95             # юнит во долю ячейки: поле нужно, но `ink` резака
-#                         # = тёмные пиксели / ПЛОЩАДЬ ЛИСТА, поэтому широкое
-#                         # поле роняет светлые кадры под порог 0.02
+FRAC = 0.95             # кадр во долю ячейки: это запас на склейку — слипшиеся
+#                         # кадры резак считает одной ячейкой и теряет оба
 
 
 def by_tag(paths: list[Path], root: Path) -> dict[str, list[Path]]:
@@ -126,10 +126,10 @@ def layout(tags: dict[str, list[Path]], per: int) -> list[list[Path]]:
 
 
 def make_sheet(paths: list[Path], dims: list[tuple[int, int]], frac: float) -> Image.Image:
-    """Кадры ставятся пиксель в пиксель (без ресайза): резак морфологически
-    закрывает силуэт ядром в 5 px и меряет `ink` долей от площади листа —
-    на раздутом листе те же пиксели не проходят порог. Колонки и ряды поэтому
-    равны самому крупному кадру в них, а не самому крупному в листе."""
+    """Кадры ставятся пиксель в пиксель (без ресайза): резак закрывает силуэт
+    ядром в 5 px, на раздутом кадре он рвётся на лоскуты и ячейка падает по
+    числу связных частей. Колонки и ряды равны самому крупному кадру в них,
+    а не самому крупному в листе: лишнее поле только скрашивает лист."""
     colw = [round(max((w for i, (w, _) in enumerate(dims) if i % COLS == c), default=0) / frac)
             for c in range(COLS)][:1 + max(i % COLS for i in range(len(dims)))]
     rowh = [round(max((h for i, (_, h) in enumerate(dims) if i // COLS == r), default=0) / frac)
@@ -173,6 +173,16 @@ def _selftest() -> int:
                 left[t] = max(0, left[t] - n)
     assert quota({'a': 3, 'b': 1}, 12) == {'a': 3, 'b': 1}
     assert arrange({'a': 7, 'b': 5}) == []    # 7 из 12 впритык не развести
+    # отбор не зависит от того, насколько лист больше кадра (иначе собранный
+    # лист на 20% шире ронял светлые костюмы по ink, не изменившись)
+    sprite = np.zeros((120, 90), bool)
+    sprite[10:110, 15:75] = True
+    sprite[40:70, 30:60] = False
+    for pad in (0, 400, 900):
+        canvas = np.zeros((120 + 2 * pad, 90 + 2 * pad), bool)
+        canvas[pad:pad + 120, pad:pad + 90] = sprite
+        ok, reasons = screen_cell(canvas)
+        assert ok, (pad, reasons)
     print('selftest OK')
     return 0
 

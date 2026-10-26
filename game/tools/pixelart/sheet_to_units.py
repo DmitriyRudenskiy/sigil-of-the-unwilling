@@ -230,7 +230,17 @@ def cell_metrics(mask: np.ndarray) -> dict:
 
 
 def screen_cell(mask: np.ndarray) -> tuple[bool, list[str]]:
-    """Отобрать ячейку по числам. Возвращает (принять, причины отказа)."""
+    """Отобрать ячейку по числам. Возвращает (принять, причины отказа).
+
+    Числа считаются по минимальному прямоугольнику силуэта, а не по маске
+    целиком: `ink` — доля тёмных пикселей **от кадра**, иначе порог измерял бы
+    размер листа (перекомпонованный из готовых кадров лист на 20% больше
+    исходного — и светлые костюмы падали под MIN_INK, не изменившись).
+    Отбор при этом остаётся по голому порогу: полости не заполняются.
+    """
+    ys, xs = np.nonzero(mask)
+    if len(ys):
+        mask = mask[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
     m = cell_metrics(mask)
     if m.get('empty'):
         return False, ['empty']
@@ -315,7 +325,7 @@ def analyse_sheet(path: str | Path) -> dict:
         bbox = cell_bbox(mask)
         metrics = cell_metrics(mask[bbox[0]:bbox[1], bbox[2]:bbox[3]]) \
             if bbox else {'empty': True}
-        accepted, reasons = screen_cell(mask)
+        accepted, reasons = screen_cell(mask)   # те же числа: screen_cell сам режет по bbox
         out[key] = {'bbox': bbox, 'metrics': metrics,
                     'accepted': accepted, 'reasons': reasons}
     return {'path': str(path), 'md5': md5_file(path), 'grid': (rows, cols),
@@ -335,7 +345,7 @@ def crop_sheet(path: str | Path, out_dir: str | Path,
     cache_dir = Path(cache_dir) if cache_dir else path.parent / '_unit_cache'
     written, skipped, duplicate = [], [], 0
     for key, mask in sorted(cells.items()):
-        accepted, reasons = screen_cell(mask)   # отбор — по голому порогу (мера сегментации)
+        accepted, reasons = screen_cell(mask)   # отбор — по голому порогу, без полостей
         # В кадр идёт заполненный силуэт: светлые участки костюма порог считает
         # фоном и вырезает их белым — «дыры внутри контура».
         cut = fill_holes(mask)
