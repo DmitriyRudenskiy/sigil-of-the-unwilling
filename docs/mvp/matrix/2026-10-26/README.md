@@ -85,7 +85,8 @@ SURVIVAL_REPEAT=2 godot --headless --path game -s res://tools/survival_report.gd
 | `survival-repeat-tool-bug.txt` | тот же прогон до фикса инструмента | ложные `same=false` на 10/10, `hashes=…,d41d8cd9` (md5 пустой строки), рост `root` до 17 узлов → потерянный `await`, инвариант «один мир за раз», D-262 |
 | `gate-local.txt` | `ef6495df`, `game/run_tests.sh` | локальный гейт смены: GdUnit **3433/0/0**, MCP **`passed=80 skipped=2 failed=0 errors=1`**; единственная ошибка — readiness-жертва T-172 (изолированно `1 passed in 3.88s`); она же доказательство режима 8.2 (headless + Xvfb, без foreground-окна) |
 | `collector-90-after-survival-slice.txt` | `671ffad8` (`matrix_report.gd -- collector 90`) | контроль регресса матрицы после среза когорты: 11/11 ячеек и сводка совпали с базой `437b8a13` по всем общим ключам, расхождение — только состав ключей (три счётчика Collector-среза) |
-| `dest-marker-after-t214.txt` | рабочий фикс T-214 поверх `0cdc4199` (`SURVIVAL_SEEDS=4211,907 SURVIVAL_REPEAT=2`) | контроль владения: 0 строк `SURVIVAL-SWEEP` вместо 3, обе строки `SURVIVAL|` и хэши `7798d256`/`a9a9cc04` совпали с базой — фикс недвигает симуляцию |
+| `dest-marker-after-t214.txt` | рабочий фикс T-214 поверх `0cdc4199` (`SURVIVAL_SEEDS=4211,907 SURVIVAL_REPEAT=2`) | контроль владения: 0 строк `SURVIVAL-SWEEP` вместо 3, обе строки `SURVIVAL|` и хэши `7798d256`/`a9a9cc04` совпали с базой — фикс не сдвигает симуляцию |
+| `gate-local-t214.txt` | `7ef3e446` + docs-only `fc355717`, `game/run_tests.sh` | локальный гейт среза T-214: GdUnit **3436/0/0** (+3 — новый тест владения), MCP **`passed=81 skipped=2 failed=0 errors=0`** (readiness-жертв в этом прогоне ноль, T-172 это не отменяет), батарея S1–S12 красная, smoke-чек-лист с пометкой «ревью диффа владельцем не сделано» |
 
 Из логов оставлены строки `MATRIX*`, заголовок движка и строки падения/ошибок; остальной шум
 отброшен. Формат строки: `MATRIX|key=value|…` (ключи упорядочены), `MATRIX-START`/
