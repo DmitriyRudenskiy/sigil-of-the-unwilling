@@ -11,6 +11,12 @@ const BATTLE_SPELL_ANIM_TIME    := 0.35
 const BATTLE_AI_THINK_TIME      := 0.7
 const BATTLE_TURN_DELAY         := 0.15
 const BATTLE_FIELD_RING         := 5
+## mvp-ui-flow 4.1 (C-10): поле боя при 720p — масштаб ×0.8. Вписанное в вьюпорт
+## «в притык» поле при высоте 720 px не оставляет запаса: ряды клеток упираются в
+## нижнюю панель HUD, а сетка перестаёт читаться. Пород включителен (≤ 720), потому
+## что запас нужен именно на малых высотах; выше порога — прежняя плотная вписка.
+const BATTLE_LOWRES_MAX_HEIGHT  := 720.0
+const BATTLE_LOWRES_FIT_SCALE   := 0.8
 const BATTLE_CLICK_RADIUS_PX    := 60.0
 const BATTLE_FLOATING_TEXT_OFFSET := Vector2(-30, -60)
 const BATTLE_DAMAGE_NUMBER_OFFSET := Vector2(-16, -50)

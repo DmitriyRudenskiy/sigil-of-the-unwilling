@@ -81,18 +81,55 @@ func spawn_hero_figure() -> void:
 	hero.position = _tile_map.map_to_local(Vector2i(1, 1))
 	add_child(hero)
 
-func fit_camera() -> void:
+## Концы используемой части поля в локальных координатах тайлмапа; пустой массив —
+## тайлсет ещё не готов (`setup()` не вызван) либо поле не залито.
+func _field_ends() -> Array:
 	if _tile_map.tile_set == null:
-		return
+		return []
 	var used: Rect2i = _tile_map.get_used_rect()
 	if used.size.x <= 0 or used.size.y <= 0:
+		return []
+	return [
+		_tile_map.map_to_local(used.position),
+		_tile_map.map_to_local(used.position + used.size - Vector2i(1, 1)),
+	]
+
+
+## Размер поля боя в пикселях вместе с 30 px запасом по краям; Vector2.ZERO —
+## вписывать камеру не во что. Публичный, потому что тест обязан считать
+## ожидаемый зум независимо, а не копировать формулу из `fit_camera`.
+func field_size() -> Vector2:
+	var ends := _field_ends()
+	if ends.is_empty():
+		return Vector2.ZERO
+	return Vector2(absf(ends[1].x - ends[0].x) + 60.0, absf(ends[1].y - ends[0].y) + 60.0)
+
+
+## Множитель вписывания поля (mvp-ui-flow 4.1, C-10): «поле боя при 720p SHALL use
+## scale x0.8». Плотная вписка занимает всю высоту вьюпорта, и при 720 px ряды
+## упираются в нижнюю панель HUD; ниже порода множитель остаётся 0.8 (запас
+## нужен малым высотам, а не ровно одной). Выше порога — 1.0, прежнее поведение.
+static func field_fit_scale(viewport_height: float) -> float:
+	if viewport_height <= GameNumbers.BATTLE_LOWRES_MAX_HEIGHT:
+		return GameNumbers.BATTLE_LOWRES_FIT_SCALE
+	return 1.0
+
+
+func fit_camera() -> void:
+	var ends := _field_ends()
+	if ends.is_empty():
 		return
-	var p0 := _tile_map.map_to_local(used.position)
-	var p1 := _tile_map.map_to_local(used.position + used.size - Vector2i(1, 1))
-	var field_sz := Vector2(absf(p1.x - p0.x) + 60.0, absf(p1.y - p0.y) + 60.0)
-	var center := (p0 + p1) / 2.0
+	var field_sz := field_size()
+	var center: Vector2 = (ends[0] + ends[1]) / 2.0
 	var vp_sz := get_viewport().get_visible_rect().size
-	var z: float = minf(vp_sz.x / field_sz.x, vp_sz.y / field_sz.y)
+	# Множитель смотрит на РЕАЛЬНОЕ окно, а не на layout: при stretch mode
+	# canvas_items `get_visible_rect()` остаётся 1920×1080 и на 720p, и на 4K
+	# (это же различает адаптивный гейт: `win=` против `layout=`).
+	var win_sz: Vector2i = get_viewport().get_window().size
+	var z: float = (
+		minf(vp_sz.x / field_sz.x, vp_sz.y / field_sz.y)
+		* field_fit_scale(float(win_sz.y))
+	)
 	_camera.zoom = Vector2(z, z)
 	_camera.position = center
 
