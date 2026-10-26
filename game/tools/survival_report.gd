@@ -75,8 +75,10 @@ func _initialize() -> void:
 	var class_id: String = ScenarioTargets.survival_class()
 	var target: Dictionary = ScenarioTargets.role(ROLE_ID)
 	if seeds.is_empty():
+		# Сломанный носитель — тот же класс технической ошибки, что сорванный прогон:
+		# «ноль прогонов» неотличим от «ноль выживших», если коды выхода разные.
 		print("SURVIVAL-ERRORS|n=1|прогон=носитель|ScenarioTargets.SURVIVAL.seeds пуст")
-		quit(2)
+		quit(1)
 		return
 	print("SURVIVAL-START|version=%s|seeds=%d|turns=%d|class=%s%s" % [
 		str(target.get("version", "?")), seeds.size(), turns, class_id,

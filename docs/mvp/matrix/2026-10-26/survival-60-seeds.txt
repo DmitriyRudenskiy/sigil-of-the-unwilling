@@ -8,6 +8,9 @@
 #   погили: 3 x total_collapse (ход 35/34/31), 1 x unsuccessored_death (exhaustion, ход 59)
 #   во всех 10: recruits=0 (T-217), recovery_turns=0 (T-215), trades=0 (базовый автопилот не торгует), successions=0
 #   детерминизм: 10/10 same=true; перед каждым прогоном с root снимался осиротевший DestMarker (T-214)
+#   кросс-процессная проверяемость: повтор всего набора отдельным процессом дал 10/10 строк,
+#   побайтово совпадающих с этим файлом (md5 строк идентичны) — воспроизводится не только
+#   внутри одного процесса, но и между запусками
 # ---------------------------------------------------------------
 Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
 SURVIVAL|battles=10|builds=13|death_cause=exhaustion|death_turn=59|done=true|error=|gathers=38|hostility=2.0|interactions=51|losses=0|reason=unsuccessored_death|recovery_turns=0|recruits=0|seed=4211|state=DEFEAT|successions=0|survived=false|trades=0|turns=63
