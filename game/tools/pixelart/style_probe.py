@@ -112,11 +112,15 @@ def geometry(path):
 
 
 def resolve(cells, images):
-    """Ячейка → файл нарезки (имя несёт хэш содержимого, потому не ключ)."""
+    """Ячейка → кадр. Имя несёт хэш содержимого, поэтому не ключ; кадры лежат
+    в подкаталогах по тегам стиля (`units_tight/1_cartoon/…`), поэтому обход
+    рекурсивный."""
     by_cell = {}
-    for f in os.listdir(images):
-        if f.endswith('.png'):
-            by_cell.setdefault('_'.join(f[:-4].split('_')[:2]), []).append(f)
+    for root, _, names in os.walk(images):
+        for f in names:
+            if f.endswith('.png'):
+                rel = os.path.relpath(os.path.join(root, f), images)
+                by_cell.setdefault('_'.join(f[:-4].split('_')[:2]), []).append(rel)
     bad = {c: by_cell.get(c) for c in cells if not by_cell.get(c) or len(by_cell[c]) > 1}
     if bad:
         raise SystemExit(f'{len(bad)} ячеек не находятся в {images} однозначно '
@@ -163,8 +167,11 @@ def registry(cells, images, emb_path, model_id, device):
 # быть честным.
 def pipe(kind, balanced=False):
     steps = [StandardScaler()]
+    # svd_solver='full': у PCA по умолчанию solver 'auto', и на широкой матрице
+    # (298 признаков геометрии) он берёт randomized SVD без seed — числа
+    # геометрии и остатков гуляли на ±0.01 от прогона к прогону.
     if kind == 'geo':
-        steps.append(PCA(50, whiten=True))          # 298 признаков формы → 50
+        steps.append(PCA(50, svd_solver='full', whiten=True))   # 298 признаков формы → 50
     steps.append(LogisticRegression(max_iter=5000, class_weight='balanced' if balanced else None))
     return make_pipeline(*steps)
 
@@ -202,7 +209,7 @@ def ridge_cv(X, Z):
     этого он бывает отрицательным и ничего не значит."""
     pred = np.zeros_like(Z)
     for tr, te in KFold(5, shuffle=True, random_state=SEED).split(X):
-        p = make_pipeline(StandardScaler(), PCA(50, whiten=True),
+        p = make_pipeline(StandardScaler(), PCA(50, svd_solver='full', whiten=True),
                           RidgeCV(alphas=np.logspace(-1, 4, 12))).fit(X[tr], Z[tr])
         pred[te] = p.predict(X[te])
     return pred, 1 - ((Z - pred) ** 2).sum() / ((Z - Z.mean(0)) ** 2).sum()
