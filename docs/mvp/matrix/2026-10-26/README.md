@@ -80,9 +80,9 @@ SURVIVAL_REPEAT=2 godot --headless --path game -s res://tools/survival_report.gd
 | `traveler-60-repeat2.txt` | `683b09e5` (`MATRIX_REPEAT=2`) | Путешественник, 60 ходов, 22 прогона: `same=true` у всех 11; `arrived` 9/11, `biomes` 1…5 |
 | `builder-60-ledger.txt` | `18f8becd` (`MATRIX_LEDGER=1`, `MATRIX_REPEAT=2`) | Городостроитель, 60 ходов: 11 строк + 76 снимков полей реестра (`food`, `starving`, `boroughs`, `level_block`, `build_block`) → **T-212**, **T-213** |
 | `builder-60-policy-experiments.txt` | `18f8becd` + правки автопилота (сняты) | те же 11 профилей при двух правках порядка действий: 5/11 и 6/11 против базовых 6/11 → обе гипотезы опровергнуты (D-260) |
-| `survival-60-seeds.txt` | когорта выживания (задачи 7.1/7.3) | `SURVIVAL_REPEAT=2`: 10 строк когорты + 10 строк повтора → 6/10 выжили, среднее 52.6 (цель 8/10 и 55) = **цель не выполнена**, `SURVIVAL-WARNING`, exit 0; детерминизм 10/10 `same=true` → **T-214…T-217** |
+| `survival-60-seeds.txt` | когорта выживания (задачи 7.1/7.3), `survival_report.gd` | `SURVIVAL_REPEAT=2`: 10 строк когорты + 10 строк повтора → 6/10 выжили, среднее 52.6 (цели 8/10 и 55) = **цель не выполнена**, `SURVIVAL-WARNING`, exit 0; минимум взаимодействий 51; детерминизм 10/10 `same=true`, повтор отдельным процессом — те же байты строк → **T-214…T-217** |
 | `survival-repeat-tool-bug.txt` | тот же прогон до фикса инструмента | ложные `same=false` на 10/10, `hashes=…,d41d8cd9` (md5 пустой строки), рост `root` до 17 узлов → потерянный `await`, инвариант «один мир за раз», D-262 |
-| `survival-60-seeds.txt` | дерево когорты, `survival_report.gd` | когорта выживания: 10 seed × 60 ходов, **выживание 6/10 при цели 8, среднее 52.6 хода при цели 55**, минимум взаимодействий 51 (`SURVIVAL-WARNING`, код выхода 0) |
+| `gate-local.txt` | `ef6495df`, `game/run_tests.sh` | локальный гейт смены: GdUnit **3433/0/0**, MCP **`passed=80 skipped=2 failed=0 errors=1`**; единственная ошибка — readiness-жертва T-172 (изолированно `1 passed in 3.88s`); она же доказательство режима 8.2 (headless + Xvfb, без foreground-окна) |
 
 Из логов оставлены строки `MATRIX*`, заголовок движка и строки падения/ошибок; остальной шум
 отброшен. Формат строки: `MATRIX|key=value|…` (ключи упорядочены), `MATRIX-START`/
