@@ -28,6 +28,7 @@ TICKETS = DOCS / "mvp" / "TICKETS.md"
 LIFECYCLE = ("draft", "audited", "deepened", "verified", "locked")
 EXEMPT = ("reference", "snapshot", "archived", "redirect")
 PENDING_RE = r"⏳\s*\*\*Предварительное"
+PRIO_RE = "🔴|🟡|🟢"  # тот же словарь приоритетов, что в gdd_gate
 VISION_RE = r"⚑\s*\*\*Меняет видение"
 
 
@@ -83,12 +84,22 @@ def blocks() -> list[tuple[int, list[str]]]:
             block.append(f"  … ещё {len(rows) - 10}")
         out.append((prio, block))
 
-    red = [l for l in qrows if "🔴" in l and "закрыт" not in l]
-    yellow = [l for l in qrows if "🟡" in l and "закрыт" not in l]
-    block = [f"## Открытые вопросы: 🔴 {len(red)}, 🟡 {len(yellow)}, всего строк {len(qrows)}"]
-    block += [f"  {l[:160]}" for l in (red + yellow)[:12]]
-    if len(red) + len(yellow) > 12:
-        block.append(f"  … ещё {len(red) + len(yellow) - 12}")
+    # Открытый = не закрыт и не редирект (`Q-M1 → **K-M1**` — ответ живёт в другом
+    # реестре). Без этой поправки дайджест врал бы: «🔴 0» при 13 открытых
+    # легаси-вопросах, у которых приоритета просто нет.
+    closed = [l for l in qrows if "закрыт" in l]
+    redirected = [l for l in qrows if "закрыт" not in l and "→ **" in l]
+    open_rows = [l for l in qrows if "закрыт" not in l and "→ **" not in l]
+    red = [l for l in open_rows if "🔴" in l]
+    yellow = [l for l in open_rows if "🟡" in l]
+    legacy = [l for l in open_rows if not re.search(PRIO_RE, strip_code(l))]
+    block = [f"## Открытые вопросы: {len(open_rows)} (🔴 {len(red)}, 🟡 {len(yellow)}, "
+             f"без приоритета {len(legacy)}) · редиректов на K-## {len(redirected)} · "
+             f"закрытых {len(closed)} · всего строк {len(qrows)}"]
+    listed = red + yellow + [l for l in legacy if l not in red and l not in yellow]
+    block += [f"  {l[:160]}" for l in listed[:12]]
+    if len(listed) > 12:
+        block.append(f"  … ещё {len(listed) - 12}")
     out.append((3, block))
 
     sec = _sections()

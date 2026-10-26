@@ -59,6 +59,30 @@ def test_digest_lists_open_questions_by_priority(world):
     assert "Q-M3" not in block  # закрытый вопрос в список открытых не попадает
 
 
+def test_redirect_to_k_registry_is_not_open(world):
+    """`Q-M1 → **K-M1**` — ответ в другом реестре: это не открытый вопрос."""
+    q = world / "QUESTIONS.md"
+    q.write_text(q.read_text(encoding="utf-8") +
+                 "| Q-M9 → **K-M9** | **Районы в MVP?** | тут | а | нет |\n", encoding="utf-8")
+    block = _block(world, 3)
+    assert "редиректов на K-## 1" in block
+    assert "Q-M9" not in block
+
+
+def test_legacy_open_questions_are_counted_even_without_priority(world):
+    """Легаси-строка без приоритета — открытый вопрос, а не «открытых нет»."
+
+    До поправки дайджест печатал «🔴 0, 🟡 0» при 13 открытых вопросах: у старых
+    строк приоритета нет, и проверка по эмодзи их не видела.
+    """
+    q = world / "QUESTIONS.md"
+    q.write_text(q.read_text(encoding="utf-8") +
+                 "| Q-M10 | **Вопрос без приоритета** | тут | а/б | нет |\n", encoding="utf-8")
+    block = _block(world, 3)
+    assert "Открытые вопросы: 3" in block and "без приоритета 1" in block
+    assert "Q-M10" in block
+
+
 def test_digest_flags_verified_without_decision(world):
     block = _block(world, 4)
     assert "02-mechanics.md" in block       # verified без ссылки D-###
