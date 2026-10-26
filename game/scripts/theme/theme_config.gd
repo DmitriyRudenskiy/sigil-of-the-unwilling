@@ -64,6 +64,13 @@ const C_RARITY_MINOR  := Color(0.8, 0.8, 0.6)
 const C_RARITY_MAJOR  := Color(0.4, 0.6, 1.0)
 const C_RARITY_RELIC  := Color(1.0, 0.75, 0.15)
 
+## Маркеры ячейки инвентаря (ui-mockup-parity 6.4/6.6): непрозрачная рамка поверх
+# ячейки, а не `modulate` и не полупрозрачная плашка — на плейсхолдерных иконках
+# (средний канал 15–75 из 255) перемножение невидимо, а плашка тонет на пёстром фоне
+# за окном (кадромер 2026-10-26). Тоны — текстовые каноны золотого и тревожного.
+const C_UI_CELL_SELECTED := Color(1.0, 0.85, 0.4)   # тон C_TEXT_GOLD
+const C_UI_CELL_BLOCKED  := Color(1.0, 0.25, 0.2)   # тон C_TEXT_DANGER
+
 const C_RES_WOOD    := Color(0.62, 0.44, 0.24)
 const C_RES_MERCURY := Color(0.64, 0.67, 0.74)
 const C_RES_ORE     := Color(0.50, 0.40, 0.34)

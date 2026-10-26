@@ -11,7 +11,25 @@ var bp_page := 0
 var bp_slots: Array = []
 
 var _selected_slot: Artifact.Slot = Artifact.Slot.WEAPON
+## Выбор предмета из сумки: индекс в `inventory.backpack`, −1 — ничего. До задачи 6.4
+## выбор был только у слота, и тот не менялся ни одним действием: «Remove» всегда
+## снимал WEAPON, а «Equip» надевал первый предмет сумки, игнорируя волю игрока.
+var _selected_bp: int = -1
 var _right: Control = null
+
+## Размер страницы сумки: шесть ячеек `BackpackSlot_%d` в сцене-носителе.
+const _BP_PAGE_SIZE := 6
+## Маркеры ячейки (6.4/6.6) — непрозрачная рамка поверх ячейки, а не `modulate` ячейки
+## и не полупрозрачная плашка. Модуляция перемножается с пикселями рисунка, а иконки
+## артефактов — плейсхолдеры со средним каналом 15–75 из 255 (`assets/artifacts/*.png`);
+## плашка же зависит от того, что под ячейкой: кадр меню за 2026-10-26 показал, что на
+## пёстром фоне витража золотая плашка тонет (средний канал ячейки менялся меньше, чем
+## фон между двумя соседними пустыми ячейками). Рамка видна на любом фоне.
+const _MARK_SELECTED := "BpSelectedMark"
+const _MARK_BLOCKED := "BpBlockedMark"
+const _MARK_THICKNESS := 2.0
+## Отступ второй рамки от края: когда оба знака включены, они не сливаются в одну полосу.
+const _MARK_INSET := 4.0
 
 const TEXT_GOLD := ThemeConfig.C_TEXT_GOLD_SOFT
 const TEXT_LIGHT := ThemeConfig.C_TEXT_LIGHT_SOFT
@@ -59,12 +77,44 @@ const _ICON := {
 signal closed
 
 func set_hero(hero: HeroController) -> void:
+	_unwatch_inventory()
 	_hero = hero
 	_build()
+	_watch_inventory()
+
+
+## Экран обязан жить на сигналах инвентаря, а не только на собственном `_refresh()`:
+## предмет, подобранный в мире, появляется в сумке сразу, а не после пересборки экрана.
+func _watch_inventory() -> void:
+	var inv: HeroInventory = _hero.inventory if _hero != null else null
+	if inv == null:
+		return
+	for sig in [inv.backpack_changed, inv.equipped_changed]:
+		if not sig.is_connected(_refresh):
+			sig.connect(_refresh)
+
+
+## Отписка обязательна: без неё экран остаётся подписчиком инвентаря прежнего героя,
+## а при смене героев (6.5) такие подписки накапливаются молча.
+func _unwatch_inventory() -> void:
+	if _hero == null or not is_instance_valid(_hero):
+		return
+	var inv: HeroInventory = _hero.inventory
+	if inv == null or not is_instance_valid(inv):
+		return
+	for sig in [inv.backpack_changed, inv.equipped_changed]:
+		if sig.is_connected(_refresh):
+			sig.disconnect(_refresh)
 
 func close() -> void:
 	closed.emit()
 	hide()
+
+
+func _exit_tree() -> void:
+	# Экран переживает героя? Нет — но инвентарь живёт в герое, а герой в мире: без
+	# отписки на освобождённый экран прилетает вызов `_refresh` из сигнала инвентаря.
+	_unwatch_inventory()
 
 func _ready() -> void:
 	add_theme_color_override("font_color", TEXT_GOLD)
@@ -94,6 +144,15 @@ func _connect_signals() -> void:
 	_connect_btn("Center/Window/Right/Dispose", _on_dispose)
 	_connect_btn("Center/Window/Side/Ok", close)
 
+	# Ячейки сумки — TextureRect, а они по умолчанию не принимают мышь; без STOP клик
+	# по предмету не доходит до обработчика вообще (6.4: действие игрока).
+	for i in _BP_PAGE_SIZE:
+		var cell := get_node_or_null("Center/Window/Right/Inventory/BackpackSlot_%d" % i)
+		if cell is Control:
+			cell.mouse_filter = Control.MOUSE_FILTER_STOP
+			if not cell.gui_input.is_connected(_on_backpack_gui_input):
+				cell.gui_input.connect(_on_backpack_gui_input.bind(i))
+
 	for i in 4:
 		var b := get_node_or_null("Center/Window/Bottom/Formations/Form_%d" % i)
 		if b is Button:
@@ -103,6 +162,45 @@ func _connect_signals() -> void:
 
 func _on_prev_page() -> void:
 	_backpack_scroll_by(-1)
+
+
+## Выбор предмета из сумки (индекс в `inventory.backpack`, −1 — сброс). Публичный: через
+## него в экран входят и клики ячеек, и тесты действия интерфейса (6.7).
+func select_backpack(idx: int) -> void:
+	_selected_bp = idx
+	_refresh_backpack()
+
+
+func selected_backpack_index() -> int:
+	return _selected_bp
+
+
+## Выбор слота куклы — то, что снимет «Remove».
+func select_slot(slot: Artifact.Slot) -> void:
+	_selected_slot = slot
+	_refresh()
+
+
+func _selected_artifact() -> Artifact:
+	if _hero == null or _selected_bp < 0:
+		return null
+	var bp: Array[Artifact] = _hero.inventory.backpack
+	if _selected_bp >= bp.size():
+		return null
+	return bp[_selected_bp]
+
+
+func _on_backpack_gui_input(event: InputEvent, cell_index: int) -> void:
+	var mb := event as InputEventMouseButton
+	if mb == null or not mb.pressed or mb.button_index != MOUSE_BUTTON_LEFT:
+		return
+	var idx := bp_page * _BP_PAGE_SIZE + cell_index
+	if _hero != null and idx < _hero.inventory.backpack.size() \
+			and _hero.inventory.backpack[idx] != null:
+		select_backpack(idx)
+	else:
+		select_backpack(-1)
+	get_viewport().set_input_as_handled()
 
 func _on_next_page() -> void:
 	_backpack_scroll_by(1)
@@ -253,8 +351,36 @@ func _build_bottom() -> void:
 func _refresh() -> void:
 	if _hero == null or _right == null:
 		return
+	_refresh_stats()
 	_rebuild_equipped()
 	_refresh_backpack()
+
+
+## Значения левой панели. До 6.4 панель собиралась один раз в `_build()` и после
+## экипировки продолжала показывать базу: «пересчёт характеристик» был невидим, хотя
+## носитель (`get_battle_bonus`, `get_daily_movement_points`) читал модификаторы живьём.
+## Формат: «12 (+3)» — база и то, что дали артефакты.
+func _refresh_stats() -> void:
+	if _hero == null:
+		return
+	var mods: Dictionary = _hero.inventory.get_total_modifiers()
+	var bonus: Dictionary = _hero.get_battle_bonus()
+	var keys := ["attack", "defense", "spell_power", "knowledge"]
+	for i in keys.size():
+		var key: String = keys[i]
+		var total: int = int(bonus.get(key, 0))
+		var delta: int = int(mods.get(key, 0))
+		var sv := get_node_or_null("Center/Window/Left/StatValue_%d" % i)
+		if sv is Label:
+			if delta == 0:
+				sv.text = str(total)
+			else:
+				var sign_: String = "+" if delta > 0 else "-"
+				sv.text = "%d (%s%d)" % [total, sign_, absi(delta)]
+	var ev := get_node_or_null("Center/Window/Left/Exp_val")
+	if ev is Label and _hero.has_method("get_xp"):
+		# До этого здесь стояла литеральная «0» при существующем счётчике опыта.
+		ev.text = str(_hero.get_xp())
 
 func _rebuild_equipped() -> void:
 	if _hero == null:
@@ -286,20 +412,86 @@ func _rebuild_equipped() -> void:
 func _refresh_backpack() -> void:
 	if _hero == null:
 		return
-	var bp: Array[Artifact] = _hero.inventory.backpack
-	for i in 6:
+	var inv: HeroInventory = _hero.inventory
+	var bp: Array[Artifact] = inv.backpack
+	for i in _BP_PAGE_SIZE:
+		var cell := get_node_or_null("Center/Window/Right/Inventory/BackpackSlot_%d" % i)
 		var ic := get_node_or_null(
 			"Center/Window/Right/Inventory/BackpackSlot_%d/BpIcon" % i)
 		if ic is not TextureRect:
 			continue
-		var idx := bp_page * 6 + i
-		if idx < bp.size() and bp[idx] != null:
-			var icon_path := _artifact_icon(bp[idx])
-			if not icon_path.is_empty():
-				ic.texture = _tex(icon_path, 56, 56)
-				ic.visible = true
-				continue
-		ic.visible = false
+		var idx := bp_page * _BP_PAGE_SIZE + i
+		var art: Artifact = bp[idx] if idx < bp.size() else null
+		var icon_path := _artifact_icon(art) if art != null else ""
+		var has_icon := art != null and not icon_path.is_empty()
+		if has_icon:
+			ic.texture = _tex(icon_path, 56, 56)
+		ic.visible = has_icon
+		if cell is Control:
+			_apply_cell_marks(cell, inv, art, idx)
+
+
+## 6.4/6.6: чем помечена ячейка. Выбор — золото, предмет без свободного слота —
+## красная рамка (лексика «недоступно», как подсветка недостижимых клеток боя);
+## оба знака складываются, а не вытесняют друг друга: игрок обязан видеть и «что
+## выбрано», и «почему «Equip» ничего не сделает».
+func _apply_cell_marks(cell: Control, inv: HeroInventory, art: Artifact, idx: int) -> void:
+	var selected := art != null and idx == _selected_bp
+	var blocked := art != null and not inv.can_equip(art)
+	_set_cell_mark(cell, _MARK_SELECTED, ThemeConfig.C_UI_CELL_SELECTED, selected, 0.0)
+	_set_cell_mark(cell, _MARK_BLOCKED, ThemeConfig.C_UI_CELL_BLOCKED, blocked, _MARK_INSET)
+
+
+## Рамка собирается из четырёх полос на якорях: раскладка переживает и смену размера
+## окна, и то, что на первом кадре у ячейки ещё нет размера (иначе маркер молча
+## остался бы не нарисованным — тот же класс бага, что чинится здесь).
+func _set_cell_mark(
+		cell: Control, mark_name: String, color: Color, on: bool, inset: float) -> void:
+	var frame := cell.get_node_or_null(mark_name) as Control
+	if frame == null:
+		if not on:
+			return
+		frame = Control.new()
+		frame.name = mark_name
+		# Рамка не имеет права съедать клик по ячейке: выбор идёт по `gui_input` клетки.
+		frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		cell.add_child(frame)
+		frame.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		for preset in [
+				Control.PRESET_TOP_WIDE, Control.PRESET_BOTTOM_WIDE,
+				Control.PRESET_LEFT_WIDE, Control.PRESET_RIGHT_WIDE]:
+			var strip := ColorRect.new()
+			strip.color = color
+			strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			frame.add_child(strip)
+			_layout_mark_strip(strip, preset as Control.LayoutPreset, inset)
+	frame.visible = on
+
+
+func _layout_mark_strip(strip: ColorRect, preset: Control.LayoutPreset, inset: float) -> void:
+	var t := _MARK_THICKNESS
+	strip.set_anchors_preset(preset)
+	match preset:
+		Control.PRESET_TOP_WIDE:
+			strip.offset_left = inset
+			strip.offset_top = inset
+			strip.offset_right = -inset
+			strip.offset_bottom = inset + t
+		Control.PRESET_BOTTOM_WIDE:
+			strip.offset_left = inset
+			strip.offset_top = -inset - t
+			strip.offset_right = -inset
+			strip.offset_bottom = -inset
+		Control.PRESET_LEFT_WIDE:
+			strip.offset_left = inset
+			strip.offset_top = inset
+			strip.offset_right = inset + t
+			strip.offset_bottom = -inset
+		Control.PRESET_RIGHT_WIDE:
+			strip.offset_left = -inset - t
+			strip.offset_top = inset
+			strip.offset_right = -inset
+			strip.offset_bottom = -inset
 
 func _backpack_scroll_by(dir: int) -> void:
 	if _hero == null:
@@ -312,26 +504,43 @@ func _on_equip() -> void:
 	if _hero == null:
 		return
 	var inv: HeroInventory = _hero.inventory
-	for art in inv.backpack:
-		if art != null and inv.can_equip(art):
-			inv.equip(art)
-		break
+	var art: Artifact = _selected_artifact()
+	if art == null:
+		return
+	if not inv.can_equip(art):
+		# 6.4: неподходящий слот не меняет ничего — ни перестановки, ни «надень вместо
+		# этого что-нибудь другое». Признак висит на ячейке (см. `_apply_cell_marks`).
+		return
+	if inv.equip(art):
+		_selected_slot = art.slot
+		_selected_bp = -1
 	_refresh()
+
 
 func _on_remove() -> void:
 	if _hero == null:
 		return
 	var inv: HeroInventory = _hero.inventory
-	if inv.has_slot(_selected_slot):
-		inv.unequip(_selected_slot)
+	if not inv.has_slot(_selected_slot):
+		return
+	var art: Artifact = inv.unequip(_selected_slot)
+	# Снятое становится выбранным: следующее действие игрока — про тот же предмет.
+	_selected_bp = inv.backpack.find(art) if art != null else -1
 	_refresh()
+
 
 func _on_dispose() -> void:
 	if _hero == null:
 		return
 	var inv: HeroInventory = _hero.inventory
-	if not inv.backpack.is_empty():
-		inv.remove_from_backpack(0)
+	var art: Artifact = _selected_artifact()
+	if art == null:
+		return
+	var idx: int = inv.backpack.find(art)
+	if idx < 0:
+		return
+	inv.remove_from_backpack(idx)
+	_selected_bp = -1
 	_refresh()
 
 func _on_form(_i: int) -> void:
