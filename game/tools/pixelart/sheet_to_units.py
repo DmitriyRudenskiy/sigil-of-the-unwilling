@@ -300,12 +300,12 @@ def analyse_sheet(path: str | Path) -> dict:
 
 def crop_sheet(path: str | Path, out_dir: str | Path,
                cache_dir: str | Path | None = None) -> dict:
-    """Вырезать принятые отбором ячейки в out_dir; оригиналы не трогаются."""
+    """Вырезать принятые отбором ячейки в out_dir/<лист>/; оригиналы не трогаются."""
     started = time.perf_counter()
     rgb, path = load_rgb(path)
     alpha = alpha_of(rgb)
     cells, rows, cols = grid_cells(seeds_of(alpha))
-    out_dir = Path(out_dir)
+    out_dir = Path(out_dir) / path.stem
     out_dir.mkdir(parents=True, exist_ok=True)
     cache_dir = Path(cache_dir) if cache_dir else path.parent / '_unit_cache'
     written, skipped, duplicate = [], [], 0
