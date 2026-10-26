@@ -238,6 +238,15 @@ func test_click_on_a_backpack_cell_selects_its_item() -> void:
 			.override_failure_message(
 				"ячейка сумки %d не принимает мышь — выбор по клику недоступен" % i)
 
+	# Размер ячейки обязан задаваться минимальным размером, а не размером текстуры:
+	# `TextureRect` внутри `HBoxContainer` без `custom_minimum_size` получает ширину из
+	# минимума (0, если рисунок не задан), а рисует всё равно 56 px — соседняя ячейка
+	# вставала вплотную и перекрывала рамку выбора (T-218, кадр до/после в
+	# sigil-reserve/inventory-t218: 342 → 574 пикселя реестрового золота в кадре).
+	for i in 6:
+		assert_that(_cell(i).custom_minimum_size.x).is_greater_equal(56.0) \
+			.override_failure_message("ячейка сумки %d не имеет своей ширины" % i)
+
 	_click(1)
 
 	assert_that(_screen.selected_backpack_index()).is_equal(1)
