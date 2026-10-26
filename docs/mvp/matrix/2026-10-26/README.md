@@ -87,6 +87,7 @@ SURVIVAL_REPEAT=2 godot --headless --path game -s res://tools/survival_report.gd
 | `collector-90-after-survival-slice.txt` | `671ffad8` (`matrix_report.gd -- collector 90`) | контроль регресса матрицы после среза когорты: 11/11 ячеек и сводка совпали с базой `437b8a13` по всем общим ключам, расхождение — только состав ключей (три счётчика Collector-среза) |
 | `dest-marker-after-t214.txt` | рабочий фикс T-214 поверх `0cdc4199` (`SURVIVAL_SEEDS=4211,907 SURVIVAL_REPEAT=2`) | контроль владения: 0 строк `SURVIVAL-SWEEP` вместо 3, обе строки `SURVIVAL|` и хэши `7798d256`/`a9a9cc04` совпали с базой — фикс не сдвигает симуляцию |
 | `gate-local-t214.txt` | `7ef3e446` + docs-only `fc355717`, `game/run_tests.sh` | локальный гейт среза T-214: GdUnit **3436/0/0** (+3 — новый тест владения), MCP **`passed=81 skipped=2 failed=0 errors=0`** (readiness-жертв в этом прогоне ноль, T-172 это не отменяет), батарея S1–S12 красная, smoke-чек-лист с пометкой «ревью диффа владельцем не сделано» |
+| `gate-local-t218.txt` | `76db602c`, `game/run_tests.sh` | локальный гейт среза «экран артефактов отвечает на выбор» (ui-mockup-parity 6.4/6.6/6.7): GdUnit **3444/0/0** (+8 — `test_inventory_actions.gd`), MCP **81 passed / 2 skipped** повторным прогоном (первый прогон дал 1 флейк readiness — зафиксирован и измерен, не списан), батарея M1–M10 красные, M2 — эквивалентный |
 
 Из логов оставлены строки `MATRIX*`, заголовок движка и строки падения/ошибок; остальной шум
 отброшен. Формат строки: `MATRIX|key=value|…` (ключи упорядочены), `MATRIX-START`/

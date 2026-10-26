@@ -228,6 +228,16 @@ func test_click_on_a_backpack_cell_selects_its_item() -> void:
 	var b := _artifact(&"test_click_b", Artifact.Slot.MISC_B)
 	_open([a, b])
 
+	# Структурная проверка, а не поведение: `gui_input` ниже эмулируется на узле, и мышь
+	# через неё не проходит, поэтому `mouse_filter` в этом пути не участвует. Проверяется
+	# отдельно и именно так, потому что дефолт `TextureRect` — `MOUSE_FILTER_IGNORE`, и
+	# без явной проводки клик по предмету в живой игре молча проваливался бы сквозь ячейку
+	# (мутант M9 батареи `mut_inventory_marks.sh` был зелёным, пока этой строки не было).
+	for i in 6:
+		assert_that(_cell(i).mouse_filter).is_equal(Control.MOUSE_FILTER_STOP) \
+			.override_failure_message(
+				"ячейка сумки %d не принимает мышь — выбор по клику недоступен" % i)
+
 	_click(1)
 
 	assert_that(_screen.selected_backpack_index()).is_equal(1)
