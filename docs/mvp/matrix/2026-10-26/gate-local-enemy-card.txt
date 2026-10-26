@@ -14,7 +14,7 @@ READINESS-CLASSIFIER: selftest GREEN
 VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
 ```
 
-MCP: errors=1 —  упал на setup 180.16 с (readiness). Классификатор D-265 отнёс к среде: статус YELLOW, гейт не покраснел. Корень не исправлен — T-172.
+MCP: errors=1 — test_hexutils_perf.py::test_map_generation_80x80 упал на setup (180.16 с, readiness). Классификатор D-265 отнёс к среде: статус YELLOW, гейт не покраснел. Корень не исправлен — T-172.
 
 Мутационная батарея tools/mut_enemy_card.sh (все мутанты красные):
 ```
