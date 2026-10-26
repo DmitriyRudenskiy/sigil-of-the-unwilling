@@ -34,7 +34,7 @@
 | MCP node_modules | `game/addons/godot-mcp/node_modules` (gitignored; `npm ci` из package-lock) |
 | Ремот `origin` | `git@github.com:DmitriyRudenskiy/sigil-of-the-unwilling.git` — **SSH** (ключ `~/.ssh/id_ed25519`). HTTPS не работает: токен в `gh auth` просрочен (проверено 2026-10-17) → `git push`/`git fetch` идут по SSH, `gh`-операции трекера — отдельный вопрос (реестр тикетов — `docs/mvp/TICKETS.md`, хост — зеркало) |
 
-| OpenSpec | `openspec/changes/<name>/`, CLI: `/usr/bin/openspec` |
+| OpenSpec | `openspec/changes/<name>/`, CLI: `openspec` (npm `@fission-ai/openspec` 1.14.3, `~/.npm-global/bin/openspec`; в неинтерактивной оболочке PATH его не видит — звать `node /home/user/.npm-global/lib/node_modules/@fission-ai/openspec/bin/openspec.js`. `/usr/bin/openspec` на этой машине нет — проверено 2026-10-26) |
 
 ## Режим работы
 

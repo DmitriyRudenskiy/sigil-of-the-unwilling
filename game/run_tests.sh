@@ -339,7 +339,14 @@ fi
 echo "=== python: классификатор MCP-журнала (scripts/test_classify_mcp_junit.py) ==="
 if "$PYTEST_PY" -c 'import pytest' 2>/dev/null; then
 	"$PYTEST_PY" -m pytest ../scripts/test_classify_mcp_junit.py -q --tb=short -p no:cacheprovider 2>&1 | tail -3
-	[ "${PIPESTATUS[0]}" -ne 0 ] && MCP_RC=1
+	# Вердикт печатается явно: «секция молча прошла» и «секция не запустилась» не должны
+	# различаться тишиной (тот же аргумент, что у жёлтого статуса D-265).
+	if [ "${PIPESTATUS[0]}" -eq 0 ]; then
+		echo "READINESS-CLASSIFIER: selftest GREEN"
+	else
+		echo "READINESS-CLASSIFIER: selftest RED — классификатор сломан, его «жёлтому» гейт не верит"
+		MCP_RC=1
+	fi
 else
 	echo "READINESS-CLASSIFIER: SKIPPED (нет pytest в $PYTEST_PY)"
 fi

@@ -22,6 +22,18 @@ def _png(width: int, height: int) -> bytes:
     )
 
 
+@pytest.fixture(autouse=True)
+def _канон_кадра_не_наследуется_из_оболочки(request, monkeypatch):
+    """Подставные кадры этого файла — 1920×1080, поэтому чужой `CAPTURE_SIZE` в
+    окружении прогона красил их как «снимок недействителен» (замер 2026-10-26:
+    5 красных кейсов при `CAPTURE_SIZE=1280x720` в той же команде). Съёмка по
+    запросу `test_capture` — единственная, кому размер вызывающего нужен: только
+    так снимают неканон (mvp-ui-flow 4.1: поле боя на 1280×720)."""
+    if request.node.name == "test_capture":
+        return
+    monkeypatch.delenv(capture.SIZE_ENV, raising=False)
+
+
 def test_parse_size_принимает_канон_и_variants():
     assert capture.parse_size("1920x1080") == (1920, 1080)
     assert capture.parse_size(" 1920×1080 ") == (1920, 1080)
