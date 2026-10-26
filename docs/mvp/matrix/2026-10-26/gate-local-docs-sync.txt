@@ -1,0 +1,25 @@
+# Гейт среза docs-code-sync (local, CI не запускался — по директиве владельца)
+
+```
+Executed test cases : (3464/3464)
+Executed test suites: (365/365)
+MCP VERDICT: GREEN
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+PYTEST LEDGER: passed=81 skipped=2 failed=0 errors=0 collected=83
+READINESS-CLASSIFIER: selftest GREEN
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+EXIT=0
+```
+
+Игровой код не менялся: GdUnit-счёт не вырос (365/3464). Документационные гейты:
+
+```
+факты кода: autoload=15, input_action=5, scene=51, class_name=405, save_key=10
+
+ЕСТЬ В КОДЕ, НЕ УПОМИНАЕТСЯ В ДОКАХ (0):
+
+ДОК ССЫЛАЕТСЯ, ФАЙЛА НЕТ (0):
+AUDIT_EXIT=0
+OK: docs/ links consistent (99 notes checked)
+21 passed in 0.03s
+```

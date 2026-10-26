@@ -20,11 +20,27 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 GAME = ROOT / "game"
 DOCS = ROOT / "docs"
-PROJECT = GAME / "project.godot"
+def project_path() -> pathlib.Path:
+    """project.godot текущего дерева (функция — чтобы тесты подменяли GAME)."""
+    return GAME / "project.godot"
 
 # Документированность проверяется только по «живым» заметкам: архивные логи и
 # банк канона (docs/bank) намеренно выведены из графа (AGENTS.md «Документация»).
 SKIP_DOC_PARTS = {"bank"}
+# Реестры/журналы: append-only история, имена файлов в них — цитаты прошлого.
+REGISTRY_PREFIXES = (
+    "docs/CHANGELOG.md",
+    "docs/DECISIONS.md",
+    "docs/QUESTIONS.md",
+    "docs/mvp/",
+)
+# Формулировки, при которых имя файла — сознательное «этого больше нет».
+ABSENCE_MARKERS = (
+    "в репо нет", "нет в репо", "не существует", "отсутству", "удален", "удалён",
+    "снята", "снято", "больше не", "пре-D1", "историч", "ранее", " formerly",
+    "не instantiated", "артефакт аудита",
+)
+
 SKIP_DOC_NAMES = {"STRUCTURE_AUDIT", "CONFLICTS_REPORT", "UNIFICATION_CHANGES", "NORMALIZATION_REPORT"}
 
 
@@ -56,12 +72,32 @@ def _section(text: str, name: str) -> list[str]:
     return keys
 
 
+def _allowlist() -> set[str]:
+    """Ratchet-бэклог: имена классов, ещё не названных в доках. Список может
+    только сокращаться — задокументированное имя, оставленное здесь, краснит
+    гейт (иначе allowlist превращается в свалку)."""
+    f = pathlib.Path(__file__).with_suffix(".allowlist")
+    if not f.exists():
+        return set()
+    return {ln.strip() for ln in f.read_text(encoding="utf-8").splitlines() if ln.strip() and not ln.startswith("#")}
+
+
+def _facts() -> dict:
+    return {
+        "autoload": autoloads(),
+        "input_action": input_actions(),
+        "scene": scenes(),
+        "class_name": class_names(),
+        "save_key": save_keys(),
+    }
+
+
 def autoloads() -> list[str]:
-    return _section(PROJECT.read_text(encoding="utf-8"), "autoload")
+    return _section(project_path().read_text(encoding="utf-8"), "autoload")
 
 
 def input_actions() -> list[str]:
-    keys = _section(PROJECT.read_text(encoding="utf-8"), "input")
+    keys = _section(project_path().read_text(encoding="utf-8"), "input")
     return [k.split("/")[-1] for k in keys]
 
 
@@ -92,60 +128,73 @@ def save_keys() -> list[str]:
     return sorted(set(re.findall(r"\"([a-z_]{3,})\"\s*:", s)))
 
 
-def main() -> int:
+def audit() -> dict:
+    """Собрать расхождения. Отдельно от печати — чтобы поведение тестировалось."""
     docs = _doc_texts()
-    blob = "\n".join(t for _, t in docs)
-    facts = {
-        "autoload": autoloads(),
-        "input_action": input_actions(),
-        "scene": scenes(),
-        "class_name": class_names(),
-        "save_key": save_keys(),
-    }
-    missing_in_code: list[dict] = []
+    facts = _facts()
+    strict_kinds = {"autoload", "input_action", "scene", "save_key"}
+    allowlist = _allowlist()
     undocumented: list[dict] = []
+    stale: list[str] = []
+    missing_in_code: list[dict] = []
     for kind, names in facts.items():
         for n in names:
-            # Имя сцены в доках пишут и с расширением, и без; класс — как есть.
             pat = re.compile(rf"\b{re.escape(n)}\b" + (r"(\.tscn)?" if kind == "scene" else ""))
             hit = any(pat.search(t) for _, t in docs)
-            if not hit:
-                undocumented.append({"kind": kind, "name": n})
-    # Обратная сторона: на что доки ссылаются как на код игры.
-    ref_re = re.compile(r"\b([A-Z][A-Za-z0-9_]{3,})\b")
-    # Вендор (addons/) — не предмет доков игры, но и не битая ссылка: путь существует.
-    vendor = set()
-    for p in (GAME / "addons").rglob("*.gd"):
-        m = re.search(r"^class_name\s+([A-Za-z0-9_]+)", p.read_text(encoding="utf-8", errors="replace"), re.M)
-        if m:
-            vendor.add(m.group(1))
-    known = set(facts["class_name"]) | set(facts["autoload"]) | vendor
-    for p, t in docs:
-        for name in sorted(set(ref_re.findall(t))):
-            if name in known or name.isupper():
+            if kind not in strict_kinds and n in allowlist:
+                if hit:
+                    stale.append(n)
                 continue
-            # Ссылка на класс-стиль, которого нет ни в class_name, ни в автолоадах.
-            if any(re.search(rf"\bclass_name\s+{re.escape(name)}\b", f.read_text(encoding="utf-8", errors="replace"))
-                   for f in game_scripts()):
+            if hit:
                 continue
-            if re.search(rf"\b{re.escape(name)}\.(?:gd|tscn)\b", t):
-                missing_in_code.append({"kind": "doc_ref", "name": name, "doc": str(p.relative_to(ROOT))})
-    result = {
+            undocumented.append({"kind": kind, "name": n})
+    ref_re = re.compile(r"\b([A-Za-z_][A-Za-z0-9_]*\.(?:gd|tscn))\b")
+    existing = {q.name for q in GAME.rglob("*.gd")} | {q.name for q in GAME.rglob("*.tscn")}
+    for doc, t in docs:
+        rel = str(doc.relative_to(ROOT))
+        if rel.startswith(REGISTRY_PREFIXES):
+            # Реестры и логи — исторические акты: они вправе называть файлы,
+            # удалённые позже; переписать их под текущий код = фальсификация.
+            continue
+        for line in t.splitlines():
+            if any(m in line for m in ABSENCE_MARKERS):
+                # Док прямо говорит, что носителя нет, — это правда о настоящем.
+                continue
+            for ref in sorted(set(ref_re.findall(line))):
+                if ref not in existing:
+                    missing_in_code.append({"kind": "doc_ref", "name": ref, "doc": rel})
+    return {
         "facts": {k: len(v) for k, v in facts.items()},
         "undocumented": undocumented,
+        "allowlist_stale": sorted(set(stale)),
         "doc_refs_absent_in_code": missing_in_code,
     }
+
+
+def main_for() -> int:
+    """Вердикт + печать. 0 — расхождений нет, 1 — есть (change docs-code-sync)."""
+    res = audit()
+    und, missing, stale = res["undocumented"], res["doc_refs_absent_in_code"], res["allowlist_stale"]
+    print("факты кода:", ", ".join(f"{k}={v}" for k, v in res["facts"].items()))
+    print(f"\nЕСТЬ В КОДЕ, НЕ УПОМИНАЕТСЯ В ДОКАХ ({len(und)}):")
+    for row in und:
+        print(f"  [{row['kind']}] {row['name']}")
+    print(f"\nДОК ССЫЛАЕТСЯ, ФАЙЛА НЕТ ({len(missing)}):")
+    for row in missing[:40]:
+        print(f"  [{row['kind']}] {row['name']} -> {row['doc']}")
+    if stale:
+        print(f"\nALLOWLIST УСТАРЕЛ, имена уже задокументированы, убери их ({len(stale)}):")
+        for n in stale[:40]:
+            print(f"  {n}")
+    bad = bool(missing) or bool(stale) or bool(und)
+    return 1 if bad else 0
+
+
+def main() -> int:
     if "--json" in sys.argv:
-        print(json.dumps(result, ensure_ascii=False, indent=1))
-    else:
-        print("факты кода:", ", ".join(f"{k}={v}" for k, v in result["facts"].items()))
-        print(f"\nЕСТЬ В КОДЕ, НЕ УПОМИНАЕТСЯ В ДОКАХ ({len(undocumented)}):")
-        for row in undocumented:
-            print(f"  [{row['kind']}] {row['name']}")
-        print(f"\nДОК ССЫЛАЕТСЯ, В КОДЕ НЕТ ({len(missing_in_code)}):")
-        for row in missing_in_code[:40]:
-            print(f"  [{row['kind']}] {row['name']} -> {row['doc']}")
-    return 1 if (undocumented or missing_in_code) else 0
+        print(json.dumps(audit(), ensure_ascii=False, indent=1))
+        return 0
+    return main_for()
 
 
 if __name__ == "__main__":

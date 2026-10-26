@@ -43,7 +43,7 @@ Read-only аудит визуальных ассетов (`game/assets/**/*.{png
 | Файл | Размер | Доказательство орфанства | Рекомендация |
 |---|---|---|---|
 | ui/events/bandit_event.png, herbalist_event.png | 2 файла | ни в одном `data/events/*.json` в `icon_path`; 0 в коде | удалить (или прописать в JSON существующих событий) |
-| ui/widgets/decorators/divider_horizontal.png, divider_vertical.png, corner_decor.png | 3 файла | 0 ссылок; генератор `gen_widget_textures.gd` их не пишет и не называет | удалить |
+| ui/widgets/decorators/divider_horizontal.png, divider_vertical.png, corner_decor.png | 3 файла | 0 ссылок; генератор `gen_widget_textures.gd` в репо больше не существуетератор `gen_widget_textures.gd` их не пишет и не называет | удалить |
 | ui/widgets/progress_bars/fill_mana.png, fill_exp.png | 2 файла | 0 ссылок; код/генератор используют `bar_mana_fill`/`bar_xp_fill` — старые имена | удалить |
 | textures/objects/building_*.jpg ×12 (academy, apothecary, archery_range, barracks, farmhouse, greenhouse, longhouse, palace, sawmill, stable, temple, town_hall) | ~3.3 МБ | `BUILDING_ART_BY_ID` маппит **только .webp**; `*.jpg` — 0 ссылок | удалить jpg-двойники |
 | textures/objects/portrait_*.jpg ×9 (beaver, felid, felid_2, fox, frogfolk, harpy, human_boy, lizardfolk, silhouette_hat) | ~0.2 МБ | UnitSprites грузит только `units/%s.png`; в `team_dialogs/*.json` поля portrait нет; 0 ссылок | удалить (если не под них задуман TeamDialog — тогда wire-тикет) |
@@ -73,7 +73,7 @@ Read-only аудит визуальных ассетов (`game/assets/**/*.{png
 ## Несоответствия нейминга и структуры
 
 - Нижнего регистра/разделителей — **0 нарушений**.
-- `scenes/ui/TeamDialogScreen.gd` и `scripts/data/TeamDialogData.gd` — PascalCase в **коде**
+- `TeamDialogScreen.gd` и `TeamDialogData.gd` — PascalCase в **коде** (на момент аудита; сейчас носитель — `scripts/ui/team_dialog_screen.gd`, данных-класса `TeamDialogData.gd` в репо нет, система — `scripts/systems/TeamDialogSystem.gd`)
   (вне assets/, но против godot-конвенции нижнего регистра; Linux case-sensitivity — риск для MCP-тестов).
 - `assets/raw/` — свалка исходников (2 файла); категории `tiles/` — 1 файл (`world_tiles.jpeg`),
   «категория-однушка»; `textures/objects/` смешивает здания и портреты. Рекомендация: портреты —
