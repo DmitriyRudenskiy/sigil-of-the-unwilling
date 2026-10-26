@@ -37,6 +37,13 @@ var first_collision_turn := -1
 var first_win_turn := -1
 var losses := 0
 var battles_fought := 0
+## Успешные действия, а не попытки (когорта выживания, задача 7.1): «хотя бы одно
+## фактически выполненное взаимодействие» нельзя мерить по `first_building_turn`,
+## потому что он отвечает «когда началась стройка», а не «сколько построек состоялось».
+## Считаются только `ok`-ответы `CityScreen.build_pressed/recruit_pressed`, то есть
+## те же вызовы, которые тратят запасы и меняют город.
+var builds_done := 0
+var recruits_done := 0
 ## Сталл-сеть боя: кадров без необратимого прогресса до принудительного skip() и до
 ## технического падения (матрица обязана видеть ошибку, а не молча упираться в
 ## предохранитель кадров).
@@ -63,6 +70,8 @@ func start_probe(world: Node, p_seed: int) -> Dictionary:
 	_battle_stall_frames = 0
 	first_building_turn = -1
 	first_recruit_turn = -1
+	builds_done = 0
+	recruits_done = 0
 	first_collision_turn = -1
 	first_win_turn = -1
 	losses = 0
@@ -119,6 +128,8 @@ func report() -> Dictionary:
 		"error": error_msg,
 		"first_building_turn": first_building_turn,
 		"first_recruit_turn": first_recruit_turn,
+		"builds_done": builds_done,
+		"recruits_done": recruits_done,
 		"first_collision_turn": first_collision_turn,
 		"first_win_turn": first_win_turn,
 		"losses": losses,
@@ -385,6 +396,7 @@ func _try_build() -> bool:
 		if check.ok:
 			if first_building_turn < 0:
 				first_building_turn = turn
+			builds_done += 1
 			return true
 	return false
 
@@ -395,6 +407,7 @@ func _try_recruit() -> bool:
 	if check.ok:
 		if first_recruit_turn < 0:
 			first_recruit_turn = turn
+		recruits_done += 1
 		return true
 	return false
 

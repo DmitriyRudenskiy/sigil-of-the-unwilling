@@ -1,0 +1,70 @@
+# Когорта выживания: почему первый замер детерминизма был неверен (2026-10-26)
+
+Два дефекта, найденные в задаче 7.3 цикла `scenario-matrix-behavior-reliability`. Файл —
+доказательство *до*; после фикса (`await` у проверки детерминизма, инвариант «один мир за
+раз», снятие осиротевших узлов перед прогоном) носитель замера —
+`survival-60-seeds.txt` (тот же каталог), а этот файл остаётся как запись причины.
+
+## 1. Инструмент терял `await`: прогоны шли параллельно
+
+`SURVIVAL_REPEAT=2`, 10 seed, один процесс (`/tmp/survival_rep2.txt`, RC=1):
+
+```
+SURVIVAL-DETERMINISM|seed=4211|runs=2|same=false|hashes=7798d256,0a833203
+SURVIVAL-DETERMINISM|seed=907|runs=2|same=false|hashes=291bd7bf,a5e378fe
+SURVIVAL-DETERMINISM|seed=13613|runs=2|same=false|hashes=611116ea,ebfbe3bd
+SURVIVAL-DETERMINISM|seed=257|runs=2|same=false|hashes=e57a6170,b03679e0
+SURVIVAL-DETERMINISM|seed=6571|runs=2|same=false|hashes=480ed6b3,d3e309ba
+SURVIVAL-DETERMINISM|seed=10007|runs=2|same=false|hashes=3107803f,d1ec67ea
+SURVIVAL-DETERMINISM|seed=1723|runs=2|same=false|hashes=ec1aa704,551a2e83
+SURVIVAL-DETERMINISM|seed=33071|runs=2|same=false|hashes=acec03d5,93f73a22
+SURVIVAL-DETERMINISM|seed=4517|runs=2|same=false|hashes=cf6462f4,75fff5fa
+SURVIVAL-ERRORS|n=3|seeds=907(бой-висяк: ни движения, ни потерь 600 кадров (ход 51, …
+```
+
+`same=false` у **всех** seed при том, что матрица (`matrix_report.gd`, 22 повтора) даёт
+`same=true`, — признак не игры, а инструмента. Причина: `_determinism_check(...)` вызывался
+без `await`, хотя внутри ждёт кадры. Проверка повтора уходила в параллель, и следующий seed
+поднимал свой мир, пока предыдущий прогон ещё шёл.
+
+## 2. Что из этого видно по следам (подмножество 907,4517, `SURVIVAL_TRACE=1`)
+
+```
+SURVIVAL-START|version=1|seeds=2|turns=60|class=fighter|subset=907,4517
+SURVIVAL-TRACE|stage=pre|seed=907|root_children=15|…автозагрузки…
+SURVIVAL-TRACE|stage=post|seed=907|root_children=16|… (+1 узел после teardown)
+SURVIVAL-SWEEP|seed=907|swept=1|DestMarker
+SURVIVAL-TRACE|stage=pre|seed=4517|root_children=17|… (+2 узла)
+SURVIVAL-SWEEP|seed=4517|swept=2|World,DestMarker
+SURVIVAL-DETERMINISM|seed=907|runs=2|same=false|hashes=a9a9cc04,d41d8cd9
+SURVIVAL-TRACE|stage=post|seed=4517|root_children=17
+SURVIVAL-SWEEP|seed=4517|swept=2|DestMarker,ScenarioPilot
+```
+
+Три факта:
+
+1. `DestMarker` переживает `queue_free()` мира и два кадра teardown:
+   `hero_visual_controller.gd:100` монтирует маркер в `get_tree().root`, если хост-карта
+   не задан, и владелец (герой) умирает вместе с миром, не сняв маркер. Тот же класс
+   дефекта, что D-255 / T-204 (узел, переживший владельца).
+2. Под `root` переживает teardown и целый `World` — когда прогон прерван (бой-висяк,
+   гибель героя), то есть «повтор того же seed» в предыдущем процессе мерился в мире,
+   где тикают два мира.
+3. `hashes=a9a9cc04,d41d8cd9`: второй хеш — `d41d8cd9…` есть md5 **пустой строки**. Строки
+   прогона не стало: параллельная проверка сняла с `root` мир ещё не завершившегося
+   прогона, его coroutine оборвался, `report()` вернул пустой снимок. Ложный вердикт
+   «seed не детерминирован» был следом этой гонки, а не свойства игры.
+
+## Что сделано в инструменте
+
+* `_determinism_check` вызывается `await`-ом (матрица делала это всегда — её строки в силе);
+* инвариант «один мир за раз» стал механизмом: `claim_single_run()` / `release_single_run()`,
+  второй прогон при живом первом даёт `SURVIVAL-ERRORS` и код 1, а не тихую гонку
+  (тест `test_tool_refuses_a_second_run_while_one_is_in_flight`, мутация S11);
+* перед каждым прогоном с `root` снимается всё, что не автозагрузка, и снесённое печатается
+  (`SURVIVAL-SWEEP`) — молча подчищать чужую утечку означало бы прятать наблюдаемый дефект;
+* `SURVIVAL_TRACE=1` печатает состав `root` до прогона и после teardown.
+
+Утечка `DestMarker` (и `World` при прерванном прогоне) — **свойство игры**, а не инструмента:
+инструмент теперь её видит и от неё защищается, носитель исправления — игра, тикет
+`T-214` (`docs/mvp/TICKETS.md`).
