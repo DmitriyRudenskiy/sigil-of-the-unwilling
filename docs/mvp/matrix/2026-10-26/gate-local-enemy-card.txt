@@ -33,3 +33,41 @@ EXIT=0
 `~/.local/share/sigil-reserve/enemy-card-d267/UX-REVIEW.md`, кадр `enemy_card.png` 1280x720,
 sha256 65bac0a1e13ac15f… Вердикт: AC/HP/«всегда» — PASS, abilities — PASS условно (у не-dnd
 юнита строки нет по правилу M1), удача — FAIL и отложена T-221.
+
+## UX-review закрытия T-221 (машинное зрение, 2026-10-26)
+
+Кадр: `~/.local/share/sigil-reserve/enemy-card-d267/enemy_card_luck.png` (1280×720,
+setup `game/tools/capture/enemy_card_open.gd` поднимает бойца с `luck = 1`,
+`luck_source = "artifact"` — тот же набор полей, что кладёт писатель).
+
+Разбор правого верхнего окна: подпись «Противник», «Кол-во: 3», «Здоровье: 20»,
+«Защита: 7», **«Удача: +1»** — строка на месте, тон и отступ совпадают с соседними
+рядами (`LabelBody` + `LabelNumber`, никаких override в кадре), за край окна текст не
+лезет, пустая строка имени — тот же артефакт синтетического стека, что и в первом кадре.
+AC-вердикт: «luck displayed» — **PASS** (был FAIL). Строка способностей у не-dnd юнита
+скрыта — без изменений, по-прежнему по правилу M1.
+
+## Гейт закрытия T-221 (local, CI не запускался)
+
+```
+Executed test cases : (3464/3464)
+Executed test suites: (365/365)
+MCP VERDICT: GREEN
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+PYTEST LEDGER: passed=81 skipped=2 failed=0 errors=0 collected=83
+READINESS-CLASSIFIER: selftest GREEN
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+EXIT=0
+```
+
+Предыдущий прогон этого среза был красным по той же причине, что D-265, но классификатор её не накрывал: readiness-таймаут внутри теста pytest записывает как <failure>, а не <error> (test_scenario_pilot_collector_wizard, 180 с). Классификатор расширен: подпись readiness читается с любым тегом; кейс добавлен в selftest (13 passed). Батарея tools/mut_battle_luck.sh: M6–M10 красные.
+
+```
+M6 — мод не читается из артефактных модов: 0 errors | 7 failures
+M7 — число без источника: 0 errors | 5 failures
+M8 — строка без источника: 0 errors | 2 failures
+M9 — знак мода потерян: 0 errors | 1 failures
+M10 — источник выводится из числа: 0 errors | 1 failures
+ИТОГ: все мутанты красные — гейт держит
+EXIT=0
+```

@@ -140,3 +140,16 @@ def test_green_exits_zero_and_is_distinct_from_yellow(tmp_path: Path) -> None:
 def test_pattern_list_is_single_sourced() -> None:
     # Расширение списка молча превращает жёлтое в свалку; каждый паттерн — замер.
     assert clf.READINESS_PATTERNS == ("игра не готова за",)
+
+def test_failure_with_readiness_signature_is_yellow_not_red(tmp_path):
+    """Readiness внутри теста (<failure>), а не в setup — та же среда (D-265)."""
+    xml = """<?xml version="1.0"?>
+<testsuites><testsuite name="p" tests="2" failures="1" errors="0">
+<testcase classname="m" name="ok"/><testcase classname="m" name="pilot">
+<failure message="godot_mcp.MCPError: игра не готова за 180 с (последняя ошибка: tool)">tb</failure>
+</testcase></testsuite></testsuites>"""
+    path = tmp_path / "j.xml"
+    path.write_text(xml, encoding="utf-8")
+    res = clf.classify([path])
+    assert res["verdict"] == clf.YELLOW, res
+    assert res["counts"]["failed"] == 1, res

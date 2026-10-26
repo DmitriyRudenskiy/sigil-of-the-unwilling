@@ -70,7 +70,13 @@ def classify(paths: list[Path]) -> dict:
                     filter(None, [node.get("message") or "", node.text or ""])
                 )
                 counts["errors" if node.tag == "error" else "failed"] += 1
-                if node.tag == "error" and _is_readiness(text):
+                # 2026-10-26: readiness ловился только как <error>. Замер гейта
+                # среза D-268: `test_scenario_pilot_collector_wizard` упал с тем же
+                # `MCPError: игра не готова за 180 с`, но pytest записал его как
+                # <failure> (таймаут наступил не в setup, а внутри теста) — и гейт
+                # покраснел, хотя классификатор должен был сказать «среда».
+                # Подпись принадлежит только readiness-гейту, тег значения не имеет.
+                if _is_readiness(text):
                     yellow.append(f"{where} :: {_first_line(text)}")
                 else:
                     red.append(f"{where} [{node.tag}] :: {_first_line(text)}")

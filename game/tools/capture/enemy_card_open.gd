@@ -22,6 +22,8 @@ var unit = BattleState.BattleUnit.new()
 unit.side = 1
 unit.alive = true
 unit.stack = stack
+unit.luck = 1
+unit.luck_source = &"artifact"
 state.defender_units.append(unit)
 var ui = scene.get_node_or_null("BattleUI")
 if ui == null:
