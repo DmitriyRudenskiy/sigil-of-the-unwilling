@@ -23,11 +23,6 @@ var _marker: DestMarker
 var _status_orb: StatusOrb
 var _parent: HeroController
 var _map_gen: MapGenerator
-## Слой-хост для глобальных оверлеев (маркер пути); инжектируется сценой.
-var _map_root: Node = null
-
-func set_marker_host(host: Node) -> void:
-	_map_root = host
 
 func get_avatar_texture() -> Texture2D:
 	return _avatar_tex
@@ -95,14 +90,34 @@ func set_running(enabled: bool) -> void:
 func setup_path_visual() -> void:
 	if _marker == null:
 		_marker = DestMarkerScene.instantiate()
-		# Маркер — глобальный оверлей пути: монтируется в слой, объявленный
-		# сценой (контракт @onready), а не находится обходом дерева вверх.
-		var marker_host: Node = _map_root if _map_root != null else get_tree().root
-		marker_host.add_child(_marker)
+		# Маркер — глобальный оверлей пути: он рисуется поверх карты и не должен ехать
+		# вместе с деревом героя, поэтому монтируется под `root` сцены. T-214: раньше
+		# выбор хоста зависел от инжекции `set_marker_host`, у которой не было ни одного
+		# вызова, — всегда срабатывала ветка `root`, а сироту под `root` не снимал никто.
+		# Мёртвый сетёр снят вместе с веткой; если слой оверлеев появится, он возвращается
+		# вместе с обязательством на снятие (`teardown_path_visual`).
+		get_tree().root.add_child(_marker)
 	if _status_orb == null:
 		_status_orb = StatusOrbScene.instantiate()
 		_status_orb.name = "StatusOrb"
 		_parent.add_child(_status_orb)
+
+## Владение оверлеем: освобождён или снят с дерева герой (`HeroLifecycleSystem._detach_hero`)
+## — маркер уходит вместе с ним. Молча висеть под `root` он не имеет права: в когорте
+## выживания это была утечка, которую каждый прогон убирал измерительный инструмент (T-214).
+func teardown_path_visual() -> void:
+	if _marker != null and is_instance_valid(_marker):
+		# Освобождение отложенное: `teardown_path_visual` вызывается из `_exit_tree`, а в
+		# момент, когда дерево занято пересборкой детей, `remove_child()`/`free()`
+		# запрещены (Godot прямо советует `remove_child.call_deferred`; `free()` поверх
+		# неснятого родителя ронял процесс на SIGSEGV).
+		_marker.queue_free()
+	_marker = null
+
+func _exit_tree() -> void:
+	# `_exit_tree` срабатывает и при `free()`, и при `remove_child()` героя — ровно те
+	# два пути, на которых маркер оставался сиротой.
+	teardown_path_visual()
 
 func draw_path(_pts: Array[Vector2i]) -> void:
 	pass

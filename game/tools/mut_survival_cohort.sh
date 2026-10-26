@@ -8,7 +8,8 @@
 # не сворачивает прогон раньше срока (S4), взаимодействие считаются только успешные
 # действия (S5, S6), пороги когорты не превращаются в «ok» (S7) и не теряют требование
 # взаимодействия (S8), причина гибели — первая, а не последняя (S9), набор seed
-# остаётся множеством (S10), параллельный прогон того же процесса отвергается (S11).
+# остаётся множеством (S10), параллельный прогон того же процесса отвергается (S11),
+# оверлей-маркер обязано снимать с root вместе с героем (S12, T-214).
 #
 # Запуск: bash game/tools/mut_survival_cohort.sh   (из корня репо, дерево чистое)
 set -u
@@ -19,6 +20,8 @@ PROBE=game/scripts/probe/balance_probe.gd
 PILOT=game/scripts/probe/ScenarioPilot.gd
 TARGETS=game/scripts/data/scenario_targets.gd
 REPORT=game/tools/survival_report.gd
+HEROVIS=game/scripts/entities/hero_visual_controller.gd
+MARKER_TEST=res://tests/unit/entities/test_dest_marker_ownership.gd
 FAILED=0
 
 # На шаренной машине нельзя запускать второй Godot, пока жив первый (протокол зависших
@@ -38,12 +41,18 @@ wait_for_godot() {
 run() {
 	local name="$1"
 	local out
+	# Третьим аргументом можно подменить тест: S12 проверяет не когорту, а владение
+	# оверлеем (тест маркера), и краснеть должен именно он.
+	local -a suite_list=("${TESTS[@]}")
+	if [ -n "${3:-}" ]; then
+		suite_list=(-a "$3")
+	fi
 	# Классификатор читает ВСЮ тройку «N test cases | E errors | F failures»: прогон, в
 	# котором не нашлось ни одного теста (конфликт с чужим Godot-процессом на шаренной
 	# машине), обязан считаться нечитаемым, а не зелёным.
 	wait_for_godot
 	out=$(cd game && timeout 600 "$G" --headless --path . -s addons/gdunit4/bin/GdUnitCmdTool.gd \
-		--ignoreHeadlessMode -c "${TESTS[@]}" 2>&1 | grep -oE "[0-9]+ test cases \| [0-9]+ errors \| [0-9]+ failures" | tail -1)
+		--ignoreHeadlessMode -c "${suite_list[@]}" 2>&1 | grep -oE "[0-9]+ test cases \| [0-9]+ errors \| [0-9]+ failures" | tail -1)
 	echo "$name: $out"
 	case "$out" in
 	"" | "0 test cases |"*)
@@ -112,6 +121,11 @@ run S10 "$TARGETS"
 # S11 — инвариант «один мир за раз» выключен: параллельные прогоны снова молчат.
 mutate "$REPORT" 's = s.replace("if _run_in_flight:", "if false:", 1)'
 run S11 "$REPORT"
+
+# S12 — владение оверлеем снято: герой умер, а его маркер цели остался висеть под root
+# (T-214 — именно так когорта выживания каждый прогон отдавала осиротевший DestMarker).
+mutate "$HEROVIS" 's = s.replace("\tteardown_path_visual()\n", "\tpass\n", 1)'
+run S12 "$HEROVIS" "$MARKER_TEST"
 
 echo "ИТОГ: $([ "$FAILED" -eq 0 ] && echo "все мутанты красные (гейт держит)" || echo "ЕСТЬ ЗЕЛЁНЫЕ — гейт дырявый")"
 git status --porcelain | grep -v "^??" || echo "дерево чистое"
