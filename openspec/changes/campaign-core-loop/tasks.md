@@ -21,10 +21,11 @@
 
 - [x] 3.1 AFK-капы per-ресурс per-рейд: еда ≤40%, железо/оружие ≤30% (Q-M58→(в), D-189) — реализация в `raid-pressure-system` (T-127), здесь — только требование. *(Верифицировано: реализовано в raid-pressure-system 2.1 — `loss_caps` {еда 0.4, дерево/железо 0.3} + `loss_cap_for(resource)`; GdUnit 2672/0.)*
 - [x] 3.2 Голод: ёмкость 10 еды, расход 1/персонаж/переход (R7, Q-M75→(б)) — `SupplySystem` (party-characters 3.2); голод → −2 к атакам — проводка в боевой движок: `hunger_penalty` в `make_combatant` + margin в `_strike` (P-4); проводка `supply_system.attack_penalty()` → герой в `_request_battle` (тесты: `test_campaign_battle.gd` ×2, `test_campaign_wiring.gd: test_hunger_penalty_wired_into_battle`)
-- [ ] 3.3 Инвариант «≥2 доступных глагола в player-фазе» — smoke-чек-лист в `mvp-ui-flow`
+- [x] 3.3 Инвариант «≥2 доступных глагола в player-фазе» — smoke-чек-лист в `mvp-ui-flow`
 
 ## 4. Верификация
 
 - [x] 4.1 GdUnit4: порядок фаз (production после threats), no-op caravans/diplomacy. *(test_turn_driver.gd: test_phase_order_mandate, test_post_mvp_slots_noop.)*
 - [x] 4.2 GdUnit4: 100 повторов seed+actions → byte-identical state. *(test_turn_driver.gd: test_i1_determinism_100_repeats_byte_identical.)*
 - [x] 4.3 GdUnit4: статус кампании (wipe → defeat; голод сам по себе не defeat; victory — ход 21 + запас > 0, wipe в ходу 21 → defeat, не victory). *(test_turn_driver.gd: test_wipe_defeat, test_defeat_idempotent, test_hunger_alone_not_defeat, test_defeat_status_serialized; test_campaign_victory.gd (14, T-071, 2026-10-21).)*
+**Исход 2026-10-26 (срез агента).** Носитель — пункт smoke-чек-листа в `mvp-ui-flow/tasks.md` 5.4 (там же формулировка прохода и граница). Задача закрывается тем, чем была поставлена: инвариант переведён из «идеи про дизайн» в проверяемый пункт смока. Машинного GdUnit-ассерта под ним нет и появляться в этой задаче не должно: 5.4 — playtest-смок, отложенный по K-M8, поэтому закрывать вместе с ней 3.3 нельзя (иначе инвариант «закрылся» бы вместе с непроверенным смоком).
