@@ -143,6 +143,25 @@ func test_item_covers_exactly_its_cells() -> void:
 			ArtifactInventoryScreen.item_rect(origin, art.resolved_cells(), rot, pitch).size)
 
 
+## Клетки и предметы обязаны делить один шаг решётки (T-255).
+## На кадре рамка предмета была шире своих клеток: клетки расставлялись
+## пиксельными офсетами от размера макета (и не сжимались ниже текстуры),
+## а оверлеи считались долями от фактического `Bag`.
+func test_cells_and_items_share_one_pitch() -> void:
+	var screen := await _mk_screen(true)
+	var pitch: Vector2 = screen._bag_pitch()
+	for row in ArtifactInventoryScreen.GRID_ROWS:
+		for col in ArtifactInventoryScreen.GRID_COLS:
+			var cell := _cell(screen, col, row)
+			# Клетка = ровно своя ячейка решётки, без пиксельных желобов:
+			# их рисует плитка, иначе долевой и пиксельный отступы разойдутся.
+			var origin := Vector2(col, row) * pitch
+			assert_float(cell.position.x).is_equal_approx(origin.x, 0.5)
+			assert_float(cell.position.y).is_equal_approx(origin.y, 0.5)
+			assert_float(cell.size.x).is_equal_approx(pitch.x, 0.5)
+			assert_float(cell.size.y).is_equal_approx(pitch.y, 0.5)
+
+
 func test_tall_item_is_rotated_to_fit() -> void:
 	var screen := await _mk_screen(true)
 	var inv: HeroInventory = _hero.inventory

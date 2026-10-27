@@ -47,6 +47,10 @@ func _add_node(name: String, typ: String, parent_path: String, extra: String = "
 	var pp := parent_path
 	if pp != "" and pp != "." and not pp.begins_with("Center"):
 		pp = "Center/Window/" + pp
+	if typ == "TextureRect" and "expand_mode" not in extra:
+		# KEEP_SIZE по умолчанию = минимум поперек текстуры: клетка сумки из
+		# плитки 96 px не могла сжаться до своих 76 и вылезала за поле (T-255).
+		extra += "expand_mode = 1\n"
 	var line := "[node name=\"" + name + "\" type=\"" + typ + "\""
 	if true:
 		line += " unique_id=" + str(_u)
@@ -95,8 +99,15 @@ func _f(v: float) -> String:
 	return "%.6f" % v
 
 ## Узел-блок из таблицы: якоря от `parent`, опциональный фон-плитка.
-func _block(node: String, parent: String, uid: int, bg: String = "") -> void:
-	_add_node(node, "Control", parent, _anch(_L.BLOCKS[node], parent), uid)
+func _block(
+		node: String, parent: String, uid: int, bg: String = "", inset: int = 0) -> void:
+	# inset — внутренний отступ зоны в px: зона, вставшая впритык к границе
+	# камня, читается как наложение на стык колонок (T-257).
+	var props := _anch(_L.BLOCKS[node], parent)
+	if inset > 0:
+		props += "offset_left = %d\noffset_top = %d\noffset_right = %d\noffset_bottom = %d\n" % [
+			-inset, -inset, inset, inset]
+	_add_node(node, "Control", parent, props, uid)
 	uid += 1
 	if bg != "":
 		# Поля 9-slice — из MANIFEST.json (D-275): у пергамента они 48 px, у камня 40,
@@ -261,12 +272,18 @@ func _build() -> void:
 	var pitch := Vector2(bag.size.x / _L.GRID_COLS, bag.size.y / _L.GRID_ROWS)
 	for row in _L.GRID_ROWS:
 		for col in _L.GRID_COLS:
-			var p0 := Vector2(col * pitch.x, row * pitch.y)
+			# Доли той же решётки, что у предметов (`origin * шаг`): пиксельные
+			# офсеты от размера макета перестают совпадать с полем в любом другом
+			# окне, и подсветка врёт о том, какие клетки заняты (T-255).
+			# Желоба между клетками — дело рисунка плитки, а не разметки:
+			# долевой желоб растёт вместе с окном, а отступ предмета (`ITEM_GAP`)
+			# постоянен в px, и на любом размере, кроме макетного, они расходятся.
 			_add_node(
 				"GridCell_%d_%d" % [col, row], "TextureRect", stone + "/Bag",
-				"offset_left = %s\noffset_top = %s\noffset_right = %s\noffset_bottom = %s\n" % [
-					_f(p0.x), _f(p0.y), _f(p0.x + pitch.x - _L.CELL_GAP),
-					_f(p0.y + pitch.y - _L.CELL_GAP)]
+				"anchor_left = %s\nanchor_top = %s\nanchor_right = %s\nanchor_bottom = %s\n" % [
+					_f(float(col) / _L.GRID_COLS), _f(float(row) / _L.GRID_ROWS),
+					_f(float(col + 1) / _L.GRID_COLS),
+					_f(float(row + 1) / _L.GRID_ROWS)]
 				+ "texture = " + _kit("cell_grid") + "\nstretch_mode = 5\nmouse_filter = 2\n", uid)
 			uid += 1
 	_add_node(
@@ -283,7 +300,7 @@ func _build() -> void:
 		uid += 1
 
 	# — зона переноса A: мана и школа (камня макета не касаются) -------------
-	_block("BandMana", "Sheet", uid)
+	_block("BandMana", "Sheet", uid, "", 14)
 	uid += 1
 	var band := "Sheet/BandMana"
 	_add_node("Mana_lbl", "Label", band,
@@ -309,7 +326,7 @@ func _build() -> void:
 	uid += 1
 
 	# — зона переноса C: навыки и построения --------------------------------
-	_block("BandSkills", "Sheet", uid)
+	_block("BandSkills", "Sheet", uid, "", 14)
 	uid += 1
 	var bs := "Sheet/BandSkills"
 	_add_node("Skills_lbl", "Label", bs,

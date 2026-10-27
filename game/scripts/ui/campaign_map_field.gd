@@ -82,6 +82,12 @@ func selected_region() -> String:
 	return _selected
 
 
+## Регион отряда (маркер на поле). Читает миникарта, чтобы не заводить второго
+## носителя позиции (D-281).
+func hero_region() -> String:
+	return "" if _map == null else _map.hero_region
+
+
 ## Регионы, которые поле показывает открытыми — порядок и состав обязан
 ## совпадать с носителем (тест сверяет с `RegionMap.open_regions`).
 func visible_regions() -> Array:
@@ -111,6 +117,17 @@ func select_region(region: String) -> void:
 	var card := _card_for(region)
 	queue_redraw()
 	region_selected.emit(card)
+
+
+## Сброс выбора (четвёртый тайл левой колонки, D-281 задача 3.7): «пустого
+## региона» в носителе нет, поэтому сброс — отдельное действие, а не
+## `select_region("")`, который обязан отвергнуть несуществующий id.
+func clear_selection() -> void:
+	if _selected == "":
+		return
+	_selected = ""
+	queue_redraw()
+	region_selected.emit({})
 
 
 ## Карточка региона из модели экрана + причины движения до него. Отдельная

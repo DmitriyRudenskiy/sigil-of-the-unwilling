@@ -78,6 +78,7 @@ anchor_bottom = 0.383051
 texture = ExtResource("13")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -89,6 +90,7 @@ anchor_bottom = 0.383051
 texture = ExtResource("22")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -136,6 +138,7 @@ anchor_bottom = 0.529944
 texture = ExtResource("17")
 stretch_mode = 1
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -147,6 +150,7 @@ anchor_bottom = 0.655367
 texture = ExtResource("17")
 stretch_mode = 1
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -155,6 +159,7 @@ anchor_left = 0.032787
 anchor_top = 0.542373
 anchor_right = 0.094262
 anchor_bottom = 0.576271
+expand_mode = 1
 
 
 
@@ -180,6 +185,7 @@ anchor_left = 0.520492
 anchor_top = 0.542373
 anchor_right = 0.581967
 anchor_bottom = 0.576271
+expand_mode = 1
 
 
 
@@ -205,6 +211,7 @@ anchor_left = 0.032787
 anchor_top = 0.595480
 anchor_right = 0.094262
 anchor_bottom = 0.629379
+expand_mode = 1
 
 
 
@@ -230,6 +237,7 @@ anchor_left = 0.520492
 anchor_top = 0.595480
 anchor_right = 0.581967
 anchor_bottom = 0.629379
+expand_mode = 1
 
 
 
@@ -259,6 +267,7 @@ texture = ExtResource("24")
 stretch_mode = 1
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -269,6 +278,7 @@ anchor_right = 0.09
 anchor_bottom = 0.9
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -289,6 +299,7 @@ texture = ExtResource("24")
 stretch_mode = 1
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -299,6 +310,7 @@ anchor_right = 0.09
 anchor_bottom = 0.9
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -319,6 +331,7 @@ texture = ExtResource("24")
 stretch_mode = 1
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -329,6 +342,7 @@ anchor_right = 0.09
 anchor_bottom = 0.9
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -349,6 +363,7 @@ texture = ExtResource("24")
 stretch_mode = 1
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -359,6 +374,7 @@ anchor_right = 0.09
 anchor_bottom = 0.9
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -379,6 +395,7 @@ texture = ExtResource("24")
 stretch_mode = 1
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -389,6 +406,7 @@ anchor_right = 0.09
 anchor_bottom = 0.9
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -409,6 +427,7 @@ texture = ExtResource("24")
 stretch_mode = 1
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -419,6 +438,7 @@ anchor_right = 0.09
 anchor_bottom = 0.9
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -439,6 +459,7 @@ texture = ExtResource("24")
 stretch_mode = 1
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -449,6 +470,7 @@ anchor_right = 0.09
 anchor_bottom = 0.9
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -490,6 +512,7 @@ anchor_bottom = 0.555932
 texture = ExtResource("21")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -508,6 +531,7 @@ anchor_bottom = 0.100000
 texture = ExtResource("14")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -518,6 +542,7 @@ anchor_right = 0.452055
 anchor_bottom = 0.093220
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -529,6 +554,7 @@ anchor_bottom = 0.115254
 texture = ExtResource("14")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -539,6 +565,7 @@ anchor_right = 0.645330
 anchor_bottom = 0.108475
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -550,6 +577,7 @@ anchor_bottom = 0.178305
 texture = ExtResource("14")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -560,6 +588,7 @@ anchor_right = 0.250809
 anchor_bottom = 0.171525
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -571,6 +600,7 @@ anchor_bottom = 0.178305
 texture = ExtResource("14")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -581,6 +611,7 @@ anchor_right = 0.452055
 anchor_bottom = 0.171525
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -592,6 +623,7 @@ anchor_bottom = 0.188475
 texture = ExtResource("14")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -602,6 +634,7 @@ anchor_right = 0.685181
 anchor_bottom = 0.181695
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -613,6 +646,7 @@ anchor_bottom = 0.269831
 texture = ExtResource("14")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -623,6 +657,7 @@ anchor_right = 0.452055
 anchor_bottom = 0.263051
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -634,6 +669,7 @@ anchor_bottom = 0.269831
 texture = ExtResource("14")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -644,6 +680,7 @@ anchor_right = 0.685181
 anchor_bottom = 0.263051
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -655,6 +692,7 @@ anchor_bottom = 0.296271
 texture = ExtResource("14")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -665,6 +703,7 @@ anchor_right = 0.204981
 anchor_bottom = 0.289492
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -676,6 +715,7 @@ anchor_bottom = 0.351186
 texture = ExtResource("14")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -686,6 +726,7 @@ anchor_right = 0.685181
 anchor_bottom = 0.344407
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -697,6 +738,7 @@ anchor_bottom = 0.361356
 texture = ExtResource("14")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -707,6 +749,7 @@ anchor_right = 0.274720
 anchor_bottom = 0.354576
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -718,6 +761,7 @@ anchor_bottom = 0.400000
 texture = ExtResource("14")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -728,6 +772,7 @@ anchor_right = 0.585554
 anchor_bottom = 0.393220
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -739,6 +784,7 @@ anchor_bottom = 0.438644
 texture = ExtResource("14")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -749,6 +795,7 @@ anchor_right = 0.346451
 anchor_bottom = 0.431864
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -760,6 +807,7 @@ anchor_bottom = 0.479322
 texture = ExtResource("14")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -770,6 +818,7 @@ anchor_right = 0.466003
 anchor_bottom = 0.472542
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -781,6 +830,7 @@ anchor_bottom = 0.501695
 texture = ExtResource("14")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -791,6 +841,7 @@ anchor_right = 0.204981
 anchor_bottom = 0.494915
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -802,6 +853,7 @@ anchor_bottom = 0.501695
 texture = ExtResource("14")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -812,6 +864,7 @@ anchor_right = 0.725031
 anchor_bottom = 0.494915
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -823,6 +876,7 @@ anchor_bottom = 0.554576
 texture = ExtResource("14")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -833,6 +887,7 @@ anchor_right = 0.521793
 anchor_bottom = 0.547797
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -846,552 +901,602 @@ mouse_filter = 2
 
 
 [node name="GridCell_0_0" type="TextureRect" unique_id=1084 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 0.000000
-offset_top = 0.000000
-offset_right = 68.000000
-offset_bottom = 66.800003
+anchor_left = 0.000000
+anchor_top = 0.000000
+anchor_right = 0.100000
+anchor_bottom = 0.200000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_1_0" type="TextureRect" unique_id=1085 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 72.000000
-offset_top = 0.000000
-offset_right = 140.000000
-offset_bottom = 66.800003
+anchor_left = 0.100000
+anchor_top = 0.000000
+anchor_right = 0.200000
+anchor_bottom = 0.200000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_2_0" type="TextureRect" unique_id=1086 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 144.000000
-offset_top = 0.000000
-offset_right = 212.000000
-offset_bottom = 66.800003
+anchor_left = 0.200000
+anchor_top = 0.000000
+anchor_right = 0.300000
+anchor_bottom = 0.200000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_3_0" type="TextureRect" unique_id=1087 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 216.000000
-offset_top = 0.000000
-offset_right = 284.000000
-offset_bottom = 66.800003
+anchor_left = 0.300000
+anchor_top = 0.000000
+anchor_right = 0.400000
+anchor_bottom = 0.200000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_4_0" type="TextureRect" unique_id=1088 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 288.000000
-offset_top = 0.000000
-offset_right = 356.000000
-offset_bottom = 66.800003
+anchor_left = 0.400000
+anchor_top = 0.000000
+anchor_right = 0.500000
+anchor_bottom = 0.200000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_5_0" type="TextureRect" unique_id=1089 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 360.000000
-offset_top = 0.000000
-offset_right = 428.000000
-offset_bottom = 66.800003
+anchor_left = 0.500000
+anchor_top = 0.000000
+anchor_right = 0.600000
+anchor_bottom = 0.200000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_6_0" type="TextureRect" unique_id=1090 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 432.000000
-offset_top = 0.000000
-offset_right = 500.000000
-offset_bottom = 66.800003
+anchor_left = 0.600000
+anchor_top = 0.000000
+anchor_right = 0.700000
+anchor_bottom = 0.200000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_7_0" type="TextureRect" unique_id=1091 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 504.000000
-offset_top = 0.000000
-offset_right = 572.000000
-offset_bottom = 66.800003
+anchor_left = 0.700000
+anchor_top = 0.000000
+anchor_right = 0.800000
+anchor_bottom = 0.200000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_8_0" type="TextureRect" unique_id=1092 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 576.000000
-offset_top = 0.000000
-offset_right = 644.000000
-offset_bottom = 66.800003
+anchor_left = 0.800000
+anchor_top = 0.000000
+anchor_right = 0.900000
+anchor_bottom = 0.200000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_9_0" type="TextureRect" unique_id=1093 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 648.000000
-offset_top = 0.000000
-offset_right = 716.000000
-offset_bottom = 66.800003
+anchor_left = 0.900000
+anchor_top = 0.000000
+anchor_right = 1.000000
+anchor_bottom = 0.200000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_0_1" type="TextureRect" unique_id=1094 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 0.000000
-offset_top = 70.800003
-offset_right = 68.000000
-offset_bottom = 137.600006
+anchor_left = 0.000000
+anchor_top = 0.200000
+anchor_right = 0.100000
+anchor_bottom = 0.400000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_1_1" type="TextureRect" unique_id=1095 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 72.000000
-offset_top = 70.800003
-offset_right = 140.000000
-offset_bottom = 137.600006
+anchor_left = 0.100000
+anchor_top = 0.200000
+anchor_right = 0.200000
+anchor_bottom = 0.400000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_2_1" type="TextureRect" unique_id=1096 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 144.000000
-offset_top = 70.800003
-offset_right = 212.000000
-offset_bottom = 137.600006
+anchor_left = 0.200000
+anchor_top = 0.200000
+anchor_right = 0.300000
+anchor_bottom = 0.400000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_3_1" type="TextureRect" unique_id=1097 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 216.000000
-offset_top = 70.800003
-offset_right = 284.000000
-offset_bottom = 137.600006
+anchor_left = 0.300000
+anchor_top = 0.200000
+anchor_right = 0.400000
+anchor_bottom = 0.400000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_4_1" type="TextureRect" unique_id=1098 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 288.000000
-offset_top = 70.800003
-offset_right = 356.000000
-offset_bottom = 137.600006
+anchor_left = 0.400000
+anchor_top = 0.200000
+anchor_right = 0.500000
+anchor_bottom = 0.400000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_5_1" type="TextureRect" unique_id=1099 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 360.000000
-offset_top = 70.800003
-offset_right = 428.000000
-offset_bottom = 137.600006
+anchor_left = 0.500000
+anchor_top = 0.200000
+anchor_right = 0.600000
+anchor_bottom = 0.400000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_6_1" type="TextureRect" unique_id=1100 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 432.000000
-offset_top = 70.800003
-offset_right = 500.000000
-offset_bottom = 137.600006
+anchor_left = 0.600000
+anchor_top = 0.200000
+anchor_right = 0.700000
+anchor_bottom = 0.400000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_7_1" type="TextureRect" unique_id=1101 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 504.000000
-offset_top = 70.800003
-offset_right = 572.000000
-offset_bottom = 137.600006
+anchor_left = 0.700000
+anchor_top = 0.200000
+anchor_right = 0.800000
+anchor_bottom = 0.400000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_8_1" type="TextureRect" unique_id=1102 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 576.000000
-offset_top = 70.800003
-offset_right = 644.000000
-offset_bottom = 137.600006
+anchor_left = 0.800000
+anchor_top = 0.200000
+anchor_right = 0.900000
+anchor_bottom = 0.400000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_9_1" type="TextureRect" unique_id=1103 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 648.000000
-offset_top = 70.800003
-offset_right = 716.000000
-offset_bottom = 137.600006
+anchor_left = 0.900000
+anchor_top = 0.200000
+anchor_right = 1.000000
+anchor_bottom = 0.400000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_0_2" type="TextureRect" unique_id=1104 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 0.000000
-offset_top = 141.600006
-offset_right = 68.000000
-offset_bottom = 208.400009
+anchor_left = 0.000000
+anchor_top = 0.400000
+anchor_right = 0.100000
+anchor_bottom = 0.600000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_1_2" type="TextureRect" unique_id=1105 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 72.000000
-offset_top = 141.600006
-offset_right = 140.000000
-offset_bottom = 208.400009
+anchor_left = 0.100000
+anchor_top = 0.400000
+anchor_right = 0.200000
+anchor_bottom = 0.600000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_2_2" type="TextureRect" unique_id=1106 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 144.000000
-offset_top = 141.600006
-offset_right = 212.000000
-offset_bottom = 208.400009
+anchor_left = 0.200000
+anchor_top = 0.400000
+anchor_right = 0.300000
+anchor_bottom = 0.600000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_3_2" type="TextureRect" unique_id=1107 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 216.000000
-offset_top = 141.600006
-offset_right = 284.000000
-offset_bottom = 208.400009
+anchor_left = 0.300000
+anchor_top = 0.400000
+anchor_right = 0.400000
+anchor_bottom = 0.600000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_4_2" type="TextureRect" unique_id=1108 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 288.000000
-offset_top = 141.600006
-offset_right = 356.000000
-offset_bottom = 208.400009
+anchor_left = 0.400000
+anchor_top = 0.400000
+anchor_right = 0.500000
+anchor_bottom = 0.600000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_5_2" type="TextureRect" unique_id=1109 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 360.000000
-offset_top = 141.600006
-offset_right = 428.000000
-offset_bottom = 208.400009
+anchor_left = 0.500000
+anchor_top = 0.400000
+anchor_right = 0.600000
+anchor_bottom = 0.600000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_6_2" type="TextureRect" unique_id=1110 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 432.000000
-offset_top = 141.600006
-offset_right = 500.000000
-offset_bottom = 208.400009
+anchor_left = 0.600000
+anchor_top = 0.400000
+anchor_right = 0.700000
+anchor_bottom = 0.600000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_7_2" type="TextureRect" unique_id=1111 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 504.000000
-offset_top = 141.600006
-offset_right = 572.000000
-offset_bottom = 208.400009
+anchor_left = 0.700000
+anchor_top = 0.400000
+anchor_right = 0.800000
+anchor_bottom = 0.600000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_8_2" type="TextureRect" unique_id=1112 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 576.000000
-offset_top = 141.600006
-offset_right = 644.000000
-offset_bottom = 208.400009
+anchor_left = 0.800000
+anchor_top = 0.400000
+anchor_right = 0.900000
+anchor_bottom = 0.600000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_9_2" type="TextureRect" unique_id=1113 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 648.000000
-offset_top = 141.600006
-offset_right = 716.000000
-offset_bottom = 208.400009
+anchor_left = 0.900000
+anchor_top = 0.400000
+anchor_right = 1.000000
+anchor_bottom = 0.600000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_0_3" type="TextureRect" unique_id=1114 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 0.000000
-offset_top = 212.400009
-offset_right = 68.000000
-offset_bottom = 279.200012
+anchor_left = 0.000000
+anchor_top = 0.600000
+anchor_right = 0.100000
+anchor_bottom = 0.800000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_1_3" type="TextureRect" unique_id=1115 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 72.000000
-offset_top = 212.400009
-offset_right = 140.000000
-offset_bottom = 279.200012
+anchor_left = 0.100000
+anchor_top = 0.600000
+anchor_right = 0.200000
+anchor_bottom = 0.800000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_2_3" type="TextureRect" unique_id=1116 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 144.000000
-offset_top = 212.400009
-offset_right = 212.000000
-offset_bottom = 279.200012
+anchor_left = 0.200000
+anchor_top = 0.600000
+anchor_right = 0.300000
+anchor_bottom = 0.800000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_3_3" type="TextureRect" unique_id=1117 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 216.000000
-offset_top = 212.400009
-offset_right = 284.000000
-offset_bottom = 279.200012
+anchor_left = 0.300000
+anchor_top = 0.600000
+anchor_right = 0.400000
+anchor_bottom = 0.800000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_4_3" type="TextureRect" unique_id=1118 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 288.000000
-offset_top = 212.400009
-offset_right = 356.000000
-offset_bottom = 279.200012
+anchor_left = 0.400000
+anchor_top = 0.600000
+anchor_right = 0.500000
+anchor_bottom = 0.800000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_5_3" type="TextureRect" unique_id=1119 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 360.000000
-offset_top = 212.400009
-offset_right = 428.000000
-offset_bottom = 279.200012
+anchor_left = 0.500000
+anchor_top = 0.600000
+anchor_right = 0.600000
+anchor_bottom = 0.800000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_6_3" type="TextureRect" unique_id=1120 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 432.000000
-offset_top = 212.400009
-offset_right = 500.000000
-offset_bottom = 279.200012
+anchor_left = 0.600000
+anchor_top = 0.600000
+anchor_right = 0.700000
+anchor_bottom = 0.800000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_7_3" type="TextureRect" unique_id=1121 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 504.000000
-offset_top = 212.400009
-offset_right = 572.000000
-offset_bottom = 279.200012
+anchor_left = 0.700000
+anchor_top = 0.600000
+anchor_right = 0.800000
+anchor_bottom = 0.800000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_8_3" type="TextureRect" unique_id=1122 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 576.000000
-offset_top = 212.400009
-offset_right = 644.000000
-offset_bottom = 279.200012
+anchor_left = 0.800000
+anchor_top = 0.600000
+anchor_right = 0.900000
+anchor_bottom = 0.800000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_9_3" type="TextureRect" unique_id=1123 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 648.000000
-offset_top = 212.400009
-offset_right = 716.000000
-offset_bottom = 279.200012
+anchor_left = 0.900000
+anchor_top = 0.600000
+anchor_right = 1.000000
+anchor_bottom = 0.800000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_0_4" type="TextureRect" unique_id=1124 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 0.000000
-offset_top = 283.200012
-offset_right = 68.000000
-offset_bottom = 350.000015
+anchor_left = 0.000000
+anchor_top = 0.800000
+anchor_right = 0.100000
+anchor_bottom = 1.000000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_1_4" type="TextureRect" unique_id=1125 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 72.000000
-offset_top = 283.200012
-offset_right = 140.000000
-offset_bottom = 350.000015
+anchor_left = 0.100000
+anchor_top = 0.800000
+anchor_right = 0.200000
+anchor_bottom = 1.000000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_2_4" type="TextureRect" unique_id=1126 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 144.000000
-offset_top = 283.200012
-offset_right = 212.000000
-offset_bottom = 350.000015
+anchor_left = 0.200000
+anchor_top = 0.800000
+anchor_right = 0.300000
+anchor_bottom = 1.000000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_3_4" type="TextureRect" unique_id=1127 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 216.000000
-offset_top = 283.200012
-offset_right = 284.000000
-offset_bottom = 350.000015
+anchor_left = 0.300000
+anchor_top = 0.800000
+anchor_right = 0.400000
+anchor_bottom = 1.000000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_4_4" type="TextureRect" unique_id=1128 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 288.000000
-offset_top = 283.200012
-offset_right = 356.000000
-offset_bottom = 350.000015
+anchor_left = 0.400000
+anchor_top = 0.800000
+anchor_right = 0.500000
+anchor_bottom = 1.000000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_5_4" type="TextureRect" unique_id=1129 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 360.000000
-offset_top = 283.200012
-offset_right = 428.000000
-offset_bottom = 350.000015
+anchor_left = 0.500000
+anchor_top = 0.800000
+anchor_right = 0.600000
+anchor_bottom = 1.000000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_6_4" type="TextureRect" unique_id=1130 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 432.000000
-offset_top = 283.200012
-offset_right = 500.000000
-offset_bottom = 350.000015
+anchor_left = 0.600000
+anchor_top = 0.800000
+anchor_right = 0.700000
+anchor_bottom = 1.000000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_7_4" type="TextureRect" unique_id=1131 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 504.000000
-offset_top = 283.200012
-offset_right = 572.000000
-offset_bottom = 350.000015
+anchor_left = 0.700000
+anchor_top = 0.800000
+anchor_right = 0.800000
+anchor_bottom = 1.000000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_8_4" type="TextureRect" unique_id=1132 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 576.000000
-offset_top = 283.200012
-offset_right = 644.000000
-offset_bottom = 350.000015
+anchor_left = 0.800000
+anchor_top = 0.800000
+anchor_right = 0.900000
+anchor_bottom = 1.000000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
 [node name="GridCell_9_4" type="TextureRect" unique_id=1133 parent="Center/Window/Sheet/Stone/Bag"]
-offset_left = 648.000000
-offset_top = 283.200012
-offset_right = 716.000000
-offset_bottom = 350.000015
+anchor_left = 0.900000
+anchor_top = 0.800000
+anchor_right = 1.000000
+anchor_bottom = 1.000000
 texture = ExtResource("15")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -1425,6 +1530,10 @@ anchor_left = 0.315000
 anchor_top = 0.037778
 anchor_right = 0.386875
 anchor_bottom = 0.562222
+offset_left = -14
+offset_top = -14
+offset_right = 14
+offset_bottom = 14
 
 
 
@@ -1453,6 +1562,7 @@ anchor_bottom = 0.145
 texture = ExtResource("18")
 stretch_mode = 1
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -1464,6 +1574,7 @@ anchor_bottom = 0.145
 texture = ExtResource("19")
 stretch_mode = 0
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -1488,6 +1599,10 @@ anchor_left = 0.716875
 anchor_top = 0.037778
 anchor_right = 0.816875
 anchor_bottom = 0.562222
+offset_left = -14
+offset_top = -14
+offset_right = 14
+offset_bottom = 14
 
 
 
@@ -1515,6 +1630,7 @@ anchor_right = 0.2
 anchor_bottom = 0.85
 stretch_mode = 6
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -1543,6 +1659,7 @@ anchor_right = 0.2
 anchor_bottom = 0.85
 stretch_mode = 6
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -1571,6 +1688,7 @@ anchor_right = 0.2
 anchor_bottom = 0.85
 stretch_mode = 6
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -1599,6 +1717,7 @@ anchor_right = 0.2
 anchor_bottom = 0.85
 stretch_mode = 6
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -1627,6 +1746,7 @@ anchor_right = 0.2
 anchor_bottom = 0.85
 stretch_mode = 6
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -1655,6 +1775,7 @@ anchor_right = 0.2
 anchor_bottom = 0.85
 stretch_mode = 6
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -1762,6 +1883,7 @@ anchor_bottom = 0.758824
 texture = ExtResource("23")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -1773,6 +1895,7 @@ anchor_bottom = 0.676471
 stretch_mode = 5
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -1812,6 +1935,7 @@ anchor_bottom = 0.811765
 texture = ExtResource("18")
 stretch_mode = 1
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -1823,6 +1947,7 @@ anchor_bottom = 0.976471
 texture = ExtResource("18")
 stretch_mode = 1
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -1843,6 +1968,7 @@ anchor_bottom = 0.758824
 texture = ExtResource("23")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -1854,6 +1980,7 @@ anchor_bottom = 0.676471
 stretch_mode = 5
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -1893,6 +2020,7 @@ anchor_bottom = 0.811765
 texture = ExtResource("18")
 stretch_mode = 1
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -1904,6 +2032,7 @@ anchor_bottom = 0.976471
 texture = ExtResource("18")
 stretch_mode = 1
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -1924,6 +2053,7 @@ anchor_bottom = 0.758824
 texture = ExtResource("23")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -1935,6 +2065,7 @@ anchor_bottom = 0.676471
 stretch_mode = 5
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -1974,6 +2105,7 @@ anchor_bottom = 0.811765
 texture = ExtResource("18")
 stretch_mode = 1
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -1985,6 +2117,7 @@ anchor_bottom = 0.976471
 texture = ExtResource("18")
 stretch_mode = 1
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -2005,6 +2138,7 @@ anchor_bottom = 0.758824
 texture = ExtResource("23")
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -2016,6 +2150,7 @@ anchor_bottom = 0.676471
 stretch_mode = 5
 mouse_filter = 2
 visible = false
+expand_mode = 1
 
 
 
@@ -2055,6 +2190,7 @@ anchor_bottom = 0.811765
 texture = ExtResource("18")
 stretch_mode = 1
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -2066,6 +2202,7 @@ anchor_bottom = 0.976471
 texture = ExtResource("18")
 stretch_mode = 1
 mouse_filter = 2
+expand_mode = 1
 
 
 
@@ -2148,6 +2285,7 @@ anchor_right = 0.98
 anchor_bottom = 0.34
 stretch_mode = 5
 mouse_filter = 2
+expand_mode = 1
 
 
 

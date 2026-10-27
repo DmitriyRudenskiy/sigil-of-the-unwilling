@@ -482,6 +482,15 @@ static func campaign_menu_hint() -> String: return TranslationServer.translate("
 static func campaign_turn() -> String: return TranslationServer.translate("campaign.turn")
 static func campaign_turn_hint() -> String: return TranslationServer.translate("campaign.turn_hint")
 static func campaign_goals_title() -> String: return TranslationServer.translate("campaign.goals_title")
+## Заглушки макета 10 (D-281, задачи 3.3–3.5): метка на блоке, у которого нет
+## носителя значения. Пустая ячейка без метки выглядит готовой — «задача»
+## отличает «не нарисовано» от «нечего показывать» (прецедент T-200).
+static func campaign_todo_abilities() -> String: return TranslationServer.translate("campaign.todo_abilities")
+static func campaign_todo_supplies() -> String: return TranslationServer.translate("campaign.todo_supplies")
+static func campaign_todo_potions() -> String: return TranslationServer.translate("campaign.todo_potions")
+static func campaign_todo_hint() -> String: return TranslationServer.translate("campaign.todo_hint")
+static func campaign_reset_region() -> String: return TranslationServer.translate("campaign.reset_region")
+static func campaign_reset_region_hint() -> String: return TranslationServer.translate("campaign.reset_region_hint")
 ## signs-prestige 2.3: подпись числа Престижа на плите Знака. Подпись отдельной
 ## строкой, а не вшита в текст: роль числа — `LabelNumber` (гайд §2), а «240»
 ## без подписи — число без рассказа.

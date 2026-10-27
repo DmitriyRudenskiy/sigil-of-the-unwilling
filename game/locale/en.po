@@ -1156,6 +1156,25 @@ msgstr "Month {month} Week {week} Day {day}"
 msgid "campaign.goals_title"
 msgstr "First-day goals"
 
+## Mockup 10 placeholders (D-281): blocks with no value carrier yet.
+msgid "campaign.todo_abilities"
+msgstr "Abilities — to do"
+
+msgid "campaign.todo_supplies"
+msgstr "Supplies — to do"
+
+msgid "campaign.todo_potions"
+msgstr "Potions — to do"
+
+msgid "campaign.todo_hint"
+msgstr "No value carrier: T-244, T-245, T-246"
+
+msgid "campaign.reset_region"
+msgstr "Reset"
+
+msgid "campaign.reset_region_hint"
+msgstr "Clear the selected region"
+
 msgid "campaign.prestige_label"
 msgstr "Prestige"
 

@@ -32,7 +32,6 @@ const CounterRegistryScript := preload("res://scripts/ui/campaign_counters.gd")
 const TUTORIAL_OVERLAY_PATH := HUD_PATH + "/TutorialOverlay"
 const HUD_PATH := "CampaignHUD/CampaignHud"
 const PARTY_PANEL_PATH := HUD_PATH + "/PartyPanel"
-const PARTY_SLOTS_PATH := PARTY_PANEL_PATH + "/PartySlots"
 const COUNTER_BAR_PATH := HUD_PATH + "/CounterBar"
 const DATE_LABEL_PATH := HUD_PATH + "/CampaignDate"
 const TOP_BUTTONS_PATH := HUD_PATH + "/TopButtons"
@@ -51,6 +50,14 @@ const SIMPLE_CARRIERS := {
 	"панель отряда (7.12)": PARTY_PANEL_PATH,
 	"панель целей (mvp-ui-flow 2.3)": HUD_PATH + "/GoalsPanel",
 	"плита Знака (signs-prestige 2.3)": HUD_PATH + "/SignPlaque",
+	# D-281 (3.3–3.7) — блоки макета 10, заведённые срезом перестановки.
+	"медальон (D-281 3.3)": HUD_PATH + "/Medallion",
+	"каркас способностей (D-281 3.4)": HUD_PATH + "/AbilityFrame",
+	"повозка (D-281 3.4)": HUD_PATH + "/CartButton",
+	"мечи узла хода (D-281 3.5)": HUD_PATH + "/TurnSwordsButton",
+	"глобус узла хода (D-281 3.5)": HUD_PATH + "/TurnGlobeButton",
+	"миникарта (D-281 3.7)": HUD_PATH + "/CampaignMinimap",
+	"сброс выбора (D-281 3.7)": HUD_PATH + "/ResetTile",
 }
 
 var _main: Node = null
@@ -106,9 +113,11 @@ func test_party_panel_has_capacity_slots() -> void:
 	var panel := main.get_node_or_null(PARTY_PANEL_PATH) as PanelContainer
 	assert_that(panel).is_not_null()
 	assert_bool(panel.visible).is_true()
-	var row := panel.get_node_or_null("PartySlots") as HBoxContainer
-	assert_that(row).is_not_null()
-	var slots := _slots(row)
+	# Силуэт отряда — два блока по две колонки (D-281); ёмкость распределена
+	# между ними, поэтому слоты собираются обходом обоих.
+	for block_name in ["PartySlots", "PartySlotsRight"]:
+		assert_that(panel.find_child(block_name, true, false)).is_not_null()
+	var slots := _slots(main)
 	assert_int(slots.size()).is_equal(PartyScreenModelScript.DEFAULT_CAPACITY)
 	for i in slots.size():
 		assert_str(slots[i].name).is_equal("PartySlot_%d" % i)
@@ -118,7 +127,7 @@ func test_party_panel_has_capacity_slots() -> void:
 ## занимает (alive-модель D-221), лишний слот был бы обещанием бойца.
 func test_occupied_slots_match_alive_roster() -> void:
 	var main := await _boot_campaign()
-	var slots := _slots(main.get_node(PARTY_SLOTS_PATH) as HBoxContainer)
+	var slots := _slots(main)
 	var alive := _alive_count(main.composition.party as Array)
 	assert_int(alive).is_greater(0)
 	assert_int(_occupied(slots)).is_equal(alive)
@@ -139,13 +148,12 @@ func test_occupied_slots_match_alive_roster() -> void:
 func test_empty_slots_are_inert() -> void:
 	var main := await _boot_campaign()
 	var hud := _hud()
-	var row := main.get_node(PARTY_SLOTS_PATH) as HBoxContainer
 	var party: Array = main.composition.party
 	while party.size() > 2:
 		party.pop_back()
 	hud.refresh_campaign(main.game_manager.get_current_day())
 	await get_tree().process_frame
-	var slots := _slots(row)
+	var slots := _slots(main)
 	assert_int(_occupied(slots)).is_equal(2)
 	for i in range(2, slots.size()):
 		assert_bool(slots[i].disabled).is_true()
@@ -159,17 +167,16 @@ func test_empty_slots_are_inert() -> void:
 func test_death_releases_its_slot() -> void:
 	var main := await _boot_campaign()
 	var hud := _hud()
-	var row := main.get_node(PARTY_SLOTS_PATH) as HBoxContainer
 	var party: Array = main.composition.party
 	var alive := _alive_count(party)
 	assert_int(alive).is_greater_equal(2)
-	assert_int(_occupied(_slots(row))).is_equal(alive)
+	assert_int(_occupied(_slots(main))).is_equal(alive)
 	# Смерть — через состояние ростера, как её оставляет бой, и через штатное
 	# обновление слоя.
 	(party[alive - 1] as Dictionary)["state"] = PartySystem.STATE_DEAD
 	hud.refresh_campaign(main.game_manager.get_current_day())
 	await get_tree().process_frame
-	var slots := _slots(row)
+	var slots := _slots(main)
 	assert_int(_occupied(slots)).is_equal(alive - 1)
 	assert_bool(slots[alive - 1].disabled).is_true()
 	assert_str(slots[alive - 1].text).is_empty()
@@ -183,7 +190,7 @@ func test_occupied_slot_opens_party_screen() -> void:
 	var party_screen := main.get_node_or_null(PARTY_SCREEN_PATH) as Control
 	assert_that(party_screen).is_not_null()
 	assert_bool(party_screen.visible).is_false()
-	var slots := _slots(main.get_node(PARTY_SLOTS_PATH) as HBoxContainer)
+	var slots := _slots(main)
 	assert_bool(slots[0].disabled).is_false()
 	slots[0].pressed.emit()
 	await get_tree().process_frame
@@ -216,7 +223,7 @@ func test_hud_elements_resolve_from_theme_roles() -> void:
 	# Полоса кнопок и слоты — роль `ButtonAction`, а не дефолт `Button`.
 	var turn := main.get_node(TOP_BUTTONS_PATH + "/TurnButton") as Button
 	assert_str(str(turn.theme_type_variation)).is_equal("ButtonAction")
-	for slot in _slots(main.get_node(PARTY_SLOTS_PATH) as HBoxContainer):
+	for slot in _slots(main):
 		assert_str(str(slot.theme_type_variation)).is_equal("ButtonAction")
 	# Панель отряда — та же карточка поля, что панель целей.
 	var panel := main.get_node(PARTY_PANEL_PATH) as PanelContainer
@@ -237,10 +244,11 @@ func test_frame_composition_coverage_is_complete() -> void:
 	await get_tree().process_frame
 	var total := 0
 	var covered := 0
+	var frame := (main.get_node(HUD_PATH) as Control).get_global_rect()
 	var missing: PackedStringArray = PackedStringArray()
 	for label in SIMPLE_CARRIERS:
 		total += 1
-		if _carrier_in_frame(main.get_node_or_null(NodePath(String(SIMPLE_CARRIERS[label])))):
+		if _carrier_in_frame(main.get_node_or_null(NodePath(String(SIMPLE_CARRIERS[label]))), frame):
 			covered += 1
 		else:
 			missing.append("%s → %s" % [label, SIMPLE_CARRIERS[label]])
@@ -250,7 +258,7 @@ func test_frame_composition_coverage_is_complete() -> void:
 		var row_id := StringName(row.get("id", &""))
 		var box := main.get_node(COUNTER_BAR_PATH).get_node_or_null(
 			"Counter_%s" % String(row_id)) as Control
-		if _carrier_in_frame(box):
+		if _carrier_in_frame(box, frame):
 			covered += 1
 		elif _hud().get_counter_text(row_id) == "":
 			# Счётчик скрыт по значению, а не по небрежности: реестр сам решает,
@@ -259,10 +267,10 @@ func test_frame_composition_coverage_is_complete() -> void:
 			hidden.append(String(row_id))
 		else:
 			missing.append("счётчик %s" % String(row_id))
-	var slots := _slots(main.get_node(PARTY_SLOTS_PATH) as HBoxContainer)
+	var slots := _slots(main)
 	for i in slots.size():
 		total += 1
-		if _carrier_in_frame(slots[i]):
+		if _carrier_in_frame(slots[i], frame):
 			covered += 1
 		else:
 			missing.append("слот отряда %d" % i)
@@ -283,7 +291,11 @@ func test_frame_composition_coverage_is_complete() -> void:
 ## Носитель «в кадре» = узел виден и его глобальный прямоугольник ненулевой.
 ## Нулевой прямоугольник при непустом тексте — ровно тот дефект, из-за которого
 ## строка даты существовала в модели и исчезала на экране.
-func _carrier_in_frame(node: Node) -> bool:
+## Носитель считается покрытым кадром, только он видим, ненулевой и **целиком
+## лежит в кадре**: узел, свесившийся за нижнюю кромку (плита Знака дорастала за
+## окно на 72 px — урок этого среза), на глаз не виден, а по прежней мере «просто
+## ненулевой прямоугольник» засчитывался покрытым.
+func _carrier_in_frame(node: Node, frame: Rect2) -> bool:
 	if node == null or not is_instance_valid(node):
 		return false
 	var control := node as Control
@@ -294,7 +306,8 @@ func _carrier_in_frame(node: Node) -> bool:
 		if not item.visible:
 			return false
 		item = item.get_parent() as Control
-	return control.get_global_rect().size.x > 0.0 and control.get_global_rect().size.y > 0.0
+	var rect := control.get_global_rect()
+	return rect.size.x > 0.0 and rect.size.y > 0.0 and frame.encloses(rect.grow(-0.5))
 
 
 func _alive_count(party: Array) -> int:
@@ -313,10 +326,16 @@ func _occupied(slots: Array[Button]) -> int:
 	return count
 
 
-func _slots(row: HBoxContainer) -> Array[Button]:
+func _slots(main: Node) -> Array[Button]:
 	var out: Array[Button] = []
-	for child in row.get_children():
-		var button := child as Button
-		if button != null:
-			out.append(button)
+	for block_name in ["PartySlots", "PartySlotsRight"]:
+		# Блоки лежат внутри `PartyBlocks`, поэтому поиск рекурсивный по имени —
+		# иначе тест был бы привязан к промежуточному узлу.
+		var block := main.find_child(block_name, true, false)
+		if block == null:
+			continue
+		for child in block.get_children():
+			var button := child as Button
+			if button != null:
+				out.append(button)
 	return out

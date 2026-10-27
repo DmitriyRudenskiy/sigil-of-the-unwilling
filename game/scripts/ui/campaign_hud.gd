@@ -52,7 +52,14 @@ const GOALS_PANEL_NAME := "GoalsPanel"
 ## ui-mockup-parity 7.12 — панель отряда снизу и её слоты (`PartySlot_0…4`).
 const PARTY_PANEL_NAME := "PartyPanel"
 const PARTY_SLOTS_NAME := "PartySlots"
+## Правый блок силуэта отряда (макет: второй блок за латунной перегородкой).
+## Узел заведён отдельным, потому что между блоками макета стоит медальон и
+## один контейнер на два блока не оставил бы зазора (D-281, задача 3.2).
+const PARTY_SLOTS_RIGHT_NAME := "PartySlotsRight"
 const PARTY_SLOT_NAME := "PartySlot"
+## Слотов в левом блоке силуэта: макет рисует блок 2×2, остальное до ёмкости
+## (`PartyScreenModel.DEFAULT_CAPACITY`) уходит в правый блок (D-281).
+const PARTY_BLOCK_LEFT_SLOTS := 4
 const GOALS_TITLE_NAME := "GoalsTitle"
 const GOALS_LIST_NAME := "GoalsList"
 ## mvp-ui-flow 2.2 (T-186): туториал-оверлей первых ходов (K-M8: оверлей, не экран).
@@ -69,6 +76,18 @@ const SIGN_PLAQUE_NAME := "SignPlaque"
 const SIGN_NAME_LABEL_NAME := "SignName"
 const SIGN_RANK_LABEL_NAME := "SignRank"
 const SIGN_PRESTIGE_LABEL_NAME := "SignPrestige"
+## D-281 (задачи 3.3–3.7) — блоки макета 10, заведённые этим срезом. Имена узлов
+## читают тесты места и съёмка, поэтому они константы, а не литералы.
+const MEDALLION_NAME := "Medallion"
+const MEDALLION_BADGE_NAME := "MedallionBadge"
+const ABILITY_FRAME_NAME := "AbilityFrame"
+const CART_BUTTON_NAME := "CartButton"
+const MINIMAP_NAME := "CampaignMinimap"
+const RESET_TILE_NAME := "ResetTile"
+## Ячеек каркаса способностей — сколько рисует макет (8), а не сколько есть
+## носителю: способностей в данных нет, блок зарезервирован под них (T-244).
+const ABILITY_CELLS := 8
+const TURN_SIDE_BUTTON_NAMES: Array[String] = ["TurnSwordsButton", "TurnGlobeButton"]
 ## Экраны в машине навигации кампании: id перехода и куда возвращаться.
 const CITY_SCREEN_ID := &"city"
 const PARTY_SCREEN_ID := &"party"
@@ -92,7 +111,7 @@ var city_screen: CityScreen = null
 var party_screen: PartyScreen = null
 var settings_screen: SettingsScreen = null
 var chronicle_screen: ChronicleScreen = null
-var _top_row: HBoxContainer = null
+var _top_row: Control = null
 var _city_button: Button = null
 var _party_button: Button = null
 var _settings_button: Button = null
@@ -120,8 +139,9 @@ var _goals_panel: PanelContainer = null
 var _goals_list: VBoxContainer = null
 ## 7.12 — панель отряда: ряд слотов и сами кнопки. Данных здесь нет: слоты
 ## читают `PartyScreenModel` поверх `_party` при каждом обновлении (D-200).
-var _party_panel: PanelContainer = null
-var _party_slots_row: HBoxContainer = null
+var _party_panel: Control = null
+var _party_slots_row: Container = null
+var _party_slots_right: Container = null
 var _party_slots: Array[Button] = []
 ## signs-prestige 2.3 — плита Знака (имя, титул ранга, Престиж). Как и у панели
 ## отряда, значений здесь нет: композиция — единственный носитель Престижа
@@ -140,6 +160,20 @@ var _tutorial_directives: Dictionary = {}
 ## Последний день, который хост показал слою. Своего счёта дней у HUD нет
 ## (D-200) — это значение того же пуша, что рисует дату.
 var _campaign_day: int = 0
+## D-281 — медальон, каркас способностей, миникарта и сброс выбора. Значений
+## здесь ни у чего нет: доля месяца считается из календаря, бейдж — из трекера
+## целей, точки миникарты и выбор региона — из поля карты (D-200).
+var _medallion: Button = null
+var _medallion_ring: RingProgress = null
+var _medallion_badge: Label = null
+## Журнал целей открыт? Панель целей (D-241) живёт как жила, медальон — только
+## вход в неё: клик прячет и показывает, ничего не пересчитывая.
+var _goals_journal_open: bool = true
+var _cart_button: Button = null
+var _turn_side_buttons: Array[Button] = []
+var _minimap: CampaignMinimap = null
+var _reset_tile: Button = null
+var _map_field: CampaignMapField = null
 ## Полоса счётчиков: id строки реестра → контейнер счётчика. Значений здесь нет:
 ## числа читаются из носителя при каждом обновлении (D-200).
 var _counters: Dictionary = {}
@@ -174,6 +208,15 @@ func refresh_campaign(day: int) -> void:
 	# вызывает один раз при поднятии кампейна.
 	_refresh_party_panel()
 	_refresh_sign_plaque()
+	# Медальон: прожитая доля месяца (D-281, задача 3.3). Число берётся из
+	# календаря, а не из счётчика дней слоя: длину месяца задаёт календарь.
+	if _medallion_ring != null:
+		var month_day := int(CalendarScript.date_of(day).day)
+		_medallion_ring.set_fraction(
+			month_day / float(CalendarScript.days_per_month()))
+	if _minimap != null:
+		_minimap.refresh()
+	_refresh_reset_tile()
 
 
 ## Текст счётчика по id строки реестра ("" — счётчик не показан).
@@ -221,17 +264,19 @@ func _build() -> void:
 	# HUD, а кнопки (дети) берут своё как обычно.
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-	_top_row = HBoxContainer.new()
+	_top_row = Control.new()
 	_top_row.name = "TopButtons"
 	_top_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_top_row)
-	_top_row.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	# Ширина ряда под шесть кнопок: 6 × 140 + 5 × 16 separation + 16 отступ.
-	_top_row.add_theme_constant_override("separation", 16)
-	_top_row.offset_left = -936.0
-	_top_row.offset_right = -16.0
-	_top_row.offset_top = 16.0
-	_top_row.offset_bottom = 56.0
+	# Хост кнопок — прозрачный `Control` на весь кадр, а не `HBoxContainer`: ряд
+	# расставлял кнопки по порядку, тогда как макет 10 кладёт их в разные углы
+	# (книга и шестерня — справа сверху, полоса тайлов — слева снизу, узел хода —
+	# в правом нижнем). Имя узла оставлено: пути `TopButtons/…` несут семь
+	# функциональных тестов и MCP-съёмка; менять их ради переименования незачем.
+	# `set_anchors_and_offsets_preset`, а не `set_anchors_preset`: второй сохраняет
+	# текущий прямоугольник, а он у только что созданного узла нулевой — ряд
+	# собрался размером 0×0 и кнопки схлопнулись в левый верхний угол.
+	_top_row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	_city_button = Button.new()
 	_city_button.name = CITY_BUTTON_NAME
@@ -311,12 +356,46 @@ func _build() -> void:
 	# `Button`, который в кампании давал ахроматический серый (макет — золото по
 	# тёмному). Роль одна на ряд: кнопки ряда однотипны, а локальные оверрайды
 	# цвета/кегля запрещены конвенцией T-147/T-148.
-	for button in [
-		_city_button, _party_button, _chronicle_button, _settings_button,
-		_menu_button, _turn_button,
+	for entry in [
+		[&"tile_city", _city_button], [&"tile_party", _party_button],
+		[&"tile_menu", _menu_button], [&"button_book", _chronicle_button],
+		[&"button_gear", _settings_button], [&"turn_button", _turn_button],
 	]:
+		var button: Button = entry[1]
 		button.theme_type_variation = &"ButtonAction"
+		# Размер — по ячейке макета, а не по подписи: минимальный размер кнопки
+		# (140×40) шире ячейки 0.04 кадра, и соседние кнопки легли бы друг на
+		# друга. Подпись до носителя рисунка (T-247) остаётся текстовой и
+		# сокращается многоточием, а не обрезается по пикселю.
+		button.custom_minimum_size = Vector2.ZERO
+		button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		_place(button, entry[0])
+	_build_medallion()
+	_build_ability_frame()
+	_build_cart_button()
+	_build_turn_side_buttons()
+	_build_minimap()
+	_build_reset_tile()
 	_build_tutorial_overlay()
+
+
+## Место блока по карте элементов макета (D-281): координаты берутся из реестра,
+## а не из числа в коде экрана, — блок не может разойтись со своим адресом, а
+## сдвиг в реестре автоматически двигает экран.
+##
+## Каждый блок растянут ровно в свой прямоугольник: у экрана нет ни одного
+## собственного числа, с которого можно было бы разойтись с макетом.
+func _place(node: Control, element_id: StringName) -> void:
+	var rect: Rect2 = CampaignScreenMap.row_by_id(element_id).get("rect", Rect2())
+	node.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	node.anchor_left = rect.position.x
+	node.anchor_top = rect.position.y
+	node.anchor_right = rect.end.x
+	node.anchor_bottom = rect.end.y
+	node.offset_left = 0.0
+	node.offset_top = 0.0
+	node.offset_right = 0.0
+	node.offset_bottom = 0.0
 
 
 ## 7.10 — полоса счётчиков макета: один контейнер на строку реестра, порядок —
@@ -326,16 +405,18 @@ func _build() -> void:
 func _build_counter_bar() -> void:
 	var bar := HBoxContainer.new()
 	bar.name = COUNTER_BAR_NAME
-	bar.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	bar.offset_left = 16.0
-	bar.offset_top = 16.0
-	bar.add_theme_constant_override("separation", 8)
+	bar.add_theme_constant_override("separation", 0)
 	add_child(bar)
+	_place(bar, &"counter_frame")
 	for row in CounterRegistry.rendered_rows():
 		var box := HBoxContainer.new()
 		box.name = "Counter_%s" % String(row.get("id", &""))
 		box.tooltip_text = CounterRegistry.label_text(row)
 		box.add_theme_constant_override("separation", 4)
+		# Ячейки полосы делят её ширину поровну: в макете счётчики — равные
+		# латунные ячейки, и равная доля ширины есть у каждой строки реестра.
+		box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		box.alignment = BoxContainer.ALIGNMENT_CENTER
 		var icon := TextureRect.new()
 		icon.name = "Icon"
 		icon.custom_minimum_size = Vector2(24, 24)
@@ -366,17 +447,14 @@ func _build_counter_bar() -> void:
 func _build_date_label() -> void:
 	var date := Label.new()
 	date.name = DATE_LABEL_NAME
-	date.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	date.offset_left = 24.0
-	date.offset_top = -48.0
-	date.offset_right = 424.0
-	date.offset_bottom = -24.0
+	add_child(date)
+	_place(date, &"date_plaque")
 	date.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	date.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	# Дата — вторичная строка (гайд §2, `LabelSecondary` 16): она не счётчик, но
 	# и не заголовок; роль несёт ещё и гарнитуру с цветом, поэтому «просто кегль»
 	# здесь не выбор.
 	date.theme_type_variation = &"LabelSecondary"
-	add_child(date)
 
 
 ## mvp-ui-flow 2.3 (T-182, M3): панель целей первых трёх дней — левый верхний
@@ -432,34 +510,43 @@ func _build_goals_panel() -> void:
 ## T-183), а «активный отряд» макета в MVP нечем — партия одна, и это
 ## зарегистрировано (T-193), а не имитировано подсветкой.
 ##
-## Панель растёт от нижнего левого якоря вверх и вправо: нижняя полоса кадра
-## свободна (поля карты в `main.tscn` нет, D-204), дата стоит ниже, цели — сверху
-## слева. Как и у панели целей, прямоугольник задан якорями, а размер добирается
-## минимальным размером детей.
+## Панель стоит по строке реестра `party_frame` — нижняя полоса, средняя колонка
+## (D-281 3.2: сюда она переехала из левого угла). Прямоугольник задан якорями
+## строки, размер добирается минимальным размером детей.
 func _build_party_panel() -> void:
 	var panel := PanelContainer.new()
 	panel.name = PARTY_PANEL_NAME
 	panel.theme_type_variation = &"PanelCard"
-	panel.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	panel.offset_left = 16.0
-	panel.offset_top = -128.0
-	panel.offset_bottom = -60.0
-	panel.offset_right = 16.0
-	panel.grow_horizontal = Control.GROW_DIRECTION_END
-	panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	add_child(panel)
+	_place(panel, &"party_frame")
 	# Как и панель целей: плита не имеет права перехватывать клики кампании.
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	# До привязки партии панели нет: пять пустых рамок выглядели бы обещанием
 	# отряда, которого нет.
 	panel.visible = false
-	var row := HBoxContainer.new()
+	var blocks := HBoxContainer.new()
+	blocks.name = "PartyBlocks"
+	blocks.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	blocks.add_theme_constant_override("separation", 12)
+	panel.add_child(blocks)
+	# Силуэт отряда из макета — два блока по две колонки; между ними в кадре
+	# стоит медальон. Ёмкость не меняется: 4 слота в левом блоке, остальное — в
+	# правом (D-281; три неиспользуемые ячейки макета не рисуются).
+	var row := GridContainer.new()
 	row.name = PARTY_SLOTS_NAME
+	row.columns = 2
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_theme_constant_override("separation", 8)
-	panel.add_child(row)
+	row.add_theme_constant_override("separation", 4)
+	blocks.add_child(row)
+	var right := GridContainer.new()
+	right.name = PARTY_SLOTS_RIGHT_NAME
+	right.columns = 2
+	right.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	right.add_theme_constant_override("separation", 4)
+	blocks.add_child(right)
 	_party_panel = panel
 	_party_slots_row = row
-	add_child(panel)
+	_party_slots_right = right
 	_rebuild_party_slots(_party_capacity)
 
 
@@ -469,21 +556,25 @@ func _build_party_panel() -> void:
 func _rebuild_party_slots(capacity: int) -> void:
 	if _party_slots_row == null:
 		return
-	for child in _party_slots_row.get_children():
-		_party_slots_row.remove_child(child)
-		child.queue_free()
+	for block in [_party_slots_row, _party_slots_right]:
+		if block == null:
+			continue
+		for child in block.get_children():
+			block.remove_child(child)
+			child.queue_free()
 	_party_slots.clear()
 	for i in maxi(capacity, 0):
 		var slot := Button.new()
 		slot.name = "%s_%d" % [PARTY_SLOT_NAME, i]
 		slot.theme_type_variation = &"ButtonAction"
-		slot.custom_minimum_size = Vector2(128, 52)
+		slot.custom_minimum_size = Vector2(96, 52)
 		# Пустой слот выключен до первого наполнения: нажатие несуществующего
 		# бойца не должно быть действием (7.12, спека «Пустой слот»). Включает и
 		# подписывает их `_refresh_party_panel`.
 		slot.disabled = true
 		slot.pressed.connect(_on_party_slot_pressed)
-		_party_slots_row.add_child(slot)
+		# Первые четыре слота — левый блок 2×2, остальные — правый (D-281).
+		(_party_slots_row if i < PARTY_BLOCK_LEFT_SLOTS else _party_slots_right).add_child(slot)
 		_party_slots.append(slot)
 
 
@@ -543,16 +634,16 @@ func _build_sign_plaque() -> void:
 	var panel := PanelContainer.new()
 	panel.name = SIGN_PLAQUE_NAME
 	panel.theme_type_variation = &"PanelCard"
-	panel.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	panel.offset_right = -16.0
-	panel.offset_bottom = -60.0
-	panel.offset_top = -128.0
-	panel.offset_left = -16.0
-	panel.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	# Плита — статус, а не действие: клики кампании она перехватывать не должна.
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Строка реестра — однострочная плашка макета (4.5% кадра), а содержимое у
+	# плиты четырёхстрочное (имя, титул, престиж, метки задачи): по высоте оно
+	# больше своего прямоугольника. Расти обязано вверх, иначе нижний край уходит
+	# за нижнюю кромку окна и метки задачи становятся невидимыми.
+	panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	panel.visible = false
+	add_child(panel)
+	_place(panel, &"sign_plaque")
 	var column := VBoxContainer.new()
 	column.name = "SignColumn"
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -583,8 +674,25 @@ func _build_sign_plaque() -> void:
 	_sign_prestige.name = SIGN_PRESTIGE_LABEL_NAME
 	_sign_prestige.theme_type_variation = &"LabelNumber"
 	prestige_row.add_child(_sign_prestige)
+	# Печенье и склянка макета (T-246): предметов провизии и зелий в носителях
+	# нет — `HeroInventory` хранит артефакты, а в `data/` таких предметов нет
+	# вовсе. Рисуется метка задачи, а не иконка с нулём (D-200).
+	var todo_row := HBoxContainer.new()
+	todo_row.name = "SignTodoRow"
+	todo_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	todo_row.add_theme_constant_override("separation", 6)
+	column.add_child(todo_row)
+	for entry in [
+		["SignSuppliesTodo", GameText.campaign_todo_supplies()],
+		["SignPotionsTodo", GameText.campaign_todo_potions()],
+	]:
+		var todo := Label.new()
+		todo.name = String(entry[0])
+		todo.text = String(entry[1])
+		todo.theme_type_variation = &"LabelSecondary"
+		todo.tooltip_text = GameText.campaign_todo_hint()
+		todo_row.add_child(todo)
 	_sign_plaque = panel
-	add_child(panel)
 
 
 ## Пересчёт плиты. Вызывается из `refresh_campaign`: Престиж меняется ходами
@@ -638,6 +746,166 @@ func is_tutorial_open() -> bool:
 ## видит игрок.
 func get_tutorial_text() -> String:
 	return "" if _tutorial == null else _tutorial.directive_text()
+
+
+## Ребёнок растянут на весь родителя — так рисуются носитель внутри кнопки
+## (кольцо медальона) и плашка без собственной раскладки.
+func _fill(node: Control) -> void:
+	node.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+
+## Медальон нижней полосы (D-281, задача 3.3): кольцо = прожитая доля месяца из
+## CampaignCalendar.days_per_month(), бейдж = цели с done == false, клик = журнал
+## целей (носитель D-241). Резной ободок макета — T-247; до носителя рисунка
+## кольцо рисуется линией.
+func _build_medallion() -> void:
+	_medallion = Button.new()
+	_medallion.name = MEDALLION_NAME
+	_medallion.theme_type_variation = &"ButtonAction"
+	_medallion.custom_minimum_size = Vector2.ZERO
+	_medallion.tooltip_text = GameText.campaign_goals_title()
+	_medallion.pressed.connect(_on_medallion_pressed)
+	add_child(_medallion)
+	_place(_medallion, &"medallion")
+	_medallion_ring = RingProgress.new()
+	_medallion_ring.name = "MedallionRing"
+	_medallion_ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_medallion.add_child(_medallion_ring)
+	_fill(_medallion_ring)
+	_medallion_badge = Label.new()
+	_medallion_badge.name = MEDALLION_BADGE_NAME
+	_medallion_badge.theme_type_variation = &"LabelNumber"
+	_medallion_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_medallion.add_child(_medallion_badge)
+	_medallion_badge.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+
+
+## Клик по медальону — вход/выход журнала целей. Пересчёта целей здесь нет:
+## `_refresh_goals` — единственная точка, решающая, что видно.
+func _on_medallion_pressed() -> void:
+	_goals_journal_open = not _goals_journal_open
+	_refresh_goals()
+
+
+## Каркас способностей (D-281, задача 3.4): восемь пустых ячеек и метка задачи.
+## Иконки птицы и лотоса с макета не рисуются: способностей в носителях нет
+## (T-244), немой писатель дороже пустой рамки (D-200). Кнопкой ячейка не
+## заведена — нажатие без действия было бы тем же враньём.
+func _build_ability_frame() -> void:
+	var panel := PanelContainer.new()
+	panel.name = ABILITY_FRAME_NAME
+	panel.theme_type_variation = &"PanelCard"
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_place(panel, &"ability_frame")
+	var column := VBoxContainer.new()
+	column.name = "AbilityColumn"
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.add_theme_constant_override("separation", 2)
+	panel.add_child(column)
+	var grid := GridContainer.new()
+	grid.name = "AbilityCells"
+	grid.columns = 4
+	grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	grid.add_theme_constant_override("separation", 3)
+	column.add_child(grid)
+	for i in ABILITY_CELLS:
+		var cell := Panel.new()
+		cell.name = "AbilityCell_%d" % i
+		cell.theme_type_variation = &"PanelSlotThin"
+		cell.custom_minimum_size = Vector2(26, 26)
+		grid.add_child(cell)
+	var note := Label.new()
+	note.name = "AbilityTodoNote"
+	note.text = GameText.campaign_todo_abilities()
+	note.theme_type_variation = &"LabelSecondary"
+	note.tooltip_text = GameText.campaign_todo_hint()
+	column.add_child(note)
+
+
+## Круглая кнопка повозки (D-281, задача 3.4): вход в городской экран тем же
+## путём, что и тайл «Город», — второго носителя города слой не заводит.
+## Доступность = доступность городского экрана (`bind_city`).
+func _build_cart_button() -> void:
+	_cart_button = Button.new()
+	_cart_button.name = CART_BUTTON_NAME
+	_cart_button.theme_type_variation = &"ButtonAction"
+	_cart_button.text = GameText.city_cart()
+	_cart_button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_cart_button.custom_minimum_size = Vector2.ZERO
+	_cart_button.disabled = true
+	_cart_button.pressed.connect(_on_city_pressed)
+	add_child(_cart_button)
+	_place(_cart_button, &"cart_button")
+
+
+## Две малые кнопки узла хода (D-281, задача 3.5): мечи и глобус макета.
+## Экрана-носителя у них нет (T-245), поэтому они нарисованы и выключены:
+## кликабельная кнопка без действия обещает то, чего нет.
+func _build_turn_side_buttons() -> void:
+	for index in TURN_SIDE_BUTTON_NAMES.size():
+		var button := Button.new()
+		button.name = TURN_SIDE_BUTTON_NAMES[index]
+		button.theme_type_variation = &"ButtonAction"
+		button.custom_minimum_size = Vector2.ZERO
+		button.disabled = true
+		button.tooltip_text = GameText.campaign_todo_hint()
+		add_child(button)
+		_place(button, &"turn_swords" if index == 0 else &"turn_globe")
+		_turn_side_buttons.append(button)
+
+
+## Миникарта левой колонки (D-281, задача 3.7): второй вид того же носителя, что
+## у поля карты. Своих координат и своего тумана нет — читает CampaignMapField.
+func _build_minimap() -> void:
+	_minimap = CampaignMinimap.new()
+	_minimap.name = MINIMAP_NAME
+	_minimap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_minimap)
+	_place(_minimap, &"minimap")
+
+
+## Четвёртый тайл левой колонки (D-281, задача 3.7): сброс выбора региона.
+## Неактивен без выбора — кнопка, которой нечего снимать, обещала бы действие.
+func _build_reset_tile() -> void:
+	_reset_tile = Button.new()
+	_reset_tile.name = RESET_TILE_NAME
+	_reset_tile.theme_type_variation = &"ButtonAction"
+	_reset_tile.text = GameText.campaign_reset_region()
+	_reset_tile.tooltip_text = GameText.campaign_reset_region_hint()
+	_reset_tile.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_reset_tile.custom_minimum_size = Vector2.ZERO
+	_reset_tile.disabled = true
+	_reset_tile.pressed.connect(_on_reset_tile_pressed)
+	add_child(_reset_tile)
+	_place(_reset_tile, &"tile_reset")
+
+
+func _on_reset_tile_pressed() -> void:
+	if _map_field != null:
+		_map_field.clear_selection()
+	_refresh_reset_tile()
+
+
+func _on_region_selected(_card: Dictionary) -> void:
+	_refresh_reset_tile()
+
+
+func _refresh_reset_tile() -> void:
+	if _reset_tile != null:
+		_reset_tile.disabled = _map_field == null or _map_field.selected_region() == ""
+
+
+## Привязка поля карты (D-281, задача 3.7): миникарта и сброс выбора читают тот
+## же узел, что рисует карту. `MapScreenModel` — view model без состояния, выбор
+## живёт в поле, поэтому второго носителя выбора здесь не появляется.
+func bind_map_field(field: CampaignMapField) -> void:
+	_map_field = field
+	if _minimap != null:
+		_minimap.bind_field(field)
+	if field != null and not field.region_selected.is_connected(_on_region_selected):
+		field.region_selected.connect(_on_region_selected)
+	_refresh_reset_tile()
 
 
 func _build_tutorial_overlay() -> void:
@@ -699,6 +967,10 @@ func bind_city(value: City, rng: RandomNumberGenerator = null) -> void:
 	# (подпись переносимого груза и рельеф клеток тогда просто не рисуются).
 	city_screen.setup(city, null, city.center, rng, Vector2i.ZERO, Callable())
 	_city_button.disabled = false
+	# Повозка макета ведёт в тот же городской экран (D-281, задача 3.4), поэтому и
+	# живёт она ровно тогда, когда жив экран: доступность у них общая.
+	if _cart_button != null:
+		_cart_button.disabled = false
 
 
 ## Привязка партии: экран создаётся здесь, как и город — слой переживает
@@ -785,7 +1057,14 @@ func _refresh_goals() -> void:
 		row.theme_type_variation = &"LabelBody"
 		row.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_goals_list.add_child(row)
-	_goals_panel.visible = _goals != null and _goals.visible()
+	_goals_panel.visible = (
+		_goals != null and _goals.visible() and _goals_journal_open
+	)
+	# Бейдж медальона — сколько целей ещё открыто (D-281, задача 3.3). Ноль не
+	# печатается: «0» на медальоне читается как «цель есть, но пустая».
+	if _medallion_badge != null:
+		_medallion_badge.text = "" if pending.is_empty() else str(pending.size())
+		_medallion_badge.visible = not pending.is_empty()
 
 
 ## Заголовок дня внутри списка целей.

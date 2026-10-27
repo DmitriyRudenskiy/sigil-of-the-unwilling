@@ -1156,6 +1156,28 @@ msgstr "Месяц {month} · Неделя {week} · День {day}"
 msgid "campaign.goals_title"
 msgstr "Цели первых дней"
 
+## Заглушки макета 10 (D-281): блоки, у которых нет носителя значения. Метка
+## «задача» рисуется на кадре нарочно — пустая ячейка без метки выглядит
+## сделанной, а игрок и ревью не отличают «ещё не нарисовано» от «нечего
+## показывать». Номера тикетов — в подсказке, не в подписи.
+msgid "campaign.todo_abilities"
+msgstr "Способности — задача"
+
+msgid "campaign.todo_supplies"
+msgstr "Провизия — задача"
+
+msgid "campaign.todo_potions"
+msgstr "Зелья — задача"
+
+msgid "campaign.todo_hint"
+msgstr "Носителя значения нет: T-244, T-245, T-246"
+
+msgid "campaign.reset_region"
+msgstr "Сброс"
+
+msgid "campaign.reset_region_hint"
+msgstr "Снять выбор региона"
+
 msgid "campaign.prestige_label"
 msgstr "Престиж"
 

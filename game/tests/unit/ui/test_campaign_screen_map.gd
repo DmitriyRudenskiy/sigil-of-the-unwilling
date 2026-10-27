@@ -62,20 +62,33 @@ func test_cell_matches_rect_center() -> void:
 			.is_equal(ScreenMap.cell_of(row.get("rect", Rect2())))
 
 
-## Порядок строк = порядок элементов макета: горизонтальные блоки — по X,
-## левая колонка — по Y.
+## Порядок строк = порядок чтения макета: горизонтальные блоки — по X, левая
+## колонка — по Y.
+##
+## Сравнение только для пар, которые не перекрываются: в макете плита города
+## нарисована под медальоном, а рамка панели объёмлет свои ячейки, и строгая
+## монотонность по X требовала бы от элементов не перекрывать друг друга —
+## то есть от реестра врать о кадре.
 func test_rows_follow_the_mockup_order() -> void:
 	for block in [&"top_counters", &"top_right", &"bottom_band"]:
-		var last := -1.0
-		for row in ScreenMap.rows_in_block(StringName(block)):
-			var rect: Rect2 = row.get("rect", Rect2())
-			assert_bool(rect.position.x >= last - 0.001).is_true()  # строка не по X
-			last = rect.position.x
-	var last_y := -1.0
-	for row in ScreenMap.rows_in_block(&"left_column"):
-		var rect: Rect2 = row.get("rect", Rect2())
-		assert_bool(rect.position.y >= last_y - 0.001).is_true()  # строка не по Y
-		last_y = rect.position.y
+		_assert_reading_order(ScreenMap.rows_in_block(StringName(block)), true)
+	_assert_reading_order(ScreenMap.rows_in_block(&"left_column"), false)
+
+
+## `horizontal = true` — порядок по X, иначе по Y. Пара строк сравнивается,
+## только если вдоль оси порядок они не делят (иначе порядок не определён).
+func _assert_reading_order(rows: Array[Dictionary], horizontal: bool) -> void:
+	for i in rows.size() - 1:
+		var a: Rect2 = rows[i].get("rect", Rect2())
+		var b: Rect2 = rows[i + 1].get("rect", Rect2())
+		if horizontal:
+			if b.position.x < a.end.x - 0.001:
+				continue  # перекрываются — порядок не определён
+			assert_bool(b.position.x >= a.position.x - 0.001).is_true()
+		else:
+			if b.position.y < a.end.y - 0.001:
+				continue
+			assert_bool(b.position.y >= a.position.y - 0.001).is_true()
 
 
 ## Верхняя полоса: карта элементов и реестр счётчиков — один и тот же порядок

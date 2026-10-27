@@ -223,7 +223,7 @@ func test_backpack_full_rolls_back_resources() -> void:
 	# Откат: ресурсы на месте.
 	assert_int(int(s.get_all()[&"wood"])).is_equal(4)
 	assert_int(int(s.get_all()[&"oak"])).is_equal(2)
-	assert_that(inv.backpack.size()).is_equal(20)
+	assert_that(inv.backpack.size()).is_equal(GameNumbers.MAX_BACKPACK_SIZE - 4)
 
 
 func test_item_crafted_signal_emitted() -> void:

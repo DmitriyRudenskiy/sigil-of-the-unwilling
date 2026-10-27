@@ -139,6 +139,9 @@ func _mount_campaign_hud() -> void:
 	# после `_apply_pending_flow`, иначе Continue показал бы карту новой игры.
 	if campaign_map_field != null:
 		campaign_map_field.bind_map(composition.region_map)
+		# Миникарта и сброс выбора (D-281, задача 3.7) читают поле, а не свою
+		# копию графа: второй носитель позиции и выбора завёлся бы молча.
+		campaign_hud.bind_map_field(campaign_map_field)
 	_update_turn_availability()
 	# Полоса счётчиков и дата — за носителем: первый вызов сразу после привязки
 	# города, дальше — по сигналу дня (`_on_day_passed`). Своего счёта дней у HUD

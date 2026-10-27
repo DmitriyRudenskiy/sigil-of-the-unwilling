@@ -23,6 +23,7 @@ extends BaseTest
 ## повторял бы реализацию.
 
 const MAIN_SCENE_PATH := "res://scenes/main/main.tscn"
+const ScreenMap := preload("res://scripts/ui/campaign_screen_map.gd")
 const HUD_PATH := "CampaignHUD/CampaignHud"
 const TUTORIAL_OVERLAY_PATH := HUD_PATH + "/TutorialOverlay"
 const SIGN_PLAQUE_PATH := HUD_PATH + "/SignPlaque"
@@ -221,22 +222,43 @@ func test_plaque_resolves_from_theme_roles() -> void:
 
 ## ── место в кадре ────────────────────────────────────────────────────────────
 
-## Плита занимает свободный правый нижний угол и не наступает на панель отряда и
-## панель целей: три носителя в одном углу кадра — это «текст есть, но его не
-## видно», тот же дефект, что нулевой прямоугольник строки даты (7.11).
-func test_plaque_sits_in_the_free_corner() -> void:
+## Плита стоит там, где её поставил реестр (D-281 3.2): прямоугольник = строка
+## `CampaignScreenMap` в долях кадра, низ — по нижней кромке окна. Прежняя
+## проверка «свободный правый нижний угол» меряла место, которое макет отдал
+## самой плите, и ловила проходной кадр; угловая точка в `has_point` не лежит
+## (правый нижний пиксель — исключение прямоугольника).
+func test_plaque_sits_where_the_registry_puts_it() -> void:
 	var main := await _boot_campaign()
 	main.composition.set_sign(SIGN_ID)
 	_refresh()
 	await get_tree().process_frame
 	var plaque := main.get_node(SIGN_PLAQUE_PATH) as Control
-	assert_bool(plaque.get_global_rect().size.x > 0.0).is_true()
-	assert_bool(plaque.get_global_rect().size.y > 0.0).is_true()
-	var window := _root() as Window
-	var frame := Rect2(Vector2.ZERO, Vector2(window.size))
-	assert_bool(frame.encloses(plaque.get_global_rect())).is_true()
-	assert_bool(frame.has_point(plaque.get_global_rect().end)).is_true()
-	for other_path in [PARTY_PANEL_PATH, GOALS_PANEL_PATH]:
+	var rect := plaque.get_global_rect()
+	assert_bool(rect.size.x > 0.0).is_true()
+	assert_bool(rect.size.y > 0.0).is_true()
+	var frame := (plaque.get_parent() as Control).get_global_rect()
+	var want: Rect2 = ScreenMap.row_by_id(&"sign_plaque").get("rect", Rect2())
+	# Плита привязана к строке реестра по нижней кромке: X и ширина — по реестру,
+	# низ — по нижней кромке кадра. Высота у строки макета однострочная, а
+	# содержимое плиты — четыре строки, поэтому плита дорастает вверх
+	# (`GROW_DIRECTION_BEGIN`); проверка по нижней кромке ловит и это: стоило бы
+	# оставить рост вниз, низ вылез бы за окно.
+	var measured := [rect.position.x - frame.position.x, rect.size.x,
+			frame.end.y - rect.end.y]
+	var expected := [want.position.x * frame.size.x, want.size.x * frame.size.x,
+			(1.0 - want.end.y) * frame.size.y]
+	for i in measured.size():
+		assert_bool(absf(measured[i] - expected[i]) < 2.0).is_true() \
+			.override_failure_message("плита стоит не по реестру: %s vs %s" % [measured, expected])
+	assert_bool(rect.size.y >= want.size.y * frame.size.y - 1.0).is_true()
+	assert_bool(frame.encloses(rect.grow(-0.5))).is_true() \
+			.override_failure_message("плита вылезла за кадр: %s в %s" % [rect, frame])
+	# Панель целей не заставлена. На панель отряда плита ложится нарочно: обе
+	# строки реестра стоят в средней колонке нижней полосы, и нижний край плиты —
+	# по нижнему краю кадра (макет рисует плиту поверх силуэта отряда).
+	for other_path in [GOALS_PANEL_PATH]:
 		var other := main.get_node_or_null(NodePath(String(other_path))) as Control
 		assert_that(other).is_not_null()
-		assert_bool(plaque.get_global_rect().intersects(other.get_global_rect())).is_false()
+		var overlap := rect.grow(-1.0).intersection(other.get_global_rect().grow(-1.0))
+		assert_bool(overlap.get_area() > 1.0).is_false() \
+			.override_failure_message("плита наступила на %s: %s" % [other_path, overlap])

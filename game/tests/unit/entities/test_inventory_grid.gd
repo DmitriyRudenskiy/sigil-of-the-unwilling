@@ -46,8 +46,10 @@ func test_overlap_is_refused_and_changes_nothing() -> void:
 
 func test_out_of_grid_is_refused_with_grid_size() -> void:
 	var inv := HeroInventory.new()
-	var err := inv.can_place(Vector2i(6, 1), Vector2i(2, 0), false)
-	assert_str(err).contains("6×4")
+	# За поле — правый край решётки; номер в тексте тоже из носителя,
+	# литерал «6×4» пережил бы смену INVENTORY_GRID молча (D-280).
+	var err := inv.can_place(Vector2i(2, 1), Vector2i(GRID.x - 1, 0), false)
+	assert_str(err).contains("%d×%d" % [GRID.x, GRID.y])
 
 
 ## «Не хватает одной клетки» — текст с фактическими числами.
