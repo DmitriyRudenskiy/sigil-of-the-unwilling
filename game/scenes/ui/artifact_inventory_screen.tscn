@@ -1,1348 +1,2029 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=15 format=3]
 [ext_resource type="Script" path="res://scripts/ui/artifact_inventory_screen.gd" id="1"]
+[ext_resource type="Texture2D" path="res://assets/ui/hero/panel_parchment.png" id="10"]
+[ext_resource type="Texture2D" path="res://assets/ui/hero/frame_portrait.png" id="13"]
+[ext_resource type="Texture2D" path="res://assets/ui/hero/portrait.png" id="22"]
+[ext_resource type="Texture2D" path="res://assets/ui/hero/banner_name.png" id="12"]
+[ext_resource type="Texture2D" path="res://assets/ui/hero/rule_brass.png" id="17"]
+[ext_resource type="Texture2D" path="res://assets/ui/hero/frame_row.png" id="24"]
+[ext_resource type="Texture2D" path="res://assets/ui/hero/panel_stone.png" id="11"]
+[ext_resource type="Texture2D" path="res://assets/ui/hero/figure.png" id="21"]
+[ext_resource type="Texture2D" path="res://assets/ui/hero/slot_doll.png" id="14"]
+[ext_resource type="Texture2D" path="res://assets/ui/hero/cell_grid.png" id="15"]
+[ext_resource type="Texture2D" path="res://assets/ui/hero/bar_track.png" id="18"]
+[ext_resource type="Texture2D" path="res://assets/ui/hero/bar_mana.png" id="19"]
+[ext_resource type="Texture2D" path="res://assets/ui/hero/frame_card.png" id="23"]
 [node name="ArtifactInventoryScreen" type="Control" unique_id=1000]
 script = ExtResource("1")
 
 
 [node name="Center" type="Control" unique_id=1001 parent="."]
-offset_left = 10.0
-offset_top = 10.0
-offset_right = 1410.0
-offset_bottom = 690.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
 
 
 
 [node name="Window" type="Control" unique_id=1002 parent="Center"]
-offset_left = 10.0
-offset_top = 10.0
-offset_right = 1390.0
-offset_bottom = 670.0
-
-
-
-[node name="Outline" type="PanelContainer" unique_id=1003 parent="Center/Window"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+mouse_filter = 2
+
+
+
+[node name="Sheet" type="Control" unique_id=1003 parent="Center/Window"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+
+
+[node name="Outline" type="PanelContainer" unique_id=1004 parent="Center/Window"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
 theme_type_variation = &"ArtifactOutline"
 
 
 
-[node name="Left" type="Control" unique_id=1004 parent="Center/Window"]
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
+[node name="Left" type="Control" unique_id=1005 parent="Sheet"]
+anchor_left = 0.008750
+anchor_top = 0.008889
+anchor_right = 0.313750
+anchor_bottom = 0.992222
 
 
 
-[node name="Portrait" type="TextureRect" unique_id=1005 parent="Center/Window/Left"]
-offset_left = 11.0
-offset_top = 11.0
-offset_right = 91.0
-offset_bottom = 91.0
+[node name="Bg" type="NinePatchRect" unique_id=1006 parent="Sheet/Left"]
+texture = ExtResource("10")
+patch_margin_left = 40
+patch_margin_top = 40
+patch_margin_right = 40
+patch_margin_bottom = 40
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+mouse_filter = 2
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+
+
+[node name="PortraitFrame" type="TextureRect" unique_id=1007 parent="Sheet/Left"]
+anchor_left = 0.026639
+anchor_top = 0.006780
+anchor_right = 0.975410
+anchor_bottom = 0.383051
+texture = ExtResource("13")
 stretch_mode = 5
-
-
-
-[node name="Name" type="Label" unique_id=1006 parent="Center/Window/Left"]
-offset_left = 100.0
-offset_top = 31.0
-offset_right = 300.0
-offset_bottom = 60.0
-
-
-
-[node name="StatIcon_0" type="TextureRect" unique_id=1007 parent="Center/Window/Left"]
-offset_left = 20.0
-offset_top = 95.0
-offset_right = 66.0
-offset_bottom = 141.0
-
-
-
-[node name="StatIcon_1" type="TextureRect" unique_id=1008 parent="Center/Window/Left"]
-offset_left = 121.0
-offset_top = 95.0
-offset_right = 167.0
-offset_bottom = 141.0
-
-
-
-[node name="StatIcon_2" type="TextureRect" unique_id=1009 parent="Center/Window/Left"]
-offset_left = 222.0
-offset_top = 95.0
-offset_right = 268.0
-offset_bottom = 141.0
-
-
-
-[node name="StatIcon_3" type="TextureRect" unique_id=1010 parent="Center/Window/Left"]
-offset_left = 323.0
-offset_top = 95.0
-offset_right = 369.0
-offset_bottom = 141.0
-
-
-
-[node name="StatName_0" type="Label" unique_id=1011 parent="Center/Window/Left"]
-offset_left = 20.0
-offset_top = 143.0
-offset_right = 121.0
-offset_bottom = 161.0
-
-
-
-[node name="StatName_1" type="Label" unique_id=1012 parent="Center/Window/Left"]
-offset_left = 121.0
-offset_top = 143.0
-offset_right = 222.0
-offset_bottom = 161.0
-
-
-
-[node name="StatName_2" type="Label" unique_id=1013 parent="Center/Window/Left"]
-offset_left = 222.0
-offset_top = 143.0
-offset_right = 323.0
-offset_bottom = 161.0
-
-
-
-[node name="StatName_3" type="Label" unique_id=1014 parent="Center/Window/Left"]
-offset_left = 323.0
-offset_top = 143.0
-offset_right = 424.0
-offset_bottom = 161.0
-
-
-
-[node name="StatValue_0" type="Label" unique_id=1015 parent="Center/Window/Left"]
-offset_left = 12.0
-offset_top = 168.0
-offset_right = 109.0
-offset_bottom = 189.0
-
-
-
-[node name="StatValue_1" type="Label" unique_id=1016 parent="Center/Window/Left"]
-offset_left = 113.0
-offset_top = 168.0
-offset_right = 210.0
-offset_bottom = 189.0
-
-
-
-[node name="StatValue_2" type="Label" unique_id=1017 parent="Center/Window/Left"]
-offset_left = 214.0
-offset_top = 168.0
-offset_right = 311.0
-offset_bottom = 189.0
-
-
-
-[node name="StatValue_3" type="Label" unique_id=1018 parent="Center/Window/Left"]
-offset_left = 315.0
-offset_top = 168.0
-offset_right = 412.0
-offset_bottom = 189.0
-
-
-
-[node name="Mana_lbl" type="Label" unique_id=1019 parent="Center/Window/Left"]
-offset_left = 12.0
-offset_top = 191.0
-offset_right = 162.0
-offset_bottom = 211.0
-
-
-
-[node name="Mana_val" type="Label" unique_id=1020 parent="Center/Window/Left"]
-offset_left = 204.0
-offset_top = 191.0
-offset_right = 300.0
-offset_bottom = 211.0
-
-
-
-[node name="Exp_lbl" type="Label" unique_id=1021 parent="Center/Window/Left"]
-offset_left = 12.0
-offset_top = 240.0
-offset_right = 162.0
-offset_bottom = 260.0
-
-
-
-[node name="Exp_val" type="Label" unique_id=1022 parent="Center/Window/Left"]
-offset_left = 204.0
-offset_top = 240.0
-offset_right = 300.0
-offset_bottom = 260.0
-
-
-
-[node name="School_lbl" type="Label" unique_id=1023 parent="Center/Window/Left"]
-offset_left = 12.0
-offset_top = 289.0
-offset_right = 162.0
-offset_bottom = 309.0
-
-
-
-[node name="School_val" type="Label" unique_id=1024 parent="Center/Window/Left"]
-offset_left = 204.0
-offset_top = 289.0
-offset_right = 300.0
-offset_bottom = 309.0
-
-
-
-[node name="Skills_lbl" type="Label" unique_id=1025 parent="Center/Window/Left"]
-offset_left = 12.0
-offset_top = 320.0
-offset_right = 132.0
-offset_bottom = 340.0
-
-
-
-[node name="Skill_0" type="Button" unique_id=1026 parent="Center/Window/Left"]
-offset_left = 22.0
-offset_top = 352.0
-offset_right = 142.0
-offset_bottom = 422.0
-
-
-
-[node name="SkillIcon" type="TextureRect" unique_id=1027 parent="Center/Window/Left/Skill_0"]
 mouse_filter = 2
-offset_left = 8.0
-offset_top = 15.0
-offset_right = 48.0
-offset_bottom = 55.0
 
 
 
-[node name="SkillLevel" type="Label" unique_id=1028 parent="Center/Window/Left/Skill_0"]
-visible = false
-mouse_filter = 2
-horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.902, 0.8118, 0.6039, 1.0)
-theme_override_font_sizes/font_size = 20
-offset_left = 52.0
-offset_top = 24.0
-offset_right = 112.0
-offset_bottom = 46.0
-
-
-
-[node name="Skill_1" type="Button" unique_id=1029 parent="Center/Window/Left"]
-offset_left = 212.0
-offset_top = 352.0
-offset_right = 332.0
-offset_bottom = 422.0
-
-
-
-[node name="SkillIcon" type="TextureRect" unique_id=1030 parent="Center/Window/Left/Skill_1"]
-mouse_filter = 2
-offset_left = 8.0
-offset_top = 15.0
-offset_right = 48.0
-offset_bottom = 55.0
-
-
-
-[node name="SkillLevel" type="Label" unique_id=1031 parent="Center/Window/Left/Skill_1"]
-visible = false
-mouse_filter = 2
-horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.902, 0.8118, 0.6039, 1.0)
-theme_override_font_sizes/font_size = 20
-offset_left = 52.0
-offset_top = 24.0
-offset_right = 112.0
-offset_bottom = 46.0
-
-
-
-[node name="Skill_2" type="Button" unique_id=1032 parent="Center/Window/Left"]
-offset_left = 22.0
-offset_top = 434.0
-offset_right = 142.0
-offset_bottom = 504.0
-
-
-
-[node name="SkillIcon" type="TextureRect" unique_id=1033 parent="Center/Window/Left/Skill_2"]
-mouse_filter = 2
-offset_left = 8.0
-offset_top = 15.0
-offset_right = 48.0
-offset_bottom = 55.0
-
-
-
-[node name="SkillLevel" type="Label" unique_id=1034 parent="Center/Window/Left/Skill_2"]
-visible = false
-mouse_filter = 2
-horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.902, 0.8118, 0.6039, 1.0)
-theme_override_font_sizes/font_size = 20
-offset_left = 52.0
-offset_top = 24.0
-offset_right = 112.0
-offset_bottom = 46.0
-
-
-
-[node name="Skill_3" type="Button" unique_id=1035 parent="Center/Window/Left"]
-offset_left = 212.0
-offset_top = 434.0
-offset_right = 332.0
-offset_bottom = 504.0
-
-
-
-[node name="SkillIcon" type="TextureRect" unique_id=1036 parent="Center/Window/Left/Skill_3"]
-mouse_filter = 2
-offset_left = 8.0
-offset_top = 15.0
-offset_right = 48.0
-offset_bottom = 55.0
-
-
-
-[node name="SkillLevel" type="Label" unique_id=1037 parent="Center/Window/Left/Skill_3"]
-visible = false
-mouse_filter = 2
-horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.902, 0.8118, 0.6039, 1.0)
-theme_override_font_sizes/font_size = 20
-offset_left = 52.0
-offset_top = 24.0
-offset_right = 112.0
-offset_bottom = 46.0
-
-
-
-[node name="Skill_4" type="Button" unique_id=1038 parent="Center/Window/Left"]
-offset_left = 22.0
-offset_top = 516.0
-offset_right = 142.0
-offset_bottom = 586.0
-
-
-
-[node name="SkillIcon" type="TextureRect" unique_id=1039 parent="Center/Window/Left/Skill_4"]
-mouse_filter = 2
-offset_left = 8.0
-offset_top = 15.0
-offset_right = 48.0
-offset_bottom = 55.0
-
-
-
-[node name="SkillLevel" type="Label" unique_id=1040 parent="Center/Window/Left/Skill_4"]
-visible = false
-mouse_filter = 2
-horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.902, 0.8118, 0.6039, 1.0)
-theme_override_font_sizes/font_size = 20
-offset_left = 52.0
-offset_top = 24.0
-offset_right = 112.0
-offset_bottom = 46.0
-
-
-
-[node name="Skill_5" type="Button" unique_id=1041 parent="Center/Window/Left"]
-offset_left = 212.0
-offset_top = 516.0
-offset_right = 332.0
-offset_bottom = 586.0
-
-
-
-[node name="SkillIcon" type="TextureRect" unique_id=1042 parent="Center/Window/Left/Skill_5"]
-mouse_filter = 2
-offset_left = 8.0
-offset_top = 15.0
-offset_right = 48.0
-offset_bottom = 55.0
-
-
-
-[node name="SkillLevel" type="Label" unique_id=1043 parent="Center/Window/Left/Skill_5"]
-visible = false
-mouse_filter = 2
-horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.902, 0.8118, 0.6039, 1.0)
-theme_override_font_sizes/font_size = 20
-offset_left = 52.0
-offset_top = 24.0
-offset_right = 112.0
-offset_bottom = 46.0
-
-
-
-[node name="Right" type="Control" unique_id=1044 parent="Center/Window"]
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
-
-
-
-[node name="Figure" type="TextureRect" unique_id=1045 parent="Center/Window/Right"]
-offset_left = 607.0
-offset_top = 13.0
-offset_right = 847.0
-offset_bottom = 373.0
+[node name="Portrait" type="TextureRect" unique_id=1008 parent="Sheet/Left"]
+anchor_left = 0.026639
+anchor_top = 0.006780
+anchor_right = 0.975410
+anchor_bottom = 0.383051
+texture = ExtResource("22")
 stretch_mode = 5
-
-
-
-[node name="DollSlot_0" type="TextureRect" unique_id=1046 parent="Center/Window/Right"]
-offset_left = 768.0
-offset_top = 16.0
-offset_right = 824.0
-offset_bottom = 72.0
-
-
-
-[node name="EquipIcon" type="TextureRect" unique_id=1047 parent="Center/Window/Right/DollSlot_0"]
-visible = false
 mouse_filter = 2
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 56.0
-offset_bottom = 56.0
 
 
 
-[node name="DollSlot_1" type="TextureRect" unique_id=1048 parent="Center/Window/Right"]
-offset_left = 828.0
-offset_top = 16.0
-offset_right = 884.0
-offset_bottom = 72.0
-
-
-
-[node name="EquipIcon" type="TextureRect" unique_id=1049 parent="Center/Window/Right/DollSlot_1"]
-visible = false
+[node name="NamePlate" type="NinePatchRect" unique_id=1009 parent="Sheet/Left"]
+anchor_left = 0.014344
+anchor_top = 0.386441
+anchor_right = 0.987705
+anchor_bottom = 0.480226
+texture = ExtResource("12")
+patch_margin_left = 28
+patch_margin_top = 20
+patch_margin_right = 28
+patch_margin_bottom = 20
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
 mouse_filter = 2
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 56.0
-offset_bottom = 56.0
 
 
 
-[node name="DollSlot_2" type="TextureRect" unique_id=1050 parent="Center/Window/Right"]
-offset_left = 690.0
-offset_top = 76.0
-offset_right = 746.0
-offset_bottom = 132.0
-
-
-
-[node name="EquipIcon" type="TextureRect" unique_id=1051 parent="Center/Window/Right/DollSlot_2"]
-visible = false
-mouse_filter = 2
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 56.0
-offset_bottom = 56.0
-
-
-
-[node name="DollSlot_3" type="TextureRect" unique_id=1052 parent="Center/Window/Right"]
-offset_left = 516.0
-offset_top = 68.0
-offset_right = 572.0
-offset_bottom = 124.0
-
-
-
-[node name="EquipIcon" type="TextureRect" unique_id=1053 parent="Center/Window/Right/DollSlot_3"]
-visible = false
-mouse_filter = 2
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 56.0
-offset_bottom = 56.0
-
-
-
-[node name="DollSlot_4" type="TextureRect" unique_id=1054 parent="Center/Window/Right"]
-offset_left = 578.0
-offset_top = 68.0
-offset_right = 634.0
-offset_bottom = 124.0
-
-
-
-[node name="EquipIcon" type="TextureRect" unique_id=1055 parent="Center/Window/Right/DollSlot_4"]
-visible = false
-mouse_filter = 2
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 56.0
-offset_bottom = 56.0
-
-
-
-[node name="DollSlot_5" type="TextureRect" unique_id=1056 parent="Center/Window/Right"]
-offset_left = 828.0
-offset_top = 78.0
-offset_right = 884.0
-offset_bottom = 134.0
-
-
-
-[node name="EquipIcon" type="TextureRect" unique_id=1057 parent="Center/Window/Right/DollSlot_5"]
-visible = false
-mouse_filter = 2
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 56.0
-offset_bottom = 56.0
-
-
-
-[node name="DollSlot_6" type="TextureRect" unique_id=1058 parent="Center/Window/Right"]
-offset_left = 690.0
-offset_top = 156.0
-offset_right = 746.0
-offset_bottom = 212.0
-
-
-
-[node name="EquipIcon" type="TextureRect" unique_id=1059 parent="Center/Window/Right/DollSlot_6"]
-visible = false
-mouse_filter = 2
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 56.0
-offset_bottom = 56.0
-
-
-
-[node name="DollSlot_7" type="TextureRect" unique_id=1060 parent="Center/Window/Right"]
-offset_left = 828.0
-offset_top = 140.0
-offset_right = 884.0
-offset_bottom = 196.0
-
-
-
-[node name="EquipIcon" type="TextureRect" unique_id=1061 parent="Center/Window/Right/DollSlot_7"]
-visible = false
-mouse_filter = 2
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 56.0
-offset_bottom = 56.0
-
-
-
-[node name="DollSlot_8" type="TextureRect" unique_id=1062 parent="Center/Window/Right"]
-offset_left = 516.0
-offset_top = 170.0
-offset_right = 572.0
-offset_bottom = 226.0
-
-
-
-[node name="EquipIcon" type="TextureRect" unique_id=1063 parent="Center/Window/Right/DollSlot_8"]
-visible = false
-mouse_filter = 2
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 56.0
-offset_bottom = 56.0
-
-
-
-[node name="DollSlot_9" type="TextureRect" unique_id=1064 parent="Center/Window/Right"]
-offset_left = 532.0
-offset_top = 240.0
-offset_right = 588.0
-offset_bottom = 296.0
-
-
-
-[node name="EquipIcon" type="TextureRect" unique_id=1065 parent="Center/Window/Right/DollSlot_9"]
-visible = false
-mouse_filter = 2
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 56.0
-offset_bottom = 56.0
-
-
-
-[node name="DollSlot_10" type="TextureRect" unique_id=1066 parent="Center/Window/Right"]
-offset_left = 828.0
-offset_top = 228.0
-offset_right = 884.0
-offset_bottom = 284.0
-
-
-
-[node name="EquipIcon" type="TextureRect" unique_id=1067 parent="Center/Window/Right/DollSlot_10"]
-visible = false
-mouse_filter = 2
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 56.0
-offset_bottom = 56.0
-
-
-
-[node name="DollSlot_11" type="TextureRect" unique_id=1068 parent="Center/Window/Right"]
-offset_left = 556.0
-offset_top = 310.0
-offset_right = 612.0
-offset_bottom = 366.0
-
-
-
-[node name="EquipIcon" type="TextureRect" unique_id=1069 parent="Center/Window/Right/DollSlot_11"]
-visible = false
-mouse_filter = 2
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 56.0
-offset_bottom = 56.0
-
-
-
-[node name="DollSlot_12" type="TextureRect" unique_id=1070 parent="Center/Window/Right"]
-offset_left = 768.0
-offset_top = 308.0
-offset_right = 824.0
-offset_bottom = 364.0
-
-
-
-[node name="EquipIcon" type="TextureRect" unique_id=1071 parent="Center/Window/Right/DollSlot_12"]
-visible = false
-mouse_filter = 2
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 56.0
-offset_bottom = 56.0
-
-
-
-[node name="DollSlot_13" type="TextureRect" unique_id=1072 parent="Center/Window/Right"]
-offset_left = 516.0
-offset_top = 380.0
-offset_right = 572.0
-offset_bottom = 436.0
-
-
-
-[node name="EquipIcon" type="TextureRect" unique_id=1073 parent="Center/Window/Right/DollSlot_13"]
-visible = false
-mouse_filter = 2
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 56.0
-offset_bottom = 56.0
-
-
-
-[node name="DollSlot_14" type="TextureRect" unique_id=1074 parent="Center/Window/Right"]
-offset_left = 578.0
-offset_top = 380.0
-offset_right = 634.0
-offset_bottom = 436.0
-
-
-
-[node name="EquipIcon" type="TextureRect" unique_id=1075 parent="Center/Window/Right/DollSlot_14"]
-visible = false
-mouse_filter = 2
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 56.0
-offset_bottom = 56.0
-
-
-
-[node name="DollSlot_15" type="TextureRect" unique_id=1076 parent="Center/Window/Right"]
-offset_left = 828.0
-offset_top = 402.0
-offset_right = 884.0
-offset_bottom = 458.0
-
-
-
-[node name="EquipIcon" type="TextureRect" unique_id=1077 parent="Center/Window/Right/DollSlot_15"]
-visible = false
-mouse_filter = 2
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 56.0
-offset_bottom = 56.0
-
-
-
-[node name="Grid" type="Control" unique_id=1078 parent="Center/Window/Right"]
-offset_left = 900.0
-offset_top = 26.0
-offset_right = 1260.0
-offset_bottom = 266.0
-
-
-
-[node name="GridCell_0_0" type="ColorRect" unique_id=1079 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 56.0
-offset_bottom = 56.0
-color = Color(1.0, 1.0, 1.0, 0.05)
-
-
-
-[node name="GridCell_1_0" type="ColorRect" unique_id=1080 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 60.0
-offset_top = 0.0
-offset_right = 116.0
-offset_bottom = 56.0
-color = Color(1.0, 1.0, 1.0, 0.05)
-
-
-
-[node name="GridCell_2_0" type="ColorRect" unique_id=1081 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 120.0
-offset_top = 0.0
-offset_right = 176.0
-offset_bottom = 56.0
-color = Color(1.0, 1.0, 1.0, 0.05)
-
-
-
-[node name="GridCell_3_0" type="ColorRect" unique_id=1082 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 180.0
-offset_top = 0.0
-offset_right = 236.0
-offset_bottom = 56.0
-color = Color(1.0, 1.0, 1.0, 0.05)
-
-
-
-[node name="GridCell_4_0" type="ColorRect" unique_id=1083 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 240.0
-offset_top = 0.0
-offset_right = 296.0
-offset_bottom = 56.0
-color = Color(1.0, 1.0, 1.0, 0.05)
-
-
-
-[node name="GridCell_5_0" type="ColorRect" unique_id=1084 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 300.0
-offset_top = 0.0
-offset_right = 356.0
-offset_bottom = 56.0
-color = Color(1.0, 1.0, 1.0, 0.05)
-
-
-
-[node name="GridCell_0_1" type="ColorRect" unique_id=1085 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 0.0
-offset_top = 60.0
-offset_right = 56.0
-offset_bottom = 116.0
-color = Color(1.0, 1.0, 1.0, 0.05)
-
-
-
-[node name="GridCell_1_1" type="ColorRect" unique_id=1086 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 60.0
-offset_top = 60.0
-offset_right = 116.0
-offset_bottom = 116.0
-color = Color(1.0, 1.0, 1.0, 0.05)
-
-
-
-[node name="GridCell_2_1" type="ColorRect" unique_id=1087 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 120.0
-offset_top = 60.0
-offset_right = 176.0
-offset_bottom = 116.0
-color = Color(1.0, 1.0, 1.0, 0.05)
-
-
-
-[node name="GridCell_3_1" type="ColorRect" unique_id=1088 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 180.0
-offset_top = 60.0
-offset_right = 236.0
-offset_bottom = 116.0
-color = Color(1.0, 1.0, 1.0, 0.05)
-
-
-
-[node name="GridCell_4_1" type="ColorRect" unique_id=1089 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 240.0
-offset_top = 60.0
-offset_right = 296.0
-offset_bottom = 116.0
-color = Color(1.0, 1.0, 1.0, 0.05)
-
-
-
-[node name="GridCell_5_1" type="ColorRect" unique_id=1090 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 300.0
-offset_top = 60.0
-offset_right = 356.0
-offset_bottom = 116.0
-color = Color(1.0, 1.0, 1.0, 0.05)
-
-
-
-[node name="GridCell_0_2" type="ColorRect" unique_id=1091 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 0.0
-offset_top = 120.0
-offset_right = 56.0
-offset_bottom = 176.0
-color = Color(1.0, 1.0, 1.0, 0.05)
-
-
-
-[node name="GridCell_1_2" type="ColorRect" unique_id=1092 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 60.0
-offset_top = 120.0
-offset_right = 116.0
-offset_bottom = 176.0
-color = Color(1.0, 1.0, 1.0, 0.05)
-
-
-
-[node name="GridCell_2_2" type="ColorRect" unique_id=1093 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 120.0
-offset_top = 120.0
-offset_right = 176.0
-offset_bottom = 176.0
-color = Color(1.0, 1.0, 1.0, 0.05)
-
-
-
-[node name="GridCell_3_2" type="ColorRect" unique_id=1094 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 180.0
-offset_top = 120.0
-offset_right = 236.0
-offset_bottom = 176.0
-color = Color(1.0, 1.0, 1.0, 0.05)
-
-
-
-[node name="GridCell_4_2" type="ColorRect" unique_id=1095 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 240.0
-offset_top = 120.0
-offset_right = 296.0
-offset_bottom = 176.0
-color = Color(1.0, 1.0, 1.0, 0.05)
-
-
-
-[node name="GridCell_5_2" type="ColorRect" unique_id=1096 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 300.0
-offset_top = 120.0
-offset_right = 356.0
-offset_bottom = 176.0
-color = Color(1.0, 1.0, 1.0, 0.05)
-
-
-
-[node name="GridCell_0_3" type="ColorRect" unique_id=1097 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 0.0
-offset_top = 180.0
-offset_right = 56.0
-offset_bottom = 236.0
-color = Color(1.0, 1.0, 1.0, 0.05)
-
-
-
-[node name="GridCell_1_3" type="ColorRect" unique_id=1098 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 60.0
-offset_top = 180.0
-offset_right = 116.0
-offset_bottom = 236.0
-color = Color(1.0, 1.0, 1.0, 0.05)
-
-
-
-[node name="GridCell_2_3" type="ColorRect" unique_id=1099 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 120.0
-offset_top = 180.0
-offset_right = 176.0
-offset_bottom = 236.0
-color = Color(1.0, 1.0, 1.0, 0.05)
-
-
-
-[node name="GridCell_3_3" type="ColorRect" unique_id=1100 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 180.0
-offset_top = 180.0
-offset_right = 236.0
-offset_bottom = 236.0
-color = Color(1.0, 1.0, 1.0, 0.05)
-
-
-
-[node name="GridCell_4_3" type="ColorRect" unique_id=1101 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 240.0
-offset_top = 180.0
-offset_right = 296.0
-offset_bottom = 236.0
-color = Color(1.0, 1.0, 1.0, 0.05)
-
-
-
-[node name="GridCell_5_3" type="ColorRect" unique_id=1102 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 300.0
-offset_top = 180.0
-offset_right = 356.0
-offset_bottom = 236.0
-color = Color(1.0, 1.0, 1.0, 0.05)
-
-
-
-[node name="Items" type="Control" unique_id=1103 parent="Center/Window/Right/Grid"]
-mouse_filter = 2
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 360.0
-offset_bottom = 240.0
-
-
-
-[node name="Overflow_lbl" type="Label" unique_id=1104 parent="Center/Window/Right"]
-offset_left = 900.0
-offset_top = 286.0
-offset_right = 1390.0
-offset_bottom = 310.0
-
-
-
-[node name="Overflow" type="Control" unique_id=1105 parent="Center/Window/Right"]
-mouse_filter = 2
-offset_left = 900.0
-offset_top = 310.0
-offset_right = 1390.0
-offset_bottom = 370.0
-
-
-
-[node name="Desc_lbl" type="Label" unique_id=1106 parent="Center/Window/Right"]
-offset_left = 900.0
-offset_top = 372.0
-offset_right = 1390.0
-offset_bottom = 396.0
-
-
-
-[node name="Desc" type="Label" unique_id=1107 parent="Center/Window/Right"]
-autowrap_mode = 3
+[node name="Name" type="Label" unique_id=1010 parent="Sheet/Left"]
+anchor_left = 0.014344
+anchor_top = 0.386441
+anchor_right = 0.987705
+anchor_bottom = 0.480226
+horizontal_alignment = 1
 vertical_alignment = 1
-offset_left = 900.0
-offset_top = 396.0
-offset_right = 1390.0
-offset_bottom = 484.0
+theme_type_variation = &"LabelTitle"
 
 
 
-[node name="Equip" type="Button" unique_id=1108 parent="Center/Window/Right"]
-offset_left = 1280.0
-offset_top = 26.0
-offset_right = 1390.0
-offset_bottom = 82.0
+[node name="LevelRow" type="Label" unique_id=1011 parent="Sheet/Left"]
+anchor_left = 0.014344
+anchor_top = 0.480226
+anchor_right = 0.987705
+anchor_bottom = 0.518644
+horizontal_alignment = 1
 
 
 
-[node name="Remove" type="Button" unique_id=1109 parent="Center/Window/Right"]
-offset_left = 1280.0
-offset_top = 90.0
-offset_right = 1390.0
-offset_bottom = 146.0
+[node name="Rule1" type="TextureRect" unique_id=1012 parent="Sheet/Left"]
+anchor_left = 0.051230
+anchor_top = 0.520904
+anchor_right = 0.952869
+anchor_bottom = 0.529944
+texture = ExtResource("17")
+stretch_mode = 1
+mouse_filter = 2
 
 
 
-[node name="Dispose" type="Button" unique_id=1110 parent="Center/Window/Right"]
-offset_left = 1280.0
-offset_top = 154.0
-offset_right = 1390.0
-offset_bottom = 210.0
+[node name="Rule2" type="TextureRect" unique_id=1013 parent="Sheet/Left"]
+anchor_left = 0.051230
+anchor_top = 0.646328
+anchor_right = 0.952869
+anchor_bottom = 0.655367
+texture = ExtResource("17")
+stretch_mode = 1
+mouse_filter = 2
 
 
 
-[node name="Side" type="Control" unique_id=1111 parent="Center/Window"]
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
+[node name="StatIcon_0" type="TextureRect" unique_id=1014 parent="Sheet/Left"]
+anchor_left = 0.032787
+anchor_top = 0.542373
+anchor_right = 0.094262
+anchor_bottom = 0.576271
 
 
 
-[node name="Banner" type="TextureRect" unique_id=1112 parent="Center/Window/Side"]
-offset_left = 329.0
-offset_top = 19.0
-offset_right = 391.0
-offset_bottom = 81.0
+[node name="StatName_0" type="Label" unique_id=1015 parent="Sheet/Left"]
+anchor_left = 0.110656
+anchor_top = 0.540113
+anchor_right = 0.393443
+anchor_bottom = 0.562712
+
+
+
+[node name="StatValue_0" type="Label" unique_id=1016 parent="Sheet/Left"]
+anchor_left = 0.114754
+anchor_top = 0.562712
+anchor_right = 0.495902
+anchor_bottom = 0.589831
+theme_type_variation = &"LabelNumber"
+
+
+
+[node name="StatIcon_1" type="TextureRect" unique_id=1017 parent="Sheet/Left"]
+anchor_left = 0.520492
+anchor_top = 0.542373
+anchor_right = 0.581967
+anchor_bottom = 0.576271
+
+
+
+[node name="StatName_1" type="Label" unique_id=1018 parent="Sheet/Left"]
+anchor_left = 0.598361
+anchor_top = 0.540113
+anchor_right = 0.881148
+anchor_bottom = 0.562712
+
+
+
+[node name="StatValue_1" type="Label" unique_id=1019 parent="Sheet/Left"]
+anchor_left = 0.602459
+anchor_top = 0.562712
+anchor_right = 0.983607
+anchor_bottom = 0.589831
+theme_type_variation = &"LabelNumber"
+
+
+
+[node name="StatIcon_2" type="TextureRect" unique_id=1020 parent="Sheet/Left"]
+anchor_left = 0.032787
+anchor_top = 0.595480
+anchor_right = 0.094262
+anchor_bottom = 0.629379
+
+
+
+[node name="StatName_2" type="Label" unique_id=1021 parent="Sheet/Left"]
+anchor_left = 0.110656
+anchor_top = 0.593220
+anchor_right = 0.393443
+anchor_bottom = 0.615819
+
+
+
+[node name="StatValue_2" type="Label" unique_id=1022 parent="Sheet/Left"]
+anchor_left = 0.114754
+anchor_top = 0.615819
+anchor_right = 0.495902
+anchor_bottom = 0.642938
+theme_type_variation = &"LabelNumber"
+
+
+
+[node name="StatIcon_3" type="TextureRect" unique_id=1023 parent="Sheet/Left"]
+anchor_left = 0.520492
+anchor_top = 0.595480
+anchor_right = 0.581967
+anchor_bottom = 0.629379
+
+
+
+[node name="StatName_3" type="Label" unique_id=1024 parent="Sheet/Left"]
+anchor_left = 0.598361
+anchor_top = 0.593220
+anchor_right = 0.881148
+anchor_bottom = 0.615819
+
+
+
+[node name="StatValue_3" type="Label" unique_id=1025 parent="Sheet/Left"]
+anchor_left = 0.602459
+anchor_top = 0.615819
+anchor_right = 0.983607
+anchor_bottom = 0.642938
+theme_type_variation = &"LabelNumber"
+
+
+
+[node name="EquipRow_0" type="TextureRect" unique_id=1026 parent="Sheet/Left"]
+anchor_left = 0.024590
+anchor_top = 0.658757
+anchor_right = 1.000000
+anchor_bottom = 0.705730
+texture = ExtResource("24")
+stretch_mode = 1
+mouse_filter = 2
+visible = false
+
+
+
+[node name="EquipIcon_0" type="TextureRect" unique_id=1027 parent="Sheet/Left/EquipRow_0"]
+anchor_left = 0.02
+anchor_top = 0.08
+anchor_right = 0.09
+anchor_bottom = 0.9
 stretch_mode = 5
+mouse_filter = 2
 
 
 
-[node name="Mini" type="TextureRect" unique_id=1113 parent="Center/Window/Side"]
-offset_left = 329.0
-offset_top = 89.0
-offset_right = 391.0
-offset_bottom = 135.0
+[node name="EquipName_0" type="Label" unique_id=1028 parent="Sheet/Left/EquipRow_0"]
+anchor_left = 0.1
+anchor_right = 0.98
+anchor_bottom = 1.0
+vertical_alignment = 1
+
+
+
+[node name="EquipRow_1" type="TextureRect" unique_id=1029 parent="Sheet/Left"]
+anchor_left = 0.024590
+anchor_top = 0.705730
+anchor_right = 1.000000
+anchor_bottom = 0.752704
+texture = ExtResource("24")
+stretch_mode = 1
+mouse_filter = 2
+visible = false
+
+
+
+[node name="EquipIcon_1" type="TextureRect" unique_id=1030 parent="Sheet/Left/EquipRow_1"]
+anchor_left = 0.02
+anchor_top = 0.08
+anchor_right = 0.09
+anchor_bottom = 0.9
 stretch_mode = 5
-
-
-
-[node name="SideSlot_0" type="TextureRect" unique_id=1114 parent="Center/Window/Side"]
-offset_left = 329.0
-offset_top = 132.0
-offset_right = 391.0
-offset_bottom = 174.0
-
-
-
-[node name="SideSlot_1" type="TextureRect" unique_id=1115 parent="Center/Window/Side"]
-offset_left = 329.0
-offset_top = 182.0
-offset_right = 391.0
-offset_bottom = 224.0
-
-
-
-[node name="SideSlot_2" type="TextureRect" unique_id=1116 parent="Center/Window/Side"]
-offset_left = 329.0
-offset_top = 232.0
-offset_right = 391.0
-offset_bottom = 274.0
-
-
-
-[node name="SideSlot_3" type="TextureRect" unique_id=1117 parent="Center/Window/Side"]
-offset_left = 329.0
-offset_top = 282.0
-offset_right = 391.0
-offset_bottom = 324.0
-
-
-
-[node name="SideSlot_4" type="TextureRect" unique_id=1118 parent="Center/Window/Side"]
-offset_left = 329.0
-offset_top = 332.0
-offset_right = 391.0
-offset_bottom = 374.0
-
-
-
-[node name="SideSlot_5" type="TextureRect" unique_id=1119 parent="Center/Window/Side"]
-offset_left = 329.0
-offset_top = 382.0
-offset_right = 391.0
-offset_bottom = 424.0
-
-
-
-[node name="Ok" type="Button" unique_id=1120 parent="Center/Window/Side"]
-offset_left = 329.0
-offset_top = 542.0
-offset_right = 391.0
-offset_bottom = 588.0
-
-
-
-[node name="Bottom" type="PanelContainer" unique_id=1121 parent="Center/Window"]
-theme_type_variation = &"ArtifactBottom"
-offset_left = 10.0
-offset_top = 486.0
-offset_right = 1390.0
-offset_bottom = 666.0
-
-
-
-[node name="ArmySlot_0" type="TextureRect" unique_id=1122 parent="Center/Window/Bottom"]
-offset_left = 10.0
-offset_top = 10.0
-offset_right = 86.0
-offset_bottom = 86.0
-
-
-
-[node name="ArmyIcon" type="TextureRect" unique_id=1123 parent="Center/Window/Bottom/ArmySlot_0"]
-visible = false
 mouse_filter = 2
-offset_left = 6.0
-offset_top = 6.0
-offset_right = 70.0
-offset_bottom = 70.0
 
 
 
-[node name="ArmyCount" type="Label" unique_id=1124 parent="Center/Window/Bottom/ArmySlot_0"]
-visible = false
+[node name="EquipName_1" type="Label" unique_id=1031 parent="Sheet/Left/EquipRow_1"]
+anchor_left = 0.1
+anchor_right = 0.98
+anchor_bottom = 1.0
+vertical_alignment = 1
+
+
+
+[node name="EquipRow_2" type="TextureRect" unique_id=1032 parent="Sheet/Left"]
+anchor_left = 0.024590
+anchor_top = 0.752704
+anchor_right = 1.000000
+anchor_bottom = 0.799677
+texture = ExtResource("24")
+stretch_mode = 1
 mouse_filter = 2
-horizontal_alignment = 2
+visible = false
+
+
+
+[node name="EquipIcon_2" type="TextureRect" unique_id=1033 parent="Sheet/Left/EquipRow_2"]
+anchor_left = 0.02
+anchor_top = 0.08
+anchor_right = 0.09
+anchor_bottom = 0.9
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="EquipName_2" type="Label" unique_id=1034 parent="Sheet/Left/EquipRow_2"]
+anchor_left = 0.1
+anchor_right = 0.98
+anchor_bottom = 1.0
+vertical_alignment = 1
+
+
+
+[node name="EquipRow_3" type="TextureRect" unique_id=1035 parent="Sheet/Left"]
+anchor_left = 0.024590
+anchor_top = 0.799677
+anchor_right = 1.000000
+anchor_bottom = 0.846651
+texture = ExtResource("24")
+stretch_mode = 1
+mouse_filter = 2
+visible = false
+
+
+
+[node name="EquipIcon_3" type="TextureRect" unique_id=1036 parent="Sheet/Left/EquipRow_3"]
+anchor_left = 0.02
+anchor_top = 0.08
+anchor_right = 0.09
+anchor_bottom = 0.9
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="EquipName_3" type="Label" unique_id=1037 parent="Sheet/Left/EquipRow_3"]
+anchor_left = 0.1
+anchor_right = 0.98
+anchor_bottom = 1.0
+vertical_alignment = 1
+
+
+
+[node name="EquipRow_4" type="TextureRect" unique_id=1038 parent="Sheet/Left"]
+anchor_left = 0.024590
+anchor_top = 0.846651
+anchor_right = 1.000000
+anchor_bottom = 0.893624
+texture = ExtResource("24")
+stretch_mode = 1
+mouse_filter = 2
+visible = false
+
+
+
+[node name="EquipIcon_4" type="TextureRect" unique_id=1039 parent="Sheet/Left/EquipRow_4"]
+anchor_left = 0.02
+anchor_top = 0.08
+anchor_right = 0.09
+anchor_bottom = 0.9
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="EquipName_4" type="Label" unique_id=1040 parent="Sheet/Left/EquipRow_4"]
+anchor_left = 0.1
+anchor_right = 0.98
+anchor_bottom = 1.0
+vertical_alignment = 1
+
+
+
+[node name="EquipRow_5" type="TextureRect" unique_id=1041 parent="Sheet/Left"]
+anchor_left = 0.024590
+anchor_top = 0.893624
+anchor_right = 1.000000
+anchor_bottom = 0.940597
+texture = ExtResource("24")
+stretch_mode = 1
+mouse_filter = 2
+visible = false
+
+
+
+[node name="EquipIcon_5" type="TextureRect" unique_id=1042 parent="Sheet/Left/EquipRow_5"]
+anchor_left = 0.02
+anchor_top = 0.08
+anchor_right = 0.09
+anchor_bottom = 0.9
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="EquipName_5" type="Label" unique_id=1043 parent="Sheet/Left/EquipRow_5"]
+anchor_left = 0.1
+anchor_right = 0.98
+anchor_bottom = 1.0
+vertical_alignment = 1
+
+
+
+[node name="EquipRow_6" type="TextureRect" unique_id=1044 parent="Sheet/Left"]
+anchor_left = 0.024590
+anchor_top = 0.940597
+anchor_right = 1.000000
+anchor_bottom = 0.987571
+texture = ExtResource("24")
+stretch_mode = 1
+mouse_filter = 2
+visible = false
+
+
+
+[node name="EquipIcon_6" type="TextureRect" unique_id=1045 parent="Sheet/Left/EquipRow_6"]
+anchor_left = 0.02
+anchor_top = 0.08
+anchor_right = 0.09
+anchor_bottom = 0.9
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="EquipName_6" type="Label" unique_id=1046 parent="Sheet/Left/EquipRow_6"]
+anchor_left = 0.1
+anchor_right = 0.98
+anchor_bottom = 1.0
+vertical_alignment = 1
+
+
+
+[node name="Stone" type="Control" unique_id=1047 parent="Sheet"]
+anchor_left = 0.315000
+anchor_top = 0.008889
+anchor_right = 0.816875
+anchor_bottom = 0.992222
+
+
+
+[node name="Bg" type="NinePatchRect" unique_id=1048 parent="Sheet/Stone"]
+texture = ExtResource("11")
+patch_margin_left = 40
+patch_margin_top = 40
+patch_margin_right = 40
+patch_margin_bottom = 40
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+mouse_filter = 2
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+
+
+[node name="Figure" type="TextureRect" unique_id=1049 parent="Sheet/Stone"]
+anchor_left = 0.185554
+anchor_top = 0.016949
+anchor_right = 0.717310
+anchor_bottom = 0.555932
+texture = ExtResource("21")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="Doll" type="Control" unique_id=1050 parent="Sheet/Stone"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+
+
+[node name="DollSlot_0" type="TextureRect" unique_id=1051 parent="Sheet/Stone/Doll"]
+anchor_left = 0.377335
+anchor_top = 0.034463
+anchor_right = 0.459527
+anchor_bottom = 0.100000
+texture = ExtResource("14")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="DollIcon_0" type="TextureRect" unique_id=1052 parent="Sheet/Stone/Doll"]
+anchor_left = 0.384807
+anchor_top = 0.041243
+anchor_right = 0.452055
+anchor_bottom = 0.093220
+mouse_filter = 2
+visible = false
+
+
+
+[node name="DollSlot_1" type="TextureRect" unique_id=1053 parent="Sheet/Stone/Doll"]
+anchor_left = 0.570610
+anchor_top = 0.049718
+anchor_right = 0.652802
+anchor_bottom = 0.115254
+texture = ExtResource("14")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="DollIcon_1" type="TextureRect" unique_id=1054 parent="Sheet/Stone/Doll"]
+anchor_left = 0.578082
+anchor_top = 0.056497
+anchor_right = 0.645330
+anchor_bottom = 0.108475
+mouse_filter = 2
+visible = false
+
+
+
+[node name="DollSlot_2" type="TextureRect" unique_id=1055 parent="Sheet/Stone/Doll"]
+anchor_left = 0.176090
+anchor_top = 0.112768
+anchor_right = 0.258281
+anchor_bottom = 0.178305
+texture = ExtResource("14")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="DollIcon_2" type="TextureRect" unique_id=1056 parent="Sheet/Stone/Doll"]
+anchor_left = 0.183562
+anchor_top = 0.119548
+anchor_right = 0.250809
+anchor_bottom = 0.171525
+mouse_filter = 2
+visible = false
+
+
+
+[node name="DollSlot_3" type="TextureRect" unique_id=1057 parent="Sheet/Stone/Doll"]
+anchor_left = 0.377335
+anchor_top = 0.112768
+anchor_right = 0.459527
+anchor_bottom = 0.178305
+texture = ExtResource("14")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="DollIcon_3" type="TextureRect" unique_id=1058 parent="Sheet/Stone/Doll"]
+anchor_left = 0.384807
+anchor_top = 0.119548
+anchor_right = 0.452055
+anchor_bottom = 0.171525
+mouse_filter = 2
+visible = false
+
+
+
+[node name="DollSlot_4" type="TextureRect" unique_id=1059 parent="Sheet/Stone/Doll"]
+anchor_left = 0.610461
+anchor_top = 0.122938
+anchor_right = 0.692653
+anchor_bottom = 0.188475
+texture = ExtResource("14")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="DollIcon_4" type="TextureRect" unique_id=1060 parent="Sheet/Stone/Doll"]
+anchor_left = 0.617933
+anchor_top = 0.129718
+anchor_right = 0.685181
+anchor_bottom = 0.181695
+mouse_filter = 2
+visible = false
+
+
+
+[node name="DollSlot_5" type="TextureRect" unique_id=1061 parent="Sheet/Stone/Doll"]
+anchor_left = 0.377335
+anchor_top = 0.204294
+anchor_right = 0.459527
+anchor_bottom = 0.269831
+texture = ExtResource("14")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="DollIcon_5" type="TextureRect" unique_id=1062 parent="Sheet/Stone/Doll"]
+anchor_left = 0.384807
+anchor_top = 0.211073
+anchor_right = 0.452055
+anchor_bottom = 0.263051
+mouse_filter = 2
+visible = false
+
+
+
+[node name="DollSlot_6" type="TextureRect" unique_id=1063 parent="Sheet/Stone/Doll"]
+anchor_left = 0.610461
+anchor_top = 0.204294
+anchor_right = 0.692653
+anchor_bottom = 0.269831
+texture = ExtResource("14")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="DollIcon_6" type="TextureRect" unique_id=1064 parent="Sheet/Stone/Doll"]
+anchor_left = 0.617933
+anchor_top = 0.211073
+anchor_right = 0.685181
+anchor_bottom = 0.263051
+mouse_filter = 2
+visible = false
+
+
+
+[node name="DollSlot_7" type="TextureRect" unique_id=1065 parent="Sheet/Stone/Doll"]
+anchor_left = 0.130261
+anchor_top = 0.230734
+anchor_right = 0.212453
+anchor_bottom = 0.296271
+texture = ExtResource("14")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="DollIcon_7" type="TextureRect" unique_id=1066 parent="Sheet/Stone/Doll"]
+anchor_left = 0.137733
+anchor_top = 0.237514
+anchor_right = 0.204981
+anchor_bottom = 0.289492
+mouse_filter = 2
+visible = false
+
+
+
+[node name="DollSlot_8" type="TextureRect" unique_id=1067 parent="Sheet/Stone/Doll"]
+anchor_left = 0.610461
+anchor_top = 0.285650
+anchor_right = 0.692653
+anchor_bottom = 0.351186
+texture = ExtResource("14")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="DollIcon_8" type="TextureRect" unique_id=1068 parent="Sheet/Stone/Doll"]
+anchor_left = 0.617933
+anchor_top = 0.292429
+anchor_right = 0.685181
+anchor_bottom = 0.344407
+mouse_filter = 2
+visible = false
+
+
+
+[node name="DollSlot_9" type="TextureRect" unique_id=1069 parent="Sheet/Stone/Doll"]
+anchor_left = 0.200000
+anchor_top = 0.295819
+anchor_right = 0.282192
+anchor_bottom = 0.361356
+texture = ExtResource("14")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="DollIcon_9" type="TextureRect" unique_id=1070 parent="Sheet/Stone/Doll"]
+anchor_left = 0.207472
+anchor_top = 0.302599
+anchor_right = 0.274720
+anchor_bottom = 0.354576
+mouse_filter = 2
+visible = false
+
+
+
+[node name="DollSlot_10" type="TextureRect" unique_id=1071 parent="Sheet/Stone/Doll"]
+anchor_left = 0.510834
+anchor_top = 0.334463
+anchor_right = 0.593026
+anchor_bottom = 0.400000
+texture = ExtResource("14")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="DollIcon_10" type="TextureRect" unique_id=1072 parent="Sheet/Stone/Doll"]
+anchor_left = 0.518306
+anchor_top = 0.341243
+anchor_right = 0.585554
+anchor_bottom = 0.393220
+mouse_filter = 2
+visible = false
+
+
+
+[node name="DollSlot_11" type="TextureRect" unique_id=1073 parent="Sheet/Stone/Doll"]
+anchor_left = 0.271731
+anchor_top = 0.373107
+anchor_right = 0.353923
+anchor_bottom = 0.438644
+texture = ExtResource("14")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="DollIcon_11" type="TextureRect" unique_id=1074 parent="Sheet/Stone/Doll"]
+anchor_left = 0.279203
+anchor_top = 0.379887
+anchor_right = 0.346451
+anchor_bottom = 0.431864
+mouse_filter = 2
+visible = false
+
+
+
+[node name="DollSlot_12" type="TextureRect" unique_id=1075 parent="Sheet/Stone/Doll"]
+anchor_left = 0.391283
+anchor_top = 0.413785
+anchor_right = 0.473474
+anchor_bottom = 0.479322
+texture = ExtResource("14")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="DollIcon_12" type="TextureRect" unique_id=1076 parent="Sheet/Stone/Doll"]
+anchor_left = 0.398755
+anchor_top = 0.420565
+anchor_right = 0.466003
+anchor_bottom = 0.472542
+mouse_filter = 2
+visible = false
+
+
+
+[node name="DollSlot_13" type="TextureRect" unique_id=1077 parent="Sheet/Stone/Doll"]
+anchor_left = 0.130261
+anchor_top = 0.436158
+anchor_right = 0.212453
+anchor_bottom = 0.501695
+texture = ExtResource("14")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="DollIcon_13" type="TextureRect" unique_id=1078 parent="Sheet/Stone/Doll"]
+anchor_left = 0.137733
+anchor_top = 0.442938
+anchor_right = 0.204981
+anchor_bottom = 0.494915
+mouse_filter = 2
+visible = false
+
+
+
+[node name="DollSlot_14" type="TextureRect" unique_id=1079 parent="Sheet/Stone/Doll"]
+anchor_left = 0.650311
+anchor_top = 0.436158
+anchor_right = 0.732503
+anchor_bottom = 0.501695
+texture = ExtResource("14")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="DollIcon_14" type="TextureRect" unique_id=1080 parent="Sheet/Stone/Doll"]
+anchor_left = 0.657783
+anchor_top = 0.442938
+anchor_right = 0.725031
+anchor_bottom = 0.494915
+mouse_filter = 2
+visible = false
+
+
+
+[node name="DollSlot_15" type="TextureRect" unique_id=1081 parent="Sheet/Stone/Doll"]
+anchor_left = 0.447073
+anchor_top = 0.489040
+anchor_right = 0.529265
+anchor_bottom = 0.554576
+texture = ExtResource("14")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="DollIcon_15" type="TextureRect" unique_id=1082 parent="Sheet/Stone/Doll"]
+anchor_left = 0.454545
+anchor_top = 0.495819
+anchor_right = 0.521793
+anchor_bottom = 0.547797
+mouse_filter = 2
+visible = false
+
+
+
+[node name="Bag" type="Control" unique_id=1083 parent="Sheet/Stone"]
+anchor_left = 0.083437
+anchor_top = 0.572881
+anchor_right = 0.980075
+anchor_bottom = 0.972881
+mouse_filter = 2
+
+
+
+[node name="GridCell_0_0" type="TextureRect" unique_id=1084 parent="Sheet/Stone/Bag"]
+offset_left = 0.000000
+offset_top = 0.000000
+offset_right = 68.000000
+offset_bottom = 66.800003
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_1_0" type="TextureRect" unique_id=1085 parent="Sheet/Stone/Bag"]
+offset_left = 72.000000
+offset_top = 0.000000
+offset_right = 140.000000
+offset_bottom = 66.800003
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_2_0" type="TextureRect" unique_id=1086 parent="Sheet/Stone/Bag"]
+offset_left = 144.000000
+offset_top = 0.000000
+offset_right = 212.000000
+offset_bottom = 66.800003
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_3_0" type="TextureRect" unique_id=1087 parent="Sheet/Stone/Bag"]
+offset_left = 216.000000
+offset_top = 0.000000
+offset_right = 284.000000
+offset_bottom = 66.800003
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_4_0" type="TextureRect" unique_id=1088 parent="Sheet/Stone/Bag"]
+offset_left = 288.000000
+offset_top = 0.000000
+offset_right = 356.000000
+offset_bottom = 66.800003
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_5_0" type="TextureRect" unique_id=1089 parent="Sheet/Stone/Bag"]
+offset_left = 360.000000
+offset_top = 0.000000
+offset_right = 428.000000
+offset_bottom = 66.800003
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_6_0" type="TextureRect" unique_id=1090 parent="Sheet/Stone/Bag"]
+offset_left = 432.000000
+offset_top = 0.000000
+offset_right = 500.000000
+offset_bottom = 66.800003
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_7_0" type="TextureRect" unique_id=1091 parent="Sheet/Stone/Bag"]
+offset_left = 504.000000
+offset_top = 0.000000
+offset_right = 572.000000
+offset_bottom = 66.800003
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_8_0" type="TextureRect" unique_id=1092 parent="Sheet/Stone/Bag"]
+offset_left = 576.000000
+offset_top = 0.000000
+offset_right = 644.000000
+offset_bottom = 66.800003
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_9_0" type="TextureRect" unique_id=1093 parent="Sheet/Stone/Bag"]
+offset_left = 648.000000
+offset_top = 0.000000
+offset_right = 716.000000
+offset_bottom = 66.800003
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_0_1" type="TextureRect" unique_id=1094 parent="Sheet/Stone/Bag"]
+offset_left = 0.000000
+offset_top = 70.800003
+offset_right = 68.000000
+offset_bottom = 137.600006
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_1_1" type="TextureRect" unique_id=1095 parent="Sheet/Stone/Bag"]
+offset_left = 72.000000
+offset_top = 70.800003
+offset_right = 140.000000
+offset_bottom = 137.600006
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_2_1" type="TextureRect" unique_id=1096 parent="Sheet/Stone/Bag"]
+offset_left = 144.000000
+offset_top = 70.800003
+offset_right = 212.000000
+offset_bottom = 137.600006
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_3_1" type="TextureRect" unique_id=1097 parent="Sheet/Stone/Bag"]
+offset_left = 216.000000
+offset_top = 70.800003
+offset_right = 284.000000
+offset_bottom = 137.600006
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_4_1" type="TextureRect" unique_id=1098 parent="Sheet/Stone/Bag"]
+offset_left = 288.000000
+offset_top = 70.800003
+offset_right = 356.000000
+offset_bottom = 137.600006
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_5_1" type="TextureRect" unique_id=1099 parent="Sheet/Stone/Bag"]
+offset_left = 360.000000
+offset_top = 70.800003
+offset_right = 428.000000
+offset_bottom = 137.600006
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_6_1" type="TextureRect" unique_id=1100 parent="Sheet/Stone/Bag"]
+offset_left = 432.000000
+offset_top = 70.800003
+offset_right = 500.000000
+offset_bottom = 137.600006
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_7_1" type="TextureRect" unique_id=1101 parent="Sheet/Stone/Bag"]
+offset_left = 504.000000
+offset_top = 70.800003
+offset_right = 572.000000
+offset_bottom = 137.600006
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_8_1" type="TextureRect" unique_id=1102 parent="Sheet/Stone/Bag"]
+offset_left = 576.000000
+offset_top = 70.800003
+offset_right = 644.000000
+offset_bottom = 137.600006
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_9_1" type="TextureRect" unique_id=1103 parent="Sheet/Stone/Bag"]
+offset_left = 648.000000
+offset_top = 70.800003
+offset_right = 716.000000
+offset_bottom = 137.600006
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_0_2" type="TextureRect" unique_id=1104 parent="Sheet/Stone/Bag"]
+offset_left = 0.000000
+offset_top = 141.600006
+offset_right = 68.000000
+offset_bottom = 208.400009
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_1_2" type="TextureRect" unique_id=1105 parent="Sheet/Stone/Bag"]
+offset_left = 72.000000
+offset_top = 141.600006
+offset_right = 140.000000
+offset_bottom = 208.400009
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_2_2" type="TextureRect" unique_id=1106 parent="Sheet/Stone/Bag"]
+offset_left = 144.000000
+offset_top = 141.600006
+offset_right = 212.000000
+offset_bottom = 208.400009
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_3_2" type="TextureRect" unique_id=1107 parent="Sheet/Stone/Bag"]
+offset_left = 216.000000
+offset_top = 141.600006
+offset_right = 284.000000
+offset_bottom = 208.400009
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_4_2" type="TextureRect" unique_id=1108 parent="Sheet/Stone/Bag"]
+offset_left = 288.000000
+offset_top = 141.600006
+offset_right = 356.000000
+offset_bottom = 208.400009
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_5_2" type="TextureRect" unique_id=1109 parent="Sheet/Stone/Bag"]
+offset_left = 360.000000
+offset_top = 141.600006
+offset_right = 428.000000
+offset_bottom = 208.400009
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_6_2" type="TextureRect" unique_id=1110 parent="Sheet/Stone/Bag"]
+offset_left = 432.000000
+offset_top = 141.600006
+offset_right = 500.000000
+offset_bottom = 208.400009
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_7_2" type="TextureRect" unique_id=1111 parent="Sheet/Stone/Bag"]
+offset_left = 504.000000
+offset_top = 141.600006
+offset_right = 572.000000
+offset_bottom = 208.400009
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_8_2" type="TextureRect" unique_id=1112 parent="Sheet/Stone/Bag"]
+offset_left = 576.000000
+offset_top = 141.600006
+offset_right = 644.000000
+offset_bottom = 208.400009
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_9_2" type="TextureRect" unique_id=1113 parent="Sheet/Stone/Bag"]
+offset_left = 648.000000
+offset_top = 141.600006
+offset_right = 716.000000
+offset_bottom = 208.400009
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_0_3" type="TextureRect" unique_id=1114 parent="Sheet/Stone/Bag"]
+offset_left = 0.000000
+offset_top = 212.400009
+offset_right = 68.000000
+offset_bottom = 279.200012
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_1_3" type="TextureRect" unique_id=1115 parent="Sheet/Stone/Bag"]
+offset_left = 72.000000
+offset_top = 212.400009
+offset_right = 140.000000
+offset_bottom = 279.200012
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_2_3" type="TextureRect" unique_id=1116 parent="Sheet/Stone/Bag"]
+offset_left = 144.000000
+offset_top = 212.400009
+offset_right = 212.000000
+offset_bottom = 279.200012
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_3_3" type="TextureRect" unique_id=1117 parent="Sheet/Stone/Bag"]
+offset_left = 216.000000
+offset_top = 212.400009
+offset_right = 284.000000
+offset_bottom = 279.200012
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_4_3" type="TextureRect" unique_id=1118 parent="Sheet/Stone/Bag"]
+offset_left = 288.000000
+offset_top = 212.400009
+offset_right = 356.000000
+offset_bottom = 279.200012
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_5_3" type="TextureRect" unique_id=1119 parent="Sheet/Stone/Bag"]
+offset_left = 360.000000
+offset_top = 212.400009
+offset_right = 428.000000
+offset_bottom = 279.200012
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_6_3" type="TextureRect" unique_id=1120 parent="Sheet/Stone/Bag"]
+offset_left = 432.000000
+offset_top = 212.400009
+offset_right = 500.000000
+offset_bottom = 279.200012
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_7_3" type="TextureRect" unique_id=1121 parent="Sheet/Stone/Bag"]
+offset_left = 504.000000
+offset_top = 212.400009
+offset_right = 572.000000
+offset_bottom = 279.200012
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_8_3" type="TextureRect" unique_id=1122 parent="Sheet/Stone/Bag"]
+offset_left = 576.000000
+offset_top = 212.400009
+offset_right = 644.000000
+offset_bottom = 279.200012
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_9_3" type="TextureRect" unique_id=1123 parent="Sheet/Stone/Bag"]
+offset_left = 648.000000
+offset_top = 212.400009
+offset_right = 716.000000
+offset_bottom = 279.200012
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_0_4" type="TextureRect" unique_id=1124 parent="Sheet/Stone/Bag"]
+offset_left = 0.000000
+offset_top = 283.200012
+offset_right = 68.000000
+offset_bottom = 350.000015
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_1_4" type="TextureRect" unique_id=1125 parent="Sheet/Stone/Bag"]
+offset_left = 72.000000
+offset_top = 283.200012
+offset_right = 140.000000
+offset_bottom = 350.000015
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_2_4" type="TextureRect" unique_id=1126 parent="Sheet/Stone/Bag"]
+offset_left = 144.000000
+offset_top = 283.200012
+offset_right = 212.000000
+offset_bottom = 350.000015
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_3_4" type="TextureRect" unique_id=1127 parent="Sheet/Stone/Bag"]
+offset_left = 216.000000
+offset_top = 283.200012
+offset_right = 284.000000
+offset_bottom = 350.000015
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_4_4" type="TextureRect" unique_id=1128 parent="Sheet/Stone/Bag"]
+offset_left = 288.000000
+offset_top = 283.200012
+offset_right = 356.000000
+offset_bottom = 350.000015
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_5_4" type="TextureRect" unique_id=1129 parent="Sheet/Stone/Bag"]
+offset_left = 360.000000
+offset_top = 283.200012
+offset_right = 428.000000
+offset_bottom = 350.000015
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_6_4" type="TextureRect" unique_id=1130 parent="Sheet/Stone/Bag"]
+offset_left = 432.000000
+offset_top = 283.200012
+offset_right = 500.000000
+offset_bottom = 350.000015
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_7_4" type="TextureRect" unique_id=1131 parent="Sheet/Stone/Bag"]
+offset_left = 504.000000
+offset_top = 283.200012
+offset_right = 572.000000
+offset_bottom = 350.000015
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_8_4" type="TextureRect" unique_id=1132 parent="Sheet/Stone/Bag"]
+offset_left = 576.000000
+offset_top = 283.200012
+offset_right = 644.000000
+offset_bottom = 350.000015
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="GridCell_9_4" type="TextureRect" unique_id=1133 parent="Sheet/Stone/Bag"]
+offset_left = 648.000000
+offset_top = 283.200012
+offset_right = 716.000000
+offset_bottom = 350.000015
+texture = ExtResource("15")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="Items" type="Control" unique_id=1134 parent="Sheet/Stone/Bag"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+
+
+[node name="Overflow_lbl" type="Label" unique_id=1135 parent="Sheet/Stone"]
+anchor_left = 0.083437
+anchor_top = 0.510734
+anchor_right = 0.980075
+anchor_bottom = 0.562712
+horizontal_alignment = 0
+
+
+
+[node name="Overflow" type="Control" unique_id=1136 parent="Sheet/Stone"]
+anchor_left = 0.083437
+anchor_top = 0.510734
+anchor_right = 0.980075
+anchor_bottom = 0.562712
+mouse_filter = 2
+
+
+
+[node name="BandMana" type="Control" unique_id=1137 parent="Sheet"]
+anchor_left = 0.315000
+anchor_top = 0.037778
+anchor_right = 0.386875
+anchor_bottom = 0.562222
+
+
+
+[node name="Mana_lbl" type="Label" unique_id=1138 parent="Sheet/BandMana"]
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.05
+
+
+
+[node name="Mana_val" type="Label" unique_id=1139 parent="Sheet/BandMana"]
+anchor_left = 0.0
+anchor_top = 0.05
+anchor_right = 1.0
+anchor_bottom = 0.11
 theme_type_variation = &"LabelNumber"
-offset_left = 6.0
-offset_top = 50.0
-offset_right = 74.0
-offset_bottom = 76.0
 
 
 
-[node name="ArmySlot_1" type="TextureRect" unique_id=1125 parent="Center/Window/Bottom"]
-offset_left = 92.0
-offset_top = 10.0
-offset_right = 168.0
-offset_bottom = 86.0
-
-
-
-[node name="ArmyIcon" type="TextureRect" unique_id=1126 parent="Center/Window/Bottom/ArmySlot_1"]
-visible = false
+[node name="ManaTrack" type="TextureRect" unique_id=1140 parent="Sheet/BandMana"]
+anchor_left = 0.0
+anchor_top = 0.11
+anchor_right = 1.0
+anchor_bottom = 0.145
+texture = ExtResource("18")
+stretch_mode = 1
 mouse_filter = 2
-offset_left = 6.0
-offset_top = 6.0
-offset_right = 70.0
-offset_bottom = 70.0
 
 
 
-[node name="ArmyCount" type="Label" unique_id=1127 parent="Center/Window/Bottom/ArmySlot_1"]
-visible = false
+[node name="ManaBar" type="TextureRect" unique_id=1141 parent="Sheet/BandMana"]
+anchor_left = 0.0
+anchor_top = 0.11
+anchor_right = 1.0
+anchor_bottom = 0.145
+texture = ExtResource("19")
+stretch_mode = 1
 mouse_filter = 2
-horizontal_alignment = 2
+
+
+
+[node name="School_lbl" type="Label" unique_id=1142 parent="Sheet/BandMana"]
+anchor_left = 0.0
+anchor_top = 0.155
+anchor_right = 1.0
+anchor_bottom = 0.205
+
+
+
+[node name="School_val" type="Label" unique_id=1143 parent="Sheet/BandMana"]
+anchor_left = 0.0
+anchor_top = 0.205
+anchor_right = 1.0
+anchor_bottom = 0.26
+
+
+
+[node name="BandSkills" type="Control" unique_id=1144 parent="Sheet"]
+anchor_left = 0.716875
+anchor_top = 0.037778
+anchor_right = 0.816875
+anchor_bottom = 0.562222
+
+
+
+[node name="Skills_lbl" type="Label" unique_id=1145 parent="Sheet/BandSkills"]
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.055
+
+
+
+[node name="Skill_0" type="Button" unique_id=1146 parent="Sheet/BandSkills"]
+anchor_left = 0.0
+anchor_top = 0.060000
+anchor_right = 1.0
+anchor_bottom = 0.110000
+text = ""
+
+
+
+[node name="Skill_1" type="Button" unique_id=1147 parent="Sheet/BandSkills"]
+anchor_left = 0.0
+anchor_top = 0.115000
+anchor_right = 1.0
+anchor_bottom = 0.165000
+text = ""
+
+
+
+[node name="Skill_2" type="Button" unique_id=1148 parent="Sheet/BandSkills"]
+anchor_left = 0.0
+anchor_top = 0.170000
+anchor_right = 1.0
+anchor_bottom = 0.220000
+text = ""
+
+
+
+[node name="Skill_3" type="Button" unique_id=1149 parent="Sheet/BandSkills"]
+anchor_left = 0.0
+anchor_top = 0.225000
+anchor_right = 1.0
+anchor_bottom = 0.275000
+text = ""
+
+
+
+[node name="Skill_4" type="Button" unique_id=1150 parent="Sheet/BandSkills"]
+anchor_left = 0.0
+anchor_top = 0.280000
+anchor_right = 1.0
+anchor_bottom = 0.330000
+text = ""
+
+
+
+[node name="Skill_5" type="Button" unique_id=1151 parent="Sheet/BandSkills"]
+anchor_left = 0.0
+anchor_top = 0.335000
+anchor_right = 1.0
+anchor_bottom = 0.385000
+text = ""
+
+
+
+[node name="Formations_lbl" type="Label" unique_id=1152 parent="Sheet/BandSkills"]
+anchor_left = 0.0
+anchor_top = 0.42
+anchor_right = 1.0
+anchor_bottom = 0.475
+
+
+
+[node name="Formations" type="Control" unique_id=1153 parent="Sheet/BandSkills"]
+anchor_left = 0.0
+anchor_top = 0.48
+anchor_right = 1.0
+anchor_bottom = 0.72
+mouse_filter = 2
+
+
+
+[node name="Form_0" type="Button" unique_id=1154 parent="Sheet/BandSkills/Formations"]
+anchor_left = 0.000000
+anchor_top = 0.000000
+anchor_right = 0.500000
+anchor_bottom = 0.500000
+text = ""
+
+
+
+[node name="Form_1" type="Button" unique_id=1155 parent="Sheet/BandSkills/Formations"]
+anchor_left = 0.500000
+anchor_top = 0.000000
+anchor_right = 1.000000
+anchor_bottom = 0.500000
+text = ""
+
+
+
+[node name="Form_2" type="Button" unique_id=1156 parent="Sheet/BandSkills/Formations"]
+anchor_left = 0.000000
+anchor_top = 0.500000
+anchor_right = 0.500000
+anchor_bottom = 1.000000
+text = ""
+
+
+
+[node name="Form_3" type="Button" unique_id=1157 parent="Sheet/BandSkills/Formations"]
+anchor_left = 0.500000
+anchor_top = 0.500000
+anchor_right = 1.000000
+anchor_bottom = 1.000000
+text = ""
+
+
+
+[node name="Units" type="Control" unique_id=1158 parent="Sheet"]
+anchor_left = 0.818750
+anchor_top = 0.008889
+anchor_right = 0.993125
+anchor_bottom = 0.992222
+
+
+
+[node name="Bottom" type="Control" unique_id=1159 parent="Sheet/Units"]
+anchor_left = 0.000000
+anchor_top = 0.092655
+anchor_right = 1.000000
+anchor_bottom = 0.917514
+mouse_filter = 2
+
+
+
+[node name="Card_0" type="Control" unique_id=1160 parent="Sheet/Units/Bottom"]
+anchor_left = 0.0
+anchor_top = 0.000000
+anchor_right = 1.0
+anchor_bottom = 0.232877
+mouse_filter = 2
+
+
+
+[node name="ArmySlot_0" type="TextureRect" unique_id=1161 parent="Sheet/Units/Bottom/Card_0"]
+anchor_left = 0.182796
+anchor_top = 0.000000
+anchor_right = 0.720430
+anchor_bottom = 0.758824
+texture = ExtResource("23")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="ArmyIcon_0" type="TextureRect" unique_id=1162 parent="Sheet/Units/Bottom/Card_0"]
+anchor_left = 0.232975
+anchor_top = 0.082353
+anchor_right = 0.670251
+anchor_bottom = 0.676471
+stretch_mode = 5
+mouse_filter = 2
+visible = false
+
+
+
+[node name="CardName_0" type="Label" unique_id=1163 parent="Sheet/Units/Bottom/Card_0"]
+anchor_left = 0.182796
+anchor_top = 0.717647
+anchor_right = 0.465950
+anchor_bottom = 0.947059
+clip_text = true
+vertical_alignment = 1
+
+
+
+[node name="ArmyCount_0" type="Label" unique_id=1164 parent="Sheet/Units/Bottom/Card_0"]
+anchor_left = 0.487455
+anchor_top = 0.729412
+anchor_right = 0.598566
+anchor_bottom = 0.823529
 theme_type_variation = &"LabelNumber"
-offset_left = 6.0
-offset_top = 50.0
-offset_right = 74.0
-offset_bottom = 76.0
 
 
 
-[node name="ArmySlot_2" type="TextureRect" unique_id=1128 parent="Center/Window/Bottom"]
-offset_left = 174.0
-offset_top = 10.0
-offset_right = 250.0
-offset_bottom = 86.0
+[node name="CardLv_0" type="Label" unique_id=1165 parent="Sheet/Units/Bottom/Card_0"]
+anchor_left = 0.487455
+anchor_top = 0.729412
+anchor_right = 0.598566
+anchor_bottom = 0.823529
+horizontal_alignment = 1
 
 
 
-[node name="ArmyIcon" type="TextureRect" unique_id=1129 parent="Center/Window/Bottom/ArmySlot_2"]
-visible = false
+[node name="CardHp_0" type="TextureRect" unique_id=1166 parent="Sheet/Units/Bottom/Card_0"]
+anchor_left = 0.598566
+anchor_top = 0.741176
+anchor_right = 0.842294
+anchor_bottom = 0.811765
+texture = ExtResource("18")
+stretch_mode = 1
 mouse_filter = 2
-offset_left = 6.0
-offset_top = 6.0
-offset_right = 70.0
-offset_bottom = 70.0
 
 
 
-[node name="ArmyCount" type="Label" unique_id=1130 parent="Center/Window/Bottom/ArmySlot_2"]
-visible = false
+[node name="CardMp_0" type="TextureRect" unique_id=1167 parent="Sheet/Units/Bottom/Card_0"]
+anchor_left = 0.598566
+anchor_top = 0.905882
+anchor_right = 0.842294
+anchor_bottom = 0.976471
+texture = ExtResource("18")
+stretch_mode = 1
 mouse_filter = 2
-horizontal_alignment = 2
+
+
+
+[node name="Card_1" type="Control" unique_id=1168 parent="Sheet/Units/Bottom"]
+anchor_left = 0.0
+anchor_top = 0.273973
+anchor_right = 1.0
+anchor_bottom = 0.506849
+mouse_filter = 2
+
+
+
+[node name="ArmySlot_1" type="TextureRect" unique_id=1169 parent="Sheet/Units/Bottom/Card_1"]
+anchor_left = 0.182796
+anchor_top = 0.000000
+anchor_right = 0.720430
+anchor_bottom = 0.758824
+texture = ExtResource("23")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="ArmyIcon_1" type="TextureRect" unique_id=1170 parent="Sheet/Units/Bottom/Card_1"]
+anchor_left = 0.232975
+anchor_top = 0.082353
+anchor_right = 0.670251
+anchor_bottom = 0.676471
+stretch_mode = 5
+mouse_filter = 2
+visible = false
+
+
+
+[node name="CardName_1" type="Label" unique_id=1171 parent="Sheet/Units/Bottom/Card_1"]
+anchor_left = 0.182796
+anchor_top = 0.717647
+anchor_right = 0.465950
+anchor_bottom = 0.947059
+clip_text = true
+vertical_alignment = 1
+
+
+
+[node name="ArmyCount_1" type="Label" unique_id=1172 parent="Sheet/Units/Bottom/Card_1"]
+anchor_left = 0.487455
+anchor_top = 0.729412
+anchor_right = 0.598566
+anchor_bottom = 0.823529
 theme_type_variation = &"LabelNumber"
-offset_left = 6.0
-offset_top = 50.0
-offset_right = 74.0
-offset_bottom = 76.0
 
 
 
-[node name="ArmySlot_3" type="TextureRect" unique_id=1131 parent="Center/Window/Bottom"]
-offset_left = 256.0
-offset_top = 10.0
-offset_right = 332.0
-offset_bottom = 86.0
+[node name="CardLv_1" type="Label" unique_id=1173 parent="Sheet/Units/Bottom/Card_1"]
+anchor_left = 0.487455
+anchor_top = 0.729412
+anchor_right = 0.598566
+anchor_bottom = 0.823529
+horizontal_alignment = 1
 
 
 
-[node name="ArmyIcon" type="TextureRect" unique_id=1132 parent="Center/Window/Bottom/ArmySlot_3"]
-visible = false
+[node name="CardHp_1" type="TextureRect" unique_id=1174 parent="Sheet/Units/Bottom/Card_1"]
+anchor_left = 0.598566
+anchor_top = 0.741176
+anchor_right = 0.842294
+anchor_bottom = 0.811765
+texture = ExtResource("18")
+stretch_mode = 1
 mouse_filter = 2
-offset_left = 6.0
-offset_top = 6.0
-offset_right = 70.0
-offset_bottom = 70.0
 
 
 
-[node name="ArmyCount" type="Label" unique_id=1133 parent="Center/Window/Bottom/ArmySlot_3"]
-visible = false
+[node name="CardMp_1" type="TextureRect" unique_id=1175 parent="Sheet/Units/Bottom/Card_1"]
+anchor_left = 0.598566
+anchor_top = 0.905882
+anchor_right = 0.842294
+anchor_bottom = 0.976471
+texture = ExtResource("18")
+stretch_mode = 1
 mouse_filter = 2
-horizontal_alignment = 2
+
+
+
+[node name="Card_2" type="Control" unique_id=1176 parent="Sheet/Units/Bottom"]
+anchor_left = 0.0
+anchor_top = 0.547945
+anchor_right = 1.0
+anchor_bottom = 0.780822
+mouse_filter = 2
+
+
+
+[node name="ArmySlot_2" type="TextureRect" unique_id=1177 parent="Sheet/Units/Bottom/Card_2"]
+anchor_left = 0.182796
+anchor_top = 0.000000
+anchor_right = 0.720430
+anchor_bottom = 0.758824
+texture = ExtResource("23")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="ArmyIcon_2" type="TextureRect" unique_id=1178 parent="Sheet/Units/Bottom/Card_2"]
+anchor_left = 0.232975
+anchor_top = 0.082353
+anchor_right = 0.670251
+anchor_bottom = 0.676471
+stretch_mode = 5
+mouse_filter = 2
+visible = false
+
+
+
+[node name="CardName_2" type="Label" unique_id=1179 parent="Sheet/Units/Bottom/Card_2"]
+anchor_left = 0.182796
+anchor_top = 0.717647
+anchor_right = 0.465950
+anchor_bottom = 0.947059
+clip_text = true
+vertical_alignment = 1
+
+
+
+[node name="ArmyCount_2" type="Label" unique_id=1180 parent="Sheet/Units/Bottom/Card_2"]
+anchor_left = 0.487455
+anchor_top = 0.729412
+anchor_right = 0.598566
+anchor_bottom = 0.823529
 theme_type_variation = &"LabelNumber"
-offset_left = 6.0
-offset_top = 50.0
-offset_right = 74.0
-offset_bottom = 76.0
 
 
 
-[node name="ArmySlot_4" type="TextureRect" unique_id=1134 parent="Center/Window/Bottom"]
-offset_left = 338.0
-offset_top = 10.0
-offset_right = 414.0
-offset_bottom = 86.0
+[node name="CardLv_2" type="Label" unique_id=1181 parent="Sheet/Units/Bottom/Card_2"]
+anchor_left = 0.487455
+anchor_top = 0.729412
+anchor_right = 0.598566
+anchor_bottom = 0.823529
+horizontal_alignment = 1
 
 
 
-[node name="ArmyIcon" type="TextureRect" unique_id=1135 parent="Center/Window/Bottom/ArmySlot_4"]
-visible = false
+[node name="CardHp_2" type="TextureRect" unique_id=1182 parent="Sheet/Units/Bottom/Card_2"]
+anchor_left = 0.598566
+anchor_top = 0.741176
+anchor_right = 0.842294
+anchor_bottom = 0.811765
+texture = ExtResource("18")
+stretch_mode = 1
 mouse_filter = 2
-offset_left = 6.0
-offset_top = 6.0
-offset_right = 70.0
-offset_bottom = 70.0
 
 
 
-[node name="ArmyCount" type="Label" unique_id=1136 parent="Center/Window/Bottom/ArmySlot_4"]
-visible = false
+[node name="CardMp_2" type="TextureRect" unique_id=1183 parent="Sheet/Units/Bottom/Card_2"]
+anchor_left = 0.598566
+anchor_top = 0.905882
+anchor_right = 0.842294
+anchor_bottom = 0.976471
+texture = ExtResource("18")
+stretch_mode = 1
 mouse_filter = 2
-horizontal_alignment = 2
+
+
+
+[node name="Card_3" type="Control" unique_id=1184 parent="Sheet/Units/Bottom"]
+anchor_left = 0.0
+anchor_top = 0.821918
+anchor_right = 1.0
+anchor_bottom = 1.054795
+mouse_filter = 2
+
+
+
+[node name="ArmySlot_3" type="TextureRect" unique_id=1185 parent="Sheet/Units/Bottom/Card_3"]
+anchor_left = 0.182796
+anchor_top = 0.000000
+anchor_right = 0.720430
+anchor_bottom = 0.758824
+texture = ExtResource("23")
+stretch_mode = 5
+mouse_filter = 2
+
+
+
+[node name="ArmyIcon_3" type="TextureRect" unique_id=1186 parent="Sheet/Units/Bottom/Card_3"]
+anchor_left = 0.232975
+anchor_top = 0.082353
+anchor_right = 0.670251
+anchor_bottom = 0.676471
+stretch_mode = 5
+mouse_filter = 2
+visible = false
+
+
+
+[node name="CardName_3" type="Label" unique_id=1187 parent="Sheet/Units/Bottom/Card_3"]
+anchor_left = 0.182796
+anchor_top = 0.717647
+anchor_right = 0.465950
+anchor_bottom = 0.947059
+clip_text = true
+vertical_alignment = 1
+
+
+
+[node name="ArmyCount_3" type="Label" unique_id=1188 parent="Sheet/Units/Bottom/Card_3"]
+anchor_left = 0.487455
+anchor_top = 0.729412
+anchor_right = 0.598566
+anchor_bottom = 0.823529
 theme_type_variation = &"LabelNumber"
-offset_left = 6.0
-offset_top = 50.0
-offset_right = 74.0
-offset_bottom = 76.0
 
 
 
-[node name="ArmySlot_5" type="TextureRect" unique_id=1137 parent="Center/Window/Bottom"]
-offset_left = 420.0
-offset_top = 10.0
-offset_right = 496.0
-offset_bottom = 86.0
+[node name="CardLv_3" type="Label" unique_id=1189 parent="Sheet/Units/Bottom/Card_3"]
+anchor_left = 0.487455
+anchor_top = 0.729412
+anchor_right = 0.598566
+anchor_bottom = 0.823529
+horizontal_alignment = 1
 
 
 
-[node name="ArmyIcon" type="TextureRect" unique_id=1138 parent="Center/Window/Bottom/ArmySlot_5"]
-visible = false
+[node name="CardHp_3" type="TextureRect" unique_id=1190 parent="Sheet/Units/Bottom/Card_3"]
+anchor_left = 0.598566
+anchor_top = 0.741176
+anchor_right = 0.842294
+anchor_bottom = 0.811765
+texture = ExtResource("18")
+stretch_mode = 1
 mouse_filter = 2
-offset_left = 6.0
-offset_top = 6.0
-offset_right = 70.0
-offset_bottom = 70.0
 
 
 
-[node name="ArmyCount" type="Label" unique_id=1139 parent="Center/Window/Bottom/ArmySlot_5"]
-visible = false
+[node name="CardMp_3" type="TextureRect" unique_id=1191 parent="Sheet/Units/Bottom/Card_3"]
+anchor_left = 0.598566
+anchor_top = 0.905882
+anchor_right = 0.842294
+anchor_bottom = 0.976471
+texture = ExtResource("18")
+stretch_mode = 1
 mouse_filter = 2
-horizontal_alignment = 2
-theme_type_variation = &"LabelNumber"
-offset_left = 6.0
-offset_top = 50.0
-offset_right = 74.0
-offset_bottom = 76.0
 
 
 
-[node name="ArmySlot_6" type="TextureRect" unique_id=1140 parent="Center/Window/Bottom"]
-offset_left = 502.0
-offset_top = 10.0
-offset_right = 578.0
-offset_bottom = 86.0
+[node name="Close" type="Button" unique_id=1192 parent="Sheet/Units"]
+anchor_left = 0.713262
+anchor_top = 0.006780
+anchor_right = 0.953405
+anchor_bottom = 0.084746
+text = "×"
+theme_type_variation = &"Button"
 
 
 
-[node name="ArmyIcon" type="TextureRect" unique_id=1141 parent="Center/Window/Bottom/ArmySlot_6"]
+[node name="Quests" type="Button" unique_id=1193 parent="Sheet/Units"]
+anchor_left = 0.713262
+anchor_top = 0.906215
+anchor_right = 0.953405
+anchor_bottom = 0.983051
+text = "?"
+
+
+
+[node name="ItemTip" type="PanelContainer" unique_id=1194 parent="Sheet"]
+anchor_left = 0.356875
+anchor_top = 0.333333
+anchor_right = 0.644375
+anchor_bottom = 0.600000
+theme_type_variation = &"ArtifactOutline"
 visible = false
+
+
+
+[node name="TipBox" type="VBoxContainer" unique_id=1195 parent="Sheet/ItemTip"]
 mouse_filter = 2
-offset_left = 6.0
-offset_top = 6.0
-offset_right = 70.0
-offset_bottom = 70.0
 
 
 
-[node name="ArmyCount" type="Label" unique_id=1142 parent="Center/Window/Bottom/ArmySlot_6"]
+[node name="TipName" type="Label" unique_id=1196 parent="Sheet/ItemTip/TipBox"]
+autowrap_mode = 3
+
+
+
+[node name="TipDesc" type="Label" unique_id=1197 parent="Sheet/ItemTip/TipBox"]
+autowrap_mode = 3
+
+
+
+[node name="Desc_lbl" type="Label" unique_id=1198 parent="Sheet/ItemTip/TipBox"]
 visible = false
+
+
+
+[node name="Desc" type="Label" unique_id=1199 parent="Sheet/ItemTip/TipBox"]
+visible = false
+
+
+
+[node name="TipButtons" type="HBoxContainer" unique_id=1200 parent="Sheet/ItemTip/TipBox"]
+
+
+[node name="Equip" type="Button" unique_id=1201 parent="Sheet/ItemTip/TipButtons"]
+text = ""
+
+
+
+[node name="Remove" type="Button" unique_id=1202 parent="Sheet/ItemTip/TipButtons"]
+text = ""
+
+
+
+[node name="Dispose" type="Button" unique_id=1203 parent="Sheet/ItemTip/TipButtons"]
+text = ""
+
+
+
+[node name="TipIcon" type="TextureRect" unique_id=1204 parent="Sheet/ItemTip"]
+anchor_left = 0.82
+anchor_top = 0.04
+anchor_right = 0.98
+anchor_bottom = 0.34
+stretch_mode = 5
 mouse_filter = 2
-horizontal_alignment = 2
-theme_type_variation = &"LabelNumber"
-offset_left = 6.0
-offset_top = 50.0
-offset_right = 74.0
-offset_bottom = 76.0
-
-
-
-[node name="Formations" type="Control" unique_id=1143 parent="Center/Window/Bottom"]
-offset_left = 1224.0
-offset_top = 11.0
-offset_right = 1357.0
-offset_bottom = 84.0
-
-
-
-[node name="Form_0" type="Button" unique_id=1144 parent="Center/Window/Bottom/Formations"]
-offset_left = 6.0
-offset_top = 6.0
-offset_right = 66.0
-offset_bottom = 38.0
-
-
-
-[node name="Form_1" type="Button" unique_id=1145 parent="Center/Window/Bottom/Formations"]
-offset_left = 72.0
-offset_top = 6.0
-offset_right = 132.0
-offset_bottom = 38.0
-
-
-
-[node name="Form_2" type="Button" unique_id=1146 parent="Center/Window/Bottom/Formations"]
-offset_left = 6.0
-offset_top = 42.0
-offset_right = 66.0
-offset_bottom = 74.0
-
-
-
-[node name="Form_3" type="Button" unique_id=1147 parent="Center/Window/Bottom/Formations"]
-offset_left = 72.0
-offset_top = 42.0
-offset_right = 132.0
-offset_bottom = 74.0
 
 
 

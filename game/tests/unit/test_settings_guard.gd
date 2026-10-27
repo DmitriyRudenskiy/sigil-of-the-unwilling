@@ -31,4 +31,10 @@ func test_apply_display_mode_headless_safe() -> void:
 
 func test_backpack_single_source() -> void:
 	assert_that(HeroInventory.MAX_BACKPACK).is_equal(GameNumbers.MAX_BACKPACK_SIZE)
-	assert_that(GameNumbers.MAX_BACKPACK_SIZE).is_equal(16)
+	# Число — макет 12 (50 ячеек сумки 10×5), a не настройка по вкусу: правится
+	# только вместе с INVENTORY_GRID и картой элементов (D-280).
+	assert_that(GameNumbers.MAX_BACKPACK_SIZE).is_equal(50)
+	assert_that(GameNumbers.INVENTORY_GRID).is_equal(Vector2i(10, 5))
+	# Вместимость и сетка сходятся: ровно одна клетка на предмет.
+	assert_that(GameNumbers.MAX_BACKPACK_SIZE).is_equal(
+		GameNumbers.INVENTORY_GRID.x * GameNumbers.INVENTORY_GRID.y)
