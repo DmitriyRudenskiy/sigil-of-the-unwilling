@@ -286,9 +286,11 @@ func test_army_counter_fits_its_slot() -> void:
 	var win: Node = menu.get_node("HeroModelWindow") as Node
 	var game_theme: Theme = load(_THEME) as Theme
 	var declared: int = int(game_theme.get_font_size("font_size", "LabelNumber"))
-	for i in 7:
-		var slot: Control = win.get_node("Center/Window/Bottom/ArmySlot_%d" % i) as Control
-		var lbl: Label = slot.get_node("ArmyCount") as Label
+	# Макет 12: армейская полоса — четыре карточки в колонке справа (D-280).
+	for i in 4:
+		var slot: Control = win.get_node(
+				"Center/Window/Sheet/Units/Bottom/Cards/Card_%d" % i) as Control
+		var lbl: Label = slot.get_node("ArmyCount_%d" % i) as Label
 		assert_str(lbl.theme_type_variation).is_equal("LabelNumber")
 		var kegl: int = lbl.get_theme_font_size("font_size")
 		assert_int(kegl).override_failure_message(

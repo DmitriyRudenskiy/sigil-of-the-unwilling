@@ -210,9 +210,10 @@ func test_backpack_full_rolls_back_resources() -> void:
 	var s := _strategic({&"wood": 4, &"oak": 2})
 	var inv := HeroInventory.new()
 	# «Полный рюкзак» со сменой носителя — это забитая сетка, а не счёт
-	# предметов (grid-inventory-and-merchant): 20 предметов оставляют полосу
-	# 4×1, щиту 2×2 в неё не встать.
-	for i in 20:
+	# предметов (grid-inventory-and-merchant): заполненная сетка оставляет полосу
+	# 4×1, щиту 2×2 в неё не встать. Число берётся от вместимости: литерал 20
+	# пережил бы смену INVENTORY_GRID (D-280) молча.
+	for i in GameNumbers.MAX_BACKPACK_SIZE - 4:
 		assert_bool(inv.add_to_backpack(Artifact.new(&"filler_%d" % i))).is_true()
 	assert_that(inv.free_cell_count()).is_equal(4)
 	var ctx := _ctx(s, inv, 1, false)

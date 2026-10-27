@@ -306,6 +306,8 @@ func _build_units() -> void:
 	if q is Control:
 		q.visible = false
 		q.disabled = true
+		# Выключенный контрол объясняет причину (тот же закон, что у пунктов меню).
+		q.tooltip_text = "Журнала квестов в игре ещё нет — задача T-252"
 ## Карточка юнита (макет: портрет + плашка имени + Lv/M с полосами). Из них
 ## носитель имеют портрет, имя и число; уровень, HP и MP отряда в main не
 ## существуют (current_hp живёт в кампанийном ростере, D-220) — эти три метки
@@ -340,6 +342,7 @@ func _build_bottom() -> void:
 			fb.add_theme_color_override("font_pressed_color", TEXT_LIGHT)
 			# Построений в модели нет — кнопки-носители макета стоят заглушками (T-250).
 			fb.disabled = true
+			fb.tooltip_text = "Построений в игре ещё нет — задача T-250"
 
 func _refresh() -> void:
 	if _hero == null or _right == null:

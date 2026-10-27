@@ -4,7 +4,7 @@ extends BaseTest
 ## группа 2). Вместимость — клетки: 6×4 = 24. Отказ не меняет ни сетку,
 ## ни список, ни причину «на словах»: текст обязан содержать числа.
 
-const GRID := Vector2i(6, 4)
+const GRID := GameNumbers.INVENTORY_GRID
 
 
 func _item(p_id: String, p_slot: Artifact.Slot, p_cells: Vector2i) -> Artifact:
