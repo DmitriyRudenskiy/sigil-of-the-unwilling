@@ -1,27 +1,29 @@
 #!/usr/bin/env bash
-# Мутационная батарея гейта «поле боя при 720p — масштаб ×0.8» (mvp-ui-flow 4.1, C-10).
-# Каждый мутант обязан покраснить tests/unit/systems/test_battle_field_fit_720p.gd;
+# Мутационная батарея гейта «поле боя вписывается в полосу между бендами HUD» (T-220).
+# Каждый мутант обязан покраснить tests/unit/systems/test_battle_field_fit.gd;
 # зелёный мутант = дыра гейта.
 #
-# M1 — множитель забыт (возврат 1.0): ровно тот дефект, из-за которого задача 4.1
-#      оставалась открытой (плотная вписка на всех разрешениях).
-# M2 — граница `<=` → `<`: спецификация говорит «at 720p», то есть пород включителен.
-# M3 — пород 720 → 1080: множитель утекает на Full HD и молча сдвигает все прежние
-#      кадры-доказательства боя.
-# M4 — множитель берётся из layout-высоты вместо высоты окна. Это НЕ гипотетика:
-#      первая реализация среза сделала именно так и прошла бы «на глаз», потому что
-#      при stretch mode canvas_items `get_visible_rect()` остаётся 1920×1080 и на 720p.
-#      Мутант ловится кейсом `test_camera_at_720p_is_scaled_fit`.
-# M5 — число 0.8 → 0.9 (правильная идея, неверная константа).
-# M6 — вызов множителя выброшен из формулы целиком (страховка от «функция есть,
-#      но её никто не зовёт»).
+# Прежняя батарея (M1…M6) стояла вокруг множителя ×0.8 по порогу разрешения — механизм
+# снят D-279: порог не лечил Full HD (доля кадра 1.000, панель HUD поверх нижних рядов),
+# а две независимые компрессии на 720p дали бы 0.57. Поэтому мутанты теперь про связку
+# «панель → запас → формула», а не про константу.
+#
+# M1' — запас не применён (`avail_y = vp_sz.y`): ровно исходный дефект T-220.
+# M2' — сеттер выбрасывает значение: хост внедряет запас, а камера живёт без него
+#       («код есть, его никто не использует» — тот класс дефекта, что молчал в 4.1).
+# M3' — сдвиг центра выброшен: поле вписывается в полосу, но остаётся отцентровано по
+#       всему кадру и нижней половиной лежит на HUD.
+# M4' — запас берётся из константы, а не из прямоугольника панели: правка панели в
+#       сцене перестала бы править запас (кейс `test_reserve_follows_a_panel_edit`).
+# M5' — запас применён по ширине вместо высоты: горизонтальное сжатие вместо вертикального.
+# M6' — `top` и `bottom` перепутаны в сдвиге: поле уезжает вниз, прямо под панель.
 #
 # Запуск: bash game/tools/mut_battle_fit.sh   (из корня репо, дерево чистое)
 set -u
 G=${GODOT_BIN:-/home/user/.local/bin/godot}
-TEST=res://tests/unit/systems/test_battle_field_fit_720p.gd
+TEST=res://tests/unit/systems/test_battle_field_fit.gd
 VIEW=game/scripts/systems/battle_view.gd
-NUMBERS=game/scripts/constants/game_numbers_battle.gd
+UI=game/scripts/ui/battle_ui.gd
 FAILED=0
 
 run() {
@@ -36,7 +38,7 @@ run() {
 		FAILED=1
 		;;
 	esac
-	git checkout -- "$VIEW" "$NUMBERS"
+	git checkout -- "$VIEW" "$UI"
 }
 
 mut() { # mut <файл> <было> <станет>
@@ -51,27 +53,24 @@ p.write_text(s.replace(old, new, 1), encoding="utf-8")
 PY
 }
 
-CALL='* field_fit_scale(float(win_sz.y))'
+mut "$VIEW" "	var avail_y: float = vp_sz.y - _hud_reserve.x - _hud_reserve.y" "	var avail_y: float = vp_sz.y"
+run "M1' (запас не применён)"
 
-mut "$VIEW" "		return GameNumbers.BATTLE_LOWRES_FIT_SCALE" "		return 1.0"
-run M1
+mut "$VIEW" "	_hud_reserve = Vector2(maxf(top, 0.0), maxf(bottom, 0.0))" "	_hud_reserve = Vector2.ZERO"
+run "M2' (сеттер выбрасывает значение)"
 
-mut "$VIEW" "	if viewport_height <= GameNumbers.BATTLE_LOWRES_MAX_HEIGHT:" "	if viewport_height < GameNumbers.BATTLE_LOWRES_MAX_HEIGHT:"
-run M2
+mut "$VIEW" "	_camera.position = center - Vector2(0.0, (_hud_reserve.x - _hud_reserve.y) / (2.0 * z))" "	_camera.position = center"
+run "M3' (сдвиг центра выброшен)"
 
-mut "$VIEW" "	if viewport_height <= GameNumbers.BATTLE_LOWRES_MAX_HEIGHT:" "	if viewport_height <= 1080.0:"
-run M3
+mut "$UI" "	return Vector2(top, bottom)" "	return Vector2(155.0, 160.0)"
+run "M4' (запас из константы, не из панели)"
 
-mut "$VIEW" "$CALL" "	* field_fit_scale(vp_sz.y)"
-run M4
+mut "$VIEW" "	var z: float = minf(vp_sz.x / field_sz.x, avail_y / field_sz.y)" "	var z: float = minf((vp_sz.x - _hud_reserve.x - _hud_reserve.y) / field_sz.x, vp_sz.y / field_sz.y)"
+run "M5' (запас по ширине вместо высоты)"
 
-mut "$NUMBERS" "const BATTLE_LOWRES_FIT_SCALE   := 0.8" "const BATTLE_LOWRES_FIT_SCALE   := 0.9"
-run M5
-
-mut "$VIEW" "		minf(vp_sz.x / field_sz.x, vp_sz.y / field_sz.y)
-		* field_fit_scale(float(win_sz.y))" "		minf(vp_sz.x / field_sz.x, vp_sz.y / field_sz.y)"
-run M6
+mut "$VIEW" "	_camera.position = center - Vector2(0.0, (_hud_reserve.x - _hud_reserve.y) / (2.0 * z))" "	_camera.position = center - Vector2(0.0, (_hud_reserve.y - _hud_reserve.x) / (2.0 * z))"
+run "M6' (top и bottom перепутаны)"
 
 echo "=== сводка: $([ "$FAILED" -eq 0 ] && echo 'все мутанты красные (гейт держит)' || echo 'ЕСТЬ ЗЕЛЁНЫЙ — дыра гейта')"
-git status --porcelain -- "$VIEW" "$NUMBERS"
+git status --porcelain -- "$VIEW" "$UI"
 exit "$FAILED"

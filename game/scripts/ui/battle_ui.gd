@@ -31,6 +31,9 @@ static var _hero_portrait: Texture2D = null
 # и спасение, справа — боевые команды. Путь узла меняется вместе с составом
 # кластеров, поэтому он здесь и обязан совпадать со сценой.
 @onready var _bottom_bar: Control = $bottom_bar
+## T-220: полосы, чья геометрия отъедает вертикаль поля боя (носитель числа — сцена).
+@onready var _hero_cards_band: Control = $hero_cards
+@onready var _initiative_band: Control = $initiative_bar
 @onready var _settings_btn: Button = $"bottom_bar/bar_box/left_box/settings_btn"
 @onready var _retreat_btn: Button = $"bottom_bar/bar_box/left_box/retreat_btn"
 @onready var _rescue_btn: Button = $"bottom_bar/bar_box/left_box/rescue_btn"
@@ -553,3 +556,26 @@ func _on_settings_applied() -> void:
 
 func _on_settings_closed() -> void:
 	settings_closed.emit()
+
+## Сколько вертикали кадра занято полосами HUD (T-220): x — верх, y — низ, в
+## layout-пикселях. Число — не константа кода, а геометрия сцены: правка панели в
+## `scenes/ui/battle_ui.tscn` автоматически правит и запас поля боя, поэтому «чинить
+## хардкод разрешений» не приходится.
+##
+## Верх = нижняя граница самой низкой из верхних полос (карточки героя, инициатива).
+## Бейдж таймера хода (158 px по центру) сознательно НЕ резервируется на всю ширину:
+## под него ушло бы ещё ~140 px поля, а клеток в его колонке нет — наложение фиксируется
+## кадром ux-review, а не числом в тесте.
+##
+## Вызывается после первого кадра (хост читает после `process_frame`): до раскладки
+## `get_global_rect()` пуст, и запас молча стал бы нулём.
+func hud_bands() -> Vector2:
+	var top := 0.0
+	for band in [_hero_cards_band, _initiative_band]:
+		if band == null:
+			continue
+		top = maxf(top, band.get_global_rect().end.y)
+	var bottom := 0.0
+	if _bottom_bar != null:
+		bottom = _bottom_bar.get_global_rect().size.y
+	return Vector2(top, bottom)

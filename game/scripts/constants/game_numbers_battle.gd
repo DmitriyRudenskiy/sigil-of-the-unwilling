@@ -15,8 +15,6 @@ const BATTLE_FIELD_RING         := 5
 ## «в притык» поле при высоте 720 px не оставляет запаса: ряды клеток упираются в
 ## нижнюю панель HUD, а сетка перестаёт читаться. Пород включителен (≤ 720), потому
 ## что запас нужен именно на малых высотах; выше порога — прежняя плотная вписка.
-const BATTLE_LOWRES_MAX_HEIGHT  := 720.0
-const BATTLE_LOWRES_FIT_SCALE   := 0.8
 const BATTLE_CLICK_RADIUS_PX    := 60.0
 const BATTLE_FLOATING_TEXT_OFFSET := Vector2(-30, -60)
 const BATTLE_DAMAGE_NUMBER_OFFSET := Vector2(-16, -50)
