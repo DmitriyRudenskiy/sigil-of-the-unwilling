@@ -10,7 +10,7 @@
 | Цикл | Задачи | Что держит остаток | Спеки |
 | --- | --- | --- | --- |
 | `scene-first-dev-loop` | 12/12 | — (закрыт; гейт перенесён в конец смены) | создан `dev-verification-loop` |
-| `wave-1-ui-foundation-battle` | 1/8 | код карточки/очереди/медальонов в `main` и под тестами, не хватает фикстуры состояния боя для кадра → **T-230** | создан `specs/battle-ui` |
+| `wave-1-ui-foundation-battle` | 1/8 | код карточки/очереди/медальонов в `main` и под тестами, не хватает фикстуры состояния боя для кадра → **T-241** | создан `specs/battle-ui` |
 | `theme-type-hygiene` | 20/27 | Q-M95 (фокус) открыт; `T-148.2`–`T-148.5` не начаты → **T-231** | создан `specs/theme-type-hygiene` |
 | `ui-mockup-parity` | 43/63 | панель описания артефактов → **T-232**; мирная рать и бронзовый комплект → **T-233** (блок: палитра, T-231) | созданы `battle-hud`, `campaign-hud`, `inventory-screen`, `start-screen`, `ui-screenshot-verification`; `ui-graphics` уже был — не перезаписан |
 | `grid-inventory-and-merchant` | 16/42 | сетка в `main`; лавки нет (`MerchantSystem` отсутствует) → **T-234**; иконки → **T-235** | созданы `gear-grid-inventory`, `gear-merchant`; `save-migration` уже был |
@@ -18,7 +18,7 @@
 | `concept-art-style-variants` | 19/39 | канон стиля — акт владельца → **T-236** | создан `concept-art-pipeline` |
 | `image-clone` | 52/88 | сводка принятия и регламент очереди; очередь в момент архива грязная (работает другая сессия) → **T-237** | создан `image-clone-lab` |
 | `scenario-matrix-behavior-reliability` | 15/27 | матрица не собрана (есть пилот одного сценария) → **T-238** | создан `scenario-matrix-behavior`; `balance-probe` уже был |
-| `battle-demo-two-rosters` | 99/116 | приёмочные кадры боя (блок — T-230) и сводка баланса → **T-239** | `battle-demo-sprites`, `battle-demo-ui`, `roster-lineups`, `turn-battle-core` уже были — не перезаписаны |
+| `battle-demo-two-rosters` | 99/116 | приёмочные кадры боя (блок — T-241) и сводка баланса → **T-239** | `battle-demo-sprites`, `battle-demo-ui`, `roster-lineups`, `turn-battle-core` уже были — не перезаписаны |
 
 Ранее в тот же день архивированы: `2026-10-27-ci-speedup` (24/24, спек
 `ci-pipeline`), `2026-10-27-mvp-ui-flow` (17/21, спек `mvp-ui-flow`),
