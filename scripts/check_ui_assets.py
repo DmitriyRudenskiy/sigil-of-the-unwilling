@@ -31,6 +31,7 @@
 
 Область: game/assets/ui/widgets/ (buttons/panels/sliders/progress_bars;
 классификация — MANIFEST.json, kind "9-slice"/"иконка") +
+game/assets/ui/hero/ (кит экрана «Герой», D-278; свой MANIFEST) +
 game/assets/ui/icons/.
 
 Exit: 0 — чистый набор; 1 — перечень нарушений; 2 — ошибка среды
@@ -346,7 +347,15 @@ def main():
         print("check_ui_assets: нет MANIFEST: %s" % MANIFEST)
         return 2
     with open(MANIFEST, encoding="utf-8") as f:
-        manifest = json.load(f)["files"]
+        # Ключи MANIFEST.json кита макета 09 — относительно widgets/; приводим
+        # их к тому же виду «каталог/файл», что и ключи кита экрана «Герой».
+        manifest = {"widgets/%s" % k: v for k, v in json.load(f)["files"].items()}
+    # Экран «Герой» (D-278) носит свой кит отдельно от макета 09, но под теми же
+    # правилами — свой MANIFEST, тот же аудит.
+    hero_manifest = os.path.join(UI_ROOT, "hero", "MANIFEST.json")
+    if os.path.isfile(hero_manifest):
+        with open(hero_manifest, encoding="utf-8") as f:
+            manifest.update(json.load(f)["files"])
 
     violations = []
     checked = 0
@@ -368,16 +377,16 @@ def main():
         for v in check_halo(im):
             violations.append("%s: (c) %s" % (rel, v))
 
-    for d in WIDGET_DIRS:
-        dd = os.path.join(UI_ROOT, "widgets", d)
+    areas = [(os.path.join(UI_ROOT, "widgets", d), "widgets/%s" % d) for d in WIDGET_DIRS]
+    areas.append((os.path.join(UI_ROOT, "hero"), "hero"))
+    for dd, prefix in areas:
         if not os.path.isdir(dd):
             continue
         for name in sorted(os.listdir(dd)):
             if not name.endswith(".png"):
                 continue
-            rel = "widgets/%s/%s" % (d, name)
-            # Ключи MANIFEST.json — относительно game/assets/ui/widgets/.
-            meta = manifest.get("%s/%s" % (d, name))
+            rel = "%s/%s" % (prefix, name)
+            meta = manifest.get(rel)
             if meta is None:
                 violations.append("%s: файл не в MANIFEST.json" % rel)
                 continue

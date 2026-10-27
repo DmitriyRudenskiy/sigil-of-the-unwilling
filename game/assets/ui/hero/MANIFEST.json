@@ -1,0 +1,171 @@
+{
+ "mockup": "reference/12_inventory_parchment_sheet.jpeg",
+ "generator": "scripts/ui_kit/build_hero_kit.py",
+ "scale": "макет 2816×1584 → канва 1600×900 (×0.5682)",
+ "method": "векторная геометрия + зерно из замера, без диффузии (D-275)",
+ "note": "носители экрана «Герой» (D-278). Марджины 9-slice — в px носителя; в сцене TextureRect растягивает крайнюю полосу под фактический размер (пересчёт в hero_layout.gd).",
+ "files": {
+  "hero/panel_parchment.png": {
+   "kind": "9-slice",
+   "size": [
+    256,
+    256
+   ],
+   "margin": 48,
+   "source": "макет 12: пергамент, рваный край (замер в docstring билдера)",
+   "note": "panel_parchment.png"
+  },
+  "hero/panel_stone.png": {
+   "kind": "9-slice",
+   "size": [
+    256,
+    256
+   ],
+   "margin": 40,
+   "source": "макет 12: тёмный камень, латунная рамка (замер в docstring билдера)",
+   "note": "panel_stone.png"
+  },
+  "hero/banner_name.png": {
+   "kind": "9-slice",
+   "size": [
+    256,
+    96
+   ],
+   "margin": 36,
+   "source": "макет 12: тёмный камень, латунная рамка (замер в docstring билдера)",
+   "note": "banner_name.png"
+  },
+  "hero/frame_portrait.png": {
+   "kind": "frame",
+   "size": [
+    128,
+    128
+   ],
+   "margin": 26,
+   "source": "макет 12: латунная рамка (замер в docstring)",
+   "note": "frame_portrait.png"
+  },
+  "hero/frame_card.png": {
+   "kind": "frame",
+   "size": [
+    160,
+    120
+   ],
+   "margin": 30,
+   "source": "макет 12: латунная рамка (замер в docstring)",
+   "note": "frame_card.png"
+  },
+  "hero/slot_doll.png": {
+   "kind": "frame",
+   "size": [
+    96,
+    96
+   ],
+   "margin": 22,
+   "source": "макет 12: латунная рамка (замер в docstring)",
+   "note": "slot_doll.png"
+  },
+  "hero/frame_row.png": {
+   "kind": "frame",
+   "size": [
+    96,
+    96
+   ],
+   "margin": 20,
+   "source": "макет 12: латунная рамка (замер в docstring)",
+   "note": "frame_row.png"
+  },
+  "hero/cell_grid.png": {
+   "kind": "9-slice",
+   "size": [
+    96,
+    96
+   ],
+   "margin": 14,
+   "source": "макет 12: клетка сетки (замер в docstring)",
+   "note": "cell_grid.png"
+  },
+  "hero/bar_hp.png": {
+   "kind": "bar",
+   "size": [
+    12,
+    12
+   ],
+   "source": "макет 12: полоса карточки (замер в docstring)",
+   "note": "bar_hp.png"
+  },
+  "hero/bar_mana.png": {
+   "kind": "bar",
+   "size": [
+    12,
+    12
+   ],
+   "source": "макет 12: полоса карточки (замер в docstring)",
+   "note": "bar_mana.png"
+  },
+  "hero/bar_track.png": {
+   "kind": "track",
+   "size": [
+    12,
+    12
+   ],
+   "source": "макет 12: жёлоб полосы",
+   "note": "bar_track.png"
+  },
+  "hero/rule_brass.png": {
+   "kind": "rule",
+   "size": [
+    16,
+    8
+   ],
+   "source": "макет 12: разделитель (замер в docstring)",
+   "note": "rule_brass.png"
+  },
+  "hero/tile_brass.png": {
+   "kind": "9-slice",
+   "size": [
+    64,
+    64
+   ],
+   "margin": 12,
+   "source": "макет 12: плитка кнопки ×/? (замер в docstring)",
+   "note": "tile_brass.png"
+  },
+  "hero/portrait.png": {
+   "kind": "image",
+   "size": [
+    80,
+    80
+   ],
+   "source": "плейсхолдер UI-2",
+   "note": "плейсхолдер портрета (замена — UI-6)"
+  },
+  "hero/figure.png": {
+   "kind": "image",
+   "size": [
+    240,
+    360
+   ],
+   "source": "плейсхолдер UI-2",
+   "note": "плейсхолдер фигуры героя (замена — UI-6)"
+  },
+  "hero/banner.png": {
+   "kind": "image",
+   "size": [
+    124,
+    124
+   ],
+   "source": "плейсхолдер UI-2",
+   "note": "плейсхолдер знамени отряда (снят с экрана, арта носителя нет)"
+  },
+  "hero/mini.png": {
+   "kind": "image",
+   "size": [
+    124,
+    92
+   ],
+   "source": "плейсхолдер UI-2",
+   "note": "плейсхолдер мини-карты отряда (снят с экрана как выдуманный элемент, D-278)"
+  }
+ }
+}
