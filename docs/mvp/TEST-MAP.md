@@ -49,10 +49,13 @@ pytest (mcp):    файлов 30, функций 78
    файлов на носителя. Механика роста — «новый тикет = новый файл», тогда как
    покрытие привязано к носителю, а не к тикету.
 3. **Покрытие при этом не 100%.** 92 носителя не названы ни одним тестом, включая
-   `scripts/autoload/artifact_registry.gd` (299 строк), `scripts/systems/battle_attack_sequence.gd`
-   (194), `scripts/data/battle_spell_bridge.gd` (180), `scripts/autoload/world_state_serializer.gd`
-   (152), три генератора карты (`map_forest|mountain|river_generator.gd`) и семейство
-   из десяти `hero_*_component.gd`.
+   `scripts/systems/battle_attack_sequence.gd` (194), `scripts/data/battle_spell_bridge.gd`
+   (180), `scripts/autoload/world_state_serializer.gd` (152), три генератора карты
+   (`map_forest|mountain|river_generator.gd`) и семейство из десяти `hero_*_component.gd`.
+   (Снято с списка 2026-10-27: `scripts/autoload/artifact_registry.gd`, 299 строк —
+   крупнейшая одиночная дыра на момент диагноза, закрыта контрактом
+   `tests/unit/autoload/test_artifact_registry.gd` и батареей `tools/mut_artifact_registry.sh`,
+   С-4.)
 
 Итог: **тестов не «много», а много файлов**. Целевая форма — то же число проверок
 (и больше) в меньшем числе файлов, а не меньшее число проверок.
@@ -105,9 +108,15 @@ pytest (mcp):    файлов 30, функций 78
 
 Каждая дыра получает одну из пометок: **реальная дыра** (тест в файл семейства),
 **покрыт опосредованно** (указывается тест-носитель), **нечего покрывать** (перенос в
-`EXCLUDED_PREFIXES` с причиной). Приоритет по объёму: `artifact_registry`,
-`battle_attack_sequence`, `battle_spell_bridge`, `world_state_serializer`,
+`EXCLUDED_PREFIXES` с причиной). Приоритет по объёму (первый из списка снят 2026-10-27,
+см. диагноз §3): `battle_attack_sequence`, `battle_spell_bridge`, `world_state_serializer`,
 `city_state_serializer`, генераторы карты, десять hero-компонентов.
+
+Первая закрытая дыра — `artifact_registry`: тест пишется на контракт носителя
+(уникальность id, инварианты строки, габарит против `GameNumbers.INVENTORY_GRID`,
+строки ↔ иконки 1:1, партиция редкостей, воспроизводимость случайности, закрытый
+словарь модификаторов), а не на перебор 60 строк таблицы; мутационная батарея
+обязательна, иначе «зелёный по умолчанию» неотличим от проверки.
 
 ### С-5 · Рэтчет — **встроен 2026-10-27** (слово владельца «встраивай»)
 
