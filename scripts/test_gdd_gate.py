@@ -195,13 +195,32 @@ def test_bank_is_exempt_from_question_citations(world):
     assert [b for b in bad if "НЕВЕДОМЫЙ ВОПРОС" in b] == [], bad
 
 
-def test_duplicate_question_numbers_are_measured(world):
-    """Задвоенный номер вопроса — сигнал, что закрытие записали отдельной строкой."""
+def test_baseline_key_set_must_match_the_metrics(world, tmp_path, monkeypatch):
+    """Ключ базлайна не совпадает с метриками → exit 2, а не «нулевой допуск по умолчанию».
+
+    Молча отсутствующий ключ означал бы ноль допуска, лишний (опечатка в имени) —
+    метрику без гейта. Оба читаются как зелёный прогон.
+    """
+    bl = tmp_path / "b.json"
+    bl.write_text('{"q_without_type": 97}', encoding="utf-8")
+    monkeypatch.setattr(gate, "BASELINE", bl)
+    monkeypatch.setattr("sys.argv", ["gdd_gate.py"])
+    assert gate.main() == 2
+
+
+def test_ghost_row_is_measured_reopen_and_suffix_are_not(world):
+    """Открытая строка с закрытым двойником = призрак; два закрытых и `Q-M##b` — нет."""
     docs, _ = world
     q = docs / "QUESTIONS.md"
-    q.write_text(q.read_text(encoding="utf-8") +
-                 "| Q-M1 | **дубль той же строки** | тут | а | нет |\n", encoding="utf-8")
-    assert gate.duplicate_numbers() == 1
+    q.write_text(q.read_text(encoding="utf-8")
+                 + "| Q-M501 | **открытая половина** | тут | а | нет |\n"
+                 + "| Q-M501 → **закрыт (2026-10-27, владелец)** | | | | |\n"
+                 + "| Q-M502 → **закрыт (2026-10-03, владелец)** | | | | |\n"
+                 + "| Q-M502 (ре-опен) → **закрыт (2026-10-04, владелец)** | | | | |\n"
+                 + "| Q-M503 | **сосед** | тут | а | нет |\n"
+                 + "| Q-M503b | **другой вопрос с суффиксом** | тут | а | нет |\n",
+                 encoding="utf-8")
+    assert gate.ghost_rows() == 1
 
 
 def test_dead_path_in_gdd_section_is_measured(world, monkeypatch):

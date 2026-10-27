@@ -4,5 +4,5 @@
  "d_without_rejected": 169,
  "risks_without_number": 10,
  "dead_paths": 5,
- "q_duplicate_numbers": 13
+ "q_ghost_rows": 0
 }

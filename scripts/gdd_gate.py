@@ -21,9 +21,11 @@
 7. Путь в backticks внутри живой GDD-секции существует в репозитории (реестры
    `CHANGELOG`/`DECISIONS`/`QUESTIONS` — история, они исключены). Число мёртвых
    путей — часть ratchet: сокращается, но не растёт.
-8. Номер вопроса в `docs/QUESTIONS.md` не задвоен (дубль = закрытие записали новой
-   строкой, а «открытую» оставили: счётчик открытых начинает врать). Число дублей —
-   часть ratchet'а.
+8. В `docs/QUESTIONS.md` нет **строк-призраков**: строка открыта, хотя по её номеру
+   уже есть закрытая. Закрытие оформляли новой строкой, прежнюю «открытую» оставляли —
+   дайджест шага 0 звал владельца отвечать отвеченное. Две закрытые строки одного номера
+   (ре-опен Q-M18) и соседние id с суффиксом (`Q-M23`/`Q-M23b` — разные вопросы)
+   призраками не считаются. Число призраков — часть ratchet'а.
 9. Тикет, ссылающийся на предварительное (`⏳`) решение, обязан нести
    `blocked-on: D-xxx` — иначе связь «ждёт решения» теряется.
 
@@ -48,7 +50,7 @@ TYPE_RE = r"\[(agent|human)\]"
 PRIO_RE = "🔴|🟡|🟢"
 
 BACKLOG_KEYS = ("q_without_type", "q_without_priority", "d_without_rejected",
-                "risks_without_number", "dead_paths", "q_duplicate_numbers")
+                "risks_without_number", "dead_paths", "q_ghost_rows")
 
 
 def strip_code(line: str) -> str:
@@ -113,7 +115,7 @@ def measure() -> dict[str, int]:
         "d_without_rejected": sum(1 for l in d if "Отвергнутые" not in l),
         "risks_without_number": sum(1 for l in r if not re.search(r"\bR-\d+", l)),
         "dead_paths": len(dead_paths()),
-        "q_duplicate_numbers": duplicate_numbers(),
+        "q_ghost_rows": ghost_rows(),
     }
 
 
@@ -122,20 +124,36 @@ DEAD_PATH_PREFIX = ("docs/", "game/", "scripts/", "openspec/", "design/", "tools
 DEAD_PATH_EXEMPT = ("CHANGELOG", "DECISIONS", "QUESTIONS")
 
 
-def duplicate_numbers() -> int:
-    """Сколько номеров вопросов встречаются больше одного раза.
+def redirect_row(l: str) -> bool:
+    """Перенаправление вопроса в другой реестр: `→ **K-12**` и т.п."""
+    return bool(re.search(r"→\s*\*\*[A-Z]-", l))
 
-    Дубль появляется так: закрытие записывают новой строкой, а старую «открытую»
-    оставляют. Счётчик открытых вопросов становится призрачным, и шаг 0 аудита
-    показывает то, чего нет. Старые строки не переписываются (D-272), поэтому
-    номер — бэклог ratchet'а, а не ошибка.
+
+def closed_row(l: str) -> bool:
+    """Признак закрытия строки реестра — тот же, что у дайджеста `gdd_grounding`.
+
+    `(**закрыт` — маркер статуса; `закрыт (` — закрытие, записанное в колонке «Статус»
+    или «Блокирует». Причастие «закрыты» и «не закрыт» маркерами не считаются, иначе
+    строка «права так и не были закрыты» читается как отвеченный вопрос.
     """
-    seen: dict[str, int] = {}
+    return bool(re.search(r"→?\s*\*\*(?<!не)закрыт|(?<!не)закрыт \(", l))
+
+
+def ghost_rows() -> int:
+    """Сколько строк реестра выглядят открытыми, хотя по их номеру есть закрытая.
+
+    Механика дефекта: закрытие оформлялось новой строкой (`| Q-M37 → **закрыт (...)** |`),
+    а прежняя открытая строка оставалась жива — дайджест шага 0 звал владельца отвечать
+    отвеченное (11 таких строк, 2026-10-27). Две закрытые строки одного номера — история
+    ре-опена, не призрак; `Q-M23` и `Q-M23b` — разные вопросы (суффикс значим).
+    """
+    by: dict[str, list[bool]] = {}
     for l in q_rows():
-        m = re.match(r"^\| (Q-M\d+)", l)
+        m = re.match(r"^\| (Q-M\d+[a-z]?)", l)
         if m:
-            seen[m.group(1)] = seen.get(m.group(1), 0) + 1
-    return sum(1 for c in seen.values() if c > 1)
+            by.setdefault(m.group(1), []).append(
+                closed_row(l) or bool(re.search(r"→\s*\*\*[A-Z]-", l)))
+    return sum(1 for f in by.values() if len(f) > 1 and any(f) and not all(f))
 
 
 def dead_paths() -> list[str]:
@@ -260,9 +278,20 @@ def main() -> int:
         print(f"БАЗЛАЙН БИТЫЙ: {exc}")
         return 2
 
+    # Комплект ключей базлайна обязан совпадать с измеряемым: отсутствующий ключ
+    # молча означал бы «нулевой допуск», а лишний (опечатка в имени) — метрику,
+    # которую никто не проверяет. Оба варианта выглядят как зелёный прогон.
+    missing = [k for k in BACKLOG_KEYS if k not in base]
+    stale = [k for k in base if k not in BACKLOG_KEYS]
+    if missing or stale:
+        print("БАЗЛАЙН НЕ СООТВЕТСТВУЕТ МЕТРИКАМ "
+              f"(нет: {missing or '—'}; не измеряется: {stale or '—'}) "
+              "— обновить: --update-baseline")
+        return 2
+
     print("бэклог (только сокращается, D-272):")
     for k in BACKLOG_KEYS:
-        cur, old = now.get(k, 0), base.get(k, 0)
+        cur, old = now[k], base[k]
         mark = "РОСТ" if cur > old else "OK"
         print(f"  {k}: {cur} (базлайн {old}) {mark}")
         if cur > old:
