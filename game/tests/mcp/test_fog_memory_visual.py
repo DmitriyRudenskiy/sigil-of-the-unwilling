@@ -48,6 +48,15 @@ MIN_MEMORY_PIXELS = 1000
 # Доля потемневших пикселей среди пикселей памяти.
 MIN_DARKENED_SHARE = 0.8
 
+# Допуск цвета «пустого фона» (2026-10-27). `default_clear_color` в project.godot не
+# задан, то есть движковый `Color(0.3, 0.3, 0.3)`: `int(round(0.3 * 255)) = 77`, а тем
+# же пикселем на Metal выходит 76 (замер кадра `never`: 1 152 176 пикселей цвета
+# (76, 76, 76) — 63% кадра — и ровно 0 пикселей (77, 77, 77)). Сверка «в нуль»
+# поэтому была машинной: проверка объявляла «тумана в кадре нет» там, где туман
+# занимал две трети кадра. Цвета фона и местности расходятся на десятки единиц,
+# так что допуск в 3 ничего не утверждать не позволяет.
+VOID_TOLERANCE = 3
+
 # Только базовый слой + подготовка: дальняя клетка (противоположный угол карты),
 # городские источники и живой туман, который к этому моменту уже содержит память о
 # стартовой клетке героя (её нарисовал bootstrap).
@@ -162,6 +171,7 @@ var clear: Color = ProjectSettings.get_setting(
 var vr: int = int(round(clear.r * 255.0))
 var vg: int = int(round(clear.g * 255.0))
 var vb: int = int(round(clear.b * 255.0))
+var void_tol := {void_tol}
 var dn: PackedByteArray = n.get_data()
 var dm: PackedByteArray = m.get_data()
 var db: PackedByteArray = b.get_data()
@@ -170,7 +180,8 @@ var darker := 0
 var void_never := 0
 var i := 0
 while i < dn.size():
-    if dn[i] == vr and dn[i + 1] == vg and dn[i + 2] == vb:
+    if abs(dn[i] - vr) <= void_tol and abs(dn[i + 1] - vg) <= void_tol \\
+            and abs(dn[i + 2] - vb) <= void_tol:
         void_never += 1
     if dn[i] != dm[i] or dn[i + 1] != dm[i + 1] or dn[i + 2] != dm[i + 2]:
         diff += 1
@@ -181,6 +192,8 @@ return {"ok": true, "pixels": dn.size() / 4, "diff": diff, "darker": darker,
     "void_never": void_never, "void": [vr, vg, vb],
     "frame": [n.get_width(), n.get_height()]}
 """
+
+_COMPARE = _COMPARE.replace("{void_tol}", str(VOID_TOLERANCE))
 
 
 def _grab(mcp, key: str) -> None:

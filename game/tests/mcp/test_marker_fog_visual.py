@@ -28,6 +28,12 @@ pytestmark = pytest.mark.timeout(900)
 
 # Подготовка: слой получает туман от хоста так, как его получает в игре, и
 # сообщает, сколько маркеров ресурсов на карте и сколько клеток исследовано.
+# Допуск цвета «пустого фона»: тот же класс, что в `test_fog_memory_visual.py`
+# (2026-10-27): движковый `Color(0.3, 0.3, 0.3)` даётся в кадре как (76, 76, 76),
+# а `int(round(0.3 * 255))` = 77. Без допуска условие «пиксель на пустом фоне» не
+# выполнялось никогда, то есть `leaks == 0` проходило бы и при настоящем дефекте.
+VOID_TOLERANCE = 3
+
 _PREPARE = """
 var world = get_tree().current_scene
 var markers: Node = world.get_node("WorldUI/MarkerLayer")
@@ -95,6 +101,7 @@ var clear: Color = ProjectSettings.get_setting(
 var vr: int = int(round(clear.r * 255.0))
 var vg: int = int(round(clear.g * 255.0))
 var vb: int = int(round(clear.b * 255.0))
+var void_tol := {void_tol}
 var da: PackedByteArray = a.get_data()
 var db: PackedByteArray = b.get_data()
 var dg: PackedByteArray = bg.get_data()
@@ -108,7 +115,8 @@ while i < n:
     if da[i] != db[i] or da[i + 1] != db[i + 1] or da[i + 2] != db[i + 2]:
         hidden += 1
     if (dg[i] != df[i] or dg[i + 1] != df[i + 1] or dg[i + 2] != df[i + 2]) \\
-            and dg[i] == vr and dg[i + 1] == vg and dg[i + 2] == vb:
+            and abs(dg[i] - vr) <= void_tol and abs(dg[i + 1] - vg) <= void_tol \\
+            and abs(dg[i + 2] - vb) <= void_tol:
         leaks += 1
         if first == "":
             var px: int = int(i / 4.0)
@@ -117,6 +125,8 @@ while i < n:
 return {"ok": true, "hidden": hidden, "leaks": leaks, "first": first,
     "void": [vr, vg, vb], "frame": [a.get_width(), a.get_height()]}
 """
+
+_COMPARE = _COMPARE.replace("{void_tol}", str(VOID_TOLERANCE))
 
 
 def test_markers_do_not_shine_through_fog(full_game):
