@@ -34,6 +34,8 @@ func _ready() -> void:
 	_ui.show_default_enemy_card(_state)
 
 	await get_tree().process_frame
+	# T-220: запас читается после раскладки — до первого кадра прямоугольники полос пусты.
+	_apply_hud_reserve()
 	_view.fit_camera()
 
 ## battle-unit-vitals: the turn clock is model state (BattleState); the battle
@@ -388,9 +390,16 @@ func start_battle(
 		_view.create_unit_sprite(u)
 
 	_view.spawn_hero_figure()
+	_apply_hud_reserve()
 	_view.fit_camera()
 
 	_executor.start_battle()
+
+## T-220: запас поля боя берётся из геометрии полос HUD, а не из константы разрешения.
+func _apply_hud_reserve() -> void:
+	var bands := _ui.hud_bands()
+	_view.set_hud_reserve(bands.x, bands.y)
+
 
 func _on_initiative_changed() -> void:
 	_ui.update_initiative(_state.turn_queue, _state.active_unit)

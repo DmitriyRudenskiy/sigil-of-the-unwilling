@@ -105,33 +105,51 @@ func field_size() -> Vector2:
 	return Vector2(absf(ends[1].x - ends[0].x) + 60.0, absf(ends[1].y - ends[0].y) + 60.0)
 
 
-## Множитель вписывания поля (mvp-ui-flow 4.1, C-10): «поле боя при 720p SHALL use
-## scale x0.8». Плотная вписка занимает всю высоту вьюпорта, и при 720 px ряды
-## упираются в нижнюю панель HUD; ниже порода множитель остаётся 0.8 (запас
-## нужен малым высотам, а не ровно одной). Выше порога — 1.0, прежнее поведение.
-static func field_fit_scale(viewport_height: float) -> float:
-	if viewport_height <= GameNumbers.BATTLE_LOWRES_MAX_HEIGHT:
-		return GameNumbers.BATTLE_LOWRES_FIT_SCALE
-	return 1.0
+## Запас вертикали, отнятый у поля боя полосами HUD (T-220), layout-пиксели:
+## x — верхние карточки и инициатива, y — нижняя панель. Внедряет хост
+## (`BattleController` читает `BattleUI.hud_bands()`): `BattleView` не должен знать про
+## UI ничего, приём тот же, что с `mood_sink` у канала настроения.
+var _hud_reserve := Vector2.ZERO
+
+
+func set_hud_reserve(top: float, bottom: float) -> void:
+	_hud_reserve = Vector2(maxf(top, 0.0), maxf(bottom, 0.0))
+
+
+func hud_reserve() -> Vector2:
+	return _hud_reserve
+
+
+## Центр используемой части поля в локальных координатах тайлмапа; публичный по той же
+## причине, что `field_size()` — тест сверяет сдвиг камеры, а не копирует формулу.
+func field_center() -> Vector2:
+	var ends := _field_ends()
+	if ends.is_empty():
+		return Vector2.ZERO
+	return (ends[0] + ends[1]) / 2.0
 
 
 func fit_camera() -> void:
-	var ends := _field_ends()
-	if ends.is_empty():
+	if _field_ends().is_empty():
 		return
 	var field_sz := field_size()
-	var center: Vector2 = (ends[0] + ends[1]) / 2.0
+	var center := field_center()
 	var vp_sz := get_viewport().get_visible_rect().size
-	# Множитель смотрит на РЕАЛЬНОЕ окно, а не на layout: при stretch mode
-	# canvas_items `get_visible_rect()` остаётся 1920×1080 и на 720p, и на 4K
-	# (это же различает адаптивный гейт: `win=` против `layout=`).
-	var win_sz: Vector2i = get_viewport().get_window().size
-	var z: float = (
-		minf(vp_sz.x / field_sz.x, vp_sz.y / field_sz.y)
-		* field_fit_scale(float(win_sz.y))
-	)
+	# T-220: поле вписывается в полосу между бендами HUD, а не во весь вьюпорт. Нижняя
+	# панель — CanvasLayer, она рисуется поверх мира всегда, поэтому прежняя «вписка
+	# впритык» означала на Full HD поле под кнопками (замер T-220: доля кадра 1.000).
+	var avail_y: float = vp_sz.y - _hud_reserve.x - _hud_reserve.y
+	if avail_y <= 0.0:
+		# Полосы съели весь кадр (крошечное окно либо правка сцены). Молча оставить
+		# нулевой зум = невидимый дефект, поэтому ругаемся и оставляем четверть кадра.
+		push_error("BattleView: полосы HUD съели всю высоту кадра (%.0f px)" % vp_sz.y)
+		avail_y = vp_sz.y * 0.25
+	var z: float = minf(vp_sz.x / field_sz.x, avail_y / field_sz.y)
 	_camera.zoom = Vector2(z, z)
-	_camera.position = center
+	# Поле обязано стать по центру ПОЛОСЫ, а не вьюпорта: без сдвига оно вписалось бы
+	# в полосу, но осталось бы отцентровано по всему кадру и нижней половиной легло бы
+	# на HUD. При bottom > top камера уходит вниз по миру, то есть поле на экране — вверх.
+	_camera.position = center - Vector2(0.0, (_hud_reserve.x - _hud_reserve.y) / (2.0 * z))
 
 func create_unit_sprite(unit: BattleState.BattleUnit) -> void:
 	var n: Node2D = _UnitSprite.instantiate()
