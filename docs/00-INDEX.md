@@ -39,7 +39,7 @@ date: 2026-10-14
 | [[README]] | Снимок матрицы автопилота 2026-10-26 | reference | 2026-10-26 |
 | [[README]] | — | — | — |
 
-## GDD и стиль (84)
+## GDD и стиль (85)
 
 | Заметка | Название | Статус | Дата |
 | --- | --- | --- | --- |
@@ -84,6 +84,7 @@ date: 2026-10-14
 | [[15-asset-spec-artifacts]] | Asset-spec — 29 иконок артефактов (UI-4) | draft | 2026-10-13 |
 | [[16-ux-review-battle-hud]] | UX-ревью боевого HUD (UI-3, шаг 3) | draft | 2026-10-13 |
 | [[17-ui-style-guide]] | UI Style Guide — Sigil of the Unwilling | deepened | 2026-10-18 |
+| [[18-lora-style-groups]] | Теги стилей обучающей нарезки — измерено, а не на глаз | reference | 2026-10-27 |
 | [[18-system-map]] | Карта систем | reference | 2026-10-26 |
 | [[19-gdd-workflow]] | Контур фаз GDD | reference | 2026-10-27 |
 | [[CONFLICTS_REPORT]] | — | архив (вне графа) | — |
