@@ -1,0 +1,63 @@
+# Локальный гейт смены когорты выживания (2026-10-26, `ef6495df`, machine-local)
+
+`game/run_tests.sh` целиком, один прогон; CI не поллился (запрет владельца 2026-10-13 —
+вердикт = локальные тесты + smoke + ревью диффа).
+
+```
+=== gdUnit4: unit + integration + functional ===
+Overall Summary: 3433 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans
+=== lint: gdlint (T-141, report-only) ===
+LINT: SKIPPED (нет gdtoolkit у python3 или нет .gdlintrc в .../game)
+=== vacuous asserts: сканер T-123 (гейт) ===
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+=== MCP tests (tugcantopaloglu/godot-mcp) ===
+80 passed, 2 skipped, 1 error in 468.80s (0:07:48)
+PYTEST LEDGER: passed=80 skipped=2 failed=0 errors=1 collected=83
+=== python: генератор арта карты (scripts/test_gen_map_art.py) ===
+GENART: SKIPPED (нет pytest/PIL в python3)
+итоговый код run_tests.sh: 1  (только из-за errors=1 в MCP-секции)
+```
+
+**GdUnit — зелёный (0 ошибок, 0 падений,exit 0).** Два жёлтых уровня (`LINT`, `GENART`) —
+предсуществующие: в этой среде нет `gdtoolkit` и `PIL`, не регрессия.
+
+## Единственная ошибка MCP — readiness-жертва T-172, не падение ассерта
+
+```
+ERROR tests/mcp/test_campaign_carrier.py::test_second_press_closes_city_screen
+  - godot_mcp.MCPError: игра не готова за 180 с (последняя ошибка: тулз game_eval
+    вернул ошибку: Not connected to game interaction server.)
+```
+
+Изолированный перезапуск того же теста: **`1 passed in 3.88s`**. Ни одной упавшей
+ассерт-проверки во всей MCP-секции (`failed=0`).
+
+Предыдущий прогон того же гейта на этом же дереве (счёт ради честности: флейка не
+привязана к тесту) дал две жертвы — `test_scene_transitions.py::test_world_battle_world_transitions`
+и `test_village_capture.py::test_village_capture`, обе в изоляции прошли за 7.45 с
+(`2 passed`). Счётчик T-172 пополняется, ассерты не ослабляются.
+
+```sh
+# как перезапускались жертвы (Xvfb :96, не дисплей пользователя)
+DISPLAY=:96 GODOT_MCP_SERVER=$PWD/addons/godot-mcp/build/index.js \
+GODOT_PROJECT_PATH=$PWD GODOT_PATH=$HOME/.local/bin/godot GODOT_BIN=$HOME/.local/bin/godot \
+  /home/user/.venv/godot-mcp-tests/bin/python -m pytest \
+  tests/mcp/test_campaign_carrier.py::test_second_press_closes_city_screen -v --timeout=900
+```
+
+## Режим (задача 8.2)
+
+GdUnit — `--headless`; MCP — живой Godot без `--headless`, но на Xvfb: `run_tests.sh` поднимает
+его сам на свободном дисплее (:97, затем :91–:98), если `DISPLAY` не задан, и пробрасывает
+в MCP-сервер, то есть offscreen: foreground-окно не поднималось, курсор не захватывался,
+дисплей владельца не использовался (перезапуски жертв ниже — на `:96`, тоже Xvfb). Когорта выживания и диагностика (`survival_report.gd`,
+`matrix_report.gd`, `diag_*.gd`) запускаются только с `--headless` и окон не создают.
+
+## Smoke, прогнанный сверх автотестов
+
+- `SURVIVAL_SEEDS` не задан → когорта 10/10 строк, RC=0, `SURVIVAL-WARNING` вместо
+  техошибки; повтор отдельным процессом — 10/10 побайтово совпадающих строк;
+- `SURVIVAL_REPEAT=2` — 20 прогонов, `SURVIVAL-DETERMINISM … same=true` ×10,
+  `SURVIVAL-SWEEP` (осиротевший `DestMarker`) перед каждым прогоном;
+- батарея `tools/mut_survival_cohort.sh` — 11/11 мутантов красные, «дерево чистое».

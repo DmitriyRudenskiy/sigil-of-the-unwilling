@@ -34,7 +34,7 @@
 | MCP node_modules | `game/addons/godot-mcp/node_modules` (gitignored; `npm ci` из package-lock) |
 | Ремот `origin` | `git@github.com:DmitriyRudenskiy/sigil-of-the-unwilling.git` — **SSH** (ключ `~/.ssh/id_ed25519`). HTTPS не работает: токен в `gh auth` просрочен (проверено 2026-10-17) → `git push`/`git fetch` идут по SSH, `gh`-операции трекера — отдельный вопрос (реестр тикетов — `docs/mvp/TICKETS.md`, хост — зеркало) |
 
-| OpenSpec | `openspec/changes/<name>/`, CLI: `/usr/bin/openspec` |
+| OpenSpec | `openspec/changes/<name>/`, CLI: `openspec` (npm `@fission-ai/openspec` 1.14.3, `~/.npm-global/bin/openspec`; в неинтерактивной оболочке PATH его не видит — звать `node /home/user/.npm-global/lib/node_modules/@fission-ai/openspec/bin/openspec.js`. `/usr/bin/openspec` на этой машине нет — проверено 2026-10-26) |
 
 ## Режим работы
 
@@ -102,6 +102,17 @@ ux-review — не шаг владельца и не предлог отложи
 падение), `100` и прочие = реальные падения. **Политика гейта (CI-2, 2026-10-03):**
 GdUnit4 `0`/`101` → GATE=0 (orphan = **warning**, не влияет на exit; красный =
 только падения/регрессии); маппинг прописан явно в run_tests.sh.
+
+**Readiness MCP — жёлтый (владелец, 2026-10-26, D-265).** `MCPError: игра не готова за
+180 с …` (error в fixture readiness, T-172) — **жёлтый**, а не красный: среда, не
+регрессия. Классификация машинная, не чтение лога глазами: pytest пишет `--junitxml`,
+`scripts/classify_mcp_junit.py` возвращает `0` зелёный / `3` жёлтый (только readiness) /
+`1` красный / `2` журнал не разобран; красный снимает **только** `3`, и только когда
+красного нет вовсе. Неполный прогон (`сумма != collected`), неразобранный журнал,
+`failure` и любой другой `error` красный не снимают. Жёлтый печатается поимённо
+(`MCP READINESS: YELLOW — … - tests/mcp/…`); в гейт-артефакт обязана попасть строка
+`MCP VERDICT:`. Сами-тест классификатора (`scripts/test_classify_mcp_junit.py`) — часть
+гейта.
 
 **Вердикт и протокол публикации (владелец, 2026-10-13, взамен CI-гейта;
 переименован D-224):** вердикт =

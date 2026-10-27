@@ -30,6 +30,8 @@ func _ready() -> void:
 	_wire_ui_signals()
 	_view.setup()
 	_view.paint_field()
+	# 4.1 (M1): карточка врага видна с первого кадра боя, а не с первого наведения
+	_ui.show_default_enemy_card(_state)
 
 	await get_tree().process_frame
 	_view.fit_camera()
@@ -105,7 +107,8 @@ func _wire_signals() -> void:
 
 func _on_attack_target_updated(target: BattleState.BattleUnit) -> void:
 	if target == null:
-		_ui.hide_target_card()
+		# 4.1: пропало прицеливание — не пустой экран, а карточка текущего врага
+		_ui.show_default_enemy_card(_state)
 	else:
 		_ui.show_target_card(target)
 

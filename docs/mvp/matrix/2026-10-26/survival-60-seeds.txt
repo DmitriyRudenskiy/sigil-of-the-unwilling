@@ -1,0 +1,42 @@
+# Когорта выживания: 10 seed x 60 ходов, класс fighter (задача 7.1) + повтор каждого seed в том же процессе (задача 7.3), 2026-10-26
+# команда: SURVIVAL_REPEAT=2 SURVIVAL_TRACE=1 godot --headless --path game -s res://tools/survival_report.gd
+#   (Repeat=2: один артефакт даёт и основную когорту, и проверку детерминизма —
+#    каждый seed прогоняется в том же процессе дважды)
+# носитель набора: game/scripts/data/scenario_targets.gd, const SURVIVAL (version: 1)
+# цель: выжить >= 8/10 и среднее >= 55 ходов; ниже — 10 строк когорты, 10 строк повтора, сводка
+# вердикт: 6/10 выжили, среднее 52.6 -> SURVIVAL-WARNING (баланс), exit 0 (техсбоев нет)
+#   погили: 3 x total_collapse (ход 35/34/31), 1 x unsuccessored_death (exhaustion, ход 59)
+#   во всех 10: recruits=0 (T-217), recovery_turns=0 (T-215), trades=0 (базовый автопилот не торгует), successions=0
+#   детерминизм: 10/10 same=true; перед каждым прогоном с root снимался осиротевший DestMarker (T-214)
+#   кросс-процессная проверяемость: повтор всего набора отдельным процессом дал 10/10 строк,
+#   побайтово совпадающих с этим файлом (md5 строк идентичны) — воспроизводится не только
+#   внутри одного процесса, но и между запусками
+# ---------------------------------------------------------------
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+SURVIVAL|battles=10|builds=13|death_cause=exhaustion|death_turn=59|done=true|error=|gathers=38|hostility=2.0|interactions=51|losses=0|reason=unsuccessored_death|recovery_turns=0|recruits=0|seed=4211|state=DEFEAT|successions=0|survived=false|trades=0|turns=63
+SURVIVAL-DETERMINISM|seed=4211|runs=2|same=true|hashes=7798d256,7798d256
+SURVIVAL|battles=23|builds=23|death_cause=|death_turn=-1|done=true|error=|gathers=53|hostility=2.0|interactions=76|losses=3|reason=|recovery_turns=0|recruits=0|seed=907|state=RUNNING|successions=0|survived=true|trades=0|turns=60
+SURVIVAL-DETERMINISM|seed=907|runs=2|same=true|hashes=a9a9cc04,a9a9cc04
+SURVIVAL|battles=21|builds=19|death_cause=|death_turn=-1|done=true|error=|gathers=56|hostility=2.0|interactions=75|losses=6|reason=|recovery_turns=0|recruits=0|seed=13613|state=RUNNING|successions=0|survived=true|trades=0|turns=60
+SURVIVAL-DETERMINISM|seed=13613|runs=2|same=true|hashes=9db1124a,9db1124a
+SURVIVAL|battles=20|builds=17|death_cause=|death_turn=-1|done=true|error=|gathers=60|hostility=2.0|interactions=77|losses=5|reason=|recovery_turns=0|recruits=0|seed=257|state=RUNNING|successions=0|survived=true|trades=0|turns=61
+SURVIVAL-DETERMINISM|seed=257|runs=2|same=true|hashes=9e6b88b0,9e6b88b0
+SURVIVAL|battles=20|builds=24|death_cause=|death_turn=-1|done=true|error=|gathers=53|hostility=2.0|interactions=77|losses=7|reason=|recovery_turns=0|recruits=0|seed=6571|state=RUNNING|successions=0|survived=true|trades=0|turns=60
+SURVIVAL-DETERMINISM|seed=6571|runs=2|same=true|hashes=1e7286fc,1e7286fc
+SURVIVAL|battles=13|builds=17|death_cause=|death_turn=-1|done=true|error=|gathers=45|hostility=1.7|interactions=62|losses=2|reason=total_collapse|recovery_turns=0|recruits=0|seed=10007|state=DEFEAT|successions=0|survived=false|trades=0|turns=35
+SURVIVAL-DETERMINISM|seed=10007|runs=2|same=true|hashes=fe595eb0,fe595eb0
+SURVIVAL|battles=29|builds=26|death_cause=|death_turn=-1|done=true|error=|gathers=53|hostility=2.0|interactions=79|losses=9|reason=|recovery_turns=0|recruits=0|seed=1723|state=RUNNING|successions=0|survived=true|trades=0|turns=61
+SURVIVAL-DETERMINISM|seed=1723|runs=2|same=true|hashes=13d6a5c2,13d6a5c2
+SURVIVAL|battles=7|builds=18|death_cause=|death_turn=-1|done=true|error=|gathers=42|hostility=1.68|interactions=60|losses=1|reason=total_collapse|recovery_turns=0|recruits=0|seed=33071|state=DEFEAT|successions=0|survived=false|trades=0|turns=34
+SURVIVAL-DETERMINISM|seed=33071|runs=2|same=true|hashes=bb99ca69,bb99ca69
+SURVIVAL|battles=13|builds=16|death_cause=|death_turn=-1|done=true|error=|gathers=43|hostility=1.62|interactions=59|losses=2|reason=total_collapse|recovery_turns=0|recruits=0|seed=4517|state=DEFEAT|successions=0|survived=false|trades=0|turns=31
+SURVIVAL-DETERMINISM|seed=4517|runs=2|same=true|hashes=41798e15,41798e15
+SURVIVAL|battles=18|builds=27|death_cause=|death_turn=-1|done=true|error=|gathers=54|hostility=2.0|interactions=81|losses=4|reason=|recovery_turns=0|recruits=0|seed=20899|state=RUNNING|successions=0|survived=true|trades=0|turns=61
+SURVIVAL-DETERMINISM|seed=20899|runs=2|same=true|hashes=f6073a47,f6073a47
+SURVIVAL-SUMMARY|avg_turns=52.6|goal_avg_turns=55|goal_survived=8|meets_goals=false|min_interactions=51|no_interaction_seeds=|runs=10|survived=6
+# ---------------------------------------------------------------
+# примеры снятия утечки (по одному на прогон):
+SURVIVAL-SWEEP|seed=4211|swept=1|DestMarker
+SURVIVAL-SWEEP|seed=907|swept=1|DestMarker
+SURVIVAL-SWEEP|seed=907|swept=1|DestMarker
+# всего снесено узлов за прогон: 19

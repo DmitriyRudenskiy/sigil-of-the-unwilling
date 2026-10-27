@@ -15,6 +15,7 @@ date: 2026-10-14
 > `snapshot` / `archived`. `redirect` — файл-перенаправление, читать цель.
 
 ## Реестры и процессы (18)
+## Реестры и процессы (19)
 
 | Заметка | Название | Статус | Дата |
 | --- | --- | --- | --- |
@@ -38,6 +39,10 @@ date: 2026-10-14
 | [[README]] | Снимок матрицы автопилота 2026-10-26 | reference | 2026-10-26 |
 
 ## GDD и стиль (83)
+| [[VERDICT-REQUEST]] | Вердикты владельца — блокирующие решения (verdict-request) | reference | 2026-10-26 |
+| [[README]] | — | — | — |
+
+## GDD и стиль (84)
 
 | Заметка | Название | Статус | Дата |
 | --- | --- | --- | --- |
@@ -83,6 +88,8 @@ date: 2026-10-14
 | [[16-ux-review-battle-hud]] | UX-ревью боевого HUD (UI-3, шаг 3) | draft | 2026-10-13 |
 | [[17-ui-style-guide]] | UI Style Guide — Sigil of the Unwilling | deepened | 2026-10-18 |
 | [[18-lora-style-groups]] | Теги стилей обучающей нарезки — измерено, а не на глаз | reference | 2026-10-26 |
+| [[18-system-map]] | Карта систем | reference | 2026-10-26 |
+| [[19-gdd-workflow]] | Контур фаз GDD | reference | 2026-10-27 |
 | [[CONFLICTS_REPORT]] | — | архив (вне графа) | — |
 | [[MVP-scope]] | MVP Scope — доказательство, что core loop fun | deepened | 2026-10-21 |
 | [[NORMALIZATION_REPORT]] | — | архив (вне графа) | — |

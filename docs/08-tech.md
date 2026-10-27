@@ -32,23 +32,40 @@ date: 2026-09-30
 
 ## Data-driven и валидация
 
-- Карточки (05-content) → Godot resources; валидация: `godot --headless --script validate_cards.gd` (схема, закрытый набор тегов, целостность ссылок, уникальность id).
+- Карточки (05-content) → Godot resources; валидация: headless-валидатора `validate_cards.gd` в репо нет (не написан, T-222); фактическая проверка — GdUnit-тесты каталогов: `tests/unit/data/test_mvp_catalog.gd`, `test_canon_classes.gd`, `test_canon_races.gd`, `test_campaign_building_catalog.gd` (`godot --headless --path game …`) (схема, закрытый набор тегов, целостность ссылок, уникальность id).
 - Авто-тест баланса: детерминированные прогоны юнит vs CR-якор **K-резолвером** (05-content: исход + зона лестницы ≤ LADDER_CAP, коридор [К ЮНИТУ]; мера изменена Q-M80 → (а), экс-«раунды ≤ ROUND_CAP»), прогоняется в CI.
 
 ## Сохранения
 
+Формат описан **по фактическому коду** (`scripts/campaign/save/mvp_save_manager.gd`,
+`scripts/campaign/save/mvp_save_schema.gd`), инвентарь секций — в [[18-system-map#6. Сейв-пайплайн]].
+
 ```json
-// save.json (v1)
+// user://mvp_save_slot_1.json  (PATH_TEMPLATE, CAMPAIGN_SLOT = 1, SLOT_COUNT = 3)
 {
-  "version": 1,
-  "turn": 12,
-  "city": {"hex": 52, "buildings": ["forge_01@12,7", "..."], "population": 34, "stocks": {"еда": 41}},  // hex 52: ядро 4 + кольца 1–3 (02g §2.1); «grid: 24» — пре-D1
-  "party": [{"id": "c1", "class": "fighter", "level": 3, "hd": "2d10", "state": "READY"}],
-  "map": {"hero_pos": [9, 11], "fog": "base64", "nodes": [...], "visibility": 1.4},
-  "sign": {"id": "sign_craft", "prestige": 40, "rank": 2},
-  "chronicle": ["..."]
+  "version": { "major": 1, "minor": 0 },        // MvpSaveSchema.current_version()
+  "state": {
+    "campaign":  { "turn": 12, "seed": 8123, "phase": "day" },
+    "resources": { "food": 41, "wood": 12, "iron": 3 },
+    "population": { "count": 34, "housing": 40 },
+    "party":     [ { "id": "c1", "class": "fighter", "race": "human", "level": 3, "xp": 120, "stats": {}, "luck": 1 } ],
+    "city":      { "buildings": [], "districts": {}, "hexes": {} },   // T-030
+    "map":       { "region": "", "fog": {}, "nodes": {} },
+    "prestige":  { "ledger": [ { "turn": 12, "source": "raid_repelled", "amount": 2 } ] },
+    "sign":      { "id": "sign_craft", "rank": 2 }
+  }
 }
 ```
+
+- Секций ровно восемь, они перечислены в `MvpSaveSchema.SECTIONS` вместе с ожидаемым
+  типом; загрузка обязана проверить тип каждой (`_type_ok`) и отказать, а не
+  «подлечить молча».
+- **Производные ключи в сейве запрещены** (`MvpSaveSchema.DERIVED_KEYS`): `ladder`,
+  `prestige_balance`, `effective_stats`, `morale`. Основание то же, что у снятия шкалы
+  «морали» (K-M14): производное пересчитывается, а не хранится.
+- **Хроники в сейве нет**: `chronicle_log.gd` — отдельный писатель, секции
+  `chronicle` схема не объявляет (прежний пример с `"chronicle": [...]` описывал
+  то, что код не пишет).
 - Миграции: таблица `v1→v2: <поле>`; старая версия без миграции → отказ в загрузке + лог (не silent-default).
 - **3 слота** (M2): слоты 1/2/3 + автосейв. Поражение в позднем бою можно перезагрузить из предыдущего слота — «2 часа в корзину» исключено; точка сейва в бою = граница раунда (ниже).
 - Точка сейва в бою — граница раунда (07-ui-ux EC2).

@@ -79,6 +79,16 @@ class BattleUnit extends RefCounted:
 	var uid := 0
 	var statuses: Dictionary = {}
 	var max_count: int = 0
+	## T-221 (D-268): модификатор Удачи бойца тактического боя. Парное поле
+	## `luck_source` обязательно: «0 без носителя» и «мод 0» — это разные
+	## утверждения, а M1 (`battle_ui.gd`) запрещает показывать число без источника.
+	## Пишет носитель-писатель (артефактные моды в `BattleStateBuilder`); читатель —
+	## карточка врага и, когда слой будет решён, разрешение исхода.
+	var luck: int = 0
+	var luck_source: StringName = &""
+
+	func has_luck() -> bool:
+		return luck_source != &""
 	var distance_moved_this_turn: int = 0
 	var already_reborn: bool = false
 	var spell: StringName = ""

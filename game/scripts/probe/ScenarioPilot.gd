@@ -9,11 +9,33 @@ var role: ScenarioRole = null
 var class_id: String = ""
 var goal_reached_turn := -1
 var extracted_total := 0
+## Счётчик УЗЛОВ, а не единиц добычи (задача 4.2, T-210). Сигнал
+## `resource_extracted` приносит `amount = ResourceType.pickup_amount`: у золота это
+## **50 единиц на один узел** при редкой цели «10». Без пары «узел/единицы» строка
+## матрицы не отвечает на вопрос, собрал ли Собиратель десять ресурсов или нашёл одно
+## золотое месторождение,
+var extracted_nodes := 0
 var _rare_ids: Array = []
 var _rare_count := 0
+var _rare_nodes := 0
+
+## Смерть героя — измеряемый исход, а не техсбой (спека `balance-probe`, задача 7.1).
+## `hero_died` — событие гибели конкретного героя; бег продолжается, если есть
+## преемник (`successions`), и только без преемника мир уходит в DEFEAT
+## (`unsuccessored_death`). Поэтому в отчёт когорты идут оба числа: без них «выжил»
+## и «выжил, похоронив двух предшественников» неразличимы.
+var hero_death_turn := -1
+var hero_death_cause := ""
+
+func _on_probe_hero_died(cause: StringName) -> void:
+	if hero_death_turn < 0:
+		hero_death_turn = turn
+		hero_death_cause = str(cause)
 
 func _ready() -> void:
 	GameEventBus.resource_extracted.connect(_on_resource_extracted)
+	if not GameEventBus.hero_died.is_connected(_on_probe_hero_died):
+		GameEventBus.hero_died.connect(_on_probe_hero_died)
 	if not GameEventBus.battle_won.is_connected(_on_role_battle_won):
 		GameEventBus.battle_won.connect(_on_role_battle_won)
 	if not GameEventBus.battle_lost.is_connected(_on_role_battle_lost):
@@ -28,8 +50,9 @@ func start_scenario(world: Node, p_seed: int, role_id: String, p_class_id: Strin
 		return {"error": "неизвестная роль: %s" % role_id}
 	var target: Dictionary = role.target
 	_rare_ids = target.get("rare_ids", [])
-	_rare_count = 0
-	extracted_total = 0
+	_reset_extraction_counters()
+	hero_death_turn = -1
+	hero_death_cause = ""
 	goal_reached_turn = -1
 	var r: Dictionary = start_probe(world, p_seed)
 	if r.get("error") != null or r.get("status") != "probe_started":
@@ -73,15 +96,38 @@ static func make_role(role_id: String, target: Dictionary) -> ScenarioRole:
 			r.id = role_id
 			r.target = target
 			return r
+		"survival":
+			# Когорта выживания (задача 7.1) — не роль матрицы: в `ROLES` не входит,
+			# чтобы матрица осталась 5×11, а цель/метрики отдаются тем же интерфейсом.
+			var r := SurvivalRole.new()
+			r.id = role_id
+			r.target = target
+			return r
 	return null
 
 func rare_count() -> int:
 	return _rare_count
 
+## Сброс счётчиков добычи. Вынесен в метод ради теста: матрица гоняет 11 профилей
+## в одном процессе, и непройденный сброс означал бы, что второй класс начинает забег
+## с чужой добычей (тот же класс дефекта, что переживший teardown бой, T-204).
+func _reset_extraction_counters() -> void:
+	_rare_count = 0
+	_rare_nodes = 0
+	extracted_total = 0
+	extracted_nodes = 0
+
+## Сколько РАЗНЫХ узлов редкого типа реально снято со спавнера (задача 4.2: отчёт
+## обязан различать узлы и единицы — цель роли считается в единицах).
+func rare_nodes() -> int:
+	return _rare_nodes
+
 func _on_resource_extracted(_cell: Vector2i, resource_id: StringName, amount: int) -> void:
 	extracted_total += amount
+	extracted_nodes += 1
 	if _rare_ids.has(ResourceType.from_name(resource_id)):
 		_rare_count += amount
+		_rare_nodes += 1
 
 ## Ранний финиш: цель роли достигнута (проверяется перед каждым шагом).
 ## Хук act: роль сама обрабатывает кадр (базовый цикл не вызывается).
@@ -142,10 +188,19 @@ func _finish() -> void:
 		GameEventBus.battle_won.disconnect(_on_role_battle_won)
 	if GameEventBus.battle_lost.is_connected(_on_role_battle_lost):
 		GameEventBus.battle_lost.disconnect(_on_role_battle_lost)
+	if GameEventBus.hero_died.is_connected(_on_probe_hero_died):
+		GameEventBus.hero_died.disconnect(_on_probe_hero_died)
 	super._finish()
 
 func report() -> Dictionary:
 	var rep: Dictionary = super.report()
+	rep["hero_death_turn"] = hero_death_turn
+	rep["hero_death_cause"] = hero_death_cause
+	# Число наследований берётся у самой игры (`GameSession.successions`, пишет
+	# EndgameController по тому же сигналу), а не дублируется в пилоте: вторая копия
+	# счёта означает, что при расхождении не будет понятно, кому верить.
+	var sess: Variant = _world.get_session() if _world != null else null
+	rep["successions"] = int(sess.successions) if sess != null else 0
 	if role != null:
 		rep["role"] = role.id
 		rep["hero_class"] = class_id

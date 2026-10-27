@@ -74,7 +74,17 @@ Auto mode SHALL use the same engine as manual mode with a deterministic AI (mini
 - **AND** the battle ends with a DEFEAT or RETREAT outcome
 
 ### Requirement: Enemy AI
-Enemy AI SHALL be greedy (minimum HP in radius, tiebreak by lower id). The turn-21 boss SHALL be greedy plus exactly two abilities (D-218, owner verdict 2026-10-20; no positional zones, D-222): (1) a telegraphed powerful strike — deterministic target (existing targeting: the opponent in 1v1, `select_target` in multi), base damage × 1.5, cooldown of 2 turns, no RNG; (2) a rage phase — activates once when the boss's own HP drops to ≤ 50% of its max HP, +25% damage for the rest of the battle, no extra phases, minions, or control. All parameters SHALL be data-driven (balance config).
+Enemy AI SHALL be greedy (minimum HP in radius, tiebreak by lower id), and the turn-21 boss SHALL add exactly two abilities to that policy (D-218, owner verdict 2026-10-20; no positional zones, D-222). All ability parameters SHALL be data-driven (balance config), no RNG.
+
+#### Scenario: Greedy target selection
+- **WHEN** the enemy AI picks a target
+- **THEN** it attacks the lowest-HP character within its radius
+- **AND** ties are broken by the lower id
+- **AND** no positional zone or coordinate is consulted (D-222)
+
+#### Scenario: Ability parameters come from the balance config
+- **WHEN** the balance config changes a boss damage multiplier or cooldown
+- **THEN** the boss behavior follows the config without a code change
 
 #### Scenario: Boss powerful strike
 - **WHEN** the boss acts and its powerful-strike cooldown is 0
@@ -97,12 +107,23 @@ Enemy stats (AC, HP, luck, abilities) SHALL be visible to the player at all time
 - **AND** the card is always accessible during battle
 
 ### Requirement: States and terrain
-States SHALL include prone (-2/+2) and elevation status (flight, K-M7). Blink (K-M7) is **deferred, not part of MVP (D-222, 2026-10-20)**: no grid, cells, coordinates, or positional zones are introduced; a future Blink requires a separate owner verdict on a positioning system. Terrain SHALL have 3 types (swamp, spikes, height, C3) as abstract modifiers (no hex). The binom "Flank" (fighter + ranger) SHALL be active from turn 1 and is the only MVP binom; it is keyed by shared target, not by position (D-222).
+States SHALL include prone (-2/+2) and elevation (flight, K-M7). Terrain SHALL provide 3 types (swamp, spikes, height, C3) as abstract modifiers, without a hex grid. The "Flank" binom (fighter + ranger) SHALL be active from turn 1, SHALL be keyed by shared target, and SHALL remain the only MVP binom (D-222).
 
 #### Scenario: Prone penalty
 - **WHEN** a character is prone
 - **THEN** the character gets -2 to attacks and +2 to attacks against it
 - **AND** the state is visible in the UI
+
+#### Scenario: Terrain is an abstract modifier
+- **WHEN** a combatant is affected by swamp, spikes or height terrain
+- **THEN** the ±2 margin modifiers apply to the attack resolution
+- **AND** no hex coordinates, cells or zones are read (D-222)
+
+#### Scenario: Blink is out of MVP
+- **WHEN** the ladder runs a battle
+- **THEN** no Blink ability is available to any combatant
+- **AND** the battle state exposes no grid, cells or coordinates (D-222)
+- **AND** reintroducing Blink requires a separate change with a positioning system
 
 #### Scenario: Flank binom
 - **WHEN** a fighter and a ranger attack the same enemy in the same round (position-free, D-222)

@@ -1,0 +1,91 @@
+# Гейт локального агента — срез «экран артефактов отвечает на выбор» (ui-mockup-parity 6.4/6.6/6.7, T-218)
+
+Дата: 2026-10-26. Команда: `bash game/run_tests.sh` (GdUnit4 headless + MCP e2e + python).
+Код изменения: `76db602c`. Пуск: `local` (агент), не CI: CI-поллинг агенту запрещён
+(директива владельца 2026-10-13), вердикт = локальные тесты + smoke + ревью диффа в треде.
+
+## GdUnit4 (unit + integration + functional, headless)
+
+```
+Overall Summary: 3444 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans
+```
+
+Прирост относительно предыдущего замера (`3436`, срез T-214) = **+8** — ровно
+`tests/unit/ui/test_inventory_actions.gd`. ORPHAN-GATE: OK (сирот всего: 0; allowlist:
+0 файл(а)). VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет).
+LINT: SKIPPED (нет gdtoolkit у python3 — поддерживаемая конфигурация, `game/run_tests.sh`).
+CHECK-DOCS-LINKS: OK (98 заметок).
+
+## MCP e2e (живой Godot, Xvfb)
+
+Первый прогон (внутри гейта):
+
+```
+PYTEST LEDGER: passed=80 skipped=2 failed=1 errors=0 collected=83
+FAILED tests/mcp/test_main_menu_buttons_live.py::test_disabled_credits_press_keeps_menu
+  - godot_mcp.MCPError: игра не готова за 180 с
+```
+
+Это **не регрессия среза, а флейк готовности среды**, и это измерено, а не списано:
+тот же файл в изоляции — `3 passed in 7.67s`; весь MCP-набор повторным прогоном —
+`81 passed, 2 skipped in 290.88s (0:04:50)`, то есть базовая база (`81/2`) восстановлена.
+Косвенное свидетельство причины — длительность: 468 с против 290 с на том же дереве при
+заполненной памяти машины (45 ГиБ из 46 занято, на шару с другими сессиями). Флаг
+системного порядка, а не кода: таймаут readiness (900 с на тест, 180 с на игру) при
+нехватке памяти ведёт себя именно так. Чужие процессы не трогались.
+
+## Мутационная батарея
+
+`bash game/tools/mut_inventory_marks.sh` (дерево чистое, код среза закоммичен до battery):
+
+```
+M1: <нет сводки: прогон упал до сводки — тоже красный>   M6: 0 errors | 5 failures
+M2 (эквивалентный, ожидается зелёным): 0 errors | 0 failures
+M3: 0 errors | 1 failures    M4: 0 errors | 3 failures   M7: 0 errors | 3 failures
+M5: 0 errors | 4 failures    M8: 0 errors | 1 failures   M9: 0 errors | 6 failures
+M10: <нет сводки: прогон упал до сводки — тоже красный>
+ИТОГ: все мутанты красные
+```
+
+Две честные лакуны зафиксированы в шапке батареи: `M2` зелёный по причине владения
+правилом моделью (`HeroInventory.equip` сам отказывает), а не дырой гейта; `Exp_val`
+тестом не покрыт (у тестового героя опыт и есть 0, литеральная «0» прошла бы зелёной).
+`M9` был зелёным до добавления структурной проверки `mouse_filter` — тест-дыра закрыта
+тем же коммитом, что её обнаружила.
+
+## Smoke (чек-лист, headless не покрывает)
+
+- Экран артефактов из мира: кадр `sigil-reserve/inventory-t218/inventory_frame.png` —
+  золотая рамка выбора и красная рамка «некуда надеть» видны, пересчёт «Магия 8 (+4)» читается.
+- Кнопки меню/создания не задеты (MCP `test_main_menu_buttons_live.py` — 3 passed).
+- Код состояния кадра: `backpack 2, selected 1, stats 0, 0, 8 (+4), 2, marks 0:-B | 1:S-`.
+
+## UX-review
+
+`~/.local/share/sigil-reserve/inventory-t218/UX-REVIEW.md` + `SHA256.txt`. Расхождение с
+макетом (сетка сумки вне рамки окна, питч ≈ 1 px) — **T-218**, владение открытыми
+6.2/6.3 того же цикла.
+
+## Дополнение: снятие наложения ячеек (та же смена)
+
+После `custom_minimum_size = (56, 56)` на шести ячейках сумки (`artifact_inventory_screen.tscn`)
+и новой структурной проверки в `test_inventory_actions.gd`:
+
+```
+tests/unit/ui: 219 test cases | 0 errors | 0 failures | 0 orphans
+```
+
+Пересъёмка кадра (`inventory_after.png`, хэши в `SHA256.txt`): питч 61 px при ширине 56,
+красная рамка замкнулась, пиксели реестрового золота 342 → 574.
+
+Полный гейт на этом дереве перезапускался (пуш без зелёного гейта запрещён), код `eeb3ab3a`:
+
+```
+Overall Summary: 3444 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+LINT: SKIPPED (нет gdtoolkit у python3)
+PYTEST LEDGER: passed=81 skipped=2 failed=0 errors=0 collected=83   (4:50)
+```
+
+Флейк readiness из первого прогона не повторился: MCP-секция дважды дала базовые 81/2.

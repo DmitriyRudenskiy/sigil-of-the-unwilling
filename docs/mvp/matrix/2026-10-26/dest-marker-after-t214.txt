@@ -1,0 +1,59 @@
+# Контроль фикса T-214: сирота `DestMarker` под `root` больше не находится
+
+Дата: 2026-10-26. Машина: та же, что и для всего снимка `2026-10-26`.
+Дерево: рабочий фикс `game/scripts/entities/hero_visual_controller.gd` поверх `0cdc4199`
+(коммит этого же среза). Команда:
+
+```
+SURVIVAL_SEEDS=4211,907 SURVIVAL_REPEAT=2 \
+  godot --headless --path game -s res://tools/survival_report.gd
+```
+
+Выбраны ровно те две конфигурации, которые давали сироту в базовом снимке, и тот же
+повтор, чтобы сравнение было построчным, а не «на глаз».
+
+## Что измерялось
+
+`_sweep()` в инструменте печатает `SURVIVAL-SWEEP` только тогда, когда перед прогоном
+под `root` нашёлся чужой узел. До фикса это была штатная строка: в базовом снимке
+(`survival-60-seeds.txt`, 10 seed × 2 повтора = 20 прогонов) сирота находили **3 раза**,
+и всегда это был `DestMarker`:
+
+```
+SURVIVAL-SWEEP|seed=4211|swept=1|DestMarker
+SURVIVAL-SWEEP|seed=907|swept=1|DestMarker
+SURVIVAL-SWEEP|seed=907|swept=1|DestMarker
+```
+
+После фикса (`teardown_path_visual()` из `_exit_tree`, снятие через `queue_free`) —
+**0 строк `SURVIVAL-SWEEP`** в контрольном прогоне (4 прогона: 2 seed × 2 повтора).
+Инструмент ничего не убирал, потому что убирать стало нечего.
+
+## Результат (полные структурные строки)
+
+```
+SURVIVAL-START|version=1|seeds=2|turns=60|class=fighter|subset=4211,907
+SURVIVAL|battles=10|builds=13|death_cause=exhaustion|death_turn=59|done=true|error=|gathers=38|hostility=2.0|interactions=51|losses=0|reason=unsuccessored_death|recovery_turns=0|recruits=0|seed=4211|state=DEFEAT|successions=0|survived=false|trades=0|turns=63
+SURVIVAL-DETERMINISM|seed=4211|runs=2|same=true|hashes=7798d256,7798d256
+SURVIVAL|battles=23|builds=23|death_cause=|death_turn=-1|done=true|error=|gathers=53|hostility=2.0|interactions=76|losses=3|reason=|recovery_turns=0|recruits=0|seed=907|state=RUNNING|successions=0|survived=true|trades=0|turns=60
+SURVIVAL-DETERMINISM|seed=907|runs=2|same=true|hashes=a9a9cc04,a9a9cc04
+SURVIVAL-SUMMARY|avg_turns=61.5|goal_avg_turns=55|goal_survived=8|meets_goals=false|min_interactions=51|no_interaction_seeds=|runs=2|survived=1
+SURVIVAL-WARNING|выживание 1/2 при цели 8, среднее 61.5 хода(ов) при цели 55
+```
+
+## Выводы
+
+1. **Поведение не сдвинулось.** Обе строки `SURVIVAL|` побайтово совпали с базовым
+   снимком (`diff` отфильтрованных строк `seed=4211`/`seed=907` — пусто), хэши
+   детерминизма тоже (`7798d256`, `a9a9cc04`). Фикс меняет только время жизни узла,
+   а не симуляцию — именно это и требовалось показать, чтобы не «починить» утечку
+   изменением меры.
+2. **Утечка закрыта в живой игре, а не только в тесте.** `test_dest_marker_ownership.gd`
+   покрывает оба пути (`free()` героя и `remove_child` — путь `HeroLifecycleSystem._detach_hero`),
+   контроль подтверждает то же самое на полном 60-ходовом прогоне.
+3. **`SURVIVAL-SWEEP` оставлен в инструменте.** Он больше ничего не убирает, но это
+   бесплатный датчик: если очередной оверлей снова забудут снять с `root`, строка
+   появится в протоколе, и её не придётся искать постфактум по утечкам памяти.
+4. Осталась известной и не тронутой этим фиксом другая часть протокола: `ObjectDB
+   instances were leaked at exit` (660) — это объект-протёк внутри мира после teardown,
+   не узел под `root`; отдельная линия (T-215/T-216 — владелец).

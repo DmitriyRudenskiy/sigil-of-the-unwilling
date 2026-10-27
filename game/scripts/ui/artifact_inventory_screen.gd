@@ -13,9 +13,14 @@ var _selected_slot: Artifact.Slot = Artifact.Slot.WEAPON
 # -1 — ничего; раньше кнопки действовали на «первый попавшийся», что в сетке
 # без порядка читается как «непонятно что».
 var _hover_backpack := -1
-var _picked_backpack := -1
+## Индекс в `inventory.backpack` — предмет, над которым работают «Equip»/«Dispose».
+var _selected_bp: int = -1
 
 var _right: Control = null
+
+## Узлы предметов по индексу сумки — чтобы смена выбора перекрашивала рамки, не
+## пересобирая иконки (`_refresh_grid` их всё равно чистит и строит заново).
+var _icons: Dictionary = {}
 
 const TEXT_GOLD := ThemeConfig.C_TEXT_GOLD_SOFT
 const TEXT_LIGHT := ThemeConfig.C_TEXT_LIGHT_SOFT
@@ -32,6 +37,18 @@ const OVERFLOW_ORIGIN := Vector2i(900, 310)
 const CELL_EMPTY := Color(1.0, 1.0, 1.0, 0.05)
 const CELL_FILLED := Color(1.0, 1.0, 1.0, 0.13)
 const CELL_HOVER := Color(0.9, 0.75, 0.4, 0.3)
+
+## Маркеры предмета — непрозрачная рамка поверх иконки, а не `modulate` и не
+## полупрозрачная плашка: иконки артефактов — плейсхолдеры со средним каналом
+## 15–75 из 255, а плашка зависит от фона под ней (на витраже золотая плашка
+## тонула). Рамка видна на любом фоне. Выбор — золото, предмет без свободного
+## слота — красный: игрок обязан видеть и «что выбрано», и «почему «Equip» ничего
+## не сделает».
+const _MARK_SELECTED := "BpSelectedMark"
+const _MARK_BLOCKED := "BpBlockedMark"
+const _MARK_THICKNESS := 2.0
+## Отступ второй рамки от края: когда оба знака включены, они не сливаются в одну полосу.
+const _MARK_INSET := 4.0
 
 const _STAT_ICON := {
 	"attack": "atk_sword", "defense": "helm", "spell_power": "spell",
@@ -76,12 +93,45 @@ const _ICON := {
 signal closed
 
 func set_hero(hero: HeroController) -> void:
+	_unwatch_inventory()
 	_hero = hero
 	_build()
+	_watch_inventory()
+
+
+## Экран обязан жить на сигналах инвентаря, а не только на собственном `_refresh()`:
+## предмет, подобранный в мире, появляется в сумке сразу, а не после пересборки экрана.
+func _watch_inventory() -> void:
+	var inv: HeroInventory = _hero.inventory if _hero != null else null
+	if inv == null:
+		return
+	for sig in [inv.backpack_changed, inv.equipped_changed]:
+		if not sig.is_connected(_refresh):
+			sig.connect(_refresh)
+
+
+## Отписка обязательна: без неё экран остаётся подписчиком инвентаря прежнего героя,
+## а при смене героев такие подписки накапливаются молча.
+func _unwatch_inventory() -> void:
+	if _hero == null or not is_instance_valid(_hero):
+		return
+	var inv: HeroInventory = _hero.inventory
+	if inv == null or not is_instance_valid(inv):
+		return
+	for sig in [inv.backpack_changed, inv.equipped_changed]:
+		if sig.is_connected(_refresh):
+			sig.disconnect(_refresh)
+
 
 func close() -> void:
 	closed.emit()
 	hide()
+
+
+func _exit_tree() -> void:
+	# Инвентарь живёт в герое, а герой — в мире: без отписки на освобождённый экран
+	# прилетает вызов `_refresh` из сигнала инвентаря.
+	_unwatch_inventory()
 
 func _ready() -> void:
 	add_theme_color_override("font_color", TEXT_GOLD)
@@ -117,6 +167,32 @@ func _connect_signals() -> void:
 			var cb := _on_form.bind(i)
 			if not b.pressed.is_connected(cb):
 				b.pressed.connect(cb)
+
+## Выбор предмета из сумки (индекс в `inventory.backpack`, −1 — сброс). Публичный:
+## через него в экран входят и клики по сетке, и тесты действий интерфейса.
+func select_backpack(idx: int) -> void:
+	_selected_bp = idx
+	_repaint()
+
+
+func selected_backpack_index() -> int:
+	return _selected_bp
+
+
+## Выбор слота куклы — то, что снимет «Remove».
+func select_slot(slot: Artifact.Slot) -> void:
+	_selected_slot = slot
+	_refresh()
+
+
+func _selected_artifact() -> Artifact:
+	if _hero == null or _selected_bp < 0:
+		return null
+	var bp: Array[Artifact] = _hero.inventory.backpack
+	if _selected_bp >= bp.size():
+		return null
+	return bp[_selected_bp]
+
 
 func _set_btn_text(path: String, value: String) -> void:
 	var b := get_node_or_null(path)
@@ -269,8 +345,34 @@ func _build_bottom() -> void:
 func _refresh() -> void:
 	if _hero == null or _right == null:
 		return
+	_refresh_stats()
 	_rebuild_equipped()
 	_refresh_grid()
+
+
+## Значения левой панели. Без них панель собиралась один раз в `_build()` и после
+## экипировки продолжала показывать базу: «пересчёт характеристик» был невидим.
+## Формат: «12 (+3)» — база и то, что дали артефакты.
+func _refresh_stats() -> void:
+	if _hero == null:
+		return
+	var mods: Dictionary = _hero.inventory.get_total_modifiers()
+	var bonus: Dictionary = _hero.get_battle_bonus()
+	var keys := ["attack", "defense", "spell_power", "knowledge"]
+	for i in keys.size():
+		var key: String = keys[i]
+		var total: int = int(bonus.get(key, 0))
+		var delta: int = int(mods.get(key, 0))
+		var sv := get_node_or_null("Center/Window/Left/StatValue_%d" % i)
+		if sv is Label:
+			if delta == 0:
+				sv.text = str(total)
+			else:
+				var sign_: String = "+" if delta > 0 else "-"
+				sv.text = "%d (%s%d)" % [total, sign_, absi(delta)]
+	var ev := get_node_or_null("Center/Window/Left/Exp_val")
+	if ev is Label and _hero.has_method("get_xp"):
+		ev.text = str(_hero.get_xp())
 
 func _rebuild_equipped() -> void:
 	if _hero == null:
@@ -311,6 +413,7 @@ func _refresh_grid() -> void:
 	var inv := _inv()
 	_prune(items)
 	_prune(strip)
+	_icons.clear()
 	# Карта занятости — один вызов: `occupied_cells()` заодно доводит раскладку
 	# до инварианта («у каждого предмета есть клетка»), и дальше клетки только
 	# перекрашиваются, а не пересчитываются на каждую из 24.
@@ -323,11 +426,13 @@ func _refresh_grid() -> void:
 			if art == null:
 				continue
 			if inv.is_overflow(i):
-				_add_item_icon(strip, art, i, Vector2(overflow_n * CELL_PITCH, 0), Vector2(CELL_SIZE, CELL_SIZE))
+				var strip_icon := _add_item_icon(
+						strip, art, i, Vector2(overflow_n * CELL_PITCH, 0), Vector2(CELL_SIZE, CELL_SIZE))
+				_apply_item_marks(strip_icon, inv, art, i)
 				overflow_n += 1
 				continue
 			var rect := item_rect(inv.placements[i], art.resolved_cells(), inv.rotated[i])
-			_add_item_icon(items, art, i, rect.position, rect.size)
+			_apply_item_marks(_add_item_icon(items, art, i, rect.position, rect.size), inv, art, i)
 	var lbl := get_node_or_null("Center/Window/Right/Overflow_lbl")
 	if lbl is Label:
 		lbl.text = GameText.artifact_overflow()
@@ -338,16 +443,12 @@ func _refresh_grid() -> void:
 func _inv() -> HeroInventory:
 	return _hero.inventory if _hero != null else null
 
-func _picked_art(inv: HeroInventory) -> Artifact:
-	if inv == null or _picked_backpack < 0 or _picked_backpack >= inv.backpack.size():
-		return null
-	return inv.backpack[_picked_backpack]
-
 func _prune(parent: Node) -> void:
 	for ch in parent.get_children():
 		ch.free()
 
-func _add_item_icon(parent: Control, art: Artifact, idx: int, at: Vector2, size: Vector2) -> void:
+func _add_item_icon(
+			parent: Control, art: Artifact, idx: int, at: Vector2, size: Vector2) -> TextureRect:
 	var icon := TextureRect.new()
 	icon.name = "Item_%d" % idx
 	icon.position = at
@@ -361,6 +462,68 @@ func _add_item_icon(parent: Control, art: Artifact, idx: int, at: Vector2, size:
 	icon.mouse_exited.connect(_on_item_hover.bind(-1))
 	icon.gui_input.connect(_on_item_input.bind(idx))
 	parent.add_child(icon)
+	_icons[idx] = icon
+	return icon
+
+
+## Чем помечен предмет: выбор — золото, отсутствие свободного слота — красная
+## рамка. Оба знака складываются, а не вытесняют друг друга.
+func _apply_item_marks(icon: Control, inv: HeroInventory, art: Artifact, idx: int) -> void:
+	var selected := art != null and idx == _selected_bp
+	var blocked := art != null and not inv.can_equip(art)
+	_set_item_mark(icon, _MARK_SELECTED, ThemeConfig.C_UI_CELL_SELECTED, selected, 0.0)
+	_set_item_mark(icon, _MARK_BLOCKED, ThemeConfig.C_UI_CELL_BLOCKED, blocked, _MARK_INSET)
+
+
+## Рамка собирается из четырёх полос на якорях: раскладка переживает и смену размера
+## окна, и то, что на первом кадре у узла ещё нет размера (иначе маркер молча остался
+## бы не нарисованным).
+func _set_item_mark(icon: Control, mark_name: String, color: Color, on: bool, inset: float) -> void:
+	var frame := icon.get_node_or_null(mark_name) as Control
+	if frame == null:
+		if not on:
+			return
+		frame = Control.new()
+		frame.name = mark_name
+		# Рамка не имеет права съедать клик по предмету: выбор идёт по `gui_input` иконки.
+		frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		icon.add_child(frame)
+		frame.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		for preset in [
+				Control.PRESET_TOP_WIDE, Control.PRESET_BOTTOM_WIDE,
+				Control.PRESET_LEFT_WIDE, Control.PRESET_RIGHT_WIDE]:
+			var strip := ColorRect.new()
+			strip.color = color
+			strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			frame.add_child(strip)
+			_layout_mark_strip(strip, preset as Control.LayoutPreset, inset)
+	frame.visible = on
+
+
+func _layout_mark_strip(strip: ColorRect, preset: Control.LayoutPreset, inset: float) -> void:
+	var t := _MARK_THICKNESS
+	strip.set_anchors_preset(preset)
+	match preset:
+		Control.PRESET_TOP_WIDE:
+			strip.offset_left = inset
+			strip.offset_top = inset
+			strip.offset_right = -inset
+			strip.offset_bottom = inset + t
+		Control.PRESET_BOTTOM_WIDE:
+			strip.offset_left = inset
+			strip.offset_top = -inset - t
+			strip.offset_right = -inset
+			strip.offset_bottom = -inset
+		Control.PRESET_LEFT_WIDE:
+			strip.offset_left = inset
+			strip.offset_top = inset
+			strip.offset_right = inset + t
+			strip.offset_bottom = -inset
+		Control.PRESET_RIGHT_WIDE:
+			strip.offset_left = -inset - t
+			strip.offset_top = inset
+			strip.offset_right = -inset
+			strip.offset_bottom = -inset
 
 func _on_item_hover(idx: int) -> void:
 	_hover_backpack = idx
@@ -370,20 +533,30 @@ func _on_item_input(event: InputEvent, idx: int) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		# Повторный клик по выбранному снимает выбор: «что выбрано» должно быть
 		# видно по подсветке, а не по догадке.
-		_picked_backpack = -1 if _picked_backpack == idx else idx
-		_repaint()
+		select_backpack(-1 if _selected_bp == idx else idx)
 
 ## Перекраска без перестройки иконок — наведение не должно дёргать всё дерево.
 func _repaint() -> void:
 	var inv := _inv()
 	_paint_cells(inv.occupied_cells() if inv != null else {})
 	_update_desc(inv)
+	_refresh_marks(inv)
+
+
+## Рамки «выбран»/«некуда» живут на узле предмета, а выбор меняет их без пересборки
+## иконок — иначе клик по предмету подсвечивал бы клетки и молчал про сам предмет.
+func _refresh_marks(inv: HeroInventory) -> void:
+	if inv == null:
+		return
+	for idx in _icons:
+		var art: Artifact = inv.backpack[idx] if idx < inv.backpack.size() else null
+		_apply_item_marks(_icons[idx], inv, art, idx)
 
 ## Подсветка клеток: занятые — тёмным, клетки выбранного (или наведённого)
 ## предмета — золотом. `used` — карта HeroInventory.occupied_cells(): клетка →
 ## индекс предмета в рюкзаке.
 func _paint_cells(used: Dictionary) -> void:
-	var shown := _picked_backpack if _picked_backpack >= 0 else _hover_backpack
+	var shown := _selected_bp if _selected_bp >= 0 else _hover_backpack
 	for row in GRID_ROWS:
 		for col in GRID_COLS:
 			var cell := get_node_or_null("Center/Window/Right/Grid/GridCell_%d_%d" % [col, row])
@@ -398,7 +571,7 @@ func _update_desc(inv: HeroInventory) -> void:
 	var desc := get_node_or_null("Center/Window/Right/Desc")
 	if desc is not Label:
 		return
-	var idx := _picked_backpack if _picked_backpack >= 0 else _hover_backpack
+	var idx := _selected_bp if _selected_bp >= 0 else _hover_backpack
 	if inv == null or idx < 0 or idx >= inv.backpack.size() or inv.backpack[idx] == null:
 		desc.text = ""
 		return
@@ -417,35 +590,44 @@ static func item_rect(origin: Vector2i, cells: Vector2i, rot: bool) -> Rect2:
 	return Rect2(Vector2(origin) * CELL_PITCH, Vector2(c) * CELL_PITCH - Vector2(gap, gap))
 
 func _on_equip() -> void:
-	var inv := _inv()
-	if inv == null:
+	if _hero == null:
 		return
-	var art := _picked_art(inv)
+	var inv: HeroInventory = _hero.inventory
+	var art: Artifact = _selected_artifact()
 	if art == null:
-		# Без выбора — первая пригодная, как было до сетки.
-		for candidate in inv.backpack:
-			if candidate != null and inv.can_equip(candidate):
-				art = candidate
-				break
-	if art != null and inv.can_equip(art):
-		inv.equip(art)
-	_picked_backpack = -1
+		return
+	if not inv.can_equip(art):
+		# Неподходящий слот не меняет ничего — ни перестановки, ни «надень вместо
+		# этого что-нибудь другое». Признак висит на предмете (`_apply_item_marks`).
+		return
+	if inv.equip(art):
+		_selected_slot = art.slot
+		_selected_bp = -1
 	_refresh()
 
 func _on_remove() -> void:
 	if _hero == null:
 		return
 	var inv: HeroInventory = _hero.inventory
-	if inv.has_slot(_selected_slot):
-		inv.unequip(_selected_slot)
+	if not inv.has_slot(_selected_slot):
+		return
+	var art: Artifact = inv.unequip(_selected_slot)
+	# Снятое становится выбранным: следующее действие игрока — про тот же предмет.
+	_selected_bp = inv.backpack.find(art) if art != null else -1
 	_refresh()
 
 func _on_dispose() -> void:
-	var inv := _inv()
-	if inv == null or inv.backpack.is_empty():
+	if _hero == null:
 		return
-	inv.remove_from_backpack(_picked_backpack if _picked_backpack >= 0 else 0)
-	_picked_backpack = -1
+	var inv: HeroInventory = _hero.inventory
+	var art: Artifact = _selected_artifact()
+	if art == null:
+		return
+	var idx: int = inv.backpack.find(art)
+	if idx < 0:
+		return
+	inv.remove_from_backpack(idx)
+	_selected_bp = -1
 	_refresh()
 
 func _on_form(_i: int) -> void:

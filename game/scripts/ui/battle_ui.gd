@@ -52,10 +52,13 @@ static var _hero_portrait: Texture2D = null
 @onready var _turn_timer: TurnTimer = $turn_timer
 @onready var _target_card: PanelContainer = $target_card
 @onready var _tc_name: Label = $"target_card/tc_box/tc_name"
+@onready var _tc_caption: Label = $"target_card/tc_box/tc_caption"
 @onready var _tc_count: Label = $"target_card/tc_box/tc_count_row/tc_count"
 @onready var _tc_count_row: HBoxContainer = $"target_card/tc_box/tc_count_row"
 @onready var _tc_hp: Label = $"target_card/tc_box/tc_hp_row/tc_hp"
 @onready var _tc_def: Label = $"target_card/tc_box/tc_def_row/tc_def"
+@onready var _tc_luck_row: HBoxContainer = $"target_card/tc_box/tc_luck_row"
+@onready var _tc_luck: Label = $"target_card/tc_box/tc_luck_row/tc_luck"
 @onready var _tc_atk_row: HBoxContainer = $"target_card/tc_box/tc_atk_row"
 @onready var _tc_atk: Label = $"target_card/tc_box/tc_atk_row/tc_atk"
 @onready var _tc_preview: Label = $"target_card/tc_box/tc_preview"
@@ -186,11 +189,12 @@ func set_attack_preview(text: String) -> void:
 	_tc_preview.text = text
 	_tc_preview.visible = text != ""
 
-func show_target_card(unit: BattleState.BattleUnit) -> void:
+func show_target_card(unit: BattleState.BattleUnit, caption: String = "Цель") -> void:
 	# B (M1): только live-поля; строка без источника — скрыта, фейковых чисел нет
 	if unit == null:
 		hide_target_card()
 		return
+	_tc_caption.text = caption
 	_tc_name.text = unit.get_display_name()
 	var count: int = unit.get_count()
 	_tc_count_row.visible = count > 1
@@ -202,6 +206,11 @@ func show_target_card(unit: BattleState.BattleUnit) -> void:
 	var defense: int = unit.get_defense()
 	_tc_def.text = str(defense)
 	_tc_def.visible = defense > 0
+	## T-221 (D-268): Удача — только при наличии носителя; «0 без источника» было бы
+	## выдуманным числом, M1 это прямо запрещает.
+	_tc_luck_row.visible = unit.has_luck()
+	if unit.has_luck():
+		_tc_luck.text = "%+d" % unit.luck
 	var atk: int = unit.dnd_profile.get_attack_bonus() if unit.dnd_profile != null else 0
 	_tc_atk_row.visible = unit.dnd_profile != null
 	_tc_atk.text = "+%d" % atk
@@ -219,6 +228,22 @@ func show_target_card(unit: BattleState.BattleUnit) -> void:
 
 func hide_target_card() -> void:
 	_target_card.visible = false
+
+
+## 4.1 (M1): «AC/HP/способность видны всегда». Подпись «Противник» вместо «Цель»,
+## пока игрок не нацелился: карточка показывает текущего живого врага, а не пустоту.
+## Строка Удача в ней сознательно нет — источника удачи в бою не существует
+## (`BattleRules.resolve_ladder(luck_mod)` никто не вызывает с ненулевым значением),
+## а M1 запрещает показывать число без носителя.
+func show_default_enemy_card(state: BattleState) -> void:
+	if state == null:
+		hide_target_card()
+		return
+	for unit in state.defender_units:
+		if unit != null and unit.alive:
+			show_target_card(unit, "Противник")
+			return
+	hide_target_card()
 
 func update_active_unit(unit: BattleState.BattleUnit) -> void:
 	# A: переподсветка активного в очереди инициативы

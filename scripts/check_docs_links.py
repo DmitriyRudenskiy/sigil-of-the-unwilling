@@ -23,7 +23,11 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DOCS = os.path.join(ROOT, "docs")
 
-ALLOWED_STATUSES = {"canon", "deepened", "draft", "redirect", "reference", "archived", "snapshot"}
+# `canon` — легаси-синоним `locked` (D-271): 11 canon-секций не переименовываются.
+# `audited`/`verified`/`locked` — состояния контура фаз (D-273); легальность перехода
+# проверяет scripts/gdd_gate.py, здесь — только «значение из словаря».
+ALLOWED_STATUSES = {"canon", "deepened", "draft", "redirect", "reference", "archived",
+                    "snapshot", "audited", "verified", "locked"}
 
 # Архивные логи: не редактируются, вне графа как источники (ссылки на них из живых
 # доков остаются валидными), освобождены от frontmatter (AGENTS.md, D-106/D-109).

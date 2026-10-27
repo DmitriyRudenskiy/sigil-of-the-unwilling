@@ -63,6 +63,39 @@ date: 2026-10-13
 
 **Инварианты:** любой модификатор достижим за ≤2 клика до причины (столп 1); в бою все правила D&D, влияющие на ход, видны на экране без подсказок (справка — по клавише).
 
+## Управление (по input map)
+
+Секция собрана из `game/project.godot` и обработчиков кода — это единственная
+строка сверки «док ↔ движок» по вводу (гейт `scripts/audit_docs_vs_code.py`
+требует, чтобы каждое имя из `[input]` было названо в `docs/`).
+
+**Именованные действия `InputMap` — ровно пять** (`project.godot [input]`):
+
+| Действие | Привязки | Кто читает |
+| --- | --- | --- |
+| `camera_up` | `W`, `↑` | `scripts/world/world_camera.gd` (`Input.is_action_pressed`) |
+| `camera_down` | `S`, `↓` | `scripts/world/world_camera.gd` |
+| `camera_left` | `A`, `←` | `scripts/world/world_camera.gd` |
+| `camera_right` | `D`, `→` | `scripts/world/world_camera.gd` |
+| `mute` | `M` | `scripts/autoload/sound_manager.gd` |
+
+**Прямые клавиши сцен** — они в `InputMap` не объявлены, читаются как `event.keycode`:
+
+| Клавиша | Экран | Действие | Источник |
+| --- | --- | --- | --- |
+| `A` / `D` / `W` / `S` | бой | атака / защита / ждать / пропуск | `scripts/ui/battle_ui.gd` (`_unhandled_input`, ветка `match`) |
+| `K` | бой | книга заклинаний | `scripts/ui/battle_ui.gd` |
+| `H`, `↑`, `↓` | бой | журнал боя и его прокрутка | `scripts/ui/battle_ui.gd` |
+| `Esc` | бой, кампания, город, диалог | отмена/закрытие | `scripts/ui/battle_ui.gd`, `scripts/ui/campaign_hud.gd`, `scripts/ui/city_screen.gd`, `scripts/ui/team_dialog_screen.gd`, `scripts/world/world_shortcuts.gd` |
+| `I` | мир | инвентарь артефактов | `scripts/world/world_shortcuts.gd` |
+| `F5` / `F9` | мир | сохранить / загрузить | `scripts/world/world_shortcuts.gd` |
+| `=`/`+`, `-`/`_` | мир | зум карты (через `Settings.step_zoom`) | `scripts/world/world_camera.gd` |
+
+Расхождение, о котором надо помнить: `W`/`A`/`S`/`D` — два разных слоя. В мире
+это панорама камеры (именованное действие), в бою — команды (прямая клавиша).
+Менять привязку нужно в двух местах, и «передвинуть WASD на стрелки» одной
+правкой `InputMap` не закрывается.
+
 ## Пре-пивотный канон UI (15.x, перенос из GDD.md v2.1)
 
 ### 15.1. Режимы [КАНОН]

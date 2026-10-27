@@ -136,7 +136,15 @@ func _apply_artifact_effects(units: Array[BattleState.BattleUnit], mods: Diction
 	var flat_hp: int = int(mods.get("stack_hp", 0))
 	var percent_hp: float = float(mods.get("stack_hp_percent", 0.0))
 	var speed_bonus: int = int(mods.get("stack_speed", 0))
+	## T-221 (D-268): «luck» в артефактных модах был писателем без читателя — реестр
+	## `artifact_registry.gd` выдаёт {"luck": 1}, в бою его не читал никто и карточка
+	## врага не могла показать Удачу. Теперь мод доезжает до бойца и получает
+	## источник; до мод = 0 остаётся без источника (строка скрыта, а не ноль).
+	var luck_mod: int = int(mods.get("luck", 0))
 	for u in units:
+		if luck_mod != 0:
+			u.luck = luck_mod
+			u.luck_source = &"artifact"
 		if u.stack == null or u.stack.stats == null:
 			continue
 		if flat_hp > 0 or percent_hp > 0.0:

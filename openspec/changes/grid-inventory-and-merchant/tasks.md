@@ -63,9 +63,11 @@
 
 ## 6. Лавка снаряжения
 
-- [ ] 6.1 `game/data/config/merchant_stock.json`: четыре записи
+- [x] 6.1 `game/data/config/merchant_stock.json`: четыре записи
+      (легли параллельной веткой в `9f51951b`, шаг «шаг 6.4/6.6 экрана артефактов»;
+      экран лавки 6.5–6.8 этим не сделан)
       `{id, price_buy, price_sell}`; `price_sell` сверяется с `value_gold / 2`
-- [ ] 6.2 Гейт стоки: id существует в реестре, `price_buy > 0`,
+- [x] 6.2 Гейт стоки: id существует в реестре, `price_buy > 0`,
       `price_sell ≤ price_buy`, у товара есть своя иконка (дубль md5 = падение)
 - [ ] 6.3 `MerchantSystem` (или метод `HeroInventory`+`GameManager`): `buy(id)` —
       место → казна → `modify_resource(&"gold", -price)` → размещение;

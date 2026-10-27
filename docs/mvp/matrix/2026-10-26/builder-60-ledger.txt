@@ -1,0 +1,115 @@
+# Городостроитель: матрица 11 классов × 60 ходов со снимком City-реестра
+
+- HEAD: `18f8becd`, машина 2026-10-26, задача 6.1 цикла `scenario-matrix-behavior-reliability`.
+- Команда: `MATRIX_LEDGER=1 MATRIX_LEDGER_EVERY=10 MATRIX_REPEAT=2 godot --headless --path game \
+    -s res://tools/matrix_report.gd -- builder 60` (шаг снимка — 10 ходов, повтор ×2).
+- `MATRIX-LEDGER` — только чтение (`level_up_check`/`can_level_up`, `first_free_build_cell`,
+  `can_build_building`); кнопки `CityScreen` трасса не вызывает, иначе замер двигал бы
+  измеряемое. Поля: `level_block` — именованное условие следующего уровня,
+  `build_block` — почему не строится каждый id очереди `BalanceProbe.BUILD_QUEUE`.
+- `food_in`/`food_out` — приток/отток еды за ход, `pop_capped` — население с учётом жилья
+  (совпадение с `pop` = рост не ограничен жильём), `starving` — флаг голода города.
+
+## Строки матрицы (первый прогон)
+
+```
+MATRIX|attempts=-1|battles=19|buildings=18|buildings_goal=2|hero=alive|block=|city_level=1|city_level_goal=2|class=barbarian|deals=0|done=true|error=|gold=0|margin=0|market=false|population=3|population_goal=8|reason=|seed=616125505|state=RUNNING|survived=true|turns=60
+MATRIX|attempts=-1|battles=1|buildings=15|buildings_goal=2|hero=alive|block=|city_level=2|city_level_goal=2|class=chanter|deals=0|done=true|error=|gold=0|margin=0|market=false|population=7|population_goal=8|reason=|seed=550432139|state=RUNNING|survived=true|turns=35
+MATRIX|attempts=-1|battles=12|buildings=12|buildings_goal=2|hero=alive|block=|city_level=2|city_level_goal=2|class=cipher|deals=0|done=true|error=|gold=0|margin=0|market=false|population=8|population_goal=8|reason=|seed=917109845|state=RUNNING|survived=true|turns=28
+MATRIX|attempts=-1|battles=3|buildings=14|buildings_goal=2|hero=alive|block=|city_level=2|city_level_goal=2|class=druid|deals=0|done=true|error=|gold=0|margin=0|market=false|population=8|population_goal=8|reason=|seed=1469196208|state=RUNNING|survived=true|turns=28
+MATRIX|attempts=-1|battles=0|buildings=17|buildings_goal=2|hero=alive|block=|city_level=1|city_level_goal=2|class=fighter|deals=0|done=true|error=|gold=0|margin=0|market=false|population=3|population_goal=8|reason=|seed=1115086861|state=RUNNING|survived=true|turns=60
+MATRIX|attempts=-1|battles=3|buildings=4|buildings_goal=2|hero=alive|block=|city_level=2|city_level_goal=2|class=monk|deals=0|done=true|error=|gold=0|margin=0|market=false|population=8|population_goal=8|reason=|seed=2047355965|state=RUNNING|survived=true|turns=10
+MATRIX|attempts=-1|battles=3|buildings=5|buildings_goal=2|hero=alive|block=|city_level=2|city_level_goal=2|class=paladin|deals=0|done=true|error=|gold=0|margin=0|market=false|population=8|population_goal=8|reason=|seed=127670880|state=RUNNING|survived=true|turns=11
+MATRIX|attempts=-1|battles=21|buildings=19|buildings_goal=2|hero=alive|block=|city_level=1|city_level_goal=2|class=priest|deals=0|done=true|error=|gold=0|margin=0|market=false|population=2|population_goal=8|reason=|seed=1739236022|state=RUNNING|survived=true|turns=61
+MATRIX|attempts=-1|battles=14|buildings=15|buildings_goal=2|hero=alive|block=|city_level=1|city_level_goal=2|class=ranger|deals=0|done=true|error=|gold=0|margin=0|market=false|population=1|population_goal=8|reason=|seed=19907924|state=RUNNING|survived=true|turns=60
+MATRIX|attempts=-1|battles=27|buildings=15|buildings_goal=2|hero=alive|block=|city_level=1|city_level_goal=2|class=rogue|deals=0|done=true|error=|gold=0|margin=0|market=false|population=3|population_goal=8|reason=|seed=1701587817|state=RUNNING|survived=true|turns=63
+MATRIX|attempts=-1|battles=7|buildings=15|buildings_goal=2|hero=alive|block=|city_level=2|city_level_goal=2|class=wizard|deals=0|done=true|error=|gold=0|margin=0|market=false|population=10|population_goal=8|reason=|seed=512858568|state=RUNNING|survived=true|turns=36
+```
+
+## Детерминированность (MATRIX_REPEAT=2)
+
+```
+MATRIX-DETERMINISM|class=barbarian|runs=2|same=true|hashes=f9160e66,f9160e66
+MATRIX-DETERMINISM|class=chanter|runs=2|same=true|hashes=383e53bf,383e53bf
+MATRIX-DETERMINISM|class=cipher|runs=2|same=true|hashes=bc649724,bc649724
+MATRIX-DETERMINISM|class=druid|runs=2|same=true|hashes=38f7a5bd,38f7a5bd
+MATRIX-DETERMINISM|class=fighter|runs=2|same=true|hashes=013d6d0b,013d6d0b
+MATRIX-DETERMINISM|class=monk|runs=2|same=true|hashes=4c6da69b,4c6da69b
+MATRIX-DETERMINISM|class=paladin|runs=2|same=true|hashes=84bb6890,84bb6890
+MATRIX-DETERMINISM|class=priest|runs=2|same=true|hashes=dd0eb458,dd0eb458
+MATRIX-DETERMINISM|class=ranger|runs=2|same=true|hashes=4f54b01e,4f54b01e
+MATRIX-DETERMINISM|class=rogue|runs=2|same=true|hashes=2e7bb298,2e7bb298
+MATRIX-DETERMINISM|class=wizard|runs=2|same=true|hashes=bebab52e,bebab52e
+```
+
+## Сводка
+
+```
+MATRIX-SUMMARY|class=SUMMARY|deals=0|gold_goal_reached=0/11|gold_max=0|gold_median=0|margin_median=0|profiles=11|role=builder|survived=11/11|turns=60
+```
+
+## Трасса неуспешного класса: barbarian (уровень 1 на 60-м ходу)
+
+`done=true` — автопилот отработал лимит ходов; цель (уровень 2) не достигнута. Ходы 10→60:
+
+```
+MATRIX-LEDGER|bld=6|boroughs=0|build_block=barracks:Промышленность: 1/20; market:Промышленность: 1/25; farm:Промышленность: 1/12; range:Нужен город 3 уровня|class=barbarian|food=0.0|food_in=3.0|food_out=4.0|housing=20|level=1|level_block=Население: 6/8|pop=6|pop_capped=6|prosperity=56|starving=true|storage=industry:1|turn=10
+MATRIX-LEDGER|bld=10|boroughs=0|build_block=barracks:Промышленность: 12/20; market:Промышленность: 12/25; farm:ok; range:Нужен город 3 уровня|class=barbarian|food=0.0|food_in=1.0|food_out=2.0|housing=30|level=1|level_block=Процветание: 52/55; Население: 3/8|pop=3|pop_capped=3|prosperity=52|starving=true|storage=industry:12|turn=20
+MATRIX-LEDGER|bld=12|boroughs=0|build_block=barracks:Промышленность: 12/20; market:Промышленность: 12/25; farm:Промышленность: 12/12; range:Нужен город 3 уровня|class=barbarian|food=0.0|food_in=1.0|food_out=2.0|housing=40|level=1|level_block=Население: 3/8|pop=3|pop_capped=3|prosperity=60|starving=true|storage=industry:11|turn=30
+MATRIX-LEDGER|bld=18|boroughs=0|build_block=barracks:Промышленность: 8/20; market:Промышленность: 8/25; farm:Промышленность: 8/12; range:Нужен город 3 уровня|class=barbarian|food=0.0|food_in=1.0|food_out=2.0|housing=60|level=1|level_block=Процветание: 50/55; Население: 3/8|pop=3|pop_capped=3|prosperity=50|starving=true|storage=industry:7|turn=60
+```
+
+## Трасса успешного класса: cipher (уровень 2 на 28-м ходу)
+
+```
+MATRIX-LEDGER|bld=6|boroughs=0|build_block=barracks:ok; market:Промышленность: 21/25; farm:ok; range:Нужен город 3 уровня|class=cipher|food=43.4|food_in=47.4|food_out=4.0|housing=30|level=1|level_block=Население: 7/8|pop=7|pop_capped=7|prosperity=81|starving=false|storage=industry:20|turn=10
+MATRIX-LEDGER|bld=9|boroughs=0|build_block=barracks:ok; market:ok; farm:ok; range:Нужен город 3 уровня|class=cipher|food=65.6|food_in=67.6|food_out=2.0|housing=45|level=1|level_block=Население: 4/8|pop=4|pop_capped=4|prosperity=90|starving=false|storage=industry:62|turn=20
+MATRIX-LEDGER|bld=12|boroughs=0|build_block=barracks:ok; market:ok; farm:ok; range:Нужен город 3 уровня|class=cipher|food=66.0|food_in=70.0|food_out=4.0|housing=60|level=2|level_block=Население: 8/12|pop=8|pop_capped=8|prosperity=93|starving=false|storage=industry:49|turn=28
+```
+
+## Трасса пограничного класса: chanter (уровень 2 на 35-м ходу, pop 7/8 на 30-м)
+
+```
+MATRIX-LEDGER|bld=5|boroughs=0|build_block=barracks:Промышленность: 17/20; market:Промышленность: 17/25; farm:ok; range:Нужен город 3 уровня|class=chanter|food=7.0|food_in=11.0|food_out=4.0|housing=15|level=1|level_block=Население: 7/8|pop=7|pop_capped=7|prosperity=78|starving=false|storage=industry:16|turn=10
+MATRIX-LEDGER|bld=9|boroughs=0|build_block=barracks:Промышленность: 11/20; market:Промышленность: 11/25; farm:Промышленность: 11/12; range:Нужен город 3 уровня|class=chanter|food=8.9|food_in=10.9|food_out=2.0|housing=35|level=1|level_block=Население: 4/8|pop=4|pop_capped=4|prosperity=86|starving=false|storage=industry:11|turn=20
+MATRIX-LEDGER|bld=13|boroughs=0|build_block=barracks:Промышленность: 0/20; market:Промышленность: 0/25; farm:Промышленность: 0/12; range:Нужен город 3 уровня|class=chanter|food=14.4|food_in=16.4|food_out=2.0|housing=50|level=1|level_block=Население: 6/8|pop=6|pop_capped=6|prosperity=92|starving=false|storage=industry:0|turn=30
+MATRIX-LEDGER|bld=15|boroughs=0|build_block=barracks:Промышленность: 6/20; market:Промышленность: 6/25; farm:Промышленность: 6/12; range:Нужен город 3 уровня|class=chanter|food=16.4|food_in=20.4|food_out=4.0|housing=50|level=2|level_block=Население: 7/12|pop=7|pop_capped=7|prosperity=73|starving=true|storage=industry:5|turn=35
+```
+
+## Что видно из трассы
+
+1. **Цель по зданиям мертва до старта.** Стартовый город даёт 4–19 зданий при
+   `buildings_goal = 2`: условие `buildings >= 2` истинно на нулевом ходу у всех 11 классов,
+   и цель роли сводится к «дойти до уровня 2». Docstring роли при этом обещает 4 (T-213).
+2. **Уровень 2 упирается в население, население — в еду.** `ProsperitySystem.can_level_up`
+   для мирового города требует процветание/население/здания; блокатор на всех неуспешных
+   профилях — `Население: N/8`. `pop == pop_capped`, `housing` 15–60: жильё не лимит,
+   лимит — прокорм.
+3. **Голодовая ловушка.** У barbarian `food_in` падает 3.0 → 1.0 на 20-м ходу и держится;
+   `food = 0.0`, `starving=true` с 10-го по 60-й ход; население стоит на 3. При этом город
+   построил 12 зданий (bld 6 → 18), из них фермы (очередь `barracks:20 → market:25 →
+   farm:12`: при industry 12 ферма — единственный проходимый id), но `food_in` от этого не
+   изменился: приток еды у голодного города не растёт от застройки, потому что работники —
+   из населения, которого нет. Замкнутый круг: нет еды → нет людей → нет работы на фермах →
+   нет еды → нет уровня 2.
+4. **Успешные классы отличаются только стартовым продовольствием.** cipher: `food` 43→66,
+   `food_in` 47→70 при `food_out` 2–4 → население 8 к 28-му ходу → уровень 2. chanter:
+   `food_in` 11→20, голод появился только на 35-м ходу (уже после level-up). Разница между
+   43 единицами еды на старте и нулём — стартовый город seed'а, а не политика роли.
+5. **Политики стройки у роли нет.** `BUILD_QUEUE` — общий список `BalanceProbe`, один на все
+   роли; `BuilderRole.act` не перехватывает ход. Голод (starving=true) ни на что в очереди
+   не влияет: очередь тратит industry на barracks/market в первую очередь (T-212).
+6. **`range` не строится никогда**: `Нужен город 3 уровня` — четвёртый id очереди недоступен
+   пока город не вырастет до 3, а до 3 он не растёт даже у успешных классов (блокатор
+   `Население: 8/12`).
+
+## Счёт по задаче 6.3
+
+| критерий | факт | verdict |
+| --- | --- | --- |
+| цель (уровень ≥2 и здания ≥2) в ≥7/11 | 6/11 (chanter, cipher, druid, monk, paladin, wizard) | FAIL |
+| население ≥12 в 60 ходов | максимум 10 (wizard), медиана 3–8 | FAIL |
+| ≥3 здания | 11/11 (но и стартовый город уже ≥4 — критерий ничего не отделяет) | FAIL как мера |
+| детерминированность повторного прогона | 11/11 одинаковых хэша | PASS |
+| выживаемость | 11/11 | PASS |
+
