@@ -50,6 +50,12 @@ __pycache__/
 !/image-clone/map/MANIFEST.json
 /image-clone/gen_map_art.log
 
+# экран кампании: сырые кадры UI-носителей (1024²) выводимы прогоном
+# scripts/concept_art/generate.py --spec scripts/concept_art/campaign_ui_spec.json
+# по затравке из manifest.json; носитель — game/assets/ui/campaign, он и лежит в git.
+/image-clone/campaign_ui/*
+!/image-clone/campaign_ui/manifest.json
+
 # git worktrees (изолированные рабочие деревья сессий) — не содержимое репо
 .worktrees/
 

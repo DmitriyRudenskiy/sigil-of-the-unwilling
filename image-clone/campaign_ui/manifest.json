@@ -1,0 +1,380 @@
+{
+ "krea2/u1_iron_parchment/signs/camp_medallion": {
+  "variant": "u1_iron_parchment",
+  "category": "signs",
+  "id": "camp_medallion",
+  "subject": "glyph of an open human palm laid over a closed eye",
+  "file": "image-clone/campaign_ui/krea2/u1_iron_parchment/signs/camp_medallion.webp",
+  "verdict": "ok",
+  "error": "",
+  "seed": 1595331162,
+  "model": "krea2",
+  "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
+  "prompt": "circular engraved metal medallion sigils, dark iron disc with fine beaded rim and ornamental engraving, one luminous glyph at the center, strong contrast of dark metal and glowing symbol, flat front view, hand-painted game interface asset, matte painted rendering, soft warm key light from the upper left, dark iron and tarnished brass on aged parchment, limited earthy palette of browns #664328 #a46739 #ca9861 and dull gold, crisp readable silhouette, visible brush texture, no photorealism, no glossy shaders, one circular medallion sigil, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, brand mark design, glyph of an open human palm laid over a closed eye, no photograph, photorealism, 3d render, cgi, glossy plastic, shiny enamel, anime, cartoon, line art, sketch, text, letters, numbers, digits, watermark, logo, signature, ui, interface, panel, screen, frame around the canvas, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, multiple objects, collage, grid of variants",
+  "negative_prompt": "",
+  "size": [
+   1024,
+   1024
+  ],
+  "server_file": "krea2/u1_iron_parchment/signs/camp_medallion_00001_.png",
+  "seconds": 25.4,
+  "tries": 1
+ },
+ "krea2/u1_iron_parchment/signs/camp_medallion_ring": {
+  "variant": "u1_iron_parchment",
+  "category": "signs",
+  "id": "camp_medallion_ring",
+  "subject": "glyph of a thin bronze ring with one missing arc, like a counting ring",
+  "file": "image-clone/campaign_ui/krea2/u1_iron_parchment/signs/camp_medallion_ring.webp",
+  "verdict": "ok",
+  "error": "",
+  "seed": 839656711,
+  "model": "krea2",
+  "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
+  "prompt": "circular engraved metal medallion sigils, dark iron disc with fine beaded rim and ornamental engraving, one luminous glyph at the center, strong contrast of dark metal and glowing symbol, flat front view, hand-painted game interface asset, matte painted rendering, soft warm key light from the upper left, dark iron and tarnished brass on aged parchment, limited earthy palette of browns #664328 #a46739 #ca9861 and dull gold, crisp readable silhouette, visible brush texture, no photorealism, no glossy shaders, one circular medallion sigil, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, brand mark design, glyph of a thin bronze ring with one missing arc, like a counting ring, no photograph, photorealism, 3d render, cgi, glossy plastic, shiny enamel, anime, cartoon, line art, sketch, text, letters, numbers, digits, watermark, logo, signature, ui, interface, panel, screen, frame around the canvas, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, multiple objects, collage, grid of variants",
+  "negative_prompt": "",
+  "size": [
+   1024,
+   1024
+  ],
+  "server_file": "krea2/u1_iron_parchment/signs/camp_medallion_ring_00001_.png",
+  "seconds": 15.3,
+  "tries": 1
+ },
+ "krea2/u1_iron_parchment/signs/camp_sign_food": {
+  "variant": "u1_iron_parchment",
+  "category": "signs",
+  "id": "camp_sign_food",
+  "subject": "glyph of a round loaf of bread with a short knife",
+  "file": "image-clone/campaign_ui/krea2/u1_iron_parchment/signs/camp_sign_food.webp",
+  "verdict": "ok",
+  "error": "",
+  "seed": 1096892704,
+  "model": "krea2",
+  "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
+  "prompt": "circular engraved metal medallion sigils, dark iron disc with fine beaded rim and ornamental engraving, one luminous glyph at the center, strong contrast of dark metal and glowing symbol, flat front view, hand-painted game interface asset, matte painted rendering, soft warm key light from the upper left, dark iron and tarnished brass on aged parchment, limited earthy palette of browns #664328 #a46739 #ca9861 and dull gold, crisp readable silhouette, visible brush texture, no photorealism, no glossy shaders, one circular medallion sigil, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, brand mark design, glyph of a round loaf of bread with a short knife, no photograph, photorealism, 3d render, cgi, glossy plastic, shiny enamel, anime, cartoon, line art, sketch, text, letters, numbers, digits, watermark, logo, signature, ui, interface, panel, screen, frame around the canvas, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, multiple objects, collage, grid of variants",
+  "negative_prompt": "",
+  "size": [
+   1024,
+   1024
+  ],
+  "server_file": "krea2/u1_iron_parchment/signs/camp_sign_food_00001_.png",
+  "seconds": 15.3,
+  "tries": 1
+ },
+ "krea2/u1_iron_parchment/signs/camp_sign_potion": {
+  "variant": "u1_iron_parchment",
+  "category": "signs",
+  "id": "camp_sign_potion",
+  "subject": "glyph of a stoppered round-bottom glass flask",
+  "file": "image-clone/campaign_ui/krea2/u1_iron_parchment/signs/camp_sign_potion.webp",
+  "verdict": "ok",
+  "error": "",
+  "seed": 1202102086,
+  "model": "krea2",
+  "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
+  "prompt": "circular engraved metal medallion sigils, dark iron disc with fine beaded rim and ornamental engraving, one luminous glyph at the center, strong contrast of dark metal and glowing symbol, flat front view, hand-painted game interface asset, matte painted rendering, soft warm key light from the upper left, dark iron and tarnished brass on aged parchment, limited earthy palette of browns #664328 #a46739 #ca9861 and dull gold, crisp readable silhouette, visible brush texture, no photorealism, no glossy shaders, one circular medallion sigil, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, brand mark design, glyph of a stoppered round-bottom glass flask, no photograph, photorealism, 3d render, cgi, glossy plastic, shiny enamel, anime, cartoon, line art, sketch, text, letters, numbers, digits, watermark, logo, signature, ui, interface, panel, screen, frame around the canvas, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, multiple objects, collage, grid of variants",
+  "negative_prompt": "",
+  "size": [
+   1024,
+   1024
+  ],
+  "server_file": "krea2/u1_iron_parchment/signs/camp_sign_potion_00001_.png",
+  "seconds": 15.3,
+  "tries": 1
+ },
+ "krea2/u1_iron_parchment/signs/camp_turn_swords": {
+  "variant": "u1_iron_parchment",
+  "category": "signs",
+  "id": "camp_turn_swords",
+  "subject": "glyph of two crossed swords with hilts at the bottom",
+  "file": "image-clone/campaign_ui/krea2/u1_iron_parchment/signs/camp_turn_swords.webp",
+  "verdict": "ok",
+  "error": "",
+  "seed": 1959095149,
+  "model": "krea2",
+  "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
+  "prompt": "circular engraved metal medallion sigils, dark iron disc with fine beaded rim and ornamental engraving, one luminous glyph at the center, strong contrast of dark metal and glowing symbol, flat front view, hand-painted game interface asset, matte painted rendering, soft warm key light from the upper left, dark iron and tarnished brass on aged parchment, limited earthy palette of browns #664328 #a46739 #ca9861 and dull gold, crisp readable silhouette, visible brush texture, no photorealism, no glossy shaders, one circular medallion sigil, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, brand mark design, glyph of two crossed swords with hilts at the bottom, no photograph, photorealism, 3d render, cgi, glossy plastic, shiny enamel, anime, cartoon, line art, sketch, text, letters, numbers, digits, watermark, logo, signature, ui, interface, panel, screen, frame around the canvas, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, multiple objects, collage, grid of variants",
+  "negative_prompt": "",
+  "size": [
+   1024,
+   1024
+  ],
+  "server_file": "krea2/u1_iron_parchment/signs/camp_turn_swords_00001_.png",
+  "seconds": 15.3,
+  "tries": 1
+ },
+ "krea2/u1_iron_parchment/signs/camp_turn_globe": {
+  "variant": "u1_iron_parchment",
+  "category": "signs",
+  "id": "camp_turn_globe",
+  "subject": "glyph of a small armillary sphere of three rings",
+  "file": "image-clone/campaign_ui/krea2/u1_iron_parchment/signs/camp_turn_globe.webp",
+  "verdict": "ok",
+  "error": "",
+  "seed": 822710104,
+  "model": "krea2",
+  "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
+  "prompt": "circular engraved metal medallion sigils, dark iron disc with fine beaded rim and ornamental engraving, one luminous glyph at the center, strong contrast of dark metal and glowing symbol, flat front view, hand-painted game interface asset, matte painted rendering, soft warm key light from the upper left, dark iron and tarnished brass on aged parchment, limited earthy palette of browns #664328 #a46739 #ca9861 and dull gold, crisp readable silhouette, visible brush texture, no photorealism, no glossy shaders, one circular medallion sigil, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, brand mark design, glyph of a small armillary sphere of three rings, no photograph, photorealism, 3d render, cgi, glossy plastic, shiny enamel, anime, cartoon, line art, sketch, text, letters, numbers, digits, watermark, logo, signature, ui, interface, panel, screen, frame around the canvas, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, multiple objects, collage, grid of variants",
+  "negative_prompt": "",
+  "size": [
+   1024,
+   1024
+  ],
+  "server_file": "krea2/u1_iron_parchment/signs/camp_turn_globe_00001_.png",
+  "seconds": 15.3,
+  "tries": 1
+ },
+ "krea2/u1_iron_parchment/signs/camp_date_gear": {
+  "variant": "u1_iron_parchment",
+  "category": "signs",
+  "id": "camp_date_gear",
+  "subject": "glyph of a toothed gear wheel with a square hub",
+  "file": "image-clone/campaign_ui/krea2/u1_iron_parchment/signs/camp_date_gear.webp",
+  "verdict": "ok",
+  "error": "",
+  "seed": 967342545,
+  "model": "krea2",
+  "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
+  "prompt": "circular engraved metal medallion sigils, dark iron disc with fine beaded rim and ornamental engraving, one luminous glyph at the center, strong contrast of dark metal and glowing symbol, flat front view, hand-painted game interface asset, matte painted rendering, soft warm key light from the upper left, dark iron and tarnished brass on aged parchment, limited earthy palette of browns #664328 #a46739 #ca9861 and dull gold, crisp readable silhouette, visible brush texture, no photorealism, no glossy shaders, one circular medallion sigil, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, brand mark design, glyph of a toothed gear wheel with a square hub, no photograph, photorealism, 3d render, cgi, glossy plastic, shiny enamel, anime, cartoon, line art, sketch, text, letters, numbers, digits, watermark, logo, signature, ui, interface, panel, screen, frame around the canvas, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, multiple objects, collage, grid of variants",
+  "negative_prompt": "",
+  "size": [
+   1024,
+   1024
+  ],
+  "server_file": "krea2/u1_iron_parchment/signs/camp_date_gear_00001_.png",
+  "seconds": 15.2,
+  "tries": 1
+ },
+ "krea2/u1_iron_parchment/signs/camp_tile_reset": {
+  "variant": "u1_iron_parchment",
+  "category": "signs",
+  "id": "camp_tile_reset",
+  "subject": "glyph of a curved arrow returning into its own tail",
+  "file": "image-clone/campaign_ui/krea2/u1_iron_parchment/signs/camp_tile_reset.webp",
+  "verdict": "ok",
+  "error": "",
+  "seed": 1963913863,
+  "model": "krea2",
+  "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
+  "prompt": "circular engraved metal medallion sigils, dark iron disc with fine beaded rim and ornamental engraving, one luminous glyph at the center, strong contrast of dark metal and glowing symbol, flat front view, hand-painted game interface asset, matte painted rendering, soft warm key light from the upper left, dark iron and tarnished brass on aged parchment, limited earthy palette of browns #664328 #a46739 #ca9861 and dull gold, crisp readable silhouette, visible brush texture, no photorealism, no glossy shaders, one circular medallion sigil, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, brand mark design, glyph of a curved arrow returning into its own tail, no photograph, photorealism, 3d render, cgi, glossy plastic, shiny enamel, anime, cartoon, line art, sketch, text, letters, numbers, digits, watermark, logo, signature, ui, interface, panel, screen, frame around the canvas, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, multiple objects, collage, grid of variants",
+  "negative_prompt": "",
+  "size": [
+   1024,
+   1024
+  ],
+  "server_file": "krea2/u1_iron_parchment/signs/camp_tile_reset_00001_.png",
+  "seconds": 15.2,
+  "tries": 1
+ },
+ "krea2/u1_iron_parchment/plates/camp_plate_ability": {
+  "variant": "u1_iron_parchment",
+  "category": "plates",
+  "id": "camp_plate_ability",
+  "subject": "rectangular plaque frame with four engraved corner ornaments and one blank recessed centre",
+  "file": "image-clone/campaign_ui/krea2/u1_iron_parchment/plates/camp_plate_ability.webp",
+  "verdict": "ok",
+  "error": "",
+  "seed": 1150042043,
+  "model": "krea2",
+  "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
+  "prompt": "carved dark iron and dark wood interface plates with thin brass filigree and parchment insets, matte painted rendering, engraved edges, empty recessed centres meant to hold content, flat front view, hand-painted game interface asset, matte painted rendering, soft warm key light from the upper left, dark iron and tarnished brass on aged parchment, limited earthy palette of browns #664328 #a46739 #ca9861 and dull gold, crisp readable silhouette, visible brush texture, no photorealism, no glossy shaders, one single interface plate, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, empty plaque with no text and no icons inside, rectangular plaque frame with four engraved corner ornaments and one blank recessed centre, no photograph, photorealism, 3d render, cgi, glossy plastic, shiny enamel, anime, cartoon, line art, sketch, text, letters, numbers, digits, watermark, logo, signature, ui, interface, panel, screen, frame around the canvas, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, multiple objects, collage, grid of variants",
+  "negative_prompt": "",
+  "size": [
+   1024,
+   1024
+  ],
+  "server_file": "krea2/u1_iron_parchment/plates/camp_plate_ability_00001_.png",
+  "seconds": 15.2,
+  "tries": 1
+ },
+ "krea2/u1_iron_parchment/plates/camp_plate_minimap": {
+  "variant": "u1_iron_parchment",
+  "category": "plates",
+  "id": "camp_plate_minimap",
+  "subject": "small square map frame plate with a plain blank recessed centre",
+  "file": "image-clone/campaign_ui/krea2/u1_iron_parchment/plates/camp_plate_minimap.webp",
+  "verdict": "ok",
+  "error": "",
+  "seed": 628457282,
+  "model": "krea2",
+  "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
+  "prompt": "carved dark iron and dark wood interface plates with thin brass filigree and parchment insets, matte painted rendering, engraved edges, empty recessed centres meant to hold content, flat front view, hand-painted game interface asset, matte painted rendering, soft warm key light from the upper left, dark iron and tarnished brass on aged parchment, limited earthy palette of browns #664328 #a46739 #ca9861 and dull gold, crisp readable silhouette, visible brush texture, no photorealism, no glossy shaders, one single interface plate, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, empty plaque with no text and no icons inside, small square map frame plate with a plain blank recessed centre, no photograph, photorealism, 3d render, cgi, glossy plastic, shiny enamel, anime, cartoon, line art, sketch, text, letters, numbers, digits, watermark, logo, signature, ui, interface, panel, screen, frame around the canvas, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, multiple objects, collage, grid of variants",
+  "negative_prompt": "",
+  "size": [
+   1024,
+   1024
+  ],
+  "server_file": "krea2/u1_iron_parchment/plates/camp_plate_minimap_00001_.png",
+  "seconds": 15.3,
+  "tries": 1
+ },
+ "krea2/u1_iron_parchment/plates/camp_plate_party": {
+  "variant": "u1_iron_parchment",
+  "category": "plates",
+  "id": "camp_plate_party",
+  "subject": "long horizontal plaque frame divided by thin brass bars into five equal empty square slots in one row",
+  "file": "image-clone/campaign_ui/krea2/u1_iron_parchment/plates/camp_plate_party.webp",
+  "verdict": "ok",
+  "error": "",
+  "seed": 1067140275,
+  "model": "krea2",
+  "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
+  "prompt": "carved dark iron and dark wood interface plates with thin brass filigree and parchment insets, matte painted rendering, engraved edges, empty recessed centres meant to hold content, flat front view, hand-painted game interface asset, matte painted rendering, soft warm key light from the upper left, dark iron and tarnished brass on aged parchment, limited earthy palette of browns #664328 #a46739 #ca9861 and dull gold, crisp readable silhouette, visible brush texture, no photorealism, no glossy shaders, one single interface plate, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, empty plaque with no text and no icons inside, long horizontal plaque frame divided by thin brass bars into five equal empty square slots in one row, no photograph, photorealism, 3d render, cgi, glossy plastic, shiny enamel, anime, cartoon, line art, sketch, text, letters, numbers, digits, watermark, logo, signature, ui, interface, panel, screen, frame around the canvas, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, multiple objects, collage, grid of variants",
+  "negative_prompt": "",
+  "size": [
+   1024,
+   1024
+  ],
+  "server_file": "krea2/u1_iron_parchment/plates/camp_plate_party_00001_.png",
+  "seconds": 15.2,
+  "tries": 1
+ },
+ "krea2/u1_iron_parchment/plates/camp_plate_counter": {
+  "variant": "u1_iron_parchment",
+  "category": "plates",
+  "id": "camp_plate_counter",
+  "subject": "narrow horizontal counter chip plaque with one blank recessed number field",
+  "file": "image-clone/campaign_ui/krea2/u1_iron_parchment/plates/camp_plate_counter.webp",
+  "verdict": "ok",
+  "error": "",
+  "seed": 811681279,
+  "model": "krea2",
+  "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
+  "prompt": "carved dark iron and dark wood interface plates with thin brass filigree and parchment insets, matte painted rendering, engraved edges, empty recessed centres meant to hold content, flat front view, hand-painted game interface asset, matte painted rendering, soft warm key light from the upper left, dark iron and tarnished brass on aged parchment, limited earthy palette of browns #664328 #a46739 #ca9861 and dull gold, crisp readable silhouette, visible brush texture, no photorealism, no glossy shaders, one single interface plate, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, empty plaque with no text and no icons inside, narrow horizontal counter chip plaque with one blank recessed number field, no photograph, photorealism, 3d render, cgi, glossy plastic, shiny enamel, anime, cartoon, line art, sketch, text, letters, numbers, digits, watermark, logo, signature, ui, interface, panel, screen, frame around the canvas, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, multiple objects, collage, grid of variants",
+  "negative_prompt": "",
+  "size": [
+   1024,
+   1024
+  ],
+  "server_file": "krea2/u1_iron_parchment/plates/camp_plate_counter_00001_.png",
+  "seconds": 15.3,
+  "tries": 1
+ },
+ "krea2/u1_iron_parchment/plates/camp_plate_slot": {
+  "variant": "u1_iron_parchment",
+  "category": "plates",
+  "id": "camp_plate_slot",
+  "subject": "single empty square slot frame with a recessed centre and beaded inner edge",
+  "file": "image-clone/campaign_ui/krea2/u1_iron_parchment/plates/camp_plate_slot.webp",
+  "verdict": "ok",
+  "error": "",
+  "seed": 558794189,
+  "model": "krea2",
+  "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
+  "prompt": "carved dark iron and dark wood interface plates with thin brass filigree and parchment insets, matte painted rendering, engraved edges, empty recessed centres meant to hold content, flat front view, hand-painted game interface asset, matte painted rendering, soft warm key light from the upper left, dark iron and tarnished brass on aged parchment, limited earthy palette of browns #664328 #a46739 #ca9861 and dull gold, crisp readable silhouette, visible brush texture, no photorealism, no glossy shaders, one single interface plate, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, empty plaque with no text and no icons inside, single empty square slot frame with a recessed centre and beaded inner edge, no photograph, photorealism, 3d render, cgi, glossy plastic, shiny enamel, anime, cartoon, line art, sketch, text, letters, numbers, digits, watermark, logo, signature, ui, interface, panel, screen, frame around the canvas, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, multiple objects, collage, grid of variants",
+  "negative_prompt": "",
+  "size": [
+   1024,
+   1024
+  ],
+  "server_file": "krea2/u1_iron_parchment/plates/camp_plate_slot_00001_.png",
+  "seconds": 15.3,
+  "tries": 1
+ },
+ "krea2/u1_iron_parchment/emblems/camp_medallion_badge": {
+  "variant": "u1_iron_parchment",
+  "category": "emblems",
+  "id": "camp_medallion_badge",
+  "subject": "a round red gemstone cabochon set in the middle of the disc, four metal claws holding the gem",
+  "file": "image-clone/campaign_ui/krea2/u1_iron_parchment/emblems/camp_medallion_badge.webp",
+  "verdict": "ok",
+  "error": "",
+  "seed": 557477810,
+  "model": "krea2",
+  "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
+  "prompt": "circular engraved metal medallion sigils, dark iron disc with fine beaded rim and ornamental engraving, one luminous raised picture embossed at the centre, strong contrast of dark metal and bright embossed object, flat front view, hand-painted game interface asset, matte painted rendering, soft warm key light from the upper left, dark iron and tarnished brass on aged parchment, limited earthy palette of browns #664328 #a46739 #ca9861 and dull gold, crisp readable silhouette, visible brush texture, no photorealism, no glossy shaders, one circular medallion, its disc filled by an embossed picture of the subject, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, the picture is an object not a letter, not a rune, not a monogram, not a cross, a round red gemstone cabochon set in the middle of the disc, four metal claws holding the gem, no photograph, photorealism, 3d render, cgi, glossy plastic, shiny enamel, anime, cartoon, line art, sketch, text, letters, numbers, digits, watermark, logo, signature, ui, interface, panel, screen, frame around the canvas, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, multiple objects, collage, grid of variants",
+  "negative_prompt": "",
+  "size": [
+   1024,
+   1024
+  ],
+  "server_file": "krea2/u1_iron_parchment/emblems/camp_medallion_badge_00001_.png",
+  "seconds": 15.3,
+  "tries": 1
+ },
+ "krea2/u1_iron_parchment/emblems/camp_sign_coins": {
+  "variant": "u1_iron_parchment",
+  "category": "emblems",
+  "id": "camp_sign_coins",
+  "subject": "a stack of three gold coins with visible rim edges, the pile standing upright",
+  "file": "image-clone/campaign_ui/krea2/u1_iron_parchment/emblems/camp_sign_coins.webp",
+  "verdict": "ok",
+  "error": "",
+  "seed": 1106504589,
+  "model": "krea2",
+  "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
+  "prompt": "circular engraved metal medallion sigils, dark iron disc with fine beaded rim and ornamental engraving, one luminous raised picture embossed at the centre, strong contrast of dark metal and bright embossed object, flat front view, hand-painted game interface asset, matte painted rendering, soft warm key light from the upper left, dark iron and tarnished brass on aged parchment, limited earthy palette of browns #664328 #a46739 #ca9861 and dull gold, crisp readable silhouette, visible brush texture, no photorealism, no glossy shaders, one circular medallion, its disc filled by an embossed picture of the subject, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, the picture is an object not a letter, not a rune, not a monogram, not a cross, a stack of three gold coins with visible rim edges, the pile standing upright, no photograph, photorealism, 3d render, cgi, glossy plastic, shiny enamel, anime, cartoon, line art, sketch, text, letters, numbers, digits, watermark, logo, signature, ui, interface, panel, screen, frame around the canvas, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, multiple objects, collage, grid of variants",
+  "negative_prompt": "",
+  "size": [
+   1024,
+   1024
+  ],
+  "server_file": "krea2/u1_iron_parchment/emblems/camp_sign_coins_00001_.png",
+  "seconds": 15.3,
+  "tries": 1
+ },
+ "krea2/u1_iron_parchment/emblems/camp_sign_shield": {
+  "variant": "u1_iron_parchment",
+  "category": "emblems",
+  "id": "camp_sign_shield",
+  "subject": "a metal heraldic shield with a round boss in the middle, standing upright",
+  "file": "image-clone/campaign_ui/krea2/u1_iron_parchment/emblems/camp_sign_shield.webp",
+  "verdict": "ok",
+  "error": "",
+  "seed": 2070706510,
+  "model": "krea2",
+  "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
+  "prompt": "circular engraved metal medallion sigils, dark iron disc with fine beaded rim and ornamental engraving, one luminous raised picture embossed at the centre, strong contrast of dark metal and bright embossed object, flat front view, hand-painted game interface asset, matte painted rendering, soft warm key light from the upper left, dark iron and tarnished brass on aged parchment, limited earthy palette of browns #664328 #a46739 #ca9861 and dull gold, crisp readable silhouette, visible brush texture, no photorealism, no glossy shaders, one circular medallion, its disc filled by an embossed picture of the subject, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, the picture is an object not a letter, not a rune, not a monogram, not a cross, a metal heraldic shield with a round boss in the middle, standing upright, no photograph, photorealism, 3d render, cgi, glossy plastic, shiny enamel, anime, cartoon, line art, sketch, text, letters, numbers, digits, watermark, logo, signature, ui, interface, panel, screen, frame around the canvas, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, multiple objects, collage, grid of variants",
+  "negative_prompt": "",
+  "size": [
+   1024,
+   1024
+  ],
+  "server_file": "krea2/u1_iron_parchment/emblems/camp_sign_shield_00001_.png",
+  "seconds": 15.2,
+  "tries": 1
+ },
+ "krea2/u1_iron_parchment/emblems/camp_cart": {
+  "variant": "u1_iron_parchment",
+  "category": "emblems",
+  "id": "camp_cart",
+  "subject": "a wooden cart with two spoked wheels and a linen sack on the cart bed",
+  "file": "image-clone/campaign_ui/krea2/u1_iron_parchment/emblems/camp_cart.webp",
+  "verdict": "ok",
+  "error": "",
+  "seed": 328541494,
+  "model": "krea2",
+  "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
+  "prompt": "circular engraved metal medallion sigils, dark iron disc with fine beaded rim and ornamental engraving, one luminous raised picture embossed at the centre, strong contrast of dark metal and bright embossed object, flat front view, hand-painted game interface asset, matte painted rendering, soft warm key light from the upper left, dark iron and tarnished brass on aged parchment, limited earthy palette of browns #664328 #a46739 #ca9861 and dull gold, crisp readable silhouette, visible brush texture, no photorealism, no glossy shaders, one circular medallion, its disc filled by an embossed picture of the subject, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, the picture is an object not a letter, not a rune, not a monogram, not a cross, a wooden cart with two spoked wheels and a linen sack on the cart bed, no photograph, photorealism, 3d render, cgi, glossy plastic, shiny enamel, anime, cartoon, line art, sketch, text, letters, numbers, digits, watermark, logo, signature, ui, interface, panel, screen, frame around the canvas, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, multiple objects, collage, grid of variants",
+  "negative_prompt": "",
+  "size": [
+   1024,
+   1024
+  ],
+  "server_file": "krea2/u1_iron_parchment/emblems/camp_cart_00001_.png",
+  "seconds": 15.2,
+  "tries": 1
+ },
+ "krea2/u1_iron_parchment/emblems/camp_hero_marker": {
+  "variant": "u1_iron_parchment",
+  "category": "emblems",
+  "id": "camp_hero_marker",
+  "subject": "a metal gauntlet holding a spear with a leaf-shaped spearhead, spear upright",
+  "file": "image-clone/campaign_ui/krea2/u1_iron_parchment/emblems/camp_hero_marker.webp",
+  "verdict": "ok",
+  "error": "",
+  "seed": 1512452089,
+  "model": "krea2",
+  "checkpoint": "krea2_turbo_fp8_scaled.safetensors",
+  "prompt": "circular engraved metal medallion sigils, dark iron disc with fine beaded rim and ornamental engraving, one luminous raised picture embossed at the centre, strong contrast of dark metal and bright embossed object, flat front view, hand-painted game interface asset, matte painted rendering, soft warm key light from the upper left, dark iron and tarnished brass on aged parchment, limited earthy palette of browns #664328 #a46739 #ca9861 and dull gold, crisp readable silhouette, visible brush texture, no photorealism, no glossy shaders, one circular medallion, its disc filled by an embossed picture of the subject, whole object with a clear empty margin around it, nothing touching the frame, centered, isolated on plain white background, the picture is an object not a letter, not a rune, not a monogram, not a cross, a metal gauntlet holding a spear with a leaf-shaped spearhead, spear upright, no photograph, photorealism, 3d render, cgi, glossy plastic, shiny enamel, anime, cartoon, line art, sketch, text, letters, numbers, digits, watermark, logo, signature, ui, interface, panel, screen, frame around the canvas, border, vignette, drop shadow, lens flare, depth of field, blur, noise, jpeg artifacts, multiple objects, collage, grid of variants",
+  "negative_prompt": "",
+  "size": [
+   1024,
+   1024
+  ],
+  "server_file": "krea2/u1_iron_parchment/emblems/camp_hero_marker_00001_.png",
+  "seconds": 15.2,
+  "tries": 1
+ }
+}
