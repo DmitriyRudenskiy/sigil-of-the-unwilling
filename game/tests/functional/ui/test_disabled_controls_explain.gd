@@ -92,6 +92,9 @@ func _assert_equal(actual: String, expected: String, what: String) -> void:
 ## именно поэтому причина ставится уже в `_ready`, а не только в `open()`.
 func _expected_menu_disabled(has_save: bool) -> Array[String]:
 	var out: Array[String] = [CREDITS_PATH, EXIT_PATH]
+	# Экран снаряжения живёт внутри меню и выключает свою плитку «?» при
+	# монтировании: журнала квестов в игре нет (T-252), причина — в подсказке.
+	out.append("HeroModelWindow/Center/Window/Sheet/Units/Quests")
 	if not has_save:
 		out.append(CONTINUE_PATH)
 	for i in 5:

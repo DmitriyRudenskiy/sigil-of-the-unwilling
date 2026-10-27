@@ -143,7 +143,12 @@ func _connect_signals() -> void:
 	_set_btn_text("Center/Window/Sheet/ItemTip/TipBox/TipButtons/Equip", GameText.artifact_equip())
 	_set_btn_text("Center/Window/Sheet/ItemTip/TipBox/TipButtons/Remove", GameText.artifact_remove())
 	_set_btn_text("Center/Window/Sheet/ItemTip/TipBox/TipButtons/Dispose", GameText.artifact_dispose())
-	_set_btn_text("Center/Window/Sheet/Units/Close", GameText.ui_close())
+	# Плитка закрытия макета 12 — знак `×`, а не слово: подпись «Закрыть» не
+	# влезает в квадрат макета. Слово остаётся в подсказке (доступное имя).
+	_set_btn_text("Center/Window/Sheet/Units/Close", "×")
+	var cls := get_node_or_null("Center/Window/Sheet/Units/Close") as Control
+	if cls != null:
+		cls.tooltip_text = GameText.ui_close()
 	var dlbl := get_node_or_null("Center/Window/Sheet/ItemTip/TipBox/Desc_lbl")
 	if dlbl is Label:
 		dlbl.text = GameText.artifact_description()
