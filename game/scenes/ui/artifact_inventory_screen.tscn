@@ -4,34 +4,34 @@
 script = ExtResource("1")
 
 
-[node name="Center" type="CenterContainer" unique_id=1001 parent="."]
+[node name="Center" type="Control" unique_id=1001 parent="."]
 offset_left = 10.0
 offset_top = 10.0
-offset_right = 990.0
+offset_right = 1410.0
 offset_bottom = 690.0
-custom_minimum_size = Vector2(980, 680)
 
 
 
 [node name="Window" type="Control" unique_id=1002 parent="Center"]
-anchors_preset = 15
 offset_left = 10.0
 offset_top = 10.0
-offset_right = 970.0
+offset_right = 1390.0
 offset_bottom = 670.0
 
 
 
 [node name="Outline" type="PanelContainer" unique_id=1003 parent="Center/Window"]
+anchor_right = 1.0
+anchor_bottom = 1.0
 theme_type_variation = &"ArtifactOutline"
 
 
+
 [node name="Left" type="Control" unique_id=1004 parent="Center/Window"]
-anchors_preset = 15
-offset_left = 10.0
-offset_top = 10.0
-offset_right = 310.0
-offset_bottom = 650.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
 
 
 
@@ -225,7 +225,7 @@ offset_bottom = 55.0
 visible = false
 mouse_filter = 2
 horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.901961, 0.811765, 0.603922, 1)
+theme_override_colors/font_color = Color(0.902, 0.8118, 0.6039, 1.0)
 theme_override_font_sizes/font_size = 20
 offset_left = 52.0
 offset_top = 24.0
@@ -255,7 +255,7 @@ offset_bottom = 55.0
 visible = false
 mouse_filter = 2
 horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.901961, 0.811765, 0.603922, 1)
+theme_override_colors/font_color = Color(0.902, 0.8118, 0.6039, 1.0)
 theme_override_font_sizes/font_size = 20
 offset_left = 52.0
 offset_top = 24.0
@@ -285,7 +285,7 @@ offset_bottom = 55.0
 visible = false
 mouse_filter = 2
 horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.901961, 0.811765, 0.603922, 1)
+theme_override_colors/font_color = Color(0.902, 0.8118, 0.6039, 1.0)
 theme_override_font_sizes/font_size = 20
 offset_left = 52.0
 offset_top = 24.0
@@ -315,7 +315,7 @@ offset_bottom = 55.0
 visible = false
 mouse_filter = 2
 horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.901961, 0.811765, 0.603922, 1)
+theme_override_colors/font_color = Color(0.902, 0.8118, 0.6039, 1.0)
 theme_override_font_sizes/font_size = 20
 offset_left = 52.0
 offset_top = 24.0
@@ -345,7 +345,7 @@ offset_bottom = 55.0
 visible = false
 mouse_filter = 2
 horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.901961, 0.811765, 0.603922, 1)
+theme_override_colors/font_color = Color(0.902, 0.8118, 0.6039, 1.0)
 theme_override_font_sizes/font_size = 20
 offset_left = 52.0
 offset_top = 24.0
@@ -375,7 +375,7 @@ offset_bottom = 55.0
 visible = false
 mouse_filter = 2
 horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.901961, 0.811765, 0.603922, 1)
+theme_override_colors/font_color = Color(0.902, 0.8118, 0.6039, 1.0)
 theme_override_font_sizes/font_size = 20
 offset_left = 52.0
 offset_top = 24.0
@@ -385,11 +385,10 @@ offset_bottom = 46.0
 
 
 [node name="Right" type="Control" unique_id=1044 parent="Center/Window"]
-anchors_preset = 3
-offset_left = 510.0
-offset_top = 10.0
-offset_right = 950.0
-offset_bottom = 340.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
 
 
 
@@ -690,173 +689,331 @@ offset_bottom = 56.0
 
 
 
-[node name="Inventory" type="HBoxContainer" unique_id=1078 parent="Center/Window/Right"]
-offset_left = 511.0
-offset_top = 461.0
-offset_right = 938.0
-offset_bottom = 529.0
-theme_override_constants/separation = 6
+[node name="Grid" type="Control" unique_id=1078 parent="Center/Window/Right"]
+offset_left = 900.0
+offset_top = 26.0
+offset_right = 1260.0
+offset_bottom = 266.0
 
 
 
-[node name="Prev" type="Button" unique_id=1079 parent="Center/Window/Right/Inventory"]
-offset_left = 6.0
-offset_top = 9.0
-offset_right = 28.0
-offset_bottom = 65.0
-
-
-
-[node name="Next" type="Button" unique_id=1080 parent="Center/Window/Right/Inventory"]
-offset_left = 375.0
-offset_top = 9.0
-offset_right = 397.0
-offset_bottom = 65.0
-
-
-
-[node name="BackpackSlot_0" type="TextureRect" unique_id=1081 parent="Center/Window/Right/Inventory"]
-offset_left = 49.0
-offset_top = 9.0
-offset_right = 105.0
-offset_bottom = 65.0
-
-
-
-[node name="BpIcon" type="TextureRect" unique_id=1082 parent="Center/Window/Right/Inventory/BackpackSlot_0"]
-visible = false
+[node name="GridCell_0_0" type="ColorRect" unique_id=1079 parent="Center/Window/Right/Grid"]
 mouse_filter = 2
-offset_left = 6.0
-offset_top = 6.0
-offset_right = 62.0
-offset_bottom = 62.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 56.0
+offset_bottom = 56.0
+color = Color(1.0, 1.0, 1.0, 0.05)
 
 
 
-[node name="BackpackSlot_1" type="TextureRect" unique_id=1083 parent="Center/Window/Right/Inventory"]
-offset_left = 110.0
-offset_top = 9.0
-offset_right = 166.0
-offset_bottom = 65.0
-
-
-
-[node name="BpIcon" type="TextureRect" unique_id=1084 parent="Center/Window/Right/Inventory/BackpackSlot_1"]
-visible = false
+[node name="GridCell_1_0" type="ColorRect" unique_id=1080 parent="Center/Window/Right/Grid"]
 mouse_filter = 2
-offset_left = 6.0
-offset_top = 6.0
-offset_right = 62.0
-offset_bottom = 62.0
+offset_left = 60.0
+offset_top = 0.0
+offset_right = 116.0
+offset_bottom = 56.0
+color = Color(1.0, 1.0, 1.0, 0.05)
 
 
 
-[node name="BackpackSlot_2" type="TextureRect" unique_id=1085 parent="Center/Window/Right/Inventory"]
-offset_left = 171.0
-offset_top = 9.0
-offset_right = 227.0
-offset_bottom = 65.0
-
-
-
-[node name="BpIcon" type="TextureRect" unique_id=1086 parent="Center/Window/Right/Inventory/BackpackSlot_2"]
-visible = false
+[node name="GridCell_2_0" type="ColorRect" unique_id=1081 parent="Center/Window/Right/Grid"]
 mouse_filter = 2
-offset_left = 6.0
-offset_top = 6.0
-offset_right = 62.0
-offset_bottom = 62.0
+offset_left = 120.0
+offset_top = 0.0
+offset_right = 176.0
+offset_bottom = 56.0
+color = Color(1.0, 1.0, 1.0, 0.05)
 
 
 
-[node name="BackpackSlot_3" type="TextureRect" unique_id=1087 parent="Center/Window/Right/Inventory"]
-offset_left = 232.0
-offset_top = 9.0
-offset_right = 288.0
-offset_bottom = 65.0
-
-
-
-[node name="BpIcon" type="TextureRect" unique_id=1088 parent="Center/Window/Right/Inventory/BackpackSlot_3"]
-visible = false
+[node name="GridCell_3_0" type="ColorRect" unique_id=1082 parent="Center/Window/Right/Grid"]
 mouse_filter = 2
-offset_left = 6.0
-offset_top = 6.0
-offset_right = 62.0
-offset_bottom = 62.0
+offset_left = 180.0
+offset_top = 0.0
+offset_right = 236.0
+offset_bottom = 56.0
+color = Color(1.0, 1.0, 1.0, 0.05)
 
 
 
-[node name="BackpackSlot_4" type="TextureRect" unique_id=1089 parent="Center/Window/Right/Inventory"]
-offset_left = 293.0
-offset_top = 9.0
-offset_right = 349.0
-offset_bottom = 65.0
-
-
-
-[node name="BpIcon" type="TextureRect" unique_id=1090 parent="Center/Window/Right/Inventory/BackpackSlot_4"]
-visible = false
+[node name="GridCell_4_0" type="ColorRect" unique_id=1083 parent="Center/Window/Right/Grid"]
 mouse_filter = 2
-offset_left = 6.0
-offset_top = 6.0
-offset_right = 62.0
-offset_bottom = 62.0
+offset_left = 240.0
+offset_top = 0.0
+offset_right = 296.0
+offset_bottom = 56.0
+color = Color(1.0, 1.0, 1.0, 0.05)
 
 
 
-[node name="BackpackSlot_5" type="TextureRect" unique_id=1091 parent="Center/Window/Right/Inventory"]
-offset_left = 354.0
-offset_top = 9.0
-offset_right = 410.0
-offset_bottom = 65.0
-
-
-
-[node name="BpIcon" type="TextureRect" unique_id=1092 parent="Center/Window/Right/Inventory/BackpackSlot_5"]
-visible = false
+[node name="GridCell_5_0" type="ColorRect" unique_id=1084 parent="Center/Window/Right/Grid"]
 mouse_filter = 2
-offset_left = 6.0
-offset_top = 6.0
-offset_right = 62.0
-offset_bottom = 62.0
+offset_left = 300.0
+offset_top = 0.0
+offset_right = 356.0
+offset_bottom = 56.0
+color = Color(1.0, 1.0, 1.0, 0.05)
 
 
 
-[node name="Equip" type="Button" unique_id=1093 parent="Center/Window/Right"]
-offset_left = 6.0
-offset_top = 531.0
-offset_right = 64.0
-offset_bottom = 577.0
+[node name="GridCell_0_1" type="ColorRect" unique_id=1085 parent="Center/Window/Right/Grid"]
+mouse_filter = 2
+offset_left = 0.0
+offset_top = 60.0
+offset_right = 56.0
+offset_bottom = 116.0
+color = Color(1.0, 1.0, 1.0, 0.05)
 
 
 
-[node name="Remove" type="Button" unique_id=1094 parent="Center/Window/Right"]
-offset_left = 184.0
-offset_top = 531.0
-offset_right = 242.0
-offset_bottom = 577.0
+[node name="GridCell_1_1" type="ColorRect" unique_id=1086 parent="Center/Window/Right/Grid"]
+mouse_filter = 2
+offset_left = 60.0
+offset_top = 60.0
+offset_right = 116.0
+offset_bottom = 116.0
+color = Color(1.0, 1.0, 1.0, 0.05)
 
 
 
-[node name="Dispose" type="Button" unique_id=1095 parent="Center/Window/Right"]
-offset_left = 362.0
-offset_top = 531.0
-offset_right = 420.0
-offset_bottom = 577.0
+[node name="GridCell_2_1" type="ColorRect" unique_id=1087 parent="Center/Window/Right/Grid"]
+mouse_filter = 2
+offset_left = 120.0
+offset_top = 60.0
+offset_right = 176.0
+offset_bottom = 116.0
+color = Color(1.0, 1.0, 1.0, 0.05)
 
 
 
-[node name="Side" type="Control" unique_id=1096 parent="Center/Window"]
-anchors_preset = 8
-offset_left = 320.0
-offset_top = 10.0
-offset_right = 500.0
-offset_bottom = 650.0
+[node name="GridCell_3_1" type="ColorRect" unique_id=1088 parent="Center/Window/Right/Grid"]
+mouse_filter = 2
+offset_left = 180.0
+offset_top = 60.0
+offset_right = 236.0
+offset_bottom = 116.0
+color = Color(1.0, 1.0, 1.0, 0.05)
 
 
 
-[node name="Banner" type="TextureRect" unique_id=1097 parent="Center/Window/Side"]
+[node name="GridCell_4_1" type="ColorRect" unique_id=1089 parent="Center/Window/Right/Grid"]
+mouse_filter = 2
+offset_left = 240.0
+offset_top = 60.0
+offset_right = 296.0
+offset_bottom = 116.0
+color = Color(1.0, 1.0, 1.0, 0.05)
+
+
+
+[node name="GridCell_5_1" type="ColorRect" unique_id=1090 parent="Center/Window/Right/Grid"]
+mouse_filter = 2
+offset_left = 300.0
+offset_top = 60.0
+offset_right = 356.0
+offset_bottom = 116.0
+color = Color(1.0, 1.0, 1.0, 0.05)
+
+
+
+[node name="GridCell_0_2" type="ColorRect" unique_id=1091 parent="Center/Window/Right/Grid"]
+mouse_filter = 2
+offset_left = 0.0
+offset_top = 120.0
+offset_right = 56.0
+offset_bottom = 176.0
+color = Color(1.0, 1.0, 1.0, 0.05)
+
+
+
+[node name="GridCell_1_2" type="ColorRect" unique_id=1092 parent="Center/Window/Right/Grid"]
+mouse_filter = 2
+offset_left = 60.0
+offset_top = 120.0
+offset_right = 116.0
+offset_bottom = 176.0
+color = Color(1.0, 1.0, 1.0, 0.05)
+
+
+
+[node name="GridCell_2_2" type="ColorRect" unique_id=1093 parent="Center/Window/Right/Grid"]
+mouse_filter = 2
+offset_left = 120.0
+offset_top = 120.0
+offset_right = 176.0
+offset_bottom = 176.0
+color = Color(1.0, 1.0, 1.0, 0.05)
+
+
+
+[node name="GridCell_3_2" type="ColorRect" unique_id=1094 parent="Center/Window/Right/Grid"]
+mouse_filter = 2
+offset_left = 180.0
+offset_top = 120.0
+offset_right = 236.0
+offset_bottom = 176.0
+color = Color(1.0, 1.0, 1.0, 0.05)
+
+
+
+[node name="GridCell_4_2" type="ColorRect" unique_id=1095 parent="Center/Window/Right/Grid"]
+mouse_filter = 2
+offset_left = 240.0
+offset_top = 120.0
+offset_right = 296.0
+offset_bottom = 176.0
+color = Color(1.0, 1.0, 1.0, 0.05)
+
+
+
+[node name="GridCell_5_2" type="ColorRect" unique_id=1096 parent="Center/Window/Right/Grid"]
+mouse_filter = 2
+offset_left = 300.0
+offset_top = 120.0
+offset_right = 356.0
+offset_bottom = 176.0
+color = Color(1.0, 1.0, 1.0, 0.05)
+
+
+
+[node name="GridCell_0_3" type="ColorRect" unique_id=1097 parent="Center/Window/Right/Grid"]
+mouse_filter = 2
+offset_left = 0.0
+offset_top = 180.0
+offset_right = 56.0
+offset_bottom = 236.0
+color = Color(1.0, 1.0, 1.0, 0.05)
+
+
+
+[node name="GridCell_1_3" type="ColorRect" unique_id=1098 parent="Center/Window/Right/Grid"]
+mouse_filter = 2
+offset_left = 60.0
+offset_top = 180.0
+offset_right = 116.0
+offset_bottom = 236.0
+color = Color(1.0, 1.0, 1.0, 0.05)
+
+
+
+[node name="GridCell_2_3" type="ColorRect" unique_id=1099 parent="Center/Window/Right/Grid"]
+mouse_filter = 2
+offset_left = 120.0
+offset_top = 180.0
+offset_right = 176.0
+offset_bottom = 236.0
+color = Color(1.0, 1.0, 1.0, 0.05)
+
+
+
+[node name="GridCell_3_3" type="ColorRect" unique_id=1100 parent="Center/Window/Right/Grid"]
+mouse_filter = 2
+offset_left = 180.0
+offset_top = 180.0
+offset_right = 236.0
+offset_bottom = 236.0
+color = Color(1.0, 1.0, 1.0, 0.05)
+
+
+
+[node name="GridCell_4_3" type="ColorRect" unique_id=1101 parent="Center/Window/Right/Grid"]
+mouse_filter = 2
+offset_left = 240.0
+offset_top = 180.0
+offset_right = 296.0
+offset_bottom = 236.0
+color = Color(1.0, 1.0, 1.0, 0.05)
+
+
+
+[node name="GridCell_5_3" type="ColorRect" unique_id=1102 parent="Center/Window/Right/Grid"]
+mouse_filter = 2
+offset_left = 300.0
+offset_top = 180.0
+offset_right = 356.0
+offset_bottom = 236.0
+color = Color(1.0, 1.0, 1.0, 0.05)
+
+
+
+[node name="Items" type="Control" unique_id=1103 parent="Center/Window/Right/Grid"]
+mouse_filter = 2
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 360.0
+offset_bottom = 240.0
+
+
+
+[node name="Overflow_lbl" type="Label" unique_id=1104 parent="Center/Window/Right"]
+offset_left = 900.0
+offset_top = 286.0
+offset_right = 1390.0
+offset_bottom = 310.0
+
+
+
+[node name="Overflow" type="Control" unique_id=1105 parent="Center/Window/Right"]
+mouse_filter = 2
+offset_left = 900.0
+offset_top = 310.0
+offset_right = 1390.0
+offset_bottom = 370.0
+
+
+
+[node name="Desc_lbl" type="Label" unique_id=1106 parent="Center/Window/Right"]
+offset_left = 900.0
+offset_top = 386.0
+offset_right = 1390.0
+offset_bottom = 410.0
+
+
+
+[node name="Desc" type="Label" unique_id=1107 parent="Center/Window/Right"]
+autowrap_mode = 3
+vertical_alignment = 1
+offset_left = 900.0
+offset_top = 410.0
+offset_right = 1390.0
+offset_bottom = 460.0
+
+
+
+[node name="Equip" type="Button" unique_id=1108 parent="Center/Window/Right"]
+offset_left = 1280.0
+offset_top = 26.0
+offset_right = 1390.0
+offset_bottom = 82.0
+
+
+
+[node name="Remove" type="Button" unique_id=1109 parent="Center/Window/Right"]
+offset_left = 1280.0
+offset_top = 90.0
+offset_right = 1390.0
+offset_bottom = 146.0
+
+
+
+[node name="Dispose" type="Button" unique_id=1110 parent="Center/Window/Right"]
+offset_left = 1280.0
+offset_top = 154.0
+offset_right = 1390.0
+offset_bottom = 210.0
+
+
+
+[node name="Side" type="Control" unique_id=1111 parent="Center/Window"]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+
+
+
+[node name="Banner" type="TextureRect" unique_id=1112 parent="Center/Window/Side"]
 offset_left = 329.0
 offset_top = 19.0
 offset_right = 391.0
@@ -865,7 +1022,7 @@ stretch_mode = 5
 
 
 
-[node name="Mini" type="TextureRect" unique_id=1098 parent="Center/Window/Side"]
+[node name="Mini" type="TextureRect" unique_id=1113 parent="Center/Window/Side"]
 offset_left = 329.0
 offset_top = 89.0
 offset_right = 391.0
@@ -874,7 +1031,7 @@ stretch_mode = 5
 
 
 
-[node name="SideSlot_0" type="TextureRect" unique_id=1099 parent="Center/Window/Side"]
+[node name="SideSlot_0" type="TextureRect" unique_id=1114 parent="Center/Window/Side"]
 offset_left = 329.0
 offset_top = 132.0
 offset_right = 391.0
@@ -882,7 +1039,7 @@ offset_bottom = 174.0
 
 
 
-[node name="SideSlot_1" type="TextureRect" unique_id=1100 parent="Center/Window/Side"]
+[node name="SideSlot_1" type="TextureRect" unique_id=1115 parent="Center/Window/Side"]
 offset_left = 329.0
 offset_top = 182.0
 offset_right = 391.0
@@ -890,7 +1047,7 @@ offset_bottom = 224.0
 
 
 
-[node name="SideSlot_2" type="TextureRect" unique_id=1101 parent="Center/Window/Side"]
+[node name="SideSlot_2" type="TextureRect" unique_id=1116 parent="Center/Window/Side"]
 offset_left = 329.0
 offset_top = 232.0
 offset_right = 391.0
@@ -898,7 +1055,7 @@ offset_bottom = 274.0
 
 
 
-[node name="SideSlot_3" type="TextureRect" unique_id=1102 parent="Center/Window/Side"]
+[node name="SideSlot_3" type="TextureRect" unique_id=1117 parent="Center/Window/Side"]
 offset_left = 329.0
 offset_top = 282.0
 offset_right = 391.0
@@ -906,7 +1063,7 @@ offset_bottom = 324.0
 
 
 
-[node name="SideSlot_4" type="TextureRect" unique_id=1103 parent="Center/Window/Side"]
+[node name="SideSlot_4" type="TextureRect" unique_id=1118 parent="Center/Window/Side"]
 offset_left = 329.0
 offset_top = 332.0
 offset_right = 391.0
@@ -914,7 +1071,7 @@ offset_bottom = 374.0
 
 
 
-[node name="SideSlot_5" type="TextureRect" unique_id=1104 parent="Center/Window/Side"]
+[node name="SideSlot_5" type="TextureRect" unique_id=1119 parent="Center/Window/Side"]
 offset_left = 329.0
 offset_top = 382.0
 offset_right = 391.0
@@ -922,7 +1079,7 @@ offset_bottom = 424.0
 
 
 
-[node name="Ok" type="Button" unique_id=1105 parent="Center/Window/Side"]
+[node name="Ok" type="Button" unique_id=1120 parent="Center/Window/Side"]
 offset_left = 329.0
 offset_top = 542.0
 offset_right = 391.0
@@ -930,17 +1087,16 @@ offset_bottom = 588.0
 
 
 
-[node name="Bottom" type="PanelContainer" unique_id=1106 parent="Center/Window"]
+[node name="Bottom" type="PanelContainer" unique_id=1121 parent="Center/Window"]
 theme_type_variation = &"ArtifactBottom"
-anchors_preset = 10
 offset_left = 10.0
 offset_top = 470.0
-offset_right = 950.0
+offset_right = 1390.0
 offset_bottom = 650.0
 
 
 
-[node name="ArmySlot_0" type="TextureRect" unique_id=1107 parent="Center/Window/Bottom"]
+[node name="ArmySlot_0" type="TextureRect" unique_id=1122 parent="Center/Window/Bottom"]
 offset_left = 10.0
 offset_top = 10.0
 offset_right = 86.0
@@ -948,7 +1104,7 @@ offset_bottom = 86.0
 
 
 
-[node name="ArmyIcon" type="TextureRect" unique_id=1108 parent="Center/Window/Bottom/ArmySlot_0"]
+[node name="ArmyIcon" type="TextureRect" unique_id=1123 parent="Center/Window/Bottom/ArmySlot_0"]
 visible = false
 mouse_filter = 2
 offset_left = 6.0
@@ -958,7 +1114,7 @@ offset_bottom = 70.0
 
 
 
-[node name="ArmyCount" type="Label" unique_id=1109 parent="Center/Window/Bottom/ArmySlot_0"]
+[node name="ArmyCount" type="Label" unique_id=1124 parent="Center/Window/Bottom/ArmySlot_0"]
 visible = false
 mouse_filter = 2
 horizontal_alignment = 2
@@ -970,7 +1126,7 @@ offset_bottom = 76.0
 
 
 
-[node name="ArmySlot_1" type="TextureRect" unique_id=1110 parent="Center/Window/Bottom"]
+[node name="ArmySlot_1" type="TextureRect" unique_id=1125 parent="Center/Window/Bottom"]
 offset_left = 92.0
 offset_top = 10.0
 offset_right = 168.0
@@ -978,7 +1134,7 @@ offset_bottom = 86.0
 
 
 
-[node name="ArmyIcon" type="TextureRect" unique_id=1111 parent="Center/Window/Bottom/ArmySlot_1"]
+[node name="ArmyIcon" type="TextureRect" unique_id=1126 parent="Center/Window/Bottom/ArmySlot_1"]
 visible = false
 mouse_filter = 2
 offset_left = 6.0
@@ -988,7 +1144,7 @@ offset_bottom = 70.0
 
 
 
-[node name="ArmyCount" type="Label" unique_id=1112 parent="Center/Window/Bottom/ArmySlot_1"]
+[node name="ArmyCount" type="Label" unique_id=1127 parent="Center/Window/Bottom/ArmySlot_1"]
 visible = false
 mouse_filter = 2
 horizontal_alignment = 2
@@ -1000,7 +1156,7 @@ offset_bottom = 76.0
 
 
 
-[node name="ArmySlot_2" type="TextureRect" unique_id=1113 parent="Center/Window/Bottom"]
+[node name="ArmySlot_2" type="TextureRect" unique_id=1128 parent="Center/Window/Bottom"]
 offset_left = 174.0
 offset_top = 10.0
 offset_right = 250.0
@@ -1008,7 +1164,7 @@ offset_bottom = 86.0
 
 
 
-[node name="ArmyIcon" type="TextureRect" unique_id=1114 parent="Center/Window/Bottom/ArmySlot_2"]
+[node name="ArmyIcon" type="TextureRect" unique_id=1129 parent="Center/Window/Bottom/ArmySlot_2"]
 visible = false
 mouse_filter = 2
 offset_left = 6.0
@@ -1018,7 +1174,7 @@ offset_bottom = 70.0
 
 
 
-[node name="ArmyCount" type="Label" unique_id=1115 parent="Center/Window/Bottom/ArmySlot_2"]
+[node name="ArmyCount" type="Label" unique_id=1130 parent="Center/Window/Bottom/ArmySlot_2"]
 visible = false
 mouse_filter = 2
 horizontal_alignment = 2
@@ -1030,7 +1186,7 @@ offset_bottom = 76.0
 
 
 
-[node name="ArmySlot_3" type="TextureRect" unique_id=1116 parent="Center/Window/Bottom"]
+[node name="ArmySlot_3" type="TextureRect" unique_id=1131 parent="Center/Window/Bottom"]
 offset_left = 256.0
 offset_top = 10.0
 offset_right = 332.0
@@ -1038,7 +1194,7 @@ offset_bottom = 86.0
 
 
 
-[node name="ArmyIcon" type="TextureRect" unique_id=1117 parent="Center/Window/Bottom/ArmySlot_3"]
+[node name="ArmyIcon" type="TextureRect" unique_id=1132 parent="Center/Window/Bottom/ArmySlot_3"]
 visible = false
 mouse_filter = 2
 offset_left = 6.0
@@ -1048,7 +1204,7 @@ offset_bottom = 70.0
 
 
 
-[node name="ArmyCount" type="Label" unique_id=1118 parent="Center/Window/Bottom/ArmySlot_3"]
+[node name="ArmyCount" type="Label" unique_id=1133 parent="Center/Window/Bottom/ArmySlot_3"]
 visible = false
 mouse_filter = 2
 horizontal_alignment = 2
@@ -1060,7 +1216,7 @@ offset_bottom = 76.0
 
 
 
-[node name="ArmySlot_4" type="TextureRect" unique_id=1119 parent="Center/Window/Bottom"]
+[node name="ArmySlot_4" type="TextureRect" unique_id=1134 parent="Center/Window/Bottom"]
 offset_left = 338.0
 offset_top = 10.0
 offset_right = 414.0
@@ -1068,7 +1224,7 @@ offset_bottom = 86.0
 
 
 
-[node name="ArmyIcon" type="TextureRect" unique_id=1120 parent="Center/Window/Bottom/ArmySlot_4"]
+[node name="ArmyIcon" type="TextureRect" unique_id=1135 parent="Center/Window/Bottom/ArmySlot_4"]
 visible = false
 mouse_filter = 2
 offset_left = 6.0
@@ -1078,7 +1234,7 @@ offset_bottom = 70.0
 
 
 
-[node name="ArmyCount" type="Label" unique_id=1121 parent="Center/Window/Bottom/ArmySlot_4"]
+[node name="ArmyCount" type="Label" unique_id=1136 parent="Center/Window/Bottom/ArmySlot_4"]
 visible = false
 mouse_filter = 2
 horizontal_alignment = 2
@@ -1090,7 +1246,7 @@ offset_bottom = 76.0
 
 
 
-[node name="ArmySlot_5" type="TextureRect" unique_id=1122 parent="Center/Window/Bottom"]
+[node name="ArmySlot_5" type="TextureRect" unique_id=1137 parent="Center/Window/Bottom"]
 offset_left = 420.0
 offset_top = 10.0
 offset_right = 496.0
@@ -1098,7 +1254,7 @@ offset_bottom = 86.0
 
 
 
-[node name="ArmyIcon" type="TextureRect" unique_id=1123 parent="Center/Window/Bottom/ArmySlot_5"]
+[node name="ArmyIcon" type="TextureRect" unique_id=1138 parent="Center/Window/Bottom/ArmySlot_5"]
 visible = false
 mouse_filter = 2
 offset_left = 6.0
@@ -1108,7 +1264,7 @@ offset_bottom = 70.0
 
 
 
-[node name="ArmyCount" type="Label" unique_id=1124 parent="Center/Window/Bottom/ArmySlot_5"]
+[node name="ArmyCount" type="Label" unique_id=1139 parent="Center/Window/Bottom/ArmySlot_5"]
 visible = false
 mouse_filter = 2
 horizontal_alignment = 2
@@ -1120,7 +1276,7 @@ offset_bottom = 76.0
 
 
 
-[node name="ArmySlot_6" type="TextureRect" unique_id=1125 parent="Center/Window/Bottom"]
+[node name="ArmySlot_6" type="TextureRect" unique_id=1140 parent="Center/Window/Bottom"]
 offset_left = 502.0
 offset_top = 10.0
 offset_right = 578.0
@@ -1128,7 +1284,7 @@ offset_bottom = 86.0
 
 
 
-[node name="ArmyIcon" type="TextureRect" unique_id=1126 parent="Center/Window/Bottom/ArmySlot_6"]
+[node name="ArmyIcon" type="TextureRect" unique_id=1141 parent="Center/Window/Bottom/ArmySlot_6"]
 visible = false
 mouse_filter = 2
 offset_left = 6.0
@@ -1138,7 +1294,7 @@ offset_bottom = 70.0
 
 
 
-[node name="ArmyCount" type="Label" unique_id=1127 parent="Center/Window/Bottom/ArmySlot_6"]
+[node name="ArmyCount" type="Label" unique_id=1142 parent="Center/Window/Bottom/ArmySlot_6"]
 visible = false
 mouse_filter = 2
 horizontal_alignment = 2
@@ -1150,15 +1306,15 @@ offset_bottom = 76.0
 
 
 
-[node name="Formations" type="Control" unique_id=1128 parent="Center/Window/Bottom"]
-offset_left = 783.0
+[node name="Formations" type="Control" unique_id=1143 parent="Center/Window/Bottom"]
+offset_left = 1224.0
 offset_top = 11.0
-offset_right = 916.0
+offset_right = 1357.0
 offset_bottom = 84.0
 
 
 
-[node name="Form_0" type="Button" unique_id=1129 parent="Center/Window/Bottom/Formations"]
+[node name="Form_0" type="Button" unique_id=1144 parent="Center/Window/Bottom/Formations"]
 offset_left = 6.0
 offset_top = 6.0
 offset_right = 66.0
@@ -1166,7 +1322,7 @@ offset_bottom = 38.0
 
 
 
-[node name="Form_1" type="Button" unique_id=1130 parent="Center/Window/Bottom/Formations"]
+[node name="Form_1" type="Button" unique_id=1145 parent="Center/Window/Bottom/Formations"]
 offset_left = 72.0
 offset_top = 6.0
 offset_right = 132.0
@@ -1174,7 +1330,7 @@ offset_bottom = 38.0
 
 
 
-[node name="Form_2" type="Button" unique_id=1131 parent="Center/Window/Bottom/Formations"]
+[node name="Form_2" type="Button" unique_id=1146 parent="Center/Window/Bottom/Formations"]
 offset_left = 6.0
 offset_top = 42.0
 offset_right = 66.0
@@ -1182,7 +1338,7 @@ offset_bottom = 74.0
 
 
 
-[node name="Form_3" type="Button" unique_id=1132 parent="Center/Window/Bottom/Formations"]
+[node name="Form_3" type="Button" unique_id=1147 parent="Center/Window/Bottom/Formations"]
 offset_left = 72.0
 offset_top = 42.0
 offset_right = 132.0

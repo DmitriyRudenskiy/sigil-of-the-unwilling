@@ -274,6 +274,15 @@ static func tool_name(id: int) -> String:
 	return String(TranslationServer.translate("tool." + str(name))) if name != &"" else str(id)
 static func stat_label(key: String) -> String: return TranslationServer.translate("stat." + key)
 static func artifact_default_name() -> String: return TranslationServer.translate("artifact.default_name")
+# Экран снаряжения (grid-inventory-and-merchant 4.2/4.3): подписи кнопок и
+# строка габарита. Жёстких строк в сцене нет — D-189.
+static func artifact_equip() -> String: return TranslationServer.translate("artifact.equip")
+static func artifact_remove() -> String: return TranslationServer.translate("artifact.remove")
+static func artifact_dispose() -> String: return TranslationServer.translate("artifact.dispose")
+static func artifact_overflow() -> String: return TranslationServer.translate("artifact.overflow")
+static func artifact_description() -> String: return TranslationServer.translate("artifact.description")
+static func artifact_footprint(w: int, h: int, cells: int) -> String:
+	return TranslationServer.translate("artifact.footprint").format({"w": w, "h": h, "cells": cells})
 static func citypanel_capital() -> String: return TranslationServer.translate("citypanel.capital")
 static func citypanel_over_limit(n: int) -> String:
 	return "  " + TranslationServer.translate("citypanel.over_limit").format({"n": n})

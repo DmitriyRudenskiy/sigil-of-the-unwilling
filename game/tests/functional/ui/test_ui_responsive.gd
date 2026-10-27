@@ -114,6 +114,11 @@ const _OVERLAYS := {
 		"Figure",         # кукла; слоты экипировки DollSlot_* рисуются поверх
 		"Left", "Side",   # колонки; нижняя панель Bottom осознанно
 		"Bottom",         # пересекает их (полоса на всю ширину окна)
+		# Items — слой иконок сетки: пустой контейнер размером со всю сетку, на
+		# котором иконки стоят по клеткам. Пересекается rect'ом слоя, а не
+		# видимым контентом (тот лежит НА клетках, а не рядом с ними) — тот же
+		# случай, что hero_cards/bar_box выше.
+		"Items",
 	],
 	"world_ui": [
 		"end_overlay",    # оверлей конца похода
@@ -136,17 +141,16 @@ const _BLEED_ALLOWED := {
 
 ## Известные layout-дефекты (T-154, 2026-10-21): префиксы путей
 ## нарушений, которые печатаются, но не краснят гейт до фикса сцены.
-## Основание: artifact_inventory_screen.tscn — (а) CenterContainer
-## сворачивает Center/Window (обычный Control без min-size) в 0×0, контент
-## окна разбросан от (500,350), строка Inventory уходит 26–28 px за правый
-## край на 16:9; (б) Bottom — PanelContainer с 8 детьми: все ArmySlot_* и
-## Formations накладываются в один и тот же content-rect (908×148),
-## Form_0×Form_2 / Form_1×Form_3 пересекаются на 12 px (min-высота кнопки
-## 48 > шаг строк 36). Живой носитель: main_menu HeroModelWindow +
-## world_ui WorldUILayer/ArtifactInventoryScreen.
+## (а) из старого основания снята 2026-10-27 (grid-inventory-and-merchant 4.4):
+## окно экрана стало 1400 px (макет), Center больше не сворачивается в 0×0 и
+## строка Right/Inventory не уходит за правый край — запись про неё удалена
+## (гейт её больше не печатает). Осталось (б): Bottom — PanelContainer с 8
+## детьми: все ArmySlot_* и Formations накладываются в один и тот же
+## content-rect, Form_0×Form_2 / Form_1×Form_3 пересекаются на 12 px
+## (min-высота кнопки 48 > шаг строк 36). Живой носитель: main_menu
+## HeroModelWindow + world_ui WorldUILayer/ArtifactInventoryScreen.
 const _KNOWN_VIOLATIONS := {
 	"artifact_inventory_screen": [
-		"Center/Window/Right/Inventory",
 		"Center/Window/Bottom/ArmySlot_",
 		"Center/Window/Bottom/Formations",
 	],

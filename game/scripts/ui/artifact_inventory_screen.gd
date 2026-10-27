@@ -7,14 +7,31 @@ var _hero: HeroController = null
 
 var _tex_cache: Dictionary = {}
 
-var bp_page := 0
-var bp_slots: Array = []
-
 var _selected_slot: Artifact.Slot = Artifact.Slot.WEAPON
+
+# Выбор в сетке: наведение показывает предмет, клик выбирает его для действий.
+# -1 — ничего; раньше кнопки действовали на «первый попавшийся», что в сетке
+# без порядка читается как «непонятно что».
+var _hover_backpack := -1
+var _picked_backpack := -1
+
 var _right: Control = null
 
 const TEXT_GOLD := ThemeConfig.C_TEXT_GOLD_SOFT
 const TEXT_LIGHT := ThemeConfig.C_TEXT_LIGHT_SOFT
+
+# Геометрия сетки снаряжения (grid-inventory-and-merchant 4.1): 6×4 клеток по
+# 56 px с шагом 60. Единственный источник для генератора сцены
+# (gen_inventory_scene.gd читает эти же константы) и для `_refresh_grid()`.
+const GRID_ORIGIN := Vector2i(900, 26)
+const GRID_COLS := 6
+const GRID_ROWS := 4
+const CELL_PITCH := 60
+const CELL_SIZE := 56
+const OVERFLOW_ORIGIN := Vector2i(900, 310)
+const CELL_EMPTY := Color(1.0, 1.0, 1.0, 0.05)
+const CELL_FILLED := Color(1.0, 1.0, 1.0, 0.13)
+const CELL_HOVER := Color(0.9, 0.75, 0.4, 0.3)
 
 const _STAT_ICON := {
 	"attack": "atk_sword", "defense": "helm", "spell_power": "spell",
@@ -79,15 +96,15 @@ func _theme_font_size(path: String, name_: String) -> void:
 		n.add_theme_font_size_override("font", sz)
 
 func _connect_signals() -> void:
-	var prev := get_node_or_null("Center/Window/Right/Inventory/Prev")
-	var next := get_node_or_null("Center/Window/Right/Inventory/Next")
-
-	if prev is Button:
-		if not prev.pressed.is_connected(_on_prev_page):
-			prev.pressed.connect(_on_prev_page)
-	if next is Button:
-		if not next.pressed.is_connected(_on_next_page):
-			next.pressed.connect(_on_next_page)
+	# Подписи кнопок: в сцене их не задаёт никто (ни .tscn, ни генератор), и до
+	# этого шага Экранировать/Снять/Уничтожить/Закрыть рисовались пустыми.
+	_set_btn_text("Center/Window/Right/Equip", GameText.artifact_equip())
+	_set_btn_text("Center/Window/Right/Remove", GameText.artifact_remove())
+	_set_btn_text("Center/Window/Right/Dispose", GameText.artifact_dispose())
+	_set_btn_text("Center/Window/Side/Ok", GameText.ui_close())
+	var dlbl := get_node_or_null("Center/Window/Right/Desc_lbl")
+	if dlbl is Label:
+		dlbl.text = GameText.artifact_description()
 
 	_connect_btn("Center/Window/Right/Equip", _on_equip)
 	_connect_btn("Center/Window/Right/Remove", _on_remove)
@@ -101,11 +118,10 @@ func _connect_signals() -> void:
 			if not b.pressed.is_connected(cb):
 				b.pressed.connect(cb)
 
-func _on_prev_page() -> void:
-	_backpack_scroll_by(-1)
-
-func _on_next_page() -> void:
-	_backpack_scroll_by(1)
+func _set_btn_text(path: String, value: String) -> void:
+	var b := get_node_or_null(path)
+	if b is Button:
+		b.text = value
 
 func _connect_btn(path: String, handler: Callable) -> void:
 	var b := get_node_or_null(path)
@@ -204,7 +220,7 @@ func _build_right() -> void:
 	if figure is TextureRect:
 		figure.texture = _tex("res://assets/ui/hero/figure.png", 240, 360)
 	_rebuild_equipped()
-	_refresh_backpack()
+	_refresh_grid()
 
 func _build_side() -> void:
 	var side := get_node_or_null("Center/Window/Side")
@@ -254,7 +270,7 @@ func _refresh() -> void:
 	if _hero == null or _right == null:
 		return
 	_rebuild_equipped()
-	_refresh_backpack()
+	_refresh_grid()
 
 func _rebuild_equipped() -> void:
 	if _hero == null:
@@ -283,39 +299,137 @@ func _rebuild_equipped() -> void:
 		if ov is TextureRect:
 			ov.visible = false
 
-func _refresh_backpack() -> void:
-	if _hero == null:
+## Рюкзак — сетка 6×4 (grid-inventory-and-merchant 4.2): предмет рисуется
+## прямоугольником cells[rot] со своей origin; не влезшее в носитель — полосой
+## «Перевес» под сеткой. Иконки пересоздаются на каждый refresh (их мало),
+## клетки — узлы сцены, их только перекрашиваем.
+func _refresh_grid() -> void:
+	var items := get_node_or_null("Center/Window/Right/Grid/Items")
+	var strip := get_node_or_null("Center/Window/Right/Overflow")
+	if items == null or strip == null:
 		return
-	var bp: Array[Artifact] = _hero.inventory.backpack
-	for i in 6:
-		var ic := get_node_or_null(
-			"Center/Window/Right/Inventory/BackpackSlot_%d/BpIcon" % i)
-		if ic is not TextureRect:
-			continue
-		var idx := bp_page * 6 + i
-		if idx < bp.size() and bp[idx] != null:
-			var icon_path := _artifact_icon(bp[idx])
-			if not icon_path.is_empty():
-				ic.texture = _tex(icon_path, 56, 56)
-				ic.visible = true
+	var inv := _inv()
+	_prune(items)
+	_prune(strip)
+	# Карта занятости — один вызов: `occupied_cells()` заодно доводит раскладку
+	# до инварианта («у каждого предмета есть клетка»), и дальше клетки только
+	# перекрашиваются, а не пересчитываются на каждую из 24.
+	var overflow_n := 0
+	var used := {}
+	if inv != null:
+		used = inv.occupied_cells()
+		for i in inv.backpack.size():
+			var art: Artifact = inv.backpack[i]
+			if art == null:
 				continue
-		ic.visible = false
+			if inv.is_overflow(i):
+				_add_item_icon(strip, art, i, Vector2(overflow_n * CELL_PITCH, 0), Vector2(CELL_SIZE, CELL_SIZE))
+				overflow_n += 1
+				continue
+			var rect := item_rect(inv.placements[i], art.resolved_cells(), inv.rotated[i])
+			_add_item_icon(items, art, i, rect.position, rect.size)
+	var lbl := get_node_or_null("Center/Window/Right/Overflow_lbl")
+	if lbl is Label:
+		lbl.text = GameText.artifact_overflow()
+		lbl.visible = overflow_n > 0
+	_paint_cells(used)
+	_update_desc(inv)
 
-func _backpack_scroll_by(dir: int) -> void:
-	if _hero == null:
+func _inv() -> HeroInventory:
+	return _hero.inventory if _hero != null else null
+
+func _picked_art(inv: HeroInventory) -> Artifact:
+	if inv == null or _picked_backpack < 0 or _picked_backpack >= inv.backpack.size():
+		return null
+	return inv.backpack[_picked_backpack]
+
+func _prune(parent: Node) -> void:
+	for ch in parent.get_children():
+		ch.free()
+
+func _add_item_icon(parent: Control, art: Artifact, idx: int, at: Vector2, size: Vector2) -> void:
+	var icon := TextureRect.new()
+	icon.name = "Item_%d" % idx
+	icon.position = at
+	icon.size = size
+	icon.mouse_filter = Control.MOUSE_FILTER_STOP
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	var path := _artifact_icon(art)
+	if not path.is_empty():
+		icon.texture = _tex(path, CELL_SIZE, CELL_SIZE)
+	icon.mouse_entered.connect(_on_item_hover.bind(idx))
+	icon.mouse_exited.connect(_on_item_hover.bind(-1))
+	icon.gui_input.connect(_on_item_input.bind(idx))
+	parent.add_child(icon)
+
+func _on_item_hover(idx: int) -> void:
+	_hover_backpack = idx
+	_repaint()
+
+func _on_item_input(event: InputEvent, idx: int) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		# Повторный клик по выбранному снимает выбор: «что выбрано» должно быть
+		# видно по подсветке, а не по догадке.
+		_picked_backpack = -1 if _picked_backpack == idx else idx
+		_repaint()
+
+## Перекраска без перестройки иконок — наведение не должно дёргать всё дерево.
+func _repaint() -> void:
+	var inv := _inv()
+	_paint_cells(inv.occupied_cells() if inv != null else {})
+	_update_desc(inv)
+
+## Подсветка клеток: занятые — тёмным, клетки выбранного (или наведённого)
+## предмета — золотом. `used` — карта HeroInventory.occupied_cells(): клетка →
+## индекс предмета в рюкзаке.
+func _paint_cells(used: Dictionary) -> void:
+	var shown := _picked_backpack if _picked_backpack >= 0 else _hover_backpack
+	for row in GRID_ROWS:
+		for col in GRID_COLS:
+			var cell := get_node_or_null("Center/Window/Right/Grid/GridCell_%d_%d" % [col, row])
+			if cell is not ColorRect:
+				continue
+			var owner := int(used.get(Vector2i(col, row), -1))
+			cell.color = CELL_EMPTY if owner < 0 else (CELL_HOVER if owner == shown else CELL_FILLED)
+
+## Подпись габарита в описании предмета (4.3): сколько клеток занимает предмет
+## в текущем повороте — это игрок обязан видеть до поворота и до покупки.
+func _update_desc(inv: HeroInventory) -> void:
+	var desc := get_node_or_null("Center/Window/Right/Desc")
+	if desc is not Label:
 		return
-	var max_page := int(floorf(float(GameNumbers.MAX_BACKPACK_SIZE - 6) / 6.0))
-	bp_page = clampi(bp_page + dir, 0, max_page)
-	_refresh_backpack()
+	var idx := _picked_backpack if _picked_backpack >= 0 else _hover_backpack
+	if inv == null or idx < 0 or idx >= inv.backpack.size() or inv.backpack[idx] == null:
+		desc.text = ""
+		return
+	var art: Artifact = inv.backpack[idx]
+	var cells: Vector2i = art.resolved_cells()
+	var line := GameText.artifact_footprint(cells.x, cells.y, cells.x * cells.y)
+	if inv.is_overflow(idx):
+		line += " · " + GameText.artifact_overflow()
+	desc.text = "%s\n%s\n%s" % [art.display_name, art.description, line]
+
+## Прямоугольник предмета в координатах сетки: от origin*шаг на cells*шаг минус
+## зазор между клетками. Чистая функция — на ней держится тест 4.4.
+static func item_rect(origin: Vector2i, cells: Vector2i, rot: bool) -> Rect2:
+	var c: Vector2i = Vector2i(cells.y, cells.x) if rot else cells
+	var gap := float(CELL_PITCH - CELL_SIZE)
+	return Rect2(Vector2(origin) * CELL_PITCH, Vector2(c) * CELL_PITCH - Vector2(gap, gap))
 
 func _on_equip() -> void:
-	if _hero == null:
+	var inv := _inv()
+	if inv == null:
 		return
-	var inv: HeroInventory = _hero.inventory
-	for art in inv.backpack:
-		if art != null and inv.can_equip(art):
-			inv.equip(art)
-		break
+	var art := _picked_art(inv)
+	if art == null:
+		# Без выбора — первая пригодная, как было до сетки.
+		for candidate in inv.backpack:
+			if candidate != null and inv.can_equip(candidate):
+				art = candidate
+				break
+	if art != null and inv.can_equip(art):
+		inv.equip(art)
+	_picked_backpack = -1
 	_refresh()
 
 func _on_remove() -> void:
@@ -327,11 +441,11 @@ func _on_remove() -> void:
 	_refresh()
 
 func _on_dispose() -> void:
-	if _hero == null:
+	var inv := _inv()
+	if inv == null or inv.backpack.is_empty():
 		return
-	var inv: HeroInventory = _hero.inventory
-	if not inv.backpack.is_empty():
-		inv.remove_from_backpack(0)
+	inv.remove_from_backpack(_picked_backpack if _picked_backpack >= 0 else 0)
+	_picked_backpack = -1
 	_refresh()
 
 func _on_form(_i: int) -> void:

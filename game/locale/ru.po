@@ -1176,3 +1176,21 @@ msgstr "Потренировать воина"
 
 msgid "campaign.goal.ruins"
 msgstr "Посетить руины"
+
+msgid "artifact.equip"
+msgstr "Экипировать"
+
+msgid "artifact.remove"
+msgstr "Снять"
+
+msgid "artifact.dispose"
+msgstr "Уничтожить"
+
+msgid "artifact.overflow"
+msgstr "Перевес"
+
+msgid "artifact.description"
+msgstr "Описание"
+
+msgid "artifact.footprint"
+msgstr "Габарит: {w}×{h} ({cells} кл.)"

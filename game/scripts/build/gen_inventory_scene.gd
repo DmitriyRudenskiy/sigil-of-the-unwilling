@@ -5,6 +5,10 @@ var OUT := "res://scenes/ui/artifact_inventory_screen.tscn"
 var _ext: Array = []
 var _node_lines: Array = []
 
+# Геометрия сетки снаряжения живёт в скрипте экрана; генератор берёт её оттуда же,
+# чтобы раскладка сцены и `_refresh_grid()` не разъезжались.
+const _Screen = preload("res://scripts/ui/artifact_inventory_screen.gd")
+
 const _DOLL_X := [258, 318, 180, 6, 68, 318, 180, 318, 6, 22, 318, 46, 258, 6, 68, 318]
 const _DOLL_Y := [6, 6, 66, 58, 58, 68, 146, 130, 160, 230, 218, 300, 298, 370, 370, 392]
 
@@ -32,24 +36,29 @@ func _build() -> void:
 	_add_node("ArtifactInventoryScreen", "Control", "", "script = ExtResource(\"1\")", uid)
 	uid += 1
 
+	# Центр окна — обычный Control, а не CenterContainer (T-154, дефект «а»):
+	# контейнер разворачивал Window (обычный Control без min-size) в 0×0, весь
+	# контент разбегался от центра, а рамка Outline не рисовалась вовсе.
 	_add_node(
-		"Center", "CenterContainer", ".",
-		"offset_left = 10.0\noffset_top = 10.0\noffset_right = 990.0\noffset_bottom = 690.0\n"
-		+ "custom_minimum_size = Vector2(980, 680)\n"
-		+ "theme_override_constants/separation = 8\n", uid)
+		"Center", "Control", ".",
+		"offset_left = 10.0\noffset_top = 10.0\noffset_right = 1410.0\noffset_bottom = 690.0\n", uid)
 	uid += 1
 
 	_add_node(
 		"Window", "Control", "Center",
-		"anchors_preset = 15\noffset_left = 10.0\noffset_top = 10.0\noffset_right = 970.0\noffset_bottom = 670.0\n", uid)
+		"offset_left = 10.0\noffset_top = 10.0\noffset_right = 1390.0\noffset_bottom = 670.0\n", uid)
 	uid += 1
 
-	_add_node("Outline", "PanelContainer", "Center/Window", "", uid)
-	uid += 1
-
+	# Рамка — на весь Window: без якорей PanelContainer свёрнут в 0×0 и рамку не рисует.
 	_add_node(
-		"Left", "Control", "Center/Window",
-		"anchors_preset = 15\noffset_left = 10.0\noffset_top = 10.0\noffset_right = 310.0\noffset_bottom = 650.0\n", uid)
+		"Outline", "PanelContainer", "Center/Window",
+		"anchor_right = 1.0\nanchor_bottom = 1.0\ntheme_type_variation = &\"ArtifactOutline\"\n", uid)
+	uid += 1
+
+	# Left/Side/Right — не прямоугольники-колонки, а нулевые точки: их дети
+	# расписаны в координатах окна (историческая разметка сцены). См. комментарий
+	# у _box ниже: смещение родителя сложилось бы с offset ребёнка дважды.
+	_add_node("Left", "Control", "Center/Window", _box(0, 0, 0, 0), uid)
 	uid += 1
 
 	_add_node(
@@ -124,9 +133,7 @@ func _build() -> void:
 			"visible = false\nmouse_filter = 2\nhorizontal_alignment = 1\n" + _gold(20) + "\n" + _box(52, 24, 112, 46), uid)
 		uid += 1
 
-	_add_node(
-		"Right", "Control", "Center/Window",
-		"anchors_preset = 3\noffset_left = 510.0\noffset_top = 10.0\noffset_right = 950.0\noffset_bottom = 340.0\n", uid)
+	_add_node("Right", "Control", "Center/Window", _box(0, 0, 0, 0), uid)
 	uid += 1
 
 	_add_node(
@@ -144,44 +151,65 @@ func _build() -> void:
 			"visible = false\nmouse_filter = 2\n" + _box(0, 0, 56, 56), uid)
 		uid += 1
 
+	# Сетка снаряжения (grid-inventory-and-merchant 4.1): 6×4 клетки по 56 px
+	# с шагом 60 вместо шести BackpackSlot_* и постраничной прокрутки. Координаты
+	# берёт один источник — константы экрана, иначе генератор и `_refresh_grid()`
+	# разъедутся на первом же изменении размера клетки.
+	var g: Vector2i = _Screen.GRID_ORIGIN
+	var pitch: int = _Screen.CELL_PITCH
+	var cell: int = _Screen.CELL_SIZE
 	_add_node(
-		"Inventory", "HBoxContainer", "Center/Window/Right",
-		"offset_left = 511.0\noffset_top = 461.0\noffset_right = 938.0\noffset_bottom = 529.0\ntheme_override_constants/separation = 6\n", uid)
+		"Grid", "Control", "Center/Window/Right",
+		_box(g.x, g.y, g.x + pitch * 6, g.y + pitch * 4), uid)
 	uid += 1
+	for row in 4:
+		for col in 6:
+			# Координаты — внутри Grid'а (сам Grid стоит в сетке окна), иначе
+			# смещение родителя сложится с offset клетки дважды.
+			var x0: int = col * pitch
+			var y0: int = row * pitch
+			_add_node(
+				"GridCell_%d_%d" % [col, row], "ColorRect", "Center/Window/Right/Grid",
+				"mouse_filter = 2\n" + _box(x0, y0, x0 + cell, y0 + cell)
+				+ "color = " + _color(_Screen.CELL_EMPTY), uid)
+			uid += 1
 	_add_node(
-		"Prev", "Button", "Center/Window/Right/Inventory",
-		"offset_left = 6.0\noffset_top = 9.0\noffset_right = 28.0\noffset_bottom = 65.0\n", uid)
-	uid += 1
-	_add_node(
-		"Next", "Button", "Center/Window/Right/Inventory",
-		"offset_left = 375.0\noffset_top = 9.0\noffset_right = 397.0\noffset_bottom = 65.0\n", uid)
-	uid += 1
-	for i in 6:
-		_add_node(
-			"BackpackSlot_" + str(i), "TextureRect", "Center/Window/Right/Inventory",
-			"offset_left = " + str(49 + i * 61) + ".0\noffset_top = 9.0\noffset_right = " + str(105 + i * 61) + ".0\noffset_bottom = 65.0\n", uid)
-		uid += 1
-		_add_node(
-			"BpIcon", "TextureRect", "Center/Window/Right/Inventory/BackpackSlot_" + str(i),
-			"visible = false\nmouse_filter = 2\n" + _box(6, 6, 62, 62), uid)
-		uid += 1
-
-	_add_node(
-		"Equip", "Button", "Center/Window/Right",
-		"offset_left = 6.0\noffset_top = 531.0\noffset_right = 64.0\noffset_bottom = 577.0\n", uid)
-	uid += 1
-	_add_node(
-		"Remove", "Button", "Center/Window/Right",
-		"offset_left = 184.0\noffset_top = 531.0\noffset_right = 242.0\noffset_bottom = 577.0\n", uid)
-	uid += 1
-	_add_node(
-		"Dispose", "Button", "Center/Window/Right",
-		"offset_left = 362.0\noffset_top = 531.0\noffset_right = 420.0\noffset_bottom = 577.0\n", uid)
+		"Items", "Control", "Center/Window/Right/Grid",
+		"mouse_filter = 2\n" + _box(0, 0, pitch * 6, pitch * 4), uid)
 	uid += 1
 
 	_add_node(
-		"Side", "Control", "Center/Window",
-		"anchors_preset = 8\noffset_left = 320.0\noffset_top = 10.0\noffset_right = 500.0\noffset_bottom = 650.0\n", uid)
+		# Подпись — по левому краю колонки: полоса перевеса растёт вправо от
+		# x=900, и центрированная подпись уезжала бы от своих предметов (кадр
+		# 2026-10-27: «Перевес» на 260 px правее первой иконки).
+		"Overflow_lbl", "Label", "Center/Window/Right",
+		_box(900, 286, 1390, 310), uid)
+	uid += 1
+	_add_node(
+		"Overflow", "Control", "Center/Window/Right",
+		"mouse_filter = 2\n" + _box(900, 310, 1390, 370), uid)
+	uid += 1
+	_add_node(
+		"Desc_lbl", "Label", "Center/Window/Right",
+		_box(900, 386, 1390, 410), uid)
+	uid += 1
+	_add_node(
+		# Ни цвета, ни размера: цвет наследуется от корня экрана (золото), а
+		# размер — от темы. Свои override'ы сюда просить нельзя: font_color
+		# считается мёртвым (T-189), а размер ниже 16 — нечитаемым (T-190).
+		"Desc", "Label", "Center/Window/Right",
+		"autowrap_mode = 3\nvertical_alignment = 1\n" + _box(900, 410, 1390, 460), uid)
+	uid += 1
+
+	# Кнопки действий — справа от сетки: раньше они стояли на y 531..577, то есть
+	# поверх панели армии (Bottom 470..650).
+	for pair in [["Equip", 26], ["Remove", 90], ["Dispose", 154]]:
+		_add_node(
+			String(pair[0]), "Button", "Center/Window/Right",
+			_box(1280, int(pair[1]), 1390, int(pair[1]) + 56), uid)
+		uid += 1
+
+	_add_node("Side", "Control", "Center/Window", _box(0, 0, 0, 0), uid)
 	uid += 1
 
 	_add_node(
@@ -204,7 +232,7 @@ func _build() -> void:
 
 	_add_node(
 		"Bottom", "PanelContainer", "Center/Window",
-		"anchors_preset = 10\noffset_left = 10.0\noffset_top = 470.0\noffset_right = 950.0\noffset_bottom = 650.0\n", uid)
+		"theme_type_variation = &\"ArtifactBottom\"\n" + _box(10, 470, 1390, 650), uid)
 	uid += 1
 
 	for i in 7:
@@ -218,12 +246,13 @@ func _build() -> void:
 		uid += 1
 		_add_node(
 			"ArmyCount", "Label", "Center/Window/Bottom/ArmySlot_" + str(i),
-			"visible = false\nmouse_filter = 2\nhorizontal_alignment = 1\n" + _white(14) + "\n" + _box(50, 56, 74, 76), uid)
+			"visible = false\nmouse_filter = 2\nhorizontal_alignment = 2\n"
+			+ "theme_type_variation = &\"LabelNumber\"\n" + _box(6, 50, 74, 76), uid)
 		uid += 1
 
 	_add_node(
 		"Formations", "Control", "Center/Window/Bottom",
-		"offset_left = 783.0\noffset_top = 11.0\noffset_right = 916.0\noffset_bottom = 84.0\n", uid)
+		_box(1224, 11, 1357, 84), uid)
 	uid += 1
 	for i in 4:
 		_add_node(
@@ -231,14 +260,22 @@ func _build() -> void:
 			"offset_left = " + str(6 + (i % 2) * 66) + ".0\noffset_top = " + str(6 + (i / 2) * 36) + ".0\noffset_right = " + str(66 + (i % 2) * 66) + ".0\noffset_bottom = " + str(38 + (i / 2) * 36) + ".0\n", uid)
 		uid += 1
 
+## Координаты узла. Родители детей Left/Side/Right — нулевые точки, поэтому
+## числа здесь читаются как координаты окна, а не как смещение внутри колонки.
 func _box(l: int, t: int, r: int, b: int) -> String:
 	return "offset_left = " + str(l) + ".0\noffset_top = " + str(t) + ".0\noffset_right = " + str(r) + ".0\noffset_bottom = " + str(b) + ".0\n"
 
+## Литерал цвета для .tscn: `str(Color)` отдаёт кортеж `(r, g, b, a)`, а редактор
+## пишет `Color(r, g, b, a)`; без обёртки каждый прогон генератора переписывал
+## бы цвет в файле (дрейф 107 строк, найден 2026-10-27).
+func _color(c: Color) -> String:
+	return "Color" + str(c) + "\n"
+
 func _gold(sz: int) -> String:
-	return "theme_override_colors/font_color = " + str(ThemeConfig.C_TEXT_GOLD_SOFT) + "\ntheme_override_font_sizes/font_size = " + str(sz)
+	return "theme_override_colors/font_color = " + _color(ThemeConfig.C_TEXT_GOLD_SOFT) + "theme_override_font_sizes/font_size = " + str(sz)
 
 func _white(sz: int) -> String:
-	return "theme_override_colors/font_color = " + str(ThemeConfig.C_TEXT_WHITE) + "\ntheme_override_font_sizes/font_size = " + str(sz)
+	return "theme_override_colors/font_color = " + _color(ThemeConfig.C_TEXT_WHITE) + "theme_override_font_sizes/font_size = " + str(sz)
 
 func _emit() -> void:
 	var out := ""

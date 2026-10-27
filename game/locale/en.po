@@ -1176,3 +1176,21 @@ msgstr "Train a warrior"
 
 msgid "campaign.goal.ruins"
 msgstr "Visit the ruins"
+
+msgid "artifact.equip"
+msgstr "Equip"
+
+msgid "artifact.remove"
+msgstr "Remove"
+
+msgid "artifact.dispose"
+msgstr "Dispose"
+
+msgid "artifact.overflow"
+msgstr "Overflow"
+
+msgid "artifact.description"
+msgstr "Description"
+
+msgid "artifact.footprint"
+msgstr "Size: {w}×{h} ({cells} cells)"
