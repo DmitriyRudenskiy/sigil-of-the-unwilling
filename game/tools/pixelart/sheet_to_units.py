@@ -22,6 +22,7 @@ import hashlib
 import json
 import shutil
 import math
+import re
 import sys
 import time
 from pathlib import Path
@@ -314,12 +315,53 @@ def cache_put(cache_dir: Path, frame: np.ndarray, *, sheet: str, cell,
 
 # ------------------------------------------------------------------ верхний уровень
 
-def analyse_sheet(path: str | Path) -> dict:
+def grid_cells_fixed(alpha: np.ndarray, rows: int, cols: int,
+                     sliver: float = 0.25) -> dict:
+    """Ровная сетка листа: rows×cols равных долей, чужие лоскуты на границе долой.
+
+    Нужна для листов, где генератор поставил персонажей вплотную: севено
+    склеивается, центроидов становится меньше, чем рядов, и автоматическая
+    сетка съедала колонку. Здесь сетку задаёт человек, знающий лист. Доля
+    отсекается по краю ячейки, поэтому к персонажу возвращается всё, что не
+    откушено соседом: компонент выбрасывается, только если он и касается
+    границы доли, и мельче `sliver` от крупнейшего в ячейке.
+    """
+    h, w = alpha.shape
+    cells = {}
+    for r in range(rows):
+        for c in range(cols):
+            box = (round(r * h / rows), round((r + 1) * h / rows),
+                   round(c * w / cols), round((c + 1) * w / cols))
+            part = alpha[box[0]:box[1], box[2]:box[3]]
+            comps = components_of(part)
+            if not comps:
+                continue
+            cell = np.zeros_like(part)
+            for area, (y0, x0, y1, x1) in comps:
+                edge = y0 == 0 or x0 == 0 or y1 == part.shape[0] or x1 == part.shape[1]
+                if not edge or area >= sliver * comps[0][0]:
+                    cell[y0:y1, x0:x1] |= part[y0:y1, x0:x1]
+            m = np.zeros_like(alpha)
+            m[box[0]:box[1], box[2]:box[3]] = cell
+            cells[(r, c)] = m
+    return cells
+
+
+def cells_of(alpha: np.ndarray, grid=None) -> tuple[dict, int, int]:
+    """Ячейки листа: своей сеткой (`grid=(рядов, колонок)`) или кластеризацией."""
+    if grid:
+        rows, cols = grid
+        return grid_cells_fixed(alpha, rows, cols), rows, cols
+    cells, rows, cols = grid_cells(seeds_of(alpha))
+    return cells, rows, cols
+
+
+def analyse_sheet(path: str | Path, grid=None) -> dict:
     """Лист → сетка ячеек + числовой отбор каждой. Ничего не пишет."""
     started = time.perf_counter()
     rgb, path = load_rgb(path)
     alpha = alpha_of(rgb)
-    cells, rows, cols = grid_cells(seeds_of(alpha))
+    cells, rows, cols = cells_of(alpha, grid)
     out = {}
     for key, mask in sorted(cells.items()):
         bbox = cell_bbox(mask)
@@ -334,12 +376,12 @@ def analyse_sheet(path: str | Path) -> dict:
 
 def crop_sheet(path: str | Path, out_dir: str | Path,
                cache_dir: str | Path | None = None, *, tight=False,
-               flat=False) -> dict:
+               flat=False, grid=None) -> dict:
     """Вырезать принятые отбором ячейки в out_dir/<лист>/; оригиналы не трогаются."""
     started = time.perf_counter()
     rgb, path = load_rgb(path)
     alpha = alpha_of(rgb)
-    cells, rows, cols = grid_cells(seeds_of(alpha))
+    cells, rows, cols = cells_of(alpha, grid)
     out_dir = Path(out_dir) if flat else Path(out_dir) / path.stem
     out_dir.mkdir(parents=True, exist_ok=True)
     cache_dir = Path(cache_dir) if cache_dir else path.parent / '_unit_cache'
@@ -369,21 +411,51 @@ def crop_sheet(path: str | Path, out_dir: str | Path,
             'seconds': time.perf_counter() - started}
 
 
+def selftest() -> int:
+    """Ровная сетка: 12 ячеек, чужой лоскут через границу отброшен, свой цел."""
+    h, w = 1200, 900
+    alpha = np.zeros((h, w), bool)
+    for r in range(3):
+        for c in range(4):
+            cy, cx = int((r + .5) * h / 3), int((c + .5) * w / 4)
+            alpha[cy - 100:cy + 100, cx - 60:cx + 60] = True
+    blob = int(alpha.sum() / 12)
+    alpha[0:20, w // 4 - 30:w // 4 + 30] = True
+    cells = grid_cells_fixed(alpha, 3, 4)
+    assert len(cells) == 12, len(cells)
+    assert all(int(m.sum()) == blob for m in cells.values()), 'лоскут не отброшен'
+    kept = grid_cells_fixed(alpha, 3, 4, sliver=0.0)
+    assert sum(int(m.sum()) for m in kept.values()) == int(alpha.sum()), 'sliver=0.0 должен оставить всё'
+    print(f'selftest: 12 ячеек, лоскут {int(alpha.sum()) - 12 * blob} пикс. отброшен')
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument('sheets', nargs='+', type=Path)
+    ap.add_argument('sheets', nargs='*', type=Path)
     ap.add_argument('--dry-run', action='store_true', help='только вердикт по ячейкам')
+    ap.add_argument('--selftest', action='store_true', help='проверка ровной сетки')
     ap.add_argument('--crop', action='store_true', help='вырезать отобранное')
     ap.add_argument('--out', type=Path, default=None)
     ap.add_argument('--cache', type=Path, default=None)
     ap.add_argument('--tight', action='store_true',
                     help='кадр в край силуэта на белом фоне, без канваса 1024')
     ap.add_argument('--flat', action='store_true', help='без подкаталога на лист')
+    ap.add_argument('--grid', default=None, metavar='RxC',
+                    help='ровная сетка вместо кластеризации (лист склеен вплотную)')
     args = ap.parse_args(argv)
+    if args.selftest:
+        return selftest()
+    if not args.sheets:
+        ap.error('не указан лист')
     if not (args.dry_run or args.crop):
         ap.error('нужен --dry-run и/или --crop')
+    grid = None
+    if args.grid:
+        r, c = re.split('[×xX]', args.grid)
+        grid = (int(r), int(c))
     for sheet in args.sheets:
-        report = analyse_sheet(sheet)
+        report = analyse_sheet(sheet, grid=grid)
         rows, cols = report['grid']
         taken = sum(1 for c in report['cells'].values() if c['accepted'])
         print(f"{report['path']}: сетка {rows}×{cols}, принято {taken}/"
@@ -394,7 +466,7 @@ def main(argv=None) -> int:
         if args.crop:
             result = crop_sheet(sheet, args.out or sheet.parent / 'units',
                                 cache_dir=args.cache, tight=args.tight,
-                                flat=args.flat)
+                                flat=args.flat, grid=grid)
             print(f"  вырезано {len(result['written'])}, "
                   f"дубликатов {result['duplicate']}")
     return 0
