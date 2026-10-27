@@ -53,8 +53,8 @@ func test_slot_shows_info_and_delete_clears_it() -> void:
 	assert_bool(n["load"].disabled).is_true()
 	assert_that(n["info"].text).is_equal(GameText.no_save_found())
 
-func test_slot_paths_clamped() -> void:
-	assert_that(SaveManager.get_slot_path(1)).is_equal("user://save_slot_1.json")
-	assert_that(SaveManager.get_slot_path(5)).is_equal("user://save_slot_5.json")
-	assert_that(SaveManager.get_slot_path(99)).is_equal("user://save_slot_5.json")
-	assert_that(SaveManager.get_slot_path(0)).is_equal("user://save_slot_1.json")
+# Путь слота клампится в SaveManager.get_slot_path; проверка живёт в его юнит-тесте
+# (tests/unit/core/test_save_manager.gd::test_get_slot_path_clamped) и была продублирована
+# здесь символ в символ — удалено как дубль (T-227). Экран проверяет экран:
+# test_slot_shows_info_and_delete_clears_it покрывает и клампинг индекса (обращение к
+# несуществующему слоту 2 не ломает отрисовку).

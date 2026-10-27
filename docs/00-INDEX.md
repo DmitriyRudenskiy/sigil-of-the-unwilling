@@ -14,13 +14,12 @@ date: 2026-10-14
 > Статусы: `canon` / `deepened` / `draft` / `reference` / `redirect` /
 > `snapshot` / `archived`. `redirect` — файл-перенаправление, читать цель.
 
-## Реестры и процессы (18)
-## Реестры и процессы (19)
+## Реестры и процессы (20)
 
 | Заметка | Название | Статус | Дата |
 | --- | --- | --- | --- |
 | [[BANK]] | Банк контента | reference | 2026-10-03 |
-| [[CHANGELOG]] | Журнал изменений docs/ | reference | 2026-10-26 |
+| [[CHANGELOG]] | Журнал изменений docs/ | reference | 2026-10-27 |
 | [[DECISIONS]] | Реестр решений и открытых вопросов | canon | 2026-10-21 |
 | [[QUESTIONS]] | Открытые вопросы — Фаза 4 (MVP и тикеты) | reference | 2026-10-24 |
 | [[ACTOR-ARMY]] | Актёрная модель армии (K-канон) | canon | 2026-10-11 |
@@ -33,13 +32,11 @@ date: 2026-10-14
 | [[PR-ASSET-1]] | Тело PR ASSET-1 (feat/asset-1-resources) | draft | 2026-10-15 |
 | [[PR-DOCS-ARTBIBLE]] | Тело PR docs (feat/art-bible-rev2) | archived | 2026-10-14 |
 | [[PR-UI-PHASE5]] | Тело PR фазы 5 (feat/ui-phase5) | archived | 2026-10-14 |
+| [[TEST-MAP]] | Карта тестов: покрытие меньшим количеством тестов | reference | 2026-10-27 |
 | [[TICKETS]] | Тикеты MVP (T-001…T-113) | reference | 2026-10-25 |
-| [[VERDICT-REQUEST]] | Вердикты владельца — блокирующие решения (verdict-request) | reference | 2026-10-21 |
+| [[VERDICT-REQUEST]] | Вердикты владельца — блокирующие решения (verdict-request) | reference | 2026-10-26 |
 | [[f-plan]] | F-план — приёмка Д1/Д2 и сведение расхождений | draft | 2026-10-04 |
 | [[README]] | Снимок матрицы автопилота 2026-10-26 | reference | 2026-10-26 |
-
-## GDD и стиль (83)
-| [[VERDICT-REQUEST]] | Вердикты владельца — блокирующие решения (verdict-request) | reference | 2026-10-26 |
 | [[README]] | — | — | — |
 
 ## GDD и стиль (84)
@@ -75,7 +72,7 @@ date: 2026-10-14
 | [[03-progression]] | Прогрессия и мета-цикл | deepened | 2026-10-13 |
 | [[04-narrative]] | Нарратив / Сеттинг / Тон | deepened | 2026-10-02 |
 | [[05-content]] | Контент-пайплайн | deepened | 2026-10-13 |
-| [[06-economy]] | Экономика и баланс | deepened | 2026-10-16 |
+| [[06-economy]] | Экономика и баланс | deepened | 2026-10-27 |
 | [[07-balance]] | Баланс-лист — единый источник чисел | canon | 2026-10-16 |
 | [[07-ui-ux]] | UI/UX flow | deepened | 2026-10-13 |
 | [[08-tech]] | Технический стек и платформы | deepened | 2026-09-30 |
@@ -87,7 +84,6 @@ date: 2026-10-14
 | [[15-asset-spec-artifacts]] | Asset-spec — 29 иконок артефактов (UI-4) | draft | 2026-10-13 |
 | [[16-ux-review-battle-hud]] | UX-ревью боевого HUD (UI-3, шаг 3) | draft | 2026-10-13 |
 | [[17-ui-style-guide]] | UI Style Guide — Sigil of the Unwilling | deepened | 2026-10-18 |
-| [[18-lora-style-groups]] | Теги стилей обучающей нарезки — измерено, а не на глаз | reference | 2026-10-26 |
 | [[18-system-map]] | Карта систем | reference | 2026-10-26 |
 | [[19-gdd-workflow]] | Контур фаз GDD | reference | 2026-10-27 |
 | [[CONFLICTS_REPORT]] | — | архив (вне графа) | — |

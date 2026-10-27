@@ -15,7 +15,18 @@
 4. Ratchet (D-272): число старых записей без полей имеет право только сокращаться —
    рост краснит прогон. Базлайн — `scripts/gdd_gate.baseline.json`.
 5. Номера рисков `R-##` не повторяются.
-6. Тикет, ссылающийся на предварительное (`⏳`) решение, обязан нести
+6. Каждая ссылка `Q-M##` в `docs/` существует в реестре `docs/QUESTIONS.md`
+   (банк `docs/bank/` — зона без гейта). Ссылка на незаведённый вопрос выглядит как
+   закрытая дыра и читается как доказательство.
+7. Путь в backticks внутри живой GDD-секции существует в репозитории (реестры
+   `CHANGELOG`/`DECISIONS`/`QUESTIONS` — история, они исключены). Число мёртвых
+   путей — часть ratchet: сокращается, но не растёт.
+8. В `docs/QUESTIONS.md` нет **строк-призраков**: строка открыта, хотя по её номеру
+   уже есть закрытая. Закрытие оформляли новой строкой, прежнюю «открытую» оставляли —
+   дайджест шага 0 звал владельца отвечать отвеченное. Две закрытые строки одного номера
+   (ре-опен Q-M18) и соседние id с суффиксом (`Q-M23`/`Q-M23b` — разные вопросы)
+   призраками не считаются. Число призраков — часть ratchet'а.
+9. Тикет, ссылающийся на предварительное (`⏳`) решение, обязан нести
    `blocked-on: D-xxx` — иначе связь «ждёт решения» теряется.
 
 Выход: 0 — зелено, 1 — нарушения, 2 — базлайн отсутствует/битый.
@@ -39,7 +50,7 @@ TYPE_RE = r"\[(agent|human)\]"
 PRIO_RE = "🔴|🟡|🟢"
 
 BACKLOG_KEYS = ("q_without_type", "q_without_priority", "d_without_rejected",
-                "risks_without_number")
+                "risks_without_number", "dead_paths", "q_ghost_rows")
 
 
 def strip_code(line: str) -> str:
@@ -103,7 +114,91 @@ def measure() -> dict[str, int]:
         "q_without_priority": sum(1 for l in q if not re.search(PRIO_RE, strip_code(l))),
         "d_without_rejected": sum(1 for l in d if "Отвергнутые" not in l),
         "risks_without_number": sum(1 for l in r if not re.search(r"\bR-\d+", l)),
+        "dead_paths": len(dead_paths()),
+        "q_ghost_rows": ghost_rows(),
     }
+
+
+DEAD_PATH_PREFIX = ("docs/", "game/", "scripts/", "openspec/", "design/", "tools/",
+                    "assets/")
+DEAD_PATH_EXEMPT = ("CHANGELOG", "DECISIONS", "QUESTIONS")
+
+
+def redirect_row(l: str) -> bool:
+    """Перенаправление вопроса в другой реестр: `→ **K-12**` и т.п."""
+    return bool(re.search(r"→\s*\*\*[A-Z]-", l))
+
+
+def closed_row(l: str) -> bool:
+    """Признак закрытия строки реестра — тот же, что у дайджеста `gdd_grounding`.
+
+    `(**закрыт` — маркер статуса; `закрыт (` — закрытие, записанное в колонке «Статус»
+    или «Блокирует». Причастие «закрыты» и «не закрыт» маркерами не считаются, иначе
+    строка «права так и не были закрыты» читается как отвеченный вопрос.
+    """
+    return bool(re.search(r"→?\s*\*\*(?<!не)закрыт|(?<!не)закрыт \(", l))
+
+
+def ghost_rows() -> int:
+    """Сколько строк реестра выглядят открытыми, хотя по их номеру есть закрытая.
+
+    Механика дефекта: закрытие оформлялось новой строкой (`| Q-M37 → **закрыт (...)** |`),
+    а прежняя открытая строка оставалась жива — дайджест шага 0 звал владельца отвечать
+    отвеченное (11 таких строк, 2026-10-27). Две закрытые строки одного номера — история
+    ре-опена, не призрак; `Q-M23` и `Q-M23b` — разные вопросы (суффикс значим).
+    """
+    by: dict[str, list[bool]] = {}
+    for l in q_rows():
+        m = re.match(r"^\| (Q-M\d+[a-z]?)", l)
+        if m:
+            by.setdefault(m.group(1), []).append(
+                closed_row(l) or bool(re.search(r"→\s*\*\*[A-Z]-", l)))
+    return sum(1 for f in by.values() if len(f) > 1 and any(f) and not all(f))
+
+
+def dead_paths() -> list[str]:
+    """Пути в backticks внутри GDD-секций, которых нет в репозитории.
+
+    Реестры (`CHANGELOG`/`DECISIONS`/`QUESTIONS`) — история: они вне выборки GDD-секций
+    (нет ведущей цифры) и дополнительно исключены по имени; имеют право ссылаться на
+    путь, который существовал тогда. Живой документ такого права
+    не имеет: ссылка на несуществующий носитель читается как подтверждение.
+    Путь разрешается и от корня репо, и от `game/` (в доках — res//-конвенция).
+    """
+    bad = []
+    for f in sorted(DOCS.glob("[0-9]*.md")):
+        if any(e in f.stem for e in DEAD_PATH_EXEMPT):
+            continue
+        for raw in sorted(set(re.findall(r"`([^`\s]+)`", f.read_text(encoding="utf-8")))):
+            if not raw.startswith(DEAD_PATH_PREFIX) or any(
+                    c in raw for c in "*…<>{}"):
+                continue
+            rel = raw.split(":")[0]
+            if "." not in rel.rsplit("/", 1)[-1]:
+                continue
+            if (ROOT / rel).exists() or (ROOT / "game" / rel).exists():
+                continue
+            bad.append(f"{f.name}: {raw}")
+    return bad
+
+
+def question_citations() -> list[str]:
+    """Ссылки `Q-M##` вне реестра. Банк исключён (зона без гейта, как везде).
+
+    Без этой проверки аудит может объявить строку закрытой ссылкой на «открытый
+    вопрос», которого нет: расхождение становится невидимым, а выглядит как учтённое.
+    """
+    reg = (DOCS / "QUESTIONS.md").read_text(encoding="utf-8")
+    known = set(re.findall(r"Q-M(\d+)", reg))
+    bad = []
+    for f in sorted(DOCS.rglob("*.md")):
+        rel = f.relative_to(DOCS).as_posix()
+        if rel.startswith("bank/"):
+            continue
+        for qid in sorted(set(re.findall(r"Q-M(\d+)", f.read_text(encoding="utf-8")))):
+            if qid not in known:
+                bad.append(f"ССЫЛКА НА НЕВЕДОМЫЙ ВОПРОС: {rel}: Q-M{qid} нет в реестре")
+    return bad
 
 
 def check() -> tuple[list[str], dict[str, int]]:
@@ -156,6 +251,8 @@ def check() -> tuple[list[str], dict[str, int]]:
                 if dnum in sect and "blocked-on" not in sect:
                     errors.append(f"ТИКЕТ {head.group(1)} ждёт {dnum}, а `blocked-on` не несёт")
 
+    errors += question_citations()
+
     return errors, measure()
 
 
@@ -181,9 +278,20 @@ def main() -> int:
         print(f"БАЗЛАЙН БИТЫЙ: {exc}")
         return 2
 
+    # Комплект ключей базлайна обязан совпадать с измеряемым: отсутствующий ключ
+    # молча означал бы «нулевой допуск», а лишний (опечатка в имени) — метрику,
+    # которую никто не проверяет. Оба варианта выглядят как зелёный прогон.
+    missing = [k for k in BACKLOG_KEYS if k not in base]
+    stale = [k for k in base if k not in BACKLOG_KEYS]
+    if missing or stale:
+        print("БАЗЛАЙН НЕ СООТВЕТСТВУЕТ МЕТРИКАМ "
+              f"(нет: {missing or '—'}; не измеряется: {stale or '—'}) "
+              "— обновить: --update-baseline")
+        return 2
+
     print("бэклог (только сокращается, D-272):")
     for k in BACKLOG_KEYS:
-        cur, old = now.get(k, 0), base.get(k, 0)
+        cur, old = now[k], base[k]
         mark = "РОСТ" if cur > old else "OK"
         print(f"  {k}: {cur} (базлайн {old}) {mark}")
         if cur > old:

@@ -17,10 +17,17 @@ import datetime
 import pathlib
 import re
 import subprocess
+import sys
 from collections import Counter
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
+
+# Признаки «строка реестра закрыта/перенаправлена» импортируются из гейта: у дайджеста
+# и гейта не может быть двух разных ответов на вопрос, считается ли вопрос отвеченным
+# (разъехались они ровно один раз — дайджест закрывал строки по подстроке «закрыт»).
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from gdd_gate import closed_row, redirect_row  # noqa: E402
 TICKETS = DOCS / "mvp" / "TICKETS.md"
 
 # Порядок отсечки: ⚑ → ⏳ → 🔴 → остальное (D-274). Всё, что не влезло,
@@ -84,12 +91,25 @@ def blocks() -> list[tuple[int, list[str]]]:
             block.append(f"  … ещё {len(rows) - 10}")
         out.append((prio, block))
 
-    # Открытый = не закрыт и не редирект (`Q-M1 → **K-M1**` — ответ живёт в другом
-    # реестре). Без этой поправки дайджест врал бы: «🔴 0» при 13 открытых
-    # легаси-вопросах, у которых приоритета просто нет.
-    closed = [l for l in qrows if "закрыт" in l]
-    redirected = [l for l in qrows if "закрыт" not in l and "→ **" in l]
-    open_rows = [l for l in qrows if "закрыт" not in l and "→ **" not in l]
+    # Открытый = не закрыт и не редирект на другой реестр (`Q-M1 → **K-M1**`).
+    # Две ошибки, найденные на живом реестре: (1) «открытый = в строке есть 🔴»
+    # давало «🔴 0» при 13 легаси-вопросах без приоритета; (2) любая стрелка со
+    # `**` считалась редиректом, из-за чего строки нового формата
+    # `Q-M105 → **открыт (…)**` выпадали из счёта и дайджест врал вниз.
+    # Предикаты состояния — из гейта: у дайджеста и гейта не может быть двух разных
+    # ответов на вопрос «считается ли строка отвеченной».
+    _closed, _redirect = closed_row, redirect_row
+
+    closed = [l for l in qrows if _closed(l)]
+    redirected = [l for l in qrows if _redirect(l)]
+    open_rows = [l for l in qrows if not _closed(l) and not _redirect(l)]
+    # Одна строка = один вопрос: повторная строка того же номера не имеет права
+    # удваивать счётчик (дубли разбирает T-226, до разбора — считаем один раз).
+    uniq = {}
+    for l in open_rows:
+        m = re.match(r"^\| (Q-M\d+[a-z]?)", l)
+        uniq.setdefault(m.group(1) if m else l, l)
+    open_rows = list(uniq.values())
     red = [l for l in open_rows if "🔴" in l]
     yellow = [l for l in open_rows if "🟡" in l]
     legacy = [l for l in open_rows if not re.search(PRIO_RE, strip_code(l))]

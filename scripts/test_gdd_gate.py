@@ -169,6 +169,82 @@ def test_ticket_awaiting_pending_decision_needs_blocked_on(world):
     assert not any("ТИКЕТ T-2" in e for e in errors)
 
 
+def test_question_citation_outside_registry_is_red(world):
+    """Ссылка дока на незаведённый вопрос красная: «вопрос задан» ≠ «вопрос существует»."""
+    docs, _ = world
+    (docs / "01-core-loop.md").write_text(
+        (docs / "01-core-loop.md").read_text(encoding="utf-8") + "\nСм. Q-M900 и Q-M901.\n",
+        encoding="utf-8")
+    bad, _ = gate.check()
+    hits = [b for b in bad if "НЕВЕДОМЫЙ ВОПРОС" in b]
+    assert len(hits) == 2 and any("Q-M901" in h for h in hits), bad
+    (docs / "QUESTIONS.md").write_text(
+        (docs / "QUESTIONS.md").read_text(encoding="utf-8")
+        + "| Q-M900 | вопрос | тут | а/б | нет | Статус: ⏳ открыт |\n", encoding="utf-8")
+    bad, _ = gate.check()
+    hits = [b for b in bad if "НЕВЕДОМЫЙ ВОПРОС" in b]
+    assert len(hits) == 1 and "Q-M900" not in hits[0], hits
+
+
+def test_bank_is_exempt_from_question_citations(world):
+    """Банк — зона без гейта: ссылка внутри банка не красится."""
+    docs, _ = world
+    (docs / "bank").mkdir()
+    (docs / "bank" / "K-1.md").write_text("Q-M999\n", encoding="utf-8")
+    bad, _ = gate.check()
+    assert [b for b in bad if "НЕВЕДОМЫЙ ВОПРОС" in b] == [], bad
+
+
+def test_baseline_key_set_must_match_the_metrics(world, tmp_path, monkeypatch):
+    """Ключ базлайна не совпадает с метриками → exit 2, а не «нулевой допуск по умолчанию».
+
+    Молча отсутствующий ключ означал бы ноль допуска, лишний (опечатка в имени) —
+    метрику без гейта. Оба читаются как зелёный прогон.
+    """
+    bl = tmp_path / "b.json"
+    bl.write_text('{"q_without_type": 97}', encoding="utf-8")
+    monkeypatch.setattr(gate, "BASELINE", bl)
+    monkeypatch.setattr("sys.argv", ["gdd_gate.py"])
+    assert gate.main() == 2
+
+
+def test_ghost_row_is_measured_reopen_and_suffix_are_not(world):
+    """Открытая строка с закрытым двойником = призрак; два закрытых и `Q-M##b` — нет."""
+    docs, _ = world
+    q = docs / "QUESTIONS.md"
+    q.write_text(q.read_text(encoding="utf-8")
+                 + "| Q-M501 | **открытая половина** | тут | а | нет |\n"
+                 + "| Q-M501 → **закрыт (2026-10-27, владелец)** | | | | |\n"
+                 + "| Q-M502 → **закрыт (2026-10-03, владелец)** | | | | |\n"
+                 + "| Q-M502 (ре-опен) → **закрыт (2026-10-04, владелец)** | | | | |\n"
+                 + "| Q-M503 | **сосед** | тут | а | нет |\n"
+                 + "| Q-M503b | **другой вопрос с суффиксом** | тут | а | нет |\n",
+                 encoding="utf-8")
+    assert gate.ghost_rows() == 1
+
+
+def test_dead_path_in_gdd_section_is_measured(world, monkeypatch):
+    """Путь-призрак в живой секции попадает в замер ratchet'а; живой путь — нет."""
+    docs, _ = world
+    (world[0].parent / "scripts").mkdir(exist_ok=True)
+    (world[0].parent / "scripts" / "gdd_gate.py").write_text("x\n", encoding="utf-8")
+    (docs / "01-core-loop.md").write_text(
+        (docs / "01-core-loop.md").read_text(encoding="utf-8")
+        + "\nНоситель: `game/scripts/nope.gd` и `scripts/gdd_gate.py`.\n", encoding="utf-8")
+    monkeypatch.setattr(gate, "ROOT", world[0].parent)
+    got = gate.dead_paths()
+    assert any("game/scripts/nope.gd" == d.split(": ", 1)[1] for d in got), got
+    assert not any("gdd_gate.py" in d for d in got), got
+
+
+def test_registries_are_exempt_from_dead_paths(world, monkeypatch):
+    """Реестры — история: ссылка на несуществующий путь в них не считается."""
+    docs, _ = world
+    (docs / "00-CHANGELOG.md").write_text("было: `game/scripts/nope.gd`\n", encoding="utf-8")
+    monkeypatch.setattr(gate, "ROOT", world[0].parent)
+    assert not any("nope.gd" in d for d in gate.dead_paths())
+
+
 def test_duplicate_risk_number_is_red(world):
     _green_baseline(world)
     r = world[0] / "09-risks.md"

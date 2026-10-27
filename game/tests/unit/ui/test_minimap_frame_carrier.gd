@@ -166,26 +166,10 @@ func test_no_scene_stylebox_overrides_remain() -> void:
 		)
 
 
-## Уникальность sub_resource id в файле темы. Дубликат id молча отдаёт ссылку на
-# ПЕРВЫЙ ресурс (прецедент подсреза «армия»: носитель слота резолвился в алый
-# `PanelArmySlot`, тема читалась без единой ошибки).
-func test_theme_sub_resource_ids_are_unique() -> void:
-	var f := FileAccess.open("res://assets/theme/game_theme.tres", FileAccess.READ)
-	assert_that(f).is_not_null()
-	var text := f.get_as_text()
-	f.close()
-	var seen := {}
-	var dupes := PackedStringArray()
-	var re := RegEx.create_from_string("id=\"([^\"]+)\"")
-	assert_that(re).is_not_null()
-	for m in re.search_all(text):
-		var id: String = m.get_string(1)
-		if seen.has(id):
-			dupes.append(id)
-		seen[id] = true
-	assert_int(dupes.size()).is_equal(0) \
-		.override_failure_message("дубли sub_resource id в теме: %s" % ", ".join(dupes))
-
+# Уникальность sub_resource id — инвариант уровня темы, а не этого экрана: одна копия
+# проверки живёт в tests/unit/ui/test_army_panel_theme_carrier.gd
+# (::test_theme_sub_resource_ids_are_unique), там, где дубликат id и был найден.
+# Вторая копия отсюда удалена как дубль (T-227).
 
 ## base_type носителя обязан быть именно `Panel`. Мутация «base_type =
 # PanelContainer» резолв НЕ ломает (и Panel, и PanelContainer читают стиль `panel`),

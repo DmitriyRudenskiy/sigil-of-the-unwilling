@@ -83,6 +83,15 @@ def test_legacy_open_questions_are_counted_even_without_priority(world):
     assert "Q-M10" in block
 
 
+def test_prose_about_being_not_closed_does_not_close_a_row(world):
+    """Слово «незакрытой» в тексте вопроса — не статус: строка остаётся открытой."""
+    q = world / "QUESTIONS.md"
+    q.write_text(q.read_text(encoding="utf-8") +
+                 "| Q-M9 → **открыт (2026-10-27, аудит)** | **текст** | тут: строка "
+                 "остаётся незакрытой | а/б | да | Статус: ⏳ открыт |\n", encoding="utf-8")
+    assert "Q-M9" in _block(world, 3)
+
+
 def test_digest_flags_verified_without_decision(world):
     block = _block(world, 4)
     assert "02-mechanics.md" in block       # verified без ссылки D-###
