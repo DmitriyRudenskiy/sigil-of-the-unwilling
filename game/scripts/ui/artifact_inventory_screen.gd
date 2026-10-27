@@ -55,8 +55,9 @@ const _MARK_INSET := 4.0
 const SLOT_ICON := "Center/Window/Sheet/Stone/Doll/DollSlot_%d/EquipIcon"
 
 const _STAT_ICON := {
-	"attack": "atk_sword", "defense": "helm", "spell_power": "spell",
-	"knowledge": "compass", "specialty": "scout", "morale": "heart",
+	"attack": "hero/stat_attack", "defense": "hero/stat_defense",
+	"spell_power": "hero/stat_magic", "knowledge": "hero/stat_knowledge",
+	"specialty": "scout", "morale": "heart",
 	"luck": "clover", "stack_hp": "hp_orb", "stack_hp_percent": "hp_orb",
 	"secondary1": "horse", "secondary2": "battle_flag_s",
 	"exp": "flag", "mana": "scroll", "main1": "arrow", "main2": "helm",
@@ -222,7 +223,9 @@ func _doll_frame(slot) -> int:
 
 
 func _build_left() -> void:
-	var left := get_node_or_null("Center/Window/Left")
+	# Блок переехал под Sheet (D-280); сторож по старому пути молча глушил всю
+	# левую колонку — ни имени, ни характеристик, ни иконок на кадре.
+	var left := get_node_or_null("Center/Window/Sheet/Left")
 	if left == null:
 		return
 	var portrait := get_node_or_null("Center/Window/Sheet/Left/Portrait")
