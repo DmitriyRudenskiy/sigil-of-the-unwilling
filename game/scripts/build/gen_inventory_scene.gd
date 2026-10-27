@@ -41,12 +41,18 @@ func _icon(name: String) -> String:
 var _u := 1000
 
 func _add_node(name: String, typ: String, parent_path: String, extra: String = "", _uid: int = 0) -> void:
+	# В .tscn parent= — путь ОТ КОРНЯ, а не от предыдущего узла: блоки таблицы
+	# пишутся как "Sheet/Left", а сцена живёт под Center/Window (без префикса
+	# Godot теряет родителя и пересоздаёт узел в корне с именем "Sheet_Left").
+	var pp := parent_path
+	if pp != "" and pp != "." and not pp.begins_with("Center"):
+		pp = "Center/Window/" + pp
 	var line := "[node name=\"" + name + "\" type=\"" + typ + "\""
 	if true:
 		line += " unique_id=" + str(_u)
 		_u += 1
-	if parent_path != "":
-		line += " parent=\"" + parent_path + "\""
+	if pp != "":
+		line += " parent=\"" + pp + "\""
 	line += "]"
 	if extra != "":
 		line += "\n" + extra
@@ -86,7 +92,11 @@ func _build() -> void:
 	_ext_resource("Script", "res://scripts/ui/artifact_inventory_screen.gd", 1)
 	var uid := 1000
 
-	_add_node("ArtifactInventoryScreen", "Control", "", "script = ExtResource(\"1\")", uid)
+	# Корень — на полных якорях: у Control, добавленного прямо в Viewport,
+	# без якорей размер 0×0, и все доли блоков схлопываются в точку.
+	_add_node(
+		"ArtifactInventoryScreen", "Control", "",
+		"anchor_right = 1.0\nanchor_bottom = 1.0\nscript = ExtResource(\"1\")", uid)
 	uid += 1
 	# Экран — на всё окно (корень на полных якорях): композиция макета 12
 	# живёт долями, прокрутки нет и быть не должно (AC1, T-248).
@@ -380,7 +390,7 @@ func _build() -> void:
 	_add_node("TipButtons", "HBoxContainer", tip + "/TipBox", "", uid)
 	uid += 1
 	for nm in ["Equip", "Remove", "Dispose"]:
-		_add_node(nm, "Button", tip + "/TipButtons", "text = \"\"\n", uid)
+		_add_node(nm, "Button", tip + "/TipBox/TipButtons", "text = \"\"\n", uid)
 		uid += 1
 	_add_node("TipIcon", "TextureRect", tip,
 		"anchor_left = 0.82\nanchor_top = 0.04\nanchor_right = 0.98\nanchor_bottom = 0.34\n"
