@@ -8,6 +8,45 @@ date: 2026-10-27
 ---
 
 # CHANGELOG — docs/
+## 2026-10-27 (самое позднее) — OpenSpec обнулён: 12 смен в архиве, активных циклов нет
+
+- **Директива владельца:** незакрытые смены архивировать, хвосты — в реестр тикетов,
+  а не держать в виде «активного цикла». В `archive/2026-10-27-*/` убраны
+  `ci-speedup`, `mvp-ui-flow`, `races-cultures`, `scene-first-dev-loop`,
+  `wave-1-ui-foundation-battle`, `theme-type-hygiene`, `ui-mockup-parity`,
+  `grid-inventory-and-merchant`, `artifact-icons-comfyui`,
+  `concept-art-style-variants`, `image-clone`, `scenario-matrix-behavior-reliability`,
+  `battle-demo-two-rosters`. Индекс переписан: `openspec/changes/README.md`.
+- **Задним числом ничего не отмечалось.** У каждой архивированной смены в `tasks.md`
+  появился раздел «Остаток на момент архива»: что реально лежит в носителе (проверено
+  `ls`/`grep`/тестами), а что нет. Три смены оказались с ложным носителем — то есть
+  задачи описывали файл, которого в репозитории нет: `artifact-icons-comfyui`
+  (`game/tools/icons/manifest.json`, `postprocess.py`, `check_icons.py` — каталога нет),
+  `scenario-matrix-behavior-reliability` (`scripts/scenario_matrix.py`,
+  `game/tests/scenarios/` — есть только пилот одного сценария),
+  `grid-inventory-and-merchant` (лавки нет: `grep MerchantSystem game/scripts/` пуст).
+- **Хвосты стали тикетами:** T-230 (фикстура состояния боя → кадр наполненного HUD),
+  T-231 (`T-148.2`–`T-148.5`: палитры, вариации, роли S5, тени/шрифты), T-232 (панель
+  описания артефактов в правую колонку), T-233 (мирная рать и бронзовый комплект),
+  T-234 (лавка), T-235 (производственный контур иконок), T-236 (канон стиля — акт
+  владельца), T-237 (сводка принятия партий image-clone), T-238 (матрица сценариев),
+  T-239 (сводка баланса боя и формат сейва).
+- **Спек-дельты** перенесены в `openspec/specs/` (создано 14 capability: `dev-verification-loop`, `battle-ui`,
+  `theme-type-hygiene`, `battle-hud`, `campaign-hud`, `inventory-screen`,
+  `start-screen`, `ui-screenshot-verification`, `gear-grid-inventory`, `gear-merchant`,
+  `artifact-icon-generation`, `concept-art-pipeline`, `image-clone-lab`,
+  `scenario-matrix-behavior`); восемь уже существующих главных спеков
+  (`ui-graphics`, `save-migration`, `icon-system`, `balance-probe`,
+  `battle-demo-sprites`, `battle-demo-ui`, `roster-lineups`, `turn-battle-core`)
+  **не перезаписывались** — чужая дельта осталась в архиве. В перенесённых спек —
+  шапка: это запись о намерении и о проверенном состоянии носителя, а не протокол
+  того, что всё работает.
+- **Урок шарящегося рабочего дерева** (второй за день): правка, лежащая в дереве,
+  не принадлежит сессии, пока не запушена — коммит другой сессии в том же дереве
+  забирает файл себе (так из `docs/CHANGELOG.md` пропали записи про реестр D-240,
+  перезапись `AGENTS.md`, съёмку D-242 и скилл `ui-grid-review`; восстановлены выше).
+  Перед коммитом сверять, что правка ещё в файле.
+
 ## 2026-10-27 (самое позднее) — смена цикла разработки + три архива OpenSpec; восстановлены потерянные записи дня
 
 - **Восстановление.** Записи этого дня про реестр D-240, перезапись `AGENTS.md`, съёмку
