@@ -30,7 +30,7 @@
 | Корень игры | `game/` (project.godot лежит в `game/`) |
 | Godot-бинарь | `/Applications/Godot.app/Contents/MacOS/Godot` (4.7.2.stable) — **пути — по машине; эталон — CI-2-раннер** (не хардкодить macOS-путь как универсальный) |
 | Тесты | `game/run_tests.sh` (GdUnit4 headless + MCP e2e) |
-| MCP e2e venv | `/home/user/.venv/godot-mcp-tests` (pytest 9.1.1 + pytest-timeout + pytest-xdist + mcp + anyio) |
+| MCP e2e venv | `/home/user/.venv/godot-mcp-tests` (pytest 9.1.1 + pytest-timeout + pytest-xdist + mcp + anyio; + numpy/Pillow/scipy — их требует `scripts/test_gen_map_art.py`, T-223) |
 | MCP node_modules | `game/addons/godot-mcp/node_modules` (gitignored; `npm ci` из package-lock) |
 | Ремот `origin` | `git@github.com:DmitriyRudenskiy/sigil-of-the-unwilling.git` — **SSH** (ключ `~/.ssh/id_ed25519`). HTTPS не работает: токен в `gh auth` просрочен (проверено 2026-10-17) → `git push`/`git fetch` идут по SSH, `gh`-операции трекера — отдельный вопрос (реестр тикетов — `docs/mvp/TICKETS.md`, хост — зеркало) |
 

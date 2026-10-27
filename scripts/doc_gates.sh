@@ -31,10 +31,15 @@ run "доки ↔ код (автолоады, сцены, классы, save-к�
 run "контур фаз GDD (состояния, поля реестров, ratchet)" "$PY" scripts/gdd_gate.py
 
 TESTS=(scripts/test_check_docs_links.py scripts/test_audit_docs_vs_code.py
-	scripts/test_classify_mcp_junit.py scripts/test_gdd_gate.py scripts/test_gdd_grounding.py)
+	scripts/test_classify_mcp_junit.py scripts/test_gdd_gate.py scripts/test_gdd_grounding.py
+	scripts/test_gen_map_art.py)
+# Отсутствующий файл списка — КРАСНЫЙ, а не «молча не досчитались»: ровно так список
+# и жил, пока в нём значился test_check_docs_links.py, которого никогда не было
+# (T-223). Проверщик без теста и проверщик, которого нет, — один и тот же класс.
+MISSING=()
 EXIST=()
 for t in "${TESTS[@]}"; do
-	[ -f "$t" ] && EXIST+=("$t")
+	if [ -f "$t" ]; then EXIST+=("$t"); else MISSING+=("$t"); fi
 done
 # Интерпретатор с pytest: явный PYTEST_PY → PYTHON → venv MCP (путь фиксирован
 # AGENTS.md, его же использует game/run_tests.sh). Молчать уровень не имеет права:
@@ -48,6 +53,10 @@ pick_pytest_py() {
 }
 
 echo "=== тесты самих проверщиков ==="
+if [ ${#MISSING[@]} -gt 0 ]; then
+	echo "RED: в списке уровней есть несуществующие файлы: ${MISSING[*]}"
+	FAIL=1
+fi
 if [ ${#EXIST[@]} -eq 0 ]; then
 	echo "YELLOW: тестов проверщиков нет — проверщик без теста уже один раз протих"
 	YELLOW=$((YELLOW + 1))
