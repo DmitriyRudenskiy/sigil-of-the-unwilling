@@ -60,6 +60,10 @@ func is_paused() -> bool:
 func get_depth() -> int:
 	return _depth
 
-func _on_scene_changed(_scenetree: SceneTree) -> void:
+# Сигнатура без параметра: движковый `SceneTree.scene_changed` аргументов не несёт.
+# С `_scenetree: SceneTree` движок падал на арности при каждом эмите («Method
+# expected 1 argument(s), but called with 0»), то есть `force_release_all()` не
+# выполнялся никогда, а автоосвобождение токенов — заявленный контракт `acquire`.
+func _on_scene_changed() -> void:
 	# Смена сцены: ни одна уходящая система не должна держать паузу.
 	force_release_all()
