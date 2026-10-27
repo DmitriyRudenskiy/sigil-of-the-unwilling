@@ -134,20 +134,20 @@
   "hero/portrait.png": {
    "kind": "image",
    "size": [
-    80,
-    80
+    512,
+    368
    ],
-   "source": "плейсхолдер UI-2",
-   "note": "плейсхолдер портрета (замена — UI-6)"
+   "source": "comfyui krea2 по scripts/concept_art/hero_screen_spec.json (эталон — макет 12), укладка scripts/ui_kit/place_hero_art.py",
+   "note": "портрет героя (макет 12: чёрные волосы, латунные заклёпки, тёмный шарф); читают artifact_inventory_screen.gd и battle_ui.gd; бокс = пропорция HERO['Portrait']"
   },
   "hero/figure.png": {
    "kind": "image",
    "size": [
-    240,
-    360
+    428,
+    478
    ],
-   "source": "плейсхолдер UI-2",
-   "note": "плейсхолдер фигуры героя (замена — UI-6)"
+   "source": "comfyui krea2 по scripts/concept_art/hero_screen_spec.json (эталон — макет 12), укладка scripts/ui_kit/place_hero_art.py",
+   "note": "фигура-кукла: алый капюшон, поднятая рука, кремовая обводка; фон срезан по связным областям (place_hero_art.py); бокс = пропорция HERO['Figure']"
   },
   "hero/banner.png": {
    "kind": "image",

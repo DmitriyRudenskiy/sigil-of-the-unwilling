@@ -1,0 +1,348 @@
+{
+ "_comment": "Носители экрана «Герой» (T-249, T-251): портрет, фигура-кукла, иконки характеристик, иконки предметов. Эталон — макет 12 reference/12_inventory_parchment_sheet.jpeg, его же кропы в etalons_hero/. Категории названы так, чтобы попасть в проверки generate.py: units/emblems/resources — изолятор на белом (ключится альфа), portraits — только яркость.",
+ "server": "http://192.168.0.230:9000/mcp",
+ "comfy": "http://192.168.0.230:8188",
+ "out_dir": "concept_art",
+ "export": {
+  "format": "WEBP",
+  "quality": 92
+ },
+ "models": {
+  "krea2": {
+   "tool": "api_generate_image_krea2",
+   "steps": 8,
+   "cfg": 1.0,
+   "unet": "krea2_turbo_fp8_scaled.safetensors",
+   "clip": "qwen3vl_4b_fp8_scaled.safetensors",
+   "vae": "qwen_image_vae.safetensors"
+  }
+ },
+ "model": "krea2",
+ "probe_models": [
+  "krea2"
+ ],
+ "references_dir": "scripts/concept_art/etalons_hero",
+ "variants": [
+  {
+   "id": "h1_painted",
+   "name": "h1_painted",
+   "style": "painted semi-realistic dark fantasy game art, confident painterly brushwork, warm brass highlights against deep charcoal, soft top rim light, crisp silhouette, readable at small size, mobile strategy game asset",
+   "negative": "photograph, photorealism, 3d render, anime, cartoon, sketch, text, letters, numbers, watermark, signature, frame, border, background scenery, clutter, extra limb, deformed hands, lowres, jpeg artifacts"
+  }
+ ],
+ "categories": {
+  "portraits": {
+   "size": [
+    1024,
+    768
+   ],
+   "count": 1,
+   "reference": "hero_portrait.png",
+   "style": "bust portrait of a person from the chest up, three-quarter view, looking at the viewer",
+   "frame": "portrait filling the whole frame edge to edge, soft neutral warm-grey studio background, no vignette, no frame, no text",
+   "items": [
+    {
+     "id": "hero_portrait",
+     "subject": "young man with thick black hair falling over his brow, stern dark eyes, strong jaw, dark leather and steel pauldrons with round brass clasps, dark scarf wound at the throat, faint scar across one eyebrow"
+    }
+   ],
+   "_note": "hero_mini снят: res://assets/ui/hero/mini.png никто не читает (D-278 убрал его с экрана)"
+  },
+  "units": {
+   "size": [
+    832,
+    1024
+   ],
+   "count": 1,
+   "reference": "hero_figure.png",
+   "style": "full body paper-doll figure of a fantasy hero, standing pose, one arm raised and pointing to the side",
+   "frame": "single isolated full body figure centred on a plain pure white background, whole figure inside the frame with margin, no shadow on the ground, no text",
+   "items": [
+    {
+     "id": "hero_figure",
+     "subject": "hooded figure in a long crimson robe over dark mail, cream-coloured outline tracing the whole silhouette, raised left arm pointing, right hand in a gauntlet at the hip, red shoes, face hidden in the hood"
+    }
+   ]
+  },
+  "emblems": {
+   "size": [
+    512,
+    512
+   ],
+   "count": 4,
+   "reference": "hero_stats.png",
+   "style": "single small game UI icon of one object, painted, thick dark outline, slight top-down light",
+   "frame": "one isolated icon centred on a plain pure white background, occupying most of the frame, no plate, no text, no other objects",
+   "items": [
+    {
+     "id": "stat_attack",
+     "subject": "single sword seen diagonally, steel blade, brass hilt"
+    },
+    {
+     "id": "stat_defense",
+     "subject": "five-point gold star medallion with a beaded rim"
+    },
+    {
+     "id": "stat_magic",
+     "subject": "five-point amethyst star with a violet glow"
+    },
+    {
+     "id": "stat_knowledge",
+     "subject": "closed book with a brass clasp and a ribbon marker"
+    }
+   ]
+  },
+  "resources": {
+   "size": [
+    512,
+    512
+   ],
+   "count": 60,
+   "reference": "hero_items.png",
+   "style": "single game inventory item icon, painted, thick dark outline, glossy highlights",
+   "frame": "one isolated item centred on a plain pure white background, whole item inside the frame with margin, no tile, no plate, no text",
+   "items": [
+    {
+     "id": "amulet_mourning",
+     "subject": "engraved amulet on a fine chain, black iron, a single tear drop, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "amulet_prescience",
+     "subject": "engraved amulet on a fine chain, amber eye, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "armor_wonder",
+     "subject": "small fantasy relic, iridescent sheen, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "boots_levitation",
+     "subject": "pair of knee-high armoured boots, a floating feather, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "boots_polar",
+     "subject": "pair of knee-high armoured boots, ice blue, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "boots_titan",
+     "subject": "pair of knee-high armoured boots, riveted iron, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "boots_zephyr",
+     "subject": "pair of knee-high armoured boots, pale moving air, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "breastplate_brimestone",
+     "subject": "heavy plate chest armour, brimstone yellow, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "buckler",
+     "subject": "small round buckler with a central boss, brass and dark steel, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "buckler_ripple",
+     "subject": "small round buckler with a central boss, water sheen, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "charm_beast",
+     "subject": "small talisman charm on a cord, beast claw, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "circlet_aurora",
+     "subject": "delicate gold circlet set with a bright gem, dawn-coloured light, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "cloak_undead",
+     "subject": "long cloak with a heavy collar, bone and rot, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "cloth_pants",
+     "subject": "folded pair of cloth trousers, coarse cloth, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "club",
+     "subject": "knotted wooden war club, brass and dark steel, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "crown_magi",
+     "subject": "slim gold crown set with a sapphire, brass and dark steel, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "greatsword_might",
+     "subject": "enormous two-handed greatsword, broad steel blade, brass crossguard, brass fittings, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "greaves_juggernaut",
+     "subject": "pair of articulated armoured greaves, spiked iron, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "greaves_snake",
+     "subject": "pair of articulated armoured greaves, serpent motif, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "helm_bulwark",
+     "subject": "steel helmet with a nose guard, plain iron, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "helm_heavenly",
+     "subject": "steel helmet with a nose guard, gold inlay, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "helm_sentinel",
+     "subject": "steel helmet with a nose guard, blued steel, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "hood_wraith",
+     "subject": "tattered deep hood, face in shadow, bone-pale cloth, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "iron_sword",
+     "subject": "hand-and-a-half sword, steel blade, brass hilt, wrought iron, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "leather_stalker",
+     "subject": "small fantasy relic, soft stealth leather, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "leather_vest",
+     "subject": "padded leather vest, worn leather, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "longbow_hawk",
+     "subject": "small fantasy relic, falcon motif, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "lucky_clover",
+     "subject": "single four-leaf clover, bright green, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "pendant_life",
+     "subject": "pendant on a thin chain, green glow, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "pendant_negation",
+     "subject": "pendant on a thin chain, dull grey, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "plate_dread",
+     "subject": "heavy plate chest armour, matte black, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "ring_arcanum",
+     "subject": "slim ring set with a faceted gemstone, arcane purple, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "ring_cunning",
+     "subject": "slim ring set with a faceted gemstone, silver, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "ring_giant",
+     "subject": "slim ring set with a faceted gemstone, heavy bronze, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "ring_infinite_gems",
+     "subject": "slim ring set with a faceted gemstone, several small coloured gems, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "ring_lexicon",
+     "subject": "slim ring set with a faceted gemstone, blue floating glyph, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "ring_mage",
+     "subject": "slim ring set with a faceted gemstone, sapphire blue, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "ring_vitality",
+     "subject": "slim ring set with a faceted gemstone, deep red, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "ring_wayfarer",
+     "subject": "slim ring set with a faceted gemstone, dusty travel-worn bronze, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "robes_astronomer",
+     "subject": "long flowing robe with wide sleeves, starry indigo, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "rune_sword",
+     "subject": "hand-and-a-half sword, steel blade, brass hilt, brass and dark steel, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "runic_blade",
+     "subject": "single-edged steel blade with a runed fuller, brass and dark steel, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "sandals",
+     "subject": "pair of strapped leather sandals, brass and dark steel, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "shield_damned",
+     "subject": "large heraldic shield with a brass rim, cursed red seams, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "shield_greatwall",
+     "subject": "large heraldic shield with a brass rim, rough stone, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "shield_sentinel",
+     "subject": "large heraldic shield with a brass rim, blued steel, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "skirt_conjunction",
+     "subject": "conjurer skirt of hanging cloth strips, brass and dark steel, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "soles_mercury",
+     "subject": "pair of thin insoles with a feather motif, quicksilver, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "spellbinders_hat",
+     "subject": "wide-brimmed wizard hat with a buckle band, deep indigo, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "staff_void",
+     "subject": "tall wooden staff topped with a hollow glowing gem, violet-black void light, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "statue_legion",
+     "subject": "small carved stone figurine of a rank of soldiers, brass and dark steel, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "steel_longsword",
+     "subject": "long knightly sword, straight steel blade, wrapped grip, polished steel, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "stone_axe",
+     "subject": "broad-bladed battle axe with a wooden haft, brass and dark steel, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "sword_hellstorm",
+     "subject": "hand-and-a-half sword, steel blade, brass hilt, ember-red flame, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "sword_judgment",
+     "subject": "hand-and-a-half sword, steel blade, brass hilt, white-gold light, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "tome_infinity",
+     "subject": "thick spellbook, metal-bound cover, glowing page edges, brass and dark steel, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "trinket_epoch",
+     "subject": "small curious trinket of unknown use, hourglass sand, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "ward_arcane",
+     "subject": "glowing ward stone carved with a sigil, crackling arcane blue, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "wooden_sword",
+     "subject": "hand-and-a-half sword, steel blade, brass hilt, plain wood, painted game item icon, single object filling the tile"
+    },
+    {
+     "id": "wraps_peregrine",
+     "subject": "pair of worn hand wraps, falcon feather, painted game item icon, single object filling the tile"
+    }
+   ]
+  }
+ }
+}

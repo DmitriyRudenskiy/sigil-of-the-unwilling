@@ -28,7 +28,7 @@ date: 2026-10-18
 
 | Путь | Кто сделал / откуда | Из чего | Права | Статус |
 |---|---|---|---|---|
-| `game/assets/artifacts/` | генератор репо `game/scripts/build/gen_artifact_icons.gd`; файлы пришли `8334a974` (2026-08-30, перенос кода в `game/`) | 60 растровых иконок артефактов, 32/64 px | записей нет; md5/dHash-свип [[13-art-bible]] §12.1 против `reference/` и `___STYLE_BOOK/` — совпадений нет | неизвестно |
+| `game/assets/artifacts/` | comfyui krea2 (сервер 192.168.0.230:8188) по спеке `scripts/concept_art/hero_screen_spec.json`, эталон — макет 12 `reference/12_inventory_parchment_sheet.jpeg`; укладка кадра — `scripts/ui_kit/place_hero_art.py` | 60 png иконок предметов 128×128, фон срезан по связным областям (2026-10-29; прежние плоские глифы `gen_artifact_icons.gd` лежали с `8334a974`) | промпт и seed'ы в `concept_art/manifest.json`; права на модель Krea-2 turbo не проверялись | жёлтый |
 | `game/assets/audio/music/` | не установлено — `278f5534` (2026-08-31, audio-pass) | 43 mp3 | записей нет, атрибуции нет | неизвестно |
 | `game/assets/audio/sfx/` | не установлено — `278f5534` (2026-08-31) | 9 wav | записей нет | неизвестно |
 | `game/assets/cursors/` | не установлено — `8334a974` (2026-08-30) | 6 png курсоров | записей нет | неизвестно |
@@ -45,8 +45,9 @@ date: 2026-10-18
 | `game/assets/tiles/world_map_atlas.webp` | конвейер репо `scripts/gen_map_art.py` (world-map-art-variety) | comfyui/image-clone: 8 биомов × 4 варианта базы + 6 декалей границ на биом, 82 px; материал 1024² → зашивка шва → полоса M | права на модель Krea-2 turbo не проверялись | жёлтый |
 | `game/assets/ui/` | AI-генерация референса 04; `17e75cf4` как конверсия jpeg из «image-очереди» | `main_menu_bg.webp` 1920×1080 | права на генерацию не проверялись | жёлтый — перегенерация с чистой палитрой (UI-4) |
 | `game/assets/ui/events/` | не установлено — `3b32788f` (2026-09-16, события) | 14 png иллюстраций событий | записей нет | неизвестно |
-| `game/assets/ui/hero/` | не установлено — `8334a974` (2026-08-30) | 4 png портретов | записей нет | неизвестно |
+| `game/assets/ui/hero/` | comfyui krea2 (сервер 192.168.0.230:8188) по спеке `scripts/concept_art/hero_screen_spec.json`, эталон — макет 12 `reference/12_inventory_parchment_sheet.jpeg`; укладка кадра — `scripts/ui_kit/place_hero_art.py` (`portrait.png`, `figure.png`) и генератор репо `scripts/ui_kit/build_hero_kit.py` (остальные плитки, D-275/D-278); `mini.png` — старый плейсхолдер `8334a974`, читателя нет | 18 png носителей экрана «Герой» | права на модель не проверялись | жёлтый |
 | `game/assets/ui/icons/` | не установлено — `8334a974` (2026-08-30) | 28 png прочих иконок (армия, флаг, компас…) | записей нет | неизвестно |
+| `game/assets/ui/icons/hero/` | comfyui krea2 (сервер 192.168.0.230:8188) по спеке `scripts/concept_art/hero_screen_spec.json`, эталон — макет 12 `reference/12_inventory_parchment_sheet.jpeg`; укладка кадра — `scripts/ui_kit/place_hero_art.py` | 4 png иконок характеристик 128×128 (меч, звезда щита, звезда магии, книга) | права на модель не проверялись | жёлтый |
 | `game/assets/ui/icons/buildings/` | генератор репо `game/scripts/build/gen_building_icons.gd` (+ `gen_building_icons2.gd`); файлы — `cb9bfe49` (2026-09-16, «Update UI graphics…») | 18 png иконок зданий | связь текущих файлов с генератором не доказана; записей нет | неизвестно |
 | `game/assets/ui/icons/needs/` | генератор репо `game/scripts/build/gen_need_icons.gd` | 3 png нужд | записей нет | неизвестно |
 | `game/assets/ui/icons/resources/` | **ASSET-1, этот прогон** — `game/tools/gen_resource_icons.py` | 20 png 32×32 по формуле §7.1 | нарисованы в репо, прав третьих лиц нет (бывший атлас HoMM III удалён) | чисто |
