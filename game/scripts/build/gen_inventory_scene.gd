@@ -403,7 +403,10 @@ func _build() -> void:
 		uid += 1
 		_add_node("ArmyCount_" + n, "Label", card_parent,
 			_anchor_rect(_L.CARD["lv_label"], Rect2(Vector2.ZERO, card_size))
-			+ "theme_type_variation = &\"LabelNumber\"\n", uid)
+			# Число прижато к правому краю поля и растёт влево: четырёхзначное
+			# в кегле роли шире макетного бокса, а левый край — граница слота.
+			+ "theme_type_variation = &\"LabelNumber\"\n"
+			+ "horizontal_alignment = 2\nsize_flags_horizontal = 4\n", uid)
 		uid += 1
 		for pair2 in [["CardLv_", "lv_label", ""], ["CardHp_", "hp_bar", "bar_track"],
 				["CardMp_", "mp_bar", "bar_track"]]:

@@ -1915,6 +1915,8 @@ anchor_top = 0.717647
 anchor_right = 0.598566
 anchor_bottom = 0.835294
 theme_type_variation = &"LabelNumber"
+horizontal_alignment = 2
+size_flags_horizontal = 4
 
 
 
@@ -2000,6 +2002,8 @@ anchor_top = 0.717647
 anchor_right = 0.598566
 anchor_bottom = 0.835294
 theme_type_variation = &"LabelNumber"
+horizontal_alignment = 2
+size_flags_horizontal = 4
 
 
 
@@ -2085,6 +2089,8 @@ anchor_top = 0.717647
 anchor_right = 0.598566
 anchor_bottom = 0.835294
 theme_type_variation = &"LabelNumber"
+horizontal_alignment = 2
+size_flags_horizontal = 4
 
 
 
@@ -2170,6 +2176,8 @@ anchor_top = 0.717647
 anchor_right = 0.598566
 anchor_bottom = 0.835294
 theme_type_variation = &"LabelNumber"
+horizontal_alignment = 2
+size_flags_horizontal = 4
 
 
 
