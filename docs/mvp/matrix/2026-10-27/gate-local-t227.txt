@@ -1,0 +1,13 @@
+# Гейт локальный (local), T-227, 2026-10-27; запуск bash game/run_tests.sh
+# GdUnit: Overall Summary: 3462 test cases | 0 errors | 0 failures | 0 flaky | 0 skipped | 0 orphans
+Executed test suites: (365/365)
+Total execution time: 2min 59s 623ms
+ORPHAN-GATE: OK (сирот всего: 0; allowlist: 0 файл(а))
+VACUOUS-ASSERT-GATE: OK (полупустых assert-* нет)
+PYTEST LEDGER: passed=80 skipped=2 failed=0 errors=1 collected=83
+MCP VERDICT: YELLOW
+READINESS-CLASSIFIER: selftest GREEN
+# ЖЁЛТЫЙ уровень: 1 error с подпиской readiness (180 с) — test_campaign_carrier::
+# test_date_follows_the_day_in_live_game; классификатор отнёс к среде (D-265), корень — T-172
+# (readiness > 180 с под давлением памяти: free показывает 45/46 GB занято).
+# Карта тестов: тест-файлов .gd: 365, тест-функций: 3462 pytest (mcp):    файлов 30, функций 78 носителей (без служебных): 400, покрыто: 310 (77%), дыр: 92 групп слияния (≥3 файла на носителе): 27, файлов в них: 140 групп межфайловых дублей тел: 0 

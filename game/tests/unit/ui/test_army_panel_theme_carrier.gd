@@ -213,7 +213,8 @@ func test_army_panel_overrides_removed_and_counter_ratcheted() -> void:
 		)
 
 
-## Уникальность sub_resource id в файле темы. Дубликат id молча отдаёт ссылку на
+## Уникальность sub_resource id в файле темы (инвариант уровня темы, единственная
+#копия — вторая была в test_minimap_frame_carrier.gd, удалена как дубль, T-227). Дубликат id молча отдаёт ссылку на
 # ПЕРВЫЙ ресурс: носитель слота резолвился в алый стиль `PanelArmySlot`,
 # тема при этом читалась без единой ошибки.
 func test_theme_sub_resource_ids_are_unique() -> void:

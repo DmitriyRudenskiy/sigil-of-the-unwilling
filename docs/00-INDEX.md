@@ -14,7 +14,7 @@ date: 2026-10-14
 > Статусы: `canon` / `deepened` / `draft` / `reference` / `redirect` /
 > `snapshot` / `archived`. `redirect` — файл-перенаправление, читать цель.
 
-## Реестры и процессы (19)
+## Реестры и процессы (20)
 
 | Заметка | Название | Статус | Дата |
 | --- | --- | --- | --- |
@@ -32,6 +32,7 @@ date: 2026-10-14
 | [[PR-ASSET-1]] | Тело PR ASSET-1 (feat/asset-1-resources) | draft | 2026-10-15 |
 | [[PR-DOCS-ARTBIBLE]] | Тело PR docs (feat/art-bible-rev2) | archived | 2026-10-14 |
 | [[PR-UI-PHASE5]] | Тело PR фазы 5 (feat/ui-phase5) | archived | 2026-10-14 |
+| [[TEST-MAP]] | Карта тестов: покрытие меньшим количеством тестов | reference | 2026-10-27 |
 | [[TICKETS]] | Тикеты MVP (T-001…T-113) | reference | 2026-10-25 |
 | [[VERDICT-REQUEST]] | Вердикты владельца — блокирующие решения (verdict-request) | reference | 2026-10-26 |
 | [[f-plan]] | F-план — приёмка Д1/Д2 и сведение расхождений | draft | 2026-10-04 |

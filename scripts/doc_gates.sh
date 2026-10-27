@@ -32,7 +32,7 @@ run "контур фаз GDD (состояния, поля реестров, rat
 
 TESTS=(scripts/test_check_docs_links.py scripts/test_audit_docs_vs_code.py
 	scripts/test_classify_mcp_junit.py scripts/test_gdd_gate.py scripts/test_gdd_grounding.py
-	scripts/test_gen_map_art.py)
+	scripts/test_gen_map_art.py scripts/test_testmap.py)
 # Отсутствующий файл списка — КРАСНЫЙ, а не «молча не досчитались»: ровно так список
 # и жил, пока в нём значился test_check_docs_links.py, которого никогда не было
 # (T-223). Проверщик без теста и проверщик, которого нет, — один и тот же класс.
@@ -71,6 +71,17 @@ else
 	echo "YELLOW: pytest недоступен (ни PYTEST_PY/PYTHON, ни venv godot-mcp-tests) — ${#EXIST[@]} файлов уровня не исполнены"
 	YELLOW=$((YELLOW + 1))
 fi
+
+# Карта тестов — информационный уровень: она считает покрытие и оскопление набора,
+# но пока не красится (дыры 93 носителя — наследие, а не сегодняшняя правка; красным
+# её делает владелец, когда дыры разобраны — T-227).
+echo "=== карта тестов (информационно, на вердикт не влияет) ==="
+if "$PY" scripts/testmap.py --top 0; then
+	: ; else
+	echo "YELLOW: testmap не исполнился — покрытие не измерено"
+	YELLOW=$((YELLOW + 1))
+fi
+echo ""
 
 echo "=========================================="
 if [ "$FAIL" -eq 0 ]; then
