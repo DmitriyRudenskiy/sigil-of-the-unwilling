@@ -42,7 +42,7 @@ const _REMOVED_COLOR := Color(1, 1, 1, 1)
 
 ## Сколько `theme_override_colors/font_color` обязано остаться в сцене после среза.
 # Экран артефактов: 6 золотых `SkillLevel` (S3, ждут Q-M96). Спрайт юнита: ноль.
-const _REMAINING_ARTIFACT := 6
+const _REMAINING_ARTIFACT := 0
 const _REMAINING_UNIT_SPRITE := 0
 
 ## Роль, в которую T-189 одел семь счётчиков войск (вместо обхода 14 px). Шкала
@@ -51,13 +51,10 @@ const _REMAINING_UNIT_SPRITE := 0
 const _ARMY_COUNT_ROLE := "LabelNumber"
 
 const _ARMY_COUNT_PATHS: Array[String] = [
-	"Center/Window/Bottom/ArmySlot_0/ArmyCount",
-	"Center/Window/Bottom/ArmySlot_1/ArmyCount",
-	"Center/Window/Bottom/ArmySlot_2/ArmyCount",
-	"Center/Window/Bottom/ArmySlot_3/ArmyCount",
-	"Center/Window/Bottom/ArmySlot_4/ArmyCount",
-	"Center/Window/Bottom/ArmySlot_5/ArmyCount",
-	"Center/Window/Bottom/ArmySlot_6/ArmyCount",
+	"Center/Window/Sheet/Units/Bottom/Cards/Card_0/ArmyCount_0",
+	"Center/Window/Sheet/Units/Bottom/Cards/Card_1/ArmyCount_1",
+	"Center/Window/Sheet/Units/Bottom/Cards/Card_2/ArmyCount_2",
+	"Center/Window/Sheet/Units/Bottom/Cards/Card_3/ArmyCount_3",
 ]
 
 

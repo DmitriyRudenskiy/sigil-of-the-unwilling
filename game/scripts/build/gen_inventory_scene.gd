@@ -71,6 +71,26 @@ func _anch(r: Rect2, parent: String) -> String:
 		_f((r.position.x + r.size.x) / p.size.x),
 		_f((r.position.y + r.size.y) / p.size.y)]
 
+## Поля 9-slice паттерна — из реестра `assets/ui/hero/MANIFEST.json` (D-275).
+var _margins := {}
+
+func _kit_margin(name: String) -> int:
+	if _margins.is_empty():
+		var f := FileAccess.open("res://assets/ui/hero/MANIFEST.json", FileAccess.READ)
+		if f != null:
+			var raw: Variant = JSON.parse_string(f.get_as_text())
+			f.close()
+			if raw is Dictionary:
+				var files: Variant = (raw as Dictionary).get("files", {})
+				if files is Dictionary:
+					# Ключи пути-именованные: files → "hero/panel_parchment.png".
+					for k in (files as Dictionary):
+						var e: Variant = (files as Dictionary)[k]
+						if e is Dictionary and (e as Dictionary).has("margin"):
+							_margins[str(k).get_file().get_basename()] = int((e as Dictionary)["margin"])
+	return int(_margins.get(name, 40))
+
+
 func _f(v: float) -> String:
 	return "%.6f" % v
 
@@ -79,12 +99,16 @@ func _block(node: String, parent: String, uid: int, bg: String = "") -> void:
 	_add_node(node, "Control", parent, _anch(_L.BLOCKS[node], parent), uid)
 	uid += 1
 	if bg != "":
+		# Поля 9-slice — из MANIFEST.json (D-275): у пергамента они 48 px, у камня 40,
+		# общий литерал нарезал бы патч не по тому шву. Растяжение — STRETCH (0):
+		# лист пергамента в макете один, тайлинг (1) давал бы швы и тёмные полосы.
+		var m := _kit_margin(bg)
 		_add_node(
 			"Bg", "NinePatchRect", parent + "/" + node,
 			"texture = " + _kit(bg) + "\n"
-			+ "patch_margin_left = 40\npatch_margin_top = 40\n"
-			+ "patch_margin_right = 40\npatch_margin_bottom = 40\n"
-			+ "axis_stretch_horizontal = 1\naxis_stretch_vertical = 1\n"
+			+ "patch_margin_left = %d\npatch_margin_top = %d\n" % [m, m]
+			+ "patch_margin_right = %d\npatch_margin_bottom = %d\n" % [m, m]
+			+ "axis_stretch_horizontal = 0\naxis_stretch_vertical = 0\n"
 			+ "mouse_filter = 2\nanchor_right = 1.0\nanchor_bottom = 1.0\n", uid)
 		uid += 1
 
@@ -275,7 +299,7 @@ func _build() -> void:
 	uid += 1
 	_add_node("ManaBar", "TextureRect", band,
 		"anchor_left = 0.0\nanchor_top = 0.11\nanchor_right = 1.0\nanchor_bottom = 0.145\n"
-		+ "texture = " + _kit("bar_mana") + "\nstretch_mode = 1\nmouse_filter = 2\n", uid)
+		+ "texture = " + _kit("bar_mana") + "\nstretch_mode = 0\nmouse_filter = 2\n", uid)
 	uid += 1
 	_add_node("School_lbl", "Label", band,
 		"anchor_left = 0.0\nanchor_top = 0.155\nanchor_right = 1.0\nanchor_bottom = 0.205\n", uid)
@@ -297,6 +321,16 @@ func _build() -> void:
 			"anchor_left = 0.0\nanchor_top = %s\nanchor_right = 1.0\nanchor_bottom = %s\n"
 			% [_f(t0), _f(t0 + 0.05)] + "text = \"\"\n", uid)
 		uid += 1
+		# Строка навыка = иконка + уровень: скрипт экрана пишет SkillIcon/SkillLevel,
+		# без этих детей перенесённый блок остался бы без значения (AC2).
+		_add_node("SkillIcon", "TextureRect", bs + "/Skill_" + str(i),
+			"anchor_left = 0.02\nanchor_top = 0.15\nanchor_right = 0.2\nanchor_bottom = 0.85\n"
+			+ "stretch_mode = 6\nmouse_filter = 2\n", uid)
+		uid += 1
+		_add_node("SkillLevel", "Label", bs + "/Skill_" + str(i),
+			"anchor_left = 0.7\nanchor_top = 0.15\nanchor_right = 0.98\nanchor_bottom = 0.85\n"
+			+ "theme_type_variation = &\"LabelNumber\"\n", uid)
+		uid += 1
 	_add_node("Formations_lbl", "Label", bs,
 		"anchor_left = 0.0\nanchor_top = 0.42\nanchor_right = 1.0\nanchor_bottom = 0.475\n", uid)
 	uid += 1
@@ -315,16 +349,21 @@ func _build() -> void:
 	_block("Units", "Sheet", uid)
 	uid += 1
 	var units := "Sheet/Units"
-	_add_node("Bottom", "Control", units,
-		_anchor_within("CardScroll", _L.BLOCKS["Units"]) + "mouse_filter = 2\n", uid)
+	# Узел `Bottom` сохранён: на него повязаны тема ArtifactBottom и тесты носителя
+	# темы (T-147). PanelContainer не раскидывает карточки — у него один ребёнок
+	# `Cards`, а карточки живут внутри него своими долями.
+	_add_node("Bottom", "PanelContainer", units,
+		_anchor_within("CardScroll", _L.BLOCKS["Units"])
+		+ "theme_type_variation = &\"ArtifactBottom\"\nmouse_filter = 2\n", uid)
 	uid += 1
-	# Узел `Bottom` сохранён: на него повязаны тема ArtifactBottom и тесты
-	# носителя темы; содержимое — карточки вместо семи иконок армии.
+	_add_node("Cards", "Control", units + "/Bottom",
+		"anchor_right = 1.0\nanchor_bottom = 1.0\nmouse_filter = 2\n", uid)
+	uid += 1
 	var card_h: float = _L.CARD["h"]
 	for i in 4:
 		var n := str(i)
-		var card_parent := units + "/Bottom/Card_" + n
-		_add_node("Card_" + n, "Control", units + "/Bottom",
+		var card_parent := units + "/Bottom/Cards/Card_" + n
+		_add_node("Card_" + n, "Control", units + "/Bottom/Cards",
 			"anchor_left = 0.0\nanchor_top = %s\nanchor_right = 1.0\nanchor_bottom = %s\n" % [
 				_f(i * _L.CARD["pitch"] / _L.BLOCKS["CardScroll"].size.y),
 				_f((i * _L.CARD["pitch"] + card_h) / _L.BLOCKS["CardScroll"].size.y)]

@@ -137,7 +137,7 @@ func test_outline_carries_theme_variation() -> void:
 func test_bottom_carries_theme_variation() -> void:
 	var screen := _mk_screen()
 	await get_tree().process_frame
-	var bottom := _node(screen, "Center/Window/Bottom")
+	var bottom := _node(screen, "Center/Window/Sheet/Units/Bottom")
 	assert_str(str(bottom.theme_type_variation)).is_equal("ArtifactBottom") \
 		.override_failure_message("`Bottom` не переведён на носитель ArtifactBottom")
 	var ov := ThemeCarrierGuard.stylebox_overrides(bottom)
@@ -168,7 +168,7 @@ func test_outline_resolves_transcribed_values() -> void:
 func test_bottom_resolves_transcribed_values() -> void:
 	var screen := _mk_screen()
 	await get_tree().process_frame
-	var bottom := _node(screen, "Center/Window/Bottom")
+	var bottom := _node(screen, "Center/Window/Sheet/Units/Bottom")
 	var got: StyleBoxTexture = bottom.get_theme_stylebox("panel") as StyleBoxTexture
 	assert_that(got).is_not_null() \
 		.override_failure_message("`Bottom` резолвит не StyleBoxTexture — класс стиля часть снятого значения")
@@ -189,7 +189,7 @@ func test_nodes_do_not_fall_back_to_panel_container_default() -> void:
 	# Функция сохранена как регрессивный якорь на семантику предиката.
 	var screen := _mk_screen()
 	await get_tree().process_frame
-	for path in ["Center/Window/Outline", "Center/Window/Bottom"]:
+	for path in ["Center/Window/Outline", "Center/Window/Sheet/Units/Bottom"]:
 		assert_bool(
 			ThemeCarrierGuard.falls_back_to_type_default(_node(screen, path), _THEME, "panel", "PanelContainer")
 		).is_false() \

@@ -100,6 +100,12 @@ const CELL_GAP := 4          # зазор между ячейками, пикс�
 const DOLL_SLOTS_N := 16
 
 
+## Шаг сетки сумки в пикселях канвы: Bag поделён на 10×5, зазор — CELL_GAP.
+static func grid_pitch() -> Vector2:
+	var b: Rect2 = BLOCKS["Bag"]
+	return b.size / Vector2(GRID_COLS, GRID_ROWS)
+
+
 static func rect(block: String) -> Rect2:
 	return BLOCKS[block]
 

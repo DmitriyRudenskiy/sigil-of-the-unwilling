@@ -15,9 +15,9 @@ extends BaseTest
 
 const _SCENE := preload("res://scenes/ui/artifact_inventory_screen.tscn")
 
-const _EQUIP := "Center/Window/Right/Equip"
-const _REMOVE := "Center/Window/Right/Remove"
-const _DISPOSE := "Center/Window/Right/Dispose"
+const _EQUIP := "Center/Window/Sheet/ItemTip/TipBox/TipButtons/Equip"
+const _REMOVE := "Center/Window/Sheet/ItemTip/TipBox/TipButtons/Remove"
+const _DISPOSE := "Center/Window/Sheet/ItemTip/TipBox/TipButtons/Dispose"
 
 var _screen: Control = null
 var _hero: HeroController = null
@@ -66,11 +66,11 @@ func _press(path: String) -> void:
 ## предмет занимает несколько клеток, а «выбран» относится к предмету).
 func _item(i: int) -> Control:
 	return _screen.get_node_or_null(
-		"Center/Window/Right/Grid/Items/Item_%d" % i) as Control
+		"Center/Window/Sheet/Stone/Bag/Items/Item_%d" % i) as Control
 
 
 func _stat(i: int) -> Label:
-	return _screen.get_node_or_null("Center/Window/Left/StatValue_%d" % i) as Label
+	return _screen.get_node_or_null("Center/Window/Sheet/Left/StatValue_%d" % i) as Label
 
 
 ## Видимость маркера предмета — это то, что нарисовано: рамка лежит поверх иконки,

@@ -58,12 +58,12 @@ anchor_bottom = 0.992222
 
 [node name="Bg" type="NinePatchRect" unique_id=1006 parent="Center/Window/Sheet/Left"]
 texture = ExtResource("10")
-patch_margin_left = 40
-patch_margin_top = 40
-patch_margin_right = 40
-patch_margin_bottom = 40
-axis_stretch_horizontal = 1
-axis_stretch_vertical = 1
+patch_margin_left = 48
+patch_margin_top = 48
+patch_margin_right = 48
+patch_margin_bottom = 48
+axis_stretch_horizontal = 0
+axis_stretch_vertical = 0
 mouse_filter = 2
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -474,8 +474,8 @@ patch_margin_left = 40
 patch_margin_top = 40
 patch_margin_right = 40
 patch_margin_bottom = 40
-axis_stretch_horizontal = 1
-axis_stretch_vertical = 1
+axis_stretch_horizontal = 0
+axis_stretch_vertical = 0
 mouse_filter = 2
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -1462,7 +1462,7 @@ anchor_top = 0.11
 anchor_right = 1.0
 anchor_bottom = 0.145
 texture = ExtResource("19")
-stretch_mode = 1
+stretch_mode = 0
 mouse_filter = 2
 
 
@@ -1508,7 +1508,26 @@ text = ""
 
 
 
-[node name="Skill_1" type="Button" unique_id=1147 parent="Center/Window/Sheet/BandSkills"]
+[node name="SkillIcon" type="TextureRect" unique_id=1147 parent="Center/Window/Sheet/BandSkills/Skill_0"]
+anchor_left = 0.02
+anchor_top = 0.15
+anchor_right = 0.2
+anchor_bottom = 0.85
+stretch_mode = 6
+mouse_filter = 2
+
+
+
+[node name="SkillLevel" type="Label" unique_id=1148 parent="Center/Window/Sheet/BandSkills/Skill_0"]
+anchor_left = 0.7
+anchor_top = 0.15
+anchor_right = 0.98
+anchor_bottom = 0.85
+theme_type_variation = &"LabelNumber"
+
+
+
+[node name="Skill_1" type="Button" unique_id=1149 parent="Center/Window/Sheet/BandSkills"]
 anchor_left = 0.0
 anchor_top = 0.115000
 anchor_right = 1.0
@@ -1517,7 +1536,26 @@ text = ""
 
 
 
-[node name="Skill_2" type="Button" unique_id=1148 parent="Center/Window/Sheet/BandSkills"]
+[node name="SkillIcon" type="TextureRect" unique_id=1150 parent="Center/Window/Sheet/BandSkills/Skill_1"]
+anchor_left = 0.02
+anchor_top = 0.15
+anchor_right = 0.2
+anchor_bottom = 0.85
+stretch_mode = 6
+mouse_filter = 2
+
+
+
+[node name="SkillLevel" type="Label" unique_id=1151 parent="Center/Window/Sheet/BandSkills/Skill_1"]
+anchor_left = 0.7
+anchor_top = 0.15
+anchor_right = 0.98
+anchor_bottom = 0.85
+theme_type_variation = &"LabelNumber"
+
+
+
+[node name="Skill_2" type="Button" unique_id=1152 parent="Center/Window/Sheet/BandSkills"]
 anchor_left = 0.0
 anchor_top = 0.170000
 anchor_right = 1.0
@@ -1526,7 +1564,26 @@ text = ""
 
 
 
-[node name="Skill_3" type="Button" unique_id=1149 parent="Center/Window/Sheet/BandSkills"]
+[node name="SkillIcon" type="TextureRect" unique_id=1153 parent="Center/Window/Sheet/BandSkills/Skill_2"]
+anchor_left = 0.02
+anchor_top = 0.15
+anchor_right = 0.2
+anchor_bottom = 0.85
+stretch_mode = 6
+mouse_filter = 2
+
+
+
+[node name="SkillLevel" type="Label" unique_id=1154 parent="Center/Window/Sheet/BandSkills/Skill_2"]
+anchor_left = 0.7
+anchor_top = 0.15
+anchor_right = 0.98
+anchor_bottom = 0.85
+theme_type_variation = &"LabelNumber"
+
+
+
+[node name="Skill_3" type="Button" unique_id=1155 parent="Center/Window/Sheet/BandSkills"]
 anchor_left = 0.0
 anchor_top = 0.225000
 anchor_right = 1.0
@@ -1535,7 +1592,26 @@ text = ""
 
 
 
-[node name="Skill_4" type="Button" unique_id=1150 parent="Center/Window/Sheet/BandSkills"]
+[node name="SkillIcon" type="TextureRect" unique_id=1156 parent="Center/Window/Sheet/BandSkills/Skill_3"]
+anchor_left = 0.02
+anchor_top = 0.15
+anchor_right = 0.2
+anchor_bottom = 0.85
+stretch_mode = 6
+mouse_filter = 2
+
+
+
+[node name="SkillLevel" type="Label" unique_id=1157 parent="Center/Window/Sheet/BandSkills/Skill_3"]
+anchor_left = 0.7
+anchor_top = 0.15
+anchor_right = 0.98
+anchor_bottom = 0.85
+theme_type_variation = &"LabelNumber"
+
+
+
+[node name="Skill_4" type="Button" unique_id=1158 parent="Center/Window/Sheet/BandSkills"]
 anchor_left = 0.0
 anchor_top = 0.280000
 anchor_right = 1.0
@@ -1544,7 +1620,26 @@ text = ""
 
 
 
-[node name="Skill_5" type="Button" unique_id=1151 parent="Center/Window/Sheet/BandSkills"]
+[node name="SkillIcon" type="TextureRect" unique_id=1159 parent="Center/Window/Sheet/BandSkills/Skill_4"]
+anchor_left = 0.02
+anchor_top = 0.15
+anchor_right = 0.2
+anchor_bottom = 0.85
+stretch_mode = 6
+mouse_filter = 2
+
+
+
+[node name="SkillLevel" type="Label" unique_id=1160 parent="Center/Window/Sheet/BandSkills/Skill_4"]
+anchor_left = 0.7
+anchor_top = 0.15
+anchor_right = 0.98
+anchor_bottom = 0.85
+theme_type_variation = &"LabelNumber"
+
+
+
+[node name="Skill_5" type="Button" unique_id=1161 parent="Center/Window/Sheet/BandSkills"]
 anchor_left = 0.0
 anchor_top = 0.335000
 anchor_right = 1.0
@@ -1553,7 +1648,26 @@ text = ""
 
 
 
-[node name="Formations_lbl" type="Label" unique_id=1152 parent="Center/Window/Sheet/BandSkills"]
+[node name="SkillIcon" type="TextureRect" unique_id=1162 parent="Center/Window/Sheet/BandSkills/Skill_5"]
+anchor_left = 0.02
+anchor_top = 0.15
+anchor_right = 0.2
+anchor_bottom = 0.85
+stretch_mode = 6
+mouse_filter = 2
+
+
+
+[node name="SkillLevel" type="Label" unique_id=1163 parent="Center/Window/Sheet/BandSkills/Skill_5"]
+anchor_left = 0.7
+anchor_top = 0.15
+anchor_right = 0.98
+anchor_bottom = 0.85
+theme_type_variation = &"LabelNumber"
+
+
+
+[node name="Formations_lbl" type="Label" unique_id=1164 parent="Center/Window/Sheet/BandSkills"]
 anchor_left = 0.0
 anchor_top = 0.42
 anchor_right = 1.0
@@ -1561,7 +1675,7 @@ anchor_bottom = 0.475
 
 
 
-[node name="Formations" type="Control" unique_id=1153 parent="Center/Window/Sheet/BandSkills"]
+[node name="Formations" type="Control" unique_id=1165 parent="Center/Window/Sheet/BandSkills"]
 anchor_left = 0.0
 anchor_top = 0.48
 anchor_right = 1.0
@@ -1570,7 +1684,7 @@ mouse_filter = 2
 
 
 
-[node name="Form_0" type="Button" unique_id=1154 parent="Center/Window/Sheet/BandSkills/Formations"]
+[node name="Form_0" type="Button" unique_id=1166 parent="Center/Window/Sheet/BandSkills/Formations"]
 anchor_left = 0.000000
 anchor_top = 0.000000
 anchor_right = 0.500000
@@ -1579,7 +1693,7 @@ text = ""
 
 
 
-[node name="Form_1" type="Button" unique_id=1155 parent="Center/Window/Sheet/BandSkills/Formations"]
+[node name="Form_1" type="Button" unique_id=1167 parent="Center/Window/Sheet/BandSkills/Formations"]
 anchor_left = 0.500000
 anchor_top = 0.000000
 anchor_right = 1.000000
@@ -1588,7 +1702,7 @@ text = ""
 
 
 
-[node name="Form_2" type="Button" unique_id=1156 parent="Center/Window/Sheet/BandSkills/Formations"]
+[node name="Form_2" type="Button" unique_id=1168 parent="Center/Window/Sheet/BandSkills/Formations"]
 anchor_left = 0.000000
 anchor_top = 0.500000
 anchor_right = 0.500000
@@ -1597,7 +1711,7 @@ text = ""
 
 
 
-[node name="Form_3" type="Button" unique_id=1157 parent="Center/Window/Sheet/BandSkills/Formations"]
+[node name="Form_3" type="Button" unique_id=1169 parent="Center/Window/Sheet/BandSkills/Formations"]
 anchor_left = 0.500000
 anchor_top = 0.500000
 anchor_right = 1.000000
@@ -1606,7 +1720,7 @@ text = ""
 
 
 
-[node name="Units" type="Control" unique_id=1158 parent="Center/Window/Sheet"]
+[node name="Units" type="Control" unique_id=1170 parent="Center/Window/Sheet"]
 anchor_left = 0.818750
 anchor_top = 0.008889
 anchor_right = 0.993125
@@ -1614,16 +1728,24 @@ anchor_bottom = 0.992222
 
 
 
-[node name="Bottom" type="Control" unique_id=1159 parent="Center/Window/Sheet/Units"]
+[node name="Bottom" type="PanelContainer" unique_id=1171 parent="Center/Window/Sheet/Units"]
 anchor_left = 0.000000
 anchor_top = 0.092655
 anchor_right = 1.000000
 anchor_bottom = 0.917514
+theme_type_variation = &"ArtifactBottom"
 mouse_filter = 2
 
 
 
-[node name="Card_0" type="Control" unique_id=1160 parent="Center/Window/Sheet/Units/Bottom"]
+[node name="Cards" type="Control" unique_id=1172 parent="Center/Window/Sheet/Units/Bottom"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+
+
+[node name="Card_0" type="Control" unique_id=1173 parent="Center/Window/Sheet/Units/Bottom/Cards"]
 anchor_left = 0.0
 anchor_top = 0.000000
 anchor_right = 1.0
@@ -1632,7 +1754,7 @@ mouse_filter = 2
 
 
 
-[node name="ArmySlot_0" type="TextureRect" unique_id=1161 parent="Center/Window/Sheet/Units/Bottom/Card_0"]
+[node name="ArmySlot_0" type="TextureRect" unique_id=1174 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_0"]
 anchor_left = 0.182796
 anchor_top = 0.000000
 anchor_right = 0.720430
@@ -1643,7 +1765,7 @@ mouse_filter = 2
 
 
 
-[node name="ArmyIcon_0" type="TextureRect" unique_id=1162 parent="Center/Window/Sheet/Units/Bottom/Card_0"]
+[node name="ArmyIcon_0" type="TextureRect" unique_id=1175 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_0"]
 anchor_left = 0.232975
 anchor_top = 0.082353
 anchor_right = 0.670251
@@ -1654,7 +1776,7 @@ visible = false
 
 
 
-[node name="CardName_0" type="Label" unique_id=1163 parent="Center/Window/Sheet/Units/Bottom/Card_0"]
+[node name="CardName_0" type="Label" unique_id=1176 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_0"]
 anchor_left = 0.182796
 anchor_top = 0.717647
 anchor_right = 0.465950
@@ -1664,7 +1786,7 @@ vertical_alignment = 1
 
 
 
-[node name="ArmyCount_0" type="Label" unique_id=1164 parent="Center/Window/Sheet/Units/Bottom/Card_0"]
+[node name="ArmyCount_0" type="Label" unique_id=1177 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_0"]
 anchor_left = 0.487455
 anchor_top = 0.729412
 anchor_right = 0.598566
@@ -1673,7 +1795,7 @@ theme_type_variation = &"LabelNumber"
 
 
 
-[node name="CardLv_0" type="Label" unique_id=1165 parent="Center/Window/Sheet/Units/Bottom/Card_0"]
+[node name="CardLv_0" type="Label" unique_id=1178 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_0"]
 anchor_left = 0.487455
 anchor_top = 0.729412
 anchor_right = 0.598566
@@ -1682,7 +1804,7 @@ horizontal_alignment = 1
 
 
 
-[node name="CardHp_0" type="TextureRect" unique_id=1166 parent="Center/Window/Sheet/Units/Bottom/Card_0"]
+[node name="CardHp_0" type="TextureRect" unique_id=1179 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_0"]
 anchor_left = 0.598566
 anchor_top = 0.741176
 anchor_right = 0.842294
@@ -1693,7 +1815,7 @@ mouse_filter = 2
 
 
 
-[node name="CardMp_0" type="TextureRect" unique_id=1167 parent="Center/Window/Sheet/Units/Bottom/Card_0"]
+[node name="CardMp_0" type="TextureRect" unique_id=1180 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_0"]
 anchor_left = 0.598566
 anchor_top = 0.905882
 anchor_right = 0.842294
@@ -1704,7 +1826,7 @@ mouse_filter = 2
 
 
 
-[node name="Card_1" type="Control" unique_id=1168 parent="Center/Window/Sheet/Units/Bottom"]
+[node name="Card_1" type="Control" unique_id=1181 parent="Center/Window/Sheet/Units/Bottom/Cards"]
 anchor_left = 0.0
 anchor_top = 0.273973
 anchor_right = 1.0
@@ -1713,7 +1835,7 @@ mouse_filter = 2
 
 
 
-[node name="ArmySlot_1" type="TextureRect" unique_id=1169 parent="Center/Window/Sheet/Units/Bottom/Card_1"]
+[node name="ArmySlot_1" type="TextureRect" unique_id=1182 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_1"]
 anchor_left = 0.182796
 anchor_top = 0.000000
 anchor_right = 0.720430
@@ -1724,7 +1846,7 @@ mouse_filter = 2
 
 
 
-[node name="ArmyIcon_1" type="TextureRect" unique_id=1170 parent="Center/Window/Sheet/Units/Bottom/Card_1"]
+[node name="ArmyIcon_1" type="TextureRect" unique_id=1183 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_1"]
 anchor_left = 0.232975
 anchor_top = 0.082353
 anchor_right = 0.670251
@@ -1735,7 +1857,7 @@ visible = false
 
 
 
-[node name="CardName_1" type="Label" unique_id=1171 parent="Center/Window/Sheet/Units/Bottom/Card_1"]
+[node name="CardName_1" type="Label" unique_id=1184 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_1"]
 anchor_left = 0.182796
 anchor_top = 0.717647
 anchor_right = 0.465950
@@ -1745,7 +1867,7 @@ vertical_alignment = 1
 
 
 
-[node name="ArmyCount_1" type="Label" unique_id=1172 parent="Center/Window/Sheet/Units/Bottom/Card_1"]
+[node name="ArmyCount_1" type="Label" unique_id=1185 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_1"]
 anchor_left = 0.487455
 anchor_top = 0.729412
 anchor_right = 0.598566
@@ -1754,7 +1876,7 @@ theme_type_variation = &"LabelNumber"
 
 
 
-[node name="CardLv_1" type="Label" unique_id=1173 parent="Center/Window/Sheet/Units/Bottom/Card_1"]
+[node name="CardLv_1" type="Label" unique_id=1186 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_1"]
 anchor_left = 0.487455
 anchor_top = 0.729412
 anchor_right = 0.598566
@@ -1763,7 +1885,7 @@ horizontal_alignment = 1
 
 
 
-[node name="CardHp_1" type="TextureRect" unique_id=1174 parent="Center/Window/Sheet/Units/Bottom/Card_1"]
+[node name="CardHp_1" type="TextureRect" unique_id=1187 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_1"]
 anchor_left = 0.598566
 anchor_top = 0.741176
 anchor_right = 0.842294
@@ -1774,7 +1896,7 @@ mouse_filter = 2
 
 
 
-[node name="CardMp_1" type="TextureRect" unique_id=1175 parent="Center/Window/Sheet/Units/Bottom/Card_1"]
+[node name="CardMp_1" type="TextureRect" unique_id=1188 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_1"]
 anchor_left = 0.598566
 anchor_top = 0.905882
 anchor_right = 0.842294
@@ -1785,7 +1907,7 @@ mouse_filter = 2
 
 
 
-[node name="Card_2" type="Control" unique_id=1176 parent="Center/Window/Sheet/Units/Bottom"]
+[node name="Card_2" type="Control" unique_id=1189 parent="Center/Window/Sheet/Units/Bottom/Cards"]
 anchor_left = 0.0
 anchor_top = 0.547945
 anchor_right = 1.0
@@ -1794,7 +1916,7 @@ mouse_filter = 2
 
 
 
-[node name="ArmySlot_2" type="TextureRect" unique_id=1177 parent="Center/Window/Sheet/Units/Bottom/Card_2"]
+[node name="ArmySlot_2" type="TextureRect" unique_id=1190 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_2"]
 anchor_left = 0.182796
 anchor_top = 0.000000
 anchor_right = 0.720430
@@ -1805,7 +1927,7 @@ mouse_filter = 2
 
 
 
-[node name="ArmyIcon_2" type="TextureRect" unique_id=1178 parent="Center/Window/Sheet/Units/Bottom/Card_2"]
+[node name="ArmyIcon_2" type="TextureRect" unique_id=1191 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_2"]
 anchor_left = 0.232975
 anchor_top = 0.082353
 anchor_right = 0.670251
@@ -1816,7 +1938,7 @@ visible = false
 
 
 
-[node name="CardName_2" type="Label" unique_id=1179 parent="Center/Window/Sheet/Units/Bottom/Card_2"]
+[node name="CardName_2" type="Label" unique_id=1192 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_2"]
 anchor_left = 0.182796
 anchor_top = 0.717647
 anchor_right = 0.465950
@@ -1826,7 +1948,7 @@ vertical_alignment = 1
 
 
 
-[node name="ArmyCount_2" type="Label" unique_id=1180 parent="Center/Window/Sheet/Units/Bottom/Card_2"]
+[node name="ArmyCount_2" type="Label" unique_id=1193 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_2"]
 anchor_left = 0.487455
 anchor_top = 0.729412
 anchor_right = 0.598566
@@ -1835,7 +1957,7 @@ theme_type_variation = &"LabelNumber"
 
 
 
-[node name="CardLv_2" type="Label" unique_id=1181 parent="Center/Window/Sheet/Units/Bottom/Card_2"]
+[node name="CardLv_2" type="Label" unique_id=1194 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_2"]
 anchor_left = 0.487455
 anchor_top = 0.729412
 anchor_right = 0.598566
@@ -1844,7 +1966,7 @@ horizontal_alignment = 1
 
 
 
-[node name="CardHp_2" type="TextureRect" unique_id=1182 parent="Center/Window/Sheet/Units/Bottom/Card_2"]
+[node name="CardHp_2" type="TextureRect" unique_id=1195 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_2"]
 anchor_left = 0.598566
 anchor_top = 0.741176
 anchor_right = 0.842294
@@ -1855,7 +1977,7 @@ mouse_filter = 2
 
 
 
-[node name="CardMp_2" type="TextureRect" unique_id=1183 parent="Center/Window/Sheet/Units/Bottom/Card_2"]
+[node name="CardMp_2" type="TextureRect" unique_id=1196 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_2"]
 anchor_left = 0.598566
 anchor_top = 0.905882
 anchor_right = 0.842294
@@ -1866,7 +1988,7 @@ mouse_filter = 2
 
 
 
-[node name="Card_3" type="Control" unique_id=1184 parent="Center/Window/Sheet/Units/Bottom"]
+[node name="Card_3" type="Control" unique_id=1197 parent="Center/Window/Sheet/Units/Bottom/Cards"]
 anchor_left = 0.0
 anchor_top = 0.821918
 anchor_right = 1.0
@@ -1875,7 +1997,7 @@ mouse_filter = 2
 
 
 
-[node name="ArmySlot_3" type="TextureRect" unique_id=1185 parent="Center/Window/Sheet/Units/Bottom/Card_3"]
+[node name="ArmySlot_3" type="TextureRect" unique_id=1198 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_3"]
 anchor_left = 0.182796
 anchor_top = 0.000000
 anchor_right = 0.720430
@@ -1886,7 +2008,7 @@ mouse_filter = 2
 
 
 
-[node name="ArmyIcon_3" type="TextureRect" unique_id=1186 parent="Center/Window/Sheet/Units/Bottom/Card_3"]
+[node name="ArmyIcon_3" type="TextureRect" unique_id=1199 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_3"]
 anchor_left = 0.232975
 anchor_top = 0.082353
 anchor_right = 0.670251
@@ -1897,7 +2019,7 @@ visible = false
 
 
 
-[node name="CardName_3" type="Label" unique_id=1187 parent="Center/Window/Sheet/Units/Bottom/Card_3"]
+[node name="CardName_3" type="Label" unique_id=1200 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_3"]
 anchor_left = 0.182796
 anchor_top = 0.717647
 anchor_right = 0.465950
@@ -1907,7 +2029,7 @@ vertical_alignment = 1
 
 
 
-[node name="ArmyCount_3" type="Label" unique_id=1188 parent="Center/Window/Sheet/Units/Bottom/Card_3"]
+[node name="ArmyCount_3" type="Label" unique_id=1201 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_3"]
 anchor_left = 0.487455
 anchor_top = 0.729412
 anchor_right = 0.598566
@@ -1916,7 +2038,7 @@ theme_type_variation = &"LabelNumber"
 
 
 
-[node name="CardLv_3" type="Label" unique_id=1189 parent="Center/Window/Sheet/Units/Bottom/Card_3"]
+[node name="CardLv_3" type="Label" unique_id=1202 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_3"]
 anchor_left = 0.487455
 anchor_top = 0.729412
 anchor_right = 0.598566
@@ -1925,7 +2047,7 @@ horizontal_alignment = 1
 
 
 
-[node name="CardHp_3" type="TextureRect" unique_id=1190 parent="Center/Window/Sheet/Units/Bottom/Card_3"]
+[node name="CardHp_3" type="TextureRect" unique_id=1203 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_3"]
 anchor_left = 0.598566
 anchor_top = 0.741176
 anchor_right = 0.842294
@@ -1936,7 +2058,7 @@ mouse_filter = 2
 
 
 
-[node name="CardMp_3" type="TextureRect" unique_id=1191 parent="Center/Window/Sheet/Units/Bottom/Card_3"]
+[node name="CardMp_3" type="TextureRect" unique_id=1204 parent="Center/Window/Sheet/Units/Bottom/Cards/Card_3"]
 anchor_left = 0.598566
 anchor_top = 0.905882
 anchor_right = 0.842294
@@ -1947,7 +2069,7 @@ mouse_filter = 2
 
 
 
-[node name="Close" type="Button" unique_id=1192 parent="Center/Window/Sheet/Units"]
+[node name="Close" type="Button" unique_id=1205 parent="Center/Window/Sheet/Units"]
 anchor_left = 0.713262
 anchor_top = 0.006780
 anchor_right = 0.953405
@@ -1957,7 +2079,7 @@ theme_type_variation = &"Button"
 
 
 
-[node name="Quests" type="Button" unique_id=1193 parent="Center/Window/Sheet/Units"]
+[node name="Quests" type="Button" unique_id=1206 parent="Center/Window/Sheet/Units"]
 anchor_left = 0.713262
 anchor_top = 0.906215
 anchor_right = 0.953405
@@ -1966,7 +2088,7 @@ text = "?"
 
 
 
-[node name="ItemTip" type="PanelContainer" unique_id=1194 parent="Center/Window/Sheet"]
+[node name="ItemTip" type="PanelContainer" unique_id=1207 parent="Center/Window/Sheet"]
 anchor_left = 0.356875
 anchor_top = 0.333333
 anchor_right = 0.644375
@@ -1976,50 +2098,50 @@ visible = false
 
 
 
-[node name="TipBox" type="VBoxContainer" unique_id=1195 parent="Center/Window/Sheet/ItemTip"]
+[node name="TipBox" type="VBoxContainer" unique_id=1208 parent="Center/Window/Sheet/ItemTip"]
 mouse_filter = 2
 
 
 
-[node name="TipName" type="Label" unique_id=1196 parent="Center/Window/Sheet/ItemTip/TipBox"]
+[node name="TipName" type="Label" unique_id=1209 parent="Center/Window/Sheet/ItemTip/TipBox"]
 autowrap_mode = 3
 
 
 
-[node name="TipDesc" type="Label" unique_id=1197 parent="Center/Window/Sheet/ItemTip/TipBox"]
+[node name="TipDesc" type="Label" unique_id=1210 parent="Center/Window/Sheet/ItemTip/TipBox"]
 autowrap_mode = 3
 
 
 
-[node name="Desc_lbl" type="Label" unique_id=1198 parent="Center/Window/Sheet/ItemTip/TipBox"]
+[node name="Desc_lbl" type="Label" unique_id=1211 parent="Center/Window/Sheet/ItemTip/TipBox"]
 visible = false
 
 
 
-[node name="Desc" type="Label" unique_id=1199 parent="Center/Window/Sheet/ItemTip/TipBox"]
+[node name="Desc" type="Label" unique_id=1212 parent="Center/Window/Sheet/ItemTip/TipBox"]
 visible = false
 
 
 
-[node name="TipButtons" type="HBoxContainer" unique_id=1200 parent="Center/Window/Sheet/ItemTip/TipBox"]
+[node name="TipButtons" type="HBoxContainer" unique_id=1213 parent="Center/Window/Sheet/ItemTip/TipBox"]
 
 
-[node name="Equip" type="Button" unique_id=1201 parent="Center/Window/Sheet/ItemTip/TipBox/TipButtons"]
+[node name="Equip" type="Button" unique_id=1214 parent="Center/Window/Sheet/ItemTip/TipBox/TipButtons"]
 text = ""
 
 
 
-[node name="Remove" type="Button" unique_id=1202 parent="Center/Window/Sheet/ItemTip/TipBox/TipButtons"]
+[node name="Remove" type="Button" unique_id=1215 parent="Center/Window/Sheet/ItemTip/TipBox/TipButtons"]
 text = ""
 
 
 
-[node name="Dispose" type="Button" unique_id=1203 parent="Center/Window/Sheet/ItemTip/TipBox/TipButtons"]
+[node name="Dispose" type="Button" unique_id=1216 parent="Center/Window/Sheet/ItemTip/TipBox/TipButtons"]
 text = ""
 
 
 
-[node name="TipIcon" type="TextureRect" unique_id=1204 parent="Center/Window/Sheet/ItemTip"]
+[node name="TipIcon" type="TextureRect" unique_id=1217 parent="Center/Window/Sheet/ItemTip"]
 anchor_left = 0.82
 anchor_top = 0.04
 anchor_right = 0.98

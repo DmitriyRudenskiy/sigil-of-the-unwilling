@@ -28,15 +28,17 @@ const TEXT_LIGHT := ThemeConfig.C_TEXT_LIGHT_SOFT
 # Геометрия сетки снаряжения (grid-inventory-and-merchant 4.1): 6×4 клеток по
 # 56 px с шагом 60. Единственный источник для генератора сцены
 # (gen_inventory_scene.gd читает эти же константы) и для `_refresh_grid()`.
-const GRID_ORIGIN := Vector2i(900, 26)
-const GRID_COLS := 6
-const GRID_ROWS := 4
-const CELL_PITCH := 60
-const CELL_SIZE := 56
-const OVERFLOW_ORIGIN := Vector2i(900, 310)
-const CELL_EMPTY := Color(1.0, 1.0, 1.0, 0.05)
-const CELL_FILLED := Color(1.0, 1.0, 1.0, 0.13)
-const CELL_HOVER := Color(0.9, 0.75, 0.4, 0.3)
+# Сетка и кукла — из HeroLayout (геометрия макета 12) и GameNumbers (вместимость):
+# литерал здесь был бы вторым носителем той же чиселки.
+const GRID_COLS: int = GameNumbers.INVENTORY_GRID.x
+const GRID_ROWS: int = GameNumbers.INVENTORY_GRID.y
+const DOLL_SLOTS_N: int = 16
+const ARMY_CARDS_N: int = 4
+# Зазор предмета внутри клетки — чтобы соседние предметы не слипались.
+const ITEM_GAP := 4.0
+const CELL_EMPTY := Color(1.0, 1.0, 1.0, 1.0)
+const CELL_FILLED := Color(0.62, 0.55, 0.45, 1.0)
+const CELL_HOVER := Color(1.3, 1.05, 0.6, 1.0)
 
 ## Маркеры предмета — непрозрачная рамка поверх иконки, а не `modulate` и не
 ## полупрозрачная плашка: иконки артефактов — плейсхолдеры со средним каналом
@@ -50,6 +52,8 @@ const _MARK_THICKNESS := 2.0
 ## Отступ второй рамки от края: когда оба знака включены, они не сливаются в одну полосу.
 const _MARK_INSET := 4.0
 
+const SLOT_ICON := "Center/Window/Sheet/Stone/Doll/DollSlot_%d/EquipIcon"
+
 const _STAT_ICON := {
 	"attack": "atk_sword", "defense": "helm", "spell_power": "spell",
 	"knowledge": "compass", "specialty": "scout", "morale": "heart",
@@ -59,19 +63,7 @@ const _STAT_ICON := {
 	"arrows": "arrow_s", "action_scroll": "scroll", "kit": "compass",
 }
 
-const _DOLL_SLOTS := [
-	Vector2i(258, 6), Vector2i(318, 6), Vector2i(180, 66), Vector2i(6, 58),
-	Vector2i(68, 58), Vector2i(318, 68), Vector2i(180, 146), Vector2i(318, 130),
-	Vector2i(6, 160), Vector2i(22, 230), Vector2i(318, 218), Vector2i(46, 300),
-	Vector2i(258, 298), Vector2i(6, 370), Vector2i(68, 370), Vector2i(318, 392)
-]
-
-const _DOLL_MAP := {
-	Artifact.Slot.HEAD: 0, Artifact.Slot.NECK: 2, Artifact.Slot.SHIELD: 3,
-	Artifact.Slot.WEAPON: 5, Artifact.Slot.TORSO: 6, Artifact.Slot.MISC_A: 7,
-	Artifact.Slot.MISC_B: 8, Artifact.Slot.RING_R: 10, Artifact.Slot.LEGS: 11,
-	Artifact.Slot.RING_L: 12, Artifact.Slot.BOOTS: 13, Artifact.Slot.SPELLBOOK: 14,
-}
+# Карта слотов и их места — HeroLayout.DOLL_SLOTS / DOLL_MAP (один носитель).
 
 const _SKILL_ICON := [
 	"res://assets/ui/icons/nature_sense.png",
@@ -148,21 +140,21 @@ func _theme_font_size(path: String, name_: String) -> void:
 func _connect_signals() -> void:
 	# Подписи кнопок: в сцене их не задаёт никто (ни .tscn, ни генератор), и до
 	# этого шага Экранировать/Снять/Уничтожить/Закрыть рисовались пустыми.
-	_set_btn_text("Center/Window/Right/Equip", GameText.artifact_equip())
-	_set_btn_text("Center/Window/Right/Remove", GameText.artifact_remove())
-	_set_btn_text("Center/Window/Right/Dispose", GameText.artifact_dispose())
-	_set_btn_text("Center/Window/Side/Ok", GameText.ui_close())
-	var dlbl := get_node_or_null("Center/Window/Right/Desc_lbl")
+	_set_btn_text("Center/Window/Sheet/ItemTip/TipBox/TipButtons/Equip", GameText.artifact_equip())
+	_set_btn_text("Center/Window/Sheet/ItemTip/TipBox/TipButtons/Remove", GameText.artifact_remove())
+	_set_btn_text("Center/Window/Sheet/ItemTip/TipBox/TipButtons/Dispose", GameText.artifact_dispose())
+	_set_btn_text("Center/Window/Sheet/Units/Close", GameText.ui_close())
+	var dlbl := get_node_or_null("Center/Window/Sheet/ItemTip/TipBox/Desc_lbl")
 	if dlbl is Label:
 		dlbl.text = GameText.artifact_description()
 
-	_connect_btn("Center/Window/Right/Equip", _on_equip)
-	_connect_btn("Center/Window/Right/Remove", _on_remove)
-	_connect_btn("Center/Window/Right/Dispose", _on_dispose)
-	_connect_btn("Center/Window/Side/Ok", close)
+	_connect_btn("Center/Window/Sheet/ItemTip/TipBox/TipButtons/Equip", _on_equip)
+	_connect_btn("Center/Window/Sheet/ItemTip/TipBox/TipButtons/Remove", _on_remove)
+	_connect_btn("Center/Window/Sheet/ItemTip/TipBox/TipButtons/Dispose", _on_dispose)
+	_connect_btn("Center/Window/Sheet/Units/Close", close)
 
 	for i in 4:
-		var b := get_node_or_null("Center/Window/Bottom/Formations/Form_%d" % i)
+		var b := get_node_or_null("Center/Window/Sheet/Stone/BandSkills/Formations/Form_%d" % i)
 		if b is Button:
 			var cb := _on_form.bind(i)
 			if not b.pressed.is_connected(cb):
@@ -208,21 +200,33 @@ func _connect_btn(path: String, handler: Callable) -> void:
 func _build() -> void:
 	_build_left()
 	_build_right()
-	_build_side()
+	_build_units()
 	_build_bottom()
 	_refresh()
+
+## Рамка куклы для слота — поиск по HeroLayout.DOLL_SLOTS: порядок рамок задан
+## один раз в таблице геометрии, вторая карта здесь обязательно бы разошлась.
+func _doll_frame(slot) -> int:
+	var slots: Array = HeroLayout.DOLL_SLOTS
+	for i in slots.size():
+		var v: Variant = slots[i]
+		# Декоративные рамки (T-242) держат StringName-метку, а не слот.
+		if v is int and int(v) == int(slot):
+			return i
+	return -1
+
 
 func _build_left() -> void:
 	var left := get_node_or_null("Center/Window/Left")
 	if left == null:
 		return
-	var portrait := get_node_or_null("Center/Window/Left/Portrait")
+	var portrait := get_node_or_null("Center/Window/Sheet/Left/Portrait")
 	if portrait is TextureRect:
-		portrait.texture = _tex("res://assets/ui/hero/portrait.png", 80, 80)
-	var name_ := get_node_or_null("Center/Window/Left/Name")
+		portrait.texture = _tex("res://assets/ui/hero/portrait.png")
+	var name_ := get_node_or_null("Center/Window/Sheet/Left/Name")
 	if name_ is Label:
 		name_.text = _hero.hero_name if _hero else GameText.artifact_default_name()
-	_theme_font_size("Center/Window/Left/Name", "large")
+	_theme_font_size("Center/Window/Sheet/Left/Name", "large")
 	var primary := [
 		["attack", GameText.stat_label("attack"), _hero.stats.get("attack", 0) if _hero else 0],
 		["defense", GameText.stat_label("defense"), _hero.stats.get("defense", 0) if _hero else 0],
@@ -234,118 +238,114 @@ func _build_left() -> void:
 		var label: String = primary[i][1]
 		var val: int = int(primary[i][2])
 		var icon_path := "res://assets/ui/icons/%s.png" % _STAT_ICON.get(key, "dot")
-		var ic := get_node_or_null("Center/Window/Left/StatIcon_%d" % i)
+		var ic := get_node_or_null("Center/Window/Sheet/Left/StatIcon_%d" % i)
 		if ic is TextureRect:
-			ic.texture = _tex(icon_path, 46, 46)
-		var sn := get_node_or_null("Center/Window/Left/StatName_%d" % i)
+			ic.texture = _tex(icon_path)
+		var sn := get_node_or_null("Center/Window/Sheet/Left/StatName_%d" % i)
 		if sn is Label:
 			sn.text = label
-			_theme_font_size("Center/Window/Left/StatName_%d" % i, "small")
-		var sv := get_node_or_null("Center/Window/Left/StatValue_%d" % i)
+			_theme_font_size("Center/Window/Sheet/Left/StatName_%d" % i, "small")
+		var sv := get_node_or_null("Center/Window/Sheet/Left/StatValue_%d" % i)
 		if sv is Label:
 			sv.text = str(val)
-			_theme_font_size("Center/Window/Left/StatValue_%d" % i, "stat")
-	var ml := get_node_or_null("Center/Window/Left/Mana_lbl")
+			_theme_font_size("Center/Window/Sheet/Left/StatValue_%d" % i, "stat")
+	var ml := get_node_or_null("Center/Window/Sheet/Stone/BandMana/Mana_lbl")
 	if ml is Label:
 		ml.text = GameText.stat_label("mana")
-		_theme_font_size("Center/Window/Left/Mana_lbl", "default")
-	var mv := get_node_or_null("Center/Window/Left/Mana_val")
+		_theme_font_size("Center/Window/Sheet/Stone/BandMana/Mana_lbl", "default")
+	var mv := get_node_or_null("Center/Window/Sheet/Stone/BandMana/Mana_val")
 	if mv is Label:
 		mv.text = "%d/%d" % [_mana_cur(), _mana_max()]
-		_theme_font_size("Center/Window/Left/Mana_val", "default")
-	var el := get_node_or_null("Center/Window/Left/Exp_lbl")
-	if el is Label:
-		el.text = GameText.stat_label("xp")
-		_theme_font_size("Center/Window/Left/Exp_lbl", "default")
-	var ev := get_node_or_null("Center/Window/Left/Exp_val")
-	if ev is Label:
-		ev.text = "0"
-		_theme_font_size("Center/Window/Left/Exp_val", "default")
-	var sl := get_node_or_null("Center/Window/Left/School_lbl")
+		_theme_font_size("Center/Window/Sheet/Stone/BandMana/Mana_val", "default")
+	# «Уровень» из макета: в HeroController есть опыт (get_xp), но нет уровня —
+	# строку показывать нечем, а нулевой placeholder канон-макет портит (T-251).
+	var lv := get_node_or_null("Center/Window/Sheet/Left/LevelRow")
+	if lv is Control:
+		lv.visible = false
+	var sl := get_node_or_null("Center/Window/Sheet/Stone/BandMana/School_lbl")
 	if sl is Label:
 		sl.text = GameText.stat_label("school")
-		_theme_font_size("Center/Window/Left/School_lbl", "default")
-	var sv2 := get_node_or_null("Center/Window/Left/School_val")
+		_theme_font_size("Center/Window/Sheet/Stone/BandMana/School_lbl", "default")
+	var sv2 := get_node_or_null("Center/Window/Sheet/Stone/BandMana/School_val")
 	if sv2 is Label:
 		sv2.text = _magic_school()
-		_theme_font_size("Center/Window/Left/School_val", "default")
-	var st := get_node_or_null("Center/Window/Left/Skills_lbl")
+		_theme_font_size("Center/Window/Sheet/Stone/BandMana/School_val", "default")
+	var st := get_node_or_null("Center/Window/Sheet/Stone/BandSkills/Skills_lbl")
 	if st is Label:
 		st.text = GameText.stat_label("skills")
-		_theme_font_size("Center/Window/Left/Skills_lbl", "large")
+		_theme_font_size("Center/Window/Sheet/Stone/BandSkills/Skills_lbl", "large")
 	for i in 6:
-		var slot := get_node_or_null("Center/Window/Left/Skill_%d" % i)
+		var slot := get_node_or_null("Center/Window/Sheet/Stone/BandSkills/Skill_%d" % i)
 		if slot is not Button:
 			continue
 		var lvl := _skill_level(i)
 		var has := lvl > 0
-		var sic := get_node_or_null("Center/Window/Left/Skill_%d/SkillIcon" % i)
+		var sic := get_node_or_null("Center/Window/Sheet/Stone/BandSkills/Skill_%d/SkillIcon" % i)
 		if sic is TextureRect:
-			sic.texture = _tex(_SKILL_ICON[i], 40, 40) if i < _SKILL_ICON.size() else null
-		var ll := get_node_or_null("Center/Window/Left/Skill_%d/SkillLevel" % i)
+			sic.texture = _tex(_SKILL_ICON[i]) if i < _SKILL_ICON.size() else null
+		var ll := get_node_or_null("Center/Window/Sheet/Stone/BandSkills/Skill_%d/SkillLevel" % i)
 		if ll is Label:
 			ll.text = str(lvl)
 			ll.visible = has
 
 func _build_right() -> void:
-	var right := get_node_or_null("Center/Window/Right")
+	var right := get_node_or_null("Center/Window/Sheet/Stone")
 	if right == null:
 		return
 	_right = right
-	var figure := get_node_or_null("Center/Window/Right/Figure")
+	var figure := get_node_or_null("Center/Window/Sheet/Stone/Figure")
 	if figure is TextureRect:
-		figure.texture = _tex("res://assets/ui/hero/figure.png", 240, 360)
+		figure.texture = _tex("res://assets/ui/hero/figure.png")
 	_rebuild_equipped()
 	_refresh_grid()
 
-func _build_side() -> void:
-	var side := get_node_or_null("Center/Window/Side")
-	if side == null:
-		return
-	var banner := get_node_or_null("Center/Window/Side/Banner")
-	if banner is TextureRect:
-		banner.texture = _tex("res://assets/ui/hero/banner.png", 62, 62)
-	var mini_val := get_node_or_null("Center/Window/Side/Mini")
-	if mini_val is TextureRect:
-		mini_val.texture = _tex("res://assets/ui/hero/mini.png", 62, 46)
-
+## Плитка «?» (правый нижний угол макета) остаётся без носителя: журнала квестов
+## в main нет ни сценой, ни системой — кнопка скрыта, а не выдумана (T-252, D-280).
+func _build_units() -> void:
+	var q := get_node_or_null("Center/Window/Sheet/Units/Quests")
+	if q is Control:
+		q.visible = false
+		q.disabled = true
+## Карточка юнита (макет: портрет + плашка имени + Lv/M с полосами). Из них
+## носитель имеют портрет, имя и число; уровень, HP и MP отряда в main не
+## существуют (current_hp живёт в кампанийном ростере, D-220) — эти три метки
+## скрыты, а не обнулены (T-241, D-280).
 func _build_bottom() -> void:
-	var bottom := get_node_or_null("Center/Window/Bottom")
-	if bottom == null:
-		return
 	var army: HeroArmyController = _hero.army if _hero != null else null
-	for i in 7:
-		var slot := get_node_or_null("Center/Window/Bottom/ArmySlot_%d" % i)
-		if slot is not TextureRect:
-			continue
-		var ic := slot.get_node_or_null("ArmyIcon") as TextureRect
-		var ct := slot.get_node_or_null("ArmyCount") as Label
+	for i in ARMY_CARDS_N:
+		var card := "Center/Window/Sheet/Units/Bottom/Cards/Card_%d" % i
+		var ic := get_node_or_null(card + "/ArmyIcon_%d" % i) as TextureRect
+		var ct := get_node_or_null(card + "/ArmyCount_%d" % i) as Label
+		var nm := get_node_or_null(card + "/CardName_%d" % i) as Label
+		for key in ["Lv", "Hp", "Mp"]:
+			var ph := get_node_or_null(card + "/Card%s_%d" % [key, i])
+			if ph is Control:
+				ph.visible = false
 		var filled := army != null and i < army.army.size() and army.army[i] != null
-		if filled:
-			var key: String = str(army.army[i].get_key())
-			var icon := _unit_icon(key)
-			if ic != null and icon != null:
-				ic.texture = icon
-				ic.visible = true
-			if ct != null:
+		if ic is TextureRect:
+			ic.visible = filled
+			if filled:
+				ic.texture = _unit_icon(str(army.army[i].get_key()))
+		if ct is Label:
+			ct.visible = filled
+			if filled:
 				ct.text = str(army.army[i].count)
-				ct.visible = true
-		else:
-			if ic != null:
-				ic.visible = false
-			if ct != null:
-				ct.visible = false
+		if nm is Label:
+			nm.text = str(army.army[i].get_display_name()) if filled else ""
 	for i in 4:
-		var fb := get_node_or_null("Center/Window/Bottom/Formations/Form_%d" % i)
+		var fb := get_node_or_null("Center/Window/Sheet/Stone/BandSkills/Formations/Form_%d" % i)
 		if fb is Button:
 			fb.icon = load(_ICON["formation"][i])
 			fb.add_theme_color_override("font_color", TEXT_GOLD)
 			fb.add_theme_color_override("font_pressed_color", TEXT_LIGHT)
+			# Построений в модели нет — кнопки-носители макета стоят заглушками (T-250).
+			fb.disabled = true
 
 func _refresh() -> void:
 	if _hero == null or _right == null:
 		return
 	_refresh_stats()
+	_refresh_mana()
 	_rebuild_equipped()
 	_refresh_grid()
 
@@ -363,16 +363,13 @@ func _refresh_stats() -> void:
 		var key: String = keys[i]
 		var total: int = int(bonus.get(key, 0))
 		var delta: int = int(mods.get(key, 0))
-		var sv := get_node_or_null("Center/Window/Left/StatValue_%d" % i)
+		var sv := get_node_or_null("Center/Window/Sheet/Left/StatValue_%d" % i)
 		if sv is Label:
 			if delta == 0:
 				sv.text = str(total)
 			else:
 				var sign_: String = "+" if delta > 0 else "-"
 				sv.text = "%d (%s%d)" % [total, sign_, absi(delta)]
-	var ev := get_node_or_null("Center/Window/Left/Exp_val")
-	if ev is Label and _hero.has_method("get_xp"):
-		ev.text = str(_hero.get_xp())
 
 func _rebuild_equipped() -> void:
 	if _hero == null:
@@ -383,40 +380,44 @@ func _rebuild_equipped() -> void:
 		var art: Artifact = eq.equipped[slot]
 		if art == null:
 			continue
-		var idx: int = _DOLL_MAP.get(slot, -1)
-		if idx < 0 or idx >= _DOLL_SLOTS.size():
+		var idx: int = _doll_frame(slot)
+		if idx < 0 or idx >= DOLL_SLOTS_N:
 			continue
 		var icon_path := _artifact_icon(art)
 		if icon_path.is_empty():
 			continue
-		var ov := get_node_or_null("Center/Window/Right/DollSlot_%d/EquipIcon" % idx)
+		var ov := get_node_or_null(SLOT_ICON % idx)
 		if ov is TextureRect:
-			ov.texture = _tex(icon_path, 56, 56)
+			ov.texture = _tex(icon_path)
 			ov.visible = true
 			shown[idx] = true
-	for i in 16:
+	for i in DOLL_SLOTS_N:
 		if shown.has(i):
 			continue
-		var ov := get_node_or_null("Center/Window/Right/DollSlot_%d/EquipIcon" % i)
+		var ov := get_node_or_null(SLOT_ICON % i)
 		if ov is TextureRect:
 			ov.visible = false
 
-## Рюкзак — сетка 6×4 (grid-inventory-and-merchant 4.2): предмет рисуется
-## прямоугольником cells[rot] со своей origin; не влезшее в носитель — полосой
-## «Перевес» под сеткой. Иконки пересоздаются на каждый refresh (их мало),
-## клетки — узлы сцены, их только перекрашиваем.
+## Шаг сетки = размер Bag / (10×5): сцена на якорях-долях, пиксельный шаг был бы
+## вторым носителем геометрии и расходился бы с окном. Нулевой размер (первый
+## кадр, layout ещё не сошёлся) — эталон HeroLayout.
+func _bag_pitch() -> Vector2:
+	var bag := get_node_or_null("Center/Window/Sheet/Stone/Bag") as Control
+	if bag == null or bag.size.x <= 0.0:
+		return HeroLayout.grid_pitch()
+	return bag.size / Vector2(GRID_COLS, GRID_ROWS)
+
+
 func _refresh_grid() -> void:
-	var items := get_node_or_null("Center/Window/Right/Grid/Items")
-	var strip := get_node_or_null("Center/Window/Right/Overflow")
+	var items := get_node_or_null("Center/Window/Sheet/Stone/Bag/Items")
+	var strip := get_node_or_null("Center/Window/Sheet/Stone/Overflow")
 	if items == null or strip == null:
 		return
 	var inv := _inv()
+	var pitch := _bag_pitch()
 	_prune(items)
 	_prune(strip)
 	_icons.clear()
-	# Карта занятости — один вызов: `occupied_cells()` заодно доводит раскладку
-	# до инварианта («у каждого предмета есть клетка»), и дальше клетки только
-	# перекрашиваются, а не пересчитываются на каждую из 24.
 	var overflow_n := 0
 	var used := {}
 	if inv != null:
@@ -426,19 +427,21 @@ func _refresh_grid() -> void:
 			if art == null:
 				continue
 			if inv.is_overflow(i):
-				var strip_icon := _add_item_icon(
-						strip, art, i, Vector2(overflow_n * CELL_PITCH, 0), Vector2(CELL_SIZE, CELL_SIZE))
-				_apply_item_marks(strip_icon, inv, art, i)
+				var at := Vector2(overflow_n * pitch.x, 0)
+				_apply_item_marks(
+						_add_item_icon(strip, art, i, at, pitch - Vector2(ITEM_GAP, ITEM_GAP)),
+						inv, art, i)
 				overflow_n += 1
 				continue
-			var rect := item_rect(inv.placements[i], art.resolved_cells(), inv.rotated[i])
+			var rect := item_rect(inv.placements[i], art.resolved_cells(), inv.rotated[i], pitch)
 			_apply_item_marks(_add_item_icon(items, art, i, rect.position, rect.size), inv, art, i)
-	var lbl := get_node_or_null("Center/Window/Right/Overflow_lbl")
+	var lbl := get_node_or_null("Center/Window/Sheet/Stone/Overflow_lbl")
 	if lbl is Label:
 		lbl.text = GameText.artifact_overflow()
 		lbl.visible = overflow_n > 0
 	_paint_cells(used)
 	_update_desc(inv)
+
 
 func _inv() -> HeroInventory:
 	return _hero.inventory if _hero != null else null
@@ -457,7 +460,7 @@ func _add_item_icon(
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	var path := _artifact_icon(art)
 	if not path.is_empty():
-		icon.texture = _tex(path, CELL_SIZE, CELL_SIZE)
+		icon.texture = _tex(path)
 	icon.mouse_entered.connect(_on_item_hover.bind(idx))
 	icon.mouse_exited.connect(_on_item_hover.bind(-1))
 	icon.gui_input.connect(_on_item_input.bind(idx))
@@ -466,8 +469,6 @@ func _add_item_icon(
 	return icon
 
 
-## Чем помечен предмет: выбор — золото, отсутствие свободного слота — красная
-## рамка. Оба знака складываются, а не вытесняют друг друга.
 func _apply_item_marks(icon: Control, inv: HeroInventory, art: Artifact, idx: int) -> void:
 	var selected := art != null and idx == _selected_bp
 	var blocked := art != null and not inv.can_equip(art)
@@ -559,35 +560,45 @@ func _paint_cells(used: Dictionary) -> void:
 	var shown := _selected_bp if _selected_bp >= 0 else _hover_backpack
 	for row in GRID_ROWS:
 		for col in GRID_COLS:
-			var cell := get_node_or_null("Center/Window/Right/Grid/GridCell_%d_%d" % [col, row])
-			if cell is not ColorRect:
+			var cell := get_node_or_null("Center/Window/Sheet/Stone/Bag/GridCell_%d_%d" % [col, row]) as CanvasItem
+			if cell == null:
 				continue
 			var owner := int(used.get(Vector2i(col, row), -1))
-			cell.color = CELL_EMPTY if owner < 0 else (CELL_HOVER if owner == shown else CELL_FILLED)
+			cell.modulate = CELL_EMPTY if owner < 0 \
+					else (CELL_HOVER if owner == shown else CELL_FILLED)
 
-## Подпись габарита в описании предмета (4.3): сколько клеток занимает предмет
-## в текущем повороте — это игрок обязан видеть до поворота и до покупки.
+
 func _update_desc(inv: HeroInventory) -> void:
-	var desc := get_node_or_null("Center/Window/Right/Desc")
+	var desc := get_node_or_null("Center/Window/Sheet/ItemTip/TipBox/Desc")
+	var tip := get_node_or_null("Center/Window/Sheet/ItemTip") as Control
 	if desc is not Label:
 		return
 	var idx := _selected_bp if _selected_bp >= 0 else _hover_backpack
-	if inv == null or idx < 0 or idx >= inv.backpack.size() or inv.backpack[idx] == null:
+	var art: Artifact = null
+	if inv != null and idx >= 0 and idx < inv.backpack.size():
+		art = inv.backpack[idx]
+	if tip is Control:
+		# Подсказка без предмета — пустая плашка поперёк камня; в макете её там нет.
+		tip.visible = art != null
+	if art == null:
 		desc.text = ""
 		return
-	var art: Artifact = inv.backpack[idx]
 	var cells: Vector2i = art.resolved_cells()
 	var line := GameText.artifact_footprint(cells.x, cells.y, cells.x * cells.y)
 	if inv.is_overflow(idx):
 		line += " · " + GameText.artifact_overflow()
-	desc.text = "%s\n%s\n%s" % [art.display_name, art.description, line]
+	var nm := get_node_or_null("Center/Window/Sheet/ItemTip/TipBox/TipName")
+	if nm is Label:
+		nm.text = art.display_name
+	desc.text = "%s\n%s" % [art.description, line]
 
-## Прямоугольник предмета в координатах сетки: от origin*шаг на cells*шаг минус
-## зазор между клетками. Чистая функция — на ней держится тест 4.4.
-static func item_rect(origin: Vector2i, cells: Vector2i, rot: bool) -> Rect2:
+
+static func item_rect(
+			origin: Vector2i, cells: Vector2i, rot: bool, pitch: Vector2 = Vector2.ZERO) -> Rect2:
 	var c: Vector2i = Vector2i(cells.y, cells.x) if rot else cells
-	var gap := float(CELL_PITCH - CELL_SIZE)
-	return Rect2(Vector2(origin) * CELL_PITCH, Vector2(c) * CELL_PITCH - Vector2(gap, gap))
+	var p := pitch if pitch != Vector2.ZERO else HeroLayout.grid_pitch()
+	var gap := Vector2(ITEM_GAP, ITEM_GAP)
+	return Rect2(Vector2(origin) * p, Vector2(c) * p - gap)
 
 func _on_equip() -> void:
 	if _hero == null:
@@ -633,31 +644,16 @@ func _on_dispose() -> void:
 func _on_form(_i: int) -> void:
 	pass
 
-func _set_offsets(c: Control, left: int, top: int, w: int, h: int) -> void:
-	c.custom_minimum_size = Vector2(w, h)
-	c.size = Vector2(w, h)
-	c.offset_left = float(left)
-	c.offset_top = float(top)
-	c.offset_right = float(left + w)
-	c.offset_bottom = float(top + h)
-
-func _tex(path: String, w: int, h: int) -> Texture2D:
-	var key := "%s_%dx%d" % [path, w, h]
-	if _tex_cache.has(key):
-		return _tex_cache[key]
-
+## D-275: ресемплинга нет — текстура идёт как есть, вписывает её StretchMode узла.
+func _tex(path: String) -> Texture2D:
+	if _tex_cache.has(path):
+		return _tex_cache[path]
 	var res := load(path)
 	if res is Texture2D:
-		var timg: Image = res.get_image()
-		if timg != null:
-			if timg.get_width() != w or timg.get_height() != h:
-				timg.resize(w, h, Image.INTERPOLATE_BILINEAR)
-			var tex := ImageTexture.create_from_image(timg)
-			_tex_cache[key] = tex
-			return tex
+		_tex_cache[path] = res
 		return res
-
 	return null
+
 
 func _artifact_icon(art: Artifact) -> String:
 	if art == null:
@@ -672,6 +668,17 @@ func _unit_icon(key: String) -> Texture2D:
 	if ResourceLoader.exists(path):
 		return load(path)
 	return null
+
+## Заполнение полосы маны: ширина полосы = доля от дорожки (текстура 12×12,
+## рисуется растяжением — маскировать её иначе означало бы врать о запасе).
+func _refresh_mana() -> void:
+	var bar := get_node_or_null("Center/Window/Sheet/Stone/BandMana/ManaBar") as Control
+	if bar == null:
+		return
+	var mx := _mana_max()
+	var ratio := float(_mana_cur()) / float(mx) if mx > 0 else 0.0
+	bar.anchor_right = clampf(ratio, 0.0, 1.0)
+
 
 func _mana_cur() -> int:
 	return _hero.magic.mana_current if _hero != null else 0
